@@ -109,3 +109,15 @@ not incomplete P3 behavior. No finding is waived or left unresolved.
 Architecture/code re-review approves P3. P3-R001 through P3-R003 are reviewer-confirmed `fixed`;
 there are no unresolved findings. P3 may be committed locally as its own phase checkpoint. This
 approval does not authorize a push or any P4 implementation.
+
+## Post-approval correction discovered by P4
+
+P3 review 继续为 `approved`，既有 findings 与结论不改写。P4 depth-picking 验收发现
+Surface 需要复用最近正常 render commands 到 pick+depth pass；Architecture Agent 已将
+该 SceneGIS-owned correction 授权纳入 P4。第二次裁决进一步采用 selection OBB 与
+DrawCommand BoundingSphere 的双包围体职责，避免 zero-thickness plane 精确落在 near
+plane 而写入 raw depth `0`。最终 Tile 4/4、Surface 18/18、P3 planar WebGL aggregate
+62/62；三个独立真实 Widget fixtures 分别覆盖默认 depth、首次 translucent-depth replay
+和 non-log linear depth，均得到 `0 < rawDepth < 1` 且与 mathematical pick 在 `1e-4`
+内一致。P3 状态与原 findings/approval 均不变；完整源码事实、实现路径、验证矩阵和
+ownership audit 见 P4 plan/review。

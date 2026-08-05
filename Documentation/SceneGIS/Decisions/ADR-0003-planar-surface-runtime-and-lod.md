@@ -208,19 +208,23 @@ gl_Position = czm_modelViewProjection * vec4(position, 1.0);
 model-view translation，再上传 GPU。
 
 surface 共享一个 vertex array、shader program 和 opaque render state。tile 拥有
-自己的 model matrix、zero-thickness bounding box 和 DrawCommand。P3 平面双面可见，
-启用 depth test/depth write，使用 `Pass.OPAQUE`，不参与 shadow、pick 或透明 pass。
+自己的 model matrix、用于 quadtree selection 的 exact zero-thickness
+`OrientedBoundingBox`、从该 OBB 一次性派生并供 DrawCommand 使用的 conservative
+`BoundingSphere`，以及 DrawCommand。两种 bounding volume 都随 tile record 创建，
+不得逐帧分配；command sphere 不能回用于 quadtree visibility、SSE 或距离计算。P3
+平面双面可见，启用 depth test/depth write，使用 `Pass.OPAQUE`，不参与 shadow、
+generic object pick 或透明 pass。
 
 ### 生命周期与 Context 所有权
 
 `SceneGISPlanarWorld` constructor 不接收 Scene、Context 或 canvas。职责映射为：
 
-| Lifecycle method | P3 responsibility                                                     |
-| ---------------- | --------------------------------------------------------------------- |
-| `update`         | 校验 `SCENE3D` 和公开配置；不创建 GPU 资源或遍历 quadtree。           |
-| `beginFrame`     | 重置 frame-local selection、protected set 和统计。                    |
-| `render`         | 仅处理 color render pass；选择 tile，延迟创建资源，追加 DrawCommand。 |
-| `endFrame`       | command 执行后更新 LRU、trim cache 并清理 frame-local 状态。          |
+| Lifecycle method | P3 responsibility                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| `update`         | 校验 `SCENE3D` 和公开配置；不创建 GPU 资源或遍历 quadtree。                                 |
+| `beginFrame`     | 重置 frame-local selection、protected set 和统计。                                          |
+| `render`         | normal render 选择 tile、延迟创建资源并缓存实际提交 command；pick+depth pass 只重提该缓存。 |
+| `endFrame`       | command 执行后更新 LRU、trim cache 并清理 frame-local 状态。                                |
 
 共享 GPU 资源只在首个具有可见 renderable tile 的 color frame 中创建。一个 world
 实例第一次渲染后绑定一个 Context；不得跨 Scene/Context 复用。`show = false` 时不
@@ -323,3 +327,25 @@ Sandcastle、navigation、picking、raster loading 和 E2E 不属于 P3。
 
 只有 upstream 提供语义等价且不重新引入球面假设的抽象时，才评估替换 SceneGIS
 private runtime。
+
+## P4-discovered amendment（2026-08-06）
+
+P3 approval 后，P4 的 rendered-depth consistency 验收发现两项属于 P3 Surface pass
+contract 的缺口。本 amendment 不重新激活 P3，也不改变原 review 历史：
+
+1. normal `passes.render` 仍是唯一执行 visibility、SSE、LOD selection、LRU/protected-set
+   mutation 和 GPU/DrawCommand creation 的路径，并缓存最近一次正常 render 实际提交的
+   command references；`passes.pick && passes.depth && !passes.render` 只重提该缓存，
+   不重新选择、不分配、不改变 normal-render statistics。无 prior render、无可见 tile、
+   zero buffer 或 hidden world 时安全 no-op。generic object pick 仍不在本契约内。
+2. exact zero-thickness OBB 继续承担 quadtree selection。将它同时用于 DrawCommand 会使
+   nadir 平面精确落在 closest frustum near plane，产生 raw depth `0`，而 Cesium 用 `0`
+   表示无有效 depth hit。因此 DrawCommand 改用
+   `BoundingSphere.fromOrientedBoundingBox(tile.boundingVolume)` 一次性派生的保守 sphere。
+   这不是给数学平面增加厚度；quad/model matrix/shader 仍严格位于 `Z=0`，SSE、tile
+   traversal 和 visibility 仍只使用 exact OBB。
+
+P4 correction Specs 锁定 command reference replay 的零 selection/allocation/LRU delta、
+双 Context fail-fast、sphere 对真实四角的保守包含、nadir plane 严格位于 command-volume
+near/far interval 内，以及 logarithmic/linear 两条真实 WebGL depth path 的
+`0 < rawDepth < 1`。相关证据记录于 P4 phase plan/review。

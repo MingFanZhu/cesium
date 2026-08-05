@@ -1,11 +1,44 @@
 import Color from "../../Core/Color.js";
+import Cartesian3 from "../../Core/Cartesian3.js";
 import destroyObject from "../../Core/destroyObject.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import Frozen from "../../Core/Frozen.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import SceneGISPlanarCoordinateSystem from "../Core/SceneGISPlanarCoordinateSystem.js";
 import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
+import SceneGISPlanarCamera from "./_private/_SceneGISPlanarCamera.js";
 import SceneGISPlanarSurface from "./_private/_SceneGISPlanarSurface.js";
+
+const scratchPickRay = {
+  origin: new Cartesian3(),
+  direction: new Cartesian3(),
+};
+
+function validateRay(ray) {
+  if (
+    !ray ||
+    !ray.origin ||
+    !ray.direction ||
+    !Number.isFinite(ray.origin.x) ||
+    !Number.isFinite(ray.origin.y) ||
+    !Number.isFinite(ray.origin.z) ||
+    !Number.isFinite(ray.direction.x) ||
+    !Number.isFinite(ray.direction.y) ||
+    !Number.isFinite(ray.direction.z)
+  ) {
+    throw new DeveloperError(
+      "ray must have finite origin and direction components.",
+    );
+  }
+  const magnitude = Math.hypot(
+    ray.direction.x,
+    ray.direction.y,
+    ray.direction.z,
+  );
+  if (!Number.isFinite(magnitude) || magnitude === 0.0) {
+    throw new DeveloperError("ray.direction must be non-zero and finite.");
+  }
+}
 
 function validateMaximumScreenSpaceError(value) {
   if (!Number.isFinite(value) || value <= 0.0) {
@@ -269,6 +302,83 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
  */
 SceneGISPlanarWorld.prototype.endFrame = function (frameState) {
   this._surface.endFrame(this._tileCacheSize);
+};
+
+/**
+ * Intersects a ray with the bounded mathematical planar surface at Z=0.
+ * This operation is independent of rendering, depth picking, and surface LOD.
+ *
+ * @param {Ray} ray The ray to intersect. Its direction need not be normalized.
+ * @param {Cartesian3} [result] The object in which to store the intersection.
+ * @returns {Cartesian3|undefined} The intersection, or undefined when the forward ray misses the bounded surface.
+ *
+ * @exception {DeveloperError} <code>ray</code> does not have a finite origin and non-zero finite direction.
+ * @exception {DeveloperError} This world has been destroyed.
+ */
+SceneGISPlanarWorld.prototype.pick = function (ray, result) {
+  validateRay(ray);
+  const intersection = SceneGISPlanarCamera.intersectPlane(ray, result);
+  if (!intersection) {
+    return undefined;
+  }
+  const extent = this._coordinateSystem.extent;
+  if (
+    intersection.x < extent.minimumX ||
+    intersection.x > extent.maximumX ||
+    intersection.y < extent.minimumY ||
+    intersection.y > extent.maximumY
+  ) {
+    return undefined;
+  }
+  return intersection;
+};
+
+/**
+ * Computes a four-frustum window ray and intersects it with the bounded
+ * mathematical planar surface at Z=0.
+ *
+ * @param {Cartesian2} windowPosition The finite client-space position with a top-left origin.
+ * @param {Scene} scene The live SCENE3D scene whose primary world is this world.
+ * @param {Cartesian3} [result] The object in which to store the intersection.
+ * @returns {Cartesian3|undefined} The intersection, or undefined for a zero-sized canvas or a miss.
+ *
+ * @exception {DeveloperError} <code>windowPosition</code> is missing or non-finite.
+ * @exception {DeveloperError} <code>scene</code> is missing, destroyed, uses another world, or is not in SCENE3D.
+ * @exception {DeveloperError} The scene camera does not use a supported finite frustum and pose.
+ * @exception {DeveloperError} This world has been destroyed.
+ */
+SceneGISPlanarWorld.prototype.pickFromWindowPosition = function (
+  windowPosition,
+  scene,
+  result,
+) {
+  if (
+    !windowPosition ||
+    !Number.isFinite(windowPosition.x) ||
+    !Number.isFinite(windowPosition.y)
+  ) {
+    throw new DeveloperError(
+      "windowPosition must have finite x and y components.",
+    );
+  }
+  if (!scene || (scene.isDestroyed && scene.isDestroyed())) {
+    throw new DeveloperError("scene must be a live Scene.");
+  }
+  if (scene.world !== this) {
+    throw new DeveloperError("scene.world must be this SceneGISPlanarWorld.");
+  }
+  if (scene.mode !== SceneMode.SCENE3D) {
+    throw new DeveloperError(
+      "Planar window picking requires SceneMode.SCENE3D.",
+    );
+  }
+  const ray = SceneGISPlanarCamera.getWindowRay(
+    scene.camera,
+    scene.canvas,
+    windowPosition,
+    scratchPickRay,
+  );
+  return ray ? this.pick(ray, result) : undefined;
 };
 
 /**

@@ -89,6 +89,64 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(surface._vertexArray._attributes[0].vertexBuffer.sizeInBytes).toBe(
       12 * Float32Array.BYTES_PER_ELEMENT,
     );
+    const tile = surface._quadtree._idealTiles[0];
+    expect(tile.command.boundingVolume).toBe(tile.commandBoundingVolume);
+    expect(tile.command.boundingVolume).not.toBe(tile.boundingVolume);
+  });
+
+  it("uses the exact tile volume for quadtree visibility", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    let testedVolume;
+    const frameState = {
+      frameNumber: 1,
+      passes: { render: true },
+      context: { drawingBufferWidth: 1, drawingBufferHeight: 1 },
+      pixelRatio: 1.0,
+      commandList: [],
+      cullingVolume: {
+        computeVisibility: (volume) => {
+          testedVolume = volume;
+          return Intersect.OUTSIDE;
+        },
+      },
+      camera: {
+        positionWC: new Cartesian3(0.0, 0.0, 64.0),
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3.0,
+          aspectRatio: 1.0,
+          near: 1.0,
+          far: 1000.0,
+        }),
+      },
+    };
+
+    world.beginFrame(frameState);
+    world.render(frameState);
+
+    const tile = world._surface._quadtree._tiles.get("0/0/0");
+    expect(testedVolume).toBe(tile.boundingVolume);
+    expect(testedVolume).not.toBe(tile.commandBoundingVolume);
+    world.destroy();
+  });
+
+  it("fits the nadir plane strictly inside the command-volume frustum interval", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    scene = createPlanarScene(world);
+    pointCameraAt(world);
+    scene.renderForSpecs();
+
+    const tile = world._surface._quadtree._idealTiles[0];
+    const distance = scene.camera.positionWC.z;
+    const interval = tile.commandBoundingVolume.computePlaneDistances(
+      scene.camera.positionWC,
+      scene.camera.directionWC,
+    );
+    expect(interval.start).toBeLessThan(distance);
+    expect(interval.stop).toBeGreaterThan(distance);
+
+    const frustum = scene._view.frustumCommandsList[0];
+    expect(frustum.near).toBeLessThan(distance);
+    expect(frustum.far).toBeGreaterThan(distance);
   });
 
   it("does not select or allocate for a zero-sized drawing buffer", function () {
@@ -184,6 +242,101 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     world.render(scene.frameState);
 
     expect(scene.frameState.commandList.length).toBe(commandCount);
+  });
+
+  it("replays the last normal render commands for depth picking without mutation", function () {
+    const world = createWorld({ maximumLevel: 1 });
+    scene = createPlanarScene(world);
+    pointCameraAt(world, 64.0);
+    scene.renderForSpecs();
+    const surface = world._surface;
+    const commands = surface._renderCommands.slice();
+    const debugBefore = { ...surface._debug };
+    const quadtreeDebugBefore = { ...surface._quadtree._debug };
+    const idealBefore = surface._quadtree._idealTiles.slice();
+    const protectedBefore = new Set(surface._quadtree._protectedKeys);
+    const tileStateBefore = Array.from(surface._quadtree._tiles.values()).map(
+      (tile) => ({
+        tile,
+        lastUsedFrame: tile.lastUsedFrame,
+        command: tile.command,
+      }),
+    );
+
+    const depthFrameState = {
+      ...scene.frameState,
+      passes: { render: false, pick: true, depth: true },
+      commandList: [],
+    };
+    world.render(depthFrameState);
+
+    expect(depthFrameState.commandList).toEqual(commands);
+    for (let i = 0; i < commands.length; ++i) {
+      expect(depthFrameState.commandList[i]).toBe(commands[i]);
+    }
+    expect(surface._debug.submittedCommands).toBe(
+      debugBefore.submittedCommands,
+    );
+    expect(surface._debug.depthSubmittedCommands).toBe(commands.length);
+    expect(surface._debug.createdCommands).toBe(debugBefore.createdCommands);
+    expect(surface._debug.createdBuffers).toBe(debugBefore.createdBuffers);
+    expect(surface._debug.createdShaders).toBe(debugBefore.createdShaders);
+    expect(surface._quadtree._debug).toEqual(quadtreeDebugBefore);
+    expect(surface._quadtree._idealTiles).toEqual(idealBefore);
+    expect(surface._quadtree._protectedKeys).toEqual(protectedBefore);
+    expect(
+      Array.from(surface._quadtree._tiles.values()).map((tile) => ({
+        tile,
+        lastUsedFrame: tile.lastUsedFrame,
+        command: tile.command,
+      })),
+    ).toEqual(tileStateBefore);
+
+    depthFrameState.commandList.length = 0;
+    world.render(depthFrameState);
+    expect(depthFrameState.commandList).toEqual(commands);
+    expect(surface._debug.depthSubmittedCommands).toBe(commands.length * 2);
+    expect(surface._debug.createdCommands).toBe(debugBefore.createdCommands);
+    expect(surface._quadtree._debug).toEqual(quadtreeDebugBefore);
+  });
+
+  it("does not bind or allocate when a depth pass has no normal-render cache", function () {
+    const world = createWorld();
+    const frameState = {
+      frameNumber: 1,
+      passes: { render: false, pick: true, depth: true },
+      context: { drawingBufferWidth: 1, drawingBufferHeight: 1 },
+      commandList: [],
+    };
+
+    world.render(frameState);
+
+    expect(frameState.commandList).toEqual([]);
+    expect(world._surface._context).toBeUndefined();
+    expect(world._surface._vertexArray).toBeUndefined();
+    expect(world._surface._debug.createdCommands).toBe(0);
+    expect(world._surface._quadtree._debug.visited).toBe(0);
+    world.destroy();
+  });
+
+  it("validates Context before a cached depth-pass replay", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    scene = createPlanarScene(world);
+    pointCameraAt(world);
+    scene.renderForSpecs();
+    const commands = world._surface._renderCommands.slice();
+    const depthFrameState = {
+      ...scene.frameState,
+      passes: { render: false, pick: true, depth: true },
+      context: { drawingBufferWidth: 1, drawingBufferHeight: 1 },
+      commandList: [],
+    };
+
+    expect(() => world.render(depthFrameState)).toThrowDeveloperError(
+      "SceneGISPlanarWorld cannot render with more than one Context.",
+    );
+    expect(depthFrameState.commandList).toEqual([]);
+    expect(world._surface._renderCommands).toEqual(commands);
   });
 
   it("refines perspective and orthographic views deterministically", function () {

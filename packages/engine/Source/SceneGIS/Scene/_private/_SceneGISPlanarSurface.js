@@ -51,6 +51,7 @@ function SceneGISPlanarSurface(tilingScheme) {
   this._baseColor = undefined;
   this._frameNumber = -1;
   this._renderedFrameNumber = -1;
+  this._renderCommands = [];
   this._destroyed = false;
   this._unitQuad = unitQuad;
   this._debug = {
@@ -59,6 +60,7 @@ function SceneGISPlanarSurface(tilingScheme) {
     createdShaders: 0,
     createdCommands: 0,
     submittedCommands: 0,
+    depthSubmittedCommands: 0,
     destroyedVertexArrays: 0,
     destroyedBuffers: 0,
     destroyedShaders: 0,
@@ -115,7 +117,7 @@ function createResources(surface, context) {
 function getCommand(surface, tile) {
   if (!defined(tile.command)) {
     tile.command = new DrawCommand({
-      boundingVolume: tile.boundingVolume,
+      boundingVolume: tile.commandBoundingVolume,
       modelMatrix: tile.modelMatrix,
       primitiveType: PrimitiveType.TRIANGLE_STRIP,
       vertexArray: surface._vertexArray,
@@ -155,15 +157,32 @@ SceneGISPlanarSurface.prototype.render = function (
   baseColor,
 ) {
   validateContext(this, frameState.context);
-  if (
-    !frameState.passes.render ||
-    frameState.context.drawingBufferWidth === 0 ||
-    frameState.context.drawingBufferHeight === 0 ||
-    this._renderedFrameNumber === frameState.frameNumber
-  ) {
+  const passes = frameState.passes;
+  const depthPick = passes.pick && passes.depth && !passes.render;
+  if (depthPick) {
+    if (
+      frameState.context.drawingBufferWidth === 0 ||
+      frameState.context.drawingBufferHeight === 0
+    ) {
+      return;
+    }
+    for (const command of this._renderCommands) {
+      frameState.commandList.push(command);
+      ++this._debug.depthSubmittedCommands;
+    }
+    return;
+  }
+  if (!passes.render || this._renderedFrameNumber === frameState.frameNumber) {
     return;
   }
   this._renderedFrameNumber = frameState.frameNumber;
+  this._renderCommands.length = 0;
+  if (
+    frameState.context.drawingBufferWidth === 0 ||
+    frameState.context.drawingBufferHeight === 0
+  ) {
+    return;
+  }
   this._baseColor = baseColor;
   const tiles = this._quadtree.selectTiles(
     frameState,
@@ -175,7 +194,9 @@ SceneGISPlanarSurface.prototype.render = function (
   }
   createResources(this, frameState.context);
   for (const tile of tiles) {
-    frameState.commandList.push(getCommand(this, tile));
+    const command = getCommand(this, tile);
+    frameState.commandList.push(command);
+    this._renderCommands.push(command);
     ++this._debug.submittedCommands;
   }
 };
@@ -205,6 +226,7 @@ SceneGISPlanarSurface.prototype.destroy = function () {
   this._vertexArray = undefined;
   this._shaderProgram = undefined;
   this._renderState = undefined;
+  this._renderCommands.length = 0;
   this._context = undefined;
   this._destroyed = true;
 };

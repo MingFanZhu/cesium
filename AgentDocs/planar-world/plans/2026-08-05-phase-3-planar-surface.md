@@ -730,3 +730,20 @@ roadmap 已收口为 `completed`；未进入 P4。
 
 P3 已通过 Architecture/code re-review，可作为独立阶段创建本地提交。P4 仍为
 `pending`，必须先与项目负责人讨论并形成阶段计划，不能由本计划自动授权实施。
+
+### Post-approval correction discovered by P4
+
+P3 保持 `completed`，原审批历史不变。P4 depth-picking 验收发现 P3 Surface 的 normal
+render command 不能在 pick+depth pass 重提。Architecture Agent 已授权在 P4 工作树中
+修正 `_SceneGISPlanarSurface`：缓存最近正常 render 精确提交的 commands，并在
+pick+depth pass 无选择、无分配、无 LRU/protection mutation 地重提。第二次架构裁决
+确认 raw depth `0` 来自 exact zero-thickness OBB 同时用于 DrawCommand，使 nadir plane
+精确落在 closest frustum near plane；因此 tile 继续以 exact OBB 做 quadtree selection，
+并一次性派生 conservative `BoundingSphere` 专供 DrawCommand culling/near-far fitting。
+真实 quad 与数学平面仍严格位于 `Z=0`，没有 epsilon padding。
+
+最终 correction 专项为 Tile 4/4、Surface 18/18；真实 WebGL Widget 的默认 depth、首次
+translucent-depth replay 和关闭 logarithmic depth 的 linear fixture 均得到
+`0 < rawDepth < 1`，并与 mathematical pick 在 `1e-4` 内一致。P3 WebGL aggregate
+62/62。后续完整证据与裁决记录见 P4 plan/review。本记录不重新激活 P3，也不授权修改
+upstream。

@@ -7,12 +7,13 @@
 - 总体计划（extension plan）：
   [2026-08-05-planar-world-extension.md](2026-08-05-planar-world-extension.md)
 - 最近完成的阶段计划（phase plan）：
-  [2026-08-05-phase-3-planar-surface.md](2026-08-05-phase-3-planar-surface.md)
+  [2026-08-05-phase-4-planar-navigation.md](2026-08-05-phase-4-planar-navigation.md)
   （`completed`）
-- 当前阶段计划（phase plan）：无。
+- 当前阶段计划（phase plan）：无；P5 尚未进入。
 
-P3 已完成实现、验证和 Architecture/code re-review。下一步先与项目负责人讨论 P4，
-再创建 P4 phase plan；当前状态不授权 P4 实现或 push。
+P1 至 P4 均已完成。P4 实现、两次 Architecture decision 授权的 P3 Surface correction
+与 P4-R001 至 P4-R005 修复已完成验证并通过 Architecture/code re-review。阶段 checkpoint
+完成后停下讨论 P5；不得提前创建 P5 implementation plan、push 或进入下一阶段。
 
 总体计划维护长期边界和 phase roadmap。阶段计划仅在对应阶段即将开始或正在执行时
 细化；后续阶段不得在本目录提前创建实现级计划。

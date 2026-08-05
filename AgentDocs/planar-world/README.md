@@ -8,13 +8,13 @@
 | Status                 | `active`                                                                             |
 | Planning model         | `extension`                                                                          |
 | Active extension plan  | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`active`) |
-| Current phase          | None; `P3-planar-surface` is `completed`                                             |
+| Current phase          | None (P4 completed; P5 not started)                                                  |
 | Active phase plan      | None                                                                                 |
 | Proposed phase plan    | None                                                                                 |
 | Active standalone plan | None                                                                                 |
 | Architecture contact   | Architecture Agent                                                                   |
 | Execution contact      | Execution Agent                                                                      |
-| Last updated           | `2026-08-05`                                                                         |
+| Last updated           | `2026-08-06`                                                                         |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -41,7 +41,8 @@
 
 - Source paths: `packages/engine/Source/SceneGIS/Core`,
   `packages/engine/Source/SceneGIS/Scene/SceneGISWorld.js`,
-  `packages/engine/Source/SceneGIS/Scene/SceneGISPlanarWorld.js` and
+  `packages/engine/Source/SceneGIS/Scene/SceneGISPlanarWorld.js`,
+  `packages/engine/Source/SceneGIS/Scene/SceneGISPlanarCameraController.js` and
   `packages/engine/Source/SceneGIS/Scene/_private`
 - Test paths: `packages/engine/Specs/SceneGIS/Scene`,
   `packages/engine/Specs/SceneGIS/Widget` and `packages/engine/Specs/SceneGIS/Core`
@@ -50,21 +51,22 @@
 - ADR:
   [ADR-0001 Scene primary world contract](../../Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md)、
   [ADR-0002 planar coordinate and tiling contract](../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)、
-  [ADR-0003 planar surface runtime and LOD contract](../../Documentation/SceneGIS/Decisions/ADR-0003-planar-surface-runtime-and-lod.md)
+  [ADR-0003 planar surface runtime and LOD contract](../../Documentation/SceneGIS/Decisions/ADR-0003-planar-surface-runtime-and-lod.md)、
+  [ADR-0004 planar navigation and picking contract](../../Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md)
 - SGP: `SGP-0001`（`active`）
 
 ## Current handoff
 
-- Current state: P1 through P3 are complete on `feature/planar-world`; P3-R001 through P3-R003
-  are reviewer-confirmed `fixed` and the P3 review is approved.
-- Next action: discuss P4 navigation, boundary constraints and picking with the project owner,
-  then create a P4 phase plan. No P4 implementation or push is currently authorized.
-- Current phase status: no active phase; `P3-planar-surface` is `completed` and P4 is `pending`.
+- Current state: P1 through P4 are complete on `feature/planar-world`; focused Architecture/code
+  re-review confirmed P4-R001 through P4-R005 and approved the P4 implementation from base
+  `4cfbf58a5658f57bba57e3ba8cd7e75ef9989439`.
+- Next action: stop at the phase gate and discuss P5 scope with the project owner. No P5 plan or
+  implementation is authorized until that discussion confirms the next phase.
+- Current phase status: none; `P4-planar-navigation` is `completed` and P5 is not started.
 - Open discussions: None; later-phase implementation details are intentionally deferred.
-- Latest review:
-  [P3 planar surface review request](reviews/2026-08-05-p3-planar-surface.md)
-  (`approved`)
+- Latest completed review:
+  [P4 planar navigation review](reviews/2026-08-05-p4-planar-navigation.md) (`approved`)
 - Pending review: None.
-- Unresolved reviews: None.
-- Known risks: `Scene`, camera, picking and Viewer contain direct Globe assumptions; the
-  integration seam must stay narrow and upgrade-auditable.
+- Unresolved reviews: None; P4-R001 through P4-R005 are reviewer-confirmed `fixed`.
+- Known risks: Cesium private Camera/frustum and CameraEventAggregator seams, plus Surface
+  command-replay/derived-command behavior, require upgrade-auditable private containment.

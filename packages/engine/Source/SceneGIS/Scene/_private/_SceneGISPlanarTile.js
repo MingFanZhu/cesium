@@ -1,3 +1,4 @@
+import BoundingSphere from "../../../Core/BoundingSphere.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import Matrix3 from "../../../Core/Matrix3.js";
 import Matrix4 from "../../../Core/Matrix4.js";
@@ -33,6 +34,9 @@ function SceneGISPlanarTile(tilingScheme, x, y, level) {
   this.boundingVolume = new OrientedBoundingBox(
     center,
     new Matrix3(width * 0.5, 0.0, 0.0, 0.0, height * 0.5, 0.0, 0.0, 0.0, 0.0),
+  );
+  this.commandBoundingVolume = BoundingSphere.fromOrientedBoundingBox(
+    this.boundingVolume,
   );
   this.modelMatrix = Matrix4.fromScale(new Cartesian3(width, height, 1.0));
   Matrix4.setTranslation(this.modelMatrix, center, this.modelMatrix);

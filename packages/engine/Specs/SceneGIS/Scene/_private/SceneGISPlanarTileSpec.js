@@ -1,4 +1,5 @@
 import {
+  Cartesian3,
   Matrix4,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
@@ -20,6 +21,26 @@ describe("SceneGIS/Scene/SceneGISPlanarTile", function () {
     });
   }
 
+  function expectCommandBoundingVolume(tile) {
+    const volume = tile.commandBoundingVolume;
+    expect(volume.center).toEqual(tile.boundingVolume.center);
+    expect(Number.isFinite(volume.radius)).toBe(true);
+    expect(volume.radius).toBeGreaterThan(0.0);
+
+    const extent = tile.extent;
+    const corners = [
+      new Cartesian3(extent.minimumX, extent.minimumY, 0.0),
+      new Cartesian3(extent.minimumX, extent.maximumY, 0.0),
+      new Cartesian3(extent.maximumX, extent.minimumY, 0.0),
+      new Cartesian3(extent.maximumX, extent.maximumY, 0.0),
+    ];
+    for (const corner of corners) {
+      expect(Cartesian3.distance(volume.center, corner)).toBeLessThanOrEqual(
+        volume.radius,
+      );
+    }
+  }
+
   it("stores a stable address, extent, and zero-thickness bounding box", function () {
     const tile = new SceneGISPlanarTile(createTilingScheme(), 1, 0, 1);
 
@@ -30,6 +51,30 @@ describe("SceneGIS/Scene/SceneGISPlanarTile", function () {
     expect(tile.boundingVolume.center.y).toBe(50.0);
     expect(tile.boundingVolume.center.z).toBe(0.0);
     expect(tile.boundingVolume.halfAxes[8]).toBe(0.0);
+    expectCommandBoundingVolume(tile);
+  });
+
+  it("derives one conservative command volume for large-offset and maximum-level tiles", function () {
+    const largeOffset = new SceneGISPlanarTile(
+      createTilingScheme(1.0e9, 1.0e9 + 1024.0),
+      1,
+      1,
+      1,
+    );
+    expect(largeOffset.boundingVolume.halfAxes[8]).toBe(0.0);
+    expectCommandBoundingVolume(largeOffset);
+
+    const tilingScheme = createTilingScheme();
+    const level = tilingScheme.maximumSafeLevel;
+    const count = 2 ** level;
+    const maximumLevelTile = new SceneGISPlanarTile(
+      tilingScheme,
+      count - 1,
+      Math.floor(count * 0.5),
+      level,
+    );
+    expect(maximumLevelTile.boundingVolume.halfAxes[8]).toBe(0.0);
+    expectCommandBoundingVolume(maximumLevelTile);
   });
 
   it("places a shared unit quad with a finite model matrix", function () {

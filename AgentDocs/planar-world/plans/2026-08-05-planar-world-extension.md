@@ -8,16 +8,18 @@
 - 架构评审（Architecture review）：`approved`
 - 架构评审人（Architecture reviewer）：项目负责人
 - 创建日期（Created）：`2026-08-05`
-- 更新日期（Updated）：`2026-08-05`
+- 更新日期（Updated）：`2026-08-06`
 - 相关讨论（Related discussions）：无
 - 相关评审（Related reviews）：
   [P1 world contract review request](../reviews/2026-08-05-p1-world-contract.md)
   [P2 planar core review request](../reviews/2026-08-05-p2-planar-core.md)
   [P3 planar surface review request](../reviews/2026-08-05-p3-planar-surface.md)
+  [P4 planar navigation review](../reviews/2026-08-05-p4-planar-navigation.md)
 - ADR：
   - `Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md`
   - `Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md`
   - `Documentation/SceneGIS/Decisions/ADR-0003-planar-surface-runtime-and-lod.md`
+  - `Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md`
 - SGP：`SGP-0001`（primary world lifecycle slot，`active`）
 
 ## 目标
@@ -57,6 +59,11 @@
    仅限窄小集成缝隙，并通过 SGP 标记和追踪。
 9. `Globe` 专用功能仍是 `Globe` 的能力，不应成为
    `SceneGISPlanarWorld` 的必需成员，也不得用虚假的空实现字段冒充支持。
+10. 平面导航使用 SceneGIS-owned `SceneGISPlanarCameraController` 和 Cesium 公共
+    `ControllerHost`。它替代平面场景中的输入职责，但不替换具体类型的
+    `scene.screenSpaceCameraController` 属性。
+11. planar surface picking 是有界 `Z=0` 数学交点；`scene.pickPosition` 继续表示当前
+    rendered depth 的 frontmost position。两者不得互相冒充或隐式回退。
 
 ## 源码与基线事实
 
@@ -75,18 +82,23 @@
   更新存在耦合。
 - 在 `SCENE3D` 中，Cesium 的 command 执行、矩阵、视锥裁剪以及基于深度的
   位置重建可以作用于一般的笛卡尔世界坐标。
+- Cesium 已提供公共 `Controller` structural interface、`ControllerHost` 和
+  `CesiumWidget.addController/removeController`，但 legacy
+  `ScreenSpaceCameraController` 仍由 Scene 独立创建、更新和销毁。
+- 当前 `Camera.getPickRay` 对 direct `PerspectiveOffCenterFrustum` 的 structural
+  classification 不正确；P4 需要 SceneGIS private four-frustum ray helper。
 
 ## 阶段路线图
 
-| 阶段 | 目标                                                                           | 依赖   | 进入门槛                              | 完成门槛                                                              | 状态        | 阶段计划                                         |
-| ---- | ------------------------------------------------------------------------------ | ------ | ------------------------------------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------ |
-| P1   | 引入主世界契约和生命周期集成缝隙，同时保持 `Globe` 行为。                      | 无     | 总体计划获批；已分配 ADR 和 SGP。     | 默认 `Globe` 回归通过；模拟的非 `Globe` 世界可以完成 Scene 生命周期。 | `completed` | [第一阶段](2026-08-05-phase-1-world-contract.md) |
-| P2   | 实现米制范围、坐标系元数据和单根平面瓦片数学。                                 | P1     | P1 契约稳定。                         | 公共 Core API 与完整的瓦片边界 Specs 通过。                           | `completed` | [第二阶段](2026-08-05-phase-2-planar-core.md)    |
-| P3   | 实现 `SceneGISPlanarWorld`、平面 surface renderer、平面 quadtree、SSE 和缓存。 | P1、P2 | Core 类型稳定；已检查 renderer 源码。 | 通过程序控制的 Scene 可在没有 `Globe` 的情况下渲染并细化平面。        | `completed` | [第三阶段](2026-08-05-phase-3-planar-surface.md) |
-| P4   | 实现平面导航、home view、边界约束和世界坐标拾取。                              | P3     | 平面 surface runtime 稳定。           | 鼠标/触摸导航及 `Cartesian3` 平面拾取通过交互 Specs。                 | `pending`   | 在阶段进入时创建。                               |
-| P5   | 实现平面栅格 provider、图层、加载状态、祖先瓦片回退和合成。                    | P3、P4 | 瓦片选择与拾取契约稳定。              | XYZ 和 TMS 影像无空洞渲染，且资源能被确定性释放。                     | `pending`   | 在阶段进入时创建。                               |
-| P6   | 集成 Viewer 默认行为、兼容 widget、Sandcastle 和公共开发流程。                 | P4、P5 | Engine API 稳定。                     | Viewer 可创建不含 `Globe` 专用控件的平面场景；示例与类型检查通过。    | `pending`   | 在阶段进入时创建。                               |
-| P7   | 完成性能、生命周期、升级审计和首个版本文档的发布验收。                         | P1-P6  | 已形成 feature-complete 候选版本。    | 总体验收条件和发布证据齐备。                                          | `pending`   | 在阶段进入时创建。                               |
+| 阶段 | 目标                                                                           | 依赖   | 进入门槛                              | 完成门槛                                                              | 状态        | 阶段计划                                            |
+| ---- | ------------------------------------------------------------------------------ | ------ | ------------------------------------- | --------------------------------------------------------------------- | ----------- | --------------------------------------------------- |
+| P1   | 引入主世界契约和生命周期集成缝隙，同时保持 `Globe` 行为。                      | 无     | 总体计划获批；已分配 ADR 和 SGP。     | 默认 `Globe` 回归通过；模拟的非 `Globe` 世界可以完成 Scene 生命周期。 | `completed` | [第一阶段](2026-08-05-phase-1-world-contract.md)    |
+| P2   | 实现米制范围、坐标系元数据和单根平面瓦片数学。                                 | P1     | P1 契约稳定。                         | 公共 Core API 与完整的瓦片边界 Specs 通过。                           | `completed` | [第二阶段](2026-08-05-phase-2-planar-core.md)       |
+| P3   | 实现 `SceneGISPlanarWorld`、平面 surface renderer、平面 quadtree、SSE 和缓存。 | P1、P2 | Core 类型稳定；已检查 renderer 源码。 | 通过程序控制的 Scene 可在没有 `Globe` 的情况下渲染并细化平面。        | `completed` | [第三阶段](2026-08-05-phase-3-planar-surface.md)    |
+| P4   | 实现平面导航、home view、边界约束和世界坐标拾取。                              | P3     | 平面 surface runtime 稳定。           | PC 鼠标导航及两层 `Cartesian3` 平面拾取通过自动化交互 Specs。         | `completed` | [第四阶段](2026-08-05-phase-4-planar-navigation.md) |
+| P5   | 实现平面栅格 provider、图层、加载状态、祖先瓦片回退和合成。                    | P3、P4 | 瓦片选择与拾取契约稳定。              | XYZ 和 TMS 影像无空洞渲染，且资源能被确定性释放。                     | `pending`   | 在阶段进入时创建。                                  |
+| P6   | 集成 Viewer 默认行为、兼容 widget、Sandcastle 和公共开发流程。                 | P4、P5 | Engine API 稳定。                     | Viewer 可创建不含 `Globe` 专用控件的平面场景；示例与类型检查通过。    | `pending`   | 在阶段进入时创建。                                  |
+| P7   | 完成性能、生命周期、升级审计和首个版本文档的发布验收。                         | P1-P6  | 已形成 feature-complete 候选版本。    | 总体验收条件和发布证据齐备。                                          | `pending`   | 在阶段进入时创建。                                  |
 
 阶段状态只允许使用 `pending`、`proposed`、`active`、`completed`、
 `deferred` 和 `superseded`。
@@ -114,6 +126,9 @@
   每项此类依赖都应封装在一个 SceneGIS 私有 wrapper 后面。
 - 极大的投影坐标可能暴露渲染路径中的精度假设。必须保留局部顶点数据，
   并使用大坐标测试 fixture 验证。
+- Camera 的 center ray、off-center frustum 和 reference transform 容易被误当成普通
+  `camera.direction` 与对称视锥；平面导航和拾取必须共享四 frustum helper 并维护升级
+  检查点。
 - 栅格回退和多图层合成会增加 GPU 内存与 draw call。在优化 shader 结构前，
   应先建立可量化的预算。
 - 首个版本明确排除高程地形，但 surface provider 契约应允许后续扩展高程，
@@ -129,7 +144,8 @@
   不执行全局重定心。
 - 平面 surface 瓦片细化时无空洞，使用局部 geometry 加 `modelMatrix`，
   并遵循确定性的缓存和销毁规则。
-- 平面相机控制、home view 和 surface picking 能覆盖所配置的坐标范围。
+- 平面 PC 相机控制、home view 和 mathematical surface picking 能覆盖所配置的坐标
+  范围，并与 rendered-depth picking 保持明确边界。
 - 至少一个公共 URL template 栅格 provider 支持 XYZ 与 TMS 寻址、图层顺序
   和 alpha，并能在加载期间使用祖先瓦片回退。
 - Viewer 具有显式的平面构造路径，且不会静默启用 `Globe` 专用 provider
@@ -140,12 +156,14 @@
 
 ## 进度与交接
 
-- 最近完成阶段：`P3-planar-surface`（`completed`）。
-- 最近完成阶段计划：
-  [2026-08-05-phase-3-planar-surface.md](2026-08-05-phase-3-planar-surface.md)。
-- 当前阶段：无 active phase；`P4` 仍为 `pending`。
-- 当前交接：P3-R001 至 P3-R003 均已由 Architecture Agent 复核为 `fixed`，
-  [P3 review](../reviews/2026-08-05-p3-planar-surface.md) 为 `approved`。下一步先与
-  项目负责人讨论 P4 的导航、边界约束和拾取范围，再创建 P4 phase plan；当前状态不
-  授权 P4 实现或 push。
+- 最近完成阶段：`P4-planar-navigation`（`completed`）；其 implementation diff base 为
+  P3 checkpoint `4cfbf58a5658f57bba57e3ba8cd7e75ef9989439`。
+- 当前阶段：无；P5 尚未进入。
+- 当前阶段计划：无；不得在阶段讨论和确认前创建 P5 implementation plan。
+- 当前交接：P4 explicit ControllerHost registration、四 frustum PC mouse navigation、
+  home、target constraint、两层 flat-surface picking，以及两次 Architecture decision
+  授权的 P3 Surface correction 均已实现并通过 Architecture/code re-review。P4-R001 至
+  P4-R005 均为 reviewer-confirmed `fixed`，
+  [P4 review](../reviews/2026-08-05-p4-planar-navigation.md) 为 `approved`。阶段 checkpoint
+  完成后停下与项目负责人讨论 P5，不 push、不自动进入下一阶段。
 - 后续阶段在达到各自进入门槛前，刻意只保留粗粒度描述。
