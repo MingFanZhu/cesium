@@ -35,6 +35,10 @@ import TimeDynamicPointCloud from "../Scene/TimeDynamicPointCloud.js";
 import VoxelPrimitive from "../Scene/VoxelPrimitive.js";
 import BufferPrimitiveCollection from "../Scene/BufferPrimitiveCollection.js";
 
+// SCENEGIS_PATCH_BEGIN SGP-0001: Type the non-Globe world construction option.
+/** @import SceneGISWorld from "../SceneGIS/Scene/SceneGISWorld.js"; */
+// SCENEGIS_PATCH_END SGP-0001
+
 function trackDataSourceClock(clock, dataSource) {
   if (defined(dataSource)) {
     const dataSourceClock = dataSource.clock;
@@ -134,6 +138,7 @@ function configureCameraFrustum(widget) {
   }
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0001: Document the primary world construction contract.
 /**
  * A widget containing a Cesium scene.
  *
@@ -155,6 +160,7 @@ function configureCameraFrustum(widget) {
  * @param {boolean} [options.orderIndependentTranslucency=true] If true and the configuration supports it, use order independent translucency.
  * @param {MapProjection} [options.mapProjection=new GeographicProjection(options.ellipsoid)] The map projection to use in 2D and Columbus View modes.
  * @param {Globe | false} [options.globe=new Globe(options.ellipsoid)] The globe to use in the scene.  If set to <code>false</code>, no globe will be added and the sky atmosphere will be hidden by default.
+ * @param {SceneGISWorld | false} [options.world] A non-Globe primary world to use in the scene. This option is mutually exclusive with <code>options.globe</code>. If set to <code>false</code>, no primary world or default Earth environment is created.
  * @param {boolean} [options.useDefaultRenderLoop=true] True if this widget should control the render loop, false otherwise.
  * @param {boolean} [options.useBrowserRecommendedResolution=true] If true, render at the browser's recommended resolution and ignore <code>window.devicePixelRatio</code>.
  * @param {number} [options.targetFrameRate] The target frame rate when using the default render loop.
@@ -175,6 +181,8 @@ function configureCameraFrustum(widget) {
  * @param {number} [options.msaaSamples=4] If provided, this value controls the rate of multisample antialiasing. Typical multisampling rates are 2, 4, and sometimes 8 samples per pixel. Higher sampling rates of MSAA may impact performance in exchange for improved visual quality. This value only applies to WebGL2 contexts that support multisample render targets. Set to 1 to disable MSAA.
  *
  * @exception {DeveloperError} Element with id "container" does not exist in the document.
+ * @exception {DeveloperError} <code>options.world</code> and <code>options.globe</code> are both specified.
+ * @exception {DeveloperError} A non-Globe <code>options.world</code> is specified with the Globe-only <code>options.baseLayer</code>, <code>options.terrainProvider</code>, <code>options.terrain</code>, or <code>options.terrainShadows</code> option.
  *
  * @demo {@link https://sandcastle.cesium.com/index.html?id=cesium-widget|Cesium Sandcastle Cesium Widget Demo}
  *
@@ -204,6 +212,7 @@ function configureCameraFrustum(widget) {
  *     mapProjection: new Cesium.WebMercatorProjection()
  * });
  */
+// SCENEGIS_PATCH_END SGP-0001
 function CesiumWidget(container, options) {
   //>>includeStart('debug', pragmas.debug);
   if (!defined(container)) {
@@ -214,6 +223,34 @@ function CesiumWidget(container, options) {
   container = getElement(container);
 
   options = options ?? Frozen.EMPTY_OBJECT;
+
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Validate mutually exclusive world construction before allocating DOM state.
+  const hasWorldOption = defined(options.world);
+  const hasCustomWorld = hasWorldOption && options.world !== false;
+
+  if (hasWorldOption && defined(options.globe)) {
+    throw new DeveloperError(
+      "Specify either options.world or options.globe, but not both.",
+    );
+  }
+
+  if (hasCustomWorld) {
+    const globeOnlyOptions = [
+      "baseLayer",
+      "terrainProvider",
+      "terrain",
+      "terrainShadows",
+    ];
+    for (let i = 0; i < globeOnlyOptions.length; ++i) {
+      const optionName = globeOnlyOptions[i];
+      if (defined(options[optionName])) {
+        throw new DeveloperError(
+          `options.${optionName} is not supported with a non-Globe options.world.`,
+        );
+      }
+    }
+  }
+  // SCENEGIS_PATCH_END SGP-0001
 
   //Configure the widget DOM elements
   const element = document.createElement("div");
@@ -336,31 +373,49 @@ function CesiumWidget(container, options) {
     configurePixelRatio(this);
     configureCameraFrustum(this);
 
-    let globe = options.globe;
-    if (!defined(globe)) {
-      globe = new Globe(ellipsoid);
+    // SCENEGIS_PATCH_BEGIN SGP-0001: Select one primary world without creating a temporary Globe.
+    let globe;
+    if (hasWorldOption) {
+      if (options.world !== false) {
+        scene._initializeWorld(options.world);
+      }
+    } else {
+      globe = options.globe;
+      if (!defined(globe)) {
+        globe = new Globe(ellipsoid);
+      }
+      if (globe !== false) {
+        scene.globe = globe;
+        scene.globe.shadows = options.terrainShadows ?? ShadowMode.RECEIVE_ONLY;
+      }
     }
-    if (globe !== false) {
-      scene.globe = globe;
-      scene.globe.shadows = options.terrainShadows ?? ShadowMode.RECEIVE_ONLY;
-    }
+    // SCENEGIS_PATCH_END SGP-0001
 
     let skyBox = options.skyBox;
-    if (!defined(skyBox) && Ellipsoid.WGS84.equals(ellipsoid)) {
+    // SCENEGIS_PATCH_BEGIN SGP-0001: Keep automatic Earth environment out of non-Globe construction.
+    if (
+      !defined(skyBox) &&
+      !hasWorldOption &&
+      Ellipsoid.WGS84.equals(ellipsoid)
+    ) {
       skyBox = SkyBox.createEarthSkyBox();
     }
-    if (skyBox !== false) {
+    if (defined(skyBox) && skyBox !== false) {
       scene.skyBox = skyBox;
       scene.sun = new Sun();
 
-      if (Ellipsoid.WGS84.equals(ellipsoid)) {
+      if (!hasWorldOption && Ellipsoid.WGS84.equals(ellipsoid)) {
         scene.moon = new Moon();
       }
     }
 
     // Blue sky, and the glow around the Earth's limb.
     let skyAtmosphere = options.skyAtmosphere;
-    if (!defined(skyAtmosphere) && Ellipsoid.WGS84.equals(ellipsoid)) {
+    if (
+      !defined(skyAtmosphere) &&
+      !hasWorldOption &&
+      Ellipsoid.WGS84.equals(ellipsoid)
+    ) {
       skyAtmosphere = new SkyAtmosphere(ellipsoid);
       skyAtmosphere.show = options.globe !== false && globe.show;
     }
@@ -370,7 +425,7 @@ function CesiumWidget(container, options) {
 
     // Set the base imagery layer
     let baseLayer = options.baseLayer;
-    if (options.globe !== false && baseLayer !== false) {
+    if (!hasWorldOption && options.globe !== false && baseLayer !== false) {
       if (!defined(baseLayer)) {
         baseLayer = ImageryLayer.fromWorldImagery();
       }
@@ -378,11 +433,19 @@ function CesiumWidget(container, options) {
     }
 
     // Set the terrain provider if one is provided.
-    if (defined(options.terrainProvider) && options.globe !== false) {
+    if (
+      !hasWorldOption &&
+      defined(options.terrainProvider) &&
+      options.globe !== false
+    ) {
       scene.terrainProvider = options.terrainProvider;
     }
 
-    if (defined(options.terrain) && options.globe !== false) {
+    if (
+      !hasWorldOption &&
+      defined(options.terrain) &&
+      options.globe !== false
+    ) {
       //>>includeStart('debug', pragmas.debug);
       if (defined(options.terrainProvider)) {
         throw new DeveloperError(
@@ -393,6 +456,7 @@ function CesiumWidget(container, options) {
 
       scene.setTerrain(options.terrain);
     }
+    // SCENEGIS_PATCH_END SGP-0001
 
     this._screenSpaceEventHandler = new ScreenSpaceEventHandler(canvas);
 

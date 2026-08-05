@@ -84,6 +84,10 @@ import getMetadataClassProperty from "./getMetadataClassProperty.js";
 import PickedMetadataInfo from "./PickedMetadataInfo.js";
 import getMetadataProperty from "./getMetadataProperty.js";
 
+// SCENEGIS_PATCH_BEGIN SGP-0001: Type the primary world lifecycle slot.
+/** @import SceneGISWorld from "../SceneGIS/Scene/SceneGISWorld.js"; */
+// SCENEGIS_PATCH_END SGP-0001
+
 const requestRenderAfterFrame = function (scene) {
   return function () {
     scene.frameState.afterRender.push(function () {
@@ -180,6 +184,9 @@ function Scene(options) {
   this._computeEngine = new ComputeEngine(context);
 
   this._ellipsoid = options.ellipsoid ?? Ellipsoid.default;
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Track one mutually exclusive primary world.
+  this._world = undefined;
+  // SCENEGIS_PATCH_END SGP-0001
   this._globe = undefined;
   this._globeTranslucencyState = new GlobeTranslucencyState();
   this._primitives = new PrimitiveCollection({ countReferences });
@@ -817,6 +824,26 @@ function updateGlobeListeners(scene, globe) {
   scene._removeGlobeCallbacks = removeGlobeCallbacks;
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0001: Centralize primary world ownership transitions.
+function setPrimaryWorld(scene, world, globe) {
+  if (scene._world === world && scene._globe === globe) {
+    return;
+  }
+
+  updateGlobeListeners(scene, undefined);
+
+  const previousWorld = scene._world;
+  scene._world = world;
+  scene._globe = globe;
+
+  if (defined(previousWorld) && previousWorld !== world) {
+    previousWorld.destroy();
+  }
+
+  updateGlobeListeners(scene, globe);
+}
+// SCENEGIS_PATCH_END SGP-0001
+
 Object.defineProperties(Scene.prototype, {
   /**
    * Gets the canvas element to which this scene is bound.
@@ -981,11 +1008,13 @@ Object.defineProperties(Scene.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Preserve and document Globe mutation beside a custom world.
   /**
    * Gets or sets the depth-test ellipsoid.
    * @memberof Scene.prototype
    *
    * @type {Globe}
+   * @exception {DeveloperError} Assigning a defined Globe is not supported while a non-Globe world is active.
    */
   globe: {
     get: function () {
@@ -993,12 +1022,34 @@ Object.defineProperties(Scene.prototype, {
     },
 
     set: function (globe) {
-      this._globe = this._globe && this._globe.destroy();
-      this._globe = globe;
+      if (defined(this._world) && !defined(this._globe)) {
+        if (defined(globe)) {
+          throw new DeveloperError(
+            "scene.globe cannot be assigned while a non-Globe world is active.",
+          );
+        }
+        return;
+      }
 
-      updateGlobeListeners(this, globe);
+      setPrimaryWorld(this, globe, globe);
     },
   },
+  // SCENEGIS_PATCH_END SGP-0001
+
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Expose the primary world as a read-only property.
+  /**
+   * Gets the primary world owned by this scene.
+   *
+   * @memberof Scene.prototype
+   * @type {SceneGISWorld|undefined}
+   * @readonly
+   */
+  world: {
+    get: function () {
+      return this._world;
+    },
+  },
+  // SCENEGIS_PATCH_END SGP-0001
 
   /**
    * Gets the collection of primitives.
@@ -3893,9 +3944,11 @@ function updateAndRenderPrimitives(scene) {
   updateDebugFrustumPlanes(scene);
   updateShadowMaps(scene);
 
-  if (scene._globe) {
-    scene._globe.render(frameState);
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Render through the primary world lifecycle slot.
+  if (defined(scene._world)) {
+    scene._world.render(frameState);
   }
+  // SCENEGIS_PATCH_END SGP-0001
 }
 
 function updateAndClearFramebuffers(scene, passState, clearColor) {
@@ -4441,9 +4494,11 @@ function prePassesUpdate(scene) {
   const frameState = scene._frameState;
   scene.primitives.prePassesUpdate(frameState);
 
-  if (defined(scene.globe)) {
-    scene.globe.update(frameState);
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Update through the primary world lifecycle slot.
+  if (defined(scene._world)) {
+    scene._world.update(frameState);
   }
+  // SCENEGIS_PATCH_END SGP-0001
 
   scene._picking.update();
   frameState.creditDisplay.update();
@@ -4521,9 +4576,11 @@ function render(scene) {
 
   context.beginFrame();
 
-  if (defined(scene.globe)) {
-    scene.globe.beginFrame(frameState);
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Begin frames through the primary world lifecycle slot.
+  if (defined(scene._world)) {
+    scene._world.beginFrame(frameState);
   }
+  // SCENEGIS_PATCH_END SGP-0001
 
   scene.updateEnvironment();
   scene.updateAndExecuteCommands(passState, backgroundColor);
@@ -4532,13 +4589,15 @@ function render(scene) {
   passState.framebuffer = undefined;
   executeOverlayCommands(scene, passState);
 
-  if (defined(scene.globe)) {
-    scene.globe.endFrame(frameState);
+  // SCENEGIS_PATCH_BEGIN SGP-0001: End frames and request loading frames through the primary world.
+  if (defined(scene._world)) {
+    scene._world.endFrame(frameState);
 
-    if (!scene.globe.tilesLoaded) {
+    if (!scene._world.tilesLoaded) {
       scene._renderRequested = true;
     }
   }
+  // SCENEGIS_PATCH_END SGP-0001
 
   context.endFrame();
 }
@@ -5431,6 +5490,22 @@ Scene.prototype.isDestroyed = function () {
   return false;
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0001: Provide a construction-only internal world initializer.
+/**
+ * Installs a non-Globe primary world during owner construction.
+ *
+ * @param {SceneGISWorld} world The world to install.
+ * @private
+ */
+Scene.prototype._initializeWorld = function (world) {
+  if (defined(this._world) || defined(this._globe)) {
+    throw new DeveloperError("The scene already has a primary world.");
+  }
+
+  setPrimaryWorld(this, world, undefined);
+};
+// SCENEGIS_PATCH_END SGP-0001
+
 /**
  * Destroys the WebGL resources held by this object.  Destroying an object allows for deterministic
  * release of WebGL resources, instead of relying on the garbage collector to destroy this object.
@@ -5460,7 +5535,9 @@ Scene.prototype.destroy = function () {
   this._primitives = this._primitives && this._primitives.destroy();
   this._groundPrimitives =
     this._groundPrimitives && this._groundPrimitives.destroy();
-  this._globe = this._globe && this._globe.destroy();
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Destroy the owned primary world exactly once.
+  setPrimaryWorld(this, undefined, undefined);
+  // SCENEGIS_PATCH_END SGP-0001
   this._removeTerrainProviderReadyListener =
     this._removeTerrainProviderReadyListener &&
     this._removeTerrainProviderReadyListener();

@@ -1,4 +1,28 @@
 {
   "schemaVersion": 1,
-  "patches": []
+  "patches": [
+    {
+      "id": "SGP-0001",
+      "title": "Add a primary world lifecycle slot",
+      "status": "active",
+      "reason": "Scene and CesiumWidget currently route the primary world lifecycle exclusively through Globe, so a non-Globe world cannot participate without impersonating Globe.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Widget/CesiumWidget.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISWorldSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISWorldCesiumWidgetSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md",
+      "removalCondition": "Retire when upstream Scene and CesiumWidget expose an equivalent mutually exclusive primary-world construction and lifecycle contract."
+    }
+  ]
 }
