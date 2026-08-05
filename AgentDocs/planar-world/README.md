@@ -8,8 +8,9 @@
 | Status                 | `active`                                                                             |
 | Planning model         | `extension`                                                                          |
 | Active extension plan  | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`active`) |
-| Current phase          | None; `P1-world-contract` is completed                                               |
+| Current phase          | `P2-planar-core` (`proposed`)                                                        |
 | Active phase plan      | None                                                                                 |
+| Proposed phase plan    | [P2 planar core plan](plans/2026-08-05-phase-2-planar-core.md) (`draft`)             |
 | Active standalone plan | None                                                                                 |
 | Architecture contact   | Architecture Agent                                                                   |
 | Execution contact      | Execution Agent                                                                      |
@@ -44,16 +45,19 @@
 - Sandcastle: `packages/sandcastle/gallery/scenegis-planar-world` (not created)
 - Branches: `scenegis/develop`; planned implementation branch `feature/planar-world`
 - ADR:
-  [ADR-0001 Scene primary world contract](../../Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md)
+  [ADR-0001 Scene primary world contract](../../Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md)、
+  [ADR-0002 planar coordinate and tiling contract](../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)
 - SGP: `SGP-0001`（`active`）
 
 ## Current handoff
 
-- Current state: `P1-world-contract` is completed on `feature/planar-world`; its
-  architecture/code review is approved.
-- Next action: Discuss P2 architecture and phase scope with the project owner. Do not
-  create or activate a P2 phase plan before that discussion is approved.
-- Current phase status: None; P2 remains `pending` in the extension roadmap.
+- Current state: `P1-world-contract` is completed, approved and committed as
+  `10e7b42d4c` on `feature/planar-world`. P2 architecture and its Chinese phase plan are
+  confirmed; implementation has not started.
+- Next action: The Execution Agent changes the P2 plan and roadmap from `draft`/
+  `proposed` to `active`, then implements only P2 from this planning checkpoint. Do not
+  design or implement P3.
+- Current phase status: `P2-planar-core` is `proposed`; there is no active phase plan.
 - Open discussions: None; later-phase implementation details are intentionally deferred.
 - Latest review:
   [P1 world contract review request](reviews/2026-08-05-p1-world-contract.md)
