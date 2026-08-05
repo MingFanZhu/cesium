@@ -90,6 +90,9 @@
 - 大型、跨模块、实验性、长期未完成、难回退或多人并行的工作使用 `feature/*`。
 - 官方版本升级必须使用 `upgrade/cesium-*`；发布维护使用 `release/*`。
 - 上游同步和 SceneGIS 功能开发不得混在同一个提交中。
+- 大型扩展的每个 phase 在实现、验证和 review 完成后，必须由 Architecture Agent
+  将该阶段代码、Specs、ADR/SGP 与 AgentDocs 形成独立的本地提交检查点，再讨论、
+  激活或实现下一阶段。禁止把多个阶段混入同一提交。
 - 不得 force-push `main` 或 `scenegis/develop`。
 - SGP 与分支相互独立：大型 SceneGIS 自有功能可以没有 SGP；两行上游改动也可能需要 SGP。
 
@@ -109,5 +112,6 @@
 
 ## 语言
 
-- JavaScript、GLSL、JSDoc、源码注释、标识符、提交信息和 SGP 标记说明使用英文。
+- JavaScript、GLSL、JSDoc、源码注释、标识符和 SGP 标记说明使用英文。
+- SceneGIS 提交信息使用中文；上游同步提交可保留其原始提交信息。
 - SceneGIS 架构与开发文档可以使用中文，但关键术语、路径、命令和 API 名称保持英文原文。

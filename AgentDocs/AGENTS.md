@@ -62,6 +62,9 @@ Sandcastle 路径。链接使用仓库相对路径，不写本机绝对路径。
   phase/standalone plan 的 `draft -> active -> completed` 状态流转。
 - phase 完成、延期或被替代时，执行 Agent 同步更新 extension plan 的 phase roadmap；
   被替代的未完成 plan 转为 `superseded` 并链接后继 plan。
+- phase 实现、验证和 review 全部完成后，Architecture Agent 负责把该阶段代码、
+  Specs、正式决策/补丁记录与 AgentDocs 创建为独立本地提交。该提交完成前不得激活
+  或实现下一 phase；下一阶段规划已经开始时，必须与已完成阶段分开提交。
 - 评审 Agent 新建 review，逐项记录 finding；执行 Agent 回填处置，评审 Agent 或后续维护者确认结论。
 - review finding 标记为 `fixed` 时必须附验证证据；标记为 `accepted` 或 `deferred` 时必须附理由，并在需要后续工作时链接后继 plan。
 - 完成任务前更新扩展索引，并使所有未完成事项都有明确状态、负责人角色和下一步文档链接。

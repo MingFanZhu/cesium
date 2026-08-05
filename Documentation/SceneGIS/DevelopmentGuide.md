@@ -73,6 +73,9 @@ AgentDocs/terrain-materials/
    证据、状态和 follow-up；执行 Agent 回填处置结果。
 7. phase 完成时将 phase plan 标记为 `completed`，更新 extension roadmap 和索引
    handoff。所有 review finding 必须已解决、明确延期或链接到后续 plan。
+8. Architecture Agent 将该 phase 的代码、Specs、ADR/SGP 和 AgentDocs 创建为一个
+   独立本地提交检查点。提交完成前不激活或实现下一 phase；已经形成的下一阶段规划
+   必须留在后续提交中。
 
 仓库内 plan 是跨对话长期保存的交接资料，不替代 Agent 运行时计划。extension plan
 回答“整体为什么做、分几步、何时完成”，phase plan 回答“当前阶段具体怎么做和验证”。
@@ -95,6 +98,8 @@ AgentDocs/terrain-materials/
 要求：
 
 - 每个提交保持单一目的，即使没有独立分支。
+- 分阶段扩展按 phase 提交。阶段实现、验证和 review 完成后先提交该阶段代码与文档，
+  再进入下一阶段，禁止在一个提交中混合多个 phase。
 - 不在普通功能提交中同步官方版本或更新 `upstream-base.json`。
 - 不把格式化整个上游文件与功能改动混在一起。
 - 不 force-push `main` 或 `scenegis/develop`。
