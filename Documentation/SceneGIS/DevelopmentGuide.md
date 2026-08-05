@@ -10,11 +10,16 @@
 
 1. 确认当前分支、工作区状态和任务范围，保留不属于任务的现有修改。
 2. 阅读作用域内的 `AGENTS.md`。
-3. 对扩展范围内的实现或维护任务，确定其 `AgentDocs/<extension-slug>/`；新扩展先创建目录，已有扩展先阅读索引、active plan、open discussion 和未解决 review。仓库治理、协作规范维护和纯官方升级等非扩展任务不创建伪扩展目录。
+3. 对扩展范围内的实现或维护任务，确定其 `AgentDocs/<extension-slug>/`；新扩展先
+   创建目录，已有扩展先阅读索引、active extension/standalone plan、current phase
+   plan、open discussion 和未解决 review。仓库治理、协作规范维护和纯官方升级等
+   非扩展任务不创建伪扩展目录。
 4. 使用代码知识图谱确认相关符号、调用路径、构建入口和测试入口；图谱不足时再使用 `rg`。
 5. 判断任务是否只涉及 SceneGIS-owned paths。
 6. 判断是否需要架构阅读、ADR、SGP 或独立分支。
-7. 扩展任务在持久 plan 中确认范围、步骤和最小验证方案，再开始实现；非扩展任务使用其专用流程记录。
+7. 扩展任务先选择 planning model。大型或分阶段扩展先确认 extension plan，进入阶段
+   前再确认 phase plan；小型单阶段工作确认 standalone plan 后开始实现。非扩展任务
+   使用其专用流程记录。
 
 不得以“目录看起来相似”为依据假定 Shader、Worker、资源或类型会被正确构建。
 
@@ -39,7 +44,7 @@ AgentDocs/terrain-materials/
 
 - 扩展状态、范围和非目标。
 - 源码、测试、Sandcastle 和相关分支路径。
-- 当前 active plan。
+- Planning model、active extension/standalone plan、current phase 和 active phase plan。
 - 相关 ADR、SGP 和 open discussion。
 - 最新 review、未解决发现和下一步动作。
 
@@ -47,19 +52,32 @@ AgentDocs/terrain-materials/
 
 | 目录           | 内容                                                                                       | 状态示例                                              |
 | -------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
-| `plans/`       | 目标、非目标、源码事实、影响路径、步骤、验证、风险、依赖和完成条件                         | `draft`、`active`、`completed`、`superseded`          |
+| `plans/`       | Extension roadmap、phase/standalone 设计、步骤、验证、风险、依赖和完成条件                 | `draft`、`active`、`completed`、`superseded`          |
 | `discussions/` | 提炼后的问题、证据、备选方案、权衡、结论、后续动作和正式决定链接                           | `open`、`resolved`、`superseded`                      |
 | `reviews/`     | review target、发现严重度、负责人角色、证据、处置状态、follow-up、验证结果、结论和剩余风险 | `open`、`changes-requested`、`approved`、`superseded` |
 
 协作顺序：
 
-1. 架构 Agent 创建或校正扩展索引，确认边界、依赖方向、ADR/SGP 触发条件和待决问题。涉及架构边界的 plan 在 Metadata 中保持 `Architecture review: pending`，由架构 Agent 核对后改为 `confirmed`。
-2. 执行 Agent 创建 plan，并负责 `draft -> active -> completed` 的正常状态流转；实现中出现范围、架构或验证偏差时先回写 plan，重大问题进入 discussion。任一未完成 plan 都可以转为 `superseded`，但必须链接后继 plan。
-3. discussion 只保存提炼后的源码事实和方案权衡，不粘贴原始对话。长期决定提升为 ADR，并从 discussion 和扩展索引链接。
-4. 评审 Agent 在 `reviews/` 新建记录，明确 review target，以及每项 finding 的严重度、负责人角色、证据、状态和 follow-up；执行 Agent 回填处置结果。`fixed` 必须附验证证据，`accepted` 或 `deferred` 必须附理由并链接后继 plan（如需后续工作）。
-5. 完成时将 plan 标记为 `completed`，更新索引 handoff，确保所有 review finding 已解决、明确延期或链接到后续 plan。
+1. 架构 Agent 创建或校正扩展索引，并判断使用 extension/phase 还是 standalone
+   planning model。
+2. 大型扩展先创建 extension plan，确认稳定边界、phase roadmap、依赖、ADR/SGP
+   触发条件和整体验收；尚未进入的阶段只保留粗粒度 entry/exit gate。
+3. 阶段开始前重新检查当前源码和 open discussion，再创建 phase plan。涉及架构边界时
+   保持 `Architecture review: pending`，由架构 Agent 核对后改为 `confirmed`。
+4. 执行 Agent 负责 phase/standalone plan 的 `draft -> active -> completed` 流转；出现
+   偏差时先回写当前 plan，改变总体边界时同步更新 extension plan，重大问题进入
+   discussion。
+5. discussion 只保存提炼后的源码事实和方案权衡，不粘贴原始对话。长期决定提升为
+   ADR，并从 discussion 和扩展索引链接。
+6. 评审 Agent 在 `reviews/` 新建记录，明确 review target、finding 严重度、负责人角色、
+   证据、状态和 follow-up；执行 Agent 回填处置结果。
+7. phase 完成时将 phase plan 标记为 `completed`，更新 extension roadmap 和索引
+   handoff。所有 review finding 必须已解决、明确延期或链接到后续 plan。
 
-仓库内 plan 是跨对话长期保存的交接资料，不替代 Agent 运行时计划。历史 plan、discussion 和 review 应标记 `superseded` 或 `resolved` 并链接后继文档，不通过删除历史掩盖变化。
+仓库内 plan 是跨对话长期保存的交接资料，不替代 Agent 运行时计划。extension plan
+回答“整体为什么做、分几步、何时完成”，phase plan 回答“当前阶段具体怎么做和验证”。
+历史 plan、discussion 和 review 应标记 `superseded` 或 `resolved` 并链接后继文档，
+不通过删除历史掩盖变化。
 
 默认只提交 Markdown。不得在 AgentDocs 中保存 secret、本机绝对路径、原始聊天转录、大型日志、二进制、构建输出或可复用产品源码；验证证据应尽量链接到测试、提交或受版本控制的小型文本资料。
 
@@ -332,5 +350,6 @@ Build/**
 - [ ] 没有混入无关格式化、重构或上游同步。
 - [ ] Specs、Sandcastle、E2E 和性能验证与风险相称。
 - [ ] 长期架构决定已经记录 ADR，并链接相关 SGP。
-- [ ] 对应 AgentDocs plan、discussion、review 和扩展索引已反映最终状态、验证结果与剩余事项。
+- [ ] 当前 phase/standalone plan、parent extension roadmap、discussion、review 和扩展
+      索引已反映最终状态、验证结果与剩余事项。
 - [ ] 最终报告列出验证结果、上游文件、SGP 和剩余风险。

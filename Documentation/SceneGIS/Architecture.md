@@ -82,7 +82,14 @@ AgentDocs/<extension-slug>/
 └── reviews/
 ```
 
-扩展目录按产品能力或子系统划分，不按 Agent 对话、Git 分支、提交或单个缺陷划分。目录索引维护当前状态、范围、active plan、未决问题和工程链接；三个子目录分别保存可执行计划、提炼后的方案讨论和带处置状态的评审记录。
+扩展目录按产品能力或子系统划分，不按 Agent 对话、Git 分支、提交或单个缺陷划分。
+目录索引维护当前状态、范围、planning model、current phase、active plan、未决问题和
+工程链接；三个子目录分别保存计划、提炼后的方案讨论和带处置状态的评审记录。
+
+大型扩展使用 progressive elaboration：一个 extension plan 维护稳定目标、架构边界、
+阶段依赖和整体验收条件；阶段真正开始时再建立 phase plan，依据当前源码细化设计、
+步骤和验证。尚未进入的阶段不得提前固化易变实现。小型单阶段工作可以使用一个
+standalone plan。
 
 AgentDocs 是工作过程和交接记录，不建立新的规范层：
 

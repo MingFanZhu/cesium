@@ -5,7 +5,9 @@
 ## 必读路由
 
 - 开始任何 SceneGIS 实现前，阅读 `Documentation/SceneGIS/DevelopmentGuide.md` 中与任务相关的章节。
-- 开发新的扩展或继续已有扩展前，阅读 `AgentDocs/README.md`；新扩展先从 `AgentDocs/_template/` 建立稳定的扩展目录，已有扩展先阅读其索引、active plan、open discussion 和未解决 review。
+- 开发新的扩展或继续已有扩展前，阅读 `AgentDocs/README.md`；新扩展先从
+  `AgentDocs/_template/` 建立稳定的扩展目录，已有扩展先阅读其索引、active
+  extension/standalone plan、current phase plan、open discussion 和未解决 review。
 - 新增子系统、公共 API，或修改渲染管线、Shader、Worker、构建、发布和官方版本基线前，完整阅读 `Documentation/SceneGIS/Architecture.md` 以及相关 ADR。
 - 修改任何上游已有文件前，读取 `.scenegis/upstream-base.json` 和 `.scenegis/upstream-patches.json`，创建或复用一个 `SGP-####` 条目。
 - 在 `packages/engine` 或 `packages/sandcastle` 下工作时，同时遵守对应目录中的 `AGENTS.md`。
@@ -40,6 +42,11 @@
 
 - 每个独立 SceneGIS 扩展使用一个稳定的 `AgentDocs/<extension-slug>/`，并遵守 `AgentDocs/AGENTS.md`；不得按对话、分支、提交或单个缺陷重复建目录。
 - 扩展目录必须包含索引以及 `plans/`、`discussions/`、`reviews/`。仓库内 plan 是供跨 Agent、跨任务交接的持久记录，不等同于 Agent 运行时的临时计划。
+- 大型、跨模块或明确分阶段的扩展必须先建立 `extension plan`，只定义稳定目标、
+  边界、阶段、依赖、全局风险和整体验收条件。
+- 进入具体阶段前，必须依据当时的源码事实建立或更新 `phase plan`，再细化该阶段的
+  设计、影响路径、步骤和验证。不得为尚未进入的阶段提前猜测易变实现细节。
+- 小型、单阶段且可一次验证的工作可以只使用一个 `standalone plan`。
 - AgentDocs 只保存提炼后的计划、讨论、评审和交接状态，不保存原始聊天转录、secret、本机绝对路径、大型日志、二进制和生成产物。
 - 架构 Agent 负责明确边界和待决问题；执行 Agent 必须记录实现偏差与验证结果；评审 Agent 必须记录发现项及其处理状态。未解决事项不得通过删除文档来表示完成。
 - AgentDocs 不是新的规范或实现事实源。长期架构决定提升到 ADR，通用强制规则提升到 `Architecture.md` 或相应 `AGENTS.md`，上游补丁继续登记 SGP。

@@ -24,16 +24,36 @@ AgentDocs/
 
 1. 复制 `_template/` 的结构到 `AgentDocs/<extension-slug>/`。
 2. 填写扩展 `README.md` 的范围、状态、工程路径和 current handoff。
-3. 在 `plans/` 创建首个 plan，并从扩展索引链接。
+3. 判断 planning model：大型或分阶段扩展创建 extension plan；小型单阶段工作创建
+   standalone plan。
 4. 将未知且会改变方案的问题写入 `discussions/`。
-5. 实现进入可评审状态后，在 `reviews/` 创建独立 review 文档。
+5. extension plan 的具体阶段开始前创建 phase plan，并从扩展索引和 extension plan
+   双向链接。
+6. 实现进入可评审状态后，在 `reviews/` 创建独立 review 文档。
 
-维护或修复已有扩展时继续使用原目录。开始工作前，至少阅读扩展索引、current active plan、相关 open discussion 和未解决 review。
+维护或修复已有扩展时继续使用原目录。开始工作前，至少阅读扩展索引、active
+extension/standalone plan、current phase plan、相关 open discussion 和未解决 review。
+
+## 分层计划
+
+大型扩展采用 progressive elaboration：extension plan 先稳定整体目标和阶段边界，
+phase plan 在阶段真正开始时依据最新源码细化。这样后续阶段可以保留方向和依赖，
+但不会过早固化 Shader、Worker、构建入口或内部类等易变实现。
+
+- Extension plan：范围、非目标、架构边界、phase roadmap、依赖、全局风险和整体验收。
+- Phase plan：当前阶段的源码事实、详细设计、影响路径、步骤、验证和退出条件。
+- Standalone plan：小型、单阶段、可一次验证的独立工作。
+
+同一大型扩展保持一个 active extension plan。默认一次推进一个 active phase plan；
+只有总体计划已经证明阶段可独立执行时才并行。阶段完成后先回写 roadmap 和 handoff，
+再为下一阶段细化计划。
 
 ## 文档职责
 
-- `README.md`：扩展范围、状态、工程链接、current plan、open issues 和下一步 handoff。
-- `plans/`：可执行步骤、影响范围、Architecture review、验证方案、风险、依赖和完成条件。
+- `README.md`：扩展范围、planning model、current phase、active plan、open issues 和
+  下一步 handoff。
+- `plans/`：extension、phase 或 standalone plan；记录对应层级的范围、步骤、验证、
+  风险、依赖和完成条件。
 - `discussions/`：提炼后的问题、源码事实、备选方案、权衡、结论和待办。
 - `reviews/`：review target、findings、负责人角色、证据、处置状态、follow-up、验证结果和剩余风险。
 
