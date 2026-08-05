@@ -44,8 +44,10 @@ Cesium `BoundingRectangle` 使用 `x/y/width/height` 表示一个可变二维包
 
 - 构造参数为
   `{ minimumX, minimumY, maximumX, maximumY }`。
-- 四个边界必须是有限数；必须满足 `maximumX > minimumX` 和
-  `maximumY > minimumY`。
+- 四个边界以及派生的 `width = maximumX - minimumX`、
+  `height = maximumY - minimumY` 都必须是有限数；必须满足
+  `maximumX > minimumX` 和 `maximumY > minimumY`。有限端点产生 Infinity span
+  时也拒绝构造。
 - extent 本身允许矩形。它以后可以表示图层或数据覆盖范围，不等同于一个合法的
   平面世界。
 - 公共契约只读：只提供 getter，不提供 setter；不要求通过 `Object.freeze` 改变
@@ -102,15 +104,21 @@ Cesium `BoundingRectangle` 使用 `x/y/width/height` 表示一个可变二维包
 边界编号计算，不从相邻瓦片累计加法：
 
 ```text
-west  = minimumX + size * x       / count
-east  = minimumX + size * (x + 1) / count
-north = maximumY - size * y       / count
-south = maximumY - size * (y + 1) / count
+west  = minimumX + size * (x       / count)
+east  = minimumX + size * ((x + 1) / count)
+north = maximumY - size * (y       / count)
+south = maximumY - size * ((y + 1) / count)
 ```
 
-这种公式保证所有层级都以配置的完整世界坐标为事实源。P2 保存完整 CRS/world
-数值，不引入 recenter、`modelMatrix` 或局部顶点；后续 renderer 才负责把完整瓦片
-坐标转换为 tile-local geometry 并通过 `modelMatrix` 放回世界位置。
+boundary index 为 `0` 或 `count` 时，不执行反算，直接返回配置的 outer minimum 或
+maximum，保证 Level 0 和所有层级的 outer boundary 精确保留原值。内部边界先计算
+`index / count` 再乘 `size`；因为 `count` 是 2 的幂且 index 为 safe integer，该除法
+在二进制中精确，同时避免 `size * index` 在最终边界可表示时先产生 Infinity。
+
+这种公式保证所有层级都以配置的完整世界坐标为事实源，并让相邻 tile 调用同一个
+helper 得到完全相同的共享边。P2 保存完整 CRS/world 数值，不引入 recenter、
+`modelMatrix` 或局部顶点；后续 renderer 才负责把完整瓦片坐标转换为 tile-local
+geometry 并通过 `modelMatrix` 放回世界位置。
 
 ### 点到瓦片的归属
 
@@ -128,10 +136,19 @@ south = maximumY - size * (y + 1) / count
 和相邻边界的数学上限：
 
 - 硬上限为 52；Level 53 的 `2 ** level` 已不再是 safe integer。
-- 构造 tiling scheme 时，从 Level 0 向上检查 X/Y 两端的相邻边界。若首列、末列、
-  首行或末行在浮点表示中出现相邻边界相等，则前一级为
-  `maximumSafeLevel`。
-- `maximumSafeLevel` 是 52 与上述坐标精度上限中的较小值。
+- `maximumSafeLevel` 必须保证每个 accepted level 的全部 X/Y boundary 严格有序，
+  不能以首末 sampling 代替全域保证。
+- 构造 tiling scheme 时，从 Level 1 向 Level 52 递增。对每个轴计算
+  `idealSpacing = size / count`；只有当它严格大于
+  `ULP(size) + max(ULP(minimum), ULP(maximum))` 时才接受该层。`index / count`
+  精确；一个 multiplication ULP 加一个最终 addition/subtraction ULP 是两个相邻
+  computed boundary 之间舍入误差差值的保守上界，因此该条件保证所有内部边界
+  严格有序。
+- outer boundary 使用原始端点，并另外验证其相邻的首末 boundary；这覆盖
+  `maximum - minimum` 的舍入与 cancellation 对最外 tile 的影响。
+- 首个不满足上述保证的 level 及所有更深 level 都拒绝；
+  `maximumSafeLevel` 是最后一个 accepted level，因而可能保守地低于仍有部分可区分
+  tile 的层级。
 - 所有公开寻址方法在 `level > maximumSafeLevel` 时抛出 `DeveloperError`。
 
 provider 或 surface 的业务 `maximumLevel` 属于后续阶段。它可以低于

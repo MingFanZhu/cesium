@@ -3,7 +3,7 @@
 ## 元数据
 
 - 计划类型（Plan type）：`phase`
-- 状态（Status）：`draft`
+- 状态（Status）：`completed`
 - 总体计划（Parent plan）：
   [2026-08-05-planar-world-extension.md](2026-08-05-planar-world-extension.md)
 - 阶段（Phase）：`P2-planar-core`
@@ -13,7 +13,8 @@
 - 创建日期（Created）：`2026-08-05`
 - 更新日期（Updated）：`2026-08-05`
 - 相关讨论（Related discussions）：无；结论已提升到 ADR
-- 相关评审（Related reviews）：无；实现后创建 P2 review
+- 相关评审（Related reviews）：
+  [P2 planar core review request](../reviews/2026-08-05-p2-planar-core.md)
 - ADR：
   `Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md`
 - SGP：无；本阶段禁止修改 upstream-owned file
@@ -119,7 +120,8 @@ new SceneGISPlanarExtent({
 
 行为要求：
 
-- 四个输入都必须是 finite number。
+- 四个输入和派生的 `width`/`height` 都必须是 finite number；有限端点产生
+  Infinity span 时同样抛出 `DeveloperError`。
 - 必须满足 `maximumX > minimumX` 和 `maximumY > minimumY`；零宽、零高、
   反向范围、`NaN` 和 infinity 均抛出 `DeveloperError`。
 - 提供 getter-only 的 `minimumX`、`minimumY`、`maximumX`、`maximumY`、
@@ -203,11 +205,15 @@ positionToTileXY(position, level, result)
 count = 2 ** level
 size = coordinateSystem.extent.width
 
-west  = minimumX + size * x       / count
-east  = minimumX + size * (x + 1) / count
-north = maximumY - size * y       / count
-south = maximumY - size * (y + 1) / count
+west  = minimumX + size * (x       / count)
+east  = minimumX + size * ((x + 1) / count)
+north = maximumY - size * (y       / count)
+south = maximumY - size * ((y + 1) / count)
 ```
+
+boundary index `0`/`count` 必须直接返回配置的 outer minimum/maximum，不能反算；
+内部边界先计算 `index / count`，避免 `size * index` 的中间 overflow。相邻 tile 必须
+调用同一个 helper，因此共享边为同一数值。
 
 `tileXYToExtent` 每次返回新的 `SceneGISPlanarExtent`，不接受 result。相邻 tile
 必须共享同一个数值边界，Level 0 必须精确返回 coordinate system 的完整 extent。
@@ -219,12 +225,19 @@ south = maximumY - size * (y + 1) / count
 
 `maximumSafeLevel` 是寻址数学上限，不是数据源的业务最大层级：
 
-1. 从 Level 0 开始，最多检查到 Level 52。
-2. 每一级使用与 `tileXYToExtent` 相同的 boundary formula，检查首列和末列是否
-   `east > west`，以及首行和末行是否 `north > south`。
-3. 任一轴任一端的相邻边界发生 collapse 时停止；最后一个全部可区分的 level
-   即为 `maximumSafeLevel`。
-4. 每个寻址方法都拒绝更高 level；`tileXYToExtent` 还应防御性确认返回范围仍有
+1. Level 0 由精确保留的 outer boundary 保证可用；从 Level 1 开始最多检查到
+   Level 52。
+2. 每个 accepted level 必须保证全部 X/Y boundary 严格有序，首末 sampling 不能
+   作为充分条件。
+3. 对每个轴计算 `idealSpacing = size / count`。只有当其严格大于
+   `ULP(size) + max(ULP(minimum), ULP(maximum))` 时才满足全域分辨率保证。
+   `index / count` 在本契约中精确；上述 ULP 和是相邻 boundary 的 multiplication
+   与 addition/subtraction 舍入误差差值的保守上界。
+4. outer boundary 直接使用原始端点，并另外检查首末 outer-adjacent tile，覆盖
+   span subtraction 舍入和 cancellation。
+5. 首个不满足保证的 level 及所有更深 level 都拒绝；最后 accepted level 即为
+   `maximumSafeLevel`。允许该上限保守，但 accepted level 内不得存在 collapse tile。
+6. 每个寻址方法都拒绝更高 level；`tileXYToExtent` 还应防御性确认返回范围仍有
    正宽和正高。
 
 Level 52 的硬上限保证 `count` 与 `count - 1` 仍处于本阶段允许的 safe-integer
@@ -384,6 +397,96 @@ WebGL、Sandcastle、E2E、像素或性能测试。
 
 ## 偏差与结果
 
-项目负责人已确认本书面计划，尚未开始实现。当前状态保持 `draft`，由 Execution
-Agent 从 P2 planning checkpoint 开始时转为 `active`。任何 upstream-owned 修改
-需求都会使本阶段暂停并重新进入架构讨论。
+### 实际设计
+
+- `SceneGISPlanarExtent` 保存四条只读边界，派生 `width`/`height`，允许矩形；四条
+  边界和两个 span 都必须 finite。`clone`、exact `equals` 和 inclusive `contains`
+  均不引入 result mutation。
+- `SceneGISPlanarCoordinateSystem` 严格使用 `width === height`，clone 并拥有 extent，
+  保留可选 CRS 原字符串；`crs: null` 作为已提供的无效值抛出
+  `DeveloperError`。
+- `SceneGISPlanarTilingScheme` 保存同一个 coordinate system 引用，以 `2 ** level`
+  建立单个 `1 × 1` root。tile extent 始终从 root extent 和整数 boundary index
+  直接计算。
+- boundary index `0`/`count` 直接保留原始 outer edge；内部按
+  `size * (index / count)` 计算，避免可表示结果被中间 multiplication overflow。
+- `maximumSafeLevel` 使用 documented ULP resolution bound 保守保证 accepted level
+  的全部内部边界严格有序，并单独验证 outer-adjacent boundaries；不再使用首末
+  sampling 作为全域充分条件。
+- `positionToTileXY` 使用与 tile extent 相同的 boundary formula 做至多 52 次的
+  整数边界二分；这样内部 X/Y 共享边稳定归东/归南，outer maximum X/minimum Y
+  稳定 clamp 到末列/末行，不使用 epsilon、bitshift、wrap 或局部重定心。
+
+实现没有偏离 ADR-0002，没有修改 upstream-owned file，也没有创建或复用 SGP。
+首次 coordinate system Specs 使用 `10 + Number.EPSILON` 构造 strict-square 反例，
+该值在数值 10 处舍入回 10；同时实现把 `crs: null` 当作缺省。该次运行得到 5/7，
+随后 fixture 改为可表示的 `10.000000000000002`，并按“提供时必须为非空 string”
+显式拒绝 `null`，最终 7/7 通过。
+
+首次 architecture/code review 提出的 P2-R001 至 P2-R004 已修复：outer boundary
+精确保留，内部 boundary 避免中间 overflow，safe level 改用全域 ULP 保守保证，
+extent 拒绝 Infinity span，并按最终 runner 结果修正测试总数。ADR-0002 已同步修订，
+不再把首末 sampling 视为充分条件。
+
+### 最终影响路径
+
+Source 与 Specs：
+
+- `packages/engine/Source/SceneGIS/Core/SceneGISPlanarExtent.js`
+- `packages/engine/Source/SceneGIS/Core/SceneGISPlanarCoordinateSystem.js`
+- `packages/engine/Source/SceneGIS/Core/SceneGISPlanarTilingScheme.js`
+- `packages/engine/Specs/SceneGIS/Core/SceneGISPlanarExtentSpec.js`
+- `packages/engine/Specs/SceneGIS/Core/SceneGISPlanarCoordinateSystemSpec.js`
+- `packages/engine/Specs/SceneGIS/Core/SceneGISPlanarTilingSchemeSpec.js`
+
+协作文档：
+
+- `AgentDocs/planar-world/README.md`
+- `AgentDocs/planar-world/plans/2026-08-05-planar-world-extension.md`
+- `AgentDocs/planar-world/plans/2026-08-05-phase-2-planar-core.md`
+- `AgentDocs/planar-world/reviews/README.md`
+- `AgentDocs/planar-world/reviews/2026-08-05-p2-planar-core.md`
+
+### 验证结果
+
+| 命令                                                                                                                | 结果                                                                           |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarExtent"`                                                | Exit 0；9/9 success。                                                          |
+| `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarCoordinateSystem"`                                      | 最终 Exit 0；7/7 success；首次 5/7 的 fixture 与 `null` 语义已按上述记录修正。 |
+| `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarTilingScheme"`                                          | Exit 0；21/21 success。                                                        |
+| `npm run build`                                                                                                     | Exit 0；engine、widgets 与 Cesium unminified bundles 构建成功。                |
+| `npm run build-ts`                                                                                                  | Exit 0；声明生成成功；输出仓库既有 TSD-JSDoc warnings，无 P2 新 warning。      |
+| `npm run build-docs`                                                                                                | Exit 0；三个公共类型的 API HTML 生成成功。                                     |
+| `npm run tsc`                                                                                                       | Exit 0。                                                                       |
+| `npx eslint "packages/engine/Source/SceneGIS/Core/**/*.js" "packages/engine/Specs/SceneGIS/Core/**/*.js"`           | Exit 0。                                                                       |
+| `npx prettier --check "packages/engine/Source/SceneGIS/Core/**/*.js" "packages/engine/Specs/SceneGIS/Core/**/*.js"` | Exit 0。                                                                       |
+| `npx prettier --check --ignore-path .gitignore "AgentDocs/planar-world/**/*.md" "Documentation/SceneGIS/**/*.md"`   | Exit 0。                                                                       |
+| `npx markdownlint "AgentDocs/planar-world/**/*.md" "Documentation/SceneGIS/**/*.md"`                                | Exit 0。                                                                       |
+| `git diff --check`                                                                                                  | Exit 0。                                                                       |
+
+生成检查确认 engine 根 export、`packages/engine/index.d.ts` 和
+`Source/Cesium.d.ts` 均包含三个公共类型；生成的 `positionToTileXY` 类型为
+`Cartesian3` 到 `Cartesian2 | undefined`，`maximumSafeLevel` 为 readonly。
+生成文件未进入 Git diff 或 status。
+
+未运行完整 15810 Specs、WebGL、Sandcastle、E2E、像素和性能测试。P2 是无 DOM、
+无 WebGL、无资源生命周期的纯 Core 数学；37 个专项 Specs 与公共 build/type/docs
+链是本阶段的最小充分证据。
+
+### 所有权、评审与剩余风险
+
+- Implementation diff base：`2554e3882d`。
+- Upstream-owned files：0。
+- P2 SGP：0；`.scenegis/upstream-patches.json` 未修改。
+- ADR：
+  [ADR-0002](../../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)
+  保持 `approved`。
+- Review：
+  [P2 planar core review request](../reviews/2026-08-05-p2-planar-core.md)
+  为 `approved`；P2-R001 至 P2-R004 均已由 Architecture Agent 复核为 `fixed`。
+- 剩余风险：strict-square 不使用 epsilon；大坐标的数学寻址上限可能低于 52；
+  `maximumSafeLevel` 不是 provider 数据可用层级。上述行为均由契约和 Specs 锁定。
+
+P2 plan 与总体 roadmap 已更新为 `completed`。Architecture Agent 将代码、Specs、ADR
+和 AgentDocs 作为独立 P2 阶段提交；提交后停在阶段边界，与项目负责人讨论 P3，
+不直接进入实现。
