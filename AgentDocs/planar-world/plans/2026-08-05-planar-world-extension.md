@@ -13,9 +13,11 @@
 - 相关评审（Related reviews）：
   [P1 world contract review request](../reviews/2026-08-05-p1-world-contract.md)
   [P2 planar core review request](../reviews/2026-08-05-p2-planar-core.md)
+  [P3 planar surface review request](../reviews/2026-08-05-p3-planar-surface.md)
 - ADR：
   - `Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md`
   - `Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md`
+  - `Documentation/SceneGIS/Decisions/ADR-0003-planar-surface-runtime-and-lod.md`
 - SGP：`SGP-0001`（primary world lifecycle slot，`active`）
 
 ## 目标
@@ -80,7 +82,7 @@
 | ---- | ------------------------------------------------------------------------------ | ------ | ------------------------------------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------ |
 | P1   | 引入主世界契约和生命周期集成缝隙，同时保持 `Globe` 行为。                      | 无     | 总体计划获批；已分配 ADR 和 SGP。     | 默认 `Globe` 回归通过；模拟的非 `Globe` 世界可以完成 Scene 生命周期。 | `completed` | [第一阶段](2026-08-05-phase-1-world-contract.md) |
 | P2   | 实现米制范围、坐标系元数据和单根平面瓦片数学。                                 | P1     | P1 契约稳定。                         | 公共 Core API 与完整的瓦片边界 Specs 通过。                           | `completed` | [第二阶段](2026-08-05-phase-2-planar-core.md)    |
-| P3   | 实现 `SceneGISPlanarWorld`、平面 surface renderer、平面 quadtree、SSE 和缓存。 | P1、P2 | Core 类型稳定；已检查 renderer 源码。 | 通过程序控制的 Scene 可在没有 `Globe` 的情况下渲染并细化平面。        | `pending`   | 在阶段进入时创建。                               |
+| P3   | 实现 `SceneGISPlanarWorld`、平面 surface renderer、平面 quadtree、SSE 和缓存。 | P1、P2 | Core 类型稳定；已检查 renderer 源码。 | 通过程序控制的 Scene 可在没有 `Globe` 的情况下渲染并细化平面。        | `completed` | [第三阶段](2026-08-05-phase-3-planar-surface.md) |
 | P4   | 实现平面导航、home view、边界约束和世界坐标拾取。                              | P3     | 平面 surface runtime 稳定。           | 鼠标/触摸导航及 `Cartesian3` 平面拾取通过交互 Specs。                 | `pending`   | 在阶段进入时创建。                               |
 | P5   | 实现平面栅格 provider、图层、加载状态、祖先瓦片回退和合成。                    | P3、P4 | 瓦片选择与拾取契约稳定。              | XYZ 和 TMS 影像无空洞渲染，且资源能被确定性释放。                     | `pending`   | 在阶段进入时创建。                               |
 | P6   | 集成 Viewer 默认行为、兼容 widget、Sandcastle 和公共开发流程。                 | P4、P5 | Engine API 稳定。                     | Viewer 可创建不含 `Globe` 专用控件的平面场景；示例与类型检查通过。    | `pending`   | 在阶段进入时创建。                               |
@@ -138,13 +140,12 @@
 
 ## 进度与交接
 
-- 最近完成阶段：`P2-planar-core`（`completed`）。
+- 最近完成阶段：`P3-planar-surface`（`completed`）。
 - 最近完成阶段计划：
-  [2026-08-05-phase-2-planar-core.md](2026-08-05-phase-2-planar-core.md)。
-- 当前交接：P2-R001 至 P2-R004 均已复核为 `fixed`，
-  [P2 review](../reviews/2026-08-05-p2-planar-core.md) 为 `approved`。核心架构已形成
-  [ADR-0002](../../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)
-  并获批准；三个公共 Core 类型和 37 个专项 Specs 已完成。
-- 当前没有 active phase。下一步与项目负责人讨论 P3 的范围和 phase plan；P3 仍为
-  `pending`，在计划获批前不得实现。
+  [2026-08-05-phase-3-planar-surface.md](2026-08-05-phase-3-planar-surface.md)。
+- 当前阶段：无 active phase；`P4` 仍为 `pending`。
+- 当前交接：P3-R001 至 P3-R003 均已由 Architecture Agent 复核为 `fixed`，
+  [P3 review](../reviews/2026-08-05-p3-planar-surface.md) 为 `approved`。下一步先与
+  项目负责人讨论 P4 的导航、边界约束和拾取范围，再创建 P4 phase plan；当前状态不
+  授权 P4 实现或 push。
 - 后续阶段在达到各自进入门槛前，刻意只保留粗粒度描述。
