@@ -109,7 +109,8 @@
 | P4   | 实现平面导航、home view、边界约束和世界坐标拾取。                                               | P3     | 平面 surface runtime 稳定。                        | PC 鼠标导航及两层 `Cartesian3` 平面拾取通过自动化交互 Specs。                      | `completed` | [第四阶段](2026-08-05-phase-4-planar-navigation.md)         |
 | P5   | 实现平面栅格 provider、图层、加载状态、祖先瓦片回退、合成和一个 EPSG:3857 人工案例。            | P3、P4 | 瓦片选择与拾取契约稳定。                           | XYZ/TMS 无空洞渲染、资源确定性释放，OSM 案例可人工验收。                           | `completed` | [第五阶段](2026-08-06-phase-5-planar-imagery.md)            |
 | P6   | 集成 Viewer 默认行为、兼容 widget、显式 Sandcastle 和公共开发流程；不增加通用 provider picker。 | P4、P5 | Engine API 稳定；P5 checkpoint 完成；P6 架构获批。 | Viewer 可创建不含 `Globe` 专用控件的平面场景；示例、生命周期、回归与类型检查通过。 | `completed` | [第六阶段](2026-08-06-phase-6-planar-viewer-integration.md) |
-| P7   | 完成性能、生命周期、升级审计和首个版本文档的发布验收。                                          | P1-P6  | 已形成 feature-complete 候选版本。                 | 总体验收条件和发布证据齐备。                                                       | `pending`   | 在阶段进入时创建。                                          |
+| P7   | 修正滚轮方向与速度、边界复位和低俯仰复位，并显式演示天空盒。                                    | P1-P6  | P6 checkpoint 完成；手工 finding 已复现和分类。    | 自动化与架构评审通过；项目负责人复测接受；独立检查点完成。                         | `completed` | [第七阶段](2026-08-06-phase-7-manual-acceptance.md)         |
+| P8   | 完成性能、生命周期、升级审计和首个版本文档的发布验收。                                          | P1-P7  | 已形成通过人工功能验收的候选版本。                 | 总体验收条件和发布证据齐备。                                                       | `pending`   | 在阶段进入时创建。                                          |
 
 阶段状态只允许使用 `pending`、`proposed`、`active`、`completed`、
 `deferred` 和 `superseded`。
@@ -140,6 +141,10 @@
 - Camera 的 center ray、off-center frustum 和 reference transform 容易被误当成普通
   `camera.direction` 与对称视锥；平面导航和拾取必须共享四 frustum helper 并维护升级
   检查点。
+- browser wheel 的物理方向必须经过 `ScreenSpaceEventHandler` 和
+  `CameraEventAggregator` 的真实归一化链路验证；只注入 private movement 容易锁定错误符号。
+- 当前 navigation controller 只实现 surface-side profile，但这不是 planar world、double-sided
+  surface 或 picking 的永久 `Z > 0` 限制；未来地下模式需要独立设计 side 和 pitch policy。
 - 栅格回退和多图层合成会增加 GPU 内存与 draw call。在优化 shader 结构前，
   应先建立可量化的预算。
 - Viewer 构造与销毁集中管理大量 DOM、widget、controller 和 Scene 资源；P6 option conflict
@@ -158,7 +163,8 @@
 - 平面 surface 瓦片细化时无空洞，使用局部 geometry 加 `modelMatrix`，
   并遵循确定性的缓存和销毁规则。
 - 平面 PC 相机控制、home view 和 mathematical surface picking 能覆盖所配置的坐标
-  范围，并与 rendered-depth picking 保持明确边界。
+  范围，wheel 方向和主观速度与默认 Globe 一致，extent/pitch 边界不发生隐式 home，
+  并与 rendered-depth picking 保持明确边界。
 - 至少一个公共 URL template 栅格 provider 支持 XYZ 与 TMS 寻址、图层顺序
   和 alpha，并能在加载期间使用祖先瓦片回退。
 - Viewer 具有显式的平面构造路径，且不会静默启用 `Globe` 专用 provider
@@ -167,17 +173,21 @@
   `world.imageryLayers` 显式组装数据。
 - 默认 `Globe` 应用保持既有行为，并通过针对性的回归测试。
 - 公共构建、生成类型、相关 Specs、Sandcastle 及性能证据均通过验收。
+- 项目负责人完成关键 PC 导航、边界、倾斜视角、影像与 skybox 的人工验收；发现项均已
+  修复、明确接受或延期。
 - 每项上游修改都有 SGP 记录，每项长期架构决策都有 ADR 记录。
 
 ## 进度与交接
 
-- 最近完成阶段：`P6-planar-viewer-integration`（`completed`）。P6-R001 至 P6-R004 已由
-  focused Architecture re-review 确认为`fixed`，review 为`approved`；Architecture Agent将
-  本阶段形成独立本地checkpoint，不push。
-- 当前阶段：无active phase；P7继续为`pending`。
-- 当前阶段计划：无。
-- 当前交接：P1至P6已经完成。平面Viewer只支持具体`SceneGISPlanarWorld`、automatic controller
-  ownership、planar Home、兼容widget allowlist、Entity navigation guards和显式
-  EPSG:3857/OSM Viewer示例；通用平面底图选择器明确不做。当前停在阶段门禁，下一步先与项目
-  负责人讨论P7；不自动创建P7 plan、不push、不进入P7实现。
+- 最近完成阶段：`P7-manual-acceptance`（`completed`）。P7-R001 至 P7-R004 已由 focused
+  Architecture re-review 确认为`fixed`，review 为`approved`；项目负责人的浏览器/GPU人工
+  复测也已通过。Architecture Agent将本阶段形成独立本地checkpoint，不push。
+- 当前阶段：无。P8仍为`pending`，尚未建立或批准 phase plan。
+- 最近完成阶段计划：
+  [P7手工验收与平面导航修正](2026-08-06-phase-7-manual-acceptance.md)（`completed`）。
+- 当前交接：P7 wheel normalization、outside-center boundary correction、pitch round-trip与两个
+  示例的显式skybox已经实现，聚焦/回归/构建/no-embedding矩阵通过。initial Architecture/code
+  review提出P7-R001至P7-R004；focused re-review已确认全部为`fixed`，review为`approved`，
+  项目负责人也已确认人工门禁通过。P7已完成；terrain与地下模式仍延期。下一步先讨论P8，
+  当前不push、未进入P8。
 - 后续阶段在达到各自进入门槛前，刻意只保留粗粒度描述。

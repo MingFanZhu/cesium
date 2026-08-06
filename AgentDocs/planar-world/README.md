@@ -2,19 +2,19 @@
 
 ## Metadata
 
-| Field                  | Value                                                                                 |
-| ---------------------- | ------------------------------------------------------------------------------------- |
-| Extension slug         | `planar-world`                                                                        |
-| Status                 | `active`                                                                              |
-| Planning model         | `extension`                                                                           |
-| Active extension plan  | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`active`)  |
-| Current phase          | `P6-planar-viewer-integration` (`completed`)                                          |
-| Active phase plan      | None                                                                                  |
-| Proposed phase plan    | None                                                                                  |
-| Active standalone plan | None                                                                                  |
-| Architecture contact   | Architecture Agent                                                                    |
-| Execution contact      | Execution Agent                                                                       |
-| Last updated           | `2026-08-06`                                                                          |
+| Field                  | Value                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| Extension slug         | `planar-world`                                                                       |
+| Status                 | `active`                                                                             |
+| Planning model         | `extension`                                                                          |
+| Active extension plan  | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`active`) |
+| Current phase          | `P7-manual-acceptance` (`completed`)                                                 |
+| Active phase plan      | None                                                                                 |
+| Proposed phase plan    | None                                                                                 |
+| Active standalone plan | None                                                                                 |
+| Architecture contact   | Architecture Agent                                                                   |
+| Execution contact      | Execution Agent                                                                      |
+| Last updated           | `2026-08-06`                                                                         |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -63,20 +63,23 @@
 
 ## Current handoff
 
-- Current state: P1 through P6 are complete on `feature/planar-world`. The P5 base checkpoint is
-  `ac56b9c6f79cf813e1c6b8208bfdf1138f2c4a4c`; P6 review is approved and its independent local
-  Architecture checkpoint follows the completed phase conclusion.
-- Next action: stop at the phase gate and discuss P7 with the project owner. No P7 plan is active or
-  proposed, and no P7 implementation may begin yet.
-- Current phase status: `P6-planar-viewer-integration` is `completed`.
-- Open discussions: None; confirmed P6 decisions are recorded in ADR-0006. A generic planar base
-  layer/provider picker is explicitly out of scope and remains application-specific.
+- Current state: P1 through P6 are complete on `feature/planar-world`; the P6 Architecture checkpoint
+  is `b25691eba82317df870af20c948cd40bc8d92cf3`.
+- Next action: stop at the P7 checkpoint and discuss P8 scope with the project owner. P8 has not been
+  activated and no P8 phase plan exists.
+- Current phase status: `P7-manual-acceptance` is `completed`; Architecture/code review and the
+  project-owner browser/GPU gate are both `approved`.
+- Open discussions: None. Confirmed boundaries are: extent crossing must clamp without home reset;
+  terrain is deferred; underground navigation remains a future capability and current surface-side
+  restrictions must not become permanent world invariants.
 - Latest completed review:
-  [P6 planar Viewer integration review](reviews/2026-08-06-p6-planar-viewer-integration.md)
+  [P7 manual acceptance review](reviews/2026-08-06-p7-manual-acceptance.md)
   (`approved`).
 - Current review: None.
-- Unresolved reviews: None; P1 through P6 findings are reviewer-confirmed `fixed`.
-- Known risks: `Viewer.js` remains an upstream high-frequency file tracked by `SGP-0002`. Focused
+- Unresolved reviews: none. P7-R001 through P7-R004 and all P1 through P6 findings are
+  reviewer-confirmed `fixed`.
+- Known risks: automated and project-owner manual navigation evidence pass. `Viewer.js` remains an
+  upstream high-frequency file tracked by `SGP-0002`. Focused
   lifecycle evidence is approved. Architecture reproduced the two upstream Viewer timing failures,
   while clean P5/current P6 comparison runs passed `59/59` and Execution's final fix-state run passed
   `82/82`; they remain accepted local runner flakes rather than a P6 finding. The 8090 Sandcastle

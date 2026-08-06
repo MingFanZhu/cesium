@@ -21,6 +21,7 @@ const world = new Cesium.SceneGISPlanarWorld({
 });
 const widget = new Cesium.CesiumWidget("cesiumContainer", {
   world,
+  skyBox: Cesium.SkyBox.createEarthSkyBox(),
 });
 
 widget.scene.screenSpaceCameraController.enableInputs = false;

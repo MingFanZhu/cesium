@@ -8,6 +8,8 @@
 - Related plan：
   `AgentDocs/planar-world/plans/2026-08-05-phase-4-planar-navigation.md`
 - Related patch：无；P4 禁止修改 upstream-owned file
+- P7 amendment：`2026-08-06`，修正真实 browser wheel normalization、boundary
+  synchronization 与 pitch round-trip；不改变 public picking contract
 
 ## 上下文与源码事实
 
@@ -133,6 +135,12 @@ controller 在 idle frame 不持续重写 Camera。调用方直接修改 Camera 
 gesture 开始时从实际 world-space pose 和 center ray 重新同步 rig。只有 pose、frustum
 或 plane intersection 无法形成有效 planar view 时才回到 home。
 
+同步使用 SceneGIS private four-frustum window ray 与无限 `Z=0` plane 求交。该 prospective
+center target 即使位于配置 extent 外也仍是有效 planar view；controller 对它执行 inclusive
+target clamp 并整体平移 Camera，而不是调用 `viewHome`。public
+`SceneGISPlanarWorld.pickFromWindowPosition` 继续保持 bounded surface contract，不能被内部
+navigation intersection 复用或放宽。
+
 pose 同步必须同时分解 `directionWC`、`upWC` 和 `rightWC`。非垂直视角以 direction
 确定 heading，并相对期望的 zero-roll axes 检验 roll；真正的 non-zero roll 或非正交
 axes 不满足 planar invariant。exact nadir 的 direction XY 为零，此时 heading 从
@@ -213,6 +221,19 @@ Wheel 使用指数比例而不是固定米数增量。pointer 有 bounded surfac
 zoom anchor；否则回退当前 target。没有 boundary correction 时，anchor 在 zoom 前后
 保持同一 screen position。
 
+真实浏览器 `WheelEvent` 先由 `ScreenSpaceEventHandler` 把标准 `deltaY` 反向规范为 wheel
+delta，再由 `CameraEventAggregator` 转成 movement：向前滚动最终得到正的
+`endPosition.y - startPosition.y`。P7 固定使用 canvas viewport 高度归一化：
+
+```text
+diff = endPosition.y - startPosition.y
+ratio = clamp(diff / canvas.clientHeight, -0.1, 0.1)
+factor = exp(-5.0 * ratio)
+```
+
+因此向前滚动使 range/span 变小，向后滚动使其变大。比例上限约束单帧大 delta，small
+trackpad-like delta 保持连续；不增加 public speed option。
+
 - perspective zoom 改变 Camera 到 navigation plane/anchor 的距离，不修改 frustum；
 - `OrthographicFrustum` 修改 width；
 - `OrthographicOffCenterFrustum` 同比例缩放四边，不改变其 off-center ratio；
@@ -233,6 +254,15 @@ Camera/target 重新选择 zoom anchor。该顺序固定并由 Specs 锁定。
 - 最小 view range 由坐标 ULP、Camera-plane distance、viewport 和 frustum 共同得到
   precision-safe internal floor，不能退化为零、`NaN` 或不可逆矩阵；
 - P4 不把 arbitrary minimum/maximum view size 暴露为公共属性。
+
+从 Camera axes 分解 pitch 时允许一个仅覆盖浮点 round-trip 的窄 angular tolerance，随后将
+controller state clamp 回精确边界。out-of-pitch-tolerance、axes 仍合法但 center ray 与平面
+parallel、Camera 位于平面下方或 non-zero-roll 的 pose 走安全 home recovery。non-finite 或
+degenerate Camera axes 由 four-frustum helper 在 mutation 前抛出 `DeveloperError`；P7 不捕获或
+降级该 P4 fail-fast contract。Camera 必须位于 `Z=0` 上方只是当前
+`SceneGISPlanarCameraController` 的 surface-side profile，不是 `SceneGISPlanarWorld`、
+double-sided surface、imagery 或 mathematical picking 的永久负 Z 禁令；地下导航需要后续
+独立架构设计。
 
 canvas resize 不自动调用 home，也不在 idle frame改变 Camera。下一次 home 或输入开始
 时重新计算当前 canvas 下的 home maximum 和 numerical minimum。

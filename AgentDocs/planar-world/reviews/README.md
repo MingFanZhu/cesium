@@ -4,6 +4,8 @@
 
 当前 review：
 
+- [P7 manual acceptance review](2026-08-06-p7-manual-acceptance.md)
+  （`approved`）
 - [P6 planar Viewer integration review request](2026-08-06-p6-planar-viewer-integration.md)
   （`approved`）
 - [P5 planar imagery review request](2026-08-06-p5-planar-imagery.md)
@@ -22,5 +24,6 @@ P1-R001 至 P1-R003、P2-R001 至 P2-R004、P3-R001 至 P3-R003、P4-R001 至 P4
 `approved`。P5 的第二次 focused Architecture re-review 已确认 P5-R001/P5-R002；至此
 P5-R001 至 P5-R006 均为 reviewer-confirmed `fixed`，P5 review 为 `approved`。P6-R001 至
 P6-R004 也已由 focused Architecture re-review 确认为`fixed`；P6 review 为`approved`，phase
-为`completed`。当前没有 unresolved review。Architecture Agent创建P6独立本地checkpoint后
-停在阶段门禁；不得自动创建或执行P7 plan。
+为`completed`。P7-R001至P7-R004均已由focused Architecture re-review确认为`fixed`，P7
+review为`approved`；项目负责人的人工复测也已通过，P7 phase为`completed`并形成独立本地
+checkpoint。未push，P8尚未开始。

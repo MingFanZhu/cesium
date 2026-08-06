@@ -12,8 +12,10 @@ import SceneGISPlanarCamera from "./_private/_SceneGISPlanarCamera.js";
 
 const MINIMUM_PITCH = -CesiumMath.PI_OVER_TWO;
 const MAXIMUM_PITCH = -CesiumMath.toRadians(5.0);
+const PITCH_ROUND_TRIP_TOLERANCE = CesiumMath.EPSILON10;
 const ROTATE_RATE = Math.PI;
-const WHEEL_EXPONENT = 1.0 / 1200.0;
+const MAXIMUM_WHEEL_RATIO = 0.1;
+const WHEEL_ZOOM_RATE = 5.0;
 
 const scratchCenter = new Cartesian2();
 const scratchRay = { origin: new Cartesian3(), direction: new Cartesian3() };
@@ -44,6 +46,17 @@ function getCenter(scene, result) {
   result.x = scene.canvas.clientWidth * 0.5;
   result.y = scene.canvas.clientHeight * 0.5;
   return result;
+}
+
+function getUnboundedCenterTarget(scene, result) {
+  const center = getCenter(scene, scratchCenter);
+  const ray = SceneGISPlanarCamera.getWindowRay(
+    scene.camera,
+    scene.canvas,
+    center,
+    scratchRay,
+  );
+  return ray && SceneGISPlanarCamera.intersectPlane(ray, result);
 }
 
 function translateCamera(camera, translation) {
@@ -420,8 +433,7 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
   scene,
   allowHome,
 ) {
-  const center = getCenter(scene, scratchCenter);
-  let target = this._world.pickFromWindowPosition(center, scene, this._target);
+  let target = getUnboundedCenterTarget(scene, scratchPoint);
   const camera = scene.camera;
   const pose = SceneGISPlanarCamera.getHeadingPitch(camera);
   const worldPose = SceneGISPlanarCamera.getWorldPose(
@@ -431,8 +443,8 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
   if (
     !defined(target) ||
     worldPose.position.z <= 0.0 ||
-    pose.pitch < MINIMUM_PITCH ||
-    pose.pitch > MAXIMUM_PITCH ||
+    pose.pitch < MINIMUM_PITCH - PITCH_ROUND_TRIP_TOLERANCE ||
+    pose.pitch > MAXIMUM_PITCH + PITCH_ROUND_TRIP_TOLERANCE ||
     !pose.valid ||
     Math.abs(pose.roll) > CesiumMath.EPSILON8
   ) {
@@ -440,8 +452,12 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
       return false;
     }
     this.viewHome(scene);
-    target = this._world.pickFromWindowPosition(center, scene, this._target);
+    target = getUnboundedCenterTarget(scene, scratchPoint);
   }
+  if (!defined(target)) {
+    return false;
+  }
+  this._applyTargetClamp(scene);
   const synchronizedPose = SceneGISPlanarCamera.getHeadingPitch(camera);
   this._heading = CesiumMath.zeroToTwoPi(synchronizedPose.heading);
   this._pitch = CesiumMath.clamp(
@@ -713,7 +729,13 @@ SceneGISPlanarCameraController.prototype._zoom = function (scene, movement) {
   );
   const anchor =
     pointerAnchor && Cartesian3.clone(pointerAnchor, new Cartesian3());
-  const factor = Math.exp(movement.endPosition.y * WHEEL_EXPONENT);
+  const difference = movement.endPosition.y - movement.startPosition.y;
+  const ratio = CesiumMath.clamp(
+    difference / scene.canvas.clientHeight,
+    -MAXIMUM_WHEEL_RATIO,
+    MAXIMUM_WHEEL_RATIO,
+  );
+  const factor = Math.exp(-WHEEL_ZOOM_RATE * ratio);
   const info = SceneGISPlanarCamera.getFrustumInfo(camera.frustum);
   if (info.perspective) {
     const worldPose = SceneGISPlanarCamera.getWorldPose(

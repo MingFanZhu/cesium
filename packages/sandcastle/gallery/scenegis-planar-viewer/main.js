@@ -34,5 +34,8 @@ world.imageryLayers.addImageryProvider(
   }),
 );
 
-const viewer = new Cesium.Viewer("cesiumContainer", { world });
+const viewer = new Cesium.Viewer("cesiumContainer", {
+  world,
+  skyBox: Cesium.SkyBox.createEarthSkyBox(),
+});
 viewer.planarCameraController.viewHome(viewer.scene);
