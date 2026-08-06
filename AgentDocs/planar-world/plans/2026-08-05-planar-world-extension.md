@@ -16,13 +16,16 @@
   [P3 planar surface review request](../reviews/2026-08-05-p3-planar-surface.md)
   [P4 planar navigation review](../reviews/2026-08-05-p4-planar-navigation.md)
   [P5 planar imagery review request](../reviews/2026-08-06-p5-planar-imagery.md)
+  [P6 planar Viewer integration review](../reviews/2026-08-06-p6-planar-viewer-integration.md)
 - ADR：
   - `Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md`
   - `Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md`
   - `Documentation/SceneGIS/Decisions/ADR-0003-planar-surface-runtime-and-lod.md`
   - `Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md`
   - `Documentation/SceneGIS/Decisions/ADR-0005-planar-imagery-runtime-and-composition.md`
-- SGP：`SGP-0001`（primary world lifecycle slot，`active`）
+  - `Documentation/SceneGIS/Decisions/ADR-0006-planar-viewer-and-widget-integration.md`
+- SGP：`SGP-0001`（primary world lifecycle slot，`active`）；`SGP-0002`（P6 narrow
+  planar Viewer seam，`active`）
 
 ## 目标
 
@@ -66,6 +69,9 @@
     `scene.screenSpaceCameraController` 属性。
 11. planar surface picking 是有界 `Z=0` 数学交点；`scene.pickPosition` 继续表示当前
     rendered depth 的 frontmost position。两者不得互相冒充或隐式回退。
+12. 高层 Viewer 只为具体 `SceneGISPlanarWorld` 提供受限集成；generic custom world、手工
+    controller ownership 和 `world: false` 继续使用 `CesiumWidget`。自定义平面 CRS 不提供
+    通用 base-layer/provider picker，应用必须显式匹配 world 与 provider。
 
 ## 源码与基线事实
 
@@ -79,6 +85,9 @@
   构造 Scene 后将其赋给 Scene。
 - `packages/widgets/Source/Viewer/Viewer.js` 的 base layer picker、地形选项
   和多个便捷属性都以 `Globe` 为前提。
+- 当前 Viewer 默认创建 Geocoder、HomeButton、BaseLayerPicker、NavigationHelp 等 widget，
+  安装 double-click Entity tracking，并且 HomeButton 直接调用 `camera.flyHome`；P6 必须通过
+  capability allowlist 和 planar Home 明确收窄，而不是伪造 Globe 能力。
 - Cesium 的 `TilingScheme`、`QuadtreeTile` 和 `QuadtreePrimitive` 与
   `Ellipsoid`、`Cartographic`、大地测量 `Rectangle`、地平线遮挡和高度
   更新存在耦合。
@@ -92,15 +101,15 @@
 
 ## 阶段路线图
 
-| 阶段 | 目标                                                                                 | 依赖   | 进入门槛                              | 完成门槛                                                               | 状态        | 阶段计划                                            |
-| ---- | ------------------------------------------------------------------------------------ | ------ | ------------------------------------- | ---------------------------------------------------------------------- | ----------- | --------------------------------------------------- |
-| P1   | 引入主世界契约和生命周期集成缝隙，同时保持 `Globe` 行为。                            | 无     | 总体计划获批；已分配 ADR 和 SGP。     | 默认 `Globe` 回归通过；模拟的非 `Globe` 世界可以完成 Scene 生命周期。  | `completed` | [第一阶段](2026-08-05-phase-1-world-contract.md)    |
-| P2   | 实现米制范围、坐标系元数据和单根平面瓦片数学。                                       | P1     | P1 契约稳定。                         | 公共 Core API 与完整的瓦片边界 Specs 通过。                            | `completed` | [第二阶段](2026-08-05-phase-2-planar-core.md)       |
-| P3   | 实现 `SceneGISPlanarWorld`、平面 surface renderer、平面 quadtree、SSE 和缓存。       | P1、P2 | Core 类型稳定；已检查 renderer 源码。 | 通过程序控制的 Scene 可在没有 `Globe` 的情况下渲染并细化平面。         | `completed` | [第三阶段](2026-08-05-phase-3-planar-surface.md)    |
-| P4   | 实现平面导航、home view、边界约束和世界坐标拾取。                                    | P3     | 平面 surface runtime 稳定。           | PC 鼠标导航及两层 `Cartesian3` 平面拾取通过自动化交互 Specs。          | `completed` | [第四阶段](2026-08-05-phase-4-planar-navigation.md) |
-| P5   | 实现平面栅格 provider、图层、加载状态、祖先瓦片回退、合成和一个 EPSG:3857 人工案例。 | P3、P4 | 瓦片选择与拾取契约稳定。              | XYZ/TMS 无空洞渲染、资源确定性释放，OSM 案例可人工验收。               | `completed` | [第五阶段](2026-08-06-phase-5-planar-imagery.md)    |
-| P6   | 集成 Viewer 默认行为、兼容 widget、通用 Sandcastle 和公共开发流程。                  | P4、P5 | Engine API 稳定。                     | Viewer 可创建不含 `Globe` 专用控件的平面场景；通用示例与类型检查通过。 | `pending`   | 在阶段进入时创建。                                  |
-| P7   | 完成性能、生命周期、升级审计和首个版本文档的发布验收。                               | P1-P6  | 已形成 feature-complete 候选版本。    | 总体验收条件和发布证据齐备。                                           | `pending`   | 在阶段进入时创建。                                  |
+| 阶段 | 目标                                                                                            | 依赖   | 进入门槛                                           | 完成门槛                                                                           | 状态        | 阶段计划                                                    |
+| ---- | ----------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
+| P1   | 引入主世界契约和生命周期集成缝隙，同时保持 `Globe` 行为。                                       | 无     | 总体计划获批；已分配 ADR 和 SGP。                  | 默认 `Globe` 回归通过；模拟的非 `Globe` 世界可以完成 Scene 生命周期。              | `completed` | [第一阶段](2026-08-05-phase-1-world-contract.md)            |
+| P2   | 实现米制范围、坐标系元数据和单根平面瓦片数学。                                                  | P1     | P1 契约稳定。                                      | 公共 Core API 与完整的瓦片边界 Specs 通过。                                        | `completed` | [第二阶段](2026-08-05-phase-2-planar-core.md)               |
+| P3   | 实现 `SceneGISPlanarWorld`、平面 surface renderer、平面 quadtree、SSE 和缓存。                  | P1、P2 | Core 类型稳定；已检查 renderer 源码。              | 通过程序控制的 Scene 可在没有 `Globe` 的情况下渲染并细化平面。                     | `completed` | [第三阶段](2026-08-05-phase-3-planar-surface.md)            |
+| P4   | 实现平面导航、home view、边界约束和世界坐标拾取。                                               | P3     | 平面 surface runtime 稳定。                        | PC 鼠标导航及两层 `Cartesian3` 平面拾取通过自动化交互 Specs。                      | `completed` | [第四阶段](2026-08-05-phase-4-planar-navigation.md)         |
+| P5   | 实现平面栅格 provider、图层、加载状态、祖先瓦片回退、合成和一个 EPSG:3857 人工案例。            | P3、P4 | 瓦片选择与拾取契约稳定。                           | XYZ/TMS 无空洞渲染、资源确定性释放，OSM 案例可人工验收。                           | `completed` | [第五阶段](2026-08-06-phase-5-planar-imagery.md)            |
+| P6   | 集成 Viewer 默认行为、兼容 widget、显式 Sandcastle 和公共开发流程；不增加通用 provider picker。 | P4、P5 | Engine API 稳定；P5 checkpoint 完成；P6 架构获批。 | Viewer 可创建不含 `Globe` 专用控件的平面场景；示例、生命周期、回归与类型检查通过。 | `completed` | [第六阶段](2026-08-06-phase-6-planar-viewer-integration.md) |
+| P7   | 完成性能、生命周期、升级审计和首个版本文档的发布验收。                                          | P1-P6  | 已形成 feature-complete 候选版本。                 | 总体验收条件和发布证据齐备。                                                       | `pending`   | 在阶段进入时创建。                                          |
 
 阶段状态只允许使用 `pending`、`proposed`、`active`、`completed`、
 `deferred` 和 `superseded`。
@@ -133,6 +142,8 @@
   检查点。
 - 栅格回退和多图层合成会增加 GPU 内存与 draw call。在优化 shader 结构前，
   应先建立可量化的预算。
+- Viewer 构造与销毁集中管理大量 DOM、widget、controller 和 Scene 资源；P6 option conflict
+  必须尽量 preflight，controller registration 与 failure rollback 必须成对验证。
 - 首个版本明确排除高程地形，但 surface provider 契约应允许后续扩展高程，
   同时不得宣称当前已经支持。
 
@@ -152,20 +163,21 @@
   和 alpha，并能在加载期间使用祖先瓦片回退。
 - Viewer 具有显式的平面构造路径，且不会静默启用 `Globe` 专用 provider
   或 widget。
+- 平面 Viewer 不提供无法验证自定义 CRS coverage 的通用 provider picker；应用通过
+  `world.imageryLayers` 显式组装数据。
 - 默认 `Globe` 应用保持既有行为，并通过针对性的回归测试。
 - 公共构建、生成类型、相关 Specs、Sandcastle 及性能证据均通过验收。
 - 每项上游修改都有 SGP 记录，每项长期架构决策都有 ADR 记录。
 
 ## 进度与交接
 
-- 最近完成阶段：`P5-planar-imagery`（`completed`）；其 implementation diff base 为 P4
-  checkpoint `e4d45e3bafcb249dac98ac8118c28a6b643c8146`，代码与文档由本次阶段完成提交形成
-  独立 checkpoint。
-- 当前阶段：无；P6 尚未进入。
-- 当前阶段计划：无；不得在阶段讨论和确认前创建 P6 implementation plan。
-- 当前交接：P5 public provider/layer/collection、per-layer cache 与 ancestor fallback、
-  single-pass composition、dynamic `tilesLoaded` 和 EPSG:3857/OpenStreetMap Sandcastle 均已实现；
-  P5-R001 至 P5-R006 全部经 Architecture re-review 确认为 `fixed`，
-  [P5 review](../reviews/2026-08-06-p5-planar-imagery.md) 为 `approved`。P5 checkpoint 后停下与
-  项目负责人讨论 P6，不 push、不自动进入下一阶段。
+- 最近完成阶段：`P6-planar-viewer-integration`（`completed`）。P6-R001 至 P6-R004 已由
+  focused Architecture re-review 确认为`fixed`，review 为`approved`；Architecture Agent将
+  本阶段形成独立本地checkpoint，不push。
+- 当前阶段：无active phase；P7继续为`pending`。
+- 当前阶段计划：无。
+- 当前交接：P1至P6已经完成。平面Viewer只支持具体`SceneGISPlanarWorld`、automatic controller
+  ownership、planar Home、兼容widget allowlist、Entity navigation guards和显式
+  EPSG:3857/OSM Viewer示例；通用平面底图选择器明确不做。当前停在阶段门禁，下一步先与项目
+  负责人讨论P7；不自动创建P7 plan、不push、不进入P7实现。
 - 后续阶段在达到各自进入门槛前，刻意只保留粗粒度描述。

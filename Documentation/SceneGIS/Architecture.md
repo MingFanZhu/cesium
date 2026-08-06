@@ -212,8 +212,35 @@ shown layer 数超过 `ContextLimits.maximumTextureImageUnits` 时必须在 requ
 mutation 前原子失败；P5 不使用 multipass，也不改变 P3 geometry/SSE/selection。
 
 `scenegis-planar-imagery` 是 engine-level Sandcastle 人工案例，只通过显式 `CesiumWidget({ world })`
-和 controller registration 组装能力。Viewer、widgets 自动集成与 UI provider selection 属于 P6，
-不得从该示例反向形成隐式 engine contract。
+和 controller registration 组装能力。Viewer 与 widgets 自动集成属于 P6，不得从该示例反向形成
+隐式 engine contract。通用 UI provider selection 不属于 SceneGIS：自定义平面 CRS、extent、
+canonical tiling scheme 与服务 coverage 必须由应用显式匹配，具体选择 UI 由应用实现。
+
+### 平面 Viewer 集成
+
+`Viewer` 的平面入口只接受 live `SceneGISPlanarWorld`：
+
+```js
+new Viewer("cesiumContainer", { world });
+```
+
+generic custom world、`world: false` 和手工 controller ownership 继续使用低层 `CesiumWidget`。
+定义 `world` 后不得同时定义 `globe`；planar Viewer 固定 `SCENE3D`/`scene3DOnly`，并在 DOM、
+WebGL、controller 或 provider mutation 前拒绝 base layer、terrain、map projection 和不兼容 widget
+选项。没有定义 `world` 时，默认 Globe 与 `globe: false` 行为不得改变。
+
+planar Viewer 关闭 legacy `screenSpaceCameraController` 的 inputs，但不替换该属性；它通过
+`ControllerHost` 注册唯一 `SceneGISPlanarCameraController`，并在 CesiumWidget/Scene/world
+销毁前成对移除。传入 world 表示转移独占生命周期所有权，同一 world instance 不得交给第二个
+Viewer/CesiumWidget；P6 不增加跨 Scene owner registry。
+
+Viewer 使用 SceneGIS-owned planar Home command 调用 controller `viewHome(scene)`。InfoBox 只保留
+title/description，SelectionIndicator 与 left-click selection 可以保留；Entity tracking、InfoBox
+camera、`zoomTo` 和 `flyTo` 不属于当前 planar contract。BaseLayerPicker、Geocoder、
+SceneModePicker、ProjectionPicker、NavigationHelpButton 和 VRButton 默认关闭，显式启用时
+fail-fast。Animation、Timeline、Fullscreen 以及不携带 Globe 语义的显示控件保持可用。完整选项矩阵、
+ownership 和升级检查点见
+[ADR-0006](Decisions/ADR-0006-planar-viewer-and-widget-integration.md)。
 
 ## 验证架构
 

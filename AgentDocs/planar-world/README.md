@@ -2,19 +2,19 @@
 
 ## Metadata
 
-| Field                  | Value                                                                                |
-| ---------------------- | ------------------------------------------------------------------------------------ |
-| Extension slug         | `planar-world`                                                                       |
-| Status                 | `active`                                                                             |
-| Planning model         | `extension`                                                                          |
-| Active extension plan  | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`active`) |
-| Current phase          | None (P5 completed; P6 not started)                                                  |
-| Active phase plan      | None                                                                                 |
-| Proposed phase plan    | None                                                                                 |
-| Active standalone plan | None                                                                                 |
-| Architecture contact   | Architecture Agent                                                                   |
-| Execution contact      | Execution Agent                                                                      |
-| Last updated           | `2026-08-06`                                                                         |
+| Field                  | Value                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------- |
+| Extension slug         | `planar-world`                                                                        |
+| Status                 | `active`                                                                              |
+| Planning model         | `extension`                                                                           |
+| Active extension plan  | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`active`)  |
+| Current phase          | `P6-planar-viewer-integration` (`completed`)                                          |
+| Active phase plan      | None                                                                                  |
+| Proposed phase plan    | None                                                                                  |
+| Active standalone plan | None                                                                                  |
+| Architecture contact   | Architecture Agent                                                                    |
+| Execution contact      | Execution Agent                                                                       |
+| Last updated           | `2026-08-06`                                                                          |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -43,33 +43,42 @@
   `packages/engine/Source/SceneGIS/Scene/SceneGISWorld.js`,
   `packages/engine/Source/SceneGIS/Scene/SceneGISPlanarWorld.js`,
   `packages/engine/Source/SceneGIS/Scene/SceneGISPlanarCameraController.js` and
-  `packages/engine/Source/SceneGIS/Scene/_private`
+  `packages/engine/Source/SceneGIS/Scene/_private`, plus
+  `packages/widgets/Source/SceneGIS` and the `SGP-0002` seam in
+  `packages/widgets/Source/Viewer/Viewer.js`
 - Test paths: `packages/engine/Specs/SceneGIS/Scene`,
-  `packages/engine/Specs/SceneGIS/Widget` and `packages/engine/Specs/SceneGIS/Core`
-- Sandcastle: `packages/sandcastle/gallery/scenegis-planar-imagery` (P5 implemented)
+  `packages/engine/Specs/SceneGIS/Widget`, `packages/engine/Specs/SceneGIS/Core` and
+  `packages/widgets/Specs/SceneGIS`
+- Sandcastle: `packages/sandcastle/gallery/scenegis-planar-imagery` (P5 implemented) and
+  `packages/sandcastle/gallery/scenegis-planar-viewer` (P6 implemented)
 - Branches: `scenegis/develop`; implementation branch `feature/planar-world`
 - ADR:
   [ADR-0001 Scene primary world contract](../../Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md)、
   [ADR-0002 planar coordinate and tiling contract](../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)、
   [ADR-0003 planar surface runtime and LOD contract](../../Documentation/SceneGIS/Decisions/ADR-0003-planar-surface-runtime-and-lod.md)、
   [ADR-0004 planar navigation and picking contract](../../Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md)、
-  [ADR-0005 planar imagery runtime and composition](../../Documentation/SceneGIS/Decisions/ADR-0005-planar-imagery-runtime-and-composition.md)
-- SGP: `SGP-0001`（`active`）
+  [ADR-0005 planar imagery runtime and composition](../../Documentation/SceneGIS/Decisions/ADR-0005-planar-imagery-runtime-and-composition.md)、
+  [ADR-0006 planar Viewer and widget integration](../../Documentation/SceneGIS/Decisions/ADR-0006-planar-viewer-and-widget-integration.md)
+- SGP: `SGP-0001`（`active`）；`SGP-0002`（`active`，仅跟踪 P6 `Viewer.js` 缝隙）
 
 ## Current handoff
 
-- Current state: P1 through P5 are complete on `feature/planar-world`. The
-  [P5 review](reviews/2026-08-06-p5-planar-imagery.md) is `approved`; P5-R001 through P5-R006 are
-  reviewer-confirmed `fixed`, and the P5 implementation is captured by its independent phase
-  completion checkpoint.
-- Next action: stop at the phase gate and discuss P6 scope with the project owner. No P6 plan or
-  implementation is authorized until that discussion confirms the next phase.
-- Current phase status: none; `P5-planar-imagery` is `completed` and P6 is not started.
-- Open discussions: None; the confirmed architecture decisions are recorded in ADR-0005.
+- Current state: P1 through P6 are complete on `feature/planar-world`. The P5 base checkpoint is
+  `ac56b9c6f79cf813e1c6b8208bfdf1138f2c4a4c`; P6 review is approved and its independent local
+  Architecture checkpoint follows the completed phase conclusion.
+- Next action: stop at the phase gate and discuss P7 with the project owner. No P7 plan is active or
+  proposed, and no P7 implementation may begin yet.
+- Current phase status: `P6-planar-viewer-integration` is `completed`.
+- Open discussions: None; confirmed P6 decisions are recorded in ADR-0006. A generic planar base
+  layer/provider picker is explicitly out of scope and remains application-specific.
 - Latest completed review:
-  [P5 planar imagery review](reviews/2026-08-06-p5-planar-imagery.md) (`approved`)
+  [P6 planar Viewer integration review](reviews/2026-08-06-p6-planar-viewer-integration.md)
+  (`approved`).
 - Current review: None.
-- Unresolved reviews: None; P1 through P5 findings are reviewer-confirmed `fixed`.
-- Known risks: public OpenStreetMap availability is external and remains a manual, non-CI signal;
-  Cesium's existing repository-wide TSD-JSDoc warnings and optional Sandcastle embedding download
-  are unchanged. Private renderer/resource seams remain explicit upgrade checkpoints.
+- Unresolved reviews: None; P1 through P6 findings are reviewer-confirmed `fixed`.
+- Known risks: `Viewer.js` remains an upstream high-frequency file tracked by `SGP-0002`. Focused
+  lifecycle evidence is approved. Architecture reproduced the two upstream Viewer timing failures,
+  while clean P5/current P6 comparison runs passed `59/59` and Execution's final fix-state run passed
+  `82/82`; they remain accepted local runner flakes rather than a P6 finding. The 8090 Sandcastle
+  preview remains on its Bucket placeholder; OpenStreetMap remains a manual, non-CI signal. Existing
+  TSD-JSDoc warnings and the optional embedding download are unchanged.

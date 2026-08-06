@@ -345,6 +345,24 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - `scenegis-planar-imagery` 只展示 engine-level 显式组装。不要在 P5 示例中加入 Viewer、widgets、
   provider picker、离线下载或预取；这些属于后续 UI 集成阶段。
 
+### 平面 Viewer 集成检查
+
+实现或评审 `Viewer({ world })` 时同时检查：
+
+- `world` 只接受 live `SceneGISPlanarWorld`；generic world、`world: false`、destroyed world 和
+  任意 defined `globe` 都必须在 Viewer child DOM、WebGL Context、controller 或 request mutation
+  前 fail-fast。没有 `world` 的默认 Globe 与 `globe: false` 路径必须保持原行为。
+- planar Viewer 固定 `SCENE3D`/`scene3DOnly`，禁止 Earth base layer、terrain、map projection、
+  provider view model，以及 Geocoder、mode/projection picker、NavigationHelp 和 VR。Animation、
+  Timeline、Fullscreen、SelectionIndicator、InfoBox title/description 与 planar Home 保持可用。
+- Viewer 必须关闭 legacy camera inputs，通过 `ControllerHost` 注册唯一
+  `SceneGISPlanarCameraController`，并在 CesiumWidget/Scene/world destroy 前 exactly-once remove。
+  registration failure 也必须释放已经连接的 aggregator 和 child state。
+- planar Home 只调用 `controller.viewHome(scene)`。InfoBox camera、double-click tracking、defined
+  `trackedEntity`、`zoomTo` 和 `flyTo` 不属于当前能力，必须同步拒绝；left-click selection 保留。
+- planar imagery 仍由应用通过 canonical `world.tilingScheme` 和 `world.imageryLayers` 显式组装；
+  `scenegis-planar-viewer` 只演示该高层 ownership，不引入通用 provider picker、预取或离线下载。
+
 ## 生成文件与构建输出
 
 以下内容由现有工具生成，不作为手工维护源：

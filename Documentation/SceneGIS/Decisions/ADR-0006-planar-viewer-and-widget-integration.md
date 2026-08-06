@@ -1,0 +1,267 @@
+# ADR-0006：平面 Viewer 与 Widget 集成
+
+## 状态
+
+- Status：`approved`
+- Date：`2026-08-06`
+- Decision owners：Architecture Agent、项目负责人
+- Related plan：
+  `AgentDocs/planar-world/plans/2026-08-06-phase-6-planar-viewer-integration.md`
+- Related patch：`SGP-0002`；仅允许修改
+  `packages/widgets/Source/Viewer/Viewer.js`
+
+## 上下文与源码事实
+
+P1 至 P5 已经建立互斥的 primary-world slot、平面坐标与瓦片数学、surface renderer、
+PC 导航和拾取，以及显式的平面栅格图层。低层调用方已经可以通过
+`CesiumWidget({ world })` 组装这些能力，但 Cesium 1.144 的 `Viewer` 仍只把 `globe`
+转发给 `CesiumWidget`，并默认创建多个带有 Earth/Globe 语义的 widget。
+
+当前源码具有以下约束：
+
+- `Viewer` 在创建自己的 DOM、`CesiumWidget` 和各类 widget 后才形成完整所有权，构造
+  失败后的回滚面较大；平面不兼容选项必须尽量在 DOM/WebGL/request mutation 前拒绝；
+- `BaseLayerPicker`、terrain post-construction mutation、`Geocoder`、
+  `SceneModePicker`、`ProjectionPicker`、`NavigationHelpButton` 和 `VRButton` 都直接或
+  间接包含 Globe、ellipsoid、map projection、Earth navigation 或当前平面控制器不支持的
+  交互语义；
+- 上游 `HomeButtonViewModel` 的 command 调用 `scene.camera.flyHome(duration)`，不能表达
+  P4 的 planar extent、四种 frustum 和 controller target contract；
+- `Viewer` 默认安装 left-click selection 和 left-double-click Entity tracking，并从
+  `zoomTo`、`flyTo`、`trackedEntity` 与 InfoBox camera button 进入 Entity tracking；P6 没有
+  为这些路径建立平面 DataSource/clamping/flight 契约；
+- `SelectionIndicator` 的核心坐标是 `Cartesian3` 到 window coordinate，InfoBox 的
+  title/description 也不要求 Globe，因此二者可以在收窄能力后保留；
+- `CesiumWidget.addController/removeController` 是公开的 ControllerHost 注册协议。
+  `SceneGISPlanarCameraController` 明确要求调用方先关闭 legacy controller，销毁 widget 前
+  再移除自己；ControllerHost 不会由 Scene destroy 自动代替这个配对；
+- `Scene._initializeWorld` 只约束一个 Scene 的 primary-world slot，不是跨 Scene 的全局
+  owner registry。P3 的 single-Context guard 能发现第二个 Context 的渲染，但不能把共享
+  world 变成受支持用法；
+- P5 的 provider 必须与 `world.tilingScheme` 使用同一 object identity。自定义平面 CRS、
+  extent、tile endpoint 和 provider coverage 无法由一个 Cesium 通用底图目录安全推断。
+
+## 决策
+
+### Viewer 的平面构造入口
+
+P6 在现有 `Viewer` 上增加显式构造入口：
+
+```js
+const viewer = new Cesium.Viewer("cesiumContainer", {
+  world: planarWorld,
+});
+```
+
+`Viewer.ConstructorOptions.world` 只接受一个尚未销毁的
+`SceneGISPlanarWorld` instance。它不接受 `false`、任意其他 `SceneGISWorld`
+implementation 或 duck-typed custom world。更低层的 `world: false` 和 generic custom-world
+composition 继续只属于 `CesiumWidget`。
+
+一旦定义 `world`，Viewer 就进入 planar construction mode，并把该 instance 原样转交给
+`CesiumWidget`。`world` 与任何已定义的 `globe`（包括 `globe: false`）互斥。没有定义
+`world` 时，Viewer 的所有既有 Globe 路径，包括 `globe: false`，保持原样。
+
+平面 Viewer 固定 `scene3DOnly: true`。`sceneMode` 只允许未定义或
+`SceneMode.SCENE3D`，`scene3DOnly` 只允许未定义或 `true`。P6 不增加新的 SceneMode，也不
+把 planar world 映射成 2D projection。
+
+传入 `world` 表示把该 instance 的独占生命周期所有权转交给一个 Viewer/Scene。调用方不得
+把同一 instance 交给第二个 Viewer 或 CesiumWidget；每个 Viewer 必须使用独立 world。
+P6 记录并测试现有 single-Context failure signal，但不扩展 engine owner registry。
+
+### 构造前兼容矩阵
+
+平面模式在创建 Viewer 子 DOM、WebGL Context、controller 或 provider request 前完成参数
+验证。矩阵如下：
+
+| 选项组                                                                                                                                            | 平面 Viewer 规则                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `world`                                                                                                                                           | 必须是 live `SceneGISPlanarWorld`                               |
+| `globe`                                                                                                                                           | 任何 defined value 均拒绝                                       |
+| `sceneMode`                                                                                                                                       | undefined 或 `SCENE3D`；内部固定 `SCENE3D`                      |
+| `scene3DOnly`                                                                                                                                     | undefined 或 `true`；内部固定 `true`                            |
+| `baseLayerPicker`                                                                                                                                 | undefined 自动关闭，`false` 允许，其他值拒绝                    |
+| `baseLayer`、legacy `imageryProvider`                                                                                                             | 任何 defined value（包括 `false`）均拒绝                        |
+| imagery provider view model 选项                                                                                                                  | 任何 defined value 均拒绝                                       |
+| `terrainProvider`、`terrain`、`terrainShadows`                                                                                                    | 任何 defined value 均拒绝                                       |
+| terrain provider view model 选项                                                                                                                  | 任何 defined value 均拒绝                                       |
+| `geocoder`、`navigationHelpButton`、`sceneModePicker`、`projectionPicker`、`vrButton`                                                             | undefined 自动关闭，`false` 允许，显式启用或配置均拒绝          |
+| `navigationInstructionsInitiallyVisible`                                                                                                          | 任何 defined value 均拒绝                                       |
+| `mapProjection`、`mapMode2D`、`depthPlaneEllipsoidOffset`                                                                                         | 任何 defined value 均拒绝                                       |
+| `ellipsoid`                                                                                                                                       | 允许作为 Cesium Scene 的辅助 ellipsoid；不定义或改变 planar CRS |
+| `skyBox`、`skyAtmosphere`、shadows、OIT、MSAA、Context、Clock、render loop、request-render、credits、DataSources、Animation、Timeline、Fullscreen | 保留既有选项语义                                                |
+
+`selectedImageryProviderViewModel`、`imageryProviderViewModels`、
+`selectedTerrainProviderViewModel` 和 `terrainProviderViewModels` 都属于被拒绝的 view-model
+选项。错误必须是带英文 JSDoc `@exception {DeveloperError}` 的确定性 fail-fast，而不是
+创建半个 Viewer 后依赖 `scene.globe` 的偶然异常。
+
+### 导航控制器所有权
+
+平面 Viewer 自动完成 P4 低层案例中由应用负责的组装：
+
+1. 关闭 `scene.screenSpaceCameraController.enableInputs`；
+2. 创建唯一的 `SceneGISPlanarCameraController({ world })`；
+3. 通过 `CesiumWidget.addController` 注册；
+4. 通过只读 `viewer.planarCameraController` 暴露该 instance；
+5. Viewer destroy 时先调用 `removeController`，再销毁 CesiumWidget/Scene/world。
+
+`scene.screenSpaceCameraController` 的具体类型和属性保持存在，不替换、不 monkey patch。
+平面 Viewer 不提供 constructor opt-out；调用方需要临时停止导航时使用
+`viewer.planarCameraController.enabled = false`，需要自定义 controller ownership 时改用
+`CesiumWidget`。Globe Viewer 的 `planarCameraController` 为 `undefined`。
+
+构造中若 controller 创建或注册失败，Viewer 必须清理已经建立的 planar controller 状态，
+不能遗留连接的 `CameraEventAggregator`。正常销毁和失败回滚都必须具有 exactly-once
+disconnect 证据。
+
+### 平面 Home Button
+
+P6 新增 SceneGIS-owned public widget：
+
+- `SceneGISPlanarHomeButton`；
+- `SceneGISPlanarHomeButtonViewModel`。
+
+公共构造形式采用明确依赖：
+
+```js
+new SceneGISPlanarHomeButton(container, scene, planarCameraController);
+new SceneGISPlanarHomeButtonViewModel(scene, planarCameraController);
+```
+
+view model 的 command 直接调用
+`planarCameraController.viewHome(scene)`，不调用 `camera.flyHome`，不创建 Earth rectangle，
+也不承诺 flight duration。command 保留 Cesium `createCommand` 的 `beforeExecute` 和
+`afterExecute`，使 Viewer 可以继续在 home 前清理 tracked/selected state。
+
+在平面 Viewer 中，`homeButton` 未定义或为 `true` 时创建 planar button，为 `false` 时不
+创建。`viewer.homeButton` 在 Globe 模式返回原 `HomeButton`，在平面模式返回
+`SceneGISPlanarHomeButton`，关闭时为 `undefined`；生成声明必须表达这个 union。P6 优先复用
+现有 toolbar button CSS class，不修改 upstream `widgets.css`。若实际实现必须增加 CSS
+集成缝隙，Execution Agent 必须暂停并交回架构评审。
+
+### Widget 与 Entity 能力边界
+
+平面 Viewer 的默认 widget 行为分为三类：
+
+- 保留：planar Home、InfoBox title/description、SelectionIndicator、Animation、Timeline、
+  Fullscreen；
+- 默认关闭并禁止显式启用：BaseLayerPicker、Geocoder、SceneModePicker、ProjectionPicker、
+  NavigationHelpButton、VRButton；
+- 不自动提供：任何 planar provider picker。影像始终由应用显式写入
+  `world.imageryLayers`。
+
+NavigationHelpButton 的上游说明包含右键缩放与 touch gestures，而 P4 第一版只承诺左键
+拖动、中键旋转和滚轮缩放，因此不能显示误导性帮助。未来若增加平面帮助 widget，应基于
+当时控制器能力独立设计，不复用这次被关闭的 Earth instructions。
+
+P6 保留 Viewer 的 left-click Entity/Primitive selection 和 SelectionIndicator。InfoBox 可以
+显示选中对象的 title/description，但其 camera control 在平面 Viewer 中始终 disabled。
+平面模式不安装默认 left-double-click Entity tracking，并对下列入口 fail-fast：
+
+- `viewer.trackedEntity = definedEntity`；
+- `viewer.zoomTo(...)`；
+- `viewer.flyTo(...)`。
+
+`viewer.trackedEntity = undefined` 保持允许，以支持通用清理代码。以上收窄不宣称
+DataSource position、Entity clamping、tracking 或 flight 已与 planar CRS 兼容。没有定义
+`world` 的 Viewer 继续使用全部既有 Entity 行为。
+
+### 影像组装与 Sandcastle
+
+P6 不建立通用平面 base-layer/provider picker。自定义平面坐标系的 CRS、extent、canonical
+tiling scheme 和服务 coverage 都属于应用配置；仅凭 provider 名称不能安全匹配。应用必须
+先创建 world，再用 `world.tilingScheme` 创建 provider/layer，并显式加入
+`world.imageryLayers`。
+
+P6 增加一个 `scenegis-planar-viewer` Sandcastle：显式创建 EPSG:3857 world、OpenStreetMap
+XYZ provider 和 layer，再调用 `new Viewer({ world })`。它必须显示 OSM attribution，遵守
+公开 tile policy，并把网络可用性视为 best-effort 人工信号。自动化验证必须拦截或使用本地
+fixture，不能依赖外部 OSM 服务。
+
+P5 的 `scenegis-planar-imagery` 继续作为低层 `CesiumWidget` 显式组装案例，不被 P6 替换，
+也不从 Viewer 示例反向形成隐式 online provider/default layer contract。
+
+## 不采用的方案
+
+### 让 Viewer 接受任意 `SceneGISWorld`
+
+不采用。Viewer 的默认 widget、navigation 和 Entity compatibility 必须由具体 world 能力
+决定。P6 只有 `SceneGISPlanarWorld` 的完整证据；接受 structural custom world 会把未验证
+能力伪装成公共承诺。
+
+### 用平面 controller 替换 `scene.screenSpaceCameraController`
+
+不采用。该属性是 Cesium 的具体 legacy controller，许多现有调用方依赖它。ControllerHost
+已经提供并行的显式扩展点；关闭其输入并注册 planar controller 可以保持类型和销毁边界。
+
+### 复用上游 HomeButton 并伪造 Earth home state
+
+不采用。`camera.flyHome` 与 P4 的 planar extent、center-ray range、off-center frustum 和
+target clamp 契约不同。伪造 rectangle 或 camera default view 会重新引入 Earth 语义。
+
+### 保留全部 Viewer 默认 widget
+
+不采用。静默显示无法兑现的 geocoder、terrain、projection、navigation 或 VR 能力比明确
+关闭更危险。P6 采用 allowlist，并对显式冲突在构造前报错。
+
+### 增加通用平面底图选择器
+
+不采用。平面坐标系是自定义的，provider 与 canonical tiling scheme 的 identity 也是 world
+实例级契约。一个通用目录无法可靠判断 CRS、extent、axis、root coverage 和授权策略；选择
+UI 应由具体应用实现。
+
+### 在 P6 支持 Entity tracking、zoom 和 flight
+
+不采用。这些路径涉及 DataSource position 语义、bounding sphere、clamping、camera flight
+和当前 Globe 假设。P6 只保留 selection/display，并通过 fail-fast 防止错误承诺。
+
+### 增加跨 Scene 的 world owner registry
+
+不采用。P6 只需要明确所有权文档和现有 second-Context failure evidence；修改 engine owner
+协议会越过 widget integration 范围，并需要重新评估 P1/P3 生命周期。
+
+## 兼容性与所有权
+
+P6 预计只修改一个 upstream-owned product file：
+`packages/widgets/Source/Viewer/Viewer.js`。该窄缝隙由 `SGP-0002` 跟踪，每个独立 hunk 使用
+成对 `SCENEGIS_PATCH_BEGIN/END SGP-0002` 标记。SceneGIS widget、Specs、Sandcastle、ADR 和
+AgentDocs 保持在 SceneGIS-owned 路径。
+
+`SGP-0001` 的 `Scene.js`/`CesiumWidget.js` primary-world seam 不在 P6 修改范围。P6 不修改
+engine runtime、P5 imagery state、upstream HomeButton、InfoBox、SelectionIndicator、
+BaseLayerPicker、widgets CSS 或生成文件。
+
+没有定义 `world` 时，默认 Globe Viewer、`globe: false`、所有现有 widget option、Entity
+tracking/zoom/flight 和 destroy 顺序必须保持上游行为。升级 Cesium 时应重点复核 Viewer
+constructor option validation、CesiumWidget forwarding、widget creation order、screen-space
+event registration、InfoBox tick handling、HomeButton hooks 和 destroy order。
+
+## 验证要求
+
+- SceneGIS-owned Specs 覆盖 planar option matrix 的成功与 fail-fast，并证明失败发生在
+  Viewer child DOM、WebGL Context、controller 和 request mutation 前；
+- 覆盖 controller 唯一注册、legacy inputs 关闭、公开 getter、临时 disable/re-enable、
+  registration failure rollback 和 destroy 前 exactly-once remove；
+- 覆盖 planar Home command、`beforeExecute/afterExecute`、`viewHome` 调用、无
+  `camera.flyHome`、widget destroy 和四 frustum 代表性 home；
+- 覆盖保留/关闭 widget matrix、left-click selection、InfoBox camera disabled、无默认
+  double-click tracking，以及 trackedEntity/zoomTo/flyTo guard；
+- 覆盖显式 P5 imagery 通过 Viewer render、credit、depth pick 与 stable warm frame；
+- 覆盖 Globe Viewer 与 `globe: false` 的现有 Viewer Specs 和代表性回归；
+- 验证 public exports、JSDoc、generated TypeScript declarations 和 API HTML；生成物不得出现在
+  Git diff/status，SGP marker 不得泄漏到生成声明或 API 文档；
+- Sandcastle 自动化使用本地 fixture/interception，人工 OSM 结果只作 best-effort 证据；
+- 构建、release build、types、docs、scoped lint/format、Markdown 和 ownership audit 全部通过。
+
+## 后果与后续
+
+P6 完成后，大多数应用可以用一个 Viewer 构造入口获得平面渲染、影像、PC 导航、Home、
+selection 和常用非地理 UI，而不必手工管理 ControllerHost。代价是 Viewer 的平面模式采用
+明确的 capability allowlist；不兼容选项会立即报错，而不是部分工作。
+
+通用 planar provider picker、Geocoder、准确的 NavigationHelp、touch/inertia、Entity
+tracking/flight/clamping，以及 generic custom-world Viewer 都是未来独立能力，不因本 ADR
+自动进入 roadmap。P6 评审和独立本地 checkpoint 完成后仍需停在阶段门禁，由项目负责人
+决定 P7。

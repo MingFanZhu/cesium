@@ -23,6 +23,26 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md",
       "removalCondition": "Retire when upstream Scene and CesiumWidget expose an equivalent mutually exclusive primary-world construction and lifecycle contract."
+    },
+    {
+      "id": "SGP-0002",
+      "title": "Add planar Viewer integration",
+      "status": "active",
+      "reason": "Viewer currently constructs Globe-oriented widgets, navigation, and entity camera behavior without a planar-world construction and ownership path.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/widgets/Source/Viewer/Viewer.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarHomeButtonSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarHomeButtonViewModelSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0006-planar-viewer-and-widget-integration.md",
+      "removalCondition": "Retire when upstream Viewer exposes an equivalent planar-world construction path, controller ownership lifecycle, planar Home integration, and compatible widget capability guards."
     }
   ]
 }
