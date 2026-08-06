@@ -194,6 +194,27 @@ Shader builtin、SceneGIS Worker 输出结构以及严格私有 barrel 当前都
 - 热路径避免无依据的逐帧对象分配、Shader 重编译和状态抖动。
 - 影响默认画面时提供稳定的像素回归场景；影响性能时记录可重复的基线和对比条件。
 
+### 平面影像运行时
+
+`SceneGISPlanarWorld` 的 imagery provider 必须与 world 共享同一个 canonical
+`SceneGISPlanarTilingScheme` object；等值但非同一 identity 的 scheme 不属于受支持配置。
+`SceneGISPlanarImageryLayerCollection` 拥有加入其中的 layer，并负责其 exactly-once destroy，
+但 layer、collection 和 world 都不拥有 provider。
+
+影像 readiness 只描述当前 normal-render ideal tile set 上所有 shown layer 的 desired imagery；
+因此 `world.tilesLoaded` 是 current-view 动态值，而不是 provider 全金字塔完成标志。每个 binding
+请求 desired address，并在需要时 bootstrap Level 0；它可以复用 cache 中最近的 READY ancestor，
+但 P5 不主动请求 intermediate ancestor。request、decoded image、texture、generation 和 cache
+reference 必须分别有明确的取消、迟到隔离与 exactly-once 释放语义。
+
+图层按 collection 的 bottom-to-top 顺序在每个 ideal tile 的单个 opaque command 中合成。
+shown layer 数超过 `ContextLimits.maximumTextureImageUnits` 时必须在 request、selection 或 GPU
+mutation 前原子失败；P5 不使用 multipass，也不改变 P3 geometry/SSE/selection。
+
+`scenegis-planar-imagery` 是 engine-level Sandcastle 人工案例，只通过显式 `CesiumWidget({ world })`
+和 controller registration 组装能力。Viewer、widgets 自动集成与 UI provider selection 属于 P6，
+不得从该示例反向形成隐式 engine contract。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：

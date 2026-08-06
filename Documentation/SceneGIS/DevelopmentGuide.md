@@ -328,6 +328,23 @@ npm run create-demo -- scenegis-<domain>-<feature>
 
 Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状态必须由 Specs 覆盖。关键交互和持久画面变化使用 Playwright。
 
+### 平面影像实现检查
+
+实现或评审 `SceneGISPlanarWorld` imagery 时同时检查：
+
+- provider 的 `tilingScheme` 必须与 world 的 canonical scheme 保持 object identity；collection
+  owns layer，provider 始终由调用方拥有。
+- `tilesLoaded` 只汇总当前视图、当前 shown layers 的 desired entries；READY ancestor 仅用于
+  画面 fallback，不能把 pending desired 提前标为 loaded。
+- 每个 binding 只请求 desired 与必要的 Level 0 bootstrap，不主动推进 intermediate ancestor；
+  cache 中已有的最近 READY ancestor 可以复用，reference 切换和 eviction 必须 exactly once。
+- 每个 ideal tile 保持一个 opaque command；shown layer 数必须在任何 request 或 GPU mutation
+  前按 texture-unit limit fail-fast，不能用 multipass 绕过。
+- provider failure、retry、cancel、stale generation、decoded image close、texture destroy 和第二
+  Context 拒绝都需要自动化 Specs；Sandcastle 外网结果不能替代这些证据。
+- `scenegis-planar-imagery` 只展示 engine-level 显式组装。不要在 P5 示例中加入 Viewer、widgets、
+  provider picker、离线下载或预取；这些属于后续 UI 集成阶段。
+
 ## 生成文件与构建输出
 
 以下内容由现有工具生成，不作为手工维护源：

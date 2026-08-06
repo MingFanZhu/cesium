@@ -99,10 +99,28 @@ describe("SceneGIS/Scene/SceneGISPlanarTile", function () {
     const tile = new SceneGISPlanarTile(createTilingScheme(), 0, 0, 0);
     tile.command = {};
 
+    expect(tile.imageryBindings).toBeUndefined();
+    expect(tile._imageryRelease).toBeUndefined();
+
     tile.destroy();
     tile.destroy();
 
     expect(tile.isDestroyed()).toBe(true);
     expect(tile.command).toBeUndefined();
+  });
+
+  it("releases imagery bindings when the cached tile is evicted", function () {
+    const tile = new SceneGISPlanarTile(createTilingScheme(), 0, 0, 0);
+    const release = jasmine.createSpy("release");
+    tile._imageryRelease = release;
+    tile.imageryBindings = new Map();
+    tile.imageryBindings.set({}, {});
+
+    tile.destroy();
+    tile.destroy();
+
+    expect(release).toHaveBeenCalledOnceWith(tile);
+    expect(tile.imageryBindings).toBeUndefined();
+    expect(tile._imageryRelease).toBeUndefined();
   });
 });

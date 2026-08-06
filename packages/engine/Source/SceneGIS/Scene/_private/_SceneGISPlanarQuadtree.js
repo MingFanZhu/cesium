@@ -203,6 +203,12 @@ SceneGISPlanarQuadtree.prototype.trim = function (tileCacheSize) {
   }
 };
 
+SceneGISPlanarQuadtree.prototype.forEachTile = function (callback) {
+  for (const tile of this._tiles.values()) {
+    callback(tile);
+  }
+};
+
 SceneGISPlanarQuadtree.prototype.destroy = function () {
   for (const tile of this._tiles.values()) {
     if (!tile.isDestroyed()) {

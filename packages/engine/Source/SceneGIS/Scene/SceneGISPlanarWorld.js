@@ -8,6 +8,7 @@ import SceneGISPlanarCoordinateSystem from "../Core/SceneGISPlanarCoordinateSyst
 import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
 import SceneGISPlanarCamera from "./_private/_SceneGISPlanarCamera.js";
 import SceneGISPlanarSurface from "./_private/_SceneGISPlanarSurface.js";
+import SceneGISPlanarImageryLayerCollection from "./SceneGISPlanarImageryLayerCollection.js";
 
 const scratchPickRay = {
   origin: new Cartesian3(),
@@ -61,7 +62,8 @@ function validateBaseColor(value) {
 }
 
 /**
- * A bounded, meter-based planar primary world with a solid-color tiled surface.
+ * A bounded, meter-based planar primary world with an opaque tiled surface and
+ * an ordered collection of optional raster imagery layers.
  * The world supports programmatically positioned perspective and orthographic
  * cameras in {@link SceneMode.SCENE3D}.
  *
@@ -132,7 +134,11 @@ function SceneGISPlanarWorld(options) {
   this._tileCacheSize = tileCacheSize;
   this._baseColor = Color.clone(baseColor);
   this._show = true;
-  this._surface = new SceneGISPlanarSurface(tilingScheme);
+  this._imageryLayers = new SceneGISPlanarImageryLayerCollection({
+    tilingScheme,
+  });
+  this._imageryLayers._owner = this;
+  this._surface = new SceneGISPlanarSurface(tilingScheme, this._imageryLayers);
 }
 
 Object.defineProperties(SceneGISPlanarWorld.prototype, {
@@ -173,8 +179,8 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets whether all tiles required for the current view are loaded. P3 tiles
-   * are synchronous, so this value is always true.
+   * Gets whether every shown imagery layer's desired tiles for the current
+   * view are ready or terminally failed. Hidden worlds are loaded by definition.
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {boolean}
@@ -182,7 +188,19 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
    */
   tilesLoaded: {
     get: function () {
-      return true;
+      return !this._show || this._surface.tilesLoaded;
+    },
+  },
+  /**
+   * Gets the world-owned ordered planar imagery layers.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {SceneGISPlanarImageryLayerCollection}
+   * @readonly
+   */
+  imageryLayers: {
+    get: function () {
+      return this._imageryLayers;
     },
   },
   /**
@@ -397,6 +415,8 @@ SceneGISPlanarWorld.prototype.isDestroyed = function () {
  */
 SceneGISPlanarWorld.prototype.destroy = function () {
   this._surface.destroy();
+  this._imageryLayers._owner = undefined;
+  this._imageryLayers.destroy();
   return destroyObject(this);
 };
 

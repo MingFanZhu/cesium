@@ -174,6 +174,13 @@ renderable set。P3 的纯色 tile 同步可用，因此二者相同，父 tile 
 P5 接入异步 raster data 后，由 surface 把未就绪 ideal tile 替换为最近的 ready
 ancestor；不改变 P3 的平面 SSE 和 quadtree selection contract。
 
+> P5 refinement（2026-08-06）：
+> [ADR-0005](ADR-0005-planar-imagery-runtime-and-composition.md) 将这里的整体 tile
+> replacement 细化为 per-layer imagery ancestor fallback。P3 quadtree 仍产生同一组
+> ideal surface geometry；每个可见图层独立选择 ready imagery ancestor，并通过 UV
+> translation/scale 在 ideal geometry 上采样。涉及 raster readiness、fallback 和
+> composition 时以 ADR-0005 为准。
+
 ### 缓存
 
 cache 以 tile record 为单位，按最后一次被选中或作为 render dependency 使用的

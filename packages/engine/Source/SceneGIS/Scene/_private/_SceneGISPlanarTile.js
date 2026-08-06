@@ -41,6 +41,8 @@ function SceneGISPlanarTile(tilingScheme, x, y, level) {
   this.modelMatrix = Matrix4.fromScale(new Cartesian3(width, height, 1.0));
   Matrix4.setTranslation(this.modelMatrix, center, this.modelMatrix);
   this.command = undefined;
+  this.imageryBindings = undefined;
+  this._imageryRelease = undefined;
   this.lastUsedFrame = -1;
   this._destroyed = false;
 }
@@ -51,6 +53,10 @@ SceneGISPlanarTile.prototype.isDestroyed = function () {
 
 SceneGISPlanarTile.prototype.destroy = function () {
   if (!this._destroyed) {
+    this._imageryRelease?.(this);
+    this.imageryBindings?.clear();
+    this.imageryBindings = undefined;
+    this._imageryRelease = undefined;
     this.command = undefined;
     this._destroyed = true;
   }

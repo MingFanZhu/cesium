@@ -1,0 +1,11 @@
+title: SceneGIS Planar Imagery
+description: >-
+  Renders an EPSG:3857 planar world with best-effort OpenStreetMap raster tiles,
+  ready-ancestor fallback, and explicit PC planar navigation. The demo requests
+  only tiles needed by the current interactive view and follows the OpenStreetMap
+  tile usage policy; it does not prefetch or download tiles for offline use.
+  Policy: https://operations.osmfoundation.org/policies/tiles/
+labels:
+  - SceneGIS
+  - Imagery
+development: false

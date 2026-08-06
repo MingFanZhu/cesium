@@ -8,7 +8,7 @@
 | Status                 | `active`                                                                             |
 | Planning model         | `extension`                                                                          |
 | Active extension plan  | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`active`) |
-| Current phase          | None (P4 completed; P5 not started)                                                  |
+| Current phase          | None (P5 completed; P6 not started)                                                  |
 | Active phase plan      | None                                                                                 |
 | Proposed phase plan    | None                                                                                 |
 | Active standalone plan | None                                                                                 |
@@ -46,27 +46,30 @@
   `packages/engine/Source/SceneGIS/Scene/_private`
 - Test paths: `packages/engine/Specs/SceneGIS/Scene`,
   `packages/engine/Specs/SceneGIS/Widget` and `packages/engine/Specs/SceneGIS/Core`
-- Sandcastle: `packages/sandcastle/gallery/scenegis-planar-world` (not created)
+- Sandcastle: `packages/sandcastle/gallery/scenegis-planar-imagery` (P5 implemented)
 - Branches: `scenegis/develop`; implementation branch `feature/planar-world`
 - ADR:
   [ADR-0001 Scene primary world contract](../../Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md)、
   [ADR-0002 planar coordinate and tiling contract](../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)、
   [ADR-0003 planar surface runtime and LOD contract](../../Documentation/SceneGIS/Decisions/ADR-0003-planar-surface-runtime-and-lod.md)、
-  [ADR-0004 planar navigation and picking contract](../../Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md)
+  [ADR-0004 planar navigation and picking contract](../../Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md)、
+  [ADR-0005 planar imagery runtime and composition](../../Documentation/SceneGIS/Decisions/ADR-0005-planar-imagery-runtime-and-composition.md)
 - SGP: `SGP-0001`（`active`）
 
 ## Current handoff
 
-- Current state: P1 through P4 are complete on `feature/planar-world`; focused Architecture/code
-  re-review confirmed P4-R001 through P4-R005 and approved the P4 implementation from base
-  `4cfbf58a5658f57bba57e3ba8cd7e75ef9989439`.
-- Next action: stop at the phase gate and discuss P5 scope with the project owner. No P5 plan or
+- Current state: P1 through P5 are complete on `feature/planar-world`. The
+  [P5 review](reviews/2026-08-06-p5-planar-imagery.md) is `approved`; P5-R001 through P5-R006 are
+  reviewer-confirmed `fixed`, and the P5 implementation is captured by its independent phase
+  completion checkpoint.
+- Next action: stop at the phase gate and discuss P6 scope with the project owner. No P6 plan or
   implementation is authorized until that discussion confirms the next phase.
-- Current phase status: none; `P4-planar-navigation` is `completed` and P5 is not started.
-- Open discussions: None; later-phase implementation details are intentionally deferred.
+- Current phase status: none; `P5-planar-imagery` is `completed` and P6 is not started.
+- Open discussions: None; the confirmed architecture decisions are recorded in ADR-0005.
 - Latest completed review:
-  [P4 planar navigation review](reviews/2026-08-05-p4-planar-navigation.md) (`approved`)
-- Pending review: None.
-- Unresolved reviews: None; P4-R001 through P4-R005 are reviewer-confirmed `fixed`.
-- Known risks: Cesium private Camera/frustum and CameraEventAggregator seams, plus Surface
-  command-replay/derived-command behavior, require upgrade-auditable private containment.
+  [P5 planar imagery review](reviews/2026-08-06-p5-planar-imagery.md) (`approved`)
+- Current review: None.
+- Unresolved reviews: None; P1 through P5 findings are reviewer-confirmed `fixed`.
+- Known risks: public OpenStreetMap availability is external and remains a manual, non-CI signal;
+  Cesium's existing repository-wide TSD-JSDoc warnings and optional Sandcastle embedding download
+  are unchanged. Private renderer/resource seams remain explicit upgrade checkpoints.

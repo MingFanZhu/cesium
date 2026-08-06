@@ -49,6 +49,7 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.baseColor).toEqual(Color.GRAY);
     expect(world.show).toBe(true);
     expect(world.tilesLoaded).toBe(true);
+    expect(world.imageryLayers.tilingScheme).toBe(world.tilingScheme);
     world.destroy();
   });
 
@@ -59,6 +60,7 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
       "tilingScheme",
       "maximumLevel",
       "tilesLoaded",
+      "imageryLayers",
     ]) {
       expect(
         Object.getOwnPropertyDescriptor(SceneGISPlanarWorld.prototype, property)
@@ -66,6 +68,17 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
       ).toBeUndefined();
     }
     world.destroy();
+  });
+
+  it("owns its imagery layer collection", function () {
+    const world = createWorld();
+    expect(function () {
+      world.imageryLayers.destroy();
+    }).toThrowDeveloperError();
+    expect(world.imageryLayers.isDestroyed()).toBe(false);
+    const collection = world.imageryLayers;
+    world.destroy();
+    expect(collection.isDestroyed()).toBe(true);
   });
 
   it("owns baseColor values on construction, get, and set", function () {

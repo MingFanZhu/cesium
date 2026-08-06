@@ -1,6 +1,7 @@
 import {
   Cartesian3,
   Color,
+  Event,
   Intersect,
   OrthographicFrustum,
   PerspectiveFrustum,
@@ -90,8 +91,45 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       12 * Float32Array.BYTES_PER_ELEMENT,
     );
     const tile = surface._quadtree._idealTiles[0];
+    expect(tile._imagerySlots).toBeUndefined();
+    expect(tile.imageryBindings).toBeUndefined();
+    expect(tile._imageryRelease).toBeUndefined();
     expect(tile.command.boundingVolume).toBe(tile.commandBoundingVolume);
     expect(tile.command.boundingVolume).not.toBe(tile.boundingVolume);
+  });
+
+  it("keeps fresh zero-layer imagery state absent and only clears existing slots", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    scene = createPlanarScene(world);
+    pointCameraAt(world);
+    scene.renderForSpecs();
+
+    const tile = world._surface._quadtree._idealTiles[0];
+    expect(tile._imagerySlots).toBeUndefined();
+    expect(tile.imageryBindings).toBeUndefined();
+    expect(tile._imageryRelease).toBeUndefined();
+
+    world.imageryLayers.addImageryProvider({
+      tilingScheme: world.tilingScheme,
+      minimumLevel: 0,
+      maximumLevel: 0,
+      tileWidth: 1,
+      tileHeight: 1,
+      hasAlphaChannel: true,
+      errorEvent: new Event(),
+      credit: undefined,
+      requestImage: () => undefined,
+    });
+    scene.renderForSpecs();
+    const slots = tile._imagerySlots;
+    expect(slots.length).toBe(1);
+    expect(tile.imageryBindings).toBeDefined();
+    expect(tile._imageryRelease).toBeDefined();
+
+    world.imageryLayers.removeAll();
+    scene.renderForSpecs();
+    expect(tile._imagerySlots).toBe(slots);
+    expect(tile._imagerySlots.length).toBe(0);
   });
 
   it("uses the exact tile volume for quadtree visibility", function () {
@@ -598,5 +636,57 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(surface._frameNumber).toBe(frameNumber);
     expect(surface._renderedFrameNumber).toBe(renderedFrameNumber);
     expect(surface._quadtree._debug.visited).toBe(visited);
+  });
+
+  it("rejects a second Context before imagery state mutation", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    const requestImage = jasmine
+      .createSpy("requestImage")
+      .and.returnValue(undefined);
+    world.imageryLayers.addImageryProvider({
+      tilingScheme: world.tilingScheme,
+      minimumLevel: 0,
+      maximumLevel: 0,
+      tileWidth: 1,
+      tileHeight: 1,
+      hasAlphaChannel: true,
+      errorEvent: new Event(),
+      credit: undefined,
+      requestImage,
+    });
+    scene = createPlanarScene(world);
+    pointCameraAt(world);
+    scene.renderForSpecs();
+    const surface = world._surface;
+    const imageryDebug = { ...surface._imagery._debug };
+    const runtimes = surface._imagery._runtimes;
+    const tile = surface._quadtree._idealTiles[0];
+    const bindings = tile.imageryBindings;
+
+    const secondScene = createPlanarScene(createWorld({ maximumLevel: 0 }));
+    try {
+      secondScene.camera.setView({
+        destination: new Cartesian3(0.0, 0.0, 64.0),
+        orientation: {
+          direction: new Cartesian3(0.0, 0.0, -1.0),
+          up: new Cartesian3(0.0, 1.0, 0.0),
+        },
+      });
+      secondScene.renderForSpecs();
+      const frameState = secondScene.frameState;
+      frameState.frameNumber = scene.frameState.frameNumber + 100;
+      expect(() => world.beginFrame(frameState)).toThrowDeveloperError(
+        "SceneGISPlanarWorld cannot render with more than one Context.",
+      );
+      expect(() => world.render(frameState)).toThrowDeveloperError(
+        "SceneGISPlanarWorld cannot render with more than one Context.",
+      );
+      expect(surface._imagery._debug).toEqual(imageryDebug);
+      expect(surface._imagery._runtimes).toBe(runtimes);
+      expect(tile.imageryBindings).toBe(bindings);
+      expect(requestImage).toHaveBeenCalledTimes(1);
+    } finally {
+      secondScene.destroyForSpecs();
+    }
   });
 });
