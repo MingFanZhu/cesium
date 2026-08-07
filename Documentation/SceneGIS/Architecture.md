@@ -212,6 +212,33 @@ SW→NE triangle interpolation 与 Cesium 数据表示兼容，但 extent、坐�
 错误边界见
 [ADR-0007](Decisions/ADR-0007-planar-terrain-core-contract.md)。
 
+### 平面地形 Surface 集成
+
+`SceneGISPlanarWorld` 的 terrain provider 通过可写 `terrainProvider` 属性在 World 创建后显式
+挂载；T2 不提供 constructor option，因为 provider 必须引用该 World 已创建的同一个 canonical
+`SceneGISPlanarTilingScheme` object。provider 始终由调用方拥有，setter 必须在任何 request、
+command 或 GPU mutation 前原子验证 identity、米制全局高度范围、maximum level、error curve、
+event、Credit 和 request/availability contract。replacement、detach、tile eviction 与 world
+destroy 必须取消旧 request、隔离迟到 generation 并 exactly once 释放 World-owned CPU/GPU
+terrain resource，但不得销毁 provider。
+
+Heightmap terrain mesh 使用 tile-local normalized XY 与相对 reference height；完整 CRS tile
+center、scale 和 reference Z 只通过 `modelMatrix` 恢复。selection OBB 与 camera distance 使用
+真实三维高度区间；SSE 取现有 flat/imagery nominal error 与 provider terrain error 的最大值。
+相机位于 terrain 下方仍是合法笛卡尔视角，surface 继续双面渲染。
+
+terrain geometry 与 imagery 必须共用同一 ideal tile 和单个 opaque command。normal render 是
+request、mesh、GPU、bounds、command cache、readiness 与 LRU mutation 的唯一通道；pick+depth
+pass 只重放最近 normal render 的 command references。`scene.pickPosition` 可以反映 rendered
+terrain depth，但 World 和 camera controller 的现有 public pick 继续表示有界 Z=0 reference
+plane，直到独立 terrain query/picking phase 提供明确 API。
+
+无 provider 时不得 materialize terrain runtime、entry、request、mesh 或 terrain GPU buffer，
+现有 shared-unit-quad flat path 保持。T2 只提供 Z=0 ideal-tile fallback 和主线程 Heightmap mesh；
+ancestor fallback、upsampling、裂缝处理、availability metadata、Worker 和 byte budget 必须在
+后续 phase 依据真实 runtime 重新设计。完整决定见
+[ADR-0008](Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)。
+
 ### 平面影像运行时
 
 `SceneGISPlanarWorld` 的 imagery provider 必须与 world 共享同一个 canonical

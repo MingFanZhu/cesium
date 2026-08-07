@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                 |
 | Planning model         | `extension`                                                                              |
 | Active extension plan  | [Planar Terrain extension plan](plans/2026-08-07-planar-terrain-extension.md) (`active`) |
-| Current phase          | `T1-terrain-core` completed；T2 not activated                                            |
-| Active phase plan      | None                                                                                     |
+| Current phase          | `T2-terrain-surface` active                                                              |
+| Active phase plan      | [T2 terrain surface plan](plans/2026-08-07-phase-t2-terrain-surface.md)                  |
 | Active standalone plan | None                                                                                     |
 | Architecture contact   | Architecture Agent                                                                       |
 | Execution contact      | Unassigned                                                                               |
@@ -53,23 +53,25 @@
   [ADR-0004](../../Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md) 和
   [ADR-0005](../../Documentation/SceneGIS/Decisions/ADR-0005-planar-imagery-runtime-and-composition.md)
 - New ADR:
-  [ADR-0007](../../Documentation/SceneGIS/Decisions/ADR-0007-planar-terrain-core-contract.md)
+  [ADR-0007](../../Documentation/SceneGIS/Decisions/ADR-0007-planar-terrain-core-contract.md)、
+  [ADR-0008](../../Documentation/SceneGIS/Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)
 - SGP: None planned；现有 `SGP-0001` 和 `SGP-0002` 仅作为 planar-world 依赖
 
 ## Current handoff
 
-- Current state: T1 architecture/code review 已 `approved`；三个纯 Core 公共类型、17 个 direct
-  unique Specs、root/types/API evidence 与 zero-upstream/zero-SGP 审计已形成独立阶段
-  checkpoint。
-- Next action: 项目负责人与 Architecture Agent 讨论 T2；依据届时 surface/Renderer/Shader
-  源码事实形成 T2 phase plan，获明确批准后才重新指派 Execution Agent。
-- Current phase status: T1 `completed`；extension 继续 `active`，T2 尚未激活。不得先行实现
-  World/Renderer/Worker 或 terrain geometry。
-- Open discussions: None。mesh、Worker、runtime 请求状态机和具体 URL provider 继续延迟到
-  对应 phase。
+- Current state: T1 已在本地 checkpoint `a5f971bbcd` 完成。项目负责人已确认 T2 的 public
+  provider setter、tile-local Heightmap mesh、三维 bounds/SSE、Z=0 fallback、最小异步状态和
+  GPU ownership；ADR-0008 approved，T2 phase plan `active`。
+- Next action: Execution Agent 以 Architecture Agent 派工消息给出的准确 T2 planning
+  checkpoint 为 diff base，按 active plan 实现；完成后创建 pending review 并停下，不得进入
+  T3。
+- Current phase status: T2 `active`；extension 继续 `active`。本阶段禁止 upstream、Shader、
+  Worker、Sandcastle 和 T3 ancestor/upsample/crack work。
+- Open discussions: None。T3 的连续 LOD/Worker、T4 query/picking、T5 provider/example 和 T6
+  lighting/performance 继续延迟到对应 phase。
 - Latest review:
   [T1 terrain Core review request](reviews/2026-08-07-t1-terrain-core.md)（`approved`）。
 - Unresolved reviews: None；T1-R001 已由 Architecture Agent 确认为 `fixed`。
 - Known risks: terrain 会扩大现有 planar surface 的 CPU/GPU 与异步状态；Worker/build
-  接入、跨 LOD seam、内存规模、公开 DEM 的许可/CORS/稳定性，以及未来地下模式兼容性
-  必须在相应 phase 重新评估。
+  接入、跨 LOD seam、主线程 mesh、CPU 内存规模、公开 DEM 的许可/CORS/稳定性，以及未来
+  地下模式兼容性必须在相应 phase 重新评估。
