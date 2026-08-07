@@ -5,9 +5,11 @@ import {
   Intersect,
   OrthographicFrustum,
   PerspectiveFrustum,
+  PrimitiveType,
   Scene,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
+  SceneGISPlanarHeightmapTerrainData,
   SceneGISPlanarWorld,
 } from "../../../../index.js";
 import createCanvas from "../../../../../../Specs/createCanvas.js";
@@ -79,6 +81,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     pointCameraAt(world);
 
     expect(world._surface._vertexArray).toBeUndefined();
+    expect(world._surface._terrain).toBeUndefined();
     expect(scene).toRender([255, 0, 0, 255]);
 
     const surface = world._surface;
@@ -96,6 +99,62 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(tile._imageryRelease).toBeUndefined();
     expect(tile.command.boundingVolume).toBe(tile.commandBoundingVolume);
     expect(tile.command.boundingVolume).not.toBe(tile.boundingVolume);
+    expect(tile.terrainEntry).toBeUndefined();
+    expect(tile._terrainRelease).toBeUndefined();
+  });
+
+  it("changes a pending flat tile to one indexed terrain command on normal render", async function () {
+    const world = createWorld({ maximumLevel: 0 });
+    const terrainData = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array([-20.0, 20.0, 40.0, 80.0]),
+      width: 2,
+      height: 2,
+    });
+    const provider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: -20.0,
+      maximumHeight: 80.0,
+      maximumLevel: 0,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: () => 4.0,
+      requestTileGeometry: () => Promise.resolve(terrainData),
+      getTileDataAvailable: () => undefined,
+      loadTileDataAvailability: () => undefined,
+    };
+    world.terrainProvider = provider;
+    scene = createPlanarScene(world);
+    pointCameraAt(world, 256.0);
+
+    scene.renderForSpecs();
+    const tile = world._surface._quadtree._idealTiles[0];
+    expect(tile.command.primitiveType).toBe(PrimitiveType.TRIANGLE_STRIP);
+    expect(world.tilesLoaded).toBe(false);
+    await Promise.resolve();
+    scene.renderForSpecs();
+
+    expect(tile.terrainEntry.state).toBe(world._surface._terrain.State.READY);
+    expect(tile.command.primitiveType).toBe(PrimitiveType.TRIANGLES);
+    expect(tile.command.vertexArray).toBe(tile.terrainEntry.vertexArray);
+    expect(tile.command.count).toBe(6);
+    expect(tile.boundingVolume.halfAxes[8]).toBe(50.0);
+    expect(world.tilesLoaded).toBe(true);
+    const debug = { ...world._surface._terrain._debug };
+    const command = tile.command;
+    scene.renderForSpecs();
+    expect(tile.command).toBe(command);
+    expect(world._surface._terrain._debug).toEqual(debug);
+
+    const cachedCommands = world._surface._renderCommands.slice();
+    const replayFrameState = {
+      context: scene.context,
+      passes: { pick: true, depth: true },
+      commandList: [],
+    };
+    world.render(replayFrameState);
+    expect(replayFrameState.commandList).toEqual(cachedCommands);
+    expect(replayFrameState.commandList[0]).toBe(command);
+    expect(world._surface._terrain._debug).toEqual(debug);
   });
 
   it("keeps fresh zero-layer imagery state absent and only clears existing slots", function () {

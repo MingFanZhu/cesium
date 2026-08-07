@@ -2,6 +2,7 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  Event,
   OrthographicFrustum,
   OrthographicOffCenterFrustum,
   PerspectiveFrustum,
@@ -36,6 +37,22 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     });
   }
 
+  function createTerrainProvider(world, options = {}) {
+    return {
+      tilingScheme: options.tilingScheme ?? world.tilingScheme,
+      minimumHeight: options.minimumHeight ?? -10.0,
+      maximumHeight: options.maximumHeight ?? 40.0,
+      maximumLevel: options.maximumLevel ?? world.maximumLevel,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: (level) => 4.0 / 2 ** level,
+      requestTileGeometry: () => undefined,
+      getTileDataAvailable: () => undefined,
+      loadTileDataAvailability: () => undefined,
+      destroy: jasmine.createSpy("destroyProvider"),
+    };
+  }
+
   it("constructs the canonical tiling scheme and defaults", function () {
     const coordinateSystem = createCoordinateSystem();
     const world = createWorld({ coordinateSystem });
@@ -50,7 +67,36 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.show).toBe(true);
     expect(world.tilesLoaded).toBe(true);
     expect(world.imageryLayers.tilingScheme).toBe(world.tilingScheme);
+    expect(world.terrainProvider).toBeUndefined();
     world.destroy();
+  });
+
+  it("atomically attaches, replaces, and detaches caller-owned terrain providers", function () {
+    const world = createWorld();
+    const first = createTerrainProvider(world);
+    const second = createTerrainProvider(world);
+    world.terrainProvider = first;
+    expect(world.terrainProvider).toBe(first);
+    const runtime = world._surface._terrain;
+    world.terrainProvider = first;
+    expect(world._surface._terrain).toBe(runtime);
+
+    const invalid = createTerrainProvider(world, { tilingScheme: {} });
+    expect(() => {
+      world.terrainProvider = invalid;
+    }).toThrowDeveloperError();
+    expect(world.terrainProvider).toBe(first);
+    expect(world._surface._terrain.provider).toBe(first);
+
+    world.terrainProvider = second;
+    expect(world.terrainProvider).toBe(second);
+    world.terrainProvider = undefined;
+    expect(world.terrainProvider).toBeUndefined();
+    expect(world._surface._terrain).toBeUndefined();
+    expect(world.tilesLoaded).toBe(true);
+    world.destroy();
+    expect(first.destroy).not.toHaveBeenCalled();
+    expect(second.destroy).not.toHaveBeenCalled();
   });
 
   it("keeps identity properties getter-only", function () {

@@ -15,6 +15,7 @@ import VertexArray from "../../../Renderer/VertexArray.js";
 import SceneGISPlanarImagery from "./_SceneGISPlanarImagery.js";
 import SceneGISPlanarQuadtree from "./_SceneGISPlanarQuadtree.js";
 import SceneGISPlanarSurfaceShader from "./_SceneGISPlanarSurfaceShader.js";
+import SceneGISPlanarTerrain from "./_SceneGISPlanarTerrain.js";
 
 const unitQuad = new Float32Array([
   -0.5, -0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.5, 0.0, 0.5, 0.5, 0.0,
@@ -35,6 +36,7 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
   this._imagery = new SceneGISPlanarImagery(imageryLayers, (callback) =>
     this._quadtree.forEachTile(callback),
   );
+  this._terrain = undefined;
   imageryLayers._changeListener = (type, layer) => {
     if (type === "removed" || (type === "changed" && !layer.show)) {
       this._renderCommands.length = 0;
@@ -77,6 +79,31 @@ Object.defineProperties(SceneGISPlanarSurface.prototype, {
     },
   },
 });
+
+SceneGISPlanarSurface.prototype.setTerrainProvider = function (
+  provider,
+  geometricErrors,
+) {
+  this._renderCommands.length = 0;
+  if (!defined(provider)) {
+    this._terrain?.destroy();
+    this._terrain = undefined;
+    this._quadtree.setHeightRange(0.0, 0.0);
+    this._tilesLoaded = this._imagery.tilesLoaded;
+    return;
+  }
+  if (!defined(this._terrain)) {
+    this._terrain = new SceneGISPlanarTerrain((callback) =>
+      this._quadtree.forEachTile(callback),
+    );
+  }
+  this._terrain.setProvider(provider, geometricErrors);
+  this._quadtree.setHeightRange(
+    Math.min(0.0, provider.minimumHeight),
+    Math.max(0.0, provider.maximumHeight),
+  );
+  this._tilesLoaded = false;
+};
 
 function validateContext(surface, context) {
   if (defined(surface._context) && surface._context !== context) {
@@ -189,6 +216,20 @@ function getCommand(surface, tile, layerCount) {
     tile.command.uniformMap = createUniformMap(surface, tile, layerCount);
     tile._imageryCommandLayerCount = layerCount;
   }
+  const terrainEntry = tile.terrainEntry;
+  const terrainReady =
+    defined(terrainEntry) &&
+    defined(surface._terrain) &&
+    terrainEntry.state === surface._terrain.State.READY;
+  tile.command.boundingVolume = tile.commandBoundingVolume;
+  tile.command.modelMatrix = tile.modelMatrix;
+  tile.command.primitiveType = terrainReady
+    ? PrimitiveType.TRIANGLES
+    : PrimitiveType.TRIANGLE_STRIP;
+  tile.command.vertexArray = terrainReady
+    ? terrainEntry.vertexArray
+    : surface._vertexArray;
+  tile.command.count = terrainReady ? terrainEntry.mesh.indexCount : 4;
   return tile.command;
 }
 
@@ -284,6 +325,7 @@ SceneGISPlanarSurface.prototype.render = function (
     frameState,
     maximumLevel,
     maximumScreenSpaceError,
+    this._terrain?.geometricErrors,
   );
   if (tiles.length === 0) {
     this._tilesLoaded = true;
@@ -300,13 +342,20 @@ SceneGISPlanarSurface.prototype.render = function (
     });
     ++this._debug.createdTextures;
   }
+  this._terrain?.prepare(frameState.context, tiles, frameState.frameNumber);
   this._imagery.prepare(
     frameState.context,
     tiles,
     shownLayers,
     frameState.frameNumber,
   );
-  this._tilesLoaded = shownLayers.length === 0 || this._imagery.tilesLoaded;
+  this._tilesLoaded =
+    (!defined(this._terrain) || this._terrain.tilesLoaded) &&
+    (shownLayers.length === 0 || this._imagery.tilesLoaded);
+  const terrainProvider = this._terrain?.provider;
+  if (defined(terrainProvider?.credit)) {
+    frameState.creditDisplay.addCreditToNextFrame(terrainProvider.credit);
+  }
   for (const layer of shownLayers) {
     if (defined(layer.imageryProvider.credit)) {
       frameState.creditDisplay.addCreditToNextFrame(
@@ -315,6 +364,15 @@ SceneGISPlanarSurface.prototype.render = function (
     }
   }
   for (const tile of tiles) {
+    const terrainData = tile.terrainEntry?.terrainData;
+    if (
+      tile.terrainEntry?.state === this._terrain?.State.READY &&
+      defined(terrainData?.credits)
+    ) {
+      for (const credit of terrainData.credits) {
+        frameState.creditDisplay.addCreditToNextFrame(credit);
+      }
+    }
     updateTileSlots(this, tile, shownLayers);
     const command = getCommand(this, tile, shownLayers.length);
     frameState.commandList.push(command);
@@ -336,6 +394,8 @@ SceneGISPlanarSurface.prototype.destroy = function () {
     return;
   }
   this._imageryLayers._changeListener = undefined;
+  this._terrain?.destroy();
+  this._terrain = undefined;
   this._imagery.destroy();
   this._quadtree.destroy();
   if (defined(this._vertexArray) && !this._vertexArray.isDestroyed()) {

@@ -33,6 +33,9 @@ describe("SceneGIS/Core/SceneGISPlanarHeightmapTerrainData", function () {
     expect(floatData.interpolateHeight(extent, 0.0, 0.0)).toBe(40.0);
     expect(integerData.minimumHeight).toBe(-5.0);
     expect(integerData.maximumHeight).toBe(11.0);
+    expect(floatData._getSample(0, 0)).toBe(10.0);
+    expect(floatData._getSample(1, 2)).toBe(60.0);
+    expect(() => floatData._getSample(-1, 0)).toThrowDeveloperError();
   });
 
   it("decodes scale, offset, stride, and both endian orders", function () {

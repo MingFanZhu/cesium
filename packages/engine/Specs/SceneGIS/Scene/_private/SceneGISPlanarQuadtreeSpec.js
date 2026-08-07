@@ -89,6 +89,24 @@ describe("SceneGIS/Scene/SceneGISPlanarQuadtree", function () {
     expect(quadtree.selectTiles(frameState, 1, 2.0).length).toBe(4);
   });
 
+  it("uses three-dimensional closed bounds and provider geometric errors", function () {
+    const quadtree = createQuadtree();
+    quadtree.setHeightRange(-50.0, 100.0);
+    const frameState = createFrameState({
+      position: new Cartesian3(256.0, 0.0, -100.0),
+    });
+    quadtree.beginFrame(1);
+    const nominal = quadtree.selectTiles(frameState, 1, 2.0);
+    expect(nominal.map((tile) => tile.key)).toEqual(["0/0/0"]);
+    expect(nominal[0].minimumHeight).toBe(-50.0);
+    expect(nominal[0].maximumHeight).toBe(100.0);
+
+    quadtree.beginFrame(2);
+    const terrain = quadtree.selectTiles(frameState, 1, 2.0, [1000.0, 500.0]);
+    expect(terrain.length).toBe(4);
+    expect(terrain.every((tile) => tile.level === 1)).toBe(true);
+  });
+
   it("applies pixel ratio and bounds zero-distance refinement", function () {
     const quadtree = createQuadtree();
     const frameState = createFrameState({

@@ -7,7 +7,8 @@ import PerspectiveFrustum from "../../../Core/PerspectiveFrustum.js";
 import PerspectiveOffCenterFrustum from "../../../Core/PerspectiveOffCenterFrustum.js";
 import SceneGISPlanarTile from "./_SceneGISPlanarTile.js";
 
-function distanceToTile(position, extent) {
+function distanceToTile(position, tile) {
+  const extent = tile.extent;
   const dx =
     position.x < extent.minimumX
       ? extent.minimumX - position.x
@@ -20,7 +21,13 @@ function distanceToTile(position, extent) {
       : position.y > extent.maximumY
         ? position.y - extent.maximumY
         : 0.0;
-  return Math.hypot(dx, dy, Math.abs(position.z));
+  const dz =
+    position.z < tile.minimumHeight
+      ? tile.minimumHeight - position.z
+      : position.z > tile.maximumHeight
+        ? position.z - tile.maximumHeight
+        : 0.0;
+  return Math.hypot(dx, dy, dz);
 }
 
 function getOrthographicHeight(frustum) {
@@ -65,15 +72,16 @@ function getPerspectiveSseDenominator(frustum) {
   );
 }
 
-function computeScreenSpaceError(quadtree, tile, frameState) {
+function computeScreenSpaceError(quadtree, tile, frameState, geometricErrors) {
   ++quadtree._debug.sseComputations;
   const height = frameState.context.drawingBufferHeight;
   if (height === 0) {
     return 0.0;
   }
-  const geometricError =
-    quadtree._tilingScheme.coordinateSystem.extent.width /
-    (256.0 * 2 ** tile.level);
+  const geometricError = defined(geometricErrors)
+    ? geometricErrors[tile.level]
+    : quadtree._tilingScheme.coordinateSystem.extent.width /
+      (256.0 * 2 ** tile.level);
   const pixelRatio = frameState.pixelRatio;
   const frustum = frameState.camera.frustum;
   const orthographicHeight = getOrthographicHeight(frustum);
@@ -81,7 +89,7 @@ function computeScreenSpaceError(quadtree, tile, frameState) {
     return (geometricError * height) / orthographicHeight / pixelRatio;
   }
 
-  const distance = distanceToTile(frameState.camera.positionWC, tile.extent);
+  const distance = distanceToTile(frameState.camera.positionWC, tile);
   if (distance === 0.0) {
     return Number.POSITIVE_INFINITY;
   }
@@ -111,6 +119,8 @@ function SceneGISPlanarQuadtree(tilingScheme) {
   this._idealTiles = [];
   this._protectedKeys = new Set();
   this._frameNumber = -1;
+  this._minimumHeight = 0.0;
+  this._maximumHeight = 0.0;
   this._debug = {
     visited: 0,
     culled: 0,
@@ -137,6 +147,7 @@ SceneGISPlanarQuadtree.prototype.getOrCreateTile = function (x, y, level) {
   let tile = this._tiles.get(key);
   if (!defined(tile)) {
     tile = new SceneGISPlanarTile(this._tilingScheme, x, y, level);
+    tile.updateHeightRange(this._minimumHeight, this._maximumHeight);
     this._tiles.set(key, tile);
     ++this._debug.createdTiles;
   }
@@ -147,6 +158,7 @@ SceneGISPlanarQuadtree.prototype.selectTiles = function (
   frameState,
   maximumLevel,
   maximumScreenSpaceError,
+  geometricErrors,
 ) {
   const stack = [{ x: 0, y: 0, level: 0 }];
   while (stack.length > 0) {
@@ -162,7 +174,12 @@ SceneGISPlanarQuadtree.prototype.selectTiles = function (
       continue;
     }
 
-    const sse = computeScreenSpaceError(this, tile, frameState);
+    const sse = computeScreenSpaceError(
+      this,
+      tile,
+      frameState,
+      geometricErrors,
+    );
     if (tile.level < maximumLevel && sse > maximumScreenSpaceError) {
       const x = tile.x * 2;
       const y = tile.y * 2;
@@ -183,6 +200,17 @@ SceneGISPlanarQuadtree.prototype.selectTiles = function (
 
   this._debug.selected = this._idealTiles.length;
   return this._idealTiles;
+};
+
+SceneGISPlanarQuadtree.prototype.setHeightRange = function (
+  minimumHeight,
+  maximumHeight,
+) {
+  this._minimumHeight = minimumHeight;
+  this._maximumHeight = maximumHeight;
+  this.forEachTile((tile) =>
+    tile.updateHeightRange(minimumHeight, maximumHeight),
+  );
 };
 
 SceneGISPlanarQuadtree.prototype.trim = function (tileCacheSize) {

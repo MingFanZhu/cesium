@@ -6,8 +6,8 @@
 当前 extension plan：
 [SceneGIS 平面地形总体计划](2026-08-07-planar-terrain-extension.md)（`active`）。
 
-当前 active phase plan：
-[T2 平面地形 Mesh 与 Surface 集成](2026-08-07-phase-t2-terrain-surface.md)（`active`）。
+当前 active phase plan：None；T3 尚未激活。
 
 最近完成的 phase plan：
+[T2 平面地形 Mesh 与 Surface 集成](2026-08-07-phase-t2-terrain-surface.md)（`completed`）、
 [T1 平面地形 Core 契约](2026-08-07-phase-t1-terrain-core.md)（`completed`）。

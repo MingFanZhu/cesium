@@ -6,8 +6,12 @@ import Frozen from "../../Core/Frozen.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import SceneGISPlanarCoordinateSystem from "../Core/SceneGISPlanarCoordinateSystem.js";
 import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
+/* eslint-disable no-unused-vars -- Public JSDoc type requires a runtime-resolvable import. */
+import SceneGISPlanarTerrainProvider from "../Core/SceneGISPlanarTerrainProvider.js";
+/* eslint-enable no-unused-vars */
 import SceneGISPlanarCamera from "./_private/_SceneGISPlanarCamera.js";
 import SceneGISPlanarSurface from "./_private/_SceneGISPlanarSurface.js";
+import { validateTerrainProvider } from "./_private/_SceneGISPlanarTerrain.js";
 import SceneGISPlanarImageryLayerCollection from "./SceneGISPlanarImageryLayerCollection.js";
 
 const scratchPickRay = {
@@ -134,6 +138,7 @@ function SceneGISPlanarWorld(options) {
   this._tileCacheSize = tileCacheSize;
   this._baseColor = Color.clone(baseColor);
   this._show = true;
+  this._terrainProvider = undefined;
   this._imageryLayers = new SceneGISPlanarImageryLayerCollection({
     tilingScheme,
   });
@@ -179,8 +184,8 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
-   * Gets whether every shown imagery layer's desired tiles for the current
-   * view are ready or terminally failed. Hidden worlds are loaded by definition.
+   * Gets whether terrain and every shown imagery layer for the current view are
+   * ready or terminally failed. Hidden worlds are loaded by definition.
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {boolean}
@@ -201,6 +206,36 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
   imageryLayers: {
     get: function () {
       return this._imageryLayers;
+    },
+  },
+  /**
+   * Gets or sets the caller-owned planar terrain provider. The provider must
+   * use this world's canonical tiling scheme. Assigning undefined restores the
+   * flat Z=0 surface. Replacing or destroying the world never destroys the
+   * provider.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {SceneGISPlanarTerrainProvider|undefined}
+   * @exception {DeveloperError} The provider contract, canonical tiling identity, height range, maximum level, or geometric error curve is invalid.
+   */
+  terrainProvider: {
+    get: function () {
+      return this._terrainProvider;
+    },
+    set: function (provider) {
+      if (provider === this._terrainProvider) {
+        return;
+      }
+      let geometricErrors;
+      if (provider !== undefined) {
+        geometricErrors = validateTerrainProvider(
+          provider,
+          this._tilingScheme,
+          this._maximumLevel,
+        );
+      }
+      this._surface.setTerrainProvider(provider, geometricErrors);
+      this._terrainProvider = provider;
     },
   },
   /**

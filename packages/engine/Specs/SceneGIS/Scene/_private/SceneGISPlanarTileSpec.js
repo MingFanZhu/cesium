@@ -95,6 +95,26 @@ describe("SceneGIS/Scene/SceneGISPlanarTile", function () {
     }
   });
 
+  it("updates stable three-dimensional bounds and terrain model state", function () {
+    const tile = new SceneGISPlanarTile(createTilingScheme(), 0, 0, 0);
+    const boundingVolume = tile.boundingVolume;
+    const commandBoundingVolume = tile.commandBoundingVolume;
+    const modelMatrix = tile.modelMatrix;
+
+    tile.updateHeightRange(-20.0, 60.0);
+    tile.updateModelMatrix(20.0);
+
+    expect(tile.boundingVolume).toBe(boundingVolume);
+    expect(tile.commandBoundingVolume).toBe(commandBoundingVolume);
+    expect(tile.modelMatrix).toBe(modelMatrix);
+    expect(tile.minimumHeight).toBe(-20.0);
+    expect(tile.maximumHeight).toBe(60.0);
+    expect(tile.boundingVolume.center.z).toBe(20.0);
+    expect(tile.boundingVolume.halfAxes[8]).toBe(40.0);
+    expect(tile.commandBoundingVolume.radius).toBeGreaterThan(40.0);
+    expect(tile.modelMatrix[14]).toBe(20.0);
+  });
+
   it("destroys tile-owned state exactly once", function () {
     const tile = new SceneGISPlanarTile(createTilingScheme(), 0, 0, 0);
     tile.command = {};
@@ -122,5 +142,26 @@ describe("SceneGIS/Scene/SceneGISPlanarTile", function () {
     expect(release).toHaveBeenCalledOnceWith(tile);
     expect(tile.imageryBindings).toBeUndefined();
     expect(tile._imageryRelease).toBeUndefined();
+  });
+
+  it("releases terrain state exactly once before imagery state", function () {
+    const tile = new SceneGISPlanarTile(createTilingScheme(), 0, 0, 0);
+    const order = [];
+    tile.terrainEntry = {};
+    tile._terrainRelease = function () {
+      order.push("terrain");
+      tile.terrainEntry = undefined;
+      tile._terrainRelease = undefined;
+    };
+    tile.imageryBindings = new Map();
+    tile._imageryRelease = function () {
+      order.push("imagery");
+      tile.imageryBindings = undefined;
+      tile._imageryRelease = undefined;
+    };
+
+    tile.destroy();
+    tile.destroy();
+    expect(order).toEqual(["terrain", "imagery"]);
   });
 });

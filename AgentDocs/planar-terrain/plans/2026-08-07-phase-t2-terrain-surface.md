@@ -3,7 +3,7 @@
 ## 元数据
 
 - 计划类型（Plan type）：`phase`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - Parent extension：
   [SceneGIS 平面地形总体计划](2026-08-07-planar-terrain-extension.md)
 - 负责人角色（Owner role）：`architecture` / `execution`
@@ -11,7 +11,8 @@
 - 架构评审人（Architecture reviewer）：项目负责人
 - 创建日期（Created）：`2026-08-07`
 - 更新日期（Updated）：`2026-08-07`
-- Planning checkpoint base：`a5f971bbcd378e051f1954822650f916c4482202`
+- Planning checkpoint / implementation diff base：
+  `ca55db7c8a6ec8a5c512a40cf20fa223f58635d8`
 - 相关讨论（Related discussions）：本阶段设计已由项目负责人与 Architecture Agent 在进入
   T2 时逐项确认；没有独立 open discussion
 - 相关 ADR：
@@ -20,8 +21,8 @@
   - [ADR-0007：平面地形 Core 契约](../../../Documentation/SceneGIS/Decisions/ADR-0007-planar-terrain-core-contract.md)
   - [ADR-0008：平面地形 Mesh、Surface 集成与最小加载](../../../Documentation/SceneGIS/Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)
 - SGP：无；T2 禁止修改 upstream-owned file
-- 相关评审（Related reviews）：实现 ready 后创建
-  `AgentDocs/planar-terrain/reviews/2026-08-07-t2-terrain-surface.md`
+- 相关评审（Related reviews）：
+  [T2 terrain surface review](../reviews/2026-08-07-t2-terrain-surface.md)（`approved`）
 
 ## 阶段目标
 
@@ -449,5 +450,78 @@ Buffer、VertexArray、DrawCommand mutable fields、UniformState 与 regular-gri
 
 ## 偏差与结果
 
-等待 Execution Agent 实现后回写。任何新增路径、状态、公共 API、Shader/Worker 需求或范围
-变化必须在实现前记录并请求 Architecture Agent 裁决。
+### 实际实现
+
+- `SceneGISPlanarWorld.terrainProvider` 采用完整 structural preflight 后再切换 Surface runtime；
+  canonical tiling identity、高度范围、level coverage 和 geometric-error curve 均在 mutation 前
+  验证。相同实例 no-op，replacement/detach 释放内部状态但不销毁 caller-owned provider。
+- Heightmap 增加 private `_getSample(row, column)`；mesh builder 生成 NW row-major tile-local
+  Float32 positions，并只复用 `TerrainProvider.getRegularGridIndices`。
+- Terrain runtime lazy attach 到 selected tile，维护五态、generation/attempt、
+  `RequestType.TERRAIN`、structural/Cesium Event error/retry、shared index buffer 和 tile-owned VA。
+  Promise completion 只进入 `RECEIVED`，CPU/GPU/bounds/command mutation 仅在 normal render。
+- Tile 的 OBB、command sphere 和 model matrix 原地更新；Quadtree 使用 closed XYZ distance 与
+  effective error。pending 使用 provider global range 与 Z=0 union，READY 使用 exact tile range，
+  terminal failure 回到 flat bounds。
+- Surface 保留 lazy flat quad，READY terrain 使用 indexed `TRIANGLES`。terrain 与 imagery 继续
+  共用一个 ideal tile/opaque command；pick+depth 精确 replay。readiness、credits、single Context
+  和 destroy/eviction ownership 在同一 lifecycle 汇总。
+
+### 最终 source-to-spec mapping
+
+| Source                                            | Direct Spec                                          | Direct cases |                              T2 added |
+| ------------------------------------------------- | ---------------------------------------------------- | -----------: | ------------------------------------: |
+| `Core/SceneGISPlanarHeightmapTerrainData.js`      | `Core/SceneGISPlanarHeightmapTerrainDataSpec.js`     |           10 | 0（既有 case 增加 sample assertions） |
+| `Renderer/_private/_SceneGISPlanarTerrainMesh.js` | `Renderer/_private/SceneGISPlanarTerrainMeshSpec.js` |            3 |                                     3 |
+| `Scene/_private/_SceneGISPlanarTerrain.js`        | `Scene/_private/SceneGISPlanarTerrainSpec.js`        |            6 |                                     6 |
+| `Scene/_private/_SceneGISPlanarTile.js`           | `Scene/_private/SceneGISPlanarTileSpec.js`           |            7 |                                     2 |
+| `Scene/_private/_SceneGISPlanarQuadtree.js`       | `Scene/_private/SceneGISPlanarQuadtreeSpec.js`       |           12 |                                     1 |
+| `Scene/_private/_SceneGISPlanarSurface.js`        | `Scene/_private/SceneGISPlanarSurfaceSpec.js`        |           21 |                                     1 |
+| `Scene/SceneGISPlanarWorld.js`                    | `Scene/SceneGISPlanarWorldSpec.js`                   |           15 |                                     1 |
+| Real Context integration                          | `Widget/SceneGISPlanarTerrainCesiumWidgetSpec.js`    |            1 |                                     1 |
+
+T2 新增 direct unique case 为 15。Tile includeName aggregate 12 包含 TileImagery 5；Surface
+aggregate 23 包含 SurfaceShader 2，均不重复计入对应 source direct count。
+
+### 验证矩阵
+
+| Command                                                               | Result                                                          |
+| --------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Heightmap / mesh / terrain runtime                                    | Exit 0；10/10、3/3、6/6                                         |
+| Tile / Quadtree / Surface / World                                     | Exit 0；12/12 aggregate、12/12、23/23 aggregate、15/15          |
+| Terrain / imagery / navigation Widget                                 | Exit 0；1/1、9/9、4/4                                           |
+| `npm run build` / `build-release`                                     | Exit 0                                                          |
+| `npm run build-ts`                                                    | Exit 0；保留仓库既有 TSD-JSDoc warnings，无新增 terrain warning |
+| `npm run build-docs` / `npm run tsc`                                  | Exit 0                                                          |
+| Scoped ESLint、JS/Markdown Prettier、Markdownlint、`git diff --check` | Exit 0                                                          |
+
+真实 Context 选择 4 个 Level-1 tile，创建 4 个独占 terrain VA 并共享 1 个 runtime-owned index
+buffer；每个 tile 与 imagery 共用一个 command。warm render 与 depth replay 的 command references
+和 terrain debug counters 零增量；tile 内部 `(-64, 64)` 的 SW→NE 插值为 `Z=30`，真实
+`scene.pickPosition` 与 Heightmap surface 闭环，同一 window ray 的 `world.pick` 仍为 Z=0；destroy
+后 VA/index created/destroyed 计数平衡。
+
+### 生成、所有权与剩余风险
+
+- engine/root declarations 与 API HTML 出现
+  `terrainProvider: SceneGISPlanarTerrainProvider | undefined`；`_getSample`、private mesh/runtime 在
+  declarations/API 命中 0，generated status=`0`。
+- 相对 `ca55db7c8a6ec8a5c512a40cf20fa223f58635d8`，upstream-owned files=`0`、T2 SGP=`0`、
+  manifest/SGP-0001/SGP-0002 unchanged、new patch marker=`0`。
+- 无公共 API、pass、fallback、Shader/Worker 或 allowed-path 偏差。private mesh adapter 以
+  `_getSample` capability 识别 Heightmap adapter，避免 test/build bundle 重复 module identity 导致
+  `instanceof` 假阴性；T2 runtime 仍只支持该 adapter。
+- 主线程 mesh、无 ancestor fallback/upsampling/skirt/seam、CPU mesh 无 byte budget 均保持
+  ADR-0008 已接受限制，未扩展到 T3。
+
+### Architecture review
+
+- 首轮 review 状态为 `changes-requested`。实现边界、provider/runtime、三维 bounds/SSE、单 command
+  合成和资源所有权未发现独立缺陷。
+- `T2-R001` 已按裁决 focused 修复：既有 Widget case 在 NW Level-1 tile 内部 `(-64, 64)` 锁定
+  `Z=30`，真实 depth `scene.pickPosition` 与同一 Heightmap interpolation 一致，同一 window ray 的
+  `world.pick` 保持 Z=0；focused suite 1/1、Exit 0，case count 不变。现有绿色像素、command
+  identity、warm 与 destroy 证据均保留。
+- Architecture Agent focused re-review 已确认 `T2-R001` 为 `fixed`，review 为 `approved`，无
+  unresolved finding；T2 状态为 `completed`。本阶段代码、Specs、ADR 与 AgentDocs 纳入独立本地
+  checkpoint，不 push，也不自动进入 T3。

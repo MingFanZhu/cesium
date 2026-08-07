@@ -41,11 +41,49 @@ function SceneGISPlanarTile(tilingScheme, x, y, level) {
   this.modelMatrix = Matrix4.fromScale(new Cartesian3(width, height, 1.0));
   Matrix4.setTranslation(this.modelMatrix, center, this.modelMatrix);
   this.command = undefined;
+  this.minimumHeight = 0.0;
+  this.maximumHeight = 0.0;
+  this.terrainEntry = undefined;
+  this._terrainRelease = undefined;
   this.imageryBindings = undefined;
   this._imageryRelease = undefined;
   this.lastUsedFrame = -1;
   this._destroyed = false;
 }
+
+const scratchScale = new Cartesian3();
+const scratchTranslation = new Cartesian3();
+
+SceneGISPlanarTile.prototype.updateHeightRange = function (
+  minimumHeight,
+  maximumHeight,
+) {
+  this.minimumHeight = minimumHeight;
+  this.maximumHeight = maximumHeight;
+  const centerHeight = minimumHeight * 0.5 + maximumHeight * 0.5;
+  const halfHeight = (maximumHeight - minimumHeight) * 0.5;
+  this.boundingVolume.center.z = centerHeight;
+  this.boundingVolume.halfAxes[8] = halfHeight;
+  BoundingSphere.fromOrientedBoundingBox(
+    this.boundingVolume,
+    this.commandBoundingVolume,
+  );
+};
+
+SceneGISPlanarTile.prototype.updateModelMatrix = function (referenceHeight) {
+  scratchScale.x = this.extent.width;
+  scratchScale.y = this.extent.height;
+  scratchScale.z = 1.0;
+  Matrix4.fromScale(scratchScale, this.modelMatrix);
+  scratchTranslation.x = this.extent.minimumX + this.extent.width * 0.5;
+  scratchTranslation.y = this.extent.minimumY + this.extent.height * 0.5;
+  scratchTranslation.z = referenceHeight;
+  Matrix4.setTranslation(
+    this.modelMatrix,
+    scratchTranslation,
+    this.modelMatrix,
+  );
+};
 
 SceneGISPlanarTile.prototype.isDestroyed = function () {
   return this._destroyed;
@@ -53,10 +91,13 @@ SceneGISPlanarTile.prototype.isDestroyed = function () {
 
 SceneGISPlanarTile.prototype.destroy = function () {
   if (!this._destroyed) {
+    this._terrainRelease?.(this);
     this._imageryRelease?.(this);
     this.imageryBindings?.clear();
     this.imageryBindings = undefined;
     this._imageryRelease = undefined;
+    this.terrainEntry = undefined;
+    this._terrainRelease = undefined;
     this.command = undefined;
     this._destroyed = true;
   }

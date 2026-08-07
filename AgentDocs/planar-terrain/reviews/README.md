@@ -5,3 +5,6 @@
 - [T1 terrain Core review request](2026-08-07-t1-terrain-core.md)（`approved`）：三个 Core
   public type、Heightmap decode/interpolation/availability、公开生成链与所有权审计；
   T1-R001 已由 Architecture Agent 确认为 `fixed`，无 unresolved finding。
+- [T2 terrain mesh + surface review](2026-08-07-t2-terrain-surface.md)（`approved`）：public provider
+  attachment、private mesh/runtime、三维 bounds/SSE、terrain/imagery command、真实 depth 与
+  ownership evidence；`T2-R001` 已由 Architecture Agent 确认为 `fixed`，无 unresolved finding。

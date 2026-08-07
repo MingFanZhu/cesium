@@ -287,6 +287,36 @@ Object.defineProperties(SceneGISPlanarHeightmapTerrainData.prototype, {
 });
 
 /**
+ * Gets an exact decoded sample for the SceneGIS planar terrain mesh adapter.
+ * This is a private integration seam and does not expose the owned buffer.
+ *
+ * @param {number} row The validated north-to-south sample row.
+ * @param {number} column The validated west-to-east sample column.
+ * @returns {number} The decoded height in meters.
+ * @private
+ */
+SceneGISPlanarHeightmapTerrainData.prototype._getSample = function (
+  row,
+  column,
+) {
+  if (
+    !Number.isInteger(row) ||
+    row < 0 ||
+    row >= this._height ||
+    !Number.isInteger(column) ||
+    column < 0 ||
+    column >= this._width
+  ) {
+    throw new DeveloperError("row and column must identify a height sample.");
+  }
+  return decodeHeight(
+    this._buffer,
+    this._structure,
+    row * this._width + column,
+  );
+};
+
+/**
  * Interpolates height on the heightmap's fixed southwest-to-northeast
  * triangle split.
  *

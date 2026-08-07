@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                 |
 | Planning model         | `extension`                                                                              |
 | Active extension plan  | [Planar Terrain extension plan](plans/2026-08-07-planar-terrain-extension.md) (`active`) |
-| Current phase          | `T2-terrain-surface` active                                                              |
-| Active phase plan      | [T2 terrain surface plan](plans/2026-08-07-phase-t2-terrain-surface.md)                  |
+| Current phase          | None；T2 completed，T3 尚未激活                                                          |
+| Active phase plan      | None                                                                                     |
 | Active standalone plan | None                                                                                     |
 | Architecture contact   | Architecture Agent                                                                       |
 | Execution contact      | Unassigned                                                                               |
@@ -59,19 +59,17 @@
 
 ## Current handoff
 
-- Current state: T1 已在本地 checkpoint `a5f971bbcd` 完成。项目负责人已确认 T2 的 public
-  provider setter、tile-local Heightmap mesh、三维 bounds/SSE、Z=0 fallback、最小异步状态和
-  GPU ownership；ADR-0008 approved，T2 phase plan `active`。
-- Next action: Execution Agent 以 Architecture Agent 派工消息给出的准确 T2 planning
-  checkpoint 为 diff base，按 active plan 实现；完成后创建 pending review 并停下，不得进入
-  T3。
-- Current phase status: T2 `active`；extension 继续 `active`。本阶段禁止 upstream、Shader、
-  Worker、Sandcastle 和 T3 ancestor/upsample/crack work。
+- Current state: T2 review 已 `approved`，`T2-R001` reviewer-confirmed `fixed`；provider attachment、
+  terrain mesh/runtime、三维 bounds/SSE、terrain/imagery single command、真实 depth 与 lifecycle
+  已完成独立本地 checkpoint。
+- Next action: 停下与项目负责人讨论 T3。只有 T3 phase plan 经明确批准后才重新指派 Execution
+  Agent；当前不实现 T3。
+- Current phase status: T2 `completed`；extension 继续 `active`，T3 尚未激活。
 - Open discussions: None。T3 的连续 LOD/Worker、T4 query/picking、T5 provider/example 和 T6
   lighting/performance 继续延迟到对应 phase。
 - Latest review:
-  [T1 terrain Core review request](reviews/2026-08-07-t1-terrain-core.md)（`approved`）。
-- Unresolved reviews: None；T1-R001 已由 Architecture Agent 确认为 `fixed`。
+  [T2 terrain surface review](reviews/2026-08-07-t2-terrain-surface.md)（`approved`）。
+- Unresolved reviews: None；`T2-R001` 已由 Architecture Agent 确认为 `fixed`。
 - Known risks: terrain 会扩大现有 planar surface 的 CPU/GPU 与异步状态；Worker/build
   接入、跨 LOD seam、主线程 mesh、CPU 内存规模、公开 DEM 的许可/CORS/稳定性，以及未来
   地下模式兼容性必须在相应 phase 重新评估。
