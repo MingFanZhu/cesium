@@ -8,11 +8,11 @@
 | Status                 | `active`                                                                                 |
 | Planning model         | `extension`                                                                              |
 | Active extension plan  | [Planar Terrain extension plan](plans/2026-08-07-planar-terrain-extension.md) (`active`) |
-| Current phase          | `T1` planning                                                                            |
-| Active phase plan      | None                                                                                     |
+| Current phase          | `T1-terrain-core` implementation                                                         |
+| Active phase plan      | [T1 terrain Core phase plan](plans/2026-08-07-phase-t1-terrain-core.md) (`active`)       |
 | Active standalone plan | None                                                                                     |
 | Architecture contact   | Architecture Agent                                                                       |
-| Execution contact      | Unassigned                                                                               |
+| Execution contact      | Execution Agent                                                                          |
 | Last updated           | `2026-08-07`                                                                             |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -52,18 +52,21 @@
   [ADR-0003](../../Documentation/SceneGIS/Decisions/ADR-0003-planar-surface-runtime-and-lod.md)、
   [ADR-0004](../../Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md) 和
   [ADR-0005](../../Documentation/SceneGIS/Decisions/ADR-0005-planar-imagery-runtime-and-composition.md)
-- New ADR: Not created；在具体 phase 确认公共 API、运行时所有权或 Worker/build 决策时创建
+- New ADR:
+  [ADR-0007](../../Documentation/SceneGIS/Decisions/ADR-0007-planar-terrain-core-contract.md)
 - SGP: None planned；现有 `SGP-0001` 和 `SGP-0002` 仅作为 planar-world 依赖
 
 ## Current handoff
 
-- Current state: 中文版 extension plan 已由项目负责人确认并激活；T1 进入架构讨论，尚未
-  创建 phase plan。
-- Next action: 重新检查 T1 所需 Core/provider 源码事实，收敛 T1 公共边界；讨论获批后再创建
-  T1 phase plan。
-- Current phase status: Planning。T1 phase plan 获明确批准前不得编码，也不得进入后续阶段。
-- Open discussions: None。精确 API、mesh、Worker、调度和 provider 格式均明确延迟到对应
-  phase。
+- Current state: 项目负责人已确认 T1 provider/data 分层、Cesium-compatible Heightmap、
+  Level-0 root、availability、ownership 和错误边界；ADR-0007 与中文版 phase plan 已
+  `approved/active`。
+- Next action: Execution Agent 从 Architecture Agent 给出的 T1 planning checkpoint 实现
+  三个纯 Core 公共类型和专项 Specs，完成后创建 pending review request。
+- Current phase status: Implementation。不得修改 World/Renderer/Worker/upstream，也不得
+  进入 T2。
+- Open discussions: None。mesh、Worker、runtime 请求状态机和具体 URL provider 继续延迟到
+  对应 phase。
 - Latest review: None。
 - Unresolved reviews: None。
 - Known risks: terrain 会扩大现有 planar surface 的 CPU/GPU 与异步状态；Worker/build

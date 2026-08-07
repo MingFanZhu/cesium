@@ -194,6 +194,24 @@ Shader builtin、SceneGIS Worker 输出结构以及严格私有 barrel 当前都
 - 热路径避免无依据的逐帧对象分配、Shader 重编译和状态抖动。
 - 影响默认画面时提供稳定的像素回归场景；影响性能时记录可重复的基线和对比条件。
 
+### 平面地形 Core 契约
+
+平面地形使用独立的 `SceneGISPlanarTerrainProvider`、`SceneGISPlanarTerrainData` 和
+`SceneGISPlanarHeightmapTerrainData`，不得继承、包装或伪装 Cesium 的 ellipsoid-oriented
+terrain runtime。Provider 必须引用 world 后续使用的同一个 canonical
+`SceneGISPlanarTilingScheme` object，使用米制保守全局高度范围并提供 Level 0 `1 × 1` root。
+
+Provider 返回通用 TerrainData，不能把 Heightmap 固化为永久返回类型。TerrainData 是只读的
+CPU data object，不拥有 Request、GPU 或 Worker resource，也不提供 `destroy`、`createMesh`
+或公共 mesh-dependent upsample。Heightmap 的 raw buffer/structure、row order、child mask 和
+SW→NE triangle interpolation 与 Cesium 数据表示兼容，但 extent、坐标、mesh、Worker 和
+运行时必须保持真正的平面语义。解码高度、geometric error 和所有范围统一使用米。
+
+首版 Heightmap 不接受 NoData/NaN 或单瓦片孔洞。插值必须与后续 terrain mesh 三角化一致，
+不能用 bilinear height 替代实际 triangle surface。完整公共契约、ownership、availability 和
+错误边界见
+[ADR-0007](Decisions/ADR-0007-planar-terrain-core-contract.md)。
+
 ### 平面影像运行时
 
 `SceneGISPlanarWorld` 的 imagery provider 必须与 world 共享同一个 canonical
