@@ -3,7 +3,7 @@
 ## 元数据
 
 - 计划类型（Plan type）：`phase`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 总体计划（Parent plan）：
   [2026-08-07-planar-terrain-extension.md](2026-08-07-planar-terrain-extension.md)
 - 阶段（Phase）：`T1-terrain-core`
@@ -13,7 +13,8 @@
 - 创建日期（Created）：`2026-08-07`
 - 更新日期（Updated）：`2026-08-07`
 - 相关讨论（Related discussions）：无；本阶段架构对话的稳定结论已提升到 ADR-0007
-- 相关评审（Related reviews）：无；Implementation Agent 完成后创建 pending review request
+- 相关评审（Related reviews）：
+  [T1 terrain Core review request](../reviews/2026-08-07-t1-terrain-core.md)（`approved`）
 - ADR：
   [ADR-0007：平面地形 Core 契约与 Heightmap 兼容表示](../../../Documentation/SceneGIS/Decisions/ADR-0007-planar-terrain-core-contract.md)
 - SGP：无；本阶段禁止修改 upstream-owned file
@@ -373,11 +374,90 @@ Execution Agent 不为“以后可能需要”预留未批准的 public option �
 
 ## 偏差与结果
 
-尚未实现。Execution Agent 必须在本节记录：
+### 实际设计与路径
 
-- 实际 public/private 类型和 source-to-spec mapping；
-- 与 ADR/phase plan 的偏差及 Architecture 裁决；
-- 精确验证命令、exit code、case 数与 warning；
-- root export/types/API docs 和 generated status；
-- upstream-owned file、SGP、patch manifest 和 marker 审计；
-- 未解决风险与 review request 链接。
+实现与 ADR-0007 和本 phase plan 一致，没有扩大公共契约或影响路径：
+
+- `SceneGISPlanarTerrainProvider` 和 `SceneGISPlanarTerrainData` 使用现有 SceneGIS
+  structural interface class 风格，不可直接实例化；availability 两个方法提供
+  `undefined` 默认行为。
+- `SceneGISPlanarHeightmapTerrainData` 是只读 CPU data object。构造器接管 numeric
+  TypedArray 和可选 `waterMask`，克隆并冻结归一化后的私有 structure，构造期扫描 decoded
+  meter heights 得到准确 min/max。
+- Heightmap 解码遵循 Cesium-compatible endian/multiplier/scale/offset；插值严格使用 SW→NE
+  triangle split；child mask 使用 northwest-origin address 和 SW=`1`、SE=`2`、NW=`4`、
+  NE=`8`。
+- 没有新增 private module、mesh、Worker、GPU、request runtime 或 T2 seam。
+
+source-to-spec mapping：
+
+| Source                                                                       | Spec                                                                            | Direct cases |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------ |
+| `packages/engine/Source/SceneGIS/Core/SceneGISPlanarTerrainProvider.js`      | `packages/engine/Specs/SceneGIS/Core/SceneGISPlanarTerrainProviderSpec.js`      | 4            |
+| `packages/engine/Source/SceneGIS/Core/SceneGISPlanarTerrainData.js`          | `packages/engine/Specs/SceneGIS/Core/SceneGISPlanarTerrainDataSpec.js`          | 3            |
+| `packages/engine/Source/SceneGIS/Core/SceneGISPlanarHeightmapTerrainData.js` | `packages/engine/Specs/SceneGIS/Core/SceneGISPlanarHeightmapTerrainDataSpec.js` | 10           |
+
+总计 17 个 direct unique cases。没有 aggregate overlap。新增的第 10 个 Heightmap case 使用完整
+EPSG:3857 extent 和本地 RGBA Terrain-RGB-compatible buffer（`stride=4`），锁定 decoded
+min/max、north/west row/column 方向以及中心有限插值。
+
+### 偏差
+
+- 无 architecture/API/path 偏差；因此未改写已批准的 ADR-0007 或 Architecture durable
+  contract。
+- 开发期首次在 build 前直接执行 Provider suite 时，顶层聚合文件已发现新 basename，但
+  engine root barrel 尚未生成，编译以 3 个 missing export 结束且没有运行用例。按仓库正常
+  `npm run build` 生成链刷新后，三个专项 suite 均真实命中并通过。
+- 开发期 `tsc` 首次发现 concrete function-style Core 文件中的局部 `@ts-check` 与仓库现有
+  getter 构造模式冲突；移除该文件的局部 opt-in 后，正式 JSDoc declaration 仍完整生成，
+  最终 `tsc` 通过。没有通过 `@ts-ignore` 或降低公共声明规避类型检查。
+
+### 验证矩阵
+
+| Command                                                                                                             | Result                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarTerrainProvider"`                                       | Exit 0；4/4 passed；15992 skipped                                                                                      |
+| `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarTerrainData"`                                           | Exit 0；3/3 passed；15993 skipped                                                                                      |
+| `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarHeightmapTerrainData"`                                  | Exit 0；10/10 passed；15987 skipped；T1-R001 focused rerun                                                             |
+| `npm run build`                                                                                                     | Exit 0；engine/widgets/root unminified bundles generated successfully                                                  |
+| `npm run build-ts`                                                                                                  | Exit 0；declarations generated；保留 Cesium 1.144 既有 TSD-JSDoc parent/type warnings，无新增 SceneGIS terrain warning |
+| `npm run build-docs`                                                                                                | Exit 0；API HTML generated                                                                                             |
+| `npm run tsc`                                                                                                       | Exit 0                                                                                                                 |
+| `npx eslint "packages/engine/Source/SceneGIS/Core/**/*.js" "packages/engine/Specs/SceneGIS/Core/**/*.js"`           | Exit 0                                                                                                                 |
+| `npx prettier --check "packages/engine/Source/SceneGIS/Core/**/*.js" "packages/engine/Specs/SceneGIS/Core/**/*.js"` | Exit 0                                                                                                                 |
+| `npx prettier --check --ignore-path .gitignore "AgentDocs/planar-terrain/**/*.md" "Documentation/SceneGIS/**/*.md"` | Exit 0                                                                                                                 |
+| `npx markdownlint "AgentDocs/planar-terrain/**/*.md" "Documentation/SceneGIS/**/*.md"`                              | Exit 0                                                                                                                 |
+| `git diff --check`                                                                                                  | Exit 0                                                                                                                 |
+| PowerShell root/types/API/ownership assertion relative to `0e7cef708d...`                                           | Exit 0；11 allowed changed paths；public symbols 在 engine/Cesium JS、d.ts、API HTML 中均命中；其他审计项均为 0        |
+
+按阶段边界未运行 `build-release`、全库 Specs、WebGL、Widget/Viewer/Globe、Sandcastle、E2E
+或性能测试；T1 没有触及这些运行时。
+
+### 生成与所有权审计
+
+- 正式 `packages/engine/index.js`、`packages/engine/index.d.ts`、`Source/Cesium.js`、
+  `Source/Cesium.d.ts` 均生成三个 public type；declaration 进一步证明 readonly metadata、
+  structural `errorEvent`、Promise terrain return 和 Heightmap options/structure shape。
+- `Build/Documentation/SceneGISPlanarTerrainProvider.html`、
+  `SceneGISPlanarTerrainData.html` 和 `SceneGISPlanarHeightmapTerrainData.html` 均存在。
+- 最终 tracked/generated status=`0`；没有手工修改或提交 root barrel、declaration、SpecList、
+  API HTML 或 Build output。
+- 相对 implementation base `0e7cef708d23fe333ab83d8dfe3b84cbd7457469`，产品/测试 diff
+  仅为六个获准 SceneGIS-owned Core/Spec 新文件和本阶段 AgentDocs 回写。
+- upstream-owned files=`0`；T1 SGP=`0`；`.scenegis/upstream-patches.json` unchanged；新增
+  `SCENEGIS_PATCH` marker=`0`。
+
+### 剩余风险与交接
+
+- Heightmap ownership 依赖调用方遵守构造成功后不再 mutation TypedArray 的契约；JavaScript
+  无法冻结 TypedArray elements，这是 ADR-0007 已接受风险。
+- T1 只定义 structural Provider；global range、canonical tiling identity、Level-0 root 和
+  Promise return 的 concrete attachment/runtime fail-fast 属于后续已规划阶段，不在 T1
+  预实现。
+- T1-R001 已在唯一获准的 Spec 中补充完整 EPSG:3857 + RGBA Terrain-RGB deterministic fixture；
+  产品源码无变化，Architecture Agent focused re-review 已确认 `fixed`。
+- Review request：
+  [2026-08-07-t1-terrain-core.md](../reviews/2026-08-07-t1-terrain-core.md)。T1 与 extension
+  review 已 `approved`，无 unresolved finding；T1 状态为 `completed`。Architecture Agent 将
+  本阶段代码、Specs、ADR/Architecture 和 AgentDocs 形成独立本地 checkpoint；提交后停下与
+  项目负责人讨论 T2，不直接进入实现。

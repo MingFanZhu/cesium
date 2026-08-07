@@ -8,11 +8,11 @@
 | Status                 | `active`                                                                                 |
 | Planning model         | `extension`                                                                              |
 | Active extension plan  | [Planar Terrain extension plan](plans/2026-08-07-planar-terrain-extension.md) (`active`) |
-| Current phase          | `T1-terrain-core` implementation                                                         |
-| Active phase plan      | [T1 terrain Core phase plan](plans/2026-08-07-phase-t1-terrain-core.md) (`active`)       |
+| Current phase          | `T1-terrain-core` completed；T2 not activated                                            |
+| Active phase plan      | None                                                                                     |
 | Active standalone plan | None                                                                                     |
 | Architecture contact   | Architecture Agent                                                                       |
-| Execution contact      | Execution Agent                                                                          |
+| Execution contact      | Unassigned                                                                               |
 | Last updated           | `2026-08-07`                                                                             |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -58,17 +58,18 @@
 
 ## Current handoff
 
-- Current state: 项目负责人已确认 T1 provider/data 分层、Cesium-compatible Heightmap、
-  Level-0 root、availability、ownership 和错误边界；ADR-0007 与中文版 phase plan 已
-  `approved/active`。
-- Next action: Execution Agent 从 Architecture Agent 给出的 T1 planning checkpoint 实现
-  三个纯 Core 公共类型和专项 Specs，完成后创建 pending review request。
-- Current phase status: Implementation。不得修改 World/Renderer/Worker/upstream，也不得
-  进入 T2。
+- Current state: T1 architecture/code review 已 `approved`；三个纯 Core 公共类型、17 个 direct
+  unique Specs、root/types/API evidence 与 zero-upstream/zero-SGP 审计已形成独立阶段
+  checkpoint。
+- Next action: 项目负责人与 Architecture Agent 讨论 T2；依据届时 surface/Renderer/Shader
+  源码事实形成 T2 phase plan，获明确批准后才重新指派 Execution Agent。
+- Current phase status: T1 `completed`；extension 继续 `active`，T2 尚未激活。不得先行实现
+  World/Renderer/Worker 或 terrain geometry。
 - Open discussions: None。mesh、Worker、runtime 请求状态机和具体 URL provider 继续延迟到
   对应 phase。
-- Latest review: None。
-- Unresolved reviews: None。
+- Latest review:
+  [T1 terrain Core review request](reviews/2026-08-07-t1-terrain-core.md)（`approved`）。
+- Unresolved reviews: None；T1-R001 已由 Architecture Agent 确认为 `fixed`。
 - Known risks: terrain 会扩大现有 planar surface 的 CPU/GPU 与异步状态；Worker/build
   接入、跨 LOD seam、内存规模、公开 DEM 的许可/CORS/稳定性，以及未来地下模式兼容性
   必须在相应 phase 重新评估。

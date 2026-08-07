@@ -12,7 +12,8 @@
 - Parent extension：
   [completed `planar-world`](../../planar-world/README.md)
 - 相关讨论（Related discussions）：无
-- 相关评审（Related reviews）：无
+- 相关评审（Related reviews）：
+  [T1 terrain Core review request](../reviews/2026-08-07-t1-terrain-core.md)（`approved`）
 - 相关 ADR：
   - [ADR-0001：Scene primary world 契约](../../../Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md)
   - [ADR-0002：平面坐标与瓦片寻址契约](../../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)
@@ -114,14 +115,14 @@
 
 ## 阶段路线图
 
-| 阶段 | 目标                                                                                           | 依赖                     | 进入门槛                                                                   | 完成门槛                                                                                                         | 状态      | 阶段计划                                       |
-| ---- | ---------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------- | ---------------------------------------------- |
-| T1   | 建立平面 terrain provider、heightmap data、插值与可用性等核心契约。                            | `planar-world` completed | 总体计划获批；建立独立实现分支；重新核对 Core 与上游 terrain 公共语义。    | 公共契约、所有权和错误边界获批并实现；纯 Core 与公开构建证据通过；不接入 renderer。                              | `active`  | [T1 plan](2026-08-07-phase-t1-terrain-core.md) |
-| T2   | 建立最小 terrain geometry 与 `SceneGISPlanarWorld` surface 集成，使 imagery 可以贴附高程表面。 | T1                       | T1 已 review、提交；重新检查当前 planar surface、Renderer 与 Shader 事实。 | 确定性 terrain 数据可正确渲染；三维 bounds/SSE 和大坐标成立；无 provider flat path 保持。                        | `planned` | 未创建                                         |
-| T3   | 完成异步 LOD、fallback、上采样、连续替换、裂缝处理、缓存和资源生命周期。                       | T2                       | T2 已 review、提交；依据真实 runtime 重新设计状态和调度。                  | 加载、失败、取消、迟到结果和驱逐均保持无孔洞、无父子重复及 exactly-once 释放；`tilesLoaded` 语义成立。           | `planned` | 未创建                                         |
-| T4   | 增加驻留高度查询、terrain ray/window picking 与独立异步采样能力。                              | T3                       | T3 已 review、提交；重新检查 mesh、depth 和 navigation 边界。              | 查询与实际 mesh 三角化一致；terrain picking、Z=0 reference pick 和 `scene.pickPosition` 职责清晰；既有导航不变。 | `planned` | 未创建                                         |
-| T5   | 增加可复用的数据适配入口和可执行 terrain 示例。                                                | T4                       | T4 已 review、提交；确认目标数据格式、服务政策、CORS、Credit 与发布边界。  | 至少一个可重复的本地/确定性数据案例完成；合适时增加受政策约束的公开 DEM 演示；自动化不依赖公网。                 | `planned` | 未创建                                         |
-| T6   | 完成基础地形表现、人工验收、有限性能与交付资格。                                               | T5                       | T5 已 review、提交；依据真实画面和 profiling 决定表现范围。                | 已批准的法线/光照或其他表现目标完成；相关资源、性能、文档、包与升级检查达到整体交付标准。                        | `planned` | 未创建                                         |
+| 阶段 | 目标                                                                                           | 依赖                     | 进入门槛                                                                   | 完成门槛                                                                                                         | 状态        | 阶段计划                                       |
+| ---- | ---------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------- |
+| T1   | 建立平面 terrain provider、heightmap data、插值与可用性等核心契约。                            | `planar-world` completed | 总体计划获批；建立独立实现分支；重新核对 Core 与上游 terrain 公共语义。    | 公共契约、所有权和错误边界获批并实现；纯 Core 与公开构建证据通过；不接入 renderer。                              | `completed` | [T1 plan](2026-08-07-phase-t1-terrain-core.md) |
+| T2   | 建立最小 terrain geometry 与 `SceneGISPlanarWorld` surface 集成，使 imagery 可以贴附高程表面。 | T1                       | T1 已 review、提交；重新检查当前 planar surface、Renderer 与 Shader 事实。 | 确定性 terrain 数据可正确渲染；三维 bounds/SSE 和大坐标成立；无 provider flat path 保持。                        | `planned`   | 未创建                                         |
+| T3   | 完成异步 LOD、fallback、上采样、连续替换、裂缝处理、缓存和资源生命周期。                       | T2                       | T2 已 review、提交；依据真实 runtime 重新设计状态和调度。                  | 加载、失败、取消、迟到结果和驱逐均保持无孔洞、无父子重复及 exactly-once 释放；`tilesLoaded` 语义成立。           | `planned`   | 未创建                                         |
+| T4   | 增加驻留高度查询、terrain ray/window picking 与独立异步采样能力。                              | T3                       | T3 已 review、提交；重新检查 mesh、depth 和 navigation 边界。              | 查询与实际 mesh 三角化一致；terrain picking、Z=0 reference pick 和 `scene.pickPosition` 职责清晰；既有导航不变。 | `planned`   | 未创建                                         |
+| T5   | 增加可复用的数据适配入口和可执行 terrain 示例。                                                | T4                       | T4 已 review、提交；确认目标数据格式、服务政策、CORS、Credit 与发布边界。  | 至少一个可重复的本地/确定性数据案例完成；合适时增加受政策约束的公开 DEM 演示；自动化不依赖公网。                 | `planned`   | 未创建                                         |
+| T6   | 完成基础地形表现、人工验收、有限性能与交付资格。                                               | T5                       | T5 已 review、提交；依据真实画面和 profiling 决定表现范围。                | 已批准的法线/光照或其他表现目标完成；相关资源、性能、文档、包与升级检查达到整体交付标准。                        | `planned`   | 未创建                                         |
 
 所有 phase 串行执行。一个 phase 的实现、相关 Specs、ADR/SGP、AgentDocs 和 review 必须形成
 独立本地提交检查点，之后才能激活或实现下一 phase。
@@ -211,7 +212,16 @@
   `feature/planar-terrain`，T1 进入架构讨论，但尚未创建 phase plan。
 - `2026-08-07`：项目负责人确认 provider/data 分层、Cesium-compatible Heightmap 表示、
   Level-0 root、availability、ownership 和错误边界；ADR-0007 获批，T1 phase plan 激活。
-- 下一步：Execution Agent 只实现 T1 纯 Core 公共类型与专项 Specs，回写结果并创建 pending
-  review request 后停止。
-- T1 architecture/code review 和独立本地提交完成前，不得设计或实现 T2，也不得修改
-  upstream-owned file。
+- `2026-08-07`：Execution Agent 完成三个 T1 Core public type、16 个 direct unique Specs、
+  public export/types/API docs 与 zero-upstream/zero-SGP 审计，已创建 pending review request。
+- `2026-08-07`：首次 Architecture/code review 接受公共类型与实现边界，提出唯一
+  T1-R001：补充已批准的完整 EPSG:3857/Terrain-RGB 组合 fixture；review 状态为
+  `changes-requested`。
+- `2026-08-07`：Execution Agent 以完整 EPSG:3857 extent、RGBA/stride Terrain-RGB fixture
+  修复 T1-R001；Heightmap 10/10、T1 direct unique 17，产品源码无变化。
+- `2026-08-07`：Architecture Agent focused re-review 确认 T1-R001 `fixed`，T1 review
+  `approved`；T1 public Core、Specs、ADR/Architecture 与 AgentDocs 形成独立本地 checkpoint。
+- 下一步：停下与项目负责人讨论 T2；重新发现 surface/Renderer/Shader 源码事实后才编写
+  T2 phase plan。
+- T2 phase plan 获明确批准前，不得实现 terrain geometry、修改 upstream-owned file 或进入
+  Worker/Shader 方案。

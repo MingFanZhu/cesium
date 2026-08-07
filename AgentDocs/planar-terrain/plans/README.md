@@ -6,5 +6,7 @@
 当前 extension plan：
 [SceneGIS 平面地形总体计划](2026-08-07-planar-terrain-extension.md)（`active`）。
 
-当前 active phase plan：
-[T1 平面地形 Core 契约](2026-08-07-phase-t1-terrain-core.md)（`active`）。
+当前没有 active phase plan。
+
+最近完成的 phase plan：
+[T1 平面地形 Core 契约](2026-08-07-phase-t1-terrain-core.md)（`completed`）。
