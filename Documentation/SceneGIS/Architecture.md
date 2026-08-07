@@ -253,6 +253,12 @@ SceneGIS 使用四层验证：
 
 Sandcastle 默认截图只能作为基础冒烟，不能覆盖参数组合、错误输入、销毁过程和性能变化。
 
+## 平面世界发布资格边界
+
+Planar World 的 release qualification 必须把 observable contract 与测量证据分开：selected/submitted tile、rendered pixel、imagery fallback、depth replay、single-Context 和 exactly-once ownership 是 hard gate；单机 CPU/GPU timing 仅用于同环境趋势与调查，不能作为跨机器 flaky assertion。warm-frame 验证应同时检查持久资源计数、resident cache bound、request/ref/texture 收敛和 destroy balance。
+
+发布审计以 `.scenegis/upstream-base.json` 的 tree 判定 upstream-owned path，并要求每个 upstream diff 都由 SGP 登记、paired marker 配对、引用路径存在。package qualification 必须覆盖 workspace 与 installed tarball 的 root/engine/widgets public exports、types 和 API docs，同时证明 private runtime 不进入 public surface。所有临时 package/profile/generated 产物必须留在 delivery diff 之外。
+
 ## 官方版本升级
 
 官方升级必须在 `upgrade/cesium-*` 分支完成：

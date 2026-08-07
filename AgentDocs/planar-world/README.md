@@ -2,19 +2,19 @@
 
 ## Metadata
 
-| Field                  | Value                                                                                |
-| ---------------------- | ------------------------------------------------------------------------------------ |
-| Extension slug         | `planar-world`                                                                       |
-| Status                 | `active`                                                                             |
-| Planning model         | `extension`                                                                          |
-| Active extension plan  | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`active`) |
-| Current phase          | `P7-manual-acceptance` (`completed`)                                                 |
-| Active phase plan      | None                                                                                 |
-| Proposed phase plan    | None                                                                                 |
-| Active standalone plan | None                                                                                 |
-| Architecture contact   | Architecture Agent                                                                   |
-| Execution contact      | Execution Agent                                                                      |
-| Last updated           | `2026-08-06`                                                                         |
+| Field                  | Value                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| Extension slug         | `planar-world`                                                                          |
+| Status                 | `completed`                                                                             |
+| Planning model         | `extension`                                                                             |
+| Extension plan         | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`completed`) |
+| Current phase          | None                                                                                    |
+| Active phase plan      | None                                                                                    |
+| Proposed phase plan    | None                                                                                    |
+| Active standalone plan | None                                                                                    |
+| Architecture contact   | Architecture Agent                                                                      |
+| Execution contact      | Execution Agent                                                                         |
+| Last updated           | `2026-08-07`                                                                            |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -63,25 +63,24 @@
 
 ## Current handoff
 
-- Current state: P1 through P6 are complete on `feature/planar-world`; the P6 Architecture checkpoint
-  is `b25691eba82317df870af20c948cd40bc8d92cf3`.
-- Next action: stop at the P7 checkpoint and discuss P8 scope with the project owner. P8 has not been
-  activated and no P8 phase plan exists.
-- Current phase status: `P7-manual-acceptance` is `completed`; Architecture/code review and the
-  project-owner browser/GPU gate are both `approved`.
+- Current state: P1 through P8 are complete on `feature/planar-world`. P8 closes the approved first-version
+  extension scope with local performance/lifecycle/package/upgrade qualification and adds no workflow,
+  version/tag or npm publication.
+- Next action: discuss a new extension plan separately. No later phase is active, and no push, tag or
+  publication is implied by the P8 checkpoint.
+- Current phase status: None. `P8-release-qualification` is `completed` and its review is `approved`.
 - Open discussions: None. Confirmed boundaries are: extent crossing must clamp without home reset;
   terrain is deferred; underground navigation remains a future capability and current surface-side
   restrictions must not become permanent world invariants.
 - Latest completed review:
-  [P7 manual acceptance review](reviews/2026-08-06-p7-manual-acceptance.md)
+  [P8 release qualification review](reviews/2026-08-06-p8-release-qualification.md)
   (`approved`).
 - Current review: None.
-- Unresolved reviews: none. P7-R001 through P7-R004 and all P1 through P6 findings are
-  reviewer-confirmed `fixed`.
-- Known risks: automated and project-owner manual navigation evidence pass. `Viewer.js` remains an
-  upstream high-frequency file tracked by `SGP-0002`. Focused
-  lifecycle evidence is approved. Architecture reproduced the two upstream Viewer timing failures,
-  while clean P5/current P6 comparison runs passed `59/59` and Execution's final fix-state run passed
-  `82/82`; they remain accepted local runner flakes rather than a P6 finding. The 8090 Sandcastle
-  preview remains on its Bucket placeholder; OpenStreetMap remains a manual, non-CI signal. Existing
-  TSD-JSDoc warnings and the optional embedding download are unchanged.
+- Unresolved reviews: None. P8-R001 through P8-R005 and all earlier findings are reviewer-confirmed
+  `fixed`.
+- Known risks: `Scene.js`, `CesiumWidget.js` and `Viewer.js` remain high-frequency upstream seams
+  tracked by `SGP-0001`/`SGP-0002`; renderer, Camera and Viewer private semantics require an explicit
+  upgrade checklist. Browser timing is noisy, so P8 combines same-machine release comparisons with
+  deterministic resource/cache gates rather than absolute FPS. OpenStreetMap remains a manual signal;
+  P8 automation uses local data. Existing TSD-JSDoc warnings and optional embedding download failures
+  remain external/existing signals and must be reported separately.

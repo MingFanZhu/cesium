@@ -363,6 +363,15 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - planar imagery 仍由应用通过 canonical `world.tilingScheme` 和 `world.imageryLayers` 显式组装；
   `scenegis-planar-viewer` 只演示该高层 ownership，不引入通用 provider picker、预取或离线下载。
 
+## Planar World release qualification 检查
+
+- 在修改 runtime 前先固定 viewport/build/warmup/sample protocol，采集 bare、imagery 和 motion baseline；没有 failing gate 或可复核热点证据时不做产品优化。
+- multi-tile warm、multi-layer warm、camera/cache churn、depth replay 和 layer churn 必须检查 persistent counters 与 cache/resource 收敛，不把单帧 FPS 当作生命周期证据。
+- lightweight owner cycles 与串行 real WebGL Widget/Viewer cycles 分开执行；每轮检查 provider non-ownership、late async isolation、controller/DOM baseline 和 exactly-once release。
+- 运行 `node scripts/scenegis/audit-upstream-patches.mjs` 及其 destructive fixtures；审计脚本必须只读且失败非零退出。
+- build/types/docs 后在临时目录检查 workspace 与 installed tarball imports；E2E 使用本地 imagery 并分别覆盖 dev/release bundle，不访问公网。
+- 使用指南见 `Documentation/SceneGIS/PlanarWorldGuide.md`，官方升级前按 `Documentation/SceneGIS/PlanarWorldUpgradeChecklist.md` 逐项复核 private semantic 与 SGP。
+
 ## 生成文件与构建输出
 
 以下内容由现有工具生成，不作为手工维护源：

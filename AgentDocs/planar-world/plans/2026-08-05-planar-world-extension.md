@@ -3,12 +3,12 @@
 ## 元数据
 
 - 计划类型（Plan type）：`extension`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 负责人角色（Owner role）：`architecture`
 - 架构评审（Architecture review）：`approved`
 - 架构评审人（Architecture reviewer）：项目负责人
 - 创建日期（Created）：`2026-08-05`
-- 更新日期（Updated）：`2026-08-06`
+- 更新日期（Updated）：`2026-08-07`
 - 相关讨论（Related discussions）：无
 - 相关评审（Related reviews）：
   [P1 world contract review request](../reviews/2026-08-05-p1-world-contract.md)
@@ -17,6 +17,8 @@
   [P4 planar navigation review](../reviews/2026-08-05-p4-planar-navigation.md)
   [P5 planar imagery review request](../reviews/2026-08-06-p5-planar-imagery.md)
   [P6 planar Viewer integration review](../reviews/2026-08-06-p6-planar-viewer-integration.md)
+  [P7 manual acceptance review](../reviews/2026-08-06-p7-manual-acceptance.md)
+  [P8 release qualification review](../reviews/2026-08-06-p8-release-qualification.md)
 - ADR：
   - `Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md`
   - `Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md`
@@ -110,7 +112,7 @@
 | P5   | 实现平面栅格 provider、图层、加载状态、祖先瓦片回退、合成和一个 EPSG:3857 人工案例。            | P3、P4 | 瓦片选择与拾取契约稳定。                           | XYZ/TMS 无空洞渲染、资源确定性释放，OSM 案例可人工验收。                           | `completed` | [第五阶段](2026-08-06-phase-5-planar-imagery.md)            |
 | P6   | 集成 Viewer 默认行为、兼容 widget、显式 Sandcastle 和公共开发流程；不增加通用 provider picker。 | P4、P5 | Engine API 稳定；P5 checkpoint 完成；P6 架构获批。 | Viewer 可创建不含 `Globe` 专用控件的平面场景；示例、生命周期、回归与类型检查通过。 | `completed` | [第六阶段](2026-08-06-phase-6-planar-viewer-integration.md) |
 | P7   | 修正滚轮方向与速度、边界复位和低俯仰复位，并显式演示天空盒。                                    | P1-P6  | P6 checkpoint 完成；手工 finding 已复现和分类。    | 自动化与架构评审通过；项目负责人复测接受；独立检查点完成。                         | `completed` | [第七阶段](2026-08-06-phase-7-manual-acceptance.md)         |
-| P8   | 完成性能、生命周期、升级审计和首个版本文档的发布验收。                                          | P1-P7  | 已形成通过人工功能验收的候选版本。                 | 总体验收条件和发布证据齐备。                                                       | `pending`   | 在阶段进入时创建。                                          |
+| P8   | 完成性能、生命周期、升级审计、package/E2E 和首版文档的本地交付验收。                            | P1-P7  | 已形成通过人工功能验收的候选版本。                 | 本地总体验收证据齐备；不增加自动流程，不推送或发布。                               | `completed` | [第八阶段](2026-08-06-phase-8-release-qualification.md)     |
 
 阶段状态只允许使用 `pending`、`proposed`、`active`、`completed`、
 `deferred` 和 `superseded`。
@@ -179,15 +181,13 @@
 
 ## 进度与交接
 
-- 最近完成阶段：`P7-manual-acceptance`（`completed`）。P7-R001 至 P7-R004 已由 focused
-  Architecture re-review 确认为`fixed`，review 为`approved`；项目负责人的浏览器/GPU人工
-  复测也已通过。Architecture Agent将本阶段形成独立本地checkpoint，不push。
-- 当前阶段：无。P8仍为`pending`，尚未建立或批准 phase plan。
+- 最近完成阶段：`P8-release-qualification`（`completed`）。P8-R001 至 P8-R005 已由 focused
+  Architecture re-review 确认为`fixed`，review 为`approved`；产品 runtime、upstream-owned
+  files、SGP、workflow、版本和发布状态均未改变。
+- 当前阶段：无。首版 `planar-world` extension 已完成；后续大型能力应建立新的 extension plan。
 - 最近完成阶段计划：
-  [P7手工验收与平面导航修正](2026-08-06-phase-7-manual-acceptance.md)（`completed`）。
-- 当前交接：P7 wheel normalization、outside-center boundary correction、pitch round-trip与两个
-  示例的显式skybox已经实现，聚焦/回归/构建/no-embedding矩阵通过。initial Architecture/code
-  review提出P7-R001至P7-R004；focused re-review已确认全部为`fixed`，review为`approved`，
-  项目负责人也已确认人工门禁通过。P7已完成；terrain与地下模式仍延期。下一步先讨论P8，
-  当前不push、未进入P8。
+  [P8性能、生命周期与本地交付验收](2026-08-06-phase-8-release-qualification.md)（`completed`）。
+- 当前交接：P8 已完成 baseline/candidate timing、multi-tile/multi-layer hard gates、50/8-cycle
+  lifecycle soak、local package/dev-release E2E、upstream/SGP audit 和首版文档。Architecture 已确认
+  五项修复并批准阶段收口；本地 checkpoint 不 push/tag/publish。terrain 与地下模式仍延期。
 - 后续阶段在达到各自进入门槛前，刻意只保留粗粒度描述。

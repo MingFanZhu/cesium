@@ -4,6 +4,8 @@
 
 当前 review：
 
+- [P8 release qualification review](2026-08-06-p8-release-qualification.md)
+  （`approved`）
 - [P7 manual acceptance review](2026-08-06-p7-manual-acceptance.md)
   （`approved`）
 - [P6 planar Viewer integration review request](2026-08-06-p6-planar-viewer-integration.md)
@@ -26,4 +28,6 @@ P5-R001 至 P5-R006 均为 reviewer-confirmed `fixed`，P5 review 为 `approved`
 P6-R004 也已由 focused Architecture re-review 确认为`fixed`；P6 review 为`approved`，phase
 为`completed`。P7-R001至P7-R004均已由focused Architecture re-review确认为`fixed`，P7
 review为`approved`；项目负责人的人工复测也已通过，P7 phase为`completed`并形成独立本地
-checkpoint。未push，P8尚未开始。
+checkpoint。未push。P8 initial Architecture review提出P8-R001至P8-R005；focused
+Architecture re-review已确认五项均为`fixed`，P8 review为`approved`，phase与extension均为
+`completed`。P8 checkpoint不push/tag/publish。
