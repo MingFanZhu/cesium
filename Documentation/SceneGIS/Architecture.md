@@ -239,6 +239,32 @@ ancestor fallback、upsampling、裂缝处理、availability metadata、Worker �
 后续 phase 依据真实 runtime 重新设计。完整决定见
 [ADR-0008](Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)。
 
+### 平面地形连续 LOD 与缓存
+
+Terrain-enabled quadtree 必须把 desired、load 与实际 render cover 分开。父 tile 只有在四个直接
+child 都已有可渲染 direct、upsampled 或稳定 flat content 后才能同帧完全退出；不得提交父子重叠
+或部分 child coverage。Provider `maximumLevel` 可以低于 World `maximumLevel`，但不得 clamp
+World/imagery LOD；更深层通过 direct-parent Heightmap upsample 或稳定 flat fallback 覆盖，且不发
+越界 direct request。
+
+Availability 顺序固定为 provider tri-state、非 upsample direct-parent child mask、一次 metadata
+load，再以 optimistic geometry request 处理仍未知的 tile。Direct、fallback 与 active content
+必须独立表达，normal render 中按 `DIRECT > UPSAMPLED > FLAT` 原子切换，并以 source revision
+刷新旧 fallback。Promise completion 只能投递状态；selection、upsample、mesh、GPU、bounds、
+command cache 与 LRU mutation 仍只发生在 normal render。
+
+所有 terrain mesh 使用 regular-grid + downward skirt。Selection OBB 只包含 surface，pending
+direct 时保守包含 provider global height range；DrawCommand sphere 还必须包含 skirt。CPU-to-GPU
+promotion 每个 normal frame 最多两个，blocking coverage 优先。Tile-count LRU 保护 render、
+desired、ancestor、bridge child 与 promotion source；tile-owned direct/fallback VA 和 ref-counted
+shared index buffer 在 replacement、eviction、detach 与 destroy 中 exactly once 释放。
+
+`tilesLoaded` 只描述当前 view：recoverable direct、availability、request、promotion 或 revision
+refresh 即使已有 fallback 仍为 false；terminal direct 配合稳定 fallback 可以收敛。Imagery 只绑定
+actual render tiles，pick+depth 继续精确 replay 最近 normal-render command references。无 provider
+仍保持 zero terrain allocation，public World/camera picking 仍是 Z=0 reference plane。完整决定见
+[ADR-0009](Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)。
+
 ### 平面影像运行时
 
 `SceneGISPlanarWorld` 的 imagery provider 必须与 world 共享同一个 canonical

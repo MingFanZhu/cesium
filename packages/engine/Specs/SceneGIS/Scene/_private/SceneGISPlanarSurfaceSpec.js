@@ -136,7 +136,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(tile.terrainEntry.state).toBe(world._surface._terrain.State.READY);
     expect(tile.command.primitiveType).toBe(PrimitiveType.TRIANGLES);
     expect(tile.command.vertexArray).toBe(tile.terrainEntry.vertexArray);
-    expect(tile.command.count).toBe(6);
+    expect(tile.command.count).toBe(30);
     expect(tile.boundingVolume.halfAxes[8]).toBe(50.0);
     expect(world.tilesLoaded).toBe(true);
     const debug = { ...world._surface._terrain._debug };
@@ -155,6 +155,247 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(replayFrameState.commandList).toEqual(cachedCommands);
     expect(replayFrameState.commandList[0]).toBe(command);
     expect(world._surface._terrain._debug).toEqual(debug);
+  });
+
+  it("keeps direct content over a stale fallback refresh after the four-child gate", async function () {
+    const world = createWorld({ maximumLevel: 1 });
+    const terrainData = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array([-20.0, 20.0, 40.0, 80.0]),
+      width: 2,
+      height: 2,
+    });
+    let resolveDeferred;
+    const provider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: -20.0,
+      maximumHeight: 80.0,
+      maximumLevel: 1,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: () => 4.0,
+      requestTileGeometry: (x, y, level) => {
+        if (level === 1 && x === 1 && y === 1) {
+          return new Promise((resolve) => {
+            resolveDeferred = resolve;
+          });
+        }
+        return Promise.resolve(terrainData);
+      },
+      getTileDataAvailable: () => undefined,
+      loadTileDataAvailability: () => undefined,
+    };
+    world.terrainProvider = provider;
+    scene = createPlanarScene(world);
+    pointCameraAt(world, 64.0);
+
+    scene.renderForSpecs();
+    await Promise.resolve();
+    scene.renderForSpecs();
+    expect(world._surface._renderCommands.length).toBe(1);
+    expect(world._surface._renderCommands[0].owner).toBe(world._surface);
+    expect(world._surface._quadtree._renderTiles[0].key).toBe("0/0/0");
+
+    scene.renderForSpecs();
+    expect(
+      world._surface._quadtree._renderTiles.map((tile) => tile.key),
+    ).toEqual(["0/0/0"]);
+    scene.renderForSpecs();
+    const children = world._surface._quadtree._renderTiles;
+    expect(children.map((tile) => tile.key)).toEqual([
+      "1/0/0",
+      "1/1/0",
+      "1/0/1",
+      "1/1/1",
+    ]);
+    expect(
+      children.some(
+        (tile) =>
+          tile.terrainEntry.activeSource ===
+          world._surface._terrain.Source.UPSAMPLED,
+      ),
+    ).toBe(true);
+    expect(children.some((tile) => tile.key === "0/0/0")).toBe(false);
+
+    const deferred = children.find((tile) => tile.key === "1/1/1");
+    const fallbackVertexArray = deferred.terrainEntry.vertexArray;
+    const destroyFallback = spyOn(
+      fallbackVertexArray,
+      "destroy",
+    ).and.callThrough();
+    const command = deferred.command;
+    const parent = world._surface._quadtree._tiles.get("0/0/0");
+    parent.terrainEntry.revision =
+      parent.terrainEntry.activeContent.revision + 1;
+    const beforeDirect = { ...world._surface._terrain._debug };
+    resolveDeferred(terrainData);
+    await Promise.resolve();
+    scene.renderForSpecs();
+    expect(deferred.terrainEntry.activeSource).toBe(
+      world._surface._terrain.Source.DIRECT,
+    );
+    expect(deferred.terrainEntry.fallbackContent).toBeUndefined();
+    expect(deferred.terrainEntry.fallbackState).toBe(
+      world._surface._terrain.FallbackState.NONE,
+    );
+    expect(deferred.command).toBe(command);
+    expect(deferred.terrainEntry.vertexArray).not.toBe(fallbackVertexArray);
+    expect(fallbackVertexArray.isDestroyed()).toBe(true);
+    expect(destroyFallback).toHaveBeenCalledTimes(1);
+    expect(world._surface._terrain._debug.createdUpsampledData).toBe(
+      beforeDirect.createdUpsampledData,
+    );
+
+    const afterDirect = { ...world._surface._terrain._debug };
+    scene.renderForSpecs();
+    expect(deferred.terrainEntry.activeSource).toBe(
+      world._surface._terrain.Source.DIRECT,
+    );
+    expect(world._surface._terrain._debug).toEqual(afterDirect);
+    const replayFrameState = {
+      context: scene.context,
+      passes: { pick: true, depth: true },
+      commandList: [],
+    };
+    world.render(replayFrameState);
+    expect(replayFrameState.commandList).toEqual(
+      world._surface._renderCommands,
+    );
+    expect(deferred.terrainEntry.activeSource).toBe(
+      world._surface._terrain.Source.DIRECT,
+    );
+    expect(world._surface._terrain._debug).toEqual(afterDirect);
+  });
+
+  it("defers culled bridge direct work until it enters the visible chain", async function () {
+    const world = createWorld({
+      maximumLevel: 1,
+      maximumScreenSpaceError: 0.01,
+    });
+    const terrainData = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array([-20.0, 20.0, 40.0, 80.0]),
+      width: 2,
+      height: 2,
+    });
+    const requests = [];
+    const provider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: -20.0,
+      maximumHeight: 80.0,
+      maximumLevel: 1,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: () => 4.0,
+      requestTileGeometry: (x, y, level) => {
+        requests.push(`${level}/${x}/${y}`);
+        return Promise.resolve(terrainData);
+      },
+      getTileDataAvailable: () => undefined,
+      loadTileDataAvailability: () => undefined,
+    };
+    world.terrainProvider = provider;
+    scene = createPlanarScene(world);
+
+    let includeBridge = false;
+    const frameState = {
+      frameNumber: 0,
+      context: scene.context,
+      pixelRatio: 1.0,
+      passes: { render: true },
+      commandList: [],
+      cullingVolume: {
+        computeVisibility: (volume) =>
+          !includeBridge && volume.center.x > 0.0 && volume.center.y < 0.0
+            ? Intersect.OUTSIDE
+            : Intersect.INSIDE,
+      },
+      camera: {
+        positionWC: new Cartesian3(0.0, 0.0, 64.0),
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3.0,
+          aspectRatio: 1.0,
+          near: 1.0,
+          far: 1000.0,
+        }),
+      },
+      creditDisplay: { addCreditToNextFrame: function () {} },
+    };
+    const render = () => {
+      ++frameState.frameNumber;
+      frameState.commandList.length = 0;
+      world.beginFrame(frameState);
+      world.render(frameState);
+    };
+
+    let bridge;
+    let observedBlockingCoverage = false;
+    let observedSettledChildCover = false;
+    for (let i = 0; i < 8; ++i) {
+      render();
+      bridge ??= Array.from(world._surface._quadtree._tiles.values()).find(
+        (tile) =>
+          tile.level === 1 &&
+          tile.boundingVolume.center.x > 0.0 &&
+          tile.boundingVolume.center.y < 0.0,
+      );
+      if (
+        bridge?.terrainEntry.fallbackState ===
+          world._surface._terrain.FallbackState.QUEUED &&
+        !bridge.terrainEntry.activeContent
+      ) {
+        observedBlockingCoverage = true;
+        expect(
+          world._surface._quadtree._renderTiles.map((tile) => tile.key),
+        ).toEqual(["0/0/0"]);
+        expect(world.tilesLoaded).toBe(false);
+      }
+      if (
+        bridge?.terrainEntry.activeContent &&
+        !world._surface._quadtree._renderTiles.some(
+          (tile) => tile.key === "0/0/0",
+        ) &&
+        world.tilesLoaded
+      ) {
+        observedSettledChildCover = true;
+      }
+      await Promise.resolve();
+    }
+    expect(bridge).toBeDefined();
+    expect(observedBlockingCoverage).toBe(true);
+    expect(observedSettledChildCover).toBe(true);
+    expect(requests).not.toContain(bridge.key);
+    expect(bridge.terrainEntry.state).toBe(
+      world._surface._terrain.State.UNLOADED,
+    );
+    expect(bridge.terrainEntry.activeSource).toBe(
+      world._surface._terrain.Source.UPSAMPLED,
+    );
+    expect(world.tilesLoaded).toBe(true);
+    expect(
+      world._surface._quadtree._renderTiles.map((tile) => tile.key),
+    ).not.toContain("0/0/0");
+
+    const promotionsBeforeMove = world._surface._terrain._debug.promotions;
+    includeBridge = true;
+    render();
+    expect(requests).toContain(bridge.key);
+    expect(bridge.terrainEntry.state).toBe(
+      world._surface._terrain.State.LOADING,
+    );
+    expect(world._surface._terrain._debug.promotions).toBe(
+      promotionsBeforeMove,
+    );
+    expect(world._surface._quadtree._renderTiles.length).toBe(4);
+    expect(
+      world._surface._quadtree._renderTiles.map((tile) => tile.key),
+    ).not.toContain("0/0/0");
+
+    await Promise.resolve();
+    render();
+    expect(bridge.terrainEntry.activeSource).toBe(
+      world._surface._terrain.Source.DIRECT,
+    );
+    expect(world.tilesLoaded).toBe(true);
+    expect(world._surface._quadtree._renderTiles.length).toBe(4);
   });
 
   it("keeps fresh zero-layer imagery state absent and only clears existing slots", function () {
@@ -555,7 +796,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     world.render(frameState);
     world.endFrame(frameState);
 
-    expect(surface._quadtree._debug.evictedTiles).toBe(5);
+    expect(surface._quadtree._debug.evictedTiles).toBe(4);
     expect(surface._vertexArray).toBe(vertexArray);
     expect(surface._shaderProgram).toBe(shaderProgram);
     expect(surface._debug.createdBuffers).toBe(1);

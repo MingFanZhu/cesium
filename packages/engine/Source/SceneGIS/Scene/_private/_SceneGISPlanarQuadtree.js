@@ -117,6 +117,10 @@ function SceneGISPlanarQuadtree(tilingScheme) {
   this._tilingScheme = tilingScheme;
   this._tiles = new Map();
   this._idealTiles = [];
+  this._loadTiles = [];
+  this._renderTiles = [];
+  this._refinedKeys = new Set();
+  this._visibleKeys = new Set();
   this._protectedKeys = new Set();
   this._frameNumber = -1;
   this._minimumHeight = 0.0;
@@ -135,6 +139,10 @@ function SceneGISPlanarQuadtree(tilingScheme) {
 SceneGISPlanarQuadtree.prototype.beginFrame = function (frameNumber) {
   this._frameNumber = frameNumber;
   this._idealTiles.length = 0;
+  this._loadTiles.length = 0;
+  this._renderTiles.length = 0;
+  this._refinedKeys.clear();
+  this._visibleKeys.clear();
   this._protectedKeys.clear();
   this._debug.visited = 0;
   this._debug.culled = 0;
@@ -173,6 +181,7 @@ SceneGISPlanarQuadtree.prototype.selectTiles = function (
       ++this._debug.culled;
       continue;
     }
+    this._visibleKeys.add(tile.key);
 
     const sse = computeScreenSpaceError(
       this,
@@ -181,6 +190,7 @@ SceneGISPlanarQuadtree.prototype.selectTiles = function (
       geometricErrors,
     );
     if (tile.level < maximumLevel && sse > maximumScreenSpaceError) {
+      this._refinedKeys.add(tile.key);
       const x = tile.x * 2;
       const y = tile.y * 2;
       const level = tile.level + 1;
@@ -199,7 +209,84 @@ SceneGISPlanarQuadtree.prototype.selectTiles = function (
   }
 
   this._debug.selected = this._idealTiles.length;
+  this._buildLoadTiles();
   return this._idealTiles;
+};
+
+SceneGISPlanarQuadtree.prototype._protectTile = function (tile) {
+  tile.lastUsedFrame = this._frameNumber;
+  this._protectedKeys.add(tile.key);
+};
+
+SceneGISPlanarQuadtree.prototype._buildLoadTiles = function () {
+  const seen = new Set();
+  const add = (tile) => {
+    if (!seen.has(tile.key)) {
+      seen.add(tile.key);
+      this._loadTiles.push(tile);
+    }
+    this._protectTile(tile);
+  };
+  for (const desired of this._idealTiles) {
+    let x = desired.x;
+    let y = desired.y;
+    for (let level = desired.level; level >= 0; --level) {
+      add(this.getOrCreateTile(x, y, level));
+      x = Math.floor(x / 2);
+      y = Math.floor(y / 2);
+    }
+  }
+  for (const key of this._refinedKeys) {
+    const parent = this._tiles.get(key);
+    const level = parent.level + 1;
+    const x = parent.x * 2;
+    const y = parent.y * 2;
+    add(this.getOrCreateTile(x, y, level));
+    add(this.getOrCreateTile(x + 1, y, level));
+    add(this.getOrCreateTile(x, y + 1, level));
+    add(this.getOrCreateTile(x + 1, y + 1, level));
+  }
+  this._loadTiles.sort(
+    (left, right) =>
+      left.level - right.level || left.key.localeCompare(right.key),
+  );
+};
+
+SceneGISPlanarQuadtree.prototype.getLoadTiles = function () {
+  return this._loadTiles;
+};
+
+SceneGISPlanarQuadtree.prototype.resolveRenderTiles = function (isRenderable) {
+  const result = this._renderTiles;
+  result.length = 0;
+  const visit = (tile) => {
+    if (!this._visibleKeys.has(tile.key)) {
+      return;
+    }
+    if (this._refinedKeys.has(tile.key)) {
+      const level = tile.level + 1;
+      const x = tile.x * 2;
+      const y = tile.y * 2;
+      const children = [
+        this.getOrCreateTile(x, y, level),
+        this.getOrCreateTile(x + 1, y, level),
+        this.getOrCreateTile(x, y + 1, level),
+        this.getOrCreateTile(x + 1, y + 1, level),
+      ];
+      if (children.every(isRenderable)) {
+        for (const child of children) {
+          visit(child);
+        }
+        return;
+      }
+    }
+    if (isRenderable(tile)) {
+      this._protectTile(tile);
+      result.push(tile);
+    }
+  };
+  visit(this.getOrCreateTile(0, 0, 0));
+  return result;
 };
 
 SceneGISPlanarQuadtree.prototype.setHeightRange = function (
@@ -208,9 +295,10 @@ SceneGISPlanarQuadtree.prototype.setHeightRange = function (
 ) {
   this._minimumHeight = minimumHeight;
   this._maximumHeight = maximumHeight;
-  this.forEachTile((tile) =>
-    tile.updateHeightRange(minimumHeight, maximumHeight),
-  );
+  this.forEachTile((tile) => {
+    tile.updateHeightRange(minimumHeight, maximumHeight);
+    tile.updateCommandHeightRange(minimumHeight, maximumHeight);
+  });
 };
 
 SceneGISPlanarQuadtree.prototype.trim = function (tileCacheSize) {
@@ -246,6 +334,10 @@ SceneGISPlanarQuadtree.prototype.destroy = function () {
   }
   this._tiles.clear();
   this._idealTiles.length = 0;
+  this._loadTiles.length = 0;
+  this._renderTiles.length = 0;
+  this._refinedKeys.clear();
+  this._visibleKeys.clear();
   this._protectedKeys.clear();
 };
 

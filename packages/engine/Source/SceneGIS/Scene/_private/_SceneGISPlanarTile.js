@@ -38,6 +38,10 @@ function SceneGISPlanarTile(tilingScheme, x, y, level) {
   this.commandBoundingVolume = BoundingSphere.fromOrientedBoundingBox(
     this.boundingVolume,
   );
+  this._commandBoundingBox = new OrientedBoundingBox(
+    Cartesian3.clone(center),
+    Matrix3.clone(this.boundingVolume.halfAxes),
+  );
   this.modelMatrix = Matrix4.fromScale(new Cartesian3(width, height, 1.0));
   Matrix4.setTranslation(this.modelMatrix, center, this.modelMatrix);
   this.command = undefined;
@@ -64,8 +68,24 @@ SceneGISPlanarTile.prototype.updateHeightRange = function (
   const halfHeight = (maximumHeight - minimumHeight) * 0.5;
   this.boundingVolume.center.z = centerHeight;
   this.boundingVolume.halfAxes[8] = halfHeight;
+};
+
+SceneGISPlanarTile.prototype.updateCommandHeightRange = function (
+  minimumHeight,
+  maximumHeight,
+) {
+  const centerHeight = minimumHeight * 0.5 + maximumHeight * 0.5;
+  const halfHeight = (maximumHeight - minimumHeight) * 0.5;
+  this._commandBoundingBox.center.x = this.boundingVolume.center.x;
+  this._commandBoundingBox.center.y = this.boundingVolume.center.y;
+  this._commandBoundingBox.center.z = centerHeight;
+  Matrix3.clone(
+    this.boundingVolume.halfAxes,
+    this._commandBoundingBox.halfAxes,
+  );
+  this._commandBoundingBox.halfAxes[8] = halfHeight;
   BoundingSphere.fromOrientedBoundingBox(
-    this.boundingVolume,
+    this._commandBoundingBox,
     this.commandBoundingVolume,
   );
 };

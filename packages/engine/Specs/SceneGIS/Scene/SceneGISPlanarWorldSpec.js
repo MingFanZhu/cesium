@@ -99,6 +99,24 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(second.destroy).not.toHaveBeenCalled();
   });
 
+  it("accepts a provider below the world maximum level without clamping world LOD", function () {
+    const world = createWorld();
+    const provider = createTerrainProvider(world, { maximumLevel: 0 });
+    const errorSpy = spyOn(
+      provider,
+      "getLevelMaximumGeometricError",
+    ).and.returnValue(4.0);
+
+    world.terrainProvider = provider;
+    expect(world.maximumLevel).toBe(4);
+    expect(world.terrainProvider).toBe(provider);
+    expect(errorSpy).toHaveBeenCalledOnceWith(0);
+    expect(world._surface._terrain.geometricErrors).toEqual([
+      4.0, 4.0, 4.0, 4.0, 4.0,
+    ]);
+    world.destroy();
+  });
+
   it("keeps identity properties getter-only", function () {
     const world = createWorld();
     for (const property of [

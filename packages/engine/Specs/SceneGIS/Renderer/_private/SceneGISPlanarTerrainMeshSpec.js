@@ -18,15 +18,22 @@ describe("SceneGIS/Renderer/SceneGISPlanarTerrainMesh", function () {
       width: 2,
       height: 2,
     });
-    const mesh = buildSceneGISPlanarTerrainMesh(data, extent);
+    const mesh = buildSceneGISPlanarTerrainMesh(data, extent, 5.0, -20.0);
 
-    expect(Array.from(mesh.positions)).toEqual([
+    expect(Array.from(mesh.positions.slice(0, 12))).toEqual([
       -0.5, 0.5, -10.0, 0.5, 0.5, 10.0, -0.5, -0.5, -30.0, 0.5, -0.5, 30.0,
     ]);
-    expect(Array.from(mesh.indices)).toEqual([0, 2, 1, 1, 2, 3]);
+    expect(Array.from(mesh.indices.slice(0, 6))).toEqual([0, 2, 1, 1, 2, 3]);
     expect(buildSceneGISPlanarTerrainMesh(data, extent).indices).toBe(
       mesh.indices,
     );
+    expect(mesh.surfaceVertexCount).toBe(4);
+    expect(mesh.skirtVertexCount).toBe(8);
+    expect(mesh.vertexCount).toBe(12);
+    expect(mesh.surfaceIndexCount).toBe(6);
+    expect(mesh.indexCount).toBe(30);
+    expect(mesh.skirtMinimumHeight).toBe(-20.0);
+    expect(mesh.topologyKey).toBe("2/2/skirt");
     expect(mesh.referenceHeight).toBe(20.0);
     expect(mesh.minimumHeight).toBe(-10.0);
     expect(mesh.maximumHeight).toBe(50.0);
@@ -39,14 +46,33 @@ describe("SceneGIS/Renderer/SceneGISPlanarTerrainMesh", function () {
       height: 2,
     });
     const mesh = buildSceneGISPlanarTerrainMesh(data, extent);
-    expect(mesh.vertexCount).toBe(6);
-    expect(mesh.indexCount).toBe(12);
+    expect(mesh.surfaceVertexCount).toBe(6);
+    expect(mesh.vertexCount).toBe(16);
+    expect(mesh.surfaceIndexCount).toBe(12);
+    expect(mesh.indexCount).toBe(48);
     for (let i = 0; i < mesh.positions.length; i += 3) {
       expect(mesh.positions[i]).toBeGreaterThanOrEqual(-0.5);
       expect(mesh.positions[i]).toBeLessThanOrEqual(0.5);
       expect(mesh.positions[i + 1]).toBeGreaterThanOrEqual(-0.5);
       expect(mesh.positions[i + 1]).toBeLessThanOrEqual(0.5);
       expect(Number.isFinite(mesh.positions[i + 2])).toBe(true);
+    }
+  });
+
+  it("clamps skirt heights to the provider minimum", function () {
+    const data = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float64Array([10.0, 20.0, 30.0, 40.0]),
+      width: 2,
+      height: 2,
+    });
+    const mesh = buildSceneGISPlanarTerrainMesh(data, extent, 100.0, -50.0);
+    expect(mesh.skirtMinimumHeight).toBe(-50.0);
+    for (
+      let i = mesh.surfaceVertexCount * 3 + 2;
+      i < mesh.positions.length;
+      i += 3
+    ) {
+      expect(mesh.positions[i] + mesh.referenceHeight).toBe(-50.0);
     }
   });
 

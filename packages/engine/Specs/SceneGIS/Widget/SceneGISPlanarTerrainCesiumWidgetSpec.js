@@ -51,15 +51,19 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
       width: 2,
       height: 2,
     });
+    const requestedLevels = [];
     const provider = {
       tilingScheme: world.tilingScheme,
       minimumHeight: -20.0,
       maximumHeight: 80.0,
-      maximumLevel: 1,
+      maximumLevel: 0,
       errorEvent: new Event(),
       credit: undefined,
       getLevelMaximumGeometricError: (level) => 1000.0 / 2 ** level,
-      requestTileGeometry: () => Promise.resolve(terrainData),
+      requestTileGeometry: (x, y, level) => {
+        requestedLevels.push(level);
+        return Promise.resolve(terrainData);
+      },
       getTileDataAvailable: () => undefined,
       loadTileDataAvailability: () => undefined,
     };
@@ -101,9 +105,16 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     widget.scene.initializeFrame();
     widget.scene.render();
     await Promise.resolve();
-    widget.scene.initializeFrame();
-    widget.scene.render();
-    const tiles = world._surface._quadtree._idealTiles;
+    let previousPromotions = world._surface._terrain._debug.promotions;
+    for (let i = 0; i < 8; ++i) {
+      widget.scene.initializeFrame();
+      widget.scene.render();
+      const promotions = world._surface._terrain._debug.promotions;
+      expect(promotions - previousPromotions).toBeLessThanOrEqual(2);
+      previousPromotions = promotions;
+      await Promise.resolve();
+    }
+    const tiles = world._surface._quadtree._renderTiles;
     expect(tiles.length).toBe(4);
     expect(
       tiles.every(
@@ -117,6 +128,25 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
       tiles.map((tile) => tile.command),
     );
     expect(world._surface._terrain._indexBuffers.size).toBe(1);
+    expect(requestedLevels).toEqual([0]);
+    expect(
+      tiles.every(
+        (tile) =>
+          tile.terrainEntry.activeSource ===
+          world._surface._terrain.Source.UPSAMPLED,
+      ),
+    ).toBe(true);
+    expect(
+      tiles.every(
+        (tile) => tile.command.boundingVolume === tile.commandBoundingVolume,
+      ),
+    ).toBe(true);
+    expect(
+      tiles.some(
+        (tile) =>
+          tile.terrainEntry.mesh.skirtMinimumHeight < tile.minimumHeight,
+      ),
+    ).toBe(true);
     expect(world.tilesLoaded).toBe(true);
 
     const debug = { ...world._surface._terrain._debug };
@@ -138,12 +168,13 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     );
     const sampleX = -64.0;
     const sampleY = 64.0;
-    const sampleHeight = terrainData.interpolateHeight(
+    const renderedTerrainData = tile.terrainEntry.activeContent.terrainData;
+    const sampleHeight = renderedTerrainData.interpolateHeight(
       tile.extent,
       sampleX,
       sampleY,
     );
-    expect(sampleHeight).toBe(30.0);
+    expect(sampleHeight).toBe(5.0);
     const windowPosition = SceneTransforms.worldToWindowCoordinates(
       widget.scene,
       new Cartesian3(sampleX, sampleY, sampleHeight),
@@ -154,7 +185,7 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     expect(renderedPosition.x).toBeCloseTo(sampleX, 0);
     expect(renderedPosition.y).toBeCloseTo(sampleY, 0);
     expect(renderedPosition.z).toBeCloseTo(
-      terrainData.interpolateHeight(
+      renderedTerrainData.interpolateHeight(
         tile.extent,
         renderedPosition.x,
         renderedPosition.y,
@@ -179,6 +210,12 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     );
     expect(terrain._debug.destroyedIndexBuffers).toBe(
       terrain._debug.createdIndexBuffers,
+    );
+    expect(terrain._debug.releasedIndexReferences).toBe(
+      terrain._debug.acquiredIndexReferences,
+    );
+    expect(terrain._debug.destroyedVertexBuffers).toBe(
+      terrain._debug.createdVertexBuffers,
     );
   });
 });

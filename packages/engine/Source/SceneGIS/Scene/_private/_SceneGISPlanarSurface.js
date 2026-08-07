@@ -93,8 +93,9 @@ SceneGISPlanarSurface.prototype.setTerrainProvider = function (
     return;
   }
   if (!defined(this._terrain)) {
-    this._terrain = new SceneGISPlanarTerrain((callback) =>
-      this._quadtree.forEachTile(callback),
+    this._terrain = new SceneGISPlanarTerrain(
+      (callback) => this._quadtree.forEachTile(callback),
+      (x, y, level) => this._quadtree.getOrCreateTile(x, y, level),
     );
   }
   this._terrain.setProvider(provider, geometricErrors);
@@ -216,20 +217,17 @@ function getCommand(surface, tile, layerCount) {
     tile.command.uniformMap = createUniformMap(surface, tile, layerCount);
     tile._imageryCommandLayerCount = layerCount;
   }
-  const terrainEntry = tile.terrainEntry;
-  const terrainReady =
-    defined(terrainEntry) &&
-    defined(surface._terrain) &&
-    terrainEntry.state === surface._terrain.State.READY;
+  const terrainContent = tile.terrainEntry?.activeContent;
+  const terrainReady = defined(terrainContent?.mesh);
   tile.command.boundingVolume = tile.commandBoundingVolume;
   tile.command.modelMatrix = tile.modelMatrix;
   tile.command.primitiveType = terrainReady
     ? PrimitiveType.TRIANGLES
     : PrimitiveType.TRIANGLE_STRIP;
   tile.command.vertexArray = terrainReady
-    ? terrainEntry.vertexArray
+    ? terrainContent.vertexArray
     : surface._vertexArray;
-  tile.command.count = terrainReady ? terrainEntry.mesh.indexCount : 4;
+  tile.command.count = terrainReady ? terrainContent.mesh.indexCount : 4;
   return tile.command;
 }
 
@@ -321,13 +319,13 @@ SceneGISPlanarSurface.prototype.render = function (
     return;
   }
   this._baseColor = baseColor;
-  const tiles = this._quadtree.selectTiles(
+  const desiredTiles = this._quadtree.selectTiles(
     frameState,
     maximumLevel,
     maximumScreenSpaceError,
     this._terrain?.geometricErrors,
   );
-  if (tiles.length === 0) {
+  if (desiredTiles.length === 0) {
     this._tilesLoaded = true;
     return;
   }
@@ -342,7 +340,16 @@ SceneGISPlanarSurface.prototype.render = function (
     });
     ++this._debug.createdTextures;
   }
-  this._terrain?.prepare(frameState.context, tiles, frameState.frameNumber);
+  const loadTiles = this._quadtree.getLoadTiles();
+  this._terrain?.prepare(
+    frameState.context,
+    loadTiles,
+    desiredTiles,
+    frameState.frameNumber,
+  );
+  const tiles = this._quadtree.resolveRenderTiles((tile) =>
+    defined(this._terrain) ? this._terrain.isRenderable(tile) : true,
+  );
   this._imagery.prepare(
     frameState.context,
     tiles,
@@ -364,11 +371,8 @@ SceneGISPlanarSurface.prototype.render = function (
     }
   }
   for (const tile of tiles) {
-    const terrainData = tile.terrainEntry?.terrainData;
-    if (
-      tile.terrainEntry?.state === this._terrain?.State.READY &&
-      defined(terrainData?.credits)
-    ) {
+    const terrainData = tile.terrainEntry?.activeContent?.terrainData;
+    if (defined(terrainData?.credits)) {
       for (const credit of terrainData.credits) {
         frameState.creditDisplay.addCreditToNextFrame(credit);
       }

@@ -13,7 +13,12 @@ function midpoint(minimum, maximum) {
  * @returns {object} The CPU mesh.
  * @private
  */
-function buildSceneGISPlanarTerrainMesh(terrainData, extent) {
+function buildSceneGISPlanarTerrainMesh(
+  terrainData,
+  extent,
+  effectiveGeometricError = 0.0,
+  providerMinimumHeight = terrainData?.minimumHeight,
+) {
   if (
     !terrainData ||
     typeof terrainData._getSample !== "function" ||
@@ -33,11 +38,20 @@ function buildSceneGISPlanarTerrainMesh(terrainData, extent) {
   ) {
     throw new DeveloperError("extent must be a SceneGISPlanarExtent.");
   }
+  if (
+    !Number.isFinite(effectiveGeometricError) ||
+    effectiveGeometricError < 0.0 ||
+    !Number.isFinite(providerMinimumHeight)
+  ) {
+    throw new DeveloperError(
+      "Terrain skirt parameters must be finite and non-negative where required.",
+    );
+  }
 
   const width = terrainData.width;
   const height = terrainData.height;
-  const vertexCount = width * height;
-  if (!Number.isSafeInteger(vertexCount)) {
+  const surfaceVertexCount = width * height;
+  if (!Number.isSafeInteger(surfaceVertexCount)) {
     throw new DeveloperError("The terrain mesh vertex count must be safe.");
   }
   const referenceHeight = midpoint(
@@ -48,6 +62,21 @@ function buildSceneGISPlanarTerrainMesh(terrainData, extent) {
     throw new DeveloperError("The terrain reference height must be finite.");
   }
 
+  const topology = TerrainProvider.getRegularGridAndSkirtIndicesAndEdgeIndices(
+    width,
+    height,
+  );
+  const edges = [
+    topology.westIndicesSouthToNorth,
+    topology.southIndicesEastToWest,
+    topology.eastIndicesNorthToSouth,
+    topology.northIndicesWestToEast,
+  ];
+  let skirtVertexCount = 0;
+  for (const edge of edges) {
+    skirtVertexCount += edge.length;
+  }
+  const vertexCount = surfaceVertexCount + skirtVertexCount;
   const positions = new Float32Array(vertexCount * 3);
   let offset = 0;
   for (let row = 0; row < height; ++row) {
@@ -73,17 +102,47 @@ function buildSceneGISPlanarTerrainMesh(terrainData, extent) {
     }
   }
 
-  const indices = TerrainProvider.getRegularGridIndices(width, height);
+  const skirtDepth = effectiveGeometricError * 4.0;
+  let skirtMinimumHeight = terrainData.minimumHeight;
+  for (const edge of edges) {
+    for (const surfaceIndex of edge) {
+      const sourceOffset = surfaceIndex * 3;
+      const edgeHeight = referenceHeight + positions[sourceOffset + 2];
+      const skirtHeight = Math.max(
+        edgeHeight - skirtDepth,
+        providerMinimumHeight,
+      );
+      const relativeSkirtHeight = Math.fround(skirtHeight - referenceHeight);
+      if (!Number.isFinite(relativeSkirtHeight)) {
+        throw new DeveloperError(
+          "Every terrain skirt position must be finite in Float32.",
+        );
+      }
+      positions[offset++] = positions[sourceOffset];
+      positions[offset++] = positions[sourceOffset + 1];
+      positions[offset++] = relativeSkirtHeight;
+      skirtMinimumHeight = Math.min(skirtMinimumHeight, skirtHeight);
+    }
+  }
+
+  const indices = topology.indices;
   return {
     positions,
     indices,
     width,
     height,
+    surfaceVertexCount,
+    skirtVertexCount,
     vertexCount,
+    surfaceIndexCount: topology.indexCountWithoutSkirts,
     indexCount: indices.length,
     referenceHeight,
     minimumHeight: terrainData.minimumHeight,
     maximumHeight: terrainData.maximumHeight,
+    skirtMinimumHeight,
+    positionByteLength: positions.byteLength,
+    indexByteLength: indices.byteLength,
+    topologyKey: `${width}/${height}/skirt`,
   };
 }
 

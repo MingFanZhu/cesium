@@ -8,3 +8,7 @@
 - [T2 terrain mesh + surface review](2026-08-07-t2-terrain-surface.md)（`approved`）：public provider
   attachment、private mesh/runtime、三维 bounds/SSE、terrain/imagery command、真实 depth 与
   ownership evidence；`T2-R001` 已由 Architecture Agent 确认为 `fixed`，无 unresolved finding。
+- [T3 terrain continuous LOD review](2026-08-07-t3-terrain-continuous-lod.md)（`approved`）：
+  desired/load/render、四子门禁、availability、upsample/skirt、promotion、cache/lifecycle、
+  imagery/depth 与 zero-upstream evidence；`T3-R001`、`T3-R002` 均由 Architecture reviewer确认
+  `fixed`，无 unresolved finding。

@@ -57,13 +57,13 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
         2,
       ),
     ).toThrowDeveloperError();
-    expect(() =>
+    expect(
       validateTerrainProvider(
         { ...fixture.provider, maximumLevel: 1 },
         fixture.tilingScheme,
         2,
       ),
-    ).toThrowDeveloperError();
+    ).toEqual([4.0, 2.0, 2.0]);
   });
 
   it("requests lazily with RequestType.TERRAIN and advances only to RECEIVED asynchronously", async function () {
@@ -91,7 +91,7 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     runtime.destroy();
   });
 
-  it("settles known-unavailable tiles without raising provider errors", function () {
+  it("reports an unavailable root contract failure and keeps flat coverage", function () {
     const fixture = createFixture({ getTileDataAvailable: () => false });
     const listener = jasmine.createSpy("listener");
     fixture.provider.errorEvent.addEventListener(listener);
@@ -104,10 +104,10 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     );
     runtime.prepare(undefined, [fixture.tile], 1);
 
-    expect(fixture.tile.terrainEntry.state).toBe(runtime.State.FAILED);
+    expect(fixture.tile.terrainEntry.state).toBe(runtime.State.UNAVAILABLE);
     expect(fixture.tile.terrainEntry.knownUnavailable).toBe(true);
     expect(runtime.tilesLoaded).toBe(true);
-    expect(listener).not.toHaveBeenCalled();
+    expect(listener).toHaveBeenCalledOnceWith(jasmine.any(Object));
     runtime.destroy();
   });
 
@@ -203,6 +203,138 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     resolveLate(fixture.data);
     await Promise.resolve();
     expect(fixture.tile.terrainEntry).toBeUndefined();
+    runtime.destroy();
+  });
+
+  it("loads availability metadata once before an optimistic geometry request", async function () {
+    let resolveAvailability;
+    let availabilityCalls = 0;
+    let requestCalls = 0;
+    const fixture = createFixture();
+    fixture.provider.loadTileDataAvailability = () => {
+      ++availabilityCalls;
+      return new Promise((resolve) => {
+        resolveAvailability = resolve;
+      });
+    };
+    fixture.provider.requestTileGeometry = () => {
+      ++requestCalls;
+      return Promise.resolve(fixture.data);
+    };
+    const runtime = new SceneGISPlanarTerrain((callback) =>
+      callback(fixture.tile),
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+
+    runtime.prepare(undefined, [fixture.tile], [fixture.tile], 1);
+    expect(fixture.tile.terrainEntry.state).toBe(
+      runtime.State.AVAILABILITY_LOADING,
+    );
+    expect(availabilityCalls).toBe(1);
+    expect(requestCalls).toBe(0);
+    resolveAvailability();
+    await Promise.resolve();
+    runtime.prepare(undefined, [fixture.tile], [fixture.tile], 2);
+    expect(availabilityCalls).toBe(1);
+    expect(requestCalls).toBe(1);
+    runtime.destroy();
+  });
+
+  it("uses direct-parent child availability before requesting geometry", async function () {
+    let requestCalls = 0;
+    const fixture = createFixture({
+      getTileDataAvailable: (x, y, level) => (level === 0 ? true : undefined),
+    });
+    const parentData = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array([-10.0, 10.0, 20.0, 40.0]),
+      width: 2,
+      height: 2,
+      childTileMask: 0,
+    });
+    fixture.provider.requestTileGeometry = () => {
+      ++requestCalls;
+      return Promise.resolve(parentData);
+    };
+    const child = new SceneGISPlanarTile(fixture.tilingScheme, 0, 0, 1);
+    const tiles = new Map([
+      [fixture.tile.key, fixture.tile],
+      [child.key, child],
+    ]);
+    const runtime = new SceneGISPlanarTerrain(
+      (callback) => tiles.forEach(callback),
+      (x, y, level) => tiles.get(`${level}/${x}/${y}`),
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+    runtime.prepare(undefined, [fixture.tile], [fixture.tile], 1);
+    await Promise.resolve();
+    runtime.prepare(undefined, [fixture.tile, child], [child], 2);
+
+    expect(requestCalls).toBe(1);
+    expect(child.terrainEntry.state).toBe(runtime.State.UNAVAILABLE);
+    runtime.destroy();
+  });
+
+  it("never requests direct terrain beyond the provider maximum level", function () {
+    const fixture = createFixture();
+    fixture.provider.maximumLevel = 0;
+    const child = new SceneGISPlanarTile(fixture.tilingScheme, 0, 0, 1);
+    const tiles = new Map([
+      [fixture.tile.key, fixture.tile],
+      [child.key, child],
+    ]);
+    const request = jasmine.createSpy("requestTileGeometry");
+    fixture.provider.requestTileGeometry = request;
+    const runtime = new SceneGISPlanarTerrain(
+      (callback) => tiles.forEach(callback),
+      (x, y, level) => tiles.get(`${level}/${x}/${y}`),
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+
+    runtime.prepare(undefined, [child], [child], 1);
+    expect(child.terrainEntry.state).toBe(runtime.State.UNAVAILABLE);
+    expect(request).not.toHaveBeenCalled();
+    runtime.destroy();
+  });
+
+  it("advances direct work only for desired leaves and their coverage ancestors", function () {
+    const fixture = createFixture();
+    const children = [
+      new SceneGISPlanarTile(fixture.tilingScheme, 0, 0, 1),
+      new SceneGISPlanarTile(fixture.tilingScheme, 1, 0, 1),
+      new SceneGISPlanarTile(fixture.tilingScheme, 0, 1, 1),
+      new SceneGISPlanarTile(fixture.tilingScheme, 1, 1, 1),
+    ];
+    const allTiles = [fixture.tile, ...children];
+    const tiles = new Map(allTiles.map((tile) => [tile.key, tile]));
+    const requests = [];
+    fixture.provider.requestTileGeometry = (x, y, level) => {
+      requests.push(`${level}/${x}/${y}`);
+      return undefined;
+    };
+    const runtime = new SceneGISPlanarTerrain(
+      (callback) => tiles.forEach(callback),
+      (x, y, level) => tiles.get(`${level}/${x}/${y}`),
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+
+    runtime.prepare(undefined, allTiles, [children[0]], 1);
+
+    expect(requests).toEqual(["0/0/0", "1/0/0"]);
+    for (const bridge of children.slice(1)) {
+      expect(bridge.terrainEntry.state).toBe(runtime.State.UNLOADED);
+    }
     runtime.destroy();
   });
 });

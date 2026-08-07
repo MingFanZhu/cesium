@@ -8,7 +8,7 @@
 | Status                 | `active`                                                                                 |
 | Planning model         | `extension`                                                                              |
 | Active extension plan  | [Planar Terrain extension plan](plans/2026-08-07-planar-terrain-extension.md) (`active`) |
-| Current phase          | None；T2 completed，T3 尚未激活                                                          |
+| Current phase          | None；T3 completed，等待讨论 T4                                                          |
 | Active phase plan      | None                                                                                     |
 | Active standalone plan | None                                                                                     |
 | Architecture contact   | Architecture Agent                                                                       |
@@ -54,22 +54,24 @@
   [ADR-0005](../../Documentation/SceneGIS/Decisions/ADR-0005-planar-imagery-runtime-and-composition.md)
 - New ADR:
   [ADR-0007](../../Documentation/SceneGIS/Decisions/ADR-0007-planar-terrain-core-contract.md)、
-  [ADR-0008](../../Documentation/SceneGIS/Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)
+  [ADR-0008](../../Documentation/SceneGIS/Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)、
+  [ADR-0009](../../Documentation/SceneGIS/Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)
 - SGP: None planned；现有 `SGP-0001` 和 `SGP-0002` 仅作为 planar-world 依赖
 
 ## Current handoff
 
-- Current state: T2 review 已 `approved`，`T2-R001` reviewer-confirmed `fixed`；provider attachment、
-  terrain mesh/runtime、三维 bounds/SSE、terrain/imagery single command、真实 depth 与 lifecycle
-  已完成独立本地 checkpoint。
-- Next action: 停下与项目负责人讨论 T3。只有 T3 phase plan 经明确批准后才重新指派 Execution
-  Agent；当前不实现 T3。
-- Current phase status: T2 `completed`；extension 继续 `active`，T3 尚未激活。
-- Open discussions: None。T3 的连续 LOD/Worker、T4 query/picking、T5 provider/example 和 T6
-  lighting/performance 继续延迟到对应 phase。
+- Current state: T3 second focused review 已 `approved`；desired/load/render、四子门禁、
+  direct/fallback、availability、逐级 upsample、skirt、promotion、cache/lifecycle 与 current-view
+  readiness 已完成阶段门禁。
+- Next action: Architecture Agent 创建 T3 独立本地提交，然后停下与项目负责人讨论 T4；当前不实现
+  T4。
+- Current phase status: T3 `completed`；extension 继续 `active`。
+- Open discussions: None。Worker、正式 byte budget、terrain query/picking、provider/example 和
+  lighting/performance 已明确留到 T4-T6 或后续 measured follow-up。
 - Latest review:
-  [T2 terrain surface review](reviews/2026-08-07-t2-terrain-surface.md)（`approved`）。
-- Unresolved reviews: None；`T2-R001` 已由 Architecture Agent 确认为 `fixed`。
-- Known risks: terrain 会扩大现有 planar surface 的 CPU/GPU 与异步状态；Worker/build
-  接入、跨 LOD seam、主线程 mesh、CPU 内存规模、公开 DEM 的许可/CORS/稳定性，以及未来
-  地下模式兼容性必须在相应 phase 重新评估。
+  [T3 terrain continuous LOD review request](reviews/2026-08-07-t3-terrain-continuous-lod.md)
+  （`approved`）。
+- Unresolved reviews: None；`T3-R001`、`T3-R002` 均由 Architecture reviewer 确认为 `fixed`。
+- Known risks: T3 的 fixed-count main-thread promotion 不能严格限制单个超大 Heightmap；tile-count
+  cache 不是 byte budget；向下 skirt 在未来地下视角可能可见；无 geomorph 的 direct/fallback
+  replacement 可能产生高度 pop。Worker、memory budget 和表现问题留给 T6 profiling。

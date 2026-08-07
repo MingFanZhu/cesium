@@ -60,6 +60,27 @@ describe("SceneGIS/Scene/SceneGISPlanarQuadtree", function () {
     expect(selected.some((tile) => tile.key === "0/0/0")).toBe(false);
   });
 
+  it("keeps the parent until all four direct children are renderable", function () {
+    const quadtree = createQuadtree();
+    const frameState = createFrameState({ position: new Cartesian3(0, 0, 0) });
+    quadtree.beginFrame(frameState.frameNumber);
+    quadtree.selectTiles(frameState, 1, 0.5);
+    const renderable = new Set(["0/0/0", "1/0/0", "1/1/0", "1/0/1"]);
+
+    expect(
+      quadtree
+        .resolveRenderTiles((tile) => renderable.has(tile.key))
+        .map((tile) => tile.key),
+    ).toEqual(["0/0/0"]);
+
+    renderable.add("1/1/1");
+    expect(
+      quadtree
+        .resolveRenderTiles((tile) => renderable.has(tile.key))
+        .map((tile) => tile.key),
+    ).toEqual(["1/0/0", "1/1/0", "1/0/1", "1/1/1"]);
+  });
+
   it("culls before computing screen-space error", function () {
     const quadtree = createQuadtree();
     const frameState = createFrameState({
@@ -253,7 +274,7 @@ describe("SceneGIS/Scene/SceneGISPlanarQuadtree", function () {
     quadtree.beginFrame(1);
     quadtree.selectTiles(first, 1, 0.5);
     quadtree.trim(0);
-    expect(quadtree._tiles.size).toBe(4);
+    expect(quadtree._tiles.size).toBe(5);
 
     const second = createFrameState({ frameNumber: 2 });
     quadtree.beginFrame(2);
@@ -263,7 +284,7 @@ describe("SceneGIS/Scene/SceneGISPlanarQuadtree", function () {
     expect(quadtree._tiles.has("0/0/0")).toBe(true);
     expect(quadtree._tiles.has("1/1/1")).toBe(true);
     expect(quadtree._tiles.size).toBe(2);
-    expect(quadtree._debug.evictedTiles).toBe(4);
+    expect(quadtree._debug.evictedTiles).toBe(3);
   });
 
   it("recreates evicted tiles and destroys every resident tile once", function () {

@@ -102,6 +102,7 @@ describe("SceneGIS/Scene/SceneGISPlanarTile", function () {
     const modelMatrix = tile.modelMatrix;
 
     tile.updateHeightRange(-20.0, 60.0);
+    tile.updateCommandHeightRange(-100.0, 60.0);
     tile.updateModelMatrix(20.0);
 
     expect(tile.boundingVolume).toBe(boundingVolume);
@@ -111,7 +112,9 @@ describe("SceneGIS/Scene/SceneGISPlanarTile", function () {
     expect(tile.maximumHeight).toBe(60.0);
     expect(tile.boundingVolume.center.z).toBe(20.0);
     expect(tile.boundingVolume.halfAxes[8]).toBe(40.0);
-    expect(tile.commandBoundingVolume.radius).toBeGreaterThan(40.0);
+    expect(tile._commandBoundingBox.center.z).toBe(-20.0);
+    expect(tile._commandBoundingBox.halfAxes[8]).toBe(80.0);
+    expect(tile.commandBoundingVolume.radius).toBeGreaterThan(80.0);
     expect(tile.modelMatrix[14]).toBe(20.0);
   });
 
