@@ -265,6 +265,27 @@ actual render tiles，pick+depth 继续精确 replay 最近 normal-render comman
 仍保持 zero terrain allocation，public World/camera picking 仍是 Z=0 reference plane。完整决定见
 [ADR-0009](Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)。
 
+### 平面地形查询、拾取与独立采样
+
+平面地形的读取接口必须区分数据来源。`SceneGISPlanarWorld.getTerrainHeight` 只读取 canonical
+quadtree cache 中最深的 resident `DIRECT`/`UPSAMPLED` active mesh，并按实际 Float32 surface
+triangles求高程；它不创建 tile、不更新 LRU，也不把 `FLAT` 当作已知 terrain。`world.pickTerrain`
+只拾取最近成功 normal render发布的 actual terrain cover snapshot，使用双面 surface triangle
+intersection并排除 skirt；nearest `FLAT` 可以遮挡更远 terrain，但其自身返回 `undefined`。
+
+Terrain query snapshot只持有可复用 tile/content references，不拥有 mesh或 GPU资源。Provider
+attach/replacement/detach、hidden/zero-buffer/no-cover、content revision mismatch和 destroy必须使其
+失效。Query不得推进 selection、request、promotion、LRU、readiness或 command allocation；window
+terrain picking复用 SceneGIS four-frustum ray helper，不触发 depth render。
+
+`SceneGISPlanarTerrainSampler.sampleAtLevel` 是独立 provider sampler：它按显式 level和 canonical
+tile address聚合请求，消费 provider availability/TerrainData interpolation，并按输入顺序返回独立
+height array。它不访问 World cache，不做 ancestor/upsample/flat fallback，不 raise provider
+`errorEvent`，也不拥有 provider或 TerrainData。既有 `world.pick` 与 camera navigation继续保持有界
+Z=0 reference-plane语义；`scene.pickPosition` 继续表示包含对象和 skirt在内的 frontmost rendered
+depth。完整决定见
+[ADR-0010](Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)。
+
 ### 平面影像运行时
 
 `SceneGISPlanarWorld` 的 imagery provider 必须与 world 共享同一个 canonical

@@ -254,6 +254,9 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
         throw new DeveloperError("show must be a boolean.");
       }
       this._show = value;
+      if (!value) {
+        this._surface.invalidateTerrainQuerySnapshot();
+      }
     },
   },
   /**
@@ -338,6 +341,7 @@ SceneGISPlanarWorld.prototype.beginFrame = function (frameState) {
  */
 SceneGISPlanarWorld.prototype.render = function (frameState) {
   if (!this._show) {
+    this._surface.invalidateTerrainQuerySnapshot();
     return;
   }
   this._surface.render(
@@ -355,6 +359,100 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
  */
 SceneGISPlanarWorld.prototype.endFrame = function (frameState) {
   this._surface.endFrame(this._tileCacheSize);
+};
+
+/**
+ * Gets the terrain height from the deepest resident direct or upsampled
+ * Float32 surface mesh containing a position. This method does not request,
+ * create, promote, or retain tiles. Flat fallback content is not terrain.
+ *
+ * @param {Cartesian3} position The finite planar position. Z is validated but does not affect addressing.
+ * @returns {number|undefined} The resident terrain height in meters, or undefined when none is resident.
+ *
+ * @exception {DeveloperError} <code>position</code> is not a Cartesian3 with finite components.
+ * @exception {DeveloperError} This world has been destroyed.
+ */
+SceneGISPlanarWorld.prototype.getTerrainHeight = function (position) {
+  if (
+    !(position instanceof Cartesian3) ||
+    !Number.isFinite(position.x) ||
+    !Number.isFinite(position.y) ||
+    !Number.isFinite(position.z)
+  ) {
+    throw new DeveloperError(
+      "position must be a Cartesian3 with finite components.",
+    );
+  }
+  if (!this._terrainProvider) {
+    return undefined;
+  }
+  return this._surface.getTerrainHeight(position, this._maximumLevel);
+};
+
+/**
+ * Intersects a ray with the actual terrain cover published by the most recent
+ * successful normal render. Surface skirts are excluded. A nearest flat
+ * fallback occludes farther terrain but does not produce a terrain result.
+ *
+ * @param {Ray} ray The ray to intersect. Its direction need not be normalized.
+ * @param {Cartesian3} [result] The object in which to store the intersection.
+ * @returns {Cartesian3|undefined} The nearest terrain intersection, or undefined when none is available.
+ *
+ * @exception {DeveloperError} <code>ray</code> does not have a finite origin and non-zero finite direction.
+ * @exception {DeveloperError} This world has been destroyed.
+ */
+SceneGISPlanarWorld.prototype.pickTerrain = function (ray, result) {
+  validateRay(ray);
+  return this._surface.pickTerrain(ray, result);
+};
+
+/**
+ * Computes a four-frustum window ray and intersects it with the actual terrain
+ * cover published by the most recent successful normal render. This method
+ * does not trigger a render, depth pick, or mathematical Z=0 fallback.
+ *
+ * @param {Cartesian2} windowPosition The finite client-space position with a top-left origin.
+ * @param {Scene} scene The live SCENE3D scene whose primary world is this world.
+ * @param {Cartesian3} [result] The object in which to store the intersection.
+ * @returns {Cartesian3|undefined} The terrain intersection, or undefined for a zero-sized canvas or a miss.
+ *
+ * @exception {DeveloperError} <code>windowPosition</code> is missing or non-finite.
+ * @exception {DeveloperError} <code>scene</code> is missing, destroyed, uses another world, or is not in SCENE3D.
+ * @exception {DeveloperError} The scene camera does not use a supported finite frustum and pose.
+ * @exception {DeveloperError} This world has been destroyed.
+ */
+SceneGISPlanarWorld.prototype.pickTerrainFromWindowPosition = function (
+  windowPosition,
+  scene,
+  result,
+) {
+  if (
+    !windowPosition ||
+    !Number.isFinite(windowPosition.x) ||
+    !Number.isFinite(windowPosition.y)
+  ) {
+    throw new DeveloperError(
+      "windowPosition must have finite x and y components.",
+    );
+  }
+  if (!scene || (scene.isDestroyed && scene.isDestroyed())) {
+    throw new DeveloperError("scene must be a live Scene.");
+  }
+  if (scene.world !== this) {
+    throw new DeveloperError("scene.world must be this SceneGISPlanarWorld.");
+  }
+  if (scene.mode !== SceneMode.SCENE3D) {
+    throw new DeveloperError(
+      "Planar window terrain picking requires SceneMode.SCENE3D.",
+    );
+  }
+  const ray = SceneGISPlanarCamera.getWindowRay(
+    scene.camera,
+    scene.canvas,
+    windowPosition,
+    scratchPickRay,
+  );
+  return ray ? this.pickTerrain(ray, result) : undefined;
 };
 
 /**

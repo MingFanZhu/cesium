@@ -193,6 +193,21 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
       0,
     );
 
+    const queryDebug = { ...world._surface._terrain._debug };
+    expect(
+      world.getTerrainHeight(new Cartesian3(sampleX, sampleY, 12345.0)),
+    ).toBeCloseTo(sampleHeight, 6);
+    const terrainWindowPosition = world.pickTerrainFromWindowPosition(
+      windowPosition,
+      widget.scene,
+      new Cartesian3(),
+    );
+    expect(terrainWindowPosition).toBeDefined();
+    expect(terrainWindowPosition.x).toBeCloseTo(renderedPosition.x, 0);
+    expect(terrainWindowPosition.y).toBeCloseTo(renderedPosition.y, 0);
+    expect(terrainWindowPosition.z).toBeCloseTo(renderedPosition.z, 0);
+    expect(world._surface._terrain._debug).toEqual(queryDebug);
+
     const ray = SceneGISPlanarCamera.getWindowRay(
       widget.scene.camera,
       widget.scene.canvas,
@@ -202,6 +217,9 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     const referencePosition = world.pick(ray, new Cartesian3());
     expect(referencePosition).toBeDefined();
     expect(referencePosition.z).toBe(0.0);
+    expect(world.pickTerrain(ray, new Cartesian3())).toEqual(
+      terrainWindowPosition,
+    );
 
     const terrain = world._surface._terrain;
     widget = widget.destroy();

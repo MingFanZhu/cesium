@@ -162,6 +162,10 @@ SceneGISPlanarQuadtree.prototype.getOrCreateTile = function (x, y, level) {
   return tile;
 };
 
+SceneGISPlanarQuadtree.prototype.getTile = function (x, y, level) {
+  return this._tiles.get(`${level}/${x}/${y}`);
+};
+
 SceneGISPlanarQuadtree.prototype.selectTiles = function (
   frameState,
   maximumLevel,

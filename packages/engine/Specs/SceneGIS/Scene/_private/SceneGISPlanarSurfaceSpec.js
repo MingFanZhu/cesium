@@ -139,11 +139,19 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(tile.command.count).toBe(30);
     expect(tile.boundingVolume.halfAxes[8]).toBe(50.0);
     expect(world.tilesLoaded).toBe(true);
+    const snapshot = world._surface._terrainQuerySnapshot;
+    const snapshotEntry = snapshot[0];
+    expect(world._surface._terrainQuerySnapshotCount).toBe(1);
+    expect(snapshotEntry.tile).toBe(tile);
+    expect(snapshotEntry.content).toBe(tile.terrainEntry.activeContent);
+    expect(snapshotEntry.mesh).toBe(tile.terrainEntry.activeContent.mesh);
     const debug = { ...world._surface._terrain._debug };
     const command = tile.command;
     scene.renderForSpecs();
     expect(tile.command).toBe(command);
     expect(world._surface._terrain._debug).toEqual(debug);
+    expect(world._surface._terrainQuerySnapshot).toBe(snapshot);
+    expect(world._surface._terrainQuerySnapshot[0]).toBe(snapshotEntry);
 
     const cachedCommands = world._surface._renderCommands.slice();
     const replayFrameState = {
@@ -155,6 +163,78 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(replayFrameState.commandList).toEqual(cachedCommands);
     expect(replayFrameState.commandList[0]).toBe(command);
     expect(world._surface._terrain._debug).toEqual(debug);
+
+    const oldTile = snapshotEntry.tile;
+    const oldContent = snapshotEntry.content;
+    const oldMesh = snapshotEntry.mesh;
+    const replacement = { ...provider, errorEvent: new Event() };
+    world.terrainProvider = replacement;
+    expect(world._surface._terrainQuerySnapshotCount).toBe(0);
+    expect(snapshotEntry.tile).toBeUndefined();
+    expect(snapshotEntry.content).toBeUndefined();
+    expect(snapshotEntry.mesh).toBeUndefined();
+    expect(snapshotEntry.tile).not.toBe(oldTile);
+    expect(snapshotEntry.content).not.toBe(oldContent);
+    expect(snapshotEntry.mesh).not.toBe(oldMesh);
+
+    scene.renderForSpecs();
+    await Promise.resolve();
+    scene.renderForSpecs();
+    expect(world._surface._terrainQuerySnapshot[0]).toBe(snapshotEntry);
+    expect(snapshotEntry.tile).toBeDefined();
+    expect(snapshotEntry.content).toBeDefined();
+    expect(snapshotEntry.mesh).toBeDefined();
+    world.terrainProvider = undefined;
+    expect(world._surface._terrainQuerySnapshotCount).toBe(0);
+    expect(snapshotEntry.tile).toBeUndefined();
+    expect(snapshotEntry.content).toBeUndefined();
+    expect(snapshotEntry.mesh).toBeUndefined();
+  });
+
+  it("clears strong references across snapshot shrink and no-cover invalidation", function () {
+    const world = createWorld();
+    const surface = world._surface;
+    const entries = [{}, {}, {}];
+    surface._terrainQuerySnapshot.push(...entries);
+    for (let i = 0; i < entries.length; ++i) {
+      Object.assign(entries[i], {
+        tile: { id: `tile-${i}` },
+        content: { id: `content-${i}` },
+        mesh: { positions: new Float32Array(1024) },
+        source: "DIRECT",
+        revision: i,
+        key: `0/${i}/0`,
+      });
+    }
+    surface._terrainQuerySnapshotCount = entries.length;
+
+    surface.invalidateTerrainQuerySnapshot();
+
+    expect(surface._terrainQuerySnapshot).toEqual(entries);
+    for (const entry of entries) {
+      expect(entry.tile).toBeUndefined();
+      expect(entry.content).toBeUndefined();
+      expect(entry.mesh).toBeUndefined();
+      expect(entry.source).toBeUndefined();
+      expect(entry.revision).toBeUndefined();
+      expect(entry.key).toBeUndefined();
+    }
+
+    Object.assign(entries[0], {
+      tile: {},
+      content: {},
+      mesh: { positions: new Float32Array(16) },
+      source: "UPSAMPLED",
+      revision: 4,
+      key: "0/0/0",
+    });
+    surface._terrainQuerySnapshotCount = 1;
+    surface.invalidateTerrainQuerySnapshot();
+    expect(surface._terrainQuerySnapshot[0]).toBe(entries[0]);
+    expect(entries[0].mesh).toBeUndefined();
+    expect(entries[1].mesh).toBeUndefined();
+    expect(entries[2].mesh).toBeUndefined();
+    world.destroy();
   });
 
   it("keeps direct content over a stale fallback refresh after the four-child gate", async function () {
@@ -459,11 +539,13 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     };
 
     world.beginFrame(frameState);
+    world._surface._terrainQuerySnapshotCount = 1;
     world.render(frameState);
 
     const tile = world._surface._quadtree._tiles.get("0/0/0");
     expect(testedVolume).toBe(tile.boundingVolume);
     expect(testedVolume).not.toBe(tile.commandBoundingVolume);
+    expect(world._surface._terrainQuerySnapshotCount).toBe(0);
     world.destroy();
   });
 
@@ -497,12 +579,14 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     };
 
     world.beginFrame(frameState);
+    world._surface._terrainQuerySnapshotCount = 1;
     world.render(frameState);
 
     expect(frameState.commandList).toEqual([]);
     expect(world._surface._quadtree._debug.visited).toBe(0);
     expect(world._surface._vertexArray).toBeUndefined();
     expect(world._surface._context).toBeUndefined();
+    expect(world._surface._terrainQuerySnapshotCount).toBe(0);
 
     frameState.frameNumber = 2;
     frameState.context = { drawingBufferWidth: 1, drawingBufferHeight: 1 };
@@ -535,6 +619,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     world.show = false;
     scene.renderForSpecs();
     expect(world._surface._debug.submittedCommands).toBe(0);
+    expect(world._surface._terrainQuerySnapshotCount).toBe(0);
 
     world.show = true;
     scene.renderForSpecs();
@@ -842,6 +927,8 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     pointCameraAt(world);
     scene.renderForSpecs();
     const surface = world._surface;
+    surface._terrainQuerySnapshot.push({});
+    surface._terrainQuerySnapshotCount = 1;
 
     scene.destroyForSpecs();
     scene = undefined;
@@ -852,6 +939,8 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(surface._debug.destroyedBuffers).toBe(1);
     expect(surface._debug.destroyedShaders).toBe(1);
     expect(surface._quadtree._tiles.size).toBe(0);
+    expect(surface._terrainQuerySnapshot.length).toBe(0);
+    expect(surface._terrainQuerySnapshotCount).toBe(0);
   });
 
   it("rejects rendering shared resources with a second Context", function () {

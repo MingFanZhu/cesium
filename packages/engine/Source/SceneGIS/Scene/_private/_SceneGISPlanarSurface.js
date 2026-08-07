@@ -1,5 +1,6 @@
 import Buffer from "../../../Renderer/Buffer.js";
 import BufferUsage from "../../../Renderer/BufferUsage.js";
+import Cartesian2 from "../../../Core/Cartesian2.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import ContextLimits from "../../../Renderer/ContextLimits.js";
 import defined from "../../../Core/defined.js";
@@ -16,10 +17,12 @@ import SceneGISPlanarImagery from "./_SceneGISPlanarImagery.js";
 import SceneGISPlanarQuadtree from "./_SceneGISPlanarQuadtree.js";
 import SceneGISPlanarSurfaceShader from "./_SceneGISPlanarSurfaceShader.js";
 import SceneGISPlanarTerrain from "./_SceneGISPlanarTerrain.js";
+import SceneGISPlanarTerrainQuery from "./_SceneGISPlanarTerrainQuery.js";
 
 const unitQuad = new Float32Array([
   -0.5, -0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.5, 0.0, 0.5, 0.5, 0.0,
 ]);
+const scratchTileCoordinates = new Cartesian2();
 
 /**
  * Owns planar tile selection and shared rendering resources.
@@ -53,6 +56,8 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
   this._frameNumber = -1;
   this._renderedFrameNumber = -1;
   this._renderCommands = [];
+  this._terrainQuerySnapshot = [];
+  this._terrainQuerySnapshotCount = 0;
   this._shownLayers = [];
   this._tilesLoaded = true;
   this._destroyed = false;
@@ -85,6 +90,7 @@ SceneGISPlanarSurface.prototype.setTerrainProvider = function (
   geometricErrors,
 ) {
   this._renderCommands.length = 0;
+  this.invalidateTerrainQuerySnapshot();
   if (!defined(provider)) {
     this._terrain?.destroy();
     this._terrain = undefined;
@@ -104,6 +110,58 @@ SceneGISPlanarSurface.prototype.setTerrainProvider = function (
     Math.max(0.0, provider.maximumHeight),
   );
   this._tilesLoaded = false;
+};
+
+SceneGISPlanarSurface.prototype.invalidateTerrainQuerySnapshot = function () {
+  for (let i = 0; i < this._terrainQuerySnapshotCount; ++i) {
+    const entry = this._terrainQuerySnapshot[i];
+    if (!defined(entry)) {
+      continue;
+    }
+    entry.tile = undefined;
+    entry.content = undefined;
+    entry.mesh = undefined;
+    entry.source = undefined;
+    entry.revision = undefined;
+    entry.key = undefined;
+  }
+  this._terrainQuerySnapshotCount = 0;
+};
+
+SceneGISPlanarSurface.prototype.getTerrainHeight = function (
+  position,
+  maximumLevel,
+) {
+  for (let level = maximumLevel; level >= 0; --level) {
+    const coordinates = this._quadtree._tilingScheme.positionToTileXY(
+      position,
+      level,
+      scratchTileCoordinates,
+    );
+    if (!defined(coordinates)) {
+      return undefined;
+    }
+    const tile = this._quadtree.getTile(coordinates.x, coordinates.y, level);
+    const content = tile?.terrainEntry?.activeContent;
+    if (defined(content?.mesh) && content.source !== "FLAT") {
+      return SceneGISPlanarTerrainQuery.getHeight(
+        tile,
+        content,
+        position.x,
+        position.y,
+      );
+    }
+  }
+  return undefined;
+};
+
+SceneGISPlanarSurface.prototype.pickTerrain = function (ray, result) {
+  return SceneGISPlanarTerrainQuery.pick(
+    this._terrainQuerySnapshot,
+    this._terrainQuerySnapshotCount,
+    ray,
+    result,
+  );
 };
 
 function validateContext(surface, context) {
@@ -303,6 +361,7 @@ SceneGISPlanarSurface.prototype.render = function (
   if (!passes.render || this._renderedFrameNumber === frameState.frameNumber) {
     return;
   }
+  this.invalidateTerrainQuerySnapshot();
   const shownLayers = getShownLayers(this);
   if (shownLayers.length > ContextLimits.maximumTextureImageUnits) {
     throw new DeveloperError(
@@ -383,6 +442,25 @@ SceneGISPlanarSurface.prototype.render = function (
     this._renderCommands.push(command);
     ++this._debug.submittedCommands;
   }
+  if (defined(this._terrain)) {
+    const snapshot = this._terrainQuerySnapshot;
+    let count = 0;
+    for (const tile of tiles) {
+      const content = tile.terrainEntry?.activeContent;
+      if (!defined(content)) {
+        continue;
+      }
+      const entry = (snapshot[count] ??= {});
+      entry.tile = tile;
+      entry.content = content;
+      entry.mesh = content.mesh;
+      entry.source = content.source;
+      entry.revision = content.revision;
+      entry.key = tile.key;
+      ++count;
+    }
+    this._terrainQuerySnapshotCount = count;
+  }
 };
 
 SceneGISPlanarSurface.prototype.endFrame = function (tileCacheSize) {
@@ -426,6 +504,8 @@ SceneGISPlanarSurface.prototype.destroy = function () {
   this._transparentTexture = undefined;
   this._renderState = undefined;
   this._renderCommands.length = 0;
+  this._terrainQuerySnapshot.length = 0;
+  this._terrainQuerySnapshotCount = 0;
   this._context = undefined;
   this._destroyed = true;
 };

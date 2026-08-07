@@ -8,11 +8,11 @@
 | Status                 | `active`                                                                                 |
 | Planning model         | `extension`                                                                              |
 | Active extension plan  | [Planar Terrain extension plan](plans/2026-08-07-planar-terrain-extension.md) (`active`) |
-| Current phase          | None；T3 completed，等待讨论 T4                                                          |
+| Current phase          | None；T4 已完成，T5 尚未进入                                                             |
 | Active phase plan      | None                                                                                     |
 | Active standalone plan | None                                                                                     |
 | Architecture contact   | Architecture Agent                                                                       |
-| Execution contact      | Unassigned                                                                               |
+| Execution contact      | Execution Agent (idle; T5 not assigned)                                                  |
 | Last updated           | `2026-08-07`                                                                             |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -55,23 +55,24 @@
 - New ADR:
   [ADR-0007](../../Documentation/SceneGIS/Decisions/ADR-0007-planar-terrain-core-contract.md)、
   [ADR-0008](../../Documentation/SceneGIS/Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)、
-  [ADR-0009](../../Documentation/SceneGIS/Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)
+  [ADR-0009](../../Documentation/SceneGIS/Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)、
+  [ADR-0010](../../Documentation/SceneGIS/Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)
 - SGP: None planned；现有 `SGP-0001` 和 `SGP-0002` 仅作为 planar-world 依赖
 
 ## Current handoff
 
-- Current state: T3 second focused review 已 `approved`；desired/load/render、四子门禁、
-  direct/fallback、availability、逐级 upsample、skirt、promotion、cache/lifecycle 与 current-view
-  readiness 已完成阶段门禁。
-- Next action: Architecture Agent 创建 T3 独立本地提交，然后停下与项目负责人讨论 T4；当前不实现
-  T4。
-- Current phase status: T3 `completed`；extension 继续 `active`。
-- Open discussions: None。Worker、正式 byte budget、terrain query/picking、provider/example 和
-  lighting/performance 已明确留到 T4-T6 或后续 measured follow-up。
+- Current state: T4 implementation、focused fixes和 Architecture/code re-review均已完成；实际
+  Float32 mesh查询、snapshot strong-reference清理、sampler tile-result原子提交和100 ms private
+  scheduler delay均有直接回归证据，review为 `approved`。
+- Next action: 在 T4 独立本地提交检查点后，由项目负责人与 Architecture Agent讨论并细化 T5；
+  T5尚未激活或派工。
+- Current phase status: T4 `completed`；extension 继续 `active`。
+- Open discussions: None。Worker、正式 byte budget、concrete provider/example 和
+  lighting/performance仍留到 T5-T6 或后续 measured follow-up。
 - Latest review:
-  [T3 terrain continuous LOD review request](reviews/2026-08-07-t3-terrain-continuous-lod.md)
+  [T4 terrain query/picking review request](reviews/2026-08-07-t4-terrain-query-and-picking.md)
   （`approved`）。
-- Unresolved reviews: None；`T3-R001`、`T3-R002` 均由 Architecture reviewer 确认为 `fixed`。
-- Known risks: T3 的 fixed-count main-thread promotion 不能严格限制单个超大 Heightmap；tile-count
-  cache 不是 byte budget；向下 skirt 在未来地下视角可能可见；无 geomorph 的 direct/fallback
-  replacement 可能产生高度 pop。Worker、memory budget 和表现问题留给 T6 profiling。
+- Unresolved reviews: None。`T4-R001`～`T4-R004` 均已由 Architecture reviewer确认为 `fixed`。
+- Known risks: T4 的 ray picking首版允许在 candidate tile内线性扫描 surface triangles；snapshot只
+  表示最近成功 normal render；resident Float32 height和 provider TerrainData sampler不承诺
+  bit-identical；public sampler无 cancellation/most-detailed。性能优化只在 T6 profiling证明必要时进入。

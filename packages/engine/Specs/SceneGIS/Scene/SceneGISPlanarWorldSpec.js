@@ -10,10 +10,12 @@ import {
   Ray,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
+  SceneGISPlanarHeightmapTerrainData,
   SceneGISPlanarTilingScheme,
   SceneGISPlanarWorld,
   SceneMode,
 } from "../../../index.js";
+import buildSceneGISPlanarTerrainMesh from "../../../Source/SceneGIS/Renderer/_private/_SceneGISPlanarTerrainMesh.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
   function createCoordinateSystem(minimum = -128.0, maximum = 128.0) {
@@ -53,6 +55,28 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     };
   }
 
+  function setResidentContent(tile, heights, source = "DIRECT", revision = 1) {
+    const terrainData = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array(heights),
+      width: 2,
+      height: 2,
+      createdByUpsampling: source === "UPSAMPLED",
+    });
+    const content = {
+      source,
+      revision,
+      terrainData,
+      mesh: buildSceneGISPlanarTerrainMesh(
+        terrainData,
+        tile.extent,
+        1.0,
+        -100.0,
+      ),
+    };
+    tile.terrainEntry = { activeContent: content };
+    return content;
+  }
+
   it("constructs the canonical tiling scheme and defaults", function () {
     const coordinateSystem = createCoordinateSystem();
     const world = createWorld({ coordinateSystem });
@@ -87,6 +111,13 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     }).toThrowDeveloperError();
     expect(world.terrainProvider).toBe(first);
     expect(world._surface._terrain.provider).toBe(first);
+
+    world._surface._terrainQuerySnapshotCount = 1;
+    world.terrainProvider = second;
+    expect(world._surface._terrainQuerySnapshotCount).toBe(0);
+    world._surface._terrainQuerySnapshotCount = 1;
+    world.terrainProvider = undefined;
+    expect(world._surface._terrainQuerySnapshotCount).toBe(0);
 
     world.terrainProvider = second;
     expect(world.terrainProvider).toBe(second);
@@ -298,6 +329,12 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(() =>
       world.pick(new Ray(Cartesian3.UNIT_Z, new Cartesian3(0, 0, -1))),
     ).toThrowDeveloperError();
+    expect(() =>
+      world.getTerrainHeight(Cartesian3.ZERO),
+    ).toThrowDeveloperError();
+    expect(() =>
+      world.pickTerrain(new Ray(Cartesian3.UNIT_Z, new Cartesian3(0, 0, -1))),
+    ).toThrowDeveloperError();
   });
 
   it("preserves near-zero and large-offset intersections and rejects overflow", function () {
@@ -363,6 +400,99 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(
       world.pickFromWindowPosition(new Cartesian2(0, 0), scene),
     ).toBeUndefined();
+    world.destroy();
+  });
+
+  it("queries the deepest canonical resident Float32 terrain without mutation", function () {
+    const world = createWorld({ maximumLevel: 2 });
+    world.terrainProvider = createTerrainProvider(world);
+    const quadtree = world._surface._quadtree;
+    const root = quadtree.getOrCreateTile(0, 0, 0);
+    const southeast = quadtree.getOrCreateTile(1, 1, 1);
+    setResidentContent(root, [10, 10, 10, 10]);
+    setResidentContent(southeast, [30, 30, 30, 30], "UPSAMPLED", 2);
+    const flat = quadtree.getOrCreateTile(2, 2, 2);
+    flat.terrainEntry = {
+      activeContent: { source: "FLAT", revision: 3, mesh: undefined },
+    };
+    const missingMesh = quadtree.getOrCreateTile(0, 0, 2);
+    missingMesh.terrainEntry = {
+      activeContent: { source: "DIRECT", revision: 4, mesh: undefined },
+    };
+    const tileCount = quadtree._tiles.size;
+    const debug = { ...quadtree._debug };
+    const loaded = world.tilesLoaded;
+
+    expect(world.getTerrainHeight(new Cartesian3(0, 0, 999))).toBe(30.0);
+    expect(world.getTerrainHeight(new Cartesian3(128, -128, 0))).toBe(30.0);
+    expect(world.getTerrainHeight(new Cartesian3(-96, 96, 0))).toBe(10.0);
+    expect(world.getTerrainHeight(new Cartesian3(1000, 0, 0))).toBeUndefined();
+    expect(quadtree._tiles.size).toBe(tileCount);
+    expect(quadtree._debug).toEqual(debug);
+    expect(world.tilesLoaded).toBe(loaded);
+    world.destroy();
+  });
+
+  it("picks published terrain through perspective and orthographic window rays", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    world.terrainProvider = createTerrainProvider(world);
+    const tile = world._surface._quadtree.getOrCreateTile(0, 0, 0);
+    const content = setResidentContent(tile, [30, 30, 30, 30]);
+    const snapshot = world._surface._terrainQuerySnapshot;
+    snapshot[0] = {
+      tile,
+      content,
+      mesh: content.mesh,
+      source: content.source,
+      revision: content.revision,
+      key: tile.key,
+    };
+    world._surface._terrainQuerySnapshotCount = 1;
+    const perspective = new PerspectiveFrustum({
+      fov: Math.PI / 3.0,
+      aspectRatio: 2.0,
+      near: 1.0,
+      far: 1000.0,
+    });
+    const orthographic = new OrthographicFrustum({
+      width: 100.0,
+      aspectRatio: 2.0,
+      near: 1.0,
+      far: 1000.0,
+    });
+    const scene = {
+      world,
+      mode: SceneMode.SCENE3D,
+      camera: {
+        frustum: perspective,
+        positionWC: new Cartesian3(0, 0, 100),
+        directionWC: new Cartesian3(0, 0, -1),
+        rightWC: Cartesian3.UNIT_X,
+        upWC: Cartesian3.UNIT_Y,
+      },
+      canvas: { clientWidth: 200, clientHeight: 100 },
+      isDestroyed: () => false,
+    };
+    const result = new Cartesian3();
+    for (const frustum of [perspective, orthographic]) {
+      scene.camera.frustum = frustum;
+      expect(
+        world.pickTerrainFromWindowPosition(
+          new Cartesian2(100, 50),
+          scene,
+          result,
+        ),
+      ).toBe(result);
+      expect(result).toEqual(new Cartesian3(0, 0, 30));
+    }
+    expect(
+      world.pick(new Ray(new Cartesian3(0, 0, 100), new Cartesian3(0, 0, -1))),
+    ).toEqual(Cartesian3.ZERO);
+    expect(() =>
+      world.pickTerrain(
+        new Ray(Cartesian3.ZERO, new Cartesian3(Number.NaN, 0, 1)),
+      ),
+    ).toThrowDeveloperError();
     world.destroy();
   });
 

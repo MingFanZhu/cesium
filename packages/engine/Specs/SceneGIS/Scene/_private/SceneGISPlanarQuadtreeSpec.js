@@ -44,6 +44,17 @@ describe("SceneGIS/Scene/SceneGISPlanarQuadtree", function () {
     };
   }
 
+  it("looks up resident tiles without creating cache entries", function () {
+    const quadtree = createQuadtree();
+    expect(quadtree.getTile(0, 0, 0)).toBeUndefined();
+    expect(quadtree._debug.createdTiles).toBe(0);
+    const tile = quadtree.getOrCreateTile(0, 0, 0);
+    expect(quadtree.getTile(0, 0, 0)).toBe(tile);
+    expect(quadtree.getTile(1, 1, 1)).toBeUndefined();
+    expect(quadtree._debug.createdTiles).toBe(1);
+    quadtree.destroy();
+  });
+
   it("uses the northwest child order and has no ancestor overlap", function () {
     const quadtree = createQuadtree();
     const frameState = createFrameState({ position: new Cartesian3(0, 0, 0) });

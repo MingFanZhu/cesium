@@ -12,3 +12,7 @@
   desired/load/render、四子门禁、availability、upsample/skirt、promotion、cache/lifecycle、
   imagery/depth 与 zero-upstream evidence；`T3-R001`、`T3-R002` 均由 Architecture reviewer确认
   `fixed`，无 unresolved finding。
+- [T4 terrain query/picking review](2026-08-07-t4-terrain-query-and-picking.md)
+  （`approved`）：resident Float32 height、actual-cover terrain ray/window picking、independent
+  provider sampler、WebGL depth/Z=0 closure、public/private generation与 zero-upstream audit；
+  `T4-R001`～`T4-R004` 均由 Architecture reviewer确认为 `fixed`，无 unresolved finding。
