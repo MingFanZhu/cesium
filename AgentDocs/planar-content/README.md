@@ -7,12 +7,13 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: None；等待 C1 设计
-- Active phase plan: None
+- Current phase: `C1-content-contract`（`active`）
+- Active phase plan:
+  [C1 平面内容基础契约与兼容性基线](plans/2026-08-09-phase-c1-content-contract.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
 - Execution contact: Unassigned
-- Last updated: `2026-08-08`
+- Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -48,16 +49,18 @@
 - Planned Sandcastle root: `packages/sandcastle/gallery/scenegis-planar-content`
 - Branch: `feature/planar-content`
 - Base checkpoint: `23d06ad14c79825f680e9397c6f4a8fa70a0f008`
-- ADR: C1 形成公共坐标、高度和兼容性决定后创建
+- ADR:
+  [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)
 - SGP: None planned；实际需要修改 upstream-owned file 时必须暂停并登记
 
 ## Current handoff
 
-- Current state: 中文 extension plan 已确认并激活；尚未创建 C1 phase plan，也未开始实现。
-- Next action: Architecture Agent 与项目负责人一次性细化 C1，再创建 C1 phase plan。
-- Current phase status: None。
-- Open discussions: C1 需依据当前 Cesium 源码确定 `HeightReference` 的 planar fallback、异步更新和
-  unsupported graphics enforcement。
+- Current state: C1 设计已由项目负责人批准；ADR-0013 approved，phase plan active，尚未实现。
+- Next action: Execution Agent 按 C1 phase plan实现 private position resolver、focused Specs 与长期
+  文档，完成后创建 pending review request并停止。
+- Current phase status: `C1-content-contract` active。
+- Open discussions: None；C1 的 coordinate、HeightReference、fallback、orientation 与
+  compatibility enforcement 已由 ADR-0013 固定。
 - Unresolved reviews: None。
 - Known risks: Entity Visualizer、GeometryUpdater、ground/clamp 和 Model orientation 可能包含
   ellipsoid 假设；必要的上游缝隙尚未确认。

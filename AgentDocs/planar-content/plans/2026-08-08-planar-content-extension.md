@@ -8,13 +8,14 @@
 - 架构评审（Architecture review）：`confirmed`
 - 架构评审人（Architecture reviewer）：项目负责人
 - 创建日期（Created）：`2026-08-08`
-- 更新日期（Updated）：`2026-08-08`
+- 更新日期（Updated）：`2026-08-09`
 - 基线（Base checkpoint）：`23d06ad14c79825f680e9397c6f4a8fa70a0f008`
 - 分支（Branch）：`feature/planar-content`
 - 相关讨论（Related discussions）：项目负责人与 Architecture Agent 已确认总体边界；未创建独立
   discussion
 - 相关评审（Related reviews）：None
-- ADR：C1 明确公共契约后创建
+- ADR：
+  [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)
 - SGP：None planned
 
 ## 目标
@@ -108,7 +109,8 @@ Visualizer 系统规避真实集成边界。
 - 进入门槛：创建 C1 phase plan，完成相关调用链、构建入口和生成边界审计。
 - 完成门槛：公共契约、错误边界、fallback/readiness、ownership 与 ADR 获批；最小 deterministic
   Specs 和 public generation 通过。
-- 状态：`planned`；phase plan尚未创建。
+- 状态：`active`；phase plan：
+  [C1 平面内容基础契约与兼容性基线](2026-08-09-phase-c1-content-contract.md)。
 
 ### C2：锚点内容与普通 Model
 
@@ -198,5 +200,8 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
 - `2026-08-08`：从完成的 planar-terrain checkpoint
   `23d06ad14c79825f680e9397c6f4a8fa70a0f008` 创建 `feature/planar-content`，extension plan状态设为
   `active`。
-- 下一步：与项目负责人完整讨论 C1；在明确批准后创建 C1 phase plan并派工。不得提前实现C1或细化
-  C2-C5易变实现。
+- `2026-08-09`：项目负责人批准 C1 的 coordinate domain、HeightReference subset、resident
+  terrain/Z=0 fallback、eventual consistency、fixed planar orientation 与 compatibility
+  enforcement；ADR-0013 approved，C1 phase plan active。
+- 下一步：Execution Agent按 C1 phase plan实现并创建 pending review request；不得提前进入或细化
+  C2-C5。

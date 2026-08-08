@@ -6,7 +6,9 @@
 当前 active extension plan：
 [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)（`active`）。
 
-当前 active phase plan：None。
+当前 active phase plan：
+[C1 平面内容基础契约与兼容性基线](2026-08-09-phase-c1-content-contract.md)（`active`）。
 
-Current handoff：总体边界已由项目负责人确认。下一步只讨论并细化 C1，不提前设计 C2-C5 的
-Visualizer、GeometryUpdater、terrain clamp、Model 或 Viewer 实现细节。
+Current handoff：C1 已完成源码审计与架构确认。Execution Agent只实现 private position resolver、
+focused Specs 和 C1 文档；不得提前设计或实现 C2-C5 的 Visualizer、GeometryUpdater、Model 或
+Viewer integration。
