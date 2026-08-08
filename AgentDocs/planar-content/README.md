@@ -7,12 +7,11 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: `C1-content-contract`（`active`）
-- Active phase plan:
-  [C1 平面内容基础契约与兼容性基线](plans/2026-08-09-phase-c1-content-contract.md)
+- Current phase: None（`C1-content-contract`已`completed`；C2尚未激活）
+- Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Unassigned
+- Execution contact: Execution Agent（等待C2获批后派工）
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -55,12 +54,14 @@
 
 ## Current handoff
 
-- Current state: C1 设计已由项目负责人批准；ADR-0013 approved，phase plan active，尚未实现。
-- Next action: Execution Agent 按 C1 phase plan实现 private position resolver、focused Specs 与长期
-  文档，完成后创建 pending review request并停止。
-- Current phase status: `C1-content-contract` active。
+- Current state: C1 private resolver、focused Specs与durable docs已通过Architecture/code review，阶段
+  状态为`completed`。
+- Next action: 与项目负责人讨论C2；获明确批准后才创建并激活C2 phase plan、派发执行任务。
+- Current phase status: None；`C1-content-contract` completed。
 - Open discussions: None；C1 的 coordinate、HeightReference、fallback、orientation 与
   compatibility enforcement 已由 ADR-0013 固定。
+- Latest review:
+  [C1 content contract review](reviews/2026-08-09-c1-content-contract.md)（`approved`）。
 - Unresolved reviews: None。
 - Known risks: Entity Visualizer、GeometryUpdater、ground/clamp 和 Model orientation 可能包含
   ellipsoid 假设；必要的上游缝隙尚未确认。

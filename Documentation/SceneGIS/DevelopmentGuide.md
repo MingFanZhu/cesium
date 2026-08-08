@@ -398,6 +398,25 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - planar imagery 仍由应用通过 canonical `world.tilingScheme` 和 `world.imageryLayers` 显式组装；
   `scenegis-planar-viewer` 只演示该高层 ownership，不引入通用 provider picker、预取或离线下载。
 
+### 平面内容实现检查
+
+实现或评审 planar Entity/DataSource content 时同时检查：
+
+- 输入必须是 finite meter-based Cartesian3，使用固定 X east/Y north/Z up；anchor X/Y extent boundary
+  inclusive，outside 返回不可见结果而不是 clamp 或 camera mutation。
+- HeightReference 只接受 `NONE`、`CLAMP_TO_GROUND`、`RELATIVE_TO_GROUND`。Resolver 只读
+  `world.getTerrainHeight`，undefined 回退 Z=0；不得调用 Scene height、depth pick、terrain ray pick 或
+  隐式 sampler request。
+- 所有 validation、terrain read和relative addition必须在 output/resource mutation 前完成；result
+  alias input时也必须保持失败原子性。Resolver 不建立 subscription、request、cache或ownership。
+- Orientation undefined 使用 translation-only identity rotation；defined Quaternion映射固定planar
+  axes。禁止通过 `eastNorthUpToFixedFrame` 引入位置相关 ECEF frame。
+- Automatic adapter 使用 graphic/config allowlist，并替换而非追加会消费相同 graphics 的默认 Globe
+  visualizer。Unsupported 输入必须在低层资源 mutation 前抛 `DeveloperError`，不得 warning、silent
+  ignore或Globe fallback。
+- 每个阶段只宣称已经实现并验证的 profile。C1 private resolver不等于 `viewer.entities` 可用；升级时
+  复核 default visualizer、clamping、model matrix、DataSourceDisplay callback和ground initialization。
+
 ## Planar World release qualification 检查
 
 - 在修改 runtime 前先固定 viewport/build/warmup/sample protocol，采集 bare、imagery 和 motion baseline；没有 failing gate 或可复核热点证据时不做产品优化。

@@ -371,6 +371,26 @@ fail-fast。Animation、Timeline、Fullscreen 以及不携带 Globe 语义的显
 ownership 和升级检查点见
 [ADR-0006](Decisions/ADR-0006-planar-viewer-and-widget-integration.md)。
 
+### 平面内容 DataSources 边界
+
+SceneGIS 平面内容复用 Cesium `Entity`、Property、`EntityCollection` 与 `CustomDataSource` 数据模型，
+但不复用会把 Cartesian3 解释为 ECEF 或进入 Ellipsoid/Cartographic ground path 的默认 visualizer。
+自动 planar content 使用米制固定坐标轴：X east、Y north、Z up；opaque CRS 不参与运行时转换，
+anchor X/Y 必须位于 World inclusive extent。
+
+首版 HeightReference profile 只接受 `NONE`、`CLAMP_TO_GROUND` 与 `RELATIVE_TO_GROUND`。逻辑地表
+读取同步、无请求的 `world.getTerrainHeight`；无 resident terrain 时回退 Z=0，已有 resident ancestor
+时不得用 flat fallback 覆盖。Resolver 不拥有 subscription、request、cache 或资源，也不改变
+`world.tilesLoaded`。Orientation undefined 表示 translation-only identity rotation；defined Quaternion
+直接映射到固定 planar axes，不调用 `eastNorthUpToFixedFrame`。
+
+Automatic adapter 必须是 instance-owned allowlist，不能同时运行会消费相同 graphics 的默认 Globe
+visualizer。Unsupported graphic/config 必须在其资源 mutation 前 fail-fast，不得 silent ignore 或
+fallback 到 Globe path。C1 仅提供 private resolver 与 compatibility baseline；Point/Billboard/Label/
+Model、Polyline/Polygon 和 Entity/DataSource/Viewer 集成分别由后续批准阶段负责。完整决定见
+[ADR-0013](Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)，使用边界见
+[PlanarContentGuide](PlanarContentGuide.md)。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：

@@ -3,7 +3,7 @@
 ## 元数据
 
 - 计划类型（Plan type）：`phase`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 总体计划（Parent plan）：
   [2026-08-08-planar-content-extension.md](2026-08-08-planar-content-extension.md)
 - 阶段（Phase）：`C1-content-contract`
@@ -14,7 +14,8 @@
 - 更新日期（Updated）：`2026-08-09`
 - 基线（Planning base）：`d3e0bce1d44f0b0706b4b49fd4b52b243b933c58`
 - 相关讨论（Related discussions）：无；本阶段架构对话结论已提升到 ADR-0013
-- 相关评审（Related reviews）：None；实现完成后创建 C1 pending review request
+- 相关评审（Related reviews）：
+  [C1 content contract review](../reviews/2026-08-09-c1-content-contract.md)（`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)
 - SGP：无；C1 禁止修改 upstream-owned file
@@ -305,16 +306,69 @@ npm run build-docs
 
 ## 执行结果
 
-尚未实现。Execution Agent 完成后在此记录：
+### 实际设计与影响路径
 
-- 实际 source/spec/docs mapping；
-- case count 与运行命令结果；
-- 与 ADR/plan 的偏差；
-- upstream-owned files、SGP、patch markers 与 generated status；
-- review request 和尚未解决风险。
+- 新增 private、无状态 default-export namespace
+  `packages/engine/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPositionResolver.js`。Resolver先
+  验证 live `SceneGISPlanarWorld`、finite `Cartesian3`、HeightReference subset与可选result，再检查
+  inclusive extent；outside在terrain read前返回`undefined`。
+- `NONE`不读取terrain；clamp/relative各最多调用一次`world.getTerrainHeight`，undefined回退Z=0。
+  Terrain return和relative addition均在写result前验证finite，支持omitted result、result reuse与
+  `result === position`。
+- 新增唯一focused Spec
+  `packages/engine/Specs/SceneGIS/DataSources/_private/_SceneGISPlanarPositionResolverSpec.js`，共`11`
+  direct cases。Private behavior Spec统一从Source直接导入相关constructor，避免测试bundle把generated
+  root与direct source组合为两份constructor identity；产品契约仍严格使用`instanceof
+SceneGISPlanarWorld`。
+- 新增`Documentation/SceneGIS/PlanarContentGuide.md`，并将fixed axes、HeightReference/resident
+  fallback、allowlist enforcement和阶段可用性精简提升到`Architecture.md`、`DevelopmentGuide.md`。
+- 最终affected paths仅为上述Source/Spec、三个durable docs及`AgentDocs/planar-content/**`；没有修改
+  World、terrain/runtime、Renderer、Widget、Shader、Worker、build/release或upstream-owned file。
+
+### Source-to-Spec/docs mapping
+
+| Source/contract                      | Direct evidence                                         |
+| ------------------------------------ | ------------------------------------------------------- |
+| private position resolver            | `_SceneGISPlanarPositionResolverSpec.js`：`11/11`       |
+| coordinate/height/fallback/atomicity | resolver全部focused cases                               |
+| fixed axes与compatibility阶段边界    | `PlanarContentGuide.md`、Architecture、DevelopmentGuide |
+| private declaration/API boundary     | `build-ts`/`build-docs`后types/API关键字命中`0`         |
+| ownership、generated与patch边界      | upstream audit、base diff、generated status检查         |
+
+### 验证结果
+
+| 命令 / 检查                                                                | 结果                                                       |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `npm run test -- --includeName "SceneGISPlanarPositionResolver"`           | Exit 0；`11/11`                                            |
+| `npm run build`                                                            | Exit 0                                                     |
+| `npm run build-ts`                                                         | Exit 0；仅仓库既有TSD-JSDoc warnings                       |
+| `npm run build-docs`                                                       | Exit 0                                                     |
+| generated declarations/API query                                           | private resolver在engine/Cesium `.d.ts`与API HTML中命中`0` |
+| scoped ESLint/Prettier、Markdown Prettier/Markdownlint、`git diff --check` | 均Exit 0                                                   |
+| `node scripts/scenegis/audit-upstream-patches.mjs`                         | Exit 0；本次upstream-owned=`0`、generated status=`0`       |
+
+开发中首次在未刷新engine barrel时运行focused suite，spec bundle因新private basename尚无对应engine
+export而停止；按要求运行`npm run build`后进入用例。随后发现root public imports与direct private source在
+spec bundle中形成不同constructor identity，改为private Spec全量direct-source imports；最终真实用例
+`11/11`通过。这只调整测试导入边界，不改变产品API或resolver语义。
+
+### 偏差、ownership 与剩余风险
+
+- 实现与ADR-0013/phase plan没有产品契约偏差；额外验证defined non-finite terrain return与invalid
+  result，仍位于同一focused resolver边界，没有扩成terrain生命周期矩阵。
+- Implementation diff base为`c48a7f6b1072a75023a4c07695c326576a4ecfe6`。最终audit确认
+  upstream-owned files=`0`、C1 SGP=`0`、manifest/SGP-0001/0002 unchanged、new markers=`0`、
+  generated status=`0`；所有新增产品与测试均位于SceneGIS-owned路径。
+- Private resolver可能进入soft-private JS barrel，但`@private`使其不进入supported declarations/API；
+  调用方不得依赖deep import或runtime barrel名称。
+- C1不提供Entity visualizer/runtime、terrain subscription或requestRender integration；resident height
+  的eventual consistency、C2/C3 graphic实现和C4 instance-owned display integration仍是后续明确门禁。
+- Architecture/code review：
+  [C1 content contract review](../reviews/2026-08-09-c1-content-contract.md)（`approved`；无阻断项）。
 
 ## 当前交接
 
-- C1 设计已由项目负责人批准，ADR-0013 为 approved，本 phase plan为 active。
-- 下一步：Architecture Agent提交 planning checkpoint并向 Execution Agent派工。
-- Execution Agent只实现 C1；完成后创建 pending review request并停止。
+- C1 implementation、focused Specs、build/types/docs和durable docs已通过Architecture/code review；本
+  phase plan状态为`completed`。
+- Architecture Agent将C1代码、Specs、docs与AgentDocs形成独立中文本地提交检查点。
+- 下一步与项目负责人讨论C2；C2尚未激活或设计。
