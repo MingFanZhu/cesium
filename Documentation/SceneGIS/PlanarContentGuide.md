@@ -1,8 +1,8 @@
 # SceneGIS 平面内容使用指南
 
-本文档描述 `planar-content` 的稳定坐标、高度和兼容性边界。当前 checkpoint 只完成 C1 基础契约与
-私有 position resolver；它不表示 `viewer.entities`、Point、Billboard、Label、Model、Polyline 或
-Polygon 已可自动按平面语义渲染。
+本文档描述 `planar-content` 的稳定坐标、高度和兼容性边界。C1 已完成 position contract，C2 已提供
+显式构造的 private Anchor/Model visualizer；它仍不表示 `viewer.entities`、Polyline 或 Polygon 已可
+自动按平面语义渲染。
 
 长期设计依据见
 [ADR-0013](Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)。平面 World、terrain
@@ -48,26 +48,50 @@ eventual consistency。
 - Planar content 不调用 `Transforms.eastNorthUpToFixedFrame`。
 - glTF 自身的 up/forward axis normalization 仍由 Model pipeline负责。
 
-C1 只冻结这项语义，尚未提供 public transform helper 或 Model runtime。
+C2 的 private Model visualizer 已实现这项语义，但未增加 public transform helper。
+
+## C2 Anchor 与 Model profile
+
+C2 的 private Anchor visualizer 复用 caller-owned、`enabled === false` 的 `EntityCluster` pool，一个实例
+处理 Point、Billboard 与 Label。三类 graphic 都先经 position resolver 得到 absolute planar
+`Cartesian3`；Point 始终使用 `PointPrimitive`，低层 Billboard/Label 的 `heightReference` 固定为
+`NONE`。临时 hidden、position undefined 或 outside 只隐藏并保留 slot；graphic、position 或 Entity
+移除才归还 slot。原始 Entity 保留为低层 `id`。
+
+Anchor 支持当前 Point/Billboard/Label 中不进入 Globe path 的 direct properties，包括 color、size/
+scale、outline、font/style、pixel/eye offset、origin、distance/translucency scaling、distance display、
+disable-depth、split direction，以及 Billboard 的 size/image/subregion/rotation/aligned-axis。`alignedAxis`
+按固定 planar world axis 解释。
+
+C2 的 private Model visualizer 直接使用 `Model.fromGltfAsync` 与 `scene.primitives`。URI 和
+`incrementallyLoadTextures` 定义 load generation；position、terrain height、orientation 和 style 更新
+不 reload。Async completion 只保存 generation-matched candidate 并 `requestRender`，下一次 normal
+`update` 才加入 primitive collection。Stale/removal/destroy completion、candidate 与 active Model 均有
+exactly-once cleanup；同 generation failure 不自动重试。
+
+Model 固定 `heightReference=NONE`、`enableVerticalExaggeration=false`、`shadows=DISABLED`、dynamic
+environment map disabled，并启用 picking。C2 拒绝 vertical exaggeration、shadow、environment map、
+clipping planes 与 custom shader 配置；支持的普通 style/animation/property profile以 ADR-0014 为准。
+C2 private visualizer 不拥有 World、Scene、EntityCollection、EntityCluster 或输入 Resource。
 
 ## Compatibility matrix
 
-| 数据或 graphics                                                           | 当前决定       | 可用阶段/边界 |
-| ------------------------------------------------------------------------- | -------------- | ------------- |
-| `Entity`、Property/event、availability、show、metadata                    | 复用数据模型   | C4 集成       |
-| `EntityCollection`、`CustomDataSource`                                    | 复用数据模型   | C4            |
-| Point、Billboard、Label                                                   | approved scope | C2 planned    |
-| 普通 glTF Model                                                           | approved scope | C2 planned    |
-| planar straight Polyline、Polygon                                         | approved scope | C3 planned    |
-| Box、Corridor、Cylinder、Ellipse、Ellipsoid、Plane、Rectangle、Wall、Path | unsupported    | 首版不实现    |
-| `Cesium3DTilesetGraphics`                                                 | unsupported    | 独立扩展      |
-| GeoJSON、CZML、KML 自动 planar 转换                                       | unsupported    | 独立扩展      |
-| Globe ground、geodesic/rhumb                                              | 禁止隐式进入   | 不复用        |
-| tracking、`flyTo`、`zoomTo`                                               | unsupported    | 不改变        |
+| 数据或 graphics                                                           | 当前决定        | 可用阶段/边界    |
+| ------------------------------------------------------------------------- | --------------- | ---------------- |
+| `Entity`、Property/event、availability、show、metadata                    | 复用数据模型    | C4 集成          |
+| `EntityCollection`、`CustomDataSource`                                    | 复用数据模型    | C4               |
+| Point、Billboard、Label                                                   | private runtime | C2 explicit only |
+| 普通 glTF Model                                                           | private runtime | C2 explicit only |
+| planar straight Polyline、Polygon                                         | approved scope  | C3 planned       |
+| Box、Corridor、Cylinder、Ellipse、Ellipsoid、Plane、Rectangle、Wall、Path | unsupported     | 首版不实现       |
+| `Cesium3DTilesetGraphics`                                                 | unsupported     | 独立扩展         |
+| GeoJSON、CZML、KML 自动 planar 转换                                       | unsupported     | 独立扩展         |
+| Globe ground、geodesic/rhumb                                              | 禁止隐式进入    | 不复用           |
+| tracking、`flyTo`、`zoomTo`                                               | unsupported     | 不改变           |
 
-C2/C3 将依据实现时的源码确认具体 graphic property allowlist；C4 才负责 Entity/DataSource/Viewer 的
-instance-owned 自动集成。C5 仅在前述运行时完成后处理案例、交付和人工验收。当前不能使用默认 Globe
-visualizers 来绕过这些阶段边界。
+C2 已固定 Anchor/Model graphic property allowlist；C3 仍独立处理线面。C4 才负责 Entity/DataSource/
+Viewer 的 instance-owned 自动集成。当前不能使用默认 Globe visualizers 或直接使用
+`viewer.entities` 绕过这些阶段边界。
 
 ## Enforcement 与 ownership
 
@@ -76,8 +100,8 @@ visualizer。已知 unsupported graphic 或 approved graphic 中未支持的配�
 mutation 前抛 `DeveloperError`；不得 silent ignore、warning 后继续或 fallback 到 Globe path。
 
 手工加入 `scene.primitives` 的 raw Cesium primitive 不属于 automatic Entity compatibility
-enforcement，由应用负责其坐标、资源和销毁。C1 resolver 是无状态 private helper，不拥有 World、
-Entity、Property、terrain、request、subscription 或 GPU resource，也不是 supported public API。
+enforcement，由应用负责其坐标、资源和销毁。C1 resolver 与 C2 visualizer 都是 private implementation
+roles，不是 supported public API。
 
 ## 当前使用建议
 

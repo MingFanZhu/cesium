@@ -12,7 +12,7 @@
   [C2 平面锚点内容与普通 Model](plans/2026-08-09-phase-c2-anchor-and-model.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（C2 planning checkpoint后正式派工）
+- Execution contact: Execution Agent（C2 focused fixes ready for re-review）
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -56,17 +56,14 @@
 
 ## Current handoff
 
-- Current state: C1已完成并提交；项目负责人已批准C2 private Anchor/Model visualizer、property
-  profile、generation/lifecycle和C4 integration boundary，ADR-0014与C2 phase plan状态为`approved`/
-  `active`。
-- Next action: Architecture Agent提交planning checkpoint并向Execution Agent派发C2；Execution实现后
-  停在Architecture/code review，不进入C3。
-- Current phase status: `C2-anchor-and-model` active。
+- Current state: C2 Architecture/code focused re-review已`approved`；C2-R001～C2-R006全部关闭，
+  Anchor、Model与四类real Context闭环成立。
+- Next action: Architecture提交独立C2 checkpoint，然后依据届时源码事实设计并激活C3。
+- Current phase status: `C2-anchor-and-model` completed；C3尚未激活。
 - Open discussions: None；C2设计已完整确认。实现发现必须修改upstream-owned file或扩大public/
   Viewer边界时必须暂停重新裁决。
 - Latest review:
-  [C1 content contract review](reviews/2026-08-09-c1-content-contract.md)（`approved`）。
+  [C2 anchor and model review](reviews/2026-08-09-c2-anchor-and-model.md)（`approved`）。
 - Unresolved reviews: None。
-- Known risks: `EntityCluster` private pool与Model async lifecycle属于升级敏感面；C2必须保持
-  clustering disabled、generation isolation与exactly-once cleanup。C4的Viewer/DataSourceDisplay集成缝隙
-  尚未设计。
+- Known risks: `EntityCluster` private pool与Model async lifecycle属于升级敏感面；real Context仅是一个
+  代表性本机fixture，不是全硬件矩阵。C4的Viewer/DataSourceDisplay集成缝隙尚未设计。

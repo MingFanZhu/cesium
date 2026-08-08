@@ -14,7 +14,8 @@
 - 相关讨论（Related discussions）：项目负责人与 Architecture Agent 已确认总体边界；未创建独立
   discussion
 - 相关评审（Related reviews）：
-  [C1 content contract review](../reviews/2026-08-09-c1-content-contract.md)（`approved`）
+  [C1 content contract review](../reviews/2026-08-09-c1-content-contract.md)（`approved`）、
+  [C2 anchor and model review](../reviews/2026-08-09-c2-anchor-and-model.md)（`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
   [ADR-0014：平面锚点内容与普通 Model Visualizer](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)
@@ -120,7 +121,7 @@ Visualizer 系统规避真实集成边界。
 - 依赖：C1。
 - 进入门槛：C1 已 review并提交；重新审计相应 collection、visualizer 与 Model orientation 路径。
 - 完成门槛：静态/动态 anchor、terrain 更新、picking、精度和 exactly-once lifecycle 成立。
-- 状态：`active`；phase plan：
+- 状态：`completed`；phase plan：
   [C2 平面锚点内容与普通 Model](2026-08-09-phase-c2-anchor-and-model.md)。
 
 ### C3：Polyline、Polygon 与地表关系
@@ -214,5 +215,15 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   Model，不复用默认Globe visualizer；EntityCluster仅允许disabled，Model采用fixed planar transform与
   generation-isolated lifecycle，自动Viewer/DataSourceDisplay集成延后至C4。ADR-0014 approved，C2
   phase plan active。
-- 下一步：Architecture Agent提交C2 planning checkpoint并派发Execution；实现完成后停在review gate，
-  不进入C3。
+- `2026-08-09`：Execution完成C2两个private visualizer、`15`个新增direct cases、build/types/docs与
+  durable docs；zero-upstream/zero-SGP，创建pending review。首轮real Context报告capability skip，随后
+  Architecture review确认是未初始化`ContextLimits` module identity导致的测试接线问题，并非有效GPU
+  capability结论。
+- `2026-08-09`：Architecture/code review提出C2-R001～C2-R006：动态cluster invariant、Billboard
+  image cache、合并Anchor bounds、Model activation/preflight atomicity、direct-property合法Infinity与real
+  Context module identity/证据缺口。Review状态为`changes-requested`；均可在zero-upstream C2边界内修复。
+- `2026-08-09`：Execution完成六项focused fix；Anchor `11/11`、Model `9/9`与real Context `1/1`
+  通过，本机实际执行四类content branch、Model pixel region及完整slot/listener/cluster/Model lifecycle。
+- `2026-08-09`：Architecture focused re-review确认C2-R001～C2-R006全部关闭；独立复跑三个focused
+  suites、build与upstream audit均通过，C2状态更新为`completed`。
+- 下一步：Architecture形成独立C2 checkpoint，再依据当前源码事实创建C3 phase plan并派工。

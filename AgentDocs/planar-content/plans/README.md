@@ -6,10 +6,9 @@
 当前 active extension plan：
 [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)（`active`）。
 
-当前 active phase plan：
-[C2 平面锚点内容与普通 Model](2026-08-09-phase-c2-anchor-and-model.md)（`active`）。C1已完成：
+当前 active phase plan：None。已完成：
+[C2 平面锚点内容与普通 Model](2026-08-09-phase-c2-anchor-and-model.md)（`completed`）、
 [C1 平面内容基础契约与兼容性基线](2026-08-09-phase-c1-content-contract.md)（`completed`）。
 
-Current handoff：C1 checkpoint已完成；项目负责人已批准ADR-0014与C2完整phase plan。Architecture
-Agent提交planning checkpoint后向Execution Agent派工；Execution只实现C2 private Anchor/Model
-visualizer与focused evidence，完成后停在Architecture/code review，不进入C3。
+Current handoff：C2 Architecture/code review已`approved`，等待Architecture提交独立checkpoint并创建
+C3 phase plan。

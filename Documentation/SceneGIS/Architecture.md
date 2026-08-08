@@ -391,6 +391,13 @@ Model、Polyline/Polygon 和 Entity/DataSource/Viewer 集成分别由后续批�
 [ADR-0013](Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)，使用边界见
 [PlanarContentGuide](PlanarContentGuide.md)。
 
+C2 的 private Anchor visualizer 只复用 caller-owned disabled `EntityCluster` pools；Point 永远是
+`PointPrimitive`，Billboard/Label 只接收 resolver 产生的 absolute position 并固定 low-level
+`HeightReference.NONE`。Private Model visualizer 使用 fixed planar translation/quaternion matrix，直接
+管理 `Model.fromGltfAsync` generation 与 `scene.primitives` ownership，不调用 Entity ENU 或 Model
+height-clamping path。Async completion 不得直接添加 primitive。C4 之前这些角色只允许显式构造，
+`viewer.entities` 仍不是 supported planar content entry。完整 profile见 ADR-0014。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：

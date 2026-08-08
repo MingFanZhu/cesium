@@ -4,7 +4,7 @@
 
 - 计划类型（Plan type）：`phase`
 - 阶段（Phase）：`C2-anchor-and-model`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 父计划（Parent plan）：
   [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)
 - 负责人角色（Owner role）：`execution`
@@ -16,8 +16,8 @@
 - 分支（Branch）：`feature/planar-content`
 - 相关讨论（Related discussions）：项目负责人与 Architecture Agent 已一次性确认 C2 完整设计；未创建
   独立 discussion
-- 相关评审（Related reviews）：None；实现完成后创建
-  `AgentDocs/planar-content/reviews/2026-08-09-c2-anchor-and-model.md`
+- 相关评审（Related reviews）：
+  [C2 anchor and model review](../reviews/2026-08-09-c2-anchor-and-model.md)（`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
   [ADR-0014：平面锚点内容与普通 Model Visualizer](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)
@@ -434,11 +434,69 @@ E2E或性能矩阵。只有实际改动越过对应边界并先获Architecture�
 
 ## 执行结果
 
-待 Execution Agent实现后回写实际设计、source-to-spec mapping、case counts、命令结果、偏差、
-ownership审计与剩余风险。
+### 实际设计与路径
+
+- 新增`_SceneGISPlanarAnchorVisualizer.js`：显式接收live World/Scene、caller-owned disabled
+  `EntityCluster`和`EntityCollection`；一个item分别持有Point/Billboard/Label slot，采用C1 resolver，
+  hidden/undefined/outside保留slot，graphic/position/entity removal与destroy归还。Point始终是
+  `PointPrimitive`，Billboard/Label固定low-level `HeightReference.NONE`。
+- 新增`_SceneGISPlanarModelVisualizer.js`：URI URL与`incrementallyLoadTextures`组成generation key；
+  Promise completion只缓存candidate并`requestRender`，下一normal update才add。Transform采用fixed
+  translation与overflow-safe Quaternion normalization；未增加共享helper或C1 correction。
+- 新增两个private focused Specs与一个`SceneGISPlanarContentVisualizerSpec.js` real Context fixture；
+  durable docs更新Architecture、DevelopmentGuide与PlanarContentGuide。C2 focused修复增加运行期disabled
+  cluster门禁、Billboard image cache清理、联合Anchor bounds、property-aware preflight与Model candidate原子清理，
+  没有修改ADR-0014批准契约。
+
+最终source-to-spec mapping：
+
+| Source/contract                      | Direct Spec                              | Direct cases |
+| ------------------------------------ | ---------------------------------------- | -----------: |
+| `_SceneGISPlanarAnchorVisualizer.js` | `SceneGISPlanarAnchorVisualizerSpec.js`  |           11 |
+| `_SceneGISPlanarModelVisualizer.js`  | `SceneGISPlanarModelVisualizerSpec.js`   |            9 |
+| 四类content real Context closure     | `SceneGISPlanarContentVisualizerSpec.js` |            1 |
+| C1 resolver regression               | `_SceneGISPlanarPositionResolverSpec.js` |       既有11 |
+
+C2新增direct unique cases=`21`。其中focused修复新增Anchor `4`、Model `2`；real Context仍为一个综合
+case。该case现在从与`createScene`相同的engine module identity导入runtime，并从实际`scene.context`
+判断Anchor能力；本机进入capable branch，实际执行Point/Billboard/Label/Model四类pick，Model normal-render
+pixel region、大坐标、warm identity与slot/listener/caller-owned cluster/Model destroy闭环。Model路径不再因
+Anchor capability被跳过。
+
+### 验证结果
+
+| Command/evidence                                                                       | Result                                                        |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `npm run test -- --includeName "SceneGIS/DataSources/SceneGISPlanarAnchorVisualizer"`  | Exit 0，`11/11`                                               |
+| `npm run test -- --includeName "SceneGIS/DataSources/SceneGISPlanarModelVisualizer"`   | Exit 0，`9/9`                                                 |
+| `npm run test -- --includeName "SceneGIS/DataSources/SceneGISPlanarContentVisualizer"` | Exit 0，`1/1`；本机capable，四类branch实际执行                |
+| `npm run test -- --includeName "SceneGISPlanarPositionResolver"`                       | 首轮Exit 0，既有`11/11`；focused fix未触及C1 resolver，未重跑 |
+| `npm run build`                                                                        | Exit 0                                                        |
+| `npm run build-ts`                                                                     | 首轮Exit 0；focused fix无public API变化，按review要求未重跑   |
+| `npm run build-docs`                                                                   | 首轮Exit 0；focused fix无public API变化，按review要求未重跑   |
+| scoped ESLint/JS Prettier                                                              | Exit 0                                                        |
+| scoped Markdown Prettier/Markdownlint                                                  | Exit 0                                                        |
+| `git diff --check`                                                                     | Exit 0                                                        |
+| `node scripts/scenegis/audit-upstream-patches.mjs`                                     | Exit 0                                                        |
+
+生成检查：两个private symbol在`packages/engine/index.d.ts`、`Source/Cesium.d.ts`及API HTML中合计命中
+`0`；生成文件status=`0`。JS soft-private barrel自动发现保持仓库既有行为，不视为supported API。
+
+### 偏差、ownership与风险
+
+- 未增加可选shared helper；两个visualizer只共同复用C1 resolver。
+- 首轮real Context capability check读取错误module identity的问题已修复。修复后的case使用同一engine
+  module identity与实际`scene.context`，Model closure无条件执行，Anchor只在真实能力不足时分支；本机
+  capable并实际执行四类content。未增加第二套GPU矩阵。
+- 相对`aa2aba25778497b8d9fc3ffa2a9d483939968aa5`的产品/Spec diff全部位于SceneGIS-owned paths；
+  upstream-owned files=`0`、C2 SGP=`0`、manifest/SGP-0001/0002 unchanged、new markers=`0`。
+- C2仍是explicit private runtime；`viewer.entities`必须等待C4，未进入或创建C3实现/plan。
 
 ## 当前交接
 
-- 项目负责人已批准ADR-0014和本C2完整phase plan；状态为`active`。
-- Architecture Agent将先提交仅包含规划文档的中文本地checkpoint，再向Execution Agent正式派工。
-- Execution Agent从该checkpoint实现C2，完成后创建pending review并停止；不得commit、push或进入C3。
+- C2 Architecture/code focused re-review结论为`approved`；C2-R001～C2-R006全部关闭，phase状态为
+  `completed`。
+- Reviewer独立复跑Anchor`11/11`、Model`9/9`、Content real Context`1/1`与`npm run build`，均
+  Exit 0；upstream audit确认upstream-owned files=`0`、C2 SGP=`0`、generated status=`0`。
+- Current handoff：Architecture Agent形成独立C2本地checkpoint；后续从该checkpoint重新发现C3源码
+  事实并创建C3 phase plan，不把C3实现混入本阶段。

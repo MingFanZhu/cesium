@@ -416,6 +416,12 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   ignore或Globe fallback。
 - 每个阶段只宣称已经实现并验证的 profile。C1 private resolver不等于 `viewer.entities` 可用；升级时
   复核 default visualizer、clamping、model matrix、DataSourceDisplay callback和ground initialization。
+- C2 Anchor只使用caller-owned disabled `EntityCluster` pool，低层对象接收absolute planar position；
+  temporary hidden/outside保留slot，graphic/entity removal与destroy成对归还。
+- C2 Model的URI/load-time generation、candidate与active primitive必须隔离；Promise completion只缓存并
+  request render，下一normal update才add。Stale、replacement和destroy路径都要exactly-once cleanup。
+- Model transform只使用fixed planar translation/normalized Quaternion。不要调用`computeModelMatrix`、
+  ENU、Model height clamping，也不要在C4前把private visualizer接到`viewer.entities`。
 
 ## Planar World release qualification 检查
 
