@@ -7,12 +7,12 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: `C2-anchor-and-model`（`active`）
+- Current phase: `C3-polyline-polygon`（`active`）
 - Active phase plan:
-  [C2 平面锚点内容与普通 Model](plans/2026-08-09-phase-c2-anchor-and-model.md)
+  [C3 平面 Polyline、Polygon 与地表关系](plans/2026-08-09-phase-c3-polyline-polygon.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（C2 focused fixes ready for re-review）
+- Execution contact: Execution Agent（等待C3 planning checkpoint派工）
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -51,19 +51,21 @@
 - Base checkpoint: `23d06ad14c79825f680e9397c6f4a8fa70a0f008`
 - ADR:
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
-  [ADR-0014：平面锚点内容与普通 Model Visualizer](../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)
+  [ADR-0014：平面锚点内容与普通 Model Visualizer](../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)、
+  [ADR-0015：平面 Polyline、Polygon 与顶点采样地表](../../Documentation/SceneGIS/Decisions/ADR-0015-planar-polyline-polygon-and-vertex-drape.md)
 - SGP: None planned；实际需要修改 upstream-owned file 时必须暂停并登记
 
 ## Current handoff
 
-- Current state: C2 Architecture/code focused re-review已`approved`；C2-R001～C2-R006全部关闭，
-  Anchor、Model与四类real Context闭环成立。
-- Next action: Architecture提交独立C2 checkpoint，然后依据届时源码事实设计并激活C3。
-- Current phase status: `C2-anchor-and-model` completed；C3尚未激活。
-- Open discussions: None；C2设计已完整确认。实现发现必须修改upstream-owned file或扩大public/
-  Viewer边界时必须暂停重新裁决。
+- Current state: C2已在checkpoint `3bdd638661c14bfbf127b12dec3bd8c5e8e3f3ba`完成；ADR-0015与C3
+  phase plan已确认并激活。
+- Next action: Execution从C3 planning checkpoint实现private Polyline/Polygon visualizer，创建pending
+  review后停在C3。
+- Current phase status: `C3-polyline-polygon` active。
+- Open discussions: None；C3设计已完整确认。若experimental Buffer collection无法满足precision/depth/
+  picking/lifecycle，Execution必须暂停回报，不得擅自复制renderer或扩大上游修改。
 - Latest review:
   [C2 anchor and model review](reviews/2026-08-09-c2-anchor-and-model.md)（`approved`）。
 - Unresolved reviews: None。
-- Known risks: `EntityCluster` private pool与Model async lifecycle属于升级敏感面；real Context仅是一个
-  代表性本机fixture，不是全硬件矩阵。C4的Viewer/DataSourceDisplay集成缝隙尚未设计。
+- Known risks: Buffer collections属于experimental升级敏感面；vertex-only terrain drape不代表连续贴地；
+  per-Entity owner的批量性能留给C5。C4的Viewer/DataSourceDisplay集成缝隙尚未设计。

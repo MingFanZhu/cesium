@@ -18,7 +18,8 @@
   [C2 anchor and model review](../reviews/2026-08-09-c2-anchor-and-model.md)（`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
-  [ADR-0014：平面锚点内容与普通 Model Visualizer](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)
+  [ADR-0014：平面锚点内容与普通 Model Visualizer](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)、
+  [ADR-0015：平面 Polyline、Polygon 与顶点采样地表](../../../Documentation/SceneGIS/Decisions/ADR-0015-planar-polyline-polygon-and-vertex-drape.md)
 - SGP：None planned
 
 ## 目标
@@ -132,7 +133,8 @@ Visualizer 系统规避真实集成边界。
 - 进入门槛：C2 已 review并提交；重新审计 GeometryUpdater、GeometryPipeline 和 ground 假设。
 - 完成门槛：线面拓扑、边界、高度、terrain replacement、picking 和大坐标渲染成立，不调用
   ellipsoid geodesic/rhumb 语义。
-- 状态：`planned`；phase plan尚未创建。
+- 状态：`active`；phase plan：
+  [C3 平面 Polyline、Polygon 与地表关系](2026-08-09-phase-c3-polyline-polygon.md)。
 
 ### C4：Entity、DataSource 与 Viewer 集成
 
@@ -226,4 +228,9 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   通过，本机实际执行四类content branch、Model pixel region及完整slot/listener/cluster/Model lifecycle。
 - `2026-08-09`：Architecture focused re-review确认C2-R001～C2-R006全部关闭；独立复跑三个focused
   suites、build与upstream audit均通过，C2状态更新为`completed`。
-- 下一步：Architecture形成独立C2 checkpoint，再依据当前源码事实创建C3 phase plan并派工。
+- `2026-08-09`：Architecture形成C2独立checkpoint
+  `3bdd638661c14bfbf127b12dec3bd8c5e8e3f3ba`，重新审计Graphics、GeometryUpdater、
+  `PolygonPipeline`与experimental Buffer collections；ADR-0015批准planar straight、supplied-vertex
+  terrain sampling、Polygon height/extrusion、private render owner与C4/C5边界，C3 phase plan激活。
+- 下一步：Execution从C3 planning checkpoint实现private Polyline/Polygon visualizer，完成focused与real
+  Context证据后创建pending review并停下，不进入C4。
