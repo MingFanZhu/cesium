@@ -36,6 +36,8 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
       maximumScreenSpaceError: options.maximumScreenSpaceError,
       tileCacheSize: options.tileCacheSize,
       baseColor: options.baseColor,
+      enableLighting: options.enableLighting,
+      lambertDiffuseMultiplier: options.lambertDiffuseMultiplier,
     });
   }
 
@@ -88,6 +90,8 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.maximumScreenSpaceError).toBe(2.0);
     expect(world.tileCacheSize).toBe(100);
     expect(world.baseColor).toEqual(Color.GRAY);
+    expect(world.enableLighting).toBe(false);
+    expect(world.lambertDiffuseMultiplier).toBe(0.9);
     expect(world.show).toBe(true);
     expect(world.tilesLoaded).toBe(true);
     expect(world.imageryLayers.tilingScheme).toBe(world.tilingScheme);
@@ -228,6 +232,59 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(() => {
       world.show = 1;
     }).toThrowDeveloperError();
+    for (const value of [undefined, 0, "true"]) {
+      expect(() => {
+        world.enableLighting = value;
+      }).toThrowDeveloperError();
+    }
+    for (const value of [-1.0, Infinity, Number.NaN, "0.9"]) {
+      expect(() => {
+        world.lambertDiffuseMultiplier = value;
+      }).toThrowDeveloperError();
+    }
+    expect(world.enableLighting).toBe(false);
+    expect(world.lambertDiffuseMultiplier).toBe(0.9);
+    world.enableLighting = true;
+    world.lambertDiffuseMultiplier = 0.0;
+    expect(world.enableLighting).toBe(true);
+    expect(world.lambertDiffuseMultiplier).toBe(0.0);
+    world.destroy();
+  });
+
+  it("validates lighting constructor options atomically", function () {
+    const coordinateSystem = createCoordinateSystem();
+    for (const enableLighting of [0, "false", {}]) {
+      expect(
+        () =>
+          new SceneGISPlanarWorld({
+            coordinateSystem,
+            maximumLevel: 0,
+            enableLighting,
+          }),
+      ).toThrowDeveloperError();
+    }
+    for (const lambertDiffuseMultiplier of [
+      -1.0,
+      Infinity,
+      Number.NaN,
+      "0.9",
+    ]) {
+      expect(
+        () =>
+          new SceneGISPlanarWorld({
+            coordinateSystem,
+            maximumLevel: 0,
+            lambertDiffuseMultiplier,
+          }),
+      ).toThrowDeveloperError();
+    }
+
+    const world = createWorld({
+      enableLighting: true,
+      lambertDiffuseMultiplier: 1.25,
+    });
+    expect(world.enableLighting).toBe(true);
+    expect(world.lambertDiffuseMultiplier).toBe(1.25);
     world.destroy();
   });
 

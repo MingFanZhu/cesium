@@ -304,6 +304,25 @@ pyramid；provider只拥有Resource/config/Event和global Credit reference，glo
 必须使用本地stub，不得依赖公网。完整决定见
 [ADR-0011](Decisions/ADR-0011-planar-url-template-heightmap-terrain-provider.md)。
 
+### 平面地形基础光照
+
+`SceneGISPlanarWorld.enableLighting`默认`false`，保持flat、imagery和terrain既有unlit fast path；
+`lambertDiffuseMultiplier`默认`0.9`且只接受finite non-negative number。World只消费Scene已有的
+light automatic uniforms，不拥有或销毁`scene.light`。需要稳定方向的应用应显式使用
+`DirectionalLight`，不能为任意planar CRS赋予默认SunLight新的投影语义。
+
+Lit shader从实际render triangle的eye-space position以`dFdx`/`dFdy`计算geometric normal，并用
+Cesium face-forward规则维持双面surface。Base color与所有shown imagery先bottom-to-top单pass合成，
+再统一应用Lambert diffuse、light color和固定`0.3`环境亮度。Shader cache identity包含layer count与
+lighting flag；切换lighting只更新既有DrawCommand的shader/uniform map，multiplier只作为uniform
+读取。Single opaque command、normal-render mutation、depth exact-command replay、terrain query与
+resource ownership均保持不变。
+
+当前不增加CPU/vertex normal、normal buffer、Worker、shadow、material或byte budget。Fragment
+normal是per-triangle表现；main-thread LERC decode/mesh只有在可重复profiling证明阻断后，才通过新的
+phase/ADR设计Worker入口、transferable与build/release协议。完整决定见
+[ADR-0012](Decisions/ADR-0012-planar-terrain-lighting-and-geometric-normals.md)。
+
 ### 平面影像运行时
 
 `SceneGISPlanarWorld` 的 imagery provider 必须与 world 共享同一个 canonical

@@ -20,3 +20,8 @@
   （`approved`）：coordinate-agnostic canonical provider、image/LERC decode、full-pyramid
   availability、provider→World closure、公开best-effort Sandcastle、public generation与zero-upstream
   audit；`T5-R001`～`T5-R003`均由Architecture reviewer确认为`fixed`，无unresolved finding。
+- [T6 terrain lighting and delivery review](2026-08-08-t6-terrain-lighting-and-delivery.md)
+  （`approved`）：World lighting API、fragment geometric normals、lit/unlit shader cache、single-command/
+  depth replay、真实Context warm evidence、terrain Sandcastle与zero-upstream audit；`T6-R001`与
+  `T6-R002`均由Architecture reviewer确认为`fixed`，无unresolved finding；项目负责人真实浏览器/GPU
+  人工验收已通过。

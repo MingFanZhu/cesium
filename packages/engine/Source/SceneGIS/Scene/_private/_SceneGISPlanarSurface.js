@@ -53,6 +53,7 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
   this._transparentTexture = undefined;
   this._renderState = undefined;
   this._baseColor = undefined;
+  this._lambertDiffuseMultiplier = 0.9;
   this._frameNumber = -1;
   this._renderedFrameNumber = -1;
   this._renderCommands = [];
@@ -214,29 +215,38 @@ function createResources(surface, context, layerCount) {
   }
 }
 
-function getShaderProgram(surface, context, layerCount) {
-  let shader = surface._shaderPrograms.get(layerCount);
+function getShaderProgram(surface, context, layerCount, enableLighting) {
+  const key = `${layerCount}/${enableLighting ? 1 : 0}`;
+  let shader = surface._shaderPrograms.get(key);
   if (!shader) {
     shader = ShaderProgram.fromCache({
       context,
-      vertexShaderSource: SceneGISPlanarSurfaceShader.vertexShader,
-      fragmentShaderSource:
-        SceneGISPlanarSurfaceShader.createFragmentShader(layerCount),
+      vertexShaderSource:
+        SceneGISPlanarSurfaceShader.createVertexShader(enableLighting),
+      fragmentShaderSource: SceneGISPlanarSurfaceShader.createFragmentShader(
+        layerCount,
+        enableLighting,
+      ),
       attributeLocations: { position: 0 },
     });
-    surface._shaderPrograms.set(layerCount, shader);
+    surface._shaderPrograms.set(key, shader);
     ++surface._debug.createdShaders;
   }
   surface._shaderProgram = shader;
   return shader;
 }
 
-function createUniformMap(surface, tile, layerCount) {
+function createUniformMap(surface, tile, layerCount, enableLighting) {
   const uniformMap = {
     u_color: function () {
       return surface._baseColor;
     },
   };
+  if (enableLighting) {
+    uniformMap.u_lambertDiffuseMultiplier = function () {
+      return surface._lambertDiffuseMultiplier;
+    };
+  }
   for (let i = 0; i < layerCount; ++i) {
     uniformMap[`u_texture${i}`] = function () {
       return tile._imagerySlots[i].texture;
@@ -251,8 +261,13 @@ function createUniformMap(surface, tile, layerCount) {
   return uniformMap;
 }
 
-function getCommand(surface, tile, layerCount) {
-  const shaderProgram = getShaderProgram(surface, surface._context, layerCount);
+function getCommand(surface, tile, layerCount, enableLighting) {
+  const shaderProgram = getShaderProgram(
+    surface,
+    surface._context,
+    layerCount,
+    enableLighting,
+  );
   if (!defined(tile.command)) {
     tile.command = new DrawCommand({
       boundingVolume: tile.commandBoundingVolume,
@@ -261,7 +276,7 @@ function getCommand(surface, tile, layerCount) {
       vertexArray: surface._vertexArray,
       count: 4,
       shaderProgram,
-      uniformMap: createUniformMap(surface, tile, layerCount),
+      uniformMap: createUniformMap(surface, tile, layerCount, enableLighting),
       renderState: surface._renderState,
       pass: Pass.OPAQUE,
       owner: surface,
@@ -269,11 +284,21 @@ function getCommand(surface, tile, layerCount) {
       receiveShadows: false,
     });
     tile._imageryCommandLayerCount = layerCount;
+    tile._lightingCommandEnabled = enableLighting;
     ++surface._debug.createdCommands;
-  } else if (tile._imageryCommandLayerCount !== layerCount) {
+  } else if (
+    tile._imageryCommandLayerCount !== layerCount ||
+    tile._lightingCommandEnabled !== enableLighting
+  ) {
     tile.command.shaderProgram = shaderProgram;
-    tile.command.uniformMap = createUniformMap(surface, tile, layerCount);
+    tile.command.uniformMap = createUniformMap(
+      surface,
+      tile,
+      layerCount,
+      enableLighting,
+    );
     tile._imageryCommandLayerCount = layerCount;
+    tile._lightingCommandEnabled = enableLighting;
   }
   const terrainContent = tile.terrainEntry?.activeContent;
   const terrainReady = defined(terrainContent?.mesh);
@@ -341,6 +366,8 @@ SceneGISPlanarSurface.prototype.render = function (
   maximumLevel,
   maximumScreenSpaceError,
   baseColor,
+  enableLighting = false,
+  lambertDiffuseMultiplier = 0.9,
 ) {
   validateContext(this, frameState.context);
   const passes = frameState.passes;
@@ -378,6 +405,7 @@ SceneGISPlanarSurface.prototype.render = function (
     return;
   }
   this._baseColor = baseColor;
+  this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   const desiredTiles = this._quadtree.selectTiles(
     frameState,
     maximumLevel,
@@ -437,7 +465,7 @@ SceneGISPlanarSurface.prototype.render = function (
       }
     }
     updateTileSlots(this, tile, shownLayers);
-    const command = getCommand(this, tile, shownLayers.length);
+    const command = getCommand(this, tile, shownLayers.length, enableLighting);
     frameState.commandList.push(command);
     this._renderCommands.push(command);
     ++this._debug.submittedCommands;

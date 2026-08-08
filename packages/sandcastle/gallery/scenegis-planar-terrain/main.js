@@ -18,6 +18,7 @@ const world = new Cesium.SceneGISPlanarWorld({
   }),
   maximumLevel: 16,
   baseColor: Cesium.Color.fromCssColorString("#263238"),
+  enableLighting: true,
 });
 
 const openStreetMapCredit = new Cesium.Credit(
@@ -66,4 +67,38 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   world,
   skyBox: Cesium.SkyBox.createEarthSkyBox(),
 });
-viewer.planarCameraController.viewHome(viewer.scene);
+viewer.scene.light = new Cesium.DirectionalLight({
+  direction: Cesium.Cartesian3.normalize(
+    new Cesium.Cartesian3(-1.0, -0.5, -1.5),
+    new Cesium.Cartesian3(),
+  ),
+});
+
+const mountainTarget = new Cesium.Cartesian3(1113194.9, 5780349.2, 0.0);
+function viewMountains() {
+  viewer.scene.camera.setView({
+    destination: new Cesium.Cartesian3(
+      mountainTarget.x,
+      mountainTarget.y - 400000.0,
+      300000.0,
+    ),
+    orientation: {
+      direction: new Cesium.Cartesian3(0.0, 0.8, -0.6),
+      up: new Cesium.Cartesian3(0.0, 0.6, 0.8),
+    },
+  });
+}
+
+document
+  .querySelector("#lightingToggle")
+  .addEventListener("change", (event) => {
+    world.enableLighting = event.target.checked;
+    viewer.scene.requestRender();
+  });
+document
+  .querySelector("#mountainView")
+  .addEventListener("click", viewMountains);
+document.querySelector("#homeView").addEventListener("click", () => {
+  viewer.planarCameraController.viewHome(viewer.scene);
+});
+viewMountains();

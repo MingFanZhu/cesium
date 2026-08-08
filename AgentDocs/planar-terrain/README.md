@@ -2,18 +2,16 @@
 
 ## Metadata
 
-| Field                  | Value                                                                                    |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| Extension slug         | `planar-terrain`                                                                         |
-| Status                 | `active`                                                                                 |
-| Planning model         | `extension`                                                                              |
-| Active extension plan  | [Planar Terrain extension plan](plans/2026-08-07-planar-terrain-extension.md) (`active`) |
-| Current phase          | None；T5 已完成，T6 尚未进入                                                             |
-| Active phase plan      | None                                                                                     |
-| Active standalone plan | None                                                                                     |
-| Architecture contact   | Architecture Agent                                                                       |
-| Execution contact      | Execution Agent（idle；T6 not assigned）                                                 |
-| Last updated           | `2026-08-08`                                                                             |
+- Extension slug: `planar-terrain`
+- Status: `completed`
+- Planning model: `extension`
+- Active extension plan: None
+- Current phase: None；T1-T6均已完成
+- Active phase plan: None
+- Active standalone plan: None
+- Architecture contact: Architecture Agent
+- Execution contact: Execution Agent（extension已完成）
+- Last updated: `2026-08-08`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -57,22 +55,22 @@
   [ADR-0008](../../Documentation/SceneGIS/Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)、
   [ADR-0009](../../Documentation/SceneGIS/Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)、
   [ADR-0010](../../Documentation/SceneGIS/Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)、
-  [ADR-0011](../../Documentation/SceneGIS/Decisions/ADR-0011-planar-url-template-heightmap-terrain-provider.md)
+  [ADR-0011](../../Documentation/SceneGIS/Decisions/ADR-0011-planar-url-template-heightmap-terrain-provider.md)、
+  [ADR-0012](../../Documentation/SceneGIS/Decisions/ADR-0012-planar-terrain-lighting-and-geometric-normals.md)
 - SGP: None planned；现有 `SGP-0001` 和 `SGP-0002` 仅作为 planar-world 依赖
 
 ## Current handoff
 
-- Current state: T5 implementation、focused fixes与Architecture focused re-review均已完成；generic
-  provider、image/LERC decode、公开best-effort Sandcastle与ownership边界通过，review为`approved`。
-- Next action: 在T5独立本地提交检查点后，由项目负责人与Architecture Agent讨论并细化T6；T6尚未
-  激活或派工。
-- Current phase status: T5 `completed`；extension继续`active`。
-- Open discussions: None。候选公网服务若不满足boundary-sampled topology、CORS或授权边界，Execution
-  必须停止并交回裁决；Worker、正式 byte budget和lighting/performance仍留到T6或后续measured
-  follow-up。
+- Current state: T1-T6均完成implementation、验证、Architecture/code review与独立阶段门禁；项目负责人
+  已在真实浏览器/GPU确认T6通过，`planar-terrain` extension状态为`completed`。
+- Next action: 在新的extension或standalone plan中讨论后续能力，不在本extension继续追加未规划阶段。
+- Current phase status: None；T6与extension均为`completed`。
+- Open discussions: None。固定环境亮度`0.3`、fragment geometric normal和不引入Worker均已获批；若
+  实际画面、profiling或实现要求CPU normals、Worker、Shader build或upstream改动，Execution必须
+  停止并交回裁决。
 - Latest review:
-  [T5 URL Heightmap provider review request](reviews/2026-08-08-t5-url-template-heightmap-provider.md)
+  [T6 terrain lighting and delivery review request](reviews/2026-08-08-t6-terrain-lighting-and-delivery.md)
   （`approved`）。
-- Unresolved reviews: None；`T5-R001`～`T5-R003`均由Architecture reviewer确认为`fixed`。
-- Known risks: generic URL provider无法自行验证CRS、相邻tile共享边或公开服务SLA；main-thread LERC
-  decode与257×257 mesh成本需要在T6按真实画面profiling。T4的ray query与sampler既有风险不变。
+- Unresolved reviews: None。项目负责人的真实浏览器/GPU人工视觉验收已通过。
+- Known risks: fragment normal是per-triangle且可能显示LOD明暗变化；default SunLight对任意planar CRS
+  没有投影语义；main-thread LERC/mesh仍需有限观察。公开服务SLA与T4 query/sampler既有风险不变。

@@ -65,9 +65,24 @@ function validateBaseColor(value) {
   }
 }
 
+function validateEnableLighting(value) {
+  if (typeof value !== "boolean") {
+    throw new DeveloperError("enableLighting must be a boolean.");
+  }
+}
+
+function validateLambertDiffuseMultiplier(value) {
+  if (!Number.isFinite(value) || value < 0.0) {
+    throw new DeveloperError(
+      "lambertDiffuseMultiplier must be a finite non-negative number.",
+    );
+  }
+}
+
 /**
- * A bounded, meter-based planar primary world with an opaque tiled surface and
- * an ordered collection of optional raster imagery layers.
+ * A bounded, meter-based planar primary world with an opaque flat or heightmap
+ * terrain surface, optional geometric lighting, and an ordered collection of
+ * raster imagery layers.
  * The world supports programmatically positioned perspective and orthographic
  * cameras in {@link SceneMode.SCENE3D}.
  *
@@ -80,6 +95,8 @@ function validateBaseColor(value) {
  * @param {number} [options.maximumScreenSpaceError=2.0] The refinement threshold in pixels.
  * @param {number} [options.tileCacheSize=100] The number of unprotected tiles retained after a frame.
  * @param {Color} [options.baseColor=Color.GRAY] The opaque surface color.
+ * @param {boolean} [options.enableLighting=false] Whether geometric Lambert lighting is enabled.
+ * @param {number} [options.lambertDiffuseMultiplier=0.9] The non-negative multiplier applied to Lambert diffuse lighting.
  *
  * @exception {DeveloperError} <code>options.coordinateSystem</code> is not a SceneGISPlanarCoordinateSystem.
  * @exception {DeveloperError} <code>options.maximumLevel</code> is invalid or exceeds the coordinate system's safe level.
@@ -87,6 +104,8 @@ function validateBaseColor(value) {
  * @exception {DeveloperError} <code>options.maximumScreenSpaceError</code> is not a finite positive number.
  * @exception {DeveloperError} <code>options.tileCacheSize</code> is not a non-negative integer.
  * @exception {DeveloperError} <code>options.baseColor</code> is not an opaque Color.
+ * @exception {DeveloperError} <code>options.enableLighting</code> is not a boolean.
+ * @exception {DeveloperError} <code>options.lambertDiffuseMultiplier</code> is not a finite non-negative number.
  */
 function SceneGISPlanarWorld(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -127,9 +146,13 @@ function SceneGISPlanarWorld(options) {
   const maximumScreenSpaceError = options.maximumScreenSpaceError ?? 2.0;
   const tileCacheSize = options.tileCacheSize ?? 100;
   const baseColor = options.baseColor ?? Color.GRAY;
+  const enableLighting = options.enableLighting ?? false;
+  const lambertDiffuseMultiplier = options.lambertDiffuseMultiplier ?? 0.9;
   validateMaximumScreenSpaceError(maximumScreenSpaceError);
   validateTileCacheSize(tileCacheSize);
   validateBaseColor(baseColor);
+  validateEnableLighting(enableLighting);
+  validateLambertDiffuseMultiplier(lambertDiffuseMultiplier);
 
   this._coordinateSystem = options.coordinateSystem;
   this._tilingScheme = tilingScheme;
@@ -137,6 +160,8 @@ function SceneGISPlanarWorld(options) {
   this._maximumScreenSpaceError = maximumScreenSpaceError;
   this._tileCacheSize = tileCacheSize;
   this._baseColor = Color.clone(baseColor);
+  this._enableLighting = enableLighting;
+  this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   this._show = true;
   this._terrainProvider = undefined;
   this._imageryLayers = new SceneGISPlanarImageryLayerCollection({
@@ -307,6 +332,44 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
       Color.clone(value, this._baseColor);
     },
   },
+  /**
+   * Gets or sets whether fragment geometric Lambert lighting is enabled.
+   * Lighting consumes the owning Scene's light and does not change surface
+   * geometry, terrain selection, or resource ownership.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {boolean}
+   * @default false
+   * @exception {DeveloperError} The assigned value is not a boolean.
+   */
+  enableLighting: {
+    get: function () {
+      return this._enableLighting;
+    },
+    set: function (value) {
+      validateEnableLighting(value);
+      this._enableLighting = value;
+    },
+  },
+  /**
+   * Gets or sets the multiplier applied to Lambert diffuse lighting. This
+   * value has no effect while {@link SceneGISPlanarWorld#enableLighting} is
+   * false.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {number}
+   * @default 0.9
+   * @exception {DeveloperError} The assigned value is not a finite non-negative number.
+   */
+  lambertDiffuseMultiplier: {
+    get: function () {
+      return this._lambertDiffuseMultiplier;
+    },
+    set: function (value) {
+      validateLambertDiffuseMultiplier(value);
+      this._lambertDiffuseMultiplier = value;
+    },
+  },
 });
 
 /**
@@ -349,6 +412,8 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
     this._maximumLevel,
     this._maximumScreenSpaceError,
     this._baseColor,
+    this._enableLighting,
+    this._lambertDiffuseMultiplier,
   );
 };
 

@@ -6,11 +6,14 @@
 
 ```js
 import {
+  Cartesian3,
   Credit,
+  DirectionalLight,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarImageryLayer,
   SceneGISPlanarUrlTemplateImageryProvider,
+  SceneGISPlanarUrlTemplateHeightmapTerrainProvider,
   SceneGISPlanarWorld,
   Viewer,
 } from "cesium";
@@ -30,6 +33,7 @@ const world = new SceneGISPlanarWorld({
   maximumLevel: 19,
   maximumScreenSpaceError: 2.0,
   tileCacheSize: 100,
+  enableLighting: true,
 });
 const provider = new SceneGISPlanarUrlTemplateImageryProvider({
   url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -44,14 +48,34 @@ const provider = new SceneGISPlanarUrlTemplateImageryProvider({
 });
 world.imageryLayers.add(new SceneGISPlanarImageryLayer(provider));
 
+world.terrainProvider = new SceneGISPlanarUrlTemplateHeightmapTerrainProvider({
+  url: "https://example.invalid/terrain/{z}/{y}/{x}",
+  tilingScheme: world.tilingScheme,
+  urlScheme: "xyz",
+  format: "lerc",
+  heightmapWidth: 257,
+  heightmapHeight: 257,
+  minimumHeight: -500.0,
+  maximumHeight: 9000.0,
+  maximumLevel: 16,
+});
+
 const viewer = new Viewer("cesiumContainer", { world });
+viewer.scene.light = new DirectionalLight({
+  direction: Cartesian3.normalize(
+    new Cartesian3(-1.0, -0.5, -1.5),
+    new Cartesian3(),
+  ),
+});
 viewer.planarCameraController.viewHome(viewer.scene);
 
 // The Viewer owns and destroys its Scene and primary world.
 viewer.destroy();
 ```
 
-生产应用必须遵守影像服务条款、展示 attribution，并处理 CORS、限流和服务失败。自动化测试应使用本地 provider，不依赖公网。
+示例terrain URL是占位地址；应用必须选择提供boundary-inclusive height samples的数据源，并让
+terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务条款、展示 attribution，并
+处理CORS、限流和服务失败。自动化测试应使用本地provider，不依赖公网。
 
 ## CesiumWidget 入口
 
@@ -65,30 +89,48 @@ viewer.destroy();
 - `SceneGISPlanarCameraController.viewHome(scene)` 和 planar Home button 按当前 viewport 与四类支持的 frustum 重新计算视图。
 - `world.pick(ray)` 与 `world.pickFromWindowPosition(position, scene)` 是有界的 Z=0 数学拾取，不依赖当前 LOD 或 depth buffer；extent 外返回 `undefined`。
 - `scene.pickPosition(position)` 是 rendered-depth 拾取，要求浏览器支持 depth texture，并依赖最近一次 normal render。它不等同于通用 object picking。
+- `world.getTerrainHeight(position)`只读取resident direct/upsampled Float32 surface；不会发请求，
+  flat fallback返回`undefined`。
+- `world.pickTerrain(ray)`与`pickTerrainFromWindowPosition`只查询最近正常render发布的actual terrain
+  cover并排除skirt。它们不替代Z=0 `world.pick`，也不触发depth pass。
+- 独立批量采样使用`SceneGISPlanarTerrainSampler.sampleAtLevel`；它直接访问provider，不读取World
+  cache，也不做ancestor/upsample fallback。
 
 ## 影像与加载状态
 
 provider 的 `tilingScheme` 必须与 `world.tilingScheme` 是同一对象，不能只具有相同参数。每个 ideal geometry tile 始终提交一个 opaque command；shown layer 自底向顶在单 pass 中合成，因此 layer 数不能超过 WebGL texture image unit 上限。
 
-`world.tilesLoaded` 只描述当前视图中 shown layers 的 desired tiles 是否 ready 或 terminally failed。运行时请求 desired tile 与 Level 0 bootstrap；可复用 cache 中最近的 ready ancestor，但不会主动请求中间 ancestor。移除 layer 或销毁 world 会取消/隔离请求并释放 texture/binding，late settlement 不得重新进入 cache。
+`world.tilesLoaded` 是当前视图 terrain coverage/readiness 与 shown imagery readiness 的合取。对 imagery contribution，运行时请求 desired tile 与 Level 0 bootstrap；可复用 cache 中最近的 ready ancestor，但不会主动请求中间 ancestor。Recoverable terrain 或 imagery direct content 仍 pending 时结果保持 `false`；terminal failure 配合稳定 fallback 时可 settled。移除 layer、替换 provider 或销毁 world 会取消/隔离请求并释放对应资源，late settlement 不得重新进入 cache。
+
+## 地形、光照与数据边界
+
+`terrainProvider`由调用方拥有，并且必须引用World的canonical tiling scheme。Runtime维持direct、
+upsampled与flat fallback的连续单层coverage，以skirt遮蔽mixed-LOD边缘；terrain geometry与imagery
+始终共用每tile一个opaque command。Provider replacement、eviction与World destroy释放World拥有的
+request/mesh/GPU资源，但不销毁provider。
+
+`enableLighting`默认关闭。启用后shader从实际triangle求fragment geometric normal，并消费
+`scene.light`；`lambertDiffuseMultiplier`可调Diffuse强度。它不是smooth vertex lighting，LOD切换可能
+出现三角面明暗变化。自定义planar CRS应显式配置稳定`DirectionalLight`，不要依赖SunLight方向。
+相机位于surface下方仍合法，但这不等同于已支持地下导航、碰撞或地下材质。
 
 ## 支持矩阵与限制
 
-| 能力        | 当前契约                                                               |
-| ----------- | ---------------------------------------------------------------------- |
-| extent      | 有限、严格正方形、米制、无 wrap                                        |
-| scene mode  | 仅 `SCENE3D`                                                           |
-| tiling      | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                 |
-| surface     | opaque Z=0 mathematical plane、implicit quadtree、无 terrain           |
-| imagery     | 同 canonical tiling scheme、无 reprojection、单 pass composition       |
-| navigation  | PC pan/rotate/wheel/Home；无 touch、inertia、flight/tracking           |
-| environment | Earth skybox 只能由应用显式提供；不会自动增加 atmosphere               |
-| UI          | planar Viewer 无通用 provider picker、geocoder、mode/projection picker |
-| unsupported | terrain、underground、partial extent、availability、imagery picking    |
+| 能力        | 当前契约                                                                       |
+| ----------- | ------------------------------------------------------------------------------ |
+| extent      | 有限、严格正方形、米制、无 wrap                                                |
+| scene mode  | 仅 `SCENE3D`                                                                   |
+| tiling      | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                         |
+| surface     | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照    |
+| imagery     | 同 canonical tiling scheme、无 reprojection、单 pass composition               |
+| navigation  | PC pan/rotate/wheel/Home；无 touch、inertia、flight/tracking                   |
+| environment | Earth skybox 只能由应用显式提供；不会自动增加 atmosphere                       |
+| UI          | planar Viewer 无通用 provider picker、geocoder、mode/projection picker         |
+| unsupported | underground、collision/clamp、smooth normals、shadow/material、imagery picking |
 
 ## 性能与调参
 
-降低 `maximumScreenSpaceError` 会选择更多 tile；提高 `tileCacheSize` 会保留更多 unprotected tile record。每个 shown imagery layer 会增加 texture/request/cache 成本，但不会增加每个 ideal tile 的 draw command 数。调参时同时观察 selected/submitted tile、resident tile、request/texture/binding 与 warm-frame allocation；不要仅用单帧 FPS 推断泄漏或稳定性。
+降低 `maximumScreenSpaceError` 会选择更多 tile；提高 `tileCacheSize` 会保留更多 unprotected tile record。每个 shown imagery layer 会增加 texture/request/cache 成本，但不会增加每个 ideal tile 的 draw command 数。Terrain LERC decode、Heightmap mesh与每帧最多两个promotion当前都在主线程；`enableLighting`增加fragment derivative/Lambert成本但不增加command。调参时同时观察 selected/submitted tile、resident tile、request/texture/binding、mesh/promotion与warm-frame allocation；不要仅用单帧 FPS 推断泄漏或稳定性。
 
 release qualification 使用至少 16 个 submitted tiles、bare/双层影像各 120 warm frames、五轮 camera/cache churn、60 次 depth replay，以及重复 Widget/Viewer 生命周期作为确定性门禁。不同机器的 timing 只能作趋势参考。
 
@@ -97,6 +139,9 @@ release qualification 使用至少 16 个 submitted tiles、bare/双层影像各
 - 构造期 `DeveloperError`：检查 extent/span 是否有限且正方形、maximum level 是否安全、provider 是否复用 exact `world.tilingScheme`。
 - extent 外拾取为 `undefined`：这是 public bounded mathematical pick 的预期行为。
 - 远程影像空白：检查 CORS、URL scheme、credit、`errorEvent`、retry 和服务 SLA；baseColor/ready ancestor 是正常降级。
+- 远程terrain保持flat/ancestor：检查boundary sample dimensions、format/structure、provider height range、
+  availability、CORS与`errorEvent`；terminal failure配合稳定fallback可以报告`tilesLoaded=true`。
+- 光照方向不稳定：为`scene.light`设置显式`DirectionalLight`；自定义CRS不会改变默认SunLight语义。
 - 第二个 Context 报错：为每个 Widget/Viewer 创建独立 world。
 - Viewer option 冲突：planar Viewer 不接受 Globe imagery/terrain/map-projection/provider-picker 选项。
 - 已销毁对象报错：不要在 Scene/Viewer destroy 后继续 render、pick 或复用 controller/world。

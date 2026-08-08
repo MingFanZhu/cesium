@@ -3,7 +3,7 @@
 ## 元数据
 
 - 计划类型（Plan type）：`extension`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 负责人角色（Owner role）：`architecture`
 - 架构评审（Architecture review）：`confirmed`
 - 架构评审人（Architecture reviewer）：项目负责人
@@ -131,7 +131,7 @@
 | T3   | 完成异步 LOD、fallback、上采样、连续替换、裂缝处理、缓存和资源生命周期。                       | T2                       | T2 已 review、提交；依据真实 runtime 重新设计状态和调度。                  | 加载、失败、取消、迟到结果和驱逐均保持无孔洞、无父子重复及 exactly-once 释放；`tilesLoaded` 语义成立。           | `completed` | [T3 plan](2026-08-07-phase-t3-terrain-continuous-lod.md)          |
 | T4   | 增加驻留高度查询、terrain ray/window picking 与独立异步采样能力。                              | T3                       | T3 已 review、提交；重新检查 mesh、depth 和 navigation 边界。              | 查询与实际 mesh 三角化一致；terrain picking、Z=0 reference pick 和 `scene.pickPosition` 职责清晰；既有导航不变。 | `completed` | [T4 plan](2026-08-07-phase-t4-terrain-query-and-picking.md)       |
 | T5   | 增加可复用的数据适配入口和可执行 terrain 示例。                                                | T4                       | T4 已 review、提交；确认目标数据格式、服务政策、CORS、Credit 与发布边界。  | 至少一个可重复的本地/确定性数据案例完成；合适时增加受政策约束的公开 DEM 演示；自动化不依赖公网。                 | `completed` | [T5 plan](2026-08-08-phase-t5-url-template-heightmap-provider.md) |
-| T6   | 完成基础地形表现、人工验收、有限性能与交付资格。                                               | T5                       | T5 已 review、提交；依据真实画面和 profiling 决定表现范围。                | 已批准的法线/光照或其他表现目标完成；相关资源、性能、文档、包与升级检查达到整体交付标准。                        | `planned`   | 未创建                                                            |
+| T6   | 完成基础地形表现、人工验收、有限性能与交付资格。                                               | T5                       | T5 已 review、提交；依据真实画面和 profiling 决定表现范围。                | 已批准的法线/光照或其他表现目标完成；相关资源、性能、文档、包与升级检查达到整体交付标准。                        | `completed` | [T6 plan](2026-08-08-phase-t6-terrain-lighting-and-delivery.md)   |
 
 所有 phase 串行执行。一个 phase 的实现、相关 Specs、ADR/SGP、AgentDocs 和 review 必须形成
 独立本地提交检查点，之后才能激活或实现下一 phase。
@@ -307,5 +307,19 @@
   docs、phase/review evidence。
 - `2026-08-08`：Architecture focused re-review逐项确认并独立复跑provider `13/13`、build和最小
   static/ownership矩阵，review为`approved`，T5标记`completed`。
-- 下一步：形成T5独立本地提交检查点，然后由项目负责人与Architecture Agent讨论并细化T6；T6尚未
-  激活或派工。
+- `2026-08-08`：Architecture Agent形成T5独立本地提交检查点
+  `1cafd98ed07fda045833b4fca0c14f9004b8e0f6`；项目负责人在公开terrain Sandcastle人工查看后同意
+  进入T6。
+- `2026-08-08`：项目负责人与Architecture Agent批准T6完整设计：新增默认关闭的World Lambert
+  lighting与multiplier，使用fragment geometric normal和scene automatic light uniforms，保持
+  double-sided/single-command/depth replay；不引入CPU normal、Worker、Shader build、完整材质或重型
+  qualification。ADR-0012 approved，T6 phase plan激活并派给Execution Agent。
+- `2026-08-08`：Execution完成T6 World lighting API、lit/unlit Surface shader variants、真实Context
+  像素与warm identity证据、terrain Sandcastle和durable docs；focused/build/types/docs/no-embedding
+  Sandcastle与zero-upstream审计完成，已创建pending review request。
+- `2026-08-08`：Architecture review确认产品实现成立并提出两项docs-only finding；Execution修正
+  `tilesLoaded`联合语义与focused aggregate计数后，Architecture focused re-review确认
+  `T6-R001`/`T6-R002`均`fixed`，review为`approved`。
+- `2026-08-08`：项目负责人在真实浏览器/GPU打开terrain Sandcastle，确认页面与地形画面可用；在复核
+  固定`DirectionalLight`与未改造planar Sun语义后明确批准T6。T6与`planar-terrain` extension均标记
+  `completed`，由Architecture Agent形成独立本地提交检查点。

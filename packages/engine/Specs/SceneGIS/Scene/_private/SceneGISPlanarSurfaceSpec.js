@@ -1,6 +1,7 @@
 import {
   Cartesian3,
   Color,
+  DirectionalLight,
   Event,
   Intersect,
   OrthographicFrustum,
@@ -34,6 +35,8 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       maximumScreenSpaceError: options.maximumScreenSpaceError ?? 2.0,
       tileCacheSize: options.tileCacheSize ?? 100,
       baseColor: options.baseColor ?? Color.RED,
+      enableLighting: options.enableLighting,
+      lambertDiffuseMultiplier: options.lambertDiffuseMultiplier,
     });
   }
 
@@ -653,6 +656,72 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(surface._debug.createdBuffers).toBe(before.buffers);
     expect(surface._debug.createdShaders).toBe(before.shaders);
     expect(surface._quadtree._tiles.size).toBe(before.resident);
+  });
+
+  it("switches lighting variants on the existing command and replays the lit command", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    scene = createPlanarScene(world);
+    pointCameraAt(world, 128.0);
+    scene.light = new DirectionalLight({
+      direction: Cartesian3.normalize(
+        new Cartesian3(1.0, 0.0, 1.0),
+        new Cartesian3(),
+      ),
+    });
+    scene.renderForSpecs();
+
+    const surface = world._surface;
+    const tile = surface._quadtree._renderTiles[0];
+    const command = tile.command;
+    const unlitShader = command.shaderProgram;
+    const allocationBefore = {
+      commands: surface._debug.createdCommands,
+      buffers: surface._debug.createdBuffers,
+      vertexArrays: surface._debug.createdVertexArrays,
+      textures: surface._debug.createdTextures,
+      tiles: surface._quadtree._debug.createdTiles,
+    };
+
+    world.enableLighting = true;
+    scene.renderForSpecs();
+    const litShader = command.shaderProgram;
+    expect(tile.command).toBe(command);
+    expect(litShader).not.toBe(unlitShader);
+    expect(surface._shaderPrograms.size).toBe(2);
+    expect(command.uniformMap.u_lambertDiffuseMultiplier()).toBe(0.9);
+    expect(surface._debug.createdCommands).toBe(allocationBefore.commands);
+    expect(surface._debug.createdBuffers).toBe(allocationBefore.buffers);
+    expect(surface._debug.createdVertexArrays).toBe(
+      allocationBefore.vertexArrays,
+    );
+    expect(surface._debug.createdTextures).toBe(allocationBefore.textures);
+    expect(surface._quadtree._debug.createdTiles).toBe(allocationBefore.tiles);
+
+    const createdShaders = surface._debug.createdShaders;
+    world.lambertDiffuseMultiplier = 0.25;
+    scene.renderForSpecs();
+    expect(tile.command).toBe(command);
+    expect(command.shaderProgram).toBe(litShader);
+    expect(command.uniformMap.u_lambertDiffuseMultiplier()).toBe(0.25);
+    expect(surface._debug.createdShaders).toBe(createdShaders);
+
+    const depthFrameState = {
+      ...scene.frameState,
+      passes: { render: false, pick: true, depth: true },
+      commandList: [],
+    };
+    const quadtreeDebug = { ...surface._quadtree._debug };
+    world.render(depthFrameState);
+    expect(depthFrameState.commandList).toEqual([command]);
+    expect(depthFrameState.commandList[0]).toBe(command);
+    expect(surface._quadtree._debug).toEqual(quadtreeDebug);
+    expect(surface._debug.createdShaders).toBe(createdShaders);
+
+    world.enableLighting = false;
+    scene.renderForSpecs();
+    expect(tile.command).toBe(command);
+    expect(command.shaderProgram).toBe(unlitShader);
+    expect(surface._shaderPrograms.size).toBe(2);
   });
 
   it("does not duplicate commands when render is repeated in one frame", function () {

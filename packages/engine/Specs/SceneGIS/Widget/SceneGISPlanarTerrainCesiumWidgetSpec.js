@@ -3,6 +3,7 @@ import {
   Cartesian3,
   CesiumWidget,
   Color,
+  DirectionalLight,
   Event,
   PrimitiveType,
   Ray,
@@ -149,6 +150,70 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     ).toBe(true);
     expect(world.tilesLoaded).toBe(true);
 
+    let unlitPixels;
+    expect(widget.scene).toRenderAndCall(function (rgba) {
+      unlitPixels = Array.from(rgba);
+    });
+    const surface = world._surface;
+    const commandsBeforeLighting = tiles.map((tile) => tile.command);
+    const surfaceAllocationsBeforeLighting = {
+      buffers: surface._debug.createdBuffers,
+      vertexArrays: surface._debug.createdVertexArrays,
+      textures: surface._debug.createdTextures,
+      commands: surface._debug.createdCommands,
+    };
+    const terrainAllocationsBeforeLighting = { ...surface._terrain._debug };
+    widget.scene.light = new DirectionalLight({
+      direction: Cartesian3.UNIT_X,
+    });
+    world.enableLighting = true;
+    let litPixels;
+    expect(widget.scene).toRenderAndCall(function (rgba) {
+      litPixels = Array.from(rgba);
+    });
+    expect(litPixels).not.toEqual(unlitPixels);
+    expect(litPixels.every(Number.isFinite)).toBe(true);
+    expect(tiles.map((tile) => tile.command)).toEqual(commandsBeforeLighting);
+    expect(surface._debug.createdBuffers).toBe(
+      surfaceAllocationsBeforeLighting.buffers,
+    );
+    expect(surface._debug.createdVertexArrays).toBe(
+      surfaceAllocationsBeforeLighting.vertexArrays,
+    );
+    expect(surface._debug.createdTextures).toBe(
+      surfaceAllocationsBeforeLighting.textures,
+    );
+    expect(surface._debug.createdCommands).toBe(
+      surfaceAllocationsBeforeLighting.commands,
+    );
+    expect(surface._terrain._debug).toEqual(terrainAllocationsBeforeLighting);
+
+    const litShaderCount = surface._debug.createdShaders;
+    const litShaderPrograms = tiles.map((tile) => tile.command.shaderProgram);
+    const litUniformMaps = tiles.map((tile) => tile.command.uniformMap);
+    expect(widget.scene).toRenderAndCall(function (rgba) {
+      expect(Array.from(rgba)).toEqual(litPixels);
+    });
+    expect(tiles.map((tile) => tile.command)).toEqual(commandsBeforeLighting);
+    expect(tiles.map((tile) => tile.command.shaderProgram)).toEqual(
+      litShaderPrograms,
+    );
+    expect(tiles.map((tile) => tile.command.uniformMap)).toEqual(
+      litUniformMaps,
+    );
+    expect(surface._debug.createdShaders).toBe(litShaderCount);
+    expect(surface._terrain._debug).toEqual(terrainAllocationsBeforeLighting);
+
+    world.lambertDiffuseMultiplier = 0.0;
+    let ambientPixels;
+    expect(widget.scene).toRenderAndCall(function (rgba) {
+      ambientPixels = Array.from(rgba);
+    });
+    expect(ambientPixels).not.toEqual(litPixels);
+    expect(surface._debug.createdShaders).toBe(litShaderCount);
+    expect(tiles.map((tile) => tile.command)).toEqual(commandsBeforeLighting);
+    world.lambertDiffuseMultiplier = 0.9;
+
     const debug = { ...world._surface._terrain._debug };
     const commands = tiles.map((tile) => tile.command);
     expect(widget.scene).toRenderAndCall(function (rgba) {
@@ -220,6 +285,18 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     expect(world.pickTerrain(ray, new Cartesian3())).toEqual(
       terrainWindowPosition,
     );
+
+    widget.scene.camera.setView({
+      destination: new Cartesian3(0.0, 0.0, -256.0),
+      orientation: {
+        direction: Cartesian3.UNIT_Z,
+        up: Cartesian3.UNIT_Y,
+      },
+    });
+    expect(widget.scene).toRenderAndCall(function (rgba) {
+      expect(rgba).not.toEqual([0, 0, 0, 255]);
+      expect(Array.from(rgba).every(Number.isFinite)).toBe(true);
+    });
 
     const terrain = world._surface._terrain;
     widget = widget.destroy();

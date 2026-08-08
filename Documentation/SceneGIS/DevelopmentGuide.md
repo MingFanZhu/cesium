@@ -334,9 +334,9 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 
 - provider 的 `tilingScheme` 必须与 world 的 canonical scheme 保持 object identity；collection
   owns layer，provider 始终由调用方拥有。
-- `tilesLoaded` 只汇总当前视图、当前 shown layers 的 desired entries；READY ancestor 仅用于
-  画面 fallback，不能把 pending desired 提前标为 loaded。
-- 每个 binding 只请求 desired 与必要的 Level 0 bootstrap，不主动推进 intermediate ancestor；
+- `tilesLoaded` 汇总当前视图 terrain coverage/readiness 与当前 shown imagery readiness；任何
+  recoverable direct content pending 都不能提前标为 loaded，terminal failure 配合稳定 fallback 才可 settled。
+- 对 imagery contribution，每个 binding 只请求 desired 与必要的 Level 0 bootstrap，不主动推进 intermediate ancestor；
   cache 中已有的最近 READY ancestor 可以复用，reference 切换和 eviction 必须 exactly once。
 - 每个 ideal tile 保持一个 opaque command；shown layer 数必须在任何 request 或 GPU mutation
   前按 texture-unit limit fail-fast，不能用 multipass 绕过。
@@ -363,6 +363,22 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   per-tile attribution才进入TerrainData。
 - 自动化使用本地 Resource/LERC fixture。公开 terrain Sandcastle只作 best-effort人工检查，必须
   显示 Credit、说明 CORS/服务失败 fallback，并禁止预取、批量或离线下载。
+
+### 平面地形光照检查
+
+- 默认`enableLighting=false`必须保留unlit shader fast path；lit/unlit shader cache key同时包含
+  shown layer count与lighting flag。`lambertDiffuseMultiplier`只经uniform读取，修改它不得创建
+  command、shader、mesh或其他GPU/request资源。
+- Lit variant从eye-space position的`dFdx`/`dFdy`计算实际triangle geometric normal，并使用
+  face-forward保持双面surface。不要增加CPU normals、normal buffer、back-face culling或camera
+  collision。
+- Base color和imagery必须先完成single-pass bottom-to-top合成，再统一应用scene light、Lambert与固定
+  ambient；depth pick仍只重放最近normal render的exact command references。
+- Real Context Spec至少证明lit/unlit像素不同、terrain/imagery single command、warm allocation收敛、
+  multiplier uniform-only、surface下方可见与destroy平衡。Sandcastle使用显式稳定
+  `DirectionalLight`，但公网画面只能作为人工best-effort验收。
+- Standard derivatives、automatic light uniforms与ShaderProgram cache是升级检查点。没有可重复的
+  main-thread阻塞证据时保持现有decode/mesh和promotion budget；Worker需要独立phase/ADR。
 
 ### 平面 Viewer 集成检查
 
