@@ -398,6 +398,14 @@ C2 的 private Anchor visualizer 只复用 caller-owned disabled `EntityCluster`
 height-clamping path。Async completion 不得直接添加 primitive。C4 之前这些角色只允许显式构造，
 `viewer.entities` 仍不是 supported planar content entry。完整 profile见 ADR-0014。
 
+C3 的 private Polyline/Polygon visualizer 绕开默认 GeometryUpdater、ground 与 geodesic/rhumb 路径。
+Polyline 只接受 planar straight segments；Polygon 只接受 simple outer ring 与 direct holes，并显式生成
+cap、side wall 和 outline。Clamp/drape 只在 supplied vertices 读取 resident terrain，不沿边新增terrain
+采样或细分，也不发起请求；线段和triangle内部仍按几何线性插值。Polyline `width`与Polygon
+`outlineWidth`只接受`[0,255]`内的integer。每个 Entity 使用独立 private Buffer owner，以 local DOUBLE geometry、translation `modelMatrix`、
+explicit world bounds 和 original Entity pick 保持大坐标精度与所有权边界；candidate replacement 必须
+原子化并 exactly-once cleanup。C4 前仍只能显式构造这些 private visualizer。完整 profile见 ADR-0015。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：

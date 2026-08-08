@@ -77,7 +77,8 @@ graphics allowlist。
 
 - Entity `isShowing`、availability 与 `PolylineGraphics.show`；
 - `positions`，至少两个 finite `Cartesian3`；
-- `width`，默认 `1.0`，必须 finite 且大于或等于零；零宽度等价于当前不可见；
+- `width`，默认 `1.0`，必须是`[0,255]`内的integer，以便在Buffer `Uint8` layout中精确表示；零宽度
+  等价于当前不可见；
 - 未定义 material 时的 `Color.WHITE`，以及 `ColorMaterialProperty` 的 finite `Color`；
 - `clampToGround=false`：保留每个输入位置的 absolute Z；
 - `clampToGround=true`：忽略输入 Z，对每个 supplied vertex 使用
@@ -120,7 +121,7 @@ top Z；否则在 mutation 前拒绝。Extrusion 对 outer 和 holes 生成 side
 Polygon style 支持：
 
 - `fill`（默认 `true`）和未定义 material/`ColorMaterialProperty`；
-- `outline`（默认 `false`）、`outlineColor`（默认 `Color.BLACK`）与 finite、非负
+- `outline`（默认 `false`）、`outlineColor`（默认 `Color.BLACK`）与`[0,255]`内的integer
   `outlineWidth`（默认 `1.0`）；
 - 非 extrusion 时 outline 包含所有 top rings；extrusion 时包含 top/bottom rings 和 outer/hole 的垂直
   边，始终使用同一个 original Entity pick object；
@@ -152,8 +153,8 @@ texture coordinate 或 shadow pipeline。
 - Visualizer 显式跟踪 owner 状态，不依赖 experimental collection 始终返回 false 的
   `isDestroyed()`。Scene removal、renderer/pick resource destroy、subscription disconnect 必须 exactly
   once；失败的 candidate 不能留在 `scene.primitives`。
-- 未变化 warm update 保持 owner、collection、buffer、DrawCommand/PickId 和 subscription identity，不得
-  产生新的 owned GPU resource。
+- 未变化 warm update保持owner、collection、buffer、DrawCommand/PickId和subscription identity；不得调用
+  会重新标脏的geometry/material/show setter，也不得产生buffer copy或新的owned GPU resource。
 
 ### 原子性、上下文与集成
 

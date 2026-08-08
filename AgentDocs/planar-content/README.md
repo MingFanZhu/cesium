@@ -7,12 +7,11 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: `C3-polyline-polygon`（`active`）
-- Active phase plan:
-  [C3 平面 Polyline、Polygon 与地表关系](plans/2026-08-09-phase-c3-polyline-polygon.md)
+- Current phase: None；C3已完成，C4尚未激活
+- Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（等待C3 planning checkpoint派工）
+- Execution contact: Execution Agent（等待C4 phase plan派工）
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -57,15 +56,15 @@
 
 ## Current handoff
 
-- Current state: C2已在checkpoint `3bdd638661c14bfbf127b12dec3bd8c5e8e3f3ba`完成；ADR-0015与C3
-  phase plan已确认并激活。
-- Next action: Execution从C3 planning checkpoint实现private Polyline/Polygon visualizer，创建pending
-  review后停在C3。
-- Current phase status: `C3-polyline-polygon` active。
+- Current state: C3 Architecture focused re-review已通过，C3-R001～C3-R003全部关闭；C3进入独立本地
+  checkpoint。
+- Next action: 从C3 checkpoint重新审计`DataSourceDisplay`、Visualizer injection、Viewer selection与
+  destroy顺序，形成C4 phase plan后再派工。
+- Current phase status: C3 `completed`；C4尚未激活。
 - Open discussions: None；C3设计已完整确认。若experimental Buffer collection无法满足precision/depth/
   picking/lifecycle，Execution必须暂停回报，不得擅自复制renderer或扩大上游修改。
 - Latest review:
-  [C2 anchor and model review](reviews/2026-08-09-c2-anchor-and-model.md)（`approved`）。
+  [C3 polyline and polygon review](reviews/2026-08-09-c3-polyline-polygon.md)（`approved`）。
 - Unresolved reviews: None。
 - Known risks: Buffer collections属于experimental升级敏感面；vertex-only terrain drape不代表连续贴地；
   per-Entity owner的批量性能留给C5。C4的Viewer/DataSourceDisplay集成缝隙尚未设计。

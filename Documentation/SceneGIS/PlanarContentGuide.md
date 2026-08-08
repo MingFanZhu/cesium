@@ -1,8 +1,8 @@
 # SceneGIS 平面内容使用指南
 
 本文档描述 `planar-content` 的稳定坐标、高度和兼容性边界。C1 已完成 position contract，C2 已提供
-显式构造的 private Anchor/Model visualizer；它仍不表示 `viewer.entities`、Polyline 或 Polygon 已可
-自动按平面语义渲染。
+private Anchor/Model visualizer，C3 已提供 private Polyline/Polygon visualizer；这些角色仍只允许显式
+构造，不表示 `viewer.entities` 已可自动按平面语义渲染。
 
 长期设计依据见
 [ADR-0013](Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)。平面 World、terrain
@@ -74,6 +74,26 @@ environment map disabled，并启用 picking。C2 拒绝 vertical exaggeration�
 clipping planes 与 custom shader 配置；支持的普通 style/animation/property profile以 ADR-0014 为准。
 C2 private visualizer 不拥有 World、Scene、EntityCollection、EntityCluster 或输入 Resource。
 
+## C3 Polyline 与 Polygon profile
+
+Polyline 使用 planar straight segments；`arcType` undefined等价于`ArcType.NONE`，显式值也只接受
+`NONE`。Absolute与`CLAMP_TO_GROUND`都逐个解析 supplied vertices；clamp只读取当前resident terrain，
+不发请求、不沿长边新增terrain采样或细分；线段内部仍按几何线性插值。支持solid
+`ColorMaterialProperty`、`[0,255]` integer width、show、availability、dynamic positions、extent、
+original Entity picking与world bounds。
+
+Polygon接受一个simple outer ring和direct holes；不接受nested hierarchy、自交、ring touch或hole overlap。
+Scalar top支持`NONE`、`CLAMP_TO_GROUND`和`RELATIVE_TO_GROUND`，per-position height保留各顶点absolute Z。
+Extrusion显式生成top/bottom caps、outer/hole side walls，outline单独渲染且`outlineWidth`只接受
+`[0,255]`内的integer。Terrain sampling只发生在supplied vertices，因此长边和大三角形可能穿越中间
+terrain，这不是连续贴地承诺。
+
+两类visualizer都使用per-Entity private Buffer owner：顶点以local DOUBLE geometry保存，world translation
+进入`modelMatrix`，bounds显式保留world坐标，pick id保留original Entity。拓扑或blend变化使用candidate/
+current原子替换；warm更新复用owner与collection；replacement、removal与destroy成对释放。它们不跨Entity
+batch，也不拥有World、Scene或EntityCollection。未变化warm update不会重写Buffer geometry/material/show，
+因此不会重新标脏或触发buffer copy。
+
 ## Compatibility matrix
 
 | 数据或 graphics                                                           | 当前决定        | 可用阶段/边界    |
@@ -82,14 +102,14 @@ C2 private visualizer 不拥有 World、Scene、EntityCollection、EntityCluster
 | `EntityCollection`、`CustomDataSource`                                    | 复用数据模型    | C4               |
 | Point、Billboard、Label                                                   | private runtime | C2 explicit only |
 | 普通 glTF Model                                                           | private runtime | C2 explicit only |
-| planar straight Polyline、Polygon                                         | approved scope  | C3 planned       |
+| planar straight Polyline、Polygon                                         | private runtime | C3 explicit only |
 | Box、Corridor、Cylinder、Ellipse、Ellipsoid、Plane、Rectangle、Wall、Path | unsupported     | 首版不实现       |
 | `Cesium3DTilesetGraphics`                                                 | unsupported     | 独立扩展         |
 | GeoJSON、CZML、KML 自动 planar 转换                                       | unsupported     | 独立扩展         |
 | Globe ground、geodesic/rhumb                                              | 禁止隐式进入    | 不复用           |
 | tracking、`flyTo`、`zoomTo`                                               | unsupported     | 不改变           |
 
-C2 已固定 Anchor/Model graphic property allowlist；C3 仍独立处理线面。C4 才负责 Entity/DataSource/
+C2/C3 已固定 Anchor/Model/Polyline/Polygon graphic property allowlist。C4 才负责 Entity/DataSource/
 Viewer 的 instance-owned 自动集成。当前不能使用默认 Globe visualizers 或直接使用
 `viewer.entities` 绕过这些阶段边界。
 

@@ -422,6 +422,14 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   request render，下一normal update才add。Stale、replacement和destroy路径都要exactly-once cleanup。
 - Model transform只使用fixed planar translation/normalized Quaternion。不要调用`computeModelMatrix`、
   ENU、Model height clamping，也不要在C4前把private visualizer接到`viewer.entities`。
+- C3 Polyline只允许`ArcType.NONE`的planar straight segments；clamp逐supplied vertex调用resolver，不做
+  geodesic/rhumb、ground primitive或隐式terrain采样/细分。`width`必须是`[0,255]`内的integer。
+- C3 Polygon只接受simple outer ring与direct holes。Scalar height、per-position height、extrusion、caps、
+  side walls与outline必须先完整preflight，再以local DOUBLE geometry、translation `modelMatrix`和explicit
+  world bounds原子替换；terrain drape是vertex-only sampling，`outlineWidth`必须是`[0,255]`内的integer。
+- C3 private Buffer owner保留original Entity picking并独占其collections。Warm property/terrain变化在拓扑与
+  blend signature不变时复用owner；未变化update不得调用Buffer setter或触发buffer copy。Candidate
+  insertion失败、replacement与destroy必须exactly-once cleanup。
 
 ## Planar World release qualification 检查
 

@@ -4,7 +4,7 @@
 
 - 计划类型（Plan type）：`phase`
 - 阶段（Phase）：`C3-polyline-polygon`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 父计划（Parent plan）：
   [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)
 - 负责人角色（Owner role）：`execution`
@@ -102,7 +102,7 @@ World、Scene、EntityCollection、Entity、Property或terrain provider。
 | --------------- | ------------------------------------------------------ |
 | `show`          | 默认true；与Entity showing/availability合取            |
 | `positions`     | 至少2个finite Cartesian3；任一outside使当前graphic隐藏 |
-| `width`         | 默认1；finite、非负；0隐藏但保留owner                  |
+| `width`         | 默认1；`[0,255]`内integer；0隐藏但保留owner            |
 | `material`      | undefined=>white；仅ColorMaterialProperty              |
 | `arcType`       | undefined=>planar NONE；显式仅ArcType.NONE             |
 | `clampToGround` | false=>保留absolute Z；true=>每supplied vertex clamp   |
@@ -131,7 +131,7 @@ Extrusion：
 - `extrudedHeight`未定义时仅top；定义时每点按`extrudedHeightReference`解析bottom；
 - 每点bottom<=top；outer/holes均有side walls；`closeTop`/`closeBottom`默认true控制caps；
 - `fill`默认true，material仅undefined/ColorMaterialProperty；
-- `outline`默认false，支持outlineColor和finite非负outlineWidth；非extrusion画top rings，extrusion画
+- `outline`默认false，支持outlineColor和`[0,255]`内integer outlineWidth；非extrusion画top rings，extrusion画
   top/bottom rings和垂直edges。
 
 显式拒绝`stRotation`、`granularity`、`textureCoordinates`、非disabled shadows、
@@ -151,8 +151,9 @@ Extrusion：
 - Alpha决定OPAQUE/TRANSLUCENT collection；alpha跨class必须candidate replacement。
 - `getBoundingSphere`：active同步geometry返回DONE；hidden、outside、missing graphic或无fill/outline返回
   FAILED；C3无异步PENDING。
-- 未变化warm update保持owner、collections、buffer/command/PickId/subscription identity；terrain height
-  变化只在normal update修改positions/bounds。
+- 未变化warm update保持owner、collections、buffer/command/PickId/subscription identity；不得调用会标脏的
+  geometry/material/show setter或触发buffer copy。Terrain height真实变化只在normal update修改positions/
+  bounds。
 
 ### Atomicity 与 lifecycle
 
@@ -272,7 +273,66 @@ node scripts/scenegis/audit-upstream-patches.mjs
 
 ## 当前交接
 
-- C3设计已由Architecture Agent确认并激活；Planning base为C2 completed checkpoint
-  `3bdd638661c14bfbf127b12dec3bd8c5e8e3f3ba`。
-- 下一步：Architecture提交本planning checkpoint并向Execution派工；Execution只实现C3允许路径，创建
-  pending review后停下，不进入C4。
+### 实际影响路径与source-to-Spec mapping
+
+- Product source：
+  - `packages/engine/Source/SceneGIS/DataSources/_private/_SceneGISPlanarBufferOwner.js`
+  - `packages/engine/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolylineVisualizer.js`
+  - `packages/engine/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolygonVisualizer.js`
+- Specs：
+  - `packages/engine/Specs/SceneGIS/DataSources/_private/SceneGISPlanarPolylineVisualizerSpec.js`
+    对应Polyline contract，direct cases=`7`；
+  - `packages/engine/Specs/SceneGIS/DataSources/_private/SceneGISPlanarPolygonVisualizerSpec.js`
+    对应Polygon contract，direct cases=`9`；
+  - `packages/engine/Specs/SceneGIS/DataSources/SceneGISPlanarGeometrySpec.js`
+    对应real Context closure，direct cases=`1`。
+- Durable docs与AgentDocs：Architecture、DevelopmentGuide、PlanarContentGuide、本phase/review/index。
+- C3新增direct unique cases=`17`；C1 resolver regression=`11`个aggregate cases，不计入C3 direct total。
+
+### 实际设计与偏差
+
+- 新增一个有明确共享必要性的private Buffer owner，集中collection insertion rollback、show、pick id、
+  explicit bounds和exactly-once destroy；未增加第二个共享helper。
+- Focused review修复后，owner rollback按Scene真实membership逐collection移除；无论
+  `destroyPrimitives=true/false`均exactly-once destroy，并在cleanup异常时保留原始insertion error。
+- Polyline/Polygon都以首个resolved XY作为local origin、Z origin固定为0，保存DOUBLE local positions并以
+  translation model matrix恢复world coordinates。拓扑与blend signature不变时原位更新positions/material/
+  bounds，变化时先完整构造并插入candidate，再释放current。
+- Polygon把outer、direct holes、caps、side walls与outline显式展开为triangle/segment buffers；因为Buffer
+  polygon renderer直接消费explicit triangles，所以不依赖其hole metadata。这是计划允许的private实现
+  选择，未改变ADR-0015 topology或pick语义。
+- Clamp/relative只逐supplied vertex调用C1 resolver；没有terrain request、沿边细分或continuous drape。
+- Polyline width与Polygon outlineWidth只接受`[0,255]`内integer；last-applied state比较避免静态warm
+  update重复调用Buffer setter，真实Property/terrain/style/bounds/show变化仍在normal update生效。
+- 实际Spec basename按constructor symbol命名，不带源码private module basename的前导下划线；测试仍位于
+  `_private/`目录并且不进入public discovery surface。
+
+### 验证结果
+
+| 命令                                                                     | 结果                                                                                                                              |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run test -- --includeName "SceneGISPlanarPolylineVisualizer"`       | Exit 0，`7/7`                                                                                                                     |
+| `npm run test -- --includeName "SceneGISPlanarPolygonVisualizer"`        | Exit 0，`9/9`                                                                                                                     |
+| `npm run test -- --includeName "SceneGISPlanarGeometry"`                 | Exit 0，`1/1`；三个original Entity pick fixture、finite depth、静态dirty/copy零增量、dynamic copy、warm identity与destroy balance |
+| `npm run test -- --includeName "SceneGISPlanarPositionResolver"`         | Exit 0，`11/11` aggregate regression                                                                                              |
+| `npm run build`                                                          | Exit 0                                                                                                                            |
+| `npm run build-ts`                                                       | Exit 0；仅现有TSD-JSDoc warnings                                                                                                  |
+| `npm run build-docs`                                                     | Exit 0                                                                                                                            |
+| scoped ESLint/Prettier、Markdownlint、`git diff --check`、upstream audit | Exit 0；详见pending review evidence                                                                                               |
+
+### Ownership、generated与剩余风险
+
+- Upstream-owned files=`0`；C3 SGP=`0`；manifest、SGP-0001/0002 unchanged；new patch markers=`0`。
+- 三个private symbols在engine/Cesium declarations与API HTML命中`0`；generated files in status=`0`。
+- Buffer collections仍是experimental/private升级面；per-Entity draw-call cost留给C5 profiling。
+- Vertex-only terrain drape不保证长边/大三角形连续贴地；simple topology validation不替代完整计算几何库。
+- Real Context是一个代表性GPU fixture，不是跨硬件或全属性矩阵；C4前`viewer.entities`仍不可用。
+
+### Current handoff
+
+- Architecture focused re-review确认C3-R001～C3-R003全部关闭；Polyline `7/7`、Polygon `9/9`、real
+  Context `1/1`、build、scoped ESLint与upstream audit由Architecture独立复跑并通过。
+- Direct unique case count仍为`17`：三个finding扩展既有7/9/1 cases，没有以aggregate overlap或新增断言
+  虚增case数。C1 resolver未改，复用首轮`11/11`证据。
+- C3状态为`completed`；Architecture Agent形成独立C3本地checkpoint后，才从该checkpoint重新发现C4
+  源码事实并创建C4 phase plan。C3未push，未把C4设计或实现混入本阶段。
