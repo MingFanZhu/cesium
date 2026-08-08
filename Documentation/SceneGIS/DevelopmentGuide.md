@@ -411,17 +411,20 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   alias input时也必须保持失败原子性。Resolver 不建立 subscription、request、cache或ownership。
 - Orientation undefined 使用 translation-only identity rotation；defined Quaternion映射固定planar
   axes。禁止通过 `eastNorthUpToFixedFrame` 引入位置相关 ECEF frame。
-- Automatic adapter 使用 graphic/config allowlist，并替换而非追加会消费相同 graphics 的默认 Globe
-  visualizer。Unsupported 输入必须在低层资源 mutation 前抛 `DeveloperError`，不得 warning、silent
-  ignore或Globe fallback。
-- 每个阶段只宣称已经实现并验证的 profile。C1 private resolver不等于 `viewer.entities` 可用；升级时
-  复核 default visualizer、clamping、model matrix、DataSourceDisplay callback和ground initialization。
+- Automatic adapter 使用 instance-owned graphic/config allowlist，并替换而非追加会消费相同 graphics 的
+  默认 Globe visualizer。Unsupported 输入必须在低层资源 mutation 前抛 `DeveloperError`，不得 warning、
+  silent ignore或Globe fallback。
+- C4 automatic path 只接受 live planar World、`CustomDataSource` 与 disabled `EntityCluster`。业务 metadata
+  使用 `Entity.properties`；未知或 unsupported top-level Property 必须在所有 child normal update 和低层资源
+  mutation 前拒绝。同步 collection listener 可以先更新 CPU tracking。
+- 升级时复核 default visualizer、clamping、model matrix、`DataSourceDisplay` callback/update snapshot、
+  per-DataSource primitive container、ordering 和 destroy lifecycle。
 - C2 Anchor只使用caller-owned disabled `EntityCluster` pool，低层对象接收absolute planar position；
   temporary hidden/outside保留slot，graphic/entity removal与destroy成对归还。
 - C2 Model的URI/load-time generation、candidate与active primitive必须隔离；Promise completion只缓存并
   request render，下一normal update才add。Stale、replacement和destroy路径都要exactly-once cleanup。
 - Model transform只使用fixed planar translation/normalized Quaternion。不要调用`computeModelMatrix`、
-  ENU、Model height clamping，也不要在C4前把private visualizer接到`viewer.entities`。
+  ENU或Model height clamping。
 - C3 Polyline只允许`ArcType.NONE`的planar straight segments；clamp逐supplied vertex调用resolver，不做
   geodesic/rhumb、ground primitive或隐式terrain采样/细分。`width`必须是`[0,255]`内的integer。
 - C3 Polygon只接受simple outer ring与direct holes。Scalar height、per-position height、extrusion、caps、
@@ -430,6 +433,9 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - C3 private Buffer owner保留original Entity picking并独占其collections。Warm property/terrain变化在拓扑与
   blend signature不变时复用owner；未变化update不得调用Buffer setter或触发buffer copy。Candidate
   insertion失败、replacement与destroy必须exactly-once cleanup。
+- C4 callback第一次合法update只原子追加Anchor、Model、Polyline、Polygon并返回false；children必须等下一次
+  update。Model/Polyline/Polygon自动路径使用`dataSource._primitives`，显式private构造省略target时仍使用
+  `scene.primitives`；两种路径都不拥有caller collection。
 
 ## Planar World release qualification 检查
 

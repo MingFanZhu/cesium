@@ -409,7 +409,7 @@ describe(
       let isDestroyedCalls = 0;
       spyOn(world, "isDestroyed").and.callFake(function () {
         isDestroyedCalls++;
-        return isDestroyedCalls === 2 ? true : originalIsDestroyed.call(this);
+        return isDestroyedCalls === 3 ? true : originalIsDestroyed.call(this);
       });
       const worldDestroy = spyOn(world, "destroy").and.callThrough();
 

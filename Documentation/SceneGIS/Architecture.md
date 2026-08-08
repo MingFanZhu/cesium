@@ -386,8 +386,7 @@ anchor X/Y 必须位于 World inclusive extent。
 
 Automatic adapter 必须是 instance-owned allowlist，不能同时运行会消费相同 graphics 的默认 Globe
 visualizer。Unsupported graphic/config 必须在其资源 mutation 前 fail-fast，不得 silent ignore 或
-fallback 到 Globe path。C1 仅提供 private resolver 与 compatibility baseline；Point/Billboard/Label/
-Model、Polyline/Polygon 和 Entity/DataSource/Viewer 集成分别由后续批准阶段负责。完整决定见
+fallback 到 Globe path。完整决定见
 [ADR-0013](Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)，使用边界见
 [PlanarContentGuide](PlanarContentGuide.md)。
 
@@ -395,8 +394,7 @@ C2 的 private Anchor visualizer 只复用 caller-owned disabled `EntityCluster`
 `PointPrimitive`，Billboard/Label 只接收 resolver 产生的 absolute position 并固定 low-level
 `HeightReference.NONE`。Private Model visualizer 使用 fixed planar translation/quaternion matrix，直接
 管理 `Model.fromGltfAsync` generation 与 `scene.primitives` ownership，不调用 Entity ENU 或 Model
-height-clamping path。Async completion 不得直接添加 primitive。C4 之前这些角色只允许显式构造，
-`viewer.entities` 仍不是 supported planar content entry。完整 profile见 ADR-0014。
+height-clamping path。Async completion 不得直接添加 primitive。完整 profile见 ADR-0014。
 
 C3 的 private Polyline/Polygon visualizer 绕开默认 GeometryUpdater、ground 与 geodesic/rhumb 路径。
 Polyline 只接受 planar straight segments；Polygon 只接受 simple outer ring 与 direct holes，并显式生成
@@ -404,7 +402,15 @@ cap、side wall 和 outline。Clamp/drape 只在 supplied vertices 读取 reside
 采样或细分，也不发起请求；线段和triangle内部仍按几何线性插值。Polyline `width`与Polygon
 `outlineWidth`只接受`[0,255]`内的integer。每个 Entity 使用独立 private Buffer owner，以 local DOUBLE geometry、translation `modelMatrix`、
 explicit world bounds 和 original Entity pick 保持大坐标精度与所有权边界；candidate replacement 必须
-原子化并 exactly-once cleanup。C4 前仍只能显式构造这些 private visualizer。完整 profile见 ADR-0015。
+原子化并 exactly-once cleanup。完整 profile见 ADR-0015。
+
+C4 只为 live `SceneGISPlanarWorld` 安装 per-instance `DataSourceDisplay.visualizersCallback`；默认 Globe、
+`globe:false` 和其他 World 保持 Cesium 默认 callback。Planar gate 仅接受 `CustomDataSource`、disabled
+`EntityCluster` 和批准的 Entity top-level Property allowlist，第一次合法 update 原子追加 C2/C3 children，
+后续每帧先于 child normal update 和低层资源 mutation 复验动态 profile；同步 collection listener 可以更新
+CPU tracking。Model/Polyline/Polygon 使用 per-DataSource primitive
+container，pick 继续返回 original Entity，bounds 由现有 `DataSourceDisplay` 联合。唯一上游缝隙位于
+`CesiumWidget.js`，由 `SGP-0001` 与 ADR-0016 追踪。
 
 ## 验证架构
 

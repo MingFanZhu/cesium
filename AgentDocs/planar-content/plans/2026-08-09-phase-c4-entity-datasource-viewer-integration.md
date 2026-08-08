@@ -4,11 +4,11 @@
 
 - 计划类型（Plan type）：`phase`
 - 阶段（Phase）：`C4-entity-datasource-viewer-integration`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 父计划（Parent plan）：
   [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)
 - 负责人角色（Owner role）：`execution`
-- 架构评审（Architecture review）：`confirmed`
+- 架构评审（Architecture review）：`approved`
 - 架构评审人：Architecture Agent（依据项目负责人授予的后续阶段自主设计与派工权限）
 - 创建日期（Created）：`2026-08-09`
 - 更新日期（Updated）：`2026-08-09`
@@ -32,7 +32,7 @@
    visualizer；
 2. 让加入现有 `DataSourceCollection` 的 `CustomDataSource` 自动使用相同profile，并随DataSource顺序、
    remove和destroy正确管理内容；
-3. 在子visualizer mutation前拒绝非`CustomDataSource`、enabled clustering、未支持Cesium graphics和未知
+3. 在子visualizer normal update和低层资源mutation前拒绝非`CustomDataSource`、enabled clustering、未支持Cesium graphics和未知
    top-level Entity Property，防止平面Cartesian3静默进入Globe语义；
 4. 复用现有 original Entity pick、`DataSourceDisplay.getBoundingSphere`和Viewer selection，不新增第二套
    selection或Entity系统；
@@ -116,7 +116,8 @@ Planar callback每个DataSource返回同一个可增长数组，初始仅含gate
   `DeveloperError`，并在error中标识DataSource/Entity/property；
 - 第一次合法update在local candidates中按`Anchor -> Model -> Polyline -> Polygon`构造；失败时反向destroy
   已构造项，不改变共享数组，保留原始异常；成功后一次性append children并返回false；
-- 已激活后每帧继续先做global profile验证，再返回true，使动态新增非法graphic在child mutation前失败；
+- 已激活后每帧继续先做global profile验证，再返回true，使动态新增非法graphic在child normal update和低层
+  资源mutation前失败；同步collection listener允许先更新CPU tracking；
 - 不拥有或destroy已append children，避免与DataSourceDisplay逐项destroy重复；未激活时destroy只终止gate。
 
 允许用户纠正`cluster.enabled`或删除非法Entity/Property后再次update并成功激活。非CustomDataSource只能
@@ -229,7 +230,7 @@ Factory返回undefined时必须精确保留default Globe、`globe:false`和其�
 - default CustomDataSource初始只有gate，第一次合法update append四个children并返回false，下一次按固定顺序
   更新；
 - non-CustomDataSource、enabled cluster、每类代表性unsupported standard graphic和unknown custom top-level
-  Property在child mutation前抛错；`Entity.properties`允许；
+  Property在child normal update和低层资源mutation前抛错；同步CPU tracking允许；`Entity.properties`允许；
 - invalid配置删除或cluster disable后可激活；
 - 第二/第三child constructor失败时反向清理先前candidate，不append、不覆盖原始异常；
 - activated gate不重复构造；dynamic invalid Entity在四个child update前失败；
@@ -276,7 +277,8 @@ Execution应以仓库实际runner语法记录精确命令，至少包括：
 ## 完成条件
 
 - `widget.entities`、`viewer.entities`与`CustomDataSource`自动运行六类C2/C3 planar content；
-- invalid DataSource/cluster/Entity profile在任何child update前显式失败，合法修正路径可恢复；
+- invalid DataSource/cluster/Entity profile在任何child normal update和低层资源mutation前显式失败，合法修正
+  路径可恢复；
 - original Entity picking、Viewer selection、union bounds、dynamic update和destroy顺序通过；
 - Model/Polyline/Polygon自动path使用per-data-source primitive container，默认显式构造path不回归；
 - default Globe、`globe:false`和non-planar world仍走原Cesium callback；
@@ -286,10 +288,69 @@ Execution应以仓库实际runner语法记录精确命令，至少包括：
 - 最小充分Specs/build/types/docs/lint/audit通过，任何环境限制如实记录；
 - review request为`pending`，phase/extension保持`active`；Execution停止，不commit、不push、不进入C5。
 
+## 偏差与结果
+
+### 实际设计与路径
+
+- 新增`_SceneGISPlanarVisualizersCallback.js`：factory只为live planar World返回instance callback；gate在每次
+  update先验证World/Scene、`CustomDataSource`、disabled cluster与Entity top-level allowlist。首次合法
+  update按Anchor/Model/Polyline/Polygon顺序原子append并返回false，constructor失败反向清理且保留原异常。
+- Model/Polyline/Polygon及Buffer owner增加optional primitive target；C4传`dataSource._primitives`，省略时
+  保持`scene.primitives`。Model candidate与Buffer collection都按真实membership回滚，target保持caller-owned。
+- `CesiumWidget.js`仅增加factory import和`DataSourceDisplay.visualizersCallback`两个paired `SGP-0001`
+  hunks；`.scenegis/upstream-patches.json`只追加三个C4 test paths。
+- Factory liveness直接使用`SceneGISPlanarWorld#isDestroyed()`正式契约；live World即使绑定或覆盖五个frame
+  lifecycle方法仍安装planar callback，真实destroyed World返回`undefined`。P6 fixture按合法新增liveness call
+  观察controller构造前死亡，不再依赖硬编码旧调用次数。
+- 最终product paths：上述五个private DataSources文件与`packages/engine/Source/Widget/CesiumWidget.js`；
+  Specs为callback、C2/C3 optional-target、engine Widget和widgets Viewer；durable docs为Architecture、
+  DevelopmentGuide与PlanarContentGuide。没有修改`DataSourceDisplay.js`或`Viewer.js`。
+
+### Source-to-Spec 与计数
+
+- Factory/gate -> `_SceneGISPlanarVisualizersCallbackSpec.js`：`8` cases。
+- CesiumWidget automatic path -> `SceneGISPlanarContentCesiumWidgetSpec.js`：`4` cases。
+- Viewer selection/DataSource path -> `SceneGISPlanarContentViewerSpec.js`：`2` cases。
+- Optional target -> Model/Polyline/Polygon focused Specs各新增`1` case。
+- Model真实`PrimitiveCollection` post-insertion event rollback -> Model focused Spec新增`1` case。
+- C4 direct unique cases=`18`。受影响focused aggregate：Anchor`11`、Model`11`、Polyline`8`、Polygon`10`、
+  geometry`1`、P1 Widget`16`、P6 Viewer`18`、upstream CesiumWidget`75`、upstream Viewer`59`；aggregate不与
+  direct unique重复计数。
+
+### 验证矩阵
+
+- 三个新增suite：callback`8/8`、engine Widget`4/4`、widgets Viewer`2/2`，Exit 0。真实Widget fixture覆盖
+  normal render pixel、original Entity pick、per-DataSource target与remove/destroy。
+- C2/C3：Anchor`11/11`、Model`11/11`、Polyline`8/8`、Polygon`10/10`、geometry real Context`1/1`，Exit 0。
+- 集成回归：P1 `SceneGISWorldCesiumWidget` `16/16`、P6 `SceneGISPlanarViewer` `18/18`、upstream
+  `Widget/CesiumWidget` `75/75`、`Widgets/Viewer/Viewer` `59/59`，Exit 0。P6首次复跑暴露额外liveness call
+  顺序回归；完成上述兼容细化后`18/18`通过。
+- `npm run build`、`npm run build-ts`、`npm run build-docs`、`npm run tsc`均Exit 0；build-ts保留仓库现有
+  大量TSD-JSDoc warning，无新增C4-specific warning。
+- Scoped ESLint、JS/JSON/Markdown Prettier、Markdownlint与`git diff --check`均Exit 0。计划中的
+  `npm run scenegis:audit-upstream-patches`因仓库没有该npm script而Exit 1；等价正式入口
+  `node scripts/scenegis/audit-upstream-patches.mjs` Exit 0，报告current delivery upstream-owned entry=`1`
+  且generated status=`0`。
+- Generated engine/Cesium declarations与API HTML中factory/gate和`SCENEGIS_PATCH`命中`0`；generated files
+  status=`0`。
+- Focused review fixes不新增case：callback`8/8`锁定正式World liveness与真实third-child rollback；P6 Viewer
+  `18/18`按合法新增liveness call调整controller-death观察；engine Widget`4/4`锁定mixed profile的child
+  normal-update/resource boundary、真实Billboard/Label/Polyline/Polygon target、两个DataSource move与exactly-once
+  remove。Model`11/11`、Polyline`8/8`、Polygon`10/10`、widgets Viewer`2/2`与`npm run build`均Exit 0。
+- C4-R001～C4-R004由Execution标为`fixed`：factory删除destroyObject shape heuristic；保证措辞收窄到child
+  normal update和低层资源mutation；automatic target/order使用真实内容；third-child fixture确实在Polyline
+  constructor失败并验证Anchor/Model回滚、原异常和纠正后激活。
+
+### Ownership 与剩余风险
+
+- Upstream-owned product files=`1`：`packages/engine/Source/Widget/CesiumWidget.js`；C4复用
+  `SGP-0001`，新增paired hunks=`2`，无新SGP。`Scene.js`、`Viewer.js`与`SGP-0002` unchanged。
+- Public API delta=`0`；private callback/gate不进入supported declarations/API。Manifest只扩展SGP-0001 tests。
+- 剩余风险：C5前没有批量Entity性能或Sandcastle交付结论；非Custom DataSource、enabled clustering及未批准
+  graphics仍明确unsupported；Buffer/Model私有升级面与CesiumWidget callback seam需在上游升级时复核。
+
 ## 当前交接
 
-- Architecture已从C3 checkpoint完成CesiumWidget、DataSourceDisplay、Entity、CustomDataSource、Viewer
-  selection和C2/C3 visualizer调用链审计。
-- ADR-0016 approved；SGP-0001已扩展为primary-world lifecycle与integration patch，phase plan active。
-- 下一步：Execution从planning checkpoint实现上述严格边界，完成后回传working-tree diff和pending review；
-  Architecture review通过并提交C4后，才依据当时源码与profiling事实设计C5。
+- C4-R001～C4-R004经Architecture focused re-review全部关闭；review为`approved`，phase为`completed`，
+  extension继续`active`。
+- 下一步：Architecture形成C4独立本地提交检查点；之后才按届时源码事实设计C5，不把C5实现混入本阶段。

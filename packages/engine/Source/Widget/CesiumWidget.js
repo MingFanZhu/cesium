@@ -19,6 +19,9 @@ import DataSourceDisplay from "../DataSources/DataSourceDisplay.js";
 import EntityView from "../DataSources/EntityView.js";
 import getElement from "../DataSources/getElement.js";
 import Property from "../DataSources/Property.js";
+// SCENEGIS_PATCH_BEGIN SGP-0001: Install the instance-local planar DataSource visualizer factory.
+import createSceneGISPlanarVisualizersCallback from "../SceneGIS/DataSources/_private/_SceneGISPlanarVisualizersCallback.js";
+// SCENEGIS_PATCH_END SGP-0001
 import Cesium3DTileset from "../Scene/Cesium3DTileset.js";
 import computeFlyToLocationForRectangle from "../Scene/computeFlyToLocationForRectangle.js";
 import Globe from "../Scene/Globe.js";
@@ -497,6 +500,11 @@ function CesiumWidget(container, options) {
     const dataSourceDisplay = new DataSourceDisplay({
       scene: scene,
       dataSourceCollection: dataSourceCollection,
+      // SCENEGIS_PATCH_BEGIN SGP-0001: Select planar visualizers without changing the default callback.
+      visualizersCallback: createSceneGISPlanarVisualizersCallback(
+        options.world,
+      ),
+      // SCENEGIS_PATCH_END SGP-0001
     });
 
     const eventHelper = new EventHelper();

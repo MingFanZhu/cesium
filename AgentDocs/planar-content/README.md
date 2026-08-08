@@ -7,12 +7,11 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: `C4-entity-datasource-viewer-integration`
-- Active phase plan:
-  [C4 Entity、DataSource 与 Viewer 集成](plans/2026-08-09-phase-c4-entity-datasource-viewer-integration.md)
+- Current phase: None；C4已完成，C5尚未激活
+- Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（等待C4 planning checkpoint派工）
+- Execution contact: None；等待Architecture设计C5
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -59,16 +58,16 @@
 
 ## Current handoff
 
-- Current state: C3已在checkpoint`2015aa188f4aff5322b24ade5832547ad1c626df`完成；C4源码审计、
-  ADR-0016、phase plan和SGP-0001扩展裁决已形成，等待planning checkpoint派工。
-- Next action: Execution实现instance-owned planar visualizers callback、CustomDataSource gate、
-  per-data-source primitive targeting和最小CesiumWidget SGP seam；完成后停在C4请求review。
-- Current phase status: C4 `active`。
+- Current state: C4-R001～C4-R004经focused re-review全部关闭；C4 review为`approved`，phase为
+  `completed`。
+- Next action: Architecture Agent提交C4独立checkpoint，再依据届时源码事实设计C5。
+- Current phase status: C4 `completed`；C5尚未激活。
 - Open discussions: None；C4设计已完整确认。若需要修改`DataSourceDisplay.js`、`Viewer.js`或超过
   CesiumWidget两个窄hunk，Execution才暂停回报Architecture。
 - Latest review:
-  [C3 polyline and polygon review](reviews/2026-08-09-c3-polyline-polygon.md)（`approved`）。
-- Unresolved reviews: None；C4实现ready后才创建pending review。
+  [C4 Entity/DataSource/Viewer integration review](reviews/2026-08-09-c4-entity-datasource-viewer-integration.md)
+  （`approved`）。
+- Unresolved reviews: None。
 - Known risks: Buffer collections属于experimental升级敏感面；vertex-only terrain drape不代表连续贴地；
   per-Entity owner的批量性能留给C5；SGP-0001新增C4 seam仍位于上游高频CesiumWidget构造路径，升级时
   需重点复核。

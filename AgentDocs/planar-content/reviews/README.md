@@ -10,3 +10,6 @@
 - [C3 polyline and polygon review](2026-08-09-c3-polyline-polygon.md)（`approved`）：C3-R001～C3-R003
   均经focused re-review关闭；真实add-event rollback、integer width、静态warm dirty/copy与
   zero-upstream边界通过。
+- [C4 Entity/DataSource/Viewer integration review](2026-08-09-c4-entity-datasource-viewer-integration.md)
+  （`approved`）：C4-R001～C4-R004经focused re-review关闭；正式World liveness、收窄动态profile保证、
+  真实per-DataSource target/order、第三个child rollback及`SGP-0001`边界通过。

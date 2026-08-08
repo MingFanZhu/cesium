@@ -1,6 +1,7 @@
 import BufferPolygonCollection from "../../../Scene/BufferPolygonCollection.js";
 import BufferPolylineCollection from "../../../Scene/BufferPolylineCollection.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
+import DeveloperError from "../../../Core/DeveloperError.js";
 
 function destroyCollection(collection) {
   collection.destroy();
@@ -46,9 +47,17 @@ function removeAndDestroyCollection(primitives, collection) {
  * @constructor
  * @private
  */
-function SceneGISPlanarBufferOwner(scene, entity) {
+function SceneGISPlanarBufferOwner(scene, entity, primitiveCollection) {
   this.scene = scene;
   this.entity = entity;
+  this.primitives = primitiveCollection ?? scene.primitives;
+  if (
+    typeof this.primitives.add !== "function" ||
+    typeof this.primitives.remove !== "function" ||
+    typeof this.primitives.contains !== "function"
+  ) {
+    throw new DeveloperError("primitiveCollection must own primitives.");
+  }
   this.collections = [];
   this.destroyed = false;
 }
@@ -102,7 +111,7 @@ SceneGISPlanarBufferOwner.prototype.addPolygonCollection = function (options) {
 SceneGISPlanarBufferOwner.prototype.insert = function () {
   try {
     for (let i = 0; i < this.collections.length; i++) {
-      this.scene.primitives.add(this.collections[i]);
+      this.primitives.add(this.collections[i]);
     }
   } catch (error) {
     try {
@@ -130,7 +139,7 @@ SceneGISPlanarBufferOwner.prototype.destroy = function () {
   let cleanupError;
   for (let i = this.collections.length - 1; i >= 0; i--) {
     const collectionError = removeAndDestroyCollection(
-      this.scene.primitives,
+      this.primitives,
       this.collections[i],
     );
     cleanupError = cleanupError ?? collectionError;

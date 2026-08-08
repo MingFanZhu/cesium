@@ -326,4 +326,18 @@ describe("SceneGIS/DataSources/SceneGISPlanarPolygonVisualizer", function () {
     );
     expect(collection.contains(entity)).toBe(true);
   });
+
+  it("uses an explicit caller-owned primitive collection without owning it", function () {
+    const target = new PrimitiveCollection();
+    const targeted = new SceneGISPlanarPolygonVisualizer(
+      world,
+      scene,
+      collection,
+      target,
+    );
+    expect(targeted._primitives).toBe(target);
+    targeted.destroy();
+    expect(target.isDestroyed()).toBe(false);
+    target.destroy();
+  });
 });

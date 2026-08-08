@@ -10,6 +10,7 @@ import Matrix4 from "../../../../Source/Core/Matrix4.js";
 import Model from "../../../../Source/Scene/Model/Model.js";
 import ModelGraphics from "../../../../Source/DataSources/ModelGraphics.js";
 import Quaternion from "../../../../Source/Core/Quaternion.js";
+import PrimitiveCollection from "../../../../Source/Scene/PrimitiveCollection.js";
 import SceneGISPlanarCoordinateSystem from "../../../../Source/SceneGIS/Core/SceneGISPlanarCoordinateSystem.js";
 import SceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlanarExtent.js";
 import SceneGISPlanarModelVisualizer from "../../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarModelVisualizer.js";
@@ -360,5 +361,50 @@ describe("SceneGIS/DataSources/SceneGISPlanarModelVisualizer", function () {
     await Promise.resolve();
     await Promise.resolve();
     expect(late.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses an explicit caller-owned primitive collection without owning it", function () {
+    const target = new PrimitiveCollection();
+    const targeted = new SceneGISPlanarModelVisualizer(
+      world,
+      scene,
+      collection,
+      target,
+    );
+    expect(targeted._primitives).toBe(target);
+    targeted.destroy();
+    expect(target.isDestroyed()).toBe(false);
+    target.destroy();
+  });
+
+  it("rolls back a post-insertion target event failure", async function () {
+    visualizer.destroy();
+    visualizer = undefined;
+    const target = new PrimitiveCollection();
+    const targeted = new SceneGISPlanarModelVisualizer(
+      world,
+      scene,
+      collection,
+      target,
+    );
+    const entity = addModel();
+    targeted.update(time);
+    const candidate = createFakeModel();
+    await settle(candidate);
+    const removeListener = target.primitiveAdded.addEventListener(function () {
+      throw new Error("fixture target insertion failure");
+    });
+    try {
+      expect(function () {
+        targeted.update(time);
+      }).toThrowError("fixture target insertion failure");
+      expect(target.length).toBe(0);
+      expect(candidate.destroy).toHaveBeenCalledTimes(1);
+      expect(targeted._items.get(entity.id).failed).toBe(true);
+    } finally {
+      removeListener();
+      targeted.destroy();
+      target.destroy();
+    }
   });
 });

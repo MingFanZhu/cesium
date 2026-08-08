@@ -156,7 +156,11 @@ function computeState(visualizer, item, time) {
 }
 
 function createOwner(visualizer, item, state) {
-  const owner = new SceneGISPlanarBufferOwner(visualizer._scene, item.entity);
+  const owner = new SceneGISPlanarBufferOwner(
+    visualizer._scene,
+    item.entity,
+    visualizer._primitives,
+  );
   try {
     const render = owner.addPolylineCollection({
       primitives: [
@@ -237,7 +241,12 @@ function releaseOwner(item) {
  * @constructor
  * @private
  */
-function SceneGISPlanarPolylineVisualizer(world, scene, entityCollection) {
+function SceneGISPlanarPolylineVisualizer(
+  world,
+  scene,
+  entityCollection,
+  primitiveCollection,
+) {
   if (!(world instanceof SceneGISPlanarWorld) || world.isDestroyed()) {
     throw new DeveloperError("world must be a live SceneGISPlanarWorld.");
   }
@@ -249,6 +258,14 @@ function SceneGISPlanarPolylineVisualizer(world, scene, entityCollection) {
   }
   this._world = world;
   this._scene = scene;
+  this._primitives = primitiveCollection ?? scene.primitives;
+  if (
+    typeof this._primitives.add !== "function" ||
+    typeof this._primitives.remove !== "function" ||
+    typeof this._primitives.contains !== "function"
+  ) {
+    throw new DeveloperError("primitiveCollection must own primitives.");
+  }
   this._entityCollection = entityCollection;
   this._items = new AssociativeArray();
   entityCollection.collectionChanged.addEventListener(

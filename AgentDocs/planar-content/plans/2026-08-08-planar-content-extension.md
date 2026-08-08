@@ -16,7 +16,9 @@
 - 相关评审（Related reviews）：
   [C1 content contract review](../reviews/2026-08-09-c1-content-contract.md)（`approved`）、
   [C2 anchor and model review](../reviews/2026-08-09-c2-anchor-and-model.md)（`approved`）、
-  [C3 polyline and polygon review](../reviews/2026-08-09-c3-polyline-polygon.md)（`approved`）
+  [C3 polyline and polygon review](../reviews/2026-08-09-c3-polyline-polygon.md)（`approved`）、
+  [C4 Entity/DataSource/Viewer integration review](../reviews/2026-08-09-c4-entity-datasource-viewer-integration.md)
+  （`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
   [ADR-0014：平面锚点内容与普通 Model Visualizer](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)、
@@ -252,5 +254,15 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
 - `2026-08-09`：ADR-0016批准instance-owned planar callback、CustomDataSource-only gate、
   per-data-source primitive target、原Entity selection与deferred activation；裁决扩展active `SGP-0001`，
   C4 phase plan激活。
-- 下一步：Architecture提交C4 planning checkpoint并向Execution派工；Execution实现完成后停在C4
-  review gate，不进入C5。
+- `2026-08-09`：Execution完成C4 private gate、optional primitive target、CesiumWidget两个`SGP-0001`
+  hunks、Widget/Viewer closure与durable docs；新增direct cases=`18`，最小充分矩阵通过并创建pending review。
+- `2026-08-09`：Architecture/code review提出C4-R001～C4-R004：factory使用destroyObject method shape误判
+  live World、动态profile guarantee超过实际时序、automatic target/DataSource ordering证据未真实产生内容，以及
+  third-child rollback fixture实际提前在Model constructor失败。
+- `2026-08-09`：Execution完成四项focused fixes：factory使用正式World liveness契约，动态保证收窄到child
+  normal update和低层资源mutation，real Widget产生Billboard/Label/Polyline/Polygon并验证两个DataSource
+  ordering/remove，rollback fixture真正进入Polyline constructor。聚焦Specs与build通过。
+- `2026-08-09`：Architecture focused re-review确认C4-R001～C4-R004全部关闭；独立复跑callback`8/8`、
+  engine Widget`4/4`、P6 Viewer`18/18`，scoped ESLint、upstream audit与diff check通过；C4更新为
+  `completed`。
+- 下一步：Architecture形成C4独立本地提交检查点，再依据届时源码事实设计并激活C5。

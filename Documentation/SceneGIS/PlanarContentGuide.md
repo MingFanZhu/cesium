@@ -1,8 +1,8 @@
 # SceneGIS 平面内容使用指南
 
-本文档描述 `planar-content` 的稳定坐标、高度和兼容性边界。C1 已完成 position contract，C2 已提供
-private Anchor/Model visualizer，C3 已提供 private Polyline/Polygon visualizer；这些角色仍只允许显式
-构造，不表示 `viewer.entities` 已可自动按平面语义渲染。
+本文档描述 `planar-content` 的稳定坐标、高度和兼容性边界。C1 已完成 position contract，C2/C3 提供
+private Anchor/Model/Polyline/Polygon visualizer，C4 已把这些角色以 instance-owned callback 接入
+`CesiumWidget`、`Viewer` 和 `CustomDataSource`。
 
 长期设计依据见
 [ADR-0013](Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)。平面 World、terrain
@@ -94,38 +94,60 @@ current原子替换；warm更新复用owner与collection；replacement、removal
 batch，也不拥有World、Scene或EntityCollection。未变化warm update不会重写Buffer geometry/material/show，
 因此不会重新标脏或触发buffer copy。
 
+## C4 Entity 与 DataSource 自动集成
+
+`CesiumWidget({ world })` 和 `Viewer({ world })` 只在 `world` 是 live `SceneGISPlanarWorld` 时安装
+instance-local planar visualizer callback；其他 World、`globe:false` 与默认 Globe 继续使用 Cesium 默认
+callback。Planar callback 只接受 `CustomDataSource`，因此 `widget.entities`、`viewer.entities` 和显式加入
+`dataSources` 的 `CustomDataSource` 属于 supported path，GeoJSON/CZML/KML 等 DataSource 不属于本阶段。
+
+第一次合法 update 先完整验证 World/Scene identity、`EntityCluster.enabled === false` 与所有 Entity 的
+top-level Property profile，再原子追加 Anchor、Model、Polyline、Polygon children；children 从下一次 update
+开始执行。后续每帧 gate 仍先验证动态新增属性。Top-level 只允许 `point`、`billboard`、`label`、`model`、
+`polyline`、`polygon`、`position`、`orientation`、`description`、`properties` 与 `viewFrom`；业务字段必须放入
+`Entity.properties`。其他已定义 standard/custom property 会在 child normal update 和低层资源 mutation 前抛
+`DeveloperError`；同步 collection listener 可以先更新 CPU tracking。
+
+Model、Polyline 与 Polygon 自动路径加入各 DataSource 的 caller-owned `_primitives` container，使
+DataSource ordering、remove 与 destroy 沿用 `DataSourceDisplay` lifecycle；显式 private visualizer 构造仍
+默认使用 `scene.primitives`。SceneGIS 只拥有自己加入的 primitive，不拥有 DataSource container、
+EntityCluster、EntityCollection、Scene 或 World。Pick id 保持 original Entity，Viewer selection、InfoBox 与
+`DataSourceDisplay.getBoundingSphere` 复用现有流程。
+
 ## Compatibility matrix
 
-| 数据或 graphics                                                           | 当前决定        | 可用阶段/边界    |
-| ------------------------------------------------------------------------- | --------------- | ---------------- |
-| `Entity`、Property/event、availability、show、metadata                    | 复用数据模型    | C4 集成          |
-| `EntityCollection`、`CustomDataSource`                                    | 复用数据模型    | C4               |
-| Point、Billboard、Label                                                   | private runtime | C2 explicit only |
-| 普通 glTF Model                                                           | private runtime | C2 explicit only |
-| planar straight Polyline、Polygon                                         | private runtime | C3 explicit only |
-| Box、Corridor、Cylinder、Ellipse、Ellipsoid、Plane、Rectangle、Wall、Path | unsupported     | 首版不实现       |
-| `Cesium3DTilesetGraphics`                                                 | unsupported     | 独立扩展         |
-| GeoJSON、CZML、KML 自动 planar 转换                                       | unsupported     | 独立扩展         |
-| Globe ground、geodesic/rhumb                                              | 禁止隐式进入    | 不复用           |
-| tracking、`flyTo`、`zoomTo`                                               | unsupported     | 不改变           |
+| 数据或 graphics                                                           | 当前决定        | 可用阶段/边界 |
+| ------------------------------------------------------------------------- | --------------- | ------------- |
+| `Entity`、Property/event、availability、show、metadata                    | 复用数据模型    | C4 automatic  |
+| `EntityCollection`、`CustomDataSource`                                    | 复用数据模型    | C4 automatic  |
+| Point、Billboard、Label                                                   | private runtime | C4 automatic  |
+| 普通 glTF Model                                                           | private runtime | C4 automatic  |
+| planar straight Polyline、Polygon                                         | private runtime | C4 automatic  |
+| Box、Corridor、Cylinder、Ellipse、Ellipsoid、Plane、Rectangle、Wall、Path | unsupported     | 首版不实现    |
+| `Cesium3DTilesetGraphics`                                                 | unsupported     | 独立扩展      |
+| GeoJSON、CZML、KML 自动 planar 转换                                       | unsupported     | 独立扩展      |
+| Globe ground、geodesic/rhumb                                              | 禁止隐式进入    | 不复用        |
+| tracking、`flyTo`、`zoomTo`                                               | unsupported     | 不改变        |
 
-C2/C3 已固定 Anchor/Model/Polyline/Polygon graphic property allowlist。C4 才负责 Entity/DataSource/
-Viewer 的 instance-owned 自动集成。当前不能使用默认 Globe visualizers 或直接使用
-`viewer.entities` 绕过这些阶段边界。
+C2/C3 固定 Anchor/Model/Polyline/Polygon graphic property allowlist，C4 的 gate 固定 Entity top-level
+allowlist。Planar path 替换而不是追加默认 Globe visualizers。
 
 ## Enforcement 与 ownership
 
-未来 automatic planar adapter 必须采用 allowlist，并避免同时运行会消费相同 graphics 的默认 Globe
+Automatic planar adapter 采用 instance-owned allowlist，不同时运行会消费相同 graphics 的默认 Globe
 visualizer。已知 unsupported graphic 或 approved graphic 中未支持的配置必须在该 Entity 的资源
 mutation 前抛 `DeveloperError`；不得 silent ignore、warning 后继续或 fallback 到 Globe path。
 
 手工加入 `scene.primitives` 的 raw Cesium primitive 不属于 automatic Entity compatibility
 enforcement，由应用负责其坐标、资源和销毁。C1 resolver 与 C2 visualizer 都是 private implementation
-roles，不是 supported public API。
+roles，不是 supported public API。C4 接入点由 `SGP-0001` 追踪；升级 Cesium 时必须复核
+`DataSourceDisplay` callback、update snapshot、per-DataSource container 与 destroy ordering。
 
 ## 当前使用建议
 
-- 可以把本指南作为后续 C2-C4 的数据准备契约，但不要宣称 Entity 已自动显示。
+- 在 live planar World 的 `widget.entities`、`viewer.entities` 或 `CustomDataSource.entities` 中使用已批准的
+  Point/Billboard/Label/Model/Polyline/Polygon profile。
+- 将业务 metadata 放入 `Entity.properties`，不要注册新的 top-level Entity property。
 - 在应用边界保留 finite meter-based Cartesian3，并显式记录所使用的 planar CRS。
 - 对需要确定 terrain 高度的离线或批处理流程，先使用显式 sampler，再写入 absolute position。
 - 不要使用 `Scene.getHeight/updateHeight`、`scene.pickPosition` 或 `world.pickTerrain` 替代 Entity

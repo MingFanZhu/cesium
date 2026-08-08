@@ -179,6 +179,34 @@ function removeActive(visualizer, item) {
   }
 }
 
+function rollbackCandidate(visualizer, candidate) {
+  let contained = false;
+  try {
+    contained =
+      typeof visualizer._primitives.contains === "function" &&
+      visualizer._primitives.contains(candidate);
+  } catch {
+    // Preserve the original insertion or property-application failure.
+  }
+  if (contained) {
+    try {
+      visualizer._primitives.remove(candidate);
+    } catch {
+      // Preserve the original insertion or property-application failure.
+    }
+  }
+  try {
+    const remains =
+      typeof visualizer._primitives.contains === "function" &&
+      visualizer._primitives.contains(candidate);
+    if (!remains) {
+      destroyCandidate(candidate);
+    }
+  } catch {
+    // Preserve the original insertion or property-application failure.
+  }
+}
+
 function invalidateGeneration(visualizer, item) {
   item.generation++;
   removeActive(visualizer, item);
@@ -490,7 +518,12 @@ function hasModelGraphic(entity) {
  * @constructor
  * @private
  */
-function SceneGISPlanarModelVisualizer(world, scene, entityCollection) {
+function SceneGISPlanarModelVisualizer(
+  world,
+  scene,
+  entityCollection,
+  primitiveCollection,
+) {
   if (!(world instanceof SceneGISPlanarWorld) || world.isDestroyed()) {
     throw new DeveloperError("world must be a live SceneGISPlanarWorld.");
   }
@@ -502,7 +535,16 @@ function SceneGISPlanarModelVisualizer(world, scene, entityCollection) {
   }
   this._world = world;
   this._scene = scene;
-  this._primitives = scene.primitives;
+  this._primitives = primitiveCollection ?? scene.primitives;
+  if (
+    typeof this._primitives.add !== "function" ||
+    typeof this._primitives.removeAndDestroy !== "function" ||
+    (primitiveCollection !== undefined &&
+      (typeof this._primitives.remove !== "function" ||
+        typeof this._primitives.contains !== "function"))
+  ) {
+    throw new DeveloperError("primitiveCollection must own primitives.");
+  }
   this._entityCollection = entityCollection;
   this._items = new AssociativeArray();
   entityCollection.collectionChanged.addEventListener(
@@ -543,7 +585,7 @@ SceneGISPlanarModelVisualizer.prototype.update = function (time) {
         applyModel(item, candidate, state);
         this._primitives.add(candidate);
       } catch (error) {
-        destroyCandidate(candidate);
+        rollbackCandidate(this, candidate);
         item.candidate = undefined;
         item.failed = true;
         throw error;

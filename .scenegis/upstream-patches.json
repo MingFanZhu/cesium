@@ -19,7 +19,10 @@
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISWorldSpec.js",
-        "packages/engine/Specs/SceneGIS/Widget/SceneGISWorldCesiumWidgetSpec.js"
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISWorldCesiumWidgetSpec.js",
+        "packages/engine/Specs/SceneGIS/DataSources/_SceneGISPlanarVisualizersCallbackSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarContentCesiumWidgetSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarContentViewerSpec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md",
       "removalCondition": "Retire when upstream Scene and CesiumWidget expose equivalent mutually exclusive primary-world construction, lifecycle, and world-aware per-instance DataSource visualization contracts."

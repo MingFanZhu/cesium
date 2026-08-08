@@ -87,22 +87,25 @@ callback 初始只返回一个 private gate visualizer。第一次有效 `update
    `entityCluster.enabled === false`；
 2. 遍历当前 EntityCollection。以下已定义 Property允许存在：`point`、`billboard`、`label`、`model`、
    `polyline`、`polygon`、`position`、`orientation`、`description`、`properties` 和 `viewFrom`；
-3. 任何其他已定义的标准 graphics或 custom top-level Property在 mutation前抛 `DeveloperError`。
-   Custom metadata应使用 `Entity.properties`；
+3. 任何其他已定义的标准 graphics或 custom top-level Property在本帧 child normal update和低层资源
+   mutation前抛 `DeveloperError`。Custom metadata应使用 `Entity.properties`；同步
+   `collectionChanged` listener允许只更新CPU tracking；
 4. 在局部 candidate数组中依次构造 Anchor、Model、Polyline、Polygon visualizer；任何构造失败时反向
    destroy已构造 candidate，保留原始异常，且不改变共享 visualizer数组；
 5. 全部构造成功后一次性追加到共享数组，并让本次 gate `update` 返回`false`。由于
    `DataSourceDisplay.update` 已快照数组长度，子 visualizer从下一次 update开始运行；
 6. 后续每次 update，gate仍排在首位并重新检查 World、DataSource type、cluster和所有 Entity的
-   top-level profile。动态加入未支持 graphics时，必须在任何子 visualizer更新前失败。
+   top-level profile。动态加入未支持 graphics时，必须在任何子 visualizer normal update和低层资源
+   mutation前失败。
 
 Gate实现 `update`、`isDestroyed` 和 `destroy`，但不实现 `getBoundingSphere`。它不销毁已激活的子
 visualizer；这些对象作为同一数组的独立成员由 `DataSourceDisplay` 按顺序 exactly once destroy，避免
 双重所有权。
 
-该 gate只保证 C4 的 DataSource/global graphics profile在本帧子 visualizer mutation前成立。每个支持
-graphic内部的 Property validation、candidate/current replacement和资源原子性继续由 C2/C3 visualizer
-负责；C4不承诺多个 Entity或多个 visualizer之间的全场景事务。
+该 gate只保证 C4 的 DataSource/global graphics profile在本帧子 visualizer normal update和低层资源
+mutation前成立；已经订阅的同步collection listener可以在gate运行前更新CPU tracking。每个支持graphic内部的
+Property validation、candidate/current replacement和资源原子性继续由 C2/C3 visualizer负责；C4不承诺多个
+Entity或多个 visualizer之间的全场景事务。
 
 ### Primitive ordering 与 private visualizer 调整
 
