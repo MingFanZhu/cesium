@@ -8,12 +8,12 @@
 | Status                 | `active`                                                                                 |
 | Planning model         | `extension`                                                                              |
 | Active extension plan  | [Planar Terrain extension plan](plans/2026-08-07-planar-terrain-extension.md) (`active`) |
-| Current phase          | None；T4 已完成，T5 尚未进入                                                             |
+| Current phase          | None；T5 已完成，T6 尚未进入                                                             |
 | Active phase plan      | None                                                                                     |
 | Active standalone plan | None                                                                                     |
 | Architecture contact   | Architecture Agent                                                                       |
-| Execution contact      | Execution Agent (idle; T5 not assigned)                                                  |
-| Last updated           | `2026-08-07`                                                                             |
+| Execution contact      | Execution Agent（idle；T6 not assigned）                                                 |
+| Last updated           | `2026-08-08`                                                                             |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -56,23 +56,23 @@
   [ADR-0007](../../Documentation/SceneGIS/Decisions/ADR-0007-planar-terrain-core-contract.md)、
   [ADR-0008](../../Documentation/SceneGIS/Decisions/ADR-0008-planar-terrain-mesh-and-surface-integration.md)、
   [ADR-0009](../../Documentation/SceneGIS/Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)、
-  [ADR-0010](../../Documentation/SceneGIS/Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)
+  [ADR-0010](../../Documentation/SceneGIS/Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)、
+  [ADR-0011](../../Documentation/SceneGIS/Decisions/ADR-0011-planar-url-template-heightmap-terrain-provider.md)
 - SGP: None planned；现有 `SGP-0001` 和 `SGP-0002` 仅作为 planar-world 依赖
 
 ## Current handoff
 
-- Current state: T4 implementation、focused fixes和 Architecture/code re-review均已完成；实际
-  Float32 mesh查询、snapshot strong-reference清理、sampler tile-result原子提交和100 ms private
-  scheduler delay均有直接回归证据，review为 `approved`。
-- Next action: 在 T4 独立本地提交检查点后，由项目负责人与 Architecture Agent讨论并细化 T5；
-  T5尚未激活或派工。
-- Current phase status: T4 `completed`；extension 继续 `active`。
-- Open discussions: None。Worker、正式 byte budget、concrete provider/example 和
-  lighting/performance仍留到 T5-T6 或后续 measured follow-up。
+- Current state: T5 implementation、focused fixes与Architecture focused re-review均已完成；generic
+  provider、image/LERC decode、公开best-effort Sandcastle与ownership边界通过，review为`approved`。
+- Next action: 在T5独立本地提交检查点后，由项目负责人与Architecture Agent讨论并细化T6；T6尚未
+  激活或派工。
+- Current phase status: T5 `completed`；extension继续`active`。
+- Open discussions: None。候选公网服务若不满足boundary-sampled topology、CORS或授权边界，Execution
+  必须停止并交回裁决；Worker、正式 byte budget和lighting/performance仍留到T6或后续measured
+  follow-up。
 - Latest review:
-  [T4 terrain query/picking review request](reviews/2026-08-07-t4-terrain-query-and-picking.md)
+  [T5 URL Heightmap provider review request](reviews/2026-08-08-t5-url-template-heightmap-provider.md)
   （`approved`）。
-- Unresolved reviews: None。`T4-R001`～`T4-R004` 均已由 Architecture reviewer确认为 `fixed`。
-- Known risks: T4 的 ray picking首版允许在 candidate tile内线性扫描 surface triangles；snapshot只
-  表示最近成功 normal render；resident Float32 height和 provider TerrainData sampler不承诺
-  bit-identical；public sampler无 cancellation/most-detailed。性能优化只在 T6 profiling证明必要时进入。
+- Unresolved reviews: None；`T5-R001`～`T5-R003`均由Architecture reviewer确认为`fixed`。
+- Known risks: generic URL provider无法自行验证CRS、相邻tile共享边或公开服务SLA；main-thread LERC
+  decode与257×257 mesh成本需要在T6按真实画面profiling。T4的ray query与sampler既有风险不变。

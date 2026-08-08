@@ -345,6 +345,25 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - `scenegis-planar-imagery` 只展示 engine-level 显式组装。不要在 P5 示例中加入 Viewer、widgets、
   provider picker、离线下载或预取；这些属于后续 UI 集成阶段。
 
+### 平面 URL Heightmap Provider 检查
+
+实现或评审 URL-template terrain provider 时同时检查：
+
+- 只接受调用方提供的 canonical `SceneGISPlanarTilingScheme`；不要读取 CRS、创建等价 scheme、
+  发现 metadata 或执行重投影。
+- 分开验证 URL address、payload encoding 和 boundary-inclusive sample placement。TMS 只转换 URL
+  row；image 自然 row order不得使用 imagery `flipY`。
+- Image 必须有与RGBA stride一致的显式structure；constructor完整验证scale/offset、multiplier、
+  endian与`dimensions * stride`，request使用`skipColorSpaceConversion: true`保持数值channel，并
+  exactly once关闭`ImageBitmap`。该color-space option依赖浏览器支持，不增加隐式补偿。LERC只接受
+  单numeric band、精确dimensions、全有效mask/NoData/statistics和finite sample。
+- `fetchImage`/`fetchArrayBuffer` 返回 `undefined` 时同步传递 scheduling defer。Provider 不重试、
+  不 raise 第二次 error、不缓存 TerrainData，也不拥有 caller Request 或 World。
+- Global `provider.credit` 由Surface单独显示，不得复制到每个`TerrainData.credits`；只有真正的
+  per-tile attribution才进入TerrainData。
+- 自动化使用本地 Resource/LERC fixture。公开 terrain Sandcastle只作 best-effort人工检查，必须
+  显示 Credit、说明 CORS/服务失败 fallback，并禁止预取、批量或离线下载。
+
 ### 平面 Viewer 集成检查
 
 实现或评审 `Viewer({ world })` 时同时检查：

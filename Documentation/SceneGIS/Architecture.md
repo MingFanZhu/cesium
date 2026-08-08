@@ -286,6 +286,24 @@ Z=0 reference-plane语义；`scene.pickPosition` 继续表示包含对象和 ski
 depth。完整决定见
 [ADR-0010](Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)。
 
+### 平面 URL Heightmap Provider
+
+`SceneGISPlanarUrlTemplateHeightmapTerrainProvider` 是 coordinate-agnostic 的 concrete provider。
+应用必须传入 World 的 canonical `SceneGISPlanarTilingScheme`，并自行保证 URL 数据、world extent
+与 CRS 一致；provider 不读取 CRS、不创建 scheme，也不重投影。XYZ/TMS address、payload encoding
+和 sample placement 是三个独立契约：URL 行号转换不能改变 north-to-south Heightmap row order，
+image/LERC decode 也不能隐式修正 pixel-center 数据。
+
+每个 tile 必须提供覆盖四边的 boundary-inclusive sample grid。Image payload 使用显式 RGBA stride
+structure，在constructor完整验证structure和buffer-length arithmetic，并以
+`skipColorSpaceConversion: true`保持numeric channel bytes；该选项的实际效果受浏览器
+`ImageBitmap`能力约束。Pixel extraction 后必须 exactly once 关闭可关闭 image。LERC payload必须是
+单个、尺寸精确、全sample有效且finite的numeric band。首版provider声明`0..maximumLevel` full
+pyramid；provider只拥有Resource/config/Event和global Credit reference，global Credit由Surface单独
+显示而不复制进每个TerrainData。公开Sandcastle的terrain服务只用于best-effort人工演示；自动化
+必须使用本地stub，不得依赖公网。完整决定见
+[ADR-0011](Decisions/ADR-0011-planar-url-template-heightmap-terrain-provider.md)。
+
 ### 平面影像运行时
 
 `SceneGISPlanarWorld` 的 imagery provider 必须与 world 共享同一个 canonical

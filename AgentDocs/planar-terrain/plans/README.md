@@ -6,13 +6,15 @@
 当前 extension plan：
 [SceneGIS 平面地形总体计划](2026-08-07-planar-terrain-extension.md)（`active`）。
 
-当前 active phase plan：None；T5 尚未进入。
+当前 active phase plan：None；T6尚未进入。
 
-Current handoff：T4 implementation、focused fixes与 Architecture focused re-review均已完成；
-[review](../reviews/2026-08-07-t4-terrain-query-and-picking.md) 为 `approved`。形成 T4 独立本地提交
-检查点后再讨论、规划 T5。
+Current handoff：T5 implementation、focused fixes与Architecture focused re-review均已完成；
+[review](../reviews/2026-08-08-t5-url-template-heightmap-provider.md) 为`approved`。形成T5独立本地提交
+检查点后再讨论、规划T6。
 
 最近完成的 phase plan：
+[T5 通用 URL Heightmap Provider 与 Terrain 案例](2026-08-08-phase-t5-url-template-heightmap-provider.md)
+（`completed`）、
 [T4 平面地形查询、拾取与独立采样](2026-08-07-phase-t4-terrain-query-and-picking.md)（`completed`）、
 [T3 平面地形连续 LOD、上采样与缓存](2026-08-07-phase-t3-terrain-continuous-lod.md)（`completed`）、
 [T2 平面地形 Mesh 与 Surface 集成](2026-08-07-phase-t2-terrain-surface.md)（`completed`）、

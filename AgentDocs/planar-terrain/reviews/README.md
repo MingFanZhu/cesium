@@ -16,3 +16,7 @@
   （`approved`）：resident Float32 height、actual-cover terrain ray/window picking、independent
   provider sampler、WebGL depth/Z=0 closure、public/private generation与 zero-upstream audit；
   `T4-R001`～`T4-R004` 均由 Architecture reviewer确认为 `fixed`，无 unresolved finding。
+- [T5 generic URL Heightmap provider review](2026-08-08-t5-url-template-heightmap-provider.md)
+  （`approved`）：coordinate-agnostic canonical provider、image/LERC decode、full-pyramid
+  availability、provider→World closure、公开best-effort Sandcastle、public generation与zero-upstream
+  audit；`T5-R001`～`T5-R003`均由Architecture reviewer确认为`fixed`，无unresolved finding。

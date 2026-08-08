@@ -1,0 +1,15 @@
+title: SceneGIS Planar Terrain
+description: >-
+  Combines an EPSG:3857 planar Viewer, explicit OpenStreetMap imagery, and an
+  application-configured generic LERC heightmap provider. The public terrain
+  and imagery services are best-effort and subject to their CORS, availability,
+  attribution, and usage policies. The demo requests only current-view tiles;
+  it does not prefetch, bulk download, or prepare offline data. If terrain
+  requests fail, a ready ancestor or flat fallback keeps the world usable.
+  Sources: https://developers.arcgis.com/documentation/tiled-elevation-service/
+  and https://operations.osmfoundation.org/policies/tiles/
+labels:
+  - SceneGIS
+  - Terrain
+  - Viewer
+development: false
