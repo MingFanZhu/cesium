@@ -13,9 +13,11 @@
 - 分支（Branch）：`feature/planar-content`
 - 相关讨论（Related discussions）：项目负责人与 Architecture Agent 已确认总体边界；未创建独立
   discussion
-- 相关评审（Related reviews）：None
+- 相关评审（Related reviews）：
+  [C1 content contract review](../reviews/2026-08-09-c1-content-contract.md)（`approved`）
 - ADR：
-  [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)
+  [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
+  [ADR-0014：平面锚点内容与普通 Model Visualizer](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)
 - SGP：None planned
 
 ## 目标
@@ -118,7 +120,8 @@ Visualizer 系统规避真实集成边界。
 - 依赖：C1。
 - 进入门槛：C1 已 review并提交；重新审计相应 collection、visualizer 与 Model orientation 路径。
 - 完成门槛：静态/动态 anchor、terrain 更新、picking、精度和 exactly-once lifecycle 成立。
-- 状态：`planned`；phase plan尚未创建。
+- 状态：`active`；phase plan：
+  [C2 平面锚点内容与普通 Model](2026-08-09-phase-c2-anchor-and-model.md)。
 
 ### C3：Polyline、Polygon 与地表关系
 
@@ -207,4 +210,9 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   `PlanarContentGuide`和durable rules，创建pending review request；实现保持zero-upstream/zero-SGP。
 - `2026-08-09`：Architecture/code review通过，无阻断项；独立复跑focused resolver `11/11`与
   upstream audit均通过，C1状态更新为`completed`。
-- 下一步：与项目负责人讨论C2；C2尚未激活或设计，extension继续`active`。
+- `2026-08-09`：项目负责人批准C2完整设计：使用private Anchor/Model visualizer复用低层collection/
+  Model，不复用默认Globe visualizer；EntityCluster仅允许disabled，Model采用fixed planar transform与
+  generation-isolated lifecycle，自动Viewer/DataSourceDisplay集成延后至C4。ADR-0014 approved，C2
+  phase plan active。
+- 下一步：Architecture Agent提交C2 planning checkpoint并派发Execution；实现完成后停在review gate，
+  不进入C3。

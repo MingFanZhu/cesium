@@ -7,11 +7,12 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: None（`C1-content-contract`已`completed`；C2尚未激活）
-- Active phase plan: None
+- Current phase: `C2-anchor-and-model`（`active`）
+- Active phase plan:
+  [C2 平面锚点内容与普通 Model](plans/2026-08-09-phase-c2-anchor-and-model.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（等待C2获批后派工）
+- Execution contact: Execution Agent（C2 planning checkpoint后正式派工）
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -49,19 +50,23 @@
 - Branch: `feature/planar-content`
 - Base checkpoint: `23d06ad14c79825f680e9397c6f4a8fa70a0f008`
 - ADR:
-  [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)
+  [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
+  [ADR-0014：平面锚点内容与普通 Model Visualizer](../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)
 - SGP: None planned；实际需要修改 upstream-owned file 时必须暂停并登记
 
 ## Current handoff
 
-- Current state: C1 private resolver、focused Specs与durable docs已通过Architecture/code review，阶段
-  状态为`completed`。
-- Next action: 与项目负责人讨论C2；获明确批准后才创建并激活C2 phase plan、派发执行任务。
-- Current phase status: None；`C1-content-contract` completed。
-- Open discussions: None；C1 的 coordinate、HeightReference、fallback、orientation 与
-  compatibility enforcement 已由 ADR-0013 固定。
+- Current state: C1已完成并提交；项目负责人已批准C2 private Anchor/Model visualizer、property
+  profile、generation/lifecycle和C4 integration boundary，ADR-0014与C2 phase plan状态为`approved`/
+  `active`。
+- Next action: Architecture Agent提交planning checkpoint并向Execution Agent派发C2；Execution实现后
+  停在Architecture/code review，不进入C3。
+- Current phase status: `C2-anchor-and-model` active。
+- Open discussions: None；C2设计已完整确认。实现发现必须修改upstream-owned file或扩大public/
+  Viewer边界时必须暂停重新裁决。
 - Latest review:
   [C1 content contract review](reviews/2026-08-09-c1-content-contract.md)（`approved`）。
 - Unresolved reviews: None。
-- Known risks: Entity Visualizer、GeometryUpdater、ground/clamp 和 Model orientation 可能包含
-  ellipsoid 假设；必要的上游缝隙尚未确认。
+- Known risks: `EntityCluster` private pool与Model async lifecycle属于升级敏感面；C2必须保持
+  clustering disabled、generation isolation与exactly-once cleanup。C4的Viewer/DataSourceDisplay集成缝隙
+  尚未设计。
