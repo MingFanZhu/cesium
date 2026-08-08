@@ -20,8 +20,9 @@
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
   [ADR-0014：平面锚点内容与普通 Model Visualizer](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)、
-  [ADR-0015：平面 Polyline、Polygon 与顶点采样地表](../../../Documentation/SceneGIS/Decisions/ADR-0015-planar-polyline-polygon-and-vertex-drape.md)
-- SGP：None planned
+  [ADR-0015：平面 Polyline、Polygon 与顶点采样地表](../../../Documentation/SceneGIS/Decisions/ADR-0015-planar-polyline-polygon-and-vertex-drape.md)、
+  [ADR-0016：平面 DataSourceDisplay 与 Viewer 内容集成](../../../Documentation/SceneGIS/Decisions/ADR-0016-planar-datasource-display-integration.md)
+- SGP：C4复用active `SGP-0001`；只允许在CesiumWidget增加instance-owned visualizer callback seam
 
 ## 目标
 
@@ -85,8 +86,9 @@ Visualizer 系统规避真实集成边界。
 ### 所有权与上游集成
 
 - 默认只修改 SceneGIS-owned 路径，并优先使用组合、显式 adapter 和现有公共扩展点。
-- 当前总体计划不预设任何 upstream-owned file 或 SGP。阶段源码审计证明需要上游缝隙时，Execution
-  必须暂停，由 Architecture Agent 登记 SGP 并裁决最小影响路径。
+- C1-C3保持zero-upstream。C4源码审计确认CesiumWidget创建DataSourceDisplay时缺少world-aware
+  per-instance callback；由于同一upstream file只能由一个SGP负责，C4复用`SGP-0001`，只允许一个
+  upstream-owned file与两个paired hunks。
 - 不使用 prototype monkey patch、隐式全局 registry、加载顺序技巧或大段复制 Cesium 实现。
 - 每个内容 runtime 的 request、CPU object、Primitive、GPU resource、event subscription 与 owner
   必须有成对创建/失效/销毁协议。
@@ -144,7 +146,8 @@ Visualizer 系统规避真实集成边界。
 - 进入门槛：C3 已 review并提交；重新审计 DataSourceDisplay、Visualizer 与 Viewer 当前实现。
 - 完成门槛：supported compatibility matrix 可执行，默认 Globe 回归不变，unsupported 配置不会静默
   使用 Globe 语义。
-- 状态：`planned`；phase plan尚未创建。
+- 状态：`active`；phase plan：
+  [C4 Entity、DataSource 与 Viewer 集成](2026-08-09-phase-c4-entity-datasource-viewer-integration.md)。
 
 ### C5：动态更新、批量性能与交付
 
@@ -243,5 +246,11 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   width/outlineWidth固定为`[0,255]` integer，静态warm frame保持dirty/copy零增量且动态位置仍更新。
 - `2026-08-09`：Architecture focused re-review确认三项finding全部关闭；独立复跑7/9/1 focused suites、
   build、scoped ESLint与upstream audit均通过，C3状态更新为`completed`。
-- 下一步：Architecture形成C3独立checkpoint，再从该checkpoint审计C4源码事实并创建phase plan；不把
-  C4设计或实现混入C3提交。
+- `2026-08-09`：Architecture形成C3独立checkpoint
+  `2015aa188f4aff5322b24ade5832547ad1c626df`，随后重新审计CesiumWidget、DataSourceDisplay、Entity、
+  CustomDataSource、Viewer selection和C2/C3 visualizer调用链。
+- `2026-08-09`：ADR-0016批准instance-owned planar callback、CustomDataSource-only gate、
+  per-data-source primitive target、原Entity selection与deferred activation；裁决扩展active `SGP-0001`，
+  C4 phase plan激活。
+- 下一步：Architecture提交C4 planning checkpoint并向Execution派工；Execution实现完成后停在C4
+  review gate，不进入C5。

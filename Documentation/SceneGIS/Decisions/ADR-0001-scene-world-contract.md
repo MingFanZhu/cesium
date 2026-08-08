@@ -6,7 +6,8 @@
 - Date：`2026-08-05`
 - Decision owners：Architecture Agent、项目负责人
 - Related plan：
-  `AgentDocs/planar-world/plans/2026-08-05-phase-1-world-contract.md`
+  `AgentDocs/planar-world/plans/2026-08-05-phase-1-world-contract.md`、
+  `AgentDocs/planar-content/plans/2026-08-09-phase-c4-entity-datasource-viewer-integration.md`
 - Related patch：`SGP-0001`
 
 ## 上下文与源码事实
@@ -96,5 +97,11 @@ primary world，并同步两个 alias。custom world 永远不进入 `Globe` 专
 
 每次 Cesium 升级检查 `Scene.js` 中 `_globe`/`scene.globe` 的 frame lifecycle、
 request-render、destroy 和 listener 使用，以及 `CesiumWidget.js` 的默认 `Globe`、
-Earth environment、imagery、terrain 构造顺序。若 upstream 提供等价的互斥
-primary-world contract，评估退役 `SGP-0001`。
+Earth environment、imagery、terrain 构造顺序。
+
+`2026-08-09` 的 planar-content C4继续在同一`CesiumWidget.js` primary-world integration边界按world
+选择per-instance `DataSourceDisplay.visualizersCallback`。由于补丁清单要求一个upstream file只由一个
+SGP负责，该窄hunk复用`SGP-0001`；具体DataSource、gate、selection和lifecycle决策见
+[ADR-0016](ADR-0016-planar-datasource-display-integration.md)。升级时还需检查CesiumWidget创建
+DataSourceDisplay的位置与callback option。若upstream同时提供等价互斥primary-world contract和
+world-aware per-instance DataSource visualization seam，评估退役`SGP-0001`。

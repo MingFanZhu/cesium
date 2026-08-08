@@ -3,9 +3,9 @@
   "patches": [
     {
       "id": "SGP-0001",
-      "title": "Add a primary world lifecycle slot",
+      "title": "Add primary world lifecycle and integration slots",
       "status": "active",
-      "reason": "Scene and CesiumWidget currently route the primary world lifecycle exclusively through Globe, so a non-Globe world cannot participate without impersonating Globe.",
+      "reason": "Scene and CesiumWidget currently route primary-world lifecycle and DataSource visualization exclusively through Globe-oriented defaults, so a non-Globe world cannot participate without impersonating Globe.",
       "risk": "high",
       "files": [
         {
@@ -22,7 +22,7 @@
         "packages/engine/Specs/SceneGIS/Widget/SceneGISWorldCesiumWidgetSpec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md",
-      "removalCondition": "Retire when upstream Scene and CesiumWidget expose an equivalent mutually exclusive primary-world construction and lifecycle contract."
+      "removalCondition": "Retire when upstream Scene and CesiumWidget expose equivalent mutually exclusive primary-world construction, lifecycle, and world-aware per-instance DataSource visualization contracts."
     },
     {
       "id": "SGP-0002",
