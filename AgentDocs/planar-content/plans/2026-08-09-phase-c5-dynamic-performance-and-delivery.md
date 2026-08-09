@@ -4,7 +4,7 @@
 
 - 计划类型（Plan type）：`phase`
 - 阶段（Phase）：`C5-dynamic-performance-and-delivery`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 父计划（Parent plan）：
   [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)
 - 负责人角色（Owner role）：`execution`
@@ -204,9 +204,9 @@ Execution记录仓库实际runner语法，至少包括：
 ## 当前交接
 
 - C4 completed checkpoint：`1f9d8da4ca8c47425917c23642cea3123339e386`。
-- ADR-0017与本phase plan已confirmed；C5状态为`active`。
-- Execution已完成C5-A～C5-D implementation与首轮R001～R003 focused fixes，product runtime delta=`0`；当前
-  等待Architecture focused re-review，项目负责人的Sandcastle人工验收仍未开始且继续作为阶段完成门禁。
+- ADR-0017与本phase plan已confirmed；C5状态为`completed`。
+- Execution已完成C5-A～C5-D implementation与R001～R003 focused fixes，Architecture focused re-review已
+  批准；项目负责人已完成真实浏览器/GPU Sandcastle人工验收。
 
 ## 偏差与结果
 
@@ -287,5 +287,6 @@ Execution记录仓库实际runner语法，至少包括：
 - Public API delta=`0`；七个private content runtime文件存在于installed engine tarball；自动JS barrel中的
   underscore export仍是unsupported soft-private构建产物，其exact symbols在engine/root/Cesium declarations和
   API HTML命中`0`。生成文件、timing log、Playwright artifacts、temporary package/server均不进入status。
-- Architecture focused re-review已批准C5 delivery；项目负责人尚未打开新Sandcastle执行真实浏览器/GPU
-  人工视觉、交互与公网best-effort验收，因此C5与extension在人工门禁前继续保持`active`。
+- Architecture focused re-review已批准C5 delivery，C5实现检查点为`c6a1409442`。项目负责人于
+  `2026-08-09`打开`scenegis-planar-content`完成真实浏览器/GPU人工视觉与交互验收并明确确认通过；公网
+  imagery/terrain按既定best-effort边界成功显示。C5与extension均更新为`completed`。

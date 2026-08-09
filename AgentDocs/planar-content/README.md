@@ -3,16 +3,16 @@
 ## Metadata
 
 - Extension slug: `planar-content`
-- Status: `active`
+- Status: `completed`
 - Planning model: `extension`
-- Active extension plan:
+- Active extension plan: None
+- Completed extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: `C5-dynamic-performance-and-delivery`
-- Active phase plan:
-  [C5 动态更新、批量性能与交付](plans/2026-08-09-phase-c5-dynamic-performance-and-delivery.md)
+- Current phase: None；C1-C5均已完成
+- Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（C5 implementation与focused fixes已完成）
+- Execution contact: Execution Agent（extension已完成）
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -60,15 +60,15 @@
 
 ## Current handoff
 
-- Current state: C5 Architecture focused re-review已通过，R001～R003全部关闭；moderate baseline没有可重复
-  private热点，product runtime delta=`0`；C5独立本地提交检查点随本次Architecture交付形成。
-- Next action: 项目负责人打开新Sandcastle完成真实浏览器/GPU人工验收。
-- Current phase status: C5 `active`。
+- Current state: C1-C5均已完成implementation、验证、Architecture/code review与独立阶段检查点；项目负责人
+  已在真实浏览器/GPU确认`scenegis-planar-content`通过，extension状态为`completed`。
+- Next action: 在新的extension或standalone plan中讨论后续能力，不在本extension追加未规划阶段。
+- Current phase status: None；C5与extension均为`completed`。
 - Open discussions: None；C5不建立跨Entity batching层，timing只作同机调查证据。
 - Latest review:
   [C5 dynamic performance and delivery review](reviews/2026-08-09-c5-dynamic-performance-and-delivery.md)
   （`approved`；R001～R003经focused re-review关闭）。
-- Unresolved reviews: None；尚余项目负责人人工验收门禁。
+- Unresolved reviews: None；项目负责人的真实浏览器/GPU人工验收已通过。
 - Known risks: Buffer collections属于experimental升级敏感面；vertex-only terrain drape不代表连续贴地；
   per-Entity line/polygon ownership可能限制超大规模，但首版只做moderate qualification；公开Sandcastle
   terrain/imagery仍受网络与服务策略影响。

@@ -15,4 +15,5 @@
   真实per-DataSource target/order、第三个child rollback及`SGP-0001`边界通过。
 - [C5 dynamic performance and delivery review](2026-08-09-c5-dynamic-performance-and-delivery.md)
   （`approved`）：C5-R001～R003经focused re-review关闭；moderate qualification、异步Sandcastle controls、
-  soft-private package边界、product runtime delta=`0`和zero-upstream delivery通过。
+  soft-private package边界、product runtime delta=`0`和zero-upstream delivery通过；项目负责人真实浏览器/GPU
+  人工验收通过。

@@ -108,7 +108,8 @@
 - Sandcastle的OSM/LERC为best-effort人工展示，受公网、CORS与服务策略影响；自动化完全本地且不预取。
 - Buffer collections仍为experimental upgrade-sensitive dependency；upgrade checklist已记录，private symbol不构成
   supported public API。
-- 项目负责人尚未完成真实浏览器/GPU Sandcastle视觉与交互门禁。
+- 项目负责人已于`2026-08-09`完成真实浏览器/GPU Sandcastle视觉与交互验收；页面、六类内容、底图/地形、
+  Viewer控件与控制台状态符合首版交付预期。
 
 ## Focused re-review
 
@@ -125,5 +126,6 @@
 ## Conclusion
 
 Architecture focused re-review确认`C5-R001`～`C5-R003`全部关闭，C5 architecture/code/release-evidence
-review结论为`approved`。C5实现可形成独立本地提交检查点；C5 phase与extension仍保持`active`，下一门禁为
-项目负责人的真实浏览器/GPU Sandcastle人工验收。未经明确人工批准不得标记extension `completed`，不push。
+review结论为`approved`。C5实现检查点为`c6a1409442`；项目负责人随后在真实浏览器/GPU打开
+`scenegis-planar-content`并明确确认通过。C5 phase与`planar-content` extension完成全部门禁，状态更新为
+`completed`；不push、tag或publish。

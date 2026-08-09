@@ -3,7 +3,7 @@
 ## 元数据
 
 - 计划类型（Plan type）：`extension`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 负责人角色（Owner role）：`architecture`
 - 架构评审（Architecture review）：`confirmed`
 - 架构评审人（Architecture reviewer）：项目负责人
@@ -18,6 +18,8 @@
   [C2 anchor and model review](../reviews/2026-08-09-c2-anchor-and-model.md)（`approved`）、
   [C3 polyline and polygon review](../reviews/2026-08-09-c3-polyline-polygon.md)（`approved`）、
   [C4 Entity/DataSource/Viewer integration review](../reviews/2026-08-09-c4-entity-datasource-viewer-integration.md)
+  （`approved`）、
+  [C5 dynamic performance and delivery review](../reviews/2026-08-09-c5-dynamic-performance-and-delivery.md)
   （`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
@@ -159,7 +161,7 @@ Visualizer 系统规避真实集成边界。
 - 进入门槛：C4 已 review并提交；依据真实对象数量与 profiling 决定批量和资格范围。
 - 完成门槛：功能、生命周期、warm-frame、有限性能、types/docs/package 和人工视觉验收达到扩展交付
   标准。
-- 状态：`active`；phase plan：
+- 状态：`completed`；phase plan：
   [C5 动态更新、批量性能与交付](2026-08-09-phase-c5-dynamic-performance-and-delivery.md)。
 
 阶段默认串行推进。每个阶段在 implementation、验证和 Architecture/code review 完成后，由
@@ -279,5 +281,6 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   async controls并拆分runtime/declarations/API断言；三个finding标记fixed，等待focused re-review。
 - `2026-08-09`：Architecture focused re-review确认R001～R003全部关闭；独立复跑qualification`3/3`与
   installed-package smoke通过，接受Execution的focused Sandcastle build证据。C5 review状态为`approved`。
-- C5独立本地提交检查点随本次Architecture交付形成；下一步由项目负责人执行真实浏览器/GPU Sandcastle
-  人工验收。C5与extension保持`active`。
+- `2026-08-09`：Architecture形成C5独立实现检查点`c6a1409442`。项目负责人随后在真实浏览器/GPU打开
+  `scenegis-planar-content`完成页面、内容、交互与控制台人工验收并明确确认通过；C5与extension状态更新为
+  `completed`。后续能力必须建立新的extension或standalone plan。
