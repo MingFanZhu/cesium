@@ -27,7 +27,8 @@
   [ADR-0014：平面锚点内容与普通 Model Visualizer](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)、
   [ADR-0015：平面 Polyline、Polygon 与顶点采样地表](../../../Documentation/SceneGIS/Decisions/ADR-0015-planar-polyline-polygon-and-vertex-drape.md)、
   [ADR-0016：平面 DataSourceDisplay 与 Viewer 内容集成](../../../Documentation/SceneGIS/Decisions/ADR-0016-planar-datasource-display-integration.md)、
-  [ADR-0017：平面内容资格验证与批量边界](../../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)
+  [ADR-0017：平面内容资格验证与批量边界](../../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)、
+  [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)
 - SGP：C4复用active `SGP-0001`；只允许在CesiumWidget增加instance-owned visualizer callback seam
 
 ## 目标
@@ -185,7 +186,8 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
 - 进入门槛：重新审计Cesium Primitive、GeometryInstance、Appearance/Material、experimental Buffer与生成边界；
   创建C6 phase plan和必要ADR。
 - 完成门槛：public低层API、代表性line/fill geometry、Entity复用缝隙、精度与GPU生命周期通过review。
-- 状态：`proposed`；尚未创建phase plan。
+- 状态：`active`；phase plan：
+  [C6 Public Planar Primitive/Geometry 基础](2026-08-09-phase-c6-public-planar-primitive-and-geometry.md)。
 
 ### C7：普通锚定、体与面 Entity Graphics
 
@@ -359,3 +361,7 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   vertex-only drape仍会留下半成品Entity/Primitive/ground体系；批准复用同一`planar-content`目录继续五项
   工作：public Primitive/Geometry、普通graphics补齐、continuous ground、统一compatibility matrix与最终交付。
   Extension重新激活为`active`，C6-C10加入roadmap；详细实现只在各phase进入时依据届时源码确定。
+- `2026-08-09`：Architecture重新审计standard `Primitive`同步Geometry、single-instance scene3DOnly
+  model-matrix、`PolylineGeometry ArcType.NONE`、Appearance/picking/bounds/lifecycle与experimental Buffer
+  边界；ADR-0018批准public SceneGIS Geometry + standard Primitive wrapper、C3 Entity adapter统一迁移和
+  zero-upstream门禁，C6 phase plan激活。

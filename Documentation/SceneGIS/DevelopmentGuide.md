@@ -426,13 +426,21 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - Model transform只使用fixed planar translation/normalized Quaternion。不要调用`computeModelMatrix`、
   ENU或Model height clamping。
 - C3 Polyline只允许`ArcType.NONE`的planar straight segments；clamp逐supplied vertex调用resolver，不做
-  geodesic/rhumb、ground primitive或隐式terrain采样/细分。`width`必须是`[0,255]`内的integer。
+  geodesic/rhumb、ground primitive或隐式terrain采样/细分。C6迁移后`width`接受finite nonnegative number，
+  0隐藏，不得重新引入Buffer Uint8的integer/255限制。
 - C3 Polygon只接受simple outer ring与direct holes。Scalar height、per-position height、extrusion、caps、
   side walls与outline必须先完整preflight，再以local DOUBLE geometry、translation `modelMatrix`和explicit
-  world bounds原子替换；terrain drape是vertex-only sampling，`outlineWidth`必须是`[0,255]`内的integer。
-- C3 private Buffer owner保留original Entity picking并独占其collections。Warm property/terrain变化在拓扑与
-  blend signature不变时复用owner；未变化update不得调用Buffer setter或触发buffer copy。Candidate
-  insertion失败、replacement与destroy必须exactly-once cleanup。
+  world bounds原子替换；terrain drape是vertex-only sampling。C6迁移后`outlineWidth`与Polyline width采用相同
+  finite nonnegative规则。
+- C6 public Geometry必须clone finite米制Cartesian3输入、以完整XYZ local origin重基，并只输出审计过的
+  standard Geometry vertex format。Polyline固定`ArcType.NONE`；Polygon只使用XY triangulation，不调用Ellipsoid
+  subdivision或ground path。
+- C6 public Primitive固定single GeometryInstance与`asynchronous:false`，只接受approved SceneGIS geometry/
+  Appearance pair。Geometry replacement只在normal render通过candidate/current完成；pick/depth不得promote，失败
+  保留current。第二Context、invalid matrix/bounds和destroyed use必须在mutation前拒绝。
+- Polyline/Polygon automatic Entity adapter必须复用public SceneGISPlanarPrimitive，并保留original Entity id、
+  per-DataSource target、world bounds和exactly-once lifecycle；不得继续引用private Buffer owner、experimental
+  collection私有字段或建立dual runtime。
 - C4 callback第一次合法update只原子追加Anchor、Model、Polyline、Polygon并返回false；children必须等下一次
   update。Model/Polyline/Polygon自动路径使用`dataSource._primitives`，显式private构造省略target时仍使用
   `scene.primitives`；两种路径都不拥有caller collection。

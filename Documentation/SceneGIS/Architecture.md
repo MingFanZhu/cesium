@@ -399,10 +399,8 @@ height-clamping path。Async completion 不得直接添加 primitive。完整 pr
 C3 的 private Polyline/Polygon visualizer 绕开默认 GeometryUpdater、ground 与 geodesic/rhumb 路径。
 Polyline 只接受 planar straight segments；Polygon 只接受 simple outer ring 与 direct holes，并显式生成
 cap、side wall 和 outline。Clamp/drape 只在 supplied vertices 读取 resident terrain，不沿边新增terrain
-采样或细分，也不发起请求；线段和triangle内部仍按几何线性插值。Polyline `width`与Polygon
-`outlineWidth`只接受`[0,255]`内的integer。每个 Entity 使用独立 private Buffer owner，以 local DOUBLE geometry、translation `modelMatrix`、
-explicit world bounds 和 original Entity pick 保持大坐标精度与所有权边界；candidate replacement 必须
-原子化并 exactly-once cleanup。完整 profile见 ADR-0015。
+采样或细分，也不发起请求；线段和triangle内部仍按几何线性插值。完整geometry/terrain profile见
+ADR-0015。
 
 C4 只为 live `SceneGISPlanarWorld` 安装 per-instance `DataSourceDisplay.visualizersCallback`；默认 Globe、
 `globe:false` 和其他 World 保持 Cesium 默认 callback。Planar gate 仅接受 `CustomDataSource`、disabled
@@ -417,6 +415,16 @@ per-Entity owner；“批量性能”是固定moderate profile资格，不自动
 C4 baseline与persistent resource hard gates，只有可重复热点才允许在现有private visualizer内消除静态CPU
 重复计算；不得改变dynamic/terrain、pick、bounds或lifecycle语义。单机timing只用于同环境调查，Sandcastle
 公网服务只作人工best-effort展示，本地E2E不得访问公网。完整决定见ADR-0017。
+
+C6建立public `SceneGISPlanarPrimitive`、`SceneGISPlanarPolylineGeometry`与
+`SceneGISPlanarPolygonGeometry`。Public Geometry接收米制world Cartesian3 snapshot，自动以完整XYZ local
+origin重基并输出DOUBLE local geometry；Primitive wrapper内部只使用Cesium standard synchronous
+`Primitive`，固定single GeometryInstance，保留Appearance、attributes、picking、bounds、model matrix和GPU
+lifecycle。Public model matrix是围绕geometry origin的local transform，最终matrix为
+`translation(origin) * modelMatrix`。只接受明确审计的SceneGIS geometry与Color Appearance pair，不宣布raw
+Cesium Geometry自动具有planar语义。Geometry变化使用normal-render candidate/current，pick/depth只复用last
+current；Context、replacement与destroy必须原子且exactly once。Polyline/Polygon Entity adapter复用同一public
+wrapper，不保留experimental Buffer双路径；width改为finite nonnegative number，0隐藏。完整决定见ADR-0018。
 
 ## 验证架构
 

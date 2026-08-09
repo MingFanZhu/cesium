@@ -7,11 +7,12 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: None；C1-C5均已完成，下一步进入C6 planning
-- Active phase plan: None
+- Current phase: `C6-public-planar-primitive-and-geometry`
+- Active phase plan:
+  [C6 Public Planar Primitive/Geometry 基础](plans/2026-08-09-phase-c6-public-planar-primitive-and-geometry.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（等待C6 phase plan派工）
+- Execution contact: Execution Agent（等待C6 implementation派工）
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -55,7 +56,8 @@
   [ADR-0014：平面锚点内容与普通 Model Visualizer](../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)、
   [ADR-0015：平面 Polyline、Polygon 与顶点采样地表](../../Documentation/SceneGIS/Decisions/ADR-0015-planar-polyline-polygon-and-vertex-drape.md)、
   [ADR-0016：平面 DataSourceDisplay 与 Viewer 内容集成](../../Documentation/SceneGIS/Decisions/ADR-0016-planar-datasource-display-integration.md)、
-  [ADR-0017：平面内容资格验证与批量边界](../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)
+  [ADR-0017：平面内容资格验证与批量边界](../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)、
+  [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)
 - SGP: 复用active `SGP-0001`；C4只允许在`packages/engine/Source/Widget/CesiumWidget.js`新增两个paired
   hunks
 
@@ -63,13 +65,14 @@
 
 - Current state: C1-C5作为首批六类content profile已完成并通过项目负责人人工验收；项目负责人随后明确要求
   不留下半成品Entity/Primitive/ground体系，批准在同一extension中继续C6-C10，状态重新激活为`active`。
-- Next action: Architecture依据当前源码细化C6 public planar Primitive/Geometry foundation phase plan并派工。
-- Current phase status: None；C6尚未激活。
+- Next action: Execution依据ADR-0018与C6 phase plan实现public planar Primitive/Geometry，并把现有
+  Polyline/Polygon Entity adapter迁移到同一低层实现。
+- Current phase status: C6 `active`；等待Execution实现。
 - Open discussions: None；3D Tiles与GeoJSON/CZML/KML转换继续属于独立扩展。
 - Latest review:
   [C5 dynamic performance and delivery review](reviews/2026-08-09-c5-dynamic-performance-and-delivery.md)
   （`approved`；R001～R003经focused re-review关闭）。
-- Unresolved reviews: None；C5验收已通过，C6尚未进入review。
-- Known risks: Buffer collections属于experimental升级敏感面；vertex-only terrain drape不代表连续贴地；
-  公开Primitive契约、普通geometry覆盖和continuous ground可能需要新的Renderer/Scene seam及SGP；具体影响
-  文件必须在各phase进入时重新审计。公开Sandcastle terrain/imagery仍受网络与服务策略影响。
+- Unresolved reviews: None；C5验收已通过，C6实现ready后创建pending review。
+- Known risks: C6需把standard Primitive的immutable geometry封装为原子candidate/current，并清除SceneGIS对
+  experimental Buffer runtime的依赖；vertex-only terrain drape仍不代表连续贴地。普通geometry覆盖与continuous
+  ground按C7-C9逐阶段审计。公开Sandcastle terrain/imagery仍受网络与服务策略影响。

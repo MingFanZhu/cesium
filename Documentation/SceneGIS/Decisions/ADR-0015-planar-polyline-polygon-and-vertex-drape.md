@@ -8,6 +8,8 @@
 - Related plan：
   `AgentDocs/planar-content/plans/2026-08-09-phase-c3-polyline-polygon.md`
 - Related patch：无；C3 计划保持 upstream-owned files=`0`、SGP=`0`
+- Superseded in part：ADR-0018在C6完成后替代本ADR的private Buffer renderer、`[0,255]` integer width与
+  “不新增public API”阶段边界；planar straight、topology、HeightReference与supplied-vertex terrain语义继续有效
 
 ## 上下文与源码事实
 
