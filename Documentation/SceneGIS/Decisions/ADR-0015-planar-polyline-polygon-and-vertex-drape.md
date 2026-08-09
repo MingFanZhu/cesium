@@ -79,8 +79,8 @@ graphics allowlist。
 
 - Entity `isShowing`、availability 与 `PolylineGraphics.show`；
 - `positions`，至少两个 finite `Cartesian3`；
-- `width`，默认 `1.0`，必须是`[0,255]`内的integer，以便在Buffer `Uint8` layout中精确表示；零宽度
-  等价于当前不可见；
+- `width`，默认 `1.0`；C6起由ADR-0018替代为finite nonnegative number，零宽度等价于当前不可见，
+  positive fractional和大于255的值由standard geometry精确表示；
 - 未定义 material 时的 `Color.WHITE`，以及 `ColorMaterialProperty` 的 finite `Color`；
 - `clampToGround=false`：保留每个输入位置的 absolute Z；
 - `clampToGround=true`：忽略输入 Z，对每个 supplied vertex 使用
@@ -134,7 +134,10 @@ Polygon style 支持：
 `distanceDisplayCondition`、`classificationType` 或 `zIndex`。C3 不进入 Globe ground/classification、
 texture coordinate 或 shadow pipeline。
 
-### Buffer geometry、精度与 picking
+### C3 Buffer geometry历史与C6替代
+
+以下内容记录C3当时的实现历史。C6起由ADR-0018的public Geometry与standard synchronous Primitive完整替代，
+SceneGIS product runtime不再依赖这些experimental Buffer角色。
 
 - 每个 active Entity/graphic 在 C3 correctness phase 拥有独立 private render owner。Polyline owner 包含
   一个 `BufferPolylineCollection`；Polygon owner可以包含一个 fill `BufferPolygonCollection` 和一个

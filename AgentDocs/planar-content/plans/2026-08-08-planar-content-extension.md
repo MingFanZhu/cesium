@@ -186,7 +186,7 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
 - 进入门槛：重新审计Cesium Primitive、GeometryInstance、Appearance/Material、experimental Buffer与生成边界；
   创建C6 phase plan和必要ADR。
 - 完成门槛：public低层API、代表性line/fill geometry、Entity复用缝隙、精度与GPU生命周期通过review。
-- 状态：`active`；phase plan：
+  - 状态：`completed`；phase plan：
   [C6 Public Planar Primitive/Geometry 基础](2026-08-09-phase-c6-public-planar-primitive-and-geometry.md)。
 
 ### C7：普通锚定、体与面 Entity Graphics
@@ -365,3 +365,13 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   model-matrix、`PolylineGeometry ArcType.NONE`、Appearance/picking/bounds/lifecycle与experimental Buffer
   边界；ADR-0018批准public SceneGIS Geometry + standard Primitive wrapper、C3 Entity adapter统一迁移和
   zero-upstream门禁，C6 phase plan激活。
+- `2026-08-09`：Execution完成C6 implementation与最小充分验证。三个public类型已进入root/types/API，
+  Polyline/Polygon automatic adapter统一使用standard Primitive后端，experimental Buffer owner已删除；C6保持
+  `active`，handoff为ready for pending Architecture/code review。
+- `2026-08-09`：C6首轮review提出R001～R004。Execution完成desired/current状态分离、Buffer无关
+  collection owner、required id/attribute persistence与fixed geometry kind修复；focused tests/build/types/docs与
+  zero-upstream审计ready，等待Architecture focused re-review。
+- `2026-08-09`：Architecture focused re-review确认R001、R002与R004关闭，并发现R003 integer
+  `ComponentDatatype` representability窄缺口；Execution补无损integer conversion preflight与合法边界Spec。
+  Architecture最终复跑Primitive`7/7`，确认R001～R004全部关闭，C6 review=`approved`、phase=`completed`；
+  C6保持upstream-owned files=`0`、SGP=`0`。

@@ -23,6 +23,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarGeometry", function () {
 
   beforeAll(function () {
     scene = createScene({ canvas: createCanvas(192, 192) });
+    scene.frameState.scene3DOnly = true;
   });
 
   afterAll(function () {
@@ -164,9 +165,11 @@ describe("SceneGIS/DataSources/SceneGISPlanarGeometry", function () {
       const lineOwner = lineVisualizer._items.get(polyline.id).owner;
       const polygonOwner = polygonVisualizer._items.get(polygon.id).owner;
       const extrusionOwner = polygonVisualizer._items.get(extrusion.id).owner;
-      expect(lineOwner.collection.modelMatrix[12]).toBe(center - 65.0);
-      expect(polygonOwner.fillCollection.modelMatrix[12]).toBe(center - 30.0);
-      expect(extrusionOwner.fillPrimitive.vertexCount).toBe(8);
+      expect(lineOwner.primitive.geometry.origin.x).toBe(center - 65.0);
+      expect(polygonOwner.fillPrimitive.geometry.origin.x).toBe(center - 30.0);
+      expect(
+        extrusionOwner.fillPrimitive.geometry._bottomPositions.length,
+      ).toBe(4);
       expect(scene.primitives.length).toBeGreaterThan(primitiveBaseline);
 
       const fixtures = [
@@ -190,7 +193,11 @@ describe("SceneGIS/DataSources/SceneGISPlanarGeometry", function () {
           scene,
           fixture.position,
         );
-        expect(scene.pick(windowPosition)?.id).toBe(fixture.entity);
+        const picked = scene.pick(windowPosition);
+        expect(picked?.id).toBe(fixture.entity);
+        expect(picked?.primitive).toBeInstanceOf(
+          lineOwner.primitive.constructor,
+        );
       }
 
       const holeRegion = readRegion(new Cartesian3(center, center, 5.0), 0);
@@ -215,75 +222,55 @@ describe("SceneGIS/DataSources/SceneGISPlanarGeometry", function () {
         expect(depthPosition.z).toBeLessThan(10.0);
       }
 
-      const lineContext = lineOwner.collection._renderContext;
-      const polygonContext = polygonOwner.fillCollection._renderContext;
-      const extrusionContext = extrusionOwner.fillCollection._renderContext;
-      const lineCommand = lineContext.command;
-      const lineVertexArray = lineContext.vertexArray;
-      const polygonCommand = polygonContext.command;
-      const polygonVertexArray = polygonContext.vertexArray;
-      const lineAttributeCopy = spyOn(
-        lineVertexArray,
-        "copyAttributeFromRange",
-      ).and.callThrough();
-      const lineIndexCopy = spyOn(
-        lineVertexArray,
-        "copyIndexFromRange",
-      ).and.callThrough();
+      const lineInternal = lineOwner.primitive._current;
+      const polygonInternal = polygonOwner.fillPrimitive._current;
+      const extrusionInternal = extrusionOwner.fillPrimitive._current;
+      const lineCommand = lineInternal._colorCommands[0];
+      const lineVertexArray = lineInternal._va[0];
+      const polygonCommand = polygonInternal._colorCommands[0];
+      const polygonVertexArray = polygonInternal._va[0];
 
       lineVisualizer.update(time);
       polygonVisualizer.update(time);
-      const warmCollections = [
-        lineOwner.collection,
-        polygonOwner.fillCollection,
-        extrusionOwner.fillCollection,
-        extrusionOwner.outlineCollection,
-      ];
-      for (let i = 0; i < warmCollections.length; i++) {
-        expect(warmCollections[i]._dirtyCount).toBe(0);
-      }
       scene.renderForSpecs();
       expect(lineVisualizer._items.get(polyline.id).owner).toBe(lineOwner);
       expect(polygonVisualizer._items.get(polygon.id).owner).toBe(polygonOwner);
       expect(polygonVisualizer._items.get(extrusion.id).owner).toBe(
         extrusionOwner,
       );
-      expect(lineOwner.collection._renderContext).toBe(lineContext);
-      expect(polygonOwner.fillCollection._renderContext).toBe(polygonContext);
-      expect(extrusionOwner.fillCollection._renderContext).toBe(
-        extrusionContext,
-      );
-      expect(lineContext.command).toBe(lineCommand);
-      expect(lineContext.vertexArray).toBe(lineVertexArray);
-      expect(polygonContext.command).toBe(polygonCommand);
-      expect(polygonContext.vertexArray).toBe(polygonVertexArray);
-      expect(lineAttributeCopy).not.toHaveBeenCalled();
-      expect(lineIndexCopy).not.toHaveBeenCalled();
+      expect(lineOwner.primitive._current).toBe(lineInternal);
+      expect(polygonOwner.fillPrimitive._current).toBe(polygonInternal);
+      expect(extrusionOwner.fillPrimitive._current).toBe(extrusionInternal);
+      expect(lineInternal._colorCommands[0]).toBe(lineCommand);
+      expect(lineInternal._va[0]).toBe(lineVertexArray);
+      expect(polygonInternal._colorCommands[0]).toBe(polygonCommand);
+      expect(polygonInternal._va[0]).toBe(polygonVertexArray);
 
       polyline.polyline.positions = [
         new Cartesian3(center - 65.0, center - 30.0, 20.0),
         new Cartesian3(center - 65.0, center + 25.0, 20.0),
       ];
       lineVisualizer.update(time);
-      expect(lineVisualizer._items.get(polyline.id).owner).toBe(lineOwner);
-      expect(lineOwner.collection._dirtyCount).toBeGreaterThan(0);
-      expect(lineOwner.primitive.getPositions()[4]).toBe(55.0);
+      const changedLineOwner = lineVisualizer._items.get(polyline.id).owner;
+      expect(changedLineOwner).not.toBe(lineOwner);
+      expect(lineOwner.destroyed).toBeTrue();
+      expect(changedLineOwner.primitive.geometry.positions[1].y).toBe(
+        center + 25.0,
+      );
       scene.renderForSpecs();
-      expect(lineAttributeCopy.calls.count()).toBeGreaterThan(0);
 
-      const ownedCollections = [
-        lineOwner.collection,
-        polygonOwner.fillCollection,
-        extrusionOwner.fillCollection,
-        extrusionOwner.outlineCollection,
+      const ownedPrimitives = [
+        ...changedLineOwner.primitives,
+        ...polygonOwner.primitives,
+        ...extrusionOwner.primitives,
       ];
-      for (let i = 0; i < ownedCollections.length; i++) {
-        spyOn(ownedCollections[i], "destroy").and.callThrough();
-      }
+      const destroySpies = ownedPrimitives.map((primitive) =>
+        spyOn(primitive, "destroy").and.callThrough(),
+      );
       lineVisualizer.destroy();
       polygonVisualizer.destroy();
-      for (let i = 0; i < ownedCollections.length; i++) {
-        expect(ownedCollections[i].destroy).toHaveBeenCalledTimes(1);
+      for (let i = 0; i < ownedPrimitives.length; i++) {
+        expect(destroySpies[i]).toHaveBeenCalledTimes(1);
       }
       expect(scene.primitives.length).toBe(primitiveBaseline);
     } finally {

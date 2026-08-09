@@ -1,21 +1,22 @@
 import ArcType from "../../../Core/ArcType.js";
 import AssociativeArray from "../../../Core/AssociativeArray.js";
-import BlendOption from "../../../Scene/BlendOption.js";
 import BoundingSphere from "../../../Core/BoundingSphere.js";
 import BoundingSphereState from "../../../DataSources/BoundingSphereState.js";
-import BufferPolylineMaterial from "../../../Scene/BufferPolylineMaterial.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import Color from "../../../Core/Color.js";
 import ColorMaterialProperty from "../../../DataSources/ColorMaterialProperty.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import EntityCollection from "../../../DataSources/EntityCollection.js";
 import HeightReference from "../../../Scene/HeightReference.js";
-import Matrix4 from "../../../Core/Matrix4.js";
+import Material from "../../../Scene/Material.js";
+import PolylineMaterialAppearance from "../../../Scene/PolylineMaterialAppearance.js";
 import Property from "../../../DataSources/Property.js";
 import ShadowMode from "../../../Scene/ShadowMode.js";
 import destroyObject from "../../../Core/destroyObject.js";
-import SceneGISPlanarBufferOwner from "./_SceneGISPlanarBufferOwner.js";
+import SceneGISPlanarPolylineGeometry from "../../Core/SceneGISPlanarPolylineGeometry.js";
+import SceneGISPlanarPrimitive from "../../Scene/SceneGISPlanarPrimitive.js";
 import SceneGISPlanarPositionResolver from "./_SceneGISPlanarPositionResolver.js";
+import SceneGISPlanarPrimitiveOwner from "./_SceneGISPlanarPrimitiveOwner.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
 
 const scratchColor = new Color();
@@ -84,8 +85,8 @@ function computeState(visualizer, item, time) {
   const graphic = entity._polyline;
   validateUnsupported(graphic, time);
   const width = value(graphic._width, time, 1.0);
-  if (!Number.isInteger(width) || width < 0 || width > 255) {
-    throw new DeveloperError("width must be an integer between 0 and 255.");
+  if (!Number.isFinite(width) || width < 0) {
+    throw new DeveloperError("width must be a finite nonnegative number.");
   }
   const color = getColor(graphic, time);
   const positions = optional(graphic._positions, time);
@@ -124,14 +125,6 @@ function computeState(visualizer, item, time) {
     return { shown: false };
   }
 
-  const origin = new Cartesian3(resolved[0].x, resolved[0].y, 0.0);
-  const localPositions = new Float64Array(resolved.length * 3);
-  for (let i = 0; i < resolved.length; i++) {
-    const position = resolved[i];
-    localPositions[i * 3] = position.x - origin.x;
-    localPositions[i * 3 + 1] = position.y - origin.y;
-    localPositions[i * 3 + 2] = position.z;
-  }
   const boundingSphere = BoundingSphere.fromPoints(resolved);
   if (
     !Number.isFinite(boundingSphere.center.x) ||
@@ -141,60 +134,41 @@ function computeState(visualizer, item, time) {
   ) {
     throw new DeveloperError("The derived bounding sphere must be finite.");
   }
-  const blendOption =
-    color.alpha === 1.0 ? BlendOption.OPAQUE : BlendOption.TRANSLUCENT;
   return {
     shown: true,
-    origin,
-    modelMatrix: Matrix4.fromTranslation(origin),
-    localPositions,
+    positions: resolved,
+    width,
+    color,
     boundingSphere,
-    material: new BufferPolylineMaterial({ color, width }),
-    blendOption,
-    signature: `${resolved.length}|${blendOption}|${origin.x}|${origin.y}`,
+    signature: `${resolved.length}|${resolved.map((p) => `${p.x},${p.y},${p.z}`).join(";")}|${width}`,
   };
 }
 
 function createOwner(visualizer, item, state) {
-  const owner = new SceneGISPlanarBufferOwner(
-    visualizer._scene,
-    item.entity,
-    visualizer._primitives,
-  );
-  try {
-    const render = owner.addPolylineCollection({
-      primitives: [
-        { positions: state.localPositions, material: state.material },
-      ],
-      vertexCount: state.localPositions.length / 3,
-      modelMatrix: state.modelMatrix,
-      boundingVolume: state.boundingSphere,
-      blendOption: state.blendOption,
-    });
-    owner.collection = render.collection;
-    owner.primitive = render.primitives[0];
-    owner.signature = state.signature;
-    owner.appliedPositions = state.localPositions.slice();
-    owner.appliedMaterialKey = `${state.material.color.toRgba()}|${state.material.width}`;
-    owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
-    owner.shown = true;
-    return owner;
-  } catch (error) {
-    owner.destroy();
-    throw error;
-  }
-}
-
-function arrayEquals(left, right) {
-  if (left.length !== right.length) {
-    return false;
-  }
-  for (let i = 0; i < left.length; i++) {
-    if (left[i] !== right[i]) {
-      return false;
-    }
-  }
-  return true;
+  const material = Material.fromType(Material.ColorType, {
+    color: Color.clone(state.color),
+  });
+  const appearance = new PolylineMaterialAppearance({
+    material,
+    translucent: state.color.alpha < 1.0,
+  });
+  const primitive = new SceneGISPlanarPrimitive({
+    geometry: new SceneGISPlanarPolylineGeometry({
+      positions: state.positions,
+      width: state.width,
+    }),
+    appearance,
+    id: item.entity,
+  });
+  const owner = new SceneGISPlanarPrimitiveOwner(visualizer._primitives);
+  owner.add(primitive);
+  owner.primitive = primitive;
+  owner.collection = primitive;
+  owner.appearance = appearance;
+  owner.signature = state.signature;
+  owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
+  owner.shown = true;
+  return owner;
 }
 
 function boundingSphereEquals(left, right) {
@@ -204,20 +178,8 @@ function boundingSphereEquals(left, right) {
 }
 
 function applyState(owner, state) {
-  if (!arrayEquals(owner.appliedPositions, state.localPositions)) {
-    owner.primitive.setPositions(state.localPositions);
-    owner.appliedPositions = state.localPositions.slice();
-  }
-  const materialKey = `${state.material.color.toRgba()}|${state.material.width}`;
-  if (owner.appliedMaterialKey !== materialKey) {
-    owner.primitive.setMaterial(state.material);
-    owner.appliedMaterialKey = materialKey;
-  }
+  Color.clone(state.color, owner.appearance.material.uniforms.color);
   if (!boundingSphereEquals(owner.boundingSphere, state.boundingSphere)) {
-    BoundingSphere.clone(
-      state.boundingSphere,
-      owner.collection._boundingVolume,
-    );
     BoundingSphere.clone(state.boundingSphere, owner.boundingSphere);
   }
   if (!owner.primitive.show) {
@@ -235,7 +197,7 @@ function releaseOwner(item) {
 }
 
 /**
- * Visualizes planar straight PolylineGraphics with experimental buffer storage.
+ * Visualizes planar straight PolylineGraphics with public planar primitives.
  *
  * @alias SceneGISPlanarPolylineVisualizer
  * @constructor

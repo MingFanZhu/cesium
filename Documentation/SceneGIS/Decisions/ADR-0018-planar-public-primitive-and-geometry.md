@@ -69,7 +69,7 @@ command或GPU mutation前拒绝。C7/C8可以按同一私有brand/adapter contra
 `SceneGISPlanarPrimitive`作为可直接加入`scene.primitives`或任意caller-owned `PrimitiveCollection`的Scene
 primitive，构造profile固定为：
 
-- 必需`geometry`；必需且与geometry kind匹配的`appearance`；可选`id`、`attributes`、finite affine
+- 必需`geometry`；必需且与geometry kind匹配的`appearance`；必需non-null `id`；可选`attributes`、finite affine
   `modelMatrix`、`show`与`allowPicking`；
 - C6 Appearance allowlist为使用`Material.ColorType`的`PolylineMaterialAppearance`，以及Polygon的flat
   `PerInstanceColorAppearance`和finite color attribute。Material/texture扩展必须在后续phase形成明确
@@ -77,7 +77,8 @@ primitive，构造profile固定为：
 - `asynchronous`固定为`false`且不作为public option，不新增Worker、pack/unpack或build seam；
 - 一个wrapper只拥有一个GeometryInstance/一个内部standard Primitive。Polygon fill与outline、或多个Entity，
   使用多个wrapper，而不是让不同local origin在PrimitivePipeline中被烘焙回完整world vertices；
-- `geometry`、`appearance`、`modelMatrix`和`show`可按文档更新；`id`与`allowPicking`在构造后只读。
+- wrapper在构造时固定geometry kind；`geometry`只允许同kind replacement，`appearance`也必须继续匹配
+  该kind。跨kind需新建wrapper；`modelMatrix`和`show`可按文档更新；`id`与`allowPicking`在构造后只读。
   Public `modelMatrix`表示围绕Geometry local origin的附加local transform；最终world matrix固定为
   `translation(geometry.origin) * modelMatrix`，并在任一部分变化后重新计算world bounds；
 - `getGeometryInstanceAttributes`与`getBoundingSphere(result)`提供受支持的attributes/bounds入口；`ready`只读，
@@ -94,11 +95,15 @@ PrimitiveCollection、Context或World。
 标准Primitive在首次render后不能替换`geometryInstances`。Wrapper因此使用candidate/current协议：
 
 1. setter先完成geometry/appearance/model matrix/attributes与derived bounds的全部CPU preflight；
+   `attributes`必须具有有效`ComponentDatatype`、1至4个component、boolean `normalize`与一个完整
+   finite instance value；
 2. geometry或需要新shader/translucency class的变化只在normal render pass初始化candidate；pick/depth pass只提交
    last successful current；
-3. candidate同步初始化成功后，在同一normal frame原子成为current并释放old；失败时回滚该candidate新增的
-   command与GPU资源，保留old和原始异常；
+3. desired与last-successful current各自保留geometry/origin/bounds。Candidate同步初始化成功后，
+   在同一normal frame原子成为current并释放old；失败时回滚新command/GPU资源，旧current的
+   origin、matrix、bounds、pick/depth与原始异常均保留；
 4. 同geometry的show、model matrix、Material uniform或per-instance attribute更新优先复用current，不得每帧重建；
+   `getGeometryInstanceAttributes()`已发布的受支持attribute值在同kind replacement中必须保留；
 5. 第一个Context成功绑定后，任何第二Context都必须在command、candidate或resource mutation前fail-fast；
 6. replacement、collection removal与destroy必须exactly once，destroy后的更新、setter或bounds访问遵循
    Cesium destroyed-object规则。
@@ -115,7 +120,9 @@ geometry实现。
 
 迁移完成后，SceneGIS product runtime不再依赖`_SceneGISPlanarBufferOwner`、
 `BufferPolylineCollection`、`BufferPolygonCollection`或它们的private `_boundingVolume`/dirty字段。若没有其他
-SceneGIS引用，应删除private owner；上游experimental实现本身不修改。
+SceneGIS引用，应删除该Buffer-specific owner；可保留与Buffer无关的窄小private owner，仅负责
+public wrapper在caller-owned `PrimitiveCollection`中的post-insertion rollback、成对remove和exactly-once
+destroy。上游experimental实现本身不修改。
 
 标准Polyline geometry使用Float width，不再受Buffer Uint8 layout限制。因此ADR-0015中Polyline `width`和
 Polygon `outlineWidth`必须是`[0,255]` integer的规定由本ADR替代：Entity profile接受finite nonnegative

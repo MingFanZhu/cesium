@@ -7,12 +7,11 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: `C6-public-planar-primitive-and-geometry`
-- Active phase plan:
-  [C6 Public Planar Primitive/Geometry 基础](plans/2026-08-09-phase-c6-public-planar-primitive-and-geometry.md)
+- Current phase: None；C6 completed，C7待phase planning
+- Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（等待C6 implementation派工）
+- Execution contact: None；等待C7 phase plan派工
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -65,14 +64,13 @@
 
 - Current state: C1-C5作为首批六类content profile已完成并通过项目负责人人工验收；项目负责人随后明确要求
   不留下半成品Entity/Primitive/ground体系，批准在同一extension中继续C6-C10，状态重新激活为`active`。
-- Next action: Execution依据ADR-0018与C6 phase plan实现public planar Primitive/Geometry，并把现有
-  Polyline/Polygon Entity adapter迁移到同一低层实现。
-- Current phase status: C6 `active`；等待Execution实现。
+- Next action: Architecture Agent基于C6提交后的源码事实细化C7普通锚定、体与面Entity Graphics phase plan。
+- Current phase status: C6 `completed`；C7 `proposed`。
 - Open discussions: None；3D Tiles与GeoJSON/CZML/KML转换继续属于独立扩展。
 - Latest review:
-  [C5 dynamic performance and delivery review](reviews/2026-08-09-c5-dynamic-performance-and-delivery.md)
-  （`approved`；R001～R003经focused re-review关闭）。
-- Unresolved reviews: None；C5验收已通过，C6实现ready后创建pending review。
+  [C6 public planar Primitive/Geometry review](reviews/2026-08-09-c6-public-planar-primitive-and-geometry.md)
+  （`approved`；R001～R004全部关闭）。
+- Unresolved reviews: None。
 - Known risks: C6需把standard Primitive的immutable geometry封装为原子candidate/current，并清除SceneGIS对
   experimental Buffer runtime的依赖；vertex-only terrain drape仍不代表连续贴地。普通geometry覆盖与continuous
   ground按C7-C9逐阶段审计。公开Sandcastle terrain/imagery仍受网络与服务策略影响。

@@ -10,7 +10,9 @@ import PolylineGraphics from "../../../../Source/DataSources/PolylineGraphics.js
 import PrimitiveCollection from "../../../../Source/Scene/PrimitiveCollection.js";
 import SceneGISPlanarCoordinateSystem from "../../../../Source/SceneGIS/Core/SceneGISPlanarCoordinateSystem.js";
 import SceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlanarExtent.js";
+import SceneGISPlanarPolylineGeometry from "../../../../Source/SceneGIS/Core/SceneGISPlanarPolylineGeometry.js";
 import SceneGISPlanarPolylineVisualizer from "../../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolylineVisualizer.js";
+import SceneGISPlanarPrimitive from "../../../../Source/SceneGIS/Scene/SceneGISPlanarPrimitive.js";
 import SceneGISPlanarWorld from "../../../../Source/SceneGIS/Scene/SceneGISPlanarWorld.js";
 
 describe("SceneGIS/DataSources/SceneGISPlanarPolylineVisualizer", function () {
@@ -24,20 +26,15 @@ describe("SceneGIS/DataSources/SceneGISPlanarPolylineVisualizer", function () {
     world = new SceneGISPlanarWorld({
       coordinateSystem: new SceneGISPlanarCoordinateSystem({
         extent: new SceneGISPlanarExtent({
-          minimumX: -100.0,
-          minimumY: -100.0,
-          maximumX: 100.0,
-          maximumY: 100.0,
+          minimumX: -100,
+          minimumY: -100,
+          maximumX: 100,
+          maximumY: 100,
         }),
       }),
       maximumLevel: 1,
     });
-    scene = {
-      primitives: new PrimitiveCollection(),
-      isDestroyed: function () {
-        return false;
-      },
-    };
+    scene = { primitives: new PrimitiveCollection(), isDestroyed: () => false };
     collection = new EntityCollection();
     visualizer = new SceneGISPlanarPolylineVisualizer(world, scene, collection);
   });
@@ -57,125 +54,47 @@ describe("SceneGIS/DataSources/SceneGISPlanarPolylineVisualizer", function () {
       id: options.id ?? "line",
       polyline: new PolylineGraphics({
         positions: options.positions ?? [
-          new Cartesian3(-10.0, 0.0, 2.0),
-          new Cartesian3(10.0, 0.0, 4.0),
+          new Cartesian3(-10, 0, 2),
+          new Cartesian3(10, 0, 4),
         ],
         material: options.material ?? new ColorMaterialProperty(Color.CYAN),
-        width: options.width ?? 3.0,
+        width: options.width ?? 3,
         ...options.graphic,
       }),
     });
   }
 
-  it("uses straight absolute local DOUBLE positions and planar default arc", function () {
-    const entity = addPolyline();
+  it("adapts straight Entity geometry to the public primitive", function () {
+    const entity = addPolyline({ width: 300.5 });
     visualizer.update(time);
     const owner = visualizer._items.get(entity.id).owner;
-    expect(owner.collection.modelMatrix[12]).toBe(-10.0);
-    expect(owner.collection.modelMatrix[13]).toBe(0.0);
-    expect(Array.from(owner.primitive.getPositions())).toEqual([
-      0.0, 0.0, 2.0, 20.0, 0.0, 4.0,
-    ]);
-    expect(owner.primitive.getMaterial({ color: new Color() }).color).toEqual(
-      Color.CYAN,
+    expect(owner.primitive).toBeInstanceOf(SceneGISPlanarPrimitive);
+    expect(owner.primitive.geometry).toBeInstanceOf(
+      SceneGISPlanarPolylineGeometry,
     );
-    expect(owner.primitive.getMaterial({ color: new Color() }).width).toBe(3);
+    expect(owner.primitive.geometry.width).toBe(300.5);
+    expect(owner.primitive.geometry.positions).toEqual([
+      new Cartesian3(-10, 0, 2),
+      new Cartesian3(10, 0, 4),
+    ]);
+    expect(scene.primitives.contains(owner.primitive)).toBeTrue();
   });
 
-  it("samples supplied clamp vertices and updates terrain without replacement", function () {
-    world.getTerrainHeight = jasmine
-      .createSpy("getTerrainHeight")
-      .and.callFake(function (position) {
-        return position.x + 20.0;
-      });
+  it("resolves clamp vertices and atomically replaces changed geometry", function () {
+    spyOn(world, "getTerrainHeight").and.returnValue(12);
     const entity = addPolyline({ graphic: { clampToGround: true } });
     visualizer.update(time);
-    const owner = visualizer._items.get(entity.id).owner;
-    expect(Array.from(owner.primitive.getPositions())).toEqual([
-      0.0, 0.0, 10.0, 20.0, 0.0, 30.0,
-    ]);
-
-    world.getTerrainHeight.and.callFake(function (position) {
-      return position.x + 25.0;
-    });
-    visualizer.update(time);
-    expect(visualizer._items.get(entity.id).owner).toBe(owner);
-    expect(Array.from(owner.primitive.getPositions())).toEqual([
-      0.0, 0.0, 15.0, 20.0, 0.0, 35.0,
-    ]);
-  });
-
-  it("retains hidden and outside owners but releases missing positions", function () {
-    const entity = addPolyline();
-    visualizer.update(time);
-    const owner = visualizer._items.get(entity.id).owner;
-    entity.polyline.show = false;
-    visualizer.update(time);
-    expect(visualizer._items.get(entity.id).owner).toBe(owner);
-    expect(owner.collection.show).toBe(false);
-
-    entity.polyline.show = true;
-    entity.polyline.positions = [
-      new Cartesian3(-10.0, 0.0, 0.0),
-      new Cartesian3(101.0, 0.0, 0.0),
-    ];
-    visualizer.update(time);
-    expect(visualizer._items.get(entity.id).owner).toBe(owner);
-    expect(owner.collection.show).toBe(false);
-
-    entity.polyline.positions = undefined;
-    visualizer.update(time);
-    expect(visualizer._items.get(entity.id).owner).toBeUndefined();
-    expect(owner.destroyed).toBe(true);
-  });
-
-  it("rejects unsupported or invalid properties before current mutation", function () {
-    const entity = addPolyline();
-    visualizer.update(time);
-    const owner = visualizer._items.get(entity.id).owner;
-    const positions = Array.from(owner.primitive.getPositions());
-    entity.polyline.width = 2.5;
-    expect(function () {
-      visualizer.update(time);
-    }).toThrowDeveloperError();
-    expect(visualizer._items.get(entity.id).owner).toBe(owner);
-    expect(Array.from(owner.primitive.getPositions())).toEqual(positions);
-    expect(owner.primitive.getMaterial({ color: new Color() }).width).toBe(3);
-
-    entity.polyline.width = 255;
-    visualizer.update(time);
-    expect(visualizer._items.get(entity.id).owner).toBe(owner);
-    expect(owner.primitive.getMaterial({ color: new Color() }).width).toBe(255);
-
-    entity.polyline.arcType = ArcType.GEODESIC;
-    expect(function () {
-      visualizer.update(time);
-    }).toThrowDeveloperError();
-    expect(visualizer._items.get(entity.id).owner).toBe(owner);
-  });
-
-  it("replaces topology and blend candidates and destroys old owners once", function () {
-    const entity = addPolyline();
-    visualizer.update(time);
     const first = visualizer._items.get(entity.id).owner;
-    spyOn(first.collection, "destroy").and.callThrough();
-    entity.polyline.positions = [
-      new Cartesian3(-10.0, 0.0, 0.0),
-      new Cartesian3(0.0, 10.0, 0.0),
-      new Cartesian3(10.0, 0.0, 0.0),
-    ];
-    entity.polyline.material = new ColorMaterialProperty(
-      Color.fromAlpha(Color.CYAN, 0.5),
-    );
+    expect(first.primitive.geometry.positions[0].z).toBe(12);
+    world.getTerrainHeight.and.returnValue(20);
     visualizer.update(time);
     const second = visualizer._items.get(entity.id).owner;
     expect(second).not.toBe(first);
-    expect(first.destroyed).toBe(true);
-    expect(first.collection.destroy).toHaveBeenCalledTimes(1);
-    expect(second.primitive.vertexCount).toBe(3);
+    expect(first.destroyed).toBeTrue();
+    expect(second.primitive.geometry.positions[0].z).toBe(20);
   });
 
-  it("returns current bounds and preserves warm owner and collection identity", function () {
+  it("retains hidden owners, releases missing geometry, and reports bounds", function () {
     const entity = addPolyline();
     visualizer.update(time);
     const owner = visualizer._items.get(entity.id).owner;
@@ -183,40 +102,63 @@ describe("SceneGIS/DataSources/SceneGISPlanarPolylineVisualizer", function () {
     expect(visualizer.getBoundingSphere(entity, sphere)).toBe(
       BoundingSphereState.DONE,
     );
-    expect(Number.isFinite(sphere.radius)).toBe(true);
+    entity.show = false;
     visualizer.update(time);
-    expect(visualizer._items.get(entity.id).owner).toBe(owner);
-    expect(visualizer._items.get(entity.id).owner.collection).toBe(
-      owner.collection,
+    expect(owner.primitive.show).toBeFalse();
+    entity.polyline.positions = undefined;
+    visualizer.update(time);
+    expect(owner.destroyed).toBeTrue();
+    expect(visualizer.getBoundingSphere(entity, sphere)).toBe(
+      BoundingSphereState.FAILED,
     );
   });
 
-  it("disconnects and releases its owner without owning the collection", function () {
+  it("rejects unsupported and invalid values before current mutation", function () {
     const entity = addPolyline();
     visualizer.update(time);
     const owner = visualizer._items.get(entity.id).owner;
-    const listenerCount = collection.collectionChanged.numberOfListeners;
-    spyOn(owner.collection, "destroy").and.callThrough();
-    visualizer.destroy();
-    visualizer = undefined;
-    expect(owner.collection.destroy).toHaveBeenCalledTimes(1);
-    expect(collection.collectionChanged.numberOfListeners).toBe(
-      listenerCount - 1,
-    );
-    expect(collection.contains(entity)).toBe(true);
+    entity.polyline.arcType = ArcType.GEODESIC;
+    expect(function () {
+      visualizer.update(time);
+    }).toThrowDeveloperError();
+    expect(visualizer._items.get(entity.id).owner).toBe(owner);
+    entity.polyline.arcType = ArcType.NONE;
+    entity.polyline.width = -1;
+    expect(function () {
+      visualizer.update(time);
+    }).toThrowDeveloperError();
+    expect(visualizer._items.get(entity.id).owner).toBe(owner);
   });
 
-  it("uses an explicit caller-owned primitive collection without owning it", function () {
+  it("preserves warm owner identity and updates color without geometry replacement", function () {
+    const material = new ColorMaterialProperty(Color.RED);
+    const entity = addPolyline({ material });
+    visualizer.update(time);
+    const owner = visualizer._items.get(entity.id).owner;
+    visualizer.update(time);
+    expect(visualizer._items.get(entity.id).owner).toBe(owner);
+    material.color = Color.BLUE;
+    visualizer.update(time);
+    expect(visualizer._items.get(entity.id).owner).toBe(owner);
+    expect(owner.appearance.material.uniforms.color).toEqual(Color.BLUE);
+  });
+
+  it("uses and preserves an explicit caller-owned PrimitiveCollection", function () {
+    visualizer.destroy();
     const target = new PrimitiveCollection();
-    const targeted = new SceneGISPlanarPolylineVisualizer(
+    visualizer = new SceneGISPlanarPolylineVisualizer(
       world,
       scene,
       collection,
       target,
     );
-    expect(targeted._primitives).toBe(target);
-    targeted.destroy();
-    expect(target.isDestroyed()).toBe(false);
+    const entity = addPolyline();
+    visualizer.update(time);
+    const primitive = visualizer._items.get(entity.id).owner.primitive;
+    expect(target.contains(primitive)).toBeTrue();
+    visualizer.destroy();
+    expect(target.length).toBe(0);
+    expect(target.isDestroyed()).toBeFalse();
     target.destroy();
   });
 });

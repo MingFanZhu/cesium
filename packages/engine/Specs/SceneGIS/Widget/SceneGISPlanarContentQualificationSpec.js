@@ -198,8 +198,8 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
     const polygonOwners = profile.polygons.map(
       (entity) => visualizers.polygon._items.get(entity.id).owner,
     );
-    const lineContext = lineOwners[0].collection._renderContext;
-    const polygonContext = polygonOwners[0].fillCollection._renderContext;
+    const lineContext = lineOwners[0].primitive._current;
+    const polygonContext = polygonOwners[0].fillPrimitive._current;
     return {
       pointSlots,
       billboardSlots,
@@ -208,14 +208,14 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
       polygonOwners,
       primitiveCount: source._primitives.length,
       lineContext,
-      lineCommand: lineContext.command,
-      lineVertexArray: lineContext.vertexArray,
+      lineCommand: lineContext?._colorCommands[0],
+      lineVertexArray: lineContext?._va[0],
       polygonContext,
-      polygonCommand: polygonContext.command,
-      polygonVertexArray: polygonContext.vertexArray,
-      lineVersions: lineOwners.map((owner) => owner.collection._version),
+      polygonCommand: polygonContext?._colorCommands[0],
+      polygonVertexArray: polygonContext?._va[0],
+      lineVersions: lineOwners.map((owner) => owner.primitive._current),
       polygonVersions: polygonOwners.map((owner) =>
-        owner.collections.map((collection) => collection._version),
+        owner.primitives.map((primitive) => primitive._current),
       ),
     };
   }
@@ -236,11 +236,6 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
     expect(current.polygonVertexArray).toBe(snapshot.polygonVertexArray);
     expect(current.lineVersions).toEqual(snapshot.lineVersions);
     expect(current.polygonVersions).toEqual(snapshot.polygonVersions);
-    for (const owner of [...current.lineOwners, ...current.polygonOwners]) {
-      for (const collection of owner.collections) {
-        expect(collection._dirtyCount).toBe(0);
-      }
-    }
   }
 
   function percentile(values, fraction) {
@@ -277,8 +272,10 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
     const source = new CustomDataSource("moderate-profile");
     const profile = addModerateProfile(source, terrainHeight);
     return widget.dataSources.add(source).then(function () {
-      widget.render();
-      widget.render();
+      for (let i = 0; i < 3; i++) {
+        widget.dataSourceDisplay.update(widget.clock.currentTime);
+        widget.scene.render();
+      }
       const visualizers = getVisualizers(source);
       expect(visualizers.anchor._items.length).toBe(512);
       expect(visualizers.polyline._items.length).toBe(64);
@@ -370,15 +367,14 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
         expect(
           visualizers.anchor._items.get(profile.points[0].id).point.position.z,
         ).toBe(terrainHeight.value);
-        const clampedLinePositions = visualizers.polyline._items
-          .get(profile.polylines[0].id)
-          .owner.primitive.getPositions();
-        expect(clampedLinePositions[2]).toBe(terrainHeight.value);
-        expect(clampedLinePositions[5]).toBe(terrainHeight.value);
+        const clampedLinePositions = visualizers.polyline._items.get(
+          profile.polylines[0].id,
+        ).owner.primitive.geometry.positions;
+        expect(clampedLinePositions[0].z).toBe(terrainHeight.value);
+        expect(clampedLinePositions[1].z).toBe(terrainHeight.value);
         expect(
-          visualizers.polygon._items
-            .get(profile.polygons[0].id)
-            .owner.fillPrimitive.getPositions()[2],
+          visualizers.polygon._items.get(profile.polygons[0].id).owner
+            .fillPrimitive.geometry.positions[0].z,
         ).toBe(terrainHeight.value + 2.0);
         widget.render();
       }

@@ -1,24 +1,25 @@
 import ArcType from "../../../Core/ArcType.js";
 import AssociativeArray from "../../../Core/AssociativeArray.js";
-import BlendOption from "../../../Scene/BlendOption.js";
 import BoundingSphere from "../../../Core/BoundingSphere.js";
 import BoundingSphereState from "../../../DataSources/BoundingSphereState.js";
-import BufferPolygonMaterial from "../../../Scene/BufferPolygonMaterial.js";
-import BufferPolylineMaterial from "../../../Scene/BufferPolylineMaterial.js";
-import Cartesian2 from "../../../Core/Cartesian2.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import Color from "../../../Core/Color.js";
+import ColorGeometryInstanceAttribute from "../../../Core/ColorGeometryInstanceAttribute.js";
 import ColorMaterialProperty from "../../../DataSources/ColorMaterialProperty.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import EntityCollection from "../../../DataSources/EntityCollection.js";
 import HeightReference from "../../../Scene/HeightReference.js";
-import Matrix4 from "../../../Core/Matrix4.js";
-import PolygonPipeline from "../../../Core/PolygonPipeline.js";
+import Material from "../../../Scene/Material.js";
+import PerInstanceColorAppearance from "../../../Scene/PerInstanceColorAppearance.js";
+import PolylineMaterialAppearance from "../../../Scene/PolylineMaterialAppearance.js";
 import Property from "../../../DataSources/Property.js";
 import ShadowMode from "../../../Scene/ShadowMode.js";
 import destroyObject from "../../../Core/destroyObject.js";
-import SceneGISPlanarBufferOwner from "./_SceneGISPlanarBufferOwner.js";
+import SceneGISPlanarPolygonGeometry from "../../Core/SceneGISPlanarPolygonGeometry.js";
+import SceneGISPlanarPolylineGeometry from "../../Core/SceneGISPlanarPolylineGeometry.js";
+import SceneGISPlanarPrimitive from "../../Scene/SceneGISPlanarPrimitive.js";
 import SceneGISPlanarPositionResolver from "./_SceneGISPlanarPositionResolver.js";
+import SceneGISPlanarPrimitiveOwner from "./_SceneGISPlanarPrimitiveOwner.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
 
 const scratchColor = new Color();
@@ -247,47 +248,6 @@ function getRings(hierarchy) {
   return [outer, ...holes];
 }
 
-function triangulateRings(rings) {
-  const positions = [];
-  const holes = [];
-  for (let i = 0; i < rings.length; i++) {
-    if (i > 0) {
-      holes.push(positions.length);
-    }
-    for (let j = 0; j < rings[i].length; j++) {
-      positions.push(new Cartesian2(rings[i][j].x, rings[i][j].y));
-    }
-  }
-  const triangles = PolygonPipeline.triangulate(positions, holes);
-  if (triangles.length < 3 || triangles.length % 3 !== 0) {
-    throw new DeveloperError(
-      "Polygon triangulation must produce complete triangles.",
-    );
-  }
-  for (let i = 0; i < triangles.length; i += 3) {
-    const a = triangles[i];
-    const b = triangles[i + 1];
-    const c = triangles[i + 2];
-    if (
-      !Number.isInteger(a) ||
-      !Number.isInteger(b) ||
-      !Number.isInteger(c) ||
-      a < 0 ||
-      b < 0 ||
-      c < 0 ||
-      a >= positions.length ||
-      b >= positions.length ||
-      c >= positions.length ||
-      cross(positions[a], positions[b], positions[c]) === 0.0
-    ) {
-      throw new DeveloperError(
-        "Polygon triangulation produced an invalid triangle.",
-      );
-    }
-  }
-  return { triangles, holeOffsets: holes };
-}
-
 function resolveHeights(visualizer, rings, options) {
   const top = [];
   const bottom = options.extruded ? [] : undefined;
@@ -341,81 +301,6 @@ function resolveHeights(visualizer, rings, options) {
   return { top, bottom, outside };
 }
 
-function appendTriangle(target, a, b, c) {
-  target.push(a, b, c);
-}
-
-function buildFill(rings, triangulation, top, bottom, closeTop, closeBottom) {
-  const positions = bottom === undefined ? top.slice() : [...top, ...bottom];
-  const triangles = [];
-  if (bottom === undefined || closeTop) {
-    triangles.push(...triangulation.triangles);
-  }
-  const topCount = top.length;
-  if (bottom !== undefined) {
-    if (closeBottom) {
-      for (let i = 0; i < triangulation.triangles.length; i += 3) {
-        appendTriangle(
-          triangles,
-          topCount + triangulation.triangles[i],
-          topCount + triangulation.triangles[i + 2],
-          topCount + triangulation.triangles[i + 1],
-        );
-      }
-    }
-    let ringOffset = 0;
-    for (let ringIndex = 0; ringIndex < rings.length; ringIndex++) {
-      const ringLength = rings[ringIndex].length;
-      for (let i = 0; i < ringLength; i++) {
-        const current = ringOffset + i;
-        const next = ringOffset + ((i + 1) % ringLength);
-        appendTriangle(triangles, current, next, topCount + next);
-        appendTriangle(triangles, current, topCount + next, topCount + current);
-      }
-      ringOffset += ringLength;
-    }
-  }
-  return { positions, triangles };
-}
-
-function toLocalArray(positions, origin) {
-  const local = new Float64Array(positions.length * 3);
-  for (let i = 0; i < positions.length; i++) {
-    local[i * 3] = positions[i].x - origin.x;
-    local[i * 3 + 1] = positions[i].y - origin.y;
-    local[i * 3 + 2] = positions[i].z;
-  }
-  return local;
-}
-
-function buildOutline(rings, top, bottom, origin, material) {
-  const primitives = [];
-  let offset = 0;
-  const addRing = (positions) => {
-    primitives.push({
-      positions: toLocalArray([...positions, positions[0]], origin),
-      material,
-    });
-  };
-  for (let ringIndex = 0; ringIndex < rings.length; ringIndex++) {
-    const length = rings[ringIndex].length;
-    const topRing = top.slice(offset, offset + length);
-    addRing(topRing);
-    if (bottom !== undefined) {
-      const bottomRing = bottom.slice(offset, offset + length);
-      addRing(bottomRing);
-      for (let i = 0; i < length; i++) {
-        primitives.push({
-          positions: toLocalArray([topRing[i], bottomRing[i]], origin),
-          material,
-        });
-      }
-    }
-    offset += length;
-  }
-  return primitives;
-}
-
 function computeState(visualizer, item, time) {
   const entity = item.entity;
   const graphic = entity._polygon;
@@ -425,7 +310,6 @@ function computeState(visualizer, item, time) {
     return { missing: true };
   }
   const rings = getRings(hierarchy);
-  const triangulation = triangulateRings(rings);
   const perPositionHeight = value(graphic._perPositionHeight, time, false);
   const height = value(graphic._height, time, 0.0);
   const heightReference = value(
@@ -470,13 +354,9 @@ function computeState(visualizer, item, time) {
   );
   validateFiniteColor("outlineColor", outlineColor);
   const outlineWidth = value(graphic._outlineWidth, time, 1.0);
-  if (
-    !Number.isInteger(outlineWidth) ||
-    outlineWidth < 0 ||
-    outlineWidth > 255
-  ) {
+  if (!Number.isFinite(outlineWidth) || outlineWidth < 0) {
     throw new DeveloperError(
-      "outlineWidth must be an integer between 0 and 255.",
+      "outlineWidth must be a finite nonnegative number.",
     );
   }
   const resolved = resolveHeights(visualizer, rings, {
@@ -497,7 +377,6 @@ function computeState(visualizer, item, time) {
   if (!shown) {
     return { shown: false };
   }
-  const origin = new Cartesian3(resolved.top[0].x, resolved.top[0].y, 0.0);
   const allWorldPositions =
     resolved.bottom === undefined
       ? resolved.top
@@ -511,133 +390,106 @@ function computeState(visualizer, item, time) {
   ) {
     throw new DeveloperError("The derived bounding sphere must be finite.");
   }
-  const fillGeometry = fill
-    ? buildFill(
-        rings,
-        triangulation,
-        resolved.top,
-        resolved.bottom,
-        closeTop,
-        closeBottom,
-      )
-    : undefined;
-  const fillMaterial = new BufferPolygonMaterial({ color: fillColor });
-  const outlineMaterial = new BufferPolylineMaterial({
-    color: outlineColor,
-    width: outlineWidth,
-  });
-  const outlinePrimitives = outline
-    ? buildOutline(
-        rings,
-        resolved.top,
-        resolved.bottom,
-        origin,
-        outlineMaterial,
-      )
-    : undefined;
-  const fillBlend =
-    fillColor.alpha === 1.0 ? BlendOption.OPAQUE : BlendOption.TRANSLUCENT;
-  const outlineBlend =
-    outlineColor.alpha === 1.0 ? BlendOption.OPAQUE : BlendOption.TRANSLUCENT;
-  const fillPositions =
-    fillGeometry === undefined
-      ? undefined
-      : toLocalArray(fillGeometry.positions, origin);
-  const fillTriangles =
-    fillGeometry === undefined
-      ? undefined
-      : new Uint32Array(fillGeometry.triangles);
-  const outlineVertexCount =
-    outlinePrimitives?.reduce(
-      (sum, primitive) => sum + primitive.positions.length / 3,
-      0,
-    ) ?? 0;
+  const topRings = [];
+  let offset = 0;
+  for (let i = 0; i < rings.length; i++) {
+    topRings.push(resolved.top.slice(offset, offset + rings[i].length));
+    offset += rings[i].length;
+  }
+  const outlinePositions = [];
+  if (outline && outlineWidth > 0.0) {
+    offset = 0;
+    for (let i = 0; i < rings.length; i++) {
+      const length = rings[i].length;
+      const topRing = resolved.top.slice(offset, offset + length);
+      outlinePositions.push([...topRing, topRing[0]]);
+      if (resolved.bottom !== undefined) {
+        const bottomRing = resolved.bottom.slice(offset, offset + length);
+        outlinePositions.push([...bottomRing, bottomRing[0]]);
+        for (let j = 0; j < length; j++) {
+          outlinePositions.push([topRing[j], bottomRing[j]]);
+        }
+      }
+      offset += length;
+    }
+  }
+  const geometryKey = allWorldPositions
+    .map((p) => `${p.x},${p.y},${p.z}`)
+    .join(";");
   return {
     shown: true,
-    origin,
-    modelMatrix: Matrix4.fromTranslation(origin),
     boundingSphere,
-    fillPositions,
-    fillTriangles,
-    fillMaterial,
-    fillBlend,
-    outlinePrimitives,
-    outlineVertexCount,
-    outlineBlend,
+    fill: fill && fillColor.alpha > 0.0,
+    fillColor,
+    topRings,
+    bottomPositions: resolved.bottom,
+    closeTop,
+    closeBottom,
+    outlinePositions,
+    outlineColor,
+    outlineWidth,
     signature: [
-      origin.x,
-      origin.y,
-      fillPositions?.length ?? 0,
-      fillTriangles?.length ?? 0,
-      fillBlend,
-      outlinePrimitives?.length ?? 0,
-      outlineVertexCount,
-      outlineBlend,
+      geometryKey,
+      fill,
+      fillColor.toRgba(),
+      outline,
+      outlineColor.toRgba(),
+      outlineWidth,
+      closeTop,
+      closeBottom,
     ].join("|"),
   };
 }
 
 function createOwner(visualizer, item, state) {
-  const owner = new SceneGISPlanarBufferOwner(
-    visualizer._scene,
-    item.entity,
-    visualizer._primitives,
-  );
-  try {
-    if (state.fillPositions !== undefined) {
-      const fill = owner.addPolygonCollection({
-        positions: state.fillPositions,
-        holes: new Uint32Array(),
-        triangles: state.fillTriangles,
-        material: state.fillMaterial,
-        modelMatrix: state.modelMatrix,
-        boundingVolume: state.boundingSphere,
-        blendOption: state.fillBlend,
-      });
-      owner.fillCollection = fill.collection;
-      owner.fillPrimitive = fill.primitive;
-    }
-    if (state.outlinePrimitives !== undefined) {
-      const outline = owner.addPolylineCollection({
-        primitives: state.outlinePrimitives,
-        vertexCount: state.outlineVertexCount,
-        modelMatrix: state.modelMatrix,
-        boundingVolume: state.boundingSphere,
-        blendOption: state.outlineBlend,
-      });
-      owner.outlineCollection = outline.collection;
-      owner.outlinePrimitives = outline.primitives;
-    }
-    owner.signature = state.signature;
-    owner.appliedFillPositions = state.fillPositions?.slice();
-    owner.appliedFillTriangles = state.fillTriangles?.slice();
-    owner.appliedFillMaterialKey = state.fillMaterial.color.toRgba();
-    owner.appliedOutlinePositions = state.outlinePrimitives?.map((primitive) =>
-      primitive.positions.slice(),
-    );
-    owner.appliedOutlineMaterialKeys = state.outlinePrimitives?.map(
-      (primitive) =>
-        `${primitive.material.color.toRgba()}|${primitive.material.width}`,
-    );
-    owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
-    owner.shown = true;
-    return owner;
-  } catch (error) {
-    owner.destroy();
-    throw error;
+  const owner = new SceneGISPlanarPrimitiveOwner(visualizer._primitives);
+  let fillPrimitive;
+  if (state.fill) {
+    fillPrimitive = new SceneGISPlanarPrimitive({
+      geometry: new SceneGISPlanarPolygonGeometry({
+        positions: state.topRings[0],
+        holes: state.topRings.slice(1),
+        bottomPositions: state.bottomPositions,
+        closeTop: state.closeTop,
+        closeBottom: state.closeBottom,
+      }),
+      appearance: new PerInstanceColorAppearance({
+        flat: true,
+        translucent: state.fillColor.alpha < 1.0,
+        closed: false,
+      }),
+      attributes: {
+        color: ColorGeometryInstanceAttribute.fromColor(state.fillColor),
+      },
+      id: item.entity,
+    });
+    owner.add(fillPrimitive);
   }
-}
-
-function arrayEquals(left, right) {
-  if (left.length !== right.length) {
-    return false;
+  const outlinePrimitives = [];
+  for (let i = 0; i < state.outlinePositions.length; i++) {
+    const material = Material.fromType(Material.ColorType, {
+      color: Color.clone(state.outlineColor),
+    });
+    const primitive = new SceneGISPlanarPrimitive({
+      geometry: new SceneGISPlanarPolylineGeometry({
+        positions: state.outlinePositions[i],
+        width: state.outlineWidth,
+      }),
+      appearance: new PolylineMaterialAppearance({
+        material,
+        translucent: state.outlineColor.alpha < 1.0,
+      }),
+      id: item.entity,
+    });
+    owner.add(primitive);
+    outlinePrimitives.push(primitive);
   }
-  for (let i = 0; i < left.length; i++) {
-    if (left[i] !== right[i]) {
-      return false;
-    }
-  }
-  return true;
+  owner.fillPrimitive = fillPrimitive;
+  owner.outlinePrimitives = outlinePrimitives;
+  owner.signature = state.signature;
+  owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
+  owner.shown = true;
+  return owner;
 }
 
 function boundingSphereEquals(left, right) {
@@ -647,51 +499,7 @@ function boundingSphereEquals(left, right) {
 }
 
 function applyState(owner, state) {
-  if (owner.fillPrimitive !== undefined) {
-    if (!arrayEquals(owner.appliedFillPositions, state.fillPositions)) {
-      owner.fillPrimitive.setPositions(state.fillPositions);
-      owner.appliedFillPositions = state.fillPositions.slice();
-    }
-    if (!arrayEquals(owner.appliedFillTriangles, state.fillTriangles)) {
-      owner.fillPrimitive.setTriangles(state.fillTriangles);
-      owner.appliedFillTriangles = state.fillTriangles.slice();
-    }
-    const fillMaterialKey = state.fillMaterial.color.toRgba();
-    if (owner.appliedFillMaterialKey !== fillMaterialKey) {
-      owner.fillPrimitive.setMaterial(state.fillMaterial);
-      owner.appliedFillMaterialKey = fillMaterialKey;
-    }
-  }
-  if (owner.outlinePrimitives !== undefined) {
-    for (let i = 0; i < owner.outlinePrimitives.length; i++) {
-      const primitive = owner.outlinePrimitives[i];
-      const outlineState = state.outlinePrimitives[i];
-      if (
-        !arrayEquals(owner.appliedOutlinePositions[i], outlineState.positions)
-      ) {
-        primitive.setPositions(outlineState.positions);
-        owner.appliedOutlinePositions[i] = outlineState.positions.slice();
-      }
-      const materialKey = `${outlineState.material.color.toRgba()}|${outlineState.material.width}`;
-      if (owner.appliedOutlineMaterialKeys[i] !== materialKey) {
-        primitive.setMaterial(outlineState.material);
-        owner.appliedOutlineMaterialKeys[i] = materialKey;
-      }
-    }
-  }
   if (!boundingSphereEquals(owner.boundingSphere, state.boundingSphere)) {
-    if (owner.fillCollection !== undefined) {
-      BoundingSphere.clone(
-        state.boundingSphere,
-        owner.fillCollection._boundingVolume,
-      );
-    }
-    if (owner.outlineCollection !== undefined) {
-      BoundingSphere.clone(
-        state.boundingSphere,
-        owner.outlineCollection._boundingVolume,
-      );
-    }
     BoundingSphere.clone(state.boundingSphere, owner.boundingSphere);
   }
   owner.setShow(true);
@@ -706,7 +514,7 @@ function releaseOwner(item) {
 }
 
 /**
- * Visualizes simple planar PolygonGraphics with explicit buffer triangles.
+ * Visualizes simple planar PolygonGraphics with public planar primitives.
  *
  * @alias SceneGISPlanarPolygonVisualizer
  * @constructor

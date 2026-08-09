@@ -17,3 +17,6 @@
   （`approved`）：C5-R001～R003经focused re-review关闭；moderate qualification、异步Sandcastle controls、
   soft-private package边界、product runtime delta=`0`和zero-upstream delivery通过；项目负责人真实浏览器/GPU
   人工验收通过。
+- [C6 public planar Primitive/Geometry review](2026-08-09-c6-public-planar-primitive-and-geometry.md)
+  （`approved`）：C6-R001～C6-R004全部关闭；desired/current原子状态、collection异常回滚、required
+  id/attribute preservation与integer representability、fixed geometry kind及zero-upstream边界通过。

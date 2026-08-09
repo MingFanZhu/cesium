@@ -6,11 +6,11 @@
 当前 extension plan：
 [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)（`active`）。
 
-当前 active phase plan：
-[C6 Public Planar Primitive/Geometry 基础](2026-08-09-phase-c6-public-planar-primitive-and-geometry.md)
-（`active`）。
+当前 active phase plan：None；下一步依据当前源码创建C7 phase plan。
 
 已完成：
+[C6 Public Planar Primitive/Geometry 基础](2026-08-09-phase-c6-public-planar-primitive-and-geometry.md)
+（`completed`）、
 [C5 动态更新、批量性能与交付](2026-08-09-phase-c5-dynamic-performance-and-delivery.md)
 （`completed`）、
 [C4 Entity、DataSource 与 Viewer 集成](2026-08-09-phase-c4-entity-datasource-viewer-integration.md)
@@ -19,6 +19,5 @@
 [C2 平面锚点内容与普通 Model](2026-08-09-phase-c2-anchor-and-model.md)（`completed`）、
 [C1 平面内容基础契约与兼容性基线](2026-08-09-phase-c1-content-contract.md)（`completed`）。
 
-Current handoff：C1-C5首批六类content profile及人工验收均已完成。项目负责人明确要求继续补齐普通Entity、
-public planar Primitive/Geometry与continuous ground，不留下半成品体系；原extension已重新激活。ADR-0018和
-C6 phase plan已confirmed，下一步由Execution实现C6，完成后停止在pending Architecture/code review。
+Current handoff：C6-R001～R004已由Architecture最终确认关闭，review=`approved`、phase=`completed`；等待C6独立
+提交后进入C7源码审计与phase planning。

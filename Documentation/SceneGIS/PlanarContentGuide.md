@@ -79,20 +79,39 @@ C2 private visualizer 不拥有 World、Scene、EntityCollection、EntityCluster
 Polyline 使用 planar straight segments；`arcType` undefined等价于`ArcType.NONE`，显式值也只接受
 `NONE`。Absolute与`CLAMP_TO_GROUND`都逐个解析 supplied vertices；clamp只读取当前resident terrain，
 不发请求、不沿长边新增terrain采样或细分；线段内部仍按几何线性插值。支持solid
-`ColorMaterialProperty`、`[0,255]` integer width、show、availability、dynamic positions、extent、
+`ColorMaterialProperty`、finite nonnegative width、show、availability、dynamic positions、extent、
 original Entity picking与world bounds。
 
 Polygon接受一个simple outer ring和direct holes；不接受nested hierarchy、自交、ring touch或hole overlap。
 Scalar top支持`NONE`、`CLAMP_TO_GROUND`和`RELATIVE_TO_GROUND`，per-position height保留各顶点absolute Z。
-Extrusion显式生成top/bottom caps、outer/hole side walls，outline单独渲染且`outlineWidth`只接受
-`[0,255]`内的integer。Terrain sampling只发生在supplied vertices，因此长边和大三角形可能穿越中间
+Extrusion显式生成top/bottom caps、outer/hole side walls，outline单独渲染且`outlineWidth`接受finite
+nonnegative number。宽度`0`隐藏对应线条；positive fractional与大于255的宽度由standard geometry精确保留。
+Terrain sampling只发生在supplied vertices，因此长边和大三角形可能穿越中间
 terrain，这不是连续贴地承诺。
 
-两类visualizer都使用per-Entity private Buffer owner：顶点以local DOUBLE geometry保存，world translation
-进入`modelMatrix`，bounds显式保留world坐标，pick id保留original Entity。拓扑或blend变化使用candidate/
-current原子替换；warm更新复用owner与collection；replacement、removal与destroy成对释放。它们不跨Entity
-batch，也不拥有World、Scene或EntityCollection。未变化warm update不会重写Buffer geometry/material/show，
-因此不会重新标脏或触发buffer copy。
+两类visualizer都是public `SceneGISPlanarPrimitive`与对应Geometry的per-Entity adapter：顶点以local
+DOUBLE geometry保存，world origin通过translation恢复，bounds显式保留world坐标，pick id保留original
+Entity。拓扑变化使用candidate/current原子替换；warm更新复用wrapper、standard Primitive、DrawCommand与
+VertexArray；replacement、removal与destroy成对释放。它们不跨Entity batch，也不拥有World、Scene或
+EntityCollection。
+
+## C6 public Primitive 与 Geometry
+
+应用可以直接把`SceneGISPlanarPrimitive`加入`scene.primitives`或caller-owned
+`PrimitiveCollection`。C6只接受`SceneGISPlanarPolylineGeometry`和
+`SceneGISPlanarPolygonGeometry`，不接受raw Cesium `Geometry`。Geometry构造器复制米制Cartesian3输入，默认以
+第一个规范化顶点的完整XYZ作为origin，并生成local DOUBLE geometry；可选origin同样必须finite。
+
+Polyline Geometry固定`ArcType.NONE`并配对使用`PolylineMaterialAppearance`的Color material。Polygon
+Geometry只接受simple outer/direct holes，可选bottom/caps/sides，并配对使用flat
+`PerInstanceColorAppearance`与finite color instance attribute；outline是独立Polyline Geometry。Wrapper固定
+single synchronous standard `Primitive`，pick结果的primitive为public wrapper、required non-null id为
+调用方对象。Wrapper在构造时固定Polyline或Polygon kind；只允许同kind geometry/appearance
+replacement，跨kind需新建wrapper。GeometryInstance attributes在首次Context mutation前验证完整shape，
+通过`getGeometryInstanceAttributes()`发布的值会在同kind replacement中保留。Desired geometry与
+last-successful current分离；在normal render成功前，bounds、model matrix、pick/depth继续对应旧current。
+Geometry、Appearance、Material、id与输入attributes由调用方拥有；wrapper只拥有其内部snapshot与
+GPU资源。
 
 ## C4 Entity 与 DataSource 自动集成
 
@@ -116,18 +135,18 @@ EntityCluster、EntityCollection、Scene 或 World。Pick id 保持 original Ent
 
 ## Compatibility matrix
 
-| 数据或 graphics                                                           | 当前决定        | 可用阶段/边界 |
-| ------------------------------------------------------------------------- | --------------- | ------------- |
-| `Entity`、Property/event、availability、show、metadata                    | 复用数据模型    | C4 automatic  |
-| `EntityCollection`、`CustomDataSource`                                    | 复用数据模型    | C4 automatic  |
-| Point、Billboard、Label                                                   | private runtime | C4 automatic  |
-| 普通 glTF Model                                                           | private runtime | C4 automatic  |
-| planar straight Polyline、Polygon                                         | private runtime | C4 automatic  |
-| Box、Corridor、Cylinder、Ellipse、Ellipsoid、Plane、Rectangle、Wall、Path | unsupported     | 首版不实现    |
-| `Cesium3DTilesetGraphics`                                                 | unsupported     | 独立扩展      |
-| GeoJSON、CZML、KML 自动 planar 转换                                       | unsupported     | 独立扩展      |
-| Globe ground、geodesic/rhumb                                              | 禁止隐式进入    | 不复用        |
-| tracking、`flyTo`、`zoomTo`                                               | unsupported     | 不改变        |
+| 数据或 graphics                                                           | 当前决定                                    | 可用阶段/边界          |
+| ------------------------------------------------------------------------- | ------------------------------------------- | ---------------------- |
+| `Entity`、Property/event、availability、show、metadata                    | 复用数据模型                                | C4 automatic           |
+| `EntityCollection`、`CustomDataSource`                                    | 复用数据模型                                | C4 automatic           |
+| Point、Billboard、Label                                                   | private runtime                             | C4 automatic           |
+| 普通 glTF Model                                                           | private runtime                             | C4 automatic           |
+| planar straight Polyline、Polygon                                         | public Geometry/Primitive + private adapter | C6 direct/C4 automatic |
+| Box、Corridor、Cylinder、Ellipse、Ellipsoid、Plane、Rectangle、Wall、Path | unsupported                                 | 首版不实现             |
+| `Cesium3DTilesetGraphics`                                                 | unsupported                                 | 独立扩展               |
+| GeoJSON、CZML、KML 自动 planar 转换                                       | unsupported                                 | 独立扩展               |
+| Globe ground、geodesic/rhumb                                              | 禁止隐式进入                                | 不复用                 |
+| tracking、`flyTo`、`zoomTo`                                               | unsupported                                 | 不改变                 |
 
 C2/C3 固定 Anchor/Model/Polyline/Polygon graphic property allowlist，C4 的 gate 固定 Entity top-level
 allowlist。Planar path 替换而不是追加默认 Globe visualizers。
@@ -139,8 +158,9 @@ allowlist。Planar path 替换而不是追加默认 Globe visualizers。
 10%局部更新和三个 Widget/DataSource lifecycle cycles；它用于发现 O(N²)、重复GPU重建和ownership泄漏，
 不是公开最大容量承诺。
 
-Moderate-profile warm gate要求slot、Model、per-Entity owner、Buffer collection、render context、DrawCommand和
-VertexArray identity稳定，Buffer `_dirtyCount`保持清零。C5另用小型三轮Point+Polyline fixture直接验证
+Moderate-profile warm gate要求slot、Model、per-Entity owner、render context、DrawCommand和VertexArray
+identity稳定。C6迁移后Polyline/Polygon由standard Primitive提供command/VA复用，不再依赖experimental Buffer
+dirty range。C5另用小型三轮Point+Polyline fixture直接验证
 DataSource remove后的listener/per-DataSource primitive container，以及Widget destroy后的ControllerHost/DOM
 恢复baseline；它不把六类内容全部重建成lifecycle soak。show/availability、remove/re-add和async Model stale/
 late settlement继续由已批准的C2 Anchor/Model与C4 automatic integration Specs提供契约证据，本轮product runtime

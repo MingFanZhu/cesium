@@ -4,7 +4,7 @@
 
 - 计划类型（Plan type）：`phase`
 - 阶段（Phase）：`C6-public-planar-primitive-and-geometry`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 父计划（Parent plan）：
   [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)
 - 负责人角色（Owner role）：`execution`
@@ -13,6 +13,7 @@
 - 创建日期（Created）：`2026-08-09`
 - 更新日期（Updated）：`2026-08-09`
 - Planning base：`40b5e56f2d8358de25804a3a458aa9a044f8b82a`
+- Implementation diff base：`b5fc61bcb8d1011bc8b08d2ce11cb98810b0384a`
 - 分支（Branch）：`feature/planar-content`
 - 相关讨论（Related discussions）：None；项目负责人已批准继续五项工作，C6源码审计与设计直接提升为
   ADR-0018
@@ -106,10 +107,11 @@ Primitive；不公开experimental Buffer，不允许dual runtime。
 - required `geometry`：只能是C6两个public SceneGIS geometry类型；
 - required `appearance`：Polyline只接受使用`Material.ColorType`的`PolylineMaterialAppearance`，Polygon只接受
   flat `PerInstanceColorAppearance`和finite color attribute；
-- optional `id`、GeometryInstance `attributes`、finite affine `modelMatrix`、`show=true`、
+- required non-null `id`；optional GeometryInstance `attributes`、finite affine `modelMatrix`、`show=true`、
   `allowPicking=true`。
 
-稳定接口至少包括：mutable `geometry`/`appearance`/`modelMatrix`/`show`，readonly `id`/`allowPicking`/
+稳定接口至少包括：mutable same-kind `geometry`/compatible `appearance`/`modelMatrix`/`show`，
+readonly `id`/`allowPicking`/
 `ready`，`getGeometryInstanceAttributes()`、`getBoundingSphere(result)`、`isDestroyed()`和`destroy()`。
 具体JSDoc必须标明异常、ownership和destroyed-object行为；不得把内部standard Primitive作为public property。
 
@@ -256,5 +258,63 @@ Sandcastle或installed package交付边界，相关整体验收留给C10。
 
 ## 偏差与结果
 
-待Execution回写。任何API名称、Appearance pair、Geometry input、dynamic replacement或ownership偏差都必须先记录
-原因；若会形成不同长期contract，应暂停并交由Architecture复核。
+### 实际设计与路径
+
+- 新增public `SceneGISPlanarPolylineGeometry`、`SceneGISPlanarPolygonGeometry`与
+  `SceneGISPlanarPrimitive`。两个Geometry复制输入、以完整XYZ origin重基为local DOUBLE geometry；Polyline薄复用
+  `PolylineGeometry.createGeometry(ArcType.NONE)`，Polygon使用SceneGIS-owned topology/XY triangulation生成标准
+  `Geometry`。
+- Public Primitive使用single `GeometryInstance`、`pickPrimitive`与`asynchronous:false` standard
+  `Primitive`。Normal render通过candidate/current切换；pick/depth只更新最近current；绑定后第二Context在mutation前
+  拒绝。World matrix为`translation(origin) * modelMatrix`，bounds由local sphere按该矩阵变换。
+- Polyline/Polygon visualizer保留C1 resolver、Entity Property、vertex-only terrain、per-DataSource target与original
+  Entity id，只把render owner迁移为一个或多个public wrapper。Width/outlineWidth改为finite nonnegative；`0`隐藏，
+  `2.5`与`>255`进入standard geometry。
+- Architecture review correction新增Buffer无关`_SceneGISPlanarPrimitiveOwner.js`，仅负责public wrapper
+  在caller-owned collection中的post-insertion rollback、成对remove与exactly-once destroy；它不读取
+  experimental Buffer状态。Public wrapper分离desired/current geometry，id收紧为required，完整验证并
+  保留instance attributes，且只允许构造时geometry kind内替换。
+- 删除无引用`_SceneGISPlanarBufferOwner.js`。SceneGIS product runtime对该owner、
+  `BufferPolylineCollection`、`BufferPolygonCollection`、Buffer material及其private fields命中`0`。
+- 实际source-to-spec mapping：
+  - `SceneGISPlanarPolylineGeometry.js` → `SceneGISPlanarPolylineGeometrySpec.js`（`3` cases）；
+  - `SceneGISPlanarPolygonGeometry.js` → `SceneGISPlanarPolygonGeometrySpec.js`（`3` cases）；
+  - `SceneGISPlanarPrimitive.js` → `SceneGISPlanarPrimitiveSpec.js`（`7` cases）；
+  - `_SceneGISPlanarPrimitiveOwner.js` → Polygon visualizer real `PrimitiveCollection` lifecycle case；
+  - 两个Entity adapter →各自focused Specs（`6+6` cases）及
+    `SceneGISPlanarGeometrySpec.js`（`1` real Context case）；
+  - automatic/warm回归 → C4 Widget `4`与C5 qualification `3` cases。
+
+### 验证结果
+
+- C6新增direct unique cases=`13`（Geometry `3+3`、Primitive `7`）；修改后的C3 adapter/real Context cases=`14`
+  （Polyline `6`、Polygon `7`、real Context `1`）；C4/C5 aggregate regression=`7`。本阶段focused
+  aggregate=`34`，命令均为真实非零命中。
+- `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarPolylineGeometry"`：`3/3 SUCCESS`，Exit `0`。
+- `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarPolygonGeometry"`：`3/3 SUCCESS`，Exit `0`。
+- `npm run test -- --includeName "SceneGIS/Scene/SceneGISPlanarPrimitive"`：`7/7 SUCCESS`，Exit `0`。
+- Polyline/Polygon focused：`6/6` / `7/7 SUCCESS`，Exit `0`；real Context Geometry `1/1`，C4 Widget `4/4`、C5
+  qualification `3/3`，均Exit `0`。Qualification仅有既有Node `DEP0060` warning。
+- `npm run build`、`npm run build-ts`、`npm run build-docs`、`npm run tsc`：Exit `0`；`build-ts`仅输出仓库既有
+  TSD-JSDoc warnings。
+- Generated检查：engine/Cesium root JS与两个`.d.ts`均可见三个public类型，API HTML各有独立页面；removed
+  owner在declarations/API命中`0`。生成文件不进入status。
+- Scoped ESLint/Prettier、Markdown Prettier/Markdownlint、`git diff --check`与official upstream audit的最终结果见
+  pending review request。
+
+### 偏差、所有权与风险
+
+- Layout与public contract无架构偏差。Adapter为每个fill/outline wrapper保持小型SceneGIS-owned owner对象，只负责
+  caller collection membership与exact cleanup；没有保留第二套geometry runtime。
+- Upstream-owned files=`0`，C6 SGP=`0`，manifest与SGP-0001/0002 unchanged，new patch markers=`0`。
+- Remaining risk：standard Primitive内部状态是Cesium升级敏感依赖；polygon simple-topology和vertex-only terrain边界
+  保持不变，continuous ground仍延后C9。C6未运行Sandcastle/E2E/package smoke，符合phase最小充分边界。
+
+### Architecture review 状态
+
+- 2026-08-09首轮Architecture/code review结论为`changes-requested`；方向、public类型集合与zero-upstream/
+  zero-SGP边界成立。
+- C6-R001～C6-R004已由Architecture最终focused re-review确认fixed；Primitive suite由Architecture最终复跑
+  `7/7 SUCCESS`，review状态为`approved`。
+- C6状态更新为`completed`；upstream-owned files=`0`、C6 SGP=`0`、manifest/SGP-0001/0002 unchanged、
+  generated status=`0`。下一步在独立C6提交后进入C7 phase planning。
