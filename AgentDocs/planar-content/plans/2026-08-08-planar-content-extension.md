@@ -10,7 +10,7 @@
 - 创建日期（Created）：`2026-08-08`
 - 更新日期（Updated）：`2026-08-10`
 - 基线（Base checkpoint）：`23d06ad14c79825f680e9397c6f4a8fa70a0f008`
-- 继续规划基线（Continuation checkpoint）：`e3753322f6aa063a0a70a89150a6ff31e6bbdaa8`
+- 继续规划基线（Continuation checkpoint）：`884831a2641e370d1b104a7cf2bd7e5ca14a1fbc`
 - 分支（Branch）：`feature/planar-content`
 - 相关讨论（Related discussions）：项目负责人与 Architecture Agent 已确认总体边界；未创建独立
   discussion
@@ -25,6 +25,10 @@
   [C6 public planar Primitive/Geometry review](../reviews/2026-08-09-c6-public-planar-primitive-and-geometry.md)
   （`approved`）、
   [C7 common solid and area graphics review](../reviews/2026-08-09-c7-common-solid-and-area-graphics.md)
+  （`approved`）、
+  [C8 route-derived geometry and path review](../reviews/2026-08-10-c8-route-derived-geometry-and-path.md)
+  （`approved`）、
+  [C9 continuous ground and Ground Primitive review](../reviews/2026-08-10-c9-continuous-ground-and-ground-primitive.md)
   （`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
@@ -34,7 +38,8 @@
   [ADR-0017：平面内容资格验证与批量边界](../../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)、
   [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)、
   [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)、
-  [ADR-0020：平面路径衍生 Geometry 与动态 Path](../../../Documentation/SceneGIS/Decisions/ADR-0020-planar-route-derived-geometry-and-path.md)
+  [ADR-0020：平面路径衍生 Geometry 与动态 Path](../../../Documentation/SceneGIS/Decisions/ADR-0020-planar-route-derived-geometry-and-path.md)、
+  [ADR-0021：平面连续贴地与 Ground Primitive 晚阶段渲染协议](../../../Documentation/SceneGIS/Decisions/ADR-0021-planar-continuous-ground-and-ground-primitive.md)
 - SGP：C4复用active `SGP-0001`；只允许在CesiumWidget增加instance-owned visualizer callback seam
 
 ## 目标
@@ -123,9 +128,9 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
   picking 和独立 provider sampling，但三类读取接口职责不同。
 - Planar Viewer 已保留基本 Entity selection 与 InfoBox 文本，但 tracking、InfoBox camera、
   `zoomTo` 和 `flyTo` 不在现有契约内。
-- C1-C5已在checkpoint`c6a1409442`完成六类Entity automatic profile，并由`e3753322f6`记录首次人工验收；
-  Polyline/Polygon仍依赖private experimental Buffer owner，raw `scene.primitives`没有受支持的planar
-  compatibility contract，terrain drape仍为supplied-vertex sampling。
+- C1-C8已在checkpoint`884831a264`完成automatic Entity profile、public planar Primitive与七种Geometry；
+  Polyline/Polygon及普通体/面/route/path均使用standard Primitive或SceneGIS-owned adapter。Ground关系仍是
+  supplied/generated-vertex sampling，continuous ground与public Ground Primitive由C9交付。
 - 当前架构允许新增 `SceneGIS/DataSources` 层；该层可以依赖 Core、Scene、Cesium DataSources 与
   SceneGIS DataSources，但不得依赖 Widgets。
 - 低层 Primitive、Entity visualizer、GeometryUpdater、height reference、ground 与 Model 路径的
@@ -224,7 +229,8 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
   Worker/build边界，必要时建立新SGP。
 - 完成门槛：continuous drape、depth/picking、material、terrain replacement、warm/resource与无terrain fallback
   成立；3D Tiles classification明确保持独立。
-- 状态：`proposed`。
+- 状态：`completed`；phase plan：
+  [C9 Continuous Ground 与 Planar Ground Primitive](2026-08-10-phase-c9-continuous-ground-and-ground-primitive.md)。
 
 ### C10：统一集成、Compatibility Matrix 与交付
 
@@ -417,3 +423,22 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
 - `2026-08-10`：Architecture focused re-review确认C8-R001～C8-R004全部关闭；独立串行复跑Geometry `4/4`、
   Route `6/6`与Path `4/4`通过。C8 review=`approved`、phase=`completed`，保持upstream-owned files=`0`、
   SGP=`0`，等待独立本地提交检查点。
+- `2026-08-10`：Architecture以中文提交`完成平面路径衍生几何与动态轨迹支持`形成C8 checkpoint
+  `884831a264`。随后重新审计Cesium GroundPrimitive/classification、Scene primitive/World调用顺序、planar
+  Surface actual-cover/query snapshot、terrain mesh/skirt及C6-C8 public runtime。ADR-0021批准zero-upstream的
+  World late-registration、独立ground-render snapshot和actual-triangle drape；C9 phase plan激活并派发Execution。
+- `2026-08-10`：Execution完成C9 public Ground Primitive、actual-cover continuous drape、World/Surface
+  late-registration与Polyline/Polygon/Area/Route ground分支迁移；C9新增direct cases=`11`，focused real-Context
+  linear/log-depth、build/types/docs/static与zero-upstream证据ready。C9/extension保持`active`，等待pending
+  Architecture/code review，不进入C10。
+- `2026-08-10`：Architecture首轮C9 review提出R001～R006：常规257×257瓦片全量triangle展开/扫描、Polygon
+  duplicate/zero-area与interior bottom-over-top、ground extrusion vertical outline、Entity current bounds、
+  same-frame/stale pick-depth协议和public attribute preflight。Review=`changes-requested`；全部限定在C9
+  SceneGIS-owned边界内focused修复，不进入C10。
+- `2026-08-10`：Execution完成C9-R001～R006 focused修复：bounded regular-grid traversal、Polygon cap/side
+  normalization与footprint preflight、per-endpoint vertical refs、actual-current bounds、frameState registration与
+  stale replay guard、C6-compatible attributes。C9 direct cases=`15`；focused product/build/static/ownership证据ready，
+  findings标记`fixed`，等待Architecture focused re-review。
+- `2026-08-10`：Architecture focused re-review确认C9-R001～R006全部关闭；独立代表性复跑Ground、Polygon、
+  Surface与World相关suites均通过。C9 review=`approved`、phase=`completed`，保持upstream-owned files=`0`、
+  SGP=`0`，等待独立本地提交检查点后进入C10规划。

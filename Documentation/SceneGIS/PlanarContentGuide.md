@@ -150,6 +150,25 @@ Path复用Entity position与Cesium Property sampling，但只支持effective `Re
 INERTIAL、entity-relative/VVLH和PORTIONS material fail-fast。Sample结果降级为public Polyline，任一sample outside
 extent时当前Path隐藏，不clip。
 
+## C9 Continuous Ground 契约
+
+C9提供public `SceneGISPlanarGroundPrimitive`，直接复用现有public Polyline/Polygon Geometry。调用方需要显式传入
+live planar World与HeightReference；它不接受任意modelMatrix，也不复用Cesium Globe GroundPrimitive或3D Tiles
+classification。至少一个top/bottom reference必须是`CLAMP_TO_GROUND`或`RELATIVE_TO_GROUND`，全absolute内容继续
+使用`SceneGISPlanarPrimitive`。
+
+Ground生成以当前normal-render实际terrain triangles为准：Polyline在tile/triangle edge处分段，Polygon与surface
+triangles做XY clipping，hole、extrusion side和shared boundary使用同一交点协议。No-provider与active FLAT稳定回退
+Z=0；DIRECT/UPSAMPLED promotion、revision与provider replacement通过原子candidate收敛。该runtime不发terrain request、
+不改变`tilesLoaded`，也不持有terrain tile/cache。
+
+Extruded Ground Polygon要求bottom与top逐点共享X/Y footprint；不同bottom footprint应继续使用普通Primitive或由应用
+预处理。Draper先做Geometry/tile bounds broad-phase并只遍历相交regular-grid cells；Entity bounds在ground current ready前
+为`PENDING`，之后跟随last-successful actual current，而不是source-height fallback。
+
+Polyline、Polygon、Ellipse、Rectangle和Corridor的ground分支已迁移到该runtime；ordinary `NONE`分支继续使用
+`SceneGISPlanarPrimitive`且不创建ground snapshot或wrapper。C10仍负责统一Sandcastle/E2E/package与人工验收。
+
 ## C4 Entity 与 DataSource 自动集成
 
 `CesiumWidget({ world })` 和 `Viewer({ world })` 只在 `world` 是 live `SceneGISPlanarWorld` 时安装

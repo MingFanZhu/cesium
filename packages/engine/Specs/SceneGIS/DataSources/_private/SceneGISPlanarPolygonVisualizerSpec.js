@@ -15,6 +15,7 @@ import SceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlana
 import SceneGISPlanarPolygonGeometry from "../../../../Source/SceneGIS/Core/SceneGISPlanarPolygonGeometry.js";
 import SceneGISPlanarPolygonVisualizer from "../../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolygonVisualizer.js";
 import SceneGISPlanarPrimitive from "../../../../Source/SceneGIS/Scene/SceneGISPlanarPrimitive.js";
+import SceneGISPlanarGroundPrimitive from "../../../../Source/SceneGIS/Scene/SceneGISPlanarGroundPrimitive.js";
 import SceneGISPlanarWorld from "../../../../Source/SceneGIS/Scene/SceneGISPlanarWorld.js";
 
 describe("SceneGIS/DataSources/SceneGISPlanarPolygonVisualizer", function () {
@@ -105,23 +106,35 @@ describe("SceneGIS/DataSources/SceneGISPlanarPolygonVisualizer", function () {
     }
   });
 
-  it("resolves vertex-only terrain and replaces changed geometry", function () {
+  it("defers ground-relative caps to one continuous ground primitive", function () {
     spyOn(world, "getTerrainHeight").and.returnValue(10);
     const entity = addPolygon({
       graphic: {
         heightReference: HeightReference.RELATIVE_TO_GROUND,
         height: 2,
+        extrudedHeightReference: HeightReference.NONE,
+        extrudedHeight: -3,
+        outline: true,
       },
     });
     visualizer.update(time);
     const first = visualizer._items.get(entity.id).owner;
-    expect(first.fillPrimitive.geometry.positions[0].z).toBe(12);
+    expect(first.fillPrimitive).toBeInstanceOf(SceneGISPlanarGroundPrimitive);
+    expect(first.fillPrimitive.geometry.positions[0].z).toBe(2);
+    const vertical = first.outlinePrimitives.filter(
+      (primitive) => primitive._heightReferences !== undefined,
+    );
+    expect(vertical.length).toBe(4);
+    expect(vertical[0]._heightReferences).toEqual([
+      HeightReference.RELATIVE_TO_GROUND,
+      HeightReference.NONE,
+    ]);
     world.getTerrainHeight.and.returnValue(20);
     visualizer.update(time);
     const second = visualizer._items.get(entity.id).owner;
-    expect(second).not.toBe(first);
-    expect(first.destroyed).toBeTrue();
-    expect(second.fillPrimitive.geometry.positions[0].z).toBe(22);
+    expect(second).toBe(first);
+    expect(first.destroyed).toBeFalse();
+    expect(world.getTerrainHeight).not.toHaveBeenCalled();
   });
 
   it("retains hidden owner, releases missing hierarchy, and reports bounds", function () {

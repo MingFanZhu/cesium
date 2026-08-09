@@ -13,6 +13,7 @@ import SceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlana
 import SceneGISPlanarPolylineGeometry from "../../../../Source/SceneGIS/Core/SceneGISPlanarPolylineGeometry.js";
 import SceneGISPlanarPolylineVisualizer from "../../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolylineVisualizer.js";
 import SceneGISPlanarPrimitive from "../../../../Source/SceneGIS/Scene/SceneGISPlanarPrimitive.js";
+import SceneGISPlanarGroundPrimitive from "../../../../Source/SceneGIS/Scene/SceneGISPlanarGroundPrimitive.js";
 import SceneGISPlanarWorld from "../../../../Source/SceneGIS/Scene/SceneGISPlanarWorld.js";
 
 describe("SceneGIS/DataSources/SceneGISPlanarPolylineVisualizer", function () {
@@ -80,18 +81,55 @@ describe("SceneGIS/DataSources/SceneGISPlanarPolylineVisualizer", function () {
     expect(scene.primitives.contains(owner.primitive)).toBeTrue();
   });
 
-  it("resolves clamp vertices and atomically replaces changed geometry", function () {
+  it("defers clamp draping to the ground primitive and preserves its owner", function () {
     spyOn(world, "getTerrainHeight").and.returnValue(12);
     const entity = addPolyline({ graphic: { clampToGround: true } });
     visualizer.update(time);
     const first = visualizer._items.get(entity.id).owner;
-    expect(first.primitive.geometry.positions[0].z).toBe(12);
+    expect(first.primitive).toBeInstanceOf(SceneGISPlanarGroundPrimitive);
+    expect(first.primitive.geometry.positions[0].z).toBe(2);
     world.getTerrainHeight.and.returnValue(20);
     visualizer.update(time);
     const second = visualizer._items.get(entity.id).owner;
-    expect(second).not.toBe(first);
-    expect(first.destroyed).toBeTrue();
-    expect(second.primitive.geometry.positions[0].z).toBe(20);
+    expect(second).toBe(first);
+    expect(first.destroyed).toBeFalse();
+    expect(world.getTerrainHeight).not.toHaveBeenCalled();
+  });
+
+  it("reports pending until the ground current is ready and follows revised bounds", function () {
+    const entity = addPolyline({ graphic: { clampToGround: true } });
+    visualizer.update(time);
+    const primitive = visualizer._items.get(entity.id).owner.primitive;
+    const sphere = new BoundingSphere();
+    expect(visualizer.getBoundingSphere(entity, sphere)).toBe(
+      BoundingSphereState.PENDING,
+    );
+
+    primitive._current = { ready: true, destroy: jasmine.createSpy("destroy") };
+    primitive._currentValid = true;
+    primitive._currentBoundingSphere = new BoundingSphere(
+      new Cartesian3(0, 0, 4),
+      12,
+    );
+    expect(visualizer.getBoundingSphere(entity, sphere)).toBe(
+      BoundingSphereState.DONE,
+    );
+    expect(sphere.center.z).toBe(4);
+
+    primitive._currentBoundingSphere = new BoundingSphere(
+      new Cartesian3(0, 0, 18),
+      20,
+    );
+    expect(visualizer.getBoundingSphere(entity, sphere)).toBe(
+      BoundingSphereState.DONE,
+    );
+    expect(sphere.center.z).toBe(18);
+
+    entity.show = false;
+    visualizer.update(time);
+    expect(visualizer.getBoundingSphere(entity, sphere)).toBe(
+      BoundingSphereState.FAILED,
+    );
   });
 
   it("retains hidden owners, releases missing geometry, and reports bounds", function () {

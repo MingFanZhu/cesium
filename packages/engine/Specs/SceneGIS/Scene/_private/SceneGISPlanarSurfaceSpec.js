@@ -1,16 +1,25 @@
 import {
   Cartesian3,
+  Cartesian2,
   Color,
+  ColorGeometryInstanceAttribute,
   DirectionalLight,
   Event,
   Intersect,
+  HeightReference,
+  Material,
   OrthographicFrustum,
   PerspectiveFrustum,
+  PerInstanceColorAppearance,
+  PolylineMaterialAppearance,
   PrimitiveType,
   Scene,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
+  SceneGISPlanarGroundPrimitive,
+  SceneGISPlanarPolygonGeometry,
+  SceneGISPlanarPolylineGeometry,
   SceneGISPlanarWorld,
 } from "../../../../index.js";
 import createCanvas from "../../../../../../Specs/createCanvas.js";
@@ -75,6 +84,54 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     if (scene && !scene.isDestroyed()) {
       scene.destroyForSpecs();
     }
+  });
+
+  it("publishes flat actual cover only for same-pass ground registration", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    scene = createPlanarScene(world);
+    scene.frameState.scene3DOnly = true;
+    pointCameraAt(world);
+    scene.renderForSpecs();
+    expect(world._surface._groundRenderSnapshotCount).toBe(0);
+    expect(world._surface._groundRenderSnapshot).toBeUndefined();
+    expect(world._groundPrimitives).toBeUndefined();
+    const primitive = scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolylineGeometry({
+          positions: [new Cartesian3(-64, 0, 0), new Cartesian3(64, 0, 0)],
+          width: 3,
+        }),
+        appearance: new PolylineMaterialAppearance({
+          material: Material.fromType(Material.ColorType, {
+            color: Color.WHITE,
+          }),
+        }),
+        heightReference: HeightReference.CLAMP_TO_GROUND,
+        id: "ground",
+      }),
+    );
+    scene.renderForSpecs();
+    expect(world._surface._groundRenderSnapshotCount).toBe(1);
+    expect(world._surface._groundRenderSnapshot[0].source).toBe("FLAT");
+    expect(primitive._current).toBeDefined();
+    expect(scene).toRender([255, 255, 255, 255]);
+    const center = new Cartesian2(
+      scene.canvas.clientWidth * 0.5,
+      scene.canvas.clientHeight * 0.5,
+    );
+    expect(scene.pick(center).id).toBe("ground");
+    if (scene.pickPositionSupported) {
+      expect(scene.pickPosition(center).z).toBeCloseTo(0.0, 4);
+    }
+    const snapshot = world._surface._groundRenderSnapshot;
+    const entry = snapshot[0];
+    scene.primitives.remove(primitive);
+    scene.renderForSpecs();
+    expect(world._surface._groundRenderSnapshot).toBe(snapshot);
+    expect(world._surface._groundRenderSnapshotCount).toBe(0);
+    expect(entry.tile).toBeUndefined();
+    expect(entry.extent).toBeUndefined();
   });
 
   it("lazily creates one shared unit quad and renders the base color", function () {
@@ -192,6 +249,104 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(snapshotEntry.tile).toBeUndefined();
     expect(snapshotEntry.content).toBeUndefined();
     expect(snapshotEntry.mesh).toBeUndefined();
+  });
+
+  it("drapes through an interior terrain peak with linear and logarithmic depth", async function () {
+    const world = createWorld({ maximumLevel: 0 });
+    const terrainData = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array([0, 0, 0, 0, 48, 0, 0, 0, 0]),
+      width: 3,
+      height: 3,
+    });
+    world.terrainProvider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: 0,
+      maximumHeight: 48,
+      maximumLevel: 0,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: () => 1,
+      requestTileGeometry: () => Promise.resolve(terrainData),
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+    };
+    scene = createPlanarScene(world, 64, 64);
+    scene.frameState.scene3DOnly = true;
+    pointCameraAt(world, 256);
+    const primitive = scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolylineGeometry({
+          positions: [new Cartesian3(-96, 0, 0), new Cartesian3(96, 0, 0)],
+          width: 8,
+        }),
+        appearance: new PolylineMaterialAppearance({
+          material: Material.fromType(Material.ColorType, {
+            color: Color.WHITE,
+          }),
+        }),
+        heightReference: HeightReference.CLAMP_TO_GROUND,
+        id: "terrain-ground",
+      }),
+    );
+    scene.renderForSpecs();
+    await Promise.resolve();
+    scene.renderForSpecs();
+    scene.renderForSpecs();
+    const center = new Cartesian2(32, 32);
+    expect(world.getTerrainHeight(new Cartesian3(0, 0, 0))).toBeCloseTo(48, 5);
+    expect(scene.pick(center).id).toBe("terrain-ground");
+    if (scene.pickPositionSupported) {
+      const mathematical = world.pickFromWindowPosition(center, scene);
+      expect(
+        Math.abs(
+          scene.pickPosition(center).z - world.getTerrainHeight(mathematical),
+        ),
+      ).toBeLessThan(1.0);
+    }
+    const current = primitive._current;
+    scene.logarithmicDepthBuffer = false;
+    scene.renderForSpecs();
+    expect(primitive._current).toBe(current);
+    if (scene.context.fragmentDepth) {
+      scene.logarithmicDepthBuffer = true;
+      scene.renderForSpecs();
+      expect(scene.pick(center).id).toBe("terrain-ground");
+    }
+
+    scene.primitives.remove(primitive);
+    const polygon = scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: [
+            new Cartesian3(-24, -24, 0),
+            new Cartesian3(24, -24, 0),
+            new Cartesian3(24, 24, 0),
+            new Cartesian3(-24, 24, 0),
+          ],
+          bottomPositions: [
+            new Cartesian3(-24, -24, -8),
+            new Cartesian3(24, -24, -8),
+            new Cartesian3(24, 24, -8),
+            new Cartesian3(-24, 24, -8),
+          ],
+        }),
+        appearance: new PerInstanceColorAppearance({ flat: true }),
+        attributes: {
+          color: ColorGeometryInstanceAttribute.fromColor(Color.YELLOW),
+        },
+        heightReference: HeightReference.CLAMP_TO_GROUND,
+        extrudedHeightReference: HeightReference.NONE,
+        id: "terrain-ground-polygon",
+      }),
+    );
+    scene.renderForSpecs();
+    expect(polygon.ready).toBeTrue();
+    expect(scene.pick(center).id).toBe("terrain-ground-polygon");
+    if (scene.pickPositionSupported) {
+      expect(Math.abs(scene.pickPosition(center).z - 48)).toBeLessThan(1);
+    }
   });
 
   it("clears strong references across snapshot shrink and no-cover invalidation", function () {

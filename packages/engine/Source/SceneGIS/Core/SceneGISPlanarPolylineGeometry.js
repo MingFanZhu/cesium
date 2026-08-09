@@ -139,4 +139,13 @@ SceneGISPlanarPolylineGeometry.prototype._getLocalBoundingSphere = function (
   return BoundingSphere.clone(this._boundingSphere, result);
 };
 
+/** @private */
+SceneGISPlanarPolylineGeometry.prototype._getDrapeSource = function () {
+  return {
+    positions: this._positions,
+    origin: this._origin,
+    width: this._width,
+  };
+};
+
 export default SceneGISPlanarPolylineGeometry;

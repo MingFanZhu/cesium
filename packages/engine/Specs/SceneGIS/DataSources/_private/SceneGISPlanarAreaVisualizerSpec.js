@@ -21,6 +21,7 @@ import SceneGISPlanarAreaVisualizer from "../../../../Source/SceneGIS/DataSource
 import SceneGISPlanarCoordinateSystem from "../../../../Source/SceneGIS/Core/SceneGISPlanarCoordinateSystem.js";
 import SceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlanarExtent.js";
 import SceneGISPlanarWorld from "../../../../Source/SceneGIS/Scene/SceneGISPlanarWorld.js";
+import SceneGISPlanarGroundPrimitive from "../../../../Source/SceneGIS/Scene/SceneGISPlanarGroundPrimitive.js";
 
 describe("SceneGIS/DataSources/SceneGISPlanarAreaVisualizer", function () {
   const time = JulianDate.fromIso8601("2026-08-09T00:00:00Z");
@@ -139,7 +140,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarAreaVisualizer", function () {
     expect(visualizer._items.get(oblique.id).owners.plane).toBe(obliqueOwner);
   });
 
-  it("uses ellipse position only for XY and samples generated vertices", function () {
+  it("uses ellipse position only for XY and defers generated-vertex draping", function () {
     const terrain = spyOn(world, "getTerrainHeight").and.returnValue(11);
     const entity = collection.add({
       id: "ellipse",
@@ -156,8 +157,11 @@ describe("SceneGIS/DataSources/SceneGISPlanarAreaVisualizer", function () {
     visualizer.update(time);
     const positions = visualizer._items.get(entity.id).owners.ellipse
       .primitives[0].geometry.positions;
-    expect(positions.every((p) => p.z === 14)).toBeTrue();
-    expect(terrain.calls.count()).toBe(8);
+    expect(
+      visualizer._items.get(entity.id).owners.ellipse.primitives[0],
+    ).toBeInstanceOf(SceneGISPlanarGroundPrimitive);
+    expect(positions.every((p) => p.z === 3)).toBeTrue();
+    expect(terrain.calls.count()).toBe(0);
     expect(positions[0].x).toBeCloseTo(-10, 12);
     expect(positions[0].y).toBeCloseTo(20, 12);
   });

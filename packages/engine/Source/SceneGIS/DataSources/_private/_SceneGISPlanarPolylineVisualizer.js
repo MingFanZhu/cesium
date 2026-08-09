@@ -15,6 +15,8 @@ import ShadowMode from "../../../Scene/ShadowMode.js";
 import destroyObject from "../../../Core/destroyObject.js";
 import SceneGISPlanarPolylineGeometry from "../../Core/SceneGISPlanarPolylineGeometry.js";
 import SceneGISPlanarPrimitive from "../../Scene/SceneGISPlanarPrimitive.js";
+import SceneGISPlanarGroundPrimitive from "../../Scene/SceneGISPlanarGroundPrimitive.js";
+import getSceneGISPlanarGroundBounds from "./_SceneGISPlanarGroundBounds.js";
 import SceneGISPlanarPositionResolver from "./_SceneGISPlanarPositionResolver.js";
 import SceneGISPlanarPrimitiveOwner from "./_SceneGISPlanarPrimitiveOwner.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
@@ -103,12 +105,19 @@ function computeState(visualizer, item, time) {
   const resolved = new Array(positions.length);
   let outside = false;
   for (let i = 0; i < positions.length; i++) {
-    const result = SceneGISPlanarPositionResolver.resolve(
-      visualizer._world,
-      positions[i],
-      clampToGround ? HeightReference.CLAMP_TO_GROUND : HeightReference.NONE,
-      scratchResolved,
-    );
+    const result = clampToGround
+      ? SceneGISPlanarPositionResolver.resolve(
+          visualizer._world,
+          positions[i],
+          HeightReference.NONE,
+          scratchResolved,
+        )
+      : SceneGISPlanarPositionResolver.resolve(
+          visualizer._world,
+          positions[i],
+          HeightReference.NONE,
+          scratchResolved,
+        );
     if (result === undefined) {
       outside = true;
     } else {
@@ -139,8 +148,9 @@ function computeState(visualizer, item, time) {
     positions: resolved,
     width,
     color,
+    ground: clampToGround,
     boundingSphere,
-    signature: `${resolved.length}|${resolved.map((p) => `${p.x},${p.y},${p.z}`).join(";")}|${width}`,
+    signature: `${clampToGround}|${resolved.length}|${resolved.map((p) => `${p.x},${p.y},${p.z}`).join(";")}|${width}`,
   };
 }
 
@@ -152,7 +162,16 @@ function createOwner(visualizer, item, state) {
     material,
     translucent: state.color.alpha < 1.0,
   });
-  const primitive = new SceneGISPlanarPrimitive({
+  const PrimitiveType = state.ground
+    ? SceneGISPlanarGroundPrimitive
+    : SceneGISPlanarPrimitive;
+  const primitive = new PrimitiveType({
+    ...(state.ground
+      ? {
+          world: visualizer._world,
+          heightReference: HeightReference.CLAMP_TO_GROUND,
+        }
+      : {}),
     geometry: new SceneGISPlanarPolylineGeometry({
       positions: state.positions,
       width: state.width,
@@ -279,8 +298,7 @@ SceneGISPlanarPolylineVisualizer.prototype.getBoundingSphere = function (
   if (owner === undefined || !owner.shown) {
     return BoundingSphereState.FAILED;
   }
-  BoundingSphere.clone(owner.boundingSphere, result);
-  return BoundingSphereState.DONE;
+  return getSceneGISPlanarGroundBounds(owner, result);
 };
 
 SceneGISPlanarPolylineVisualizer.prototype.isDestroyed = function () {

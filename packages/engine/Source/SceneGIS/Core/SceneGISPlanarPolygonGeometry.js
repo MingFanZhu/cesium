@@ -276,6 +276,8 @@ function SceneGISPlanarPolygonGeometry(options) {
   this._closeBottom = closeBottom;
   this._localPositions = local;
   this._indices = indices;
+  this._rings = rings;
+  this._topTriangles = topTriangles;
   this._boundingSphere = BoundingSphere.fromPoints(local);
 }
 
@@ -369,6 +371,19 @@ SceneGISPlanarPolygonGeometry.prototype._getLocalBoundingSphere = function (
   result,
 ) {
   return BoundingSphere.clone(this._boundingSphere, result);
+};
+
+/** @private */
+SceneGISPlanarPolygonGeometry.prototype._getDrapeSource = function () {
+  return {
+    rings: this._rings,
+    top: this._rings.flat(),
+    bottom: this._bottomPositions,
+    topTriangles: this._topTriangles,
+    origin: this._origin,
+    closeTop: this._closeTop,
+    closeBottom: this._closeBottom,
+  };
 };
 
 export default SceneGISPlanarPolygonGeometry;

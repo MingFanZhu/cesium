@@ -454,10 +454,28 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   shape +X映射route-left、+Y映射world-up，并以planar corner stations生成closed mesh。不得调用upstream
   Corridor/Wall/PolylineVolume Geometry、ENU、Cartographic或geodesic subdivision。
 - Corridor必须降级到public Polygon/Polyline，Path必须降级到public Polyline。Corridor rounded granularity是
-  planar corner angle step，terrain仍只采样generated perimeter；Wall/PolylineVolume不隐式terrain clamp。
+  planar corner angle step；ground分支由C9 continuous draper消费actual cover，Wall/PolylineVolume不隐式terrain clamp。
 - Path sampler只能以`ReferenceFrame.FIXED`调用Cesium property sampler；non-FIXED position、INERTIAL、
   entity-relative/VVLH、`PathMode.PORTIONS`必须fail-fast。Callback顺序在既有Area后追加Route、Path，existing children
   顺序不变。
+- C9 Ground Primitive只接受existing planar Polyline/Polygon Geometry、live World、compatible Color appearance与
+  显式HeightReference。至少一个reference必须ground-relative；不得提供任意modelMatrix、classification、zIndex或
+  arbitrary Material。
+- Ground wrapper普通update只注册当前pass；World必须先完成Surface actual cover，再执行normal-render late drape。
+  Pick/depth只提交current。Per-pass queue必须去重并在finally/begin/destroy清理，不能形成module-global registry或World
+  ownership。
+- Ground-render snapshot必须与terrain query snapshot分离，覆盖DIRECT/UPSAMPLED/FLAT/no-provider actual render tiles，
+  排除skirts并按provider/revision/hidden/no-cover失效。Consumer不得跨late update保留tile/content/mesh引用。
+- Continuous Polyline在tile/terrain triangle edge处分段；Polygon source triangle与surface triangle做XY clipping，hole与
+  boundary side使用同一crossings。Shared edge需要确定性ownership，relative error以当前rendered triangle为基准，
+  不得发terrain request或改变SSE/LRU/tilesLoaded。实现必须先做Geometry/tile bounds broad-phase并只流式访问相交
+  regular-grid cells；extruded Ground Polygon的bottom/top XY必须逐点一致，derived points必须finite且bottom不高于top。
+- Ground renderer继续使用single synchronous standard Primitive、single GeometryInstance、candidate/current与original
+  id。Internal derived appearance可使用`LESS_OR_EQUAL`但不得修改caller appearance或依赖polygonOffset；linear/log
+  depth real Context若不稳定，必须暂停，不得擅自增加Shader/classification/upstream patch。
+- Polyline clamp、Polygon、Ellipse、Rectangle与Corridor ground配置迁移到同一public wrapper；ordinary NONE路径不得
+  分配ground runtime，Entity owner保持per-DataSource target与terrain-signature-driven warm convergence。Bounds只来自
+  valid last-successful ground current；首次promotion前为`PENDING`，hidden或无owner为`FAILED`。
 - C4 callback第一次合法update只原子追加Anchor、Model、Polyline、Polygon并返回false；children必须等下一次
   update。Model/Polyline/Polygon自动路径使用`dataSource._primitives`，显式private构造省略target时仍使用
   `scene.primitives`；两种路径都不拥有caller collection。

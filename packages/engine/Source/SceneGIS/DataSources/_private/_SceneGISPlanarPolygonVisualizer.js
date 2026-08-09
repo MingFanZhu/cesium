@@ -18,6 +18,8 @@ import destroyObject from "../../../Core/destroyObject.js";
 import SceneGISPlanarPolygonGeometry from "../../Core/SceneGISPlanarPolygonGeometry.js";
 import SceneGISPlanarPolylineGeometry from "../../Core/SceneGISPlanarPolylineGeometry.js";
 import SceneGISPlanarPrimitive from "../../Scene/SceneGISPlanarPrimitive.js";
+import SceneGISPlanarGroundPrimitive from "../../Scene/SceneGISPlanarGroundPrimitive.js";
+import getSceneGISPlanarGroundBounds from "./_SceneGISPlanarGroundBounds.js";
 import SceneGISPlanarPositionResolver from "./_SceneGISPlanarPositionResolver.js";
 import SceneGISPlanarPrimitiveOwner from "./_SceneGISPlanarPrimitiveOwner.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
@@ -262,9 +264,7 @@ function resolveHeights(visualizer, rings, options) {
       const topPosition = SceneGISPlanarPositionResolver.resolve(
         visualizer._world,
         topInput,
-        options.perPositionHeight
-          ? HeightReference.NONE
-          : options.heightReference,
+        options.ground ? HeightReference.NONE : options.heightReference,
         scratchResolved,
       );
       if (topPosition === undefined) {
@@ -277,7 +277,9 @@ function resolveHeights(visualizer, rings, options) {
         const bottomPosition = SceneGISPlanarPositionResolver.resolve(
           visualizer._world,
           new Cartesian3(source.x, source.y, options.extrudedHeight),
-          options.extrudedHeightReference,
+          options.ground
+            ? HeightReference.NONE
+            : options.extrudedHeightReference,
           scratchResolved,
         );
         if (bottomPosition === undefined) {
@@ -366,6 +368,10 @@ function computeState(visualizer, item, time) {
     extruded: extrudedHeight !== undefined,
     extrudedHeight,
     extrudedHeightReference,
+    ground:
+      heightReference !== HeightReference.NONE ||
+      (extrudedHeight !== undefined &&
+        extrudedHeightReference !== HeightReference.NONE),
   });
   const shown =
     entity.isShowing &&
@@ -397,17 +403,23 @@ function computeState(visualizer, item, time) {
     offset += rings[i].length;
   }
   const outlinePositions = [];
+  const outlineReferences = [];
   if (outline && outlineWidth > 0.0) {
     offset = 0;
     for (let i = 0; i < rings.length; i++) {
       const length = rings[i].length;
       const topRing = resolved.top.slice(offset, offset + length);
       outlinePositions.push([...topRing, topRing[0]]);
+      outlineReferences.push(heightReference);
       if (resolved.bottom !== undefined) {
         const bottomRing = resolved.bottom.slice(offset, offset + length);
         outlinePositions.push([...bottomRing, bottomRing[0]]);
+        outlineReferences.push(extrudedHeightReference);
         for (let j = 0; j < length; j++) {
-          outlinePositions.push([topRing[j], bottomRing[j]]);
+          if (!Cartesian3.equals(topRing[j], bottomRing[j])) {
+            outlinePositions.push([topRing[j], bottomRing[j]]);
+            outlineReferences.push([heightReference, extrudedHeightReference]);
+          }
         }
       }
       offset += length;
@@ -421,11 +433,18 @@ function computeState(visualizer, item, time) {
     boundingSphere,
     fill: fill && fillColor.alpha > 0.0,
     fillColor,
+    ground:
+      heightReference !== HeightReference.NONE ||
+      (extrudedHeight !== undefined &&
+        extrudedHeightReference !== HeightReference.NONE),
+    heightReference,
+    extrudedHeightReference,
     topRings,
     bottomPositions: resolved.bottom,
     closeTop,
     closeBottom,
     outlinePositions,
+    outlineReferences,
     outlineColor,
     outlineWidth,
     signature: [
@@ -437,6 +456,8 @@ function computeState(visualizer, item, time) {
       outlineWidth,
       closeTop,
       closeBottom,
+      heightReference,
+      extrudedHeightReference,
     ].join("|"),
   };
 }
@@ -445,7 +466,20 @@ function createOwner(visualizer, item, state) {
   const owner = new SceneGISPlanarPrimitiveOwner(visualizer._primitives);
   let fillPrimitive;
   if (state.fill) {
-    fillPrimitive = new SceneGISPlanarPrimitive({
+    const PrimitiveType = state.ground
+      ? SceneGISPlanarGroundPrimitive
+      : SceneGISPlanarPrimitive;
+    fillPrimitive = new PrimitiveType({
+      ...(state.ground
+        ? {
+            world: visualizer._world,
+            heightReference: state.heightReference,
+            extrudedHeightReference:
+              state.bottomPositions === undefined
+                ? undefined
+                : state.extrudedHeightReference,
+          }
+        : {}),
       geometry: new SceneGISPlanarPolygonGeometry({
         positions: state.topRings[0],
         holes: state.topRings.slice(1),
@@ -470,7 +504,26 @@ function createOwner(visualizer, item, state) {
     const material = Material.fromType(Material.ColorType, {
       color: Color.clone(state.outlineColor),
     });
-    const primitive = new SceneGISPlanarPrimitive({
+    const groundReference = state.outlineReferences[i];
+    const endpointReferences = Array.isArray(groundReference)
+      ? groundReference
+      : undefined;
+    const usesGround = endpointReferences
+      ? endpointReferences.some(
+          (reference) => reference !== HeightReference.NONE,
+        )
+      : groundReference !== HeightReference.NONE;
+    const PrimitiveType = usesGround
+      ? SceneGISPlanarGroundPrimitive
+      : SceneGISPlanarPrimitive;
+    const primitive = new PrimitiveType({
+      ...(usesGround
+        ? {
+            world: visualizer._world,
+            heightReference: endpointReferences?.[0] ?? groundReference,
+            _heightReferences: endpointReferences,
+          }
+        : {}),
       geometry: new SceneGISPlanarPolylineGeometry({
         positions: state.outlinePositions[i],
         width: state.outlineWidth,
@@ -596,8 +649,7 @@ SceneGISPlanarPolygonVisualizer.prototype.getBoundingSphere = function (
   if (owner === undefined || !owner.shown) {
     return BoundingSphereState.FAILED;
   }
-  BoundingSphere.clone(owner.boundingSphere, result);
-  return BoundingSphereState.DONE;
+  return getSceneGISPlanarGroundBounds(owner, result);
 };
 
 SceneGISPlanarPolygonVisualizer.prototype.isDestroyed = function () {

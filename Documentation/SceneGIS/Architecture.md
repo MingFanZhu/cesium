@@ -438,10 +438,38 @@ C8新增public `SceneGISPlanarWallGeometry`与`SceneGISPlanarPolylineVolumeGeome
 top/bottom高度生成open non-flat surface；PolylineVolume以route-left/world-up固定frame扫掠居中的Cartesian2
 shape，支持planar MITERED/BEVELED/ROUNDED corner。二者输出local DOUBLE positions、finite normals与bounds，
 继续使用同步standard Primitive；Corridor确定降级到public Polygon/Polyline，Path确定降级到public Polyline，不为
-等价mesh新增public类型。Corridor terrain仍只采样生成perimeter vertices；Wall/PolylineVolume不隐式查询terrain。
+等价mesh新增public类型。C9已把Corridor ground分支迁移到actual-triangle continuous drape；Wall/PolylineVolume不隐式查询terrain。
 Path只允许effective `ReferenceFrame.FIXED`、undefined/`"FIXED"` relativeTo与`PathMode.WHOLE`，通过private
 fixed-frame sampler隔离Cesium Property采样；INERTIAL、entity-relative/VVLH与PORTIONS fail-fast。Automatic callback
 顺序在Area后追加Route、Path，保持zero-upstream。完整决定见ADR-0020。
+
+### 平面 Continuous Ground 与 Ground Primitive
+
+C9新增public `SceneGISPlanarGroundPrimitive`，只接受existing
+`SceneGISPlanarPolylineGeometry`/`SceneGISPlanarPolygonGeometry`与live caller-owned World。它显式接收top和可选
+bottom HeightReference，不提供任意modelMatrix；至少一个reference必须是ground-relative，全absolute继续使用
+`SceneGISPlanarPrimitive`。多个tile/triangle pieces最终合并为local DOUBLE、single GeometryInstance与一个logical
+current，保留original id、instance attributes、bounds、single Context和candidate/current lifecycle。
+
+Cesium GroundPrimitive/classification依赖ellipsoid shadow volume、ApproximateTerrainHeights与Globe/3D Tiles pass，
+不得作为planar实现。Scene的normal Primitive update早于primary World render，因此Ground wrapper普通update只向required
+World的instance-owned per-pass queue注册；World先完成Surface render/actual cover，再驱动normal-render late candidate。
+Pick/depth只提交last-successful current。队列每pass在finally清空，World不拥有caller wrapper。
+
+Surface保持existing terrain query snapshot不变，另建private ground-render snapshot：DIRECT/UPSAMPLED只暴露
+`surfaceIndexCount`以内的实际Float32 triangles，no-provider/FLAT显式为tile rectangle上的Z=0 triangles。Snapshot按
+actual parent/children render cover填充，并在provider、revision、hidden、zero/no-cover和destroy时清除引用。Ground
+wrapper同步消费后不能持有tile/content/mesh。
+
+Private draper在tile与terrain triangle边界拆分Polyline，并把Polygon source triangles与surface triangles做XY convex
+clipping；outer/hole boundary使用相同crossings生成continuous side。Shared edge采用确定性half-open ownership，skirts
+永远排除。相对当前rendered triangle的额外垂直误差只允许numeric tolerance；绝对terrain误差不优于active source
+level的provider geometric error，FLAT不声明terrain accuracy。Ground不发request、不改变SSE/cache/readiness。
+
+内部继续使用synchronous standard Primitive与从caller Color appearance派生的`LESS_OR_EQUAL` depth state，不修改
+caller appearance，也不依赖polygonOffset。Polyline clamp、Polygon、Ellipse、Rectangle和Corridor的ground配置迁移到
+该public runtime；其他graphics profile不扩大。若representative linear/log-depth真实GPU不能稳定覆盖terrain，必须
+暂停，不能静默增加Shader、classification、Worker或upstream patch。完整决定见ADR-0021。
 
 ## 验证架构
 

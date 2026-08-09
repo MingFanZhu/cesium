@@ -637,4 +637,44 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     otherWorld.destroy();
     world.destroy();
   });
+
+  it("dispatches registered ground primitives after the surface and clears every pass", function () {
+    const world = createWorld();
+    const calls = [];
+    const surface = world._surface;
+    surface.render = function () {
+      calls.push("surface");
+      this._groundRenderSnapshotCount = 1;
+      this._groundRenderSnapshotSignature = "flat";
+    };
+    const primitive = {
+      _world: world,
+      _updateGround: jasmine.createSpy("updateGround").and.callFake(() => {
+        calls.push("ground");
+      }),
+    };
+    const frameState = { mode: SceneMode.SCENE3D, passes: { render: true } };
+    world.update(frameState);
+    expect(() =>
+      world._registerGroundPrimitive(primitive, {
+        mode: SceneMode.SCENE3D,
+        passes: { render: true },
+      }),
+    ).toThrowDeveloperError();
+    world._registerGroundPrimitive(primitive, frameState);
+    world._registerGroundPrimitive(primitive, frameState);
+    world.render(frameState);
+    expect(calls).toEqual(["surface", "ground"]);
+    expect(primitive._updateGround).toHaveBeenCalledTimes(1);
+    expect(world._groundPrimitives.length).toBe(0);
+    expect(world._groundPrimitiveSet.size).toBe(0);
+
+    surface.render = function () {
+      throw new Error("surface failure");
+    };
+    world._registerGroundPrimitive(primitive, frameState);
+    expect(() => world.render(frameState)).toThrowError("surface failure");
+    expect(world._groundPrimitives.length).toBe(0);
+    world.destroy();
+  });
 });

@@ -6,9 +6,11 @@
 当前 extension plan：
 [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)（`active`）。
 
-当前 active phase plan：None；C8已完成，等待C9详细规划。
+当前 active phase plan：None；C10将在C9独立checkpoint后依据届时源码激活。
 
 已完成：
+[C9 Continuous Ground 与 Planar Ground Primitive](2026-08-10-phase-c9-continuous-ground-and-ground-primitive.md)
+（`completed`）、
 [C8 路径衍生 Geometry 与动态 Path](2026-08-10-phase-c8-route-derived-geometry-and-path.md)
 （`completed`）、
 [C7 普通锚定、体与面 Entity Graphics](2026-08-09-phase-c7-common-solid-and-area-graphics.md)
@@ -23,5 +25,5 @@
 [C2 平面锚点内容与普通 Model](2026-08-09-phase-c2-anchor-and-model.md)（`completed`）、
 [C1 平面内容基础契约与兼容性基线](2026-08-09-phase-c1-content-contract.md)（`completed`）。
 
-Current handoff：C8-R001～C8-R004已关闭，review=`approved`、phase=`completed`；下一步由Architecture
-形成C8独立本地提交检查点，再进入C9详细规划。
+Current handoff：C9 focused Architecture/code re-review=`approved`，phase=`completed`。下一步由Architecture
+形成C9独立中文本地提交检查点，再依据当前源码规划并激活C10；extension继续`active`。

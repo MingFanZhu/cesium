@@ -26,3 +26,7 @@
 - [C8 route-derived geometry and path review](2026-08-10-c8-route-derived-geometry-and-path.md)
   （`approved`）：C8-R001～C8-R004经focused re-review关闭；world-origin replacement、clockwise shape
   canonicalization、non-axis reversal、stationary Path lifecycle与zero-upstream边界通过。
+- [C9 continuous ground and Ground Primitive review](2026-08-10-c9-continuous-ground-and-ground-primitive.md)
+  （`approved`）：C9-R001～C9-R006经focused re-review全部关闭；常规257×257 bounded drape、Polygon
+  clipping/derived heights、ground extrusion outline、current bounds、same-frame/stale pick-depth与public attribute
+  preflight均通过，保持zero-upstream/zero-SGP。

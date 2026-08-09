@@ -14,6 +14,7 @@ import SceneGISPlanarCoordinateSystem from "../../../../Source/SceneGIS/Core/Sce
 import SceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlanarExtent.js";
 import SceneGISPlanarRouteVisualizer from "../../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarRouteVisualizer.js";
 import SceneGISPlanarWorld from "../../../../Source/SceneGIS/Scene/SceneGISPlanarWorld.js";
+import SceneGISPlanarGroundPrimitive from "../../../../Source/SceneGIS/Scene/SceneGISPlanarGroundPrimitive.js";
 
 describe("SceneGIS/DataSources/SceneGISPlanarRouteVisualizer", function () {
   const time = JulianDate.fromIso8601("2026-08-10T00:00:00Z");
@@ -120,7 +121,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarRouteVisualizer", function () {
     expect(primitives.length).toBe(0);
   });
 
-  it("samples corridor generated vertices for ground references", function () {
+  it("defers corridor generated-vertex draping to the ground primitive", function () {
     spyOn(world, "getTerrainHeight").and.callFake(function (position) {
       return position.x * 0.1 + position.y * 0.05;
     });
@@ -136,12 +137,14 @@ describe("SceneGIS/DataSources/SceneGISPlanarRouteVisualizer", function () {
       }),
     });
     visualizer.update(time);
-    const positions = visualizer._items.get(entity.id).owners.corridor
-      .fillPrimitive.geometry.positions;
-    expect(world.getTerrainHeight).toHaveBeenCalled();
-    expect(
-      new Set(positions.map((position) => position.z)).size,
-    ).toBeGreaterThan(1);
+    const primitive = visualizer._items.get(entity.id).owners.corridor
+      .fillPrimitive;
+    const positions = primitive.geometry.positions;
+    expect(primitive).toBeInstanceOf(SceneGISPlanarGroundPrimitive);
+    expect(world.getTerrainHeight).not.toHaveBeenCalled();
+    expect(new Set(positions.map((position) => position.z))).toEqual(
+      new Set([0]),
+    );
   });
 
   it("updates style in place and replaces dynamic topology atomically", function () {
