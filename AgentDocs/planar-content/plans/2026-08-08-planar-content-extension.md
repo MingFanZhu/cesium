@@ -21,6 +21,8 @@
   [C4 Entity/DataSource/Viewer integration review](../reviews/2026-08-09-c4-entity-datasource-viewer-integration.md)
   （`approved`）、
   [C5 dynamic performance and delivery review](../reviews/2026-08-09-c5-dynamic-performance-and-delivery.md)
+  （`approved`）、
+  [C6 public planar Primitive/Geometry review](../reviews/2026-08-09-c6-public-planar-primitive-and-geometry.md)
   （`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
@@ -28,7 +30,8 @@
   [ADR-0015：平面 Polyline、Polygon 与顶点采样地表](../../../Documentation/SceneGIS/Decisions/ADR-0015-planar-polyline-polygon-and-vertex-drape.md)、
   [ADR-0016：平面 DataSourceDisplay 与 Viewer 内容集成](../../../Documentation/SceneGIS/Decisions/ADR-0016-planar-datasource-display-integration.md)、
   [ADR-0017：平面内容资格验证与批量边界](../../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)、
-  [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)
+  [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)、
+  [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)
 - SGP：C4复用active `SGP-0001`；只允许在CesiumWidget增加instance-owned visualizer callback seam
 
 ## 目标
@@ -187,7 +190,7 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
   创建C6 phase plan和必要ADR。
 - 完成门槛：public低层API、代表性line/fill geometry、Entity复用缝隙、精度与GPU生命周期通过review。
   - 状态：`completed`；phase plan：
-  [C6 Public Planar Primitive/Geometry 基础](2026-08-09-phase-c6-public-planar-primitive-and-geometry.md)。
+    [C6 Public Planar Primitive/Geometry 基础](2026-08-09-phase-c6-public-planar-primitive-and-geometry.md)。
 
 ### C7：普通锚定、体与面 Entity Graphics
 
@@ -196,7 +199,8 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
 - 依赖：C6。
 - 进入门槛：C6 review并提交；依据届时源码审计对应Graphics、GeometryUpdater与material path。
 - 完成门槛：静态/动态、orientation、height/extrusion、material、outline、pick、bounds与lifecycle成立。
-- 状态：`proposed`。
+- 状态：`active`；phase plan：
+  [C7 普通锚定、体与面 Entity Graphics](2026-08-09-phase-c7-common-solid-and-area-graphics.md)。
 
 ### C8：路径衍生几何与动态内容
 
@@ -375,3 +379,8 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   `ComponentDatatype` representability窄缺口；Execution补无损integer conversion preflight与合法边界Spec。
   Architecture最终复跑Primitive`7/7`，确认R001～R004全部关闭，C6 review=`approved`、phase=`completed`；
   C6保持upstream-owned files=`0`、SGP=`0`。
+- `2026-08-09`：Architecture形成C6独立checkpoint
+  `525bb1046a4f7989aaacdd73432063a193914ee9`，随后审计六类Graphics、Core Geometry、
+  GeometryUpdaterSet/GeometryVisualizer与C4 callback。ADR-0019批准只新增Box/Cylinder/Ellipsoid三个public
+  volume Geometry，Plane/Ellipse/Rectangle降级到C6 public Polygon/Polyline，两个private visualizer保持
+  zero-upstream；C7 phase plan激活。

@@ -7,11 +7,12 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: None；C6 completed，C7待phase planning
-- Active phase plan: None
+- Current phase: `C7-common-solid-and-area-graphics`
+- Active phase plan:
+  [C7 普通锚定、体与面 Entity Graphics](plans/2026-08-09-phase-c7-common-solid-and-area-graphics.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: None；等待C7 phase plan派工
+- Execution contact: Execution Agent；等待C7 planning checkpoint后正式派工
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -56,21 +57,22 @@
   [ADR-0015：平面 Polyline、Polygon 与顶点采样地表](../../Documentation/SceneGIS/Decisions/ADR-0015-planar-polyline-polygon-and-vertex-drape.md)、
   [ADR-0016：平面 DataSourceDisplay 与 Viewer 内容集成](../../Documentation/SceneGIS/Decisions/ADR-0016-planar-datasource-display-integration.md)、
   [ADR-0017：平面内容资格验证与批量边界](../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)、
-  [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)
+  [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)、
+  [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)
 - SGP: 复用active `SGP-0001`；C4只允许在`packages/engine/Source/Widget/CesiumWidget.js`新增两个paired
   hunks
 
 ## Current handoff
 
-- Current state: C1-C5作为首批六类content profile已完成并通过项目负责人人工验收；项目负责人随后明确要求
-  不留下半成品Entity/Primitive/ground体系，批准在同一extension中继续C6-C10，状态重新激活为`active`。
-- Next action: Architecture Agent基于C6提交后的源码事实细化C7普通锚定、体与面Entity Graphics phase plan。
-- Current phase status: C6 `completed`；C7 `proposed`。
+- Current state: C1-C6已完成并形成独立checkpoint；public Primitive现已支持Polyline/Polygon，existing six
+  graphics自动路径保持。Architecture已依据C6 checkpoint审计普通Graphics/Core Geometry并批准ADR-0019。
+- Next action: Execution Agent按active C7 phase plan实现三个public volume Geometry、六类Entity profile和两个
+  private visualizer，完成后创建pending review并停止。
+- Current phase status: C7 `active`；implementation尚未开始。
 - Open discussions: None；3D Tiles与GeoJSON/CZML/KML转换继续属于独立扩展。
 - Latest review:
   [C6 public planar Primitive/Geometry review](reviews/2026-08-09-c6-public-planar-primitive-and-geometry.md)
   （`approved`；R001～R004全部关闭）。
 - Unresolved reviews: None。
-- Known risks: C6需把standard Primitive的immutable geometry封装为原子candidate/current，并清除SceneGIS对
-  experimental Buffer runtime的依赖；vertex-only terrain drape仍不代表连续贴地。普通geometry覆盖与continuous
-  ground按C7-C9逐阶段审计。公开Sandcastle terrain/imagery仍受网络与服务策略影响。
+- Known risks: Core Box/Cylinder/Ellipsoid与standard Primitive仍是Cesium升级敏感依赖；Ellipse/Rectangle必须避免
+  误入Cartographic/Ellipsoid路径。C7的terrain关系仍是generated-vertex sampling，continuous ground保持C9边界。
