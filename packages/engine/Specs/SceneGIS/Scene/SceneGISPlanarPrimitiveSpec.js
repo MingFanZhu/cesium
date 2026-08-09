@@ -1,5 +1,6 @@
 import {
   BoundingSphere,
+  Cartesian2,
   Cartesian3,
   Color,
   ColorGeometryInstanceAttribute,
@@ -11,7 +12,9 @@ import {
   SceneGISPlanarBoxGeometry,
   SceneGISPlanarPolygonGeometry,
   SceneGISPlanarPolylineGeometry,
+  SceneGISPlanarPolylineVolumeGeometry,
   SceneGISPlanarPrimitive,
+  SceneGISPlanarWallGeometry,
 } from "../../../index.js";
 import createScene from "../../../../../Specs/createScene.js";
 
@@ -113,6 +116,62 @@ describe("SceneGIS/Scene/SceneGISPlanarPrimitive", function () {
     expect(primitive.getBoundingSphere(new BoundingSphere()).center).toEqual(
       geometry.center,
     );
+  });
+
+  it("renders open wall and closed polyline-volume appearance pairs", function () {
+    const attributes = {
+      color: ColorGeometryInstanceAttribute.fromColor(Color.BLUE),
+    };
+    const wall = new SceneGISPlanarWallGeometry({
+      positions: [new Cartesian3(-10, 0, 5), new Cartesian3(10, 0, 8)],
+    });
+    expect(function () {
+      return new SceneGISPlanarPrimitive({
+        geometry: wall,
+        appearance: new PerInstanceColorAppearance({
+          flat: false,
+          closed: true,
+        }),
+        attributes,
+        id: "closed-wall",
+      });
+    }).toThrowDeveloperError();
+    const wallPrimitive = scene.primitives.add(
+      new SceneGISPlanarPrimitive({
+        geometry: wall,
+        appearance: new PerInstanceColorAppearance({
+          flat: false,
+          closed: false,
+        }),
+        attributes,
+        id: "wall",
+      }),
+    );
+    const volumePrimitive = scene.primitives.add(
+      new SceneGISPlanarPrimitive({
+        geometry: new SceneGISPlanarPolylineVolumeGeometry({
+          polylinePositions: [
+            new Cartesian3(-10, 10, 4),
+            new Cartesian3(10, 10, 4),
+          ],
+          shapePositions: [
+            new Cartesian2(-1, -1),
+            new Cartesian2(1, -1),
+            new Cartesian2(1, 1),
+            new Cartesian2(-1, 1),
+          ],
+        }),
+        appearance: new PerInstanceColorAppearance({
+          flat: false,
+          closed: true,
+        }),
+        attributes,
+        id: "volume",
+      }),
+    );
+    scene.renderForSpecs();
+    expect(wallPrimitive.ready).toBeTrue();
+    expect(volumePrimitive.ready).toBeTrue();
   });
 
   it("rejects incompatible inputs before Context mutation", function () {

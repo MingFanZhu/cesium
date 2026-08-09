@@ -7,12 +7,11 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: None；C7已完成，等待C8 planning
-- Latest completed phase plan:
-  [C7 普通锚定、体与面 Entity Graphics](plans/2026-08-09-phase-c7-common-solid-and-area-graphics.md)
+- Current phase: None；C8已完成，等待C9规划
+- Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: None；C8派工后更新
+- Execution contact: None；等待C9正式派工
 - Last updated: `2026-08-10`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -58,20 +57,21 @@
   [ADR-0016：平面 DataSourceDisplay 与 Viewer 内容集成](../../Documentation/SceneGIS/Decisions/ADR-0016-planar-datasource-display-integration.md)、
   [ADR-0017：平面内容资格验证与批量边界](../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)、
   [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)、
-  [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)
+  [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)、
+  [ADR-0020：平面路径衍生 Geometry 与动态 Path](../../Documentation/SceneGIS/Decisions/ADR-0020-planar-route-derived-geometry-and-path.md)
 - SGP: 复用active `SGP-0001`；C4只允许在`packages/engine/Source/Widget/CesiumWidget.js`新增两个paired
   hunks
 
 ## Current handoff
 
-- Current state: C1-C7已完成；C7-R001～R005均经Architecture focused re-review关闭，focused
-  Specs、build/static与zero-upstream ownership边界通过。
-- Next action: Architecture Agent提交C7独立检查点，然后进入C8详细设计与派工。
-- Current phase status: C7 `completed`；C8尚未激活。
+- Current state: C1-C7已完成并提交；C8-R001～C8-R004已关闭，直接Specs、真实Context、build与
+  zero-upstream/zero-SGP边界通过，C8 review=`approved`、phase=`completed`。
+- Next action: Architecture形成C8独立本地提交检查点，再重新发现C9源码事实并建立phase plan。
+- Current phase status: C8 `completed`；C9尚未激活。
 - Open discussions: None；3D Tiles与GeoJSON/CZML/KML转换继续属于独立扩展。
-- Latest review:
-  [C7 common solid and area graphics review](reviews/2026-08-09-c7-common-solid-and-area-graphics.md)
+- Latest completed review:
+  [C8 route-derived geometry and path review](reviews/2026-08-10-c8-route-derived-geometry-and-path.md)
   （`approved`）。
 - Unresolved reviews: None。
-- Known risks: Core Box/Cylinder/Ellipsoid与standard Primitive仍是Cesium升级敏感依赖；Ellipse/Rectangle必须避免
-  误入Cartographic/Ellipsoid路径。C7的terrain关系仍是generated-vertex sampling，continuous ground保持C9边界。
+- Known risks: `PathVisualizer._subSample`与standard Primitive仍是Cesium升级敏感依赖；Corridor的terrain关系
+  仍是generated-vertex sampling，continuous ground保持C9边界。

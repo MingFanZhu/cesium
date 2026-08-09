@@ -33,7 +33,8 @@
   [ADR-0016：平面 DataSourceDisplay 与 Viewer 内容集成](../../../Documentation/SceneGIS/Decisions/ADR-0016-planar-datasource-display-integration.md)、
   [ADR-0017：平面内容资格验证与批量边界](../../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)、
   [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)、
-  [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)
+  [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)、
+  [ADR-0020：平面路径衍生 Geometry 与动态 Path](../../../Documentation/SceneGIS/Decisions/ADR-0020-planar-route-derived-geometry-and-path.md)
 - SGP：C4复用active `SGP-0001`；只允许在CesiumWidget增加instance-owned visualizer callback seam
 
 ## 目标
@@ -211,7 +212,8 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
 - 依赖：C7。
 - 进入门槛：C7 review并提交；重新审计shape generation、time sampling与capacity/batching路径。
 - 完成门槛：路径拓扑、截面、动态轨迹、material/pick/bounds和资源收敛成立，不进入geodesic/rhumb。
-- 状态：`proposed`。
+- 状态：`completed`；phase plan：
+  [C8 路径衍生 Geometry 与动态 Path](2026-08-10-phase-c8-route-derived-geometry-and-path.md)。
 
 ### C9：Continuous Ground 与 Planar Ground Primitive
 
@@ -399,3 +401,19 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
 - `2026-08-10`：Architecture focused re-review确认C7-R001～C7-R005全部关闭；独立复跑Solid `7/7`、Area
   `6/6`、real Context `2/2`、build、格式与upstream audit均通过。C7 review=`approved`、phase=`completed`，
   保持upstream-owned files=`0`、SGP=`0`，等待独立本地提交检查点。
+- `2026-08-10`：Architecture形成C7独立checkpoint
+  `480a865fda210c4e49b8a0d9eea4efa91111c38c`，随后审计Corridor/Wall/PolylineVolume Core Geometry、
+  四类Graphics、Path fixed property sampler与C4 callback。ADR-0020批准只新增Wall/PolylineVolume两个public
+  Geometry，Corridor/Path降级到既有Polygon/Polyline，Route/Path private visualizer保持zero-upstream；C8 phase
+  plan激活。
+- `2026-08-10`：Execution完成C8 implementation与最小充分验证：新增Wall/PolylineVolume两个public Geometry，
+  Route/Path private visualizer与FIXED-only sampler接入automatic callback；C8新增direct cases=`16`，focused/
+  build/types/docs/static/ownership矩阵通过，upstream-owned files=`0`、SGP=`0`。C8保持`active`，等待pending
+  Architecture/code review。
+- `2026-08-10`：Architecture首轮review提出C8-R001～C8-R004；Execution完成Route world-origin signature、
+  PolylineVolume clockwise canonical winding与non-axis exact reversal、Path duplicate normalization修复。C8 direct
+  cases更新为`20`，Geometry `4/4`、Route `6/6`、Path `4/4`、real Context `2/2`与build/static/ownership证据ready，
+  等待focused re-review。
+- `2026-08-10`：Architecture focused re-review确认C8-R001～C8-R004全部关闭；独立串行复跑Geometry `4/4`、
+  Route `6/6`与Path `4/4`通过。C8 review=`approved`、phase=`completed`，保持upstream-owned files=`0`、
+  SGP=`0`，等待独立本地提交检查点。

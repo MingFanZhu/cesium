@@ -8,12 +8,15 @@ import SceneGISPlanarAreaVisualizer from "./_SceneGISPlanarAreaVisualizer.js";
 import SceneGISPlanarModelVisualizer from "./_SceneGISPlanarModelVisualizer.js";
 import SceneGISPlanarPolygonVisualizer from "./_SceneGISPlanarPolygonVisualizer.js";
 import SceneGISPlanarPolylineVisualizer from "./_SceneGISPlanarPolylineVisualizer.js";
+import SceneGISPlanarPathVisualizer from "./_SceneGISPlanarPathVisualizer.js";
+import SceneGISPlanarRouteVisualizer from "./_SceneGISPlanarRouteVisualizer.js";
 import SceneGISPlanarSolidVisualizer from "./_SceneGISPlanarSolidVisualizer.js";
 
 const allowedPropertyNames = new Set([
   "billboard",
   "box",
   "cylinder",
+  "corridor",
   "description",
   "label",
   "ellipse",
@@ -22,12 +25,15 @@ const allowedPropertyNames = new Set([
   "orientation",
   "point",
   "plane",
+  "path",
   "polygon",
   "polyline",
+  "polylineVolume",
   "position",
   "properties",
   "rectangle",
   "viewFrom",
+  "wall",
 ]);
 
 function getDataSourceName(dataSource) {
@@ -163,6 +169,22 @@ SceneGISPlanarVisualizersGate.prototype.update = function (time) {
     );
     candidates.push(
       new SceneGISPlanarAreaVisualizer(
+        this._world,
+        this._scene,
+        entities,
+        dataSource._primitives,
+      ),
+    );
+    candidates.push(
+      new SceneGISPlanarRouteVisualizer(
+        this._world,
+        this._scene,
+        entities,
+        dataSource._primitives,
+      ),
+    );
+    candidates.push(
+      new SceneGISPlanarPathVisualizer(
         this._world,
         this._scene,
         entities,

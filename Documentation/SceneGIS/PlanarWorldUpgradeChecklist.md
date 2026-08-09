@@ -21,6 +21,7 @@
 | Entity/DataSource planar callback与profile gate                          | private content callback、SGP-0001                                  | high   | World liveness、deferred activation、dynamic allowlist、default Globe isolation                                                |
 | Point/Billboard/Label pools与Model async lifecycle                       | private Anchor/Model visualizers                                    | high   | disabled EntityCluster、original Entity pick、generation isolation、late settlement、exact release                             |
 | standard synchronous Primitive/GeometryInstance与per-DataSource ordering | public planar Primitive/Geometry、private Polyline/Polygon adapters | high   | scene3DOnly local DOUBLE、origin/model matrix、pickPrimitive、Appearance vertex format、candidate/current、move/remove/destroy |
+| Core local volume、route-derived mesh与Path fixed sampler                | C7/C8 public Geometry、Solid/Area/Route/Path adapters               | high   | coordinate-neutral Core facts、normal/closed matrix、corner stations、FIXED `_subSample`、callback order与private generation   |
 | planar content moderate qualification与local E2E                         | C5 qualification Specs、content Sandcastle/E2E                      | medium | batch warm/mutation、selection、dev/release、no public-network automation                                                      |
 | content private tarball delivery                                         | package smoke与`SceneGIS/DataSources/_private`                      | medium | runtime files存在，非underscore public spelling、`.d.ts`与API HTML命中0，临时consumer不污染workspace                           |
 
@@ -34,8 +35,8 @@
 5. 执行 dev/release 本地 E2E，确认 Viewer、imagery、pixel/depth/pick、真实 wheel/Home 与 destroy。
 6. 检查planar imagery、Viewer与terrain Sandcastle，验证terrain lighting toggle和显式scene light；
    把公网OSM/terrain可用性与engine correctness分开记录。
-7. 检查planar content Sandcastle与local E2E，复核六类graphics、dynamic update、original Entity
-   selection、per-DataSource ordering和moderate warm/resource收敛。
+7. 检查planar content Sandcastle与local E2E，复核完整approved graphics matrix、fixed Path sampling、dynamic
+   update、original Entity selection、per-DataSource ordering和moderate warm/resource收敛。
 8. 只有 Architecture review approved 后才更新官方基线、SGP 状态和阶段 checkpoint。
 
 ## 私有实现同步原则

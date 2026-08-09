@@ -4,10 +4,10 @@ import {
   BoxGraphics,
   Cartesian2,
   Cartesian3,
+  Cesium3DTilesetGraphics,
   CesiumWidget,
   Color,
   ColorMaterialProperty,
-  CorridorGraphics,
   CustomDataSource,
   LabelGraphics,
   PointGraphics,
@@ -20,6 +20,7 @@ import {
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
   SceneTransforms,
+  WallGraphics,
 } from "../../../index.js";
 import getWebGLStub from "../../../../../Specs/getWebGLStub.js";
 
@@ -91,7 +92,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     });
 
     widget.render();
-    expect(visualizers.length).toBe(7);
+    expect(visualizers.length).toBe(9);
     widget.render();
     const anchorItem = visualizers[1]._items.get(entity.id);
     expect(anchorItem.point.id).toBe(entity);
@@ -157,17 +158,25 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
         height: 3,
       }),
     });
+    const wall = dataSource.entities.add({
+      id: "wall",
+      wall: new WallGraphics({
+        positions: [new Cartesian3(-30, 30, 8), new Cartesian3(30, 30, 12)],
+      }),
+    });
     await widget.dataSources.add(dataSource);
     await widget.dataSources.add(secondDataSource);
     widget.dataSourceDisplay.update(widget.clock.currentTime);
     widget.dataSourceDisplay.update(widget.clock.currentTime);
 
-    expect(dataSource._visualizers.length).toBe(7);
+    expect(dataSource._visualizers.length).toBe(9);
     expect(dataSource._visualizers[2]._primitives).toBe(dataSource._primitives);
     expect(dataSource._visualizers[3]._primitives).toBe(dataSource._primitives);
     expect(dataSource._visualizers[4]._primitives).toBe(dataSource._primitives);
     expect(dataSource._visualizers[5]._primitives).toBe(dataSource._primitives);
     expect(dataSource._visualizers[6]._primitives).toBe(dataSource._primitives);
+    expect(dataSource._visualizers[7]._primitives).toBe(dataSource._primitives);
+    expect(dataSource._visualizers[8]._primitives).toBe(dataSource._primitives);
     const anchorItem = dataSource._visualizers[1]._items.get("anchors");
     const polylineOwner = dataSource._visualizers[3]._items.get(
       polyline.id,
@@ -178,12 +187,15 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     const boxOwner = dataSource._visualizers[5]._items.get(box.id).owners.box;
     const rectangleOwner = dataSource._visualizers[6]._items.get(rectangle.id)
       .owners.rectangle;
+    const wallOwner = dataSource._visualizers[7]._items.get(wall.id).owners
+      .wall;
     expect(anchorItem.billboard).toBeDefined();
     expect(anchorItem.label).toBeDefined();
     expect(polylineOwner).toBeDefined();
     expect(polygonOwner).toBeDefined();
     expect(boxOwner).toBeDefined();
     expect(rectangleOwner).toBeDefined();
+    expect(wallOwner).toBeDefined();
     expect(dataSource._primitives.contains(polylineOwner.collections[0])).toBe(
       true,
     );
@@ -192,6 +204,9 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     );
     expect(dataSource._primitives.contains(boxOwner.collections[0])).toBe(true);
     expect(dataSource._primitives.contains(rectangleOwner.collections[0])).toBe(
+      true,
+    );
+    expect(dataSource._primitives.contains(wallOwner.collections[0])).toBe(
       true,
     );
     expect(widget.scene.primitives.contains(polylineOwner.collections[0])).toBe(
@@ -229,6 +244,9 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     expect(
       dataSource._visualizers[6]._items.get(rectangle.id).owners.rectangle,
     ).toBe(rectangleOwner);
+    expect(dataSource._visualizers[7]._items.get(wall.id).owners.wall).toBe(
+      wallOwner,
+    );
 
     const children = dataSource._visualizers.slice();
     const childDestroy = children.map((child) =>
@@ -244,6 +262,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     expect(polygonOwner.destroyed).toBe(true);
     expect(boxOwner.destroyed).toBe(true);
     expect(rectangleOwner.destroyed).toBe(true);
+    expect(wallOwner.destroyed).toBe(true);
     expect(widget.dataSources.remove(secondDataSource)).toBe(true);
   });
 
@@ -257,13 +276,10 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     const primitiveBaseline =
       widget.dataSourceDisplay.defaultDataSource._primitives.length;
     const entity = widget.entities.add({
-      id: "mixed-point-corridor",
+      id: "mixed-point-tileset",
       position: new Cartesian3(0.0, 0.0, 1.0),
       point: new PointGraphics({ pixelSize: 8.0, color: Color.RED }),
-      corridor: new CorridorGraphics({
-        positions: [Cartesian3.ZERO, Cartesian3.UNIT_X],
-        width: 1,
-      }),
+      tileset: new Cesium3DTilesetGraphics({ uri: "local.json" }),
     });
     const anchorItem = visualizers[1]._items.get(entity.id);
     expect(anchorItem).toBeDefined();
@@ -275,6 +291,8 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     expect(visualizers[4]._items.get(entity.id)).toBeUndefined();
     expect(visualizers[5]._items.get(entity.id)).toBeUndefined();
     expect(visualizers[6]._items.get(entity.id)).toBeUndefined();
+    expect(visualizers[7]._items.get(entity.id)).toBeUndefined();
+    expect(visualizers[8]._items.get(entity.id)).toBeUndefined();
     expect(widget.dataSourceDisplay.defaultDataSource._primitives.length).toBe(
       primitiveBaseline,
     );

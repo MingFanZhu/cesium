@@ -13,6 +13,8 @@ import SceneGISPlanarCylinderGeometry from "../Core/SceneGISPlanarCylinderGeomet
 import SceneGISPlanarEllipsoidGeometry from "../Core/SceneGISPlanarEllipsoidGeometry.js";
 import SceneGISPlanarPolygonGeometry from "../Core/SceneGISPlanarPolygonGeometry.js";
 import SceneGISPlanarPolylineGeometry from "../Core/SceneGISPlanarPolylineGeometry.js";
+import SceneGISPlanarPolylineVolumeGeometry from "../Core/SceneGISPlanarPolylineVolumeGeometry.js";
+import SceneGISPlanarWallGeometry from "../Core/SceneGISPlanarWallGeometry.js";
 
 const scratchTranslation = new Matrix4();
 const scratchWorldMatrix = new Matrix4();
@@ -43,7 +45,9 @@ function validateGeometry(geometry) {
     !(geometry instanceof SceneGISPlanarPolygonGeometry) &&
     !(geometry instanceof SceneGISPlanarBoxGeometry) &&
     !(geometry instanceof SceneGISPlanarCylinderGeometry) &&
-    !(geometry instanceof SceneGISPlanarEllipsoidGeometry)
+    !(geometry instanceof SceneGISPlanarEllipsoidGeometry) &&
+    !(geometry instanceof SceneGISPlanarWallGeometry) &&
+    !(geometry instanceof SceneGISPlanarPolylineVolumeGeometry)
   ) {
     throw new DeveloperError(
       "geometry must be a supported SceneGIS planar geometry.",
@@ -64,7 +68,13 @@ function getGeometryKind(geometry) {
   if (geometry instanceof SceneGISPlanarCylinderGeometry) {
     return "cylinder";
   }
-  return "ellipsoid";
+  if (geometry instanceof SceneGISPlanarEllipsoidGeometry) {
+    return "ellipsoid";
+  }
+  if (geometry instanceof SceneGISPlanarWallGeometry) {
+    return "wall";
+  }
+  return "polylineVolume";
 }
 
 function validateAppearance(kind, appearance, attributes) {
@@ -79,16 +89,21 @@ function validateAppearance(kind, appearance, attributes) {
     }
     return;
   }
-  const volume = kind !== "polygon";
+  const polygon = kind === "polygon";
+  const wall = kind === "wall";
+  const volume = !polygon && !wall;
   if (
     !(appearance instanceof PerInstanceColorAppearance) ||
-    appearance.flat === volume ||
-    (volume && appearance.closed !== true)
+    (polygon && appearance.flat !== true) ||
+    (wall && (appearance.flat !== false || appearance.closed !== false)) ||
+    (volume && (appearance.flat !== false || appearance.closed !== true))
   ) {
     throw new DeveloperError(
-      volume
-        ? "Volume geometry requires a closed non-flat PerInstanceColorAppearance."
-        : "Polygon geometry requires a flat PerInstanceColorAppearance.",
+      wall
+        ? "Wall geometry requires an open non-flat PerInstanceColorAppearance."
+        : volume
+          ? "Volume geometry requires a closed non-flat PerInstanceColorAppearance."
+          : "Polygon geometry requires a flat PerInstanceColorAppearance.",
     );
   }
   const color = attributes?.color?.value;
@@ -236,7 +251,7 @@ function createInternal(wrapper, attributes) {
  * @alias SceneGISPlanarPrimitive
  * @constructor
  * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry} options.geometry The planar geometry snapshot.
+ * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry} options.geometry The planar geometry snapshot.
  * @param {PolylineMaterialAppearance|PerInstanceColorAppearance} options.appearance The compatible caller-owned appearance.
  * @param {*} options.id The non-null caller-owned pick identifier.
  * @param {Object.<string, GeometryInstanceAttribute>} [options.attributes] Geometry instance attributes with valid component datatype, one to four components, boolean normalization, and one complete finite value.
@@ -280,7 +295,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
    * Gets or sets a planar geometry of the kind fixed at construction. Replacement is promoted on a normal render pass.
    *
    * @memberof SceneGISPlanarPrimitive.prototype
-   * @type {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry}
+   * @type {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry}
    * @exception {DeveloperError} The value is not the construction-time geometry kind.
    */
   geometry: {

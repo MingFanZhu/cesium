@@ -434,6 +434,15 @@ position表示中心，ground reference先解析anchor再加未旋转下部suppo
 terrain，`NONE`允许合法anchor的geometry延伸extent外。所有orientation继续使用fixed planar quaternion，不进入
 ENU、ellipsoid或默认GeometryUpdater路径。完整决定见ADR-0019。
 
+C8新增public `SceneGISPlanarWallGeometry`与`SceneGISPlanarPolylineVolumeGeometry`。Wall以米制XY route和显式
+top/bottom高度生成open non-flat surface；PolylineVolume以route-left/world-up固定frame扫掠居中的Cartesian2
+shape，支持planar MITERED/BEVELED/ROUNDED corner。二者输出local DOUBLE positions、finite normals与bounds，
+继续使用同步standard Primitive；Corridor确定降级到public Polygon/Polyline，Path确定降级到public Polyline，不为
+等价mesh新增public类型。Corridor terrain仍只采样生成perimeter vertices；Wall/PolylineVolume不隐式查询terrain。
+Path只允许effective `ReferenceFrame.FIXED`、undefined/`"FIXED"` relativeTo与`PathMode.WHOLE`，通过private
+fixed-frame sampler隔离Cesium Property采样；INERTIAL、entity-relative/VVLH与PORTIONS fail-fast。Automatic callback
+顺序在Area后追加Route、Path，保持zero-upstream。完整决定见ADR-0020。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：

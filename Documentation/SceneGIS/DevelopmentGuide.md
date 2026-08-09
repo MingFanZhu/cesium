@@ -450,6 +450,14 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - C4 callback顺序固定为Anchor、Model、Polyline、Polygon、Solid、Area。六类C7 Graphics只支持Color material、
   disabled shadows与批准字段；partial Ellipsoid、Rectangle granularity、stRotation、classification和zIndex必须在
   child低层mutation前拒绝。
+- C8 public Wall Geometry必须使用XY route与explicit top/bottom生成open non-flat mesh；PolylineVolume Geometry的
+  shape +X映射route-left、+Y映射world-up，并以planar corner stations生成closed mesh。不得调用upstream
+  Corridor/Wall/PolylineVolume Geometry、ENU、Cartographic或geodesic subdivision。
+- Corridor必须降级到public Polygon/Polyline，Path必须降级到public Polyline。Corridor rounded granularity是
+  planar corner angle step，terrain仍只采样generated perimeter；Wall/PolylineVolume不隐式terrain clamp。
+- Path sampler只能以`ReferenceFrame.FIXED`调用Cesium property sampler；non-FIXED position、INERTIAL、
+  entity-relative/VVLH、`PathMode.PORTIONS`必须fail-fast。Callback顺序在既有Area后追加Route、Path，existing children
+  顺序不变。
 - C4 callback第一次合法update只原子追加Anchor、Model、Polyline、Polygon并返回false；children必须等下一次
   update。Model/Polyline/Polygon自动路径使用`dataSource._primitives`，显式private构造省略target时仍使用
   `scene.primitives`；两种路径都不拥有caller collection。

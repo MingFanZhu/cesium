@@ -1,3 +1,4 @@
+import Cesium3DTilesetGraphics from "../../../Source/DataSources/Cesium3DTilesetGraphics.js";
 import CorridorGraphics from "../../../Source/DataSources/CorridorGraphics.js";
 import Cartesian3 from "../../../Source/Core/Cartesian3.js";
 import CustomDataSource from "../../../Source/DataSources/CustomDataSource.js";
@@ -83,7 +84,7 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     expect(createSceneGISPlanarVisualizersCallback(world)).toBeUndefined();
   });
 
-  it("defers and atomically appends the six planar visualizers", function () {
+  it("defers and atomically appends the eight planar visualizers", function () {
     const visualizers = createCallbackState();
     const listenerBaseline =
       dataSource.entities.collectionChanged.numberOfListeners;
@@ -91,7 +92,7 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     expect(visualizers.length).toBe(1);
     expect(visualizers[0].getBoundingSphere).toBeUndefined();
     expect(visualizers[0].update(time)).toBe(false);
-    expect(visualizers.length).toBe(7);
+    expect(visualizers.length).toBe(9);
     expect(
       visualizers
         .slice(1)
@@ -103,11 +104,13 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
       "SceneGISPlanarPolygonVisualizer",
       "SceneGISPlanarSolidVisualizer",
       "SceneGISPlanarAreaVisualizer",
+      "SceneGISPlanarRouteVisualizer",
+      "SceneGISPlanarPathVisualizer",
     ]);
     expect(visualizers[0].update(time)).toBe(true);
-    expect(visualizers.length).toBe(7);
+    expect(visualizers.length).toBe(9);
     expect(dataSource.entities.collectionChanged.numberOfListeners).toBe(
-      listenerBaseline + 6,
+      listenerBaseline + 8,
     );
 
     visualizers[0].destroy();
@@ -126,17 +129,14 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     const visualizers = createCallbackState();
     const entity = dataSource.entities.add({
       id: "unsupported",
-      corridor: new CorridorGraphics({
-        positions: [Cartesian3.ZERO, Cartesian3.UNIT_X],
-        width: 1,
-      }),
+      tileset: new Cesium3DTilesetGraphics({ uri: "local.json" }),
     });
     expect(function () {
       visualizers[0].update(time);
     }).toThrowDeveloperError();
     expect(visualizers.length).toBe(1);
 
-    entity.corridor = undefined;
+    entity.tileset = undefined;
     entity.addProperty("customGraphic");
     entity.customGraphic = 1;
     expect(function () {
@@ -253,7 +253,7 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     failThirdListener = false;
     listenerCalls = 0;
     expect(visualizers[0].update(time)).toBe(false);
-    expect(visualizers.length).toBe(7);
+    expect(visualizers.length).toBe(9);
     for (let i = visualizers.length - 1; i >= 0; i--) {
       visualizers[i].destroy();
     }
@@ -298,7 +298,31 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     visualizers[0].destroy();
   });
 
-  it("blocks dynamic invalid profiles before child normal updates", function () {
+  it("rolls back existing children when the seventh or eighth constructor fails", function () {
+    for (const failAt of [7, 8]) {
+      const source = new CustomDataSource(`failure-${failAt}`);
+      const visualizers = createCallbackState(source);
+      const event = source.entities.collectionChanged;
+      const listenerBaseline = event.numberOfListeners;
+      const originalAdd = event.addEventListener;
+      let calls = 0;
+      spyOn(event, "addEventListener").and.callFake(function (listener, scope) {
+        calls++;
+        if (calls === failAt) {
+          throw new Error(`child ${failAt} failed`);
+        }
+        return originalAdd.call(this, listener, scope);
+      });
+      expect(function () {
+        visualizers[0].update(time);
+      }).toThrowError(`child ${failAt} failed`);
+      expect(visualizers.length).toBe(1);
+      expect(event.numberOfListeners).toBe(listenerBaseline);
+      visualizers[0].destroy();
+    }
+  });
+
+  it("allows route profiles and blocks other dynamic invalid profiles before child updates", function () {
     const visualizers = createCallbackState();
     visualizers[0].update(time);
     const childUpdates = visualizers
@@ -311,6 +335,9 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
         width: 1,
       }),
     });
+    const invalid = dataSource.entities.add({ id: "dynamic-invalid" });
+    invalid.addProperty("unsupportedGraphic");
+    invalid.unsupportedGraphic = true;
 
     expect(function () {
       for (let i = 0, length = visualizers.length; i < length; i++) {

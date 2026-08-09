@@ -6,6 +6,7 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  CorridorGraphics,
   EntityCluster,
   EntityCollection,
   EllipseGraphics,
@@ -16,15 +17,22 @@ import {
   Plane,
   PlaneGraphics,
   PointGraphics,
+  PathGraphics,
+  PolylineVolumeGraphics,
   Rectangle,
   RectangleGraphics,
+  ReferenceFrame,
+  SampledPositionProperty,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
   SceneTransforms,
+  WallGraphics,
   _SceneGISPlanarAnchorVisualizer as SceneGISPlanarAnchorVisualizer,
   _SceneGISPlanarAreaVisualizer as SceneGISPlanarAreaVisualizer,
   _SceneGISPlanarModelVisualizer as SceneGISPlanarModelVisualizer,
+  _SceneGISPlanarPathVisualizer as SceneGISPlanarPathVisualizer,
+  _SceneGISPlanarRouteVisualizer as SceneGISPlanarRouteVisualizer,
   _SceneGISPlanarSolidVisualizer as SceneGISPlanarSolidVisualizer,
 } from "../../../index.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
@@ -290,7 +298,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
     }
   });
 
-  it("renders volume and lowered area graphics with stable public primitives", function () {
+  it("renders volume, area, route, and path graphics with stable public primitives", function () {
     const center = 20037508.0;
     const world = new SceneGISPlanarWorld({
       coordinateSystem: new SceneGISPlanarCoordinateSystem({
@@ -310,6 +318,8 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
     const collection = new EntityCollection();
     const solid = new SceneGISPlanarSolidVisualizer(world, scene, collection);
     const area = new SceneGISPlanarAreaVisualizer(world, scene, collection);
+    const route = new SceneGISPlanarRouteVisualizer(world, scene, collection);
+    const path = new SceneGISPlanarPathVisualizer(world, scene, collection);
     const time = JulianDate.fromIso8601("2026-08-09T00:00:00Z");
     const entities = [
       collection.add({
@@ -354,7 +364,61 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
           material: Color.YELLOW,
         }),
       }),
+      collection.add({
+        id: "corridor-c8",
+        corridor: new CorridorGraphics({
+          positions: [
+            new Cartesian3(center - 70, center - 45, 0),
+            new Cartesian3(center - 30, center - 45, 0),
+          ],
+          width: 12,
+          height: 20,
+          material: Color.MAGENTA,
+        }),
+      }),
+      collection.add({
+        id: "wall-c8",
+        wall: new WallGraphics({
+          positions: [
+            new Cartesian3(center - 10, center + 45, 4),
+            new Cartesian3(center + 10, center + 45, 24),
+          ],
+          material: Color.CYAN,
+        }),
+      }),
+      collection.add({
+        id: "volume-c8",
+        polylineVolume: new PolylineVolumeGraphics({
+          positions: [
+            new Cartesian3(center + 30, center - 45, 12),
+            new Cartesian3(center + 65, center - 45, 12),
+          ],
+          shape: [
+            new Cartesian2(-4, -4),
+            new Cartesian2(4, -4),
+            new Cartesian2(4, 4),
+            new Cartesian2(-4, 4),
+          ],
+          material: Color.ORANGE,
+        }),
+      }),
     ];
+    const pathPosition = new SampledPositionProperty(ReferenceFrame.FIXED);
+    pathPosition.addSample(
+      JulianDate.addSeconds(time, -60, new JulianDate()),
+      new Cartesian3(center - 30, center + 65, 18),
+    );
+    pathPosition.addSample(
+      JulianDate.addSeconds(time, 60, new JulianDate()),
+      new Cartesian3(center + 30, center + 65, 18),
+    );
+    entities.push(
+      collection.add({
+        id: "path-c8",
+        position: pathPosition,
+        path: new PathGraphics({ leadTime: 60, trailTime: 60, width: 5 }),
+      }),
+    );
     scene.frameState.scene3DOnly = true;
     scene.camera.setView({
       destination: new Cartesian3(center, center, 180),
@@ -367,6 +431,8 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
     try {
       solid.update(time);
       area.update(time);
+      route.update(time);
+      path.update(time);
       scene.renderForSpecs();
       scene.renderForSpecs();
       const owners = [
@@ -374,6 +440,10 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
         area._items.get(entities[1].id).owners.plane,
         area._items.get(entities[2].id).owners.ellipse,
         area._items.get(entities[3].id).owners.rectangle,
+        route._items.get(entities[4].id).owners.corridor,
+        route._items.get(entities[5].id).owners.wall,
+        route._items.get(entities[6].id).owners.polylineVolume,
+        path._items.get(entities[7].id).owner,
       ];
       const primitiveIdentities = owners.map((owner) => owner.primitives[0]);
       const boxSurface = new Cartesian3(center - 60, center, 24);
@@ -409,16 +479,30 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
       expect(renderedBoxPosition.x).toBeCloseTo(boxSurface.x, 1);
       expect(renderedBoxPosition.y).toBeCloseTo(boxSurface.y, 1);
       expect(renderedBoxPosition.z).toBeCloseTo(boxSurface.z, 0);
+      const corridorSurface = new Cartesian3(center - 50, center - 45, 20);
+      const corridorWindow = SceneTransforms.worldToWindowCoordinates(
+        scene,
+        corridorSurface,
+      );
+      const renderedCorridorPosition = scene.pickPosition(corridorWindow);
+      expect(renderedCorridorPosition).toBeDefined();
+      expect(renderedCorridorPosition.z).toBeCloseTo(20, 0);
+      expect(scene.pick(corridorWindow)?.id ?? scene.pick(corridorWindow)).toBe(
+        entities[4],
+      );
       entities[0].box.material = Color.CYAN;
       solid.update(time);
       area.update(time);
+      route.update(time);
+      path.update(time);
       scene.renderForSpecs();
       expect(owners.map((owner) => owner.primitives[0])).toEqual(
         primitiveIdentities,
       );
       for (let i = 0; i < entities.length; i++) {
         const sphere = new BoundingSphere();
-        const visualizer = i === 0 ? solid : area;
+        const visualizer =
+          i === 0 ? solid : i < 4 ? area : i < 7 ? route : path;
         expect(visualizer.getBoundingSphere(entities[i], sphere)).toBe(
           BoundingSphereState.DONE,
         );
@@ -431,6 +515,43 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
           scene.pick(windowPosition)?.id ?? scene.pick(windowPosition),
         ).toBe(entities[i]);
       }
+      const oldCorridorOwner = owners[4];
+      const oldCorridorCenter = Cartesian3.clone(
+        oldCorridorOwner.boundingSphere.center,
+      );
+      entities[4].corridor.positions = entities[4].corridor.positions
+        .getValue(time)
+        .map(
+          (position) =>
+            new Cartesian3(position.x + 10, position.y + 15, position.z),
+        );
+      route.update(time);
+      scene.renderForSpecs();
+      scene.renderForSpecs();
+      const translatedCorridorOwner = route._items.get(entities[4].id).owners
+        .corridor;
+      expect(translatedCorridorOwner).not.toBe(oldCorridorOwner);
+      expect(translatedCorridorOwner.boundingSphere.center.x).toBeCloseTo(
+        oldCorridorCenter.x + 10,
+        8,
+      );
+      expect(translatedCorridorOwner.boundingSphere.center.y).toBeCloseTo(
+        oldCorridorCenter.y + 15,
+        8,
+      );
+      const translatedCorridorSurface = new Cartesian3(
+        corridorSurface.x + 10,
+        corridorSurface.y + 15,
+        corridorSurface.z,
+      );
+      const translatedCorridorWindow = SceneTransforms.worldToWindowCoordinates(
+        scene,
+        translatedCorridorSurface,
+      );
+      expect(
+        scene.pick(translatedCorridorWindow)?.id ??
+          scene.pick(translatedCorridorWindow),
+      ).toBe(entities[4]);
     } finally {
       const primitives = [
         solid._items.get(entities[0].id)?.owners.box?.primitives[0],
@@ -438,6 +559,8 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
       ];
       solid.destroy();
       area.destroy();
+      route.destroy();
+      path.destroy();
       expect(
         primitives.every((primitive) => primitive.isDestroyed()),
       ).toBeTrue();

@@ -23,3 +23,6 @@
 - [C7 common solid and area graphics review](2026-08-09-c7-common-solid-and-area-graphics.md)
   （`approved`）：C7-R001～C7-R005经focused re-review关闭；Plane basis、cone outline、dynamic topology、
   condition snapshot、rotation/color/depth closure与zero-upstream边界通过。
+- [C8 route-derived geometry and path review](2026-08-10-c8-route-derived-geometry-and-path.md)
+  （`approved`）：C8-R001～C8-R004经focused re-review关闭；world-origin replacement、clockwise shape
+  canonicalization、non-axis reversal、stationary Path lifecycle与zero-upstream边界通过。

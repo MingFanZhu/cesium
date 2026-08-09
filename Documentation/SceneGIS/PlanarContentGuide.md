@@ -99,8 +99,8 @@ EntityCollection。
 ## C6 public Primitive 与 Geometry
 
 应用可以直接把`SceneGISPlanarPrimitive`加入`scene.primitives`或caller-owned
-`PrimitiveCollection`。C6/C7接受五种已批准的`SceneGISPlanar*Geometry`，包括Polyline、Polygon和三个volume，
-不接受raw Cesium `Geometry`。Geometry构造器复制米制Cartesian3输入，默认以
+`PrimitiveCollection`。C6-C8接受七种已批准的`SceneGISPlanar*Geometry`，包括Polyline、Polygon、三个C7
+volume、Wall与PolylineVolume，不接受raw Cesium `Geometry`。Geometry构造器复制米制Cartesian3输入，默认以
 第一个规范化顶点的完整XYZ作为origin，并生成local DOUBLE geometry；可选origin同样必须finite。
 
 Polyline Geometry固定`ArcType.NONE`并配对使用`PolylineMaterialAppearance`的Color material。Polygon
@@ -132,6 +132,24 @@ rotation从+Y逆时针；Rectangle coordinates按meters严格有序，rotation�
 Ellipse/Rectangle terrain只在生成顶点读取resident height：`NONE`允许合法anchor geometry延伸extent外，ground
 vertex outside则隐藏并保留current owner。这不是continuous ground承诺。
 
+## C8 路径衍生 Geometry 与动态 Path
+
+Public `SceneGISPlanarWallGeometry`以米制XY route、top/bottom heights生成open non-flat mesh；
+`SceneGISPlanarPolylineVolumeGeometry`把居中的Cartesian2 shape沿route扫掠，shape +X表示route-left、+Y表示
+world-up，并支持planar MITERED/BEVELED/ROUNDED corner。二者都使用local DOUBLE positions、finite normals与
+standard synchronous Primitive。Wall配对open non-flat `PerInstanceColorAppearance`，PolylineVolume配对closed
+non-flat appearance。
+
+Corridor不新增public Geometry：centerline width/corner/end-cap确定生成simple Polygon，outline使用Polyline。
+Positions Z不参与height；height/extruded references在生成perimeter vertices读取resident terrain，因此仍是
+vertex-only approximation。Wall top默认positions.z、bottom默认Z=0，不读取terrain；defined Wall granularity拒绝。
+PolylineVolume route position.z是center elevation，shape可以延伸extent外，也不隐式clamp。
+
+Path复用Entity position与Cesium Property sampling，但只支持effective `ReferenceFrame.FIXED`、undefined或
+`"FIXED"` relativeTo、`PathMode.WHOLE`。Resolution是positive seconds；availability与lead/trail决定当前采样窗口。
+INERTIAL、entity-relative/VVLH和PORTIONS material fail-fast。Sample结果降级为public Polyline，任一sample outside
+extent时当前Path隐藏，不clip。
+
 ## C4 Entity 与 DataSource 自动集成
 
 `CesiumWidget({ world })` 和 `Viewer({ world })` 只在 `world` 是 live `SceneGISPlanarWorld` 时安装
@@ -140,10 +158,11 @@ callback。Planar callback 只接受 `CustomDataSource`，因此 `widget.entitie
 `dataSources` 的 `CustomDataSource` 属于 supported path，GeoJSON/CZML/KML 等 DataSource 不属于本阶段。
 
 第一次合法 update 先完整验证 World/Scene identity、`EntityCluster.enabled === false` 与所有 Entity 的
-top-level Property profile，再原子追加 Anchor、Model、Polyline、Polygon、Solid、Area children；children 从下一次 update
-开始执行。后续每帧 gate 仍先验证动态新增属性。Top-level 只允许 `point`、`billboard`、`label`、`model`、
-`polyline`、`polygon`、`box`、`cylinder`、`ellipsoid`、`plane`、`ellipse`、`rectangle`、`position`、
-`orientation`、`description`、`properties` 与 `viewFrom`；业务字段必须放入
+top-level Property profile，再原子追加 Anchor、Model、Polyline、Polygon、Solid、Area、Route、Path children；
+children 从下一次 update开始执行。后续每帧 gate 仍先验证动态新增属性。Top-level 只允许 `point`、
+`billboard`、`label`、`model`、`polyline`、`polygon`、`box`、`cylinder`、`ellipsoid`、`plane`、`ellipse`、
+`rectangle`、`corridor`、`wall`、`polylineVolume`、`path`、`position`、`orientation`、`description`、
+`properties` 与 `viewFrom`；业务字段必须放入
 `Entity.properties`。其他已定义 standard/custom property 会在 child normal update 和低层资源 mutation 前抛
 `DeveloperError`；同步 collection listener 可以先更新 CPU tracking。
 
@@ -163,7 +182,7 @@ EntityCluster、EntityCollection、Scene 或 World。Pick id 保持 original Ent
 | 普通 glTF Model                                        | private runtime                              | C4 automatic           |
 | planar straight Polyline、Polygon                      | public Geometry/Primitive + private adapter  | C6 direct/C4 automatic |
 | Box、Cylinder、Ellipsoid、Plane、Ellipse、Rectangle    | public volume/lowered area + private adapter | C7 direct/C4 automatic |
-| Corridor、Wall、Path、PolylineVolume                   | unsupported                                  | 后续阶段               |
+| Corridor、Wall、PolylineVolume、Path                   | public lowering/Geometry + private adapter   | C8 direct/C4 automatic |
 | `Cesium3DTilesetGraphics`                              | unsupported                                  | 独立扩展               |
 | GeoJSON、CZML、KML 自动 planar 转换                    | unsupported                                  | 独立扩展               |
 | Globe ground、geodesic/rhumb                           | 禁止隐式进入                                 | 不复用                 |
@@ -211,7 +230,8 @@ roles，不是 supported public API。C4 接入点由 `SGP-0001` 追踪；升级
 ## 当前使用建议
 
 - 在 live planar World 的 `widget.entities`、`viewer.entities` 或 `CustomDataSource.entities` 中使用已批准的
-  Point/Billboard/Label/Model/Polyline/Polygon/Box/Cylinder/Ellipsoid/Plane/Ellipse/Rectangle profile。
+  Point/Billboard/Label/Model/Polyline/Polygon/Box/Cylinder/Ellipsoid/Plane/Ellipse/Rectangle/Corridor/Wall/
+  PolylineVolume/Path profile。
 - 将业务 metadata 放入 `Entity.properties`，不要注册新的 top-level Entity property。
 - 在应用边界保留 finite meter-based Cartesian3，并显式记录所使用的 planar CRS。
 - 对需要确定 terrain 高度的离线或批处理流程，先使用显式 sampler，再写入 absolute position。
