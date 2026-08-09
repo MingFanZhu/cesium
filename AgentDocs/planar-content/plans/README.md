@@ -17,6 +17,6 @@
 [C2 平面锚点内容与普通 Model](2026-08-09-phase-c2-anchor-and-model.md)（`completed`）、
 [C1 平面内容基础契约与兼容性基线](2026-08-09-phase-c1-content-contract.md)（`completed`）。
 
-Current handoff：C4 completed checkpoint为`1f9d8da4ca8c47425917c23642cea3123339e386`；ADR-0017
-与C5 phase plan已confirmed。Execution下一步先建立moderate qualification/baseline，再决定是否需要窄private
-优化；C5保持`active`。
+Current handoff：C5-R001～R003经Architecture focused re-review全部关闭；qualification、Sandcastle controls、
+package soft-private边界和zero-runtime-delta交付已批准，独立本地提交检查点随本次Architecture交付形成。
+下一步进入项目负责人的Sandcastle人工验收；C5保持`active`。

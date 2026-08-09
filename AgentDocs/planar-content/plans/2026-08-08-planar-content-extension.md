@@ -271,5 +271,13 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   `1f9d8da4ca8c47425917c23642cea3123339e386`，重新审计automatic visualizer热路径、per-Entity owner、
   P8 qualification、Sandcastle/E2E与package入口；ADR-0017批准moderate profile、无证据不做跨Entity
   batching、hard gate/timing分离与最终人工验收，C5 phase plan激活。
-- 下一步：Execution按C5 phase plan先建立baseline与qualification，再完成动态、Sandcastle、E2E、package
-  和交付文档；C5保持`active`。
+- `2026-08-09`：Execution完成固定moderate warm/terrain/dynamic qualification与small lifecycle baseline、local
+  dev/release E2E、`scenegis-planar-content` Sandcastle、installed-package private delivery smoke与最终指南。
+  Baseline没有可重复SceneGIS private hotspot，product runtime delta=`0`；C5 direct unique cases=`4`。
+- `2026-08-09`：C5首轮Architecture review提出R001～R003：lifecycle直接证据过强、Sandcastle batch/dynamic
+  状态竞态，以及package soft-private visibility断言混淆。Execution已补primitive/controller baseline、序列化
+  async controls并拆分runtime/declarations/API断言；三个finding标记fixed，等待focused re-review。
+- `2026-08-09`：Architecture focused re-review确认R001～R003全部关闭；独立复跑qualification`3/3`与
+  installed-package smoke通过，接受Execution的focused Sandcastle build证据。C5 review状态为`approved`。
+- C5独立本地提交检查点随本次Architecture交付形成；下一步由项目负责人执行真实浏览器/GPU Sandcastle
+  人工验收。C5与extension保持`active`。

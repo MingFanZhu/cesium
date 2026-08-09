@@ -12,7 +12,7 @@
   [C5 动态更新、批量性能与交付](plans/2026-08-09-phase-c5-dynamic-performance-and-delivery.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（C5 ready for implementation）
+- Execution contact: Execution Agent（C5 implementation与focused fixes已完成）
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -60,16 +60,15 @@
 
 ## Current handoff
 
-- Current state: C4已在checkpoint`1f9d8da4ca8c47425917c23642cea3123339e386`完成；ADR-0017与C5
-  phase plan已confirmed。
-- Next action: Execution按C5-A先建立moderate qualification/baseline，再完成动态、Sandcastle、E2E、package
-  与文档；无可复核热点时product runtime保持不变。
+- Current state: C5 Architecture focused re-review已通过，R001～R003全部关闭；moderate baseline没有可重复
+  private热点，product runtime delta=`0`；C5独立本地提交检查点随本次Architecture交付形成。
+- Next action: 项目负责人打开新Sandcastle完成真实浏览器/GPU人工验收。
 - Current phase status: C5 `active`。
 - Open discussions: None；C5不建立跨Entity batching层，timing只作同机调查证据。
 - Latest review:
-  [C4 Entity/DataSource/Viewer integration review](reviews/2026-08-09-c4-entity-datasource-viewer-integration.md)
-  （`approved`）。
-- Unresolved reviews: None。
+  [C5 dynamic performance and delivery review](reviews/2026-08-09-c5-dynamic-performance-and-delivery.md)
+  （`approved`；R001～R003经focused re-review关闭）。
+- Unresolved reviews: None；尚余项目负责人人工验收门禁。
 - Known risks: Buffer collections属于experimental升级敏感面；vertex-only terrain drape不代表连续贴地；
   per-Entity line/polygon ownership可能限制超大规模，但首版只做moderate qualification；公开Sandcastle
   terrain/imagery仍受网络与服务策略影响。

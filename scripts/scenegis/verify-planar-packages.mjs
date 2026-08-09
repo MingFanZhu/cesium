@@ -27,7 +27,7 @@ const publicWidgets = [
   "SceneGISPlanarHomeButton",
   "SceneGISPlanarHomeButtonViewModel",
 ];
-const privateNames = [
+const nonPublicSpellings = [
   "SceneGISPlanarSurface",
   "SceneGISPlanarQuadtree",
   "SceneGISPlanarTile",
@@ -35,6 +35,31 @@ const privateNames = [
   "SceneGISPlanarCamera",
   "SceneGISPlanarImagery",
   "SceneGISPlanarSurfaceShader",
+  "SceneGISPlanarPositionResolver",
+  "SceneGISPlanarAnchorVisualizer",
+  "SceneGISPlanarModelVisualizer",
+  "SceneGISPlanarPolylineVisualizer",
+  "SceneGISPlanarPolygonVisualizer",
+  "SceneGISPlanarBufferOwner",
+  "SceneGISPlanarVisualizersCallback",
+];
+const softPrivateContentSymbols = [
+  "_SceneGISPlanarPositionResolver",
+  "_SceneGISPlanarAnchorVisualizer",
+  "_SceneGISPlanarModelVisualizer",
+  "_SceneGISPlanarPolylineVisualizer",
+  "_SceneGISPlanarPolygonVisualizer",
+  "_SceneGISPlanarBufferOwner",
+  "_SceneGISPlanarVisualizersCallback",
+];
+const privateContentFiles = [
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPositionResolver.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarAnchorVisualizer.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarModelVisualizer.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolylineVisualizer.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolygonVisualizer.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarBufferOwner.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarVisualizersCallback.js",
 ];
 
 function npmCommand(args) {
@@ -156,7 +181,7 @@ function assertDeclarations(file, expected) {
       new RegExp(`(?:class|function|interface) ${name}\\b`, "u"),
     );
   }
-  for (const name of privateNames) {
+  for (const name of [...nonPublicSpellings, ...softPrivateContentSymbols]) {
     assert.doesNotMatch(declarations, new RegExp(`\\b${name}\\b`, "u"));
   }
   return declarations;
@@ -182,7 +207,8 @@ function consumerSource(moduleSyntax) {
   const allPublic = JSON.stringify([...publicEngine, ...publicWidgets]);
   const enginePublic = JSON.stringify(publicEngine);
   const widgetPublic = JSON.stringify(publicWidgets);
-  const privatePublicSpellings = JSON.stringify(privateNames);
+  const privatePublicSpellings = JSON.stringify(nonPublicSpellings);
+  const softPrivateSymbols = JSON.stringify(softPrivateContentSymbols);
   if (moduleSyntax === "esm") {
     return `
 import assert from "node:assert/strict";
@@ -196,6 +222,10 @@ for (const name of ${privatePublicSpellings}) {
   assert.equal(engine[name], undefined, name);
   assert.equal(root[name], undefined, name);
 }
+for (const name of ${softPrivateSymbols}) {
+  assert.notEqual(engine[name], undefined, name);
+  assert.notEqual(root[name], undefined, name);
+}
 `;
   }
   return `
@@ -203,6 +233,7 @@ const assert = require("node:assert/strict");
 const root = require("cesium");
 for (const name of ${allPublic}) assert.equal(typeof root[name], "function", name);
 for (const name of ${privatePublicSpellings}) assert.equal(root[name], undefined, name);
+for (const name of ${softPrivateSymbols}) assert.notEqual(root[name], undefined, name);
 `;
 }
 
@@ -215,7 +246,7 @@ function verifyDocumentation() {
       `${name} API documentation`,
     );
   }
-  for (const name of privateNames) {
+  for (const name of [...nonPublicSpellings, ...softPrivateContentSymbols]) {
     assert.equal(
       fs.existsSync(path.join(documentation, `${name}.html`)),
       false,
@@ -227,7 +258,11 @@ async function verify() {
   const engineArchive = pack("packages/engine");
   const widgetsArchive = pack("packages/widgets");
   const rootArchive = pack(".");
-  assertArchive(engineArchive, ["package/index.js", "package/index.d.ts"]);
+  assertArchive(engineArchive, [
+    "package/index.js",
+    "package/index.d.ts",
+    ...privateContentFiles,
+  ]);
   assertArchive(widgetsArchive, ["package/index.js", "package/index.d.ts"]);
   assertArchive(rootArchive, [
     "package/package.json",
@@ -277,7 +312,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS bare ESM/CJS installed-tarball smoke and broken-entry fixture passed.\n",
+    "SceneGIS bare ESM/CJS installed-tarball, soft-private declaration/API, and broken-entry fixtures passed.\n",
   );
 }
 

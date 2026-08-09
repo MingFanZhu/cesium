@@ -132,6 +132,30 @@ EntityCluster、EntityCollection、Scene 或 World。Pick id 保持 original Ent
 C2/C3 固定 Anchor/Model/Polyline/Polygon graphic property allowlist，C4 的 gate 固定 Entity top-level
 allowlist。Planar path 替换而不是追加默认 Globe visualizers。
 
+## C5 资格、性能与交付边界
+
+首版以固定 moderate profile 验证 automatic path：256 Point、128 Billboard、128 Label、64 Polyline、
+32 Polygon，以及独立的两个 repository-local glTF Model。资格协议包含20个 identical warm frames、五轮约
+10%局部更新和三个 Widget/DataSource lifecycle cycles；它用于发现 O(N²)、重复GPU重建和ownership泄漏，
+不是公开最大容量承诺。
+
+Moderate-profile warm gate要求slot、Model、per-Entity owner、Buffer collection、render context、DrawCommand和
+VertexArray identity稳定，Buffer `_dirtyCount`保持清零。C5另用小型三轮Point+Polyline fixture直接验证
+DataSource remove后的listener/per-DataSource primitive container，以及Widget destroy后的ControllerHost/DOM
+恢复baseline；它不把六类内容全部重建成lifecycle soak。show/availability、remove/re-add和async Model stale/
+late settlement继续由已批准的C2 Anchor/Model与C4 automatic integration Specs提供契约证据，本轮product runtime
+未修改且没有把这些既有cases冒充为C5 direct cases。单机 `DataSourceDisplay.update` 和 Scene render 的
+median/P95只是调查证据，不是跨机器CI阈值。
+当前qualification没有定位到可重复的SceneGIS private热点，因此C5不修改product runtime，也不引入跨Entity
+batching、Worker或public batch API。
+
+稳定人工示例位于`scenegis-planar-content` Sandcastle：它展示六类graphics、absolute/clamp/relative高度、
+original Entity selection、有限动态更新和代表性`CustomDataSource`批量增删。公开imagery/terrain仅用于
+best-effort人工展示；自动E2E使用flat/local fixture并阻断公网。Installed-package smoke确认private content
+runtime文件随engine tarball交付。自动生成的JS barrel按仓库soft-private规则可导出underscore symbol；该export是
+不受支持的构建产物，不构成public API。对应non-underscore spelling不得成为runtime入口，underscore exact symbol
+不得进入`.d.ts`或API HTML。
+
 ## Enforcement 与 ownership
 
 Automatic planar adapter 采用 instance-owned allowlist，不同时运行会消费相同 graphics 的默认 Globe
@@ -150,5 +174,9 @@ roles，不是 supported public API。C4 接入点由 `SGP-0001` 追踪；升级
 - 将业务 metadata 放入 `Entity.properties`，不要注册新的 top-level Entity property。
 - 在应用边界保留 finite meter-based Cartesian3，并显式记录所使用的 planar CRS。
 - 对需要确定 terrain 高度的离线或批处理流程，先使用显式 sampler，再写入 absolute position。
+- 大量静态内容优先按业务生命周期分组到少量`CustomDataSource`，通过collection add/remove控制批次；不要依赖
+  private visualizer、Buffer owner或underscore root export实现应用级batch API。
+- 动态更新只修改实际变化的Property；需要百万级专题数据、跨Entity geometry merge或空间索引时，应建立独立
+  扩展，而不是继续扩大首版Entity compatibility adapter。
 - 不要使用 `Scene.getHeight/updateHeight`、`scene.pickPosition` 或 `world.pickTerrain` 替代 Entity
   HeightReference；它们的数据来源和生命周期不同。

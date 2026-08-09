@@ -1,0 +1,17 @@
+title: SceneGIS Planar Content
+description: >-
+  Demonstrates automatic Point, Billboard, Label, local glTF Model, straight
+  Polyline, and Polygon visualization in an EPSG:3857 planar Viewer. The page
+  compares absolute, clamped, and relative heights, preserves original Entity
+  selection, and provides bounded dynamic and representative batch controls.
+  OpenStreetMap imagery and the public elevation service are best-effort and
+  subject to their CORS, availability, attribution, and usage policies. The
+  demo requests only current-view tiles and never prefetches, bulk downloads,
+  or prepares offline data; cached ancestors or the flat fallback remain usable
+  when services fail. Sources: https://operations.osmfoundation.org/policies/tiles/
+  and https://developers.arcgis.com/documentation/tiled-elevation-service/
+labels:
+  - SceneGIS
+  - Data Sources
+  - Viewer
+development: false

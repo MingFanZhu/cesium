@@ -22,6 +22,7 @@
 | Point/Billboard/Label pools与Model async lifecycle                | private Anchor/Model visualizers                        | high   | disabled EntityCluster、original Entity pick、generation isolation、late settlement、exact release      |
 | experimental Buffer collection与per-DataSource ordering           | private Polyline/Polygon/Buffer owner                   | high   | local DOUBLE geometry、target membership、warm dirty/copy、move/remove/destroy                          |
 | planar content moderate qualification与local E2E                  | C5 qualification Specs、content Sandcastle/E2E          | medium | batch warm/mutation、selection、dev/release、no public-network automation                               |
+| content private tarball delivery                                  | package smoke与`SceneGIS/DataSources/_private`          | medium | runtime files存在，非underscore public spelling、`.d.ts`与API HTML命中0，临时consumer不污染workspace    |
 
 ## 升级执行顺序
 

@@ -205,4 +205,87 @@ Execution记录仓库实际runner语法，至少包括：
 
 - C4 completed checkpoint：`1f9d8da4ca8c47425917c23642cea3123339e386`。
 - ADR-0017与本phase plan已confirmed；C5状态为`active`。
-- 下一步：Execution严格按C5-A先建立baseline与qualification，再决定是否需要任何private runtime优化。
+- Execution已完成C5-A～C5-D implementation与首轮R001～R003 focused fixes，product runtime delta=`0`；当前
+  等待Architecture focused re-review，项目负责人的Sandcastle人工验收仍未开始且继续作为阶段完成门禁。
+
+## 偏差与结果
+
+### 实际设计与影响路径
+
+- 先建立固定moderate profile并完成baseline。未观察到可重复的SceneGIS private runtime热点；因此没有修改
+  C1-C4 visualizer/Buffer owner，也没有增加跨Entity batching，product runtime delta=`0`。
+- Qualification固定为`256` Point、`128` Billboard、`128` Label、`64` Polyline、`32` Polygon，另以`2`
+  个共享local glTF Model验证async readiness、transform identity与释放。执行`20`个warm frames、`5`个四次
+  调用归一化timing batch、`5`轮约`10%`局部mutation与`3`个串行Widget/DataSource lifecycle cycle。
+- 新增local dev/release E2E，显式初始化`ApproximateTerrainHeights`，使用`CustomDataSource`自动接入六类内容，
+  等待local Model ready后验证original Entity selection、dynamic update、remove与destroy；路由阻断所有公网请求。
+- 新增`scenegis-planar-content` Sandcastle：EPSG:3857 World、六类内容、absolute/clamp/relative、local
+  SampleData Model、选择、Content view/Home、有限动态开关和32-Point batch add/remove；OSM/LERC只作为
+  best-effort人工展示且Credit可见。
+- installed-tarball smoke继续使用仓库外临时consumer和local tarball；新增断言C1-C4七个private content
+  runtime文件被engine包交付。Non-underscore spelling不得成为engine/root runtime入口；自动JS barrel允许导出
+  underscore soft-private symbol，但其exact symbol不得进入installed declarations/API docs。一次失败准确捕获了
+  本任务开发服务生成的ignored `Build/node_modules/.vite`污染；删除该生成缓存后正式smoke通过。
+
+最终新增或修改路径：
+
+- `packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarContentQualificationSpec.js`
+- `Specs/e2e/scenegis-planar-content.spec.js`
+- `packages/sandcastle/gallery/scenegis-planar-content/{index.html,main.js,sandcastle.yaml}`
+- `scripts/scenegis/verify-planar-packages.mjs`
+- `Documentation/SceneGIS/PlanarContentGuide.md`
+- `Documentation/SceneGIS/PlanarWorldUpgradeChecklist.md`
+- `AgentDocs/planar-content/{README.md,plans/**,reviews/**}`
+
+### Hard gates、timing与case统计
+
+- Qualification direct unique cases=`3`：moderate warm/dynamic、two-model local async、three-cycle narrow
+  lifecycle baseline。
+  固定profile的anchor items=`512`、Polyline owners=`64`、Polygon owners=`32`、Model=`2`；warm frame保持
+  slot/owner/collection/render context/DrawCommand/VA identity，Buffer `_dirtyCount===0`，未变化对象identity
+  稳定。代表性Point、Polyline、Polygon与Model的terrain-relative更新在下一normal update生效。
+- 三轮small Point+Polyline lifecycle fixture直接锁定remove后的EntityCollection listener与per-DataSource
+  primitive container恢复baseline，并保存ControllerHost引用，锁定Widget destroy后controller count和DOM恢复。
+  Show/availability、remove/re-add、async Model stale/late settlement没有作为C5 direct重新执行；这些边界复用
+  C2 approved Anchor Specs（hidden/dynamic、graphic remove/re-add）、Model Specs（generation replacement、late
+  completion after destroy）以及C4 approved Widget/Viewer DataSource remove/ordering evidence。
+- 同机baseline环境：Chrome `151.0.0.0`、Windows、真实WebGL、drawing buffer `256×256`。`20` warm frames后，
+  五组、每组四次调用归一化：`DataSourceDisplay.update` median=`1.525 ms`、P95=`1.650 ms`；Scene render
+  median=`0.575 ms`、P95=`0.700 ms`。这是同机调查证据，不是跨机器hard threshold；由于runtime delta=`0`，
+  不存在candidate timing。
+- 新E2E direct unique cases=`1`，分别在dev与release bundle执行；C5 direct unique总数=`4`。C4回归aggregate
+  为callback`8`、engine Widget`4`、widgets Viewer`2`，不重复计入C5 direct unique。
+
+### 验证矩阵
+
+- `npm run test -- --includeName "SceneGIS/Widget/SceneGISPlanarContentQualification"`：`3/3 SUCCESS`，
+  Exit `0`；Node保留既有`DEP0060 util._extend` warning。
+- C4 focused回归：callback`8/8`、engine Widget`4/4`、widgets Viewer`2/2`，均Exit `0`。product runtime
+  未修改，因此按计划未重复C2/C3矩阵。
+- `npm run build`、`npm run build-release`、`npm run build-ts`、`npm run build-docs`、`npm run tsc`：
+  均Exit `0`；`build-ts`仅有仓库既有TSD-JSDoc warning。
+- 临时no-webServer Playwright config与仓库外只读static server复用正式E2E harness；dev`1/1`、release
+  `1/1`均通过。server/config/artifact均位于仓库外，服务按PID清理；公网attempt、pageerror和未过滤console
+  error均为`0`。Chromium会为Cesium内部sandboxed `about:blank` frame报告既有blocked-script console噪声，
+  E2E只过滤该精确浏览器消息。
+- `node scripts/scenegis/verify-planar-packages.mjs`：Exit `0`；bare engine/widgets/root ESM、root CJS、
+  declarations、API docs、tar content与broken-entry failure fixture通过。Non-underscore private spelling在runtime
+  为undefined；七个underscore soft-private content symbols按生成JS barrel存在，但在installed engine/root/Cesium
+  declarations与API HTML exact命中`0`。
+- `npm run build-gallery-no-embedding --workspace=packages/sandcastle`：Exit `0`，processed `307` examples；
+  `npm run build-sandcastle -- --no-embeddings`：Exit `0`，仅既有plugin timing与large chunk warning。
+- Scoped ESLint、JS/HTML/YAML/Markdown Prettier、Markdownlint与`git diff --check`均Exit `0`；diff check
+  只输出既有LF/CRLF转换warning。`node scripts/scenegis/audit-upstream-patches.mjs` Exit `0`：`3`个历史
+  registered upstream-owned entries、current delivery upstream-owned entries=`0`、`86` marker tokens、
+  generated status=`0`。
+
+### Ownership、生成与剩余风险
+
+- 相对planning checkpoint `37039ad9cbae63587708bcf0a2225f8cc544840b`，upstream-owned product/test/
+  build files=`0`，C5 SGP=`0`，new patch marker=`0`；`Scene.js`、`CesiumWidget.js`、`Viewer.js`、manifest和
+  `SGP-0001/0002` hunks unchanged。
+- Public API delta=`0`；七个private content runtime文件存在于installed engine tarball；自动JS barrel中的
+  underscore export仍是unsupported soft-private构建产物，其exact symbols在engine/root/Cesium declarations和
+  API HTML命中`0`。生成文件、timing log、Playwright artifacts、temporary package/server均不进入status。
+- Architecture focused re-review已批准C5 delivery；项目负责人尚未打开新Sandcastle执行真实浏览器/GPU
+  人工视觉、交互与公网best-effort验收，因此C5与extension在人工门禁前继续保持`active`。
