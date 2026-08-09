@@ -8,22 +8,19 @@ import ColorBlendMode from "../../../Scene/ColorBlendMode.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import EntityCollection from "../../../DataSources/EntityCollection.js";
 import HeightReference from "../../../Scene/HeightReference.js";
-import Matrix3 from "../../../Core/Matrix3.js";
 import Matrix4 from "../../../Core/Matrix4.js";
 import Model from "../../../Scene/Model/Model.js";
 import ModelAnimationLoop from "../../../Scene/ModelAnimationLoop.js";
 import Property from "../../../DataSources/Property.js";
-import Quaternion from "../../../Core/Quaternion.js";
 import Resource from "../../../Core/Resource.js";
 import ShadowMode from "../../../Scene/ShadowMode.js";
 import destroyObject from "../../../Core/destroyObject.js";
 import SceneGISPlanarPositionResolver from "./_SceneGISPlanarPositionResolver.js";
+import SceneGISPlanarEntityTransform from "./_SceneGISPlanarEntityTransform.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
 
 const scratchPosition = new Cartesian3();
 const scratchResolved = new Cartesian3();
-const scratchQuaternion = new Quaternion();
-const scratchRotation = new Matrix3();
 const scratchMatrix = new Matrix4();
 const scratchColor = new Color();
 const scratchLightColor = new Cartesian3();
@@ -120,50 +117,6 @@ function validateArticulations(articulations) {
       throw new DeveloperError("articulation values must be finite.");
     }
   }
-}
-
-function normalizeQuaternion(quaternion, result) {
-  if (!(quaternion instanceof Quaternion)) {
-    throw new DeveloperError("orientation must be a Quaternion when defined.");
-  }
-  const maximum = Math.max(
-    Math.abs(quaternion.x),
-    Math.abs(quaternion.y),
-    Math.abs(quaternion.z),
-    Math.abs(quaternion.w),
-  );
-  if (!Number.isFinite(maximum) || maximum === 0.0) {
-    throw new DeveloperError("orientation must be finite and nonzero.");
-  }
-  const x = quaternion.x / maximum;
-  const y = quaternion.y / maximum;
-  const z = quaternion.z / maximum;
-  const w = quaternion.w / maximum;
-  const magnitude = Math.hypot(x, y, z, w);
-  if (!Number.isFinite(magnitude) || magnitude === 0.0) {
-    throw new DeveloperError("orientation must be finite and nonzero.");
-  }
-  result.x = x / magnitude;
-  result.y = y / magnitude;
-  result.z = z / magnitude;
-  result.w = w / magnitude;
-  return result;
-}
-
-function computeModelMatrix(position, orientation, result) {
-  if (orientation === undefined) {
-    Matrix4.fromTranslation(position, result);
-  } else {
-    normalizeQuaternion(orientation, scratchQuaternion);
-    Matrix3.fromQuaternion(scratchQuaternion, scratchRotation);
-    Matrix4.fromRotationTranslation(scratchRotation, position, result);
-  }
-  for (let i = 0; i < 16; i++) {
-    if (!Number.isFinite(result[i])) {
-      throw new DeveloperError("The derived model matrix must be finite.");
-    }
-  }
-  return result;
 }
 
 function destroyCandidate(candidate) {
@@ -275,12 +228,16 @@ function evaluateState(visualizer, item, time) {
       scratchResolved,
     );
   }
-  const orientation = optional(entity._orientation, time, scratchQuaternion);
+  const orientation = optional(entity._orientation, time);
   const modelMatrix =
     position === undefined
       ? undefined
       : Matrix4.clone(
-          computeModelMatrix(position, orientation, scratchMatrix),
+          SceneGISPlanarEntityTransform.computeMatrix(
+            position,
+            orientation,
+            scratchMatrix,
+          ),
           new Matrix4(),
         );
 

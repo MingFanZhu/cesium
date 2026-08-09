@@ -8,6 +8,9 @@ import Material from "../../Scene/Material.js";
 import PerInstanceColorAppearance from "../../Scene/PerInstanceColorAppearance.js";
 import PolylineMaterialAppearance from "../../Scene/PolylineMaterialAppearance.js";
 import Primitive from "../../Scene/Primitive.js";
+import SceneGISPlanarBoxGeometry from "../Core/SceneGISPlanarBoxGeometry.js";
+import SceneGISPlanarCylinderGeometry from "../Core/SceneGISPlanarCylinderGeometry.js";
+import SceneGISPlanarEllipsoidGeometry from "../Core/SceneGISPlanarEllipsoidGeometry.js";
 import SceneGISPlanarPolygonGeometry from "../Core/SceneGISPlanarPolygonGeometry.js";
 import SceneGISPlanarPolylineGeometry from "../Core/SceneGISPlanarPolylineGeometry.js";
 
@@ -37,7 +40,10 @@ function validateMatrix(matrix) {
 function validateGeometry(geometry) {
   if (
     !(geometry instanceof SceneGISPlanarPolylineGeometry) &&
-    !(geometry instanceof SceneGISPlanarPolygonGeometry)
+    !(geometry instanceof SceneGISPlanarPolygonGeometry) &&
+    !(geometry instanceof SceneGISPlanarBoxGeometry) &&
+    !(geometry instanceof SceneGISPlanarCylinderGeometry) &&
+    !(geometry instanceof SceneGISPlanarEllipsoidGeometry)
   ) {
     throw new DeveloperError(
       "geometry must be a supported SceneGIS planar geometry.",
@@ -46,9 +52,19 @@ function validateGeometry(geometry) {
 }
 
 function getGeometryKind(geometry) {
-  return geometry instanceof SceneGISPlanarPolylineGeometry
-    ? "polyline"
-    : "polygon";
+  if (geometry instanceof SceneGISPlanarPolylineGeometry) {
+    return "polyline";
+  }
+  if (geometry instanceof SceneGISPlanarPolygonGeometry) {
+    return "polygon";
+  }
+  if (geometry instanceof SceneGISPlanarBoxGeometry) {
+    return "box";
+  }
+  if (geometry instanceof SceneGISPlanarCylinderGeometry) {
+    return "cylinder";
+  }
+  return "ellipsoid";
 }
 
 function validateAppearance(kind, appearance, attributes) {
@@ -63,9 +79,16 @@ function validateAppearance(kind, appearance, attributes) {
     }
     return;
   }
-  if (!(appearance instanceof PerInstanceColorAppearance) || !appearance.flat) {
+  const volume = kind !== "polygon";
+  if (
+    !(appearance instanceof PerInstanceColorAppearance) ||
+    appearance.flat === volume ||
+    (volume && appearance.closed !== true)
+  ) {
     throw new DeveloperError(
-      "Polygon geometry requires a flat PerInstanceColorAppearance.",
+      volume
+        ? "Volume geometry requires a closed non-flat PerInstanceColorAppearance."
+        : "Polygon geometry requires a flat PerInstanceColorAppearance.",
     );
   }
   const color = attributes?.color?.value;
@@ -213,7 +236,7 @@ function createInternal(wrapper, attributes) {
  * @alias SceneGISPlanarPrimitive
  * @constructor
  * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry} options.geometry The planar geometry snapshot.
+ * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry} options.geometry The planar geometry snapshot.
  * @param {PolylineMaterialAppearance|PerInstanceColorAppearance} options.appearance The compatible caller-owned appearance.
  * @param {*} options.id The non-null caller-owned pick identifier.
  * @param {Object.<string, GeometryInstanceAttribute>} [options.attributes] Geometry instance attributes with valid component datatype, one to four components, boolean normalization, and one complete finite value.
@@ -257,7 +280,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
    * Gets or sets a planar geometry of the kind fixed at construction. Replacement is promoted on a normal render pass.
    *
    * @memberof SceneGISPlanarPrimitive.prototype
-   * @type {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry}
+   * @type {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry}
    * @exception {DeveloperError} The value is not the construction-time geometry kind.
    */
   geometry: {

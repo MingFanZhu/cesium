@@ -500,7 +500,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
       widget.render();
       widget.render();
       expect(source.entities.collectionChanged.numberOfListeners).toBe(
-        attachedListenerBaseline + 4,
+        attachedListenerBaseline + 6,
       );
       expect(source._primitives.length).toBeGreaterThan(1);
       expect(widget.dataSources.remove(source)).toBe(true);

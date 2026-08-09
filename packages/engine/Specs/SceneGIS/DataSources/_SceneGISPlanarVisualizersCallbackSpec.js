@@ -1,4 +1,4 @@
-import BoxGraphics from "../../../Source/DataSources/BoxGraphics.js";
+import CorridorGraphics from "../../../Source/DataSources/CorridorGraphics.js";
 import Cartesian3 from "../../../Source/Core/Cartesian3.js";
 import CustomDataSource from "../../../Source/DataSources/CustomDataSource.js";
 import EntityCluster from "../../../Source/DataSources/EntityCluster.js";
@@ -11,6 +11,9 @@ import SceneGISPlanarWorld from "../../../Source/SceneGIS/Scene/SceneGISPlanarWo
 import createSceneGISPlanarVisualizersCallback from "../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarVisualizersCallback.js";
 import SceneGISPlanarAnchorVisualizer from "../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarAnchorVisualizer.js";
 import SceneGISPlanarModelVisualizer from "../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarModelVisualizer.js";
+import SceneGISPlanarPolygonVisualizer from "../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolygonVisualizer.js";
+import SceneGISPlanarPolylineVisualizer from "../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolylineVisualizer.js";
+import SceneGISPlanarSolidVisualizer from "../../../Source/SceneGIS/DataSources/_private/_SceneGISPlanarSolidVisualizer.js";
 
 describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () {
   const time = JulianDate.fromIso8601("2026-08-09T00:00:00Z");
@@ -80,7 +83,7 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     expect(createSceneGISPlanarVisualizersCallback(world)).toBeUndefined();
   });
 
-  it("defers and atomically appends the four planar visualizers", function () {
+  it("defers and atomically appends the six planar visualizers", function () {
     const visualizers = createCallbackState();
     const listenerBaseline =
       dataSource.entities.collectionChanged.numberOfListeners;
@@ -88,7 +91,7 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     expect(visualizers.length).toBe(1);
     expect(visualizers[0].getBoundingSphere).toBeUndefined();
     expect(visualizers[0].update(time)).toBe(false);
-    expect(visualizers.length).toBe(5);
+    expect(visualizers.length).toBe(7);
     expect(
       visualizers
         .slice(1)
@@ -98,11 +101,13 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
       "SceneGISPlanarModelVisualizer",
       "SceneGISPlanarPolylineVisualizer",
       "SceneGISPlanarPolygonVisualizer",
+      "SceneGISPlanarSolidVisualizer",
+      "SceneGISPlanarAreaVisualizer",
     ]);
     expect(visualizers[0].update(time)).toBe(true);
-    expect(visualizers.length).toBe(5);
+    expect(visualizers.length).toBe(7);
     expect(dataSource.entities.collectionChanged.numberOfListeners).toBe(
-      listenerBaseline + 4,
+      listenerBaseline + 6,
     );
 
     visualizers[0].destroy();
@@ -121,14 +126,17 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     const visualizers = createCallbackState();
     const entity = dataSource.entities.add({
       id: "unsupported",
-      box: new BoxGraphics({ dimensions: new Cartesian3(1.0, 1.0, 1.0) }),
+      corridor: new CorridorGraphics({
+        positions: [Cartesian3.ZERO, Cartesian3.UNIT_X],
+        width: 1,
+      }),
     });
     expect(function () {
       visualizers[0].update(time);
     }).toThrowDeveloperError();
     expect(visualizers.length).toBe(1);
 
-    entity.box = undefined;
+    entity.corridor = undefined;
     entity.addProperty("customGraphic");
     entity.customGraphic = 1;
     expect(function () {
@@ -245,13 +253,49 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     failThirdListener = false;
     listenerCalls = 0;
     expect(visualizers[0].update(time)).toBe(false);
-    expect(visualizers.length).toBe(5);
+    expect(visualizers.length).toBe(7);
     for (let i = visualizers.length - 1; i >= 0; i--) {
       visualizers[i].destroy();
     }
     expect(dataSource.entities.collectionChanged.numberOfListeners).toBe(
       listenerBaseline,
     );
+  });
+
+  it("rolls back all existing children when the sixth child constructor fails", function () {
+    const visualizers = createCallbackState();
+    const listenerBaseline =
+      dataSource.entities.collectionChanged.numberOfListeners;
+    const event = dataSource.entities.collectionChanged;
+    const originalAdd = event.addEventListener;
+    let calls = 0;
+    spyOn(event, "addEventListener").and.callFake(function (listener, scope) {
+      calls++;
+      if (calls === 6) {
+        throw new Error("sixth child failed");
+      }
+      return originalAdd.call(this, listener, scope);
+    });
+    const destroys = [
+      SceneGISPlanarAnchorVisualizer,
+      SceneGISPlanarModelVisualizer,
+      SceneGISPlanarPolylineVisualizer,
+      SceneGISPlanarPolygonVisualizer,
+      SceneGISPlanarSolidVisualizer,
+    ].map((Constructor) =>
+      spyOn(Constructor.prototype, "destroy").and.callThrough(),
+    );
+    expect(function () {
+      visualizers[0].update(time);
+    }).toThrowError("sixth child failed");
+    expect(visualizers.length).toBe(1);
+    expect(dataSource.entities.collectionChanged.numberOfListeners).toBe(
+      listenerBaseline,
+    );
+    for (const destroy of destroys) {
+      expect(destroy).toHaveBeenCalledTimes(1);
+    }
+    visualizers[0].destroy();
   });
 
   it("blocks dynamic invalid profiles before child normal updates", function () {
@@ -261,8 +305,11 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
       .slice(1)
       .map((visualizer) => spyOn(visualizer, "update").and.callThrough());
     dataSource.entities.add({
-      id: "dynamic-box",
-      box: new BoxGraphics({ dimensions: new Cartesian3(1.0, 1.0, 1.0) }),
+      id: "dynamic-corridor",
+      corridor: new CorridorGraphics({
+        positions: [Cartesian3.ZERO, Cartesian3.UNIT_X],
+        width: 1,
+      }),
     });
 
     expect(function () {

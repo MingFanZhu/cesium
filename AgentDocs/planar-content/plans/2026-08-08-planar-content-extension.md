@@ -8,7 +8,7 @@
 - 架构评审（Architecture review）：`confirmed`
 - 架构评审人（Architecture reviewer）：项目负责人
 - 创建日期（Created）：`2026-08-08`
-- 更新日期（Updated）：`2026-08-09`
+- 更新日期（Updated）：`2026-08-10`
 - 基线（Base checkpoint）：`23d06ad14c79825f680e9397c6f4a8fa70a0f008`
 - 继续规划基线（Continuation checkpoint）：`e3753322f6aa063a0a70a89150a6ff31e6bbdaa8`
 - 分支（Branch）：`feature/planar-content`
@@ -23,6 +23,8 @@
   [C5 dynamic performance and delivery review](../reviews/2026-08-09-c5-dynamic-performance-and-delivery.md)
   （`approved`）、
   [C6 public planar Primitive/Geometry review](../reviews/2026-08-09-c6-public-planar-primitive-and-geometry.md)
+  （`approved`）、
+  [C7 common solid and area graphics review](../reviews/2026-08-09-c7-common-solid-and-area-graphics.md)
   （`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
@@ -199,7 +201,7 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
 - 依赖：C6。
 - 进入门槛：C6 review并提交；依据届时源码审计对应Graphics、GeometryUpdater与material path。
 - 完成门槛：静态/动态、orientation、height/extrusion、material、outline、pick、bounds与lifecycle成立。
-- 状态：`active`；phase plan：
+- 状态：`completed`；phase plan：
   [C7 普通锚定、体与面 Entity Graphics](2026-08-09-phase-c7-common-solid-and-area-graphics.md)。
 
 ### C8：路径衍生几何与动态内容
@@ -384,3 +386,16 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   GeometryUpdaterSet/GeometryVisualizer与C4 callback。ADR-0019批准只新增Box/Cylinder/Ellipsoid三个public
   volume Geometry，Plane/Ellipse/Rectangle降级到C6 public Polygon/Polyline，两个private visualizer保持
   zero-upstream；C7 phase plan激活。
+- `2026-08-09`：Execution完成C7 implementation与最小充分验证：新增三个public volume Geometry，
+  `SceneGISPlanarPrimitive`增加closed volume kind，Solid/Area visualizer与shared fixed-planar transform接入
+  automatic callback；C7新增direct cases=`19`，focused/build/types/docs/static/ownership矩阵通过，
+  upstream-owned files=`0`、SGP=`0`。C7保持`active`，等待pending Architecture/code review。
+- `2026-08-10`：Architecture首轮review提出C7-R001～C7-R005：任意法向Plane不能直接进入XY triangulation、
+  cone零半径outline退化、动态topology key与distance condition snapshot不完整，以及submitted
+  color/depth/rotation证据超出实际断言。C7保持`active`与zero-upstream，等待focused修复。
+- `2026-08-10`：Execution完成Plane canonical lowering、cone outline、dynamic topology key、distance condition
+  snapshot和rotation/color/depth evidence修复；Solid `7/7`、Area `6/6`、real Context `2/2`及
+  build/static/ownership检查通过。五项finding标记fixed，等待focused re-review。
+- `2026-08-10`：Architecture focused re-review确认C7-R001～C7-R005全部关闭；独立复跑Solid `7/7`、Area
+  `6/6`、real Context `2/2`、build、格式与upstream audit均通过。C7 review=`approved`、phase=`completed`，
+  保持upstream-owned files=`0`、SGP=`0`，等待独立本地提交检查点。

@@ -7,13 +7,13 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: `C7-common-solid-and-area-graphics`
-- Active phase plan:
+- Current phase: None；C7已完成，等待C8 planning
+- Latest completed phase plan:
   [C7 普通锚定、体与面 Entity Graphics](plans/2026-08-09-phase-c7-common-solid-and-area-graphics.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent；等待C7 planning checkpoint后正式派工
-- Last updated: `2026-08-09`
+- Execution contact: None；C8派工后更新
+- Last updated: `2026-08-10`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -64,15 +64,14 @@
 
 ## Current handoff
 
-- Current state: C1-C6已完成并形成独立checkpoint；public Primitive现已支持Polyline/Polygon，existing six
-  graphics自动路径保持。Architecture已依据C6 checkpoint审计普通Graphics/Core Geometry并批准ADR-0019。
-- Next action: Execution Agent按active C7 phase plan实现三个public volume Geometry、六类Entity profile和两个
-  private visualizer，完成后创建pending review并停止。
-- Current phase status: C7 `active`；implementation尚未开始。
+- Current state: C1-C7已完成；C7-R001～R005均经Architecture focused re-review关闭，focused
+  Specs、build/static与zero-upstream ownership边界通过。
+- Next action: Architecture Agent提交C7独立检查点，然后进入C8详细设计与派工。
+- Current phase status: C7 `completed`；C8尚未激活。
 - Open discussions: None；3D Tiles与GeoJSON/CZML/KML转换继续属于独立扩展。
 - Latest review:
-  [C6 public planar Primitive/Geometry review](reviews/2026-08-09-c6-public-planar-primitive-and-geometry.md)
-  （`approved`；R001～R004全部关闭）。
+  [C7 common solid and area graphics review](reviews/2026-08-09-c7-common-solid-and-area-graphics.md)
+  （`approved`）。
 - Unresolved reviews: None。
 - Known risks: Core Box/Cylinder/Ellipsoid与standard Primitive仍是Cesium升级敏感依赖；Ellipse/Rectangle必须避免
   误入Cartographic/Ellipsoid路径。C7的terrain关系仍是generated-vertex sampling，continuous ground保持C9边界。

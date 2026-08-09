@@ -4,19 +4,20 @@
 
 - 计划类型（Plan type）：`phase`
 - 阶段（Phase）：`C7-common-solid-and-area-graphics`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 父计划（Parent plan）：
   [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)
 - 负责人角色（Owner role）：`execution`
-- 架构评审（Architecture review）：`confirmed`
+- 架构评审（Architecture review）：`approved`
 - 架构评审人：Architecture Agent（依据项目负责人授予的后续阶段自主设计与派工权限）
 - 创建日期（Created）：`2026-08-09`
-- 更新日期（Updated）：`2026-08-09`
-- Planning base：`525bb1046a4f7989aaacdd73432063a193914ee9`
+- 更新日期（Updated）：`2026-08-10`
+- Planning base / implementation diff base：`4fca3180818ae2690cbcf9d76dec7a60cb7a6917`
 - 分支（Branch）：`feature/planar-content`
 - 相关讨论（Related discussions）：None；C7源码审计与长期语义直接提升为ADR-0019
-- 相关评审（Related reviews）：implementation ready后创建
-  `AgentDocs/planar-content/reviews/2026-08-09-c7-common-solid-and-area-graphics.md`
+- 相关评审（Related reviews）：
+  [C7 common solid and area graphics review](../reviews/2026-08-09-c7-common-solid-and-area-graphics.md)
+  （`approved`）
 - ADR：
   [ADR-0013](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
   [ADR-0014](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)、
@@ -309,11 +310,90 @@ soak。若C7实际触及未授权边界，验证矩阵随真实风险扩大，�
 
 ## 当前交接
 
-- C6已在checkpoint `525bb1046a4f7989aaacdd73432063a193914ee9`完成并提交。
-- ADR-0019与本phase plan已confirmed；C7状态为`active`。
-- 下一步：Execution从C7 planning checkpoint实现C7-A～C7-D，创建pending review后回报Architecture Agent。
+- C6已完成并提交；C7 implementation diff base为
+  `4fca3180818ae2690cbcf9d76dec7a60cb7a6917`。
+- ADR-0019与本phase plan已approved；C7-R001～R005已由Architecture focused re-review关闭，C7为
+  `completed`。
+- 下一步：Architecture Agent形成C7独立本地提交检查点，再依据最新源码设计并派发C8；不push。
 
 ## 偏差与结果
 
-Implementation尚未开始。Execution必须在本节回写实际文件、source-to-spec mapping、case count、命令结果、
-public generation、upstream/SGP/generated审计、偏差与剩余风险。
+### 实际设计与影响路径
+
+- 新增public CPU descriptor：
+  `SceneGISPlanarBoxGeometry.js`、`SceneGISPlanarCylinderGeometry.js`、
+  `SceneGISPlanarEllipsoidGeometry.js`。三者clone输入、同步创建标准Cesium local mesh，并提供finite local bounds；
+  不读取World、CRS或Context。
+- `SceneGISPlanarPrimitive.js`增加三个closed volume kind；volume仅接受closed/non-flat
+  `PerInstanceColorAppearance`与finite color instance attribute，C6 polygon/polyline矩阵不变。
+- 新增private `_SceneGISPlanarEntityTransform.js`，统一fixed-planar Quaternion normalize/rotation/model matrix；
+  `_SceneGISPlanarModelVisualizer.js`已迁移并保持C2行为。
+- 新增private `_SceneGISPlanarSolidVisualizer.js`与`_SceneGISPlanarAreaVisualizer.js`。Solid直接使用三个public
+  volume Geometry，outline降级为public Polyline；Area将Plane/Ellipse/Rectangle降级为public Polygon/Polyline，
+  terrain仍只采样generated vertices。
+- `_SceneGISPlanarVisualizersCallback.js`在既有Anchor、Model、Polyline、Polygon之后追加Solid、Area，并扩展
+  top-level allowlist；C4的CesiumWidget integration hunk未修改。
+- 受影响Specs为三个Core Geometry Specs、`SceneGISPlanarPrimitiveSpec.js`、三个private C7 Specs、callback、
+  Model regression、automatic Widget、real Context aggregate与C5 qualification。
+- Durable docs更新`Architecture.md`、`DevelopmentGuide.md`与`PlanarContentGuide.md`。实现与ADR-0019一致，
+  未修改ADR；没有布局或公共契约偏差。
+
+### Source-to-Spec mapping与case count
+
+| Source / role | Focused Spec | Result |
+| --- | --- | --- |
+| `SceneGISPlanarBoxGeometry` | `SceneGISPlanarBoxGeometrySpec.js` | `2/2` |
+| `SceneGISPlanarCylinderGeometry` | `SceneGISPlanarCylinderGeometrySpec.js` | `2/2` |
+| `SceneGISPlanarEllipsoidGeometry` | `SceneGISPlanarEllipsoidGeometrySpec.js` | `2/2` |
+| `SceneGISPlanarPrimitive` volume kind | `SceneGISPlanarPrimitiveSpec.js` | aggregate `8/8` |
+| `_SceneGISPlanarEntityTransform` | `SceneGISPlanarEntityTransformSpec.js` | `2/2` |
+| `_SceneGISPlanarSolidVisualizer` | `SceneGISPlanarSolidVisualizerSpec.js` | `7/7` |
+| `_SceneGISPlanarAreaVisualizer` | `SceneGISPlanarAreaVisualizerSpec.js` | `6/6` |
+| callback/gate | `_SceneGISPlanarVisualizersCallbackSpec.js` | aggregate `9/9` |
+| Model migration | `SceneGISPlanarModelVisualizerSpec.js` | regression `11/11` |
+| automatic integration | `SceneGISPlanarContentCesiumWidgetSpec.js` | aggregate `4/4` |
+| real Context closure | `SceneGISPlanarContentVisualizerSpec.js` | aggregate `2/2` |
+| qualification listener baseline | `SceneGISPlanarContentQualificationSpec.js` | aggregate `3/3` |
+
+C7新增direct `it` cases=`24`：三个Geometry各2、Primitive 1、transform 2、Solid 7、Area 6、callback
+rollback 1、real Context 1。其余aggregate cases为既有C2-C6回归或扩展断言，不重复计入direct unique。
+
+### 验证矩阵
+
+- 上表所有focused suites均Exit `0`；focused fix复跑Solid `7/7`、Area `6/6`、real Context `2/2`。
+  Real Context覆盖volume与Plane/Ellipse/Rectangle的pixel/depth、original
+  Entity pick、EPSG:3857量级offset、warm identity、replacement/destroy balance。Context相关runner仅出现既有
+  Node `DEP0060` warning。
+- `npm run build`：Exit `0`。
+- `npm run build-ts`：Exit `0`；保留上游既有TSD-JSDoc warning。
+- `npm run build-docs`：Exit `0`。
+- `npm run tsc`：Exit `0`。
+- changed-scope ESLint：Exit `0`。
+- changed-scope JS/Markdown Prettier：Exit `0`。
+- SceneGIS/planar-content Markdownlint：Exit `0`。
+- `git diff --check`：Exit `0`。
+- `node scripts/scenegis/audit-upstream-patches.mjs`：Exit `0`。
+- 正式generated root JS、engine/Cesium `.d.ts`与API HTML均可见三个public Geometry；三个private C7 role在
+  declarations/API命中`0`。生成文件未进入working-tree status。
+
+### Ownership、偏差与剩余风险
+
+- 相对`4fca3180818ae2690cbcf9d76dec7a60cb7a6917`，upstream-owned files=`0`、C7 SGP=`0`、
+  `.scenegis/upstream-patches.json`与历史SGP-0001/0002 hunks unchanged、新patch marker=`0`。
+- Product/runtime、Specs与docs均位于C7允许的SceneGIS-owned paths；未进入Shader、Worker、build seam、
+  Sandcastle、E2E、C8或C9。
+- 剩余风险：Core Box/Cylinder/Ellipsoid与standard Primitive仍是升级敏感依赖；area terrain仍是vertex-only
+  sampling，不能解释为continuous ground；完整六类可视化的项目负责人浏览器人工验收留给后续交付阶段。
+
+### 首轮review修复
+
+- C7-R001：Plane改为canonical XY rectangle + plane-basis transform；vertical/oblique/orientation及失败保留current
+  已锁定。
+- C7-R002：cone零半径ring不生成，保留非零ring与apex vertical lines；top-zero/bottom-zero均覆盖。
+- C7-R003：Solid/Area key纳入effective component presence和实际outline topology；ready/warm topology更新重建，
+  same-topology style仍原地更新。
+- C7-R004：distance condition保存near/far value snapshot；同对象CallbackProperty在ready owner上正确写attribute。
+- C7-R005：Area Specs锁定两种rotation方向；real Context增加C7 `readPixels`与`scene.pickPosition`闭环。
+- Architecture独立复跑Solid `7/7`、Area `6/6`、real Context `2/2`、`npm run build`、格式检查、
+  Markdownlint、`git diff --check`与official upstream audit，全部Exit `0`。C7-R001～R005均已关闭，review为
+  `approved`。

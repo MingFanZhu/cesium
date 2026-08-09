@@ -4,21 +4,29 @@ import destroyObject from "../../../Core/destroyObject.js";
 import CustomDataSource from "../../../DataSources/CustomDataSource.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
 import SceneGISPlanarAnchorVisualizer from "./_SceneGISPlanarAnchorVisualizer.js";
+import SceneGISPlanarAreaVisualizer from "./_SceneGISPlanarAreaVisualizer.js";
 import SceneGISPlanarModelVisualizer from "./_SceneGISPlanarModelVisualizer.js";
 import SceneGISPlanarPolygonVisualizer from "./_SceneGISPlanarPolygonVisualizer.js";
 import SceneGISPlanarPolylineVisualizer from "./_SceneGISPlanarPolylineVisualizer.js";
+import SceneGISPlanarSolidVisualizer from "./_SceneGISPlanarSolidVisualizer.js";
 
 const allowedPropertyNames = new Set([
   "billboard",
+  "box",
+  "cylinder",
   "description",
   "label",
+  "ellipse",
+  "ellipsoid",
   "model",
   "orientation",
   "point",
+  "plane",
   "polygon",
   "polyline",
   "position",
   "properties",
+  "rectangle",
   "viewFrom",
 ]);
 
@@ -139,6 +147,22 @@ SceneGISPlanarVisualizersGate.prototype.update = function (time) {
     );
     candidates.push(
       new SceneGISPlanarPolygonVisualizer(
+        this._world,
+        this._scene,
+        entities,
+        dataSource._primitives,
+      ),
+    );
+    candidates.push(
+      new SceneGISPlanarSolidVisualizer(
+        this._world,
+        this._scene,
+        entities,
+        dataSource._primitives,
+      ),
+    );
+    candidates.push(
+      new SceneGISPlanarAreaVisualizer(
         this._world,
         this._scene,
         entities,

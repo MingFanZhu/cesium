@@ -441,6 +441,15 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - Polyline/Polygon automatic Entity adapter必须复用public SceneGISPlanarPrimitive，并保留original Entity id、
   per-DataSource target、world bounds和exactly-once lifecycle；不得继续引用private Buffer owner、experimental
   collection私有字段或建立dual runtime。
+- C7 public Box/Cylinder/Ellipsoid Geometry只描述以center为origin的local Cartesian volume，并与closed、non-flat
+  `PerInstanceColorAppearance`配对。跨geometry kind replacement继续fail-fast；Plane/Ellipse/Rectangle必须降级到
+  public Polygon/Polyline，不能调用upstream ellipsoid-oriented Geometry。
+- Solid的clamp/relative anchor在resolver结果上增加未旋转support height；Area的Ellipse position.z不参与surface
+  height，Rectangle coordinates按meters严格有序。Ellipse/Rectangle只在generated vertices读取terrain；`NONE`
+  geometry可以越过extent，ground-referenced vertex outside则隐藏current graphic。
+- C4 callback顺序固定为Anchor、Model、Polyline、Polygon、Solid、Area。六类C7 Graphics只支持Color material、
+  disabled shadows与批准字段；partial Ellipsoid、Rectangle granularity、stRotation、classification和zIndex必须在
+  child低层mutation前拒绝。
 - C4 callback第一次合法update只原子追加Anchor、Model、Polyline、Polygon并返回false；children必须等下一次
   update。Model/Polyline/Polygon自动路径使用`dataSource._primitives`，显式private构造省略target时仍使用
   `scene.primitives`；两种路径都不拥有caller collection。

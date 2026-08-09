@@ -426,6 +426,14 @@ Cesium Geometry自动具有planar语义。Geometry变化使用normal-render cand
 current；Context、replacement与destroy必须原子且exactly once。Polyline/Polygon Entity adapter复用同一public
 wrapper，不保留experimental Buffer双路径；width改为finite nonnegative number，0隐藏。完整决定见ADR-0018。
 
+C7将public Primitive扩展到`SceneGISPlanarBoxGeometry`、`SceneGISPlanarCylinderGeometry`与
+`SceneGISPlanarEllipsoidGeometry`。三种volume使用closed、non-flat `PerInstanceColorAppearance`；Plane、
+Ellipse与Rectangle不新增public mesh类型，而是按固定平面坐标降级到C6 Polygon/Polyline。Entity adapter新增
+Solid与Area两个private visualizer，并在既有Anchor/Model/Polyline/Polygon之后追加；Box/Cylinder/Ellipsoid的
+position表示中心，ground reference先解析anchor再加未旋转下部support。Ellipse与Rectangle只对生成顶点采样
+terrain，`NONE`允许合法anchor的geometry延伸extent外。所有orientation继续使用fixed planar quaternion，不进入
+ENU、ellipsoid或默认GeometryUpdater路径。完整决定见ADR-0019。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：

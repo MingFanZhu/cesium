@@ -1,21 +1,31 @@
 import {
   BillboardGraphics,
+  BoundingSphere,
+  BoundingSphereState,
+  BoxGraphics,
   Cartesian2,
   Cartesian3,
   Color,
   EntityCluster,
   EntityCollection,
+  EllipseGraphics,
   HeightReference,
   JulianDate,
   LabelGraphics,
   ModelGraphics,
+  Plane,
+  PlaneGraphics,
   PointGraphics,
+  Rectangle,
+  RectangleGraphics,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
   SceneTransforms,
   _SceneGISPlanarAnchorVisualizer as SceneGISPlanarAnchorVisualizer,
+  _SceneGISPlanarAreaVisualizer as SceneGISPlanarAreaVisualizer,
   _SceneGISPlanarModelVisualizer as SceneGISPlanarModelVisualizer,
+  _SceneGISPlanarSolidVisualizer as SceneGISPlanarSolidVisualizer,
 } from "../../../index.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -276,6 +286,161 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
       expect(scene.camera.changed.numberOfListeners).toBe(
         cameraListenerBaseline,
       );
+      world.destroy();
+    }
+  });
+
+  it("renders volume and lowered area graphics with stable public primitives", function () {
+    const center = 20037508.0;
+    const world = new SceneGISPlanarWorld({
+      coordinateSystem: new SceneGISPlanarCoordinateSystem({
+        extent: new SceneGISPlanarExtent({
+          minimumX: center - 128,
+          minimumY: center - 128,
+          maximumX: center + 128,
+          maximumY: center + 128,
+        }),
+        crs: "EPSG:3857",
+      }),
+      maximumLevel: 1,
+    });
+    world.getTerrainHeight = jasmine
+      .createSpy("getTerrainHeight")
+      .and.returnValue(4);
+    const collection = new EntityCollection();
+    const solid = new SceneGISPlanarSolidVisualizer(world, scene, collection);
+    const area = new SceneGISPlanarAreaVisualizer(world, scene, collection);
+    const time = JulianDate.fromIso8601("2026-08-09T00:00:00Z");
+    const entities = [
+      collection.add({
+        id: "box-c7",
+        position: new Cartesian3(center - 60, center, 12),
+        box: new BoxGraphics({
+          dimensions: new Cartesian3(30, 30, 24),
+          material: Color.RED,
+        }),
+      }),
+      collection.add({
+        id: "plane-c7",
+        position: new Cartesian3(center - 20, center, 10),
+        plane: new PlaneGraphics({
+          plane: new Plane(Cartesian3.UNIT_Z, 0),
+          dimensions: new Cartesian2(30, 30),
+          material: Color.GREEN,
+        }),
+      }),
+      collection.add({
+        id: "ellipse-c7",
+        position: new Cartesian3(center + 20, center, 999),
+        ellipse: new EllipseGraphics({
+          semiMajorAxis: 18,
+          semiMinorAxis: 12,
+          heightReference: HeightReference.CLAMP_TO_GROUND,
+          material: Color.BLUE,
+        }),
+      }),
+      collection.add({
+        id: "rectangle-c7",
+        rectangle: new RectangleGraphics({
+          coordinates: new Rectangle(
+            center + 40,
+            center - 15,
+            center + 70,
+            center + 15,
+          ),
+          height: 16,
+          extrudedHeight: 4,
+          rotation: 0.25,
+          material: Color.YELLOW,
+        }),
+      }),
+    ];
+    scene.frameState.scene3DOnly = true;
+    scene.camera.setView({
+      destination: new Cartesian3(center, center, 180),
+      orientation: {
+        direction: Cartesian3.negate(Cartesian3.UNIT_Z, new Cartesian3()),
+        up: Cartesian3.UNIT_Y,
+      },
+    });
+
+    try {
+      solid.update(time);
+      area.update(time);
+      scene.renderForSpecs();
+      scene.renderForSpecs();
+      const owners = [
+        solid._items.get(entities[0].id).owners.box,
+        area._items.get(entities[1].id).owners.plane,
+        area._items.get(entities[2].id).owners.ellipse,
+        area._items.get(entities[3].id).owners.rectangle,
+      ];
+      const primitiveIdentities = owners.map((owner) => owner.primitives[0]);
+      const boxSurface = new Cartesian3(center - 60, center, 24);
+      const boxWindow = SceneTransforms.worldToWindowCoordinates(
+        scene,
+        boxSurface,
+      );
+      const boxDrawing = SceneTransforms.transformWindowToDrawingBuffer(
+        scene,
+        boxWindow,
+        new Cartesian2(),
+      );
+      const boxPixel = scene.context.readPixels({
+        x: Math.max(
+          0,
+          Math.min(scene.drawingBufferWidth - 1, Math.floor(boxDrawing.x)),
+        ),
+        y: Math.max(
+          0,
+          Math.min(
+            scene.drawingBufferHeight - 1,
+            Math.floor(scene.drawingBufferHeight - boxDrawing.y),
+          ),
+        ),
+        width: 1,
+        height: 1,
+      });
+      expect(boxPixel[0]).toBeGreaterThan(boxPixel[1]);
+      expect(boxPixel[0]).toBeGreaterThan(boxPixel[2]);
+      expect(scene.pickPositionSupported).toBeTrue();
+      const renderedBoxPosition = scene.pickPosition(boxWindow);
+      expect(renderedBoxPosition).toBeDefined();
+      expect(renderedBoxPosition.x).toBeCloseTo(boxSurface.x, 1);
+      expect(renderedBoxPosition.y).toBeCloseTo(boxSurface.y, 1);
+      expect(renderedBoxPosition.z).toBeCloseTo(boxSurface.z, 0);
+      entities[0].box.material = Color.CYAN;
+      solid.update(time);
+      area.update(time);
+      scene.renderForSpecs();
+      expect(owners.map((owner) => owner.primitives[0])).toEqual(
+        primitiveIdentities,
+      );
+      for (let i = 0; i < entities.length; i++) {
+        const sphere = new BoundingSphere();
+        const visualizer = i === 0 ? solid : area;
+        expect(visualizer.getBoundingSphere(entities[i], sphere)).toBe(
+          BoundingSphereState.DONE,
+        );
+        expect(Number.isFinite(sphere.radius)).toBeTrue();
+        const windowPosition = SceneTransforms.worldToWindowCoordinates(
+          scene,
+          sphere.center,
+        );
+        expect(
+          scene.pick(windowPosition)?.id ?? scene.pick(windowPosition),
+        ).toBe(entities[i]);
+      }
+    } finally {
+      const primitives = [
+        solid._items.get(entities[0].id)?.owners.box?.primitives[0],
+        area._items.get(entities[1].id)?.owners.plane?.primitives[0],
+      ];
+      solid.destroy();
+      area.destroy();
+      expect(
+        primitives.every((primitive) => primitive.isDestroyed()),
+      ).toBeTrue();
       world.destroy();
     }
   });

@@ -7,12 +7,15 @@ import {
   CesiumWidget,
   Color,
   ColorMaterialProperty,
+  CorridorGraphics,
   CustomDataSource,
   LabelGraphics,
   PointGraphics,
   PolygonGraphics,
   PolygonHierarchy,
   PolylineGraphics,
+  Rectangle,
+  RectangleGraphics,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
@@ -88,7 +91,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     });
 
     widget.render();
-    expect(visualizers.length).toBe(5);
+    expect(visualizers.length).toBe(7);
     widget.render();
     const anchorItem = visualizers[1]._items.get(entity.id);
     expect(anchorItem.point.id).toBe(entity);
@@ -142,15 +145,29 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
         material: new ColorMaterialProperty(Color.LIME),
       }),
     });
+    const box = dataSource.entities.add({
+      id: "box",
+      position: new Cartesian3(40, -10, 8),
+      box: new BoxGraphics({ dimensions: new Cartesian3(8, 10, 12) }),
+    });
+    const rectangle = dataSource.entities.add({
+      id: "rectangle",
+      rectangle: new RectangleGraphics({
+        coordinates: new Rectangle(30, 5, 50, 25),
+        height: 3,
+      }),
+    });
     await widget.dataSources.add(dataSource);
     await widget.dataSources.add(secondDataSource);
     widget.dataSourceDisplay.update(widget.clock.currentTime);
     widget.dataSourceDisplay.update(widget.clock.currentTime);
 
-    expect(dataSource._visualizers.length).toBe(5);
+    expect(dataSource._visualizers.length).toBe(7);
     expect(dataSource._visualizers[2]._primitives).toBe(dataSource._primitives);
     expect(dataSource._visualizers[3]._primitives).toBe(dataSource._primitives);
     expect(dataSource._visualizers[4]._primitives).toBe(dataSource._primitives);
+    expect(dataSource._visualizers[5]._primitives).toBe(dataSource._primitives);
+    expect(dataSource._visualizers[6]._primitives).toBe(dataSource._primitives);
     const anchorItem = dataSource._visualizers[1]._items.get("anchors");
     const polylineOwner = dataSource._visualizers[3]._items.get(
       polyline.id,
@@ -158,14 +175,23 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     const polygonOwner = dataSource._visualizers[4]._items.get(
       polygon.id,
     ).owner;
+    const boxOwner = dataSource._visualizers[5]._items.get(box.id).owners.box;
+    const rectangleOwner = dataSource._visualizers[6]._items.get(rectangle.id)
+      .owners.rectangle;
     expect(anchorItem.billboard).toBeDefined();
     expect(anchorItem.label).toBeDefined();
     expect(polylineOwner).toBeDefined();
     expect(polygonOwner).toBeDefined();
+    expect(boxOwner).toBeDefined();
+    expect(rectangleOwner).toBeDefined();
     expect(dataSource._primitives.contains(polylineOwner.collections[0])).toBe(
       true,
     );
     expect(dataSource._primitives.contains(polygonOwner.collections[0])).toBe(
+      true,
+    );
+    expect(dataSource._primitives.contains(boxOwner.collections[0])).toBe(true);
+    expect(dataSource._primitives.contains(rectangleOwner.collections[0])).toBe(
       true,
     );
     expect(widget.scene.primitives.contains(polylineOwner.collections[0])).toBe(
@@ -197,6 +223,12 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     expect(dataSource._visualizers[4]._items.get(polygon.id).owner).toBe(
       polygonOwner,
     );
+    expect(dataSource._visualizers[5]._items.get(box.id).owners.box).toBe(
+      boxOwner,
+    );
+    expect(
+      dataSource._visualizers[6]._items.get(rectangle.id).owners.rectangle,
+    ).toBe(rectangleOwner);
 
     const children = dataSource._visualizers.slice();
     const childDestroy = children.map((child) =>
@@ -210,6 +242,8 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     }
     expect(polylineOwner.destroyed).toBe(true);
     expect(polygonOwner.destroyed).toBe(true);
+    expect(boxOwner.destroyed).toBe(true);
+    expect(rectangleOwner.destroyed).toBe(true);
     expect(widget.dataSources.remove(secondDataSource)).toBe(true);
   });
 
@@ -223,10 +257,13 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     const primitiveBaseline =
       widget.dataSourceDisplay.defaultDataSource._primitives.length;
     const entity = widget.entities.add({
-      id: "mixed-point-box",
+      id: "mixed-point-corridor",
       position: new Cartesian3(0.0, 0.0, 1.0),
       point: new PointGraphics({ pixelSize: 8.0, color: Color.RED }),
-      box: new BoxGraphics({ dimensions: new Cartesian3(1.0, 1.0, 1.0) }),
+      corridor: new CorridorGraphics({
+        positions: [Cartesian3.ZERO, Cartesian3.UNIT_X],
+        width: 1,
+      }),
     });
     const anchorItem = visualizers[1]._items.get(entity.id);
     expect(anchorItem).toBeDefined();
@@ -236,6 +273,8 @@ describe("SceneGIS/Widget/SceneGISPlanarContentCesiumWidget", function () {
     expect(visualizers[2]._items.get(entity.id)).toBeUndefined();
     expect(visualizers[3]._items.get(entity.id)).toBeUndefined();
     expect(visualizers[4]._items.get(entity.id)).toBeUndefined();
+    expect(visualizers[5]._items.get(entity.id)).toBeUndefined();
+    expect(visualizers[6]._items.get(entity.id)).toBeUndefined();
     expect(widget.dataSourceDisplay.defaultDataSource._primitives.length).toBe(
       primitiveBaseline,
     );

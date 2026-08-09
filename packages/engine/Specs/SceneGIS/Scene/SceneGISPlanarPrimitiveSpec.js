@@ -8,6 +8,7 @@ import {
   Matrix4,
   PerInstanceColorAppearance,
   PolylineMaterialAppearance,
+  SceneGISPlanarBoxGeometry,
   SceneGISPlanarPolygonGeometry,
   SceneGISPlanarPolylineGeometry,
   SceneGISPlanarPrimitive,
@@ -79,6 +80,39 @@ describe("SceneGIS/Scene/SceneGISPlanarPrimitive", function () {
     scene.renderForSpecs();
     scene.renderForSpecs();
     expect(primitive.getGeometryInstanceAttributes().color).toBeDefined();
+  });
+
+  it("renders closed volume geometry and enforces its appearance pair", function () {
+    const geometry = new SceneGISPlanarBoxGeometry({
+      center: new Cartesian3(100, 200, 30),
+      dimensions: new Cartesian3(10, 20, 30),
+    });
+    const attributes = {
+      color: ColorGeometryInstanceAttribute.fromColor(Color.BLUE),
+    };
+    expect(function () {
+      return new SceneGISPlanarPrimitive({
+        geometry,
+        appearance: new PerInstanceColorAppearance({ flat: true }),
+        attributes,
+        id: "flat-volume",
+      });
+    }).toThrowDeveloperError();
+    const primitive = new SceneGISPlanarPrimitive({
+      geometry,
+      appearance: new PerInstanceColorAppearance({
+        flat: false,
+        closed: true,
+      }),
+      attributes,
+      id: "volume",
+    });
+    scene.primitives.add(primitive);
+    scene.renderForSpecs();
+    expect(primitive.ready).toBeTrue();
+    expect(primitive.getBoundingSphere(new BoundingSphere()).center).toEqual(
+      geometry.center,
+    );
   });
 
   it("rejects incompatible inputs before Context mutation", function () {
