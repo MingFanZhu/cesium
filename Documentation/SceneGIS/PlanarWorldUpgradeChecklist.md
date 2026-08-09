@@ -18,6 +18,10 @@
 | standard derivatives、automatic light uniforms与shader variants   | private planar SurfaceShader、World lighting properties | high   | dFdx/dFdy、face-forward、light uniforms、layer+lighting cache key、uniform-only multiplier              |
 | automatic exports/types/JSDoc/package layout                      | public SceneGIS engine/widgets types                    | medium | workspace and installed tarball ESM/CJS where supported、root/types/API visibility、private absence     |
 | Sandcastle/E2E local bundle entry                                 | two planar examples and local E2E                       | medium | dev/release bundle, no public-network automation, credits and destroy                                   |
+| Entity/DataSource planar callback与profile gate                   | private content callback、SGP-0001                      | high   | World liveness、deferred activation、dynamic allowlist、default Globe isolation                         |
+| Point/Billboard/Label pools与Model async lifecycle                | private Anchor/Model visualizers                        | high   | disabled EntityCluster、original Entity pick、generation isolation、late settlement、exact release      |
+| experimental Buffer collection与per-DataSource ordering           | private Polyline/Polygon/Buffer owner                   | high   | local DOUBLE geometry、target membership、warm dirty/copy、move/remove/destroy                          |
+| planar content moderate qualification与local E2E                  | C5 qualification Specs、content Sandcastle/E2E          | medium | batch warm/mutation、selection、dev/release、no public-network automation                               |
 
 ## 升级执行顺序
 
@@ -29,7 +33,9 @@
 5. 执行 dev/release 本地 E2E，确认 Viewer、imagery、pixel/depth/pick、真实 wheel/Home 与 destroy。
 6. 检查planar imagery、Viewer与terrain Sandcastle，验证terrain lighting toggle和显式scene light；
    把公网OSM/terrain可用性与engine correctness分开记录。
-7. 只有 Architecture review approved 后才更新官方基线、SGP 状态和阶段 checkpoint。
+7. 检查planar content Sandcastle与local E2E，复核六类graphics、dynamic update、original Entity
+   selection、per-DataSource ordering和moderate warm/resource收敛。
+8. 只有 Architecture review approved 后才更新官方基线、SGP 状态和阶段 checkpoint。
 
 ## 私有实现同步原则
 

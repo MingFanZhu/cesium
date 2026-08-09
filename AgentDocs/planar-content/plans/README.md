@@ -6,7 +6,9 @@
 当前 active extension plan：
 [SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)（`active`）。
 
-当前 active phase plan：None；C5尚未设计或激活。
+当前 active phase plan：
+[C5 动态更新、批量性能与交付](2026-08-09-phase-c5-dynamic-performance-and-delivery.md)
+（`active`）。
 
 已完成：
 [C4 Entity、DataSource 与 Viewer 集成](2026-08-09-phase-c4-entity-datasource-viewer-integration.md)
@@ -15,5 +17,6 @@
 [C2 平面锚点内容与普通 Model](2026-08-09-phase-c2-anchor-and-model.md)（`completed`）、
 [C1 平面内容基础契约与兼容性基线](2026-08-09-phase-c1-content-contract.md)（`completed`）。
 
-Current handoff：C4-R001～C4-R004经Architecture focused re-review全部关闭；C4 review为`approved`，phase
-为`completed`。下一步先形成C4独立本地提交检查点，再依据届时源码事实设计C5。
+Current handoff：C4 completed checkpoint为`1f9d8da4ca8c47425917c23642cea3123339e386`；ADR-0017
+与C5 phase plan已confirmed。Execution下一步先建立moderate qualification/baseline，再决定是否需要窄private
+优化；C5保持`active`。

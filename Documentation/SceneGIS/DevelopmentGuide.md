@@ -436,6 +436,13 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - C4 callback第一次合法update只原子追加Anchor、Model、Polyline、Polygon并返回false；children必须等下一次
   update。Model/Polyline/Polygon自动路径使用`dataSource._primitives`，显式private构造省略target时仍使用
   `scene.primitives`；两种路径都不拥有caller collection。
+- C5先以固定moderate profile验证initial/warm/local mutation/remove/destroy；Anchor仍使用Cesium pool，
+  Model逐实例，Polyline/Polygon保持per-Entity owner。没有可复核热点时不得为了“批量”重写runtime。
+- Content timing固定对象数、viewport、build、warmup和样本协议，分开记录display update与render
+  median/P95；timing不是跨机器hard assertion。Hard gate是slot/owner/command/VA identity、dirty/copy、
+  persistent resource与exactly-once lifecycle收敛。
+- Content Sandcastle可以使用公开imagery/terrain做best-effort人工展示，但local E2E必须阻断公网并覆盖
+  automatic content、dynamic update、original Entity selection、remove和destroy；不新增workflow。
 
 ## Planar World release qualification 检查
 

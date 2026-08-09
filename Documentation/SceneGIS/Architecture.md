@@ -412,6 +412,12 @@ CPU tracking。Model/Polyline/Polygon 使用 per-DataSource primitive
 container，pick 继续返回 original Entity，bounds 由现有 `DataSourceDisplay` 联合。唯一上游缝隙位于
 `CesiumWidget.js`，由 `SGP-0001` 与 ADR-0016 追踪。
 
+C5的批量边界保持C1-C4 ownership：Anchor继续使用Cesium pool，Model逐实例，Polyline/Polygon继续
+per-Entity owner；“批量性能”是固定moderate profile资格，不自动引入第二套batch scene graph。先建立
+C4 baseline与persistent resource hard gates，只有可重复热点才允许在现有private visualizer内消除静态CPU
+重复计算；不得改变dynamic/terrain、pick、bounds或lifecycle语义。单机timing只用于同环境调查，Sandcastle
+公网服务只作人工best-effort展示，本地E2E不得访问公网。完整决定见ADR-0017。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：

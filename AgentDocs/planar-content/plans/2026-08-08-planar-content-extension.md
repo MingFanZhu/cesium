@@ -23,7 +23,8 @@
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
   [ADR-0014：平面锚点内容与普通 Model Visualizer](../../../Documentation/SceneGIS/Decisions/ADR-0014-planar-anchor-and-model-visualizers.md)、
   [ADR-0015：平面 Polyline、Polygon 与顶点采样地表](../../../Documentation/SceneGIS/Decisions/ADR-0015-planar-polyline-polygon-and-vertex-drape.md)、
-  [ADR-0016：平面 DataSourceDisplay 与 Viewer 内容集成](../../../Documentation/SceneGIS/Decisions/ADR-0016-planar-datasource-display-integration.md)
+  [ADR-0016：平面 DataSourceDisplay 与 Viewer 内容集成](../../../Documentation/SceneGIS/Decisions/ADR-0016-planar-datasource-display-integration.md)、
+  [ADR-0017：平面内容资格验证与批量边界](../../../Documentation/SceneGIS/Decisions/ADR-0017-planar-content-qualification-and-batching-boundary.md)
 - SGP：C4复用active `SGP-0001`；只允许在CesiumWidget增加instance-owned visualizer callback seam
 
 ## 目标
@@ -148,7 +149,7 @@ Visualizer 系统规避真实集成边界。
 - 进入门槛：C3 已 review并提交；重新审计 DataSourceDisplay、Visualizer 与 Viewer 当前实现。
 - 完成门槛：supported compatibility matrix 可执行，默认 Globe 回归不变，unsupported 配置不会静默
   使用 Globe 语义。
-- 状态：`active`；phase plan：
+- 状态：`completed`；phase plan：
   [C4 Entity、DataSource 与 Viewer 集成](2026-08-09-phase-c4-entity-datasource-viewer-integration.md)。
 
 ### C5：动态更新、批量性能与交付
@@ -158,7 +159,8 @@ Visualizer 系统规避真实集成边界。
 - 进入门槛：C4 已 review并提交；依据真实对象数量与 profiling 决定批量和资格范围。
 - 完成门槛：功能、生命周期、warm-frame、有限性能、types/docs/package 和人工视觉验收达到扩展交付
   标准。
-- 状态：`planned`；phase plan尚未创建。
+- 状态：`active`；phase plan：
+  [C5 动态更新、批量性能与交付](2026-08-09-phase-c5-dynamic-performance-and-delivery.md)。
 
 阶段默认串行推进。每个阶段在 implementation、验证和 Architecture/code review 完成后，由
 Architecture Agent形成独立中文本地提交检查点，再进入下一阶段。
@@ -265,4 +267,9 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
 - `2026-08-09`：Architecture focused re-review确认C4-R001～C4-R004全部关闭；独立复跑callback`8/8`、
   engine Widget`4/4`、P6 Viewer`18/18`，scoped ESLint、upstream audit与diff check通过；C4更新为
   `completed`。
-- 下一步：Architecture形成C4独立本地提交检查点，再依据届时源码事实设计并激活C5。
+- `2026-08-09`：Architecture形成C4独立checkpoint
+  `1f9d8da4ca8c47425917c23642cea3123339e386`，重新审计automatic visualizer热路径、per-Entity owner、
+  P8 qualification、Sandcastle/E2E与package入口；ADR-0017批准moderate profile、无证据不做跨Entity
+  batching、hard gate/timing分离与最终人工验收，C5 phase plan激活。
+- 下一步：Execution按C5 phase plan先建立baseline与qualification，再完成动态、Sandcastle、E2E、package
+  和交付文档；C5保持`active`。
