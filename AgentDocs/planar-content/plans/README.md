@@ -4,7 +4,7 @@
 阶段依赖与整体验收；进入每个阶段前才依据届时源码创建详细 phase plan。
 
 当前 extension plan：
-[SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)（`completed`）。
+[SceneGIS 平面内容总体计划](2026-08-08-planar-content-extension.md)（`active`）。
 
 当前 active phase plan：None。
 
@@ -17,6 +17,6 @@
 [C2 平面锚点内容与普通 Model](2026-08-09-phase-c2-anchor-and-model.md)（`completed`）、
 [C1 平面内容基础契约与兼容性基线](2026-08-09-phase-c1-content-contract.md)（`completed`）。
 
-Current handoff：C5-R001～R003经Architecture focused re-review全部关闭；qualification、Sandcastle controls、
-package soft-private边界和zero-runtime-delta交付已批准。项目负责人已在真实浏览器/GPU完成Sandcastle人工验收；
-C5和extension均为`completed`，后续能力进入新的extension或standalone plan。
+Current handoff：C1-C5首批六类content profile及人工验收均已完成。项目负责人明确要求继续补齐普通Entity、
+public planar Primitive/Geometry与continuous ground，不留下半成品体系；原extension已重新激活，下一步创建
+C6 phase plan，当前没有active phase。

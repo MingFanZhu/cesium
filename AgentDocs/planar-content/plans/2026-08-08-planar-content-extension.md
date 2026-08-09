@@ -3,13 +3,14 @@
 ## 元数据
 
 - 计划类型（Plan type）：`extension`
-- 状态（Status）：`completed`
+- 状态（Status）：`active`
 - 负责人角色（Owner role）：`architecture`
 - 架构评审（Architecture review）：`confirmed`
 - 架构评审人（Architecture reviewer）：项目负责人
 - 创建日期（Created）：`2026-08-08`
 - 更新日期（Updated）：`2026-08-09`
 - 基线（Base checkpoint）：`23d06ad14c79825f680e9397c6f4a8fa70a0f008`
+- 继续规划基线（Continuation checkpoint）：`e3753322f6aa063a0a70a89150a6ff31e6bbdaa8`
 - 分支（Branch）：`feature/planar-content`
 - 相关讨论（Related discussions）：项目负责人与 Architecture Agent 已确认总体边界；未创建独立
   discussion
@@ -31,20 +32,22 @@
 
 ## 目标
 
-在已完成的 `SceneGISPlanarWorld` 和 planar terrain 上建立平面内容能力，使常见矢量、标注、
-Entity/DataSource 与普通 glTF Model 能以真正的平面坐标、高度和朝向语义工作，同时最大限度复用
-Cesium 已有的 Property、Entity、Primitive、选择和渲染基础设施。
+在已完成的 `SceneGISPlanarWorld` 和 planar terrain 上建立完整、分层的普通平面内容能力，使矢量、标注、
+常见实体几何、Entity/DataSource、public low-level Primitive/Geometry 与普通 glTF Model 能以真正的平面坐标、
+高度、朝向和地表语义工作，同时最大限度复用Cesium已有的Property、Entity、选择和渲染基础设施。
 
-本扩展必须提供明确的 planar compatibility profile，而不是宣称所有 Globe-oriented Entity graphics
-自动兼容。支持路径不得把平面 `Cartesian3` 静默解释为 ECEF，也不得通过复制完整 Entity 或
-Visualizer 系统规避真实集成边界。
+本扩展必须让Cesium普通Entity graphics具有可执行的planar路径，并让Entity visualizer复用应用也能直接使用的
+public planar Primitive/Geometry层。球面专属参数必须有明确的planar映射或fail-fast边界，不得把平面
+`Cartesian3`静默解释为ECEF，也不得通过复制完整Entity或Visualizer系统规避真实集成边界。
 
 ## 非目标
 
 - 不建立 `SceneGISPlanarEntity`、第二套 Property 系统或第二套 DataSource 生命周期。
 - 不执行 CRS 识别、坐标重投影或单位转换；调用方负责把数据转换为 World 的米制 CRS。
-- 不在首版适配 GeoJSON、CZML、KML 等以地理坐标为默认语义的数据加载器。
-- 不支持 3D Tiles、Globe GroundPrimitive、geodesic/rhumb arc 或全部 Entity graphics。
+- 不在本扩展适配 GeoJSON、CZML、KML 等以地理坐标为默认语义的数据加载器。
+- 不支持3D Tiles、`Cesium3DTilesetGraphics`或3D Tiles classification/height reference；它们属于独立扩展。
+- 不把geodesic/rhumb、ellipsoid surface或Cartographic语义搬入平面；对应普通graphics使用明确的Euclidean
+  planar定义。
 - 不包含地下模式、碰撞、阴影、PBR、Entity tracking、`flyTo`、`zoomTo` 或大规模离线切片工具链。
 - 不改变默认 Globe scene、Globe Entity/DataSource 或官方数据加载器的既有行为。
 
@@ -63,7 +66,8 @@ Visualizer 系统规避真实集成边界。
 ### Entity 与 DataSource
 
 - 复用 Cesium `Entity`、`EntityCollection`、`CustomDataSource` 和 Property/event 模型。
-- 不承诺一次支持所有 graphics。每个阶段必须维护明确的 supported、unsupported 与 deferred
+- 最终覆盖Point、Billboard、Label、Model、Polyline、Polygon、Box、Corridor、Cylinder、Ellipse、
+  Ellipsoid、Plane、Rectangle、Wall、PolylineVolume与Path等普通graphics；每个阶段维护可执行的property
   compatibility matrix。
 - 支持路径只为 Globe-dependent 的 visualizer、geometry、height 或 orientation 行为增加
   SceneGIS-owned adapter/runtime；不能复制整套上游 DataSources 实现。
@@ -72,21 +76,25 @@ Visualizer 系统规避真实集成边界。
 
 ### 高度与地表
 
-- 首版公共词汇复用 `HeightReference.NONE`、`CLAMP_TO_GROUND` 和
-  `RELATIVE_TO_GROUND`；3D Tiles height reference 不属于本扩展。
+- 公共词汇复用非3D-Tiles的`HeightReference`与graphics ground/clamp属性；具体alias、目标surface和失败边界
+  在continuous-ground phase依据当前Cesium枚举与planar terrain runtime形成ADR。
 - `NONE` 表示 planar absolute Z；另外两种模式以 `SceneGISPlanarWorld` 的逻辑地表为目标。
 - Terrain 尚未 ready、provider replacement、LOD/revision、extent 外位置和 terminal failure 下的
   fallback、更新与 readiness 语义必须在 C1 phase 基于现有 terrain query/runtime 决定并提升为 ADR。
 - 内容 runtime 不得取得 terrain provider 的生命周期所有权，也不得破坏 terrain normal-render-only
   mutation、query snapshot 或 depth replay 契约。
+- 线面贴地的最终交付标准是有误差预算、可随terrain LOD/revision收敛的连续drape，而不是只采样调用方顶点。
 
 ### 内容范围
 
-- 锚点类：Point、Billboard、Label 和普通 glTF Model。
-- 线面类：planar straight Polyline、Polygon、per-position height、extrusion，以及批准范围内的 terrain
-  clamp/drape。
+- 锚点与现有内容：Point、Billboard、Label、普通glTF Model、Polyline和Polygon。
+- 普通几何：Box、Cylinder、Ellipsoid、Plane、Ellipse、Rectangle、Corridor、Wall、PolylineVolume与Path。
+- 低层内容：应用可直接构造、并由Entity adapter复用的public planar Primitive/Geometry与必要的Appearance/
+  Material compatibility profile。
+- 地表内容：planar ground polygon/polyline、连续terrain drape、动态terrain replacement/LOD收敛、picking与
+  lifecycle。
 - 集成类：Entity/CustomDataSource、Property 更新、object picking、Viewer selection 与销毁顺序。
-- 3D Tiles、GeoJSON/CZML/KML reprojection 和 Globe ground pipeline 保留为独立后续扩展。
+- 3D Tiles与GeoJSON/CZML/KML转换保留为独立后续扩展；不复用Globe ground pipeline的ellipsoid语义。
 
 ### 所有权与上游集成
 
@@ -94,6 +102,8 @@ Visualizer 系统规避真实集成边界。
 - C1-C3保持zero-upstream。C4源码审计确认CesiumWidget创建DataSourceDisplay时缺少world-aware
   per-instance callback；由于同一upstream file只能由一个SGP负责，C4复用`SGP-0001`，只允许一个
   upstream-owned file与两个paired hunks。
+- C6-C10默认继续使用SceneGIS-owned实现；若公开Primitive或ground接入确需修改upstream-owned file，只允许
+  最小显式hook，并在具体phase中创建或复用SGP，不在总体计划预判文件。
 - 不使用 prototype monkey patch、隐式全局 registry、加载顺序技巧或大段复制 Cesium 实现。
 - 每个内容 runtime 的 request、CPU object、Primitive、GPU resource、event subscription 与 owner
   必须有成对创建/失效/销毁协议。
@@ -106,6 +116,9 @@ Visualizer 系统规避真实集成边界。
   picking 和独立 provider sampling，但三类读取接口职责不同。
 - Planar Viewer 已保留基本 Entity selection 与 InfoBox 文本，但 tracking、InfoBox camera、
   `zoomTo` 和 `flyTo` 不在现有契约内。
+- C1-C5已在checkpoint`c6a1409442`完成六类Entity automatic profile，并由`e3753322f6`记录首次人工验收；
+  Polyline/Polygon仍依赖private experimental Buffer owner，raw `scene.primitives`没有受支持的planar
+  compatibility contract，terrain drape仍为supplied-vertex sampling。
 - 当前架构允许新增 `SceneGIS/DataSources` 层；该层可以依赖 Core、Scene、Cesium DataSources 与
   SceneGIS DataSources，但不得依赖 Widgets。
 - 低层 Primitive、Entity visualizer、GeometryUpdater、height reference、ground 与 Model 路径的
@@ -164,6 +177,55 @@ Visualizer 系统规避真实集成边界。
 - 状态：`completed`；phase plan：
   [C5 动态更新、批量性能与交付](2026-08-09-phase-c5-dynamic-performance-and-delivery.md)。
 
+### C6：Public Planar Primitive/Geometry 基础
+
+- 目标：建立应用可直接使用、Entity adapter可共同复用的public planar Primitive/Geometry基础契约，明确
+  coordinates、model matrix、appearance/material、bounds、picking、dynamic update与ownership。
+- 依赖：C5首批profile与人工验收完成。
+- 进入门槛：重新审计Cesium Primitive、GeometryInstance、Appearance/Material、experimental Buffer与生成边界；
+  创建C6 phase plan和必要ADR。
+- 完成门槛：public低层API、代表性line/fill geometry、Entity复用缝隙、精度与GPU生命周期通过review。
+- 状态：`proposed`；尚未创建phase plan。
+
+### C7：普通锚定、体与面 Entity Graphics
+
+- 目标：基于C6低层能力实现Box、Cylinder、Ellipsoid、Plane、Ellipse与Rectangle的planar graphics/property
+  profile，并保持existing six graphics行为。
+- 依赖：C6。
+- 进入门槛：C6 review并提交；依据届时源码审计对应Graphics、GeometryUpdater与material path。
+- 完成门槛：静态/动态、orientation、height/extrusion、material、outline、pick、bounds与lifecycle成立。
+- 状态：`proposed`。
+
+### C8：路径衍生几何与动态内容
+
+- 目标：实现Corridor、Wall、PolylineVolume与Path的Euclidean planar语义，补齐普通Entity graphics矩阵与
+  dynamic Property更新。
+- 依赖：C7。
+- 进入门槛：C7 review并提交；重新审计shape generation、time sampling与capacity/batching路径。
+- 完成门槛：路径拓扑、截面、动态轨迹、material/pick/bounds和资源收敛成立，不进入geodesic/rhumb。
+- 状态：`proposed`。
+
+### C9：Continuous Ground 与 Planar Ground Primitive
+
+- 目标：建立planar ground polygon/polyline低层能力与Entity clamp/drape接入，使线面按明确误差预算连续贴合
+  planar terrain，并随LOD/revision/provider生命周期收敛。
+- 依赖：C8和已完成planar terrain。
+- 进入门槛：C8 review并提交；重新审计GroundPrimitive、terrain mesh/query snapshot、classification、Shader与
+  Worker/build边界，必要时建立新SGP。
+- 完成门槛：continuous drape、depth/picking、material、terrain replacement、warm/resource与无terrain fallback
+  成立；3D Tiles classification明确保持独立。
+- 状态：`proposed`。
+
+### C10：统一集成、Compatibility Matrix 与交付
+
+- 目标：把C6-C9统一接入Entity/DataSource/Viewer，完成public Primitive与普通graphics/ground的版本化矩阵、
+  Sandcastle、E2E、package、性能和升级资格。
+- 依赖：C9。
+- 进入门槛：C6-C9均review并提交；基于真实对象规模和remaining seams确定最小充分qualification。
+- 完成门槛：普通Entity graphics、public planar Primitive/Geometry和continuous ground整体通过自动化与项目负责人
+  真实浏览器/GPU人工验收，extension才能再次标记`completed`。
+- 状态：`proposed`。
+
 阶段默认串行推进。每个阶段在 implementation、验证和 Architecture/code review 完成后，由
 Architecture Agent形成独立中文本地提交检查点，再进入下一阶段。
 
@@ -173,10 +235,14 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   picking 和资源生命周期证据。
 - 支持的 Entity/graphics/property 组合必须进入版本化 compatibility matrix，并通过代表性静态与动态
   fixture；不以 Sandcastle 代替 Specs。
+- Public Primitive/Geometry必须有独立于Entity的构造、渲染、更新、picking、bounds和destroy证据；Entity
+  visualizer不得复制另一套几何实现。
 - 大坐标验证必须检查局部顶点、`modelMatrix`、finite bounds 和可见像素，不能只检查 JavaScript
   double 结果。
 - Terrain clamp/relative 更新必须覆盖 pending、ready、replacement、detach、failure、late settlement
   与 destroy，但每个 phase 只运行受该阶段影响的最小充分矩阵。
+- Continuous ground必须验证terrain LOD/revision、细分误差、tile boundary、无洞覆盖、depth replay与资源预算，
+  不能以少量顶点或单一画面代替。
 - 默认 Globe、无 world 和既有 planar-world/terrain contract 在越过相关集成边界时运行对应回归。
 - 公共 API 必须通过 engine/Cesium root JS、types 和 API docs；私有模块不得进入公共声明或文档。
 - 每阶段交付报告记录 upstream-owned files、SGP、generated status 和剩余风险。
@@ -189,6 +255,10 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   出现跳回旧高度、泄漏 subscription 或销毁后复活。
 - 线面 terrain drape 可能需要额外细分、采样和 GPU geometry 更新；不得在没有性能证据前承诺无限
   精度或每帧重建。
+- 公开Primitive一旦交付即成为长期兼容面；C6必须避免暴露experimental Buffer flyweight/capacity细节，并决定
+  是否复用Cesium Primitive/GeometryInstance或建立窄SceneGIS-owned runtime。
+- 普通graphics中若Property名称带有ellipsoid/geodesic语义，必须形成明确planar映射或fail-fast；不能为了表面
+  “全支持”而保留错误语义。
 - Entity convenience 与批量性能存在张力。若大规模对象需要独立 batch layer，应由后续 phase/ADR
   明确，而不是让 compatibility adapter 隐式演化为第二套场景图。
 - 任何 upstream-owned DataSources、Scene 或 Viewer 修改都会增加官方升级成本，必须保持窄小并通过
@@ -196,14 +266,15 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
 
 ## 整体验收条件
 
-- C1-C5 均完成 implementation、最小充分验证、Architecture/code review、AgentDocs 回写和独立本地
+- C1-C10 均完成 implementation、最小充分验证、Architecture/code review、AgentDocs 回写和独立本地
   提交。
-- 已批准的 Point、Billboard、Label、Polyline、Polygon、普通 glTF Model 与
-  Entity/CustomDataSource 组合具有明确可执行的 planar contract。
+- 普通Entity graphics全部具有明确可执行的planar contract；3D Tiles与格式转换只按显式独立扩展边界排除。
+- 应用可不经过private visualizer直接使用public planar Primitive/Geometry，Entity adapter复用同一低层实现。
 - absolute、clamp 和 relative 高度在 flat/terrain、异步更新和 provider 生命周期中结果一致且可预测。
 - object picking、Viewer selection、dynamic Property 更新和 destroy 不破坏既有 planar world/terrain
   或默认 Globe 行为。
 - 大坐标精度、GPU/CPU resource ownership、warm-frame allocation 和代表性批量性能达到已批准门槛。
+- 线面continuous ground、terrain replacement/LOD收敛、depth/picking与资源生命周期达到已批准误差和性能边界。
 - public exports/types/API docs、Sandcastle、使用指南与升级清单完整，所有 upstream-owned 修改均由
   active SGP 覆盖。
 - 项目负责人完成真实浏览器/GPU人工验收并明确批准 extension 完成。
@@ -283,4 +354,8 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
   installed-package smoke通过，接受Execution的focused Sandcastle build证据。C5 review状态为`approved`。
 - `2026-08-09`：Architecture形成C5独立实现检查点`c6a1409442`。项目负责人随后在真实浏览器/GPU打开
   `scenegis-planar-content`完成页面、内容、交互与控制台人工验收并明确确认通过；C5与extension状态更新为
-  `completed`。后续能力必须建立新的extension或standalone plan。
+  `completed`。
+- `2026-08-09`：项目负责人复核完整产品边界后指出现有六类private visualizer、raw Primitive无contract与
+  vertex-only drape仍会留下半成品Entity/Primitive/ground体系；批准复用同一`planar-content`目录继续五项
+  工作：public Primitive/Geometry、普通graphics补齐、continuous ground、统一compatibility matrix与最终交付。
+  Extension重新激活为`active`，C6-C10加入roadmap；详细实现只在各phase进入时依据届时源码确定。

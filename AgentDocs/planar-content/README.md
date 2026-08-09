@@ -3,16 +3,15 @@
 ## Metadata
 
 - Extension slug: `planar-content`
-- Status: `completed`
+- Status: `active`
 - Planning model: `extension`
-- Active extension plan: None
-- Completed extension plan:
+- Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: None；C1-C5均已完成
+- Current phase: None；C1-C5均已完成，下一步进入C6 planning
 - Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Execution Agent（extension已完成）
+- Execution contact: Execution Agent（等待C6 phase plan派工）
 - Last updated: `2026-08-09`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -27,12 +26,14 @@
 - 建立 Point、Billboard、Label、Polyline、Polygon 和普通 glTF Model 的 planar compatibility
   profile。
 - 支持绝对高度、贴合平面地表和相对平面地表的明确高度语义。
+- 建立可由应用直接使用、并由 Entity visualizer共同复用的public planar Primitive/Geometry层。
+- 补齐Cesium普通Entity graphics的planar实现，并提供线面连续地形贴合与planar ground primitive。
 - 与已完成的 planar terrain、picking、Viewer selection 和资源生命周期协同。
 
 ### Out of scope
 
-- 运行时 CRS 重投影，以及 GeoJSON、CZML、KML 的自动 planar 转换。
-- 3D Tiles、Globe GroundPrimitive、geodesic/rhumb geometry 和全量 Entity graphics 兼容。
+- 运行时 CRS 识别、重投影或单位转换。
+- 3D Tiles、GeoJSON/CZML/KML自动转换，以及geodesic/rhumb等球面几何语义。
 - 地下模式、碰撞、阴影、PBR、Viewer tracking、`flyTo` 和 `zoomTo`。
 - Globe 与 planar world 的运行时切换或同场混合。
 
@@ -60,15 +61,15 @@
 
 ## Current handoff
 
-- Current state: C1-C5均已完成implementation、验证、Architecture/code review与独立阶段检查点；项目负责人
-  已在真实浏览器/GPU确认`scenegis-planar-content`通过，extension状态为`completed`。
-- Next action: 在新的extension或standalone plan中讨论后续能力，不在本extension追加未规划阶段。
-- Current phase status: None；C5与extension均为`completed`。
-- Open discussions: None；C5不建立跨Entity batching层，timing只作同机调查证据。
+- Current state: C1-C5作为首批六类content profile已完成并通过项目负责人人工验收；项目负责人随后明确要求
+  不留下半成品Entity/Primitive/ground体系，批准在同一extension中继续C6-C10，状态重新激活为`active`。
+- Next action: Architecture依据当前源码细化C6 public planar Primitive/Geometry foundation phase plan并派工。
+- Current phase status: None；C6尚未激活。
+- Open discussions: None；3D Tiles与GeoJSON/CZML/KML转换继续属于独立扩展。
 - Latest review:
   [C5 dynamic performance and delivery review](reviews/2026-08-09-c5-dynamic-performance-and-delivery.md)
   （`approved`；R001～R003经focused re-review关闭）。
-- Unresolved reviews: None；项目负责人的真实浏览器/GPU人工验收已通过。
+- Unresolved reviews: None；C5验收已通过，C6尚未进入review。
 - Known risks: Buffer collections属于experimental升级敏感面；vertex-only terrain drape不代表连续贴地；
-  per-Entity line/polygon ownership可能限制超大规模，但首版只做moderate qualification；公开Sandcastle
-  terrain/imagery仍受网络与服务策略影响。
+  公开Primitive契约、普通geometry覆盖和continuous ground可能需要新的Renderer/Scene seam及SGP；具体影响
+  文件必须在各phase进入时重新审计。公开Sandcastle terrain/imagery仍受网络与服务策略影响。
