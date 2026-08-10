@@ -107,19 +107,14 @@ describe("SceneGIS/DataSources/SceneGISPlanarPolylineVisualizer", function () {
 
     primitive._current = { ready: true, destroy: jasmine.createSpy("destroy") };
     primitive._currentValid = true;
-    primitive._currentBoundingSphere = new BoundingSphere(
-      new Cartesian3(0, 0, 4),
-      12,
-    );
+    primitive._currentPresentationBounds = primitive._desiredPresentationBounds;
+    const terrainHeight = spyOn(world, "getTerrainHeight").and.returnValue(4);
     expect(visualizer.getBoundingSphere(entity, sphere)).toBe(
       BoundingSphereState.DONE,
     );
     expect(sphere.center.z).toBe(4);
 
-    primitive._currentBoundingSphere = new BoundingSphere(
-      new Cartesian3(0, 0, 18),
-      20,
-    );
+    terrainHeight.and.returnValue(18);
     expect(visualizer.getBoundingSphere(entity, sphere)).toBe(
       BoundingSphereState.DONE,
     );

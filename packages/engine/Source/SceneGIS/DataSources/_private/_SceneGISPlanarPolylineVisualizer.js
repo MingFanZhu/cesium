@@ -169,7 +169,6 @@ function createOwner(visualizer, item, state) {
     ...(state.ground
       ? {
           world: visualizer._world,
-          heightReference: HeightReference.CLAMP_TO_GROUND,
         }
       : {}),
     geometry: new SceneGISPlanarPolylineGeometry({

@@ -8,6 +8,9 @@
 - Related plan：
   [C10 统一集成、Compatibility Matrix 与交付](../../../AgentDocs/planar-content/plans/2026-08-10-phase-c10-unified-integration-and-delivery.md)
 - Existing upstream seams：`SGP-0001`、`SGP-0002` unchanged；C10预期不新增SGP
+- Successor ground decision：C10完成后，项目负责人以
+  [ADR-0023](ADR-0023-planar-depth-stencil-ground-rendering.md)决定替换C9 actual-mesh backend；本文ground rows与
+  最终人工验收门禁由C11更新，C10自动化交付baseline仍保留。
 
 ## Context
 

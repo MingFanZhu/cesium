@@ -169,8 +169,6 @@ function SceneGISPlanarWorld(options) {
   });
   this._imageryLayers._owner = this;
   this._surface = new SceneGISPlanarSurface(tilingScheme, this._imageryLayers);
-  this._groundPrimitives = undefined;
-  this._groundPrimitiveSet = undefined;
   this._frameState = undefined;
 }
 
@@ -284,7 +282,6 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
       this._show = value;
       if (!value) {
         this._surface.invalidateTerrainQuerySnapshot();
-        this._surface.invalidateGroundRenderSnapshot();
       }
     },
   },
@@ -403,26 +400,7 @@ SceneGISPlanarWorld.prototype.update = function (frameState) {
  * @exception {DeveloperError} The world is advanced with a second WebGL Context.
  */
 SceneGISPlanarWorld.prototype.beginFrame = function (frameState) {
-  if (this._groundPrimitives !== undefined) {
-    this._groundPrimitives.length = 0;
-    this._groundPrimitiveSet.clear();
-  }
   this._surface.beginFrame(frameState);
-};
-
-SceneGISPlanarWorld.prototype._registerGroundPrimitive = function (
-  primitive,
-  frameState,
-) {
-  if (primitive._world !== this || frameState !== this._frameState) {
-    throw new DeveloperError("Ground primitive belongs to a different world.");
-  }
-  this._groundPrimitives ??= [];
-  this._groundPrimitiveSet ??= new Set();
-  if (!this._groundPrimitiveSet.has(primitive)) {
-    this._groundPrimitiveSet.add(primitive);
-    this._groundPrimitives.push(primitive);
-  }
 };
 
 /**
@@ -432,35 +410,18 @@ SceneGISPlanarWorld.prototype._registerGroundPrimitive = function (
  * @exception {DeveloperError} The world is rendered with a second WebGL Context.
  */
 SceneGISPlanarWorld.prototype.render = function (frameState) {
-  try {
-    if (!this._show) {
-      this._surface.invalidateTerrainQuerySnapshot();
-      this._surface.invalidateGroundRenderSnapshot();
-      return;
-    }
-    this._surface.render(
-      frameState,
-      this._maximumLevel,
-      this._maximumScreenSpaceError,
-      this._baseColor,
-      this._enableLighting,
-      this._lambertDiffuseMultiplier,
-      (this._groundPrimitives?.length ?? 0) > 0,
-    );
-    for (const primitive of this._groundPrimitives ?? []) {
-      primitive._updateGround(
-        frameState,
-        this._surface._groundRenderSnapshot,
-        this._surface._groundRenderSnapshotCount,
-        this._surface._groundRenderSnapshotSignature,
-      );
-    }
-  } finally {
-    if (this._groundPrimitives !== undefined) {
-      this._groundPrimitives.length = 0;
-      this._groundPrimitiveSet.clear();
-    }
+  if (!this._show) {
+    this._surface.invalidateTerrainQuerySnapshot();
+    return;
   }
+  this._surface.render(
+    frameState,
+    this._maximumLevel,
+    this._maximumScreenSpaceError,
+    this._baseColor,
+    this._enableLighting,
+    this._lambertDiffuseMultiplier,
+  );
 };
 
 /**
@@ -658,12 +619,6 @@ SceneGISPlanarWorld.prototype.isDestroyed = function () {
  * @returns {void}
  */
 SceneGISPlanarWorld.prototype.destroy = function () {
-  if (this._groundPrimitives !== undefined) {
-    this._groundPrimitives.length = 0;
-    this._groundPrimitiveSet.clear();
-  }
-  this._groundPrimitives = undefined;
-  this._groundPrimitiveSet = undefined;
   this._frameState = undefined;
   this._surface.destroy();
   this._imageryLayers._owner = undefined;

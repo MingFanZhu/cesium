@@ -33,3 +33,6 @@
 - [C10 unified integration and delivery review](2026-08-10-c10-unified-integration-and-delivery.md)
   （`approved`）：C10-R001～C10-R004经focused re-review关闭；durable rules、Ground render/depth闭环、八role
   GPU pick/Viewer selection、package exact export set及zero-runtime/zero-upstream交付边界通过，待项目负责人人工验收。
+- [C11 planar depth/stencil ground rendering review](2026-08-10-c11-planar-depth-stencil-ground-rendering.md)
+  （`approved`）：C11-R001～C11-R008全部关闭；direct Primitive caller-owned Entity metadata、真实GPU pick、
+  InfoBox及finite SelectionIndicator闭环通过，项目负责人真实浏览器/GPU人工验收通过。

@@ -402,6 +402,15 @@ function createState(visualizer, item, name, time) {
       heightReference !== HeightReference.NONE ||
       (extrudedHeight !== undefined &&
         extrudedHeightReference !== HeightReference.NONE);
+    if (
+      usesGround &&
+      (heightReference !== HeightReference.CLAMP_TO_GROUND ||
+        extrudedHeight !== undefined)
+    ) {
+      throw new DeveloperError(
+        "Planar ground corridors require a non-extruded CLAMP_TO_GROUND surface.",
+      );
+    }
     const top = resolveRing(
       visualizer._world,
       sourceRing,
@@ -529,11 +538,6 @@ function createOwner(visualizer, item, state) {
       ...(state.ground
         ? {
             world: visualizer._world,
-            heightReference: state.ground.heightReference,
-            extrudedHeightReference:
-              state.geometry._bottomPositions === undefined
-                ? undefined
-                : state.ground.extrudedHeightReference,
           }
         : {}),
       geometry: state.geometry,
@@ -566,8 +570,6 @@ function createOwner(visualizer, item, state) {
       ...(usesGround
         ? {
             world: visualizer._world,
-            heightReference: endpointReferences?.[0] ?? groundReference,
-            _heightReferences: endpointReferences,
           }
         : {}),
       geometry: new SceneGISPlanarPolylineGeometry({

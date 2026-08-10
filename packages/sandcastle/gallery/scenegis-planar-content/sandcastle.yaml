@@ -2,7 +2,7 @@ title: SceneGIS Planar Content
 description: >-
   Demonstrates all 16 supported automatic Entity Graphics plus direct ordinary
   and Ground Primitive use in an EPSG:3857 planar Viewer. Grouped views compare
-  absolute, anchor-relative, and actual-cover continuous-ground behavior while
+  absolute, anchor-relative, and GPU depth/stencil surface-clamp behavior while
   preserving original Entity selection and bounded dynamic/batch controls.
   OpenStreetMap imagery and the public elevation service are best-effort and
   subject to their CORS, availability, attribution, and usage policies. The

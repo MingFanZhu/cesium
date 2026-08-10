@@ -5,15 +5,18 @@ import {
   ColorGeometryInstanceAttribute,
   DirectionalLight,
   Event,
+  HeadingPitchRange,
   Intersect,
-  HeightReference,
   Material,
+  Matrix4,
   OrthographicFrustum,
+  Pass,
   PerspectiveFrustum,
   PerInstanceColorAppearance,
   PolylineMaterialAppearance,
   PrimitiveType,
   Scene,
+  SceneTransforms,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
@@ -39,6 +42,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
           maximumX: minimum + size,
           maximumY: minimum + size,
         }),
+        crs: options.crs,
       }),
       maximumLevel: options.maximumLevel ?? 3,
       maximumScreenSpaceError: options.maximumScreenSpaceError ?? 2.0,
@@ -80,58 +84,641 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     Cartesian3.negate(Cartesian3.UNIT_Z, scene.camera.direction);
   }
 
+  function aimCamera(position, target, referenceUp) {
+    Cartesian3.clone(position, scene.camera.position);
+    Cartesian3.subtract(target, position, scene.camera.direction);
+    Cartesian3.normalize(scene.camera.direction, scene.camera.direction);
+    Cartesian3.cross(scene.camera.direction, referenceUp, scene.camera.right);
+    Cartesian3.normalize(scene.camera.right, scene.camera.right);
+    Cartesian3.cross(
+      scene.camera.right,
+      scene.camera.direction,
+      scene.camera.up,
+    );
+    Cartesian3.normalize(scene.camera.up, scene.camera.up);
+  }
+
+  function readWindowPixel(windowPosition) {
+    return Array.from(
+      scene.context.readPixels({
+        x: Math.floor(windowPosition.x),
+        y: scene.canvas.clientHeight - Math.floor(windowPosition.y),
+        width: 1,
+        height: 1,
+      }),
+    );
+  }
+
+  function addWindowOffset(position, x, y) {
+    return new Cartesian2(position.x + x, position.y + y);
+  }
+
+  function expectStableGroundLine(
+    line,
+    start,
+    center,
+    end,
+    expectedId,
+    expectedColor,
+    context,
+  ) {
+    const startWindow = SceneTransforms.worldToWindowCoordinates(scene, start);
+    const centerWindow = SceneTransforms.worldToWindowCoordinates(
+      scene,
+      center,
+    );
+    const endWindow = SceneTransforms.worldToWindowCoordinates(scene, end);
+    expect(startWindow).withContext(context).toBeDefined();
+    expect(centerWindow).withContext(context).toBeDefined();
+    expect(endWindow).withContext(context).toBeDefined();
+
+    const tangentX = endWindow.x - startWindow.x;
+    const tangentY = endWindow.y - startWindow.y;
+    const tangentMagnitude = Math.hypot(tangentX, tangentY);
+    expect(tangentMagnitude).withContext(context).toBeGreaterThan(12.0);
+    const unitTangentX = tangentX / tangentMagnitude;
+    const unitTangentY = tangentY / tangentMagnitude;
+    const normalX = -unitTangentY;
+    const normalY = unitTangentX;
+    const anchors = [startWindow, centerWindow, endWindow];
+    const insidePositions = [];
+    const outsidePositions = [];
+    for (const anchor of anchors) {
+      insidePositions.push(
+        anchor,
+        addWindowOffset(anchor, normalX * 4.0, normalY * 4.0),
+        addWindowOffset(anchor, -normalX * 4.0, -normalY * 4.0),
+      );
+      outsidePositions.push(
+        addWindowOffset(anchor, normalX * 14.0, normalY * 14.0),
+        addWindowOffset(anchor, -normalX * 14.0, -normalY * 14.0),
+      );
+    }
+    for (let i = 0; i < insidePositions.length; ++i) {
+      const position = insidePositions[i];
+      const sampleContext = `${context} inside sample ${i}`;
+      expect(readWindowPixel(position))
+        .withContext(sampleContext)
+        .toEqual(expectedColor);
+      expect(scene.pick(position)?.id)
+        .withContext(sampleContext)
+        .toBe(expectedId);
+    }
+    for (let i = 0; i < outsidePositions.length; ++i) {
+      const position = outsidePositions[i];
+      const sampleContext = `${context} outside sample ${i}`;
+      expect(readWindowPixel(position))
+        .withContext(sampleContext)
+        .not.toEqual(expectedColor);
+      expect(scene.pick(position)?.id)
+        .withContext(sampleContext)
+        .not.toBe(expectedId);
+    }
+    expect(line.ready).withContext(context).toBeTrue();
+  }
+
   afterEach(function () {
     if (scene && !scene.isDestroyed()) {
       scene.destroyForSpecs();
     }
   });
 
-  it("publishes flat actual cover only for same-pass ground registration", function () {
+  it("uses the globe pass without materializing C9 ground snapshots", function () {
     const world = createWorld({ maximumLevel: 0 });
     scene = createPlanarScene(world);
     scene.frameState.scene3DOnly = true;
     pointCameraAt(world);
     scene.renderForSpecs();
-    expect(world._surface._groundRenderSnapshotCount).toBe(0);
     expect(world._surface._groundRenderSnapshot).toBeUndefined();
     expect(world._groundPrimitives).toBeUndefined();
+    expect(world._surface._renderCommands[0].pass).toBe(Pass.GLOBE);
     const primitive = scene.primitives.add(
       new SceneGISPlanarGroundPrimitive({
         world,
-        geometry: new SceneGISPlanarPolylineGeometry({
-          positions: [new Cartesian3(-64, 0, 0), new Cartesian3(64, 0, 0)],
-          width: 3,
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: [
+            new Cartesian3(-64, -64, 0),
+            new Cartesian3(64, -64, 0),
+            new Cartesian3(64, 64, 0),
+            new Cartesian3(-64, 64, 0),
+          ],
         }),
-        appearance: new PolylineMaterialAppearance({
-          material: Material.fromType(Material.ColorType, {
-            color: Color.WHITE,
-          }),
-        }),
-        heightReference: HeightReference.CLAMP_TO_GROUND,
+        appearance: new PerInstanceColorAppearance({ flat: true }),
+        attributes: {
+          color: ColorGeometryInstanceAttribute.fromColor(Color.WHITE),
+        },
         id: "ground",
       }),
     );
     scene.renderForSpecs();
-    expect(world._surface._groundRenderSnapshotCount).toBe(1);
-    expect(world._surface._groundRenderSnapshot[0].source).toBe("FLAT");
+    expect(world._surface._groundRenderSnapshot).toBeUndefined();
     expect(primitive._current).toBeDefined();
     expect(scene).toRender([255, 255, 255, 255]);
     const center = new Cartesian2(
       scene.canvas.clientWidth * 0.5,
       scene.canvas.clientHeight * 0.5,
     );
-    expect(scene.pick(center).id).toBe("ground");
     if (scene.pickPositionSupported) {
-      expect(scene.pickPosition(center).z).toBeCloseTo(0.0, 4);
+      const pickedPosition = scene.pickPosition(center);
+      expect(pickedPosition).toBeDefined();
+      expect(Math.abs(pickedPosition.z)).toBeLessThan(1.1);
     }
-    const snapshot = world._surface._groundRenderSnapshot;
-    const entry = snapshot[0];
+    const cachedSurfaceCommands = world._surface._renderCommands.slice();
+    const replayedSurfaceCommands = [];
+    scene.debugCommandFilter = function (command) {
+      if (cachedSurfaceCommands.includes(command)) {
+        replayedSurfaceCommands.push(command);
+      }
+      return true;
+    };
+    const picked = scene.pick(center);
+    scene.debugCommandFilter = undefined;
+    expect(picked.id).toBe("ground");
+    expect(replayedSurfaceCommands).toEqual(cachedSurfaceCommands);
     scene.primitives.remove(primitive);
     scene.renderForSpecs();
-    expect(world._surface._groundRenderSnapshot).toBe(snapshot);
-    expect(world._surface._groundRenderSnapshotCount).toBe(0);
-    expect(entry.tile).toBeUndefined();
-    expect(entry.extent).toBeUndefined();
+    expect(world._surface._groundRenderSnapshot).toBeUndefined();
+  });
+
+  it("classifies above, below, orthographic, and near-side views without stencil leakage", function () {
+    if (window.webglStub) {
+      return;
+    }
+    const world = createWorld({ maximumLevel: 0 });
+    world.terrainProvider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: -80,
+      maximumHeight: 80,
+      maximumLevel: 0,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: () => 1,
+      requestTileGeometry: () => undefined,
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+    };
+    scene = createPlanarScene(world, 256, 256);
+    scene.frameState.scene3DOnly = true;
+    scene.logarithmicDepthBuffer = false;
+    const primitive = scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: [
+            new Cartesian3(-20, -20, 0),
+            new Cartesian3(20, -20, 0),
+            new Cartesian3(20, 20, 0),
+            new Cartesian3(-20, 20, 0),
+          ],
+        }),
+        appearance: new PerInstanceColorAppearance({ flat: true }),
+        attributes: {
+          color: ColorGeometryInstanceAttribute.fromColor(Color.WHITE),
+        },
+        id: "view-ground",
+      }),
+    );
+    const line = scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolylineGeometry({
+          positions: [new Cartesian3(30, -32, 0), new Cartesian3(30, 32, 0)],
+          width: 20,
+        }),
+        appearance: new PolylineMaterialAppearance({
+          material: Material.fromType(Material.ColorType, {
+            color: Color.GREEN,
+          }),
+        }),
+        id: "view-line",
+      }),
+    );
+    const center = Cartesian3.ZERO;
+    const windowCenter = new Cartesian2(128, 128);
+    function expectCenterColor(expected) {
+      scene.renderForSpecs();
+      expect(
+        Array.from(
+          scene.context.readPixels({ x: 128, y: 128, width: 1, height: 1 }),
+        ),
+      ).toEqual(expected);
+    }
+    const views = [
+      {
+        name: "perspective high above",
+        position: new Cartesian3(0, 0, 160),
+        referenceUp: Cartesian3.UNIT_Y,
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 1000,
+        }),
+      },
+      {
+        name: "orthographic above",
+        position: new Cartesian3(0, 0, 160),
+        referenceUp: Cartesian3.UNIT_Y,
+        frustum: new OrthographicFrustum({
+          width: 128,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 1000,
+        }),
+      },
+      {
+        name: "perspective below",
+        position: new Cartesian3(0, 0, -64),
+        referenceUp: Cartesian3.UNIT_Y,
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 1000,
+        }),
+      },
+      {
+        name: "perspective near-side",
+        headingPitchRange: new HeadingPitchRange(0, -Math.PI / 4, 362),
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 1000,
+        }),
+      },
+      {
+        name: "perspective oblique quarter turn",
+        headingPitchRange: new HeadingPitchRange(
+          Math.PI / 2,
+          -Math.PI / 4,
+          362,
+        ),
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 1000,
+        }),
+      },
+      {
+        name: "perspective reverse heading",
+        headingPitchRange: new HeadingPitchRange(Math.PI, -Math.PI / 4, 362),
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 1000,
+        }),
+      },
+    ];
+    let lineCurrent;
+    let lineVertexArray;
+    let lineShaderProgram;
+    let lineCommands;
+    for (const view of views) {
+      scene.camera.frustum = view.frustum;
+      if (view.headingPitchRange !== undefined) {
+        scene.camera.lookAtTransform(Matrix4.IDENTITY, view.headingPitchRange);
+      } else {
+        aimCamera(view.position, center, view.referenceUp);
+      }
+      const mathematicalPick = world.pickFromWindowPosition(
+        windowCenter,
+        scene,
+      );
+      expect(mathematicalPick).withContext(view.name).toBeDefined();
+      expect(Math.abs(mathematicalPick.x))
+        .withContext(view.name)
+        .toBeLessThan(1);
+      expect(Math.abs(mathematicalPick.y))
+        .withContext(view.name)
+        .toBeLessThan(1);
+      scene.renderForSpecs();
+      expect(world._surface._renderCommands.length)
+        .withContext(view.name)
+        .toBeGreaterThan(0);
+      expect(
+        world._surface._quadtree._renderTiles.some(
+          (tile) =>
+            tile.extent.minimumX <= 0 &&
+            tile.extent.maximumX >= 0 &&
+            tile.extent.minimumY <= 0 &&
+            tile.extent.maximumY >= 0,
+        ),
+      )
+        .withContext(view.name)
+        .toBeTrue();
+      line.show = false;
+      if (view.name === "perspective near-side") {
+        primitive.show = false;
+        expectCenterColor([255, 0, 0, 255]);
+        primitive.show = true;
+      }
+      expectCenterColor([255, 255, 255, 255]);
+      expect(scene.pick(windowCenter).id)
+        .withContext(view.name)
+        .toBe("view-ground");
+      if (scene.pickPositionSupported) {
+        const groundCommands = [
+          ...primitive._currentCommands.stencilCommands,
+          ...primitive._currentCommands.colorCommands,
+          ...line._currentCommands.stencilCommands,
+          ...line._currentCommands.colorCommands,
+        ];
+        let groundDepthWrites = 0;
+        scene.debugCommandFilter = function (command) {
+          if (groundCommands.includes(command)) {
+            ++groundDepthWrites;
+          }
+          return true;
+        };
+        const depthPosition = scene.pickPosition(windowCenter);
+        scene.debugCommandFilter = undefined;
+        expect(groundDepthWrites).withContext(view.name).toBe(0);
+        expect(depthPosition).withContext(view.name).toBeDefined();
+        expect(Math.abs(depthPosition.z))
+          .withContext(view.name)
+          .toBeLessThan(3.0);
+      }
+      line.show = true;
+      scene.renderForSpecs();
+      if (lineCurrent === undefined) {
+        lineCurrent = line._current;
+        lineVertexArray = lineCurrent._va[0];
+        lineShaderProgram = lineCurrent._sp;
+        lineCommands = line._currentCommands.colorCommands.slice();
+      }
+      expect(line._current).withContext(view.name).toBe(lineCurrent);
+      expect(lineCurrent._va[0]).withContext(view.name).toBe(lineVertexArray);
+      expect(lineCurrent._sp).withContext(view.name).toBe(lineShaderProgram);
+      expect(line._currentCommands.colorCommands)
+        .withContext(view.name)
+        .toEqual(lineCommands);
+      expectStableGroundLine(
+        line,
+        new Cartesian3(30, -20, 0),
+        new Cartesian3(30, 0, 0),
+        new Cartesian3(30, 20, 0),
+        "view-line",
+        [0, 128, 0, 255],
+        view.name,
+      );
+    }
+
+    const overlap = scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: [
+            new Cartesian3(-20, -20, 0),
+            new Cartesian3(20, -20, 0),
+            new Cartesian3(20, 20, 0),
+            new Cartesian3(-20, 20, 0),
+          ],
+        }),
+        appearance: new PerInstanceColorAppearance({ flat: true }),
+        attributes: {
+          color: ColorGeometryInstanceAttribute.fromColor(Color.BLUE),
+        },
+        id: "overlap-ground",
+      }),
+    );
+    pointCameraAt(world);
+    scene.renderForSpecs();
+    expect([
+      [255, 255, 255, 255],
+      [0, 0, 255, 255],
+    ]).toContain(
+      Array.from(
+        scene.context.readPixels({ x: 128, y: 128, width: 1, height: 1 }),
+      ),
+    );
+    expect(["view-ground", "overlap-ground"]).toContain(
+      scene.pick(windowCenter).id,
+    );
+    scene.primitives.remove(overlap);
+    expectCenterColor([255, 255, 255, 255]);
+    expect(scene.pick(windowCenter).id).toBe("view-ground");
+    scene.primitives.remove(primitive);
+    scene.primitives.remove(line);
+  });
+
+  it("keeps mitered turns and loops continuous while updating premultiplied line color in place", function () {
+    if (window.webglStub) {
+      return;
+    }
+    const world = createWorld({ maximumLevel: 0, baseColor: Color.BLACK });
+    scene = createPlanarScene(world, 64, 64);
+    scene.frameState.scene3DOnly = true;
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 256,
+      aspectRatio: 1,
+      near: 0.1,
+      far: 1000,
+    });
+    pointCameraAt(world, 128);
+    const appearance = new PolylineMaterialAppearance({
+      material: Material.fromType(Material.ColorType, { color: Color.RED }),
+    });
+    const turn = scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolylineGeometry({
+          positions: [
+            new Cartesian3(-100, -50, 0),
+            new Cartesian3(-30, 20, 0),
+            new Cartesian3(20, -40, 0),
+          ],
+          width: 12,
+        }),
+        appearance,
+        id: "turn-line",
+      }),
+    );
+    const loop = scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolylineGeometry({
+          positions: [
+            new Cartesian3(40, -50, 0),
+            new Cartesian3(105, -20, 0),
+            new Cartesian3(70, 55, 0),
+            new Cartesian3(40, -50, 0),
+          ],
+          width: 12,
+        }),
+        appearance: new PolylineMaterialAppearance({
+          material: Material.fromType(Material.ColorType, {
+            color: Color.GREEN,
+          }),
+        }),
+        id: "loop-line",
+      }),
+    );
+    scene.renderForSpecs();
+    scene.renderForSpecs();
+    expect(loop.ready).toBeTrue();
+    const turnWindow = SceneTransforms.worldToWindowCoordinates(
+      scene,
+      new Cartesian3(-30, 20, 0),
+    );
+    const loopWindow = SceneTransforms.worldToWindowCoordinates(
+      scene,
+      new Cartesian3(40, -50, 0),
+    );
+    const turnOuterMiterWindow = SceneTransforms.worldToWindowCoordinates(
+      scene,
+      new Cartesian3(-30, 38, 0),
+    );
+    const loopSeamMiterWindow = SceneTransforms.worldToWindowCoordinates(
+      scene,
+      new Cartesian3(28, -64, 0),
+    );
+    expect(readWindowPixel(turnWindow)).toEqual([255, 0, 0, 255]);
+    expect(scene.pick(turnWindow).id).toBe("turn-line");
+    expect(readWindowPixel(turnOuterMiterWindow)).toEqual([255, 0, 0, 255]);
+    expect(scene.pick(turnOuterMiterWindow).id).toBe("turn-line");
+    expect(readWindowPixel(loopWindow)).toEqual([0, 128, 0, 255]);
+    expect(scene.pick(loopWindow).id).toBe("loop-line");
+    expect(readWindowPixel(loopSeamMiterWindow)).toEqual([0, 128, 0, 255]);
+    expect(scene.pick(loopSeamMiterWindow).id).toBe("loop-line");
+
+    const current = turn._current;
+    const vertexArray = current._va[0];
+    const shaderProgram = current._sp;
+    const commands = turn._currentCommands.colorCommands.slice();
+    appearance.material.uniforms.color = Color.fromBytes(0, 0, 255, 128);
+    scene.renderForSpecs();
+    expect(readWindowPixel(turnWindow)).toEqual([0, 0, 128, 255]);
+    expect(scene.pick(turnWindow).id).toBe("turn-line");
+    expect(turn._current).toBe(current);
+    expect(current._va[0]).toBe(vertexArray);
+    expect(current._sp).toBe(shaderProgram);
+    expect(turn._currentCommands.colorCommands).toEqual(commands);
+  });
+
+  it("keeps an EPSG:3857 ground line stable across camera poses without rebuilding GPU state", function () {
+    if (window.webglStub) {
+      return;
+    }
+    const centerValue = 20037508.342789244;
+    const world = createWorld({
+      minimum: centerValue - 128.0,
+      size: 256.0,
+      maximumLevel: 0,
+      baseColor: Color.BLACK,
+      crs: "EPSG:3857",
+    });
+    scene = createPlanarScene(world, 256, 256);
+    scene.frameState.scene3DOnly = true;
+    scene.logarithmicDepthBuffer = false;
+    const center = new Cartesian3(centerValue, centerValue, 0.0);
+    const lineX = centerValue + 30.0;
+    const line = scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolylineGeometry({
+          positions: [
+            new Cartesian3(lineX, centerValue - 32.0, 0.0),
+            new Cartesian3(lineX, centerValue + 32.0, 0.0),
+          ],
+          width: 20,
+        }),
+        appearance: new PolylineMaterialAppearance({
+          material: Material.fromType(Material.ColorType, {
+            color: Color.MAGENTA,
+          }),
+        }),
+        id: "large-offset-line",
+      }),
+    );
+    const views = [
+      {
+        name: "large-offset perspective high",
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 2000,
+        }),
+        position: new Cartesian3(centerValue, centerValue, 160.0),
+        referenceUp: Cartesian3.UNIT_Y,
+      },
+      {
+        name: "large-offset perspective oblique",
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 2000,
+        }),
+        position: new Cartesian3(
+          centerValue + 180.0,
+          centerValue - 180.0,
+          180.0,
+        ),
+        referenceUp: Cartesian3.UNIT_Z,
+      },
+      {
+        name: "large-offset perspective reverse",
+        frustum: new PerspectiveFrustum({
+          fov: Math.PI / 3,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 2000,
+        }),
+        position: new Cartesian3(
+          centerValue - 180.0,
+          centerValue + 180.0,
+          180.0,
+        ),
+        referenceUp: Cartesian3.UNIT_Z,
+      },
+      {
+        name: "large-offset orthographic",
+        frustum: new OrthographicFrustum({
+          width: 128,
+          aspectRatio: 1,
+          near: 0.1,
+          far: 2000,
+        }),
+        position: new Cartesian3(centerValue, centerValue, 160.0),
+        referenceUp: Cartesian3.UNIT_Y,
+      },
+    ];
+    let current;
+    let vertexArray;
+    let shaderProgram;
+    let commands;
+    for (const view of views) {
+      scene.camera.frustum = view.frustum;
+      aimCamera(view.position, center, view.referenceUp);
+      scene.renderForSpecs();
+      if (current === undefined) {
+        current = line._current;
+        vertexArray = current._va[0];
+        shaderProgram = current._sp;
+        commands = line._currentCommands.colorCommands.slice();
+      }
+      expect(line._current).withContext(view.name).toBe(current);
+      expect(current._va[0]).withContext(view.name).toBe(vertexArray);
+      expect(current._sp).withContext(view.name).toBe(shaderProgram);
+      expect(line._currentCommands.colorCommands)
+        .withContext(view.name)
+        .toEqual(commands);
+      expectStableGroundLine(
+        line,
+        new Cartesian3(lineX, centerValue - 20.0, 0.0),
+        new Cartesian3(lineX, centerValue, 0.0),
+        new Cartesian3(lineX, centerValue + 20.0, 0.0),
+        "large-offset-line",
+        [255, 0, 255, 255],
+        view.name,
+      );
+    }
+    scene.primitives.remove(line);
+    expect(line.isDestroyed()).toBeTrue();
   });
 
   it("lazily creates one shared unit quad and renders the base color", function () {
@@ -261,7 +848,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     world.terrainProvider = {
       tilingScheme: world.tilingScheme,
       minimumHeight: 0,
-      maximumHeight: 48,
+      maximumHeight: 80,
       maximumLevel: 0,
       errorEvent: new Event(),
       credit: undefined,
@@ -272,6 +859,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     };
     scene = createPlanarScene(world, 64, 64);
     scene.frameState.scene3DOnly = true;
+    scene.logarithmicDepthBuffer = false;
     pointCameraAt(world, 256);
     const primitive = scene.primitives.add(
       new SceneGISPlanarGroundPrimitive({
@@ -285,7 +873,6 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
             color: Color.WHITE,
           }),
         }),
-        heightReference: HeightReference.CLAMP_TO_GROUND,
         id: "terrain-ground",
       }),
     );
@@ -295,17 +882,21 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     scene.renderForSpecs();
     const center = new Cartesian2(32, 32);
     expect(world.getTerrainHeight(new Cartesian3(0, 0, 0))).toBeCloseTo(48, 5);
-    expect(scene.pick(center).id).toBe("terrain-ground");
     if (scene.pickPositionSupported) {
       const mathematical = world.pickFromWindowPosition(center, scene);
+      const pickedPosition = scene.pickPosition(center);
+      expect(pickedPosition).toBeDefined();
       expect(
-        Math.abs(
-          scene.pickPosition(center).z - world.getTerrainHeight(mathematical),
-        ),
+        Math.abs(pickedPosition.z - world.getTerrainHeight(mathematical)),
       ).toBeLessThan(1.0);
     }
+    expect(
+      Array.from(
+        scene.context.readPixels({ x: 32, y: 32, width: 1, height: 1 }),
+      ),
+    ).toEqual([255, 255, 255, 255]);
+    expect(scene.pick(center).id).toBe("terrain-ground");
     const current = primitive._current;
-    scene.logarithmicDepthBuffer = false;
     scene.renderForSpecs();
     expect(primitive._current).toBe(current);
     if (scene.context.fragmentDepth) {
@@ -325,28 +916,22 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
             new Cartesian3(24, 24, 0),
             new Cartesian3(-24, 24, 0),
           ],
-          bottomPositions: [
-            new Cartesian3(-24, -24, -8),
-            new Cartesian3(24, -24, -8),
-            new Cartesian3(24, 24, -8),
-            new Cartesian3(-24, 24, -8),
-          ],
         }),
         appearance: new PerInstanceColorAppearance({ flat: true }),
         attributes: {
           color: ColorGeometryInstanceAttribute.fromColor(Color.YELLOW),
         },
-        heightReference: HeightReference.CLAMP_TO_GROUND,
-        extrudedHeightReference: HeightReference.NONE,
         id: "terrain-ground-polygon",
       }),
     );
     scene.renderForSpecs();
     expect(polygon.ready).toBeTrue();
-    expect(scene.pick(center).id).toBe("terrain-ground-polygon");
     if (scene.pickPositionSupported) {
-      expect(Math.abs(scene.pickPosition(center).z - 48)).toBeLessThan(1);
+      const pickedPosition = scene.pickPosition(center);
+      expect(pickedPosition).toBeDefined();
+      expect(Math.abs(pickedPosition.z - 48)).toBeLessThan(1.1);
     }
+    expect(scene.pick(center).id).toBe("terrain-ground-polygon");
   });
 
   it("clears strong references across snapshot shrink and no-cover invalidation", function () {

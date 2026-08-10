@@ -196,10 +196,7 @@ viewer.entities.add({
         0.0,
       ),
     ]),
-    height: 20.0,
-    extrudedHeight: 0.0,
-    heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-    extrudedHeightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
     material: Cesium.Color.LIME.withAlpha(0.65),
     outline: true,
     outlineColor: Cesium.Color.WHITE,
@@ -398,6 +395,38 @@ viewer.entities.add({
   },
 });
 
+const directOrdinaryEntity = viewer.entities.add({
+  id: "direct-planar-primitive",
+  name: "Direct planar polygon",
+  description:
+    "A caller-owned metadata Entity picked by a direct SceneGISPlanarPrimitive.",
+  position: new Cesium.Cartesian3(
+    contentCenter.x - 150.0,
+    contentCenter.y + 2290.0,
+    130.0,
+  ),
+});
+const directGroundCenter = new Cesium.Cartesian3(
+  contentCenter.x + 300.0,
+  contentCenter.y + 2280.0,
+  0.0,
+);
+const directGroundEntity = viewer.entities.add({
+  id: "direct-planar-ground-primitive",
+  name: "Direct planar ground polyline",
+  description:
+    "A caller-owned metadata Entity picked by a direct SceneGISPlanarGroundPrimitive.",
+  position: new Cesium.CallbackProperty((_time, result) => {
+    const height = world.getTerrainHeight(directGroundCenter) ?? 0.0;
+    return Cesium.Cartesian3.fromElements(
+      directGroundCenter.x,
+      directGroundCenter.y,
+      height,
+      result,
+    );
+  }, false),
+});
+
 const directOrdinary = viewer.scene.primitives.add(
   new Cesium.SceneGISPlanarPrimitive({
     geometry: new Cesium.SceneGISPlanarPolygonGeometry({
@@ -428,7 +457,7 @@ const directOrdinary = viewer.scene.primitives.add(
     attributes: {
       color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.BLUE),
     },
-    id: "direct-planar-primitive",
+    id: directOrdinaryEntity,
   }),
 );
 const directGround = viewer.scene.primitives.add(
@@ -454,8 +483,7 @@ const directGround = viewer.scene.primitives.add(
         color: Cesium.Color.MAGENTA,
       }),
     }),
-    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-    id: "direct-planar-ground-primitive",
+    id: directGroundEntity,
   }),
 );
 void directOrdinary;

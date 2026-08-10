@@ -425,14 +425,14 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   request render，下一normal update才add。Stale、replacement和destroy路径都要exactly-once cleanup。
 - Model transform只使用fixed planar translation/normalized Quaternion。不要调用`computeModelMatrix`、
   ENU或Model height clamping。
-- C3 Polyline只允许`ArcType.NONE`的planar straight segments；C3曾逐supplied vertex解析clamp，该ground行为已由
-  C9 actual-cover continuous drape取代。当前ordinary `HeightReference.NONE`保留source geometry，批准的ground
-  分支统一走C9 wrapper，不做geodesic/rhumb或自行发terrain request。C6迁移后`width`接受finite nonnegative
+- C3 Polyline只允许`ArcType.NONE`的planar straight segments；C3逐vertex clamp与C9 actual-cover CPU drape均为历史。
+  当前ordinary `HeightReference.NONE`保留source geometry，批准的surface-clamp分支统一走C11 GPU wrapper，不做
+  geodesic/rhumb或自行发terrain request。C6迁移后`width`接受finite nonnegative
   number，0隐藏，不得重新引入Buffer Uint8的integer/255限制。
 - C3 Polygon只接受simple outer ring与direct holes。Scalar height、per-position height、extrusion、caps、
   side walls与outline必须先完整preflight，再以local DOUBLE geometry、translation `modelMatrix`和explicit
-  world bounds原子替换。C3的vertex-only terrain drape是历史行为，当前批准的Polygon ground分支由C9
-  actual-cover continuous drape取代；C6迁移后`outlineWidth`与Polyline width采用相同finite nonnegative规则。
+  world bounds原子替换。C3 vertex-only与C9 actual-cover drape均为历史；当前批准的non-extruded Polygon CLAMP分支
+  使用C11 GPU area backend。C6迁移后`outlineWidth`与Polyline width采用相同finite nonnegative规则。
 - C6 public Geometry必须clone finite米制Cartesian3输入、以完整XYZ local origin重基，并只输出审计过的
   standard Geometry vertex format。Polyline固定`ArcType.NONE`；Polygon只使用XY triangulation，不调用Ellipsoid
   subdivision或ground path。
@@ -447,7 +447,7 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   public Polygon/Polyline，不能调用upstream ellipsoid-oriented Geometry。
 - Solid的clamp/relative anchor在resolver结果上增加未旋转support height；Area的Ellipse position.z不参与surface
   height，Rectangle coordinates按meters严格有序。C7的Ellipse/Rectangle generated-vertex terrain sampling是历史
-  行为，当前ground分支由C9 actual-cover continuous drape取代；ordinary `NONE` geometry仍可以越过extent。
+  行为，C9 actual-cover drape也已被C11 GPU area backend取代；ordinary `NONE` geometry仍可以越过extent。
 - Planar callback完整顺序固定为gate、Anchor、Model、Polyline、Polygon、Solid、Area、Route、Path。六类C7
   Graphics只支持Color material、
   disabled shadows与批准字段；partial Ellipsoid、Rectangle granularity、stRotation、classification和zIndex必须在
@@ -456,28 +456,22 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   shape +X映射route-left、+Y映射world-up，并以planar corner stations生成closed mesh。不得调用upstream
   Corridor/Wall/PolylineVolume Geometry、ENU、Cartographic或geodesic subdivision。
 - Corridor必须降级到public Polygon/Polyline，Path必须降级到public Polyline。Corridor rounded granularity是
-  planar corner angle step；ground分支由C9 continuous draper消费actual cover，Wall/PolylineVolume不隐式terrain clamp。
+  planar corner angle step；Corridor CLAMP分支使用C11 GPU area backend，Wall/PolylineVolume不隐式terrain clamp。
 - Path sampler只能以`ReferenceFrame.FIXED`调用Cesium property sampler；non-FIXED position、INERTIAL、
   entity-relative/VVLH、`PathMode.PORTIONS`必须fail-fast。Route、Path位于完整callback顺序的最后，existing
   children顺序不变。
-- C9 Ground Primitive只接受existing planar Polyline/Polygon Geometry、live World、compatible Color appearance与
-  显式HeightReference。至少一个reference必须ground-relative；不得提供任意modelMatrix、classification、zIndex或
-  arbitrary Material。
-- Ground wrapper普通update只注册当前pass；World必须先完成Surface actual cover，再执行normal-render late drape。
-  Pick/depth只提交current。Per-pass queue必须去重并在finally/begin/destroy清理，不能形成module-global registry或World
-  ownership。
-- Ground-render snapshot必须与terrain query snapshot分离，覆盖DIRECT/UPSAMPLED/FLAT/no-provider actual render tiles，
-  排除skirts并按provider/revision/hidden/no-cover失效。Consumer不得跨late update保留tile/content/mesh引用。
-- Continuous Polyline在tile/terrain triangle edge处分段；Polygon source triangle与surface triangle做XY clipping，hole与
-  boundary side使用同一crossings。Shared edge需要确定性ownership，relative error以当前rendered triangle为基准，
-  不得发terrain request或改变SSE/LRU/tilesLoaded。实现必须先做Geometry/tile bounds broad-phase并只流式访问相交
-  regular-grid cells；extruded Ground Polygon的bottom/top XY必须逐点一致，derived points必须finite且bottom不高于top。
-- Ground renderer继续使用single synchronous standard Primitive、single GeometryInstance、candidate/current与original
-  id。Internal derived appearance可使用`LESS_OR_EQUAL`但不得修改caller appearance或依赖polygonOffset；linear/log
-  depth real Context若不稳定，必须暂停，不得擅自增加Shader/classification/upstream patch。
-- Polyline clamp、Polygon、Ellipse、Rectangle与Corridor ground配置迁移到同一public wrapper；ordinary NONE路径不得
-  分配ground runtime，Entity owner保持per-DataSource target与terrain-signature-driven warm convergence。Bounds只来自
-  valid last-successful ground current；首次promotion前为`PENDING`，hidden或无owner为`FAILED`。
+- C9 actual-mesh、ground snapshot与World late queue已由C11删除，不得恢复或保留fallback。Planar Surface commands使用
+  existing `Pass.GLOBE`；area/polyline ground commands使用existing `Pass.TERRAIN_CLASSIFICATION`。
+- C11 Ground Primitive只接受existing non-extruded planar Polygon或Polyline Geometry、live World与compatible Color
+  appearance。Clamp是implicit；不得提供`heightReference`、`extrudedHeightReference`、任意modelMatrix、classification、
+  zIndex或arbitrary Material。Ordinary NONE继续使用普通Primitive。
+- Area使用stable planar shadow volume与z-fail stencil-depth/color/pick；Polyline使用stable segment volume与dedicated
+  SceneGIS ground-line Shader。两者不得读取actual terrain triangles、发request或改变SSE/LRU/`tilesLoaded`。
+- Height envelope只读caller-owned provider同步global min/max；无provider围绕Z=0使用非退化padding。Provider lifecycle
+  只更新model transform/bounds，不得替换footprint VA/index/DrawCommand/Shader或订阅tile/LOD/revision。
+- Polyline clamp与non-extruded Polygon、Ellipse、Rectangle、Corridor的批准CLAMP组合使用同一GPU wrapper；面状
+  RELATIVE、mixed top/bottom和ground-relative extrusion必须在child低层mutation前fail-fast。Entity owner继续使用
+  per-DataSource target，ready current提供bounds，hidden或无owner保持`FAILED`。
 - C4 callback第一次合法update原子追加当前完整children序列Anchor、Model、Polyline、Polygon、Solid、Area、
   Route、Path并返回false；children必须等下一次update。Model及geometry自动路径使用
   `dataSource._primitives`，显式private构造省略target时仍使用`scene.primitives`；两种路径都不拥有caller
@@ -490,8 +484,8 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - Content Sandcastle可以使用公开imagery/terrain做best-effort人工展示，但local E2E必须阻断公网并覆盖
   automatic content、dynamic update、original Entity selection、remove和destroy；不新增workflow。
 - C10交付时以`PlanarContentCompatibility.md`核对24个engine与2个widget public入口、16类automatic Graphics、
-  ordinary/Ground Primitive。Qualification必须使用local deterministic terrain和actual ground current；不得用
-  resident-height spy或source-Z改写冒充continuous ground。Dev/release E2E分别执行且public network attempts为0。
+  ordinary/Ground Primitive。Qualification必须使用local deterministic terrain和真实GPU surface-clamp current；不得用
+  resident-height spy或source-Z改写冒充ground rendering。Dev/release E2E分别执行且public network attempts为0。
 - Package smoke从repo外installed-tarball consumer验证bare ESM/CJS。`SceneGISPlanarTerrainSampler`是namespace
   object；underscore模块只允许作为soft-private JS artifact存在，必须从declarations和API HTML隐藏。
 

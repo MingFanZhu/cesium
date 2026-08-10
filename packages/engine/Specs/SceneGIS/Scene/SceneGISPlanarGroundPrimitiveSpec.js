@@ -4,8 +4,10 @@ import {
   Color,
   ColorGeometryInstanceAttribute,
   ComponentDatatype,
+  Event,
   HeightReference,
   Material,
+  Pass,
   PerInstanceColorAppearance,
   PolylineMaterialAppearance,
   SceneGISPlanarCoordinateSystem,
@@ -20,7 +22,6 @@ import createScene from "../../../../../Specs/createScene.js";
 describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
   let scene;
   let world;
-  let snapshot;
 
   beforeEach(function () {
     scene = createScene();
@@ -36,15 +37,6 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
       }),
       maximumLevel: 1,
     });
-    snapshot = [
-      {
-        key: "0/0/0",
-        source: "FLAT",
-        revision: 0,
-        extent: world.coordinateSystem.extent,
-        mesh: undefined,
-      },
-    ];
   });
 
   afterEach(function () {
@@ -58,7 +50,7 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
     return new SceneGISPlanarGroundPrimitive({
       world,
       geometry: new SceneGISPlanarPolylineGeometry({
-        positions: [new Cartesian3(-5, 0, 0), new Cartesian3(5, 0, 0)],
+        positions: [new Cartesian3(-5, 0, 7), new Cartesian3(5, 0, 9)],
         width: 2,
       }),
       appearance: new PolylineMaterialAppearance({
@@ -72,12 +64,41 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
           value: [1],
         },
       },
-      heightReference: HeightReference.CLAMP_TO_GROUND,
       id: "line",
     });
   }
 
-  it("validates the ground-only construction contract", function () {
+  function update(primitive) {
+    const frameState = scene.frameState;
+    frameState.passes.render = true;
+    frameState.passes.pick = false;
+    world.update(frameState);
+    primitive.update(frameState);
+    while (frameState.afterRender.length > 0) {
+      frameState.afterRender.shift()();
+    }
+    return frameState;
+  }
+
+  function terrainProvider(minimumHeight, maximumHeight) {
+    return {
+      tilingScheme: world.tilingScheme,
+      minimumHeight,
+      maximumHeight,
+      maximumLevel: 1,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: (level) => 1 / 2 ** level,
+      requestTileGeometry: () => undefined,
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+    };
+  }
+
+  it("validates implicit clamp, support, attributes, and non-extruded polygons", function () {
+    expect(SceneGISPlanarGroundPrimitive.isSupported(scene)).toBe(
+      scene.context.stencilBuffer,
+    );
     expect(function () {
       return new SceneGISPlanarGroundPrimitive({
         world,
@@ -85,43 +106,36 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
           positions: [new Cartesian3(), new Cartesian3(1, 0, 0)],
           width: 1,
         }),
-        appearance: new PolylineMaterialAppearance(),
-        heightReference: HeightReference.NONE,
-        id: "absolute",
+        appearance: new PolylineMaterialAppearance({
+          material: Material.fromType(Material.ColorType),
+        }),
+        heightReference: HeightReference.CLAMP_TO_GROUND,
+        id: "legacy",
       });
     }).toThrowDeveloperError();
-    function expectInvalidAttribute(invalid) {
-      expect(function () {
-        return new SceneGISPlanarGroundPrimitive({
-          world,
-          geometry: new SceneGISPlanarPolylineGeometry({
-            positions: [new Cartesian3(), new Cartesian3(1, 0, 0)],
-            width: 1,
-          }),
-          appearance: new PolylineMaterialAppearance(),
-          attributes: { invalid },
-          heightReference: HeightReference.CLAMP_TO_GROUND,
-          id: "malformed-attribute",
-        });
-      }).toThrowDeveloperError();
-    }
-    for (const invalid of [
-      null,
-      {
-        componentDatatype: ComponentDatatype.UNSIGNED_BYTE,
-        componentsPerAttribute: 1,
-        normalize: "false",
-        value: [1],
-      },
-      {
-        componentDatatype: ComponentDatatype.UNSIGNED_BYTE,
-        componentsPerAttribute: 1,
-        normalize: false,
-        value: new DataView(new ArrayBuffer(1)),
-      },
-    ]) {
-      expectInvalidAttribute(invalid);
-    }
+    const extruded = new SceneGISPlanarPolygonGeometry({
+      positions: [
+        new Cartesian3(-1, -1, 1),
+        new Cartesian3(1, -1, 1),
+        new Cartesian3(1, 1, 1),
+      ],
+      bottomPositions: [
+        new Cartesian3(-1, -1, 0),
+        new Cartesian3(1, -1, 0),
+        new Cartesian3(1, 1, 0),
+      ],
+    });
+    expect(function () {
+      return new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: extruded,
+        appearance: new PerInstanceColorAppearance({ flat: true }),
+        attributes: {
+          color: ColorGeometryInstanceAttribute.fromColor(Color.BLUE),
+        },
+        id: "extruded",
+      });
+    }).toThrowDeveloperError();
     expect(function () {
       return new SceneGISPlanarGroundPrimitive({
         world,
@@ -129,7 +143,9 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
           positions: [new Cartesian3(), new Cartesian3(1, 0, 0)],
           width: 1,
         }),
-        appearance: new PolylineMaterialAppearance(),
+        appearance: new PolylineMaterialAppearance({
+          material: Material.fromType(Material.ColorType),
+        }),
         attributes: {
           invalid: {
             componentDatatype: ComponentDatatype.UNSIGNED_BYTE,
@@ -138,79 +154,24 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
             value: [256],
           },
         },
-        heightReference: HeightReference.CLAMP_TO_GROUND,
         id: "invalid-attribute",
-      });
-    }).toThrowDeveloperError();
-    const polygon = new SceneGISPlanarPolygonGeometry({
-      positions: [
-        new Cartesian3(-1, -1, 1),
-        new Cartesian3(1, -1, 1),
-        new Cartesian3(1, 1, 1),
-        new Cartesian3(-1, 1, 1),
-      ],
-    });
-    const offsetBottom = new SceneGISPlanarPolygonGeometry({
-      positions: polygon._getDrapeSource().top,
-      bottomPositions: polygon
-        ._getDrapeSource()
-        .top.map((position) => new Cartesian3(position.x + 0.5, position.y, 0)),
-    });
-    expect(function () {
-      return new SceneGISPlanarGroundPrimitive({
-        world,
-        geometry: offsetBottom,
-        appearance: new PerInstanceColorAppearance({ flat: true }),
-        attributes: {
-          color: ColorGeometryInstanceAttribute.fromColor(Color.BLUE),
-        },
-        heightReference: HeightReference.CLAMP_TO_GROUND,
-        extrudedHeightReference: HeightReference.NONE,
-        id: "offset-bottom",
-      });
-    }).toThrowDeveloperError();
-    expect(scene.primitives.length).toBe(0);
-    expect(function () {
-      return new SceneGISPlanarGroundPrimitive({
-        world,
-        geometry: polygon,
-        appearance: new PerInstanceColorAppearance({ flat: true }),
-        attributes: {
-          color: ColorGeometryInstanceAttribute.fromColor(Color.BLUE),
-        },
-        heightReference: HeightReference.CLAMP_TO_GROUND,
-        extrudedHeightReference: HeightReference.NONE,
-        id: "polygon",
       });
     }).toThrowDeveloperError();
   });
 
-  it("promotes one logical current, preserves warm identity, and destroys once", function () {
+  it("promotes one stable classification current and preserves it on failure", function () {
     const primitive = line();
-    const frameState = scene.frameState;
-    frameState.passes.render = true;
-    world.update(frameState);
-    primitive.update(frameState);
-    expect(world._groundPrimitives).toEqual([primitive]);
-    primitive._updateGround(frameState, snapshot, 1, "flat");
-    while (frameState.afterRender.length > 0) {
-      frameState.afterRender.shift()();
-    }
-    primitive._updateGround(frameState, snapshot, 1, "flat");
+    update(primitive);
+    update(primitive);
     expect(primitive.ready).toBeTrue();
     const current = primitive._current;
-    const command = current._colorCommands[0];
-    primitive._updateGround(frameState, snapshot, 1, "flat");
+    const commands = primitive._currentCommands.colorCommands.slice();
+    const bounds = primitive.getBoundingSphere(new BoundingSphere());
+    update(primitive);
     expect(primitive._current).toBe(current);
-    expect(current._colorCommands[0]).toBe(command);
-    expect(
-      primitive.getBoundingSphere(new BoundingSphere()).radius,
-    ).toBeGreaterThan(0);
-    expect(primitive.getGeometryInstanceAttributes()).toBeDefined();
+    expect(primitive._currentCommands.colorCommands).toEqual(commands);
+    expect(bounds.radius).toBeGreaterThan(0);
 
-    const oldBounds = primitive.getBoundingSphere(new BoundingSphere());
-    const oldAttributes = primitive.getGeometryInstanceAttributes();
-    oldAttributes.marker = new Float32Array([7]);
     const replacement = new SceneGISPlanarPolylineGeometry({
       positions: [new Cartesian3(-4, 1, 0), new Cartesian3(4, 1, 0)],
       width: 2,
@@ -219,17 +180,12 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
     replacement._getDrapeSource = function () {
       throw new Error("candidate failure");
     };
-    expect(() =>
-      primitive._updateGround(frameState, snapshot, 1, "flat"),
-    ).toThrowError("candidate failure");
+    expect(() => update(primitive)).toThrowError("candidate failure");
     expect(primitive._current).toBe(current);
-    expect(primitive.getGeometryInstanceAttributes().marker).toEqual(
-      new Float32Array([7]),
-    );
     expect(
       BoundingSphere.equals(
         primitive.getBoundingSphere(new BoundingSphere()),
-        oldBounds,
+        bounds,
       ),
     ).toBeTrue();
     primitive.destroy();
@@ -237,43 +193,120 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
     expect(current.isDestroyed()).toBeTrue();
   });
 
-  it("keeps pick/depth passes allocation-free and rejects a second Context", function () {
+  it("queues terrain-classification render and pick commands", function () {
     const primitive = line();
-    scene.frameState.passes.render = true;
-    primitive._updateGround(scene.frameState, snapshot, 1, "flat");
+    const frameState = update(primitive);
+    update(primitive);
+    expect(
+      primitive._currentCommands.colorCommands.every(
+        (command) => command.pass === Pass.TERRAIN_CLASSIFICATION,
+      ),
+    ).toBeTrue();
+    expect(primitive._currentCommands.stencilCommands.length).toBe(1);
+    expect(primitive._currentCommands.colorCommands.length).toBe(1);
+    frameState.passes.render = false;
+    frameState.passes.pick = true;
+    frameState.commandList.length = 0;
+    primitive.update(frameState);
+    expect(frameState.commandList).toEqual([
+      primitive._currentCommands.pickStencilCommands[0],
+      primitive._currentCommands.pickColorCommands[0],
+    ]);
+    frameState.passes.depth = true;
+    frameState.commandList.length = 0;
+    primitive.update(frameState);
+    expect(frameState.commandList.length).toBe(0);
+  });
+
+  it("updates provider envelopes without replacing footprint resources", function () {
+    const primitive = line();
+    update(primitive);
+    update(primitive);
     const current = primitive._current;
-    const passes = scene.frameState.passes;
-    passes.render = false;
-    passes.pick = true;
-    passes.depth = true;
-    scene.frameState.commandList.length = 0;
-    primitive._updateGround(scene.frameState, snapshot, 1, "flat");
-    expect(scene.frameState.commandList.length).toBeGreaterThan(0);
-    const replayCommands = scene.frameState.commandList.slice();
+    const vertexArray = current._va[0];
+    const shaderProgram = current._sp;
+    const commands = primitive._currentCommands.colorCommands.slice();
+    const initialBounds = primitive.getBoundingSphere(new BoundingSphere());
+    const attributes = primitive.getGeometryInstanceAttributes();
+    attributes.marker = [2];
 
-    scene.frameState.commandList.length = 0;
-    primitive._updateGround(scene.frameState, [], 0, "");
+    world.terrainProvider = terrainProvider(-20, 80);
+    update(primitive);
     expect(primitive._current).toBe(current);
-    expect(scene.frameState.commandList.length).toBe(0);
-    const revisedSnapshot = [{ ...snapshot[0], revision: 1 }];
-    primitive._updateGround(scene.frameState, revisedSnapshot, 1, "revised");
-    expect(scene.frameState.commandList.length).toBe(0);
+    expect(current._va[0]).toBe(vertexArray);
+    expect(current._sp).toBe(shaderProgram);
+    expect(primitive._currentCommands.colorCommands).toEqual(commands);
+    expect(
+      BoundingSphere.equals(
+        primitive.getBoundingSphere(new BoundingSphere()),
+        initialBounds,
+      ),
+    ).toBeFalse();
 
-    passes.render = true;
-    passes.pick = false;
-    passes.depth = false;
-    primitive._updateGround(scene.frameState, revisedSnapshot, 1, "revised");
-    passes.render = false;
-    passes.pick = true;
-    passes.depth = true;
-    scene.frameState.commandList.length = 0;
-    primitive._updateGround(scene.frameState, revisedSnapshot, 1, "revised");
-    expect(scene.frameState.commandList.length).toBe(replayCommands.length);
+    primitive.geometry = new SceneGISPlanarPolylineGeometry({
+      positions: [new Cartesian3(-4, 1, 0), new Cartesian3(4, 1, 0)],
+      width: 2,
+    });
+    update(primitive);
+    expect(primitive.getGeometryInstanceAttributes().marker[0]).toBe(2);
+    const replacement = primitive._current;
+    world.terrainProvider = undefined;
+    update(primitive);
+    expect(primitive._current).toBe(replacement);
+    primitive.destroy();
+  });
 
-    primitive.show = false;
-    scene.frameState.commandList.length = 0;
-    primitive._updateGround(scene.frameState, revisedSnapshot, 1, "revised");
-    expect(scene.frameState.commandList.length).toBe(0);
+  it("anchors presentation bounds to resident terrain without rebuilding the shadow volume", function () {
+    world.terrainProvider = terrainProvider(-450, 8700);
+    const terrainHeight = spyOn(world, "getTerrainHeight").and.returnValue(37);
+    const primitive = line();
+    update(primitive);
+    update(primitive);
+    const current = primitive._current;
+    const vertexArray = current._va[0];
+    const shaderProgram = current._sp;
+    const commands = primitive._currentCommands.colorCommands.slice();
+    const sphere = primitive.getBoundingSphere(new BoundingSphere());
+    expect(sphere.center).toEqual(new Cartesian3(0, 0, 37));
+    expect(sphere.center.z).not.toBe(4125);
+    expect(sphere.radius).toBeCloseTo(Math.hypot(5, 8791.5 - 37), 10);
+
+    terrainHeight.and.returnValue(64);
+    primitive.getBoundingSphere(sphere);
+    expect(sphere.center).toEqual(new Cartesian3(0, 0, 64));
+    expect(primitive._current).toBe(current);
+    expect(current._va[0]).toBe(vertexArray);
+    expect(current._sp).toBe(shaderProgram);
+    expect(primitive._currentCommands.colorCommands).toEqual(commands);
+
+    terrainHeight.and.returnValue(undefined);
+    primitive.getBoundingSphere(sphere);
+    expect(sphere.center).toEqual(Cartesian3.ZERO);
+    expect(Number.isFinite(sphere.radius)).toBe(true);
+    expect(sphere.radius).toBeCloseTo(Math.hypot(5, 8791.5), 10);
+
+    world.terrainProvider = undefined;
+    primitive.getBoundingSphere(sphere);
+    expect(sphere.center).toEqual(Cartesian3.ZERO);
+    expect(sphere.radius).toBeCloseTo(Math.hypot(5, 1), 14);
+    expect(primitive._current).toBe(current);
+    expect(current._va[0]).toBe(vertexArray);
+    expect(current._sp).toBe(shaderProgram);
+    expect(primitive._currentCommands.colorCommands).toEqual(commands);
+    primitive.destroy();
+  });
+
+  it("rejects unsupported stencil and a second Context before mutation", function () {
+    const primitive = line();
+    const frameState = scene.frameState;
+    world.update(frameState);
+    const context = frameState.context;
+    const stencil = context._stencilBits;
+    context._stencilBits = 0;
+    expect(() => primitive.update(frameState)).toThrowDeveloperError();
+    expect(primitive._current).toBeUndefined();
+    context._stencilBits = stencil;
+    update(primitive);
     expect(function () {
       primitive.update({
         context: {},

@@ -141,10 +141,19 @@ describe("SceneGIS/DataSources/SceneGISPlanarRouteVisualizer", function () {
       .fillPrimitive;
     const positions = primitive.geometry.positions;
     expect(primitive).toBeInstanceOf(SceneGISPlanarGroundPrimitive);
-    expect(world.getTerrainHeight).not.toHaveBeenCalled();
+    expect(world.getTerrainHeight).toHaveBeenCalledTimes(1);
+    expect(world.getTerrainHeight.calls.mostRecent().args[0].x).toBe(0);
+    expect(world.getTerrainHeight.calls.mostRecent().args[0].y).toBe(-10);
     expect(new Set(positions.map((position) => position.z))).toEqual(
       new Set([0]),
     );
+
+    const owner = visualizer._items.get(entity.id).owners.corridor;
+    entity.corridor.heightReference = HeightReference.RELATIVE_TO_GROUND;
+    expect(function () {
+      visualizer.update(time);
+    }).toThrowDeveloperError();
+    expect(visualizer._items.get(entity.id).owners.corridor).toBe(owner);
   });
 
   it("updates style in place and replaces dynamic topology atomically", function () {

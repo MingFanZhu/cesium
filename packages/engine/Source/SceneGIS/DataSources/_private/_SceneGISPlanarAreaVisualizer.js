@@ -410,6 +410,15 @@ function computeState(visualizer, item, name, time) {
     heightReference !== HeightReference.NONE ||
     (bottomSource !== undefined &&
       extrudedHeightReference !== HeightReference.NONE);
+  if (
+    ground &&
+    (heightReference !== HeightReference.CLAMP_TO_GROUND ||
+      bottomSource !== undefined)
+  ) {
+    throw new DeveloperError(
+      "Planar ground areas require a non-extruded CLAMP_TO_GROUND surface.",
+    );
+  }
   const top = resolveVertices(
     visualizer._world,
     topSource,
@@ -544,11 +553,6 @@ function createOwner(visualizer, item, state) {
       ...(state.ground
         ? {
             world: visualizer._world,
-            heightReference: state.heightReference,
-            extrudedHeightReference:
-              state.bottom === undefined
-                ? undefined
-                : state.extrudedHeightReference,
           }
         : {}),
       geometry: new SceneGISPlanarPolygonGeometry({
@@ -585,8 +589,6 @@ function createOwner(visualizer, item, state) {
       ...(usesGround
         ? {
             world: visualizer._world,
-            heightReference: endpointReferences?.[0] ?? groundReference,
-            _heightReferences: endpointReferences,
           }
         : {}),
       geometry: new SceneGISPlanarPolylineGeometry({

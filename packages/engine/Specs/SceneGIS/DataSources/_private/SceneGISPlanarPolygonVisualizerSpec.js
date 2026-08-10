@@ -106,35 +106,25 @@ describe("SceneGIS/DataSources/SceneGISPlanarPolygonVisualizer", function () {
     }
   });
 
-  it("defers ground-relative caps to one continuous ground primitive", function () {
+  it("uses one implicit surface clamp and rejects relative or extruded ground", function () {
     spyOn(world, "getTerrainHeight").and.returnValue(10);
     const entity = addPolygon({
       graphic: {
-        heightReference: HeightReference.RELATIVE_TO_GROUND,
-        height: 2,
-        extrudedHeightReference: HeightReference.NONE,
-        extrudedHeight: -3,
+        heightReference: HeightReference.CLAMP_TO_GROUND,
         outline: true,
       },
     });
     visualizer.update(time);
     const first = visualizer._items.get(entity.id).owner;
     expect(first.fillPrimitive).toBeInstanceOf(SceneGISPlanarGroundPrimitive);
-    expect(first.fillPrimitive.geometry.positions[0].z).toBe(2);
-    const vertical = first.outlinePrimitives.filter(
-      (primitive) => primitive._heightReferences !== undefined,
-    );
-    expect(vertical.length).toBe(4);
-    expect(vertical[0]._heightReferences).toEqual([
-      HeightReference.RELATIVE_TO_GROUND,
-      HeightReference.NONE,
-    ]);
-    world.getTerrainHeight.and.returnValue(20);
-    visualizer.update(time);
-    const second = visualizer._items.get(entity.id).owner;
-    expect(second).toBe(first);
-    expect(first.destroyed).toBeFalse();
+    expect(first.fillPrimitive.geometry.positions[0].z).toBe(0);
     expect(world.getTerrainHeight).not.toHaveBeenCalled();
+
+    entity.polygon.heightReference = HeightReference.RELATIVE_TO_GROUND;
+    entity.polygon.extrudedHeight = -3;
+    expect(() => visualizer.update(time)).toThrowDeveloperError();
+    expect(visualizer._items.get(entity.id).owner).toBe(first);
+    expect(first.destroyed).toBeFalse();
   });
 
   it("retains hidden owner, releases missing hierarchy, and reports bounds", function () {

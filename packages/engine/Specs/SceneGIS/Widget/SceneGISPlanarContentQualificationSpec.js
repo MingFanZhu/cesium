@@ -604,7 +604,6 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
             color: Color.ORANGE,
           }),
         }),
-        heightReference: HeightReference.CLAMP_TO_GROUND,
         id: "direct-ground",
       }),
     );
@@ -698,17 +697,12 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
     const secondProvider = attachDeterministicTerrain(world, 200.0);
     expect(secondProvider).not.toBe(firstProvider);
     expect(ground._current).toBe(previousGroundCurrent);
-    for (
-      let frame = 0;
-      frame < 30 &&
-      (ground._current === previousGroundCurrent || !world.tilesLoaded);
-      ++frame
-    ) {
+    for (let frame = 0; frame < 30 && !world.tilesLoaded; ++frame) {
       widget.render();
       await Promise.resolve();
     }
     expect(world.terrainProvider).toBe(secondProvider);
-    expect(ground._current).not.toBe(previousGroundCurrent);
+    expect(ground._current).toBe(previousGroundCurrent);
     expect(ground.ready).toBeTrue();
     expect(world.tilesLoaded).toBeTrue();
 
@@ -722,12 +716,12 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
         groundPosition,
         new Cartesian2(),
       );
-      expect(widget.scene.pick(windowPosition).id).toBe("direct-ground");
       const depthPosition = widget.scene.pickPosition(windowPosition);
       expect(depthPosition).toBeDefined();
       expect(Math.abs(depthPosition.x - groundPosition.x)).toBeLessThan(2.0);
       expect(Math.abs(depthPosition.y - groundPosition.y)).toBeLessThan(2.0);
       expect(Math.abs(depthPosition.z - expectedHeight)).toBeLessThan(2.0);
+      expect(widget.scene.pick(windowPosition).id).toBe("direct-ground");
     }
 
     expect(widget.dataSources.remove(source)).toBe(true);

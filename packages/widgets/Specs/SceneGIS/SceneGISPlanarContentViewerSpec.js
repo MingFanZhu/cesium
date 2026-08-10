@@ -1,13 +1,19 @@
 import {
   ApproximateTerrainHeights,
+  BoundingSphere,
   Cartesian2,
   Cartesian3,
   Color,
+  ColorMaterialProperty,
+  CorridorGraphics,
   CustomDataSource,
+  Event,
+  HeightReference,
   PointGraphics,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
+  SceneTransforms,
   ScreenSpaceEventType,
 } from "@cesium/engine";
 import createViewer from "../createViewer.js";
@@ -87,6 +93,91 @@ describe("SceneGIS/SceneGISPlanarContentViewer", function () {
       "Planar content description",
     );
     expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
+  });
+
+  it("anchors an oblique ground Corridor selection to the presentation surface", function () {
+    viewer = createPlanarViewer();
+    const world = viewer.scene.world;
+    world.terrainProvider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: -450,
+      maximumHeight: 8700,
+      maximumLevel: 1,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: (level) => 1 / 2 ** level,
+      requestTileGeometry: () => undefined,
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+    };
+    const entity = viewer.entities.add({
+      id: "viewer-ground-corridor",
+      name: "Planar Corridor",
+      description: "Ground selection anchor",
+      corridor: new CorridorGraphics({
+        positions: [new Cartesian3(-40, -10, 999), new Cartesian3(40, 10, 999)],
+        width: 14,
+        heightReference: HeightReference.CLAMP_TO_GROUND,
+        material: new ColorMaterialProperty(Color.DEEPSKYBLUE),
+      }),
+    });
+    const cameraPosition = new Cartesian3(96, -96, 96);
+    const direction = Cartesian3.normalize(
+      Cartesian3.negate(cameraPosition, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const right = Cartesian3.normalize(
+      Cartesian3.cross(direction, Cartesian3.UNIT_Z, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const up = Cartesian3.cross(right, direction, new Cartesian3());
+    viewer.camera.setView({
+      destination: cameraPosition,
+      orientation: { direction, up },
+    });
+    viewer.dataSourceDisplay.update(viewer.clock.currentTime);
+    viewer.dataSourceDisplay.update(viewer.clock.currentTime);
+    viewer.render();
+    viewer.render();
+
+    const route = viewer.dataSourceDisplay.defaultDataSource._visualizers[7];
+    const owner = route._items.get(entity.id).owners.corridor;
+    const primitive = owner.fillPrimitive;
+    const presentationSphere = primitive.getBoundingSphere(
+      new BoundingSphere(),
+    );
+    expect(presentationSphere.center.x).toBeCloseTo(0, 12);
+    expect(presentationSphere.center.y).toBeCloseTo(0, 12);
+    expect(presentationSphere.center.z).toBe(0);
+    expect(presentationSphere.center.z).not.toBe(4125);
+
+    spyOn(viewer.scene, "pick").and.returnValue({ id: entity });
+    const select = viewer.screenSpaceEventHandler.getInputAction(
+      ScreenSpaceEventType.LEFT_CLICK,
+    );
+    select({ position: new Cartesian2(32, 32) });
+    viewer._onTick(viewer.clock);
+    const viewModel = viewer.selectionIndicator.viewModel;
+    expect(viewer.selectedEntity).toBe(entity);
+    expect(viewModel.showSelection).toBe(true);
+    expect(viewModel.position).toEqual(presentationSphere.center);
+    const projected = viewModel.computeScreenSpacePosition(
+      viewModel.position,
+      new Cartesian2(),
+    );
+    expect(projected).toEqualEpsilon(
+      SceneTransforms.worldToWindowCoordinates(
+        viewer.scene,
+        presentationSphere.center,
+        new Cartesian2(),
+      ),
+      1e-12,
+    );
+    const canvas = viewer.scene.canvas;
+    expect(projected.x).toBeGreaterThanOrEqual(0);
+    expect(projected.x).toBeLessThanOrEqual(canvas.clientWidth);
+    expect(projected.y).toBeGreaterThanOrEqual(0);
+    expect(projected.y).toBeLessThanOrEqual(canvas.clientHeight);
   });
 
   it("keeps added CustomDataSource primitives isolated and releases them", async function () {

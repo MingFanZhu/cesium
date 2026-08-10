@@ -185,7 +185,7 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
     }
   });
 
-  it("composes layers bottom-to-top in one opaque command", async function () {
+  it("composes layers bottom-to-top in one Globe-pass command", async function () {
     const world = createWorld();
     world.imageryLayers.addImageryProvider(
       createProvider(world, () => Promise.resolve(createImage("rgb(255,0,0)"))),
@@ -208,7 +208,7 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
       expect(rgba[3]).toBe(255);
     });
     expect(world._surface._debug.submittedCommands).toBe(1);
-    expect(world._surface._renderCommands[0].pass).toBe(Pass.OPAQUE);
+    expect(world._surface._renderCommands[0].pass).toBe(Pass.GLOBE);
   });
 
   it("uses a ready root ancestor without settling pending desired tiles", async function () {

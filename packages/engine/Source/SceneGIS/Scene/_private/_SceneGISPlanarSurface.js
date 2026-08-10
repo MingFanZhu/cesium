@@ -59,10 +59,6 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
   this._renderCommands = [];
   this._terrainQuerySnapshot = [];
   this._terrainQuerySnapshotCount = 0;
-  this._groundRenderSnapshot = undefined;
-  this._groundRenderSnapshotCount = 0;
-  this._groundRenderSnapshotSignature = "";
-  this._groundRenderGeneration = 0;
   this._shownLayers = [];
   this._tilesLoaded = true;
   this._destroyed = false;
@@ -75,6 +71,7 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
     createdCommands: 0,
     submittedCommands: 0,
     depthSubmittedCommands: 0,
+    pickSubmittedCommands: 0,
     destroyedVertexArrays: 0,
     destroyedBuffers: 0,
     destroyedShaders: 0,
@@ -96,8 +93,6 @@ SceneGISPlanarSurface.prototype.setTerrainProvider = function (
 ) {
   this._renderCommands.length = 0;
   this.invalidateTerrainQuerySnapshot();
-  this.invalidateGroundRenderSnapshot();
-  ++this._groundRenderGeneration;
   if (!defined(provider)) {
     this._terrain?.destroy();
     this._terrain = undefined;
@@ -133,29 +128,6 @@ SceneGISPlanarSurface.prototype.invalidateTerrainQuerySnapshot = function () {
     entry.key = undefined;
   }
   this._terrainQuerySnapshotCount = 0;
-};
-
-SceneGISPlanarSurface.prototype.invalidateGroundRenderSnapshot = function () {
-  if (!defined(this._groundRenderSnapshot)) {
-    this._groundRenderSnapshotCount = 0;
-    this._groundRenderSnapshotSignature = "";
-    return;
-  }
-  for (let i = 0; i < this._groundRenderSnapshotCount; ++i) {
-    const entry = this._groundRenderSnapshot[i];
-    if (!defined(entry)) {
-      continue;
-    }
-    entry.tile = undefined;
-    entry.content = undefined;
-    entry.mesh = undefined;
-    entry.extent = undefined;
-    entry.source = undefined;
-    entry.revision = undefined;
-    entry.key = undefined;
-  }
-  this._groundRenderSnapshotCount = 0;
-  this._groundRenderSnapshotSignature = "";
 };
 
 SceneGISPlanarSurface.prototype.getTerrainHeight = function (
@@ -307,7 +279,7 @@ function getCommand(surface, tile, layerCount, enableLighting) {
       shaderProgram,
       uniformMap: createUniformMap(surface, tile, layerCount, enableLighting),
       renderState: surface._renderState,
-      pass: Pass.OPAQUE,
+      pass: Pass.GLOBE,
       owner: surface,
       castShadows: false,
       receiveShadows: false,
@@ -397,12 +369,11 @@ SceneGISPlanarSurface.prototype.render = function (
   baseColor,
   enableLighting = false,
   lambertDiffuseMultiplier = 0.9,
-  publishGroundSnapshot = false,
 ) {
   validateContext(this, frameState.context);
   const passes = frameState.passes;
-  const depthPick = passes.pick && passes.depth && !passes.render;
-  if (depthPick) {
+  const pickReplay = passes.pick && !passes.render;
+  if (pickReplay) {
     if (
       frameState.context.drawingBufferWidth === 0 ||
       frameState.context.drawingBufferHeight === 0
@@ -411,7 +382,11 @@ SceneGISPlanarSurface.prototype.render = function (
     }
     for (const command of this._renderCommands) {
       frameState.commandList.push(command);
-      ++this._debug.depthSubmittedCommands;
+      if (passes.depth) {
+        ++this._debug.depthSubmittedCommands;
+      } else {
+        ++this._debug.pickSubmittedCommands;
+      }
     }
     return;
   }
@@ -419,7 +394,6 @@ SceneGISPlanarSurface.prototype.render = function (
     return;
   }
   this.invalidateTerrainQuerySnapshot();
-  this.invalidateGroundRenderSnapshot();
   const shownLayers = getShownLayers(this);
   if (shownLayers.length > ContextLimits.maximumTextureImageUnits) {
     throw new DeveloperError(
@@ -520,26 +494,6 @@ SceneGISPlanarSurface.prototype.render = function (
     }
     this._terrainQuerySnapshotCount = count;
   }
-  if (publishGroundSnapshot) {
-    const snapshot = (this._groundRenderSnapshot ??= []);
-    const signature = [];
-    let count = 0;
-    for (const tile of tiles) {
-      const content = tile.terrainEntry?.activeContent;
-      const entry = (snapshot[count] ??= {});
-      entry.tile = tile;
-      entry.content = content;
-      entry.mesh = content?.mesh;
-      entry.extent = tile.extent;
-      entry.source = content?.source ?? "FLAT";
-      entry.revision = content?.revision ?? 0;
-      entry.key = tile.key;
-      signature.push(`${entry.key}:${entry.source}:${entry.revision}`);
-      ++count;
-    }
-    this._groundRenderSnapshotCount = count;
-    this._groundRenderSnapshotSignature = `${this._groundRenderGeneration}|${signature.join("|")}`;
-  }
 };
 
 SceneGISPlanarSurface.prototype.endFrame = function (tileCacheSize) {
@@ -585,11 +539,6 @@ SceneGISPlanarSurface.prototype.destroy = function () {
   this._renderCommands.length = 0;
   this._terrainQuerySnapshot.length = 0;
   this._terrainQuerySnapshotCount = 0;
-  this.invalidateGroundRenderSnapshot();
-  if (defined(this._groundRenderSnapshot)) {
-    this._groundRenderSnapshot.length = 0;
-  }
-  this._groundRenderSnapshot = undefined;
   this._context = undefined;
   this._destroyed = true;
 };

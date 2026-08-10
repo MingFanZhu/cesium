@@ -3,7 +3,7 @@
 ## 元数据
 
 - 计划类型（Plan type）：`extension`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 负责人角色（Owner role）：`architecture`
 - 架构评审（Architecture review）：`confirmed`
 - 架构评审人（Architecture reviewer）：项目负责人
@@ -29,6 +29,10 @@
   [C8 route-derived geometry and path review](../reviews/2026-08-10-c8-route-derived-geometry-and-path.md)
   （`approved`）、
   [C9 continuous ground and Ground Primitive review](../reviews/2026-08-10-c9-continuous-ground-and-ground-primitive.md)
+  （`approved`）、
+  [C10 unified integration and delivery review](../reviews/2026-08-10-c10-unified-integration-and-delivery.md)
+  （`approved`）、
+  [C11 planar depth/stencil ground rendering review](../reviews/2026-08-10-c11-planar-depth-stencil-ground-rendering.md)
   （`approved`）
 - ADR：
   [ADR-0013：平面内容坐标、高度、朝向与兼容性基线](../../../Documentation/SceneGIS/Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)、
@@ -40,7 +44,8 @@
   [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)、
   [ADR-0020：平面路径衍生 Geometry 与动态 Path](../../../Documentation/SceneGIS/Decisions/ADR-0020-planar-route-derived-geometry-and-path.md)、
   [ADR-0021：平面连续贴地与 Ground Primitive 晚阶段渲染协议](../../../Documentation/SceneGIS/Decisions/ADR-0021-planar-continuous-ground-and-ground-primitive.md)、
-  [ADR-0022：平面内容兼容性矩阵与最终交付](../../../Documentation/SceneGIS/Decisions/ADR-0022-planar-content-compatibility-and-delivery.md)
+  [ADR-0022：平面内容兼容性矩阵与最终交付](../../../Documentation/SceneGIS/Decisions/ADR-0022-planar-content-compatibility-and-delivery.md)、
+  [ADR-0023：平面Depth/Stencil Ground Rendering](../../../Documentation/SceneGIS/Decisions/ADR-0023-planar-depth-stencil-ground-rendering.md)
 - SGP：C4复用active `SGP-0001`；只允许在CesiumWidget增加instance-owned visualizer callback seam
 
 ## 目标
@@ -247,6 +252,21 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
   在旧C9后端人工验收前决定由C11使用单一planar depth/stencil backend替换actual-mesh drape；C10作为自动化交付
   baseline完成，最终人工验收转移到C11。
 
+### C11：Planar Depth/Stencil Ground Rendering
+
+- 目标：以SceneGIS-owned planar shadow/segment volume、existing primary-surface/classification pass和GPU Shader
+  完全替换C9 actual-triangle CPU drape，不保留runtime fallback。
+- 依赖：C10自动化交付baseline checkpoint `c376e82c7e`与项目负责人明确的单一backend决定。
+- 进入门槛：重新审计Cesium GroundPrimitive、GroundPolylinePrimitive、ClassificationPrimitive、Scene pass ordering、
+  planar Surface command与TerrainProvider global height envelope；ADR-0023批准。
+- 完成门槛：area/polyline GPU ground、above/below camera、pick/depth、stencil cleanup、provider lifecycle、warm identity、
+  public contract收窄、C9 runtime删除及项目负责人更新页面人工验收全部通过。
+- 状态：`completed`；phase plan：
+  [C11 Planar Depth/Stencil Ground Rendering](2026-08-10-phase-c11-planar-depth-stencil-ground-rendering.md)。
+- Ownership：预期upstream-owned files=`0`、C11 SGP=`0`；existing pass reuse失败时暂停，不自行新增Scene pass。
+- 完成结果：C11-R001～C11-R008全部关闭，单一GPU depth/stencil backend、更新后Sandcastle与项目负责人真实
+  浏览器/GPU人工验收通过；upstream-owned files=`0`、C11 SGP=`0`，不保留C9 runtime fallback。
+
 阶段默认串行推进。每个阶段在 implementation、验证和 Architecture/code review 完成后，由
 Architecture Agent形成独立中文本地提交检查点，再进入下一阶段。
 
@@ -287,7 +307,7 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
 
 ## 整体验收条件
 
-- C1-C10 均完成 implementation、最小充分验证、Architecture/code review、AgentDocs 回写和独立本地
+- C1-C11 均完成 implementation、最小充分验证、Architecture/code review、AgentDocs 回写和独立本地
   提交。
 - 普通Entity graphics全部具有明确可执行的planar contract；3D Tiles与格式转换只按显式独立扩展边界排除。
 - 应用可不经过private visualizer直接使用public planar Primitive/Geometry，Entity adapter复用同一低层实现。
@@ -469,3 +489,41 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
 - `2026-08-10`：项目负责人在旧C9 actual-mesh backend最终人工验收前决定不采用混合实现，要求后续按Cesium
   GroundPrimitive/GroundPolylinePrimitive思想建立单一planar depth/stencil GPU backend。C10作为自动化交付
   baseline标记`completed`并先独立提交；旧页面未宣称人工验收通过，extension保持`active`，最终验收转移到C11。
+- `2026-08-10`：Architecture以中文提交`完成平面内容统一集成与交付基线`形成C10 checkpoint
+  `c376e82c7e`。随后审计Scene pass ordering、GroundPrimitive/ClassificationPrimitive stencil states、
+  GroundPolyline dedicated Shader、planar Surface OPAQUE pass与provider global height range；ADR-0023批准单一GPU
+  backend、surface clamp public contract与zero-upstream pass reuse，C11 phase激活并派发Execution。
+- `2026-08-10`：Architecture首轮C11 review确认C9 runtime已删除且ownership边界正确，但提出C11-R001～C11-R004：
+  z-fail缺少inside-volume/depth-clamp闭合语义、depth-only derived command会写volume depth、Ground line动态Color与
+  premultiplied alpha未闭环，以及segment boxes没有join/end协议。C11/extension保持`active`，等待focused修复与re-review。
+- `2026-08-10`：Execution完成C11-R001～C11-R004 focused修复；Surface `32/32`、GroundVolume `3/3`、
+  GroundPrimitive `5/5`及四个受影响Entity adapter suites通过，保持单一GPU backend与zero-upstream/zero-SGP，等待
+  Architecture focused re-review。项目负责人人工门禁尚未开始。
+- `2026-08-10`：Architecture focused re-review确认R001～R004产品修复关闭，独立Surface `32/32`与GroundPrimitive `5/5`
+  通过。GroundVolume实际为`1/3`：private Spec混用generated barrel与direct source constructor identity；现有GPU fixture又只
+  采样旧butt segment也可命中的joint中心。新增R005 narrow evidence follow-up，只补统一direct imports及outer-miter/loop-seam采样。
+- `2026-08-10`：Execution完成R005：GroundVolume Spec统一direct source imports后为`3/3`；Surface新增off-center
+  outer-miter与loop-seam pixel/pick后为`32/32`。没有新增产品源码变化，等待最终focused re-review。
+- `2026-08-10`：Architecture final focused re-review独立复跑GroundVolume `3/3`与Surface/Shader `32/32`通过，确认
+  两个off-center采样位于旧butt caps之外；C11-R001～C11-R005全部关闭，C11 review=`approved`。Extension与C11仍
+  `active`，只等待项目负责人Sandcastle人工验收。
+- `2026-08-10`：项目负责人在Sandcastle人工验收中复现单直段ground polyline随heading/pitch产生楔形端部与宽度
+  变化，登记C11-R006并恢复review=`changes-requested`。Execution改为RTE + eye-space meter-per-pixel miter plane，
+  普通坐标六视角和EPSG:3857四视角的端部/中心width、pixel、original id与warm identity证据通过，等待focused re-review。
+- `2026-08-10`：Architecture focused re-review确认C11-R006修复，独立Surface/Shader `33/33`与更新后Sandcastle
+  基准/斜视/反向视角诊断通过；R001～R006全部关闭，C11 review=`approved`，恢复项目负责人人工复测。
+- `2026-08-10`：项目负责人人工复测发现C11-R007：clamped Corridor选择正确Entity，但SelectionIndicator使用
+  asymmetric provider shadow envelope midpoint而严重偏离surface。Execution拆分command/culling bounds与
+  resident-height presentation bounds，GroundPrimitive `6/6`、Polyline `7/7`、Viewer `3/3`通过；review恢复
+  `changes-requested`并等待Architecture focused re-review，C11/extension继续`active`。
+- `2026-08-10`：Architecture focused re-review确认C11-R007关闭，独立GroundPrimitive `6/6`与Widgets Viewer
+  `3/3`均通过；C11 review恢复`approved`。C11/extension保持`active`，下一步为项目负责人更新后Sandcastle人工
+  复测，通过后由Architecture提交C11检查点。
+- `2026-08-10`：项目负责人人工复测又发现C11-R008：Sandcastle两个direct Primitive以string id拾取，Viewer按
+  标准语义不生成Entity selection/InfoBox。Execution仅修复delivery wiring：caller-owned metadata Entity作为direct
+  id，并在唯一E2E中闭环两条真实GPU pick、InfoBox与finite selection anchor；product runtime delta=`0`，
+  dev/release各`1/1`，等待focused re-review。
+- `2026-08-10`：Architecture focused re-review在真实Sandcastle中分别点击蓝色direct Polygon与紫色direct Ground
+  Polyline，均得到精确InfoBox title与finite SelectionIndicator，确认C11-R008关闭、review恢复`approved`。
+  项目负责人随后完成其余人工验收并明确确认通过；远距离Label固定像素background被确认是Cesium正常语义，
+  不登记新finding或代码变更。C11与extension标记`completed`，等待本次独立中文本地提交检查点。

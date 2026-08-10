@@ -66,7 +66,9 @@ const nonPublicSpellings = [
   "SceneGISPlanarPathSampler",
   "SceneGISPlanarPathVisualizer",
   "SceneGISPlanarGroundBounds",
-  "SceneGISPlanarGroundDraper",
+  "SceneGISPlanarGroundCommands",
+  "SceneGISPlanarGroundLineShader",
+  "SceneGISPlanarGroundVolume",
   "SceneGISPlanarVisualizersCallback",
 ];
 const softPrivateContentSymbols = [
@@ -83,7 +85,9 @@ const softPrivateContentSymbols = [
   "_SceneGISPlanarPathSampler",
   "_SceneGISPlanarPathVisualizer",
   "_SceneGISPlanarGroundBounds",
-  "_SceneGISPlanarGroundDraper",
+  "_SceneGISPlanarGroundCommands",
+  "_SceneGISPlanarGroundLineShader",
+  "_SceneGISPlanarGroundVolume",
   "_SceneGISPlanarVisualizersCallback",
 ];
 const privateContentFiles = [
@@ -101,7 +105,9 @@ const privateContentFiles = [
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPathVisualizer.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarGroundBounds.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarVisualizersCallback.js",
-  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundDraper.js",
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundCommands.js",
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundLineShader.js",
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundVolume.js",
 ];
 
 function npmCommand(args) {

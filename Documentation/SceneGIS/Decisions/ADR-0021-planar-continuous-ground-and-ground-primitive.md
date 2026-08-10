@@ -2,12 +2,17 @@
 
 ## 状态
 
-- Status：`approved`
+- Status：`superseded`
 - Date：`2026-08-10`
 - Decision owners：Architecture Agent（依据项目负责人授予的后续阶段自主设计与派工权限）
 - Related plan：
   `AgentDocs/planar-content/plans/2026-08-10-phase-c9-continuous-ground-and-ground-primitive.md`
 - Related patch：无；C9 预期 upstream-owned files=`0`、SGP=`0`
+- Superseded by：
+  [ADR-0023：平面 Depth/Stencil Ground Rendering](ADR-0023-planar-depth-stencil-ground-rendering.md)
+
+> C9实现与评审结论仍是历史事实。项目负责人在C10最终人工验收前决定不保留actual-mesh/stencil混合backend；
+> C11将以单一GPU depth/stencil实现替换本文的draper、snapshot与late-registration协议。
 
 ## 上下文与源码事实
 

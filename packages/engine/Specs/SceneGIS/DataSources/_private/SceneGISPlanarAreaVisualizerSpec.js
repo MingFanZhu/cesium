@@ -140,7 +140,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarAreaVisualizer", function () {
     expect(visualizer._items.get(oblique.id).owners.plane).toBe(obliqueOwner);
   });
 
-  it("uses ellipse position only for XY and defers generated-vertex draping", function () {
+  it("uses ellipse XY for implicit surface clamp and rejects relative ground", function () {
     const terrain = spyOn(world, "getTerrainHeight").and.returnValue(11);
     const entity = collection.add({
       id: "ellipse",
@@ -148,8 +148,8 @@ describe("SceneGIS/DataSources/SceneGISPlanarAreaVisualizer", function () {
       ellipse: new EllipseGraphics({
         semiMajorAxis: 20,
         semiMinorAxis: 10,
-        height: 3,
-        heightReference: HeightReference.RELATIVE_TO_GROUND,
+        height: 0,
+        heightReference: HeightReference.CLAMP_TO_GROUND,
         granularity: Math.PI / 4,
         rotation: Math.PI / 2,
       }),
@@ -160,10 +160,16 @@ describe("SceneGIS/DataSources/SceneGISPlanarAreaVisualizer", function () {
     expect(
       visualizer._items.get(entity.id).owners.ellipse.primitives[0],
     ).toBeInstanceOf(SceneGISPlanarGroundPrimitive);
-    expect(positions.every((p) => p.z === 3)).toBeTrue();
-    expect(terrain.calls.count()).toBe(0);
+    expect(positions.every((p) => p.z === 0)).toBeTrue();
+    expect(terrain.calls.count()).toBe(1);
+    expect(terrain.calls.mostRecent().args[0].x).toBe(10);
+    expect(terrain.calls.mostRecent().args[0].y).toBe(20);
     expect(positions[0].x).toBeCloseTo(-10, 12);
     expect(positions[0].y).toBeCloseTo(20, 12);
+    const owner = visualizer._items.get(entity.id).owners.ellipse;
+    entity.ellipse.heightReference = HeightReference.RELATIVE_TO_GROUND;
+    expect(() => visualizer.update(time)).toThrowDeveloperError();
+    expect(visualizer._items.get(entity.id).owners.ellipse).toBe(owner);
   });
 
   it("rotates and extrudes metric rectangles and rejects granularity", function () {

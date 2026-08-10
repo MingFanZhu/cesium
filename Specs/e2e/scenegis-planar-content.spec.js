@@ -251,14 +251,30 @@ test("qualifies automatic planar content, dynamic update, selection, and destroy
       },
     });
     await viewer.dataSources.add(source);
+    const directOrdinaryEntity = viewer.entities.add({
+      id: "e2e-direct-ordinary",
+      name: "Direct ordinary polygon",
+      description: "Metadata for a direct planar primitive.",
+      position: new Cesium.Cartesian3(-60, -10, 140),
+    });
+    const directGroundCenter = new Cesium.Cartesian3(0, 0, 0);
+    const directGroundEntity = viewer.entities.add({
+      id: "e2e-direct-ground",
+      name: "Direct ground polygon",
+      description: "Metadata for a direct planar ground primitive.",
+      position: new Cesium.CallbackProperty((_time, result) => {
+        const height = world.getTerrainHeight(directGroundCenter) ?? 0;
+        return Cesium.Cartesian3.fromElements(0, 0, height, result);
+      }, false),
+    });
     const directPrimitive = viewer.scene.primitives.add(
       new Cesium.SceneGISPlanarPrimitive({
         geometry: new Cesium.SceneGISPlanarPolygonGeometry({
           positions: [
-            new Cesium.Cartesian3(-20, -25, 20),
-            new Cesium.Cartesian3(20, -25, 20),
-            new Cesium.Cartesian3(20, 5, 20),
-            new Cesium.Cartesian3(-20, 5, 20),
+            new Cesium.Cartesian3(-80, -25, 140),
+            new Cesium.Cartesian3(-40, -25, 140),
+            new Cesium.Cartesian3(-40, 5, 140),
+            new Cesium.Cartesian3(-80, 5, 140),
           ],
         }),
         appearance: new Cesium.PerInstanceColorAppearance({ flat: true }),
@@ -267,7 +283,7 @@ test("qualifies automatic planar content, dynamic update, selection, and destroy
             Cesium.Color.BLUE,
           ),
         },
-        id: "e2e-direct-ordinary",
+        id: directOrdinaryEntity,
       }),
     );
     const directGround = viewer.scene.primitives.add(
@@ -289,8 +305,7 @@ test("qualifies automatic planar content, dynamic update, selection, and destroy
             Cesium.Color.ORANGE,
           ),
         },
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        id: "e2e-direct-ground",
+        id: directGroundEntity,
       }),
     );
     for (let frame = 0; frame < 20; ++frame) {
@@ -380,6 +395,16 @@ test("qualifies automatic planar content, dynamic update, selection, and destroy
     const depthPick = viewer.scene.pickPosition(terrainWindow);
     const groundPick = viewer.scene.pick(terrainWindow);
     const groundPickId = groundPick?.id?.id ?? groundPick?.id;
+    const directPicks = [
+      findRolePick({
+        entity: directOrdinaryEntity,
+        position: new Cesium.Cartesian3(-60, -10, 140),
+      }),
+      findRolePick({
+        entity: directGroundEntity,
+        position: new Cesium.Cartesian3(0, 0, terrainHeight),
+      }),
+    ];
     source.show = true;
     viewer.dataSourceDisplay.update(viewer.clock.currentTime);
     viewer.render();
@@ -392,6 +417,8 @@ test("qualifies automatic planar content, dynamic update, selection, and destroy
       rolePicks,
       directPrimitive,
       directGround,
+      directOrdinaryEntity,
+      directGroundEntity,
     };
     return {
       visualizerCount: visualizers.length,
@@ -422,6 +449,7 @@ test("qualifies automatic planar content, dynamic update, selection, and destroy
         viewer.scene.world === world && viewer.scene.globe === undefined,
       controllerCount: viewer.scene.controllerHost.controllerCount,
       rolePicks,
+      directPicks,
     };
   });
   expect(initial).toMatchObject({
@@ -451,11 +479,46 @@ test("qualifies automatic planar content, dynamic update, selection, and destroy
     "e2e-wall",
     "e2e-path",
   ]);
+  expect(initial.directPicks.map(({ picked }) => picked)).toEqual([
+    "e2e-direct-ordinary",
+    "e2e-direct-ground",
+  ]);
   for (const role of initial.rolePicks) {
     await page.mouse.click(role.window[0], role.window[1]);
     expect(
       await page.evaluate(() => window.scenegisC10.viewer.selectedEntity?.id),
     ).toBe(role.id);
+  }
+  const directTitles = ["Direct ordinary polygon", "Direct ground polygon"];
+  for (let i = 0; i < initial.directPicks.length; ++i) {
+    const direct = initial.directPicks[i];
+    await page.mouse.click(direct.window[0], direct.window[1]);
+    await page.evaluate(() => {
+      const viewer = window.scenegisC10.viewer;
+      viewer._onTick(viewer.clock);
+    });
+    await page.waitForFunction((id) => {
+      const viewer = window.scenegisC10.viewer;
+      const position = viewer.selectionIndicator.viewModel.position;
+      return (
+        viewer.selectedEntity?.id === id &&
+        Number.isFinite(position?.x) &&
+        Number.isFinite(position?.y) &&
+        Number.isFinite(position?.z)
+      );
+    }, direct.id);
+    const selected = await page.evaluate(() => {
+      const viewer = window.scenegisC10.viewer;
+      const position = viewer.selectionIndicator.viewModel.position;
+      return {
+        id: viewer.selectedEntity?.id,
+        title: viewer.infoBox.viewModel.titleText,
+        anchor: [position.x, position.y, position.z],
+      };
+    });
+    expect(selected.id).toBe(direct.id);
+    expect(selected.title).toBe(directTitles[i]);
+    expect(selected.anchor.every(Number.isFinite)).toBe(true);
   }
 
   const dynamic = await page.evaluate(() => {

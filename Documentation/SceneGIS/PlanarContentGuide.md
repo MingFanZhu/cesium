@@ -78,8 +78,8 @@ C2 private visualizer 不拥有 World、Scene、EntityCollection、EntityCluster
 ## C3 Polyline 与 Polygon profile
 
 Polyline 使用 planar straight segments；`arcType` undefined等价于`ArcType.NONE`，显式值也只接受
-`NONE`。Ordinary absolute路径保留 supplied vertices；C9以后`clampToGround:true`统一使用actual-cover
-continuous ground，不发请求但会在当前rendered terrain triangle边界细分。支持solid
+`NONE`。Ordinary absolute路径保留 supplied vertices；`clampToGround:true`统一使用C11 GPU ground-line backend，
+不发请求、不读取terrain triangle，也不随LOD/revision重建footprint。支持solid
 `ColorMaterialProperty`、finite nonnegative width、show、availability、dynamic positions、extent、
 original Entity picking与world bounds。
 
@@ -87,8 +87,8 @@ Polygon接受一个simple outer ring和direct holes；不接受nested hierarchy�
 Scalar top支持`NONE`、`CLAMP_TO_GROUND`和`RELATIVE_TO_GROUND`，per-position height保留各顶点absolute Z。
 Extrusion显式生成top/bottom caps、outer/hole side walls，outline单独渲染且`outlineWidth`接受finite
 nonnegative number。宽度`0`隐藏对应线条；positive fractional与大于255的宽度由standard geometry精确保留。
-Ordinary路径按source geometry插值；approved ground reference组合由C9 actual-cover draper在真实terrain
-triangles上连续派生，不再使用C3时期的vertex-only近似。
+Ordinary路径按source geometry插值；批准的non-extruded CLAMP组合使用C11 GPU area backend。C3 vertex-only与C9
+actual-cover CPU drape均是历史实现。
 
 两类visualizer都是public `SceneGISPlanarPrimitive`与对应Geometry的per-Entity adapter：顶点以local
 DOUBLE geometry保存，world origin通过translation恢复，bounds显式保留world坐标，pick id保留original
@@ -130,7 +130,7 @@ Plane、Ellipse与Rectangle由private Area adapter降级到public Polygon/Polyli
 orientation和local Plane equation，不支持HeightReference。Ellipse position只提供center X/Y，height/ref决定Z，
 rotation从+Y逆时针；Rectangle coordinates按meters严格有序，rotation从+Y顺时针，defined granularity拒绝。
 Ellipse/Rectangle的ordinary路径保留generated geometry：`NONE`允许合法anchor geometry延伸extent外；approved
-ground reference组合已迁移到C9 actual-cover continuous ground，ground source outside则隐藏并保留current owner。
+ground CLAMP组合已迁移到C11 GPU area backend；不支持的RELATIVE、mixed或ground-relative extrusion在mutation前拒绝。
 
 ## C8 路径衍生 Geometry 与动态 Path
 
@@ -141,8 +141,8 @@ standard synchronous Primitive。Wall配对open non-flat `PerInstanceColorAppear
 non-flat appearance。
 
 Corridor不新增public Geometry：centerline width/corner/end-cap确定生成simple Polygon，outline使用Polyline。
-Positions Z不参与height；Corridor的approved ground reference组合由C9 actual-cover draper消费生成的perimeter，
-不再是vertex-only approximation。Wall top默认positions.z、bottom默认Z=0，不读取terrain；defined Wall granularity拒绝。
+Positions Z不参与height；Corridor的批准CLAMP组合使用C11 GPU area backend。Wall top默认positions.z、bottom默认Z=0，
+不读取terrain；defined Wall granularity拒绝。
 PolylineVolume route position.z是center elevation，shape可以延伸extent外，也不隐式clamp。
 
 Path复用Entity position与Cesium Property sampling，但只支持effective `ReferenceFrame.FIXED`、undefined或
@@ -150,24 +150,25 @@ Path复用Entity position与Cesium Property sampling，但只支持effective `Re
 INERTIAL、entity-relative/VVLH和PORTIONS material fail-fast。Sample结果降级为public Polyline，任一sample outside
 extent时当前Path隐藏，不clip。
 
-## C9 Continuous Ground 契约
+## C11 GPU Surface Clamp 契约
 
-C9提供public `SceneGISPlanarGroundPrimitive`，直接复用现有public Polyline/Polygon Geometry。调用方需要显式传入
-live planar World与HeightReference；它不接受任意modelMatrix，也不复用Cesium Globe GroundPrimitive或3D Tiles
-classification。至少一个top/bottom reference必须是`CLAMP_TO_GROUND`或`RELATIVE_TO_GROUND`，全absolute内容继续
-使用`SceneGISPlanarPrimitive`。
+Public `SceneGISPlanarGroundPrimitive`复用existing public Polyline或non-extruded Polygon Geometry，并要求live planar
+World与compatible Color appearance。Clamp是implicit；不再接受public `heightReference`或
+`extrudedHeightReference`，也不接受arbitrary modelMatrix、classification、zIndex或arbitrary Material。Ordinary NONE
+内容继续使用`SceneGISPlanarPrimitive`。
 
-Ground生成以当前normal-render实际terrain triangles为准：Polyline在tile/triangle edge处分段，Polygon与surface
-triangles做XY clipping，hole、extrusion side和shared boundary使用同一交点协议。No-provider与active FLAT稳定回退
-Z=0；DIRECT/UPSAMPLED promotion、revision与provider replacement通过原子candidate收敛。该runtime不发terrain request、
-不改变`tilesLoaded`，也不持有terrain tile/cache。
+Planar Surface先在existing `Pass.GLOBE`写入color/depth，ground随后在existing
+`Pass.TERRAIN_CLASSIFICATION`执行。Area使用stable planar shadow volume与z-fail stencil-depth/color/pick；Polyline使用
+stable segment volume和dedicated SceneGIS ground-line Shader。两者都不读取actual terrain triangles，不创建C9 snapshot，
+也不随tile、LOD或revision重建Geometry/GPU resources。
 
-Extruded Ground Polygon要求bottom与top逐点共享X/Y footprint；不同bottom footprint应继续使用普通Primitive或由应用
-预处理。Draper先做Geometry/tile bounds broad-phase并只遍历相交regular-grid cells；Entity bounds在ground current ready前
-为`PENDING`，之后跟随last-successful actual current，而不是source-height fallback。
+Height envelope来自caller-owned World当前provider的同步global minimum/maximum；无provider使用围绕Z=0的非退化padding。
+Provider attach/replace/detach只更新transform/bounds，不替换footprint VA/index/DrawCommand/Shader。该runtime不发terrain
+request、不改变`tilesLoaded`，也不拥有World/provider。
 
-Polyline、Polygon、Ellipse、Rectangle和Corridor的ground分支已迁移到该runtime；ordinary `NONE`分支继续使用
-`SceneGISPlanarPrimitive`且不创建ground snapshot或wrapper。C10仍负责统一Sandcastle/E2E/package与人工验收。
+Polyline `clampToGround:true`以及non-extruded Polygon、Ellipse、Rectangle、Corridor的批准CLAMP组合使用该runtime。
+Surface RELATIVE、mixed top/bottom和任何ground-relative extrusion在child低层mutation前fail-fast。C9 actual-cover draper、
+Surface ground snapshot与World late queue已删除，不存在fallback。完整决定见ADR-0023。
 
 ## C4 Entity 与 DataSource 自动集成
 

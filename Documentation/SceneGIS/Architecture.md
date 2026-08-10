@@ -398,9 +398,9 @@ height-clamping path。Async completion 不得直接添加 primitive。完整 pr
 
 C3 的 private Polyline/Polygon visualizer 绕开默认 GeometryUpdater与geodesic/rhumb路径。Polyline只接受
 planar straight segments；Polygon只接受simple outer ring与direct holes，并显式生成cap、side wall和outline。
-C3曾只在supplied vertices读取resident terrain；该ground行为已被C9 actual-cover continuous drape取代。
-当前ordinary `HeightReference.NONE`仍保留source geometry，批准的Polyline/Polygon ground分支统一使用C9
-actual-cover，且不自行发起terrain request。完整当前矩阵见
+C3曾只在supplied vertices读取resident terrain，C9又曾从actual-cover生成CPU drape geometry；两者均为历史实现。
+当前ordinary `HeightReference.NONE`保留source geometry，批准的Polyline/Polygon surface-clamp分支统一使用C11
+GPU depth/stencil backend，且不自行发起terrain request。完整当前矩阵见
 [PlanarContentCompatibility](PlanarContentCompatibility.md)。
 
 C4 只为 live `SceneGISPlanarWorld` 安装 per-instance `DataSourceDisplay.visualizersCallback`；默认 Globe、
@@ -432,7 +432,7 @@ C7将public Primitive扩展到`SceneGISPlanarBoxGeometry`、`SceneGISPlanarCylin
 Ellipse与Rectangle不新增public mesh类型，而是按固定平面坐标降级到C6 Polygon/Polyline。Entity adapter新增
 Solid与Area两个private visualizer，并在既有Anchor/Model/Polyline/Polygon之后追加；Box/Cylinder/Ellipsoid的
 position表示中心，ground reference先解析anchor再加未旋转下部support。C7曾对Ellipse/Rectangle generated
-vertices做vertex-only terrain sampling；该ground行为已被C9 actual-cover continuous drape取代，ordinary `NONE`
+vertices做vertex-only terrain sampling，C9又曾生成actual-cover drape；两者均被C11 GPU surface clamp取代，ordinary `NONE`
 仍允许合法anchor的geometry延伸extent外。所有orientation继续使用fixed planar quaternion，不进入ENU、
 ellipsoid或默认GeometryUpdater路径。完整决定见ADR-0019与当前compatibility matrix。
 
@@ -440,7 +440,7 @@ C8新增public `SceneGISPlanarWallGeometry`与`SceneGISPlanarPolylineVolumeGeome
 top/bottom高度生成open non-flat surface；PolylineVolume以route-left/world-up固定frame扫掠居中的Cartesian2
 shape，支持planar MITERED/BEVELED/ROUNDED corner。二者输出local DOUBLE positions、finite normals与bounds，
 继续使用同步standard Primitive；Corridor确定降级到public Polygon/Polyline，Path确定降级到public Polyline，不为
-等价mesh新增public类型。C9已把Corridor ground分支迁移到actual-triangle continuous drape；Wall/PolylineVolume不隐式查询terrain。
+等价mesh新增public类型。Corridor surface-clamp分支使用C11 GPU area backend；Wall/PolylineVolume不隐式查询terrain。
 Path只允许effective `ReferenceFrame.FIXED`、undefined/`"FIXED"` relativeTo与`PathMode.WHOLE`，通过private
 fixed-frame sampler隔离Cesium Property采样；INERTIAL、entity-relative/VVLH与PORTIONS fail-fast。Automatic callback
 完整顺序为gate、Anchor、Model、Polyline、Polygon、Solid、Area、Route、Path，保持zero-upstream。完整决定见
@@ -448,31 +448,24 @@ ADR-0020。
 
 ### 平面 Continuous Ground 与 Ground Primitive
 
-C9新增public `SceneGISPlanarGroundPrimitive`，只接受existing
-`SceneGISPlanarPolylineGeometry`/`SceneGISPlanarPolygonGeometry`与live caller-owned World。它显式接收top和可选
-bottom HeightReference，不提供任意modelMatrix；至少一个reference必须是ground-relative，全absolute继续使用
-`SceneGISPlanarPrimitive`。多个tile/triangle pieces最终合并为local DOUBLE、single GeometryInstance与一个logical
-current，保留original id、instance attributes、bounds、single Context和candidate/current lifecycle。
+C9的actual-cover CPU draper、Surface ground snapshot与World late-registration queue已由C11删除；ADR-0021保留为被
+ADR-0023 supersede的历史决定，不再是运行时契约。Planar Surface commands进入existing `Pass.GLOBE` primary-surface
+槽位，ground commands随后进入existing `Pass.TERRAIN_CLASSIFICATION`，不新增Scene pass或upstream seam。
 
-Cesium GroundPrimitive/classification依赖ellipsoid shadow volume、ApproximateTerrainHeights与Globe/3D Tiles pass，
-不得作为planar实现。Scene的normal Primitive update早于primary World render，因此Ground wrapper普通update只向required
-World的instance-owned per-pass queue注册；World先完成Surface render/actual cover，再驱动normal-render late candidate。
-Pick/depth只提交last-successful current。队列每pass在finally清空，World不拥有caller wrapper。
+Public `SceneGISPlanarGroundPrimitive`只接受existing non-extruded `SceneGISPlanarPolygonGeometry`或
+`SceneGISPlanarPolylineGeometry`、live caller-owned World与compatible Color appearance。Surface clamp是implicit语义；
+public `heightReference`/`extrudedHeightReference`已删除，ordinary NONE继续使用`SceneGISPlanarPrimitive`。面状
+RELATIVE、mixed top/bottom与ground-relative extrusion在child低层mutation前fail-fast。
 
-Surface保持existing terrain query snapshot不变，另建private ground-render snapshot：DIRECT/UPSAMPLED只暴露
-`surfaceIndexCount`以内的实际Float32 triangles，no-provider/FLAT显式为tile rectangle上的Z=0 triangles。Snapshot按
-actual parent/children render cover填充，并在provider、revision、hidden、zero/no-cover和destroy时清除引用。Ground
-wrapper同步消费后不能持有tile/content/mesh。
+Area backend为stable planar shadow volume，使用z-fail stencil/depth后提交color/pick；Polyline backend为stable segment
+volume与dedicated SceneGIS ground-line Shader。两者都只从caller-owned terrain provider的同步global
+`minimumHeight`/`maximumHeight`建立height envelope；无provider使用围绕Z=0的非退化padding。Provider attach、replace、
+detach只更新uniform/model transform/bounds，不替换footprint VA、index、DrawCommand或Shader，也不订阅tile、LOD或revision。
 
-Private draper在tile与terrain triangle边界拆分Polyline，并把Polygon source triangles与surface triangles做XY convex
-clipping；outer/hole boundary使用相同crossings生成continuous side。Shared edge采用确定性half-open ownership，skirts
-永远排除。相对当前rendered triangle的额外垂直误差只允许numeric tolerance；绝对terrain误差不优于active source
-level的provider geometric error，FLAT不声明terrain accuracy。Ground不发request、不改变SSE/cache/readiness。
-
-内部继续使用synchronous standard Primitive与从caller Color appearance派生的`LESS_OR_EQUAL` depth state，不修改
-caller appearance，也不依赖polygonOffset。Polyline clamp、Polygon、Ellipse、Rectangle和Corridor的ground配置迁移到
-该public runtime；其他graphics profile不扩大。若representative linear/log-depth真实GPU不能稳定覆盖terrain，必须
-暂停，不能静默增加Shader、classification、Worker或upstream patch。完整决定见ADR-0021。
+Ground wrapper继续保留single logical GeometryInstance、original id、CPU attributes、bounds、single Context、same-kind
+candidate/current与exactly-once lifecycle。Pick/depth使用已建立current的命令路径；不读取actual terrain triangles、不发
+terrain request、不改变SSE/cache/readiness，也不存在C9 fallback。Polyline clamp与non-extruded Polygon、Ellipse、Rectangle、
+Corridor的批准CLAMP组合使用该backend。完整决定见ADR-0023。
 
 ### 平面内容兼容性与交付
 
@@ -481,7 +474,7 @@ caller appearance，也不依赖polygonOffset。Polyline clamp、Polygon、Ellip
 16类automatic Entity Graphics以及ordinary/Ground Primitive边界。该矩阵不把underscore soft-private JS barrel
 artifact提升为public API；declarations和API HTML必须隐藏private runtime。
 
-最终qualification使用local deterministic terrain验证gate加八个child、actual-cover ground、direct public
+最终qualification使用local deterministic terrain验证gate加八个child、GPU surface-clamped ground、direct public
 Primitive、warm/mutation/provider convergence与lifecycle。Dev/release E2E和package consumer禁止公网；公开
 Sandcastle只作为best-effort人工展示。Timing只记录同机diagnostic median/P95，不是跨机器hard gate。Architecture
 review不能代替项目负责人的真实浏览器/GPU人工验收。完整决定见ADR-0022。

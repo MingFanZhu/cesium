@@ -3,12 +3,14 @@
 ## Metadata
 
 - Extension slug: `planar-content`
-- Status: `active`
+- Status: `completed`
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: C11 planning pending
+- Current phase: None
 - Active phase plan: None
+- Latest completed phase:
+  [C11 Planar Depth/Stencil Ground Rendering](plans/2026-08-10-phase-c11-planar-depth-stencil-ground-rendering.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent task `019fcff7-3313-7d03-b970-57b3d08e3a32`
@@ -60,22 +62,23 @@
   [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)、
   [ADR-0020：平面路径衍生 Geometry 与动态 Path](../../Documentation/SceneGIS/Decisions/ADR-0020-planar-route-derived-geometry-and-path.md)、
   [ADR-0021：平面连续贴地与 Ground Primitive 晚阶段渲染协议](../../Documentation/SceneGIS/Decisions/ADR-0021-planar-continuous-ground-and-ground-primitive.md)、
-  [ADR-0022：平面内容兼容性矩阵与最终交付](../../Documentation/SceneGIS/Decisions/ADR-0022-planar-content-compatibility-and-delivery.md)
+  [ADR-0022：平面内容兼容性矩阵与最终交付](../../Documentation/SceneGIS/Decisions/ADR-0022-planar-content-compatibility-and-delivery.md)、
+  [ADR-0023：平面 Depth/Stencil Ground Rendering](../../Documentation/SceneGIS/Decisions/ADR-0023-planar-depth-stencil-ground-rendering.md)
 - SGP: 复用active `SGP-0001`；C4只允许在`packages/engine/Source/Widget/CesiumWidget.js`新增两个paired
   hunks
 
 ## Current handoff
 
-- Current state: C1-C9已完成并独立提交；C10 architecture/release-evidence review已通过，作为自动化交付
-  baseline等待本地提交。项目负责人没有把C9 actual-mesh ground后端作为最终产品人工验收通过，而是决定由
-  C11以单一planar depth/stencil后端替换。
-- Next action: Architecture形成C10独立中文本地提交，然后创建并激活C11 phase plan。
-- Current phase status: C10=`completed`；extension继续`active`；C11尚未激活。
-- Open discussions: None；3D Tiles与GeoJSON/CZML/KML转换继续属于独立扩展。
+- Current state: C1-C11均已完成；C11以单一planar depth/stencil backend替换C9 actual-mesh runtime，
+  C11-R001～C11-R008全部关闭，Architecture review与项目负责人真实浏览器/GPU人工验收均已通过。
+- Next action: 由Architecture形成C11独立中文本地提交检查点；后续能力进入新的extension planning，不继续扩张
+  `planar-content`范围。
+- Current phase status: C11=`completed`；extension=`completed`。
+- Open discussions: None；resolved ground backend discussion已提升到ADR-0023；3D Tiles与GeoJSON/CZML/KML
+  转换继续属于独立扩展。
 - Latest completed review:
-  [C10 unified integration and delivery review](reviews/2026-08-10-c10-unified-integration-and-delivery.md)
-  （`approved`；C10-R001～C10-R004均关闭）。
-- Unresolved reviews: None。
-- Known risks: C9同步normal-render CPU drape只作为已验证历史实现保留到C11替换；C11必须建立单一planar
-  depth/stencil ground后端并重新完成人工验收。Classification之外的ordered ground layers与arbitrary Material仍
-  不自动进入范围。
+  [C11 planar depth/stencil ground rendering review](reviews/2026-08-10-c11-planar-depth-stencil-ground-rendering.md)
+  （`approved`；C11-R001～C11-R008已关闭，项目负责人人工验收通过）。
+- Unresolved review: None。
+- Known risks: Classification之外的ordered ground layers与arbitrary Material仍不自动进入范围；Label的
+  `showBackground`保持Cesium既有屏幕空间像素语义，远距离固定尺寸属于调用方显示策略而非planar缺陷。

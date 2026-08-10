@@ -336,6 +336,19 @@ function computeState(visualizer, item, time) {
     time,
     HeightReference.NONE,
   );
+  const usesGround =
+    heightReference !== HeightReference.NONE ||
+    (extrudedHeight !== undefined &&
+      extrudedHeightReference !== HeightReference.NONE);
+  if (
+    usesGround &&
+    (heightReference !== HeightReference.CLAMP_TO_GROUND ||
+      extrudedHeight !== undefined)
+  ) {
+    throw new DeveloperError(
+      "Planar ground polygons require a non-extruded CLAMP_TO_GROUND surface.",
+    );
+  }
   const fill = value(graphic._fill, time, true);
   const outline = value(graphic._outline, time, false);
   const closeTop = value(graphic._closeTop, time, true);
@@ -368,10 +381,7 @@ function computeState(visualizer, item, time) {
     extruded: extrudedHeight !== undefined,
     extrudedHeight,
     extrudedHeightReference,
-    ground:
-      heightReference !== HeightReference.NONE ||
-      (extrudedHeight !== undefined &&
-        extrudedHeightReference !== HeightReference.NONE),
+    ground: usesGround,
   });
   const shown =
     entity.isShowing &&
@@ -473,11 +483,6 @@ function createOwner(visualizer, item, state) {
       ...(state.ground
         ? {
             world: visualizer._world,
-            heightReference: state.heightReference,
-            extrudedHeightReference:
-              state.bottomPositions === undefined
-                ? undefined
-                : state.extrudedHeightReference,
           }
         : {}),
       geometry: new SceneGISPlanarPolygonGeometry({
@@ -520,8 +525,6 @@ function createOwner(visualizer, item, state) {
       ...(usesGround
         ? {
             world: visualizer._world,
-            heightReference: endpointReferences?.[0] ?? groundReference,
-            _heightReferences: endpointReferences,
           }
         : {}),
       geometry: new SceneGISPlanarPolylineGeometry({
