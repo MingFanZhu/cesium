@@ -281,10 +281,14 @@ terrain picking复用 SceneGIS four-frustum ray helper，不触发 depth render�
 `SceneGISPlanarTerrainSampler.sampleAtLevel` 是独立 provider sampler：它按显式 level和 canonical
 tile address聚合请求，消费 provider availability/TerrainData interpolation，并按输入顺序返回独立
 height array。它不访问 World cache，不做 ancestor/upsample/flat fallback，不 raise provider
-`errorEvent`，也不拥有 provider或 TerrainData。既有 `world.pick` 与 camera navigation继续保持有界
-Z=0 reference-plane语义；`scene.pickPosition` 继续表示包含对象和 skirt在内的 frontmost rendered
-depth。完整决定见
-[ADR-0010](Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)。
+`errorEvent`，也不拥有 provider或 TerrainData。既有 `world.pick` 继续保持有界 Z=0
+reference-plane语义；`scene.pickPosition` 继续表示包含对象和 skirt在内的 frontmost rendered depth。
+
+Planar camera gesture anchors由controller私有地按 rendered depth → actual-cover terrain → bounded Z=0
+reference plane解析。Pan与zoom的后续ray固定与anchor自身高度的水平面相交，rotate围绕完整3D pivot；drag
+期间anchor不随LOD变化。该规则不改变Home、center target clamp、public picking，也不增加碰撞或地下模式。
+完整决定见[ADR-0010](Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)与
+[ADR-0024](Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)。
 
 ### 平面 URL Heightmap Provider
 

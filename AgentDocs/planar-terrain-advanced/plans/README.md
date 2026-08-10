@@ -7,10 +7,11 @@
 
 ## Phase plans
 
-- A1：尚未创建；总体规划检查点完成后依据当前源码事实建立。
+- [A1 平面地形感知导航锚点](2026-08-10-phase-a1-terrain-aware-navigation-anchors.md)
+  （`completed`、Architecture review与项目负责人人工验收通过）
 - A2-A7：仅保留 extension plan 中的稳定阶段目标，不提前创建 phase plan。
 
 ## Handoff
 
-- 当前只允许推进 A1 planning。
-- A1 实现、验证、review 和独立提交完成前，不进入 A2 implementation。
+- A1实现、验证、Architecture review与项目负责人人工验收均已完成，当前形成独立本地提交checkpoint。
+- A2尚未激活；下一步先讨论A2边界，再按届时源码事实建立phase plan。

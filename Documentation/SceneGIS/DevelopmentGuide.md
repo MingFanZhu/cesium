@@ -398,6 +398,19 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - planar imagery 仍由应用通过 canonical `world.tilingScheme` 和 `world.imageryLayers` 显式组装；
   `scenegis-planar-viewer` 只演示该高层 ownership，不引入通用 provider picker、预取或离线下载。
 
+### 平面地形感知导航锚点检查
+
+实现或评审planar controller gesture时同时检查：
+
+- Pan、rotate与wheel共享一份private anchor resolver，严格按合法in-extent rendered depth、
+  `world.pickTerrain(ray)`、`world.pick(ray)`顺序解析；depth命中后不得重复线性terrain query。
+- Pan drag与rotate drag只在press时解析一次；pan movement与wheel correction使用anchor自身Z的水平面。
+  Wheel每次event重新解析pointer anchor，但复用controller-owned scratch，不在hot path分配对象。
+- Public `world.pick`/`pickFromWindowPosition`、Home、center target clamp与`_syncRig`仍是Z=0 contract。
+  Anchor accuracy不等于collision或underground支持。
+- Specs至少覆盖source priority、非零正负height、release后重新解析、一个perspective/orthographic
+  representative、大坐标，以及真实terrain depth/pivot且terrain runtime零mutation。
+
 ### 平面内容实现检查
 
 实现或评审 planar Entity/DataSource content 时同时检查：

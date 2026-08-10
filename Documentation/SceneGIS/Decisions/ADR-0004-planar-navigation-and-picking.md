@@ -10,6 +10,8 @@
 - Related patch：无；P4 禁止修改 upstream-owned file
 - P7 amendment：`2026-08-06`，修正真实 browser wheel normalization、boundary
   synchronization 与 pitch round-trip；不改变 public picking contract
+- A1 successor：`2026-08-10`，[ADR-0024](ADR-0024-planar-terrain-aware-navigation-anchors.md)
+  取代controller只使用Z=0 gesture anchor的阶段性限制；public Z=0 pick、Home与target clamp保持不变
 
 ## 上下文与源码事实
 

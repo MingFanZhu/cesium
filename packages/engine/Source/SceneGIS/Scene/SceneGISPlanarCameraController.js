@@ -59,6 +59,78 @@ function getUnboundedCenterTarget(scene, result) {
   return ray && SceneGISPlanarCamera.intersectPlane(ray, result);
 }
 
+function isFiniteCartesian3(position) {
+  return (
+    defined(position) &&
+    Number.isFinite(position.x) &&
+    Number.isFinite(position.y) &&
+    Number.isFinite(position.z)
+  );
+}
+
+function isInsideExtent(extent, position) {
+  return (
+    position.x >= extent.minimumX &&
+    position.x <= extent.maximumX &&
+    position.y >= extent.minimumY &&
+    position.y <= extent.maximumY
+  );
+}
+
+function intersectHorizontalPlane(ray, height, result) {
+  if (
+    !defined(ray) ||
+    !isFiniteCartesian3(ray.origin) ||
+    !isFiniteCartesian3(ray.direction) ||
+    !Number.isFinite(height) ||
+    ray.direction.z === 0.0
+  ) {
+    return undefined;
+  }
+
+  const t = (height - ray.origin.z) / ray.direction.z;
+  if (!Number.isFinite(t) || t < 0.0) {
+    return undefined;
+  }
+
+  result.x = ray.origin.x + ray.direction.x * t;
+  result.y = ray.origin.y + ray.direction.y * t;
+  result.z = height;
+  return isFiniteCartesian3(result) ? result : undefined;
+}
+
+function resolveNavigationAnchor(controller, scene, windowPosition, result) {
+  const ray = SceneGISPlanarCamera.getWindowRay(
+    scene.camera,
+    scene.canvas,
+    windowPosition,
+    scratchRay,
+  );
+  if (!ray) {
+    return undefined;
+  }
+
+  const extent = controller._world.coordinateSystem.extent;
+  if (scene.pickPositionSupported) {
+    const depthPosition = scene.pickPosition(windowPosition, result);
+    if (
+      isFiniteCartesian3(depthPosition) &&
+      isInsideExtent(extent, depthPosition)
+    ) {
+      return Cartesian3.clone(depthPosition, result);
+    }
+  }
+
+  const terrainPosition = controller._world.pickTerrain(ray, result);
+  if (isFiniteCartesian3(terrainPosition)) {
+    return Cartesian3.clone(terrainPosition, result);
+  }
+  const referencePosition = controller._world.pick(ray, result);
+  return isFiniteCartesian3(referencePosition)
+    ? Cartesian3.clone(referencePosition, result)
+    : undefined;
+}
+
 function translateCamera(camera, translation) {
   const pose = SceneGISPlanarCamera.getWorldPose(camera, scratchCameraPose);
   Cartesian3.add(pose.position, translation, scratchPosition);
@@ -162,6 +234,7 @@ function SceneGISPlanarCameraController(options) {
   this._panAnchor = new Cartesian3();
   this._rotatePivot = new Cartesian3();
   this._rotateWindowAnchor = new Cartesian2();
+  this._zoomAnchor = new Cartesian3();
   this._target = new Cartesian3();
   this._heading = 0.0;
   this._pitch = MINIMUM_PITCH;
@@ -517,11 +590,7 @@ SceneGISPlanarCameraController.prototype._pan = function (scene, movement) {
     const start = this._aggregator.getStartMousePosition(
       CameraEventType.LEFT_DRAG,
     );
-    const anchor = this._world.pickFromWindowPosition(
-      start,
-      scene,
-      this._panAnchor,
-    );
+    const anchor = resolveNavigationAnchor(this, scene, start, this._panAnchor);
     if (!anchor) {
       return;
     }
@@ -533,7 +602,8 @@ SceneGISPlanarCameraController.prototype._pan = function (scene, movement) {
     movement.endPosition,
     scratchRay,
   );
-  const current = ray && SceneGISPlanarCamera.intersectPlane(ray, scratchPoint);
+  const current =
+    ray && intersectHorizontalPlane(ray, this._panAnchor.z, scratchPoint);
   if (!current) {
     return;
   }
@@ -548,9 +618,10 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     const start = this._aggregator.getStartMousePosition(
       CameraEventType.MIDDLE_DRAG,
     );
-    const pivot = this._world.pickFromWindowPosition(
-      start,
+    const pivot = resolveNavigationAnchor(
+      this,
       scene,
+      start,
       this._rotatePivot,
     );
     if (!pivot) {
@@ -722,13 +793,12 @@ SceneGISPlanarCameraController.prototype._zoom = function (scene, movement) {
   const maximum = this._getRanges(scene);
   const camera = scene.camera;
   const pointer = this._aggregator.getStartMousePosition(CameraEventType.WHEEL);
-  const pointerAnchor = this._world.pickFromWindowPosition(
-    pointer,
+  const anchor = resolveNavigationAnchor(
+    this,
     scene,
-    scratchPoint,
+    pointer,
+    this._zoomAnchor,
   );
-  const anchor =
-    pointerAnchor && Cartesian3.clone(pointerAnchor, new Cartesian3());
   const difference = movement.endPosition.y - movement.startPosition.y;
   const ratio = CesiumMath.clamp(
     difference / scene.canvas.clientHeight,
@@ -784,8 +854,7 @@ SceneGISPlanarCameraController.prototype._zoom = function (scene, movement) {
       pointer,
       scratchRay,
     );
-    const after =
-      ray && SceneGISPlanarCamera.intersectPlane(ray, scratchPoint2);
+    const after = ray && intersectHorizontalPlane(ray, anchor.z, scratchPoint2);
     if (after) {
       Cartesian3.subtract(anchor, after, scratchPoint2);
       translateCamera(camera, scratchPoint2);

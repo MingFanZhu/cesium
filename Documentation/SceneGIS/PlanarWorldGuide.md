@@ -93,6 +93,11 @@ terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务
   flat fallback返回`undefined`。
 - `world.pickTerrain(ray)`与`pickTerrainFromWindowPosition`只查询最近正常render发布的actual terrain
   cover并排除skirt。它们不替代Z=0 `world.pick`，也不触发depth pass。
+- Pan、rotate和wheel的私有导航锚点依次尝试合法的in-extent rendered depth、当前actual-cover terrain、
+  bounded Z=0 reference plane。Pan/zoom围绕anchor自身高度的水平面校正，rotate使用完整3D pivot；一次drag
+  内anchor保持固定，release/cancel后下一gesture才重新解析。
+- 该锚点链可能选择可见Entity/Primitive的depth；depth不可用时才使用skirt-excluded terrain query。
+  它不改变public Z=0 pick，也不提供terrain collision、防穿透或underground navigation mode。
 - 独立批量采样使用`SceneGISPlanarTerrainSampler.sampleAtLevel`；它直接访问provider，不读取World
   cache，也不做ancestor/upsample fallback。
 

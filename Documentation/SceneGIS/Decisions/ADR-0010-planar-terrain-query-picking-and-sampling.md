@@ -7,6 +7,8 @@
 - Decision owners：Architecture Agent、项目负责人
 - Related plan：
   `AgentDocs/planar-terrain/plans/2026-08-07-phase-t4-terrain-query-and-picking.md`
+- A1 successor：`2026-08-10`，[ADR-0024](ADR-0024-planar-terrain-aware-navigation-anchors.md)
+  允许controller私有使用terrain query作为rendered-depth miss后的fallback；public terrain与Z=0 API不变
 - Related patch：无；T4 只允许修改 SceneGIS-owned files
 
 ## 上下文与源码事实
@@ -193,8 +195,9 @@ mesh 语义时必须使用 `getTerrainHeight`。
 | `scene.pickPosition`                         | frontmost rendered depth             | 是              | 是，取决于画面     | 不适用             |
 | `SceneGISPlanarTerrainSampler.sampleAtLevel` | provider 指定 level TerrainData      | 否              | 否                 | 否                 |
 
-Camera Controller、Viewer selection 与既有 `world.pickFromWindowPosition` 均不切换到 terrain API。
-T4 不增加相机碰撞、Entity clamp、自动 request render、地下导航或 programmatic terrain flight。
+T4阶段的Camera Controller未切换到terrain API；后续ADR-0024仅在controller私有anchor chain中把它作为
+rendered-depth miss后的fallback。Viewer selection与既有`world.pickFromWindowPosition`均不切换到terrain
+API，也不增加相机碰撞、Entity clamp、自动request render、地下导航或programmatic terrain flight。
 
 ## 不采用的方案
 

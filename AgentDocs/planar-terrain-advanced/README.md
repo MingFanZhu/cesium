@@ -7,11 +7,11 @@
 - Planning model: `extension`
 - Active extension plan:
   [总体计划：SceneGIS 平面高级地形](plans/2026-08-10-planar-terrain-advanced-extension.md)
-- Current phase: `A1` planning；平移、旋转和缩放的地形感知锚点
-- Active phase plan: Not created
+- Current phase: None；A1 completed，A2尚未激活
+- Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
-- Execution contact: Unassigned；A1 phase plan 获批后指派
+- Execution contact: Execution Agent
 - Last updated: `2026-08-10`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
@@ -48,19 +48,19 @@
   Sandcastle/E2E 的最小扩展
 - Sandcastle: 复用并按阶段更新 `scenegis-planar-terrain`；不预先增加重复案例
 - Branch: `feature/planar-terrain-advanced`，基线 checkpoint `14a7206f41`
-- ADR: 继承 ADR-0002、ADR-0004、ADR-0007～ADR-0012；A1 起按长期决策新增 ADR
+- ADR: 继承 ADR-0002、ADR-0004、ADR-0007～ADR-0012；A1 新增
+  [ADR-0024](../../Documentation/SceneGIS/Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)
 - SGP: None planned；若 Shader、Worker 或 build phase 必须修改 upstream-owned file，先建立或
   复用合法 SGP
 
 ## Current handoff
 
-- Current state: 项目负责人已批准总体方向和 A1 启动；中文版 extension plan 已建立，尚未创建
-  A1 phase plan，也未修改产品源码。
-- Next action: 形成总体规划提交检查点；随后只对 A1 重新发现 camera、depth、terrain picking 和
-  input lifecycle 源码事实，编写 phase plan 与 ADR 后再派发 Execution。
-- Current phase status: `A1 planning`
-- Open discussions: A1 的 rendered-depth、terrain 与 Z=0 fallback 选择及对象遮挡边界，需要以当前
-  Cesium/SceneGIS 源码事实细化。
+- Current state: A1 implementation、5个direct cases、59个focused aggregate cases、build、ownership
+  audit、[A1 review](reviews/2026-08-10-a1-terrain-aware-navigation-anchors.md)与项目负责人人工验收均已完成。
+- Next action: Architecture形成A1独立提交checkpoint；随后与项目负责人讨论A2的surface/underground
+  navigation mode边界，再依据届时源码事实建立A2 phase plan。
+- Current phase status: `completed`
+- Open discussions: None；A1 source order与阶段边界已由ADR-0024裁决。
 - Unresolved reviews: None
-- Known risks: 导航锚点与异步 terrain cover 的时序、地下模式与防穿透规则冲突、Worker 构建发布
-  seam、quantized-mesh 精度/边界、smooth normal 的内存和 LOD seam。
+- Known risks: A1 rendered-depth cache与terrain snapshot来自最近normal render；后续仍有地下模式与
+  防穿透规则冲突、Worker构建发布seam、quantized-mesh精度/边界、smooth normal内存和LOD seam。
