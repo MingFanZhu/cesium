@@ -182,11 +182,71 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainNavigationCesiumWidget", function
       1e-6,
     );
     if (renderedPosition) {
-      expect(terrainPickSpy).not.toHaveBeenCalled();
+      expect(terrainPickSpy.calls.count()).toBe(1);
     } else {
-      expect(terrainPickSpy).toHaveBeenCalled();
+      expect(terrainPickSpy.calls.count()).toBeGreaterThan(1);
     }
     expect(world._surface._terrain._debug).toEqual(terrainDebug);
     expect(world._surface._renderCommands).toEqual(commands);
+
+    widget.removeController(controller);
+    controller = undefined;
+    scene.camera.setView({
+      destination: new Cartesian3(0.0, 0.0, -256.0),
+      orientation: {
+        direction: Cartesian3.UNIT_Z,
+        up: Cartesian3.UNIT_Y,
+      },
+    });
+    scene.initializeFrame();
+    scene.render();
+    const center = new Cartesian2(
+      scene.canvas.clientWidth * 0.5,
+      scene.canvas.clientHeight * 0.5,
+    );
+    const belowTerrainPosition = world.pickTerrainFromWindowPosition(
+      center,
+      scene,
+      new Cartesian3(),
+    );
+    expect(belowTerrainPosition).toBeDefined();
+    expect(belowTerrainPosition.z).not.toBe(0.0);
+    let belowRenderedPosition;
+    if (scene.pickPositionSupported && !window.webglStub) {
+      belowRenderedPosition = scene.pickPosition(center, new Cartesian3());
+      expect(belowRenderedPosition).toBeDefined();
+      expect(belowRenderedPosition).toEqualEpsilon(belowTerrainPosition, 0.5);
+    }
+    const belowReferencePosition = world.pickFromWindowPosition(
+      center,
+      scene,
+      new Cartesian3(),
+    );
+    expect(belowReferencePosition.z).toBe(0.0);
+
+    controller = new SceneGISPlanarCameraController({
+      world,
+      navigationMode: "underground",
+    });
+    widget.addController(controller);
+    spyOn(controller, "viewHome").and.callThrough();
+    controller.firstUpdate(scene, JulianDate.now());
+    expect(controller._target).toEqualEpsilon(belowTerrainPosition, 5e-3);
+    const belowTerrainDebug = { ...world._surface._terrain._debug };
+    const belowCommands = world._surface._renderCommands.slice();
+    queueMiddleDrag(center, new Cartesian2(center.x + 4.0, center.y - 3.0));
+    controller.update(scene, JulianDate.now());
+
+    expect(controller.viewHome).not.toHaveBeenCalled();
+    expect(controller.navigationMode).toBe("underground");
+    const belowExpectedPivot = belowRenderedPosition ?? belowTerrainPosition;
+    expect(controller._rotatePivot).toEqualEpsilon(belowExpectedPivot, 5e-3);
+    expect(scene.camera.positionWC.z).toBeLessThan(controller._rotatePivot.z);
+    expect(project(scene, controller._rotatePivot)).toEqualEpsilon(
+      center,
+      1e-6,
+    );
+    expect(world._surface._terrain._debug).toEqual(belowTerrainDebug);
+    expect(world._surface._renderCommands).toEqual(belowCommands);
   });
 });

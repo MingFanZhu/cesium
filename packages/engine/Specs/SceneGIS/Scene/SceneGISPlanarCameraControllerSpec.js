@@ -192,6 +192,16 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     );
   }
 
+  function intersectRayAtHeight(ray, height, result) {
+    const t = (height - ray.origin.z) / ray.direction.z;
+    return Cartesian3.fromElements(
+      ray.origin.x + ray.direction.x * t,
+      ray.origin.y + ray.direction.y * t,
+      height,
+      result,
+    );
+  }
+
   beforeEach(function () {
     inputSequence = 0;
     container = document.createElement("div");
@@ -217,6 +227,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     const localWorld = createWorld();
     controller = new SceneGISPlanarCameraController({ world: localWorld });
     expect(controller.world).toBe(localWorld);
+    expect(controller.navigationMode).toBe("surface");
     expect(controller.enabled).toBe(true);
     expect(controller.enablePan).toBe(true);
     expect(controller.enableRotate).toBe(true);
@@ -249,7 +260,332 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     expect(() => {
       controller.homePadding = Number.NaN;
     }).toThrowDeveloperError();
+    expect(() => {
+      controller.navigationMode = "free";
+    }).toThrowDeveloperError();
+    expect(
+      () =>
+        new SceneGISPlanarCameraController({
+          world: localWorld,
+          navigationMode: "free",
+        }),
+    ).toThrowDeveloperError();
+    const undergroundController = new SceneGISPlanarCameraController({
+      world: localWorld,
+      navigationMode: "underground",
+    });
+    expect(undergroundController.navigationMode).toBe("underground");
     localWorld.destroy();
+  });
+
+  it("switches navigation modes atomically and isolates held input", function () {
+    const scene = createWidget();
+    controller = new SceneGISPlanarCameraController({ world });
+    widget.addController(controller);
+    controller.viewHome(scene);
+    controller.firstUpdate(scene, JulianDate.now());
+    const terrainSpy = spyOn(world, "getTerrainHeight").and.returnValue(10.0);
+    const beforePosition = Cartesian3.clone(scene.camera.positionWC);
+    const beforeDirection = Cartesian3.clone(scene.camera.directionWC);
+    const beforeTarget = Cartesian3.clone(controller._target);
+    const frustum = scene.camera.frustum;
+    const center = new Cartesian2(100.0, 50.0);
+    queueMovement(
+      CameraEventType.LEFT_DRAG,
+      center,
+      new Cartesian2(120.0, 50.0),
+    );
+    queueMovement(
+      CameraEventType.MIDDLE_DRAG,
+      center,
+      new Cartesian2(110.0, 50.0),
+    );
+    queueMovement(CameraEventType.WHEEL, center, new Cartesian2(0.0, 1.0));
+
+    controller.navigationMode = "underground";
+    expect(controller.navigationMode).toBe("underground");
+    expect(scene.camera.positionWC).toEqual(beforePosition);
+    expect(scene.camera.directionWC).toEqual(beforeDirection);
+    expect(controller._target).toEqual(beforeTarget);
+    expect(scene.camera.frustum).toBe(frustum);
+    expect(terrainSpy).not.toHaveBeenCalled();
+    expect(controller._quarantinedLeft).toBe(true);
+    expect(controller._quarantinedMiddle).toBe(true);
+    expect(controller._aggregator._update[`${CameraEventType.WHEEL}`]).toBe(
+      true,
+    );
+    expect(controller._aggregator.anyButtonDown).toBe(true);
+
+    controller.navigationMode = "underground";
+    expect(controller._quarantinedLeft).toBe(true);
+    queueMovement(
+      CameraEventType.LEFT_DRAG,
+      center,
+      new Cartesian2(140.0, 50.0),
+    );
+    controller.update(scene, JulianDate.now());
+    expect(scene.camera.positionWC).toEqual(beforePosition);
+    releaseButton(CameraEventType.LEFT_DRAG);
+    releaseButton(CameraEventType.MIDDLE_DRAG);
+    controller.update(scene, JulianDate.now());
+    expect(controller._quarantinedLeft).toBe(false);
+    expect(controller._quarantinedMiddle).toBe(false);
+  });
+
+  it("resolves the center from rendered terrain then the resident relationship plane", function () {
+    const scene = createWidget();
+    scene.camera.frustum = perspective();
+    controller = new SceneGISPlanarCameraController({ world });
+    widget.addController(controller);
+    controller.viewHome(scene);
+    const depthSpy = spyOn(scene, "pickPosition");
+    const heightSpy = spyOn(world, "getTerrainHeight").and.returnValue(12.0);
+    const terrainSpy = spyOn(world, "pickTerrain").and.returnValue(undefined);
+
+    controller.firstUpdate(scene, JulianDate.now());
+    expect(controller._target.z).toBe(12.0);
+    expect(heightSpy).toHaveBeenCalledTimes(1);
+    expect(terrainSpy).toHaveBeenCalledTimes(1);
+    expect(depthSpy).not.toHaveBeenCalled();
+
+    heightSpy.calls.reset();
+    terrainSpy.calls.reset();
+    terrainSpy.and.callFake((ray, result) =>
+      intersectRayAtHeight(ray, 30.0, result),
+    );
+    expect(controller._syncRig(scene, false)).toBe(true);
+    expect(controller._target.z).toBe(30.0);
+    expect(heightSpy).toHaveBeenCalledTimes(1);
+    expect(terrainSpy).toHaveBeenCalledTimes(1);
+    expect(depthSpy).not.toHaveBeenCalled();
+
+    terrainSpy.and.returnValue(undefined);
+    heightSpy.and.returnValue(-15.0);
+    expect(controller._syncRig(scene, false)).toBe(true);
+    expect(controller._target.z).toBe(-15.0);
+    expect(controller.navigationMode).toBe("surface");
+    heightSpy.and.returnValue(undefined);
+    expect(controller._syncRig(scene, false)).toBe(true);
+    expect(controller._target.z).toBe(0.0);
+
+    terrainSpy.calls.reset();
+    controller.update(scene, JulianDate.now());
+    expect(terrainSpy).not.toHaveBeenCalled();
+  });
+
+  it("snapshots center terrain and relationship across held pan and rotate", function () {
+    const scene = createWidget();
+    scene.camera.frustum = perspective();
+    controller = new SceneGISPlanarCameraController({ world });
+    widget.addController(controller);
+    controller.viewHome(scene);
+    controller.firstUpdate(scene, JulianDate.now());
+    const center = new Cartesian2(100.0, 50.0);
+    spyOn(scene, "pickPosition").and.callFake((windowPosition, result) =>
+      intersectAtHeight(scene, windowPosition, 20.0, result),
+    );
+    let terrainHeight = 10.0;
+    let localHeight = 5.0;
+    const terrainSpy = spyOn(world, "pickTerrain").and.callFake((ray, result) =>
+      intersectRayAtHeight(ray, terrainHeight, result),
+    );
+    const heightSpy = spyOn(world, "getTerrainHeight").and.callFake(
+      () => localHeight,
+    );
+    spyOn(controller, "viewHome").and.callThrough();
+
+    for (const type of [
+      CameraEventType.LEFT_DRAG,
+      CameraEventType.MIDDLE_DRAG,
+    ]) {
+      controller.viewHome.calls.reset();
+      terrainSpy.calls.reset();
+      heightSpy.calls.reset();
+      terrainHeight = 10.0;
+      localHeight = 5.0;
+      queueMovement(type, center, new Cartesian2(104.0, 51.0));
+      controller.update(scene, JulianDate.now());
+      expect(controller._target.z).toBe(10.0);
+      expect(terrainSpy).toHaveBeenCalledTimes(1);
+      expect(heightSpy).toHaveBeenCalledTimes(1);
+      const firstPosition = Cartesian3.clone(scene.camera.positionWC);
+
+      terrainHeight = 40.0;
+      localHeight = 60.0;
+      queueMovement(type, center, new Cartesian2(108.0, 52.0));
+      controller.update(scene, JulianDate.now());
+      expect(controller._target.z).toBe(10.0);
+      expect(scene.camera.positionWC.z).toBeGreaterThan(10.0);
+      expect(Number.isFinite(scene.camera.positionWC.x)).toBe(true);
+      expect(Cartesian3.equals(scene.camera.positionWC, firstPosition)).toBe(
+        false,
+      );
+      expect(terrainSpy).toHaveBeenCalledTimes(1);
+      expect(heightSpy).toHaveBeenCalledTimes(1);
+      expect(controller.viewHome).not.toHaveBeenCalled();
+
+      releaseButton(type);
+      controller.update(scene, JulianDate.now());
+      queueMovement(type, center, new Cartesian2(104.0, 51.0));
+      controller.update(scene, JulianDate.now());
+      expect(controller._target.z).toBe(40.0);
+      expect(terrainSpy).toHaveBeenCalledTimes(2);
+      expect(heightSpy).toHaveBeenCalledTimes(2);
+      releaseButton(type);
+      controller.update(scene, JulianDate.now());
+      controller.viewHome(scene);
+    }
+  });
+
+  it("keeps camera-local relationship independent from the center target", function () {
+    const scene = createWidget();
+    scene.camera.frustum = perspective();
+    controller = new SceneGISPlanarCameraController({ world });
+    widget.addController(controller);
+    const direction = new Cartesian3();
+    const up = new Cartesian3();
+    SceneGISPlanarCamera.getAxes(
+      0.0,
+      -CesiumMath.PI_OVER_FOUR,
+      direction,
+      up,
+      new Cartesian3(),
+    );
+    const lowCamera = new Cartesian3(0.0, -50.0, 50.0);
+    SceneGISPlanarCamera.setWorldPose(scene.camera, lowCamera, direction, up);
+    const heightSpy = spyOn(world, "getTerrainHeight").and.returnValue(100.0);
+    const terrainSpy = spyOn(world, "pickTerrain").and.callFake((ray, result) =>
+      intersectRayAtHeight(ray, 0.0, result),
+    );
+    spyOn(controller, "viewHome").and.callThrough();
+
+    controller.firstUpdate(scene, JulianDate.now());
+    expect(controller.viewHome).toHaveBeenCalledTimes(1);
+    expect(controller.navigationMode).toBe("surface");
+    expect(heightSpy).toHaveBeenCalled();
+    expect(terrainSpy).toHaveBeenCalled();
+
+    controller.navigationMode = "underground";
+    SceneGISPlanarCamera.setWorldPose(scene.camera, lowCamera, direction, up);
+    controller.viewHome.calls.reset();
+    heightSpy.calls.reset();
+    terrainSpy.calls.reset();
+    controller.firstUpdate(scene, JulianDate.now());
+    expect(controller.viewHome).not.toHaveBeenCalled();
+    expect(controller.navigationMode).toBe("underground");
+    expect(controller._surfaceHeight).toBe(100.0);
+    expect(controller._target.z).toBe(0.0);
+    expect(heightSpy).toHaveBeenCalledTimes(1);
+    expect(terrainSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps valid below-side underground gestures on their terrain side", function () {
+    const offset = 1000000000.0;
+    const scene = createWidget(offset);
+    controller = new SceneGISPlanarCameraController({
+      world,
+      navigationMode: "underground",
+    });
+    widget.addController(controller);
+    spyOn(scene, "pickPosition").and.returnValue(undefined);
+    spyOn(world, "getTerrainHeight").and.returnValue(20.0);
+    spyOn(world, "pickTerrain").and.callFake((ray, result) =>
+      intersectRayAtHeight(ray, 20.0, result),
+    );
+    spyOn(controller, "viewHome").and.callThrough();
+    const center = new Cartesian2(100.0, 50.0);
+    const direction = new Cartesian3();
+    const up = new Cartesian3();
+    const right = new Cartesian3();
+
+    for (const frustum of [perspective(), createFrusta()[2]]) {
+      scene.camera.frustum = frustum;
+      SceneGISPlanarCamera.getAxes(
+        0.0,
+        CesiumMath.PI_OVER_FOUR,
+        direction,
+        up,
+        right,
+      );
+      SceneGISPlanarCamera.setWorldPose(
+        scene.camera,
+        new Cartesian3(offset, offset - 100.0, -80.0),
+        direction,
+        up,
+      );
+      controller.firstUpdate(scene, JulianDate.now());
+      expect(controller._target.z).toBe(20.0);
+      expect(controller._pitch).toBeGreaterThan(0.0);
+
+      queueMovement(
+        CameraEventType.LEFT_DRAG,
+        center,
+        new Cartesian2(105.0, 50.0),
+      );
+      controller.update(scene, JulianDate.now());
+      expect(scene.camera.positionWC.z).toBeLessThan(20.0);
+      releaseButton(CameraEventType.LEFT_DRAG);
+      controller.update(scene, JulianDate.now());
+
+      queueMovement(
+        CameraEventType.MIDDLE_DRAG,
+        center,
+        new Cartesian2(105.0, 52.0),
+      );
+      controller.update(scene, JulianDate.now());
+      expect(scene.camera.positionWC.z).toBeLessThan(20.0);
+      releaseButton(CameraEventType.MIDDLE_DRAG);
+      controller.update(scene, JulianDate.now());
+
+      queueMovement(CameraEventType.WHEEL, center, new Cartesian2(0.0, 1.0));
+      controller.update(scene, JulianDate.now());
+      expect(scene.camera.positionWC.z).toBeLessThan(20.0);
+    }
+    expect(controller.viewHome).not.toHaveBeenCalled();
+    controller.viewHome.and.callThrough();
+    controller.viewHome(scene);
+    expect(controller.navigationMode).toBe("underground");
+  });
+
+  it("homes invalid surface-side poses while underground Home stays above", function () {
+    const scene = createWidget();
+    scene.camera.frustum = perspective();
+    controller = new SceneGISPlanarCameraController({ world });
+    widget.addController(controller);
+    spyOn(scene, "pickPosition").and.returnValue(undefined);
+    spyOn(world, "getTerrainHeight").and.returnValue(20.0);
+    spyOn(world, "pickTerrain").and.callFake((ray, result) =>
+      intersectRayAtHeight(ray, 20.0, result),
+    );
+    spyOn(controller, "viewHome").and.callThrough();
+    const direction = new Cartesian3();
+    const up = new Cartesian3();
+    SceneGISPlanarCamera.getAxes(
+      0.0,
+      CesiumMath.PI_OVER_FOUR,
+      direction,
+      up,
+      new Cartesian3(),
+    );
+    SceneGISPlanarCamera.setWorldPose(
+      scene.camera,
+      new Cartesian3(0.0, -100.0, -80.0),
+      direction,
+      up,
+    );
+
+    controller.firstUpdate(scene, JulianDate.now());
+    expect(controller.viewHome).toHaveBeenCalledTimes(1);
+    expect(scene.camera.positionWC.z).toBeGreaterThan(controller._target.z);
+    controller.navigationMode = "underground";
+    controller.viewHome(scene);
+    expect(controller.navigationMode).toBe("underground");
+    controller.viewHome.calls.reset();
+    const center = new Cartesian2(100.0, 50.0);
+    queueMovement(CameraEventType.WHEEL, center, new Cartesian2(0.0, 1.0));
+    controller.update(scene, JulianDate.now());
+    expect(controller.viewHome).not.toHaveBeenCalled();
+    expect(scene.camera.positionWC.z).toBeGreaterThan(controller._target.z);
   });
 
   it("homes every real frustum around a large-offset extent", function () {
@@ -462,7 +798,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     queueMovement(CameraEventType.LEFT_DRAG, center, center);
     controller.update(scene, JulianDate.now());
     expect(controller._panAnchor.z).toBe(25.0);
-    expect(terrainSpy).not.toHaveBeenCalled();
+    expect(terrainSpy.calls.count()).toBe(1);
     expect(planeSpy).not.toHaveBeenCalled();
     releaseButton(CameraEventType.LEFT_DRAG);
     controller.update(scene, JulianDate.now());
@@ -471,7 +807,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     queueMovement(CameraEventType.MIDDLE_DRAG, center, center);
     controller.update(scene, JulianDate.now());
     expect(controller._rotatePivot.z).toBe(-10.0);
-    expect(terrainSpy.calls.count()).toBe(1);
+    expect(terrainSpy.calls.count()).toBe(3);
     expect(planeSpy).not.toHaveBeenCalled();
     releaseButton(CameraEventType.MIDDLE_DRAG);
     controller.update(scene, JulianDate.now());
@@ -481,7 +817,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     queueMovement(CameraEventType.WHEEL, center, new Cartesian2(0.0, 1.0));
     controller.update(scene, JulianDate.now());
     expect(controller._zoomAnchor.z).toBe(0.0);
-    expect(terrainSpy.calls.count()).toBe(2);
+    expect(terrainSpy.calls.count()).toBe(5);
     expect(planeSpy.calls.count()).toBe(1);
   });
 
@@ -557,7 +893,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
       releaseButton(CameraEventType.MIDDLE_DRAG);
       controller.update(scene, JulianDate.now());
     }
-    expect(terrainSpy).not.toHaveBeenCalled();
+    expect(terrainSpy).toHaveBeenCalled();
   });
 
   it("keeps reusable nonzero zoom anchors for perspective and orthographic views", function () {
@@ -583,7 +919,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
       Cartesian2.clone(pointer, controller._aggregator._currentMousePosition);
       controller.update(scene, JulianDate.now());
       expect(depthSpy).toHaveBeenCalled();
-      expect(terrainSpy).not.toHaveBeenCalled();
+      expect(terrainSpy).toHaveBeenCalled();
       expect(controller._zoomAnchor).toBe(zoomAnchor);
       expect(controller._zoomAnchor).toEqualEpsilon(anchor, 1e-8);
       expect(project(scene, anchor)).toEqualEpsilon(pointer, 1e-7);

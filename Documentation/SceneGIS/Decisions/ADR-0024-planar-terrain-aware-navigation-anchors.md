@@ -10,6 +10,8 @@
 - Related patch：无；A1 只允许修改 SceneGIS-owned product files
 - Supersedes：ADR-0004 与 ADR-0010 中“camera controller 只使用 Z=0 pick”的阶段性限制；
   两者定义的 public World pick、four-frustum Camera、target clamp 和 terrain query 契约保持有效
+- A2 successor：[ADR-0025](ADR-0025-planar-navigation-mode-and-surface-relationship.md) 取代本ADR保留的
+  Z=0 center rig与单一surface-side profile；A1 pointer anchor chain与public picking保持有效
 
 ## 上下文与源码事实
 

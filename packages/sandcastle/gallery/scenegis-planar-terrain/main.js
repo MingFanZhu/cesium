@@ -75,6 +75,20 @@ viewer.scene.light = new Cesium.DirectionalLight({
 });
 
 const mountainTarget = new Cesium.Cartesian3(1113194.9, 5780349.2, 0.0);
+const navigationMode = document.querySelector("#navigationMode");
+const navigationStatus = document.querySelector("#navigationStatus");
+
+function updateNavigationStatus() {
+  const mode = viewer.planarCameraController.navigationMode;
+  navigationMode.value = mode;
+  navigationStatus.textContent = `Navigation profile: ${mode}.`;
+}
+
+function setNavigationMode(mode) {
+  viewer.planarCameraController.navigationMode = mode;
+  updateNavigationStatus();
+}
+
 function viewMountains() {
   viewer.scene.camera.setView({
     destination: new Cesium.Cartesian3(
@@ -89,6 +103,24 @@ function viewMountains() {
   });
 }
 
+function viewUnderground() {
+  setNavigationMode("underground");
+
+  const surfaceHeight = world.getTerrainHeight(mountainTarget) ?? 0.0;
+  viewer.scene.camera.setView({
+    destination: new Cesium.Cartesian3(
+      mountainTarget.x,
+      mountainTarget.y - 400000.0,
+      surfaceHeight - 300000.0,
+    ),
+    orientation: {
+      direction: new Cesium.Cartesian3(0.0, 0.8, 0.6),
+      up: new Cesium.Cartesian3(0.0, -0.6, 0.8),
+    },
+  });
+  viewer.scene.requestRender();
+}
+
 document
   .querySelector("#lightingToggle")
   .addEventListener("change", (event) => {
@@ -98,7 +130,15 @@ document
 document
   .querySelector("#mountainView")
   .addEventListener("click", viewMountains);
+document
+  .querySelector("#undergroundView")
+  .addEventListener("click", viewUnderground);
+navigationMode.addEventListener("change", (event) => {
+  setNavigationMode(event.target.value);
+});
 document.querySelector("#homeView").addEventListener("click", () => {
   viewer.planarCameraController.viewHome(viewer.scene);
+  updateNavigationStatus();
 });
+updateNavigationStatus();
 viewMountains();

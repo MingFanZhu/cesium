@@ -286,9 +286,18 @@ reference-plane语义；`scene.pickPosition` 继续表示包含对象和 skirt�
 
 Planar camera gesture anchors由controller私有地按 rendered depth → actual-cover terrain → bounded Z=0
 reference plane解析。Pan与zoom的后续ray固定与anchor自身高度的水平面相交，rotate围绕完整3D pivot；drag
-期间anchor不随LOD变化。该规则不改变Home、center target clamp、public picking，也不增加碰撞或地下模式。
+期间anchor不随LOD变化。Public `world.pick`仍是Z=0；controller的center rig则按actual-cover terrain →
+resident camera-surface height/Z=0 fallback解析，并在extent clamp时保留target Z。
+
+`SceneGISPlanarCameraController.navigationMode`是精确的`"surface" | "underground"`同步状态，默认
+`"surface"`，由controller而非World/Scene/Viewer拥有。Viewer应用通过readonly
+`viewer.planarCameraController`设置，不增加Viewer option或mode event。Mode切换必须取消held input，但不移动
+Camera、不调用Home或查询terrain。Observed camera-surface relationship只在controller私有地按resident terrain
+height→Z=0 fallback计算，不能反向推断mode。Surface profile保持上侧/负pitch；underground允许target上下两侧，
+下侧使用镜像正pitch。A2不提供clearance、continuous collision、防穿透、穿越或free-look；这些由A3独立决定。
 完整决定见[ADR-0010](Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)与
-[ADR-0024](Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)。
+[ADR-0024](Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
+[ADR-0025](Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)。
 
 ### 平面 URL Heightmap Provider
 

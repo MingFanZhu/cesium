@@ -2,11 +2,13 @@ title: SceneGIS Planar Terrain
 description: >-
   Combines an EPSG:3857 planar Viewer, explicit OpenStreetMap imagery, and an
   application-configured generic LERC heightmap provider, stable directional
-  geometric lighting, and a mountain view with a lighting toggle. The public terrain
-  and imagery services are best-effort and subject to their CORS, availability,
-  attribution, and usage policies. The demo requests only current-view tiles;
-  it does not prefetch, bulk download, or prepare offline data. If terrain
-  requests fail, a ready ancestor or flat fallback keeps the world usable.
+  geometric lighting, and explicit surface/underground navigation profiles. The
+  mountain and mirrored underground views provide deterministic starting poses;
+  Home preserves the selected profile. The public terrain and imagery services are
+  best-effort and subject to their CORS, availability, attribution, and usage
+  policies. The demo requests only current-view tiles; it does not prefetch, bulk
+  download, or prepare offline data. If terrain requests fail, a ready ancestor or
+  flat fallback keeps the world usable.
   Sources: https://developers.arcgis.com/documentation/tiled-elevation-service/
   and https://operations.osmfoundation.org/policies/tiles/
 labels:

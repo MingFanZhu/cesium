@@ -406,10 +406,14 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   `world.pickTerrain(ray)`、`world.pick(ray)`顺序解析；depth命中后不得重复线性terrain query。
 - Pan drag与rotate drag只在press时解析一次；pan movement与wheel correction使用anchor自身Z的水平面。
   Wheel每次event重新解析pointer anchor，但复用controller-owned scratch，不在hot path分配对象。
-- Public `world.pick`/`pickFromWindowPosition`、Home、center target clamp与`_syncRig`仍是Z=0 contract。
-  Anchor accuracy不等于collision或underground支持。
+- Public `world.pick`/`pickFromWindowPosition`与Home仍是Z=0 contract；center rig按actual-cover terrain→
+  resident camera-surface height/Z=0 fallback解析，target clamp只限制X/Y并保留target Z。
+- `navigationMode`只接受`"surface"`/`"underground"`且默认surface；setter切换必须隔离held input，但不移动
+  Camera、调用Home或查询terrain。Viewer通过`planarCameraController`配置，不增加Viewer option或Event。
+- Observed relationship是private resident height→Z=0 fallback，不能自动切mode。Surface只接纳上侧/负pitch；
+  underground接纳上侧/负pitch与下侧/正pitch。Collision、clearance、防穿透、穿越与free-look仍不属于A2。
 - Specs至少覆盖source priority、非零正负height、release后重新解析、一个perspective/orthographic
-  representative、大坐标，以及真实terrain depth/pivot且terrain runtime零mutation。
+  representative、大坐标、mode切换、terrain上下两侧，以及真实terrain depth/pivot且runtime零mutation。
 
 ### 平面内容实现检查
 

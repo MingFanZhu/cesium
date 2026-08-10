@@ -7,12 +7,12 @@
 - Planning model: `extension`
 - Active extension plan:
   [总体计划：SceneGIS 平面高级地形](plans/2026-08-10-planar-terrain-advanced-extension.md)
-- Current phase: None；A1 completed，A2尚未激活
+- Current phase: None（A2已完成，A3尚未激活）
 - Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
-- Last updated: `2026-08-10`
+- Last updated: `2026-08-11`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -48,19 +48,19 @@
   Sandcastle/E2E 的最小扩展
 - Sandcastle: 复用并按阶段更新 `scenegis-planar-terrain`；不预先增加重复案例
 - Branch: `feature/planar-terrain-advanced`，基线 checkpoint `14a7206f41`
-- ADR: 继承 ADR-0002、ADR-0004、ADR-0007～ADR-0012；A1 新增
-  [ADR-0024](../../Documentation/SceneGIS/Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)
+- ADR: 继承 ADR-0002、ADR-0004、ADR-0007～ADR-0012；A1/A2 新增
+  [ADR-0024](../../Documentation/SceneGIS/Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
+  [ADR-0025](../../Documentation/SceneGIS/Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)
 - SGP: None planned；若 Shader、Worker 或 build phase 必须修改 upstream-owned file，先建立或
   复用合法 SGP
 
 ## Current handoff
 
-- Current state: A1 implementation、5个direct cases、59个focused aggregate cases、build、ownership
-  audit、[A1 review](reviews/2026-08-10-a1-terrain-aware-navigation-anchors.md)与项目负责人人工验收均已完成。
-- Next action: Architecture形成A1独立提交checkpoint；随后与项目负责人讨论A2的surface/underground
-  navigation mode边界，再依据届时源码事实建立A2 phase plan。
-- Current phase status: `completed`
-- Open discussions: None；A1 source order与阶段边界已由ADR-0024裁决。
+- Current state: A1已在checkpoint `6657aac8fe`完成；A2-R001/R002/R003全部关闭，Architecture review与项目负责人
+  Sandcastle surface/underground人工复测均已通过。
+- Next action: Architecture形成A2独立中文checkpoint，随后从clean checkpoint重新审计并建立A3 phase plan。
+- Current phase status: None
+- Open discussions: None；A2 mode owner/API/relationship与A3 collision边界已由ADR-0025裁决。
 - Unresolved reviews: None
-- Known risks: A1 rendered-depth cache与terrain snapshot来自最近normal render；后续仍有地下模式与
-  防穿透规则冲突、Worker构建发布seam、quantized-mesh精度/边界、smooth normal内存和LOD seam。
+- Known risks: A2 relationship依赖resident terrain且不提供collision；A3仍需处理programmatic Camera、clearance、
+  防穿透与穿越。后续还有Worker构建发布seam、quantized-mesh精度/边界、smooth normal内存和LOD seam。
