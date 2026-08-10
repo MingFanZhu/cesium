@@ -1,5 +1,10 @@
 # Planar World 升级与私有依赖检查表
 
+平面内容升级还必须逐项复核版本化
+[PlanarContentCompatibility](PlanarContentCompatibility.md)：24个engine/2个widget入口、16类automatic Graphics、
+gate加八个child顺序、ordinary/Ground Primitive配对、installed declarations/API private边界，以及local dev/release
+E2E的network-zero与actual-ground证据。
+
 本清单用于升级官方 Cesium 基线时复核 SceneGIS Planar World。它不是升级结果，也不能替代 ADR、SGP 和自动化回归。
 
 | 私有依赖或缝隙                                                           | SceneGIS wrapper/owner                                              | 风险   | 升级后必须复核                                                                                                                       |

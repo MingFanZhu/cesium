@@ -396,11 +396,12 @@ C2 的 private Anchor visualizer 只复用 caller-owned disabled `EntityCluster`
 管理 `Model.fromGltfAsync` generation 与 `scene.primitives` ownership，不调用 Entity ENU 或 Model
 height-clamping path。Async completion 不得直接添加 primitive。完整 profile见 ADR-0014。
 
-C3 的 private Polyline/Polygon visualizer 绕开默认 GeometryUpdater、ground 与 geodesic/rhumb 路径。
-Polyline 只接受 planar straight segments；Polygon 只接受 simple outer ring 与 direct holes，并显式生成
-cap、side wall 和 outline。Clamp/drape 只在 supplied vertices 读取 resident terrain，不沿边新增terrain
-采样或细分，也不发起请求；线段和triangle内部仍按几何线性插值。完整geometry/terrain profile见
-ADR-0015。
+C3 的 private Polyline/Polygon visualizer 绕开默认 GeometryUpdater与geodesic/rhumb路径。Polyline只接受
+planar straight segments；Polygon只接受simple outer ring与direct holes，并显式生成cap、side wall和outline。
+C3曾只在supplied vertices读取resident terrain；该ground行为已被C9 actual-cover continuous drape取代。
+当前ordinary `HeightReference.NONE`仍保留source geometry，批准的Polyline/Polygon ground分支统一使用C9
+actual-cover，且不自行发起terrain request。完整当前矩阵见
+[PlanarContentCompatibility](PlanarContentCompatibility.md)。
 
 C4 只为 live `SceneGISPlanarWorld` 安装 per-instance `DataSourceDisplay.visualizersCallback`；默认 Globe、
 `globe:false` 和其他 World 保持 Cesium 默认 callback。Planar gate 仅接受 `CustomDataSource`、disabled
@@ -430,9 +431,10 @@ C7将public Primitive扩展到`SceneGISPlanarBoxGeometry`、`SceneGISPlanarCylin
 `SceneGISPlanarEllipsoidGeometry`。三种volume使用closed、non-flat `PerInstanceColorAppearance`；Plane、
 Ellipse与Rectangle不新增public mesh类型，而是按固定平面坐标降级到C6 Polygon/Polyline。Entity adapter新增
 Solid与Area两个private visualizer，并在既有Anchor/Model/Polyline/Polygon之后追加；Box/Cylinder/Ellipsoid的
-position表示中心，ground reference先解析anchor再加未旋转下部support。Ellipse与Rectangle只对生成顶点采样
-terrain，`NONE`允许合法anchor的geometry延伸extent外。所有orientation继续使用fixed planar quaternion，不进入
-ENU、ellipsoid或默认GeometryUpdater路径。完整决定见ADR-0019。
+position表示中心，ground reference先解析anchor再加未旋转下部support。C7曾对Ellipse/Rectangle generated
+vertices做vertex-only terrain sampling；该ground行为已被C9 actual-cover continuous drape取代，ordinary `NONE`
+仍允许合法anchor的geometry延伸extent外。所有orientation继续使用fixed planar quaternion，不进入ENU、
+ellipsoid或默认GeometryUpdater路径。完整决定见ADR-0019与当前compatibility matrix。
 
 C8新增public `SceneGISPlanarWallGeometry`与`SceneGISPlanarPolylineVolumeGeometry`。Wall以米制XY route和显式
 top/bottom高度生成open non-flat surface；PolylineVolume以route-left/world-up固定frame扫掠居中的Cartesian2
@@ -441,7 +443,8 @@ shape，支持planar MITERED/BEVELED/ROUNDED corner。二者输出local DOUBLE p
 等价mesh新增public类型。C9已把Corridor ground分支迁移到actual-triangle continuous drape；Wall/PolylineVolume不隐式查询terrain。
 Path只允许effective `ReferenceFrame.FIXED`、undefined/`"FIXED"` relativeTo与`PathMode.WHOLE`，通过private
 fixed-frame sampler隔离Cesium Property采样；INERTIAL、entity-relative/VVLH与PORTIONS fail-fast。Automatic callback
-顺序在Area后追加Route、Path，保持zero-upstream。完整决定见ADR-0020。
+完整顺序为gate、Anchor、Model、Polyline、Polygon、Solid、Area、Route、Path，保持zero-upstream。完整决定见
+ADR-0020。
 
 ### 平面 Continuous Ground 与 Ground Primitive
 
@@ -470,6 +473,18 @@ level的provider geometric error，FLAT不声明terrain accuracy。Ground不发r
 caller appearance，也不依赖polygonOffset。Polyline clamp、Polygon、Ellipse、Rectangle和Corridor的ground配置迁移到
 该public runtime；其他graphics profile不扩大。若representative linear/log-depth真实GPU不能稳定覆盖terrain，必须
 暂停，不能静默增加Shader、classification、Worker或upstream patch。完整决定见ADR-0021。
+
+### 平面内容兼容性与交付
+
+`planar-content`的稳定交付面绑定Cesium `1.144` upstream baseline，并由
+[PlanarContentCompatibility](PlanarContentCompatibility.md)维护24个engine SceneGIS入口、2个widget入口、
+16类automatic Entity Graphics以及ordinary/Ground Primitive边界。该矩阵不把underscore soft-private JS barrel
+artifact提升为public API；declarations和API HTML必须隐藏private runtime。
+
+最终qualification使用local deterministic terrain验证gate加八个child、actual-cover ground、direct public
+Primitive、warm/mutation/provider convergence与lifecycle。Dev/release E2E和package consumer禁止公网；公开
+Sandcastle只作为best-effort人工展示。Timing只记录同机diagnostic median/P95，不是跨机器hard gate。Architecture
+review不能代替项目负责人的真实浏览器/GPU人工验收。完整决定见ADR-0022。
 
 ## 验证架构
 

@@ -145,7 +145,8 @@ viewer.entities.add({
 viewer.entities.add({
   id: "planar-polyline",
   name: "Clamped planar polyline",
-  description: "Straight supplied vertices sample resident terrain only.",
+  description:
+    "A straight planar Polyline continuously draped over the current rendered terrain cover.",
   polyline: {
     positions: [
       new Cesium.Cartesian3(
@@ -163,7 +164,7 @@ viewer.entities.add({
     width: 8,
     material: Cesium.Color.CYAN,
     arcType: Cesium.ArcType.NONE,
-    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    clampToGround: true,
   },
 });
 
@@ -206,12 +207,280 @@ viewer.entities.add({
   },
 });
 
+const solidCenter = new Cesium.Cartesian3(
+  contentCenter.x - 900.0,
+  contentCenter.y + 900.0,
+  0.0,
+);
+viewer.entities.add({
+  id: "planar-box",
+  name: "Planar Box",
+  position: new Cesium.Cartesian3(solidCenter.x, solidCenter.y, 90.0),
+  box: {
+    dimensions: new Cesium.Cartesian3(140.0, 180.0, 180.0),
+    material: Cesium.Color.CORNFLOWERBLUE,
+  },
+});
+viewer.entities.add({
+  id: "planar-cylinder",
+  name: "Planar Cylinder",
+  position: new Cesium.Cartesian3(solidCenter.x + 260.0, solidCenter.y, 100.0),
+  cylinder: {
+    length: 200.0,
+    topRadius: 60.0,
+    bottomRadius: 90.0,
+    slices: 24,
+    material: Cesium.Color.ORANGE,
+  },
+});
+viewer.entities.add({
+  id: "planar-ellipsoid",
+  name: "Planar Ellipsoid",
+  position: new Cesium.Cartesian3(solidCenter.x + 520.0, solidCenter.y, 100.0),
+  ellipsoid: {
+    radii: new Cesium.Cartesian3(90.0, 120.0, 100.0),
+    material: Cesium.Color.VIOLET,
+  },
+});
+
+viewer.entities.add({
+  id: "planar-plane",
+  name: "Planar Plane",
+  position: new Cesium.Cartesian3(
+    contentCenter.x,
+    contentCenter.y + 900.0,
+    90.0,
+  ),
+  plane: {
+    plane: new Cesium.Plane(Cesium.Cartesian3.UNIT_Z, 0.0),
+    dimensions: new Cesium.Cartesian2(220.0, 140.0),
+    material: Cesium.Color.SKYBLUE,
+  },
+});
+viewer.entities.add({
+  id: "planar-ellipse",
+  name: "Planar Ellipse",
+  position: new Cesium.Cartesian3(
+    contentCenter.x + 330.0,
+    contentCenter.y + 900.0,
+    0.0,
+  ),
+  ellipse: {
+    semiMajorAxis: 130.0,
+    semiMinorAxis: 80.0,
+    height: 70.0,
+    rotation: Math.PI / 6.0,
+    material: Cesium.Color.GOLD.withAlpha(0.75),
+  },
+});
+viewer.entities.add({
+  id: "planar-rectangle",
+  name: "Planar Rectangle",
+  rectangle: {
+    coordinates: new Cesium.Rectangle(
+      contentCenter.x + 520.0,
+      contentCenter.y + 820.0,
+      contentCenter.x + 760.0,
+      contentCenter.y + 980.0,
+    ),
+    height: 70.0,
+    rotation: Math.PI / 10.0,
+    material: Cesium.Color.LIGHTGREEN.withAlpha(0.75),
+  },
+});
+
+viewer.entities.add({
+  id: "planar-corridor",
+  name: "Planar Corridor",
+  corridor: {
+    positions: [
+      new Cesium.Cartesian3(
+        contentCenter.x - 900.0,
+        contentCenter.y + 1450.0,
+        0.0,
+      ),
+      new Cesium.Cartesian3(
+        contentCenter.x - 650.0,
+        contentCenter.y + 1600.0,
+        0.0,
+      ),
+      new Cesium.Cartesian3(
+        contentCenter.x - 400.0,
+        contentCenter.y + 1450.0,
+        0.0,
+      ),
+    ],
+    width: 80.0,
+    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    material: Cesium.Color.DEEPSKYBLUE,
+  },
+});
+viewer.entities.add({
+  id: "planar-wall",
+  name: "Planar Wall",
+  wall: {
+    positions: [
+      new Cesium.Cartesian3(
+        contentCenter.x - 250.0,
+        contentCenter.y + 1450.0,
+        100.0,
+      ),
+      new Cesium.Cartesian3(contentCenter.x, contentCenter.y + 1550.0, 180.0),
+      new Cesium.Cartesian3(
+        contentCenter.x + 250.0,
+        contentCenter.y + 1450.0,
+        120.0,
+      ),
+    ],
+    material: Cesium.Color.CRIMSON.withAlpha(0.75),
+  },
+});
+viewer.entities.add({
+  id: "planar-polyline-volume",
+  name: "Planar Polyline Volume",
+  polylineVolume: {
+    positions: [
+      new Cesium.Cartesian3(
+        contentCenter.x + 400.0,
+        contentCenter.y + 1450.0,
+        100.0,
+      ),
+      new Cesium.Cartesian3(
+        contentCenter.x + 750.0,
+        contentCenter.y + 1550.0,
+        100.0,
+      ),
+    ],
+    shape: [
+      new Cesium.Cartesian2(-30.0, -30.0),
+      new Cesium.Cartesian2(30.0, -30.0),
+      new Cesium.Cartesian2(30.0, 30.0),
+      new Cesium.Cartesian2(-30.0, 30.0),
+    ],
+    material: Cesium.Color.LIGHTSEAGREEN,
+  },
+});
+
+const pathPositions = new Cesium.SampledPositionProperty();
+pathPositions.addSample(
+  Cesium.JulianDate.addSeconds(
+    viewer.clock.currentTime,
+    -60.0,
+    new Cesium.JulianDate(),
+  ),
+  new Cesium.Cartesian3(
+    contentCenter.x - 350.0,
+    contentCenter.y + 1850.0,
+    140.0,
+  ),
+);
+pathPositions.addSample(
+  Cesium.JulianDate.addSeconds(
+    viewer.clock.currentTime,
+    60.0,
+    new Cesium.JulianDate(),
+  ),
+  new Cesium.Cartesian3(
+    contentCenter.x + 350.0,
+    contentCenter.y + 1850.0,
+    180.0,
+  ),
+);
+viewer.entities.add({
+  id: "planar-path",
+  name: "Fixed planar Path",
+  position: pathPositions,
+  path: {
+    leadTime: 60.0,
+    trailTime: 60.0,
+    width: 6.0,
+    material: Cesium.Color.WHITE,
+  },
+});
+
+const directOrdinary = viewer.scene.primitives.add(
+  new Cesium.SceneGISPlanarPrimitive({
+    geometry: new Cesium.SceneGISPlanarPolygonGeometry({
+      positions: [
+        new Cesium.Cartesian3(
+          contentCenter.x - 260.0,
+          contentCenter.y + 2200.0,
+          130.0,
+        ),
+        new Cesium.Cartesian3(
+          contentCenter.x - 40.0,
+          contentCenter.y + 2200.0,
+          130.0,
+        ),
+        new Cesium.Cartesian3(
+          contentCenter.x - 40.0,
+          contentCenter.y + 2380.0,
+          130.0,
+        ),
+        new Cesium.Cartesian3(
+          contentCenter.x - 260.0,
+          contentCenter.y + 2380.0,
+          130.0,
+        ),
+      ],
+    }),
+    appearance: new Cesium.PerInstanceColorAppearance({ flat: true }),
+    attributes: {
+      color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.BLUE),
+    },
+    id: "direct-planar-primitive",
+  }),
+);
+const directGround = viewer.scene.primitives.add(
+  new Cesium.SceneGISPlanarGroundPrimitive({
+    world,
+    geometry: new Cesium.SceneGISPlanarPolylineGeometry({
+      positions: [
+        new Cesium.Cartesian3(
+          contentCenter.x + 80.0,
+          contentCenter.y + 2280.0,
+          0.0,
+        ),
+        new Cesium.Cartesian3(
+          contentCenter.x + 520.0,
+          contentCenter.y + 2280.0,
+          0.0,
+        ),
+      ],
+      width: 14.0,
+    }),
+    appearance: new Cesium.PolylineMaterialAppearance({
+      material: Cesium.Material.fromType(Cesium.Material.ColorType, {
+        color: Cesium.Color.MAGENTA,
+      }),
+    }),
+    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    id: "direct-planar-ground-primitive",
+  }),
+);
+void directOrdinary;
+void directGround;
+
 function viewContent() {
   viewer.scene.camera.setView({
     destination: new Cesium.Cartesian3(
       contentCenter.x,
       contentCenter.y - 1500.0,
       1300.0,
+    ),
+    orientation: {
+      direction: new Cesium.Cartesian3(0.0, 0.75, -0.6614378278),
+      up: new Cesium.Cartesian3(0.0, 0.6614378278, 0.75),
+    },
+  });
+}
+
+function viewGroup(northOffset) {
+  viewer.scene.camera.setView({
+    destination: new Cesium.Cartesian3(
+      contentCenter.x,
+      contentCenter.y + northOffset - 1200.0,
+      1100.0,
     ),
     orientation: {
       direction: new Cesium.Cartesian3(0.0, 0.75, -0.6614378278),
@@ -322,6 +591,15 @@ function requestBatchState(present) {
 }
 
 document.querySelector("#contentView").addEventListener("click", viewContent);
+document
+  .querySelector("#solidView")
+  .addEventListener("click", () => viewGroup(900.0));
+document
+  .querySelector("#routeView")
+  .addEventListener("click", () => viewGroup(1550.0));
+document
+  .querySelector("#directView")
+  .addEventListener("click", () => viewGroup(2280.0));
 document.querySelector("#homeView").addEventListener("click", () => {
   viewer.planarCameraController.viewHome(viewer.scene);
 });

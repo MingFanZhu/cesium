@@ -1,0 +1,100 @@
+# SceneGIS 平面内容兼容性矩阵
+
+本文档记录 `planar-content` 在 Cesium `1.144`、upstream commit
+`6d5d8b1f0725b6f831b336463f4b11c98023427b` 上的交付范围。它是版本化能力索引；源码 JSDoc、
+Specs 与相关 ADR 仍是可执行契约的事实源。
+
+## 全局前提
+
+- 坐标是米制 `Cartesian3`，固定轴为 X east、Y north、Z up；应用负责 CRS 转换和数据一致性。
+- World 只支持 `SCENE3D`。Automatic Entity path 只接受 `CustomDataSource`，并要求 `EntityCluster.enabled === false`。
+- Automatic path 是 instance-owned gate 加八个 child visualizer，共九个 visualizer object；它不会并行运行消费相同
+  Graphics 的默认 Globe visualizer。
+- Anchor X/Y 使用 World inclusive extent。普通 Geometry 可在合法 anchor 下延伸出 extent；ground-derived 顶点必须
+  落入可用 actual-cover。
+- `NONE`、`CLAMP_TO_GROUND`、`RELATIVE_TO_GROUND` 是支持的高度模式。Anchor-level reference 读取 resident
+  terrain 并在未知时回退 Z=0；continuous ground 则消费最近 normal render 的 actual terrain triangles。
+
+## Public package inventory
+
+Engine 根入口共 24 个：
+
+| 类别             | Public entry                                                                                                                                                                                                                              | 形态                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| World contract   | `SceneGISWorld`                                                                                                                                                                                                                           | constructor/interface shape            |
+| Planar core      | `SceneGISPlanarExtent`、`SceneGISPlanarCoordinateSystem`、`SceneGISPlanarTilingScheme`                                                                                                                                                    | constructor                            |
+| Terrain core     | `SceneGISPlanarTerrainData`、`SceneGISPlanarHeightmapTerrainData`、`SceneGISPlanarTerrainProvider`、`SceneGISPlanarUrlTemplateHeightmapTerrainProvider`                                                                                   | constructor                            |
+| Terrain sampling | `SceneGISPlanarTerrainSampler`                                                                                                                                                                                                            | namespace object；调用 `sampleAtLevel` |
+| World/navigation | `SceneGISPlanarWorld`、`SceneGISPlanarCameraController`                                                                                                                                                                                   | constructor                            |
+| Imagery          | `SceneGISPlanarImageryProvider`、`SceneGISPlanarUrlTemplateImageryProvider`、`SceneGISPlanarImageryLayer`、`SceneGISPlanarImageryLayerCollection`                                                                                         | constructor                            |
+| Public Geometry  | `SceneGISPlanarPolylineGeometry`、`SceneGISPlanarPolygonGeometry`、`SceneGISPlanarBoxGeometry`、`SceneGISPlanarCylinderGeometry`、`SceneGISPlanarEllipsoidGeometry`、`SceneGISPlanarWallGeometry`、`SceneGISPlanarPolylineVolumeGeometry` | constructor                            |
+| Public Primitive | `SceneGISPlanarPrimitive`、`SceneGISPlanarGroundPrimitive`                                                                                                                                                                                | constructor                            |
+
+Widgets 根入口共 2 个：`SceneGISPlanarHomeButton` 与 `SceneGISPlanarHomeButtonViewModel`。Planar `Viewer`
+入口和 `viewer.planarCameraController` 是既有 `Viewer` 的受支持成员，不另计为 SceneGIS-named entry。
+
+Package smoke 从 repo 外 consumer 使用 bare ESM `@cesium/engine`、`@cesium/widgets`、`cesium` 与 CJS
+`require("cesium")` 验证上述 inventory。Underscore modules 是 soft-private implementation detail：生成 JS barrel 可能
+包含它们，但 declarations 与 API HTML 必须隐藏。
+
+## Automatic Entity Graphics
+
+| Graphics       | Position/source                               | 高度与 ground                                        | 主要边界                                            | Child role / evidence                                 |
+| -------------- | --------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------- |
+| Point          | `Entity.position`                             | anchor-level NONE/clamp/relative                     | 始终使用 `PointPrimitive`                           | Anchor；Anchor focused + C10 qualification            |
+| Billboard      | `Entity.position`                             | anchor-level NONE/clamp/relative                     | local image；low-level reference 固定 NONE          | Anchor；Anchor focused + C10 qualification            |
+| Label          | `Entity.position`                             | anchor-level NONE/clamp/relative                     | fixed planar anchor                                 | Anchor；Anchor focused + C10 qualification            |
+| Model          | `Entity.position` + optional Quaternion       | anchor-level NONE/clamp/relative                     | local glTF；fixed planar transform；无 ENU/clamping | Model；Model focused + C10 qualification/E2E          |
+| Polyline       | supplied `positions`                          | NONE ordinary；`clampToGround:true` continuous       | straight `ArcType.NONE`；Color material             | Polyline；Polyline/Ground focused + C10 qualification |
+| Polygon        | hierarchy + scalar/per-position height        | ordinary 或 approved continuous top/bottom reference | simple outer + direct holes；caps/sides             | Polygon；Polygon/Ground focused + C10 qualification   |
+| Box            | center `Entity.position`                      | anchor-level NONE/clamp/relative + lower support     | complete dimensions；Color only                     | Solid；Solid focused + C10 cohort                     |
+| Cylinder       | center `Entity.position`                      | anchor-level NONE/clamp/relative + lower support     | cylinder/cone；Color only                           | Solid；Solid focused + C10 cohort                     |
+| Ellipsoid      | center `Entity.position`                      | anchor-level NONE/clamp/relative + lower support     | complete radii；no partial ellipsoid                | Solid；Solid focused + C10 cohort                     |
+| Plane          | `Entity.position` + orientation + local plane | NONE only                                            | canonical rectangle lowered through planar Polygon  | Area；Area focused + C10 cohort                       |
+| Ellipse        | position supplies X/Y; explicit height        | ordinary or approved continuous top/bottom reference | rotation from +Y counterclockwise                   | Area；Area/Ground focused + C10 cohort                |
+| Rectangle      | meter-based west/south/east/north             | ordinary or approved continuous top/bottom reference | strictly ordered; no IDL wrap/granularity           | Area；Area/Ground focused + C10 cohort                |
+| Corridor       | supplied route                                | ordinary or approved continuous top/bottom reference | Euclidean XY corners/caps; no geodesic/rhumb        | Route；Route/Ground focused + C10 cohort              |
+| Wall           | route + explicit top/bottom                   | no implicit continuous terrain                       | open non-flat planar wall                           | Route；Route focused + C10 cohort                     |
+| PolylineVolume | route + Cartesian2 shape                      | no implicit continuous terrain                       | fixed route-left/world-up frame                     | Route；Route focused + C10 cohort                     |
+| Path           | sampled FIXED position                        | source sample Z only                                 | `PathMode.WHOLE`; no INERTIAL/VVLH/PORTIONS         | Path；Path focused + C10 cohort                       |
+
+`description`, `properties` 与 `viewFrom` 可作为 approved top-level metadata；unsupported standard Graphics 或 custom
+top-level properties fail-fast before child normal update and low-level resource mutation.
+
+## Direct Primitive matrix
+
+`SceneGISPlanarPrimitive` 接受七种 public Geometry。Polyline 使用 `PolylineMaterialAppearance`；Polygon 使用 flat
+`PerInstanceColorAppearance`；Box/Cylinder/Ellipsoid/Wall/PolylineVolume 使用 compatible closed/open non-flat
+`PerInstanceColorAppearance`。一个 wrapper 的 geometry kind 在构造时确定，replacement 只允许同 kind。它拥有自己
+创建的 standard synchronous `Primitive`，不拥有 caller collection、Appearance 或 Entity。
+
+`SceneGISPlanarGroundPrimitive` 只接受 existing planar Polyline/Polygon Geometry、live World 与 compatible Color
+appearance，且至少一个 top/bottom HeightReference 是 ground-relative。它在 normal render 注册并消费 actual-cover；
+pick/depth 只提交 last-successful current。Ground wrapper 不发 terrain request、不拥有 World/provider，也不提供
+classification、zIndex、arbitrary material 或 arbitrary model matrix。
+
+两种 wrapper 都保留 caller `id` 用于 picking，提供 last-successful current bounds，固定单 Context，并在 candidate
+failure/replacement/destroy 中维持 exactly-once ownership。
+
+## 明确不支持
+
+- `Cesium3DTilesetGraphics`、3D Tiles/classification、ordered ground layers 与 Globe GroundPrimitive path。
+- 非 `CustomDataSource` automatic integration、enabled clustering、同时运行默认 Globe visualizer。
+- Runtime reprojection、Cartographic/Ellipsoid/ENU、geodesic/rhumb、IDL wrap 与格式自动转换。
+- Arbitrary Material、shadow、custom shader、terrain request from content、continuous ground for Model/solid/Wall/
+  PolylineVolume/Path。
+- Entity tracking、flight、`zoomTo`/`flyTo` 与 Globe-specific graphics fields。Unsupported combinations must fail fast;
+  they are not silently ignored.
+
+## 交付证据与升级
+
+- Focused C1-C9 Specs define per-type validation, topology, lifecycle, picking and ground behavior.
+- `SceneGISPlanarContentQualificationSpec` covers the fixed moderate profile, all eight child roles, direct ordinary/ground
+  primitives, deterministic local terrain, warm/mutation/provider/lifecycle gates.
+- `Specs/e2e/scenegis-planar-content.spec.js` runs the same local-network-zero scenario against development and release bundles.
+- `scenegis-planar-content` is the executable manual example; public imagery/terrain there is best-effort and is not automated
+  evidence.
+
+Any Cesium baseline, public inventory, Entity property profile, Geometry/Appearance pair, ground protocol or package export change
+requires this matrix, [PlanarContentGuide](PlanarContentGuide.md), and
+[PlanarWorldUpgradeChecklist](PlanarWorldUpgradeChecklist.md) to be reviewed together.

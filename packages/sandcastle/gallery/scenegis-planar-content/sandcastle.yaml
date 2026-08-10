@@ -1,9 +1,9 @@
 title: SceneGIS Planar Content
 description: >-
-  Demonstrates automatic Point, Billboard, Label, local glTF Model, straight
-  Polyline, and Polygon visualization in an EPSG:3857 planar Viewer. The page
-  compares absolute, clamped, and relative heights, preserves original Entity
-  selection, and provides bounded dynamic and representative batch controls.
+  Demonstrates all 16 supported automatic Entity Graphics plus direct ordinary
+  and Ground Primitive use in an EPSG:3857 planar Viewer. Grouped views compare
+  absolute, anchor-relative, and actual-cover continuous-ground behavior while
+  preserving original Entity selection and bounded dynamic/batch controls.
   OpenStreetMap imagery and the public elevation service are best-effort and
   subject to their CORS, availability, attribution, and usage policies. The
   demo requests only current-view tiles and never prefetches, bulk downloads,

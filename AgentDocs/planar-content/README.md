@@ -7,7 +7,7 @@
 - Planning model: `extension`
 - Active extension plan:
   [SceneGIS 平面内容总体计划](plans/2026-08-08-planar-content-extension.md)
-- Current phase: None；C10 pending C9 checkpoint
+- Current phase: C11 planning pending
 - Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
@@ -59,20 +59,23 @@
   [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)、
   [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)、
   [ADR-0020：平面路径衍生 Geometry 与动态 Path](../../Documentation/SceneGIS/Decisions/ADR-0020-planar-route-derived-geometry-and-path.md)、
-  [ADR-0021：平面连续贴地与 Ground Primitive 晚阶段渲染协议](../../Documentation/SceneGIS/Decisions/ADR-0021-planar-continuous-ground-and-ground-primitive.md)
+  [ADR-0021：平面连续贴地与 Ground Primitive 晚阶段渲染协议](../../Documentation/SceneGIS/Decisions/ADR-0021-planar-continuous-ground-and-ground-primitive.md)、
+  [ADR-0022：平面内容兼容性矩阵与最终交付](../../Documentation/SceneGIS/Decisions/ADR-0022-planar-content-compatibility-and-delivery.md)
 - SGP: 复用active `SGP-0001`；C4只允许在`packages/engine/Source/Widget/CesiumWidget.js`新增两个paired
   hunks
 
 ## Current handoff
 
-- Current state: C1-C8已完成并提交；C9 focused Architecture/code re-review已确认C9-R001～C9-R006全部
-  关闭，review=`approved`、phase=`completed`，ADR-0021保持`approved`。
-- Next action: Architecture形成C9独立中文本地提交检查点，再规划并激活C10。
-- Current phase status: None；extension继续`active`。
+- Current state: C1-C9已完成并独立提交；C10 architecture/release-evidence review已通过，作为自动化交付
+  baseline等待本地提交。项目负责人没有把C9 actual-mesh ground后端作为最终产品人工验收通过，而是决定由
+  C11以单一planar depth/stencil后端替换。
+- Next action: Architecture形成C10独立中文本地提交，然后创建并激活C11 phase plan。
+- Current phase status: C10=`completed`；extension继续`active`；C11尚未激活。
 - Open discussions: None；3D Tiles与GeoJSON/CZML/KML转换继续属于独立扩展。
 - Latest completed review:
-  [C9 continuous ground and Ground Primitive review](reviews/2026-08-10-c9-continuous-ground-and-ground-primitive.md)
-  （`approved`）。
+  [C10 unified integration and delivery review](reviews/2026-08-10-c10-unified-integration-and-delivery.md)
+  （`approved`；C10-R001～C10-R004均关闭）。
 - Unresolved reviews: None。
-- Known risks: C9保留同步normal-render CPU drape、standard Primitive升级面与更广GPU/driver交付风险；这些风险
-  进入C10 qualification，不扩大为classification、ordered ground layers或arbitrary Material。
+- Known risks: C9同步normal-render CPU drape只作为已验证历史实现保留到C11替换；C11必须建立单一planar
+  depth/stencil ground后端并重新完成人工验收。Classification之外的ordered ground layers与arbitrary Material仍
+  不自动进入范围。

@@ -3,23 +3,47 @@ import {
   BillboardGraphics,
   BoundingSphere,
   BoundingSphereState,
+  BoxGraphics,
   Cartesian2,
   Cartesian3,
   CesiumWidget,
   Color,
+  ColorGeometryInstanceAttribute,
   ColorMaterialProperty,
+  CorridorGraphics,
   CustomDataSource,
+  CylinderGraphics,
+  EllipseGraphics,
+  EllipsoidGraphics,
+  Event,
   HeightReference,
+  JulianDate,
   LabelGraphics,
+  Material,
   ModelGraphics,
+  PathGraphics,
+  PerInstanceColorAppearance,
+  Plane,
+  PlaneGraphics,
   PointGraphics,
   PolygonGraphics,
   PolygonHierarchy,
+  PolylineMaterialAppearance,
   PolylineGraphics,
+  PolylineVolumeGraphics,
+  Rectangle,
+  RectangleGraphics,
+  SampledPositionProperty,
+  SceneGISPlanarGroundPrimitive,
+  SceneGISPlanarHeightmapTerrainData,
+  SceneGISPlanarPolygonGeometry,
+  SceneGISPlanarPrimitive,
+  SceneGISPlanarPolylineGeometry,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
   SceneTransforms,
+  WallGraphics,
 } from "../../../index.js";
 import getWebGLStub from "../../../../../Specs/getWebGLStub.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
@@ -46,6 +70,136 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
     });
   }
 
+  function attachDeterministicTerrain(world, offset = 0.0) {
+    const terrainData = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array([
+        offset + 10.0,
+        offset + 30.0,
+        offset + 10.0,
+        offset + 40.0,
+        offset + 120.0,
+        offset + 40.0,
+        offset + 10.0,
+        offset + 30.0,
+        offset + 10.0,
+      ]),
+      width: 3,
+      height: 3,
+    });
+    const provider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: offset + 10.0,
+      maximumHeight: offset + 120.0,
+      maximumLevel: 0,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: (level) => 256.0 / 2 ** level,
+      requestTileGeometry: () => Promise.resolve(terrainData),
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+    };
+    world.terrainProvider = provider;
+    return provider;
+  }
+
+  function addCoverageCohort(source, time) {
+    const baseX = center - 900.0;
+    const baseY = center + 350.0;
+    const add = (id, options) => source.entities.add({ id, ...options });
+    const entities = {
+      box: add("coverage-box", {
+        position: new Cartesian3(baseX, baseY, 40.0),
+        box: new BoxGraphics({ dimensions: new Cartesian3(60, 80, 100) }),
+      }),
+      cylinder: add("coverage-cylinder", {
+        position: new Cartesian3(baseX + 120.0, baseY, 50.0),
+        cylinder: new CylinderGraphics({
+          length: 100,
+          topRadius: 30,
+          bottomRadius: 40,
+          slices: 12,
+        }),
+      }),
+      ellipsoid: add("coverage-ellipsoid", {
+        position: new Cartesian3(baseX + 240.0, baseY, 50.0),
+        ellipsoid: new EllipsoidGraphics({ radii: new Cartesian3(35, 45, 55) }),
+      }),
+      plane: add("coverage-plane", {
+        position: new Cartesian3(baseX + 360.0, baseY, 60.0),
+        plane: new PlaneGraphics({
+          plane: new Plane(Cartesian3.UNIT_Z, 0.0),
+          dimensions: new Cartesian2(80.0, 50.0),
+        }),
+      }),
+      ellipse: add("coverage-ellipse", {
+        position: new Cartesian3(baseX + 480.0, baseY, 0.0),
+        ellipse: new EllipseGraphics({
+          semiMajorAxis: 50.0,
+          semiMinorAxis: 30.0,
+          height: 20.0,
+        }),
+      }),
+      rectangle: add("coverage-rectangle", {
+        rectangle: new RectangleGraphics({
+          coordinates: new Rectangle(
+            baseX + 550.0,
+            baseY - 30.0,
+            baseX + 630.0,
+            baseY + 30.0,
+          ),
+          height: 20.0,
+        }),
+      }),
+      corridor: add("coverage-corridor", {
+        corridor: new CorridorGraphics({
+          positions: [
+            new Cartesian3(baseX + 700.0, baseY - 40.0, 15.0),
+            new Cartesian3(baseX + 760.0, baseY, 15.0),
+            new Cartesian3(baseX + 700.0, baseY + 40.0, 15.0),
+          ],
+          width: 18.0,
+          height: 15.0,
+        }),
+      }),
+      wall: add("coverage-wall", {
+        wall: new WallGraphics({
+          positions: [
+            new Cartesian3(baseX, baseY + 140.0, 80.0),
+            new Cartesian3(baseX + 100.0, baseY + 140.0, 100.0),
+          ],
+        }),
+      }),
+      volume: add("coverage-volume", {
+        polylineVolume: new PolylineVolumeGraphics({
+          positions: [
+            new Cartesian3(baseX + 180.0, baseY + 140.0, 60.0),
+            new Cartesian3(baseX + 280.0, baseY + 140.0, 60.0),
+          ],
+          shape: [
+            new Cartesian2(-10.0, -10.0),
+            new Cartesian2(10.0, -10.0),
+            new Cartesian2(10.0, 10.0),
+            new Cartesian2(-10.0, 10.0),
+          ],
+        }),
+      }),
+    };
+    const sampled = new SampledPositionProperty();
+    sampled.addSample(
+      JulianDate.addSeconds(time, -60.0, new JulianDate()),
+      new Cartesian3(baseX + 360.0, baseY + 140.0, 30.0),
+    );
+    sampled.addSample(
+      JulianDate.addSeconds(time, 60.0, new JulianDate()),
+      new Cartesian3(baseX + 460.0, baseY + 140.0, 30.0),
+    );
+    entities.path = add("coverage-path", {
+      position: sampled,
+      path: new PathGraphics({ leadTime: 60.0, trailTime: 60.0 }),
+    });
+    return entities;
+  }
+
   function createWidget(world) {
     const contextOptions = { webgl: { antialias: false } };
     if (!!window.webglStub) {
@@ -54,6 +208,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
     widget = new CesiumWidget(container, {
       world,
       useDefaultRenderLoop: false,
+      scene3DOnly: true,
       contextOptions,
     });
     widget.scene.highDynamicRange = false;
@@ -94,7 +249,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
     return image;
   }
 
-  function addModerateProfile(source, terrainHeightRef) {
+  function addModerateProfile(source) {
     const points = [];
     const billboards = [];
     const labels = [];
@@ -109,8 +264,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
         point: new PointGraphics({
           pixelSize: i === 0 ? 18.0 : 5.0,
           color: i === 0 ? Color.RED : Color.YELLOW,
-          heightReference:
-            i === 0 ? HeightReference.CLAMP_TO_GROUND : HeightReference.NONE,
+          heightReference: HeightReference.NONE,
         }),
       });
       points.push(entity);
@@ -143,7 +297,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
               new Cartesian3(position.x - 20.0, position.y, 8.0),
               new Cartesian3(position.x + 20.0, position.y, 8.0),
             ],
-            clampToGround: i === 0,
+            clampToGround: false,
             material: new ColorMaterialProperty(Color.CYAN),
             width: 2,
           }),
@@ -159,16 +313,12 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
           polygon: new PolygonGraphics({
             hierarchy: new PolygonHierarchy(square(position, 24.0, 0.0)),
             height: i === 0 ? 2.0 : 6.0,
-            heightReference:
-              i === 0
-                ? HeightReference.RELATIVE_TO_GROUND
-                : HeightReference.NONE,
+            heightReference: HeightReference.NONE,
             material: new ColorMaterialProperty(Color.LIME.withAlpha(0.8)),
           }),
         }),
       );
     }
-    terrainHeightRef.value = 20.0;
     return { points, billboards, labels, polylines, polygons };
   }
 
@@ -266,11 +416,9 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
 
   it("qualifies the fixed moderate profile across warm and local mutation frames", function () {
     const world = createWorld();
-    const terrainHeight = { value: 20.0 };
-    spyOn(world, "getTerrainHeight").and.callFake(() => terrainHeight.value);
     createWidget(world);
     const source = new CustomDataSource("moderate-profile");
-    const profile = addModerateProfile(source, terrainHeight);
+    const profile = addModerateProfile(source);
     return widget.dataSources.add(source).then(function () {
       for (let i = 0; i < 3; i++) {
         widget.dataSourceDisplay.update(widget.clock.currentTime);
@@ -300,7 +448,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
           point.position,
           new Cartesian2(),
         );
-        expect(widget.scene.pick(windowPosition)?.id).toBe(profile.points[0]);
+        expect(profile.points).toContain(widget.scene.pick(windowPosition)?.id);
       }
 
       const stable = snapshotStable(source, profile);
@@ -353,7 +501,6 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
             square(position, 24.0 + round + 1.0, 0.0),
           );
         }
-        terrainHeight.value += 1.0;
         widget.render();
         expect(
           visualizers.anchor._items.get(profile.points[255].id).point,
@@ -366,16 +513,7 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
         ).toBe(unchangedPolygon);
         expect(
           visualizers.anchor._items.get(profile.points[0].id).point.position.z,
-        ).toBe(terrainHeight.value);
-        const clampedLinePositions = visualizers.polyline._items.get(
-          profile.polylines[0].id,
-        ).owner.primitive.geometry.positions;
-        expect(clampedLinePositions[0].z).toBe(terrainHeight.value);
-        expect(clampedLinePositions[1].z).toBe(terrainHeight.value);
-        expect(
-          visualizers.polygon._items.get(profile.polygons[0].id).owner
-            .fillPrimitive.geometry.positions[0].z,
-        ).toBe(terrainHeight.value + 2.0);
+        ).toBe(3.0);
         widget.render();
       }
 
@@ -413,6 +551,189 @@ describe("SceneGIS/Widget/SceneGISPlanarContentQualification", function () {
         })}`,
       );
     });
+  });
+
+  it("qualifies all child roles and direct primitives against deterministic terrain", async function () {
+    const world = createWorld();
+    const firstProvider = attachDeterministicTerrain(world);
+    createWidget(world);
+    const source = new CustomDataSource("c10-coverage-cohort");
+    const cohort = addCoverageCohort(source, widget.clock.currentTime);
+    const groundEntity = source.entities.add({
+      id: "coverage-ground-line",
+      polyline: new PolylineGraphics({
+        positions: [
+          new Cartesian3(center - 220.0, center, 0.0),
+          new Cartesian3(center + 220.0, center, 0.0),
+        ],
+        clampToGround: true,
+        width: 6.0,
+        material: new ColorMaterialProperty(Color.MAGENTA),
+      }),
+    });
+    await widget.dataSources.add(source);
+
+    const ordinary = widget.scene.primitives.add(
+      new SceneGISPlanarPrimitive({
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: square(
+            new Cartesian3(center, center - 300.0, 45.0),
+            55.0,
+            45.0,
+          ),
+        }),
+        appearance: new PerInstanceColorAppearance({ flat: true }),
+        attributes: {
+          color: ColorGeometryInstanceAttribute.fromColor(Color.BLUE),
+        },
+        id: "direct-ordinary",
+      }),
+    );
+    const ground = widget.scene.primitives.add(
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolylineGeometry({
+          positions: [
+            new Cartesian3(center - 180.0, center + 220.0, 0.0),
+            new Cartesian3(center + 180.0, center + 220.0, 0.0),
+          ],
+          width: 8.0,
+        }),
+        appearance: new PolylineMaterialAppearance({
+          material: Material.fromType(Material.ColorType, {
+            color: Color.ORANGE,
+          }),
+        }),
+        heightReference: HeightReference.CLAMP_TO_GROUND,
+        id: "direct-ground",
+      }),
+    );
+
+    for (let frame = 0; frame < 20; ++frame) {
+      widget.render();
+      await Promise.resolve();
+    }
+    const visualizers = source._visualizers;
+    expect(visualizers.length).toBe(9);
+    expect(visualizers[5]._items.get(cohort.box.id).owners.box).toBeDefined();
+    expect(
+      visualizers[6]._items.get(cohort.rectangle.id).owners.rectangle,
+    ).toBeDefined();
+    expect(
+      visualizers[7]._items.get(cohort.corridor.id).owners.corridor,
+    ).toBeDefined();
+    expect(visualizers[8]._items.get(cohort.path.id).owner).toBeDefined();
+    const groundOwner = visualizers[3]._items.get(groundEntity.id).owner;
+    expect(groundOwner.primitive).toBeInstanceOf(SceneGISPlanarGroundPrimitive);
+    expect(groundOwner.primitive.ready).toBeTrue();
+    expect(ordinary.ready).toBeTrue();
+    expect(ground.ready).toBeTrue();
+    expect(world.tilesLoaded).toBeTrue();
+    expect(world.terrainProvider).toBe(firstProvider);
+
+    const bounds = new BoundingSphere();
+    expect(
+      widget.dataSourceDisplay.getBoundingSphere(groundEntity, true, bounds),
+    ).toBe(BoundingSphereState.DONE);
+    expect(bounds.center.z).toBeGreaterThan(0.0);
+    const groundCurrent = ground._current;
+    const entityGroundCurrent = groundOwner.primitive._current;
+    const ordinaryCurrent = ordinary._current;
+    const stableOwners = {
+      cylinder: visualizers[5]._items.get(cohort.cylinder.id).owners.cylinder,
+      ellipse: visualizers[6]._items.get(cohort.ellipse.id).owners.ellipse,
+      wall: visualizers[7]._items.get(cohort.wall.id).owners.wall,
+      path: visualizers[8]._items.get(cohort.path.id).owner,
+    };
+    for (let frame = 0; frame < 20; ++frame) {
+      widget.render();
+      expect(ground._current).toBe(groundCurrent);
+      expect(groundOwner.primitive._current).toBe(entityGroundCurrent);
+      expect(ordinary._current).toBe(ordinaryCurrent);
+      expect(
+        visualizers[5]._items.get(cohort.cylinder.id).owners.cylinder,
+      ).toBe(stableOwners.cylinder);
+      expect(visualizers[6]._items.get(cohort.ellipse.id).owners.ellipse).toBe(
+        stableOwners.ellipse,
+      );
+      expect(visualizers[7]._items.get(cohort.wall.id).owners.wall).toBe(
+        stableOwners.wall,
+      );
+      expect(visualizers[8]._items.get(cohort.path.id).owner).toBe(
+        stableOwners.path,
+      );
+    }
+
+    for (let round = 0; round < 5; ++round) {
+      cohort.box.position = new Cartesian3(
+        center - 900.0 + round,
+        center + 350.0,
+        40.0,
+      );
+      cohort.corridor.corridor.width = 18.0 + round;
+      ordinary.geometry = new SceneGISPlanarPolygonGeometry({
+        positions: square(
+          new Cartesian3(center + round, center - 300.0, 45.0),
+          55.0,
+          45.0,
+        ),
+      });
+      ground.geometry = new SceneGISPlanarPolylineGeometry({
+        positions: [
+          new Cartesian3(center - 180.0, center + 220.0 + round, 0.0),
+          new Cartesian3(center + 180.0, center + 220.0 + round, 0.0),
+        ],
+        width: 8.0,
+      });
+      widget.render();
+      expect(
+        visualizers[5]._items.get(cohort.cylinder.id).owners.cylinder,
+      ).toBe(stableOwners.cylinder);
+      expect(visualizers[8]._items.get(cohort.path.id).owner).toBe(
+        stableOwners.path,
+      );
+    }
+
+    const previousGroundCurrent = ground._current;
+    const secondProvider = attachDeterministicTerrain(world, 200.0);
+    expect(secondProvider).not.toBe(firstProvider);
+    expect(ground._current).toBe(previousGroundCurrent);
+    for (
+      let frame = 0;
+      frame < 30 &&
+      (ground._current === previousGroundCurrent || !world.tilesLoaded);
+      ++frame
+    ) {
+      widget.render();
+      await Promise.resolve();
+    }
+    expect(world.terrainProvider).toBe(secondProvider);
+    expect(ground._current).not.toBe(previousGroundCurrent);
+    expect(ground.ready).toBeTrue();
+    expect(world.tilesLoaded).toBeTrue();
+
+    if (!window.webglStub) {
+      const groundPosition = new Cartesian3(center, center + 220.0, 0.0);
+      const expectedHeight = world.getTerrainHeight(groundPosition);
+      expect(expectedHeight).toBeDefined();
+      groundPosition.z = expectedHeight;
+      const windowPosition = SceneTransforms.worldToWindowCoordinates(
+        widget.scene,
+        groundPosition,
+        new Cartesian2(),
+      );
+      expect(widget.scene.pick(windowPosition).id).toBe("direct-ground");
+      const depthPosition = widget.scene.pickPosition(windowPosition);
+      expect(depthPosition).toBeDefined();
+      expect(Math.abs(depthPosition.x - groundPosition.x)).toBeLessThan(2.0);
+      expect(Math.abs(depthPosition.y - groundPosition.y)).toBeLessThan(2.0);
+      expect(Math.abs(depthPosition.z - expectedHeight)).toBeLessThan(2.0);
+    }
+
+    expect(widget.dataSources.remove(source)).toBe(true);
+    expect(source._primitives.length).toBe(0);
+    expect(widget.scene.primitives.remove(ordinary)).toBe(true);
+    expect(widget.scene.primitives.remove(ground)).toBe(true);
   });
 
   it("keeps two local models stable through transform updates and removal", async function () {

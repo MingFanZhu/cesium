@@ -16,13 +16,31 @@ const publicEngine = [
   "SceneGISPlanarExtent",
   "SceneGISPlanarCoordinateSystem",
   "SceneGISPlanarTilingScheme",
+  "SceneGISPlanarTerrainData",
+  "SceneGISPlanarHeightmapTerrainData",
+  "SceneGISPlanarTerrainProvider",
+  "SceneGISPlanarTerrainSampler",
+  "SceneGISPlanarUrlTemplateHeightmapTerrainProvider",
   "SceneGISPlanarWorld",
   "SceneGISPlanarCameraController",
   "SceneGISPlanarImageryProvider",
   "SceneGISPlanarUrlTemplateImageryProvider",
   "SceneGISPlanarImageryLayer",
   "SceneGISPlanarImageryLayerCollection",
+  "SceneGISPlanarPolylineGeometry",
+  "SceneGISPlanarPolygonGeometry",
+  "SceneGISPlanarBoxGeometry",
+  "SceneGISPlanarCylinderGeometry",
+  "SceneGISPlanarEllipsoidGeometry",
+  "SceneGISPlanarWallGeometry",
+  "SceneGISPlanarPolylineVolumeGeometry",
+  "SceneGISPlanarPrimitive",
+  "SceneGISPlanarGroundPrimitive",
 ];
+const namespaceEngine = ["SceneGISPlanarTerrainSampler"];
+const callableEngine = publicEngine.filter(
+  (name) => !namespaceEngine.includes(name),
+);
 const publicWidgets = [
   "SceneGISPlanarHomeButton",
   "SceneGISPlanarHomeButtonViewModel",
@@ -40,7 +58,15 @@ const nonPublicSpellings = [
   "SceneGISPlanarModelVisualizer",
   "SceneGISPlanarPolylineVisualizer",
   "SceneGISPlanarPolygonVisualizer",
-  "SceneGISPlanarBufferOwner",
+  "SceneGISPlanarPrimitiveOwner",
+  "SceneGISPlanarEntityTransform",
+  "SceneGISPlanarSolidVisualizer",
+  "SceneGISPlanarAreaVisualizer",
+  "SceneGISPlanarRouteVisualizer",
+  "SceneGISPlanarPathSampler",
+  "SceneGISPlanarPathVisualizer",
+  "SceneGISPlanarGroundBounds",
+  "SceneGISPlanarGroundDraper",
   "SceneGISPlanarVisualizersCallback",
 ];
 const softPrivateContentSymbols = [
@@ -49,7 +75,15 @@ const softPrivateContentSymbols = [
   "_SceneGISPlanarModelVisualizer",
   "_SceneGISPlanarPolylineVisualizer",
   "_SceneGISPlanarPolygonVisualizer",
-  "_SceneGISPlanarBufferOwner",
+  "_SceneGISPlanarPrimitiveOwner",
+  "_SceneGISPlanarEntityTransform",
+  "_SceneGISPlanarSolidVisualizer",
+  "_SceneGISPlanarAreaVisualizer",
+  "_SceneGISPlanarRouteVisualizer",
+  "_SceneGISPlanarPathSampler",
+  "_SceneGISPlanarPathVisualizer",
+  "_SceneGISPlanarGroundBounds",
+  "_SceneGISPlanarGroundDraper",
   "_SceneGISPlanarVisualizersCallback",
 ];
 const privateContentFiles = [
@@ -58,8 +92,16 @@ const privateContentFiles = [
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarModelVisualizer.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolylineVisualizer.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPolygonVisualizer.js",
-  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarBufferOwner.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPrimitiveOwner.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarEntityTransform.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarSolidVisualizer.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarAreaVisualizer.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarRouteVisualizer.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPathSampler.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPathVisualizer.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarGroundBounds.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarVisualizersCallback.js",
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundDraper.js",
 ];
 
 function npmCommand(args) {
@@ -178,7 +220,12 @@ function assertDeclarations(file, expected) {
   for (const name of expected) {
     assert.match(
       declarations,
-      new RegExp(`(?:class|function|interface) ${name}\\b`, "u"),
+      new RegExp(
+        name === "SceneGISPlanarTerrainSampler"
+          ? `(?:namespace|const) ${name}\\b`
+          : `(?:class|function|interface) ${name}\\b`,
+        "u",
+      ),
     );
   }
   for (const name of [...nonPublicSpellings, ...softPrivateContentSymbols]) {
@@ -204,8 +251,11 @@ function runConsumer(file, expectSuccess = true) {
 }
 
 function consumerSource(moduleSyntax) {
-  const allPublic = JSON.stringify([...publicEngine, ...publicWidgets]);
-  const enginePublic = JSON.stringify(publicEngine);
+  const enginePublic = JSON.stringify([...publicEngine].sort());
+  const engineCallable = JSON.stringify(callableEngine);
+  const engineNamespaces = JSON.stringify(namespaceEngine);
+  const widgetPublicNames = JSON.stringify([...publicWidgets].sort());
+  const rootPublic = JSON.stringify([...publicEngine, ...publicWidgets].sort());
   const widgetPublic = JSON.stringify(publicWidgets);
   const privatePublicSpellings = JSON.stringify(nonPublicSpellings);
   const softPrivateSymbols = JSON.stringify(softPrivateContentSymbols);
@@ -215,9 +265,16 @@ import assert from "node:assert/strict";
 import * as engine from "@cesium/engine";
 import * as widgets from "@cesium/widgets";
 import * as root from "cesium";
-for (const name of ${enginePublic}) assert.equal(typeof engine[name], "function", name);
+const publicSceneGIS = (module) => Object.keys(module).filter((name) => name.startsWith("SceneGIS") && !name.startsWith("_")).sort();
+assert.deepEqual(publicSceneGIS(engine), ${enginePublic});
+assert.deepEqual(publicSceneGIS(widgets), ${widgetPublicNames});
+assert.deepEqual(publicSceneGIS(root), ${rootPublic});
+for (const name of ${engineCallable}) assert.equal(typeof engine[name], "function", name);
+for (const name of ${engineNamespaces}) assert.equal(typeof engine[name], "object", name);
 for (const name of ${widgetPublic}) assert.equal(typeof widgets[name], "function", name);
-for (const name of ${allPublic}) assert.equal(typeof root[name], "function", name);
+for (const name of ${engineCallable}) assert.equal(typeof root[name], "function", name);
+for (const name of ${engineNamespaces}) assert.equal(typeof root[name], "object", name);
+for (const name of ${widgetPublic}) assert.equal(typeof root[name], "function", name);
 for (const name of ${privatePublicSpellings}) {
   assert.equal(engine[name], undefined, name);
   assert.equal(root[name], undefined, name);
@@ -231,7 +288,11 @@ for (const name of ${softPrivateSymbols}) {
   return `
 const assert = require("node:assert/strict");
 const root = require("cesium");
-for (const name of ${allPublic}) assert.equal(typeof root[name], "function", name);
+const publicSceneGIS = Object.keys(root).filter((name) => name.startsWith("SceneGIS") && !name.startsWith("_")).sort();
+assert.deepEqual(publicSceneGIS, ${rootPublic});
+for (const name of ${engineCallable}) assert.equal(typeof root[name], "function", name);
+for (const name of ${engineNamespaces}) assert.equal(typeof root[name], "object", name);
+for (const name of ${widgetPublic}) assert.equal(typeof root[name], "function", name);
 for (const name of ${privatePublicSpellings}) assert.equal(root[name], undefined, name);
 for (const name of ${softPrivateSymbols}) assert.notEqual(root[name], undefined, name);
 `;

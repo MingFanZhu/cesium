@@ -71,7 +71,7 @@ describe("SceneGIS/SceneGISPlanarContentViewer", function () {
     viewer.dataSourceDisplay.update(viewer.clock.currentTime);
     viewer.dataSourceDisplay.update(viewer.clock.currentTime);
     const visualizers = viewer.dataSourceDisplay.defaultDataSource._visualizers;
-    expect(visualizers.length).toBe(5);
+    expect(visualizers.length).toBe(9);
     expect(visualizers[1]._items.get(entity.id).point.id).toBe(entity);
 
     spyOn(viewer.scene, "pick").and.returnValue({ id: entity });

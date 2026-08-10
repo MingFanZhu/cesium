@@ -78,8 +78,8 @@ C2 private visualizer 不拥有 World、Scene、EntityCollection、EntityCluster
 ## C3 Polyline 与 Polygon profile
 
 Polyline 使用 planar straight segments；`arcType` undefined等价于`ArcType.NONE`，显式值也只接受
-`NONE`。Absolute与`CLAMP_TO_GROUND`都逐个解析 supplied vertices；clamp只读取当前resident terrain，
-不发请求、不沿长边新增terrain采样或细分；线段内部仍按几何线性插值。支持solid
+`NONE`。Ordinary absolute路径保留 supplied vertices；C9以后`clampToGround:true`统一使用actual-cover
+continuous ground，不发请求但会在当前rendered terrain triangle边界细分。支持solid
 `ColorMaterialProperty`、finite nonnegative width、show、availability、dynamic positions、extent、
 original Entity picking与world bounds。
 
@@ -87,8 +87,8 @@ Polygon接受一个simple outer ring和direct holes；不接受nested hierarchy�
 Scalar top支持`NONE`、`CLAMP_TO_GROUND`和`RELATIVE_TO_GROUND`，per-position height保留各顶点absolute Z。
 Extrusion显式生成top/bottom caps、outer/hole side walls，outline单独渲染且`outlineWidth`接受finite
 nonnegative number。宽度`0`隐藏对应线条；positive fractional与大于255的宽度由standard geometry精确保留。
-Terrain sampling只发生在supplied vertices，因此长边和大三角形可能穿越中间
-terrain，这不是连续贴地承诺。
+Ordinary路径按source geometry插值；approved ground reference组合由C9 actual-cover draper在真实terrain
+triangles上连续派生，不再使用C3时期的vertex-only近似。
 
 两类visualizer都是public `SceneGISPlanarPrimitive`与对应Geometry的per-Entity adapter：顶点以local
 DOUBLE geometry保存，world origin通过translation恢复，bounds显式保留world坐标，pick id保留original
@@ -129,8 +129,8 @@ orientation是fixed planar quaternion，倾斜后不重新求terrain接触。Par
 Plane、Ellipse与Rectangle由private Area adapter降级到public Polygon/Polyline。Plane使用完整Entity position、
 orientation和local Plane equation，不支持HeightReference。Ellipse position只提供center X/Y，height/ref决定Z，
 rotation从+Y逆时针；Rectangle coordinates按meters严格有序，rotation从+Y顺时针，defined granularity拒绝。
-Ellipse/Rectangle terrain只在生成顶点读取resident height：`NONE`允许合法anchor geometry延伸extent外，ground
-vertex outside则隐藏并保留current owner。这不是continuous ground承诺。
+Ellipse/Rectangle的ordinary路径保留generated geometry：`NONE`允许合法anchor geometry延伸extent外；approved
+ground reference组合已迁移到C9 actual-cover continuous ground，ground source outside则隐藏并保留current owner。
 
 ## C8 路径衍生 Geometry 与动态 Path
 
@@ -141,8 +141,8 @@ standard synchronous Primitive。Wall配对open non-flat `PerInstanceColorAppear
 non-flat appearance。
 
 Corridor不新增public Geometry：centerline width/corner/end-cap确定生成simple Polygon，outline使用Polyline。
-Positions Z不参与height；height/extruded references在生成perimeter vertices读取resident terrain，因此仍是
-vertex-only approximation。Wall top默认positions.z、bottom默认Z=0，不读取terrain；defined Wall granularity拒绝。
+Positions Z不参与height；Corridor的approved ground reference组合由C9 actual-cover draper消费生成的perimeter，
+不再是vertex-only approximation。Wall top默认positions.z、bottom默认Z=0，不读取terrain；defined Wall granularity拒绝。
 PolylineVolume route position.z是center elevation，shape可以延伸extent外，也不隐式clamp。
 
 Path复用Entity position与Cesium Property sampling，但只支持effective `ReferenceFrame.FIXED`、undefined或
@@ -193,6 +193,9 @@ EntityCluster、EntityCollection、Scene 或 World。Pick id 保持 original Ent
 
 ## Compatibility matrix
 
+完整、绑定Cesium `1.144`交付基线的逐类型与package inventory见
+[PlanarContentCompatibility](PlanarContentCompatibility.md)。下表只保留高层导航。
+
 | 数据或 graphics                                        | 当前决定                                     | 可用阶段/边界          |
 | ------------------------------------------------------ | -------------------------------------------- | ---------------------- |
 | `Entity`、Property/event、availability、show、metadata | 复用数据模型                                 | C4 automatic           |
@@ -228,9 +231,10 @@ median/P95只是调查证据，不是跨机器CI阈值。
 当前qualification没有定位到可重复的SceneGIS private热点，因此C5不修改product runtime，也不引入跨Entity
 batching、Worker或public batch API。
 
-稳定人工示例位于`scenegis-planar-content` Sandcastle：它展示六类graphics、absolute/clamp/relative高度、
-original Entity selection、有限动态更新和代表性`CustomDataSource`批量增删。公开imagery/terrain仅用于
-best-effort人工展示；自动E2E使用flat/local fixture并阻断公网。Installed-package smoke确认private content
+稳定人工示例位于`scenegis-planar-content` Sandcastle：它展示全部16类automatic Graphics、direct ordinary/
+Ground Primitive、absolute/anchor-level/continuous-ground高度、original Entity selection、有限动态更新和代表性
+`CustomDataSource`批量增删。公开imagery/terrain仅用于best-effort人工展示；自动E2E使用local deterministic
+terrain并阻断公网。Installed-package smoke确认private content
 runtime文件随engine tarball交付。自动生成的JS barrel按仓库soft-private规则可导出underscore symbol；该export是
 不受支持的构建产物，不构成public API。对应non-underscore spelling不得成为runtime入口，underscore exact symbol
 不得进入`.d.ts`或API HTML。

@@ -30,3 +30,6 @@
   （`approved`）：C9-R001～C9-R006经focused re-review全部关闭；常规257×257 bounded drape、Polygon
   clipping/derived heights、ground extrusion outline、current bounds、same-frame/stale pick-depth与public attribute
   preflight均通过，保持zero-upstream/zero-SGP。
+- [C10 unified integration and delivery review](2026-08-10-c10-unified-integration-and-delivery.md)
+  （`approved`）：C10-R001～C10-R004经focused re-review关闭；durable rules、Ground render/depth闭环、八role
+  GPU pick/Viewer selection、package exact export set及zero-runtime/zero-upstream交付边界通过，待项目负责人人工验收。

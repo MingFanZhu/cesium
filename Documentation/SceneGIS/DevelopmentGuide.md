@@ -425,13 +425,14 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   request render，下一normal update才add。Stale、replacement和destroy路径都要exactly-once cleanup。
 - Model transform只使用fixed planar translation/normalized Quaternion。不要调用`computeModelMatrix`、
   ENU或Model height clamping。
-- C3 Polyline只允许`ArcType.NONE`的planar straight segments；clamp逐supplied vertex调用resolver，不做
-  geodesic/rhumb、ground primitive或隐式terrain采样/细分。C6迁移后`width`接受finite nonnegative number，
-  0隐藏，不得重新引入Buffer Uint8的integer/255限制。
+- C3 Polyline只允许`ArcType.NONE`的planar straight segments；C3曾逐supplied vertex解析clamp，该ground行为已由
+  C9 actual-cover continuous drape取代。当前ordinary `HeightReference.NONE`保留source geometry，批准的ground
+  分支统一走C9 wrapper，不做geodesic/rhumb或自行发terrain request。C6迁移后`width`接受finite nonnegative
+  number，0隐藏，不得重新引入Buffer Uint8的integer/255限制。
 - C3 Polygon只接受simple outer ring与direct holes。Scalar height、per-position height、extrusion、caps、
   side walls与outline必须先完整preflight，再以local DOUBLE geometry、translation `modelMatrix`和explicit
-  world bounds原子替换；terrain drape是vertex-only sampling。C6迁移后`outlineWidth`与Polyline width采用相同
-  finite nonnegative规则。
+  world bounds原子替换。C3的vertex-only terrain drape是历史行为，当前批准的Polygon ground分支由C9
+  actual-cover continuous drape取代；C6迁移后`outlineWidth`与Polyline width采用相同finite nonnegative规则。
 - C6 public Geometry必须clone finite米制Cartesian3输入、以完整XYZ local origin重基，并只输出审计过的
   standard Geometry vertex format。Polyline固定`ArcType.NONE`；Polygon只使用XY triangulation，不调用Ellipsoid
   subdivision或ground path。
@@ -445,9 +446,10 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   `PerInstanceColorAppearance`配对。跨geometry kind replacement继续fail-fast；Plane/Ellipse/Rectangle必须降级到
   public Polygon/Polyline，不能调用upstream ellipsoid-oriented Geometry。
 - Solid的clamp/relative anchor在resolver结果上增加未旋转support height；Area的Ellipse position.z不参与surface
-  height，Rectangle coordinates按meters严格有序。Ellipse/Rectangle只在generated vertices读取terrain；`NONE`
-  geometry可以越过extent，ground-referenced vertex outside则隐藏current graphic。
-- C4 callback顺序固定为Anchor、Model、Polyline、Polygon、Solid、Area。六类C7 Graphics只支持Color material、
+  height，Rectangle coordinates按meters严格有序。C7的Ellipse/Rectangle generated-vertex terrain sampling是历史
+  行为，当前ground分支由C9 actual-cover continuous drape取代；ordinary `NONE` geometry仍可以越过extent。
+- Planar callback完整顺序固定为gate、Anchor、Model、Polyline、Polygon、Solid、Area、Route、Path。六类C7
+  Graphics只支持Color material、
   disabled shadows与批准字段；partial Ellipsoid、Rectangle granularity、stRotation、classification和zIndex必须在
   child低层mutation前拒绝。
 - C8 public Wall Geometry必须使用XY route与explicit top/bottom生成open non-flat mesh；PolylineVolume Geometry的
@@ -456,8 +458,8 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - Corridor必须降级到public Polygon/Polyline，Path必须降级到public Polyline。Corridor rounded granularity是
   planar corner angle step；ground分支由C9 continuous draper消费actual cover，Wall/PolylineVolume不隐式terrain clamp。
 - Path sampler只能以`ReferenceFrame.FIXED`调用Cesium property sampler；non-FIXED position、INERTIAL、
-  entity-relative/VVLH、`PathMode.PORTIONS`必须fail-fast。Callback顺序在既有Area后追加Route、Path，existing children
-  顺序不变。
+  entity-relative/VVLH、`PathMode.PORTIONS`必须fail-fast。Route、Path位于完整callback顺序的最后，existing
+  children顺序不变。
 - C9 Ground Primitive只接受existing planar Polyline/Polygon Geometry、live World、compatible Color appearance与
   显式HeightReference。至少一个reference必须ground-relative；不得提供任意modelMatrix、classification、zIndex或
   arbitrary Material。
@@ -476,9 +478,10 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - Polyline clamp、Polygon、Ellipse、Rectangle与Corridor ground配置迁移到同一public wrapper；ordinary NONE路径不得
   分配ground runtime，Entity owner保持per-DataSource target与terrain-signature-driven warm convergence。Bounds只来自
   valid last-successful ground current；首次promotion前为`PENDING`，hidden或无owner为`FAILED`。
-- C4 callback第一次合法update只原子追加Anchor、Model、Polyline、Polygon并返回false；children必须等下一次
-  update。Model/Polyline/Polygon自动路径使用`dataSource._primitives`，显式private构造省略target时仍使用
-  `scene.primitives`；两种路径都不拥有caller collection。
+- C4 callback第一次合法update原子追加当前完整children序列Anchor、Model、Polyline、Polygon、Solid、Area、
+  Route、Path并返回false；children必须等下一次update。Model及geometry自动路径使用
+  `dataSource._primitives`，显式private构造省略target时仍使用`scene.primitives`；两种路径都不拥有caller
+  collection。
 - C5先以固定moderate profile验证initial/warm/local mutation/remove/destroy；Anchor仍使用Cesium pool，
   Model逐实例，Polyline/Polygon保持per-Entity owner。没有可复核热点时不得为了“批量”重写runtime。
 - Content timing固定对象数、viewport、build、warmup和样本协议，分开记录display update与render
@@ -486,6 +489,11 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
   persistent resource与exactly-once lifecycle收敛。
 - Content Sandcastle可以使用公开imagery/terrain做best-effort人工展示，但local E2E必须阻断公网并覆盖
   automatic content、dynamic update、original Entity selection、remove和destroy；不新增workflow。
+- C10交付时以`PlanarContentCompatibility.md`核对24个engine与2个widget public入口、16类automatic Graphics、
+  ordinary/Ground Primitive。Qualification必须使用local deterministic terrain和actual ground current；不得用
+  resident-height spy或source-Z改写冒充continuous ground。Dev/release E2E分别执行且public network attempts为0。
+- Package smoke从repo外installed-tarball consumer验证bare ESM/CJS。`SceneGISPlanarTerrainSampler`是namespace
+  object；underscore模块只允许作为soft-private JS artifact存在，必须从declarations和API HTML隐藏。
 
 ## Planar World release qualification 检查
 

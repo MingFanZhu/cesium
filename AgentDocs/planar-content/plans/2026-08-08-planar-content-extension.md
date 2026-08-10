@@ -39,7 +39,8 @@
   [ADR-0018：公共平面 Primitive、Geometry 与标准 Primitive 后端](../../../Documentation/SceneGIS/Decisions/ADR-0018-planar-public-primitive-and-geometry.md)、
   [ADR-0019：平面普通体与面 Graphics 的公共 Geometry 降级与 Entity 适配](../../../Documentation/SceneGIS/Decisions/ADR-0019-planar-common-solid-and-area-graphics.md)、
   [ADR-0020：平面路径衍生 Geometry 与动态 Path](../../../Documentation/SceneGIS/Decisions/ADR-0020-planar-route-derived-geometry-and-path.md)、
-  [ADR-0021：平面连续贴地与 Ground Primitive 晚阶段渲染协议](../../../Documentation/SceneGIS/Decisions/ADR-0021-planar-continuous-ground-and-ground-primitive.md)
+  [ADR-0021：平面连续贴地与 Ground Primitive 晚阶段渲染协议](../../../Documentation/SceneGIS/Decisions/ADR-0021-planar-continuous-ground-and-ground-primitive.md)、
+  [ADR-0022：平面内容兼容性矩阵与最终交付](../../../Documentation/SceneGIS/Decisions/ADR-0022-planar-content-compatibility-and-delivery.md)
 - SGP：C4复用active `SGP-0001`；只允许在CesiumWidget增加instance-owned visualizer callback seam
 
 ## 目标
@@ -240,7 +241,11 @@ public planar Primitive/Geometry层。球面专属参数必须有明确的planar
 - 进入门槛：C6-C9均review并提交；基于真实对象规模和remaining seams确定最小充分qualification。
 - 完成门槛：普通Entity graphics、public planar Primitive/Geometry和continuous ground整体通过自动化与项目负责人
   真实浏览器/GPU人工验收，extension才能再次标记`completed`。
-- 状态：`proposed`。
+- 状态：`completed`；phase plan：
+  [C10 统一集成、Compatibility Matrix 与交付](2026-08-10-phase-c10-unified-integration-and-delivery.md)。
+- 当前交接：Architecture focused re-review已确认C10-R001～C10-R004全部关闭，C10 review=`approved`。项目负责人
+  在旧C9后端人工验收前决定由C11使用单一planar depth/stencil backend替换actual-mesh drape；C10作为自动化交付
+  baseline完成，最终人工验收转移到C11。
 
 阶段默认串行推进。每个阶段在 implementation、验证和 Architecture/code review 完成后，由
 Architecture Agent形成独立中文本地提交检查点，再进入下一阶段。
@@ -442,3 +447,25 @@ Architecture Agent形成独立中文本地提交检查点，再进入下一阶�
 - `2026-08-10`：Architecture focused re-review确认C9-R001～R006全部关闭；独立代表性复跑Ground、Polygon、
   Surface与World相关suites均通过。C9 review=`approved`、phase=`completed`，保持upstream-owned files=`0`、
   SGP=`0`，等待独立本地提交检查点后进入C10规划。
+- `2026-08-10`：Architecture以中文提交`完成平面连续贴地与Ground Primitive支持`形成C9 checkpoint
+  `ef2df22e1957ddae6e8ec9bbca3f5623f0370d02`。随后重新核对automatic callback、C5 qualification/E2E/
+  Sandcastle/package smoke与当前public API inventory；ADR-0022批准版本化compatibility matrix、local deterministic
+  qualification、hard gate/timing分离与项目负责人人工验收门禁，C10 phase plan激活并派发Execution。
+- `2026-08-10`：Execution完成C10统一交付实现与最小充分验证，product runtime delta=`0`；版本化compatibility
+  matrix、现有qualification/E2E/Sandcastle/package smoke已覆盖24+2 public inventory、16类Graphics、八个child
+  roles与ordinary/Ground Primitive。C10/extension保持`active`，等待pending Architecture review及其后的项目负责人
+  真实浏览器/GPU人工验收。
+- `2026-08-10`：Architecture首轮C10 review独立复跑qualification `4/4`与installed-package smoke通过，但提出
+  C10-R001～C10-R004：durable C3/C7规则仍与C9/C10冲突、rendered Ground pick/depth未与terrain闭环、E2E只选择
+  Anchor/Point而非八个child role代表，以及package inventory只做positive presence不拒绝额外public export。
+  Review=`changes-requested`；全部限定在C10 docs/spec/E2E/package脚本内focused修复，product runtime仍应为`0`。
+- `2026-08-10`：Execution完成C10-R001～C10-R004 focused修复：durable rules明确C9 supersede与完整callback
+  顺序，qualification/E2E把rendered Ground id和depth XYZ与actual terrain闭环，唯一E2E逐一选择八个child role，
+  installed package精确断言engine/widgets/root `24/2/26` export集合。Product runtime delta保持`0`，等待focused
+  Architecture re-review。
+- `2026-08-10`：Architecture focused re-review确认C10-R001～C10-R004全部关闭；独立qualification `4/4`、
+  installed-package smoke、Markdownlint、diff check与upstream audit通过，接受不干扰用户`8081`进程的等价local
+  dev/release E2E证据。C10 review=`approved`。
+- `2026-08-10`：项目负责人在旧C9 actual-mesh backend最终人工验收前决定不采用混合实现，要求后续按Cesium
+  GroundPrimitive/GroundPolylinePrimitive思想建立单一planar depth/stencil GPU backend。C10作为自动化交付
+  baseline标记`completed`并先独立提交；旧页面未宣称人工验收通过，extension保持`active`，最终验收转移到C11。
