@@ -22,7 +22,7 @@ function createSceneGISPlanarTerrainMeshTask(
     typeof terrainData._createMeshTaskPayload !== "function"
   ) {
     throw new DeveloperError(
-      "terrainData must be a SceneGISPlanarHeightmapTerrainData.",
+      "terrainData must provide a supported planar terrain mesh payload.",
     );
   }
   return terrainData._createMeshTaskPayload(
@@ -41,6 +41,84 @@ function createSceneGISPlanarTerrainMeshTask(
  * @private
  */
 function finalizeSceneGISPlanarTerrainMesh(terrainData, result) {
+  if (result?.kind === "createQuantizedMeshMesh") {
+    const metadata = terrainData?._getMeshMetadata?.();
+    const surfaceVertexCount = metadata?.vertexCount;
+    const expectedReference =
+      terrainData?.minimumHeight * 0.5 + terrainData?.maximumHeight * 0.5;
+    if (
+      !metadata ||
+      !(result.positions instanceof Float32Array) ||
+      (!(result.indices instanceof Uint16Array) &&
+        !(result.indices instanceof Uint32Array)) ||
+      !(result.queryGridOffsets instanceof Uint32Array) ||
+      !(result.queryGridTriangles instanceof Uint32Array) ||
+      !Number.isInteger(result.queryGridDimension) ||
+      result.queryGridDimension < 1 ||
+      result.queryGridOffsets.length !==
+        result.queryGridDimension * result.queryGridDimension + 1 ||
+      result.queryGridOffsets[result.queryGridOffsets.length - 1] !==
+        result.queryGridTriangles.length ||
+      result.surfaceVertexCount !== surfaceVertexCount ||
+      result.surfaceIndexCount !== metadata.surfaceIndexCount ||
+      result.skirtVertexCount !== metadata.skirtVertexCount ||
+      result.vertexCount !== surfaceVertexCount + metadata.skirtVertexCount ||
+      result.vertexCount * 3 !== result.positions.length ||
+      result.indexCount !== result.indices.length ||
+      result.indexCount !==
+        result.surfaceIndexCount + metadata.skirtIndexCount ||
+      result.positionByteLength !== result.positions.byteLength ||
+      result.indexByteLength !== result.indices.byteLength ||
+      result.minimumHeight !== terrainData.minimumHeight ||
+      result.maximumHeight !== terrainData.maximumHeight ||
+      result.referenceHeight !== expectedReference ||
+      !Number.isFinite(result.skirtMinimumHeight) ||
+      result.skirtMinimumHeight > result.minimumHeight ||
+      result.ownsIndices !== true ||
+      result.topologyKey !== undefined
+    ) {
+      throw new DeveloperError(
+        "The planar quantized terrain mesh Worker result is invalid.",
+      );
+    }
+    for (let i = 0; i < result.positions.length; ++i) {
+      if (!Number.isFinite(result.positions[i])) {
+        throw new DeveloperError(
+          "Every planar quantized terrain mesh position must be finite.",
+        );
+      }
+    }
+    for (let i = 0; i < result.indices.length; ++i) {
+      if (
+        result.indices[i] >= result.vertexCount ||
+        (i < result.surfaceIndexCount &&
+          result.indices[i] >= result.surfaceVertexCount)
+      ) {
+        throw new DeveloperError(
+          "Every planar quantized terrain mesh index must identify its declared vertex range.",
+        );
+      }
+    }
+    const triangleCount = result.surfaceIndexCount / 3;
+    for (let i = 0; i < result.queryGridOffsets.length; ++i) {
+      if (
+        result.queryGridOffsets[i] > result.queryGridTriangles.length ||
+        (i > 0 && result.queryGridOffsets[i] < result.queryGridOffsets[i - 1])
+      ) {
+        throw new DeveloperError(
+          "The planar quantized terrain query-grid offsets are invalid.",
+        );
+      }
+    }
+    for (let i = 0; i < result.queryGridTriangles.length; ++i) {
+      if (result.queryGridTriangles[i] >= triangleCount) {
+        throw new DeveloperError(
+          "The planar quantized terrain query-grid triangle is invalid.",
+        );
+      }
+    }
+    return result;
+  }
   const width = terrainData?.width;
   const height = terrainData?.height;
   const topology =

@@ -10,6 +10,7 @@ import Request from "../../../Core/Request.js";
 import RequestType from "../../../Core/RequestType.js";
 import TileProviderError from "../../../Core/TileProviderError.js";
 import VertexArray from "../../../Renderer/VertexArray.js";
+import SceneGISPlanarQuantizedMeshTerrainData from "../../Core/SceneGISPlanarQuantizedMeshTerrainData.js";
 import upsampleSceneGISPlanarTerrain from "../../Core/_private/_SceneGISPlanarTerrainUpsampler.js";
 import terrainWorkerScheduler from "../../Core/_private/_SceneGISPlanarTerrainWorkerScheduler.js";
 import {
@@ -35,6 +36,13 @@ const FallbackState = Object.freeze({
 });
 
 const MeshState = Object.freeze({
+  NONE: 0,
+  LOADING: 1,
+  RECEIVED: 2,
+  FAILED: 3,
+});
+
+const UpsampleState = Object.freeze({
   NONE: 0,
   LOADING: 1,
   RECEIVED: 2,
@@ -218,6 +226,10 @@ function createEntry(runtime, tile) {
     fallbackState: FallbackState.NONE,
     fallbackContent: undefined,
     fallbackData: undefined,
+    fallbackUpsampleState: UpsampleState.NONE,
+    fallbackUpsampleResult: undefined,
+    fallbackUpsampleError: undefined,
+    fallbackUpsampleToken: 0,
     fallbackMeshState: MeshState.NONE,
     fallbackMeshResult: undefined,
     fallbackMeshError: undefined,
@@ -276,6 +288,7 @@ function SceneGISPlanarTerrain(forEachTile, getTile, workerScheduler) {
   this.State = State;
   this.FallbackState = FallbackState;
   this.MeshState = MeshState;
+  this.UpsampleState = UpsampleState;
   this.Source = Source;
   this._debug = {
     createdEntries: 0,
@@ -296,6 +309,11 @@ function SceneGISPlanarTerrain(forEachTile, getTile, workerScheduler) {
     startedMeshTasks: 0,
     completedMeshTasks: 0,
     staleMeshResults: 0,
+    startedUpsampleTasks: 0,
+    completedUpsampleTasks: 0,
+    staleUpsampleResults: 0,
+    createdOwnedIndexBuffers: 0,
+    destroyedOwnedIndexBuffers: 0,
   };
 }
 
@@ -342,8 +360,14 @@ SceneGISPlanarTerrain.prototype._destroyContent = function (content) {
     content.vertexArray.destroy();
     ++this._debug.destroyedVertexArrays;
     ++this._debug.destroyedVertexBuffers;
+    if (content.ownsIndexBuffer) {
+      ++this._debug.destroyedIndexBuffers;
+      ++this._debug.destroyedOwnedIndexBuffers;
+    }
   }
-  this._releaseIndex(content.indexKey);
+  if (!content.ownsIndexBuffer) {
+    this._releaseIndex(content.indexKey);
+  }
   content.vertexArray = undefined;
   content.mesh = undefined;
   content.terrainData = undefined;
@@ -383,6 +407,7 @@ SceneGISPlanarTerrain.prototype.releaseTile = function (tile) {
   ++entry.attempt;
   ++entry.directMeshToken;
   ++entry.fallbackMeshToken;
+  ++entry.fallbackUpsampleToken;
   if (entry.request) {
     entry.request.cancel();
     entry.request = undefined;
@@ -398,6 +423,8 @@ SceneGISPlanarTerrain.prototype.releaseTile = function (tile) {
   entry.directMeshError = undefined;
   entry.fallbackContent = undefined;
   entry.fallbackData = undefined;
+  entry.fallbackUpsampleResult = undefined;
+  entry.fallbackUpsampleError = undefined;
   entry.fallbackMeshResult = undefined;
   entry.fallbackMeshError = undefined;
   entry.activeContent = undefined;
@@ -630,7 +657,12 @@ SceneGISPlanarTerrain.prototype._startMeshTask = function (
   }
   let promise;
   try {
-    promise = this._workerScheduler.scheduleCreateHeightmapMesh(
+    const schedule =
+      task.parameters.kind === "createQuantizedMeshMesh"
+        ? this._workerScheduler.scheduleCreateQuantizedMeshMesh
+        : this._workerScheduler.scheduleCreateHeightmapMesh;
+    promise = schedule.call(
+      this._workerScheduler,
       task.parameters,
       task.transferableObjects,
     );
@@ -725,26 +757,146 @@ SceneGISPlanarTerrain.prototype._startFallbackMeshTask = function (
   const sourceRevision = sourceEntry.revision;
   if (entry.fallbackCandidateSourceRevision !== sourceRevision) {
     ++entry.fallbackMeshToken;
+    ++entry.fallbackUpsampleToken;
     entry.fallbackData = undefined;
+    entry.fallbackUpsampleState = UpsampleState.NONE;
+    entry.fallbackUpsampleResult = undefined;
+    entry.fallbackUpsampleError = undefined;
     entry.fallbackMeshResult = undefined;
     entry.fallbackMeshError = undefined;
     entry.fallbackMeshState = MeshState.NONE;
     entry.fallbackCandidateSourceRevision = sourceRevision;
   }
   if (!defined(entry.fallbackData)) {
-    try {
-      entry.fallbackData = upsampleSceneGISPlanarTerrain(
-        sourceContent.terrainData,
-        sourceTile.extent,
-        sourceTile,
-        tile.extent,
-        tile,
-      );
-      ++this._debug.createdUpsampledData;
-    } catch (error) {
-      entry.fallbackMeshError = error;
-      entry.fallbackMeshState = MeshState.FAILED;
-      return false;
+    if (
+      typeof sourceContent.terrainData._createUpsampleTaskPayload === "function"
+    ) {
+      if (entry.fallbackUpsampleState === UpsampleState.FAILED) {
+        entry.fallbackMeshError = entry.fallbackUpsampleError;
+        entry.fallbackMeshState = MeshState.FAILED;
+        entry.fallbackUpsampleState = UpsampleState.NONE;
+        entry.fallbackUpsampleError = undefined;
+        return false;
+      }
+      if (entry.fallbackUpsampleState === UpsampleState.RECEIVED) {
+        try {
+          const result = entry.fallbackUpsampleResult;
+          if (!result || result.kind !== "upsampleQuantizedMesh") {
+            throw new DeveloperError(
+              "The quantized terrain upsample Worker result is invalid.",
+            );
+          }
+          entry.fallbackData = new SceneGISPlanarQuantizedMeshTerrainData({
+            quantizedVertices: result.quantizedVertices,
+            indices: result.indices,
+            westIndices: result.westIndices,
+            southIndices: result.southIndices,
+            eastIndices: result.eastIndices,
+            northIndices: result.northIndices,
+            quantizedMinimumHeight: result.quantizedMinimumHeight,
+            quantizedMaximumHeight: result.quantizedMaximumHeight,
+            childTileMask: 0,
+            createdByUpsampling: true,
+            credits: sourceContent.terrainData.credits,
+          });
+          entry.fallbackUpsampleState = UpsampleState.NONE;
+          entry.fallbackUpsampleResult = undefined;
+          ++this._debug.createdUpsampledData;
+        } catch (error) {
+          entry.fallbackMeshError = error;
+          entry.fallbackMeshState = MeshState.FAILED;
+          entry.fallbackUpsampleState = UpsampleState.NONE;
+          entry.fallbackUpsampleResult = undefined;
+          return false;
+        }
+      } else if (entry.fallbackUpsampleState === UpsampleState.NONE) {
+        let task;
+        try {
+          task = sourceContent.terrainData._createUpsampleTaskPayload(
+            sourceTile,
+            tile,
+          );
+        } catch (error) {
+          entry.fallbackUpsampleError = error;
+          entry.fallbackUpsampleState = UpsampleState.FAILED;
+          return false;
+        }
+        let promise;
+        try {
+          promise = this._workerScheduler.scheduleUpsampleQuantizedMesh(
+            task.parameters,
+            task.transferableObjects,
+          );
+        } catch (error) {
+          entry.fallbackUpsampleError = error;
+          entry.fallbackUpsampleState = UpsampleState.FAILED;
+          return false;
+        }
+        if (!defined(promise)) {
+          return false;
+        }
+        if (typeof promise.then !== "function") {
+          entry.fallbackUpsampleError = new DeveloperError(
+            "The quantized terrain upsample task must return a Promise.",
+          );
+          entry.fallbackUpsampleState = UpsampleState.FAILED;
+          return false;
+        }
+        const token = ++entry.fallbackUpsampleToken;
+        const generation = this._generation;
+        entry.fallbackUpsampleState = UpsampleState.LOADING;
+        ++this._debug.startedUpsampleTasks;
+        Promise.resolve(promise).then(
+          (result) => {
+            const stale =
+              this._destroyed ||
+              tile.terrainEntry !== entry ||
+              entry.generation !== generation ||
+              entry.fallbackUpsampleToken !== token ||
+              entry.fallbackCandidateSourceRevision !== sourceRevision ||
+              sourceTile.terrainEntry?.revision !== sourceRevision;
+            if (stale) {
+              ++this._debug.staleUpsampleResults;
+              return;
+            }
+            entry.fallbackUpsampleResult = result;
+            entry.fallbackUpsampleError = undefined;
+            entry.fallbackUpsampleState = UpsampleState.RECEIVED;
+            ++this._debug.completedUpsampleTasks;
+          },
+          (error) => {
+            if (
+              this._destroyed ||
+              tile.terrainEntry !== entry ||
+              entry.generation !== generation ||
+              entry.fallbackUpsampleToken !== token
+            ) {
+              ++this._debug.staleUpsampleResults;
+              return;
+            }
+            entry.fallbackUpsampleError = error;
+            entry.fallbackUpsampleState = UpsampleState.FAILED;
+          },
+        );
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      try {
+        entry.fallbackData = upsampleSceneGISPlanarTerrain(
+          sourceContent.terrainData,
+          sourceTile.extent,
+          sourceTile,
+          tile.extent,
+          tile,
+        );
+        ++this._debug.createdUpsampledData;
+      } catch (error) {
+        entry.fallbackMeshError = error;
+        entry.fallbackMeshState = MeshState.FAILED;
+        return false;
+      }
     }
   }
   return this._startMeshTask(
@@ -763,10 +915,16 @@ SceneGISPlanarTerrain.prototype._consumeMeshFailure = function (entry) {
     entry.directMeshError = undefined;
     this._fail(entry, entry.attempt, error);
   }
-  if (entry.fallbackMeshState === MeshState.FAILED) {
-    const error = entry.fallbackMeshError;
+  if (
+    entry.fallbackMeshState === MeshState.FAILED ||
+    entry.fallbackUpsampleState === UpsampleState.FAILED
+  ) {
+    const error = entry.fallbackMeshError ?? entry.fallbackUpsampleError;
     entry.fallbackMeshState = MeshState.NONE;
     entry.fallbackMeshError = undefined;
+    entry.fallbackUpsampleState = UpsampleState.NONE;
+    entry.fallbackUpsampleError = undefined;
+    entry.fallbackUpsampleResult = undefined;
     entry.fallbackData = undefined;
     entry.fallbackMeshResult = undefined;
     entry.fallbackState = FallbackState.FAILED;
@@ -779,6 +937,19 @@ SceneGISPlanarTerrain.prototype._consumeMeshFailure = function (entry) {
 };
 
 SceneGISPlanarTerrain.prototype._acquireIndex = function (context, mesh) {
+  if (mesh.ownsIndices) {
+    const buffer = Buffer.createIndexBuffer({
+      context,
+      typedArray: mesh.indices,
+      usage: BufferUsage.STATIC_DRAW,
+      indexDatatype: IndexDatatype.fromSizeInBytes(
+        mesh.indices.BYTES_PER_ELEMENT,
+      ),
+    });
+    ++this._debug.createdIndexBuffers;
+    ++this._debug.createdOwnedIndexBuffers;
+    return { buffer, owned: true };
+  }
   const key = mesh.topologyKey;
   let shared = this._indexBuffers.get(key);
   if (!shared) {
@@ -797,7 +968,7 @@ SceneGISPlanarTerrain.prototype._acquireIndex = function (context, mesh) {
   }
   ++shared.references;
   ++this._debug.acquiredIndexReferences;
-  return shared;
+  return { ...shared, owned: false };
 };
 
 SceneGISPlanarTerrain.prototype._createContent = function (
@@ -810,25 +981,27 @@ SceneGISPlanarTerrain.prototype._createContent = function (
   const provider = this._provider;
   if (
     !terrainData ||
-    typeof terrainData._getSample !== "function" ||
+    typeof terrainData._createMeshTaskPayload !== "function" ||
     terrainData.minimumHeight < provider.minimumHeight ||
     terrainData.maximumHeight > provider.maximumHeight
   ) {
     throw new DeveloperError(
-      "Terrain data must be a supported Heightmap within the provider height range.",
+      "Terrain data must provide a supported planar mesh within the provider height range.",
     );
   }
   const mesh = finalizeSceneGISPlanarTerrainMesh(terrainData, meshResult);
   ++this._debug.createdMeshes;
-  const vertexBuffer = Buffer.createVertexBuffer({
-    context,
-    typedArray: mesh.positions,
-    usage: BufferUsage.STATIC_DRAW,
-  });
-  ++this._debug.createdVertexBuffers;
-  const shared = this._acquireIndex(context, mesh);
+  let vertexBuffer;
+  let shared;
   let vertexArray;
   try {
+    vertexBuffer = Buffer.createVertexBuffer({
+      context,
+      typedArray: mesh.positions,
+      usage: BufferUsage.STATIC_DRAW,
+    });
+    ++this._debug.createdVertexBuffers;
+    shared = this._acquireIndex(context, mesh);
     vertexArray = new VertexArray({
       context,
       attributes: [
@@ -842,8 +1015,16 @@ SceneGISPlanarTerrain.prototype._createContent = function (
       indexBuffer: shared.buffer,
     });
   } catch (error) {
-    this._releaseIndex(mesh.topologyKey);
-    if (!vertexBuffer.isDestroyed()) {
+    if (shared?.owned) {
+      if (!shared.buffer.isDestroyed()) {
+        shared.buffer.destroy();
+        ++this._debug.destroyedIndexBuffers;
+        ++this._debug.destroyedOwnedIndexBuffers;
+      }
+    } else if (shared) {
+      this._releaseIndex(mesh.topologyKey);
+    }
+    if (vertexBuffer && !vertexBuffer.isDestroyed()) {
       vertexBuffer.destroy();
       ++this._debug.destroyedVertexBuffers;
     }
@@ -857,6 +1038,7 @@ SceneGISPlanarTerrain.prototype._createContent = function (
     mesh,
     vertexArray,
     indexKey: mesh.topologyKey,
+    ownsIndexBuffer: shared.owned,
     destroyed: false,
   };
 };
@@ -905,7 +1087,11 @@ SceneGISPlanarTerrain.prototype._promoteDirect = function (
     entry.directMeshState = MeshState.NONE;
     entry.directMeshResult = undefined;
     ++entry.fallbackMeshToken;
+    ++entry.fallbackUpsampleToken;
     entry.fallbackData = undefined;
+    entry.fallbackUpsampleState = UpsampleState.NONE;
+    entry.fallbackUpsampleResult = undefined;
+    entry.fallbackUpsampleError = undefined;
     entry.fallbackMeshState = MeshState.NONE;
     entry.fallbackMeshResult = undefined;
     entry.fallbackMeshError = undefined;
@@ -1093,7 +1279,7 @@ SceneGISPlanarTerrain.prototype.prepare = function (
         entry,
         entry.attempt,
         new DeveloperError(
-          "Terrain data must be a supported Heightmap within the provider height range.",
+          "Terrain data must provide a supported planar mesh within the provider height range.",
         ),
       );
     }

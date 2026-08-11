@@ -396,6 +396,21 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - Focused验证覆盖真实TaskProcessor Worker、LERC/mesh transfer、stale/retry/fallback、depth replay、resource
   lifecycle、development/release与installed-tarball Worker文件；不增加浏览器/driver大矩阵。
 
+### 平面 Quantized-mesh Terrain 检查
+
+- Public provider只接受caller-supplied canonical tiling scheme与显式URL/range/error配置；不要读取`layer.json`、
+  projection或CRS，也不要把header ECEF center/bounds/horizon用于planar runtime。
+- Binary decode必须在Worker中逐段执行safe length/alignment preflight，再验证delta/zig-zag vertices、high-water
+  indices、CCW triangles、edge coverage和extension length。A5只请求base format并安全跳过extension。
+- TerrainData接管decoded TypedArrays，但mesh/upsample task只能transfer独立clone。Public min/max是实际surface
+  vertex range；private quantization range不得误暴露为另一个generic TerrainData contract。
+- Quantized child fallback必须裁剪父级真实triangles并继续输出Quantized data；不得为了复用Heightmap路径进行规则
+  重采样。所有terrain Worker task共享normal-frame start预算，Promise callback只发布CPU state。
+- Heightmap shared regular-grid index ownership保持；Quantized index buffer逐tile拥有并在rollback、replacement、
+  eviction、detach、destroy中exactly once释放。Query cell index必须有linear storage bound和single-cell退化路径。
+- 使用仓库内small/32-bit fixture、一个real Context closure与installed-package Worker验证。不要建立截断byte穷举、
+  公网自动化、E2E或driver矩阵；A6 normal extension不得提前混入A5。
+
 ### 平面 Viewer 集成检查
 
 实现或评审 `Viewer({ world })` 时同时检查：

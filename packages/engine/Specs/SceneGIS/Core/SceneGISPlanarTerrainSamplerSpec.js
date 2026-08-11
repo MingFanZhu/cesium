@@ -3,6 +3,7 @@ import {
   RequestType,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
+  SceneGISPlanarQuantizedMeshTerrainData,
   SceneGISPlanarTerrainSampler,
   SceneGISPlanarTilingScheme,
 } from "../../../index.js";
@@ -251,5 +252,31 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainSampler", function () {
       ),
     ).toBeRejectedWithDeveloperError();
     expect(positions).toEqual(copies);
+  });
+
+  it("samples a quantized irregular triangle without a World cache", async function () {
+    const fixture = createProvider({
+      requestTileGeometry: () =>
+        Promise.resolve(
+          new SceneGISPlanarQuantizedMeshTerrainData({
+            quantizedVertices: new Uint16Array([
+              0, 32767, 0, 32767, 0, 0, 32767, 32767, 0, 32767, 16384, 8192,
+            ]),
+            indices: new Uint16Array([0, 1, 2, 1, 3, 2]),
+            westIndices: new Uint16Array([0, 2]),
+            southIndices: new Uint16Array([1, 0]),
+            eastIndices: new Uint16Array([3, 1]),
+            northIndices: new Uint16Array([2, 3]),
+            quantizedMinimumHeight: -10.0,
+            quantizedMaximumHeight: 40.0,
+          }),
+        ),
+    });
+
+    expect(
+      await SceneGISPlanarTerrainSampler.sampleAtLevel(fixture.provider, 0, [
+        new Cartesian3(-128.0, -128.0, 999.0),
+      ]),
+    ).toEqual([-10.0]);
   });
 });

@@ -61,14 +61,44 @@ function getHeight(tile, content, x, y) {
     return undefined;
   }
 
+  const localX = (x - (extent.minimumX + extent.width * 0.5)) / extent.width;
+  const localY = (y - (extent.minimumY + extent.height * 0.5)) / extent.height;
+  if (Number.isInteger(mesh.queryGridDimension)) {
+    const dimension = mesh.queryGridDimension;
+    const cellX = Math.min(
+      dimension - 1,
+      Math.max(0, Math.floor((localX + 0.5) * dimension)),
+    );
+    const cellY = Math.min(
+      dimension - 1,
+      Math.max(0, Math.floor((localY + 0.5) * dimension)),
+    );
+    const cell = cellY * dimension + cellX;
+    const start = mesh.queryGridOffsets[cell];
+    const end = mesh.queryGridOffsets[cell + 1];
+    for (let i = start; i < end; ++i) {
+      const offset = mesh.queryGridTriangles[i] * 3;
+      const height = interpolateTriangle(
+        mesh,
+        mesh.indices[offset],
+        mesh.indices[offset + 1],
+        mesh.indices[offset + 2],
+        localX,
+        localY,
+      );
+      if (defined(height)) {
+        return height;
+      }
+    }
+    return undefined;
+  }
+
   const columnCoordinate =
     ((x - extent.minimumX) / extent.width) * (mesh.width - 1);
   const rowCoordinate =
     ((extent.maximumY - y) / extent.height) * (mesh.height - 1);
   const idealColumn = Math.min(Math.floor(columnCoordinate), mesh.width - 2);
   const idealRow = Math.min(Math.floor(rowCoordinate), mesh.height - 2);
-  const localX = (x - (extent.minimumX + extent.width * 0.5)) / extent.width;
-  const localY = (y - (extent.minimumY + extent.height * 0.5)) / extent.height;
   const indices = mesh.indices;
   for (let rowOffset = -1; rowOffset <= 1; ++rowOffset) {
     const row = idealRow + rowOffset;

@@ -6,7 +6,13 @@ import {
   SceneGISPlanarHeightmapTerrainData,
   SceneGISPlanarTilingScheme,
 } from "../../../../index.js";
-import buildSceneGISPlanarTerrainMesh from "../../../../Source/SceneGIS/Renderer/_private/_SceneGISPlanarTerrainMesh.js";
+import {
+  createSceneGISPlanarTerrainMeshTask,
+  finalizeSceneGISPlanarTerrainMesh,
+} from "../../../../Source/SceneGIS/Renderer/_private/_SceneGISPlanarTerrainMesh.js";
+import DirectSceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlanarExtent.js";
+import SceneGISPlanarQuantizedMeshTerrainData from "../../../../Source/SceneGIS/Core/SceneGISPlanarQuantizedMeshTerrainData.js";
+import processSceneGISPlanarTerrainTask from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js";
 import SceneGISPlanarTerrainQuery from "../../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarTerrainQuery.js";
 import SceneGISPlanarTile from "../../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarTile.js";
 
@@ -31,11 +37,15 @@ describe("SceneGIS/Scene/_SceneGISPlanarTerrainQuery", function () {
       width,
       height,
     });
-    const mesh = buildSceneGISPlanarTerrainMesh(
+    const task = createSceneGISPlanarTerrainMeshTask(
       terrainData,
       tile.extent,
       4.0,
       -100.0,
+    );
+    const mesh = finalizeSceneGISPlanarTerrainMesh(
+      terrainData,
+      processSceneGISPlanarTerrainTask(task.parameters, []),
     );
     const content = {
       source: options.source ?? "DIRECT",
@@ -231,5 +241,61 @@ describe("SceneGIS/Scene/_SceneGISPlanarTerrainQuery", function () {
         new Ray(new Cartesian3(0, 0, 20), new Cartesian3(0, 0, -1)),
       ),
     ).toBeUndefined();
+  });
+
+  it("uses the bounded quantized query grid and true irregular triangles", function () {
+    const extent = new DirectSceneGISPlanarExtent({
+      minimumX: -128.0,
+      minimumY: -128.0,
+      maximumX: 128.0,
+      maximumY: 128.0,
+    });
+    const terrainData = new SceneGISPlanarQuantizedMeshTerrainData({
+      quantizedVertices: new Uint16Array([
+        0, 32767, 0, 32767, 0, 0, 32767, 32767, 0, 32767, 16384, 8192,
+      ]),
+      indices: new Uint16Array([0, 1, 2, 1, 3, 2]),
+      westIndices: new Uint16Array([0, 2]),
+      southIndices: new Uint16Array([0, 1]),
+      eastIndices: new Uint16Array([1, 3]),
+      northIndices: new Uint16Array([2, 3]),
+      quantizedMinimumHeight: -10.0,
+      quantizedMaximumHeight: 90.0,
+    });
+    const task = terrainData._createMeshTaskPayload(extent, 4.0, -100.0);
+    const mesh = finalizeSceneGISPlanarTerrainMesh(
+      terrainData,
+      processSceneGISPlanarTerrainTask(task.parameters, []),
+    );
+    const content = { source: "DIRECT", revision: 1, terrainData, mesh };
+    const tile = {
+      extent,
+      key: "0/0/0",
+      terrainEntry: { activeContent: content },
+      isDestroyed: function () {
+        return false;
+      },
+    };
+    const x = 32.0;
+    const y = -48.0;
+    const height = SceneGISPlanarTerrainQuery.getHeight(tile, content, x, y);
+    expect(height).toBeDefined();
+    expect(height).toBeCloseTo(terrainData.interpolateHeight(extent, x, y), 4);
+    expect(
+      SceneGISPlanarTerrainQuery.pick(
+        [
+          {
+            tile,
+            content,
+            mesh,
+            source: "DIRECT",
+            revision: 1,
+            key: tile.key,
+          },
+        ],
+        1,
+        new Ray(new Cartesian3(x, y, 100.0), new Cartesian3(0, 0, -1)),
+      ).z,
+    ).toBeCloseTo(height, 5);
   });
 });

@@ -19,7 +19,8 @@
   [A1 approved review](../reviews/2026-08-10-a1-terrain-aware-navigation-anchors.md)、
   [A2 approved review](../reviews/2026-08-10-a2-navigation-mode-and-surface-relationship.md)、
   [A3 approved review](../reviews/2026-08-11-a3-terrain-clearance-and-penetration-prevention.md)、
-  [A4 approved review](../reviews/2026-08-11-a4-terrain-worker-pipeline.md)
+  [A4 approved review](../reviews/2026-08-11-a4-terrain-worker-pipeline.md)、
+  [A5 approved review](../reviews/2026-08-11-a5-planar-quantized-mesh.md)
 - 继承 ADR：
   - [ADR-0002：平面坐标与瓦片寻址契约](../../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)
   - [ADR-0004：平面导航、相机约束与 Surface Picking](../../../Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md)
@@ -33,8 +34,9 @@
   [ADR-0024：平面地形感知导航锚点](../../../Documentation/SceneGIS/Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
   [ADR-0025：平面导航模式与相机—地表关系](../../../Documentation/SceneGIS/Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)、
   [ADR-0026：平面地形净空与防穿透](../../../Documentation/SceneGIS/Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)、
-  [ADR-0027：平面地形 Worker 任务与交付协议](../../../Documentation/SceneGIS/Decisions/ADR-0027-planar-terrain-worker-tasks-and-delivery.md)；
-  A5-A7不预判编号和详细实现
+  [ADR-0027：平面地形 Worker 任务与交付协议](../../../Documentation/SceneGIS/Decisions/ADR-0027-planar-terrain-worker-tasks-and-delivery.md)、
+  [ADR-0028：坐标系无关的平面 Quantized-mesh Terrain](../../../Documentation/SceneGIS/Decisions/ADR-0028-planar-quantized-mesh-terrain.md)；
+  A6-A7不预判编号和详细实现
 - SGP：当前不新增；若 phase 必须修改 upstream-owned file，先登记或复用合法 SGP
 
 ## 目标
@@ -44,7 +46,7 @@
 地下、碰撞与防穿透；把已证明会阻塞主线程的解码和 mesh 工作迁移到 Worker；增加坐标系无关的
 quantized-mesh；改善地形法线和 LOD 切换的视觉连续性；最后完成统一交付与人工验收。
 
-本扩展继续采用 progressive elaboration。总体计划只冻结跨阶段稳定目标、顺序和边界。A3-A7 的
+本扩展继续采用 progressive elaboration。总体计划只冻结跨阶段稳定目标、顺序和边界。A6-A7 的
 公共签名、私有角色、Shader/Worker 文件、build seam、数据布局、性能阈值和精确验证命令，必须在
 对应 phase 真正进入时根据届时源码和测量结果重新设计。
 
@@ -127,15 +129,16 @@ quantized-mesh；改善地形法线和 LOD 切换的视觉连续性；最后完�
 | A2   | 建立 surface/underground navigation mode 与 camera-surface relationship 公共或私有契约。 | A1                              | A1 review、提交；重新审计 controller host、Viewer、programmatic camera 与 terrain query。         | 模式、切换、默认值、事件/状态、无 terrain 行为和迁移边界明确并实现；不提前加入完整 collision。          | `completed` | [A2 plan](2026-08-10-phase-a2-navigation-mode-and-surface-relationship.md) |
 | A3   | 实现模式感知的地下导航、碰撞和防穿透。                                                   | A2                              | A2 review、提交；以真实交互问题定义 collision profile。                                           | surface mode 不穿透且不异常复位；underground mode 可从上下两侧浏览；programmatic/input 路径一致。       | `completed` | [A3 plan][a3-plan]                                                         |
 | A4   | 依据 profiling 建立 LERC decode 与 terrain mesh 的 Worker 管线。                         | A3                              | A3 review、提交；重新测量 decode/mesh blocker并审计 Worker/build/package事实。                    | 获批任务进入 Worker；cancel/stale/error/transfer/destroy与发布闭环；无收益工作不迁移。                  | `completed` | [A4 plan][a4-plan]                                                         |
-| A5   | 增加坐标系无关的 planar quantized-mesh 数据/provider 适配。                              | A4                              | A4 review、提交；选择合法公开或本地fixture并核对格式/许可。                                       | 与 canonical tiling、LOD/fallback/query/pick/resource生命周期闭环；heightmap兼容路径不退化。            | `planned`   | 延迟                                                                       |
+| A5   | 增加坐标系无关的 planar quantized-mesh 数据/provider 适配。                              | A4                              | A4 review、提交；选择合法公开或本地fixture并核对格式/许可。                                       | 与 canonical tiling、LOD/fallback/query/pick/resource生命周期闭环；heightmap兼容路径不退化。            | `completed` | [A5 plan][a5-plan]                                                         |
 | A6   | 改善地形法线、跨瓦片及跨 LOD 的光照连续性。                                              | A5                              | A5 review、提交；对实际画面、normal数据和成本进行比较。                                           | 已批准方案显著减少可重复明暗跳变，保持双面/地下、imagery、depth/pick与稳定资源成本。                    | `planned`   | 延迟                                                                       |
 | A7   | 完成统一性能、发布和真实浏览器/GPU人工验收。                                             | A6                              | A1-A6均review并提交；明确最终案例和最小资格矩阵。                                                 | 导航、模式、Worker、两种terrain格式、光照和生命周期达到整体验收，文档/包/升级清单闭环。                 | `planned`   | 延迟                                                                       |
 
-所有 phase 串行执行。总体路线图中的 A4-A7 只表示产品目标和依赖，不授权提前创建实现、Spec、
+所有 phase 串行执行。总体路线图中的 A6-A7 只表示产品目标和依赖，不授权提前创建实现、Spec、
 Shader、Worker 或 build 修改。
 
 [a3-plan]: 2026-08-11-phase-a3-terrain-clearance-and-penetration-prevention.md
 [a4-plan]: 2026-08-11-phase-a4-terrain-worker-pipeline.md
+[a5-plan]: 2026-08-11-phase-a5-planar-quantized-mesh.md
 
 ## 延迟到 Phase 的决定
 
@@ -276,3 +279,23 @@ Shader、Worker 或 build 修改。
   preflight/GPU ownership、two-start/two-promotion、readiness、stale token、flat lazy与package边界符合ADR-0027；
   独立复跑actual Worker 3/3、terrain runtime 12/12、real-Context Widget 1/1、diff check与audit均通过。A4 review
   标为`approved`、phase改为`completed`；形成独立checkpoint后再激活A5。
+- `2026-08-11`：Architecture形成A4 checkpoint `bf339ee853`，随后审计official quantized-mesh-1.0、上游
+  `QuantizedMeshTerrainData`/decode/upsample思想、SceneGIS Heightmap-only mesh/upsample/query与A4 Worker/runtime状态。
+  选择仓库内small与32-bit fixture作为合法deterministic输入。ADR-0028批准两个public类型、同一Worker entry下的
+  decode/mesh/direct-child triangle-clip upsample、tile-owned index与bounded query grid；A5 phase plan激活并直接派发
+  Execution，保持zero-upstream/zero-SGP且不进入A6。
+- `2026-08-11`：Execution完成A5 public quantized data/provider、同一Worker entry的decode/mesh/upsample、
+  runtime direct/fallback/query、per-tile GPU index与real Context/package闭环。A5 direct unique=21、focused
+  aggregate=59，build/release/types/docs/tsc/package/static/audit通过；upstream-owned=0、A5 SGP=0。
+  当前handoff为ready for Architecture/code review，A5/extension保持`active`，不进入A6。
+- `2026-08-11`：Architecture完成A5首轮完整diff review并提出A5-R001～R003：真实quantized fixture的无序
+  edge list必须在direct mesh生成skirt前canonicalize；tile-owned/shared index allocation必须与已创建vertex buffer
+  位于同一原子rollback边界；public Quantized URL provider非法`subdomains`必须稳定抛`DeveloperError`。当前handoff为
+  focused fixes / re-review，A5与extension保持`active`，不提交、不push、不进入A6。
+- `2026-08-11`：Execution完成A5-R001～R003 focused fixes：Worker clone按四边canonical perimeter方向生成
+  skirt，GPU vertex/index/VA candidate统一原子回滚，Quantized URL provider在复制前验证subdomains类型。
+  Provider 5/5、Worker 7/7、mesh 6/6、Quantized TerrainData 5/5、upsampler 4/4、terrain runtime 15/15及build通过；
+  findings标为execution-fixed，等待Architecture focused re-review，A5/extension继续`active`。
+- `2026-08-11`：Architecture focused re-review确认A5-R001～R003关闭，独立复跑Provider 5/5、Worker 7/7、
+  terrain runtime 15/15、official upstream audit与`git diff --check`均通过。A5 review改为`approved`、phase改为
+  `completed`；形成独立中文checkpoint后再依据当时源码事实激活A6。

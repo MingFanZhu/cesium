@@ -365,6 +365,27 @@ Worker entry由现有`Source/Workers/**`glob自动进入development、release、
 被普通public barrel排除。A4不修改build/package upstream file；private task/scheduler不构成public API。完整决定见
 [ADR-0027](Decisions/ADR-0027-planar-terrain-worker-tasks-and-delivery.md)。
 
+### 平面 Quantized-mesh Terrain
+
+`SceneGISPlanarQuantizedMeshTerrainData` 与 `SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider` 是
+Heightmap的并列公共实现。Provider只接受caller-supplied canonical `SceneGISPlanarTilingScheme`、XYZ/TMS URL、
+global meter range、maximum level和显式Level-0 geometric error；不读取`layer.json`、不猜测CRS、projection或
+extension，也不重投影。Binary header中的ECEF center/bounds/horizon只校验并跳过；tile-local`u/v/height`、
+CCW triangles与edge lists才进入planar data contract。
+
+Quantized data接管absolute `0..32767` vertices和surface/edge index TypedArrays。Public height range由实际decoded
+surface vertices得到，private quantization interval只用于decode/interpolation/Worker。Provider通过ADR-0027的同一
+Worker entry执行`decodeQuantizedMesh`；runtime以`createQuantizedMeshMesh`生成tile-local Float32 surface/skirt与
+per-tile indices，并以`upsampleQuantizedMesh`裁剪父级真实triangles生成direct-child Quantized fallback。不得通过
+固定规则Heightmap重采样替代该triangle路径。
+
+Heightmap继续使用ref-counted shared regular-grid index；Quantized content独占tile index buffer。两种data共享现有
+四子门禁、`DIRECT > UPSAMPLED > FLAT`、normal-frame task/promotion预算、imagery/single command、lighting、
+query/pick/depth replay和exactly-once lifecycle。Quantized resident point query使用Worker生成且具有linear memory
+bound的private cell index；skirt继续排除在semantic query/pick外。A5只请求base format，oct normals、water rendering、
+sparse metadata和service discovery不进入本阶段公共API。完整决定见
+[ADR-0028](Decisions/ADR-0028-planar-quantized-mesh-terrain.md)。
+
 ### 平面影像运行时
 
 `SceneGISPlanarWorld` 的 imagery provider 必须与 world 共享同一个 canonical

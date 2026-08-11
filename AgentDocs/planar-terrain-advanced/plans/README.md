@@ -15,7 +15,9 @@
   （`completed`、Architecture review与项目负责人人工验收通过）
 - [A4 平面地形 Worker 管线](2026-08-11-phase-a4-terrain-worker-pipeline.md)
   （`completed`、Architecture/code review通过）
-- A5-A7：仅保留 extension plan 中的稳定阶段目标，不提前创建 phase plan。
+- [A5 平面 Quantized-mesh Terrain](2026-08-11-phase-a5-planar-quantized-mesh.md)
+  （`completed`、Architecture focused re-review批准）
+- A6-A7：仅保留 extension plan 中的稳定阶段目标，不提前创建 phase plan。
 
 ## Handoff
 
@@ -26,4 +28,8 @@
   Architecture final focused review与项目负责人Sandcastle人工复测均已通过；checkpoint为`c03f7d9a56`。
 - A4已完成TaskProcessor、Worker build/package、LERC/mesh profiling与ownership审计；ADR-0027批准两个独立task和
   唯一thin Worker entry。Execution完成实现、67-case focused矩阵与release/package审计，Architecture独立复跑
-  actual Worker、runtime与real Context关键闭环后批准；等待形成A4 checkpoint再进入A5。
+  actual Worker、runtime与real Context关键闭环后批准；checkpoint为`bf339ee853`。
+- A5首轮已完成public data/provider、同一Worker entry下的quantized decode/mesh/upsample、runtime
+  direct/fallback/query、per-tile index与real Context/package闭环。A5-R001～R003已由直接Specs锁定edge
+  canonicalization、GPU allocation rollback和Provider错误类型，并经Architecture独立focused re-review关闭；
+  A5等待形成独立checkpoint，A6尚未激活。

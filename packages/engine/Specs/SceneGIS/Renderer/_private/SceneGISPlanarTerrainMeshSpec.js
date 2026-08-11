@@ -2,6 +2,8 @@ import {
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
 } from "../../../../index.js";
+import SceneGISPlanarQuantizedMeshTerrainData from "../../../../Source/SceneGIS/Core/SceneGISPlanarQuantizedMeshTerrainData.js";
+import DirectSceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlanarExtent.js";
 import processSceneGISPlanarTerrainTask from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js";
 import {
   createSceneGISPlanarTerrainMeshTask,
@@ -136,5 +138,57 @@ describe("SceneGIS/Renderer/SceneGISPlanarTerrainMesh", function () {
     expect(() =>
       finalizeSceneGISPlanarTerrainMesh(data, result),
     ).toThrowDeveloperError();
+  });
+
+  it("builds irregular quantized surface, skirt, owned indices, and bounded query metadata", function () {
+    const quantizedExtent = new DirectSceneGISPlanarExtent({
+      minimumX: extent.minimumX,
+      minimumY: extent.minimumY,
+      maximumX: extent.maximumX,
+      maximumY: extent.maximumY,
+    });
+    const data = new SceneGISPlanarQuantizedMeshTerrainData({
+      quantizedVertices: new Uint16Array([
+        0, 32767, 0, 32767, 0, 0, 32767, 32767, 8192, 24575, 16384, 12288,
+      ]),
+      indices: new Uint16Array([0, 1, 2, 1, 3, 2]),
+      westIndices: new Uint16Array([0, 2]),
+      southIndices: new Uint16Array([0, 1]),
+      eastIndices: new Uint16Array([1, 3]),
+      northIndices: new Uint16Array([2, 3]),
+      quantizedMinimumHeight: -10.0,
+      quantizedMaximumHeight: 90.0,
+    });
+    const mesh = buildSceneGISPlanarTerrainMesh(
+      data,
+      quantizedExtent,
+      5.0,
+      -100.0,
+    );
+    expect(mesh.surfaceVertexCount).toBe(4);
+    expect(mesh.surfaceIndexCount).toBe(6);
+    expect(mesh.vertexCount).toBe(12);
+    expect(mesh.indices.length).toBeGreaterThan(6);
+    expect(mesh.ownsIndices).toBe(true);
+    expect(mesh.topologyKey).toBeUndefined();
+    expect(mesh.queryGridOffsets.length).toBe(mesh.queryGridDimension ** 2 + 1);
+    expect(mesh.queryGridTriangles.length).toBeLessThanOrEqual(16);
+    expect(mesh.minimumHeight).toBe(data.minimumHeight);
+    expect(mesh.maximumHeight).toBe(data.maximumHeight);
+    expect(mesh.referenceHeight).toBe(
+      data.minimumHeight * 0.5 + data.maximumHeight * 0.5,
+    );
+
+    const task = createSceneGISPlanarTerrainMeshTask(
+      data,
+      quantizedExtent,
+      5.0,
+      -100.0,
+    );
+    const malformed = processSceneGISPlanarTerrainTask(task.parameters, []);
+    malformed.queryGridTriangles[0] = 999;
+    expect(function () {
+      return finalizeSceneGISPlanarTerrainMesh(data, malformed);
+    }).toThrowDeveloperError();
   });
 });

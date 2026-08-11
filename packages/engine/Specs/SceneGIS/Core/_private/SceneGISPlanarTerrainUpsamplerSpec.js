@@ -1,7 +1,9 @@
 import Credit from "../../../../Source/Core/Credit.js";
 import SceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlanarExtent.js";
 import SceneGISPlanarHeightmapTerrainData from "../../../../Source/SceneGIS/Core/SceneGISPlanarHeightmapTerrainData.js";
+import SceneGISPlanarQuantizedMeshTerrainData from "../../../../Source/SceneGIS/Core/SceneGISPlanarQuantizedMeshTerrainData.js";
 import upsampleSceneGISPlanarTerrain from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainUpsampler.js";
+import processSceneGISPlanarTerrainTask from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js";
 
 describe("SceneGIS/Core/SceneGISPlanarTerrainUpsampler", function () {
   const rootExtent = new SceneGISPlanarExtent({
@@ -15,6 +17,24 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainUpsampler", function () {
     minimumY: 0.0,
     maximumX: 0.0,
     maximumY: rootExtent.maximumY,
+  });
+  const northeastExtent = new SceneGISPlanarExtent({
+    minimumX: 0.0,
+    minimumY: 0.0,
+    maximumX: rootExtent.maximumX,
+    maximumY: rootExtent.maximumY,
+  });
+  const southwestExtent = new SceneGISPlanarExtent({
+    minimumX: rootExtent.minimumX,
+    minimumY: rootExtent.minimumY,
+    maximumX: 0.0,
+    maximumY: 0.0,
+  });
+  const southeastExtent = new SceneGISPlanarExtent({
+    minimumX: 0.0,
+    minimumY: rootExtent.minimumY,
+    maximumX: rootExtent.maximumX,
+    maximumY: 0.0,
   });
 
   it("upsamples one direct child in north-west row order", function () {
@@ -100,5 +120,65 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainUpsampler", function () {
         { x: 0, y: 0, level: 1 },
       );
     }).toThrowDeveloperError();
+  });
+
+  it("clips true quantized triangles into an independent direct child", function () {
+    const source = new SceneGISPlanarQuantizedMeshTerrainData({
+      quantizedVertices: new Uint16Array([
+        0, 32767, 0, 32767, 0, 0, 32767, 32767, 0, 32767, 16384, 8192,
+      ]),
+      indices: new Uint16Array([0, 1, 2, 1, 3, 2]),
+      westIndices: new Uint16Array([0, 2]),
+      southIndices: new Uint16Array([0, 1]),
+      eastIndices: new Uint16Array([1, 3]),
+      northIndices: new Uint16Array([2, 3]),
+      quantizedMinimumHeight: -10.0,
+      quantizedMaximumHeight: 90.0,
+      credits: [new Credit("quantized")],
+    });
+    const fixtures = [
+      { address: { x: 0, y: 0, level: 1 }, extent: northwestExtent },
+      { address: { x: 1, y: 0, level: 1 }, extent: northeastExtent },
+      { address: { x: 0, y: 1, level: 1 }, extent: southwestExtent },
+      { address: { x: 1, y: 1, level: 1 }, extent: southeastExtent },
+    ];
+    const children = fixtures.map((fixture) => {
+      const task = source._createUpsampleTaskPayload(
+        { x: 0, y: 0, level: 0 },
+        fixture.address,
+      );
+      const result = processSceneGISPlanarTerrainTask(task.parameters, []);
+      const child = new SceneGISPlanarQuantizedMeshTerrainData({
+        ...result,
+        childTileMask: 0,
+        createdByUpsampling: true,
+        credits: source.credits,
+      });
+      const x = fixture.extent.minimumX + fixture.extent.width * 0.37;
+      const y = fixture.extent.minimumY + fixture.extent.height * 0.61;
+      expect(child.wasCreatedByUpsampling).toBe(true);
+      expect(child.credits).toBe(source.credits);
+      expect(child.waterMask).toBeUndefined();
+      expect(
+        child.isChildAvailable(
+          fixture.address.x,
+          fixture.address.y,
+          fixture.address.x * 2,
+          fixture.address.y * 2,
+        ),
+      ).toBe(false);
+      expect(child.interpolateHeight(fixture.extent, x, y)).toBeCloseTo(
+        source.interpolateHeight(rootExtent, x, y),
+        2,
+      );
+      return child;
+    });
+    const seamY = rootExtent.maximumY * 0.5;
+    expect(
+      children[0].interpolateHeight(northwestExtent, 0.0, seamY),
+    ).toBeCloseTo(
+      children[1].interpolateHeight(northeastExtent, 0.0, seamY),
+      5,
+    );
   });
 });

@@ -19,6 +19,15 @@ const SceneGISPlanarTerrainWorkerScheduler = {
   scheduleCreateHeightmapMesh(parameters, transferableObjects) {
     return getTaskProcessor().scheduleTask(parameters, transferableObjects);
   },
+  scheduleDecodeQuantizedMesh(parameters, transferableObjects) {
+    return getTaskProcessor().scheduleTask(parameters, transferableObjects);
+  },
+  scheduleCreateQuantizedMeshMesh(parameters, transferableObjects) {
+    return getTaskProcessor().scheduleTask(parameters, transferableObjects);
+  },
+  scheduleUpsampleQuantizedMesh(parameters, transferableObjects) {
+    return getTaskProcessor().scheduleTask(parameters, transferableObjects);
+  },
   _getTaskProcessor: getTaskProcessor,
 };
 

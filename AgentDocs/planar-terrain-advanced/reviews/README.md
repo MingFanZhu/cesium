@@ -8,3 +8,5 @@
   （`approved`；A3-R001/R002关闭，项目负责人最终Sandcastle复测通过）
 - [A4 平面地形 Worker 管线](2026-08-11-a4-terrain-worker-pipeline.md)
   （`approved`；无阻断finding，Architecture独立复跑关键Worker/runtime/real-Context闭环）
+- [A5 平面 Quantized-mesh Terrain](2026-08-11-a5-planar-quantized-mesh.md)
+  （`approved`；A5-R001～R003全部关闭，Architecture独立复跑关键focused suites与审计）

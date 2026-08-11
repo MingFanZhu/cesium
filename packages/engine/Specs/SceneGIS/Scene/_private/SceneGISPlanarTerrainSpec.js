@@ -1,21 +1,30 @@
-import {
-  Event,
-  RequestType,
-  SceneGISPlanarCoordinateSystem,
-  SceneGISPlanarExtent,
-  SceneGISPlanarHeightmapTerrainData,
-  SceneGISPlanarTilingScheme,
-} from "../../../../index.js";
+import { Event, RequestType } from "../../../../index.js";
+import Buffer from "../../../../Source/Renderer/Buffer.js";
+import SceneGISPlanarCoordinateSystem from "../../../../Source/SceneGIS/Core/SceneGISPlanarCoordinateSystem.js";
+import SceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlanarExtent.js";
+import SceneGISPlanarHeightmapTerrainData from "../../../../Source/SceneGIS/Core/SceneGISPlanarHeightmapTerrainData.js";
+import SceneGISPlanarTilingScheme from "../../../../Source/SceneGIS/Core/SceneGISPlanarTilingScheme.js";
 import SceneGISPlanarTerrain, {
   validateTerrainProvider,
 } from "../../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarTerrain.js";
 import SceneGISPlanarTile from "../../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarTile.js";
 import terrainWorkerScheduler from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerScheduler.js";
 import processSceneGISPlanarTerrainTask from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js";
+import SceneGISPlanarQuantizedMeshTerrainData from "../../../../Source/SceneGIS/Core/SceneGISPlanarQuantizedMeshTerrainData.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
   beforeEach(function () {
     spyOn(terrainWorkerScheduler, "scheduleCreateHeightmapMesh").and.callFake(
+      (parameters) =>
+        Promise.resolve(processSceneGISPlanarTerrainTask(parameters, [])),
+    );
+    spyOn(
+      terrainWorkerScheduler,
+      "scheduleCreateQuantizedMeshMesh",
+    ).and.callFake((parameters) =>
+      Promise.resolve(processSceneGISPlanarTerrainTask(parameters, [])),
+    );
+    spyOn(terrainWorkerScheduler, "scheduleUpsampleQuantizedMesh").and.callFake(
       (parameters) =>
         Promise.resolve(processSceneGISPlanarTerrainTask(parameters, [])),
     );
@@ -52,6 +61,21 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     };
     const tile = new SceneGISPlanarTile(tilingScheme, 0, 0, 0);
     return { tilingScheme, data, provider, tile };
+  }
+
+  function createQuantizedData() {
+    return new SceneGISPlanarQuantizedMeshTerrainData({
+      quantizedVertices: new Uint16Array([
+        0, 32767, 0, 32767, 0, 0, 32767, 32767, 0, 32767, 16384, 8192,
+      ]),
+      indices: new Uint16Array([0, 1, 2, 1, 3, 2]),
+      westIndices: new Uint16Array([0, 2]),
+      southIndices: new Uint16Array([1, 0]),
+      eastIndices: new Uint16Array([3, 1]),
+      northIndices: new Uint16Array([2, 3]),
+      quantizedMinimumHeight: -10.0,
+      quantizedMaximumHeight: 40.0,
+    });
   }
 
   it("preflights the canonical provider and effective geometric errors", function () {
@@ -117,6 +141,99 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     expect(fixture.tile.terrainEntry.knownUnavailable).toBe(true);
     expect(runtime.tilesLoaded).toBe(true);
     expect(listener).toHaveBeenCalledOnceWith(jasmine.any(Object));
+    runtime.destroy();
+  });
+
+  it("dispatches quantized direct data through the shared Worker start budget", async function () {
+    const fixture = createFixture();
+    const quantizedData = createQuantizedData();
+    fixture.provider.requestTileGeometry = () => Promise.resolve(quantizedData);
+    const runtime = new SceneGISPlanarTerrain((callback) =>
+      callback(fixture.tile),
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+
+    runtime.prepare(undefined, [fixture.tile], [fixture.tile], 1);
+    await Promise.resolve();
+    expect(fixture.tile.terrainEntry.state).toBe(runtime.State.RECEIVED);
+    runtime.prepare({}, [fixture.tile], [fixture.tile], 2);
+    expect(fixture.tile.terrainEntry.directMeshError).toBeUndefined();
+    expect(
+      terrainWorkerScheduler.scheduleCreateQuantizedMeshMesh,
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      terrainWorkerScheduler.scheduleCreateHeightmapMesh,
+    ).not.toHaveBeenCalled();
+    expect(runtime._debug.startedMeshTasks).toBe(1);
+    expect(runtime.tilesLoaded).toBe(false);
+    await Promise.resolve();
+    expect(fixture.tile.terrainEntry.directMeshState).toBe(
+      runtime.MeshState.RECEIVED,
+    );
+    runtime.destroy();
+  });
+
+  it("rolls back a quantized vertex buffer when owned index creation fails", function () {
+    const fixture = createFixture();
+    const quantizedData = createQuantizedData();
+    const runtime = new SceneGISPlanarTerrain((callback) =>
+      callback(fixture.tile),
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+    const task = quantizedData._createMeshTaskPayload(
+      fixture.tile.extent,
+      4.0,
+      fixture.provider.minimumHeight,
+    );
+    const meshResult = processSceneGISPlanarTerrainTask(task.parameters, []);
+    let destroyed = false;
+    const vertexBuffer = {
+      isDestroyed: () => destroyed,
+      destroy: jasmine.createSpy("destroyVertexBuffer").and.callFake(() => {
+        destroyed = true;
+      }),
+    };
+    spyOn(Buffer, "createVertexBuffer").and.returnValue(vertexBuffer);
+    const failure = new Error("owned index creation failed");
+    spyOn(Buffer, "createIndexBuffer").and.throwError(failure);
+    const before = { ...runtime._debug };
+    const sharedCount = runtime._indexBuffers.size;
+
+    let caught;
+    try {
+      runtime._createContent(
+        {},
+        fixture.tile,
+        quantizedData,
+        runtime.Source.DIRECT,
+        meshResult,
+      );
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBe(failure);
+    expect(vertexBuffer.destroy).toHaveBeenCalledTimes(1);
+    expect(runtime._debug.createdVertexBuffers).toBe(
+      before.createdVertexBuffers + 1,
+    );
+    expect(runtime._debug.destroyedVertexBuffers).toBe(
+      before.destroyedVertexBuffers + 1,
+    );
+    expect(runtime._debug.createdIndexBuffers).toBe(before.createdIndexBuffers);
+    expect(runtime._debug.createdOwnedIndexBuffers).toBe(
+      before.createdOwnedIndexBuffers,
+    );
+    expect(runtime._debug.acquiredIndexReferences).toBe(
+      before.acquiredIndexReferences,
+    );
+    expect(runtime._indexBuffers.size).toBe(sharedCount);
     runtime.destroy();
   });
 
@@ -311,6 +428,53 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     runtime.prepare(undefined, [child], [child], 1);
     expect(child.terrainEntry.state).toBe(runtime.State.UNAVAILABLE);
     expect(request).not.toHaveBeenCalled();
+    runtime.destroy();
+  });
+
+  it("runs quantized child fallback data and mesh tasks through the shared start budget", async function () {
+    const fixture = createFixture();
+    fixture.provider.maximumLevel = 0;
+    const quantizedData = createQuantizedData();
+    const child = new SceneGISPlanarTile(fixture.tilingScheme, 0, 0, 1);
+    const runtime = new SceneGISPlanarTerrain(
+      (callback) => callback(child),
+      (x, y, level) => (level === 0 ? fixture.tile : undefined),
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+    fixture.tile.terrainEntry = {
+      activeContent: { terrainData: quantizedData },
+      revision: 7,
+    };
+
+    runtime.prepare({}, [child], [child], 1);
+    expect(
+      terrainWorkerScheduler.scheduleUpsampleQuantizedMesh,
+    ).toHaveBeenCalledTimes(1);
+    expect(runtime._debug.startedUpsampleTasks).toBe(1);
+    expect(runtime._debug.startedMeshTasks).toBe(0);
+    expect(runtime.tilesLoaded).toBe(false);
+    await Promise.resolve();
+    expect(child.terrainEntry.fallbackUpsampleState).toBe(
+      runtime.UpsampleState.RECEIVED,
+    );
+
+    runtime.prepare({}, [child], [child], 2);
+    expect(
+      terrainWorkerScheduler.scheduleCreateQuantizedMeshMesh,
+    ).toHaveBeenCalledTimes(1);
+    expect(runtime._debug.startedUpsampleTasks).toBe(1);
+    expect(runtime._debug.startedMeshTasks).toBe(1);
+    await Promise.resolve();
+    expect(child.terrainEntry.fallbackMeshState).toBe(
+      runtime.MeshState.RECEIVED,
+    );
+    expect(child.terrainEntry.fallbackData.wasCreatedByUpsampling).toBe(true);
+    expect(runtime.tilesLoaded).toBe(false);
+
+    fixture.tile.terrainEntry = undefined;
     runtime.destroy();
   });
 

@@ -12,6 +12,13 @@ C11 private backend参考`packages/engine/Source/Scene/ClassificationPrimitive.j
 front/back operation、`Pass.GLOBE -> Pass.TERRAIN_CLASSIFICATION`顺序、clip-space pixel width与pick/depth derived
 command协议；不得直接复制其Ellipsoid、Cartographic或ApproximateTerrainHeights坐标模型。
 
+A5 private quantized terrain tasks仅参考
+`packages/engine/Source/Core/CesiumTerrainProvider.js`、
+`packages/engine/Source/Workers/createVerticesFromQuantizedTerrainMesh.js`和
+`packages/engine/Source/Workers/upsampleQuantizedTerrainMesh.js`中的坐标无关算法职责，参考baseline同为
+`6d5d8b1f0725b6f831b336463f4b11c98023427b`。升级时必须复核delta/zig-zag/high-water decode、edge skirt和direct-child
+triangle clipping；不得引入其Ellipsoid、Cartographic、TerrainEncoding或service metadata语义。
+
 本清单用于升级官方 Cesium 基线时复核 SceneGIS Planar World。它不是升级结果，也不能替代 ADR、SGP 和自动化回归。
 
 | 私有依赖或缝隙                                                           | SceneGIS wrapper/owner                                              | 风险   | 升级后必须复核                                                                                                                   |
@@ -32,6 +39,7 @@ command协议；不得直接复制其Ellipsoid、Cartographic或ApproximateTerra
 | terrain query snapshot、Float32 triangle与independent sampler            | private terrain Query、public World/Sampler APIs                    | high   | snapshot invalidation、skirt exclusion、non-unit ray、scheduler delay、zero runtime mutation                                     |
 | URL Heightmap image/LERC decode                                          | public planar URL terrain provider                                  | high   | getImagePixels、color-space option、LERC API、boundary samples、ImageBitmap close                                                |
 | planar terrain TaskProcessor Worker                                      | ADR-0027 private scheduler/task + single Worker entry               | high   | task kinds、transfer ownership、result preflight、late generation、worker URL/IIFE/release/tar delivery                          |
+| planar quantized-mesh decode/mesh/upsample                               | ADR-0028 + existing terrain Worker/runtime                          | high   | safe binary bounds、CCW/edge topology、bounded query index、true-triangle child clip、per-tile index ownership                   |
 | standard derivatives、automatic light uniforms与shader variants          | private planar SurfaceShader、World lighting properties             | high   | dFdx/dFdy、face-forward、light uniforms、layer+lighting cache key、uniform-only multiplier                                       |
 | automatic exports/types/JSDoc/package layout                             | public SceneGIS engine/widgets types                                | medium | workspace and installed tarball ESM/CJS where supported、root/types/API visibility、private absence                              |
 | Sandcastle/E2E local bundle entry                                        | two planar examples and local E2E                                   | medium | dev/release bundle, no public-network automation, credits and destroy                                                            |

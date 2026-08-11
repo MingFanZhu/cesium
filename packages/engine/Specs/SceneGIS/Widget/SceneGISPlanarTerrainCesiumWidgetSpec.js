@@ -10,6 +10,7 @@ import {
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
+  SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider,
   SceneGISPlanarWorld,
   SceneTransforms,
 } from "../../../index.js";
@@ -319,6 +320,118 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     );
     expect(terrain._debug.destroyedVertexBuffers).toBe(
       terrain._debug.createdVertexBuffers,
+    );
+  });
+
+  it("renders quantized terrain with imagery, resident queries, and owned indices", async function () {
+    const world = new SceneGISPlanarWorld({
+      coordinateSystem: new SceneGISPlanarCoordinateSystem({
+        extent: new SceneGISPlanarExtent({
+          minimumX: -20037508.342789244,
+          minimumY: -20037508.342789244,
+          maximumX: 20037508.342789244,
+          maximumY: 20037508.342789244,
+        }),
+      }),
+      maximumLevel: 0,
+      baseColor: Color.LIME,
+    });
+    world.terrainProvider =
+      new SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider({
+        url: "./Data/CesiumTerrainTileJson/QuantizedMesh/tile.terrain",
+        tilingScheme: world.tilingScheme,
+        minimumHeight: -1000.0,
+        maximumHeight: 10000.0,
+        maximumLevel: 0,
+        levelZeroMaximumGeometricError: 1000.0,
+        subdomains: "a",
+      });
+    const image = document.createElement("canvas");
+    image.width = 1;
+    image.height = 1;
+    const imageContext = image.getContext("2d");
+    imageContext.fillStyle = "lime";
+    imageContext.fillRect(0, 0, 1, 1);
+    world.imageryLayers.addImageryProvider({
+      tilingScheme: world.tilingScheme,
+      minimumLevel: 0,
+      maximumLevel: 0,
+      tileWidth: 1,
+      tileHeight: 1,
+      hasAlphaChannel: false,
+      errorEvent: new Event(),
+      credit: undefined,
+      requestImage: () => Promise.resolve(image),
+    });
+    const contextOptions = { webgl: { antialias: false } };
+    if (!!window.webglStub) {
+      contextOptions.getWebGLStub = getWebGLStub;
+    }
+    widget = new CesiumWidget(container, {
+      world,
+      useDefaultRenderLoop: false,
+      contextOptions,
+    });
+    widget.scene.camera.setView({
+      destination: new Cartesian3(0.0, 0.0, 45000000.0),
+      orientation: {
+        direction: new Cartesian3(0.0, 0.0, -1.0),
+        up: new Cartesian3(0.0, 1.0, 0.0),
+      },
+    });
+
+    await pollToPromise(function () {
+      widget.scene.initializeFrame();
+      widget.scene.render();
+      return world.tilesLoaded;
+    });
+    const tile = world._surface._quadtree._renderTiles[0];
+    const terrain = world._surface._terrain;
+    expect(tile.terrainEntry.activeSource).toBe(terrain.Source.DIRECT);
+    expect(tile.terrainEntry.activeContent.ownsIndexBuffer).toBe(true);
+    expect(terrain._indexBuffers.size).toBe(0);
+    expect(tile.imageryBindings.size).toBe(1);
+    expect(world._surface._renderCommands).toEqual([tile.command]);
+    expect(widget.scene).toRenderAndCall(function (rgba) {
+      expect(rgba).not.toEqual([0, 0, 0, 255]);
+    });
+
+    const commands = world._surface._renderCommands.slice();
+    const debug = { ...terrain._debug };
+    const height = world.getTerrainHeight(new Cartesian3(0.0, 0.0, 0.0));
+    expect(height).toBeDefined();
+    expect(Number.isFinite(height)).toBe(true);
+    const windowPosition = SceneTransforms.worldToWindowCoordinates(
+      widget.scene,
+      new Cartesian3(0.0, 0.0, height),
+      new Cartesian2(),
+    );
+    const depthPosition = widget.scene.pickPosition(windowPosition);
+    const terrainPosition = world.pickTerrainFromWindowPosition(
+      windowPosition,
+      widget.scene,
+      new Cartesian3(),
+    );
+    expect(depthPosition).toBeDefined();
+    expect(terrainPosition).toBeDefined();
+    const depthHeight = world.getTerrainHeight(depthPosition);
+    expect(depthHeight).toBeDefined();
+    expect(Math.abs(depthPosition.z - depthHeight)).toBeLessThan(50.0);
+    expect(terrainPosition.x).toBeCloseTo(depthPosition.x, -1);
+    expect(terrainPosition.y).toBeCloseTo(depthPosition.y, -1);
+    expect(terrainPosition.z).toBeCloseTo(depthHeight, 5);
+    expect(Math.abs(terrainPosition.z - depthPosition.z)).toBeLessThan(50.0);
+    expect(world._surface._renderCommands).toEqual(commands);
+    expect(terrain._debug).toEqual(debug);
+
+    const createdOwnedIndices = terrain._debug.createdOwnedIndexBuffers;
+    widget = widget.destroy();
+    expect(terrain._debug.destroyedOwnedIndexBuffers).toBe(createdOwnedIndices);
+    expect(terrain._debug.destroyedIndexBuffers).toBe(
+      terrain._debug.createdIndexBuffers,
+    );
+    expect(terrain._debug.destroyedVertexArrays).toBe(
+      terrain._debug.createdVertexArrays,
     );
   });
 });
