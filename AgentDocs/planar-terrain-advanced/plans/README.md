@@ -13,7 +13,9 @@
   （`completed`、Architecture review与项目负责人人工验收通过）
 - [A3 平面地形净空与防穿透](2026-08-11-phase-a3-terrain-clearance-and-penetration-prevention.md)
   （`completed`、Architecture review与项目负责人人工验收通过）
-- A4-A7：仅保留 extension plan 中的稳定阶段目标，不提前创建 phase plan。
+- [A4 平面地形 Worker 管线](2026-08-11-phase-a4-terrain-worker-pipeline.md)
+  （`completed`、Architecture/code review通过）
+- A5-A7：仅保留 extension plan 中的稳定阶段目标，不提前创建 phase plan。
 
 ## Handoff
 
@@ -21,5 +23,7 @@
 - A2-R001/R002/R003全部关闭，Architecture review与项目负责人人工复测通过；checkpoint为`5ff4753579`。
 - A3-R001实现后Architecture focused review确认ordinary Perspective双向穿越，并发现exact tangent release与
   Orthographic `0/0`缺口。A3-R002现已用finite press-time distance与release normalization修复，Controller 47/47；
-  Architecture final focused review与项目负责人Sandcastle人工复测均已通过。A3由本提交形成独立checkpoint；
-  A4尚未激活。
+  Architecture final focused review与项目负责人Sandcastle人工复测均已通过；checkpoint为`c03f7d9a56`。
+- A4已完成TaskProcessor、Worker build/package、LERC/mesh profiling与ownership审计；ADR-0027批准两个独立task和
+  唯一thin Worker entry。Execution完成实现、67-case focused矩阵与release/package审计，Architecture独立复跑
+  actual Worker、runtime与real Context关键闭环后批准；等待形成A4 checkpoint再进入A5。

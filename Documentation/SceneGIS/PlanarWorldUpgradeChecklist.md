@@ -31,6 +31,7 @@ command协议；不得直接复制其Ellipsoid、Cartographic或ApproximateTerra
 | terrain request/availability/upsample/skirt/shared-index runtime         | private planar Terrain/mesh/quadtree                                | high   | four-child coverage、promotion budget、Float32 mesh、skirt topology/bounds、exact release                                        |
 | terrain query snapshot、Float32 triangle与independent sampler            | private terrain Query、public World/Sampler APIs                    | high   | snapshot invalidation、skirt exclusion、non-unit ray、scheduler delay、zero runtime mutation                                     |
 | URL Heightmap image/LERC decode                                          | public planar URL terrain provider                                  | high   | getImagePixels、color-space option、LERC API、boundary samples、ImageBitmap close                                                |
+| planar terrain TaskProcessor Worker                                      | ADR-0027 private scheduler/task + single Worker entry               | high   | task kinds、transfer ownership、result preflight、late generation、worker URL/IIFE/release/tar delivery                          |
 | standard derivatives、automatic light uniforms与shader variants          | private planar SurfaceShader、World lighting properties             | high   | dFdx/dFdy、face-forward、light uniforms、layer+lighting cache key、uniform-only multiplier                                       |
 | automatic exports/types/JSDoc/package layout                             | public SceneGIS engine/widgets types                                | medium | workspace and installed tarball ESM/CJS where supported、root/types/API visibility、private absence                              |
 | Sandcastle/E2E local bundle entry                                        | two planar examples and local E2E                                   | medium | dev/release bundle, no public-network automation, credits and destroy                                                            |
@@ -46,7 +47,8 @@ command协议；不得直接复制其Ellipsoid、Cartographic或ApproximateTerra
 
 1. 核对 `.scenegis/upstream-base.json`，逐项重放并审查 SGP-0001/SGP-0002，不在功能提交中混入 upstream sync。
 2. 运行 `node scripts/scenegis/audit-upstream-patches.mjs`，确认所有 upstream-owned diff 已登记且 marker 配对。
-3. 运行 P1-P8与terrain T1-T6 focused Specs，再运行multi-tile warm/churn/depth与lifecycle soak；任何
+3. 运行 P1-P8、terrain T1-T6与advanced terrain focused Specs；复核actual Worker transfer/URL，再运行
+   multi-tile warm/churn/depth与lifecycle soak；任何
    observable selection、pixel、fallback、lighting或ownership变化先形成finding。
 4. 生成 build/release/types/docs，在临时目录执行 root/engine/widgets tarball smoke；生成文件不得进入提交。
 5. 执行 dev/release 本地 E2E，确认 Viewer、imagery、pixel/depth/pick、真实 wheel/Home 与 destroy。

@@ -6,3 +6,5 @@
   （`approved`；A2-R001/R002/R003全部关闭，项目负责人Sandcastle人工复测通过）
 - [A3 平面地形净空与防穿透](2026-08-11-a3-terrain-clearance-and-penetration-prevention.md)
   （`approved`；A3-R001/R002关闭，项目负责人最终Sandcastle复测通过）
+- [A4 平面地形 Worker 管线](2026-08-11-a4-terrain-worker-pipeline.md)
+  （`approved`；无阻断finding，Architecture独立复跑关键Worker/runtime/real-Context闭环）

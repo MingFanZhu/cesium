@@ -1,149 +1,106 @@
 import DeveloperError from "../../../Core/DeveloperError.js";
 import TerrainProvider from "../../../Core/TerrainProvider.js";
 
-function midpoint(minimum, maximum) {
-  return minimum * 0.5 + maximum * 0.5;
-}
-
 /**
- * Builds a tile-local regular-grid mesh from validated planar heightmap data.
+ * Creates a transferable Worker payload without transferring TerrainData-owned storage.
  *
  * @param {SceneGISPlanarHeightmapTerrainData} terrainData The source terrain data.
- * @param {SceneGISPlanarExtent} extent The tile extent represented by the mesh.
- * @returns {object} The CPU mesh.
+ * @param {SceneGISPlanarExtent} extent The represented tile extent.
+ * @param {number} effectiveGeometricError The effective tile error in meters.
+ * @param {number} providerMinimumHeight The provider minimum height in meters.
+ * @returns {{parameters: object, transferableObjects: ArrayBuffer[]}} The task payload.
  * @private
  */
-function buildSceneGISPlanarTerrainMesh(
+function createSceneGISPlanarTerrainMeshTask(
   terrainData,
   extent,
-  effectiveGeometricError = 0.0,
-  providerMinimumHeight = terrainData?.minimumHeight,
+  effectiveGeometricError,
+  providerMinimumHeight,
 ) {
   if (
     !terrainData ||
-    typeof terrainData._getSample !== "function" ||
-    !Number.isInteger(terrainData.width) ||
-    !Number.isInteger(terrainData.height)
+    typeof terrainData._createMeshTaskPayload !== "function"
   ) {
     throw new DeveloperError(
       "terrainData must be a SceneGISPlanarHeightmapTerrainData.",
     );
   }
+  return terrainData._createMeshTaskPayload(
+    extent,
+    effectiveGeometricError,
+    providerMinimumHeight,
+  );
+}
+
+/**
+ * Preflights a Worker result and attaches main-thread shared topology.
+ *
+ * @param {SceneGISPlanarHeightmapTerrainData} terrainData The source terrain data.
+ * @param {object} result The Worker result.
+ * @returns {object} The validated CPU mesh.
+ * @private
+ */
+function finalizeSceneGISPlanarTerrainMesh(terrainData, result) {
+  const width = terrainData?.width;
+  const height = terrainData?.height;
+  const topology =
+    Number.isInteger(width) && Number.isInteger(height)
+      ? TerrainProvider.getRegularGridAndSkirtIndicesAndEdgeIndices(
+          width,
+          height,
+        )
+      : undefined;
+  const surfaceVertexCount = width * height;
+  const skirtVertexCount = height + width + height + width;
+  const vertexCount = surfaceVertexCount + skirtVertexCount;
   if (
-    !extent ||
-    !Number.isFinite(extent.minimumX) ||
-    !Number.isFinite(extent.minimumY) ||
-    !Number.isFinite(extent.maximumX) ||
-    !Number.isFinite(extent.maximumY)
-  ) {
-    throw new DeveloperError("extent must be a SceneGISPlanarExtent.");
-  }
-  if (
-    !Number.isFinite(effectiveGeometricError) ||
-    effectiveGeometricError < 0.0 ||
-    !Number.isFinite(providerMinimumHeight)
+    !result ||
+    result.kind !== "createHeightmapMesh" ||
+    !(result.positions instanceof Float32Array) ||
+    result.width !== width ||
+    result.height !== height ||
+    result.surfaceVertexCount !== surfaceVertexCount ||
+    result.skirtVertexCount !== skirtVertexCount ||
+    result.vertexCount !== vertexCount ||
+    result.positions.length !== vertexCount * 3 ||
+    result.positionByteLength !== result.positions.byteLength ||
+    result.topologyKey !== `${width}/${height}/skirt` ||
+    !Number.isFinite(result.referenceHeight) ||
+    result.minimumHeight !== terrainData.minimumHeight ||
+    result.maximumHeight !== terrainData.maximumHeight ||
+    !Number.isFinite(result.skirtMinimumHeight) ||
+    result.skirtMinimumHeight > result.minimumHeight
   ) {
     throw new DeveloperError(
-      "Terrain skirt parameters must be finite and non-negative where required.",
+      "The planar terrain mesh Worker result is invalid.",
     );
   }
-
-  const width = terrainData.width;
-  const height = terrainData.height;
-  const surfaceVertexCount = width * height;
-  if (!Number.isSafeInteger(surfaceVertexCount)) {
-    throw new DeveloperError("The terrain mesh vertex count must be safe.");
-  }
-  const referenceHeight = midpoint(
-    terrainData.minimumHeight,
-    terrainData.maximumHeight,
-  );
-  if (!Number.isFinite(referenceHeight)) {
-    throw new DeveloperError("The terrain reference height must be finite.");
-  }
-
-  const topology = TerrainProvider.getRegularGridAndSkirtIndicesAndEdgeIndices(
-    width,
-    height,
-  );
-  const edges = [
-    topology.westIndicesSouthToNorth,
-    topology.southIndicesEastToWest,
-    topology.eastIndicesNorthToSouth,
-    topology.northIndicesWestToEast,
-  ];
-  let skirtVertexCount = 0;
-  for (const edge of edges) {
-    skirtVertexCount += edge.length;
-  }
-  const vertexCount = surfaceVertexCount + skirtVertexCount;
-  const positions = new Float32Array(vertexCount * 3);
-  let offset = 0;
-  for (let row = 0; row < height; ++row) {
-    const localY = 0.5 - row / (height - 1);
-    for (let column = 0; column < width; ++column) {
-      const localX = column / (width - 1) - 0.5;
-      const localZ = terrainData._getSample(row, column) - referenceHeight;
-      const floatX = Math.fround(localX);
-      const floatY = Math.fround(localY);
-      const floatZ = Math.fround(localZ);
-      if (
-        !Number.isFinite(floatX) ||
-        !Number.isFinite(floatY) ||
-        !Number.isFinite(floatZ)
-      ) {
-        throw new DeveloperError(
-          "Every terrain mesh position must be finite in Float32.",
-        );
-      }
-      positions[offset++] = floatX;
-      positions[offset++] = floatY;
-      positions[offset++] = floatZ;
-    }
-  }
-
-  const skirtDepth = effectiveGeometricError * 4.0;
-  let skirtMinimumHeight = terrainData.minimumHeight;
-  for (const edge of edges) {
-    for (const surfaceIndex of edge) {
-      const sourceOffset = surfaceIndex * 3;
-      const edgeHeight = referenceHeight + positions[sourceOffset + 2];
-      const skirtHeight = Math.max(
-        edgeHeight - skirtDepth,
-        providerMinimumHeight,
+  for (let i = 0; i < result.positions.length; ++i) {
+    if (!Number.isFinite(result.positions[i])) {
+      throw new DeveloperError(
+        "Every planar terrain mesh Worker position must be finite.",
       );
-      const relativeSkirtHeight = Math.fround(skirtHeight - referenceHeight);
-      if (!Number.isFinite(relativeSkirtHeight)) {
-        throw new DeveloperError(
-          "Every terrain skirt position must be finite in Float32.",
-        );
-      }
-      positions[offset++] = positions[sourceOffset];
-      positions[offset++] = positions[sourceOffset + 1];
-      positions[offset++] = relativeSkirtHeight;
-      skirtMinimumHeight = Math.min(skirtMinimumHeight, skirtHeight);
     }
   }
-
+  const expectedReference =
+    terrainData.minimumHeight * 0.5 + terrainData.maximumHeight * 0.5;
+  if (result.referenceHeight !== expectedReference) {
+    throw new DeveloperError(
+      "The planar terrain mesh reference height is invalid.",
+    );
+  }
   const indices = topology.indices;
   return {
-    positions,
+    ...result,
     indices,
-    width,
-    height,
-    surfaceVertexCount,
-    skirtVertexCount,
-    vertexCount,
     surfaceIndexCount: topology.indexCountWithoutSkirts,
     indexCount: indices.length,
-    referenceHeight,
-    minimumHeight: terrainData.minimumHeight,
-    maximumHeight: terrainData.maximumHeight,
-    skirtMinimumHeight,
-    positionByteLength: positions.byteLength,
     indexByteLength: indices.byteLength,
-    topologyKey: `${width}/${height}/skirt`,
   };
 }
 
-export default buildSceneGISPlanarTerrainMesh;
+export {
+  createSceneGISPlanarTerrainMeshTask,
+  finalizeSceneGISPlanarTerrainMesh,
+};
+export default finalizeSceneGISPlanarTerrainMesh;

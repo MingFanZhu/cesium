@@ -317,6 +317,60 @@ SceneGISPlanarHeightmapTerrainData.prototype._getSample = function (
 };
 
 /**
+ * Creates an owned transferable clone for one planar terrain mesh task.
+ * The TerrainData-owned source buffer remains available for query and upsample.
+ *
+ * @param {SceneGISPlanarExtent} extent The represented tile extent.
+ * @param {number} effectiveGeometricError The effective tile error in meters.
+ * @param {number} providerMinimumHeight The provider minimum height in meters.
+ * @returns {{parameters: object, transferableObjects: ArrayBuffer[]}} The private Worker payload.
+ * @private
+ */
+SceneGISPlanarHeightmapTerrainData.prototype._createMeshTaskPayload = function (
+  extent,
+  effectiveGeometricError,
+  providerMinimumHeight,
+) {
+  if (!(extent instanceof SceneGISPlanarExtent)) {
+    throw new DeveloperError("extent must be a SceneGISPlanarExtent.");
+  }
+  checkFiniteNumber("effectiveGeometricError", effectiveGeometricError);
+  if (effectiveGeometricError < 0.0) {
+    throw new DeveloperError("effectiveGeometricError must be non-negative.");
+  }
+  checkFiniteNumber("providerMinimumHeight", providerMinimumHeight);
+
+  const buffer = new this._buffer.constructor(this._buffer);
+  return {
+    parameters: {
+      kind: "createHeightmapMesh",
+      buffer,
+      structure: {
+        heightScale: this._structure.heightScale,
+        heightOffset: this._structure.heightOffset,
+        elementsPerHeight: this._structure.elementsPerHeight,
+        stride: this._structure.stride,
+        elementMultiplier: this._structure.elementMultiplier,
+        isBigEndian: this._structure.isBigEndian,
+      },
+      width: this._width,
+      height: this._height,
+      minimumHeight: this._minimumHeight,
+      maximumHeight: this._maximumHeight,
+      effectiveGeometricError,
+      providerMinimumHeight,
+      extent: {
+        minimumX: extent.minimumX,
+        minimumY: extent.minimumY,
+        maximumX: extent.maximumX,
+        maximumY: extent.maximumY,
+      },
+    },
+    transferableObjects: [buffer.buffer],
+  };
+};
+
+/**
  * Interpolates height on the heightmap's fixed southwest-to-northeast
  * triangle split.
  *

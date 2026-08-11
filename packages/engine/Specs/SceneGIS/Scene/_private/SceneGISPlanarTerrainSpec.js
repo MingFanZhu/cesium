@@ -10,8 +10,17 @@ import SceneGISPlanarTerrain, {
   validateTerrainProvider,
 } from "../../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarTerrain.js";
 import SceneGISPlanarTile from "../../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarTile.js";
+import terrainWorkerScheduler from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerScheduler.js";
+import processSceneGISPlanarTerrainTask from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
+  beforeEach(function () {
+    spyOn(terrainWorkerScheduler, "scheduleCreateHeightmapMesh").and.callFake(
+      (parameters) =>
+        Promise.resolve(processSceneGISPlanarTerrainTask(parameters, [])),
+    );
+  });
+
   function createFixture(options = {}) {
     const tilingScheme = new SceneGISPlanarTilingScheme({
       coordinateSystem: new SceneGISPlanarCoordinateSystem({
@@ -335,6 +344,115 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     for (const bridge of children.slice(1)) {
       expect(bridge.terrainEntry.state).toBe(runtime.State.UNLOADED);
     }
+    runtime.destroy();
+  });
+
+  it("starts at most two mesh tasks per normal frame and isolates late task results", async function () {
+    const fixture = createFixture();
+    const tiles = [
+      new SceneGISPlanarTile(fixture.tilingScheme, 0, 0, 1),
+      new SceneGISPlanarTile(fixture.tilingScheme, 1, 0, 1),
+      new SceneGISPlanarTile(fixture.tilingScheme, 0, 1, 1),
+      new SceneGISPlanarTile(fixture.tilingScheme, 1, 1, 1),
+    ];
+    const allTiles = new Map(
+      [fixture.tile, ...tiles].map((tile) => [tile.key, tile]),
+    );
+    const deferred = [];
+    terrainWorkerScheduler.scheduleCreateHeightmapMesh.and.callFake(
+      () => new Promise((resolve) => deferred.push(resolve)),
+    );
+    const runtime = new SceneGISPlanarTerrain(
+      (callback) => allTiles.forEach(callback),
+      (x, y, level) => allTiles.get(`${level}/${x}/${y}`),
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+
+    runtime.prepare(undefined, tiles, tiles, 1);
+    await Promise.resolve();
+    expect(
+      tiles.every((tile) => tile.terrainEntry.state === runtime.State.RECEIVED),
+    ).toBeTrue();
+
+    runtime.prepare({}, tiles, tiles, 2);
+    expect(deferred.length).toBe(2);
+    expect(runtime._debug.startedMeshTasks).toBe(2);
+    expect(runtime._debug.promotions).toBe(0);
+    expect(runtime.tilesLoaded).toBe(false);
+    expect(
+      tiles.filter(
+        (tile) =>
+          tile.terrainEntry.directMeshState === runtime.MeshState.LOADING,
+      ).length,
+    ).toBe(2);
+    expect(
+      tiles.filter(
+        (tile) => tile.terrainEntry.directMeshState === runtime.MeshState.NONE,
+      ).length,
+    ).toBe(2);
+
+    const transfer = [];
+    const task = fixture.data._createMeshTaskPayload(
+      tiles[0].extent,
+      2.0,
+      fixture.provider.minimumHeight,
+    );
+    const result = processSceneGISPlanarTerrainTask(task.parameters, transfer);
+    deferred[0](result);
+    await Promise.resolve();
+    expect(tiles[0].terrainEntry.directMeshState).toBe(
+      runtime.MeshState.RECEIVED,
+    );
+    expect(tiles[0].terrainEntry.activeContent).toBeUndefined();
+    expect(runtime._debug.promotions).toBe(0);
+
+    const staleBefore = runtime._debug.staleMeshResults;
+    runtime.setProvider(undefined, undefined);
+    deferred[1](result);
+    await Promise.resolve();
+    expect(runtime._debug.staleMeshResults).toBe(staleBefore + 1);
+    expect(tiles.every((tile) => tile.terrainEntry === undefined)).toBeTrue();
+    expect(fixture.data._getSample(0, 0)).toBe(-10.0);
+    runtime.destroy();
+  });
+
+  it("reports malformed mesh results and retries only on a later normal frame", async function () {
+    let requests = 0;
+    const fixture = createFixture({
+      requestTileGeometry: () => {
+        ++requests;
+        return Promise.resolve(fixture.data);
+      },
+    });
+    fixture.provider.errorEvent.addEventListener((error) => {
+      error.retry = true;
+    });
+    terrainWorkerScheduler.scheduleCreateHeightmapMesh.and.resolveTo({
+      kind: "malformed",
+    });
+    const runtime = new SceneGISPlanarTerrain((callback) =>
+      callback(fixture.tile),
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+
+    runtime.prepare(undefined, [fixture.tile], [fixture.tile], 1);
+    await Promise.resolve();
+    runtime.prepare({}, [fixture.tile], [fixture.tile], 2);
+    await Promise.resolve();
+    runtime.prepare({}, [fixture.tile], [fixture.tile], 3);
+    expect(fixture.tile.terrainEntry.state).toBe(runtime.State.UNLOADED);
+    expect(fixture.tile.terrainEntry.activeSource).toBe(runtime.Source.FLAT);
+    expect(fixture.tile.terrainEntry.activeContent.mesh).toBeUndefined();
+    expect(requests).toBe(1);
+
+    runtime.prepare(undefined, [fixture.tile], [fixture.tile], 4);
+    expect(requests).toBe(2);
     runtime.destroy();
   });
 });

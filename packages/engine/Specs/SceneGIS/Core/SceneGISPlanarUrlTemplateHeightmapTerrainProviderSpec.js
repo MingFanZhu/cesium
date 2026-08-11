@@ -8,8 +8,17 @@ import SceneGISPlanarHeightmapTerrainData from "../../../Source/SceneGIS/Core/Sc
 import SceneGISPlanarTilingScheme from "../../../Source/SceneGIS/Core/SceneGISPlanarTilingScheme.js";
 import SceneGISPlanarUrlTemplateHeightmapTerrainProvider from "../../../Source/SceneGIS/Core/SceneGISPlanarUrlTemplateHeightmapTerrainProvider.js";
 import SceneGISPlanarWorld from "../../../Source/SceneGIS/Scene/SceneGISPlanarWorld.js";
+import terrainWorkerScheduler from "../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerScheduler.js";
+import processSceneGISPlanarTerrainTask from "../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js";
 
 describe("SceneGIS/Core/SceneGISPlanarUrlTemplateHeightmapTerrainProvider", function () {
+  beforeEach(function () {
+    spyOn(terrainWorkerScheduler, "scheduleDecodeLerc").and.callFake(
+      (parameters) =>
+        Promise.resolve(processSceneGISPlanarTerrainTask(parameters, [])),
+    );
+  });
+
   function createTilingScheme(options = {}) {
     const limit = options.limit ?? 128.0;
     return new SceneGISPlanarTilingScheme({

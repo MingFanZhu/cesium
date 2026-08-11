@@ -18,7 +18,8 @@
 - 相关评审（Related reviews）：
   [A1 approved review](../reviews/2026-08-10-a1-terrain-aware-navigation-anchors.md)、
   [A2 approved review](../reviews/2026-08-10-a2-navigation-mode-and-surface-relationship.md)、
-  [A3 changes-requested review](../reviews/2026-08-11-a3-terrain-clearance-and-penetration-prevention.md)
+  [A3 approved review](../reviews/2026-08-11-a3-terrain-clearance-and-penetration-prevention.md)、
+  [A4 approved review](../reviews/2026-08-11-a4-terrain-worker-pipeline.md)
 - 继承 ADR：
   - [ADR-0002：平面坐标与瓦片寻址契约](../../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)
   - [ADR-0004：平面导航、相机约束与 Surface Picking](../../../Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md)
@@ -31,8 +32,9 @@
 - 新 ADR：
   [ADR-0024：平面地形感知导航锚点](../../../Documentation/SceneGIS/Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
   [ADR-0025：平面导航模式与相机—地表关系](../../../Documentation/SceneGIS/Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)、
-  [ADR-0026：平面地形净空与防穿透](../../../Documentation/SceneGIS/Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)；
-  A4-A7不预判编号和详细实现
+  [ADR-0026：平面地形净空与防穿透](../../../Documentation/SceneGIS/Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)、
+  [ADR-0027：平面地形 Worker 任务与交付协议](../../../Documentation/SceneGIS/Decisions/ADR-0027-planar-terrain-worker-tasks-and-delivery.md)；
+  A5-A7不预判编号和详细实现
 - SGP：当前不新增；若 phase 必须修改 upstream-owned file，先登记或复用合法 SGP
 
 ## 目标
@@ -124,7 +126,7 @@ quantized-mesh；改善地形法线和 LOD 切换的视觉连续性；最后完�
 | A1   | 建立平移、旋转、缩放共享的地形感知导航锚点，修复中键 pivot 与画面/地形不一致。           | 三个 parent extension completed | 总体计划提交；重新审计 controller、four-frustum ray、depth、terrain snapshot 与 input lifecycle。 | 三种 PC gesture 在 flat、terrain、对象遮挡、边界和大坐标下具有已批准锚点语义；public Z=0 picking 不变。 | `completed` | [A1 plan](2026-08-10-phase-a1-terrain-aware-navigation-anchors.md)         |
 | A2   | 建立 surface/underground navigation mode 与 camera-surface relationship 公共或私有契约。 | A1                              | A1 review、提交；重新审计 controller host、Viewer、programmatic camera 与 terrain query。         | 模式、切换、默认值、事件/状态、无 terrain 行为和迁移边界明确并实现；不提前加入完整 collision。          | `completed` | [A2 plan](2026-08-10-phase-a2-navigation-mode-and-surface-relationship.md) |
 | A3   | 实现模式感知的地下导航、碰撞和防穿透。                                                   | A2                              | A2 review、提交；以真实交互问题定义 collision profile。                                           | surface mode 不穿透且不异常复位；underground mode 可从上下两侧浏览；programmatic/input 路径一致。       | `completed` | [A3 plan][a3-plan]                                                         |
-| A4   | 依据 profiling 建立 LERC decode 与 terrain mesh 的 Worker 管线。                         | A3                              | A3 review、提交；重新测量 decode/mesh blocker并审计 Worker/build/package事实。                    | 获批任务进入 Worker；cancel/stale/error/transfer/destroy与发布闭环；无收益工作不迁移。                  | `planned`   | 延迟                                                                       |
+| A4   | 依据 profiling 建立 LERC decode 与 terrain mesh 的 Worker 管线。                         | A3                              | A3 review、提交；重新测量 decode/mesh blocker并审计 Worker/build/package事实。                    | 获批任务进入 Worker；cancel/stale/error/transfer/destroy与发布闭环；无收益工作不迁移。                  | `completed` | [A4 plan][a4-plan]                                                         |
 | A5   | 增加坐标系无关的 planar quantized-mesh 数据/provider 适配。                              | A4                              | A4 review、提交；选择合法公开或本地fixture并核对格式/许可。                                       | 与 canonical tiling、LOD/fallback/query/pick/resource生命周期闭环；heightmap兼容路径不退化。            | `planned`   | 延迟                                                                       |
 | A6   | 改善地形法线、跨瓦片及跨 LOD 的光照连续性。                                              | A5                              | A5 review、提交；对实际画面、normal数据和成本进行比较。                                           | 已批准方案显著减少可重复明暗跳变，保持双面/地下、imagery、depth/pick与稳定资源成本。                    | `planned`   | 延迟                                                                       |
 | A7   | 完成统一性能、发布和真实浏览器/GPU人工验收。                                             | A6                              | A1-A6均review并提交；明确最终案例和最小资格矩阵。                                                 | 导航、模式、Worker、两种terrain格式、光照和生命周期达到整体验收，文档/包/升级清单闭环。                 | `planned`   | 延迟                                                                       |
@@ -133,6 +135,7 @@ quantized-mesh；改善地形法线和 LOD 切换的视觉连续性；最后完�
 Shader、Worker 或 build 修改。
 
 [a3-plan]: 2026-08-11-phase-a3-terrain-clearance-and-penetration-prevention.md
+[a4-plan]: 2026-08-11-phase-a4-terrain-worker-pipeline.md
 
 ## 延迟到 Phase 的决定
 
@@ -260,3 +263,16 @@ Shader、Worker 或 build 修改。
 - `2026-08-11`：项目负责人在既有terrain Sandcastle完成最终人工复测，确认underground中键双向穿越、
   tangent附近release与换侧后pan/rotate/wheel均通过，且surface防穿透保持。A3状态改为`completed`，由本提交形成
   独立中文checkpoint；A4将在clean base上重新审计后激活。
+- `2026-08-11`：Architecture形成A3 checkpoint `c03f7d9a56`，随后完整审计TaskProcessor、
+  createTaskProcessorWorker、`bundleWorkers`、package delivery、URL LERC provider、Heightmap data与terrain
+  promotion。仓库内257×257 fixture证明decode/mesh为可迁移工作，sample clone成本显著更小。ADR-0027批准
+  一个thin Worker entry下的`decodeLerc`与`createHeightmapMesh`两个独立task、transfer/stale/error协议和
+  zero-upstream build路径；A4 phase plan激活并直接派发Execution。
+- `2026-08-11`：Execution完成A4 thin Worker entry、`decodeLerc`/`createHeightmapMesh` task、private lazy
+  TaskProcessor scheduler与terrain direct/fallback async mesh states。Focused aggregate 67 cases、build/release、
+  installed package smoke和official audit通过；upstream-owned=0、A4 SGP=0。A4保持active并等待Architecture/code
+  review，不进入A5。
+- `2026-08-11`：Architecture复核完整A4 diff，确认TaskProcessor完成事件沿用Scene request-render、main-thread
+  preflight/GPU ownership、two-start/two-promotion、readiness、stale token、flat lazy与package边界符合ADR-0027；
+  独立复跑actual Worker 3/3、terrain runtime 12/12、real-Context Widget 1/1、diff check与audit均通过。A4 review
+  标为`approved`、phase改为`completed`；形成独立checkpoint后再激活A5。

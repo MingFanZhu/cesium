@@ -70,6 +70,9 @@ const nonPublicSpellings = [
   "SceneGISPlanarGroundLineShader",
   "SceneGISPlanarGroundVolume",
   "SceneGISPlanarVisualizersCallback",
+  "SceneGISPlanarTerrainWorker",
+  "SceneGISPlanarTerrainWorkerScheduler",
+  "SceneGISPlanarTerrainWorkerTasks",
 ];
 const softPrivateContentSymbols = [
   "_SceneGISPlanarPositionResolver",
@@ -89,6 +92,8 @@ const softPrivateContentSymbols = [
   "_SceneGISPlanarGroundLineShader",
   "_SceneGISPlanarGroundVolume",
   "_SceneGISPlanarVisualizersCallback",
+  "_SceneGISPlanarTerrainWorkerScheduler",
+  "_SceneGISPlanarTerrainWorkerTasks",
 ];
 const privateContentFiles = [
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPositionResolver.js",
@@ -108,7 +113,14 @@ const privateContentFiles = [
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundCommands.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundLineShader.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundVolume.js",
+  "package/Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerScheduler.js",
+  "package/Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js",
 ];
+const terrainWorkerSource =
+  "package/Source/Workers/SceneGISPlanarTerrainWorker.js";
+const terrainWorkerBuild = "package/Build/Workers/SceneGISPlanarTerrainWorker.js";
+const terrainWorkerRelease =
+  "package/Build/Cesium/Workers/SceneGISPlanarTerrainWorker.js";
 
 function npmCommand(args) {
   if (process.platform === "win32") {
@@ -328,6 +340,8 @@ async function verify() {
   assertArchive(engineArchive, [
     "package/index.js",
     "package/index.d.ts",
+    terrainWorkerSource,
+    terrainWorkerBuild,
     ...privateContentFiles,
   ]);
   assertArchive(widgetsArchive, ["package/index.js", "package/index.d.ts"]);
@@ -336,6 +350,7 @@ async function verify() {
     "package/Source/Cesium.js",
     "package/Source/Cesium.d.ts",
     "package/index.cjs",
+    terrainWorkerRelease,
   ]);
 
   const nodeModules = path.join(temporaryRoot, "node_modules");

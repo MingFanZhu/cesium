@@ -27,9 +27,17 @@ import {
 } from "../../../../index.js";
 import createCanvas from "../../../../../../Specs/createCanvas.js";
 import getWebGLStub from "../../../../../../Specs/getWebGLStub.js";
+import pollToPromise from "../../../../../../Specs/pollToPromise.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
   let scene;
+
+  async function renderUntil(condition) {
+    await pollToPromise(function () {
+      scene.renderForSpecs();
+      return condition();
+    });
+  }
 
   function createWorld(options = {}) {
     const minimum = options.minimum ?? -128.0;
@@ -777,8 +785,9 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     const tile = world._surface._quadtree._idealTiles[0];
     expect(tile.command.primitiveType).toBe(PrimitiveType.TRIANGLE_STRIP);
     expect(world.tilesLoaded).toBe(false);
-    await Promise.resolve();
-    scene.renderForSpecs();
+    await renderUntil(
+      () => tile.terrainEntry.state === world._surface._terrain.State.READY,
+    );
 
     expect(tile.terrainEntry.state).toBe(world._surface._terrain.State.READY);
     expect(tile.command.primitiveType).toBe(PrimitiveType.TRIANGLES);
@@ -824,9 +833,9 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(snapshotEntry.content).not.toBe(oldContent);
     expect(snapshotEntry.mesh).not.toBe(oldMesh);
 
-    scene.renderForSpecs();
-    await Promise.resolve();
-    scene.renderForSpecs();
+    await renderUntil(
+      () => world._surface._terrainQuerySnapshot[0]?.mesh !== undefined,
+    );
     expect(world._surface._terrainQuerySnapshot[0]).toBe(snapshotEntry);
     expect(snapshotEntry.tile).toBeDefined();
     expect(snapshotEntry.content).toBeDefined();
@@ -876,10 +885,9 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
         id: "terrain-ground",
       }),
     );
-    scene.renderForSpecs();
-    await Promise.resolve();
-    scene.renderForSpecs();
-    scene.renderForSpecs();
+    await renderUntil(
+      () => world.getTerrainHeight(new Cartesian3(0, 0, 0)) === 48,
+    );
     const center = new Cartesian2(32, 32);
     expect(world.getTerrainHeight(new Cartesian3(0, 0, 0))).toBeCloseTo(48, 5);
     if (scene.pickPositionSupported) {
@@ -1011,18 +1019,21 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     scene = createPlanarScene(world);
     pointCameraAt(world, 64.0);
 
-    scene.renderForSpecs();
-    await Promise.resolve();
-    scene.renderForSpecs();
+    await renderUntil(() => {
+      const root = world._surface._quadtree._tiles.get("0/0/0");
+      return root?.terrainEntry.state === world._surface._terrain.State.READY;
+    });
     expect(world._surface._renderCommands.length).toBe(1);
     expect(world._surface._renderCommands[0].owner).toBe(world._surface);
     expect(world._surface._quadtree._renderTiles[0].key).toBe("0/0/0");
 
-    scene.renderForSpecs();
-    expect(
-      world._surface._quadtree._renderTiles.map((tile) => tile.key),
-    ).toEqual(["0/0/0"]);
-    scene.renderForSpecs();
+    await renderUntil(
+      () =>
+        world._surface._quadtree._renderTiles.length === 4 &&
+        !world._surface._quadtree._renderTiles.some(
+          (tile) => tile.key === "0/0/0",
+        ),
+    );
     const children = world._surface._quadtree._renderTiles;
     expect(children.map((tile) => tile.key)).toEqual([
       "1/0/0",
@@ -1052,7 +1063,11 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     const beforeDirect = { ...world._surface._terrain._debug };
     resolveDeferred(terrainData);
     await Promise.resolve();
-    scene.renderForSpecs();
+    await renderUntil(
+      () =>
+        deferred.terrainEntry.activeSource ===
+        world._surface._terrain.Source.DIRECT,
+    );
     expect(deferred.terrainEntry.activeSource).toBe(
       world._surface._terrain.Source.DIRECT,
     );
@@ -1152,7 +1167,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     let bridge;
     let observedBlockingCoverage = false;
     let observedSettledChildCover = false;
-    for (let i = 0; i < 8; ++i) {
+    await pollToPromise(function () {
       render();
       bridge ??= Array.from(world._surface._quadtree._tiles.values()).find(
         (tile) =>
@@ -1180,8 +1195,8 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       ) {
         observedSettledChildCover = true;
       }
-      await Promise.resolve();
-    }
+      return observedBlockingCoverage && observedSettledChildCover;
+    });
     expect(bridge).toBeDefined();
     expect(observedBlockingCoverage).toBe(true);
     expect(observedSettledChildCover).toBe(true);
@@ -1212,8 +1227,13 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       world._surface._quadtree._renderTiles.map((tile) => tile.key),
     ).not.toContain("0/0/0");
 
-    await Promise.resolve();
-    render();
+    await pollToPromise(function () {
+      render();
+      return (
+        bridge.terrainEntry.activeSource ===
+        world._surface._terrain.Source.DIRECT
+      );
+    });
     expect(bridge.terrainEntry.activeSource).toBe(
       world._surface._terrain.Source.DIRECT,
     );

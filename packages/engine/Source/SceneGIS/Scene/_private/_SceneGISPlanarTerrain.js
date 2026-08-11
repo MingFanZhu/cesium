@@ -11,7 +11,11 @@ import RequestType from "../../../Core/RequestType.js";
 import TileProviderError from "../../../Core/TileProviderError.js";
 import VertexArray from "../../../Renderer/VertexArray.js";
 import upsampleSceneGISPlanarTerrain from "../../Core/_private/_SceneGISPlanarTerrainUpsampler.js";
-import buildSceneGISPlanarTerrainMesh from "../../Renderer/_private/_SceneGISPlanarTerrainMesh.js";
+import terrainWorkerScheduler from "../../Core/_private/_SceneGISPlanarTerrainWorkerScheduler.js";
+import {
+  createSceneGISPlanarTerrainMeshTask,
+  finalizeSceneGISPlanarTerrainMesh,
+} from "../../Renderer/_private/_SceneGISPlanarTerrainMesh.js";
 
 const State = Object.freeze({
   UNLOADED: 0,
@@ -27,6 +31,13 @@ const FallbackState = Object.freeze({
   NONE: 0,
   QUEUED: 1,
   READY: 2,
+  FAILED: 3,
+});
+
+const MeshState = Object.freeze({
+  NONE: 0,
+  LOADING: 1,
+  RECEIVED: 2,
   FAILED: 3,
 });
 
@@ -196,12 +207,22 @@ function createEntry(runtime, tile) {
     mesh: undefined,
     vertexArray: undefined,
     directData: undefined,
+    directMeshState: MeshState.NONE,
+    directMeshResult: undefined,
+    directMeshError: undefined,
+    directMeshToken: 0,
     directContent: undefined,
     availabilityAttempted: false,
     availabilityPromise: undefined,
     knownUnavailable: false,
     fallbackState: FallbackState.NONE,
     fallbackContent: undefined,
+    fallbackData: undefined,
+    fallbackMeshState: MeshState.NONE,
+    fallbackMeshResult: undefined,
+    fallbackMeshError: undefined,
+    fallbackMeshToken: 0,
+    fallbackCandidateSourceRevision: -1,
     fallbackSourceRevision: -1,
     fallbackSourceTile: undefined,
     activeContent: undefined,
@@ -239,9 +260,10 @@ function syncLegacyAliases(entry) {
  * @constructor
  * @private
  */
-function SceneGISPlanarTerrain(forEachTile, getTile) {
+function SceneGISPlanarTerrain(forEachTile, getTile, workerScheduler) {
   this._forEachTile = forEachTile;
   this._getTile = getTile;
+  this._workerScheduler = workerScheduler ?? terrainWorkerScheduler;
   this._provider = undefined;
   this._geometricErrors = undefined;
   this._generation = 0;
@@ -253,6 +275,7 @@ function SceneGISPlanarTerrain(forEachTile, getTile) {
   this._releaseTile = this.releaseTile.bind(this);
   this.State = State;
   this.FallbackState = FallbackState;
+  this.MeshState = MeshState;
   this.Source = Source;
   this._debug = {
     createdEntries: 0,
@@ -270,6 +293,9 @@ function SceneGISPlanarTerrain(forEachTile, getTile) {
     destroyedVertexArrays: 0,
     destroyedIndexBuffers: 0,
     promotions: 0,
+    startedMeshTasks: 0,
+    completedMeshTasks: 0,
+    staleMeshResults: 0,
   };
 }
 
@@ -355,6 +381,8 @@ SceneGISPlanarTerrain.prototype.releaseTile = function (tile) {
     return;
   }
   ++entry.attempt;
+  ++entry.directMeshToken;
+  ++entry.fallbackMeshToken;
   if (entry.request) {
     entry.request.cancel();
     entry.request = undefined;
@@ -365,7 +393,13 @@ SceneGISPlanarTerrain.prototype.releaseTile = function (tile) {
     this._destroyContent(entry.fallbackContent);
   }
   entry.directContent = undefined;
+  entry.directData = undefined;
+  entry.directMeshResult = undefined;
+  entry.directMeshError = undefined;
   entry.fallbackContent = undefined;
+  entry.fallbackData = undefined;
+  entry.fallbackMeshResult = undefined;
+  entry.fallbackMeshError = undefined;
   entry.activeContent = undefined;
   tile.terrainEntry = undefined;
   tile._terrainRelease = undefined;
@@ -385,6 +419,10 @@ SceneGISPlanarTerrain.prototype._fail = function (entry, attempt, details) {
   }
   entry.request = undefined;
   entry.directData = undefined;
+  entry.directMeshState = MeshState.NONE;
+  entry.directMeshResult = undefined;
+  entry.directMeshError = undefined;
+  ++entry.directMeshToken;
   entry.state = State.FAILED;
   const provider = this._provider;
   this._error = reportProviderError(
@@ -463,6 +501,9 @@ SceneGISPlanarTerrain.prototype._request = function (entry) {
       }
       entry.request = undefined;
       entry.directData = terrainData;
+      entry.directMeshState = MeshState.NONE;
+      entry.directMeshResult = undefined;
+      entry.directMeshError = undefined;
       entry.state = State.RECEIVED;
       TileProviderError.reportSuccess(this._error);
     },
@@ -563,6 +604,180 @@ SceneGISPlanarTerrain.prototype._advanceDirect = function (entry, frameNumber) {
   this._request(entry);
 };
 
+SceneGISPlanarTerrain.prototype._startMeshTask = function (
+  tile,
+  entry,
+  terrainData,
+  fallback,
+  sourceRevision,
+) {
+  const stateName = fallback ? "fallbackMeshState" : "directMeshState";
+  if (entry[stateName] !== MeshState.NONE) {
+    return false;
+  }
+  let task;
+  try {
+    task = createSceneGISPlanarTerrainMeshTask(
+      terrainData,
+      tile.extent,
+      this._geometricErrors[tile.level],
+      this._provider.minimumHeight,
+    );
+  } catch (error) {
+    entry[fallback ? "fallbackMeshError" : "directMeshError"] = error;
+    entry[stateName] = MeshState.FAILED;
+    return false;
+  }
+  let promise;
+  try {
+    promise = this._workerScheduler.scheduleCreateHeightmapMesh(
+      task.parameters,
+      task.transferableObjects,
+    );
+  } catch (error) {
+    entry[fallback ? "fallbackMeshError" : "directMeshError"] = error;
+    entry[stateName] = MeshState.FAILED;
+    return false;
+  }
+  if (!defined(promise)) {
+    return false;
+  }
+  if (typeof promise.then !== "function") {
+    entry[fallback ? "fallbackMeshError" : "directMeshError"] =
+      new DeveloperError("The planar terrain mesh task must return a Promise.");
+    entry[stateName] = MeshState.FAILED;
+    return false;
+  }
+
+  const tokenName = fallback ? "fallbackMeshToken" : "directMeshToken";
+  const resultName = fallback ? "fallbackMeshResult" : "directMeshResult";
+  const errorName = fallback ? "fallbackMeshError" : "directMeshError";
+  const token = ++entry[tokenName];
+  const generation = this._generation;
+  entry[stateName] = MeshState.LOADING;
+  ++this._debug.startedMeshTasks;
+  Promise.resolve(promise).then(
+    (result) => {
+      const currentData = fallback ? entry.fallbackData : entry.directData;
+      const stale =
+        this._destroyed ||
+        tile.terrainEntry !== entry ||
+        entry.generation !== generation ||
+        entry[tokenName] !== token ||
+        currentData !== terrainData ||
+        (fallback && entry.fallbackCandidateSourceRevision !== sourceRevision);
+      if (stale) {
+        ++this._debug.staleMeshResults;
+        return;
+      }
+      entry[resultName] = result;
+      entry[errorName] = undefined;
+      entry[stateName] = MeshState.RECEIVED;
+      ++this._debug.completedMeshTasks;
+    },
+    (error) => {
+      if (
+        this._destroyed ||
+        tile.terrainEntry !== entry ||
+        entry.generation !== generation ||
+        entry[tokenName] !== token
+      ) {
+        ++this._debug.staleMeshResults;
+        return;
+      }
+      entry[resultName] = undefined;
+      entry[errorName] = error;
+      entry[stateName] = MeshState.FAILED;
+    },
+  );
+  return true;
+};
+
+SceneGISPlanarTerrain.prototype._startDirectMeshTask = function (tile, entry) {
+  if (
+    entry.state !== State.RECEIVED ||
+    entry.directMeshState !== MeshState.NONE
+  ) {
+    return false;
+  }
+  return this._startMeshTask(tile, entry, entry.directData, false, -1);
+};
+
+SceneGISPlanarTerrain.prototype._startFallbackMeshTask = function (
+  tile,
+  entry,
+) {
+  if (
+    entry.state === State.READY ||
+    entry.state === State.RECEIVED ||
+    entry.fallbackState !== FallbackState.QUEUED
+  ) {
+    return false;
+  }
+  const sourceTile = entry.fallbackSourceTile;
+  const sourceEntry = sourceTile?.terrainEntry;
+  const sourceContent = sourceEntry?.activeContent;
+  if (!sourceContent?.terrainData) {
+    entry.fallbackState = FallbackState.NONE;
+    entry.fallbackSourceTile = undefined;
+    return false;
+  }
+  const sourceRevision = sourceEntry.revision;
+  if (entry.fallbackCandidateSourceRevision !== sourceRevision) {
+    ++entry.fallbackMeshToken;
+    entry.fallbackData = undefined;
+    entry.fallbackMeshResult = undefined;
+    entry.fallbackMeshError = undefined;
+    entry.fallbackMeshState = MeshState.NONE;
+    entry.fallbackCandidateSourceRevision = sourceRevision;
+  }
+  if (!defined(entry.fallbackData)) {
+    try {
+      entry.fallbackData = upsampleSceneGISPlanarTerrain(
+        sourceContent.terrainData,
+        sourceTile.extent,
+        sourceTile,
+        tile.extent,
+        tile,
+      );
+      ++this._debug.createdUpsampledData;
+    } catch (error) {
+      entry.fallbackMeshError = error;
+      entry.fallbackMeshState = MeshState.FAILED;
+      return false;
+    }
+  }
+  return this._startMeshTask(
+    tile,
+    entry,
+    entry.fallbackData,
+    true,
+    sourceRevision,
+  );
+};
+
+SceneGISPlanarTerrain.prototype._consumeMeshFailure = function (entry) {
+  if (entry.directMeshState === MeshState.FAILED) {
+    const error = entry.directMeshError;
+    entry.directMeshState = MeshState.NONE;
+    entry.directMeshError = undefined;
+    this._fail(entry, entry.attempt, error);
+  }
+  if (entry.fallbackMeshState === MeshState.FAILED) {
+    const error = entry.fallbackMeshError;
+    entry.fallbackMeshState = MeshState.NONE;
+    entry.fallbackMeshError = undefined;
+    entry.fallbackData = undefined;
+    entry.fallbackMeshResult = undefined;
+    entry.fallbackState = FallbackState.FAILED;
+    entry.fallbackSourceRevision = entry.fallbackCandidateSourceRevision;
+    entry.fallbackSourceTile = undefined;
+    if (!defined(entry.activeContent)) {
+      this._fail(entry, entry.attempt, error);
+    }
+  }
+};
+
 SceneGISPlanarTerrain.prototype._acquireIndex = function (context, mesh) {
   const key = mesh.topologyKey;
   let shared = this._indexBuffers.get(key);
@@ -590,6 +805,7 @@ SceneGISPlanarTerrain.prototype._createContent = function (
   tile,
   terrainData,
   source,
+  meshResult,
 ) {
   const provider = this._provider;
   if (
@@ -602,12 +818,7 @@ SceneGISPlanarTerrain.prototype._createContent = function (
       "Terrain data must be a supported Heightmap within the provider height range.",
     );
   }
-  const mesh = buildSceneGISPlanarTerrainMesh(
-    terrainData,
-    tile.extent,
-    this._geometricErrors[tile.level],
-    provider.minimumHeight,
-  );
+  const mesh = finalizeSceneGISPlanarTerrainMesh(terrainData, meshResult);
   ++this._debug.createdMeshes;
   const vertexBuffer = Buffer.createVertexBuffer({
     context,
@@ -675,7 +886,10 @@ SceneGISPlanarTerrain.prototype._promoteDirect = function (
   tile,
   entry,
 ) {
-  if (entry.state !== State.RECEIVED) {
+  if (
+    entry.state !== State.RECEIVED ||
+    entry.directMeshState !== MeshState.RECEIVED
+  ) {
     return false;
   }
   try {
@@ -684,9 +898,18 @@ SceneGISPlanarTerrain.prototype._promoteDirect = function (
       tile,
       entry.directData,
       Source.DIRECT,
+      entry.directMeshResult,
     );
     entry.directContent = content;
     entry.state = State.READY;
+    entry.directMeshState = MeshState.NONE;
+    entry.directMeshResult = undefined;
+    ++entry.fallbackMeshToken;
+    entry.fallbackData = undefined;
+    entry.fallbackMeshState = MeshState.NONE;
+    entry.fallbackMeshResult = undefined;
+    entry.fallbackMeshError = undefined;
+    entry.fallbackCandidateSourceRevision = -1;
     const fallbackContent = entry.fallbackContent;
     entry.fallbackContent = undefined;
     entry.fallbackState = FallbackState.NONE;
@@ -748,33 +971,44 @@ SceneGISPlanarTerrain.prototype._promoteFallback = function (
 ) {
   if (
     entry.state === State.READY ||
-    entry.fallbackState !== FallbackState.QUEUED
+    entry.fallbackState !== FallbackState.QUEUED ||
+    entry.fallbackMeshState !== MeshState.RECEIVED
   ) {
     return false;
   }
   const sourceTile = entry.fallbackSourceTile;
   const sourceEntry = sourceTile?.terrainEntry;
-  const sourceContent = sourceEntry?.activeContent;
-  if (!sourceContent?.terrainData) {
+  if (
+    !sourceEntry?.activeContent?.terrainData ||
+    sourceEntry.revision !== entry.fallbackCandidateSourceRevision
+  ) {
+    ++entry.fallbackMeshToken;
+    entry.fallbackData = undefined;
+    entry.fallbackMeshState = MeshState.NONE;
+    entry.fallbackMeshResult = undefined;
     entry.fallbackState = FallbackState.NONE;
     entry.fallbackSourceTile = undefined;
     return false;
   }
   try {
-    const data = upsampleSceneGISPlanarTerrain(
-      sourceContent.terrainData,
-      sourceTile.extent,
-      sourceTile,
-      tile.extent,
+    const data = entry.fallbackData;
+    const content = this._createContent(
+      context,
       tile,
+      data,
+      Source.UPSAMPLED,
+      entry.fallbackMeshResult,
     );
-    ++this._debug.createdUpsampledData;
-    const content = this._createContent(context, tile, data, Source.UPSAMPLED);
     const old = entry.fallbackContent;
     entry.fallbackContent = content;
     entry.fallbackState = FallbackState.READY;
     entry.fallbackSourceRevision = sourceEntry.revision;
     entry.fallbackSourceTile = undefined;
+    entry.fallbackData = undefined;
+    entry.fallbackMeshState = MeshState.NONE;
+    entry.fallbackMeshResult = undefined;
+    entry.fallbackMeshError = undefined;
+    entry.fallbackCandidateSourceRevision = -1;
     this._activate(tile, entry, content);
     this._destroyContent(old);
     ++this._debug.promotions;
@@ -782,6 +1016,11 @@ SceneGISPlanarTerrain.prototype._promoteFallback = function (
     entry.fallbackState = FallbackState.FAILED;
     entry.fallbackSourceRevision = sourceEntry.revision;
     entry.fallbackSourceTile = undefined;
+    entry.fallbackData = undefined;
+    entry.fallbackMeshState = MeshState.NONE;
+    entry.fallbackMeshResult = undefined;
+    entry.fallbackMeshError = undefined;
+    entry.fallbackCandidateSourceRevision = -1;
     if (!defined(entry.activeContent)) {
       this._fail(entry, entry.attempt, error);
     }
@@ -846,7 +1085,7 @@ SceneGISPlanarTerrain.prototype.prepare = function (
     if (
       entry.state === State.RECEIVED &&
       (!entry.directData ||
-        typeof entry.directData._getSample !== "function" ||
+        typeof entry.directData._createMeshTaskPayload !== "function" ||
         entry.directData.minimumHeight < this._provider.minimumHeight ||
         entry.directData.maximumHeight > this._provider.maximumHeight)
     ) {
@@ -858,12 +1097,61 @@ SceneGISPlanarTerrain.prototype.prepare = function (
         ),
       );
     }
+    this._consumeMeshFailure(entry);
   }
   for (const tile of loadTiles) {
     this._queueFallback(tile, tile.terrainEntry);
   }
 
   if (defined(context)) {
+    const blockingFallbackTaskQueue = [];
+    const refreshFallbackTaskQueue = [];
+    const bridgeRefreshFallbackTaskQueue = [];
+    const directTaskQueue = [];
+    for (const tile of loadTiles) {
+      const entry = tile.terrainEntry;
+      if (
+        entry.fallbackState === FallbackState.QUEUED &&
+        entry.fallbackMeshState === MeshState.NONE
+      ) {
+        const currentView = directKeys.has(tile.key);
+        const queue = defined(entry.activeContent)
+          ? currentView
+            ? refreshFallbackTaskQueue
+            : bridgeRefreshFallbackTaskQueue
+          : blockingFallbackTaskQueue;
+        queue.push(tile);
+      }
+      if (
+        directKeys.has(tile.key) &&
+        entry.state === State.RECEIVED &&
+        entry.directMeshState === MeshState.NONE
+      ) {
+        directTaskQueue.push(tile);
+      }
+    }
+    const compare = (left, right) =>
+      left.level - right.level || left.key.localeCompare(right.key);
+    blockingFallbackTaskQueue.sort(compare);
+    directTaskQueue.sort(compare);
+    refreshFallbackTaskQueue.sort(compare);
+    bridgeRefreshFallbackTaskQueue.sort(compare);
+    let taskStarts = 0;
+    const startTasks = (queue, callback) => {
+      for (const tile of queue) {
+        if (taskStarts === 2) {
+          break;
+        }
+        if (callback.call(this, tile, tile.terrainEntry)) {
+          ++taskStarts;
+        }
+      }
+    };
+    startTasks(blockingFallbackTaskQueue, this._startFallbackMeshTask);
+    startTasks(directTaskQueue, this._startDirectMeshTask);
+    startTasks(refreshFallbackTaskQueue, this._startFallbackMeshTask);
+    startTasks(bridgeRefreshFallbackTaskQueue, this._startFallbackMeshTask);
+
     const blockingFallbackQueue = [];
     const refreshFallbackQueue = [];
     const bridgeRefreshFallbackQueue = [];
@@ -879,12 +1167,14 @@ SceneGISPlanarTerrain.prototype.prepare = function (
           : blockingFallbackQueue;
         queue.push(tile);
       }
-      if (directKeys.has(tile.key) && entry.state === State.RECEIVED) {
+      if (
+        directKeys.has(tile.key) &&
+        entry.state === State.RECEIVED &&
+        entry.directMeshState === MeshState.RECEIVED
+      ) {
         directQueue.push(tile);
       }
     }
-    const compare = (left, right) =>
-      left.level - right.level || left.key.localeCompare(right.key);
     blockingFallbackQueue.sort(compare);
     directQueue.sort(compare);
     refreshFallbackQueue.sort(compare);

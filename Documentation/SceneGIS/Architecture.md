@@ -64,9 +64,14 @@ Documentation/SceneGIS/**
 AgentDocs/**
 .scenegis/**
 scripts/scenegis/**
+packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js
 ```
 
 所有权按照“上游基线中是否已经存在该路径”判断，而不是按照当前分支中文件所在目录判断。修改 upstream-owned file 必须登记 SGP；新增 SceneGIS-owned file 不需要 SGP。
+
+`packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js`是ADR-0027批准的唯一特殊Worker entry：
+它不在上游基线中，只负责接入Cesium现有Worker构建链，实际算法继续位于`Source/SceneGIS/**`。该精确例外
+不自动授权其他`Source/Workers`文件；新增entry仍需重新审计、ADR与所有权说明。
 
 ## Agent 协作文档边界
 
@@ -171,17 +176,17 @@ proposed -> active -> retired
 
 当前已确认的构建行为：
 
-| 扩展类型                       | 当前行为                              | 架构要求                                       |
-| ------------------------------ | ------------------------------------- | ---------------------------------------------- |
-| 普通 `Source/SceneGIS/**/*.js` | 自动进入 engine 与根 Cesium barrel    | default export；basename 唯一                  |
-| `Specs/SceneGIS/**/*Spec.js`   | 自动进入 SpecList                     | 镜像源码目录                                   |
-| GLSL                           | 当前主要扫描 `Source/Shaders/**`      | 首次需求时追踪完整 shader 转换链路             |
-| Worker                         | 当前主要扫描 `Source/Workers/**`      | 首次需求时决定输出路径和运行时 URL             |
-| 静态资源、WASM、图片           | 发布复制与测试访问链路不同            | 同时验证 workspace、release、npm 和 Sandcastle |
-| CSS 与 UI                      | engine 与 widgets 规则不同            | UI 保持在 widgets 包边界内                     |
-| 模块副作用                     | 受 tree-shaking 和 `sideEffects` 影响 | 优先显式安装或注册 API                         |
+| 扩展类型                       | 当前行为                                    | 架构要求                                         |
+| ------------------------------ | ------------------------------------------- | ------------------------------------------------ |
+| 普通 `Source/SceneGIS/**/*.js` | 自动进入 engine 与根 Cesium barrel          | default export；basename 唯一                    |
+| `Specs/SceneGIS/**/*Spec.js`   | 自动进入 SpecList                           | 镜像源码目录                                     |
+| GLSL                           | 当前主要扫描 `Source/Shaders/**`            | 首次需求时追踪完整 shader 转换链路               |
+| Worker                         | 扫描 `Source/Workers/**` 并输出多种构建形态 | 每个新入口单独审计 URL、transfer 与 package 边界 |
+| 静态资源、WASM、图片           | 发布复制与测试访问链路不同                  | 同时验证 workspace、release、npm 和 Sandcastle   |
+| CSS 与 UI                      | engine 与 widgets 规则不同                  | UI 保持在 widgets 包边界内                       |
+| 模块副作用                     | 受 tree-shaking 和 `sideEffects` 影响       | 优先显式安装或注册 API                           |
 
-Shader builtin、SceneGIS Worker 输出结构以及严格私有 barrel 当前都是延迟决策，不在没有真实功能和源码证据时预设答案。
+Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前仍是延迟决策，不在没有真实功能和源码证据时预设答案。A4 已批准的唯一 terrain Worker 入口以 ADR-0027 为准。
 
 ## 渲染扩展原则
 
@@ -336,10 +341,29 @@ lighting flag；切换lighting只更新既有DrawCommand的shader/uniform map，
 读取。Single opaque command、normal-render mutation、depth exact-command replay、terrain query与
 resource ownership均保持不变。
 
-当前不增加CPU/vertex normal、normal buffer、Worker、shadow、material或byte budget。Fragment
-normal是per-triangle表现；main-thread LERC decode/mesh只有在可重复profiling证明阻断后，才通过新的
-phase/ADR设计Worker入口、transferable与build/release协议。完整决定见
+T6 lighting 阶段没有增加CPU/vertex normal、normal buffer、Worker、shadow、material或byte budget。
+Fragment normal仍是per-triangle表现；后续A4依据独立profiling与ADR-0027迁移LERC decode和Heightmap
+mesh position generation，不改变lighting contract。T6决定见
 [ADR-0012](Decisions/ADR-0012-planar-terrain-lighting-and-geometric-normals.md)。
+
+### 平面地形 Worker 管线
+
+A4依据同一257×257本地LERC fixture的bounded profiling，把LERC decode与Heightmap regular-grid/skirt
+position generation迁移到一个`SceneGISPlanarTerrainWorker` entry中的两个独立task。Decode task属于provider
+payload边界，mesh task属于generic Heightmap runtime边界；不得合并为携带private prepared mesh的provider结果。
+
+Compressed LERC input、decoded sample output、TerrainData raw buffer的独立clone与mesh position output使用
+transferable。TerrainData-owned原buffer、Request、provider、Credit、World/tile、Context和GPU resource不得转移。
+主线程继续构造/验证TerrainData、preflight Worker result、复用regular-grid indices并在normal render上传GPU。
+
+Mesh task只按既有blocking/direct/refresh优先级在normal render启动，每帧最多两个；Promise completion只发布
+当前attempt/generation的CPU result。Pending task参与`tilesLoaded=false`，GPU promotion仍最多两个，candidate失败
+保留last current。Replacement、eviction、detach和destroy使task token stale；Cesium 1.144 TaskProcessor没有
+per-task abort，已开始task只能完成后丢弃，不能以终止共享Worker伪装取消。
+
+Worker entry由现有`Source/Workers/**`glob自动进入development、release、IIFE inline与npm `Build/Workers`，并
+被普通public barrel排除。A4不修改build/package upstream file；private task/scheduler不构成public API。完整决定见
+[ADR-0027](Decisions/ADR-0027-planar-terrain-worker-tasks-and-delivery.md)。
 
 ### 平面影像运行时
 
@@ -552,7 +576,7 @@ ADR 放在 `Documentation/SceneGIS/Decisions/ADR-####-short-title.md`。首次�
 ## 当前延迟决策
 
 - SceneGIS GLSL 和 `czm_*` builtin 的最终目录与生成方式。
-- SceneGIS Worker 的入口发现、输出目录、URL 和 inline worker 行为。
+- 除 ADR-0027 唯一 terrain entry 外，其他 SceneGIS Worker 的入口、协议与发布行为。
 - 是否从根 JS barrel 严格排除 `_` 私有模块。
 - SceneGIS 静态资源在 workspace、release、npm 和 CDN 中的统一定位方式。
 - 持久视觉基线和性能基线的 CI 执行环境。

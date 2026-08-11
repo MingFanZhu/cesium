@@ -14,6 +14,7 @@ import {
   SceneTransforms,
 } from "../../../index.js";
 import getWebGLStub from "../../../../../Specs/getWebGLStub.js";
+import pollToPromise from "../../../../../Specs/pollToPromise.js";
 import SceneGISPlanarCamera from "../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarCamera.js";
 
 describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
@@ -103,19 +104,26 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
       },
     });
 
-    widget.scene.initializeFrame();
-    widget.scene.render();
-    await Promise.resolve();
     let previousPromotions = world._surface._terrain._debug.promotions;
-    for (let i = 0; i < 8; ++i) {
+    let previousTaskStarts = world._surface._terrain._debug.startedMeshTasks;
+    await pollToPromise(function () {
       widget.scene.initializeFrame();
       widget.scene.render();
       const promotions = world._surface._terrain._debug.promotions;
+      const taskStarts = world._surface._terrain._debug.startedMeshTasks;
       expect(promotions - previousPromotions).toBeLessThanOrEqual(2);
+      expect(taskStarts - previousTaskStarts).toBeLessThanOrEqual(2);
       previousPromotions = promotions;
-      await Promise.resolve();
-    }
+      previousTaskStarts = taskStarts;
+      return (
+        world._surface._quadtree._renderTiles.length === 4 && world.tilesLoaded
+      );
+    });
     const tiles = world._surface._quadtree._renderTiles;
+    expect(world._surface._terrain._debug.startedMeshTasks).toBeGreaterThan(0);
+    expect(world._surface._terrain._debug.completedMeshTasks).toBe(
+      world._surface._terrain._debug.startedMeshTasks,
+    );
     expect(tiles.length).toBe(4);
     expect(
       tiles.every(

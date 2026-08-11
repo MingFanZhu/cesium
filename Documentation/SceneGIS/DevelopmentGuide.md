@@ -377,8 +377,24 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - Real Context Spec至少证明lit/unlit像素不同、terrain/imagery single command、warm allocation收敛、
   multiplier uniform-only、surface下方可见与destroy平衡。Sandcastle使用显式稳定
   `DirectionalLight`，但公网画面只能作为人工best-effort验收。
-- Standard derivatives、automatic light uniforms与ShaderProgram cache是升级检查点。没有可重复的
-  main-thread阻塞证据时保持现有decode/mesh和promotion budget；Worker需要独立phase/ADR。
+- Standard derivatives、automatic light uniforms与ShaderProgram cache是升级检查点。T6当时未迁移
+  decode/mesh；后续A4的Worker边界只按ADR-0027和下节检查，不反向改变lighting contract。
+
+### 平面地形 Worker 检查
+
+- 唯一批准entry为`packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js`；它只包装
+  SceneGIS private handler。不要把terrain算法写入entry，也不要预防性修改`bundleWorkers`或package manifest。
+- `decodeLerc`只transfer provider-owned compressed buffer并返回decoded samples；`createHeightmapMesh`只transfer
+  TerrainData raw buffer的独立clone并返回positions/metadata。TerrainData-owned原buffer、indices、Request、
+  provider和GPU objects不得转移。
+- Worker result必须在主线程按kind、TypedArray、length/count和finite metadata完整preflight；GPU upload、bounds、
+  active switch和LRU仍只能发生在normal render。
+- Mesh task每normal frame最多启动两个，GPU promotion仍最多两个；pending task参与current-view readiness。Flat
+  no-provider path必须保持零Worker creation/task/payload clone。
+- TaskProcessor 1.144没有per-task abort。取消要区分fetch Request cancellation、提交前不再schedule与active late
+  result generation isolation；不得通过destroy共享Worker冒充单tile取消。
+- Focused验证覆盖真实TaskProcessor Worker、LERC/mesh transfer、stale/retry/fallback、depth replay、resource
+  lifecycle、development/release与installed-tarball Worker文件；不增加浏览器/driver大矩阵。
 
 ### 平面 Viewer 集成检查
 

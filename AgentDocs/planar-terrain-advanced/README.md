@@ -7,7 +7,7 @@
 - Planning model: `extension`
 - Active extension plan:
   [总体计划：SceneGIS 平面高级地形](plans/2026-08-10-planar-terrain-advanced-extension.md)
-- Current phase: None（A3 completed；A4 尚未激活）
+- Current phase: None（A4 completed；A5 尚未激活）
 - Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
@@ -42,28 +42,28 @@
   [completed `planar-terrain`](../planar-terrain/README.md) 和
   [completed `planar-content`](../planar-content/README.md)
 - Expected source roots: `packages/engine/Source/SceneGIS/Core`、
-  `packages/engine/Source/SceneGIS/Scene`、`packages/engine/Source/SceneGIS/Renderer`；
-  Shader、Worker 和 build 精确路径延迟到对应 phase 审计
+  `packages/engine/Source/SceneGIS/Scene`、`packages/engine/Source/SceneGIS/Renderer`；A4唯一特殊entry为
+  `packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js`，Shader精确路径延迟到对应phase审计
 - Expected test roots: `packages/engine/Specs/SceneGIS/**`；必要时增加既有 SceneGIS
   Sandcastle/E2E 的最小扩展
 - Sandcastle: 复用并按阶段更新 `scenegis-planar-terrain`；不预先增加重复案例
 - Branch: `feature/planar-terrain-advanced`，基线 checkpoint `14a7206f41`
-- ADR: 继承 ADR-0002、ADR-0004、ADR-0007～ADR-0012；A1-A3 新增
+- ADR: 继承 ADR-0002、ADR-0004、ADR-0007～ADR-0012；A1-A4 新增
   [ADR-0024](../../Documentation/SceneGIS/Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
   [ADR-0025](../../Documentation/SceneGIS/Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)、
-  [ADR-0026](../../Documentation/SceneGIS/Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)
+  [ADR-0026](../../Documentation/SceneGIS/Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)、
+  [ADR-0027](../../Documentation/SceneGIS/Decisions/ADR-0027-planar-terrain-worker-tasks-and-delivery.md)
 - SGP: None planned；若 Shader、Worker 或 build phase 必须修改 upstream-owned file，先建立或
   复用合法 SGP
 
 ## Current handoff
 
-- Current state: A1已在checkpoint `6657aac8fe`完成；A2已在checkpoint `5ff4753579`完成。A3-R001/R002均关闭，
-  Architecture/code review与项目负责人最终Sandcastle人工验收通过；Controller 47/47且
-  zero-upstream/zero-SGP边界保持。
-- Next action: Architecture以本提交形成A3中文checkpoint，再从clean base重新审计并激活A4 Worker phase。
-- Current phase status: None（A3 `completed`）
-- Open discussions: None；A3 public clearance、point-query collision profile与no-sweep边界已由ADR-0026裁决。
-- Unresolved reviews: None；[A3 approved review](reviews/2026-08-11-a3-terrain-clearance-and-penetration-prevention.md)
-  的人工验收门禁已关闭。
-- Known risks: A3使用最近resident terrain，new revision在下一controller update生效；endpoint clearance不承诺
-  continuous sweep或free-look。后续还有Worker构建发布seam、quantized-mesh精度/边界、smooth normal内存和LOD seam。
+- Current state: A1/A2/A3分别在`6657aac8fe`、`5ff4753579`、`c03f7d9a56`完成。A4两个独立Worker task、
+  runtime异步mesh状态与dev/release/package闭环已通过Architecture/code review。
+- Next action: Architecture形成A4中文checkpoint，再从clean base重新审计并激活A5 quantized-mesh phase。
+- Current phase status: None（A4 `completed`）
+- Open discussions: None；A4 task split、transfer/cancel/stale与特殊Worker entry ownership已由ADR-0027裁决。
+- Unresolved reviews: None；
+  [A4 Worker pipeline review](reviews/2026-08-11-a4-terrain-worker-pipeline.md)已`approved`。
+- Known risks: TaskProcessor 1.144没有per-task abort，active stale task只能完成后丢弃；Worker URL/package是高升级
+  敏感面。后续还有quantized-mesh精度/边界、smooth normal内存和LOD seam。

@@ -1,4 +1,3 @@
-import Lerc from "lerc";
 import Credit from "../../Core/Credit.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import Event from "../../Core/Event.js";
@@ -12,6 +11,7 @@ import SceneGISPlanarTerrainData from "./SceneGISPlanarTerrainData.js";
 /* eslint-enable no-unused-vars */
 import SceneGISPlanarHeightmapTerrainData from "./SceneGISPlanarHeightmapTerrainData.js";
 import SceneGISPlanarTilingScheme from "./SceneGISPlanarTilingScheme.js";
+import terrainWorkerScheduler from "./_private/_SceneGISPlanarTerrainWorkerScheduler.js";
 
 function validateSampleDimension(name, value) {
   if (!Number.isSafeInteger(value) || value < 2) {
@@ -163,60 +163,43 @@ function decodeImage(provider, image, level) {
   }
 }
 
-function decodeLerc(provider, arrayBuffer, level) {
-  const decoded = Lerc.decode(arrayBuffer);
-  if (
-    !decoded ||
-    decoded.width !== provider._heightmapWidth ||
-    decoded.height !== provider._heightmapHeight ||
-    !Array.isArray(decoded.pixels) ||
-    decoded.pixels.length !== 1 ||
-    !isNumericTypedArray(decoded.pixels[0])
-  ) {
+function createLercTask(provider, arrayBuffer) {
+  if (!(arrayBuffer instanceof ArrayBuffer)) {
     throw new DeveloperError(
-      "LERC data must contain one numeric band with the configured dimensions.",
+      "The fetched LERC payload must be an ArrayBuffer.",
     );
   }
+  return {
+    parameters: {
+      kind: "decodeLerc",
+      arrayBuffer,
+      width: provider._heightmapWidth,
+      height: provider._heightmapHeight,
+      minimumHeight: provider._minimumHeight,
+      maximumHeight: provider._maximumHeight,
+    },
+    transferableObjects: [arrayBuffer],
+  };
+}
 
-  const samples = decoded.pixels[0];
+function decodeLercResult(provider, result, level) {
+  if (
+    !result ||
+    result.kind !== "decodeLerc" ||
+    result.width !== provider._heightmapWidth ||
+    result.height !== provider._heightmapHeight ||
+    !isNumericTypedArray(result.samples)
+  ) {
+    throw new DeveloperError(
+      "The LERC Worker result must contain one numeric band with the configured dimensions.",
+    );
+  }
+  const samples = result.samples;
   const sampleCount = provider._heightmapWidth * provider._heightmapHeight;
   if (samples.length !== sampleCount) {
     throw new DeveloperError(
-      "The LERC band length must match the configured dimensions.",
+      "The LERC Worker band length must match the configured dimensions.",
     );
-  }
-  const mask = decoded.mask;
-  if (
-    mask !== null &&
-    mask !== undefined &&
-    (!isNumericTypedArray(mask) ||
-      mask.length !== sampleCount ||
-      Array.prototype.some.call(mask, (value) => value === 0))
-  ) {
-    throw new DeveloperError("LERC data must make every height sample valid.");
-  }
-  if (!Array.isArray(decoded.statistics) || decoded.statistics.length !== 1) {
-    throw new DeveloperError("LERC data must contain one statistics record.");
-  }
-  const statistics = decoded.statistics[0];
-  if (
-    !statistics ||
-    !Number.isFinite(statistics.minValue) ||
-    !Number.isFinite(statistics.maxValue) ||
-    statistics.maxValue < statistics.minValue ||
-    statistics.minValue === Number.MAX_VALUE
-  ) {
-    throw new DeveloperError("LERC statistics must describe finite heights.");
-  }
-  const noDataValue = statistics.noDataValue;
-  if (noDataValue !== undefined && !Number.isFinite(noDataValue)) {
-    throw new DeveloperError("LERC noDataValue must be finite when defined.");
-  }
-  for (let i = 0; i < samples.length; ++i) {
-    const value = samples[i];
-    if (!Number.isFinite(value) || value === noDataValue) {
-      throw new DeveloperError("LERC height samples must be finite and valid.");
-    }
   }
   return createTerrainData(provider, samples, level);
 }
@@ -508,11 +491,24 @@ SceneGISPlanarUrlTemplateHeightmapTerrainProvider.prototype.requestTileGeometry 
     if (promise === undefined) {
       return undefined;
     }
-    return Promise.resolve(promise).then((payload) =>
-      this._format === "image"
-        ? decodeImage(this, payload, level)
-        : decodeLerc(this, payload, level),
-    );
+    return Promise.resolve(promise).then((payload) => {
+      if (this._format === "image") {
+        return decodeImage(this, payload, level);
+      }
+      const task = createLercTask(this, payload);
+      const taskPromise = terrainWorkerScheduler.scheduleDecodeLerc(
+        task.parameters,
+        task.transferableObjects,
+      );
+      if (taskPromise === undefined) {
+        throw new DeveloperError(
+          "The LERC Worker task could not be scheduled.",
+        );
+      }
+      return Promise.resolve(taskPromise).then((result) =>
+        decodeLercResult(this, result, level),
+      );
+    });
   };
 
 /**

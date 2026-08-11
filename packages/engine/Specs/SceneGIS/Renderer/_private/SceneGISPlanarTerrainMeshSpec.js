@@ -2,7 +2,11 @@ import {
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
 } from "../../../../index.js";
-import buildSceneGISPlanarTerrainMesh from "../../../../Source/SceneGIS/Renderer/_private/_SceneGISPlanarTerrainMesh.js";
+import processSceneGISPlanarTerrainTask from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js";
+import {
+  createSceneGISPlanarTerrainMeshTask,
+  finalizeSceneGISPlanarTerrainMesh,
+} from "../../../../Source/SceneGIS/Renderer/_private/_SceneGISPlanarTerrainMesh.js";
 
 describe("SceneGIS/Renderer/SceneGISPlanarTerrainMesh", function () {
   const extent = new SceneGISPlanarExtent({
@@ -11,6 +15,22 @@ describe("SceneGIS/Renderer/SceneGISPlanarTerrainMesh", function () {
     maximumX: 20037508.342789244,
     maximumY: 20037508.342789244,
   });
+
+  function buildSceneGISPlanarTerrainMesh(
+    data,
+    tileExtent,
+    error = 0.0,
+    minimum = data?.minimumHeight,
+  ) {
+    const task = createSceneGISPlanarTerrainMeshTask(
+      data,
+      tileExtent,
+      error,
+      minimum,
+    );
+    const result = processSceneGISPlanarTerrainTask(task.parameters, []);
+    return finalizeSceneGISPlanarTerrainMesh(data, result);
+  }
 
   it("builds a north-west row-major non-coplanar mesh with SW-to-NE triangles", function () {
     const data = new SceneGISPlanarHeightmapTerrainData({
@@ -92,6 +112,29 @@ describe("SceneGIS/Renderer/SceneGISPlanarTerrainMesh", function () {
     });
     expect(() =>
       buildSceneGISPlanarTerrainMesh(data, extent),
+    ).toThrowDeveloperError();
+  });
+
+  it("keeps the source buffer owned and rejects malformed Worker output", function () {
+    const source = new Float32Array([10.0, 20.0, 30.0, 40.0]);
+    const data = new SceneGISPlanarHeightmapTerrainData({
+      buffer: source,
+      width: 2,
+      height: 2,
+    });
+    const task = createSceneGISPlanarTerrainMeshTask(data, extent, 1.0, 0.0);
+    expect(task.parameters.buffer).not.toBe(source);
+    expect(Array.from(task.parameters.buffer)).toEqual(Array.from(source));
+    task.parameters.buffer[0] = -100.0;
+    expect(data._getSample(0, 0)).toBe(10.0);
+
+    const result = processSceneGISPlanarTerrainTask(
+      createSceneGISPlanarTerrainMeshTask(data, extent, 1.0, 0.0).parameters,
+      [],
+    );
+    result.positions = new Float32Array(1);
+    expect(() =>
+      finalizeSceneGISPlanarTerrainMesh(data, result),
     ).toThrowDeveloperError();
   });
 });
