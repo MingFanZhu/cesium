@@ -19,7 +19,8 @@
   （`completed`、Architecture focused re-review批准）
 - [A6 平面地形平滑法线与 LOD 光照连续性](2026-08-11-phase-a6-smooth-terrain-normals-and-lod-lighting.md)
   （`completed`、A6-R001/R002关闭并获Architecture focused re-review批准）
-- A7：仅保留 extension plan 中的稳定阶段目标，不提前创建 phase plan。
+- [A7 平面高级地形统一资格与交付](2026-08-11-phase-a7-unified-qualification-and-delivery.md)
+  （`active`、Architecture plan approved；等待Execution）
 
 ## Handoff
 
@@ -41,4 +42,6 @@
   `65/65`、build/release/static/audit通过，pending A6 review已创建。
 - A6首轮review仅提出两个evidence findings。Execution已在既有curved fixture中改为共享边两侧独立candidate
   interpolation，并为synthetic/real Context Quantized路径补齐已知坡面方向、smooth lit pixel与warm identity证据；
-  Architecture独立复跑Worker `8/8`、Widget `2/2`与审计后批准；A6等待形成独立checkpoint。
+  Architecture独立复跑Worker `8/8`、Widget `2/2`与审计后批准；checkpoint为`0009fbd414`。
+- A7已按当前release qualification、Worker/package smoke、terrain Widget与唯一Sandcastle事实完成详细设计。默认
+  product runtime delta为0，只新增一个本地真实Context统一资格case并完成最终交付/人工验收，不增加workflow或重复E2E。

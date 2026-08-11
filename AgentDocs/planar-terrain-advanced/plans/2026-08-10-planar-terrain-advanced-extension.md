@@ -37,7 +37,7 @@
   [ADR-0027：平面地形 Worker 任务与交付协议](../../../Documentation/SceneGIS/Decisions/ADR-0027-planar-terrain-worker-tasks-and-delivery.md)、
   [ADR-0028：坐标系无关的平面 Quantized-mesh Terrain](../../../Documentation/SceneGIS/Decisions/ADR-0028-planar-quantized-mesh-terrain.md)、
   [ADR-0029：平面地形平滑法线与 LOD 光照连续性](../../../Documentation/SceneGIS/Decisions/ADR-0029-planar-smooth-terrain-normals-and-lod-lighting.md)；
-  A7不预判编号和详细实现
+  A7只做统一资格与交付，未改变既有架构契约，因此不新增ADR
 - SGP：当前不新增；若 phase 必须修改 upstream-owned file，先登记或复用合法 SGP
 
 ## 目标
@@ -132,15 +132,16 @@ quantized-mesh；改善地形法线和 LOD 切换的视觉连续性；最后完�
 | A4   | 依据 profiling 建立 LERC decode 与 terrain mesh 的 Worker 管线。                         | A3                              | A3 review、提交；重新测量 decode/mesh blocker并审计 Worker/build/package事实。                    | 获批任务进入 Worker；cancel/stale/error/transfer/destroy与发布闭环；无收益工作不迁移。                  | `completed` | [A4 plan][a4-plan]                                                         |
 | A5   | 增加坐标系无关的 planar quantized-mesh 数据/provider 适配。                              | A4                              | A4 review、提交；选择合法公开或本地fixture并核对格式/许可。                                       | 与 canonical tiling、LOD/fallback/query/pick/resource生命周期闭环；heightmap兼容路径不退化。            | `completed` | [A5 plan][a5-plan]                                                         |
 | A6   | 改善地形法线、跨瓦片及跨 LOD 的光照连续性。                                              | A5                              | A5 review、提交；对实际画面、normal数据和成本进行比较。                                           | 已批准方案显著减少可重复明暗跳变，保持双面/地下、imagery、depth/pick与稳定资源成本。                    | `completed` | [A6 plan][a6-plan]                                                         |
-| A7   | 完成统一性能、发布和真实浏览器/GPU人工验收。                                             | A6                              | A1-A6均review并提交；明确最终案例和最小资格矩阵。                                                 | 导航、模式、Worker、两种terrain格式、光照和生命周期达到整体验收，文档/包/升级清单闭环。                 | `planned`   | 延迟                                                                       |
+| A7   | 完成统一性能、发布和真实浏览器/GPU人工验收。                                             | A6                              | A1-A6均review并提交；明确最终案例和最小资格矩阵。                                                 | 导航、模式、Worker、两种terrain格式、光照和生命周期达到整体验收，文档/包/升级清单闭环。                 | `active`    | [A7 plan][a7-plan]                                                         |
 
-所有 phase 串行执行。总体路线图中的 A7 只表示产品目标和依赖，不授权提前创建实现、Spec、
-Shader、Worker 或 build 修改。
+所有 phase 串行执行。A7已在A6 checkpoint后依据当前源码事实建立独立phase plan；其默认边界是qualification与
+delivery evidence，不授权新增Shader、Worker protocol或build seam。
 
 [a3-plan]: 2026-08-11-phase-a3-terrain-clearance-and-penetration-prevention.md
 [a4-plan]: 2026-08-11-phase-a4-terrain-worker-pipeline.md
 [a5-plan]: 2026-08-11-phase-a5-planar-quantized-mesh.md
 [a6-plan]: 2026-08-11-phase-a6-smooth-terrain-normals-and-lod-lighting.md
+[a7-plan]: 2026-08-11-phase-a7-unified-qualification-and-delivery.md
 
 ## 延迟到 Phase 的决定
 
@@ -321,3 +322,7 @@ Shader、Worker 或 build 修改。
   `8/8`、Widget `2/2`通过；finding标为fixed，等待Architecture focused re-review，A6/extension继续`active`。
 - `2026-08-11`：Architecture focused re-review确认A6-R001/R002关闭，独立复跑Worker `8/8`、Widget `2/2`、
   `git diff --check`与official upstream audit并批准A6。A6改为`completed`，形成独立checkpoint后再激活A7。
+- `2026-08-11`：A6形成独立checkpoint `0009fbd414`。Architecture依据当前P8 qualification、A1～A6 focused
+  Specs、Worker/package smoke与唯一terrain Sandcastle事实激活A7：新增一个本地真实Context统一资格case，采用有限
+  `30` warm frames与`3` churn rounds，复核release/package并保留项目负责人人工验收；不新增workflow、重复E2E或固定
+  跨机器性能阈值。

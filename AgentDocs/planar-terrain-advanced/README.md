@@ -7,8 +7,9 @@
 - Planning model: `extension`
 - Active extension plan:
   [总体计划：SceneGIS 平面高级地形](plans/2026-08-10-planar-terrain-advanced-extension.md)
-- Current phase: None；A6已完成，A7尚未激活
-- Active phase plan: None
+- Current phase: A7 `unified-qualification-and-delivery`
+- Active phase plan:
+  [A7 平面高级地形统一资格与交付](plans/2026-08-11-phase-a7-unified-qualification-and-delivery.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
@@ -60,12 +61,12 @@
 
 ## Current handoff
 
-- Current state: A1-A5均已有独立checkpoint；A6已实现Heightmap/Quantized统一area-weighted oct normals、
+- Current state: A1-A6均已有独立checkpoint；A6已实现Heightmap/Quantized统一area-weighted oct normals、
   two-buffer GPU lifecycle与unlit/geometric/smooth shader variants。六个focused suites unique `65/65`，build/release、
   focused re-review与zero-upstream/zero-SGP审计均通过。
-- Next action: 先形成A6独立本地checkpoint，再依据当前源码事实建立A7统一交付验收phase plan。
-- Current phase status: None；A6 `completed`，A7 `planned`
-- Open discussions: None；normal storage、Worker/GPU ownership、Shader/build边界已由ADR-0029裁决。
+- Next action: Execution按A7 phase plan实现一条本地统一资格case，复核release/package/Sandcastle并停在review gate。
+- Current phase status: A7 `active`
+- Open discussions: None；A7不改变A1～A6架构契约，默认不新增ADR。
 - Unresolved reviews: None；
   [A6 implementation review](reviews/2026-08-11-a6-smooth-terrain-normals-and-lod-lighting.md)已`approved`。
 - Known risks: TaskProcessor 1.144没有per-task abort，active stale task只能完成后丢弃；A6新增2 bytes/vertex
