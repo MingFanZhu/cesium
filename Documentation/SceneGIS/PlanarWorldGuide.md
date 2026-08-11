@@ -102,8 +102,12 @@ terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务
   `viewer.planarCameraController.navigationMode = "underground"`；低层应用可在controller constructor传入。
   切换本身不移动Camera或调用Home，Home也不改mode。
 - Surface模式使用地表上侧的down-looking orbit；underground模式允许地表上侧/down-looking与下侧/
-  up-looking两种orbit。Center target优先actual terrain，缺失时使用resident height或Z=0 fallback；这不等于
-  已有collision、clearance、防穿透、terrain穿越或free-look。
+  up-looking两种orbit，并以纵向中键drag围绕press-time 3D pivot双向穿越。Center target优先actual terrain，
+  缺失时使用resident height或Z=0 fallback。
+- Surface模式默认保持1米`minimumTerrainClearance`。应用可设置任意finite positive米值；setter不移动Camera，
+  下一次controller update按Camera-local resident terrain/Z=0 fallback只向+Z纠正。Underground不执行纠正；
+  terrain降低/provider detach不会向下吸附。该能力是endpoint防穿透；underground crossing仍是固定pivot orbit，
+  不是continuous/swept collision、free-look或terrain following。
 - 独立批量采样使用`SceneGISPlanarTerrainSampler.sampleAtLevel`；它直接访问provider，不读取World
   cache，也不做ancestor/upsample fallback。
 
@@ -123,22 +127,23 @@ request/mesh/GPU资源，但不销毁provider。
 `enableLighting`默认关闭。启用后shader从实际triangle求fragment geometric normal，并消费
 `scene.light`；`lambertDiffuseMultiplier`可调Diffuse强度。它不是smooth vertex lighting，LOD切换可能
 出现三角面明暗变化。自定义planar CRS应显式配置稳定`DirectionalLight`，不要依赖SunLight方向。
-相机位于surface下方是合法状态；underground mode支持该状态下的基础PC orbit，但collision、防穿透、
-显式穿越、free-look与地下材质仍未实现。
+相机位于surface下方只在underground mode中是合法状态；surface mode会在下一次enabled controller update沿+Z
+恢复minimum clearance而不调用Home。Underground可通过中键orbit显式穿越；continuous/swept collision、free-look
+与地下材质仍未实现。
 
 ## 支持矩阵与限制
 
-| 能力        | 当前契约                                                                                          |
-| ----------- | ------------------------------------------------------------------------------------------------- |
-| extent      | 有限、严格正方形、米制、无 wrap                                                                   |
-| scene mode  | 仅 `SCENE3D`                                                                                      |
-| tiling      | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                            |
-| surface     | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                       |
-| imagery     | 同 canonical tiling scheme、无 reprojection、单 pass composition                                  |
-| navigation  | PC pan/rotate/wheel/Home、surface/underground基础orbit；无collision/touch/inertia/flight/tracking |
-| environment | Earth skybox 只能由应用显式提供；不会自动增加 atmosphere                                          |
-| UI          | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                            |
-| unsupported | collision/clamp、terrain crossing/free-look、smooth normals、shadow/material、imagery picking     |
+| 能力        | 当前契约                                                                                                                   |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| extent      | 有限、严格正方形、米制、无 wrap                                                                                            |
+| scene mode  | 仅 `SCENE3D`                                                                                                               |
+| tiling      | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                                                     |
+| surface     | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                                                |
+| imagery     | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                           |
+| navigation  | PC pan/rotate/wheel/Home、surface endpoint clearance、underground双向orbit crossing；无sweep/touch/inertia/flight/tracking |
+| environment | Earth skybox 只能由应用显式提供；不会自动增加 atmosphere                                                                   |
+| UI          | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                     |
+| unsupported | continuous/swept collision、free-look、smooth normals、shadow/material、imagery picking                                    |
 
 ## 性能与调参
 

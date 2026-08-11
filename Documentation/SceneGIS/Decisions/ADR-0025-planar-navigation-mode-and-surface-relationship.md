@@ -12,6 +12,9 @@
   `_syncRig`、center target 与 clamp 永远使用 Z=0 的 A1 保留边界
 - Preserves：public `world.pick`/`pickFromWindowPosition` 的有界 Z=0 语义、A1 gesture anchor
   fallback chain、ControllerHost/Viewer ownership、Home 的 north-up/nadir 语义
+- Successor：
+  [ADR-0026：平面地形净空与防穿透](ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)；
+  它取代A2“不主动纠正Camera”的阶段性边界，保留本ADR的mode owner与两侧profile
 
 ## 上下文与源码事实
 

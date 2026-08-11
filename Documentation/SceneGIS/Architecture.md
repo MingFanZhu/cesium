@@ -293,11 +293,16 @@ resident camera-surface height/Z=0 fallback解析，并在extent clamp时保留t
 `"surface"`，由controller而非World/Scene/Viewer拥有。Viewer应用通过readonly
 `viewer.planarCameraController`设置，不增加Viewer option或mode event。Mode切换必须取消held input，但不移动
 Camera、不调用Home或查询terrain。Observed camera-surface relationship只在controller私有地按resident terrain
-height→Z=0 fallback计算，不能反向推断mode。Surface profile保持上侧/负pitch；underground允许target上下两侧，
-下侧使用镜像正pitch。A2不提供clearance、continuous collision、防穿透、穿越或free-look；这些由A3独立决定。
+height→Z=0 fallback计算，不能反向推断mode。Surface profile保持上侧/负pitch，并以默认1米、finite positive的
+`minimumTerrainClearance`在first update、普通input前后把Camera沿world +Z推到Camera-local resident terrain/Z=0
+fallback之上；terrain降低或detach不向下吸附，正常纠正不调用Home。Underground完全跳过clearance并允许target上下
+两侧，下侧使用镜像正pitch；纵向中键orbit保持press-time完整3D pivot/window anchor，可在above/down与below/up
+之间双向穿越。该保证只覆盖controller update后的endpoint与显式orbit crossing，不承诺continuous/swept
+collision、free-look、角色体积或terrain following。
 完整决定见[ADR-0010](Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)与
 [ADR-0024](Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
-[ADR-0025](Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)。
+[ADR-0025](Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)与
+[ADR-0026](Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)。
 
 ### 平面 URL Heightmap Provider
 

@@ -4,7 +4,10 @@ description: >-
   application-configured generic LERC heightmap provider, stable directional
   geometric lighting, and explicit surface/underground navigation profiles. The
   mountain and mirrored underground views provide deterministic starting poses;
-  Home preserves the selected profile. The public terrain and imagery services are
+  the surface-clearance action demonstrates local vertical push-out without Home,
+  while Home preserves the selected profile. Underground vertical middle-drag
+  orbit crosses the terrain in either direction without becoming free-look or a
+  continuous swept collision system. The public terrain and imagery services are
   best-effort and subject to their CORS, availability, attribution, and usage
   policies. The demo requests only current-view tiles; it does not prefetch, bulk
   download, or prepare offline data. If terrain requests fail, a ready ancestor or

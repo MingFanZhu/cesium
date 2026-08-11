@@ -45,14 +45,24 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainNavigationCesiumWidget", function
   function queueMiddleDrag(start, end) {
     const aggregator = controller._aggregator;
     const key = `${CameraEventType.MIDDLE_DRAG}`;
-    aggregator._isDown[key] = true;
-    aggregator._buttonsDown++;
-    aggregator._pressTime[key] = new Date(1);
-    Cartesian2.clone(start, aggregator._eventStartPosition[key]);
+    if (!aggregator._isDown[key]) {
+      aggregator._isDown[key] = true;
+      aggregator._buttonsDown++;
+      aggregator._pressTime[key] = new Date(1);
+      Cartesian2.clone(start, aggregator._eventStartPosition[key]);
+    }
     Cartesian2.clone(start, aggregator._movement[key].startPosition);
     Cartesian2.clone(end, aggregator._movement[key].endPosition);
     aggregator._update[key] = false;
     Cartesian2.clone(end, aggregator._currentMousePosition);
+  }
+
+  function releaseMiddleDrag() {
+    const aggregator = controller._aggregator;
+    const key = `${CameraEventType.MIDDLE_DRAG}`;
+    aggregator._isDown[key] = false;
+    aggregator._buttonsDown--;
+    aggregator._releaseTime[key] = new Date(2);
   }
 
   beforeEach(function () {
@@ -191,6 +201,48 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainNavigationCesiumWidget", function
 
     widget.removeController(controller);
     controller = undefined;
+    const localSurfaceHeight = world.getTerrainHeight(
+      new Cartesian3(0.0, 0.0, 0.0),
+    );
+    expect(localSurfaceHeight).toBeDefined();
+    scene.camera.setView({
+      destination: new Cartesian3(0.0, 0.0, localSurfaceHeight - 10.0),
+      orientation: {
+        direction: new Cartesian3(0.0, 0.0, -1.0),
+        up: Cartesian3.UNIT_Y,
+      },
+    });
+    controller = new SceneGISPlanarCameraController({
+      world,
+      minimumTerrainClearance: 3.0,
+    });
+    widget.addController(controller);
+    spyOn(controller, "viewHome").and.callThrough();
+    const clearanceDebug = { ...world._surface._terrain._debug };
+    const clearanceCommands = world._surface._renderCommands.slice();
+    controller.firstUpdate(scene, JulianDate.now());
+    expect(scene.camera.positionWC.z).toEqualEpsilon(
+      localSurfaceHeight + 3.0,
+      1e-5,
+    );
+    expect(controller.viewHome).not.toHaveBeenCalled();
+    expect(world._surface._terrain._debug).toEqual(clearanceDebug);
+    expect(world._surface._renderCommands).toEqual(clearanceCommands);
+
+    const beforeClearanceChange = Cartesian3.clone(scene.camera.positionWC);
+    controller.minimumTerrainClearance = 5.0;
+    expect(scene.camera.positionWC).toEqual(beforeClearanceChange);
+    controller.update(scene, JulianDate.now());
+    expect(scene.camera.positionWC.z).toEqualEpsilon(
+      localSurfaceHeight + 5.0,
+      1e-5,
+    );
+    expect(controller.viewHome).not.toHaveBeenCalled();
+    expect(world._surface._terrain._debug).toEqual(clearanceDebug);
+    expect(world._surface._renderCommands).toEqual(clearanceCommands);
+
+    widget.removeController(controller);
+    controller = undefined;
     scene.camera.setView({
       destination: new Cartesian3(0.0, 0.0, -256.0),
       orientation: {
@@ -234,7 +286,8 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainNavigationCesiumWidget", function
     expect(controller._target).toEqualEpsilon(belowTerrainPosition, 5e-3);
     const belowTerrainDebug = { ...world._surface._terrain._debug };
     const belowCommands = world._surface._renderCommands.slice();
-    queueMiddleDrag(center, new Cartesian2(center.x + 4.0, center.y - 3.0));
+    const belowMovementEnd = new Cartesian2(center.x + 4.0, center.y - 3.0);
+    queueMiddleDrag(center, belowMovementEnd);
     controller.update(scene, JulianDate.now());
 
     expect(controller.viewHome).not.toHaveBeenCalled();
@@ -246,6 +299,37 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainNavigationCesiumWidget", function
       center,
       1e-6,
     );
+    const crossingPivot = Cartesian3.clone(controller._rotatePivot);
+    const terrainCalls = terrainPickSpy.calls.count();
+    const aboveMovementEnd = new Cartesian2(
+      belowMovementEnd.x,
+      belowMovementEnd.y + 80.0,
+    );
+    queueMiddleDrag(belowMovementEnd, aboveMovementEnd);
+    controller.update(scene, JulianDate.now());
+    expect(scene.camera.positionWC.z).toBeGreaterThan(crossingPivot.z);
+    expect(scene.camera.directionWC.z).toBeLessThan(0.0);
+    expect(controller._rotatePivot).toEqual(crossingPivot);
+    expect(project(scene, crossingPivot)).toEqualEpsilon(center, 1e-6);
+    expect(terrainPickSpy.calls.count()).toBe(terrainCalls);
+
+    const returnMovementEnd = new Cartesian2(
+      aboveMovementEnd.x,
+      aboveMovementEnd.y - 80.0,
+    );
+    queueMiddleDrag(aboveMovementEnd, returnMovementEnd);
+    controller.update(scene, JulianDate.now());
+    expect(scene.camera.positionWC.z).toBeLessThan(crossingPivot.z);
+    expect(scene.camera.directionWC.z).toBeGreaterThan(0.0);
+    expect(project(scene, crossingPivot)).toEqualEpsilon(center, 1e-6);
+    expect(terrainPickSpy.calls.count()).toBe(terrainCalls);
+
+    releaseMiddleDrag();
+    controller.update(scene, JulianDate.now());
+    queueMiddleDrag(center, new Cartesian2(center.x + 2.0, center.y - 2.0));
+    controller.update(scene, JulianDate.now());
+    expect(scene.camera.positionWC.z).toBeLessThan(controller._rotatePivot.z);
+    expect(controller.viewHome).not.toHaveBeenCalled();
     expect(world._surface._terrain._debug).toEqual(belowTerrainDebug);
     expect(world._surface._renderCommands).toEqual(belowCommands);
   });

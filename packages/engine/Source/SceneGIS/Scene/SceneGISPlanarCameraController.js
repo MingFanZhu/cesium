@@ -18,6 +18,8 @@ const PITCH_ROUND_TRIP_TOLERANCE = CesiumMath.EPSILON10;
 const ROTATE_RATE = Math.PI;
 const MAXIMUM_WHEEL_RATIO = 0.1;
 const WHEEL_ZOOM_RATE = 5.0;
+const DEFAULT_MINIMUM_TERRAIN_CLEARANCE = 1.0;
+const TANGENT_RELEASE_PITCH_EPSILON = CesiumMath.EPSILON6;
 
 const scratchCenter = new Cartesian2();
 const scratchRay = { origin: new Cartesian3(), direction: new Cartesian3() };
@@ -44,6 +46,14 @@ function validateNavigationMode(value) {
   if (value !== "surface" && value !== "underground") {
     throw new DeveloperError(
       'navigationMode must be either "surface" or "underground".',
+    );
+  }
+}
+
+function validateMinimumTerrainClearance(value) {
+  if (!Number.isFinite(value) || value <= 0.0) {
+    throw new DeveloperError(
+      "minimumTerrainClearance must be a finite number greater than 0.0.",
     );
   }
 }
@@ -175,6 +185,40 @@ function translateCamera(camera, translation) {
   );
 }
 
+function applyTerrainClearance(controller, scene) {
+  if (controller._navigationMode === "underground") {
+    return undefined;
+  }
+
+  const worldPose = SceneGISPlanarCamera.getWorldPose(
+    scene.camera,
+    scratchCameraPose,
+  );
+  if (!isFiniteCartesian3(worldPose.position)) {
+    throw new DeveloperError(
+      "The planar camera position must be finite for terrain clearance.",
+    );
+  }
+
+  const surfaceHeight = getCameraSurfaceHeight(controller, worldPose.position);
+  const minimumZ = surfaceHeight + controller._minimumTerrainClearance;
+  const deltaZ = minimumZ - worldPose.position.z;
+  if (!Number.isFinite(minimumZ) || !Number.isFinite(deltaZ)) {
+    throw new DeveloperError(
+      "The planar terrain clearance position is not representable.",
+    );
+  }
+  if (deltaZ <= 0.0) {
+    return surfaceHeight;
+  }
+
+  scratchPoint2.x = 0.0;
+  scratchPoint2.y = 0.0;
+  scratchPoint2.z = deltaZ;
+  translateCamera(scene.camera, scratchPoint2);
+  return surfaceHeight;
+}
+
 function positionForWindowAnchor(
   scene,
   point,
@@ -219,6 +263,66 @@ function positionForWindowAnchor(
   return Cartesian3.subtract(point, scratchPoint2, result);
 }
 
+function normalizeUndergroundTangent(controller, scene) {
+  if (
+    controller._navigationMode !== "underground" ||
+    !controller._rotateActive
+  ) {
+    return;
+  }
+  const worldPose = SceneGISPlanarCamera.getWorldPose(
+    scene.camera,
+    scratchCameraPose,
+  );
+  const tangentTolerance = Math.max(
+    CesiumMath.EPSILON8,
+    Math.abs(controller._rotateDistance) * CesiumMath.EPSILON8,
+  );
+  if (
+    Math.abs(worldPose.position.z - controller._rotatePivot.z) >
+    tangentTolerance
+  ) {
+    return;
+  }
+
+  let side = Math.sign(controller._pitch);
+  if (side === 0) {
+    side = controller._rotatePitchDirection || 1.0;
+  }
+  const normalizedPitch = CesiumMath.clamp(
+    controller._pitch + side * TANGENT_RELEASE_PITCH_EPSILON,
+    MINIMUM_PITCH,
+    MAXIMUM_UNDERGROUND_PITCH,
+  );
+  SceneGISPlanarCamera.getAxes(
+    controller._heading,
+    normalizedPitch,
+    scratchDirection,
+    scratchUp,
+    scratchRight,
+  );
+  positionForWindowAnchor(
+    scene,
+    controller._rotatePivot,
+    controller._rotateWindowAnchor,
+    scratchDirection,
+    scratchUp,
+    scratchRight,
+    controller._rotateDistance,
+    scratchPosition,
+  );
+  if (!isFiniteCartesian3(scratchPosition)) {
+    return;
+  }
+  SceneGISPlanarCamera.setWorldPose(
+    scene.camera,
+    scratchPosition,
+    scratchDirection,
+    scratchUp,
+  );
+  controller._pitch = normalizedPitch;
+}
+
 /**
  * A deterministic mouse camera controller for a {@link SceneGISPlanarWorld}.
  * The caller must disable the legacy controller before registering this
@@ -231,9 +335,11 @@ function positionForWindowAnchor(
  * @param {object} options Object with the following properties:
  * @param {SceneGISPlanarWorld} options.world The live planar world to navigate.
  * @param {"surface"|"underground"} [options.navigationMode="surface"] The side-aware navigation profile.
+ * @param {number} [options.minimumTerrainClearance=1.0] The minimum vertical distance, in meters, maintained above resident terrain in surface mode.
  *
  * @exception {DeveloperError} <code>options.world</code> is missing, has the wrong type, or has been destroyed.
  * @exception {DeveloperError} <code>options.navigationMode</code> is not <code>"surface"</code> or <code>"underground"</code>.
+ * @exception {DeveloperError} <code>options.minimumTerrainClearance</code> is not finite or is not greater than zero.
  *
  * @example
  * widget.scene.screenSpaceCameraController.enableInputs = false;
@@ -256,9 +362,13 @@ function SceneGISPlanarCameraController(options) {
   }
   const navigationMode = options.navigationMode ?? "surface";
   validateNavigationMode(navigationMode);
+  const minimumTerrainClearance =
+    options.minimumTerrainClearance ?? DEFAULT_MINIMUM_TERRAIN_CLEARANCE;
+  validateMinimumTerrainClearance(minimumTerrainClearance);
 
   this._world = options.world;
   this._navigationMode = navigationMode;
+  this._minimumTerrainClearance = minimumTerrainClearance;
   this._enabled = true;
   this._enablePan = true;
   this._enableRotate = true;
@@ -272,6 +382,8 @@ function SceneGISPlanarCameraController(options) {
   this._panAnchor = new Cartesian3();
   this._rotatePivot = new Cartesian3();
   this._rotateWindowAnchor = new Cartesian2();
+  this._rotateDistance = 0.0;
+  this._rotatePitchDirection = 0.0;
   this._zoomAnchor = new Cartesian3();
   this._dragTarget = new Cartesian3();
   this._dragSurfaceHeight = undefined;
@@ -318,6 +430,27 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
       }
       this._navigationMode = value;
       this._clearInputState();
+    },
+  },
+  /**
+   * Gets or sets the minimum vertical distance maintained above resident terrain in surface mode.
+   * Assigning this property does not move the Camera; the new value is applied on the next controller update.
+   *
+   * @memberof SceneGISPlanarCameraController.prototype
+   * @type {number}
+   * @default 1.0
+   * @exception {DeveloperError} The assigned value is not finite or is not greater than zero.
+   */
+  minimumTerrainClearance: {
+    get: function () {
+      return this._minimumTerrainClearance;
+    },
+    set: function (value) {
+      validateMinimumTerrainClearance(value);
+      if (value === this._minimumTerrainClearance) {
+        return;
+      }
+      this._minimumTerrainClearance = value;
     },
   },
   /**
@@ -457,6 +590,7 @@ SceneGISPlanarCameraController.prototype._cancelEvent = function (type) {
 SceneGISPlanarCameraController.prototype._clearInputState = function () {
   this._panActive = false;
   this._rotateActive = false;
+  this._rotatePitchDirection = 0.0;
   this._dragSurfaceHeight = undefined;
   if (defined(this._aggregator)) {
     this._cancelEvent(CameraEventType.LEFT_DRAG);
@@ -569,10 +703,13 @@ SceneGISPlanarCameraController.prototype.disconnectedCallback = function (
 SceneGISPlanarCameraController.prototype._syncRig = function (
   scene,
   allowHome,
+  clearanceSurfaceHeight,
 ) {
   const camera = scene.camera;
   let worldPose = SceneGISPlanarCamera.getWorldPose(camera, scratchCameraPose);
-  let surfaceHeight = getCameraSurfaceHeight(this, worldPose.position);
+  let surfaceHeight = defined(clearanceSurfaceHeight)
+    ? clearanceSurfaceHeight
+    : getCameraSurfaceHeight(this, worldPose.position);
   let target = getUnboundedCenterTarget(
     this,
     scene,
@@ -586,16 +723,13 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
   let negativePitch =
     pose.pitch >= MINIMUM_PITCH - PITCH_ROUND_TRIP_TOLERANCE &&
     pose.pitch <= MAXIMUM_PITCH + PITCH_ROUND_TRIP_TOLERANCE;
-  const positivePitch =
-    pose.pitch >= MINIMUM_UNDERGROUND_PITCH - PITCH_ROUND_TRIP_TOLERANCE &&
-    pose.pitch <= MAXIMUM_UNDERGROUND_PITCH + PITCH_ROUND_TRIP_TOLERANCE;
   let valid =
     defined(target) &&
     pose.valid &&
     Math.abs(pose.roll) <= CesiumMath.EPSILON8 &&
     (this._navigationMode === "surface"
       ? locallyAbove && above && negativePitch
-      : (above && negativePitch) || (below && positivePitch));
+      : (above && pose.pitch < 0.0) || (below && pose.pitch > 0.0));
   if (!valid) {
     if (!allowHome || this._navigationMode === "underground") {
       return false;
@@ -629,11 +763,19 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
     scratchCameraPose,
   );
   const synchronizedBelow = synchronizedWorldPose.position.z < this._target.z;
+  const synchronizedMinimumPitch =
+    this._navigationMode === "underground" || !synchronizedBelow
+      ? MINIMUM_PITCH
+      : MINIMUM_UNDERGROUND_PITCH;
+  const synchronizedMaximumPitch =
+    this._navigationMode === "underground" || synchronizedBelow
+      ? MAXIMUM_UNDERGROUND_PITCH
+      : MAXIMUM_PITCH;
   this._heading = CesiumMath.zeroToTwoPi(synchronizedPose.heading);
   this._pitch = CesiumMath.clamp(
     synchronizedPose.pitch,
-    synchronizedBelow ? MINIMUM_UNDERGROUND_PITCH : MINIMUM_PITCH,
-    synchronizedBelow ? MAXIMUM_UNDERGROUND_PITCH : MAXIMUM_PITCH,
+    synchronizedMinimumPitch,
+    synchronizedMaximumPitch,
   );
   return true;
 };
@@ -653,8 +795,9 @@ SceneGISPlanarCameraController.prototype.firstUpdate = function (scene, time) {
   }
   this._validateScene(scene);
   this._scene = scene;
+  const clearanceSurfaceHeight = applyTerrainClearance(this, scene);
   if (scene.canvas.clientWidth !== 0 && scene.canvas.clientHeight !== 0) {
-    this._syncRig(scene, true);
+    this._syncRig(scene, true, clearanceSurfaceHeight);
   }
   this._clearInputState();
 };
@@ -713,7 +856,8 @@ SceneGISPlanarCameraController.prototype._pan = function (scene, movement) {
 
 SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
   const camera = scene.camera;
-  if (!this._rotateActive) {
+  const starting = !this._rotateActive;
+  if (starting) {
     const start = this._aggregator.getStartMousePosition(
       CameraEventType.MIDDLE_DRAG,
     );
@@ -729,9 +873,9 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     } else {
       Cartesian2.clone(start, this._rotateWindowAnchor);
     }
-    this._rotateActive = true;
     Cartesian3.clone(this._target, this._dragTarget);
     this._dragSurfaceHeight = this._surfaceHeight;
+    this._rotatePitchDirection = 0.0;
   }
   const dx =
     (movement.endPosition.x - movement.startPosition.x) /
@@ -743,18 +887,43 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     camera,
     scratchCameraPose,
   );
+  if (starting) {
+    const oldRay = SceneGISPlanarCamera.getWindowRay(
+      camera,
+      scene.canvas,
+      this._rotateWindowAnchor,
+      scratchRay,
+    );
+    Cartesian3.subtract(worldPose.position, this._rotatePivot, scratchPoint);
+    let distance = Math.hypot(scratchPoint.x, scratchPoint.y, scratchPoint.z);
+    if (!SceneGISPlanarCamera.getFrustumInfo(camera.frustum).perspective) {
+      distance = (this._rotatePivot.z - oldRay.origin.z) / oldRay.direction.z;
+    }
+    if (!Number.isFinite(distance) || distance < 0.0) {
+      return;
+    }
+    this._rotateDistance = distance;
+    this._rotateActive = true;
+  }
   const belowPivot = worldPose.position.z < this._rotatePivot.z;
+  const allowsCrossing = this._navigationMode === "underground";
   if (
-    worldPose.position.z === this._rotatePivot.z ||
-    (belowPivot && this._navigationMode !== "underground")
+    (!allowsCrossing && worldPose.position.z === this._rotatePivot.z) ||
+    (belowPivot && !allowsCrossing)
   ) {
     return;
   }
-  const minimumPitch = belowPivot ? MINIMUM_UNDERGROUND_PITCH : MINIMUM_PITCH;
-  const maximumPitch = belowPivot ? MAXIMUM_UNDERGROUND_PITCH : MAXIMUM_PITCH;
+  const minimumPitch = MINIMUM_PITCH;
+  const maximumPitch = allowsCrossing
+    ? MAXIMUM_UNDERGROUND_PITCH
+    : MAXIMUM_PITCH;
+  const pitchDelta = -dy * ROTATE_RATE;
+  if (pitchDelta !== 0.0) {
+    this._rotatePitchDirection = Math.sign(pitchDelta);
+  }
   this._heading = CesiumMath.zeroToTwoPi(this._heading + dx * ROTATE_RATE);
   this._pitch = CesiumMath.clamp(
-    this._pitch - dy * ROTATE_RATE,
+    this._pitch + pitchDelta,
     minimumPitch,
     maximumPitch,
   );
@@ -765,16 +934,19 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     scratchUp,
     scratchRight,
   );
-  const oldRay = SceneGISPlanarCamera.getWindowRay(
-    camera,
-    scene.canvas,
-    this._rotateWindowAnchor,
-    scratchRay,
-  );
-  Cartesian3.subtract(worldPose.position, this._rotatePivot, scratchPoint);
-  let distance = Math.hypot(scratchPoint.x, scratchPoint.y, scratchPoint.z);
-  if (!SceneGISPlanarCamera.getFrustumInfo(camera.frustum).perspective) {
-    distance = (this._rotatePivot.z - oldRay.origin.z) / oldRay.direction.z;
+  let distance = this._rotateDistance;
+  if (!allowsCrossing) {
+    const oldRay = SceneGISPlanarCamera.getWindowRay(
+      camera,
+      scene.canvas,
+      this._rotateWindowAnchor,
+      scratchRay,
+    );
+    Cartesian3.subtract(worldPose.position, this._rotatePivot, scratchPoint);
+    distance = Math.hypot(scratchPoint.x, scratchPoint.y, scratchPoint.z);
+    if (!SceneGISPlanarCamera.getFrustumInfo(camera.frustum).perspective) {
+      distance = (this._rotatePivot.z - oldRay.origin.z) / oldRay.direction.z;
+    }
   }
   positionForWindowAnchor(
     scene,
@@ -786,9 +958,11 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     distance,
     scratchPosition,
   );
-  const remainsOnPivotSide = belowPivot
-    ? scratchPosition.z < this._rotatePivot.z
-    : scratchPosition.z > this._rotatePivot.z;
+  const remainsOnPivotSide =
+    allowsCrossing ||
+    (belowPivot
+      ? scratchPosition.z < this._rotatePivot.z
+      : scratchPosition.z > this._rotatePivot.z);
   if (!isFiniteCartesian3(scratchPosition) || !remainsOnPivotSide) {
     return;
   }
@@ -798,8 +972,10 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     scratchDirection,
     scratchUp,
   );
-  this._applyTargetClamp(scene, undefined, this._dragTarget.z);
-  Cartesian3.clone(this._target, this._dragTarget);
+  if (!allowsCrossing) {
+    this._applyTargetClamp(scene, undefined, this._dragTarget.z);
+    Cartesian3.clone(this._target, this._dragTarget);
+  }
 };
 
 SceneGISPlanarCameraController.prototype._computeHomeState = function (scene) {
@@ -996,6 +1172,7 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
       "The planar controller must be connected before update.",
     );
   }
+  const clearanceSurfaceHeight = applyTerrainClearance(this, scene);
   const aggregator = this._aggregator;
   if (scene.canvas.clientWidth === 0 || scene.canvas.clientHeight === 0) {
     this._clearInputState();
@@ -1015,12 +1192,16 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
   const leftWillRun = !middleWillRun && leftMoving && this._enablePan;
   const dragStarting =
     (middleWillRun && !this._rotateActive) || (leftWillRun && !this._panActive);
-  const dragRigReady = !dragStarting || this._syncRig(scene, true);
+  const dragRigReady =
+    !dragStarting || this._syncRig(scene, true, clearanceSurfaceHeight);
+  let inputMayMoveCamera = false;
   try {
     if (dragRigReady && middleWillRun) {
+      inputMayMoveCamera = true;
       this._panActive = false;
       this._rotate(scene, aggregator.getMovement(CameraEventType.MIDDLE_DRAG));
     } else if (dragRigReady && leftWillRun) {
+      inputMayMoveCamera = true;
       this._rotateActive = false;
       this._pan(scene, aggregator.getMovement(CameraEventType.LEFT_DRAG));
     }
@@ -1028,8 +1209,9 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
       const dragActive = this._panActive || this._rotateActive;
       const wheelRigReady = dragStarting
         ? dragRigReady
-        : this._syncRig(scene, true);
+        : this._syncRig(scene, true, clearanceSurfaceHeight);
       if (wheelRigReady) {
+        inputMayMoveCamera = true;
         this._zoom(scene, aggregator.getMovement(CameraEventType.WHEEL));
       }
       if (dragActive) {
@@ -1041,7 +1223,11 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
       this._panActive = false;
     }
     if (!aggregator.isButtonDown(CameraEventType.MIDDLE_DRAG)) {
+      normalizeUndergroundTangent(this, scene);
       this._rotateActive = false;
+    }
+    if (inputMayMoveCamera) {
+      applyTerrainClearance(this, scene);
     }
   } finally {
     aggregator.reset();

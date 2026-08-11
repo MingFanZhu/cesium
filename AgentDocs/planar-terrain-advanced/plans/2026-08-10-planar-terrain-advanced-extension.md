@@ -8,7 +8,7 @@
 - 架构评审（Architecture review）：`confirmed`
 - 架构评审人（Architecture reviewer）：项目负责人
 - 创建日期（Created）：`2026-08-10`
-- 更新日期（Updated）：`2026-08-10`
+- 更新日期（Updated）：`2026-08-11`
 - Parent extensions：
   [completed `planar-world`](../../planar-world/README.md)、
   [completed `planar-terrain`](../../planar-terrain/README.md) 和
@@ -17,7 +17,8 @@
   Worker、smooth normal 和 quantized-mesh 统一纳入本后续扩展
 - 相关评审（Related reviews）：
   [A1 approved review](../reviews/2026-08-10-a1-terrain-aware-navigation-anchors.md)、
-  [A2 approved review](../reviews/2026-08-10-a2-navigation-mode-and-surface-relationship.md)
+  [A2 approved review](../reviews/2026-08-10-a2-navigation-mode-and-surface-relationship.md)、
+  [A3 changes-requested review](../reviews/2026-08-11-a3-terrain-clearance-and-penetration-prevention.md)
 - 继承 ADR：
   - [ADR-0002：平面坐标与瓦片寻址契约](../../../Documentation/SceneGIS/Decisions/ADR-0002-planar-coordinate-and-tiling-contract.md)
   - [ADR-0004：平面导航、相机约束与 Surface Picking](../../../Documentation/SceneGIS/Decisions/ADR-0004-planar-navigation-and-picking.md)
@@ -29,8 +30,9 @@
   - [ADR-0012：平面地形基础光照与几何法线](../../../Documentation/SceneGIS/Decisions/ADR-0012-planar-terrain-lighting-and-geometric-normals.md)
 - 新 ADR：
   [ADR-0024：平面地形感知导航锚点](../../../Documentation/SceneGIS/Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
-  [ADR-0025：平面导航模式与相机—地表关系](../../../Documentation/SceneGIS/Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)；
-  A3-A7不预判编号和详细实现
+  [ADR-0025：平面导航模式与相机—地表关系](../../../Documentation/SceneGIS/Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)、
+  [ADR-0026：平面地形净空与防穿透](../../../Documentation/SceneGIS/Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)；
+  A4-A7不预判编号和详细实现
 - SGP：当前不新增；若 phase 必须修改 upstream-owned file，先登记或复用合法 SGP
 
 ## 目标
@@ -121,14 +123,16 @@ quantized-mesh；改善地形法线和 LOD 切换的视觉连续性；最后完�
 | ---- | ---------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------- |
 | A1   | 建立平移、旋转、缩放共享的地形感知导航锚点，修复中键 pivot 与画面/地形不一致。           | 三个 parent extension completed | 总体计划提交；重新审计 controller、four-frustum ray、depth、terrain snapshot 与 input lifecycle。 | 三种 PC gesture 在 flat、terrain、对象遮挡、边界和大坐标下具有已批准锚点语义；public Z=0 picking 不变。 | `completed` | [A1 plan](2026-08-10-phase-a1-terrain-aware-navigation-anchors.md)         |
 | A2   | 建立 surface/underground navigation mode 与 camera-surface relationship 公共或私有契约。 | A1                              | A1 review、提交；重新审计 controller host、Viewer、programmatic camera 与 terrain query。         | 模式、切换、默认值、事件/状态、无 terrain 行为和迁移边界明确并实现；不提前加入完整 collision。          | `completed` | [A2 plan](2026-08-10-phase-a2-navigation-mode-and-surface-relationship.md) |
-| A3   | 实现模式感知的地下导航、碰撞和防穿透。                                                   | A2                              | A2 review、提交；以真实交互问题定义 collision profile。                                           | surface mode 不穿透且不异常复位；underground mode 可从上下两侧浏览；programmatic/input 路径一致。       | `planned`   | 延迟                                                                       |
+| A3   | 实现模式感知的地下导航、碰撞和防穿透。                                                   | A2                              | A2 review、提交；以真实交互问题定义 collision profile。                                           | surface mode 不穿透且不异常复位；underground mode 可从上下两侧浏览；programmatic/input 路径一致。       | `completed` | [A3 plan][a3-plan]                                                         |
 | A4   | 依据 profiling 建立 LERC decode 与 terrain mesh 的 Worker 管线。                         | A3                              | A3 review、提交；重新测量 decode/mesh blocker并审计 Worker/build/package事实。                    | 获批任务进入 Worker；cancel/stale/error/transfer/destroy与发布闭环；无收益工作不迁移。                  | `planned`   | 延迟                                                                       |
 | A5   | 增加坐标系无关的 planar quantized-mesh 数据/provider 适配。                              | A4                              | A4 review、提交；选择合法公开或本地fixture并核对格式/许可。                                       | 与 canonical tiling、LOD/fallback/query/pick/resource生命周期闭环；heightmap兼容路径不退化。            | `planned`   | 延迟                                                                       |
 | A6   | 改善地形法线、跨瓦片及跨 LOD 的光照连续性。                                              | A5                              | A5 review、提交；对实际画面、normal数据和成本进行比较。                                           | 已批准方案显著减少可重复明暗跳变，保持双面/地下、imagery、depth/pick与稳定资源成本。                    | `planned`   | 延迟                                                                       |
 | A7   | 完成统一性能、发布和真实浏览器/GPU人工验收。                                             | A6                              | A1-A6均review并提交；明确最终案例和最小资格矩阵。                                                 | 导航、模式、Worker、两种terrain格式、光照和生命周期达到整体验收，文档/包/升级清单闭环。                 | `planned`   | 延迟                                                                       |
 
-所有 phase 串行执行。总体路线图中的 A3-A7 只表示产品目标和依赖，不授权提前创建实现、Spec、
+所有 phase 串行执行。总体路线图中的 A4-A7 只表示产品目标和依赖，不授权提前创建实现、Spec、
 Shader、Worker 或 build 修改。
+
+[a3-plan]: 2026-08-11-phase-a3-terrain-clearance-and-penetration-prevention.md
 
 ## 延迟到 Phase 的决定
 
@@ -136,7 +140,9 @@ Shader、Worker 或 build 修改。
   gesture-start snapshot、fallback 与 anchor correction 数学。
 - A2已裁决`navigationMode: "surface" | "underground"`、默认surface、同步setter、无Event/Viewer option；
   详细行为见ADR-0025与A2 phase plan。
-- collision clearance、速度/步长、法向选择、边界、穿越检测、恢复策略及 programmatic camera 范围。
+- A3已裁决frame-end Camera-local Z-up clearance、`minimumTerrainClearance`、surface/underground policy与
+  programmatic/input update时序；人工验收后续进一步纳入复用既有中键drag的双向orbit crossing。Continuous
+  sweep、角色体积、free-look、wheel crossing和新event mapping仍不在A3范围。
 - Worker 入口、任务划分、消息 payload、transferable ownership、pool、cancel、输出路径、runtime URL、
   CSP、package 和 build 配置。
 - quantized-mesh 公共类型、metadata/provider、availability、extensions、edge/skirt、normal、水体和
@@ -229,3 +235,28 @@ Shader、Worker 或 build 修改。
   Surface/Underground控件、profile状态和deterministic below/up Underground view；no-embedding gallery discovery与
   Sandcastle build通过。Architecture确认A2-R003关闭，项目负责人随后通过同一页面的surface/underground、平移、
   旋转和缩放人工复测。A2状态改为`completed`并形成独立中文checkpoint；A3尚未激活，extension继续`active`。
+- `2026-08-11`：Architecture形成A2 checkpoint `5ff4753579`，随后重新审计controller update、ControllerHost、
+  resident terrain point query与Cesium globe push-out思想。ADR-0026批准surface mode每次update的Camera-local
+  minimum clearance、只向+Z推开、零Home和underground bypass；明确不把triangle sweep或固定采样放入热路径。
+  A3 phase plan激活并直接派发Execution，预计product只修改SceneGIS-owned controller，zero upstream/zero SGP。
+- `2026-08-11`：Execution完成A3 controller、focused Specs、terrain Sandcastle确定性clearance入口与durable docs。
+  Controller 43/43、terrain-navigation 1/1、navigation 4/4及build/types/docs/tsc通过；A3新增direct cases=3，
+  upstream-owned=0、A3 SGP=0。Architecture独立复跑Controller、real Context、audit与diff check后无阻断finding，
+  A3首轮review通过。项目负责人确认原验收条件后发现underground无法通过gesture换侧；Architecture登记
+  A3-R001并批准以既有中键orbit实现双向穿越。当前handoff为focused implementation/re-review，phase保持active且
+  不得进入A4。
+- `2026-08-11`：Execution完成A3-R001：underground held middle orbit冻结press-time 3D pivot/window anchor/target，
+  允许above/down与below/up双向穿越并通过tangent，surface side lock保持。Controller 45/45、terrain-navigation
+  1/1、navigation 4/4与build通过；finding标为fixed，等待Architecture focused re-review与项目负责人复测。
+- `2026-08-11`：Architecture focused review确认ordinary Perspective双向穿越，但exact tangent release后下一
+  gesture无法重新sync，且Orthographic从tangent继续held movement时orbit distance为`0/0`；登记A3-R002并要求
+  只修复finite distance与release recovery，不扩大为free-look。A3保持active，A4未开始。
+- `2026-08-11`：Execution完成A3-R002：press-time snapshot保存finite orbit distance并供underground held
+  Perspective/Orthographic复用；exact tangent release以有符号`EPSILON6`围绕原pivot/window anchor/distance归一化。
+  Controller 47/47，finding标为fixed，等待Architecture final focused re-review；A3仍active且A4未开始。
+- `2026-08-11`：Architecture独立复跑Controller 47/47、official upstream audit与`git diff --check`并确认
+  A3-R001/R002关闭，A3 review改为`approved`。当前只剩项目负责人在既有terrain Sandcastle完成最终穿越复测；
+  通过前不提交且不进入A4。
+- `2026-08-11`：项目负责人在既有terrain Sandcastle完成最终人工复测，确认underground中键双向穿越、
+  tangent附近release与换侧后pan/rotate/wheel均通过，且surface防穿透保持。A3状态改为`completed`，由本提交形成
+  独立中文checkpoint；A4将在clean base上重新审计后激活。

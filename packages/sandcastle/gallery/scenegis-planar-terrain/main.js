@@ -81,7 +81,10 @@ const navigationStatus = document.querySelector("#navigationStatus");
 function updateNavigationStatus() {
   const mode = viewer.planarCameraController.navigationMode;
   navigationMode.value = mode;
-  navigationStatus.textContent = `Navigation profile: ${mode}.`;
+  navigationStatus.textContent =
+    mode === "underground"
+      ? "Navigation profile: underground; middle-drag vertical orbit crosses the terrain in both directions."
+      : "Navigation profile: surface; local +Z clearance prevents terrain penetration.";
 }
 
 function setNavigationMode(mode) {
@@ -121,6 +124,25 @@ function viewUnderground() {
   viewer.scene.requestRender();
 }
 
+function testSurfaceClearance() {
+  setNavigationMode("surface");
+  const surfaceHeight = world.getTerrainHeight(mountainTarget) ?? 0.0;
+  viewer.scene.camera.setView({
+    destination: new Cesium.Cartesian3(
+      mountainTarget.x,
+      mountainTarget.y,
+      surfaceHeight - 1000.0,
+    ),
+    orientation: {
+      direction: new Cesium.Cartesian3(0.0, 0.8, -0.6),
+      up: new Cesium.Cartesian3(0.0, 0.6, 0.8),
+    },
+  });
+  navigationStatus.textContent =
+    "Navigation profile: surface; local +Z clearance correction queued.";
+  viewer.scene.requestRender();
+}
+
 document
   .querySelector("#lightingToggle")
   .addEventListener("change", (event) => {
@@ -133,6 +155,9 @@ document
 document
   .querySelector("#undergroundView")
   .addEventListener("click", viewUnderground);
+document
+  .querySelector("#surfaceClearance")
+  .addEventListener("click", testSurfaceClearance);
 navigationMode.addEventListener("change", (event) => {
   setNavigationMode(event.target.value);
 });

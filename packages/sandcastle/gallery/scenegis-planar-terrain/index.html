@@ -14,13 +14,17 @@
   </label>
   <button id="mountainView" type="button">Mountain view</button>
   <button id="undergroundView" type="button">Underground view</button>
+  <button id="surfaceClearance" type="button">Surface clearance</button>
   <button id="homeView" type="button">Home</button>
   <span id="navigationStatus">Navigation profile: surface.</span>
   <span id="terrainStatus">Terrain tiles load on demand.</span>
   <span>
-    Surface is the default. Underground view switches profiles and mirrors the
-    mountain view below terrain. Home preserves the current profile. If Surface
-    is selected while below terrain, the next input intentionally returns Home;
-    gesture-based terrain crossing is not supported.
+    Surface is the default and applies local +Z terrain clearance without Home.
+    Underground view switches profiles and mirrors the mountain view below
+    terrain. Surface clearance places a surface-profile Camera below the local
+    terrain so the next controller frame demonstrates push-out. Home preserves
+    the current profile. In Underground, use a vertical middle drag around the
+    selected pivot to cross the terrain in either direction; this is an orbit,
+    not free-look or continuous swept collision.
   </span>
 </div>

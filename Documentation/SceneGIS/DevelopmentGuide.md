@@ -411,9 +411,18 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - `navigationMode`只接受`"surface"`/`"underground"`且默认surface；setter切换必须隔离held input，但不移动
   Camera、调用Home或查询terrain。Viewer通过`planarCameraController`配置，不增加Viewer option或Event。
 - Observed relationship是private resident height→Z=0 fallback，不能自动切mode。Surface只接纳上侧/负pitch；
-  underground接纳上侧/负pitch与下侧/正pitch。Collision、clearance、防穿透、穿越与free-look仍不属于A2。
+  underground接纳上侧/负pitch与下侧/正pitch，并只通过既有中键纵向orbit完成双向穿越。Crossing必须冻结
+  press-time完整3D pivot/window anchor，不重复terrain query、不调用Home或切mode；release后才重新同步新侧。
+- `minimumTerrainClearance`默认1米且只接受finite positive number；setter本身不得移动Camera或查询terrain。
+  Surface在first update与每次enabled update的input前检查Camera-local resident height→Z=0 fallback，并在input可能
+  移动Camera后再检查endpoint；只沿world +Z纠正，不能用Home代替collision，也不能在terrain降低/detach时向下吸附。
+  Underground必须完全跳过clearance query/correction。
+- A3只保证controller update后的point/endpoint clearance与underground中键orbit crossing；不得宣称
+  continuous/swept collision、free-look、角色体积、速度相关采样或terrain following。热路径复用scratch对象，
+  resident query不得推进request/LRU/GPU。
 - Specs至少覆盖source priority、非零正负height、release后重新解析、一个perspective/orthographic
-  representative、大坐标、mode切换、terrain上下两侧，以及真实terrain depth/pivot且runtime零mutation。
+  representative、大坐标、mode切换、terrain上下两侧、programmatic/input/revision clearance、非中心pivot的
+  双向/tangent crossing，以及真实terrain depth/pivot且runtime零mutation。
 
 ### 平面内容实现检查
 
