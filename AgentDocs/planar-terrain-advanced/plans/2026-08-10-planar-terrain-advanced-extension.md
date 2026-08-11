@@ -35,8 +35,9 @@
   [ADR-0025：平面导航模式与相机—地表关系](../../../Documentation/SceneGIS/Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)、
   [ADR-0026：平面地形净空与防穿透](../../../Documentation/SceneGIS/Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)、
   [ADR-0027：平面地形 Worker 任务与交付协议](../../../Documentation/SceneGIS/Decisions/ADR-0027-planar-terrain-worker-tasks-and-delivery.md)、
-  [ADR-0028：坐标系无关的平面 Quantized-mesh Terrain](../../../Documentation/SceneGIS/Decisions/ADR-0028-planar-quantized-mesh-terrain.md)；
-  A6-A7不预判编号和详细实现
+  [ADR-0028：坐标系无关的平面 Quantized-mesh Terrain](../../../Documentation/SceneGIS/Decisions/ADR-0028-planar-quantized-mesh-terrain.md)、
+  [ADR-0029：平面地形平滑法线与 LOD 光照连续性](../../../Documentation/SceneGIS/Decisions/ADR-0029-planar-smooth-terrain-normals-and-lod-lighting.md)；
+  A7不预判编号和详细实现
 - SGP：当前不新增；若 phase 必须修改 upstream-owned file，先登记或复用合法 SGP
 
 ## 目标
@@ -46,7 +47,7 @@
 地下、碰撞与防穿透；把已证明会阻塞主线程的解码和 mesh 工作迁移到 Worker；增加坐标系无关的
 quantized-mesh；改善地形法线和 LOD 切换的视觉连续性；最后完成统一交付与人工验收。
 
-本扩展继续采用 progressive elaboration。总体计划只冻结跨阶段稳定目标、顺序和边界。A6-A7 的
+本扩展继续采用 progressive elaboration。总体计划只冻结跨阶段稳定目标、顺序和边界。A7 的
 公共签名、私有角色、Shader/Worker 文件、build seam、数据布局、性能阈值和精确验证命令，必须在
 对应 phase 真正进入时根据届时源码和测量结果重新设计。
 
@@ -130,15 +131,16 @@ quantized-mesh；改善地形法线和 LOD 切换的视觉连续性；最后完�
 | A3   | 实现模式感知的地下导航、碰撞和防穿透。                                                   | A2                              | A2 review、提交；以真实交互问题定义 collision profile。                                           | surface mode 不穿透且不异常复位；underground mode 可从上下两侧浏览；programmatic/input 路径一致。       | `completed` | [A3 plan][a3-plan]                                                         |
 | A4   | 依据 profiling 建立 LERC decode 与 terrain mesh 的 Worker 管线。                         | A3                              | A3 review、提交；重新测量 decode/mesh blocker并审计 Worker/build/package事实。                    | 获批任务进入 Worker；cancel/stale/error/transfer/destroy与发布闭环；无收益工作不迁移。                  | `completed` | [A4 plan][a4-plan]                                                         |
 | A5   | 增加坐标系无关的 planar quantized-mesh 数据/provider 适配。                              | A4                              | A4 review、提交；选择合法公开或本地fixture并核对格式/许可。                                       | 与 canonical tiling、LOD/fallback/query/pick/resource生命周期闭环；heightmap兼容路径不退化。            | `completed` | [A5 plan][a5-plan]                                                         |
-| A6   | 改善地形法线、跨瓦片及跨 LOD 的光照连续性。                                              | A5                              | A5 review、提交；对实际画面、normal数据和成本进行比较。                                           | 已批准方案显著减少可重复明暗跳变，保持双面/地下、imagery、depth/pick与稳定资源成本。                    | `planned`   | 延迟                                                                       |
+| A6   | 改善地形法线、跨瓦片及跨 LOD 的光照连续性。                                              | A5                              | A5 review、提交；对实际画面、normal数据和成本进行比较。                                           | 已批准方案显著减少可重复明暗跳变，保持双面/地下、imagery、depth/pick与稳定资源成本。                    | `active`    | [A6 plan][a6-plan]                                                         |
 | A7   | 完成统一性能、发布和真实浏览器/GPU人工验收。                                             | A6                              | A1-A6均review并提交；明确最终案例和最小资格矩阵。                                                 | 导航、模式、Worker、两种terrain格式、光照和生命周期达到整体验收，文档/包/升级清单闭环。                 | `planned`   | 延迟                                                                       |
 
-所有 phase 串行执行。总体路线图中的 A6-A7 只表示产品目标和依赖，不授权提前创建实现、Spec、
+所有 phase 串行执行。总体路线图中的 A7 只表示产品目标和依赖，不授权提前创建实现、Spec、
 Shader、Worker 或 build 修改。
 
 [a3-plan]: 2026-08-11-phase-a3-terrain-clearance-and-penetration-prevention.md
 [a4-plan]: 2026-08-11-phase-a4-terrain-worker-pipeline.md
 [a5-plan]: 2026-08-11-phase-a5-planar-quantized-mesh.md
+[a6-plan]: 2026-08-11-phase-a6-smooth-terrain-normals-and-lod-lighting.md
 
 ## 延迟到 Phase 的决定
 
@@ -299,3 +301,9 @@ Shader、Worker 或 build 修改。
 - `2026-08-11`：Architecture focused re-review确认A5-R001～R003关闭，独立复跑Provider 5/5、Worker 7/7、
   terrain runtime 15/15、official upstream audit与`git diff --check`均通过。A5 review改为`approved`、phase改为
   `completed`；形成独立中文checkpoint后再依据当时源码事实激活A6。
+- `2026-08-11`：Architecture形成A5 checkpoint `e7375acf8b`，随后审计Heightmap regular-grid与Quantized
+  surface topology、现有terrain Worker result、双vertex-buffer ownership、`czm_octDecode`/`czm_normal`和
+  private dynamic Surface shader builder。ADR-0029批准两个mesh task统一生成transferable `Uint8x2` oct smooth
+  normals、non-flat smooth与FLAT geometric lit variants，并明确2 bytes/vertex成本及representative而非universal
+  cross-tile/LOD保证。现有builder足以承载，A6不增加`.glsl`/build seam、upstream diff或SGP；A6 plan激活并派发
+  Execution，禁止提前进入A7。

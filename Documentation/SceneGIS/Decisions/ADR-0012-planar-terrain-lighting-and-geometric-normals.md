@@ -8,6 +8,10 @@
 - Related plan：
   `AgentDocs/planar-terrain/plans/2026-08-08-phase-t6-terrain-lighting-and-delivery.md`
 - Related patch：无；T6 只允许修改 SceneGIS-owned files
+- Successor：A6由
+  [ADR-0029](ADR-0029-planar-smooth-terrain-normals-and-lod-lighting.md)
+  部分取代“non-flat terrain只使用fragment geometric normal”的边界；public lighting、Lambert、双面与
+  single-command语义保持不变
 
 ## 上下文与源码事实
 

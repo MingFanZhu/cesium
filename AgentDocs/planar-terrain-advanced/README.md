@@ -7,8 +7,9 @@
 - Planning model: `extension`
 - Active extension plan:
   [总体计划：SceneGIS 平面高级地形](plans/2026-08-10-planar-terrain-advanced-extension.md)
-- Current phase: None；A5 `planar-quantized-mesh` completed，A6尚未激活
-- Active phase plan: None
+- Current phase: A6 `smooth-terrain-normals-and-lod-lighting`
+- Active phase plan:
+  [A6 平面地形平滑法线与 LOD 光照连续性](plans/2026-08-11-phase-a6-smooth-terrain-normals-and-lod-lighting.md)
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
@@ -48,25 +49,26 @@
   Sandcastle/E2E 的最小扩展
 - Sandcastle: 复用并按阶段更新 `scenegis-planar-terrain`；不预先增加重复案例
 - Branch: `feature/planar-terrain-advanced`，基线 checkpoint `14a7206f41`
-- ADR: 继承 ADR-0002、ADR-0004、ADR-0007～ADR-0012；A1-A5 新增
+- ADR: 继承 ADR-0002、ADR-0004、ADR-0007～ADR-0012；A1-A6 新增
   [ADR-0024](../../Documentation/SceneGIS/Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
   [ADR-0025](../../Documentation/SceneGIS/Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)、
   [ADR-0026](../../Documentation/SceneGIS/Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)、
   [ADR-0027](../../Documentation/SceneGIS/Decisions/ADR-0027-planar-terrain-worker-tasks-and-delivery.md)、
-  [ADR-0028](../../Documentation/SceneGIS/Decisions/ADR-0028-planar-quantized-mesh-terrain.md)
+  [ADR-0028](../../Documentation/SceneGIS/Decisions/ADR-0028-planar-quantized-mesh-terrain.md)、
+  [ADR-0029](../../Documentation/SceneGIS/Decisions/ADR-0029-planar-smooth-terrain-normals-and-lod-lighting.md)
 - SGP: None planned；若 Shader、Worker 或 build phase 必须修改 upstream-owned file，先建立或
   复用合法 SGP
 
 ## Current handoff
 
-- Current state: A1/A2/A3分别在`6657aac8fe`、`5ff4753579`、`c03f7d9a56`完成；A4 checkpoint为
-  `bf339ee853`。A5 public Quantized-mesh data/provider、Worker/runtime/query/GPU/package闭环已通过Architecture
-  review，A5-R001～R003全部关闭。
-- Next action: 形成A5独立中文checkpoint；随后重新审计法线/光照源码事实并建立A6 phase plan。
-- Current phase status: None；A5 `completed`
-- Open discussions: None；A5 public/data/provider、triangle child clip、per-tile index和bounded query grid已由ADR-0028裁决。
-- Unresolved reviews: None；
-  [A5 Quantized-mesh review](reviews/2026-08-11-a5-planar-quantized-mesh.md)已`approved`。
-- Known risks: TaskProcessor 1.144没有per-task abort，active stale task只能完成后丢弃；Quantized binary safe parsing、
-  child clip/edge continuity、per-tile index lifecycle与query-grid memory bound是A5重点。后续还有smooth normal内存和
-  LOD seam。
+- Current state: A1-A5均已完成独立checkpoint；A5 checkpoint为`e7375acf8b`。Architecture已重新审计
+  terrain Worker topology、GPU attribute lifecycle、Surface shader builder与build discovery，并由ADR-0029批准
+  Worker生成`Uint8x2` oct smooth normals；A6 phase plan已激活。
+- Next action: Execution按A6 plan实现Heightmap/Quantized统一normal、GPU attribute与geometric/smooth shader variant，
+  完成focused review evidence后停下。
+- Current phase status: A6 `active`
+- Open discussions: None；normal storage、Worker/GPU ownership、Shader/build边界已由ADR-0029裁决。
+- Unresolved reviews: None；A6 review将在Execution ready时创建。
+- Known risks: TaskProcessor 1.144没有per-task abort，active stale task只能完成后丢弃；A6新增2 bytes/vertex
+  normal buffer与第二vertex-buffer lifecycle。Task-local normals不能保证任意独立provider的边界梯度bit-identical，
+  representative cross-tile/LOD continuity与最终人工画面仍是验收重点。
