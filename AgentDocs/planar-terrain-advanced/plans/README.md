@@ -18,7 +18,7 @@
 - [A5 平面 Quantized-mesh Terrain](2026-08-11-phase-a5-planar-quantized-mesh.md)
   （`completed`、Architecture focused re-review批准）
 - [A6 平面地形平滑法线与 LOD 光照连续性](2026-08-11-phase-a6-smooth-terrain-normals-and-lod-lighting.md)
-  （`active`、Architecture自主批准，等待Execution实现）
+  （`completed`、A6-R001/R002关闭并获Architecture focused re-review批准）
 - A7：仅保留 extension plan 中的稳定阶段目标，不提前创建 phase plan。
 
 ## Handoff
@@ -37,4 +37,8 @@
   checkpoint为`e7375acf8b`。
 - A6已重新审计Worker topology、Surface shader builder与GPU lifecycle。ADR-0029批准task-local area-weighted
   smooth normals、transferable `Uint8x2` oct storage、第二vertex buffer及geometric/smooth lit variants；不启用
-  新`.glsl`/build seam，不承诺任意provider边界bit-identical。
+  新`.glsl`/build seam，不承诺任意provider边界bit-identical。Execution现已完成实现：六个focused suites unique
+  `65/65`、build/release/static/audit通过，pending A6 review已创建。
+- A6首轮review仅提出两个evidence findings。Execution已在既有curved fixture中改为共享边两侧独立candidate
+  interpolation，并为synthetic/real Context Quantized路径补齐已知坡面方向、smooth lit pixel与warm identity证据；
+  Architecture独立复跑Worker `8/8`、Widget `2/2`与审计后批准；A6等待形成独立checkpoint。

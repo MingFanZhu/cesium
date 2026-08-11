@@ -124,9 +124,11 @@ upsampled与flat fallback的连续单层coverage，以skirt遮蔽mixed-LOD边缘
 始终共用每tile一个opaque command。Provider replacement、eviction与World destroy释放World拥有的
 request/mesh/GPU资源，但不销毁provider。
 
-`enableLighting`默认关闭。启用后shader从实际triangle求fragment geometric normal，并消费
-`scene.light`；`lambertDiffuseMultiplier`可调Diffuse强度。它不是smooth vertex lighting，LOD切换可能
-出现三角面明暗变化。自定义planar CRS应显式配置稳定`DirectionalLight`，不要依赖SunLight方向。
+`enableLighting`默认关闭。启用后，non-flat Heightmap/Quantized terrain使用Worker按真实surface topology生成的
+area-weighted smooth vertex normals；flat/no-provider与active FLAT fallback继续使用fragment geometric normal。
+`lambertDiffuseMultiplier`可调Diffuse强度。Smooth normals改善同一mesh内共享边和代表性LOD边界连续性，但不保证
+任意独立provider tile的boundary gradient完全一致。自定义planar CRS应显式配置稳定`DirectionalLight`，不要依赖
+SunLight方向。
 相机位于surface下方只在underground mode中是合法状态；surface mode会在下一次enabled controller update沿+Z
 恢复minimum clearance而不调用Home。Underground可通过中键orbit显式穿越；continuous/swept collision、free-look
 与地下材质仍未实现。
@@ -143,11 +145,11 @@ request/mesh/GPU资源，但不销毁provider。
 | navigation  | PC pan/rotate/wheel/Home、surface endpoint clearance、underground双向orbit crossing；无sweep/touch/inertia/flight/tracking |
 | environment | Earth skybox 只能由应用显式提供；不会自动增加 atmosphere                                                                   |
 | UI          | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                     |
-| unsupported | continuous/swept collision、free-look、smooth normals、shadow/material、imagery picking                                    |
+| unsupported | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow/material、imagery picking             |
 
 ## 性能与调参
 
-降低 `maximumScreenSpaceError` 会选择更多 tile；提高 `tileCacheSize` 会保留更多 unprotected tile record。每个 shown imagery layer 会增加 texture/request/cache 成本，但不会增加每个 ideal tile 的 draw command 数。Terrain LERC decode、Heightmap mesh与每帧最多两个promotion当前都在主线程；`enableLighting`增加fragment derivative/Lambert成本但不增加command。调参时同时观察 selected/submitted tile、resident tile、request/texture/binding、mesh/promotion与warm-frame allocation；不要仅用单帧 FPS 推断泄漏或稳定性。
+降低 `maximumScreenSpaceError` 会选择更多 tile；提高 `tileCacheSize` 会保留更多 unprotected tile record。每个 shown imagery layer 会增加 texture/request/cache 成本，但不会增加每个 ideal tile 的 draw command 数。Terrain LERC decode与Heightmap/Quantized mesh在唯一terrain Worker中执行，normal render每帧仍最多启动两个terrain task并promotion两个GPU content。每个non-flat final vertex增加2 bytes oct normal和一个terrain normal vertex buffer；`enableLighting`选择smooth或geometric Lambert variant但不增加command。调参时同时观察 selected/submitted tile、resident tile、request/texture/binding、mesh/promotion与warm-frame allocation；不要仅用单帧 FPS 推断泄漏或稳定性。
 
 release qualification 使用至少 16 个 submitted tiles、bare/双层影像各 120 warm frames、五轮 camera/cache churn、60 次 depth replay，以及重复 Widget/Viewer 生命周期作为确定性门禁。不同机器的 timing 只能作趋势参考。
 

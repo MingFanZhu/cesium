@@ -3,7 +3,7 @@
 ## 元数据
 
 - Plan type：`phase`
-- Status：`active`
+- Status：`completed`
 - Owner role：`execution`
 - Architecture review：`confirmed`
 - Architecture reviewer：Architecture Agent（依据项目负责人授予的后续阶段自主批准权限）
@@ -14,7 +14,8 @@
 - Entry checkpoint：`e7375acf8b57bdeb15ac8fe9ccf53c7a7586d27b`
 - Related decision：
   [ADR-0029](../../../Documentation/SceneGIS/Decisions/ADR-0029-planar-smooth-terrain-normals-and-lod-lighting.md)
-- Related review：None；Execution ready后创建A6 pending review
+- Related review：
+  [A6 implementation review](../reviews/2026-08-11-a6-smooth-terrain-normals-and-lod-lighting.md)（`approved`）
 - Related patch：None planned；预计 upstream-owned files=`0`、A6 SGP=`0`
 
 ## 阶段目标
@@ -189,4 +190,82 @@ E2E、Globe/Viewer/full-repo或driver矩阵；只有实际跨界修改或失败�
 
 ## 偏差与结果
 
-待 Execution 回写。
+### 实际实现与偏差
+
+- Implementation base确认为`bb880b0496e5f9ac71572c723fbfb06cf466e6db`；未新增helper、Worker entry、
+  public API、Shader asset或build seam。
+- Existing `createHeightmapMesh`与`createQuantizedMeshMesh` task都在final surface/skirt positions生成后，使用
+  bounded `Float64Array`累计真实surface triangle的area-weighted normals。Heightmap使用regular-grid实际indices；
+  Quantized使用tile-owned surface indices。退化/无贡献vertex回退`+Z`，skirt duplicate按canonical source edge复制
+  surface normal，skirt triangles不参与累计。
+- Oct encoder只实现本任务需要的numeric L1 projection/fold/byte quantization，并在源码注明参考
+  `Core/AttributeCompression.js`与upstream baseline
+  `6d5d8b1f0725b6f831b336463f4b11c98023427b`。Worker返回独立transferable `Uint8Array`，长度严格为
+  `2 * finalVertexCount`，不转移TerrainData-owned storage。
+- Main-thread mesh finalizer严格验证normal TypedArray、buffer独立性、vertex count与byte length。Terrain content把
+  position/normal vertex buffer、owned/shared index acquisition和VA construction放入同一try/catch；失败只释放实际
+  取得的资源并保留原始异常，replacement/eviction/detach/destroy准确释放两个vertex buffers。
+- Surface shader mode实际为`unlit`、`geometric`、`smooth`；cache key为
+  `layerCount/lighting/normalMode`。Smooth vertex path用`czm_octDecode(normal)`与`czm_normal`输出eye-space normal；
+  flat/no-provider/active FLAT继续derivative geometric normal。Existing DrawCommand只原位切换VA/shader/bounds，
+  imagery composition、single command与depth exact-reference replay未变。
+- Sandcastle未修改：现有terrain页面已有Lighting开关、Mountain view和稳定`DirectionalLight`，足以承担A7最终人工
+  对比；A6不重复增加控件。
+
+### 最终 Source-to-Spec mapping
+
+| Source / role                          | Direct Spec evidence                                                                                                       | Final cases |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------: |
+| `_SceneGISPlanarTerrainWorkerTasks.js` | `SceneGISPlanarTerrainWorkerTasksSpec.js`：两种topology、transfer、skirt copy、CPU continuity与representative tile/LOD边界 |           8 |
+| `_SceneGISPlanarTerrainMesh.js`        | `SceneGISPlanarTerrainMeshSpec.js`：两种mesh output与malformed normal type/length                                          |           6 |
+| `_SceneGISPlanarTerrain.js`            | `SceneGISPlanarTerrainSpec.js`：dual buffers、owned/shared index、index failure rollback、replacement/destroy              |          15 |
+| `_SceneGISPlanarSurfaceShader.js`      | `SceneGISPlanarSurfaceShaderSpec.js`：unlit/geometric/smooth source与normal decode                                         |           4 |
+| `_SceneGISPlanarSurface.js`            | `SceneGISPlanarSurfaceSpec.js`：mode/cache key、FLAT geometric、single command/depth replay                                |          30 |
+| real Context closure                   | `SceneGISPlanarTerrainCesiumWidgetSpec.js`：Heightmap/Quantized smooth、imagery、below、warm/depth/destroy                 |           2 |
+
+六个suite的direct unique aggregate为`65/65`。本阶段新增direct `it` cases=`2`（Worker continuity、Shader smooth
+variant），其余为既有cases扩展A6断言。`includeName SceneGISPlanarSurface`输出`34/34`，其中包含Shader `4`与
+Surface `30`，仅作runner aggregate，不重复计入65。
+
+### 验证矩阵
+
+| Command / evidence                                                                  | Result                                              |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks"`    | Exit 0，`8/8`；Node仅有既有`DEP0060` warning        |
+| `npm run test -- --includeName "SceneGIS/Renderer/SceneGISPlanarTerrainMesh"`       | Exit 0，`6/6`                                       |
+| `npm run test -- --includeName "SceneGIS/Scene/SceneGISPlanarTerrain"`              | Exit 0，`15/15`                                     |
+| `npm run test -- --includeName "SceneGIS/Scene/SceneGISPlanarSurface"`              | Exit 0，aggregate `34/34`（Shader 4 + Surface 30）  |
+| `npm run test -- --includeName "SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget"` | Exit 0，`2/2`；Node仅有既有`DEP0060` warning        |
+| `npm run build`                                                                     | Exit 0                                              |
+| `npm run build-release`                                                             | Exit 0                                              |
+| changed-scope ESLint / Prettier                                                     | Exit 0                                              |
+| affected Documentation / AgentDocs Prettier / Markdownlint                          | Exit 0                                              |
+| `git diff --check`                                                                  | Exit 0（Git仅报告working-tree line-ending notices） |
+| `node scripts/scenegis/audit-upstream-patches.mjs`                                  | Exit 0                                              |
+
+CPU证据中，相邻triangle内部独立插值的decoded smooth candidate angle严格小于同一曲面fixture的per-face angle；
+synthetic Quantized坡面normal为finite unit、world Z向上且与解析方向dot大于`0.998`，解析一致的representative相邻
+tile与parent/four-child world normals dot均大于`0.999`。Worker output与GPU persistent cost均精确
+为每个final vertex `2` bytes；真实Context证明每个non-flat content恰有两个vertex attributes/buffers，20个warm
+frames不新增mesh task、buffer、VA、shader或command，Heightmap与Quantized销毁时两条vertex-buffer路径均平衡。
+
+Architecture首轮review提出A6-R001/R002 focused evidence缺口。Execution只修改既有Worker与Quantized Widget
+fixtures：移除normal self-comparison，改为共享边两侧candidate interpolation；直接decode Quantized已知坡面方向，并在
+同一real Context Quantized scene启用smooth lighting，锁定finite changed pixel与warm identities。Worker `8/8`、Widget
+`2/2`重新通过；Architecture focused re-review确认两项finding均已关闭。Product runtime delta=`0`，direct case
+count仍为`65`。
+
+### Ownership、生成与剩余风险
+
+- Changed product/spec paths全部位于`packages/engine/Source/SceneGIS/**`与`packages/engine/Specs/SceneGIS/**`；
+  upstream-owned files=`0`，A6 SGP=`0`，new `SCENEGIS_PATCH` markers=`0`。
+- `.scenegis/upstream-patches.json`、SGP-0001/0002、唯一Worker entry和build files均unchanged；generated files in
+  status=`0`。A6没有public JSDoc/type变化，因此按phase边界未运行`build-ts`、`build-docs`、`tsc`或package smoke。
+- Remaining risk保持ADR-0029边界：task-local normals不保证任意独立provider tile的gradient bit-identical；极小或
+  退化triangle稳定回退`+Z`。A7仍需项目负责人在真实浏览器/GPU比较smooth/FLAT、LOD切换与地下视角。
+
+### Architecture review result
+
+Architecture focused re-review于`2026-08-11`批准A6。Reviewer独立复跑Worker `8/8`、terrain Widget `2/2`、
+`git diff --check`与official upstream audit，确认A6-R001/R002关闭；upstream-owned files=`0`、A6 SGP=`0`。
+A6至此完成，后续A7不得混入本阶段checkpoint。

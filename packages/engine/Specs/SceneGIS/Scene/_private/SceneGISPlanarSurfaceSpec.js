@@ -1434,6 +1434,8 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     const tile = surface._quadtree._renderTiles[0];
     const command = tile.command;
     const unlitShader = command.shaderProgram;
+    expect(tile._lightingCommandNormalMode).toBe("unlit");
+    expect(surface._shaderPrograms.has("0/0/unlit")).toBe(true);
     const allocationBefore = {
       commands: surface._debug.createdCommands,
       buffers: surface._debug.createdBuffers,
@@ -1447,6 +1449,8 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     const litShader = command.shaderProgram;
     expect(tile.command).toBe(command);
     expect(litShader).not.toBe(unlitShader);
+    expect(tile._lightingCommandNormalMode).toBe("geometric");
+    expect(surface._shaderPrograms.has("0/1/geometric")).toBe(true);
     expect(surface._shaderPrograms.size).toBe(2);
     expect(command.uniformMap.u_lambertDiffuseMultiplier()).toBe(0.9);
     expect(surface._debug.createdCommands).toBe(allocationBefore.commands);

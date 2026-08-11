@@ -334,17 +334,21 @@ pyramid；provider只拥有Resource/config/Event和global Credit reference，glo
 light automatic uniforms，不拥有或销毁`scene.light`。需要稳定方向的应用应显式使用
 `DirectionalLight`，不能为任意planar CRS赋予默认SunLight新的投影语义。
 
-Lit shader从实际render triangle的eye-space position以`dFdx`/`dFdy`计算geometric normal，并用
-Cesium face-forward规则维持双面surface。Base color与所有shown imagery先bottom-to-top单pass合成，
-再统一应用Lambert diffuse、light color和固定`0.3`环境亮度。Shader cache identity包含layer count与
-lighting flag；切换lighting只更新既有DrawCommand的shader/uniform map，multiplier只作为uniform
-读取。Single opaque command、normal-render mutation、depth exact-command replay、terrain query与
-resource ownership均保持不变。
+Lit non-flat terrain使用Worker按真实surface topology累计的area-weighted smooth normals；Heightmap使用
+regular-grid triangle顺序，Quantized mesh使用实际surface indices。Normals编码为每个final vertex 2 bytes的
+transferable `Uint8x2` oct stream；skirt duplicate复制对应surface normal，skirt triangles不参与累计。Vertex
+shader以`czm_octDecode`和`czm_normal`恢复eye-space normal。Flat/no-provider和active `FLAT` fallback继续从
+eye-space position以`dFdx`/`dFdy`计算geometric normal；unlit variant不声明或读取normal attribute。两种lit
+variant都使用Cesium face-forward规则维持双面surface。
 
-T6 lighting 阶段没有增加CPU/vertex normal、normal buffer、Worker、shadow、material或byte budget。
-Fragment normal仍是per-triangle表现；后续A4依据独立profiling与ADR-0027迁移LERC decode和Heightmap
-mesh position generation，不改变lighting contract。T6决定见
-[ADR-0012](Decisions/ADR-0012-planar-terrain-lighting-and-geometric-normals.md)。
+Base color与所有shown imagery先bottom-to-top单pass合成，再统一应用Lambert diffuse、light color和固定`0.3`
+环境亮度。Shader cache identity包含layer count、lighting flag与normal mode；切换lighting只更新既有DrawCommand的
+shader/uniform map，multiplier只作为uniform读取。Single opaque command、normal-render mutation、depth
+exact-command replay、terrain query与resource ownership均保持不变。A6只保证同一mesh共享vertex连续，并以
+representative cross-tile/parent-child fixtures验证边界；不承诺任意独立provider tile的gradient bit-identical，
+也不引入邻居normal registry或cross-fade。基础光照与smooth-normal successor决定分别见
+[ADR-0012](Decisions/ADR-0012-planar-terrain-lighting-and-geometric-normals.md)和
+[ADR-0029](Decisions/ADR-0029-planar-smooth-terrain-normals-and-lod-lighting.md)。
 
 ### 平面地形 Worker 管线
 

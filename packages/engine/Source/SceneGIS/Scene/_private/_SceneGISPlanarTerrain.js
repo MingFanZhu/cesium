@@ -359,7 +359,7 @@ SceneGISPlanarTerrain.prototype._destroyContent = function (content) {
   if (content.vertexArray && !content.vertexArray.isDestroyed()) {
     content.vertexArray.destroy();
     ++this._debug.destroyedVertexArrays;
-    ++this._debug.destroyedVertexBuffers;
+    this._debug.destroyedVertexBuffers += content.vertexBufferCount ?? 1;
     if (content.ownsIndexBuffer) {
       ++this._debug.destroyedIndexBuffers;
       ++this._debug.destroyedOwnedIndexBuffers;
@@ -992,12 +992,19 @@ SceneGISPlanarTerrain.prototype._createContent = function (
   const mesh = finalizeSceneGISPlanarTerrainMesh(terrainData, meshResult);
   ++this._debug.createdMeshes;
   let vertexBuffer;
+  let normalBuffer;
   let shared;
   let vertexArray;
   try {
     vertexBuffer = Buffer.createVertexBuffer({
       context,
       typedArray: mesh.positions,
+      usage: BufferUsage.STATIC_DRAW,
+    });
+    ++this._debug.createdVertexBuffers;
+    normalBuffer = Buffer.createVertexBuffer({
+      context,
+      typedArray: mesh.octEncodedNormals,
       usage: BufferUsage.STATIC_DRAW,
     });
     ++this._debug.createdVertexBuffers;
@@ -1011,6 +1018,13 @@ SceneGISPlanarTerrain.prototype._createContent = function (
           componentDatatype: ComponentDatatype.FLOAT,
           componentsPerAttribute: 3,
         },
+        {
+          index: 1,
+          vertexBuffer: normalBuffer,
+          componentDatatype: ComponentDatatype.UNSIGNED_BYTE,
+          componentsPerAttribute: 2,
+          normalize: false,
+        },
       ],
       indexBuffer: shared.buffer,
     });
@@ -1023,6 +1037,10 @@ SceneGISPlanarTerrain.prototype._createContent = function (
       }
     } else if (shared) {
       this._releaseIndex(mesh.topologyKey);
+    }
+    if (normalBuffer && !normalBuffer.isDestroyed()) {
+      normalBuffer.destroy();
+      ++this._debug.destroyedVertexBuffers;
     }
     if (vertexBuffer && !vertexBuffer.isDestroyed()) {
       vertexBuffer.destroy();
@@ -1039,6 +1057,7 @@ SceneGISPlanarTerrain.prototype._createContent = function (
     vertexArray,
     indexKey: mesh.topologyKey,
     ownsIndexBuffer: shared.owned,
+    vertexBufferCount: 2,
     destroyed: false,
   };
 };

@@ -7,9 +7,8 @@
 - Planning model: `extension`
 - Active extension plan:
   [总体计划：SceneGIS 平面高级地形](plans/2026-08-10-planar-terrain-advanced-extension.md)
-- Current phase: A6 `smooth-terrain-normals-and-lod-lighting`
-- Active phase plan:
-  [A6 平面地形平滑法线与 LOD 光照连续性](plans/2026-08-11-phase-a6-smooth-terrain-normals-and-lod-lighting.md)
+- Current phase: None；A6已完成，A7尚未激活
+- Active phase plan: None
 - Active standalone plan: None
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
@@ -61,14 +60,14 @@
 
 ## Current handoff
 
-- Current state: A1-A5均已完成独立checkpoint；A5 checkpoint为`e7375acf8b`。Architecture已重新审计
-  terrain Worker topology、GPU attribute lifecycle、Surface shader builder与build discovery，并由ADR-0029批准
-  Worker生成`Uint8x2` oct smooth normals；A6 phase plan已激活。
-- Next action: Execution按A6 plan实现Heightmap/Quantized统一normal、GPU attribute与geometric/smooth shader variant，
-  完成focused review evidence后停下。
-- Current phase status: A6 `active`
+- Current state: A1-A5均已有独立checkpoint；A6已实现Heightmap/Quantized统一area-weighted oct normals、
+  two-buffer GPU lifecycle与unlit/geometric/smooth shader variants。六个focused suites unique `65/65`，build/release、
+  focused re-review与zero-upstream/zero-SGP审计均通过。
+- Next action: 先形成A6独立本地checkpoint，再依据当前源码事实建立A7统一交付验收phase plan。
+- Current phase status: None；A6 `completed`，A7 `planned`
 - Open discussions: None；normal storage、Worker/GPU ownership、Shader/build边界已由ADR-0029裁决。
-- Unresolved reviews: None；A6 review将在Execution ready时创建。
+- Unresolved reviews: None；
+  [A6 implementation review](reviews/2026-08-11-a6-smooth-terrain-normals-and-lod-lighting.md)已`approved`。
 - Known risks: TaskProcessor 1.144没有per-task abort，active stale task只能完成后丢弃；A6新增2 bytes/vertex
   normal buffer与第二vertex-buffer lifecycle。Task-local normals不能保证任意独立provider的边界梯度bit-identical，
   representative cross-tile/LOD continuity与最终人工画面仍是验收重点。

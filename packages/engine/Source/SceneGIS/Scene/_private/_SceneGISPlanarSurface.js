@@ -216,19 +216,29 @@ function createResources(surface, context, layerCount) {
   }
 }
 
-function getShaderProgram(surface, context, layerCount, enableLighting) {
-  const key = `${layerCount}/${enableLighting ? 1 : 0}`;
+function getShaderProgram(
+  surface,
+  context,
+  layerCount,
+  enableLighting,
+  normalMode,
+) {
+  const key = `${layerCount}/${enableLighting ? 1 : 0}/${normalMode}`;
   let shader = surface._shaderPrograms.get(key);
   if (!shader) {
     shader = ShaderProgram.fromCache({
       context,
-      vertexShaderSource:
-        SceneGISPlanarSurfaceShader.createVertexShader(enableLighting),
+      vertexShaderSource: SceneGISPlanarSurfaceShader.createVertexShader(
+        enableLighting,
+        normalMode,
+      ),
       fragmentShaderSource: SceneGISPlanarSurfaceShader.createFragmentShader(
         layerCount,
         enableLighting,
+        normalMode,
       ),
-      attributeLocations: { position: 0 },
+      attributeLocations:
+        normalMode === "smooth" ? { position: 0, normal: 1 } : { position: 0 },
     });
     surface._shaderPrograms.set(key, shader);
     ++surface._debug.createdShaders;
@@ -263,11 +273,19 @@ function createUniformMap(surface, tile, layerCount, enableLighting) {
 }
 
 function getCommand(surface, tile, layerCount, enableLighting) {
+  const terrainContent = tile.terrainEntry?.activeContent;
+  const terrainReady = defined(terrainContent?.mesh);
+  const normalMode = enableLighting
+    ? terrainReady
+      ? "smooth"
+      : "geometric"
+    : "unlit";
   const shaderProgram = getShaderProgram(
     surface,
     surface._context,
     layerCount,
     enableLighting,
+    normalMode,
   );
   if (!defined(tile.command)) {
     tile.command = new DrawCommand({
@@ -286,10 +304,12 @@ function getCommand(surface, tile, layerCount, enableLighting) {
     });
     tile._imageryCommandLayerCount = layerCount;
     tile._lightingCommandEnabled = enableLighting;
+    tile._lightingCommandNormalMode = normalMode;
     ++surface._debug.createdCommands;
   } else if (
     tile._imageryCommandLayerCount !== layerCount ||
-    tile._lightingCommandEnabled !== enableLighting
+    tile._lightingCommandEnabled !== enableLighting ||
+    tile._lightingCommandNormalMode !== normalMode
   ) {
     tile.command.shaderProgram = shaderProgram;
     tile.command.uniformMap = createUniformMap(
@@ -300,9 +320,8 @@ function getCommand(surface, tile, layerCount, enableLighting) {
     );
     tile._imageryCommandLayerCount = layerCount;
     tile._lightingCommandEnabled = enableLighting;
+    tile._lightingCommandNormalMode = normalMode;
   }
-  const terrainContent = tile.terrainEntry?.activeContent;
-  const terrainReady = defined(terrainContent?.mesh);
   tile.command.boundingVolume = tile.commandBoundingVolume;
   tile.command.modelMatrix = tile.modelMatrix;
   tile.command.primitiveType = terrainReady

@@ -59,6 +59,9 @@ describe("SceneGIS/Renderer/SceneGISPlanarTerrainMesh", function () {
     expect(mesh.referenceHeight).toBe(20.0);
     expect(mesh.minimumHeight).toBe(-10.0);
     expect(mesh.maximumHeight).toBe(50.0);
+    expect(mesh.octEncodedNormals).toBeInstanceOf(Uint8Array);
+    expect(mesh.octEncodedNormals.length).toBe(mesh.vertexCount * 2);
+    expect(mesh.normalByteLength).toBe(mesh.vertexCount * 2);
   });
 
   it("keeps rectangular and large-offset meshes tile-local and finite", function () {
@@ -138,6 +141,17 @@ describe("SceneGIS/Renderer/SceneGISPlanarTerrainMesh", function () {
     expect(() =>
       finalizeSceneGISPlanarTerrainMesh(data, result),
     ).toThrowDeveloperError();
+
+    for (const invalidNormals of [new Uint16Array(12), new Uint8Array(1)]) {
+      const malformed = processSceneGISPlanarTerrainTask(
+        createSceneGISPlanarTerrainMeshTask(data, extent, 1.0, 0.0).parameters,
+        [],
+      );
+      malformed.octEncodedNormals = invalidNormals;
+      expect(() =>
+        finalizeSceneGISPlanarTerrainMesh(data, malformed),
+      ).toThrowDeveloperError();
+    }
   });
 
   it("builds irregular quantized surface, skirt, owned indices, and bounded query metadata", function () {
@@ -178,6 +192,8 @@ describe("SceneGIS/Renderer/SceneGISPlanarTerrainMesh", function () {
     expect(mesh.referenceHeight).toBe(
       data.minimumHeight * 0.5 + data.maximumHeight * 0.5,
     );
+    expect(mesh.octEncodedNormals).toBeInstanceOf(Uint8Array);
+    expect(mesh.octEncodedNormals.length).toBe(mesh.vertexCount * 2);
 
     const task = createSceneGISPlanarTerrainMeshTask(
       data,

@@ -176,7 +176,7 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     runtime.destroy();
   });
 
-  it("rolls back a quantized vertex buffer when owned index creation fails", function () {
+  it("rolls back quantized position and normal buffers when owned index creation fails", function () {
     const fixture = createFixture();
     const quantizedData = createQuantizedData();
     const runtime = new SceneGISPlanarTerrain((callback) =>
@@ -192,14 +192,21 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
       fixture.provider.minimumHeight,
     );
     const meshResult = processSceneGISPlanarTerrainTask(task.parameters, []);
-    let destroyed = false;
-    const vertexBuffer = {
-      isDestroyed: () => destroyed,
-      destroy: jasmine.createSpy("destroyVertexBuffer").and.callFake(() => {
-        destroyed = true;
-      }),
-    };
-    spyOn(Buffer, "createVertexBuffer").and.returnValue(vertexBuffer);
+    function createBuffer(name) {
+      let destroyed = false;
+      return {
+        isDestroyed: () => destroyed,
+        destroy: jasmine.createSpy(name).and.callFake(() => {
+          destroyed = true;
+        }),
+      };
+    }
+    const positionBuffer = createBuffer("destroyPositionBuffer");
+    const normalBuffer = createBuffer("destroyNormalBuffer");
+    spyOn(Buffer, "createVertexBuffer").and.returnValues(
+      positionBuffer,
+      normalBuffer,
+    );
     const failure = new Error("owned index creation failed");
     spyOn(Buffer, "createIndexBuffer").and.throwError(failure);
     const before = { ...runtime._debug };
@@ -219,12 +226,19 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     }
 
     expect(caught).toBe(failure);
-    expect(vertexBuffer.destroy).toHaveBeenCalledTimes(1);
+    expect(Buffer.createVertexBuffer.calls.argsFor(0)[0].typedArray).toBe(
+      meshResult.positions,
+    );
+    expect(Buffer.createVertexBuffer.calls.argsFor(1)[0].typedArray).toBe(
+      meshResult.octEncodedNormals,
+    );
+    expect(positionBuffer.destroy).toHaveBeenCalledTimes(1);
+    expect(normalBuffer.destroy).toHaveBeenCalledTimes(1);
     expect(runtime._debug.createdVertexBuffers).toBe(
-      before.createdVertexBuffers + 1,
+      before.createdVertexBuffers + 2,
     );
     expect(runtime._debug.destroyedVertexBuffers).toBe(
-      before.destroyedVertexBuffers + 1,
+      before.destroyedVertexBuffers + 2,
     );
     expect(runtime._debug.createdIndexBuffers).toBe(before.createdIndexBuffers);
     expect(runtime._debug.createdOwnedIndexBuffers).toBe(

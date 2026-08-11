@@ -131,7 +131,7 @@ quantized-mesh；改善地形法线和 LOD 切换的视觉连续性；最后完�
 | A3   | 实现模式感知的地下导航、碰撞和防穿透。                                                   | A2                              | A2 review、提交；以真实交互问题定义 collision profile。                                           | surface mode 不穿透且不异常复位；underground mode 可从上下两侧浏览；programmatic/input 路径一致。       | `completed` | [A3 plan][a3-plan]                                                         |
 | A4   | 依据 profiling 建立 LERC decode 与 terrain mesh 的 Worker 管线。                         | A3                              | A3 review、提交；重新测量 decode/mesh blocker并审计 Worker/build/package事实。                    | 获批任务进入 Worker；cancel/stale/error/transfer/destroy与发布闭环；无收益工作不迁移。                  | `completed` | [A4 plan][a4-plan]                                                         |
 | A5   | 增加坐标系无关的 planar quantized-mesh 数据/provider 适配。                              | A4                              | A4 review、提交；选择合法公开或本地fixture并核对格式/许可。                                       | 与 canonical tiling、LOD/fallback/query/pick/resource生命周期闭环；heightmap兼容路径不退化。            | `completed` | [A5 plan][a5-plan]                                                         |
-| A6   | 改善地形法线、跨瓦片及跨 LOD 的光照连续性。                                              | A5                              | A5 review、提交；对实际画面、normal数据和成本进行比较。                                           | 已批准方案显著减少可重复明暗跳变，保持双面/地下、imagery、depth/pick与稳定资源成本。                    | `active`    | [A6 plan][a6-plan]                                                         |
+| A6   | 改善地形法线、跨瓦片及跨 LOD 的光照连续性。                                              | A5                              | A5 review、提交；对实际画面、normal数据和成本进行比较。                                           | 已批准方案显著减少可重复明暗跳变，保持双面/地下、imagery、depth/pick与稳定资源成本。                    | `completed` | [A6 plan][a6-plan]                                                         |
 | A7   | 完成统一性能、发布和真实浏览器/GPU人工验收。                                             | A6                              | A1-A6均review并提交；明确最终案例和最小资格矩阵。                                                 | 导航、模式、Worker、两种terrain格式、光照和生命周期达到整体验收，文档/包/升级清单闭环。                 | `planned`   | 延迟                                                                       |
 
 所有 phase 串行执行。总体路线图中的 A7 只表示产品目标和依赖，不授权提前创建实现、Spec、
@@ -307,3 +307,17 @@ Shader、Worker 或 build 修改。
   normals、non-flat smooth与FLAT geometric lit variants，并明确2 bytes/vertex成本及representative而非universal
   cross-tile/LOD保证。现有builder足以承载，A6不增加`.glsl`/build seam、upstream diff或SGP；A6 plan激活并派发
   Execution，禁止提前进入A7。
+- `2026-08-11`：Architecture完成A6首轮完整diff review，确认Worker normal算法、two-buffer原子ownership、
+  smooth/geometric/unlit shader边界与zero-upstream方向符合ADR-0029；提出两个focused evidence finding：A6-R001
+  不能以同一normal的self-dot冒充跨triangle改善，A6-R002必须直接锁定Quantized normal方向并在既有Widget中执行
+  smooth lighting。A6/extension保持`active`与`changes-requested`，不提交、不push、不进入A7。
+- `2026-08-11`：Execution完成A6 task-local Heightmap/Quantized area-weighted normals、transferable `Uint8x2`
+  oct stream、main-thread preflight、two-buffer GPU lifecycle与unlit/geometric/smooth Surface variants。六个focused
+  suites unique `65/65`，build/release/static/audit通过；upstream-owned=0、A6 SGP=0。Pending review已创建，当前
+  handoff为ready for Architecture/code review；A6/extension保持`active`，不进入A7。
+- `2026-08-11`：Execution focused修复A6-R001/R002且product runtime delta=0：curved fixture在共享边两侧分别
+  插值candidate normals并直接优于per-face angle；synthetic Quantized坡面decode为finite/upward expected normal，
+  existing Quantized Widget同一scene执行smooth lighting并保持warm command/VA/shader/resource identities。Worker
+  `8/8`、Widget `2/2`通过；finding标为fixed，等待Architecture focused re-review，A6/extension继续`active`。
+- `2026-08-11`：Architecture focused re-review确认A6-R001/R002关闭，独立复跑Worker `8/8`、Widget `2/2`、
+  `git diff --check`与official upstream audit并批准A6。A6改为`completed`，形成独立checkpoint后再激活A7。

@@ -1,10 +1,45 @@
 import Lerc from "lerc";
+import AttributeCompression from "../../../../Source/Core/AttributeCompression.js";
+import Cartesian3 from "../../../../Source/Core/Cartesian3.js";
 import Resource from "../../../../Source/Core/Resource.js";
 import TaskProcessor from "../../../../Source/Core/TaskProcessor.js";
 import processSceneGISPlanarTerrainTask from "../../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js";
 
 describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
   let taskProcessor;
+
+  function decodeNormal(mesh, index, result = new Cartesian3()) {
+    return AttributeCompression.octDecode(
+      mesh.octEncodedNormals[index * 2],
+      mesh.octEncodedNormals[index * 2 + 1],
+      result,
+    );
+  }
+
+  function buildHeightmapMesh(samples, width, height, extent) {
+    return processSceneGISPlanarTerrainTask(
+      {
+        kind: "createHeightmapMesh",
+        buffer: new Float32Array(samples),
+        structure: {
+          heightScale: 1.0,
+          heightOffset: 0.0,
+          elementsPerHeight: 1,
+          stride: 1,
+          elementMultiplier: 256.0,
+          isBigEndian: false,
+        },
+        width,
+        height,
+        minimumHeight: Math.min(...samples),
+        maximumHeight: Math.max(...samples),
+        effectiveGeometricError: 1.0,
+        providerMinimumHeight: -100.0,
+        extent,
+      },
+      [],
+    );
+  }
 
   function expectCanonicalSkirt(mesh, edgeLengths, expectedEdges) {
     let skirtOffset = 0;
@@ -113,7 +148,37 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
     expect(result.skirtVertexCount).toBe(8);
     expect(result.skirtMinimumHeight).toBe(-10.0);
     expect(result.indices).toBeUndefined();
-    expect(transferableObjects).toEqual([result.positions.buffer]);
+    expect(result.octEncodedNormals).toBeInstanceOf(Uint8Array);
+    expect(result.octEncodedNormals.length).toBe(result.vertexCount * 2);
+    expect(result.normalByteLength).toBe(result.vertexCount * 2);
+    expect(transferableObjects).toEqual([
+      result.positions.buffer,
+      result.octEncodedNormals.buffer,
+    ]);
+    const edges = [
+      [2, 0],
+      [3, 2],
+      [1, 3],
+      [0, 1],
+    ];
+    let skirtVertex = result.surfaceVertexCount;
+    for (const edge of edges) {
+      for (const source of edge) {
+        expect(
+          Array.from(
+            result.octEncodedNormals.slice(
+              skirtVertex * 2,
+              skirtVertex * 2 + 2,
+            ),
+          ),
+        ).toEqual(
+          Array.from(
+            result.octEncodedNormals.slice(source * 2, source * 2 + 2),
+          ),
+        );
+        ++skirtVertex;
+      }
+    }
   });
 
   it("runs both tasks through the built TaskProcessor Worker with transfer", async function () {
@@ -168,6 +233,8 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
     expect(mesh.positions).toBeInstanceOf(Float32Array);
     expect(mesh.surfaceVertexCount).toBe(257 * 257);
     expect(mesh.positions.buffer.byteLength).toBeGreaterThan(0);
+    expect(mesh.octEncodedNormals).toBeInstanceOf(Uint8Array);
+    expect(mesh.octEncodedNormals.byteLength).toBe(mesh.vertexCount * 2);
 
     await expectAsync(
       taskProcessor.scheduleTask({ kind: "unknown" }),
@@ -292,11 +359,38 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
       transfer,
     );
     expect(mesh.positions).toBeInstanceOf(Float32Array);
+    expect(mesh.octEncodedNormals).toBeInstanceOf(Uint8Array);
+    expect(mesh.octEncodedNormals.length).toBe(mesh.vertexCount * 2);
     expect(mesh.ownsIndices).toBe(true);
     expect(mesh.surfaceIndexCount).toBe(24);
     expect(mesh.queryGridTriangles.length).toBeLessThanOrEqual(64);
     expect(mesh.queryGridOffsets.length).toBe(mesh.queryGridDimension ** 2 + 1);
     expect(transfer).toContain(mesh.indices.buffer);
+    const centerNormal = decodeNormal(mesh, 4);
+    expect(
+      [centerNormal.x, centerNormal.y, centerNormal.z].every(Number.isFinite),
+    ).toBe(true);
+    expect(Cartesian3.magnitude(centerNormal)).toBeCloseTo(1.0, 6);
+    const worldCenterNormal = Cartesian3.normalize(
+      new Cartesian3(
+        centerNormal.x / 256.0,
+        centerNormal.y / 256.0,
+        centerNormal.z,
+      ),
+      new Cartesian3(),
+    );
+    const expectedWorldNormal = Cartesian3.normalize(
+      new Cartesian3(
+        -((8192.0 / 32767.0) * 100.0) / 256.0,
+        -((24576.0 / 32767.0) * 100.0) / 256.0,
+        1.0,
+      ),
+      new Cartesian3(),
+    );
+    expect(worldCenterNormal.z).toBeGreaterThan(0.9);
+    expect(
+      Cartesian3.dot(worldCenterNormal, expectedWorldNormal),
+    ).toBeGreaterThan(0.998);
     expectCanonicalSkirt(
       mesh,
       [3, 3, 3, 3],
@@ -307,6 +401,24 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
         [6, 7, 8],
       ],
     );
+    let skirtVertex = mesh.surfaceVertexCount;
+    for (const edge of [
+      [0, 3, 6],
+      [2, 1, 0],
+      [8, 5, 2],
+      [6, 7, 8],
+    ]) {
+      for (const source of edge) {
+        expect(
+          Array.from(
+            mesh.octEncodedNormals.slice(skirtVertex * 2, skirtVertex * 2 + 2),
+          ),
+        ).toEqual(
+          Array.from(mesh.octEncodedNormals.slice(source * 2, source * 2 + 2)),
+        );
+        ++skirtVertex;
+      }
+    }
 
     const child = processSceneGISPlanarTerrainTask(
       {
@@ -359,5 +471,119 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
     expect(result.indices).toBeInstanceOf(Uint32Array);
     expect(result.surfaceVertexCount).toBe(vertexCount);
     expect(result.ownsIndices).toBe(true);
+  });
+
+  it("smooths shared vertices and preserves representative tile and LOD boundary normals", function () {
+    const curved = buildHeightmapMesh(
+      [0.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0],
+      3,
+      3,
+      { minimumX: -1.0, minimumY: -1.0, maximumX: 1.0, maximumY: 1.0 },
+    );
+    function triangleNormal(i0, i1, i2) {
+      const p0 = Cartesian3.fromArray(
+        curved.positions,
+        i0 * 3,
+        new Cartesian3(),
+      );
+      const p1 = Cartesian3.fromArray(
+        curved.positions,
+        i1 * 3,
+        new Cartesian3(),
+      );
+      const p2 = Cartesian3.fromArray(
+        curved.positions,
+        i2 * 3,
+        new Cartesian3(),
+      );
+      return Cartesian3.normalize(
+        Cartesian3.cross(
+          Cartesian3.subtract(p1, p0, p1),
+          Cartesian3.subtract(p2, p0, p2),
+          p0,
+        ),
+        p0,
+      );
+    }
+    const firstFace = triangleNormal(0, 3, 1);
+    const secondFace = triangleNormal(1, 3, 4);
+    const perFaceJump = Math.acos(
+      Math.max(-1.0, Math.min(1.0, Cartesian3.dot(firstFace, secondFace))),
+    );
+    function interpolateCandidateNormal(indices, weights) {
+      const candidate = new Cartesian3();
+      const weighted = new Cartesian3();
+      for (let i = 0; i < indices.length; ++i) {
+        Cartesian3.multiplyByScalar(
+          decodeNormal(curved, indices[i], weighted),
+          weights[i],
+          weighted,
+        );
+        Cartesian3.add(candidate, weighted, candidate);
+      }
+      return Cartesian3.normalize(candidate, candidate);
+    }
+    const firstCandidate = interpolateCandidateNormal(
+      [0, 3, 1],
+      [0.25, 0.1875, 0.5625],
+    );
+    const secondCandidate = interpolateCandidateNormal(
+      [4, 1, 3],
+      [0.25, 0.5625, 0.1875],
+    );
+    const smoothEdgeJump = Math.acos(
+      Math.max(
+        -1.0,
+        Math.min(1.0, Cartesian3.dot(firstCandidate, secondCandidate)),
+      ),
+    );
+    expect(perFaceJump).toBeGreaterThan(0.1);
+    expect(Cartesian3.magnitude(firstCandidate)).toBeCloseTo(1.0, 6);
+    expect(Cartesian3.magnitude(secondCandidate)).toBeCloseTo(1.0, 6);
+    expect(smoothEdgeJump).toBeGreaterThan(0.0);
+    expect(smoothEdgeJump).toBeLessThan(perFaceJump);
+
+    function buildPlane(extent) {
+      const samples = [];
+      for (let row = 0; row < 3; ++row) {
+        const y =
+          extent.maximumY - (row / 2) * (extent.maximumY - extent.minimumY);
+        for (let column = 0; column < 3; ++column) {
+          const x =
+            extent.minimumX +
+            (column / 2) * (extent.maximumX - extent.minimumX);
+          samples.push(0.25 * x - 0.125 * y);
+        }
+      }
+      return buildHeightmapMesh(samples, 3, 3, extent);
+    }
+    function worldNormal(mesh, index, width) {
+      const normal = decodeNormal(mesh, index);
+      normal.x /= width;
+      normal.y /= width;
+      return Cartesian3.normalize(normal, normal);
+    }
+    const parentExtent = {
+      minimumX: -2.0,
+      minimumY: -2.0,
+      maximumX: 2.0,
+      maximumY: 2.0,
+    };
+    const parent = buildPlane(parentExtent);
+    const reference = worldNormal(parent, 4, 4.0);
+    const childExtents = [
+      { minimumX: -2.0, minimumY: 0.0, maximumX: 0.0, maximumY: 2.0 },
+      { minimumX: 0.0, minimumY: 0.0, maximumX: 2.0, maximumY: 2.0 },
+      { minimumX: -2.0, minimumY: -2.0, maximumX: 0.0, maximumY: 0.0 },
+      { minimumX: 0.0, minimumY: -2.0, maximumX: 2.0, maximumY: 0.0 },
+    ];
+    for (const childExtent of childExtents) {
+      const child = buildPlane(childExtent);
+      for (let i = 0; i < child.surfaceVertexCount; ++i) {
+        expect(
+          Cartesian3.dot(reference, worldNormal(child, i, 2.0)),
+        ).toBeGreaterThan(0.999);
+      }
+    }
   });
 });

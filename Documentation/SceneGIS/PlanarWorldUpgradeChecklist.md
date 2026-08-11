@@ -19,6 +19,11 @@ A5 private quantized terrain tasks仅参考
 `6d5d8b1f0725b6f831b336463f4b11c98023427b`。升级时必须复核delta/zig-zag/high-water decode、edge skirt和direct-child
 triangle clipping；不得引入其Ellipsoid、Cartographic、TerrainEncoding或service metadata语义。
 
+A6 private terrain normal encoder参考`packages/engine/Source/Core/AttributeCompression.js`的oct encoding职责，
+参考baseline同为`6d5d8b1f0725b6f831b336463f4b11c98023427b`。升级时必须复核`czm_octDecode`输入范围、
+`czm_normal`变换、Heightmap/Quantized真实surface topology、skirt duplicate映射、2-byte attribute布局和
+two-vertex-buffer rollback/release；不得引入其无关normal compression API或新的Shader build seam。
+
 本清单用于升级官方 Cesium 基线时复核 SceneGIS Planar World。它不是升级结果，也不能替代 ADR、SGP 和自动化回归。
 
 | 私有依赖或缝隙                                                           | SceneGIS wrapper/owner                                              | 风险   | 升级后必须复核                                                                                                                   |
@@ -40,7 +45,7 @@ triangle clipping；不得引入其Ellipsoid、Cartographic、TerrainEncoding或
 | URL Heightmap image/LERC decode                                          | public planar URL terrain provider                                  | high   | getImagePixels、color-space option、LERC API、boundary samples、ImageBitmap close                                                |
 | planar terrain TaskProcessor Worker                                      | ADR-0027 private scheduler/task + single Worker entry               | high   | task kinds、transfer ownership、result preflight、late generation、worker URL/IIFE/release/tar delivery                          |
 | planar quantized-mesh decode/mesh/upsample                               | ADR-0028 + existing terrain Worker/runtime                          | high   | safe binary bounds、CCW/edge topology、bounded query index、true-triangle child clip、per-tile index ownership                   |
-| standard derivatives、automatic light uniforms与shader variants          | private planar SurfaceShader、World lighting properties             | high   | dFdx/dFdy、face-forward、light uniforms、layer+lighting cache key、uniform-only multiplier                                       |
+| terrain smooth/geometric normals与shader variants                        | Worker mesh tasks、private Terrain/SurfaceShader                    | high   | real topology accumulation、oct decode/normal matrix、skirt copy、two-buffer lifecycle、layer+lighting+mode cache key            |
 | automatic exports/types/JSDoc/package layout                             | public SceneGIS engine/widgets types                                | medium | workspace and installed tarball ESM/CJS where supported、root/types/API visibility、private absence                              |
 | Sandcastle/E2E local bundle entry                                        | two planar examples and local E2E                                   | medium | dev/release bundle, no public-network automation, credits and destroy                                                            |
 | Entity/DataSource planar callback与profile gate                          | private content callback、SGP-0001                                  | high   | World liveness、deferred activation、dynamic allowlist、default Globe isolation                                                  |

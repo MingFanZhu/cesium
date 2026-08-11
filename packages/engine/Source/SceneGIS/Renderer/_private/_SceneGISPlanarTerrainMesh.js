@@ -1,6 +1,15 @@
 import DeveloperError from "../../../Core/DeveloperError.js";
 import TerrainProvider from "../../../Core/TerrainProvider.js";
 
+function hasValidNormals(result, vertexCount) {
+  return (
+    result.octEncodedNormals instanceof Uint8Array &&
+    result.octEncodedNormals.length === vertexCount * 2 &&
+    result.normalByteLength === result.octEncodedNormals.byteLength &&
+    result.octEncodedNormals.buffer !== result.positions.buffer
+  );
+}
+
 /**
  * Creates a transferable Worker payload without transferring TerrainData-owned storage.
  *
@@ -64,6 +73,7 @@ function finalizeSceneGISPlanarTerrainMesh(terrainData, result) {
       result.skirtVertexCount !== metadata.skirtVertexCount ||
       result.vertexCount !== surfaceVertexCount + metadata.skirtVertexCount ||
       result.vertexCount * 3 !== result.positions.length ||
+      !hasValidNormals(result, result.vertexCount) ||
       result.indexCount !== result.indices.length ||
       result.indexCount !==
         result.surfaceIndexCount + metadata.skirtIndexCount ||
@@ -141,6 +151,7 @@ function finalizeSceneGISPlanarTerrainMesh(terrainData, result) {
     result.skirtVertexCount !== skirtVertexCount ||
     result.vertexCount !== vertexCount ||
     result.positions.length !== vertexCount * 3 ||
+    !hasValidNormals(result, vertexCount) ||
     result.positionByteLength !== result.positions.byteLength ||
     result.topologyKey !== `${width}/${height}/skirt` ||
     !Number.isFinite(result.referenceHeight) ||

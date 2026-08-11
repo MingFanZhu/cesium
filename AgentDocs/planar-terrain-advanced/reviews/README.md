@@ -10,3 +10,5 @@
   （`approved`；无阻断finding，Architecture独立复跑关键Worker/runtime/real-Context闭环）
 - [A5 平面 Quantized-mesh Terrain](2026-08-11-a5-planar-quantized-mesh.md)
   （`approved`；A5-R001～R003全部关闭，Architecture独立复跑关键focused suites与审计）
+- [A6 平面地形平滑法线与 LOD 光照连续性](2026-08-11-a6-smooth-terrain-normals-and-lod-lighting.md)
+  （`approved`；A6-R001/R002全部关闭，Architecture独立复跑两个focused suites与审计）

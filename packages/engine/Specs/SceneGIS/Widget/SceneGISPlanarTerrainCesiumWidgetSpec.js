@@ -131,6 +131,9 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
         (tile) =>
           tile.command.primitiveType === PrimitiveType.TRIANGLES &&
           tile.command.vertexArray === tile.terrainEntry.vertexArray &&
+          tile.command.vertexArray.numberOfAttributes === 2 &&
+          tile.terrainEntry.mesh.octEncodedNormals.byteLength ===
+            tile.terrainEntry.mesh.vertexCount * 2 &&
           tile.imageryBindings.size === 1,
       ),
     ).toBe(true);
@@ -165,6 +168,9 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     });
     const surface = world._surface;
     const commandsBeforeLighting = tiles.map((tile) => tile.command);
+    expect(
+      tiles.every((tile) => tile._lightingCommandNormalMode === "unlit"),
+    ).toBe(true);
     const surfaceAllocationsBeforeLighting = {
       buffers: surface._debug.createdBuffers,
       vertexArrays: surface._debug.createdVertexArrays,
@@ -182,6 +188,10 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     });
     expect(litPixels).not.toEqual(unlitPixels);
     expect(litPixels.every(Number.isFinite)).toBe(true);
+    expect(
+      tiles.every((tile) => tile._lightingCommandNormalMode === "smooth"),
+    ).toBe(true);
+    expect(surface._shaderPrograms.has("1/1/smooth")).toBe(true);
     expect(tiles.map((tile) => tile.command)).toEqual(commandsBeforeLighting);
     expect(surface._debug.createdBuffers).toBe(
       surfaceAllocationsBeforeLighting.buffers,
@@ -308,6 +318,9 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     });
 
     const terrain = world._surface._terrain;
+    expect(terrain._debug.createdVertexBuffers).toBe(
+      terrain._debug.createdVertexArrays * 2,
+    );
     widget = widget.destroy();
     expect(terrain._debug.destroyedVertexArrays).toBe(
       terrain._debug.createdVertexArrays,
@@ -389,15 +402,52 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     const terrain = world._surface._terrain;
     expect(tile.terrainEntry.activeSource).toBe(terrain.Source.DIRECT);
     expect(tile.terrainEntry.activeContent.ownsIndexBuffer).toBe(true);
+    expect(tile.command.vertexArray.numberOfAttributes).toBe(2);
+    expect(tile.terrainEntry.mesh.octEncodedNormals.byteLength).toBe(
+      tile.terrainEntry.mesh.vertexCount * 2,
+    );
     expect(terrain._indexBuffers.size).toBe(0);
     expect(tile.imageryBindings.size).toBe(1);
     expect(world._surface._renderCommands).toEqual([tile.command]);
+    let unlitPixels;
     expect(widget.scene).toRenderAndCall(function (rgba) {
-      expect(rgba).not.toEqual([0, 0, 0, 255]);
+      unlitPixels = Array.from(rgba);
+      expect(unlitPixels).not.toEqual([0, 0, 0, 255]);
     });
 
     const commands = world._surface._renderCommands.slice();
+    const vertexArrays = commands.map((command) => command.vertexArray);
     const debug = { ...terrain._debug };
+    widget.scene.light = new DirectionalLight({
+      direction: Cartesian3.UNIT_X,
+    });
+    world.enableLighting = true;
+    let litPixels;
+    expect(widget.scene).toRenderAndCall(function (rgba) {
+      litPixels = Array.from(rgba);
+    });
+    expect(litPixels.every(Number.isFinite)).toBe(true);
+    expect(litPixels).not.toEqual(unlitPixels);
+    expect(tile._lightingCommandNormalMode).toBe("smooth");
+    expect(world._surface._shaderPrograms.has("1/1/smooth")).toBe(true);
+    expect(world._surface._renderCommands).toEqual(commands);
+    expect(commands.map((command) => command.vertexArray)).toEqual(
+      vertexArrays,
+    );
+    expect(terrain._debug).toEqual(debug);
+    const litShaders = commands.map((command) => command.shaderProgram);
+    expect(widget.scene).toRenderAndCall(function (rgba) {
+      expect(Array.from(rgba)).toEqual(litPixels);
+    });
+    expect(world._surface._renderCommands).toEqual(commands);
+    expect(commands.map((command) => command.vertexArray)).toEqual(
+      vertexArrays,
+    );
+    expect(commands.map((command) => command.shaderProgram)).toEqual(
+      litShaders,
+    );
+    expect(terrain._debug).toEqual(debug);
+
     const height = world.getTerrainHeight(new Cartesian3(0.0, 0.0, 0.0));
     expect(height).toBeDefined();
     expect(Number.isFinite(height)).toBe(true);
@@ -425,6 +475,9 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     expect(terrain._debug).toEqual(debug);
 
     const createdOwnedIndices = terrain._debug.createdOwnedIndexBuffers;
+    expect(terrain._debug.createdVertexBuffers).toBe(
+      terrain._debug.createdVertexArrays * 2,
+    );
     widget = widget.destroy();
     expect(terrain._debug.destroyedOwnedIndexBuffers).toBe(createdOwnedIndices);
     expect(terrain._debug.destroyedIndexBuffers).toBe(
@@ -432,6 +485,9 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     );
     expect(terrain._debug.destroyedVertexArrays).toBe(
       terrain._debug.createdVertexArrays,
+    );
+    expect(terrain._debug.destroyedVertexBuffers).toBe(
+      terrain._debug.createdVertexBuffers,
     );
   });
 });

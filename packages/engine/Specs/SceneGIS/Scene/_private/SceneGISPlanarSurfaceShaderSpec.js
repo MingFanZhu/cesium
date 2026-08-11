@@ -52,4 +52,28 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     );
     expect(fragmentShader).toContain("vec4(color.rgb, 1.0)");
   });
+
+  it("decodes smooth terrain normals without changing imagery and Lambert order", function () {
+    const vertexShader = SceneGISPlanarSurfaceShader.createVertexShader(
+      true,
+      "smooth",
+    );
+    const fragmentShader = SceneGISPlanarSurfaceShader.createFragmentShader(
+      2,
+      true,
+      "smooth",
+    );
+
+    expect(vertexShader).toContain("in vec2 normal");
+    expect(vertexShader).toContain("czm_normal * czm_octDecode(normal)");
+    expect(vertexShader).not.toContain("v_positionEC");
+    expect(fragmentShader).toContain("normalize(v_normalEC)");
+    expect(fragmentShader).not.toContain("dFdx");
+    expect(fragmentShader).toContain(
+      "faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC)",
+    );
+    expect(fragmentShader.indexOf("sample1.a * u_alpha1")).toBeLessThan(
+      fragmentShader.indexOf("color.rgb *= czm_lightColor * intensity"),
+    );
+  });
 });

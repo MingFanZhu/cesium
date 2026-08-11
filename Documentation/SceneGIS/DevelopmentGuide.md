@@ -366,19 +366,23 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 
 ### 平面地形光照检查
 
-- 默认`enableLighting=false`必须保留unlit shader fast path；lit/unlit shader cache key同时包含
-  shown layer count与lighting flag。`lambertDiffuseMultiplier`只经uniform读取，修改它不得创建
-  command、shader、mesh或其他GPU/request资源。
-- Lit variant从eye-space position的`dFdx`/`dFdy`计算实际triangle geometric normal，并使用
-  face-forward保持双面surface。不要增加CPU normals、normal buffer、back-face culling或camera
-  collision。
+- 默认`enableLighting=false`必须保留unlit shader fast path；shader cache key同时包含shown layer count、
+  lighting flag与normal mode。`lambertDiffuseMultiplier`只经uniform读取，修改它不得创建command、shader、
+  mesh或其他GPU/request资源。
+- Lit non-flat terrain必须使用existing Worker mesh task按真实Heightmap/Quantized surface topology生成的
+  area-weighted `Uint8x2` oct normals；skirt duplicate复制surface normal且skirt triangles不参与累计。Main thread
+  必须验证exact TypedArray与`2 * vertexCount` byte length，再与position/index/VA放入同一原子GPU lifecycle。
+- Smooth variant以`czm_octDecode`和`czm_normal`恢复并插值eye-space normal；flat/no-provider和active `FLAT`
+  fallback继续使用`dFdx`/`dFdy` geometric normal，unlit不得读取normal attribute。所有lit variant继续用
+  face-forward保持双面surface；不要增加back-face culling、runtime邻居normal registry或camera collision。
 - Base color和imagery必须先完成single-pass bottom-to-top合成，再统一应用scene light、Lambert与固定
   ambient；depth pick仍只重放最近normal render的exact command references。
-- Real Context Spec至少证明lit/unlit像素不同、terrain/imagery single command、warm allocation收敛、
-  multiplier uniform-only、surface下方可见与destroy平衡。Sandcastle使用显式稳定
+- Real Context Spec至少证明smooth/geometric/unlit mode、lit/unlit像素不同、terrain/imagery single command、
+  2-byte normal stream、two-buffer warm allocation收敛、multiplier uniform-only、surface下方可见与destroy平衡。
+  Sandcastle使用显式稳定
   `DirectionalLight`，但公网画面只能作为人工best-effort验收。
-- Standard derivatives、automatic light uniforms与ShaderProgram cache是升级检查点。T6当时未迁移
-  decode/mesh；后续A4的Worker边界只按ADR-0027和下节检查，不反向改变lighting contract。
+- Standard derivatives、oct decode、normal matrix、automatic light uniforms与ShaderProgram cache都是升级检查点。
+  A6只保证task-local/representative continuity，不得把通过证据扩大为任意provider tile的universal seam guarantee。
 
 ### 平面地形 Worker 检查
 

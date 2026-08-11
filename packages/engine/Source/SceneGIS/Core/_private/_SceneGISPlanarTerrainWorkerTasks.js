@@ -222,6 +222,124 @@ function pushSkirtEdge(
   return { offset, skirtMinimumHeight };
 }
 
+function accumulateTriangleNormal(positions, accumulated, i0, i1, i2) {
+  const offset0 = i0 * 3;
+  const offset1 = i1 * 3;
+  const offset2 = i2 * 3;
+  const ax = positions[offset1] - positions[offset0];
+  const ay = positions[offset1 + 1] - positions[offset0 + 1];
+  const az = positions[offset1 + 2] - positions[offset0 + 2];
+  const bx = positions[offset2] - positions[offset0];
+  const by = positions[offset2 + 1] - positions[offset0 + 1];
+  const bz = positions[offset2 + 2] - positions[offset0 + 2];
+  const nx = ay * bz - az * by;
+  const ny = az * bx - ax * bz;
+  const nz = ax * by - ay * bx;
+  accumulated[offset0] += nx;
+  accumulated[offset0 + 1] += ny;
+  accumulated[offset0 + 2] += nz;
+  accumulated[offset1] += nx;
+  accumulated[offset1 + 1] += ny;
+  accumulated[offset1 + 2] += nz;
+  accumulated[offset2] += nx;
+  accumulated[offset2 + 1] += ny;
+  accumulated[offset2 + 2] += nz;
+}
+
+function toSNorm(value) {
+  return Math.round((Math.max(-1.0, Math.min(1.0, value)) * 0.5 + 0.5) * 255.0);
+}
+
+function octEncodeNormal(x, y, z, result, offset) {
+  const length = Math.abs(x) + Math.abs(y) + Math.abs(z);
+  if (!Number.isFinite(length) || length === 0.0) {
+    result[offset] = 128;
+    result[offset + 1] = 128;
+    return;
+  }
+  let octX = x / length;
+  let octY = y / length;
+  if (z < 0.0) {
+    const oldX = octX;
+    octX = (1.0 - Math.abs(octY)) * (oldX < 0.0 ? -1.0 : 1.0);
+    octY = (1.0 - Math.abs(oldX)) * (octY < 0.0 ? -1.0 : 1.0);
+  }
+  result[offset] = toSNorm(octX);
+  result[offset + 1] = toSNorm(octY);
+}
+
+function createOctEncodedNormals(
+  positions,
+  surfaceVertexCount,
+  surfaceIndices,
+  width,
+  height,
+  skirtEdges,
+) {
+  const accumulated = new Float64Array(surfaceVertexCount * 3);
+  if (surfaceIndices) {
+    for (let i = 0; i < surfaceIndices.length; i += 3) {
+      accumulateTriangleNormal(
+        positions,
+        accumulated,
+        surfaceIndices[i],
+        surfaceIndices[i + 1],
+        surfaceIndices[i + 2],
+      );
+    }
+  } else {
+    for (let row = 0; row + 1 < height; ++row) {
+      for (let column = 0; column + 1 < width; ++column) {
+        const upperLeft = row * width + column;
+        const upperRight = upperLeft + 1;
+        const lowerLeft = upperLeft + width;
+        const lowerRight = lowerLeft + 1;
+        accumulateTriangleNormal(
+          positions,
+          accumulated,
+          upperLeft,
+          lowerLeft,
+          upperRight,
+        );
+        accumulateTriangleNormal(
+          positions,
+          accumulated,
+          upperRight,
+          lowerLeft,
+          lowerRight,
+        );
+      }
+    }
+  }
+
+  const vertexCount = positions.length / 3;
+  const encoded = new Uint8Array(vertexCount * 2);
+  // This coordinate-neutral oct encoding is synchronized conceptually with
+  // packages/engine/Source/Core/AttributeCompression.js at upstream
+  // 6d5d8b1f0725b6f831b336463f4b11c98023427b.
+  for (let i = 0; i < surfaceVertexCount; ++i) {
+    const sourceOffset = i * 3;
+    octEncodeNormal(
+      accumulated[sourceOffset],
+      accumulated[sourceOffset + 1],
+      accumulated[sourceOffset + 2],
+      encoded,
+      i * 2,
+    );
+  }
+  let skirtOffset = surfaceVertexCount;
+  for (const edge of skirtEdges) {
+    for (let i = 0; i < edge.length; ++i) {
+      const sourceOffset = edge[i] * 2;
+      const targetOffset = (skirtOffset + i) * 2;
+      encoded[targetOffset] = encoded[sourceOffset];
+      encoded[targetOffset + 1] = encoded[sourceOffset + 1];
+    }
+    skirtOffset += edge.length;
+  }
+  return encoded;
+}
+
 function createHeightmapMesh(parameters, transferableObjects) {
   const surfaceVertexCount = validateMeshParameters(parameters);
   const width = parameters.width;
@@ -300,7 +418,16 @@ function createHeightmapMesh(parameters, transferableObjects) {
     );
   }
 
-  transferableObjects.push(positions.buffer);
+  const octEncodedNormals = createOctEncodedNormals(
+    positions,
+    surfaceVertexCount,
+    undefined,
+    width,
+    height,
+    [west, south, east, north],
+  );
+
+  transferableObjects.push(positions.buffer, octEncodedNormals.buffer);
   return {
     kind: "createHeightmapMesh",
     positions,
@@ -314,6 +441,8 @@ function createHeightmapMesh(parameters, transferableObjects) {
     maximumHeight: parameters.maximumHeight,
     skirtMinimumHeight,
     positionByteLength: positions.byteLength,
+    octEncodedNormals,
+    normalByteLength: octEncodedNormals.byteLength,
     topologyKey: `${width}/${height}/skirt`,
   };
 }
@@ -795,13 +924,27 @@ function createQuantizedMesh(parameters, transferableObjects) {
     );
     skirtOffset += edge.length;
   }
+  const octEncodedNormals = createOctEncodedNormals(
+    positions,
+    surfaceVertexCount,
+    parameters.indices,
+    undefined,
+    undefined,
+    edgeArrays,
+  );
   const IndexType = vertexCount > 65536 ? Uint32Array : Uint16Array;
   const indices = new IndexType(outputIndices);
   const query = buildQueryGrid(
     parameters.quantizedVertices,
     parameters.indices,
   );
-  for (const array of [positions, indices, query.offsets, query.triangles]) {
+  for (const array of [
+    positions,
+    octEncodedNormals,
+    indices,
+    query.offsets,
+    query.triangles,
+  ]) {
     transferableObjects.push(array.buffer);
   }
   return {
@@ -818,6 +961,8 @@ function createQuantizedMesh(parameters, transferableObjects) {
     maximumHeight: parameters.maximumHeight,
     skirtMinimumHeight,
     positionByteLength: positions.byteLength,
+    octEncodedNormals,
+    normalByteLength: octEncodedNormals.byteLength,
     indexByteLength: indices.byteLength,
     queryGridDimension: query.dimension,
     queryGridOffsets: query.offsets,

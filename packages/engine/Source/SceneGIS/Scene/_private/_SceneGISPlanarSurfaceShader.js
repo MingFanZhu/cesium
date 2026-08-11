@@ -9,7 +9,7 @@ void main()
 }
 `;
 
-const litVertexShader = `
+const geometricLitVertexShader = `
 in vec3 position;
 out vec2 v_textureCoordinates;
 out vec3 v_positionEC;
@@ -22,11 +22,34 @@ void main()
 }
 `;
 
-function createVertexShader(enableLighting) {
-  return enableLighting ? litVertexShader : unlitVertexShader;
+const smoothLitVertexShader = `
+in vec3 position;
+in vec2 normal;
+out vec2 v_textureCoordinates;
+out vec3 v_normalEC;
+
+void main()
+{
+    v_textureCoordinates = position.xy + vec2(0.5);
+    v_normalEC = czm_normal * czm_octDecode(normal);
+    gl_Position = czm_modelViewProjection * vec4(position, 1.0);
+}
+`;
+
+function createVertexShader(enableLighting, normalMode = "geometric") {
+  if (!enableLighting) {
+    return unlitVertexShader;
+  }
+  return normalMode === "smooth"
+    ? smoothLitVertexShader
+    : geometricLitVertexShader;
 }
 
-function createFragmentShader(layerCount, enableLighting = false) {
+function createFragmentShader(
+  layerCount,
+  enableLighting = false,
+  normalMode = "geometric",
+) {
   const declarations = [];
   const composition = [];
   for (let i = 0; i < layerCount; ++i) {
@@ -42,13 +65,20 @@ function createFragmentShader(layerCount, enableLighting = false) {
     color.rgb = mix(color.rgb, sample${i}.rgb, sample${i}.a * u_alpha${i});`);
   }
   const lightingDeclarations = enableLighting
-    ? `
-in vec3 v_positionEC;
+    ? `${
+        normalMode === "smooth"
+          ? "in vec3 v_normalEC;"
+          : "in vec3 v_positionEC;"
+      }
 uniform float u_lambertDiffuseMultiplier;`
     : "";
   const lighting = enableLighting
     ? `
-    vec3 normalEC = normalize(cross(dFdx(v_positionEC), dFdy(v_positionEC)));
+    vec3 normalEC = normalize(${
+      normalMode === "smooth"
+        ? "v_normalEC"
+        : "cross(dFdx(v_positionEC), dFdy(v_positionEC))"
+    });
     normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);
     float diffuse = czm_getLambertDiffuse(czm_lightDirectionEC, normalEC);
     float intensity = clamp(diffuse * u_lambertDiffuseMultiplier + 0.3, 0.0, 1.0);
