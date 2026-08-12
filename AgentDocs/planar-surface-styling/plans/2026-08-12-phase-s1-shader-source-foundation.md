@@ -124,7 +124,7 @@
 
 ## Deviations and results
 
-- Implementation status：`completed`；Architecture review=`approved`，无actionable finding；等待本地checkpoint，未push、未进入S2。
+- Implementation status：`completed`；Architecture review=`approved`，无actionable finding；本地checkpoint=`04ac138b37295f328f3542f143b2f6b738a7e021`，未push。
 - 实际新增8个source：
   - Planar Surface：`SceneGISPlanarSurfaceUnlitVS.glsl`、
     `SceneGISPlanarSurfaceGeometricLitVS.glsl`、`SceneGISPlanarSurfaceSmoothLitVS.glsl`、
