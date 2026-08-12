@@ -56,6 +56,71 @@ const terrainProvider =
   });
 world.terrainProvider = terrainProvider;
 
+function createRamp(stops) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 1;
+  const context = canvas.getContext("2d");
+  const gradient = context.createLinearGradient(0, 0, canvas.width, 0);
+  for (const [offset, color] of stops) {
+    gradient.addColorStop(offset, color);
+  }
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, canvas.width, 1);
+  return canvas;
+}
+
+const defaultRamps = {
+  height: [
+    [0.0, "#263238"],
+    [0.35, "#2e7d32"],
+    [0.7, "#f9a825"],
+    [1.0, "#ffffff"],
+  ],
+  slope: [
+    [0.0, "#1b5e20"],
+    [0.5, "#fdd835"],
+    [1.0, "#b71c1c"],
+  ],
+  aspect: [
+    [0.0, "#ef5350"],
+    [0.25, "#ffee58"],
+    [0.5, "#66bb6a"],
+    [0.75, "#42a5f5"],
+    [1.0, "#ef5350"],
+  ],
+};
+
+const terrainMaterials = {
+  contour: Cesium.Material.fromType(Cesium.Material.ElevationContourType, {
+    spacing: 250.0,
+    width: 1.5,
+    color: Cesium.Color.YELLOW,
+  }),
+  height: Cesium.Material.fromType(Cesium.Material.ElevationRampType, {
+    image: createRamp(defaultRamps.height),
+    minimumHeight: -450.0,
+    maximumHeight: 8700.0,
+  }),
+  slope: Cesium.Material.fromType(Cesium.Material.SlopeRampMaterialType, {
+    image: createRamp(defaultRamps.slope),
+  }),
+  aspect: Cesium.Material.fromType(Cesium.Material.AspectRampMaterialType, {
+    image: createRamp(defaultRamps.aspect),
+  }),
+};
+
+const terrainStyle = document.querySelector("#terrainStyle");
+const contourSpacing = document.querySelector("#contourSpacing");
+const contourWidth = document.querySelector("#contourWidth");
+const rampLowColor = document.querySelector("#rampLowColor");
+const rampHighColor = document.querySelector("#rampHighColor");
+function setTerrainStyle(value) {
+  world.material = value === "none" ? undefined : terrainMaterials[value];
+  terrainStyle.value = value;
+  viewer.scene.requestRender();
+}
+
 const terrainStatus = document.querySelector("#terrainStatus");
 terrainProvider.errorEvent.addEventListener(function (error) {
   terrainStatus.textContent =
@@ -149,6 +214,45 @@ document
     world.enableLighting = event.target.checked;
     viewer.scene.requestRender();
   });
+terrainStyle.addEventListener("change", (event) => {
+  setTerrainStyle(event.target.value);
+});
+contourSpacing.addEventListener("input", () => {
+  terrainMaterials.contour.uniforms.spacing = Number(contourSpacing.value);
+  setTerrainStyle("contour");
+});
+contourWidth.addEventListener("input", () => {
+  terrainMaterials.contour.uniforms.width = Number(contourWidth.value);
+  setTerrainStyle("contour");
+});
+function updateSelectedRamp() {
+  const style = terrainStyle.value;
+  if (style !== "height" && style !== "slope" && style !== "aspect") {
+    return;
+  }
+  terrainMaterials[style].uniforms.image = createRamp([
+    [0.0, rampLowColor.value],
+    [1.0, rampHighColor.value],
+  ]);
+  viewer.scene.requestRender();
+}
+rampLowColor.addEventListener("input", updateSelectedRamp);
+rampHighColor.addEventListener("input", updateSelectedRamp);
+document.querySelector("#resetStyle").addEventListener("click", () => {
+  terrainMaterials.contour.uniforms.spacing = 250.0;
+  terrainMaterials.contour.uniforms.width = 1.5;
+  terrainMaterials.contour.uniforms.color = Cesium.Color.clone(
+    Cesium.Color.YELLOW,
+  );
+  for (const style of ["height", "slope", "aspect"]) {
+    terrainMaterials[style].uniforms.image = createRamp(defaultRamps[style]);
+  }
+  contourSpacing.value = "250";
+  contourWidth.value = "1.5";
+  rampLowColor.value = "#263238";
+  rampHighColor.value = "#ffffff";
+  setTerrainStyle("none");
+});
 document
   .querySelector("#mountainView")
   .addEventListener("click", viewMountains);
@@ -167,3 +271,11 @@ document.querySelector("#homeView").addEventListener("click", () => {
 });
 updateNavigationStatus();
 viewMountains();
+
+window.addEventListener("unload", () => {
+  for (const material of Object.values(terrainMaterials)) {
+    if (!material.isDestroyed()) {
+      material.destroy();
+    }
+  }
+});

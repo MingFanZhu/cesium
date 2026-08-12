@@ -3,16 +3,16 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed`
 - Parent plan: [planar-surface-styling extension](2026-08-12-planar-surface-styling-extension.md)
 - Phase: `S3`
 - Owner role: `execution`
-- Architecture review: `confirmed`
+- Architecture review: product code `approved`; development tooling follow-up `approved`
 - Architecture reviewer: Architecture Agent
 - Created: `2026-08-12`
 - Updated: `2026-08-12`
 - Related discussions: 项目负责人提出平面 terrain 的坡度、坡向、等高线与 height styling
-- Related reviews: None；实现完成后新建 S3 review request
+- Related reviews: [S3 review request](../reviews/2026-08-12-s3-planar-terrain-styling.md)
 - ADR: 新建 `Documentation/SceneGIS/Decisions/ADR-0032-planar-terrain-material-styling.md`
 - SGP: None expected；upstream-owned diff 出现前必须停止并升级计划
 
@@ -284,6 +284,34 @@ completion checkpoint或进入S4。
 
 ## Deviations and results
 
-- Implementation status：not started。
-- Execution必须在实现、验证和review request中持续记录源码偏差、实际changed paths、case count、GL limits、
-  generated status、upstream-owned files与SGP；不得删除本phase的未解决风险来表示完成。
+- Implementation status：Architecture focused re-review已批准，`S3-R001`至`S3-R006`全部fixed；等待项目负责人
+  manual gate。
+- Product设计无scope deviation。新增允许的Styling Widget Spec；A7 qualification加入caller-owned Contour，使Material
+  持续穿过lighting churn、warm frames、underground、Heightmap→Quantized replacement与destroy ownership。WorldSpec旧
+  resident fixture同步当前oct-normal Worker/finalize contract，未修改产品terrain pipeline。
+- Shader使用固定`SCENEGIS_MATERIAL` seam；undefined继续返回S2 fast path。Material variant在selection/publication前完成
+  geometric/smooth真实compile/link；失败释放candidate且不改变旧replay。成功publication后release旧source并使resident
+  cached command metadata失效，A→B→A跨ShaderCache release会重绑live program。Uniform map直接组合published `_uniforms`。
+- Sampler preflight去除注释、支持precision qualifier并按identifier去重。当前real Context texture units=`16`、fragment
+  uniform vectors=`1024`；15 shown imagery + ElevationRamp完整link/render，第16层在update、selection/request与Surface
+  mutation前fail-fast。
+- Focused results：World `21/21`；Surface aggregate `40/40`；Styling Widget `7/7`；A7 `1/1`。所有GPU用例暴露render
+  errors；pixels覆盖四个stable builtin、non-zero absolute height、Contour width、flat slope、四方位aspect、imagery→Material
+  alpha→lighting及ancestor/upsampled/LOD。非法Fabric compile失败保持publication/replay/counters/shader refs原子。
+- Delivery：build、release、types、docs、tsc、installed package verifier与gallery 307 examples通过。Generated d.ts只读确认
+  `material: Material | undefined`且constructor无material option。
+- Static/audit：scoped ESLint、Prettier、Markdownlint、diff与upstream audit通过；upstream-owned=`0`、generated=`0`、
+  SGP=None。仅有Windows LF→CRLF提示。
+- S3-R005/006：terrain demo新增Contour spacing/width与Ramp color controls；JSDoc/Guide明确planar inputs、
+  diffuse/alpha-only及custom Fabric非完整Globe兼容。当前精确changed paths=`23`，全部在allowlist。
+- 项目负责人于`2026-08-12`在`scenegis-planar-terrain`完成Sandcastle manual gate并确认视觉验收通过；Architecture无需
+  重复或扩大像素/LOD用例。S3满足独立本地checkpoint条件。
+- Development tooling follow-up：项目负责人批准新增`scripts/scenegis/start-sandcastle-dev.mjs`、SceneGIS-owned Vite
+  wrapper及focused Node test，统一编排initial gallery sync、exported build-watch task readiness、Sandcastle Vite、serialized
+  gallery rebuild与跨平台process cleanup。Architecture最终窄范围复核已批准；T001至T006全部fixed。
+  Vite listen/printed URL/compiled outer+inner origins共享validated port；build child只在full build、incremental context与watcher
+  registration完成的task callback后发marker，父进程再校验必需outputs。HTTP port 80保留Vite numeric listen参数，同时
+  URL/origins canonicalize为`http://localhost`。Node test `8/8`与
+  changed-scope ESLint/Prettier/Markdownlint、
+  diff/upstream/generated audit通过；完整working tree为27 allowlist paths。Tooling follow-up本身未替代manual gate；项目负责人
+  随后已单独确认视觉验收通过。

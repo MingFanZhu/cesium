@@ -106,7 +106,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     expect(vertexShader).toContain("in vec2 normal");
     expect(vertexShader).toContain("czm_viewRotation * czm_octDecode(normal)");
     expect(vertexShader).not.toContain("czm_normal * czm_octDecode(normal)");
-    expect(vertexShader).not.toContain("v_positionEC");
+    expect(vertexShader).toContain("#ifdef SCENEGIS_MATERIAL");
     expect(fragmentShader).toContain("normalize(v_normalEC)");
     expect(fragmentShader).toContain("#define SCENEGIS_LIGHTING");
     expect(fragmentShader).toContain("#define SCENEGIS_SMOOTH_NORMALS");
@@ -131,5 +131,67 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
         layerCount,
       );
     }
+  });
+
+  it("assembles planar Material input and composes it before lighting", function () {
+    const materialSource = `
+uniform float styleValue;
+czm_material czm_getMaterial(czm_materialInput materialInput)
+{
+    czm_material material = czm_getDefaultMaterial(materialInput);
+    material.diffuse = vec3(styleValue);
+    material.alpha = 0.5;
+    return material;
+}`;
+    const vertexShader = SceneGISPlanarSurfaceShader.createVertexShader(
+      false,
+      "smooth",
+      true,
+    );
+    const fragmentShader = SceneGISPlanarSurfaceShader.createFragmentShader(
+      1,
+      true,
+      "smooth",
+      materialSource,
+    );
+
+    expect(vertexShader).toContain("#define SCENEGIS_MATERIAL");
+    expect(vertexShader).toContain("v_positionWC");
+    expect(vertexShader).toContain("v_normalWC");
+    expect(fragmentShader).toContain(materialSource);
+    expect(fragmentShader).not.toContain(
+      "SCENEGIS_PLANAR_SURFACE_MATERIAL_SOURCE",
+    );
+    for (const input of [
+      "materialInput.s = v_textureCoordinates.s",
+      "materialInput.st = v_textureCoordinates",
+      "materialInput.str = vec3(v_textureCoordinates, 0.0)",
+      "materialInput.normalEC = normalEC",
+      "materialInput.tangentToEyeMatrix = czm_viewRotation",
+      "materialInput.positionToEyeEC = -v_positionEC",
+      "materialInput.height = v_positionWC.z",
+      "materialInput.slope = slope",
+      "materialInput.aspect = aspect",
+      "materialInput.waterMask = 0.0",
+    ]) {
+      expect(fragmentShader).toContain(input);
+    }
+    expect(fragmentShader.indexOf("sample0.a * u_alpha0")).toBeLessThan(
+      fragmentShader.indexOf("czm_getMaterial("),
+    );
+    expect(fragmentShader.indexOf("color.rgb = mix(color.rgb")).toBeLessThan(
+      fragmentShader.indexOf("color.rgb *= czm_lightColor * intensity"),
+    );
+  });
+
+  it("keeps Material-free unlit variants on the fixed fast path", function () {
+    expect(
+      SceneGISPlanarSurfaceShader.createVertexShader(false, "geometric", false),
+    ).toBe(SceneGISPlanarSurfaceShader.vertexShader);
+    const fragmentShader = SceneGISPlanarSurfaceShader.createFragmentShader(0);
+    expect(fragmentShader).not.toContain("#define SCENEGIS_MATERIAL");
+    expect(fragmentShader).not.toContain(
+      "SCENEGIS_PLANAR_SURFACE_MATERIAL_SOURCE",
+    );
   });
 });

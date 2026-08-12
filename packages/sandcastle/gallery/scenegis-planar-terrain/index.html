@@ -1,9 +1,51 @@
 <style>
   @import url(../templates/bucket.css);
+
+  #toolbar {
+    position: absolute;
+    z-index: 2;
+    top: 5px;
+    left: 5px;
+    max-width: min(390px, calc(100% - 20px));
+    max-height: calc(100% - 70px);
+    overflow: auto;
+  }
 </style>
 <div id="cesiumContainer" class="fullSize"></div>
 <div id="loadingOverlay"><h1>Loading...</h1></div>
 <div id="toolbar">
+  <label>
+    Terrain style
+    <select id="terrainStyle">
+      <option value="none" selected>None</option>
+      <option value="contour">Contour</option>
+      <option value="height">Height</option>
+      <option value="slope">Slope</option>
+      <option value="aspect">Aspect</option>
+    </select>
+  </label>
+  <button id="resetStyle" type="button">Reset style</button>
+  <label>
+    Contour spacing (m)
+    <input id="contourSpacing" type="number" min="1" step="25" value="250" />
+  </label>
+  <label>
+    Contour width
+    <input
+      id="contourWidth"
+      type="range"
+      min="0.5"
+      max="8"
+      step="0.5"
+      value="1.5"
+    />
+  </label>
+  <label
+    >Ramp low <input id="rampLowColor" type="color" value="#263238"
+  /></label>
+  <label
+    >Ramp high <input id="rampHighColor" type="color" value="#ffffff"
+  /></label>
   <label><input id="lightingToggle" type="checkbox" checked /> Lighting</label>
   <label>
     Navigation

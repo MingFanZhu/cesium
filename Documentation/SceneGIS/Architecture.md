@@ -358,6 +358,14 @@ representative cross-tile/parent-child fixtures验证边界；不承诺任意独
 [ADR-0012](Decisions/ADR-0012-planar-terrain-lighting-and-geometric-normals.md)和
 [ADR-0029](Decisions/ADR-0029-planar-smooth-terrain-normals-and-lod-lighting.md)。
 
+`SceneGISPlanarWorld.material`复用caller-owned Cesium `Material` assembled source、`_uniforms`与texture lifecycle，
+由planar Surface组装absolute world-Z、relative +Z slope和north-clockwise downslope aspect。Material在imagery后、
+lighting前source-over；只消费diffuse/alpha。Material identity只在成功normal render发布，sampler与shown imagery共享
+fragment texture-unit预算，undefined保持既有fast path。完整输入、ownership、soft-private和升级边界见
+[ADR-0032](Decisions/ADR-0032-planar-terrain-material-styling.md)。
+Material variant必须在selection/publication前完成真实Context compile/link；失败不得替换旧normal/depth replay。
+释放旧source时必须使resident cached tile的对应command metadata失效，避免重新selection时复用已释放program。
+
 ### 平面地形 Worker 管线
 
 A4依据同一257×257本地LERC fixture的bounded profiling，把LERC decode与Heightmap regular-grid/skirt

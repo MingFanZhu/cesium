@@ -54,6 +54,9 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
   this._vertexArray = undefined;
   this._shaderProgram = undefined;
   this._shaderPrograms = new Map();
+  this._materialShaderSources = new Map();
+  this._publishedMaterial = undefined;
+  this._publishedMaterialSource = undefined;
   this._transparentTexture = undefined;
   this._renderState = undefined;
   this._baseColor = undefined;
@@ -226,32 +229,111 @@ function getShaderProgram(
   layerCount,
   enableLighting,
   normalMode,
+  materialSource,
 ) {
-  const key = `${layerCount}/${enableLighting ? 1 : 0}/${normalMode}`;
+  const key = getShaderKey(
+    layerCount,
+    enableLighting,
+    normalMode,
+    materialSource,
+  );
   let shader = surface._shaderPrograms.get(key);
   if (!shader) {
-    shader = ShaderProgram.fromCache({
+    shader = createShaderProgram(
       context,
-      vertexShaderSource: SceneGISPlanarSurfaceShader.createVertexShader(
-        enableLighting,
-        normalMode,
-      ),
-      fragmentShaderSource: SceneGISPlanarSurfaceShader.createFragmentShader(
-        layerCount,
-        enableLighting,
-        normalMode,
-      ),
-      attributeLocations:
-        normalMode === "smooth" ? { position: 0, normal: 1 } : { position: 0 },
-    });
+      layerCount,
+      enableLighting,
+      normalMode,
+      materialSource,
+    );
     surface._shaderPrograms.set(key, shader);
+    if (defined(materialSource)) {
+      surface._materialShaderSources.set(key, materialSource);
+    }
     ++surface._debug.createdShaders;
   }
   surface._shaderProgram = shader;
   return shader;
 }
 
-function createUniformMap(surface, tile, layerCount, enableLighting) {
+function getShaderKey(layerCount, enableLighting, normalMode, materialSource) {
+  const materialKey = defined(materialSource)
+    ? `/material/${materialSource}`
+    : "";
+  return `${layerCount}/${enableLighting ? 1 : 0}/${normalMode}${materialKey}`;
+}
+
+function createShaderProgram(
+  context,
+  layerCount,
+  enableLighting,
+  normalMode,
+  materialSource,
+) {
+  return ShaderProgram.fromCache({
+    context,
+    vertexShaderSource: SceneGISPlanarSurfaceShader.createVertexShader(
+      enableLighting,
+      normalMode,
+      defined(materialSource),
+    ),
+    fragmentShaderSource: SceneGISPlanarSurfaceShader.createFragmentShader(
+      layerCount,
+      enableLighting,
+      normalMode,
+      materialSource,
+    ),
+    attributeLocations:
+      normalMode === "smooth" ? { position: 0, normal: 1 } : { position: 0 },
+  });
+}
+
+function preflightMaterialShaders(
+  surface,
+  context,
+  layerCount,
+  enableLighting,
+  materialSource,
+) {
+  if (!defined(materialSource)) {
+    return;
+  }
+  const candidates = [];
+  try {
+    for (const normalMode of ["geometric", "smooth"]) {
+      const key = getShaderKey(
+        layerCount,
+        enableLighting,
+        normalMode,
+        materialSource,
+      );
+      if (surface._shaderPrograms.has(key)) {
+        continue;
+      }
+      const shader = createShaderProgram(
+        context,
+        layerCount,
+        enableLighting,
+        normalMode,
+        materialSource,
+      );
+      candidates.push({ key, shader });
+      shader._bind();
+    }
+  } catch (error) {
+    for (const candidate of candidates) {
+      candidate.shader.destroy();
+    }
+    throw error;
+  }
+  for (const candidate of candidates) {
+    surface._shaderPrograms.set(candidate.key, candidate.shader);
+    surface._materialShaderSources.set(candidate.key, materialSource);
+    ++surface._debug.createdShaders;
+  }
+}
+
+function createUniformMap(surface, tile, layerCount, enableLighting, material) {
   const uniformMap = {
     u_color: function () {
       return surface._baseColor;
@@ -288,23 +370,29 @@ function createUniformMap(surface, tile, layerCount, enableLighting) {
       return tile._imagerySlots[i].colorToAlpha;
     };
   }
+  if (defined(material)) {
+    Object.assign(uniformMap, material._uniforms);
+  }
   return uniformMap;
 }
 
-function getCommand(surface, tile, layerCount, enableLighting) {
+function getCommand(surface, tile, layerCount, enableLighting, material) {
   const terrainContent = tile.terrainEntry?.activeContent;
   const terrainReady = defined(terrainContent?.mesh);
-  const normalMode = enableLighting
+  const needsNormal = enableLighting || defined(material);
+  const normalMode = needsNormal
     ? terrainReady
       ? "smooth"
       : "geometric"
     : "unlit";
+  const materialSource = material?.shaderSource;
   const shaderProgram = getShaderProgram(
     surface,
     surface._context,
     layerCount,
     enableLighting,
     normalMode,
+    materialSource,
   );
   if (!defined(tile.command)) {
     tile.command = new DrawCommand({
@@ -314,7 +402,13 @@ function getCommand(surface, tile, layerCount, enableLighting) {
       vertexArray: surface._vertexArray,
       count: 4,
       shaderProgram,
-      uniformMap: createUniformMap(surface, tile, layerCount, enableLighting),
+      uniformMap: createUniformMap(
+        surface,
+        tile,
+        layerCount,
+        enableLighting,
+        material,
+      ),
       renderState: surface._renderState,
       pass: Pass.GLOBE,
       owner: surface,
@@ -324,11 +418,16 @@ function getCommand(surface, tile, layerCount, enableLighting) {
     tile._imageryCommandLayerCount = layerCount;
     tile._lightingCommandEnabled = enableLighting;
     tile._lightingCommandNormalMode = normalMode;
+    tile._materialCommand = material;
+    tile._materialCommandSource = materialSource;
     ++surface._debug.createdCommands;
   } else if (
     tile._imageryCommandLayerCount !== layerCount ||
     tile._lightingCommandEnabled !== enableLighting ||
-    tile._lightingCommandNormalMode !== normalMode
+    tile._lightingCommandNormalMode !== normalMode ||
+    tile._materialCommand !== material ||
+    tile._materialCommandSource !== materialSource ||
+    tile.command.shaderProgram !== shaderProgram
   ) {
     tile.command.shaderProgram = shaderProgram;
     tile.command.uniformMap = createUniformMap(
@@ -336,10 +435,13 @@ function getCommand(surface, tile, layerCount, enableLighting) {
       tile,
       layerCount,
       enableLighting,
+      material,
     );
     tile._imageryCommandLayerCount = layerCount;
     tile._lightingCommandEnabled = enableLighting;
     tile._lightingCommandNormalMode = normalMode;
+    tile._materialCommand = material;
+    tile._materialCommandSource = materialSource;
   }
   tile.command.boundingVolume = tile.commandBoundingVolume;
   tile.command.modelMatrix = tile.modelMatrix;
@@ -353,6 +455,40 @@ function getCommand(surface, tile, layerCount, enableLighting) {
   return tile.command;
 }
 
+function countMaterialSamplers(shaderSource) {
+  const samplers = new Set();
+  const sourceWithoutComments = shaderSource
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "");
+  const declaration =
+    /\buniform\s+(?:(?:lowp|mediump|highp)\s+)?sampler(?:2D|Cube)\s+([A-Za-z_]\w*)/g;
+  let match;
+  while ((match = declaration.exec(sourceWithoutComments)) !== null) {
+    samplers.add(match[1]);
+  }
+  return samplers.size;
+}
+
+function releaseStaleMaterialShaders(surface, materialSource) {
+  for (const [key, source] of surface._materialShaderSources) {
+    if (source === materialSource) {
+      continue;
+    }
+    const shader = surface._shaderPrograms.get(key);
+    if (defined(shader) && !shader.isDestroyed()) {
+      shader.destroy();
+      ++surface._debug.destroyedShaders;
+    }
+    surface._quadtree.forEachTile((tile) => {
+      if (tile.command?.shaderProgram === shader) {
+        tile._materialCommandSource = undefined;
+      }
+    });
+    surface._shaderPrograms.delete(key);
+    surface._materialShaderSources.delete(key);
+  }
+}
+
 function getShownLayers(surface) {
   const result = surface._shownLayers;
   result.length = 0;
@@ -364,6 +500,15 @@ function getShownLayers(surface) {
     }
   }
   return result;
+}
+
+function getShownLayerCount(surface) {
+  let count = 0;
+  const collection = surface._imageryLayers;
+  for (let i = 0; i < collection.length; ++i) {
+    count += collection.get(i).show ? 1 : 0;
+  }
+  return count;
 }
 
 function updateTileSlots(surface, tile, layers) {
@@ -418,6 +563,7 @@ SceneGISPlanarSurface.prototype.render = function (
   baseColor,
   enableLighting = false,
   lambertDiffuseMultiplier = 0.9,
+  material,
 ) {
   validateContext(this, frameState.context);
   const passes = frameState.passes;
@@ -442,22 +588,45 @@ SceneGISPlanarSurface.prototype.render = function (
   if (!passes.render || this._renderedFrameNumber === frameState.frameNumber) {
     return;
   }
-  this.invalidateTerrainQuerySnapshot();
-  const shownLayers = getShownLayers(this);
-  if (shownLayers.length > ContextLimits.maximumTextureImageUnits) {
-    throw new DeveloperError(
-      "The number of shown planar imagery layers exceeds maximumTextureImageUnits.",
-    );
-  }
-  this._renderedFrameNumber = frameState.frameNumber;
-  this._renderCommands.length = 0;
   if (
     frameState.context.drawingBufferWidth === 0 ||
     frameState.context.drawingBufferHeight === 0
   ) {
+    this.invalidateTerrainQuerySnapshot();
     this._tilesLoaded = true;
     return;
   }
+  if (defined(material) && material.isDestroyed()) {
+    throw new DeveloperError(
+      "SceneGISPlanarWorld.material must be an undestroyed Material.",
+    );
+  }
+  const materialSamplerCount = defined(material)
+    ? countMaterialSamplers(material.shaderSource)
+    : 0;
+  const shownLayerCount = getShownLayerCount(this);
+  if (
+    shownLayerCount + materialSamplerCount >
+    ContextLimits.maximumTextureImageUnits
+  ) {
+    throw new DeveloperError(
+      "The combined planar imagery and Material sampler count exceeds maximumTextureImageUnits.",
+    );
+  }
+  if (defined(material)) {
+    material.update(frameState.context);
+    preflightMaterialShaders(
+      this,
+      frameState.context,
+      shownLayerCount,
+      enableLighting,
+      material.shaderSource,
+    );
+  }
+  const shownLayers = getShownLayers(this);
+  this.invalidateTerrainQuerySnapshot();
+  this._renderedFrameNumber = frameState.frameNumber;
+  this._renderCommands.length = 0;
   this._baseColor = baseColor;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   const desiredTiles = this._quadtree.selectTiles(
@@ -519,7 +688,13 @@ SceneGISPlanarSurface.prototype.render = function (
       }
     }
     updateTileSlots(this, tile, shownLayers);
-    const command = getCommand(this, tile, shownLayers.length, enableLighting);
+    const command = getCommand(
+      this,
+      tile,
+      shownLayers.length,
+      enableLighting,
+      material,
+    );
     frameState.commandList.push(command);
     this._renderCommands.push(command);
     ++this._debug.submittedCommands;
@@ -543,6 +718,9 @@ SceneGISPlanarSurface.prototype.render = function (
     }
     this._terrainQuerySnapshotCount = count;
   }
+  this._publishedMaterial = material;
+  this._publishedMaterialSource = material?.shaderSource;
+  releaseStaleMaterialShaders(this, this._publishedMaterialSource);
 };
 
 SceneGISPlanarSurface.prototype.endFrame = function (tileCacheSize) {
@@ -583,6 +761,9 @@ SceneGISPlanarSurface.prototype.destroy = function () {
   this._vertexArray = undefined;
   this._shaderProgram = undefined;
   this._shaderPrograms.clear();
+  this._materialShaderSources.clear();
+  this._publishedMaterial = undefined;
+  this._publishedMaterialSource = undefined;
   this._transparentTexture = undefined;
   this._renderState = undefined;
   this._renderCommands.length = 0;

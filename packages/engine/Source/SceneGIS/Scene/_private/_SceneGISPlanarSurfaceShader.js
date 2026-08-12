@@ -4,20 +4,26 @@ import smoothLitVertexShader from "../../../Shaders/SceneGIS/PlanarSurface/Scene
 import unlitVertexShader from "../../../Shaders/SceneGIS/PlanarSurface/SceneGISPlanarSurfaceUnlitVS.js";
 
 const dynamicLayersToken = "SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS";
+const materialSourceToken = "SCENEGIS_PLANAR_SURFACE_MATERIAL_SOURCE";
 
-function createVertexShader(enableLighting, normalMode = "geometric") {
-  if (!enableLighting) {
+function createVertexShader(
+  enableLighting,
+  normalMode = "geometric",
+  enableMaterial = false,
+) {
+  if (!enableLighting && !enableMaterial) {
     return unlitVertexShader;
   }
-  return normalMode === "smooth"
-    ? smoothLitVertexShader
-    : geometricLitVertexShader;
+  const shader =
+    normalMode === "smooth" ? smoothLitVertexShader : geometricLitVertexShader;
+  return enableMaterial ? `#define SCENEGIS_MATERIAL\n${shader}` : shader;
 }
 
 function createFragmentShader(
   layerCount,
   enableLighting = false,
   normalMode = "geometric",
+  materialSource,
 ) {
   const declarations = [];
   const composition = [];
@@ -69,15 +75,18 @@ vec4 sceneGISComposeLayers(vec4 color, vec2 textureCoordinates)
 ${composition.join("\n")}
     return color;
 }`;
-  const defines = enableLighting
-    ? `#define SCENEGIS_LIGHTING
-${normalMode === "smooth" ? "#define SCENEGIS_SMOOTH_NORMALS\n" : ""}`
-    : "";
+  const enableMaterial = materialSource !== undefined;
+  let defines = enableLighting ? "#define SCENEGIS_LIGHTING\n" : "";
+  if (normalMode === "smooth" && (enableLighting || enableMaterial)) {
+    defines += "#define SCENEGIS_SMOOTH_NORMALS\n";
+  }
+  if (enableMaterial) {
+    defines += "#define SCENEGIS_MATERIAL\n";
+  }
 
-  return `${defines}${fragmentShaderTemplate.replace(
-    dynamicLayersToken,
-    dynamicLayers,
-  )}`;
+  return `${defines}${fragmentShaderTemplate
+    .replace(dynamicLayersToken, dynamicLayers)
+    .replace(materialSourceToken, materialSource ?? "")}`;
 }
 
 /** @private */

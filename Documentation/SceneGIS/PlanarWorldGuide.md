@@ -88,6 +88,19 @@ planar sampled color space。`colorToAlpha`比较raw sampled RGB，getter/setter
 `undefined`可禁用。filter执行顺序固定为color-to-alpha、gamma、brightness、contrast、hue、saturation，再应用
 layer alpha与bottom-to-top composition；terrain lighting最后统一执行。
 
+可在构造后为`world.material`赋caller-owned Cesium `Material`。稳定资格集为`ElevationContour`、`ElevationRamp`、
+`SlopeRamp`与`AspectRamp`；height是absolute meter world Z，slope相对`+Z`，aspect是从`+Y` north顺时针的downslope
+方位。Material diffuse/alpha在imagery composition后、lighting前source-over。替换、清空或destroy world不会destroy
+Material；应用负责最终调用`material.destroy()`。Material sampler与shown imagery共享fragment texture-unit预算。
+
+这不是完整Globe Material兼容层。自定义Fabric source可读取planar `czm_materialInput`：`st`为当前tile归一化XY，
+`s=st.s`，`str=vec3(st, 0)`；`normalEC`来自topology-up terrain normal，`positionToEyeEC=-positionEC`，
+`tangentToEyeMatrix`固定表达eye-space中的`+X East/+Y North/+Z Up`；`height`为absolute meter world Z，
+`slope`相对`+Z`，`aspect`为从`+Y` north顺时针的downslope azimuth且flat为0，`waterMask=0`。Surface只消费
+`czm_material.diffuse`与`alpha`；Material输出的`normal`、`specular`、`shininess`、`emission`、translucent pass及
+Globe/ellipsoid-specific输入均不支持。除上述四个稳定资格builtin外，自定义Fabric应先用目标WebGL Context验证
+compile/link、sampler预算与像素结果。
+
 示例terrain URL是占位地址；应用必须选择提供boundary-inclusive height samples的数据源，并让
 terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务条款、展示 attribution，并
 处理CORS、限流和服务失败。自动化测试应使用本地provider，不依赖公网。
@@ -153,17 +166,18 @@ SunLight方向。双面surface允许从上下两侧观察，但lighting始终使
 
 ## 支持矩阵与限制
 
-| 能力        | 当前契约                                                                                                                   |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
-| extent      | 有限、严格正方形、米制、无 wrap                                                                                            |
-| scene mode  | 仅 `SCENE3D`                                                                                                               |
-| tiling      | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                                                     |
-| surface     | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                                                |
-| imagery     | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                           |
-| navigation  | PC pan/rotate/wheel/Home、surface endpoint clearance、underground双向orbit crossing；无sweep/touch/inertia/flight/tracking |
-| environment | Earth skybox 只能由应用显式提供；不会自动增加 atmosphere                                                                   |
-| UI          | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                     |
-| unsupported | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow/material、imagery picking             |
+| 能力          | 当前契约                                                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| extent        | 有限、严格正方形、米制、无 wrap                                                                                            |
+| scene mode    | 仅 `SCENE3D`                                                                                                               |
+| tiling        | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                                                     |
+| surface       | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                                                |
+| imagery       | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                           |
+| terrain style | caller-owned `Material`；四个稳定资格builtin与受限custom Fabric，仅组合diffuse/alpha                                       |
+| navigation    | PC pan/rotate/wheel/Home、surface endpoint clearance、underground双向orbit crossing；无sweep/touch/inertia/flight/tracking |
+| environment   | Earth skybox 只能由应用显式提供；不会自动增加 atmosphere                                                                   |
+| UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                     |
+| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow、full Globe Material、imagery picking |
 
 ## 性能与调参
 

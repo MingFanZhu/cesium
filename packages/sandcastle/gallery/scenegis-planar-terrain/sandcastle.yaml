@@ -2,7 +2,9 @@ title: SceneGIS Planar Terrain
 description: >-
   Combines an EPSG:3857 planar Viewer, explicit OpenStreetMap imagery, and an
   application-configured generic LERC heightmap provider, stable directional
-  smooth terrain lighting with geometric-normal flat fallback, and explicit
+  smooth terrain lighting with geometric-normal flat fallback, caller-owned
+  contour, absolute-height, slope, and north-clockwise aspect Material styles,
+  and explicit
   surface/underground navigation profiles. The
   mountain and mirrored underground views provide deterministic starting poses;
   the surface-clearance action demonstrates local vertical push-out without Home,

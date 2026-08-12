@@ -6,6 +6,7 @@ import {
   DirectionalLight,
   Event,
   JulianDate,
+  Material,
   Ray,
   SceneGISPlanarCameraController,
   SceneGISPlanarCoordinateSystem,
@@ -214,6 +215,7 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainAdvancedQualification", function 
       contextOptions,
     });
     const scene = widget.scene;
+    scene.rethrowRenderErrors = true;
     scene.camera.setView({
       destination: new Cartesian3(0.0, 0.0, 45000000.0),
       orientation: {
@@ -235,6 +237,19 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainAdvancedQualification", function 
           tile.terrainEntry.mesh.octEncodedNormals.byteLength ===
             tile.terrainEntry.mesh.vertexCount * 2 &&
           tile.imageryBindings.size === 1,
+      ),
+    ).toBe(true);
+    const contourMaterial = Material.fromType(Material.ElevationContourType, {
+      spacing: 500.0,
+      width: 1.5,
+      color: Color.YELLOW,
+    });
+    world.material = contourMaterial;
+    renderFrame(scene);
+    expect(world._surface._publishedMaterial).toBe(contourMaterial);
+    expect(
+      world._surface._quadtree._renderTiles.every(
+        (tile) => tile._lightingCommandNormalMode === "smooth",
       ),
     ).toBe(true);
 
@@ -390,6 +405,8 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainAdvancedQualification", function 
     controller.update(scene, JulianDate.now());
     expect(controller.navigationMode).toBe("underground");
     expect(controller.viewHome).not.toHaveBeenCalled();
+    renderFrame(scene);
+    expect(world._surface._publishedMaterial).toBe(contourMaterial);
 
     controller.navigationMode = "surface";
     scene.camera.setView({
@@ -442,6 +459,7 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainAdvancedQualification", function 
     widget.removeController(controller);
     controller = undefined;
     widget = widget.destroy();
+    expect(contourMaterial.isDestroyed()).toBe(false);
     expect(terrain._debug.destroyedVertexArrays).toBe(
       terrain._debug.createdVertexArrays,
     );
@@ -458,6 +476,7 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainAdvancedQualification", function 
       terrain._debug.createdOwnedIndexBuffers,
     );
     expect(heightmapProvider.tilingScheme).toBe(world.tilingScheme);
+    contourMaterial.destroy();
     expect(quantizedProvider.tilingScheme).toBe(world.tilingScheme);
   });
 });

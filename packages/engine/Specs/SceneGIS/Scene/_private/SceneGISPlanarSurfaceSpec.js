@@ -1338,6 +1338,63 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(surface._shaderPrograms.size).toBe(shaderMapSize);
   });
 
+  it("publishes Material identity only after a successful normal render", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    scene = createPlanarScene(world);
+    pointCameraAt(world);
+    scene.renderForSpecs();
+
+    const surface = world._surface;
+    const previousCommands = surface._renderCommands.slice();
+    const previousShaderMapSize = surface._shaderPrograms.size;
+    const material = Material.fromType(Material.ElevationContourType);
+    world.material = material;
+
+    const depthFrameState = {
+      ...scene.frameState,
+      passes: { render: false, pick: true, depth: true },
+      commandList: [],
+    };
+    world.render(depthFrameState);
+    expect(depthFrameState.commandList).toEqual(previousCommands);
+    expect(surface._publishedMaterial).toBeUndefined();
+
+    const update = spyOn(material, "update").and.throwError("style update");
+    const failedFrameState = {
+      ...scene.frameState,
+      frameNumber: scene.frameState.frameNumber + 1,
+      passes: { render: true },
+      commandList: [],
+    };
+    world.beginFrame(failedFrameState);
+    expect(() => world.render(failedFrameState)).toThrowError("style update");
+    expect(failedFrameState.commandList).toEqual([]);
+    expect(surface._renderCommands).toEqual(previousCommands);
+    expect(surface._publishedMaterial).toBeUndefined();
+    expect(surface._shaderPrograms.size).toBe(previousShaderMapSize);
+
+    update.and.callThrough();
+    scene.renderForSpecs();
+    expect(surface._publishedMaterial).toBe(material);
+    expect(surface._renderCommands.length).toBe(1);
+    expect(surface._renderCommands[0]).toBe(previousCommands[0]);
+    expect(surface._renderCommands[0].uniformMap).toEqual(
+      jasmine.objectContaining(material._uniforms),
+    );
+
+    world.material = undefined;
+    const publishedCommand = surface._renderCommands[0];
+    const replayFrameState = {
+      ...scene.frameState,
+      passes: { render: false, pick: true, depth: true },
+      commandList: [],
+    };
+    world.render(replayFrameState);
+    expect(replayFrameState.commandList).toEqual([publishedCommand]);
+    expect(surface._publishedMaterial).toBe(material);
+    material.destroy();
+  });
+
   it("uses the exact tile volume for quadtree visibility", function () {
     const world = createWorld({ maximumLevel: 0 });
     let testedVolume;

@@ -1,32 +1,99 @@
 in vec2 v_textureCoordinates;
 uniform vec4 u_color;
 
-#ifdef SCENEGIS_LIGHTING
+#ifdef SCENEGIS_MATERIAL
+in vec3 v_positionWC;
     #ifdef SCENEGIS_SMOOTH_NORMALS
-in vec3 v_normalEC;
-    #else
-in vec3 v_positionEC;
+in vec3 v_normalWC;
     #endif
+#endif
+
+#if defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
+in vec3 v_positionEC;
+#endif
+
+#if defined(SCENEGIS_SMOOTH_NORMALS) && (defined(SCENEGIS_MATERIAL) || defined(SCENEGIS_LIGHTING))
+in vec3 v_normalEC;
+#endif
+
+#ifdef SCENEGIS_LIGHTING
 uniform float u_lambertDiffuseMultiplier;
 #endif
 
 SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS
+SCENEGIS_PLANAR_SURFACE_MATERIAL_SOURCE
 
-void main()
+#if defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_MATERIAL)
+vec3 sceneGISPlanarNormalEC()
 {
-    vec4 color = sceneGISComposeLayers(u_color, v_textureCoordinates);
-#ifdef SCENEGIS_LIGHTING
     #ifdef SCENEGIS_SMOOTH_NORMALS
-    vec3 normalEC = normalize(v_normalEC);
+    return normalize(v_normalEC);
     #else
     vec3 normalEC = normalize(cross(dFdx(v_positionEC), dFdy(v_positionEC)));
-    // Derivative winding can reverse below a double-sided surface. Keep
-    // lighting in the stable planar +Z hemisphere instead of facing the camera.
     vec3 planarUpEC = normalize(czm_normal * vec3(0.0, 0.0, 1.0));
     if (dot(normalEC, planarUpEC) < 0.0) {
         normalEC = -normalEC;
     }
+    return normalEC;
     #endif
+}
+#endif
+
+#ifdef SCENEGIS_MATERIAL
+vec3 sceneGISPlanarNormalWC(vec3 normalEC)
+{
+    #ifdef SCENEGIS_SMOOTH_NORMALS
+    return normalize(v_normalWC);
+    #else
+    return normalize(czm_inverseViewRotation * normalEC);
+    #endif
+}
+
+czm_materialInput sceneGISPlanarMaterialInput(vec3 normalEC)
+{
+    vec3 normalWC = sceneGISPlanarNormalWC(normalEC);
+    vec2 horizontal = normalWC.xy;
+    // One 8-bit octahedral quantization bin around +Z is style-flat.
+    float octBin = 2.0 / 255.0;
+    bool styleFlat = dot(horizontal, horizontal) <= octBin * octBin;
+    float slope = styleFlat ? 0.0 : acos(clamp(normalWC.z, 0.0, 1.0));
+    vec2 downslope = horizontal;
+    float aspect = 0.0;
+    if (!styleFlat) {
+        aspect = atan(downslope.x, downslope.y);
+        if (aspect < 0.0) {
+            aspect += czm_twoPi;
+        }
+    }
+
+    czm_materialInput materialInput;
+    materialInput.s = v_textureCoordinates.s;
+    materialInput.st = v_textureCoordinates;
+    materialInput.str = vec3(v_textureCoordinates, 0.0);
+    materialInput.normalEC = normalEC;
+    materialInput.tangentToEyeMatrix = czm_viewRotation;
+    materialInput.positionToEyeEC = -v_positionEC;
+    materialInput.height = v_positionWC.z;
+    materialInput.slope = slope;
+    materialInput.aspect = aspect;
+    materialInput.waterMask = 0.0;
+    return materialInput;
+}
+#endif
+
+void main()
+{
+    vec4 color = sceneGISComposeLayers(u_color, v_textureCoordinates);
+#if defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_MATERIAL)
+    vec3 normalEC = sceneGISPlanarNormalEC();
+#endif
+#ifdef SCENEGIS_MATERIAL
+    czm_material material = czm_getMaterial(
+        sceneGISPlanarMaterialInput(normalEC)
+    );
+    color.rgb = mix(color.rgb, material.diffuse, material.alpha);
+#endif
+#ifdef SCENEGIS_LIGHTING
     float diffuse = czm_getLambertDiffuse(czm_lightDirectionEC, normalEC);
     float intensity = clamp(
         diffuse * u_lambertDiffuseMultiplier + 0.3,

@@ -40,21 +40,20 @@
 - Branch: `feature/planar-surface-styling`
 - Base commit: `2086e5e42038dfdde23220dea8a33395445e6cd8`
 - Parent extensions: completed `planar-world`、`planar-terrain`、`planar-terrain-advanced`
-- ADR: S1=`ADR-0030`；S2=`ADR-0031`；S3 计划新增 `ADR-0032`
+- ADR: S1=`ADR-0030`；S2=`ADR-0031`；S3=`ADR-0032`
 - SGP: S1=None；任何 upstream-owned diff 必须先更新 phase plan 并登记合法 SGP
 
 ## Current handoff
 
-- Current state: S2 checkpoint `9d1cb4de44af3c2b21ad75bfc8b07c8dfd34ff8c` 已完成；Architecture 已依据
-  当前 Cesium Material/Globe 与 planar shader/normal/runtime 源码确认 S3 phase plan，正在建立规划 checkpoint 并派工。
-- Next action: Execution 仅按 confirmed S3 phase plan 实现、验证并提交 Architecture review request；review批准前
-  不请求manual gate，不commit、不push、不进入S4。
-- Current phase status: S1=`completed`；S2=`completed`；S3=`active`；S4=`planned`且未激活。
+- Current state: S3产品代码与Sandcastle development tooling follow-up均已通过Architecture review；`S3-R001`至
+  `S3-R006`及`S3-T001`至`S3-T006`全部fixed，项目负责人manual visual gate已通过。
+- Next action: Architecture创建S3独立本地checkpoint，再依据当前源码建立并派工S4 phase plan。
+- Current phase status: S1=`completed`；S2=`completed`；S3=`completed`；S4=`planned`且尚未建立phase plan。
 - Open discussions: None；S3 已确认复用 Cesium `Material`/Fabric source与uniform lifecycle，但由SceneGIS组装
   planar inputs，并冻结caller ownership、north-clockwise aspect、sampler budget与normal-render publication边界。
 - Latest review:
-  [S2 planar imagery color filters](reviews/2026-08-12-s2-planar-imagery-color-filters.md)为`approved`；
-  `S2-R001`至`S2-R004`全部fixed，manual gate通过。
-- Unresolved reviews: None；S3 review尚未创建。
+  [S3 planar terrain styling](reviews/2026-08-12-s3-planar-terrain-styling.md)为`approved`；
+  `S3-R001`至`S3-R006`及`S3-T001`至`S3-T006`全部fixed。
+- Unresolved reviews: None。
 - Known risks: S3使用Cesium `Material._uniforms` soft-private seam；eight-bit oct normal的flat量化需要style snap；
   Material samplers会压缩imagery texture-unit预算；Material identity切换必须兼顾上一normal replay与shader release。

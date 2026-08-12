@@ -3,6 +3,7 @@ import {
   Cartesian3,
   Color,
   Event,
+  Material,
   OrthographicFrustum,
   OrthographicOffCenterFrustum,
   PerspectiveFrustum,
@@ -15,7 +16,11 @@ import {
   SceneGISPlanarWorld,
   SceneMode,
 } from "../../../index.js";
-import buildSceneGISPlanarTerrainMesh from "../../../Source/SceneGIS/Renderer/_private/_SceneGISPlanarTerrainMesh.js";
+import processSceneGISPlanarTerrainTask from "../../../Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js";
+import {
+  createSceneGISPlanarTerrainMeshTask,
+  finalizeSceneGISPlanarTerrainMesh,
+} from "../../../Source/SceneGIS/Renderer/_private/_SceneGISPlanarTerrainMesh.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
   function createCoordinateSystem(minimum = -128.0, maximum = 128.0) {
@@ -64,15 +69,19 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
       height: 2,
       createdByUpsampling: source === "UPSAMPLED",
     });
+    const task = createSceneGISPlanarTerrainMeshTask(
+      terrainData,
+      tile.extent,
+      1.0,
+      -100.0,
+    );
     const content = {
       source,
       revision,
       terrainData,
-      mesh: buildSceneGISPlanarTerrainMesh(
+      mesh: finalizeSceneGISPlanarTerrainMesh(
         terrainData,
-        tile.extent,
-        1.0,
-        -100.0,
+        processSceneGISPlanarTerrainTask(task.parameters, []),
       ),
     };
     tile.terrainEntry = { activeContent: content };
@@ -96,7 +105,43 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.tilesLoaded).toBe(true);
     expect(world.imageryLayers.tilingScheme).toBe(world.tilingScheme);
     expect(world.terrainProvider).toBeUndefined();
+    expect(world.material).toBeUndefined();
     world.destroy();
+  });
+
+  it("atomically publishes caller-owned Material references", function () {
+    const world = createWorld();
+    const first = Material.fromType(Material.ElevationContourType);
+    const second = Material.fromType(Material.SlopeRampMaterialType);
+    const firstDestroy = spyOn(first, "destroy").and.callThrough();
+    const secondDestroy = spyOn(second, "destroy").and.callThrough();
+
+    world.material = first;
+    expect(world.material).toBe(first);
+    world.material = first;
+    expect(world.material).toBe(first);
+    expect(() => {
+      world.material = {};
+    }).toThrowDeveloperError();
+    expect(world.material).toBe(first);
+    const destroyed = Material.fromType(Material.ElevationContourType);
+    destroyed.destroy();
+    expect(() => {
+      world.material = destroyed;
+    }).toThrowDeveloperError();
+    expect(world.material).toBe(first);
+
+    world.material = second;
+    expect(world.material).toBe(second);
+    world.material = undefined;
+    expect(world.material).toBeUndefined();
+    world.material = first;
+    world.destroy();
+    expect(firstDestroy).not.toHaveBeenCalled();
+    expect(secondDestroy).not.toHaveBeenCalled();
+
+    first.destroy();
+    second.destroy();
   });
 
   it("atomically attaches, replaces, and detaches caller-owned terrain providers", function () {
@@ -647,6 +692,7 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     world.render(frameState);
     expect(surface.render).toHaveBeenCalledTimes(1);
     expect(surface.render.calls.argsFor(0)[0]).toBe(frameState);
+    expect(surface.render.calls.argsFor(0)[6]).toBe(world.material);
     expect(world._groundPrimitives).toBeUndefined();
     expect(world._registerGroundPrimitive).toBeUndefined();
     world.destroy();

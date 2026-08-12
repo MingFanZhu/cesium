@@ -328,6 +328,10 @@ npm run create-demo -- scenegis-<domain>-<feature>
 
 Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状态必须由 Specs 覆盖。关键交互和持久画面变化使用 Playwright。
 
+自 planar-surface-styling S4 起，SceneGIS Sandcastle 示例的 tool/control panel 面向用户的标题、标签、按钮、选项说明、
+帮助文字和状态提示统一使用中文。API 名称、枚举值、源码标识符、代码片段和必须与 Cesium 对齐的技术术语保持英文；不得仅为
+翻译上游 Sandcastle 通用界面而修改 upstream-owned 文件。
+
 ### 平面影像实现检查
 
 实现或评审 `SceneGISPlanarWorld` imagery 时同时检查：
@@ -578,6 +582,36 @@ Build/**
 ```
 
 如果生成结果错误，修改源模块、JSDoc、构建器或配置，不在生成文件中打补丁。修改 upstream-owned 生成器或配置时仍需 SGP。
+
+## Sandcastle 本地开发编排
+
+SceneGIS Sandcastle 示例可从仓库根目录使用单一入口启动：
+
+```powershell
+node scripts/scenegis/start-sandcastle-dev.mjs
+node scripts/scenegis/start-sandcastle-dev.mjs --port 6123 --id scenegis-planar-terrain
+```
+
+脚本先运行Sandcastle `build-gallery-no-embedding`完成初始gallery同步，再运行一次`build-ts`生成Vite所需declarations，
+然后由SceneGIS-owned子进程调用根`gulpfile.js`导出的`buildWatch` task。该task自身先执行一次full development build，再初始化
+incremental `buildCesium` context并注册watchers；只有task回调后子进程才发出一次ready marker。父进程收到marker并额外确认
+`Source/Cesium.js`及engine/widgets/root Unminified bundles存在后，才启动Sandcastle `dev-no-embedding`。因此clean generated
+tree不会与部分构建产物竞争，也不会额外执行第二次full build。
+
+默认Vite端口是`5173`；`--port`只接受`1`至`65535`的整数并以`--strictPort`启动，端口占用会明确失败而不会静默换端口。
+同一个validated port同时决定Vite监听端口、打印URL以及Sandcastle编译时的`__OUTER_ORIGIN__`和`__INNER_ORIGIN__`。
+SceneGIS-owned Vite wrapper复用upstream dev config的root、plugins和其余define，只覆盖这两个same-origin值，不复制完整配置。
+打印URL与两个compiled origins遵守浏览器canonical origin规则，因此`--port 80`仍向Vite传递数值`80`，但URL/origin为
+`http://localhost`。
+`--id`只接受lowercase Sandcastle slug。脚本输出的URL使用Vite根路由
+`http://localhost:<port>/index.html[?id=...]`。
+
+gallery source发生变化时，脚本防抖并串行重跑no-embedding gallery build；Vite和Cesium build watcher不会因此重启。
+Cesium engine和Shader source变化由`build-watch`生成对应开发产物。当前Sandcastle Vite配置关闭HMR，因此build完成后必须
+整页刷新浏览器；不要把该入口描述为module HMR。Vite开发服务使用same-origin资源，不需要固定`8081` mirror或额外根server。
+
+`SIGINT`、`SIGTERM`、端口占用、启动失败或任一长期子进程异常退出都会关闭gallery watcher并终止其余进程树。不要绕过
+该入口另行后台启动同一组进程，否则脚本无法负责那些外部进程的清理。
 
 ## 完成任务前检查
 

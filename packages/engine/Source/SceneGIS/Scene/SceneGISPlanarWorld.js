@@ -3,6 +3,7 @@ import Cartesian3 from "../../Core/Cartesian3.js";
 import destroyObject from "../../Core/destroyObject.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import Frozen from "../../Core/Frozen.js";
+import Material from "../../Scene/Material.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import SceneGISPlanarCoordinateSystem from "../Core/SceneGISPlanarCoordinateSystem.js";
 import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
@@ -75,6 +76,17 @@ function validateLambertDiffuseMultiplier(value) {
   if (!Number.isFinite(value) || value < 0.0) {
     throw new DeveloperError(
       "lambertDiffuseMultiplier must be a finite non-negative number.",
+    );
+  }
+}
+
+function validateMaterial(value) {
+  if (
+    value !== undefined &&
+    (!(value instanceof Material) || value.isDestroyed())
+  ) {
+    throw new DeveloperError(
+      "material must be an undestroyed Material or undefined.",
     );
   }
 }
@@ -162,6 +174,7 @@ function SceneGISPlanarWorld(options) {
   this._baseColor = Color.clone(baseColor);
   this._enableLighting = enableLighting;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
+  this._material = undefined;
   this._show = true;
   this._terrainProvider = undefined;
   this._imageryLayers = new SceneGISPlanarImageryLayerCollection({
@@ -232,6 +245,36 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
   imageryLayers: {
     get: function () {
       return this._imageryLayers;
+    },
+  },
+  /**
+   * Gets or sets the caller-owned Cesium Material used to style planar
+   * terrain. Assignment is published by the next successful normal render.
+   * Replacing, clearing, or destroying the world never destroys the material.
+   * The qualified built-ins are ElevationContour, ElevationRamp, SlopeRamp,
+   * and AspectRamp. Custom Fabric sources may consume planar materialInput
+   * fields: normalized tile st/s/str, topology-up normalEC, positionToEyeEC,
+   * the fixed east/north/up tangentToEyeMatrix, absolute world-Z height,
+   * +Z-relative slope, north-clockwise downslope aspect, and waterMask=0.
+   * Only diffuse and alpha are composited; normal, specular, shininess,
+   * emission, translucent passes, and full Globe Material compatibility are
+   * not supported.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {Material|undefined}
+   * @default undefined
+   * @exception {DeveloperError} The assigned value is not an undestroyed Material or undefined.
+   */
+  material: {
+    get: function () {
+      return this._material;
+    },
+    set: function (value) {
+      if (value === this._material) {
+        return;
+      }
+      validateMaterial(value);
+      this._material = value;
     },
   },
   /**
@@ -421,6 +464,7 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
     this._baseColor,
     this._enableLighting,
     this._lambertDiffuseMultiplier,
+    this._material,
   );
 };
 
