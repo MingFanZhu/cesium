@@ -222,15 +222,23 @@ function pushSkirtEdge(
   return { offset, skirtMinimumHeight };
 }
 
-function accumulateTriangleNormal(positions, accumulated, i0, i1, i2) {
+function accumulateTriangleNormal(
+  positions,
+  accumulated,
+  i0,
+  i1,
+  i2,
+  extentWidth,
+  extentHeight,
+) {
   const offset0 = i0 * 3;
   const offset1 = i1 * 3;
   const offset2 = i2 * 3;
-  const ax = positions[offset1] - positions[offset0];
-  const ay = positions[offset1 + 1] - positions[offset0 + 1];
+  const ax = (positions[offset1] - positions[offset0]) * extentWidth;
+  const ay = (positions[offset1 + 1] - positions[offset0 + 1]) * extentHeight;
   const az = positions[offset1 + 2] - positions[offset0 + 2];
-  const bx = positions[offset2] - positions[offset0];
-  const by = positions[offset2 + 1] - positions[offset0 + 1];
+  const bx = (positions[offset2] - positions[offset0]) * extentWidth;
+  const by = (positions[offset2 + 1] - positions[offset0 + 1]) * extentHeight;
   const bz = positions[offset2 + 2] - positions[offset0 + 2];
   const nx = ay * bz - az * by;
   const ny = az * bx - ax * bz;
@@ -275,7 +283,14 @@ function createOctEncodedNormals(
   width,
   height,
   skirtEdges,
+  extent,
 ) {
+  // Positions keep unit-local XY for rendering, but the transferable oct
+  // stream is a fixed planar world-axis normal. Restore the tile's meter
+  // metric before accumulation so non-uniform model scale cannot amplify
+  // oct quantization error.
+  const extentWidth = extent.maximumX - extent.minimumX;
+  const extentHeight = extent.maximumY - extent.minimumY;
   const accumulated = new Float64Array(surfaceVertexCount * 3);
   if (surfaceIndices) {
     for (let i = 0; i < surfaceIndices.length; i += 3) {
@@ -285,6 +300,8 @@ function createOctEncodedNormals(
         surfaceIndices[i],
         surfaceIndices[i + 1],
         surfaceIndices[i + 2],
+        extentWidth,
+        extentHeight,
       );
     }
   } else {
@@ -300,6 +317,8 @@ function createOctEncodedNormals(
           upperLeft,
           lowerLeft,
           upperRight,
+          extentWidth,
+          extentHeight,
         );
         accumulateTriangleNormal(
           positions,
@@ -307,6 +326,8 @@ function createOctEncodedNormals(
           upperRight,
           lowerLeft,
           lowerRight,
+          extentWidth,
+          extentHeight,
         );
       }
     }
@@ -425,6 +446,7 @@ function createHeightmapMesh(parameters, transferableObjects) {
     width,
     height,
     [west, south, east, north],
+    parameters.extent,
   );
 
   transferableObjects.push(positions.buffer, octEncodedNormals.buffer);
@@ -931,6 +953,7 @@ function createQuantizedMesh(parameters, transferableObjects) {
     undefined,
     undefined,
     edgeArrays,
+    parameters.extent,
   );
   const IndexType = vertexCount > 65536 ? Uint32Array : Uint16Array;
   const indices = new IndexType(outputIndices);

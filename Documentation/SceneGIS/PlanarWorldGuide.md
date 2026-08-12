@@ -126,9 +126,12 @@ request/mesh/GPU资源，但不销毁provider。
 
 `enableLighting`默认关闭。启用后，non-flat Heightmap/Quantized terrain使用Worker按真实surface topology生成的
 area-weighted smooth vertex normals；flat/no-provider与active FLAT fallback继续使用fragment geometric normal。
+Worker在tile extent真实meter metric中累计normal，2-byte oct stream固定在planar world axes；shader仅作world-to-eye
+rotation，避免EPSG:3857大尺度model transform放大量化误差。
 `lambertDiffuseMultiplier`可调Diffuse强度。Smooth normals改善同一mesh内共享边和代表性LOD边界连续性，但不保证
 任意独立provider tile的boundary gradient完全一致。自定义planar CRS应显式配置稳定`DirectionalLight`，不要依赖
-SunLight方向。
+SunLight方向。双面surface允许从上下两侧观察，但lighting始终使用稳定topology-up/planar `+Z` hemisphere，
+不会为面向相机而翻转Lambert法线。
 相机位于surface下方只在underground mode中是合法状态；surface mode会在下一次enabled controller update沿+Z
 恢复minimum clearance而不调用Home。Underground可通过中键orbit显式穿越；continuous/swept collision、free-look
 与地下材质仍未实现。
@@ -152,6 +155,8 @@ SunLight方向。
 降低 `maximumScreenSpaceError` 会选择更多 tile；提高 `tileCacheSize` 会保留更多 unprotected tile record。每个 shown imagery layer 会增加 texture/request/cache 成本，但不会增加每个 ideal tile 的 draw command 数。Terrain LERC decode与Heightmap/Quantized mesh在唯一terrain Worker中执行，normal render每帧仍最多启动两个terrain task并promotion两个GPU content。每个non-flat final vertex增加2 bytes oct normal和一个terrain normal vertex buffer；`enableLighting`选择smooth或geometric Lambert variant但不增加command。调参时同时观察 selected/submitted tile、resident tile、request/texture/binding、mesh/promotion与warm-frame allocation；不要仅用单帧 FPS 推断泄漏或稳定性。
 
 release qualification 使用至少 16 个 submitted tiles、bare/双层影像各 120 warm frames、五轮 camera/cache churn、60 次 depth replay，以及重复 Widget/Viewer 生命周期作为确定性门禁。不同机器的 timing 只能作趋势参考。
+
+高级地形交付另使用一个本地 real-Context 资格场景串联 LERC decode、Heightmap/Quantized mesh Worker、provider replacement、surface/underground navigation、smooth lighting、imagery/depth 与资源销毁。每种格式只执行 30 个 warm frames 和 3 轮有界 churn；hard gate 是 readiness、command/VA/shader/task/GPU/resource 收敛，median/P95 timing 仅作同机诊断，不是固定性能阈值。公网 terrain 与 imagery 只属于 Sandcastle 的 best-effort 人工检查，不进入自动化门禁。
 
 ## 故障排查
 

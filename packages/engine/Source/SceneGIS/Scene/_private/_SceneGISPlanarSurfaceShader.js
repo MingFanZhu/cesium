@@ -31,7 +31,8 @@ out vec3 v_normalEC;
 void main()
 {
     v_textureCoordinates = position.xy + vec2(0.5);
-    v_normalEC = czm_normal * czm_octDecode(normal);
+    // Worker oct normals are fixed planar world-axis vectors.
+    v_normalEC = czm_viewRotation * czm_octDecode(normal);
     gl_Position = czm_modelViewProjection * vec4(position, 1.0);
 }
 `;
@@ -79,7 +80,16 @@ uniform float u_lambertDiffuseMultiplier;`
         ? "v_normalEC"
         : "cross(dFdx(v_positionEC), dFdy(v_positionEC))"
     });
-    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);
+    ${
+      normalMode === "smooth"
+        ? "// Worker normals use the stable topology-up hemisphere."
+        : `// Derivative winding can reverse below a double-sided surface. Keep
+    // lighting in the stable planar +Z hemisphere instead of facing the camera.
+    vec3 planarUpEC = normalize(czm_normal * vec3(0.0, 0.0, 1.0));
+    if (dot(normalEC, planarUpEC) < 0.0) {
+        normalEC = -normalEC;
+    }`
+    }
     float diffuse = czm_getLambertDiffuse(czm_lightDirectionEC, normalEC);
     float intensity = clamp(diffuse * u_lambertDiffuseMultiplier + 0.3, 0.0, 1.0);
     color.rgb *= czm_lightColor * intensity;`

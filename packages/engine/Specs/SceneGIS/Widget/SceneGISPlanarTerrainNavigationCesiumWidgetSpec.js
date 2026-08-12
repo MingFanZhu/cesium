@@ -15,6 +15,7 @@ import {
 import CameraEventType from "../../../Source/Scene/CameraEventType.js";
 import SceneGISPlanarCamera from "../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarCamera.js";
 import getWebGLStub from "../../../../../Specs/getWebGLStub.js";
+import pollToPromise from "../../../../../Specs/pollToPromise.js";
 
 describe("SceneGIS/Widget/SceneGISPlanarTerrainNavigationCesiumWidget", function () {
   let container;
@@ -130,11 +131,11 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainNavigationCesiumWidget", function
       },
     });
 
-    for (let i = 0; i < 8; ++i) {
+    await pollToPromise(function () {
       scene.initializeFrame();
       scene.render();
-      await Promise.resolve();
-    }
+      return world.tilesLoaded;
+    });
     expect(world.tilesLoaded).toBe(true);
 
     const sampleX = -32.0;

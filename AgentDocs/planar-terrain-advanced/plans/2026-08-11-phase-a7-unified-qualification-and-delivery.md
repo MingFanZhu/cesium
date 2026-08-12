@@ -3,17 +3,19 @@
 ## 元数据
 
 - Plan type：`phase`
-- Status：`active`
+- Status：`completed`
 - Owner role：`execution`
 - Architecture review：`confirmed`
 - Architecture reviewer：Architecture Agent（依据项目负责人授予的后续阶段自主批准权限）
 - Created：`2026-08-11`
-- Updated：`2026-08-11`
+- Updated：`2026-08-12`
 - Parent plan：
   [总体计划：SceneGIS 平面高级地形](2026-08-10-planar-terrain-advanced-extension.md)
 - Entry checkpoint：`0009fbd414e231a5f3d079aa9dc03159da63cad1`
 - Related decisions：ADR-0024～ADR-0029；A7不改变既有架构契约，默认不新增ADR
-- Related review：Execution完成实现与证据后创建pending A7 review
+- Related review：
+  [A7 implementation/release-evidence review](../reviews/2026-08-11-a7-unified-qualification-and-delivery.md)（`approved`；
+  A7-R001/R002 fixed，项目负责人人工验收通过）
 - Related patch：None planned；预计 upstream-owned files=`0`、A7 SGP=`0`
 
 ## 阶段目标
@@ -183,3 +185,87 @@ A7和整个extension的completion gate；Execution不得以自动化或自己的
   upstream修改必须暂停通知项目负责人。
 - 完成后回写phase results、精确命令/计数、timing性质、manual gate、ownership与generated状态，创建pending review并
   通知Architecture Agent；不commit、不push。
+
+## 偏差与结果
+
+### 实际影响路径与 source-to-spec mapping
+
+| 类型                     | 路径                                                                                       | 结果                                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 新增统一资格             | `packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarTerrainAdvancedQualificationSpec.js`  | 唯一 direct case；本地 LERC URL provider 经真实 `decodeLerc`/Heightmap mesh Worker，随后同一 World 替换为本地 Quantized-mesh provider |
+| focused test correction  | `packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarTerrainNavigationCesiumWidgetSpec.js` | 将固定 8 render frames 改为有界 `pollToPromise(world.tilesLoaded)`；A6 Worker 异步完成不再被错误等同于固定帧数                        |
+| A7-R001 product fix      | `packages/engine/Source/SceneGIS/Scene/_private/_SceneGISPlanarSurfaceShader.js`           | 移除camera-facing normal翻转；smooth保持topology-up，geometric fallback归一到planar `+Z` hemisphere                                   |
+| A7-R001 focused evidence | existing SurfaceShader/terrain Widget Specs                                                | shader直接锁定两种稳定方向；真实Context锁定同一坡面点上下观察像素、command/shader/resource identity                                   |
+| A7-R002 product fix      | private terrain Worker tasks + SurfaceShader                                               | meter-metric world-axis normal生成；smooth shader只用`czm_viewRotation`作world-to-eye rotation                                        |
+| A7-R002 focused evidence | existing Worker/Shader/terrain Widget/A7 qualification Specs                               | Heightmap/Quantized analytic EPSG:3857 normal、连贯lit neighborhood与warm/depth/resource回归                                          |
+| Sandcastle metadata      | `packages/sandcastle/gallery/scenegis-planar-terrain/sandcastle.yaml`                      | 把旧 geometric-only 描述修正为 smooth terrain lighting + geometric-normal flat fallback                                               |
+| durable docs             | `Documentation/SceneGIS/PlanarWorldGuide.md`、`PlanarWorldUpgradeChecklist.md`             | 记录 A7 资格协议、timing 非硬阈值和升级复核入口                                                                                       |
+| AgentDocs                | 本 phase、extension/README/index 与 A7 pending review                                      | 实际结果、验证、ownership、人工门禁和 review handoff                                                                                  |
+
+Product runtime delta为SceneGIS-owned terrain Worker normal metric与private shader transform窄修复；public API、Worker task kind/transfer shape、mesh positions、terrain runtime、navigation/controller均未修改。A7初始新增direct unique cases=`1`；R001/R002没有新增`it`，扩展既有Worker/Shader/terrain Widget/qualification cases。R002复核unique focused cases=`45/45`（Worker `8`、Surface aggregate `34`且含Shader `4`、terrain Widget `2`、qualification `1`）。
+
+### 实际资格设计与偏差
+
+- 统一 case 使用完整 EPSG:3857 extent、Level-0 actual cover和本地 257×257 LERC fixture。LERC 经公开 URL provider 和真实 TaskProcessor Worker decode，Heightmap/Quantized 都经现有 mesh Worker进入同一 Surface；同一个 World/provider generation 原子替换为仓库本地 quantized-mesh tile。
+- 两种格式各执行 `30` 个 warm frames；每帧锁定 `tilesLoaded`、相同 command/VA/shader references、terrain debug counters及Surface buffer/VA/texture/command/shader allocation不增长。三轮 churn分别覆盖left pan、middle rotate和wheel + lighting切换，并在每轮后重新收敛。
+- 资格 case同时锁定smooth/unlit pixel变化、本地imagery binding、resident height、terrain/window/depth与public Z=0 pick职责、surface clearance、underground双向middle-orbit、provider replacement后旧VA退出与最终buffer/index/VA reference balance。
+- 与初始计划“LOD联合闭合”的布局偏差：没有把257×257 Level-0 LERC复制为四份Level-1 fallback mesh。初始诊断在通用5秒poll窗口内不能完成且显著放大资格成本，最终case保持单根actual cover并通过三轮camera convergence验证selection/readiness；multi-level LOD、four-child gate与upsample继续由既有terrain runtime/Widget focused suites负责。这不改变产品契约或验收结论。
+- A7暴露一个test-only可靠性缺口：既有terrain-navigation real-Context fixture在A6异步Worker后仍假定固定8帧ready，连续两次得到`tilesLoaded=false`和undefined pick。修正为仓库既有有界readiness poll后稳定`1/1`；product runtime delta仍为0。
+- Chrome 151 / Windows 10同机advisory measurement：30-frame Heightmap median `0.400 ms`、P95 `0.600 ms`；Quantized median `0.300 ms`、P95 `0.500 ms`。计时分辨率约0.1 ms，只作本机诊断，不作为自动hard gate；最终qualification runner case time在复跑中为`0.402～0.736 s`。
+
+### 验证矩阵
+
+| 命令                                                                                          | 结果            | 备注                                                                                           |
+| --------------------------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run test -- --includeName "SceneGIS/Widget/SceneGISPlanarTerrainAdvancedQualification"`  | Exit 0, `1/1`   | 大extent lit isolated-outlier `<=8`；warm/replacement/navigation/lifecycle继续通过             |
+| `npm run test -- --includeName "SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks"`              | Exit 0, `8/8`   | 真实TaskProcessor transfer；Heightmap/Quantized大extent analytic world normal与input ownership |
+| `npm run test -- --includeName "SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget"`           | Exit 0, `2/2`   | Heightmap/Quantized real Context regression                                                    |
+| `npm run test -- --includeName "SceneGIS/Widget/SceneGISPlanarTerrainNavigationCesiumWidget"` | Exit 0, `1/1`   | 修正前固定8帧连续`0/1`，readiness correction后通过                                             |
+| `npm run test -- --includeName "SceneGIS/Scene/SceneGISPlanarCameraController"`               | Exit 0, `47/47` | A1-A3 navigation/clearance/crossing regression                                                 |
+| `npm run test -- --includeName "SceneGIS/Scene/SceneGISPlanarSurfaceShader"`                  | Exit 0, `4/4`   | smooth不翻转；geometric显式归一到`czm_normal * +Z` hemisphere                                  |
+| `npm run test -- --includeName "SceneGIS/Scene/SceneGISPlanarSurface"`                        | Exit 0, `34/34` | aggregate含Shader `4`；unlit/imagery/single command/depth replay与Surface资源回归              |
+| `npm run test -- --includeName "SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget"`           | Exit 0, `2/2`   | 同一坡面点上下观察stable lit pixel；command/VA/shader/counter identity与destroy不退化          |
+| `npm run build`                                                                               | Exit 0          | development build                                                                              |
+| `npm run build-release`                                                                       | Exit 0          | release build                                                                                  |
+| `npm run build-ts`                                                                            | Exit 0          | 仓库既有 TSD-JSDoc warnings；无A7新增warning                                                   |
+| `npm run build-docs`                                                                          | Exit 0          | API docs生成                                                                                   |
+| `npm run tsc`                                                                                 | Exit 0          | TypeScript validation                                                                          |
+| `node scripts/scenegis/verify-planar-packages.mjs`                                            | Exit 0          | 26/2/28 inventory、Worker source/dev/release/tar、ESM/CJS/private/broken-entry通过             |
+| `npm run build-gallery-no-embedding`（`packages/sandcastle`）                                 | Exit 0          | no-embedding，307 examples                                                                     |
+| `npm run build-sandcastle -- --no-embeddings`                                                 | Exit 0          | Vite build；仅既有chunk/plugin timing warnings                                                 |
+| scoped ESLint/Prettier/Markdownlint                                                           | Exit 0          | changed JS/YAML/Markdown                                                                       |
+| `git diff --check`                                                                            | Exit 0          | 仅line-ending notices                                                                          |
+| `node scripts/scenegis/audit-upstream-patches.mjs`                                            | Exit 0          | current delivery upstream-owned entries=0、generated status=0                                  |
+
+### Ownership、生成与剩余风险
+
+- 相对 implementation base `a0b412a7d2234d4247601c3e0e798ddd91f294c8`，产品源码改动=`2`：SceneGIS-owned private terrain Worker tasks与Surface shader builder；其余变更为SceneGIS Specs、唯一terrain Sandcastle metadata、durable docs与AgentDocs。
+- Upstream-owned files=`0`；A7 SGP=`0`；`.scenegis/upstream-patches.json`、SGP-0001/0002与marker均未修改；新增`SCENEGIS_PATCH` marker=`0`。
+- Public inventory保持engine/widgets/root `26/2/28`；无新增declaration/API。生成文件status=`0`。
+- 未运行standard embeddings，也未访问公网。公开OSM/LERC成功、Credit、console、Mountain/LOD、Lighting、surface三手势/clearance、underground上下侧/双向穿越和Home保持mode仍由项目负责人在现有Sandcastle完成人工门禁。
+- Architecture/code/release-evidence review曾于`2026-08-12`依据自动化证据批准。Reviewer独立复跑A7
+  qualification `1/1`、terrain-navigation Widget `1/1`、`git diff --check`与official upstream audit；Level-0
+  unified case与既有multi-level/four-child/upsample focused suites的证据拆分获接受。
+- 随后项目负责人人工验收稳定复现A7-R001：Lighting开启时地下视角出现大面积黑暗碎块，关闭Lighting恢复。
+  Architecture确认当前lit shader的camera-facing `faceforward`会在相机越过地表时翻转topology-up normal，与Globe
+  terrain稳定outward normal语义不一致。Review已恢复为`changes-requested`；允许在A7内作SceneGIS-owned窄修复，
+  补一个focused地表上下侧光照证据并同步ADR-0029/durable docs，不改变Worker normal协议、mesh、public API、
+  World/Camera或build/upstream边界。
+- Execution已移除camera-facing翻转：smooth直接使用Worker topology-up normal，geometric fallback只在derivative winding
+  落入planar `-Z` hemisphere时显式翻转。Shader/Surface `34/34`、terrain Widget `2/2`与qualification `1/1`通过；
+  同一非平坦地形点从上下两侧观察的lit RGBA neighborhood在每分量`<=8`容差内一致，且command/shader/terrain counters不变。
+- A7-R001 focused修复经Architecture独立复跑Shader `4/4`、terrain Widget `2/2`、`git diff --check`与official
+  upstream audit后确认关闭，review恢复为`approved`。
+- 项目负责人再次人工复测在公开EPSG:3857/LERC Surface视角发现Lighting全图密集噪点，关闭Lighting后恢复；
+  Architecture登记A7-R002并把review恢复为`changes-requested`。初步源码事实显示Worker在unit-local XY与meter Z上
+  计算并oct量化normal，shader再经大尺度非均匀model transform解释，现有小extent fixtures未覆盖该精度边界。
+- Execution须先以deterministic大extent Heightmap/Quantized fixture确认或推翻该根因；确认后统一到真实平面米制
+  normal坐标空间并补一个大extent real-Context光照证据。若根因不成立则停止并回报，不得用禁用smooth lighting或
+  增加噪声掩盖逻辑绕过。A7与extension保持`active`，不得commit、push或标记completed。
+- Execution已确认并修复A7-R002：两个Worker topology在40075016.68557849米extent上输出fixed world-axis oct normal，
+  decoded normal与analytic direction dot均`>0.9999`；shader用`czm_viewRotation`避免model inverse scale。Worker `8/8`、
+  Surface `34/34`、terrain Widget `2/2`、qualification `1/1`通过；large-extent lit neighborhood outlier count`<=8`，
+  warm command/VA/shader、imagery/depth与资源生命周期不退化。
+- Architecture独立复跑Worker `8/8`、Surface/Shader `34/34`、terrain Widget `2/2`、A7 qualification `1/1`，并运行
+  `npm run build`、changed-scope ESLint/Prettier/Markdownlint、`git diff --check`与official upstream audit，全部通过。
+  项目负责人随后在公开EPSG:3857/LERC Sandcastle目视确认Lighting正确。A7-R002关闭，phase与extension完成。

@@ -372,9 +372,12 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - Lit non-flat terrain必须使用existing Worker mesh task按真实Heightmap/Quantized surface topology生成的
   area-weighted `Uint8x2` oct normals；skirt duplicate复制surface normal且skirt triangles不参与累计。Main thread
   必须验证exact TypedArray与`2 * vertexCount` byte length，再与position/index/VA放入同一原子GPU lifecycle。
-- Smooth variant以`czm_octDecode`和`czm_normal`恢复并插值eye-space normal；flat/no-provider和active `FLAT`
-  fallback继续使用`dFdx`/`dFdy` geometric normal，unlit不得读取normal attribute。所有lit variant继续用
-  face-forward保持双面surface；不要增加back-face culling、runtime邻居normal registry或camera collision。
+- Worker normal必须在tile extent的真实meter XY与meter Z中累计；oct stream是fixed planar world-axis normal，不能在
+  unit-local XY/meter Z混合尺度上先量化。Smooth variant以`czm_octDecode`和`czm_viewRotation`恢复并插值eye-space
+  normal；flat/no-provider和active `FLAT`
+  fallback继续使用`dFdx`/`dFdy` geometric normal，unlit不得读取normal attribute。Smooth lighting保持Worker
+  topology-up方向，geometric fallback必须归一到planar `+Z` hemisphere；double-sided可见性不能用camera-facing
+  normal决定。不要增加back-face culling、runtime邻居normal registry或camera collision。
 - Base color和imagery必须先完成single-pass bottom-to-top合成，再统一应用scene light、Lambert与固定
   ambient；depth pick仍只重放最近normal render的exact command references。
 - Real Context Spec至少证明smooth/geometric/unlit mode、lit/unlit像素不同、terrain/imagery single command、

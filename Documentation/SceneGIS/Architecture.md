@@ -334,12 +334,15 @@ pyramid；provider只拥有Resource/config/Event和global Credit reference，glo
 light automatic uniforms，不拥有或销毁`scene.light`。需要稳定方向的应用应显式使用
 `DirectionalLight`，不能为任意planar CRS赋予默认SunLight新的投影语义。
 
-Lit non-flat terrain使用Worker按真实surface topology累计的area-weighted smooth normals；Heightmap使用
+Lit non-flat terrain使用Worker按真实surface topology和tile extent meter metric累计fixed planar world-axis
+area-weighted smooth normals；Heightmap使用
 regular-grid triangle顺序，Quantized mesh使用实际surface indices。Normals编码为每个final vertex 2 bytes的
 transferable `Uint8x2` oct stream；skirt duplicate复制对应surface normal，skirt triangles不参与累计。Vertex
-shader以`czm_octDecode`和`czm_normal`恢复eye-space normal。Flat/no-provider和active `FLAT` fallback继续从
+shader以`czm_octDecode`和`czm_viewRotation`恢复eye-space normal，不能再用包含tile非均匀scale的model normal
+matrix解释oct stream。Flat/no-provider和active `FLAT` fallback继续从
 eye-space position以`dFdx`/`dFdy`计算geometric normal；unlit variant不声明或读取normal attribute。两种lit
-variant都使用Cesium face-forward规则维持双面surface。
+variant都使用稳定planar-outward lighting orientation：smooth保持Worker topology-up方向，derivative winding显式
+归一到`czm_normal * +Z` hemisphere。Surface仍双面可见，但观察侧不得翻转Lambert法线。
 
 Base color与所有shown imagery先bottom-to-top单pass合成，再统一应用Lambert diffuse、light color和固定`0.3`
 环境亮度。Shader cache identity包含layer count、lighting flag与normal mode；切换lighting只更新既有DrawCommand的

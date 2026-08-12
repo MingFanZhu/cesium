@@ -25,7 +25,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     expect(fragmentShader).toContain("sample1.a * u_alpha1");
   });
 
-  it("lights the fully composed color from a face-forward geometric normal", function () {
+  it("lights the fully composed color from a stable planar-up geometric normal", function () {
     const vertexShader = SceneGISPlanarSurfaceShader.createVertexShader(true);
     const fragmentShader = SceneGISPlanarSurfaceShader.createFragmentShader(
       2,
@@ -38,9 +38,9 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     expect(fragmentShader).toContain(
       "cross(dFdx(v_positionEC), dFdy(v_positionEC))",
     );
-    expect(fragmentShader).toContain(
-      "faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC)",
-    );
+    expect(fragmentShader).toContain("czm_normal * vec3(0.0, 0.0, 1.0)");
+    expect(fragmentShader).toContain("dot(normalEC, planarUpEC) < 0.0");
+    expect(fragmentShader).not.toContain("faceforward");
     expect(fragmentShader).toContain(
       "czm_getLambertDiffuse(czm_lightDirectionEC, normalEC)",
     );
@@ -65,13 +65,14 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     );
 
     expect(vertexShader).toContain("in vec2 normal");
-    expect(vertexShader).toContain("czm_normal * czm_octDecode(normal)");
+    expect(vertexShader).toContain("czm_viewRotation * czm_octDecode(normal)");
+    expect(vertexShader).not.toContain("czm_normal * czm_octDecode(normal)");
     expect(vertexShader).not.toContain("v_positionEC");
     expect(fragmentShader).toContain("normalize(v_normalEC)");
     expect(fragmentShader).not.toContain("dFdx");
-    expect(fragmentShader).toContain(
-      "faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC)",
-    );
+    expect(fragmentShader).toContain("stable topology-up hemisphere");
+    expect(fragmentShader).not.toContain("faceforward");
+    expect(fragmentShader).not.toContain("planarUpEC");
     expect(fragmentShader.indexOf("sample1.a * u_alpha1")).toBeLessThan(
       fragmentShader.indexOf("color.rgb *= czm_lightColor * intensity"),
     );

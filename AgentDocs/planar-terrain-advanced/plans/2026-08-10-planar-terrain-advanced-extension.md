@@ -3,12 +3,12 @@
 ## 元数据
 
 - 计划类型（Plan type）：`extension`
-- 状态（Status）：`active`
+- 状态（Status）：`completed`
 - 负责人角色（Owner role）：`architecture`
 - 架构评审（Architecture review）：`confirmed`
 - 架构评审人（Architecture reviewer）：项目负责人
 - 创建日期（Created）：`2026-08-10`
-- 更新日期（Updated）：`2026-08-11`
+- 更新日期（Updated）：`2026-08-12`
 - Parent extensions：
   [completed `planar-world`](../../planar-world/README.md)、
   [completed `planar-terrain`](../../planar-terrain/README.md) 和
@@ -326,3 +326,34 @@ delivery evidence，不授权新增Shader、Worker protocol或build seam。
   Specs、Worker/package smoke与唯一terrain Sandcastle事实激活A7：新增一个本地真实Context统一资格case，采用有限
   `30` warm frames与`3` churn rounds，复核release/package并保留项目负责人人工验收；不新增workflow、重复E2E或固定
   跨机器性能阈值。
+- `2026-08-11`：Execution完成A7统一资格与交付，product runtime delta=`0`。唯一direct case以本地LERC和
+  Quantized provider在同一World串联真实Worker、navigation、lighting、imagery/depth、provider replacement、
+  `30+30` warm frames、`3` churn rounds与destroy balance；focused aggregate `59/59`及
+  build/release/types/docs/package/no-embedding Sandcastle/static/audit通过。既有terrain-navigation固定8帧
+  readiness假设改为有界poll。A7/extension保持`active`，handoff为Architecture review，之后仍需项目负责人人工验收。
+- `2026-08-12`：Architecture完成A7 code/release-evidence review，独立复跑qualification `1/1`、
+  terrain-navigation `1/1`、diff check与official audit并批准；接受Level-0 unified delivery与既有multi-level focused
+  suites的证据拆分。A7/extension仍为`active`，只等待项目负责人在唯一terrain Sandcastle完成人工验收。
+- `2026-08-12`：项目负责人人工验收稳定复现Lighting开启时地下视角出现大面积黑暗碎块，关闭Lighting恢复。
+  Architecture确认当前planar lit shader以camera-facing `faceforward`翻转topology-up normal，而Globe terrain采用稳定
+  outward normal；登记A7-R001并将review恢复为`changes-requested`。允许Execution仅在A7内修复stable +Z/topology-up
+  lighting、补最小地表上下侧证据并同步ADR-0029/durable docs；不改变Worker normal协议、mesh、public API、
+  World/Camera或upstream/build边界。
+- `2026-08-12`：Execution已将smooth lighting固定为Worker topology-up方向，并仅把derivative geometric fallback
+  归一到planar `+Z` hemisphere。Shader/Surface `34/34`、terrain Widget `2/2`与qualification `1/1`通过；
+  A7-R001标记execution-fixed，A7/extension继续`active`等待Architecture re-review与项目负责人人工复测。
+- `2026-08-12`：Architecture focused re-review确认A7-R001关闭：smooth normal与观察侧解耦，geometric只纠正
+  derivative winding而保留坡度；独立复跑Shader `4/4`、真实terrain Widget `2/2`、diff check与official audit均
+  通过。A7 review恢复为`approved`，extension仍`active`并只等待项目负责人Sandcastle人工复测。
+- `2026-08-12`：项目负责人复测公开EPSG:3857/LERC案例时发现Surface Lighting仍产生全图密集噪点，关闭Lighting
+  后立即恢复。Architecture复现并登记A7-R002：现有Worker在unit-local XY与meter Z上计算normal并先作`Uint8x2`
+  oct量化，shader随后通过大尺度非均匀model transform解释该normal，可能把量化误差放大为噪声。Review恢复为
+  `changes-requested`；Execution须先用deterministic大extent fixture验证，再修复统一的米制normal坐标空间并补
+  Heightmap/Quantized及real-Context证据。A7-R001保持fixed，不得提交、push或结束extension。
+- `2026-08-12`：Execution以40075016.68557849米extent的Heightmap/Quantized plane确认R002根因，并将Worker
+  normal定义改为meter-metric fixed world-axis、shader改用`czm_viewRotation`。Worker `8/8`、Surface `34/34`、
+  terrain Widget `2/2`、qualification `1/1`通过；R002标记execution-fixed，等待Architecture re-review与人工复测。
+- `2026-08-12`：Architecture focused re-review确认A7-R002关闭：独立复跑Worker `8/8`、Surface/Shader `34/34`、
+  terrain Widget `2/2`、A7 qualification `1/1`与build/static/audit，均通过；项目负责人随后在公开
+  EPSG:3857/LERC Sandcastle目视确认Lighting正确。A7 review改为`approved`，A7与本extension改为`completed`，
+  由Architecture形成独立中文本地checkpoint。

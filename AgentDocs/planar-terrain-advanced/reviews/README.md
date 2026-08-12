@@ -12,3 +12,5 @@
   （`approved`；A5-R001～R003全部关闭，Architecture独立复跑关键focused suites与审计）
 - [A6 平面地形平滑法线与 LOD 光照连续性](2026-08-11-a6-smooth-terrain-normals-and-lod-lighting.md)
   （`approved`；A6-R001/R002全部关闭，Architecture独立复跑两个focused suites与审计）
+- [A7 平面高级地形统一资格与交付](2026-08-11-a7-unified-qualification-and-delivery.md)
+  （`approved`；A7-R001/R002 fixed，Architecture focused re-review与项目负责人人工验收通过）

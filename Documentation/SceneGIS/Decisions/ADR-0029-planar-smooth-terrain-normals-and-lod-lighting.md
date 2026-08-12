@@ -42,10 +42,11 @@ mesh内部的插值法线连续，并对共享解析曲面提供代表性的跨t
 ### Worker 生成 topology-aware smooth normals
 
 现有`createHeightmapMesh`与`createQuantizedMeshMesh` task必须在最终tile-local positions与surface topology上
-生成model-coordinate smooth vertex normals：
+生成fixed planar world-axis smooth vertex normals：
 
-1. 只遍历`surfaceIndexCount`内的CCW surface triangles，使用triangle cross product累加area-weighted
-   vertex normal；skirt triangle不得影响surface normal。
+1. 只遍历`surfaceIndexCount`内的CCW surface triangles；triangle cross product使用tile extent width/height把
+   unit-local XY delta恢复为真实planar meter delta，Z delta继续以meter计算，再累加area-weighted vertex normal。
+   Skirt triangle不得影响surface normal。
 2. Heightmap使用与`TerrainProvider` shared index完全一致的两个triangle/cell顺序，不在Worker复制或
    transfer整份shared index。
 3. Quantized mesh使用task clone中的真实surface indices；A5 canonical edge order只服务skirt，不改变
@@ -84,10 +85,21 @@ candidate boundary。失败只清理已取得resource并保留原始异常；rep
 destroy必须exactly once释放。Private debug counters应反映实际创建/销毁的buffer数量，不以隐藏第二个buffer
 维持旧计数。
 
-Lit terrain vertex shader解码model-coordinate normal，并通过`czm_normal`转换到eye coordinates；fragment shader
-normalize插值结果，然后继续使用ADR-0012既有face-forward、Lambert、light color、固定ambient与imagery合成
-顺序。Flat/no-provider与active FLAT fallback没有normal attribute，继续使用derivative geometric-normal lit variant。
+Lit terrain vertex shader解码fixed planar world-axis normal，并通过`czm_viewRotation`转换到eye coordinates；fragment shader
+normalize插值结果，然后继续使用Lambert、light color、固定ambient与imagery合成顺序。Smooth normal保持Worker
+保证的topology-up方向；Flat/no-provider与active FLAT fallback没有normal attribute，继续使用derivative
+geometric-normal lit variant，并把derivative winding显式归一到由`czm_normal * +Z`定义的planar-up hemisphere。
 Unlit variant不声明、不读取normal attribute。
+
+2026-08-12 A7 amendment：项目负责人人工验收证明ADR-0012/A6沿用的camera-facing `faceforward`会在地下观察时
+翻转topology-up normal并产生大面积黑暗碎块。本ADR以稳定outward/topology-up lighting normal取代该部分旧决定；
+double-sided rasterization只负责上下两侧可见，不再决定Lambert法线方向。不得以`abs(dot)`掩盖错误winding。
+
+2026-08-12 A7-R002 amendment：公开EPSG:3857/LERC人工复测证明旧链路在unit-local XY与meter Z的混合尺度上
+先累计并oct量化normal，再由`czm_normal`应用大尺度非均匀inverse-transpose，会把少数oct量化级放大为密集
+lighting噪点。Oct stream现明确定义为fixed planar world-axis normal：Worker在真实meter metric中累计/归一化，
+shader只用`czm_viewRotation`执行world-to-eye rotation。Position/modelMatrix、skirt、transfer shape与2 bytes/vertex
+成本均不改变。
 
 Shader cache identity从`layerCount + lighting`扩展为`layerCount + lighting + normal mode`。同一tile仍只有一个
 opaque DrawCommand；content从FLAT切换到DIRECT/UPSAMPLED时只原子更新既有command的VA/shader/bounds。Lighting
@@ -151,7 +163,7 @@ navigation、tilesLoaded或Worker entry。预计upstream-owned files=`0`、A6 SG
 每次Cesium升级必须复核：
 
 - `TerrainProvider` regular-grid triangle与skirt topology；
-- `czm_octDecode(vec2)`的range和zero encoding、`czm_normal`的model normal transform；
+- `czm_octDecode(vec2)`的range和zero encoding、`czm_viewRotation`的world-to-eye vector transform；
 - `Buffer`/`VertexArray`多attribute ownership与destroy语义；
 - Worker transferable/result preflight和development/release bundle；
 - ShaderProgram cache key/reference release、single-command imagery和depth replay；

@@ -1,9 +1,9 @@
 # Planar Terrain Advanced Plans
 
-## Active extension plan
+## Completed extension plan
 
 - [总体计划：SceneGIS 平面高级地形](2026-08-10-planar-terrain-advanced-extension.md)
-  （`active`、`confirmed`）
+  （`completed`、`confirmed`）
 
 ## Phase plans
 
@@ -20,7 +20,7 @@
 - [A6 平面地形平滑法线与 LOD 光照连续性](2026-08-11-phase-a6-smooth-terrain-normals-and-lod-lighting.md)
   （`completed`、A6-R001/R002关闭并获Architecture focused re-review批准）
 - [A7 平面高级地形统一资格与交付](2026-08-11-phase-a7-unified-qualification-and-delivery.md)
-  （`active`、Architecture plan approved；等待Execution）
+  （`completed`、A7-R001/R002关闭，Architecture focused re-review与人工验收通过）
 
 ## Handoff
 
@@ -45,3 +45,11 @@
   Architecture独立复跑Worker `8/8`、Widget `2/2`与审计后批准；checkpoint为`0009fbd414`。
 - A7已按当前release qualification、Worker/package smoke、terrain Widget与唯一Sandcastle事实完成详细设计。默认
   product runtime delta为0，只新增一个本地真实Context统一资格case并完成最终交付/人工验收，不增加workflow或重复E2E。
+- A7 Execution已完成：新增唯一real-Context direct case，本地LERC→Worker→Heightmap后替换Quantized，
+  两种格式各30 warm frames、3轮churn与资源平衡通过；修正terrain-navigation固定8帧的test-only等待。
+  Focused `59/59`与build/release/types/docs/package/no-embedding Sandcastle/static/audit通过；Architecture独立复跑
+  qualification/navigation与审计后曾批准。项目负责人人工验收随后稳定复现地下Lighting黑暗碎块；A7-R001现已按
+  stable topology-up/+Z normal修复，并经Architecture独立复跑Shader `4/4`、terrain Widget `2/2`与审计后批准。
+  项目负责人人工复测又在公开EPSG:3857案例中发现Surface Lighting密集噪点；A7-R002现已以meter-metric
+  world-axis normal与`czm_viewRotation`修复。Architecture独立复跑Worker `8/8`、Surface/Shader `34/34`、terrain
+  Widget `2/2`、qualification `1/1`及build/static/audit，项目负责人公开案例人工验收通过；A7与extension完成。

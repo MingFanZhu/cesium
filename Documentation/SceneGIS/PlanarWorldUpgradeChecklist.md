@@ -21,7 +21,7 @@ triangle clipping；不得引入其Ellipsoid、Cartographic、TerrainEncoding或
 
 A6 private terrain normal encoder参考`packages/engine/Source/Core/AttributeCompression.js`的oct encoding职责，
 参考baseline同为`6d5d8b1f0725b6f831b336463f4b11c98023427b`。升级时必须复核`czm_octDecode`输入范围、
-`czm_normal`变换、Heightmap/Quantized真实surface topology、skirt duplicate映射、2-byte attribute布局和
+`czm_viewRotation`变换、Heightmap/Quantized真实surface topology与meter metric、skirt duplicate映射、2-byte attribute布局和
 two-vertex-buffer rollback/release；不得引入其无关normal compression API或新的Shader build seam。
 
 本清单用于升级官方 Cesium 基线时复核 SceneGIS Planar World。它不是升级结果，也不能替代 ADR、SGP 和自动化回归。
@@ -45,7 +45,8 @@ two-vertex-buffer rollback/release；不得引入其无关normal compression API
 | URL Heightmap image/LERC decode                                          | public planar URL terrain provider                                  | high   | getImagePixels、color-space option、LERC API、boundary samples、ImageBitmap close                                                |
 | planar terrain TaskProcessor Worker                                      | ADR-0027 private scheduler/task + single Worker entry               | high   | task kinds、transfer ownership、result preflight、late generation、worker URL/IIFE/release/tar delivery                          |
 | planar quantized-mesh decode/mesh/upsample                               | ADR-0028 + existing terrain Worker/runtime                          | high   | safe binary bounds、CCW/edge topology、bounded query index、true-triangle child clip、per-tile index ownership                   |
-| terrain smooth/geometric normals与shader variants                        | Worker mesh tasks、private Terrain/SurfaceShader                    | high   | real topology accumulation、oct decode/normal matrix、skirt copy、two-buffer lifecycle、layer+lighting+mode cache key            |
+| terrain smooth/geometric normals与shader variants                        | Worker mesh tasks、private Terrain/SurfaceShader                    | high   | topology accumulation、oct decode、stable +Z lighting、two-buffer lifecycle、layer+lighting+mode cache key                       |
+| advanced terrain unified qualification                                   | A7 local real-Context qualification                                 | high   | LERC/Quantized replacement、30 warm frames、bounded churn、task/GPU convergence、provider destroy balance                        |
 | automatic exports/types/JSDoc/package layout                             | public SceneGIS engine/widgets types                                | medium | workspace and installed tarball ESM/CJS where supported、root/types/API visibility、private absence                              |
 | Sandcastle/E2E local bundle entry                                        | two planar examples and local E2E                                   | medium | dev/release bundle, no public-network automation, credits and destroy                                                            |
 | Entity/DataSource planar callback与profile gate                          | private content callback、SGP-0001                                  | high   | World liveness、deferred activation、dynamic allowlist、default Globe isolation                                                  |
@@ -60,7 +61,7 @@ two-vertex-buffer rollback/release；不得引入其无关normal compression API
 
 1. 核对 `.scenegis/upstream-base.json`，逐项重放并审查 SGP-0001/SGP-0002，不在功能提交中混入 upstream sync。
 2. 运行 `node scripts/scenegis/audit-upstream-patches.mjs`，确认所有 upstream-owned diff 已登记且 marker 配对。
-3. 运行 P1-P8、terrain T1-T6与advanced terrain focused Specs；复核actual Worker transfer/URL，再运行
+3. 运行 P1-P8、terrain T1-T6与advanced terrain focused Specs；复核actual Worker transfer/URL与A7本地统一资格，再按风险运行
    multi-tile warm/churn/depth与lifecycle soak；任何
    observable selection、pixel、fallback、lighting或ownership变化先形成finding。
 4. 生成 build/release/types/docs，在临时目录执行 root/engine/widgets tarball smoke；生成文件不得进入提交。

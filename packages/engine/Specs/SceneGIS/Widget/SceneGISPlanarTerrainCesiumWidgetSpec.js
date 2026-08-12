@@ -18,6 +18,33 @@ import getWebGLStub from "../../../../../Specs/getWebGLStub.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
 import SceneGISPlanarCamera from "../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarCamera.js";
 
+function samplePixelNeighborhood(scene, rgba, position) {
+  const windowPosition = SceneTransforms.worldToWindowCoordinates(
+    scene,
+    position,
+    new Cartesian2(),
+  );
+  const width = scene.drawingBufferWidth;
+  const height = scene.drawingBufferHeight;
+  const centerX = Math.floor(windowPosition.x);
+  const centerY = height - 1 - Math.floor(windowPosition.y);
+  const total = [0, 0, 0, 0];
+  let count = 0;
+  for (let y = centerY - 1; y <= centerY + 1; ++y) {
+    for (let x = centerX - 1; x <= centerX + 1; ++x) {
+      if (x < 0 || x >= width || y < 0 || y >= height) {
+        continue;
+      }
+      const offset = (y * width + x) * 4;
+      for (let component = 0; component < 4; ++component) {
+        total[component] += rgba[offset + component];
+      }
+      ++count;
+    }
+  }
+  return total.map((value) => value / count);
+}
+
 describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
   let container;
   let widget;
@@ -183,8 +210,14 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     });
     world.enableLighting = true;
     let litPixels;
+    let aboveLitSample;
     expect(widget.scene).toRenderAndCall(function (rgba) {
       litPixels = Array.from(rgba);
+      aboveLitSample = samplePixelNeighborhood(
+        widget.scene,
+        rgba,
+        new Cartesian3(-64.0, 64.0, 5.0),
+      );
     });
     expect(litPixels).not.toEqual(unlitPixels);
     expect(litPixels.every(Number.isFinite)).toBe(true);
@@ -315,7 +348,22 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     expect(widget.scene).toRenderAndCall(function (rgba) {
       expect(rgba).not.toEqual([0, 0, 0, 255]);
       expect(Array.from(rgba).every(Number.isFinite)).toBe(true);
+      const belowLitSample = samplePixelNeighborhood(
+        widget.scene,
+        rgba,
+        new Cartesian3(-64.0, 64.0, 5.0),
+      );
+      for (let component = 0; component < 4; ++component) {
+        expect(
+          Math.abs(belowLitSample[component] - aboveLitSample[component]),
+        ).toBeLessThanOrEqual(8.0);
+      }
     });
+    expect(tiles.map((candidate) => candidate.command)).toEqual(commands);
+    expect(tiles.map((candidate) => candidate.command.shaderProgram)).toEqual(
+      litShaderPrograms,
+    );
+    expect(world._surface._terrain._debug).toEqual(debug);
 
     const terrain = world._surface._terrain;
     expect(terrain._debug.createdVertexBuffers).toBe(

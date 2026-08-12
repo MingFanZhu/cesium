@@ -371,14 +371,6 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
       [centerNormal.x, centerNormal.y, centerNormal.z].every(Number.isFinite),
     ).toBe(true);
     expect(Cartesian3.magnitude(centerNormal)).toBeCloseTo(1.0, 6);
-    const worldCenterNormal = Cartesian3.normalize(
-      new Cartesian3(
-        centerNormal.x / 256.0,
-        centerNormal.y / 256.0,
-        centerNormal.z,
-      ),
-      new Cartesian3(),
-    );
     const expectedWorldNormal = Cartesian3.normalize(
       new Cartesian3(
         -((8192.0 / 32767.0) * 100.0) / 256.0,
@@ -387,10 +379,76 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
       ),
       new Cartesian3(),
     );
-    expect(worldCenterNormal.z).toBeGreaterThan(0.9);
+    expect(centerNormal.z).toBeGreaterThan(0.9);
+    expect(Cartesian3.dot(centerNormal, expectedWorldNormal)).toBeGreaterThan(
+      0.998,
+    );
+
+    const maximum = 32767;
+    const largeExtent = {
+      minimumX: -20037508.342789244,
+      minimumY: -20037508.342789244,
+      maximumX: 20037508.342789244,
+      maximumY: 20037508.342789244,
+    };
+    const planeVertices = new Uint16Array([
+      0,
+      maximum,
+      0,
+      maximum,
+      0,
+      0,
+      maximum,
+      maximum,
+      0,
+      21845,
+      10922,
+      maximum,
+    ]);
+    const planeIndices = new Uint16Array([0, 1, 2, 1, 3, 2]);
+    const planeMesh = processSceneGISPlanarTerrainTask(
+      {
+        kind: "createQuantizedMeshMesh",
+        quantizedVertices: planeVertices,
+        indices: planeIndices,
+        westIndices: new Uint16Array([0, 2]),
+        southIndices: new Uint16Array([1, 0]),
+        eastIndices: new Uint16Array([3, 1]),
+        northIndices: new Uint16Array([2, 3]),
+        quantizedMinimumHeight: 0.0,
+        quantizedMaximumHeight: 300.0,
+        minimumHeight: 0.0,
+        maximumHeight: 300.0,
+        effectiveGeometricError: 10.0,
+        providerMinimumHeight: -100.0,
+        extent: largeExtent,
+      },
+      [],
+    );
+    const extentWidth = largeExtent.maximumX - largeExtent.minimumX;
+    const extentHeight = largeExtent.maximumY - largeExtent.minimumY;
+    const analyticQuantizedNormal = Cartesian3.normalize(
+      new Cartesian3(-200.0 / extentWidth, -100.0 / extentHeight, 1.0),
+      new Cartesian3(),
+    );
     expect(
-      Cartesian3.dot(worldCenterNormal, expectedWorldNormal),
-    ).toBeGreaterThan(0.998);
+      Cartesian3.dot(decodeNormal(planeMesh, 0), analyticQuantizedNormal),
+    ).toBeGreaterThan(0.9999);
+    expect(Array.from(planeVertices)).toEqual([
+      0,
+      maximum,
+      0,
+      maximum,
+      0,
+      0,
+      maximum,
+      maximum,
+      0,
+      21845,
+      10922,
+      maximum,
+    ]);
+    expect(Array.from(planeIndices)).toEqual([0, 1, 2, 1, 3, 2]);
     expectCanonicalSkirt(
       mesh,
       [3, 3, 3, 3],
@@ -540,7 +598,6 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
     expect(perFaceJump).toBeGreaterThan(0.1);
     expect(Cartesian3.magnitude(firstCandidate)).toBeCloseTo(1.0, 6);
     expect(Cartesian3.magnitude(secondCandidate)).toBeCloseTo(1.0, 6);
-    expect(smoothEdgeJump).toBeGreaterThan(0.0);
     expect(smoothEdgeJump).toBeLessThan(perFaceJump);
 
     function buildPlane(extent) {
@@ -557,11 +614,8 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
       }
       return buildHeightmapMesh(samples, 3, 3, extent);
     }
-    function worldNormal(mesh, index, width) {
-      const normal = decodeNormal(mesh, index);
-      normal.x /= width;
-      normal.y /= width;
-      return Cartesian3.normalize(normal, normal);
+    function worldNormal(mesh, index) {
+      return decodeNormal(mesh, index);
     }
     const parentExtent = {
       minimumX: -2.0,
@@ -570,7 +624,7 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
       maximumY: 2.0,
     };
     const parent = buildPlane(parentExtent);
-    const reference = worldNormal(parent, 4, 4.0);
+    const reference = worldNormal(parent, 4);
     const childExtents = [
       { minimumX: -2.0, minimumY: 0.0, maximumX: 0.0, maximumY: 2.0 },
       { minimumX: 0.0, minimumY: 0.0, maximumX: 2.0, maximumY: 2.0 },
@@ -581,9 +635,38 @@ describe("SceneGIS/Core/SceneGISPlanarTerrainWorkerTasks", function () {
       const child = buildPlane(childExtent);
       for (let i = 0; i < child.surfaceVertexCount; ++i) {
         expect(
-          Cartesian3.dot(reference, worldNormal(child, i, 2.0)),
+          Cartesian3.dot(reference, worldNormal(child, i)),
         ).toBeGreaterThan(0.999);
       }
     }
+
+    const largeExtent = {
+      minimumX: -20037508.342789244,
+      minimumY: -20037508.342789244,
+      maximumX: 20037508.342789244,
+      maximumY: 20037508.342789244,
+    };
+    const largeSamples = [];
+    for (let row = 0; row < 3; ++row) {
+      const y =
+        largeExtent.maximumY -
+        (row / 2) * (largeExtent.maximumY - largeExtent.minimumY);
+      for (let column = 0; column < 3; ++column) {
+        const x =
+          largeExtent.minimumX +
+          (column / 2) * (largeExtent.maximumX - largeExtent.minimumX);
+        largeSamples.push(0.00001 * x - 0.00002 * y);
+      }
+    }
+    const largeSamplesSnapshot = largeSamples.slice();
+    const largeMesh = buildHeightmapMesh(largeSamples, 3, 3, largeExtent);
+    const analyticHeightmapNormal = Cartesian3.normalize(
+      new Cartesian3(-0.00001, 0.00002, 1.0),
+      new Cartesian3(),
+    );
+    expect(
+      Cartesian3.dot(decodeNormal(largeMesh, 4), analyticHeightmapNormal),
+    ).toBeGreaterThan(0.9999);
+    expect(largeSamples).toEqual(largeSamplesSnapshot);
   });
 });
