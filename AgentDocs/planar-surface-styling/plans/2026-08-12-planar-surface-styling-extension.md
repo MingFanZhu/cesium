@@ -13,8 +13,8 @@
 - Related discussions: 项目负责人提出 Shader 独立目录、平面影像滤镜及 terrain 坡度/坡向/等高线能力
 - Related reviews:
   [S2 planar imagery color filters](../reviews/2026-08-12-s2-planar-imagery-color-filters.md)
-- ADR: S1=`ADR-0030`；S2=`ADR-0031`；后续 phase 按激活时源码事实决定
-- SGP: S1=None；S2=None
+- ADR: S1=`ADR-0030`；S2=`ADR-0031`；S3 计划新增 `ADR-0032`；S4 按激活时源码事实决定
+- SGP: S1=None；S2=None；S3=None expected
 
 ## Objective
 
@@ -54,13 +54,26 @@
 - Cesium Globe 通过 Material shader source 为 terrain 提供 height、slope、aspect、normalEC 与 st，但该接入由 Globe shader 与 ellipsoid runtime 组装，不能直接假定适用于 planar Surface。
 - Completed A6/A7 已提供 meter-metric、fixed planar world-axis oct normal；这使平面 slope/aspect 具备稳定输入，但不等于 terrain material API 已确认。
 
+### S3 activation facts
+
+- Cesium `Material` 的 assembled `shaderSource`、private `_uniforms` 与 `update(context)` 可独立于 Globe 复用；
+  Globe 自己组装的 ellipsoid/cartographic/ENU inputs 不可复用。World/Globe均不拥有caller Material。
+- `ElevationContour`、`ElevationRamp`、`SlopeRamp` 与 `AspectRamp` 只需要height/slope/aspect及最多一个Ramp
+  sampler；planar fragment可按固定world axes组装这些inputs，再仅消费`czm_material.diffuse/alpha`。
+- Terrain vertex local Z与tile model Z translation相加即absolute meter world Z；A7 normal为world-axis topology-up，
+  但eight-bit oct flat decode含一个量化bin偏差，S3必须在style input中snap flat slope/aspect。
+- Material存在时即使lighting关闭也需要normal-capable shader；material identity/source必须进入variant，uniform value
+  mutation不得进入variant。shown imagery与Material samplers必须共同接受pre-request texture-unit preflight。
+- S3 public/API、shader/state、ownership、验证与manual gate已在
+  [S3 phase plan](2026-08-12-phase-s3-planar-terrain-styling.md)确认。
+
 ## Phase roadmap
 
 | Phase | Objective                                                                                     | Dependencies            | Entry gate                                                                              | Exit gate                                                                                   | Status      | Phase plan                                                |
 | ----- | --------------------------------------------------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------- |
 | S1    | 建立独立 SceneGIS GLSL source/delivery foundation，并等价迁移现有自有 Surface/Ground shader。 | predecessor checkpoints | 审计 shader glob、生成物、imports、dev/release/npm 与现有 shader variants。             | ADR/Architecture ownership 完成；内嵌主体迁出；现有像素、cache、资源和三种交付形态等价。    | `completed` | [S1](2026-08-12-phase-s1-shader-source-foundation.md)     |
 | S2    | 为 planar imagery layer 增加坐标系无关的颜色滤镜。                                            | S1 checkpoint           | 重新审计 layer mutation、uniform map、cache key 与 Globe filter math。                  | 公共属性、默认等价、uniform-only mutation、组合顺序、错误与生命周期通过 Specs/manual gate。 | `completed` | [S2](2026-08-12-phase-s2-planar-imagery-color-filters.md) |
-| S3    | 建立 terrain height/slope/aspect/contour styling contract，并决定 Material 复用边界。         | S2 checkpoint           | 重新审计 Cesium Material/Globe inputs、planar normals、world height 与 shader variant。 | 已批准 contract 与合成顺序实现；四类 styling、lighting/underground/LOD 与资源边界闭环。     | `planned`   | Not created                                               |
+| S3    | 建立 terrain height/slope/aspect/contour styling contract，并决定 Material 复用边界。         | S2 checkpoint           | 重新审计 Cesium Material/Globe inputs、planar normals、world height 与 shader variant。 | 已批准 contract 与合成顺序实现；四类 styling、lighting/underground/LOD 与资源边界闭环。     | `active`    | [S3](2026-08-12-phase-s3-planar-terrain-styling.md)       |
 | S4    | 完成统一资格、案例、发布与升级交付。                                                          | S3 checkpoint           | S1-S3 review/checkpoint 完成；固定最小资格矩阵与 manual gate。                          | filters + terrain style 在 dev/release/npm、真实 WebGL/GPU、lifecycle 与文档中统一闭环。    | `planned`   | Not created                                               |
 
 ## Cross-phase validation
@@ -93,4 +106,7 @@
   `04ac138b37295f328f3542f143b2f6b738a7e021`已完成。
 - S2 implementation、自动化验证、Architecture review与项目负责人manual gate均已完成；`S2-R001`至`S2-R004`
   全部关闭。[review](../reviews/2026-08-12-s2-planar-imagery-color-filters.md)为`approved`。
-- S2随本次状态回写创建独立本地checkpoint；未push、未进入S3。S3-S4仍只保留稳定目标与gate。
+- S2独立本地checkpoint=`9d1cb4de44af3c2b21ad75bfc8b07c8dfd34ff8c`，未push。
+- Architecture已完成S3源码复核并确认
+  [S3 phase plan](2026-08-12-phase-s3-planar-terrain-styling.md)；下一步建立S3规划checkpoint并向绑定Execution
+  task正式派工。S3 review/manual gate尚未开始；S4仍只保留稳定目标与gate。
