@@ -1,6 +1,6 @@
 # SceneGIS 开发指南
 
-本文档说明 SceneGIS 的日常开发流程。强制规则由仓库根目录及相关包中的 `AGENTS.md` 定义；长期系统边界见 [Architecture.md](Architecture.md)；跨 Agent 协作方式见 [AgentDocs README](../../AgentDocs/README.md)。
+本文档说明 SceneGIS 的日常开发流程。强制规则由仓库根目录及相关包中的 `AGENTS.md` 定义；长期系统边界见 [Architecture.md](Architecture.md)；跨 Agent 协作方式见 [AgentDocs README](../../AgentDocs/README.md)。可重建的对话角色见 [Architecture Agent](AgentRoles/ArchitectureAgent.md) 和 [Execution Agent](AgentRoles/ExecutionAgent.md)。
 
 文档中的“必须”和“不得”表示强制要求，“建议”表示默认选择；偏离建议时应在代码评审、SGP 或 ADR 中说明理由。
 

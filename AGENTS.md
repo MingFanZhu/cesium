@@ -4,6 +4,9 @@
 
 ## 必读路由
 
+- 用户在新对话中指定“SceneGIS 架构角色”或等价表述时，完整阅读
+  `Documentation/SceneGIS/AgentRoles/ArchitectureAgent.md` 并按其启动恢复协议工作；指定“SceneGIS 执行角色”时，完整阅读
+  `Documentation/SceneGIS/AgentRoles/ExecutionAgent.md`。角色规则不能覆盖本文件或作用域内更具体的 `AGENTS.md`。
 - 开始任何 SceneGIS 实现前，阅读 `Documentation/SceneGIS/DevelopmentGuide.md` 中与任务相关的章节。
 - 开发新的扩展或继续已有扩展前，阅读 `AgentDocs/README.md`；新扩展先从
   `AgentDocs/_template/` 建立稳定的扩展目录，已有扩展先阅读其索引、active
@@ -48,7 +51,7 @@
   设计、影响路径、步骤和验证。不得为尚未进入的阶段提前猜测易变实现细节。
 - 小型、单阶段且可一次验证的工作可以只使用一个 `standalone plan`。
 - AgentDocs 只保存提炼后的计划、讨论、评审和交接状态，不保存原始聊天转录、secret、本机绝对路径、大型日志、二进制和生成产物。
-- 架构 Agent 负责明确边界和待决问题；执行 Agent 必须记录实现偏差与验证结果；评审 Agent 必须记录发现项及其处理状态。未解决事项不得通过删除文档来表示完成。
+- 架构 Agent 负责明确边界和待决问题，并默认承担 Architecture/code review；执行 Agent 必须记录实现偏差与验证结果。项目负责人明确启用独立评审 Agent 时，由其记录发现项，最终阶段 gate 仍由架构 Agent 确认。未解决事项不得通过删除文档来表示完成。
 - AgentDocs 不是新的规范或实现事实源。长期架构决定提升到 ADR，通用强制规则提升到 `Architecture.md` 或相应 `AGENTS.md`，上游补丁继续登记 SGP。
 
 ## 上游修改纪律

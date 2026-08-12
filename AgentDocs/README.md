@@ -1,8 +1,17 @@
 # SceneGIS AgentDocs
 
-`AgentDocs/` 是 SceneGIS 架构 Agent、执行 Agent 和评审 Agent 的版本化协作区。它保存跨对话仍有价值的计划、讨论、评审和 handoff，使后续 Agent 能在不依赖聊天历史的情况下继续工作。
+`AgentDocs/` 是 SceneGIS 架构 Agent、执行 Agent 和可选独立评审 Agent 的版本化协作区。它保存跨对话仍有价值的计划、讨论、评审和 handoff，使后续 Agent 能在不依赖聊天历史的情况下继续工作。
 
 强制规则见 [AgentDocs AGENTS.md](AGENTS.md)，长期边界见 [SceneGIS Architecture](../Documentation/SceneGIS/Architecture.md)，日常流程见 [DevelopmentGuide](../Documentation/SceneGIS/DevelopmentGuide.md)。
+
+## 角色启动
+
+长期扩展默认使用两个可重建的对话角色：
+
+- [Architecture Agent](../Documentation/SceneGIS/AgentRoles/ArchitectureAgent.md)：负责总体/阶段设计、派工、review、manual gate 和阶段提交。
+- [Execution Agent](../Documentation/SceneGIS/AgentRoles/ExecutionAgent.md)：负责当前阶段实现、验证、证据回写和 finding 修复。
+
+架构角色默认兼任 Architecture/code reviewer；只有项目负责人明确要求时才增加临时独立评审角色。新对话只需指定“使用 SceneGIS 架构角色”或“使用 SceneGIS 执行角色”，并可选提供 `<extension-slug>`。角色必须从 Git、正式文档和本目录 handoff 恢复状态，不依赖旧聊天历史。两个对话之间优先使用 Codex 任务间消息传递派工、blocker 和 review 通知；所有长期状态仍以本目录文档为准。
 
 ## 目录模型
 
