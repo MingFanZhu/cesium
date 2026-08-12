@@ -63,8 +63,9 @@ Object.defineProperties(SceneGISPlanarImageryLayerCollection.prototype, {
 SceneGISPlanarImageryLayerCollection.prototype._notify = function (
   type,
   layer,
+  property,
 ) {
-  this._changeListener?.(type, layer);
+  this._changeListener?.(type, layer, property);
 };
 
 /**
@@ -113,7 +114,8 @@ SceneGISPlanarImageryLayerCollection.prototype.add = function (layer, index) {
   validateIndex(index, this._layers.length, "index");
   this._layers.splice(index, 0, layer);
   layer._collection = this;
-  layer._changeListener = () => this._notify("changed", layer);
+  layer._changeListener = (changedLayer, property) =>
+    this._notify("changed", changedLayer, property);
   this._notify("added", layer);
   return layer;
 };

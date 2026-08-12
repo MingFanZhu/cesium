@@ -42,4 +42,45 @@ const imageryProvider = new Cesium.SceneGISPlanarUrlTemplateImageryProvider({
   maximumLevel: 19,
   credit: openStreetMapCredit,
 });
-world.imageryLayers.addImageryProvider(imageryProvider);
+const imageryLayer = world.imageryLayers.addImageryProvider(imageryProvider);
+
+const defaults = {
+  brightness: 1.0,
+  contrast: 1.0,
+  hue: 0.0,
+  saturation: 1.0,
+  gamma: 1.0,
+  colorToAlphaThreshold: 0.004,
+};
+
+for (const property of Object.keys(defaults)) {
+  const input = document.getElementById(property);
+  input.addEventListener("input", function () {
+    imageryLayer[property] = Number(input.value);
+  });
+}
+
+function updateColorToAlpha() {
+  const enabled = document.getElementById("colorToAlphaEnabled").checked;
+  imageryLayer.colorToAlpha = enabled
+    ? Cesium.Color.fromCssColorString(
+        document.getElementById("colorToAlpha").value,
+      )
+    : undefined;
+}
+
+document
+  .getElementById("colorToAlphaEnabled")
+  .addEventListener("change", updateColorToAlpha);
+document
+  .getElementById("colorToAlpha")
+  .addEventListener("input", updateColorToAlpha);
+document.getElementById("resetFilters").addEventListener("click", function () {
+  for (const [property, value] of Object.entries(defaults)) {
+    document.getElementById(property).value = value;
+    imageryLayer[property] = value;
+  }
+  document.getElementById("colorToAlphaEnabled").checked = false;
+  document.getElementById("colorToAlpha").value = "#ffffff";
+  imageryLayer.colorToAlpha = undefined;
+});

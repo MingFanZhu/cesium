@@ -27,6 +27,41 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
       fragmentShader.indexOf("sample1"),
     );
     expect(fragmentShader).toContain("sample1.a * u_alpha1");
+    for (const uniform of [
+      "brightness",
+      "contrast",
+      "hue",
+      "saturation",
+      "gamma",
+      "colorToAlpha",
+      "colorToAlphaThreshold",
+    ]) {
+      expect(fragmentShader).toContain(`u_${uniform}0`);
+      expect(fragmentShader).toContain(`u_${uniform}1`);
+    }
+  });
+
+  it("filters raw samples in the approved order with exact identity bypasses", function () {
+    const shader = SceneGISPlanarSurfaceShader.createFragmentShader(1);
+    const ordered = [
+      "vec4 sample0 = texture",
+      "u_colorToAlpha0.a > 0.5",
+      "u_gamma0 != 1.0",
+      "u_brightness0 != 1.0",
+      "u_contrast0 != 1.0",
+      "u_hue0 != 0.0",
+      "u_saturation0 != 1.0",
+      "sample0.a * u_alpha0",
+    ];
+    for (let i = 1; i < ordered.length; ++i) {
+      expect(shader.indexOf(ordered[i - 1])).toBeLessThan(
+        shader.indexOf(ordered[i]),
+      );
+    }
+    expect(shader).toContain("vec3(1.0 / u_gamma0)");
+    expect(shader).toContain("czm_hue(sample0.rgb, u_hue0)");
+    expect(shader).toContain("czm_saturation(sample0.rgb, u_saturation0)");
+    expect(shader).not.toContain("czm_gammaCorrect");
   });
 
   it("lights the fully composed color from a stable planar-up geometric normal", function () {

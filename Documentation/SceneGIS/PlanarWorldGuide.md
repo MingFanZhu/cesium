@@ -46,7 +46,17 @@ const provider = new SceneGISPlanarUrlTemplateImageryProvider({
     '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>',
   ),
 });
-world.imageryLayers.add(new SceneGISPlanarImageryLayer(provider));
+const layer = world.imageryLayers.add(
+  new SceneGISPlanarImageryLayer(provider, {
+    brightness: 1.0,
+    contrast: 1.0,
+    hue: 0.0,
+    saturation: 1.0,
+    gamma: 1.0,
+    colorToAlpha: undefined,
+    colorToAlphaThreshold: 0.004,
+  }),
+);
 
 world.terrainProvider = new SceneGISPlanarUrlTemplateHeightmapTerrainProvider({
   url: "https://example.invalid/terrain/{z}/{y}/{x}",
@@ -72,6 +82,11 @@ viewer.planarCameraController.viewHome(viewer.scene);
 // The Viewer owns and destroys its Scene and primary world.
 viewer.destroy();
 ```
+
+Imagery filter直接修改layer属性，并在下一次normal render生效；不会重新请求或上传texture。默认值保持现有
+planar sampled color space。`colorToAlpha`比较raw sampled RGB，getter/setter均defensive clone；设置为
+`undefined`可禁用。filter执行顺序固定为color-to-alpha、gamma、brightness、contrast、hue、saturation，再应用
+layer alpha与bottom-to-top composition；terrain lighting最后统一执行。
 
 示例terrain URL是占位地址；应用必须选择提供boundary-inclusive height samples的数据源，并让
 terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务条款、展示 attribution，并

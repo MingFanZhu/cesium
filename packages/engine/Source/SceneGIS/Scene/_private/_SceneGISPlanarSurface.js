@@ -1,6 +1,7 @@
 import Buffer from "../../../Renderer/Buffer.js";
 import BufferUsage from "../../../Renderer/BufferUsage.js";
 import Cartesian2 from "../../../Core/Cartesian2.js";
+import Cartesian4 from "../../../Core/Cartesian4.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import ContextLimits from "../../../Renderer/ContextLimits.js";
 import defined from "../../../Core/defined.js";
@@ -40,8 +41,11 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
     this._quadtree.forEachTile(callback),
   );
   this._terrain = undefined;
-  imageryLayers._changeListener = (type, layer) => {
-    if (type === "removed" || (type === "changed" && !layer.show)) {
+  imageryLayers._changeListener = (type, layer, property) => {
+    if (
+      type === "removed" ||
+      (type === "changed" && property === "show" && !layer.show)
+    ) {
       this._renderCommands.length = 0;
       this._imagery.releaseLayer(layer);
     }
@@ -268,6 +272,21 @@ function createUniformMap(surface, tile, layerCount, enableLighting) {
     uniformMap[`u_alpha${i}`] = function () {
       return tile._imagerySlots[i].alpha;
     };
+    for (const name of [
+      "brightness",
+      "contrast",
+      "hue",
+      "saturation",
+      "gamma",
+      "colorToAlphaThreshold",
+    ]) {
+      uniformMap[`u_${name}${i}`] = function () {
+        return tile._imagerySlots[i][name];
+      };
+    }
+    uniformMap[`u_colorToAlpha${i}`] = function () {
+      return tile._imagerySlots[i].colorToAlpha;
+    };
   }
   return uniformMap;
 }
@@ -362,11 +381,22 @@ function updateTileSlots(surface, tile, layers) {
     const selected = binding.selected;
     let slot = slots[i];
     if (!slot) {
-      slot = slots[i] = {};
+      slot = slots[i] = { colorToAlpha: new Cartesian4() };
     }
     slot.texture = selected?.texture ?? surface._transparentTexture;
     slot.translationScale = binding.translationScale;
     slot.alpha = layer.alpha;
+    slot.brightness = layer.brightness;
+    slot.contrast = layer.contrast;
+    slot.hue = layer.hue;
+    slot.saturation = layer.saturation;
+    slot.gamma = layer.gamma;
+    const target = layer._colorToAlpha;
+    slot.colorToAlpha.x = target?.red ?? 0.0;
+    slot.colorToAlpha.y = target?.green ?? 0.0;
+    slot.colorToAlpha.z = target?.blue ?? 0.0;
+    slot.colorToAlpha.w = defined(target) ? 1.0 : 0.0;
+    slot.colorToAlphaThreshold = layer.colorToAlphaThreshold;
   }
 }
 

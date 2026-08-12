@@ -11,9 +11,10 @@
 - Updated: `2026-08-12`
 - Parent extensions: completed `planar-world`、`planar-terrain`、`planar-terrain-advanced`
 - Related discussions: 项目负责人提出 Shader 独立目录、平面影像滤镜及 terrain 坡度/坡向/等高线能力
-- Related reviews: None
-- ADR: S1=`ADR-0030`；S2 计划新增 `ADR-0031`；后续 phase 按激活时源码事实决定
-- SGP: S1=None；S2 预计 None
+- Related reviews:
+  [S2 planar imagery color filters](../reviews/2026-08-12-s2-planar-imagery-color-filters.md)
+- ADR: S1=`ADR-0030`；S2=`ADR-0031`；后续 phase 按激活时源码事实决定
+- SGP: S1=None；S2=None
 
 ## Objective
 
@@ -58,7 +59,7 @@
 | Phase | Objective                                                                                     | Dependencies            | Entry gate                                                                              | Exit gate                                                                                   | Status      | Phase plan                                                |
 | ----- | --------------------------------------------------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------- |
 | S1    | 建立独立 SceneGIS GLSL source/delivery foundation，并等价迁移现有自有 Surface/Ground shader。 | predecessor checkpoints | 审计 shader glob、生成物、imports、dev/release/npm 与现有 shader variants。             | ADR/Architecture ownership 完成；内嵌主体迁出；现有像素、cache、资源和三种交付形态等价。    | `completed` | [S1](2026-08-12-phase-s1-shader-source-foundation.md)     |
-| S2    | 为 planar imagery layer 增加坐标系无关的颜色滤镜。                                            | S1 checkpoint           | 重新审计 layer mutation、uniform map、cache key 与 Globe filter math。                  | 公共属性、默认等价、uniform-only mutation、组合顺序、错误与生命周期通过 Specs/manual gate。 | `active`    | [S2](2026-08-12-phase-s2-planar-imagery-color-filters.md) |
+| S2    | 为 planar imagery layer 增加坐标系无关的颜色滤镜。                                            | S1 checkpoint           | 重新审计 layer mutation、uniform map、cache key 与 Globe filter math。                  | 公共属性、默认等价、uniform-only mutation、组合顺序、错误与生命周期通过 Specs/manual gate。 | `completed` | [S2](2026-08-12-phase-s2-planar-imagery-color-filters.md) |
 | S3    | 建立 terrain height/slope/aspect/contour styling contract，并决定 Material 复用边界。         | S2 checkpoint           | 重新审计 Cesium Material/Globe inputs、planar normals、world height 与 shader variant。 | 已批准 contract 与合成顺序实现；四类 styling、lighting/underground/LOD 与资源边界闭环。     | `planned`   | Not created                                               |
 | S4    | 完成统一资格、案例、发布与升级交付。                                                          | S3 checkpoint           | S1-S3 review/checkpoint 完成；固定最小资格矩阵与 manual gate。                          | filters + terrain style 在 dev/release/npm、真实 WebGL/GPU、lifecycle 与文档中统一闭环。    | `planned`   | Not created                                               |
 
@@ -90,4 +91,6 @@
 
 - S1 implementation、自动化验证、Architecture review与本地checkpoint
   `04ac138b37295f328f3542f143b2f6b738a7e021`已完成。
-- S2 已依据 checkpoint 后源码审计建立 [confirmed phase plan](2026-08-12-phase-s2-planar-imagery-color-filters.md)，等待 Execution 实现；S3-S4 仍只保留稳定目标与 gate。
+- S2 implementation、自动化验证、Architecture review与项目负责人manual gate均已完成；`S2-R001`至`S2-R004`
+  全部关闭。[review](../reviews/2026-08-12-s2-planar-imagery-color-filters.md)为`approved`。
+- S2随本次状态回写创建独立本地checkpoint；未push、未进入S3。S3-S4仍只保留稳定目标与gate。

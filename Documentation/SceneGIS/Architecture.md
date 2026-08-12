@@ -415,6 +415,11 @@ reference 必须分别有明确的取消、迟到隔离与 exactly-once 释放�
 shown layer 数超过 `ContextLimits.maximumTextureImageUnits` 时必须在 request、selection 或 GPU
 mutation 前原子失败；P5 不使用 multipass，也不改变 P3 geometry/SSE/selection。
 
+每个shown layer固定携带brightness、contrast、hue、saturation、gamma与color-to-alpha完整uniform shape；
+filter mutation只在下一次normal render发布到per-tile slot，depth/pick replay继续读取最后发布快照。
+默认值由shader精确branch跳过，filter不改变shader key、request、texture、binding、mesh、VA、command或
+ShaderProgram identity。raw sample处理顺序、颜色空间与公共契约见[ADR-0031](Decisions/ADR-0031-planar-imagery-color-filters.md)。
+
 `scenegis-planar-imagery` 是 engine-level Sandcastle 人工案例，只通过显式 `CesiumWidget({ world })`
 和 controller registration 组装能力。Viewer 与 widgets 自动集成属于 P6，不得从该示例反向形成
 隐式 engine contract。通用 UI provider selection 不属于 SceneGIS：自定义平面 CRS、extent、

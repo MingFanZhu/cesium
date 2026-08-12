@@ -112,6 +112,34 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
     };
   }
 
+  function expectApproximateSolid(expected, tolerance = 2) {
+    return function (rgba) {
+      for (let component = 0; component < 4; ++component) {
+        expect(
+          Math.abs(rgba[component] - expected[component]),
+        ).toBeLessThanOrEqual(tolerance);
+      }
+    };
+  }
+
+  function hueExpected(rgb, adjustment) {
+    const yiq = [
+      0.299 * rgb[0] + 0.595716 * rgb[1] + 0.211456 * rgb[2],
+      0.587 * rgb[0] - 0.274453 * rgb[1] - 0.522591 * rgb[2],
+      0.114 * rgb[0] - 0.321263 * rgb[1] + 0.311135 * rgb[2],
+    ];
+    const hue = Math.atan2(yiq[2], yiq[1]) + adjustment;
+    const chroma = Math.hypot(yiq[2], yiq[1]);
+    const color = [yiq[0], chroma * Math.cos(hue), chroma * Math.sin(hue)];
+    return [
+      color[0] + color[1] + color[2],
+      0.9563 * color[0] - 0.2721 * color[1] - 1.107 * color[2],
+      0.621 * color[0] - 0.6474 * color[1] + 1.7046 * color[2],
+    ]
+      .map((component) => Math.min(255, Math.max(0, component)))
+      .concat(255);
+  }
+
   beforeEach(function () {
     container = document.createElement("div");
     container.style.width = "16px";
@@ -211,6 +239,107 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
     expect(world._surface._renderCommands[0].pass).toBe(Pass.GLOBE);
   });
 
+  it("applies scalar filters without replacing imagery or GPU identities", async function () {
+    const world = createWorld();
+    const requestImage = jasmine
+      .createSpy("requestImage")
+      .and.returnValue(Promise.resolve(createImage("rgb(64,128,192)")));
+    const layer = world.imageryLayers.addImageryProvider(
+      createProvider(world, requestImage),
+    );
+    createWidget(world);
+    widget.render();
+    await settleImage();
+    expect(widget.scene).toRenderAndCall(
+      expectApproximateSolid([64, 128, 192, 255], 0),
+    );
+
+    const surface = world._surface;
+    const tile = surface._quadtree._idealTiles[0];
+    const command = tile.command;
+    const identities = {
+      requests: surface._imagery._debug.createdRequests,
+      textures: surface._imagery._debug.createdTextures,
+      binding: tile.imageryBindings.get(layer),
+      vertexArray: command.vertexArray,
+      command,
+      shader: command.shaderProgram,
+      shaderMapSize: surface._shaderPrograms.size,
+    };
+
+    layer.brightness = 0.5;
+    expect(widget.scene).toRenderAndCall(
+      expectApproximateSolid([32, 64, 96, 255]),
+    );
+    layer.brightness = 1.0;
+    layer.contrast = 0.5;
+    expect(widget.scene).toRenderAndCall(
+      expectApproximateSolid([96, 128, 160, 255]),
+    );
+    layer.contrast = 1.0;
+    layer.gamma = 2.0;
+    expect(widget.scene).toRenderAndCall(
+      expectApproximateSolid([128, 181, 221, 255]),
+    );
+    layer.gamma = 1.0;
+    layer.saturation = 0.0;
+    expect(widget.scene).toRenderAndCall(
+      expectApproximateSolid([119, 119, 119, 255]),
+    );
+    layer.saturation = 1.0;
+    layer.hue = Math.PI;
+    expect(widget.scene).toRenderAndCall(
+      expectApproximateSolid(hueExpected([64, 128, 192], Math.PI), 3),
+    );
+
+    expect(requestImage).toHaveBeenCalledTimes(1);
+    expect(surface._imagery._debug.createdRequests).toBe(identities.requests);
+    expect(surface._imagery._debug.createdTextures).toBe(identities.textures);
+    expect(tile.imageryBindings.get(layer)).toBe(identities.binding);
+    expect(tile.command.vertexArray).toBe(identities.vertexArray);
+    expect(tile.command).toBe(identities.command);
+    expect(tile.command.shaderProgram).toBe(identities.shader);
+    expect(surface._shaderPrograms.size).toBe(identities.shaderMapSize);
+  });
+
+  it("applies strict raw color-to-alpha before layer alpha and composition", async function () {
+    const world = createWorld();
+    world.imageryLayers.addImageryProvider(
+      createProvider(world, () => Promise.resolve(createImage("rgb(255,0,0)"))),
+    );
+    const top = world.imageryLayers.add(
+      new SceneGISPlanarImageryLayer(
+        createProvider(world, () =>
+          Promise.resolve(createImage("rgb(0,0,255)")),
+        ),
+        {
+          alpha: 0.5,
+          colorToAlpha: Color.BLUE,
+          colorToAlphaThreshold: 0.01,
+        },
+      ),
+    );
+    createWidget(world);
+    widget.render();
+    await settleImage();
+    expect(widget.scene).toRenderAndCall(expectSolid([255, 0, 0, 255]));
+
+    top.colorToAlpha = Color.RED;
+    expect(widget.scene).toRenderAndCall(
+      expectApproximateSolid([128, 0, 128, 255], 1),
+    );
+    top.colorToAlpha = Color.BLUE;
+    top.colorToAlphaThreshold = 0.0;
+    expect(widget.scene).toRenderAndCall(
+      expectApproximateSolid([128, 0, 128, 255], 1),
+    );
+    top.colorToAlpha = undefined;
+    top.brightness = 0.5;
+    expect(widget.scene).toRenderAndCall(
+      expectApproximateSolid([128, 0, 64, 255], 1),
+    );
+  });
+
   it("uses a ready root ancestor without settling pending desired tiles", async function () {
     const world = createWorld({
       maximumLevel: 1,
@@ -265,26 +394,96 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
     expect(Array.from(runtime.entries.keys())).toEqual(["0/0/0"]);
   });
 
-  it("rejects the texture-unit limit before requests or selection mutation", function () {
+  it("links the maximum layer variant and rejects one more before mutation", async function () {
     const world = createWorld();
-    const requestImage = jasmine.createSpy("requestImage");
+    const requestImage = jasmine
+      .createSpy("requestImage")
+      .and.callFake(() => Promise.resolve(createImage("rgb(255,0,0)")));
     createWidget(world);
-    widget.render();
-    const commands = world._surface._renderCommands.slice();
-    const shaders = world._surface._debug.createdShaders;
-    for (let i = 0; i < 128; ++i) {
+    const gl = widget.scene.context._gl;
+    const maximum = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+    const maximumFragmentUniformVectors = gl.getParameter(
+      gl.MAX_FRAGMENT_UNIFORM_VECTORS,
+    );
+    expect(maximum).toBeGreaterThan(0);
+    expect(maximumFragmentUniformVectors).toBeGreaterThan(0);
+    for (let i = 0; i < maximum; ++i) {
       world.imageryLayers.addImageryProvider(
         createProvider(world, requestImage),
       );
     }
+
+    widget.render();
+    await settleImage();
+    expect(widget.scene).toRenderAndCall(expectSolid([255, 0, 0, 255]));
+    expect(requestImage).toHaveBeenCalledTimes(maximum);
+    expect(world._surface._renderCommands[0].shaderProgram).toBeDefined();
+
+    const commands = world._surface._renderCommands.slice();
+    const shaders = world._surface._debug.createdShaders;
     const createdTiles = world._surface._quadtree._debug.createdTiles;
+    world.imageryLayers.addImageryProvider(createProvider(world, requestImage));
     expect(function () {
       widget.render();
     }).toThrowDeveloperError();
-    expect(requestImage).not.toHaveBeenCalled();
+    expect(requestImage).toHaveBeenCalledTimes(maximum);
     expect(world._surface._quadtree._debug.createdTiles).toBe(createdTiles);
     expect(world._surface._renderCommands).toEqual(commands);
     expect(world._surface._debug.createdShaders).toBe(shaders);
+  });
+
+  it("keeps settled hidden imagery stable across filter mutations", async function () {
+    const world = createWorld({ baseColor: Color.BLUE });
+    const requestImage = jasmine
+      .createSpy("requestImage")
+      .and.returnValue(Promise.resolve(createImage("rgb(255,0,0)")));
+    const layer = world.imageryLayers.addImageryProvider(
+      createProvider(world, requestImage),
+    );
+    createWidget(world);
+    widget.render();
+    await settleImage();
+    widget.render();
+
+    layer.show = false;
+    expect(widget.scene).toRenderAndCall(expectSolid([0, 0, 255, 255]));
+    const surface = world._surface;
+    const commands = surface._renderCommands.slice();
+    const imageryDebug = { ...surface._imagery._debug };
+    const surfaceDebug = { ...surface._debug };
+    const runtimes = surface._imagery._runtimes;
+    expect(world.tilesLoaded).toBe(true);
+
+    layer.brightness = 0.5;
+    layer.contrast = 0.5;
+    layer.hue = 0.5;
+    layer.saturation = 0.5;
+    layer.gamma = 2.0;
+    layer.colorToAlpha = Color.RED;
+    layer.colorToAlphaThreshold = 0.5;
+
+    expect(surface._renderCommands).toEqual(commands);
+    expect(surface._imagery._debug).toEqual(imageryDebug);
+    expect(surface._debug).toEqual(surfaceDebug);
+    expect(surface._imagery._runtimes).toBe(runtimes);
+    expect(surface._imagery.tilesLoaded).toBe(true);
+    expect(surface.tilesLoaded).toBe(true);
+    expect(world.tilesLoaded).toBe(true);
+    expect(requestImage).toHaveBeenCalledTimes(1);
+
+    if (widget.scene.pickPositionSupported && !window.webglStub) {
+      widget.scene.pickTranslucentDepth = true;
+      const depthBefore = surface._debug.depthSubmittedCommands;
+      expect(widget.scene.pickPosition(new Cartesian2(8, 8))).toBeDefined();
+      expect(surface._renderCommands).toEqual(commands);
+      expect(surface._imagery._debug).toEqual(imageryDebug);
+      expect(surface._debug.depthSubmittedCommands).toBeGreaterThan(
+        depthBefore,
+      );
+    }
+
+    expect(widget.scene).toRenderAndCall(expectSolid([0, 0, 255, 255]));
+    expect(requestImage).toHaveBeenCalledTimes(1);
   });
 
   it("releases hidden imagery and destroys owned resources exactly once", async function () {

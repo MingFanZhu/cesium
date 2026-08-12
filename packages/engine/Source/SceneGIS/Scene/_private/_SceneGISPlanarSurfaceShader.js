@@ -25,12 +25,41 @@ function createFragmentShader(
     declarations.push(`uniform sampler2D u_texture${i};`);
     declarations.push(`uniform vec4 u_translationScale${i};`);
     declarations.push(`uniform float u_alpha${i};`);
+    declarations.push(`uniform float u_brightness${i};`);
+    declarations.push(`uniform float u_contrast${i};`);
+    declarations.push(`uniform float u_hue${i};`);
+    declarations.push(`uniform float u_saturation${i};`);
+    declarations.push(`uniform float u_gamma${i};`);
+    declarations.push(`uniform vec4 u_colorToAlpha${i};`);
+    declarations.push(`uniform float u_colorToAlphaThreshold${i};`);
     composition.push(`
     vec2 coordinates${i} = clamp(
         u_translationScale${i}.xy + textureCoordinates * u_translationScale${i}.zw,
         vec2(0.0),
         vec2(1.0));
     vec4 sample${i} = texture(u_texture${i}, coordinates${i});
+    if (u_colorToAlpha${i}.a > 0.5 &&
+        max(max(abs(sample${i}.r - u_colorToAlpha${i}.r),
+                abs(sample${i}.g - u_colorToAlpha${i}.g)),
+            abs(sample${i}.b - u_colorToAlpha${i}.b)) <
+            u_colorToAlphaThreshold${i}) {
+        sample${i}.a = 0.0;
+    }
+    if (u_gamma${i} != 1.0) {
+        sample${i}.rgb = pow(sample${i}.rgb, vec3(1.0 / u_gamma${i}));
+    }
+    if (u_brightness${i} != 1.0) {
+        sample${i}.rgb = mix(vec3(0.0), sample${i}.rgb, u_brightness${i});
+    }
+    if (u_contrast${i} != 1.0) {
+        sample${i}.rgb = mix(vec3(0.5), sample${i}.rgb, u_contrast${i});
+    }
+    if (u_hue${i} != 0.0) {
+        sample${i}.rgb = czm_hue(sample${i}.rgb, u_hue${i});
+    }
+    if (u_saturation${i} != 1.0) {
+        sample${i}.rgb = czm_saturation(sample${i}.rgb, u_saturation${i});
+    }
     color.rgb = mix(color.rgb, sample${i}.rgb, sample${i}.a * u_alpha${i});`);
   }
   const dynamicLayers = `${declarations.join("\n")}

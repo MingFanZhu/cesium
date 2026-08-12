@@ -3,16 +3,17 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed`
 - Parent plan: [planar-surface-styling extension](2026-08-12-planar-surface-styling-extension.md)
 - Phase: `S2`
 - Owner role: `execution`
-- Architecture review: `confirmed`
+- Architecture review: `approved`
 - Architecture reviewer: Architecture Agent
 - Created: `2026-08-12`
 - Updated: `2026-08-12`
 - Related discussions: 项目负责人提出平面 `ImageryLayer` 对齐球面常用颜色滤镜
-- Related reviews: None; Execution 在 ready-for-review 时新建
+- Related reviews:
+  [S2 planar imagery color filters](../reviews/2026-08-12-s2-planar-imagery-color-filters.md)
 - ADR: 新建 `Documentation/SceneGIS/Decisions/ADR-0031-planar-imagery-color-filters.md`
 - SGP: None expected; upstream-owned diff 出现前必须停止并升级计划
 
@@ -241,7 +242,60 @@ manual gate。项目负责人确认前 phase 不得 checkpoint 或进入 S3。
 
 ## Deviations and results
 
-- Implementation status: not started。
-- Validation: not run。
-- Review: not created。
-- Manual gate: pending implementation and Architecture approval。
+- Implementation status：`completed`；Architecture review approved、项目负责人manual gate通过；随本次状态回写创建
+  S2本地checkpoint，未push、未进入S3。
+- Public contract：新增七个批准属性、constructor/setter validation、scalar/RGB no-op notification、
+  `colorToAlpha` constructor/get/set defensive clone与alpha ignored语义。invalid setter在state/listener mutation前失败。
+- Runtime/shader：每层固定新增完整filter uniform set；slot内复用persistent `Cartesian4`，`w`为private enabled
+  sentinel。normal render原地发布；depth/pick-only replay不读取live layer。shader key仍为
+  `layerCount/lighting/normalMode`，filter mutation未触发request/texture/binding/VA/command/shader replacement。
+- Shader顺序按plan实现raw color-to-alpha、gamma、brightness、contrast、hue、saturation、layer alpha/mix；
+  identity defaults显式branch，未增加`czm_gammaCorrect`或新builtin，existing terrain lighting仍在全部layer之后一次执行。
+- Real-Context：default pixel保持；五个scalar filter均有deterministic pixels；color-to-alpha覆盖raw命中、未命中、
+  threshold 0与disable；双层alpha/order与filter所属层隔离通过；mutation identity与destroy既有证据通过。
+- Sandcastle：扩展现有`scenegis-planar-imagery`，显式持有layer并提供五个scalar、color target/enable/threshold与reset控件；
+  OSM credit、best-effort、usage policy、explicit CesiumWidget/controller assembly与caller-owned provider不变。
+- 正式文档：新增ADR-0031；Architecture加入filter/snapshot/resource规则；ADR-0005仅加amendment；Guide加入API示例；
+  upgrade checklist加入filter order/default/snapshot升级复核。
+- Focused Specs：ImageryLayer include=`11/11`（Layer `7`、Collection既有`4`）；Surface aggregate=`37/37`
+  （Shader `6`、Surface `31`）；Imagery Widget=`11/11`；A7 lit terrain qualification=`1/1`。
+- Build/delivery：`npm run build`、`build-release`、`build-ts`、`build-docs`、`tsc`全部exit 0；build-ts保留仓库既有
+  TSD-JSDoc warnings。installed package verifier exit 0；generated declarations/API HTML确认七个新属性；
+  Sandcastle `build-gallery-no-embedding`成功处理307 examples。
+- Static/audit：changed-scope ESLint/Prettier/Markdownlint、`git diff --check`通过；upstream audit通过，current delivery
+  upstream-owned entries=`0`、generated status=`0`、SGP=None。AgentDocs scoped checks在最终回写后执行。
+- 已解决偏差：public contract首轮仅因Jasmine object equality比较两个`NaN` alpha失败，改为逐RGB与`isNaN`证明
+  alpha ignored；Widget hue首轮直觉期望不符合Cesium YIQ builtin，随后修正GLSL column-major矩阵解释并加入
+  framebuffer normalized clamp，最终使用官方builtin数学与3/255容差通过。产品shader未为测试期望改变。
+- Manual gate：项目负责人于`2026-08-12`在现有`scenegis-planar-imagery` Sandcastle确认验收通过；默认/reset、
+  五项scalar filters、color-to-alpha controls、相机交互、credit与best-effort路径满足本phase人工gate。
+- 剩余风险：完整uniform shape的硬件上限已在当前real Context证明，但未来baseline/hardware仍需升级复核；
+  hue/gamma precision与color space只保证当前planar contract和测试容差。
+- Architecture首轮review fixes：`S2-R001`通过Collection property-aware forwarding与Surface仅响应
+  `removed`或`property === "show" && !layer.show`关闭；shown/hidden filter mutation均不再release或清空最近normal replay。
+  新增Collection forwarding与settled hidden layer回归，七项filter mutation后、下一normal render前保持request/texture/
+  binding/runtime counters、`surface._imagery.tilesLoaded`、`surface.tilesLoaded`、`world.tilesLoaded`及depth replay不变；下一normal
+  render不请求hidden layer。Architecture为此批准Collection source/spec两条SceneGIS-owned路径，未修改private imagery runtime。
+- `S2-R002`通过当前Widget real Context闭环：实际`MAX_TEXTURE_IMAGE_UNITS=16`、
+  `MAX_FRAGMENT_UNIFORM_VECTORS=1024`；16个shown layers的完整uniform variant成功生成、链接、渲染，添加第17层后产品Surface
+  在新增request/selection/shader mutation前fail-fast。初次测试从direct Source `ContextLimits`模块读取到初始化前`0`，改为从
+  `widget.scene.context._gl`读取实际limit；产品effective limit仍由“16成功、17产品拒绝”行为闭环证明一致。
+- `S2-R003`增加property-aware unit-range validator，threshold constructor/setter诊断准确命名
+  `colorToAlphaThreshold`，并加入精确message断言；brightness/contrast/saturation/gamma四处`@exception`逻辑措辞已修正，
+  existing alpha validator/message与accepted values不变。
+- Review-fix focused结果：ImageryLayer include=`12/12`（Layer `7`、Collection `5`）；Surface aggregate=`37/37`；
+  Imagery Widget=`12/12`。为取得精确GL limits曾加入一次临时诊断assertion并按预期得到`1 FAILED`，随后立即移除；最终工作树
+  不含诊断代码，以上12/12 Widget结果为最终证据。
+- Manual-gate blocker `S2-R004`：实际Sandcastle iframe证明原`.backdrop`没有positioning contract，controls/status被full-size
+  canvas覆盖。仅修改既有demo `index.html`：controls/status显式`position:absolute`、`z-index:2`及自有background/border/padding；
+  status固定在credit上方；controls使用viewport-relative `max-height`与`overflow:auto`，紧凑高度media rule进一步限制为
+  `min(220px, calc(100% - 76px))`。
+- R004 Chromium证据：代表视口controls/status hit-test分别命中overlay内`LABEL`与`DIV`，不再命中`CANVAS`；computed
+  position=`absolute`、z-index=`2`，status与credit rect不重叠。紧凑视口controls `scrollHeight=247`、
+  `clientHeight=218`，确认可滚动；brightness slider从`1`变为`0.2`后纯地图区域截图SHA-256由
+  `77f833313d112803c0081d3523080f9b2cb8120f7b051ffe16605816377465dd`变为
+  `c453bc13e8b9a6cfcc256c1e021f110b417bb588ba994d8c7cac3d26c47d4506`；console errors=`0`。代表与紧凑
+  viewport截图均已检查；未修改engine、renderer或public API。
+- Architecture独立复核R004：代表与紧凑iframe中controls/status均为`position:absolute`、`z-index:2`且命中overlay内部；
+  compact controls可滚动、status与credit不重叠，brightness `1 -> 0.2`改变实际canvas pixels。唯一HTTP 404为
+  `--no-embeddings`按预期未生成的外层`gallery/embeddings.json`，与Viewer、filters和rendering无关。

@@ -4,8 +4,100 @@
 <div id="cesiumContainer" class="fullSize"></div>
 <div id="loadingOverlay"><h1>Loading...</h1></div>
 <div id="toolbar"></div>
+<div class="backdrop" id="filterControls">
+  <label
+    >Brightness
+    <input id="brightness" type="range" min="0" max="2" step="0.01" value="1"
+  /></label>
+  <label
+    >Contrast
+    <input id="contrast" type="range" min="0" max="2" step="0.01" value="1"
+  /></label>
+  <label
+    >Hue
+    <input
+      id="hue"
+      type="range"
+      min="-3.1416"
+      max="3.1416"
+      step="0.01"
+      value="0"
+  /></label>
+  <label
+    >Saturation
+    <input id="saturation" type="range" min="0" max="2" step="0.01" value="1"
+  /></label>
+  <label
+    >Gamma
+    <input id="gamma" type="range" min="0.1" max="3" step="0.01" value="1"
+  /></label>
+  <label
+    ><input id="colorToAlphaEnabled" type="checkbox" /> Color to alpha</label
+  >
+  <label>Target <input id="colorToAlpha" type="color" value="#ffffff" /></label>
+  <label
+    >Threshold
+    <input
+      id="colorToAlphaThreshold"
+      type="range"
+      min="0"
+      max="1"
+      step="0.001"
+      value="0.004"
+  /></label>
+  <button id="resetFilters" type="button">Reset filters</button>
+</div>
 <div class="backdrop" id="status">
   OpenStreetMap tiles are loaded only for the current interactive view. If the
   public service is unavailable, the planar base color or a ready ancestor
   remains visible.
 </div>
+<style>
+  #filterControls {
+    position: absolute;
+    z-index: 2;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    gap: 4px;
+    max-width: 310px;
+    max-height: calc(100% - 104px);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 8px;
+    color: white;
+    background: rgb(42 42 42 / 90%);
+    border: 1px solid rgb(255 255 255 / 35%);
+    border-radius: 4px;
+  }
+  #filterControls label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  #status {
+    position: absolute;
+    z-index: 2;
+    right: 8px;
+    bottom: 28px;
+    left: 8px;
+    max-width: 760px;
+    max-height: 60px;
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 8px;
+    color: white;
+    background: rgb(42 42 42 / 90%);
+    border: 1px solid rgb(255 255 255 / 35%);
+    border-radius: 4px;
+  }
+  @media (max-height: 360px) {
+    #filterControls {
+      max-height: min(220px, calc(100% - 76px));
+    }
+    #status {
+      max-height: 44px;
+      padding: 4px 8px;
+    }
+  }
+</style>

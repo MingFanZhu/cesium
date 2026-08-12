@@ -58,6 +58,22 @@ describe("SceneGIS/Scene/SceneGISPlanarImageryLayerCollection", function () {
     collection.destroy();
   });
 
+  it("forwards the changed property from attached layers", function () {
+    const tilingScheme = createTilingScheme();
+    const collection = new SceneGISPlanarImageryLayerCollection({
+      tilingScheme,
+    });
+    const changed = jasmine.createSpy("changed");
+    collection._changeListener = changed;
+    const layer = collection.addImageryProvider(createProvider(tilingScheme));
+    changed.calls.reset();
+
+    layer.brightness = 0.5;
+
+    expect(changed).toHaveBeenCalledOnceWith("changed", layer, "brightness");
+    collection.destroy();
+  });
+
   it("requires exact tiling-scheme identity and a detached live layer", function () {
     const tilingScheme = createTilingScheme();
     const collection = new SceneGISPlanarImageryLayerCollection({

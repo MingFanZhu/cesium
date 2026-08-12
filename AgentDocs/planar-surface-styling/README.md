@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                      |
-| ---------------------- | -------------------------------------------------------------------------- |
-| Extension slug         | `planar-surface-styling`                                                   |
-| Status                 | `active`                                                                   |
-| Planning model         | `extension`                                                                |
-| Active extension plan  | [总体计划](plans/2026-08-12-planar-surface-styling-extension.md)           |
-| Current phase          | S2 Planar Imagery Color Filters                                            |
-| Active phase plan      | [S2 phase plan](plans/2026-08-12-phase-s2-planar-imagery-color-filters.md) |
-| Active standalone plan | None                                                                       |
-| Architecture contact   | Architecture Agent                                                         |
-| Execution contact      | Execution Agent                                                            |
-| Last updated           | `2026-08-12`                                                               |
+| Field                  | Value                                                            |
+| ---------------------- | ---------------------------------------------------------------- |
+| Extension slug         | `planar-surface-styling`                                         |
+| Status                 | `active`                                                         |
+| Planning model         | `extension`                                                      |
+| Active extension plan  | [总体计划](plans/2026-08-12-planar-surface-styling-extension.md) |
+| Current phase          | None（S2 completed；S3 尚未激活）                                |
+| Active phase plan      | None                                                             |
+| Active standalone plan | None                                                             |
+| Architecture contact   | Architecture Agent                                               |
+| Execution contact      | Execution Agent                                                  |
+| Last updated           | `2026-08-12`                                                     |
 
 ## Scope
 
@@ -45,11 +45,15 @@
 
 ## Current handoff
 
-- Current state: S1 已由本地 checkpoint `04ac138b37295f328f3542f143b2f6b738a7e021` 关闭；Architecture 已依据当前源码确认 S2 phase plan，等待 Execution 正式实现。
-- Next action: Execution Agent 按 [S2 phase plan](plans/2026-08-12-phase-s2-planar-imagery-color-filters.md) 实现并回交 review request；未 review/manual gate 前不得 checkpoint 或进入 S3。
-- Current phase status: S1=`completed`；S2=`active`；S3-S4=`planned`。
+- Current state: S2 implementation、自动化验证、Architecture review与项目负责人manual gate均已完成；
+  `S2-R001`至`S2-R004`全部关闭。本索引与相关计划、review随S2本地checkpoint提交，未push、未进入S3。
+- Next action: S2 checkpoint后，由Architecture依据当前源码重新发现并细化S3 terrain
+  height/slope/aspect/contour styling phase；在正式assignment前Execution不得进入S3。
+- Current phase status: S1=`completed`；S2=`completed`；S3-S4=`planned`且均未激活。
 - Open discussions: None；S2 已冻结 public filter contract、颜色处理顺序、normal-render snapshot 与 zero-upstream 边界。
 - Latest review:
-  [S1 shader source/delivery review](reviews/2026-08-12-s1-shader-source-foundation.md)为`approved`；无 actionable finding。
+  [S2 planar imagery color filters](reviews/2026-08-12-s2-planar-imagery-color-filters.md)为`approved`；
+  `S2-R001`至`S2-R004`全部fixed，manual gate通过。
 - Unresolved reviews: None。
-- Known risks: S1 fragment inactive branch 升级风险由 ADR-0030 承载；S2 的 hue/gamma 颜色空间、完整 per-layer uniform 成本与 mutable `Color` snapshot 必须由 ADR-0031、real-Context pixels 和 warm identity 关闭。
+- Known risks: full uniform shape在当前real Context/dev/release通过，但Cesium升级后仍需复核fragment uniform limit与
+  builtin dependency scan；hue/saturation只承诺当前Cesium builtin数学，不宣称与Globe HDR color space相同。

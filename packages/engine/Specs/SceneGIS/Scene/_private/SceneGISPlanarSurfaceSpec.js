@@ -1,6 +1,7 @@
 import {
   Cartesian3,
   Cartesian2,
+  Cartesian4,
   Color,
   ColorGeometryInstanceAttribute,
   DirectionalLight,
@@ -1273,6 +1274,68 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     scene.renderForSpecs();
     expect(tile._imagerySlots).toBe(slots);
     expect(tile._imagerySlots.length).toBe(0);
+  });
+
+  it("publishes filter snapshots only on normal render and reuses command resources", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    const layer = world.imageryLayers.addImageryProvider({
+      tilingScheme: world.tilingScheme,
+      minimumLevel: 0,
+      maximumLevel: 0,
+      tileWidth: 1,
+      tileHeight: 1,
+      hasAlphaChannel: true,
+      errorEvent: new Event(),
+      credit: undefined,
+      requestImage: () => undefined,
+    });
+    scene = createPlanarScene(world);
+    pointCameraAt(world);
+    scene.renderForSpecs();
+
+    const surface = world._surface;
+    const tile = surface._quadtree._idealTiles[0];
+    const slot = tile._imagerySlots[0];
+    const command = tile.command;
+    const shader = command.shaderProgram;
+    const vertexArray = command.vertexArray;
+    const binding = tile.imageryBindings.get(layer);
+    const shaderMapSize = surface._shaderPrograms.size;
+    const colorToAlpha = slot.colorToAlpha;
+    expect(command.uniformMap.u_brightness0()).toBe(1.0);
+    expect(command.uniformMap.u_colorToAlpha0()).toBe(colorToAlpha);
+    expect(colorToAlpha.w).toBe(0.0);
+
+    layer.brightness = 0.25;
+    layer.gamma = 2.0;
+    layer.colorToAlpha = new Color(0.1, 0.2, 0.3, 0.0);
+    layer.colorToAlphaThreshold = 0.2;
+    expect(command.uniformMap.u_brightness0()).toBe(1.0);
+    expect(command.uniformMap.u_gamma0()).toBe(1.0);
+    expect(colorToAlpha.w).toBe(0.0);
+
+    const depthFrameState = {
+      ...scene.frameState,
+      passes: { render: false, pick: true, depth: true },
+      commandList: [],
+    };
+    world.render(depthFrameState);
+    expect(depthFrameState.commandList).toEqual([command]);
+    expect(command.uniformMap.u_brightness0()).toBe(1.0);
+    expect(colorToAlpha.w).toBe(0.0);
+
+    scene.renderForSpecs();
+    expect(tile._imagerySlots[0]).toBe(slot);
+    expect(slot.colorToAlpha).toBe(colorToAlpha);
+    expect(command.uniformMap.u_brightness0()).toBe(0.25);
+    expect(command.uniformMap.u_gamma0()).toBe(2.0);
+    expect(command.uniformMap.u_colorToAlphaThreshold0()).toBe(0.2);
+    expect(colorToAlpha).toEqual(new Cartesian4(0.1, 0.2, 0.3, 1.0));
+    expect(tile.command).toBe(command);
+    expect(command.shaderProgram).toBe(shader);
+    expect(command.vertexArray).toBe(vertexArray);
+    expect(tile.imageryBindings.get(layer)).toBe(binding);
+    expect(surface._shaderPrograms.size).toBe(shaderMapSize);
   });
 
   it("uses the exact tile volume for quadtree visibility", function () {

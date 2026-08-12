@@ -140,6 +140,10 @@ best-effort failure 降级为平面 `baseColor` 或已 ready ancestor。所有�
 
 ### Layer 与 Collection
 
+> 2026-08-12 amendment：S2在不改变P5 request/cache/texture/composition ownership的前提下增加
+> uniform-only颜色滤镜。公共属性、raw sampled RGB顺序、normal-render snapshot与资源边界见
+> [ADR-0031](ADR-0031-planar-imagery-color-filters.md)。本节保留P5历史基线。
+
 `SceneGISPlanarImageryLayer` 构造形式为：
 
 ```text
