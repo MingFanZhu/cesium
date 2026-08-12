@@ -18,6 +18,7 @@ import {
   SceneGISPlanarWorld,
 } from "../../../index.js";
 import createScene from "../../../../../Specs/createScene.js";
+import SceneGISPlanarGroundLineShader from "../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundLineShader.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
   let scene;
@@ -94,6 +95,24 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
       loadTileDataAvailability: () => undefined,
     };
   }
+
+  it("loads the generated area and line shader modules", function () {
+    expect(SceneGISPlanarGroundLineShader.areaVertexShaderSource).toContain(
+      "czm_modelViewProjectionRelativeToEye",
+    );
+    expect(SceneGISPlanarGroundLineShader.areaFragmentShaderSource).toContain(
+      "czm_gammaCorrect(v_color)",
+    );
+    expect(SceneGISPlanarGroundLineShader.vertexShaderSource).toContain(
+      "u_sceneGISGroundLineWidth",
+    );
+    expect(SceneGISPlanarGroundLineShader.vertexShaderSource).toContain(
+      "czm_metersPerPixel(positionEC)",
+    );
+    expect(SceneGISPlanarGroundLineShader.fragmentShaderSource).toContain(
+      "czm_writeDepthClamp()",
+    );
+  });
 
   it("validates implicit clamp, support, attributes, and non-extruded polygons", function () {
     expect(SceneGISPlanarGroundPrimitive.isSupported(scene)).toBe(

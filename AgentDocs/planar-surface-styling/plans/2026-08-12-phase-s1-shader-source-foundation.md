@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed`
 - Parent plan: [planar-surface-styling extension](2026-08-12-planar-surface-styling-extension.md)
 - Phase: `S1`
 - Owner role: `execution`
@@ -12,7 +12,8 @@
 - Created: `2026-08-12`
 - Updated: `2026-08-12`
 - Related discussions: None
-- Related reviews: None; Execution ready-for-review 后创建
+- Related reviews:
+  [S1 shader source/delivery review](../reviews/2026-08-12-s1-shader-source-foundation.md)
 - ADR: 新建 `Documentation/SceneGIS/Decisions/ADR-0030-scenegis-shader-source-and-delivery.md`
 - SGP: None expected; upstream-owned diff 出现前必须停止并升级计划
 
@@ -123,5 +124,33 @@
 
 ## Deviations and results
 
-- 尚未实现。Execution 必须记录实际 Shader 文件列表、动态 seam、验证 case counts、package evidence、ownership audit 与剩余风险。
-- 未 commit、未 push、不得进入 S2。
+- Implementation status：`completed`；Architecture review=`approved`，无actionable finding；等待本地checkpoint，未push、未进入S2。
+- 实际新增8个source：
+  - Planar Surface：`SceneGISPlanarSurfaceUnlitVS.glsl`、
+    `SceneGISPlanarSurfaceGeometricLitVS.glsl`、`SceneGISPlanarSurfaceSmoothLitVS.glsl`、
+    `SceneGISPlanarSurfaceFS.glsl`。
+  - Planar Ground：`SceneGISPlanarGroundAreaVS.glsl`、`SceneGISPlanarGroundAreaFS.glsl`、
+    `SceneGISPlanarGroundLineVS.glsl`、`SceneGISPlanarGroundLineFS.glsl`。
+- Dynamic seam：Surface fragment只有一个`SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS` token；JS替换为
+  per-layer uniforms与`sceneGISComposeLayers`。lighting/normal只由前置`SCENEGIS_LIGHTING`/
+  `SCENEGIS_SMOOTH_NORMALS` compile-time defines选择；cache key、uniform map与runtime ownership不变。
+- Ground保留原soft-private aggregator shape，只把四个字段改为显式generated module imports；public Primitive未改。
+- 正式文档：新增ADR-0030，Architecture加入SceneGIS shader owned root/build rule，upgrade checklist加入
+  converter/minifier/ignore/import/tar复核项。
+- Focused Specs：SurfaceShader=`5/5`；Surface aggregate（含SurfaceShader）=`35/35`；Ground Primitive=`7/7`；
+  A7 real-Context terrain qualification=`1/1`。
+- Delivery：`npm run build`通过；`npm run build-release`通过；现有installed package verifier exit 0，真实打包安装后
+  ESM/CJS加载通过；engine `npm pack . --dry-run`明确列出8个`.glsl`与8个generated `.js` tar entries。
+- Static/audit：changed-scope ESLint、Prettier、Markdownlint、`git diff --check`通过；8个basename全局唯一；
+  upstream audit通过，current delivery upstream-owned entries=`0`、generated status=`0`、SGP=None。
+- 已解决偏差：首次dev build在engine/widgets完成后因根`index.js.map`短暂`EBUSY`失败，后续同命令完整通过；
+  SurfaceShader首轮仍按旧内嵌source断言inactive branch不存在，改为验证compile-time defines后`5/5`通过；
+  一次从repo root运行`npm pack packages/engine --dry-run`被npm误解为Git地址，改在engine目录运行
+  `npm pack . --dry-run`后得到正确tar entry证据。以上均未扩大代码或允许路径。
+- 未运行：full TypeScript/API docs、Sandcastle/E2E，符合S1无public API/视觉行为变化的明确非要求；package verifier
+  复用当前既有declarations/docs做private/public边界检查。
+- 剩余风险：inactive lighting branch存在于单一原始GLSL template并由WebGL preprocessor裁剪；real-Context已证明
+  unlit/geometric/smooth实际compile/pixel。官方升级仍需按ADR-0030复核converter/minifier与package files。
+- Architecture独立复核：Surface aggregate=`35/35`、Ground Primitive=`7/7`、A7 real-Context qualification=`1/1`；
+  `npm run build-release`、installed package verifier、engine tar inventory、official upstream audit、case-sensitive
+  shader basename audit与`git diff --check`通过。项目负责人manual gate不需要：S1没有新增视觉行为或公共API。

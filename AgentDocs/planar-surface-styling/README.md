@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                  |
-| ---------------------- | ---------------------------------------------------------------------- |
-| Extension slug         | `planar-surface-styling`                                               |
-| Status                 | `active`                                                               |
-| Planning model         | `extension`                                                            |
-| Active extension plan  | [总体计划](plans/2026-08-12-planar-surface-styling-extension.md)       |
-| Current phase          | S1 Shader source and delivery foundation                               |
-| Active phase plan      | [S1 phase plan](plans/2026-08-12-phase-s1-shader-source-foundation.md) |
-| Active standalone plan | None                                                                   |
-| Architecture contact   | Architecture Agent                                                     |
-| Execution contact      | Execution Agent                                                        |
-| Last updated           | `2026-08-12`                                                           |
+| Field                  | Value                                                            |
+| ---------------------- | ---------------------------------------------------------------- |
+| Extension slug         | `planar-surface-styling`                                         |
+| Status                 | `active`                                                         |
+| Planning model         | `extension`                                                      |
+| Active extension plan  | [总体计划](plans/2026-08-12-planar-surface-styling-extension.md) |
+| Current phase          | None; S1 completed                                               |
+| Active phase plan      | None                                                             |
+| Active standalone plan | None                                                             |
+| Architecture contact   | Architecture Agent                                               |
+| Execution contact      | Execution Agent                                                  |
+| Last updated           | `2026-08-12`                                                     |
 
 ## Scope
 
@@ -40,14 +40,18 @@
 - Branch: `feature/planar-surface-styling`
 - Base commit: `2086e5e42038dfdde23220dea8a33395445e6cd8`
 - Parent extensions: completed `planar-world`、`planar-terrain`、`planar-terrain-advanced`
-- ADR: S1 计划新增 `ADR-0030`；后续公共 styling contract 在相应 phase 激活时编号
-- SGP: S1 预计 None；任何 upstream-owned diff 必须先更新 phase plan 并登记合法 SGP
+- ADR: S1 已新增 `ADR-0030`；后续公共 styling contract 在相应 phase 激活时编号
+- SGP: S1=None；任何 upstream-owned diff 必须先更新 phase plan 并登记合法 SGP
 
 ## Current handoff
 
-- Current state: extension plan 与 S1 phase plan 已由 Architecture confirmed；产品实现尚未开始。
-- Next action: Execution Agent 按 S1 assignment 建立 Shader source/delivery foundation，回写验证与 review request。
-- Current phase status: S1=`active`；S2-S4=`planned`。
+- Current state: S1 implementation、自动化验证与 Architecture review 已完成并 approved；等待本地 checkpoint commit。
+- Next action: Architecture Agent 创建 S1 中文本地 checkpoint；checkpoint 完成后再依据当前源码细化 S2，禁止提前实现。
+- Current phase status: S1=`completed`；S2-S4=`planned`，尚未激活。
 - Open discussions: None；S1 的目录与构建选择已收敛，长期决定由 ADR-0030 承载。
-- Unresolved reviews: None；S1 ready-for-review 后创建 review 文档。
-- Known risks: 当前 shader 转换器只扫描 `Source/Shaders/**`，生成 `.js` 被忽略但 npm 包包含 `Source`；动态 Surface fragment 仍需由 JS 组合 variant，迁移不得改变 cache key、uniform 或像素行为。
+- Latest review:
+  [S1 shader source/delivery review](reviews/2026-08-12-s1-shader-source-foundation.md)为`approved`；无 actionable finding。
+- Unresolved reviews: None。
+- Known risks: fragment template 的inactive lighting branch由GLSL preprocessor裁剪；focused source tests已改为验证
+  variant defines，实际compile/pixel由Surface与A7 real-Context qualification覆盖。后续Cesium升级仍需复核
+  converter/minifier、生成模块ignore与tarball files。

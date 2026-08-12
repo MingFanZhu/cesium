@@ -8,10 +8,14 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     expect(vertexShader).not.toContain("v_positionEC");
     const fragmentShader = SceneGISPlanarSurfaceShader.createFragmentShader(0);
     expect(fragmentShader).not.toContain("sampler2D");
-    expect(fragmentShader).not.toContain("dFdx");
-    expect(fragmentShader).not.toContain("czm_getLambertDiffuse");
-    expect(fragmentShader).toContain("vec4 color = u_color");
+    expect(fragmentShader).not.toContain("#define SCENEGIS_LIGHTING");
+    expect(fragmentShader).toContain(
+      "sceneGISComposeLayers(u_color, v_textureCoordinates)",
+    );
     expect(fragmentShader).toContain("vec4(color.rgb, 1.0)");
+    expect(fragmentShader).not.toContain(
+      "SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS",
+    );
   });
 
   it("statically composes texture slots bottom-to-top", function () {
@@ -69,12 +73,28 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     expect(vertexShader).not.toContain("czm_normal * czm_octDecode(normal)");
     expect(vertexShader).not.toContain("v_positionEC");
     expect(fragmentShader).toContain("normalize(v_normalEC)");
-    expect(fragmentShader).not.toContain("dFdx");
-    expect(fragmentShader).toContain("stable topology-up hemisphere");
+    expect(fragmentShader).toContain("#define SCENEGIS_LIGHTING");
+    expect(fragmentShader).toContain("#define SCENEGIS_SMOOTH_NORMALS");
     expect(fragmentShader).not.toContain("faceforward");
-    expect(fragmentShader).not.toContain("planarUpEC");
     expect(fragmentShader.indexOf("sample1.a * u_alpha1")).toBeLessThan(
       fragmentShader.indexOf("color.rgb *= czm_lightColor * intensity"),
     );
+  });
+
+  it("replaces the single dynamic layer seam for every layer count", function () {
+    for (const layerCount of [0, 1, 4]) {
+      const fragmentShader = SceneGISPlanarSurfaceShader.createFragmentShader(
+        layerCount,
+        true,
+        "smooth",
+      );
+      expect(fragmentShader).not.toContain(
+        "SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS",
+      );
+      expect(fragmentShader.match(/sceneGISComposeLayers/g).length).toBe(2);
+      expect(fragmentShader.match(/uniform sampler2D/g)?.length ?? 0).toBe(
+        layerCount,
+      );
+    }
   });
 });
