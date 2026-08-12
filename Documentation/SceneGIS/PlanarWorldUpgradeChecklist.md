@@ -52,6 +52,7 @@ two-vertex-buffer rollback/release；不得引入其无关normal compression API
 | automatic exports/types/JSDoc/package layout                             | public SceneGIS engine/widgets types                                | medium | workspace and installed tarball ESM/CJS where supported、root/types/API visibility、private absence                                |
 | Sandcastle/E2E local bundle entry                                        | two planar examples and local E2E                                   | medium | dev/release bundle, no public-network automation, credits and destroy                                                              |
 | SceneGIS Sandcastle Vite wrapper                                         | `scripts/scenegis/sandcastle-vite.config.mjs`                       | medium | upstream `vite.config.dev.ts` export/`config.define` shape、Vite duplicate `--config` last-wins、canonical localhost origin        |
+| planar styling unified qualification与installed delivery                 | S4 Widget/E2E/package verifier                                      | high   | non-default filter→Material→lighting、warm identities、8 GLSL+8 generated JS、7 filter properties、Material/API anchors            |
 | Entity/DataSource planar callback与profile gate                          | private content callback、SGP-0001                                  | high   | World liveness、deferred activation、dynamic allowlist、default Globe isolation                                                    |
 | Point/Billboard/Label pools与Model async lifecycle                       | private Anchor/Model visualizers                                    | high   | disabled EntityCluster、original Entity pick、generation isolation、late settlement、exact release                                 |
 | standard synchronous Primitive/GeometryInstance与per-DataSource ordering | public planar Primitive/Geometry、private Polyline/Polygon adapters | high   | scene3DOnly local DOUBLE、origin/model matrix、pickPrimitive、Appearance vertex format、candidate/current、move/remove/destroy     |
@@ -60,6 +61,10 @@ two-vertex-buffer rollback/release；不得引入其无关normal compression API
 | planar content moderate qualification与local E2E                         | C5 qualification Specs、content Sandcastle/E2E                      | medium | batch warm/mutation、selection、dev/release、no public-network automation                                                          |
 | content private tarball delivery                                         | package smoke与`SceneGIS/DataSources/_private`                      | medium | runtime files存在，非underscore public spelling、`.d.ts`与API HTML命中0，临时consumer不污染workspace                               |
 
+升级SceneGIS Sandcastle Vite wrapper时还必须复核具名static-copy/import-map plugin替换、三个Cesium specifier的单一watched
+root module identity、`Sandcastle` mapping与type-path defines、external route allowlist、GET/HEAD、traversal拒绝、
+Content-Type/404/405、两种SampleData URL，以及打印URL前对实际runtime root module的JavaScript HEAD readiness probe。
+
 ## 升级执行顺序
 
 1. 核对 `.scenegis/upstream-base.json`，逐项重放并审查 SGP-0001/SGP-0002，不在功能提交中混入 upstream sync。
@@ -67,10 +72,13 @@ two-vertex-buffer rollback/release；不得引入其无关normal compression API
 3. 运行 P1-P8、terrain T1-T6与advanced terrain focused Specs；复核actual Worker transfer/URL与A7本地统一资格，再按风险运行
    multi-tile warm/churn/depth与lifecycle soak；任何
    observable selection、pixel、fallback、lighting或ownership变化先形成finding。
-4. 生成 build/release/types/docs，在临时目录执行 root/engine/widgets tarball smoke；生成文件不得进入提交。
-5. 执行 dev/release 本地 E2E，确认 Viewer、imagery、pixel/depth/pick、真实 wheel/Home 与 destroy。
+4. 生成 build/release/types/docs，在临时目录执行 root/engine/widgets tarball smoke；逐项确认8个SceneGIS GLSL、8个generated
+   shader module、7个imagery filter properties、World Material declaration/API anchors与caller ownership；生成文件不得进入提交。
+5. 执行dev/release本地E2E，确认非默认filter + caller-owned Material + lighting像素、single command/readiness、
+   depth/pick、真实wheel/Home与destroy，且public network attempts为0。
 6. 检查planar imagery、Viewer与terrain Sandcastle，验证terrain lighting toggle和显式scene light；terrain案例还必须验证
-   None/Contour/Height/Slope/Aspect、reset、underground方向稳定、caller Material ownership与overlay；
+   None/Contour/Height/Slope/Aspect、reset、underground方向稳定、caller Material ownership与overlay；两个示例的用户可见
+   tool/control标题、标签、按钮、选项、帮助与status应保持清晰中文，技术API名称和Credit保持原契约；
    把公网OSM/terrain可用性与engine correctness分开记录。
 7. 检查planar content Sandcastle与local E2E，复核完整approved graphics matrix、fixed Path sampling、dynamic
    update、original Entity selection、per-DataSource ordering和moderate warm/resource收敛。

@@ -563,7 +563,24 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainStylingCesiumWidget", function ()
       enableLighting: true,
       lambertDiffuseMultiplier: 0.0,
     });
-    world.imageryLayers.addImageryProvider({
+    const terrainData = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array([0.0, 0.0, 0.0, 0.0]),
+      width: 2,
+      height: 2,
+    });
+    world.terrainProvider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: 0.0,
+      maximumHeight: 0.0,
+      maximumLevel: 0,
+      errorEvent: new Event(),
+      credit: undefined,
+      getLevelMaximumGeometricError: () => 1.0,
+      requestTileGeometry: () => Promise.resolve(terrainData),
+      getTileDataAvailable: () => undefined,
+      loadTileDataAvailability: () => undefined,
+    };
+    const layer = world.imageryLayers.addImageryProvider({
       tilingScheme: world.tilingScheme,
       minimumLevel: 0,
       maximumLevel: 0,
@@ -574,6 +591,7 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainStylingCesiumWidget", function ()
       credit: undefined,
       requestImage: () => Promise.resolve(createSolidImage("red")),
     });
+    layer.brightness = 0.5;
     const material = Material.fromType(Material.ColorType, {
       color: Color.fromBytes(0, 0, 255, 128),
     });
@@ -599,20 +617,64 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainStylingCesiumWidget", function ()
         up: Cartesian3.UNIT_Y,
       },
     });
-    renderFrame();
-    await Promise.resolve();
-    await Promise.resolve();
-    renderFrame();
-    const pixel = widget.scene.context.readPixels({
-      x: Math.floor(widget.scene.drawingBufferWidth / 2),
-      y: Math.floor(widget.scene.drawingBufferHeight / 2),
-      width: 1,
-      height: 1,
+    await pollToPromise(function () {
+      renderFrame();
+      return world.tilesLoaded && world._surface._renderCommands.length === 1;
     });
-    expect(pixel[0]).toBeCloseTo(38, -1);
+
+    function readCenterPixel() {
+      return widget.scene.context.readPixels({
+        x: Math.floor(widget.scene.drawingBufferWidth / 2),
+        y: Math.floor(widget.scene.drawingBufferHeight / 2),
+        width: 1,
+        height: 1,
+      });
+    }
+
+    const pixel = readCenterPixel();
+    expect(pixel[0]).toBeCloseTo(19, -1);
     expect(pixel[1]).toBeLessThan(5);
     expect(pixel[2]).toBeCloseTo(38, -1);
     expect(pixel[3]).toBe(255);
+
+    const surface = world._surface;
+    const tile = surface._quadtree._renderTiles[0];
+    const binding = tile.imageryBindings.get(layer);
+    const identities = {
+      command: tile.command,
+      shader: tile.command.shaderProgram,
+      vertexArray: tile.command.vertexArray,
+      imageryTexture: binding.desired.texture,
+      terrainMesh: tile.terrainEntry.activeContent.mesh,
+    };
+    function expectWarmIdentities() {
+      expect(surface._quadtree._renderTiles.length).toBe(1);
+      expect(surface._quadtree._renderTiles[0]).toBe(tile);
+      expect(surface._renderCommands.length).toBe(1);
+      expect(surface._renderCommands[0]).toBe(identities.command);
+      expect(tile.command).toBe(identities.command);
+      expect(tile.command.shaderProgram).toBe(identities.shader);
+      expect(tile.command.vertexArray).toBe(identities.vertexArray);
+      expect(tile.imageryBindings.get(layer)).toBe(binding);
+      expect(binding.desired.texture).toBe(identities.imageryTexture);
+      expect(tile.terrainEntry.activeContent.mesh).toBe(identities.terrainMesh);
+    }
+
+    layer.brightness = 1.0;
+    renderFrame();
+    const filterPixel = readCenterPixel();
+    expect(filterPixel[0]).toBeCloseTo(38, -1);
+    expect(filterPixel[1]).toBeLessThan(5);
+    expect(filterPixel[2]).toBeCloseTo(38, -1);
+    expectWarmIdentities();
+
+    material.uniforms.color = Color.fromBytes(0, 255, 0, 128);
+    renderFrame();
+    const materialPixel = readCenterPixel();
+    expect(materialPixel[0]).toBeCloseTo(38, -1);
+    expect(materialPixel[1]).toBeCloseTo(38, -1);
+    expect(materialPixel[2]).toBeLessThan(5);
+    expectWarmIdentities();
   });
 
   it("orients north, east, south, west, and flat aspect deterministically", async function () {

@@ -3,12 +3,12 @@
 ## Metadata
 
 - Plan type: `extension`
-- Status: `active`
+- Status: `completed`
 - Owner role: `architecture`
 - Architecture review: `confirmed`
 - Architecture reviewer: Architecture Agent
 - Created: `2026-08-12`
-- Updated: `2026-08-12`
+- Updated: `2026-08-13`
 - Parent extensions: completed `planar-world`、`planar-terrain`、`planar-terrain-advanced`
 - Related discussions: 项目负责人提出 Shader 独立目录、平面影像滤镜及 terrain 坡度/坡向/等高线能力
 - Related reviews:
@@ -69,12 +69,12 @@
 
 ## Phase roadmap
 
-| Phase | Objective                                                                                     | Dependencies            | Entry gate                                                                              | Exit gate                                                                                   | Status                      | Phase plan                                                |
-| ----- | --------------------------------------------------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------- | --------------------------------------------------------- |
-| S1    | 建立独立 SceneGIS GLSL source/delivery foundation，并等价迁移现有自有 Surface/Ground shader。 | predecessor checkpoints | 审计 shader glob、生成物、imports、dev/release/npm 与现有 shader variants。             | ADR/Architecture ownership 完成；内嵌主体迁出；现有像素、cache、资源和三种交付形态等价。    | `completed`                 | [S1](2026-08-12-phase-s1-shader-source-foundation.md)     |
-| S2    | 为 planar imagery layer 增加坐标系无关的颜色滤镜。                                            | S1 checkpoint           | 重新审计 layer mutation、uniform map、cache key 与 Globe filter math。                  | 公共属性、默认等价、uniform-only mutation、组合顺序、错误与生命周期通过 Specs/manual gate。 | `completed`                 | [S2](2026-08-12-phase-s2-planar-imagery-color-filters.md) |
-| S3    | 建立 terrain height/slope/aspect/contour styling contract，并决定 Material 复用边界。         | S2 checkpoint           | 重新审计 Cesium Material/Globe inputs、planar normals、world height 与 shader variant。 | 已批准 contract 与合成顺序实现；四类 styling、lighting/underground/LOD 与资源边界闭环。     | `completed`                 | [S3](2026-08-12-phase-s3-planar-terrain-styling.md)       |
-| S4    | 完成统一资格、案例、发布与升级交付。                                                          | S3 checkpoint           | S1-S3 review/checkpoint 完成；固定最小资格矩阵与 manual gate。                          | filters + terrain style 在 dev/release/npm、真实 WebGL/GPU、lifecycle 与文档中统一闭环。    | `planned`                   | Not created                                               |
+| Phase | Objective                                                                                     | Dependencies            | Entry gate                                                                              | Exit gate                                                                                   | Status      | Phase plan                                                  |
+| ----- | --------------------------------------------------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
+| S1    | 建立独立 SceneGIS GLSL source/delivery foundation，并等价迁移现有自有 Surface/Ground shader。 | predecessor checkpoints | 审计 shader glob、生成物、imports、dev/release/npm 与现有 shader variants。             | ADR/Architecture ownership 完成；内嵌主体迁出；现有像素、cache、资源和三种交付形态等价。    | `completed` | [S1](2026-08-12-phase-s1-shader-source-foundation.md)       |
+| S2    | 为 planar imagery layer 增加坐标系无关的颜色滤镜。                                            | S1 checkpoint           | 重新审计 layer mutation、uniform map、cache key 与 Globe filter math。                  | 公共属性、默认等价、uniform-only mutation、组合顺序、错误与生命周期通过 Specs/manual gate。 | `completed` | [S2](2026-08-12-phase-s2-planar-imagery-color-filters.md)   |
+| S3    | 建立 terrain height/slope/aspect/contour styling contract，并决定 Material 复用边界。         | S2 checkpoint           | 重新审计 Cesium Material/Globe inputs、planar normals、world height 与 shader variant。 | 已批准 contract 与合成顺序实现；四类 styling、lighting/underground/LOD 与资源边界闭环。     | `completed` | [S3](2026-08-12-phase-s3-planar-terrain-styling.md)         |
+| S4    | 完成统一资格、案例、发布与升级交付。                                                          | S3 checkpoint           | S1-S3 review/checkpoint 完成；固定最小资格矩阵与 manual gate。                          | filters + terrain style 在 dev/release/npm、真实 WebGL/GPU、lifecycle 与文档中统一闭环。    | `completed` | [S4](2026-08-12-phase-s4-unified-qualification-delivery.md) |
 
 ## Cross-phase validation
 
@@ -110,4 +110,15 @@
 - Architecture focused re-review已批准S3产品代码与SceneGIS-owned Sandcastle development tooling follow-up；
   `S3-R001`至`S3-R006`及`S3-T001`至`S3-T006`全部fixed，
   [S3 review](../reviews/2026-08-12-s3-planar-terrain-styling.md)为`approved`。项目负责人已通过manual gate并授权进入S4；
-  Architecture先创建S3独立本地checkpoint，再按当前源码建立S4 phase plan。
+  Architecture已创建S3独立本地checkpoint `201fb98213a15a160fbc4340c63918180734f6a7`。
+- Architecture已依据当前源码建立并确认
+  [S4 unified qualification and delivery phase plan](2026-08-12-phase-s4-unified-qualification-delivery.md)。S4不扩产品
+  API/runtime，聚焦非默认filter + Material + lighting联合资格、installed shader/API交付、两个现有示例中文tool panel与
+  extension关闭证据。
+- Execution已完成S4 implementation与交付验证；Architecture focused re-review已批准
+  [S4 review](../reviews/2026-08-12-s4-unified-qualification-delivery.md)，S4-R001至S4-R003全部fixed。Dev/release E2E因
+  外部端口占用的原始门禁已由项目负责人授权释放；同一Playwright config/project/spec在headed dev与release模式均通过。
+  默认headless `--use-angle=gl`在当前NVIDIA环境的Context初始化失败保留为工具链风险。
+- 项目负责人manual gate live launcher过程中发现marker/output竞态与external static routes返回HTML；该SceneGIS-owned
+  tooling follow-up及S4-T007 runtime import-map修复已通过Architecture narrow re-review。项目负责人随后使用修复后的launcher
+  完成中文panel与Cesium画面的final visual/manual gate，并授权进入独立`planar-environment`扩展；本扩展已完成。

@@ -43,6 +43,12 @@ const imageryProvider = new Cesium.SceneGISPlanarUrlTemplateImageryProvider({
   credit: openStreetMapCredit,
 });
 const imageryLayer = world.imageryLayers.addImageryProvider(imageryProvider);
+const status = document.getElementById("status");
+imageryProvider.errorEvent.addEventListener(function (error) {
+  status.textContent =
+    "OpenStreetMap 服务暂时不可用；当前将继续显示平面底色或已就绪的祖先瓦片。";
+  error.retry = false;
+});
 
 const defaults = {
   brightness: 1.0,

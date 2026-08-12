@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { EventEmitter } from "node:events";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { createServer } from "node:http";
+import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
 import test from "node:test";
@@ -12,11 +15,19 @@ import {
   createNpmInvocation,
   createViteArguments,
   createViteEnvironment,
+  initializeBuildWatch,
   parseArguments,
   runDevelopmentOrchestrator,
   waitForBuildWatchReady,
+  waitForViteReady,
 } from "./start-sandcastle-dev.mjs";
-import { createSceneGISViteConfig } from "./sandcastle-vite.config.mjs";
+import {
+  createSceneGISImportMapPlugin,
+  createSceneGISStaticMiddleware,
+  createSceneGISViteConfig,
+  resolveSceneGISStaticRequest,
+  sandcastleRuntimeModuleUrl,
+} from "./sandcastle-vite.config.mjs";
 
 function createChild(label) {
   const child = new EventEmitter();
@@ -53,10 +64,13 @@ test("parses the port and optional example id", () => {
 });
 
 test("couples listen port, URL, environment, and effective iframe origins", async () => {
-  const plugin = {};
+  const plugin = { name: "preserved-plugin" };
+  const staticServe = { name: "vite-plugin-static-copy:serve" };
+  const staticBuild = { name: "vite-plugin-static-copy:build" };
+  const upstreamImportMap = { name: "custom-import-map" };
   const upstreamConfig = async () => ({
     root: "sandcastle-root",
-    plugins: [plugin],
+    plugins: [plugin, [staticServe, staticBuild], upstreamImportMap],
     define: { __UPSTREAM_DEFINE__: JSON.stringify("preserved") },
   });
   for (const port of [80, 5173, 6123]) {
@@ -72,6 +86,14 @@ test("couples listen port, URL, environment, and effective iframe origins", asyn
     assert.equal(environment.SCENEGIS_SANDCASTLE_ORIGIN, origin);
     assert.equal(effectiveConfig.root, "sandcastle-root");
     assert.equal(effectiveConfig.plugins[0], plugin);
+    assert.deepEqual(
+      effectiveConfig.plugins.map((entry) => entry.name),
+      [
+        "preserved-plugin",
+        "scenegis-sandcastle-static-routes",
+        "scenegis-sandcastle-import-map",
+      ],
+    );
     assert.equal(
       effectiveConfig.define.__UPSTREAM_DEFINE__,
       JSON.stringify("preserved"),
@@ -98,6 +120,117 @@ test("couples listen port, URL, environment, and effective iframe origins", asyn
   assert.equal(
     createSandcastleUrl({ port: 80 }),
     "http://localhost/index.html",
+  );
+});
+
+test("maps all Cesium runtime specifiers to one watched root module", () => {
+  const plugin = createSceneGISImportMapPlugin();
+  const transformed = plugin.transformIndexHtml.handler("<html></html>", {
+    filename: path.join("sandcastle-root", "templates", "bucket.html"),
+  });
+  const importMap = JSON.parse(transformed.tags[0].children).imports;
+  assert.deepEqual(importMap, {
+    Sandcastle: "../templates/Sandcastle.js",
+    cesium: sandcastleRuntimeModuleUrl,
+    "@cesium/engine": sandcastleRuntimeModuleUrl,
+    "@cesium/widgets": sandcastleRuntimeModuleUrl,
+  });
+  assert.equal(
+    plugin.transformIndexHtml.handler("<html></html>", {
+      filename: path.join("sandcastle-root", "index.html"),
+    }),
+    undefined,
+  );
+});
+
+test("serves only explicit SceneGIS development routes", async (context) => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "scenegis-static-"));
+  context.after(() => rmSync(root, { recursive: true, force: true }));
+  const files = new Map([
+    ["Source/Cesium.js", "export const Cesium = true;"],
+    ["Source/Cesium.d.ts", "export declare const Cesium: boolean;"],
+    [
+      "packages/engine/Build/Unminified/index.js",
+      "export const engine = true;",
+    ],
+    ["packages/engine/index.d.ts", "export declare const engine: boolean;"],
+    [
+      "packages/widgets/Build/Unminified/index.js",
+      "export const widgets = true;",
+    ],
+    ["packages/widgets/index.d.ts", "export declare const widgets: boolean;"],
+    ["Build/CesiumUnminified/Assets/data.json", "{}"],
+    ["Apps/SampleData/example.json", "{}"],
+    ["Apps/SampleData/example.czml", "[]"],
+  ]);
+  for (const [relative, contents] of files) {
+    const target = path.join(root, relative);
+    mkdirSync(path.dirname(target), { recursive: true });
+    writeFileSync(target, contents);
+  }
+  writeFileSync(path.join(root, "secret.txt"), "secret");
+
+  assert.equal(
+    resolveSceneGISStaticRequest("/Source/Cesium.js", root).contentType,
+    "text/javascript; charset=utf-8",
+  );
+  assert.equal(
+    resolveSceneGISStaticRequest(
+      "/Build/CesiumUnminified/Assets/data.json",
+      root,
+    ).contentType,
+    "application/json; charset=utf-8",
+  );
+  assert.equal(
+    resolveSceneGISStaticRequest("/SampleData/example.json", root).contentType,
+    "application/json; charset=utf-8",
+  );
+  assert.equal(
+    resolveSceneGISStaticRequest("/SampleData/example.czml", root).contentType,
+    "application/json; charset=utf-8",
+  );
+  assert.equal(
+    resolveSceneGISStaticRequest(
+      "/Build/CesiumUnminified/%2e%2e/%2e%2e/secret.txt",
+      root,
+    ).status,
+    400,
+  );
+  assert.equal(resolveSceneGISStaticRequest("/secret.txt", root), undefined);
+
+  const server = createServer((request, response) => {
+    createSceneGISStaticMiddleware(root)(request, response, () => {
+      response.statusCode = 418;
+      response.end();
+    });
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  context.after(() => new Promise((resolve) => server.close(resolve)));
+  const { port } = server.address();
+  const base = `http://127.0.0.1:${port}`;
+  const get = await globalThis.fetch(`${base}/Source/Cesium.js`);
+  assert.equal(get.status, 200);
+  assert.match(get.headers.get("content-type"), /javascript/u);
+  assert.match(await get.text(), /Cesium = true/u);
+  const head = await globalThis.fetch(`${base}/packages/engine/index.d.ts`, {
+    method: "HEAD",
+  });
+  assert.equal(head.status, 200);
+  assert.match(head.headers.get("content-type"), /text\/plain/u);
+  assert.equal(await head.text(), "");
+  const post = await globalThis.fetch(`${base}/Apps/SampleData/example.json`, {
+    method: "POST",
+  });
+  assert.equal(post.status, 405);
+  assert.equal(post.headers.get("allow"), "GET, HEAD");
+  assert.equal(
+    (await globalThis.fetch(`${base}/Source/missing.js`)).status,
+    418,
+  );
+  assert.equal(
+    (await globalThis.fetch(`${base}/Build/CesiumUnminified/missing.js`))
+      .status,
+    404,
   );
 });
 
@@ -153,6 +286,93 @@ test("waits for the explicit build-watch marker across ANSI chunk boundaries", a
   child.stdout.write("incremental rebuild output\n");
   await delay(0);
   assert.match(forwardedOutput.at(-1), /incremental rebuild output/);
+});
+
+test("materializes the root bundle after build-watch registers", async () => {
+  const events = [];
+  await initializeBuildWatch(
+    (callback) => {
+      events.push("watchers-ready");
+      callback();
+    },
+    async () => events.push("root-materialized"),
+  );
+  assert.deepEqual(events, ["watchers-ready", "root-materialized"]);
+});
+
+test("polls for outputs that become ready after the build-watch marker", async () => {
+  const child = createChild("build-watch");
+  child.stdout = new PassThrough();
+  child.stderr = new PassThrough();
+  let outputsReady = false;
+  const readiness = waitForBuildWatchReady(child, {
+    timeoutMilliseconds: 1000,
+    pollMilliseconds: 5,
+    outputsReady: () => outputsReady,
+    writeStdout: () => {},
+    writeStderr: () => {},
+  });
+  child.stdout.write("SCENEGIS_BUILD_WATCH_READY\n");
+  await delay(15);
+  outputsReady = true;
+  await readiness;
+});
+
+test("times out actionably when outputs never appear after the marker", async () => {
+  const child = createChild("build-watch");
+  child.stdout = new PassThrough();
+  child.stderr = new PassThrough();
+  const readiness = waitForBuildWatchReady(child, {
+    timeoutMilliseconds: 30,
+    pollMilliseconds: 5,
+    outputsReady: () => false,
+    writeStdout: () => {},
+    writeStderr: () => {},
+  });
+  child.stdout.write("SCENEGIS_BUILD_WATCH_READY\n");
+  await assert.rejects(readiness, /outputs after build-watch reported ready/u);
+});
+
+test("waits for Vite HEAD routes to change from HTML fallback to JavaScript", async () => {
+  const child = createChild("Sandcastle Vite");
+  let calls = 0;
+  const methods = [];
+  await waitForViteReady(child, 6123, {
+    timeoutMilliseconds: 1000,
+    pollMilliseconds: 1,
+    fetch: async (requestUrl, options) => {
+      assert.match(requestUrl, /^http:\/\/localhost:6123\//u);
+      methods.push(options.method);
+      ++calls;
+      const ready = calls > 1;
+      return {
+        ok: true,
+        headers: {
+          get: () =>
+            ready
+              ? "text/javascript; charset=utf-8"
+              : "text/html; charset=utf-8",
+        },
+      };
+    },
+  });
+  assert.ok(calls >= 2);
+  assert.deepEqual(new Set(methods), new Set(["HEAD"]));
+});
+
+test("reports a Vite child exit while waiting for HTTP readiness", async () => {
+  const child = createChild("Sandcastle Vite");
+  const readiness = waitForViteReady(child, 6123, {
+    timeoutMilliseconds: 1000,
+    pollMilliseconds: 1,
+    fetch: async () => ({
+      ok: true,
+      headers: { get: () => "text/html; charset=utf-8" },
+    }),
+  });
+  await delay(2);
+  child.emit("exit", 7, null);
+  await assert.rejects(readiness, /exited before HTTP readiness with code 7/u);
 });
 
 test("debounces gallery changes and serializes a queued rebuild", async () => {
@@ -217,6 +437,7 @@ test("starts both services after sync and stops siblings on child failure", asyn
         ++viteStarts;
         return vite;
       },
+      waitForViteReady: async () => {},
       createGalleryWatcher: (onChange) => {
         watched = true;
         galleryChanged = onChange;
@@ -261,6 +482,7 @@ test("maps Ctrl+C to exit 130 and cleans up children", async () => {
       startBuildWatch: () => createChild("build-watch"),
       waitForBuildWatchReady: async () => {},
       startVite: () => createChild("Sandcastle Vite"),
+      waitForViteReady: async () => {},
       createGalleryWatcher: () => ({ close: async () => {} }),
       terminateAll: async () => ++terminated,
       signalTarget: signals,

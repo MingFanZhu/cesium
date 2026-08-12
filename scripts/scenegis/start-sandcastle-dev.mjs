@@ -5,6 +5,7 @@ import path from "node:path";
 import process from "node:process";
 import { clearTimeout, setTimeout } from "node:timers";
 import { watch } from "chokidar";
+import { sandcastleRuntimeModuleUrl } from "./sandcastle-vite.config.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
@@ -287,6 +288,7 @@ export function createReadyMarkerDetector(onReady) {
 
 export function waitForBuildWatchReady(child, options = {}) {
   const timeoutMilliseconds = options.timeoutMilliseconds ?? 120000;
+  const pollMilliseconds = options.pollMilliseconds ?? 50;
   const outputsReady =
     options.outputsReady ??
     (() => buildReadinessPaths.every((file) => existsSync(file)));
@@ -295,16 +297,21 @@ export function waitForBuildWatchReady(child, options = {}) {
   const writeStderr =
     options.writeStderr ?? ((chunk) => process.stderr.write(chunk));
   return new Promise((resolve, reject) => {
+    let markerSeen = false;
+    let pollTimer;
     const timeout = setTimeout(() => {
       cleanup();
       reject(
         new Error(
-          "Timed out waiting for build-watch to initialize its incremental context and file watchers.",
+          markerSeen
+            ? "Timed out waiting for required Cesium development outputs after build-watch reported ready."
+            : "Timed out waiting for build-watch to initialize its incremental context and file watchers.",
         ),
       );
     }, timeoutMilliseconds);
     function cleanup(removeOutputListeners = true) {
       clearTimeout(timeout);
+      clearTimeout(pollTimer);
       if (removeOutputListeners) {
         child.stdout.removeListener("data", onStdout);
         child.stderr.removeListener("data", onStderr);
@@ -312,18 +319,17 @@ export function waitForBuildWatchReady(child, options = {}) {
       child.removeListener("error", onError);
       child.removeListener("exit", onExit);
     }
-    const detectReady = createReadyMarkerDetector(() => {
-      if (!outputsReady()) {
-        cleanup();
-        reject(
-          new Error(
-            "build-watch reported ready before all required Cesium development outputs existed.",
-          ),
-        );
-        return;
+    function pollOutputs() {
+      if (outputsReady()) {
+        cleanup(false);
+        resolve();
+      } else {
+        pollTimer = setTimeout(pollOutputs, pollMilliseconds);
       }
-      cleanup(false);
-      resolve();
+    }
+    const detectReady = createReadyMarkerDetector(() => {
+      markerSeen = true;
+      pollOutputs();
     });
     function onStdout(chunk) {
       writeStdout(chunk);
@@ -353,6 +359,51 @@ export function waitForBuildWatchReady(child, options = {}) {
   });
 }
 
+export async function waitForViteReady(child, port, options = {}) {
+  const timeoutMilliseconds = options.timeoutMilliseconds ?? 30000;
+  const pollMilliseconds = options.pollMilliseconds ?? 100;
+  const request = options.fetch ?? globalThis.fetch;
+  const origin = createSandcastleOrigin(port);
+  const endpoints = options.endpoints ?? [sandcastleRuntimeModuleUrl];
+  let exited;
+  const onExit = (code, signal) => {
+    exited = signal ? `with signal ${signal}` : `with code ${code}`;
+  };
+  child.once("exit", onExit);
+  const deadline = Date.now() + timeoutMilliseconds;
+  try {
+    while (Date.now() < deadline) {
+      if (exited) {
+        throw new Error(
+          `Sandcastle Vite exited before HTTP readiness ${exited}.`,
+        );
+      }
+      try {
+        const responses = await Promise.all(
+          endpoints.map(async (endpoint) => {
+            const response = await request(`${origin}${endpoint}`, {
+              method: "HEAD",
+            });
+            const contentType = response.headers.get("content-type") ?? "";
+            return response.ok && /javascript/u.test(contentType);
+          }),
+        );
+        if (responses.every(Boolean)) {
+          return;
+        }
+      } catch {
+        // Vite may not be listening yet.
+      }
+      await new Promise((resolve) => setTimeout(resolve, pollMilliseconds));
+    }
+    throw new Error(
+      `Timed out waiting for Sandcastle Vite JavaScript routes at ${origin}.`,
+    );
+  } finally {
+    child.removeListener("exit", onExit);
+  }
+}
+
 export async function runDevelopmentOrchestrator(options, dependencies) {
   const {
     initialGalleryBuild,
@@ -361,6 +412,7 @@ export async function runDevelopmentOrchestrator(options, dependencies) {
     startBuildWatch,
     waitForBuildWatchReady,
     startVite,
+    waitForViteReady,
     createGalleryWatcher,
     terminateAll,
     signalTarget,
@@ -433,6 +485,10 @@ export async function runDevelopmentOrchestrator(options, dependencies) {
     }
     const vite = startVite(options.port);
     monitorChild(vite);
+    await waitForViteReady(vite, options.port);
+    if (shuttingDown) {
+      return await exitPromise;
+    }
     rebuilder = createSerializedRebuilder(rebuildGallery, (error) => {
       void shutdown(1, `Gallery rebuild failed: ${error.message}`);
     });
@@ -492,6 +548,7 @@ async function main() {
         "inherit",
         createViteEnvironment(port),
       ),
+    waitForViteReady,
     createGalleryWatcher: (onChange, onError) => {
       const watcher = watch(galleryDirectory, {
         ignoreInitial: true,
@@ -509,12 +566,20 @@ async function main() {
   });
 }
 
+export async function initializeBuildWatch(buildWatch, materializeRoot) {
+  await new Promise((resolve, reject) => {
+    buildWatch((error) => (error ? reject(error) : resolve()));
+  });
+  await materializeRoot();
+}
+
 async function runBuildWatchChild() {
   try {
     const { buildWatch } = await import("../../gulpfile.js");
-    await new Promise((resolve, reject) => {
-      buildWatch((error) => (error ? reject(error) : resolve()));
-    });
+    const { buildCesium } = await import("../../scripts/build.js");
+    await initializeBuildWatch(buildWatch, () =>
+      buildCesium({ incremental: false }),
+    );
     process.stdout.write(`${buildWatchReadyMarker}\n`);
     return 0;
   } catch (error) {

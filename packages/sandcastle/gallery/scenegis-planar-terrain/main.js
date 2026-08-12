@@ -124,7 +124,7 @@ function setTerrainStyle(value) {
 const terrainStatus = document.querySelector("#terrainStatus");
 terrainProvider.errorEvent.addEventListener(function (error) {
   terrainStatus.textContent =
-    "Terrain service unavailable; cached ancestors or the flat fallback remain usable.";
+    "地形服务暂时不可用；仍可使用已缓存的祖先瓦片或平面回退。";
   error.retry = false;
 });
 
@@ -148,8 +148,8 @@ function updateNavigationStatus() {
   navigationMode.value = mode;
   navigationStatus.textContent =
     mode === "underground"
-      ? "Navigation profile: underground; middle-drag vertical orbit crosses the terrain in both directions."
-      : "Navigation profile: surface; local +Z clearance prevents terrain penetration.";
+      ? "当前导航模式：地下；纵向拖动鼠标中键可从两个方向穿越地形。"
+      : "当前导航模式：地表；局部 +Z 净空会阻止相机穿入地形。";
 }
 
 function setNavigationMode(mode) {
@@ -204,7 +204,7 @@ function testSurfaceClearance() {
     },
   });
   navigationStatus.textContent =
-    "Navigation profile: surface; local +Z clearance correction queued.";
+    "当前导航模式：地表；已等待下一帧执行局部 +Z 净空修正。";
   viewer.scene.requestRender();
 }
 

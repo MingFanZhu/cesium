@@ -594,13 +594,22 @@ node scripts/scenegis/start-sandcastle-dev.mjs --port 6123 --id scenegis-planar-
 
 脚本先运行Sandcastle `build-gallery-no-embedding`完成初始gallery同步，再运行一次`build-ts`生成Vite所需declarations，
 然后由SceneGIS-owned子进程调用根`gulpfile.js`导出的`buildWatch` task。该task自身先执行一次full development build，再初始化
-incremental `buildCesium` context并注册watchers；只有task回调后子进程才发出一次ready marker。父进程收到marker并额外确认
-`Source/Cesium.js`及engine/widgets/root Unminified bundles存在后，才启动Sandcastle `dev-no-embedding`。因此clean generated
-tree不会与部分构建产物竞争，也不会额外执行第二次full build。
+incremental `buildCesium` context并注册watchers。当前upstream incremental context初始化会先清空root
+`Build/CesiumUnminified`且不会自行执行首轮build，因此SceneGIS child在task回调后复用现有`buildCesium`只重新物化root
+bundle（不重复engine/widgets build），完成后才发出ready marker。父进程收到marker后再以有界轮询确认
+`Source/Cesium.js`及engine/widgets/root Unminified bundles存在，最后启动Sandcastle `dev-no-embedding`；文件系统写入可见性
+稍晚于stdout marker不会造成瞬时失败。
 
 默认Vite端口是`5173`；`--port`只接受`1`至`65535`的整数并以`--strictPort`启动，端口占用会明确失败而不会静默换端口。
 同一个validated port同时决定Vite监听端口、打印URL以及Sandcastle编译时的`__OUTER_ORIGIN__`和`__INNER_ORIGIN__`。
-SceneGIS-owned Vite wrapper复用upstream dev config的root、plugins和其余define，只覆盖这两个same-origin值，不复制完整配置。
+SceneGIS-owned Vite wrapper复用upstream dev config的root、非static-copy plugins和其余define，只覆盖这两个same-origin值，
+并以显式allowlist只读middleware交付repo外的`Source/Cesium.*`、engine/widgets Unminified入口与declarations、
+`Build/CesiumUnminified/**`以及`Apps/SampleData/**`/`SampleData/**`两种官方示例路径。middleware只接受GET/HEAD，拒绝
+path traversal，不暴露其他repo文件；
+它按plugin name替换upstream `vite-plugin-static-copy` dev routes，不依赖plugin数组位置，也不复制完整upstream config。
+wrapper还按名称替换upstream `custom-import-map` plugin，使runtime `cesium`、`@cesium/engine`与`@cesium/widgets`统一解析到
+build-watch持续更新的`/Build/CesiumUnminified/index.js`，避免raw `Source/Cesium.js`再加载startup后不更新的package bundles或
+产生重复module identity；`Sandcastle`仍映射到`../templates/Sandcastle.js`，upstream type-path defines保持不变。
 打印URL与两个compiled origins遵守浏览器canonical origin规则，因此`--port 80`仍向Vite传递数值`80`，但URL/origin为
 `http://localhost`。
 `--id`只接受lowercase Sandcastle slug。脚本输出的URL使用Vite根路由
@@ -609,6 +618,9 @@ SceneGIS-owned Vite wrapper复用upstream dev config的root、plugins和其余de
 gallery source发生变化时，脚本防抖并串行重跑no-embedding gallery build；Vite和Cesium build watcher不会因此重启。
 Cesium engine和Shader source变化由`build-watch`生成对应开发产物。当前Sandcastle Vite配置关闭HMR，因此build完成后必须
 整页刷新浏览器；不要把该入口描述为module HMR。Vite开发服务使用same-origin资源，不需要固定`8081` mirror或额外根server。
+launcher只有在实际runtime root module `/Build/CesiumUnminified/index.js`的HEAD响应返回JavaScript Content-Type而非HTML后，
+才打印可打开URL；缺失或被SPA fallback吞掉会以有界、可操作的startup timeout失败。Source与package入口仅保留给Monaco
+type/source路径和兼容诊断，不是Sandcastle bucket runtime入口。
 
 `SIGINT`、`SIGTERM`、端口占用、启动失败或任一长期子进程异常退出都会关闭gallery watcher并终止其余进程树。不要绕过
 该入口另行后台启动同一组进程，否则脚本无法负责那些外部进程的清理。

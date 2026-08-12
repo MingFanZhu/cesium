@@ -120,9 +120,25 @@ const privateContentFiles = [
 ];
 const terrainWorkerSource =
   "package/Source/Workers/SceneGISPlanarTerrainWorker.js";
-const terrainWorkerBuild = "package/Build/Workers/SceneGISPlanarTerrainWorker.js";
+const terrainWorkerBuild =
+  "package/Build/Workers/SceneGISPlanarTerrainWorker.js";
 const terrainWorkerRelease =
   "package/Build/Cesium/Workers/SceneGISPlanarTerrainWorker.js";
+const sceneGISShaderSources = [
+  "PlanarGround/SceneGISPlanarGroundAreaFS",
+  "PlanarGround/SceneGISPlanarGroundAreaVS",
+  "PlanarGround/SceneGISPlanarGroundLineFS",
+  "PlanarGround/SceneGISPlanarGroundLineVS",
+  "PlanarSurface/SceneGISPlanarSurfaceFS",
+  "PlanarSurface/SceneGISPlanarSurfaceGeometricLitVS",
+  "PlanarSurface/SceneGISPlanarSurfaceSmoothLitVS",
+  "PlanarSurface/SceneGISPlanarSurfaceUnlitVS",
+];
+const sceneGISShaderArchiveEntries = sceneGISShaderSources.flatMap((shader) =>
+  ["glsl", "js"].map(
+    (extension) => `package/Source/Shaders/SceneGIS/${shader}.${extension}`,
+  ),
+);
 
 function npmCommand(args) {
   if (process.platform === "win32") {
@@ -303,6 +319,65 @@ for (const name of ${softPrivateSymbols}) {
   assert.notEqual(engine[name], undefined, name);
   assert.notEqual(root[name], undefined, name);
 }
+const coordinateSystem = new engine.SceneGISPlanarCoordinateSystem({
+  extent: new engine.SceneGISPlanarExtent({
+    minimumX: -1,
+    minimumY: -1,
+    maximumX: 1,
+    maximumY: 1,
+  }),
+});
+const world = new engine.SceneGISPlanarWorld({
+  coordinateSystem,
+  maximumLevel: 0,
+});
+const provider = {
+  tilingScheme: world.tilingScheme,
+  minimumLevel: 0,
+  maximumLevel: 0,
+  tileWidth: 1,
+  tileHeight: 1,
+  hasAlphaChannel: true,
+  errorEvent: new engine.Event(),
+  credit: undefined,
+  requestImage: () => undefined,
+};
+const layer = new engine.SceneGISPlanarImageryLayer(provider);
+assert.equal(layer.brightness, 1);
+assert.equal(layer.contrast, 1);
+assert.equal(layer.hue, 0);
+assert.equal(layer.saturation, 1);
+assert.equal(layer.gamma, 1);
+assert.equal(layer.colorToAlpha, undefined);
+assert.equal(layer.colorToAlphaThreshold, 0.004);
+layer.brightness = 0.5;
+assert.equal(layer.brightness, 0.5);
+const target = new engine.Color(0.1, 0.2, 0.3, 0.9);
+layer.colorToAlpha = target;
+target.red = 0.9;
+assert.equal(layer.colorToAlpha.red, 0.1);
+const returnedTarget = layer.colorToAlpha;
+returnedTarget.green = 0.9;
+assert.equal(layer.colorToAlpha.green, 0.2);
+layer.destroy();
+assert.equal(layer.isDestroyed(), true);
+const material = new engine.Material({
+  fabric: {
+    type: "SceneGISInstalledOwnershipProbe",
+    source: "czm_material czm_getMaterial(czm_materialInput materialInput) { return czm_getDefaultMaterial(materialInput); }",
+  },
+});
+world.material = material;
+assert.equal(world.material, material);
+world.material = undefined;
+assert.equal(world.material, undefined);
+assert.equal(material.isDestroyed(), false);
+world.material = material;
+assert.equal(world.material, material);
+world.destroy();
+assert.equal(material.isDestroyed(), false);
+material.destroy();
+assert.equal(material.isDestroyed(), true);
 `;
   }
   return `
@@ -333,6 +408,53 @@ function verifyDocumentation() {
       false,
     );
   }
+  const layerDocumentation = fs.readFileSync(
+    path.join(documentation, "SceneGISPlanarImageryLayer.html"),
+    "utf8",
+  );
+  for (const member of [
+    "brightness",
+    "contrast",
+    "hue",
+    "saturation",
+    "gamma",
+    "colorToAlpha",
+    "colorToAlphaThreshold",
+  ]) {
+    assert.match(
+      layerDocumentation,
+      new RegExp(`<h4 class="name" id="${member}">`, "u"),
+    );
+  }
+  const worldDocumentation = fs.readFileSync(
+    path.join(documentation, "SceneGISPlanarWorld.html"),
+    "utf8",
+  );
+  assert.match(worldDocumentation, /<h4 class="name" id="material">/u);
+}
+
+function classDeclaration(declarations, name) {
+  const start = declarations.indexOf(`export class ${name} {`);
+  assert.notEqual(start, -1, `${name} declaration start`);
+  const nextClass = declarations.indexOf("\nexport class ", start + 1);
+  return declarations.slice(start, nextClass === -1 ? undefined : nextClass);
+}
+
+function verifyStylingDeclarations(declarations) {
+  const layer = classDeclaration(declarations, "SceneGISPlanarImageryLayer");
+  for (const member of [
+    "brightness",
+    "contrast",
+    "hue",
+    "saturation",
+    "gamma",
+    "colorToAlphaThreshold",
+  ]) {
+    assert.match(layer, new RegExp(`\\n\\s*${member}: number;`, "u"));
+  }
+  assert.match(layer, /\n\s*colorToAlpha: Color \| undefined;/u);
+  const world = classDeclaration(declarations, "SceneGISPlanarWorld");
+  assert.match(world, /\n\s*material: Material \| undefined;/u);
 }
 
 async function verify() {
@@ -344,6 +466,7 @@ async function verify() {
     "package/index.d.ts",
     terrainWorkerSource,
     terrainWorkerBuild,
+    ...sceneGISShaderArchiveEntries,
     ...privateContentFiles,
   ]);
   assertArchive(widgetsArchive, ["package/index.js", "package/index.d.ts"]);
@@ -372,7 +495,11 @@ async function verify() {
   runConsumer(esmConsumer);
   runConsumer(cjsConsumer);
 
-  assertDeclarations(path.join(engineDirectory, "index.d.ts"), publicEngine);
+  const engineDeclarations = assertDeclarations(
+    path.join(engineDirectory, "index.d.ts"),
+    publicEngine,
+  );
+  verifyStylingDeclarations(engineDeclarations);
   const widgetDeclarations = assertDeclarations(
     path.join(widgetsDirectory, "index.d.ts"),
     publicWidgets,
@@ -381,6 +508,7 @@ async function verify() {
     path.join(rootDirectory, "Source/Cesium.d.ts"),
     [...publicEngine, ...publicWidgets],
   );
+  verifyStylingDeclarations(rootDeclarations);
   for (const declarations of [widgetDeclarations, rootDeclarations]) {
     assert.match(declarations, /world\?: SceneGISPlanarWorld;/u);
     assert.match(
@@ -396,7 +524,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS bare ESM/CJS installed-tarball, soft-private declaration/API, and broken-entry fixtures passed.\n",
+    "SceneGIS installed delivery passed: 8/8 GLSL, 8/8 generated shader modules, bare ESM/CJS, S2/S3 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
   );
 }
 

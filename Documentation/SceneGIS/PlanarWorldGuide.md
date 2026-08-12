@@ -187,6 +187,12 @@ release qualification 使用至少 16 个 submitted tiles、bare/双层影像各
 
 高级地形交付另使用一个本地 real-Context 资格场景串联 LERC decode、Heightmap/Quantized mesh Worker、provider replacement、surface/underground navigation、smooth lighting、imagery/depth 与资源销毁。每种格式只执行 30 个 warm frames 和 3 轮有界 churn；hard gate 是 readiness、command/VA/shader/task/GPU/resource 收敛，median/P95 timing 仅作同机诊断，不是固定性能阈值。公网 terrain 与 imagery 只属于 Sandcastle 的 best-effort 人工检查，不进入自动化门禁。
 
+统一styling交付另以一个最小real-Context场景和同一local dev/release E2E证明非默认imagery filter → Material
+diffuse/alpha → lighting的公开链路，并检查uniform mutation不会替换DrawCommand、ShaderProgram、VA、imagery texture或
+terrain mesh。Installed-package verifier逐项要求8个SceneGIS GLSL source及其8个generated shader module，同时验证S2/S3
+runtime properties、declarations与API member anchors；Node consumer只检查对象契约和caller ownership，不模拟WebGL、DOM或
+network。两个公开Sandcastle示例的用户工具面板使用中文，公网数据仍只属于best-effort人工验收。
+
 ## 故障排查
 
 - 构造期 `DeveloperError`：检查 extent/span 是否有限且正方形、maximum level 是否安全、provider 是否复用 exact `world.tilingScheme`。

@@ -12,25 +12,26 @@
   }
 </style>
 <div id="cesiumContainer" class="fullSize"></div>
-<div id="loadingOverlay"><h1>Loading...</h1></div>
+<div id="loadingOverlay"><h1>正在加载……</h1></div>
 <div id="toolbar">
+  <strong>平面地形样式与导航</strong>
   <label>
-    Terrain style
+    地形样式
     <select id="terrainStyle">
-      <option value="none" selected>None</option>
-      <option value="contour">Contour</option>
-      <option value="height">Height</option>
-      <option value="slope">Slope</option>
-      <option value="aspect">Aspect</option>
+      <option value="none" selected>无样式</option>
+      <option value="contour">等高线</option>
+      <option value="height">高程</option>
+      <option value="slope">坡度</option>
+      <option value="aspect">坡向</option>
     </select>
   </label>
-  <button id="resetStyle" type="button">Reset style</button>
+  <button id="resetStyle" type="button">重置样式</button>
   <label>
-    Contour spacing (m)
+    等高线间距（米）
     <input id="contourSpacing" type="number" min="1" step="25" value="250" />
   </label>
   <label>
-    Contour width
+    等高线宽度
     <input
       id="contourWidth"
       type="range"
@@ -41,32 +42,29 @@
     />
   </label>
   <label
-    >Ramp low <input id="rampLowColor" type="color" value="#263238"
+    >色带低值 <input id="rampLowColor" type="color" value="#263238"
   /></label>
   <label
-    >Ramp high <input id="rampHighColor" type="color" value="#ffffff"
+    >色带高值 <input id="rampHighColor" type="color" value="#ffffff"
   /></label>
-  <label><input id="lightingToggle" type="checkbox" checked /> Lighting</label>
+  <label><input id="lightingToggle" type="checkbox" checked /> 地形光照</label>
   <label>
-    Navigation
+    导航模式
     <select id="navigationMode">
-      <option value="surface" selected>Surface</option>
-      <option value="underground">Underground</option>
+      <option value="surface" selected>地表</option>
+      <option value="underground">地下</option>
     </select>
   </label>
-  <button id="mountainView" type="button">Mountain view</button>
-  <button id="undergroundView" type="button">Underground view</button>
-  <button id="surfaceClearance" type="button">Surface clearance</button>
-  <button id="homeView" type="button">Home</button>
-  <span id="navigationStatus">Navigation profile: surface.</span>
-  <span id="terrainStatus">Terrain tiles load on demand.</span>
+  <button id="mountainView" type="button">山地视角</button>
+  <button id="undergroundView" type="button">地下视角</button>
+  <button id="surfaceClearance" type="button">演示地表净空</button>
+  <button id="homeView" type="button">返回初始视角</button>
+  <span id="navigationStatus">当前导航模式：地表。</span>
+  <span id="terrainStatus">地形瓦片将按当前视图加载。</span>
   <span>
-    Surface is the default and applies local +Z terrain clearance without Home.
-    Underground view switches profiles and mirrors the mountain view below
-    terrain. Surface clearance places a surface-profile Camera below the local
-    terrain so the next controller frame demonstrates push-out. Home preserves
-    the current profile. In Underground, use a vertical middle drag around the
-    selected pivot to cross the terrain in either direction; this is an orbit,
-    not free-look or continuous swept collision.
+    地表模式默认沿局部 +Z
+    保持地形净空，不会自动返回初始视角。地下视角会切换到地下模式，并把山地视角镜像到地形下方。
+    “演示地表净空”会把地表模式相机放到局部地形下方，由下一控制器帧展示向上推出。返回初始视角会保留当前导航模式。
+    在地下模式中，可围绕选定支点纵向拖动鼠标中键，从任一方向穿越地形；该操作是轨道旋转，不是自由观察或连续扫掠碰撞。
   </span>
 </div>

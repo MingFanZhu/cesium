@@ -305,7 +305,8 @@ completion checkpoint或进入S4。
 - S3-R005/006：terrain demo新增Contour spacing/width与Ramp color controls；JSDoc/Guide明确planar inputs、
   diffuse/alpha-only及custom Fabric非完整Globe兼容。当前精确changed paths=`23`，全部在allowlist。
 - 项目负责人于`2026-08-12`在`scenegis-planar-terrain`完成Sandcastle manual gate并确认视觉验收通过；Architecture无需
-  重复或扩大像素/LOD用例。S3满足独立本地checkpoint条件。
+  重复或扩大像素/LOD用例。Architecture随后创建独立本地checkpoint
+  `201fb98213a15a160fbc4340c63918180734f6a7`，S3正式关闭并作为S4 implementation base。
 - Development tooling follow-up：项目负责人批准新增`scripts/scenegis/start-sandcastle-dev.mjs`、SceneGIS-owned Vite
   wrapper及focused Node test，统一编排initial gallery sync、exported build-watch task readiness、Sandcastle Vite、serialized
   gallery rebuild与跨平台process cleanup。Architecture最终窄范围复核已批准；T001至T006全部fixed。

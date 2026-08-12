@@ -76,6 +76,8 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
       maximumScreenSpaceError: 0.01,
       tileCacheSize: 16,
       baseColor: Cesium.Color.BLACK,
+      enableLighting: true,
+      lambertDiffuseMultiplier: 0.0,
     });
     function image(color) {
       const canvas = document.createElement("canvas");
@@ -99,9 +101,16 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
       };
     }
     world.imageryLayers.addImageryProvider(provider("red"));
-    world.imageryLayers.add(
-      new Cesium.SceneGISPlanarImageryLayer(provider("blue"), { alpha: 0.5 }),
+    const filteredLayer = world.imageryLayers.add(
+      new Cesium.SceneGISPlanarImageryLayer(provider("blue"), {
+        alpha: 0.5,
+        brightness: 0.5,
+      }),
     );
+    const material = Cesium.Material.fromType(Cesium.Material.ColorType, {
+      color: Cesium.Color.fromBytes(0, 255, 0, 128),
+    });
+    world.material = material;
     const viewer = new Cesium.Viewer("cesiumContainer", {
       world,
       useDefaultRenderLoop: false,
@@ -128,7 +137,14 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
     const depth = viewer.scene.pickPosition(windowPosition);
     const controller = viewer.planarCameraController;
     const controllerHost = viewer.scene.controllerHost;
-    window.scenegisP8 = { viewer, world, controller, controllerHost };
+    window.scenegisP8 = {
+      viewer,
+      world,
+      controller,
+      controllerHost,
+      filteredLayer,
+      material,
+    };
     return {
       pixel,
       tilesLoaded: world.tilesLoaded,
@@ -148,14 +164,22 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
         (candidate) => candidate === controller,
       ).length,
       legacyInputs: viewer.scene.screenSpaceCameraController.enableInputs,
+      filterBrightness: filteredLayer.brightness,
+      materialIdentity: world.material === material,
+      materialDestroyed: material.isDestroyed(),
     };
   });
 
-  expect(initial.pixel[0]).toBeGreaterThanOrEqual(126);
-  expect(initial.pixel[2]).toBeGreaterThanOrEqual(126);
+  expect(initial.pixel[0]).toBeGreaterThanOrEqual(15);
+  expect(initial.pixel[0]).toBeLessThanOrEqual(23);
+  expect(initial.pixel[1]).toBeGreaterThanOrEqual(34);
+  expect(initial.pixel[1]).toBeLessThanOrEqual(42);
+  expect(initial.pixel[2]).toBeGreaterThanOrEqual(6);
+  expect(initial.pixel[2]).toBeLessThanOrEqual(14);
   expect(initial.tilesLoaded).toBe(true);
   expect(initial.selected).toBeGreaterThanOrEqual(16);
   expect(initial.submitted).toBeGreaterThanOrEqual(16);
+  expect(initial.submitted).toBe(initial.selected);
   expect(initial.depth).toBeDefined();
   expect(initial.mathematical).toBeDefined();
   expect(Math.abs(initial.depth[2])).toBeLessThan(1e-3);
@@ -164,6 +188,9 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
   expect(initial.controllerCount).toBe(1);
   expect(initial.controllerMatches).toBe(1);
   expect(initial.legacyInputs).toBe(false);
+  expect(initial.filterBrightness).toBe(0.5);
+  expect(initial.materialIdentity).toBe(true);
+  expect(initial.materialDestroyed).toBe(false);
   expect(pageErrors).toEqual([]);
 
   await page.mouse.move(480, 270);
@@ -190,9 +217,12 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
   expect(pageErrors).toEqual([]);
 
   const destroyed = await page.evaluate(() => {
-    const { viewer, world, controller, controllerHost } = window.scenegisP8;
+    const { viewer, world, controller, controllerHost, material } =
+      window.scenegisP8;
     const aggregator = controller._aggregator;
     viewer.destroy();
+    const materialOwnedByCaller = !material.isDestroyed();
+    material.destroy();
     return {
       viewer: viewer.isDestroyed(),
       world: world.isDestroyed(),
@@ -200,6 +230,8 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
       controllerCount: controllerHost.controllerCount,
       controllerAggregator: controller._aggregator,
       aggregatorDestroyed: aggregator.isDestroyed(),
+      materialOwnedByCaller,
+      materialDestroyedByCaller: material.isDestroyed(),
     };
   });
   expect(destroyed).toEqual({
@@ -209,6 +241,8 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
     controllerCount: 0,
     controllerAggregator: undefined,
     aggregatorDestroyed: true,
+    materialOwnedByCaller: true,
+    materialDestroyedByCaller: true,
   });
   expect(externalAttempts).toEqual([]);
   expect(badResponses).toEqual([]);
