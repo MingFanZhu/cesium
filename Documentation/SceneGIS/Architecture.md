@@ -60,6 +60,7 @@ packages/engine/Specs/SceneGIS/**
 packages/widgets/Source/SceneGIS/**
 packages/widgets/Specs/SceneGIS/**
 packages/sandcastle/gallery/scenegis-*/**
+Test/**
 Specs/e2e/scenegis-*.spec.js
 Documentation/SceneGIS/**
 AgentDocs/**
@@ -137,7 +138,13 @@ SceneGIS/DataSources
 | `Scene`       | Core、Renderer、Cesium Scene、SceneGIS Scene          | DataSources、Widgets                  |
 | `DataSources` | Core、Scene、Cesium DataSources、SceneGIS DataSources | Widgets                               |
 
-UI 能力属于 `packages/widgets/Source/SceneGIS`。Sandcastle 只组装示例，不承载可复用业务实现。
+UI 能力属于 `packages/widgets/Source/SceneGIS`。`Test/**` 是 SceneGIS-owned 的直接开发示例根目录，只组装API、
+本地测试数据和人工调试UI，不承载可复用业务实现，也不进入engine/widgets npm产物。既有
+`packages/sandcastle/gallery/scenegis-*` 作为legacy示例保留；除兼容性复现或明确的上游Sandcastle集成需求外，
+新SceneGIS示例默认进入`Test/**`。
+
+`Test/lib/**`只允许保存浏览器示例确实需要的本地第三方库。每个库必须记录固定版本、上游来源和许可证；
+不得由engine/widgets/runtime导入，不得把CDN、access token或其他secret作为示例运行前提。
 
 ## 公共 API 与私有语义
 
@@ -586,10 +593,10 @@ SceneGIS 使用四层验证：
 
 1. Jasmine 单元、契约和资源生命周期 Specs。
 2. WebGL、Shader 和渲染 matcher 测试。
-3. Sandcastle 可执行示例与人工视觉验收。
+3. `Test/**` 直接开发示例与人工视觉验收；必要时保留legacy Sandcastle兼容案例。
 4. Playwright 关键交互和持久视觉回归。
 
-Sandcastle 默认截图只能作为基础冒烟，不能覆盖参数组合、错误输入、销毁过程和性能变化。
+开发示例截图只能作为基础冒烟，不能覆盖参数组合、错误输入、销毁过程和性能变化。
 
 ## 平面世界发布资格边界
 
@@ -605,7 +612,7 @@ Planar World 的 release qualification 必须把 observable contract 与测量�
 2. 将 tag 合入升级分支，不混入新功能开发。
 3. 逐项检查 active SGP：继续、调整或退役。
 4. 复核所有 ADR 中记录的构建、运行时和升级检查点。
-5. 运行构建、类型、Specs、关键 Sandcastle、E2E 和性能验证。
+5. 运行构建、类型、Specs、关键 `Test/**` 开发示例、必要的legacy Sandcastle、E2E 和性能验证。
 6. 更新 `upstream-base.json`，并使补丁清单反映新基线下的实际差异。
 7. 验证完成后再合入 `scenegis/develop`。
 

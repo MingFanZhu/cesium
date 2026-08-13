@@ -19,6 +19,7 @@ const generatedPatterns = [
 const ownedMarkerPatterns = [
   /^packages\/(?:engine|widgets)\/(?:Source|Specs)\/SceneGIS\//u,
   /^packages\/sandcastle\/gallery\/scenegis-[^/]+\//u,
+  /^Test\//u,
   /^Specs\/e2e\/scenegis-[^/]+\.spec\.js$/u,
   /^scripts\/scenegis\//u,
   /^\.github\/workflows\/scenegis-[^/]+\.ya?ml$/u,

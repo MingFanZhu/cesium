@@ -13,7 +13,7 @@
   extension/standalone plan、current phase plan、open discussion 和未解决 review。
 - 新增子系统、公共 API，或修改渲染管线、Shader、Worker、构建、发布和官方版本基线前，完整阅读 `Documentation/SceneGIS/Architecture.md` 以及相关 ADR。
 - 修改任何上游已有文件前，读取 `.scenegis/upstream-base.json` 和 `.scenegis/upstream-patches.json`，创建或复用一个 `SGP-####` 条目。
-- 在 `packages/engine` 或 `packages/sandcastle` 下工作时，同时遵守对应目录中的 `AGENTS.md`。
+- 在 `packages/engine`、`packages/sandcastle` 或 `Test` 下工作时，同时遵守对应目录中的 `AGENTS.md`。
 
 ## 代码发现
 
@@ -30,6 +30,7 @@
 - `packages/widgets/Source/SceneGIS/**`
 - `packages/widgets/Specs/SceneGIS/**`
 - `packages/sandcastle/gallery/scenegis-*/**`
+- `Test/**`
 - `Specs/e2e/scenegis-*.spec.js`
 - `Documentation/SceneGIS/**`
 - `AgentDocs/**`
@@ -108,7 +109,8 @@
 
 ## 验证与交付
 
-- 每个行为变化必须有与风险相称的自动化测试。Sandcastle 是可执行示例和视觉验收页，不能替代 Specs。
+- 每个行为变化必须有与风险相称的自动化测试。`Test/**` 开发示例以及保留的 legacy Sandcastle
+  案例只用于组装、调试和视觉验收，不能替代 Specs。
 - 渲染热路径修改必须验证画面正确性、资源生命周期，并提供性能或回归证据。
 - 只运行与任务相关的最小充分检查；扩大到公共 API、构建或发布时，必须运行相应的完整构建和类型检查。
 - 最终报告必须列出：修改内容、验证结果、所有改动过的 upstream-owned files、对应 SGP，以及尚未解决的风险。

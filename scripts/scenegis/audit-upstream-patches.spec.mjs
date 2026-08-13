@@ -196,6 +196,7 @@ for (const [name, file] of [
     "SceneGIS Sandcastle marker",
     "packages/sandcastle/gallery/scenegis-fixture/main.js",
   ],
+  ["SceneGIS Test example marker", "Test/fixture.html"],
 ]) {
   expectFailure(name, (repo) => {
     write(repo, file, `// ${markerPrefix}BEGIN SGP-9999: forbidden.\n`);

@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1"
+    />
+    <title>SceneGIS 平面环境</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #cesiumContainer {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      body > .lil-gui.lil-root {
+        position: absolute !important;
+        z-index: 10 !important;
+        top: 10px !important;
+        right: 10px !important;
+        max-width: calc(100% - 20px) !important;
+        max-height: calc(100% - 76px) !important;
+        overflow: auto !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module">
+      import * as Cesium from "/Build/CesiumUnminified/index.js";
+      import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
+
+      const OPENSTREETMAP_TILE_ENDPOINT =
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+      const TERRAIN_TILE_ENDPOINT =
+        "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer/tile/{z}/{y}/{x}";
+      const WEB_MERCATOR_LIMIT = 20037508.342789244;
+
+      function viewMountain(scene) {
+        scene.camera.setView({
+          destination: new Cesium.Cartesian3(
+            1113194.9,
+            5780349.2 - 400000.0,
+            300000.0,
+          ),
+          orientation: {
+            direction: new Cesium.Cartesian3(0.0, 0.8, -0.6),
+            up: new Cesium.Cartesian3(0.0, 0.6, 0.8),
+          },
+        });
+        scene.requestRender();
+      }
+
+      const world = new Cesium.SceneGISPlanarWorld({
+        coordinateSystem: new Cesium.SceneGISPlanarCoordinateSystem({
+          extent: new Cesium.SceneGISPlanarExtent({
+            minimumX: -WEB_MERCATOR_LIMIT,
+            minimumY: -WEB_MERCATOR_LIMIT,
+            maximumX: WEB_MERCATOR_LIMIT,
+            maximumY: WEB_MERCATOR_LIMIT,
+          }),
+          crs: "EPSG:3857",
+        }),
+        maximumLevel: 16,
+        baseColor: Cesium.Color.fromCssColorString("#263238"),
+        enableLighting: true,
+      });
+
+      const openStreetMapCredit = new Cesium.Credit(
+        '<a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>',
+        true,
+      );
+      const imageryProvider =
+        new Cesium.SceneGISPlanarUrlTemplateImageryProvider({
+          url: OPENSTREETMAP_TILE_ENDPOINT,
+          tilingScheme: world.tilingScheme,
+          urlScheme: "xyz",
+          tileWidth: 256,
+          tileHeight: 256,
+          maximumLevel: 16,
+          credit: openStreetMapCredit,
+        });
+      world.imageryLayers.addImageryProvider(imageryProvider);
+
+      const terrainCredit = new Cesium.Credit(
+        '<a href="https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer" target="_blank">World Elevation services by Esri and listed contributors</a>',
+        true,
+      );
+      const terrainProvider =
+        new Cesium.SceneGISPlanarUrlTemplateHeightmapTerrainProvider({
+          url: TERRAIN_TILE_ENDPOINT,
+          tilingScheme: world.tilingScheme,
+          urlScheme: "xyz",
+          heightmapWidth: 257,
+          heightmapHeight: 257,
+          format: "lerc",
+          minimumHeight: -450.0,
+          maximumHeight: 8700.0,
+          maximumLevel: 16,
+          credit: terrainCredit,
+        });
+      world.terrainProvider = terrainProvider;
+
+      let widget = new Cesium.CesiumWidget("cesiumContainer", {
+        world,
+        skyBox: false,
+        skyAtmosphere: false,
+      });
+      widget.scene.screenSpaceCameraController.enableInputs = false;
+      const planarCameraController = new Cesium.SceneGISPlanarCameraController({
+        world,
+      });
+      widget.addController(planarCameraController);
+      widget.scene.rethrowRenderErrors = true;
+      viewMountain(widget.scene);
+
+      const defaultState = Object.freeze({
+        environmentEnabled: true,
+        terrainLighting: true,
+        sunAzimuth: 315.0,
+        sunElevation: 35.0,
+        sunIntensity: 2.0,
+      });
+      const state = {
+        ...defaultState,
+        environmentState: "正在等待首次环境帧……",
+        providerState: "公开影像与地形正在加载（best-effort）……",
+        moonNotice:
+          "Moon方向仅作为E1未来状态保存；本阶段不显示月球，也不创建第二个光源。",
+        reset: () => resetEnvironment(),
+        cameraEnabled: planarCameraController.enabled,
+        navigationMode: planarCameraController.navigationMode,
+        enablePan: planarCameraController.enablePan,
+        enableRotate: planarCameraController.enableRotate,
+        enableZoom: planarCameraController.enableZoom,
+        minimumTerrainClearance: planarCameraController.minimumTerrainClearance,
+        mountainView: () => viewMountain(widget.scene),
+        planarHome: () => {
+          planarCameraController.viewHome(widget.scene);
+          widget.scene.requestRender();
+        },
+        cameraHelp: "左键拖动平移；中键拖动旋转；滚轮缩放。",
+      };
+      const providerState = {
+        imageryFailed: false,
+        terrainFailed: false,
+        settled: false,
+      };
+
+      function directionFromAngles(azimuthDegrees, elevationDegrees, result) {
+        const azimuth = Cesium.Math.toRadians(azimuthDegrees);
+        const elevation = Cesium.Math.toRadians(elevationDegrees);
+        const horizontal = Math.cos(elevation);
+        result.x = Math.sin(azimuth) * horizontal;
+        result.y = Math.cos(azimuth) * horizontal;
+        result.z = Math.sin(elevation);
+        return result;
+      }
+
+      const sunDirection = new Cesium.Cartesian3();
+      const environment = new Cesium.SceneGISPlanarEnvironment({
+        world,
+        sunDirection: directionFromAngles(
+          state.sunAzimuth,
+          state.sunElevation,
+          sunDirection,
+        ),
+        moonDirection: new Cesium.Cartesian3(-1.0, 1.0, 0.5),
+        sunIntensity: state.sunIntensity,
+      });
+      widget.addController(environment);
+
+      const gui = new GUI({
+        title: "平面环境（EPSG:3857）",
+        width: 360,
+      });
+      gui
+        .add(state, "environmentEnabled")
+        .name("Environment启用")
+        .onChange((value) => {
+          environment.enabled = value;
+          updateEnvironmentState();
+        });
+      gui
+        .add(state, "terrainLighting")
+        .name("地形光照")
+        .onChange((value) => {
+          world.enableLighting = value;
+          widget.scene.requestRender();
+          updateEnvironmentState();
+        });
+      gui
+        .add(state, "sunAzimuth", 0.0, 360.0, 1.0)
+        .name("太阳方位角（°）")
+        .onChange(updateSunDirection);
+      gui
+        .add(state, "sunElevation", -10.0, 90.0, 1.0)
+        .name("太阳仰角（°）")
+        .onChange(updateSunDirection);
+      gui
+        .add(state, "sunIntensity", 0.0, 5.0, 0.1)
+        .name("太阳强度")
+        .onChange((value) => {
+          environment.sunIntensity = value;
+          updateEnvironmentState();
+        });
+      gui.add(state, "reset").name("恢复手动默认值");
+      gui.add(state, "environmentState").name("当前状态").listen().disable();
+      gui.add(state, "providerState").name("公开数据").listen().disable();
+      gui.add(state, "moonNotice").name("Moon说明").listen().disable();
+
+      const cameraFolder = gui.addFolder("平面相机");
+      cameraFolder
+        .add(state, "cameraEnabled")
+        .name("启用平面相机")
+        .onChange((value) => {
+          planarCameraController.enabled = value;
+          widget.scene.requestRender();
+        });
+      cameraFolder
+        .add(state, "navigationMode", {
+          地表模式: "surface",
+          地下模式: "underground",
+        })
+        .name("导航模式")
+        .onChange((value) => {
+          planarCameraController.navigationMode = value;
+          widget.scene.requestRender();
+        });
+      cameraFolder
+        .add(state, "enablePan")
+        .name("允许平移")
+        .onChange((value) => {
+          planarCameraController.enablePan = value;
+        });
+      cameraFolder
+        .add(state, "enableRotate")
+        .name("允许旋转")
+        .onChange((value) => {
+          planarCameraController.enableRotate = value;
+        });
+      cameraFolder
+        .add(state, "enableZoom")
+        .name("允许缩放")
+        .onChange((value) => {
+          planarCameraController.enableZoom = value;
+        });
+      cameraFolder
+        .add(state, "minimumTerrainClearance", 0.1, 1000.0, 0.1)
+        .name("最小离地高度（米）")
+        .onChange((value) => {
+          planarCameraController.minimumTerrainClearance = value;
+          widget.scene.requestRender();
+        });
+      cameraFolder.add(state, "mountainView").name("返回山地区域");
+      cameraFolder.add(state, "planarHome").name("平面全域 Home");
+      cameraFolder.add(state, "cameraHelp").name("操作说明").disable();
+
+      function updateEnvironmentState() {
+        const direction = environment.sunDirection;
+        state.environmentState =
+          `${environment.enabled ? "Environment启用" : "Environment禁用"}；` +
+          `地形光照${world.enableLighting ? "开启" : "关闭"}；` +
+          `太阳 东${direction.x.toFixed(3)} 北${direction.y.toFixed(3)} ` +
+          `上${direction.z.toFixed(3)}；强度${environment.sunIntensity.toFixed(1)}`;
+      }
+
+      function updateSunDirection() {
+        environment.sunDirection = directionFromAngles(
+          state.sunAzimuth,
+          state.sunElevation,
+          sunDirection,
+        );
+        updateEnvironmentState();
+      }
+
+      function resetEnvironment() {
+        Object.assign(state, defaultState);
+        world.enableLighting = state.terrainLighting;
+        environment.sunIntensity = state.sunIntensity;
+        environment.enabled = state.environmentEnabled;
+        updateSunDirection();
+        gui
+          .controllersRecursive()
+          .forEach((controller) => controller.updateDisplay());
+        widget.scene.requestRender();
+      }
+
+      function updateProviderState() {
+        const failures = [];
+        if (providerState.imageryFailed) {
+          failures.push("影像不可用，使用baseColor");
+        }
+        if (providerState.terrainFailed) {
+          failures.push("地形不可用，使用flat fallback");
+        }
+        if (failures.length > 0) {
+          state.providerState = failures.join("；");
+        } else if (providerState.settled) {
+          state.providerState = "当前视图公开影像与地形已就绪";
+        } else {
+          state.providerState = "公开影像与地形正在加载（best-effort）……";
+        }
+      }
+
+      imageryProvider.errorEvent.addEventListener((error) => {
+        providerState.imageryFailed = true;
+        error.retry = false;
+        updateProviderState();
+      });
+      terrainProvider.errorEvent.addEventListener((error) => {
+        providerState.terrainFailed = true;
+        error.retry = false;
+        updateProviderState();
+      });
+      const removePostRender = widget.scene.postRender.addEventListener(() => {
+        if (!providerState.settled && world.tilesLoaded) {
+          providerState.settled = true;
+          updateProviderState();
+        }
+      });
+      updateEnvironmentState();
+      updateProviderState();
+
+      window.widget = widget;
+      window.world = world;
+      window.environment = environment;
+      window.planarCameraController = planarCameraController;
+      window.gui = gui;
+
+      let disposed = false;
+      function dispose() {
+        if (disposed) {
+          return;
+        }
+        disposed = true;
+        removePostRender();
+        if (!widget.isDestroyed()) {
+          widget.removeController(environment);
+          widget.removeController(planarCameraController);
+        }
+        gui.destroy();
+        if (!widget.isDestroyed()) {
+          widget = widget.destroy();
+        }
+        window.widget = undefined;
+        window.world = undefined;
+        window.environment = undefined;
+        window.planarCameraController = undefined;
+        window.gui = undefined;
+      }
+      window.addEventListener("pagehide", (event) => {
+        if (!event.persisted) {
+          dispose();
+        }
+      });
+    </script>
+  </body>
+</html>

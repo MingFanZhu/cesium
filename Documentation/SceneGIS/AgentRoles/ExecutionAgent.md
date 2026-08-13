@@ -60,7 +60,7 @@ Execution Agent 必须与 Architecture Agent 使用同一个 repository checkout
 
 1. 将 phase plan 状态设为 `active`，确认 source-to-spec mapping。
 2. 在批准边界内实现最小完整闭环；需要偏离时先回写原因。
-3. 按行为、失败、生命周期和必要的真实 Context/Sandcastle 风险补充测试。
+3. 按行为、失败、生命周期和必要的真实 Context/`Test/**`开发示例风险补充测试；只有维护legacy Sandcastle时才追加其验证。
 4. 运行 phase plan 规定的最小充分命令。只有公共 API、build、package 或发布边界实际变化时才扩大对应验证。
 5. 检查 upstream-owned files、SGP markers、manifest 和 generated status。
 6. 回写 phase results、extension roadmap/index handoff，并创建 pending review。
@@ -81,7 +81,7 @@ Execution Agent 必须与 Architecture Agent 使用同一个 repository checkout
 - 修改摘要和关键契约；
 - 完整 changed paths 分类；
 - focused Specs 与其他必要验证的精确结果；
-- build/type/docs/package/Sandcastle 中实际运行和未运行的项目；
+- build/type/docs/package/`Test/**`开发示例（以及适用的legacy Sandcastle）中实际运行和未运行的项目；
 - upstream-owned files、SGP、manifest、patch markers 和 generated status；
 - AgentDocs plan/review 路径及当前状态；
 - 剩余风险、manual gate 和明确的“未进入下一 phase”。

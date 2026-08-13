@@ -43,7 +43,7 @@ AgentDocs/terrain-materials/
 扩展 `README.md` 是交接索引，至少维护：
 
 - 扩展状态、范围和非目标。
-- 源码、测试、Sandcastle 和相关分支路径。
+- 源码、测试、`Test/**` 开发示例、保留的legacy Sandcastle和相关分支路径。
 - Planning model、active extension/standalone plan、current phase 和 active phase plan。
 - 相关 ADR、SGP 和 open discussion。
 - 最新 review、未解决发现和下一步动作。
@@ -137,7 +137,7 @@ git cat-file -e "<upstream-base-commit>:<path>"
 以下情况通常不需要 SGP：
 
 - 只新增或修改 SceneGIS-owned files。
-- 只新增 Sandcastle `scenegis-*` 示例。
+- 只新增 `Test/**` SceneGIS开发示例，或维护已有Sandcastle `scenegis-*` 示例。
 - 只更新 SceneGIS 文档或 ADR。
 
 一个 SGP 可以覆盖多个相关文件和多个提交，但只能对应一个稳定的集成目的。不同原因必须使用不同 SGP；同一集成点的后续修正继续使用原编号。编号退役后不得复用。
@@ -276,7 +276,7 @@ packages/engine/Specs/SceneGIS/Scene/SceneGISFooSpec.js
 | 纯函数、数据转换        | Jasmine 单元测试和错误输入                               |
 | 公共 API                | 单元测试、根入口导入、JSDoc/类型生成                     |
 | WebGL、Shader、渲染状态 | WebGL matcher、默认画面、状态变化、销毁                  |
-| 交互和完整场景          | Specs、Sandcastle、必要的 Playwright                     |
+| 交互和完整场景          | Specs、`Test/**`开发示例、必要的 Playwright              |
 | 热路径和缓存            | 正确性测试、资源生命周期、可重复性能对比                 |
 | 构建或发布              | development build、release build、包内容和运行时资源路径 |
 | upstream patch          | SGP 中列出的专项验证和受影响上游测试                     |
@@ -306,31 +306,46 @@ npm run test-e2e -- -g "SceneGIS Foo"
 
 不要求每个局部修改运行所有命令，但必须说明实际运行了什么、为什么足够，以及未运行检查的原因。
 
-## Sandcastle 示例
+## SceneGIS 开发示例
 
-可视化或交互型公共功能应提供：
+可视化或交互型公共功能默认在SceneGIS-owned `Test/**`下提供一个可由根Cesium开发服务器直接访问的HTML入口：
 
 ```text
-packages/sandcastle/gallery/scenegis-<domain>-<feature>/
-├── index.html
-├── main.js
-├── sandcastle.yaml
-└── thumbnail.jpg  # optional
+Test/
+├── <名称>.html
+├── <feature>/        # 复杂示例可选
+│   ├── index.html
+│   └── ...
+└── lib/              # 仅供示例使用的本地第三方浏览器库
 ```
 
-可以使用：
+简单示例优先使用单HTML文件；结构复杂时才拆为子目录。页面必须在Cesium import前设置：
 
-```powershell
-npm run create-demo -- scenegis-<domain>-<feature>
+```html
+<script type="module">
+  window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+  const Cesium = await import("/Build/CesiumUnminified/index.js");
+</script>
 ```
 
-随后必须修正默认 title、description 和 labels。统一使用 `sandcastle.yaml`，所有 SceneGIS 示例添加 `SceneGIS` label。开发调试页使用 `-dev` 和 `development: true`。
+只加载ESM `index.js`；不得再以`<script src>`同时加载`Cesium.js` IIFE，否则会产生两份Cesium module identity。
+示例默认使用本地确定性数据，不包含access token或其他secret。开发便利所需的公开diagnostic reference可以挂在`window`，
+但不得成为产品API。
 
-Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状态必须由 Specs 覆盖。关键交互和持久画面变化使用 Playwright。
+`Test/lib/**`可以保存经典WebGL/UI等浏览器库，但必须在`Test/lib/README.md`登记固定版本、上游来源、许可证和使用页面，
+并一并保存许可证文本。产品源码不得导入该目录。
 
-自 planar-surface-styling S4 起，SceneGIS Sandcastle 示例的 tool/control panel 面向用户的标题、标签、按钮、选项说明、
-帮助文字和状态提示统一使用中文。API 名称、枚举值、源码标识符、代码片段和必须与 Cesium 对齐的技术术语保持英文；不得仅为
-翻译上游 Sandcastle 通用界面而修改 upstream-owned 文件。
+当前upstream `.prettierignore`的directory allowlist尚未包含新`Test/**`根目录；在不修改upstream config的前提下，
+Test页面必须使用显式命令检查，例如
+`npx prettier --check --ignore-path .gitignore "Test/**/*.html" "Test/**/*.md"`。不要把默认`prettier-check`没有报告
+Test文件误当成已验证。
+
+开发示例负责组装和人工验收；边界条件、资源释放和内部状态必须由Specs覆盖。关键交互和持久画面变化使用Playwright。
+tool/control panel面向用户的标题、标签、按钮、选项说明、帮助文字和状态提示统一使用中文；API名称、枚举值、源码标识符、
+代码片段和必须与Cesium对齐的技术术语保持英文。
+
+已有`packages/sandcastle/gallery/scenegis-*`示例作为legacy案例保留，不要求为本次约定迁移。后续只有在明确验证上游
+Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们；新能力默认补`Test/**`示例。
 
 ### 平面影像实现检查
 
@@ -345,7 +360,7 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - 每个 ideal tile 保持一个 opaque command；shown layer 数必须在任何 request 或 GPU mutation
   前按 texture-unit limit fail-fast，不能用 multipass 绕过。
 - provider failure、retry、cancel、stale generation、decoded image close、texture destroy 和第二
-  Context 拒绝都需要自动化 Specs；Sandcastle 外网结果不能替代这些证据。
+  Context 拒绝都需要自动化 Specs；开发示例的外网结果不能替代这些证据。
 - `scenegis-planar-imagery` 只展示 engine-level 显式组装。不要在 P5 示例中加入 Viewer、widgets、
   provider picker、离线下载或预取；这些属于后续 UI 集成阶段。
 
@@ -594,47 +609,25 @@ Build/**
 
 如果生成结果错误，修改源模块、JSDoc、构建器或配置，不在生成文件中打补丁。修改 upstream-owned 生成器或配置时仍需 SGP。
 
-## Sandcastle 本地开发编排
+## `Test/**` 本地开发
 
-SceneGIS Sandcastle 示例可从仓库根目录使用单一入口启动：
+从仓库根目录直接启动官方Cesium开发服务器：
 
 ```powershell
-node scripts/scenegis/start-sandcastle-dev.mjs
-node scripts/scenegis/start-sandcastle-dev.mjs --port 6123 --id scenegis-planar-terrain
+npm run start -- --port 8092 --no-embeddings
 ```
 
-脚本先运行Sandcastle `build-gallery-no-embedding`完成初始gallery同步，再运行一次`build-ts`生成Vite所需declarations，
-然后由SceneGIS-owned子进程调用根`gulpfile.js`导出的`buildWatch` task。该task自身先执行一次full development build，再初始化
-incremental `buildCesium` context并注册watchers。当前upstream incremental context初始化会先清空root
-`Build/CesiumUnminified`且不会自行执行首轮build，因此SceneGIS child在task回调后复用现有`buildCesium`只重新物化root
-bundle（不重复engine/widgets build），完成后才发出ready marker。父进程收到marker后再以有界轮询确认
-`Source/Cesium.js`及engine/widgets/root Unminified bundles存在，最后启动Sandcastle `dev-no-embedding`；文件系统写入可见性
-稍晚于stdout marker不会造成瞬时失败。
+然后访问`http://localhost:8092/Test/<页面>.html`。端口被占用时更换`--port`，并使用相同端口访问页面。
+`--no-embeddings`只跳过Sandcastle semantic-search embedding生成，与`Test/**`页面或Cesium runtime无关。
 
-默认Vite端口是`5173`；`--port`只接受`1`至`65535`的整数并以`--strictPort`启动，端口占用会明确失败而不会静默换端口。
-同一个validated port同时决定Vite监听端口、打印URL以及Sandcastle编译时的`__OUTER_ORIGIN__`和`__INNER_ORIGIN__`。
-SceneGIS-owned Vite wrapper复用upstream dev config的root、非static-copy plugins和其余define，只覆盖这两个same-origin值，
-并以显式allowlist只读middleware交付repo外的`Source/Cesium.*`、engine/widgets Unminified入口与declarations、
-`Build/CesiumUnminified/**`以及`Apps/SampleData/**`/`SampleData/**`两种官方示例路径。middleware只接受GET/HEAD，拒绝
-path traversal，不暴露其他repo文件；
-它按plugin name替换upstream `vite-plugin-static-copy` dev routes，不依赖plugin数组位置，也不复制完整upstream config。
-wrapper还按名称替换upstream `custom-import-map` plugin，使runtime `cesium`、`@cesium/engine`与`@cesium/widgets`统一解析到
-build-watch持续更新的`/Build/CesiumUnminified/index.js`，避免raw `Source/Cesium.js`再加载startup后不更新的package bundles或
-产生重复module identity；`Sandcastle`仍映射到`../templates/Sandcastle.js`，upstream type-path defines保持不变。
-打印URL与两个compiled origins遵守浏览器canonical origin规则，因此`--port 80`仍向Vite传递数值`80`，但URL/origin为
-`http://localhost`。
-`--id`只接受lowercase Sandcastle slug。脚本输出的URL使用Vite根路由
-`http://localhost:<port>/index.html[?id=...]`。
+`Test/**`运行时不使用Sandcastle，但当前upstream `server.js`仍会额外创建固定`8081` Sandcastle mirror；
+`--port`只改变主服务端口。如果`8081`被其他进程占用，根开发服务器仍会启动失败。本约定不通过SceneGIS patch改变
+该upstream行为；先释放`8081`，或在后续独立任务中评估是否需要正式SGP integration seam。
 
-gallery source发生变化时，脚本防抖并串行重跑no-embedding gallery build；Vite和Cesium build watcher不会因此重启。
-Cesium engine和Shader source变化由`build-watch`生成对应开发产物。当前Sandcastle Vite配置关闭HMR，因此build完成后必须
-整页刷新浏览器；不要把该入口描述为module HMR。Vite开发服务使用same-origin资源，不需要固定`8081` mirror或额外根server。
-launcher只有在实际runtime root module `/Build/CesiumUnminified/index.js`的HEAD响应返回JavaScript Content-Type而非HTML后，
-才打印可打开URL；缺失或被SPA fallback吞掉会以有界、可操作的startup timeout失败。Source与package入口仅保留给Monaco
-type/source路径和兼容诊断，不是Sandcastle bucket runtime入口。
-
-`SIGINT`、`SIGTERM`、端口占用、启动失败或任一长期子进程异常退出都会关闭gallery watcher并终止其余进程树。不要绕过
-该入口另行后台启动同一组进程，否则脚本无法负责那些外部进程的清理。
+根开发服务器启动engine、widgets和root Cesium bundle的incremental build contexts，并监听对应JS与Shader源码。
+`/Build/CesiumUnminified/index.js`是development route：源码变化会清理相关bundle cache，页面刷新后的新请求会从增量构建
+context取得最新代码。因而不需要另跑`npm run build-watch`或Sandcastle Vite；HTML/CSS/JS及Cesium源码修改后刷新页面即可。
+这里的“热更新”指开发服务器按请求重建并返回最新bundle，不承诺浏览器自动HMR或保留页面状态。
 
 ## 完成任务前检查
 
@@ -644,7 +637,7 @@ type/source路径和兼容诊断，不是Sandcastle bucket runtime入口。
 - [ ] 没有从 engine 内部导入自身 package/barrel。
 - [ ] 每个 upstream-owned hunk 都有有效 SGP 和 paired marker，或有合法 `manifest-only` 说明。
 - [ ] 没有混入无关格式化、重构或上游同步。
-- [ ] Specs、Sandcastle、E2E 和性能验证与风险相称。
+- [ ] Specs、`Test/**`开发示例、必要的legacy Sandcastle、E2E 和性能验证与风险相称。
 - [ ] 长期架构决定已经记录 ADR，并链接相关 SGP。
 - [ ] 当前 phase/standalone plan、parent extension roadmap、discussion、review 和扩展
       索引已反映最终状态、验证结果与剩余事项。
