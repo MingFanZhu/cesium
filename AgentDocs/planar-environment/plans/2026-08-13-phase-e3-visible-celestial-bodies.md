@@ -3,11 +3,11 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed`
 - Parent plan: [planar-environment extension](2026-08-13-planar-environment-extension.md)
 - Phase: `E3`
 - Owner role: `execution`
-- Architecture review: `confirmed`
+- Architecture review: `approved`
 - Architecture reviewer: Architecture Agent
 - Created: `2026-08-13`
 - Updated: `2026-08-13`
@@ -156,12 +156,13 @@ request-render、GPU资源所有权和environment-pass顺序。实现需要在Ce
   `packages/engine/Source/Shaders/SceneGIS/PlanarEnvironment/**`，basename全局唯一；不动态拼接Shader。
 - RenderState固定alpha blending、depth test disabled、depth mask false、culling disabled。每个main frame最多执行
   两个body command；不进入`frameState.commandList`，不创建derived/pick/depth/shadow command。
-- Context必须与World/Surface既有single Context一致；candidate resource创建/compile失败不得发布partial renderer，
-  必须释放本次candidate并保留既有warm resources与last successful frame state。
+- Public World/Surface继续只支持其既有single Context，正常产品路径不迁移renderer Context。Private renderer只做防御性
+  mismatch处理：先exactly-once释放旧Context资源，再为新Context创建candidate；创建/compile失败不得发布partial state，
+  并保持empty/retriable，不保留已失效的旧Context资源。
 - Hot path使用renderer/world-owned scratch Cartesian/clip/uniform objects；不逐帧new Cartesian、Color、array、
   command、RenderState或ShaderProgram。
-- Context loss/restore只遵循当前Cesium resource contract，不新增promise或global registry；E3至少锁定normal
-  destroy balance与second-Context fail-fast。
+- Context loss/restore只遵循当前Cesium resource contract，不新增promise或global registry；E3锁定normal destroy balance，
+  并以private second-Context cleanup/recreate测试防御性资源协议，而不是扩大public multi-Context支持。
 
 ## Primary-world environment hook and SGP
 
@@ -280,7 +281,7 @@ Unit/private evidence至少覆盖：
 - four-frustum center projection、off-center shift、behind camera、`z<=0` horizon、screen clipping与CSS pixel
   conversion的hard-coded结果；
 - default hidden零allocation，first visible lazy allocation，show/direction/color/size mutation保持VA/SP/command，
-  candidate failure cleanup、second Context拒绝和World destroy exactly-once；
+  candidate failure cleanup、second Context旧资源cleanup/recreate和World destroy exactly-once；
 - SceneGISWorld optional environment method、generic world without method不受Scene hook影响、World show/Environment
   enabled/sever/remove ownership闭环。
 
@@ -357,8 +358,21 @@ Architecture/code review批准后，项目负责人使用根Cesium development s
 
 ## Current handoff
 
-- Architecture已完成E3源码审计并确认普通`Pass.ENVIRONMENT` command不会执行，必须使用一个新的
-  primary-world environment hook；设计限定为`SGP-0003`的单一optional call。
-- Public contract、projection、horizon/underground、native conflict、Clock、resource budget、allowed/forbidden paths和
-  acceptance已确认。等待Architecture planning checkpoint后向Execution正式派工。
+- Execution已完成E3 implementation与最小充分自动化；
+  `../reviews/2026-08-13-e3-visible-celestial-bodies.md`已通过Architecture/code review，未commit、未push、未进入E4。
+- 实际实现保持`SGP-0003`单一optional primary-world environment hook；SceneGIS-owned renderer为one VA/one SP/two
+  stable commands/zero texture，hidden default不分配GPU资源。
+- 初次official audit发现`Scene.js`既有`SGP-0001`导致单registration审计模型无法表达独立`SGP-0003`。Architecture明确
+  保留两个SGP及各自移除条件，并批准审计器按path保存registration数组：同path仅允许全部`paired`；active pair必需，
+  proposed可尚未落地但已存在时必须合法，retired只保留历史且不得继续保留marker或覆盖diff；changed lines由active与已落地
+  proposed ranges并集覆盖，manifest-only保持排他。Audit focused fixtures 25/25通过。
+- Architecture findings E3-R001..R009已addressed：candidate buffer ownership、render-boundary native conflict、active viewport
+  CSS conversion、single frustum scratch、status-aware multi-SGP retirement、real host/Clock/hook/pick-depth/resident-terrain证据、
+  asymmetric OrthographicOffCenter数值资格与durable Context/Moon contract均已补齐。
+- Focused suites为Environment 19/19、SceneGISWorld 2/2、PlanarWorld 23/23、private renderer 6/6、Camera basename
+  aggregate 56/56（含9个helper/47个controller）、Widget 8/8；
+  build/release/types/docs/tsc与installed verifier通过，10份GLSL+10份generated module交付闭环。
+- Perspective与Orthographic由real Context实际compile/link/draw；PerspectiveOffCenter与OrthographicOffCenter因Cesium
+  Scene3D Camera不接受直接安装该frustum类型，采用private projection hard-coded证据，不虚构Camera draw。
+- 项目负责人已于`2026-08-13`确认`Test/平面环境.html`manual gate通过；E3所有gate已关闭，正在创建独立checkpoint。
 - 用户自有未跟踪`Test/地形.html`继续在phase外，禁止读取、修改、暂存或提交。

@@ -49,6 +49,7 @@ two-vertex-buffer rollback/release；不得引入其无关normal compression API
 | planar terrain Material styling                                          | World/Surface/SurfaceShader、ADR-0032                               | high   | assembled source、`_uniforms`、update lifecycle、absolute Z、north-clockwise aspect、oct flat snap、sampler budget、replay/release |
 | planar Environment Controller与Scene light authority                     | Environment/World/ControllerHost、ADR-0033                          | high   | callback/first-update顺序、fixed ENU/sign、one-per-world、conditional restore、requestRender、World sever、caller ownership        |
 | planar Environment astronomical directions                               | Environment、ADR-0034                                               | high   | Simon1994显式time、TEME pseudo-fixed、WGS84 origin ENU、Moon topocentric parallax、atomic publication、effective direction声明     |
+| planar visible celestial bodies与environment hook                        | World/private renderer、ADR-0035、SGP-0003                          | high   | environment-pass顺序、four-frustum/CSS pixel、horizon/terrain地下、native冲突、one VA/SP/two commands、private delivery            |
 | SceneGIS planar GLSL source与生成模块交付                                | `Source/Shaders/SceneGIS/**`、ADR-0030                              | high   | shader glob、comment minify、相邻JS ignore、basename唯一性、显式imports、dev/release/npm tarball加载                               |
 | advanced terrain unified qualification                                   | A7 local real-Context qualification                                 | high   | LERC/Quantized replacement、30 warm frames、bounded churn、task/GPU convergence、provider destroy balance                          |
 | automatic exports/types/JSDoc/package layout                             | public SceneGIS engine/widgets types                                | medium | workspace and installed tarball ESM/CJS where supported、root/types/API visibility、private absence                                |
@@ -70,7 +71,10 @@ context交付；engine/widgets/Shader source watcher能清理相关cache，刷�
 ## 升级执行顺序
 
 1. 核对 `.scenegis/upstream-base.json`，逐项重放并审查 SGP-0001/SGP-0002，不在功能提交中混入 upstream sync。
-2. 运行 `node scripts/scenegis/audit-upstream-patches.mjs`，确认所有 upstream-owned diff 已登记且 marker 配对。
+2. 运行 `node scripts/scenegis/audit-upstream-patches.mjs`，确认所有 upstream-owned diff 已登记且 marker 配对；同一
+   path承载多个SGP时必须全部为`paired`：active逐ID至少一个完整pair，proposed可以尚无pair但已存在时必须合法，retired
+   不得保留marker或覆盖live diff，changed lines位于active与已落地proposed合法ranges并集内。复核`Scene.js`的
+   `SGP-0001`与`SGP-0003`仍保持独立目的和移除条件，并可单独retire。
 3. 运行 P1-P8、terrain T1-T6与advanced terrain focused Specs；复核actual Worker transfer/URL与A7本地统一资格，再按风险运行
    multi-tile warm/churn/depth与lifecycle soak；任何
    observable selection、pixel、fallback、lighting或ownership变化先形成finding。

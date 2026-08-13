@@ -50,6 +50,13 @@ function writeManifest(repo, files) {
   );
 }
 
+function setPatchStatus(repo, index, status) {
+  const manifestPath = path.join(repo, ".scenegis/upstream-patches.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  manifest.patches[index].status = status;
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+}
+
 function fixture() {
   const repo = fs.mkdtempSync(path.join(os.tmpdir(), "scenegis-audit-"));
   git(repo, ["init", "--quiet"]);
@@ -107,6 +114,78 @@ test("accepts registered paired upstream patches", () => {
   fs.rmSync(repo, { recursive: true, force: true });
 });
 
+test("accepts independent paired patch registrations for one upstream file", () => {
+  const repo = fixture();
+  writeManifest(repo, [
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+  ]);
+  write(
+    repo,
+    "packages/engine/Source/Scene/Scene.js",
+    `// ${markerPrefix}BEGIN SGP-0001: first fixture.\nexport const first = 1;\n// ${markerPrefix}END SGP-0001\n// ${markerPrefix}BEGIN SGP-0002: second fixture.\nexport const second = 2;\n// ${markerPrefix}END SGP-0002\n`,
+  );
+  const result = audit(repo);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /1 registered upstream-owned entries/u);
+  assert.match(result.stdout, /SGP-0001, SGP-0002/u);
+  fs.rmSync(repo, { recursive: true, force: true });
+});
+
+test("accepts an active pair beside retired history for one upstream file", () => {
+  const repo = fixture();
+  writeManifest(repo, [
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+  ]);
+  setPatchStatus(repo, 1, "retired");
+  const result = audit(repo);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /SGP-0001/u);
+  assert.doesNotMatch(result.stdout, /SGP-0002/u);
+  fs.rmSync(repo, { recursive: true, force: true });
+});
+
+test("accepts an active pair beside an unmaterialized proposed registration", () => {
+  const repo = fixture();
+  writeManifest(repo, [
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+  ]);
+  setPatchStatus(repo, 1, "proposed");
+  const result = audit(repo);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /SGP-0001/u);
+  assert.doesNotMatch(result.stdout, /SGP-0002/u);
+  fs.rmSync(repo, { recursive: true, force: true });
+});
+
+test("accepts a valid materialized proposed pair beside an active pair", () => {
+  const repo = fixture();
+  writeManifest(repo, [
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+  ]);
+  setPatchStatus(repo, 1, "proposed");
+  write(
+    repo,
+    "packages/engine/Source/Scene/Scene.js",
+    `// ${markerPrefix}BEGIN SGP-0001: active fixture.\nexport const active = 1;\n// ${markerPrefix}END SGP-0001\n// ${markerPrefix}BEGIN SGP-0002: proposed fixture.\nexport const proposed = 2;\n// ${markerPrefix}END SGP-0002\n`,
+  );
+  const result = audit(repo);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /SGP-0001, SGP-0002/u);
+  fs.rmSync(repo, { recursive: true, force: true });
+});
+
+test("accepts a retired registration with no upstream diff", () => {
+  const repo = fixture();
+  setPatchStatus(repo, 0, "retired");
+  write(repo, "packages/engine/Source/Scene/Scene.js", "export default 1;\n");
+  assert.equal(audit(repo).status, 0);
+  fs.rmSync(repo, { recursive: true, force: true });
+});
+
 test("accepts registered manifest-only rename and retains the old path", () => {
   const repo = fixture();
   writeManifest(repo, [
@@ -145,6 +224,73 @@ expectFailure("an unregistered upstream diff", (repo) => {
   fs.appendFileSync(
     path.join(repo, "packages/engine/Source/Scene/Extra.js"),
     "// changed\n",
+  );
+});
+
+expectFailure("a duplicate patch and path registration", (repo) => {
+  const manifestPath = path.join(repo, ".scenegis/upstream-patches.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  manifest.patches[0].files.push({
+    path: "packages/engine/Source/Scene/Scene.js",
+    markerMode: "paired",
+  });
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+});
+
+expectFailure("paired and manifest-only registrations for one file", (repo) => {
+  writeManifest(repo, [
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    {
+      file: "packages/engine/Source/Scene/Scene.js",
+      markerMode: "manifest-only",
+    },
+  ]);
+});
+
+expectFailure("a missing marker for a second registered patch", (repo) => {
+  writeManifest(repo, [
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+  ]);
+});
+
+expectFailure("a retained marker for a retired patch", (repo) => {
+  writeManifest(repo, [
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+  ]);
+  setPatchStatus(repo, 1, "retired");
+  write(
+    repo,
+    "packages/engine/Source/Scene/Scene.js",
+    `// ${markerPrefix}BEGIN SGP-0001: active fixture.\nexport const active = 1;\n// ${markerPrefix}END SGP-0001\n// ${markerPrefix}BEGIN SGP-0002: retired fixture.\nexport const retired = 2;\n// ${markerPrefix}END SGP-0002\n`,
+  );
+});
+
+expectFailure(
+  "an unregistered third marker in a multiply registered file",
+  (repo) => {
+    writeManifest(repo, [
+      { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+      { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    ]);
+    write(
+      repo,
+      "packages/engine/Source/Scene/Scene.js",
+      `// ${markerPrefix}BEGIN SGP-0001: first fixture.\nexport const first = 1;\n// ${markerPrefix}END SGP-0001\n// ${markerPrefix}BEGIN SGP-0002: second fixture.\nexport const second = 2;\n// ${markerPrefix}END SGP-0002\n// ${markerPrefix}BEGIN SGP-9999: foreign.\nexport const foreign = 3;\n// ${markerPrefix}END SGP-9999\n`,
+    );
+  },
+);
+
+expectFailure("a changed line outside multiple paired ranges", (repo) => {
+  writeManifest(repo, [
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+  ]);
+  write(
+    repo,
+    "packages/engine/Source/Scene/Scene.js",
+    `// ${markerPrefix}BEGIN SGP-0001: first fixture.\nexport const first = 1;\n// ${markerPrefix}END SGP-0001\n// ${markerPrefix}BEGIN SGP-0002: second fixture.\nexport const second = 2;\n// ${markerPrefix}END SGP-0002\nexport const unmarked = true;\n`,
   );
 });
 

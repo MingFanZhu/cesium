@@ -76,6 +76,7 @@ const nonPublicSpellings = [
   "SceneGISPlanarTerrainWorker",
   "SceneGISPlanarTerrainWorkerScheduler",
   "SceneGISPlanarTerrainWorkerTasks",
+  "SceneGISPlanarCelestialBodyRenderer",
 ];
 const softPrivateContentSymbols = [
   "_SceneGISPlanarPositionResolver",
@@ -97,6 +98,7 @@ const softPrivateContentSymbols = [
   "_SceneGISPlanarVisualizersCallback",
   "_SceneGISPlanarTerrainWorkerScheduler",
   "_SceneGISPlanarTerrainWorkerTasks",
+  "_SceneGISPlanarCelestialBodyRenderer",
 ];
 const privateContentFiles = [
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPositionResolver.js",
@@ -118,6 +120,7 @@ const privateContentFiles = [
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundVolume.js",
   "package/Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerScheduler.js",
   "package/Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js",
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarCelestialBodyRenderer.js",
 ];
 const terrainWorkerSource =
   "package/Source/Workers/SceneGISPlanarTerrainWorker.js";
@@ -134,6 +137,8 @@ const sceneGISShaderSources = [
   "PlanarSurface/SceneGISPlanarSurfaceGeometricLitVS",
   "PlanarSurface/SceneGISPlanarSurfaceSmoothLitVS",
   "PlanarSurface/SceneGISPlanarSurfaceUnlitVS",
+  "PlanarEnvironment/SceneGISPlanarCelestialBodyFS",
+  "PlanarEnvironment/SceneGISPlanarCelestialBodyVS",
 ];
 const sceneGISShaderArchiveEntries = sceneGISShaderSources.flatMap((shader) =>
   ["glsl", "js"].map(
@@ -375,6 +380,18 @@ assert.equal(layer.colorToAlpha.green, 0.2);
   assert.equal(environment.originLongitude, undefined);
   assert.equal(environment.originLatitude, undefined);
   assert.equal(environment.sunIntensity, 2);
+  assert.equal(environment.showSun, false);
+  assert.equal(environment.showMoon, false);
+  assert.equal(environment.sunPixelSize, 48);
+  assert.equal(environment.moonPixelSize, 36);
+  const installedMoonColor = environment.moonColor;
+  environment.moonColor = new engine.Color(0.5, 0.6, 0.7, 0.8);
+  installedMoonColor.red = 0;
+  assert.equal(environment.moonColor.red, 0.5);
+  environment.showSun = true;
+  environment.showMoon = true;
+  assert.equal(environment.showSun, true);
+  assert.equal(environment.showMoon, true);
   assert.equal(environment.light instanceof engine.DirectionalLight, true);
   assert.equal(environment.light.direction.x, -environment.sunDirection.x);
   sunInput.x = 99;
@@ -505,6 +522,11 @@ function verifyDocumentation(engineDirectory) {
     "effectiveMoonDirection",
     "sunColor",
     "sunIntensity",
+    "showSun",
+    "showMoon",
+    "sunPixelSize",
+    "moonPixelSize",
+    "moonColor",
     "enabled",
   ]) {
     assert.match(
@@ -589,6 +611,11 @@ function verifyStylingDeclarations(declarations) {
   );
   assert.match(environment, /\n\s*sunColor: Color;/u);
   assert.match(environment, /\n\s*sunIntensity: number;/u);
+  assert.match(environment, /\n\s*showSun: boolean;/u);
+  assert.match(environment, /\n\s*showMoon: boolean;/u);
+  assert.match(environment, /\n\s*sunPixelSize: number;/u);
+  assert.match(environment, /\n\s*moonPixelSize: number;/u);
+  assert.match(environment, /\n\s*moonColor: Color;/u);
   assert.match(environment, /\n\s*enabled: boolean;/u);
 }
 
@@ -659,7 +686,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 8/8 GLSL, 8/8 generated shader modules, bare ESM/CJS, S2/S3/E1/E2 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 10/10 GLSL, 10/10 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
   );
 }
 

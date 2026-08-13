@@ -35,6 +35,11 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
       directionMode: options.directionMode,
       originLongitude: options.originLongitude,
       originLatitude: options.originLatitude,
+      showSun: options.showSun,
+      showMoon: options.showMoon,
+      sunPixelSize: options.sunPixelSize,
+      moonPixelSize: options.moonPixelSize,
+      moonColor: options.moonColor,
     });
   }
 
@@ -83,6 +88,66 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
     exposedColor.red = 0.0;
     expect(environment.sunDirection.x).toBeCloseTo(Math.SQRT1_2, 15);
     expect(environment.sunColor).toEqual(Color.WHITE);
+    world.destroy();
+  });
+
+  it("validates cloned visible-body state and preserves same-value no-ops", function () {
+    const world = createWorld();
+    const moonColor = new Color(0.7, 0.8, 0.9, 0.6);
+    const environment = createEnvironment(world, { moonColor });
+
+    expect(environment.showSun).toBe(false);
+    expect(environment.showMoon).toBe(false);
+    expect(environment.sunPixelSize).toBe(48.0);
+    expect(environment.moonPixelSize).toBe(36.0);
+    expect(environment.moonColor).toEqual(moonColor);
+    expect(environment.moonColor).not.toBe(moonColor);
+
+    expect(() => {
+      environment.showSun = 1;
+    }).toThrowDeveloperError();
+    expect(() => {
+      environment.sunPixelSize = 0.0;
+    }).toThrowDeveloperError();
+    expect(() => {
+      environment.moonPixelSize = Number.NaN;
+    }).toThrowDeveloperError();
+    expect(() => {
+      environment.moonColor = new Color(Number.NaN, 0.0, 0.0, 1.0);
+    }).toThrowDeveloperError();
+
+    const scene = createScene(world);
+    environment.connectedCallback({});
+    environment.firstUpdate(scene, new JulianDate(2451545, 0.0));
+    scene.requestRender.calls.reset();
+    environment.showSun = true;
+    environment.showSun = true;
+    environment.sunPixelSize = 64.0;
+    environment.sunPixelSize = 64.0;
+    expect(scene.requestRender.calls.count()).toBe(2);
+    world.destroy();
+  });
+
+  it("rejects visible native bodies without mutating planar visibility", function () {
+    const world = createWorld();
+    const environment = createEnvironment(world);
+    const scene = createScene(world);
+    scene.sun = { show: true };
+    environment.connectedCallback({});
+
+    environment.showSun = true;
+    expect(() =>
+      environment.firstUpdate(scene, new JulianDate(2451545, 0.0)),
+    ).toThrowDeveloperError();
+    expect(scene.requestRender).not.toHaveBeenCalled();
+    expect(scene.light).not.toBe(environment.light);
+
+    environment.showSun = false;
+    environment.firstUpdate(scene, new JulianDate(2451545, 0.0));
+    expect(() => {
+      environment.showSun = true;
+    }).toThrowDeveloperError();
+    expect(environment.showSun).toBe(false);
     world.destroy();
   });
 

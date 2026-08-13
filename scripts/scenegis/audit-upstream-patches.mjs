@@ -126,8 +126,17 @@ function registeredFile(entriesByFile, entry) {
   );
 }
 
-function markerRanges(source, expectedId, errors, file) {
+function markerRanges(
+  source,
+  requiredIds,
+  optionalIds,
+  retiredIds,
+  errors,
+  file,
+) {
   const ranges = [];
+  const acceptedIds = new Set([...requiredIds, ...optionalIds]);
+  const pairCounts = new Map([...acceptedIds].map((id) => [id, 0]));
   let open;
   const marker = new RegExp(`${markerPrefix}(BEGIN|END) (SGP-\\d{4})`, "u");
   const lines = source.split(/\r?\n/u);
@@ -138,30 +147,43 @@ function markerRanges(source, expectedId, errors, file) {
     }
     const line = index + 1;
     const [, kind, id] = match;
-    if (id !== expectedId) {
-      errors.push(`Foreign marker ${id} in ${file}; expected ${expectedId}.`);
+    if (retiredIds.has(id)) {
+      errors.push(`Retired marker ${id} must be removed from ${file}.`);
+    } else if (!acceptedIds.has(id)) {
+      errors.push(
+        `Foreign marker ${id} in ${file}; expected one of ${[...acceptedIds].join(", ")}.`,
+      );
     }
     if (kind === "BEGIN") {
       if (open !== undefined) {
-        errors.push(
-          `Nested or misordered ${expectedId} marker at ${file}:${line}.`,
-        );
+        errors.push(`Nested or misordered ${id} marker at ${file}:${line}.`);
+        continue;
       }
       open = { id, start: line };
     } else if (open === undefined || open.id !== id) {
       errors.push(`Unmatched ${id} END marker at ${file}:${line}.`);
     } else {
-      ranges.push({ start: open.start, end: line });
+      if (acceptedIds.has(id)) {
+        ranges.push({ id, start: open.start, end: line });
+        pairCounts.set(id, pairCounts.get(id) + 1);
+      }
       open = undefined;
     }
   }
   if (open !== undefined) {
     errors.push(`Unclosed ${open.id} marker at ${file}:${open.start}.`);
   }
-  if (ranges.length === 0) {
-    errors.push(`No paired ${expectedId} marker range in ${file}.`);
+  for (const id of requiredIds) {
+    if (pairCounts.get(id) === 0) {
+      errors.push(`No paired ${id} marker range in ${file}.`);
+    }
   }
-  return ranges;
+  return {
+    ranges,
+    pairedIds: new Set(
+      [...pairCounts].filter(([, count]) => count > 0).map(([id]) => id),
+    ),
+  };
 }
 
 function changedNewLines(repo, base, file) {
@@ -305,26 +327,62 @@ function audit(repo) {
           `${patchEntry.id} lists a file absent from the upstream base: ${file.path}`,
         );
       }
-      if (entriesByFile.has(file.path)) {
-        errors.push(`Upstream file is registered more than once: ${file.path}`);
+      const registrations = entriesByFile.get(file.path) ?? [];
+      if (
+        registrations.some(
+          (registration) => registration.patchEntry.id === patchEntry.id,
+        )
+      ) {
+        errors.push(
+          `Duplicate ${patchEntry.id} registration for upstream file: ${file.path}`,
+        );
       }
-      entriesByFile.set(file.path, { patchEntry, file });
+      registrations.push({ patchEntry, file });
+      entriesByFile.set(file.path, registrations);
+    }
+  }
+
+  for (const [file, registrations] of entriesByFile) {
+    if (
+      registrations.length > 1 &&
+      registrations.some(
+        (registration) => registration.file.markerMode !== "paired",
+      )
+    ) {
+      errors.push(
+        `Multiple registrations for ${file} require every marker mode to be paired.`,
+      );
     }
   }
 
   let markerCount = 0;
-  const seenManifestFiles = new Set();
+  const seenManifestRegistrations = new Set();
+  const involvedPatchIds = new Set();
   for (const entry of upstreamOwned) {
-    const registered = registeredFile(entriesByFile, entry);
+    const registrations = registeredFile(entriesByFile, entry);
     const displayPath = entry.newPath ?? entry.oldPath;
-    if (!registered) {
+    if (!registrations) {
       errors.push(
         `Unregistered upstream-owned diff: ${entryPaths(entry).join(" -> ")}`,
       );
       continue;
     }
-    seenManifestFiles.add(registered.file.path);
-    if (registered.file.markerMode === "manifest-only") {
+    const liveRegistrations = registrations.filter(
+      (registration) => registration.patchEntry.status !== "retired",
+    );
+    if (liveRegistrations.length === 0) {
+      errors.push(
+        `Retired registrations cannot cover an upstream-owned diff: ${entryPaths(entry).join(" -> ")}`,
+      );
+      continue;
+    }
+    for (const registration of liveRegistrations) {
+      seenManifestRegistrations.add(
+        `${registration.patchEntry.id}\0${registration.file.path}`,
+      );
+    }
+    const [firstRegistration] = liveRegistrations;
+    if (firstRegistration.file.markerMode === "manifest-only") {
       const unannotatable =
         ["D", "R", "C"].includes(entry.status) ||
         (displayPath && isBinaryDiff(repo, base.commit, displayPath));
@@ -333,22 +391,49 @@ function audit(repo) {
           `Stale manifest-only registration for annotatable diff: ${displayPath}`,
         );
       }
+      for (const registration of liveRegistrations) {
+        involvedPatchIds.add(registration.patchEntry.id);
+      }
       continue;
     }
-    if (entry.status !== "M" || entry.newPath !== registered.file.path) {
+    if (entry.status !== "M" || entry.newPath !== firstRegistration.file.path) {
       errors.push(
         `Paired registration cannot cover ${entry.status} path change: ${entryPaths(entry).join(" -> ")}`,
       );
       continue;
     }
     const source = fs.readFileSync(path.join(repo, entry.newPath), "utf8");
-    const ranges = markerRanges(
+    const requiredIds = new Set(
+      liveRegistrations
+        .filter((registration) => registration.patchEntry.status === "active")
+        .map((registration) => registration.patchEntry.id),
+    );
+    const optionalIds = new Set(
+      liveRegistrations
+        .filter((registration) => registration.patchEntry.status === "proposed")
+        .map((registration) => registration.patchEntry.id),
+    );
+    const retiredIds = new Set(
+      registrations
+        .filter((registration) => registration.patchEntry.status === "retired")
+        .map((registration) => registration.patchEntry.id),
+    );
+    const markerResult = markerRanges(
       source,
-      registered.patchEntry.id,
+      requiredIds,
+      optionalIds,
+      retiredIds,
       errors,
       entry.newPath,
     );
+    const { ranges } = markerResult;
     markerCount += ranges.length * 2;
+    for (const id of requiredIds) {
+      involvedPatchIds.add(id);
+    }
+    for (const id of markerResult.pairedIds) {
+      involvedPatchIds.add(id);
+    }
     for (const line of changedNewLines(repo, base.commit, entry.newPath)) {
       if (!ranges.some((range) => line >= range.start && line <= range.end)) {
         errors.push(`Unmarked changed line in ${entry.newPath}:${line}.`);
@@ -356,12 +441,18 @@ function audit(repo) {
     }
   }
 
-  for (const [file, registration] of entriesByFile) {
-    if (
-      registration.patchEntry.status === "active" &&
-      !seenManifestFiles.has(file)
-    ) {
-      errors.push(`Active manifest entry has no upstream diff: ${file}`);
+  for (const [file, registrations] of entriesByFile) {
+    for (const registration of registrations) {
+      if (
+        registration.patchEntry.status === "active" &&
+        !seenManifestRegistrations.has(
+          `${registration.patchEntry.id}\0${registration.file.path}`,
+        )
+      ) {
+        errors.push(
+          `Active ${registration.patchEntry.id} manifest entry has no upstream diff: ${file}`,
+        );
+      }
     }
   }
 
@@ -387,7 +478,7 @@ function audit(repo) {
     errors,
     upstreamOwned,
     deliveryUpstreamOwned,
-    patchIds: [...patchIds],
+    patchIds: [...involvedPatchIds],
     markerCount,
     changedCount: changedPaths.size,
   };

@@ -1,10 +1,12 @@
 import {
+  Cartesian2,
   Cartesian3,
   CesiumWidget,
   Color,
   DirectionalLight,
   Event,
   JulianDate,
+  OrthographicFrustum,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarEnvironment,
   SceneGISPlanarExtent,
@@ -373,6 +375,348 @@ describe("SceneGIS/Widget/SceneGISPlanarEnvironmentCesiumWidget", function () {
       Cartesian3.negate(environment.sunDirection, new Cartesian3()),
     );
     expectWarm();
+  });
+
+  it("moves a visible astronomical body with native host Clock time", async function () {
+    const { world } = createWorld();
+    createWidget(world);
+    const firstTime = JulianDate.fromIso8601("2026-06-21T00:00:00Z");
+    const secondTime = JulianDate.fromIso8601("2026-12-21T00:00:00Z");
+    environment = new SceneGISPlanarEnvironment({
+      world,
+      sunDirection: Cartesian3.UNIT_Z,
+      moonDirection: Cartesian3.UNIT_X,
+      directionMode: "astronomical",
+      originLongitude: 2.0943951023931953,
+      originLatitude: 0.6108652381980153,
+      showSun: true,
+      sunPixelSize: 8.0,
+    });
+    widget.clock.shouldAnimate = false;
+    widget.clock.currentTime = JulianDate.clone(firstTime);
+    widget.addController(environment);
+    widget.render();
+    const firstSun = environment.effectiveSunDirection;
+    const celestialUp = Cartesian3.normalize(
+      Cartesian3.cross(firstSun, Cartesian3.UNIT_X, new Cartesian3()),
+      new Cartesian3(),
+    );
+    widget.scene.camera.setView({
+      destination: new Cartesian3(0.0, 0.0, 400.0),
+      orientation: { direction: firstSun, up: celestialUp },
+    });
+    await pollToPromise(function () {
+      widget.render();
+      return world._celestialBodyRenderer._shaderProgram !== undefined;
+    });
+    const renderer = world._celestialBodyRenderer;
+    const identities = {
+      vertexArray: renderer._vertexArray,
+      shaderProgram: renderer._shaderProgram,
+      command: renderer._sunCommand,
+    };
+    const firstCenter = renderer._sun.center.x;
+    const firstPixel = readCenterPixel();
+    expect(firstPixel[0]).toBeGreaterThan(0);
+
+    const requestRender = spyOn(
+      widget.scene,
+      "requestRender",
+    ).and.callThrough();
+    const firstPublishedTime = JulianDate.clone(environment._publishedTime);
+    widget.render();
+    expect(requestRender).not.toHaveBeenCalled();
+    expect(environment.effectiveSunDirection).toEqual(firstSun);
+    expect(environment._publishedTime).toEqual(firstPublishedTime);
+    expect(renderer._sun.center.x).toBe(firstCenter);
+    expect(renderer._vertexArray).toBe(identities.vertexArray);
+    expect(renderer._shaderProgram).toBe(identities.shaderProgram);
+    expect(renderer._sunCommand).toBe(identities.command);
+
+    widget.clock.currentTime = JulianDate.clone(secondTime);
+    widget.render();
+    const secondSun = environment.effectiveSunDirection;
+    const secondCenter = renderer._sun.center.x;
+    const secondPublishedTime = JulianDate.clone(environment._publishedTime);
+    expect(secondSun).not.toEqual(firstSun);
+    expect(secondCenter).not.toBeCloseTo(firstCenter, 3);
+    expect(readCenterPixel()).not.toEqual(firstPixel);
+    expect(requestRender).toHaveBeenCalledTimes(1);
+    expect(renderer._vertexArray).toBe(identities.vertexArray);
+    expect(renderer._shaderProgram).toBe(identities.shaderProgram);
+    expect(renderer._sunCommand).toBe(identities.command);
+
+    widget.render();
+    expect(requestRender).toHaveBeenCalledTimes(1);
+    expect(environment.effectiveSunDirection).toEqual(secondSun);
+    expect(environment._publishedTime).toEqual(secondPublishedTime);
+    expect(renderer._sun.center.x).toBe(secondCenter);
+    expect(renderer._vertexArray).toBe(identities.vertexArray);
+    expect(renderer._shaderProgram).toBe(identities.shaderProgram);
+    expect(renderer._sunCommand).toBe(identities.command);
+  });
+
+  it("keeps a visible body behind foreground resident terrain", async function () {
+    const { world } = createWorld();
+    world.enableLighting = false;
+    createWidget(world);
+    await pollToPromise(function () {
+      renderFrame();
+      return world.tilesLoaded && world._surface._renderCommands.length === 1;
+    });
+
+    const samples = [
+      new Cartesian3(-64.0, -64.0, 0.0),
+      new Cartesian3(64.0, -64.0, 0.0),
+      new Cartesian3(-64.0, 64.0, 0.0),
+      new Cartesian3(64.0, 64.0, 0.0),
+    ].map((position) => ({
+      position,
+      height: world.getTerrainHeight(position),
+    }));
+    samples.sort((left, right) => left.height - right.height);
+    const low = samples[0];
+    const high = samples[samples.length - 1];
+    expect(high.height).toBeGreaterThan(low.height + 5.0);
+    const cameraPosition = new Cartesian3(
+      low.position.x,
+      low.position.y,
+      low.height + 5.0,
+    );
+    const target = new Cartesian3(
+      high.position.x,
+      high.position.y,
+      high.height,
+    );
+    const bodyDirection = Cartesian3.normalize(
+      Cartesian3.subtract(target, cameraPosition, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const right = Cartesian3.normalize(
+      Cartesian3.cross(bodyDirection, Cartesian3.UNIT_Z, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const up = Cartesian3.normalize(
+      Cartesian3.cross(right, bodyDirection, new Cartesian3()),
+      new Cartesian3(),
+    );
+    widget.scene.camera.setView({
+      destination: cameraPosition,
+      orientation: { direction: bodyDirection, up },
+    });
+    widget.scene.requestRender();
+    renderFrame();
+    const foregroundPixel = readCenterPixel();
+
+    environment = new SceneGISPlanarEnvironment({
+      world,
+      sunDirection: bodyDirection,
+      moonDirection: bodyDirection,
+      sunColor: Color.RED,
+      showSun: true,
+      sunPixelSize: 40.0,
+    });
+    widget.addController(environment);
+    await pollToPromise(function () {
+      renderFrame();
+      return world._celestialBodyRenderer._sunCommand !== undefined;
+    });
+    expect(world._celestialBodyRenderer._sun.center.x).toBeCloseTo(0.0, 12);
+    expect(world._celestialBodyRenderer._sun.center.y).toBeCloseTo(0.0, 12);
+    expect(readCenterPixel()).toEqual(foregroundPixel);
+  });
+
+  it("draws opt-in procedural bodies with warm shared resources", async function () {
+    const { world } = createWorld();
+    createWidget(world);
+    await pollToPromise(function () {
+      renderFrame();
+      return world.tilesLoaded && world._surface._renderCommands.length === 1;
+    });
+    const terrainPosition = new Cartesian3(-64.0, -64.0, 0.0);
+    const residentTerrainHeight = world.getTerrainHeight(terrainPosition);
+    expect(Number.isFinite(residentTerrainHeight)).toBe(true);
+    const direction = Cartesian3.normalize(
+      new Cartesian3(0.0, 1.0, 1.0),
+      new Cartesian3(),
+    );
+    widget.scene.camera.setView({
+      destination: new Cartesian3(0.0, -100.0, 100.0),
+      orientation: {
+        direction,
+        up: Cartesian3.normalize(
+          new Cartesian3(0.0, -1.0, 1.0),
+          new Cartesian3(),
+        ),
+      },
+    });
+    environment = new SceneGISPlanarEnvironment({
+      world,
+      sunDirection: direction,
+      moonDirection: direction,
+      showSun: true,
+      showMoon: true,
+      sunPixelSize: 24.0,
+      moonPixelSize: 16.0,
+    });
+    widget.addController(environment);
+
+    await pollToPromise(function () {
+      renderFrame();
+      return world._celestialBodyRenderer._shaderProgram !== undefined;
+    });
+    const renderer = world._celestialBodyRenderer;
+    const identities = {
+      vertexArray: renderer._vertexArray,
+      shaderProgram: renderer._shaderProgram,
+      sunCommand: renderer._sunCommand,
+      moonCommand: renderer._moonCommand,
+    };
+    const center = readCenterPixel();
+    expect(center[0]).toBeGreaterThan(0);
+    expect(center[3]).toBe(255);
+
+    const perspective = widget.scene.camera.frustum;
+    const orthographic = new OrthographicFrustum({
+      width: 200.0,
+      aspectRatio: 1.0,
+      near: 1.0,
+      far: 1000000.0,
+    });
+    for (const frustum of [perspective, orthographic]) {
+      widget.scene.camera.frustum = frustum;
+      renderFrame();
+      expect(readCenterPixel()[0]).toBeGreaterThan(0);
+    }
+    widget.scene.camera.frustum = perspective;
+
+    environment.sunPixelSize = 30.0;
+    environment.moonColor = Color.RED;
+    renderFrame();
+    expect(renderer._vertexArray).toBe(identities.vertexArray);
+    expect(renderer._shaderProgram).toBe(identities.shaderProgram);
+    expect(renderer._sunCommand).toBe(identities.sunCommand);
+    expect(renderer._moonCommand).toBe(identities.moonCommand);
+
+    expect(renderer._sunCommand.renderState.depthTest.enabled).toBe(false);
+    expect(renderer._sunCommand.renderState.depthMask).toBe(false);
+
+    spyOn(renderer._sunCommand, "execute");
+    spyOn(renderer._moonCommand, "execute");
+    const originalSun = widget.scene.sun;
+    const originalMoon = widget.scene.moon;
+    widget.scene.sun = {
+      show: false,
+      update: jasmine.createSpy("nativeSunUpdate"),
+      destroy: jasmine.createSpy("nativeSunDestroy"),
+    };
+    widget.scene.moon = {
+      show: false,
+      update: jasmine.createSpy("nativeMoonUpdate"),
+      destroy: jasmine.createSpy("nativeMoonDestroy"),
+    };
+    function expectWarmBodies() {
+      expect(renderer._vertexArray).toBe(identities.vertexArray);
+      expect(renderer._shaderProgram).toBe(identities.shaderProgram);
+      expect(renderer._sunCommand).toBe(identities.sunCommand);
+      expect(renderer._moonCommand).toBe(identities.moonCommand);
+    }
+
+    const pickPosition = new Cartesian2(32.0, 32.0);
+    const commandListLength = widget.scene.frameState.commandList.length;
+    const pickBefore = widget.scene.pick(pickPosition);
+    const depthBefore = widget.scene.pickPosition(pickPosition);
+    expect(widget.scene.pick(pickPosition)).toEqual(pickBefore);
+    expect(widget.scene.pickPosition(pickPosition)).toEqual(depthBefore);
+    expect(renderer._sunCommand.execute).not.toHaveBeenCalled();
+    expect(renderer._moonCommand.execute).not.toHaveBeenCalled();
+    expect(widget.scene.frameState.commandList.length).toBe(commandListLength);
+
+    function expectLateNativeConflict(slot) {
+      const nativeBody = widget.scene[slot];
+      const previousShow = nativeBody.show;
+      const removePreRender = widget.scene.preRender.addEventListener(
+        function () {
+          removePreRender();
+          nativeBody.show = true;
+        },
+      );
+      widget.scene.requestRender();
+      const sunCalls = renderer._sunCommand.execute.calls.count();
+      const moonCalls = renderer._moonCommand.execute.calls.count();
+      expect(() => widget.render()).toThrowDeveloperError();
+      nativeBody.show = previousShow;
+      expect(renderer._sunCommand.execute.calls.count()).toBe(sunCalls);
+      expect(renderer._moonCommand.execute.calls.count()).toBe(moonCalls);
+      expectWarmBodies();
+    }
+    expectLateNativeConflict("sun");
+    expectLateNativeConflict("moon");
+
+    const removePreRender = widget.scene.preRender.addEventListener(
+      function () {
+        removePreRender();
+        widget.scene.sun.show = false;
+        widget.scene.moon.show = false;
+      },
+    );
+    widget.scene.requestRender();
+    widget.render();
+    expect(renderer._sunCommand.execute).toHaveBeenCalledTimes(1);
+    expect(renderer._moonCommand.execute).toHaveBeenCalledTimes(1);
+    expectWarmBodies();
+
+    expect(world.getTerrainHeight(terrainPosition)).toBe(residentTerrainHeight);
+    const orientation = {
+      direction,
+      up: Cartesian3.normalize(
+        new Cartesian3(0.0, -1.0, 1.0),
+        new Cartesian3(),
+      ),
+    };
+    widget.scene.camera.setView({
+      destination: new Cartesian3(-64.0, -64.0, residentTerrainHeight - 1.0),
+      orientation,
+    });
+    widget.scene.requestRender();
+    widget.render();
+    expect(renderer._sunCommand.execute).toHaveBeenCalledTimes(1);
+    expect(renderer._moonCommand.execute).toHaveBeenCalledTimes(1);
+
+    widget.scene.camera.setView({
+      destination: new Cartesian3(-64.0, -64.0, residentTerrainHeight + 1.0),
+      orientation,
+    });
+    widget.scene.requestRender();
+    widget.render();
+    expect(renderer._sunCommand.execute).toHaveBeenCalledTimes(2);
+    expect(renderer._moonCommand.execute).toHaveBeenCalledTimes(2);
+    expectWarmBodies();
+
+    world.show = false;
+    widget.scene.requestRender();
+    widget.render();
+    expect(renderer._sunCommand.execute).toHaveBeenCalledTimes(2);
+    expect(renderer._moonCommand.execute).toHaveBeenCalledTimes(2);
+    world.show = true;
+    environment.enabled = false;
+    widget.render();
+    expect(renderer._sunCommand.execute).toHaveBeenCalledTimes(2);
+    expect(renderer._moonCommand.execute).toHaveBeenCalledTimes(2);
+    environment.enabled = true;
+    environment.showSun = false;
+    environment.showMoon = false;
+    widget.render();
+    expect(renderer._sunCommand.execute).toHaveBeenCalledTimes(2);
+    expect(renderer._moonCommand.execute).toHaveBeenCalledTimes(2);
+
+    environment.showSun = true;
+    widget.render();
+    expect(renderer._sunCommand.execute).toHaveBeenCalledTimes(3);
+    expect(renderer._moonCommand.execute).toHaveBeenCalledTimes(2);
+    widget.scene.sun = originalSun;
+    widget.scene.moon = originalMoon;
+    expectWarmBodies();
   });
 
   it("keeps real host validation and world-destroy sever failure atomic", function () {

@@ -21,6 +21,9 @@ describe("SceneGIS/Scene/SceneGISWorld", function () {
       world.render(frameState);
     }).toThrowDeveloperError();
     expect(function () {
+      world.renderEnvironment(frameState, {});
+    }).toThrowDeveloperError();
+    expect(function () {
       world.endFrame(frameState);
     }).toThrowDeveloperError();
     expect(function () {

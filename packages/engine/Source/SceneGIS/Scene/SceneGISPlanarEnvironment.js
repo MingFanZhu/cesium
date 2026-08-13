@@ -75,6 +75,49 @@ function validateIntensity(value) {
   }
 }
 
+function validateBoolean(value, propertyName) {
+  if (typeof value !== "boolean") {
+    throw new DeveloperError(`${propertyName} must be a boolean.`);
+  }
+}
+
+function validatePixelSize(value, propertyName) {
+  if (!Number.isFinite(value) || value <= 0.0) {
+    throw new DeveloperError(
+      `${propertyName} must be a finite positive number.`,
+    );
+  }
+}
+
+function validateNativeBodyConflict(environment, scene) {
+  if (environment._showSun && defined(scene.sun) && scene.sun.show !== false) {
+    throw new DeveloperError(
+      "SceneGIS planar Sun cannot be shown while the native Scene Sun is visible.",
+    );
+  }
+  if (
+    environment._showMoon &&
+    defined(scene.moon) &&
+    scene.moon.show !== false
+  ) {
+    throw new DeveloperError(
+      "SceneGIS planar Moon cannot be shown while the native Scene Moon is visible.",
+    );
+  }
+}
+
+SceneGISPlanarEnvironment.prototype._validateNativeBodyConflict = function (
+  scene,
+) {
+  validateNativeBodyConflict(this, scene);
+};
+
+function requestBodyRender(environment, visible) {
+  if (visible && environment._hasAuthority) {
+    requestRender(environment);
+  }
+}
+
 function validateDirectionMode(value) {
   if (value !== "manual" && value !== "astronomical") {
     throw new DeveloperError(
@@ -298,6 +341,11 @@ function releaseAuthority(environment) {
  * @param {"manual"|"astronomical"} [options.directionMode="manual"] The source of effective celestial directions.
  * @param {number} [options.originLongitude] The project-origin WGS84 longitude in radians, required in astronomical mode.
  * @param {number} [options.originLatitude] The project-origin WGS84 geodetic latitude in radians, required in astronomical mode.
+ * @param {boolean} [options.showSun=false] Whether the procedural planar Sun is visible.
+ * @param {boolean} [options.showMoon=false] Whether the procedural planar Moon is visible.
+ * @param {number} [options.sunPixelSize=48.0] The Sun disc diameter in CSS pixels.
+ * @param {number} [options.moonPixelSize=36.0] The Moon disc diameter in CSS pixels.
+ * @param {Color} [options.moonColor=Color.LIGHTGRAY] The finite procedural Moon color.
  *
  * @exception {DeveloperError} The world is not a live SceneGISPlanarWorld.
  * @exception {DeveloperError} A direction is not a finite non-zero Cartesian3.
@@ -306,6 +354,7 @@ function releaseAuthority(environment) {
  * @exception {DeveloperError} The direction mode is not <code>"manual"</code> or <code>"astronomical"</code>.
  * @exception {DeveloperError} An origin is not undefined or a finite value in its inclusive longitude or latitude range.
  * @exception {DeveloperError} Astronomical mode does not define both origin longitude and origin latitude.
+ * @exception {DeveloperError} A visible-body option is not a boolean, a finite positive CSS-pixel size, or a finite Color.
  */
 function SceneGISPlanarEnvironment(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -326,6 +375,11 @@ function SceneGISPlanarEnvironment(options) {
   const directionMode = options.directionMode ?? "manual";
   const originLongitude = options.originLongitude;
   const originLatitude = options.originLatitude;
+  const showSun = options.showSun ?? false;
+  const showMoon = options.showMoon ?? false;
+  const sunPixelSize = options.sunPixelSize ?? 48.0;
+  const moonPixelSize = options.moonPixelSize ?? 36.0;
+  const moonColor = options.moonColor ?? Color.LIGHTGRAY;
   validateColor(sunColor, "sunColor");
   validateIntensity(sunIntensity);
   validateDirectionMode(directionMode);
@@ -339,6 +393,11 @@ function SceneGISPlanarEnvironment(options) {
   if (directionMode === "astronomical") {
     validateAstronomicalOrigin(originLongitude, originLatitude);
   }
+  validateBoolean(showSun, "showSun");
+  validateBoolean(showMoon, "showMoon");
+  validatePixelSize(sunPixelSize, "sunPixelSize");
+  validatePixelSize(moonPixelSize, "moonPixelSize");
+  validateColor(moonColor, "moonColor");
 
   this._world = options.world;
   this._sunDirection = sunDirection;
@@ -363,6 +422,11 @@ function SceneGISPlanarEnvironment(options) {
   this._astronomyRenderRequested = false;
   this._sunColor = Color.clone(sunColor);
   this._sunIntensity = sunIntensity;
+  this._showSun = showSun;
+  this._showMoon = showMoon;
+  this._sunPixelSize = sunPixelSize;
+  this._moonPixelSize = moonPixelSize;
+  this._moonColor = Color.clone(moonColor);
   this._enabled = true;
   this._element = undefined;
   this._scene = undefined;
@@ -638,6 +702,122 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
+   * Gets or sets whether the procedural planar Sun is visible.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {boolean}
+   * @default false
+   * @exception {DeveloperError} The assigned value is not a boolean or conflicts with a visible native Sun.
+   */
+  showSun: {
+    get: function () {
+      return this._showSun;
+    },
+    set: function (value) {
+      validateBoolean(value, "showSun");
+      if (value === this._showSun) {
+        return;
+      }
+      if (value && defined(this._scene)) {
+        const previous = this._showSun;
+        this._showSun = true;
+        try {
+          validateNativeBodyConflict(this, this._scene);
+        } finally {
+          this._showSun = previous;
+        }
+      }
+      this._showSun = value;
+      requestBodyRender(this, true);
+    },
+  },
+
+  /** Gets or sets whether the procedural planar Moon is visible.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {boolean}
+   * @default false
+   * @exception {DeveloperError} The assigned value is not a boolean or conflicts with a visible native Moon.
+   */
+  showMoon: {
+    get: function () {
+      return this._showMoon;
+    },
+    set: function (value) {
+      validateBoolean(value, "showMoon");
+      if (value === this._showMoon) {
+        return;
+      }
+      if (value && defined(this._scene)) {
+        const previous = this._showMoon;
+        this._showMoon = true;
+        try {
+          validateNativeBodyConflict(this, this._scene);
+        } finally {
+          this._showMoon = previous;
+        }
+      }
+      this._showMoon = value;
+      requestBodyRender(this, true);
+    },
+  },
+
+  /** Gets or sets the procedural Sun disc diameter in CSS pixels.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {number}
+   * @exception {DeveloperError} The assigned value is not finite and positive.
+   */
+  sunPixelSize: {
+    get: function () {
+      return this._sunPixelSize;
+    },
+    set: function (value) {
+      validatePixelSize(value, "sunPixelSize");
+      if (value === this._sunPixelSize) {
+        return;
+      }
+      this._sunPixelSize = value;
+      requestBodyRender(this, this._showSun);
+    },
+  },
+
+  /** Gets or sets the procedural Moon disc diameter in CSS pixels.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {number}
+   * @exception {DeveloperError} The assigned value is not finite and positive.
+   */
+  moonPixelSize: {
+    get: function () {
+      return this._moonPixelSize;
+    },
+    set: function (value) {
+      validatePixelSize(value, "moonPixelSize");
+      if (value === this._moonPixelSize) {
+        return;
+      }
+      this._moonPixelSize = value;
+      requestBodyRender(this, this._showMoon);
+    },
+  },
+
+  /** Gets or sets the finite procedural Moon color, cloned on access.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {Color}
+   * @exception {DeveloperError} The assigned value is not a finite Color.
+   */
+  moonColor: {
+    get: function () {
+      return Color.clone(this._moonColor);
+    },
+    set: function (value) {
+      validateColor(value, "moonColor");
+      if (Color.equals(value, this._moonColor)) {
+        return;
+      }
+      Color.clone(value, this._moonColor);
+      requestBodyRender(this, this._showMoon);
+    },
+  },
+
+  /**
    * Gets or sets whether this controller owns planar scene-light authority.
    *
    * @memberof SceneGISPlanarEnvironment.prototype
@@ -665,6 +845,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
       validateLiveWorld(this._world);
       if (defined(this._scene)) {
         validateScene(this, this._scene);
+        validateNativeBodyConflict(this, this._scene);
       }
       this._enabled = true;
       if (defined(this._scene)) {
@@ -752,6 +933,7 @@ SceneGISPlanarEnvironment.prototype.firstUpdate = function (scene, time) {
     );
   }
   validateScene(this, scene);
+  validateNativeBodyConflict(this, scene);
 
   if (this._directionMode === "astronomical") {
     computeAstronomicalCandidates(this, time);
@@ -786,6 +968,7 @@ SceneGISPlanarEnvironment.prototype.update = function (scene, time) {
     );
   }
   validateScene(this, scene);
+  validateNativeBodyConflict(this, scene);
   if (astronomyNeedsUpdate(this, time)) {
     computeAstronomicalCandidates(this, time);
     publishAstronomicalCandidates(this, time);

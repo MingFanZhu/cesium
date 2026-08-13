@@ -178,11 +178,13 @@ SGP 生命周期：
 proposed -> active -> retired
 ```
 
-- `proposed`：已确认需要上游缝隙，但尚未完成实现或验证。
-- `active`：当前产品主线仍依赖该补丁。
-- `retired`：官方已提供等价能力、设计已移除，或不再支持相关功能。
+- `proposed`：已确认需要上游缝隙，但尚未完成实现或验证；可以尚无marker，已存在的marker仍必须完整并覆盖对应diff。
+- `active`：当前产品主线仍依赖该补丁；每个登记路径必须存在完整marker pair并覆盖对应diff。
+- `retired`：官方已提供等价能力、设计已移除，或不再支持相关功能；只保留manifest历史，不再允许marker或覆盖live diff。
 
 编号不得复用。官方升级时逐项复核所有 active SGP。
+同一upstream path可承载多个独立SGP，但必须全部使用`paired`；审计按status解析一次该文件的所有marker，使用active与已落地
+proposed ranges的并集覆盖changed lines，使任一retired登记可独立移除而不影响同文件其他active补丁。
 
 ## 构建边界
 
@@ -390,7 +392,8 @@ Disable、disconnect与World sever按reference identity conditional restore，�
 `originLongitude`/`originLatitude`（radians），并只消费ControllerHost传入的simulation `JulianDate`。Environment固定使用
 `Simon1994PlanetaryPositions`与同步`computeTemeToPseudoFixedMatrix`，在height=0 observer处把Earth-centered body position
 转换为topocentric local ENU，再直接映射到planar axes；整张平面共享该方向，不从CRS、camera或planar XY推断。
-Sun/Moon候选全部成功才原子发布readonly effective directions与同一stable light；Moon仍不产生第二盏灯或visible body。
+Sun/Moon候选全部成功才原子发布readonly effective directions与同一stable light；direction publication本身不产生第二盏灯或
+visible body，E3才允许应用通过`showSun`/`showMoon`显式启用SceneGIS procedural bodies。
 该UT1≈UTC pseudo-fixed路径只提供确定的visual-grade近似，完整时间、视差、publication与升级边界见
 [ADR-0034](Decisions/ADR-0034-planar-environment-astronomical-directions.md)。
 
@@ -612,6 +615,12 @@ Planar World 的 release qualification 必须把 observable contract 与测量�
 
 发布审计以 `.scenegis/upstream-base.json` 的 tree 判定 upstream-owned path，并要求每个 upstream diff 都由 SGP 登记、paired marker 配对、引用路径存在。package qualification 必须覆盖 workspace 与 installed tarball 的 root/engine/widgets public exports、types 和 API docs，同时证明 private runtime 不进入 public surface。所有临时 package/profile/generated 产物必须留在 delivery diff 之外。
 
+同一个 upstream-owned path 可以承载目的和移除条件彼此独立的多个 SGP，但这些 registration 必须全部使用
+`paired` marker；`manifest-only` registration 始终排他。审计器按文件一次解析全部已登记 marker ID：active必须至少形成
+一个完整pair，proposed可以尚无pair但已存在的pair必须完整，retired不得保留marker；changed lines必须位于active与已落地
+proposed合法ranges的并集内。该规则允许`Scene.js`的`SGP-0001` world lifecycle seam与`SGP-0003` environment render seam
+独立升级，不允许未登记marker或未标记hunk。
+
 ## 官方版本升级
 
 官方升级必须在 `upgrade/cesium-*` 分支完成：
@@ -656,3 +665,11 @@ ADR 放在 `Documentation/SceneGIS/Decisions/ADR-####-short-title.md`。首次�
 - 持久视觉基线和性能基线的 CI 执行环境。
 
 处理这些问题时必须以届时的 Cesium 源码为准；本文档不把当前推测升级为约束。
+
+### 平面可见天体
+
+平面Environment的可见Sun/Moon必须消费同一Environment发布的effective ENU directions。GPU renderer由
+`SceneGISPlanarWorld`拥有，通过`SGP-0003`的单一environment hook在ordinary geometry前执行；不得复用native Earth
+body、进入普通command list或引入asset/network。Public World/Surface保持single Context；private renderer遇到异常Context
+mismatch时只做旧资源cleanup与新candidate recreate，失败保持empty/retriable，不构成public multi-Context支持。投影、
+地平线、地下、native冲突与资源预算由ADR-0035定义。

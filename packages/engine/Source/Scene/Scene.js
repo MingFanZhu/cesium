@@ -3255,6 +3255,15 @@ function renderEnvironment(scene, passState) {
       panoramaCommandList.splice(i, 1);
     }
   }
+
+  // SCENEGIS_PATCH_BEGIN SGP-0003: Render optional primary-world environment content.
+  if (
+    defined(scene._world) &&
+    typeof scene._world.renderEnvironment === "function"
+  ) {
+    scene._world.renderEnvironment(scene.frameState, passState);
+  }
+  // SCENEGIS_PATCH_END SGP-0003
 }
 
 /**

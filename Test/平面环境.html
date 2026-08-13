@@ -134,13 +134,19 @@
         sunAzimuth: 315.0,
         sunElevation: 35.0,
         sunIntensity: 2.0,
+        showSun: true,
+        showMoon: true,
+        sunPixelSize: 48.0,
+        moonPixelSize: 36.0,
+        moonColor: "#d3d3d3",
+        clockPlaying: false,
+        clockMultiplier: 60.0,
       });
       const state = {
         ...defaultState,
         environmentState: "正在等待首次环境帧……",
         providerState: "公开影像与地形正在加载（best-effort）……",
-        moonNotice:
-          "E2只计算有效Moon方向；本阶段仍不显示月球，也不创建第二个光源。",
+        moonNotice: "月亮仅为程序化圆盘，不表示月相，也不创建第二个光源。",
         effectiveSunState: "正在等待有效太阳方向……",
         effectiveMoonState: "正在等待有效月亮方向……",
         stepBackward: () => stepSimulationDays(-1.0),
@@ -177,6 +183,7 @@
 
       const sunDirection = new Cesium.Cartesian3();
       widget.clock.shouldAnimate = false;
+      widget.clock.multiplier = state.clockMultiplier;
       widget.clock.currentTime = Cesium.JulianDate.fromIso8601(
         state.simulationTimeIso,
       );
@@ -192,6 +199,11 @@
         directionMode: state.directionMode,
         originLongitude: Cesium.Math.toRadians(state.originLongitudeDegrees),
         originLatitude: Cesium.Math.toRadians(state.originLatitudeDegrees),
+        showSun: state.showSun,
+        showMoon: state.showMoon,
+        sunPixelSize: state.sunPixelSize,
+        moonPixelSize: state.moonPixelSize,
+        moonColor: Cesium.Color.fromCssColorString(state.moonColor),
       });
       widget.addController(environment);
 
@@ -257,6 +269,53 @@
           environment.sunIntensity = value;
           updateEnvironmentState();
         });
+      const bodiesFolder = gui.addFolder("可见天体");
+      bodiesFolder
+        .add(state, "showSun")
+        .name("显示太阳")
+        .onChange((value) => {
+          environment.showSun = value;
+        });
+      bodiesFolder
+        .add(state, "showMoon")
+        .name("显示月亮")
+        .onChange((value) => {
+          environment.showMoon = value;
+        });
+      bodiesFolder
+        .add(state, "sunPixelSize", 8.0, 160.0, 1.0)
+        .name("太阳直径（CSS像素）")
+        .onChange((value) => {
+          environment.sunPixelSize = value;
+        });
+      bodiesFolder
+        .add(state, "moonPixelSize", 8.0, 160.0, 1.0)
+        .name("月亮直径（CSS像素）")
+        .onChange((value) => {
+          environment.moonPixelSize = value;
+        });
+      bodiesFolder
+        .addColor(state, "moonColor")
+        .name("月亮颜色")
+        .onChange((value) => {
+          environment.moonColor = Cesium.Color.fromCssColorString(value);
+        });
+      bodiesFolder.add(state, "moonNotice").name("月亮说明").disable();
+
+      const clockFolder = gui.addFolder("原生模拟时钟");
+      clockFolder
+        .add(state, "clockPlaying")
+        .name("播放")
+        .onChange((value) => {
+          widget.clock.shouldAnimate = value;
+          widget.scene.requestRender();
+        });
+      clockFolder
+        .add(state, "clockMultiplier", -86400.0, 86400.0, 1.0)
+        .name("时间倍率")
+        .onChange((value) => {
+          widget.clock.multiplier = value;
+        });
       gui.add(state, "reset").name("重置环境与时间");
       gui.add(state, "environmentState").name("当前状态").listen().disable();
       gui
@@ -270,7 +329,6 @@
         .listen()
         .disable();
       gui.add(state, "providerState").name("公开数据").listen().disable();
-      gui.add(state, "moonNotice").name("Moon说明").listen().disable();
 
       const cameraFolder = gui.addFolder("平面相机");
       cameraFolder
@@ -404,6 +462,15 @@
           state.originLatitudeDegrees,
         );
         environment.directionMode = state.directionMode;
+        environment.showSun = state.showSun;
+        environment.showMoon = state.showMoon;
+        environment.sunPixelSize = state.sunPixelSize;
+        environment.moonPixelSize = state.moonPixelSize;
+        environment.moonColor = Cesium.Color.fromCssColorString(
+          state.moonColor,
+        );
+        widget.clock.shouldAnimate = state.clockPlaying;
+        widget.clock.multiplier = state.clockMultiplier;
         widget.clock.currentTime = Cesium.JulianDate.fromIso8601(
           state.simulationTimeIso,
         );

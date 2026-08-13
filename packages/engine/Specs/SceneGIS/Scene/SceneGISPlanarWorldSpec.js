@@ -717,4 +717,37 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world._registerGroundPrimitive).toBeUndefined();
     world.destroy();
   });
+
+  it("guards environment rendering and owns the private renderer", function () {
+    const world = createWorld();
+    const renderer = world._celestialBodyRenderer;
+    spyOn(renderer, "render");
+    const frameState = {
+      mode: SceneMode.SCENE3D,
+      passes: { render: true },
+    };
+    const passState = {};
+    const environment = {
+      _enabled: true,
+      _hasAuthority: true,
+      _showSun: true,
+      _showMoon: false,
+    };
+    world._environment = environment;
+    world.renderEnvironment(frameState, passState);
+    expect(renderer.render).toHaveBeenCalledWith(
+      world,
+      environment,
+      frameState,
+      passState,
+    );
+
+    renderer.render.calls.reset();
+    world.show = false;
+    world.renderEnvironment(frameState, passState);
+    expect(renderer.render).not.toHaveBeenCalled();
+    world._environment = undefined;
+    world.destroy();
+    expect(renderer.isDestroyed()).toBe(true);
+  });
 });

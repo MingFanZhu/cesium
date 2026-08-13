@@ -62,6 +62,17 @@ class SceneGISWorld {
   }
 
   /**
+   * Renders world-owned background environment content before ordinary geometry.
+   *
+   * @param {object} frameState The state for the current frame.
+   * @param {object} passState The active render pass state.
+   * @returns {void}
+   */
+  renderEnvironment(frameState, passState) {
+    DeveloperError.throwInstantiationError();
+  }
+
+  /**
    * Completes the world's work at the end of a rendered frame.
    *
    * @param {object} frameState The state for the current frame.

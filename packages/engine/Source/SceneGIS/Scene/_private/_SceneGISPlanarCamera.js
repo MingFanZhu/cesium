@@ -131,10 +131,11 @@ function isFrustumType(frustum, constructor, typeName) {
  * Classifies a supported planar camera frustum and returns its effective bounds.
  *
  * @param {object} frustum The camera frustum.
+ * @param {object} [result] The object in which to store the classification.
  * @returns {object} The classified effective bounds.
  * @private
  */
-function getFrustumInfo(frustum) {
+function getFrustumInfo(frustum, result) {
   let effective;
   let type;
   if (isFrustumType(frustum, PerspectiveFrustum, "PerspectiveFrustum")) {
@@ -169,17 +170,17 @@ function getFrustumInfo(frustum) {
     );
   }
 
-  return validateBounds({
-    type: type,
-    perspective: type.startsWith("perspective"),
-    directOffCenter: type.endsWith("OffCenter"),
-    left: effective.left,
-    right: effective.right,
-    bottom: effective.bottom,
-    top: effective.top,
-    near: effective.near,
-    far: effective.far,
-  });
+  result = result ?? {};
+  result.type = type;
+  result.perspective = type.startsWith("perspective");
+  result.directOffCenter = type.endsWith("OffCenter");
+  result.left = effective.left;
+  result.right = effective.right;
+  result.bottom = effective.bottom;
+  result.top = effective.top;
+  result.near = effective.near;
+  result.far = effective.far;
+  return validateBounds(result);
 }
 
 function getWorldPose(camera, result) {

@@ -8,8 +8,8 @@
 | Status                 | `active`                                                         |
 | Planning model         | `extension`                                                      |
 | Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)     |
-| Current phase          | E3 Visible Celestial Bodies                                      |
-| Active phase plan      | [E3 plan](plans/2026-08-13-phase-e3-visible-celestial-bodies.md) |
+| Current phase          | E3 completed；E4 pending activation                              |
+| Active phase plan      | None                                                             |
 | Active standalone plan | None                                                             |
 | Architecture contact   | Architecture Agent                                               |
 | Execution contact      | Execution Agent                                                  |
@@ -45,19 +45,21 @@
   `planar-surface-styling`
 - Checkpoints: E1=`b343b64bad`；direct Test migration=`a8c22d8c35`；E2=`fa40b49dbb4ba6f14db68c5fe94852b9f47367ff`
 - ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3 expected `ADR-0035`
-- SGP: E1/E2=None；E3 expected `SGP-0003`（仅`Scene.js` optional world environment hook）
+- SGP: E1/E2=None；E3=`SGP-0003`（仅`Scene.js` optional world environment hook；与同路径`SGP-0001`独立登记）
 
 ## Current handoff
 
-- Current state: E2 checkpoint已完成；Architecture已确认E3 visible-body contract、单一environment hook、
-  procedural renderer、Clock、horizon/underground与resource边界。
-- Next action: Architecture创建仅含E3 planning docs的checkpoint，并以该精确base向Execution发送正式assignment。
-- Current phase status: E1-E2=`completed`；E3=`active`；E4-E5=`planned`，不提前冻结E4 shader细节。
+- Current state: E3-R001..R009已关闭，Architecture/code review与项目负责人人工验收均已通过；status-aware multi-SGP
+  retirement、真实Widget Clock/SGP hook/pick-depth/resident-terrain路径、asymmetric OrthographicOffCenter与
+  Context/Moon durable contract均已闭环；正在创建独立local checkpoint。
+- Next action: 以E3 checkpoint为基线重新审计当前Cesium atmosphere/SkyBox/environment pass源码，建立并确认E4 phase plan；
+  在E4 planning checkpoint与正式assignment前不实现E4。
+- Current phase status: E1-E3=`completed`；E4-E5=`planned`，不提前冻结E4 shader细节。
 - Open discussions: None。
-- Latest review: [E2 approved review](reviews/2026-08-13-e2-astronomical-direction-mode.md)。
+- Latest review: [E3 approved review](reviews/2026-08-13-e3-visible-celestial-bodies.md)。
 - Unresolved reviews: None。
 - Known risks: `scene.light` 是 scene-wide 可变状态；Controller 必须明确独占、恢复与外部覆盖语义；
   future atmosphere 不得误用 Earth ellipsoid automatic uniforms。
-- Manual gate: 项目负责人已在`2026-08-13`验收E1中文Environment控制、真实公开terrain光照和平面相机交互，以及E2
-  manual/天文模式、project-origin、UTC时间与有效Sun/Moon方向表现，并明确允许进入E3。Architecture负责代码和契约质量；
-  用户可见tool panel说明使用中文。
+- Manual gate: 项目负责人已在`2026-08-13`验收E1中文Environment控制、真实公开terrain光照和平面相机交互，E2
+  manual/天文模式、project-origin、UTC时间与有效Sun/Moon方向，以及E3 visible Sun/Moon、native Clock、horizon/
+  underground与foreground表现，并明确允许进入E4。Architecture负责代码和契约质量；用户可见tool panel说明使用中文。

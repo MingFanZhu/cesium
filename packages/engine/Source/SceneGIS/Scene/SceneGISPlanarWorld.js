@@ -11,6 +11,7 @@ import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
 import SceneGISPlanarTerrainProvider from "../Core/SceneGISPlanarTerrainProvider.js";
 /* eslint-enable no-unused-vars */
 import SceneGISPlanarCamera from "./_private/_SceneGISPlanarCamera.js";
+import SceneGISPlanarCelestialBodyRenderer from "./_private/_SceneGISPlanarCelestialBodyRenderer.js";
 import SceneGISPlanarSurface from "./_private/_SceneGISPlanarSurface.js";
 import { validateTerrainProvider } from "./_private/_SceneGISPlanarTerrain.js";
 import SceneGISPlanarImageryLayerCollection from "./SceneGISPlanarImageryLayerCollection.js";
@@ -183,6 +184,7 @@ function SceneGISPlanarWorld(options) {
   });
   this._imageryLayers._owner = this;
   this._surface = new SceneGISPlanarSurface(tilingScheme, this._imageryLayers);
+  this._celestialBodyRenderer = new SceneGISPlanarCelestialBodyRenderer();
   this._frameState = undefined;
 }
 
@@ -484,6 +486,30 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
 };
 
 /**
+ * Renders opt-in procedural celestial bodies before ordinary scene geometry.
+ *
+ * @param {object} frameState The state for the current frame.
+ * @param {object} passState The active environment pass state.
+ */
+SceneGISPlanarWorld.prototype.renderEnvironment = function (
+  frameState,
+  passState,
+) {
+  const environment = this._environment;
+  if (
+    !this._show ||
+    environment === undefined ||
+    !environment._enabled ||
+    !environment._hasAuthority ||
+    (!environment._showSun && !environment._showMoon) ||
+    frameState.passes.render !== true
+  ) {
+    return;
+  }
+  this._celestialBodyRenderer.render(this, environment, frameState, passState);
+};
+
+/**
  * Trims unprotected tile records after command execution.
  *
  * @param {object} frameState The state for the current frame.
@@ -717,6 +743,7 @@ SceneGISPlanarWorld.prototype.destroy = function () {
     this._environment = undefined;
   }
   this._frameState = undefined;
+  this._celestialBodyRenderer.destroy();
   this._surface.destroy();
   this._imageryLayers._owner = undefined;
   this._imageryLayers.destroy();

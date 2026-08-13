@@ -64,6 +64,15 @@ describe("SceneGIS/Scene/SceneGISPlanarCamera", function () {
     ];
   }
 
+  it("reuses an optional frustum classification result", function () {
+    const result = {};
+    for (const frustum of createFrusta()) {
+      expect(SceneGISPlanarCamera.getFrustumInfo(frustum, result)).toBe(result);
+      expect(Number.isFinite(result.horizontalSpan)).toBe(true);
+      expect(Number.isFinite(result.verticalSpan)).toBe(true);
+    }
+  });
+
   it("classifies all four real frustum types before using effective bounds", function () {
     const types = createFrusta().map(
       (frustum) => SceneGISPlanarCamera.getFrustumInfo(frustum).type,

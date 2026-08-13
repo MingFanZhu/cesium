@@ -28,6 +28,25 @@
       "removalCondition": "Retire when upstream Scene and CesiumWidget expose equivalent mutually exclusive primary-world construction, lifecycle, and world-aware per-instance DataSource visualization contracts."
     },
     {
+      "id": "SGP-0003",
+      "title": "Add primary-world environment render slot",
+      "status": "active",
+      "reason": "Scene's environment pass has no structural slot for procedural environment content owned by a non-Globe primary world.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISWorldSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarEnvironmentCesiumWidgetSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0035-planar-visible-celestial-bodies.md",
+      "removalCondition": "Retire when upstream Scene exposes an equivalent optional primary-world environment render slot before ordinary geometry."
+    },
+    {
       "id": "SGP-0002",
       "title": "Add planar Viewer integration",
       "status": "active",

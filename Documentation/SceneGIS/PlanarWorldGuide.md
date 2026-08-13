@@ -152,7 +152,8 @@ widget.clock.currentTime = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
 `effectiveSunDirection`与`effectiveMoonDirection`是当前host simulation time在该project origin的topocentric ENU方向clone。
 整张平面共享同一组方向；它们不随camera、terrain或planar XY变化。Astronomical mode使用同步pseudo-fixed visual-grade
 近似，不适用于navigation、survey、eclipse或高精度天文。`sunDirection`/`moonDirection`仍是manual fallback，切回
-`directionMode="manual"`时原子恢复；E2仍不显示Sun/Moon、不创建moon light。
+`directionMode="manual"`时原子恢复；direction publication本身不创建Sun/Moon或moon light。E3的显式opt-in显示语义见
+[可见太阳与月亮](#可见太阳与月亮)。
 
 ## 导航、Home 与拾取
 
@@ -247,3 +248,11 @@ network。两个公开Sandcastle示例的用户工具面板使用中文，公网
 - 第二个 Context 报错：为每个 Widget/Viewer 创建独立 world。
 - Viewer option 冲突：planar Viewer 不接受 Globe imagery/terrain/map-projection/provider-picker 选项。
 - 已销毁对象报错：不要在 Scene/Viewer destroy 后继续 render、pick 或复用 controller/world。
+
+### 可见太阳与月亮
+
+`SceneGISPlanarEnvironment`的`showSun`与`showMoon`默认关闭。启用后，procedural body严格使用
+`effectiveSunDirection`/`effectiveMoonDirection`，尺寸由`sunPixelSize`/`moonPixelSize`（CSS pixels）控制；
+`moonColor`只影响月亮外观，月亮不产生第二光源。对应native `scene.sun`或`scene.moon`必须未定义或显式
+`show=false`。天体低于planar horizon、在camera后方或camera实际位于resident terrain下时隐藏，且会被后续
+terrain/model自然遮挡。它们不提供pick、depth、shadow、月相或atmosphere语义。
