@@ -718,13 +718,28 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     world.destroy();
   });
 
-  it("guards environment rendering and owns the private renderer", function () {
+  it("orders planar environment rendering and owns both private renderers", function () {
     const world = createWorld();
-    const renderer = world._celestialBodyRenderer;
-    spyOn(renderer, "render");
+    const atmosphereRenderer = world._atmosphereRenderer;
+    const celestialRenderer = world._celestialBodyRenderer;
+    const order = [];
+    const environmentState = { underground: false };
+    spyOn(atmosphereRenderer, "prepare").and.returnValue(environmentState);
+    spyOn(atmosphereRenderer, "render").and.callFake(() => {
+      order.push("atmosphere");
+    });
+    spyOn(celestialRenderer, "render").and.callFake(() => {
+      order.push("celestial");
+    });
+    const skyBoxCommand = {
+      execute: jasmine.createSpy("executeSkyBox").and.callFake(() => {
+        order.push("skyBox");
+      }),
+    };
     const frameState = {
       mode: SceneMode.SCENE3D,
       passes: { render: true },
+      context: {},
     };
     const passState = {};
     const environment = {
@@ -732,22 +747,33 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
       _hasAuthority: true,
       _showSun: true,
       _showMoon: false,
+      _showAtmosphere: true,
+      _skyBox: {
+        _update: jasmine
+          .createSpy("updateSkyBox")
+          .and.returnValue(skyBoxCommand),
+      },
+      _scene: { highDynamicRange: false },
+      _validateNativeEnvironmentConflict: jasmine.createSpy("validateConflict"),
     };
     world._environment = environment;
     world.renderEnvironment(frameState, passState);
-    expect(renderer.render).toHaveBeenCalledWith(
+    expect(order).toEqual(["skyBox", "atmosphere", "celestial"]);
+    expect(celestialRenderer.render).toHaveBeenCalledWith(
       world,
       environment,
       frameState,
       passState,
+      environmentState,
     );
 
-    renderer.render.calls.reset();
+    celestialRenderer.render.calls.reset();
     world.show = false;
     world.renderEnvironment(frameState, passState);
-    expect(renderer.render).not.toHaveBeenCalled();
+    expect(celestialRenderer.render).not.toHaveBeenCalled();
     world._environment = undefined;
     world.destroy();
-    expect(renderer.isDestroyed()).toBe(true);
+    expect(atmosphereRenderer.isDestroyed()).toBe(true);
+    expect(celestialRenderer.isDestroyed()).toBe(true);
   });
 });

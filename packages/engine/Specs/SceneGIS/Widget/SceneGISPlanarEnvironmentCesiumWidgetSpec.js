@@ -11,8 +11,10 @@ import {
   SceneGISPlanarEnvironment,
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
+  SceneGISPlanarSkyBox,
   SceneGISPlanarWorld,
   SceneMode,
+  SkyBox,
 } from "../../../index.js";
 import getWebGLStub from "../../../../../Specs/getWebGLStub.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
@@ -21,6 +23,7 @@ describe("SceneGIS/Widget/SceneGISPlanarEnvironmentCesiumWidget", function () {
   let container;
   let widget;
   let environment;
+  let planarSkyBox;
 
   function createSolidImage(cssColor) {
     const canvas = document.createElement("canvas");
@@ -128,10 +131,14 @@ describe("SceneGIS/Widget/SceneGISPlanarEnvironmentCesiumWidget", function () {
     ) {
       widget.removeController(environment);
     }
+    if (planarSkyBox && !planarSkyBox.isDestroyed()) {
+      planarSkyBox.destroy();
+    }
     if (widget && !widget.isDestroyed()) {
       widget = widget.destroy();
     }
     environment = undefined;
+    planarSkyBox = undefined;
     document.body.removeChild(container);
   });
 
@@ -717,6 +724,232 @@ describe("SceneGIS/Widget/SceneGISPlanarEnvironmentCesiumWidget", function () {
     widget.scene.sun = originalSun;
     widget.scene.moon = originalMoon;
     expectWarmBodies();
+  });
+
+  it("composes a local planar SkyBox, atmosphere, bodies, and terrain with warm resources", async function () {
+    const { world } = createWorld();
+    createWidget(world);
+    await pollToPromise(function () {
+      renderFrame();
+      return world.tilesLoaded && world._surface._renderCommands.length === 1;
+    });
+
+    const blueFaces = {
+      positiveX: createSolidImage("rgb(0, 0, 180)"),
+      negativeX: createSolidImage("rgb(0, 0, 180)"),
+      positiveY: createSolidImage("rgb(0, 0, 180)"),
+      negativeY: createSolidImage("rgb(0, 0, 180)"),
+      positiveZ: createSolidImage("rgb(0, 0, 180)"),
+      negativeZ: createSolidImage("rgb(0, 0, 180)"),
+    };
+    planarSkyBox = new SceneGISPlanarSkyBox({ sources: blueFaces });
+    const direction = Cartesian3.normalize(
+      new Cartesian3(0.0, 1.0, 0.5),
+      new Cartesian3(),
+    );
+    const up = Cartesian3.normalize(
+      new Cartesian3(0.0, -0.5, 1.0),
+      new Cartesian3(),
+    );
+    widget.scene.camera.setView({
+      destination: new Cartesian3(0.0, -100.0, 150.0),
+      orientation: { direction, up },
+    });
+    environment = new SceneGISPlanarEnvironment({
+      world,
+      sunDirection: direction,
+      moonDirection: direction,
+      sunColor: Color.YELLOW,
+      showSun: true,
+      sunPixelSize: 10.0,
+      showAtmosphere: true,
+      atmosphereZenithColor: new Color(0.0, 0.5, 1.0, 0.65),
+      atmosphereHorizonColor: new Color(1.0, 0.25, 0.0, 0.55),
+      skyBox: planarSkyBox,
+    });
+    widget.addController(environment);
+
+    await pollToPromise(function () {
+      renderFrame();
+      return (
+        world._atmosphereRenderer._shaderProgram !== undefined &&
+        planarSkyBox._panorama._command.shaderProgram !== undefined &&
+        world._celestialBodyRenderer._shaderProgram !== undefined
+      );
+    });
+    const atmosphereRenderer = world._atmosphereRenderer;
+    const celestialRenderer = world._celestialBodyRenderer;
+    const identities = {
+      atmosphereVertexArray: atmosphereRenderer._vertexArray,
+      atmosphereShaderProgram: atmosphereRenderer._shaderProgram,
+      atmosphereCommand: atmosphereRenderer._command,
+      skyBoxVertexArray: planarSkyBox._panorama._command.vertexArray,
+      skyBoxShaderProgram: planarSkyBox._panorama._command.shaderProgram,
+      skyBoxCommand: planarSkyBox._panorama._command,
+      celestialVertexArray: celestialRenderer._vertexArray,
+      celestialShaderProgram: celestialRenderer._shaderProgram,
+      celestialCommand: celestialRenderer._sunCommand,
+      surfaceCommand: world._surface._renderCommands[0],
+    };
+    const firstPixel = readCenterPixel();
+    expect(firstPixel[0] + firstPixel[1] + firstPixel[2]).toBeGreaterThan(0);
+    expect(firstPixel[3]).toBe(255);
+
+    environment.showSun = false;
+    environment.sunDirection = Cartesian3.UNIT_Z;
+    renderFrame();
+    const dayPixel = readCenterPixel();
+    environment.sunDirection = Cartesian3.negate(
+      Cartesian3.UNIT_Z,
+      new Cartesian3(),
+    );
+    renderFrame();
+    const nightPixel = readCenterPixel();
+    expect(nightPixel).not.toEqual(dayPixel);
+    environment.atmosphereFadeHeight = 10.0;
+    renderFrame();
+    expect(readCenterPixel()).not.toEqual(nightPixel);
+    environment.atmosphereFadeHeight = 1000000.0;
+    environment.sunDirection = direction;
+    environment.showSun = true;
+    renderFrame();
+
+    environment.atmosphereZenithColor = Color.RED;
+    environment.atmosphereIntensity = 0.25;
+    environment.sunDirection = new Cartesian3(0.0, 1.0, 0.1);
+    renderFrame();
+    expect(readCenterPixel()).not.toEqual(firstPixel);
+    expect(atmosphereRenderer._vertexArray).toBe(
+      identities.atmosphereVertexArray,
+    );
+    expect(atmosphereRenderer._shaderProgram).toBe(
+      identities.atmosphereShaderProgram,
+    );
+    expect(atmosphereRenderer._command).toBe(identities.atmosphereCommand);
+    expect(planarSkyBox._panorama._command.vertexArray).toBe(
+      identities.skyBoxVertexArray,
+    );
+    expect(planarSkyBox._panorama._command.shaderProgram).toBe(
+      identities.skyBoxShaderProgram,
+    );
+    expect(planarSkyBox._panorama._command).toBe(identities.skyBoxCommand);
+    expect(celestialRenderer._vertexArray).toBe(
+      identities.celestialVertexArray,
+    );
+    expect(celestialRenderer._shaderProgram).toBe(
+      identities.celestialShaderProgram,
+    );
+    expect(celestialRenderer._sunCommand).toBe(identities.celestialCommand);
+    expect(world._surface._renderCommands[0]).toBe(identities.surfaceCommand);
+
+    spyOn(atmosphereRenderer._command, "execute").and.callThrough();
+    spyOn(planarSkyBox._panorama._command, "execute").and.callThrough();
+    spyOn(celestialRenderer._sunCommand, "execute").and.callThrough();
+    const pickPosition = new Cartesian2(32.0, 32.0);
+    widget.scene.pick(pickPosition);
+    widget.scene.pickPosition(pickPosition);
+    expect(atmosphereRenderer._command.execute).not.toHaveBeenCalled();
+    expect(planarSkyBox._panorama._command.execute).not.toHaveBeenCalled();
+    expect(celestialRenderer._sunCommand.execute).not.toHaveBeenCalled();
+
+    const terrainPosition = new Cartesian3(-64.0, -64.0, 0.0);
+    const terrainHeight = world.getTerrainHeight(terrainPosition);
+    expect(Number.isFinite(terrainHeight)).toBe(true);
+    widget.scene.camera.setView({
+      destination: new Cartesian3(-64.0, -64.0, terrainHeight - 1.0),
+      orientation: { direction, up },
+    });
+    widget.scene.requestRender();
+    widget.render();
+    expect(atmosphereRenderer._command.execute).not.toHaveBeenCalled();
+    expect(planarSkyBox._panorama._command.execute).not.toHaveBeenCalled();
+    expect(celestialRenderer._sunCommand.execute).not.toHaveBeenCalled();
+
+    environment.skyBox = undefined;
+    const nativeSkyBox = new SkyBox({ sources: blueFaces });
+    widget.scene.skyBox = nativeSkyBox;
+    widget.scene.backgroundColor = Color.MAGENTA;
+    widget.scene.camera.setView({
+      destination: new Cartesian3(-64.0, -64.0, terrainHeight - 1.0),
+      orientation: { direction: Cartesian3.UNIT_Z, up: Cartesian3.UNIT_Y },
+    });
+    const removePreRender = widget.scene.preRender.addEventListener(
+      function () {
+        removePreRender();
+        widget.scene._globeTranslucencyState._environmentVisible = true;
+      },
+    );
+    widget.scene.requestRender();
+    widget.render();
+    expect(atmosphereRenderer._environmentState.underground).toBe(true);
+    expect(widget.scene._environmentState.skyBoxCommand).toBeDefined();
+    expect(atmosphereRenderer._command.execute).toHaveBeenCalledTimes(1);
+    expect(atmosphereRenderer._mask).toBe(true);
+    expect(atmosphereRenderer._backgroundColor).toEqual(Color.MAGENTA);
+
+    environment.sunDirection = direction;
+    widget.scene.camera.setView({
+      destination: new Cartesian3(-64.0, -64.0, terrainHeight + 1.0),
+      orientation: { direction, up },
+    });
+    widget.scene.requestRender();
+    widget.render();
+    expect(atmosphereRenderer._environmentState.underground).toBe(false);
+    expect(atmosphereRenderer._command.execute).toHaveBeenCalledTimes(2);
+    expect(celestialRenderer._sunCommand.execute).toHaveBeenCalledTimes(1);
+    expect(atmosphereRenderer._vertexArray).toBe(
+      identities.atmosphereVertexArray,
+    );
+    expect(atmosphereRenderer._shaderProgram).toBe(
+      identities.atmosphereShaderProgram,
+    );
+  });
+
+  it("rejects late native atmosphere activation at the actual environment hook", async function () {
+    const { world } = createWorld();
+    createWidget(world);
+    const nativeAtmosphere = {
+      show: false,
+      setDynamicLighting: jasmine.createSpy("setDynamicLighting"),
+      update: jasmine.createSpy("update").and.returnValue(undefined),
+      destroy: jasmine.createSpy("destroy"),
+    };
+    widget.scene.skyAtmosphere = nativeAtmosphere;
+    environment = new SceneGISPlanarEnvironment({
+      world,
+      sunDirection: Cartesian3.UNIT_Z,
+      moonDirection: Cartesian3.UNIT_X,
+      showAtmosphere: true,
+    });
+    widget.addController(environment);
+    await pollToPromise(function () {
+      renderFrame();
+      return world._atmosphereRenderer._command !== undefined;
+    });
+    const renderer = world._atmosphereRenderer;
+    const identities = {
+      vertexArray: renderer._vertexArray,
+      shaderProgram: renderer._shaderProgram,
+      command: renderer._command,
+    };
+    spyOn(renderer._command, "execute").and.callThrough();
+    const removePreRender = widget.scene.preRender.addEventListener(
+      function () {
+        removePreRender();
+        nativeAtmosphere.show = true;
+      },
+    );
+    widget.scene.requestRender();
+    expect(() => widget.render()).toThrowDeveloperError();
+    expect(renderer._command.execute).not.toHaveBeenCalled();
+    expect(renderer._vertexArray).toBe(identities.vertexArray);
+    expect(renderer._shaderProgram).toBe(identities.shaderProgram);
+    expect(renderer._command).toBe(identities.command);
+
+    nativeAtmosphere.show = false;
+    widget.scene.requestRender();
+    widget.render();
+    expect(renderer._command.execute).toHaveBeenCalledTimes(1);
   });
 
   it("keeps real host validation and world-destroy sever failure atomic", function () {

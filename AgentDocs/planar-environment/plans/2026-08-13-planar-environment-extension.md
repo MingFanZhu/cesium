@@ -79,7 +79,7 @@
 | E1    | 建立 manual sun/moon direction、scene light authority、ownership/lifecycle 与中文示例。 | surface-styling checkpoint               | 审计 ControllerHost、Scene.light、DirectionalLight、World lifecycle 与 public delivery。    | 公共 contract/ADR、真实 Context 光照、恢复/独占、warm identity、dev/release/npm 和 manual gate 闭环。       | `completed` | [E1](2026-08-13-phase-e1-manual-celestial-light-contract.md) |
 | E2    | 以 project-origin WGS84 anchor 和 host time 增加 astronomical Sun/Moon direction。      | E1 checkpoint、Test migration checkpoint | 重新审计当前 Cesium astronomy/transforms、time scale、accuracy 和 package boundary。        | manual/astronomical mode 切换、单原点 topocentric 确定性方向、时区/日期/极端纬度与 ownership 闭环。         | `completed` | [E2](2026-08-13-phase-e2-astronomical-direction-mode.md)     |
 | E3    | 实现 SceneGIS-owned 可见太阳/月亮，并冻结尺度、遮挡和地下行为。                         | E2 checkpoint                            | 重新审计 billboard/command/render pass、depth/horizon 与资源 contract。                     | 日月视觉、方向同步、资源 ownership、requestRender、camera/underground 与 lifecycle 闭环。                   | `completed` | [E3](2026-08-13-phase-e3-visible-celestial-bodies.md)        |
-| E4    | 实现独立平面大气与 caller-owned SkyBox 适配。                                           | E3 checkpoint、ADR-0030                  | 重新审计 atmosphere shader、fullscreen/sky pass、camera height、precision 和 SkyBox seams。 | 大气/天空合成、地下规则、SkyBox ownership、shader delivery、性能与真实 GPU 画面闭环。                       | `active`    | [E4](2026-08-13-phase-e4-planar-atmosphere-skybox.md)        |
+| E4    | 实现独立平面大气与 caller-owned SkyBox 适配。                                           | E3 checkpoint、ADR-0030                  | 重新审计 atmosphere shader、fullscreen/sky pass、camera height、precision 和 SkyBox seams。 | 大气/天空合成、地下规则、SkyBox ownership、shader delivery、性能与真实 GPU 画面闭环。                       | `completed` | [E4](2026-08-13-phase-e4-planar-atmosphere-skybox.md)        |
 | E5    | 完成环境能力联合资格、发布、文档和升级交付。                                            | E4 checkpoint                            | E1-E4 review/checkpoint 完成；固定最小联合矩阵。                                            | manual/astronomical light、visible bodies、atmosphere/SkyBox 在 dev/release/npm/lifecycle/docs 中统一闭环。 | `planned`   | 激活时建立                                                   |
 
 ## Cross-phase validation
@@ -131,4 +131,6 @@
   E3独立checkpoint=`8ff8b48ebf`。
 - E4源码再发现与confirmed phase plan已完成：独立fullscreen planar atmosphere、caller-owned fixed-axis
   `SceneGISPlanarSkyBox`、SkyBox→atmosphere→bodies顺序、native conflict、underground mask与one-pass resource budget已冻结；
-  E4不修改upstream并只消费既有`SGP-0003`。等待planning checkpoint与正式assignment。
+  E4不修改upstream并只消费既有`SGP-0003`。Implementation、focused real-Context、build/types/docs与12/12 installed
+  shader delivery、Architecture review和项目负责人manual gate均已完成；E4-R003示例cubemap seam修复也已复验通过，
+  当前正在创建E4独立checkpoint，之后激活E5。

@@ -239,12 +239,23 @@ SceneGISPlanarCelestialBodyRenderer.prototype.render = function (
   environment,
   frameState,
   passState,
+  environmentState,
 ) {
-  environment._validateNativeBodyConflict(environment._scene);
+  environment._validateNativeEnvironmentConflict(environment._scene);
   const context = frameState.context;
-  SceneGISPlanarCamera.getWorldPose(frameState.camera, this._pose);
-  const terrainHeight = world.getTerrainHeight(this._pose.position) ?? 0.0;
-  if (this._pose.position.z < terrainHeight) {
+  if (defined(environmentState)) {
+    Cartesian3.clone(environmentState.pose.position, this._pose.position);
+    Cartesian3.clone(environmentState.pose.direction, this._pose.direction);
+    Cartesian3.clone(environmentState.pose.up, this._pose.up);
+    Cartesian3.clone(environmentState.pose.right, this._pose.right);
+  } else {
+    SceneGISPlanarCamera.getWorldPose(frameState.camera, this._pose);
+    const terrainHeight = world.getTerrainHeight(this._pose.position) ?? 0.0;
+    if (this._pose.position.z < terrainHeight) {
+      return;
+    }
+  }
+  if (defined(environmentState) && environmentState.underground) {
     return;
   }
 

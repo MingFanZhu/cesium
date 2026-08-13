@@ -61,6 +61,72 @@
         scene.requestRender();
       }
 
+      const SKY_EDGE_COLOR = "#1b2d4a";
+
+      function createSkyFace(centerColor) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 64;
+        canvas.height = 64;
+        const context = canvas.getContext("2d");
+        context.fillStyle = SKY_EDGE_COLOR;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        const gradient = context.createRadialGradient(
+          canvas.width * 0.5,
+          canvas.height * 0.5,
+          0,
+          canvas.width * 0.5,
+          canvas.height * 0.5,
+          canvas.width * 0.375,
+        );
+        gradient.addColorStop(0, centerColor);
+        gradient.addColorStop(1, SKY_EDGE_COLOR);
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = SKY_EDGE_COLOR;
+        context.fillRect(0, 0, canvas.width, 1);
+        context.fillRect(0, canvas.height - 1, canvas.width, 1);
+        context.fillRect(0, 0, 1, canvas.height);
+        context.fillRect(canvas.width - 1, 0, 1, canvas.height);
+        return canvas;
+      }
+
+      function assertMatchingSkyFaceBorders(sources) {
+        let reference;
+        for (const canvas of Object.values(sources)) {
+          const { width, height } = canvas;
+          const pixels = canvas
+            .getContext("2d")
+            .getImageData(0, 0, width, height).data;
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              if (x !== 0 && x !== width - 1 && y !== 0 && y !== height - 1) {
+                continue;
+              }
+              const offset = (y * width + x) * 4;
+              const pixel = pixels.slice(offset, offset + 4).join(",");
+              reference ??= pixel;
+              if (pixel !== reference) {
+                throw new Error("本地平面SkyBox的六面边缘像素必须完全一致。");
+              }
+            }
+          }
+        }
+      }
+
+      const skyBoxSources = {
+        positiveX: createSkyFace("#244064"),
+        negativeX: createSkyFace("#223a5c"),
+        positiveY: createSkyFace("#29476c"),
+        negativeY: createSkyFace("#203854"),
+        positiveZ: createSkyFace("#2c4d73"),
+        negativeZ: createSkyFace("#182942"),
+      };
+      assertMatchingSkyFaceBorders(skyBoxSources);
+
+      const planarSkyBox = new Cesium.SceneGISPlanarSkyBox({
+        sources: skyBoxSources,
+      });
+
       const world = new Cesium.SceneGISPlanarWorld({
         coordinateSystem: new Cesium.SceneGISPlanarCoordinateSystem({
           extent: new Cesium.SceneGISPlanarExtent({
@@ -139,6 +205,12 @@
         sunPixelSize: 48.0,
         moonPixelSize: 36.0,
         moonColor: "#d3d3d3",
+        showPlanarSkyBox: false,
+        showAtmosphere: false,
+        atmosphereZenithColor: "#1f66b8",
+        atmosphereHorizonColor: "#ed8f47",
+        atmosphereIntensity: 1.0,
+        atmosphereFadeHeight: 1000000.0,
         clockPlaying: false,
         clockMultiplier: 60.0,
       });
@@ -164,6 +236,8 @@
           widget.scene.requestRender();
         },
         cameraHelp: "左键拖动平移；中键拖动旋转；滚轮缩放。",
+        atmosphereNotice:
+          "平面SkyBox固定为东/北/上轴；地下时天空、大气和天体统一隐藏。",
       };
       const providerState = {
         imageryFailed: false,
@@ -182,6 +256,11 @@
       }
 
       const sunDirection = new Cesium.Cartesian3();
+      function atmosphereColor(cssColor, alpha) {
+        const color = Cesium.Color.fromCssColorString(cssColor);
+        color.alpha = alpha;
+        return color;
+      }
       widget.clock.shouldAnimate = false;
       widget.clock.multiplier = state.clockMultiplier;
       widget.clock.currentTime = Cesium.JulianDate.fromIso8601(
@@ -204,6 +283,18 @@
         sunPixelSize: state.sunPixelSize,
         moonPixelSize: state.moonPixelSize,
         moonColor: Cesium.Color.fromCssColorString(state.moonColor),
+        showAtmosphere: state.showAtmosphere,
+        atmosphereZenithColor: atmosphereColor(
+          state.atmosphereZenithColor,
+          0.72,
+        ),
+        atmosphereHorizonColor: atmosphereColor(
+          state.atmosphereHorizonColor,
+          0.58,
+        ),
+        atmosphereIntensity: state.atmosphereIntensity,
+        atmosphereFadeHeight: state.atmosphereFadeHeight,
+        skyBox: state.showPlanarSkyBox ? planarSkyBox : undefined,
       });
       widget.addController(environment);
 
@@ -302,6 +393,47 @@
         });
       bodiesFolder.add(state, "moonNotice").name("月亮说明").disable();
 
+      const skyFolder = gui.addFolder("平面天空与大气");
+      skyFolder
+        .add(state, "showPlanarSkyBox")
+        .name("显示平面SkyBox")
+        .onChange((value) => {
+          environment.skyBox = value ? planarSkyBox : undefined;
+          updateEnvironmentState();
+        });
+      skyFolder
+        .add(state, "showAtmosphere")
+        .name("显示平面大气")
+        .onChange((value) => {
+          environment.showAtmosphere = value;
+          updateEnvironmentState();
+        });
+      skyFolder
+        .addColor(state, "atmosphereZenithColor")
+        .name("天顶颜色")
+        .onChange((value) => {
+          environment.atmosphereZenithColor = atmosphereColor(value, 0.72);
+        });
+      skyFolder
+        .addColor(state, "atmosphereHorizonColor")
+        .name("地平线颜色")
+        .onChange((value) => {
+          environment.atmosphereHorizonColor = atmosphereColor(value, 0.58);
+        });
+      skyFolder
+        .add(state, "atmosphereIntensity", 0.0, 3.0, 0.05)
+        .name("大气强度")
+        .onChange((value) => {
+          environment.atmosphereIntensity = value;
+        });
+      skyFolder
+        .add(state, "atmosphereFadeHeight", 1000.0, 5000000.0, 1000.0)
+        .name("高度淡出尺度（米）")
+        .onChange((value) => {
+          environment.atmosphereFadeHeight = value;
+        });
+      skyFolder.add(state, "atmosphereNotice").name("天空说明").disable();
+
       const clockFolder = gui.addFolder("原生模拟时钟");
       clockFolder
         .add(state, "clockPlaying")
@@ -383,6 +515,8 @@
           `${environment.enabled ? "Environment启用" : "Environment禁用"}；` +
           `地形光照${world.enableLighting ? "开启" : "关闭"}；` +
           `${environment.directionMode === "manual" ? "手动方向" : "天文方向"}；` +
+          `SkyBox${environment.skyBox ? "显示" : "隐藏"}；` +
+          `大气${environment.showAtmosphere ? "显示" : "隐藏"}；` +
           `太阳 东${direction.x.toFixed(3)} 北${direction.y.toFixed(3)} ` +
           `上${direction.z.toFixed(3)}；强度${environment.sunIntensity.toFixed(1)}`;
         state.effectiveSunState = directionState(
@@ -469,6 +603,18 @@
         environment.moonColor = Cesium.Color.fromCssColorString(
           state.moonColor,
         );
+        environment.skyBox = state.showPlanarSkyBox ? planarSkyBox : undefined;
+        environment.showAtmosphere = state.showAtmosphere;
+        environment.atmosphereZenithColor = atmosphereColor(
+          state.atmosphereZenithColor,
+          0.72,
+        );
+        environment.atmosphereHorizonColor = atmosphereColor(
+          state.atmosphereHorizonColor,
+          0.58,
+        );
+        environment.atmosphereIntensity = state.atmosphereIntensity;
+        environment.atmosphereFadeHeight = state.atmosphereFadeHeight;
         widget.clock.shouldAnimate = state.clockPlaying;
         widget.clock.multiplier = state.clockMultiplier;
         widget.clock.currentTime = Cesium.JulianDate.fromIso8601(
@@ -522,6 +668,7 @@
       window.world = world;
       window.environment = environment;
       window.planarCameraController = planarCameraController;
+      window.planarSkyBox = planarSkyBox;
       window.gui = gui;
 
       let disposed = false;
@@ -535,6 +682,9 @@
           widget.removeController(environment);
           widget.removeController(planarCameraController);
         }
+        if (!planarSkyBox.isDestroyed()) {
+          planarSkyBox.destroy();
+        }
         gui.destroy();
         if (!widget.isDestroyed()) {
           widget = widget.destroy();
@@ -543,6 +693,7 @@
         window.world = undefined;
         window.environment = undefined;
         window.planarCameraController = undefined;
+        window.planarSkyBox = undefined;
         window.gui = undefined;
       }
       window.addEventListener("pagehide", (event) => {

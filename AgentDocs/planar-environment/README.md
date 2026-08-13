@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                            |
-| ---------------------- | ---------------------------------------------------------------- |
-| Extension slug         | `planar-environment`                                             |
-| Status                 | `active`                                                         |
-| Planning model         | `extension`                                                      |
-| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)     |
-| Current phase          | E4 Planar Atmosphere and SkyBox                                  |
-| Active phase plan      | [E4 plan](plans/2026-08-13-phase-e4-planar-atmosphere-skybox.md) |
-| Active standalone plan | None                                                             |
-| Architecture contact   | Architecture Agent                                               |
-| Execution contact      | Execution Agent                                                  |
-| Last updated           | `2026-08-13`                                                     |
+| Field                  | Value                                                        |
+| ---------------------- | ------------------------------------------------------------ |
+| Extension slug         | `planar-environment`                                         |
+| Status                 | `active`                                                     |
+| Planning model         | `extension`                                                  |
+| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md) |
+| Current phase          | None；E5待E4 checkpoint后激活                                |
+| Active phase plan      | None                                                         |
+| Active standalone plan | None                                                         |
+| Architecture contact   | Architecture Agent                                           |
+| Execution contact      | Execution Agent                                              |
+| Last updated           | `2026-08-13`                                                 |
 
 ## Scope
 
@@ -50,17 +50,16 @@
 
 ## Current handoff
 
-- Current state: E3 checkpoint=`8ff8b48ebf`。Architecture已重新审计native atmosphere/SkyBox/CubeMapPanorama、Scene
-  environment order/destroy、four-frustum与resident terrain；E4 confirmed plan已冻结独立planar atmosphere、caller-owned
-  fixed-axis SkyBox、native conflict、underground mask和one-pass budget。
-- Next action: 创建E4 planning checkpoint后向Execution发送正式assignment；实现完成后由Architecture只review代码/契约，
-  项目负责人把关视觉表现。
-- Current phase status: E1-E3=`completed`；E4=`active`；E5=`planned`。
+- Current state: E4产品代码、Architecture review与最终manual gate均已通过；E4-R003 direct Test generated cubemap
+  edge mismatch已用共同edge color、内部radial tint和逐border-pixel Canvas assertion窄修复并由项目负责人确认接缝消失。
+- Next action: Architecture创建E4独立checkpoint；之后再激活E5联合资格、发布与扩展收尾。
+- Current phase status: E1-E4=`completed`；E5=`planned`。
 - Open discussions: None。
-- Latest review: [E3 approved review](reviews/2026-08-13-e3-visible-celestial-bodies.md)；E4 review待implementation时新建。
+- Latest review: [E4 approved review](reviews/2026-08-13-e4-planar-atmosphere-skybox.md)。
 - Unresolved reviews: None。
 - Known risks: `scene.light` 是 scene-wide 可变状态；Controller 必须明确独占、恢复与外部覆盖语义；
   future atmosphere 不得误用 Earth ellipsoid automatic uniforms。
 - Manual gate: 项目负责人已在`2026-08-13`验收E1中文Environment控制、真实公开terrain光照和平面相机交互，E2
   manual/天文模式、project-origin、UTC时间与有效Sun/Moon方向，以及E3 visible Sun/Moon、native Clock、horizon/
-  underground与foreground表现，并明确允许进入E4。Architecture负责代码和契约质量；用户可见tool panel说明使用中文。
+  underground与foreground表现，以及E4 atmosphere、SkyBox、地下行为和seam修复。Architecture负责代码和契约质量；
+  用户可见tool panel说明使用中文。

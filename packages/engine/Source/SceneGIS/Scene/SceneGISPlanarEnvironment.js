@@ -12,7 +12,11 @@ import Simon1994PlanetaryPositions from "../../Core/Simon1994PlanetaryPositions.
 import Transforms from "../../Core/Transforms.js";
 import DirectionalLight from "../../Scene/DirectionalLight.js";
 import SceneMode from "../../Scene/SceneMode.js";
+import SceneGISPlanarSkyBox from "./SceneGISPlanarSkyBox.js";
 import SceneGISPlanarWorld from "./SceneGISPlanarWorld.js";
+
+const defaultAtmosphereZenithColor = new Color(0.12, 0.32, 0.72, 0.72);
+const defaultAtmosphereHorizonColor = new Color(0.92, 0.56, 0.28, 0.58);
 
 function validateLiveWorld(world) {
   if (!(world instanceof SceneGISPlanarWorld) || world.isDestroyed()) {
@@ -89,7 +93,39 @@ function validatePixelSize(value, propertyName) {
   }
 }
 
-function validateNativeBodyConflict(environment, scene) {
+function validatePositive(value, propertyName) {
+  if (!Number.isFinite(value) || value <= 0.0) {
+    throw new DeveloperError(
+      `${propertyName} must be a finite positive number.`,
+    );
+  }
+}
+
+function validateNonNegative(value, propertyName) {
+  if (!Number.isFinite(value) || value < 0.0) {
+    throw new DeveloperError(
+      `${propertyName} must be a finite non-negative number.`,
+    );
+  }
+}
+
+function validateSkyBox(value) {
+  if (
+    defined(value) &&
+    (!(value instanceof SceneGISPlanarSkyBox) || value.isDestroyed())
+  ) {
+    throw new DeveloperError(
+      "skyBox must be an undestroyed SceneGISPlanarSkyBox or undefined.",
+    );
+  }
+}
+
+function nativeVisible(value) {
+  return defined(value) && value !== false && value.show !== false;
+}
+
+function validateNativeEnvironmentConflict(environment, scene) {
+  validateSkyBox(environment._skyBox);
   if (environment._showSun && defined(scene.sun) && scene.sun.show !== false) {
     throw new DeveloperError(
       "SceneGIS planar Sun cannot be shown while the native Scene Sun is visible.",
@@ -104,13 +140,39 @@ function validateNativeBodyConflict(environment, scene) {
       "SceneGIS planar Moon cannot be shown while the native Scene Moon is visible.",
     );
   }
+  if (defined(environment._skyBox)) {
+    if (
+      nativeVisible(scene.skyBox) ||
+      nativeVisible(scene.skyAtmosphere) ||
+      nativeVisible(scene.sun) ||
+      nativeVisible(scene.moon)
+    ) {
+      throw new DeveloperError(
+        "SceneGIS planar SkyBox conflicts with a visible native Scene environment primitive.",
+      );
+    }
+  } else if (
+    environment._showAtmosphere &&
+    (nativeVisible(scene.skyAtmosphere) ||
+      nativeVisible(scene.sun) ||
+      nativeVisible(scene.moon))
+  ) {
+    throw new DeveloperError(
+      "SceneGIS planar atmosphere conflicts with a visible native Scene atmosphere, Sun, or Moon.",
+    );
+  }
 }
 
 SceneGISPlanarEnvironment.prototype._validateNativeBodyConflict = function (
   scene,
 ) {
-  validateNativeBodyConflict(this, scene);
+  validateNativeEnvironmentConflict(this, scene);
 };
+
+SceneGISPlanarEnvironment.prototype._validateNativeEnvironmentConflict =
+  function (scene) {
+    validateNativeEnvironmentConflict(this, scene);
+  };
 
 function requestBodyRender(environment, visible) {
   if (visible && environment._hasAuthority) {
@@ -346,6 +408,12 @@ function releaseAuthority(environment) {
  * @param {number} [options.sunPixelSize=48.0] The Sun disc diameter in CSS pixels.
  * @param {number} [options.moonPixelSize=36.0] The Moon disc diameter in CSS pixels.
  * @param {Color} [options.moonColor=Color.LIGHTGRAY] The finite procedural Moon color.
+ * @param {boolean} [options.showAtmosphere=false] Whether the planar atmosphere is visible.
+ * @param {Color} [options.atmosphereZenithColor=(0.12, 0.32, 0.72, 0.72)] The finite zenith color and maximum alpha.
+ * @param {Color} [options.atmosphereHorizonColor=(0.92, 0.56, 0.28, 0.58)] The finite horizon color and maximum alpha.
+ * @param {number} [options.atmosphereIntensity=1.0] The finite non-negative visual atmosphere strength.
+ * @param {number} [options.atmosphereFadeHeight=1000000.0] The finite positive height-fade scale in meters.
+ * @param {SceneGISPlanarSkyBox} [options.skyBox] The live caller-owned fixed-axis planar sky box.
  *
  * @exception {DeveloperError} The world is not a live SceneGISPlanarWorld.
  * @exception {DeveloperError} A direction is not a finite non-zero Cartesian3.
@@ -355,6 +423,7 @@ function releaseAuthority(environment) {
  * @exception {DeveloperError} An origin is not undefined or a finite value in its inclusive longitude or latitude range.
  * @exception {DeveloperError} Astronomical mode does not define both origin longitude and origin latitude.
  * @exception {DeveloperError} A visible-body option is not a boolean, a finite positive CSS-pixel size, or a finite Color.
+ * @exception {DeveloperError} An atmosphere option is not a valid boolean, finite Color, non-negative intensity, positive fade height, or live planar SkyBox.
  */
 function SceneGISPlanarEnvironment(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -380,6 +449,14 @@ function SceneGISPlanarEnvironment(options) {
   const sunPixelSize = options.sunPixelSize ?? 48.0;
   const moonPixelSize = options.moonPixelSize ?? 36.0;
   const moonColor = options.moonColor ?? Color.LIGHTGRAY;
+  const showAtmosphere = options.showAtmosphere ?? false;
+  const atmosphereZenithColor =
+    options.atmosphereZenithColor ?? defaultAtmosphereZenithColor;
+  const atmosphereHorizonColor =
+    options.atmosphereHorizonColor ?? defaultAtmosphereHorizonColor;
+  const atmosphereIntensity = options.atmosphereIntensity ?? 1.0;
+  const atmosphereFadeHeight = options.atmosphereFadeHeight ?? 1000000.0;
+  const skyBox = options.skyBox;
   validateColor(sunColor, "sunColor");
   validateIntensity(sunIntensity);
   validateDirectionMode(directionMode);
@@ -398,6 +475,12 @@ function SceneGISPlanarEnvironment(options) {
   validatePixelSize(sunPixelSize, "sunPixelSize");
   validatePixelSize(moonPixelSize, "moonPixelSize");
   validateColor(moonColor, "moonColor");
+  validateBoolean(showAtmosphere, "showAtmosphere");
+  validateColor(atmosphereZenithColor, "atmosphereZenithColor");
+  validateColor(atmosphereHorizonColor, "atmosphereHorizonColor");
+  validateNonNegative(atmosphereIntensity, "atmosphereIntensity");
+  validatePositive(atmosphereFadeHeight, "atmosphereFadeHeight");
+  validateSkyBox(skyBox);
 
   this._world = options.world;
   this._sunDirection = sunDirection;
@@ -427,6 +510,12 @@ function SceneGISPlanarEnvironment(options) {
   this._sunPixelSize = sunPixelSize;
   this._moonPixelSize = moonPixelSize;
   this._moonColor = Color.clone(moonColor);
+  this._showAtmosphere = showAtmosphere;
+  this._atmosphereZenithColor = Color.clone(atmosphereZenithColor);
+  this._atmosphereHorizonColor = Color.clone(atmosphereHorizonColor);
+  this._atmosphereIntensity = atmosphereIntensity;
+  this._atmosphereFadeHeight = atmosphereFadeHeight;
+  this._skyBox = skyBox;
   this._enabled = true;
   this._element = undefined;
   this._scene = undefined;
@@ -721,7 +810,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
         const previous = this._showSun;
         this._showSun = true;
         try {
-          validateNativeBodyConflict(this, this._scene);
+          validateNativeEnvironmentConflict(this, this._scene);
         } finally {
           this._showSun = previous;
         }
@@ -750,7 +839,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
         const previous = this._showMoon;
         this._showMoon = true;
         try {
-          validateNativeBodyConflict(this, this._scene);
+          validateNativeEnvironmentConflict(this, this._scene);
         } finally {
           this._showMoon = previous;
         }
@@ -817,6 +906,153 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
     },
   },
 
+  /** Gets or sets whether the planar atmosphere is visible.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {boolean}
+   * @default false
+   * @exception {DeveloperError} The value is not boolean or conflicts with a visible native environment primitive.
+   */
+  showAtmosphere: {
+    get: function () {
+      return this._showAtmosphere;
+    },
+    set: function (value) {
+      validateBoolean(value, "showAtmosphere");
+      if (value === this._showAtmosphere) {
+        return;
+      }
+      if (value && this._hasAuthority) {
+        const previous = this._showAtmosphere;
+        this._showAtmosphere = true;
+        try {
+          validateNativeEnvironmentConflict(this, this._scene);
+        } finally {
+          this._showAtmosphere = previous;
+        }
+      }
+      this._showAtmosphere = value;
+      if (this._hasAuthority) {
+        requestRender(this);
+      }
+    },
+  },
+
+  /** Gets or sets the finite planar atmosphere zenith color, cloned on access.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {Color}
+   * @exception {DeveloperError} The assigned value is not a finite Color.
+   */
+  atmosphereZenithColor: {
+    get: function () {
+      return Color.clone(this._atmosphereZenithColor);
+    },
+    set: function (value) {
+      validateColor(value, "atmosphereZenithColor");
+      if (Color.equals(value, this._atmosphereZenithColor)) {
+        return;
+      }
+      Color.clone(value, this._atmosphereZenithColor);
+      if (this._hasAuthority && this._showAtmosphere) {
+        requestRender(this);
+      }
+    },
+  },
+
+  /** Gets or sets the finite planar atmosphere horizon color, cloned on access.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {Color}
+   * @exception {DeveloperError} The assigned value is not a finite Color.
+   */
+  atmosphereHorizonColor: {
+    get: function () {
+      return Color.clone(this._atmosphereHorizonColor);
+    },
+    set: function (value) {
+      validateColor(value, "atmosphereHorizonColor");
+      if (Color.equals(value, this._atmosphereHorizonColor)) {
+        return;
+      }
+      Color.clone(value, this._atmosphereHorizonColor);
+      if (this._hasAuthority && this._showAtmosphere) {
+        requestRender(this);
+      }
+    },
+  },
+
+  /** Gets or sets the finite non-negative atmosphere strength.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {number}
+   * @default 1.0
+   * @exception {DeveloperError} The assigned value is not finite and non-negative.
+   */
+  atmosphereIntensity: {
+    get: function () {
+      return this._atmosphereIntensity;
+    },
+    set: function (value) {
+      validateNonNegative(value, "atmosphereIntensity");
+      if (value === this._atmosphereIntensity) {
+        return;
+      }
+      this._atmosphereIntensity = value;
+      if (this._hasAuthority && this._showAtmosphere) {
+        requestRender(this);
+      }
+    },
+  },
+
+  /** Gets or sets the finite positive atmosphere height-fade scale in meters.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {number}
+   * @default 1000000.0
+   * @exception {DeveloperError} The assigned value is not finite and positive.
+   */
+  atmosphereFadeHeight: {
+    get: function () {
+      return this._atmosphereFadeHeight;
+    },
+    set: function (value) {
+      validatePositive(value, "atmosphereFadeHeight");
+      if (value === this._atmosphereFadeHeight) {
+        return;
+      }
+      this._atmosphereFadeHeight = value;
+      if (this._hasAuthority && this._showAtmosphere) {
+        requestRender(this);
+      }
+    },
+  },
+
+  /** Gets or sets the live caller-owned fixed-axis planar sky box.
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {SceneGISPlanarSkyBox|undefined}
+   * @exception {DeveloperError} The assigned value is not an undestroyed SceneGISPlanarSkyBox or conflicts with a visible native environment primitive.
+   */
+  skyBox: {
+    get: function () {
+      return this._skyBox;
+    },
+    set: function (value) {
+      validateSkyBox(value);
+      if (value === this._skyBox) {
+        return;
+      }
+      if (defined(value) && this._hasAuthority) {
+        const previous = this._skyBox;
+        this._skyBox = value;
+        try {
+          validateNativeEnvironmentConflict(this, this._scene);
+        } finally {
+          this._skyBox = previous;
+        }
+      }
+      this._skyBox = value;
+      if (this._hasAuthority) {
+        requestRender(this);
+      }
+    },
+  },
+
   /**
    * Gets or sets whether this controller owns planar scene-light authority.
    *
@@ -845,7 +1081,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
       validateLiveWorld(this._world);
       if (defined(this._scene)) {
         validateScene(this, this._scene);
-        validateNativeBodyConflict(this, this._scene);
+        validateNativeEnvironmentConflict(this, this._scene);
       }
       this._enabled = true;
       if (defined(this._scene)) {
@@ -933,7 +1169,7 @@ SceneGISPlanarEnvironment.prototype.firstUpdate = function (scene, time) {
     );
   }
   validateScene(this, scene);
-  validateNativeBodyConflict(this, scene);
+  validateNativeEnvironmentConflict(this, scene);
 
   if (this._directionMode === "astronomical") {
     computeAstronomicalCandidates(this, time);
@@ -968,7 +1204,7 @@ SceneGISPlanarEnvironment.prototype.update = function (scene, time) {
     );
   }
   validateScene(this, scene);
-  validateNativeBodyConflict(this, scene);
+  validateNativeEnvironmentConflict(this, scene);
   if (astronomyNeedsUpdate(this, time)) {
     computeAstronomicalCandidates(this, time);
     publishAstronomicalCandidates(this, time);

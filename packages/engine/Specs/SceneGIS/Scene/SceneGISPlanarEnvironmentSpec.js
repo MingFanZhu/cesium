@@ -6,6 +6,7 @@ import {
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarEnvironment,
   SceneGISPlanarExtent,
+  SceneGISPlanarSkyBox,
   SceneGISPlanarWorld,
   SceneMode,
 } from "../../../index.js";
@@ -40,6 +41,25 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
       sunPixelSize: options.sunPixelSize,
       moonPixelSize: options.moonPixelSize,
       moonColor: options.moonColor,
+      showAtmosphere: options.showAtmosphere,
+      atmosphereZenithColor: options.atmosphereZenithColor,
+      atmosphereHorizonColor: options.atmosphereHorizonColor,
+      atmosphereIntensity: options.atmosphereIntensity,
+      atmosphereFadeHeight: options.atmosphereFadeHeight,
+      skyBox: options.skyBox,
+    });
+  }
+
+  function createSkyBox() {
+    return new SceneGISPlanarSkyBox({
+      sources: {
+        positiveX: { width: 1, height: 1 },
+        negativeX: { width: 1, height: 1 },
+        positiveY: { width: 1, height: 1 },
+        negativeY: { width: 1, height: 1 },
+        positiveZ: { width: 1, height: 1 },
+        negativeZ: { width: 1, height: 1 },
+      },
     });
   }
 
@@ -694,5 +714,154 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
     expect(scene.requestRender).toHaveBeenCalledTimes(3);
     environment.disconnectedCallback(element);
     world.destroy();
+  });
+
+  it("validates cloned atmosphere defaults and preserves same-value no-ops", function () {
+    const world = createWorld();
+    const environment = createEnvironment(world);
+    expect(environment.showAtmosphere).toBe(false);
+    expect(environment.atmosphereIntensity).toBe(1.0);
+    expect(environment.atmosphereFadeHeight).toBe(1000000.0);
+    expect(environment.skyBox).toBeUndefined();
+    expect(environment.atmosphereZenithColor).toEqual(
+      new Color(0.12, 0.32, 0.72, 0.72),
+    );
+    expect(environment.atmosphereHorizonColor).toEqual(
+      new Color(0.92, 0.56, 0.28, 0.58),
+    );
+
+    const zenith = environment.atmosphereZenithColor;
+    zenith.red = 1.0;
+    expect(environment.atmosphereZenithColor.red).toBe(0.12);
+    expect(() => {
+      environment.showAtmosphere = 1;
+    }).toThrowDeveloperError();
+    expect(() => {
+      environment.atmosphereIntensity = -1.0;
+    }).toThrowDeveloperError();
+    expect(() => {
+      environment.atmosphereFadeHeight = 0.0;
+    }).toThrowDeveloperError();
+    expect(() => {
+      environment.atmosphereZenithColor = new Color(Number.NaN, 0.0, 0.0, 1.0);
+    }).toThrowDeveloperError();
+    expect(() => {
+      environment.skyBox = {};
+    }).toThrowDeveloperError();
+
+    const element = {};
+    const scene = createScene(world);
+    environment.connectedCallback(element);
+    environment.firstUpdate(
+      scene,
+      JulianDate.fromIso8601("2026-06-21T12:00:00Z"),
+    );
+    const requestCount = scene.requestRender.calls.count();
+    environment.showAtmosphere = false;
+    environment.atmosphereIntensity = 1.0;
+    environment.atmosphereFadeHeight = 1000000.0;
+    environment.atmosphereZenithColor = environment.atmosphereZenithColor;
+    expect(scene.requestRender.calls.count()).toBe(requestCount);
+    environment.disconnectedCallback(element);
+    world.destroy();
+  });
+
+  it("requests active visual mutations and keeps planar SkyBox caller-owned", function () {
+    const world = createWorld();
+    const skyBox = createSkyBox();
+    const replacement = createSkyBox();
+    const environment = createEnvironment(world, { skyBox });
+    const element = {};
+    const scene = createScene(world);
+    environment.connectedCallback(element);
+    environment.firstUpdate(
+      scene,
+      JulianDate.fromIso8601("2026-06-21T12:00:00Z"),
+    );
+    const requestCount = scene.requestRender.calls.count();
+    environment.skyBox = skyBox;
+    expect(scene.requestRender.calls.count()).toBe(requestCount);
+    environment.skyBox = replacement;
+    environment.showAtmosphere = true;
+    environment.atmosphereIntensity = 0.5;
+    environment.atmosphereFadeHeight = 500000.0;
+    environment.atmosphereZenithColor = Color.BLUE;
+    environment.atmosphereHorizonColor = Color.ORANGE;
+    expect(scene.requestRender.calls.count()).toBe(requestCount + 6);
+    expect(skyBox.isDestroyed()).toBe(false);
+    expect(replacement.isDestroyed()).toBe(false);
+
+    environment.disconnectedCallback(element);
+    world.destroy();
+    expect(skyBox.isDestroyed()).toBe(false);
+    expect(replacement.isDestroyed()).toBe(false);
+    skyBox.destroy();
+    replacement.destroy();
+  });
+
+  it("rejects native conflicts and destroyed planar SkyBox atomically", function () {
+    const world = createWorld();
+    const skyBox = createSkyBox();
+    const environment = createEnvironment(world);
+    const element = {};
+    const scene = createScene(world);
+    scene.skyAtmosphere = { show: true };
+    environment.connectedCallback(element);
+    environment.firstUpdate(
+      scene,
+      JulianDate.fromIso8601("2026-06-21T12:00:00Z"),
+    );
+    const requestCount = scene.requestRender.calls.count();
+    expect(() => {
+      environment.showAtmosphere = true;
+    }).toThrowDeveloperError();
+    expect(environment.showAtmosphere).toBe(false);
+    expect(() => {
+      environment.skyBox = skyBox;
+    }).toThrowDeveloperError();
+    expect(environment.skyBox).toBeUndefined();
+    expect(scene.requestRender.calls.count()).toBe(requestCount);
+    scene.skyAtmosphere.show = false;
+    environment.skyBox = skyBox;
+    environment.skyBox = undefined;
+    skyBox.destroy();
+    expect(() => {
+      environment.skyBox = skyBox;
+    }).toThrowDeveloperError();
+    environment.disconnectedCallback(element);
+    world.destroy();
+  });
+
+  it("defers inactive visual conflicts until authority is reacquired", function () {
+    const world = createWorld();
+    const skyBox = createSkyBox();
+    const environment = createEnvironment(world);
+    const element = {};
+    const scene = createScene(world);
+    environment.connectedCallback(element);
+    environment.firstUpdate(
+      scene,
+      JulianDate.fromIso8601("2026-06-21T12:00:00Z"),
+    );
+    environment.enabled = false;
+    scene.skyAtmosphere = { show: true };
+    const requestCount = scene.requestRender.calls.count();
+
+    environment.showAtmosphere = true;
+    environment.skyBox = skyBox;
+    expect(scene.requestRender.calls.count()).toBe(requestCount);
+    expect(() => {
+      environment.enabled = true;
+    }).toThrowDeveloperError();
+    expect(environment.enabled).toBe(false);
+    expect(scene.requestRender.calls.count()).toBe(requestCount);
+
+    environment.showAtmosphere = false;
+    environment.skyBox = undefined;
+    environment.enabled = true;
+    expect(scene.requestRender.calls.count()).toBe(requestCount + 1);
+    environment.disconnectedCallback(element);
+    world.destroy();
+    skyBox.destroy();
   });
 });

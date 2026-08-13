@@ -10,6 +10,7 @@ import {
   Credit,
   DirectionalLight,
   SceneGISPlanarEnvironment,
+  SceneGISPlanarSkyBox,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarImageryLayer,
@@ -219,7 +220,7 @@ SunLight方向。双面surface允许从上下两侧观察，但lighting始终使
 | imagery       | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                           |
 | terrain style | caller-owned `Material`；四个稳定资格builtin与受限custom Fabric，仅组合diffuse/alpha                                       |
 | navigation    | PC pan/rotate/wheel/Home、surface endpoint clearance、underground双向orbit crossing；无sweep/touch/inertia/flight/tracking |
-| environment   | Earth skybox 只能由应用显式提供；不会自动增加 atmosphere                                                                   |
+| environment   | 默认无visual sky；可选caller-owned fixed-axis planar SkyBox、planar atmosphere与程序化Sun/Moon，不自动增加Earth sky语义    |
 | UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                     |
 | unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow、full Globe Material、imagery picking |
 
@@ -256,3 +257,36 @@ network。两个公开Sandcastle示例的用户工具面板使用中文，公网
 `moonColor`只影响月亮外观，月亮不产生第二光源。对应native `scene.sun`或`scene.moon`必须未定义或显式
 `show=false`。天体低于planar horizon、在camera后方或camera实际位于resident terrain下时隐藏，且会被后续
 terrain/model自然遮挡。它们不提供pick、depth、shadow、月相或atmosphere语义。
+
+### 平面 SkyBox 与大气
+
+`showAtmosphere`默认关闭。启用后，`atmosphereZenithColor`与`atmosphereHorizonColor`定义visual-grade RGBA，
+`atmosphereIntensity`控制强度，`atmosphereFadeHeight`是米制视觉淡出尺度；它们不代表Earth physical atmosphere。
+Atmosphere只使用planar camera、resident terrain和`effectiveSunDirection`，不会安装native `SkyAtmosphere`。
+
+需要固定轴SkyBox时，先准备六个已经加载且同类型的image/canvas face，再由调用方管理生命周期：
+
+```js
+const planarSkyBox = new SceneGISPlanarSkyBox({
+  sources: {
+    positiveX: eastImage,
+    negativeX: westImage,
+    positiveY: northImage,
+    negativeY: southImage,
+    positiveZ: upImage,
+    negativeZ: downImage,
+  },
+});
+environment.skyBox = planarSkyBox;
+environment.showAtmosphere = true;
+
+// Before destroying the Widget/Context:
+environment.skyBox = undefined;
+viewer.removeController(environment);
+planarSkyBox.destroy();
+```
+
+不要把planar SkyBox传给`CesiumWidget`的`skyBox` option或写入`scene.skyBox`。Planar SkyBox存在时，visible native
+SkyBox/SkyAtmosphere/Sun/Moon均冲突；只显示planar atmosphere时，可保留不承载planar celestial语义的native generic
+SkyBox作为background。Camera低于resident terrain时SkyBox、atmosphere和可见天体统一隐藏；普通terrain/model仍在它们之后
+绘制并自然遮挡。

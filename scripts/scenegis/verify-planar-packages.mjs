@@ -26,6 +26,7 @@ const publicEngine = [
   "SceneGISPlanarWorld",
   "SceneGISPlanarCameraController",
   "SceneGISPlanarEnvironment",
+  "SceneGISPlanarSkyBox",
   "SceneGISPlanarImageryProvider",
   "SceneGISPlanarUrlTemplateImageryProvider",
   "SceneGISPlanarImageryLayer",
@@ -77,6 +78,7 @@ const nonPublicSpellings = [
   "SceneGISPlanarTerrainWorkerScheduler",
   "SceneGISPlanarTerrainWorkerTasks",
   "SceneGISPlanarCelestialBodyRenderer",
+  "SceneGISPlanarAtmosphereRenderer",
 ];
 const softPrivateContentSymbols = [
   "_SceneGISPlanarPositionResolver",
@@ -99,6 +101,7 @@ const softPrivateContentSymbols = [
   "_SceneGISPlanarTerrainWorkerScheduler",
   "_SceneGISPlanarTerrainWorkerTasks",
   "_SceneGISPlanarCelestialBodyRenderer",
+  "_SceneGISPlanarAtmosphereRenderer",
 ];
 const privateContentFiles = [
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPositionResolver.js",
@@ -121,6 +124,7 @@ const privateContentFiles = [
   "package/Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerScheduler.js",
   "package/Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarCelestialBodyRenderer.js",
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarAtmosphereRenderer.js",
 ];
 const terrainWorkerSource =
   "package/Source/Workers/SceneGISPlanarTerrainWorker.js";
@@ -139,6 +143,8 @@ const sceneGISShaderSources = [
   "PlanarSurface/SceneGISPlanarSurfaceUnlitVS",
   "PlanarEnvironment/SceneGISPlanarCelestialBodyFS",
   "PlanarEnvironment/SceneGISPlanarCelestialBodyVS",
+  "PlanarEnvironment/SceneGISPlanarAtmosphereFS",
+  "PlanarEnvironment/SceneGISPlanarAtmosphereVS",
 ];
 const sceneGISShaderArchiveEntries = sceneGISShaderSources.flatMap((shader) =>
   ["glsl", "js"].map(
@@ -384,6 +390,28 @@ assert.equal(layer.colorToAlpha.green, 0.2);
   assert.equal(environment.showMoon, false);
   assert.equal(environment.sunPixelSize, 48);
   assert.equal(environment.moonPixelSize, 36);
+  assert.equal(environment.showAtmosphere, false);
+  assert.equal(environment.atmosphereIntensity, 1);
+  assert.equal(environment.atmosphereFadeHeight, 1000000);
+  assert.equal(environment.skyBox, undefined);
+  const zenithColor = environment.atmosphereZenithColor;
+  environment.atmosphereZenithColor = new engine.Color(0.2, 0.3, 0.4, 0.5);
+  zenithColor.red = 99;
+  assert.equal(environment.atmosphereZenithColor.red, 0.2);
+  const skyFaces = {
+    positiveX: { width: 1, height: 1 },
+    negativeX: { width: 1, height: 1 },
+    positiveY: { width: 1, height: 1 },
+    negativeY: { width: 1, height: 1 },
+    positiveZ: { width: 1, height: 1 },
+    negativeZ: { width: 1, height: 1 },
+  };
+  const planarSkyBox = new engine.SceneGISPlanarSkyBox({ sources: skyFaces });
+  assert.notEqual(planarSkyBox.sources, skyFaces);
+  assert.equal(planarSkyBox.sources.positiveX, skyFaces.positiveX);
+  assert.equal(Object.isFrozen(planarSkyBox.sources), true);
+  environment.skyBox = planarSkyBox;
+  assert.equal(environment.skyBox, planarSkyBox);
   const installedMoonColor = environment.moonColor;
   environment.moonColor = new engine.Color(0.5, 0.6, 0.7, 0.8);
   installedMoonColor.red = 0;
@@ -448,10 +476,13 @@ world.material = material;
 assert.equal(world.material, material);
   world.destroy();
   assert.equal(material.isDestroyed(), false);
+  assert.equal(planarSkyBox.isDestroyed(), false);
   assert.equal(environment.light instanceof engine.DirectionalLight, true);
   environment.disconnectedCallback(hostElement);
   material.destroy();
-assert.equal(material.isDestroyed(), true);
+  planarSkyBox.destroy();
+  assert.equal(material.isDestroyed(), true);
+  assert.equal(planarSkyBox.isDestroyed(), true);
 `;
   }
   return `
@@ -527,10 +558,26 @@ function verifyDocumentation(engineDirectory) {
     "sunPixelSize",
     "moonPixelSize",
     "moonColor",
+    "showAtmosphere",
+    "atmosphereZenithColor",
+    "atmosphereHorizonColor",
+    "atmosphereIntensity",
+    "atmosphereFadeHeight",
+    "skyBox",
     "enabled",
   ]) {
     assert.match(
       environmentDocumentation,
+      new RegExp(`<h4 class="name" id="${member}">`, "u"),
+    );
+  }
+  const skyBoxDocumentation = fs.readFileSync(
+    path.join(documentation, "SceneGISPlanarSkyBox.html"),
+    "utf8",
+  );
+  for (const member of ["sources", "credit"]) {
+    assert.match(
+      skyBoxDocumentation,
       new RegExp(`<h4 class="name" id="${member}">`, "u"),
     );
   }
@@ -616,7 +663,16 @@ function verifyStylingDeclarations(declarations) {
   assert.match(environment, /\n\s*sunPixelSize: number;/u);
   assert.match(environment, /\n\s*moonPixelSize: number;/u);
   assert.match(environment, /\n\s*moonColor: Color;/u);
+  assert.match(environment, /\n\s*showAtmosphere: boolean;/u);
+  assert.match(environment, /\n\s*atmosphereZenithColor: Color;/u);
+  assert.match(environment, /\n\s*atmosphereHorizonColor: Color;/u);
+  assert.match(environment, /\n\s*atmosphereIntensity: number;/u);
+  assert.match(environment, /\n\s*atmosphereFadeHeight: number;/u);
+  assert.match(environment, /\n\s*skyBox: SceneGISPlanarSkyBox \| undefined;/u);
   assert.match(environment, /\n\s*enabled: boolean;/u);
+  const skyBox = classDeclaration(declarations, "SceneGISPlanarSkyBox");
+  assert.match(skyBox, /\n\s*readonly sources: any;/u);
+  assert.match(skyBox, /\n\s*readonly credit: Credit \| undefined;/u);
 }
 
 async function verify() {
@@ -686,7 +742,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 10/10 GLSL, 10/10 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 12/12 GLSL, 12/12 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3/E4 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
   );
 }
 

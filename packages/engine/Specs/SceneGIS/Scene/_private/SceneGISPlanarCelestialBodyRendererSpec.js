@@ -86,7 +86,7 @@ describe("SceneGIS/Scene/_private/SceneGISPlanarCelestialBodyRenderer", function
       _moonPixelSize: 10.0,
       _sunColor: Color.WHITE,
       _moonColor: Color.LIGHTGRAY,
-      _validateNativeBodyConflict: jasmine.createSpy("validateConflict"),
+      _validateNativeEnvironmentConflict: jasmine.createSpy("validateConflict"),
     };
     const world = {
       getTerrainHeight: jasmine

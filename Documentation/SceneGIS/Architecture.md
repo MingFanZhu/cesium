@@ -673,3 +673,15 @@ ADR 放在 `Documentation/SceneGIS/Decisions/ADR-####-short-title.md`。首次�
 body、进入普通command list或引入asset/network。Public World/Surface保持single Context；private renderer遇到异常Context
 mismatch时只做旧资源cleanup与新candidate recreate，失败保持empty/retriable，不构成public multi-Context支持。投影、
 地平线、地下、native冲突与资源预算由ADR-0035定义。
+
+### 平面大气与固定轴 SkyBox
+
+Planar atmosphere不得复用ellipsoid `SkyAtmosphere`；它由World-owned private fullscreen renderer在`SGP-0003`hook内直接执行，
+只消费planar camera/frustum、resident terrain、E2 effective Sun和Environment visual uniforms。资源预算固定为一个VA、一个
+ShaderProgram和一个stable command，不创建texture、FBO或postprocess。Planar `SceneGISPlanarSkyBox`由caller创建/销毁，
+固定`+X East/+Y North/+Z Up`，不得写入Scene-owned `skyBox`/`skyAtmosphere` slots。
+
+Environment合成顺序固定为planar SkyBox→atmosphere→Sun/Moon→ordinary geometry。统一native conflict与resident-terrain
+underground判定必须先于任何E4 allocation/execute；地下时全部planar visual environment隐藏，已执行的native generic
+background由同一atmosphere command输出opaque background mask。完整public、soft-private、ownership与升级边界见
+[ADR-0036](Decisions/ADR-0036-planar-atmosphere-skybox.md)。

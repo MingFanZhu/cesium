@@ -11,6 +11,7 @@ import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
 import SceneGISPlanarTerrainProvider from "../Core/SceneGISPlanarTerrainProvider.js";
 /* eslint-enable no-unused-vars */
 import SceneGISPlanarCamera from "./_private/_SceneGISPlanarCamera.js";
+import SceneGISPlanarAtmosphereRenderer from "./_private/_SceneGISPlanarAtmosphereRenderer.js";
 import SceneGISPlanarCelestialBodyRenderer from "./_private/_SceneGISPlanarCelestialBodyRenderer.js";
 import SceneGISPlanarSurface from "./_private/_SceneGISPlanarSurface.js";
 import { validateTerrainProvider } from "./_private/_SceneGISPlanarTerrain.js";
@@ -184,6 +185,7 @@ function SceneGISPlanarWorld(options) {
   });
   this._imageryLayers._owner = this;
   this._surface = new SceneGISPlanarSurface(tilingScheme, this._imageryLayers);
+  this._atmosphereRenderer = new SceneGISPlanarAtmosphereRenderer();
   this._celestialBodyRenderer = new SceneGISPlanarCelestialBodyRenderer();
   this._frameState = undefined;
 }
@@ -486,7 +488,8 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
 };
 
 /**
- * Renders opt-in procedural celestial bodies before ordinary scene geometry.
+ * Renders the opt-in planar SkyBox, atmosphere, and celestial bodies before
+ * ordinary scene geometry.
  *
  * @param {object} frameState The state for the current frame.
  * @param {object} passState The active environment pass state.
@@ -501,12 +504,60 @@ SceneGISPlanarWorld.prototype.renderEnvironment = function (
     environment === undefined ||
     !environment._enabled ||
     !environment._hasAuthority ||
-    (!environment._showSun && !environment._showMoon) ||
-    frameState.passes.render !== true
+    (!environment._showAtmosphere &&
+      environment._skyBox === undefined &&
+      !environment._showSun &&
+      !environment._showMoon)
   ) {
     return;
   }
-  this._celestialBodyRenderer.render(this, environment, frameState, passState);
+  if (frameState.passes.render !== true) {
+    return;
+  }
+  environment._validateNativeEnvironmentConflict(environment._scene);
+  const environmentState = this._atmosphereRenderer.prepare(this, frameState);
+  const scene = environment._scene;
+  if (environmentState.underground) {
+    const nativeState = scene._environmentState;
+    if (
+      nativeState?.skyBoxCommand !== undefined ||
+      nativeState?.isSkyAtmosphereVisible === true
+    ) {
+      this._atmosphereRenderer.renderMask(
+        frameState,
+        passState,
+        scene.backgroundColor,
+      );
+    }
+    return;
+  }
+
+  if (environment._skyBox !== undefined) {
+    const skyBoxCommand = environment._skyBox._update(
+      frameState,
+      scene.highDynamicRange,
+    );
+    if (skyBoxCommand !== undefined) {
+      skyBoxCommand.execute(frameState.context, passState);
+    }
+  }
+  if (environment._showAtmosphere) {
+    this._atmosphereRenderer.render(
+      environment,
+      frameState,
+      passState,
+      environmentState,
+    );
+  }
+  if (environment._showSun || environment._showMoon) {
+    this._celestialBodyRenderer.render(
+      this,
+      environment,
+      frameState,
+      passState,
+      environmentState,
+    );
+  }
 };
 
 /**
@@ -743,6 +794,7 @@ SceneGISPlanarWorld.prototype.destroy = function () {
     this._environment = undefined;
   }
   this._frameState = undefined;
+  this._atmosphereRenderer.destroy();
   this._celestialBodyRenderer.destroy();
   this._surface.destroy();
   this._imageryLayers._owner = undefined;

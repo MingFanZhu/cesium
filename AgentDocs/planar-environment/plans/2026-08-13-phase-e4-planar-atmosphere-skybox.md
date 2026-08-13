@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed`
 - Parent plan: [planar-environment extension](2026-08-13-planar-environment-extension.md)
 - Phase: `E4`
 - Owner role: `execution`
@@ -84,11 +84,11 @@ ordinary terrain/model自然覆盖。相机低于resident terrain（无resident�
 | API                                                         | Contract                                                                                                          |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `options.showAtmosphere` / `showAtmosphere`                 | Optional `false`；严格boolean。控制planar fullscreen atmosphere，不改变native `scene.skyAtmosphere`。             |
-| `options.atmosphereZenithColor` / `atmosphereZenithColor`   | Optional finite RGBA `Color`；assignment/access defensive clone，定义day zenith基础色和最大alpha。                 |
-| `options.atmosphereHorizonColor` / `atmosphereHorizonColor` | Optional finite RGBA `Color`；assignment/access defensive clone，定义horizon/twilight基础色和最大alpha。           |
-| `options.atmosphereIntensity` / `atmosphereIntensity`       | Optional `1.0`；finite non-negative visual strength。`0`保留show state但产生透明atmosphere。                       |
-| `options.atmosphereFadeHeight` / `atmosphereFadeHeight`     | Optional `1000000.0` meters；finite positive visual fade scale，不宣称Earth physical scale height。                |
-| `options.skyBox` / `skyBox`                                 | Optional live caller-owned `SceneGISPlanarSkyBox` reference；`undefined`无planar SkyBox；Environment从不destroy。  |
+| `options.atmosphereZenithColor` / `atmosphereZenithColor`   | Optional finite RGBA `Color`；assignment/access defensive clone，定义day zenith基础色和最大alpha。                |
+| `options.atmosphereHorizonColor` / `atmosphereHorizonColor` | Optional finite RGBA `Color`；assignment/access defensive clone，定义horizon/twilight基础色和最大alpha。          |
+| `options.atmosphereIntensity` / `atmosphereIntensity`       | Optional `1.0`；finite non-negative visual strength。`0`保留show state但产生透明atmosphere。                      |
+| `options.atmosphereFadeHeight` / `atmosphereFadeHeight`     | Optional `1000000.0` meters；finite positive visual fade scale，不宣称Earth physical scale height。               |
+| `options.skyBox` / `skyBox`                                 | Optional live caller-owned `SceneGISPlanarSkyBox` reference；`undefined`无planar SkyBox；Environment从不destroy。 |
 
 <!-- markdownlint-enable MD060 -->
 
@@ -266,5 +266,28 @@ Architecture/code review批准后，项目负责人通过根Cesium开发服务�
 ## Current handoff
 
 - E3 checkpoint=`8ff8b48ebf`，项目负责人人工验收已通过；用户自有`Test/地形.html`继续严格在phase外。
-- Architecture已确认native atmosphere/sky ownership与render ordering；E4不新增upstream patch，复用`SGP-0003`。
-- E4 plan已confirmed；等待Architecture planning checkpoint和正式Execution assignment，assignment前不实现。
+- E4 implementation已完成：新增caller-owned fixed-axis `SceneGISPlanarSkyBox`、World-owned fullscreen atmosphere renderer与
+  两个fixed shaders；World通过既有`SGP-0003`固定执行SkyBox→atmosphere→bodies，地下统一隐藏并按需执行opaque mask。
+- Focused suites为Environment 23、SkyBox 4、atmosphere renderer 4、celestial renderer 6、World 23、real-Context Widget 10，
+  全部`TOTAL SUCCESS`。build/release/types/docs/tsc与installed verifier通过，后者确认12/12 GLSL和12/12 generated modules。
+- Exact delivery为24个E4 paths；current E4 upstream-owned diff=`0`、SGP=None、generated status=`0`。用户自有
+  `Test/地形.html`未读取、修改、暂存或纳入delivery。
+- Architecture/code review已批准，E4-R001/R002已关闭；首次manual gate发现的E4-R003 local cubemap edge seam已窄修复，
+  deterministic Canvas assertion证明六面所有border pixels（含corners）完全一致。项目负责人刷新后已确认接缝消失，
+  并于`2026-08-13`通过E4最终manual gate；E4所有gate已关闭，正在创建独立checkpoint，提交前不进入E5。
+
+## Execution results and deviations
+
+- `SceneGISPlanarSkyBox`仅接受六个同步preloaded、same-constructor、square/same-size、non-URL faces，严格限制credit为
+  `Credit|string|undefined`，冻结face-reference snapshot并以
+  `Matrix3.IDENTITY`和`CubeMapPanorama({returnCommand:true})`输出caller-owned fixed-axis command；不会写入或销毁Scene slots。
+- Atmosphere renderer以两阶段candidate publication维持default-hidden zero GPU allocation；首次有效显示发布一个VA、一个固定
+  ShaderProgram和一个stable fullscreen command，Context切换或构造失败会清理candidate且不留下半发布状态。
+- World一次计算planar pose/resident-terrain underground state并共享给atmosphere与E3 bodies；地下时不执行planar visuals，若native
+  generic background已经执行则复用同一atmosphere command输出opaque `backgroundColor` mask。
+- 未扩大upstream、render pass、Surface/terrain/imagery/camera controller或native atmosphere/SkyBox边界；未新增asset、network、
+  texture、sampler、FBO、postprocess或第二Clock。实现与confirmed plan无行为偏差。
+- 未运行full suite、E2E、Sandcastle gallery、公网成功或无关terrain suites，符合本phase validation boundary。
+- Manual finding E4-R003只修改direct Test generated cubemap：统一edge color、低对比内部radial tint与显式1px border覆盖；
+  现有root server短headless smoke实测六面全部border pixels为同一RGBA `27,45,74,255`且page errors=0；未修改产品SkyBox、
+  atmosphere、Environment/World或网络/asset契约。
