@@ -314,6 +314,8 @@ import * as engine from "@cesium/engine";
 import * as widgets from "@cesium/widgets";
 import * as root from "cesium";
 const publicSceneGIS = (module) => Object.keys(module).filter((name) => name.startsWith("SceneGIS") && !name.startsWith("_")).sort();
+assert.equal(typeof widgets.Viewer, "function");
+assert.equal(typeof root.Viewer, "function");
 assert.deepEqual(publicSceneGIS(engine), ${enginePublic});
 assert.deepEqual(publicSceneGIS(widgets), ${widgetPublicNames});
 assert.deepEqual(publicSceneGIS(root), ${rootPublic});
@@ -489,6 +491,7 @@ assert.equal(world.material, material);
 const assert = require("node:assert/strict");
 const root = require("cesium");
 const publicSceneGIS = Object.keys(root).filter((name) => name.startsWith("SceneGIS") && !name.startsWith("_")).sort();
+assert.equal(typeof root.Viewer, "function");
 assert.deepEqual(publicSceneGIS, ${rootPublic});
 for (const name of ${engineCallable}) assert.equal(typeof root[name], "function", name);
 for (const name of ${engineNamespaces}) assert.equal(typeof root[name], "object", name);
@@ -513,6 +516,13 @@ function verifyDocumentation(engineDirectory) {
       false,
     );
   }
+  const viewerDocumentation = fs.readFileSync(
+    path.join(documentation, "Viewer.html"),
+    "utf8",
+  );
+  assert.match(viewerDocumentation, /<h4 class="name"\s+id="planarWorld">/u);
+  assert.match(viewerDocumentation, /Viewer\.PlanarWorldOptions/u);
+  assert.match(viewerDocumentation, /Viewer\.PlanarExtentOptions/u);
   const layerDocumentation = fs.readFileSync(
     path.join(documentation, "SceneGISPlanarImageryLayer.html"),
     "utf8",
@@ -729,6 +739,13 @@ async function verify() {
   verifyStylingDeclarations(rootDeclarations);
   for (const declarations of [widgetDeclarations, rootDeclarations]) {
     assert.match(declarations, /world\?: SceneGISPlanarWorld;/u);
+    assert.match(declarations, /planarWorld\?: Viewer\.PlanarWorldOptions;/u);
+    assert.match(declarations, /type PlanarExtentOptions = \{/u);
+    assert.match(declarations, /type PlanarWorldOptions = \{/u);
+    assert.match(
+      declarations,
+      /readonly planarWorld: SceneGISPlanarWorld \| undefined;/u,
+    );
     assert.match(
       declarations,
       /readonly planarCameraController: SceneGISPlanarCameraController \| undefined;/u,
@@ -742,7 +759,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 12/12 GLSL, 12/12 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3/E4 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 12/12 GLSL, 12/12 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3/E4 runtime properties, V1 Viewer declarations/API, soft-private, and broken-entry fixtures.\n",
   );
 }
 

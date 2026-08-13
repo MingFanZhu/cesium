@@ -11,32 +11,29 @@ import {
   DirectionalLight,
   SceneGISPlanarEnvironment,
   SceneGISPlanarSkyBox,
-  SceneGISPlanarCoordinateSystem,
-  SceneGISPlanarExtent,
   SceneGISPlanarImageryLayer,
   SceneGISPlanarUrlTemplateImageryProvider,
   SceneGISPlanarUrlTemplateHeightmapTerrainProvider,
-  SceneGISPlanarWorld,
   Viewer,
 } from "cesium";
 
-const extent = new SceneGISPlanarExtent({
-  minimumX: -20037508.342789244,
-  minimumY: -20037508.342789244,
-  maximumX: 20037508.342789244,
-  maximumY: 20037508.342789244,
+const viewer = new Viewer("cesiumContainer", {
+  planarWorld: {
+    extent: {
+      minimumX: -20037508.342789244,
+      minimumY: -20037508.342789244,
+      maximumX: 20037508.342789244,
+      maximumY: 20037508.342789244,
+    },
+    crs: "EPSG:3857",
+    maximumLevel: 19,
+    maximumScreenSpaceError: 2.0,
+    tileCacheSize: 100,
+    enableLighting: true,
+  },
 });
-const coordinateSystem = new SceneGISPlanarCoordinateSystem({
-  extent,
-  crs: "EPSG:3857",
-});
-const world = new SceneGISPlanarWorld({
-  coordinateSystem,
-  maximumLevel: 19,
-  maximumScreenSpaceError: 2.0,
-  tileCacheSize: 100,
-  enableLighting: true,
-});
+const world = viewer.planarWorld;
+
 const provider = new SceneGISPlanarUrlTemplateImageryProvider({
   url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
   tilingScheme: world.tilingScheme,
@@ -72,7 +69,6 @@ world.terrainProvider = new SceneGISPlanarUrlTemplateHeightmapTerrainProvider({
   maximumLevel: 16,
 });
 
-const viewer = new Viewer("cesiumContainer", { world });
 viewer.scene.light = new DirectionalLight({
   direction: Cartesian3.normalize(
     new Cartesian3(-1.0, -0.5, -1.5),
@@ -117,7 +113,7 @@ terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务
 
 ## CesiumWidget 入口
 
-低层应用可使用 `new CesiumWidget(container, { world })`。应用必须把 `scene.screenSpaceCameraController.enableInputs` 设为 `false`，再通过 `widget.addController` 注册唯一 `SceneGISPlanarCameraController`；销毁 Widget 前先移除 controller。`Viewer({ world })` 已自动完成这套顺序。
+低层应用可使用 `new CesiumWidget(container, { world })`。应用必须把 `scene.screenSpaceCameraController.enableInputs` 设为 `false`，再通过 `widget.addController` 注册唯一 `SceneGISPlanarCameraController`；销毁 Widget 前先移除 controller。`Viewer({ world })`与`Viewer({ planarWorld })`已自动完成这套顺序。live World入口适合高级调用方；常规应用优先使用raw config，并从readonly `viewer.planarWorld`取得resolved World后再安装provider。
 
 一个 world 只能绑定一个 WebGL `Context`。不要在多个 Widget/Viewer 之间复用同一个 live world。`Scene` 拥有 primary world，销毁 Scene/Widget/Viewer 会销毁 world；imagery layer collection 拥有 layer，但 provider 始终由调用方拥有。
 
@@ -255,7 +251,7 @@ declarations、API anchors与private hiding；Node consumer不模拟WebGL、DOM�
   availability、CORS与`errorEvent`；terminal failure配合稳定fallback可以报告`tilesLoaded=true`。
 - 光照方向不稳定：为`scene.light`设置显式`DirectionalLight`；自定义CRS不会改变默认SunLight语义。
 - 第二个 Context 报错：为每个 Widget/Viewer 创建独立 world。
-- Viewer option 冲突：planar Viewer 不接受 Globe imagery/terrain/map-projection/provider-picker 选项。
+- Viewer option 冲突：`world`、`planarWorld`与defined `globe`互斥；planar Viewer不接受Globe imagery/terrain/map-projection/provider-picker选项。
 - 已销毁对象报错：不要在 Scene/Viewer destroy 后继续 render、pick 或复用 controller/world。
 
 ### 可见太阳与月亮

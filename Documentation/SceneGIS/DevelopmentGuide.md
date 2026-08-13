@@ -439,11 +439,14 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
 
 ### 平面 Viewer 集成检查
 
-实现或评审 `Viewer({ world })` 时同时检查：
+实现或评审 `Viewer({ world })` / `Viewer({ planarWorld })` 时同时检查：
 
-- `world` 只接受 live `SceneGISPlanarWorld`；generic world、`world: false`、destroyed world 和
-  任意 defined `globe` 都必须在 Viewer child DOM、WebGL Context、controller 或 request mutation
-  前 fail-fast。没有 `world` 的默认 Globe 与 `globe: false` 路径必须保持原行为。
+- `world`只接受live `SceneGISPlanarWorld`；`planarWorld`只接受non-null/non-array raw config，并把extent、CRS和
+  World字段转发给对应public constructors。两者与任意defined `globe`严格互斥，所有确定性config/option错误必须在
+  Viewer child DOM、WebGL Context、controller或request mutation前fail-fast。没有planar入口的默认Globe与
+  `globe: false`路径必须保持原行为。
+- helper不得访问DOM/Context/provider或保留config引用。成功后`viewer.planarWorld === viewer.scene.world`；后续
+  runtime只能消费这个resolved reference。provider必须在Viewer返回后使用resolved `world.tilingScheme`显式创建。
 - planar Viewer 固定 `SCENE3D`/`scene3DOnly`，禁止 Earth base layer、terrain、map projection、
   provider view model，以及 Geocoder、mode/projection picker、NavigationHelp 和 VR。Animation、
   Timeline、Fullscreen、SelectionIndicator、InfoBox title/description 与 planar Home 保持可用。
@@ -452,7 +455,7 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
   registration failure 也必须释放已经连接的 aggregator 和 child state。
 - planar Home 只调用 `controller.viewHome(scene)`。InfoBox camera、double-click tracking、defined
   `trackedEntity`、`zoomTo` 和 `flyTo` 不属于当前能力，必须同步拒绝；left-click selection 保留。
-- planar imagery 仍由应用通过 canonical `world.tilingScheme` 和 `world.imageryLayers` 显式组装；
+- planar imagery仍由应用通过canonical `world.tilingScheme`和`world.imageryLayers`显式组装；
   `scenegis-planar-viewer` 只演示该高层 ownership，不引入通用 provider picker、预取或离线下载。
 
 ### 平面 Environment Controller检查

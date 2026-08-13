@@ -67,6 +67,17 @@ describe(
       });
     }
 
+    function createDeclarativePlanarViewer(planarWorld, options = {}) {
+      return createViewer(container, {
+        planarWorld,
+        useDefaultRenderLoop: false,
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+        ...options,
+      });
+    }
+
     function expectPreflightError(options) {
       expect(function () {
         return createViewer(container, options);
@@ -105,6 +116,7 @@ describe(
       viewer = createPlanarViewer(world);
 
       expect(viewer.scene.world).toBe(world);
+      expect(viewer.planarWorld).toBe(world);
       expect(viewer.scene.globe).toBeUndefined();
       expect(viewer.planarCameraController).toBeInstanceOf(
         SceneGISPlanarCameraController,
@@ -117,6 +129,125 @@ describe(
       expect(viewer.projectionPicker).toBeUndefined();
       expect(viewer.baseLayerPicker).toBeUndefined();
       expect(viewer.navigationHelpButton).toBeUndefined();
+    });
+
+    it("constructs and snapshots a declarative planar World", function () {
+      const extent = {
+        minimumX: -256,
+        minimumY: -256,
+        maximumX: 256,
+        maximumY: 256,
+      };
+      const baseColor = new Color(0.1, 0.2, 0.3, 1.0);
+      const options = {
+        extent,
+        crs: "EPSG:3857",
+        maximumLevel: 4,
+        maximumScreenSpaceError: 3.0,
+        tileCacheSize: 12,
+        baseColor,
+        enableLighting: true,
+        lambertDiffuseMultiplier: 0.75,
+      };
+
+      viewer = createDeclarativePlanarViewer(options);
+      const world = viewer.planarWorld;
+
+      expect(world).toBeInstanceOf(SceneGISPlanarWorld);
+      expect(viewer.scene.world).toBe(world);
+      expect(viewer.planarCameraController.world).toBe(world);
+      expect(world.coordinateSystem.crs).toBe("EPSG:3857");
+      expect(world.coordinateSystem.extent.minimumX).toBe(-256);
+      expect(world.coordinateSystem.extent.maximumY).toBe(256);
+      expect(world.maximumLevel).toBe(4);
+      expect(world.maximumScreenSpaceError).toBe(3.0);
+      expect(world.tileCacheSize).toBe(12);
+      expect(world.baseColor).toEqual(new Color(0.1, 0.2, 0.3, 1.0));
+      expect(world.enableLighting).toBe(true);
+      expect(world.lambertDiffuseMultiplier).toBe(0.75);
+
+      extent.minimumX = -1024;
+      options.crs = "changed";
+      options.maximumLevel = 0;
+      baseColor.red = 0.9;
+
+      expect(world.coordinateSystem.extent.minimumX).toBe(-256);
+      expect(world.coordinateSystem.crs).toBe("EPSG:3857");
+      expect(world.maximumLevel).toBe(4);
+      expect(world.baseColor).toEqual(new Color(0.1, 0.2, 0.3, 1.0));
+    });
+
+    it("rejects invalid declarative options before runtime mutation", function () {
+      const register = spyOn(
+        ControllerHost.prototype,
+        "registerController",
+      ).and.callThrough();
+      const addController = spyOn(
+        CesiumWidget.prototype,
+        "addController",
+      ).and.callThrough();
+      const validExtent = {
+        minimumX: -128,
+        minimumY: -128,
+        maximumX: 128,
+        maximumY: 128,
+      };
+      const invalidConfigurations = [
+        null,
+        false,
+        [],
+        "EPSG:3857",
+        { extent: validExtent },
+        {
+          extent: { ...validExtent, maximumX: -128 },
+          maximumLevel: 0,
+        },
+        {
+          extent: { ...validExtent, maximumY: 64 },
+          maximumLevel: 0,
+        },
+        {
+          extent: validExtent,
+          maximumLevel: 0,
+          maximumScreenSpaceError: 0,
+        },
+        {
+          extent: validExtent,
+          maximumLevel: 0,
+          tileCacheSize: -1,
+        },
+        {
+          extent: validExtent,
+          maximumLevel: 0,
+          baseColor: Color.TRANSPARENT,
+        },
+      ];
+
+      for (let i = 0; i < invalidConfigurations.length; i++) {
+        expectPreflightError({
+          planarWorld: invalidConfigurations[i],
+        });
+      }
+
+      const world = createWorld();
+      looseWorlds.push(world);
+      expectPreflightError({
+        world,
+        planarWorld: {
+          extent: validExtent,
+          maximumLevel: 0,
+        },
+      });
+      expectPreflightError({
+        globe: false,
+        planarWorld: {
+          extent: validExtent,
+          maximumLevel: 0,
+        },
+      });
+
+      expect(register).not.toHaveBeenCalled();
+      expect(addController).not.toHaveBeenCalled();
     });
 
     it("allows disabling and re-enabling the owned controller", function () {
@@ -527,6 +658,7 @@ describe(
       });
       expect(viewer.scene.globe).toBeDefined();
       expect(viewer.planarCameraController).toBeUndefined();
+      expect(viewer.planarWorld).toBeUndefined();
       viewer.destroy();
 
       viewer = createViewer(container, {
@@ -540,6 +672,7 @@ describe(
       });
       expect(viewer.scene.globe).toBeUndefined();
       expect(viewer.planarCameraController).toBeUndefined();
+      expect(viewer.planarWorld).toBeUndefined();
     });
 
     it("renders explicit local imagery with credit, depth, and warm reuse", async function () {

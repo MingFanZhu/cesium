@@ -261,6 +261,22 @@ P6 完成后，大多数应用可以用一个 Viewer 构造入口获得平面渲
 selection 和常用非地理 UI，而不必手工管理 ControllerHost。代价是 Viewer 的平面模式采用
 明确的 capability allowlist；不兼容选项会立即报错，而不是部分工作。
 
+## 2026-08-14 amendment：声明式平面 World 入口
+
+V1在strict live `world`高级入口之外增加`Viewer.ConstructorOptions.planarWorld`。该raw config只包含square extent、
+opaque CRS、required `maximumLevel`与现有`SceneGISPlanarWorld` constructor字段；SceneGIS-owned private helper同步创建
+`SceneGISPlanarExtent`→`SceneGISPlanarCoordinateSystem`→`SceneGISPlanarWorld`，不推断CRS、不创建provider、不访问DOM或
+WebGL，也不保留config引用。底层public constructors继续是字段validation的唯一事实源。
+
+`world`、`planarWorld`与任何defined `globe`严格互斥；完整planar option matrix必须先于helper和Viewer child DOM验证。
+成功后Viewer内部只使用单一resolved World，readonly `viewer.planarWorld`与`viewer.scene.world`为同一identity；Globe与
+`globe:false`返回`undefined`。Scene继续exactly-once拥有并销毁resolved World，planar controller仍在Scene/World前移除。
+需要canonical tiling scheme的imagery/terrain provider只能在Viewer返回后，从resolved World显式创建和安装。
+
+该amendment复用SGP-0002，不增加CesiumWidget/engine seam。升级时还必须复核Viewer constructor option typedef、raw config
+preflight、resolved local forwarding/getter、controller rollback与生成declaration/API HTML；默认Globe、`globe:false`及live
+`world`行为不得改变。
+
 通用 planar provider picker、Geocoder、准确的 NavigationHelp、touch/inertia、Entity
 tracking/flight/clamping，以及 generic custom-world Viewer 都是未来独立能力，不因本 ADR
 自动进入 roadmap。P6 评审和独立本地 checkpoint 完成后仍需停在阶段门禁，由项目负责人

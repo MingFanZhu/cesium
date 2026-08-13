@@ -127,20 +127,37 @@
         sources: skyBoxSources,
       });
 
-      const world = new Cesium.SceneGISPlanarWorld({
-        coordinateSystem: new Cesium.SceneGISPlanarCoordinateSystem({
-          extent: new Cesium.SceneGISPlanarExtent({
+      let viewer = new Cesium.Viewer("cesiumContainer", {
+        planarWorld: {
+          extent: {
             minimumX: -WEB_MERCATOR_LIMIT,
             minimumY: -WEB_MERCATOR_LIMIT,
             maximumX: WEB_MERCATOR_LIMIT,
             maximumY: WEB_MERCATOR_LIMIT,
-          }),
+          },
           crs: "EPSG:3857",
-        }),
-        maximumLevel: 16,
-        baseColor: Cesium.Color.fromCssColorString("#263238"),
-        enableLighting: true,
+          maximumLevel: 16,
+          baseColor: Cesium.Color.fromCssColorString("#263238"),
+          enableLighting: true,
+        },
+        skyBox: false,
+        skyAtmosphere: false,
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+        infoBox: false,
+        selectionIndicator: false,
+        baseLayerPicker: false,
+        geocoder: false,
+        sceneModePicker: false,
+        projectionPicker: false,
+        navigationHelpButton: false,
+        vrButton: false,
       });
+      const world = viewer.planarWorld;
+      const planarCameraController = viewer.planarCameraController;
+      viewer.scene.rethrowRenderErrors = true;
+      viewMountain(viewer.scene);
 
       const openStreetMapCredit = new Cesium.Credit(
         '<a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>',
@@ -176,19 +193,6 @@
           credit: terrainCredit,
         });
       world.terrainProvider = terrainProvider;
-
-      let widget = new Cesium.CesiumWidget("cesiumContainer", {
-        world,
-        skyBox: false,
-        skyAtmosphere: false,
-      });
-      widget.scene.screenSpaceCameraController.enableInputs = false;
-      const planarCameraController = new Cesium.SceneGISPlanarCameraController({
-        world,
-      });
-      widget.addController(planarCameraController);
-      widget.scene.rethrowRenderErrors = true;
-      viewMountain(widget.scene);
 
       const defaultState = Object.freeze({
         environmentEnabled: true,
@@ -230,10 +234,10 @@
         enableRotate: planarCameraController.enableRotate,
         enableZoom: planarCameraController.enableZoom,
         minimumTerrainClearance: planarCameraController.minimumTerrainClearance,
-        mountainView: () => viewMountain(widget.scene),
+        mountainView: () => viewMountain(viewer.scene),
         planarHome: () => {
-          planarCameraController.viewHome(widget.scene);
-          widget.scene.requestRender();
+          planarCameraController.viewHome(viewer.scene);
+          viewer.scene.requestRender();
         },
         cameraHelp: "左键拖动平移；中键拖动旋转；滚轮缩放。",
         atmosphereNotice:
@@ -261,9 +265,9 @@
         color.alpha = alpha;
         return color;
       }
-      widget.clock.shouldAnimate = false;
-      widget.clock.multiplier = state.clockMultiplier;
-      widget.clock.currentTime = Cesium.JulianDate.fromIso8601(
+      viewer.clock.shouldAnimate = false;
+      viewer.clock.multiplier = state.clockMultiplier;
+      viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(
         state.simulationTimeIso,
       );
       const environment = new Cesium.SceneGISPlanarEnvironment({
@@ -296,7 +300,7 @@
         atmosphereFadeHeight: state.atmosphereFadeHeight,
         skyBox: state.showPlanarSkyBox ? planarSkyBox : undefined,
       });
-      widget.addController(environment);
+      viewer.addController(environment);
 
       const gui = new GUI({
         title: "平面环境（EPSG:3857）",
@@ -314,7 +318,7 @@
         .name("地形光照")
         .onChange((value) => {
           world.enableLighting = value;
-          widget.scene.requestRender();
+          viewer.scene.requestRender();
           updateEnvironmentState();
         });
       gui
@@ -439,14 +443,14 @@
         .add(state, "clockPlaying")
         .name("播放")
         .onChange((value) => {
-          widget.clock.shouldAnimate = value;
-          widget.scene.requestRender();
+          viewer.clock.shouldAnimate = value;
+          viewer.scene.requestRender();
         });
       clockFolder
         .add(state, "clockMultiplier", -86400.0, 86400.0, 1.0)
         .name("时间倍率")
         .onChange((value) => {
-          widget.clock.multiplier = value;
+          viewer.clock.multiplier = value;
         });
       gui.add(state, "reset").name("重置环境与时间");
       gui.add(state, "environmentState").name("当前状态").listen().disable();
@@ -468,7 +472,7 @@
         .name("启用平面相机")
         .onChange((value) => {
           planarCameraController.enabled = value;
-          widget.scene.requestRender();
+          viewer.scene.requestRender();
         });
       cameraFolder
         .add(state, "navigationMode", {
@@ -478,7 +482,7 @@
         .name("导航模式")
         .onChange((value) => {
           planarCameraController.navigationMode = value;
-          widget.scene.requestRender();
+          viewer.scene.requestRender();
         });
       cameraFolder
         .add(state, "enablePan")
@@ -503,7 +507,7 @@
         .name("最小离地高度（米）")
         .onChange((value) => {
           planarCameraController.minimumTerrainClearance = value;
-          widget.scene.requestRender();
+          viewer.scene.requestRender();
         });
       cameraFolder.add(state, "mountainView").name("返回山地区域");
       cameraFolder.add(state, "planarHome").name("平面全域 Home");
@@ -540,12 +544,12 @@
       function setSimulationTime(value) {
         try {
           const time = Cesium.JulianDate.fromIso8601(value);
-          widget.clock.currentTime = time;
+          viewer.clock.currentTime = time;
           state.simulationTimeIso = Cesium.JulianDate.toIso8601(time, 0);
-          widget.scene.requestRender();
+          viewer.scene.requestRender();
         } catch (error) {
           state.simulationTimeIso = Cesium.JulianDate.toIso8601(
-            widget.clock.currentTime,
+            viewer.clock.currentTime,
             0,
           );
           gui.controllersRecursive().forEach((controller) => {
@@ -558,13 +562,13 @@
       }
 
       function stepSimulationDays(days) {
-        widget.clock.currentTime = Cesium.JulianDate.addDays(
-          widget.clock.currentTime,
+        viewer.clock.currentTime = Cesium.JulianDate.addDays(
+          viewer.clock.currentTime,
           days,
           new Cesium.JulianDate(),
         );
         state.simulationTimeIso = Cesium.JulianDate.toIso8601(
-          widget.clock.currentTime,
+          viewer.clock.currentTime,
           0,
         );
         gui.controllersRecursive().forEach((controller) => {
@@ -572,7 +576,7 @@
             controller.updateDisplay();
           }
         });
-        widget.scene.requestRender();
+        viewer.scene.requestRender();
       }
 
       function updateSunDirection() {
@@ -615,16 +619,16 @@
         );
         environment.atmosphereIntensity = state.atmosphereIntensity;
         environment.atmosphereFadeHeight = state.atmosphereFadeHeight;
-        widget.clock.shouldAnimate = state.clockPlaying;
-        widget.clock.multiplier = state.clockMultiplier;
-        widget.clock.currentTime = Cesium.JulianDate.fromIso8601(
+        viewer.clock.shouldAnimate = state.clockPlaying;
+        viewer.clock.multiplier = state.clockMultiplier;
+        viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(
           state.simulationTimeIso,
         );
         updateSunDirection();
         gui
           .controllersRecursive()
           .forEach((controller) => controller.updateDisplay());
-        widget.scene.requestRender();
+        viewer.scene.requestRender();
       }
 
       function updateProviderState() {
@@ -654,7 +658,7 @@
         error.retry = false;
         updateProviderState();
       });
-      const removePostRender = widget.scene.postRender.addEventListener(() => {
+      const removePostRender = viewer.scene.postRender.addEventListener(() => {
         if (!providerState.settled && world.tilesLoaded) {
           providerState.settled = true;
           updateProviderState();
@@ -664,7 +668,7 @@
       updateEnvironmentState();
       updateProviderState();
 
-      window.widget = widget;
+      window.viewer = viewer;
       window.world = world;
       window.environment = environment;
       window.planarCameraController = planarCameraController;
@@ -678,18 +682,17 @@
         }
         disposed = true;
         removePostRender();
-        if (!widget.isDestroyed()) {
-          widget.removeController(environment);
-          widget.removeController(planarCameraController);
+        if (!viewer.isDestroyed()) {
+          viewer.removeController(environment);
         }
         if (!planarSkyBox.isDestroyed()) {
           planarSkyBox.destroy();
         }
         gui.destroy();
-        if (!widget.isDestroyed()) {
-          widget = widget.destroy();
+        if (!viewer.isDestroyed()) {
+          viewer = viewer.destroy();
         }
-        window.widget = undefined;
+        window.viewer = undefined;
         window.world = undefined;
         window.environment = undefined;
         window.planarCameraController = undefined;

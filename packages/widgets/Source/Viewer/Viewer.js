@@ -37,6 +37,7 @@ import FullscreenButton from "../FullscreenButton/FullscreenButton.js";
 import Geocoder from "../Geocoder/Geocoder.js";
 import HomeButton from "../HomeButton/HomeButton.js";
 // SCENEGIS_PATCH_BEGIN SGP-0002: Use a SceneGIS-owned Home widget for planar navigation.
+import createSceneGISPlanarViewerWorld from "../SceneGIS/_SceneGISPlanarViewerBootstrap.js";
 import SceneGISPlanarHomeButton from "../SceneGIS/SceneGISPlanarHomeButton.js";
 // SCENEGIS_PATCH_END SGP-0002
 import InfoBox from "../InfoBox/InfoBox.js";
@@ -312,18 +313,25 @@ function enableVRUI(viewer, enabled) {
 }
 
 // SCENEGIS_PATCH_BEGIN SGP-0002: Reject incompatible planar Viewer options before creating child state.
-function validatePlanarViewerOptions(options) {
-  const world = options.world;
-  if (!(world instanceof SceneGISPlanarWorld) || world.isDestroyed()) {
+function validatePlanarViewerOptions(options, hasWorld, hasPlanarWorldOptions) {
+  if (hasWorld && hasPlanarWorldOptions) {
+    throw new DeveloperError(
+      "options.world and options.planarWorld cannot both be provided.",
+    );
+  }
+
+  if (
+    hasWorld &&
+    (!(options.world instanceof SceneGISPlanarWorld) ||
+      options.world.isDestroyed())
+  ) {
     throw new DeveloperError(
       "options.world must be a live SceneGISPlanarWorld instance.",
     );
   }
 
   if (defined(options.globe)) {
-    throw new DeveloperError(
-      "options.world and options.globe cannot both be provided.",
-    );
+    throw new DeveloperError("A planar Viewer cannot define options.globe.");
   }
   if (defined(options.sceneMode) && options.sceneMode !== SceneMode.SCENE3D) {
     throw new DeveloperError(
@@ -381,6 +389,32 @@ function validatePlanarViewerOptions(options) {
 
 // SCENEGIS_PATCH_BEGIN SGP-0002: Declare the planar Viewer construction option without leaking patch markers into generated docs.
 /**
+ * @typedef {object} Viewer.PlanarExtentOptions
+ *
+ * Raw square planar extent options measured in meters.
+ *
+ * @property {number} minimumX The minimum X coordinate.
+ * @property {number} minimumY The minimum Y coordinate.
+ * @property {number} maximumX The maximum X coordinate.
+ * @property {number} maximumY The maximum Y coordinate.
+ */
+
+/**
+ * @typedef {object} Viewer.PlanarWorldOptions
+ *
+ * Declarative options used to synchronously create a SceneGIS planar world.
+ *
+ * @property {Viewer.PlanarExtentOptions} extent The strictly square planar extent.
+ * @property {number} maximumLevel The highest selectable surface level.
+ * @property {string} [crs] An optional non-empty opaque CRS identifier.
+ * @property {number} [maximumScreenSpaceError=2.0] The refinement threshold in pixels.
+ * @property {number} [tileCacheSize=100] The number of unprotected tiles retained after a frame.
+ * @property {Color} [baseColor=Color.GRAY] The opaque surface color.
+ * @property {boolean} [enableLighting=false] Whether geometric Lambert lighting is enabled.
+ * @property {number} [lambertDiffuseMultiplier=0.9] The non-negative multiplier applied to Lambert diffuse lighting.
+ */
+
+/**
  * @typedef {object} Viewer.ConstructorOptions
  *
  * Initialization options for the Viewer constructor
@@ -420,7 +454,8 @@ function validatePlanarViewerOptions(options) {
  * @property {SceneMode} [sceneMode=SceneMode.SCENE3D] The initial scene mode.
  * @property {MapProjection} [mapProjection=new GeographicProjection(options.ellipsoid)] The map projection to use in 2D and Columbus View modes.
  * @property {Globe|false} [globe=new Globe(options.ellipsoid)] The globe to use in the scene.  If set to <code>false</code>, no globe will be added and the sky atmosphere will be hidden by default.
- * @property {SceneGISPlanarWorld} [world] The live planar world to use. This option is mutually exclusive with every defined <code>globe</code> value.
+ * @property {SceneGISPlanarWorld} [world] The live planar world to use. This option is mutually exclusive with <code>planarWorld</code> and every defined <code>globe</code> value.
+ * @property {Viewer.PlanarWorldOptions} [planarWorld] Declarative options used to synchronously create a planar world. This option is mutually exclusive with <code>world</code> and every defined <code>globe</code> value.
  * @property {boolean} [orderIndependentTranslucency=true] If true and the configuration supports it, use order independent translucency.
  * @property {Element|string} [creditContainer] The DOM element or ID that will contain the {@link CreditDisplay}.  If not specified, the credits are added to the bottom of the widget itself.
  * @property {Element|string} [creditViewport] The DOM element or ID that will contain the credit pop up created by the {@link CreditDisplay}.  If not specified, it will appear over the widget itself.
@@ -452,7 +487,7 @@ function validatePlanarViewerOptions(options) {
  * @exception {DeveloperError} Element with id "container" does not exist in the document.
  * @exception {DeveloperError} options.selectedImageryProviderViewModel is not available when not using the BaseLayerPicker widget, specify options.baseLayer instead.
  * @exception {DeveloperError} options.selectedTerrainProviderViewModel is not available when not using the BaseLayerPicker widget, specify options.terrainProvider instead.
- * @exception {DeveloperError} options.world is not a live SceneGISPlanarWorld, conflicts with options.globe, or is combined with a planar-incompatible option.
+ * @exception {DeveloperError} options.world is not a live SceneGISPlanarWorld, options.planarWorld is invalid, the planar entries conflict with each other or options.globe, or a planar entry is combined with a planar-incompatible option.
  *
  * @see Animation
  * @see BaseLayerPicker
@@ -517,9 +552,15 @@ function Viewer(container, options) {
   options = options ?? Frozen.EMPTY_OBJECT;
 
   // SCENEGIS_PATCH_BEGIN SGP-0002: Complete planar preflight before child DOM or runtime mutation.
-  const isPlanarViewer = defined(options.world);
+  const hasWorld = defined(options.world);
+  const hasPlanarWorldOptions = options.planarWorld !== undefined;
+  const isPlanarViewer = hasWorld || hasPlanarWorldOptions;
+  let planarWorld;
   if (isPlanarViewer) {
-    validatePlanarViewerOptions(options);
+    validatePlanarViewerOptions(options, hasWorld, hasPlanarWorldOptions);
+    planarWorld = hasWorld
+      ? options.world
+      : createSceneGISPlanarViewerWorld(options.planarWorld);
   }
   // SCENEGIS_PATCH_END SGP-0002
 
@@ -600,7 +641,7 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
   // Cesium widget
   const cesiumWidget = new CesiumWidget(cesiumWidgetContainer, {
     // SCENEGIS_PATCH_BEGIN SGP-0002: Forward the validated planar world into the existing CesiumWidget seam.
-    world: options.world,
+    world: planarWorld,
     // SCENEGIS_PATCH_END SGP-0002
     baseLayer:
       (createBaseLayerPicker &&
@@ -651,7 +692,7 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
     const controllerCountBeforeRegistration = controllerHost.controllerCount;
     try {
       planarCameraController = new SceneGISPlanarCameraController({
-        world: options.world,
+        world: planarWorld,
       });
       cesiumWidget.addController(planarCameraController);
     } catch (error) {
@@ -1022,8 +1063,9 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
   this._bottomContainer = bottomContainer;
   this._element = viewerContainer;
   this._cesiumWidget = cesiumWidget;
-  // SCENEGIS_PATCH_BEGIN SGP-0002: Retain planar mode and controller ownership for public guards and teardown.
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Retain resolved planar capabilities for public guards and teardown.
   this._isPlanarViewer = isPlanarViewer;
+  this._planarWorld = planarWorld;
   this._planarCameraController = planarCameraController;
   // SCENEGIS_PATCH_END SGP-0002
   this._selectionIndicator = selectionIndicator;
@@ -1237,6 +1279,21 @@ Object.defineProperties(Viewer.prototype, {
   planarCameraController: {
     get: function () {
       return this._planarCameraController;
+    },
+  },
+  // SCENEGIS_PATCH_END SGP-0002
+
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Expose the resolved planar world as a readonly capability.
+  /**
+   * Gets the resolved planar world used by this Viewer.
+   *
+   * @memberof Viewer.prototype
+   * @type {SceneGISPlanarWorld|undefined}
+   * @readonly
+   */
+  planarWorld: {
+    get: function () {
+      return this._planarWorld;
     },
   },
   // SCENEGIS_PATCH_END SGP-0002

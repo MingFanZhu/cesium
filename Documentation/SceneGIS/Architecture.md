@@ -466,21 +466,33 @@ canonical tiling scheme 与服务 coverage 必须由应用显式匹配，具体�
 
 ### 平面 Viewer 集成
 
-`Viewer` 的平面入口只接受 live `SceneGISPlanarWorld`：
+`Viewer` 提供 strict live World 高级入口和同步声明式入口：
 
 ```js
 new Viewer("cesiumContainer", { world });
+new Viewer("cesiumContainer", {
+  planarWorld: {
+    extent: { minimumX, minimumY, maximumX, maximumY },
+    crs,
+    maximumLevel,
+  },
+});
 ```
 
-generic custom world、`world: false` 和手工 controller ownership 继续使用低层 `CesiumWidget`。
-定义 `world` 后不得同时定义 `globe`；planar Viewer 固定 `SCENE3D`/`scene3DOnly`，并在 DOM、
-WebGL、controller 或 provider mutation 前拒绝 base layer、terrain、map projection 和不兼容 widget
-选项。没有定义 `world` 时，默认 Globe 与 `globe: false` 行为不得改变。
+`planarWorld`只接受raw square extent、opaque CRS与现有World constructor字段；SceneGIS-owned helper同步组装
+Extent→CoordinateSystem→World，不推断CRS、不创建provider且不保留config引用。两种入口均通过readonly
+`viewer.planarWorld`发布与`viewer.scene.world`相同的resolved World。generic custom world、`world: false`和手工
+controller ownership继续使用低层`CesiumWidget`。
+
+`world`、`planarWorld`与任何defined `globe`严格互斥；planar Viewer固定`SCENE3D`/`scene3DOnly`，并在DOM、
+WebGL、controller或provider mutation前拒绝invalid raw config、base layer、terrain、map projection和不兼容widget
+选项。没有planar入口时，默认Globe与`globe: false`行为不得改变。
 
 planar Viewer 关闭 legacy `screenSpaceCameraController` 的 inputs，但不替换该属性；它通过
 `ControllerHost` 注册唯一 `SceneGISPlanarCameraController`，并在 CesiumWidget/Scene/world
-销毁前成对移除。传入 world 表示转移独占生命周期所有权，同一 world instance 不得交给第二个
-Viewer/CesiumWidget；P6 不增加跨 Scene owner registry。
+销毁前成对移除。传入live world或声明式创建resolved world均把独占生命周期所有权交给Scene；同一live world
+instance不得交给第二个Viewer/CesiumWidget，且P6不增加跨Scene owner registry。依赖canonical tiling scheme的provider
+必须在Viewer返回后通过`viewer.planarWorld`显式创建与安装。
 
 Viewer 使用 SceneGIS-owned planar Home command 调用 controller `viewHome(scene)`。InfoBox 只保留
 title/description，SelectionIndicator 与 left-click selection 可以保留；Entity tracking、InfoBox
