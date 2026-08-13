@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                               |
-| ---------------------- | ------------------------------------------------------------------- |
-| Extension slug         | `planar-environment`                                                |
-| Status                 | `active`                                                            |
-| Planning model         | `extension`                                                         |
-| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)        |
-| Current phase          | E3 Visible Celestial Bodies planning                                |
-| Active phase plan      | None; Architecture is refreshing source facts after E2              |
-| Active standalone plan | None                                                                |
-| Architecture contact   | Architecture Agent                                                  |
-| Execution contact      | Execution Agent                                                     |
-| Last updated           | `2026-08-13`                                                        |
+| Field                  | Value                                                            |
+| ---------------------- | ---------------------------------------------------------------- |
+| Extension slug         | `planar-environment`                                             |
+| Status                 | `active`                                                         |
+| Planning model         | `extension`                                                      |
+| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)     |
+| Current phase          | E3 Visible Celestial Bodies                                      |
+| Active phase plan      | [E3 plan](plans/2026-08-13-phase-e3-visible-celestial-bodies.md) |
+| Active standalone plan | None                                                             |
+| Architecture contact   | Architecture Agent                                               |
+| Execution contact      | Execution Agent                                                  |
+| Last updated           | `2026-08-13`                                                     |
 
 ## Scope
 
@@ -43,16 +43,16 @@
 - Predecessor checkpoint: `f4f4bd6e9f946fb6945bdce795183b14afdbd7cf`
 - Parent extensions: completed `planar-world`、`planar-terrain-advanced`、
   `planar-surface-styling`
-- Checkpoints: E1=`b343b64bad`；direct Test migration=`a8c22d8c35`
-- ADR: E1=`ADR-0033`；E2=`ADR-0034`
-- SGP: E2=None；任何 upstream-owned diff 必须先停止并升级phase plan
+- Checkpoints: E1=`b343b64bad`；direct Test migration=`a8c22d8c35`；E2=`fa40b49dbb4ba6f14db68c5fe94852b9f47367ff`
+- ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3 expected `ADR-0035`
+- SGP: E1/E2=None；E3 expected `SGP-0003`（仅`Scene.js` optional world environment hook）
 
 ## Current handoff
 
-- Current state: E2 implementation、Architecture review与项目负责人manual gate均已通过；本次E2 checkpoint提交不push。
-- Next action: Architecture以E2 checkpoint为新base重新审计visible-body render pass、depth/horizon、resource与Clock事实，
-  建立并确认E3 phase plan后再向Execution发送正式assignment。
-- Current phase status: E1-E2=`completed`；E3=`planning`；E4-E5=`planned`，不提前冻结易变实现。
+- Current state: E2 checkpoint已完成；Architecture已确认E3 visible-body contract、单一environment hook、
+  procedural renderer、Clock、horizon/underground与resource边界。
+- Next action: Architecture创建仅含E3 planning docs的checkpoint，并以该精确base向Execution发送正式assignment。
+- Current phase status: E1-E2=`completed`；E3=`active`；E4-E5=`planned`，不提前冻结E4 shader细节。
 - Open discussions: None。
 - Latest review: [E2 approved review](reviews/2026-08-13-e2-astronomical-direction-mode.md)。
 - Unresolved reviews: None。
