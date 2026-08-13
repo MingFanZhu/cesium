@@ -2,11 +2,11 @@
 
 ## Open
 
-- None；E1 implementation 尚未进入 review。
+- None。
 
 ## Approved
 
-- None。
+- [E1：手动天体方向与光照契约](2026-08-13-e1-manual-celestial-light-contract.md)
 
 ## Superseded
 

@@ -25,6 +25,7 @@ const publicEngine = [
   "SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider",
   "SceneGISPlanarWorld",
   "SceneGISPlanarCameraController",
+  "SceneGISPlanarEnvironment",
   "SceneGISPlanarImageryProvider",
   "SceneGISPlanarUrlTemplateImageryProvider",
   "SceneGISPlanarImageryLayer",
@@ -359,9 +360,37 @@ assert.equal(layer.colorToAlpha.red, 0.1);
 const returnedTarget = layer.colorToAlpha;
 returnedTarget.green = 0.9;
 assert.equal(layer.colorToAlpha.green, 0.2);
-layer.destroy();
-assert.equal(layer.isDestroyed(), true);
-const material = new engine.Material({
+  layer.destroy();
+  assert.equal(layer.isDestroyed(), true);
+  const sunInput = new engine.Cartesian3(1, 2, 3);
+  const moonInput = new engine.Cartesian3(-1, 1, 0.5);
+  const environment = new engine.SceneGISPlanarEnvironment({
+    world,
+    sunDirection: sunInput,
+    moonDirection: moonInput,
+  });
+  assert.equal(environment.world, world);
+  assert.equal(environment.enabled, true);
+  assert.equal(environment.sunIntensity, 2);
+  assert.equal(environment.light instanceof engine.DirectionalLight, true);
+  assert.equal(environment.light.direction.x, -environment.sunDirection.x);
+  sunInput.x = 99;
+  moonInput.y = 99;
+  assert.notEqual(environment.sunDirection.x, 99);
+  assert.notEqual(environment.moonDirection.y, 99);
+  const exposedSun = environment.sunDirection;
+  exposedSun.z = 99;
+  assert.notEqual(environment.sunDirection.z, 99);
+  const sunColor = new engine.Color(0.25, 0.5, 0.75, 1);
+  environment.sunColor = sunColor;
+  sunColor.red = 99;
+  assert.equal(environment.sunColor.red, 0.25);
+  environment.sunIntensity = 3;
+  assert.equal(environment.light.intensity, 3);
+  const hostElement = {};
+  environment.connectedCallback(hostElement);
+  assert.equal(world.environment, environment);
+  const material = new engine.Material({
   fabric: {
     type: "SceneGISInstalledOwnershipProbe",
     source: "czm_material czm_getMaterial(czm_materialInput materialInput) { return czm_getDefaultMaterial(materialInput); }",
@@ -374,9 +403,11 @@ assert.equal(world.material, undefined);
 assert.equal(material.isDestroyed(), false);
 world.material = material;
 assert.equal(world.material, material);
-world.destroy();
-assert.equal(material.isDestroyed(), false);
-material.destroy();
+  world.destroy();
+  assert.equal(material.isDestroyed(), false);
+  assert.equal(environment.light instanceof engine.DirectionalLight, true);
+  environment.disconnectedCallback(hostElement);
+  material.destroy();
 assert.equal(material.isDestroyed(), true);
 `;
   }
@@ -431,6 +462,25 @@ function verifyDocumentation() {
     "utf8",
   );
   assert.match(worldDocumentation, /<h4 class="name" id="material">/u);
+  assert.match(worldDocumentation, /<h4 class="name" id="environment">/u);
+  const environmentDocumentation = fs.readFileSync(
+    path.join(documentation, "SceneGISPlanarEnvironment.html"),
+    "utf8",
+  );
+  for (const member of [
+    "world",
+    "light",
+    "sunDirection",
+    "moonDirection",
+    "sunColor",
+    "sunIntensity",
+    "enabled",
+  ]) {
+    assert.match(
+      environmentDocumentation,
+      new RegExp(`<h4 class="name" id="${member}">`, "u"),
+    );
+  }
 }
 
 function classDeclaration(declarations, name) {
@@ -455,6 +505,21 @@ function verifyStylingDeclarations(declarations) {
   assert.match(layer, /\n\s*colorToAlpha: Color \| undefined;/u);
   const world = classDeclaration(declarations, "SceneGISPlanarWorld");
   assert.match(world, /\n\s*material: Material \| undefined;/u);
+  assert.match(
+    world,
+    /\n\s*readonly environment: SceneGISPlanarEnvironment \| undefined;/u,
+  );
+  const environment = classDeclaration(
+    declarations,
+    "SceneGISPlanarEnvironment",
+  );
+  assert.match(environment, /\n\s*readonly world: SceneGISPlanarWorld;/u);
+  assert.match(environment, /\n\s*readonly light: DirectionalLight;/u);
+  assert.match(environment, /\n\s*sunDirection: Cartesian3;/u);
+  assert.match(environment, /\n\s*moonDirection: Cartesian3;/u);
+  assert.match(environment, /\n\s*sunColor: Color;/u);
+  assert.match(environment, /\n\s*sunIntensity: number;/u);
+  assert.match(environment, /\n\s*enabled: boolean;/u);
 }
 
 async function verify() {
@@ -524,7 +589,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 8/8 GLSL, 8/8 generated shader modules, bare ESM/CJS, S2/S3 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 8/8 GLSL, 8/8 generated shader modules, bare ESM/CJS, S2/S3/E1 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
   );
 }
 

@@ -1,0 +1,14 @@
+title: SceneGIS Planar Environment
+description: >-
+  Demonstrates a caller-created and caller-registered planar Environment with
+  explicit observer-to-sun and observer-to-moon directions in fixed local
+  east, north, and up axes. The Environment controls one stable directional
+  light with conditional authority restoration. Local deterministic imagery
+  and heightmap terrain keep the example independent of network services. The
+  Moon direction is retained as future environment state but E1 does not draw
+  a visible Moon or add a second light.
+labels:
+  - SceneGIS
+  - Environment
+  - Lighting
+development: false

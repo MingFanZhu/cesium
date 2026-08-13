@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                         |
-| ---------------------- | ----------------------------------------------------------------------------- |
-| Extension slug         | `planar-environment`                                                          |
-| Status                 | `active`                                                                      |
-| Planning model         | `extension`                                                                   |
-| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)                  |
-| Current phase          | E1 Manual Celestial Direction and Lighting Contract                           |
-| Active phase plan      | [E1 phase plan](plans/2026-08-13-phase-e1-manual-celestial-light-contract.md) |
-| Active standalone plan | None                                                                          |
-| Architecture contact   | Architecture Agent                                                            |
-| Execution contact      | Execution Agent                                                               |
-| Last updated           | `2026-08-13`                                                                  |
+| Field                  | Value                                                                 |
+| ---------------------- | --------------------------------------------------------------------- |
+| Extension slug         | `planar-environment`                                                  |
+| Status                 | `active`                                                              |
+| Planning model         | `extension`                                                           |
+| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)          |
+| Current phase          | E2 Astronomical Direction Mode planning                               |
+| Active phase plan      | None; Architecture is refreshing source facts after the E1 checkpoint |
+| Active standalone plan | None                                                                  |
+| Architecture contact   | Architecture Agent                                                    |
+| Execution contact      | Execution Agent                                                       |
+| Last updated           | `2026-08-13`                                                          |
 
 ## Scope
 
@@ -47,14 +47,14 @@
 
 ## Current handoff
 
-- Current state: Architecture 已完成总体计划与 E1 源码事实研究；E1 contract 已 confirmed，等待正式
-  Execution assignment 后实现。
-- Next action: Execution 仅实现 E1 manual celestial direction/light contract，不进入天文、可见日月或大气。
-- Current phase status: E1=`active`；E2-E5=`planned`，仅保留稳定目标，不提前冻结实现。
+- Current state: E1 implementation、Architecture review与项目负责人manual gate均已通过；本次E1 checkpoint提交不push。
+- Next action: Architecture以E1 checkpoint为新base重新审计Cesium astronomy/transforms/time-scale事实，建立并确认E2 phase plan，
+  再向Execution发送正式assignment。
+- Current phase status: E1=`completed`；E2=`planning`；E3-E5=`planned`，仅保留稳定目标，不提前冻结实现。
 - Open discussions: None。
-- Latest review: None；E1 implementation review 尚未建立。
+- Latest review: [E1 approved review](reviews/2026-08-13-e1-manual-celestial-light-contract.md)。
 - Unresolved reviews: None。
 - Known risks: `scene.light` 是 scene-wide 可变状态；Controller 必须明确独占、恢复与外部覆盖语义；
   future atmosphere 不得误用 Earth ellipsoid automatic uniforms。
-- Manual gate: Architecture 负责代码和证据 review；明显视觉表现由项目负责人把关。所有 Sandcastle tool panel
-  用户可见说明使用中文。
+- Manual gate: 项目负责人已在`2026-08-13`验收中文Environment控制、真实公开terrain光照和平面相机交互，并明确同意进入
+  下一阶段。Architecture负责代码和契约质量；用户可见tool panel说明使用中文。

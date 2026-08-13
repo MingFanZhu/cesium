@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed`
 - Parent plan: [planar-environment extension](2026-08-13-planar-environment-extension.md)
 - Phase: `E1`
 - Owner role: `execution`
@@ -12,7 +12,7 @@
 - Created: `2026-08-13`
 - Updated: `2026-08-13`
 - Related discussions: 项目负责人要求先进入大气和日月扩展；Architecture 选择先固定 manual environment contract
-- Related reviews: E1 implementation 时新建
+- Related reviews: [E1 review request](../reviews/2026-08-13-e1-manual-celestial-light-contract.md)
 - ADR: 新建 `Documentation/SceneGIS/Decisions/ADR-0033-planar-environment-manual-celestial-light.md`
 - SGP: None expected；upstream-owned diff 出现前必须停止并升级计划
 
@@ -118,8 +118,8 @@ Constructor/options and properties:
    全部通过后才原子记录connection并占用world registry。它不监听DOM、不写`scene.light`。若callback失败，Execution须考虑
    ControllerHost已先插入controller的现状，确保instance/world自身无partial state；不修改ControllerHost来补偿。
 2. `firstUpdate(scene,time)`先验证已连接、registry仍指向本instance、live Scene、`scene.world === world`和
-   `SceneMode.SCENE3D`；所有验证成功后才记录scene、capture displaced light并取得authority。E1忽略time，但保留签名供E2
-   使用。
+   `SceneMode.SCENE3D`；所有验证成功后才记录scene、capture displaced light、取得authority并请求一帧。E1忽略time，但保留
+   签名供E2使用。
 3. Active authority取得时，Environment保存当时`scene.light`为displaced light，更新stable DirectionalLight，并设置
    `scene.light = environment.light`。每次active `update`重新验证scene/world并reassert同一light，因而外部临时改写将在下帧
    被Environment覆盖；这是显式registered controller的authority contract。
@@ -232,8 +232,8 @@ Real-Context evidence至少覆盖：
   `scene.light === environment.light`，light direction精确等于normalized `-sunDirection`；
 - fixed non-flat terrain上east/north/up和低仰角manual sun方向至少两组产生deterministic lighting pixels；color/intensity
   mutation同样改变pixels且不更换tile、DrawCommand、ShaderProgram、VA、terrain mesh、imagery texture/binding；
-- active property setter在requestRenderMode下产生一个有效render request；stable帧update不持续request；inactive mutation
-  不触碰scene light，但disabled registered Environment继续保留registry；
+- 首次authority acquisition与active property setter在requestRenderMode下各产生一个有效render request；stable帧update不
+  持续request；inactive mutation不触碰scene light，但disabled registered Environment继续保留registry；
 - enabled false恢复原SunLight；re-enable capture当前light并重取authority；remove同样恢复。若caller在Environment active期间
   替换scene.light，disable/remove保留caller override而不恢复stale light；
 - 同world第二Environment冲突在第二instance或light mutation前失败，并保持第一registry；wrong scene/world/mode、destroyed
@@ -255,6 +255,12 @@ Architecture/code review approved后，由项目负责人使用 SceneGIS Sandcas
 
 项目负责人已明确视觉表现由其把关；Architecture review不重复视觉用例，仅审代码、contract和证据。manual gate确认前不得
 创建E1 completion checkpoint或进入E2。
+
+### Manual gate result
+
+- `2026-08-13`项目负责人在直接开发页面验收中文Environment控制、公开EPSG:3857 terrain/imagery上的太阳光照变化与
+  平面相机交互，确认功能通过并明确允许进入下一阶段。
+- 该owner evidence关闭E1最后gate；Architecture不把自动化headless检查冒充视觉验收，也不要求重复legacy Sandcastle gate。
 
 ## Risks and dependencies
 
@@ -289,3 +295,35 @@ Architecture/code review approved后，由项目负责人使用 SceneGIS Sandcas
 - Implementation/review期间不得commit、不得push、不得publish、不得进入E2。
 - Execution必须回写本phase plan、extension roadmap/README、plans/reviews indexes、review request和current handoff，保留
   implementation deviations、exact changed paths、验证结果、未运行项和风险。
+
+## Execution result
+
+- 实现与confirmed设计一致，无产品范围扩大：`SceneGISPlanarEnvironment`完成robust direction normalization、clone/no-op、
+  stable `DirectionalLight`、ControllerHost callbacks、one-per-world registry、enabled authority、conditional restore、
+  requestRender和World destroy soft-private sever。World只保存reference，不拥有Environment或light。
+- Real Context使用本地2×2 non-flat heightmap与本地imagery，证明`light.direction=-sunDirection`、相反斜坡方向pixels、
+  color/intensity pixels、Moon non-visual、每次active mutation单一request，以及tile/DrawCommand/ShaderProgram/VA/mesh/
+  imagery binding/texture identities保持。
+- 新增`scenegis-planar-environment`，所有用户可见tool panel文案为中文；terrain/imagery完全本地deterministic，无公网请求。
+- 新建ADR-0033，并更新Architecture、DevelopmentGuide、PlanarWorldGuide和UpgradeChecklist；installed package verifier覆盖
+  public ESM/CJS、constructor/state/clone/attached-destroy ownership、engine/root declarations与API anchors。
+- Focused结果：Environment `10/10`、World aggregate `22/22`、Environment Widget real-Context `4/4`。
+- Delivery结果：`build`、`build-release`、`build-ts`、`build-docs`、`tsc`、package verifier和Sandcastle gallery build通过；
+  package证据为8/8 GLSL、8/8 generated shader modules及E1 runtime/declarations/API。
+- Deviation：无。未运行existing TerrainStyling Widget，因为未修改Surface/shader/fixture；未运行full suite/E2E，符合phase最小边界。
+- Ownership：upstream-owned files=`0`、SGP=None；生成Build/index/declarations/API仅用于验证，git status中generated files=`0`。
+- Architecture/code review与项目负责人manual gate均已approved；E1以本次独立本地checkpoint完成，未push。E2仅在该
+  checkpoint后进入Architecture planning。
+
+### E1-R001 execution response
+
+- `firstUpdate`保持所有validation在前；成功记录Scene并取得authority后恰好调用一次`scene.requestRender()`，failure path仍为
+  零Scene/light/request mutation。稳定`update`继续不request。
+- Unit精确断言首次取得authority为1次request，紧接stable update仍为1；既有active mutation计数同步保留no-op边界。
+- Existing Widget suite新增late registration时序：先让real request-render Scene进入`_renderRequested=false`，再通过真实
+  `widget.addController`注册default-enabled Environment；首次host frame同轮request并把Environment light发布到World
+  frameState，下一stable frame不重复request。
+- ADR-0033、Architecture和PlanarWorldGuide已修正为首次authority acquisition、active mutation与重新enable请求一帧，stable
+  update不请求。未修改ControllerHost、Scene、Widget Source、Surface或其他产品路径。
+- Architecture focused re-review确认validation—authority—request顺序、stable update零request与late ControllerHost同frame
+  publish证据成立，`E1-R001`已关闭且review=`approved`。项目负责人manual gate随后通过，phase现为`completed`。

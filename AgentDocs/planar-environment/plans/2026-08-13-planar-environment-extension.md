@@ -12,7 +12,7 @@
 - Parent extensions: completed `planar-world`、`planar-terrain-advanced`、
   `planar-surface-styling`
 - Related discussions: 项目负责人提出日月方向、太阳光照、平面大气和 SkyBox 适配
-- Related reviews: None
+- Related reviews: [E1 review request](../reviews/2026-08-13-e1-manual-celestial-light-contract.md)
 - ADR: E1 expected `ADR-0033`；后续 phase 按激活时的长期决定建立 ADR
 - SGP: E1 expected None
 
@@ -67,13 +67,13 @@
 
 ## Phase roadmap
 
-| Phase | Objective                                                                                 | Dependencies               | Entry gate                                                                                  | Exit gate                                                                                                   | Status    | Phase plan                                                   |
-| ----- | ----------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------ |
-| E1    | 建立 manual sun/moon direction、scene light authority、ownership/lifecycle 与中文示例。   | surface-styling checkpoint | 审计 ControllerHost、Scene.light、DirectionalLight、World lifecycle 与 public delivery。    | 公共 contract/ADR、真实 Context 光照、恢复/独占、warm identity、dev/release/npm 和 manual gate 闭环。       | `active`  | [E1](2026-08-13-phase-e1-manual-celestial-light-contract.md) |
-| E2    | 在显式 reference longitude/latitude 和 time 下增加 astronomical sun/moon direction mode。 | E1 checkpoint              | 重新审计当前 Cesium astronomy/transforms、time scale、accuracy 和 package boundary。        | manual/astronomical mode 切换、确定性方向、时区/日期/极端纬度与 ownership 闭环。                            | `planned` | 激活时建立                                                   |
-| E3    | 实现 SceneGIS-owned 可见太阳/月亮，并冻结尺度、遮挡和地下行为。                           | E2 checkpoint              | 重新审计 billboard/command/render pass、depth/horizon 与资源 contract。                     | 日月视觉、方向同步、资源 ownership、requestRender、camera/underground 与 lifecycle 闭环。                   | `planned` | 激活时建立                                                   |
-| E4    | 实现独立平面大气与 caller-owned SkyBox 适配。                                             | E3 checkpoint、ADR-0030    | 重新审计 atmosphere shader、fullscreen/sky pass、camera height、precision 和 SkyBox seams。 | 大气/天空合成、地下规则、SkyBox ownership、shader delivery、性能与真实 GPU 画面闭环。                       | `planned` | 激活时建立                                                   |
-| E5    | 完成环境能力联合资格、发布、文档和升级交付。                                              | E4 checkpoint              | E1-E4 review/checkpoint 完成；固定最小联合矩阵。                                            | manual/astronomical light、visible bodies、atmosphere/SkyBox 在 dev/release/npm/lifecycle/docs 中统一闭环。 | `planned` | 激活时建立                                                   |
+| Phase | Objective                                                                                 | Dependencies               | Entry gate                                                                                  | Exit gate                                                                                                   | Status      | Phase plan                                                   |
+| ----- | ----------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------ |
+| E1    | 建立 manual sun/moon direction、scene light authority、ownership/lifecycle 与中文示例。   | surface-styling checkpoint | 审计 ControllerHost、Scene.light、DirectionalLight、World lifecycle 与 public delivery。    | 公共 contract/ADR、真实 Context 光照、恢复/独占、warm identity、dev/release/npm 和 manual gate 闭环。       | `completed` | [E1](2026-08-13-phase-e1-manual-celestial-light-contract.md) |
+| E2    | 在显式 reference longitude/latitude 和 time 下增加 astronomical sun/moon direction mode。 | E1 checkpoint              | 重新审计当前 Cesium astronomy/transforms、time scale、accuracy 和 package boundary。        | manual/astronomical mode 切换、确定性方向、时区/日期/极端纬度与 ownership 闭环。                            | `planning`  | Architecture source refresh后建立                            |
+| E3    | 实现 SceneGIS-owned 可见太阳/月亮，并冻结尺度、遮挡和地下行为。                           | E2 checkpoint              | 重新审计 billboard/command/render pass、depth/horizon 与资源 contract。                     | 日月视觉、方向同步、资源 ownership、requestRender、camera/underground 与 lifecycle 闭环。                   | `planned`   | 激活时建立                                                   |
+| E4    | 实现独立平面大气与 caller-owned SkyBox 适配。                                             | E3 checkpoint、ADR-0030    | 重新审计 atmosphere shader、fullscreen/sky pass、camera height、precision 和 SkyBox seams。 | 大气/天空合成、地下规则、SkyBox ownership、shader delivery、性能与真实 GPU 画面闭环。                       | `planned`   | 激活时建立                                                   |
+| E5    | 完成环境能力联合资格、发布、文档和升级交付。                                              | E4 checkpoint              | E1-E4 review/checkpoint 完成；固定最小联合矩阵。                                            | manual/astronomical light、visible bodies、atmosphere/SkyBox 在 dev/release/npm/lifecycle/docs 中统一闭环。 | `planned`   | 激活时建立                                                   |
 
 ## Cross-phase validation
 
@@ -108,5 +108,9 @@
 
 - `planar-surface-styling` S4 已通过 Architecture review、headed dev/release E2E 和项目负责人 final visual/manual gate，并形成 predecessor checkpoint。
 - Architecture 已依据当前源码确认 ControllerHost timing seam、DirectionalLight sign、native Earth environment 边界和 E1 ownership design。
-- E1 phase plan 已 confirmed；Architecture planning checkpoint 后向绑定 Execution task 发送正式 assignment。
-- E2-E5 仅冻结目标与边界；在对应 checkpoint 和最新源码事实产生前不实现、不猜测详细 shader/renderer/API。
+- E1实现已完成：新增Environment Controller、World registry/sever、unit与real-Context资格、local中文示例、ADR-0033和
+  installed delivery验证。Architecture focused re-review与项目负责人manual gate均已通过，本次独立checkpoint不push。
+- Architecture finding `E1-R001`已关闭：首次authority acquisition请求一帧，stable update不请求；unit与late registration
+  真实ControllerHost时序证据证明同frame request/publish，且未扩大ControllerHost/Scene/Widget Source边界。
+- E2已进入Architecture planning：先以E1 checkpoint刷新Cesium astronomy/transforms/time-scale与package boundary事实，再建立
+  confirmed phase plan。E3-E5仍只冻结目标与边界。

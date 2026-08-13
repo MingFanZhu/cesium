@@ -366,6 +366,19 @@ fragment texture-unit预算，undefined保持既有fast path。完整输入、ow
 Material variant必须在selection/publication前完成真实Context compile/link；失败不得替换旧normal/depth replay。
 释放旧source时必须使resident cached tile的对应command metadata失效，避免重新selection时复用已释放program。
 
+### 平面环境手动方向与Scene light authority
+
+`SceneGISPlanarEnvironment`是caller-created、caller-registered Controller；每个live `SceneGISPlanarWorld`最多登记一个
+reference，World不拥有或销毁Environment/light。Manual `sunDirection`与`moonDirection`固定使用`+X East/+Y North/+Z Up`
+observer-to-body语义，内部稳定`DirectionalLight.direction`等于normalized `-sunDirection`；Moon在E1只保存状态。
+
+Environment在ControllerHost first update通过live world、registry、Scene/world identity和`SCENE3D`验证后取得scene-wide
+`scene.light` authority，并为首次authority acquisition请求一帧。Active update纠正并reassert同一light但不持续request
+render；active property mutation与重新enable同样请求一帧。
+Disable、disconnect与World sever按reference identity conditional restore，外部override不得被stale light覆盖。Environment不自动
+设置`world.enableLighting`，authority也会影响Models/3D Tiles等其他Scene consumer。完整时序、所有权与E2升级边界见
+[ADR-0033](Decisions/ADR-0033-planar-environment-manual-celestial-light.md)。
+
 ### 平面地形 Worker 管线
 
 A4依据同一257×257本地LERC fixture的bounded profiling，把LERC decode与Heightmap regular-grid/skirt

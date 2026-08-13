@@ -440,6 +440,17 @@ Sandcastle 负责展示和人工验收；边界条件、资源释放和内部状
 - planar imagery 仍由应用通过 canonical `world.tilingScheme` 和 `world.imageryLayers` 显式组装；
   `scenegis-planar-viewer` 只演示该高层 ownership，不引入通用 provider picker、预取或离线下载。
 
+### 平面 Environment Controller检查
+
+- Environment必须是caller-created并显式`addController`；World只登记一个reference且不拥有它。调用方在destroy host前先
+  `removeController`。ControllerHost在`connectedCallback`前已插入controller，因此只注册已通过constructor validation的
+  instance，不宣称callback failure会回滚host。
+- Manual celestial direction固定为`+X East/+Y North/+Z Up` observer-to-body，`DirectionalLight.direction`必须取负。
+  禁止使用Earth SunLight、automatic celestial uniform或CRS推断替代显式方向。
+- First update前不写`scene.light`；active update可reassert同一stable light但不得每帧request render。Disable/remove/world
+  sever必须按当前light reference conditional restore，并保留外部override。
+- Environment light authority是scene-wide而非terrain-only；不能自动切换`world.enableLighting`。E1 Moon只保存状态。
+
 ### 平面地形感知导航锚点检查
 
 实现或评审planar controller gesture时同时检查：

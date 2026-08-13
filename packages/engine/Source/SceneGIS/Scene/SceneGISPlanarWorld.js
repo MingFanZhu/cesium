@@ -175,6 +175,7 @@ function SceneGISPlanarWorld(options) {
   this._enableLighting = enableLighting;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   this._material = undefined;
+  this._environment = undefined;
   this._show = true;
   this._terrainProvider = undefined;
   this._imageryLayers = new SceneGISPlanarImageryLayerCollection({
@@ -245,6 +246,20 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
   imageryLayers: {
     get: function () {
       return this._imageryLayers;
+    },
+  },
+  /**
+   * Gets the caller-owned planar Environment currently registered with this
+   * world, or undefined. The world keeps only a reference and never destroys
+   * the Environment or its light.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {SceneGISPlanarEnvironment|undefined}
+   * @readonly
+   */
+  environment: {
+    get: function () {
+      return this._environment;
     },
   },
   /**
@@ -649,6 +664,39 @@ SceneGISPlanarWorld.prototype.pickFromWindowPosition = function (
 };
 
 /**
+ * Registers the sole caller-owned Environment reference for this live world.
+ *
+ * @param {SceneGISPlanarEnvironment} environment The Environment being connected.
+ * @private
+ */
+SceneGISPlanarWorld.prototype._registerEnvironment = function (environment) {
+  if (this.isDestroyed()) {
+    throw new DeveloperError(
+      "A destroyed SceneGISPlanarWorld cannot register an Environment.",
+    );
+  }
+  if (this._environment !== undefined) {
+    throw new DeveloperError(
+      "A SceneGISPlanarWorld may register only one Environment.",
+    );
+  }
+  this._environment = environment;
+};
+
+/**
+ * Clears this world's Environment reference when the matching controller is
+ * disconnected. A stale controller cannot detach another registration.
+ *
+ * @param {SceneGISPlanarEnvironment} environment The Environment being disconnected.
+ * @private
+ */
+SceneGISPlanarWorld.prototype._unregisterEnvironment = function (environment) {
+  if (this._environment === environment) {
+    this._environment = undefined;
+  }
+};
+
+/**
  * Returns true if this object was destroyed; otherwise, false.
  *
  * @returns {boolean} True if this object was destroyed; otherwise, false.
@@ -663,6 +711,11 @@ SceneGISPlanarWorld.prototype.isDestroyed = function () {
  * @returns {void}
  */
 SceneGISPlanarWorld.prototype.destroy = function () {
+  const environment = this._environment;
+  if (environment !== undefined) {
+    environment._severWorld(this);
+    this._environment = undefined;
+  }
   this._frameState = undefined;
   this._surface.destroy();
   this._imageryLayers._owner = undefined;

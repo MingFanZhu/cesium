@@ -12,6 +12,7 @@ import {
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
+  SceneGISPlanarEnvironment,
   SceneGISPlanarTilingScheme,
   SceneGISPlanarWorld,
   SceneMode,
@@ -106,6 +107,7 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.imageryLayers.tilingScheme).toBe(world.tilingScheme);
     expect(world.terrainProvider).toBeUndefined();
     expect(world.material).toBeUndefined();
+    expect(world.environment).toBeUndefined();
     world.destroy();
   });
 
@@ -205,6 +207,7 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
       "maximumLevel",
       "tilesLoaded",
       "imageryLayers",
+      "environment",
     ]) {
       expect(
         Object.getOwnPropertyDescriptor(SceneGISPlanarWorld.prototype, property)
@@ -212,6 +215,23 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
       ).toBeUndefined();
     }
     world.destroy();
+  });
+
+  it("keeps a registered Environment caller-owned across world destruction", function () {
+    const world = createWorld();
+    const environment = new SceneGISPlanarEnvironment({
+      world,
+      sunDirection: Cartesian3.UNIT_Z,
+      moonDirection: Cartesian3.UNIT_X,
+    });
+    const element = {};
+    environment.connectedCallback(element);
+
+    expect(world.environment).toBe(environment);
+    world.destroy();
+    expect(environment.world).toBe(world);
+    expect(environment.light).toBeDefined();
+    expect(() => environment.disconnectedCallback(element)).not.toThrow();
   });
 
   it("owns its imagery layer collection", function () {

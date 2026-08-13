@@ -9,6 +9,7 @@ import {
   Cartesian3,
   Credit,
   DirectionalLight,
+  SceneGISPlanarEnvironment,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarImageryLayer,
@@ -79,7 +80,15 @@ viewer.scene.light = new DirectionalLight({
 });
 viewer.planarCameraController.viewHome(viewer.scene);
 
+const environment = new SceneGISPlanarEnvironment({
+  world,
+  sunDirection: new Cartesian3(1.0, 1.0, 1.0),
+  moonDirection: new Cartesian3(-1.0, -1.0, 0.5),
+});
+viewer.addController(environment);
+
 // The Viewer owns and destroys its Scene and primary world.
+viewer.removeController(environment);
 viewer.destroy();
 ```
 
@@ -110,6 +119,19 @@ terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务
 低层应用可使用 `new CesiumWidget(container, { world })`。应用必须把 `scene.screenSpaceCameraController.enableInputs` 设为 `false`，再通过 `widget.addController` 注册唯一 `SceneGISPlanarCameraController`；销毁 Widget 前先移除 controller。`Viewer({ world })` 已自动完成这套顺序。
 
 一个 world 只能绑定一个 WebGL `Context`。不要在多个 Widget/Viewer 之间复用同一个 live world。`Scene` 拥有 primary world，销毁 Scene/Widget/Viewer 会销毁 world；imagery layer collection 拥有 layer，但 provider 始终由调用方拥有。
+
+## 手动环境方向与光照控制权
+
+`SceneGISPlanarEnvironment`必须由调用方构造并通过`addController`注册；同一个live World一次只能注册一个。方向坐标固定为
+`+X East/+Y North/+Z Up`，`sunDirection`和`moonDirection`均表示observer-to-body并在赋值时normalize。内部稳定
+`DirectionalLight`使用相反传播方向。Getter返回clone，`light`则返回同一诊断reference。
+
+注册成功后`world.environment`立即指向该instance；首次enabled Controller frame才capture既有`scene.light`并取得authority。
+Disable/remove会在Environment light仍是当前reference时恢复captured light；外部已替换reference时保留override。active property
+mutation、首次authority acquisition与重新enable都会请求一帧，stable update不持续request render。Environment authority
+是全Scene的，也会影响Models和3D Tiles；它不会
+自动打开`world.enableLighting`。Moon方向在E1不显示Moon、不产生moon light。销毁Viewer/Widget前必须先
+`removeController(environment)`；World不会destroy Environment或任何light。
 
 ## 导航、Home 与拾取
 
