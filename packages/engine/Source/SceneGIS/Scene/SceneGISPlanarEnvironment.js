@@ -1,8 +1,15 @@
 import Cartesian3 from "../../Core/Cartesian3.js";
+import Cartographic from "../../Core/Cartographic.js";
 import Color from "../../Core/Color.js";
 import defined from "../../Core/defined.js";
 import DeveloperError from "../../Core/DeveloperError.js";
+import Ellipsoid from "../../Core/Ellipsoid.js";
 import Frozen from "../../Core/Frozen.js";
+import JulianDate from "../../Core/JulianDate.js";
+import Matrix3 from "../../Core/Matrix3.js";
+import Matrix4 from "../../Core/Matrix4.js";
+import Simon1994PlanetaryPositions from "../../Core/Simon1994PlanetaryPositions.js";
+import Transforms from "../../Core/Transforms.js";
 import DirectionalLight from "../../Scene/DirectionalLight.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import SceneGISPlanarWorld from "./SceneGISPlanarWorld.js";
@@ -68,6 +75,147 @@ function validateIntensity(value) {
   }
 }
 
+function validateDirectionMode(value) {
+  if (value !== "manual" && value !== "astronomical") {
+    throw new DeveloperError(
+      'directionMode must be either "manual" or "astronomical".',
+    );
+  }
+}
+
+function validateOrigin(value, propertyName, minimum, maximum) {
+  if (
+    defined(value) &&
+    (!Number.isFinite(value) || value < minimum || value > maximum)
+  ) {
+    throw new DeveloperError(
+      `${propertyName} must be undefined or a finite number in [${minimum}, ${maximum}].`,
+    );
+  }
+}
+
+function validateAstronomicalOrigin(longitude, latitude) {
+  if (!defined(longitude) || !defined(latitude)) {
+    throw new DeveloperError(
+      "Astronomical directionMode requires originLongitude and originLatitude.",
+    );
+  }
+}
+
+function validateTime(time) {
+  if (
+    !(time instanceof JulianDate) ||
+    !Number.isFinite(time.dayNumber) ||
+    !Number.isFinite(time.secondsOfDay)
+  ) {
+    throw new DeveloperError("time must be a finite JulianDate.");
+  }
+}
+
+function computeAstronomicalDirection(
+  environment,
+  time,
+  computeBodyPosition,
+  result,
+) {
+  computeBodyPosition(time, environment._bodyInertial);
+  Matrix3.multiplyByVector(
+    environment._temeToFixed,
+    environment._bodyInertial,
+    environment._bodyFixed,
+  );
+  Cartesian3.subtract(
+    environment._bodyFixed,
+    environment._observerFixed,
+    environment._lineOfSight,
+  );
+  Matrix3.multiplyByVector(
+    environment._fixedToEnu,
+    environment._lineOfSight,
+    environment._lineOfSight,
+  );
+  return normalizeDirection(
+    environment._lineOfSight,
+    environment._directionMode === "astronomical"
+      ? "astronomical direction"
+      : "direction",
+    result,
+  );
+}
+
+function computeAstronomicalCandidates(environment, time) {
+  validateTime(time);
+  validateAstronomicalOrigin(
+    environment._originLongitude,
+    environment._originLatitude,
+  );
+
+  environment._originCartographic.longitude = environment._originLongitude;
+  environment._originCartographic.latitude = environment._originLatitude;
+  environment._originCartographic.height = 0.0;
+  Ellipsoid.WGS84.cartographicToCartesian(
+    environment._originCartographic,
+    environment._observerFixed,
+  );
+  Transforms.eastNorthUpToFixedFrame(
+    environment._observerFixed,
+    Ellipsoid.WGS84,
+    environment._enuTransform,
+  );
+  Matrix4.getMatrix3(environment._enuTransform, environment._fixedToEnu);
+  Matrix3.transpose(environment._fixedToEnu, environment._fixedToEnu);
+  Transforms.computeTemeToPseudoFixedMatrix(time, environment._temeToFixed);
+
+  computeAstronomicalDirection(
+    environment,
+    time,
+    Simon1994PlanetaryPositions.computeSunPositionInEarthInertialFrame,
+    environment._candidateSunDirection,
+  );
+  computeAstronomicalDirection(
+    environment,
+    time,
+    Simon1994PlanetaryPositions.computeMoonPositionInEarthInertialFrame,
+    environment._candidateMoonDirection,
+  );
+}
+
+function publishAstronomicalCandidates(environment, time) {
+  Cartesian3.clone(
+    environment._candidateSunDirection,
+    environment._effectiveSunDirection,
+  );
+  Cartesian3.clone(
+    environment._candidateMoonDirection,
+    environment._effectiveMoonDirection,
+  );
+  environment._publishedTime = JulianDate.clone(
+    time,
+    environment._publishedTime,
+  );
+  environment._astronomyDirty = false;
+  syncLight(environment);
+}
+
+function astronomyNeedsUpdate(environment, time) {
+  if (environment._directionMode !== "astronomical") {
+    return false;
+  }
+  validateTime(time);
+  return (
+    environment._astronomyDirty ||
+    !defined(environment._publishedTime) ||
+    !JulianDate.equals(time, environment._publishedTime)
+  );
+}
+
+function requestAstronomyRender(environment) {
+  if (environment._hasAuthority) {
+    requestRender(environment);
+    environment._astronomyRenderRequested = true;
+  }
+}
+
 function validateScene(environment, scene) {
   if (
     !defined(scene) ||
@@ -103,9 +251,9 @@ function syncLight(environment) {
   const light = environment._light;
   light.direction = environment._lightDirection;
   light.color = environment._lightColor;
-  environment._lightDirection.x = -environment._sunDirection.x;
-  environment._lightDirection.y = -environment._sunDirection.y;
-  environment._lightDirection.z = -environment._sunDirection.z;
+  environment._lightDirection.x = -environment._effectiveSunDirection.x;
+  environment._lightDirection.y = -environment._effectiveSunDirection.y;
+  environment._lightDirection.z = -environment._effectiveSunDirection.z;
   Color.clone(environment._sunColor, environment._lightColor);
   light.intensity = environment._sunIntensity;
 }
@@ -131,10 +279,11 @@ function releaseAuthority(environment) {
 }
 
 /**
- * Controls explicit manual celestial directions and planar scene lighting for
- * one caller-owned {@link SceneGISPlanarWorld}. Register the instance with a
- * CesiumWidget or Viewer controller host and remove it before destroying the
- * widget. The world does not own this instance or its stable light.
+ * Controls manual or project-origin astronomical celestial directions and
+ * planar scene lighting for one caller-owned {@link SceneGISPlanarWorld}.
+ * Register the instance with a CesiumWidget or Viewer controller host and
+ * remove it before destroying the widget. The world does not own this
+ * instance or its stable light.
  *
  * @alias SceneGISPlanarEnvironment
  * @constructor
@@ -146,11 +295,17 @@ function releaseAuthority(environment) {
  * @param {Cartesian3} options.moonDirection The finite non-zero observer-to-moon direction retained for future visual stages.
  * @param {Color} [options.sunColor=Color.WHITE] The finite directional-light color.
  * @param {number} [options.sunIntensity=2.0] The finite non-negative directional-light intensity.
+ * @param {"manual"|"astronomical"} [options.directionMode="manual"] The source of effective celestial directions.
+ * @param {number} [options.originLongitude] The project-origin WGS84 longitude in radians, required in astronomical mode.
+ * @param {number} [options.originLatitude] The project-origin WGS84 geodetic latitude in radians, required in astronomical mode.
  *
  * @exception {DeveloperError} The world is not a live SceneGISPlanarWorld.
  * @exception {DeveloperError} A direction is not a finite non-zero Cartesian3.
  * @exception {DeveloperError} The sun color is not finite.
  * @exception {DeveloperError} The sun intensity is not finite and non-negative.
+ * @exception {DeveloperError} The direction mode is not <code>"manual"</code> or <code>"astronomical"</code>.
+ * @exception {DeveloperError} An origin is not undefined or a finite value in its inclusive longitude or latitude range.
+ * @exception {DeveloperError} Astronomical mode does not define both origin longitude and origin latitude.
  */
 function SceneGISPlanarEnvironment(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
@@ -168,12 +323,44 @@ function SceneGISPlanarEnvironment(options) {
   );
   const sunColor = options.sunColor ?? Color.WHITE;
   const sunIntensity = options.sunIntensity ?? 2.0;
+  const directionMode = options.directionMode ?? "manual";
+  const originLongitude = options.originLongitude;
+  const originLatitude = options.originLatitude;
   validateColor(sunColor, "sunColor");
   validateIntensity(sunIntensity);
+  validateDirectionMode(directionMode);
+  validateOrigin(originLongitude, "originLongitude", -Math.PI, Math.PI);
+  validateOrigin(
+    originLatitude,
+    "originLatitude",
+    -Math.PI * 0.5,
+    Math.PI * 0.5,
+  );
+  if (directionMode === "astronomical") {
+    validateAstronomicalOrigin(originLongitude, originLatitude);
+  }
 
   this._world = options.world;
   this._sunDirection = sunDirection;
   this._moonDirection = moonDirection;
+  this._effectiveSunDirection = Cartesian3.clone(sunDirection);
+  this._effectiveMoonDirection = Cartesian3.clone(moonDirection);
+  this._candidateSunDirection = new Cartesian3();
+  this._candidateMoonDirection = new Cartesian3();
+  this._originCartographic = new Cartographic();
+  this._observerFixed = new Cartesian3();
+  this._enuTransform = new Matrix4();
+  this._fixedToEnu = new Matrix3();
+  this._temeToFixed = new Matrix3();
+  this._bodyInertial = new Cartesian3();
+  this._bodyFixed = new Cartesian3();
+  this._lineOfSight = new Cartesian3();
+  this._directionMode = directionMode;
+  this._originLongitude = originLongitude;
+  this._originLatitude = originLatitude;
+  this._publishedTime = undefined;
+  this._astronomyDirty = directionMode === "astronomical";
+  this._astronomyRenderRequested = false;
   this._sunColor = Color.clone(sunColor);
   this._sunIntensity = sunIntensity;
   this._enabled = true;
@@ -208,7 +395,7 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
 
   /**
    * Gets the stable Cesium directional light controlled by this environment.
-   * Its direction is the normalized negative of {@link SceneGISPlanarEnvironment#sunDirection}.
+   * Its direction is the normalized negative of {@link SceneGISPlanarEnvironment#effectiveSunDirection}.
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {DirectionalLight}
@@ -217,6 +404,127 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   light: {
     get: function () {
       return this._light;
+    },
+  },
+
+  /**
+   * Gets or sets whether effective celestial directions use manual fallback
+   * state or the project-origin astronomical calculation.
+   *
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {"manual"|"astronomical"}
+   * @exception {DeveloperError} The assigned value is not <code>"manual"</code> or <code>"astronomical"</code>.
+   * @exception {DeveloperError} Astronomical mode is selected without both origin longitude and origin latitude.
+   */
+  directionMode: {
+    get: function () {
+      return this._directionMode;
+    },
+    set: function (value) {
+      validateDirectionMode(value);
+      if (value === this._directionMode) {
+        return;
+      }
+      if (value === "astronomical") {
+        validateAstronomicalOrigin(this._originLongitude, this._originLatitude);
+        this._directionMode = value;
+        this._astronomyDirty = true;
+        requestAstronomyRender(this);
+        return;
+      }
+
+      this._directionMode = value;
+      this._astronomyDirty = false;
+      this._publishedTime = undefined;
+      this._astronomyRenderRequested = false;
+      Cartesian3.clone(this._sunDirection, this._effectiveSunDirection);
+      Cartesian3.clone(this._moonDirection, this._effectiveMoonDirection);
+      syncLight(this);
+      if (this._hasAuthority) {
+        requestRender(this);
+      }
+    },
+  },
+
+  /**
+   * Gets or sets the project-origin WGS84 longitude in radians.
+   *
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {number|undefined}
+   * @exception {DeveloperError} The assigned value is neither undefined nor a finite number in <code>[-PI, PI]</code>.
+   * @exception {DeveloperError} The value is undefined while astronomical mode is active.
+   */
+  originLongitude: {
+    get: function () {
+      return this._originLongitude;
+    },
+    set: function (value) {
+      validateOrigin(value, "originLongitude", -Math.PI, Math.PI);
+      if (this._directionMode === "astronomical" && !defined(value)) {
+        validateAstronomicalOrigin(value, this._originLatitude);
+      }
+      if (value === this._originLongitude) {
+        return;
+      }
+      this._originLongitude = value;
+      if (this._directionMode === "astronomical") {
+        this._astronomyDirty = true;
+        requestAstronomyRender(this);
+      }
+    },
+  },
+
+  /**
+   * Gets or sets the project-origin WGS84 geodetic latitude in radians.
+   *
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {number|undefined}
+   * @exception {DeveloperError} The assigned value is neither undefined nor a finite number in <code>[-PI/2, PI/2]</code>.
+   * @exception {DeveloperError} The value is undefined while astronomical mode is active.
+   */
+  originLatitude: {
+    get: function () {
+      return this._originLatitude;
+    },
+    set: function (value) {
+      validateOrigin(value, "originLatitude", -Math.PI * 0.5, Math.PI * 0.5);
+      if (this._directionMode === "astronomical" && !defined(value)) {
+        validateAstronomicalOrigin(this._originLongitude, value);
+      }
+      if (value === this._originLatitude) {
+        return;
+      }
+      this._originLatitude = value;
+      if (this._directionMode === "astronomical") {
+        this._astronomyDirty = true;
+        requestAstronomyRender(this);
+      }
+    },
+  },
+
+  /**
+   * Gets the effective observer-to-sun planar direction.
+   *
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {Cartesian3}
+   * @readonly
+   */
+  effectiveSunDirection: {
+    get: function () {
+      return Cartesian3.clone(this._effectiveSunDirection);
+    },
+  },
+
+  /**
+   * Gets the effective observer-to-moon planar direction.
+   *
+   * @memberof SceneGISPlanarEnvironment.prototype
+   * @type {Cartesian3}
+   * @readonly
+   */
+  effectiveMoonDirection: {
+    get: function () {
+      return Cartesian3.clone(this._effectiveMoonDirection);
     },
   },
 
@@ -240,6 +548,10 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
         return;
       }
       Cartesian3.clone(normalized, this._sunDirection);
+      if (this._directionMode === "astronomical") {
+        return;
+      }
+      Cartesian3.clone(normalized, this._effectiveSunDirection);
       syncLight(this);
       if (this._hasAuthority) {
         requestRender(this);
@@ -268,6 +580,10 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
         return;
       }
       Cartesian3.clone(normalized, this._moonDirection);
+      if (this._directionMode === "astronomical") {
+        return;
+      }
+      Cartesian3.clone(normalized, this._effectiveMoonDirection);
       if (this._hasAuthority) {
         requestRender(this);
       }
@@ -354,6 +670,9 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
       if (defined(this._scene)) {
         acquireAuthority(this);
         requestRender(this);
+        if (this._directionMode === "astronomical") {
+          this._astronomyRenderRequested = true;
+        }
       }
     },
   },
@@ -434,8 +753,16 @@ SceneGISPlanarEnvironment.prototype.firstUpdate = function (scene, time) {
   }
   validateScene(this, scene);
 
+  if (this._directionMode === "astronomical") {
+    computeAstronomicalCandidates(this, time);
+  }
+
   this._scene = scene;
+  if (this._directionMode === "astronomical") {
+    publishAstronomicalCandidates(this, time);
+  }
   acquireAuthority(this);
+  this._astronomyRenderRequested = false;
   scene.requestRender();
 };
 
@@ -459,6 +786,14 @@ SceneGISPlanarEnvironment.prototype.update = function (scene, time) {
     );
   }
   validateScene(this, scene);
+  if (astronomyNeedsUpdate(this, time)) {
+    computeAstronomicalCandidates(this, time);
+    publishAstronomicalCandidates(this, time);
+    if (!this._astronomyRenderRequested) {
+      scene.requestRender();
+    }
+    this._astronomyRenderRequested = false;
+  }
   syncLight(this);
   scene.light = this._light;
   this._hasAuthority = true;

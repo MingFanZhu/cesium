@@ -371,6 +371,9 @@ assert.equal(layer.colorToAlpha.green, 0.2);
   });
   assert.equal(environment.world, world);
   assert.equal(environment.enabled, true);
+  assert.equal(environment.directionMode, "manual");
+  assert.equal(environment.originLongitude, undefined);
+  assert.equal(environment.originLatitude, undefined);
   assert.equal(environment.sunIntensity, 2);
   assert.equal(environment.light instanceof engine.DirectionalLight, true);
   assert.equal(environment.light.direction.x, -environment.sunDirection.x);
@@ -381,6 +384,19 @@ assert.equal(layer.colorToAlpha.green, 0.2);
   const exposedSun = environment.sunDirection;
   exposedSun.z = 99;
   assert.notEqual(environment.sunDirection.z, 99);
+  const exposedEffectiveSun = environment.effectiveSunDirection;
+  exposedEffectiveSun.z = 99;
+  assert.notEqual(environment.effectiveSunDirection.z, 99);
+  environment.originLongitude = 0;
+  environment.originLatitude = 0;
+  environment.directionMode = "astronomical";
+  const astronomicalScene = {
+    world,
+    mode: engine.SceneMode.SCENE3D,
+    light: new engine.DirectionalLight({ direction: engine.Cartesian3.UNIT_Z }),
+    requestRender() {},
+    isDestroyed: () => false,
+  };
   const sunColor = new engine.Color(0.25, 0.5, 0.75, 1);
   environment.sunColor = sunColor;
   sunColor.red = 99;
@@ -390,6 +406,16 @@ assert.equal(layer.colorToAlpha.green, 0.2);
   const hostElement = {};
   environment.connectedCallback(hostElement);
   assert.equal(world.environment, environment);
+  environment.firstUpdate(
+    astronomicalScene,
+    engine.JulianDate.fromIso8601("2026-03-20T12:00:00Z"),
+  );
+  assert.equal(environment.effectiveSunDirection.z > 0.99, true);
+  assert.equal(environment.effectiveMoonDirection.z > 0.9, true);
+  assert.equal(
+    environment.light.direction.x,
+    -environment.effectiveSunDirection.x,
+  );
   const material = new engine.Material({
   fabric: {
     type: "SceneGISInstalledOwnershipProbe",
@@ -424,7 +450,7 @@ for (const name of ${softPrivateSymbols}) assert.notEqual(root[name], undefined,
 `;
 }
 
-function verifyDocumentation() {
+function verifyDocumentation(engineDirectory) {
   const documentation = path.join(repo, "Build/Documentation");
   for (const name of [...publicEngine, ...publicWidgets]) {
     assert.equal(
@@ -470,8 +496,13 @@ function verifyDocumentation() {
   for (const member of [
     "world",
     "light",
+    "directionMode",
+    "originLongitude",
+    "originLatitude",
     "sunDirection",
     "moonDirection",
+    "effectiveSunDirection",
+    "effectiveMoonDirection",
     "sunColor",
     "sunIntensity",
     "enabled",
@@ -481,10 +512,38 @@ function verifyDocumentation() {
       new RegExp(`<h4 class="name" id="${member}">`, "u"),
     );
   }
+  for (const exceptionText of [
+    "The direction mode is not",
+    "An origin is not undefined or a finite value",
+    "Astronomical mode does not define both origin longitude and origin latitude",
+  ]) {
+    assert.match(environmentDocumentation, new RegExp(exceptionText, "u"));
+  }
+  const environmentSource = fs.readFileSync(
+    path.join(
+      engineDirectory,
+      "Source/SceneGIS/Scene/SceneGISPlanarEnvironment.js",
+    ),
+    "utf8",
+  );
+  for (const exceptionText of [
+    'The assigned value is not <code>"manual"</code> or <code>"astronomical"</code>.',
+    "Astronomical mode is selected without both origin longitude and origin latitude.",
+    "The assigned value is neither undefined nor a finite number in <code>[-PI, PI]</code>.",
+    "The assigned value is neither undefined nor a finite number in <code>[-PI/2, PI/2]</code>.",
+    "The value is undefined while astronomical mode is active.",
+  ]) {
+    assert.ok(
+      environmentSource.includes(exceptionText),
+      `installed Environment source documents: ${exceptionText}`,
+    );
+  }
 }
 
 function classDeclaration(declarations, name) {
-  const start = declarations.indexOf(`export class ${name} {`);
+  const start = declarations.search(
+    new RegExp(`^export class ${name}(?: implements [^{]+)? \\{`, "mu"),
+  );
   assert.notEqual(start, -1, `${name} declaration start`);
   const nextClass = declarations.indexOf("\nexport class ", start + 1);
   return declarations.slice(start, nextClass === -1 ? undefined : nextClass);
@@ -515,8 +574,19 @@ function verifyStylingDeclarations(declarations) {
   );
   assert.match(environment, /\n\s*readonly world: SceneGISPlanarWorld;/u);
   assert.match(environment, /\n\s*readonly light: DirectionalLight;/u);
+  assert.match(environment, /\n\s*directionMode: "manual" \| "astronomical";/u);
+  assert.match(environment, /\n\s*originLongitude: number \| undefined;/u);
+  assert.match(environment, /\n\s*originLatitude: number \| undefined;/u);
   assert.match(environment, /\n\s*sunDirection: Cartesian3;/u);
   assert.match(environment, /\n\s*moonDirection: Cartesian3;/u);
+  assert.match(
+    environment,
+    /\n\s*readonly effectiveSunDirection: Cartesian3;/u,
+  );
+  assert.match(
+    environment,
+    /\n\s*readonly effectiveMoonDirection: Cartesian3;/u,
+  );
   assert.match(environment, /\n\s*sunColor: Color;/u);
   assert.match(environment, /\n\s*sunIntensity: number;/u);
   assert.match(environment, /\n\s*enabled: boolean;/u);
@@ -581,7 +651,7 @@ async function verify() {
       /readonly planarCameraController: SceneGISPlanarCameraController \| undefined;/u,
     );
   }
-  verifyDocumentation();
+  verifyDocumentation(engineDirectory);
 
   const rootPackagePath = path.join(rootDirectory, "package.json");
   const rootPackage = JSON.parse(fs.readFileSync(rootPackagePath, "utf8"));
@@ -589,7 +659,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 8/8 GLSL, 8/8 generated shader modules, bare ESM/CJS, S2/S3/E1 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 8/8 GLSL, 8/8 generated shader modules, bare ESM/CJS, S2/S3/E1/E2 runtime properties, declarations/API, soft-private, and broken-entry fixtures.\n",
   );
 }
 

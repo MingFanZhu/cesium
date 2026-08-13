@@ -373,7 +373,7 @@ fragment texture-unit预算，undefined保持既有fast path。完整输入、ow
 Material variant必须在selection/publication前完成真实Context compile/link；失败不得替换旧normal/depth replay。
 释放旧source时必须使resident cached tile的对应command metadata失效，避免重新selection时复用已释放program。
 
-### 平面环境手动方向与Scene light authority
+### 平面环境方向与Scene light authority
 
 `SceneGISPlanarEnvironment`是caller-created、caller-registered Controller；每个live `SceneGISPlanarWorld`最多登记一个
 reference，World不拥有或销毁Environment/light。Manual `sunDirection`与`moonDirection`固定使用`+X East/+Y North/+Z Up`
@@ -385,6 +385,14 @@ render；active property mutation与重新enable同样请求一帧。
 Disable、disconnect与World sever按reference identity conditional restore，外部override不得被stale light覆盖。Environment不自动
 设置`world.enableLighting`，authority也会影响Models/3D Tiles等其他Scene consumer。完整时序、所有权与E2升级边界见
 [ADR-0033](Decisions/ADR-0033-planar-environment-manual-celestial-light.md)。
+
+可选`directionMode="astronomical"`要求应用显式提供planar project origin对应的WGS84
+`originLongitude`/`originLatitude`（radians），并只消费ControllerHost传入的simulation `JulianDate`。Environment固定使用
+`Simon1994PlanetaryPositions`与同步`computeTemeToPseudoFixedMatrix`，在height=0 observer处把Earth-centered body position
+转换为topocentric local ENU，再直接映射到planar axes；整张平面共享该方向，不从CRS、camera或planar XY推断。
+Sun/Moon候选全部成功才原子发布readonly effective directions与同一stable light；Moon仍不产生第二盏灯或visible body。
+该UT1≈UTC pseudo-fixed路径只提供确定的visual-grade近似，完整时间、视差、publication与升级边界见
+[ADR-0034](Decisions/ADR-0034-planar-environment-astronomical-directions.md)。
 
 ### 平面地形 Worker 管线
 

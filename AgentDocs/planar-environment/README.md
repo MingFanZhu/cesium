@@ -8,8 +8,8 @@
 | Status                 | `active`                                                            |
 | Planning model         | `extension`                                                         |
 | Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)        |
-| Current phase          | E2 Astronomical Direction Mode                                      |
-| Active phase plan      | [E2 plan](plans/2026-08-13-phase-e2-astronomical-direction-mode.md) |
+| Current phase          | E3 Visible Celestial Bodies planning                                |
+| Active phase plan      | None; Architecture is refreshing source facts after E2              |
 | Active standalone plan | None                                                                |
 | Architecture contact   | Architecture Agent                                                  |
 | Execution contact      | Execution Agent                                                     |
@@ -44,20 +44,20 @@
 - Parent extensions: completed `planar-world`、`planar-terrain-advanced`、
   `planar-surface-styling`
 - Checkpoints: E1=`b343b64bad`；direct Test migration=`a8c22d8c35`
-- ADR: E1=`ADR-0033`；E2 expected `ADR-0034`
-- SGP: E2 expected None；任何 upstream-owned diff 必须先停止并升级phase plan
+- ADR: E1=`ADR-0033`；E2=`ADR-0034`
+- SGP: E2=None；任何 upstream-owned diff 必须先停止并升级phase plan
 
 ## Current handoff
 
-- Current state: E1与direct Test migration已形成独立本地checkpoint；E2源码审计和phase plan已由Architecture confirmed；
-  astronomical mode 采用应用声明的 project-origin WGS84 anchor，整张平面共享其局部 ENU 天体方向。
-- Next action: Architecture提交E2 planning checkpoint并向Execution发送精确base/路径/验收assignment；Execution review-ready前
-  不请求项目负责人manual gate。
-- Current phase status: E1=`completed`；E2=`active`；E3-E5=`planned`，仅保留稳定目标，不提前冻结实现。
+- Current state: E2 implementation、Architecture review与项目负责人manual gate均已通过；本次E2 checkpoint提交不push。
+- Next action: Architecture以E2 checkpoint为新base重新审计visible-body render pass、depth/horizon、resource与Clock事实，
+  建立并确认E3 phase plan后再向Execution发送正式assignment。
+- Current phase status: E1-E2=`completed`；E3=`planning`；E4-E5=`planned`，不提前冻结易变实现。
 - Open discussions: None。
-- Latest review: [E1 approved review](reviews/2026-08-13-e1-manual-celestial-light-contract.md)。
+- Latest review: [E2 approved review](reviews/2026-08-13-e2-astronomical-direction-mode.md)。
 - Unresolved reviews: None。
 - Known risks: `scene.light` 是 scene-wide 可变状态；Controller 必须明确独占、恢复与外部覆盖语义；
   future atmosphere 不得误用 Earth ellipsoid automatic uniforms。
-- Manual gate: 项目负责人已在`2026-08-13`验收中文Environment控制、真实公开terrain光照和平面相机交互，并明确同意进入
-  下一阶段。Architecture负责代码和契约质量；用户可见tool panel说明使用中文。
+- Manual gate: 项目负责人已在`2026-08-13`验收E1中文Environment控制、真实公开terrain光照和平面相机交互，以及E2
+  manual/天文模式、project-origin、UTC时间与有效Sun/Moon方向表现，并明确允许进入E3。Architecture负责代码和契约质量；
+  用户可见tool panel说明使用中文。

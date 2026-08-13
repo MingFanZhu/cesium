@@ -120,7 +120,7 @@ terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务
 
 一个 world 只能绑定一个 WebGL `Context`。不要在多个 Widget/Viewer 之间复用同一个 live world。`Scene` 拥有 primary world，销毁 Scene/Widget/Viewer 会销毁 world；imagery layer collection 拥有 layer，但 provider 始终由调用方拥有。
 
-## 手动环境方向与光照控制权
+## 环境方向与光照控制权
 
 `SceneGISPlanarEnvironment`必须由调用方构造并通过`addController`注册；同一个live World一次只能注册一个。方向坐标固定为
 `+X East/+Y North/+Z Up`，`sunDirection`和`moonDirection`均表示observer-to-body并在赋值时normalize。内部稳定
@@ -132,6 +132,27 @@ mutation、首次authority acquisition与重新enable都会请求一帧，stable
 是全Scene的，也会影响Models和3D Tiles；它不会
 自动打开`world.enableLighting`。Moon方向在E1不显示Moon、不产生moon light。销毁Viewer/Widget前必须先
 `removeController(environment)`；World不会destroy Environment或任何light。
+
+需要天文方向时，应用必须把平面project origin对应的WGS84经纬度显式传给Environment；API使用radians，不读取
+`world.crs`或EPSG:3857坐标：
+
+```js
+const environment = new SceneGISPlanarEnvironment({
+  world,
+  sunDirection: Cartesian3.UNIT_Z,
+  moonDirection: Cartesian3.UNIT_X,
+  directionMode: "astronomical",
+  originLongitude: CesiumMath.toRadians(10.0),
+  originLatitude: CesiumMath.toRadians(46.0),
+});
+widget.addController(environment);
+widget.clock.currentTime = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
+```
+
+`effectiveSunDirection`与`effectiveMoonDirection`是当前host simulation time在该project origin的topocentric ENU方向clone。
+整张平面共享同一组方向；它们不随camera、terrain或planar XY变化。Astronomical mode使用同步pseudo-fixed visual-grade
+近似，不适用于navigation、survey、eclipse或高精度天文。`sunDirection`/`moonDirection`仍是manual fallback，切回
+`directionMode="manual"`时原子恢复；E2仍不显示Sun/Moon、不创建moon light。
 
 ## 导航、Home 与拾取
 

@@ -4,6 +4,7 @@ import {
   Color,
   DirectionalLight,
   Event,
+  JulianDate,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarEnvironment,
   SceneGISPlanarExtent,
@@ -96,9 +97,9 @@ describe("SceneGIS/Widget/SceneGISPlanarEnvironmentCesiumWidget", function () {
     });
   }
 
-  function renderFrame() {
+  function renderFrame(time) {
     widget.scene.initializeFrame();
-    widget.scene.render();
+    widget.scene.render(time);
   }
 
   function readCenterPixel() {
@@ -277,6 +278,101 @@ describe("SceneGIS/Widget/SceneGISPlanarEnvironmentCesiumWidget", function () {
     expect(widget.scene.light).toBe(replacement);
     expect(world.environment).toBeUndefined();
     environment = undefined;
+  });
+
+  it("draws astronomical directions from host time and keeps resources warm", async function () {
+    const { world, layer } = createWorld();
+    createWidget(world);
+    const firstTime = JulianDate.fromIso8601("2026-06-21T00:00:00Z");
+    const secondTime = JulianDate.fromIso8601("2026-12-21T00:00:00Z");
+    environment = new SceneGISPlanarEnvironment({
+      world,
+      sunDirection: Cartesian3.UNIT_Z,
+      moonDirection: Cartesian3.UNIT_X,
+      directionMode: "astronomical",
+      originLongitude: 2.0943951023931953,
+      originLatitude: 0.6108652381980153,
+    });
+    widget.addController(environment);
+
+    await pollToPromise(function () {
+      renderFrame(firstTime);
+      return world.tilesLoaded && world._surface._renderCommands.length === 1;
+    });
+    const firstSun = environment.effectiveSunDirection;
+    const firstMoon = environment.effectiveMoonDirection;
+    expect(firstSun.x).toBeCloseTo(0.7948554945506935, 13);
+    expect(firstSun.y).toBeCloseTo(0.0628769289415441, 13);
+    expect(firstSun.z).toBeCloseTo(0.6035322978842579, 13);
+    expect(environment.light.direction).toEqual(
+      Cartesian3.negate(firstSun, new Cartesian3()),
+    );
+    const firstPixel = readCenterPixel();
+    const surface = world._surface;
+    const tile = surface._quadtree._renderTiles[0];
+    const binding = tile.imageryBindings.get(layer);
+    const identities = {
+      tile,
+      command: tile.command,
+      shader: tile.command.shaderProgram,
+      vertexArray: tile.command.vertexArray,
+      mesh: tile.terrainEntry.activeContent.mesh,
+      binding,
+      texture: binding.desired.texture,
+      light: environment.light,
+    };
+    function expectWarm() {
+      expect(surface._quadtree._renderTiles).toEqual([identities.tile]);
+      expect(surface._renderCommands).toEqual([identities.command]);
+      expect(tile.command.shaderProgram).toBe(identities.shader);
+      expect(tile.command.vertexArray).toBe(identities.vertexArray);
+      expect(tile.terrainEntry.activeContent.mesh).toBe(identities.mesh);
+      expect(tile.imageryBindings.get(layer)).toBe(identities.binding);
+      expect(binding.desired.texture).toBe(identities.texture);
+      expect(environment.light).toBe(identities.light);
+      expect(surface._renderCommands.length).toBe(1);
+    }
+
+    const requestRender = spyOn(
+      widget.scene,
+      "requestRender",
+    ).and.callThrough();
+    renderFrame(firstTime);
+    expect(requestRender).not.toHaveBeenCalled();
+    expect(environment.effectiveSunDirection).toEqual(firstSun);
+    expect(environment.effectiveMoonDirection).toEqual(firstMoon);
+    expectWarm();
+
+    renderFrame(secondTime);
+    const secondSun = environment.effectiveSunDirection;
+    const secondMoon = environment.effectiveMoonDirection;
+    const secondPixel = readCenterPixel();
+    expect(secondSun).not.toEqual(firstSun);
+    expect(secondMoon).not.toEqual(firstMoon);
+    expect(secondPixel[0]).not.toBeCloseTo(firstPixel[0], -1);
+    expect(requestRender).toHaveBeenCalledTimes(1);
+    expectWarm();
+
+    environment.originLongitude = 2.0;
+    expect(requestRender).toHaveBeenCalledTimes(2);
+    renderFrame(secondTime);
+    expect(environment.effectiveSunDirection).not.toEqual(secondSun);
+    expect(requestRender).toHaveBeenCalledTimes(2);
+    expectWarm();
+
+    environment.sunDirection = new Cartesian3(-1.0, 0.0, 1.0);
+    expect(requestRender).toHaveBeenCalledTimes(2);
+    environment.directionMode = "manual";
+    expect(requestRender).toHaveBeenCalledTimes(3);
+    renderFrame(secondTime);
+    expect(environment.effectiveSunDirection).toEqual(environment.sunDirection);
+    expect(environment.effectiveMoonDirection).toEqual(
+      environment.moonDirection,
+    );
+    expect(environment.light.direction).toEqual(
+      Cartesian3.negate(environment.sunDirection, new Cartesian3()),
+    );
+    expectWarm();
   });
 
   it("keeps real host validation and world-destroy sever failure atomic", function () {

@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed`
 - Parent plan: [planar-environment extension](2026-08-13-planar-environment-extension.md)
 - Phase: `E2`
 - Owner role: `execution`
@@ -318,6 +318,30 @@ Architecture/code review批准后，才由项目负责人使用根 Cesium develo
 
 ## Current handoff
 
-- Architecture source audit已完成，plan与边界已confirmed。
-- 当前等待Execution以Architecture assignment精确base开始实现；review request尚未创建。
-- E3可见Sun/Moon、E4 atmosphere/SkyBox和E5统一交付均未进入，不得提前实现。
+- Execution已实现manual/astronomical public contract、controller-owned scratch天文pipeline、原子publication与requestRender
+  去重；未修改Core helper、ControllerHost、World、Surface或其他forbidden path。
+- Unit focused suite为16/16；real-Context Widget为5/5，覆盖fixed vectors、time/origin/mode pixels与warm
+  tile/command/shader/VA/mesh/imagery identities。Build/release/types/docs/tsc与installed package verifier通过。
+- `Test/平面环境.html`保留公开EPSG:3857 provider、local lil-gui与平面相机，新增中文mode/project-origin/time/effective
+  direction controls；自动化只拦截公网请求验证best-effort fallback，不宣称公开瓦片成功。
+- Architecture review已approved，`E2-R001..R002`均关闭；项目负责人已通过direct Test manual gate。E2以本次独立本地
+  checkpoint完成，未push；E3仅在checkpoint后进入Architecture planning。
+
+## Execution results
+
+- Actual changed paths=`15`：5个product/spec/Test/verifier，4个formal docs/ADR，6个AgentDocs writeback；全部位于allowlist。
+- 无实现偏差；astronomy hot path使用Environment instance-owned scratch，不分配per-frame Cartesian/matrix。
+- `npm run build`、`build-release`、`build-ts`、`build-docs`、`tsc`均exit 0；`build-ts`仅既有baseline
+  TSD-JSDoc warnings。Verifier最初暴露class matcher不接受generated `implements Controller`，已把既有通用matcher窄扩为
+  可选implements并通过installed ESM/CJS/runtime/declaration/API qualification。
+- 未运行Sandcastle gallery、full suite、E2E、public-network automation与无关terrain suites，符合phase边界。
+- Expected upstream-owned=`0`、actual=`0`；SGP=None；generated status=`0`；未commit、未push、未publish。
+
+## Completion record
+
+- Architecture focused re-review确认public JSDoc/installed delivery证据与active astronomical同值no-op闭环完整，review=`approved`。
+- 项目负责人于`2026-08-13`通过`Test/平面环境.html`人工验收，确认manual/天文模式、project-origin经纬度、UTC时间、
+  terrain lighting、中文lil-gui和平面相机表现，并允许进入E3。
+- 原生时间authority保持单一：`CesiumWidget.clock.tick()`产生的`currentTime`经`Scene.render`和`ControllerHost`传入
+  Environment；示例UTC输入和时间步进直接修改`widget.clock.currentTime`，未创建第二套Clock。
+- Phase现为`completed`；本次独立E2 local checkpoint不push，E3 phase plan须以该checkpoint重新审计后建立。

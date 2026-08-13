@@ -2,6 +2,7 @@ import {
   Cartesian3,
   Color,
   DirectionalLight,
+  JulianDate,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarEnvironment,
   SceneGISPlanarExtent,
@@ -31,6 +32,9 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
       moonDirection: options.moonDirection ?? new Cartesian3(-1.0, 2.0, 0.5),
       sunColor: options.sunColor,
       sunIntensity: options.sunIntensity,
+      directionMode: options.directionMode,
+      originLongitude: options.originLongitude,
+      originLatitude: options.originLatitude,
     });
   }
 
@@ -338,5 +342,292 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
       environment.enabled = true;
     }).toThrowDeveloperError();
     expect(() => environment.disconnectedCallback(element)).not.toThrow();
+  });
+
+  it("validates astronomical mode and project-origin state atomically", function () {
+    const world = createWorld();
+    const construct = (options) =>
+      createEnvironment(world, {
+        directionMode: "astronomical",
+        originLongitude: 0.0,
+        originLatitude: 0.0,
+        ...options,
+      });
+
+    expect(createEnvironment(world).directionMode).toBe("manual");
+    expect(() =>
+      construct({ directionMode: "automatic" }),
+    ).toThrowDeveloperError();
+    expect(() =>
+      construct({ originLongitude: undefined }),
+    ).toThrowDeveloperError();
+    expect(() =>
+      construct({ originLatitude: undefined }),
+    ).toThrowDeveloperError();
+    expect(() =>
+      construct({ originLongitude: Math.PI + 0.01 }),
+    ).toThrowDeveloperError();
+    expect(() =>
+      construct({ originLatitude: Math.PI * 0.5 + 0.01 }),
+    ).toThrowDeveloperError();
+
+    const environment = createEnvironment(world);
+    const originalSun = environment.effectiveSunDirection;
+    environment.originLongitude = Math.PI;
+    environment.originLatitude = -Math.PI * 0.5;
+    expect(environment.originLongitude).toBe(Math.PI);
+    expect(environment.originLatitude).toBe(-Math.PI * 0.5);
+    environment.originLongitude = undefined;
+    expect(() => {
+      environment.directionMode = "astronomical";
+    }).toThrowDeveloperError();
+    expect(environment.directionMode).toBe("manual");
+    expect(environment.effectiveSunDirection).toEqual(originalSun);
+    environment.originLongitude = -Math.PI;
+    environment.directionMode = "astronomical";
+    expect(() => {
+      environment.originLatitude = undefined;
+    }).toThrowDeveloperError();
+    expect(environment.originLatitude).toBe(-Math.PI * 0.5);
+    expect(() => {
+      environment.originLongitude = Infinity;
+    }).toThrowDeveloperError();
+    expect(environment.originLongitude).toBe(-Math.PI);
+    world.destroy();
+  });
+
+  it("publishes hard-coded topocentric directions from explicit host time", function () {
+    const world = createWorld();
+    const environment = createEnvironment(world, {
+      directionMode: "astronomical",
+      originLongitude: 0.0,
+      originLatitude: 0.0,
+    });
+    const manualSun = environment.sunDirection;
+    const manualMoon = environment.moonDirection;
+    const exposedEffective = environment.effectiveSunDirection;
+    exposedEffective.x = 99.0;
+    expect(environment.effectiveSunDirection).toEqual(manualSun);
+    const element = {};
+    const scene = createScene(world);
+    const time = JulianDate.fromIso8601("2026-03-20T12:00:00Z");
+    environment.connectedCallback(element);
+    environment.firstUpdate(scene, time);
+
+    const sun = environment.effectiveSunDirection;
+    const moon = environment.effectiveMoonDirection;
+    expect(sun.x).toBeCloseTo(0.026674352089693723, 13);
+    expect(sun.y).toBeCloseTo(-0.0033130590135607156, 13);
+    expect(sun.z).toBeCloseTo(0.9996386860163865, 13);
+    expect(moon.x).toBeCloseTo(0.30546108496896607, 13);
+    expect(moon.y).toBeCloseTo(0.1835248788096602, 13);
+    expect(moon.z).toBeCloseTo(0.9343511890223513, 13);
+    expect(Cartesian3.magnitude(sun)).toBeCloseTo(1.0, 14);
+    expect(Cartesian3.magnitude(moon)).toBeCloseTo(1.0, 14);
+    expect(environment.light.direction).toEqual(
+      Cartesian3.negate(sun, new Cartesian3()),
+    );
+    expect(environment.sunDirection).toEqual(manualSun);
+    expect(environment.moonDirection).toEqual(manualMoon);
+
+    environment.disconnectedCallback(element);
+    world.destroy();
+  });
+
+  it("keeps invalid astronomical first-update time failure atomic", function () {
+    const world = createWorld();
+    const environment = createEnvironment(world, {
+      directionMode: "astronomical",
+      originLongitude: 0.0,
+      originLatitude: 0.0,
+    });
+    const element = {};
+    const displaced = new DirectionalLight({ direction: Cartesian3.UNIT_Y });
+    const scene = createScene(world, displaced);
+    const effectiveSun = environment.effectiveSunDirection;
+    const effectiveMoon = environment.effectiveMoonDirection;
+    environment.connectedCallback(element);
+
+    expect(() =>
+      environment.firstUpdate(scene, undefined),
+    ).toThrowDeveloperError();
+    expect(() =>
+      environment.firstUpdate(scene, new JulianDate(0, Infinity)),
+    ).toThrowDeveloperError();
+    expect(environment._scene).toBeUndefined();
+    expect(environment._publishedTime).toBeUndefined();
+    expect(environment.effectiveSunDirection).toEqual(effectiveSun);
+    expect(environment.effectiveMoonDirection).toEqual(effectiveMoon);
+    expect(scene.light).toBe(displaced);
+    expect(scene.requestRender).not.toHaveBeenCalled();
+
+    environment.disconnectedCallback(element);
+    world.destroy();
+  });
+
+  it("keeps astronomical publication atomic and requestRender minimal", function () {
+    const world = createWorld();
+    const environment = createEnvironment(world, {
+      directionMode: "astronomical",
+      originLongitude: 2.0943951023931953,
+      originLatitude: 0.6108652381980153,
+    });
+    const element = {};
+    const scene = createScene(world);
+    const firstTime = JulianDate.fromIso8601("2026-06-21T00:00:00Z");
+    const secondTime = JulianDate.fromIso8601("2026-12-21T00:00:00Z");
+    environment.connectedCallback(element);
+    environment.firstUpdate(scene, firstTime);
+    const firstSun = environment.effectiveSunDirection;
+    const firstMoon = environment.effectiveMoonDirection;
+    const light = environment.light;
+    expect(scene.requestRender).toHaveBeenCalledTimes(1);
+
+    environment.update(scene, firstTime);
+    expect(scene.requestRender).toHaveBeenCalledTimes(1);
+    environment.sunDirection = Cartesian3.UNIT_X;
+    environment.moonDirection = Cartesian3.UNIT_Y;
+    expect(environment.effectiveSunDirection).toEqual(firstSun);
+    expect(environment.effectiveMoonDirection).toEqual(firstMoon);
+    expect(scene.requestRender).toHaveBeenCalledTimes(1);
+
+    environment.originLongitude = 2.0;
+    expect(scene.requestRender).toHaveBeenCalledTimes(2);
+    environment.update(scene, firstTime);
+    expect(scene.requestRender).toHaveBeenCalledTimes(2);
+    const originSun = environment.effectiveSunDirection;
+    expect(originSun).not.toEqual(firstSun);
+    expect(environment.light).toBe(light);
+
+    environment.update(scene, secondTime);
+    expect(scene.requestRender).toHaveBeenCalledTimes(3);
+    const secondSun = environment.effectiveSunDirection;
+    const secondMoon = environment.effectiveMoonDirection;
+    const publishedTime = JulianDate.clone(environment._publishedTime);
+    const lightDirection = Cartesian3.clone(light.direction);
+    expect(secondSun).not.toEqual(originSun);
+    expect(secondMoon).not.toEqual(firstMoon);
+    expect(() =>
+      environment.update(scene, new JulianDate(NaN, 0.0)),
+    ).toThrowDeveloperError();
+    expect(environment.effectiveSunDirection).toEqual(secondSun);
+    expect(environment.effectiveMoonDirection).toEqual(secondMoon);
+    expect(environment.light.direction).toEqual(lightDirection);
+    expect(environment._publishedTime).toEqual(publishedTime);
+    expect(scene.requestRender).toHaveBeenCalledTimes(3);
+
+    environment.directionMode = "manual";
+    expect(environment.effectiveSunDirection).toEqual(Cartesian3.UNIT_X);
+    expect(environment.effectiveMoonDirection).toEqual(Cartesian3.UNIT_Y);
+    expect(scene.requestRender).toHaveBeenCalledTimes(4);
+    environment.disconnectedCallback(element);
+    world.destroy();
+  });
+
+  it("keeps active astronomical same mode and origin assignments no-op", function () {
+    const world = createWorld();
+    const longitude = 2.0943951023931953;
+    const latitude = 0.6108652381980153;
+    const environment = createEnvironment(world, {
+      directionMode: "astronomical",
+      originLongitude: longitude,
+      originLatitude: latitude,
+    });
+    const element = {};
+    const scene = createScene(world);
+    const time = JulianDate.fromIso8601("2026-06-21T00:00:00Z");
+    environment.connectedCallback(element);
+    environment.firstUpdate(scene, time);
+    const effectiveSun = environment.effectiveSunDirection;
+    const effectiveMoon = environment.effectiveMoonDirection;
+    const publishedTime = JulianDate.clone(environment._publishedTime);
+    const light = environment.light;
+    const lightDirection = Cartesian3.clone(light.direction);
+    const requestCount = scene.requestRender.calls.count();
+    expect(environment._astronomyDirty).toBe(false);
+
+    environment.directionMode = "astronomical";
+    environment.originLongitude = longitude;
+    environment.originLatitude = latitude;
+    expect(environment._astronomyDirty).toBe(false);
+    expect(scene.requestRender.calls.count()).toBe(requestCount);
+    environment.update(scene, time);
+
+    expect(environment.effectiveSunDirection).toEqual(effectiveSun);
+    expect(environment.effectiveMoonDirection).toEqual(effectiveMoon);
+    expect(environment._publishedTime).toEqual(publishedTime);
+    expect(environment.light).toBe(light);
+    expect(environment.light.direction).toEqual(lightDirection);
+    expect(environment._astronomyDirty).toBe(false);
+    expect(scene.requestRender.calls.count()).toBe(requestCount);
+
+    environment.disconnectedCallback(element);
+    world.destroy();
+  });
+
+  it("is deterministic across timezone spellings, latitudes, and Moon parallax", function () {
+    const timeA = JulianDate.fromIso8601("2026-03-20T12:00:00Z");
+    const timeB = JulianDate.fromIso8601("2026-03-20T20:00:00+08:00");
+    const origins = [
+      [0.0, 0.0],
+      [2.0943951023931953, 0.6108652381980153],
+      [Math.PI, Math.PI * 0.5],
+      [-Math.PI, -Math.PI * 0.5],
+    ];
+    const results = [];
+
+    for (const [longitude, latitude] of origins) {
+      const world = createWorld();
+      const environment = createEnvironment(world, {
+        directionMode: "astronomical",
+        originLongitude: longitude,
+        originLatitude: latitude,
+      });
+      const element = {};
+      const scene = createScene(world);
+      environment.connectedCallback(element);
+      environment.firstUpdate(scene, timeA);
+      const sunA = environment.effectiveSunDirection;
+      const moonA = environment.effectiveMoonDirection;
+      environment.update(scene, timeB);
+      expect(environment.effectiveSunDirection).toEqual(sunA);
+      expect(environment.effectiveMoonDirection).toEqual(moonA);
+      expect(Cartesian3.magnitude(sunA)).toBeCloseTo(1.0, 14);
+      expect(Cartesian3.magnitude(moonA)).toBeCloseTo(1.0, 14);
+      results.push({ sun: sunA, moon: moonA });
+      environment.disconnectedCallback(element);
+      world.destroy();
+    }
+
+    expect(results[0].moon).not.toEqual(results[1].moon);
+    expect(results[2].sun.y).toBeGreaterThan(0.99);
+    expect(results[3].sun.y).toBeLessThan(-0.99);
+  });
+
+  it("refreshes astronomical time on re-enable without redundant requests", function () {
+    const world = createWorld();
+    const environment = createEnvironment(world, {
+      directionMode: "astronomical",
+      originLongitude: 0.0,
+      originLatitude: 0.0,
+    });
+    const element = {};
+    const scene = createScene(world);
+    const firstTime = JulianDate.fromIso8601("2026-03-20T12:00:00Z");
+    const secondTime = JulianDate.fromIso8601("2026-03-21T12:00:00Z");
+    environment.connectedCallback(element);
+    environment.firstUpdate(scene, firstTime);
+    const firstSun = environment.effectiveSunDirection;
+    environment.enabled = false;
+    expect(scene.requestRender).toHaveBeenCalledTimes(2);
+    environment.enabled = true;
+    expect(scene.requestRender).toHaveBeenCalledTimes(3);
+    environment.update(scene, secondTime);
+    expect(environment.effectiveSunDirection).not.toEqual(firstSun);
+    expect(scene.requestRender).toHaveBeenCalledTimes(3);
+    environment.update(scene, secondTime);
+    expect(scene.requestRender).toHaveBeenCalledTimes(3);
+    environment.disconnectedCallback(element);
+    world.destroy();
   });
 });

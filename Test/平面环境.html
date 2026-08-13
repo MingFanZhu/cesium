@@ -127,6 +127,10 @@
       const defaultState = Object.freeze({
         environmentEnabled: true,
         terrainLighting: true,
+        directionMode: "manual",
+        originLongitudeDegrees: 10.0,
+        originLatitudeDegrees: 46.0,
+        simulationTimeIso: "2026-06-21T12:00:00Z",
         sunAzimuth: 315.0,
         sunElevation: 35.0,
         sunIntensity: 2.0,
@@ -136,7 +140,11 @@
         environmentState: "正在等待首次环境帧……",
         providerState: "公开影像与地形正在加载（best-effort）……",
         moonNotice:
-          "Moon方向仅作为E1未来状态保存；本阶段不显示月球，也不创建第二个光源。",
+          "E2只计算有效Moon方向；本阶段仍不显示月球，也不创建第二个光源。",
+        effectiveSunState: "正在等待有效太阳方向……",
+        effectiveMoonState: "正在等待有效月亮方向……",
+        stepBackward: () => stepSimulationDays(-1.0),
+        stepForward: () => stepSimulationDays(1.0),
         reset: () => resetEnvironment(),
         cameraEnabled: planarCameraController.enabled,
         navigationMode: planarCameraController.navigationMode,
@@ -168,6 +176,10 @@
       }
 
       const sunDirection = new Cesium.Cartesian3();
+      widget.clock.shouldAnimate = false;
+      widget.clock.currentTime = Cesium.JulianDate.fromIso8601(
+        state.simulationTimeIso,
+      );
       const environment = new Cesium.SceneGISPlanarEnvironment({
         world,
         sunDirection: directionFromAngles(
@@ -177,6 +189,9 @@
         ),
         moonDirection: new Cesium.Cartesian3(-1.0, 1.0, 0.5),
         sunIntensity: state.sunIntensity,
+        directionMode: state.directionMode,
+        originLongitude: Cesium.Math.toRadians(state.originLongitudeDegrees),
+        originLatitude: Cesium.Math.toRadians(state.originLatitudeDegrees),
       });
       widget.addController(environment);
 
@@ -200,6 +215,34 @@
           updateEnvironmentState();
         });
       gui
+        .add(state, "directionMode", {
+          手动方向: "manual",
+          天文方向: "astronomical",
+        })
+        .name("方向模式")
+        .onChange((value) => {
+          environment.directionMode = value;
+          updateEnvironmentState();
+        });
+      gui
+        .add(state, "originLongitudeDegrees", -180.0, 180.0, 0.1)
+        .name("项目原点经度（°）")
+        .onChange((value) => {
+          environment.originLongitude = Cesium.Math.toRadians(value);
+        });
+      gui
+        .add(state, "originLatitudeDegrees", -90.0, 90.0, 0.1)
+        .name("项目原点纬度（°）")
+        .onChange((value) => {
+          environment.originLatitude = Cesium.Math.toRadians(value);
+        });
+      gui
+        .add(state, "simulationTimeIso")
+        .name("模拟UTC时间")
+        .onFinishChange(setSimulationTime);
+      gui.add(state, "stepBackward").name("UTC时间 -1天");
+      gui.add(state, "stepForward").name("UTC时间 +1天");
+      gui
         .add(state, "sunAzimuth", 0.0, 360.0, 1.0)
         .name("太阳方位角（°）")
         .onChange(updateSunDirection);
@@ -214,8 +257,18 @@
           environment.sunIntensity = value;
           updateEnvironmentState();
         });
-      gui.add(state, "reset").name("恢复手动默认值");
+      gui.add(state, "reset").name("重置环境与时间");
       gui.add(state, "environmentState").name("当前状态").listen().disable();
+      gui
+        .add(state, "effectiveSunState")
+        .name("有效太阳方向")
+        .listen()
+        .disable();
+      gui
+        .add(state, "effectiveMoonState")
+        .name("有效月亮方向")
+        .listen()
+        .disable();
       gui.add(state, "providerState").name("公开数据").listen().disable();
       gui.add(state, "moonNotice").name("Moon说明").listen().disable();
 
@@ -267,12 +320,67 @@
       cameraFolder.add(state, "cameraHelp").name("操作说明").disable();
 
       function updateEnvironmentState() {
-        const direction = environment.sunDirection;
+        const direction = environment.effectiveSunDirection;
         state.environmentState =
           `${environment.enabled ? "Environment启用" : "Environment禁用"}；` +
           `地形光照${world.enableLighting ? "开启" : "关闭"}；` +
+          `${environment.directionMode === "manual" ? "手动方向" : "天文方向"}；` +
           `太阳 东${direction.x.toFixed(3)} 北${direction.y.toFixed(3)} ` +
           `上${direction.z.toFixed(3)}；强度${environment.sunIntensity.toFixed(1)}`;
+        state.effectiveSunState = directionState(
+          environment.effectiveSunDirection,
+        );
+        state.effectiveMoonState = directionState(
+          environment.effectiveMoonDirection,
+        );
+      }
+
+      function directionState(direction) {
+        const azimuth = Cesium.Math.toDegrees(
+          Cesium.Math.zeroToTwoPi(Math.atan2(direction.x, direction.y)),
+        );
+        const elevation = Cesium.Math.toDegrees(
+          Math.asin(Cesium.Math.clamp(direction.z, -1.0, 1.0)),
+        );
+        return `方位角${azimuth.toFixed(1)}°；仰角${elevation.toFixed(1)}°`;
+      }
+
+      function setSimulationTime(value) {
+        try {
+          const time = Cesium.JulianDate.fromIso8601(value);
+          widget.clock.currentTime = time;
+          state.simulationTimeIso = Cesium.JulianDate.toIso8601(time, 0);
+          widget.scene.requestRender();
+        } catch (error) {
+          state.simulationTimeIso = Cesium.JulianDate.toIso8601(
+            widget.clock.currentTime,
+            0,
+          );
+          gui.controllersRecursive().forEach((controller) => {
+            if (controller.property === "simulationTimeIso") {
+              controller.updateDisplay();
+            }
+          });
+          console.error("模拟UTC时间格式无效。", error);
+        }
+      }
+
+      function stepSimulationDays(days) {
+        widget.clock.currentTime = Cesium.JulianDate.addDays(
+          widget.clock.currentTime,
+          days,
+          new Cesium.JulianDate(),
+        );
+        state.simulationTimeIso = Cesium.JulianDate.toIso8601(
+          widget.clock.currentTime,
+          0,
+        );
+        gui.controllersRecursive().forEach((controller) => {
+          if (controller.property === "simulationTimeIso") {
+            controller.updateDisplay();
+          }
+        });
+        widget.scene.requestRender();
       }
 
       function updateSunDirection() {
@@ -289,6 +397,16 @@
         world.enableLighting = state.terrainLighting;
         environment.sunIntensity = state.sunIntensity;
         environment.enabled = state.environmentEnabled;
+        environment.originLongitude = Cesium.Math.toRadians(
+          state.originLongitudeDegrees,
+        );
+        environment.originLatitude = Cesium.Math.toRadians(
+          state.originLatitudeDegrees,
+        );
+        environment.directionMode = state.directionMode;
+        widget.clock.currentTime = Cesium.JulianDate.fromIso8601(
+          state.simulationTimeIso,
+        );
         updateSunDirection();
         gui
           .controllersRecursive()
@@ -328,6 +446,7 @@
           providerState.settled = true;
           updateProviderState();
         }
+        updateEnvironmentState();
       });
       updateEnvironmentState();
       updateProviderState();
