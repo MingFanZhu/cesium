@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                        |
-| ---------------------- | ------------------------------------------------------------ |
-| Extension slug         | `planar-environment`                                         |
-| Status                 | `active`                                                     |
-| Planning model         | `extension`                                                  |
-| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md) |
-| Current phase          | None；E5待E4 checkpoint后激活                                |
-| Active phase plan      | None                                                         |
-| Active standalone plan | None                                                         |
-| Architecture contact   | Architecture Agent                                           |
-| Execution contact      | Execution Agent                                              |
-| Last updated           | `2026-08-13`                                                 |
+| Field                  | Value                                                                  |
+| ---------------------- | ---------------------------------------------------------------------- |
+| Extension slug         | `planar-environment`                                                   |
+| Status                 | `completed`                                                            |
+| Planning model         | `extension`                                                            |
+| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)           |
+| Current phase          | None                                                                   |
+| Active phase plan      | None                                                                   |
+| Active standalone plan | None                                                                   |
+| Architecture contact   | Architecture Agent                                                     |
+| Execution contact      | Execution Agent                                                        |
+| Last updated           | `2026-08-14`                                                           |
 
 ## Scope
 
@@ -44,18 +44,19 @@
 - Parent extensions: completed `planar-world`、`planar-terrain-advanced`、
   `planar-surface-styling`
 - Checkpoints: E1=`b343b64bad`；direct Test migration=`a8c22d8c35`；E2=`fa40b49dbb4ba6f14db68c5fe94852b9f47367ff`；
-  E3=`8ff8b48ebf`
-- ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3=`ADR-0035`；E4 expected `ADR-0036`
+  E3=`8ff8b48ebf`；E4=`b9dd353e1d`
+- ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3=`ADR-0035`；E4=`ADR-0036`
 - SGP: E1/E2/E4=None；E3=`SGP-0003`（仅`Scene.js` optional world environment hook；E4只读依赖该hook）
 
 ## Current handoff
 
-- Current state: E4产品代码、Architecture review与最终manual gate均已通过；E4-R003 direct Test generated cubemap
-  edge mismatch已用共同edge color、内部radial tint和逐border-pixel Canvas assertion窄修复并由项目负责人确认接缝消失。
-- Next action: Architecture创建E4独立checkpoint；之后再激活E5联合资格、发布与扩展收尾。
-- Current phase status: E1-E4=`completed`；E5=`planned`。
+- Current state: E1-E5全部完成。Existing Widget为10/10，build/release/types/docs/tsc与12/12 installed shader delivery均通过；
+  owner授权临时释放固定端口后，同一focused Viewer case在headed dev与Windows process-local release中各1/1 passed，network
+  attempts与全部error channels为0。E5-R001已关闭，root development service已恢复并验证。
+- Next action: 回顾前序大型扩展的显式deferred/independent candidates；若没有阻塞性交付缺口，则为Viewer直接创建planar world建立独立扩展。
+- Current phase status: E1-E5=`completed`。
 - Open discussions: None。
-- Latest review: [E4 approved review](reviews/2026-08-13-e4-planar-atmosphere-skybox.md)。
+- Latest review: [E5 approved review](reviews/2026-08-13-e5-unified-qualification-delivery.md)。
 - Unresolved reviews: None。
 - Known risks: `scene.light` 是 scene-wide 可变状态；Controller 必须明确独占、恢复与外部覆盖语义；
   future atmosphere 不得误用 Earth ellipsoid automatic uniforms。

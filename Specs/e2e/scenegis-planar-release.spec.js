@@ -111,6 +111,39 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
       color: Cesium.Color.fromBytes(0, 255, 0, 128),
     });
     world.material = material;
+    function skyFace(color) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 4;
+      canvas.height = 4;
+      const context = canvas.getContext("2d");
+      context.fillStyle = color;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      return canvas;
+    }
+    const skyBox = new Cesium.SceneGISPlanarSkyBox({
+      sources: {
+        positiveX: skyFace("#1b2d4a"),
+        negativeX: skyFace("#1b2d4a"),
+        positiveY: skyFace("#1b2d4a"),
+        negativeY: skyFace("#1b2d4a"),
+        positiveZ: skyFace("#1b2d4a"),
+        negativeZ: skyFace("#1b2d4a"),
+      },
+    });
+    const firstTime = Cesium.JulianDate.fromIso8601("2026-06-21T00:00:00Z");
+    const secondTime = Cesium.JulianDate.fromIso8601("2026-12-21T00:00:00Z");
+    const environment = new Cesium.SceneGISPlanarEnvironment({
+      world,
+      sunDirection: Cesium.Cartesian3.UNIT_Z,
+      moonDirection: Cesium.Cartesian3.UNIT_X,
+      directionMode: "astronomical",
+      originLongitude: 2.0943951023931953,
+      originLatitude: 0.6108652381980153,
+      showSun: true,
+      showMoon: true,
+      showAtmosphere: true,
+      skyBox,
+    });
     const viewer = new Cesium.Viewer("cesiumContainer", {
       world,
       useDefaultRenderLoop: false,
@@ -119,7 +152,61 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
       fullscreenButton: false,
     });
     viewer.scene.highDynamicRange = false;
+    viewer.scene.rethrowRenderErrors = true;
     viewer.scene.pickTranslucentDepth = true;
+    viewer.clock.shouldAnimate = false;
+    viewer.clock.currentTime = Cesium.JulianDate.clone(firstTime);
+    viewer.addController(environment);
+    viewer.render();
+    function lookAtBody(direction) {
+      const right = Cesium.Cartesian3.cross(
+        direction,
+        Cesium.Cartesian3.UNIT_Z,
+        new Cesium.Cartesian3(),
+      );
+      if (Cesium.Cartesian3.magnitudeSquared(right) < 1e-12) {
+        Cesium.Cartesian3.clone(Cesium.Cartesian3.UNIT_X, right);
+      } else {
+        Cesium.Cartesian3.normalize(right, right);
+      }
+      const up = Cesium.Cartesian3.normalize(
+        Cesium.Cartesian3.cross(right, direction, new Cesium.Cartesian3()),
+        new Cesium.Cartesian3(),
+      );
+      viewer.scene.camera.setView({
+        destination: new Cesium.Cartesian3(0, 0, 512),
+        orientation: { direction, up },
+      });
+    }
+    lookAtBody(environment.effectiveSunDirection);
+    viewer.render();
+    const atmosphereRenderer = world._atmosphereRenderer;
+    const celestialRenderer = world._celestialBodyRenderer;
+    const environmentCommands = [
+      skyBox._panorama._command,
+      atmosphereRenderer._command,
+      celestialRenderer._sunCommand,
+      celestialRenderer._moonCommand,
+    ];
+    const executionCounts = [0, 0, 0, 0];
+    const originalExecutions = environmentCommands.map(
+      (command) => command.execute,
+    );
+    environmentCommands.forEach((command, index) => {
+      command.execute = function (...args) {
+        executionCounts[index]++;
+        return originalExecutions[index].apply(this, args);
+      };
+    });
+    lookAtBody(environment.effectiveSunDirection);
+    viewer.render();
+    if (environment.effectiveMoonDirection.z > 0.0) {
+      lookAtBody(environment.effectiveMoonDirection);
+      viewer.render();
+    }
+    environmentCommands.forEach((command, index) => {
+      command.execute = originalExecutions[index];
+    });
     viewer.planarCameraController.viewHome(viewer.scene);
     for (let i = 0; i < 8; ++i) {
       viewer.render();
@@ -137,6 +224,11 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
     const depth = viewer.scene.pickPosition(windowPosition);
     const controller = viewer.planarCameraController;
     const controllerHost = viewer.scene.controllerHost;
+    const surface = world._surface;
+    const tile = surface._quadtree._renderTiles[0];
+    const binding = tile.imageryBindings.get(filteredLayer);
+    const effectiveSun = environment.effectiveSunDirection;
+    const effectiveMoon = environment.effectiveMoonDirection;
     window.scenegisP8 = {
       viewer,
       world,
@@ -144,6 +236,29 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
       controllerHost,
       filteredLayer,
       material,
+      environment,
+      skyBox,
+      secondTime,
+      identities: {
+        light: environment.light,
+        effectiveSun,
+        tile,
+        surfaceCommand: tile.command,
+        surfaceShader: tile.command.shaderProgram,
+        surfaceVertexArray: tile.command.vertexArray,
+        binding,
+        texture: binding.desired.texture,
+        atmosphereVertexArray: atmosphereRenderer._vertexArray,
+        atmosphereShaderProgram: atmosphereRenderer._shaderProgram,
+        atmosphereCommand: atmosphereRenderer._command,
+        celestialVertexArray: celestialRenderer._vertexArray,
+        celestialShaderProgram: celestialRenderer._shaderProgram,
+        sunCommand: celestialRenderer._sunCommand,
+        moonCommand: celestialRenderer._moonCommand,
+        skyBoxVertexArray: skyBox._panorama._command.vertexArray,
+        skyBoxShaderProgram: skyBox._panorama._command.shaderProgram,
+        skyBoxCommand: skyBox._panorama._command,
+      },
     };
     return {
       pixel,
@@ -163,10 +278,33 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
       controllerMatches: controllerHost._controllers.filter(
         (candidate) => candidate === controller,
       ).length,
+      environmentMatches: controllerHost._controllers.filter(
+        (candidate) => candidate === environment,
+      ).length,
       legacyInputs: viewer.scene.screenSpaceCameraController.enableInputs,
       filterBrightness: filteredLayer.brightness,
       materialIdentity: world.material === material,
       materialDestroyed: material.isDestroyed(),
+      environmentRegistered: world.environment === environment,
+      environmentAuthority: viewer.scene.light === environment.light,
+      lightDirectionMatches: Cesium.Cartesian3.equalsEpsilon(
+        environment.light.direction,
+        Cesium.Cartesian3.negate(effectiveSun, new Cesium.Cartesian3()),
+        1e-14,
+      ),
+      effectiveSun: [effectiveSun.x, effectiveSun.y, effectiveSun.z],
+      effectiveMoon: [effectiveMoon.x, effectiveMoon.y, effectiveMoon.z],
+      showSun: environment.showSun,
+      showMoon: environment.showMoon,
+      showAtmosphere: environment.showAtmosphere,
+      skyBoxIdentity: environment.skyBox === skyBox,
+      environmentResources: {
+        atmosphere: atmosphereRenderer._command !== undefined,
+        sun: celestialRenderer._sunCommand !== undefined,
+        moon: celestialRenderer._moonCommand !== undefined,
+        skyBox: skyBox._panorama._command !== undefined,
+      },
+      environmentExecutions: executionCounts,
     };
   });
 
@@ -185,13 +323,101 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
   expect(Math.abs(initial.depth[2])).toBeLessThan(1e-3);
   expect(initial.worldIdentity).toBe(true);
   expect(initial.globeUndefined).toBe(true);
-  expect(initial.controllerCount).toBe(1);
+  expect(initial.controllerCount).toBe(2);
   expect(initial.controllerMatches).toBe(1);
+  expect(initial.environmentMatches).toBe(1);
   expect(initial.legacyInputs).toBe(false);
   expect(initial.filterBrightness).toBe(0.5);
   expect(initial.materialIdentity).toBe(true);
   expect(initial.materialDestroyed).toBe(false);
+  expect(initial.environmentRegistered).toBe(true);
+  expect(initial.environmentAuthority).toBe(true);
+  expect(initial.lightDirectionMatches).toBe(true);
+  expect(initial.effectiveSun.every(Number.isFinite)).toBe(true);
+  expect(initial.effectiveMoon.every(Number.isFinite)).toBe(true);
+  expect(initial.showSun).toBe(true);
+  expect(initial.showMoon).toBe(true);
+  expect(initial.showAtmosphere).toBe(true);
+  expect(initial.skyBoxIdentity).toBe(true);
+  expect(initial.environmentResources).toEqual({
+    atmosphere: true,
+    sun: true,
+    moon: true,
+    skyBox: true,
+  });
+  expect(initial.environmentExecutions[0]).toBeGreaterThan(0);
+  expect(initial.environmentExecutions[1]).toBeGreaterThan(0);
+  expect(initial.environmentExecutions[2]).toBeGreaterThan(0);
+  if (initial.effectiveMoon[2] > 0.0) {
+    expect(initial.environmentExecutions[3]).toBeGreaterThan(0);
+  } else {
+    expect(initial.environmentExecutions[3]).toBe(0);
+  }
   expect(pageErrors).toEqual([]);
+
+  const timeMutation = await page.evaluate(() => {
+    const {
+      viewer,
+      world,
+      filteredLayer,
+      environment,
+      secondTime,
+      identities,
+    } = window.scenegisP8;
+    viewer.clock.currentTime = Cesium.JulianDate.clone(secondTime);
+    viewer.render();
+    const tile = world._surface._quadtree._renderTiles[0];
+    const binding = tile.imageryBindings.get(filteredLayer);
+    return {
+      effectiveChanged: !Cesium.Cartesian3.equalsEpsilon(
+        environment.effectiveSunDirection,
+        identities.effectiveSun,
+        1e-14,
+      ),
+      light: environment.light === identities.light,
+      lightAuthority: viewer.scene.light === environment.light,
+      tile: tile === identities.tile,
+      surfaceCommand: tile.command === identities.surfaceCommand,
+      surfaceShader: tile.command.shaderProgram === identities.surfaceShader,
+      surfaceVertexArray:
+        tile.command.vertexArray === identities.surfaceVertexArray,
+      binding: binding === identities.binding,
+      texture: binding.desired.texture === identities.texture,
+      atmosphere:
+        world._atmosphereRenderer._vertexArray ===
+          identities.atmosphereVertexArray &&
+        world._atmosphereRenderer._shaderProgram ===
+          identities.atmosphereShaderProgram &&
+        world._atmosphereRenderer._command === identities.atmosphereCommand,
+      celestial:
+        world._celestialBodyRenderer._vertexArray ===
+          identities.celestialVertexArray &&
+        world._celestialBodyRenderer._shaderProgram ===
+          identities.celestialShaderProgram &&
+        world._celestialBodyRenderer._sunCommand === identities.sunCommand &&
+        world._celestialBodyRenderer._moonCommand === identities.moonCommand,
+      skyBox:
+        environment.skyBox._panorama._command.vertexArray ===
+          identities.skyBoxVertexArray &&
+        environment.skyBox._panorama._command.shaderProgram ===
+          identities.skyBoxShaderProgram &&
+        environment.skyBox._panorama._command === identities.skyBoxCommand,
+    };
+  });
+  expect(timeMutation).toEqual({
+    effectiveChanged: true,
+    light: true,
+    lightAuthority: true,
+    tile: true,
+    surfaceCommand: true,
+    surfaceShader: true,
+    surfaceVertexArray: true,
+    binding: true,
+    texture: true,
+    atmosphere: true,
+    celestial: true,
+    skyBox: true,
+  });
 
   await page.mouse.move(480, 270);
   await page.mouse.wheel(0, -120);
@@ -217,9 +443,24 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
   expect(pageErrors).toEqual([]);
 
   const destroyed = await page.evaluate(() => {
-    const { viewer, world, controller, controllerHost, material } =
-      window.scenegisP8;
+    const {
+      viewer,
+      world,
+      controller,
+      controllerHost,
+      material,
+      environment,
+      skyBox,
+    } = window.scenegisP8;
     const aggregator = controller._aggregator;
+    viewer.removeController(environment);
+    const environmentRemoved =
+      world.environment === undefined &&
+      !controllerHost._controllers.includes(environment);
+    environment.skyBox = undefined;
+    const skyBoxOwnedByCaller = !skyBox.isDestroyed();
+    skyBox.destroy();
+    const skyBoxDestroyedByCaller = skyBox.isDestroyed();
     viewer.destroy();
     const materialOwnedByCaller = !material.isDestroyed();
     material.destroy();
@@ -232,6 +473,11 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
       aggregatorDestroyed: aggregator.isDestroyed(),
       materialOwnedByCaller,
       materialDestroyedByCaller: material.isDestroyed(),
+      environmentRemoved,
+      environmentWorldIdentity: environment.world === world,
+      skyBoxOwnedByCaller,
+      skyBoxDestroyedByCaller,
+      browserErrors: window.scenegisP8BrowserErrors,
     };
   });
   expect(destroyed).toEqual({
@@ -243,6 +489,11 @@ test("planar Viewer qualifies local imagery, picking, wheel, Home, and destroy",
     aggregatorDestroyed: true,
     materialOwnedByCaller: true,
     materialDestroyedByCaller: true,
+    environmentRemoved: true,
+    environmentWorldIdentity: true,
+    skyBoxOwnedByCaller: true,
+    skyBoxDestroyedByCaller: true,
+    browserErrors: [],
   });
   expect(externalAttempts).toEqual([]);
   expect(badResponses).toEqual([]);

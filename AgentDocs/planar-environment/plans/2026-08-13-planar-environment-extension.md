@@ -3,17 +3,17 @@
 ## Metadata
 
 - Plan type: `extension`
-- Status: `active`
+- Status: `completed`
 - Owner role: `architecture`
 - Architecture review: `confirmed`
 - Architecture reviewer: Architecture Agent
 - Created: `2026-08-13`
-- Updated: `2026-08-13`
+- Updated: `2026-08-14`
 - Parent extensions: completed `planar-world`、`planar-terrain-advanced`、
   `planar-surface-styling`
 - Related discussions: 项目负责人提出日月方向、太阳光照、平面大气和 SkyBox 适配
 - Related reviews: [E1 review request](../reviews/2026-08-13-e1-manual-celestial-light-contract.md)
-- ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3=`ADR-0035`；E4 expected `ADR-0036`；后续 phase 按激活时建立 ADR
+- ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3=`ADR-0035`；E4=`ADR-0036`
 - SGP: E1/E2/E4=None；E3=`SGP-0003`，E4只消费既有hook
 
 ## Objective
@@ -80,7 +80,7 @@
 | E2    | 以 project-origin WGS84 anchor 和 host time 增加 astronomical Sun/Moon direction。      | E1 checkpoint、Test migration checkpoint | 重新审计当前 Cesium astronomy/transforms、time scale、accuracy 和 package boundary。        | manual/astronomical mode 切换、单原点 topocentric 确定性方向、时区/日期/极端纬度与 ownership 闭环。         | `completed` | [E2](2026-08-13-phase-e2-astronomical-direction-mode.md)     |
 | E3    | 实现 SceneGIS-owned 可见太阳/月亮，并冻结尺度、遮挡和地下行为。                         | E2 checkpoint                            | 重新审计 billboard/command/render pass、depth/horizon 与资源 contract。                     | 日月视觉、方向同步、资源 ownership、requestRender、camera/underground 与 lifecycle 闭环。                   | `completed` | [E3](2026-08-13-phase-e3-visible-celestial-bodies.md)        |
 | E4    | 实现独立平面大气与 caller-owned SkyBox 适配。                                           | E3 checkpoint、ADR-0030                  | 重新审计 atmosphere shader、fullscreen/sky pass、camera height、precision 和 SkyBox seams。 | 大气/天空合成、地下规则、SkyBox ownership、shader delivery、性能与真实 GPU 画面闭环。                       | `completed` | [E4](2026-08-13-phase-e4-planar-atmosphere-skybox.md)        |
-| E5    | 完成环境能力联合资格、发布、文档和升级交付。                                            | E4 checkpoint                            | E1-E4 review/checkpoint 完成；固定最小联合矩阵。                                            | manual/astronomical light、visible bodies、atmosphere/SkyBox 在 dev/release/npm/lifecycle/docs 中统一闭环。 | `planned`   | 激活时建立                                                   |
+| E5    | 完成环境能力联合资格、发布、文档和升级交付。                                            | E4 checkpoint                            | E1-E4 review/checkpoint 完成；固定最小联合矩阵。                                            | manual/astronomical light、visible bodies、atmosphere/SkyBox 在 dev/release/npm/lifecycle/docs 中统一闭环。 | `completed` | [E5](2026-08-13-phase-e5-unified-qualification-delivery.md)  |
 
 ## Cross-phase validation
 
@@ -133,4 +133,12 @@
   `SceneGISPlanarSkyBox`、SkyBox→atmosphere→bodies顺序、native conflict、underground mask与one-pass resource budget已冻结；
   E4不修改upstream并只消费既有`SGP-0003`。Implementation、focused real-Context、build/types/docs与12/12 installed
   shader delivery、Architecture review和项目负责人manual gate均已完成；E4-R003示例cubemap seam修复也已复验通过，
-  当前正在创建E4独立checkpoint，之后激活E5。
+  E4独立checkpoint=`b9dd353e1d`。E5已激活为纯联合资格与交付阶段：只补同一local blocked-network dev/release公开路径，
+  复跑existing Widget/package/build证据并完成扩展状态闭环，不新增产品能力或视觉功能。
+- E5 implementation已完成：既有blocked-network Viewer case现在联合Environment astronomical/native Clock、visible bodies、
+  atmosphere与caller-owned generated SkyBox，并冻结Environment/flat Surface VA/imagery texture warm identity和Context-live
+  caller cleanup；existing Widget aggregate继续提供真实terrain mesh evidence。
+  Widget 10/10、build/release/types/docs/tsc、12/12 installed delivery与scoped audit已闭环；owner授权临时释放固定端口后，
+  corrected focused headed dev与Windows process-local release同一Viewer case均1/1 passed，network attempts=0。首次dev的
+  flat-world mesh test bug E5-R001已窄修复；Architecture最终review与release evidence gate均通过，root development service已恢复，
+  extension随E5独立checkpoint标记为`completed`。没有open finding、discussion或本扩展内必须继续完成的phase。

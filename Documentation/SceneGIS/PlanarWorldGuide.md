@@ -238,6 +238,14 @@ terrain mesh。Installed-package verifier逐项要求8个SceneGIS GLSL source及
 runtime properties、declarations与API member anchors；Node consumer只检查对象契约和caller ownership，不模拟WebGL、DOM或
 network。两个公开Sandcastle示例的用户工具面板使用中文，公网数据仍只属于best-effort人工验收。
 
+统一environment交付复用现有real-Context Widget aggregate，并在同一个blocked-network local dev/release Viewer场景中串联
+caller-owned `SceneGISPlanarEnvironment`、astronomical host Clock方向、visible Sun/Moon、planar atmosphere与generated local
+`SceneGISPlanarSkyBox`。该E2E使用无terrain provider的flat world，因此时间变化必须保持stable light、body/atmosphere
+commands、Surface tile/command/shader/VA与imagery binding/texture identity；真实terrain mesh identity由前述Environment
+Widget aggregate覆盖。Pick/depth、wheel/Home、World/Controller/SkyBox caller ownership和public network attempts=0继续作为
+同一门禁。Installed-package verifier要求12个SceneGIS GLSL source及其12个generated shader module，并验证E1-E4 runtime、
+declarations、API anchors与private hiding；Node consumer不模拟WebGL、DOM或network。
+
 ## 故障排查
 
 - 构造期 `DeveloperError`：检查 extent/span 是否有限且正方形、maximum level 是否安全、provider 是否复用 exact `world.tilingScheme`。
