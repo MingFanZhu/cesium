@@ -29,6 +29,10 @@ import Transforms from "../Core/Transforms.js";
 import CameraFlightPath from "./CameraFlightPath.js";
 import MapMode2D from "./MapMode2D.js";
 import SceneMode from "./SceneMode.js";
+// SCENEGIS_PATCH_BEGIN SGP-0004: Dispatch planar Camera APIs to fixed-axis SceneGIS implementations.
+import SceneGISPlanarCamera from "../SceneGIS/Scene/_private/_SceneGISPlanarCamera.js";
+import SceneGISPlanarCameraFlight from "../SceneGIS/Scene/_private/_SceneGISPlanarCameraFlight.js";
+// SCENEGIS_PATCH_END SGP-0004
 
 /**
  * @typedef {object} DirectionUp
@@ -984,15 +988,23 @@ Object.defineProperties(Camera.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Document fixed planar Camera axes.
   /**
    * Gets the camera heading in radians.
+   * For a live {@link SceneGISPlanarWorld}, heading is measured clockwise from fixed world +Y toward +X.
    * @memberof Camera.prototype
    *
    * @type {number}
    * @readonly
    */
+  // SCENEGIS_PATCH_END SGP-0004
   heading: {
     get: function () {
+      // SCENEGIS_PATCH_BEGIN SGP-0004: Read heading from the fixed planar world axes.
+      if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+        return SceneGISPlanarCamera.getHeadingPitchRoll(this).heading;
+      }
+      // SCENEGIS_PATCH_END SGP-0004
       if (this._mode !== SceneMode.MORPHING) {
         const ellipsoid = this._projection.ellipsoid;
 
@@ -1015,15 +1027,23 @@ Object.defineProperties(Camera.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Document fixed planar Camera axes.
   /**
    * Gets the camera pitch in radians.
+   * For a live {@link SceneGISPlanarWorld}, pitch is measured from the fixed world XY plane.
    * @memberof Camera.prototype
    *
    * @type {number}
    * @readonly
    */
+  // SCENEGIS_PATCH_END SGP-0004
   pitch: {
     get: function () {
+      // SCENEGIS_PATCH_BEGIN SGP-0004: Read pitch from the fixed planar world axes.
+      if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+        return SceneGISPlanarCamera.getHeadingPitchRoll(this).pitch;
+      }
+      // SCENEGIS_PATCH_END SGP-0004
       if (this._mode !== SceneMode.MORPHING) {
         const ellipsoid = this._projection.ellipsoid;
 
@@ -1046,15 +1066,23 @@ Object.defineProperties(Camera.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Document fixed planar Camera axes.
   /**
    * Gets the camera roll in radians.
+   * For a live {@link SceneGISPlanarWorld}, roll is measured around the fixed-axis view direction.
    * @memberof Camera.prototype
    *
    * @type {number}
    * @readonly
    */
+  // SCENEGIS_PATCH_END SGP-0004
   roll: {
     get: function () {
+      // SCENEGIS_PATCH_BEGIN SGP-0004: Read roll from the fixed planar world axes.
+      if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+        return SceneGISPlanarCamera.getHeadingPitchRoll(this).roll;
+      }
+      // SCENEGIS_PATCH_END SGP-0004
       if (this._mode !== SceneMode.MORPHING) {
         const ellipsoid = this._projection.ellipsoid;
 
@@ -1434,6 +1462,7 @@ const scratchSetViewOptions = {
 };
 
 const scratchHpr = new HeadingPitchRoll();
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document the planar setView profile.
 /**
  * Sets the camera position, orientation and transform.
  *
@@ -1444,6 +1473,7 @@ const scratchHpr = new HeadingPitchRoll();
  * y direction in Columbus view. Orientation is not used in 2D when in infinite scrolling mode.
  * @param {Matrix4} [options.endTransform] Transform matrix representing the reference frame of the camera.
  * @param {boolean} [options.convert] Whether to convert the destination from world coordinates to scene coordinates (only relevant when not using 3D). Defaults to <code>true</code>.
+ * @exception {DeveloperError} In a live {@link SceneGISPlanarWorld}, the destination is not a finite Cartesian3, is a Rectangle, or the fixed-axis orientation/transform is invalid.
  *
  * @example
  * // 1. Set position with a top-down view
@@ -1485,7 +1515,14 @@ const scratchHpr = new HeadingPitchRoll();
  *     }
  * });
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.setView = function (options) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Use fixed-axis Cartesian view semantics for a planar primary world.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    SceneGISPlanarCamera.setView(this, options);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   options = options ?? Frozen.EMPTY_OBJECT;
   let orientation = options.orientation ?? Frozen.EMPTY_OBJECT;
 
@@ -1539,14 +1576,23 @@ Camera.prototype.setView = function (options) {
 };
 
 const pitchScratch = new Cartesian3();
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document planar Home flight semantics.
 /**
  * Fly the camera to the home view.  Use {@link Camera#.DEFAULT_VIEW_RECTANGLE} to set
  * the default view for the 3D scene.  The home view for 2D and columbus view shows the
  * entire map.
  *
  * @param {number} [duration] The duration of the flight in seconds. If omitted, Cesium attempts to calculate an ideal duration based on the distance to be traveled by the flight. See {@link Camera#flyTo}
+ * For a live {@link SceneGISPlanarWorld}, this flies to the padded planar extent using fixed +X east, +Y north, and +Z up axes.
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.flyHome = function (duration) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Fly to the planar extent Home without an Earth rectangle.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    SceneGISPlanarCameraFlight.flyHome(this, duration);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   const mode = this._mode;
 
   if (mode === SceneMode.MORPHING) {
@@ -2299,6 +2345,7 @@ Camera.prototype.getMagnitude = function () {
 
 const scratchLookAtMatrix4 = new Matrix4();
 
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document the planar lookAt frame.
 /**
  * Sets the camera position and orientation using a target and offset. The target must be given in
  * world coordinates. The offset can be either a cartesian or heading/pitch/range in the local east-north-up reference frame centered at the target.
@@ -2315,6 +2362,7 @@ const scratchLookAtMatrix4 = new Matrix4();
  * @param {Cartesian3|HeadingPitchRange} offset The offset from the target in the local east-north-up reference frame centered at the target.
  *
  * @exception {DeveloperError} lookAt is not supported while morphing.
+ * @exception {DeveloperError} In a live {@link SceneGISPlanarWorld}, the target or offset is non-finite or degenerate. The target frame uses fixed planar axes and translation only.
  *
  * @example
  * // 1. Using a cartesian offset
@@ -2328,7 +2376,14 @@ const scratchLookAtMatrix4 = new Matrix4();
  * const range = 5000.0;
  * viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.lookAt = function (target, offset) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Use a translation-only fixed-axis planar target frame.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    SceneGISPlanarCamera.lookAt(this, target, offset);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   //>>includeStart('debug', pragmas.debug);
   if (!defined(target)) {
     throw new DeveloperError("target is required");
@@ -3333,6 +3388,11 @@ const newOptions = {
  * If no flight is in progress, this function does nothing.
  */
 Camera.prototype.cancelFlight = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Restore planar ControllerHost input when canceling a Cartesian flight.
+  if (SceneGISPlanarCameraFlight.cancelFlight(this)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   if (defined(this._currentFlight)) {
     this._currentFlight.cancelTween();
     this._currentFlight = undefined;
@@ -3344,6 +3404,11 @@ Camera.prototype.cancelFlight = function () {
  * If no flight is in progress, this function does nothing.
  */
 Camera.prototype.completeFlight = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Complete the planar Cartesian flight through its fixed-axis final state.
+  if (SceneGISPlanarCameraFlight.completeFlight(this)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   if (defined(this._currentFlight)) {
     this._currentFlight.cancelTween();
 
@@ -3371,6 +3436,7 @@ Camera.prototype.completeFlight = function () {
   }
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document the planar Cartesian flight profile.
 /**
  * Flies the camera from its current position to a new position.
  *
@@ -3391,6 +3457,7 @@ Camera.prototype.completeFlight = function () {
  * @param {EasingFunction.Callback} [options.easingFunction] Controls how the time is interpolated over the duration of the flight.
  *
  * @exception {DeveloperError} If either direction or up is given, then both are required.
+ * @exception {DeveloperError} In a live {@link SceneGISPlanarWorld}, destination is not a finite Cartesian3, is a Rectangle, or flyOverLongitude/flyOverLongitudeWeight is defined.
  *
  * @example
  * // 1. Fly to a position with a top-down view
@@ -3422,7 +3489,14 @@ Camera.prototype.completeFlight = function () {
  *     }
  * });
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.flyTo = function (options) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Bypass Cartographic interpolation for a planar primary world.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    SceneGISPlanarCameraFlight.flyTo(this, options);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   options = options ?? Frozen.EMPTY_OBJECT;
   let destination = options.destination;
   //>>includeStart('debug', pragmas.debug);
@@ -3588,6 +3662,7 @@ function adjustBoundingSphereOffset(camera, boundingSphere, offset) {
   return offset;
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document fixed-axis planar sphere framing.
 /**
  * Sets the camera so that the current view contains the provided bounding sphere.
  *
@@ -3605,8 +3680,16 @@ function adjustBoundingSphereOffset(camera, boundingSphere, offset) {
  * @param {HeadingPitchRange} [offset] The offset from the target in the local east-north-up reference frame centered at the target.
  *
  * @exception {DeveloperError} viewBoundingSphere is not supported while morphing.
+ * In a live {@link SceneGISPlanarWorld}, the offset is interpreted in fixed +X east, +Y north, and +Z up axes.
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.viewBoundingSphere = function (boundingSphere, offset) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Frame a planar bounding sphere in the fixed world axes.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    SceneGISPlanarCamera.viewBoundingSphere(this, boundingSphere, offset);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   //>>includeStart('debug', pragmas.debug);
   if (!defined(boundingSphere)) {
     throw new DeveloperError("boundingSphere is required.");
@@ -3632,6 +3715,7 @@ const scratchFlyToBoundingSphereCart4 = new Cartesian4();
 const scratchFlyToBoundingSphereQuaternion = new Quaternion();
 const scratchFlyToBoundingSphereMatrix3 = new Matrix3();
 
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document fixed-axis planar sphere flight.
 /**
  * Flies the camera to a location where the current view contains the provided bounding sphere.
  *
@@ -3656,8 +3740,20 @@ const scratchFlyToBoundingSphereMatrix3 = new Matrix3();
  * @param {number} [options.flyOverLongitude] There are always two ways between 2 points on globe. This option force camera to choose fight direction to fly over that longitude.
  * @param {number} [options.flyOverLongitudeWeight] Fly over the lon specifyed via flyOverLongitude only if that way is not longer than short way times flyOverLongitudeWeight.
  * @param {EasingFunction.Callback} [options.easingFunction] Controls how the time is interpolated over the duration of the flight.
+ * @exception {DeveloperError} In a live {@link SceneGISPlanarWorld}, the sphere/offset is invalid or flyOverLongitude/flyOverLongitudeWeight is defined.
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.flyToBoundingSphere = function (boundingSphere, options) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Fly to planar bounds without an ellipsoid ENU target frame.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    SceneGISPlanarCameraFlight.flyToBoundingSphere(
+      this,
+      boundingSphere,
+      options,
+    );
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   //>>includeStart('debug', pragmas.debug);
   if (!defined(boundingSphere)) {
     throw new DeveloperError("boundingSphere is required.");

@@ -156,6 +156,13 @@ widget.clock.currentTime = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
 
 - PC 输入为 left-drag pan、middle-drag rotate、wheel zoom；没有 touch、pinch 或 inertia。
 - `SceneGISPlanarCameraController.viewHome(scene)` 和 planar Home button 按当前 viewport 与四类支持的 frustum 重新计算视图。
+- `viewer.camera`的`heading`/`pitch`/`roll`、`setView`、`lookAt`、`viewBoundingSphere`、`flyTo`、
+  `flyToBoundingSphere`与`flyHome`在live planar World中使用固定`+X East/+Y North/+Z Up`与Cartesian位置。
+  Rectangle destination和`flyOverLongitude*`不具有planar语义，会同步抛出`DeveloperError`。
+- Camera flight继续使用Cesium tween与complete/cancel callback；飞行期间已注册planar controller暂停input，结束后恢复
+  caller原有`enabled`状态，并从下一controller frame继续surface clearance。低层Scene没有controller时仍可flight。
+- `Viewer.zoomTo`、`Viewer.flyTo`、Entity tracking与InfoBox camera尚未解锁；请直接调用`viewer.camera`方法并传入
+  planar Cartesian坐标。
 - `world.pick(ray)` 与 `world.pickFromWindowPosition(position, scene)` 是有界的 Z=0 数学拾取，不依赖当前 LOD 或 depth buffer；extent 外返回 `undefined`。
 - `scene.pickPosition(position)` 是 rendered-depth 拾取，要求浏览器支持 depth texture，并依赖最近一次 normal render。它不等同于通用 object picking。
 - `world.getTerrainHeight(position)`只读取resident direct/upsampled Float32 surface；不会发请求，
@@ -207,18 +214,18 @@ SunLight方向。双面surface允许从上下两侧观察，但lighting始终使
 
 ## 支持矩阵与限制
 
-| 能力          | 当前契约                                                                                                                   |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| extent        | 有限、严格正方形、米制、无 wrap                                                                                            |
-| scene mode    | 仅 `SCENE3D`                                                                                                               |
-| tiling        | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                                                     |
-| surface       | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                                                |
-| imagery       | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                           |
-| terrain style | caller-owned `Material`；四个稳定资格builtin与受限custom Fabric，仅组合diffuse/alpha                                       |
-| navigation    | PC pan/rotate/wheel/Home、surface endpoint clearance、underground双向orbit crossing；无sweep/touch/inertia/flight/tracking |
-| environment   | 默认无visual sky；可选caller-owned fixed-axis planar SkyBox、planar atmosphere与程序化Sun/Moon，不自动增加Earth sky语义    |
-| UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                     |
-| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow、full Globe Material、imagery picking |
+| 能力          | 当前契约                                                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| extent        | 有限、严格正方形、米制、无 wrap                                                                                                               |
+| scene mode    | 仅 `SCENE3D`                                                                                                                                  |
+| tiling        | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                                                                        |
+| surface       | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                                                                   |
+| imagery       | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                                              |
+| terrain style | caller-owned `Material`；四个稳定资格builtin与受限custom Fabric，仅组合diffuse/alpha                                                          |
+| navigation    | PC pan/rotate/wheel/Home、public Camera Cartesian view/flight、surface clearance与underground crossing；无sweep/touch/inertia/Viewer tracking |
+| environment   | 默认无visual sky；可选caller-owned fixed-axis planar SkyBox、planar atmosphere与程序化Sun/Moon，不自动增加Earth sky语义                       |
+| UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                                        |
+| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow、full Globe Material、imagery picking                    |
 
 ## 性能与调参
 

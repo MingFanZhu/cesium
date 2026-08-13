@@ -65,6 +65,27 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0006-planar-viewer-and-widget-integration.md",
       "removalCondition": "Retire when upstream Viewer exposes an equivalent planar-world construction path, controller ownership lifecycle, planar Home integration, and compatible widget capability guards."
+    },
+    {
+      "id": "SGP-0004",
+      "title": "Add planar Camera view and flight dispatch",
+      "status": "proposed",
+      "reason": "Camera public view and flight APIs currently route SCENE3D positions and orientations through ellipsoid ENU and Cartographic interpolation, so a live planar primary world requires an explicit fixed-axis dispatch.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Camera.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISPlanarCameraSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISPlanarCameraFlightSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarCameraControllerSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarCameraCesiumWidgetSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0037-planar-camera-view-and-flight.md",
+      "removalCondition": "Retire when upstream Camera exposes equivalent non-ellipsoid fixed-axis view, framing, Cartesian flight, and external controller input-suspension hooks for a custom primary world."
     }
   ]
 }

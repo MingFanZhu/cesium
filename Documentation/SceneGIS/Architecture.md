@@ -318,6 +318,14 @@ fallback之上；terrain降低或detach不向下吸附，正常纠正不调用Ho
 两侧，下侧使用镜像正pitch；纵向中键orbit保持press-time完整3D pivot/window anchor，可在above/down与below/up
 之间双向穿越。该保证只覆盖controller update后的endpoint与显式orbit crossing，不承诺continuous/swept
 collision、free-look、角色体积或terrain following。
+
+Public `Camera`在live primary `SceneGISPlanarWorld`中通过`SGP-0004`使用固定`+X East/+Y North/+Z Up`
+的HPR、Cartesian `setView`/`lookAt`/bounding-sphere framing与flight。Planar Rectangle以及
+`flyOverLongitude*`同步拒绝；Perspective、PerspectiveOffCenter、Orthographic和OrthographicOffCenter都按自身
+frustum bounds求view/flight endpoint，不借用ellipsoid ENU或Cartographic。Flight继续使用Scene的TweenCollection、
+callback/cancel/complete/requestRender/preload协议，并以soft-private token暂停已注册planar controller的input/clearance；
+结束或失败时exactly once恢复caller原有enabled状态。没有controller的低层planar Scene仍可flight。完整决定见
+[ADR-0037](Decisions/ADR-0037-planar-camera-view-and-flight.md)。
 完整决定见[ADR-0010](Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)与
 [ADR-0024](Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
 [ADR-0025](Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)与
@@ -496,7 +504,8 @@ instance不得交给第二个Viewer/CesiumWidget，且P6不增加跨Scene owner 
 
 Viewer 使用 SceneGIS-owned planar Home command 调用 controller `viewHome(scene)`。InfoBox 只保留
 title/description，SelectionIndicator 与 left-click selection 可以保留；Entity tracking、InfoBox
-camera、`zoomTo` 和 `flyTo` 不属于当前 planar contract。BaseLayerPicker、Geocoder、
+camera、Viewer `zoomTo` 和 Viewer `flyTo` 不属于当前 planar contract；这不限制ADR-0037已经适配的public
+`viewer.camera` view/flight方法。BaseLayerPicker、Geocoder、
 SceneModePicker、ProjectionPicker、NavigationHelpButton 和 VRButton 默认关闭，显式启用时
 fail-fast。Animation、Timeline、Fullscreen 以及不携带 Globe 语义的显示控件保持可用。完整选项矩阵、
 ownership 和升级检查点见

@@ -239,7 +239,51 @@
           planarCameraController.viewHome(viewer.scene);
           viewer.scene.requestRender();
         },
+        cameraLookAt: () => {
+          viewer.camera.lookAt(
+            new Cesium.Cartesian3(1113194.9, 5780349.2, 0.0),
+            new Cesium.HeadingPitchRange(0.0, -0.65, 500000.0),
+          );
+          viewer.scene.requestRender();
+        },
+        cameraViewBounds: () => {
+          viewer.camera.viewBoundingSphere(
+            new Cesium.BoundingSphere(
+              new Cesium.Cartesian3(1113194.9, 5780349.2, 0.0),
+              120000.0,
+            ),
+          );
+          viewer.scene.requestRender();
+        },
+        cameraFlyMountain: () => {
+          viewer.camera.flyTo({
+            destination: new Cesium.Cartesian3(
+              1113194.9,
+              5780349.2 - 400000.0,
+              300000.0,
+            ),
+            orientation: {
+              direction: new Cesium.Cartesian3(0.0, 0.8, -0.6),
+              up: new Cesium.Cartesian3(0.0, 0.6, 0.8),
+            },
+            duration: 2.0,
+          });
+        },
+        cameraFlyBounds: () => {
+          viewer.camera.flyToBoundingSphere(
+            new Cesium.BoundingSphere(
+              new Cesium.Cartesian3(1113194.9, 5780349.2, 0.0),
+              120000.0,
+            ),
+            { duration: 2.0 },
+          );
+        },
+        cameraFlyHome: () => viewer.camera.flyHome(2.0),
+        cameraCancelFlight: () => viewer.camera.cancelFlight(),
+        cameraCompleteFlight: () => viewer.camera.completeFlight(),
         cameraHelp: "左键拖动平移；中键拖动旋转；滚轮缩放。",
+        cameraApiHelp:
+          "公开Camera API使用平面东/北/上固定轴；飞行期间平面输入暂停，结束后自动恢复。",
         atmosphereNotice:
           "平面SkyBox固定为东/北/上轴；地下时天空、大气和天体统一隐藏。",
       };
@@ -512,6 +556,19 @@
       cameraFolder.add(state, "mountainView").name("返回山地区域");
       cameraFolder.add(state, "planarHome").name("平面全域 Home");
       cameraFolder.add(state, "cameraHelp").name("操作说明").disable();
+      const cameraApiFolder = cameraFolder.addFolder("公开 Camera 视图与飞行");
+      cameraApiFolder.add(state, "mountainView").name("setView 山地视角");
+      cameraApiFolder.add(state, "cameraLookAt").name("lookAt 山地中心");
+      cameraApiFolder.add(state, "cameraViewBounds").name("viewBoundingSphere");
+      cameraApiFolder.add(state, "cameraFlyMountain").name("flyTo 山地视角");
+      cameraApiFolder.add(state, "cameraFlyBounds").name("flyToBoundingSphere");
+      cameraApiFolder.add(state, "cameraFlyHome").name("Camera flyHome");
+      cameraApiFolder.add(state, "cameraCancelFlight").name("取消飞行");
+      cameraApiFolder.add(state, "cameraCompleteFlight").name("立即完成飞行");
+      cameraApiFolder
+        .add(state, "cameraApiHelp")
+        .name("Camera API说明")
+        .disable();
 
       function updateEnvironmentState() {
         const direction = environment.effectiveSunDirection;

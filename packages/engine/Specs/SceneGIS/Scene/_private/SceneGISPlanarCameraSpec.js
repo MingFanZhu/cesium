@@ -7,11 +7,26 @@ import {
   PerspectiveFrustum,
   PerspectiveOffCenterFrustum,
   Ray,
+  Rectangle,
+  SceneMode,
 } from "../../../../index.js";
+import SceneGISPlanarCoordinateSystem from "../../../../Source/SceneGIS/Core/SceneGISPlanarCoordinateSystem.js";
+import SceneGISPlanarExtent from "../../../../Source/SceneGIS/Core/SceneGISPlanarExtent.js";
 import SceneGISPlanarCamera from "../../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarCamera.js";
+import SceneGISPlanarWorld from "../../../../Source/SceneGIS/Scene/SceneGISPlanarWorld.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarCamera", function () {
   const element = { clientWidth: 200, clientHeight: 100 };
+  const worlds = [];
+
+  afterEach(function () {
+    while (worlds.length > 0) {
+      const world = worlds.pop();
+      if (!world.isDestroyed()) {
+        world.destroy();
+      }
+    }
+  });
 
   function createCamera(frustum) {
     return {
@@ -62,6 +77,38 @@ describe("SceneGIS/Scene/SceneGISPlanarCamera", function () {
       orthographic,
       orthographicOffCenter,
     ];
+  }
+
+  function createPlanarCamera(frustum) {
+    const world = new SceneGISPlanarWorld({
+      coordinateSystem: new SceneGISPlanarCoordinateSystem({
+        extent: new SceneGISPlanarExtent({
+          minimumX: -1000.0,
+          minimumY: -1000.0,
+          maximumX: 1000.0,
+          maximumY: 1000.0,
+        }),
+      }),
+      maximumLevel: 0,
+    });
+    worlds.push(world);
+    const camera = {
+      _scene: {
+        world,
+        mode: SceneMode.SCENE3D,
+        canvas: element,
+      },
+      transform: Matrix4.clone(Matrix4.IDENTITY),
+      position: new Cartesian3(0.0, 0.0, 100.0),
+      direction: new Cartesian3(0.0, 0.0, -1.0),
+      up: Cartesian3.clone(Cartesian3.UNIT_Y),
+      right: Cartesian3.clone(Cartesian3.UNIT_X),
+      frustum,
+    };
+    camera._setTransform = function (transform) {
+      Matrix4.clone(transform, camera.transform);
+    };
+    return camera;
   }
 
   it("reuses an optional frustum classification result", function () {
@@ -223,6 +270,172 @@ describe("SceneGIS/Scene/SceneGISPlanarCamera", function () {
     expect(pose.heading).toEqualEpsilon(heading, 1e-14);
     expect(pose.pitch).toEqualEpsilon(pitch, 1e-14);
     expect(Math.abs(pose.roll)).toEqualEpsilon(0.2, 1e-14);
+  });
+
+  it("round-trips zenith and nadir headings without flipping the up axis", function () {
+    const camera = createPlanarCamera(createFrusta()[0]);
+    for (const pitch of [Math.PI / 2.0, -Math.PI / 2.0]) {
+      const heading = 0.7;
+      const direction = new Cartesian3();
+      const up = new Cartesian3();
+      const right = new Cartesian3();
+      SceneGISPlanarCamera.getAxes(heading, pitch, direction, up, right);
+      Cartesian3.clone(direction, camera.direction);
+      Cartesian3.clone(up, camera.up);
+      Cartesian3.clone(right, camera.right);
+
+      const hpr = SceneGISPlanarCamera.getHeadingPitchRoll(camera, {});
+      expect(hpr.heading).toEqualEpsilon(heading, 1e-14);
+      expect(hpr.pitch).toEqualEpsilon(pitch, 1e-14);
+      expect(hpr.roll).toBe(0.0);
+
+      const roundTripDirection = new Cartesian3();
+      const roundTripUp = new Cartesian3();
+      const roundTripRight = new Cartesian3();
+      SceneGISPlanarCamera.getAxes(
+        hpr.heading,
+        hpr.pitch,
+        roundTripDirection,
+        roundTripUp,
+        roundTripRight,
+        hpr.roll,
+      );
+      expect(roundTripDirection).toEqualEpsilon(direction, 1e-14);
+      expect(roundTripUp).toEqualEpsilon(up, 1e-14);
+      expect(roundTripRight).toEqualEpsilon(right, 1e-14);
+    }
+  });
+
+  it("round-trips fixed-axis HPR through non-identity transforms and four frusta", function () {
+    for (const frustum of createFrusta()) {
+      const camera = createPlanarCamera(frustum);
+      camera._setTransform(
+        Matrix4.fromTranslation(new Cartesian3(100.0, -50.0, 25.0)),
+      );
+      const destination = new Cartesian3(4.0e8, -7.0e8, 9000.0);
+      SceneGISPlanarCamera.setView(camera, {
+        destination,
+        orientation: {
+          heading: 5.8,
+          pitch: -0.63,
+          roll: 0.27,
+        },
+      });
+      const pose = SceneGISPlanarCamera.getWorldPose(camera);
+      const hpr = SceneGISPlanarCamera.getHeadingPitchRoll(camera, {});
+      expect(pose.position).toEqualEpsilon(destination, 1e-7);
+      expect(hpr.heading).toEqualEpsilon(5.8, 1e-14);
+      expect(hpr.pitch).toEqualEpsilon(-0.63, 1e-14);
+      expect(hpr.roll).toEqualEpsilon(0.27, 1e-14);
+    }
+  });
+
+  it("sets direction/up atomically and rejects planar Rectangle destinations", function () {
+    const camera = createPlanarCamera(createFrusta()[0]);
+    const original = SceneGISPlanarCamera.getWorldPose(camera, {
+      position: new Cartesian3(),
+      direction: new Cartesian3(),
+      up: new Cartesian3(),
+      right: new Cartesian3(),
+    });
+    expect(() =>
+      SceneGISPlanarCamera.setView(camera, {
+        destination: Rectangle.fromDegrees(-1.0, -1.0, 1.0, 1.0),
+      }),
+    ).toThrowDeveloperError();
+    expect(SceneGISPlanarCamera.getWorldPose(camera).position).toEqual(
+      original.position,
+    );
+
+    SceneGISPlanarCamera.setView(camera, {
+      destination: new Cartesian3(10.0, 20.0, 30.0),
+      orientation: {
+        direction: new Cartesian3(1.0, 2.0, -3.0),
+        up: Cartesian3.UNIT_Z,
+      },
+    });
+    const pose = SceneGISPlanarCamera.getWorldPose(camera);
+    expect(Cartesian3.magnitude(pose.direction)).toEqualEpsilon(1.0, 1e-14);
+    expect(Cartesian3.dot(pose.direction, pose.up)).toEqualEpsilon(0.0, 1e-14);
+  });
+
+  it("uses a translation-only lookAt frame and frames bounds in four frusta", function () {
+    for (const frustum of createFrusta()) {
+      const camera = createPlanarCamera(frustum);
+      const target = new Cartesian3(300.0, -200.0, 40.0);
+      SceneGISPlanarCamera.lookAt(camera, target, {
+        heading: Math.PI / 2.0,
+        pitch: -Math.PI / 4.0,
+        range: 200.0,
+      });
+      expect(
+        Matrix4.getTranslation(camera.transform, new Cartesian3()),
+      ).toEqual(target);
+      let pose = SceneGISPlanarCamera.getWorldPose(camera);
+      const toTarget = Cartesian3.normalize(
+        Cartesian3.subtract(target, pose.position, new Cartesian3()),
+        new Cartesian3(),
+      );
+      expect(pose.direction).toEqualEpsilon(toTarget, 1e-14);
+
+      SceneGISPlanarCamera.viewBoundingSphere(
+        camera,
+        { center: target, radius: 40.0 },
+        { heading: 0.4, pitch: -0.7, range: 0.0 },
+      );
+      pose = SceneGISPlanarCamera.getWorldPose(camera);
+      expect(Number.isFinite(pose.position.x)).toBe(true);
+      expect(Cartesian3.distance(pose.position, target)).toBeGreaterThan(40.0);
+      const centerRay = SceneGISPlanarCamera.getWindowRay(
+        camera,
+        element,
+        new Cartesian2(100.0, 50.0),
+      );
+      expect(centerRay.direction).toEqualEpsilon(
+        Cartesian3.normalize(
+          Cartesian3.subtract(target, centerRay.origin, new Cartesian3()),
+          new Cartesian3(),
+        ),
+        1e-14,
+      );
+      expect(SceneGISPlanarCamera.getFrustumInfo(camera.frustum).near).toBe(
+        frustum.near,
+      );
+    }
+  });
+
+  it("fits tall and wide planar home extents in all four frusta", function () {
+    const padding = 1.1;
+    for (const [width, height] of [
+      [200.0, 800.0],
+      [800.0, 200.0],
+    ]) {
+      const extent = new SceneGISPlanarExtent({
+        minimumX: -width * 0.5,
+        minimumY: -height * 0.5,
+        maximumX: width * 0.5,
+        maximumY: height * 0.5,
+      });
+      for (const frustum of createFrusta()) {
+        frustum.far = 10000.0;
+        const camera = createPlanarCamera(frustum);
+        const home = SceneGISPlanarCamera.computeHomeState(
+          camera,
+          element,
+          extent,
+          padding,
+        );
+        const info = home.info;
+        const coveredWidth = info.perspective
+          ? home.position.z * info.horizontalSlopeSpan
+          : info.horizontalSpan * home.orthographicScale;
+        const coveredHeight = info.perspective
+          ? home.position.z * info.verticalSlopeSpan
+          : info.verticalSpan * home.orthographicScale;
+        expect(coveredWidth).toBeGreaterThanOrEqual(width * padding);
+        expect(coveredHeight).toBeGreaterThanOrEqual(height * padding);
+      }
+    }
   });
 
   it("rejects non-representable derived geometry for every frustum family", function () {

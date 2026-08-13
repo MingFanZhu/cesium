@@ -776,8 +776,14 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     expect(scene.camera.positionWC.z).toBeGreaterThan(controller._target.z);
   });
 
-  it("homes every real frustum around a large-offset extent", function () {
+  it("homes every real frustum around a tall large-offset extent", function () {
     const scene = createWidget(1000000000.0);
+    world.coordinateSystem._extent = new SceneGISPlanarExtent({
+      minimumX: 999999872.0,
+      minimumY: 999999488.0,
+      maximumX: 1000000128.0,
+      maximumY: 1000000512.0,
+    });
     controller = new SceneGISPlanarCameraController({ world });
     for (const [width, height] of [
       [200, 100],
@@ -830,7 +836,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
             (infoAfter.top - infoAfter.bottom),
         ).toEqualEpsilon(verticalOffsetBefore, 1e-14);
         for (const x of [999999872.0, 1000000128.0]) {
-          for (const y of [999999872.0, 1000000128.0]) {
+          for (const y of [999999488.0, 1000000512.0]) {
             const windowPosition = project(scene, new Cartesian3(x, y, 0.0));
             expect(windowPosition.x).toBeGreaterThanOrEqual(0.0);
             expect(windowPosition.x).toBeLessThanOrEqual(

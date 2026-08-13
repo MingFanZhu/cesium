@@ -35,6 +35,11 @@ const scratchCameraPose = {
   up: new Cartesian3(),
   right: new Cartesian3(),
 };
+const scratchHome = {
+  info: {},
+  target: new Cartesian3(),
+  position: new Cartesian3(),
+};
 
 function validateBoolean(name, value) {
   if (typeof value !== "boolean") {
@@ -396,6 +401,7 @@ function SceneGISPlanarCameraController(options) {
   this._quarantinedMiddle = false;
   this._quarantinedLeftPressTime = undefined;
   this._quarantinedMiddlePressTime = undefined;
+  this._flightSuspensionCount = 0;
 }
 
 Object.defineProperties(SceneGISPlanarCameraController.prototype, {
@@ -795,6 +801,10 @@ SceneGISPlanarCameraController.prototype.firstUpdate = function (scene, time) {
   }
   this._validateScene(scene);
   this._scene = scene;
+  if (this._flightSuspensionCount > 0) {
+    this._clearInputState();
+    return;
+  }
   const clearanceSurfaceHeight = applyTerrainClearance(this, scene);
   if (scene.canvas.clientWidth !== 0 && scene.canvas.clientHeight !== 0) {
     this._syncRig(scene, true, clearanceSurfaceHeight);
@@ -979,81 +989,13 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
 };
 
 SceneGISPlanarCameraController.prototype._computeHomeState = function (scene) {
-  const canvas = scene.canvas;
-  if (
-    !Number.isFinite(canvas.clientWidth) ||
-    !Number.isFinite(canvas.clientHeight) ||
-    canvas.clientWidth <= 0 ||
-    canvas.clientHeight <= 0
-  ) {
-    throw new DeveloperError(
-      "The planar home viewport must have a positive finite size.",
-    );
-  }
-  const info = SceneGISPlanarCamera.getFrustumInfo(scene.camera.frustum);
-  const extent = this._world.coordinateSystem.extent;
-  const target = SceneGISPlanarCamera.getExtentCenter(extent, new Cartesian3());
-  const halfSize = extent.width * this._homePadding * 0.5;
-  if (!Number.isFinite(halfSize) || halfSize <= 0.0) {
-    throw new DeveloperError("The padded planar extent is not representable.");
-  }
-
-  let distance;
-  let orthoScale;
-  let maximumRange;
-  if (info.perspective) {
-    const horizontalSlope = info.horizontalSlopeSpan * 0.5;
-    const verticalSlope = info.verticalSlopeSpan * 0.5;
-    distance = Math.max(
-      halfSize / horizontalSlope,
-      halfSize / verticalSlope,
-      info.near * (1.0 + CesiumMath.EPSILON8),
-    );
-    maximumRange =
-      distance * Math.hypot(info.centerSlopeX, info.centerSlopeY, 1.0);
-  } else {
-    orthoScale = Math.max(
-      (halfSize * 2.0) / info.horizontalSpan,
-      (halfSize * 2.0) / info.verticalSpan,
-    );
-    distance = info.near + (info.far - info.near) * 0.5;
-    maximumRange = info.verticalSpan * orthoScale;
-  }
-  if (
-    !Number.isFinite(distance) ||
-    !Number.isFinite(maximumRange) ||
-    !Number.isFinite(orthoScale ?? 1.0) ||
-    distance <= info.near ||
-    distance >= info.far ||
-    maximumRange <= 0.0
-  ) {
-    throw new DeveloperError(
-      "The camera near/far range cannot contain the planar home view.",
-    );
-  }
-
-  const scale = orthoScale ?? 1.0;
-  const scaledCenterX = info.centerX * scale;
-  const scaledCenterY = info.centerY * scale;
-  const position = new Cartesian3(
-    target.x -
-      (info.perspective ? distance * info.centerSlopeX : scaledCenterX),
-    target.y -
-      (info.perspective ? distance * info.centerSlopeY : scaledCenterY),
-    distance,
+  return SceneGISPlanarCamera.computeHomeState(
+    scene.camera,
+    scene.canvas,
+    this._world.coordinateSystem.extent,
+    this._homePadding,
+    scratchHome,
   );
-  if (!Number.isFinite(position.x) || !Number.isFinite(position.y)) {
-    throw new DeveloperError(
-      "The planar home camera position is not representable.",
-    );
-  }
-  return {
-    info: info,
-    target: target,
-    position: position,
-    orthoScale: orthoScale,
-    maximumRange: maximumRange,
-  };
 };
 
 SceneGISPlanarCameraController.prototype._getRanges = function (scene) {
@@ -1162,7 +1104,7 @@ SceneGISPlanarCameraController.prototype._zoom = function (scene, movement) {
  * @exception {DeveloperError} The controller is disconnected, the Scene/world/mode/frustum is invalid, or legacy input is enabled.
  */
 SceneGISPlanarCameraController.prototype.update = function (scene, time) {
-  if (!this._enabled) {
+  if (!this._enabled || this._flightSuspensionCount > 0) {
     this._clearInputState();
     return;
   }
@@ -1234,6 +1176,55 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
   }
 };
 
+SceneGISPlanarCameraController.prototype._suspendForCameraFlight = function (
+  scene,
+) {
+  if (this._world !== scene.world || !defined(this._aggregator)) {
+    throw new DeveloperError(
+      "The planar Camera controller must be registered for the flight Scene.",
+    );
+  }
+  this._flightSuspensionCount++;
+  this._clearInputState();
+  return {
+    controller: this,
+    active: true,
+  };
+};
+
+SceneGISPlanarCameraController.prototype._resumeFromCameraFlight = function (
+  token,
+) {
+  if (!defined(token) || token.controller !== this || !token.active) {
+    return;
+  }
+  token.active = false;
+  this._flightSuspensionCount = Math.max(0, this._flightSuspensionCount - 1);
+};
+
+SceneGISPlanarCameraController._getRegisteredForScene = function (scene) {
+  const controllers = scene?.controllerHost?._controllers;
+  if (!Array.isArray(controllers)) {
+    return undefined;
+  }
+  let result;
+  for (const controller of controllers) {
+    if (
+      controller instanceof SceneGISPlanarCameraController &&
+      controller._world === scene.world &&
+      defined(controller._aggregator)
+    ) {
+      if (defined(result)) {
+        throw new DeveloperError(
+          "Only one registered SceneGISPlanarCameraController may own planar Camera input.",
+        );
+      }
+      result = controller;
+    }
+  }
+  return result;
+};
+
 /**
  * Sets an immediate north-up, nadir view that contains the padded world extent.
  *
@@ -1258,8 +1249,11 @@ SceneGISPlanarCameraController.prototype.viewHome = function (scene) {
     homeDirection,
     homeUp,
   );
-  if (defined(home.orthoScale)) {
-    SceneGISPlanarCamera.scaleOrthographicFrustum(frustum, home.orthoScale);
+  if (defined(home.orthographicScale)) {
+    SceneGISPlanarCamera.scaleOrthographicFrustum(
+      frustum,
+      home.orthographicScale,
+    );
   }
   SceneGISPlanarCamera.setWorldPose(
     camera,
