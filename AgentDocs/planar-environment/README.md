@@ -8,8 +8,8 @@
 | Status                 | `active`                                                         |
 | Planning model         | `extension`                                                      |
 | Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)     |
-| Current phase          | E3 completed；E4 pending activation                              |
-| Active phase plan      | None                                                             |
+| Current phase          | E4 Planar Atmosphere and SkyBox                                  |
+| Active phase plan      | [E4 plan](plans/2026-08-13-phase-e4-planar-atmosphere-skybox.md) |
 | Active standalone plan | None                                                             |
 | Architecture contact   | Architecture Agent                                               |
 | Execution contact      | Execution Agent                                                  |
@@ -43,20 +43,21 @@
 - Predecessor checkpoint: `f4f4bd6e9f946fb6945bdce795183b14afdbd7cf`
 - Parent extensions: completed `planar-world`、`planar-terrain-advanced`、
   `planar-surface-styling`
-- Checkpoints: E1=`b343b64bad`；direct Test migration=`a8c22d8c35`；E2=`fa40b49dbb4ba6f14db68c5fe94852b9f47367ff`
-- ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3 expected `ADR-0035`
-- SGP: E1/E2=None；E3=`SGP-0003`（仅`Scene.js` optional world environment hook；与同路径`SGP-0001`独立登记）
+- Checkpoints: E1=`b343b64bad`；direct Test migration=`a8c22d8c35`；E2=`fa40b49dbb4ba6f14db68c5fe94852b9f47367ff`；
+  E3=`8ff8b48ebf`
+- ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3=`ADR-0035`；E4 expected `ADR-0036`
+- SGP: E1/E2/E4=None；E3=`SGP-0003`（仅`Scene.js` optional world environment hook；E4只读依赖该hook）
 
 ## Current handoff
 
-- Current state: E3-R001..R009已关闭，Architecture/code review与项目负责人人工验收均已通过；status-aware multi-SGP
-  retirement、真实Widget Clock/SGP hook/pick-depth/resident-terrain路径、asymmetric OrthographicOffCenter与
-  Context/Moon durable contract均已闭环；正在创建独立local checkpoint。
-- Next action: 以E3 checkpoint为基线重新审计当前Cesium atmosphere/SkyBox/environment pass源码，建立并确认E4 phase plan；
-  在E4 planning checkpoint与正式assignment前不实现E4。
-- Current phase status: E1-E3=`completed`；E4-E5=`planned`，不提前冻结E4 shader细节。
+- Current state: E3 checkpoint=`8ff8b48ebf`。Architecture已重新审计native atmosphere/SkyBox/CubeMapPanorama、Scene
+  environment order/destroy、four-frustum与resident terrain；E4 confirmed plan已冻结独立planar atmosphere、caller-owned
+  fixed-axis SkyBox、native conflict、underground mask和one-pass budget。
+- Next action: 创建E4 planning checkpoint后向Execution发送正式assignment；实现完成后由Architecture只review代码/契约，
+  项目负责人把关视觉表现。
+- Current phase status: E1-E3=`completed`；E4=`active`；E5=`planned`。
 - Open discussions: None。
-- Latest review: [E3 approved review](reviews/2026-08-13-e3-visible-celestial-bodies.md)。
+- Latest review: [E3 approved review](reviews/2026-08-13-e3-visible-celestial-bodies.md)；E4 review待implementation时新建。
 - Unresolved reviews: None。
 - Known risks: `scene.light` 是 scene-wide 可变状态；Controller 必须明确独占、恢复与外部覆盖语义；
   future atmosphere 不得误用 Earth ellipsoid automatic uniforms。

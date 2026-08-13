@@ -13,8 +13,8 @@
   `planar-surface-styling`
 - Related discussions: 项目负责人提出日月方向、太阳光照、平面大气和 SkyBox 适配
 - Related reviews: [E1 review request](../reviews/2026-08-13-e1-manual-celestial-light-contract.md)
-- ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3 expected `ADR-0035`；后续 phase 按激活时的长期决定建立 ADR
-- SGP: E1/E2=None；E3 expected `SGP-0003`
+- ADR: E1=`ADR-0033`；E2=`ADR-0034`；E3=`ADR-0035`；E4 expected `ADR-0036`；后续 phase 按激活时建立 ADR
+- SGP: E1/E2/E4=None；E3=`SGP-0003`，E4只消费既有hook
 
 ## Objective
 
@@ -79,7 +79,7 @@
 | E1    | 建立 manual sun/moon direction、scene light authority、ownership/lifecycle 与中文示例。 | surface-styling checkpoint               | 审计 ControllerHost、Scene.light、DirectionalLight、World lifecycle 与 public delivery。    | 公共 contract/ADR、真实 Context 光照、恢复/独占、warm identity、dev/release/npm 和 manual gate 闭环。       | `completed` | [E1](2026-08-13-phase-e1-manual-celestial-light-contract.md) |
 | E2    | 以 project-origin WGS84 anchor 和 host time 增加 astronomical Sun/Moon direction。      | E1 checkpoint、Test migration checkpoint | 重新审计当前 Cesium astronomy/transforms、time scale、accuracy 和 package boundary。        | manual/astronomical mode 切换、单原点 topocentric 确定性方向、时区/日期/极端纬度与 ownership 闭环。         | `completed` | [E2](2026-08-13-phase-e2-astronomical-direction-mode.md)     |
 | E3    | 实现 SceneGIS-owned 可见太阳/月亮，并冻结尺度、遮挡和地下行为。                         | E2 checkpoint                            | 重新审计 billboard/command/render pass、depth/horizon 与资源 contract。                     | 日月视觉、方向同步、资源 ownership、requestRender、camera/underground 与 lifecycle 闭环。                   | `completed` | [E3](2026-08-13-phase-e3-visible-celestial-bodies.md)        |
-| E4    | 实现独立平面大气与 caller-owned SkyBox 适配。                                           | E3 checkpoint、ADR-0030                  | 重新审计 atmosphere shader、fullscreen/sky pass、camera height、precision 和 SkyBox seams。 | 大气/天空合成、地下规则、SkyBox ownership、shader delivery、性能与真实 GPU 画面闭环。                       | `planned`   | 激活时建立                                                   |
+| E4    | 实现独立平面大气与 caller-owned SkyBox 适配。                                           | E3 checkpoint、ADR-0030                  | 重新审计 atmosphere shader、fullscreen/sky pass、camera height、precision 和 SkyBox seams。 | 大气/天空合成、地下规则、SkyBox ownership、shader delivery、性能与真实 GPU 画面闭环。                       | `active`    | [E4](2026-08-13-phase-e4-planar-atmosphere-skybox.md)        |
 | E5    | 完成环境能力联合资格、发布、文档和升级交付。                                            | E4 checkpoint                            | E1-E4 review/checkpoint 完成；固定最小联合矩阵。                                            | manual/astronomical light、visible bodies、atmosphere/SkyBox 在 dev/release/npm/lifecycle/docs 中统一闭环。 | `planned`   | 激活时建立                                                   |
 
 ## Cross-phase validation
@@ -128,4 +128,7 @@
   optional world environment hook；官方audit已扩展为允许同path的`SGP-0001`/`SGP-0003`独立paired registration，并按
   active/proposed/retired status支持独立落地与退役，同时保持manifest-only排他和合法range覆盖。E3-R001..R009均已
   closed；项目负责人已确认visible Sun/Moon、Clock、horizon/underground、foreground occlusion与中文lil-gui表现通过。
-  E4-E5仍只冻结目标与边界，E3 checkpoint和E4 confirmed phase plan前不得实现E4。
+  E3独立checkpoint=`8ff8b48ebf`。
+- E4源码再发现与confirmed phase plan已完成：独立fullscreen planar atmosphere、caller-owned fixed-axis
+  `SceneGISPlanarSkyBox`、SkyBox→atmosphere→bodies顺序、native conflict、underground mask与one-pass resource budget已冻结；
+  E4不修改upstream并只消费既有`SGP-0003`。等待planning checkpoint与正式assignment。
