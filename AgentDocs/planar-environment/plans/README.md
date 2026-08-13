@@ -3,8 +3,7 @@
 ## Active
 
 - [总体计划：SceneGIS 平面环境](2026-08-13-planar-environment-extension.md)
-
-E2等待Architecture基于E1 checkpoint完成当前源码审计并建立phase plan。
+- [E2：天文天体方向模式](2026-08-13-phase-e2-astronomical-direction-mode.md)
 
 ## Completed
 

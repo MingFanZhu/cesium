@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                 |
-| ---------------------- | --------------------------------------------------------------------- |
-| Extension slug         | `planar-environment`                                                  |
-| Status                 | `active`                                                              |
-| Planning model         | `extension`                                                           |
-| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)          |
-| Current phase          | E2 Astronomical Direction Mode planning                               |
-| Active phase plan      | None; Architecture is refreshing source facts after the E1 checkpoint |
-| Active standalone plan | None                                                                  |
-| Architecture contact   | Architecture Agent                                                    |
-| Execution contact      | Execution Agent                                                       |
-| Last updated           | `2026-08-13`                                                          |
+| Field                  | Value                                                               |
+| ---------------------- | ------------------------------------------------------------------- |
+| Extension slug         | `planar-environment`                                                |
+| Status                 | `active`                                                            |
+| Planning model         | `extension`                                                         |
+| Active extension plan  | [总体计划](plans/2026-08-13-planar-environment-extension.md)        |
+| Current phase          | E2 Astronomical Direction Mode                                      |
+| Active phase plan      | [E2 plan](plans/2026-08-13-phase-e2-astronomical-direction-mode.md) |
+| Active standalone plan | None                                                                |
+| Architecture contact   | Architecture Agent                                                  |
+| Execution contact      | Execution Agent                                                     |
+| Last updated           | `2026-08-13`                                                        |
 
 ## Scope
 
@@ -21,7 +21,7 @@
 
 - 为真正平面的 SceneGIS world 建立显式、固定轴、无隐式 CRS 推断的环境契约。
 - 支持应用提供太阳/月亮局部方向，并以稳定 `DirectionalLight` 驱动现有 terrain lighting。
-- 后续阶段在明确参考位置和时间时增加天文方向、可见日月、平面大气与 SkyBox/地下行为。
+- 后续阶段在应用明确提供 planar project origin 对应的 WGS84 经纬度和时间时增加天文方向、可见日月、平面大气与 SkyBox/地下行为。
 - 保持调用方对 Controller、SkyBox 和外部资源的显式所有权，并保留 Cesium 公共 scene/widget 生命周期。
 
 ### Out of scope
@@ -37,20 +37,23 @@
   `packages/engine/Source/Shaders/SceneGIS/**`
 - Test paths: `packages/engine/Specs/SceneGIS/Scene/**`、
   `packages/engine/Specs/SceneGIS/Widget/**`
-- Sandcastle: E1 新增 `packages/sandcastle/gallery/scenegis-planar-environment/**`
+- Direct development example: `Test/平面环境.html`
+- Legacy Sandcastle: E1 `packages/sandcastle/gallery/scenegis-planar-environment/**`，E2不再扩展
 - Branch: `feature/planar-environment`
 - Predecessor checkpoint: `f4f4bd6e9f946fb6945bdce795183b14afdbd7cf`
 - Parent extensions: completed `planar-world`、`planar-terrain-advanced`、
   `planar-surface-styling`
-- ADR: E1 expected `ADR-0033`
-- SGP: E1 expected None；任何 upstream-owned diff 必须先更新 phase plan 并登记合法 SGP
+- Checkpoints: E1=`b343b64bad`；direct Test migration=`a8c22d8c35`
+- ADR: E1=`ADR-0033`；E2 expected `ADR-0034`
+- SGP: E2 expected None；任何 upstream-owned diff 必须先停止并升级phase plan
 
 ## Current handoff
 
-- Current state: E1 implementation、Architecture review与项目负责人manual gate均已通过；本次E1 checkpoint提交不push。
-- Next action: Architecture以E1 checkpoint为新base重新审计Cesium astronomy/transforms/time-scale事实，建立并确认E2 phase plan，
-  再向Execution发送正式assignment。
-- Current phase status: E1=`completed`；E2=`planning`；E3-E5=`planned`，仅保留稳定目标，不提前冻结实现。
+- Current state: E1与direct Test migration已形成独立本地checkpoint；E2源码审计和phase plan已由Architecture confirmed；
+  astronomical mode 采用应用声明的 project-origin WGS84 anchor，整张平面共享其局部 ENU 天体方向。
+- Next action: Architecture提交E2 planning checkpoint并向Execution发送精确base/路径/验收assignment；Execution review-ready前
+  不请求项目负责人manual gate。
+- Current phase status: E1=`completed`；E2=`active`；E3-E5=`planned`，仅保留稳定目标，不提前冻结实现。
 - Open discussions: None。
 - Latest review: [E1 approved review](reviews/2026-08-13-e1-manual-celestial-light-contract.md)。
 - Unresolved reviews: None。

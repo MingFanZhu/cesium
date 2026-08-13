@@ -13,12 +13,12 @@
   `planar-surface-styling`
 - Related discussions: 项目负责人提出日月方向、太阳光照、平面大气和 SkyBox 适配
 - Related reviews: [E1 review request](../reviews/2026-08-13-e1-manual-celestial-light-contract.md)
-- ADR: E1 expected `ADR-0033`；后续 phase 按激活时的长期决定建立 ADR
-- SGP: E1 expected None
+- ADR: E1=`ADR-0033`；E2 expected `ADR-0034`；后续 phase 按激活时的长期决定建立 ADR
+- SGP: E1/E2 expected None
 
 ## Objective
 
-在 SceneGIS 真正平面 Cartesian3 world 上建立一套不依赖椭球、不猜测 CRS 地理含义、可渐进扩展的环境系统：先让应用以固定平面轴显式提供太阳和月亮方向，并把太阳方向接入现有 lighting；随后在应用提供参考经纬度和时间时计算天文方向，再实现可见日月、独立平面大气、caller-owned SkyBox 预设以及地下行为。系统必须保留现有 world、camera、Surface、terrain 和 Cesium scene 生命周期，不让默认 Earth environment 静默进入 planar semantics。
+在 SceneGIS 真正平面 Cartesian3 world 上建立一套不依赖椭球、不猜测 CRS 地理含义、可渐进扩展的环境系统：先让应用以固定平面轴显式提供太阳和月亮方向，并把太阳方向接入现有 lighting；随后在应用提供平面项目原点对应的 WGS84 经纬度和时间时计算天文方向，再实现可见日月、独立平面大气、caller-owned SkyBox 预设以及地下行为。系统必须保留现有 world、camera、Surface、terrain 和 Cesium scene 生命周期，不让默认 Earth environment 静默进入 planar semantics。
 
 ## Non-goals
 
@@ -33,7 +33,7 @@
 ## Stable architecture boundaries
 
 1. Planar local axes 始终为 `+X East / +Y North / +Z Up`。所有公开 celestial direction 都表示从平面观察者指向天体的归一化 world-axis direction；方位角采用从 `+Y` north 顺时针，仰角相对 XY plane。
-2. Environment 不从 opaque CRS 或 terrain 数据推断天文参考点。Manual mode 只接受应用显式方向；astronomical mode 必须额外接受显式 longitude/latitude reference 和 time。
+2. Environment 不从 opaque CRS 或 terrain 数据推断天文位置。Manual mode 只接受应用显式方向；astronomical mode 必须额外接受应用声明的 planar project origin 所对应的 WGS84 `originLongitude`/`originLatitude`，并只消费 ControllerHost 明确传入的 simulation `JulianDate`，不读取系统时钟。该原点定义整个平面固定 `+X East / +Y North / +Z Up` frame 的局部 ENU 天文锚点；整张平面共享一组方向，不随 camera 或 planar XY 变化。
 3. `SceneGISPlanarEnvironment` 是 caller-created、caller-registered 的 Cesium `Controller`。它复用 `CesiumWidget.addController/removeController` 或 `Viewer.addController/removeController`，不增加 `Scene.js`、`CesiumWidget.js` 或 `Viewer.js` upstream hook。
 4. Environment 只在显式注册且 enabled 后取得 `scene.light` authority；默认 world 行为不变。`world.enableLighting` 仍由应用显式控制，Environment 不替调用方开启 terrain lighting。
 5. Manual sun direction 通过稳定 `DirectionalLight` 接入；由于 Cesium `DirectionalLight.direction` 表示光传播方向，内部值必须是公开 observer-to-sun direction 的负向。Moon direction 在 E1 只作为未来可见 Moon/astronomical mode 的稳定状态，不伪装成第二个 scene light。
@@ -46,7 +46,7 @@
 9. SkyBox 继续 caller-owned。SceneGIS 可提供纯配置 helper/preset，但不得隐式创建网络资源、替调用方销毁 SkyBox，或把 Earth SkyBox 解释成 CRS-aware environment。
 10. 地下行为必须在可见天体/大气阶段显式定义并统一测试；不能依靠双面 Surface、camera controller 或 Earth horizon 的偶然裁剪结果。
 11. SceneGIS 固定 environment shader 进入 `packages/engine/Source/Shaders/SceneGIS/**`，复用 ADR-0030 的生成/交付链；动态组合只保留必要 seam，不提交生成 `.js`。
-12. 所有 Sandcastle tool panel 用户可见标题、标签、按钮、帮助和状态使用中文；technical API、标识符和 gallery metadata 可保留英文。
+12. 所有 `Test/**` 开发示例与保留 Sandcastle 的 tool panel 用户可见标题、标签、按钮、帮助和状态使用中文；technical API、标识符和 gallery metadata 可保留英文。
 13. 默认只修改 SceneGIS-owned 路径。任何 upstream-owned diff 必须先证明现有 Controller/world/render seam 不足、登记 SGP，并经 Architecture 重新确认。
 14. Phase 串行推进；每个 phase 完成实现、最小充分自动化、Architecture/code review、项目负责人要求的视觉 gate 与独立本地 checkpoint 后才能进入下一 phase。
 
@@ -64,32 +64,34 @@
 - `SceneGISPlanarSurface` 已在 `world.enableLighting=true` 时消费 `frameState.light`，且
   `planar-surface-styling` 已证明 uniform/state mutation 可以保持 warm command/shader/VA/mesh identity。
 - ADR-0030 已建立 `packages/engine/Source/Shaders/SceneGIS/**` 的 source/delivery ownership，可供后续 atmosphere renderer 复用。
+- E1 已形成 checkpoint `b343b64bad`；direct `Test/**` development convention、local lil-gui Environment页与已批准平面相机交互形成checkpoint `a8c22d8c35`。E2以后一等开发示例修改`Test/平面环境.html`，不继续扩大legacy Sandcastle。
+- 当前Cesium `Simon1994PlanetaryPositions`输出Earth-centered inertial Sun/Moon position；`computeTemeToPseudoFixedMatrix`提供同步UT1≈UTC approximation。E2固定该离线路径，避免ICRF/XYS readiness改变结果，并在应用显式声明的 WGS84 project-origin anchor 处计算 topocentric ENU 方向。
 
 ## Phase roadmap
 
-| Phase | Objective                                                                                 | Dependencies               | Entry gate                                                                                  | Exit gate                                                                                                   | Status      | Phase plan                                                   |
-| ----- | ----------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------ |
-| E1    | 建立 manual sun/moon direction、scene light authority、ownership/lifecycle 与中文示例。   | surface-styling checkpoint | 审计 ControllerHost、Scene.light、DirectionalLight、World lifecycle 与 public delivery。    | 公共 contract/ADR、真实 Context 光照、恢复/独占、warm identity、dev/release/npm 和 manual gate 闭环。       | `completed` | [E1](2026-08-13-phase-e1-manual-celestial-light-contract.md) |
-| E2    | 在显式 reference longitude/latitude 和 time 下增加 astronomical sun/moon direction mode。 | E1 checkpoint              | 重新审计当前 Cesium astronomy/transforms、time scale、accuracy 和 package boundary。        | manual/astronomical mode 切换、确定性方向、时区/日期/极端纬度与 ownership 闭环。                            | `planning`  | Architecture source refresh后建立                            |
-| E3    | 实现 SceneGIS-owned 可见太阳/月亮，并冻结尺度、遮挡和地下行为。                           | E2 checkpoint              | 重新审计 billboard/command/render pass、depth/horizon 与资源 contract。                     | 日月视觉、方向同步、资源 ownership、requestRender、camera/underground 与 lifecycle 闭环。                   | `planned`   | 激活时建立                                                   |
-| E4    | 实现独立平面大气与 caller-owned SkyBox 适配。                                             | E3 checkpoint、ADR-0030    | 重新审计 atmosphere shader、fullscreen/sky pass、camera height、precision 和 SkyBox seams。 | 大气/天空合成、地下规则、SkyBox ownership、shader delivery、性能与真实 GPU 画面闭环。                       | `planned`   | 激活时建立                                                   |
-| E5    | 完成环境能力联合资格、发布、文档和升级交付。                                              | E4 checkpoint              | E1-E4 review/checkpoint 完成；固定最小联合矩阵。                                            | manual/astronomical light、visible bodies、atmosphere/SkyBox 在 dev/release/npm/lifecycle/docs 中统一闭环。 | `planned`   | 激活时建立                                                   |
+| Phase | Objective                                                                                                | Dependencies                             | Entry gate                                                                                  | Exit gate                                                                                                   | Status      | Phase plan                                                   |
+| ----- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------ |
+| E1    | 建立 manual sun/moon direction、scene light authority、ownership/lifecycle 与中文示例。                  | surface-styling checkpoint               | 审计 ControllerHost、Scene.light、DirectionalLight、World lifecycle 与 public delivery。    | 公共 contract/ADR、真实 Context 光照、恢复/独占、warm identity、dev/release/npm 和 manual gate 闭环。       | `completed` | [E1](2026-08-13-phase-e1-manual-celestial-light-contract.md) |
+| E2    | 以 project-origin WGS84 anchor 和 host time 增加 astronomical Sun/Moon direction。                       | E1 checkpoint、Test migration checkpoint | 重新审计当前 Cesium astronomy/transforms、time scale、accuracy 和 package boundary。        | manual/astronomical mode 切换、单原点 topocentric 确定性方向、时区/日期/极端纬度与 ownership 闭环。         | `active`    | [E2](2026-08-13-phase-e2-astronomical-direction-mode.md)     |
+| E3    | 实现 SceneGIS-owned 可见太阳/月亮，并冻结尺度、遮挡和地下行为。                                          | E2 checkpoint                            | 重新审计 billboard/command/render pass、depth/horizon 与资源 contract。                     | 日月视觉、方向同步、资源 ownership、requestRender、camera/underground 与 lifecycle 闭环。                   | `planned`   | 激活时建立                                                   |
+| E4    | 实现独立平面大气与 caller-owned SkyBox 适配。                                                            | E3 checkpoint、ADR-0030                  | 重新审计 atmosphere shader、fullscreen/sky pass、camera height、precision 和 SkyBox seams。 | 大气/天空合成、地下规则、SkyBox ownership、shader delivery、性能与真实 GPU 画面闭环。                       | `planned`   | 激活时建立                                                   |
+| E5    | 完成环境能力联合资格、发布、文档和升级交付。                                                             | E4 checkpoint                            | E1-E4 review/checkpoint 完成；固定最小联合矩阵。                                            | manual/astronomical light、visible bodies、atmosphere/SkyBox 在 dev/release/npm/lifecycle/docs 中统一闭环。 | `planned`   | 激活时建立                                                   |
 
 ## Cross-phase validation
 
 - Jasmine 覆盖公共属性、failure atomicity、clone/no-op、Controller registration/exclusivity、scene light authority、restore 与 non-ownership。
 - Real Context 覆盖实际 compile/link/draw/pixels、direction/color/intensity mutation、requestRender 和 warm command/shader/VA/terrain/imagery identities。
-- 时间与 astronomy 阶段必须使用固定 JulianDate/reference 的 deterministic vectors，不依赖系统时钟、locale 或公网。
+- 时间与 astronomy 阶段必须使用固定 `JulianDate`/project-origin anchor 的 deterministic vectors，不依赖系统时钟、locale 或公网。
 - 可见日月/大气阶段验证 camera above/below terrain、horizon、requestRenderMode、Scene3D-only failure 与 destroy balance。
 - Development build、release build、types/docs、installed npm tarball 和 SceneGIS shader delivery 按 phase 公共边界验证。
-- Sandcastle 是视觉 gate，不替代 Specs；项目负责人负责视觉表现验收，Architecture 负责代码/契约质量。
+- `Test/**` direct development example和保留Sandcastle都是视觉gate，不替代Specs；项目负责人负责视觉表现验收，Architecture负责代码/契约质量。
 - 每 phase 执行 ownership/generated-file/SGP 审计与 scoped static checks。
 
 ## Global risks and dependencies
 
 - `scene.light` 是 scene-wide mutable state，Environment 与应用或其他 Controller 可能竞争。E1 必须冻结单 world 独占、每帧 reassert 与条件式恢复，避免销毁外部 light 或覆盖后来的 caller override。
 - ControllerHost 会跳过 disabled controller；enabled setter、first update、remove 和 re-enable 的状态机必须在不泄漏 world registry 的前提下闭合。
-- Cesium 天文 helpers 的坐标系和 time scale 以 Earth 为基准。E2 必须明确“参考经纬度处局部 ENU 方向”只是天文计算输入，再映射到 planar fixed axes，而不是把 planar coordinates 变成地球坐标。
+- Cesium 天文 helpers 的坐标系和 time scale 以 Earth 为基准。E2 必须明确“项目原点 WGS84 经纬度处局部 ENU 方向”只是整个 planar fixed frame 的天文锚点，不会把 planar coordinates 变成地球坐标，也不会按 camera 或 planar XY 改变方向。该单原点近似适合局部/区域项目；大范围平面项目接受整图平行光近似。
 - Native Sun/Moon/SkyAtmosphere 与 Earth automatic uniforms 耦合。E3/E4 若误复用会出现看似可见但方向、遮挡或尺度错误的适配。
 - 无限平面没有天然 planet horizon；可见天体、大气和地下隐藏规则必须由 planar contract 定义，不能照搬 ellipsoid horizon。
 - 大气可能增加全屏 pass、shader variants 和高分辨率 fill cost；E4 需预算 warm allocations、command count 和 requestRender 行为。
@@ -97,7 +99,7 @@
 
 ## Overall acceptance criteria
 
-- 任意 planar CRS 可在不提供地理参考点时通过 explicit local directions 获得稳定太阳光照；提供 reference/time 后可选 astronomical mode，且从不猜测 CRS。
+- 任意 planar CRS 可在不提供地理锚点时通过 explicit local directions 获得稳定太阳光照；提供 project-origin WGS84 longitude/latitude 和 host time 后可选 astronomical mode，且从不猜测 CRS。
 - 公开 direction/azimuth/elevation 与固定 planar axes 定义一致，内部 `DirectionalLight` 符号转换有自动化和像素证明。
 - 可见日月、大气和 SkyBox 在 above-ground/underground、requestRender 和 caller ownership 下行为清晰，不依赖 native Earth environment 偶然行为。
 - 默认未注册 Environment 时现有 world、lighting、terrain styling、imagery、camera 与 scene lifecycle 完全不变。
@@ -113,4 +115,4 @@
 - Architecture finding `E1-R001`已关闭：首次authority acquisition请求一帧，stable update不请求；unit与late registration
   真实ControllerHost时序证据证明同frame request/publish，且未扩大ControllerHost/Scene/Widget Source边界。
 - E2已进入Architecture planning：先以E1 checkpoint刷新Cesium astronomy/transforms/time-scale与package boundary事实，再建立
-  confirmed phase plan。E3-E5仍只冻结目标与边界。
+  confirmed phase plan。源码审计与plan现已完成，等待planning checkpoint和Execution assignment；E3-E5仍只冻结目标与边界。
