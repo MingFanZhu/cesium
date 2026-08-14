@@ -9,7 +9,7 @@
   `AgentDocs/atmosphere-clouds-effects/plans/2026-08-14-atmosphere-clouds-effects-extension.md`
 - Related phase：
   `AgentDocs/atmosphere-clouds-effects/plans/2026-08-14-phase-a1-render-foundation.md`
-- Related patch：proposed `SGP-0008`
+- Related patch：active `SGP-0008`
 - Constrains：ADR-0030、ADR-0033、ADR-0034、ADR-0036、ADR-0039
 
 ## 上下文与源码事实

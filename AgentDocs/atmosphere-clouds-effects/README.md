@@ -3,15 +3,16 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A1 render foundation and dual-world frame contract`
-- Current phase plan:
+- Current phase: none（A1 completed；A2尚未激活）
+- Latest completed phase plan:
   [2026-08-14-phase-a1-render-foundation.md](plans/2026-08-14-phase-a1-render-foundation.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decision:
   [ADR-0040](../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md)
-- Upstream patch: proposed `SGP-0008`
+- Upstream patch: active `SGP-0008`
 - Branch: `feature/atmosphere-clouds-effects`
+- A1 implementation: `completed`（Architecture checkpoint为本次A1 completion commit，未push）
 
 ## Objective
 
@@ -22,9 +23,9 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
-- A1 只实现双阶段 render integration、private pipeline lifecycle 与 globe/planar reference-frame contract。
-- A1 不增加可见效果、public API、LUT/noise asset 或 temporal accumulation。
-- Execution Agent 必须从 Architecture assignment 指定的 exact base 开始；未通过 review 前不得 commit、push 或进入 A2。
+- A1 已实现并通过 Architecture/code review：双阶段 render integration、private pipeline lifecycle 与 globe/planar
+  reference-frame contract。
+- A1 不增加可见效果、public API、LUT/noise asset 或 temporal accumulation；A2尚未激活。
 
 ## Discussions
 
@@ -32,8 +33,7 @@ reference frame，不互相伪造坐标语义。
 
 ## Reviews
 
-- 当前无 implementation review；A1 实现完成后新建
-  `reviews/2026-08-14-a1-render-foundation.md`。
+- [A1 render foundation implementation review](reviews/2026-08-14-a1-render-foundation.md) — `approved`
 
 ## External references
 

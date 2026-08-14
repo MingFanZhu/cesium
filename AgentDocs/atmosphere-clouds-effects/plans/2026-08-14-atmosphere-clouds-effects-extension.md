@@ -8,12 +8,13 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-14`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A1 render foundation and dual-world frame contract`
-- Current phase plan:
+- Current phase: none（A1 completed；A2尚未激活）
+- Latest completed phase plan:
   [2026-08-14-phase-a1-render-foundation.md](2026-08-14-phase-a1-render-foundation.md)
 - Architecture decision:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md)
-- Upstream patch: proposed `SGP-0008`
+- Upstream patch: active `SGP-0008`
+- A1 implementation: `completed`
 
 ## Goal
 
@@ -69,10 +70,11 @@
 
 ## Phase roadmap
 
-### A1 — Render foundation and dual-world frame contract
+### A1 — Render foundation and dual-world frame contract (`completed`)
 
 实现 approved ADR-0040 的 background + linear-HDR slots、private pipeline lifecycle、Globe/planar reference-frame publication 与
-order/pick/resource identity Specs；不增加可见效果或 public API。
+order/pick/resource identity Specs；不增加可见效果或 public API。Implementation、Architecture review与本地checkpoint均已完成；
+A2尚未激活。
 
 ### A2 — Bruneton atmosphere and aerial perspective
 

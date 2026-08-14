@@ -3,21 +3,21 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed`
 - Parent plan:
   [atmosphere-clouds-effects extension](2026-08-14-atmosphere-clouds-effects-extension.md)
 - Phase: `A1`
 - Owner role: `execution`
-- Architecture review: `confirmed`
+- Architecture review: `approved`
 - Architecture reviewer: Architecture Agent
 - Created: `2026-08-14`
 - Updated: `2026-08-14`
 - Predecessor checkpoint: planar closeout=`d822303e69`
 - ADR:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md)
-- SGP: proposed `SGP-0008`
-- Related review: implementation时新建
-  `../reviews/2026-08-14-a1-render-foundation.md`
+- SGP: active `SGP-0008`
+- Related review:
+  [2026-08-14-a1-render-foundation.md](../reviews/2026-08-14-a1-render-foundation.md)
 
 ## Objective
 
@@ -99,7 +99,7 @@ Controller与 Bruneton asset contract提供可信基础。
 
 ### Product and upstream seam
 
-- `.scenegis/upstream-patches.json`（只把既有proposed `SGP-0008`在A1通过review后转`active`并同步exact tests；不得新增SGP）
+- `.scenegis/upstream-patches.json`（Architecture completion时把`SGP-0008`转`active`并同步exact tests；不得新增SGP）
 - `packages/engine/Source/Scene/Scene.js`（upstream-owned；仅paired `SGP-0008`）
 - `packages/engine/Source/SceneGIS/Scene/_private/_SceneGISEnvironmentEffectsPipeline.js`（new）
 - `packages/engine/Source/SceneGIS/Scene/_private/_SceneGISAtmosphereReferenceFrame.js`（new；若源码事实要求拆成两个adapter，先回写偏差）
@@ -178,4 +178,19 @@ A1无可见产品效果，不设置项目负责人视觉manual gate。Architectu
 
 ## Execution results
 
-待 Execution Agent 实现后回写。当前状态：未实现、未commit、未push、不得进入下一phase。
+Execution 已从 exact base `74a8bbadd72a805ca506f1841351009bdb62a8ea` 完成 A1；Architecture review已批准并关闭phase gate：
+
+- `Scene.js` 在 native environment 与 SGP-0003 之间增加 optional background delegation，在 resolved color/depth/id 与
+  `PostProcessStageCollection.execute` 之间增加 optional linear-HDR delegation；两处均使用 paired `SGP-0008`。
+- 新增 SceneGIS-owned private pipeline，锁定 single-Scene attach/detach/destroy、inactive identity、foreign authority preservation 与
+  invalid HDR return failure-atomic contract；A1 不创建 GPU resource、asset、network、listener 或 timer。
+- 新增显式 Globe/planar reference-frame publication；Globe 使用 ellipsoid radial state，planar 固定 `+X/+Y/+Z` 且仅使用 planar Z 与
+  explicit base height。Publication 使用 caller result、candidate-then-commit、finite validation 与 last-good semantics。
+- 新增三个 focused Specs。Focused totals 为 pipeline `7 SUCCESS`、reference frame `4 SUCCESS`、render slot `5 SUCCESS`；
+  `Scene/Scene` aggregate `399 SUCCESS`，`SceneGISWorld` regression `2 SUCCESS`。
+- `npm run build`、`npm run build-release`、`npm run build-ts`、`npm run tsc` 全部通过。`build-ts` 仍输出仓库既有
+  TSD-JSDoc warnings，但 exit code 为 `0`，A1 未增加 public documentation surface。
+- Codebase graph 对近期 private files 和 `Scene.prototype.resolveFramebuffers` mapping 不完整；按规则使用 exact file/string fallback，
+  这是工具索引限制，不是实现偏差。
+- Exact changed product/spec paths、最终审计、unrun boundary 与风险见 linked review。Architecture已把三个真实Spec路径写入manifest并将
+  `SGP-0008`转为`active`；A1纳入本地completion checkpoint，未push，A2未激活。

@@ -39,7 +39,7 @@
 2. **共享光学核心，分离 reference-frame adapter。** Globe 使用 ellipsoid center/radii、radial altitude 与 atmosphere shell；
    planar 使用 `+X East/+Y North/+Z Up`、显式 base height 与分层 slab。两者共享 physical coefficients、Sun authority、LUT/noise
    interfaces、quality tiers 与 compositor，但不要求 pixel-identical，也不把平面坐标转换成伪 ECEF/Cartographic。
-3. **增加一个 scene-wide 双阶段窄 hook。** proposed `SGP-0008`在 `Scene.js`提供 background slot 与 pre-postprocess linear-HDR
+3. **增加一个 scene-wide 双阶段窄 hook。** `SGP-0008`在 `Scene.js`提供 background slot 与 pre-postprocess linear-HDR
    composite slot；不修改 `PostProcessStageCollection` public order，不复用只服务 primary World 的 `SGP-0003`，不访问 raw `_gl`。
 4. **A1 不冻结 public API。** A1 只建立 private pipeline、attachment/lifecycle、reference-frame publication 与 render-order Specs。
    A2 在 Bruneton atmosphere + aerial perspective 有真实 pixels、resource budget 与 failure evidence 后再冻结 caller-owned public
