@@ -5,10 +5,10 @@
 | Field                  | Value                                                             |
 | ---------------------- | ----------------------------------------------------------------- |
 | Extension slug         | `planar-viewer-bootstrap`                                         |
-| Status                 | `active`                                                          |
+| Status                 | `completed`                                                       |
 | Planning model         | `extension`                                                       |
 | Active extension plan  | [总体计划](plans/2026-08-14-planar-viewer-bootstrap-extension.md) |
-| Current phase          | Between phases                                                    |
+| Current phase          | None                                                              |
 | Active phase plan      | None                                                              |
 | Active standalone plan | None                                                              |
 | Architecture contact   | Architecture Agent                                                |
@@ -49,13 +49,14 @@
 ## Current handoff
 
 - Current state: V1声明式helper、Viewer SGP-0002 integration、focused Specs、direct Test迁移、formal docs与installed delivery
-  已实现并验证；Architecture/code review无finding，项目负责人manual gate通过，等待独立本地checkpoint。
-- Next action: Architecture创建V1独立checkpoint，然后审计Cesium public API中的球面假设与planar融合缺口，再建立V2
-  confirmed phase plan。
-- Current phase status: V1=`completed`；V2=`proposed`。
+  已实现并验证；Architecture/code review与项目负责人manual gate通过，独立checkpoint为
+  `b6377c5e6e865c8c04041359f99d952c15be17e3`。
+- Next action: 后续Camera/Viewer/Entity API融合与联合交付进入独立
+  [`planar-api-integration`](../planar-api-integration/README.md)扩展；本目录不再追加V2实现。
+- Current phase status: V1=`completed`；原V2交付目标由后继扩展I5吸收并标记`superseded`。
 - Open discussions: None。
 - Latest review:
   [V1 approved review](reviews/2026-08-14-v1-declarative-planar-world-bootstrap.md)（manual gate passed）。
 - Unresolved reviews: None。
 - Known risks: `Viewer.js` 是高频 upstream seam；声明式构造必须在 DOM/WebGL mutation 前完成确定性 validation，并保持现有
-  live-world、Globe、controller、Home、DataSource 和 destroy 行为。
+  live-world、Globe、controller、Home、DataSource 和 destroy 行为。后继扩展在解除Camera/Viewer guard时不得倒退该preflight。

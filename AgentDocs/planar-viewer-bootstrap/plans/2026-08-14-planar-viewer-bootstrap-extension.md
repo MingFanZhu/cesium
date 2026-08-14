@@ -3,14 +3,15 @@
 ## Metadata
 
 - Plan type: `extension`
-- Status: `active`
+- Status: `superseded`
 - Owner role: `architecture`
 - Architecture review: `confirmed`
 - Architecture reviewer: Architecture Agent
 - Created: `2026-08-14`
 - Updated: `2026-08-14`
 - Parent checkpoint: `685a3bb06e54243706e1b73caef5833d48bdf197`
-- Related discussions: None
+- Related discussions:
+  [`planar-api-integration` compatibility discussion](../../planar-api-integration/discussions/2026-08-14-cesium-public-api-planar-compatibility.md)
 - Related reviews: None
 - ADR: amend `ADR-0006-planar-viewer-and-widget-integration.md`
 - SGP: reuse active `SGP-0002`
@@ -74,10 +75,10 @@ planar controller、Home、widget capability guards、DataSource integration 和
 
 ## Phase roadmap
 
-| Phase | Objective                                                                  | Dependencies                           | Entry gate                                                               | Exit gate                                                                                  | Status      | Phase plan                                                      |
-| ----- | -------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ----------- | --------------------------------------------------------------- |
-| V1    | 增加声明式planarWorld、resolved getter、失败/所有权闭环与direct Test迁移。 | E5 checkpoint、ADR-0001/0006、SGP-0002 | 审计Viewer preflight、World constructors、controller/destroy与生成声明。 | Public contract、focused Specs、types/docs/package、direct browser/manual和SGP audit通过。 | `completed` | [V1](2026-08-14-phase-v1-declarative-planar-world-bootstrap.md) |
-| V2    | 联合现有live-world与声明式路径完成dev/release/npm/upgrade交付并关闭扩展。  | V1 checkpoint                          | 重新审计E2E、installed widgets package与最小回归矩阵。                   | 两种入口在dev/release/npm/lifecycle/docs中统一闭环，无open finding。                       | `proposed`  | V1 checkpoint后建立                                             |
+| Phase | Objective                                                                  | Dependencies                           | Entry gate                                                               | Exit gate                                                                                  | Status       | Phase plan                                                      |
+| ----- | -------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ------------ | --------------------------------------------------------------- |
+| V1    | 增加声明式planarWorld、resolved getter、失败/所有权闭环与direct Test迁移。 | E5 checkpoint、ADR-0001/0006、SGP-0002 | 审计Viewer preflight、World constructors、controller/destroy与生成声明。 | Public contract、focused Specs、types/docs/package、direct browser/manual和SGP audit通过。 | `completed`  | [V1](2026-08-14-phase-v1-declarative-planar-world-bootstrap.md) |
+| V2    | 联合现有live-world与声明式路径完成dev/release/npm/upgrade交付并关闭扩展。  | V1 checkpoint                          | 重新审计E2E、installed widgets package与最小回归矩阵。                   | 两种入口在dev/release/npm/lifecycle/docs中统一闭环，无open finding。                       | `superseded` | 由`planar-api-integration` I5吸收                               |
 
 ## Cross-phase validation
 
@@ -108,8 +109,10 @@ planar controller、Home、widget capability guards、DataSource integration 和
 
 ## Progress and handoff
 
-- V1实现与自动化/直连浏览器证据已完成；focused Viewer aggregate 20/20、build/release/types/docs/tsc、installed package与
-  official audit通过。
+- V1实现、自动化/直连浏览器证据、Architecture review、项目负责人人工gate与独立checkpoint均已完成；focused Viewer
+  aggregate 20/20、build/release/types/docs/tsc、installed package与official audit通过。
 - Current review:
   `../reviews/2026-08-14-v1-declarative-planar-world-bootstrap.md`（Architecture/code approved；manual gate passed）。
-- V1等待Architecture独立checkpoint；项目负责人自有untracked `Test/地形.html`未读取/修改/暂存；checkpoint前不得进入V2。
+- 原V2未单独实施。用户要求扩大到Camera/Viewer/Entity public API融合后，Architecture完成源码审计并建立
+  [`planar-api-integration`](../../planar-api-integration/README.md)；原V2联合交付由该扩展I5吸收。项目负责人自有
+  untracked `Test/地形.html`仍未读取/修改/暂存。

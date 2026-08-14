@@ -248,6 +248,6 @@ Not required:
 - Architecture已恢复owner root service PID 30388并确认8080/8081与Test页面。E2E结果后未修改代码/config/service/AgentDocs；本次仅做
   final result writeback。`ADR-0037`至`ADR-0039`最终为`approved`，`SGP-0004`至`SGP-0007`最终为`active`；I5现为
   `checkpoint-ready`，等待Architecture创建独立本地checkpoint。建议中文提交信息：`完成平面 API 融合统一交付`；未push。
-- Architecture已创建I5独立本地checkpoint `a81bbecebdda3362decc8505dc31a96b14a82aa3`（short `a81bbecebd`，
+- Architecture已创建I5独立本地checkpoint `2eaa13ad2946f7d50bb54f5f77c3b616b461667b`（short `2eaa13ad29`，
   `完成平面 API 融合统一交付`，not pushed）。Architecture review approved/final；I5-R001错误的HomeButton flight-publication部分
   withdrawn，I5-R002-R006 closed；I5 completed。当前无follow-up phase，等待未来Architecture audit或新extension assignment。

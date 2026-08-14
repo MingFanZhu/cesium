@@ -378,7 +378,7 @@ Build/package commands：`npm run build`、`npm run build-release`、`npm run bu
 - E2E结果后未修改代码/config/service/AgentDocs；Architecture随后恢复owner root service为PID 30388。Final results writeback只修改
   既有六个I5 AgentDocs。Review现为`final-delivery-ready`，等待Architecture创建独立本地checkpoint；建议中文提交信息：
   `完成平面 API 融合统一交付`。未commit、未push。
-- Architecture已创建I5独立本地checkpoint `a81bbecebdda3362decc8505dc31a96b14a82aa3`（short `a81bbecebd`，
+- Architecture已创建I5独立本地checkpoint `2eaa13ad2946f7d50bb54f5f77c3b616b461667b`（short `2eaa13ad29`，
   commit message `完成平面 API 融合统一交付`，not pushed）。Review approved/final；I5-R001错误的HomeButton flight-publication部分
   withdrawn，I5-R002-R006 closed；I5与extension completed。当前无follow-up phase，等待未来Architecture audit或新extension。
 

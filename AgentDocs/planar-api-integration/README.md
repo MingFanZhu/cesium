@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                             |
-| ---------------------- | ----------------------------------------------------------------- |
-| Extension slug         | `planar-api-integration`                                          |
-| Status                 | `active`                                                          |
-| Planning model         | `extension`                                                       |
-| Active extension plan  | [总体计划](plans/2026-08-14-planar-api-integration-extension.md)  |
-| Current phase          | I5 Unified Qualification and Delivery                             |
-| Active phase plan      | [I5](plans/2026-08-14-phase-i5-unified-qualification-delivery.md) |
-| Active standalone plan | None                                                              |
-| Architecture contact   | Architecture Agent                                                |
-| Execution contact      | Execution Agent task `019ff3d8-d1f4-7fd1-aecb-8cf0aa638d4f`       |
-| Last updated           | `2026-08-14`                                                      |
+| Field                  | Value                                                            |
+| ---------------------- | ---------------------------------------------------------------- |
+| Extension slug         | `planar-api-integration`                                         |
+| Status                 | `completed`                                                      |
+| Planning model         | `extension`                                                      |
+| Active extension plan  | [总体计划](plans/2026-08-14-planar-api-integration-extension.md) |
+| Current phase          | None                                                             |
+| Active phase plan      | None                                                             |
+| Active standalone plan | None                                                             |
+| Architecture contact   | Architecture Agent                                               |
+| Execution contact      | Execution Agent                                                  |
+| Last updated           | `2026-08-14`                                                     |
 
 ## Scope
 
@@ -57,7 +57,7 @@
   （`实现平面 Scene API 安全边界`，not pushed）。Architecture已确认
   [I5 phase plan](plans/2026-08-14-phase-i5-unified-qualification-delivery.md)。
 - Next action: Extension已完成，等待未来Architecture audit或新extension assignment；当前无active phase，不得自行开始后续工作。
-- Current phase status: I1=`completed`；I2=`completed`；I3=`completed`；I4=`completed`；I5=`completed`（Architecture checkpoint=`a81bbecebd`，`完成平面 API 融合统一交付`，not pushed）。
+- Current phase status: I1=`completed`；I2=`completed`；I3=`completed`；I4=`completed`；I5=`completed`（Architecture checkpoint=`2eaa13ad29`，`完成平面 API 融合统一交付`，not pushed）。
 - Open discussion:
   [Cesium public API planar compatibility](discussions/2026-08-14-cesium-public-api-planar-compatibility.md)
   （resolved；作为路线依据）。
@@ -75,7 +75,7 @@
 - Approved review: [I4 Planar Scene API Qualification and Safety](reviews/2026-08-14-i4-planar-scene-api-safety.md)
   （approved；I4-R001 closed；owner manual gate passed；checkpoint=`22bd7e1c29`，not pushed；I4 completed）。
 - Approved final review: [I5 Unified Qualification and Delivery](reviews/2026-08-14-i5-unified-qualification-delivery.md)
-  （dev/release同一named E2E各`1 passed`；I5-R001错误的HomeButton flight部分withdrawn，I5-R002-R006 closed；checkpoint=`a81bbecebd`，not pushed）。
+  （dev/release同一named E2E各`1 passed`；I5-R001错误的HomeButton flight部分withdrawn，I5-R002-R006 closed；checkpoint=`2eaa13ad29`，not pushed）。
 - Known risks: `Camera.js`/`CameraFlightPath.js`是高频upstream算法；flight期间legacy
   `screenSpaceCameraController.enableInputs`不能代表planar ControllerHost输入权威；当前以soft-private suspension token隔离。
   `Camera.js`仍是高频upgrade seam；I3新增的private tracker必须与I1 flight token和I2 framing transaction保持互斥。
