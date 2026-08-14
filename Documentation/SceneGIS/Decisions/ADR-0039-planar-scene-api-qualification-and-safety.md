@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`proposed`
+- Status：`approved`
 - Date：`2026-08-14`
 - Decision owners：Architecture Agent、项目负责人
 - Related plan：
@@ -78,3 +78,6 @@ identity、Camera result/view atomicity，以及Perspective/Orthographic和high-
 升级Cesium时复核Scene constructor Fog/Shadow初始化、`updateFrameState`在`preRender`之后的位置、height API delegation、Camera三个
 globe-only入口、Widget/Viewer option forwarding和SceneTransforms SCENE3D分支。若上游提供primary-world-aware capabilities与
 native-effect policy，可退役`SGP-0007`；其他SGP按各自独立removal condition处理。
+
+I5 unified dev/release E2E与installed engine/root package验证已闭合Scene capability/guard recovery、
+`_SceneGISPlanarSceneApi` archive与soft-private delivery、无underscore public hiding；paired `SGP-0007`已转为`active`。

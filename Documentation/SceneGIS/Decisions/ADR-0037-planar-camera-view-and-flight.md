@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`proposed`
+- Status：`approved`
 - Date：`2026-08-14`
 - Decision owners：Architecture Agent
 - Related plan：`AgentDocs/planar-api-integration/plans/2026-08-14-phase-i1-planar-camera-view-flight.md`
@@ -56,3 +56,7 @@ Rectangle/fly-over拒绝、zero/default/custom flight、replace/cancel/complete�
 preload与next-frame clearance。Real Context覆盖Perspective与Orthographic actual tween frames，以及terrain mesh、Surface
 command/shader/VA、imagery binding/texture和Environment light warm identity；representative Globe Camera regression确认原路径
 不变。
+
+I5 unified dev/release E2E与installed engine/root package验证已闭合public Camera view/flight联合路径、
+`_SceneGISPlanarCamera`/`_SceneGISPlanarCameraFlight` archive与soft-private delivery、无underscore public hiding；
+对应paired `SGP-0004`已转为`active`。

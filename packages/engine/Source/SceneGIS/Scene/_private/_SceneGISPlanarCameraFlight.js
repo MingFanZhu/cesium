@@ -208,6 +208,17 @@ function restoreInput(state) {
   state.suspensionToken = undefined;
 }
 
+function releaseFlight(state, tween) {
+  try {
+    restoreInput(state);
+  } finally {
+    planarFlights.delete(tween);
+    if (state.camera._currentFlight === tween) {
+      state.camera._currentFlight = undefined;
+    }
+  }
+}
+
 function buildFlightCandidate(camera, options, stateOptions) {
   const world = SceneGISPlanarCamera.validatePlanarCamera(camera);
   const destination = stateOptions?.destination ?? options.destination;
@@ -376,6 +387,7 @@ function buildFlightCandidate(camera, options, stateOptions) {
     easingFunction,
     complete: options.complete,
     cancel: options.cancel,
+    completingExplicitly: false,
     controller: SceneGISPlanarCameraController._getRegisteredForScene(
       camera._scene,
     ),
@@ -486,17 +498,14 @@ function addFlight(camera, options, stateOptions) {
         }
       },
       complete() {
-        restoreInput(state);
-        if (camera._currentFlight === tween) {
-          camera._currentFlight = undefined;
-        }
+        releaseFlight(state, tween);
         if (typeof state.complete === "function") {
           state.complete();
         }
       },
       cancel() {
-        restoreInput(state);
-        if (typeof state.cancel === "function") {
+        releaseFlight(state, tween);
+        if (!state.completingExplicitly && typeof state.cancel === "function") {
           state.cancel();
         }
       },
@@ -606,14 +615,18 @@ function completeFlight(camera) {
   if (!defined(state)) {
     return false;
   }
-  tween.cancelTween();
-  updateFlight(state, state.duration);
-  if (typeof tween.complete === "function") {
-    tween.complete();
+  state.completingExplicitly = true;
+  try {
+    tween.cancelTween();
+    updateFlight(state, state.duration);
+    state.scene.requestRender();
+    if (typeof tween.complete === "function") {
+      tween.complete();
+    }
+  } finally {
+    state.completingExplicitly = false;
+    releaseFlight(state, tween);
   }
-  planarFlights.delete(tween);
-  camera._currentFlight = undefined;
-  state.scene.requestRender();
   return true;
 }
 

@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`proposed`
+- Status：`approved`
 - Date：`2026-08-14`
 - Decision owners：Architecture Agent
 - Related plan：
@@ -66,3 +66,7 @@ Focused private/controller/Widget/Viewer Specs覆盖profile validation、viewFro
 native Clock、position gap、replacement/clear/remove/destroy、flight/framing互斥、InfoBox/double-click、
 Perspective/Orthographic real Context、actual input suppression以及Globe/default回归。Build、types、
 docs、installed package verifier、SGP audit和direct Test人工验收闭环交付。
+
+I5 unified dev/release E2E与installed engine/root package验证已闭合Entity/DataSource framing、native Clock tracking、
+`_SceneGISPlanarEntityFraming`/`_SceneGISPlanarEntityTracker` archive与soft-private delivery、无underscore public hiding；
+paired `SGP-0005`与`SGP-0006`已转为`active`。

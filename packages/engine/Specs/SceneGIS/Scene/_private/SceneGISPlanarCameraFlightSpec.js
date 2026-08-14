@@ -177,6 +177,86 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraFlight", function () {
     expect(scene.requestCount).toBeGreaterThan(0);
   });
 
+  it("publishes explicit completion without cancel and cleans state before callbacks", function () {
+    const { camera } = createFixture();
+    const callbackOrder = [];
+    const destination = new Cartesian3(40.0, -20.0, 80.0);
+    SceneGISPlanarCameraFlight.flyTo(camera, {
+      destination,
+      duration: 2.0,
+      cancel() {
+        callbackOrder.push("cancel");
+      },
+      complete() {
+        callbackOrder.push("complete");
+        expect(camera._currentFlight).toBeUndefined();
+        expect(controller._flightSuspensionCount).toBe(0);
+      },
+    });
+
+    expect(SceneGISPlanarCameraFlight.completeFlight(camera)).toBe(true);
+    expect(callbackOrder).toEqual(["complete"]);
+    expect(SceneGISPlanarCamera.getWorldPose(camera).position).toEqualEpsilon(
+      destination,
+      1e-12,
+    );
+    expect(camera._currentFlight).toBeUndefined();
+    expect(controller._flightSuspensionCount).toBe(0);
+    expect(SceneGISPlanarCameraFlight.completeFlight(camera)).toBe(false);
+    expect(SceneGISPlanarCameraFlight.cancelFlight(camera)).toBe(false);
+  });
+
+  it("cleans explicit completion state when final update or complete throws", function () {
+    const fixture = createFixture();
+    const updateFailure = new Error("final update failed");
+    const cancel = jasmine.createSpy("cancel");
+    const complete = jasmine.createSpy("complete");
+    SceneGISPlanarCameraFlight.flyTo(fixture.camera, {
+      destination: new Cartesian3(10.0, 20.0, 30.0),
+      duration: 1.0,
+      cancel,
+      complete,
+    });
+    spyOn(SceneGISPlanarCamera, "setWorldPose").and.throwError(updateFailure);
+
+    expect(() =>
+      SceneGISPlanarCameraFlight.completeFlight(fixture.camera),
+    ).toThrowError(Error, updateFailure.message);
+    expect(cancel).not.toHaveBeenCalled();
+    expect(complete).not.toHaveBeenCalled();
+    expect(fixture.camera._currentFlight).toBeUndefined();
+    expect(controller._flightSuspensionCount).toBe(0);
+    expect(SceneGISPlanarCameraFlight.completeFlight(fixture.camera)).toBe(
+      false,
+    );
+
+    SceneGISPlanarCamera.setWorldPose.calls.reset();
+    SceneGISPlanarCamera.setWorldPose.and.callThrough();
+    const completeFailure = new Error("nonzero complete failed");
+    const destination = new Cartesian3(-30.0, 40.0, 50.0);
+    SceneGISPlanarCameraFlight.flyTo(fixture.camera, {
+      destination,
+      duration: 1.0,
+      cancel,
+      complete() {
+        expect(fixture.camera._currentFlight).toBeUndefined();
+        expect(controller._flightSuspensionCount).toBe(0);
+        throw completeFailure;
+      },
+    });
+
+    expect(() =>
+      SceneGISPlanarCameraFlight.completeFlight(fixture.camera),
+    ).toThrowError(Error, completeFailure.message);
+    expect(cancel).not.toHaveBeenCalled();
+    expect(
+      SceneGISPlanarCamera.getWorldPose(fixture.camera).position,
+    ).toEqualEpsilon(destination, 1e-12);
+    expect(fixture.camera._currentFlight).toBeUndefined();
+    expect(controller._flightSuspensionCount).toBe(0);
+    expect(SceneGISPlanarCameraFlight.cancelFlight(fixture.camera)).toBe(false);
+  });
+
   it("preserves default/custom timing callbacks requestRender and final preload", function () {
     const { camera, scene } = createFixture();
     const easingFunction = (time) => time;

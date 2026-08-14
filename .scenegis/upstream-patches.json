@@ -69,7 +69,7 @@
     {
       "id": "SGP-0004",
       "title": "Add planar Camera view and flight dispatch",
-      "status": "proposed",
+      "status": "active",
       "reason": "Camera public view and flight APIs currently route SCENE3D positions and orientations through ellipsoid ENU and Cartographic interpolation, so a live planar primary world requires an explicit fixed-axis dispatch.",
       "risk": "high",
       "files": [
@@ -90,7 +90,7 @@
     {
       "id": "SGP-0005",
       "title": "Add planar Entity and DataSource framing dispatch",
-      "status": "proposed",
+      "status": "active",
       "reason": "CesiumWidget and Viewer currently normalize zoom targets through Globe-specific overloads and share mutable completion state, while planar Entity framing requires an exact target profile, isolated operation lifecycle, and zoom-only InfoBox behavior.",
       "risk": "high",
       "files": [
@@ -113,7 +113,7 @@
     {
       "id": "SGP-0006",
       "title": "Add planar Entity tracking dispatch",
-      "status": "proposed",
+      "status": "active",
       "reason": "CesiumWidget and Viewer route Entity tracking through ellipsoid EntityView semantics, while a planar primary world requires fixed-axis tracking, ControllerHost camera authority, and operation-isolated framing interaction.",
       "risk": "high",
       "files": [
@@ -138,7 +138,7 @@
     {
       "id": "SGP-0007",
       "title": "Add non-Globe Scene API and native-effect safety",
-      "status": "proposed",
+      "status": "active",
       "reason": "Scene height/clamp APIs and native Earth environment effects silently retain ellipsoid or Globe semantics for a non-Globe primary world, so Scene needs explicit capability guards at API and frame boundaries.",
       "risk": "high",
       "files": [

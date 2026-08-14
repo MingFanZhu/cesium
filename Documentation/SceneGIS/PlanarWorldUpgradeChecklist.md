@@ -62,6 +62,7 @@ two-vertex-buffer rollback/release；不得引入其无关normal compression API
 | Entity/DataSource planar callback与profile gate                          | private content callback、SGP-0001                                  | high   | World liveness、deferred activation、dynamic allowlist、default Globe isolation                                                      |
 | planar Entity/DataSource framing与InfoBox zoom fallback                  | private framing helper、SGP-0005、ADR-0006/0037                     | high   | exact target identity、snapshot/loading listener、operation identity、PENDING/DONE/FAILED、Camera bounds handoff、tracking互斥       |
 | planar Entity tracking与Viewer interaction                               | private tracker、SGP-0006、ADR-0038                                 | high   | FIXED/AUTODETECT/ENU、native Clock、viewFrom/bounds acquisition、input token、flight/framing/Home/remove、InfoBox/double-click       |
+| planar API unified qualification与installed delivery                     | I5 focused Specs/E2E/package verifier                               | high   | declarative Viewer→Camera→framing→tracking→Scene safety、private tar/soft-private hiding、ADR/SGP final status                       |
 | Point/Billboard/Label pools与Model async lifecycle                       | private Anchor/Model visualizers                                    | high   | disabled EntityCluster、original Entity pick、generation isolation、late settlement、exact release                                   |
 | standard synchronous Primitive/GeometryInstance与per-DataSource ordering | public planar Primitive/Geometry、private Polyline/Polygon adapters | high   | scene3DOnly local DOUBLE、origin/model matrix、pickPrimitive、Appearance vertex format、candidate/current、move/remove/destroy       |
 | Core local volume、route-derived mesh与Path fixed sampler                | C7/C8 public Geometry、Solid/Area/Route/Path adapters               | high   | coordinate-neutral Core facts、normal/closed matrix、corner stations、FIXED `_subSample`、callback order与private generation         |
@@ -116,3 +117,17 @@ private module basename、debug counter 和内部 command/cache entry 都不是�
   `SceneGISPlanarEnvironment`的sky/atmosphere/body，opaque mask保持private defensive seam。
 - 复核Camera三个Rectangle/Ellipsoid入口仍由SGP-0004 guard，`positionCartographic`内部consumer不应被应用级guard破坏。
 - 重新资格确认SCENE3D SceneTransforms、pick/depth、ordinary ray的Cartesian路径；MostDetailed 3D Tiles路径保持deferred。
+
+## I5 planar API unified delivery
+
+- 确认`ADR-0037`、`ADR-0038`、`ADR-0039`保持`approved`，`SGP-0004`至`SGP-0007`保持`active`；不得借升级改变既有
+  file mapping、reason、risk、removal condition或marker purpose。
+- 同一blocked-network dev/release case必须从public `Viewer({ planarWorld })`串联Camera view/flight、Entity/DataSource framing、
+  FIXED Entity native Clock tracking、Scene Cartesian qualification与guard recovery，并保持Surface/controller/token/destroy identity。
+- Installed engine tar必须包含`_SceneGISPlanarCamera.js`、`_SceneGISPlanarCameraFlight.js`、
+  `_SceneGISPlanarEntityFraming.js`、`_SceneGISPlanarEntityTracker.js`、`_SceneGISPlanarSceneApi.js`；widgets tar必须包含
+  `_SceneGISPlanarViewerBootstrap.js`。Engine/widgets/root ESM和root CJS按实际barrel验证underscore soft-private存在；对应
+  无underscore拼写、declarations与API HTML必须保持public absent。
+- 继续验证12个SceneGIS GLSL source与12个generated shader modules。Package consumer不得伪造DOM/WebGL Viewer运行，也不得把
+  soft-private export描述为稳定public API。
+- 3D Tiles MostDetailed、格式转换、clustering、planar Fog/Shadow仍是独立后继能力；本交付矩阵不得被用作支持声明。

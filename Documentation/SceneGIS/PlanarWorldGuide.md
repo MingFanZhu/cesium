@@ -330,3 +330,20 @@ planar Widget/Viewer只接受SCENE3D/3D-only，并拒绝defined ellipsoid、map 
 skyBox/skyAtmosphere。构造会关闭默认Fog；运行中visible native SkyBox/SkyAtmosphere/Sun/Moon、enabled Fog/Shadow在frame发布前
 失败。hidden/disabled对象可以保留且仍由原caller/Scene ownership管理；修正后下一frame可恢复。使用
 `SceneGISPlanarEnvironment`提供平面sky、bodies和atmosphere。
+
+## Planar API 统一交付
+
+V1与I1-I4的公开路径作为同一交付单元验证：`Viewer({ planarWorld })`先解析唯一planar World与controller，public
+`Camera`完成fixed-axis view/bounds/flight，`Viewer.zoomTo/flyTo`消费受支持的Entity/DataSource profile，
+`trackedEntity`按native Clock跟随FIXED position，最后由Scene API safety阻止ellipsoid height/clamp、globe-only Camera入口和
+native Fog/Shadow/Earth environment产生伪平面语义。Dev与release使用同一个blocked-network Viewer case；应用不得把3D Tiles
+MostDetailed、GeoJSON/CZML/KML转换、clustering或planar Fog/Shadow误认为已包含在该矩阵中。
+
+Installed-package verifier除公共声明、API HTML、ESM/CJS与12个GLSL/12个generated shader modules外，还显式锁定以下运行时文件：
+
+- engine：`_SceneGISPlanarCamera.js`、`_SceneGISPlanarCameraFlight.js`、`_SceneGISPlanarEntityFraming.js`、
+  `_SceneGISPlanarEntityTracker.js`、`_SceneGISPlanarSceneApi.js`；
+- widgets：`_SceneGISPlanarViewerBootstrap.js`。
+
+这些underscore export只用于SceneGIS package间的soft-private组装与交付验证，不是稳定public API；相应无underscore拼写必须保持
+不可公开导入。升级或应用代码不得依赖其参数、状态或内部resource identity。

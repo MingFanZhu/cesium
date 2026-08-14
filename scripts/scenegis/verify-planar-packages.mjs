@@ -55,6 +55,10 @@ const nonPublicSpellings = [
   "SceneGISPlanarTile",
   "SceneGISPlanarTileImagery",
   "SceneGISPlanarCamera",
+  "SceneGISPlanarCameraFlight",
+  "SceneGISPlanarEntityFraming",
+  "SceneGISPlanarEntityTracker",
+  "SceneGISPlanarViewerBootstrap",
   "SceneGISPlanarImagery",
   "SceneGISPlanarSurfaceShader",
   "SceneGISPlanarPositionResolver",
@@ -82,6 +86,9 @@ const nonPublicSpellings = [
   "SceneGISPlanarSceneApi",
 ];
 const softPrivateContentSymbols = [
+  "_SceneGISPlanarCamera",
+  "_SceneGISPlanarCameraFlight",
+  "_SceneGISPlanarEntityFraming",
   "_SceneGISPlanarPositionResolver",
   "_SceneGISPlanarAnchorVisualizer",
   "_SceneGISPlanarModelVisualizer",
@@ -106,7 +113,11 @@ const softPrivateContentSymbols = [
   "_SceneGISPlanarEntityTracker",
   "_SceneGISPlanarSceneApi",
 ];
+const softPrivateWidgetSymbols = ["_SceneGISPlanarViewerBootstrap"];
 const privateContentFiles = [
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarCamera.js",
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarCameraFlight.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarEntityFraming.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPositionResolver.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarAnchorVisualizer.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarModelVisualizer.js",
@@ -130,6 +141,9 @@ const privateContentFiles = [
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarAtmosphereRenderer.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarEntityTracker.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarSceneApi.js",
+];
+const privateWidgetFiles = [
+  "package/Source/SceneGIS/_SceneGISPlanarViewerBootstrap.js",
 ];
 const terrainWorkerSource =
   "package/Source/Workers/SceneGISPlanarTerrainWorker.js";
@@ -312,6 +326,7 @@ function consumerSource(moduleSyntax) {
   const widgetPublic = JSON.stringify(publicWidgets);
   const privatePublicSpellings = JSON.stringify(nonPublicSpellings);
   const softPrivateSymbols = JSON.stringify(softPrivateContentSymbols);
+  const softPrivateWidgets = JSON.stringify(softPrivateWidgetSymbols);
   if (moduleSyntax === "esm") {
     return `
 import assert from "node:assert/strict";
@@ -332,10 +347,15 @@ for (const name of ${engineNamespaces}) assert.equal(typeof root[name], "object"
 for (const name of ${widgetPublic}) assert.equal(typeof root[name], "function", name);
 for (const name of ${privatePublicSpellings}) {
   assert.equal(engine[name], undefined, name);
+  assert.equal(widgets[name], undefined, name);
   assert.equal(root[name], undefined, name);
 }
 for (const name of ${softPrivateSymbols}) {
   assert.notEqual(engine[name], undefined, name);
+  assert.notEqual(root[name], undefined, name);
+}
+for (const name of ${softPrivateWidgets}) {
+  assert.notEqual(widgets[name], undefined, name);
   assert.notEqual(root[name], undefined, name);
 }
 const coordinateSystem = new engine.SceneGISPlanarCoordinateSystem({
@@ -503,6 +523,7 @@ for (const name of ${engineNamespaces}) assert.equal(typeof root[name], "object"
 for (const name of ${widgetPublic}) assert.equal(typeof root[name], "function", name);
 for (const name of ${privatePublicSpellings}) assert.equal(root[name], undefined, name);
 for (const name of ${softPrivateSymbols}) assert.notEqual(root[name], undefined, name);
+for (const name of ${softPrivateWidgets}) assert.notEqual(root[name], undefined, name);
 `;
 }
 
@@ -768,6 +789,7 @@ async function verify() {
     "package/index.js",
     "package/index.d.ts",
     "package/Source/Viewer/Viewer.js",
+    ...privateWidgetFiles,
   ]);
   assertArchive(rootArchive, [
     "package/package.json",
@@ -831,7 +853,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 12/12 GLSL, 12/12 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3/E4 runtime properties, V1 Viewer, I2 framing and I3 tracking API, soft-private, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 12/12 GLSL, 12/12 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3/E4 runtime properties, V1/I1-I4 private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
   );
 }
 

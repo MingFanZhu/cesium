@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `extension`
-- Status: `active`
+- Status: `completed`
 - Owner role: `architecture`
 - Architecture review: `confirmed`
 - Architecture reviewer: Architecture Agent
@@ -72,13 +72,13 @@ Entity/DataSource与Scene API。适配必须沿固定米制Cartesian3、`+X East
 
 <!-- markdownlint-disable MD060 -->
 
-| Phase | Objective                                                                                 | Dependencies                      | Entry gate                                                                  | Exit gate                                                                                                              | Status                | Phase plan                                                    |
-| ----- | ----------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------- |
-| I1    | 适配Camera fixed-axis HPR、setView/lookAt/bounds、Cartesian flight与Home。                | V1 checkpoint、ADR-0004/0024-0026 | 审计Camera/CameraFlightPath、ControllerHost与四frustum helper。             | Focused/unit/real-Context证明Camera public APIs、flight生命周期与Globe non-regression；ADR/SGP闭环。                   | `completed`           | [I1](2026-08-14-phase-i1-planar-camera-view-flight.md)        |
-| I2    | 开放Viewer/CesiumWidget对supported planar Entity/DataSource的zoomTo/flyTo与InfoBox zoom。 | I1 checkpoint                     | 重审zoom target resolution、bounds、Promise与SGP-0001/0002。                | live/declarative Viewer对单/多Entity、Collection、CustomDataSource framing/flight闭环；unsupported targets fail-fast。 | `completed`           | [I2](2026-08-14-phase-i2-planar-entity-datasource-framing.md) |
-| I3    | 为Viewer/CesiumWidget提供time-dynamic planar trackedEntity与交互入口。                    | I2 checkpoint                     | 重审EntityView、Clock tick、ControllerHost priority、viewFrom/orientation。 | Public tracking、double-click/InfoBox、stop/remove/destroy与input ownership闭环；Earth EntityView不变。                | `completed`           | [I3](2026-08-14-phase-i3-planar-entity-tracking.md)           |
+| Phase | Objective                                                                                 | Dependencies                      | Entry gate                                                                  | Exit gate                                                                                                              | Status             | Phase plan                                                    |
+| ----- | ----------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------- |
+| I1    | 适配Camera fixed-axis HPR、setView/lookAt/bounds、Cartesian flight与Home。                | V1 checkpoint、ADR-0004/0024-0026 | 审计Camera/CameraFlightPath、ControllerHost与四frustum helper。             | Focused/unit/real-Context证明Camera public APIs、flight生命周期与Globe non-regression；ADR/SGP闭环。                   | `completed`        | [I1](2026-08-14-phase-i1-planar-camera-view-flight.md)        |
+| I2    | 开放Viewer/CesiumWidget对supported planar Entity/DataSource的zoomTo/flyTo与InfoBox zoom。 | I1 checkpoint                     | 重审zoom target resolution、bounds、Promise与SGP-0001/0002。                | live/declarative Viewer对单/多Entity、Collection、CustomDataSource framing/flight闭环；unsupported targets fail-fast。 | `completed`        | [I2](2026-08-14-phase-i2-planar-entity-datasource-framing.md) |
+| I3    | 为Viewer/CesiumWidget提供time-dynamic planar trackedEntity与交互入口。                    | I2 checkpoint                     | 重审EntityView、Clock tick、ControllerHost priority、viewFrom/orientation。 | Public tracking、double-click/InfoBox、stop/remove/destroy与input ownership闭环；Earth EntityView不变。                | `completed`        | [I3](2026-08-14-phase-i3-planar-entity-tracking.md)           |
 | I4    | 资格确认通用Cartesian Scene API并为globe-only API/native effects建立明确安全边界。        | I3 checkpoint                     | 重审SceneTransforms、Picking、Fog、Shadow、format/widget guards。           | screen/pick APIs有证据；ellipsoid-only/unsupported paths不再静默错误；文档矩阵完成。                                   | `completed`        | [I4](2026-08-14-phase-i4-planar-scene-api-safety.md)          |
-| I5    | 统一dev/release/npm/types/docs/E2E与升级交付。                                            | I4 checkpoint                     | 重审installed packages、E2E fixed ports与最小联合场景。                     | Camera→Viewer→tracking→Scene safety在dev/release/npm和direct Test统一闭环，无open finding。                            | `proposed`            | I4 checkpoint后建立                                           |
+| I5    | 统一dev/release/npm/types/docs/E2E与升级交付。                                            | I4 checkpoint                     | 重审installed packages、E2E fixed ports与最小联合场景。                     | Camera→Viewer→tracking→Scene safety在dev/release/npm和direct Test统一闭环，无open finding。                            | `review-requested` | [I5](2026-08-14-phase-i5-unified-qualification-delivery.md)   |
 
 <!-- markdownlint-enable MD060 -->
 
@@ -150,4 +150,47 @@ Entity/DataSource与Scene API。适配必须沿固定米制Cartesian3、`+X East
   `SceneGISPlanarEnvironment`成为live non-Globe唯一受支持sky/atmosphere/body路径；opaque mask仅保留为private defensive seam。
   本轮只修正式文档/AgentDocs，未修改产品/Specs/Test/SGP。Architecture focused re-review已关闭I4-R001并批准code review；
   项目负责人I4中文manual gate已通过。Architecture已创建I4独立本地checkpoint `22bd7e1c29`
-  （`实现平面 Scene API 安全边界`，not pushed）；I4 completed。当前等待Architecture amend状态回写，随后审计/规划I5；I5尚未进入。
+  （`实现平面 Scene API 安全边界`，not pushed），最终amend/base=`0c95a54024`；I4 completed。
+- Architecture已审计现有release E2E、installed verifier、ADR/SGP状态与direct Test，确认
+  [I5 phase plan](2026-08-14-phase-i5-unified-qualification-delivery.md)：补一个blocked-network public bundle联合case、显式锁定
+  V1/I1-I4 private helper tar/soft-private delivery、批准ADR-0037-0039并激活SGP-0004-0007。I5不修改product Source/Test页面，
+  不新增manual gate。
+- I5实现与非E2E证据已完成：focused Camera/EntityZoom/EntityTracking/Scene API/Viewer合计`3/11/3/3/23` SUCCESS；
+  build、release、types、docs、tsc与installed verifier通过，verifier锁定`12/12` GLSL、`12/12` generated modules和V1/I1-I4
+  private tar/soft-private/public hiding；existing root server上的blocked-network direct Test smoke通过。`ADR-0037`至`ADR-0039`
+  已approved，`SGP-0004`至`SGP-0007`已active。PID 11948占用8080/8081，Architecture确认这是environment-only blocker并禁止
+  Execution终止、重配或轮询；dev/release同一I5 E2E case等待owner授权释放端口。
+- Architecture finding I5-R001已addressed：HomeButton触发后先证明tracking同步清理与non-zero Home flight已启动，再显式
+  `completeFlight()`，锁定最终Home position/direction/up、`_currentFlight`与flight suspension归零；qualification和外部expect均
+  包含start/settlement结果。未运行E2E，等待Architecture focused re-review关闭finding及后续端口授权。
+- Architecture focused re-review已关闭I5-R001并批准code/non-E2E evidence。首次owner-authorized dev E2E初次/retry均在整个
+  `page.evaluate`达到30秒timeout；release按协议未运行，Architecture已恢复root service PID 30060。根因是关闭default render loop后
+  Entity zoom、DataSource fly与tracking-clear zoom只render一帧即await frame-driven Promise。I5-R002现已addressed：每个Promise使用
+  fixed maximum frame pump；DataSource fly先锁定同一operation发布actual Camera flight、显式complete，再泵原Promise；耗尽错误包含
+  operation/framing/flight/tracker状态。未提高timeout、未sleep、未修改产品/config；等待focused re-review，禁止重跑E2E。
+- Architecture关闭I5-R002后，第二次owner-authorized dev E2E由pump在约3秒内确定性报告Entity zoom连续120帧仍PENDING；release
+  未运行，root service已恢复为PID 33344。Architecture诊断`DataSourceDisplay._ready`仍false，因为tight render+microtask chain没有
+  让首次`ApproximateTerrainHeights` JSON completion browser task运行。I5-R003现已addressed：每个fixed-budget iteration先等待
+  `requestAnimationFrame`，再显式`viewer.render()`与两轮microtask drain；diagnostics增加DataSourceDisplay ready与default planar
+  visualizer gate exists/activated/count。未使用sleep、wall clock、default loop、第二Viewer或private initialization，等待focused
+  re-review且禁止重跑E2E。
+- Architecture关闭I5-R003后，第三次owner-authorized dev E2E已完成`page.evaluate`，仅返回`dataSourceFlew=false`与
+  `homeFlightStarted=false`；release未运行，root service已恢复为PID 30828。I5-R004修复explicit planar
+  `completeFlight()`的cancel-before-complete语义，focused CameraFlight `9/9`与EntityZoom Widget `12/12`通过；I5-R005按
+  `SceneGISPlanarHomeButton`真实同步Home契约撤销错误的flight-start要求，改为`homeApplied`与`homeStayedFlightFree`。
+  `npm run build`与`npm run build-release`通过。R004/R005现为addressed，等待Architecture focused re-review和新的owner端口授权；
+  不运行E2E、不commit、不push。
+- Architecture关闭R004/R005后的owner-authorized dev case中，全部qualification、network/page/browser error arrays均通过，仅intentional
+  Fog guard rejection被CesiumWidget error panel写入`consoleErrors`；release未运行，root service已恢复为PID 33124。I5-R006只在
+  该单次`viewer.render()`周围保存并临时关闭`_showRenderLoopErrors`，在`finally`恢复精确旧值并由`fogErrorPanelRestored`锁定；
+  `scene.rethrowRenderErrors=true`与全局collectors保持。R006现为addressed，等待focused re-review及新端口授权。
+- Architecture关闭I5-R006并取得owner授权后，最终dev命令
+  `npm run test-e2e -- Specs/e2e/scenegis-planar-release.spec.js --grep "planar API integration qualifies unified public delivery" --headed`
+  为`1 passed`（test 4.0s / total 7.5s）；Windows process-local `release=true`配合同一config/project/spec/grep/headed为`1 passed`
+  （test 2.9s / total 6.5s）。Timing case排除；qualification、destroy、`externalAttempts`、`badResponses`、`pageErrors`、
+  `browserErrors`与`consoleErrors`全部通过/为空。Architecture已恢复root service PID 30388。
+- `ADR-0037`至`ADR-0039`的`approved`和`SGP-0004`至`SGP-0007`的`active`现为最终delivery事实。Extension为
+  `checkpoint-ready`，等待Architecture final review与独立本地checkpoint；建议提交信息`完成平面 API 融合统一交付`，未push。
+- Architecture已创建I5/final extension本地checkpoint `a81bbecebdda3362decc8505dc31a96b14a82aa3`（short
+  `a81bbecebd`，`完成平面 API 融合统一交付`，not pushed）。I1-I5全部completed，extension completed；当前无follow-up phase，
+  handoff等待未来Architecture audit或新extension assignment。

@@ -4,12 +4,14 @@ import {
   Cartesian3,
   CesiumWidget,
   Color,
+  CustomDataSource,
   Entity,
   EntityCollection,
   Event,
   HeadingPitchRange,
   OrthographicFrustum,
   PointGraphics,
+  SceneGISPlanarCameraController,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
@@ -608,5 +610,41 @@ describe("SceneGIS/Widget/SceneGISPlanarEntityZoomCesiumWidget", function () {
         widget.scene.context.readPixels().some((value) => value !== 0),
       ).toBe(true);
     }
+  });
+
+  it("settles a real DataSource flight true after public explicit completion", async function () {
+    createWidget();
+    widget.resize();
+    const controller = new SceneGISPlanarCameraController({
+      world: widget.scene.world,
+    });
+    widget.scene.screenSpaceCameraController.enableInputs = false;
+    widget.addController(controller);
+    const dataSource = new CustomDataSource("explicit-completion");
+    dataSource.entities.add({
+      id: "explicit-completion-point",
+      position: new Cartesian3(12.0, -18.0, 6.0),
+      point: new PointGraphics({ pixelSize: 10.0, color: Color.YELLOW }),
+    });
+    await widget.dataSources.add(dataSource);
+
+    let settlementCount = 0;
+    const flightPromise = widget.flyTo(dataSource, { duration: 1.0 });
+    flightPromise.then(function () {
+      settlementCount++;
+    });
+    await pollToPromise(function () {
+      widget.render();
+      return widget.camera._currentFlight !== undefined;
+    });
+    expect(controller._flightSuspensionCount).toBe(1);
+
+    widget.camera.completeFlight();
+    expect(await flightPromise).toBe(true);
+    await Promise.resolve();
+    expect(settlementCount).toBe(1);
+    expect(widget.camera._currentFlight).toBeUndefined();
+    expect(controller._flightSuspensionCount).toBe(0);
+    expect(widget._sceneGISPlanarFramingOperation).toBeUndefined();
   });
 });
