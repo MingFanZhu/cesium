@@ -49,6 +49,7 @@
         cameraStatus: "公共Camera操作尚未执行。",
         framingStatus: "Entity/DataSource定位尚未执行。",
         trackingStatus: "Entity跟踪尚未启动。",
+        sceneApiStatus: "Scene Cartesian与安全边界尚未检查。",
         simulationTime: Cesium.JulianDate.toIso8601(TRACKING_EPOCH),
         clockAnimating: false,
         clockMultiplier: 60.0,
@@ -165,12 +166,43 @@
           viewer.planarCameraController.viewHome(viewer.scene);
           viewer.scene.requestRender();
         },
+        inspectSceneApi: () => {
+          const scene = viewer.scene;
+          const center = new Cesium.Cartesian2(
+            scene.canvas.clientWidth * 0.5,
+            scene.canvas.clientHeight * 0.5,
+          );
+          const terrain = world.pickTerrainFromWindowPosition(center, scene);
+          const canvas = Cesium.defined(terrain)
+            ? scene.cartesianToCanvasCoordinates(terrain)
+            : undefined;
+          const depth = scene.pickPositionSupported
+            ? scene.pickPosition(center)
+            : undefined;
+          state.sceneApiStatus = `屏幕=${Cesium.defined(canvas) ? `${canvas.x.toFixed(1)},${canvas.y.toFixed(1)}` : "无"}；terrain Z=${Cesium.defined(terrain) ? terrain.z.toFixed(2) : "无"}；depth Z=${Cesium.defined(depth) ? depth.z.toFixed(2) : "无"}`;
+        },
+        verifySceneGuards: () => {
+          const errors = [];
+          try {
+            viewer.scene.sampleHeight(new Cesium.Cartographic());
+          } catch (error) {
+            errors.push("sampleHeight");
+          }
+          try {
+            viewer.camera.pickEllipsoid(new Cesium.Cartesian2(0.0, 0.0));
+          } catch (error) {
+            errors.push("pickEllipsoid");
+          }
+          state.sceneApiStatus = `已同步拒绝：${errors.join("、") || "未触发"}；supported=${viewer.scene.sampleHeightSupported}`;
+        },
         cameraHelp:
           "公共Camera使用平面东/北/上固定轴；左键平移、中键旋转、滚轮缩放。",
         framingHelp:
           "支持Entity、纯Entity数组、EntityCollection及其DataSource定位。",
         trackingHelp:
           "跟踪仅接受FIXED position与AUTODETECT/ENU固定轴；双击动态点也可开始跟踪。",
+        sceneApiHelp:
+          "支持Cartesian屏幕、pick/depth与World terrain；ellipsoid height/Rectangle API会同步拒绝。",
       };
 
       let viewer = new Cesium.Viewer("cesiumContainer", {
@@ -364,7 +396,7 @@
       });
 
       const gui = new GUI({
-        title: "平面 API 集成（I1 + I2 + I3）",
+        title: "平面 API 集成（I1 + I2 + I3 + I4）",
         width: 370,
       });
       const cameraFolder = gui.addFolder("公共 Camera 视图与飞行");
@@ -429,6 +461,17 @@
         .listen()
         .disable();
       trackingFolder.add(state, "trackingHelp").name("固定轴说明").disable();
+      const sceneApiFolder = gui.addFolder("Scene API 安全边界");
+      sceneApiFolder.add(state, "inspectSceneApi").name("检查屏幕/深度/地形");
+      sceneApiFolder
+        .add(state, "verifySceneGuards")
+        .name("验证ellipsoid API拒绝");
+      sceneApiFolder
+        .add(state, "sceneApiStatus")
+        .name("检查状态")
+        .listen()
+        .disable();
+      sceneApiFolder.add(state, "sceneApiHelp").name("能力边界").disable();
       gui.add(state, "home").name("平面全域 Home");
       gui.add(state, "providerStatus").name("公开数据").listen().disable();
 

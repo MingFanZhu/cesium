@@ -717,6 +717,17 @@ ShaderProgram和一个stable command，不创建texture、FBO或postprocess。Pl
 固定`+X East/+Y North/+Z Up`，不得写入Scene-owned `skyBox`/`skyAtmosphere` slots。
 
 Environment合成顺序固定为planar SkyBox→atmosphere→Sun/Moon→ordinary geometry。统一native conflict与resident-terrain
-underground判定必须先于任何E4 allocation/execute；地下时全部planar visual environment隐藏，已执行的native generic
-background由同一atmosphere command输出opaque background mask。完整public、soft-private、ownership与升级边界见
-[ADR-0036](Decisions/ADR-0036-planar-atmosphere-skybox.md)。
+underground判定必须先于任何E4 allocation/execute；地下时全部planar visual environment隐藏。ADR-0039/I4已取代visible native
+generic background与planar atmosphere共存的public配置：live non-Globe Scene的sky、atmosphere和body只允许
+`SceneGISPlanarEnvironment`。Atmosphere command中的opaque background mask仅是private defensive compatibility seam，不是应用
+配置入口。完整public、soft-private、ownership与升级边界见
+[ADR-0036](Decisions/ADR-0036-planar-atmosphere-skybox.md)与
+[ADR-0039](Decisions/ADR-0039-planar-scene-api-qualification-and-safety.md)。
+
+### 平面 Scene API 资格与安全
+
+live non-Globe primary World只资格确认SCENE3D Cartesian screen transform、pick/depth、普通ray和World terrain query。Ellipsoid
+height/clamp与Camera Rectangle/Ellipsoid方法必须fail-fast；`Camera.positionCartographic`和`Scene.ellipsoid`仅为Cesium internal
+ellipsoid substrate，不代表planar CRS。non-Globe构造固定3D-only、关闭默认Fog并拒绝显式native Earth sky/Fog/Shadow；
+`Scene.updateFrameState`在发布frame state前再次验证caller late mutation。完整矩阵与SGP边界见
+[ADR-0039](Decisions/ADR-0039-planar-scene-api-qualification-and-safety.md)。

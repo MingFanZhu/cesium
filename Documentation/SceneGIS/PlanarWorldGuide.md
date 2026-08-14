@@ -308,7 +308,25 @@ viewer.removeController(environment);
 planarSkyBox.destroy();
 ```
 
-不要把planar SkyBox传给`CesiumWidget`的`skyBox` option或写入`scene.skyBox`。Planar SkyBox存在时，visible native
-SkyBox/SkyAtmosphere/Sun/Moon均冲突；只显示planar atmosphere时，可保留不承载planar celestial语义的native generic
-SkyBox作为background。Camera低于resident terrain时SkyBox、atmosphere和可见天体统一隐藏；普通terrain/model仍在它们之后
-绘制并自然遮挡。
+不要把planar SkyBox传给`CesiumWidget`的`skyBox` option或写入`scene.skyBox`。ADR-0039/I4已取代早期允许planar atmosphere与
+visible native generic SkyBox共存的说明；live non-Globe Scene的visible native SkyBox/SkyAtmosphere/Sun/Moon始终冲突，
+`SceneGISPlanarEnvironment`是唯一受支持的sky、atmosphere和body路径。Camera低于resident terrain时SkyBox、atmosphere和可见
+天体统一隐藏；普通terrain/model仍在它们之后绘制并自然遮挡。Renderer中保留的opaque background mask只是private defensive
+compatibility seam，应用不得依赖它配置native sky。
+
+## Scene API 资格与安全边界
+
+平面Scene支持通用SCENE3D Cartesian API：`Camera.getPickRay`、`Scene.cartesianToCanvasCoordinates`、
+`SceneTransforms` window/drawing-buffer transforms、`Scene.pick`、`drillPick`、`pickPosition`以及World terrain query。普通private
+ray pick具有回归证据；`*MostDetailed` ray仍是3D Tiles-specific，不属于SceneGIS承诺。
+
+以下入口保留Cesium的Earth/ellipsoid含义，因此在live non-Globe World中同步抛`DeveloperError`：
+`Scene.sampleHeight*`、`clampToHeight*`、`Camera.getRectangleCameraCoordinates`、`pickEllipsoid`、
+`computeViewRectangle`。平面高度改用`world.getTerrainHeight`、`world.pickTerrain`或`SceneGISPlanarTerrainSampler`。应用读取Camera
+Cartesian `positionWC`/`position`；`positionCartographic`与`Scene.ellipsoid`只是Cesium内部ellipsoid projection/substrate，不是
+项目CRS。
+
+planar Widget/Viewer只接受SCENE3D/3D-only，并拒绝defined ellipsoid、map projection、2D mode、enabled shadows或native
+skyBox/skyAtmosphere。构造会关闭默认Fog；运行中visible native SkyBox/SkyAtmosphere/Sun/Moon、enabled Fog/Shadow在frame发布前
+失败。hidden/disabled对象可以保留且仍由原caller/Scene ownership管理；修正后下一frame可恢复。使用
+`SceneGISPlanarEnvironment`提供平面sky、bodies和atmosphere。

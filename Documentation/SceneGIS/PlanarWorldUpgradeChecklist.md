@@ -82,8 +82,8 @@ context交付；engine/widgets/Shader source watcher能清理相关cache，刷�
    `SGP-0001`与`SGP-0003`仍保持独立目的和移除条件，并可单独retire。
    同时复核`CubeMapPanorama`仍允许`Matrix3.IDENTITY`、同步preloaded non-URL faces和return-command；returned command、credit、
    CubeMap destroy ownership以及duplicate Context行为必须与ADR-0036一致。确认`Scene.renderEnvironment`仍在native generic
-   background之后、ordinary geometry之前，并且`Scene._environmentState`仍能区分已经执行的native SkyBox/SkyAtmosphere，供
-   planar underground opaque mask使用。
+   background之后、ordinary geometry之前。`Scene._environmentState`对native SkyBox/SkyAtmosphere的区分只允许服务private
+   defensive underground mask；ADR-0039/I4已禁止应用在live non-Globe Scene中配置visible native background。
 3. 运行 P1-P8、terrain T1-T6与advanced terrain focused Specs；复核actual Worker transfer/URL与A7本地统一资格，再按风险运行
    multi-tile warm/churn/depth与lifecycle soak；任何
    observable selection、pixel、fallback、lighting或ownership变化先形成finding。
@@ -105,3 +105,14 @@ context交付；engine/widgets/Shader source watcher能清理相关cache，刷�
 ## 私有实现同步原则
 
 private module basename、debug counter 和内部 command/cache entry 都不是公共 API。测试可以观察它们来证明资源收敛，但应用不得依赖。升级若迫使 private semantic 改变，优先调整 SceneGIS wrapper；需要新增 upstream hook、改变 public contract、Shader/Worker protocol 或 selection/SSE/LRU/fallback 时，应建立新的 ADR/phase，而不是在升级中顺手扩边。
+
+## I4 Scene API safety
+
+- 复核`Scene.sampleHeight*`/`clampToHeight*` delegation与supported getter仍可在Picking/Promise/input mutation前guard。
+- 复核`Scene.updateFrameState`仍位于`preRender`之后且在frame-state/World render/native command publication之前；SGP-0007必须只登记
+  `Scene.js`中的paired seams。
+- 复核`CesiumWidget`/`Viewer`构造option forwarding、WGS84 Fog默认值、ShadowMap enabled和native sky/body `show`语义。
+- 确认ADR-0039继续取代E4早期“planar atmosphere + visible native generic background”public说明；live non-Globe Scene只支持
+  `SceneGISPlanarEnvironment`的sky/atmosphere/body，opaque mask保持private defensive seam。
+- 复核Camera三个Rectangle/Ellipsoid入口仍由SGP-0004 guard，`positionCartographic`内部consumer不应被应用级guard破坏。
+- 重新资格确认SCENE3D SceneTransforms、pick/depth、ordinary ray的Cartesian路径；MostDetailed 3D Tiles路径保持deferred。

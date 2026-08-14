@@ -2924,14 +2924,20 @@ function rectangleCameraPosition2D(camera, rectangle, result) {
   return result;
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document the non-Globe rectangle guard.
 /**
  * Get the camera position needed to view a rectangle on an ellipsoid or map
  *
  * @param {Rectangle} rectangle The rectangle to view.
  * @param {Cartesian3} [result] The camera position needed to view the rectangle
  * @returns {Cartesian3} The camera position needed to view the rectangle
+ * @exception {DeveloperError} getRectangleCameraCoordinates is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.getRectangleCameraCoordinates = function (rectangle, result) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Reject ellipsoid rectangle framing for a non-Globe primary world.
+  SceneGISPlanarCamera.throwIfGlobeOnly(this, "getRectangleCameraCoordinates");
+  // SCENEGIS_PATCH_END SGP-0004
   //>>includeStart('debug', pragmas.debug);
   if (!defined(rectangle)) {
     throw new DeveloperError("rectangle is required");
@@ -3004,6 +3010,7 @@ function pickMapColumbusView(camera, windowPosition, projection, result) {
   return projection.ellipsoid.cartographicToCartesian(cart, result);
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document the non-Globe ellipsoid-pick guard.
 /**
  * Pick an ellipsoid or map.
  *
@@ -3013,6 +3020,7 @@ function pickMapColumbusView(camera, windowPosition, projection, result) {
  * @returns {Cartesian3 | undefined} If the ellipsoid or map was picked,
  * returns the point on the surface of the ellipsoid or map in world
  * coordinates. If the ellipsoid or map was not picked, returns undefined.
+ * @exception {DeveloperError} pickEllipsoid is not supported with a non-Globe primary world.
  *
  * @example
  * const canvas = viewer.scene.canvas;
@@ -3020,7 +3028,11 @@ function pickMapColumbusView(camera, windowPosition, projection, result) {
  * const ellipsoid = viewer.scene.ellipsoid;
  * const result = viewer.camera.pickEllipsoid(center, ellipsoid);
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.pickEllipsoid = function (windowPosition, ellipsoid, result) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Reject ellipsoid picking for a non-Globe primary world.
+  SceneGISPlanarCamera.throwIfGlobeOnly(this, "pickEllipsoid");
+  // SCENEGIS_PATCH_END SGP-0004
   //>>includeStart('debug', pragmas.debug);
   if (!defined(windowPosition)) {
     throw new DeveloperError("windowPosition is required.");
@@ -3968,6 +3980,7 @@ function addToResult(x, y, index, camera, ellipsoid, computedHorizonQuad) {
   );
   return 0;
 }
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document the non-Globe view-rectangle guard.
 /**
  * Computes the approximate visible rectangle on the ellipsoid.
  *
@@ -3975,8 +3988,13 @@ function addToResult(x, y, index, camera, ellipsoid, computedHorizonQuad) {
  * @param {Rectangle} [result] The rectangle in which to store the result
  *
  * @returns {Rectangle|undefined} The visible rectangle or undefined if the ellipsoid isn't visible at all.
+ * @exception {DeveloperError} computeViewRectangle is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.computeViewRectangle = function (ellipsoid, result) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Reject ellipsoid view computation for a non-Globe primary world.
+  SceneGISPlanarCamera.throwIfGlobeOnly(this, "computeViewRectangle");
+  // SCENEGIS_PATCH_END SGP-0004
   ellipsoid = ellipsoid ?? Ellipsoid.default;
   const cullingVolume = this.frustum.computeCullingVolume(
     this.positionWC,

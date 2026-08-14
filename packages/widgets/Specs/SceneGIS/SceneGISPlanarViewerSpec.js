@@ -298,10 +298,14 @@ describe(
         terrainShadows: false,
         selectedTerrainProviderViewModel: false,
         terrainProviderViewModels: [],
+        ellipsoid: Ellipsoid.UNIT_SPHERE,
         mapProjection: false,
         mapMode2D: false,
         depthPlaneEllipsoidOffset: 0,
         navigationInstructionsInitiallyVisible: false,
+        shadows: true,
+        skyBox: {},
+        skyAtmosphere: {},
         baseLayerPicker: true,
         geocoder: true,
         sceneModePicker: true,
@@ -371,15 +375,14 @@ describe(
       ).toBeNull();
     });
 
-    it("preserves planar identities when an ellipsoid is supplied", function () {
+    it("preserves planar identities beside the internal Scene ellipsoid", function () {
       const world = createWorld();
       const coordinateSystem = world.coordinateSystem;
       const tilingScheme = world.tilingScheme;
-      const ellipsoid = new Ellipsoid(2.0, 3.0, 4.0);
 
-      viewer = createPlanarViewer(world, { ellipsoid });
+      viewer = createPlanarViewer(world);
 
-      expect(viewer.scene.ellipsoid).toBe(ellipsoid);
+      expect(viewer.scene.ellipsoid).toBe(Ellipsoid.default);
       expect(world.coordinateSystem).toBe(coordinateSystem);
       expect(world.tilingScheme).toBe(tilingScheme);
     });

@@ -320,3 +320,15 @@ Planar InfoBox camera对当前可track Entity执行track/untrack，对不可trac
 使用同一track-or-zoom规则。Globe、`globe:false`与generic custom World继续使用原EntityView/Viewer行为。该amendment由proposed
 SGP-0006跟踪`CesiumWidget.js`与`Viewer.js`的独立paired seams；完整Camera authority、failure atomicity与升级边界见
 [ADR-0038](ADR-0038-planar-entity-tracking.md)。
+
+## 2026-08-14 amendment：Scene API 与 native effect safety
+
+I4进一步收紧direct `CesiumWidget({world})`和live/declarative planar Viewer的构造profile：`sceneMode`只允许
+`SCENE3D`，`scene3DOnly`实际固定true；defined `ellipsoid`、`mapProjection`、`mapMode2D`、
+`depthPlaneEllipsoidOffset`拒绝；`shadows`、native `skyBox`和`skyAtmosphere`只允许undefined/false。该规则取代本ADR早期
+矩阵中“planar Viewer允许辅助ellipsoid及generic native environment”的描述。`Scene.ellipsoid`仍由Cesium内部创建并供render
+invariant使用，但不是planar CRS或application position contract。
+
+Direct Widget preflight和construction Fog normalization继续属于SGP-0001，Viewer preflight继续属于SGP-0002；Scene height/native
+frame safety由SGP-0007与[ADR-0039](ADR-0039-planar-scene-api-qualification-and-safety.md)定义。`world:false`、`globe:false`和默认
+Globe Viewer不进入该profile。

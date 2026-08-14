@@ -83,6 +83,21 @@ function isPlanarCamera(camera) {
   return camera?._scene?.world instanceof SceneGISPlanarWorld;
 }
 
+function throwIfGlobeOnly(camera, methodName) {
+  const scene = camera?._scene;
+  const world = scene?.world;
+  if (
+    defined(world) &&
+    !defined(scene.globe) &&
+    typeof world.isDestroyed === "function" &&
+    !world.isDestroyed()
+  ) {
+    throw new DeveloperError(
+      `Camera.${methodName} is not supported with a non-Globe world. Use fixed-axis Cartesian Camera APIs instead.`,
+    );
+  }
+}
+
 function validateBounds(bounds) {
   const horizontalSpan = bounds.right - bounds.left;
   const verticalSpan = bounds.top - bounds.bottom;
@@ -1060,6 +1075,7 @@ const SceneGISPlanarCamera = {
   scaleOrthographicFrustum: scaleOrthographicFrustum,
   setView: setView,
   setWorldPose: setWorldPose,
+  throwIfGlobeOnly: throwIfGlobeOnly,
   validatePlanarCamera: validatePlanarCamera,
   validateWorldPose: validateWorldPose,
   viewBoundingSphere: viewBoundingSphere,

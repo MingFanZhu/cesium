@@ -354,6 +354,7 @@ function validatePlanarViewerOptions(options, hasWorld, hasPlanarWorldOptions) {
     "terrainShadows",
     "selectedTerrainProviderViewModel",
     "terrainProviderViewModels",
+    "ellipsoid",
     "mapProjection",
     "mapMode2D",
     "depthPlaneEllipsoidOffset",
@@ -364,6 +365,16 @@ function validatePlanarViewerOptions(options, hasWorld, hasPlanarWorldOptions) {
     if (defined(options[name])) {
       throw new DeveloperError(
         `options.${name} is not supported by a planar Viewer.`,
+      );
+    }
+  }
+
+  const disabledNativeOptions = ["shadows", "skyBox", "skyAtmosphere"];
+  for (let i = 0; i < disabledNativeOptions.length; i++) {
+    const name = disabledNativeOptions[i];
+    if (defined(options[name]) && options[name] !== false) {
+      throw new DeveloperError(
+        `options.${name} must be false for a planar Viewer.`,
       );
     }
   }

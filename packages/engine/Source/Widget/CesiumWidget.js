@@ -21,6 +21,7 @@ import getElement from "../DataSources/getElement.js";
 import Property from "../DataSources/Property.js";
 // SCENEGIS_PATCH_BEGIN SGP-0001: Install the instance-local planar DataSource visualizer factory.
 import createSceneGISPlanarVisualizersCallback from "../SceneGIS/DataSources/_private/_SceneGISPlanarVisualizersCallback.js";
+import SceneGISPlanarSceneApi from "../SceneGIS/Scene/_private/_SceneGISPlanarSceneApi.js";
 // SCENEGIS_PATCH_END SGP-0001
 // SCENEGIS_PATCH_BEGIN SGP-0005: Dispatch planar Entity framing through an operation-isolated helper.
 import SceneGISPlanarEntityFraming from "../SceneGIS/DataSources/_private/_SceneGISPlanarEntityFraming.js";
@@ -244,6 +245,7 @@ function CesiumWidget(container, options) {
   }
 
   if (hasCustomWorld) {
+    SceneGISPlanarSceneApi.validateConstructionOptions(options);
     const globeOnlyOptions = [
       "baseLayer",
       "terrainProvider",
@@ -367,7 +369,9 @@ function CesiumWidget(container, options) {
       ellipsoid: ellipsoid,
       mapProjection: options.mapProjection,
       orderIndependentTranslucency: options.orderIndependentTranslucency,
-      scene3DOnly: options.scene3DOnly ?? false,
+      // SCENEGIS_PATCH_BEGIN SGP-0001: Keep a non-Globe primary world permanently in 3D-only mode.
+      scene3DOnly: hasCustomWorld ? true : (options.scene3DOnly ?? false),
+      // SCENEGIS_PATCH_END SGP-0001
       shadows: options.shadows,
       mapMode2D: options.mapMode2D,
       requestRenderMode: options.requestRenderMode,

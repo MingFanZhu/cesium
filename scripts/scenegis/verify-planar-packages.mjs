@@ -79,6 +79,7 @@ const nonPublicSpellings = [
   "SceneGISPlanarTerrainWorkerTasks",
   "SceneGISPlanarCelestialBodyRenderer",
   "SceneGISPlanarAtmosphereRenderer",
+  "SceneGISPlanarSceneApi",
 ];
 const softPrivateContentSymbols = [
   "_SceneGISPlanarPositionResolver",
@@ -103,6 +104,7 @@ const softPrivateContentSymbols = [
   "_SceneGISPlanarCelestialBodyRenderer",
   "_SceneGISPlanarAtmosphereRenderer",
   "_SceneGISPlanarEntityTracker",
+  "_SceneGISPlanarSceneApi",
 ];
 const privateContentFiles = [
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPositionResolver.js",
@@ -127,6 +129,7 @@ const privateContentFiles = [
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarCelestialBodyRenderer.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarAtmosphereRenderer.js",
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarEntityTracker.js",
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarSceneApi.js",
 ];
 const terrainWorkerSource =
   "package/Source/Workers/SceneGISPlanarTerrainWorker.js";
@@ -542,6 +545,30 @@ function verifyDocumentation(engineDirectory) {
   assert.match(
     cesiumWidgetDocumentation,
     /<h4 class="name"\s+id="trackedEntity">/u,
+  );
+  const sceneDocumentation = fs.readFileSync(
+    path.join(documentation, "Scene.html"),
+    "utf8",
+  );
+  assert.match(
+    sceneDocumentation,
+    /sampleHeight is not supported with a non-Globe primary world/u,
+  );
+  assert.match(
+    sceneDocumentation,
+    /clampToHeightMostDetailed is not supported with a non-Globe primary world/u,
+  );
+  const cameraDocumentation = fs.readFileSync(
+    path.join(documentation, "Camera.html"),
+    "utf8",
+  );
+  assert.match(
+    cameraDocumentation,
+    /pickEllipsoid is not supported with a non-Globe primary world/u,
+  );
+  assert.match(
+    cameraDocumentation,
+    /computeViewRectangle is not supported with a non-Globe primary world/u,
   );
   const layerDocumentation = fs.readFileSync(
     path.join(documentation, "SceneGISPlanarImageryLayer.html"),

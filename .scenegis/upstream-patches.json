@@ -134,6 +134,25 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0038-planar-entity-tracking.md",
       "removalCondition": "Retire when upstream CesiumWidget and Viewer expose equivalent custom-world fixed-axis Entity tracking, controller-authority coordination, and configurable InfoBox/double-click tracking behavior."
+    },
+    {
+      "id": "SGP-0007",
+      "title": "Add non-Globe Scene API and native-effect safety",
+      "status": "proposed",
+      "reason": "Scene height/clamp APIs and native Earth environment effects silently retain ellipsoid or Globe semantics for a non-Globe primary world, so Scene needs explicit capability guards at API and frame boundaries.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarSceneApiCesiumWidgetSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISWorldCesiumWidgetSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0039-planar-scene-api-qualification-and-safety.md",
+      "removalCondition": "Retire when upstream Scene exposes equivalent primary-world-aware height/clamp capability reporting and pre-frame native environment effect validation for non-Globe worlds."
     }
   ]
 }

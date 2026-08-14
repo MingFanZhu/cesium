@@ -1,8 +1,8 @@
 import {
   CesiumWidget,
   Globe,
+  SceneMode,
   SceneGISWorld,
-  SkyAtmosphere,
 } from "../../../index.js";
 
 import getWebGLStub from "../../../../../Specs/getWebGLStub.js";
@@ -113,19 +113,48 @@ describe("SceneGIS/Widget/SceneGISWorldCesiumWidget", function () {
     expect(widget.scene.skyAtmosphere).toBeUndefined();
     expect(widget.scene.moon).toBeUndefined();
     expect(widget.scene.sun).toBeUndefined();
+    expect(widget.scene.fog.enabled).toBe(false);
+    expect(widget.scene.frameState.scene3DOnly).toBe(true);
   });
 
-  it("keeps explicitly supplied generic environment options", function () {
-    const world = createMockWorld();
-    const skyAtmosphere = new SkyAtmosphere();
-
+  it("allows explicit disabled native environment options", function () {
     widget = createWidget({
-      world: world,
+      world: createMockWorld(),
       skyBox: false,
-      skyAtmosphere: skyAtmosphere,
+      skyAtmosphere: false,
+      shadows: false,
+      sceneMode: SceneMode.SCENE3D,
+      scene3DOnly: true,
     });
 
-    expect(widget.scene.skyAtmosphere).toBe(skyAtmosphere);
+    expect(widget.scene.skyBox).toBeUndefined();
+    expect(widget.scene.skyAtmosphere).toBeUndefined();
+    expect(widget.scene.shadowMap.enabled).toBe(false);
+  });
+
+  [
+    ["sceneMode", SceneMode.SCENE2D],
+    ["scene3DOnly", false],
+    ["ellipsoid", {}],
+    ["mapProjection", {}],
+    ["mapMode2D", 0],
+    ["depthPlaneEllipsoidOffset", 0.0],
+    ["shadows", true],
+    ["skyBox", {}],
+    ["skyAtmosphere", {}],
+  ].forEach(function ([optionName, value]) {
+    it(`rejects non-Globe world option ${optionName} before DOM mutation`, function () {
+      const world = createMockWorld();
+      const options = { world: world };
+      options[optionName] = value;
+
+      expect(function () {
+        createWidget(options);
+      }).toThrowDeveloperError();
+      expect(container.children.length).toBe(0);
+      expect(world.destroyCalls).toBe(0);
+      expect(world.calls).toEqual([]);
+    });
   });
 
   it("rejects world and globe together", function () {

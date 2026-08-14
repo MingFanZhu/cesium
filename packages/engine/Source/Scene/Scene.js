@@ -84,6 +84,10 @@ import getMetadataClassProperty from "./getMetadataClassProperty.js";
 import PickedMetadataInfo from "./PickedMetadataInfo.js";
 import getMetadataProperty from "./getMetadataProperty.js";
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Guard non-Globe Scene APIs and native effects.
+import SceneGISPlanarSceneApi from "../SceneGIS/Scene/_private/_SceneGISPlanarSceneApi.js";
+// SCENEGIS_PATCH_END SGP-0007
+
 // SCENEGIS_PATCH_BEGIN SGP-0001: Type the primary world lifecycle slot.
 /** @import SceneGISWorld from "../SceneGIS/Scene/SceneGISWorld.js"; */
 // SCENEGIS_PATCH_END SGP-0001
@@ -945,6 +949,11 @@ Object.defineProperties(Scene.prototype, {
    */
   sampleHeightSupported: {
     get: function () {
+      // SCENEGIS_PATCH_BEGIN SGP-0007: Report ellipsoid height sampling as unsupported for non-Globe worlds.
+      if (SceneGISPlanarSceneApi.isLiveNonGlobeScene(this)) {
+        return false;
+      }
+      // SCENEGIS_PATCH_END SGP-0007
       return this._context.depthTexture;
     },
   },
@@ -961,6 +970,11 @@ Object.defineProperties(Scene.prototype, {
    */
   clampToHeightSupported: {
     get: function () {
+      // SCENEGIS_PATCH_BEGIN SGP-0007: Report ellipsoid height clamping as unsupported for non-Globe worlds.
+      if (SceneGISPlanarSceneApi.isLiveNonGlobeScene(this)) {
+        return false;
+      }
+      // SCENEGIS_PATCH_END SGP-0007
       return this._context.depthTexture;
     },
   },
@@ -2085,6 +2099,9 @@ function updateFrameNumber(scene, frameNumber, time) {
  * @private
  */
 Scene.prototype.updateFrameState = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Reject native Earth effects before publishing non-Globe frame state.
+  SceneGISPlanarSceneApi.validateFrameState(this);
+  // SCENEGIS_PATCH_END SGP-0007
   const camera = this.camera;
 
   const frameState = this._frameState;
@@ -5223,6 +5240,7 @@ Scene.prototype.drillPickFromRayMostDetailed = function (
   );
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Document non-Globe height sampling safety.
 /**
  * Returns the height of scene geometry at the given cartographic position or <code>undefined</code> if there was no
  * scene geometry to sample height from. The height of the input position is ignored. May be used to clamp objects to
@@ -5248,11 +5266,17 @@ Scene.prototype.drillPickFromRayMostDetailed = function (
  *
  * @exception {DeveloperError} sampleHeight is only supported in 3D mode.
  * @exception {DeveloperError} sampleHeight requires depth texture support. Check sampleHeightSupported.
+ * @exception {DeveloperError} sampleHeight is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0007
 Scene.prototype.sampleHeight = function (position, objectsToExclude, width) {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Fail before delegating ellipsoid height sampling for a non-Globe world.
+  SceneGISPlanarSceneApi.throwIfHeightApiUnsupported(this, "sampleHeight");
+  // SCENEGIS_PATCH_END SGP-0007
   return this._picking.sampleHeight(this, position, objectsToExclude, width);
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Document non-Globe height clamping safety.
 /**
  * Clamps the given cartesian position to the scene geometry along the geodetic surface normal. Returns the
  * clamped position or <code>undefined</code> if there was no scene geometry to clamp to. May be used to clamp
@@ -5279,13 +5303,18 @@ Scene.prototype.sampleHeight = function (position, objectsToExclude, width) {
  *
  * @exception {DeveloperError} clampToHeight is only supported in 3D mode.
  * @exception {DeveloperError} clampToHeight requires depth texture support. Check clampToHeightSupported.
+ * @exception {DeveloperError} clampToHeight is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0007
 Scene.prototype.clampToHeight = function (
   cartesian,
   objectsToExclude,
   width,
   result,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Fail before delegating ellipsoid height clamping for a non-Globe world.
+  SceneGISPlanarSceneApi.throwIfHeightApiUnsupported(this, "clampToHeight");
+  // SCENEGIS_PATCH_END SGP-0007
   return this._picking.clampToHeight(
     this,
     cartesian,
@@ -5295,6 +5324,7 @@ Scene.prototype.clampToHeight = function (
   );
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Document non-Globe detailed height sampling safety.
 /**
  * Initiates an asynchronous {@link Scene#sampleHeight} query for an array of {@link Cartographic} positions
  * using the maximum level of detail for 3D Tilesets in the scene. The height of the input positions is ignored.
@@ -5322,12 +5352,20 @@ Scene.prototype.clampToHeight = function (
  *
  * @exception {DeveloperError} sampleHeightMostDetailed is only supported in 3D mode.
  * @exception {DeveloperError} sampleHeightMostDetailed requires depth texture support. Check sampleHeightSupported.
+ * @exception {DeveloperError} sampleHeightMostDetailed is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0007
 Scene.prototype.sampleHeightMostDetailed = function (
   positions,
   objectsToExclude,
   width,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Fail before queuing detailed ellipsoid height sampling for a non-Globe world.
+  SceneGISPlanarSceneApi.throwIfHeightApiUnsupported(
+    this,
+    "sampleHeightMostDetailed",
+  );
+  // SCENEGIS_PATCH_END SGP-0007
   return this._picking.sampleHeightMostDetailed(
     this,
     positions,
@@ -5336,6 +5374,7 @@ Scene.prototype.sampleHeightMostDetailed = function (
   );
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Document non-Globe detailed height clamping safety.
 /**
  * Initiates an asynchronous {@link Scene#clampToHeight} query for an array of {@link Cartesian3} positions
  * using the maximum level of detail for 3D Tilesets in the scene. Returns a promise that is resolved when
@@ -5362,12 +5401,20 @@ Scene.prototype.sampleHeightMostDetailed = function (
  *
  * @exception {DeveloperError} clampToHeightMostDetailed is only supported in 3D mode.
  * @exception {DeveloperError} clampToHeightMostDetailed requires depth texture support. Check clampToHeightSupported.
+ * @exception {DeveloperError} clampToHeightMostDetailed is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0007
 Scene.prototype.clampToHeightMostDetailed = function (
   cartesians,
   objectsToExclude,
   width,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Fail before queuing detailed ellipsoid height clamping for a non-Globe world.
+  SceneGISPlanarSceneApi.throwIfHeightApiUnsupported(
+    this,
+    "clampToHeightMostDetailed",
+  );
+  // SCENEGIS_PATCH_END SGP-0007
   return this._picking.clampToHeightMostDetailed(
     this,
     cartesians,
@@ -5512,6 +5559,7 @@ Scene.prototype._initializeWorld = function (world) {
   }
 
   setPrimaryWorld(this, world, undefined);
+  SceneGISPlanarSceneApi.prepareScene(this);
 };
 // SCENEGIS_PATCH_END SGP-0001
 

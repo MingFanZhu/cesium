@@ -1,5 +1,6 @@
 import {
   BoundingSphere,
+  Cartesian2,
   Cartesian3,
   CesiumWidget,
   Color,
@@ -7,6 +8,7 @@ import {
   HeadingPitchRange,
   Matrix4,
   OrthographicFrustum,
+  Rectangle,
   SceneGISPlanarCameraController,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarEnvironment,
@@ -249,5 +251,45 @@ describe("SceneGIS/Widget/SceneGISPlanarCameraCesiumWidget", function () {
     expect(camera.positionWC.z).toBe(-10.0);
     renderFrame();
     expect(camera.positionWC.z).toBe(controller.minimumTerrainClearance);
+  });
+
+  it("rejects ellipsoid-only Camera methods without mutating results or view", function () {
+    const world = createWorld();
+    createWidget(world);
+    const camera = widget.scene.camera;
+    camera.setView({
+      destination: new Cartesian3(10.0, -20.0, 100.0),
+      orientation: { heading: 0.3, pitch: -0.8, roll: 0.1 },
+    });
+    const position = Cartesian3.clone(camera.positionWC);
+    const direction = Cartesian3.clone(camera.directionWC);
+    const requestCount = widget.scene._renderRequested;
+    const cartesianResult = new Cartesian3(1.0, 2.0, 3.0);
+    const rectangleResult = new Rectangle(0.1, 0.2, 0.3, 0.4);
+
+    expect(function () {
+      camera.getRectangleCameraCoordinates(
+        Rectangle.MAX_VALUE,
+        cartesianResult,
+      );
+    }).toThrowDeveloperError();
+    expect(cartesianResult).toEqual(new Cartesian3(1.0, 2.0, 3.0));
+
+    expect(function () {
+      camera.pickEllipsoid(
+        new Cartesian2(48.0, 48.0),
+        undefined,
+        cartesianResult,
+      );
+    }).toThrowDeveloperError();
+    expect(cartesianResult).toEqual(new Cartesian3(1.0, 2.0, 3.0));
+
+    expect(function () {
+      camera.computeViewRectangle(undefined, rectangleResult);
+    }).toThrowDeveloperError();
+    expect(rectangleResult).toEqual(new Rectangle(0.1, 0.2, 0.3, 0.4));
+    expect(camera.positionWC).toEqual(position);
+    expect(camera.directionWC).toEqual(direction);
+    expect(widget.scene._renderRequested).toBe(requestCount);
   });
 });

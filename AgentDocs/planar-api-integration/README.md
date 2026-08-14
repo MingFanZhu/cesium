@@ -8,8 +8,8 @@
 | Status                 | `active`                                                         |
 | Planning model         | `extension`                                                      |
 | Active extension plan  | [总体计划](plans/2026-08-14-planar-api-integration-extension.md) |
-| Current phase          | I3 Planar Entity Tracking                                        |
-| Active phase plan      | [I3](plans/2026-08-14-phase-i3-planar-entity-tracking.md)        |
+| Current phase          | I4 Planar Scene API Qualification and Safety                     |
+| Active phase plan      | [I4](plans/2026-08-14-phase-i4-planar-scene-api-safety.md)       |
 | Active standalone plan | None                                                             |
 | Architecture contact   | Architecture Agent                                               |
 | Execution contact      | Execution Agent task `019ff3d8-d1f4-7fd1-aecb-8cf0aa638d4f`      |
@@ -51,14 +51,12 @@
 ## Current handoff
 
 - Current state: I1 checkpoint=`ff7c1916d6604400465414305f3f647ef9347d5c`；I2最终checkpoint=`e755ad95a2`
-  （not pushed）；阶段外Test示例拆分checkpoint=`74b41bb999`。I3 FIXED planar `trackedEntity`、native Clock、
-  ControllerHost authority、Viewer double-click/InfoBox、SGP-0006/ADR-0038、direct Test与delivery evidence已完成，
-  [I3 review](reviews/2026-08-14-i3-planar-entity-tracking.md)已由Architecture批准；I3-R001-R005全部closed，private tracker
-  最终focused result=`9/9`；项目负责人已完成Clock tracking、InfoBox/double-click、tracking input isolation及
-  stop/zoom/fly/Home manual gate并明确通过。Architecture已创建I3独立本地checkpoint `63cf8bbe44`
-  （`实现平面实体跟踪`，not pushed），I3 completed。
-- Next action: 等待Architecture基于I3 checkpoint开展I4 planning；正式assignment前不修改、不commit/push、不进入I4。
-- Current phase status: I1=`completed`；I2=`completed`；I3=`completed`；I4-I5=`proposed`。
+  （not pushed）；阶段外Test示例拆分checkpoint=`74b41bb999`。I3 Architecture/code review与项目负责人manual gate已通过，
+  I3-R001-I3-R005全部closed；最终I3 checkpoint=`dfc8be40a92503b01b8ae9938a0e2ae581e3a878`
+  （`实现平面实体跟踪`，not pushed）。Architecture已完成I4源码审计并确认
+  [I4 phase plan](plans/2026-08-14-phase-i4-planar-scene-api-safety.md)。
+- Next action: Architecture将本次状态回写amend进同一I4 checkpoint，随后审计并规划I5；正式assignment前不进入I5。
+- Current phase status: I1=`completed`；I2=`completed`；I3=`completed`；I4=`completed`；I5=`proposed`。
 - Open discussion:
   [Cesium public API planar compatibility](discussions/2026-08-14-cesium-public-api-planar-compatibility.md)
   （resolved；作为路线依据）。
@@ -71,6 +69,12 @@
 - Approved review:
   [I3 Planar Entity Tracking](reviews/2026-08-14-i3-planar-entity-tracking.md)（approved；I3-R001-R005 closed；
   manual gate passed；checkpoint=`63cf8bbe44`，not pushed）。
+- Confirmed phase: [I4 Planar Scene API Qualification and Safety](plans/2026-08-14-phase-i4-planar-scene-api-safety.md)
+  （screen/pick资格、height/clamp与globe-only Camera guard、native Fog/Shadow/Earth environment安全边界）。
+- Open review: [I4 Planar Scene API Qualification and Safety](reviews/2026-08-14-i4-planar-scene-api-safety.md)
+  （approved；I4-R001 closed；owner manual gate passed；checkpoint=`22bd7e1c29`，not pushed；I4 completed）。
 - Known risks: `Camera.js`/`CameraFlightPath.js`是高频upstream算法；flight期间legacy
   `screenSpaceCameraController.enableInputs`不能代表planar ControllerHost输入权威；当前以soft-private suspension token隔离。
   `Camera.js`仍是高频upgrade seam；I3新增的private tracker必须与I1 flight token和I2 framing transaction保持互斥。
+  `Camera.positionCartographic`和`Scene.ellipsoid`仍被Cesium通用内部状态读取，I4只能把应用语义标为internal-only并阻止
+  Fog/Shadow/Globe-specific consumer静默启用，不能用大范围内部patch换取getter throw。

@@ -638,6 +638,11 @@ context取得最新代码。因而不需要另跑`npm run build-watch`或Sandcas
 
 ## 完成任务前检查
 
+平面Scene API开发还必须区分Cartesian supported、ellipsoid guarded、internal-only与deferred：高度使用
+`world.getTerrainHeight`、`world.pickTerrain`或`SceneGISPlanarTerrainSampler`；应用位置使用`Camera.positionWC`/`position`，
+不得把`positionCartographic`或`Scene.ellipsoid`解释为planar CRS。planar Widget/Viewer不传ellipsoid/map projection/2D/native
+sky/shadow选项；自动化同时覆盖constructor preflight与`preRender`后的frame-boundary guard。
+
 - [ ] 修改位于正确的 owned root 和架构层。
 - [ ] 没有意外修改或提交生成文件。
 - [ ] 公共 API 名称、default export 和 JSDoc 一致。

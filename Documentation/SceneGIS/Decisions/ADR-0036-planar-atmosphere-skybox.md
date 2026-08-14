@@ -33,8 +33,12 @@ camera world axes/frustum、resident terrain height、E2 effective Sun direction
 
 既有`SGP-0003`hook内顺序固定为planar SkyBox→planar atmosphere→E3 Sun/Moon→ordinary geometry。统一validator在任何
 E4 allocation/execute前拒绝冲突的native environment。Camera严格低于resident terrain（无resident时Z=0）时，planar
-SkyBox/atmosphere/bodies全部隐藏；若native generic SkyBox或SkyAtmosphere已经执行，同一atmosphere command以
-`scene.backgroundColor`和alpha=1遮蔽其背景，ordinary geometry随后仍可覆盖mask。
+SkyBox/atmosphere/bodies全部隐藏。
+
+ADR-0039/I4后续取代了“planar atmosphere + visible native generic background”的public配置：live non-Globe Scene中的visible
+native `SkyBox`、`SkyAtmosphere`、Sun和Moon会在frame publication及E4 hook前失败；应用的sky、atmosphere和body只能使用
+`SceneGISPlanarEnvironment`。Atmosphere renderer中以`scene.backgroundColor`和alpha=1输出的underground opaque-mask分支仅保留为
+defensive/private compatibility seam，用于隔离无法由应用配置到达的旧集成状态；它不是public能力，也不是配置native sky的依据。
 
 Public World/Surface保持single Context。Private renderer仅在异常Context mismatch时释放旧资源并recreate；candidate失败
 保持empty/retriable。Disable、clear、replacement、Environment disconnect或World/Scene destroy均不转移caller SkyBox
@@ -44,9 +48,10 @@ ownership。
 
 E4不新增upstream diff或SGP，只消费ADR-0035定义的`SGP-0003`。升级Cesium时必须复核：environment hook仍位于native
 background/panorama之后和ordinary geometry之前；`CubeMapPanorama`仍支持显式`Matrix3.IDENTITY`、同步preloaded faces与
-return-command；returned command ownership、credit和destroy语义未变；`Scene._environmentState`仍可区分已经执行的native
-SkyBox/SkyAtmosphere。若任一soft-private seam改变，必须先更新focused tests和本ADR，不能把planar SkyBox写入Scene-owned
-slots或复制native renderer。
+return-command；returned command ownership、credit和destroy语义未变。`Scene._environmentState`对已经执行的native
+SkyBox/SkyAtmosphere的区分只服务上述private defensive mask，不构成public配置；若I4 guard或Scene顺序使其永久不可达，可在独立
+审计后移除。任一soft-private seam改变时必须先更新focused tests和本ADR，不能把planar SkyBox写入Scene-owned slots或复制native
+renderer。
 
 ## 验证
 
