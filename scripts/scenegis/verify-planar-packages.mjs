@@ -102,6 +102,7 @@ const softPrivateContentSymbols = [
   "_SceneGISPlanarTerrainWorkerTasks",
   "_SceneGISPlanarCelestialBodyRenderer",
   "_SceneGISPlanarAtmosphereRenderer",
+  "_SceneGISPlanarEntityTracker",
 ];
 const privateContentFiles = [
   "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarPositionResolver.js",
@@ -125,6 +126,7 @@ const privateContentFiles = [
   "package/Source/SceneGIS/Core/_private/_SceneGISPlanarTerrainWorkerTasks.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarCelestialBodyRenderer.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarAtmosphereRenderer.js",
+  "package/Source/SceneGIS/DataSources/_private/_SceneGISPlanarEntityTracker.js",
 ];
 const terrainWorkerSource =
   "package/Source/Workers/SceneGISPlanarTerrainWorker.js";
@@ -528,6 +530,7 @@ function verifyDocumentation(engineDirectory) {
     /For a planar Viewer, the resolved target must be an Entity/u,
   );
   assert.match(viewerDocumentation, /supported planar profile/u);
+  assert.match(viewerDocumentation, /<h4 class="name"\s+id="trackedEntity">/u);
   const cesiumWidgetDocumentation = fs.readFileSync(
     path.join(documentation, "CesiumWidget.html"),
     "utf8",
@@ -535,6 +538,10 @@ function verifyDocumentation(engineDirectory) {
   assert.match(
     cesiumWidgetDocumentation,
     /For a planar world, the resolved target must be an Entity/u,
+  );
+  assert.match(
+    cesiumWidgetDocumentation,
+    /<h4 class="name"\s+id="trackedEntity">/u,
   );
   const layerDocumentation = fs.readFileSync(
     path.join(documentation, "SceneGISPlanarImageryLayer.html"),
@@ -698,6 +705,25 @@ function verifyStylingDeclarations(declarations) {
   assert.match(skyBox, /\n\s*readonly credit: Credit \| undefined;/u);
 }
 
+function verifyTrackingSources(engineDirectory, widgetsDirectory) {
+  const cesiumWidgetSource = fs.readFileSync(
+    path.join(engineDirectory, "Source/Widget/CesiumWidget.js"),
+    "utf8",
+  );
+  assert.match(
+    cesiumWidgetSource,
+    /In a planar world, the value is not an Entity with a FIXED position/u,
+  );
+  const viewerSource = fs.readFileSync(
+    path.join(widgetsDirectory, "Source/Viewer/Viewer.js"),
+    "utf8",
+  );
+  assert.match(
+    viewerSource,
+    /In a planar Viewer, the value is not an Entity with a FIXED position/u,
+  );
+}
+
 async function verify() {
   const engineArchive = pack("packages/engine");
   const widgetsArchive = pack("packages/widgets");
@@ -705,12 +731,17 @@ async function verify() {
   assertArchive(engineArchive, [
     "package/index.js",
     "package/index.d.ts",
+    "package/Source/Widget/CesiumWidget.js",
     terrainWorkerSource,
     terrainWorkerBuild,
     ...sceneGISShaderArchiveEntries,
     ...privateContentFiles,
   ]);
-  assertArchive(widgetsArchive, ["package/index.js", "package/index.d.ts"]);
+  assertArchive(widgetsArchive, [
+    "package/index.js",
+    "package/index.d.ts",
+    "package/Source/Viewer/Viewer.js",
+  ]);
   assertArchive(rootArchive, [
     "package/package.json",
     "package/Source/Cesium.js",
@@ -728,6 +759,7 @@ async function verify() {
   extract(engineArchive, engineDirectory);
   extract(widgetsArchive, widgetsDirectory);
   extract(rootArchive, rootDirectory);
+  verifyTrackingSources(engineDirectory, widgetsDirectory);
 
   const esmConsumer = path.join(temporaryRoot, "consumer.mjs");
   const cjsConsumer = path.join(temporaryRoot, "consumer.cjs");
@@ -772,7 +804,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 12/12 GLSL, 12/12 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3/E4 runtime properties, V1 Viewer and I2 framing API, soft-private, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 12/12 GLSL, 12/12 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3/E4 runtime properties, V1 Viewer, I2 framing and I3 tracking API, soft-private, and broken-entry fixtures.\n",
   );
 }
 

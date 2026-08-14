@@ -164,8 +164,14 @@ widget.clock.currentTime = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
 - `Viewer`和低层`CesiumWidget`的`zoomTo`/`flyTo`支持`Entity`、纯`Entity[]`、`EntityCollection`、
   `entities`为真实`EntityCollection`的DataSource及resolve为这些类型的Promise。Entity属性必须已经使用当前World的
   planar Cartesian米制语义；不会转换GeoJSON/CZML/KML坐标或推断CRS。
-- framing等待完整`DataSourceDisplay` bounds；empty或无`DONE` bounds返回`false`，PENDING不移动Camera。InfoBox camera
-  仅在selected Entity bounds为`DONE`时启用，并且只执行`zoomTo`。Entity tracking和left-double-click仍未开放。
+- framing等待完整`DataSourceDisplay` bounds；empty或无`DONE` bounds返回`false`，PENDING不移动Camera。
+- `trackedEntity`只接受真实Entity、defined `ReferenceFrame.FIXED` position与`AUTODETECT/ENU`
+  `trackingReferenceFrame`。两种tracking frame都使用固定`+X East/+Y North/+Z Up`，不读取Entity orientation；
+  INERTIAL、VELOCITY/body-frame与clamping不支持。当前position gap保留最后pose，native Clock sample恢复后继续。
+- 初始tracking优先使用finite non-zero `viewFrom`；否则PENDING bounds等待、DONE bounds复用public Camera framing、FAILED
+  bounds使用当前Camera fixed offset。Tracking暂停planar input但不改变controller `enabled`；direct Camera flight结束后恢复，
+  successful zoom/fly、Home、Entity removal或clear停止tracking。
+- InfoBox camera对当前可track Entity执行track/untrack，对不可track但DONE bounds执行zoom fallback；left-double-click使用同一规则。
 - `ImageryLayer`、3D Tiles、point cloud、Voxel、Buffer与plain-object target在planar World中不受支持；直接使用
   `viewer.camera` fixed-axis方法处理应用自有Cartesian bounds。
 - `world.pick(ray)` 与 `world.pickFromWindowPosition(position, scene)` 是有界的 Z=0 数学拾取，不依赖当前 LOD 或 depth buffer；extent 外返回 `undefined`。
@@ -219,18 +225,18 @@ SunLight方向。双面surface允许从上下两侧观察，但lighting始终使
 
 ## 支持矩阵与限制
 
-| 能力          | 当前契约                                                                                                                                      |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| extent        | 有限、严格正方形、米制、无 wrap                                                                                                               |
-| scene mode    | 仅 `SCENE3D`                                                                                                                                  |
-| tiling        | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                                                                        |
-| surface       | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                                                                   |
-| imagery       | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                                              |
-| terrain style | caller-owned `Material`；四个稳定资格builtin与受限custom Fabric，仅组合diffuse/alpha                                                          |
-| navigation    | PC pan/rotate/wheel/Home、public Camera Cartesian view/flight、surface clearance与underground crossing；无sweep/touch/inertia/Viewer tracking |
-| environment   | 默认无visual sky；可选caller-owned fixed-axis planar SkyBox、planar atmosphere与程序化Sun/Moon，不自动增加Earth sky语义                       |
-| UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                                        |
-| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow、full Globe Material、imagery picking                    |
+| 能力          | 当前契约                                                                                                                                                                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| extent        | 有限、严格正方形、米制、无 wrap                                                                                                                                             |
+| scene mode    | 仅 `SCENE3D`                                                                                                                                                                |
+| tiling        | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                                                                                                      |
+| surface       | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                                                                                                 |
+| imagery       | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                                                                            |
+| terrain style | caller-owned `Material`；四个稳定资格builtin与受限custom Fabric，仅组合diffuse/alpha                                                                                        |
+| navigation    | PC pan/rotate/wheel/Home、public Camera Cartesian view/flight、FIXED Entity tracking、surface clearance与underground crossing；无sweep/touch/inertia/body/inertial tracking |
+| environment   | 默认无visual sky；可选caller-owned fixed-axis planar SkyBox、planar atmosphere与程序化Sun/Moon，不自动增加Earth sky语义                                                     |
+| UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                                                                      |
+| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow、full Globe Material、imagery picking                                                  |
 
 ## 性能与调参
 

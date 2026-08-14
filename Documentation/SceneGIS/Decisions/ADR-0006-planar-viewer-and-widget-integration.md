@@ -303,3 +303,20 @@ left-double-click tracking仍由后续阶段处理，Globe与`globe:false`保留
 该amendment由proposed SGP-0005跟踪`CesiumWidget.js`与`Viewer.js`的独立paired seams，不扩大SGP-0001/0002/0004。
 升级时复核target overload、`_postRender`更新点、destroy/cancel顺序、DataSource loading event、InfoBox tick/click以及
 `DataSourceDisplay`三态；若上游提供等价custom-world target profile与operation-isolated lifecycle，可移除SGP-0005。
+
+## 2026-08-14 amendment：FIXED Entity tracking与Viewer交互
+
+I3取代P6/I2对planar tracking与left-double-click的禁用。直接`CesiumWidget`及live/declarative planar Viewer的defined
+`trackedEntity`只接受真实`Entity`、defined `ReferenceFrame.FIXED` position与`AUTODETECT/ENU`
+`trackingReferenceFrame`；两种frame都解释为translation-only fixed `+X East/+Y North/+Z Up`。Private tracker不读取Entity
+orientation，不进入Earth `EntityView`，也不支持INERTIAL、VELOCITY、body frame、clamping或CRS推断。
+
+Tracker lazy注册到`ControllerHost`，在`DataSourceDisplay.update(time)`后消费同一native Clock time。初次authority使用
+`viewFrom`或PENDING/DONE/FAILED bounds fallback建立fixed offset，并以独立计数token暂停planar input controller；token可与
+Camera flight suspension嵌套且不改变caller `enabled`。Direct Camera flight暂时优先，successful I2 framing、Home、remove、clear
+与destroy停止tracking。Definition listener、Camera transform与token均exactly once清理。
+
+Planar InfoBox camera对当前可track Entity执行track/untrack，对不可track但DONE bounds执行I2 zoom fallback；left-double-click
+使用同一track-or-zoom规则。Globe、`globe:false`与generic custom World继续使用原EntityView/Viewer行为。该amendment由proposed
+SGP-0006跟踪`CesiumWidget.js`与`Viewer.js`的独立paired seams；完整Camera authority、failure atomicity与升级边界见
+[ADR-0038](ADR-0038-planar-entity-tracking.md)。

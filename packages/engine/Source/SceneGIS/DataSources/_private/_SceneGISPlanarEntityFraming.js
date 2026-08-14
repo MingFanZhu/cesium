@@ -8,6 +8,7 @@ import BoundingSphereState from "../../../DataSources/BoundingSphereState.js";
 import Entity from "../../../DataSources/Entity.js";
 import EntityCollection from "../../../DataSources/EntityCollection.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
+import SceneGISPlanarEntityTracker from "./_SceneGISPlanarEntityTracker.js";
 
 function isPlanarWidget(widget) {
   const world = widget?.scene?.world;
@@ -300,12 +301,14 @@ function update(widget) {
       if (widget._sceneGISPlanarFramingOperation === operation) {
         operation.flight = camera._currentFlight;
       }
+      SceneGISPlanarEntityTracker.clearForSuccessfulFraming(widget);
     } else {
       camera.viewBoundingSphere(
         operation.boundingSphere,
         framingOptions.offset,
       );
       camera.lookAtTransform(Matrix4.IDENTITY);
+      SceneGISPlanarEntityTracker.clearForSuccessfulFraming(widget);
       settle(widget, operation, false, true);
     }
   } catch (error) {

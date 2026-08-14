@@ -1133,6 +1133,21 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
   function pickAndTrackObject(e) {
     const entity = pickEntity(that, e);
     if (defined(entity)) {
+      // SCENEGIS_PATCH_BEGIN SGP-0006: Route planar double-click through the exact fixed-axis tracking profile.
+      if (isPlanarViewer) {
+        if (
+          cesiumWidget._canTrackSceneGISPlanarEntity(
+            entity,
+            that.clock.currentTime,
+          )
+        ) {
+          that.trackedEntity = entity;
+        } else {
+          that.zoomTo(entity);
+        }
+        return;
+      }
+      // SCENEGIS_PATCH_END SGP-0006
       //Only track the entity if it has a valid position at the current time.
       if (
         Property.getValueOrUndefined(entity.position, that.clock.currentTime)
@@ -1154,14 +1169,12 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
     pickAndSelectObject,
     ScreenSpaceEventType.LEFT_CLICK,
   );
-  // SCENEGIS_PATCH_BEGIN SGP-0002: Planar Viewer deliberately omits Entity tracking on double click.
-  if (!isPlanarViewer) {
-    cesiumWidget.screenSpaceEventHandler.setInputAction(
-      pickAndTrackObject,
-      ScreenSpaceEventType.LEFT_DOUBLE_CLICK,
-    );
-  }
-  // SCENEGIS_PATCH_END SGP-0002
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Enable exact-profile Entity tracking for planar double-click.
+  cesiumWidget.screenSpaceEventHandler.setInputAction(
+    pickAndTrackObject,
+    ScreenSpaceEventType.LEFT_DOUBLE_CLICK,
+  );
+  // SCENEGIS_PATCH_END SGP-0006
 
   // This allows to update the Viewer's _clockViewModel instead of the CesiumWidget's _clock
   // when CesiumWidget is created from the Viewer.
@@ -1701,27 +1714,22 @@ Object.defineProperties(Viewer.prototype, {
     },
   },
 
-  // SCENEGIS_PATCH_BEGIN SGP-0002: Document and enforce the planar tracking guard.
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Delegate planar tracking validation and lifecycle to CesiumWidget.
   /**
    * Gets or sets the Entity instance currently being tracked by the camera.
    * @memberof Viewer.prototype
    * @type {Entity | undefined}
-   * @exception {DeveloperError} A defined tracked Entity is assigned to a planar Viewer.
+   * @exception {DeveloperError} In a planar Viewer, the value is not an Entity with a FIXED position and an AUTODETECT or ENU tracking reference frame.
    */
   trackedEntity: {
     get: function () {
       return this._cesiumWidget.trackedEntity;
     },
     set: function (value) {
-      if (this._isPlanarViewer && defined(value)) {
-        throw new DeveloperError(
-          "Entity tracking is not supported by a planar Viewer.",
-        );
-      }
       this._cesiumWidget.trackedEntity = value;
     },
   },
-  // SCENEGIS_PATCH_END SGP-0002
+  // SCENEGIS_PATCH_END SGP-0006
   /**
    * Gets or sets the object instance for which to display a selection indicator.
    *
@@ -2129,6 +2137,15 @@ Viewer.prototype._onTick = function (clock) {
       ? boundingSphereState === BoundingSphereState.DONE
       : defined(position);
     // SCENEGIS_PATCH_END SGP-0005
+    // SCENEGIS_PATCH_BEGIN SGP-0006: Allow planar InfoBox tracking when the current fixed sample is valid.
+    if (
+      this._isPlanarViewer &&
+      (this.trackedEntity === selectedEntity ||
+        this._cesiumWidget._canTrackSceneGISPlanarEntity(selectedEntity, time))
+    ) {
+      enableCamera = true;
+    }
+    // SCENEGIS_PATCH_END SGP-0006
   }
 
   const selectionIndicatorViewModel = defined(this._selectionIndicator)
@@ -2192,12 +2209,24 @@ Viewer.prototype._onEntityCollectionChanged = function (
  * @private
  */
 Viewer.prototype._onInfoBoxCameraClicked = function (infoBoxViewModel) {
-  // SCENEGIS_PATCH_BEGIN SGP-0005: Planar InfoBox camera is zoom-only and never starts tracking.
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Toggle exact-profile planar tracking with DONE-bounds zoom fallback.
   if (this._isPlanarViewer) {
-    this.zoomTo(this.selectedEntity);
+    const selectedEntity = this.selectedEntity;
+    if (this.trackedEntity === selectedEntity) {
+      this.trackedEntity = undefined;
+    } else if (
+      this._cesiumWidget._canTrackSceneGISPlanarEntity(
+        selectedEntity,
+        this.clock.currentTime,
+      )
+    ) {
+      this.trackedEntity = selectedEntity;
+    } else {
+      this.zoomTo(selectedEntity);
+    }
     return;
   }
-  // SCENEGIS_PATCH_END SGP-0005
+  // SCENEGIS_PATCH_END SGP-0006
   if (
     infoBoxViewModel.isCameraTracking &&
     this.trackedEntity === this.selectedEntity

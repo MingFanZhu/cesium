@@ -109,6 +109,31 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0006-planar-viewer-and-widget-integration.md",
       "removalCondition": "Retire when upstream CesiumWidget and Viewer expose equivalent custom-world Entity/DataSource target validation, operation-isolated zoom lifecycle, and configurable zoom-only InfoBox camera behavior."
+    },
+    {
+      "id": "SGP-0006",
+      "title": "Add planar Entity tracking dispatch",
+      "status": "proposed",
+      "reason": "CesiumWidget and Viewer route Entity tracking through ellipsoid EntityView semantics, while a planar primary world requires fixed-axis tracking, ControllerHost camera authority, and operation-isolated framing interaction.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Widget/CesiumWidget.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/widgets/Source/Viewer/Viewer.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/DataSources/_private/SceneGISPlanarEntityTrackerSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarEntityTrackingCesiumWidgetSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarCameraControllerSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0038-planar-entity-tracking.md",
+      "removalCondition": "Retire when upstream CesiumWidget and Viewer expose equivalent custom-world fixed-axis Entity tracking, controller-authority coordination, and configurable InfoBox/double-click tracking behavior."
     }
   ]
 }

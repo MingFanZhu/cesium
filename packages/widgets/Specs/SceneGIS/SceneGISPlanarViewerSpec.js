@@ -1,6 +1,7 @@
 import {
   BoundingSphere,
   BoundingSphereState,
+  CallbackPositionProperty,
   Cartesian2,
   Cartesian3,
   CesiumWidget,
@@ -11,6 +12,7 @@ import {
   Ellipsoid,
   Entity,
   Event,
+  ReferenceFrame,
   SceneGISPlanarCameraController,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
@@ -18,6 +20,7 @@ import {
   SceneGISPlanarWorld,
   SceneMode,
   ScreenSpaceEventType,
+  TrackingReferenceFrame,
 } from "@cesium/engine";
 import { ClockViewModel, SceneGISPlanarHomeButton } from "../../index.js";
 import createViewer from "../createViewer.js";
@@ -430,12 +433,21 @@ describe(
       );
     });
 
-    it("enables planar InfoBox camera only for DONE bounds and zooms without tracking", function () {
+    it("toggles planar InfoBox tracking with DONE-bounds zoom fallback", function () {
       viewer = createPlanarViewer(createWorld());
+      let currentPosition = new Cartesian3(12.0, 8.0, 3.0);
       const entity = new Entity({
         id: "info-box-framing",
         name: "Planar framing",
-        position: new Cartesian3(12.0, 8.0, 3.0),
+        position: new CallbackPositionProperty(
+          function (time, result) {
+            return currentPosition === undefined
+              ? undefined
+              : Cartesian3.clone(currentPosition, result);
+          },
+          false,
+          ReferenceFrame.FIXED,
+        ),
       });
       viewer.selectedEntity = entity;
       let state = BoundingSphereState.PENDING;
@@ -453,12 +465,30 @@ describe(
       });
 
       viewer._onTick(viewer.clock);
-      expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
+      expect(viewer.infoBox.viewModel.enableCamera).toBe(true);
       expect(viewer.selectionIndicator.viewModel.showSelection).toBe(false);
 
+      viewer.infoBox.viewModel.cameraClicked.raiseEvent(
+        viewer.infoBox.viewModel,
+      );
+      expect(viewer.trackedEntity).toBe(entity);
+      currentPosition = undefined;
+      viewer._onTick(viewer.clock);
+      expect(viewer.infoBox.viewModel.enableCamera).toBe(true);
+      expect(viewer.infoBox.viewModel.isCameraTracking).toBe(true);
+      const zoomTo = spyOn(viewer, "zoomTo").and.returnValue(
+        Promise.resolve(true),
+      );
+      viewer.infoBox.viewModel.cameraClicked.raiseEvent(
+        viewer.infoBox.viewModel,
+      );
+      expect(viewer.trackedEntity).toBeUndefined();
+      expect(zoomTo).not.toHaveBeenCalled();
+
+      currentPosition = new Cartesian3(12.0, 8.0, 3.0);
       state = BoundingSphereState.FAILED;
       viewer._onTick(viewer.clock);
-      expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
+      expect(viewer.infoBox.viewModel.enableCamera).toBe(true);
       expect(viewer.selectionIndicator.viewModel.showSelection).toBe(true);
       expect(viewer.selectionIndicator.viewModel.position).toEqual(
         new Cartesian3(12.0, 8.0, 3.0),
@@ -470,9 +500,7 @@ describe(
       expect(viewer.selectionIndicator.viewModel.position).toEqual(
         sphere.center,
       );
-      const zoomTo = spyOn(viewer, "zoomTo").and.returnValue(
-        Promise.resolve(true),
-      );
+      entity.trackingReferenceFrame = TrackingReferenceFrame.VELOCITY;
       viewer.infoBox.viewModel.cameraClicked.raiseEvent(
         viewer.infoBox.viewModel,
       );
@@ -522,7 +550,7 @@ describe(
       await qualifyZoom(viewer);
     });
 
-    it("keeps left-click selection and omits double-click tracking", function () {
+    it("keeps left-click selection and enables exact-profile double-click tracking", function () {
       viewer = createPlanarViewer(createWorld());
 
       expect(
@@ -534,7 +562,19 @@ describe(
         viewer.screenSpaceEventHandler.getInputAction(
           ScreenSpaceEventType.LEFT_DOUBLE_CLICK,
         ),
-      ).toBeUndefined();
+      ).toBeDefined();
+      const entity = new Entity({
+        id: "double-click-track",
+        position: new Cartesian3(1.0, 2.0, 3.0),
+      });
+      spyOn(viewer.scene, "pick").and.returnValue({ id: entity });
+      const doubleClick = viewer.screenSpaceEventHandler.getInputAction(
+        ScreenSpaceEventType.LEFT_DOUBLE_CLICK,
+      );
+      doubleClick({ position: new Cartesian2(16.0, 16.0) });
+      expect(viewer.trackedEntity).toBe(entity);
+      viewer.homeButton.viewModel.command();
+      expect(viewer.trackedEntity).toBeUndefined();
     });
 
     it("selects positioned Entities through direct and primitive ids", function () {
@@ -577,7 +617,7 @@ describe(
           new Cartesian3(0, 0, 0),
         ),
       ).toBe(true);
-      expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
+      expect(viewer.infoBox.viewModel.enableCamera).toBe(true);
 
       select({ position: new Cartesian2(20, 16) });
       viewer._onTick(viewer.clock);
@@ -587,15 +627,23 @@ describe(
       expect(Number.isFinite(indicatorPosition.x)).toBe(true);
       expect(Number.isFinite(indicatorPosition.y)).toBe(true);
       expect(Number.isFinite(indicatorPosition.z)).toBe(true);
-      expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
+      expect(viewer.infoBox.viewModel.enableCamera).toBe(true);
     });
 
-    it("rejects planar tracking and unsupported framing targets synchronously", function () {
+    it("accepts exact-profile planar tracking and rejects unsupported targets synchronously", function () {
       viewer = createPlanarViewer(createWorld());
 
+      const entity = new Entity({
+        position: new Cartesian3(1.0, 2.0, 3.0),
+      });
+      expect(function () {
+        viewer.trackedEntity = entity;
+      }).not.toThrow();
+      expect(viewer.trackedEntity).toBe(entity);
       expect(function () {
         viewer.trackedEntity = {};
       }).toThrowDeveloperError();
+      expect(viewer.trackedEntity).toBe(entity);
       expect(function () {
         viewer.zoomTo({});
       }).toThrowDeveloperError();

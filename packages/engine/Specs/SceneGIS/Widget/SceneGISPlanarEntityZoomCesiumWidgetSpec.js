@@ -394,6 +394,10 @@ describe("SceneGIS/Widget/SceneGISPlanarEntityZoomCesiumWidget", function () {
     createWidget();
     const entity = new Entity({ id: "flight" });
     const replacement = new Entity({ id: "replacement" });
+    const tracked = new Entity({
+      id: "tracked",
+      position: new Cartesian3(3.0, 4.0, 5.0),
+    });
     installBoundingSphereStates(
       new Map([
         [
@@ -425,6 +429,16 @@ describe("SceneGIS/Widget/SceneGISPlanarEntityZoomCesiumWidget", function () {
       widget.camera._currentFlight = undefined;
       flightCallbacks.cancel();
     });
+    widget.trackedEntity = tracked;
+    let replacementPromise;
+    let replacementOperation;
+    let trackingChanges = 0;
+    widget.trackedEntityChanged.addEventListener(function (value) {
+      trackingChanges++;
+      expect(value).toBeUndefined();
+      replacementPromise = widget.zoomTo(replacement);
+      replacementOperation = widget._sceneGISPlanarFramingOperation;
+    });
     const flightPromise = widget.flyTo(entity, {
       duration: 2.0,
       maximumHeight: 80.0,
@@ -435,11 +449,15 @@ describe("SceneGIS/Widget/SceneGISPlanarEntityZoomCesiumWidget", function () {
     expect(flightCallbacks.duration).toBe(2.0);
     expect(flightCallbacks.maximumHeight).toBe(80.0);
     expect(flightCallbacks.offset.range).toBe(30.0);
-
-    const replacementPromise = widget.zoomTo(replacement);
+    expect(widget.trackedEntity).toBeUndefined();
+    expect(trackingChanges).toBe(1);
+    expect(replacementPromise).toBeDefined();
+    expect(widget._sceneGISPlanarFramingOperation).toBe(replacementOperation);
     expect(await flightPromise).toBe(false);
     expect(widget.camera.cancelFlight).toHaveBeenCalledTimes(1);
     flightCallbacks.complete();
+    expect(widget._sceneGISPlanarFramingOperation).toBe(replacementOperation);
+    expect(trackingChanges).toBe(1);
     const viewBoundingSphere = spyOn(
       widget.camera,
       "viewBoundingSphere",

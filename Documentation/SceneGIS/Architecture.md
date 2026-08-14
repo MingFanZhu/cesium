@@ -503,11 +503,18 @@ instance不得交给第二个Viewer/CesiumWidget，且P6不增加跨Scene owner 
 必须在Viewer返回后通过`viewer.planarWorld`显式创建与安装。
 
 Viewer 使用 SceneGIS-owned planar Home command 调用 controller `viewHome(scene)`。InfoBox保留
-title/description；只有selected Entity的`DataSourceDisplay` bounds为`DONE`时camera button才启用，并且只调用
+title/description；camera button对当前可track的FIXED Entity执行track/untrack，对不可track但bounds为`DONE`的Entity执行
 `viewer.zoomTo(selectedEntity)`。`Viewer`与低层`CesiumWidget`的`zoomTo`/`flyTo`支持`Entity`、纯`Entity[]`、
 `EntityCollection`及`entities`为真实`EntityCollection`的DataSource interface；target Promise、loading、replacement、
-cancel与destroy由operation identity隔离。Tracking、left-double-click和Globe-specific target仍不属于planar contract。
-SelectionIndicator与left-click selection继续保留；public Camera fixed-axis语义见ADR-0037。BaseLayerPicker、Geocoder、
+cancel与destroy由operation identity隔离。
+
+Planar `trackedEntity`只接受真实`Entity`、defined `ReferenceFrame.FIXED` position与`AUTODETECT/ENU`
+`trackingReferenceFrame`；两种tracking frame都解释为translation-only固定`+X East/+Y North/+Z Up`。Lazy private tracker在
+`DataSourceDisplay.update(time)`之后由`ControllerHost`消费同一native Clock time，使用初始`viewFrom`或bounds/current-Camera
+fallback建立fixed offset，并以独立token暂停planar input controller。Orientation、INERTIAL、VELOCITY/body-frame、clamping与
+CRS推断不属于contract。Direct Camera flight暂时优先；成功framing、Home、remove与destroy停止tracking。Planar
+left-double-click恢复为track-or-zoom fallback；Globe-specific target仍不属于planar contract。
+SelectionIndicator与left-click selection继续保留；public Camera fixed-axis语义见ADR-0037，tracking见ADR-0038。BaseLayerPicker、Geocoder、
 SceneModePicker、ProjectionPicker、NavigationHelpButton 和 VRButton 默认关闭，显式启用时
 fail-fast。Animation、Timeline、Fullscreen 以及不携带 Globe 语义的显示控件保持可用。完整选项矩阵、
 ownership 和升级检查点见

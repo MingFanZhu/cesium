@@ -25,6 +25,9 @@ import createSceneGISPlanarVisualizersCallback from "../SceneGIS/DataSources/_pr
 // SCENEGIS_PATCH_BEGIN SGP-0005: Dispatch planar Entity framing through an operation-isolated helper.
 import SceneGISPlanarEntityFraming from "../SceneGIS/DataSources/_private/_SceneGISPlanarEntityFraming.js";
 // SCENEGIS_PATCH_END SGP-0005
+// SCENEGIS_PATCH_BEGIN SGP-0006: Dispatch fixed-axis planar Entity tracking through ControllerHost.
+import SceneGISPlanarEntityTracker from "../SceneGIS/DataSources/_private/_SceneGISPlanarEntityTracker.js";
+// SCENEGIS_PATCH_END SGP-0006
 import Cesium3DTileset from "../Scene/Cesium3DTileset.js";
 import computeFlyToLocationForRectangle from "../Scene/computeFlyToLocationForRectangle.js";
 import Globe from "../Scene/Globe.js";
@@ -893,16 +896,42 @@ Object.defineProperties(CesiumWidget.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Document the exact planar tracked Entity profile.
   /**
    * Gets or sets the Entity instance currently being tracked by the camera.
    * @memberof CesiumWidget.prototype
    * @type {Entity | undefined}
+   * @exception {DeveloperError} In a planar world, the value is not an Entity with a FIXED position and an AUTODETECT or ENU tracking reference frame.
    */
+  // SCENEGIS_PATCH_END SGP-0006
   trackedEntity: {
     get: function () {
       return this._trackedEntity;
     },
     set: function (value) {
+      // SCENEGIS_PATCH_BEGIN SGP-0006: Validate and publish planar tracking without constructing Earth EntityView.
+      if (SceneGISPlanarEntityTracker.isLivePlanarWidget(this)) {
+        if (this._trackedEntity === value) {
+          return;
+        }
+        if (defined(value)) {
+          SceneGISPlanarEntityTracker.validateStaticTarget(value);
+        }
+
+        cancelZoom(this);
+        if (defined(value)) {
+          SceneGISPlanarEntityTracker.setTarget(this, value);
+        } else {
+          SceneGISPlanarEntityTracker.clear(this);
+        }
+        this._trackedEntity = value;
+        this._needTrackedEntityUpdate = false;
+        this._entityView = undefined;
+        this._trackedEntityChanged.raiseEvent(value);
+        this.scene.requestRender();
+        return;
+      }
+      // SCENEGIS_PATCH_END SGP-0006
       if (this._trackedEntity !== value) {
         this._trackedEntity = value;
 
@@ -1094,6 +1123,9 @@ CesiumWidget.prototype.isDestroyed = function () {
  * removing the widget from layout.
  */
 CesiumWidget.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Release planar tracking authority before DataSource and Scene destruction.
+  SceneGISPlanarEntityTracker.destroy(this);
+  // SCENEGIS_PATCH_END SGP-0006
   // SCENEGIS_PATCH_BEGIN SGP-0005: Settle and detach planar framing before destroying DataSource and Scene state.
   SceneGISPlanarEntityFraming.cancel(this);
   // SCENEGIS_PATCH_END SGP-0005
@@ -1334,6 +1366,12 @@ CesiumWidget.prototype.removeController = function (controller) {
     this.container,
   );
 };
+
+// SCENEGIS_PATCH_BEGIN SGP-0006: Expose a side-effect-free planar trackability query to Viewer integration.
+CesiumWidget.prototype._canTrackSceneGISPlanarEntity = function (entity, time) {
+  return SceneGISPlanarEntityTracker.canTrack(this, entity, time);
+};
+// SCENEGIS_PATCH_END SGP-0006
 
 // SCENEGIS_PATCH_BEGIN SGP-0005: Document the exact planar Entity/DataSource zoom profile.
 /**

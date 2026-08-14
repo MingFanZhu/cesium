@@ -402,6 +402,7 @@ function SceneGISPlanarCameraController(options) {
   this._quarantinedLeftPressTime = undefined;
   this._quarantinedMiddlePressTime = undefined;
   this._flightSuspensionCount = 0;
+  this._trackingSuspensionCount = 0;
 }
 
 Object.defineProperties(SceneGISPlanarCameraController.prototype, {
@@ -801,7 +802,7 @@ SceneGISPlanarCameraController.prototype.firstUpdate = function (scene, time) {
   }
   this._validateScene(scene);
   this._scene = scene;
-  if (this._flightSuspensionCount > 0) {
+  if (this._flightSuspensionCount > 0 || this._trackingSuspensionCount > 0) {
     this._clearInputState();
     return;
   }
@@ -1104,7 +1105,11 @@ SceneGISPlanarCameraController.prototype._zoom = function (scene, movement) {
  * @exception {DeveloperError} The controller is disconnected, the Scene/world/mode/frustum is invalid, or legacy input is enabled.
  */
 SceneGISPlanarCameraController.prototype.update = function (scene, time) {
-  if (!this._enabled || this._flightSuspensionCount > 0) {
+  if (
+    !this._enabled ||
+    this._flightSuspensionCount > 0 ||
+    this._trackingSuspensionCount > 0
+  ) {
     this._clearInputState();
     return;
   }
@@ -1200,6 +1205,35 @@ SceneGISPlanarCameraController.prototype._resumeFromCameraFlight = function (
   }
   token.active = false;
   this._flightSuspensionCount = Math.max(0, this._flightSuspensionCount - 1);
+};
+
+SceneGISPlanarCameraController.prototype._suspendForEntityTracking = function (
+  scene,
+) {
+  if (this._world !== scene.world || !defined(this._aggregator)) {
+    throw new DeveloperError(
+      "The planar Camera controller must be registered for the tracking Scene.",
+    );
+  }
+  this._trackingSuspensionCount++;
+  this._clearInputState();
+  return {
+    controller: this,
+    active: true,
+  };
+};
+
+SceneGISPlanarCameraController.prototype._resumeFromEntityTracking = function (
+  token,
+) {
+  if (!defined(token) || token.controller !== this || !token.active) {
+    return;
+  }
+  token.active = false;
+  this._trackingSuspensionCount = Math.max(
+    0,
+    this._trackingSuspensionCount - 1,
+  );
 };
 
 SceneGISPlanarCameraController._getRegisteredForScene = function (scene) {

@@ -40,11 +40,18 @@
       const LIMIT = 20037508.342789244;
       const MOUNTAIN = new Cesium.Cartesian3(1113194.9, 5780349.2, 0.0);
       const BOUNDS = new Cesium.BoundingSphere(MOUNTAIN, 120000.0);
+      const TRACKING_EPOCH = Cesium.JulianDate.fromIso8601(
+        "2026-08-14T00:00:00Z",
+      );
       const providerState = { imageryFailed: false, terrainFailed: false };
       const state = {
         providerStatus: "公开影像与地形正在加载（best-effort）……",
         cameraStatus: "公共Camera操作尚未执行。",
         framingStatus: "Entity/DataSource定位尚未执行。",
+        trackingStatus: "Entity跟踪尚未启动。",
+        simulationTime: Cesium.JulianDate.toIso8601(TRACKING_EPOCH),
+        clockAnimating: false,
+        clockMultiplier: 60.0,
         setView: () => {
           viewMountain();
           state.cameraStatus = "setView已发布山地视角。";
@@ -97,7 +104,7 @@
           viewer.selectedEntity = framingEntity;
           viewer.scene.requestRender();
           state.framingStatus =
-            "已选择Entity；InfoBox相机按钮仅执行zoomTo，不启用trackedEntity。";
+            "已选择定位Entity；DONE bounds时InfoBox相机按钮可定位。";
         },
         zoomEntity: () =>
           runFraming("Entity zoomTo", () =>
@@ -125,6 +132,35 @@
           viewer.camera.completeFlight();
           state.framingStatus = "DataSource/Entity飞行已立即完成。";
         },
+        selectTrackingEntity: () => {
+          viewer.selectedEntity = trackingEntity;
+          viewer.scene.requestRender();
+          state.trackingStatus =
+            "已选择动态Entity；InfoBox相机按钮可跟踪/取消跟踪。";
+        },
+        trackEntity: () => {
+          viewer.trackedEntity = trackingEntity;
+          viewer.selectedEntity = trackingEntity;
+          state.trackingStatus = "正在按原生Clock跟踪FIXED动态Entity。";
+        },
+        stopTracking: () => {
+          viewer.trackedEntity = undefined;
+          state.trackingStatus = "已停止Entity跟踪，平面输入在下一帧恢复。";
+        },
+        stepTime: () => {
+          viewer.clock.currentTime = Cesium.JulianDate.addSeconds(
+            viewer.clock.currentTime,
+            60.0,
+            new Cesium.JulianDate(),
+          );
+          viewer.scene.requestRender();
+        },
+        resetTime: () => {
+          viewer.clock.shouldAnimate = false;
+          viewer.clock.currentTime = Cesium.JulianDate.clone(TRACKING_EPOCH);
+          state.clockAnimating = false;
+          viewer.scene.requestRender();
+        },
         home: () => {
           viewer.planarCameraController.viewHome(viewer.scene);
           viewer.scene.requestRender();
@@ -132,7 +168,9 @@
         cameraHelp:
           "公共Camera使用平面东/北/上固定轴；左键平移、中键旋转、滚轮缩放。",
         framingHelp:
-          "支持Entity、纯Entity数组、EntityCollection及其DataSource；InfoBox相机按钮只zoom，不跟踪。",
+          "支持Entity、纯Entity数组、EntityCollection及其DataSource定位。",
+        trackingHelp:
+          "跟踪仅接受FIXED position与AUTODETECT/ENU固定轴；双击动态点也可开始跟踪。",
       };
 
       let viewer = new Cesium.Viewer("cesiumContainer", {
@@ -216,7 +254,7 @@
         id: "planar-framing-single",
         name: "平面定位点",
         description:
-          "InfoBox相机按钮使用viewer.zoomTo；不会设置trackedEntity。",
+          "此静态Entity用于viewer.zoomTo与DataSource framing人工验证。",
         position: new Cesium.Cartesian3(1113194.9, 5780349.2, 18000.0),
         point: {
           pixelSize: 14.0,
@@ -239,6 +277,42 @@
         point: { pixelSize: 12.0, color: Cesium.Color.LIME },
       });
       await viewer.dataSources.add(framingDataSource);
+
+      const trackingPosition = new Cesium.CallbackPositionProperty(
+        (time, result) => {
+          const seconds = Cesium.JulianDate.secondsDifference(
+            time,
+            TRACKING_EPOCH,
+          );
+          const angle = seconds / 240.0;
+          return Cesium.Cartesian3.fromElements(
+            MOUNTAIN.x + Math.cos(angle) * 90000.0,
+            MOUNTAIN.y + Math.sin(angle) * 70000.0,
+            30000.0 + Math.sin(angle * 0.5) * 8000.0,
+            result,
+          );
+        },
+        false,
+        Cesium.ReferenceFrame.FIXED,
+      );
+      const trackingEntity = viewer.entities.add({
+        id: "planar-tracking-dynamic",
+        name: "FIXED动态跟踪点",
+        description:
+          "InfoBox相机按钮在跟踪与取消跟踪之间切换；画布左键双击也可开始跟踪。",
+        position: trackingPosition,
+        trackingReferenceFrame: Cesium.TrackingReferenceFrame.AUTODETECT,
+        viewFrom: new Cesium.Cartesian3(0.0, -180000.0, 140000.0),
+        point: {
+          pixelSize: 16.0,
+          color: Cesium.Color.ORANGE,
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 2.0,
+        },
+      });
+      viewer.clock.currentTime = Cesium.JulianDate.clone(TRACKING_EPOCH);
+      viewer.clock.shouldAnimate = false;
+      viewer.clock.multiplier = state.clockMultiplier;
 
       async function runFraming(label, operation) {
         state.framingStatus = `${label}执行中……`;
@@ -264,6 +338,16 @@
               ? "当前视图公开数据已就绪"
               : "公开影像与地形正在加载（best-effort）……";
       }
+      function updateTrackingStatus() {
+        state.simulationTime = Cesium.JulianDate.toIso8601(
+          viewer.clock.currentTime,
+        );
+        state.clockAnimating = viewer.clock.shouldAnimate;
+        state.clockMultiplier = viewer.clock.multiplier;
+        if (viewer.trackedEntity === trackingEntity) {
+          state.trackingStatus = "正在按原生Clock跟踪FIXED动态Entity。";
+        }
+      }
       imageryProvider.errorEvent.addEventListener((error) => {
         providerState.imageryFailed = true;
         error.retry = false;
@@ -274,10 +358,15 @@
         error.retry = false;
         updateProviderStatus();
       });
-      const removePostRender =
-        viewer.scene.postRender.addEventListener(updateProviderStatus);
+      const removePostRender = viewer.scene.postRender.addEventListener(() => {
+        updateProviderStatus();
+        updateTrackingStatus();
+      });
 
-      const gui = new GUI({ title: "平面 API 集成（I1 + I2）", width: 370 });
+      const gui = new GUI({
+        title: "平面 API 集成（I1 + I2 + I3）",
+        width: 370,
+      });
       const cameraFolder = gui.addFolder("公共 Camera 视图与飞行");
       cameraFolder.add(state, "setView").name("setView 山地视角");
       cameraFolder.add(state, "lookAt").name("lookAt 山地中心");
@@ -309,6 +398,37 @@
         .listen()
         .disable();
       framingFolder.add(state, "framingHelp").name("支持边界").disable();
+
+      const trackingFolder = gui.addFolder("Entity 跟踪与原生 Clock");
+      trackingFolder.add(state, "selectTrackingEntity").name("选择动态Entity");
+      trackingFolder.add(state, "trackEntity").name("开始trackedEntity");
+      trackingFolder.add(state, "stopTracking").name("停止trackedEntity");
+      trackingFolder
+        .add(state, "clockAnimating")
+        .name("Clock播放")
+        .onChange((value) => {
+          viewer.clock.shouldAnimate = value;
+          viewer.scene.requestRender();
+        });
+      trackingFolder
+        .add(state, "clockMultiplier", 1.0, 600.0, 1.0)
+        .name("Clock倍率")
+        .onChange((value) => {
+          viewer.clock.multiplier = value;
+        });
+      trackingFolder.add(state, "stepTime").name("时间前进60秒");
+      trackingFolder.add(state, "resetTime").name("重置UTC时间");
+      trackingFolder
+        .add(state, "simulationTime")
+        .name("当前UTC")
+        .listen()
+        .disable();
+      trackingFolder
+        .add(state, "trackingStatus")
+        .name("跟踪状态")
+        .listen()
+        .disable();
+      trackingFolder.add(state, "trackingHelp").name("固定轴说明").disable();
       gui.add(state, "home").name("平面全域 Home");
       gui.add(state, "providerStatus").name("公开数据").listen().disable();
 
@@ -318,6 +438,7 @@
       window.world = world;
       window.framingEntity = framingEntity;
       window.framingDataSource = framingDataSource;
+      window.trackingEntity = trackingEntity;
       window.gui = gui;
       window.exampleKind = "planar-api-integration";
 
@@ -336,6 +457,7 @@
         window.world = undefined;
         window.framingEntity = undefined;
         window.framingDataSource = undefined;
+        window.trackingEntity = undefined;
         window.gui = undefined;
         window.exampleKind = undefined;
       }

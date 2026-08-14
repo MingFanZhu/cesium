@@ -2240,4 +2240,58 @@ describe("Scene/Controllers/ControllerHost/SceneGISPlanarCameraController", func
     localWidget.destroy();
     document.body.removeChild(container);
   });
+
+  it("nests flight and tracking suspension tokens independently", function () {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const localWorld = new SceneGISPlanarWorld({
+      coordinateSystem: new SceneGISPlanarCoordinateSystem({
+        extent: new SceneGISPlanarExtent({
+          minimumX: -128.0,
+          minimumY: -128.0,
+          maximumX: 128.0,
+          maximumY: 128.0,
+        }),
+      }),
+      maximumLevel: 0,
+    });
+    const contextOptions = { webgl: {} };
+    if (!!window.webglStub) {
+      contextOptions.getWebGLStub = getWebGLStub;
+    }
+    const localWidget = new CesiumWidget(container, {
+      world: localWorld,
+      useDefaultRenderLoop: false,
+      contextOptions,
+    });
+    localWidget.scene.screenSpaceCameraController.enableInputs = false;
+    const localController = new SceneGISPlanarCameraController({
+      world: localWorld,
+    });
+    localWidget.addController(localController);
+
+    const flightToken = localController._suspendForCameraFlight(
+      localWidget.scene,
+    );
+    const firstTrackingToken = localController._suspendForEntityTracking(
+      localWidget.scene,
+    );
+    const secondTrackingToken = localController._suspendForEntityTracking(
+      localWidget.scene,
+    );
+    expect(localController._flightSuspensionCount).toBe(1);
+    expect(localController._trackingSuspensionCount).toBe(2);
+
+    localController._resumeFromEntityTracking(firstTrackingToken);
+    localController._resumeFromCameraFlight(flightToken);
+    localController._resumeFromEntityTracking(firstTrackingToken);
+    expect(localController._flightSuspensionCount).toBe(0);
+    expect(localController._trackingSuspensionCount).toBe(1);
+    localController._resumeFromEntityTracking(secondTrackingToken);
+    expect(localController._trackingSuspensionCount).toBe(0);
+
+    localWidget.removeController(localController);
+    localWidget.destroy();
+    document.body.removeChild(container);
+  });
 });
