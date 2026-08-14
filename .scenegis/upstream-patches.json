@@ -153,6 +153,22 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0039-planar-scene-api-qualification-and-safety.md",
       "removalCondition": "Retire when upstream Scene exposes equivalent primary-world-aware height/clamp capability reporting and pre-frame native environment effect validation for non-Globe worlds."
+    },
+    {
+      "id": "SGP-0008",
+      "title": "Add advanced environment background and HDR render slots",
+      "status": "proposed",
+      "reason": "Scene has no optional scene-wide slot that can render an advanced environment for both Globe and non-Globe worlds before geometry and composite resolved scene color and depth before built-in bloom and tone mapping.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md",
+      "removalCondition": "Retire when upstream Scene exposes equivalent optional pre-geometry advanced-environment and pre-tone-mapping resolved color/depth extension slots with explicit lifecycle ownership."
     }
   ]
 }
