@@ -25,6 +25,8 @@ Architecture Agent 与 Execution Agent 必须使用同一个 repository checkout
 
 找不到对方时，可以继续架构讨论和文档工作；需要派工时再报告“执行角色尚未绑定”。存在多个候选时必须根据 branch、HEAD 和 extension 消歧，不能猜测。任务 ID 仅保存在当前对话上下文，不写入 AgentDocs 或 Git。
 
+向已绑定的执行任务发送正式派工、findings 或 checkpoint 状态后，架构角色不轮询、不循环读取，也不通过等待工具持续跟踪其进度。执行角色在完成、需要 review 或遇到 blocker 时负责主动发送结构化通知；架构角色收到通知后再继续处理。只有项目负责人明确询问执行状态、消息投递结果不明确，或外部工具已经报告 actionable status 时，才进行一次有界状态读取。
+
 ## 启动恢复
 
 按以下顺序恢复：
@@ -76,6 +78,8 @@ Architecture Agent 与 Execution Agent 必须使用同一个 repository checkout
 - `未 commit、未 push、不得进入下一 phase`。
 
 优先通过 Codex 的任务间消息工具向已绑定的 Execution Agent 发送派工。若当前环境无法定位对方任务，则把同一份派工完整写入 current phase plan 和扩展 handoff，并向项目负责人报告需要绑定一次任务 ID。任务 ID 只负责消息投递，不承载项目状态。
+
+派工发送成功即结束该次跟踪动作；不得为了等待 `review-ready` 持续调用任务读取或等待工具。架构角色可以继续处理当前对话中不依赖执行结果的工作，或直接把控制权交还项目负责人。
 
 任务间消息使用稳定的 `type`：`handshake`、`assignment`、`changes-requested`、`approved` 或 `checkpoint-created`。每条消息都应重复 extension、phase、branch、base/HEAD 和相关 AgentDocs 路径，使接收方不依赖更早消息也能处理。
 

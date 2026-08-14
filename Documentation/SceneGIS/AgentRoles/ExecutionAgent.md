@@ -66,6 +66,8 @@ Execution Agent 必须与 Architecture Agent 使用同一个 repository checkout
 6. 回写 phase results、extension roadmap/index handoff，并创建 pending review。
 7. 向架构角色发送 ready-for-review 通知，然后停止；不得进入下一 phase。
 
+架构角色不会轮询执行任务。实现完成、finding 修复完成或 blocker 已确认时，执行角色必须主动发送一次结构化通知；不能只在自己的对话中结束或等待对方读取。通知发送后停止持续轮询架构任务，等待新的正式派工或 review 结论。
+
 如果在实现中发现 blocking defect：
 
 - 先完成安全的只读诊断并记录可重复事实；
@@ -103,6 +105,8 @@ Execution Agent 必须与 Architecture Agent 使用同一个 repository checkout
 - Execution → Architecture：blocker、ready-for-review 或 focused-fix-ready。
 
 普通进度由 AgentDocs current handoff 承载，不持续发送聊天流水。任务间消息不可用时，完整更新 current handoff，再把对应路径交给项目负责人转告。任务 ID 可以更换，不需要写入长期架构文档。
+
+双方均采用事件驱动交接：Execution 主动报告 blocker、review-ready、changes-addressed 和 checkpoint-ready，Architecture 主动发送 assignment、changes-requested、approved 和 checkpoint-created。任何一方发送消息后都不以轮询或循环等待对方任务作为正常工作流。
 
 任务间消息使用稳定的 `type`：`handshake`、`blocker`、`review-ready` 或 `fix-ready`。每条消息都重复 extension、phase、branch、base/HEAD 和相关 AgentDocs 路径，不能只回复“已完成”或依赖旧消息上下文。
 
