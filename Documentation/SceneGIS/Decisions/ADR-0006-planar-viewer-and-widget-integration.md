@@ -281,3 +281,25 @@ preflight、resolved local forwarding/getter、controller rollback与生成decla
 tracking/flight/clamping，以及 generic custom-world Viewer 都是未来独立能力，不因本 ADR
 自动进入 roadmap。P6 评审和独立本地 checkpoint 完成后仍需停在阶段门禁，由项目负责人
 决定 P7。
+
+## 2026-08-14 amendment：Entity/DataSource framing与InfoBox zoom-only
+
+I2取代P6对planar `Viewer.zoomTo`/`flyTo`和InfoBox camera的永久禁用，但不开放tracking。直接`CesiumWidget`与
+live/declarative planar Viewer仅接受`Entity`、全为真实`Entity`的snapshot数组、`EntityCollection`、`entities`为真实
+`EntityCollection`的DataSource interface，以及resolve为这些类型的Promise/thenable。Plain object、mixed array、
+ImageryLayer、3D Tiles、point cloud、Voxel和Buffer目标保持拒绝；应用负责Entity属性的planar Cartesian米制语义。
+
+SceneGIS-owned private helper以per-operation identity管理target snapshot、DataSource loading listener、bounds candidate及
+Promise终态。同步非法直接target/options必须在replacement、requestRender和Camera mutation前失败；async rejection/invalid
+target/Camera candidate错误拒绝并原子清理。Replacement、cancel、trackedEntity cleanup和destroy仅把当前operation resolve
+为`false`一次；stale target/loading/flight callback不能结算新operation。Bounds继续来自
+`DataSourceDisplay.getBoundingSphere(entity, false, scratch)`：PENDING不发布，mixed DONE/FAILED只合并DONE，empty或全部
+FAILED resolve `false`。最终只调用ADR-0037适配的public Camera bounds API。
+
+Planar InfoBox camera仅在selected Entity bounds状态为DONE时启用；PENDING不读取stale scratch，FAILED position fallback只供
+SelectionIndicator。Camera click调用`viewer.zoomTo(selectedEntity)`，不赋值`trackedEntity`。Defined trackedEntity与
+left-double-click tracking仍由后续阶段处理，Globe与`globe:false`保留上游target和InfoBox行为。
+
+该amendment由proposed SGP-0005跟踪`CesiumWidget.js`与`Viewer.js`的独立paired seams，不扩大SGP-0001/0002/0004。
+升级时复核target overload、`_postRender`更新点、destroy/cancel顺序、DataSource loading event、InfoBox tick/click以及
+`DataSourceDisplay`三态；若上游提供等价custom-world target profile与operation-isolated lifecycle，可移除SGP-0005。

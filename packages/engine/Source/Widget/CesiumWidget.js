@@ -22,6 +22,9 @@ import Property from "../DataSources/Property.js";
 // SCENEGIS_PATCH_BEGIN SGP-0001: Install the instance-local planar DataSource visualizer factory.
 import createSceneGISPlanarVisualizersCallback from "../SceneGIS/DataSources/_private/_SceneGISPlanarVisualizersCallback.js";
 // SCENEGIS_PATCH_END SGP-0001
+// SCENEGIS_PATCH_BEGIN SGP-0005: Dispatch planar Entity framing through an operation-isolated helper.
+import SceneGISPlanarEntityFraming from "../SceneGIS/DataSources/_private/_SceneGISPlanarEntityFraming.js";
+// SCENEGIS_PATCH_END SGP-0005
 import Cesium3DTileset from "../Scene/Cesium3DTileset.js";
 import computeFlyToLocationForRectangle from "../Scene/computeFlyToLocationForRectangle.js";
 import Globe from "../Scene/Globe.js";
@@ -1091,6 +1094,9 @@ CesiumWidget.prototype.isDestroyed = function () {
  * removing the widget from layout.
  */
 CesiumWidget.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Settle and detach planar framing before destroying DataSource and Scene state.
+  SceneGISPlanarEntityFraming.cancel(this);
+  // SCENEGIS_PATCH_END SGP-0005
   // Unsubscribe from data sources
   const dataSources = this.dataSources;
   const dataSourceLength = dataSources.length;
@@ -1329,6 +1335,7 @@ CesiumWidget.prototype.removeController = function (controller) {
   );
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0005: Document the exact planar Entity/DataSource zoom profile.
 /**
  * Asynchronously sets the camera to view the provided entity, entities, or data source.
  * If the data source is still in the process of loading or the visualization is otherwise still loading,
@@ -1344,9 +1351,10 @@ CesiumWidget.prototype.removeController = function (controller) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The entity, array of entities, entity collection, data source, Cesium3DTileset, point cloud, or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar world, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
  * @param {HeadingPitchRange} [offset] The offset from the center of the entity in the local east-north-up reference frame.
  * @returns {Promise<boolean>} A Promise that resolves to true if the zoom was successful or false if the target is not currently visualized in the scene or the zoom was cancelled.
+ * @exception {DeveloperError} In a planar world, the resolved target or offset does not belong to the supported planar profile.
  */
 CesiumWidget.prototype.zoomTo = function (target, offset) {
   const options = {
@@ -1354,7 +1362,9 @@ CesiumWidget.prototype.zoomTo = function (target, offset) {
   };
   return zoomToOrFly(this, target, options, false);
 };
+// SCENEGIS_PATCH_END SGP-0005
 
+// SCENEGIS_PATCH_BEGIN SGP-0005: Document the exact planar Entity/DataSource flight profile.
 /**
  * Flies the camera to the provided entity, entities, or data source.
  * If the data source is still in the process of loading or the visualization is otherwise still loading,
@@ -1370,16 +1380,18 @@ CesiumWidget.prototype.zoomTo = function (target, offset) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The entity, array of entities, entity collection, data source, Cesium3DTileset, point cloud, or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar world, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
  * @param {object} [options] Object with the following properties:
  * @param {number} [options.duration=3.0] The duration of the flight in seconds.
  * @param {number} [options.maximumHeight] The maximum height at the peak of the flight.
  * @param {HeadingPitchRange} [options.offset] The offset from the target in the local east-north-up reference frame centered at the target.
  * @returns {Promise<boolean>} A Promise that resolves to true if the flight was successful or false if the target is not currently visualized in the scene or the flight was cancelled. //TODO: Cleanup entity mentions
+ * @exception {DeveloperError} In a planar world, the resolved target, offset, duration, or maximumHeight does not belong to the supported planar profile.
  */
 CesiumWidget.prototype.flyTo = function (target, options) {
   return zoomToOrFly(this, target, options, true);
 };
+// SCENEGIS_PATCH_END SGP-0005
 
 function zoomToOrFly(that, zoomTarget, options, isFlight) {
   //>>includeStart('debug', pragmas.debug);
@@ -1387,6 +1399,17 @@ function zoomToOrFly(that, zoomTarget, options, isFlight) {
     throw new DeveloperError("zoomTarget is required.");
   }
   //>>includeEnd('debug');
+
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Keep planar target validation and lifecycle independent from Globe overloads.
+  if (SceneGISPlanarEntityFraming.isPlanarWidget(that)) {
+    return SceneGISPlanarEntityFraming.start(
+      that,
+      zoomTarget,
+      options,
+      isFlight,
+    );
+  }
+  // SCENEGIS_PATCH_END SGP-0005
 
   cancelZoom(that);
 
@@ -1493,6 +1516,11 @@ function clearZoom(widget) {
 }
 
 function cancelZoom(widget) {
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Settle only the current planar operation and ignore stale callbacks.
+  if (SceneGISPlanarEntityFraming.cancel(widget)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0005
   const zoomPromise = widget._zoomPromise;
   if (defined(zoomPromise)) {
     clearZoom(widget);
@@ -1511,6 +1539,12 @@ CesiumWidget.prototype._postRender = function () {
 const zoomTargetBoundingSphereScratch = new BoundingSphere();
 
 function updateZoomTarget(widget) {
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Aggregate planar Entity bounds without entering Globe target branches.
+  if (SceneGISPlanarEntityFraming.isPlanarWidget(widget)) {
+    SceneGISPlanarEntityFraming.update(widget);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0005
   const target = widget._zoomTarget;
   if (!defined(target) || widget.scene.mode === SceneMode.MORPHING) {
     return;

@@ -523,6 +523,19 @@ function verifyDocumentation(engineDirectory) {
   assert.match(viewerDocumentation, /<h4 class="name"\s+id="planarWorld">/u);
   assert.match(viewerDocumentation, /Viewer\.PlanarWorldOptions/u);
   assert.match(viewerDocumentation, /Viewer\.PlanarExtentOptions/u);
+  assert.match(
+    viewerDocumentation,
+    /For a planar Viewer, the resolved target must be an Entity/u,
+  );
+  assert.match(viewerDocumentation, /supported planar profile/u);
+  const cesiumWidgetDocumentation = fs.readFileSync(
+    path.join(documentation, "CesiumWidget.html"),
+    "utf8",
+  );
+  assert.match(
+    cesiumWidgetDocumentation,
+    /For a planar world, the resolved target must be an Entity/u,
+  );
   const layerDocumentation = fs.readFileSync(
     path.join(documentation, "SceneGISPlanarImageryLayer.html"),
     "utf8",
@@ -759,7 +772,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 12/12 GLSL, 12/12 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3/E4 runtime properties, V1 Viewer declarations/API, soft-private, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 12/12 GLSL, 12/12 generated shader modules, bare ESM/CJS, S2/S3/E1/E2/E3/E4 runtime properties, V1 Viewer and I2 framing API, soft-private, and broken-entry fixtures.\n",
   );
 }
 

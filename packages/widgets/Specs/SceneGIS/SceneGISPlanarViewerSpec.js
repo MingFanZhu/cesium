@@ -1,4 +1,6 @@
 import {
+  BoundingSphere,
+  BoundingSphereState,
   Cartesian2,
   Cartesian3,
   CesiumWidget,
@@ -379,7 +381,7 @@ describe(
       expect(world.tilingScheme).toBe(tilingScheme);
     });
 
-    it("keeps compatible default widgets and disables InfoBox camera", function () {
+    it("keeps compatible default widgets and starts InfoBox camera disabled", function () {
       viewer = createViewer(container, {
         world: createWorld(),
         useDefaultRenderLoop: false,
@@ -392,6 +394,132 @@ describe(
       expect(viewer.fullscreenButton).toBeDefined();
       viewer._onTick(viewer.clock);
       expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
+    });
+
+    it("preserves nonplanar PENDING InfoBox and SelectionIndicator publication", function () {
+      viewer = createViewer(container, {
+        globe: false,
+        baseLayer: false,
+        baseLayerPicker: false,
+        useDefaultRenderLoop: false,
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+      });
+      const entity = new Entity({
+        id: "nonplanar-pending",
+        position: new Cartesian3(1.0, 2.0, 3.0),
+      });
+      const pendingCenter = new Cartesian3(8.0, 9.0, 10.0);
+      viewer.selectedEntity = entity;
+      spyOn(
+        viewer.cesiumWidget.dataSourceDisplay,
+        "getBoundingSphere",
+      ).and.callFake(function (selected, allowPartial, result) {
+        expect(selected).toBe(entity);
+        expect(allowPartial).toBe(true);
+        Cartesian3.clone(pendingCenter, result.center);
+        return BoundingSphereState.PENDING;
+      });
+
+      viewer._onTick(viewer.clock);
+      expect(viewer.infoBox.viewModel.enableCamera).toBe(true);
+      expect(viewer.selectionIndicator.viewModel.showSelection).toBe(true);
+      expect(viewer.selectionIndicator.viewModel.position).toEqual(
+        pendingCenter,
+      );
+    });
+
+    it("enables planar InfoBox camera only for DONE bounds and zooms without tracking", function () {
+      viewer = createPlanarViewer(createWorld());
+      const entity = new Entity({
+        id: "info-box-framing",
+        name: "Planar framing",
+        position: new Cartesian3(12.0, 8.0, 3.0),
+      });
+      viewer.selectedEntity = entity;
+      let state = BoundingSphereState.PENDING;
+      const sphere = new BoundingSphere(new Cartesian3(10.0, 11.0, 12.0), 4.0);
+      spyOn(
+        viewer.cesiumWidget.dataSourceDisplay,
+        "getBoundingSphere",
+      ).and.callFake(function (selected, allowPartial, result) {
+        expect(selected).toBe(entity);
+        expect(allowPartial).toBe(false);
+        if (state === BoundingSphereState.DONE) {
+          BoundingSphere.clone(sphere, result);
+        }
+        return state;
+      });
+
+      viewer._onTick(viewer.clock);
+      expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
+      expect(viewer.selectionIndicator.viewModel.showSelection).toBe(false);
+
+      state = BoundingSphereState.FAILED;
+      viewer._onTick(viewer.clock);
+      expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
+      expect(viewer.selectionIndicator.viewModel.showSelection).toBe(true);
+      expect(viewer.selectionIndicator.viewModel.position).toEqual(
+        new Cartesian3(12.0, 8.0, 3.0),
+      );
+
+      state = BoundingSphereState.DONE;
+      viewer._onTick(viewer.clock);
+      expect(viewer.infoBox.viewModel.enableCamera).toBe(true);
+      expect(viewer.selectionIndicator.viewModel.position).toEqual(
+        sphere.center,
+      );
+      const zoomTo = spyOn(viewer, "zoomTo").and.returnValue(
+        Promise.resolve(true),
+      );
+      viewer.infoBox.viewModel.cameraClicked.raiseEvent(
+        viewer.infoBox.viewModel,
+      );
+      expect(zoomTo).toHaveBeenCalledOnceWith(entity);
+      expect(viewer.trackedEntity).toBeUndefined();
+    });
+
+    it("delegates live and declarative planar Entity zoom to the resolved World", async function () {
+      async function qualifyZoom(planarViewer) {
+        const entity = new Entity({ id: "viewer-zoom" });
+        spyOn(
+          planarViewer.cesiumWidget.dataSourceDisplay,
+          "getBoundingSphere",
+        ).and.callFake(function (selected, allowPartial, result) {
+          expect(selected).toBe(entity);
+          expect(allowPartial).toBe(false);
+          BoundingSphere.clone(
+            new BoundingSphere(new Cartesian3(2.0, 3.0, 4.0), 5.0),
+            result,
+          );
+          return BoundingSphereState.DONE;
+        });
+        const viewBoundingSphere = spyOn(
+          planarViewer.camera,
+          "viewBoundingSphere",
+        ).and.stub();
+        spyOn(planarViewer.camera, "lookAtTransform").and.stub();
+        const promise = planarViewer.zoomTo(entity);
+        planarViewer.cesiumWidget._postRender();
+        expect(await promise).toBe(true);
+        expect(viewBoundingSphere).toHaveBeenCalledTimes(1);
+        expect(planarViewer.scene.world).toBe(planarViewer.planarWorld);
+      }
+
+      viewer = createPlanarViewer(createWorld());
+      await qualifyZoom(viewer);
+      viewer.destroy();
+      viewer = createDeclarativePlanarViewer({
+        extent: {
+          minimumX: -128.0,
+          minimumY: -128.0,
+          maximumX: 128.0,
+          maximumY: 128.0,
+        },
+        maximumLevel: 0,
+      });
+      await qualifyZoom(viewer);
     });
 
     it("keeps left-click selection and omits double-click tracking", function () {
@@ -423,6 +551,10 @@ describe(
         description: "Primitive planar description",
         position: new Cartesian3(32, 0, 0),
       });
+      spyOn(
+        viewer.cesiumWidget.dataSourceDisplay,
+        "getBoundingSphere",
+      ).and.returnValue(BoundingSphereState.FAILED);
       spyOn(viewer.scene, "pick").and.returnValues(
         { id: directEntity },
         { primitive: { id: primitiveEntity } },
@@ -458,7 +590,7 @@ describe(
       expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
     });
 
-    it("rejects planar tracking, zoom, and flight synchronously", function () {
+    it("rejects planar tracking and unsupported framing targets synchronously", function () {
       viewer = createPlanarViewer(createWorld());
 
       expect(function () {

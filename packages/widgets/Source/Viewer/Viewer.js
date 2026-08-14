@@ -2094,6 +2094,9 @@ Viewer.prototype._onTick = function (clock) {
 
   let position;
   let enableCamera = false;
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Track complete planar bounds independently from fallback position.
+  let boundingSphereState;
+  // SCENEGIS_PATCH_END SGP-0005
   const selectedEntity = this.selectedEntity;
   const showSelection = defined(selectedEntity) && this._enableInfoOrSelection;
 
@@ -2102,17 +2105,30 @@ Viewer.prototype._onTick = function (clock) {
     selectedEntity.isShowing &&
     selectedEntity.isAvailable(time)
   ) {
-    const state = this._cesiumWidget.dataSourceDisplay.getBoundingSphere(
-      selectedEntity,
-      true,
-      boundingSphereScratch,
-    );
-    if (state !== BoundingSphereState.FAILED) {
+    // SCENEGIS_PATCH_BEGIN SGP-0005: Require complete planar bounds before enabling InfoBox zoom.
+    boundingSphereState =
+      this._cesiumWidget.dataSourceDisplay.getBoundingSphere(
+        selectedEntity,
+        this._isPlanarViewer ? false : true,
+        boundingSphereScratch,
+      );
+    if (
+      (this._isPlanarViewer &&
+        boundingSphereState === BoundingSphereState.DONE) ||
+      (!this._isPlanarViewer &&
+        boundingSphereState !== BoundingSphereState.FAILED)
+    ) {
       position = boundingSphereScratch.center;
-    } else if (defined(selectedEntity.position)) {
+    } else if (
+      boundingSphereState === BoundingSphereState.FAILED &&
+      defined(selectedEntity.position)
+    ) {
       position = selectedEntity.position.getValue(time, position);
     }
-    enableCamera = defined(position);
+    enableCamera = this._isPlanarViewer
+      ? boundingSphereState === BoundingSphereState.DONE
+      : defined(position);
+    // SCENEGIS_PATCH_END SGP-0005
   }
 
   const selectionIndicatorViewModel = defined(this._selectionIndicator)
@@ -2123,7 +2139,10 @@ Viewer.prototype._onTick = function (clock) {
       position,
       selectionIndicatorViewModel.position,
     );
-    selectionIndicatorViewModel.showSelection = showSelection && enableCamera;
+    // SCENEGIS_PATCH_BEGIN SGP-0005: Keep fallback selection independent from planar InfoBox capability.
+    selectionIndicatorViewModel.showSelection =
+      showSelection && defined(position);
+    // SCENEGIS_PATCH_END SGP-0005
     selectionIndicatorViewModel.update();
   }
 
@@ -2132,9 +2151,9 @@ Viewer.prototype._onTick = function (clock) {
     : undefined;
   if (defined(infoBoxViewModel)) {
     infoBoxViewModel.showInfo = showSelection;
-    // SCENEGIS_PATCH_BEGIN SGP-0002: Keep the InfoBox camera capability permanently disabled for planar Viewer.
-    infoBoxViewModel.enableCamera = this._isPlanarViewer ? false : enableCamera;
-    // SCENEGIS_PATCH_END SGP-0002
+    // SCENEGIS_PATCH_BEGIN SGP-0005: Publish the exact planar DONE-bounds camera capability.
+    infoBoxViewModel.enableCamera = enableCamera;
+    // SCENEGIS_PATCH_END SGP-0005
     infoBoxViewModel.isCameraTracking =
       this.trackedEntity === this.selectedEntity;
 
@@ -2173,6 +2192,12 @@ Viewer.prototype._onEntityCollectionChanged = function (
  * @private
  */
 Viewer.prototype._onInfoBoxCameraClicked = function (infoBoxViewModel) {
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Planar InfoBox camera is zoom-only and never starts tracking.
+  if (this._isPlanarViewer) {
+    this.zoomTo(this.selectedEntity);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0005
   if (
     infoBoxViewModel.isCameraTracking &&
     this.trackedEntity === this.selectedEntity
@@ -2280,7 +2305,7 @@ Viewer.prototype.removeController = function (controller) {
   return this._cesiumWidget.removeController(controller);
 };
 
-// SCENEGIS_PATCH_BEGIN SGP-0002: Document the planar zoom guard.
+// SCENEGIS_PATCH_BEGIN SGP-0005: Document the exact planar Viewer zoom profile.
 /**
  * Asynchronously sets the camera to view the provided entity, entities, or data source.
  * If the data source is still in the process of loading or the visualization is otherwise still loading,
@@ -2296,22 +2321,17 @@ Viewer.prototype.removeController = function (controller) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The entity, array of entities, entity collection, data source, Cesium3DTileset, point cloud, or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar Viewer, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
  * @param {HeadingPitchRange} [offset] The offset from the center of the entity in the local east-north-up reference frame.
  * @returns {Promise<boolean>} A Promise that resolves to true if the zoom was successful or false if the target is not currently visualized in the scene or the zoom was cancelled.
- * @exception {DeveloperError} This Viewer uses a SceneGISPlanarWorld.
+ * @exception {DeveloperError} In a planar Viewer, the resolved target or offset does not belong to the supported planar profile.
  */
-// SCENEGIS_PATCH_END SGP-0002
+// SCENEGIS_PATCH_END SGP-0005
 Viewer.prototype.zoomTo = function (target, offset) {
-  // SCENEGIS_PATCH_BEGIN SGP-0002: Reject unsupported planar Entity zoom synchronously.
-  if (this._isPlanarViewer) {
-    throw new DeveloperError("zoomTo is not supported by a planar Viewer.");
-  }
-  // SCENEGIS_PATCH_END SGP-0002
   return this._cesiumWidget.zoomTo(target, offset);
 };
 
-// SCENEGIS_PATCH_BEGIN SGP-0002: Document the planar flight guard.
+// SCENEGIS_PATCH_BEGIN SGP-0005: Document the exact planar Viewer flight profile.
 /**
  * Flies the camera to the provided entity, entities, or data source.
  * If the data source is still in the process of loading or the visualization is otherwise still loading,
@@ -2327,21 +2347,16 @@ Viewer.prototype.zoomTo = function (target, offset) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The entity, array of entities, entity collection, data source, Cesium3DTileset, point cloud, or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar Viewer, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
  * @param {object} [options] Object with the following properties:
  * @param {number} [options.duration=3.0] The duration of the flight in seconds.
  * @param {number} [options.maximumHeight] The maximum height at the peak of the flight.
  * @param {HeadingPitchRange} [options.offset] The offset from the target in the local east-north-up reference frame centered at the target.
  * @returns {Promise<boolean>} A Promise that resolves to true if the flight was successful or false if the target is not currently visualized in the scene or the flight was cancelled. //TODO: Cleanup entity mentions
- * @exception {DeveloperError} This Viewer uses a SceneGISPlanarWorld.
+ * @exception {DeveloperError} In a planar Viewer, the resolved target, offset, duration, or maximumHeight does not belong to the supported planar profile.
  */
-// SCENEGIS_PATCH_END SGP-0002
+// SCENEGIS_PATCH_END SGP-0005
 Viewer.prototype.flyTo = function (target, options) {
-  // SCENEGIS_PATCH_BEGIN SGP-0002: Reject unsupported planar Entity flight synchronously.
-  if (this._isPlanarViewer) {
-    throw new DeveloperError("flyTo is not supported by a planar Viewer.");
-  }
-  // SCENEGIS_PATCH_END SGP-0002
   return this._cesiumWidget.flyTo(target, options);
 };
 

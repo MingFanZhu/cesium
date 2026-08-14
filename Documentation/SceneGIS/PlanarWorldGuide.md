@@ -161,8 +161,13 @@ widget.clock.currentTime = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
   Rectangle destination和`flyOverLongitude*`不具有planar语义，会同步抛出`DeveloperError`。
 - Camera flight继续使用Cesium tween与complete/cancel callback；飞行期间已注册planar controller暂停input，结束后恢复
   caller原有`enabled`状态，并从下一controller frame继续surface clearance。低层Scene没有controller时仍可flight。
-- `Viewer.zoomTo`、`Viewer.flyTo`、Entity tracking与InfoBox camera尚未解锁；请直接调用`viewer.camera`方法并传入
-  planar Cartesian坐标。
+- `Viewer`和低层`CesiumWidget`的`zoomTo`/`flyTo`支持`Entity`、纯`Entity[]`、`EntityCollection`、
+  `entities`为真实`EntityCollection`的DataSource及resolve为这些类型的Promise。Entity属性必须已经使用当前World的
+  planar Cartesian米制语义；不会转换GeoJSON/CZML/KML坐标或推断CRS。
+- framing等待完整`DataSourceDisplay` bounds；empty或无`DONE` bounds返回`false`，PENDING不移动Camera。InfoBox camera
+  仅在selected Entity bounds为`DONE`时启用，并且只执行`zoomTo`。Entity tracking和left-double-click仍未开放。
+- `ImageryLayer`、3D Tiles、point cloud、Voxel、Buffer与plain-object target在planar World中不受支持；直接使用
+  `viewer.camera` fixed-axis方法处理应用自有Cartesian bounds。
 - `world.pick(ray)` 与 `world.pickFromWindowPosition(position, scene)` 是有界的 Z=0 数学拾取，不依赖当前 LOD 或 depth buffer；extent 外返回 `undefined`。
 - `scene.pickPosition(position)` 是 rendered-depth 拾取，要求浏览器支持 depth texture，并依赖最近一次 normal render。它不等同于通用 object picking。
 - `world.getTerrainHeight(position)`只读取resident direct/upsampled Float32 surface；不会发请求，

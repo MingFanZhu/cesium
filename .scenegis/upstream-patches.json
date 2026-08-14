@@ -86,6 +86,29 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0037-planar-camera-view-and-flight.md",
       "removalCondition": "Retire when upstream Camera exposes equivalent non-ellipsoid fixed-axis view, framing, Cartesian flight, and external controller input-suspension hooks for a custom primary world."
+    },
+    {
+      "id": "SGP-0005",
+      "title": "Add planar Entity and DataSource framing dispatch",
+      "status": "proposed",
+      "reason": "CesiumWidget and Viewer currently normalize zoom targets through Globe-specific overloads and share mutable completion state, while planar Entity framing requires an exact target profile, isolated operation lifecycle, and zoom-only InfoBox behavior.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Widget/CesiumWidget.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/widgets/Source/Viewer/Viewer.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarEntityZoomCesiumWidgetSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0006-planar-viewer-and-widget-integration.md",
+      "removalCondition": "Retire when upstream CesiumWidget and Viewer expose equivalent custom-world Entity/DataSource target validation, operation-isolated zoom lifecycle, and configurable zoom-only InfoBox camera behavior."
     }
   ]
 }

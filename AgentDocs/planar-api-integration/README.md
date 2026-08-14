@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                            |
-| ---------------------- | ---------------------------------------------------------------- |
-| Extension slug         | `planar-api-integration`                                         |
-| Status                 | `active`                                                         |
-| Planning model         | `extension`                                                      |
-| Active extension plan  | [总体计划](plans/2026-08-14-planar-api-integration-extension.md) |
-| Current phase          | I1 Planar Camera View and Flight                                 |
-| Active phase plan      | [I1](plans/2026-08-14-phase-i1-planar-camera-view-flight.md)     |
-| Active standalone plan | None                                                             |
-| Architecture contact   | Architecture Agent                                               |
-| Execution contact      | Execution Agent task `019ff3d8-d1f4-7fd1-aecb-8cf0aa638d4f`      |
-| Last updated           | `2026-08-14`                                                     |
+| Field                  | Value                                                               |
+| ---------------------- | ------------------------------------------------------------------- |
+| Extension slug         | `planar-api-integration`                                            |
+| Status                 | `active`                                                            |
+| Planning model         | `extension`                                                         |
+| Active extension plan  | [总体计划](plans/2026-08-14-planar-api-integration-extension.md)    |
+| Current phase          | I2 Planar Entity/DataSource Framing                                 |
+| Active phase plan      | [I2](plans/2026-08-14-phase-i2-planar-entity-datasource-framing.md) |
+| Active standalone plan | None                                                                |
+| Architecture contact   | Architecture Agent                                                  |
+| Execution contact      | Execution Agent task `019ff3d8-d1f4-7fd1-aecb-8cf0aa638d4f`         |
+| Last updated           | `2026-08-14`                                                        |
 
 ## Scope
 
@@ -50,18 +50,20 @@
 
 ## Current handoff
 
-- Current state: I1 fixed-axis public Camera view/flight、SGP-0004、ADR-0037、focused/real-Context/Globe与
-  build/types/docs/package证据已完成；I1-R001-I1-R003 closed，Architecture review approved，owner manual gate passed，
-  Architecture已创建I1独立本地checkpoint（`实现平面相机视图与飞行接口`，not pushed；稳定hash由后续phase作为parent记录）。
-- Next action: 等待Architecture基于I1 checkpoint审计并建立I2 confirmed phase plan/assignment；此前不修改、不commit/push、
-  不进入I2。
-- Current phase status: I1=`completed`；I2-I5=`proposed`。
+- Current state: I1 checkpoint=`ff7c1916d6604400465414305f3f647ef9347d5c`；I2 Architecture/code review
+  approved，I2-R001/R002 closed，项目负责人direct Test manual gate passed；Architecture已创建I2本地checkpoint
+  `7e4f574a83`（not pushed）。
+- Next action: 等待Architecture完成checkpoint状态amend并规划后续任务；不commit/push，不实现阶段外示例拆分，不进入I3。
+- Current phase status: I1=`completed`；I2=`completed`；I3-I5=`proposed`。
 - Open discussion:
   [Cesium public API planar compatibility](discussions/2026-08-14-cesium-public-api-planar-compatibility.md)
   （resolved；作为路线依据）。
 - Approved reviews:
   [I1 Planar Camera View and Flight](reviews/2026-08-14-i1-planar-camera-view-flight.md)（approved；manual gate passed；
   I1 checkpoint已创建）。
+- Approved review:
+  [I2 Planar Entity/DataSource Framing](reviews/2026-08-14-i2-planar-entity-datasource-framing.md)（approved；
+  I2-R001/R002 closed；manual gate passed；checkpoint=`7e4f574a83`，not pushed）。
 - Known risks: `Camera.js`/`CameraFlightPath.js`是高频upstream算法；flight期间legacy
   `screenSpaceCameraController.enableInputs`不能代表planar ControllerHost输入权威；当前以soft-private suspension token隔离。
   `Camera.js`仍是高频upgrade seam；direct Test manual gate已通过。

@@ -71,13 +71,13 @@ Entity/DataSource与Scene API。适配必须沿固定米制Cartesian3、`+X East
 
 <!-- markdownlint-disable MD060 -->
 
-| Phase | Objective                                                                                 | Dependencies                      | Entry gate                                                                  | Exit gate                                                                                                              | Status     | Phase plan                                             |
-| ----- | ----------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------ |
-| I1    | 适配Camera fixed-axis HPR、setView/lookAt/bounds、Cartesian flight与Home。                | V1 checkpoint、ADR-0004/0024-0026 | 审计Camera/CameraFlightPath、ControllerHost与四frustum helper。             | Focused/unit/real-Context证明Camera public APIs、flight生命周期与Globe non-regression；ADR/SGP闭环。                   | `completed` | [I1](2026-08-14-phase-i1-planar-camera-view-flight.md) |
-| I2    | 开放Viewer/CesiumWidget对supported planar Entity/DataSource的zoomTo/flyTo与InfoBox zoom。 | I1 checkpoint                     | 重审zoom target resolution、bounds、Promise与SGP-0001/0002。                | live/declarative Viewer对单/多Entity、Collection、CustomDataSource framing/flight闭环；unsupported targets fail-fast。 | `proposed` | I1 checkpoint后建立                                    |
-| I3    | 为Viewer/CesiumWidget提供time-dynamic planar trackedEntity与交互入口。                    | I2 checkpoint                     | 重审EntityView、Clock tick、ControllerHost priority、viewFrom/orientation。 | Public tracking、double-click/InfoBox、stop/remove/destroy与input ownership闭环；Earth EntityView不变。                | `proposed` | I2 checkpoint后建立                                    |
-| I4    | 资格确认通用Cartesian Scene API并为globe-only API/native effects建立明确安全边界。        | I3 checkpoint                     | 重审SceneTransforms、Picking、Fog、Shadow、format/widget guards。           | screen/pick APIs有证据；ellipsoid-only/unsupported paths不再静默错误；文档矩阵完成。                                   | `proposed` | I3 checkpoint后建立                                    |
-| I5    | 统一dev/release/npm/types/docs/E2E与升级交付。                                            | I4 checkpoint                     | 重审installed packages、E2E fixed ports与最小联合场景。                     | Camera→Viewer→tracking→Scene safety在dev/release/npm和direct Test统一闭环，无open finding。                            | `proposed` | I4 checkpoint后建立                                    |
+| Phase | Objective                                                                                 | Dependencies                      | Entry gate                                                                  | Exit gate                                                                                                              | Status      | Phase plan                                                    |
+| ----- | ----------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------- |
+| I1    | 适配Camera fixed-axis HPR、setView/lookAt/bounds、Cartesian flight与Home。                | V1 checkpoint、ADR-0004/0024-0026 | 审计Camera/CameraFlightPath、ControllerHost与四frustum helper。             | Focused/unit/real-Context证明Camera public APIs、flight生命周期与Globe non-regression；ADR/SGP闭环。                   | `completed` | [I1](2026-08-14-phase-i1-planar-camera-view-flight.md)        |
+| I2    | 开放Viewer/CesiumWidget对supported planar Entity/DataSource的zoomTo/flyTo与InfoBox zoom。 | I1 checkpoint                     | 重审zoom target resolution、bounds、Promise与SGP-0001/0002。                | live/declarative Viewer对单/多Entity、Collection、CustomDataSource framing/flight闭环；unsupported targets fail-fast。 | `completed` | [I2](2026-08-14-phase-i2-planar-entity-datasource-framing.md) |
+| I3    | 为Viewer/CesiumWidget提供time-dynamic planar trackedEntity与交互入口。                    | I2 checkpoint                     | 重审EntityView、Clock tick、ControllerHost priority、viewFrom/orientation。 | Public tracking、double-click/InfoBox、stop/remove/destroy与input ownership闭环；Earth EntityView不变。                | `proposed`  | I2 checkpoint后建立                                           |
+| I4    | 资格确认通用Cartesian Scene API并为globe-only API/native effects建立明确安全边界。        | I3 checkpoint                     | 重审SceneTransforms、Picking、Fog、Shadow、format/widget guards。           | screen/pick APIs有证据；ellipsoid-only/unsupported paths不再静默错误；文档矩阵完成。                                   | `proposed`  | I3 checkpoint后建立                                           |
+| I5    | 统一dev/release/npm/types/docs/E2E与升级交付。                                            | I4 checkpoint                     | 重审installed packages、E2E fixed ports与最小联合场景。                     | Camera→Viewer→tracking→Scene safety在dev/release/npm和direct Test统一闭环，无open finding。                            | `proposed`  | I4 checkpoint后建立                                           |
 
 <!-- markdownlint-enable MD060 -->
 
@@ -113,5 +113,12 @@ Entity/DataSource与Scene API。适配必须沿固定米制Cartesian3、`+X East
 - Public API compatibility discussion已resolved；I1-R001-I1-R003已closed，focused aggregate `68/68`、Camera Widget
   `2/2`通过，Architecture/code review approved，项目负责人manual gate passed。
 - I1使用`SGP-0004`只修改`Camera.js`；`CameraFlightPath.js`和Viewer/CesiumWidget guards相对base byte-for-byte不变。
-- Architecture已创建I1独立本地checkpoint（`实现平面相机视图与飞行接口`；稳定hash由后续phase作为parent记录）；I1 completed，checkpoint
-  未push。I2尚未assigned/entered；owner untracked `Test/地形.html`保持排除。
+- Architecture已创建I1独立本地checkpoint `ff7c1916d6604400465414305f3f647ef9347d5c`
+  （`实现平面相机视图与飞行接口`，not pushed）；I2已根据该checkpoint完成源码审计与confirmed phase plan。
+- I2边界为Entity/DataSource framing、Promise/lifecycle和InfoBox zoom-only；tracking/double-click与Globe-specific targets继续留后。
+- I2 implementation/evidence已完成：新增private operation helper与proposed SGP-0005，focused Widget `10/10`、planar Viewer
+  `22/22`、real-content Viewer `3/3`、upstream CesiumWidget `75/75`、Viewer `59/59`通过；build/types/docs/package/audit通过。
+  Architecture initial review的I2-R001/R002已窄修复；补充focused Widget `11/11`、Viewer `23/23`通过；focused
+  re-review approved、findings closed。项目负责人direct Test manual gate已通过；Architecture已创建I2本地checkpoint
+  `7e4f574a83`（`实现平面实体与数据源定位`，not pushed）。I2 completed，I3尚未进入。
+- Owner untracked `Test/地形.html`保持排除。

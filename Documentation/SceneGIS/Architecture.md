@@ -502,10 +502,12 @@ planar Viewer 关闭 legacy `screenSpaceCameraController` 的 inputs，但不替
 instance不得交给第二个Viewer/CesiumWidget，且P6不增加跨Scene owner registry。依赖canonical tiling scheme的provider
 必须在Viewer返回后通过`viewer.planarWorld`显式创建与安装。
 
-Viewer 使用 SceneGIS-owned planar Home command 调用 controller `viewHome(scene)`。InfoBox 只保留
-title/description，SelectionIndicator 与 left-click selection 可以保留；Entity tracking、InfoBox
-camera、Viewer `zoomTo` 和 Viewer `flyTo` 不属于当前 planar contract；这不限制ADR-0037已经适配的public
-`viewer.camera` view/flight方法。BaseLayerPicker、Geocoder、
+Viewer 使用 SceneGIS-owned planar Home command 调用 controller `viewHome(scene)`。InfoBox保留
+title/description；只有selected Entity的`DataSourceDisplay` bounds为`DONE`时camera button才启用，并且只调用
+`viewer.zoomTo(selectedEntity)`。`Viewer`与低层`CesiumWidget`的`zoomTo`/`flyTo`支持`Entity`、纯`Entity[]`、
+`EntityCollection`及`entities`为真实`EntityCollection`的DataSource interface；target Promise、loading、replacement、
+cancel与destroy由operation identity隔离。Tracking、left-double-click和Globe-specific target仍不属于planar contract。
+SelectionIndicator与left-click selection继续保留；public Camera fixed-axis语义见ADR-0037。BaseLayerPicker、Geocoder、
 SceneModePicker、ProjectionPicker、NavigationHelpButton 和 VRButton 默认关闭，显式启用时
 fail-fast。Animation、Timeline、Fullscreen 以及不携带 Globe 语义的显示控件保持可用。完整选项矩阵、
 ownership 和升级检查点见
@@ -517,6 +519,11 @@ SceneGIS 平面内容复用 Cesium `Entity`、Property、`EntityCollection` 与 
 但不复用会把 Cartesian3 解释为 ECEF 或进入 Ellipsoid/Cartographic ground path 的默认 visualizer。
 自动 planar content 使用米制固定坐标轴：X east、Y north、Z up；opaque CRS 不参与运行时转换，
 anchor X/Y 必须位于 World inclusive extent。
+
+Entity/DataSource framing必须复用`DataSourceDisplay.getBoundingSphere(entity, false, scratch)`：任一`PENDING`等待且不发布
+部分Camera状态，mixed `DONE`/`FAILED`只合并`DONE`，empty或全部`FAILED`返回`false`。接纳时snapshot array/collection；
+plain object、mixed array及ImageryLayer/3D Tiles/point cloud/Voxel/Buffer目标同步或异步明确拒绝。最终bounds只交给
+ADR-0037的`Camera.viewBoundingSphere`/`flyToBoundingSphere`，不得复制visualizer bounds或推断CRS。
 
 首版 HeightReference profile 只接受 `NONE`、`CLAMP_TO_GROUND` 与 `RELATIVE_TO_GROUND`。逻辑地表
 读取同步、无请求的 `world.getTerrainHeight`；无 resident terrain 时回退 Z=0，已有 resident ancestor

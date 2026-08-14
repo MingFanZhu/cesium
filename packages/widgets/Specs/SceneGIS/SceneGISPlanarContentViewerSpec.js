@@ -92,7 +92,7 @@ describe("SceneGIS/SceneGISPlanarContentViewer", function () {
     expect(viewer.infoBox.viewModel.description).toBe(
       "Planar content description",
     );
-    expect(viewer.infoBox.viewModel.enableCamera).toBe(false);
+    expect(viewer.infoBox.viewModel.enableCamera).toBe(true);
   });
 
   it("anchors an oblique ground Corridor selection to the presentation surface", function () {
