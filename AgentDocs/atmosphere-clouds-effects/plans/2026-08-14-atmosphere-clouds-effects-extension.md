@@ -8,11 +8,14 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-14`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: none（A1 completed；A2尚未激活）
+- Current phase: A2 — Bruneton atmosphere and aerial perspective（`active`）
+- Active phase plan:
+  [2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md](2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)
 - Latest completed phase plan:
   [2026-08-14-phase-a1-render-foundation.md](2026-08-14-phase-a1-render-foundation.md)
-- Architecture decision:
-  [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md)
+- Architecture decisions:
+  [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
+  [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md)
 - Upstream patch: active `SGP-0008`
 - A1 implementation: `completed`
 
@@ -74,12 +77,14 @@
 
 实现 approved ADR-0040 的 background + linear-HDR slots、private pipeline lifecycle、Globe/planar reference-frame publication 与
 order/pick/resource identity Specs；不增加可见效果或 public API。Implementation、Architecture review与本地checkpoint均已完成；
-A2尚未激活。
+A2已在独立planning checkpoint中激活。
 
-### A2 — Bruneton atmosphere and aerial perspective
+### A2 — Bruneton atmosphere and aerial perspective (`active`)
 
-在 A1 基础上冻结 public Controller 与 capability/fallback contract，交付两种 World 的 physical sky、Sun disk、transmittance/
-scattering/irradiance LUT、depth-aware aerial perspective及资源/asset delivery。开始前依据 A1 源码与 asset measurements新建 phase plan。
+依据
+[A2 phase plan](2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)与ADR-0041冻结public Controller、capability/fallback、
+resource与package contract。Globe交付combined Bruneton LUT physical sky/Sun/aerial；planar交付共享physical coefficients但几何独立的
+fixed-axis flat-slab sky/Sun/aerial。A2只消费既有SGP-0008，并在Architecture review、项目负责人manual gate与独立checkpoint前停止。
 
 ### A3 — Exponential height fog
 

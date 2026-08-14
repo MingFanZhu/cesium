@@ -56,6 +56,7 @@ SceneGIS 的主要目标是：
 ```text
 packages/engine/Source/SceneGIS/**
 packages/engine/Source/Shaders/SceneGIS/**/*.glsl
+packages/engine/Source/Assets/SceneGIS/**
 packages/engine/Specs/SceneGIS/**
 packages/widgets/Source/SceneGIS/**
 packages/widgets/Specs/SceneGIS/**
@@ -78,6 +79,10 @@ packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js
 `packages/engine/Source/Shaders/SceneGIS/**/*.glsl` 是 ADR-0030 批准的 SceneGIS shader source root。
 它复用 Cesium 现有 `Source/Shaders/**` GLSL-to-JS 构建链；相邻生成 `.js` 是忽略的 build artifact，
 不得手工编辑或提交。SceneGIS runtime 通过显式相对 import 使用生成模块，不依赖 side-effect 注册。
+
+`packages/engine/Source/Assets/SceneGIS/**` 是 ADR-0041 批准的 SceneGIS runtime asset root。只允许保存经过
+license/provenance、format、尺寸和资源预算审计的版本化静态资源及其机器可读 manifest；许可证文本必须随衍生资源进入
+build/npm 产物。Runtime 使用 `buildModuleUrl("Assets/SceneGIS/...")` 定位，不依赖公网 URL、本机路径或临时 clone。
 
 ## Agent 协作文档边界
 
@@ -190,15 +195,16 @@ proposed ranges的并集覆盖changed lines，使任一retired登记可独立移
 
 当前已确认的构建行为：
 
-| 扩展类型                       | 当前行为                                    | 架构要求                                                       |
-| ------------------------------ | ------------------------------------------- | -------------------------------------------------------------- |
-| 普通 `Source/SceneGIS/**/*.js` | 自动进入 engine 与根 Cesium barrel          | default export；basename 唯一                                  |
-| `Specs/SceneGIS/**/*Spec.js`   | 自动进入 SpecList                           | 镜像源码目录                                                   |
-| SceneGIS GLSL                  | 扫描 `Source/Shaders/SceneGIS/**/*.glsl`    | basename 全局唯一；生成 `.js` 不提交；验证 dev、release 与 npm |
-| Worker                         | 扫描 `Source/Workers/**` 并输出多种构建形态 | 每个新入口单独审计 URL、transfer 与 package 边界               |
-| 静态资源、WASM、图片           | 发布复制与测试访问链路不同                  | 同时验证 workspace、release、npm 和 Sandcastle                 |
-| CSS 与 UI                      | engine 与 widgets 规则不同                  | UI 保持在 widgets 包边界内                                     |
-| 模块副作用                     | 受 tree-shaking 和 `sideEffects` 影响       | 优先显式安装或注册 API                                         |
+| 扩展类型                       | 当前行为                                              | 架构要求                                                                        |
+| ------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 普通 `Source/SceneGIS/**/*.js` | 自动进入 engine 与根 Cesium barrel                    | default export；basename 唯一                                                   |
+| `Specs/SceneGIS/**/*Spec.js`   | 自动进入 SpecList                                     | 镜像源码目录                                                                    |
+| SceneGIS GLSL                  | 扫描 `Source/Shaders/SceneGIS/**/*.glsl`              | basename 全局唯一；生成 `.js` 不提交；验证 dev、release 与 npm                  |
+| Worker                         | 扫描 `Source/Workers/**` 并输出多种构建形态           | 每个新入口单独审计 URL、transfer 与 package 边界                                |
+| SceneGIS runtime asset         | `copyEngineAssets` 保持 `Assets/SceneGIS/**` 相对路径 | 验证 workspace、dev/release、root 与 installed npm；随包携带 license/provenance |
+| 其他静态资源、WASM、图片       | 发布复制与测试访问链路不同                            | 首次接入时重新审计 workspace、release、npm 和 Sandcastle                        |
+| CSS 与 UI                      | engine 与 widgets 规则不同                            | UI 保持在 widgets 包边界内                                                      |
+| 模块副作用                     | 受 tree-shaking 和 `sideEffects` 影响                 | 优先显式安装或注册 API                                                          |
 
 Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前仍是延迟决策，不在没有真实功能和源码证据时预设答案。SceneGIS GLSL source/delivery 以 ADR-0030 为准；A4 已批准的唯一 terrain Worker 入口以 ADR-0027 为准。
 
@@ -212,6 +218,23 @@ Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前�
 - 明确 GPU/CPU 资源的创建、所有权、复用、失效和销毁时机。
 - 热路径避免无依据的逐帧对象分配、Shader 重编译和状态抖动。
 - 影响默认画面时提供稳定的像素回归场景；影响性能时记录可重复的基线和对比条件。
+
+### 双世界高级环境渲染
+
+高级 atmosphere/cloud/fog/god-ray/lens stack 使用 ADR-0040 的 SceneGIS-owned advanced background 与
+pre-tonemap linear-HDR 两个 slot。Public `SceneGISEnvironmentEffects` 是 caller-created、caller-registered Controller；
+`mode="globe"|"planar"` 必须显式给出，planar 还必须绑定 live `SceneGISPlanarWorld`。Controller 默认
+`enabled=false`，注册本身不得 attach pipeline、fetch asset 或分配 GPU resource；每个 live Scene 最多一个 active pipeline。
+
+A2 的 Globe atmosphere 把 Cesium geodetic altitude/local vertical 映射到固定 Earth Bruneton sphere，使用随包交付的
+transmittance、combined scattering 与 irradiance RGBA16F LUT；planar atmosphere 使用同一 Rayleigh/Mie/ozone coefficients，
+但在固定 `+Z` slab 中独立积分，不读取 spherical LUT、不制造 curved horizon。两条路径提供同一 physical sky、Sun disk 与
+depth-aware aerial-perspective capability family，但不承诺 pixel-identical 或相同 multiple-scattering order。
+
+Advanced effects 不接管 `scene.light`，也不自动修改或恢复 native/simple environment。Caller 必须在启用前显式关闭会造成
+double energy 的 native `SkyAtmosphere`、ground atmosphere、Fog、Sun/Moon body/bloom、SkyBox 或 planar lightweight
+atmosphere/body；冲突和 capability failure 必须先于 asset/GPU mutation fail closed。完整 public、asset、resource、dual-world 与
+升级 contract 见 [ADR-0041](Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md)。
 
 ### 平面地形 Core 契约
 
@@ -696,7 +719,6 @@ ADR 放在 `Documentation/SceneGIS/Decisions/ADR-####-short-title.md`。首次�
 - SceneGIS `czm_*` builtin 的接入与生成方式；普通 SceneGIS GLSL source/delivery 已由 ADR-0030 决定。
 - 除 ADR-0027 唯一 terrain entry 外，其他 SceneGIS Worker 的入口、协议与发布行为。
 - 是否从根 JS barrel 严格排除 `_` 私有模块。
-- SceneGIS 静态资源在 workspace、release、npm 和 CDN 中的统一定位方式。
 - 持久视觉基线和性能基线的 CI 执行环境。
 
 处理这些问题时必须以届时的 Cesium 源码为准；本文档不把当前推测升级为约束。
