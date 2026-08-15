@@ -2,7 +2,8 @@
 
 - Active extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](2026-08-14-atmosphere-clouds-effects-extension.md)
-- Active phase plan: None; A3 planning has not been checkpointed.
+- Active phase plan:
+  [2026-08-15-phase-a3-exponential-height-fog.md](2026-08-15-phase-a3-exponential-height-fog.md)
 - Latest completed phase plan:
   [2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md](2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)
 

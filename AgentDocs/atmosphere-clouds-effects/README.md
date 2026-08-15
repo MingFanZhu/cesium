@@ -3,11 +3,11 @@
 ## Status
 
 - Extension: `active`
-- Current phase: A2 — Bruneton atmosphere and aerial perspective（`active`）
+- Current phase: A3 — Exponential height fog（`active`）
 - Active phase plan:
-  [2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md](plans/2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)
+  [2026-08-15-phase-a3-exponential-height-fog.md](plans/2026-08-15-phase-a3-exponential-height-fog.md)
 - Latest completed phase plan:
-  [2026-08-14-phase-a1-render-foundation.md](plans/2026-08-14-phase-a1-render-foundation.md)
+  [2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md](plans/2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -15,10 +15,12 @@
   [ADR-0041](../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
   [ADR-0042](../../Documentation/SceneGIS/Decisions/ADR-0042-planar-precomputed-atmosphere.md),
   [ADR-0043](../../Documentation/SceneGIS/Decisions/ADR-0043-atmosphere-log-depth-and-radiance-mapping.md),
-  [ADR-0044](../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md)
+  [ADR-0044](../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md),
+  [ADR-0045](../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md)
 - Upstream patch: active `SGP-0008`
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
+- A2 checkpoint: `da2eb55743a46423e65b2047965907c05ea260b7`（未push）
 
 ## Objective
 
@@ -33,7 +35,7 @@ reference frame，不互相伪造坐标语义。
   reference-frame contract。
 - A2经过A2R、A2R2与A2R3修正后，implementation、Architecture review和第四次project-owner visual gate均已通过；本次A2
   独立本地checkpoint关闭该阶段。
-- A3尚未激活；必须在A2 checkpoint后依据当前源码建立独立phase plan与planning checkpoint。
+- A3已依据A2 checkpoint后的源码事实建立phase plan与ADR-0045；implementation尚未开始。
 
 ## Discussions
 
@@ -57,13 +59,10 @@ reference frame，不互相伪造坐标语义。
 
 ## Current handoff
 
-A2R3已用default `10`的`backgroundRadianceScale`与default `1`的`aerialRadianceScale`完整替换未checkpoint的single public
-scale，两个pass只消费各自warm calibration。默认ground/day aerial full-frame/ground ROI mean分别为Globe `17.03/8.51`与Planar
-`21.53/5.39`，均满足`0 < mean <= 32`，同时`max=122/327`保持nonidentity。Architecture已接受代码、像素和截图证据；其独立
-review发现的`Test/高级环境.html:628` `prefer-template`交付问题已由Execution机械改为单个template literal，并已用
-`--ignore-path .gitignore`对该HTML完成最终Prettier修正。精确HTML Prettier check、changed-scope ESLint与
-`git diff --check`均通过；Architecture独立复核后无剩余blocker，project owner已明确判定第四次visual gate“通过”。本change set形成
-A2独立本地checkpoint并关闭A2。该checkpoint不推送；A3仍未激活，下一步必须先建立A3 phase plan与独立planning checkpoint。
+A2已在`da2eb55743a46423e65b2047965907c05ea260b7`形成独立本地checkpoint并关闭，未push。A3现已激活：ADR-0045冻结single-layer
+dual-world exponential height fog、九个warm public controls、Globe radial/Planar fixed-Z积分、atmosphere-aware但独立calibrated fog source、
+native `Fog`互斥，以及相对A2零新增program/FBO/texture/upstream seam的边界。Execution从A3 planning checkpoint开始实现，完成后必须以
+uncommitted review target停下；Architecture review和project-owner visual gate之前不得checkpoint或进入A4。
 
 ## External references
 

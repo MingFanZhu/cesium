@@ -8,20 +8,22 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-15`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: A2 — Bruneton atmosphere and aerial perspective（`active`）
+- Current phase: A3 — Exponential height fog（`active`）
 - Active phase plan:
-  [2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md](2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)
+  [2026-08-15-phase-a3-exponential-height-fog.md](2026-08-15-phase-a3-exponential-height-fog.md)
 - Latest completed phase plan:
-  [2026-08-14-phase-a1-render-foundation.md](2026-08-14-phase-a1-render-foundation.md)
+  [2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md](2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
   [ADR-0042](../../../Documentation/SceneGIS/Decisions/ADR-0042-planar-precomputed-atmosphere.md),
   [ADR-0043](../../../Documentation/SceneGIS/Decisions/ADR-0043-atmosphere-log-depth-and-radiance-mapping.md),
-  [ADR-0044](../../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md)
+  [ADR-0044](../../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md),
+  [ADR-0045](../../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md)
 - Upstream patch: active `SGP-0008`
 - A1 implementation: `completed`
-- A2 implementation: `review-ready` (`A2R3 separate background/aerial calibration`)
+- A2 implementation: `completed`
+- A3 implementation: `not-started`
 
 ## Goal
 
@@ -95,10 +97,12 @@ Architecture review，但第二次owner gate再次因效果弱失败；现场诊
 颜色覆盖而失败；ADR-0044 A2R3的代码、像素和视觉修正及其direct Test lint/format corrections现已通过Architecture独立复核，
 第四次project-owner visual gate也已明确通过。本change set形成A2独立本地checkpoint；A3仍需独立planning checkpoint后才能激活。
 
-### A3 — Exponential height fog
+### A3 — Exponential height fog (`active`)
 
-增加一至两层 exponential height density、directional inscattering 与 atmosphere-aware composition；Globe使用radial height，planar使用
-fixed Z。保持与 native Fog 的明确互斥/降级边界。
+依据
+[A3 phase plan](2026-08-15-phase-a3-exponential-height-fog.md)与ADR-0045增加single-layer exponential height density、
+directional inscattering与atmosphere-aware composition；Globe使用radial height，planar使用fixed Z。复用A2 programs/FBO且保持与native
+Fog的明确互斥边界，不新增upstream hook或GPU resource family。
 
 ### A4 — Volumetric cloud core
 
