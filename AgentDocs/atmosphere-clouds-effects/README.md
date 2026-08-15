@@ -12,7 +12,10 @@
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
   [ADR-0040](../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
-  [ADR-0041](../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md)
+  [ADR-0041](../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
+  [ADR-0042](../../Documentation/SceneGIS/Decisions/ADR-0042-planar-precomputed-atmosphere.md),
+  [ADR-0043](../../Documentation/SceneGIS/Decisions/ADR-0043-atmosphere-log-depth-and-radiance-mapping.md),
+  [ADR-0044](../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md)
 - Upstream patch: active `SGP-0008`
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
@@ -28,9 +31,9 @@ reference frame，不互相伪造坐标语义。
 
 - A1 已实现并通过 Architecture/code review：双阶段 render integration、private pipeline lifecycle 与 globe/planar
   reference-frame contract。
-- A2 已由 Architecture 完成源码、capability、depth、asset/license与package delivery审计并正式激活；当前只允许实现
-  `SceneGISEnvironmentEffects`、Globe Bruneton LUT atmosphere/aerial、planar flat-slab atmosphere/aerial及其交付验证。
-- A2 manual visual gate由项目负责人验收；A2 review/checkpoint前不得进入A3。
+- A2经过A2R、A2R2与A2R3修正后，implementation、Architecture review和第四次project-owner visual gate均已通过；本次A2
+  独立本地checkpoint关闭该阶段。
+- A3尚未激活；必须在A2 checkpoint后依据当前源码建立独立phase plan与planning checkpoint。
 
 ## Discussions
 
@@ -40,6 +43,7 @@ reference frame，不互相伪造坐标语义。
 ## Reviews
 
 - [A1 render foundation implementation review](reviews/2026-08-14-a1-render-foundation.md) — `approved`
+- [A2 Bruneton atmosphere and aerial perspective implementation review](reviews/2026-08-14-a2-bruneton-atmosphere-aerial-perspective.md) — `approved`
 
 ## Engineering paths
 
@@ -47,13 +51,19 @@ reference frame，不互相伪造坐标语义。
   `packages/engine/Source/SceneGIS/Scene/_private/`
 - A2 public/private runtime：`packages/engine/Source/SceneGIS/Scene/`、
   `packages/engine/Source/Shaders/SceneGIS/EnvironmentEffects/`
-- A2 assets/importer：`packages/engine/Source/Assets/SceneGIS/Environment/BrunetonEarth/`、`scripts/scenegis/`
+- A2 assets/importer/generator：`packages/engine/Source/Assets/SceneGIS/Environment/BrunetonEarth/`、
+  `packages/engine/Source/Assets/SceneGIS/Environment/PlanarEarth/`、`scripts/scenegis/`
 - Specs/manual page：`packages/engine/Specs/SceneGIS/Scene/`、`Test/高级环境.html`
 
 ## Current handoff
 
-Execution 从 A2 planning checkpoint 实现 active phase plan，完成实现与最小充分验证后保持未commit、未push，写入A2 open review并发送
-`review_ready`；不得激活A3。Architecture review通过后仍需项目负责人实际完成manual visual gate。
+A2R3已用default `10`的`backgroundRadianceScale`与default `1`的`aerialRadianceScale`完整替换未checkpoint的single public
+scale，两个pass只消费各自warm calibration。默认ground/day aerial full-frame/ground ROI mean分别为Globe `17.03/8.51`与Planar
+`21.53/5.39`，均满足`0 < mean <= 32`，同时`max=122/327`保持nonidentity。Architecture已接受代码、像素和截图证据；其独立
+review发现的`Test/高级环境.html:628` `prefer-template`交付问题已由Execution机械改为单个template literal，并已用
+`--ignore-path .gitignore`对该HTML完成最终Prettier修正。精确HTML Prettier check、changed-scope ESLint与
+`git diff --check`均通过；Architecture独立复核后无剩余blocker，project owner已明确判定第四次visual gate“通过”。本change set形成
+A2独立本地checkpoint并关闭A2。该checkpoint不推送；A3仍未激活，下一步必须先建立A3 phase plan与独立planning checkpoint。
 
 ## External references
 

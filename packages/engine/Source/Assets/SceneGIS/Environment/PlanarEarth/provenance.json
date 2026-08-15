@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "preset": "earth-flat-precomputed-v1",
+  "generator": {
+    "path": "scripts/scenegis/generate-planar-earth-luts.mjs",
+    "version": "scene-gis-flat-atmosphere-2",
+    "runtimeDependencies": []
+  },
+  "source": {
+    "model": "flat-slab radiative transport",
+    "coefficientAuthority": "Bruneton Earth 2017 preset",
+    "attribution": "Eric Bruneton, Precomputed Atmospheric Scattering; SceneGIS flat-slab adaptation",
+    "licenseFile": "LICENSE.txt"
+  },
+  "format": {
+    "byteOrder": "little-endian",
+    "channels": "RGBA",
+    "component": "IEEE-754 binary16",
+    "pixelDatatype": "HALF_FLOAT",
+    "textures": {
+      "transmittance": {
+        "dimensions": [
+          256,
+          64
+        ],
+        "file": "transmittance.bin",
+        "mapping": "x=signedSquare(viewZenithCosine), y=squareRoot(height/top)"
+      },
+      "scattering": {
+        "dimensions": [
+          256,
+          128,
+          32
+        ],
+        "file": "scattering.bin",
+        "mapping": "x=32 signedSquare(sunZenithCosine) blocks by 8 linear scatteringCosine samples, y=signedSquare(viewZenithCosine), z=squareRoot(height/top)",
+        "alpha": "unused; stores total RGB red for deterministic RGBA packing"
+      },
+      "irradiance": {
+        "dimensions": [
+          64,
+          16
+        ],
+        "file": "irradiance.bin",
+        "mapping": "x=signedSquare(sunZenithCosine), y=squareRoot(height/top)"
+      }
+    }
+  },
+  "transport": {
+    "geometry": "fixed +Z flat slab [0,60000] meters",
+    "segmentRule": "intersect untruncated geometric ray with slab, then cap only in-medium length",
+    "quadrature": {
+      "viewSamples": 12,
+      "angularZenithSamples": 12,
+      "angularAzimuthSamples": 8,
+      "multipleScatteringOrders": [
+        2,
+        3,
+        4
+      ],
+      "sourceHeightSamples": 32,
+      "sourceSunSamples": 32,
+      "mediumDistanceLimitMeters": 300000
+    },
+    "multipleScatteringOrders": [
+      2,
+      3,
+      4
+    ],
+    "runtimeEvaluation": "true-boundary entry/endpoint radiance differencing with analytic segment transmittance",
+    "boundaryEvaluation": "true slab boundary; exact horizontal uses semi-infinite optical limit",
+    "segmentTransmittance": "runtime analytic Rayleigh/Mie/ozone optical depth over the capped visible segment",
+    "groundBoundary": "irradiance stores direct solar plus cosine-weighted atmospheric diffuse irradiance; fixed ground albedo is applied once at runtime and is excluded from orders 2-4"
+  },
+  "physicalPreset": {
+    "atmosphereTopMeters": 60000,
+    "solarIrradiance": [
+      1.474,
+      1.8504,
+      1.91198
+    ],
+    "sunAngularRadiusRadians": 0.004675,
+    "rayleighScaleHeightMeters": 8000,
+    "rayleighScatteringPerMeter": [
+      0.000005802,
+      0.000013558,
+      0.0000331
+    ],
+    "mieScaleHeightMeters": 1200,
+    "mieScatteringPerMeter": [
+      0.000003996,
+      0.000003996,
+      0.000003996
+    ],
+    "mieExtinctionPerMeter": [
+      0.00000444,
+      0.00000444,
+      0.00000444
+    ],
+    "miePhaseFunctionG": 0.8,
+    "ozoneLayerCenterMeters": 25000,
+    "ozoneLayerWidthMeters": 15000,
+    "absorptionExtinctionPerMeter": [
+      6.5e-7,
+      0.000001881,
+      8.5e-8
+    ],
+    "groundAlbedo": [
+      0.1,
+      0.1,
+      0.1
+    ]
+  },
+  "files": {
+    "transmittance.bin": {
+      "bytes": 131072,
+      "sha256": "5CD60C76237A4C6DC20CEB54BE1726C325A6898CD1B114E69FC3496A1A9FF851"
+    },
+    "scattering.bin": {
+      "bytes": 8388608,
+      "sha256": "873162E5730406EF0183E0B16E7F6E79537268AC1F6BC38B2F0AADED5C9D7FB9"
+    },
+    "irradiance.bin": {
+      "bytes": 8192,
+      "sha256": "0265335BDFAB584639965B920A5F668C4906D77C290D6D6805D6F3F199CCE278"
+    },
+    "LICENSE.txt": {
+      "bytes": 4239,
+      "sha256": "32F7B6D5E239CA7B8E5662932940BB81DE592FE4DC6B179A029AB267C22CEF7B"
+    }
+  }
+}

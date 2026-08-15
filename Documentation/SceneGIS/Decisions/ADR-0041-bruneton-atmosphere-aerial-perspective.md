@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`approved`
+- Status：`approved`；planar single-scattering/resource sections partially superseded by ADR-0042
 - Date：`2026-08-14`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -13,6 +13,7 @@
   `AgentDocs/atmosphere-clouds-effects/discussions/2026-08-14-a2-lut-and-planar-model.md`
 - Related patch：active `SGP-0008`（A2只消费既有hook，不增加upstream hunk）
 - Constrains：ADR-0030、ADR-0033、ADR-0034、ADR-0036、ADR-0039、ADR-0040
+- Partially superseded by：ADR-0042（planar LUT、multiple scattering、ray/slab distance semantics与resource budget）
 
 ## 上下文与源码事实
 

@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "preset": "earth-bruneton-2017",
+  "source": {
+    "repository": "takram-design-engineering/three-geospatial",
+    "commit": "9c6dfd0054f077f3ad4695b802e74d4c6a814440",
+    "package": "packages/atmosphere",
+    "licensePath": "packages/atmosphere/LICENSE"
+  },
+  "format": {
+    "byteOrder": "little-endian",
+    "channels": "RGBA",
+    "component": "IEEE-754 binary16",
+    "pixelDatatype": "HALF_FLOAT",
+    "textures": {
+      "transmittance": {
+        "dimensions": [
+          256,
+          64
+        ],
+        "file": "transmittance.bin"
+      },
+      "scattering": {
+        "dimensions": [
+          256,
+          128,
+          32
+        ],
+        "file": "scattering.bin",
+        "combinedSingleMieRedInAlpha": true
+      },
+      "irradiance": {
+        "dimensions": [
+          64,
+          16
+        ],
+        "file": "irradiance.bin"
+      }
+    }
+  },
+  "physicalPreset": {
+    "bottomRadiusMeters": 6360000,
+    "topRadiusMeters": 6420000,
+    "solarIrradiance": [
+      1.474,
+      1.8504,
+      1.91198
+    ],
+    "sunAngularRadiusRadians": 0.004675,
+    "rayleighScaleHeightMeters": 8000,
+    "rayleighScatteringPerMeter": [
+      0.000005802,
+      0.000013558,
+      0.0000331
+    ],
+    "mieScaleHeightMeters": 1200,
+    "mieScatteringPerMeter": [
+      0.000003996,
+      0.000003996,
+      0.000003996
+    ],
+    "mieExtinctionPerMeter": [
+      0.00000444,
+      0.00000444,
+      0.00000444
+    ],
+    "miePhaseFunctionG": 0.8,
+    "ozoneLayerCenterMeters": 25000,
+    "ozoneLayerWidthMeters": 15000,
+    "absorptionExtinctionPerMeter": [
+      6.5e-7,
+      0.000001881,
+      8.5e-8
+    ],
+    "groundAlbedo": [
+      0.1,
+      0.1,
+      0.1
+    ]
+  },
+  "files": {
+    "transmittance.bin": {
+      "bytes": 131072,
+      "sha256": "A2A0DD1464048D92E7BFDF385A9108E8D9C3E2748684F1F64523587D5894180A"
+    },
+    "scattering.bin": {
+      "bytes": 8388608,
+      "sha256": "82C505FE6E3B7F1995C650CC8A1478F42BD510029BF63845E9485C078AEF6617"
+    },
+    "irradiance.bin": {
+      "bytes": 8192,
+      "sha256": "126BD4FF0419E04C877639CAF9E3CD64A139AE511CF315A23A0C989FC47B51A5"
+    },
+    "LICENSE.txt": {
+      "bytes": 4239,
+      "sha256": "32F7B6D5E239CA7B8E5662932940BB81DE592FE4DC6B179A029AB267C22CEF7B"
+    }
+  }
+}

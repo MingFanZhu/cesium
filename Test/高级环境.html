@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SceneGIS 高级环境</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        color: #eef5fa;
+        background: #071019;
+        font-family: system-ui, "Microsoft YaHei", sans-serif;
+      }
+      main {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        width: 100%;
+        height: 100%;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 20px;
+        padding: 10px 16px;
+        border-bottom: 1px solid #294455;
+        background: #10202c;
+      }
+      h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .worlds {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 0;
+      }
+      section {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+        border-right: 1px solid #294455;
+      }
+      section:last-child {
+        border-right: 0;
+      }
+      .viewer {
+        position: absolute;
+        inset: 0;
+      }
+      .badge {
+        position: absolute;
+        z-index: 2;
+        top: 10px;
+        left: 10px;
+        padding: 7px 10px;
+        border: 1px solid #54788d;
+        border-radius: 6px;
+        background: rgb(5 16 24 / 82%);
+        pointer-events: none;
+      }
+      .badge strong,
+      .badge span {
+        display: block;
+      }
+      .badge span {
+        margin-top: 3px;
+        color: #a8c1d0;
+        font-size: 12px;
+      }
+      @media (max-width: 900px) {
+        .worlds {
+          grid-template-columns: 1fr;
+          grid-template-rows: 1fr 1fr;
+        }
+        section {
+          border-right: 0;
+          border-bottom: 1px solid #294455;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>A2R3 Bruneton 大气与空气透视（本地、零网络）</h1>
+        <div class="controls">
+          <label><input id="enabled" type="checkbox" />启用</label>
+          <label
+            ><input id="atmosphere" type="checkbox" checked />天空与太阳</label
+          >
+          <label><input id="aerial" type="checkbox" checked />空气透视</label>
+          <label
+            >Background radiance
+            <input
+              id="backgroundRadianceScale"
+              type="range"
+              min="0"
+              max="64"
+              step="1"
+              value="10"
+            />
+            <output id="backgroundRadianceScaleValue">10</output></label
+          >
+          <label
+            >Aerial radiance
+            <input
+              id="aerialRadianceScale"
+              type="range"
+              min="0"
+              max="64"
+              step="0.1"
+              value="1"
+            />
+            <output id="aerialRadianceScaleValue">1</output></label
+          >
+          <button id="day" type="button">白昼</button>
+          <button id="sunset" type="button">日落</button>
+          <button id="night" type="button">夜间</button>
+          <button id="ground" type="button">地面</button>
+          <button id="air" type="button">空中</button>
+          <button id="high" type="button">高空</button>
+          <button id="diagnostic" type="button">对比 enabled / identity</button>
+          <button id="nativeConflict" type="button">注入 native 冲突</button>
+          <button id="simpleConflict" type="button">
+            注入 planar simple 冲突
+          </button>
+          <button id="retry" type="button">修复并重试</button>
+        </div>
+      </header>
+      <div class="worlds">
+        <section>
+          <div id="globeViewer" class="viewer"></div>
+          <div class="badge">
+            <strong>Globe · Bruneton combined LUT</strong>
+            <span id="globeStatus">初始化</span>
+            <span id="globeDiagnostic">identity delta · 未测</span>
+          </div>
+        </section>
+        <section>
+          <div id="planarViewer" class="viewer"></div>
+          <div class="badge">
+            <strong>Planar · +Z flat LUT · scattering orders 1–4</strong>
+            <span id="planarStatus">初始化</span>
+            <span id="planarTransport">slab / geometry · 未测</span>
+            <span id="planarDiagnostic">identity delta · 未测</span>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module">
+      import * as Cesium from "/Build/CesiumUnminified/index.js";
+
+      try {
+        const viewerOptions = {
+          animation: false,
+          baseLayer: false,
+          baseLayerPicker: false,
+          fullscreenButton: false,
+          geocoder: false,
+          homeButton: false,
+          infoBox: false,
+          navigationHelpButton: false,
+          scene3DOnly: true,
+          selectionIndicator: false,
+          timeline: false,
+          requestRenderMode: true,
+        };
+
+        function hideNativeEnvironment(scene) {
+          for (const object of [
+            scene.skyAtmosphere,
+            scene.skyBox,
+            scene.sun,
+            scene.moon,
+          ]) {
+            if (object) {
+              object.show = false;
+            }
+          }
+          scene.sunBloom = false;
+          scene.fog.enabled = false;
+          if (scene.globe) {
+            scene.globe.showGroundAtmosphere = false;
+          }
+          scene.highDynamicRange = true;
+        }
+
+        function addComparisonBoxes(scene, instances) {
+          scene.primitives.add(
+            new Cesium.Primitive({
+              geometryInstances: instances.map(
+                ({ position, dimensions, color }) =>
+                  new Cesium.GeometryInstance({
+                    geometry: Cesium.BoxGeometry.fromDimensions({ dimensions }),
+                    modelMatrix: Cesium.Matrix4.fromTranslation(position),
+                    attributes: {
+                      color:
+                        Cesium.ColorGeometryInstanceAttribute.fromColor(color),
+                    },
+                  }),
+              ),
+              appearance: new Cesium.PerInstanceColorAppearance({
+                translucent: false,
+                closed: true,
+              }),
+              asynchronous: false,
+            }),
+          );
+        }
+
+        let globeViewer = new Cesium.Viewer("globeViewer", viewerOptions);
+        hideNativeEnvironment(globeViewer.scene);
+        globeViewer.scene.globe.baseColor =
+          Cesium.Color.fromCssColorString("#22302a");
+        globeViewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(121.5, 31.2, 1200000.0),
+          orientation: {
+            heading: Cesium.Math.toRadians(15.0),
+            pitch: Cesium.Math.toRadians(-36.0),
+            roll: 0.0,
+          },
+        });
+        const globeEffects = new Cesium.SceneGISEnvironmentEffects({
+          mode: "globe",
+          enabled: false,
+        });
+        globeViewer.addController(globeEffects);
+        const globeBoxDimensions = new Cesium.Cartesian3(
+          40000.0,
+          40000.0,
+          40000.0,
+        );
+        const globeNearTransform = Cesium.Transforms.eastNorthUpToFixedFrame(
+          Cesium.Cartesian3.fromDegrees(121.5, 31.2, 20000.0),
+        );
+        const globeFarTransform = Cesium.Transforms.eastNorthUpToFixedFrame(
+          Cesium.Cartesian3.fromDegrees(122.7, 31.2, 20000.0),
+        );
+        globeViewer.scene.primitives.add(
+          new Cesium.Primitive({
+            geometryInstances: [
+              new Cesium.GeometryInstance({
+                geometry: Cesium.BoxGeometry.fromDimensions({
+                  dimensions: globeBoxDimensions,
+                }),
+                modelMatrix: globeNearTransform,
+                attributes: {
+                  color: Cesium.ColorGeometryInstanceAttribute.fromColor(
+                    Cesium.Color.WHITE,
+                  ),
+                },
+              }),
+              new Cesium.GeometryInstance({
+                geometry: Cesium.BoxGeometry.fromDimensions({
+                  dimensions: globeBoxDimensions,
+                }),
+                modelMatrix: globeFarTransform,
+                attributes: {
+                  color: Cesium.ColorGeometryInstanceAttribute.fromColor(
+                    Cesium.Color.YELLOW,
+                  ),
+                },
+              }),
+            ],
+            appearance: new Cesium.PerInstanceColorAppearance({
+              translucent: false,
+              closed: true,
+            }),
+            asynchronous: false,
+          }),
+        );
+
+        const limit = 20037508.342789244;
+        let planarViewer = new Cesium.Viewer("planarViewer", {
+          ...viewerOptions,
+          baseLayer: undefined,
+          planarWorld: {
+            crs: "EPSG:3857",
+            extent: {
+              minimumX: -limit,
+              minimumY: -limit,
+              maximumX: limit,
+              maximumY: limit,
+            },
+            maximumLevel: 0,
+          },
+        });
+        const planarScene = planarViewer.scene;
+        hideNativeEnvironment(planarScene);
+        const world = planarScene.world;
+        world.baseColor = Cesium.Color.fromCssColorString("#26362f");
+        planarViewer.camera.setView({
+          destination: new Cesium.Cartesian3(0.0, -800000.0, 500000.0),
+          orientation: {
+            direction: new Cesium.Cartesian3(0.0, 0.82, -0.57),
+            up: new Cesium.Cartesian3(0.0, 0.57, 0.82),
+          },
+        });
+        const planarEnvironment = new Cesium.SceneGISPlanarEnvironment({
+          world,
+          showAtmosphere: false,
+          showSun: false,
+          showMoon: false,
+          sunDirection: Cesium.Cartesian3.normalize(
+            new Cesium.Cartesian3(0.45, 0.2, 0.87),
+            new Cesium.Cartesian3(),
+          ),
+          moonDirection: new Cesium.Cartesian3(-0.5, -0.2, 0.8),
+        });
+        const planarEffects = new Cesium.SceneGISEnvironmentEffects({
+          mode: "planar",
+          world,
+          enabled: false,
+        });
+        planarViewer.addController(planarEnvironment);
+        planarViewer.addController(planarEffects);
+        const planarComparisonBoxes = [
+          {
+            position: new Cesium.Cartesian3(-70000.0, -250000.0, 40000.0),
+            dimensions: new Cesium.Cartesian3(120000.0, 100000.0, 80000.0),
+            color: Cesium.Color.WHITE,
+          },
+          {
+            position: new Cesium.Cartesian3(70000.0, 350000.0, 40000.0),
+            dimensions: new Cesium.Cartesian3(120000.0, 100000.0, 80000.0),
+            color: Cesium.Color.YELLOW,
+          },
+        ];
+        addComparisonBoxes(planarScene, planarComparisonBoxes);
+
+        window.globeViewer = globeViewer;
+        window.planarViewer = planarViewer;
+        window.globeEffects = globeEffects;
+        window.planarEffects = planarEffects;
+        window.planarEnvironment = planarEnvironment;
+        window.environmentDiagnostics = {};
+
+        const effects = [globeEffects, planarEffects];
+        let currentLighting = "day";
+        let currentCameraPreset = "ground";
+        let retryRenderInterval;
+        function driveEffectsUntilSettled() {
+          globeViewer.scene.requestRenderMode = false;
+          planarScene.requestRenderMode = false;
+          let attempts = 0;
+          clearInterval(retryRenderInterval);
+          retryRenderInterval = setInterval(() => {
+            globeViewer.scene.requestRender();
+            planarScene.requestRender();
+            attempts++;
+            if (
+              effects.every((controller) => controller.ready) ||
+              attempts >= 100
+            ) {
+              globeViewer.scene.requestRenderMode = true;
+              planarScene.requestRenderMode = true;
+              clearInterval(retryRenderInterval);
+              retryRenderInterval = undefined;
+            }
+          }, 50);
+        }
+        function updateEffects(property, value) {
+          for (const controller of effects) {
+            controller[property] = value;
+          }
+          globeViewer.scene.requestRender();
+          planarViewer.scene.requestRender();
+        }
+        document
+          .querySelector("#enabled")
+          .addEventListener("change", (event) => {
+            updateEffects("enabled", event.target.checked);
+            if (event.target.checked) {
+              driveEffectsUntilSettled();
+            }
+          });
+        document
+          .querySelector("#atmosphere")
+          .addEventListener("change", (event) => {
+            updateEffects("showAtmosphere", event.target.checked);
+          });
+        document
+          .querySelector("#aerial")
+          .addEventListener("change", (event) => {
+            updateEffects("showAerialPerspective", event.target.checked);
+          });
+        for (const property of [
+          "backgroundRadianceScale",
+          "aerialRadianceScale",
+        ]) {
+          document
+            .querySelector(`#${property}`)
+            .addEventListener("input", (event) => {
+              const value = Number(event.target.value);
+              document.querySelector(`#${property}Value`).value = value;
+              updateEffects(property, value);
+            });
+        }
+
+        function setPlanarSun(x, y, z) {
+          planarEnvironment.sunDirection = Cesium.Cartesian3.normalize(
+            new Cesium.Cartesian3(x, y, z),
+            new Cesium.Cartesian3(),
+          );
+          planarScene.requestRender();
+        }
+        document.querySelector("#day").addEventListener("click", () => {
+          currentLighting = "day";
+          globeViewer.clock.currentTime = Cesium.JulianDate.fromIso8601(
+            "2026-06-21T04:00:00Z",
+          );
+          setPlanarSun(0.45, 0.2, 0.87);
+          globeViewer.scene.requestRender();
+        });
+        document.querySelector("#sunset").addEventListener("click", () => {
+          currentLighting = "sunset";
+          globeViewer.clock.currentTime = Cesium.JulianDate.fromIso8601(
+            "2026-06-21T10:30:00Z",
+          );
+          setPlanarSun(0.95, 0.1, 0.08);
+          globeViewer.scene.requestRender();
+        });
+        document.querySelector("#night").addEventListener("click", () => {
+          currentLighting = "night";
+          globeViewer.clock.currentTime = Cesium.JulianDate.fromIso8601(
+            "2026-06-21T16:00:00Z",
+          );
+          setPlanarSun(-0.45, -0.2, -0.87);
+          globeViewer.scene.requestRender();
+        });
+
+        const cameraPresets = {
+          ground: {
+            globeAltitude: 2000.0,
+            planarPosition: new Cesium.Cartesian3(0.0, -180000.0, 5000.0),
+          },
+          air: {
+            globeAltitude: 30000.0,
+            planarPosition: new Cesium.Cartesian3(0.0, -350000.0, 30000.0),
+          },
+          high: {
+            globeAltitude: 250000.0,
+            planarPosition: new Cesium.Cartesian3(0.0, -900000.0, 120000.0),
+          },
+        };
+        function applyCameraPreset(name) {
+          currentCameraPreset = name;
+          const preset = cameraPresets[name];
+          globeViewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(
+              121.5,
+              31.2,
+              preset.globeAltitude,
+            ),
+            orientation: {
+              heading: 0.0,
+              pitch: Cesium.Math.toRadians(-12.0),
+              roll: 0.0,
+            },
+          });
+          planarViewer.camera.setView({
+            destination: preset.planarPosition,
+            orientation: {
+              direction: new Cesium.Cartesian3(0.0, 0.98, -0.2),
+              up: new Cesium.Cartesian3(0.0, 0.2, 0.98),
+            },
+          });
+          const direction = Cesium.Cartesian3.normalize(
+            new Cesium.Cartesian3(0.0, 0.98, -0.2),
+            new Cesium.Cartesian3(),
+          );
+          const altitude = preset.planarPosition.z;
+          const slabEntry =
+            altitude > 60000.0 ? (altitude - 60000.0) / -direction.z : 0.0;
+          const slabExit = altitude / -direction.z;
+          const boxDistances = planarComparisonBoxes.map(({ position }) =>
+            Cesium.Cartesian3.distance(preset.planarPosition, position),
+          );
+          document.querySelector("#planarTransport").textContent =
+            `slab entry/exit · ${(slabEntry / 1000.0).toFixed(0)}/${(
+              slabExit / 1000.0
+            ).toFixed(0)} km · geometry near/far · ${(
+              Math.min(...boxDistances) / 1000.0
+            ).toFixed(0)}/${(Math.max(...boxDistances) / 1000.0).toFixed(
+              0,
+            )} km`;
+          globeViewer.scene.requestRender();
+          planarScene.requestRender();
+        }
+        for (const name of ["ground", "air", "high"]) {
+          document.querySelector(`#${name}`).addEventListener("click", () => {
+            applyCameraPreset(name);
+          });
+        }
+
+        function nextRenderedSamples(scene) {
+          return new Promise((resolve) => {
+            const remove = scene.postRender.addEventListener(() => {
+              remove();
+              const width = scene.context.drawingBufferWidth;
+              const height = scene.context.drawingBufferHeight;
+              resolve({
+                samples: Array.from(
+                  scene.context.readPixels({ x: 0, y: 0, width, height }),
+                ),
+                width,
+                height,
+              });
+            });
+            scene.requestRender();
+          });
+        }
+
+        function measureDelta(rendered, identity, region) {
+          let delta = 0;
+          let maximumDelta = 0;
+          let changedPixels = 0;
+          const { samples, width, height } = rendered;
+          const bounds = region ?? { x: 0, y: 0, width, height };
+          for (let y = bounds.y; y < bounds.y + bounds.height; y++) {
+            for (let x = bounds.x; x < bounds.x + bounds.width; x++) {
+              const index = (y * width + x) * 4;
+              const pixelDelta =
+                Math.abs(samples[index] - identity.samples[index]) +
+                Math.abs(samples[index + 1] - identity.samples[index + 1]) +
+                Math.abs(samples[index + 2] - identity.samples[index + 2]);
+              delta += pixelDelta;
+              maximumDelta = Math.max(maximumDelta, pixelDelta);
+              changedPixels += pixelDelta > 0 ? 1 : 0;
+            }
+          }
+          return {
+            delta,
+            maximumDelta,
+            changedPixels,
+            meanChangedDelta: changedPixels > 0 ? delta / changedPixels : 0,
+          };
+        }
+
+        async function diagnoseController(controller, scene, output, name) {
+          if (!controller.enabled || !controller.ready) {
+            output.textContent = "pass matrix · 请先启用并等待 ready";
+            return;
+          }
+          const showAtmosphere = controller.showAtmosphere;
+          const showAerialPerspective = controller.showAerialPerspective;
+          controller.showAtmosphere = false;
+          controller.showAerialPerspective = false;
+          const identity = await nextRenderedSamples(scene);
+          const matrix = {};
+          for (const pass of [
+            { name: "background", atmosphere: true, aerial: false },
+            { name: "aerial", atmosphere: false, aerial: true },
+            { name: "combined", atmosphere: true, aerial: true },
+          ]) {
+            controller.showAtmosphere = pass.atmosphere;
+            controller.showAerialPerspective = pass.aerial;
+            const rendered = await nextRenderedSamples(scene);
+            const groundRegion = {
+              x: Math.floor(rendered.width * 0.25),
+              y: Math.floor(rendered.height * 0.08),
+              width: Math.floor(rendered.width * 0.5),
+              height: Math.floor(rendered.height * 0.3),
+            };
+            matrix[pass.name] = {
+              ...measureDelta(rendered, identity),
+              groundRoi: measureDelta(rendered, identity, groundRegion),
+              groundRegion,
+            };
+          }
+          controller.showAtmosphere = showAtmosphere;
+          controller.showAerialPerspective = showAerialPerspective;
+          scene.requestRender();
+          window.environmentDiagnostics[name] = matrix;
+          const describe = (pass) => {
+            const value = matrix[pass];
+            const requiresFloor =
+              currentLighting !== "night" &&
+              (currentCameraPreset !== "high" || pass !== "background");
+            const expectation = requiresFloor
+              ? value.maximumDelta >= 8 && value.changedPixels > 0
+                ? "required≥8 PASS"
+                : "required≥8 FAIL"
+              : currentLighting === "night"
+                ? value.delta === 0
+                  ? "identity PASS"
+                  : "night optional radiance"
+                : "high background observational";
+            const mean = value.meanChangedDelta.toFixed(2);
+            const groundMean = value.groundRoi.meanChangedDelta.toFixed(2);
+            const requiresSurfaceRetention =
+              currentLighting === "day" &&
+              currentCameraPreset === "ground" &&
+              pass === "aerial";
+            const surfaceExpectation = requiresSurfaceRetention
+              ? value.meanChangedDelta > 0 &&
+                value.meanChangedDelta <= 32 &&
+                value.groundRoi.meanChangedDelta > 0 &&
+                value.groundRoi.meanChangedDelta <= 32
+                ? "surface≤32 PASS"
+                : "surface≤32 FAIL"
+              : "";
+            return `${pass} L1=${value.delta} max=${value.maximumDelta} changed=${value.changedPixels} mean=${mean} groundROImean=${groundMean} ${expectation} ${surfaceExpectation}`;
+          };
+          output.textContent = `${describe("background")} · ${describe("aerial")} · ${describe("combined")}`;
+          return matrix;
+        }
+
+        document
+          .querySelector("#diagnostic")
+          .addEventListener("click", async () => {
+            await Promise.all([
+              diagnoseController(
+                globeEffects,
+                globeViewer.scene,
+                document.querySelector("#globeDiagnostic"),
+                "globe",
+              ),
+              diagnoseController(
+                planarEffects,
+                planarScene,
+                document.querySelector("#planarDiagnostic"),
+                "planar",
+              ),
+            ]);
+          });
+
+        const errors = new Map();
+        const injectedNativeAtmospheres = new Map();
+        function revealNativeConflict(scene) {
+          if (!scene.skyAtmosphere) {
+            scene.skyAtmosphere = new Cesium.SkyAtmosphere();
+            injectedNativeAtmospheres.set(scene, scene.skyAtmosphere);
+          }
+          scene.skyAtmosphere.show = true;
+        }
+        function removeInjectedNativeConflict(scene, finalize) {
+          const atmosphere = injectedNativeAtmospheres.get(scene);
+          if (scene.skyAtmosphere === atmosphere) {
+            scene.skyAtmosphere = undefined;
+          }
+          if (finalize && atmosphere && !atmosphere.isDestroyed()) {
+            atmosphere.destroy();
+          }
+          if (finalize) {
+            injectedNativeAtmospheres.delete(scene);
+          }
+        }
+        document
+          .querySelector("#nativeConflict")
+          .addEventListener("click", () => {
+            if (!globeEffects.enabled || !globeEffects.ready) {
+              errors.set(
+                globeEffects,
+                "请先启用并等待 Globe ready，再注入冲突",
+              );
+              globeViewer.scene.requestRender();
+              return;
+            }
+            revealNativeConflict(globeViewer.scene);
+            globeViewer.scene.requestRender();
+          });
+        document
+          .querySelector("#simpleConflict")
+          .addEventListener("click", () => {
+            if (!planarEffects.enabled || !planarEffects.ready) {
+              errors.set(
+                planarEffects,
+                "请先启用并等待 planar ready，再注入冲突",
+              );
+              planarScene.requestRender();
+              return;
+            }
+            planarEnvironment.showAtmosphere = true;
+            planarScene.requestRender();
+          });
+        document.querySelector("#retry").addEventListener("click", () => {
+          removeInjectedNativeConflict(globeViewer.scene, false);
+          removeInjectedNativeConflict(planarScene, false);
+          hideNativeEnvironment(globeViewer.scene);
+          hideNativeEnvironment(planarScene);
+          planarEnvironment.showAtmosphere = false;
+          errors.clear();
+          updateEffects("enabled", false);
+          globeViewer.removeController(globeEffects);
+          planarViewer.removeController(planarEffects);
+          document.querySelector("#enabled").checked = false;
+          setTimeout(() => {
+            removeInjectedNativeConflict(globeViewer.scene, true);
+            removeInjectedNativeConflict(planarScene, true);
+            hideNativeEnvironment(globeViewer.scene);
+            hideNativeEnvironment(planarScene);
+            globeViewer.addController(globeEffects);
+            planarViewer.addController(planarEffects);
+            updateEffects("enabled", true);
+            document.querySelector("#enabled").checked = true;
+            driveEffectsUntilSettled();
+          }, 300);
+        });
+
+        function status(controller) {
+          if (errors.has(controller)) {
+            return `fail closed · ${errors.get(controller)}`;
+          }
+          if (!controller.enabled) {
+            return "disabled · identity";
+          }
+          return controller.ready ? "ready · HDR" : "loading / unsupported";
+        }
+        const removeGlobePostRender =
+          globeViewer.scene.postRender.addEventListener(() => {
+            document.querySelector("#globeStatus").textContent =
+              status(globeEffects);
+          });
+        const removePlanarPostRender =
+          planarViewer.scene.postRender.addEventListener(() => {
+            document.querySelector("#planarStatus").textContent =
+              status(planarEffects);
+          });
+        for (const controller of effects) {
+          controller.errorEvent.addEventListener((_owner, error) => {
+            errors.set(controller, error.message ?? String(error));
+            document.querySelector(
+              controller === globeEffects ? "#globeStatus" : "#planarStatus",
+            ).textContent = status(controller);
+            console.error(
+              "高级环境已 fail closed；关闭后重新启用可重试。",
+              error,
+            );
+          });
+        }
+
+        applyCameraPreset("ground");
+
+        let disposed = false;
+        function dispose() {
+          if (disposed) {
+            return;
+          }
+          disposed = true;
+          clearInterval(retryRenderInterval);
+          removeGlobePostRender();
+          removePlanarPostRender();
+          if (!globeViewer.isDestroyed()) {
+            globeViewer.removeController(globeEffects);
+            globeViewer = globeViewer.destroy();
+          }
+          if (!planarViewer.isDestroyed()) {
+            planarViewer.removeController(planarEffects);
+            planarViewer.removeController(planarEnvironment);
+            planarViewer = planarViewer.destroy();
+          }
+        }
+        window.addEventListener("pagehide", (event) => {
+          if (!event.persisted) {
+            dispose();
+          }
+        });
+      } catch (error) {
+        window.a2InitializationError = error.stack ?? String(error);
+        console.error(window.a2InitializationError);
+      }
+    </script>
+  </body>
+</html>

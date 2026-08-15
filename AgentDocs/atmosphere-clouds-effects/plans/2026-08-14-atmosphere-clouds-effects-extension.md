@@ -6,7 +6,7 @@
 - Status: `active`
 - Owner roles: Architecture Agent, Execution Agent
 - Created: `2026-08-14`
-- Updated: `2026-08-14`
+- Updated: `2026-08-15`
 - Branch: `feature/atmosphere-clouds-effects`
 - Current phase: A2 — Bruneton atmosphere and aerial perspective（`active`）
 - Active phase plan:
@@ -15,9 +15,13 @@
   [2026-08-14-phase-a1-render-foundation.md](2026-08-14-phase-a1-render-foundation.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
-  [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md)
+  [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
+  [ADR-0042](../../../Documentation/SceneGIS/Decisions/ADR-0042-planar-precomputed-atmosphere.md),
+  [ADR-0043](../../../Documentation/SceneGIS/Decisions/ADR-0043-atmosphere-log-depth-and-radiance-mapping.md),
+  [ADR-0044](../../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md)
 - Upstream patch: active `SGP-0008`
 - A1 implementation: `completed`
+- A2 implementation: `review-ready` (`A2R3 separate background/aerial calibration`)
 
 ## Goal
 
@@ -79,12 +83,17 @@
 order/pick/resource identity Specs；不增加可见效果或 public API。Implementation、Architecture review与本地checkpoint均已完成；
 A2已在独立planning checkpoint中激活。
 
-### A2 — Bruneton atmosphere and aerial perspective (`active`)
+### A2 — Bruneton atmosphere and aerial perspective (`completed`)
 
 依据
-[A2 phase plan](2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)与ADR-0041冻结public Controller、capability/fallback、
-resource与package contract。Globe交付combined Bruneton LUT physical sky/Sun/aerial；planar交付共享physical coefficients但几何独立的
-fixed-axis flat-slab sky/Sun/aerial。A2只消费既有SGP-0008，并在Architecture review、项目负责人manual gate与独立checkpoint前停止。
+[A2 phase plan](2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)、ADR-0041、ADR-0042与ADR-0043冻结public Controller、
+capability/fallback、resource与package contract。Globe交付combined Bruneton LUT physical sky/Sun/aerial；planar交付独立flat-slab
+precomputed LUT、multiple scattering与high-altitude-correct aerial。首次Architecture review通过，但项目负责人manual visual gate失败；
+首个A2R review target又发现capped-boundary differencing、multiple-order重复累计与irradiance定义blocker。修正版已通过第二次
+Architecture review，但第二次owner gate再次因效果弱失败；现场诊断确认log-depth aerial reconstruction与scene-linear radiance mapping
+缺失。ADR-0043 A2R2及后续RGBA16F storage-safety修正通过Architecture独立复审后，第三次owner gate又因single scale导致地表被aerial
+颜色覆盖而失败；ADR-0044 A2R3的代码、像素和视觉修正及其direct Test lint/format corrections现已通过Architecture独立复核，
+第四次project-owner visual gate也已明确通过。本change set形成A2独立本地checkpoint；A3仍需独立planning checkpoint后才能激活。
 
 ### A3 — Exponential height fog
 
