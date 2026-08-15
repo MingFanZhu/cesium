@@ -8,8 +8,9 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-15`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: none（A3 `completed`; A4 planning pending）
-- Active phase plan: none
+- Current phase: A4 — Volumetric cloud core（`active`）
+- Active phase plan:
+  [2026-08-15-phase-a4-volumetric-cloud-core.md](2026-08-15-phase-a4-volumetric-cloud-core.md)
 - Latest completed phase plan:
   [2026-08-15-phase-a3-exponential-height-fog.md](2026-08-15-phase-a3-exponential-height-fog.md)
 - Architecture decisions:
@@ -18,11 +19,13 @@
   [ADR-0042](../../../Documentation/SceneGIS/Decisions/ADR-0042-planar-precomputed-atmosphere.md),
   [ADR-0043](../../../Documentation/SceneGIS/Decisions/ADR-0043-atmosphere-log-depth-and-radiance-mapping.md),
   [ADR-0044](../../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md),
-  [ADR-0045](../../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md)
+  [ADR-0045](../../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md),
+  [ADR-0046](../../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md)
 - Upstream patch: active `SGP-0008`
 - A1 implementation: `completed`
 - A2 implementation: `completed`
 - A3 implementation: `completed`
+- A4 implementation: `active`
 
 ## Goal
 
@@ -110,10 +113,12 @@ overlay或stopped/black viewer。A3已`approved-for-owner-gate`；checkpoint与A
 项目负责人已在live dual-world Test上明确报告`通过`。A3 manual visual gate通过，本change set形成A3独立本地checkpoint；A4仍需独立
 source-based phase plan与planning checkpoint后才能激活。
 
-### A4 — Volumetric cloud core
+### A4 — Volumetric cloud core (`active`)
 
-增加 Globe shell / planar layer raymarch、shape/detail/weather/noise、Sun lighting、quality tiers和基础运动，不提前承诺 shadow 或
-temporal算法细节。
+依据[A4 phase plan](2026-08-15-phase-a4-volumetric-cloud-core.md)与ADR-0046增加single-deck Globe shell / planar slab raymarch、独立生成的
+shape/detail/weather/blue-noise assets、A2 Sun/sky lighting、three fixed quality tiers、caller-owned基础运动与A2/A3-aware cloud composition。
+使用one low-resolution two-attachment RGBA16F cloud MRT并复用现有full-resolution HDR composite；不增加`Scene.js`hook，不提前实现shadow、
+god rays或temporal history。
 
 ### A5 — Cloud shadows and crepuscular rays
 

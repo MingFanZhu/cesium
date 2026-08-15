@@ -3,8 +3,9 @@
 ## Status
 
 - Extension: `active`
-- Current phase: none（A3 `completed`; A4 planning pending）
-- Active phase plan: none
+- Current phase: A4 — Volumetric cloud core（`active`）
+- Active phase plan:
+  [2026-08-15-phase-a4-volumetric-cloud-core.md](plans/2026-08-15-phase-a4-volumetric-cloud-core.md)
 - Latest completed phase plan:
   [2026-08-15-phase-a3-exponential-height-fog.md](plans/2026-08-15-phase-a3-exponential-height-fog.md)
 - Extension plan:
@@ -15,11 +16,13 @@
   [ADR-0042](../../Documentation/SceneGIS/Decisions/ADR-0042-planar-precomputed-atmosphere.md),
   [ADR-0043](../../Documentation/SceneGIS/Decisions/ADR-0043-atmosphere-log-depth-and-radiance-mapping.md),
   [ADR-0044](../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md),
-  [ADR-0045](../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md)
+  [ADR-0045](../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md),
+  [ADR-0046](../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md)
 - Upstream patch: active `SGP-0008`
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
 - A2 checkpoint: `da2eb55743a46423e65b2047965907c05ea260b7`（未push）
+- A3 checkpoint: `43ed40117104e0450bf23dc094b2ab2e602bbfa2`（未push）
 
 ## Objective
 
@@ -37,6 +40,9 @@ reference frame，不互相伪造坐标语义。
 - A3首轮Architecture review的两个blocker均已由Execution修复并通过Architecture独立复审：Planar近水平短segment使用float32稳定的指数积分比，
   direct Test对`Scene.renderError`、有限有序frustum、新成功帧与Cesium error panel执行严格门禁；A3已
   `approved`，项目负责人live visual gate已明确通过。
+- A4已基于checkpointed A3 renderer、MRT capability、asset/package边界以及fixed reference commits完成source-based planning。Frozen scope是
+  single-deck dual-world cloud core、deterministic local assets、bounded low-resolution raymarch、A2/A3-aware composition与caller-owned motion；
+  cloud shadow/god rays、temporal history和bloom/lens flare保持在A5-A7。
 
 ## Discussions
 
@@ -58,15 +64,15 @@ reference frame，不互相伪造坐标语义。
   `packages/engine/Source/Shaders/SceneGIS/EnvironmentEffects/`
 - A2 assets/importer/generator：`packages/engine/Source/Assets/SceneGIS/Environment/BrunetonEarth/`、
   `packages/engine/Source/Assets/SceneGIS/Environment/PlanarEarth/`、`scripts/scenegis/`
+- A4 planned assets/generator：`packages/engine/Source/Assets/SceneGIS/Environment/CloudCore/`、`scripts/scenegis/`
 - Specs/manual page：`packages/engine/Specs/SceneGIS/Scene/`、`Test/高级环境.html`
 
 ## Current handoff
 
-A2已在`da2eb55743a46423e65b2047965907c05ea260b7`形成独立本地checkpoint并关闭，未push。A3保持相对A2零新增
-program/FBO/texture/upstream seam。A3-AR-001/002已关闭：Architecture独立float32复现最大相对误差为`6.4503e-8`，focused real-Context为
-`41/41`，并确认六张最终artifact的双viewer均无error overlay或stopped/black输出。Execution的严格24-state smoke为`24/24`，两个Scene的
-`renderError=0`、error panel=`0`、外部请求=`0`；installed-package与official audit通过。A3现已通过project-owner visual gate，本change
-set形成A3独立本地checkpoint且不push。A4保持inactive，等待Architecture建立独立phase plan与planning checkpoint。
+A3已在`43ed40117104e0450bf23dc094b2ab2e602bbfa2`形成独立本地checkpoint并关闭，未push。A4 phase plan与ADR-0046已冻结十个public
+cloud controls、Globe shell/Planar slab、四个deterministic package-local assets、three quality budgets、two-attachment RGBA16F cloud MRT、
+A2/A3-to-mean composition、resource ceiling和manual stop conditions。A4只消费active `SGP-0008`；`Scene.js`与upstream manifest不得改变。
+Execution从Architecture A4 planning checkpoint开始，保持实现tree未commit/未push，在review-ready或stop condition时通知Architecture。
 
 ## External references
 
