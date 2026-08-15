@@ -3,11 +3,10 @@
 ## Status
 
 - Extension: `active`
-- Current phase: A3 — Exponential height fog（`active`）
-- Active phase plan:
-  [2026-08-15-phase-a3-exponential-height-fog.md](plans/2026-08-15-phase-a3-exponential-height-fog.md)
+- Current phase: none（A3 `completed`; A4 planning pending）
+- Active phase plan: none
 - Latest completed phase plan:
-  [2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md](plans/2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)
+  [2026-08-15-phase-a3-exponential-height-fog.md](plans/2026-08-15-phase-a3-exponential-height-fog.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -35,17 +34,21 @@ reference frame，不互相伪造坐标语义。
   reference-frame contract。
 - A2经过A2R、A2R2与A2R3修正后，implementation、Architecture review和第四次project-owner visual gate均已通过；本次A2
   独立本地checkpoint关闭该阶段。
-- A3已依据A2 checkpoint后的源码事实建立phase plan与ADR-0045；implementation尚未开始。
+- A3首轮Architecture review的两个blocker均已由Execution修复并通过Architecture独立复审：Planar近水平短segment使用float32稳定的指数积分比，
+  direct Test对`Scene.renderError`、有限有序frustum、新成功帧与Cesium error panel执行严格门禁；A3已
+  `approved`，项目负责人live visual gate已明确通过。
 
 ## Discussions
 
 - [双世界环境渲染架构与参考项目取舍](discussions/2026-08-14-dual-world-render-architecture.md) — `resolved`
 - [A2 LUT 资产与 planar atmosphere 模型](discussions/2026-08-14-a2-lut-and-planar-model.md) — `resolved`
+- [A3 default height-fog washout](discussions/2026-08-15-a3-default-fog-washout.md) — `resolved`
 
 ## Reviews
 
 - [A1 render foundation implementation review](reviews/2026-08-14-a1-render-foundation.md) — `approved`
 - [A2 Bruneton atmosphere and aerial perspective implementation review](reviews/2026-08-14-a2-bruneton-atmosphere-aerial-perspective.md) — `approved`
+- [A3 exponential height fog implementation review](reviews/2026-08-15-a3-exponential-height-fog.md) — `approved`
 
 ## Engineering paths
 
@@ -59,10 +62,11 @@ reference frame，不互相伪造坐标语义。
 
 ## Current handoff
 
-A2已在`da2eb55743a46423e65b2047965907c05ea260b7`形成独立本地checkpoint并关闭，未push。A3现已激活：ADR-0045冻结single-layer
-dual-world exponential height fog、九个warm public controls、Globe radial/Planar fixed-Z积分、atmosphere-aware但独立calibrated fog source、
-native `Fog`互斥，以及相对A2零新增program/FBO/texture/upstream seam的边界。Execution从A3 planning checkpoint开始实现，完成后必须以
-uncommitted review target停下；Architecture review和project-owner visual gate之前不得checkpoint或进入A4。
+A2已在`da2eb55743a46423e65b2047965907c05ea260b7`形成独立本地checkpoint并关闭，未push。A3保持相对A2零新增
+program/FBO/texture/upstream seam。A3-AR-001/002已关闭：Architecture独立float32复现最大相对误差为`6.4503e-8`，focused real-Context为
+`41/41`，并确认六张最终artifact的双viewer均无error overlay或stopped/black输出。Execution的严格24-state smoke为`24/24`，两个Scene的
+`renderError=0`、error panel=`0`、外部请求=`0`；installed-package与official audit通过。A3现已通过project-owner visual gate，本change
+set形成A3独立本地checkpoint且不push。A4保持inactive，等待Architecture建立独立phase plan与planning checkpoint。
 
 ## External references
 

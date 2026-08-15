@@ -24,6 +24,7 @@ import brunetonRuntimeSource from "../../../Shaders/SceneGIS/EnvironmentEffects/
 import aerialFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS.js";
 import atmosphereSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
 import backgroundFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS.js";
+import heightFogSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISExponentialHeightFog.js";
 import vertexSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsVS.js";
 import SceneGISAtmosphereReferenceFrame from "./_SceneGISAtmosphereReferenceFrame.js";
 import SceneGISEnvironmentEffectsPipeline from "./_SceneGISEnvironmentEffectsPipeline.js";
@@ -109,9 +110,10 @@ function createProgram(context, fragmentSource, globe, additionalDefines) {
         brunetonCommonSource,
         brunetonRuntimeSource,
         atmosphereSource,
+        heightFogSource,
         fragmentSource,
       ]
-    : [atmosphereSource, fragmentSource];
+    : [atmosphereSource, heightFogSource, fragmentSource];
   const fragmentShaderSource = new ShaderSource({
     defines,
     sources,
@@ -274,6 +276,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._resources = undefined;
   this._showAtmosphere = true;
   this._showAerialPerspective = true;
+  this._showHeightFog = true;
   this._frame = SceneGISAtmosphereReferenceFrame.createSnapshot();
   this._scratchFrame = SceneGISAtmosphereReferenceFrame.createSnapshot();
   this._frustum = new Cartesian4();
@@ -297,6 +300,18 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_altitude: () => that._frame.altitude,
     u_backgroundRadianceScale: () => that._owner._backgroundRadianceScale,
     u_aerialRadianceScale: () => that._owner._aerialRadianceScale,
+    u_showAerialPerspective: () => that._showAerialPerspective,
+    u_showHeightFog: () => that._showHeightFog,
+    u_heightFogDensity: () => that._owner._heightFogDensity,
+    u_heightFogHeightFalloff: () => that._owner._heightFogHeightFalloff,
+    u_heightFogBaseHeight: () => that._owner._heightFogBaseHeight,
+    u_heightFogStartDistance: () => that._owner._heightFogStartDistance,
+    u_heightFogMaximumOpacity: () => that._owner._heightFogMaximumOpacity,
+    u_heightFogInscatteringScale: () => that._owner._heightFogInscatteringScale,
+    u_heightFogDirectionalInscatteringScale: () =>
+      that._owner._heightFogDirectionalInscatteringScale,
+    u_heightFogDirectionalInscatteringExponent: () =>
+      that._owner._heightFogDirectionalInscatteringExponent,
     u_colorTexture: () => that._inputColorTexture,
     u_depthTexture: () => that._depthTexture,
     u_transmittanceTexture: () => that._resources?.transmittanceTexture,
@@ -328,9 +343,11 @@ SceneGISEnvironmentEffectsRenderer.prototype.hasResources = function () {
 SceneGISEnvironmentEffectsRenderer.prototype.setShow = function (
   showAtmosphere,
   showAerialPerspective,
+  showHeightFog,
 ) {
   this._showAtmosphere = showAtmosphere;
   this._showAerialPerspective = showAerialPerspective;
+  this._showHeightFog = showHeightFog;
 };
 
 SceneGISEnvironmentEffectsRenderer.prototype.renderBackground = function (
@@ -395,7 +412,10 @@ SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
   idTexture,
 ) {
   void idTexture;
-  if (!this._showAerialPerspective || !defined(this._resources)) {
+  if (
+    (!this._showAerialPerspective && !this._showHeightFog) ||
+    !defined(this._resources)
+  ) {
     return colorTexture;
   }
   if (!this._owner._validateRenderFrame()) {

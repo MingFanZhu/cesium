@@ -29,17 +29,17 @@ Framebuffer。
 
 `SceneGISEnvironmentEffects`增加以下constructor option与同名writable property；所有数值必须finite并在闭区间内：
 
-| Property                                   |   Default |             Range | Meaning                                                       |
-| ------------------------------------------ | --------: | ----------------: | ------------------------------------------------------------- |
-| `showHeightFog`                            |    `true` |           boolean | 独立启用height fog；global `enabled`仍default `false`         |
-| `heightFogDensity`                         | `0.00004` |      `[0, 0.001]` | base height处的每米extinction coefficient                     |
-| `heightFogHeightFalloff`                   |  `0.0002` |      `[0, 0.001]` | 每米指数衰减；`0`表示uniform fog                              |
-| `heightFogBaseHeight`                      |     `0.0` | `[-60000, 60000]` | 相对world reference ground的米制density reference             |
-| `heightFogStartDistance`                   |   `250.0` |     `[0, 300000]` | 从每pixel ray origin起不施加fog的距离                         |
-| `heightFogMaximumOpacity`                  |    `0.85` |          `[0, 1]` | 仅限制height fog extinction/inscattering，不限制A2 atmosphere |
-| `heightFogInscatteringScale`               |    `0.35` |         `[0, 64]` | ambient fog source的scene-linear calibration                  |
-| `heightFogDirectionalInscatteringScale`    |    `0.15` |         `[0, 64]` | view-to-Sun directional lobe的scene-linear calibration        |
-| `heightFogDirectionalInscatteringExponent` |     `8.0` |        `[1, 128]` | directional lobe exponent                                     |
+| Property                                   |    Default |             Range | Meaning                                                       |
+| ------------------------------------------ | ---------: | ----------------: | ------------------------------------------------------------- |
+| `showHeightFog`                            |     `true` |           boolean | 独立启用height fog；global `enabled`仍default `false`         |
+| `heightFogDensity`                         | `0.000008` |      `[0, 0.001]` | base height处的每米extinction coefficient                     |
+| `heightFogHeightFalloff`                   |   `0.0002` |      `[0, 0.001]` | 每米指数衰减；`0`表示uniform fog                              |
+| `heightFogBaseHeight`                      |      `0.0` | `[-60000, 60000]` | 相对world reference ground的米制density reference             |
+| `heightFogStartDistance`                   |    `250.0` |     `[0, 300000]` | 从每pixel ray origin起不施加fog的距离                         |
+| `heightFogMaximumOpacity`                  |     `0.70` |          `[0, 1]` | 仅限制height fog extinction/inscattering，不限制A2 atmosphere |
+| `heightFogInscatteringScale`               |     `0.35` |         `[0, 64]` | ambient fog source的scene-linear calibration                  |
+| `heightFogDirectionalInscatteringScale`    |     `0.15` |         `[0, 64]` | view-to-Sun directional lobe的scene-linear calibration        |
+| `heightFogDirectionalInscatteringExponent` |      `8.0` |        `[1, 128]` | directional lobe exponent                                     |
 
 Setter只更新uniform source并在active、connected且值实际变化时`requestRender`。不得触发asset fetch、shader compile、generation replacement、
 FBO/texture/program重建或lifecycle churn。A3不增加public color、second layer、distance cap、quality tier或native-culling option；后续phase若有
@@ -81,9 +81,29 @@ authority。
 
 Fog color不是public hard-coded blue，也不消费`backgroundRadianceScale`或`aerialRadianceScale`。Shader在裁剪段的稳定代表点使用A2既有
 world-specific Sun transmittance/ground-occlusion authority，形成finite、non-negative的Sun color；ambient使用Sun color与shared
-Rayleigh/Mie coefficients形成luminance-normalized chromaticity，directional项使用Sun chromaticity和
+Rayleigh/Mie coefficients形成fixed-reference normalized source，directional项使用同一fixed-reference rule和
 `pow(max(dot(viewToSun, 0)), exponent)`。两项只分别乘自己的A3 scale。Sun在地平线下或transmittance近零时对应项为零，不允许用隐藏fallback
 颜色维持白天亮度。
+
+2026-08-15的bounded calibration amendment冻结下列定义：
+
+```text
+ambientNumerator = max(sunColor * (RAYLEIGH + MIE_SCATTERING), 0)
+ambientDenominator = maxComponent(
+    SOLAR_IRRADIANCE * (RAYLEIGH + MIE_SCATTERING))
+ambientSource = ambientNumerator / max(ambientDenominator, epsilon)
+directionalSource = max(sunColor, 0) /
+    max(maxComponent(SOLAR_IRRADIANCE), epsilon)
+fogSource = ambientSource * heightFogInscatteringScale +
+    directionalSource * directionalLobe *
+        heightFogDirectionalInscatteringScale
+```
+
+分母是fixed top-of-atmosphere reference，不得再用当前pixel numerator的
+luminance或max component重新归一化。这保留world-specific Sun transmittance的
+magnitude与spectral shift；unattenuated top-of-atmosphere的两类source component peak均不超过
+`1`。只可将finite计算roundoff限制为non-negative并继续使用已接受的
+RGBA16F final storage guard，不得增加fog-source clamp或隐藏multiplier。
 
 该定义共享光学/Sun authority但保持独立scene-linear calibration，因此A3调雾不会改变A2 sky或aerial radiance，A2两个scale的变化也不会改变
 fog-only输出。每pixel新增的Sun-transmittance lookup必须有固定上界并写入shader contract evidence。

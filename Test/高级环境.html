@@ -98,13 +98,16 @@
   <body>
     <main>
       <header>
-        <h1>A2R3 Bruneton 大气与空气透视（本地、零网络）</h1>
+        <h1>A3 双世界大气、空气透视与指数高度雾（本地、零网络）</h1>
         <div class="controls">
           <label><input id="enabled" type="checkbox" />启用</label>
           <label
             ><input id="atmosphere" type="checkbox" checked />天空与太阳</label
           >
           <label><input id="aerial" type="checkbox" checked />空气透视</label>
+          <label
+            ><input id="heightFog" type="checkbox" checked />指数高度雾</label
+          >
           <label
             >Background radiance
             <input
@@ -116,6 +119,106 @@
               value="10"
             />
             <output id="backgroundRadianceScaleValue">10</output></label
+          >
+          <label
+            >Fog density
+            <input
+              id="heightFogDensity"
+              type="range"
+              min="0"
+              max="0.001"
+              step="0.00001"
+              value="0.000008"
+            />
+            <output id="heightFogDensityValue">0.000008</output></label
+          >
+          <label
+            >Fog falloff
+            <input
+              id="heightFogHeightFalloff"
+              type="range"
+              min="0"
+              max="0.001"
+              step="0.00005"
+              value="0.0002"
+            />
+            <output id="heightFogHeightFalloffValue">0.0002</output></label
+          >
+          <label
+            >Fog base Z
+            <input
+              id="heightFogBaseHeight"
+              type="range"
+              min="-60000"
+              max="60000"
+              step="100"
+              value="0"
+            />
+            <output id="heightFogBaseHeightValue">0</output></label
+          >
+          <label
+            >Fog start
+            <input
+              id="heightFogStartDistance"
+              type="range"
+              min="0"
+              max="300000"
+              step="50"
+              value="250"
+            />
+            <output id="heightFogStartDistanceValue">250</output></label
+          >
+          <label
+            >Fog max opacity
+            <input
+              id="heightFogMaximumOpacity"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.70"
+            />
+            <output id="heightFogMaximumOpacityValue">0.70</output></label
+          >
+          <label
+            >Fog ambient
+            <input
+              id="heightFogInscatteringScale"
+              type="range"
+              min="0"
+              max="64"
+              step="0.05"
+              value="0.35"
+            />
+            <output id="heightFogInscatteringScaleValue">0.35</output></label
+          >
+          <label
+            >Fog directional
+            <input
+              id="heightFogDirectionalInscatteringScale"
+              type="range"
+              min="0"
+              max="64"
+              step="0.05"
+              value="0.15"
+            />
+            <output id="heightFogDirectionalInscatteringScaleValue"
+              >0.15</output
+            ></label
+          >
+          <label
+            >Fog lobe exponent
+            <input
+              id="heightFogDirectionalInscatteringExponent"
+              type="range"
+              min="1"
+              max="128"
+              step="1"
+              value="8"
+            />
+            <output id="heightFogDirectionalInscatteringExponentValue"
+              >8</output
+            ></label
           >
           <label
             >Aerial radiance
@@ -135,8 +238,13 @@
           <button id="ground" type="button">地面</button>
           <button id="air" type="button">空中</button>
           <button id="high" type="button">高空</button>
+          <button id="highMiss" type="button">高空不穿层</button>
+          <button id="perspective" type="button">Perspective</button>
+          <button id="orthographic" type="button">Orthographic</button>
           <button id="diagnostic" type="button">对比 enabled / identity</button>
-          <button id="nativeConflict" type="button">注入 native 冲突</button>
+          <button id="nativeConflict" type="button">
+            注入 native Fog 冲突
+          </button>
           <button id="simpleConflict" type="button">
             注入 planar simple 冲突
           </button>
@@ -246,15 +354,57 @@
         });
         globeViewer.addController(globeEffects);
         const globeBoxDimensions = new Cesium.Cartesian3(
-          40000.0,
-          40000.0,
-          40000.0,
+          4000.0,
+          4000.0,
+          4000.0,
+        );
+        const globeComparisonPositions = [
+          Cesium.Cartesian3.fromDegrees(121.47, 31.3, 1000.0),
+          Cesium.Cartesian3.fromDegrees(121.57, 31.55, 1000.0),
+        ];
+        const globeGroundCameraPosition = Cesium.Cartesian3.fromDegrees(
+          121.5,
+          31.2,
+          2000.0,
+        );
+        const globeGroundTarget = Cesium.Cartesian3.midpoint(
+          globeComparisonPositions[0],
+          globeComparisonPositions[1],
+          new Cesium.Cartesian3(),
+        );
+        const globeGroundDirection = Cesium.Cartesian3.normalize(
+          Cesium.Cartesian3.subtract(
+            globeGroundTarget,
+            globeGroundCameraPosition,
+            new Cesium.Cartesian3(),
+          ),
+          new Cesium.Cartesian3(),
+        );
+        const globeGroundNormal = Cesium.Cartesian3.normalize(
+          globeGroundCameraPosition,
+          new Cesium.Cartesian3(),
+        );
+        const globeGroundRight = Cesium.Cartesian3.normalize(
+          Cesium.Cartesian3.cross(
+            globeGroundDirection,
+            globeGroundNormal,
+            new Cesium.Cartesian3(),
+          ),
+          new Cesium.Cartesian3(),
+        );
+        const globeGroundUp = Cesium.Cartesian3.normalize(
+          Cesium.Cartesian3.cross(
+            globeGroundRight,
+            globeGroundDirection,
+            new Cesium.Cartesian3(),
+          ),
+          new Cesium.Cartesian3(),
         );
         const globeNearTransform = Cesium.Transforms.eastNorthUpToFixedFrame(
-          Cesium.Cartesian3.fromDegrees(121.5, 31.2, 20000.0),
+          globeComparisonPositions[0],
         );
         const globeFarTransform = Cesium.Transforms.eastNorthUpToFixedFrame(
-          Cesium.Cartesian3.fromDegrees(122.7, 31.2, 20000.0),
+          globeComparisonPositions[1],
         );
         globeViewer.scene.primitives.add(
           new Cesium.Primitive({
@@ -277,7 +427,7 @@
                 modelMatrix: globeFarTransform,
                 attributes: {
                   color: Cesium.ColorGeometryInstanceAttribute.fromColor(
-                    Cesium.Color.YELLOW,
+                    Cesium.Color.WHITE,
                   ),
                 },
               }),
@@ -355,6 +505,80 @@
         window.planarEnvironment = planarEnvironment;
         window.environmentDiagnostics = {};
 
+        const environmentRenderEvidence = {
+          renderErrors: [],
+          successfulFrames: {
+            globe: 0,
+            planar: 0,
+          },
+        };
+        function recordRenderError(world, _scene, error) {
+          environmentRenderEvidence.renderErrors.push({
+            world,
+            message: error?.message ?? String(error),
+          });
+        }
+        const removeGlobeRenderError =
+          globeViewer.scene.renderError.addEventListener((scene, error) => {
+            recordRenderError("globe", scene, error);
+          });
+        const removePlanarRenderError =
+          planarScene.renderError.addEventListener((scene, error) => {
+            recordRenderError("planar", scene, error);
+          });
+
+        function finiteOrderedFrustum(scene) {
+          const frustum = scene.camera.frustum;
+          const common =
+            Number.isFinite(frustum.near) &&
+            Number.isFinite(frustum.far) &&
+            frustum.near > 0.0 &&
+            frustum.far > frustum.near;
+          if (!common) {
+            return false;
+          }
+          if (frustum instanceof Cesium.OrthographicFrustum) {
+            const bounds = frustum.offCenterFrustum;
+            return (
+              Number.isFinite(bounds.left) &&
+              Number.isFinite(bounds.right) &&
+              Number.isFinite(bounds.bottom) &&
+              Number.isFinite(bounds.top) &&
+              bounds.right > bounds.left &&
+              bounds.top > bounds.bottom
+            );
+          }
+          const nearTop =
+            frustum.near * Math.tan(0.5 * (frustum.fovy ?? frustum.fov));
+          const nearRight = nearTop * frustum.aspectRatio;
+          return (
+            Number.isFinite(nearTop) &&
+            Number.isFinite(nearRight) &&
+            nearTop > 0.0 &&
+            nearRight > 0.0
+          );
+        }
+
+        function visibleCesiumErrorPanels() {
+          return Array.from(
+            document.querySelectorAll(".cesium-widget-errorPanel"),
+          ).filter((panel) => {
+            const style = getComputedStyle(panel);
+            return style.display !== "none" && style.visibility !== "hidden";
+          });
+        }
+
+        window.environmentRenderEvidence = environmentRenderEvidence;
+        window.validateEnvironmentRenderState = function () {
+          return {
+            renderErrors: environmentRenderEvidence.renderErrors.slice(),
+            successfulFrames: { ...environmentRenderEvidence.successfulFrames },
+            globeFrustumValid: finiteOrderedFrustum(globeViewer.scene),
+            planarFrustumValid: finiteOrderedFrustum(planarScene),
+            visibleErrorPanels: visibleCesiumErrorPanels().length,
+          };
+        };
+
         const effects = [globeEffects, planarEffects];
         let currentLighting = "day";
         let currentCameraPreset = "ground";
@@ -404,9 +628,22 @@
           .addEventListener("change", (event) => {
             updateEffects("showAerialPerspective", event.target.checked);
           });
+        document
+          .querySelector("#heightFog")
+          .addEventListener("change", (event) => {
+            updateEffects("showHeightFog", event.target.checked);
+          });
         for (const property of [
           "backgroundRadianceScale",
           "aerialRadianceScale",
+          "heightFogDensity",
+          "heightFogHeightFalloff",
+          "heightFogBaseHeight",
+          "heightFogStartDistance",
+          "heightFogMaximumOpacity",
+          "heightFogInscatteringScale",
+          "heightFogDirectionalInscatteringScale",
+          "heightFogDirectionalInscatteringExponent",
         ]) {
           document
             .querySelector(`#${property}`)
@@ -452,6 +689,9 @@
         const cameraPresets = {
           ground: {
             globeAltitude: 2000.0,
+            globeDestination: globeGroundCameraPosition,
+            globeDirection: globeGroundDirection,
+            globeUp: globeGroundUp,
             planarPosition: new Cesium.Cartesian3(0.0, -180000.0, 5000.0),
           },
           air: {
@@ -462,37 +702,54 @@
             globeAltitude: 250000.0,
             planarPosition: new Cesium.Cartesian3(0.0, -900000.0, 120000.0),
           },
+          highMiss: {
+            globeAltitude: 250000.0,
+            globePitch: 0.0,
+            planarPosition: new Cesium.Cartesian3(0.0, -900000.0, 120000.0),
+            planarDirection: Cesium.Cartesian3.UNIT_Y,
+          },
         };
         function applyCameraPreset(name) {
           currentCameraPreset = name;
           const preset = cameraPresets[name];
           globeViewer.camera.setView({
-            destination: Cesium.Cartesian3.fromDegrees(
-              121.5,
-              31.2,
-              preset.globeAltitude,
-            ),
-            orientation: {
-              heading: 0.0,
-              pitch: Cesium.Math.toRadians(-12.0),
-              roll: 0.0,
-            },
+            destination:
+              preset.globeDestination ??
+              Cesium.Cartesian3.fromDegrees(121.5, 31.2, preset.globeAltitude),
+            orientation: Cesium.defined(preset.globeDirection)
+              ? {
+                  direction: preset.globeDirection,
+                  up: preset.globeUp,
+                }
+              : {
+                  heading: 0.0,
+                  pitch: preset.globePitch ?? Cesium.Math.toRadians(-12.0),
+                  roll: 0.0,
+                },
           });
           planarViewer.camera.setView({
             destination: preset.planarPosition,
             orientation: {
-              direction: new Cesium.Cartesian3(0.0, 0.98, -0.2),
+              direction:
+                preset.planarDirection ??
+                new Cesium.Cartesian3(0.0, 0.98, -0.2),
               up: new Cesium.Cartesian3(0.0, 0.2, 0.98),
             },
           });
           const direction = Cesium.Cartesian3.normalize(
-            new Cesium.Cartesian3(0.0, 0.98, -0.2),
+            preset.planarDirection ?? new Cesium.Cartesian3(0.0, 0.98, -0.2),
             new Cesium.Cartesian3(),
           );
           const altitude = preset.planarPosition.z;
-          const slabEntry =
-            altitude > 60000.0 ? (altitude - 60000.0) / -direction.z : 0.0;
-          const slabExit = altitude / -direction.z;
+          const intersectsSlab = altitude <= 60000.0 || direction.z < -1.0e-7;
+          const slabEntry = intersectsSlab
+            ? altitude > 60000.0
+              ? (altitude - 60000.0) / -direction.z
+              : 0.0
+            : Number.POSITIVE_INFINITY;
+          const slabExit = intersectsSlab
+            ? altitude / Math.max(-direction.z, 1.0e-7)
+            : Number.POSITIVE_INFINITY;
           const boxDistances = planarComparisonBoxes.map(({ position }) =>
             Cesium.Cartesian3.distance(preset.planarPosition, position),
           );
@@ -507,16 +764,49 @@
           globeViewer.scene.requestRender();
           planarScene.requestRender();
         }
-        for (const name of ["ground", "air", "high"]) {
+        for (const name of ["ground", "air", "high", "highMiss"]) {
           document.querySelector(`#${name}`).addEventListener("click", () => {
             applyCameraPreset(name);
           });
         }
+        document.querySelector("#perspective").addEventListener("click", () => {
+          globeViewer.camera.switchToPerspectiveFrustum();
+          planarViewer.camera.switchToPerspectiveFrustum();
+          globeViewer.scene.requestRender();
+          planarScene.requestRender();
+        });
+        document
+          .querySelector("#orthographic")
+          .addEventListener("click", () => {
+            const widths = {
+              ground: 200000.0,
+              air: 700000.0,
+              high: 1500000.0,
+              highMiss: 1500000.0,
+            };
+            globeViewer.camera.switchToOrthographicFrustum();
+            planarViewer.camera.switchToOrthographicFrustum();
+            for (const camera of [globeViewer.camera, planarViewer.camera]) {
+              camera.frustum.width = widths[currentCameraPreset];
+              camera.frustum.near = 1.0;
+              camera.frustum.far = 20000000.0;
+            }
+            globeViewer.scene.requestRender();
+            planarScene.requestRender();
+          });
 
         function nextRenderedSamples(scene) {
-          return new Promise((resolve) => {
+          return new Promise((resolve, reject) => {
+            const removeError = scene.renderError.addEventListener(
+              (_renderScene, error) => {
+                remove();
+                removeError();
+                reject(error);
+              },
+            );
             const remove = scene.postRender.addEventListener(() => {
               remove();
+              removeError();
               const width = scene.context.drawingBufferWidth;
               const height = scene.context.drawingBufferHeight;
               resolve({
@@ -557,6 +847,56 @@
           };
         }
 
+        function targetRegion(
+          scene,
+          rendered,
+          position,
+          radiusFraction = 0.025,
+        ) {
+          const windowPosition =
+            Cesium.SceneTransforms.worldToWindowCoordinates(scene, position);
+          const radius = Math.max(
+            12,
+            Math.floor(
+              Math.min(rendered.width, rendered.height) * radiusFraction,
+            ),
+          );
+          const finiteProjection =
+            Cesium.defined(windowPosition) &&
+            Number.isFinite(windowPosition.x) &&
+            Number.isFinite(windowPosition.y);
+          if (!finiteProjection) {
+            return { available: false };
+          }
+          const centerX = Math.round(windowPosition.x);
+          const centerY = Math.round(rendered.height - windowPosition.y);
+          const region = {
+            x: centerX - radius,
+            y: centerY - radius,
+            width: radius * 2,
+            height: radius * 2,
+          };
+          const inside =
+            region.x >= 0 &&
+            region.y >= 0 &&
+            region.x + region.width <= rendered.width &&
+            region.y + region.height <= rendered.height;
+          return {
+            available: inside,
+            projection: { x: windowPosition.x, y: windowPosition.y },
+            region,
+          };
+        }
+
+        function regionsOverlap(left, right) {
+          return !(
+            left.x + left.width <= right.x ||
+            right.x + right.width <= left.x ||
+            left.y + left.height <= right.y ||
+            right.y + right.height <= left.y
+          );
+        }
+
         async function diagnoseController(controller, scene, output, name) {
           if (!controller.enabled || !controller.ready) {
             output.textContent = "pass matrix · 请先启用并等待 ready";
@@ -564,17 +904,74 @@
           }
           const showAtmosphere = controller.showAtmosphere;
           const showAerialPerspective = controller.showAerialPerspective;
+          const showHeightFog = controller.showHeightFog;
           controller.showAtmosphere = false;
           controller.showAerialPerspective = false;
+          controller.showHeightFog = false;
           const identity = await nextRenderedSamples(scene);
           const matrix = {};
+          let globeTargetEvidence;
+          const planarFarTarget =
+            name === "planar"
+              ? targetRegion(
+                  scene,
+                  identity,
+                  planarComparisonBoxes[1].position,
+                  0.04,
+                )
+              : undefined;
+          if (name === "globe") {
+            const targetRegions = globeComparisonPositions.map((position) =>
+              targetRegion(scene, identity, position),
+            );
+            const distances = globeComparisonPositions.map((position) =>
+              Cesium.Cartesian3.distance(scene.camera.positionWC, position),
+            );
+            const projectionsAvailable = targetRegions.every(
+              ({ available }) => available,
+            );
+            const distinct =
+              projectionsAvailable &&
+              !regionsOverlap(targetRegions[0].region, targetRegions[1].region);
+            globeTargetEvidence = {
+              available:
+                projectionsAvailable && distinct && distances[1] > distances[0],
+              distances,
+              distanceOrdered: distances[1] > distances[0],
+              distinct,
+              targets: targetRegions,
+            };
+            matrix.targetEvidence = globeTargetEvidence;
+          }
           for (const pass of [
-            { name: "background", atmosphere: true, aerial: false },
-            { name: "aerial", atmosphere: false, aerial: true },
-            { name: "combined", atmosphere: true, aerial: true },
+            {
+              name: "background",
+              atmosphere: true,
+              aerial: false,
+              fog: false,
+            },
+            {
+              name: "aerial",
+              atmosphere: false,
+              aerial: true,
+              fog: false,
+            },
+            {
+              name: "fog",
+              atmosphere: false,
+              aerial: false,
+              fog: true,
+            },
+            {
+              name: "combined",
+              atmosphere: true,
+              aerial: true,
+              fog: true,
+            },
           ]) {
             controller.showAtmosphere = pass.atmosphere;
             controller.showAerialPerspective = pass.aerial;
+            controller.showHeightFog = pass.fog;
             const rendered = await nextRenderedSamples(scene);
             const groundRegion = {
               x: Math.floor(rendered.width * 0.25),
@@ -582,21 +979,57 @@
               width: Math.floor(rendered.width * 0.5),
               height: Math.floor(rendered.height * 0.3),
             };
+            const planarNearRegion = {
+              x: Math.floor(rendered.width * 0.1),
+              y: Math.floor(rendered.height * 0.12),
+              width: Math.floor(rendered.width * 0.3),
+              height: Math.floor(rendered.height * 0.35),
+            };
+            const nearRegion =
+              name === "globe"
+                ? globeTargetEvidence.available
+                  ? globeTargetEvidence.targets[0].region
+                  : undefined
+                : planarNearRegion;
+            const farRegion =
+              name === "globe"
+                ? globeTargetEvidence.available
+                  ? globeTargetEvidence.targets[1].region
+                  : undefined
+                : planarFarTarget.available
+                  ? planarFarTarget.region
+                  : undefined;
+            const unavailableDelta = {
+              delta: 0,
+              maximumDelta: 0,
+              changedPixels: 0,
+              meanChangedDelta: 0,
+              unavailable: true,
+            };
             matrix[pass.name] = {
               ...measureDelta(rendered, identity),
               groundRoi: measureDelta(rendered, identity, groundRegion),
+              nearRoi: Cesium.defined(nearRegion)
+                ? measureDelta(rendered, identity, nearRegion)
+                : unavailableDelta,
+              farRoi: Cesium.defined(farRegion)
+                ? measureDelta(rendered, identity, farRegion)
+                : unavailableDelta,
               groundRegion,
+              nearRegion,
+              farRegion,
             };
           }
           controller.showAtmosphere = showAtmosphere;
           controller.showAerialPerspective = showAerialPerspective;
+          controller.showHeightFog = showHeightFog;
           scene.requestRender();
           window.environmentDiagnostics[name] = matrix;
           const describe = (pass) => {
             const value = matrix[pass];
             const requiresFloor =
               currentLighting !== "night" &&
-              (currentCameraPreset !== "high" || pass !== "background");
+              (currentCameraPreset !== "highMiss" || pass === "aerial");
             const expectation = requiresFloor
               ? value.maximumDelta >= 8 && value.changedPixels > 0
                 ? "required≥8 PASS"
@@ -608,21 +1041,38 @@
                 : "high background observational";
             const mean = value.meanChangedDelta.toFixed(2);
             const groundMean = value.groundRoi.meanChangedDelta.toFixed(2);
+            const nearMean = value.nearRoi.meanChangedDelta.toFixed(2);
+            const farMean = value.farRoi.meanChangedDelta.toFixed(2);
             const requiresSurfaceRetention =
               currentLighting === "day" &&
               currentCameraPreset === "ground" &&
-              pass === "aerial";
+              (pass === "aerial" || pass === "fog");
+            const surfaceLimit = pass === "fog" ? 24 : 32;
             const surfaceExpectation = requiresSurfaceRetention
               ? value.meanChangedDelta > 0 &&
-                value.meanChangedDelta <= 32 &&
+                value.meanChangedDelta <= surfaceLimit &&
                 value.groundRoi.meanChangedDelta > 0 &&
-                value.groundRoi.meanChangedDelta <= 32
-                ? "surface≤32 PASS"
-                : "surface≤32 FAIL"
+                value.groundRoi.meanChangedDelta <= surfaceLimit
+                ? `surface≤${surfaceLimit} PASS`
+                : `surface≤${surfaceLimit} FAIL`
               : "";
-            return `${pass} L1=${value.delta} max=${value.maximumDelta} changed=${value.changedPixels} mean=${mean} groundROImean=${groundMean} ${expectation} ${surfaceExpectation}`;
+            const distanceExpectation =
+              pass === "fog" && currentCameraPreset === "ground"
+                ? name === "globe" && !matrix.targetEvidence.available
+                  ? "target diagnostic unavailable FAIL"
+                  : value.nearRoi.changedPixels > 0 &&
+                      value.farRoi.changedPixels > 0 &&
+                      value.farRoi.meanChangedDelta >
+                        value.nearRoi.meanChangedDelta
+                    ? `far>near PASS margin=${(
+                        value.farRoi.meanChangedDelta -
+                        value.nearRoi.meanChangedDelta
+                      ).toFixed(2)}`
+                    : "far>near FAIL"
+                : "";
+            return `${pass} L1=${value.delta} max=${value.maximumDelta} changed=${value.changedPixels} mean=${mean} groundROImean=${groundMean} near=${nearMean} far=${farMean} ${expectation} ${surfaceExpectation} ${distanceExpectation}`;
           };
-          output.textContent = `${describe("background")} · ${describe("aerial")} · ${describe("combined")}`;
+          output.textContent = `${describe("background")} · ${describe("aerial")} · ${describe("fog")} · ${describe("combined")}`;
           return matrix;
         }
 
@@ -646,25 +1096,11 @@
           });
 
         const errors = new Map();
-        const injectedNativeAtmospheres = new Map();
         function revealNativeConflict(scene) {
-          if (!scene.skyAtmosphere) {
-            scene.skyAtmosphere = new Cesium.SkyAtmosphere();
-            injectedNativeAtmospheres.set(scene, scene.skyAtmosphere);
-          }
-          scene.skyAtmosphere.show = true;
+          scene.fog.enabled = true;
         }
-        function removeInjectedNativeConflict(scene, finalize) {
-          const atmosphere = injectedNativeAtmospheres.get(scene);
-          if (scene.skyAtmosphere === atmosphere) {
-            scene.skyAtmosphere = undefined;
-          }
-          if (finalize && atmosphere && !atmosphere.isDestroyed()) {
-            atmosphere.destroy();
-          }
-          if (finalize) {
-            injectedNativeAtmospheres.delete(scene);
-          }
+        function removeInjectedNativeConflict(scene) {
+          scene.fog.enabled = false;
         }
         document
           .querySelector("#nativeConflict")
@@ -678,6 +1114,7 @@
               return;
             }
             revealNativeConflict(globeViewer.scene);
+            revealNativeConflict(planarScene);
             globeViewer.scene.requestRender();
           });
         document
@@ -729,11 +1166,13 @@
         }
         const removeGlobePostRender =
           globeViewer.scene.postRender.addEventListener(() => {
+            environmentRenderEvidence.successfulFrames.globe++;
             document.querySelector("#globeStatus").textContent =
               status(globeEffects);
           });
         const removePlanarPostRender =
           planarViewer.scene.postRender.addEventListener(() => {
+            environmentRenderEvidence.successfulFrames.planar++;
             document.querySelector("#planarStatus").textContent =
               status(planarEffects);
           });
@@ -761,6 +1200,8 @@
           clearInterval(retryRenderInterval);
           removeGlobePostRender();
           removePlanarPostRender();
+          removeGlobeRenderError();
+          removePlanarRenderError();
           if (!globeViewer.isDestroyed()) {
             globeViewer.removeController(globeEffects);
             globeViewer = globeViewer.destroy();

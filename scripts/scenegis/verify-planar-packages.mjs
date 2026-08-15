@@ -162,6 +162,7 @@ const sceneGISShaderSources = [
   "EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsVS",
+  "EnvironmentEffects/SceneGISExponentialHeightFog",
   "PlanarGround/SceneGISPlanarGroundAreaFS",
   "PlanarGround/SceneGISPlanarGroundAreaVS",
   "PlanarGround/SceneGISPlanarGroundLineFS",
@@ -281,10 +282,7 @@ function verifyPlanarEarthDelivery(root) {
     fs.readFileSync(path.join(root, "provenance.json"), "utf8"),
   );
   assert.equal(provenance.preset, "earth-flat-precomputed-v1");
-  assert.equal(
-    provenance.generator.version,
-    "scene-gis-flat-atmosphere-2",
-  );
+  assert.equal(provenance.generator.version, "scene-gis-flat-atmosphere-2");
   assert.deepEqual(provenance.transport.multipleScatteringOrders, [2, 3, 4]);
   assert.match(provenance.transport.boundaryEvaluation, /true slab boundary/);
   assert.match(provenance.transport.segmentTransmittance, /runtime analytic/);
@@ -501,13 +499,40 @@ assert.equal(globeEffects.world, undefined);
 assert.equal(globeEffects.enabled, false);
 assert.equal(globeEffects.showAtmosphere, true);
 assert.equal(globeEffects.showAerialPerspective, true);
+assert.equal(globeEffects.showHeightFog, true);
 assert.equal(globeEffects.backgroundRadianceScale, 10.0);
 assert.equal(globeEffects.aerialRadianceScale, 1.0);
+assert.equal(globeEffects.heightFogDensity, 0.000008);
+assert.equal(globeEffects.heightFogHeightFalloff, 0.0002);
+assert.equal(globeEffects.heightFogBaseHeight, 0.0);
+assert.equal(globeEffects.heightFogStartDistance, 250.0);
+assert.equal(globeEffects.heightFogMaximumOpacity, 0.7);
+assert.equal(globeEffects.heightFogInscatteringScale, 0.35);
+assert.equal(globeEffects.heightFogDirectionalInscatteringScale, 0.15);
+assert.equal(globeEffects.heightFogDirectionalInscatteringExponent, 8.0);
 assert.equal("radianceScale" in globeEffects, false);
 globeEffects.backgroundRadianceScale = 2.0;
 globeEffects.aerialRadianceScale = 0.5;
+globeEffects.showHeightFog = false;
+globeEffects.heightFogDensity = 0.0001;
+globeEffects.heightFogHeightFalloff = 0.0;
+globeEffects.heightFogBaseHeight = 100.0;
+globeEffects.heightFogStartDistance = 500.0;
+globeEffects.heightFogMaximumOpacity = 0.5;
+globeEffects.heightFogInscatteringScale = 0.7;
+globeEffects.heightFogDirectionalInscatteringScale = 0.3;
+globeEffects.heightFogDirectionalInscatteringExponent = 16.0;
 assert.equal(globeEffects.backgroundRadianceScale, 2.0);
 assert.equal(globeEffects.aerialRadianceScale, 0.5);
+assert.equal(globeEffects.showHeightFog, false);
+assert.equal(globeEffects.heightFogDensity, 0.0001);
+assert.equal(globeEffects.heightFogHeightFalloff, 0.0);
+assert.equal(globeEffects.heightFogBaseHeight, 100.0);
+assert.equal(globeEffects.heightFogStartDistance, 500.0);
+assert.equal(globeEffects.heightFogMaximumOpacity, 0.5);
+assert.equal(globeEffects.heightFogInscatteringScale, 0.7);
+assert.equal(globeEffects.heightFogDirectionalInscatteringScale, 0.3);
+assert.equal(globeEffects.heightFogDirectionalInscatteringExponent, 16.0);
 assert.equal(globeEffects.ready, false);
 assert.equal(typeof globeEffects.errorEvent.addEventListener, "function");
 const planarEffects = new engine.SceneGISEnvironmentEffects({
@@ -675,6 +700,15 @@ assert.equal(effects.mode, "globe");
 assert.equal(effects.enabled, false);
 assert.equal(effects.backgroundRadianceScale, 10.0);
 assert.equal(effects.aerialRadianceScale, 1.0);
+assert.equal(effects.showHeightFog, true);
+assert.equal(effects.heightFogDensity, 0.000008);
+assert.equal(effects.heightFogHeightFalloff, 0.0002);
+assert.equal(effects.heightFogBaseHeight, 0.0);
+assert.equal(effects.heightFogStartDistance, 250.0);
+assert.equal(effects.heightFogMaximumOpacity, 0.7);
+assert.equal(effects.heightFogInscatteringScale, 0.35);
+assert.equal(effects.heightFogDirectionalInscatteringScale, 0.15);
+assert.equal(effects.heightFogDirectionalInscatteringExponent, 8.0);
 assert.equal("radianceScale" in effects, false);
 effects.backgroundRadianceScale = 2.0;
 effects.aerialRadianceScale = 0.5;
@@ -711,6 +745,22 @@ function verifyDocumentation(engineDirectory) {
     effectsDocumentation,
     /<h4 class="name"\s+id="aerialRadianceScale">/u,
   );
+  for (const property of [
+    "showHeightFog",
+    "heightFogDensity",
+    "heightFogHeightFalloff",
+    "heightFogBaseHeight",
+    "heightFogStartDistance",
+    "heightFogMaximumOpacity",
+    "heightFogInscatteringScale",
+    "heightFogDirectionalInscatteringScale",
+    "heightFogDirectionalInscatteringExponent",
+  ]) {
+    assert.match(
+      effectsDocumentation,
+      new RegExp(`<h4 class="name"\\s+id="${property}">`, "u"),
+    );
+  }
   assert.doesNotMatch(
     effectsDocumentation,
     /<h4 class="name"\s+id="radianceScale">/u,
@@ -1037,6 +1087,21 @@ async function verify() {
     assert.match(declarations, /backgroundRadianceScale: number;/u);
     assert.match(declarations, /aerialRadianceScale\?: number;/u);
     assert.match(declarations, /aerialRadianceScale: number;/u);
+    assert.match(declarations, /showHeightFog\?: boolean;/u);
+    assert.match(declarations, /showHeightFog: boolean;/u);
+    for (const property of [
+      "heightFogDensity",
+      "heightFogHeightFalloff",
+      "heightFogBaseHeight",
+      "heightFogStartDistance",
+      "heightFogMaximumOpacity",
+      "heightFogInscatteringScale",
+      "heightFogDirectionalInscatteringScale",
+      "heightFogDirectionalInscatteringExponent",
+    ]) {
+      assert.match(declarations, new RegExp(`${property}\\?: number;`, "u"));
+      assert.match(declarations, new RegExp(`${property}: number;`, "u"));
+    }
     assert.doesNotMatch(declarations, /\bradianceScale(?:\?|): number;/u);
   }
   verifyStylingDeclarations(rootDeclarations);
@@ -1062,7 +1127,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 19/19 GLSL, 19/19 generated shader modules, exact Bruneton and PlanarEarth LUT/license/provenance in engine/root, bare ESM/CJS, A2 public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 20/20 GLSL, 20/20 generated shader modules, exact Bruneton and PlanarEarth LUT/license/provenance in engine/root, bare ESM/CJS, A3 public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
   );
 }
 

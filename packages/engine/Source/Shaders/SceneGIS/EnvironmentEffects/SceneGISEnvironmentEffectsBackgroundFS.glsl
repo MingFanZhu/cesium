@@ -14,6 +14,15 @@ uniform vec3 u_vertical;
 uniform vec3 u_sunDirection;
 uniform float u_altitude;
 uniform float u_backgroundRadianceScale;
+uniform bool u_showHeightFog;
+uniform float u_heightFogDensity;
+uniform float u_heightFogHeightFalloff;
+uniform float u_heightFogBaseHeight;
+uniform float u_heightFogStartDistance;
+uniform float u_heightFogMaximumOpacity;
+uniform float u_heightFogInscatteringScale;
+uniform float u_heightFogDirectionalInscatteringScale;
+uniform float u_heightFogDirectionalInscatteringExponent;
 uniform sampler2D u_transmittanceTexture;
 uniform sampler3D u_scatteringTexture;
 uniform sampler2D u_irradianceTexture;
@@ -68,5 +77,22 @@ void main()
     vec3 physicalRadiance = sceneGISApplySunDisk(
         radiance, viewDirection, sunDirection, transmittance);
     vec3 sceneLinearRadiance = physicalRadiance * u_backgroundRadianceScale;
+    if (u_showHeightFog) {
+        sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
+            u_transmittanceTexture,
+            sceneLinearRadiance,
+            rayOrigin,
+            viewDirection,
+            sunDirection,
+            SCENEGIS_PLANAR_BACKGROUND_DISTANCE,
+            u_heightFogDensity,
+            u_heightFogHeightFalloff,
+            u_heightFogBaseHeight,
+            u_heightFogStartDistance,
+            u_heightFogMaximumOpacity,
+            u_heightFogInscatteringScale,
+            u_heightFogDirectionalInscatteringScale,
+            u_heightFogDirectionalInscatteringExponent);
+    }
     out_FragColor = vec4(sceneGISGuardHdrStorage(sceneLinearRadiance), 1.0);
 }

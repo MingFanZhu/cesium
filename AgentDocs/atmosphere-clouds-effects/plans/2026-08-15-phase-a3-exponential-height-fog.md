@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed`
 - Parent extension:
   [2026-08-14-atmosphere-clouds-effects-extension.md](2026-08-14-atmosphere-clouds-effects-extension.md)
 - Previous phase:
@@ -12,14 +12,14 @@
 - Reviewer role: Architecture Agent
 - Created: `2026-08-15`
 - Updated: `2026-08-15`
-- Architecture review: `not-started`
-- Implementation status: `not-started`
+- Architecture review: `confirmed`
+- Implementation status: `completed`
 - Branch: `feature/atmosphere-clouds-effects`
 - Predecessor checkpoint: A2=`da2eb55743a46423e65b2047965907c05ea260b7`
 - Related decision:
   [ADR-0045](../../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md)
 - Upstream patch: active `SGP-0008`（consume only）
-- Manual visual gate: required after Architecture approval
+- Manual visual gate: `passed` on `2026-08-15`
 
 ## Goal
 
@@ -144,3 +144,142 @@ Architecture review通过后才能请求project owner gate。Direct Test至少�
 出现ADR-0045任一停止条件、需要新upstream seam/FBO/texture、无法在16-sample budget内满足Globe积分误差、或默认效果washout时，Execution立即
 停止并提交discussion/review evidence。正常完成时也必须保持working tree uncommitted/unpushed，不请求owner gate、不激活A4；仅发送
 `review_ready`给Architecture Agent。
+
+## Implementation blocker — default fog washout — 2026-08-15
+
+The first exact-default local Chromium ground/day gate triggers ADR-0045's
+explicit stop condition. Fog-only full-frame/ground-ROI mean deltas are Globe
+`51.78/31.22` and Planar `78.53/45.93`, exceeding the required upper bound
+`24`; both screenshots show substantial blue-grey surface replacement. Page
+errors and public network attempts are zero. Focused real-Context Specs pass
+`31/31`, so the result is a reproducible default calibration issue rather than
+a shader compile or page startup failure.
+
+Execution stopped without changing frozen defaults, adding a hidden multiplier,
+running broader qualification, creating the A3 review, or entering A4. Evidence,
+implemented source facts, and the Architecture decision options are recorded in
+[A3 Default Height-fog Washout](../discussions/2026-08-15-a3-default-fog-washout.md).
+
+## Architecture calibration amendment — 2026-08-15
+
+Architecture accepted a bounded A3-only correction after independently
+confirming the stop. The frozen defaults are now `heightFogDensity=0.000008`
+and `heightFogMaximumOpacity=0.70`; public ranges and the `0.35`/`0.15`
+inscattering defaults remain unchanged. Fog source normalization uses fixed
+top-of-atmosphere denominators from the immutable solar irradiance and shared
+Rayleigh/Mie coefficients, never the current pixel's luminance or maximum.
+Execution must first replay the exact-default ground/day visual gate and may
+continue broader qualification only when both full-frame and ground ROI means
+are in `(0, 24]`, near is weaker than far, and the Planar yellow comparison box
+retains visible A2 color separation.
+
+The corrected replay passes both intensity bounds and Planar color/distance
+conditions, but Globe reports near/far means `2.6754/2.6738`; therefore the
+strict distance condition does not pass. Execution stopped before broader
+qualification as required. Exact evidence and the off-window Globe target
+diagnostic limitation are recorded in the reopened
+[A3 Default Height-fog Washout](../discussions/2026-08-15-a3-default-fog-washout.md)
+discussion.
+
+## Implementation and validation writeback — 2026-08-15
+
+Architecture authorized a Test-only correction after determining that the
+previous Globe near/far numbers came from off-canvas targets and a fallback ROI,
+not product behavior. The final page uses two same-material explicit world
+targets and hard-validates projection, full ROI containment, non-overlap, and
+distance order before comparison. Final Globe target evidence is
+`11.50 < 39.40 km` and fog-only `12.17 < 49.51` with margin `37.34`; Planar
+retains `5.40 < 99.59` with margin `94.19`. Both worlds retain the corrected
+surface-preservation bounds, and the yellow Planar box remains distinct.
+
+Actual product implementation:
+
+- `SceneGISEnvironmentEffects` exposes the frozen nine warm height-fog
+  properties with corrected exact defaults `0.000008/0.70`, unchanged ranges,
+  request-render semantics, and installed runtime/types/docs delivery;
+- the existing renderer publishes fog uniforms and reuses the existing one
+  background plus linear/log aerial programs and lazy aerial FBO;
+- `SceneGISExponentialHeightFog.glsl` implements exact planar analytic transport,
+  fixed 16-sample Globe Gauss-Legendre transport, support clipping/start/cap,
+  A2 Sun-transmittance/occlusion authority, and fixed top-of-atmosphere source
+  normalization;
+- background and geometry composition remain inside the existing A2 commands,
+  with the existing final RGBA16F guard and clear-depth no-double-apply branch;
+- no new program, FBO, texture, asset, request, listener, timer, command slot,
+  render loop, or upstream seam was added.
+
+Validation results:
+
+- focused controller plus A1 pipeline real-Context Specs: `41/41` (`34/34` + `7/7`);
+- A1 advanced render-slot: `5/5`; A1 reference frame: `4/4`;
+- `Scene/Scene` aggregate boundary: `432/432`;
+- `npm run build`, `build-release`, `build-ts`, `build-docs`, and `tsc`: passed;
+  `build-ts` retains the repository's existing TSD-JSDoc warnings;
+- installed-package verifier: passed with `20/20` GLSL and generated modules,
+  exact A3 runtime/types/docs, private hiding, and dual LUT delivery;
+- importer/generator Node tests: `14/14`; both LUT `--verify-only`: passed;
+- local Chromium narrow gate and strict 24-state smoke: `24/24`, both frusta
+  plus day/sunset/night and ground/air/high/highMiss; both Scenes produced new
+  successful frames after every switch, `renderError=0`, visible error panels
+  `0`, browser errors `0`, and external requests `0`;
+- changed-scope ESLint/Prettier/Markdownlint, `git diff --check`, exact
+  `Scene.js`/manifest diff, and official upstream/generated audit: passed at
+  final handoff.
+
+The official audit reports current-delivery upstream-owned `0` and generated
+`0`; A3 only consumes active `SGP-0008`. Globe and Planar LUT bytes/hashes remain
+unchanged. No full `16429`-Spec suite was run; the focused/A1/aggregate boundary
+is the intentional minimum. Independent Architecture/code re-review is complete;
+the remaining gate is the project-owner manual visual gate. The working tree
+stays uncommitted/unpushed and A4 remains inactive.
+
+## Architecture review corrections — execution writeback — 2026-08-15
+
+A3-AR-001 is corrected without changing the public or optical contract. The
+Planar integral now evaluates a stable exponential integral ratio and uses an
+explicit Taylor/limit branch for small `abs(x)`, eliminating both the
+near-equal-density subtraction and the old vertical threshold. Source and
+shader-equivalent float32 fixtures cover threshold sides, `250/1000 m`, both
+vertical signs, falloff `0`, default density, and public maximum density. They
+prove finite/nonzero/continuous output and relative error below `2e-6` against
+the double-precision `expm1` reference.
+
+A3-AR-002 is corrected in Test/evidence scope. Both Scenes register persistent
+`renderError` evidence; diagnostic reads reject on render failure; the smoke
+proves finite ordered frustum bounds, a new successful frame from each Scene,
+and no visible Cesium error panel after every switch. The final run reports
+Globe `12.161 < 49.553` (margin `37.392`) and Planar `5.728 < 99.470` (margin
+`93.742`). All six named final artifacts were regenerated from this exact final
+source and visually checked without overlays or stopped/black error output.
+
+Affected-scope qualification passes: focused `41/41`, installed package
+`20/20` GLSL/modules, changed-scope ESLint/Prettier, `git diff --check`, exact
+empty `Scene.js`/upstream-manifest diff, and official audit with
+current-delivery upstream-owned `0`, generated `0`. Previously accepted broader
+build/full-boundary evidence remains unchanged and was not unnecessarily
+repeated. Architecture re-review closes A3-AR-001/002 and approves the retained
+tree for the owner gate. Checkpoint, commit/push, and A4 remain blocked pending
+the project owner's explicit visual acceptance.
+
+## Architecture re-review result — 2026-08-15
+
+Architecture independently inspected the corrected shader, float32 fixture,
+direct-Test render evidence, and all six regenerated final artifacts. The
+shader-equivalent `20`-case numeric reproduction is finite/nonzero with maximum
+relative error `6.4503e-8`; focused real-Context Specs pass `41/41`. Both viewers
+render without error overlays or stopped/black output in every final artifact.
+`git diff --check`, exact upstream-file emptiness, and the official audit also
+pass with current-delivery upstream-owned `0` and generated `0`.
+
+Decision: `approved-for-owner-gate`. The phase remains `active` and the tree
+remains uncommitted/unpushed until the project owner passes the manual visual
+gate; A4 is inactive.
+
+## Completion checkpoint — 2026-08-15
+
+The project owner inspected the live Globe/Planar Test and explicitly reported
+`通过`. The manual visual gate passes. Implementation, focused/boundary
+qualification, independent Architecture review, and owner acceptance are now
+complete. This change set is the independent local A3 checkpoint; no push is
+performed. A4 requires its own source-based phase plan and separate planning
+checkpoint before activation.

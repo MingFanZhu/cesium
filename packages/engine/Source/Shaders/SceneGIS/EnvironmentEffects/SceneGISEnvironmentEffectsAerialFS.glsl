@@ -15,6 +15,16 @@ uniform vec3 u_vertical;
 uniform vec3 u_sunDirection;
 uniform float u_altitude;
 uniform float u_aerialRadianceScale;
+uniform bool u_showAerialPerspective;
+uniform bool u_showHeightFog;
+uniform float u_heightFogDensity;
+uniform float u_heightFogHeightFalloff;
+uniform float u_heightFogBaseHeight;
+uniform float u_heightFogStartDistance;
+uniform float u_heightFogMaximumOpacity;
+uniform float u_heightFogInscatteringScale;
+uniform float u_heightFogDirectionalInscatteringScale;
+uniform float u_heightFogDirectionalInscatteringExponent;
 uniform sampler2D u_transmittanceTexture;
 uniform sampler3D u_scatteringTexture;
 uniform sampler2D u_irradianceTexture;
@@ -48,32 +58,52 @@ void main()
         dot(u_sunDirection, u_east),
         dot(u_sunDirection, u_north),
         dot(u_sunDirection, u_vertical)));
-    vec3 transmittance;
-    #ifdef SCENEGIS_GLOBE
-    vec3 radiance = sceneGISGlobeSkyRadianceToPoint(
+    vec3 sceneLinearRadiance = inputColor.rgb;
+    if (u_showAerialPerspective) {
+        vec3 transmittance;
+        #ifdef SCENEGIS_GLOBE
+        vec3 radiance = sceneGISGlobeSkyRadianceToPoint(
+                u_transmittanceTexture,
+                u_scatteringTexture,
+                rayOrigin,
+                viewDirection,
+                sunDirection,
+                distanceToPoint,
+                transmittance);
+        #else
+        bool intersectsAtmosphere;
+        vec3 radiance = sceneGISPlanarRadianceToPoint(
+                u_transmittanceTexture,
+                u_scatteringTexture,
+                u_irradianceTexture,
+                rayOrigin,
+                viewDirection,
+                sunDirection,
+                distanceToPoint,
+                false,
+                intersectsAtmosphere,
+                transmittance);
+        #endif
+        sceneLinearRadiance =
+            inputColor.rgb * transmittance + radiance * u_aerialRadianceScale;
+    }
+    if (u_showHeightFog) {
+        sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
             u_transmittanceTexture,
-            u_scatteringTexture,
+            sceneLinearRadiance,
             rayOrigin,
             viewDirection,
             sunDirection,
             distanceToPoint,
-            transmittance);
-    #else
-    bool intersectsAtmosphere;
-    vec3 radiance = sceneGISPlanarRadianceToPoint(
-            u_transmittanceTexture,
-            u_scatteringTexture,
-            u_irradianceTexture,
-            rayOrigin,
-            viewDirection,
-            sunDirection,
-            distanceToPoint,
-            false,
-            intersectsAtmosphere,
-            transmittance);
-    #endif
-    vec3 sceneLinearRadiance =
-        inputColor.rgb * transmittance + radiance * u_aerialRadianceScale;
+            u_heightFogDensity,
+            u_heightFogHeightFalloff,
+            u_heightFogBaseHeight,
+            u_heightFogStartDistance,
+            u_heightFogMaximumOpacity,
+            u_heightFogInscatteringScale,
+            u_heightFogDirectionalInscatteringScale,
+            u_heightFogDirectionalInscatteringExponent);
+    }
     out_FragColor = vec4(
         sceneGISGuardHdrStorage(sceneLinearRadiance), inputColor.a);
 }

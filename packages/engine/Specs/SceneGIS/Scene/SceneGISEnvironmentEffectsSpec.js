@@ -32,6 +32,7 @@ import SceneGISEnvironmentEffectsRenderer from "../../../Source/SceneGIS/Scene/_
 import aerialFragmentSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS.js";
 import atmosphereSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
 import backgroundFragmentSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS.js";
+import heightFogSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISExponentialHeightFog.js";
 
 describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
   let scene;
@@ -95,6 +96,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     effects = new SceneGISEnvironmentEffects({
       mode: "globe",
       enabled: true,
+      showHeightFog: false,
     });
     effects.connectedCallback({});
     return requests;
@@ -120,6 +122,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       mode: "planar",
       world,
       enabled: true,
+      showHeightFog: false,
     });
     effects.connectedCallback({});
     return world;
@@ -262,6 +265,31 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
         }).toThrowDeveloperError();
       }
     }
+    const fogRanges = {
+      heightFogDensity: [0.0, 0.001],
+      heightFogHeightFalloff: [0.0, 0.001],
+      heightFogBaseHeight: [-60000.0, 60000.0],
+      heightFogStartDistance: [0.0, 300000.0],
+      heightFogMaximumOpacity: [0.0, 1.0],
+      heightFogInscatteringScale: [0.0, 64.0],
+      heightFogDirectionalInscatteringScale: [0.0, 64.0],
+      heightFogDirectionalInscatteringExponent: [1.0, 128.0],
+    };
+    for (const [property, range] of Object.entries(fogRanges)) {
+      for (const value of [
+        range[0] - 1.0,
+        range[1] + 1.0,
+        Number.NaN,
+        Infinity,
+      ]) {
+        expect(function () {
+          return new SceneGISEnvironmentEffects({
+            mode: "globe",
+            [property]: value,
+          });
+        }).toThrowDeveloperError();
+      }
+    }
 
     effects = new SceneGISEnvironmentEffects({ mode: "globe" });
     expect(effects.mode).toBe("globe");
@@ -269,8 +297,17 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.enabled).toBe(false);
     expect(effects.showAtmosphere).toBe(true);
     expect(effects.showAerialPerspective).toBe(true);
+    expect(effects.showHeightFog).toBe(true);
     expect(effects.backgroundRadianceScale).toBe(10.0);
     expect(effects.aerialRadianceScale).toBe(1.0);
+    expect(effects.heightFogDensity).toBe(0.000008);
+    expect(effects.heightFogHeightFalloff).toBe(0.0002);
+    expect(effects.heightFogBaseHeight).toBe(0.0);
+    expect(effects.heightFogStartDistance).toBe(250.0);
+    expect(effects.heightFogMaximumOpacity).toBe(0.7);
+    expect(effects.heightFogInscatteringScale).toBe(0.35);
+    expect(effects.heightFogDirectionalInscatteringScale).toBe(0.15);
+    expect(effects.heightFogDirectionalInscatteringExponent).toBe(8.0);
     expect("radianceScale" in effects).toBe(false);
     expect(effects.ready).toBe(false);
     expect(effects.errorEvent).toBeDefined();
@@ -279,9 +316,27 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       mode: "globe",
       backgroundRadianceScale: 3.0,
       aerialRadianceScale: 0.5,
+      showHeightFog: false,
+      heightFogDensity: 0.0001,
+      heightFogHeightFalloff: 0.0,
+      heightFogBaseHeight: 100.0,
+      heightFogStartDistance: 500.0,
+      heightFogMaximumOpacity: 0.5,
+      heightFogInscatteringScale: 0.7,
+      heightFogDirectionalInscatteringScale: 0.3,
+      heightFogDirectionalInscatteringExponent: 16.0,
     });
     expect(effects.backgroundRadianceScale).toBe(3.0);
     expect(effects.aerialRadianceScale).toBe(0.5);
+    expect(effects.showHeightFog).toBe(false);
+    expect(effects.heightFogDensity).toBe(0.0001);
+    expect(effects.heightFogHeightFalloff).toBe(0.0);
+    expect(effects.heightFogBaseHeight).toBe(100.0);
+    expect(effects.heightFogStartDistance).toBe(500.0);
+    expect(effects.heightFogMaximumOpacity).toBe(0.5);
+    expect(effects.heightFogInscatteringScale).toBe(0.7);
+    expect(effects.heightFogDirectionalInscatteringScale).toBe(0.3);
+    expect(effects.heightFogDirectionalInscatteringExponent).toBe(16.0);
     world.destroy();
   });
 
@@ -338,14 +393,14 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
     }
-    scene.sun = { show: true };
+    scene.fog.enabled = true;
 
     expect(function () {
       effects.firstUpdate(scene, scene.frameState.time);
     }).toThrowDeveloperError();
     expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
     expect(effects._pipeline).toBeUndefined();
-    scene.sun = undefined;
+    scene.fog.enabled = false;
   });
 
   it("publishes planar Texture3D resources, toggles warm, and re-registers", async function () {
@@ -542,6 +597,433 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
           setCalibrationScale.bind(undefined, property, value),
         ).toThrowDeveloperError();
       }
+    }
+  });
+
+  it("updates all height-fog controls as warm uniforms only", async function () {
+    connectPlanar();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    await publishPlanarResources();
+    const resources = effects._pipeline._resources;
+    const requestRender = spyOn(scene, "requestRender").and.callThrough();
+    const fetch = spyOn(Resource, "fetchArrayBuffer");
+    const compile = spyOn(ShaderProgram, "fromCache");
+    const entries = [
+      ["heightFogDensity", "u_heightFogDensity", 0.00008],
+      ["heightFogHeightFalloff", "u_heightFogHeightFalloff", 0.0001],
+      ["heightFogBaseHeight", "u_heightFogBaseHeight", 500.0],
+      ["heightFogStartDistance", "u_heightFogStartDistance", 1000.0],
+      ["heightFogMaximumOpacity", "u_heightFogMaximumOpacity", 0.5],
+      ["heightFogInscatteringScale", "u_heightFogInscatteringScale", 0.7],
+      [
+        "heightFogDirectionalInscatteringScale",
+        "u_heightFogDirectionalInscatteringScale",
+        0.4,
+      ],
+      [
+        "heightFogDirectionalInscatteringExponent",
+        "u_heightFogDirectionalInscatteringExponent",
+        16.0,
+      ],
+    ];
+
+    requestRender.calls.reset();
+    effects.showHeightFog = true;
+    for (const [property, uniform, value] of entries) {
+      effects[property] = value;
+      expect(effects._pipeline._uniformMap[uniform]()).toBe(value);
+    }
+    expect(effects._pipeline._uniformMap.u_showHeightFog()).toBe(true);
+    expect(requestRender).toHaveBeenCalledTimes(9);
+    expect(fetch).not.toHaveBeenCalled();
+    expect(compile).not.toHaveBeenCalled();
+    expect(effects._pipeline._resources).toBe(resources);
+
+    requestRender.calls.reset();
+    effects.showHeightFog = true;
+    for (const [property, , value] of entries) {
+      effects[property] = value;
+    }
+    expect(requestRender).not.toHaveBeenCalled();
+
+    effects.enabled = false;
+    requestRender.calls.reset();
+    effects.heightFogDensity = 0.00009;
+    effects.showHeightFog = false;
+    expect(requestRender).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(compile).not.toHaveBeenCalled();
+    expect(effects._pipeline._resources).toBe(resources);
+  });
+
+  it("keeps height fog bounded, atmosphere-aware, and calibration-isolated in shader source", function () {
+    expect(heightFogSource).toContain(
+      "SCENEGIS_HEIGHT_FOG_GLOBE_SAMPLE_COUNT = 16",
+    );
+    expect(heightFogSource).toContain("for (int i = 0; i < 8; ++i)");
+    expect(heightFogSource).toContain("sceneGISHeightFogPlanarOpticalDepth");
+    expect(heightFogSource).toContain(
+      "sceneGISHeightFogExponentialIntegralRatio",
+    );
+    expect(heightFogSource).toContain("absoluteX < 1.0e-2");
+    expect(heightFogSource).not.toContain("startDensity - endDensity");
+    expect(heightFogSource).not.toContain("abs(viewDirection.z) <= 1.0e-7");
+    expect(heightFogSource).toContain("sceneGISHeightFogGlobeOpticalDepth");
+    expect(heightFogSource).toContain("GetTransmittanceToSun");
+    expect(heightFogSource).toContain("sceneGISPlanarSegmentTransmittance");
+    expect(heightFogSource).toContain("sceneGISHeightFogAmbientSource");
+    expect(heightFogSource).toContain("sceneGISHeightFogDirectionalSource");
+    expect(heightFogSource).toContain("SCENEGIS_SOLAR_IRRADIANCE * scattering");
+    expect(heightFogSource).not.toContain("sceneGISHeightFogChromaticity");
+    expect(heightFogSource).toContain(
+      "segmentStart + SCENEGIS_HEIGHT_FOG_MAX_DISTANCE",
+    );
+    expect(heightFogSource).not.toContain("backgroundRadianceScale");
+    expect(heightFogSource).not.toContain("aerialRadianceScale");
+    expect(backgroundFragmentSource).toContain(
+      "sceneGISApplyExponentialHeightFog",
+    );
+    expect(aerialFragmentSource).toContain("sceneGISApplyExponentialHeightFog");
+    expect(aerialFragmentSource.indexOf("u_aerialRadianceScale")).toBeLessThan(
+      aerialFragmentSource.indexOf("sceneGISApplyExponentialHeightFog"),
+    );
+    expect(
+      aerialFragmentSource.indexOf("sceneGISApplyExponentialHeightFog"),
+    ).toBeLessThan(
+      aerialFragmentSource.indexOf(
+        "sceneGISGuardHdrStorage(sceneLinearRadiance)",
+      ),
+    );
+  });
+
+  it("keeps the planar analytic fog integral stable in shader-equivalent float32 arithmetic", function () {
+    const f32 = Math.fround;
+
+    function referenceIntegral(
+      startHeight,
+      vertical,
+      distance,
+      density,
+      falloff,
+    ) {
+      const startDensity = density * Math.exp(-falloff * startHeight);
+      const x = falloff * vertical * distance;
+      const ratio = x === 0.0 ? 1.0 : -Math.expm1(-x) / x;
+      return Math.min(startDensity * distance * ratio, 80.0);
+    }
+
+    function shaderRatio(value) {
+      const x = f32(value);
+      if (Math.abs(x) < 1.0e-2) {
+        const xSquared = f32(x * x);
+        return f32(
+          f32(f32(1.0 - f32(0.5 * x)) + f32(xSquared / 6.0)) -
+            f32(f32(xSquared * x) / 24.0),
+        );
+      }
+      if (x > 0.0) {
+        return f32(f32(1.0 - f32(Math.exp(-Math.min(x, 80.0)))) / x);
+      }
+      return f32(f32(f32(Math.exp(Math.min(-x, 80.0))) - 1.0) / f32(-x));
+    }
+
+    function shaderIntegral(startHeight, vertical, distance, density, falloff) {
+      const localDistance = f32(distance);
+      const localFalloff = f32(falloff);
+      const localDensity = f32(density);
+      const exponent = Math.max(
+        -80.0,
+        Math.min(80.0, f32(-f32(localFalloff * f32(startHeight)))),
+      );
+      const startDensity = f32(localDensity * f32(Math.exp(exponent)));
+      if (localFalloff <= 1.0e-10) {
+        return Math.min(f32(startDensity * localDistance), 80.0);
+      }
+      const x = f32(f32(localFalloff * f32(vertical)) * localDistance);
+      const scaledDistance = f32(localDistance * shaderRatio(x));
+      if (startDensity >= f32(80.0 / Math.max(scaledDistance, 1.0e-30))) {
+        return 80.0;
+      }
+      return f32(startDensity * scaledDistance);
+    }
+
+    const cases = [];
+    for (const density of [0.000008, 0.001]) {
+      for (const distance of [250.0, 1000.0]) {
+        for (const vertical of [-1.01e-7, -0.99e-7, 0.0, 0.99e-7, 1.01e-7]) {
+          cases.push({ density, distance, vertical, falloff: 0.0002 });
+        }
+      }
+    }
+    cases.push({
+      density: 0.001,
+      distance: 1000.0,
+      vertical: 1.01e-7,
+      falloff: 0.0,
+    });
+
+    for (const testCase of cases) {
+      const actual = shaderIntegral(
+        1000.0,
+        testCase.vertical,
+        testCase.distance,
+        testCase.density,
+        testCase.falloff,
+      );
+      const expected = referenceIntegral(
+        1000.0,
+        testCase.vertical,
+        testCase.distance,
+        testCase.density,
+        testCase.falloff,
+      );
+      expect(Number.isFinite(actual)).toBe(true);
+      expect(actual).toBeGreaterThan(0.0);
+      expect(Math.abs(actual - expected) / expected).toBeLessThan(2.0e-6);
+    }
+
+    for (const distance of [250.0, 1000.0]) {
+      const below = shaderIntegral(1000.0, 0.99e-7, distance, 0.001, 0.0002);
+      const above = shaderIntegral(1000.0, 1.01e-7, distance, 0.001, 0.0002);
+      expect(Math.abs(above - below) / Math.max(above, below)).toBeLessThan(
+        1.0e-6,
+      );
+    }
+  });
+
+  it("keeps the fixed-reference fog source bounded and preserves Sun transmittance magnitude", function () {
+    const solarIrradiance = [1.474, 1.8504, 1.91198];
+    const rayleigh = [5.802e-6, 1.3558e-5, 3.31e-5];
+    const mieScattering = [3.996e-6, 3.996e-6, 3.996e-6];
+    const scattering = rayleigh.map(
+      (component, index) => component + mieScattering[index],
+    );
+    const ambientReference = solarIrradiance.map(
+      (component, index) => component * scattering[index],
+    );
+    const ambientDenominator = Math.max(...ambientReference);
+    const directionalDenominator = Math.max(...solarIrradiance);
+
+    function sources(transmittance) {
+      const sunColor = solarIrradiance.map(
+        (component) => component * transmittance,
+      );
+      return {
+        ambient: sunColor.map(
+          (component, index) =>
+            (component * scattering[index]) / ambientDenominator,
+        ),
+        directional: sunColor.map(
+          (component) => component / directionalDenominator,
+        ),
+      };
+    }
+
+    const unattenuated = sources(1.0);
+    expect(Math.max(...unattenuated.ambient)).toBeLessThanOrEqual(1.0);
+    expect(Math.max(...unattenuated.directional)).toBeLessThanOrEqual(1.0);
+    expect(Math.max(...unattenuated.ambient)).toBeCloseTo(1.0, 14);
+    expect(Math.max(...unattenuated.directional)).toBeCloseTo(1.0, 14);
+
+    const attenuated = sources(0.25);
+    expect(Math.max(...attenuated.ambient)).toBeCloseTo(0.25, 14);
+    expect(Math.max(...attenuated.directional)).toBeCloseTo(0.25, 14);
+    expect(Math.max(...attenuated.ambient)).toBeLessThan(
+      Math.max(...unattenuated.ambient),
+    );
+    expect(Math.max(...attenuated.directional)).toBeLessThan(
+      Math.max(...unattenuated.directional),
+    );
+
+    const occluded = sources(0.0);
+    expect(occluded.ambient).toEqual([0.0, 0.0, 0.0]);
+    expect(occluded.directional).toEqual([0.0, 0.0, 0.0]);
+  });
+
+  it("keeps the corrected default near fog unsaturated, strengthens distance, and honors the opacity cap", function () {
+    const density = 0.000008;
+    const startDistance = 250.0;
+    const maximumOpacity = 0.7;
+    function fogAmount(distance) {
+      const opticalDepth = density * Math.max(distance - startDistance, 0.0);
+      return Math.min(1.0 - Math.exp(-opticalDepth), maximumOpacity);
+    }
+
+    const near = fogAmount(105000.0);
+    const far = fogAmount(300000.0);
+    const beyondCap = fogAmount(1000000.0);
+    expect(near).toBeGreaterThan(0.0);
+    expect(near).toBeLessThan(maximumOpacity);
+    expect(far).toBeGreaterThan(near);
+    expect(far).toBeLessThanOrEqual(maximumOpacity);
+    expect(beyondCap).toBe(maximumOpacity);
+  });
+
+  it("matches planar analytic and Globe 16-sample fog integrals to CPU references", function () {
+    const density = 0.00004;
+    const falloff = 0.0002;
+    const bottomRadius = 6360000.0;
+    const nodes = [
+      0.0950125098, 0.2816035508, 0.4580167777, 0.6178762444, 0.7554044083,
+      0.8656312024, 0.9445750231, 0.9894009349,
+    ];
+    const weights = [
+      0.1894506105, 0.182603415, 0.1691565194, 0.1495959888, 0.1246289713,
+      0.0951585117, 0.0622535239, 0.0271524594,
+    ];
+
+    function planarIntegral(startHeight, vertical, distance, localFalloff) {
+      const startDensity = density * Math.exp(-localFalloff * startHeight);
+      const x = localFalloff * vertical * distance;
+      const ratio = x === 0.0 ? 1.0 : -Math.expm1(-x) / x;
+      return startDensity * distance * ratio;
+    }
+
+    expect(planarIntegral(1000.0, 0.0, 50000.0, falloff)).toBeCloseTo(
+      density * Math.exp(-falloff * 1000.0) * 50000.0,
+      12,
+    );
+    expect(planarIntegral(1000.0, 1.0, 59000.0, 0.0)).toBeCloseTo(
+      density * 59000.0,
+      12,
+    );
+    const shallow = [50000.0, 150000.0, 300000.0].map((distance) =>
+      planarIntegral(1000.0, 0.001, distance, falloff),
+    );
+    expect(shallow[1]).toBeGreaterThan(shallow[0]);
+    expect(shallow[2]).toBeGreaterThan(shallow[1]);
+
+    function globeDensity(origin, direction, distance) {
+      const x = origin[0] + direction[0] * distance;
+      const y = origin[1] + direction[1] * distance;
+      const z = origin[2] + direction[2] * distance;
+      const height = Math.sqrt(x * x + y * y + z * z) - bottomRadius;
+      return density * Math.exp(-falloff * height);
+    }
+
+    function gaussIntegral(origin, direction, start, end) {
+      const midpoint = 0.5 * (start + end);
+      const halfLength = 0.5 * (end - start);
+      let sum = 0.0;
+      for (let i = 0; i < nodes.length; i++) {
+        const offset = halfLength * nodes[i];
+        sum +=
+          weights[i] *
+          (globeDensity(origin, direction, midpoint - offset) +
+            globeDensity(origin, direction, midpoint + offset));
+      }
+      return halfLength * sum;
+    }
+
+    function simpson(origin, direction, start, end, tolerance, depth) {
+      function value(distance) {
+        return globeDensity(origin, direction, distance);
+      }
+      function recurse(
+        left,
+        right,
+        leftValue,
+        middleValue,
+        rightValue,
+        whole,
+        localTolerance,
+        remaining,
+      ) {
+        const middle = 0.5 * (left + right);
+        const leftMiddle = 0.5 * (left + middle);
+        const rightMiddle = 0.5 * (middle + right);
+        const leftMiddleValue = value(leftMiddle);
+        const rightMiddleValue = value(rightMiddle);
+        const leftArea =
+          ((middle - left) / 6.0) *
+          (leftValue + 4.0 * leftMiddleValue + middleValue);
+        const rightArea =
+          ((right - middle) / 6.0) *
+          (middleValue + 4.0 * rightMiddleValue + rightValue);
+        const delta = leftArea + rightArea - whole;
+        if (remaining === 0 || Math.abs(delta) <= 15.0 * localTolerance) {
+          return leftArea + rightArea + delta / 15.0;
+        }
+        return (
+          recurse(
+            left,
+            middle,
+            leftValue,
+            leftMiddleValue,
+            middleValue,
+            leftArea,
+            localTolerance * 0.5,
+            remaining - 1,
+          ) +
+          recurse(
+            middle,
+            right,
+            middleValue,
+            rightMiddleValue,
+            rightValue,
+            rightArea,
+            localTolerance * 0.5,
+            remaining - 1,
+          )
+        );
+      }
+      const middle = 0.5 * (start + end);
+      const leftValue = value(start);
+      const middleValue = value(middle);
+      const rightValue = value(end);
+      const whole =
+        ((end - start) / 6.0) * (leftValue + 4.0 * middleValue + rightValue);
+      return recurse(
+        start,
+        end,
+        leftValue,
+        middleValue,
+        rightValue,
+        whole,
+        tolerance,
+        depth,
+      );
+    }
+
+    for (const testCase of [
+      {
+        origin: [0.0, 0.0, bottomRadius + 100.0],
+        direction: [1.0, 0.0, 0.0],
+        end: 300000.0,
+      },
+      {
+        origin: [0.0, 0.0, bottomRadius + 10000.0],
+        direction: [0.6, 0.0, 0.8],
+        end: 50000.0,
+      },
+      {
+        origin: [0.0, 0.0, bottomRadius + 60000.0],
+        direction: [0.4, 0.0, -Math.sqrt(0.84)],
+        end: 65000.0,
+      },
+    ]) {
+      const actual = gaussIntegral(
+        testCase.origin,
+        testCase.direction,
+        0.0,
+        testCase.end,
+      );
+      const reference = simpson(
+        testCase.origin,
+        testCase.direction,
+        0.0,
+        testCase.end,
+        1.0e-10,
+        20,
+      );
+      const relativeError = Math.abs(actual - reference) / reference;
+      const fogAmountError = Math.abs(
+        1.0 - Math.exp(-actual) - (1.0 - Math.exp(-reference)),
+      );
+      expect(relativeError).toBeLessThanOrEqual(0.02);
+      expect(fogAmountError).toBeLessThanOrEqual(0.005);
     }
   });
 
@@ -1116,7 +1598,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     }
 
     function renderAerial(distance) {
-      depthClear.depth = depthForDistance(distance);
+      depthClear.depth =
+        distance === undefined ? 1.0 : depthForDistance(distance);
       depthClear.execute(scene.context);
       effects._pipeline.executeHdr(
         scene.context,
@@ -1189,6 +1672,28 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       }
       expect(lightingPixels[0]).not.toEqual(lightingPixels[1]);
       expect(lightingPixels[1]).not.toEqual(lightingPixels[2]);
+
+      effects.showAerialPerspective = false;
+      effects.showHeightFog = true;
+      environment.sunDirection = Cartesian3.normalize(
+        new Cartesian3(0.4, 0.2, 0.89),
+        new Cartesian3(),
+      );
+      environment.update(scene, scene.frameState.time);
+      effects.backgroundRadianceScale = 0.0;
+      effects.aerialRadianceScale = 0.0;
+      const fogOnly = renderAerial(29000.0);
+      const clearFog = renderAerial(undefined);
+      expect(fogOnly).not.toEqual(clearFog);
+      expect(fogOnly[3]).toBe(clearFog[3]);
+
+      effects.backgroundRadianceScale = 64.0;
+      effects.aerialRadianceScale = 64.0;
+      expect(renderAerial(29000.0)).toEqual(fogOnly);
+
+      effects.heightFogInscatteringScale = 64.0;
+      effects.heightFogDirectionalInscatteringScale = 64.0;
+      expectFiniteHdrStorage(renderAerial(29000.0));
     } finally {
       depthFramebuffer.destroy();
       depthColorTexture.destroy();
@@ -1348,6 +1853,26 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
         expect(effects._pipeline._frame.altitude).toBe(120000.0);
         expect(insideSlab).not.toEqual(beforeSlab);
         expect(deltaEnergy(insideSlab, beforeSlab)).toBeGreaterThan(0.0);
+
+        effects.showAerialPerspective = false;
+        effects.showHeightFog = true;
+        const fogClear = renderAerial(undefined, orthographic);
+        expect(renderAerial(250000.0, orthographic)).toEqual(fogClear);
+        const fogInsideSlab = renderAerial(450000.0, orthographic);
+        expect(fogInsideSlab).not.toEqual(fogClear);
+        expect(deltaEnergy(fogInsideSlab, fogClear)).toBeGreaterThan(0.0);
+
+        configureCamera(
+          orthographic,
+          new Cartesian3(0.0, -100000.0, 120000.0),
+          Cartesian3.UNIT_Y,
+        );
+        const nonintersectingClear = renderAerial(undefined, orthographic);
+        expect(renderAerial(450000.0, orthographic)).toEqual(
+          nonintersectingClear,
+        );
+        effects.showHeightFog = false;
+        effects.showAerialPerspective = true;
       }
     } finally {
       depthFramebuffer.destroy();
@@ -1423,10 +1948,17 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
         effects.showAerialPerspective = true;
         scene.render();
         const aerial = readFramePixels();
+        effects.showAerialPerspective = false;
+        effects.showHeightFog = true;
+        scene.render();
+        const fogOnly = readFramePixels();
         const actualLogDepth = scene.frameState.useLogDepth;
         if (projection === "perspective" && logarithmicDepth) {
           expect(maximumRgbDelta(aerial, identity))
             .withContext("perspective integrated log depth")
+            .toBeGreaterThan(0);
+          expect(maximumRgbDelta(fogOnly, identity))
+            .withContext("perspective integrated log-depth fog")
             .toBeGreaterThan(0);
         }
         expect(effects._pipeline._resources.aerialCommand.shaderProgram).toBe(
@@ -1434,6 +1966,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
             ? effects._pipeline._resources.aerialLogDepthProgram
             : effects._pipeline._resources.aerialProgram,
         );
+        effects.showHeightFog = false;
       }
     }
   });
@@ -1448,7 +1981,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       errors.push({ controller, error });
     });
     await publishPlanarResources();
-    scene.sun = { show: true };
+    scene.fog.enabled = true;
 
     effects.update(scene, scene.frameState.time);
     effects.update(scene, scene.frameState.time);
@@ -1456,7 +1989,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(errors[0].controller).toBe(effects);
     expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
 
-    scene.sun = undefined;
+    scene.fog.enabled = false;
     effects.enabled = false;
     effects.enabled = true;
     effects.update(scene, scene.frameState.time);

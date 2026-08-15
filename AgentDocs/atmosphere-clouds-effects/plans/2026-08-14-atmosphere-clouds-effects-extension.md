@@ -8,11 +8,10 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-15`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: A3 — Exponential height fog（`active`）
-- Active phase plan:
-  [2026-08-15-phase-a3-exponential-height-fog.md](2026-08-15-phase-a3-exponential-height-fog.md)
+- Current phase: none（A3 `completed`; A4 planning pending）
+- Active phase plan: none
 - Latest completed phase plan:
-  [2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md](2026-08-14-phase-a2-bruneton-atmosphere-aerial-perspective.md)
+  [2026-08-15-phase-a3-exponential-height-fog.md](2026-08-15-phase-a3-exponential-height-fog.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -23,7 +22,7 @@
 - Upstream patch: active `SGP-0008`
 - A1 implementation: `completed`
 - A2 implementation: `completed`
-- A3 implementation: `not-started`
+- A3 implementation: `completed`
 
 ## Goal
 
@@ -97,12 +96,19 @@ Architecture review，但第二次owner gate再次因效果弱失败；现场诊
 颜色覆盖而失败；ADR-0044 A2R3的代码、像素和视觉修正及其direct Test lint/format corrections现已通过Architecture独立复核，
 第四次project-owner visual gate也已明确通过。本change set形成A2独立本地checkpoint；A3仍需独立planning checkpoint后才能激活。
 
-### A3 — Exponential height fog (`active`)
+### A3 — Exponential height fog (`completed`)
 
 依据
 [A3 phase plan](2026-08-15-phase-a3-exponential-height-fog.md)与ADR-0045增加single-layer exponential height density、
 directional inscattering与atmosphere-aware composition；Globe使用radial height，planar使用fixed Z。复用A2 programs/FBO且保持与native
 Fog的明确互斥边界，不新增upstream hook或GPU resource family。
+
+首轮Architecture review发现的Planar float32 analytic-integral cancellation与stale error-bearing artifacts均已execution-fixed并通过独立
+Architecture复审。Architecture复跑focused boundary为`41/41`、独立float32最大相对误差为`6.4503e-8`，并检查六张重生成artifact均无error
+overlay或stopped/black viewer。A3已`approved-for-owner-gate`；checkpoint与A4仍未激活。
+
+项目负责人已在live dual-world Test上明确报告`通过`。A3 manual visual gate通过，本change set形成A3独立本地checkpoint；A4仍需独立
+source-based phase plan与planning checkpoint后才能激活。
 
 ### A4 — Volumetric cloud core
 

@@ -118,10 +118,11 @@ function validatePlanarConflict(controller, scene) {
     !isHidden(scene.skyAtmosphere) ||
     !isHidden(scene.skyBox) ||
     !isHidden(scene.sun) ||
-    !isHidden(scene.moon)
+    !isHidden(scene.moon) ||
+    scene.fog.enabled !== false
   ) {
     throw new DeveloperError(
-      "Advanced planar environment requires native Scene sky, Sun, and Moon output to be disabled.",
+      "Advanced planar environment requires native Scene sky, Sun, Moon, and Fog output to be disabled.",
     );
   }
 }
@@ -177,6 +178,38 @@ function validateCalibrationScale(name, value) {
   ) {
     throw new DeveloperError(`${name} must be a finite number from 0 to 64.`);
   }
+}
+
+function validateRange(name, value, minimum, maximum) {
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    value < minimum ||
+    value > maximum
+  ) {
+    throw new DeveloperError(
+      `${name} must be a finite number from ${minimum} to ${maximum}.`,
+    );
+  }
+}
+
+function requestRenderIfActive(controller) {
+  if (
+    controller._enabled &&
+    defined(controller._element) &&
+    defined(controller._scene)
+  ) {
+    requestRender(controller);
+  }
+}
+
+function setWarmNumber(controller, property, value, minimum, maximum) {
+  validateRange("value", value, minimum, maximum);
+  if (controller[property] === value) {
+    return;
+  }
+  controller[property] = value;
+  requestRenderIfActive(controller);
 }
 
 function raiseGenerationError(controller, generation, error) {
@@ -246,6 +279,7 @@ function ensurePipeline(controller, scene) {
   pipeline.setShow(
     controller._showAtmosphere,
     controller._showAerialPerspective,
+    controller._showHeightFog,
   );
   pipeline.enabled = true;
   return pipeline;
@@ -283,7 +317,11 @@ function activate(controller, scene) {
   }
   controller._scene = scene;
   ensurePipeline(controller, scene);
-  if (!controller._showAtmosphere && !controller._showAerialPerspective) {
+  if (
+    !controller._showAtmosphere &&
+    !controller._showAerialPerspective &&
+    !controller._showHeightFog
+  ) {
     return;
   }
   if (controller._pipeline.hasResources()) {
@@ -335,17 +373,68 @@ function SceneGISEnvironmentEffects(options) {
   const enabled = options.enabled ?? false;
   const showAtmosphere = options.showAtmosphere ?? true;
   const showAerialPerspective = options.showAerialPerspective ?? true;
+  const showHeightFog = options.showHeightFog ?? true;
   const backgroundRadianceScale = options.backgroundRadianceScale ?? 10.0;
   const aerialRadianceScale = options.aerialRadianceScale ?? 1.0;
+  const heightFogDensity = options.heightFogDensity ?? 0.000008;
+  const heightFogHeightFalloff = options.heightFogHeightFalloff ?? 0.0002;
+  const heightFogBaseHeight = options.heightFogBaseHeight ?? 0.0;
+  const heightFogStartDistance = options.heightFogStartDistance ?? 250.0;
+  const heightFogMaximumOpacity = options.heightFogMaximumOpacity ?? 0.7;
+  const heightFogInscatteringScale = options.heightFogInscatteringScale ?? 0.35;
+  const heightFogDirectionalInscatteringScale =
+    options.heightFogDirectionalInscatteringScale ?? 0.15;
+  const heightFogDirectionalInscatteringExponent =
+    options.heightFogDirectionalInscatteringExponent ?? 8.0;
   validateCalibrationScale(
     "options.backgroundRadianceScale",
     backgroundRadianceScale,
   );
   validateCalibrationScale("options.aerialRadianceScale", aerialRadianceScale);
+  validateRange("options.heightFogDensity", heightFogDensity, 0.0, 0.001);
+  validateRange(
+    "options.heightFogHeightFalloff",
+    heightFogHeightFalloff,
+    0.0,
+    0.001,
+  );
+  validateRange(
+    "options.heightFogBaseHeight",
+    heightFogBaseHeight,
+    -60000.0,
+    60000.0,
+  );
+  validateRange(
+    "options.heightFogStartDistance",
+    heightFogStartDistance,
+    0.0,
+    300000.0,
+  );
+  validateRange(
+    "options.heightFogMaximumOpacity",
+    heightFogMaximumOpacity,
+    0.0,
+    1.0,
+  );
+  validateCalibrationScale(
+    "options.heightFogInscatteringScale",
+    heightFogInscatteringScale,
+  );
+  validateCalibrationScale(
+    "options.heightFogDirectionalInscatteringScale",
+    heightFogDirectionalInscatteringScale,
+  );
+  validateRange(
+    "options.heightFogDirectionalInscatteringExponent",
+    heightFogDirectionalInscatteringExponent,
+    1.0,
+    128.0,
+  );
   //>>includeStart('debug', pragmas.debug);
   Check.typeOf.bool("options.enabled", enabled);
   Check.typeOf.bool("options.showAtmosphere", showAtmosphere);
   Check.typeOf.bool("options.showAerialPerspective", showAerialPerspective);
+  Check.typeOf.bool("options.showHeightFog", showHeightFog);
   //>>includeEnd('debug');
 
   this._mode = mode;
@@ -353,8 +442,19 @@ function SceneGISEnvironmentEffects(options) {
   this._enabled = enabled;
   this._showAtmosphere = showAtmosphere;
   this._showAerialPerspective = showAerialPerspective;
+  this._showHeightFog = showHeightFog;
   this._backgroundRadianceScale = backgroundRadianceScale;
   this._aerialRadianceScale = aerialRadianceScale;
+  this._heightFogDensity = heightFogDensity;
+  this._heightFogHeightFalloff = heightFogHeightFalloff;
+  this._heightFogBaseHeight = heightFogBaseHeight;
+  this._heightFogStartDistance = heightFogStartDistance;
+  this._heightFogMaximumOpacity = heightFogMaximumOpacity;
+  this._heightFogInscatteringScale = heightFogInscatteringScale;
+  this._heightFogDirectionalInscatteringScale =
+    heightFogDirectionalInscatteringScale;
+  this._heightFogDirectionalInscatteringExponent =
+    heightFogDirectionalInscatteringExponent;
   this._ready = false;
   this._errorEvent = new Event();
   this._element = undefined;
@@ -437,7 +537,11 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       }
       this._showAtmosphere = value;
       if (defined(this._pipeline) && !this._pipeline.isDestroyed()) {
-        this._pipeline.setShow(value, this._showAerialPerspective);
+        this._pipeline.setShow(
+          value,
+          this._showAerialPerspective,
+          this._showHeightFog,
+        );
       }
       if (this._enabled && defined(this._scene)) {
         requestRender(this);
@@ -458,7 +562,11 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       }
       this._showAerialPerspective = value;
       if (defined(this._pipeline) && !this._pipeline.isDestroyed()) {
-        this._pipeline.setShow(this._showAtmosphere, value);
+        this._pipeline.setShow(
+          this._showAtmosphere,
+          value,
+          this._showHeightFog,
+        );
       }
       if (this._enabled && defined(this._scene)) {
         requestRender(this);
@@ -501,6 +609,158 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       }
       this._aerialRadianceScale = value;
       requestRender(this);
+    },
+  },
+  /**
+   * Gets or sets whether exponential height fog is shown.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
+  showHeightFog: {
+    get: function () {
+      return this._showHeightFog;
+    },
+    set: function (value) {
+      //>>includeStart('debug', pragmas.debug);
+      Check.typeOf.bool("value", value);
+      //>>includeEnd('debug');
+      if (this._showHeightFog === value) {
+        return;
+      }
+      this._showHeightFog = value;
+      if (defined(this._pipeline) && !this._pipeline.isDestroyed()) {
+        this._pipeline.setShow(
+          this._showAtmosphere,
+          this._showAerialPerspective,
+          value,
+        );
+      }
+      requestRenderIfActive(this);
+    },
+  },
+  /**
+   * Gets or sets the base-height extinction coefficient per meter.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  heightFogDensity: {
+    get: function () {
+      return this._heightFogDensity;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_heightFogDensity", value, 0.0, 0.001);
+    },
+  },
+  /**
+   * Gets or sets the exponential height falloff per meter.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  heightFogHeightFalloff: {
+    get: function () {
+      return this._heightFogHeightFalloff;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_heightFogHeightFalloff", value, 0.0, 0.001);
+    },
+  },
+  /**
+   * Gets or sets the density reference height in meters.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  heightFogBaseHeight: {
+    get: function () {
+      return this._heightFogBaseHeight;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_heightFogBaseHeight", value, -60000.0, 60000.0);
+    },
+  },
+  /**
+   * Gets or sets the distance in meters before fog starts along each ray.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  heightFogStartDistance: {
+    get: function () {
+      return this._heightFogStartDistance;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_heightFogStartDistance", value, 0.0, 300000.0);
+    },
+  },
+  /**
+   * Gets or sets the maximum fog opacity.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  heightFogMaximumOpacity: {
+    get: function () {
+      return this._heightFogMaximumOpacity;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_heightFogMaximumOpacity", value, 0.0, 1.0);
+    },
+  },
+  /**
+   * Gets or sets the scene-linear ambient fog inscattering scale.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  heightFogInscatteringScale: {
+    get: function () {
+      return this._heightFogInscatteringScale;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_heightFogInscatteringScale", value, 0.0, 64.0);
+    },
+  },
+  /**
+   * Gets or sets the scene-linear directional fog inscattering scale.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  heightFogDirectionalInscatteringScale: {
+    get: function () {
+      return this._heightFogDirectionalInscatteringScale;
+    },
+    set: function (value) {
+      setWarmNumber(
+        this,
+        "_heightFogDirectionalInscatteringScale",
+        value,
+        0.0,
+        64.0,
+      );
+    },
+  },
+  /**
+   * Gets or sets the directional fog lobe exponent.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  heightFogDirectionalInscatteringExponent: {
+    get: function () {
+      return this._heightFogDirectionalInscatteringExponent;
+    },
+    set: function (value) {
+      setWarmNumber(
+        this,
+        "_heightFogDirectionalInscatteringExponent",
+        value,
+        1.0,
+        128.0,
+      );
     },
   },
 });
@@ -571,7 +831,7 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
   ensurePipeline(this, scene);
   if (
     !this._pipeline.hasResources() &&
-    (this._showAtmosphere || this._showAerialPerspective)
+    (this._showAtmosphere || this._showAerialPerspective || this._showHeightFog)
   ) {
     beginGeneration(this, scene);
   }
@@ -597,8 +857,17 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [enabled=false] Whether advanced effects are active.
  * @property {boolean} [showAtmosphere=true] Whether to render atmosphere and Sun background.
  * @property {boolean} [showAerialPerspective=true] Whether to composite opaque geometry aerial perspective.
+ * @property {boolean} [showHeightFog=true] Whether to apply single-layer exponential height fog.
  * @property {number} [backgroundRadianceScale=10.0] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64.
  * @property {number} [aerialRadianceScale=1.0] Scene-linear scale applied to physical aerial radiance, in the inclusive range 0–64.
+ * @property {number} [heightFogDensity=0.000008] Base-height extinction coefficient per meter, in the inclusive range 0–0.001.
+ * @property {number} [heightFogHeightFalloff=0.0002] Exponential height falloff per meter, in the inclusive range 0–0.001.
+ * @property {number} [heightFogBaseHeight=0.0] Density reference height in meters, in the inclusive range -60000–60000.
+ * @property {number} [heightFogStartDistance=250.0] Fog-free ray distance in meters, in the inclusive range 0–300000.
+ * @property {number} [heightFogMaximumOpacity=0.7] Maximum fog opacity, in the inclusive range 0–1.
+ * @property {number} [heightFogInscatteringScale=0.35] Ambient fog source scale, in the inclusive range 0–64.
+ * @property {number} [heightFogDirectionalInscatteringScale=0.15] Directional fog source scale, in the inclusive range 0–64.
+ * @property {number} [heightFogDirectionalInscatteringExponent=8.0] Directional lobe exponent, in the inclusive range 1–128.
  */
 
 export default SceneGISEnvironmentEffects;
