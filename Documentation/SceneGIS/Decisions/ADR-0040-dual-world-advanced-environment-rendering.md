@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`approved`
+- Status：`approved; 2026-08-27 Globe-first delivery amendment`
 - Date：`2026-08-14`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -127,6 +127,38 @@ resolve、`PostProcessStageCollection`内built-in/tone/custom顺序、HDR强制o
 - Official upstream audit只允许`Scene.js`/SGP-0008，generated status=`0`；后续每个visual phase另行增加pixel、asset、resource、performance与
   dual-world manual evidence。
 
+## 2026-08-27 Globe-first delivery amendment
+
+Project owner rejected the retained A4 visual gate after Planar exponential
+height fog and volumetric clouds produced an invalid large white region and
+incorrect layering. The screenshot rejects the current candidate but does not by
+itself establish the shader or composition root cause.
+
+The final architecture remains dual-world. Delivery order changes as follows:
+
+1. Complete the entire Globe advanced-rendering track first: integrated
+   atmosphere/aerial/fog/cloud, cloud shadow and shadow-length coupling,
+   atmosphere-derived skylight, temporal/performance policy, bloom/lens flare,
+   and Globe qualification.
+2. Existing checkpointed Planar A2/A3 work remains intact but frozen. No new
+   Planar calibration, parity gate, resource, or product repair is authorized
+   until the Globe track is accepted.
+3. The fixed Cesium reference commit is now a preferred implementation authority
+   for the Globe feature topology and for file-level licensed adaptations, not
+   merely a visual comparison. Its atmosphere/cloud/BSM/shadow-resolve/skylight
+   coupling should be retained where compatible.
+4. Reference runtime mechanics remain rejected: no raw `_gl`, PBO, public-network
+   runtime fetch, third-party texture wrapper, post-tone-map physical effect, or
+   duplicate tone mapping. Adapted work must use `SGP-0008`, Cesium Renderer
+   abstractions, packaged assets, and SceneGIS failure-atomic ownership.
+5. Each Globe phase still requires its own implementation review, project-owner
+   visual gate, and Architecture checkpoint. “Globe first” does not merge phases
+   or authorize A5-G work before the A4-G checkpoint.
+
+Planar work resumes as a later adaptation track against the accepted Globe
+optical contract. The reported fog/cloud composition defect remains a known issue
+and must not be hidden by a Planar-only tint, scale, fallback, or geometry fiction.
+
 ## 参考资料
 
 - [Eric Bruneton: Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/)：
@@ -139,5 +171,5 @@ resolve、`PostProcessStageCollection`内built-in/tone/custom顺序、HDR强制o
   volume texture raymarch、ground-to-space cloud与atmosphere integration参考。
 - [Unreal Engine: Exponential Height Fog](https://dev.epicgames.com/documentation/en-us/unreal-engine/exponential-height-fog-in-unreal-engine)：
   layered height density、directional inscattering与performance controls参考。
-- [yuwoniu03/cesium-clouds-atmosphere](https://github.com/yuwoniu03/cesium-clouds-atmosphere)：用户指定的Cesium原型参考；
-  Architecture检查commit=`1f38602b84ab5c3f2bc289f9e4464df3db917155`，只参考职责与效果链，不直接移植runtime/assets。
+- [yuwoniu03/cesium-clouds-atmosphere](https://github.com/yuwoniu03/cesium-clouds-atmosphere)：用户指定的Cesium实现参考；
+  Architecture检查commit=`1f38602b84ab5c3f2bc289f9e4464df3db917155`。Globe可采用逐文件审计后的实现与资产；raw runtime容器仍不移植。

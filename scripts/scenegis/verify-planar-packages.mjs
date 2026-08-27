@@ -161,8 +161,11 @@ const sceneGISShaderSources = [
   "EnvironmentEffects/SceneGISBrunetonRuntime",
   "EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS",
+  "EnvironmentEffects/SceneGISEnvironmentEffectsCloudFS",
+  "EnvironmentEffects/SceneGISEnvironmentEffectsCloudResolveFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsVS",
   "EnvironmentEffects/SceneGISExponentialHeightFog",
+  "EnvironmentEffects/SceneGISVolumetricClouds",
   "PlanarGround/SceneGISPlanarGroundAreaFS",
   "PlanarGround/SceneGISPlanarGroundAreaVS",
   "PlanarGround/SceneGISPlanarGroundLineFS",
@@ -225,6 +228,18 @@ const planarEarthSourceArchiveRoot =
   "package/Source/Assets/SceneGIS/Environment/PlanarEarth";
 const planarEarthReleaseArchiveRoot =
   "package/Build/Cesium/Assets/SceneGIS/Environment/PlanarEarth";
+const cloudCoreArchiveFiles = [
+  "shape.bin",
+  "detail.bin",
+  "weather.bin",
+  "turbulence.bin",
+  "stbn.bin",
+  "PROVENANCE.json",
+];
+const cloudCoreSourceArchiveRoot =
+  "package/Source/Assets/SceneGIS/Environment/CloudCore";
+const cloudCoreReleaseArchiveRoot =
+  "package/Build/Cesium/Assets/SceneGIS/Environment/CloudCore";
 
 function brunetonArchiveEntries(root) {
   return [...Object.keys(brunetonFiles), "provenance.json"].map(
@@ -236,6 +251,10 @@ function planarEarthArchiveEntries(root) {
   return [...Object.keys(planarEarthFiles), "provenance.json"].map(
     (name) => `${root}/${name}`,
   );
+}
+
+function cloudCoreArchiveEntries(root) {
+  return cloudCoreArchiveFiles.map((name) => `${root}/${name}`);
 }
 
 function verifyBrunetonDelivery(root) {
@@ -292,6 +311,77 @@ function verifyPlanarEarthDelivery(root) {
     provenance.format.textures.scattering.dimensions.join("x"),
     "256x128x32",
   );
+}
+
+function verifyCloudCoreDelivery(root) {
+  const provenance = JSON.parse(
+    fs.readFileSync(path.join(root, "PROVENANCE.json"), "utf8"),
+  );
+  assert.equal(provenance.generatorVersion, 4);
+  assert.equal(provenance.seed, "0x4A17C9E3");
+  assert.equal(provenance.copiedBinaries, 0);
+  assert.equal(provenance.copiedSource, 0);
+  assert.equal(provenance.totalBinaryBytes, 11796480);
+  assert.deepEqual(
+    provenance.files.map(({ name, format, dimensions, bytes, sha256 }) => ({
+      name,
+      format,
+      dimensions,
+      bytes,
+      sha256,
+    })),
+    [
+      {
+        name: "shape.bin",
+        format: "RGBA8",
+        dimensions: [128, 128, 128],
+        bytes: 8388608,
+        sha256:
+          "E6D6C471B1753E13FE0C669BB06E3D541C1CD88D66D1452941DE7EC6C7749EC2",
+      },
+      {
+        name: "detail.bin",
+        format: "RGBA8",
+        dimensions: [64, 64, 64],
+        bytes: 1048576,
+        sha256:
+          "D09AA6508C0EB571A9F33E801B2AF2F288929F754633812699330AB51C29CE7B",
+      },
+      {
+        name: "weather.bin",
+        format: "RGBA8",
+        dimensions: [256, 256],
+        bytes: 262144,
+        sha256:
+          "122ABD03DD698878EEE0983E8F3441487FCE6EBECE850332A6E18F16BB8F0B88",
+      },
+      {
+        name: "turbulence.bin",
+        format: "RGBA8",
+        dimensions: [64, 64, 64],
+        bytes: 1048576,
+        sha256:
+          "C8F66FA83474EDE878D76EC2BBF4ABDF0F3EC47A26F710FAB8A9D01BD054B8E8",
+      },
+      {
+        name: "stbn.bin",
+        format: "R8",
+        dimensions: [128, 128, 64],
+        bytes: 1048576,
+        sha256:
+          "B16C8B017D8435B38F7041F7447D6C52D29E477F978242E97DCDC0987C4A71AE",
+      },
+    ],
+  );
+  for (const file of provenance.files) {
+    const contents = fs.readFileSync(path.join(root, file.name));
+    assert.equal(contents.byteLength, file.bytes, file.name);
+    assert.equal(
+      createHash("sha256").update(contents).digest("hex").toUpperCase(),
+      file.sha256,
+      file.name,
+    );
+  }
 }
 
 function npmCommand(args) {
@@ -510,6 +600,17 @@ assert.equal(globeEffects.heightFogMaximumOpacity, 0.7);
 assert.equal(globeEffects.heightFogInscatteringScale, 0.35);
 assert.equal(globeEffects.heightFogDirectionalInscatteringScale, 0.15);
 assert.equal(globeEffects.heightFogDirectionalInscatteringExponent, 8.0);
+assert.equal(globeEffects.showClouds, true);
+assert.equal(globeEffects.cloudQuality, "medium");
+assert.equal(globeEffects.cloudPreset, "cumulus");
+assert.equal(globeEffects.cloudCoverage, 0.45);
+assert.equal(globeEffects.cloudDensity, 0.001);
+assert.equal(globeEffects.cloudBaseHeight, 1500.0);
+assert.equal(globeEffects.cloudThickness, 4500.0);
+assert.equal(globeEffects.cloudWindDirection, 0.785398);
+assert.equal(globeEffects.cloudWindSpeed, 20.0);
+assert.equal(globeEffects.cloudTime, 0.0);
+assert.equal(globeEffects.cloudRadianceScale, 48.0);
 assert.equal("radianceScale" in globeEffects, false);
 globeEffects.backgroundRadianceScale = 2.0;
 globeEffects.aerialRadianceScale = 0.5;
@@ -522,6 +623,17 @@ globeEffects.heightFogMaximumOpacity = 0.5;
 globeEffects.heightFogInscatteringScale = 0.7;
 globeEffects.heightFogDirectionalInscatteringScale = 0.3;
 globeEffects.heightFogDirectionalInscatteringExponent = 16.0;
+globeEffects.showClouds = false;
+globeEffects.cloudQuality = "high";
+globeEffects.cloudPreset = "mixed";
+globeEffects.cloudCoverage = 0.6;
+globeEffects.cloudDensity = 0.002;
+globeEffects.cloudBaseHeight = 2000.0;
+globeEffects.cloudThickness = 6000.0;
+globeEffects.cloudWindDirection = 1.0;
+globeEffects.cloudWindSpeed = 40.0;
+globeEffects.cloudTime = 120.0;
+globeEffects.cloudRadianceScale = 2.0;
 assert.equal(globeEffects.backgroundRadianceScale, 2.0);
 assert.equal(globeEffects.aerialRadianceScale, 0.5);
 assert.equal(globeEffects.showHeightFog, false);
@@ -533,6 +645,17 @@ assert.equal(globeEffects.heightFogMaximumOpacity, 0.5);
 assert.equal(globeEffects.heightFogInscatteringScale, 0.7);
 assert.equal(globeEffects.heightFogDirectionalInscatteringScale, 0.3);
 assert.equal(globeEffects.heightFogDirectionalInscatteringExponent, 16.0);
+assert.equal(globeEffects.showClouds, false);
+assert.equal(globeEffects.cloudQuality, "high");
+assert.equal(globeEffects.cloudPreset, "mixed");
+assert.equal(globeEffects.cloudCoverage, 0.6);
+assert.equal(globeEffects.cloudDensity, 0.002);
+assert.equal(globeEffects.cloudBaseHeight, 2000.0);
+assert.equal(globeEffects.cloudThickness, 6000.0);
+assert.equal(globeEffects.cloudWindDirection, 1.0);
+assert.equal(globeEffects.cloudWindSpeed, 40.0);
+assert.equal(globeEffects.cloudTime, 120.0);
+assert.equal(globeEffects.cloudRadianceScale, 2.0);
 assert.equal(globeEffects.ready, false);
 assert.equal(typeof globeEffects.errorEvent.addEventListener, "function");
 const planarEffects = new engine.SceneGISEnvironmentEffects({
@@ -709,11 +832,28 @@ assert.equal(effects.heightFogMaximumOpacity, 0.7);
 assert.equal(effects.heightFogInscatteringScale, 0.35);
 assert.equal(effects.heightFogDirectionalInscatteringScale, 0.15);
 assert.equal(effects.heightFogDirectionalInscatteringExponent, 8.0);
+assert.equal(effects.showClouds, true);
+assert.equal(effects.cloudQuality, "medium");
+assert.equal(effects.cloudPreset, "cumulus");
+assert.equal(effects.cloudCoverage, 0.45);
+assert.equal(effects.cloudDensity, 0.001);
+assert.equal(effects.cloudBaseHeight, 1500.0);
+assert.equal(effects.cloudThickness, 4500.0);
+assert.equal(effects.cloudWindDirection, 0.785398);
+assert.equal(effects.cloudWindSpeed, 20.0);
+assert.equal(effects.cloudTime, 0.0);
+assert.equal(effects.cloudRadianceScale, 48.0);
 assert.equal("radianceScale" in effects, false);
 effects.backgroundRadianceScale = 2.0;
 effects.aerialRadianceScale = 0.5;
+effects.cloudQuality = "low";
+effects.cloudPreset = "cirrus";
+effects.cloudTime = 1.0;
 assert.equal(effects.backgroundRadianceScale, 2.0);
 assert.equal(effects.aerialRadianceScale, 0.5);
+assert.equal(effects.cloudQuality, "low");
+assert.equal(effects.cloudPreset, "cirrus");
+assert.equal(effects.cloudTime, 1.0);
 assert.equal(effects.ready, false);
 `;
 }
@@ -755,6 +895,17 @@ function verifyDocumentation(engineDirectory) {
     "heightFogInscatteringScale",
     "heightFogDirectionalInscatteringScale",
     "heightFogDirectionalInscatteringExponent",
+    "showClouds",
+    "cloudQuality",
+    "cloudPreset",
+    "cloudCoverage",
+    "cloudDensity",
+    "cloudBaseHeight",
+    "cloudThickness",
+    "cloudWindDirection",
+    "cloudWindSpeed",
+    "cloudTime",
+    "cloudRadianceScale",
   ]) {
     assert.match(
       effectsDocumentation,
@@ -1009,6 +1160,7 @@ async function verify() {
     ...sceneGISShaderArchiveEntries,
     ...brunetonArchiveEntries(brunetonSourceArchiveRoot),
     ...planarEarthArchiveEntries(planarEarthSourceArchiveRoot),
+    ...cloudCoreArchiveEntries(cloudCoreSourceArchiveRoot),
     ...privateContentFiles,
   ]);
   assertArchive(widgetsArchive, [
@@ -1025,6 +1177,7 @@ async function verify() {
     terrainWorkerRelease,
     ...brunetonArchiveEntries(brunetonReleaseArchiveRoot),
     ...planarEarthArchiveEntries(planarEarthReleaseArchiveRoot),
+    ...cloudCoreArchiveEntries(cloudCoreReleaseArchiveRoot),
   ]);
 
   const nodeModules = path.join(temporaryRoot, "node_modules");
@@ -1048,6 +1201,9 @@ async function verify() {
       "Source/Assets/SceneGIS/Environment/PlanarEarth",
     ),
   );
+  verifyCloudCoreDelivery(
+    path.join(engineDirectory, "Source/Assets/SceneGIS/Environment/CloudCore"),
+  );
   verifyBrunetonDelivery(
     path.join(
       rootDirectory,
@@ -1058,6 +1214,12 @@ async function verify() {
     path.join(
       rootDirectory,
       "Build/Cesium/Assets/SceneGIS/Environment/PlanarEarth",
+    ),
+  );
+  verifyCloudCoreDelivery(
+    path.join(
+      rootDirectory,
+      "Build/Cesium/Assets/SceneGIS/Environment/CloudCore",
     ),
   );
   verifyTrackingSources(engineDirectory, widgetsDirectory);
@@ -1089,6 +1251,12 @@ async function verify() {
     assert.match(declarations, /aerialRadianceScale: number;/u);
     assert.match(declarations, /showHeightFog\?: boolean;/u);
     assert.match(declarations, /showHeightFog: boolean;/u);
+    assert.match(declarations, /showClouds\?: boolean;/u);
+    assert.match(declarations, /showClouds: boolean;/u);
+    assert.match(declarations, /cloudQuality\?: string;/u);
+    assert.match(declarations, /cloudQuality: string;/u);
+    assert.match(declarations, /cloudPreset\?: string;/u);
+    assert.match(declarations, /cloudPreset: string;/u);
     for (const property of [
       "heightFogDensity",
       "heightFogHeightFalloff",
@@ -1098,6 +1266,19 @@ async function verify() {
       "heightFogInscatteringScale",
       "heightFogDirectionalInscatteringScale",
       "heightFogDirectionalInscatteringExponent",
+    ]) {
+      assert.match(declarations, new RegExp(`${property}\\?: number;`, "u"));
+      assert.match(declarations, new RegExp(`${property}: number;`, "u"));
+    }
+    for (const property of [
+      "cloudCoverage",
+      "cloudDensity",
+      "cloudBaseHeight",
+      "cloudThickness",
+      "cloudWindDirection",
+      "cloudWindSpeed",
+      "cloudTime",
+      "cloudRadianceScale",
     ]) {
       assert.match(declarations, new RegExp(`${property}\\?: number;`, "u"));
       assert.match(declarations, new RegExp(`${property}: number;`, "u"));
@@ -1127,7 +1308,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 20/20 GLSL, 20/20 generated shader modules, exact Bruneton and PlanarEarth LUT/license/provenance in engine/root, bare ESM/CJS, A3 public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 23/23 GLSL, 23/23 generated shader modules, exact Bruneton, PlanarEarth, and CloudCore assets/provenance in engine/root, bare ESM/CJS, A4R public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
   );
 }
 

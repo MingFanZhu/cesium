@@ -6,13 +6,12 @@
 - Status: `active`
 - Owner roles: Architecture Agent, Execution Agent
 - Created: `2026-08-14`
-- Updated: `2026-08-15`
+- Updated: `2026-08-27`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: A4 — Volumetric cloud core（`active`）
-- Active phase plan:
-  [2026-08-15-phase-a4-volumetric-cloud-core.md](2026-08-15-phase-a4-volumetric-cloud-core.md)
+- Current phase: none（A4-G `completed`; A5-G not activated）
+- Active phase plan: none
 - Latest completed phase plan:
-  [2026-08-15-phase-a3-exponential-height-fog.md](2026-08-15-phase-a3-exponential-height-fog.md)
+  [2026-08-27-phase-a4g-globe-integrated-cloud-core.md](2026-08-27-phase-a4g-globe-integrated-cloud-core.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -25,7 +24,7 @@
 - A1 implementation: `completed`
 - A2 implementation: `completed`
 - A3 implementation: `completed`
-- A4 implementation: `active`
+- A4 implementation: `A4-G completed; Architecture approved; owner visual gate passed; local checkpoint`
 
 ## Goal
 
@@ -42,6 +41,10 @@
 
 “同样支持”定义为两种 World 提供同一 feature family、quality/profile 与 lifecycle semantics；几何模型分别正确，不要求球面与
 平面输出相同像素。
+
+Delivery order is Globe-first. The extension completes and qualifies the entire
+Globe advanced-rendering stack before reopening Planar adaptation. This changes
+phase sequencing, not the final dual-world product goal.
 
 ## Stable boundaries
 
@@ -113,32 +116,66 @@ overlay或stopped/black viewer。A3已`approved-for-owner-gate`；checkpoint与A
 项目负责人已在live dual-world Test上明确报告`通过`。A3 manual visual gate通过，本change set形成A3独立本地checkpoint；A4仍需独立
 source-based phase plan与planning checkpoint后才能激活。
 
-### A4 — Volumetric cloud core (`active`)
+### A4-G — Globe volumetric cloud and integrated-media core (`completed`)
 
-依据[A4 phase plan](2026-08-15-phase-a4-volumetric-cloud-core.md)与ADR-0046增加single-deck Globe shell / planar slab raymarch、独立生成的
-shape/detail/weather/blue-noise assets、A2 Sun/sky lighting、three fixed quality tiers、caller-owned基础运动与A2/A3-aware cloud composition。
-使用one low-resolution two-attachment RGBA16F cloud MRT并复用现有full-resolution HDR composite；不增加`Scene.js`hook，不提前实现shadow、
-god rays或temporal history。
+The 2026-08-27 project-owner sequencing decision supersedes the dual-world gate
+described in the historical A4 record below. The retained uncommitted candidate is
+frozen; the active work is the
+[A4-G phase plan](2026-08-27-phase-a4g-globe-integrated-cloud-core.md). A4-G judges
+only the Globe atmosphere, aerial, radial height fog, atmosphere-derived cloud
+skylight, volumetric cloud, depth, and HDR composition. Planar behavior is neither
+an acceptance target nor an authorized repair scope.
 
-### A5 — Cloud shadows and crepuscular rays
+依据[A4 phase plan](2026-08-15-phase-a4-volumetric-cloud-core.md)与ADR-0046增加single-deck Globe shell / planar slab raymarch、SceneGIS-owned
+shape/detail/weather/turbulence/STBN assets、A2 Sun/sky lighting、three fixed quality tiers、caller-owned基础运动与A2/A3-aware cloud composition。
+使用one low-resolution two-attachment RGBA16F cloud MRT、depth/front bilateral resolve与two ping-pong full-resolution cloud-only history managers，
+复用现有HDR composite；不增加`Scene.js`hook，不提前实现shadow/god rays或A6 stack-wide temporal policy。`A4-AR-002`与product visual已通过第二次Architecture re-review；`A4-AR-006`现以geometry-free structure
+capture、clouds-off exact identity和target/ground visibility invariance关闭。Architecture第三次独立复审已批准A4进入owner visual gate；
+project owner随后因低质量噪声团块、缺少多云型与Globe/Planar opacity/color不一致拒绝该gate。ADR-0046停止条件触发后已完成A4R修订并获得
+project-owner明确授权：新增四种typed morphology preset（内部最多四层）、reference-quality asset/turbulence/STBN authority、bilateral + minimum
+cloud-only temporal resolve，以及dual-world matched optical/radiometric contract。A4R执行已激活但仍未checkpoint；A5未激活。
+
+`A4-AR-010/012/013/017`已经关闭。Actual runtime mip failure injection、candidate exact cleanup、conservative max hierarchy、thin/sub-cell
+false-negative与compiled scheduler counters通过Architecture独立复核；current tracked/runtime texture count=`5/6`，static GPU=`15,691,189 bytes`，
+controller/A1=`63/63`，exact Scene aggregate=`127/127`。Execution已完成Specs-only constant -> ray -> density -> lighting replay、same owner/
+independent A/B MRT comparison及完整depth/uniform/program/FBO/texture/sampler/history authority。Low MRT在全部冻结矩阵和fixed real-asset phase逐bit
+exact；remaining resolve delta定位为`exp2`实现相关舍入，现由固定有理bilateral weight与统一spatial-only shader-facing state修复。Two clean loads ×
+two consecutive diagnostics均both-world exact zero/true。`A4-AR-011/016`已execution-fixed并回到review-ready；owner gate、checkpoint、push与A5
+activation继续blocked，等待Architecture独立复审。
+
+Final A4-G source, direct Test evidence and focused automated authority passed
+Architecture review. The project owner then reported `通过` on the live Globe
+result. A4-G is closed by its local unpublished checkpoint; A5-G remains
+unactivated and Planar adaptation remains deferred.
+
+### A5-G — Globe cloud shadows, skylight, and crepuscular rays
 
 增加 cloud transmittance/shadow representation、ground shadow 与 atmosphere/cloud/fog统一的 crepuscular rays。阶段开始时根据
-Cesium shadow/depth源码决定是否需要新的 integration seam；不得在 extension plan猜测。
+Cesium shadow/depth源码决定是否需要新的 integration seam；同时把Bruneton atmosphere irradiance冻结为cloud与已批准scene consumer共享的
+Globe skylight authority。不得在 extension plan猜测尚未source-discover的surface/IBL API。
 
-### A6 — Temporal stabilization and performance tiers
+### A6-G — Globe temporal stabilization and performance tiers
 
-为 clouds/volumetrics增加 Cesium Renderer-owned temporal history、jitter/reprojection、disocclusion/reset与明确的 quality/resource
-budgets；不直接采用 raw WebGL PBO readback。
+在A4R最小cloud-only history之上统一dynamic performance policy、跨effect temporal stabilization与长期quality/resource budgets；不得建立第二套
+不兼容的cloud history authority，也不直接采用raw WebGL PBO readback。
 
-### A7 — HDR bloom and lens flare
+### A7-G — Globe HDR bloom and lens flare
 
 增加 bright-source threshold、bloom、ghost/halo/lens artifact与遮挡，保持在 linear-HDR compositor内并与 native `sunBloom`、
 `SunPostProcess`明确互斥。
 
-### A8 — Unified qualification and delivery
+### A8-G — Globe qualification and delivery
 
-完成 dual-world visual matrix、performance/resource evidence、build/types/docs/npm/root package、中文 direct Test、focused E2E、upgrade
-checklist、manual gate与扩展收口。A8 不补做前序 phase 遗留的核心正确性。
+完成 Globe visual matrix、performance/resource evidence、build/types/docs/npm/root package、中文 direct Test、focused E2E、upgrade
+checklist与manual gate。A8-G不宣称dual-world扩展收口，也不补做前序Globe phase遗留的核心正确性。
+
+### P1+ — Planar advanced-effects adaptation (`deferred`)
+
+Only after A8-G approval does Architecture source-discover the Planar track. It
+will begin by reproducing the retained exponential-height-fog plus volumetric-cloud
+composition failure, then adapt the accepted Globe optical contracts to fixed-Z
+slab geometry without pretending Planar is spherical. Detailed Planar phases are
+intentionally not guessed before that entry gate.
 
 ## Global acceptance criteria
 
@@ -155,10 +192,50 @@ checklist、manual gate与扩展收口。A8 不补做前序 phase 遗留的核�
 - Cesium depth/OIT/MSAA/HDR framebuffer路径组合复杂；A1必须锁定 resolved input与resize/context lifecycle，不能等到cloud phase补救。
 - Planar atmosphere并非 spherical Bruneton公式的参数替换；若 slab approximation缺少物理依据，必须明确标为独立模型与视觉误差，不能宣称
   与 Globe完全物理等价。
-- Temporal history与 request-render、Clock seek、camera teleport、dynamic resolution互相耦合；A6前各phase不得私建不兼容history。
+- Temporal history与request-render、Clock seek、camera teleport、dynamic resolution互相耦合；A4R只允许ADR-0046冻结的最小cloud-only
+  authority，A6必须复用或演进该authority，不得并存第二套history。
 - Native Globe sky/fog/sun bloom与 advanced effects双重执行会产生错误能量；public phase必须 fail-fast或提供显式、可恢复的authority切换。
 
 ## Phase gate
 
 所有 phase 严格串行。Execution完成实现与最小充分验证后写 review-ready handoff并停止；Architecture review批准、项目负责人要求的
 manual gate通过且 Architecture建立独立本地 checkpoint后，才可创建/激活下一 phase。不得合并多个 phase提交。
+
+2026-08-27起串行顺序为A4-G → A5-G → A6-G → A7-G → A8-G → Planar
+adaptation。A8-G批准前不得以dual-world parity、Planar owner gate或Planar视觉修复阻塞Globe阶段，也不得提前修改Planar实现。
+
+### A4-AR-018/019 focused closure — 2026-08-27
+
+Execution removed the shared near-sentinel depth epsilon and fixed 250 m cloud binary cutoff. Exact sentinel semantics and bounded footprint occlusion passed focused
+controller/A1 `64/64` plus dual-world downward/horizon live continuity evidence. A4 remains active and `review-ready`; Architecture re-review, owner gate and isolated
+checkpoint remain mandatory before A5.
+
+### Architecture focused re-review — No-Go — 2026-08-27
+
+Architecture接受shared exact-sentinel classifier及focused controller/A1 `64/64`结果；三张final artifact也未再显示owner原始横向断层。但
+`sceneGISSelectCloudSample`在data-dependent invalid-distance early return和`clearDepth`分支之后/之内调用`fwidth(frontDelta)`，使geometry/cloud
+silhouette处的derivative落入non-uniform control flow，current GPU通过不能构成portable closure。`A4-AR-020`要求只把derivative computation提升到所有
+data-dependent branch之前，保持现有visibility/composition、public/resource/asset contract不变，并复跑既有focused与fixed-view evidence。
+
+Execution已完成该hoist，并以source-order contract、focused controller/A1 `64/64`及final downward/horizon artifacts关闭实现侧证据。Architecture独立复审与
+owner re-gate仍为必需；checkpoint、commit/push和A5保持blocked。
+
+### Architecture AR-020 re-review — No-Go — 2026-08-27
+
+Derivative ordering本身已接受，final artifacts也未再显示owner原始横向断层。但Architecture独立controller run为`56/57`：Planar
+`logarithmicDepth=true` clear-depth identity在aggregate中发生像素变化，而同一Spec isolated为`1/1`。新增`A4-AR-021`，要求在本controller文件内做
+最小ordered bisection并捕获raw/resolved depth、selected program与before/after pixels，定位真实state owner；禁止追加settling frames、放宽equality或重复跑到
+绿色。Owner re-gate、checkpoint与A5继续blocked。
+
+### Execution A4-AR-021 closure — 2026-08-27
+
+Ordered isolation排除了相邻六个failure-injection fixtures的owner泄漏。Shared clear classifier现以resolved depth texture raw exact `0/1`作为唯一sentinel
+authority，不再要求`czm_readDepth`浮点解码也exact命中；finite non-sentinel仍必定进入geometry path。Failure context覆盖raw/decoded、live program/show flags及
+input/output pixels。Exact controller=`57/57`，A4-AR-020 assertion保持通过；A4回到`review-ready`等待Architecture复审，owner re-gate、checkpoint与A5仍blocked。
+
+### Architecture A4-AR-021 re-review — No-Go — 2026-08-27
+
+Current program facts否定“raw与decoded是两个不稳定authority”的根因：linear program无`LOG_DEPTH`，log variant只有`LOG_DEPTH_READ_ONLY`；
+`czm_reverseLogDepth`只在`LOG_DEPTH`分支解码，且`DerivedCommand`看到read-only define会返回原program。因此两者的`czm_readDepth`都等于raw，raw-only改写
+不改变classifier。Architecture本轮controller虽为`57/57`，但这与修复前已有绿色run同样不能解释先前`56/57`。新增`A4-AR-022`，要求fixed immutable
+color/depth input的direct aerial identity fixture定位实际owner；不扩大测试边界。

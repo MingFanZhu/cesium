@@ -16,11 +16,19 @@ const assetRoots = Object.freeze({
   globe: "Assets/SceneGIS/Environment/BrunetonEarth/",
   planar: "Assets/SceneGIS/Environment/PlanarEarth/",
 });
-const assetNames = Object.freeze([
-  "transmittance.bin",
-  "scattering.bin",
-  "irradiance.bin",
+const cloudAssetRoot = "Assets/SceneGIS/Environment/CloudCore/";
+const assetFiles = Object.freeze([
+  { key: "transmittance", root: "world", name: "transmittance.bin" },
+  { key: "scattering", root: "world", name: "scattering.bin" },
+  { key: "irradiance", root: "world", name: "irradiance.bin" },
+  { key: "cloudShape", root: "cloud", name: "shape.bin" },
+  { key: "cloudDetail", root: "cloud", name: "detail.bin" },
+  { key: "cloudWeather", root: "cloud", name: "weather.bin" },
+  { key: "cloudTurbulence", root: "cloud", name: "turbulence.bin" },
+  { key: "cloudStbn", root: "cloud", name: "stbn.bin" },
 ]);
+const cloudQualities = Object.freeze(["low", "medium", "high"]);
+const cloudPresets = Object.freeze(["cumulus", "stratus", "cirrus", "mixed"]);
 
 function validateLiveScene(scene) {
   //>>includeStart('debug', pragmas.debug);
@@ -45,6 +53,8 @@ function isSupported(scene) {
     context.textureHalfFloatLinear === true &&
     context.depthTexture === true &&
     context.colorBufferHalfFloat === true &&
+    ContextLimits.maximumDrawBuffers >= 2 &&
+    ContextLimits.maximumColorAttachments >= 2 &&
     scene.highDynamicRangeSupported === true
   );
 }
@@ -151,6 +161,7 @@ function setPipelineEnabled(controller, enabled) {
   if (!defined(pipeline) || pipeline.isDestroyed()) {
     return;
   }
+  pipeline.invalidateCloudHistory(enabled ? "enable" : "disable");
   pipeline.enabled = enabled;
   if (!enabled) {
     pipeline.detach();
@@ -240,18 +251,20 @@ async function fetchEnvironmentAssets(controller, generation) {
   const assetRoot = assetRoots[controller._mode];
   try {
     const buffers = await Promise.all(
-      assetNames.map((name) =>
-        Resource.fetchArrayBuffer(buildModuleUrl(`${assetRoot}${name}`)),
+      assetFiles.map((file) =>
+        Resource.fetchArrayBuffer(
+          buildModuleUrl(
+            `${file.root === "world" ? assetRoot : cloudAssetRoot}${file.name}`,
+          ),
+        ),
       ),
     );
     if (!isCurrentGeneration(controller, generation)) {
       return;
     }
-    controller._pendingBuffers = {
-      transmittance: buffers[0],
-      scattering: buffers[1],
-      irradiance: buffers[2],
-    };
+    controller._pendingBuffers = Object.fromEntries(
+      assetFiles.map((file, index) => [file.key, buffers[index]]),
+    );
     requestRender(controller);
   } catch (error) {
     if (
@@ -280,6 +293,7 @@ function ensurePipeline(controller, scene) {
     controller._showAtmosphere,
     controller._showAerialPerspective,
     controller._showHeightFog,
+    controller._showClouds,
   );
   pipeline.enabled = true;
   return pipeline;
@@ -320,7 +334,8 @@ function activate(controller, scene) {
   if (
     !controller._showAtmosphere &&
     !controller._showAerialPerspective &&
-    !controller._showHeightFog
+    !controller._showHeightFog &&
+    !controller._showClouds
   ) {
     return;
   }
@@ -374,6 +389,17 @@ function SceneGISEnvironmentEffects(options) {
   const showAtmosphere = options.showAtmosphere ?? true;
   const showAerialPerspective = options.showAerialPerspective ?? true;
   const showHeightFog = options.showHeightFog ?? true;
+  const showClouds = options.showClouds ?? true;
+  const cloudQuality = options.cloudQuality ?? "medium";
+  const cloudPreset = options.cloudPreset ?? "cumulus";
+  const cloudCoverage = options.cloudCoverage ?? 0.45;
+  const cloudDensity = options.cloudDensity ?? 0.001;
+  const cloudBaseHeight = options.cloudBaseHeight ?? 1500.0;
+  const cloudThickness = options.cloudThickness ?? 4500.0;
+  const cloudWindDirection = options.cloudWindDirection ?? 0.785398;
+  const cloudWindSpeed = options.cloudWindSpeed ?? 20.0;
+  const cloudTime = options.cloudTime ?? 0.0;
+  const cloudRadianceScale = options.cloudRadianceScale ?? 48.0;
   const backgroundRadianceScale = options.backgroundRadianceScale ?? 10.0;
   const aerialRadianceScale = options.aerialRadianceScale ?? 1.0;
   const heightFogDensity = options.heightFogDensity ?? 0.000008;
@@ -398,6 +424,29 @@ function SceneGISEnvironmentEffects(options) {
     0.0,
     0.001,
   );
+  if (!cloudQualities.includes(cloudQuality)) {
+    throw new DeveloperError(
+      'options.cloudQuality must be exactly "low", "medium", or "high".',
+    );
+  }
+  if (!cloudPresets.includes(cloudPreset)) {
+    throw new DeveloperError(
+      'options.cloudPreset must be exactly "cumulus", "stratus", "cirrus", or "mixed".',
+    );
+  }
+  validateRange("options.cloudCoverage", cloudCoverage, 0.0, 1.0);
+  validateRange("options.cloudDensity", cloudDensity, 0.0, 0.01);
+  validateRange("options.cloudBaseHeight", cloudBaseHeight, -500.0, 20000.0);
+  validateRange("options.cloudThickness", cloudThickness, 0.0, 20000.0);
+  validateRange(
+    "options.cloudWindDirection",
+    cloudWindDirection,
+    -Math.PI,
+    Math.PI,
+  );
+  validateRange("options.cloudWindSpeed", cloudWindSpeed, 0.0, 200.0);
+  validateRange("options.cloudTime", cloudTime, -1000000000.0, 1000000000.0);
+  validateCalibrationScale("options.cloudRadianceScale", cloudRadianceScale);
   validateRange(
     "options.heightFogBaseHeight",
     heightFogBaseHeight,
@@ -435,6 +484,7 @@ function SceneGISEnvironmentEffects(options) {
   Check.typeOf.bool("options.showAtmosphere", showAtmosphere);
   Check.typeOf.bool("options.showAerialPerspective", showAerialPerspective);
   Check.typeOf.bool("options.showHeightFog", showHeightFog);
+  Check.typeOf.bool("options.showClouds", showClouds);
   //>>includeEnd('debug');
 
   this._mode = mode;
@@ -443,6 +493,17 @@ function SceneGISEnvironmentEffects(options) {
   this._showAtmosphere = showAtmosphere;
   this._showAerialPerspective = showAerialPerspective;
   this._showHeightFog = showHeightFog;
+  this._showClouds = showClouds;
+  this._cloudQuality = cloudQuality;
+  this._cloudPreset = cloudPreset;
+  this._cloudCoverage = cloudCoverage;
+  this._cloudDensity = cloudDensity;
+  this._cloudBaseHeight = cloudBaseHeight;
+  this._cloudThickness = cloudThickness;
+  this._cloudWindDirection = cloudWindDirection;
+  this._cloudWindSpeed = cloudWindSpeed;
+  this._cloudTime = cloudTime;
+  this._cloudRadianceScale = cloudRadianceScale;
   this._backgroundRadianceScale = backgroundRadianceScale;
   this._aerialRadianceScale = aerialRadianceScale;
   this._heightFogDensity = heightFogDensity;
@@ -502,7 +563,12 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       return this._errorEvent;
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {boolean} */
+  /**
+   * Gets or sets whether advanced environment effects are active.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
   enabled: {
     get: function () {
       return this._enabled;
@@ -523,7 +589,12 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       requestRender(this);
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {boolean} */
+  /**
+   * Gets or sets whether the physical atmosphere and Sun background are shown.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
   showAtmosphere: {
     get: function () {
       return this._showAtmosphere;
@@ -541,6 +612,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
           value,
           this._showAerialPerspective,
           this._showHeightFog,
+          this._showClouds,
         );
       }
       if (this._enabled && defined(this._scene)) {
@@ -548,7 +620,12 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       }
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {boolean} */
+  /**
+   * Gets or sets whether opaque geometry receives aerial perspective.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
   showAerialPerspective: {
     get: function () {
       return this._showAerialPerspective;
@@ -566,6 +643,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
           this._showAtmosphere,
           value,
           this._showHeightFog,
+          this._showClouds,
         );
       }
       if (this._enabled && defined(this._scene)) {
@@ -634,6 +712,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
           this._showAtmosphere,
           this._showAerialPerspective,
           value,
+          this._showClouds,
         );
       }
       requestRenderIfActive(this);
@@ -763,6 +842,193 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       );
     },
   },
+  /**
+   * Gets or sets whether the single-deck volumetric cloud core is shown.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
+  showClouds: {
+    get: function () {
+      return this._showClouds;
+    },
+    set: function (value) {
+      //>>includeStart('debug', pragmas.debug);
+      Check.typeOf.bool("value", value);
+      //>>includeEnd('debug');
+      if (this._showClouds === value) {
+        return;
+      }
+      this._showClouds = value;
+      if (defined(this._pipeline) && !this._pipeline.isDestroyed()) {
+        this._pipeline.setShow(
+          this._showAtmosphere,
+          this._showAerialPerspective,
+          this._showHeightFog,
+          value,
+        );
+      }
+      requestRenderIfActive(this);
+    },
+  },
+  /**
+   * Gets or sets the exact low, medium, or high cloud budget.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {string}
+   */
+  cloudQuality: {
+    get: function () {
+      return this._cloudQuality;
+    },
+    set: function (value) {
+      if (!cloudQualities.includes(value)) {
+        throw new DeveloperError(
+          'value must be exactly "low", "medium", or "high".',
+        );
+      }
+      if (this._cloudQuality === value) {
+        return;
+      }
+      this._cloudQuality = value;
+      requestRenderIfActive(this);
+    },
+  },
+  /**
+   * Gets or sets the immutable cloud morphology preset.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {string}
+   */
+  cloudPreset: {
+    get() {
+      return this._cloudPreset;
+    },
+    set(value) {
+      if (!cloudPresets.includes(value)) {
+        throw new DeveloperError(
+          'cloudPreset must be exactly "cumulus", "stratus", "cirrus", or "mixed".',
+        );
+      }
+      if (this._cloudPreset === value) {
+        return;
+      }
+      this._cloudPreset = value;
+      requestRenderIfActive(this);
+    },
+  },
+  /**
+   * Gets or sets the global cloud coverage bias.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  cloudCoverage: {
+    get: function () {
+      return this._cloudCoverage;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_cloudCoverage", value, 0.0, 1.0);
+    },
+  },
+  /**
+   * Gets or sets cloud extinction per meter.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  cloudDensity: {
+    get: function () {
+      return this._cloudDensity;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_cloudDensity", value, 0.0, 0.01);
+    },
+  },
+  /**
+   * Gets or sets cloud base height in meters above the world reference ground.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  cloudBaseHeight: {
+    get: function () {
+      return this._cloudBaseHeight;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_cloudBaseHeight", value, -500.0, 20000.0);
+    },
+  },
+  /**
+   * Gets or sets cloud deck thickness in meters.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  cloudThickness: {
+    get: function () {
+      return this._cloudThickness;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_cloudThickness", value, 0.0, 20000.0);
+    },
+  },
+  /**
+   * Gets or sets clockwise wind direction from local North in radians.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  cloudWindDirection: {
+    get: function () {
+      return this._cloudWindDirection;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_cloudWindDirection", value, -Math.PI, Math.PI);
+    },
+  },
+  /**
+   * Gets or sets cloud advection speed in meters per second.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  cloudWindSpeed: {
+    get: function () {
+      return this._cloudWindSpeed;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_cloudWindSpeed", value, 0.0, 200.0);
+    },
+  },
+  /**
+   * Gets or sets caller-owned cloud simulation time in seconds.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  cloudTime: {
+    get: function () {
+      return this._cloudTime;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_cloudTime", value, -1000000000.0, 1000000000.0);
+    },
+  },
+  /**
+   * Gets or sets intrinsic scene-linear cloud radiance scale.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  cloudRadianceScale: {
+    get: function () {
+      return this._cloudRadianceScale;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_cloudRadianceScale", value, 0.0, 64.0);
+    },
+  },
 });
 
 SceneGISEnvironmentEffects.prototype.connectedCallback = function (element) {
@@ -831,7 +1097,10 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
   ensurePipeline(this, scene);
   if (
     !this._pipeline.hasResources() &&
-    (this._showAtmosphere || this._showAerialPerspective || this._showHeightFog)
+    (this._showAtmosphere ||
+      this._showAerialPerspective ||
+      this._showHeightFog ||
+      this._showClouds)
   ) {
     beginGeneration(this, scene);
   }
@@ -858,6 +1127,17 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [showAtmosphere=true] Whether to render atmosphere and Sun background.
  * @property {boolean} [showAerialPerspective=true] Whether to composite opaque geometry aerial perspective.
  * @property {boolean} [showHeightFog=true] Whether to apply single-layer exponential height fog.
+ * @property {boolean} [showClouds=true] Whether to render the single-deck volumetric cloud core.
+ * @property {string} [cloudQuality="medium"] Exact "low", "medium", or "high" cloud budget.
+ * @property {string} [cloudPreset="cumulus"] Exact "cumulus", "stratus", "cirrus", or "mixed" immutable morphology preset.
+ * @property {number} [cloudCoverage=0.45] Global cloud coverage bias in the inclusive range 0–1.
+ * @property {number} [cloudDensity=0.001] Cloud extinction per meter in the inclusive range 0–0.01.
+ * @property {number} [cloudBaseHeight=1500.0] Cloud base height in meters in the inclusive range -500–20000.
+ * @property {number} [cloudThickness=4500.0] Cloud deck thickness in meters in the inclusive range 0–20000.
+ * @property {number} [cloudWindDirection=0.785398] Clockwise wind direction from local North in radians, in the inclusive range -pi–pi.
+ * @property {number} [cloudWindSpeed=20.0] Cloud advection speed in meters per second in the inclusive range 0–200.
+ * @property {number} [cloudTime=0.0] Caller-owned simulation seconds in the inclusive range -1000000000–1000000000.
+ * @property {number} [cloudRadianceScale=48.0] Intrinsic cloud radiance scale in the inclusive range 0–64.
  * @property {number} [backgroundRadianceScale=10.0] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64.
  * @property {number} [aerialRadianceScale=1.0] Scene-linear scale applied to physical aerial radiance, in the inclusive range 0–64.
  * @property {number} [heightFogDensity=0.000008] Base-height extinction coefficient per meter, in the inclusive range 0–0.001.

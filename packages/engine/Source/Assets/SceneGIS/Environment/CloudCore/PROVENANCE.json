@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 2,
+  "generator": "scripts/scenegis/generate-cloud-core-assets.mjs",
+  "generatorVersion": 4,
+  "seed": "0x4A17C9E3",
+  "byteOrder": "little-endian raw texel order, x-fastest then y then z",
+  "copiedBinaries": 0,
+  "copiedSource": 0,
+  "references": {
+    "license": "Repository Apache-2.0; all binary texels are generator output",
+    "guerrilla": "Nubis and The Real-time Volumetric Cloudscapes of Horizon Zero Dawn",
+    "stbn": "Wolfe et al. 2021, Scalar Spatiotemporal Blue Noise Masks"
+  },
+  "algorithm": {
+    "shape": "128-cubed periodic gradient-value and Worley base/FBM channels",
+    "detail": "64-cubed periodic high-frequency Worley erosion and ridge channels",
+    "weather": "256-squared four independent periodic empirical-CDF rank-normalized 15-kilometer macro-weather fields",
+    "turbulence": "64-cubed finite-difference curl field with encoded direction and magnitude",
+    "stbn": "128x128x64 deterministic spatial-temporal high-pass rank volume"
+  },
+  "files": [
+    {
+      "name": "shape.bin",
+      "format": "RGBA8",
+      "dimensions": [
+        128,
+        128,
+        128
+      ],
+      "channels": 4,
+      "bytes": 8388608,
+      "sha256": "E6D6C471B1753E13FE0C669BB06E3D541C1CD88D66D1452941DE7EC6C7749EC2"
+    },
+    {
+      "name": "detail.bin",
+      "format": "RGBA8",
+      "dimensions": [
+        64,
+        64,
+        64
+      ],
+      "channels": 4,
+      "bytes": 1048576,
+      "sha256": "D09AA6508C0EB571A9F33E801B2AF2F288929F754633812699330AB51C29CE7B"
+    },
+    {
+      "name": "weather.bin",
+      "format": "RGBA8",
+      "dimensions": [
+        256,
+        256
+      ],
+      "channels": 4,
+      "bytes": 262144,
+      "sha256": "122ABD03DD698878EEE0983E8F3441487FCE6EBECE850332A6E18F16BB8F0B88"
+    },
+    {
+      "name": "turbulence.bin",
+      "format": "RGBA8",
+      "dimensions": [
+        64,
+        64,
+        64
+      ],
+      "channels": 4,
+      "bytes": 1048576,
+      "sha256": "C8F66FA83474EDE878D76EC2BBF4ABDF0F3EC47A26F710FAB8A9D01BD054B8E8"
+    },
+    {
+      "name": "stbn.bin",
+      "format": "R8",
+      "dimensions": [
+        128,
+        128,
+        64
+      ],
+      "channels": 1,
+      "bytes": 1048576,
+      "sha256": "B16C8B017D8435B38F7041F7447D6C52D29E477F978242E97DCDC0987C4A71AE"
+    }
+  ],
+  "totalBinaryBytes": 11796480
+}
