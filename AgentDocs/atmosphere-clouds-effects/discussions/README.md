@@ -1,5 +1,6 @@
 # Discussions
 
+- [A5-G shadow, skylight, and rays source discovery](2026-08-28-a5g-shadow-skylight-rays-source-discovery.md) — `resolved; A5-G activated`
 - [A4-G Globe cloud whiteness and frequency calibration](2026-08-27-a4g-cloud-whiteness-frequency-calibration.md) — `resolved; Architecture and owner accepted`
 - [A4-G reference source map and provenance audit](2026-08-27-a4g-reference-source-map.md) — `resolved; retained provenance authority`
 

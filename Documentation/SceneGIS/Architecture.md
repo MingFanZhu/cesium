@@ -236,6 +236,12 @@ double energy 的 native `SkyAtmosphere`、ground atmosphere、Fog、Sun/Moon bo
 atmosphere/body；冲突和 capability failure 必须先于 asset/GPU mutation fail closed。完整 public、asset、resource、dual-world 与
 升级 contract 见 [ADR-0041](Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md)。
 
+A5-G遵循Globe-first边界：volumetric cloud shadow使用SceneGIS-owned current-frame Beer optical-depth atlas，不复用Cesium native
+geometry `ShadowMap`；Globe surface是唯一获准消费A2 Sun/sky irradiance与cloud transmittance的scene albedo consumer，Models、3D Tiles和
+resolved scene color不得被fullscreen relight。Crepuscular rays通过Bruneton `shadow_length`与A3 directional fog inscatter耦合，不使用radial
+blur、第二层haze或独立shadow history。最小Globe surface seam登记为`SGP-0009`；资源、packing、public options及Planar冻结边界见
+[ADR-0047](Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md)。
+
 ### 平面地形 Core 契约
 
 平面地形使用独立的 `SceneGISPlanarTerrainProvider`、`SceneGISPlanarTerrainData` 和

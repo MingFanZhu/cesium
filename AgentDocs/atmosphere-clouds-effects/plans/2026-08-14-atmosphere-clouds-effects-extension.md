@@ -6,10 +6,11 @@
 - Status: `active`
 - Owner roles: Architecture Agent, Execution Agent
 - Created: `2026-08-14`
-- Updated: `2026-08-27`
+- Updated: `2026-08-28`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: none（A4-G `completed`; A5-G not activated）
-- Active phase plan: none
+- Current phase: `A5-G active`
+- Active phase plan:
+  [2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md)
 - Latest completed phase plan:
   [2026-08-27-phase-a4g-globe-integrated-cloud-core.md](2026-08-27-phase-a4g-globe-integrated-cloud-core.md)
 - Architecture decisions:
@@ -19,12 +20,14 @@
   [ADR-0043](../../../Documentation/SceneGIS/Decisions/ADR-0043-atmosphere-log-depth-and-radiance-mapping.md),
   [ADR-0044](../../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md),
   [ADR-0045](../../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md),
-  [ADR-0046](../../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md)
-- Upstream patch: active `SGP-0008`
+  [ADR-0046](../../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
+  [ADR-0047](../../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md)
+- Upstream patches: active `SGP-0008`（consume only）、proposed `SGP-0009`（A5-G surface seam）
 - A1 implementation: `completed`
 - A2 implementation: `completed`
 - A3 implementation: `completed`
 - A4 implementation: `A4-G completed; Architecture approved; owner visual gate passed; local checkpoint`
+- A5-G implementation: `active; assigned to Execution`
 
 ## Goal
 
@@ -145,14 +148,18 @@ activation继续blocked，等待Architecture独立复审。
 
 Final A4-G source, direct Test evidence and focused automated authority passed
 Architecture review. The project owner then reported `通过` on the live Globe
-result. A4-G is closed by its local unpublished checkpoint; A5-G remains
-unactivated and Planar adaptation remains deferred.
+result. A4-G is closed by local unpublished checkpoint
+`241de41fc36835114a4e9312ad53ca2ac64407b8`; A5-G is active and Planar adaptation
+remains deferred.
 
 ### A5-G — Globe cloud shadows, skylight, and crepuscular rays
 
-增加 cloud transmittance/shadow representation、ground shadow 与 atmosphere/cloud/fog统一的 crepuscular rays。阶段开始时根据
-Cesium shadow/depth源码决定是否需要新的 integration seam；同时把Bruneton atmosphere irradiance冻结为cloud与已批准scene consumer共享的
-Globe skylight authority。不得在 extension plan猜测尚未source-discover的surface/IBL API。
+Active plan:
+[2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md).
+
+Source discovery已冻结为SceneGIS-owned current-frame Beer shadow atlas、`SGP-0009`最小Globe surface seam、A2 Sun/sky地表lighting，
+以及通过既有Cloud distance alpha传递的Bruneton/fog shadow length。不得使用native geometry `ShadowMap`、resolved-scene relighting、radial blur、
+独立shadow history或任何Planar实现。
 
 ### A6-G — Globe temporal stabilization and performance tiers
 

@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`
+- Status: `completed; Architecture and owner accepted`
 - Parent extension:
   [2026-08-14-atmosphere-clouds-effects-extension.md](2026-08-14-atmosphere-clouds-effects-extension.md)
 - Supersedes:
@@ -11,8 +11,10 @@
 - Owner role: Execution Agent
 - Reviewer role: Architecture Agent
 - Created: `2026-08-27`
+- Updated: `2026-08-28`
 - Branch: `feature/atmosphere-clouds-effects`
 - Retained HEAD: `ad9898261831e1314fe98307b7b0303fce3ba08f`
+- Phase checkpoint: `241de41fc36835114a4e9312ad53ca2ac64407b8`（未push）
 - Predecessor checkpoint: A3=`43ed40117104e0450bf23dc094b2ab2e602bbfa2`
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
@@ -20,9 +22,9 @@
 - Related discussions:
   [Globe-first advanced environment delivery](../discussions/2026-08-27-globe-first-delivery.md),
   [Globe cloud whiteness and frequency calibration](../discussions/2026-08-27-a4g-cloud-whiteness-frequency-calibration.md)
-- Open review finding: `A4-AR-030 converged implementation assigned; owner visual No-Go`
+- Open review finding: none
 - Upstream patch: active `SGP-0008` (`consume only`)
-- Owner visual gate: `failed; blocked pending A4-AR-030 repair and re-review`
+- Owner visual gate: `passed`
 
 ## Goal
 
