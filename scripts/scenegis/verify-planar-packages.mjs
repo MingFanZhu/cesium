@@ -159,12 +159,15 @@ const sceneGISShaderSources = [
   "EnvironmentEffects/SceneGISBrunetonCommon",
   "EnvironmentEffects/SceneGISBrunetonDefinitions",
   "EnvironmentEffects/SceneGISBrunetonRuntime",
+  "EnvironmentEffects/SceneGISCloudShadowFS",
+  "EnvironmentEffects/SceneGISCloudShadows",
   "EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsCloudFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsCloudResolveFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsVS",
   "EnvironmentEffects/SceneGISExponentialHeightFog",
+  "EnvironmentEffects/SceneGISGlobeSurfaceLighting",
   "EnvironmentEffects/SceneGISVolumetricClouds",
   "PlanarGround/SceneGISPlanarGroundAreaFS",
   "PlanarGround/SceneGISPlanarGroundAreaVS",
@@ -592,6 +595,7 @@ assert.equal(globeEffects.showAerialPerspective, true);
 assert.equal(globeEffects.showHeightFog, true);
 assert.equal(globeEffects.backgroundRadianceScale, 10.0);
 assert.equal(globeEffects.aerialRadianceScale, 1.0);
+assert.equal(globeEffects.surfaceRadianceScale, 10.0);
 assert.equal(globeEffects.heightFogDensity, 0.000008);
 assert.equal(globeEffects.heightFogHeightFalloff, 0.0002);
 assert.equal(globeEffects.heightFogBaseHeight, 0.0);
@@ -601,6 +605,8 @@ assert.equal(globeEffects.heightFogInscatteringScale, 0.35);
 assert.equal(globeEffects.heightFogDirectionalInscatteringScale, 0.15);
 assert.equal(globeEffects.heightFogDirectionalInscatteringExponent, 8.0);
 assert.equal(globeEffects.showClouds, true);
+assert.equal(globeEffects.showCloudShadows, true);
+assert.equal(globeEffects.showCrepuscularRays, true);
 assert.equal(globeEffects.cloudQuality, "medium");
 assert.equal(globeEffects.cloudPreset, "cumulus");
 assert.equal(globeEffects.cloudCoverage, 0.45);
@@ -614,6 +620,7 @@ assert.equal(globeEffects.cloudRadianceScale, 48.0);
 assert.equal("radianceScale" in globeEffects, false);
 globeEffects.backgroundRadianceScale = 2.0;
 globeEffects.aerialRadianceScale = 0.5;
+globeEffects.surfaceRadianceScale = 4.0;
 globeEffects.showHeightFog = false;
 globeEffects.heightFogDensity = 0.0001;
 globeEffects.heightFogHeightFalloff = 0.0;
@@ -624,6 +631,8 @@ globeEffects.heightFogInscatteringScale = 0.7;
 globeEffects.heightFogDirectionalInscatteringScale = 0.3;
 globeEffects.heightFogDirectionalInscatteringExponent = 16.0;
 globeEffects.showClouds = false;
+globeEffects.showCloudShadows = false;
+globeEffects.showCrepuscularRays = false;
 globeEffects.cloudQuality = "high";
 globeEffects.cloudPreset = "mixed";
 globeEffects.cloudCoverage = 0.6;
@@ -636,6 +645,7 @@ globeEffects.cloudTime = 120.0;
 globeEffects.cloudRadianceScale = 2.0;
 assert.equal(globeEffects.backgroundRadianceScale, 2.0);
 assert.equal(globeEffects.aerialRadianceScale, 0.5);
+assert.equal(globeEffects.surfaceRadianceScale, 4.0);
 assert.equal(globeEffects.showHeightFog, false);
 assert.equal(globeEffects.heightFogDensity, 0.0001);
 assert.equal(globeEffects.heightFogHeightFalloff, 0.0);
@@ -646,6 +656,8 @@ assert.equal(globeEffects.heightFogInscatteringScale, 0.7);
 assert.equal(globeEffects.heightFogDirectionalInscatteringScale, 0.3);
 assert.equal(globeEffects.heightFogDirectionalInscatteringExponent, 16.0);
 assert.equal(globeEffects.showClouds, false);
+assert.equal(globeEffects.showCloudShadows, false);
+assert.equal(globeEffects.showCrepuscularRays, false);
 assert.equal(globeEffects.cloudQuality, "high");
 assert.equal(globeEffects.cloudPreset, "mixed");
 assert.equal(globeEffects.cloudCoverage, 0.6);
@@ -823,6 +835,7 @@ assert.equal(effects.mode, "globe");
 assert.equal(effects.enabled, false);
 assert.equal(effects.backgroundRadianceScale, 10.0);
 assert.equal(effects.aerialRadianceScale, 1.0);
+assert.equal(effects.surfaceRadianceScale, 10.0);
 assert.equal(effects.showHeightFog, true);
 assert.equal(effects.heightFogDensity, 0.000008);
 assert.equal(effects.heightFogHeightFalloff, 0.0002);
@@ -833,6 +846,8 @@ assert.equal(effects.heightFogInscatteringScale, 0.35);
 assert.equal(effects.heightFogDirectionalInscatteringScale, 0.15);
 assert.equal(effects.heightFogDirectionalInscatteringExponent, 8.0);
 assert.equal(effects.showClouds, true);
+assert.equal(effects.showCloudShadows, true);
+assert.equal(effects.showCrepuscularRays, true);
 assert.equal(effects.cloudQuality, "medium");
 assert.equal(effects.cloudPreset, "cumulus");
 assert.equal(effects.cloudCoverage, 0.45);
@@ -846,11 +861,13 @@ assert.equal(effects.cloudRadianceScale, 48.0);
 assert.equal("radianceScale" in effects, false);
 effects.backgroundRadianceScale = 2.0;
 effects.aerialRadianceScale = 0.5;
+effects.surfaceRadianceScale = 4.0;
 effects.cloudQuality = "low";
 effects.cloudPreset = "cirrus";
 effects.cloudTime = 1.0;
 assert.equal(effects.backgroundRadianceScale, 2.0);
 assert.equal(effects.aerialRadianceScale, 0.5);
+assert.equal(effects.surfaceRadianceScale, 4.0);
 assert.equal(effects.cloudQuality, "low");
 assert.equal(effects.cloudPreset, "cirrus");
 assert.equal(effects.cloudTime, 1.0);

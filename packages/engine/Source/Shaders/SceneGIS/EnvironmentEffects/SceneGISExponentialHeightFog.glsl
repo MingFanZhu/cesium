@@ -235,9 +235,13 @@ vec3 sceneGISHeightFogAmbientSource(vec3 sunColor)
 vec3 sceneGISHeightFogDirectionalSource(vec3 sunColor)
 {
     vec3 numerator = max(sunColor, vec3(0.0));
+    #ifdef SCENEGIS_GLOBE
+    return numerator;
+    #else
     float denominator = sceneGISHeightFogMaxComponent(
         SCENEGIS_SOLAR_IRRADIANCE);
     return numerator / max(denominator, 1.0e-8);
+    #endif
 }
 
 vec3 sceneGISApplyExponentialHeightFog(
@@ -247,11 +251,13 @@ vec3 sceneGISApplyExponentialHeightFog(
     vec3 viewDirection,
     vec3 sunDirection,
     float maximumDistance,
+    float shadowLength,
     float density,
     float heightFalloff,
     float baseHeight,
     float startDistance,
     float maximumOpacity,
+    float sourceRadianceScale,
     float inscatteringScale,
     float directionalInscatteringScale,
     float directionalInscatteringExponent)
@@ -311,6 +317,30 @@ vec3 sceneGISApplyExponentialHeightFog(
             representativeDistance);
     vec3 ambientSource = sceneGISHeightFogAmbientSource(sunColor);
     vec3 directionalSource = sceneGISHeightFogDirectionalSource(sunColor);
+    ambientSource *= sourceRadianceScale;
+    directionalSource *= sourceRadianceScale;
+    #ifdef SCENEGIS_GLOBE
+    float directionalShadowFraction = 1.0;
+    float segmentLength = segmentEnd - segmentStart;
+    float clampedShadowLength = clamp(shadowLength, 0.0, segmentLength);
+    if (clampedShadowLength >= segmentLength) {
+        directionalShadowFraction = 0.0;
+    } else if (clampedShadowLength > 0.0 && opticalDepth > 0.0) {
+        float shadowOpticalDepth = sceneGISHeightFogGlobeOpticalDepth(
+            rayOrigin,
+            viewDirection,
+            segmentStart,
+            segmentStart + clampedShadowLength,
+            density,
+            heightFalloff,
+            baseHeight);
+        directionalShadowFraction = clamp(
+            (opticalDepth - shadowOpticalDepth) / opticalDepth,
+            0.0,
+            1.0);
+    }
+    directionalSource *= directionalShadowFraction;
+    #endif
     float directionalLobe = pow(
         max(dot(viewDirection, sunDirection), 0.0),
         directionalInscatteringExponent);

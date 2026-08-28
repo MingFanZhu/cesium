@@ -18,6 +18,7 @@ bool sceneGISIsClearResolvedDepth(float rawDepth)
 const int SCENEGIS_CLOUD_PRIMARY_MAX_STEPS = 64;
 const int SCENEGIS_CLOUD_FINE_MAX_STEPS = 4;
 const int SCENEGIS_CLOUD_SUN_MAX_STEPS = 4;
+const int SCENEGIS_CLOUD_SHADOW_VIEW_MAX_STEPS = 384;
 
 bool sceneGISCloudSphereInterval(
     vec3 rayOrigin,
@@ -92,6 +93,97 @@ bool sceneGISCloudSegment(
     segmentEnd = min(segmentEnd, segmentStart + SCENEGIS_CLOUD_VISIBLE_END);
     return segmentEnd > segmentStart;
 }
+
+#ifdef SCENEGIS_GLOBE
+bool sceneGISCloudShadowViewSegment(
+    vec3 rayOrigin,
+    vec3 rayDirection,
+    float maximumDistance,
+    out float segmentStart,
+    out float segmentEnd)
+{
+    if (maximumDistance <= 0.0) {
+        return false;
+    }
+    vec3 virtualOrigin = vec3(
+        rayOrigin.xy, SCENEGIS_BOTTOM_RADIUS + rayOrigin.z);
+    float shadowTopRadius =
+        SCENEGIS_BOTTOM_RADIUS + u_sceneGISShadowCloudTop;
+    float topNear;
+    float topFar;
+    if (!sceneGISCloudSphereInterval(
+            virtualOrigin,
+            rayDirection,
+            shadowTopRadius,
+            topNear,
+            topFar)) {
+        return false;
+    }
+    segmentStart = max(topNear, 0.0);
+    segmentEnd = min(topFar, maximumDistance);
+    float groundNear;
+    float groundFar;
+    if (sceneGISCloudSphereInterval(
+            virtualOrigin,
+            rayDirection,
+            SCENEGIS_BOTTOM_RADIUS,
+            groundNear,
+            groundFar) &&
+        groundNear > segmentStart) {
+        segmentEnd = min(segmentEnd, groundNear);
+    }
+    segmentEnd = min(
+        segmentEnd,
+        segmentStart + SCENEGIS_CLOUD_SHADOW_MAX_LENGTH);
+    return segmentEnd > segmentStart;
+}
+
+float sceneGISCloudShadowViewLength(
+    vec3 localRayOrigin,
+    vec3 localRayDirection,
+    float maximumDistance)
+{
+    if (!u_sceneGISShowCrepuscularRays) {
+        return 0.0;
+    }
+    float shadowSegmentStart;
+    float shadowSegmentEnd;
+    if (!sceneGISCloudShadowViewSegment(
+            localRayOrigin,
+            localRayDirection,
+            maximumDistance,
+            shadowSegmentStart,
+            shadowSegmentEnd)) {
+        return 0.0;
+    }
+    float shadowLength = 0.0;
+    float intervalStart = shadowSegmentStart;
+    float intervalLength = 50.0;
+    for (int step = 0;
+         step < SCENEGIS_CLOUD_SHADOW_VIEW_MAX_STEPS;
+         ++step) {
+        if (intervalStart >= shadowSegmentEnd) {
+            break;
+        }
+        float intervalEnd = min(
+            intervalStart + intervalLength,
+            shadowSegmentEnd);
+        float actualIntervalLength = intervalEnd - intervalStart;
+        float viewDistance = intervalStart + actualIntervalLength * 0.5;
+        vec3 midpoint =
+            localRayOrigin + localRayDirection * viewDistance;
+        float opticalDepth = sceneGISCloudShadowRawOpticalDepth(
+            midpoint,
+            viewDistance);
+        shadowLength +=
+            (1.0 - exp(-min(opticalDepth, 80.0))) *
+            actualIntervalLength;
+        intervalStart = intervalEnd;
+        intervalLength *= 1.01;
+    }
+    return min(shadowLength, SCENEGIS_CLOUD_SHADOW_MAX_LENGTH);
+}
+#endif
 
 vec2 sceneGISCloudMaterialOrigin(
     vec3 worldCameraPosition,
@@ -740,14 +832,27 @@ void sceneGISMarchClouds(
         supportThickness);
     float segmentStart;
     float segmentEnd;
-    if (!sceneGISCloudSegment(
+    bool hasCloudSegment = sceneGISCloudSegment(
             localRayOrigin,
             localRayDirection,
             maximumDistance,
             supportBaseHeight,
             supportThickness,
             segmentStart,
-            segmentEnd)) {
+            segmentEnd);
+    float accumulatedShadowLength = 0.0;
+    #ifdef SCENEGIS_GLOBE
+    accumulatedShadowLength = sceneGISCloudShadowViewLength(
+        localRayOrigin,
+        localRayDirection,
+        maximumDistance);
+    #endif
+    if (!hasCloudSegment) {
+        #ifdef SCENEGIS_GLOBE
+        cloudDistances.a = sceneGISEncodeCloudShadowLength(
+            false,
+            accumulatedShadowLength);
+        #endif
         return;
     }
     vec2 materialOrigin = sceneGISCloudMaterialOrigin(
@@ -927,6 +1032,13 @@ void sceneGISMarchClouds(
         skippedCoarseIntervals,
         accumulatedTransmittance <= 0.01 ? 1.0 : 0.0);
     if (!hasFront || accumulatedWeight <= 1.0e-6) {
+        #ifdef SCENEGIS_GLOBE
+        cloudDistances.a = sceneGISEncodeCloudShadowLength(
+            false,
+            u_sceneGISShowCrepuscularRays
+                ? min(accumulatedShadowLength, SCENEGIS_CLOUD_SHADOW_MAX_LENGTH)
+                : 0.0);
+        #endif
         return;
     }
     float meanDistance = max(
@@ -939,5 +1051,14 @@ void sceneGISMarchClouds(
         clamp(meanDistance / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0),
         clamp(frontDistance / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0),
         clamp(maximumDistance / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0),
-        1.0);
+        #ifdef SCENEGIS_GLOBE
+        sceneGISEncodeCloudShadowLength(
+            true,
+            u_sceneGISShowCrepuscularRays
+                ? min(accumulatedShadowLength, SCENEGIS_CLOUD_SHADOW_MAX_LENGTH)
+                : 0.0)
+        #else
+        1.0
+        #endif
+        );
 }

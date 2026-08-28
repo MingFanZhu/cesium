@@ -81,15 +81,59 @@ function validateGlobeConflict(controller, scene) {
     !isHidden(scene.moon) ||
     scene.sunBloom !== false ||
     scene.fog.enabled !== false ||
-    scene.globe.showGroundAtmosphere !== false
+    scene.globe.showGroundAtmosphere !== false ||
+    scene.globe.enableLighting !== false
   ) {
     throw new DeveloperError(
-      "Advanced Globe environment requires native sky, bodies, bloom, Fog, and ground atmosphere to be disabled.",
+      "Advanced Globe environment requires native sky, bodies, bloom, Fog, ground atmosphere, and Globe lighting to be disabled.",
     );
   }
   if (defined(controller._world)) {
     throw new DeveloperError('mode "globe" must not use a planar world.');
   }
+  if (
+    controller._ownsGlobeDepthTestLifecycle &&
+    scene.globe.depthTestAgainstTerrain !== true
+  ) {
+    throw new DeveloperError(
+      "scene.globe.depthTestAgainstTerrain must remain true while advanced Globe environment effects are active.",
+    );
+  }
+}
+
+function acquireGlobeDepthTestLifecycle(controller, scene) {
+  if (
+    controller._mode !== globeMode ||
+    controller._ownsGlobeDepthTestLifecycle
+  ) {
+    return;
+  }
+  const previousValue = scene.globe.depthTestAgainstTerrain;
+  controller._globeDepthTestAgainstTerrainPrevious = previousValue;
+  controller._changedGlobeDepthTestAgainstTerrain = previousValue !== true;
+  controller._ownsGlobeDepthTestLifecycle = true;
+  if (controller._changedGlobeDepthTestAgainstTerrain) {
+    scene.globe.depthTestAgainstTerrain = true;
+  }
+}
+
+function releaseGlobeDepthTestLifecycle(controller) {
+  if (!controller._ownsGlobeDepthTestLifecycle) {
+    return;
+  }
+  const scene = controller._scene;
+  if (
+    controller._changedGlobeDepthTestAgainstTerrain &&
+    defined(scene) &&
+    !scene.isDestroyed() &&
+    defined(scene.globe)
+  ) {
+    scene.globe.depthTestAgainstTerrain =
+      controller._globeDepthTestAgainstTerrainPrevious;
+  }
+  controller._ownsGlobeDepthTestLifecycle = false;
+  controller._changedGlobeDepthTestAgainstTerrain = false;
+  controller._globeDepthTestAgainstTerrainPrevious = undefined;
 }
 
 function validatePlanarConflict(controller, scene) {
@@ -164,6 +208,7 @@ function setPipelineEnabled(controller, enabled) {
   pipeline.invalidateCloudHistory(enabled ? "enable" : "disable");
   pipeline.enabled = enabled;
   if (!enabled) {
+    pipeline.releaseGlobeLighting();
     pipeline.detach();
   }
 }
@@ -220,6 +265,20 @@ function setWarmNumber(controller, property, value, minimum, maximum) {
     return;
   }
   controller[property] = value;
+  requestRenderIfActive(controller);
+}
+
+function setWarmBoolean(controller, property, value, historyReason) {
+  //>>includeStart('debug', pragmas.debug);
+  Check.typeOf.bool("value", value);
+  //>>includeEnd('debug');
+  if (controller[property] === value) {
+    return;
+  }
+  controller[property] = value;
+  if (defined(controller._pipeline) && !controller._pipeline.isDestroyed()) {
+    controller._pipeline.invalidateCloudHistory(historyReason);
+  }
   requestRenderIfActive(controller);
 }
 
@@ -330,8 +389,10 @@ function activate(controller, scene) {
     );
   }
   controller._scene = scene;
+  acquireGlobeDepthTestLifecycle(controller, scene);
   ensurePipeline(controller, scene);
   if (
+    controller._mode !== globeMode &&
     !controller._showAtmosphere &&
     !controller._showAerialPerspective &&
     !controller._showHeightFog &&
@@ -341,10 +402,14 @@ function activate(controller, scene) {
   }
   if (controller._pipeline.hasResources()) {
     controller._ready = true;
+    controller._pipeline.prepareGlobeLighting(scene.frameState);
     return;
   }
   beginGeneration(controller, scene);
   publishPendingResources(controller, scene);
+  if (controller._ready) {
+    controller._pipeline.prepareGlobeLighting(scene.frameState);
+  }
 }
 
 /**
@@ -390,6 +455,8 @@ function SceneGISEnvironmentEffects(options) {
   const showAerialPerspective = options.showAerialPerspective ?? true;
   const showHeightFog = options.showHeightFog ?? true;
   const showClouds = options.showClouds ?? true;
+  const showCloudShadows = options.showCloudShadows ?? true;
+  const showCrepuscularRays = options.showCrepuscularRays ?? true;
   const cloudQuality = options.cloudQuality ?? "medium";
   const cloudPreset = options.cloudPreset ?? "cumulus";
   const cloudCoverage = options.cloudCoverage ?? 0.45;
@@ -402,6 +469,7 @@ function SceneGISEnvironmentEffects(options) {
   const cloudRadianceScale = options.cloudRadianceScale ?? 48.0;
   const backgroundRadianceScale = options.backgroundRadianceScale ?? 10.0;
   const aerialRadianceScale = options.aerialRadianceScale ?? 1.0;
+  const surfaceRadianceScale = options.surfaceRadianceScale ?? 10.0;
   const heightFogDensity = options.heightFogDensity ?? 0.000008;
   const heightFogHeightFalloff = options.heightFogHeightFalloff ?? 0.0002;
   const heightFogBaseHeight = options.heightFogBaseHeight ?? 0.0;
@@ -417,6 +485,10 @@ function SceneGISEnvironmentEffects(options) {
     backgroundRadianceScale,
   );
   validateCalibrationScale("options.aerialRadianceScale", aerialRadianceScale);
+  validateCalibrationScale(
+    "options.surfaceRadianceScale",
+    surfaceRadianceScale,
+  );
   validateRange("options.heightFogDensity", heightFogDensity, 0.0, 0.001);
   validateRange(
     "options.heightFogHeightFalloff",
@@ -485,6 +557,8 @@ function SceneGISEnvironmentEffects(options) {
   Check.typeOf.bool("options.showAerialPerspective", showAerialPerspective);
   Check.typeOf.bool("options.showHeightFog", showHeightFog);
   Check.typeOf.bool("options.showClouds", showClouds);
+  Check.typeOf.bool("options.showCloudShadows", showCloudShadows);
+  Check.typeOf.bool("options.showCrepuscularRays", showCrepuscularRays);
   //>>includeEnd('debug');
 
   this._mode = mode;
@@ -494,6 +568,8 @@ function SceneGISEnvironmentEffects(options) {
   this._showAerialPerspective = showAerialPerspective;
   this._showHeightFog = showHeightFog;
   this._showClouds = showClouds;
+  this._showCloudShadows = showCloudShadows;
+  this._showCrepuscularRays = showCrepuscularRays;
   this._cloudQuality = cloudQuality;
   this._cloudPreset = cloudPreset;
   this._cloudCoverage = cloudCoverage;
@@ -506,6 +582,7 @@ function SceneGISEnvironmentEffects(options) {
   this._cloudRadianceScale = cloudRadianceScale;
   this._backgroundRadianceScale = backgroundRadianceScale;
   this._aerialRadianceScale = aerialRadianceScale;
+  this._surfaceRadianceScale = surfaceRadianceScale;
   this._heightFogDensity = heightFogDensity;
   this._heightFogHeightFalloff = heightFogHeightFalloff;
   this._heightFogBaseHeight = heightFogBaseHeight;
@@ -521,6 +598,9 @@ function SceneGISEnvironmentEffects(options) {
   this._element = undefined;
   this._scene = undefined;
   this._pipeline = undefined;
+  this._ownsGlobeDepthTestLifecycle = false;
+  this._changedGlobeDepthTestAgainstTerrain = false;
+  this._globeDepthTestAgainstTerrainPrevious = undefined;
   this._generation = 0;
   this._generationStarted = false;
   this._pendingBuffers = undefined;
@@ -585,6 +665,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       this._errorGeneration = -1;
       if (!value) {
         setPipelineEnabled(this, false);
+        releaseGlobeDepthTestLifecycle(this);
       }
       requestRender(this);
     },
@@ -671,7 +752,9 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the scene-linear scale applied to physical aerial radiance.
+   * Gets or sets the aerial radiance scale. On Globe, this is relative to
+   * {@link SceneGISEnvironmentEffects#backgroundRadianceScale}; on Planar, it
+   * is the absolute scene-linear scale applied to physical aerial radiance.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -687,6 +770,20 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       }
       this._aerialRadianceScale = value;
       requestRender(this);
+    },
+  },
+  /**
+   * Gets or sets the Globe surface scene-linear Sun and sky radiance scale.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  surfaceRadianceScale: {
+    get: function () {
+      return this._surfaceRadianceScale;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_surfaceRadianceScale", value, 0.0, 64.0);
     },
   },
   /**
@@ -872,6 +969,34 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
+   * Gets or sets whether volumetric clouds attenuate direct Sun on the Globe.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
+  showCloudShadows: {
+    get: function () {
+      return this._showCloudShadows;
+    },
+    set: function (value) {
+      setWarmBoolean(this, "_showCloudShadows", value, "cloud-shadows");
+    },
+  },
+  /**
+   * Gets or sets whether cloud shadow length modulates atmosphere and fog Sun inscatter.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
+  showCrepuscularRays: {
+    get: function () {
+      return this._showCrepuscularRays;
+    },
+    set: function (value) {
+      setWarmBoolean(this, "_showCrepuscularRays", value, "crepuscular-rays");
+    },
+  },
+  /**
    * Gets or sets the exact low, medium, or high cloud budget.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
@@ -1054,6 +1179,7 @@ SceneGISEnvironmentEffects.prototype.disconnectedCallback = function (element) {
   if (defined(this._pipeline) && !this._pipeline.isDestroyed()) {
     this._pipeline.destroy();
   }
+  releaseGlobeDepthTestLifecycle(this);
   this._pipeline = undefined;
   this._scene = undefined;
   this._element = undefined;
@@ -1097,7 +1223,8 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
   ensurePipeline(this, scene);
   if (
     !this._pipeline.hasResources() &&
-    (this._showAtmosphere ||
+    (this._mode === globeMode ||
+      this._showAtmosphere ||
       this._showAerialPerspective ||
       this._showHeightFog ||
       this._showClouds)
@@ -1105,6 +1232,9 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
     beginGeneration(this, scene);
   }
   publishPendingResources(this, scene);
+  if (this._ready) {
+    this._pipeline.prepareGlobeLighting(scene.frameState);
+  }
 };
 
 SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
@@ -1128,6 +1258,8 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [showAerialPerspective=true] Whether to composite opaque geometry aerial perspective.
  * @property {boolean} [showHeightFog=true] Whether to apply single-layer exponential height fog.
  * @property {boolean} [showClouds=true] Whether to render the single-deck volumetric cloud core.
+ * @property {boolean} [showCloudShadows=true] Whether volumetric clouds attenuate direct Sun on the Globe.
+ * @property {boolean} [showCrepuscularRays=true] Whether cloud shadow length modulates atmosphere and fog Sun inscatter.
  * @property {string} [cloudQuality="medium"] Exact "low", "medium", or "high" cloud budget.
  * @property {string} [cloudPreset="cumulus"] Exact "cumulus", "stratus", "cirrus", or "mixed" immutable morphology preset.
  * @property {number} [cloudCoverage=0.45] Global cloud coverage bias in the inclusive range 0–1.
@@ -1139,7 +1271,8 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [cloudTime=0.0] Caller-owned simulation seconds in the inclusive range -1000000000–1000000000.
  * @property {number} [cloudRadianceScale=48.0] Intrinsic cloud radiance scale in the inclusive range 0–64.
  * @property {number} [backgroundRadianceScale=10.0] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64.
- * @property {number} [aerialRadianceScale=1.0] Scene-linear scale applied to physical aerial radiance, in the inclusive range 0–64.
+ * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64. On Globe, this is relative to backgroundRadianceScale; on Planar, it is the absolute scene-linear scale applied to physical aerial radiance.
+ * @property {number} [surfaceRadianceScale=10.0] Globe surface scene-linear Sun and sky radiance scale, in the inclusive range 0–64.
  * @property {number} [heightFogDensity=0.000008] Base-height extinction coefficient per meter, in the inclusive range 0–0.001.
  * @property {number} [heightFogHeightFalloff=0.0002] Exponential height falloff per meter, in the inclusive range 0–0.001.
  * @property {number} [heightFogBaseHeight=0.0] Density reference height in meters, in the inclusive range -60000–60000.

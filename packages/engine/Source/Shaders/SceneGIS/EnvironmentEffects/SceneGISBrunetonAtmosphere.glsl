@@ -123,6 +123,7 @@ vec3 sceneGISGlobeSkyRadiance(
     vec3 rayOrigin,
     vec3 viewDirection,
     vec3 sunDirection,
+    float shadowLength,
     out vec3 transmittance)
 {
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
@@ -136,7 +137,7 @@ vec3 sceneGISGlobeSkyRadiance(
         scatteringTexture,
         camera,
         viewDirection,
-        0.0,
+        max(shadowLength, 0.0) * 0.001,
         sunDirection,
         true,
         transmittance), vec3(0.0));
@@ -149,6 +150,7 @@ vec3 sceneGISGlobeSkyRadianceToPoint(
     vec3 viewDirection,
     vec3 sunDirection,
     float distanceToPoint,
+    float shadowLength,
     out vec3 transmittance)
 {
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
@@ -163,7 +165,7 @@ vec3 sceneGISGlobeSkyRadianceToPoint(
         scatteringTexture,
         camera,
         point,
-        0.0,
+        max(shadowLength, 0.0) * 0.001,
         sunDirection,
         transmittance), vec3(0.0));
 }

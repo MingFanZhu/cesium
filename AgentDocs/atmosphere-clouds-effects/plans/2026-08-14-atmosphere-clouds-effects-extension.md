@@ -8,11 +8,10 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-28`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A5-G active`
-- Active phase plan:
-  [2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md)
+- Current phase: `none; A5-G completed, A6-G not activated`
+- Active phase plan: `none`
 - Latest completed phase plan:
-  [2026-08-27-phase-a4g-globe-integrated-cloud-core.md](2026-08-27-phase-a4g-globe-integrated-cloud-core.md)
+  [2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -22,12 +21,12 @@
   [ADR-0045](../../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md),
   [ADR-0046](../../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
   [ADR-0047](../../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md)
-- Upstream patches: active `SGP-0008`（consume only）、proposed `SGP-0009`（A5-G surface seam）
+- Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - A1 implementation: `completed`
 - A2 implementation: `completed`
 - A3 implementation: `completed`
 - A4 implementation: `A4-G completed; Architecture approved; owner visual gate passed; local checkpoint`
-- A5-G implementation: `active; assigned to Execution`
+- A5-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 
 ## Goal
 
@@ -154,7 +153,7 @@ remains deferred.
 
 ### A5-G — Globe cloud shadows, skylight, and crepuscular rays
 
-Active plan:
+Completed plan:
 [2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md).
 
 Source discovery已冻结为SceneGIS-owned current-frame Beer shadow atlas、`SGP-0009`最小Globe surface seam、A2 Sun/sky地表lighting，
@@ -210,6 +209,20 @@ manual gate通过且 Architecture建立独立本地 checkpoint后，才可创建
 
 2026-08-27起串行顺序为A4-G → A5-G → A6-G → A7-G → A8-G → Planar
 adaptation。A8-G批准前不得以dual-world parity、Planar owner gate或Planar视觉修复阻塞Globe阶段，也不得提前修改Planar实现。
+
+### A5-G completion — 2026-08-28
+
+All Architecture findings through A5-AR-016 are closed. The project owner
+manually rechecked the final Globe result and reported that the effect is
+correct. The phase-closing commit then exposed A5-AR-017: the existing SGP-0009
+FrameState extension read lacks a local JSDoc type boundary. A5-G remains in its
+closing state until that type-only correction passes `tsc` and Architecture
+creates the checkpoint. A6-G and Planar remain inactive.
+
+The local structural cast passed independent Architecture `tsc` review and
+A5-AR-017 is closed. The phase-closing commit containing this record is the
+isolated A5-G checkpoint. A6-G and Planar remain inactive until a separate
+Architecture activation.
 
 ### A4-AR-018/019 focused closure — 2026-08-27
 

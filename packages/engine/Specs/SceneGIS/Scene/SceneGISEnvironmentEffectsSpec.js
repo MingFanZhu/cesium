@@ -1,6 +1,7 @@
 import {
   BoxGeometry,
   BoundingRectangle,
+  Cartesian2,
   Cartesian3,
   ClearCommand,
   Color,
@@ -18,12 +19,14 @@ import {
   PixelFormat,
   Primitive,
   Resource,
+  Sampler,
   SceneGISEnvironmentEffects,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarEnvironment,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
   Texture,
+  TextureMagnificationFilter,
   Transforms,
 } from "../../../index.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -39,9 +42,14 @@ import SceneGISEnvironmentEffectsRenderer, {
 } from "../../../Source/SceneGIS/Scene/_private/_SceneGISEnvironmentEffectsRenderer.js";
 import aerialFragmentSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS.js";
 import atmosphereSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
+import brunetonCommonSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonCommon.js";
+import brunetonDefinitionsSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonDefinitions.js";
+import brunetonRuntimeSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonRuntime.js";
 import backgroundFragmentSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS.js";
 import cloudFragmentSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsCloudFS.js";
 import cloudResolveFragmentSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsCloudResolveFS.js";
+import cloudShadowSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISCloudShadows.js";
+import globeSurfaceLightingSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISGlobeSurfaceLighting.js";
 import heightFogSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISExponentialHeightFog.js";
 import globeCloudSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISGlobeClouds.js";
 import cloudSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISVolumetricClouds.js";
@@ -349,6 +357,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     targetScene.fog.enabled = false;
     if (targetScene.globe) {
       targetScene.globe.showGroundAtmosphere = false;
+      targetScene.globe.enableLighting = false;
     }
   }
 
@@ -602,6 +611,43 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       );
     } finally {
       framebuffer.destroy();
+    }
+  }
+
+  function executeHalfFloatQuad(sources, options = {}) {
+    const width = options.width ?? 1;
+    const texture = new Texture({
+      context: scene.context,
+      width,
+      height: 1,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+    });
+    const framebuffer = new Framebuffer({
+      context: scene.context,
+      colorTextures: [texture],
+      destroyAttachments: false,
+    });
+    const passState = new PassState(scene.context);
+    passState.framebuffer = framebuffer;
+    passState.viewport = new BoundingRectangle(0, 0, width, 1);
+    const command = scene.context.createViewportQuadCommand(
+      new ShaderSource({
+        defines: options.defines ?? [],
+        sources,
+      }),
+      {
+        uniformMap: options.uniformMap ?? {},
+        framebuffer,
+      },
+    );
+    try {
+      command.execute(scene.context, passState);
+      return readHalfTexturePixels(texture);
+    } finally {
+      command.shaderProgram.destroy();
+      framebuffer.destroy();
+      texture.destroy();
     }
   }
 
@@ -1134,7 +1180,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     return installControlledAtmosphereTextures(mode);
   }
 
-  async function connectControlledCloudMode(mode) {
+  async function connectControlledCloudMode(mode, beforeFirstUpdate) {
     if (mode === "planar") {
       connectPlanar();
       environment.sunDirection = Cartesian3.UNIT_Z;
@@ -1162,6 +1208,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       cloudDensity: 0.001,
     });
     effects.connectedCallback({});
+    if (typeof beforeFirstUpdate === "function") {
+      beforeFirstUpdate();
+    }
     effects.firstUpdate(scene, scene.frameState.time);
     await pollToPromise(function () {
       effects.update(scene, scene.frameState.time);
@@ -1752,7 +1801,11 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(function () {
       return new SceneGISEnvironmentEffects({ mode: "planar" });
     }).toThrowDeveloperError();
-    for (const property of ["backgroundRadianceScale", "aerialRadianceScale"]) {
+    for (const property of [
+      "backgroundRadianceScale",
+      "aerialRadianceScale",
+      "surfaceRadianceScale",
+    ]) {
       for (const value of [-1.0, 64.1, Number.NaN, Infinity]) {
         expect(function () {
           return new SceneGISEnvironmentEffects({
@@ -1820,6 +1873,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.showAerialPerspective).toBe(true);
     expect(effects.showHeightFog).toBe(true);
     expect(effects.showClouds).toBe(true);
+    expect(effects.showCloudShadows).toBe(true);
+    expect(effects.showCrepuscularRays).toBe(true);
     expect(effects.cloudQuality).toBe("medium");
     expect(effects.cloudPreset).toBe("cumulus");
     expect(effects.cloudCoverage).toBe(0.45);
@@ -1832,6 +1887,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.cloudRadianceScale).toBe(48.0);
     expect(effects.backgroundRadianceScale).toBe(10.0);
     expect(effects.aerialRadianceScale).toBe(1.0);
+    expect(effects.surfaceRadianceScale).toBe(10.0);
     expect(effects.heightFogDensity).toBe(0.000008);
     expect(effects.heightFogHeightFalloff).toBe(0.0002);
     expect(effects.heightFogBaseHeight).toBe(0.0);
@@ -1848,6 +1904,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       mode: "globe",
       backgroundRadianceScale: 3.0,
       aerialRadianceScale: 0.5,
+      surfaceRadianceScale: 4.0,
       showHeightFog: false,
       heightFogDensity: 0.0001,
       heightFogHeightFalloff: 0.0,
@@ -1858,6 +1915,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       heightFogDirectionalInscatteringScale: 0.3,
       heightFogDirectionalInscatteringExponent: 16.0,
       showClouds: false,
+      showCloudShadows: false,
+      showCrepuscularRays: false,
       cloudQuality: "high",
       cloudCoverage: 0.6,
       cloudDensity: 0.002,
@@ -1870,6 +1929,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     });
     expect(effects.backgroundRadianceScale).toBe(3.0);
     expect(effects.aerialRadianceScale).toBe(0.5);
+    expect(effects.surfaceRadianceScale).toBe(4.0);
     expect(effects.showHeightFog).toBe(false);
     expect(effects.heightFogDensity).toBe(0.0001);
     expect(effects.heightFogHeightFalloff).toBe(0.0);
@@ -1880,6 +1940,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.heightFogDirectionalInscatteringScale).toBe(0.3);
     expect(effects.heightFogDirectionalInscatteringExponent).toBe(16.0);
     expect(effects.showClouds).toBe(false);
+    expect(effects.showCloudShadows).toBe(false);
+    expect(effects.showCrepuscularRays).toBe(false);
     expect(effects.cloudQuality).toBe("high");
     expect(effects.cloudCoverage).toBe(0.6);
     expect(effects.cloudDensity).toBe(0.002);
@@ -1904,6 +1966,1038 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(fetch).not.toHaveBeenCalled();
     expect(requestRender).not.toHaveBeenCalled();
     expect(effects.ready).toBe(false);
+  });
+
+  it("round-trips the packed cloud shadow length on the actual GPU", function () {
+    scene = createScene();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const pixels = executeHalfFloatQuad(
+      [
+        cloudShadowSource,
+        `precision highp float;
+        void main() {
+          int sampleIndex = int(gl_FragCoord.x);
+          bool valid = sampleIndex != 0;
+          float shadowLength = sampleIndex < 2
+            ? 0.0
+            : (sampleIndex == 2 ? 100000.0 : 250000.0);
+          float packed = sceneGISEncodeCloudShadowLength(
+            valid, shadowLength);
+          bool decodedValid;
+          float decodedLength;
+          sceneGISDecodeCloudShadowLength(
+            packed, decodedValid, decodedLength);
+          out_FragColor = vec4(
+            packed,
+            decodedLength / SCENEGIS_CLOUD_SHADOW_MAX_LENGTH,
+            decodedValid ? 1.0 : 0.0,
+            0.75);
+        }`,
+      ],
+      { width: 4 },
+    );
+    expect(pixels[0][0]).toBe(0.0);
+    expect(pixels[1][0]).toBe(1.0);
+    expect(pixels[0][1]).toBe(0.0);
+    expect(pixels[1][1]).toBe(0.0);
+    expect(pixels[2][1]).toEqualEpsilon(0.5, 0.001);
+    expect(pixels[3][1]).toBe(1.0);
+    expect(pixels[0][2]).toBe(0.0);
+    expect(pixels[1][2]).toBe(1.0);
+    expect(pixels[2][2]).toBe(1.0);
+    expect(pixels[3][2]).toBe(1.0);
+    for (const pixel of pixels) {
+      expect(pixel[3]).toBe(0.75);
+    }
+  });
+
+  it("marches raw progressive Globe shadow length outside cloud support on the actual GPU", function () {
+    scene = createScene();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const atlasSize = 16;
+    const atlasValues = new Uint16Array(atlasSize * atlasSize * 4);
+    for (let offset = 0; offset < atlasValues.length; offset += 4) {
+      atlasValues[offset] = encodeFloat16(0.0);
+      atlasValues[offset + 1] = encodeFloat16(1.0);
+      atlasValues[offset + 2] = encodeFloat16(0.0);
+      atlasValues[offset + 3] = encodeFloat16(0.0);
+    }
+    for (let y = 0; y < atlasSize; y++) {
+      for (let x = 0; x < atlasSize; x++) {
+        if (x !== 2 && x !== 5) {
+          atlasValues[(y * atlasSize + x) * 4 + 2] = encodeFloat16(4.0);
+        }
+      }
+    }
+    const atlas = new Texture({
+      context: scene.context,
+      width: atlasSize,
+      height: atlasSize,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+      sampler: new Sampler({
+        minificationFilter: TextureMinificationFilter.NEAREST,
+        magnificationFilter: TextureMagnificationFilter.NEAREST,
+      }),
+      source: {
+        width: atlasSize,
+        height: atlasSize,
+        arrayBufferView: atlasValues,
+      },
+    });
+    const filteredUniformMutationSource = cloudSource.replace(
+      `    float shadowLength = 0.0;
+    float intervalStart = shadowSegmentStart;
+    float intervalLength = 50.0;
+    for (int step = 0;
+         step < SCENEGIS_CLOUD_SHADOW_VIEW_MAX_STEPS;
+         ++step) {
+        if (intervalStart >= shadowSegmentEnd) {
+            break;
+        }
+        float intervalEnd = min(
+            intervalStart + intervalLength,
+            shadowSegmentEnd);
+        float actualIntervalLength = intervalEnd - intervalStart;
+        float viewDistance = intervalStart + actualIntervalLength * 0.5;
+        vec3 midpoint =
+            localRayOrigin + localRayDirection * viewDistance;
+        float opticalDepth = sceneGISCloudShadowRawOpticalDepth(
+            midpoint,
+            viewDistance);
+        shadowLength +=
+            (1.0 - exp(-min(opticalDepth, 80.0))) *
+            actualIntervalLength;
+        intervalStart = intervalEnd;
+        intervalLength *= 1.01;
+    }`,
+      `    float shadowLength = 0.0;
+    float intervalLength =
+        (shadowSegmentEnd - shadowSegmentStart) / 64.0;
+    for (int step = 0; step < 64; ++step) {
+        float viewDistance =
+            shadowSegmentStart + (float(step) + 0.5) * intervalLength;
+        vec3 midpoint =
+            localRayOrigin + localRayDirection * viewDistance;
+        float opticalDepth = sceneGISCloudShadowOpticalDepth(
+            midpoint,
+            viewDistance);
+        shadowLength +=
+            (1.0 - exp(-min(opticalDepth, 80.0))) * intervalLength;
+    }`,
+    );
+    expect(filteredUniformMutationSource).not.toBe(cloudSource);
+    const fragment = `precision highp float;
+      void main() {
+        vec3 origin = vec3(0.0, 0.0, 20000.0);
+        vec3 direction = vec3(0.0, 0.0, 1.0);
+        float cloudStart;
+        float cloudEnd;
+        bool cloudHit = sceneGISCloudSegment(
+          origin, direction, 10000.0, 1500.0, 4500.0,
+          cloudStart, cloudEnd);
+        float shadowStart;
+        float shadowEnd;
+        bool shadowHit = sceneGISCloudShadowViewSegment(
+          origin, direction, 10000.0, shadowStart, shadowEnd);
+        float shadowLength = sceneGISCloudShadowViewLength(
+          origin, direction, 10000.0);
+        float rawOpticalDepth = sceneGISCloudShadowRawOpticalDepth(
+          origin + direction * 25.0, 25.0);
+        out_FragColor = vec4(
+          shadowLength / SCENEGIS_CLOUD_SHADOW_MAX_LENGTH,
+          shadowHit ? 1.0 : 0.0,
+          rawOpticalDepth / 4.0,
+          cloudHit ? 1.0 : 0.0);
+      }`;
+    const matrices = [
+      Matrix4.fromScale(Cartesian3.ZERO, new Matrix4()),
+      Matrix4.clone(Matrix4.IDENTITY),
+      Matrix4.clone(Matrix4.IDENTITY),
+    ];
+    const intervals = [
+      new Cartesian2(0.0, 10000.0),
+      new Cartesian2(0.0, 0.0),
+      new Cartesian2(0.0, 0.0),
+    ];
+    const render = (librarySource) =>
+      executeHalfFloatQuad(
+        [
+          brunetonDefinitionsSource,
+          brunetonCommonSource,
+          brunetonRuntimeSource,
+          atmosphereSource,
+          cloudShadowSource,
+          globeCloudSource,
+          librarySource,
+          fragment,
+        ],
+        {
+          defines: [
+            "SCENEGIS_GLOBE",
+            "COMBINED_SCATTERING_TEXTURES",
+            "TRANSMITTANCE_TEXTURE_WIDTH 256",
+            "TRANSMITTANCE_TEXTURE_HEIGHT 64",
+            "SCATTERING_TEXTURE_R_SIZE 32",
+            "SCATTERING_TEXTURE_MU_SIZE 128",
+            "SCATTERING_TEXTURE_MU_S_SIZE 32",
+            "SCATTERING_TEXTURE_NU_SIZE 8",
+            "IRRADIANCE_TEXTURE_WIDTH 64",
+            "IRRADIANCE_TEXTURE_HEIGHT 16",
+          ],
+          uniformMap: {
+            u_sceneGISCloudShadowAtlas: () => atlas,
+            u_sceneGISCloudShadowMatrices: () => matrices,
+            u_sceneGISCloudShadowIntervals: () => intervals,
+            u_sceneGISCloudShadowCascadeCount: () => 1,
+            u_sceneGISShowCrepuscularRays: () => true,
+            u_sceneGISShadowSunDirection: () => Cartesian3.UNIT_Z,
+            u_sceneGISShadowCloudTop: () => 30000.0,
+          },
+        },
+      )[0];
+    try {
+      const actual = render(cloudSource);
+      const filteredUniformMutation = render(filteredUniformMutationSource);
+      let cpuIntervalStart = 0.0;
+      let cpuIntervalLength = 50.0;
+      let expectedLength = 0.0;
+      for (let step = 0; step < 384 && cpuIntervalStart < 10000.0; step++) {
+        const intervalEnd = Math.min(
+          cpuIntervalStart + cpuIntervalLength,
+          10000.0,
+        );
+        expectedLength +=
+          (1.0 - Math.exp(-4.0)) * (intervalEnd - cpuIntervalStart);
+        cpuIntervalStart = intervalEnd;
+        cpuIntervalLength *= 1.01;
+      }
+      expect(cpuIntervalStart).toBe(10000.0);
+      expect(actual[0]).toEqualEpsilon(expectedLength / 200000.0, 0.0002);
+      expect(actual[1]).toBe(1.0);
+      expect(actual[2]).toBe(1.0);
+      expect(filteredUniformMutation[0]).toBeLessThan(actual[0] * 0.9);
+      expect(filteredUniformMutation[1]).toBe(1.0);
+      expect(filteredUniformMutation[2]).toBe(1.0);
+      expect(actual[3]).toBe(0.0);
+      expect(filteredUniformMutation[3]).toBe(0.0);
+    } finally {
+      atlas.destroy();
+    }
+  });
+
+  it("renders the full clear-depth Globe fog medium with physical directional Sun on the actual GPU", async function () {
+    await connectControlledCloudMode("globe");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const resources = effects._pipeline._resources;
+    const makeTexture = (values) =>
+      new Texture({
+        context: scene.context,
+        width: 1,
+        height: 1,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: PixelDatatype.HALF_FLOAT,
+        source: {
+          width: 1,
+          height: 1,
+          arrayBufferView: new Uint16Array(values.map(encodeFloat16)),
+        },
+      });
+    const transmittanceTexture = new Texture({
+      context: scene.context,
+      width: 1,
+      height: 1,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+      source: {
+        width: 1,
+        height: 1,
+        arrayBufferView: new Uint16Array([
+          encodeFloat16(1.0),
+          encodeFloat16(1.0),
+          encodeFloat16(1.0),
+          encodeFloat16(1.0),
+        ]),
+      },
+    });
+    const noSunTransmittanceTexture = makeTexture([0.0, 0.0, 0.0, 1.0]);
+    const irradianceTexture = resources.irradianceTexture;
+    const colorTexture = makeTexture([0.05, 0.05, 0.05, 1.0]);
+    const depthTexture = makeTexture([1.0, 0.0, 0.0, 1.0]);
+    const finiteDepthTexture = makeTexture([0.5, 0.0, 0.0, 1.0]);
+    const cloudColorTexture = makeTexture([0.0, 0.0, 0.0, 1.0]);
+    const selectedCloudColorTexture = makeTexture([0.0, 0.0, 0.0, 0.1]);
+    const cloudDistanceZeroTexture = makeTexture([0.0, 0.0, 0.0, 0.0]);
+    const shadowLength = 20000.0;
+    const shadowCode = Math.round((shadowLength / 200000.0) * 1023.0);
+    const cloudDistanceShadowTexture = makeTexture([
+      0.0,
+      0.0,
+      0.0,
+      shadowCode / 2048.0,
+    ]);
+    const cloudDistanceAt = (meanDistance, frontDistance) =>
+      makeTexture([
+        meanDistance / 2000000.0,
+        frontDistance / 2000000.0,
+        5000.0 / 2000000.0,
+        1.0,
+      ]);
+    const cloudMeanFourFrontOneTexture = cloudDistanceAt(4000.0, 1000.0);
+    const cloudMeanEightFrontOneTexture = cloudDistanceAt(8000.0, 1000.0);
+    const cloudMeanFourFrontFarTexture = cloudDistanceAt(4000.0, 100000.0);
+    const deltaOnlyAerialSource = aerialFragmentSource
+      .replace(
+        `if (isClearDepth && !u_showClouds
+        #ifdef SCENEGIS_GLOBE
+        && !u_showHeightFog
+        #endif
+        )`,
+        `if (isClearDepth && !u_showClouds)`,
+      )
+      .replace(
+        `    if (isClearDepth && u_showHeightFog) {
+        sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
+            u_transmittanceTexture,
+            sceneLinearRadiance,
+            rayOrigin,
+            viewDirection,
+            sunDirection,
+            distanceToPoint,
+            shadowLength,
+            u_heightFogDensity,
+            u_heightFogHeightFalloff,
+            u_heightFogBaseHeight,
+            u_heightFogStartDistance,
+            u_heightFogMaximumOpacity,
+            u_backgroundRadianceScale,
+            u_heightFogInscatteringScale,
+            u_heightFogDirectionalInscatteringScale,
+            u_heightFogDirectionalInscatteringExponent);
+    }`,
+        `    if (isClearDepth && u_showHeightFog && shadowLength > 0.0) {
+        vec3 clearFogBase = sceneLinearRadiance;
+        vec3 shadowedFog = sceneGISApplyExponentialHeightFog(
+            u_transmittanceTexture,
+            clearFogBase,
+            rayOrigin,
+            viewDirection,
+            sunDirection,
+            distanceToPoint,
+            shadowLength,
+            u_heightFogDensity,
+            u_heightFogHeightFalloff,
+            u_heightFogBaseHeight,
+            u_heightFogStartDistance,
+            u_heightFogMaximumOpacity,
+            u_backgroundRadianceScale,
+            u_heightFogInscatteringScale,
+            u_heightFogDirectionalInscatteringScale,
+            u_heightFogDirectionalInscatteringExponent);
+        vec3 unshadowedFog = sceneGISApplyExponentialHeightFog(
+            u_transmittanceTexture,
+            clearFogBase,
+            rayOrigin,
+            viewDirection,
+            sunDirection,
+            distanceToPoint,
+            0.0,
+            u_heightFogDensity,
+            u_heightFogHeightFalloff,
+            u_heightFogBaseHeight,
+            u_heightFogStartDistance,
+            u_heightFogMaximumOpacity,
+            u_backgroundRadianceScale,
+            u_heightFogInscatteringScale,
+            u_heightFogDirectionalInscatteringScale,
+            u_heightFogDirectionalInscatteringExponent);
+        sceneLinearRadiance += shadowedFog - unshadowedFog;
+    }`,
+      );
+    expect(deltaOnlyAerialSource).not.toBe(aerialFragmentSource);
+    const normalizedSunFogSource = heightFogSource.replace(
+      `    #ifdef SCENEGIS_GLOBE
+    return numerator;
+    #else
+    float denominator = sceneGISHeightFogMaxComponent(
+        SCENEGIS_SOLAR_IRRADIANCE);
+    return numerator / max(denominator, 1.0e-8);
+    #endif`,
+      `    float denominator = sceneGISHeightFogMaxComponent(
+        SCENEGIS_SOLAR_IRRADIANCE);
+    return numerator / max(denominator, 1.0e-8);`,
+    );
+    expect(normalizedSunFogSource).not.toBe(heightFogSource);
+    const finitePointAerialSource = aerialFragmentSource
+      .replace(
+        `vec3 clearRadiance = sceneGISGlobeSkyRadiance(
+            u_transmittanceTexture,
+            u_scatteringTexture,
+            rayOrigin,
+            viewDirection,
+            sunDirection,
+            shadowLength,
+            clearTransmittance);`,
+        `vec3 clearRadiance = sceneGISGlobeSkyRadianceToPoint(
+            u_transmittanceTexture,
+            u_scatteringTexture,
+            rayOrigin,
+            viewDirection,
+            sunDirection,
+            distanceToPoint,
+            shadowLength,
+            clearTransmittance);`,
+      )
+      .replace(
+        `vec3 unshadowedRadiance = sceneGISGlobeSkyRadiance(
+            u_transmittanceTexture,
+            u_scatteringTexture,
+            rayOrigin,
+            viewDirection,
+            sunDirection,
+            0.0,
+            unshadowedTransmittance);`,
+        `vec3 unshadowedRadiance = sceneGISGlobeSkyRadianceToPoint(
+            u_transmittanceTexture,
+            u_scatteringTexture,
+            rayOrigin,
+            viewDirection,
+            sunDirection,
+            distanceToPoint,
+            0.0,
+            unshadowedTransmittance);`,
+      );
+    expect(finitePointAerialSource).not.toBe(aerialFragmentSource);
+    const defines = [
+      "SCENEGIS_GLOBE",
+      "COMBINED_SCATTERING_TEXTURES",
+      "TRANSMITTANCE_TEXTURE_WIDTH 256",
+      "TRANSMITTANCE_TEXTURE_HEIGHT 64",
+      "SCATTERING_TEXTURE_R_SIZE 32",
+      "SCATTERING_TEXTURE_MU_SIZE 128",
+      "SCATTERING_TEXTURE_MU_S_SIZE 32",
+      "SCATTERING_TEXTURE_NU_SIZE 8",
+      "IRRADIANCE_TEXTURE_WIDTH 64",
+      "IRRADIANCE_TEXTURE_HEIGHT 16",
+    ];
+    const renderAerial = ({
+      aerialSource = aerialFragmentSource,
+      fogSource = heightFogSource,
+      lengthTexture = cloudDistanceZeroTexture,
+      sampledDepthTexture = depthTexture,
+      sampledCloudColorTexture = cloudColorTexture,
+      showClouds = true,
+      cloudCoverage = 0.65,
+      showAerialPerspective = false,
+      showHeightFog = true,
+      ambientScale = 0.0,
+      directionalScale = 1.0,
+      backgroundScale = 10.0,
+    } = {}) =>
+      executeHalfFloatQuad(
+        [
+          brunetonDefinitionsSource,
+          brunetonCommonSource,
+          brunetonRuntimeSource,
+          atmosphereSource,
+          cloudShadowSource,
+          fogSource,
+          globeCloudSource,
+          cloudSource,
+          aerialSource,
+        ],
+        {
+          defines,
+          uniformMap: {
+            u_colorTexture: () => colorTexture,
+            u_depthTexture: () => sampledDepthTexture,
+            u_perspective: () => false,
+            u_cameraDirection: () => Cartesian3.UNIT_Z,
+            u_cameraRight: () => Cartesian3.UNIT_X,
+            u_cameraUp: () => Cartesian3.UNIT_Y,
+            u_east: () => Cartesian3.UNIT_X,
+            u_north: () => Cartesian3.UNIT_Y,
+            u_vertical: () => Cartesian3.UNIT_Z,
+            u_sunDirection: () => Cartesian3.UNIT_Z,
+            u_altitude: () => 1000.0,
+            u_aerialRadianceScale: () => 1.0,
+            u_backgroundRadianceScale: () => backgroundScale,
+            u_showAerialPerspective: () => showAerialPerspective,
+            u_showHeightFog: () => showHeightFog,
+            u_showClouds: () => showClouds,
+            u_heightFogDensity: () => 0.001,
+            u_heightFogHeightFalloff: () => 0.00002,
+            u_heightFogBaseHeight: () => 0.0,
+            u_heightFogStartDistance: () => 0.0,
+            u_heightFogMaximumOpacity: () => 1.0,
+            u_heightFogInscatteringScale: () => ambientScale,
+            u_heightFogDirectionalInscatteringScale: () => directionalScale,
+            u_heightFogDirectionalInscatteringExponent: () => 1.0,
+            u_transmittanceTexture: () => transmittanceTexture,
+            u_scatteringTexture: () => resources.scatteringTexture,
+            u_irradianceTexture: () => irradianceTexture,
+            u_cloudColorTexture: () => sampledCloudColorTexture,
+            u_cloudDistanceTexture: () => lengthTexture,
+            u_cloudCoverage: () => cloudCoverage,
+            u_sceneGISShowCrepuscularRays: () => true,
+            u_sceneGISShadowCloudTop: () => 6000.0,
+          },
+        },
+      )[0];
+    const hazeFragment = `precision highp float;
+      uniform sampler2D u_transmittanceTexture;
+      uniform sampler2D u_irradianceTexture;
+      uniform float u_testShadowLength;
+      void main() {
+        vec3 cameraPosition = vec3(0.0, 0.0, 1000.0);
+        vec3 direction = vec3(0.0, 0.0, 1.0);
+        vec3 intervalOrigin = cameraPosition + direction * 100.0;
+        float rayDistance = sceneGISGlobeCloudHazeRayDistance(
+          intervalOrigin, direction, 10000.0);
+        out_FragColor = sceneGISGlobeCloudHaze(
+          u_transmittanceTexture,
+          u_irradianceTexture,
+          cameraPosition,
+          direction,
+          direction,
+          rayDistance,
+          u_testShadowLength,
+          0.65);
+      }`;
+    const renderHaze = (sunTexture, testShadowLength) =>
+      executeHalfFloatQuad(
+        [
+          brunetonDefinitionsSource,
+          brunetonCommonSource,
+          brunetonRuntimeSource,
+          atmosphereSource,
+          cloudShadowSource,
+          globeCloudSource,
+          cloudSource,
+          hazeFragment,
+        ],
+        {
+          defines,
+          uniformMap: {
+            u_transmittanceTexture: () => sunTexture,
+            u_irradianceTexture: () => resources.irradianceTexture,
+            u_testShadowLength: () => testShadowLength,
+            u_sceneGISShadowCloudTop: () => 6000.0,
+          },
+        },
+      )[0];
+    const irradianceFragment = `precision highp float;
+      uniform sampler2D u_transmittanceTexture;
+      uniform sampler2D u_irradianceTexture;
+      void main() {
+        AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
+        vec3 skyIrradiance;
+        vec3 sunIrradiance = GetSunAndSkyScalarIrradiance(
+          atmosphere,
+          u_transmittanceTexture,
+          u_irradianceTexture,
+          vec3(0.0, 0.0, SCENEGIS_BOTTOM_RADIUS + 1000.0) * 0.001,
+          vec3(0.0, 0.0, 1.0),
+          skyIrradiance);
+        out_FragColor = gl_FragCoord.x < 1.5
+          ? vec4(sunIrradiance, 1.0)
+          : vec4(skyIrradiance, 1.0);
+      }`;
+    const sampledIrradiance = executeHalfFloatQuad(
+      [
+        brunetonDefinitionsSource,
+        brunetonCommonSource,
+        brunetonRuntimeSource,
+        atmosphereSource,
+        irradianceFragment,
+      ],
+      {
+        width: 2,
+        defines,
+        uniformMap: {
+          u_transmittanceTexture: () => resources.transmittanceTexture,
+          u_irradianceTexture: () => resources.irradianceTexture,
+        },
+      },
+    );
+    const skyWrapperFragment = `precision highp float;
+      uniform sampler2D u_transmittanceTexture;
+      uniform sampler3D u_scatteringTexture;
+      void main() {
+        vec3 zeroTransmittance;
+        vec3 shadowedTransmittance;
+        vec3 zeroRadiance = sceneGISGlobeSkyRadiance(
+          u_transmittanceTexture,
+          u_scatteringTexture,
+          vec3(0.0, 0.0, 1000.0),
+          vec3(0.0, 0.0, 1.0),
+          vec3(0.0, 0.0, 1.0),
+          0.0,
+          zeroTransmittance);
+        vec3 shadowedRadiance = sceneGISGlobeSkyRadiance(
+          u_transmittanceTexture,
+          u_scatteringTexture,
+          vec3(0.0, 0.0, 1000.0),
+          vec3(0.0, 0.0, 1.0),
+          vec3(0.0, 0.0, 1.0),
+          20000.0,
+          shadowedTransmittance);
+        vec3 difference = abs(shadowedRadiance - zeroRadiance);
+        out_FragColor = vec4(
+          difference,
+          max(difference.r, max(difference.g, difference.b)));
+      }`;
+    const skyDifference = executeHalfFloatQuad(
+      [
+        brunetonDefinitionsSource,
+        brunetonCommonSource,
+        brunetonRuntimeSource,
+        atmosphereSource,
+        skyWrapperFragment,
+      ],
+      {
+        defines,
+        uniformMap: {
+          u_transmittanceTexture: () => transmittanceTexture,
+          u_scatteringTexture: () => resources.scatteringTexture,
+        },
+      },
+    )[0];
+    try {
+      const clearZero = renderAerial({ showClouds: false });
+      const clearShadowed = renderAerial({
+        lengthTexture: cloudDistanceShadowTexture,
+      });
+      const ambientZero = renderAerial({
+        showClouds: false,
+        cloudCoverage: 0.0,
+        ambientScale: 1.0,
+        directionalScale: 0.0,
+      });
+      const ambientShadowed = renderAerial({
+        lengthTexture: cloudDistanceShadowTexture,
+        cloudCoverage: 0.0,
+        ambientScale: 1.0,
+        directionalScale: 0.0,
+      });
+      const deltaOnlyZero = renderAerial({
+        aerialSource: deltaOnlyAerialSource,
+        showClouds: false,
+      });
+      const normalizedSunZero = renderAerial({
+        fogSource: normalizedSunFogSource,
+        showClouds: false,
+      });
+      const infiniteSkyShadowed = renderAerial({
+        lengthTexture: cloudDistanceShadowTexture,
+        showAerialPerspective: true,
+        showHeightFog: false,
+      });
+      const finitePointSkyShadowed = renderAerial({
+        aerialSource: finitePointAerialSource,
+        lengthTexture: cloudDistanceShadowTexture,
+        showAerialPerspective: true,
+        showHeightFog: false,
+      });
+      const hazeZero = renderHaze(resources.transmittanceTexture, 0.0);
+      const hazeShadowed = renderHaze(resources.transmittanceTexture, 2500.0);
+      const ambientHazeZero = renderHaze(noSunTransmittanceTexture, 0.0);
+      const ambientHazeShadowed = renderHaze(noSunTransmittanceTexture, 2500.0);
+      const integratedHazeZero = renderAerial({
+        showAerialPerspective: false,
+        showHeightFog: false,
+      });
+      const integratedHazeShadowed = renderAerial({
+        lengthTexture: cloudDistanceShadowTexture,
+        showAerialPerspective: false,
+        showHeightFog: false,
+      });
+      const finiteNoCloud = renderAerial({
+        sampledDepthTexture: finiteDepthTexture,
+        showAerialPerspective: false,
+        showHeightFog: false,
+      });
+      const frontOneMeanFour = renderAerial({
+        lengthTexture: cloudMeanFourFrontOneTexture,
+        sampledCloudColorTexture: selectedCloudColorTexture,
+        showAerialPerspective: false,
+        showHeightFog: false,
+      });
+      const frontOneMeanEight = renderAerial({
+        lengthTexture: cloudMeanEightFrontOneTexture,
+        sampledCloudColorTexture: selectedCloudColorTexture,
+        showAerialPerspective: false,
+        showHeightFog: false,
+      });
+      const frontFarMeanFour = renderAerial({
+        lengthTexture: cloudMeanFourFrontFarTexture,
+        sampledCloudColorTexture: selectedCloudColorTexture,
+        showAerialPerspective: false,
+        showHeightFog: false,
+      });
+      const fogDomainZero = renderAerial({
+        showClouds: false,
+        backgroundScale: 0.0,
+      });
+      const fogDomainOne = renderAerial({
+        showClouds: false,
+        backgroundScale: 1.0,
+      });
+      const fogDomainTen = renderAerial({
+        showClouds: false,
+        backgroundScale: 10.0,
+      });
+      expect(clearZero[0]).toBeGreaterThan(0.05);
+      for (let channel = 0; channel < 3; channel++) {
+        expect(deltaOnlyZero[channel]).toEqualEpsilon(0.05, 0.001);
+        expect(clearShadowed[channel]).toBeLessThan(clearZero[channel]);
+        expect(ambientShadowed[channel]).toBe(ambientZero[channel]);
+      }
+      expect(clearZero[0]).toBeGreaterThan(normalizedSunZero[0]);
+      expect(skyDifference.every(Number.isFinite)).toBe(true);
+      expect(skyDifference[3]).toBeGreaterThan(0.0);
+      expect(infiniteSkyShadowed.every(Number.isFinite)).toBe(true);
+      expect(
+        Math.max(
+          ...infiniteSkyShadowed
+            .slice(0, 3)
+            .map((value) => Math.abs(value - 0.05)),
+        ),
+      ).toBeGreaterThan(0.0);
+      expect(
+        Math.max(
+          ...finitePointSkyShadowed
+            .slice(0, 3)
+            .map((value, channel) => Math.abs(value - 0.05)),
+        ),
+      ).toBeLessThan(skyDifference[3]);
+      const hazeDensity = 3.0e-5 * Math.exp(-1.0);
+      const hazeAngle = 1.0;
+      const hazeExponent = hazeAngle * 1.0e-3;
+      const hazeLinearTerm = hazeDensity / 1.0e-3 / hazeAngle;
+      const hazeExpTerm = 1.0 - Math.exp(-4900.0 * hazeExponent);
+      const hazeShadowExpTerm = 1.0 - Math.exp(-2500.0 * hazeExponent);
+      const hazeOpticalDepth = hazeExpTerm * hazeLinearTerm;
+      const hazeDirectionalOpticalDepth =
+        (hazeExpTerm - hazeShadowExpTerm) * hazeLinearTerm;
+      const hazeOpacity = 1.0 - Math.exp(-hazeOpticalDepth);
+      const hazeDirectionalOpacity =
+        1.0 - Math.exp(-hazeDirectionalOpticalDepth);
+      const hazeCosineTheta = 1.0;
+      const henyeyGreensteinAtCosine = (anisotropy) =>
+        (1.0 - anisotropy * anisotropy) /
+        (4.0 * Math.PI) /
+        Math.pow(
+          1.0 + anisotropy * anisotropy - 2.0 * anisotropy * hazeCosineTheta,
+          1.5,
+        );
+      const hazePhase =
+        0.5 * (henyeyGreensteinAtCosine(0.7) + henyeyGreensteinAtCosine(-0.2));
+      const solarIrradiance = sampledIrradiance[0];
+      const skyIrradiance = sampledIrradiance[1];
+      for (let channel = 0; channel < 3; channel++) {
+        const expectedShadowedHaze =
+          (solarIrradiance[channel] * hazePhase * hazeDirectionalOpacity +
+            (skyIrradiance[channel] / (4.0 * Math.PI)) * hazeOpacity) *
+          (0.9 / 1.4);
+        expect(hazeShadowed[channel]).toEqualEpsilon(
+          expectedShadowedHaze,
+          0.004,
+        );
+        expect(hazeShadowed[channel]).toBeLessThan(hazeZero[channel]);
+        expect(ambientHazeShadowed[channel]).toBe(ambientHazeZero[channel]);
+        expect(integratedHazeZero[channel]).not.toBe(0.05);
+        expect(integratedHazeShadowed[channel]).toBeLessThan(
+          integratedHazeZero[channel],
+        );
+        expect(finiteNoCloud[channel]).toEqualEpsilon(0.05, 0.001);
+        expect(frontOneMeanFour[channel]).toEqualEpsilon(
+          frontOneMeanEight[channel],
+          0.001,
+        );
+        expect(frontFarMeanFour[channel]).not.toBe(frontOneMeanFour[channel]);
+        expect(fogDomainTen[channel] - fogDomainZero[channel]).toEqualEpsilon(
+          10.0 * (fogDomainOne[channel] - fogDomainZero[channel]),
+          0.02,
+        );
+      }
+      expect(hazeZero.every(Number.isFinite)).toBe(true);
+      expect(hazeShadowed.every(Number.isFinite)).toBe(true);
+      expect(hazeZero[3]).toEqualEpsilon(hazeOpacity, 0.001);
+      expect(hazeShadowed[3]).toBe(hazeZero[3]);
+      expect(ambientHazeShadowed[3]).toBe(ambientHazeZero[3]);
+      expect(heightFogSource).toContain("segmentStart + clampedShadowLength");
+    } finally {
+      transmittanceTexture.destroy();
+      noSunTransmittanceTexture.destroy();
+      colorTexture.destroy();
+      depthTexture.destroy();
+      finiteDepthTexture.destroy();
+      cloudColorTexture.destroy();
+      selectedCloudColorTexture.destroy();
+      cloudDistanceZeroTexture.destroy();
+      cloudDistanceShadowTexture.destroy();
+      cloudMeanFourFrontOneTexture.destroy();
+      cloudMeanEightFrontOneTexture.destroy();
+      cloudMeanFourFrontFarTexture.destroy();
+    }
+  });
+
+  it("decodes known Beer extinction continuously across a cascade overlap on the actual GPU", function () {
+    scene = createScene();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const atlasValues = new Uint16Array(4 * 4 * 4);
+    for (let y = 0; y < 4; y++) {
+      for (let x = 0; x < 4; x++) {
+        const cascade = x < 2 ? 0 : 1;
+        const values = [
+          10.0 / 200000.0,
+          cascade === 0 ? 0.001 : 0.002,
+          10.0,
+          0.0,
+        ];
+        const offset = (y * 4 + x) * 4;
+        for (let channel = 0; channel < 4; channel++) {
+          atlasValues[offset + channel] = encodeFloat16(values[channel]);
+        }
+      }
+    }
+    const atlas = new Texture({
+      context: scene.context,
+      width: 4,
+      height: 4,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+      source: {
+        width: 4,
+        height: 4,
+        arrayBufferView: atlasValues,
+      },
+    });
+    const matrices = [
+      Matrix4.clone(Matrix4.IDENTITY),
+      Matrix4.clone(Matrix4.IDENTITY),
+      Matrix4.clone(Matrix4.IDENTITY),
+    ];
+    const intervals = [
+      new Cartesian2(0.0, 100.0),
+      new Cartesian2(100.0, 200.0),
+      new Cartesian2(0.0, 0.0),
+    ];
+    try {
+      const pixel = executeHalfFloatQuad(
+        [
+          cloudShadowSource,
+          `precision highp float;
+          void main() {
+            vec3 position = vec3(0.0);
+            float beforeOverlap = sceneGISCloudShadowOpticalDepth(
+              position, 90.0);
+            float overlapMiddle = sceneGISCloudShadowOpticalDepth(
+              position, 97.5);
+            float split = sceneGISCloudShadowOpticalDepth(position, 100.0);
+            out_FragColor = vec4(
+              beforeOverlap,
+              overlapMiddle,
+              split,
+              exp(-split));
+          }`,
+        ],
+        {
+          uniformMap: {
+            u_sceneGISCloudShadowAtlas: () => atlas,
+            u_sceneGISCloudShadowMatrices: () => matrices,
+            u_sceneGISCloudShadowIntervals: () => intervals,
+            u_sceneGISCloudShadowCascadeCount: () => 2,
+            u_sceneGISShadowSunDirection: () => Cartesian3.UNIT_Z,
+            u_sceneGISShadowCloudTop: () => 1010.0,
+          },
+        },
+      )[0];
+      expect(pixel[0]).toEqualEpsilon(1.0, 0.002);
+      expect(pixel[1]).toEqualEpsilon(
+        -Math.log((Math.exp(-1.0) + Math.exp(-2.0)) * 0.5),
+        0.003,
+      );
+      expect(pixel[2]).toEqualEpsilon(2.0, 0.004);
+      expect(pixel[3]).toEqualEpsilon(Math.exp(-2.0), 0.001);
+    } finally {
+      atlas.destroy();
+    }
+  });
+
+  it("filters Globe cloud shadows in Beer space without crossing atlas tiles on the actual GPU", function () {
+    scene = createScene();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const atlasValues = new Uint16Array(8 * 8 * 4);
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const inFirstTile = x < 4;
+        const opticalDepth = inFirstTile ? (x < 2 ? 0.0 : 4.0) : 80.0;
+        const values = [0.0, 1.0, opticalDepth, 0.0];
+        const offset = (y * 8 + x) * 4;
+        for (let channel = 0; channel < 4; channel++) {
+          atlasValues[offset + channel] = encodeFloat16(values[channel]);
+        }
+      }
+    }
+    const atlas = new Texture({
+      context: scene.context,
+      width: 8,
+      height: 8,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+      source: {
+        width: 8,
+        height: 8,
+        arrayBufferView: atlasValues,
+      },
+    });
+    try {
+      const pixels = executeHalfFloatQuad(
+        [
+          cloudShadowSource,
+          `precision highp float;
+          void main() {
+            float x = gl_FragCoord.x < 1.5
+              ? -0.25
+              : (gl_FragCoord.x < 2.5 ? 0.0 :
+                (gl_FragCoord.x < 3.5 ? 0.25 : 1.0));
+            float opticalDepth = sceneGISCloudShadowCascadeOpticalDepth(
+              vec3(x, 0.0, 0.0), 0);
+            out_FragColor = vec4(
+              opticalDepth,
+              exp(-opticalDepth),
+              0.0,
+              1.0);
+          }`,
+        ],
+        {
+          width: 4,
+          uniformMap: {
+            u_sceneGISCloudShadowAtlas: () => atlas,
+            u_sceneGISCloudShadowMatrices: () => [
+              Matrix4.IDENTITY,
+              Matrix4.IDENTITY,
+              Matrix4.IDENTITY,
+            ],
+            u_sceneGISShadowSunDirection: () => Cartesian3.UNIT_Z,
+            u_sceneGISShadowCloudTop: () => 100.0,
+          },
+        },
+      );
+      expect(pixels[0][1]).toBeGreaterThan(pixels[1][1]);
+      expect(pixels[1][1]).toBeGreaterThan(pixels[2][1]);
+      expect(pixels[3][0]).toEqualEpsilon(4.0, 0.01);
+      expect(pixels[3][1]).toEqualEpsilon(Math.exp(-4.0), 0.001);
+    } finally {
+      atlas.destroy();
+    }
+  });
+
+  it("marches controlled cloud density into the bounded Beer atlas on the actual GPU", async function () {
+    await connectControlledCloudMode("globe");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    installSolidCloudTestTextures();
+    scene.camera.setView({
+      destination: Cartesian3.fromDegrees(0.0, 0.0, 10000.0),
+      orientation: {
+        heading: 0.0,
+        pitch: CesiumMath.toRadians(-35.0),
+        roll: 0.0,
+      },
+    });
+    effects.cloudQuality = "low";
+    effects.cloudPreset = "cumulus";
+    effects.cloudCoverage = 1.0;
+    effects.cloudDensity = 0.0001;
+    effects.update(scene, scene.frameState.time);
+    const shadow = effects._pipeline._globeShadowResources;
+    const execute = spyOn(shadow.command, "execute").and.callThrough();
+    scene.renderForSpecs();
+    expect(execute).toHaveBeenCalledTimes(2);
+    const texture = shadow.framebuffer.getColorTexture(0);
+    const atlasPixels = readHalfTexturePixels(texture);
+    let firstIndex = 0;
+    for (let y = 0; y < 256; y++) {
+      for (let x = 0; x < 256; x++) {
+        const index = y * texture.width + x;
+        if (atlasPixels[index][2] > atlasPixels[firstIndex][2]) {
+          firstIndex = index;
+        }
+      }
+    }
+    const first = atlasPixels[firstIndex];
+    expect(first.every(Number.isFinite)).toBe(true);
+    expect(first[0]).toBeGreaterThanOrEqual(0.0);
+    expect(first[0]).toBeLessThanOrEqual(1.0);
+    expect(first[1]).toBeGreaterThan(0.0);
+    expect(first[2]).toBeGreaterThan(0.0);
+    expect(first[2]).toBeLessThanOrEqual(80.0);
+    expect(first[3]).toBeGreaterThanOrEqual(0.0);
+    expect(first[3]).toBeLessThanOrEqual(80.0);
+
+    const atlasU = ((firstIndex % texture.width) + 0.5) / texture.width;
+    const atlasV =
+      (Math.floor(firstIndex / texture.width) + 0.5) / texture.height;
+    const receiverMatrix = Matrix4.fromTranslation(
+      new Cartesian3(4.0 * atlasU - 1.0, 4.0 * atlasV - 1.0, 0.0),
+    );
+    const receiverPixel = executeHalfFloatQuad(
+      [
+        cloudShadowSource,
+        `precision highp float;
+        void main() {
+          float opticalDepth = sceneGISCloudShadowCascadeOpticalDepth(
+            vec3(0.0), 0);
+          out_FragColor = vec4(
+            opticalDepth,
+            exp(-opticalDepth),
+            0.0,
+            1.0);
+        }`,
+      ],
+      {
+        uniformMap: {
+          u_sceneGISCloudShadowAtlas: () => texture,
+          u_sceneGISCloudShadowMatrices: () => [
+            receiverMatrix,
+            Matrix4.IDENTITY,
+            Matrix4.IDENTITY,
+          ],
+          u_sceneGISShadowSunDirection: () => Cartesian3.UNIT_Z,
+          u_sceneGISShadowCloudTop: () => 200000.0,
+        },
+      },
+    )[0];
+    expect(receiverPixel[0]).toBeGreaterThan(0.0);
+    expect(receiverPixel[1]).toBeLessThan(1.0);
+
+    effects.cloudDensity = 0.0002;
+    effects.update(scene, scene.frameState.time);
+    execute.calls.reset();
+    scene.renderForSpecs();
+    expect(execute).toHaveBeenCalledTimes(2);
+    const second = readHalfTexturePixel(
+      texture,
+      firstIndex % texture.width,
+      Math.floor(firstIndex / texture.width),
+    );
+    expect(second.every(Number.isFinite)).toBe(true);
+    expect(second[1] / first[1]).toEqualEpsilon(2.0, 0.03);
+    expect(second[2] / first[2]).toEqualEpsilon(2.0, 0.03);
   });
 
   it("provides read-only capability preflight", function () {
@@ -1938,6 +3032,394 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     }).toThrowDeveloperError();
     expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("rejects native Globe lighting before any A5 resource mutation", function () {
+    scene = createScene();
+    scene.globe = new Globe(Ellipsoid.WGS84);
+    hideNativeEnvironment(scene);
+    scene.globe.enableLighting = true;
+    scene.highDynamicRange = true;
+    effects = new SceneGISEnvironmentEffects({
+      mode: "globe",
+      enabled: true,
+    });
+    effects.connectedCallback({});
+    const fetch = spyOn(Resource, "fetchArrayBuffer").and.callThrough();
+
+    expect(function () {
+      effects.firstUpdate(scene, scene.frameState.time);
+    }).toThrowDeveloperError();
+    expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
+    expect(scene.frameState._sceneGISGlobeLighting).toBeUndefined();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("keeps Globe shadow toggles warm and releases the exact atlas lifecycle", async function () {
+    const fetchArrayBuffer = Resource.fetchArrayBuffer;
+    let acquiredBeforeResourceRequest = false;
+    await connectControlledCloudMode("globe", function () {
+      spyOn(Resource, "fetchArrayBuffer").and.callFake(function (...args) {
+        acquiredBeforeResourceRequest =
+          scene.globe.depthTestAgainstTerrain === true;
+        return fetchArrayBuffer.apply(Resource, args);
+      });
+    });
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    expect(acquiredBeforeResourceRequest).toBe(true);
+    expect(scene.globe.depthTestAgainstTerrain).toBe(true);
+    const pipeline = effects._pipeline;
+    const mediumShadow = pipeline._globeShadowResources;
+    const texture = mediumShadow.framebuffer.getColorTexture(0);
+    expect(texture.width).toBe(1024);
+    expect(texture.height).toBe(1024);
+    expect(texture.width * texture.height * 4 * 2).toBe(8388608);
+    expect(pipeline._shadowCascadeCount).toBe(3);
+    expect(pipeline._uniformMap.u_sceneGISShadowSteps()).toBe(50);
+    effects.cloudQuality = "low";
+    effects.update(scene, scene.frameState.time);
+    const lowShadow = pipeline._globeShadowResources;
+    const lowTexture = lowShadow.framebuffer.getColorTexture(0);
+    expect(lowShadow).not.toBe(mediumShadow);
+    expect(lowTexture.width).toBe(512);
+    expect(lowTexture.height).toBe(512);
+    expect(lowTexture.width * lowTexture.height * 4 * 2).toBe(2097152);
+    expect(pipeline._shadowCascadeCount).toBe(2);
+    expect(pipeline._uniformMap.u_sceneGISShadowSteps()).toBe(25);
+    effects.cloudQuality = "high";
+    effects.update(scene, scene.frameState.time);
+    const shadow = pipeline._globeShadowResources;
+    const highTexture = shadow.framebuffer.getColorTexture(0);
+    expect(shadow).not.toBe(mediumShadow);
+    expect(shadow).not.toBe(lowShadow);
+    expect(highTexture.width).toBe(1536);
+    expect(highTexture.height).toBe(1536);
+    expect(highTexture.width * highTexture.height * 4 * 2).toBe(18874368);
+    expect(pipeline._shadowCascadeCount).toBe(3);
+    expect(pipeline._uniformMap.u_sceneGISShadowSteps()).toBe(50);
+    const requestRender = spyOn(scene, "requestRender").and.callThrough();
+
+    effects.showCloudShadows = false;
+    effects.showCrepuscularRays = false;
+    effects.update(scene, scene.frameState.time);
+    expect(pipeline._globeShadowResources).toBe(shadow);
+    expect(scene.frameState._sceneGISGlobeLighting.showCloudShadows).toBe(
+      false,
+    );
+    expect(scene.frameState._sceneGISGlobeLighting.showCrepuscularRays).toBe(
+      false,
+    );
+    effects.surfaceRadianceScale = 4.0;
+    effects.update(scene, scene.frameState.time);
+    expect(pipeline._globeShadowResources).toBe(shadow);
+    expect(pipeline._uniformMap.u_surfaceRadianceScale()).toBe(4.0);
+    expect(scene.frameState._sceneGISGlobeLighting.surfaceRadianceScale).toBe(
+      4.0,
+    );
+    expect(requestRender).toHaveBeenCalledTimes(3);
+
+    requestRender.calls.reset();
+    effects.showCloudShadows = false;
+    effects.showCrepuscularRays = false;
+    effects.surfaceRadianceScale = 4.0;
+    expect(requestRender).not.toHaveBeenCalled();
+
+    effects.showCloudShadows = true;
+    effects.showCrepuscularRays = true;
+    effects.showClouds = false;
+    effects.update(scene, scene.frameState.time);
+    expect(scene.frameState._sceneGISGlobeLighting.showCloudShadows).toBe(
+      false,
+    );
+    expect(scene.frameState._sceneGISGlobeLighting.showCrepuscularRays).toBe(
+      false,
+    );
+
+    effects.enabled = false;
+    expect(pipeline._globeShadowResources).toBeUndefined();
+    expect(scene.frameState._sceneGISGlobeLighting).toBeUndefined();
+    expect(scene.globe.depthTestAgainstTerrain).toBe(false);
+
+    scene.globe.depthTestAgainstTerrain = true;
+    effects.enabled = true;
+    effects.update(scene, scene.frameState.time);
+    expect(scene.globe.depthTestAgainstTerrain).toBe(true);
+    effects.enabled = false;
+    expect(scene.globe.depthTestAgainstTerrain).toBe(true);
+
+    scene.globe.depthTestAgainstTerrain = false;
+    effects.enabled = true;
+    effects.update(scene, scene.frameState.time);
+    expect(scene.globe.depthTestAgainstTerrain).toBe(true);
+    const errors = [];
+    effects.errorEvent.addEventListener(function (controller, error) {
+      errors.push({ controller, error });
+    });
+    scene.globe.depthTestAgainstTerrain = false;
+    effects.update(scene, scene.frameState.time);
+    expect(errors.length).toBe(1);
+    expect(errors[0].controller).toBe(effects);
+    expect(errors[0].error.message).toContain("depthTestAgainstTerrain");
+    expect(scene.globe.depthTestAgainstTerrain).toBe(false);
+
+    effects.enabled = false;
+    effects.enabled = true;
+    effects.update(scene, scene.frameState.time);
+    expect(scene.globe.depthTestAgainstTerrain).toBe(true);
+    effects.disconnectedCallback(effects._element);
+    expect(scene.globe.depthTestAgainstTerrain).toBe(false);
+  });
+
+  it("compiles the frame-local Globe surface variant and restores the native variant", async function () {
+    await connectControlledCloudMode("globe");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    scene.camera.setView({
+      destination: Cartesian3.fromDegrees(15.0, 45.0, 12000.0),
+      orientation: {
+        heading: 0.0,
+        pitch: CesiumMath.toRadians(-45.0),
+        roll: 0.0,
+      },
+    });
+    const shaderSet = scene.globe._surfaceShaderSet;
+    const getShaderProgram = spyOn(
+      shaderSet,
+      "getShaderProgram",
+    ).and.callThrough();
+    let surfaceShaders;
+    await pollToPromise(function () {
+      scene.renderForSpecs();
+      surfaceShaders = Object.values(shaderSet._shadersByTexturesFlags).flatMap(
+        (byFlags) => Object.values(byFlags ?? {}),
+      );
+      return surfaceShaders.length > 0;
+    });
+    const sceneGISVariant = surfaceShaders.find(
+      (surfaceShader) =>
+        Math.floor(surfaceShader.flags / 0x400000000) % 2 === 1,
+    );
+    expect(sceneGISVariant)
+      .withContext(
+        JSON.stringify(
+          surfaceShaders.map((surfaceShader) => surfaceShader.flags),
+        ),
+      )
+      .toBeDefined();
+    const defines = sceneGISVariant.shaderProgram._fragmentShaderSource.defines;
+    expect(defines).toContain("SCENEGIS_GLOBE_SURFACE_LIGHTING");
+    expect(defines).toContain("SCENEGIS_GLOBE");
+    expect(defines).not.toContain("SCENEGIS_GLOBE_SURFACE_TERRAIN_NORMAL");
+
+    const geodeticOptions = getShaderProgram.calls.mostRecent().args[0];
+    const terrainProgram = shaderSet.getShaderProgram({
+      ...geodeticOptions,
+      hasVertexNormals: true,
+    });
+    terrainProgram._bind();
+    expect(terrainProgram._fragmentShaderSource.defines).toContain(
+      "SCENEGIS_GLOBE_SURFACE_TERRAIN_NORMAL",
+    );
+    expect(terrainProgram._vertexShaderSource.defines).toContain(
+      "GENERATE_POSITION_AND_NORMAL",
+    );
+
+    effects.enabled = false;
+    scene.renderForSpecs();
+    const allSurfaceShaders = Object.values(
+      shaderSet._shadersByTexturesFlags,
+    ).flatMap((byFlags) => Object.values(byFlags ?? {}));
+    expect(
+      allSurfaceShaders.some(
+        (surfaceShader) =>
+          Math.floor(surfaceShader.flags / 0x400000000) % 2 === 0,
+      ),
+    ).toBe(true);
+    expect(scene.frameState._sceneGISGlobeLighting).toBeUndefined();
+  });
+
+  it("scales Globe surface radiance and matches aerial extinction endpoints on the actual GPU", async function () {
+    await connectControlledCloudMode("globe");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const resources = effects._pipeline._resources;
+    const surfacePosition = Cartesian3.fromDegrees(15.0, 45.0, 0.0);
+    const vertical = Ellipsoid.WGS84.geodeticSurfaceNormal(
+      surfacePosition,
+      new Cartesian3(),
+    );
+    const eastNorthUp = Transforms.eastNorthUpToFixedFrame(surfacePosition);
+    const east = Matrix4.getColumn(eastNorthUp, 0, new Cartesian3());
+    const north = Matrix4.getColumn(eastNorthUp, 1, new Cartesian3());
+    const renderSurface = function (scale) {
+      effects.surfaceRadianceScale = scale;
+      return executeHalfFloatQuad(
+        [
+          brunetonDefinitionsSource,
+          brunetonCommonSource,
+          brunetonRuntimeSource,
+          atmosphereSource,
+          cloudShadowSource,
+          globeSurfaceLightingSource,
+          `precision highp float;
+          void main() {
+            vec3 radiance = sceneGISGlobeSurfaceLighting(
+              vec3(0.5),
+              u_sceneGISShadowSurfacePosition,
+              u_sceneGISShadowVertical);
+            out_FragColor = vec4(radiance, 1.0);
+          }`,
+        ],
+        {
+          defines: [
+            "SCENEGIS_GLOBE",
+            "COMBINED_SCATTERING_TEXTURES",
+            "TRANSMITTANCE_TEXTURE_WIDTH 256",
+            "TRANSMITTANCE_TEXTURE_HEIGHT 64",
+            "SCATTERING_TEXTURE_R_SIZE 32",
+            "SCATTERING_TEXTURE_MU_SIZE 128",
+            "SCATTERING_TEXTURE_MU_S_SIZE 32",
+            "SCATTERING_TEXTURE_NU_SIZE 8",
+            "IRRADIANCE_TEXTURE_WIDTH 64",
+            "IRRADIANCE_TEXTURE_HEIGHT 16",
+          ],
+          uniformMap: {
+            u_sceneGISTransmittanceTexture: () =>
+              resources.transmittanceTexture,
+            u_sceneGISIrradianceTexture: () => resources.irradianceTexture,
+            u_surfaceRadianceScale: () => effects.surfaceRadianceScale,
+            u_sceneGISShowCloudShadows: () => false,
+            u_sceneGISShowCrepuscularRays: () => false,
+            u_sceneGISCloudShadowAtlas: () =>
+              effects._pipeline._globeShadowResources.framebuffer.getColorTexture(
+                0,
+              ),
+            u_sceneGISCloudShadowMatrices: () =>
+              effects._pipeline._shadowMatrices,
+            u_sceneGISCloudShadowIntervals: () =>
+              effects._pipeline._shadowIntervals,
+            u_sceneGISCloudShadowCascadeCount: () =>
+              effects._pipeline._shadowCascadeCount,
+            u_sceneGISShadowSurfacePosition: () => surfacePosition,
+            u_sceneGISShadowEast: () => east,
+            u_sceneGISShadowNorth: () => north,
+            u_sceneGISShadowVertical: () => vertical,
+            u_sceneGISShadowSunDirection: () => Cartesian3.UNIT_Z,
+            u_sceneGISShadowCameraPosition: () => surfacePosition,
+            u_sceneGISShadowCloudTop: () => 6000.0,
+          },
+        },
+      )[0];
+    };
+    const surfaceZero = renderSurface(0.0);
+    const surfaceOne = renderSurface(1.0);
+    const surfaceTen = renderSurface(10.0);
+    expect(surfaceZero.slice(0, 3)).toEqual([0.0, 0.0, 0.0]);
+    let positiveChannels = 0;
+    for (let channel = 0; channel < 3; channel++) {
+      if (surfaceOne[channel] > 0.0) {
+        positiveChannels++;
+        expect(surfaceTen[channel] / surfaceOne[channel]).toEqualEpsilon(
+          10.0,
+          0.03,
+        );
+      }
+      expect(Number.isFinite(surfaceTen[channel])).toBe(true);
+      expect(surfaceTen[channel]).toBeLessThan(65504.0);
+    }
+    expect(positiveChannels).toBeGreaterThan(0);
+
+    const helperStart = aerialFragmentSource.indexOf(
+      "float sceneGISGlobeAtmosphereRadianceScale",
+    );
+    const helperEnd = aerialFragmentSource.indexOf("void main()", helperStart);
+    const aerialDomain = executeHalfFloatQuad(
+      [
+        `precision highp float;
+        uniform float u_backgroundRadianceScale;
+        uniform float u_aerialRadianceScale;
+        uniform float u_surfaceRadianceScale;`,
+        aerialFragmentSource.slice(helperStart, helperEnd),
+        `void main() {
+          vec3 transmittance = vec3(0.35);
+          float sharedScale = sceneGISGlobeAtmosphereRadianceScale();
+          float rejectedScale = mix(
+            u_aerialRadianceScale,
+            u_surfaceRadianceScale,
+            1.0 - max(
+              transmittance.r,
+              max(transmittance.g, transmittance.b)));
+          out_FragColor = vec4(
+            sharedScale,
+            rejectedScale,
+            transmittance.r,
+            1.0);
+        }`,
+      ],
+      {
+        defines: ["SCENEGIS_GLOBE"],
+        uniformMap: {
+          u_backgroundRadianceScale: () => 4.0,
+          u_aerialRadianceScale: () => 1.5,
+          u_surfaceRadianceScale: () => 10.0,
+        },
+      },
+    )[0];
+    expect(aerialDomain[0]).toEqualEpsilon(6.0, 0.004);
+    expect(aerialDomain[1]).toEqualEpsilon(7.025, 0.01);
+    expect(aerialDomain[2]).toEqualEpsilon(0.35, 0.001);
+    expect(aerialDomain[0]).not.toEqualEpsilon(aerialDomain[1], 0.01);
+    expect(aerialFragmentSource).not.toContain(
+      "sceneGISGlobeEffectiveAerialScale",
+    );
+    expect(aerialFragmentSource).not.toContain("u_surfaceRadianceScale");
+  });
+
+  it("uses the WGS84 geodetic fallback normal at mid latitude on the actual GPU", function () {
+    scene = createScene();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const helperEnd = globeSurfaceLightingSource.indexOf(
+      "vec3 sceneGISGlobeSurfaceLighting",
+    );
+    const helperSource = globeSurfaceLightingSource.slice(0, helperEnd);
+    const surfacePosition = Cartesian3.fromDegrees(15.0, 45.0, 0.0);
+    const expected = Ellipsoid.WGS84.geodeticSurfaceNormal(
+      surfacePosition,
+      new Cartesian3(),
+    );
+    const pixel = executeHalfFloatQuad(
+      [
+        helperSource,
+        `precision highp float;
+        uniform vec3 u_testSurfacePosition;
+        void main() {
+          vec3 normal = sceneGISGlobeGeodeticSurfaceNormal(
+            u_testSurfacePosition);
+          out_FragColor = vec4(
+            normal * 0.5 + 0.5,
+            normal.z == 0.0 ? 0.0 : normal.x / normal.z);
+        }`,
+      ],
+      {
+        uniformMap: {
+          u_testSurfacePosition: () => surfacePosition,
+        },
+      },
+    )[0];
+    expect(pixel[0]).toEqualEpsilon(expected.x * 0.5 + 0.5, 0.001);
+    expect(pixel[1]).toEqualEpsilon(expected.y * 0.5 + 0.5, 0.001);
+    expect(pixel[2]).toEqualEpsilon(expected.z * 0.5 + 0.5, 0.001);
+    expect(pixel[3]).toEqualEpsilon(expected.x / expected.z, 0.001);
+    expect(pixel[3]).not.toEqualEpsilon(
+      surfacePosition.x / surfacePosition.z,
+      0.001,
+    );
   });
 
   it("fails deterministic planar native conflicts before attachment", function () {
@@ -5302,7 +6784,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     );
     expect(cloudSelectionSource.indexOf("fwidth(frontDelta)"))
       .withContext("derivative precedes invalid-distance branch")
-      .toBeLessThan(cloudSelectionSource.indexOf("if (distances.a < 0.5)"));
+      .toBeLessThan(cloudSelectionSource.indexOf("if (!cloudValid)"));
     expect(cloudSelectionSource.indexOf("fwidth(frontDelta)"))
       .withContext("derivative precedes clear-depth branch")
       .toBeLessThan(cloudSelectionSource.indexOf("if (!clearDepth)"));
@@ -6028,7 +7510,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       "inputColor.rgb * transmittance + radiance * u_aerialRadianceScale",
     );
     expect(backgroundFragmentSource).not.toContain("u_aerialRadianceScale");
-    expect(aerialFragmentSource).not.toContain("u_backgroundRadianceScale");
+    expect(aerialFragmentSource).toContain(
+      "u_backgroundRadianceScale * u_aerialRadianceScale",
+    );
     expect(backgroundFragmentSource).not.toContain("u_radianceScale");
     expect(aerialFragmentSource).not.toContain("u_radianceScale");
     expect(atmosphereSource).toContain("SCENEGIS_HDR_MAX = 65504.0");

@@ -56,6 +56,7 @@ void main()
             rayOrigin,
             viewDirection,
             sunDirection,
+            0.0,
             transmittance);
     #else
     bool intersectsAtmosphere;
@@ -85,11 +86,17 @@ void main()
             viewDirection,
             sunDirection,
             SCENEGIS_PLANAR_BACKGROUND_DISTANCE,
+            0.0,
             u_heightFogDensity,
             u_heightFogHeightFalloff,
             u_heightFogBaseHeight,
             u_heightFogStartDistance,
             u_heightFogMaximumOpacity,
+            #ifdef SCENEGIS_GLOBE
+            u_backgroundRadianceScale,
+            #else
+            1.0,
+            #endif
             u_heightFogInscatteringScale,
             u_heightFogDirectionalInscatteringScale,
             u_heightFogDirectionalInscatteringExponent);

@@ -3,12 +3,11 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A5-G active`
-- Current review: `implementation assigned; Architecture review pending`
-- Active phase plan:
-  [2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](plans/2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md)
+- Current phase: `A5-G completed; A6-G not activated`
+- Current review: `A5-G accepted; Architecture review and owner visual gate passed`
+- Active phase plan: `none`
 - Latest completed phase plan:
-  [2026-08-27-phase-a4g-globe-integrated-cloud-core.md](plans/2026-08-27-phase-a4g-globe-integrated-cloud-core.md)
+  [2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](plans/2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -20,7 +19,7 @@
   [ADR-0045](../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md),
   [ADR-0046](../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
   [ADR-0047](../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md)
-- Upstream patches: active `SGP-0008`（consume only）、proposed `SGP-0009`（A5-G surface seam）
+- Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
 - A2 checkpoint: `da2eb55743a46423e65b2047965907c05ea260b7`（未push）
@@ -82,7 +81,8 @@ reference frame，不互相伪造坐标语义。
 - [A4 cloud structure calibration](discussions/2026-08-15-a4-cloud-structure-calibration.md) — `reopened by owner visual No-Go`
 - [Globe-first advanced environment delivery](discussions/2026-08-27-globe-first-delivery.md) — `resolved; A4-G active`
 - [A4-G Globe cloud whiteness and frequency calibration](discussions/2026-08-27-a4g-cloud-whiteness-frequency-calibration.md) — `design resolved by Architecture; implementation assigned`
-- [A5-G shadow, skylight, and rays source discovery](discussions/2026-08-28-a5g-shadow-skylight-rays-source-discovery.md) — `resolved; A5-G active`
+- [A5-G shadow, skylight, and rays source discovery](discussions/2026-08-28-a5g-shadow-skylight-rays-source-discovery.md) — `resolved; A5-G completed`
+- [A5-G owner visual corrections](discussions/2026-08-28-a5g-owner-visual-corrections.md) — `resolved; owner accepted`
 
 ## Reviews
 
@@ -90,7 +90,7 @@ reference frame，不互相伪造坐标语义。
 - [A2 Bruneton atmosphere and aerial perspective implementation review](reviews/2026-08-14-a2-bruneton-atmosphere-aerial-perspective.md) — `approved`
 - [A3 exponential height fog implementation review](reviews/2026-08-15-a3-exponential-height-fog.md) — `approved`
 - [A4 volumetric cloud core implementation review](reviews/2026-08-15-a4-volumetric-cloud-core.md) — `changes-requested; superseded by A4-G`
-- [A5-G Globe cloud shadows, skylight, and crepuscular rays review](reviews/2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md) — `implementation pending`
+- [A5-G Globe cloud shadows, skylight, and crepuscular rays review](reviews/2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md) — `accepted; closed`
 
 ## Engineering paths
 
@@ -349,3 +349,594 @@ with checkpoint, commit/push and A5-G still blocked.
 The project owner subsequently reported `通过` on the live Globe result. The
 A4-G visual gate is accepted and this change set is the local unpublished A4-G
 checkpoint. A5-G has not been activated; Planar adaptation remains deferred.
+
+## A5-G execution — review-ready 2026-08-28
+
+Execution implemented the bounded current-frame Beer shadow atlas, inherent
+Globe Sun/sky surface lighting through active `SGP-0009`, and semantic
+crepuscular shadow-length transport. The public warm booleans default to true;
+native `globe.enableLighting` conflicts fail before A5 allocation. The atlas is
+one RGBA16F texture/FBO/program with no depth or history: low and medium use
+2,097,152 bytes, while high uses 8,388,608 bytes.
+
+Focused actual-GPU transport, Globe surface, controller, A1, upstream surface,
+generator, package/provenance and browser evidence passed. The fixed browser set
+reported finite/storage-safe raw Cloud MRT, high-Sun surface separation, warm
+sunset source `R > G > B`, exact-zero night cloud source and no render errors.
+Planar behavior, A4-G assets/equations, generated files and resource categories
+outside the specified atlas remain unchanged. State=`review-ready`; no owner
+gate, checkpoint, commit, push or A6-G work was requested.
+
+## A5-G Architecture review — changes requested 2026-08-28
+
+Independent review accepted the bounded resource/ownership seam but found three
+direct data-contract blockers: atlas front depth uses an incompatible ray origin
+and exceeds `RGBA16F` range, clear/invalid cloud pixels discard crepuscular
+shadow length, and the SceneGIS fallback surface normal is geocentric rather
+than WGS84 geodetic. `A5-AR-001`, `A5-AR-002` and `A5-AR-003` are open.
+
+The repair is limited to relative normalized front depth, validity-independent
+clear-ray length transport and the WGS84 fallback normal, with one focused GPU
+assertion for each. No broad matrix, additional resource, Planar work, owner
+gate, checkpoint, commit/push or A6-G work is authorized.
+
+## A5-G correction execution — review-ready 2026-08-28
+
+Execution repaired only the three reviewed contracts. Atlas R is now measured
+from `segmentStart`, normalized by 200 km on write and decoded to metres at the
+receiver. The view-ray BSM integral now runs once per bounded coarse interval,
+independent of density/occupancy/cloud validity; invalid-cloud pixels may carry
+positive length through spatial/history resolve and into clear/finite/cloud
+atmosphere plus directional-only fog. The SceneGIS no-terrain surface branch now
+uses WGS84 inverse-radii-squared through one shared helper.
+
+Each requested focused GPU assertion passed 1/1, as did the three directly
+affected prior fixtures. Resource/API/pass/program/texture/FBO/history counts,
+Planar behavior and the three-path `SGP-0009` boundary are unchanged. State is
+`review-ready` for Architecture re-review; the findings remain recorded until
+Architecture closes them.
+
+## A5-AR-002 fog correction — review-ready 2026-08-28
+
+The Globe clear-depth Aerial branch now adds the difference between real
+shadowed and zero-length `sceneGISApplyExponentialHeightFog` evaluations using
+the same base color and parameters. Shared color, transmittance and ambient terms
+cancel, so only the directional fog source changes; zero length remains exact
+identity and fog is not composed twice.
+
+The replacement GPU fixture directly compiled the production Bruneton,
+CloudShadow and HeightFog stack from packed `valid=false` plus 100 km length.
+Directional fog was lower than zero length, while directional-scale-zero
+ambient output was bit-identical. The existing packed fixture also passed 1/1.
+No resource, API, Planar, SGP or Test-page boundary changed.
+
+## A5-G correction Architecture re-review — changes requested 2026-08-28
+
+Architecture independently closes `A5-AR-001` and `A5-AR-003`. The normalized
+segment-relative atlas depth and WGS84 fallback normal are correctly connected,
+and their focused GPU fixtures pass.
+
+`A5-AR-002` remains open only because clear depth still skips the actual A3
+height-fog consumer. The delivered helper fixture cannot detect this: it tests
+packing and a scalar directional factor, not Aerial/fog composition. The final
+repair is limited to a clear-depth shadowed-minus-unshadowed fog delta and one
+direct actual height-fog/Aerial GPU assertion. All other boundaries remain
+frozen.
+
+## A5-G final Architecture correction review — passed 2026-08-28
+
+Architecture independently accepts the clear-depth fog delta and closes
+`A5-AR-002`. The replacement production-stack GPU fixture and packed identity
+fixture each passed 1/1; the three-path `SGP-0009` audit also remains clean.
+
+All A5-G technical findings are closed. Public API, atlas/resources, pass and
+history counts, Planar behavior and upstream scope are unchanged. The phase now
+waits only for the project-owner Globe visual gate; checkpoint, commit/push and
+A6-G remain blocked.
+
+## A5-G project-owner visual gate — changes requested 2026-08-28
+
+The project owner rejected the Globe result for five concrete visible defects:
+cloud-shadow mosaic, black twilight ground, a returned downward aerial layer
+line, invisible crepuscular rays, and a Test surface without Cesium imagery or
+terrain selection. Architecture reproduced the decisive toggles and opened
+`A5-AR-004` through `A5-AR-008`.
+
+The converged repair is limited to a 3×3 transmittance-domain tent PCF with
+`256/512/768` BSM tiles; public Globe-only `surfaceRadianceScale=10`; a
+transmittance-driven Globe finite-aerial asymptote; one live-Sun-aligned
+Globe-only rays owner preset using visible `0.6/4` fog controls; and an
+offline-first Globe layer selector with Natural Earth II, optional official
+Cesium World Imagery + World Terrain, and solid diagnostic modes.
+
+No new pass/program/texture/FBO/history, upstream path, asset download, Planar
+product behavior or A6 work is authorized. Validation remains the five direct
+fixtures/states in the active plan rather than a full matrix, hash, replay or
+convergence gate. A5-G is `changes-requested`; owner re-gate, checkpoint,
+commit/push and A6-G remain blocked.
+
+## A5-G owner-correction execution — review-ready 2026-08-28
+
+Execution completed the exact converged code and Test surface: Beer-space 3×3
+PCF with `256/512/768` tiles, public warm `surfaceRadianceScale=10`, the Globe
+finite-aerial extinction asymptote, a live-Sun-aligned rays preset, and the
+offline-first Natural Earth II / optional Cesium online / solid selector.
+
+Focused GPU, controller, A1, Globe surface, installed delivery and `SGP-0009`
+audits pass. No new upstream path, generated file, SGP, asset or render-resource
+kind was added. The browser evidence remains finite and storage-safe, but the
+downward profile still has a `0.400905` step and the aligned rays off/on
+percentiles are identical. Execution stopped without an unapproved workaround;
+Architecture review and owner re-gate remain blocked pending judgment of those
+two direct visual facts.
+
+## A5-G owner-correction Architecture review — changes requested 2026-08-28
+
+Architecture closes `A5-AR-004`, `A5-AR-005` and `A5-AR-008` after source
+review and independent 1/1 passes for the Beer-space PCF and surface/aerial GPU
+fixtures. Those paths are frozen.
+
+`A5-AR-006` remains open only because the returned evidence is invalid: the
+120 km/`-8°` center ray is above the ellipsoid horizon, and 33 sparse displayed
+samples have no resolved-depth classification. Execution is assigned one fixed
+ground-intersecting, same-frame color/depth observation; the accepted product
+asymptote is unchanged.
+
+`A5-AR-007` remains open because A3 fog still maps decoded metres with
+`exp(-L/200000)`, making kilometre-scale shadows too weak. ADR-0047 now requires
+the same final-shadowed-segment semantics as Bruneton, evaluated through the
+existing height-density optical-depth integral. Closure uses one focused fog
+fixture and one fixed integrated local observation only; no broad matrix,
+replay/hash machinery or parameter search is authorized.
+
+## A5-G bounded 006/007 execution — review-ready 2026-08-28
+
+Execution keeps the accepted finite-aerial formula unchanged and replaces the
+invalid sparse profile with one 120 km/`-20°` same-frame color/depth boundary.
+The center column transitions directly from finite depth `0.876953125` at
+`y=348`, luminance `0.803154`, to exact-clear depth `1` at `y=349`, luminance
+`0.818690`.
+
+A3 Globe fog now interprets decoded length as the final shadowed subsegment and
+weights directional Sun by the unshadowed/total height-density optical-depth
+ratio. The production-source GPU fixture passes for zero, partial, full and
+ambient-only cases. At the fixed aligned sunset state (`coverage=0.65`,
+`cloudTime=0`), rays-on resolves 3,666 nonzero lengths with median `391.007 m`,
+`p90=1173.021 m`; the 17×17 near-Sun mean RGB delta is approximately
+`[-4.07e-5,-2.71e-5,-4.07e-5]`. No camera/time search or additional effect was
+introduced. Architecture review remains required.
+
+## A5-G bounded 006/007 Architecture re-review — changes requested 2026-08-28
+
+Architecture closes `A5-AR-006`. The corrected same-frame depth authority finds
+the immediate finite/clear pair and measures only a `0.015536` luminance change;
+the earlier sparse `0.400905` claim is withdrawn. The accepted finite-aerial
+product formula and this evidence path are frozen.
+
+`A5-AR-007` remains open. The delivered fog consumer passes its local equation,
+but the fixed owner state still produces no visible shaft and only a roughly
+`4e-5` local RGB delta. Source comparison against
+`three-geospatial@b012ad06d858fc035d88aacfd73f092f93c994e4` identifies the
+producer mismatch: reference `getShadowRayNearFar` and `marchShadowLength`
+integrate BSM visibility over a separate camera-to-scene/ground/shadow-top ray,
+capped at 200 km, while SceneGIS first clips to `sceneGISCloudSegment` and
+samples only inside the cloud support shell.
+
+The correction is one cost-bounded adaptation: retain the existing 32/64 BSM
+samples but distribute them over an independent Globe shadow-view interval,
+without changing the primary cloud-body march. A3 fog interprets the resulting
+equivalent length as the camera-near shadowed prefix, matching reference
+`approximateHaze`; Bruneton point transport retains its existing API semantics.
+Closure needs one producer fixture, the corrected fog fixture, and the existing
+single fixed low-Sun observation only. No broad matrix, parameter search,
+hash/replay gate, public control, resource, Planar or A6 change is authorized.
+
+## A5-AR-007 bounded producer execution — review-ready 2026-08-28
+
+Execution now computes the Globe shadow-view interval independently from cloud
+support, spanning camera/entry to the nearest finite scene, ground or
+shadow-top exit and clamping at 200 km. The existing `primarySteps` budget is
+used once for BSM reconstruction; cloud density, occupancy and radiance retain
+their original support interval. A cloud-support miss can therefore publish an
+invalid cloud with positive shadow length. A3 fog now removes the camera-near
+height-density optical-depth prefix from directional Sun only.
+
+Both focused production-source GPU fixtures pass 1/1, including the clipped
+support mutation rejection and the zero/partial/full prefix cases. In the one
+fixed low-Sun view, rays-on produces 197,878 nonzero lengths with
+`p10/median/p90/max = 1173.021/2737.048/16031.281/23069.404 m`; rays-off remains
+zero. The 17×17 near-Sun displayed mean RGB is unchanged at 8-bit precision, so
+the producer correction materially expands transport support but still does
+not demonstrate an owner-visible shaft. No additional calibration or state
+search was performed; Architecture review remains required.
+
+## A5-AR-007 Test witness correction — review-ready 2026-08-28
+
+The A5-G Test surface now keeps `trueSunset` at `18:30Z` for twilight warmth
+and adds a distinct `crepuscularRays` state at `17:30Z`. Its live-Sun-aligned
+camera measures elevation `11.647154°` and `dot(view,sun)=1.000000`, with the
+fixed coverage/time and visible fog controls unchanged at `0.65`, `0`, and
+`0.6/4`. The A5 evidence helper contains exactly one rays-off/on pair for this
+state and no longer derives the 17×17 center ROI difference authority.
+
+The single pair is valid. Displayed p10/median/p90 changes from
+`0.420470/0.810409/0.888542` off to `0.417130/0.809174/0.888542` on; rays-on
+resolves 68,306 nonzero lengths with median `5669.599 m`, while rays-off is
+zero. Direct inspection still shows no distinct shaft, only slight broad
+dimming. Execution stopped without another state, threshold or product change.
+
+## A5-AR-007 Architecture re-review — Test correction requested 2026-08-28
+
+Architecture accepts and freezes the independent Globe shadow-view march and
+the camera-near A3 fog prefix. Source review matches the fixed reference, and
+the two directly affected actual-GPU fixtures independently pass 1/1.
+
+The remaining failure is the owner preset, not another missing transport term.
+At the current `2.175387°` true-sunset state, rays on changes the final-frame
+distribution by only about `0.006–0.007` luminance while the Sun-center 17×17
+ROI is exactly unchanged. A bounded higher fog-scale diagnostic increased only
+broad dimming and still left that ROI unchanged; the visible controls were
+restored to `0.6/4`.
+
+Execution is assigned a Test-only correction: keep true sunset for twilight
+surface/color evidence, add one distinct live-Sun-aligned rays state at
+`2026-06-21T17:30:00Z` (target measured elevation about `10–12°`), and use one
+direct off/on visual pair without a center-ROI gate or parameter search. Product
+GLSL, Specs, public controls and resources remain frozen. A5-G stays
+`changes-requested`; owner gate, checkpoint and A6-G remain blocked.
+
+## A5-AR-007 Architecture sampling correction — changes requested 2026-08-28
+
+The fixed `17:30Z` witness rules out the former time/ROI explanation: shadow
+length is present, but the image still contains only broad dimming. A renewed
+fixed-reference audit found that the accepted producer did not preserve the
+reference sampling contract. Reference `marchShadowLength` samples the BSM
+with radius zero, starts at `50 m`, grows the interval by `1.01`, and reaches
+the `200 km` bound in about 374 samples. The current producer instead spreads
+only `32/64/64` uniform samples across that distance and routes each sample
+through the surface receiver's fixed 3×3 PCF.
+
+The prior product freeze is superseded. Execution must keep the 3×3 Beer-space
+PCF for surface shadows, but add a raw one-tap BSM path for shadow-length
+integration and use at most 384 progressive `50 m × 1.01` intervals, clipped
+to the actual final interval. This replaces at least 576 filtered atlas reads
+at medium/high quality with at most roughly 384 one-tap reads; the cloud-body
+march, transport consumers, resources, public API, Planar and SGP-0009 stay
+unchanged. A5-G remains `changes-requested`; owner gate, checkpoint and A6-G
+remain blocked.
+
+## A5-AR-007 raw/progressive BSM execution — review-ready 2026-08-28
+
+Surface and cloud-shadow receivers retain their accepted 3×3 Beer-space PCF.
+Shadow-length transport now uses a dedicated raw one-tap reconstruction with
+the same channel decode, cascade choice, bounded OD and transmittance-domain
+overlap. Its independent view march uses at most 384 intervals, begins at
+50 m, grows by `1.01`, weights the actual interval, and clips its final interval
+exactly to the existing segment/200 km bound.
+
+The single actual-GPU fixture matches an independent CPU progressive sum and
+rejects the restored filtered 64-uniform mutation while retaining the
+cloud-support-miss witness. The one repeated 17:30Z pair remains visually
+without a distinct shaft: off/on displayed p10 is `0.420470/0.417115`, median
+is `0.810409/0.809174`, and rays-on resolves 68,288 nonzero lengths. Execution
+stopped without another state or product adjustment.
+
+## A5-AR-007 closure and A5-AR-009 source correction — 2026-08-28
+
+Architecture independently reran the sole raw/progressive GPU fixture with
+1/1 success. Source review confirms the dedicated one-tap reconstruction,
+progressive clipped integration and unchanged surface PCF, so `A5-AR-007` is
+closed and frozen.
+
+The unchanged owner image exposes a separate composition defect. Fixed
+reference `approximateHaze` always renders the complete unshadowed participating
+medium and uses `shadowLength` only to remove direct-Sun scattering from its
+camera-near part. SceneGIS clear depth instead adds only
+`shadowedFog - unshadowedFog` when length is positive. It therefore never
+renders the lit medium and can produce only slight background darkening.
+
+`A5-AR-009` is open. The Globe clear-depth path must apply the existing height
+fog exactly once for both zero and positive length, use physical A2 Sun units
+for its directional source, and retain the existing A3 public power-lobe
+control as the deliberate SceneGIS adaptation. The fixed owner preset maps the
+reference haze coefficients directly (`3e-5`, `1e-3`, start `0`, maximum
+opacity `1`, directional scale `0.9 / 1.4`) without a sweep. No second fog
+layer, new resource/API, Planar change or display effect is authorized.
+
+## A5-AR-009 full-medium execution — review-ready 2026-08-28
+
+Globe clear depth now performs exactly one existing height-fog evaluation for
+both zero and positive decoded shadow length, including when clouds are
+disabled. The Globe directional fog source consumes physical A2 Sun RGB
+directly; Planar retains its normalized source. Ambient/extinction,
+finite/cloud fog, the camera-near prefix, Bruneton transport and the frozen
+raw/progressive BSM path are unchanged.
+
+The amended production-stack GPU fixture passes 1/1 and rejects both the former
+delta-only Aerial path and max-solar-normalized Globe source. The fixed
+reference preset exposes `3e-5/1e-3/0/1`, directional `0.642857`, exponent `4`.
+The sole 17:30Z pair still shows no distinct shaft: displayed off/on
+p10/median/p90 is `0.492689/0.810866/0.889093` versus
+`0.489900/0.806791/0.889093`. Execution stopped without another state or
+formula.
+
+## A5-AR-009 accepted; A5-AR-010 reference intensity mapping — 2026-08-28
+
+Architecture accepts and freezes the A5-AR-009 product correction. The Globe
+clear-depth path now renders one complete existing fog medium and shadows only
+its directional Sun prefix; its focused production-stack fixture is sufficient
+for that source contract.
+
+The unchanged fixed image exposes one remaining reference-mapping omission.
+Reference `approximateHaze` multiplies its directional source by both
+`sunIntensity = 20` and the scattering albedo `0.9 / (0.9 + 0.5)`. The current
+owner preset maps only the albedo as `0.642857`; physical A2 Sun RGB does not
+replace that explicit scene-linear reference intensity while SceneGIS
+background/cloud/surface paths retain their own `10/48/10` radiance scales.
+
+`A5-AR-010` is open and Test-only. Keep every product shader, public API,
+resource and Planar path frozen. Change the one existing fixed 17:30Z preset to
+`heightFogDirectionalInscatteringScale = 20 * 0.9 / 1.4`, then repeat its sole
+off/on pair and direct visual inspection. Add no Spec, metric threshold, search,
+retry, hash, replay or broader matrix. If the same pair still lacks a distinct
+shaft, stop and report.
+
+## A5-AR-010 Test coefficient execution — review-ready 2026-08-28
+
+The existing 17:30Z crepuscular preset now exposes the exact reference mapping
+`20 * 0.9 / 1.4 = 12.857143` through the existing directional fog control.
+Time, location, Sun alignment, coverage/time, medium coefficients, exponent,
+public default/range and all product paths remain unchanged.
+
+The sole valid pair has displayed off/on p10/median/p90/max
+`0.872892/0.911818/0.951085/1` versus
+`0.872892/0.911557/0.949685/1`. Rays-on resolves 68,288 nonzero lengths with
+median `5669.599 m`; rays-off is zero. Direct inspection still shows no distinct
+shaft and the brighter medium is nearly uniform, so execution stopped without
+another state or adjustment.
+
+## A5-AR-010 closed; A5-AR-011 clear-sky transport correction — 2026-08-28
+
+The A5-AR-010 Test change followed its bounded assignment, but its result
+disproves intensity as the missing shaft mechanism. Raising only the existing
+fog coefficient saturates the participating medium while preserving almost the
+same off/on image. The Test preset must return to the accepted A5-AR-009 value
+`0.9 / 1.4`; no product calibration follows from A5-AR-010.
+
+Fixed-reference source comparison identifies the actual remaining defect. For
+exact clear depth, reference `aerialPerspectiveEffect.frag` calls
+`getSkyRadiance`, which passes `shadowLength` to Bruneton `GetSkyRadiance`.
+SceneGIS instead calls `sceneGISGlobeSkyRadianceToPoint` with
+`SCENEGIS_PLANAR_BACKGROUND_DISTANCE = 1e9`. The finite-point routine places
+the equivalent shadow at the far end of that artificial ray, outside the
+atmosphere after radius clamping, rather than in the camera-near infinite-sky
+segment. Kilometre-scale decoded lengths therefore collapse to negligible
+clear-sky radiance deltas.
+
+`A5-AR-011` is open. Add shadow-length input to the existing Globe infinite-sky
+wrapper, keep Background on exact zero, and use shadowed/unshadowed infinite-sky
+radiance for the Aerial clear-depth delta. Finite geometry and cloud bodies
+retain `GetSkyRadianceToPoint`; the accepted A3 full fog, BSM producer,
+packing/resolve, API/resources, Planar and SGP-0009 stay frozen. Amend one
+focused actual-GPU fixture and repeat the single fixed 17:30Z off/on visual pair
+only; no sweep, visibility threshold or broader matrix is authorized.
+
+## A5-AR-011 execution — review-ready 2026-08-28
+
+The Globe infinite-sky wrapper now forwards nonnegative decoded shadow length
+to Bruneton `GetSkyRadiance`; Background passes exact zero, and only the Globe
+exact-clear Aerial delta uses the shadowed/unshadowed infinite-sky pair.
+Finite geometry and cloud bodies retain `GetSkyRadianceToPoint`. The fixed
+17:30Z preset is restored to `0.9 / 1.4`.
+
+The amended production-source GPU fixture passes 1/1 and rejects the former
+`1e9 m` finite-point mutation. In the sole fixed off/on witness, Sun elevation
+is `11.647154°`, `dot(view,sun)=1`, and rays-on resolves 69,268 nonzero lengths
+with median `5865.103 m`. Displayed p10/median/p90/max changes from
+`0.518031/0.817954/0.891347/1` to `0.514059/0.814048/0.891347/1`.
+Direct inspection still shows no distinct separated shaft, so execution stops
+without another state, coefficient or product change.
+
+## A5-AR-011 closed; A5-AR-012 reference cloud haze — 2026-08-28
+
+Architecture accepts and freezes the A5-AR-011 infinite-sky correction and its
+single focused fixture. Its unchanged owner image proves that Bruneton and A3
+shadow modulation are not the missing reference source.
+
+The fixed `three-geospatial` source audit corrects the earlier A5 decision:
+`haze=true` is inherited by every quality preset, and `approximateHaze` is a
+coverage-coupled cloud term with its own analytic optical depth, ground Sun/sky
+irradiance, dual-HG phase, scattering albedo and post-cloud composition. It is
+not equivalent to the generic A3 height fog. `A5-AR-012` therefore restores
+that term inside the existing Globe Aerial pass with no new pass, texture,
+history, public API or Planar behavior. One amended production-source GPU
+fixture and one fixed 17:30Z direct off/on pair are the complete validation
+boundary; owner gate, checkpoint and A6-G remain blocked.
+
+## A5-AR-012 execution — review-ready 2026-08-28
+
+The retained Globe cloud library now contains the reference cloud-local haze
+adaptation. It uses the accepted dual-HG phase and Bruneton scalar ground
+Sun/sky irradiance, exact reference coefficients, analytic optical depth, and
+camera-near shadow prefix. Aerial bounds it by Cesium near, scene depth,
+ellipsoid ground, shadow cloud top and opacity-weighted cloud front, then
+composites it once after scene/cloud composition. A3 and A5-AR-011 are unchanged.
+
+The amended production-stack GPU fixture passes 1/1. The fixed 17:30Z pair has
+A3 disabled in both captures. Off/on displayed p10/median/p90/max is
+`0.382456/0.790802/0.888542/1` versus
+`0.380834/0.790235/0.888542/1`; rays-on resolves 68,288 nonzero lengths with
+median `5669.599 m`. Direct inspection still shows no distinct separated
+shaft, so execution stopped without another state or coefficient.
+
+## A5-AR-012 changes requested; A5-AR-013 haze authority — 2026-08-28
+
+Independent review finds that the candidate restores the haze formula but not
+both reference data authorities. `sceneGISGlobeCloudHaze` samples Bruneton
+Sun/sky irradiance at a fixed sea-level point and receives the near-shifted ray
+origin for camera-dependent haze terms. The reference uses the actual camera
+position; near distance changes the bounded ray interval, not the camera
+irradiance/height origin. Aerial also feeds the cloud mean distance into the
+opacity-weighted haze clamp even though the assignment requires the decoded
+front distance.
+
+The existing focused fixture cannot detect either error because its 1x1 LUTs
+are spatially constant and its integrated sample does not separate mean from
+front depth. `A5-AR-013` is therefore open for only these two corrections, one
+amendment to the same fixture, and reuse of the same A3-disabled 17:30Z pair.
+No coefficient tuning, new evidence machinery, broader matrix or alternate
+owner state is authorized.
+
+## A5-AR-014/015 terrain preservation and horizon continuity — 2026-08-28
+
+The project owner supplied direct World Terrain evidence that the current
+Globe effects can hide finite terrain and that both aerial perspective and
+exponential height fog form a hard terrain/sky boundary. Architecture
+isolation separates two product causes:
+
+- the restored reference cloud-local haze is currently applied to every
+  finite pixel, even when no visible cloud lies in front of that terrain;
+- Globe background radiance is scaled by `backgroundRadianceScale`, while
+  finite A2 scattering uses a transmittance-dependent interpolation from
+  `aerialRadianceScale` to `surfaceRadianceScale`, and the A3 fog source uses
+  neither domain. The branches therefore cannot converge at the horizon.
+
+`A5-AR-014` restricts cloud-local haze on finite geometry to an actually
+selected visible cloud sample; exact-clear sky retains the reference haze.
+`A5-AR-015` removes the Globe transmittance-dependent scale interpolation.
+All Globe Bruneton radiance in Aerial uses
+`backgroundRadianceScale * aerialRadianceScale`, so the existing aerial
+property becomes a relative Globe coefficient while Planar retains its current
+absolute contract. Globe height-fog source radiance uses the same
+`backgroundRadianceScale`; its existing ambient/directional controls remain
+relative coefficients. Defaults, ranges, density, depth authority, LUTs,
+transport and Planar formulas stay unchanged.
+
+Execution must amend the existing two focused GPU fixtures and inspect only one
+fixed World Terrain camera across baseline, aerial, height-fog and cloud states,
+plus the already fixed A3-disabled 17:30Z haze pair for `A5-AR-013`. No new
+fixture, sweep, profile, hash, replay, threshold, full matrix or screen-space
+seam workaround is authorized.
+
+## A5-AR-013/014/015 execution evidence — 2026-08-28
+
+- Globe haze now derives camera height, origin/horizon normal and Bruneton
+  scalar irradiance from the unshifted virtual camera; the near-shifted origin
+  remains limited to interval bounds. Decoded cloud front and mean distances
+  have separate consumers.
+- Exact-clear sky retains cloud-local haze. Finite geometry receives it only
+  with an existing visible cloud selection, so finite/no-cloud pixels preserve
+  the pre-haze A2/A3 result.
+- Globe Aerial Bruneton sources now share
+  `backgroundRadianceScale * aerialRadianceScale`; Globe height-fog source uses
+  `backgroundRadianceScale` once, while Planar passes identity.
+- The two amended GPU fixtures pass 1/1 each. The fixed World Terrain four-state
+  inspection preserves terrain and a continuous horizon with zero browser
+  errors. The fixed 17:30Z A3-disabled pair retains 68,288 nonzero shadow-length
+  pixels, but direct inspection still shows no distinct separated shaft.
+
+## A5-AR-013/014 closed; A5-AR-015 focused correction — 2026-08-28
+
+Architecture source review accepts the A5-AR-013 coordinate/front authorities
+and A5-AR-014 finite-terrain scope. The A5-AR-015 product formula also matches
+the decision, but review reproduced one directly related stale Spec:
+
+`keeps orthographic origins and untruncated slab entry before the medium cap`
+fails 0/1 because it still asserts that Aerial must not contain
+`u_backgroundRadianceScale`. Public JSDoc also still describes
+`aerialRadianceScale` without its new Globe-relative/Planar-absolute semantics.
+
+Execution must update only that existing assertion and the two affected JSDoc
+descriptions, then rerun the one failing Spec plus focused ESLint/Prettier and
+`git diff --check`. Product GLSL, GPU fixtures and browser evidence remain
+frozen; no broader validation or new finding is authorized.
+
+### A5-AR-015 focused Spec/JSDoc execution — 2026-08-28
+
+The stale negative source assertion now checks the accepted Globe
+`backgroundRadianceScale * aerialRadianceScale` contract while retaining the
+Planar absolute-formula assertion. Both public `aerialRadianceScale` JSDoc
+descriptions now state Globe-relative and Planar-absolute semantics. The
+formerly failing isolated Spec passes 1/1; runtime and product GLSL are
+unchanged.
+
+## A5-AR-016 terrain-depth lifecycle assignment — 2026-08-28
+
+Architecture source tracing confirms that Aerial, exponential height fog and
+cloud clipping do sample the supplied scene depth, but the active Globe path can
+receive Cesium's post-clear `DepthPlane` depth instead of actual terrain depth.
+With native `globe.depthTestAgainstTerrain === false`, Cesium copies terrain
+depth to `czm_globeDepthTexture`, clears the main depth buffer, writes the depth
+plane, and later supplies that main depth texture to `SGP-0008`. The three owner
+screenshots therefore share one depth-authority defect rather than three
+radiometric defects.
+
+The fixed Cesium reference explicitly enables
+`viewer.scene.globe.depthTestAgainstTerrain = true`. A5-AR-016 assigns the same
+prerequisite to the active Globe controller lifecycle: acquire it before A5
+pipeline allocation, require it while active, and restore the snapshotted prior
+value on disable or disconnect. Planar, shaders, coefficients, resources and
+upstream files remain frozen; no second depth texture, horizon mask, epsilon or
+opacity workaround is authorized.
+
+### A5-AR-016 execution — review ready
+
+The Globe controller now snapshots and, only when needed, enables
+`globe.depthTestAgainstTerrain` after native-conflict validation and before the
+pipeline/resource path. Active external invalidation fails through the existing
+controller error event without rewriting the property. Disable and disconnect
+restore the prior value only when this lifecycle changed it; an existing `true`
+value remains caller-owned.
+
+The amended lifecycle/resource Spec passes 1/1 and covers acquisition before
+the first resource request, prior-true preservation, disable/disconnect restore
+and external-mutation failure. One fixed 15°E/45°N high-Sun World Terrain
+camera retained terrain silhouettes and foreground occlusion in Aerial-only,
+height-fog-only and cloud-only states. Product shaders, Test prerequisites,
+Planar behavior, resources and upstream files are unchanged.
+
+### A5-AR-016 Architecture closure — 2026-08-28
+
+Independent source review confirms acquisition occurs before `ensurePipeline`,
+active validation does not rewrite an external mutation, and both disable and
+disconnect release only the controller-owned prior-false lifecycle. The
+Architecture thread independently reran the amended focused Spec: 1/1 success.
+A5-AR-016 is closed with no upstream-owned or SGP delta. This closes the code
+review finding only; the prior owner visual gate has not been re-requested.
+
+## A5-G project-owner acceptance — 2026-08-28
+
+The project owner manually rechecked the corrected Globe result and reported
+that the effect is correct. The A5-G owner visual gate therefore passes after
+A5-AR-016. Architecture review has no open finding, and A5-G is complete.
+This acceptance authorizes the phase-closing local checkpoint. The first commit
+attempt was correctly blocked by A5-AR-017 below; A6-G and Planar remain inactive
+and no push is authorized.
+
+## A5-AR-017 pre-commit FrameState type boundary — 2026-08-28
+
+The required checkpoint hook ran `tsc` and rejected the SGP-0009 read of
+`frameState._sceneGISGlobeLighting` because upstream `FrameState` does not
+declare the SceneGIS frame-local extension. Runtime behavior and owner visuals
+are unchanged. Execution must add one local structural JSDoc cast at the
+existing SGP-0009 read point, without modifying `FrameState`, expanding the SGP
+path set or suppressing type checking globally. Only the engine `tsc`, focused
+format/diff checks and record lint are required before Architecture retries the
+checkpoint.
+
+### A5-AR-017 execution — review ready
+
+The existing SGP-0009 read now uses one local structural JSDoc cast whose only
+optional field is `_sceneGISGlobeLighting` with optional boolean `active`.
+Runtime selection, marker scope and frame-local ownership are unchanged. Engine
+`npx tsc` passes with no diagnostic. No `FrameState` edit, suppression, new
+typedef, runtime/API/resource change or new SGP was introduced.
+
+### A5-AR-017 Architecture closure
+
+Architecture independently inspected the local structural cast and reran
+engine `npx tsc`, which exited 0 with no diagnostic. The runtime read, strict
+`active === true` decision, SGP-0009 markers and three-path upstream boundary
+are unchanged. A5-AR-017 is closed. The phase-closing commit containing this
+record is the required local A5-G checkpoint; no push, A6-G or Planar activation
+is authorized.

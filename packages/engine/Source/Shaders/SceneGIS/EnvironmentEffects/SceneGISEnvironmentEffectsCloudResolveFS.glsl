@@ -53,6 +53,8 @@ void main()
     }
     vec4 colorSum = vec4(0.0);
     vec4 distanceSum = vec4(0.0);
+    float shadowLengthSum = 0.0;
+    float shadowLengthWeightSum = 0.0;
     float weightSum = 0.0;
     float distanceWeightSum = 0.0;
     ivec2 dimensions = textureSize(u_cloudLowDistanceTexture, 0);
@@ -69,7 +71,20 @@ void main()
                 : sceneGISCloudDeterministicExp2Negative(
                     abs(distanceSample.z - sceneDistance) * 96.0);
             float weight = spatialWeight * frontWeight;
+            #ifdef SCENEGIS_GLOBE
+            bool sampleValid;
+            float sampleShadowLength;
+            sceneGISDecodeCloudShadowLength(
+                distanceSample.a,
+                sampleValid,
+                sampleShadowLength);
+            float distanceWeight = weight * (sampleValid ? 1.0 : 0.0);
+            float shadowLengthWeight = spatialWeight;
+            shadowLengthSum += sampleShadowLength * shadowLengthWeight;
+            shadowLengthWeightSum += shadowLengthWeight;
+            #else
             float distanceWeight = weight * step(0.5, distanceSample.a);
+            #endif
             colorSum += colorSample * weight;
             distanceSum += distanceSample * distanceWeight;
             weightSum += weight;
@@ -78,7 +93,16 @@ void main()
     }
     vec4 spatialColor = colorSum / max(weightSum, 1.0e-6);
     vec4 spatialDistance = distanceSum / max(distanceWeightSum, 1.0e-6);
+    #ifdef SCENEGIS_GLOBE
+    bool spatialValid = distanceWeightSum > 1.0e-6;
+    float spatialShadowLength = shadowLengthSum /
+        max(shadowLengthWeightSum, 1.0e-6);
+    spatialDistance.a = sceneGISEncodeCloudShadowLength(
+        spatialValid,
+        spatialShadowLength);
+    #else
     spatialDistance.a = step(1.0e-6, distanceWeightSum);
+    #endif
     if (!u_cloudHistoryValid || u_cloudHistoryWeight <= 0.0) {
         out_FragData_0 = spatialColor;
         out_FragData_1 = spatialDistance;
@@ -88,12 +112,33 @@ void main()
     vec4 historyColor = texture(
         u_cloudHistoryColorTexture, v_textureCoordinates);
     vec4 historyDistance = texture(u_cloudHistoryDistanceTexture, v_textureCoordinates);
+    #ifdef SCENEGIS_GLOBE
+    bool currentValid;
+    bool previousValid;
+    float currentShadowLength;
+    float previousShadowLength;
+    sceneGISDecodeCloudShadowLength(
+        spatialDistance.a,
+        currentValid,
+        currentShadowLength);
+    sceneGISDecodeCloudShadowLength(
+        historyDistance.a,
+        previousValid,
+        previousShadowLength);
+    #else
     bool currentValid = spatialDistance.a > 0.5;
     bool previousValid = historyDistance.a > 0.5;
+    #endif
     bool distanceCompatible =
         abs(historyDistance.x - spatialDistance.x) <= 8.0e-6 &&
         abs(historyDistance.y - spatialDistance.y) <= 8.0e-6 &&
-        abs(historyDistance.z - spatialDistance.z) <= 2.0 / 65535.0;
+        abs(historyDistance.z - spatialDistance.z) <= 2.0 / 65535.0
+        #ifdef SCENEGIS_GLOBE
+        && abs(previousShadowLength - currentShadowLength) <=
+            2.0 * SCENEGIS_CLOUD_SHADOW_MAX_LENGTH /
+                SCENEGIS_CLOUD_SHADOW_CODE_MAX
+        #endif
+        ;
     bool transmittanceCompatible =
         abs(historyColor.a - spatialColor.a) <= 0.08;
     bool radianceCompatible = all(lessThanEqual(
@@ -104,9 +149,28 @@ void main()
         ? 1.0
         : 0.0;
     historyWeight *= historyCompatible;
+    #ifdef SCENEGIS_GLOBE
+    float shadowHistoryCompatible =
+        abs(previousShadowLength - currentShadowLength) <=
+            2.0 * SCENEGIS_CLOUD_SHADOW_MAX_LENGTH /
+                SCENEGIS_CLOUD_SHADOW_CODE_MAX
+        ? 1.0
+        : 0.0;
+    float shadowHistoryWeight =
+        u_cloudHistoryWeight * shadowHistoryCompatible;
+    #endif
     out_FragData_0 = mix(
         spatialColor,
         historyColor,
         historyWeight);
     out_FragData_1 = mix(spatialDistance, historyDistance, historyWeight);
+    #ifdef SCENEGIS_GLOBE
+    float resolvedShadowLength = mix(
+        currentShadowLength,
+        previousShadowLength,
+        shadowHistoryWeight);
+    out_FragData_1.a = sceneGISEncodeCloudShadowLength(
+        currentValid,
+        resolvedShadowLength);
+    #endif
 }

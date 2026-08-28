@@ -5,6 +5,14 @@ import destroyObject from "../Core/destroyObject.js";
 import TerrainQuantization from "../Core/TerrainQuantization.js";
 import ShaderProgram from "../Renderer/ShaderProgram.js";
 import VectorCommon from "../Shaders/VectorCommon.js";
+// SCENEGIS_PATCH_BEGIN SGP-0009: Inject the optional SceneGIS Globe surface lighting library.
+import sceneGISBrunetonAtmosphere from "../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
+import sceneGISBrunetonCommon from "../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonCommon.js";
+import sceneGISBrunetonDefinitions from "../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonDefinitions.js";
+import sceneGISBrunetonRuntime from "../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonRuntime.js";
+import sceneGISCloudShadows from "../Shaders/SceneGIS/EnvironmentEffects/SceneGISCloudShadows.js";
+import sceneGISGlobeSurfaceLighting from "../Shaders/SceneGIS/EnvironmentEffects/SceneGISGlobeSurfaceLighting.js";
+// SCENEGIS_PATCH_END SGP-0009
 import getClippingFunction from "./getClippingFunction.js";
 import SceneMode from "./SceneMode.js";
 
@@ -141,6 +149,13 @@ class GlobeSurfaceShaderSet {
     const translucent = options.translucent;
     const vectorData = surfaceTile.vectorData;
     const hasVectorLayer = vectorData?.show;
+    // SCENEGIS_PATCH_BEGIN SGP-0009: Select one explicit frame-local SceneGIS Globe lighting variant.
+    const sceneGISGlobeLighting = /** @type {{
+      _sceneGISGlobeLighting?: { active?: boolean },
+    }} */ (frameState)._sceneGISGlobeLighting;
+    const enableSceneGISGlobeLighting =
+      defined(sceneGISGlobeLighting) && sceneGISGlobeLighting.active === true;
+    // SCENEGIS_PATCH_END SGP-0009
 
     let quantization = 0;
     let quantizationDefine = "";
@@ -205,7 +220,10 @@ class GlobeSurfaceShaderSet {
         (+translucent << 31)) >>>
         0) +
       (applyDayNightAlpha ? 0x100000000 : 0) +
-      (hasVectorLayer ? 0x200000000 : 0);
+      // SCENEGIS_PATCH_BEGIN SGP-0009: Reserve the next Globe surface shader variant bit.
+      (hasVectorLayer ? 0x200000000 : 0) +
+      (enableSceneGISGlobeLighting ? 0x400000000 : 0);
+    // SCENEGIS_PATCH_END SGP-0009
 
     let currentClippingShaderState = 0;
     // @ts-expect-error Missing types.
@@ -401,6 +419,36 @@ class GlobeSurfaceShaderSet {
         fs.defines.push("HAS_VECTOR_LAYER");
         fs.sources.unshift(VectorCommon); // before GlobeFS.
       }
+
+      // SCENEGIS_PATCH_BEGIN SGP-0009: Prepend SceneGIS-owned physical surface lighting only for its variant.
+      if (enableSceneGISGlobeLighting) {
+        fs.defines.push(
+          "SCENEGIS_GLOBE",
+          "SCENEGIS_GLOBE_SURFACE_LIGHTING",
+          "COMBINED_SCATTERING_TEXTURES",
+          "TRANSMITTANCE_TEXTURE_WIDTH 256",
+          "TRANSMITTANCE_TEXTURE_HEIGHT 64",
+          "SCATTERING_TEXTURE_R_SIZE 32",
+          "SCATTERING_TEXTURE_MU_SIZE 128",
+          "SCATTERING_TEXTURE_MU_S_SIZE 32",
+          "SCATTERING_TEXTURE_NU_SIZE 8",
+          "IRRADIANCE_TEXTURE_WIDTH 64",
+          "IRRADIANCE_TEXTURE_HEIGHT 16",
+        );
+        if (hasVertexNormals) {
+          fs.defines.push("SCENEGIS_GLOBE_SURFACE_TERRAIN_NORMAL");
+          vs.defines.push("GENERATE_POSITION_AND_NORMAL");
+        }
+        fs.sources.unshift(
+          sceneGISBrunetonDefinitions,
+          sceneGISBrunetonCommon,
+          sceneGISBrunetonRuntime,
+          sceneGISBrunetonAtmosphere,
+          sceneGISCloudShadows,
+          sceneGISGlobeSurfaceLighting,
+        );
+      }
+      // SCENEGIS_PATCH_END SGP-0009
 
       let computeDayColor =
         "\

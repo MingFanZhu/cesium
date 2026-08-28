@@ -153,7 +153,7 @@
   <body>
     <main>
       <header>
-        <h1>A4 双世界大气、雾与体积云核心（本地、零网络）</h1>
+        <h1>A5-G Globe 云影、天光与体积光（本地、零网络）</h1>
         <div class="controls">
           <label><input id="enabled" type="checkbox" />启用</label>
           <label
@@ -164,6 +164,14 @@
             ><input id="heightFog" type="checkbox" checked />指数高度雾</label
           >
           <label><input id="clouds" type="checkbox" checked />体积云</label>
+          <label
+            ><input id="cloudShadows" type="checkbox" checked />Globe
+            云影</label
+          >
+          <label
+            ><input id="crepuscularRays" type="checkbox" checked />Globe
+            体积光</label
+          >
           <label
             >Cloud quality
             <select id="cloudQuality">
@@ -368,7 +376,7 @@
               type="range"
               min="0"
               max="64"
-              step="0.05"
+              step="0.000001"
               value="0.15"
             />
             <output id="heightFogDirectionalInscatteringScaleValue"
@@ -441,6 +449,36 @@
           <output id="a4gSolarElevation">未采集太阳高度</output>
           <button id="a4gCaptureEvidence" type="button">采集 Globe 证据</button>
           <button id="a4gCloseEvidence" type="button">关闭证据</button>
+          <strong>A5-G Globe owner evidence</strong>
+          <label
+            >Surface radiance
+            <input
+              id="surfaceRadianceScale"
+              type="range"
+              min="0"
+              max="64"
+              step="0.1"
+              value="10"
+            />
+            <output id="surfaceRadianceScaleValue">10</output></label
+          >
+          <label
+            >Globe surface
+            <select id="globeSurfaceMode">
+              <option value="naturalEarth">Natural Earth II (offline)</option>
+              <option value="world">Cesium World Imagery + Terrain</option>
+              <option value="solid">Solid diagnostic</option>
+            </select>
+          </label>
+          <output id="globeSurfaceStatus">Natural Earth II · ellipsoid</output>
+          <button id="a5gSunAlignedRays" type="button">
+            Crepuscular rays · 17:30 Sun aligned
+          </button>
+          <output id="a5gRayAlignment">未设置 rays 视角</output>
+          <button id="a5gCaptureEvidence" type="button">
+            采集 A5-G 固定证据
+          </button>
+          <button id="a5gCloseEvidence" type="button">关闭 A5-G 证据</button>
           <button id="presetGrid" type="button">生成 Globe 四预设网格</button>
           <button id="diagnostic" type="button">对比 enabled / identity</button>
           <button id="nativeConflict" type="button">
@@ -480,6 +518,7 @@
         <div id="presetGridImages" class="preset-grid"></div>
       </aside>
       <pre id="a4gEvidence" hidden></pre>
+      <pre id="a5gEvidence" hidden></pre>
       <pre id="diagnosticTransactionEvidence" hidden></pre>
     </main>
 
@@ -520,6 +559,7 @@
           scene.fog.enabled = false;
           if (scene.globe) {
             scene.globe.showGroundAtmosphere = false;
+            scene.globe.enableLighting = false;
           }
           scene.highDynamicRange = true;
         }
@@ -552,6 +592,12 @@
         hideNativeEnvironment(globeViewer.scene);
         globeViewer.scene.globe.baseColor =
           Cesium.Color.fromCssColorString("#22302a");
+        globeViewer.imageryLayers.addImageryProvider(
+          await Cesium.TileMapServiceImageryProvider.fromUrl(
+            Cesium.buildModuleUrl("Assets/Textures/NaturalEarthII"),
+          ),
+        );
+        globeViewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
         globeViewer.camera.setView({
           destination: Cesium.Cartesian3.fromDegrees(121.5, 31.2, 1200000.0),
           orientation: {
@@ -565,6 +611,63 @@
           enabled: false,
         });
         globeViewer.addController(globeEffects);
+        let currentGlobeSurfaceMode = "naturalEarth";
+        let globeOnlineSurfaceAttempted = false;
+        async function applyGlobeSurfaceMode(mode) {
+          const status = document.querySelector("#globeSurfaceStatus");
+          if (mode === currentGlobeSurfaceMode) {
+            return true;
+          }
+          if (mode === "world" && globeOnlineSurfaceAttempted) {
+            return false;
+          }
+          try {
+            let imageryProvider;
+            let terrainProvider;
+            if (mode === "naturalEarth") {
+              imageryProvider =
+                await Cesium.TileMapServiceImageryProvider.fromUrl(
+                  Cesium.buildModuleUrl("Assets/Textures/NaturalEarthII"),
+                );
+              terrainProvider = new Cesium.EllipsoidTerrainProvider();
+            } else if (mode === "world") {
+              globeOnlineSurfaceAttempted = true;
+              [imageryProvider, terrainProvider] = await Promise.all([
+                Cesium.createWorldImageryAsync(),
+                Cesium.createWorldTerrainAsync(),
+              ]);
+            } else {
+              terrainProvider = new Cesium.EllipsoidTerrainProvider();
+            }
+            globeViewer.imageryLayers.removeAll();
+            if (Cesium.defined(imageryProvider)) {
+              globeViewer.imageryLayers.addImageryProvider(imageryProvider);
+            }
+            globeViewer.terrainProvider = terrainProvider;
+            currentGlobeSurfaceMode = mode;
+            status.value =
+              mode === "naturalEarth"
+                ? "Natural Earth II · ellipsoid"
+                : mode === "world"
+                  ? "Cesium World Imagery + World Terrain"
+                  : "Solid diagnostic · ellipsoid";
+            globeViewer.scene.requestRender();
+            return true;
+          } catch (error) {
+            document.querySelector("#globeSurfaceMode").value =
+              currentGlobeSurfaceMode;
+            status.value = `online unavailable · retained ${currentGlobeSurfaceMode} · ${error.message ?? error}`;
+            return false;
+          }
+        }
+        window.applyGlobeA5GSurfaceMode = applyGlobeSurfaceMode;
+        document
+          .querySelector("#globeSurfaceMode")
+          .addEventListener("change", async (event) => {
+            event.target.disabled = true;
+            await applyGlobeSurfaceMode(event.target.value);
+            event.target.disabled = false;
+          });
         const globeBoxDimensions = new Cesium.Cartesian3(
           4000.0,
           4000.0,
@@ -1208,6 +1311,27 @@
             updateEffects("showClouds", event.target.checked);
           });
         document
+          .querySelector("#cloudShadows")
+          .addEventListener("change", (event) => {
+            globeEffects.showCloudShadows = event.target.checked;
+            globeViewer.scene.requestRender();
+          });
+        document
+          .querySelector("#crepuscularRays")
+          .addEventListener("change", (event) => {
+            globeEffects.showCrepuscularRays = event.target.checked;
+            globeViewer.scene.requestRender();
+          });
+        document
+          .querySelector("#surfaceRadianceScale")
+          .addEventListener("input", (event) => {
+            const value = Number(event.target.value);
+            globeEffects.surfaceRadianceScale = value;
+            document.querySelector("#surfaceRadianceScaleValue").value =
+              String(value);
+            globeViewer.scene.requestRender();
+          });
+        document
           .querySelector("#cloudQuality")
           .addEventListener("change", (event) => {
             updateEffects("cloudQuality", event.target.value);
@@ -1459,13 +1583,19 @@
         const globeOwnerLightingPresets = {
           highSun: "2026-06-21T10:30:00Z",
           trueSunset: "2026-06-21T18:30:00Z",
+          crepuscularRays: "2026-06-21T17:30:00Z",
           noMoonNight: "2026-06-21T22:00:00Z",
         };
         const globeOwnerCameras = {
           ground: { altitude: 500.0, pitch: Cesium.Math.toRadians(-5.0) },
+          oblique: { altitude: 3500.0, pitch: Cesium.Math.toRadians(-28.0) },
           inside: { altitude: 3000.0, pitch: Cesium.Math.toRadians(-8.0) },
           above: { altitude: 15000.0, pitch: Cesium.Math.toRadians(-20.0) },
           space: { altitude: 120000.0, pitch: Cesium.Math.toRadians(-35.0) },
+          downwardProfile: {
+            altitude: 120000.0,
+            pitch: Cesium.Math.toRadians(-20.0),
+          },
         };
         let currentGlobeOwnerLocation = "midLatitude";
         let currentGlobeOwnerCamera = "ground";
@@ -1511,6 +1641,86 @@
           globeViewer.scene.requestRender();
         }
         window.applyGlobeA4GLightingPreset = applyGlobeOwnerLightingPreset;
+        function applyGlobeA5GCrepuscularRaysPreset() {
+          currentGlobeOwnerLocation = "midLatitude";
+          currentGlobeOwnerCamera = "ground";
+          applyGlobeOwnerLightingPreset("crepuscularRays");
+          globeViewer.scene.render(globeViewer.clock.currentTime);
+          const location = globeOwnerLocations.midLatitude;
+          const destination = Cesium.Cartesian3.fromDegrees(
+            location.longitude,
+            location.latitude,
+            Math.max(globeEffects.cloudBaseHeight - 500.0, 100.0),
+          );
+          const transform =
+            Cesium.Transforms.eastNorthUpToFixedFrame(destination);
+          const inverseTransform = Cesium.Matrix4.inverseTransformation(
+            transform,
+            new Cesium.Matrix4(),
+          );
+          const localSun = Cesium.Matrix4.multiplyByPointAsVector(
+            inverseTransform,
+            globeViewer.scene.context.uniformState.sunDirectionWC,
+            new Cesium.Cartesian3(),
+          );
+          Cesium.Cartesian3.normalize(localSun, localSun);
+          const heading = Math.atan2(localSun.x, localSun.y);
+          const pitch = Math.asin(Cesium.Math.clamp(localSun.z, -1.0, 1.0));
+          globeViewer.camera.setView({
+            destination,
+            orientation: { heading, pitch, roll: 0.0 },
+          });
+          currentCameraPreset = "a5g-midLatitude-sunAligned";
+          currentGlobeOwnerCamera = "sunAligned";
+          globeEffects.heightFogDensity = 0.00003;
+          globeEffects.heightFogHeightFalloff = 0.001;
+          globeEffects.heightFogStartDistance = 0.0;
+          globeEffects.heightFogMaximumOpacity = 1.0;
+          const referenceDirectionalScale = 0.9 / 1.4;
+          globeEffects.heightFogDirectionalInscatteringScale =
+            referenceDirectionalScale;
+          globeEffects.heightFogDirectionalInscatteringExponent = 4.0;
+          globeEffects.cloudCoverage = 0.65;
+          globeEffects.cloudTime = 0.0;
+          document.querySelector("#heightFogDensity").value = "0.00003";
+          document.querySelector("#heightFogDensityValue").value = "0.00003";
+          document.querySelector("#heightFogHeightFalloff").value = "0.001";
+          document.querySelector("#heightFogHeightFalloffValue").value =
+            "0.001";
+          document.querySelector("#heightFogStartDistance").value = "0";
+          document.querySelector("#heightFogStartDistanceValue").value = "0";
+          document.querySelector("#heightFogMaximumOpacity").value = "1";
+          document.querySelector("#heightFogMaximumOpacityValue").value = "1";
+          document.querySelector(
+            "#heightFogDirectionalInscatteringScale",
+          ).value = String(referenceDirectionalScale);
+          document.querySelector(
+            "#heightFogDirectionalInscatteringScaleValue",
+          ).value = referenceDirectionalScale.toFixed(6);
+          document.querySelector(
+            "#heightFogDirectionalInscatteringExponent",
+          ).value = "4";
+          document.querySelector(
+            "#heightFogDirectionalInscatteringExponentValue",
+          ).value = "4";
+          document.querySelector("#cloudCoverage").value = "0.65";
+          document.querySelector("#cloudCoverageValue").value = "0.65";
+          document.querySelector("#cloudTime").value = "0";
+          document.querySelector("#cloudTimeValue").value = "0";
+          const viewSunDot = Cesium.Cartesian3.dot(
+            globeViewer.camera.directionWC,
+            globeViewer.scene.context.uniformState.sunDirectionWC,
+          );
+          document.querySelector("#a5gRayAlignment").value =
+            `Sun elevation ${globeOwnerSolarElevation().toFixed(3)}° · heading ${Cesium.Math.toDegrees(heading).toFixed(3)}° · pitch ${Cesium.Math.toDegrees(pitch).toFixed(3)}° · dot(view,sun) ${viewSunDot.toFixed(6)}`;
+          globeViewer.scene.requestRender();
+          return { heading, pitch, viewSunDot };
+        }
+        window.applyGlobeA5GCrepuscularRaysPreset =
+          applyGlobeA5GCrepuscularRaysPreset;
+        document
+          .querySelector("#a5gSunAlignedRays")
+          .addEventListener("click", applyGlobeA5GCrepuscularRaysPreset);
         function applyGlobeOwnerCameraPreset(name) {
           currentCameraPreset = `a4g-${currentGlobeOwnerLocation}-${name}`;
           currentGlobeOwnerCamera = name;
@@ -1752,7 +1962,11 @@
           return diagnosticObjectIds.get(value);
         }
 
-        function diagnosticDepthFingerprint(controller, scene) {
+        function diagnosticDepthFingerprint(
+          controller,
+          scene,
+          includeValues = false,
+        ) {
           const renderer = controller._pipeline;
           const depthTexture = renderer?._diagnosticDepthTexture;
           if (!Cesium.defined(depthTexture)) {
@@ -1853,13 +2067,17 @@
             minimum = Math.min(minimum, value);
             maximum = Math.max(maximum, value);
           }
-          return {
+          const result = {
             hash: (hash >>> 0).toString(16).padStart(8, "0"),
             width: capture.width,
             height: capture.height,
             minimum,
             maximum,
           };
+          if (includeValues) {
+            result.values = values;
+          }
+          return result;
         }
 
         function diagnosticSampler(sampler) {
@@ -3176,7 +3394,19 @@
             if (distance.some((value) => value < 0.0 || value > 1.0)) {
               distanceBoundsExceededPixels++;
             }
-            if (distance[3] !== 0.0 && distance[3] !== 1.0) {
+            const packedValidity = distance[3];
+            const cloudValid = packedValidity >= 0.5;
+            const shadowLengthCode = Math.round(
+              (cloudValid ? 1.0 - packedValidity : packedValidity) * 2048.0,
+            );
+            const repackedValidity = cloudValid
+              ? 1.0 - shadowLengthCode / 2048.0
+              : shadowLengthCode / 2048.0;
+            if (
+              shadowLengthCode < 0 ||
+              shadowLengthCode > 1023 ||
+              repackedValidity !== packedValidity
+            ) {
               validityBoundsExceededPixels++;
             }
             const opacity = Math.max(0.0, 1.0 - transmittance);
@@ -3260,6 +3490,93 @@
           };
         }
 
+        function summarizeResolvedShadowLength(capturedRaw) {
+          if (!Cesium.defined(capturedRaw)) {
+            return { available: false };
+          }
+          const lengths = [];
+          let nonzeroPixels = 0;
+          for (
+            let offset = 3;
+            offset < capturedRaw.distance.length;
+            offset += 4
+          ) {
+            const packed = decodeCloudHalfFloat(capturedRaw.distance[offset]);
+            const valid = packed >= 0.5;
+            const code = Math.round((valid ? 1.0 - packed : packed) * 2048.0);
+            const length =
+              (Cesium.Math.clamp(code, 0, 1023) / 1023.0) * 200000.0;
+            if (length > 0.0) {
+              nonzeroPixels++;
+              lengths.push(length);
+            }
+          }
+          lengths.sort((left, right) => left - right);
+          const percentile = (fraction) =>
+            lengths[Math.floor((lengths.length - 1) * fraction)] ?? 0.0;
+          return {
+            available: true,
+            nonzeroPixels,
+            p10: percentile(0.1),
+            median: percentile(0.5),
+            p90: percentile(0.9),
+            maximum: lengths.at(-1) ?? 0.0,
+          };
+        }
+
+        function summarizeFiniteClearTransition(displayed, depth) {
+          if (
+            !Cesium.defined(depth?.values) ||
+            displayed.width !== depth.width ||
+            displayed.height !== depth.height
+          ) {
+            return { available: false };
+          }
+          const centerX = Math.floor(displayed.width * 0.5);
+          const centerY = Math.floor(displayed.height * 0.5);
+          const sample = (y) => {
+            const pixelIndex = y * displayed.width + centerX;
+            const colorOffset = pixelIndex * 4;
+            const rawDepth = decodeCloudHalfFloat(depth.values[colorOffset]);
+            const clear = rawDepth === 0.0 || rawDepth === 1.0;
+            const color = [0, 1, 2, 3].map(
+              (channel) => displayed.samples[colorOffset + channel] / 255.0,
+            );
+            return {
+              x: centerX,
+              y,
+              classification: clear ? "exact-clear" : "finite-geometry",
+              rawDepth,
+              depthHalfBits: depth.values[colorOffset],
+              color,
+              luminance:
+                0.2126 * color[0] + 0.7152 * color[1] + 0.0722 * color[2],
+            };
+          };
+          let transition;
+          for (let y = 0; y + 1 < displayed.height; y++) {
+            const first = sample(y);
+            const second = sample(y + 1);
+            if (first.classification === second.classification) {
+              continue;
+            }
+            const distanceToCenter = Math.abs(y + 0.5 - centerY);
+            if (
+              !Cesium.defined(transition) ||
+              distanceToCenter < transition.distanceToCenter
+            ) {
+              transition = { distanceToCenter, first, second };
+            }
+          }
+          return Cesium.defined(transition)
+            ? {
+                available: true,
+                first: transition.first,
+                second: transition.second,
+              }
+            : { available: true, transitionPresent: false };
+        }
+
         window.captureCloudMrtLightingEvidence = function () {
           function viewSunCosine(viewer, controller) {
             const sunDirection =
@@ -3330,6 +3647,32 @@
               interiorPixels++;
             }
           }
+          const centerX = Math.floor(capture.width * 0.5);
+          const centerY = Math.floor(capture.height * 0.5);
+          const roiHalfExtent = 8;
+          const centerRoiMeanRgb = [0.0, 0.0, 0.0];
+          let centerRoiPixels = 0;
+          for (
+            let y = Math.max(centerY - roiHalfExtent, 0);
+            y <= Math.min(centerY + roiHalfExtent, capture.height - 1);
+            y++
+          ) {
+            for (
+              let x = Math.max(centerX - roiHalfExtent, 0);
+              x <= Math.min(centerX + roiHalfExtent, capture.width - 1);
+              x++
+            ) {
+              const offset = (y * capture.width + x) * 4;
+              for (let channel = 0; channel < 3; channel++) {
+                centerRoiMeanRgb[channel] +=
+                  capture.samples[offset + channel] / 255.0;
+              }
+              centerRoiPixels++;
+            }
+          }
+          for (let channel = 0; channel < 3; channel++) {
+            centerRoiMeanRgb[channel] /= centerRoiPixels;
+          }
           return {
             width: capture.width,
             height: capture.height,
@@ -3341,6 +3684,10 @@
             maximumRgb,
             gradientEnergy: gradientEnergy / Math.max(interiorPixels, 1),
             laplacianEnergy: laplacianEnergy / Math.max(interiorPixels, 1),
+            centerRoi: {
+              side: roiHalfExtent * 2 + 1,
+              meanRgb: centerRoiMeanRgb,
+            },
             hash: (hash >>> 0).toString(16).padStart(8, "0"),
           };
         }
@@ -3397,7 +3744,16 @@
                     height,
                   };
                   const raw = readCloudMrtRaw(globeEffects, globeViewer.scene);
-                  resolve({ displayed, raw });
+                  const resolved = readCloudResolvedRaw(
+                    globeEffects,
+                    globeViewer.scene,
+                  );
+                  const sceneDepth = diagnosticDepthFingerprint(
+                    globeEffects,
+                    globeViewer.scene,
+                    true,
+                  );
+                  resolve({ displayed, raw, resolved, sceneDepth });
                 },
               );
               globeViewer.scene.requestRender();
@@ -3422,6 +3778,13 @@
               globeViewer.scene,
               captured.raw,
             );
+            const finiteClearTransition =
+              ownerSnapshot.camera === "downwardProfile"
+                ? summarizeFiniteClearTransition(
+                    captured.displayed,
+                    captured.sceneDepth,
+                  )
+                : undefined;
             const valid =
               globeEffects.enabled === true &&
               globeEffects.ready === true &&
@@ -3441,13 +3804,21 @@
               solarElevationDegrees: globeOwnerSolarElevation(),
               cloudPreset: globeEffects.cloudPreset,
               cloudRadianceScale: globeEffects.cloudRadianceScale,
+              surfaceRadianceScale: globeEffects.surfaceRadianceScale,
+              globeSurfaceMode: currentGlobeSurfaceMode,
+              rayAlignment: document.querySelector("#a5gRayAlignment").value,
               raw,
               displayed: {
                 width: displayedSummary.width,
                 height: displayedSummary.height,
                 luminance: displayedSummary.luminance,
                 maximumRgb: displayedSummary.maximumRgb,
+                centerRoi: displayedSummary.centerRoi,
               },
+              resolvedShadowLength: summarizeResolvedShadowLength(
+                captured.resolved,
+              ),
+              finiteClearTransition,
               ownerAfter,
               ownerUnchanged,
               valid,
@@ -3477,6 +3848,124 @@
           .querySelector("#a4gCloseEvidence")
           .addEventListener("click", () => {
             document.querySelector("#a4gEvidence").hidden = true;
+          });
+
+        function setGlobeA5GCoupling(cloudShadows, crepuscularRays) {
+          document.querySelector("#cloudShadows").checked = cloudShadows;
+          document.querySelector("#crepuscularRays").checked = crepuscularRays;
+          globeEffects.showCloudShadows = cloudShadows;
+          globeEffects.showCrepuscularRays = crepuscularRays;
+          globeViewer.scene.requestRender();
+        }
+
+        window.captureGlobeA5GEvidence = async function () {
+          const saved = {
+            location: currentGlobeOwnerLocation,
+            camera: currentGlobeOwnerCamera,
+            state: currentGlobeOwnerGateState,
+            lighting: currentLighting,
+            time: Cesium.JulianDate.clone(globeViewer.clock.currentTime),
+            cloudShadows: globeEffects.showCloudShadows,
+            crepuscularRays: globeEffects.showCrepuscularRays,
+            heightFog: globeEffects.showHeightFog,
+            cloudCoverage: globeEffects.cloudCoverage,
+            cloudTime: globeEffects.cloudTime,
+          };
+          const states = [
+            ["highSunGroundShadowOff", "highSun", "ground", false, false],
+            ["highSunGroundShadowOn", "highSun", "ground", true, false],
+            ["highSunObliqueShadowOff", "highSun", "oblique", false, false],
+            ["highSunObliqueShadowOn", "highSun", "oblique", true, false],
+            ["trueSunsetCombined", "trueSunset", "ground", true, true],
+            [
+              "crepuscularRaysOff",
+              "crepuscularRays",
+              "sunAligned",
+              true,
+              false,
+            ],
+            ["crepuscularRaysOn", "crepuscularRays", "sunAligned", true, true],
+            ["highSunCombined", "highSun", "oblique", true, true],
+            [
+              "highSunDownwardProfile",
+              "highSun",
+              "downwardProfile",
+              true,
+              true,
+            ],
+            ["noMoonNight", "noMoonNight", "ground", true, true],
+          ];
+          const evidence = {};
+          try {
+            setGlobeOwnerGateState("a4gCombined");
+            for (const [label, lighting, camera, shadows, rays] of states) {
+              if (camera === "sunAligned") {
+                applyGlobeA5GCrepuscularRaysPreset();
+                document.querySelector("#heightFog").checked = false;
+                globeEffects.showHeightFog = false;
+              } else {
+                document.querySelector("#heightFog").checked = true;
+                globeEffects.showHeightFog = true;
+                applyGlobeOwnerCameraPreset(camera);
+                applyGlobeOwnerLightingPreset(lighting);
+              }
+              setGlobeA5GCoupling(shadows, rays);
+              evidence[label] = {
+                ...(await window.captureGlobeA4GEvidence()),
+                showCloudShadows: shadows,
+                showCrepuscularRays: rays,
+              };
+            }
+            return evidence;
+          } finally {
+            currentGlobeOwnerLocation = saved.location;
+            currentLighting = saved.lighting;
+            globeViewer.clock.currentTime = saved.time;
+            setGlobeOwnerGateState(saved.state);
+            if (saved.camera === "sunAligned") {
+              applyGlobeA5GCrepuscularRaysPreset();
+            } else {
+              applyGlobeOwnerCameraPreset(saved.camera);
+            }
+            setGlobeA5GCoupling(saved.cloudShadows, saved.crepuscularRays);
+            document.querySelector("#heightFog").checked = saved.heightFog;
+            globeEffects.showHeightFog = saved.heightFog;
+            globeEffects.cloudCoverage = saved.cloudCoverage;
+            globeEffects.cloudTime = saved.cloudTime;
+            document.querySelector("#cloudCoverage").value = String(
+              saved.cloudCoverage,
+            );
+            document.querySelector("#cloudCoverageValue").value = String(
+              saved.cloudCoverage,
+            );
+            document.querySelector("#cloudTime").value = String(
+              saved.cloudTime,
+            );
+            document.querySelector("#cloudTimeValue").value = String(
+              saved.cloudTime,
+            );
+          }
+        };
+        document
+          .querySelector("#a5gCaptureEvidence")
+          .addEventListener("click", async () => {
+            const output = document.querySelector("#a5gEvidence");
+            output.hidden = false;
+            output.textContent = "capturing Globe A5-G evidence…";
+            try {
+              output.textContent = JSON.stringify(
+                await window.captureGlobeA5GEvidence(),
+                undefined,
+                2,
+              );
+            } catch (error) {
+              output.textContent = `capture failed: ${error.stack ?? error}`;
+            }
+          });
+        document
+          .querySelector("#a5gCloseEvidence")
+          .addEventListener("click", () => {
+            document.querySelector("#a5gEvidence").hidden = true;
           });
 
         window.captureCloudMrtPresetLightingEvidence = async function () {

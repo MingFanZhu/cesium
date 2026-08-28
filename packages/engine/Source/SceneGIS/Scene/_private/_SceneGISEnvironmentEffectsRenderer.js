@@ -4,8 +4,14 @@ import BoundingRectangle from "../../../Core/BoundingRectangle.js";
 import Cartesian2 from "../../../Core/Cartesian2.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import Cartesian4 from "../../../Core/Cartesian4.js";
+import Color from "../../../Core/Color.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import defined from "../../../Core/defined.js";
+import Matrix3 from "../../../Core/Matrix3.js";
+import Matrix4 from "../../../Core/Matrix4.js";
+import Simon1994PlanetaryPositions from "../../../Core/Simon1994PlanetaryPositions.js";
+import Transforms from "../../../Core/Transforms.js";
+import ClearCommand from "../../../Renderer/ClearCommand.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
@@ -25,6 +31,8 @@ import VertexArray from "../../../Renderer/VertexArray.js";
 import brunetonCommonSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonCommon.js";
 import brunetonDefinitionsSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonDefinitions.js";
 import brunetonRuntimeSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonRuntime.js";
+import cloudShadowFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISCloudShadowFS.js";
+import cloudShadowSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISCloudShadows.js";
 import aerialFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS.js";
 import atmosphereSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
 import backgroundFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS.js";
@@ -77,6 +85,9 @@ const cloudQualityProfiles = Object.freeze({
     fineSteps: 1,
     sunSteps: 2,
     detail: false,
+    shadowCascades: 2,
+    shadowResolution: 256,
+    shadowSteps: 25,
   },
   medium: {
     scale: 0.5,
@@ -84,6 +95,9 @@ const cloudQualityProfiles = Object.freeze({
     fineSteps: 4,
     sunSteps: 3,
     detail: true,
+    shadowCascades: 3,
+    shadowResolution: 512,
+    shadowSteps: 50,
   },
   high: {
     scale: 0.75,
@@ -91,9 +105,14 @@ const cloudQualityProfiles = Object.freeze({
     fineSteps: 4,
     sunSteps: 4,
     detail: true,
+    shadowCascades: 3,
+    shadowResolution: 768,
+    shadowSteps: 50,
   },
 });
 const cloudTileMeters = 200000.0;
+const cloudShadowMaximumDistance = 200000.0;
+const cloudShadowSplitLambda = 0.5;
 const cloudPresetIndices = Object.freeze({
   cumulus: 0,
   stratus: 1,
@@ -385,6 +404,7 @@ function createProgram(
         brunetonCommonSource,
         brunetonRuntimeSource,
         atmosphereSource,
+        cloudShadowSource,
         heightFogSource,
         globeCloudLibrarySource,
         cloudLibrarySource,
@@ -408,6 +428,290 @@ function createProgram(
     throw error;
   }
   return program;
+}
+
+function destroyGlobeShadowResources(renderer) {
+  const shadow = renderer._globeShadowResources;
+  if (!defined(shadow)) {
+    return;
+  }
+  destroyResource(shadow.framebuffer);
+  destroyResource(shadow.program);
+  renderer._globeShadowResources = undefined;
+}
+
+function createGlobeShadowResources(renderer, context, resolution) {
+  const atlasSize = resolution * 2;
+  const candidate = {};
+  try {
+    candidate.program = createProgram(context, cloudShadowFragmentSource, true);
+    candidate.framebuffer = new FramebufferManager({
+      depth: false,
+      depthStencil: false,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+      pixelFormat: PixelFormat.RGBA,
+    });
+    candidate.framebuffer.update(
+      context,
+      atlasSize,
+      atlasSize,
+      1,
+      PixelDatatype.HALF_FLOAT,
+      PixelFormat.RGBA,
+    );
+    candidate.resolution = resolution;
+    candidate.command = new DrawCommand({
+      vertexArray: renderer._resources.vertexArray,
+      shaderProgram: candidate.program,
+      uniformMap: renderer._uniformMap,
+      renderState: RenderState.fromCache({
+        cull: { enabled: false },
+        depthTest: { enabled: false },
+        depthMask: false,
+      }),
+      primitiveType: PrimitiveType.TRIANGLE_STRIP,
+      count: 4,
+      owner: renderer,
+    });
+    candidate.clearCommand = new ClearCommand({
+      color: Color.TRANSPARENT,
+      framebuffer: candidate.framebuffer.framebuffer,
+      owner: renderer,
+    });
+  } catch (error) {
+    destroyResource(candidate.framebuffer);
+    destroyResource(candidate.program);
+    throw error;
+  }
+  return candidate;
+}
+
+function ensureGlobeShadowResources(renderer, context, resolution) {
+  const current = renderer._globeShadowResources;
+  if (defined(current) && current.resolution === resolution) {
+    current.command.vertexArray = renderer._resources.vertexArray;
+    return current;
+  }
+  const candidate = createGlobeShadowResources(renderer, context, resolution);
+  renderer._globeShadowResources = candidate;
+  if (defined(current)) {
+    destroyResource(current.framebuffer);
+    destroyResource(current.program);
+  }
+  renderer.invalidateCloudHistory("cloud-shadow-atlas");
+  return candidate;
+}
+
+function toLocalDirection(frame, direction, result) {
+  result.x = Cartesian3.dot(direction, frame.east);
+  result.y = Cartesian3.dot(direction, frame.north);
+  result.z = Cartesian3.dot(direction, frame.vertical);
+  return Cartesian3.normalize(result, result);
+}
+
+function toLocalPosition(frame, position, result) {
+  Cartesian3.subtract(position, frame.surfacePosition, result);
+  const x = Cartesian3.dot(result, frame.east);
+  const y = Cartesian3.dot(result, frame.north);
+  const z = Cartesian3.dot(result, frame.vertical);
+  return Cartesian3.fromElements(x, y, z, result);
+}
+
+function practicalSplit(near, far, index, count) {
+  const fraction = index / count;
+  const logarithmic = near * Math.pow(far / near, fraction);
+  const uniform = near + (far - near) * fraction;
+  return (
+    cloudShadowSplitLambda * logarithmic +
+    (1.0 - cloudShadowSplitLambda) * uniform
+  );
+}
+
+function addFrustumCorner(
+  renderer,
+  cameraPosition,
+  direction,
+  right,
+  up,
+  distance,
+  horizontal,
+  vertical,
+  corners,
+) {
+  const corner = new Cartesian3();
+  Cartesian3.multiplyByScalar(direction, distance, corner);
+  Cartesian3.add(cameraPosition, corner, corner);
+  Cartesian3.multiplyByScalar(right, horizontal, renderer._shadowScratch0);
+  Cartesian3.add(corner, renderer._shadowScratch0, corner);
+  Cartesian3.multiplyByScalar(up, vertical, renderer._shadowScratch0);
+  Cartesian3.add(corner, renderer._shadowScratch0, corner);
+  corners.push(corner);
+}
+
+function buildCascadeCorners(renderer, camera, near, far) {
+  const frame = renderer._frame;
+  const cameraPosition = toLocalPosition(
+    frame,
+    frame.cameraPosition,
+    renderer._shadowCameraLocal,
+  );
+  const direction = toLocalDirection(
+    frame,
+    frame.cameraDirection,
+    renderer._shadowDirectionLocal,
+  );
+  const right = toLocalDirection(
+    frame,
+    frame.cameraRight,
+    renderer._shadowRightLocal,
+  );
+  const up = toLocalDirection(frame, frame.cameraUp, renderer._shadowUpLocal);
+  void camera.frustum.projectionMatrix;
+  const frustum = camera.frustum.offCenterFrustum ?? camera.frustum;
+  const perspective = frame.projection === "perspective";
+  const corners = [];
+  for (const distance of [near, far]) {
+    const scale = perspective ? distance / frustum.near : 1.0;
+    for (const horizontal of [frustum.left * scale, frustum.right * scale]) {
+      for (const vertical of [frustum.bottom * scale, frustum.top * scale]) {
+        addFrustumCorner(
+          renderer,
+          cameraPosition,
+          direction,
+          right,
+          up,
+          distance,
+          horizontal,
+          vertical,
+          corners,
+        );
+      }
+    }
+  }
+  return corners;
+}
+
+function buildShadowMatrix(right, up, center, halfWidth, halfHeight, result) {
+  return Matrix4.fromRowMajorArray(
+    [
+      right.x / halfWidth,
+      right.y / halfWidth,
+      right.z / halfWidth,
+      -Cartesian3.dot(right, center) / halfWidth,
+      up.x / halfHeight,
+      up.y / halfHeight,
+      up.z / halfHeight,
+      -Cartesian3.dot(up, center) / halfHeight,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+    ],
+    result,
+  );
+}
+
+function updateGlobeShadowCascades(renderer, frameState, profile) {
+  const camera = frameState.camera;
+  const frustum = camera.frustum.offCenterFrustum ?? camera.frustum;
+  const near = Math.max(frustum.near, 0.1);
+  const far = Math.max(
+    near + 1.0,
+    Math.min(frustum.far, cloudShadowMaximumDistance),
+  );
+  const sun = toLocalDirection(
+    renderer._frame,
+    renderer._sunDirection,
+    renderer._shadowSunLocal,
+  );
+  Cartesian3.negate(sun, renderer._shadowRayDirection);
+  const reference =
+    Math.abs(renderer._shadowRayDirection.z) > 0.95
+      ? Cartesian3.UNIT_X
+      : Cartesian3.UNIT_Z;
+  Cartesian3.cross(
+    reference,
+    renderer._shadowRayDirection,
+    renderer._shadowLightRight,
+  );
+  Cartesian3.normalize(renderer._shadowLightRight, renderer._shadowLightRight);
+  Cartesian3.cross(
+    renderer._shadowRayDirection,
+    renderer._shadowLightRight,
+    renderer._shadowLightUp,
+  );
+  Cartesian3.normalize(renderer._shadowLightUp, renderer._shadowLightUp);
+  renderer._shadowNear = near;
+  renderer._shadowFar = far;
+  renderer._shadowCascadeCount = profile.shadowCascades;
+  for (let cascade = 0; cascade < profile.shadowCascades; cascade++) {
+    const splitNear =
+      cascade === 0
+        ? near
+        : practicalSplit(near, far, cascade, profile.shadowCascades);
+    const splitFar = practicalSplit(
+      near,
+      far,
+      cascade + 1,
+      profile.shadowCascades,
+    );
+    const interval = renderer._shadowIntervals[cascade];
+    interval.x = splitNear;
+    interval.y = splitFar;
+    const corners = buildCascadeCorners(renderer, camera, splitNear, splitFar);
+    let minimumX = Number.POSITIVE_INFINITY;
+    let maximumX = Number.NEGATIVE_INFINITY;
+    let minimumY = Number.POSITIVE_INFINITY;
+    let maximumY = Number.NEGATIVE_INFINITY;
+    const center = renderer._shadowCenters[cascade];
+    Cartesian3.fromElements(0.0, 0.0, 0.0, center);
+    for (const corner of corners) {
+      Cartesian3.add(center, corner, center);
+      const x = Cartesian3.dot(corner, renderer._shadowLightRight);
+      const y = Cartesian3.dot(corner, renderer._shadowLightUp);
+      minimumX = Math.min(minimumX, x);
+      maximumX = Math.max(maximumX, x);
+      minimumY = Math.min(minimumY, y);
+      maximumY = Math.max(maximumY, y);
+    }
+    Cartesian3.multiplyByScalar(center, 1.0 / corners.length, center);
+    const halfWidth = Math.max((maximumX - minimumX) * 0.525, 1.0);
+    const halfHeight = Math.max((maximumY - minimumY) * 0.525, 1.0);
+    const centerX = (minimumX + maximumX) * 0.5;
+    const centerY = (minimumY + maximumY) * 0.5;
+    const texelX = (halfWidth * 2.0) / profile.shadowResolution;
+    const texelY = (halfHeight * 2.0) / profile.shadowResolution;
+    const snappedX = Math.round(centerX / texelX) * texelX;
+    const snappedY = Math.round(centerY / texelY) * texelY;
+    const centerDepth = Cartesian3.dot(center, renderer._shadowRayDirection);
+    Cartesian3.multiplyByScalar(renderer._shadowLightRight, snappedX, center);
+    Cartesian3.multiplyByScalar(
+      renderer._shadowLightUp,
+      snappedY,
+      renderer._shadowScratch0,
+    );
+    Cartesian3.add(center, renderer._shadowScratch0, center);
+    Cartesian3.multiplyByScalar(
+      renderer._shadowRayDirection,
+      centerDepth,
+      renderer._shadowScratch0,
+    );
+    Cartesian3.add(center, renderer._shadowScratch0, center);
+    renderer._shadowHalfSizes[cascade].x = halfWidth;
+    renderer._shadowHalfSizes[cascade].y = halfHeight;
+    buildShadowMatrix(
+      renderer._shadowLightRight,
+      renderer._shadowLightUp,
+      center,
+      halfWidth,
+      halfHeight,
+      renderer._shadowMatrices[cascade],
+    );
+  }
 }
 
 function createResources(renderer, context, buffers) {
@@ -586,6 +890,22 @@ function updateFrustum(renderer, camera) {
   );
 }
 
+const sunFixedTransform = new Matrix3();
+const sunInertialPosition = new Cartesian3();
+function computeGlobeSunDirection(time, result) {
+  Transforms.computeIcrfToCentralBodyFixedMatrix(time, sunFixedTransform);
+  Simon1994PlanetaryPositions.computeSunPositionInEarthInertialFrame(
+    time,
+    sunInertialPosition,
+  );
+  Matrix3.multiplyByVector(
+    sunFixedTransform,
+    sunInertialPosition,
+    sunInertialPosition,
+  );
+  return Cartesian3.normalize(sunInertialPosition, result);
+}
+
 function updateFrame(renderer, scene, frameState) {
   SceneGISAtmosphereReferenceFrame.publish(
     {
@@ -600,9 +920,11 @@ function updateFrame(renderer, scene, frameState) {
   updateFrustum(renderer, frameState.camera);
   const sunDirection =
     renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
-      ? frameState.context.uniformState.sunDirectionWC
+      ? computeGlobeSunDirection(frameState.time, renderer._sunDirection)
       : renderer._world.environment._effectiveSunDirection;
-  Cartesian3.clone(sunDirection, renderer._sunDirection);
+  if (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
+    Cartesian3.clone(sunDirection, renderer._sunDirection);
+  }
   const owner = renderer._owner;
   const wrappedDistance =
     (((owner._cloudTime * owner._cloudWindSpeed) % cloudTileMeters) +
@@ -673,6 +995,34 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._cloudHistoryPendingResetReason = "initial";
   this._cloudHistorySunDirection = new Cartesian3();
   this._cloudBufferDimensions = new Cartesian2();
+  this._globeShadowResources = undefined;
+  this._shadowCascadeIndex = 0;
+  this._shadowCascadeCount = 0;
+  this._shadowNear = 0.1;
+  this._shadowFar = cloudShadowMaximumDistance;
+  this._shadowMatrices = [new Matrix4(), new Matrix4(), new Matrix4()];
+  this._shadowIntervals = [
+    new Cartesian2(),
+    new Cartesian2(),
+    new Cartesian2(),
+  ];
+  this._shadowCenters = [new Cartesian3(), new Cartesian3(), new Cartesian3()];
+  this._shadowHalfSizes = [
+    new Cartesian2(),
+    new Cartesian2(),
+    new Cartesian2(),
+  ];
+  this._shadowSunLocal = new Cartesian3();
+  this._shadowRayDirection = new Cartesian3();
+  this._shadowLightRight = new Cartesian3();
+  this._shadowLightUp = new Cartesian3();
+  this._shadowCameraLocal = new Cartesian3();
+  this._shadowDirectionLocal = new Cartesian3();
+  this._shadowRightLocal = new Cartesian3();
+  this._shadowUpLocal = new Cartesian3();
+  this._shadowScratch0 = new Cartesian3();
+  this._shadowPassState = undefined;
+  this._globeLightingRecord = undefined;
 
   const that = this;
   this._uniformMap = {
@@ -693,6 +1043,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_ellipsoidRadii: () => that._frame.ellipsoidRadii,
     u_backgroundRadianceScale: () => that._owner._backgroundRadianceScale,
     u_aerialRadianceScale: () => that._owner._aerialRadianceScale,
+    u_surfaceRadianceScale: () => that._owner._surfaceRadianceScale,
     u_showAerialPerspective: () => that._showAerialPerspective,
     u_showHeightFog: () => that._showHeightFog,
     u_showClouds: () => that._cloudPassActive,
@@ -755,6 +1106,42 @@ function SceneGISEnvironmentEffectsRenderer(options) {
       that._cloudColorTexture ?? that._resources?.transmittanceTexture,
     u_cloudDistanceTexture: () =>
       that._cloudDistanceTexture ?? that._resources?.transmittanceTexture,
+    u_sceneGISCloudShadowAtlas: () =>
+      that._globeShadowResources?.framebuffer.getColorTexture(0) ??
+      that._resources?.transmittanceTexture,
+    u_sceneGISCloudShadowMatrices: () => that._shadowMatrices,
+    u_sceneGISCloudShadowIntervals: () => that._shadowIntervals,
+    u_sceneGISCloudShadowCascadeCount: () => that._shadowCascadeCount,
+    u_sceneGISShowCloudShadows: () =>
+      that._showClouds && that._owner._showCloudShadows,
+    u_sceneGISShowCrepuscularRays: () =>
+      that._showClouds && that._owner._showCrepuscularRays,
+    u_sceneGISShadowSurfacePosition: () => that._frame.surfacePosition,
+    u_sceneGISShadowEast: () => that._frame.east,
+    u_sceneGISShadowNorth: () => that._frame.north,
+    u_sceneGISShadowVertical: () => that._frame.vertical,
+    u_sceneGISShadowSunDirection: () => that._shadowSunLocal,
+    u_sceneGISShadowCameraPosition: () => that._frame.cameraPosition,
+    u_sceneGISShadowCloudTop: () =>
+      that._frame.baseHeight +
+      that._owner._cloudBaseHeight +
+      that._owner._cloudThickness,
+    u_sceneGISShadowCascadeIndex: () => that._shadowCascadeIndex,
+    u_sceneGISShadowRayCenter: () =>
+      that._shadowCenters[that._shadowCascadeIndex],
+    u_sceneGISShadowRayRight: () => that._shadowLightRight,
+    u_sceneGISShadowRayUp: () => that._shadowLightUp,
+    u_sceneGISShadowRayDirection: () => that._shadowRayDirection,
+    u_sceneGISShadowHalfSize: () =>
+      that._shadowHalfSizes[that._shadowCascadeIndex],
+    u_sceneGISShadowRayOffset: () => cloudShadowMaximumDistance,
+    u_sceneGISShadowFootprint: () => {
+      const halfSize = that._shadowHalfSizes[that._shadowCascadeIndex];
+      const resolution = that._globeShadowResources?.resolution ?? 1;
+      return (Math.max(halfSize.x, halfSize.y) * 2.0) / resolution;
+    },
+    u_sceneGISShadowSteps: () =>
+      cloudQualityProfiles[that._owner._cloudQuality].shadowSteps,
   };
 }
 
@@ -778,6 +1165,67 @@ SceneGISEnvironmentEffectsRenderer.prototype.publishResources = function (
 SceneGISEnvironmentEffectsRenderer.prototype.hasResources = function () {
   return defined(this._resources);
 };
+
+SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
+  frameState,
+) {
+  if (
+    this._mode !== SceneGISAtmosphereReferenceFrame.GLOBE ||
+    !defined(this._resources) ||
+    !this._owner._ready
+  ) {
+    this.releaseGlobeLighting();
+    return;
+  }
+  updateFrame(this, this._scene, frameState);
+  const profile = cloudQualityProfiles[this._owner._cloudQuality];
+  const shadow = ensureGlobeShadowResources(
+    this,
+    frameState.context,
+    profile.shadowResolution,
+  );
+  updateGlobeShadowCascades(this, frameState, profile);
+  const record = Object.freeze({
+    active: true,
+    atlasTexture: shadow.framebuffer.getColorTexture(0),
+    transmittanceTexture: this._resources.transmittanceTexture,
+    irradianceTexture: this._resources.irradianceTexture,
+    matrices: this._shadowMatrices,
+    intervals: this._shadowIntervals,
+    cascadeCount: this._shadowCascadeCount,
+    near: this._shadowNear,
+    far: this._shadowFar,
+    showCloudShadows: this._showClouds && this._owner._showCloudShadows,
+    showCrepuscularRays: this._showClouds && this._owner._showCrepuscularRays,
+    surfaceRadianceScale: this._owner._surfaceRadianceScale,
+    surfacePosition: this._frame.surfacePosition,
+    east: this._frame.east,
+    north: this._frame.north,
+    vertical: this._frame.vertical,
+    sunDirection: this._shadowSunLocal,
+    cameraPosition: this._frame.cameraPosition,
+    cloudTop:
+      this._frame.baseHeight +
+      this._owner._cloudBaseHeight +
+      this._owner._cloudThickness,
+  });
+  this._globeLightingRecord = record;
+  frameState._sceneGISGlobeLighting = record;
+};
+
+SceneGISEnvironmentEffectsRenderer.prototype.releaseGlobeLighting =
+  function () {
+    if (
+      defined(this._scene) &&
+      this._scene.frameState._sceneGISGlobeLighting ===
+        this._globeLightingRecord
+    ) {
+      this._scene.frameState._sceneGISGlobeLighting = undefined;
+    }
+    this._globeLightingRecord = undefined;
+    this._shadowCascadeCount = 0;
+    destroyGlobeShadowResources(this);
+  };
 
 SceneGISEnvironmentEffectsRenderer.prototype.setShow = function (
   showAtmosphere,
@@ -814,7 +1262,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.renderBackground = function (
   frameState,
   passState,
 ) {
-  if (!this._showAtmosphere || !defined(this._resources)) {
+  if (!defined(this._resources)) {
     return;
   }
   if (!this._owner._validateRenderFrame()) {
@@ -824,7 +1272,34 @@ SceneGISEnvironmentEffectsRenderer.prototype.renderBackground = function (
   if (isUnderground(this)) {
     return;
   }
-  this._resources.backgroundCommand.execute(frameState.context, passState);
+  const record = frameState._sceneGISGlobeLighting;
+  if (
+    defined(record) &&
+    record === this._globeLightingRecord &&
+    (record.showCloudShadows || record.showCrepuscularRays)
+  ) {
+    const shadow = this._globeShadowResources;
+    shadow.command.vertexArray = this._resources.vertexArray;
+    shadow.clearCommand.framebuffer = shadow.framebuffer.framebuffer;
+    shadow.clearCommand.execute(frameState.context, passState);
+    shadow.command.framebuffer = shadow.framebuffer.framebuffer;
+    if (!defined(this._shadowPassState)) {
+      this._shadowPassState = new PassState(frameState.context);
+      this._shadowPassState.viewport = new BoundingRectangle();
+    }
+    const viewport = this._shadowPassState.viewport;
+    for (let cascade = 0; cascade < this._shadowCascadeCount; cascade++) {
+      this._shadowCascadeIndex = cascade;
+      viewport.x = (cascade % 2) * shadow.resolution;
+      viewport.y = Math.floor(cascade / 2) * shadow.resolution;
+      viewport.width = shadow.resolution;
+      viewport.height = shadow.resolution;
+      shadow.command.execute(frameState.context, this._shadowPassState);
+    }
+  }
+  if (this._showAtmosphere) {
+    this._resources.backgroundCommand.execute(frameState.context, passState);
+  }
 };
 
 function ensureAerialFramebuffer(renderer, context, width, height) {
@@ -1230,6 +1705,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
 };
 
 SceneGISEnvironmentEffectsRenderer.prototype.releaseResources = function () {
+  this.releaseGlobeLighting();
   destroyResources(this._resources);
   this._resources = undefined;
 };

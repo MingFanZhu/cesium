@@ -96,3 +96,45 @@ A2R3不得修改LUT、physical transport、`Scene.js`、SGP-0008、FramebufferMa
 - [ADR-0041](ADR-0041-bruneton-atmosphere-aerial-perspective.md)
 - [ADR-0042](ADR-0042-planar-precomputed-atmosphere.md)
 - [ADR-0043](ADR-0043-atmosphere-log-depth-and-radiance-mapping.md)
+
+## A5-G Globe surface amendment — 2026-08-28
+
+[ADR-0047](ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md) adds a
+Globe-only `surfaceRadianceScale=10` after the first physical Sun/sky surface
+consumer exposed the missing Cesium renderer-domain bridge. This does not
+change `backgroundRadianceScale`: it remains background-only. It also does not
+restore one global atmosphere multiplier.
+
+For Globe finite geometry only, ADR-0047 uses path extinction to interpolate the
+additive physical aerial source from `aerialRadianceScale` at `T -> 1` to
+`surfaceRadianceScale` at `T -> 0`. This preserves the near-ground anti-washout
+endpoint accepted here while making fully extinguished distant surface use the
+same default renderer domain as the Globe surface and background. Planar and
+cloud-body formulas remain governed by this ADR without that A5-G amendment.
+
+## A5-AR-015 Globe horizon-continuity amendment — 2026-08-28
+
+The preceding A5-G interpolation is superseded after direct World Terrain
+evidence showed that partial-transmittance finite rays still cannot converge to
+the clear background. The Globe Aerial program now treats
+`backgroundRadianceScale` as its renderer-domain authority and
+`aerialRadianceScale` as a relative coefficient. Every Globe Bruneton source in
+that program uses their product; `surfaceRadianceScale` remains exclusive to
+Globe surface lighting. Near geometry does not need a scale interpolation
+because physical in-scattering itself approaches zero with optical path length.
+
+Planar retains this ADR's original absolute `aerialRadianceScale` semantics
+until its later phase. Public defaults and finite ranges remain unchanged. The
+amendment changes no LUT, transmittance, scattering equation, scene-input
+attenuation, depth classification or display transfer.
+
+### A5-AR-015 execution writeback — 2026-08-28
+
+The Globe Aerial program now applies
+`backgroundRadianceScale * aerialRadianceScale` to exact-clear shadow deltas,
+finite point radiance and cloud-body Bruneton radiance. The superseded
+transmittance-to-`surfaceRadianceScale` interpolation is removed. The existing
+height-fog helper receives an explicit source-domain coefficient: Globe
+Background/Aerial/cloud-body calls pass `backgroundRadianceScale`, while Planar
+passes `1.0`. The amended actual-GPU fixtures pass and public defaults/ranges
+remain unchanged.

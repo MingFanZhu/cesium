@@ -31,6 +31,142 @@ const float SCENEGIS_GLOBE_CLOUD_WEATHER_SCALE = 240000.0;
 const float SCENEGIS_GLOBE_CLOUD_MACRO_SCALE = 0.25;
 const float SCENEGIS_GLOBE_CLOUD_LOD_SCALE = 0.5;
 
+bool sceneGISCloudSphereInterval(
+    vec3 rayOrigin,
+    vec3 rayDirection,
+    float radius,
+    out float intervalStart,
+    out float intervalEnd);
+
+float sceneGISCloudDualPhase(
+    float cosineTheta,
+    float phaseAttenuation);
+
+float sceneGISGlobeCloudRemap(
+    float value,
+    float minimum,
+    float maximum);
+
+float sceneGISGlobeCloudHazeRayDistance(
+    vec3 rayOrigin,
+    vec3 rayDirection,
+    float maximumDistance)
+{
+    vec3 virtualOrigin = vec3(
+        rayOrigin.xy, SCENEGIS_BOTTOM_RADIUS + rayOrigin.z);
+    float topNear;
+    float topFar;
+    float rayDistance = max(maximumDistance, 0.0);
+    if (!sceneGISCloudSphereInterval(
+            virtualOrigin,
+            rayDirection,
+            SCENEGIS_BOTTOM_RADIUS + u_sceneGISShadowCloudTop,
+            topNear,
+            topFar)) {
+        return 0.0;
+    }
+    rayDistance = min(rayDistance, max(topFar, 0.0));
+    float groundNear;
+    float groundFar;
+    if (sceneGISCloudSphereInterval(
+            virtualOrigin,
+            rayDirection,
+            SCENEGIS_BOTTOM_RADIUS,
+            groundNear,
+            groundFar) &&
+        groundNear > 0.0) {
+        rayDistance = min(rayDistance, groundNear);
+    }
+    return max(rayDistance, 0.0);
+}
+
+float sceneGISGlobeCloudHazeClampToCloudFront(
+    float rayDistance,
+    float cloudFrontDistance,
+    float cameraNear,
+    float cloudOpacity)
+{
+    float frontDistance = max(cloudFrontDistance - cameraNear, 0.0);
+    return mix(
+        rayDistance,
+        min(frontDistance, rayDistance),
+        clamp(cloudOpacity, 0.0, 1.0));
+}
+
+vec4 sceneGISGlobeCloudHaze(
+    sampler2D transmittanceTexture,
+    sampler2D irradianceTexture,
+    vec3 cameraPosition,
+    vec3 rayDirection,
+    vec3 sunDirection,
+    float maximumDistance,
+    float shadowLength,
+    float cloudCoverage)
+{
+    const float hazeDensityScale = 3.0e-5;
+    const float hazeExponent = 1.0e-3;
+    const float hazeSkyScale = 1.0;
+    const float hazeScattering = 0.9;
+    const float hazeAbsorption = 0.5;
+    float modulation = sceneGISGlobeCloudRemap(
+        cloudCoverage, 0.2, 0.4);
+    vec3 virtualCameraPosition = vec3(
+        cameraPosition.xy,
+        SCENEGIS_BOTTOM_RADIUS + cameraPosition.z);
+    float cameraHeight =
+        length(virtualCameraPosition) - SCENEGIS_BOTTOM_RADIUS;
+    if (cameraHeight * modulation < 0.0) {
+        return vec4(0.0);
+    }
+    float density = modulation * hazeDensityScale *
+        exp(-cameraHeight * hazeExponent);
+    if (density < 1.0e-7) {
+        return vec4(0.0);
+    }
+
+    vec3 normalAtOrigin = normalize(virtualCameraPosition);
+    vec3 normalAtHorizon = (
+        virtualCameraPosition -
+        dot(virtualCameraPosition, rayDirection) * rayDirection) /
+        SCENEGIS_BOTTOM_RADIUS;
+    float normalBlend = sceneGISGlobeCloudRemap(
+        dot(normalAtOrigin, normalAtHorizon), 0.9, 1.0);
+    vec3 normal = mix(normalAtOrigin, normalAtHorizon, normalBlend);
+    float angle = max(dot(normal, rayDirection), 1.0e-5);
+    float exponent = angle * hazeExponent;
+    float linearTerm = density / hazeExponent / angle;
+    float expTerm = 1.0 - exp(-max(maximumDistance, 0.0) * exponent);
+    float shadowExpTerm = 1.0 - exp(
+        -min(max(maximumDistance, 0.0), max(shadowLength, 0.0)) *
+            exponent);
+    float opticalDepth = expTerm * linearTerm;
+    float directionalOpticalDepth = max(
+        (expTerm - shadowExpTerm) * linearTerm,
+        0.0);
+    float opacity = clamp(1.0 - exp(-opticalDepth), 0.0, 1.0);
+    float directionalOpacity = clamp(
+        1.0 - exp(-directionalOpticalDepth),
+        0.0,
+        1.0);
+
+    AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
+    vec3 skyIrradiance;
+    vec3 sunIrradiance = GetSunAndSkyScalarIrradiance(
+        atmosphere,
+        transmittanceTexture,
+        irradianceTexture,
+        virtualCameraPosition * 0.001,
+        sunDirection,
+        skyIrradiance);
+    float cosineTheta = dot(sunDirection, rayDirection);
+    vec3 inscatter = sunIrradiance *
+        sceneGISCloudDualPhase(cosineTheta, 1.0) * directionalOpacity;
+    inscatter += skyIrradiance * (1.0 / (4.0 * czm_pi)) *
+        hazeSkyScale * opacity;
+    inscatter *= hazeScattering / (hazeAbsorption + hazeScattering);
+    return vec4(max(inscatter, vec3(0.0)), opacity);
+}
+
 vec2 sceneGISGlobeCloudCubeSphereUv(vec3 position)
 {
     vec3 normal = normalize(position);
