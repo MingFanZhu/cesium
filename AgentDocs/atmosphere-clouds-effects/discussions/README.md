@@ -1,5 +1,6 @@
 # Discussions
 
+- [A6-G temporal and performance source discovery](2026-08-28-a6g-temporal-performance-source-discovery.md) — `resolved; A6-G activated`
 - [A5-G owner visual corrections](2026-08-28-a5g-owner-visual-corrections.md) — `resolved; owner accepted`
 - [A5-G shadow, skylight, and rays source discovery](2026-08-28-a5g-shadow-skylight-rays-source-discovery.md) — `resolved; A5-G activated`
 - [A4-G Globe cloud whiteness and frequency calibration](2026-08-27-a4g-cloud-whiteness-frequency-calibration.md) — `resolved; Architecture and owner accepted`

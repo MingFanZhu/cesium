@@ -3,9 +3,10 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A5-G completed; A6-G not activated`
-- Current review: `A5-G accepted; Architecture review and owner visual gate passed`
-- Active phase plan: `none`
+- Current phase: `A6-G active`
+- Current review: `A6-G implementation pending`
+- Active phase plan:
+  [2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md](plans/2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md)
 - Latest completed phase plan:
   [2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](plans/2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md)
 - Extension plan:
@@ -18,13 +19,15 @@
   [ADR-0044](../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md),
   [ADR-0045](../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md),
   [ADR-0046](../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
-  [ADR-0047](../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md)
+  [ADR-0047](../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md),
+  [ADR-0048](../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
 - A2 checkpoint: `da2eb55743a46423e65b2047965907c05ea260b7`（未push）
 - A3 checkpoint: `43ed40117104e0450bf23dc094b2ab2e602bbfa2`（未push）
 - A4-G checkpoint: `241de41fc36835114a4e9312ad53ca2ac64407b8`（未push）
+- A5-G checkpoint: `3ead681e7854082b6b9d016fdcd9cd8619087102`（未push）
 
 ## Objective
 
@@ -35,10 +38,11 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
-- A5-G已在A4-G Architecture/owner双gate与独立checkpoint后激活。ADR-0047冻结为一个current-frame RGBA16F Beer shadow atlas、
-  `SGP-0009`最小Globe surface lighting seam、A2 Sun/sky地表lighting及复用Cloud distance alpha的Bruneton/fog shadow-length coupling；
-  native `ShadowMap`、resolved-scene relighting、radial blur、第二套shadow history和全部Planar实现均不进入本阶段。Execution只运行phase plan规定的
-  minimal sufficient validation，避免hash/replay/convergence或无关全量矩阵。
+- A6-G已从冻结A5-G checkpoint单独激活。ADR-0048只演进A4R既有two-target Cloud history，为bounded Globe camera/cloud motion增加
+  world-position reprojection，并把A5 shadow length保持在同一semantic history authority内；`cloudQuality`继续是唯一caller-owned动态档位。
+  第二套Beer history、velocity MRT、automatic FPS、额外GPU resource category、A7-G、Planar与hash/replay/convergence验证均不进入本阶段。
+- A5-G已经完成Architecture review、owner visual gate与独立checkpoint。ADR-0047的current-frame RGBA16F Beer atlas、`SGP-0009`最小Globe
+  surface seam、A2 Sun/sky surface lighting、packed shadow length与terrain-depth lifecycle全部冻结。
 - A1 已实现并通过 Architecture/code review：双阶段 render integration、private pipeline lifecycle 与 globe/planar
   reference-frame contract。
 - A2经过A2R、A2R2与A2R3修正后，implementation、Architecture review和第四次project-owner visual gate均已通过；本次A2
@@ -83,6 +87,7 @@ reference frame，不互相伪造坐标语义。
 - [A4-G Globe cloud whiteness and frequency calibration](discussions/2026-08-27-a4g-cloud-whiteness-frequency-calibration.md) — `design resolved by Architecture; implementation assigned`
 - [A5-G shadow, skylight, and rays source discovery](discussions/2026-08-28-a5g-shadow-skylight-rays-source-discovery.md) — `resolved; A5-G completed`
 - [A5-G owner visual corrections](discussions/2026-08-28-a5g-owner-visual-corrections.md) — `resolved; owner accepted`
+- [A6-G temporal and performance source discovery](discussions/2026-08-28-a6g-temporal-performance-source-discovery.md) — `resolved; A6-G active`
 
 ## Reviews
 
@@ -91,6 +96,7 @@ reference frame，不互相伪造坐标语义。
 - [A3 exponential height fog implementation review](reviews/2026-08-15-a3-exponential-height-fog.md) — `approved`
 - [A4 volumetric cloud core implementation review](reviews/2026-08-15-a4-volumetric-cloud-core.md) — `changes-requested; superseded by A4-G`
 - [A5-G Globe cloud shadows, skylight, and crepuscular rays review](reviews/2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md) — `accepted; closed`
+- [A6-G Globe temporal stabilization and performance review](reviews/2026-08-28-a6g-globe-temporal-stabilization-performance.md) — `implementation pending`
 
 ## Engineering paths
 
@@ -940,3 +946,15 @@ engine `npx tsc`, which exited 0 with no diagnostic. The runtime read, strict
 are unchanged. A5-AR-017 is closed. The phase-closing commit containing this
 record is the required local A5-G checkpoint; no push, A6-G or Planar activation
 is authorized.
+
+## A6-G Architecture activation — 2026-08-28
+
+The project owner explicitly authorized the next Globe-first phase. A5-G
+checkpoint `3ead681e7854082b6b9d016fdcd9cd8619087102` remains frozen.
+Architecture source discovery resolved A6-G in ADR-0048: evolve the existing
+A4R Cloud history for bounded Globe world-position reprojection, preserve
+stationary/cut spatial-only semantics, and keep `cloudQuality` as the sole
+caller-owned runtime performance tier. No second Beer history, velocity MRT,
+automatic FPS policy, extra GPU resource category, A7-G or Planar change is
+authorized. Execution starts only from the separate A6-G activation checkpoint
+and returns an uncommitted/unpushed `review_ready` candidate.

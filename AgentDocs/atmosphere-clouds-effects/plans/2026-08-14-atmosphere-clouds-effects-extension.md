@@ -8,8 +8,9 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-28`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `none; A5-G completed, A6-G not activated`
-- Active phase plan: `none`
+- Current phase: `A6-G active`
+- Active phase plan:
+  [2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md](2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md)
 - Latest completed phase plan:
   [2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md)
 - Architecture decisions:
@@ -20,13 +21,15 @@
   [ADR-0044](../../../Documentation/SceneGIS/Decisions/ADR-0044-separate-background-aerial-radiance-calibration.md),
   [ADR-0045](../../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md),
   [ADR-0046](../../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
-  [ADR-0047](../../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md)
+  [ADR-0047](../../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md),
+  [ADR-0048](../../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - A1 implementation: `completed`
 - A2 implementation: `completed`
 - A3 implementation: `completed`
 - A4 implementation: `A4-G completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A5-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
+- A6-G implementation: `active; formally assigned from a separate Architecture activation checkpoint`
 
 ## Goal
 
@@ -223,6 +226,17 @@ The local structural cast passed independent Architecture `tsc` review and
 A5-AR-017 is closed. The phase-closing commit containing this record is the
 isolated A5-G checkpoint. A6-G and Planar remain inactive until a separate
 Architecture activation.
+
+### A6-G activation — 2026-08-28
+
+Project owner explicitly authorized the next Globe-first phase after the frozen
+A5-G checkpoint `3ead681e7854082b6b9d016fdcd9cd8619087102`. Architecture source
+discovery found that current A4R history already carries every cloud and A5
+shadow-length value but remains same-UV and resets on camera motion. ADR-0048
+therefore activates an in-place Globe reprojection of that same history, with no
+new GPU resource category, second Beer history, velocity MRT, automatic FPS
+controller, A7-G work or Planar change. The active phase plan is
+[A6-G Globe temporal stabilization and performance](2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md).
 
 ### A4-AR-018/019 focused closure — 2026-08-27
 

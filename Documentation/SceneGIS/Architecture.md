@@ -242,6 +242,12 @@ resolved scene color不得被fullscreen relight。Crepuscular rays通过Bruneton
 blur、第二层haze或独立shadow history。最小Globe surface seam登记为`SGP-0009`；资源、packing、public options及Planar冻结边界见
 [ADR-0047](Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md)。
 
+A6-G只演进ADR-0046既有的two-target Cloud history：Globe resolve从现有mean/front/scene distance重建world position并投影到previous
+successful camera，cloud validity与A5 shadow length先semantic decode/filter再repack；invalid、exact-stationary与camera-cut frame均发布完整
+spatial-only结果。Public `cloudQuality`是cloud/Beer/resolve唯一caller-owned动态performance tier；renderer不得自动测FPS、按camera motion降档、增加
+settling render或建立第二套Beer history。A6-G不增加GPU resource/pass/command category，完整continuity、budget与Planar冻结边界见
+[ADR-0048](Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md)。
+
 ### 平面地形 Core 契约
 
 平面地形使用独立的 `SceneGISPlanarTerrainProvider`、`SceneGISPlanarTerrainData` 和
