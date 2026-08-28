@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`accepted; A6-G implementation active`
+- Status：`accepted; A6-G completed`
 - Date：`2026-08-28`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -144,3 +144,140 @@ existing history，并让A5 shadow-length consumers共享稳定结果。代价�
 world-position/reprojection ALU与最多一个独立shadow-history lookup；cut frame仍有意使用
 完整spatial-only输出。任何后续surface BSM temporal需求必须先有固定可复现画面并修订
 本ADR，不能在执行期顺手加入。
+
+## Execution writeback — 2026-08-28
+
+Execution implemented the decision in the existing Cloud resolve category. A
+preallocated structured snapshot retains the previous successful camera basis,
+frustum, Sun, cloud time/offset and compatibility fields. Globe selects the
+mean-distance cloud anchor, finite-scene invalid-cloud anchor or exact-clear
+direction, then applies bounded previous-frame projection and wind compensation.
+Cloud validity and decoded shadow length use independent history weights and are
+repacked only after selection. Planar remains same-UV.
+
+The prior per-frame array/map/join key and temporary framebuffer array are gone.
+Persistent GPU/resource/category delta is exactly zero. The frozen low/medium/
+high profiles and A5 BSM byte counts are unchanged. The amended GPU mutation
+fixture, tier lifecycle fixture, `76/76` focused controller and `7/7` A1 suite
+all pass. The fixed Test observations report the expected continuous motion and
+quality-reset modes; subtle interactive ghosting/shimmer remains an owner visual
+gate rather than a new numerical threshold.
+
+## Architecture review correction — 2026-08-28
+
+Independent review found that the first candidate does not yet implement four
+parts of this decision: current-neighborhood color/transmittance clipping;
+semantic mean/front/scene position compatibility with RGBA16F-aware bounds;
+independent shadow-length selection with finite/clear scene-edge checks; and
+Orthographic exact-clear reprojection. The passing first fixture observes CPU
+mode selection and differing attachments but does not prove a moved cloud-valid
+pixel retains temporal history.
+
+These are `A6-AR-001` through `A6-AR-004` in the active A6 review. The accepted
+resource topology, quality profiles, continuity thresholds, A5 paths, public
+API, upstream seams and Planar boundary remain unchanged. Correction must reuse
+the existing GPU fixture and add no new matrix, resource or fallback.
+
+## Execution correction writeback — 2026-08-28
+
+The corrected Globe resolve clips sampled history radiance/transmittance to the
+finite current 3x3 range before compatibility and blend. It reconstructs the
+mean, front and scene semantics independently and uses binary16 ULP-derived
+quantization radii rather than a fixed normalized-integer tolerance. Invalid
+cloud output retains scene distance for finite/clear edge classification.
+
+Cloud radiance compatibility is independent of decoded shadow length. Invalid
+finite shadow history requires semantic scene-position compatibility, exact
+clear rejects a previous finite scene, and Orthographic exact-clear derives its
+previous UV from the current ray origin projected into the previous plane.
+Perspective direction reprojection and the frozen Planar same-UV path remain
+unchanged.
+
+The one amended actual-GPU history fixture proves current-range clipping,
+moved-cloud history survival, changed-length radiance reuse, finite/clear edge
+rejection and failing Perspective/Orthographic same-UV mutations. It passes
+`1/1`; final focused controller and A1 runs pass `76/76` and `7/7`. Persistent
+GPU/resource/category/API/upstream/SGP delta remains zero.
+
+## Architecture correction re-review — 2026-08-28
+
+`A6-AR-001`, `A6-AR-003` and `A6-AR-004` are closed. `A6-AR-002` remains open:
+the candidate computes but discards front/scene projected UVs, compares their
+expected distances against channels read at the mean UV, and publishes a blend
+of current distances with raw previous-camera distances. That does not provide
+coordinate-aligned semantic compatibility or a valid current-frame history
+record.
+
+The correction must retain current-frame `xyz` semantics and compare history
+channels in the coordinate domain from which they were sampled. One second
+bounded motion frame in the existing fixture is the minimum direct proof that a
+successful history publication remains reusable; it is not a convergence loop.
+All resource, lookup, API, tier, A5, upstream and Planar decisions remain frozen.
+
+## Architecture second A6-AR-002 correction — 2026-08-28
+
+The previous-ray reconstruction, binary16 plus bounded `16 m` float tolerance,
+and current-frame `xyz` publication are accepted. `A6-AR-002` remains open for
+two final points: a valid cloud must treat exact-clear scene depth as a
+classification rather than comparing two diverging `200 km` synthetic world
+points; and the same-UV mutation must preserve the real anchors and demonstrably
+select a different NEAREST texel.
+
+The existing fixture must restore meaningful bounded camera motion and apply a
+second bounded camera/cloud transition. This remains one direct temporal test,
+not a convergence loop or matrix. Resource, lookup, API, tier, continuity, A5,
+upstream and Planar decisions stay frozen.
+
+## Architecture code closure — 2026-08-28
+
+All A6 code findings are closed. Exact-clear scene compatibility now uses the
+stored clear classification; finite scenes and cloud mean/front use
+coordinate-aligned world positions; history distance output remains in the
+current camera domain. The bounded binary16 plus `16 m` tolerance and the
+zero-resource previous-ray reconstruction are accepted.
+
+The existing GPU fixture proves two consecutive bounded `100 m / 0.1 rad`
+camera/cloud transitions, different NEAREST history texels, nonzero reuse and
+current-frame distance publication, and independently passes `1/1`. The phase
+now requires only project-owner interactive motion judgment. No resource, API,
+tier, continuity, A5, upstream or Planar decision changed.
+
+## A6-AR-002 continuation execution — 2026-08-28
+
+The implementation now reconstructs the previous ray at the selected history
+coordinate and interprets all three sampled distance channels on that same ray.
+Mean/front anchors retain cloud-advection compensation; scene anchors do not.
+Compatibility combines binary16 ULP radii with the observed 16 m float
+reconstruction floor. Successful output keeps the current spatial distance
+`xyz`, preventing previous-camera distances from entering the next frame.
+
+The existing actual-GPU fixture uses nonuniform semantic distance data, asserts
+current-domain publication, and proves reuse across the initial bounded motion
+and one second bounded cloud-time motion. It passes `1/1`; controller `76/76`
+and A1 `7/7` also pass. Resource, lookup, renderer-state, API, upstream, SGP,
+A5 and Planar deltas remain zero.
+
+## A6-AR-002 final continuation execution — 2026-08-28
+
+For a valid cloud whose current scene depth is exact clear, compatibility now
+requires an exact-clear sampled history scene code rather than comparing two
+synthetic points at the `200 km` encoding limit. Finite scene depth continues
+to use the coordinate-aligned scene-position bound. All accepted mean/front,
+shadow and current-domain publication semantics remain intact.
+
+The amended existing fixture proves two bounded `100 m / 0.1 rad` camera moves
+with cloud-time motion, distinct projected/current NEAREST texels, semantic
+distance separation beyond the compatibility floor, a UV-only same-UV mutation
+failure, current `xyz`, and nonzero second-transition history reuse. Focused
+results are history `1/1`, controller `76/76`, and A1 `7/7`; frozen resource,
+API, renderer, upstream, SGP, A5 and Planar boundaries remain unchanged.
+
+## A6-G completion — 2026-08-28
+
+Architecture closed all code findings and the project owner explicitly passed
+the prepared interactive Globe motion gate. Bounded camera/cloud motion showed
+no rejected screen-space trail, stopping required no settling-frame snap, and
+the assigned `medium -> low` transition produced a clean spatial reset. A6-G is
+therefore complete with the frozen zero-resource, caller-owned tier and
+Globe-first decisions intact. The phase-closing commit containing this record
+is the unpublished local A6-G checkpoint.

@@ -113,6 +113,10 @@ const cloudQualityProfiles = Object.freeze({
 const cloudTileMeters = 200000.0;
 const cloudShadowMaximumDistance = 200000.0;
 const cloudShadowSplitLambda = 0.5;
+const cloudHistoryMaximumTranslation = 25000.0;
+const cloudHistoryMinimumOrientationDot = 0.984807753;
+const cloudHistoryMinimumSunDot = 0.99999;
+const cloudHistoryMaximumFrustumChange = 0.25;
 const cloudPresetIndices = Object.freeze({
   cumulus: 0,
   stratus: 1,
@@ -980,20 +984,19 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._cloudHistoryDistanceTexture = undefined;
   this._cloudHistoryValid = false;
   this._cloudHistoryReadIndex = 0;
-  this._cloudHistoryKey = undefined;
-  this._cloudHistoryTime = undefined;
+  this._cloudHistorySnapshot = createCloudHistorySnapshot();
   this._cloudHistoryWeight = 0.0;
   this._cloudHistoryStationary = false;
+  this._cloudHistoryReprojection = false;
   this._cloudHistoryDiagnostics = {
-    key: undefined,
     stationary: false,
-    compatibility: "full-attachments",
+    mode: "invalid-spatial-only",
+    compatibility: "structured-full-attachments",
     resetReason: "initial",
     historyValid: false,
     weight: 0.0,
   };
   this._cloudHistoryPendingResetReason = "initial";
-  this._cloudHistorySunDirection = new Cartesian3();
   this._cloudBufferDimensions = new Cartesian2();
   this._globeShadowResources = undefined;
   this._shadowCascadeIndex = 0;
@@ -1102,6 +1105,20 @@ function SceneGISEnvironmentEffectsRenderer(options) {
       that._cloudHistoryValid && !that._cloudHistoryStationary,
     u_cloudHistoryWeight: () =>
       that._cloudHistoryStationary ? 0.0 : that._cloudHistoryWeight,
+    u_cloudHistoryReprojection: () => that._cloudHistoryReprojection,
+    u_cloudPreviousPerspective: () =>
+      that._cloudHistorySnapshot.projection === "perspective",
+    u_cloudPreviousFrustum: () => that._cloudHistorySnapshot.frustum,
+    u_cloudPreviousCameraPosition: () =>
+      that._cloudHistorySnapshot.frame.cameraPosition,
+    u_cloudPreviousCameraDirection: () =>
+      that._cloudHistorySnapshot.frame.cameraDirection,
+    u_cloudPreviousCameraRight: () =>
+      that._cloudHistorySnapshot.frame.cameraRight,
+    u_cloudPreviousCameraUp: () => that._cloudHistorySnapshot.frame.cameraUp,
+    u_cloudPreviousEast: () => that._cloudHistorySnapshot.frame.east,
+    u_cloudPreviousNorth: () => that._cloudHistorySnapshot.frame.north,
+    u_cloudPreviousCloudOffset: () => that._cloudHistorySnapshot.cloudOffset,
     u_cloudColorTexture: () =>
       that._cloudColorTexture ?? that._resources?.transmittanceTexture,
     u_cloudDistanceTexture: () =>
@@ -1246,12 +1263,12 @@ SceneGISEnvironmentEffectsRenderer.prototype.invalidateCloudHistory = function (
   reason = "explicit",
 ) {
   this._cloudHistoryValid = false;
-  this._cloudHistoryKey = undefined;
-  this._cloudHistoryTime = undefined;
+  this._cloudHistorySnapshot.valid = false;
   this._cloudHistoryWeight = 0.0;
   this._cloudHistoryStationary = false;
-  this._cloudHistoryDiagnostics.key = undefined;
+  this._cloudHistoryReprojection = false;
   this._cloudHistoryDiagnostics.stationary = false;
+  this._cloudHistoryDiagnostics.mode = "invalid-spatial-only";
   this._cloudHistoryDiagnostics.resetReason = reason;
   this._cloudHistoryDiagnostics.historyValid = false;
   this._cloudHistoryDiagnostics.weight = 0.0;
@@ -1425,7 +1442,7 @@ function ensureCloudHistoryFramebuffers(renderer, context, width, height) {
       PixelFormat.RGBA,
     );
   if (firstClean && secondClean) {
-    return [first, second];
+    return;
   }
   let candidate0;
   let candidate1;
@@ -1443,7 +1460,6 @@ function ensureCloudHistoryFramebuffers(renderer, context, width, height) {
   destroyResource(second);
   renderer.invalidateCloudHistory("viewport-resize");
   renderer._cloudHistoryReadIndex = 0;
-  return [candidate0, candidate1];
 }
 
 function cloudHistoryNumber(value) {
@@ -1454,107 +1470,343 @@ function cloudHistoryNumber(value) {
   return Math.round(value * scale) / scale;
 }
 
-function cloudHistoryKey(renderer, width, height) {
+function createCloudHistorySnapshot() {
+  return {
+    valid: false,
+    mode: undefined,
+    projection: undefined,
+    width: 0,
+    height: 0,
+    quality: undefined,
+    preset: undefined,
+    cloudBaseHeight: 0.0,
+    cloudThickness: 0.0,
+    cloudCoverage: 0.0,
+    cloudDensity: 0.0,
+    cloudWindDirection: 0.0,
+    cloudWindSpeed: 0.0,
+    cloudRadianceScale: 0.0,
+    useLogDepth: false,
+    cloudTime: 0.0,
+    frustum: new Cartesian4(),
+    cloudOffset: new Cartesian2(),
+    sunDirection: new Cartesian3(),
+    frame: SceneGISAtmosphereReferenceFrame.createSnapshot(),
+  };
+}
+
+function cloudHistoryNumbersEqual(left, right) {
+  return cloudHistoryNumber(left) === cloudHistoryNumber(right);
+}
+
+function cloudHistoryVectorEqual(left, right) {
+  return (
+    cloudHistoryNumbersEqual(left.x, right.x) &&
+    cloudHistoryNumbersEqual(left.y, right.y) &&
+    cloudHistoryNumbersEqual(left.z, right.z)
+  );
+}
+
+function cloudHistoryVectorFinite(value) {
+  return (
+    Number.isFinite(value.x) &&
+    Number.isFinite(value.y) &&
+    Number.isFinite(value.z)
+  );
+}
+
+function cloudHistoryInputsFinite(renderer) {
   const frame = renderer._frame;
-  const values = [
-    renderer._mode,
-    frame.projection,
-    width,
-    height,
-    renderer._owner._cloudQuality,
-    renderer._owner._cloudPreset,
-    renderer._owner._cloudBaseHeight,
-    renderer._owner._cloudThickness,
-    renderer._owner._cloudCoverage,
-    renderer._owner._cloudDensity,
-    renderer._owner._cloudWindDirection,
-    renderer._owner._cloudWindSpeed,
-    renderer._owner._cloudRadianceScale,
-    renderer._scene.frameState.useLogDepth,
-    frame.mode,
-    frame.altitude,
-    frame.baseHeight,
-    renderer._frustum.x,
-    renderer._frustum.y,
-    renderer._frustum.z,
-    renderer._frustum.w,
-  ].map(cloudHistoryNumber);
-  for (const vector of [
-    frame.cameraPosition,
-    frame.cameraDirection,
-    frame.cameraUp,
-    frame.cameraRight,
-    frame.surfacePosition,
-    frame.east,
-    frame.north,
-    frame.vertical,
-    frame.ellipsoidCenter,
-    frame.ellipsoidRadii,
-  ]) {
-    values.push(
-      cloudHistoryNumber(vector.x),
-      cloudHistoryNumber(vector.y),
-      cloudHistoryNumber(vector.z),
-    );
+  const owner = renderer._owner;
+  return (
+    Number.isFinite(owner._cloudBaseHeight) &&
+    Number.isFinite(owner._cloudThickness) &&
+    Number.isFinite(owner._cloudCoverage) &&
+    Number.isFinite(owner._cloudDensity) &&
+    Number.isFinite(owner._cloudWindDirection) &&
+    Number.isFinite(owner._cloudWindSpeed) &&
+    Number.isFinite(owner._cloudRadianceScale) &&
+    Number.isFinite(owner._cloudTime) &&
+    Number.isFinite(frame.altitude) &&
+    Number.isFinite(frame.baseHeight) &&
+    Number.isFinite(renderer._frustum.x) &&
+    Number.isFinite(renderer._frustum.y) &&
+    Number.isFinite(renderer._frustum.z) &&
+    Number.isFinite(renderer._frustum.w) &&
+    cloudHistoryVectorFinite(frame.cameraPosition) &&
+    cloudHistoryVectorFinite(frame.cameraDirection) &&
+    cloudHistoryVectorFinite(frame.cameraUp) &&
+    cloudHistoryVectorFinite(frame.cameraRight) &&
+    cloudHistoryVectorFinite(frame.surfacePosition) &&
+    cloudHistoryVectorFinite(frame.east) &&
+    cloudHistoryVectorFinite(frame.north) &&
+    cloudHistoryVectorFinite(frame.vertical) &&
+    cloudHistoryVectorFinite(frame.ellipsoidCenter) &&
+    cloudHistoryVectorFinite(frame.ellipsoidRadii) &&
+    cloudHistoryVectorFinite(renderer._sunDirection) &&
+    Number.isFinite(renderer._cloudOffset.x) &&
+    Number.isFinite(renderer._cloudOffset.y)
+  );
+}
+
+function cloudHistoryMaterialCompatible(renderer, width, height) {
+  const snapshot = renderer._cloudHistorySnapshot;
+  const owner = renderer._owner;
+  const frame = renderer._frame;
+  return (
+    snapshot.valid &&
+    snapshot.mode === renderer._mode &&
+    snapshot.projection === frame.projection &&
+    snapshot.width === width &&
+    snapshot.height === height &&
+    snapshot.quality === owner._cloudQuality &&
+    snapshot.preset === owner._cloudPreset &&
+    cloudHistoryNumbersEqual(
+      snapshot.cloudBaseHeight,
+      owner._cloudBaseHeight,
+    ) &&
+    cloudHistoryNumbersEqual(snapshot.cloudThickness, owner._cloudThickness) &&
+    cloudHistoryNumbersEqual(snapshot.cloudCoverage, owner._cloudCoverage) &&
+    cloudHistoryNumbersEqual(snapshot.cloudDensity, owner._cloudDensity) &&
+    cloudHistoryNumbersEqual(
+      snapshot.cloudWindDirection,
+      owner._cloudWindDirection,
+    ) &&
+    cloudHistoryNumbersEqual(snapshot.cloudWindSpeed, owner._cloudWindSpeed) &&
+    cloudHistoryNumbersEqual(
+      snapshot.cloudRadianceScale,
+      owner._cloudRadianceScale,
+    ) &&
+    snapshot.useLogDepth === renderer._scene.frameState.useLogDepth &&
+    snapshot.frame.mode === frame.mode &&
+    cloudHistoryNumbersEqual(snapshot.frame.baseHeight, frame.baseHeight) &&
+    cloudHistoryVectorEqual(
+      snapshot.frame.ellipsoidCenter,
+      frame.ellipsoidCenter,
+    ) &&
+    cloudHistoryVectorEqual(snapshot.frame.ellipsoidRadii, frame.ellipsoidRadii)
+  );
+}
+
+function cloudHistoryPlanarCompatible(renderer) {
+  const previous = renderer._cloudHistorySnapshot;
+  const frame = renderer._frame;
+  return (
+    cloudHistoryNumbersEqual(previous.frame.altitude, frame.altitude) &&
+    cloudHistoryNumbersEqual(previous.frustum.x, renderer._frustum.x) &&
+    cloudHistoryNumbersEqual(previous.frustum.y, renderer._frustum.y) &&
+    cloudHistoryNumbersEqual(previous.frustum.z, renderer._frustum.z) &&
+    cloudHistoryNumbersEqual(previous.frustum.w, renderer._frustum.w) &&
+    cloudHistoryVectorEqual(
+      previous.frame.cameraPosition,
+      frame.cameraPosition,
+    ) &&
+    cloudHistoryVectorEqual(
+      previous.frame.cameraDirection,
+      frame.cameraDirection,
+    ) &&
+    cloudHistoryVectorEqual(previous.frame.cameraUp, frame.cameraUp) &&
+    cloudHistoryVectorEqual(previous.frame.cameraRight, frame.cameraRight) &&
+    cloudHistoryVectorEqual(
+      previous.frame.surfacePosition,
+      frame.surfacePosition,
+    ) &&
+    cloudHistoryVectorEqual(previous.frame.east, frame.east) &&
+    cloudHistoryVectorEqual(previous.frame.north, frame.north) &&
+    cloudHistoryVectorEqual(previous.frame.vertical, frame.vertical)
+  );
+}
+
+function cloudHistoryFrustumContinuous(renderer) {
+  const previous = renderer._cloudHistorySnapshot.frustum;
+  const current = renderer._frustum;
+  const horizontalSpan = previous.y - previous.x;
+  const verticalSpan = previous.w - previous.z;
+  return (
+    horizontalSpan > 0.0 &&
+    verticalSpan > 0.0 &&
+    Math.abs(current.x - previous.x) <=
+      horizontalSpan * cloudHistoryMaximumFrustumChange &&
+    Math.abs(current.y - previous.y) <=
+      horizontalSpan * cloudHistoryMaximumFrustumChange &&
+    Math.abs(current.z - previous.z) <=
+      verticalSpan * cloudHistoryMaximumFrustumChange &&
+    Math.abs(current.w - previous.w) <=
+      verticalSpan * cloudHistoryMaximumFrustumChange
+  );
+}
+
+function cloudHistoryContinuityFailure(renderer, width, height) {
+  const previous = renderer._cloudHistorySnapshot;
+  const frame = renderer._frame;
+  const time = renderer._owner._cloudTime;
+  if (!cloudHistoryInputsFinite(renderer)) {
+    return "nonfinite-input";
   }
-  return values.join("|");
+  if (previous.projection !== frame.projection) {
+    return "camera-projection";
+  }
+  if (!cloudHistoryMaterialCompatible(renderer, width, height)) {
+    return "structured-compatibility";
+  }
+  if (
+    renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE &&
+    !cloudHistoryPlanarCompatible(renderer)
+  ) {
+    return "history-state";
+  }
+  if (!Number.isFinite(time) || Math.abs(time - previous.cloudTime) > 1.0) {
+    return "cloud-time";
+  }
+  if (
+    Cartesian3.dot(previous.sunDirection, renderer._sunDirection) <
+    cloudHistoryMinimumSunDot
+  ) {
+    return "sun-direction";
+  }
+  if (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
+    return undefined;
+  }
+  if (
+    Cartesian3.distance(previous.frame.cameraPosition, frame.cameraPosition) >
+    cloudHistoryMaximumTranslation
+  ) {
+    return "camera-translation";
+  }
+  if (
+    Cartesian3.dot(previous.frame.cameraDirection, frame.cameraDirection) <
+      cloudHistoryMinimumOrientationDot ||
+    Cartesian3.dot(previous.frame.cameraUp, frame.cameraUp) <
+      cloudHistoryMinimumOrientationDot
+  ) {
+    return "camera-orientation";
+  }
+  if (!cloudHistoryFrustumContinuous(renderer)) {
+    return "camera-frustum";
+  }
+  return undefined;
+}
+
+function cloudHistoryStationary(renderer) {
+  const previous = renderer._cloudHistorySnapshot;
+  const frame = renderer._frame;
+  return (
+    renderer._owner._cloudTime === previous.cloudTime &&
+    renderer._cloudOffset.x === previous.cloudOffset.x &&
+    renderer._cloudOffset.y === previous.cloudOffset.y &&
+    renderer._frustum.x === previous.frustum.x &&
+    renderer._frustum.y === previous.frustum.y &&
+    renderer._frustum.z === previous.frustum.z &&
+    renderer._frustum.w === previous.frustum.w &&
+    cloudHistoryVectorEqual(
+      frame.cameraPosition,
+      previous.frame.cameraPosition,
+    ) &&
+    cloudHistoryVectorEqual(
+      frame.cameraDirection,
+      previous.frame.cameraDirection,
+    ) &&
+    cloudHistoryVectorEqual(frame.cameraUp, previous.frame.cameraUp) &&
+    cloudHistoryVectorEqual(frame.cameraRight, previous.frame.cameraRight) &&
+    cloudHistoryVectorEqual(renderer._sunDirection, previous.sunDirection)
+  );
+}
+
+function commitCloudHistorySnapshot(renderer, width, height) {
+  const snapshot = renderer._cloudHistorySnapshot;
+  const frame = renderer._frame;
+  const owner = renderer._owner;
+  snapshot.valid = true;
+  snapshot.mode = renderer._mode;
+  snapshot.projection = frame.projection;
+  snapshot.width = width;
+  snapshot.height = height;
+  snapshot.quality = owner._cloudQuality;
+  snapshot.preset = owner._cloudPreset;
+  snapshot.cloudBaseHeight = owner._cloudBaseHeight;
+  snapshot.cloudThickness = owner._cloudThickness;
+  snapshot.cloudCoverage = owner._cloudCoverage;
+  snapshot.cloudDensity = owner._cloudDensity;
+  snapshot.cloudWindDirection = owner._cloudWindDirection;
+  snapshot.cloudWindSpeed = owner._cloudWindSpeed;
+  snapshot.cloudRadianceScale = owner._cloudRadianceScale;
+  snapshot.useLogDepth = renderer._scene.frameState.useLogDepth;
+  snapshot.cloudTime = owner._cloudTime;
+  Cartesian4.clone(renderer._frustum, snapshot.frustum);
+  Cartesian2.clone(renderer._cloudOffset, snapshot.cloudOffset);
+  Cartesian3.clone(renderer._sunDirection, snapshot.sunDirection);
+  snapshot.frame.mode = frame.mode;
+  snapshot.frame.projection = frame.projection;
+  snapshot.frame.altitude = frame.altitude;
+  snapshot.frame.baseHeight = frame.baseHeight;
+  Cartesian3.clone(frame.cameraPosition, snapshot.frame.cameraPosition);
+  Cartesian3.clone(frame.cameraDirection, snapshot.frame.cameraDirection);
+  Cartesian3.clone(frame.cameraUp, snapshot.frame.cameraUp);
+  Cartesian3.clone(frame.cameraRight, snapshot.frame.cameraRight);
+  Cartesian3.clone(frame.surfacePosition, snapshot.frame.surfacePosition);
+  Cartesian3.clone(frame.east, snapshot.frame.east);
+  Cartesian3.clone(frame.north, snapshot.frame.north);
+  Cartesian3.clone(frame.vertical, snapshot.frame.vertical);
+  Cartesian3.clone(frame.ellipsoidCenter, snapshot.frame.ellipsoidCenter);
+  Cartesian3.clone(frame.ellipsoidRadii, snapshot.frame.ellipsoidRadii);
+}
+
+function cloudHistoryFailureIsCameraCut(reason) {
+  return (
+    reason === "nonfinite-input" ||
+    reason === "cloud-time" ||
+    reason === "sun-direction" ||
+    reason === "camera-projection" ||
+    reason === "camera-translation" ||
+    reason === "camera-orientation" ||
+    reason === "camera-frustum"
+  );
 }
 
 function executeCloudResolve(renderer, context, depthTexture) {
   const width = depthTexture.width;
   const height = depthTexture.height;
-  const histories = ensureCloudHistoryFramebuffers(
-    renderer,
-    context,
-    width,
-    height,
-  );
-  const key = cloudHistoryKey(renderer, width, height);
-  const time = renderer._owner._cloudTime;
-  const continuousTime =
-    defined(renderer._cloudHistoryTime) &&
-    Number.isFinite(time) &&
-    Math.abs(time - renderer._cloudHistoryTime) <= 1.0;
-  const continuousSun =
-    !renderer._cloudHistoryValid ||
-    Cartesian3.dot(
-      renderer._cloudHistorySunDirection,
-      renderer._sunDirection,
-    ) >= 0.99999;
-  renderer._cloudHistoryValid =
-    renderer._cloudHistoryValid &&
-    renderer._cloudHistoryKey === key &&
-    continuousTime &&
-    continuousSun;
+  ensureCloudHistoryFramebuffers(renderer, context, width, height);
+  const previousValid = renderer._cloudHistoryValid;
+  const failure = previousValid
+    ? cloudHistoryContinuityFailure(renderer, width, height)
+    : (renderer._cloudHistoryPendingResetReason ?? "invalid-history");
+  renderer._cloudHistoryValid = previousValid && !defined(failure);
   renderer._cloudHistoryWeight = renderer._cloudHistoryValid ? 0.82 : 0.0;
   renderer._cloudHistoryStationary =
-    renderer._cloudHistoryValid && time === renderer._cloudHistoryTime;
-  renderer._cloudHistoryDiagnostics.key = key;
+    renderer._cloudHistoryValid && cloudHistoryStationary(renderer);
+  renderer._cloudHistoryReprojection =
+    renderer._cloudHistoryValid &&
+    !renderer._cloudHistoryStationary &&
+    renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
   renderer._cloudHistoryDiagnostics.stationary =
     renderer._cloudHistoryStationary;
+  renderer._cloudHistoryDiagnostics.mode = !renderer._cloudHistoryValid
+    ? previousValid && cloudHistoryFailureIsCameraCut(failure)
+      ? "camera-cut-spatial-only"
+      : "invalid-spatial-only"
+    : renderer._cloudHistoryStationary
+      ? "exact-stationary-spatial-only"
+      : renderer._cloudHistoryReprojection
+        ? "continuous-reprojected"
+        : "continuous-same-uv";
   if (!renderer._cloudHistoryValid) {
-    renderer._cloudHistoryDiagnostics.resetReason =
-      renderer._cloudHistoryPendingResetReason ??
-      (renderer._cloudHistoryKey !== key
-        ? "history-key"
-        : !continuousTime
-          ? "cloud-time"
-          : !continuousSun
-            ? "sun-direction"
-            : renderer._cloudHistoryDiagnostics.resetReason);
+    renderer._cloudHistoryDiagnostics.resetReason = failure;
   }
   renderer._cloudHistoryDiagnostics.historyValid = renderer._cloudHistoryValid;
   renderer._cloudHistoryDiagnostics.weight = renderer._cloudHistoryWeight;
-  // Spatial-only publication always targets framebuffer 0. This makes the
-  // invalid and stationary paths byte-stable instead of re-quantizing the same
-  // spatial result through alternating RGBA16F owners. The unused framebuffer
-  // remains bound as the history sampler, avoiding a texture feedback loop.
   const spatialOnly =
     !renderer._cloudHistoryValid || renderer._cloudHistoryStationary;
   const writeIndex = spatialOnly ? 0 : 1 - renderer._cloudHistoryReadIndex;
   const readIndex = spatialOnly ? 1 : renderer._cloudHistoryReadIndex;
-  const read = histories[readIndex];
-  const write = histories[writeIndex];
+  const read =
+    readIndex === 0
+      ? renderer._resources.cloudHistoryFramebuffer0
+      : renderer._resources.cloudHistoryFramebuffer1;
+  const write =
+    writeIndex === 0
+      ? renderer._resources.cloudHistoryFramebuffer0
+      : renderer._resources.cloudHistoryFramebuffer1;
   renderer._cloudHistoryColorTexture = read.getColorTexture(0);
   renderer._cloudHistoryDistanceTexture = read.getColorTexture(1);
   const command = renderer._resources.cloudResolveCommand;
@@ -1573,9 +1825,7 @@ function executeCloudResolve(renderer, context, depthTexture) {
   viewport.height = height;
   command.execute(context, renderer._cloudResolvePassState);
   renderer._cloudHistoryReadIndex = writeIndex;
-  renderer._cloudHistoryKey = key;
-  renderer._cloudHistoryTime = time;
-  Cartesian3.clone(renderer._sunDirection, renderer._cloudHistorySunDirection);
+  commitCloudHistorySnapshot(renderer, width, height);
   renderer._cloudHistoryValid = true;
   renderer._cloudHistoryPendingResetReason = undefined;
   renderer._cloudColorTexture = write.getColorTexture(0);

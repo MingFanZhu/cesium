@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active; assigned to Execution`
+- Status: `completed; Architecture and owner visual gates passed`
 - Parent extension:
   [2026-08-14-atmosphere-clouds-effects-extension.md](2026-08-14-atmosphere-clouds-effects-extension.md)
 - Predecessor:
@@ -19,8 +19,8 @@
 - Source discovery:
   [A6-G temporal/performance source discovery](../discussions/2026-08-28-a6g-temporal-performance-source-discovery.md)
 - Upstream patches: active `SGP-0008` (`consume only`), active `SGP-0009`
-- Open review findings: `none; implementation pending`
-- Owner visual gate: `pending after Architecture review`
+- Open review findings: `none; A6-AR-001 through A6-AR-004 closed`
+- Owner visual gate: `passed by project owner on 2026-08-28`
 
 ## Goal
 
@@ -156,3 +156,163 @@ Execution implements only this boundary, writes concise evidence, and returns
 `review_ready` without committing, pushing, requesting the owner gate, entering
 A7-G or touching Planar. Architecture independently reviews and, after the
 owner visual gate, creates the isolated A6-G checkpoint.
+
+## Execution result — 2026-08-28
+
+The existing two-target A4R history now owns one reusable structured previous-
+frame snapshot. Globe continuous frames reconstruct mean-distance cloud anchors,
+finite-scene invalid-cloud anchors or exact-clear directions, project them into
+the previous Perspective/Orthographic camera, and apply the existing wind offset
+delta. Compatibility is checked before history sampling against the frozen
+camera, frustum, `cloudTime` and Sun bounds. Stationary and cut frames still
+publish one complete spatial-only result. Planar retains same-UV behavior.
+
+Resolve filters cloud validity and decoded A5 shadow length independently,
+checks the current 3x3 finite distance range and position/scene/radiance/
+transmittance compatibility, and repacks alpha only after semantic selection.
+The old per-frame array/map/join key and the temporary framebuffer array were
+removed. GPU delta is zero: the low MRT, two full-resolution RGBA16F history
+FBOs, resolve command/program category and A5 atlas remain unchanged. History
+storage remains `32 * viewportWidth * viewportHeight` bytes; BSM bytes remain
+`2,097,152 / 8,388,608 / 18,874,368`.
+
+The amended GPU history fixture passes with Perspective translate/look,
+`cloudTime=0.25`, an in-bounds previous UV, `continuous-reprojected`, a 30 km
+cut, valid cloud, invalid-cloud positive shadow length and a failing pre-A6
+same-UV mutation. The amended lifecycle fixture confirms the frozen three-tier
+table and unchanged resource keys. Focused controller and A1 results are
+`76/76` and `7/7` success.
+
+The fixed high-Sun observation measured Sun elevation `67.484068°`, medium
+`64/4/3`, three `512` BSM cascades and `continuous-reprojected` at weight
+`0.82`; all raw attachments were finite/bounded and maximum raw RGB was
+`1.185547`. The fixed medium-to-low observation reported `32/1/2`, detail off,
+two `256` cascades and the expected `viewport-resize` spatial-only reset. No
+viewport-wide trail or slab was apparent. The deliberately single-frame
+observations cannot exclude subtle motion-edge ghosting or shimmer; that remains
+the project-owner visual risk.
+
+## Architecture review result — 2026-08-28
+
+The resource/tier and structured-snapshot boundaries are accepted, but A6-G is
+not ready for the owner gate. Architecture opened four focused findings:
+
+- `A6-AR-001`: clamp history radiance/transmittance to the finite current 3x3
+  neighborhood before compatibility/blending;
+- `A6-AR-002`: replace the shared mean-distance shift with semantic
+  mean/front/scene position checks using an RGBA16F-aware bound, and prove a
+  moved cloud-valid sample actually receives history;
+- `A6-AR-003`: decouple cloud radiance from shadow-length compatibility and
+  enforce finite/clear scene-edge compatibility for invalid-cloud shadow
+  history;
+- `A6-AR-004`: reproject the current ray origin for Orthographic exact-clear
+  history instead of returning the same UV.
+
+The correction stays inside the existing renderer/resolve/Spec paths and the
+one amended GPU fixture. No new resource, public API, test matrix, Test-page
+observation, upstream patch, A5 edit, Planar work or broad validation is
+authorized.
+
+## Focused correction result — 2026-08-28
+
+Execution repaired `A6-AR-001` through `A6-AR-004` in the existing resolve and
+single history fixture; the renderer and Test page did not change in this
+correction. The shader now accumulates finite current 3x3 premultiplied RGB and
+transmittance limits and clamps sampled history before compatibility and blend.
+It reconstructs independent previous mean/front/scene distances and compares
+each using the sum of the two RGBA16F quantization radii instead of a shared
+integer-normalized shift.
+
+Invalid-cloud publications retain the current encoded scene distance. Shadow
+length no longer participates in cloud-radiance compatibility: finite invalid
+samples require semantic scene-distance agreement, while exact-clear samples
+reject a previous finite scene. Orthographic exact-clear uses the current ray
+origin in the previous Orthographic plane; Perspective retains direction
+reprojection.
+
+The amended actual-GPU fixture exposes the real resolved UV/distances and
+proves one moved valid-cloud sample with `cloudTime=0.25` survives, a controlled
+history outlier is clipped, changed shadow length does not discard cloud
+radiance, finite/clear invalid-cloud history is rejected, and both Perspective
+and Orthographic same-UV mutations fail. Exact results are history `1/1`,
+controller `76/76`, and A1 `7/7` success. Resource, public API, upstream-owned,
+generated and SGP deltas remain zero; no browser evidence was rerun.
+
+## Architecture correction re-review — 2026-08-28
+
+`A6-AR-001`, `A6-AR-003` and `A6-AR-004` are closed. `A6-AR-002` remains open
+because front/scene UVs are computed and discarded while all three history
+distance channels are read at the mean UV, and raw previous-camera distances
+are then mixed into the current-frame attachment. The uniform-distance,
+single-motion-frame fixture cannot expose either defect.
+
+The next correction is limited to coordinate-aligned semantic checks and
+current-frame `xyz` publication in the existing resolve. The same fixture may
+use nonuniform distance data and one second bounded motion frame to prove the
+published history remains reusable. No new lookup/resource/test/browser/
+renderer/API/A5/Planar/upstream work or broad validation is authorized.
+
+## Architecture second A6-AR-002 result — 2026-08-28
+
+Previous-ray semantic reconstruction, the bounded `16 m` float floor and
+current-frame `xyz` publication are accepted. `A6-AR-002` remains open only
+because valid-cloud exact-clear scene compatibility still compares diverging
+`200 km` synthetic world points, and the fixture narrowed the original motion
+while its same-UV mutation also zeroes the anchors.
+
+The final correction restores a meaningful fixed camera motion, treats exact
+clear as a classification while retaining finite-scene world checks, isolates
+only the UV mutation, proves different NEAREST texels, and applies one further
+bounded camera/cloud move. It stays in the same resolve/fixture/record boundary
+with no sweep, loop, resource, lookup, browser or broader validation.
+
+## Architecture code closure — 2026-08-28
+
+All A6 findings are closed. Independent review and the existing GPU fixture
+confirm exact-clear versus finite-scene authority, coordinate-aligned
+mean/front semantics, current-frame distance publication, distinct NEAREST
+texel reprojection and two consecutive bounded `100 m / 0.1 rad` camera/cloud
+transitions. The history fixture passes `1/1`; execution's final controller and
+A1 results remain `76/76` and `7/7`.
+
+No resource/API/tier/continuity/upstream/A5/Planar boundary changed. The phase
+now waits only for the project-owner interactive Globe motion visual gate; no
+checkpoint or A7-G activation is authorized before that decision.
+
+## A6-AR-002 continuation execution — 2026-08-28
+
+The resolve now selects one semantic history coordinate, reconstructs the
+previous ray there, and derives sampled mean/front/scene positions from that
+coordinate-aligned ray. Existing cloud advection applies only to mean/front.
+The bound combines binary16 ULP radii with the directly observed 16 m float
+reconstruction floor. Output distance `xyz` stays equal to the current spatial
+record, so no previous-camera distance enters the next successful history.
+
+The amended existing fixture uses a nonuniform distance texture and verifies
+the selected coordinate, current-domain publication, and nonzero reuse across
+two bounded transitions (`cloudTime` `0.0` to `0.25` to `0.26`). It passes
+`1/1`; the final controller and A1 checks pass `76/76` and `7/7`. No browser,
+resource, API, renderer, upstream, SGP, A5 or Planar surface changed.
+
+## A6-AR-002 final continuation execution — 2026-08-28
+
+Valid clouds now use exact-clear code compatibility for an exact-clear scene,
+avoiding synthetic `200 km` scene-point divergence. Finite scenes continue to
+use coordinate-aligned scene world positions; the accepted mean/front and
+invalid-cloud checks are unchanged.
+
+The existing GPU fixture restores fixed `100 m / 0.1 rad` Perspective motion,
+then repeats that bounded camera move with cloud time `0.25 -> 0.26`. It asserts
+different projected/current NEAREST texels, more than `16 m` nonuniform semantic
+separation, a UV-only same-UV mutation failure, exact current `xyz`, and nonzero
+history reuse after the second publication. Exact results are `1/1`, `76/76`
+and `7/7`; no frozen surface changed.
+
+## Project-owner visual acceptance — 2026-08-28
+
+The project owner exercised the prepared live Globe state and explicitly
+reported `通过`. The accepted gate covers bounded orbit/pan without cloud or
+shadow trails across terrain and sky silhouettes, immediate stability after
+motion stops, and one clean `medium -> low` quality reset without stale history.
+Architecture therefore closes A6-G. The phase-closing local commit containing
+this record is the isolated A6-G checkpoint; it is not pushed.

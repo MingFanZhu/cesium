@@ -3077,7 +3077,12 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(texture.height).toBe(1024);
     expect(texture.width * texture.height * 4 * 2).toBe(8388608);
     expect(pipeline._shadowCascadeCount).toBe(3);
+    expect(pipeline._uniformMap.u_cloudPrimarySteps()).toBe(64);
+    expect(pipeline._uniformMap.u_cloudFineSteps()).toBe(4);
+    expect(pipeline._uniformMap.u_cloudSunSteps()).toBe(3);
+    expect(pipeline._uniformMap.u_cloudUseDetail()).toBe(true);
     expect(pipeline._uniformMap.u_sceneGISShadowSteps()).toBe(50);
+    const resourceKeys = Object.keys(pipeline._resources).sort();
     effects.cloudQuality = "low";
     effects.update(scene, scene.frameState.time);
     const lowShadow = pipeline._globeShadowResources;
@@ -3087,6 +3092,10 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(lowTexture.height).toBe(512);
     expect(lowTexture.width * lowTexture.height * 4 * 2).toBe(2097152);
     expect(pipeline._shadowCascadeCount).toBe(2);
+    expect(pipeline._uniformMap.u_cloudPrimarySteps()).toBe(32);
+    expect(pipeline._uniformMap.u_cloudFineSteps()).toBe(1);
+    expect(pipeline._uniformMap.u_cloudSunSteps()).toBe(2);
+    expect(pipeline._uniformMap.u_cloudUseDetail()).toBe(false);
     expect(pipeline._uniformMap.u_sceneGISShadowSteps()).toBe(25);
     effects.cloudQuality = "high";
     effects.update(scene, scene.frameState.time);
@@ -3098,7 +3107,12 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(highTexture.height).toBe(1536);
     expect(highTexture.width * highTexture.height * 4 * 2).toBe(18874368);
     expect(pipeline._shadowCascadeCount).toBe(3);
+    expect(pipeline._uniformMap.u_cloudPrimarySteps()).toBe(64);
+    expect(pipeline._uniformMap.u_cloudFineSteps()).toBe(4);
+    expect(pipeline._uniformMap.u_cloudSunSteps()).toBe(4);
+    expect(pipeline._uniformMap.u_cloudUseDetail()).toBe(true);
     expect(pipeline._uniformMap.u_sceneGISShadowSteps()).toBe(50);
+    expect(Object.keys(pipeline._resources).sort()).toEqual(resourceKeys);
     const requestRender = spyOn(scene, "requestRender").and.callThrough();
 
     effects.showCloudShadows = false;
@@ -4204,14 +4218,14 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       "out_FragData_0 = spatialColor",
     );
     expect(cloudResolveFragmentSource).toContain(
-      "abs(historyDistance.x - spatialDistance.x)",
+      "sceneGISCloudHistoryCoordinates",
     );
     expect(cloudResolveFragmentSource).toContain(
-      "abs(historyDistance.y - spatialDistance.y)",
+      "u_cloudPreviousCameraPosition",
     );
     expect(cloudResolveFragmentSource).toContain("spatialDistance.a > 0.5");
     expect(cloudResolveFragmentSource).toContain(
-      "abs(historyColor.a - spatialColor.a)",
+      "abs(clippedHistoryColor.a - spatialColor.a)",
     );
     connectPlanar();
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -4273,7 +4287,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       const transition = readResolvedColor();
       expect(validity.at(-1)).toBe(false);
       expect(effects._pipeline._cloudHistoryDiagnostics.resetReason).toBe(
-        "history-key",
+        "structured-compatibility",
       );
       effects._pipeline.invalidateCloudHistory();
       scene.renderForSpecs();
@@ -4284,11 +4298,11 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       expect(validity.at(-1)).toBe(true);
       expect(readResolvedColor()).toEqual(spatialOnly);
       expect(effects._pipeline._cloudHistoryDiagnostics.stationary).toBe(true);
-      expect(effects._pipeline._cloudHistoryDiagnostics.key).toBe(
-        effects._pipeline._cloudHistoryKey,
+      expect(effects._pipeline._cloudHistoryDiagnostics.mode).toBe(
+        "exact-stationary-spatial-only",
       );
       expect(effects._pipeline._cloudHistoryDiagnostics.compatibility).toBe(
-        "full-attachments",
+        "structured-full-attachments",
       );
       if (scale === 0.0) {
         for (let offset = 0; offset < transition.length; offset += 4) {
@@ -4297,6 +4311,364 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
           expect(decodeFloat16(transition[offset + 2])).toBe(0.0);
         }
       }
+    }
+
+    disconnectControlledCloudMode();
+    await connectControlledCloudMode("globe");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      disconnectControlledCloudMode();
+      return;
+    }
+    scene.canvas.width = 16;
+    scene.canvas.height = 8;
+    installSolidCloudTestTextures();
+    effects.cloudTime = 0.0;
+    const previousDestination = Cartesian3.fromDegrees(15.0, 45.0, 6000.0);
+    const previousDirection = Cartesian3.normalize(
+      Cartesian3.negate(previousDestination, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const previousRight = Cartesian3.normalize(
+      Cartesian3.cross(previousDirection, Cartesian3.UNIT_Z, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const previousUp = Cartesian3.normalize(
+      Cartesian3.cross(previousRight, previousDirection, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const fixedTime = JulianDate.fromIso8601("2026-06-21T10:30:00Z");
+    const resources = effects._pipeline._resources;
+    const productCloud = resources.cloudProgram;
+    const productCloudLogarithmic = resources.cloudLogDepthProgram;
+    const productResolve = resources.cloudResolveProgram;
+    const productResolveLogarithmic = resources.cloudResolveLogDepthProgram;
+
+    function historyManager() {
+      return effects._pipeline._cloudHistoryReadIndex === 0
+        ? resources.cloudHistoryFramebuffer0
+        : resources.cloudHistoryFramebuffer1;
+    }
+
+    function readResolvedPixel() {
+      const manager = historyManager();
+      const texture = manager.getColorTexture(0);
+      const x = Math.floor(texture.width * 0.5);
+      const y = Math.floor(texture.height * 0.5);
+      return {
+        x,
+        y,
+        color: readHalfTexturePixel(texture, x, y),
+        distance: readHalfTexturePixel(manager.getColorTexture(1), x, y),
+      };
+    }
+
+    function copyHistory(colorForPixel, distanceForPixel) {
+      const manager = historyManager();
+      for (let attachment = 0; attachment < 2; attachment++) {
+        const texture = manager.getColorTexture(attachment);
+        const values = new Uint16Array(texture.width * texture.height * 4);
+        for (let y = 0; y < texture.height; y++) {
+          for (let x = 0; x < texture.width; x++) {
+            const value =
+              attachment === 0
+                ? colorForPixel(x, y, texture.width, texture.height)
+                : distanceForPixel(x, y, texture.width, texture.height);
+            const offset = (y * texture.width + x) * 4;
+            values[offset] = encodeFloat16(value[0]);
+            values[offset + 1] = encodeFloat16(value[1]);
+            values[offset + 2] = encodeFloat16(value[2]);
+            values[offset + 3] = encodeFloat16(value[3]);
+          }
+        }
+        texture.copyFrom({
+          source: {
+            width: texture.width,
+            height: texture.height,
+            arrayBufferView: values,
+          },
+        });
+      }
+    }
+
+    function cloudSentinelProgram(colorStatement, distance) {
+      const source = cloudReplaySentinelFragmentSource
+        .replace(
+          "out_FragData_0 = vec4(0.125, 0.25, 0.5, 0.75);",
+          colorStatement,
+        )
+        .replace(
+          "vec4(0.0625, 0.1875, 0.375, 1.0)",
+          `vec4(${distance.join(", ")})`,
+        );
+      return createEnvironmentEffectsProgramForSpecs(
+        scene.context,
+        source,
+        true,
+      );
+    }
+
+    function resetPreviousCamera(orthographic) {
+      if (orthographic) {
+        scene.camera.switchToOrthographicFrustum();
+        scene.camera.frustum.width = 10000.0;
+      } else {
+        scene.camera.switchToPerspectiveFrustum();
+      }
+      scene.camera.setView({
+        destination: previousDestination,
+        orientation: { direction: previousDirection, up: previousUp },
+      });
+      effects.cloudTime = 0.0;
+      effects._pipeline.invalidateCloudHistory("spec-semantic-history");
+      scene.renderForSpecs(fixedTime);
+    }
+
+    function beginPerspectiveMotion() {
+      scene.camera.moveRight(100.0);
+      scene.camera.lookRight(0.1);
+      effects.cloudTime = 0.25;
+    }
+
+    const activePrograms = [];
+    try {
+      const currentProgram = cloudSentinelProgram(
+        "float stripe = step(1.0, mod(floor(gl_FragCoord.x), 2.0)); out_FragData_0 = vec4(mix(vec3(0.125), vec3(0.25), stripe), 0.75);",
+        [0.025, 0.0245, 1.0, 1.0],
+      );
+      activePrograms.push(currentProgram);
+      resources.cloudProgram = currentProgram;
+      resources.cloudLogDepthProgram = currentProgram;
+      resetPreviousCamera(false);
+      beginPerspectiveMotion();
+      const probeSource = cloudResolveFragmentSource.replace(
+        "historyWeight *= reprojectedPositionValid ? 1.0 : 0.0;",
+        "vec3 probePreviousOrigin; vec3 probePreviousDirection; sceneGISCloudResolveRay(historyCoordinates, u_cloudPreviousPerspective, u_cloudPreviousFrustum, vec3(0.0), u_cloudPreviousCameraDirection, u_cloudPreviousCameraRight, u_cloudPreviousCameraUp, probePreviousOrigin, probePreviousDirection); vec3 probeSemanticDistances = vec3(dot(currentMeanAnchor - probePreviousOrigin, probePreviousDirection), dot(currentFrontAnchor - probePreviousOrigin, probePreviousDirection), dot(currentSceneAnchor - probePreviousOrigin, probePreviousDirection)) / SCENEGIS_CLOUD_DISTANCE_ENCODING; out_FragData_0 = vec4(historyCoordinates, probeSemanticDistances.xy); out_FragData_1 = vec4(probeSemanticDistances.z, reprojectedPositionValid ? 1.0 : 0.0, v_textureCoordinates); return;",
+      );
+      expect(probeSource).not.toBe(cloudResolveFragmentSource);
+      const probeProgram = createEnvironmentEffectsProgramForSpecs(
+        scene.context,
+        probeSource,
+        true,
+      );
+      activePrograms.push(probeProgram);
+      resources.cloudResolveProgram = probeProgram;
+      resources.cloudResolveLogDepthProgram = probeProgram;
+      scene.renderForSpecs(fixedTime);
+      const probe = readResolvedPixel();
+      expect(probe.color[0]).toBeGreaterThan(0.0);
+      expect(probe.color[0]).toBeLessThan(1.0);
+      expect(probe.color[1]).toBeGreaterThan(0.0);
+      expect(probe.color[1]).toBeLessThan(1.0);
+      expect(Math.abs(probe.color[0] - probe.distance[2])).toBeGreaterThan(
+        1.0e-4,
+      );
+      expect(probe.color[2]).toBeGreaterThan(0.0);
+      expect(probe.color[3]).toBeGreaterThan(0.0);
+      expect(probe.distance[1]).toBe(1.0);
+      const semanticDistances = [
+        probe.color[2],
+        probe.color[3],
+        probe.distance[0],
+      ];
+      const historyDistanceTexture = historyManager().getColorTexture(1);
+      const projectedTexelX = Math.min(
+        historyDistanceTexture.width - 1,
+        Math.floor(probe.color[0] * historyDistanceTexture.width),
+      );
+      const currentTexelX = Math.min(
+        historyDistanceTexture.width - 1,
+        Math.floor(probe.distance[2] * historyDistanceTexture.width),
+      );
+      expect(projectedTexelX).not.toBe(currentTexelX);
+      const projectedTexelCenter =
+        (projectedTexelX + 0.5) / historyDistanceTexture.width;
+      function semanticDistanceForPixel(x, width, packedAlpha) {
+        const coordinate = (x + 0.5) / width;
+        const delta = coordinate - projectedTexelCenter;
+        return [
+          semanticDistances[0] + 0.002 * delta,
+          semanticDistances[1] - 0.002 * delta,
+          semanticDistances[2],
+          packedAlpha,
+        ];
+      }
+      expect(
+        Math.abs(
+          semanticDistanceForPixel(
+            projectedTexelX,
+            historyDistanceTexture.width,
+            1.0,
+          )[0] -
+            semanticDistanceForPixel(
+              currentTexelX,
+              historyDistanceTexture.width,
+              1.0,
+            )[0],
+        ) * 200000.0,
+      ).toBeGreaterThan(16.0);
+
+      resources.cloudResolveProgram = productResolve;
+      resources.cloudResolveLogDepthProgram = productResolveLogarithmic;
+      resetPreviousCamera(false);
+      beginPerspectiveMotion();
+      copyHistory(
+        function () {
+          return [0.5, 0.5, 0.5, 0.75];
+        },
+        function (x, y, width) {
+          return semanticDistanceForPixel(x, width, 0.75);
+        },
+      );
+      scene.renderForSpecs(fixedTime);
+      expect(effects._pipeline._cloudHistoryDiagnostics.mode).toBe(
+        "continuous-reprojected",
+      );
+      const clampedHistory = readResolvedPixel();
+      expect(clampedHistory.color[0]).toBeLessThanOrEqual(0.2501);
+      expect(clampedHistory.color[1]).toBeLessThanOrEqual(0.2501);
+      expect(clampedHistory.color[2]).toBeLessThanOrEqual(0.2501);
+      expect(clampedHistory.distance[3]).toBe(1.0);
+      expect(clampedHistory.distance[0]).toEqualEpsilon(0.025, 0.0001);
+      expect(clampedHistory.distance[1]).toEqualEpsilon(0.0245, 0.0001);
+      expect(clampedHistory.distance[2]).toBe(1.0);
+
+      const secondCurrentProgram = cloudSentinelProgram(
+        "float stripe = step(1.0, mod(floor(gl_FragCoord.x), 2.0)); out_FragData_0 = vec4(mix(vec3(0.15), vec3(0.275), stripe), 0.75);",
+        [0.025, 0.0245, 1.0, 1.0],
+      );
+      activePrograms.push(secondCurrentProgram);
+      resources.cloudProgram = secondCurrentProgram;
+      resources.cloudLogDepthProgram = secondCurrentProgram;
+      scene.camera.moveRight(100.0);
+      scene.camera.lookRight(0.1);
+      effects.cloudTime = 0.26;
+      scene.renderForSpecs(fixedTime);
+      expect(effects._pipeline._cloudHistoryDiagnostics.mode).toBe(
+        "continuous-reprojected",
+      );
+      const secondTransition = readResolvedPixel();
+      expect(secondTransition.distance[0]).toEqualEpsilon(0.025, 0.0001);
+      expect(secondTransition.distance[1]).toEqualEpsilon(0.0245, 0.0001);
+      expect(secondTransition.distance[2]).toBe(1.0);
+
+      effects._pipeline.invalidateCloudHistory("spec-spatial-baseline");
+      scene.renderForSpecs(fixedTime);
+      const spatialOnly = readResolvedPixel();
+      expect(secondTransition.color).not.toEqual(spatialOnly.color);
+
+      resetPreviousCamera(false);
+      beginPerspectiveMotion();
+      copyHistory(
+        function (x, y, width) {
+          const value = 0.125 + (0.125 * x) / Math.max(width - 1, 1);
+          return [value, value, value, 0.75];
+        },
+        function (x, y, width) {
+          return semanticDistanceForPixel(x, width, 1.0);
+        },
+      );
+      scene.renderForSpecs(fixedTime);
+      const reprojected = readResolvedPixel();
+
+      const sameUvSource = cloudResolveFragmentSource.replace(
+        /(reprojectedPositionValid = sceneGISCloudHistoryCoordinates\([\s\S]*?currentSceneAnchor\);)/,
+        "$1 historyCoordinates = v_textureCoordinates;",
+      );
+      expect(sameUvSource).not.toBe(cloudResolveFragmentSource);
+      const sameUvProgram = createEnvironmentEffectsProgramForSpecs(
+        scene.context,
+        sameUvSource,
+        true,
+      );
+      activePrograms.push(sameUvProgram);
+      resetPreviousCamera(false);
+      beginPerspectiveMotion();
+      copyHistory(
+        function (x, y, width) {
+          const value = 0.125 + (0.125 * x) / Math.max(width - 1, 1);
+          return [value, value, value, 0.75];
+        },
+        function (x, y, width) {
+          return semanticDistanceForPixel(x, width, 1.0);
+        },
+      );
+      resources.cloudResolveProgram = sameUvProgram;
+      resources.cloudResolveLogDepthProgram = sameUvProgram;
+      scene.renderForSpecs(fixedTime);
+      expect(readResolvedPixel().color).not.toEqual(reprojected.color);
+
+      resources.cloudResolveProgram = productResolve;
+      resources.cloudResolveLogDepthProgram = productResolveLogarithmic;
+      resetPreviousCamera(false);
+      scene.camera.moveRight(30000.0);
+      scene.renderForSpecs(fixedTime);
+      expect(effects._pipeline._cloudHistoryDiagnostics.mode).toBe(
+        "camera-cut-spatial-only",
+      );
+      expect(effects._pipeline._cloudHistoryDiagnostics.resetReason).toBe(
+        "camera-translation",
+      );
+
+      const invalidProgram = cloudSentinelProgram(
+        "out_FragData_0 = vec4(0.0);",
+        [0.0, 0.0, 0.0, 102.0 / 2048.0],
+      );
+      activePrograms.push(invalidProgram);
+      resources.cloudProgram = invalidProgram;
+      resources.cloudLogDepthProgram = invalidProgram;
+      resetPreviousCamera(true);
+      copyHistory(
+        function () {
+          return [0.0, 0.0, 0.0, 1.0];
+        },
+        function (x) {
+          return [0.0, 0.0, 1.0, (100.0 + (x % 5)) / 2048.0];
+        },
+      );
+      scene.camera.moveRight(500.0);
+      scene.renderForSpecs(fixedTime);
+      const orthographicProduct = readResolvedPixel();
+
+      resetPreviousCamera(true);
+      copyHistory(
+        function () {
+          return [0.0, 0.0, 0.0, 1.0];
+        },
+        function (x) {
+          return [0.0, 0.0, 1.0, (100.0 + (x % 5)) / 2048.0];
+        },
+      );
+      resources.cloudResolveProgram = sameUvProgram;
+      resources.cloudResolveLogDepthProgram = sameUvProgram;
+      scene.camera.moveRight(500.0);
+      scene.renderForSpecs(fixedTime);
+      expect(readResolvedPixel().distance).not.toEqual(
+        orthographicProduct.distance,
+      );
+
+      resources.cloudResolveProgram = productResolve;
+      resources.cloudResolveLogDepthProgram = productResolveLogarithmic;
+      resetPreviousCamera(true);
+      copyHistory(
+        function () {
+          return [0.0, 0.0, 0.0, 1.0];
+        },
+        function () {
+          return [0.0, 0.0, 0.25, 100.0 / 2048.0];
+        },
+      );
+      scene.camera.moveRight(500.0);
+      scene.renderForSpecs(fixedTime);
+      expect(Math.round(readResolvedPixel().distance[3] * 2048.0)).toBe(102);
+    } finally {
+      resources.cloudProgram = productCloud;
+      resources.cloudLogDepthProgram = productCloudLogarithmic;
+      resources.cloudResolveProgram = productResolve;
+      resources.cloudResolveLogDepthProgram = productResolveLogarithmic;
+      for (const program of activePrograms) {
+        program.destroy();
+      }
+      disconnectControlledCloudMode();
     }
   });
 

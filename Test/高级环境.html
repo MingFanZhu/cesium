@@ -479,6 +479,11 @@
             采集 A5-G 固定证据
           </button>
           <button id="a5gCloseEvidence" type="button">关闭 A5-G 证据</button>
+          <strong>A6-G Globe temporal / quality</strong>
+          <button id="a6gMotionObservation" type="button">
+            观察相机 + 云运动重投影
+          </button>
+          <button id="a6gQualityObservation" type="button">观察质量切换</button>
           <button id="presetGrid" type="button">生成 Globe 四预设网格</button>
           <button id="diagnostic" type="button">对比 enabled / identity</button>
           <button id="nativeConflict" type="button">
@@ -519,6 +524,7 @@
       </aside>
       <pre id="a4gEvidence" hidden></pre>
       <pre id="a5gEvidence" hidden></pre>
+      <pre id="a6gEvidence" hidden></pre>
       <pre id="diagnosticTransactionEvidence" hidden></pre>
     </main>
 
@@ -3967,6 +3973,134 @@
           .addEventListener("click", () => {
             document.querySelector("#a5gEvidence").hidden = true;
           });
+
+        async function captureGlobeA6Frame() {
+          const savedDefaultRenderLoop = globeViewer.useDefaultRenderLoop;
+          globeViewer.useDefaultRenderLoop = false;
+          try {
+            const captured = await new Promise((resolve, reject) => {
+              const removeError =
+                globeViewer.scene.renderError.addEventListener(
+                  (_renderScene, error) => {
+                    remove();
+                    removeError();
+                    reject(error);
+                  },
+                );
+              const remove = globeViewer.scene.postRender.addEventListener(
+                () => {
+                  remove();
+                  removeError();
+                  const width = globeViewer.scene.context.drawingBufferWidth;
+                  const height = globeViewer.scene.context.drawingBufferHeight;
+                  resolve({
+                    displayed: {
+                      samples: Array.from(
+                        globeViewer.scene.context.readPixels({
+                          x: 0,
+                          y: 0,
+                          width,
+                          height,
+                        }),
+                      ),
+                      width,
+                      height,
+                    },
+                    raw: readCloudMrtRaw(globeEffects, globeViewer.scene),
+                  });
+                },
+              );
+              globeViewer.scene.requestRender();
+              globeViewer.render();
+            });
+            const renderer = globeEffects._pipeline;
+            const displayed = summarizeDisplayedPixels(captured.displayed);
+            const profile = {
+              quality: globeEffects.cloudQuality,
+              cloudScale:
+                renderer?._resources?.cloudFramebuffer?.getColorTexture(0)
+                  .width / globeViewer.scene.context.drawingBufferWidth,
+              primarySteps: renderer?._uniformMap.u_cloudPrimarySteps(),
+              fineSteps: renderer?._uniformMap.u_cloudFineSteps(),
+              sunSteps: renderer?._uniformMap.u_cloudSunSteps(),
+              detail: renderer?._uniformMap.u_cloudUseDetail(),
+              shadowCascades: renderer?._shadowCascadeCount,
+              shadowResolution: renderer?._globeShadowResources?.resolution,
+              shadowSteps: renderer?._uniformMap.u_sceneGISShadowSteps(),
+            };
+            return {
+              profile,
+              history: { ...renderer?._cloudHistoryDiagnostics },
+              cloudTime: globeEffects.cloudTime,
+              solarElevationDegrees: globeOwnerSolarElevation(),
+              raw: summarizeCloudMrtLighting(
+                globeEffects,
+                globeViewer.scene,
+                captured.raw,
+              ),
+              displayed: {
+                width: displayed.width,
+                height: displayed.height,
+                luminance: displayed.luminance,
+                maximumRgb: displayed.maximumRgb,
+                gradientEnergy: displayed.gradientEnergy,
+                laplacianEnergy: displayed.laplacianEnergy,
+              },
+            };
+          } finally {
+            globeViewer.useDefaultRenderLoop = savedDefaultRenderLoop;
+            globeViewer.scene.requestRender();
+          }
+        }
+
+        async function showA6Observation(run) {
+          const output = document.querySelector("#a6gEvidence");
+          output.hidden = false;
+          output.textContent = "capturing Globe A6-G observation…";
+          try {
+            output.textContent = JSON.stringify(await run(), undefined, 2);
+          } catch (error) {
+            output.textContent = `capture failed: ${error.stack ?? error}`;
+          }
+        }
+
+        document
+          .querySelector("#a6gMotionObservation")
+          .addEventListener("click", () =>
+            showA6Observation(async () => {
+              currentGlobeOwnerLocation = "midLatitude";
+              currentGlobeOwnerCamera = "ground";
+              applyGlobeOwnerLightingPreset("highSun");
+              applyGlobeOwnerCameraPreset("ground");
+              globeEffects.cloudQuality = "medium";
+              globeEffects.cloudTime = 0.0;
+              const prior = await captureGlobeA6Frame();
+              globeViewer.camera.moveRight(100.0);
+              globeViewer.camera.lookRight(0.005);
+              globeEffects.cloudTime = 0.25;
+              const moved = await captureGlobeA6Frame();
+              return {
+                observation: "high-Sun camera/cloud motion",
+                priorMode: prior.history.mode,
+                moved,
+              };
+            }),
+          );
+
+        document
+          .querySelector("#a6gQualityObservation")
+          .addEventListener("click", () =>
+            showA6Observation(async () => {
+              const previousQuality = globeEffects.cloudQuality;
+              globeEffects.cloudQuality =
+                previousQuality === "low" ? "medium" : "low";
+              return {
+                observation: "quality switch",
+                previousQuality,
+                switched: await captureGlobeA6Frame(),
+              };
+            }),
+          );
 
         window.captureCloudMrtPresetLightingEvidence = async function () {
           const savedPresets = effects.map(

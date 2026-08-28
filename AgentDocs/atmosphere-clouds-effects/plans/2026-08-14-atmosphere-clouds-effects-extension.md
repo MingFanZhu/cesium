@@ -8,11 +8,9 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-28`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A6-G active`
-- Active phase plan:
-  [2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md](2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md)
+- Current phase: `A6-G completed; A7-G pending separate activation`
 - Latest completed phase plan:
-  [2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md](2026-08-28-phase-a5g-globe-cloud-shadows-skylight-rays.md)
+  [2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md](2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -29,7 +27,7 @@
 - A3 implementation: `completed`
 - A4 implementation: `A4-G completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A5-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
-- A6-G implementation: `active; formally assigned from a separate Architecture activation checkpoint`
+- A6-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 
 ## Goal
 
@@ -237,6 +235,16 @@ therefore activates an in-place Globe reprojection of that same history, with no
 new GPU resource category, second Beer history, velocity MRT, automatic FPS
 controller, A7-G work or Planar change. The active phase plan is
 [A6-G Globe temporal stabilization and performance](2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md).
+
+### A6-G completion — 2026-08-28
+
+All Architecture findings are closed and the project owner explicitly passed
+the prepared interactive motion gate. The accepted result has no rejected
+camera-motion cloud/shadow trail, no settling-frame snap after motion stops,
+and one clean `medium -> low` history reset. The phase-closing local commit
+containing this record is the isolated A6-G checkpoint. A7-G requires a
+separate Architecture source-discovery and activation; A8-G and Planar remain
+inactive.
 
 ### A4-AR-018/019 focused closure — 2026-08-27
 
