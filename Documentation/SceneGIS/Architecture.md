@@ -248,6 +248,13 @@ spatial-only结果。Public `cloudQuality`是cloud/Beer/resolve唯一caller-owne
 settling render或建立第二套Beer history。A6-G不增加GPU resource/pass/command category，完整continuity、budget与Planar冻结边界见
 [ADR-0048](Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md)。
 
+A7-G在同一`SGP-0008` pre-tonemap linear-HDR slot末端执行Globe bright threshold、固定separable blur与additive bloom/ghost/halo composite。
+Lens artifact只消费final HDR Sun signal与resolved exact-clear depth完成terrain/cloud visibility；不得新增Sun、Cloud MRT或history authority。
+SceneGIS bloom启用时Cesium general bloom必须caller-owned地保持disabled，existing `scene.sunBloom=false` contract继续排除`SunPostProcess`。
+A7固定使用two half-resolution加one full-resolution color-only RGBA16F targets，不使用public `PostProcessStage`、raw WebGL、screen blend、asset、
+tone mapping或Planar执行；完整public、resource与lifecycle contract见
+[ADR-0049](Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md)。
+
 ### 平面地形 Core 契约
 
 平面地形使用独立的 `SceneGISPlanarTerrainProvider`、`SceneGISPlanarTerrainData` 和

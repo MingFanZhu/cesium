@@ -8,7 +8,9 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-28`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A6-G completed; A7-G pending separate activation`
+- Current phase: `A7-G active`
+- Active phase plan:
+  [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
 - Latest completed phase plan:
   [2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md](2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md)
 - Architecture decisions:
@@ -20,7 +22,8 @@
   [ADR-0045](../../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md),
   [ADR-0046](../../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
   [ADR-0047](../../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md),
-  [ADR-0048](../../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md)
+  [ADR-0048](../../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md),
+  [ADR-0049](../../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - A1 implementation: `completed`
 - A2 implementation: `completed`
@@ -28,6 +31,7 @@
 - A4 implementation: `A4-G completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A5-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A6-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
+- A7-G implementation: `active; formally assigned from a separate Architecture activation checkpoint`
 
 ## Goal
 
@@ -245,6 +249,17 @@ and one clean `medium -> low` history reset. The phase-closing local commit
 containing this record is the isolated A6-G checkpoint. A7-G requires a
 separate Architecture source-discovery and activation; A8-G and Planar remain
 inactive.
+
+### A7-G activation — 2026-08-28
+
+The project owner explicitly authorized the next phase after passing A6-G.
+Checkpoint `201f6edada8fe2738bf9eb3277a30ea3b519e7d7` is frozen. Architecture
+re-audited the fixed reference threshold/blur/ghost/halo topology and the live
+Cesium 1.144 HDR/postprocess order, then accepted ADR-0049. A7-G uses the
+existing `SGP-0008` slot, three SceneGIS-owned color-only framebuffer managers
+and explicit resolved-depth/final-HDR Sun visibility. No upstream edit, new SGP,
+asset/history, A8-G or Planar work is active. The phase plan is
+[A7-G Globe HDR bloom and lens flare](2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md).
 
 ### A4-AR-018/019 focused closure — 2026-08-27
 

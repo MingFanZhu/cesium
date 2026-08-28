@@ -3,8 +3,10 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A6-G completed; A7-G pending separate activation`
-- Current review: `A6-G accepted; closed`
+- Current phase: `A7-G active`
+- Current review: `A7-G implementation pending`
+- Active phase plan:
+  [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](plans/2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
 - Latest completed phase plan:
   [2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md](plans/2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md)
 - Extension plan:
@@ -18,7 +20,8 @@
   [ADR-0045](../../Documentation/SceneGIS/Decisions/ADR-0045-dual-world-exponential-height-fog.md),
   [ADR-0046](../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
   [ADR-0047](../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md),
-  [ADR-0048](../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md)
+  [ADR-0048](../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md),
+  [ADR-0049](../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
@@ -26,6 +29,7 @@
 - A3 checkpoint: `43ed40117104e0450bf23dc094b2ab2e602bbfa2`（未push）
 - A4-G checkpoint: `241de41fc36835114a4e9312ad53ca2ac64407b8`（未push）
 - A5-G checkpoint: `3ead681e7854082b6b9d016fdcd9cd8619087102`（未push）
+- A6-G checkpoint: `201f6edada8fe2738bf9eb3277a30ea3b519e7d7`（未push）
 
 ## Objective
 
@@ -36,9 +40,12 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- A7-G已从冻结A6-G checkpoint单独激活。ADR-0049在既有`SGP-0008` linear-HDR slot末端增加half-resolution bright threshold、fixed separable blur、
+  additive bloom与Sun ghost/halo；terrain/geometry使用resolved exact-clear depth遮挡，cloud遮挡复用final HDR signal。A7固定为two half-resolution加one
+  full-resolution color-only RGBA16F targets，不使用public `PostProcessStage`、raw WebGL、asset、history、screen blend、第二tone mapper、A8-G或Planar执行。
 - A6-G已通过Architecture review与项目负责人动态人工验收。ADR-0048只演进A4R既有two-target Cloud history，为bounded Globe camera/cloud motion增加
   world-position reprojection，并把A5 shadow length保持在同一semantic history authority内；`cloudQuality`继续是唯一caller-owned动态档位。
-  第二套Beer history、velocity MRT、automatic FPS、额外GPU resource category、A7-G、Planar与hash/replay/convergence验证均不进入本阶段。
+  第二套Beer history、velocity MRT、automatic FPS与额外GPU resource category均未增加；该checkpoint现已冻结。
 - A5-G已经完成Architecture review、owner visual gate与独立checkpoint。ADR-0047的current-frame RGBA16F Beer atlas、`SGP-0009`最小Globe
   surface seam、A2 Sun/sky surface lighting、packed shadow length与terrain-depth lifecycle全部冻结。
 - A1 已实现并通过 Architecture/code review：双阶段 render integration、private pipeline lifecycle 与 globe/planar
@@ -86,6 +93,7 @@ reference frame，不互相伪造坐标语义。
 - [A5-G shadow, skylight, and rays source discovery](discussions/2026-08-28-a5g-shadow-skylight-rays-source-discovery.md) — `resolved; A5-G completed`
 - [A5-G owner visual corrections](discussions/2026-08-28-a5g-owner-visual-corrections.md) — `resolved; owner accepted`
 - [A6-G temporal and performance source discovery](discussions/2026-08-28-a6g-temporal-performance-source-discovery.md) — `resolved; A6-G active`
+- [A7-G HDR bloom and lens flare source discovery](discussions/2026-08-28-a7g-hdr-bloom-lens-flare-source-discovery.md) — `resolved; A7-G active`
 
 ## Reviews
 
@@ -95,6 +103,7 @@ reference frame，不互相伪造坐标语义。
 - [A4 volumetric cloud core implementation review](reviews/2026-08-15-a4-volumetric-cloud-core.md) — `changes-requested; superseded by A4-G`
 - [A5-G Globe cloud shadows, skylight, and crepuscular rays review](reviews/2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md) — `accepted; closed`
 - [A6-G Globe temporal stabilization and performance review](reviews/2026-08-28-a6g-globe-temporal-stabilization-performance.md) — `accepted; closed`
+- [A7-G Globe HDR bloom and lens flare review](reviews/2026-08-28-a7g-globe-hdr-bloom-lens-flare.md) — `implementation pending`
 
 ## Engineering paths
 
@@ -1091,3 +1100,14 @@ single `medium -> low` observation produced the accepted clean spatial reset.
 All Architecture findings were already closed, so A6-G is accepted. The
 phase-closing local commit containing this record is the isolated A6-G
 checkpoint; A7-G remains a separate activation and Planar remains frozen.
+
+## A7-G Architecture activation — 2026-08-28
+
+The project owner explicitly requested the next phase after passing A6-G.
+Architecture froze checkpoint `201f6edada8fe2738bf9eb3277a30ea3b519e7d7`,
+re-audited the fixed Cesium/three-geospatial lens references and current Cesium
+postprocess order, and accepted ADR-0049. A7-G adapts the reference
+threshold/blur/ghost/halo topology inside the existing SceneGIS linear-HDR slot
+with explicit terrain/cloud Sun visibility and a deterministic three-FBO
+budget. No upstream file, new SGP, asset, history, A8-G or Planar behavior is
+authorized. Execution starts only from the separate A7-G activation checkpoint.

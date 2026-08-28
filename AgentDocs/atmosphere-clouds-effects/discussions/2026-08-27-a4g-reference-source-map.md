@@ -9,7 +9,8 @@
   [A4-G Globe reference-first integrated cloud core](../plans/2026-08-27-phase-a4g-globe-integrated-cloud-core.md)
 - Decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
-  [ADR-0046](../../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md)
+  [ADR-0046](../../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
+  [ADR-0049](../../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md)
 - Reference commits:
   [`cesium-clouds-atmosphere@1f38602b`](https://github.com/yuwoniu03/cesium-clouds-atmosphere/tree/1f38602b84ab5c3f2bc289f9e4464df3db917155),
   [`three-geospatial@b012ad06`](https://github.com/takram-design-engineering/three-geospatial/tree/b012ad06d858fc035d88aacfd73f092f93c994e4/packages/clouds)
@@ -28,6 +29,7 @@
 | Composition                               | Cesium reference cloud stage and `AerialPerspectiveEffect` stage                                                                                                                                            | `packages/clouds/src/shaders/clouds.frag#applyAerialPerspective` and MRT outputs                                         | Adapt only optical ordering. Retain SceneGIS premultiplied cloud MRT, depth-aware resolve and one Cesium display-transfer authority.                                                                                                                                                 |
 | Cloud temporal resolve                    | `src/ThreeGeospatialPipeline.js#_taaCapture`, `#_taaGetHistoryTexture`, `#_taaUpdateVP`                                                                                                                     | `packages/clouds/src/CloudsResolveMaterial.ts`, `shaders/cloudsResolve.frag`                                             | Retain the already accepted SceneGIS cloud-only history owner, reset key and Cesium framebuffer managers. Reject raw PBO and reference runtime texture wrappers. Stack-wide temporal policy remains A6-G.                                                                            |
 | Beer shadow, ground shadow and rays       | `src/CloudShadowPass.js`, `ShadowResolvePass.js`, pipeline BSM helpers                                                                                                                                      | `packages/clouds/src/ShadowPass.ts`, `ShadowResolveMaterial.ts`, shadow shaders                                          | Source-mapped only. Deferred to A5-G; no program, pass, texture or uniform is adopted in A4-G.                                                                                                                                                                                       |
+| HDR bloom and lens artifacts              | `src/AtmosphereFromThreeGeospatial/LensFlareBloomStage.js`                                                                                                                                                  | `packages/effects/src/LensFlareEffect.ts`, threshold/features/composite shaders                                          | A7-G adopts the half-resolution threshold, blur, ghost/halo and additive HDR topology inside the existing SceneGIS slot. Reject the fork's public postprocess container, screen blend and duplicate display transfer.                                                                |
 
 ## Terrain-depth lifecycle authority
 
@@ -59,9 +61,16 @@ Audited source files are:
 - `three-geospatial/packages/clouds/src/DensityProfile.ts`
 - `three-geospatial/packages/clouds/src/CloudsMaterial.ts`
 - `three-geospatial/packages/clouds/src/qualityPresets.ts`
+- `three-geospatial/packages/effects/src/LensFlareEffect.ts`
+- `three-geospatial/packages/effects/src/DownsampleThresholdMaterial.ts`
+- `three-geospatial/packages/effects/src/LensFlareFeaturesMaterial.ts`
+- `three-geospatial/packages/effects/src/shaders/downsampleThreshold.frag`
+- `three-geospatial/packages/effects/src/shaders/lensFlareFeatures.frag`
+- `three-geospatial/packages/effects/src/shaders/lensFlareEffect.frag`
 - `cesium-clouds-atmosphere/src/ThreeGeospatialPipeline.js`
 - `cesium-clouds-atmosphere/src/AtmosphereFromThreeGeospatial/AtmospherePostProcess.js`
 - `cesium-clouds-atmosphere/src/AtmosphereFromThreeGeospatial/AerialPerspectiveEffect.js`
+- `cesium-clouds-atmosphere/src/AtmosphereFromThreeGeospatial/LensFlareBloomStage.js`
 
 The Cesium fork changes container, depth reconstruction, atmosphere wiring,
 uniform naming and optional display correction. SceneGIS adopts its Cesium Globe
