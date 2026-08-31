@@ -138,6 +138,19 @@
         background: rgb(7 16 25 / 96%);
         color: #d7edf8;
       }
+      #a7gEvidence {
+        position: fixed;
+        z-index: 30;
+        right: 12px;
+        bottom: 12px;
+        width: min(680px, 48vw);
+        max-height: 65vh;
+        overflow: auto;
+        padding: 10px;
+        border: 1px solid #54788d;
+        background: rgb(7 16 25 / 96%);
+        color: #d7edf8;
+      }
       @media (max-width: 900px) {
         .worlds {
           grid-template-columns: 1fr;
@@ -484,6 +497,48 @@
             观察相机 + 云运动重投影
           </button>
           <button id="a6gQualityObservation" type="button">观察质量切换</button>
+          <strong>A7-G Globe HDR bloom / lens flare</strong>
+          <label><input id="showBloom" type="checkbox" checked />Bloom</label>
+          <label
+            ><input id="showLensFlare" type="checkbox" checked />Lens
+            flare</label
+          >
+          <label
+            >Threshold
+            <input
+              id="bloomThreshold"
+              type="range"
+              min="0"
+              max="40"
+              step="0.1"
+              value="10"
+            /><output id="bloomThresholdValue">10</output></label
+          >
+          <label
+            >Bloom intensity
+            <input
+              id="bloomIntensity"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.05"
+            /><output id="bloomIntensityValue">0.05</output></label
+          >
+          <label
+            >Lens intensity
+            <input
+              id="lensFlareIntensity"
+              type="range"
+              min="0"
+              max="64"
+              step="0.1"
+              value="5"
+            /><output id="lensFlareIntensityValue">5</output></label
+          >
+          <button id="a7gVisibleSun" type="button">A7 可见高日</button>
+          <button id="a7gLensDisabled" type="button">A7 关闭 Lens</button>
+          <button id="a7gSunBelowHorizon" type="button">A7 日落线下</button>
           <button id="presetGrid" type="button">生成 Globe 四预设网格</button>
           <button id="diagnostic" type="button">对比 enabled / identity</button>
           <button id="nativeConflict" type="button">
@@ -525,6 +580,7 @@
       <pre id="a4gEvidence" hidden></pre>
       <pre id="a5gEvidence" hidden></pre>
       <pre id="a6gEvidence" hidden></pre>
+      <pre id="a7gEvidence" hidden></pre>
       <pre id="diagnosticTransactionEvidence" hidden></pre>
     </main>
 
@@ -1337,6 +1393,28 @@
               String(value);
             globeViewer.scene.requestRender();
           });
+        document.querySelector("#showBloom").addEventListener("change", (event) => {
+          globeEffects.showBloom = event.target.checked;
+          globeViewer.scene.requestRender();
+        });
+        document
+          .querySelector("#showLensFlare")
+          .addEventListener("change", (event) => {
+            globeEffects.showLensFlare = event.target.checked;
+            globeViewer.scene.requestRender();
+          });
+        ["bloomThreshold", "bloomIntensity", "lensFlareIntensity"].forEach(
+          (property) => {
+          document
+            .querySelector(`#${property}`)
+            .addEventListener("input", (event) => {
+              const value = Number(event.target.value);
+              globeEffects[property] = value;
+              document.querySelector(`#${property}Value`).value = String(value);
+              globeViewer.scene.requestRender();
+            });
+          },
+        );
         document
           .querySelector("#cloudQuality")
           .addEventListener("change", (event) => {
@@ -1647,17 +1725,8 @@
           globeViewer.scene.requestRender();
         }
         window.applyGlobeA4GLightingPreset = applyGlobeOwnerLightingPreset;
-        function applyGlobeA5GCrepuscularRaysPreset() {
-          currentGlobeOwnerLocation = "midLatitude";
-          currentGlobeOwnerCamera = "ground";
-          applyGlobeOwnerLightingPreset("crepuscularRays");
+        function alignGlobeCameraToLiveSun(destination) {
           globeViewer.scene.render(globeViewer.clock.currentTime);
-          const location = globeOwnerLocations.midLatitude;
-          const destination = Cesium.Cartesian3.fromDegrees(
-            location.longitude,
-            location.latitude,
-            Math.max(globeEffects.cloudBaseHeight - 500.0, 100.0),
-          );
           const transform =
             Cesium.Transforms.eastNorthUpToFixedFrame(destination);
           const inverseTransform = Cesium.Matrix4.inverseTransformation(
@@ -1671,11 +1740,27 @@
           );
           Cesium.Cartesian3.normalize(localSun, localSun);
           const heading = Math.atan2(localSun.x, localSun.y);
-          const pitch = Math.asin(Cesium.Math.clamp(localSun.z, -1.0, 1.0));
+          const pitch = Math.asin(
+            Cesium.Math.clamp(localSun.z, -1.0, 1.0),
+          );
           globeViewer.camera.setView({
             destination,
             orientation: { heading, pitch, roll: 0.0 },
           });
+          return { heading, pitch };
+        }
+        function applyGlobeA5GCrepuscularRaysPreset() {
+          currentGlobeOwnerLocation = "midLatitude";
+          currentGlobeOwnerCamera = "ground";
+          applyGlobeOwnerLightingPreset("crepuscularRays");
+          const location = globeOwnerLocations.midLatitude;
+          const destination = Cesium.Cartesian3.fromDegrees(
+            location.longitude,
+            location.latitude,
+            Math.max(globeEffects.cloudBaseHeight - 500.0, 100.0),
+          );
+          const { heading, pitch } =
+            alignGlobeCameraToLiveSun(destination);
           currentCameraPreset = "a5g-midLatitude-sunAligned";
           currentGlobeOwnerCamera = "sunAligned";
           globeEffects.heightFogDensity = 0.00003;
@@ -4101,6 +4186,65 @@
               };
             }),
           );
+
+        async function showA7Observation(lighting, lensFlare) {
+          const output = document.querySelector("#a7gEvidence");
+          output.hidden = false;
+          applyGlobeOwnerLightingPreset(lighting);
+          applyGlobeOwnerCameraPreset("ground");
+          if (lighting === "highSun") {
+            const location = globeOwnerLocations.midLatitude;
+            const destination = Cesium.Cartesian3.fromDegrees(
+              location.longitude,
+              location.latitude,
+              globeOwnerCameras.ground.altitude,
+            );
+            alignGlobeCameraToLiveSun(destination);
+          }
+          globeEffects.showBloom = true;
+          globeEffects.showLensFlare = lensFlare;
+          document.querySelector("#showBloom").checked = true;
+          document.querySelector("#showLensFlare").checked = lensFlare;
+          try {
+            const frame = await captureGlobeA6Frame();
+            output.textContent = JSON.stringify(
+              {
+                observation:
+                  lighting === "highSun"
+                    ? lensFlare
+                      ? "visible high Sun"
+                      : "visible high Sun, lens disabled"
+                    : "Sun below horizon",
+                showBloom: globeEffects.showBloom,
+                showLensFlare: globeEffects.showLensFlare,
+                bloomThreshold: globeEffects.bloomThreshold,
+                bloomIntensity: globeEffects.bloomIntensity,
+                lensFlareIntensity: globeEffects.lensFlareIntensity,
+                solarElevationDegrees: frame.solarElevationDegrees,
+                raw: frame.raw,
+                displayed: frame.displayed,
+              },
+              undefined,
+              2,
+            );
+          } catch (error) {
+            output.textContent = `capture failed: ${error.stack ?? error}`;
+          }
+        }
+
+        document.querySelector("#a7gVisibleSun").addEventListener("click", () => {
+          void showA7Observation("highSun", true);
+        });
+        document
+          .querySelector("#a7gLensDisabled")
+          .addEventListener("click", () => {
+            void showA7Observation("highSun", false);
+          });
+        document
+          .querySelector("#a7gSunBelowHorizon")
+          .addEventListener("click", () => {
+            void showA7Observation("noMoonNight", true);
+          });
 
         window.captureCloudMrtPresetLightingEvidence = async function () {
           const savedPresets = effects.map(

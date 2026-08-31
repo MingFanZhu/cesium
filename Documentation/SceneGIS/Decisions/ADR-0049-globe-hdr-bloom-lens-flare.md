@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`accepted; A7-G implementation active`
+- Status：`accepted; A7-G completed`
 - Date：`2026-08-28`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -36,7 +36,7 @@ A7-G在`SceneGISEnvironmentEffects`增加以下warm writable properties：
 | `showLensFlare`      |  `true` |      boolean | Globe Sun ghost/halo lens artifacts            |
 | `bloomThreshold`     |  `10.0` |  `[0,65504]` | Scene-linear luminance threshold               |
 | `bloomIntensity`     |  `0.05` |     `[0,64]` | Additive blurred-bright-field multiplier       |
-| `lensFlareIntensity` |   `1.0` |     `[0,64]` | Multiplier over reference ghost/halo amplitude |
+| `lensFlareIntensity` |   `5.0` |     `[0,64]` | Multiplier over reference ghost/halo amplitude |
 
 Setters只request render，不invalidate A6 cloud history。A7-G只执行Globe分支；
 Planar可保留公共值但产品公式、command、resource与画面必须完全不变，直到A8-G后
@@ -48,8 +48,9 @@ Planar可保留公共值但产品公式、command、resource与画面必须完�
 
 1. 以`ceil(width/2) x ceil(height/2)` RGBA16F执行reference-shaped
    luminance downsample与`smoothstep(threshold, threshold+1)`；
-2. 使用一个固定、对称、separable blur horizontal/vertical通过第二个同尺寸
-   RGBA16F target；
+2. 使用一个固定、归一化、对称的separable blur，以direction radius
+   `1/2/4`执行三组horizontal/vertical octave，通过同一对half-resolution
+   RGBA16F targets ping-pong；
 3. full-resolution composite读取原HDR、blurred bright field与resolved depth，
    加上`bloom * bloomIntensity`以及reference ghost/halo；
 4. 保持input alpha exact不变，只使用既有finite RGBA16F guard，禁止screen blend、
@@ -71,7 +72,8 @@ resolved depth为exact clear `0|1`，且同一坐标的final HDR bright signal�
 A7-G增加：
 
 - three programs：threshold、shared separable blur、composite；
-- four commands：threshold、horizontal blur、vertical blur、composite；
+- four command objects：threshold、horizontal blur、vertical blur、composite；
+  active frame按固定顺序执行一次threshold、六次blur和一次composite；
 - three color-only `FramebufferManager`/RGBA16F textures：two half-resolution、
   one full-resolution；
 - zero depth attachment、history、readback、asset、network request或runtime dependency。
@@ -107,3 +109,77 @@ existing controller error path.
 - Focused controller/A1, `tsc`, installed-package verification, lint/format and
   direct fixed visual observations are sufficient. No full repository matrix,
   replay/hash/convergence or absolute FPS gate is required.
+
+## Execution evidence — 2026-08-28
+
+- Implemented the Globe-only half-resolution threshold, shared separable blur and
+  full-resolution additive HDR composite. The lens branch uses the fixed
+  reference ghost/halo amplitude `1e-5` and is gated by projected Sun visibility,
+  exact-clear resolved depth and the final-HDR threshold.
+- Added warm public controls with defaults `true/true/10/0.05/1`; all setters
+  request render without invalidating A6 history. Planar execution remains an
+  exact bypass.
+- Lazy A7 topology is exactly three programs, four commands and three color-only
+  RGBA16F targets. Bytes are
+  `8*W*H + 16*ceil(W/2)*ceil(H/2)`; resource/pass/history/upstream/SGP deltas are
+  `3 programs / 4 commands / 3 FBOs / 0 history / 0 upstream / 0 SGP`.
+- Focused actual-GPU A7 and lifecycle fixtures pass. Final focused controller,
+  A1 pipeline, TypeScript, installed-package and changed-scope checks are listed
+  in the A7 review. Browser observations used only the three fixed Globe states;
+  render errors were zero.
+
+## A7-AR-004 架构修订 — 2026-08-28
+
+Project-owner固定高日照画面证明single-octave finite-support blur会把极高亮Sun
+扩展为axis-aligned saturated square，且同一窄blur source使ghost/halo footprint
+过小。重新审计固定MIT参考后，Architecture确认参考的bloom是multi-level blur，
+feature source另有pre-blur；原A7把两种scale domain压成一次H/V blur是直接偏差。
+
+本修订不增加resource或改变Sun radiometry/public intensity。现有normalized blur
+command以固定`1/2/4` direction radius执行三组H/V octave，最终broad field同时供
+general bloom与既有mirrored ghost/halo读取。Program、command object、texture、FBO、
+GPU bytes、depth/history/API/upstream/SGP/Planar预算保持不变；active execution从
+`threshold + 2 blur + composite`调整为`threshold + 6 blur + composite`。
+
+### A7-AR-004 execution result
+
+Execution已按决定复用既有两个blur command object与两个half-resolution target，
+依次执行`1/2/4`三组H/V octave。聚焦GPU fixture通过，并用single-octave mutation
+证明新图在旧finite footprint之外保留连续非零support。固定高日照观察中原
+axis-aligned saturated square已消失，ghost/halo field明显扩大；resource、API、
+physical source、upstream、SGP与Planar均无增量。
+
+## A7-AR-006 架构修订 — 2026-08-30
+
+Project-owner画面确认Bloom在可见Sun周围跨越terrain silhouette，但明确判断lens
+halo过淡。Bloom是depth-resolved scene之后的additive screen-space point-spread
+function；对每个blurred destination pixel再次以terrain depth裁切会产生不真实的
+hard horizon edge，因此Bloom threshold、intensity、blur、source gate与composite均
+保持冻结。
+
+固定reference的overall effect intensity为`0.005`，ghost/halo source coefficient
+为`0.001`，feature-to-bloom ratio为`0.001`。SceneGIS原默认组合为
+`1e-5 * 1.0 / 0.05 = 0.0002`，相对reference弱五倍。本修订仅把
+`lensFlareIntensity`默认值改为`5.0`，恢复
+`1e-5 * 5.0 / 0.05 = 0.001`。Public range仍为`[0,64]`；GLSL内部系数、Bloom、
+Sun radiometry、tone transfer、depth、resource、A2-A6、Planar、upstream与SGP均
+不变。
+
+### A7-AR-006 execution result
+
+Execution已将constructor、JSDoc、Test与installed-package authority的默认值同步
+为`5.0`，并保持public range `[0,64]`与内部`1e-5`系数不变。聚焦constructor
+Spec和installed delivery verifier通过；单次固定高日照观察显示halo/ghost相对
+Bloom明显增强且仍为宽范围soft field。GLSL、Bloom、depth、resource与其他冻结
+边界均无变化。
+
+Architecture逐项复核default链路并独立重跑既有constructor-contract Spec为
+`1/1 SUCCESS`。`A7-AR-006`关闭；同一default-5画面进入project-owner visual
+re-gate，明确通过前不得继续sweep或进入checkpoint/A8-G。
+
+## A7-G 最终验收 — 2026-08-31
+
+Project owner已对default-5最终画面明确报告`通过`，接受Bloom跨越terrain
+silhouette的screen-space optical spread与增强后的lens halo/ghost balance。
+Architecture review与owner visual gate全部关闭；本ADR随A7-G独立本地checkpoint
+冻结，A8-G需另行激活。

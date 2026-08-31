@@ -6,13 +6,11 @@
 - Status: `active`
 - Owner roles: Architecture Agent, Execution Agent
 - Created: `2026-08-14`
-- Updated: `2026-08-28`
+- Updated: `2026-08-31`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A7-G active`
-- Active phase plan:
-  [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
+- Current phase: `A7-G completed; A8-G pending separate activation`
 - Latest completed phase plan:
-  [2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md](2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md)
+  [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -31,7 +29,7 @@
 - A4 implementation: `A4-G completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A5-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A6-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
-- A7-G implementation: `active; formally assigned from a separate Architecture activation checkpoint`
+- A7-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 
 ## Goal
 
@@ -260,6 +258,15 @@ existing `SGP-0008` slot, three SceneGIS-owned color-only framebuffer managers
 and explicit resolved-depth/final-HDR Sun visibility. No upstream edit, new SGP,
 asset/history, A8-G or Planar work is active. The phase plan is
 [A7-G Globe HDR bloom and lens flare](2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md).
+
+### A7-G completion — 2026-08-31
+
+Architecture closed `A7-AR-001` through `A7-AR-006`, and the project owner
+explicitly reported `通过` for the final default-5 Bloom/lens image. The accepted
+result retains screen-space Bloom across the terrain silhouette and the stronger
+reference-balanced halo/ghost field. The phase-closing local commit containing
+this record is the isolated A7-G checkpoint and is not pushed. A8-G and Planar
+remain inactive until a separate Architecture activation.
 
 ### A4-AR-018/019 focused closure — 2026-08-27
 

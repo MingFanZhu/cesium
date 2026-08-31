@@ -163,6 +163,9 @@ const sceneGISShaderSources = [
   "EnvironmentEffects/SceneGISCloudShadows",
   "EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS",
+  "EnvironmentEffects/SceneGISEnvironmentEffectsBloomBlurFS",
+  "EnvironmentEffects/SceneGISEnvironmentEffectsBloomCompositeFS",
+  "EnvironmentEffects/SceneGISEnvironmentEffectsBloomThresholdFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsCloudFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsCloudResolveFS",
   "EnvironmentEffects/SceneGISEnvironmentEffectsVS",
@@ -607,6 +610,11 @@ assert.equal(globeEffects.heightFogDirectionalInscatteringExponent, 8.0);
 assert.equal(globeEffects.showClouds, true);
 assert.equal(globeEffects.showCloudShadows, true);
 assert.equal(globeEffects.showCrepuscularRays, true);
+assert.equal(globeEffects.showBloom, true);
+assert.equal(globeEffects.showLensFlare, true);
+assert.equal(globeEffects.bloomThreshold, 10.0);
+assert.equal(globeEffects.bloomIntensity, 0.05);
+assert.equal(globeEffects.lensFlareIntensity, 5.0);
 assert.equal(globeEffects.cloudQuality, "medium");
 assert.equal(globeEffects.cloudPreset, "cumulus");
 assert.equal(globeEffects.cloudCoverage, 0.45);
@@ -633,6 +641,11 @@ globeEffects.heightFogDirectionalInscatteringExponent = 16.0;
 globeEffects.showClouds = false;
 globeEffects.showCloudShadows = false;
 globeEffects.showCrepuscularRays = false;
+globeEffects.showBloom = false;
+globeEffects.showLensFlare = false;
+globeEffects.bloomThreshold = 12.0;
+globeEffects.bloomIntensity = 0.1;
+globeEffects.lensFlareIntensity = 2.0;
 globeEffects.cloudQuality = "high";
 globeEffects.cloudPreset = "mixed";
 globeEffects.cloudCoverage = 0.6;
@@ -658,6 +671,11 @@ assert.equal(globeEffects.heightFogDirectionalInscatteringExponent, 16.0);
 assert.equal(globeEffects.showClouds, false);
 assert.equal(globeEffects.showCloudShadows, false);
 assert.equal(globeEffects.showCrepuscularRays, false);
+assert.equal(globeEffects.showBloom, false);
+assert.equal(globeEffects.showLensFlare, false);
+assert.equal(globeEffects.bloomThreshold, 12.0);
+assert.equal(globeEffects.bloomIntensity, 0.1);
+assert.equal(globeEffects.lensFlareIntensity, 2.0);
 assert.equal(globeEffects.cloudQuality, "high");
 assert.equal(globeEffects.cloudPreset, "mixed");
 assert.equal(globeEffects.cloudCoverage, 0.6);
@@ -848,6 +866,11 @@ assert.equal(effects.heightFogDirectionalInscatteringExponent, 8.0);
 assert.equal(effects.showClouds, true);
 assert.equal(effects.showCloudShadows, true);
 assert.equal(effects.showCrepuscularRays, true);
+assert.equal(effects.showBloom, true);
+assert.equal(effects.showLensFlare, true);
+assert.equal(effects.bloomThreshold, 10.0);
+assert.equal(effects.bloomIntensity, 0.05);
+assert.equal(effects.lensFlareIntensity, 5.0);
 assert.equal(effects.cloudQuality, "medium");
 assert.equal(effects.cloudPreset, "cumulus");
 assert.equal(effects.cloudCoverage, 0.45);
@@ -1325,7 +1348,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 23/23 GLSL, 23/23 generated shader modules, exact Bruneton, PlanarEarth, and CloudCore assets/provenance in engine/root, bare ESM/CJS, A4R public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 26/26 GLSL, 26/26 generated shader modules, exact Bruneton, PlanarEarth, and CloudCore assets/provenance in engine/root, bare ESM/CJS, A4R-A7 public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
   );
 }
 

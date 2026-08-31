@@ -36,6 +36,9 @@ import cloudShadowSource from "../../../Shaders/SceneGIS/EnvironmentEffects/Scen
 import aerialFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS.js";
 import atmosphereSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
 import backgroundFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS.js";
+import bloomBlurFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBloomBlurFS.js";
+import bloomCompositeFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBloomCompositeFS.js";
+import bloomThresholdFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBloomThresholdFS.js";
 import cloudFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsCloudFS.js";
 import cloudResolveFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsCloudResolveFS.js";
 import heightFogSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISExponentialHeightFog.js";
@@ -432,6 +435,190 @@ function createProgram(
     throw error;
   }
   return program;
+}
+
+function createPostProgram(context, fragmentSource) {
+  const program = ShaderProgram.fromCache({
+    context,
+    vertexShaderSource: vertexSource,
+    fragmentShaderSource: fragmentSource,
+    attributeLocations,
+  });
+  try {
+    program._bind();
+  } catch (error) {
+    destroyResource(program);
+    throw error;
+  }
+  return program;
+}
+
+function destroyBloomResources(resources) {
+  if (!defined(resources)) {
+    return;
+  }
+  destroyResource(resources.thresholdFramebuffer);
+  destroyResource(resources.blurFramebuffer);
+  destroyResource(resources.compositeFramebuffer);
+  destroyResource(resources.thresholdProgram);
+  destroyResource(resources.blurProgram);
+  destroyResource(resources.compositeProgram);
+}
+
+function createBloomFramebuffer(context, width, height, sampler) {
+  const framebuffer = new FramebufferManager({
+    colorAttachmentsLength: 1,
+    depth: false,
+    depthStencil: false,
+    pixelDatatype: PixelDatatype.HALF_FLOAT,
+    pixelFormat: PixelFormat.RGBA,
+  });
+  try {
+    framebuffer.update(
+      context,
+      width,
+      height,
+      1,
+      PixelDatatype.HALF_FLOAT,
+      PixelFormat.RGBA,
+    );
+    if (defined(sampler)) {
+      framebuffer.getColorTexture(0).sampler = sampler;
+    }
+  } catch (error) {
+    framebuffer.destroy();
+    throw error;
+  }
+  return framebuffer;
+}
+
+function createBloomResources(renderer, context, width, height) {
+  const halfWidth = Math.max(1, Math.ceil(width * 0.5));
+  const halfHeight = Math.max(1, Math.ceil(height * 0.5));
+  const candidate = {};
+  const renderState = RenderState.fromCache({
+    cull: { enabled: false },
+    depthTest: { enabled: false },
+    depthMask: false,
+  });
+  try {
+    candidate.thresholdProgram = createPostProgram(
+      context,
+      bloomThresholdFragmentSource,
+    );
+    candidate.blurProgram = createPostProgram(context, bloomBlurFragmentSource);
+    candidate.compositeProgram = createPostProgram(
+      context,
+      bloomCompositeFragmentSource,
+    );
+    candidate.thresholdFramebuffer = createBloomFramebuffer(
+      context,
+      halfWidth,
+      halfHeight,
+      linearSampler,
+    );
+    candidate.blurFramebuffer = createBloomFramebuffer(
+      context,
+      halfWidth,
+      halfHeight,
+      linearSampler,
+    );
+    candidate.compositeFramebuffer = createBloomFramebuffer(
+      context,
+      width,
+      height,
+    );
+    const options = {
+      vertexArray: renderer._resources.vertexArray,
+      uniformMap: renderer._uniformMap,
+      renderState,
+      primitiveType: PrimitiveType.TRIANGLE_STRIP,
+      count: 4,
+      owner: renderer,
+    };
+    candidate.thresholdCommand = new DrawCommand({
+      ...options,
+      shaderProgram: candidate.thresholdProgram,
+    });
+    candidate.horizontalBlurCommand = new DrawCommand({
+      ...options,
+      shaderProgram: candidate.blurProgram,
+    });
+    candidate.verticalBlurCommand = new DrawCommand({
+      ...options,
+      shaderProgram: candidate.blurProgram,
+    });
+    candidate.compositeCommand = new DrawCommand({
+      ...options,
+      shaderProgram: candidate.compositeProgram,
+    });
+    candidate.width = width;
+    candidate.height = height;
+    candidate.halfWidth = halfWidth;
+    candidate.halfHeight = halfHeight;
+  } catch (error) {
+    destroyBloomResources(candidate);
+    throw error;
+  }
+  return candidate;
+}
+
+function ensureBloomResources(renderer, context, width, height) {
+  const current = renderer._bloomResources;
+  const halfWidth = Math.max(1, Math.ceil(width * 0.5));
+  const halfHeight = Math.max(1, Math.ceil(height * 0.5));
+  if (
+    defined(current) &&
+    current.width === width &&
+    current.height === height &&
+    current.halfWidth === halfWidth &&
+    current.halfHeight === halfHeight
+  ) {
+    return current;
+  }
+  if (defined(current)) {
+    let thresholdFramebuffer;
+    let blurFramebuffer;
+    let compositeFramebuffer;
+    try {
+      thresholdFramebuffer = createBloomFramebuffer(
+        context,
+        halfWidth,
+        halfHeight,
+        linearSampler,
+      );
+      blurFramebuffer = createBloomFramebuffer(
+        context,
+        halfWidth,
+        halfHeight,
+        linearSampler,
+      );
+      compositeFramebuffer = createBloomFramebuffer(context, width, height);
+    } catch (error) {
+      destroyResource(thresholdFramebuffer);
+      destroyResource(blurFramebuffer);
+      destroyResource(compositeFramebuffer);
+      throw error;
+    }
+    const oldThreshold = current.thresholdFramebuffer;
+    const oldBlur = current.blurFramebuffer;
+    const oldComposite = current.compositeFramebuffer;
+    current.thresholdFramebuffer = thresholdFramebuffer;
+    current.blurFramebuffer = blurFramebuffer;
+    current.compositeFramebuffer = compositeFramebuffer;
+    current.width = width;
+    current.height = height;
+    current.halfWidth = halfWidth;
+    current.halfHeight = halfHeight;
+    destroyResource(oldThreshold);
+    destroyResource(oldBlur);
+    destroyResource(oldComposite);
+    return current;
+  }
+  const candidate = createBloomResources(renderer, context, width, height);
+  renderer._bloomResources = candidate;
+  destroyBloomResources(current);
+  return candidate;
 }
 
 function destroyGlobeShadowResources(renderer) {
@@ -960,6 +1147,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._world = options.world;
   this._owner = options.owner;
   this._resources = undefined;
+  this._bloomResources = undefined;
   this._showAtmosphere = true;
   this._showAerialPerspective = true;
   this._showHeightFog = true;
@@ -973,6 +1161,12 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._perspective = true;
   this._inputColorTexture = undefined;
   this._depthTexture = undefined;
+  this._bloomTexture = undefined;
+  this._bloomDirection = new Cartesian2();
+  this._sunViewportCoordinates = new Cartesian2(0.5, 0.5);
+  this._sunLensVisible = false;
+  this._bloomHalfPassState = undefined;
+  this._bloomFullPassState = undefined;
   this._aerialPassState = undefined;
   this._cloudPassState = undefined;
   this._cloudResolvePassState = undefined;
@@ -1083,6 +1277,15 @@ function SceneGISEnvironmentEffectsRenderer(options) {
       that._owner._heightFogDirectionalInscatteringExponent,
     u_colorTexture: () => that._inputColorTexture,
     u_depthTexture: () => that._depthTexture,
+    u_bloomTexture: () => that._bloomTexture,
+    u_bloomDirection: () => that._bloomDirection,
+    u_sunViewportCoordinates: () => that._sunViewportCoordinates,
+    u_sunLensVisible: () => that._sunLensVisible,
+    u_showBloom: () => that._owner._showBloom,
+    u_showLensFlare: () => that._owner._showLensFlare,
+    u_bloomThreshold: () => that._owner._bloomThreshold,
+    u_bloomIntensity: () => that._owner._bloomIntensity,
+    u_lensFlareIntensity: () => that._owner._lensFlareIntensity,
     u_transmittanceTexture: () => that._resources?.transmittanceTexture,
     u_scatteringTexture: () => that._resources?.scatteringTexture,
     u_irradianceTexture: () => that._resources?.irradianceTexture,
@@ -1876,16 +2079,126 @@ function executeCloudPass(renderer, context, depthTexture) {
   return true;
 }
 
+function updateSunViewportCoordinates(renderer) {
+  renderer._sunLensVisible = false;
+  renderer._sunViewportCoordinates.x = 0.5;
+  renderer._sunViewportCoordinates.y = 0.5;
+  if (!renderer._perspective) {
+    return;
+  }
+  const forward = Cartesian3.dot(
+    renderer._sunDirection,
+    renderer._frame.cameraDirection,
+  );
+  if (!(forward > 0.0)) {
+    return;
+  }
+  const planeX =
+    Cartesian3.dot(renderer._sunDirection, renderer._frame.cameraRight) /
+    forward;
+  const planeY =
+    Cartesian3.dot(renderer._sunDirection, renderer._frame.cameraUp) / forward;
+  const width = renderer._frustum.y - renderer._frustum.x;
+  const height = renderer._frustum.w - renderer._frustum.z;
+  if (!(width > 0.0) || !(height > 0.0)) {
+    return;
+  }
+  const x = (planeX - renderer._frustum.x) / width;
+  const y = (planeY - renderer._frustum.z) / height;
+  renderer._sunViewportCoordinates.x = Math.min(Math.max(x, 0.0), 1.0);
+  renderer._sunViewportCoordinates.y = Math.min(Math.max(y, 0.0), 1.0);
+  renderer._sunLensVisible = x >= 0.0 && x <= 1.0 && y >= 0.0 && y <= 1.0;
+}
+
+function updateBloomPassState(passState, context, width, height) {
+  if (!defined(passState)) {
+    passState = new PassState(context);
+    passState.viewport = new BoundingRectangle();
+  }
+  passState.viewport.x = 0;
+  passState.viewport.y = 0;
+  passState.viewport.width = width;
+  passState.viewport.height = height;
+  return passState;
+}
+
+function executeBloom(renderer, context, colorTexture, depthTexture) {
+  const resources = ensureBloomResources(
+    renderer,
+    context,
+    colorTexture.width,
+    colorTexture.height,
+  );
+  renderer._bloomHalfPassState = updateBloomPassState(
+    renderer._bloomHalfPassState,
+    context,
+    resources.halfWidth,
+    resources.halfHeight,
+  );
+  renderer._bloomFullPassState = updateBloomPassState(
+    renderer._bloomFullPassState,
+    context,
+    resources.width,
+    resources.height,
+  );
+  renderer._inputColorTexture = colorTexture;
+  renderer._depthTexture = depthTexture;
+  updateSunViewportCoordinates(renderer);
+  try {
+    resources.thresholdCommand.framebuffer =
+      resources.thresholdFramebuffer.framebuffer;
+    resources.thresholdCommand.execute(context, renderer._bloomHalfPassState);
+
+    for (let octave = 0; octave < 3; ++octave) {
+      const radius = 2 ** octave;
+      renderer._bloomTexture =
+        resources.thresholdFramebuffer.getColorTexture(0);
+      renderer._bloomDirection.x = radius;
+      renderer._bloomDirection.y = 0.0;
+      resources.horizontalBlurCommand.framebuffer =
+        resources.blurFramebuffer.framebuffer;
+      resources.horizontalBlurCommand.execute(
+        context,
+        renderer._bloomHalfPassState,
+      );
+
+      renderer._bloomTexture = resources.blurFramebuffer.getColorTexture(0);
+      renderer._bloomDirection.x = 0.0;
+      renderer._bloomDirection.y = radius;
+      resources.verticalBlurCommand.framebuffer =
+        resources.thresholdFramebuffer.framebuffer;
+      resources.verticalBlurCommand.execute(
+        context,
+        renderer._bloomHalfPassState,
+      );
+    }
+
+    renderer._bloomTexture = resources.thresholdFramebuffer.getColorTexture(0);
+    resources.compositeCommand.framebuffer =
+      resources.compositeFramebuffer.framebuffer;
+    resources.compositeCommand.execute(context, renderer._bloomFullPassState);
+    return resources.compositeFramebuffer.getColorTexture(0);
+  } finally {
+    renderer._inputColorTexture = undefined;
+    renderer._depthTexture = undefined;
+    renderer._bloomTexture = undefined;
+  }
+}
+
 SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
   context,
   colorTexture,
   depthTexture,
   idTexture,
 ) {
+  const bloomActive =
+    this._mode === SceneGISAtmosphereReferenceFrame.GLOBE &&
+    (this._owner._showBloom || this._owner._showLensFlare);
   if (
     (!this._showAerialPerspective &&
       !this._showHeightFog &&
-      !this._showClouds) ||
+      !this._showClouds &&
+      !bloomActive) ||
     !defined(this._resources)
   ) {
     return colorTexture;
@@ -1899,6 +2212,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
   }
   void idTexture;
   let cloudPassExecuted;
+  let hdrTexture;
   try {
     cloudPassExecuted = executeCloudPass(this, context, depthTexture);
   } catch (error) {
@@ -1914,7 +2228,9 @@ SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
     !this._showAerialPerspective &&
     !this._showHeightFog
   ) {
-    return colorTexture;
+    return bloomActive
+      ? executeBloom(this, context, colorTexture, depthTexture)
+      : colorTexture;
   }
   const framebuffer = ensureAerialFramebuffer(
     this,
@@ -1951,13 +2267,25 @@ SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
     this._cloudHistoryDistanceTexture = undefined;
     this._cloudPassActive = false;
   }
-  return framebuffer.getColorTexture(0);
+  hdrTexture = framebuffer.getColorTexture(0);
+  if (bloomActive) {
+    try {
+      hdrTexture = executeBloom(this, context, hdrTexture, depthTexture);
+    } finally {
+      this._inputColorTexture = undefined;
+      this._depthTexture = undefined;
+      this._bloomTexture = undefined;
+    }
+  }
+  return hdrTexture;
 };
 
 SceneGISEnvironmentEffectsRenderer.prototype.releaseResources = function () {
   this.releaseGlobeLighting();
   destroyResources(this._resources);
+  destroyBloomResources(this._bloomResources);
   this._resources = undefined;
+  this._bloomResources = undefined;
 };
 
 SceneGISEnvironmentEffectsRenderer.prototype.destroy = function () {

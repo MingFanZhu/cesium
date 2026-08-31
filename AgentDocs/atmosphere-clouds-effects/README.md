@@ -3,12 +3,10 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A7-G active`
-- Current review: `A7-G implementation pending`
-- Active phase plan:
-  [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](plans/2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
+- Current phase: `A7-G completed; A8-G pending separate activation`
+- Current review: `A7-G accepted; closed`
 - Latest completed phase plan:
-  [2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md](plans/2026-08-28-phase-a6g-globe-temporal-stabilization-performance.md)
+  [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](plans/2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -43,6 +41,33 @@ reference frame，不互相伪造坐标语义。
 - A7-G已从冻结A6-G checkpoint单独激活。ADR-0049在既有`SGP-0008` linear-HDR slot末端增加half-resolution bright threshold、fixed separable blur、
   additive bloom与Sun ghost/halo；terrain/geometry使用resolved exact-clear depth遮挡，cloud遮挡复用final HDR signal。A7固定为two half-resolution加one
   full-resolution color-only RGBA16F targets，不使用public `PostProcessStage`、raw WebGL、asset、history、screen blend、第二tone mapper、A8-G或Planar执行。
+- A7-G Architecture correction review已关闭`A7-AR-001/002`：two half-resolution targets在initial/resize allocation后显式使用existing linear sampler；
+  composite恢复fixed nine mirrored ghost offsets/colors、aspect-correct chromatic halo与cubic ring。Architecture独立复跑localized-source actual-GPU fixture为
+  `1/1 SUCCESS`，forced `Sampler.NEAREST` mutation与finite-depth ghost suppression均有直接authority。A7 code review通过，只剩项目负责人固定画面人工验收。
+- Project owner点击`A7 可见高日`后无法验收，因为static `#a7gEvidence`成为`main`第三个grid row：Architecture direct reproduction中JSON row为
+  `355.977 px`，Globe viewer被压缩到`127.656 px`。`A7-AR-003`只修复Test evidence为right-side bounded fixed overlay；A7 product、capture字段、参数与已关闭
+  shader findings保持冻结。
+- Architecture独立复核已关闭`A7-AR-003`：同一`1600 x 900`页面点击前后`.worlds`与Globe viewer均保持`483.6328125 px`，evidence为fixed、
+  scrollable且完全位于右侧world区域。A7-G全部code/Test findings已关闭，owner visual gate重新开放。
+- Project owner随后拒绝固定高日照画面：Bloom把Sun扩成axis-aligned white square，lens flare footprint过小。Architecture重新审计固定
+  `three-geospatial`源，确认reference以multi-level blur处理Bloom、以独立pre-blur形成feature source，而current single H/V blur压缩了两个scale
+  domain。`A7-AR-004`已下发固定`1/2/4`三octave ping-pong correction；保持public intensity、Sun radiometry、program/command object/FBO/bytes、
+  A2-A6、Planar与SGP不变，仅把active blur execution从2次扩展为6次。Owner re-gate、checkpoint与A8-G继续blocked。
+- Architecture独立检查并重跑聚焦GPU fixture=`1/1 SUCCESS`，已关闭`A7-AR-004`产品修复；但fresh `1600 x 900`页面单击`A7 可见高日`后，
+  `799 x 483.6328125` Globe viewport内实际没有Sun或lens artifact。Test源码仍把相机设为`heading=0/pitch=-5°` ground view，未对准
+  67.484° live Sun。`A7-AR-005`只修正这两个high-Sun Test witness使用既有live-Sun ENU alignment；产品、参数、证据字段与below-horizon state冻结。
+- Architecture独立复核已关闭`A7-AR-005`：最小Test helper保持A5原语义，只为两个A7 high-Sun按钮在相同15°E/45°N、500 m位置对准live Sun；night
+  path不变。Fresh `1600 x 900`单击后Sun位于完整Globe viewport中心，原axis-aligned bloom方块消失，形成连续soft field。A7-G全部code/Test
+  findings关闭；Bloom softness与分离ghost/halo balance只等待项目负责人人工判断。
+- Project owner确认Bloom跨越terrain silhouette可视为合理screen-space optical spread，但判定lens halo过淡。Architecture冻结Bloom与depth行为，并以
+  fixed reference coefficient ratio定位`A7-AR-006`：current default feature-to-bloom ratio为`0.0002`，reference为`0.001`。只把
+  `lensFlareIntensity`默认值从`1.0`校正到`5.0`即可精确恢复比例；禁止参数sweep、GLSL/Bloom/resource/Planar改动。Owner re-gate、checkpoint与A8-G
+  继续blocked。
+- Architecture独立复核已关闭`A7-AR-006`：constructor/JSDoc、既有default Spec、installed-delivery expectation与Test control完整采用`5.0`，显式`2.0`
+  lifecycle、`[0,64]`range、internal `1e-5`、Bloom与resources保持不变。独立constructor-contract Spec为`1/1 SUCCESS`；同一default-5画面现仅等待
+  project-owner visual re-gate。
+- Project owner已对default-5最终画面明确报告`通过`，接受Bloom跨terrain silhouette的screen-space optical spread与增强后的lens halo/ghost balance。
+  A7-G Architecture review和owner visual gate全部关闭；本阶段形成独立本地checkpoint，不push。A8-G等待单独Architecture activation。
 - A6-G已通过Architecture review与项目负责人动态人工验收。ADR-0048只演进A4R既有two-target Cloud history，为bounded Globe camera/cloud motion增加
   world-position reprojection，并把A5 shadow length保持在同一semantic history authority内；`cloudQuality`继续是唯一caller-owned动态档位。
   第二套Beer history、velocity MRT、automatic FPS与额外GPU resource category均未增加；该checkpoint现已冻结。
@@ -103,7 +128,7 @@ reference frame，不互相伪造坐标语义。
 - [A4 volumetric cloud core implementation review](reviews/2026-08-15-a4-volumetric-cloud-core.md) — `changes-requested; superseded by A4-G`
 - [A5-G Globe cloud shadows, skylight, and crepuscular rays review](reviews/2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md) — `accepted; closed`
 - [A6-G Globe temporal stabilization and performance review](reviews/2026-08-28-a6g-globe-temporal-stabilization-performance.md) — `accepted; closed`
-- [A7-G Globe HDR bloom and lens flare review](reviews/2026-08-28-a7g-globe-hdr-bloom-lens-flare.md) — `implementation pending`
+- [A7-G Globe HDR bloom and lens flare review](reviews/2026-08-28-a7g-globe-hdr-bloom-lens-flare.md) — `accepted; closed`
 
 ## Engineering paths
 
@@ -1111,3 +1136,93 @@ threshold/blur/ghost/halo topology inside the existing SceneGIS linear-HDR slot
 with explicit terrain/cloud Sun visibility and a deterministic three-FBO
 budget. No upstream file, new SGP, asset, history, A8-G or Planar behavior is
 authorized. Execution starts only from the separate A7-G activation checkpoint.
+
+## Execution evidence — 2026-08-28
+
+- Implemented the Globe-only half-resolution threshold, shared separable blur and
+  full-resolution additive HDR composite. The lens branch uses the fixed
+  reference ghost/halo amplitude `1e-5` and is gated by projected Sun visibility,
+  exact-clear resolved depth and the final-HDR threshold.
+- Added warm public controls with defaults `true/true/10/0.05/1`; all setters
+  request render without invalidating A6 history. Planar execution remains an
+  exact bypass.
+- Lazy A7 topology is exactly three programs, four commands and three color-only
+  RGBA16F targets. Bytes are
+  `8*W*H + 16*ceil(W/2)*ceil(H/2)`; resource/pass/history/upstream/SGP deltas are
+  `3 programs / 4 commands / 3 FBOs / 0 history / 0 upstream / 0 SGP`.
+- Focused actual-GPU A7 and lifecycle fixtures pass. Final focused controller,
+  A1 pipeline, TypeScript, installed-package and changed-scope checks are listed
+  in the A7 review. Browser observations used only the three fixed Globe states;
+  render errors were zero.
+
+## A7-AR-001/002 execution correction — 2026-08-28
+
+The A7 correction assigns the existing renderer linear sampler to both
+half-resolution bloom targets and replaces the rejected Sun-centered lens
+mapping with the audited reference mirrored ghosts and aspect-correct chromatic
+halo/ring mask. The amended localized-source actual-GPU fixture passes `1/1`,
+distinguishes linear sampling from a forced nearest mutation, observes a
+spatially separated ghost and confirms finite-depth suppression. Resource/API,
+history, upstream, SGP and Planar deltas remain zero.
+
+## A7-AR-003 Test layout correction — 2026-08-28
+
+The A7 JSON evidence is now a fixed, bounded, scrollable right-side overlay
+instead of a main-grid child affecting layout. A direct `1600 x 900` high-Sun
+capture kept `.worlds` and `#globeViewer` height unchanged at
+`483.6328125 px`; the overlay stayed in the right-side world area. Product,
+capture and owner parameters remain unchanged.
+
+## A7-AR-004 execution correction — 2026-08-28
+
+The existing bloom ping-pong targets now run the normalized blur at fixed
+progressive radii `1/2/4`, producing six executions through the same two command
+objects before composite. The amended actual-GPU fixture passes and rejects the
+former single-octave footprint. One fixed high-Sun inspection showed no
+axis-aligned saturated square and materially broader lens features. Resource,
+API, physical-source, upstream, SGP and Planar deltas remain zero.
+
+## A7-AR-005 execution correction — 2026-08-28
+
+The two A7 high-Sun Test states now align the unchanged `500 m` ground camera to
+the live WGS84 local Sun using the accepted A5 ENU calculation. One fresh
+`1600 x 900` click visibly centered the `67.484068°` Sun and showed broad smooth
+bloom/halo without the former square or undersized footprint. The below-horizon
+state, capture data, owner parameters and product remain unchanged.
+
+## A7-AR-006 Architecture assignment — 2026-08-30
+
+The project-owner image accepts Bloom crossing the terrain silhouette but finds
+the lens halo too faint. Architecture keeps Bloom unchanged: it is an additive
+screen-space point-spread function, not a second geometry layer. The fixed
+reference feature-to-bloom ratio is `0.001`; the current defaults yield
+`0.0002`. Execution is assigned the exact default-only correction
+`lensFlareIntensity: 1.0 -> 5.0`, with existing expectations and Test control
+updated accordingly. Shader coefficients, Bloom, resources, depth, A2-A6,
+Planar, upstream and SGP remain frozen.
+
+## A7-AR-006 execution correction — 2026-08-30
+
+The public/JSDoc/Test/package `lensFlareIntensity` default is now `5.0`, with
+the existing `[0,64]` range and warm semantics unchanged. The focused
+constructor Spec and installed delivery verifier pass. One fixed high-Sun
+observation showed a materially stronger broad soft lens field without a new
+rectangular footprint. GLSL, Bloom, depth, resources, A2-A6, Planar, upstream
+and SGP remain unchanged.
+
+## Architecture A7-AR-006 closure — 2026-08-30
+
+Architecture verified every default occurrence, the unchanged explicit `2.0`
+fixture, public range, internal shader coefficient and Bloom/resource boundary.
+The existing constructor-contract Spec independently passes `1/1`. The finding
+is closed and the same default-5 page is ready for project-owner visual re-gate;
+checkpoint and A8-G remain blocked until an explicit pass.
+
+## A7-G project-owner visual gate — passed 2026-08-31
+
+The project owner explicitly reported `通过` for the corrected default-5 image.
+This accepts both the intentional screen-space Bloom crossing the terrain
+silhouette and the stronger reference-balanced lens halo/ghost appearance. A7-G
+is accepted and closed; its phase-closing local commit is the isolated
+checkpoint and is not pushed. A8-G remains inactive pending separate
+Architecture activation.

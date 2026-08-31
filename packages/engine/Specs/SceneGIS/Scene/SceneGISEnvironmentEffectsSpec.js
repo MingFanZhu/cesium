@@ -1805,6 +1805,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       "backgroundRadianceScale",
       "aerialRadianceScale",
       "surfaceRadianceScale",
+      "bloomIntensity",
+      "lensFlareIntensity",
     ]) {
       for (const value of [-1.0, 64.1, Number.NaN, Infinity]) {
         expect(function () {
@@ -1832,6 +1834,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       cloudWindSpeed: [0.0, 200.0],
       cloudTime: [-1000000000.0, 1000000000.0],
       cloudRadianceScale: [0.0, 64.0],
+      bloomThreshold: [0.0, 65504.0],
     };
     for (const [property, range] of Object.entries(fogRanges)) {
       for (const value of [
@@ -1875,6 +1878,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.showClouds).toBe(true);
     expect(effects.showCloudShadows).toBe(true);
     expect(effects.showCrepuscularRays).toBe(true);
+    expect(effects.showBloom).toBe(true);
+    expect(effects.showLensFlare).toBe(true);
     expect(effects.cloudQuality).toBe("medium");
     expect(effects.cloudPreset).toBe("cumulus");
     expect(effects.cloudCoverage).toBe(0.45);
@@ -1888,6 +1893,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.backgroundRadianceScale).toBe(10.0);
     expect(effects.aerialRadianceScale).toBe(1.0);
     expect(effects.surfaceRadianceScale).toBe(10.0);
+    expect(effects.bloomThreshold).toBe(10.0);
+    expect(effects.bloomIntensity).toBe(0.05);
+    expect(effects.lensFlareIntensity).toBe(5.0);
     expect(effects.heightFogDensity).toBe(0.000008);
     expect(effects.heightFogHeightFalloff).toBe(0.0002);
     expect(effects.heightFogBaseHeight).toBe(0.0);
@@ -1917,6 +1925,11 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       showClouds: false,
       showCloudShadows: false,
       showCrepuscularRays: false,
+      showBloom: false,
+      showLensFlare: false,
+      bloomThreshold: 12.0,
+      bloomIntensity: 0.1,
+      lensFlareIntensity: 2.0,
       cloudQuality: "high",
       cloudCoverage: 0.6,
       cloudDensity: 0.002,
@@ -1942,6 +1955,11 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.showClouds).toBe(false);
     expect(effects.showCloudShadows).toBe(false);
     expect(effects.showCrepuscularRays).toBe(false);
+    expect(effects.showBloom).toBe(false);
+    expect(effects.showLensFlare).toBe(false);
+    expect(effects.bloomThreshold).toBe(12.0);
+    expect(effects.bloomIntensity).toBe(0.1);
+    expect(effects.lensFlareIntensity).toBe(2.0);
     expect(effects.cloudQuality).toBe("high");
     expect(effects.cloudCoverage).toBe(0.6);
     expect(effects.cloudDensity).toBe(0.002);
@@ -3053,6 +3071,16 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
     expect(scene.frameState._sceneGISGlobeLighting).toBeUndefined();
     expect(fetch).not.toHaveBeenCalled();
+
+    scene.globe.enableLighting = false;
+    scene.postProcessStages.bloom.enabled = true;
+    expect(function () {
+      effects.firstUpdate(scene, scene.frameState.time);
+    }).toThrowDeveloperError();
+    expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
+    expect(effects._pipeline).toBeUndefined();
+    expect(fetch).not.toHaveBeenCalled();
+    scene.postProcessStages.bloom.enabled = false;
   });
 
   it("keeps Globe shadow toggles warm and releases the exact atlas lifecycle", async function () {
@@ -3071,6 +3099,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(acquiredBeforeResourceRequest).toBe(true);
     expect(scene.globe.depthTestAgainstTerrain).toBe(true);
     const pipeline = effects._pipeline;
+    expect(pipeline._bloomResources).toBeUndefined();
     const mediumShadow = pipeline._globeShadowResources;
     const texture = mediumShadow.framebuffer.getColorTexture(0);
     expect(texture.width).toBe(1024);
@@ -3151,7 +3180,65 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       false,
     );
 
+    effects.showAerialPerspective = false;
+    effects.showHeightFog = false;
+    effects.showBloom = false;
+    effects.showLensFlare = false;
+    const input = scene.context.defaultTexture;
+    const resetReason = pipeline._cloudHistoryDiagnostics.resetReason;
+    expect(pipeline.executeHdr(scene.context, input, input, input)).toBe(input);
+    expect(pipeline._bloomResources).toBeUndefined();
+    expect(pipeline._cloudHistoryDiagnostics.resetReason).toBe(resetReason);
+
+    effects.showBloom = true;
+    const bloomOutput = pipeline.executeHdr(scene.context, input, input, input);
+    const bloomResources = pipeline._bloomResources;
+    const thresholdFramebuffer =
+      bloomResources.thresholdFramebuffer.framebuffer;
+    const blurFramebuffer = bloomResources.blurFramebuffer.framebuffer;
+    const compositeFramebuffer =
+      bloomResources.compositeFramebuffer.framebuffer;
+    expect(bloomOutput).toBe(
+      bloomResources.compositeFramebuffer.getColorTexture(0),
+    );
+    expect(bloomResources.thresholdFramebuffer.depthStencilTexture).toBe(
+      undefined,
+    );
+    expect(bloomResources.blurFramebuffer.depthStencilTexture).toBeUndefined();
+    expect(
+      bloomResources.compositeFramebuffer.depthStencilTexture,
+    ).toBeUndefined();
+    expect(
+      bloomResources.width * bloomResources.height * 8 +
+        bloomResources.halfWidth * bloomResources.halfHeight * 16,
+    ).toBe(
+      8 * input.width * input.height +
+        16 * Math.ceil(input.width / 2) * Math.ceil(input.height / 2),
+    );
+    expect(bloomResources.thresholdProgram).toBeDefined();
+    expect(bloomResources.blurProgram).toBeDefined();
+    expect(bloomResources.compositeProgram).toBeDefined();
+    expect(bloomResources.thresholdCommand).toBeDefined();
+    expect(bloomResources.horizontalBlurCommand).toBeDefined();
+    expect(bloomResources.verticalBlurCommand).toBeDefined();
+    expect(bloomResources.compositeCommand).toBeDefined();
+
+    const bloomErrors = [];
+    const removeBloomErrorListener = effects.errorEvent.addEventListener(
+      function (controller, error) {
+        bloomErrors.push({ controller, error });
+      },
+    );
+    scene.postProcessStages.bloom.enabled = true;
+    effects.update(scene, scene.frameState.time);
+    expect(bloomErrors.length).toBe(1);
+    expect(bloomErrors[0].error.message).toContain("post-process bloom");
+    expect(pipeline._bloomResources).toBe(bloomResources);
+    scene.postProcessStages.bloom.enabled = false;
+    removeBloomErrorListener();
+
     effects.enabled = false;
+    expect(pipeline._bloomResources).toBe(bloomResources);
     expect(pipeline._globeShadowResources).toBeUndefined();
     expect(scene.frameState._sceneGISGlobeLighting).toBeUndefined();
     expect(scene.globe.depthTestAgainstTerrain).toBe(false);
@@ -3184,6 +3271,263 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(scene.globe.depthTestAgainstTerrain).toBe(true);
     effects.disconnectedCallback(effects._element);
     expect(scene.globe.depthTestAgainstTerrain).toBe(false);
+    expect(pipeline._bloomResources).toBeUndefined();
+    expect(thresholdFramebuffer.isDestroyed()).toBe(true);
+    expect(blurFramebuffer.isDestroyed()).toBe(true);
+    expect(compositeFramebuffer.isDestroyed()).toBe(true);
+  });
+
+  it("applies Globe HDR bloom and Sun-gated lens artifacts on the actual GPU", async function () {
+    await connectControlledCloudMode("globe");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    effects.showAerialPerspective = false;
+    effects.showHeightFog = false;
+    effects.showClouds = false;
+    effects.showBloom = false;
+    effects.showLensFlare = true;
+    effects.bloomThreshold = 10.0;
+    effects.bloomIntensity = 0.05;
+    effects.lensFlareIntensity = 64.0;
+    effects.update(scene, scene.frameState.time);
+
+    const width = 32;
+    const height = 16;
+    function makeTexture(valueOrCallback) {
+      const values = new Uint16Array(width * height * 4);
+      for (let y = 0; y < height; ++y) {
+        for (let x = 0; x < width; ++x) {
+          const value =
+            typeof valueOrCallback === "function"
+              ? valueOrCallback(x, y)
+              : valueOrCallback;
+          values.set(value.map(encodeFloat16), (y * width + x) * 4);
+        }
+      }
+      return new Texture({
+        context: scene.context,
+        width,
+        height,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: PixelDatatype.HALF_FLOAT,
+        source: { arrayBufferView: values },
+      });
+    }
+
+    const dimmed = makeTexture([8.0, 8.0, 8.0, 0.25]);
+    const clearDepth = makeTexture([1.0, 1.0, 1.0, 1.0]);
+    const finiteDepth = makeTexture([0.5, 0.5, 0.5, 1.0]);
+    const pipeline = effects._pipeline;
+    pipeline.executeHdr(scene.context, dimmed, clearDepth, clearDepth);
+    const sunDirection = Cartesian3.clone(pipeline._sunDirection);
+    const referenceUp =
+      Math.abs(Cartesian3.dot(sunDirection, Cartesian3.UNIT_Z)) < 0.9
+        ? Cartesian3.UNIT_Z
+        : Cartesian3.UNIT_Y;
+    const right = Cartesian3.normalize(
+      Cartesian3.cross(sunDirection, referenceUp, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const viewDirection = Cartesian3.normalize(
+      Cartesian3.add(
+        sunDirection,
+        Cartesian3.multiplyByScalar(right, 0.35, new Cartesian3()),
+        new Cartesian3(),
+      ),
+      new Cartesian3(),
+    );
+    const viewRight = Cartesian3.normalize(
+      Cartesian3.cross(viewDirection, referenceUp, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const viewUp = Cartesian3.normalize(
+      Cartesian3.cross(viewRight, viewDirection, new Cartesian3()),
+      new Cartesian3(),
+    );
+    Cartesian3.clone(viewDirection, scene.camera.direction);
+    Cartesian3.clone(viewUp, scene.camera.up);
+    Cartesian3.clone(viewRight, scene.camera.right);
+    pipeline.executeHdr(scene.context, dimmed, clearDepth, clearDepth);
+    const sunUv = Cartesian2.clone(pipeline._sunViewportCoordinates);
+    const sourceX = Math.min(
+      width - 2,
+      Math.max(0, Math.floor(sunUv.x * width)),
+    );
+    const sourceY = Math.min(
+      height - 2,
+      Math.max(0, Math.floor(sunUv.y * height)),
+    );
+    const bright = makeTexture((x, y) =>
+      x >= sourceX && x <= sourceX + 1 && y >= sourceY && y <= sourceY + 1
+        ? [4096.0, 3072.0, 2048.0, 0.25]
+        : [0.0, 0.0, 0.0, 0.25],
+    );
+
+    function executeAndRead(color, depth) {
+      const output = pipeline.executeHdr(scene.context, color, depth, depth);
+      return readHalfTexturePixels(output);
+    }
+
+    try {
+      const clearLens = executeAndRead(bright, clearDepth);
+      const finiteLens = executeAndRead(bright, finiteDepth);
+      const dimmedLens = executeAndRead(dimmed, clearDepth);
+      const dimmedPixel = dimmedLens[0];
+      expect(pipeline._sunLensVisible).toBe(true);
+      const sourceUv = new Cartesian2(
+        (sourceX + 1.0) / width,
+        (sourceY + 1.0) / height,
+      );
+      const ghostOffset = -1.5;
+      const ghostUv = new Cartesian2(
+        (sourceUv.x - 1.0 + 0.5 * ghostOffset) / (ghostOffset - 1.0),
+        (sourceUv.y - 1.0 + 0.5 * ghostOffset) / (ghostOffset - 1.0),
+      );
+      const ghostX = Math.round(ghostUv.x * (width - 1));
+      const ghostY = Math.round(ghostUv.y * (height - 1));
+      let separatedArtifactDelta = 0.0;
+      for (
+        let y = Math.max(0, ghostY - 1);
+        y <= Math.min(height - 1, ghostY + 1);
+        ++y
+      ) {
+        for (
+          let x = Math.max(0, ghostX - 1);
+          x <= Math.min(width - 1, ghostX + 1);
+          ++x
+        ) {
+          if (Math.abs(x - sourceX) <= 1 && Math.abs(y - sourceY) <= 1) {
+            continue;
+          }
+          const index = y * width + x;
+          separatedArtifactDelta = Math.max(
+            separatedArtifactDelta,
+            clearLens[index][0] - finiteLens[index][0],
+            clearLens[index][1] - finiteLens[index][1],
+            clearLens[index][2] - finiteLens[index][2],
+          );
+        }
+      }
+      expect(separatedArtifactDelta).toBeGreaterThan(0.0);
+      expect(dimmedPixel[0]).toBeCloseTo(8.0, 2);
+      expect(dimmedPixel[1]).toBeCloseTo(8.0, 2);
+      expect(clearLens.every((pixel) => pixel[3] === 0.25)).toBe(true);
+      expect(finiteLens.every((pixel) => pixel[3] === 0.25)).toBe(true);
+      clearLens.forEach(expectFiniteHdrStorage);
+
+      effects.showLensFlare = false;
+      effects.showBloom = true;
+      const horizontalCommand = pipeline._bloomResources.horizontalBlurCommand;
+      const verticalCommand = pipeline._bloomResources.verticalBlurCommand;
+      const originalHorizontalExecute = horizontalCommand.execute;
+      const originalVerticalExecute = verticalCommand.execute;
+      const horizontalExecute = spyOn(
+        horizontalCommand,
+        "execute",
+      ).and.callThrough();
+      const verticalExecute = spyOn(
+        verticalCommand,
+        "execute",
+      ).and.callThrough();
+      const linearBloom = executeAndRead(bright, finiteDepth);
+      expect(horizontalExecute).toHaveBeenCalledTimes(3);
+      expect(verticalExecute).toHaveBeenCalledTimes(3);
+      const thresholdTexture =
+        pipeline._bloomResources.thresholdFramebuffer.getColorTexture(0);
+      const blurTexture =
+        pipeline._bloomResources.blurFramebuffer.getColorTexture(0);
+      expect(thresholdTexture.sampler.minificationFilter).toBe(
+        TextureMinificationFilter.LINEAR,
+      );
+      expect(thresholdTexture.sampler.magnificationFilter).toBe(
+        TextureMagnificationFilter.LINEAR,
+      );
+      expect(blurTexture.sampler.minificationFilter).toBe(
+        TextureMinificationFilter.LINEAR,
+      );
+      expect(blurTexture.sampler.magnificationFilter).toBe(
+        TextureMagnificationFilter.LINEAR,
+      );
+      const thresholdSampler = thresholdTexture.sampler;
+      const blurSampler = blurTexture.sampler;
+      thresholdTexture.sampler = Sampler.NEAREST;
+      blurTexture.sampler = Sampler.NEAREST;
+      const nearestBloom = executeAndRead(bright, finiteDepth);
+      thresholdTexture.sampler = thresholdSampler;
+      blurTexture.sampler = blurSampler;
+      expect(
+        Math.max(
+          ...linearBloom.map((pixel, index) =>
+            Math.max(
+              Math.abs(pixel[0] - nearestBloom[index][0]),
+              Math.abs(pixel[1] - nearestBloom[index][1]),
+              Math.abs(pixel[2] - nearestBloom[index][2]),
+            ),
+          ),
+        ),
+      ).toBeGreaterThan(0.0);
+      expect(
+        linearBloom.some(
+          (pixel, index) =>
+            pixel[0] > finiteLens[index][0] ||
+            pixel[1] > finiteLens[index][1] ||
+            pixel[2] > finiteLens[index][2],
+        ),
+      ).toBe(true);
+      expect(linearBloom.every((pixel) => pixel[3] === 0.25)).toBe(true);
+      linearBloom.forEach(expectFiniteHdrStorage);
+
+      horizontalExecute.calls.reset();
+      verticalExecute.calls.reset();
+      horizontalExecute.and.callFake(function (context, passState) {
+        if (horizontalExecute.calls.count() === 1) {
+          originalHorizontalExecute.call(this, context, passState);
+        }
+      });
+      verticalExecute.and.callFake(function (context, passState) {
+        if (verticalExecute.calls.count() === 1) {
+          originalVerticalExecute.call(this, context, passState);
+        }
+      });
+      const singleOctaveBloom = executeAndRead(bright, finiteDepth);
+      expect(horizontalExecute).toHaveBeenCalledTimes(3);
+      expect(verticalExecute).toHaveBeenCalledTimes(3);
+      let extendedSmoothSupport = false;
+      for (let y = 1; y < height - 1 && !extendedSmoothSupport; ++y) {
+        for (let x = 1; x < width - 1; ++x) {
+          if (Math.abs(x - sourceX) <= 8 && Math.abs(y - sourceY) <= 8) {
+            continue;
+          }
+          const index = y * width + x;
+          const productEnergy = Math.max(...linearBloom[index].slice(0, 3));
+          const formerEnergy = Math.max(
+            ...singleOctaveBloom[index].slice(0, 3),
+          );
+          const horizontalNeighbor = Math.max(
+            ...linearBloom[index + 1].slice(0, 3),
+          );
+          const verticalNeighbor = Math.max(
+            ...linearBloom[index + width].slice(0, 3),
+          );
+          if (
+            formerEnergy === 0.0 &&
+            productEnergy > 0.0 &&
+            horizontalNeighbor > 0.0 &&
+            verticalNeighbor > 0.0
+          ) {
+            extendedSmoothSupport = true;
+            break;
+          }
+        }
+      }
+      expect(extendedSmoothSupport).toBe(true);
+    } finally {
+      bright.destroy();
+      dimmed.destroy();
+      clearDepth.destroy();
+      finiteDepth.destroy();
+    }
   });
 
   it("compiles the frame-local Globe surface variant and restores the native variant", async function () {

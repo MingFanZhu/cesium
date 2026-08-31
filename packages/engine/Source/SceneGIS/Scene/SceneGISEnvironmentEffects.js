@@ -80,12 +80,14 @@ function validateGlobeConflict(controller, scene) {
     !isHidden(scene.sun) ||
     !isHidden(scene.moon) ||
     scene.sunBloom !== false ||
+    (controller._showBloom &&
+      scene.postProcessStages.bloom.enabled !== false) ||
     scene.fog.enabled !== false ||
     scene.globe.showGroundAtmosphere !== false ||
     scene.globe.enableLighting !== false
   ) {
     throw new DeveloperError(
-      "Advanced Globe environment requires native sky, bodies, bloom, Fog, ground atmosphere, and Globe lighting to be disabled.",
+      "Advanced Globe environment requires native sky, bodies, Sun bloom, enabled post-process bloom, Fog, ground atmosphere, and Globe lighting to be disabled.",
     );
   }
   if (defined(controller._world)) {
@@ -282,6 +284,17 @@ function setWarmBoolean(controller, property, value, historyReason) {
   requestRenderIfActive(controller);
 }
 
+function setRenderBoolean(controller, property, value) {
+  //>>includeStart('debug', pragmas.debug);
+  Check.typeOf.bool("value", value);
+  //>>includeEnd('debug');
+  if (controller[property] === value) {
+    return;
+  }
+  controller[property] = value;
+  requestRenderIfActive(controller);
+}
+
 function raiseGenerationError(controller, generation, error) {
   if (
     generation !== controller._generation ||
@@ -457,6 +470,8 @@ function SceneGISEnvironmentEffects(options) {
   const showClouds = options.showClouds ?? true;
   const showCloudShadows = options.showCloudShadows ?? true;
   const showCrepuscularRays = options.showCrepuscularRays ?? true;
+  const showBloom = options.showBloom ?? true;
+  const showLensFlare = options.showLensFlare ?? true;
   const cloudQuality = options.cloudQuality ?? "medium";
   const cloudPreset = options.cloudPreset ?? "cumulus";
   const cloudCoverage = options.cloudCoverage ?? 0.45;
@@ -470,6 +485,9 @@ function SceneGISEnvironmentEffects(options) {
   const backgroundRadianceScale = options.backgroundRadianceScale ?? 10.0;
   const aerialRadianceScale = options.aerialRadianceScale ?? 1.0;
   const surfaceRadianceScale = options.surfaceRadianceScale ?? 10.0;
+  const bloomThreshold = options.bloomThreshold ?? 10.0;
+  const bloomIntensity = options.bloomIntensity ?? 0.05;
+  const lensFlareIntensity = options.lensFlareIntensity ?? 5.0;
   const heightFogDensity = options.heightFogDensity ?? 0.000008;
   const heightFogHeightFalloff = options.heightFogHeightFalloff ?? 0.0002;
   const heightFogBaseHeight = options.heightFogBaseHeight ?? 0.0;
@@ -489,6 +507,9 @@ function SceneGISEnvironmentEffects(options) {
     "options.surfaceRadianceScale",
     surfaceRadianceScale,
   );
+  validateRange("options.bloomThreshold", bloomThreshold, 0.0, 65504.0);
+  validateCalibrationScale("options.bloomIntensity", bloomIntensity);
+  validateCalibrationScale("options.lensFlareIntensity", lensFlareIntensity);
   validateRange("options.heightFogDensity", heightFogDensity, 0.0, 0.001);
   validateRange(
     "options.heightFogHeightFalloff",
@@ -559,6 +580,8 @@ function SceneGISEnvironmentEffects(options) {
   Check.typeOf.bool("options.showClouds", showClouds);
   Check.typeOf.bool("options.showCloudShadows", showCloudShadows);
   Check.typeOf.bool("options.showCrepuscularRays", showCrepuscularRays);
+  Check.typeOf.bool("options.showBloom", showBloom);
+  Check.typeOf.bool("options.showLensFlare", showLensFlare);
   //>>includeEnd('debug');
 
   this._mode = mode;
@@ -570,6 +593,8 @@ function SceneGISEnvironmentEffects(options) {
   this._showClouds = showClouds;
   this._showCloudShadows = showCloudShadows;
   this._showCrepuscularRays = showCrepuscularRays;
+  this._showBloom = showBloom;
+  this._showLensFlare = showLensFlare;
   this._cloudQuality = cloudQuality;
   this._cloudPreset = cloudPreset;
   this._cloudCoverage = cloudCoverage;
@@ -583,6 +608,9 @@ function SceneGISEnvironmentEffects(options) {
   this._backgroundRadianceScale = backgroundRadianceScale;
   this._aerialRadianceScale = aerialRadianceScale;
   this._surfaceRadianceScale = surfaceRadianceScale;
+  this._bloomThreshold = bloomThreshold;
+  this._bloomIntensity = bloomIntensity;
+  this._lensFlareIntensity = lensFlareIntensity;
   this._heightFogDensity = heightFogDensity;
   this._heightFogHeightFalloff = heightFogHeightFalloff;
   this._heightFogBaseHeight = heightFogBaseHeight;
@@ -997,6 +1025,61 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
+   * Gets or sets whether Globe scene-wide HDR bloom is shown.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
+  showBloom: {
+    get: function () {
+      return this._showBloom;
+    },
+    set: function (value) {
+      setRenderBoolean(this, "_showBloom", value);
+    },
+  },
+  /**
+   * Gets or sets whether Globe Sun-gated lens artifacts are shown.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
+  showLensFlare: {
+    get: function () {
+      return this._showLensFlare;
+    },
+    set: function (value) {
+      setRenderBoolean(this, "_showLensFlare", value);
+    },
+  },
+  /** @memberof SceneGISEnvironmentEffects.prototype @type {number} */
+  bloomThreshold: {
+    get: function () {
+      return this._bloomThreshold;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_bloomThreshold", value, 0.0, 65504.0);
+    },
+  },
+  /** @memberof SceneGISEnvironmentEffects.prototype @type {number} */
+  bloomIntensity: {
+    get: function () {
+      return this._bloomIntensity;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_bloomIntensity", value, 0.0, 64.0);
+    },
+  },
+  /** @memberof SceneGISEnvironmentEffects.prototype @type {number} */
+  lensFlareIntensity: {
+    get: function () {
+      return this._lensFlareIntensity;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_lensFlareIntensity", value, 0.0, 64.0);
+    },
+  },
+  /**
    * Gets or sets the exact low, medium, or high cloud budget.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
@@ -1260,6 +1343,8 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [showClouds=true] Whether to render the single-deck volumetric cloud core.
  * @property {boolean} [showCloudShadows=true] Whether volumetric clouds attenuate direct Sun on the Globe.
  * @property {boolean} [showCrepuscularRays=true] Whether cloud shadow length modulates atmosphere and fog Sun inscatter.
+ * @property {boolean} [showBloom=true] Whether Globe scene-wide HDR bloom is shown.
+ * @property {boolean} [showLensFlare=true] Whether Globe Sun-gated lens artifacts are shown.
  * @property {string} [cloudQuality="medium"] Exact "low", "medium", or "high" cloud budget.
  * @property {string} [cloudPreset="cumulus"] Exact "cumulus", "stratus", "cirrus", or "mixed" immutable morphology preset.
  * @property {number} [cloudCoverage=0.45] Global cloud coverage bias in the inclusive range 0–1.
@@ -1273,6 +1358,9 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [backgroundRadianceScale=10.0] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64.
  * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64. On Globe, this is relative to backgroundRadianceScale; on Planar, it is the absolute scene-linear scale applied to physical aerial radiance.
  * @property {number} [surfaceRadianceScale=10.0] Globe surface scene-linear Sun and sky radiance scale, in the inclusive range 0–64.
+ * @property {number} [bloomThreshold=10.0] Globe HDR bloom threshold in the inclusive RGBA16F range 0–65504.
+ * @property {number} [bloomIntensity=0.05] Globe scene-wide bloom intensity in the inclusive range 0–64.
+ * @property {number} [lensFlareIntensity=5.0] Globe Sun-gated lens artifact intensity in the inclusive range 0–64.
  * @property {number} [heightFogDensity=0.000008] Base-height extinction coefficient per meter, in the inclusive range 0–0.001.
  * @property {number} [heightFogHeightFalloff=0.0002] Exponential height falloff per meter, in the inclusive range 0–0.001.
  * @property {number} [heightFogBaseHeight=0.0] Density reference height in meters, in the inclusive range -60000–60000.
