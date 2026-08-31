@@ -8,7 +8,9 @@
 - Created: `2026-08-14`
 - Updated: `2026-08-31`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A7-G completed; A8-G pending separate activation`
+- Current phase: `A8-G active; implementation pending`
+- Active phase plan:
+  [2026-08-31-phase-a8g-globe-qualification-delivery.md](2026-08-31-phase-a8g-globe-qualification-delivery.md)
 - Latest completed phase plan:
   [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
 - Architecture decisions:
@@ -267,6 +269,23 @@ result retains screen-space Bloom across the terrain silhouette and the stronger
 reference-balanced halo/ghost field. The phase-closing local commit containing
 this record is the isolated A7-G checkpoint and is not pushed. A8-G and Planar
 remain inactive until a separate Architecture activation.
+
+### A8-G activation — 2026-08-31
+
+The project owner explicitly requested the next phase and additionally asked
+that the release-facing advanced-environment Test be split into multiple pages
+with a unified `lil-gui` interface. A7-G checkpoint
+`6f70b54c80ce174bf7befe49fe37262230288e61` is frozen. A8-G qualifies the
+accepted Globe A2-A7 stack through bounded visual/resource evidence,
+development and release builds, types, API docs, installed package, focused
+local E2E, upstream audit and an upgrade checklist. It also replaces the
+monolithic direct Test with a hub plus separate Globe and retained Planar
+pages using the already vendored local `lil-gui`.
+
+No predecessor product path, resource/API contract, upstream seam, generated
+file or Planar product behavior is authorized to change. A reproduced product
+defect returns to Architecture as a focused finding. The active plan is
+[A8-G Globe qualification and delivery](2026-08-31-phase-a8g-globe-qualification-delivery.md).
 
 ### A4-AR-018/019 focused closure — 2026-08-27
 

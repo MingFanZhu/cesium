@@ -3,8 +3,10 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A7-G completed; A8-G pending separate activation`
-- Current review: `A7-G accepted; closed`
+- Current phase: `A8-G active; implementation pending`
+- Current review: `A8-G implementation pending`
+- Active phase plan:
+  [2026-08-31-phase-a8g-globe-qualification-delivery.md](plans/2026-08-31-phase-a8g-globe-qualification-delivery.md)
 - Latest completed phase plan:
   [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](plans/2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
 - Extension plan:
@@ -28,6 +30,7 @@
 - A4-G checkpoint: `241de41fc36835114a4e9312ad53ca2ac64407b8`（未push）
 - A5-G checkpoint: `3ead681e7854082b6b9d016fdcd9cd8619087102`（未push）
 - A6-G checkpoint: `201f6edada8fe2738bf9eb3277a30ea3b519e7d7`（未push）
+- A7-G checkpoint: `6f70b54c80ce174bf7befe49fe37262230288e61`（未push）
 
 ## Objective
 
@@ -38,6 +41,7 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- A8-G已从冻结A7-G checkpoint单独激活。当前阶段只做Globe发布资格与交付收口：bounded visual/resource evidence、development/release build、types、API docs、installed package、focused local E2E、upstream audit与upgrade checklist。用户要求的direct Test重构纳入同一阶段：`高级环境.html`改为入口，拆出Globe/Planar页面，并统一使用本地`lil-gui 0.21.0`；Planar页面只是保留与分离，不构成Planar产品资格或视觉gate。A2-A7产品、资源/API、SGP与generated边界冻结，若资格检查复现产品缺陷必须停止并返回Architecture finding。
 - A7-G已从冻结A6-G checkpoint单独激活。ADR-0049在既有`SGP-0008` linear-HDR slot末端增加half-resolution bright threshold、fixed separable blur、
   additive bloom与Sun ghost/halo；terrain/geometry使用resolved exact-clear depth遮挡，cloud遮挡复用final HDR signal。A7固定为two half-resolution加one
   full-resolution color-only RGBA16F targets，不使用public `PostProcessStage`、raw WebGL、asset、history、screen blend、第二tone mapper、A8-G或Planar执行。
@@ -119,6 +123,7 @@ reference frame，不互相伪造坐标语义。
 - [A5-G owner visual corrections](discussions/2026-08-28-a5g-owner-visual-corrections.md) — `resolved; owner accepted`
 - [A6-G temporal and performance source discovery](discussions/2026-08-28-a6g-temporal-performance-source-discovery.md) — `resolved; A6-G active`
 - [A7-G HDR bloom and lens flare source discovery](discussions/2026-08-28-a7g-hdr-bloom-lens-flare-source-discovery.md) — `resolved; A7-G active`
+- [A8-G qualification and delivery source discovery](discussions/2026-08-31-a8g-qualification-source-discovery.md) — `resolved; A8-G activated`
 
 ## Reviews
 
@@ -129,6 +134,7 @@ reference frame，不互相伪造坐标语义。
 - [A5-G Globe cloud shadows, skylight, and crepuscular rays review](reviews/2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md) — `accepted; closed`
 - [A6-G Globe temporal stabilization and performance review](reviews/2026-08-28-a6g-globe-temporal-stabilization-performance.md) — `accepted; closed`
 - [A7-G Globe HDR bloom and lens flare review](reviews/2026-08-28-a7g-globe-hdr-bloom-lens-flare.md) — `accepted; closed`
+- [A8-G Globe qualification and delivery review](reviews/2026-08-31-a8g-globe-qualification-delivery.md) — `implementation pending`
 
 ## Engineering paths
 

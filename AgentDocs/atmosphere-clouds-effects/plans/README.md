@@ -2,6 +2,8 @@
 
 - Active extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](2026-08-14-atmosphere-clouds-effects-extension.md)
+- Active phase plan:
+  [2026-08-31-phase-a8g-globe-qualification-delivery.md](2026-08-31-phase-a8g-globe-qualification-delivery.md)
 - Latest completed phase plan:
   [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
 

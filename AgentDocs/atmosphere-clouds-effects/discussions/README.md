@@ -1,5 +1,6 @@
 # Discussions
 
+- [A8-G qualification and delivery source discovery](2026-08-31-a8g-qualification-source-discovery.md) — `resolved; A8-G activated`
 - [A7-G HDR bloom and lens flare source discovery](2026-08-28-a7g-hdr-bloom-lens-flare-source-discovery.md) — `resolved; A7-G completed`
 - [A6-G temporal and performance source discovery](2026-08-28-a6g-temporal-performance-source-discovery.md) — `resolved; A6-G completed`
 - [A5-G owner visual corrections](2026-08-28-a5g-owner-visual-corrections.md) — `resolved; owner accepted`
