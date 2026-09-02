@@ -2,7 +2,7 @@
 
 ## Status
 
-- State: `resolved; P1 activated`
+- State: `resolved; P1 activation superseded and deferred`
 - Date: `2026-09-02`
 - Frozen predecessor: A10-G
   `6afba87af181f3cdb7a20aff09b81af11eb302f4`
@@ -67,3 +67,11 @@ spherical substitution, Test-only branch or new resource category is accepted.
 - the existing controller Spec and deterministic Planar direct sample.
 
 Any required path outside this surface is an Architecture stop condition.
+
+## Route correction
+
+The project owner clarified before P1 acceptance that the next product phase
+must remain Globe-first and deliver Moon lighting, directional Moon shadows and
+an improved lunar surface. P1 is therefore deferred rather than rejected. Its
+unaccepted implementation candidate is preserved outside committed delivery;
+none of its product or evidence changes become the A11-G baseline.

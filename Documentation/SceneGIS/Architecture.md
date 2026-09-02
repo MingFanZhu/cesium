@@ -231,7 +231,8 @@ transmittance、combined scattering 与 irradiance RGBA16F LUT；planar atmosphe
 但在固定 `+Z` slab 中独立积分，不读取 spherical LUT、不制造 curved horizon。两条路径提供同一 physical sky、Sun disk 与
 depth-aware aerial-perspective capability family，但不承诺 pixel-identical 或相同 multiple-scattering order。
 
-Advanced effects 不接管 `scene.light`，也不自动修改或恢复 native/simple environment。Caller 必须在启用前显式关闭会造成
+Advanced effects 默认不接管 `scene.light`，也不自动修改或恢复 native/simple environment；唯一例外是ADR-0053明确授权的
+Globe A11-G primary celestial-light lifecycle。Caller 必须在启用前显式关闭会造成
 double energy 的 native `SkyAtmosphere`、ground atmosphere、Fog、Sun body/bloom、SkyBox 或 planar lightweight
 atmosphere/body；冲突和 capability failure 必须先于 asset/GPU mutation fail closed。A10-G 起，Globe 的 caller-owned native
 `scene.moon` 是唯一 body 例外：它复用 Cesium 星历、月面朝向、Sun-only lighting 与 Globe occlusion，并通过 `SGP-0008` 在 advanced
@@ -270,7 +271,17 @@ Scene environment pass exact-once执行，并继续使用Cesium culling与Globe 
 shadow、asset或Planar行为；完整ordering、conflict与ownership contract见
 [ADR-0051](Decisions/ADR-0051-globe-native-moon-composition.md)。
 
-P1在冻结A10-G后恢复Planar路线，但首阶段只重新资格化既有A2/A3/A4 integrated medium。Planar必须继续使用fixed `+Z` atmosphere/fog/cloud slab、
+A11-G在冻结A10-G后增加一个Globe-only primary celestial light。Actual ECEF Sun继续作为background/aerial/native Moon phase与A7 Sun gate；
+surface/cloud directional transport、A5 Beer atlas/rays及一个stable controller-owned `DirectionalLight`共享phase/horizon/night-weighted Moon endpoint。
+Moon direction由same Simon1994 + central-body-fixed transform和geodetic surface observer计算，不得读取camera orientation。Geometry shadow只复用
+Scene-owned `scene.shadowMap`与native Globe/3D Tiles/Model cast/receive commands；A5 Beer atlas仍是volumetric transmittance，禁止第二ShadowMap或
+把二者混用。Controller snapshot/restore `scene.light`、native shadow state、Globe ShadowMode与defined native `Moon.textureUrl`，active external
+mutation fail closed。更高分辨率月面只替换pinned NASA CGI Moon Kit color asset；Moon object/show/phase/orientation/ellipsoid ownership不变，不支持
+displacement/normal/eclipses。Existing `SGP-0009`只扩展current frame-local surface uniforms，不增加upstream path或new SGP。完整API、resource、
+lifecycle与Planar冻结边界见[ADR-0053](Decisions/ADR-0053-globe-moonlight-shadow-surface.md)。
+
+P1设计在冻结A10-G后恢复Planar路线，但已在review/owner gate前延期；重新激活时首阶段仍只重新资格化既有A2/A3/A4 integrated medium。
+Planar必须继续使用fixed `+Z` atmosphere/fog/cloud slab、
 独立Planar LUT/asset/scheduler与same-UV cloud history；不得借用Globe ellipsoid/ECEF、Beer atlas、surface seam、world reprojection或A7–A10效果。
 任何product修复前，必须先以同一resolved color/depth建立baseline、aerial-only、fog-only、cloud-only与combined actual-GPU final-composition
 authority；历史白屏截图不构成调参、hidden multiplier或球面替代的根因证据。完整阶段与零资源/API/upstream增量边界见

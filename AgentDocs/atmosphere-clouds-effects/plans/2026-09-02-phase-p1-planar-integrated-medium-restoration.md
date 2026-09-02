@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active; Architecture assignment ready`
+- Status: `deferred before acceptance; implementation candidate preserved outside committed delivery`
 - Parent extension:
   [2026-08-14-atmosphere-clouds-effects-extension.md](2026-08-14-atmosphere-clouds-effects-extension.md)
 - Predecessor:
@@ -20,8 +20,8 @@
 - Decision:
   [ADR-0052](../../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md)
 - Upstream patch: active `SGP-0008` consume-only; P1 upstream delta must be zero
-- Open review findings: `none; implementation not reviewed`
-- Owner visual gate: `blocked until Architecture code review`
+- Open review findings: `none; phase suspended before review`
+- Owner visual gate: `not opened`
 
 ## Goal
 

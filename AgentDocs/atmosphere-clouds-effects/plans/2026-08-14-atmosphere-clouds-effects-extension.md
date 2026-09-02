@@ -8,9 +8,9 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-02`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P1 active; Planar integrated-medium restoration`
+- Current phase: `A11-G active; Globe Moonlight, directional shadows, and lunar surface`
 - Current phase plan:
-  [2026-09-02-phase-p1-planar-integrated-medium-restoration.md](2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
+  [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
 - Previous completed phase plan:
   [2026-09-02-phase-a10g-globe-native-moon-composition.md](2026-09-02-phase-a10g-globe-native-moon-composition.md)
 - Architecture decisions:
@@ -26,7 +26,8 @@
   [ADR-0049](../../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md),
   [ADR-0050](../../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md),
   [ADR-0051](../../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md),
-  [ADR-0052](../../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md)
+  [ADR-0052](../../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md),
+  [ADR-0053](../../../Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - A1 implementation: `completed`
 - A2 implementation: `completed`
@@ -38,7 +39,8 @@
 - A8-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A9-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A10-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
-- P1 implementation: `active; Architecture assignment ready`
+- A11-G implementation: `active; Architecture assignment ready`
+- P1 implementation: `deferred before review; candidate not accepted`
 
 ## Goal
 
@@ -202,16 +204,29 @@ pre-tone-mapping HDR effects之前exact-once合成。不得复制Moon实现、�
 新SGP或Planar执行。Active plan为
 [A10-G Globe native Moon composition](2026-09-02-phase-a10g-globe-native-moon-composition.md)。
 
-### P1 — Planar integrated-medium restoration (`active`)
+### A11-G — Globe Moonlight, directional shadows, and lunar surface (`active`)
 
-P1 starts from frozen A10-G checkpoint
+A11-G starts from frozen A10-G product checkpoint
+`6afba87af181f3cdb7a20aff09b81af11eb302f4`. It adds one shared ECEF
+primary-light authority, a stable controller-owned native `DirectionalLight`,
+reuse of the Scene-owned native ShadowMap for terrain/3D Tiles/models, existing
+SGP-0009 surface publication, and one exact pinned `2048 x 1024` NASA CGI Moon
+Kit color asset on the caller-owned native Moon. It adds no second
+light/shadow/body, eclipse, displacement shader, new SGP or Planar execution.
+Active plan:
+[A11-G Globe Moonlight, directional shadows, and lunar surface](2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md).
+
+### P1 — Planar integrated-medium restoration (`deferred`)
+
+P1 was initially activated from frozen A10-G checkpoint
 `6afba87af181f3cdb7a20aff09b81af11eb302f4` and requalifies the retained
 fixed-Z atmosphere/aerial/height-fog/cloud composition. The historical white-fill
 owner rejection remains regression motivation but not an assumed current root
 cause. Execution must first add one actual-GPU final-composition authority over
 identical baseline/aerial/fog/cloud/combined inputs and then correct only the
-first proven Planar product divergence. A qualification-only result is valid if
-the final source already satisfies the contract. Active plan:
+first proven Planar product divergence. Before review, the project owner
+corrected the route to A11-G. The P1 design and unaccepted candidate are
+preserved but deferred outside committed delivery. Deferred plan:
 [P1 Planar integrated-medium restoration](2026-09-02-phase-p1-planar-integrated-medium-restoration.md).
 
 ### P2+ — Later Planar advanced-effects adaptation (`deferred`)
@@ -245,8 +260,9 @@ must not be copied into Planar without a separate source-based phase decision.
 所有 phase 严格串行。Execution完成实现与最小充分验证后写 review-ready handoff并停止；Architecture review批准、项目负责人要求的
 manual gate通过且 Architecture建立独立本地 checkpoint后，才可创建/激活下一 phase。不得合并多个 phase提交。
 
-2026-09-02项目负责人完成Globe-first路线并明确启动下一阶段。当前串行顺序为A4-G → A5-G → A6-G → A7-G → A8-G → A9-G → A10-G → P1。
-P1只恢复Planar A2/A3/A4 integrated-medium；任何Planar A5+能力仍需后续独立phase。
+2026-09-02项目负责人完成A10-G后明确把A11-G作为下一Globe阶段。当前串行顺序为
+A4-G → A5-G → A6-G → A7-G → A8-G → A9-G → A10-G → A11-G。
+P1及任何Planar A5+能力延期，必须在A11-G独立checkpoint之后重新激活。
 
 ### A5-G completion — 2026-08-28
 
@@ -417,3 +433,19 @@ plane/box geometry that must be separated from effects deltas. ADR-0052 therefor
 activates an evidence-first P1 final-composition qualification before any product
 repair. Globe A1–A10, public API/defaults, resources, upstream paths, SGP-0008/
 0009 and all Planar A5+ behavior remain frozen.
+
+### A11-G route correction and activation — 2026-09-02
+
+Before P1 entered review or owner acceptance, the project owner clarified that
+the next product phase must implement Globe Moon light, directional Moon
+shadows on terrain/3D Tiles/models and a higher-quality Moon surface. P1 is
+deferred with its unaccepted candidate outside committed delivery; frozen A10-G
+checkpoint `6afba87af181f3cdb7a20aff09b81af11eb302f4` remains the product base.
+
+Cesium source discovery confirms a single native scene light and ShadowMap
+already cover Globe, 3D Tiles and Models, while native `Moon.textureUrl` permits
+a color-resource replacement without copying the body. ADR-0053 activates one
+shared ECEF primary-light publication, stable snapshot/restore ownership,
+existing SGP-0009 surface uniforms and exact pinned NASA CGI Moon Kit color
+asset. A second light/shadow/body, eclipse, displacement/normal shader, new
+SGP, Planar execution and unrelated A1-A10 recalibration remain forbidden.

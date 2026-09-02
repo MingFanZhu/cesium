@@ -199,7 +199,7 @@
         "packages/engine/Specs/SceneGIS/Scene/SceneGISEnvironmentEffectsSpec.js",
         "packages/engine/Specs/Scene/GlobeSurfaceTileProviderSpec.js"
       ],
-      "decision": "Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md",
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md",
       "removalCondition": "Retire when upstream Globe surface rendering exposes an equivalent optional frame-local material-lighting extension with shader-source and uniform ownership hooks."
     }
   ]

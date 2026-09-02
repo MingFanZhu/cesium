@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`accepted; P1 active`
+- Status：`accepted design; execution deferred before acceptance`
 - Date：`2026-09-02`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -117,3 +117,10 @@ Globe product path、upstream hunk或Planar A5+能力，Execution必须停止并
 - 当前源码若已修复历史故障，P1可能只增加最终合成证据与发布页状态，不要求product diff。
 - P1通过Architecture与owner gate并形成独立checkpoint后，才可规划后续Planar shadows/
   rays、temporal/performance或HDR optical effects。
+
+## 路线更正（2026-09-02）
+
+项目负责人在P1进入Architecture review与owner gate前明确更正后续顺序：下一阶段继续
+Globe-first，先实现Moon directional light、作用于terrain/3D Tiles/models的方向光阴影与
+更高质量月面。P1设计本身仍有效，但执行延期；未验收candidate保存在committed delivery
+之外，不成为A11-G基线，也不改变冻结A10-G product checkpoint。

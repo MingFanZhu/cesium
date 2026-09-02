@@ -3,10 +3,10 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P1 active; Planar integrated-medium restoration`
+- Current phase: `A11-G active; Globe Moonlight, directional shadows, and lunar surface`
 - Current review: `implementation assigned; review pending`
 - Current phase plan:
-  [2026-09-02-phase-p1-planar-integrated-medium-restoration.md](plans/2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
+  [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](plans/2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
 - Previous completed phase plan:
   [2026-09-02-phase-a10g-globe-native-moon-composition.md](plans/2026-09-02-phase-a10g-globe-native-moon-composition.md)
 - Extension plan:
@@ -24,8 +24,9 @@
   [ADR-0049](../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md),
   [ADR-0050](../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md),
   [ADR-0051](../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md),
-  [ADR-0052](../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md)
-- Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
+  [ADR-0052](../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md),
+  [ADR-0053](../../Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md)
+- Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5/A11 Globe surface seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
 - A2 checkpoint: `da2eb55743a46423e65b2047965907c05ea260b7`（未push）
@@ -47,17 +48,20 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
-- P1 is active from frozen A10-G checkpoint
-  `6afba87af181f3cdb7a20aff09b81af11eb302f4`. Fresh source discovery confirms
-  that the retained Planar path still owns independent flat-slab atmosphere,
-  fixed-Z fog, Planar cloud assets/scheduling and same-UV history. The historical
-  white-fill screenshot remains valid rejection evidence but does not establish
-  a current root cause, and the final A10 source does not reproduce that exact
-  fill on the deterministic Planar page. ADR-0052 therefore requires one
-  actual-GPU final-composition authority before any product correction. P1 is
-  limited to atmosphere/aerial/fog/cloud composition; all Globe A1–A10 output,
-  public API/defaults, resources, upstream paths, SGP-0008/0009 and Planar A5+
-  features remain frozen.
+- A11-G is active from frozen A10-G product checkpoint
+  `6afba87af181f3cdb7a20aff09b81af11eb302f4`. The project owner corrected the
+  accidental Planar route before P1 review and defined “Moon shadow” as
+  directional Moon-light shadowing on terrain, 3D Tiles and models. ADR-0053
+  adds one camera-independent ECEF Sun/Moon primary-light authority, a stable
+  controller-owned `DirectionalLight`, reuse of the Scene-owned native
+  `ShadowMap`, the existing SGP-0009 Globe surface seam, and one pinned
+  `2048 x 1024` NASA CGI Moon Kit color asset on the caller-owned native Moon.
+  It adds no second light/shadow/body, no lunar eclipse, no displacement shader,
+  no new SGP and no Planar execution.
+- P1 Planar integrated-medium restoration is deferred before Architecture
+  review or owner acceptance. Its design record remains valid and its
+  unaccepted candidate is preserved outside committed delivery, but neither is
+  part of the A11-G baseline.
 - A10-G is complete from frozen A9-G checkpoint
   `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`. Source discovery confirms that
   Cesium already owns the Moon texture, physical ellipsoid, Simon1994 position,
@@ -1971,3 +1975,21 @@ and direct-page isolation do not reproduce the historical full-screen white
 fill exactly, so ADR-0052 requires a real final-composition witness before any
 product correction. P1 targets zero resource/API/upstream/generated/SGP delta;
 Globe A1–A10 and every Planar A5+ feature remain frozen.
+
+## A11-G route correction and activation — 2026-09-02
+
+Before P1 entered Architecture review or owner acceptance, the project owner
+clarified that the successor must remain Globe-first: Moon lighting, Moon-cast
+directional shadows on terrain/3D Tiles/models, and a higher-quality lunar
+surface. Architecture stopped the P1 execution route, preserved its unaccepted
+candidate outside committed delivery, and retained frozen A10-G product
+checkpoint `6afba87af181f3cdb7a20aff09b81af11eb302f4` as the A11-G predecessor.
+
+Source discovery confirms one native `scene.light` and one native
+`scene.shadowMap` already feed Globe/3D Tiles/Models, while caller-owned
+`scene.moon.textureUrl` can replace only the lunar color payload without
+copying the body. ADR-0053 therefore activates one shared ECEF primary-light
+authority, stable light/shadow ownership, existing SGP-0009 surface publication
+and an exact pinned NASA CGI Moon Kit color asset. P1 remains deferred; lunar
+eclipse, displacement/normal Moon material, second light/shadow/body, Planar
+execution and unrelated A1-A10 recalibration are not authorized.

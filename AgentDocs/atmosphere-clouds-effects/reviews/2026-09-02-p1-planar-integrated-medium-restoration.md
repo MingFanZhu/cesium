@@ -3,10 +3,10 @@
 ## Status
 
 - Phase: `P1`
-- State: `implementation assigned; review pending`
+- State: `deferred before review; candidate not accepted`
 - Reviewer: Architecture Agent
-- Open findings: `none; candidate not received`
-- Owner visual gate: `blocked until Architecture code approval`
+- Open findings: `none; review was not entered`
+- Owner visual gate: `not opened`
 - Phase plan:
   [P1 phase plan](../plans/2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
 - Frozen predecessor checkpoint:
@@ -38,5 +38,7 @@ Planar A5+ feature remain frozen.
 
 ## Findings
 
-No finding is open because no implementation candidate has been received. This
-is not code approval and does not open the project-owner gate.
+No finding is open because Architecture did not enter code review. The project
+owner corrected the phase route before acceptance, so the preserved P1
+candidate is not part of committed delivery and no project-owner gate was
+opened.
