@@ -3,9 +3,10 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A8-G completed; local checkpoint is this phase-closing commit`
-- Current review: `approved; A8-AR-001 through A8-AR-034 closed; owner gate passed`
-- Active phase plan: none; the next phase requires a separate Architecture activation
+- Current phase: `A9-G active; implementation assigned`
+- Current review: `implementation pending`
+- Active phase plan:
+  [2026-09-02-phase-a9g-globe-readable-night-skylight.md](plans/2026-09-02-phase-a9g-globe-readable-night-skylight.md)
 - Latest completed phase plan:
   [2026-08-31-phase-a8g-globe-qualification-delivery.md](plans/2026-08-31-phase-a8g-globe-qualification-delivery.md)
 - Extension plan:
@@ -20,7 +21,8 @@
   [ADR-0046](../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
   [ADR-0047](../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md),
   [ADR-0048](../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md),
-  [ADR-0049](../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md)
+  [ADR-0049](../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md),
+  [ADR-0050](../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
@@ -30,6 +32,7 @@
 - A5-G checkpoint: `3ead681e7854082b6b9d016fdcd9cd8619087102`（未push）
 - A6-G checkpoint: `201f6edada8fe2738bf9eb3277a30ea3b519e7d7`（未push）
 - A7-G checkpoint: `6f70b54c80ce174bf7befe49fe37262230288e61`（未push）
+- A8-G checkpoint: `eee8a8bbb241c2e71dc68397a6b324faa670862c`（未push）
 
 ## Objective
 
@@ -40,6 +43,16 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- A9-G is active from frozen A8-G checkpoint
+  `eee8a8bbb241c2e71dc68397a6b324faa670862c`. The project owner selected one
+  Globe `readable` night result and explicitly rejected a two-style product.
+  ADR-0050 adds one fixed blue-gray hemispherical source in the A2 irradiance
+  domain, transitioning by each receiver/sample's local solar elevation from
+  zero at `-6 degrees` to full at `-12 degrees`. Terrain, cloud body/ground
+  bounce/haze and height-fog ambient consume the source; direct Sun, Beer
+  shadows, rays, background sky, exposure, Models/3D Tiles and Planar remain
+  frozen. The phase adds no public property, uniform, resource, upstream hunk or
+  SGP. Implementation is assigned and no owner gate is yet open.
 - A8-G is closed. Architecture accepts the final A8 delivery and all findings
   through `A8-AR-034`; the project owner explicitly passed the final interactive
   Globe cloud-shadow gate on 2026-09-02. The accepted fixed-time result keeps

@@ -8,8 +8,9 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-02`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A8-G completed; local checkpoint is this phase-closing commit`
-- Active phase plan: none; a successor requires separate Architecture activation
+- Current phase: `A9-G active; implementation assigned`
+- Active phase plan:
+  [2026-09-02-phase-a9g-globe-readable-night-skylight.md](2026-09-02-phase-a9g-globe-readable-night-skylight.md)
 - Latest completed phase plan:
   [2026-08-31-phase-a8g-globe-qualification-delivery.md](2026-08-31-phase-a8g-globe-qualification-delivery.md)
 - Architecture decisions:
@@ -22,7 +23,8 @@
   [ADR-0046](../../../Documentation/SceneGIS/Decisions/ADR-0046-dual-world-volumetric-cloud-core.md),
   [ADR-0047](../../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md),
   [ADR-0048](../../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md),
-  [ADR-0049](../../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md)
+  [ADR-0049](../../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md),
+  [ADR-0050](../../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - A1 implementation: `completed`
 - A2 implementation: `completed`
@@ -32,6 +34,7 @@
 - A6-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A7-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A8-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
+- A9-G implementation: `active; implementation assigned`
 
 ## Goal
 
@@ -180,6 +183,13 @@ Source discovery已冻结为SceneGIS-owned current-frame Beer shadow atlas、`SG
 完成 Globe visual matrix、performance/resource evidence、build/types/docs/npm/root package、中文 direct Test、focused E2E、upgrade
 checklist与manual gate。A8-G不宣称dual-world扩展收口，也不补做前序Globe phase遗留的核心正确性。
 
+### A9-G — Globe readable night skylight (`active`)
+
+在A2 physical irradiance domain加入一种固定blue-gray hemispherical night source，并按每个Globe receiver/sample的local solar elevation
+从`-6 degrees`到`-12 degrees`平滑接管。Terrain、cloud body/ground bounce/haze与height-fog ambient共享同一source；不增加第二风格、
+public mode/property、directional moon、background stars、exposure、Model/3D Tiles relight、resource、upstream seam或Planar执行。Active plan为
+[A9-G Globe readable night skylight](2026-09-02-phase-a9g-globe-readable-night-skylight.md)。
+
 ### P1+ — Planar advanced-effects adaptation (`deferred`)
 
 Only after A8-G approval does Architecture source-discover the Planar track. It
@@ -212,8 +222,8 @@ intentionally not guessed before that entry gate.
 所有 phase 严格串行。Execution完成实现与最小充分验证后写 review-ready handoff并停止；Architecture review批准、项目负责人要求的
 manual gate通过且 Architecture建立独立本地 checkpoint后，才可创建/激活下一 phase。不得合并多个 phase提交。
 
-2026-08-27起串行顺序为A4-G → A5-G → A6-G → A7-G → A8-G → Planar
-adaptation。A8-G批准前不得以dual-world parity、Planar owner gate或Planar视觉修复阻塞Globe阶段，也不得提前修改Planar实现。
+2026-09-02项目负责人继续Globe-first路线，当前串行顺序为A4-G → A5-G → A6-G → A7-G → A8-G → A9-G → Planar
+adaptation。A9-G批准前不得以dual-world parity、Planar owner gate或Planar视觉修复阻塞Globe阶段，也不得提前修改Planar实现。
 
 ### A5-G completion — 2026-08-28
 
@@ -332,3 +342,19 @@ qualification. The project owner explicitly passed the final fixed-time
 camera-pitch cloud-shadow gate. The phase-closing local commit containing this
 record is the isolated A8-G checkpoint and is not pushed. A successor Globe or
 Planar phase requires a separate Architecture activation.
+
+### A9-G activation — 2026-09-02
+
+The project owner explicitly chose to continue the Globe-first track after the
+accepted A8 result and requested only one `readable` night style. A8-G checkpoint
+`eee8a8bbb241c2e71dc68397a6b324faa670862c` is frozen. Architecture source
+discovery found that terrain, cloud, cloud haze and height-fog ambient all lose
+their physical irradiance at night, while the existing `SGP-0009` seam already
+provides every input needed for one fixed shader-domain source.
+
+ADR-0050 therefore activates a local-radial blue-gray hemispherical irradiance
+transition from `-6 degrees` to `-12 degrees`, shared by the accepted Globe
+ambient consumers. No public API, mode, uniform, resource, upstream hunk, SGP,
+Model/3D Tiles, moon/stars/exposure or Planar behavior is active. The phase plan
+is
+[A9-G Globe readable night skylight](2026-09-02-phase-a9g-globe-readable-night-skylight.md).

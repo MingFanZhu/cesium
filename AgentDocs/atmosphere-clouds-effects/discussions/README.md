@@ -1,5 +1,6 @@
 # Discussions
 
+- [A9-G readable night skylight source discovery](2026-09-02-a9g-readable-night-skylight-source-discovery.md) — `resolved; A9-G activated`
 - [A8-G qualification and delivery source discovery](2026-08-31-a8g-qualification-source-discovery.md) — `resolved; A8-G activated`
 - [A7-G HDR bloom and lens flare source discovery](2026-08-28-a7g-hdr-bloom-lens-flare-source-discovery.md) — `resolved; A7-G completed`
 - [A6-G temporal and performance source discovery](2026-08-28-a6g-temporal-performance-source-discovery.md) — `resolved; A6-G completed`

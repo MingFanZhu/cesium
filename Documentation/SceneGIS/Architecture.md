@@ -255,6 +255,12 @@ A7固定使用two half-resolution加one full-resolution color-only RGBA16F targe
 tone mapping或Planar执行；完整public、resource与lifecycle contract见
 [ADR-0049](Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md)。
 
+A9-G在同一physical irradiance/source domain为Globe natural environment增加一种固定`readable` night skylight。它按每个
+receiver/sample的actual radial up与ECEF Sun direction在local solar elevation `-6°`到`-12°`之间平滑接管，只进入terrain、cloud body/
+ground bounce/haze与height-fog ambient；direct Sun、Beer shadow、directional fog/rays、background atmosphere、Models/3D Tiles、Planar及
+HDR display transfer保持不变。A9不增加public mode/property、uniform、resource、history、upstream hunk或SGP；完整source与consumer contract见
+[ADR-0050](Decisions/ADR-0050-globe-readable-night-skylight.md)。
+
 ### 平面地形 Core 契约
 
 平面地形使用独立的 `SceneGISPlanarTerrainProvider`、`SceneGISPlanarTerrainData` 和
