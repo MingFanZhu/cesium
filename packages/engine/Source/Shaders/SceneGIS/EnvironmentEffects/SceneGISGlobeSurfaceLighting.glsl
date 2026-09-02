@@ -41,6 +41,11 @@ vec3 sceneGISGlobeSurfaceLighting(
         globeNormal,
         globeSun,
         skyIrradiance);
+    float skyHemisphere = 0.5 *
+        (1.0 + dot(globeNormal, geodeticNormal));
+    skyIrradiance += sceneGISReadableNightSkyIrradiance(
+        geodeticNormal,
+        globeSun) * skyHemisphere;
     float cloudTransmittance = 1.0;
     if (u_sceneGISShowCloudShadows) {
         float viewDistance = max(

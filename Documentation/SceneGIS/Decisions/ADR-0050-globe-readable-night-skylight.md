@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`accepted; A9-G active`
+- Status：`accepted; A9-G complete`
 - Date：`2026-09-02`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -33,7 +33,7 @@ hemispherical source：
 
 ```glsl
 const vec3 SCENEGIS_READABLE_NIGHT_SKY_IRRADIANCE =
-    vec3(0.010, 0.018, 0.030);
+    vec3(0.020, 0.036, 0.060);
 ```
 
 这是engine-readable fill，不宣称physical moonlight。它不增加public property、
@@ -104,3 +104,64 @@ GPU bytes。Planar compile可看到shared declaration，但不得调用或改变
   sweep、retry、hash、convergence或automatic acceptance metric。
 - Architecture code review通过后，由项目负责人判断dark-but-readable terrain、
   cloud thickness、fog balance、camera invariance和无terminator/horizon artifact。
+
+## 执行记录（2026-09-02）
+
+A9-G按本ADR实现为一个shared SceneGIS shader helper，并在Globe terrain、cloud
+body、ground bounce、cloud-local haze与height-fog ambient的existing source domain
+各消费一次。没有新增uniform、JS state、resource、final-color lift或directional
+source；Planar不调用该helper。
+
+聚焦actual-GPU fixture在Chrome 152通过`1/1`，覆盖factor边界、night terrain/cloud/
+fog ambient、Beer independence、day/Planar exact identity与RGBA16F storage safety。
+固定15E/45N观察在`2026-06-21T22:00:00Z`测得Sun `-20.120 degrees`，页面为
+`ready · HDR`且browser/render errors为`0`。Architecture review与owner visual gate
+仍待后续明确结论。
+
+## Architecture review（2026-09-02）
+
+Architecture逐项确认fixed helper与五个ambient/irradiance consumer没有重复source、
+final-RGB lift、directional/Beer coupling或camera authority。独立production GPU
+fixture=`1/1 SUCCESS`；upstream audit current delivery entries=`0`、generated
+status=`0`，focused lint/format/diff checks均通过。固定Sun `-20.120 degrees`页面
+保持`ready · HDR`且browser warnings/errors=`0`，未见bright-blue veil、viewport-wide
+fill或seam。Code gate已批准；night readability与cloud/terrain contrast留给项目负责人
+人工gate。
+
+## A9-AR-001 owner calibration（2026-09-02）
+
+首个owner gate只拒绝absolute night-fill magnitude：画面仍过暗。Blue-gray ratio、
+local `-6/-12 degree` transition、五个ambient consumer及所有resource/source边界均
+已接受并冻结。Fixed private source校正为exact 2x：
+
+```glsl
+const vec3 SCENEGIS_READABLE_NIGHT_SKY_IRRADIANCE =
+    vec3(0.020, 0.036, 0.060);
+```
+
+本修订不增加public intensity/style，不改变day/Planar identity、directional Sun、
+Beer、fog directionality、background、exposure、resource、upstream或SGP。禁止继续
+parameter sweep；同一fixed night state完成一次owner re-gate。
+
+### A9-AR-001 执行记录
+
+Execution已将shared private source更新为上述exact 2x值，并仅同步existing GPU
+fixture的constant authority。Focused production fixture在Chrome 152上`1/1`
+通过；day/Planar exact identity、Beer independence、ambient-only fog和finite
+storage保持不变。同一15E/45N、`2026-06-21T22:00:00Z` fixed observation为
+`ready · HDR`、Sun `-20.120 degrees`、browser/render errors `0`；最终亮度继续由
+owner视觉判断。
+
+### A9-AR-001 Architecture closure
+
+Architecture确认exact corrected constant、local solar transition与五个consumer
+边界一致，并独立复跑production GPU fixture=`1/1 SUCCESS`。同一fixed browser
+state保持`ready · HDR`、Sun `-20.120 degrees`、warnings/errors=`0`；未见
+viewport-wide fill或seam。`A9-AR-001`关闭并重新开放owner visual gate；该复审不
+推断owner接受。
+
+### Project-owner acceptance
+
+项目负责人检查exact 2x fixed night state后明确接受当前亮度。A9-G owner visual
+gate通过，Architecture findings全部关闭；本决定的source、transition、consumer与
+边界成为A9-G冻结基线。

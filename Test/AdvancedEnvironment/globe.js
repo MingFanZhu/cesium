@@ -89,6 +89,7 @@ const state = {
   aboveHighSun: () => applyObservation("aboveHighSun"),
   groundSunset: () => applyObservation("groundSunset"),
   groundNight: () => applyObservation("groundNight"),
+  readableNight: () => applyObservation("readableNight"),
   nearSpaceHighSun: () => applyObservation("nearSpaceHighSun"),
   qualityObservation: () => observeQualitySwitch(),
   destroySample: () => destroySample(),
@@ -133,6 +134,14 @@ const observationDefinitions = Object.freeze({
   },
   groundNight: {
     label: "地面 · 无月夜 · 完整合成",
+    time: "2026-06-21T22:00:00Z",
+    altitude: 500.0,
+    pitch: -5.0,
+    quality: "high",
+    preset: "cumulus",
+  },
+  readableNight: {
+    label: "A9 可读夜景 · 地面 · 固定蓝灰环境天光",
     time: "2026-06-21T22:00:00Z",
     altitude: 500.0,
     pitch: -5.0,
@@ -529,6 +538,9 @@ function createGui() {
   observations.add(state, "groundNight").name("地面 · 无月夜");
   observations.add(state, "nearSpaceHighSun").name("近太空 · 高日");
   observations.add(state, "qualityObservation").name("high → medium → low");
+
+  const nightObservation = gui.addFolder("A9-G 固定观察");
+  nightObservation.add(state, "readableNight").name("A9 可读夜景");
 
   const onlineData = gui.addFolder("Cesium ion 在线数据");
   globalBuildingsButton = onlineData

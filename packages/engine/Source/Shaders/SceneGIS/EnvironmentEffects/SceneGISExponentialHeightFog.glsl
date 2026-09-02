@@ -365,7 +365,18 @@ vec3 sceneGISApplyExponentialHeightFog(
             viewDirection,
             sunDirection,
             representativeDistance);
-    vec3 ambientSource = sceneGISHeightFogAmbientSource(sunColor);
+    vec3 ambientIrradiance = sunColor;
+    #ifdef SCENEGIS_GLOBE
+    vec3 representativePoint =
+        rayOrigin + viewDirection * representativeDistance;
+    vec3 representativeRadialUp = normalize(vec3(
+        representativePoint.xy,
+        SCENEGIS_BOTTOM_RADIUS + representativePoint.z));
+    ambientIrradiance += sceneGISReadableNightSkyIrradiance(
+        representativeRadialUp,
+        sunDirection);
+    #endif
+    vec3 ambientSource = sceneGISHeightFogAmbientSource(ambientIrradiance);
     vec3 directionalSource = sceneGISHeightFogDirectionalSource(sunColor);
     ambientSource *= sourceRadianceScale;
     directionalSource *= sourceRadianceScale;

@@ -3,8 +3,8 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A9-G active; implementation assigned`
-- Current review: `implementation pending`
+- Current phase: `A9-G accepted; owner visual gate passed; checkpoint pending`
+- Current review: `accepted; closed`
 - Active phase plan:
   [2026-09-02-phase-a9g-globe-readable-night-skylight.md](plans/2026-09-02-phase-a9g-globe-readable-night-skylight.md)
 - Latest completed phase plan:
@@ -52,7 +52,12 @@ reference frame，不互相伪造坐标语义。
   bounce/haze and height-fog ambient consume the source; direct Sun, Beer
   shadows, rays, background sky, exposure, Models/3D Tiles and Planar remain
   frozen. The phase adds no public property, uniform, resource, upstream hunk or
-  SGP. Implementation is assigned and no owner gate is yet open.
+  SGP. Architecture code review passed, but the project owner judged the first
+  result too dark. The closed `A9-AR-001` changed only the private source constant from
+  `vec3(0.010, 0.018, 0.030)` to its exact 2x value
+  `vec3(0.020, 0.036, 0.060)`; chromaticity, local `-6/-12 degree` transition,
+  consumers and every frozen boundary remain unchanged. Architecture independently
+  re-ran the production GPU fixture and reopened the same fixed owner gate.
 - A8-G is closed. Architecture accepts the final A8 delivery and all findings
   through `A8-AR-034`; the project owner explicitly passed the final interactive
   Globe cloud-shadow gate on 2026-09-02. The accepted fixed-time result keeps
@@ -1825,3 +1830,52 @@ the accepted history dot bound and keeps cascade scale equal, but correctly
 publishes fractional displacement. A compiled mutation that ignores lattice
 orientation rounds it and fails. The focused actual-GPU fixture passes `1/1`
 with zero resource, API, upstream, SGP or Planar delta.
+
+## A9-G execution evidence — 2026-09-02
+
+The initial A9-G candidate used one shared Globe shader helper with the fixed
+`vec3(0.010, 0.018, 0.030)` readable-night irradiance and the local radial
+`-6/-12 degree` transition. Terrain, cloud-body sky, cloud ground bounce,
+cloud-local haze and Globe height-fog ambient consume it exactly once in their
+existing irradiance/source domains. Direct Sun, Beer attenuation, directional
+fog, rays, background/aerial radiance and Planar remain unchanged.
+
+The single actual-GPU fixture passed `1/1` on Chrome 152. It covers factor
+boundaries, no-direct-Sun blue-gray terrain with albedo/surface-scale response,
+Beer independence, thickness-dependent cloud energy with an A9-removal
+mutation, ambient-only fog, exact day identity, Planar identity and finite
+RGBA16F storage. The fixed `A9 可读夜景` observation at 15E/45N reported
+`Sun -20.120 degrees`, `ready · HDR` and zero browser/render errors; direct
+inspection showed a dark terrain/horizon boundary, cool cloud silhouettes and
+no bright blue fog veil or viewport-wide fill. Architecture independently
+repeated the GPU fixture and upstream/generated audit successfully. The code
+gate is approved; exact readability and cloud/terrain contrast remain for the
+project-owner visual gate.
+
+## A9-AR-001 execution evidence — 2026-09-02
+
+Execution replaced only the shared private readable-night source with the
+authorized exact 2x value `vec3(0.020, 0.036, 0.060)` and synchronized the
+existing GPU fixture's source mutation. The production fixture remains `1/1`
+successful with day/Planar identity, Beer independence, ambient-only fog and
+finite storage intact. One unchanged 15E/45N, `2026-06-21T22:00:00Z` browser
+observation reported Sun `-20.120 degrees`, `ready · HDR` and zero
+browser/render errors. Terrain and cloud layers are more readable while
+retaining the frozen blue-gray balance; final brightness remains an owner
+visual judgment.
+
+## A9-AR-001 Architecture re-review — 2026-09-02
+
+Architecture verified the exact `vec3(0.020, 0.036, 0.060)` source and unchanged
+helper/consumer boundary, then independently repeated the focused production GPU
+fixture with `1/1 SUCCESS`. The same fixed 15E/45N, Sun `-20.120 degrees` page
+remained `ready · HDR` with no browser warning/error; terrain and cool cloud
+structure are visibly brighter without a viewport fill or seam. `A9-AR-001` is
+closed and the owner re-gate is open; visual acceptance is not inferred.
+
+## A9-G project-owner acceptance — 2026-09-02
+
+The project owner inspected the exact 2x readable-night result and explicitly
+reported that the current brightness is acceptable. The A9-G visual gate is
+therefore passed, all Architecture findings are closed, and the phase is
+accepted. No push or successor implementation is part of this acceptance.

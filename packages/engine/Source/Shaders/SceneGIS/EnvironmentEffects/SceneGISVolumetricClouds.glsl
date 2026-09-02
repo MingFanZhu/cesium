@@ -802,7 +802,10 @@ void sceneGISCloudIncidentIrradiance(
         point,
         sunDirection,
         skyIrradiance), vec3(0.0));
-    skyIrradiance = max(skyIrradiance, vec3(0.0));
+    skyIrradiance = max(skyIrradiance, vec3(0.0)) +
+        sceneGISReadableNightSkyIrradiance(
+            normalize(globePosition),
+            sunDirection);
     #else
     vec3 totalIrradiance = max(sceneGISPlanarIrradiance(
         irradianceTexture, localPosition.z, sunDirection.z), vec3(0.0));
@@ -841,6 +844,11 @@ vec3 sceneGISGlobeCloudGroundSource(
         surfaceNormal,
         sunDirection,
         groundSkyIrradiance);
+    float groundSkyHemisphere = 0.5 *
+        (1.0 + dot(surfaceNormal, normalize(groundPoint)));
+    groundSkyIrradiance += sceneGISReadableNightSkyIrradiance(
+        normalize(groundPoint),
+        sunDirection) * groundSkyHemisphere;
     const float groundAlbedo = 0.3;
     vec3 groundIrradiance = max(groundSkyIrradiance, vec3(0.0)) +
         (1.0 - clamp(cloudCoverage, 0.0, 1.0)) *

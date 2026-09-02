@@ -165,6 +165,9 @@ vec4 sceneGISGlobeCloudHaze(
         virtualCameraPosition * 0.001,
         sunDirection,
         skyIrradiance);
+    skyIrradiance += sceneGISReadableNightSkyIrradiance(
+        normalAtOrigin,
+        sunDirection);
     float cosineTheta = dot(sunDirection, rayDirection);
     vec3 inscatter = sunIrradiance *
         sceneGISCloudDualPhase(cosineTheta, 1.0) * directionalOpacity;

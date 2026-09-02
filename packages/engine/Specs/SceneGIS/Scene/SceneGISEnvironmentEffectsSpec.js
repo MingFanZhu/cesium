@@ -98,7 +98,11 @@ uniform float u_cloudThickness;
 uniform int u_cloudPreset;
 void main()
 {
+    #ifdef SCENEGIS_READABLE_NIGHT_PROBE
+    vec3 sunDirection = vec3(-1.0, 0.0, 0.0);
+    #else
     vec3 sunDirection = vec3(0.0, 0.0, 1.0);
+    #endif
     vec3 sampleLocal = vec3(
         0.0,
         0.0,
@@ -1590,6 +1594,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       `SCENEGIS_CLOUD_PROBE_VIEW_COSINE ${sample.viewCosine}`,
       `SCENEGIS_CLOUD_PROBE_HEIGHT_GRADIENT ${sample.heightGradient}`,
       `SCENEGIS_CLOUD_PROBE_LOCAL_EXTINCTION ${sample.localExtinction}`,
+      ...(sample.readableNight ? ["SCENEGIS_READABLE_NIGHT_PROBE"] : []),
     ];
     const directProgram = createEnvironmentEffectsProgramForSpecs(
       scene.context,
@@ -6419,6 +6424,325 @@ ${hardCascadeLibrary}`;
       "sceneGISGlobeEffectiveAerialScale",
     );
     expect(aerialFragmentSource).not.toContain("u_surfaceRadianceScale");
+  });
+
+  it("adds fixed Globe readable-night irradiance only to ambient domains on the actual GPU", async function () {
+    await connectControlledCloudMode("globe");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const resources = effects._pipeline._resources;
+    const shaderDefines = [
+      "SCENEGIS_GLOBE",
+      "COMBINED_SCATTERING_TEXTURES",
+      "TRANSMITTANCE_TEXTURE_WIDTH 256",
+      "TRANSMITTANCE_TEXTURE_HEIGHT 64",
+      "SCATTERING_TEXTURE_R_SIZE 32",
+      "SCATTERING_TEXTURE_MU_SIZE 128",
+      "SCATTERING_TEXTURE_MU_S_SIZE 32",
+      "SCATTERING_TEXTURE_NU_SIZE 8",
+      "IRRADIANCE_TEXTURE_WIDTH 64",
+      "IRRADIANCE_TEXTURE_HEIGHT 16",
+    ];
+
+    const factorPixel = executeHalfFloatQuad(
+      [
+        brunetonDefinitionsSource,
+        brunetonCommonSource,
+        brunetonRuntimeSource,
+        atmosphereSource,
+        `precision highp float;
+        vec3 sunAtCosine(float cosineValue) {
+          return vec3(
+            sqrt(max(1.0 - cosineValue * cosineValue, 0.0)),
+            0.0,
+            cosineValue);
+        }
+        void main() {
+          vec3 up = vec3(0.0, 0.0, 1.0);
+          out_FragColor = vec4(
+            sceneGISReadableNightFactor(
+              up, sunAtCosine(-0.1045284633)),
+            sceneGISReadableNightFactor(up, sunAtCosine(-0.15)),
+            sceneGISReadableNightFactor(
+              up, sunAtCosine(-0.2079116908)),
+            sceneGISReadableNightFactor(up, sunAtCosine(-0.3)));
+        }`,
+      ],
+      { defines: shaderDefines },
+    )[0];
+    expect(factorPixel[0]).toBe(0.0);
+    expect(factorPixel[1]).toBeGreaterThan(0.0);
+    expect(factorPixel[1]).toBeLessThan(1.0);
+    expect(factorPixel[2]).toBe(1.0);
+    expect(factorPixel[3]).toBe(1.0);
+
+    const surfacePosition = Cartesian3.fromDegrees(15.0, 45.0, 0.0);
+    const radialUp = Ellipsoid.WGS84.geodeticSurfaceNormal(
+      surfacePosition,
+      new Cartesian3(),
+    );
+    const nightSun = Cartesian3.negate(radialUp, new Cartesian3());
+    const zeroMatrix = Matrix4.fromScale(Cartesian3.ZERO, new Matrix4());
+    const atlasValues = new Uint16Array(4 * 4 * 4);
+    for (let offset = 0; offset < atlasValues.length; offset += 4) {
+      atlasValues[offset] = encodeFloat16(0.0);
+      atlasValues[offset + 1] = encodeFloat16(0.01);
+      atlasValues[offset + 2] = encodeFloat16(40.0);
+      atlasValues[offset + 3] = encodeFloat16(40.0);
+    }
+    const shadowAtlas = new Texture({
+      context: scene.context,
+      width: 4,
+      height: 4,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+      source: {
+        width: 4,
+        height: 4,
+        arrayBufferView: atlasValues,
+      },
+    });
+    const surfaceWithoutNight = globeSurfaceLightingSource.replace(
+      `    float skyHemisphere = 0.5 *
+        (1.0 + dot(globeNormal, geodeticNormal));
+    skyIrradiance += sceneGISReadableNightSkyIrradiance(
+        geodeticNormal,
+        globeSun) * skyHemisphere;
+`,
+      "",
+    );
+    expect(surfaceWithoutNight).not.toBe(globeSurfaceLightingSource);
+    function renderSurface(
+      source,
+      sunDirection,
+      albedo,
+      scale,
+      showCloudShadows,
+    ) {
+      return executeHalfFloatQuad(
+        [
+          brunetonDefinitionsSource,
+          brunetonCommonSource,
+          brunetonRuntimeSource,
+          atmosphereSource,
+          cloudShadowSource,
+          source,
+          `precision highp float;
+          uniform float u_testAlbedo;
+          void main() {
+            out_FragColor = vec4(sceneGISGlobeSurfaceLighting(
+              vec3(u_testAlbedo),
+              u_sceneGISShadowSurfacePosition,
+              u_sceneGISShadowVertical), 1.0);
+          }`,
+        ],
+        {
+          defines: shaderDefines,
+          uniformMap: {
+            u_testAlbedo: () => albedo,
+            u_sceneGISTransmittanceTexture: () =>
+              resources.transmittanceTexture,
+            u_sceneGISIrradianceTexture: () => resources.irradianceTexture,
+            u_surfaceRadianceScale: () => scale,
+            u_sceneGISShowCloudShadows: () => showCloudShadows,
+            u_sceneGISShowCrepuscularRays: () => false,
+            u_sceneGISCloudShadowAtlas: () => shadowAtlas,
+            u_sceneGISCloudShadowMatrices: () => [
+              zeroMatrix,
+              zeroMatrix,
+              zeroMatrix,
+            ],
+            u_sceneGISCloudShadowIntervals: () => [
+              new Cartesian2(0.0, 10000000.0),
+              new Cartesian2(0.0, 0.0),
+              new Cartesian2(0.0, 0.0),
+            ],
+            u_sceneGISCloudShadowCascadeCount: () => 1,
+            u_sceneGISShadowSurfacePosition: () => surfacePosition,
+            u_sceneGISShadowEast: () => Cartesian3.UNIT_X,
+            u_sceneGISShadowNorth: () => Cartesian3.UNIT_Y,
+            u_sceneGISShadowVertical: () => radialUp,
+            u_sceneGISShadowSunDirection: () => sunDirection,
+            u_sceneGISShadowCameraPosition: () => surfacePosition,
+            u_sceneGISShadowCloudTop: () => 6000.0,
+          },
+        },
+      )[0];
+    }
+    try {
+      const nightSurface = renderSurface(
+        globeSurfaceLightingSource,
+        nightSun,
+        0.5,
+        10.0,
+        false,
+      );
+      const nightSurfaceShadowed = renderSurface(
+        globeSurfaceLightingSource,
+        nightSun,
+        0.5,
+        10.0,
+        true,
+      );
+      const nightSurfaceHalfAlbedo = renderSurface(
+        globeSurfaceLightingSource,
+        nightSun,
+        0.25,
+        10.0,
+        false,
+      );
+      const nightSurfaceHalfScale = renderSurface(
+        globeSurfaceLightingSource,
+        nightSun,
+        0.5,
+        5.0,
+        false,
+      );
+      expectFiniteHdrStorage(nightSurface);
+      expect(nightSurface[0]).toBeGreaterThan(0.0);
+      expect(nightSurface[2]).toBeGreaterThan(nightSurface[1]);
+      expect(nightSurface[1]).toBeGreaterThan(nightSurface[0]);
+      expect(nightSurfaceShadowed).toEqual(nightSurface);
+      for (let channel = 0; channel < 3; channel++) {
+        expect(nightSurfaceHalfAlbedo[channel]).toEqualEpsilon(
+          nightSurface[channel] * 0.5,
+          0.002,
+        );
+        expect(nightSurfaceHalfScale[channel]).toEqualEpsilon(
+          nightSurface[channel] * 0.5,
+          0.002,
+        );
+      }
+
+      const daySurface = renderSurface(
+        globeSurfaceLightingSource,
+        radialUp,
+        0.5,
+        10.0,
+        false,
+      );
+      const daySurfaceWithoutNight = renderSurface(
+        surfaceWithoutNight,
+        radialUp,
+        0.5,
+        10.0,
+        false,
+      );
+      expect(daySurface).toEqual(daySurfaceWithoutNight);
+    } finally {
+      shadowAtlas.destroy();
+    }
+
+    const nightSample = {
+      heightFraction: "0.5",
+      heightGradient: "0.75",
+      opticalDepth: "1.2",
+      viewCosine: "0.0",
+      localExtinction: "0.001",
+      readableNight: true,
+    };
+    const undersideSample = {
+      ...nightSample,
+      heightFraction: "0.0",
+      heightGradient: "0.5",
+      opticalDepth: "4.0",
+      localExtinction: "0.01",
+    };
+    const cloudWithoutNight = cloudSource.replace(
+      `    skyIrradiance = max(skyIrradiance, vec3(0.0)) +
+        sceneGISReadableNightSkyIrradiance(
+            normalize(globePosition),
+            sunDirection);`,
+      "    skyIrradiance = max(skyIrradiance, vec3(0.0));",
+    );
+    expect(cloudWithoutNight).not.toBe(cloudSource);
+    const nightCloud = renderCloudLightingComponentProbe("globe", nightSample);
+    const undersideCloud = renderCloudLightingComponentProbe(
+      "globe",
+      undersideSample,
+    );
+    const cloudMutation = renderCloudLightingComponentProbe(
+      "globe",
+      nightSample,
+      cloudWithoutNight,
+    );
+    expectFiniteHdrStorage([...nightCloud.total, 1.0]);
+    expect(rgbEnergy(nightCloud.total)).toBeGreaterThan(0.0);
+    expect(nightCloud.total[2]).toBeGreaterThan(nightCloud.total[0]);
+    expect(rgbEnergy(nightCloud.total)).toBeGreaterThan(
+      rgbEnergy(cloudMutation.total),
+    );
+    expect(rgbEnergy(nightCloud.total)).not.toEqualEpsilon(
+      rgbEnergy(undersideCloud.total),
+      0.00025,
+    );
+
+    const fogFragment = `precision highp float;
+      uniform sampler2D u_transmittanceTexture;
+      uniform float u_testAmbientScale;
+      uniform float u_testDirectionalScale;
+      void main() {
+        out_FragColor = vec4(sceneGISApplyExponentialHeightFog(
+          u_transmittanceTexture,
+          vec3(0.0),
+          vec3(0.0),
+          vec3(0.0, 1.0, 0.0),
+          vec3(0.0, 0.0, -1.0),
+          10000.0,
+          0.0,
+          3.0e-5,
+          1.0e-3,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          u_testAmbientScale,
+          u_testDirectionalScale,
+          4.0), 1.0);
+      }`;
+    function renderFog(
+      readableAtmosphereSource,
+      globe,
+      ambientScale,
+      directionalScale,
+    ) {
+      return executeHalfFloatQuad(
+        globe
+          ? [
+              brunetonDefinitionsSource,
+              brunetonCommonSource,
+              brunetonRuntimeSource,
+              readableAtmosphereSource,
+              heightFogSource,
+              fogFragment,
+            ]
+          : [readableAtmosphereSource, heightFogSource, fogFragment],
+        {
+          defines: globe ? shaderDefines : [],
+          uniformMap: {
+            u_transmittanceTexture: () => resources.transmittanceTexture,
+            u_testAmbientScale: () => ambientScale,
+            u_testDirectionalScale: () => directionalScale,
+          },
+        },
+      )[0];
+    }
+    const nightFogAmbient = renderFog(atmosphereSource, true, 1.0, 0.0);
+    const nightFogDirectional = renderFog(atmosphereSource, true, 0.0, 1.0);
+    expectFiniteHdrStorage(nightFogAmbient);
+    expect(rgbEnergy(nightFogAmbient)).toBeGreaterThan(0.0);
+    expect(nightFogAmbient[2]).toBeGreaterThan(nightFogAmbient[0]);
+    expect(nightFogDirectional.slice(0, 3)).toEqual([0.0, 0.0, 0.0]);
+
+    const planarMutationSource = atmosphereSource.replace(
+      "vec3(0.020, 0.036, 0.060)",
+      "vec3(64000.0)",
+    );
+    expect(planarMutationSource).not.toBe(atmosphereSource);
+    const planarFog = renderFog(atmosphereSource, false, 1.0, 1.0);
+    const planarFogMutation = renderFog(planarMutationSource, false, 1.0, 1.0);
+    expect(planarFogMutation).toEqual(planarFog);
   });
 
   it("uses the WGS84 geodetic fallback normal at mid latitude on the actual GPU", function () {

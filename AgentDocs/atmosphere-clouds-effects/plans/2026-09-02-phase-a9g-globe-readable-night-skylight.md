@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active; implementation assigned`
+- Status: `complete; owner visual gate passed`
 - Parent extension:
   [2026-08-14-atmosphere-clouds-effects-extension.md](2026-08-14-atmosphere-clouds-effects-extension.md)
 - Predecessor:
@@ -20,8 +20,8 @@
 - Decision:
   [ADR-0050](../../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md)
 - Upstream patches: active `SGP-0008` and `SGP-0009`, both frozen/consume-only
-- Open review findings: `none; implementation pending`
-- Owner visual gate: `not requested`
+- Open review findings: `none`
+- Owner visual gate: `passed; exact 2x readable-night result accepted`
 
 ## Goal
 
@@ -55,7 +55,7 @@ irradiance:
 
 ```glsl
 const vec3 SCENEGIS_READABLE_NIGHT_SKY_IRRADIANCE =
-    vec3(0.010, 0.018, 0.030);
+    vec3(0.020, 0.036, 0.060);
 ```
 
 The value is intentionally a conservative game-readable fill, not measured
@@ -176,6 +176,43 @@ The physical black background sky is not a failure in A9-G. Stars, moonlight,
 night sky radiance, city emissive content, local lights and Model/3D Tiles
 lighting are separate future decisions.
 
+## Execution results — 2026-09-02
+
+- Added the fixed source and local-radial factor to the shared Bruneton source;
+  only `SCENEGIS_GLOBE` consumers invoke it.
+- Added it before Lambertian terrain reflection, cloud angular transport,
+  ground bounce, cloud-haze composition and height-fog ambient normalization.
+  Direct Sun and every Beer/directional path remain separate.
+- Added one existing-Spec-file actual-GPU fixture. Final-source command:
+  `npm run test -- --includeName "adds fixed Globe readable-night irradiance only to ambient domains on the actual GPU" --production --failTaskOnError`
+  returned `TOTAL: 1 SUCCESS` on Chrome 152 with process exit `0`.
+- Added one `A9 可读夜景` action to the existing Globe `lil-gui`. Its fixed
+  15E/45N, `2026-06-21T22:00:00Z` observation measured Sun elevation
+  `-20.120 degrees`, stayed `ready · HDR`, and reported zero browser/render
+  errors.
+- Public API, uniforms, controller/renderer state, passes, programs, commands,
+  textures, FBOs, histories, readback, assets, requests, dependencies and GPU
+  bytes changed by exactly zero. Upstream-owned paths, generated tracked files,
+  SGP scope and Planar output also changed by zero.
+
+## A9-AR-001 owner brightness correction — 2026-09-02
+
+The first owner gate rejected only the absolute night-fill magnitude: the
+result remains too dark. Architecture preserves the accepted blue-gray ratio,
+local solar transition, all five consumers and every source/resource boundary,
+and authorizes one exact source-only calibration:
+
+```glsl
+const vec3 SCENEGIS_READABLE_NIGHT_SKY_IRRADIANCE =
+    vec3(0.020, 0.036, 0.060);
+```
+
+This is exactly `2x` the first reviewed source. Execution must change the shared
+constant and the existing focused fixture's exact authority/mutation only,
+repeat that fixture plus focused static checks, then perform one fixed A9 night
+observation. No alternate coefficient, parameter sweep, public intensity,
+transition/consumer change or new test is authorized.
+
 ## Stop conditions
 
 Execution stops and reports to Architecture if the implementation needs a new
@@ -193,3 +230,29 @@ inferred.
   prepared night result.
 - Architecture creates one isolated local A9-G checkpoint before any successor
   phase is designed or activated.
+
+## A9-AR-001 execution result — 2026-09-02
+
+Execution applied the exact 2x constant and changed no consumer, transition,
+Test state or other shader. The existing actual-GPU fixture passed `1/1` on
+Chrome 152 while retaining day/Planar exact identity, Beer independence,
+ambient-only fog and finite storage. The single unchanged fixed observation was
+`ready · HDR` at Sun `-20.120 degrees` with zero browser/render errors; terrain
+and cloud layers are visibly more readable, pending owner judgment.
+
+## A9-AR-001 Architecture closure — 2026-09-02
+
+Architecture confirmed that the correction changes only the shared private
+source and the existing fixture's exact mutation authority. An independent
+production GPU rerun passed `1/1`; `git diff --check` passed with retained line
+ending warnings only. The same fixed owner page remained `ready · HDR` at Sun
+`-20.120 degrees`, with no browser warnings/errors and no visible viewport fill
+or seam. The finding is closed and the owner re-gate is open. No checkpoint,
+push, A10 or Planar work is authorized before explicit owner acceptance.
+
+## Project-owner acceptance — 2026-09-02
+
+The project owner reviewed the corrected fixed night state and explicitly
+accepted its brightness. A9-G therefore meets its final visual completion
+criterion. Architecture may create the isolated local phase checkpoint before
+activating the successor Globe phase; no push is inferred.
