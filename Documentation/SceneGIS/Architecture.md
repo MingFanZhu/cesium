@@ -232,9 +232,12 @@ transmittance、combined scattering 与 irradiance RGBA16F LUT；planar atmosphe
 depth-aware aerial-perspective capability family，但不承诺 pixel-identical 或相同 multiple-scattering order。
 
 Advanced effects 不接管 `scene.light`，也不自动修改或恢复 native/simple environment。Caller 必须在启用前显式关闭会造成
-double energy 的 native `SkyAtmosphere`、ground atmosphere、Fog、Sun/Moon body/bloom、SkyBox 或 planar lightweight
-atmosphere/body；冲突和 capability failure 必须先于 asset/GPU mutation fail closed。完整 public、asset、resource、dual-world 与
-升级 contract 见 [ADR-0041](Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md)。
+double energy 的 native `SkyAtmosphere`、ground atmosphere、Fog、Sun body/bloom、SkyBox 或 planar lightweight
+atmosphere/body；冲突和 capability failure 必须先于 asset/GPU mutation fail closed。A10-G 起，Globe 的 caller-owned native
+`scene.moon` 是唯一 body 例外：它复用 Cesium 星历、月面朝向、Sun-only lighting 与 Globe occlusion，并通过 `SGP-0008` 在 advanced
+background 之后、ordinary geometry 之前执行；Planar 仍禁止 native Moon。完整基础 contract 见
+[ADR-0041](Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md)，Moon 例外见
+[ADR-0051](Decisions/ADR-0051-globe-native-moon-composition.md)。
 
 A5-G遵循Globe-first边界：volumetric cloud shadow使用SceneGIS-owned current-frame Beer optical-depth atlas，不复用Cesium native
 geometry `ShadowMap`；Globe surface是唯一获准消费A2 Sun/sky irradiance与cloud transmittance的scene albedo consumer，Models、3D Tiles和
@@ -260,6 +263,12 @@ receiver/sample的actual radial up与ECEF Sun direction在local solar elevation 
 ground bounce/haze与height-fog ambient；direct Sun、Beer shadow、directional fog/rays、background atmosphere、Models/3D Tiles、Planar及
 HDR display transfer保持不变。A9不增加public mode/property、uniform、resource、history、upstream hunk或SGP；完整source与consumer contract见
 [ADR-0050](Decisions/ADR-0050-globe-readable-night-skylight.md)。
+
+A10-G复用Cesium caller-owned native `scene.moon`，不复制Moon primitive、Simon1994星历、IAU orientation或
+`Assets/Textures/moonSmall.jpg`。Active advanced pipeline通过既有`SGP-0008`把advanced background排在native Moon command之前；Moon随后仍由
+Scene environment pass exact-once执行，并继续使用Cesium culling与Globe occluder。A10不增加SceneGIS GPU resource、controller property、moonlight、
+shadow、asset或Planar行为；完整ordering、conflict与ownership contract见
+[ADR-0051](Decisions/ADR-0051-globe-native-moon-composition.md)。
 
 ### 平面地形 Core 契约
 

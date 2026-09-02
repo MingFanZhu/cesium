@@ -10,6 +10,8 @@
   [2026-08-31-phase-a8g-globe-qualification-delivery.md](2026-08-31-phase-a8g-globe-qualification-delivery.md)
 - Frozen predecessor checkpoint:
   A8-G=`eee8a8bbb241c2e71dc68397a6b324faa670862c`
+- Local checkpoint:
+  A9-G=`f8d655ab75baf95b1421eddb35489a6a9d9dd62e`（not pushed）
 - Owner role: Execution Agent
 - Reviewer role: Architecture Agent
 - Created: `2026-09-02`

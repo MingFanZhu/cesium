@@ -1,5 +1,6 @@
 # Reviews
 
+- [2026-09-02-a10g-globe-native-moon-composition.md](2026-09-02-a10g-globe-native-moon-composition.md) — `implementation-assigned; no findings yet`。
 - [2026-08-14-a1-render-foundation.md](2026-08-14-a1-render-foundation.md) — `approved`；无 blocking finding，A1 gate已关闭。
 - [2026-08-15-a4-volumetric-cloud-core.md](2026-08-15-a4-volumetric-cloud-core.md) — `approved; A4-G project-owner visual gate passed; local checkpoint`。
 - [2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md](2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md) — `accepted; closed`。

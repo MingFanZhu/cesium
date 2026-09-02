@@ -8,11 +8,11 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-02`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A9-G active; implementation assigned`
+- Current phase: `A10-G active; implementation assigned`
 - Active phase plan:
-  [2026-09-02-phase-a9g-globe-readable-night-skylight.md](2026-09-02-phase-a9g-globe-readable-night-skylight.md)
+  [2026-09-02-phase-a10g-globe-native-moon-composition.md](2026-09-02-phase-a10g-globe-native-moon-composition.md)
 - Latest completed phase plan:
-  [2026-08-31-phase-a8g-globe-qualification-delivery.md](2026-08-31-phase-a8g-globe-qualification-delivery.md)
+  [2026-09-02-phase-a9g-globe-readable-night-skylight.md](2026-09-02-phase-a9g-globe-readable-night-skylight.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -24,7 +24,8 @@
   [ADR-0047](../../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md),
   [ADR-0048](../../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md),
   [ADR-0049](../../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md),
-  [ADR-0050](../../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md)
+  [ADR-0050](../../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md),
+  [ADR-0051](../../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - A1 implementation: `completed`
 - A2 implementation: `completed`
@@ -34,7 +35,8 @@
 - A6-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A7-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A8-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
-- A9-G implementation: `active; implementation assigned`
+- A9-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
+- A10-G implementation: `active; implementation assigned`
 
 ## Goal
 
@@ -183,12 +185,20 @@ Source discovery已冻结为SceneGIS-owned current-frame Beer shadow atlas、`SG
 完成 Globe visual matrix、performance/resource evidence、build/types/docs/npm/root package、中文 direct Test、focused E2E、upgrade
 checklist与manual gate。A8-G不宣称dual-world扩展收口，也不补做前序Globe phase遗留的核心正确性。
 
-### A9-G — Globe readable night skylight (`active`)
+### A9-G — Globe readable night skylight (`completed`)
 
 在A2 physical irradiance domain加入一种固定blue-gray hemispherical night source，并按每个Globe receiver/sample的local solar elevation
 从`-6 degrees`到`-12 degrees`平滑接管。Terrain、cloud body/ground bounce/haze与height-fog ambient共享同一source；不增加第二风格、
 public mode/property、directional moon、background stars、exposure、Model/3D Tiles relight、resource、upstream seam或Planar执行。Active plan为
 [A9-G Globe readable night skylight](2026-09-02-phase-a9g-globe-readable-night-skylight.md)。
+
+### A10-G — Globe native Moon composition (`active`)
+
+复用Cesium caller-owned native `scene.moon`的texture、physical ellipsoid、Simon1994 position、IAU orientation、Sun-only lighting与Globe
+occlusion。既有`SGP-0008` advanced background必须移到native Moon command之前，使Moon在advanced atmosphere之后、ordinary geometry与
+pre-tone-mapping HDR effects之前exact-once合成。不得复制Moon实现、增加moonlight、public controller option、asset、SceneGIS GPU resource、
+新SGP或Planar执行。Active plan为
+[A10-G Globe native Moon composition](2026-09-02-phase-a10g-globe-native-moon-composition.md)。
 
 ### P1+ — Planar advanced-effects adaptation (`deferred`)
 
@@ -222,8 +232,8 @@ intentionally not guessed before that entry gate.
 所有 phase 严格串行。Execution完成实现与最小充分验证后写 review-ready handoff并停止；Architecture review批准、项目负责人要求的
 manual gate通过且 Architecture建立独立本地 checkpoint后，才可创建/激活下一 phase。不得合并多个 phase提交。
 
-2026-09-02项目负责人继续Globe-first路线，当前串行顺序为A4-G → A5-G → A6-G → A7-G → A8-G → A9-G → Planar
-adaptation。A9-G批准前不得以dual-world parity、Planar owner gate或Planar视觉修复阻塞Globe阶段，也不得提前修改Planar实现。
+2026-09-02项目负责人继续Globe-first路线，当前串行顺序为A4-G → A5-G → A6-G → A7-G → A8-G → A9-G → A10-G → Planar
+adaptation。A10-G批准前不得以dual-world parity、Planar owner gate或Planar视觉修复阻塞Globe阶段，也不得提前修改Planar实现。
 
 ### A5-G completion — 2026-08-28
 
@@ -358,3 +368,18 @@ ambient consumers. No public API, mode, uniform, resource, upstream hunk, SGP,
 Model/3D Tiles, moon/stars/exposure or Planar behavior is active. The phase plan
 is
 [A9-G Globe readable night skylight](2026-09-02-phase-a9g-globe-readable-night-skylight.md).
+
+### A9-G completion and A10-G activation — 2026-09-02
+
+The project owner explicitly accepted the corrected A9 readable-night
+brightness. Architecture closed A9-G in local unpushed checkpoint
+`f8d655ab75baf95b1421eddb35489a6a9d9dd62e`. The owner then requested the
+native Moon as the next Globe feature.
+
+Architecture source discovery found that CesiumWidget already creates a native
+`Moon` for the WGS84/default-skybox path, but the advanced sample hides it and
+the current `SGP-0008` background executes after the native Moon command. ADR-0051
+therefore activates A10-G to move that existing background slot before the
+caller-owned Moon, permit the native Moon in Globe conflict validation, and add
+one direct fixed Moon observation. Moonlight, new assets/resources, public API,
+new SGP and Planar behavior remain out of scope.

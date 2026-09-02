@@ -3,12 +3,12 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A9-G accepted; owner visual gate passed; checkpoint pending`
-- Current review: `accepted; closed`
+- Current phase: `A10-G active; implementation assigned`
+- Current review: `implementation-pending; no open findings`
 - Active phase plan:
-  [2026-09-02-phase-a9g-globe-readable-night-skylight.md](plans/2026-09-02-phase-a9g-globe-readable-night-skylight.md)
+  [2026-09-02-phase-a10g-globe-native-moon-composition.md](plans/2026-09-02-phase-a10g-globe-native-moon-composition.md)
 - Latest completed phase plan:
-  [2026-08-31-phase-a8g-globe-qualification-delivery.md](plans/2026-08-31-phase-a8g-globe-qualification-delivery.md)
+  [2026-09-02-phase-a9g-globe-readable-night-skylight.md](plans/2026-09-02-phase-a9g-globe-readable-night-skylight.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -22,7 +22,8 @@
   [ADR-0047](../../Documentation/SceneGIS/Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md),
   [ADR-0048](../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md),
   [ADR-0049](../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md),
-  [ADR-0050](../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md)
+  [ADR-0050](../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md),
+  [ADR-0051](../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
@@ -33,6 +34,7 @@
 - A6-G checkpoint: `201f6edada8fe2738bf9eb3277a30ea3b519e7d7`（未push）
 - A7-G checkpoint: `6f70b54c80ce174bf7befe49fe37262230288e61`（未push）
 - A8-G checkpoint: `eee8a8bbb241c2e71dc68397a6b324faa670862c`（未push）
+- A9-G checkpoint: `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`（未push）
 
 ## Objective
 
@@ -43,7 +45,18 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
-- A9-G is active from frozen A8-G checkpoint
+- A10-G is active from frozen A9-G checkpoint
+  `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`. Source discovery confirms that
+  Cesium already owns the Moon texture, physical ellipsoid, Simon1994 position,
+  IAU orientation, Sun-only phase lighting, culling and Globe occlusion. The
+  current advanced sample hides that native object, while `SGP-0008` draws the
+  opaque advanced background after the native Moon and therefore covers it.
+  ADR-0051 reuses caller-owned `scene.moon`, moves the existing advanced
+  background slot before the native Moon command, and permits that single Globe
+  body exception. No Moon copy, public controller option, moonlight, new asset,
+  SceneGIS GPU resource, new SGP or Planar behavior is authorized.
+- A9-G is closed at local checkpoint
+  `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`, which remains unpushed. It started from frozen A8-G checkpoint
   `eee8a8bbb241c2e71dc68397a6b324faa670862c`. The project owner selected one
   Globe `readable` night result and explicitly rejected a two-style product.
   ADR-0050 adds one fixed blue-gray hemispherical source in the A2 irradiance
@@ -1879,3 +1892,13 @@ The project owner inspected the exact 2x readable-night result and explicitly
 reported that the current brightness is acceptable. The A9-G visual gate is
 therefore passed, all Architecture findings are closed, and the phase is
 accepted. No push or successor implementation is part of this acceptance.
+
+## A10-G activation — 2026-09-02
+
+After accepting A9-G, the project owner explicitly requested the Moon as the
+next Globe feature and identified Cesium's existing native Moon. Architecture
+confirmed the native object is currently hidden and then overwritten by the
+later advanced background. A10-G is activated to retain the same native Moon
+command and move only the existing `SGP-0008` background slot before it. The
+formal implementation assignment is bounded by ADR-0051 and the A10-G phase
+plan; the frozen A9 checkpoint is not to be amended.
