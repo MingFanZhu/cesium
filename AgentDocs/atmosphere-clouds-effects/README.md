@@ -3,11 +3,11 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A10-G active; implementation assigned`
-- Current review: `implementation-pending; no open findings`
-- Active phase plan:
+- Current phase: `A10-G completed; successor not activated`
+- Current review: `closed; Architecture and owner gates passed`
+- Current phase plan:
   [2026-09-02-phase-a10g-globe-native-moon-composition.md](plans/2026-09-02-phase-a10g-globe-native-moon-composition.md)
-- Latest completed phase plan:
+- Previous completed phase plan:
   [2026-09-02-phase-a9g-globe-readable-night-skylight.md](plans/2026-09-02-phase-a9g-globe-readable-night-skylight.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
@@ -45,7 +45,7 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
-- A10-G is active from frozen A9-G checkpoint
+- A10-G is complete from frozen A9-G checkpoint
   `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`. Source discovery confirms that
   Cesium already owns the Moon texture, physical ellipsoid, Simon1994 position,
   IAU orientation, Sun-only phase lighting, culling and Globe occlusion. The
@@ -55,6 +55,15 @@ reference frame，不互相伪造坐标语义。
   background slot before the native Moon command, and permits that single Globe
   body exception. No Moon copy, public controller option, moonlight, new asset,
   SceneGIS GPU resource, new SGP or Planar behavior is authorized.
+  Execution and Architecture review now pass. Independent production evidence
+  is render-slot `5/5`, Globe Moon acceptance `1/1` and Planar Moon rejection
+  `1/1`; the upstream audit reports only `Scene.js` under existing `SGP-0008`,
+  generated `0`, new SGP `0`. A fresh fixed page shows the caller-owned native
+  textured crescent centered above the horizon at azimuth `257.917 degrees`,
+  elevation `7.443 degrees`, Sun `-20.120 degrees`, with zero browser/render
+  errors. The project owner explicitly passed the visual gate; A10-G is closed
+  with no open finding. Moonlight, Moon shadows, alternate Moon assets, Planar
+  work and any successor phase remain inactive.
 - A9-G is closed at local checkpoint
   `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`, which remains unpushed. It started from frozen A8-G checkpoint
   `eee8a8bbb241c2e71dc68397a6b324faa670862c`. The project owner selected one
@@ -1902,3 +1911,40 @@ later advanced background. A10-G is activated to retain the same native Moon
 command and move only the existing `SGP-0008` background slot before it. The
 formal implementation assignment is bounded by ADR-0051 and the A10-G phase
 plan; the frozen A9 checkpoint is not to be amended.
+
+## A10-G execution evidence — 2026-09-02
+
+Execution moved the existing `SGP-0008` advanced-background invocation before
+the unchanged native Moon block, permitted caller-owned visible Moon only in
+the Globe conflict policy, and left Planar rejection intact. The existing
+render-slot fixture passed `5/5`, the private pipeline passed `7/7`, and the
+three focused conflict witnesses each passed `1/1` on Chrome 152. The upstream
+audit reports one current-delivery upstream path (`Scene.js`), existing
+`SGP-0008`, generated status `0`, new SGP `0`, and zero SceneGIS resource/API
+delta. The fixed A10 observation derived native Moon heading `257.917 degrees`
+and elevation `7.443 degrees` from Cesium ephemeris at 15E/45N, 500 m,
+`2026-06-21T22:00:00Z`; the centered Sun-lit phase was visible above the
+horizon with browser/render errors `0`. Cloud interaction remains an owner
+visual judgment through the existing control.
+
+## A10-G Architecture review — approved for owner gate 2026-09-02
+
+Architecture independently confirmed the intact paired `SGP-0008` move before
+the unchanged exact-once native Moon command, the Moon-only Globe conflict
+exception, unchanged Planar rejection, and zero SceneGIS resource/API delta.
+Production focused runs from `packages/engine` passed render-slot `5/5`, Globe
+Moon acceptance `1/1` and Planar Moon rejection `1/1`; the upstream audit and
+diff check passed. A fresh fixed browser observation showed the native textured
+crescent above the terrain horizon at azimuth `257.917 degrees`, elevation
+`7.443 degrees`, Sun `-20.120 degrees`, `ready · HDR`, with zero warnings/errors.
+One existing-cloud toggle retained the Moon in the normal cloud/HDR composition,
+after which the page was restored to the fixed clouds-off state. Code review has
+no open finding; project-owner visual acceptance is still required.
+
+## A10-G project-owner acceptance — passed 2026-09-02
+
+The project owner inspected the prepared native Moon result and explicitly
+reported that it passes. Architecture closes A10-G with no open finding. The
+phase-closing local commit containing this record is the isolated unpushed
+A10-G checkpoint. No successor phase, moonlight, Moon shadow, alternate asset
+or Planar change is inferred.

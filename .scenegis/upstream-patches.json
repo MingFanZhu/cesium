@@ -156,9 +156,9 @@
     },
     {
       "id": "SGP-0008",
-      "title": "Add advanced environment background and HDR render slots",
+      "title": "Add advanced environment background, celestial ordering, and HDR render slots",
       "status": "active",
-      "reason": "Scene has no optional scene-wide slot that can render an advanced environment for both Globe and non-Globe worlds before geometry and composite resolved scene color and depth before built-in bloom and tone mapping.",
+      "reason": "Scene has no optional scene-wide slot that can render an advanced environment for both Globe and non-Globe worlds before native celestial bodies and geometry, then composite resolved scene color and depth before built-in bloom and tone mapping.",
       "risk": "high",
       "files": [
         {
@@ -168,11 +168,12 @@
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlotSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISEnvironmentEffectsSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISEnvironmentEffectsPipelineSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrameSpec.js"
       ],
-      "decision": "Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md",
-      "removalCondition": "Retire when upstream Scene exposes equivalent optional pre-geometry advanced-environment and pre-tone-mapping resolved color/depth extension slots with explicit lifecycle ownership."
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md",
+      "removalCondition": "Retire when upstream Scene exposes equivalent optional pre-celestial/pre-geometry advanced-environment and pre-tone-mapping resolved color/depth extension slots with explicit lifecycle ownership and native celestial ordering."
     },
     {
       "id": "SGP-0009",

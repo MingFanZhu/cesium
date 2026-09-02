@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`accepted; A10-G active`
+- Status：`accepted; A10-G complete; owner gate passed`
 - Date：`2026-09-02`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -85,3 +85,37 @@ background/HDR extension slots与明确celestial ordering。
 - Native Moon texture与phase质量受Cesium原实现约束；若未来需要更高分辨率asset或
   directional moonlight，必须建立独立phase/ADR与resource/radiometry budget。
 - Planar仍只使用其SceneGIS procedural celestial-body contract，不继承Earth native Moon。
+
+## 执行记录（2026-09-02）
+
+Execution复用existing `SGP-0008`并将同一advanced-background invocation移动到
+unchanged native Moon block之前；Moon command仍exact-once。Focused render-slot=
+`5/5`、private pipeline=`7/7`，Globe Moon acceptance、remaining conflict和Planar
+Moon rejection witnesses各=`1/1`。Upstream audit确认current-delivery upstream
+path仅`Scene.js`、generated=`0`、new SGP=`0`，SceneGIS resource/API delta=`0`。
+Fixed direct observation从same Cesium ephemeris得到azimuth `257.917 degrees`、
+elevation `7.443 degrees`，native Sun-lit phase可见且browser/render errors=`0`；
+owner acceptance未推断。
+
+## Architecture复审（2026-09-02）
+
+Architecture独立确认existing paired `SGP-0008`完整移动到unchanged native Moon
+block之前，Moon command继续exact-once并保持caller-owned。Globe只移除Moon conflict；
+Planar与其余native conflict继续fail closed。`packages/engine` production focused
+render-slot=`5/5`、Globe Moon acceptance=`1/1`、Planar Moon rejection=`1/1`；
+upstream audit确认current-delivery upstream path仅`Scene.js`、existing
+`SGP-0008`、generated=`0`、new SGP=`0`，SceneGIS resource/API delta=`0`。
+
+Fresh fixed browser observation显示native textured crescent位于terrain horizon上方，
+azimuth=`257.917 degrees`、elevation=`7.443 degrees`、Sun=`-20.120 degrees`，
+页面保持`ready · HDR`且browser/render warning/error=`0`。一次existing cloud control
+检查确认Moon继续进入normal cloud/HDR composition，随后页面恢复clouds-off固定态。
+Code gate已通过；texture/phase观感、physical angular footprint以及interactive
+terrain/cloud occlusion仍由project owner判断，不推断acceptance。
+
+## Project-owner验收（2026-09-02）
+
+Project owner已检查prepared native Moon result并明确报告通过。A10-G至此完成，
+Architecture finding=`0`。包含本记录的phase-closing local commit是A10-G独立、
+未push的checkpoint；该结论不激活moonlight、Moon shadow、alternate Moon asset、
+Planar behavior或successor phase。

@@ -8,9 +8,6 @@ import {
   RenderState,
   ShaderProgram,
   ShaderSource,
-  SceneGISPlanarCoordinateSystem,
-  SceneGISPlanarExtent,
-  SceneGISPlanarWorld,
 } from "../../../index.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -20,20 +17,6 @@ describe("SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlot", function () {
   let scene;
   let pipeline;
 
-  function createPlanarWorld() {
-    return new SceneGISPlanarWorld({
-      coordinateSystem: new SceneGISPlanarCoordinateSystem({
-        extent: new SceneGISPlanarExtent({
-          minimumX: -100.0,
-          minimumY: -100.0,
-          maximumX: 100.0,
-          maximumY: 100.0,
-        }),
-      }),
-      maximumLevel: 0,
-    });
-  }
-
   function readPixels() {
     return scene.context.readPixels({
       x: 0,
@@ -41,6 +24,25 @@ describe("SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlot", function () {
       width: 1,
       height: 1,
     });
+  }
+
+  function installMoonWitness(onExecute) {
+    const command = {
+      cull: false,
+      execute: onExecute,
+    };
+    scene.moon = {
+      show: true,
+      update: function () {
+        return command;
+      },
+      isDestroyed: function () {
+        return false;
+      },
+      destroy: function () {
+        return undefined;
+      },
+    };
   }
 
   afterEach(function () {
@@ -52,31 +54,33 @@ describe("SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlot", function () {
     }
   });
 
-  it("orders advanced background before primary-world environment and geometry", function () {
+  it("orders advanced background before native Moon, primary-world environment, and geometry", function () {
     scene = createScene({ scene3DOnly: true });
     scene.logarithmicDepthBuffer = false;
     scene.highDynamicRange = false;
-    const world = createPlanarWorld();
-    scene._initializeWorld(world);
+    const order = [];
+    const world = new Globe(Ellipsoid.WGS84);
+    world.renderEnvironment = function () {
+      order.push("primary-world");
+    };
+    scene.globe = world;
     scene.camera.setView({
-      destination: new Cartesian3(0.0, 0.0, 300.0),
+      destination: Cartesian3.fromDegrees(15.0, 45.0, 1000.0),
       orientation: {
-        direction: new Cartesian3(0.0, 0.0, -1.0),
-        up: Cartesian3.UNIT_Y,
+        heading: 0.0,
+        pitch: -0.2,
+        roll: 0.0,
       },
     });
 
-    const order = [];
+    installMoonWitness(function () {
+      order.push("native-moon");
+    });
     pipeline = new SceneGISEnvironmentEffectsPipeline();
     pipeline.attach(scene);
     pipeline.enabled = true;
     spyOn(pipeline, "renderBackground").and.callFake(function () {
       order.push("advanced-background");
-    });
-    const originalWorldEnvironment = world.renderEnvironment;
-    spyOn(world, "renderEnvironment").and.callFake(function (...args) {
-      order.push("primary-world");
-      return originalWorldEnvironment.apply(this, args);
     });
 
     const command = new DrawCommand({
@@ -113,8 +117,12 @@ describe("SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlot", function () {
     scene.renderForSpecs();
 
     expect(order.indexOf("advanced-background")).toBeGreaterThan(-1);
-    expect(order.indexOf("primary-world")).toBeGreaterThan(
+    expect(order.filter((entry) => entry === "native-moon").length).toBe(1);
+    expect(order.indexOf("native-moon")).toBeGreaterThan(
       order.indexOf("advanced-background"),
+    );
+    expect(order.indexOf("primary-world")).toBeGreaterThan(
+      order.indexOf("native-moon"),
     );
     expect(order.indexOf("geometry")).toBeGreaterThan(
       order.indexOf("primary-world"),
@@ -165,7 +173,12 @@ describe("SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlot", function () {
       msaaSamples: 1,
     });
     scene.highDynamicRange = true;
+    let moonExecutions = 0;
+    installMoonWitness(function () {
+      moonExecutions++;
+    });
     scene.renderForSpecs();
+    expect(moonExecutions).toBe(1);
     const baseline = readPixels();
     const identities = {
       sceneFramebuffer: scene._view.sceneFramebuffer,
@@ -177,10 +190,12 @@ describe("SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlot", function () {
     pipeline = new SceneGISEnvironmentEffectsPipeline();
     pipeline.attach(scene);
     scene.renderForSpecs();
+    expect(moonExecutions).toBe(2);
     expect(readPixels()).toEqual(baseline);
 
     pipeline.enabled = true;
     scene.renderForSpecs();
+    expect(moonExecutions).toBe(3);
     expect(readPixels()).toEqual(baseline);
     expect(scene._view.sceneFramebuffer).toBe(identities.sceneFramebuffer);
     expect(scene._view.sceneFramebuffer._colorFramebuffer).toBe(
@@ -192,6 +207,7 @@ describe("SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlot", function () {
     scene.canvas.width = 4;
     scene.canvas.height = 4;
     scene.renderForSpecs();
+    expect(moonExecutions).toBe(4);
     expect(readPixels()).toEqual(baseline);
     expect(scene._view.sceneFramebuffer).toBe(identities.sceneFramebuffer);
     expect(scene._view.sceneFramebuffer._colorFramebuffer).toBe(
@@ -200,6 +216,7 @@ describe("SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlot", function () {
 
     pipeline.detach();
     scene.renderForSpecs();
+    expect(moonExecutions).toBe(5);
     expect(readPixels()).toEqual(baseline);
   });
 

@@ -5576,22 +5576,61 @@ ${hardCascadeLibrary}`;
     }).toThrowDeveloperError();
   });
 
-  it("fails deterministic Globe conflicts before attachment or fetch", function () {
-    scene = createScene();
-    scene.globe = new Globe(Ellipsoid.WGS84);
-    scene.highDynamicRange = true;
-    effects = new SceneGISEnvironmentEffects({
-      mode: "globe",
-      enabled: true,
-    });
-    effects.connectedCallback({});
-    const fetch = spyOn(Resource, "fetchArrayBuffer").and.callThrough();
-
-    expect(function () {
+  it("accepts caller-owned Globe Moon while other conflicts fail before attachment or fetch", function () {
+    connectGlobeWithDeferredAssets();
+    const moon = {
+      show: true,
+      isDestroyed: function () {
+        return false;
+      },
+      destroy: function () {
+        return undefined;
+      },
+    };
+    scene.moon = moon;
+    const conflictCases = [
+      {
+        enable: () => (scene.skyAtmosphere = { show: true }),
+        disable: () => (scene.skyAtmosphere = undefined),
+      },
+      {
+        enable: () => (scene.skyBox = { show: true }),
+        disable: () => (scene.skyBox = undefined),
+      },
+      {
+        enable: () => (scene.sun = { show: true }),
+        disable: () => (scene.sun = undefined),
+      },
+      {
+        enable: () => (scene.sunBloom = true),
+        disable: () => (scene.sunBloom = false),
+      },
+      {
+        enable: () => (scene.fog.enabled = true),
+        disable: () => (scene.fog.enabled = false),
+      },
+      {
+        enable: () => (scene.globe.showGroundAtmosphere = true),
+        disable: () => (scene.globe.showGroundAtmosphere = false),
+      },
+    ];
+    const firstUpdate = function () {
       effects.firstUpdate(scene, scene.frameState.time);
-    }).toThrowDeveloperError();
-    expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
-    expect(fetch).not.toHaveBeenCalled();
+    };
+
+    for (const conflict of conflictCases) {
+      conflict.enable();
+      expect(firstUpdate).toThrowDeveloperError();
+      expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
+      expect(effects._pipeline).toBeUndefined();
+      expect(Resource.fetchArrayBuffer).not.toHaveBeenCalled();
+      conflict.disable();
+    }
+
+    expect(firstUpdate).not.toThrow();
+    expect(Resource.fetchArrayBuffer).toHaveBeenCalledTimes(8);
+    expect(scene.moon).toBe(moon);
+    expect(scene.moon.show).toBe(true);
   });
 
   it("rejects native Globe lighting before any A5 resource mutation", function () {
@@ -6793,14 +6832,21 @@ ${hardCascadeLibrary}`;
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
     }
-    scene.fog.enabled = true;
+    scene.moon = {
+      show: true,
+      isDestroyed: function () {
+        return false;
+      },
+      destroy: function () {
+        return undefined;
+      },
+    };
 
     expect(function () {
       effects.firstUpdate(scene, scene.frameState.time);
     }).toThrowDeveloperError();
     expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
     expect(effects._pipeline).toBeUndefined();
-    scene.fog.enabled = false;
   });
 
   it("publishes planar Texture3D resources, toggles warm, and re-registers", async function () {

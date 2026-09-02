@@ -3256,6 +3256,22 @@ function renderEnvironment(scene, passState) {
     }
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0008: Render an optional scene-wide advanced background before native celestial bodies and the primary world.
+  const environmentEffectsPipeline = scene._sceneGISEnvironmentEffectsPipeline;
+  if (defined(environmentEffectsPipeline)) {
+    if (typeof environmentEffectsPipeline._renderBackground !== "function") {
+      throw new DeveloperError(
+        "The Scene advanced-environment pipeline authority is invalid.",
+      );
+    }
+    environmentEffectsPipeline._renderBackground(
+      scene,
+      scene.frameState,
+      passState,
+    );
+  }
+  // SCENEGIS_PATCH_END SGP-0008
+
   // Moon can be seen through the atmosphere, since the sun is rendered after the atmosphere.
   if (environmentState.isMoonVisible) {
     environmentState.moonCommand.execute(context, passState);
@@ -3272,22 +3288,6 @@ function renderEnvironment(scene, passState) {
       panoramaCommandList.splice(i, 1);
     }
   }
-
-  // SCENEGIS_PATCH_BEGIN SGP-0008: Render an optional scene-wide advanced background before the primary world.
-  const environmentEffectsPipeline = scene._sceneGISEnvironmentEffectsPipeline;
-  if (defined(environmentEffectsPipeline)) {
-    if (typeof environmentEffectsPipeline._renderBackground !== "function") {
-      throw new DeveloperError(
-        "The Scene advanced-environment pipeline authority is invalid.",
-      );
-    }
-    environmentEffectsPipeline._renderBackground(
-      scene,
-      scene.frameState,
-      passState,
-    );
-  }
-  // SCENEGIS_PATCH_END SGP-0008
 
   // SCENEGIS_PATCH_BEGIN SGP-0003: Render optional primary-world environment content.
   if (

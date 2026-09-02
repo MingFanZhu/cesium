@@ -78,3 +78,12 @@ the primary-world environment and ordinary geometry.
   SceneGIS GPU resource, new SGP or generated file.
 - Existing A9 readable-night irradiance remains the only night illumination
   source in this phase.
+
+## Execution confirmation — 2026-09-02
+
+The accepted reorder required no second body authority: the same cached native
+Moon command now follows the existing `SGP-0008` background call exactly once.
+The fixed Test observation uses the same Simon1994/ICRF-to-fixed authority as
+native Moon and derives azimuth `257.917 degrees`, elevation `7.443 degrees` at
+the assigned state. No Moon asset, light, shadow, resource, public API, Planar
+behavior or new SGP was introduced.

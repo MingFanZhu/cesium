@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active; implementation assigned`
+- Status: `completed; Architecture approved; owner visual gate passed`
 - Parent extension:
   [2026-08-14-atmosphere-clouds-effects-extension.md](2026-08-14-atmosphere-clouds-effects-extension.md)
 - Predecessor:
@@ -21,8 +21,8 @@
   [ADR-0051](../../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md)
 - Upstream patch: active `SGP-0008`, reused and narrowed to the same `Scene.js`
   environment-order seam
-- Open review findings: `none before first implementation handoff`
-- Owner visual gate: `not open until Architecture code review passes`
+- Open review findings: `none`
+- Owner visual gate: `passed`
 
 ## Goal
 
@@ -145,3 +145,46 @@ checkpoint, push, A11 or Planar work is inferred.
   behavior with the existing atmosphere/cloud controls.
 - Architecture creates one isolated local A10-G checkpoint before activating a
   successor phase.
+
+## Execution result — 2026-09-02
+
+The existing `SGP-0008` background call now executes immediately before the
+unchanged native Moon block. Globe accepts caller-owned visible Moon while all
+other conflicts remain pre-fetch/pre-attachment failures; Planar Moon rejection
+is unchanged. Focused results are render-slot `5/5`, private pipeline `7/7`, and
+three conflict tests at `1/1` each on Chrome 152. The SGP audit reports one
+current-delivery upstream path, generated status `0`, and no new SGP or
+SceneGIS resource/API delta. One fixed browser observation showed the centered
+native Sun-lit phase at derived azimuth `257.917 degrees`, elevation
+`7.443 degrees`, with zero browser/render errors. Owner visual acceptance is not
+inferred.
+
+## Architecture review — approved for owner gate 2026-09-02
+
+Architecture independently verified that the moved `SGP-0008` block remains a
+single paired upstream seam immediately before the unchanged exact-once native
+Moon command. Globe removes only Moon from its native-conflict predicate;
+Planar and every other conflict remain fail-closed. Production focused runs
+from `packages/engine` passed render-slot `5/5`, Globe Moon acceptance `1/1`
+and Planar Moon rejection `1/1`. The upstream audit passed with one
+current-delivery upstream-owned path, existing `SGP-0008`, generated status
+`0`, new SGP `0`, and zero SceneGIS resource/API delta.
+
+Architecture reloaded the direct sample and ran the single fixed `A10 月亮夜景`
+observation. The caller-owned native textured crescent was centered above the
+terrain horizon at azimuth `257.917 degrees`, elevation `7.443 degrees`, with
+Sun elevation `-20.120 degrees`; the page remained `ready · HDR` with zero
+warnings/errors. Enabling the existing cloud control retained the Moon inside
+the existing cloud/HDR composition rather than drawing it as a final overlay.
+The page was restored to the clouds-off fixed observation. Code review is
+complete; body/phase appearance and interactive terrain/cloud occlusion remain
+project-owner visual judgments, so acceptance is not inferred.
+
+## Project-owner acceptance — passed 2026-09-02
+
+The project owner inspected the prepared native Moon result and explicitly
+reported that the visual gate passes. Architecture therefore closes A10-G with
+no open finding. The phase-closing local commit containing this record is the
+isolated A10-G checkpoint and remains unpushed. Directional moonlight, Moon
+shadows, alternate Moon assets, Planar behavior and any successor phase remain
+inactive until separately designed and authorized.

@@ -96,7 +96,6 @@ function validateGlobeConflict(controller, scene) {
     !isHidden(scene.skyAtmosphere) ||
     !isHidden(scene.skyBox) ||
     !isHidden(scene.sun) ||
-    !isHidden(scene.moon) ||
     scene.sunBloom !== false ||
     (controller._showBloom &&
       scene.postProcessStages.bloom.enabled !== false) ||
@@ -105,7 +104,7 @@ function validateGlobeConflict(controller, scene) {
     scene.globe.enableLighting !== false
   ) {
     throw new DeveloperError(
-      "Advanced Globe environment requires native sky, bodies, Sun bloom, enabled post-process bloom, Fog, ground atmosphere, and Globe lighting to be disabled.",
+      "Advanced Globe environment requires native sky, Sun, Sun bloom, enabled post-process bloom, Fog, ground atmosphere, and Globe lighting to be disabled.",
     );
   }
   if (defined(controller._world)) {

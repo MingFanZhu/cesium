@@ -8,10 +8,10 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-02`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A10-G active; implementation assigned`
-- Active phase plan:
+- Current phase: `A10-G completed; successor not activated`
+- Current phase plan:
   [2026-09-02-phase-a10g-globe-native-moon-composition.md](2026-09-02-phase-a10g-globe-native-moon-composition.md)
-- Latest completed phase plan:
+- Previous completed phase plan:
   [2026-09-02-phase-a9g-globe-readable-night-skylight.md](2026-09-02-phase-a9g-globe-readable-night-skylight.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
@@ -36,7 +36,7 @@
 - A7-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A8-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A9-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
-- A10-G implementation: `active; implementation assigned`
+- A10-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 
 ## Goal
 
@@ -192,7 +192,7 @@ checklist与manual gate。A8-G不宣称dual-world扩展收口，也不补做前�
 public mode/property、directional moon、background stars、exposure、Model/3D Tiles relight、resource、upstream seam或Planar执行。Active plan为
 [A9-G Globe readable night skylight](2026-09-02-phase-a9g-globe-readable-night-skylight.md)。
 
-### A10-G — Globe native Moon composition (`active`)
+### A10-G — Globe native Moon composition (`completed`)
 
 复用Cesium caller-owned native `scene.moon`的texture、physical ellipsoid、Simon1994 position、IAU orientation、Sun-only lighting与Globe
 occlusion。既有`SGP-0008` advanced background必须移到native Moon command之前，使Moon在advanced atmosphere之后、ordinary geometry与
@@ -383,3 +383,13 @@ therefore activates A10-G to move that existing background slot before the
 caller-owned Moon, permit the native Moon in Globe conflict validation, and add
 one direct fixed Moon observation. Moonlight, new assets/resources, public API,
 new SGP and Planar behavior remain out of scope.
+
+### A10-G completion — 2026-09-02
+
+Architecture independently approved the exact-once native Moon composition,
+Moon-only Globe conflict exception, unchanged Planar rejection, existing
+`SGP-0008` ownership and zero SceneGIS resource/API delta. The project owner
+then explicitly passed the fixed native Moon visual gate. A10-G is complete;
+the phase-closing local commit containing this record is its isolated unpushed
+checkpoint. No successor phase, moonlight, Moon shadow, alternate Moon asset or
+Planar work is activated by this closure.

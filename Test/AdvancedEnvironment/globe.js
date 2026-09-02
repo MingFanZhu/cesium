@@ -71,6 +71,7 @@ const state = {
   showCrepuscularRays: true,
   showBloom: true,
   showLensFlare: true,
+  showMoon: false,
   cloudQuality: "high",
   cloudPreset: "cumulus",
   cloudCoverage: 0.3,
@@ -90,6 +91,7 @@ const state = {
   groundSunset: () => applyObservation("groundSunset"),
   groundNight: () => applyObservation("groundNight"),
   readableNight: () => applyObservation("readableNight"),
+  moonNight: () => applyMoonObservation(),
   nearSpaceHighSun: () => applyObservation("nearSpaceHighSun"),
   qualityObservation: () => observeQualitySwitch(),
   destroySample: () => destroySample(),
@@ -174,6 +176,46 @@ function solarElevation() {
   );
 }
 
+function moonCameraOrientation(destination, time) {
+  const icrfToFixed = new Cesium.Matrix3();
+  if (
+    !Cesium.defined(
+      Cesium.Transforms.computeIcrfToFixedMatrix(time, icrfToFixed),
+    )
+  ) {
+    Cesium.Transforms.computeTemeToPseudoFixedMatrix(time, icrfToFixed);
+  }
+  const moonPosition =
+    Cesium.Simon1994PlanetaryPositions.computeMoonPositionInEarthInertialFrame(
+      time,
+      new Cesium.Cartesian3(),
+    );
+  Cesium.Matrix3.multiplyByVector(icrfToFixed, moonPosition, moonPosition);
+  const direction = Cesium.Cartesian3.normalize(
+    Cesium.Cartesian3.subtract(
+      moonPosition,
+      destination,
+      new Cesium.Cartesian3(),
+    ),
+    new Cesium.Cartesian3(),
+  );
+  const fixedToEnu = Cesium.Matrix4.inverseTransformation(
+    Cesium.Transforms.eastNorthUpToFixedFrame(destination),
+    new Cesium.Matrix4(),
+  );
+  const localDirection = Cesium.Matrix4.multiplyByPointAsVector(
+    fixedToEnu,
+    direction,
+    new Cesium.Cartesian3(),
+  );
+  return {
+    heading: Cesium.Math.zeroToTwoPi(
+      Math.atan2(localDirection.x, localDirection.y),
+    ),
+    pitch: Math.asin(Cesium.Math.clamp(localDirection.z, -1.0, 1.0)),
+  };
+}
+
 function updateObservationStatus() {
   observationStatus.textContent = `固定观察：${currentObservation} · tier=${effects.cloudQuality} · Sun ${solarElevation().toFixed(3)}°`;
 }
@@ -186,6 +228,8 @@ function applyObservation(name) {
   state.cloudPreset = definition.preset;
   effects.cloudQuality = definition.quality;
   effects.cloudPreset = definition.preset;
+  state.showMoon = false;
+  viewer.scene.moon.show = false;
   viewer.clock.shouldAnimate = false;
   viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(definition.time);
   viewer.camera.setView({
@@ -197,6 +241,38 @@ function applyObservation(name) {
     orientation: {
       heading: 0.0,
       pitch: Cesium.Math.toRadians(definition.pitch),
+      roll: 0.0,
+    },
+  });
+  gui
+    .controllersRecursive()
+    .forEach((controller) => controller.updateDisplay());
+  viewer.scene.requestRender();
+}
+
+function applyMoonObservation() {
+  const time = Cesium.JulianDate.fromIso8601("2026-06-21T22:00:00Z");
+  const destination = Cesium.Cartesian3.fromDegrees(
+    locations.longitude,
+    locations.latitude,
+    500.0,
+  );
+  const orientation = moonCameraOrientation(destination, time);
+  currentStatusLocation = locations;
+  currentObservation = `A10 月亮夜景 · 方位 ${Cesium.Math.toDegrees(orientation.heading).toFixed(3)}° · 仰角 ${Cesium.Math.toDegrees(orientation.pitch).toFixed(3)}°`;
+  state.showMoon = true;
+  state.showClouds = false;
+  state.showHeightFog = false;
+  viewer.scene.moon.show = true;
+  effects.showClouds = false;
+  effects.showHeightFog = false;
+  viewer.clock.shouldAnimate = false;
+  viewer.clock.currentTime = time;
+  viewer.camera.setView({
+    destination,
+    orientation: {
+      heading: orientation.heading,
+      pitch: orientation.pitch,
       roll: 0.0,
     },
   });
@@ -399,6 +475,13 @@ function createGui() {
     viewer.scene,
     "Lens flare",
   );
+  effectsFolder
+    .add(state, "showMoon")
+    .name("原生月亮")
+    .onChange((value) => {
+      viewer.scene.moon.show = value;
+      viewer.scene.requestRender();
+    });
 
   const cloudFolder = gui.addFolder("云与 HDR");
   cloudFolder
@@ -542,6 +625,9 @@ function createGui() {
   const nightObservation = gui.addFolder("A9-G 固定观察");
   nightObservation.add(state, "readableNight").name("A9 可读夜景");
 
+  const moonObservation = gui.addFolder("A10-G 固定观察");
+  moonObservation.add(state, "moonNight").name("A10 月亮夜景");
+
   const onlineData = gui.addFolder("Cesium ion 在线数据");
   globalBuildingsButton = onlineData
     .add(state, "toggleGlobalBuildings")
@@ -563,6 +649,7 @@ function getState() {
     destroyed,
     ready: effects?.ready === true,
     enabled: effects?.enabled === true,
+    moonVisible: scene?.moon?.show === true,
     hdr: scene?.highDynamicRange === true,
     baseLayerPicker: viewer?.baseLayerPicker !== undefined,
     timeline: viewer?.timeline !== undefined,
