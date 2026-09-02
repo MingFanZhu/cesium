@@ -16,30 +16,38 @@ vec3 sceneGISGlobeSurfaceLighting(
     vec3 positionWC,
     vec3 surfaceNormalWC)
 {
-    vec3 localPosition = sceneGISCloudShadowLocalPosition(positionWC);
-    vec3 localNormal = normalize(vec3(
-        dot(surfaceNormalWC, u_sceneGISShadowEast),
-        dot(surfaceNormalWC, u_sceneGISShadowNorth),
-        dot(surfaceNormalWC, u_sceneGISShadowVertical)));
-    vec3 localSun = normalize(u_sceneGISShadowSunDirection);
+    vec3 radiiSquared = czm_ellipsoidRadii * czm_ellipsoidRadii;
+    vec3 geodeticNormal = normalize(positionWC / radiiSquared);
+    float surfaceScale = inversesqrt(dot(
+        radiiSquared,
+        geodeticNormal * geodeticNormal));
+    vec3 ellipsoidSurface =
+        radiiSquared * geodeticNormal * surfaceScale;
+    float height = dot(
+        positionWC - ellipsoidSurface,
+        geodeticNormal);
+    vec3 globePosition = geodeticNormal *
+        (SCENEGIS_BOTTOM_RADIUS + height);
+    vec3 globeNormal = normalize(surfaceNormalWC);
+    vec3 globeSun = normalize(u_sceneGISShadowSunDirection);
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
-    vec3 virtualPoint = vec3(
-        localPosition.xy * 0.001,
-        atmosphere.bottom_radius + localPosition.z * 0.001);
+    vec3 virtualPoint = globePosition * 0.001;
     vec3 skyIrradiance;
     vec3 sunIrradiance = GetSunAndSkyIrradiance(
         atmosphere,
         u_sceneGISTransmittanceTexture,
         u_sceneGISIrradianceTexture,
         virtualPoint,
-        localNormal,
-        localSun,
+        globeNormal,
+        globeSun,
         skyIrradiance);
     float cloudTransmittance = 1.0;
     if (u_sceneGISShowCloudShadows) {
-        float viewDistance = length(positionWC - u_sceneGISShadowCameraPosition);
+        float viewDistance = max(
+            -(czm_modelView * vec4(positionWC, 1.0)).z,
+            0.0);
         cloudTransmittance = exp(-sceneGISCloudShadowOpticalDepth(
-            localPosition,
+            globePosition,
             viewDistance));
     }
     return max(albedo, vec3(0.0)) * (1.0 / czm_pi) *

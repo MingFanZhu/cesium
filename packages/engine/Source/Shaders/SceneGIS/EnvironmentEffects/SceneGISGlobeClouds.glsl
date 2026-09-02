@@ -28,8 +28,15 @@
 // DEALINGS IN THE SOFTWARE.
 
 const float SCENEGIS_GLOBE_CLOUD_WEATHER_SCALE = 240000.0;
-const float SCENEGIS_GLOBE_CLOUD_MACRO_SCALE = 0.25;
-const float SCENEGIS_GLOBE_CLOUD_LOD_SCALE = 0.5;
+const float SCENEGIS_GLOBE_CLOUD_WEATHER_TEXTURE_SIZE = 512.0;
+const float SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE = 10000.0 / 3.0;
+const float SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE = 1000.0 / 6.0;
+const float SCENEGIS_GLOBE_CLOUD_DETAIL_TEXTURE_SIZE = 32.0;
+// The matched Basic reference keeps temporalUpscale enabled. Its quarter-rate
+// Cloud MRT therefore maps the full-resolution projected footprint by 0.25.
+const float SCENEGIS_GLOBE_CLOUD_TEMPORAL_MIP_SCALE = 0.25;
+
+uniform bool u_sceneGISGlobeCloudTurbulence;
 
 bool sceneGISCloudSphereInterval(
     vec3 rayOrigin,
@@ -196,60 +203,138 @@ vec2 sceneGISGlobeCloudCubeSphereUv(vec3 position)
     return vec2(x, y) * 0.5 + 0.5;
 }
 
+float sceneGISGlobeCloudEntryTexelsPerPixel(
+    vec3 globePosition,
+    vec2 currentTargetDimensions,
+    vec2 resolvedTargetDimensions,
+    float cameraHeight,
+    float maximumCloudHeight)
+{
+    vec2 globeUv = sceneGISGlobeCloudCubeSphereUv(globePosition);
+    vec2 referenceCurrentDimensions = max(
+        ceil(resolvedTargetDimensions * 0.25),
+        vec2(1.0));
+    vec2 referenceResolution = referenceCurrentDimensions * 4.0;
+    vec2 coordinate = globeUv * 100.0 * referenceResolution;
+    vec2 rasterFootprintConversion = currentTargetDimensions /
+        referenceCurrentDimensions;
+    vec2 derivativeX = dFdx(coordinate) * rasterFootprintConversion.x;
+    vec2 derivativeY = dFdy(coordinate) * rasterFootprintConversion.y;
+    float maximumDeltaSquared = max(
+        dot(derivativeX, derivativeX),
+        dot(derivativeY, derivativeY)) * 0.1;
+    float mipLevel = max(
+        0.0,
+        0.5 * log2(max(1.0, maximumDeltaSquared)));
+    mipLevel *= SCENEGIS_GLOBE_CLOUD_TEMPORAL_MIP_SCALE;
+    mipLevel = mix(
+        0.0,
+        mipLevel,
+        min(1.0, 0.2 * max(cameraHeight, 0.0) /
+            max(maximumCloudHeight, 1.0)));
+    return exp2(mipLevel);
+}
+
 vec4 sceneGISGlobeCloudLayerDescriptor(int preset, int layer)
 {
+    const float firstLowThickness = 650.0 / 4500.0;
+    const float secondLowThickness = 1200.0 / 4500.0;
+    const float highThickness = 500.0 / 4500.0;
     if (preset == 0) {
-        return layer == 0 ? vec4(0.0, 1.0, 1.0, 0.0) : vec4(0.0);
+        if (layer == 0) {
+            return vec4(0.0, firstLowThickness, 0.20, 0.0);
+        }
+        return layer == 1 ?
+            vec4(250.0, secondLowThickness, 0.20, 0.0) : vec4(0.0);
     }
     if (preset == 1) {
-        return layer == 0 ? vec4(500.0, 0.4, 0.42, 0.12) : vec4(0.0);
+        return layer == 0 ?
+            vec4(250.0, secondLowThickness, 0.20, 0.0) : vec4(0.0);
     }
     if (preset == 2) {
-        return layer == 0 ? vec4(6500.0, 0.32, 0.10, -0.08) : vec4(0.0);
+        return layer == 0 ?
+            vec4(6750.0, highThickness, 0.003, 0.0) : vec4(0.0);
     }
     if (layer == 0) {
-        return vec4(0.0, 0.85, 0.72, -0.03);
+        return vec4(0.0, firstLowThickness, 0.20, 0.0);
     }
     if (layer == 1) {
-        return vec4(4200.0, 0.34, 0.28, 0.04);
+        return vec4(250.0, secondLowThickness, 0.20, 0.0);
     }
-    return layer == 2 ? vec4(7800.0, 0.24, 0.08, -0.10) : vec4(0.0);
+    return layer == 2 ?
+        vec4(6750.0, highThickness, 0.003, 0.0) : vec4(0.0);
+}
+
+bool sceneGISGlobeCloudLayerCastsShadow(int preset, int layer)
+{
+    if (preset == 2) {
+        return false;
+    }
+    if (preset == 1) {
+        return layer == 0;
+    }
+    return layer == 0 || layer == 1;
+}
+
+void sceneGISGlobeCloudShadowPresetSupport(
+    int preset,
+    float cloudBaseHeight,
+    float cloudThickness,
+    out float supportBaseHeight,
+    out float supportThickness)
+{
+    float supportTopHeight = cloudBaseHeight;
+    supportBaseHeight = cloudBaseHeight + cloudThickness;
+    for (int layer = 0; layer < 4; ++layer) {
+        vec4 descriptor = sceneGISGlobeCloudLayerDescriptor(preset, layer);
+        if (!sceneGISGlobeCloudLayerCastsShadow(preset, layer) ||
+            descriptor.z <= 0.0) {
+            continue;
+        }
+        float layerBaseHeight = cloudBaseHeight + descriptor.x;
+        float layerTopHeight = layerBaseHeight + cloudThickness * descriptor.y;
+        supportBaseHeight = min(supportBaseHeight, layerBaseHeight);
+        supportTopHeight = max(supportTopHeight, layerTopHeight);
+    }
+    supportThickness = max(supportTopHeight - supportBaseHeight, 0.0);
+    if (supportThickness <= 0.0) {
+        supportBaseHeight = cloudBaseHeight;
+    }
 }
 
 vec4 sceneGISGlobeCloudLayerSampling(int preset, int layer)
 {
-    if (preset == 1 || (preset == 3 && layer == 1)) {
-        return vec4(0.75, 0.35, 0.60, 0.55);
-    }
     if (preset == 2 || (preset == 3 && layer == 2)) {
-        return vec4(2.0, 0.35, 0.50, 0.0);
+        return vec4(1.0, 0.35, 0.50, 0.0);
     }
-    return vec4(1.0, 0.35, 0.60, preset == 3 ? 0.80 : 1.0);
+    return vec4(1.0, 0.35, 0.60, 1.0);
 }
 
 vec3 sceneGISGlobeCloudLayerScales(int preset, int layer)
 {
-    if (preset == 1 || (preset == 3 && layer == 1)) {
-        return vec3(
-            22000.0 * SCENEGIS_GLOBE_CLOUD_MACRO_SCALE,
-            2800.0,
-            0.65);
-    }
     if (preset == 2 || (preset == 3 && layer == 2)) {
         return vec3(
-            30000.0 * SCENEGIS_GLOBE_CLOUD_MACRO_SCALE,
-            900.0,
+            SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE,
+            SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE,
             0.40);
     }
     return vec3(
-        (preset == 3 ? 13000.0 : 10000.0) *
-            SCENEGIS_GLOBE_CLOUD_MACRO_SCALE,
-        preset == 3 ? 1200.0 : 900.0,
+        SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE,
+        SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE,
         1.0);
 }
 
-float sceneGISGlobeCloudWeatherChannel(vec4 weather, int layer)
+float sceneGISGlobeCloudWeatherChannel(
+    vec4 weather,
+    int preset,
+    int layer)
 {
+    if (preset == 1) {
+        return weather.g;
+    }
+    if (preset == 2) {
+        return weather.b;
+    }
     return layer == 0 ? weather.r :
         (layer == 1 ? weather.g : (layer == 2 ? weather.b : weather.a));
 }
@@ -269,11 +354,11 @@ float sceneGISGlobeCloudShapeAltering(float heightFraction, float bias)
     return 1.0 - x * x;
 }
 
-float sceneGISGlobeCloudDensitySample(
+float sceneGISGlobeCloudDensitySampleInternal(
     sampler3D shapeTexture,
     sampler3D detailTexture,
     sampler2D weatherTexture,
-    sampler3D turbulenceTexture,
+    sampler2D turbulenceTexture,
     vec3 globePosition,
     vec3 globeOffset,
     vec2 cloudOffset,
@@ -282,21 +367,30 @@ float sceneGISGlobeCloudDensitySample(
     float cloudCoverage,
     int cloudPreset,
     float detailStrength,
-    float footprintMeters,
+    float mipLevel,
+    float jitter,
+    bool shadowLayersOnly,
     out float activeLayerHeightGradient)
 {
     float height = length(globePosition) - SCENEGIS_BOTTOM_RADIUS;
     vec2 globeUv = sceneGISGlobeCloudCubeSphereUv(globePosition);
     vec2 weatherUv = globeUv * 100.0 +
         cloudOffset / SCENEGIS_GLOBE_CLOUD_WEATHER_SCALE;
-    vec4 weather = textureLod(weatherTexture, weatherUv, 0.0);
-    float accumulatedDensity = 0.0;
-    float accumulatedGradient = 0.0;
+    float materialMipLevel = max(mipLevel, 0.0);
+    vec4 weather = textureLod(
+        weatherTexture, weatherUv, materialMipLevel);
+    vec4 heightFractions = vec4(0.0);
+    vec4 weatherDensity = vec4(0.0);
+    vec4 densityScales = vec4(0.0);
+    vec4 shapeAmounts = vec4(0.0);
+    vec4 detailAmounts = vec4(0.0);
     for (int layer = 0; layer < 4; ++layer) {
         vec4 descriptor = sceneGISGlobeCloudLayerDescriptor(
             cloudPreset,
             layer);
-        if (descriptor.z <= 0.0) {
+        if (descriptor.z <= 0.0 ||
+            (shadowLayersOnly &&
+                !sceneGISGlobeCloudLayerCastsShadow(cloudPreset, layer))) {
             continue;
         }
         float layerBase = cloudBaseHeight + descriptor.x;
@@ -310,90 +404,189 @@ float sceneGISGlobeCloudDensitySample(
         if (!insideLayer) {
             continue;
         }
+        heightFractions[layer] = heightFraction;
+        densityScales[layer] = descriptor.z;
         vec4 sampling = sceneGISGlobeCloudLayerSampling(
             cloudPreset,
             layer);
         float localWeather = pow(
-            max(sceneGISGlobeCloudWeatherChannel(weather, layer), 0.0),
+            max(sceneGISGlobeCloudWeatherChannel(
+                weather,
+                cloudPreset,
+                layer), 0.0),
             sampling.x);
         float heightScale = sceneGISGlobeCloudShapeAltering(
             heightFraction,
             sampling.y);
         float coverage = clamp(cloudCoverage + descriptor.w, 0.0, 1.0);
         float factor = 1.0 - coverage * heightScale;
-        float weatherDensity = sceneGISGlobeCloudRemap(
+        weatherDensity[layer] = sceneGISGlobeCloudRemap(
             mix(localWeather, 1.0, sampling.z),
             factor,
             factor + sampling.z);
-        if (weatherDensity <= 1.0e-5) {
-            continue;
-        }
         vec3 scales = sceneGISGlobeCloudLayerScales(cloudPreset, layer);
-        float bottomWeight = sceneGISGlobeCloudRemap(
-            heightFraction,
-            0.3,
-            0.0);
-        float turbulenceLod = clamp(
-            log2(max(footprintMeters / 250.0, 1.0)) *
-                SCENEGIS_GLOBE_CLOUD_LOD_SCALE,
-            0.0,
-            6.0);
-        vec3 turbulence = (textureLod(
-            turbulenceTexture,
-            vec3(globeUv * 2000.0, heightFraction),
-            turbulenceLod).rgb - vec3(128.0 / 255.0)) *
-            (255.0 / 127.0) * 350.0 * weatherDensity * bottomWeight;
-        vec3 shapePosition = globePosition + globeOffset + turbulence;
-        float shapeTexelMeters = scales.x / 128.0;
-        float shapeLod = clamp(
-            log2(max(footprintMeters / shapeTexelMeters, 1.0)) *
-                SCENEGIS_GLOBE_CLOUD_LOD_SCALE,
-            0.0,
-            7.0);
-        float shape = textureLod(
-            shapeTexture,
-            shapePosition / scales.x,
-            shapeLod).r;
-        float density = sceneGISGlobeCloudRemap(
-            weatherDensity,
-            (1.0 - shape) * scales.z,
-            1.0);
-        if (density > 1.0e-5 &&
-            detailStrength > 0.0 &&
-            sampling.w > 0.0) {
-            float detailTexelMeters = scales.y / 64.0;
-            float detailLod = clamp(
-                log2(max(footprintMeters / detailTexelMeters, 1.0)) *
-                    SCENEGIS_GLOBE_CLOUD_LOD_SCALE,
-                0.0,
-                6.0);
-            float detail = textureLod(
-                detailTexture,
-                (globePosition + globeOffset + turbulence) / scales.y,
-                detailLod).r;
-            float heightBlend = sceneGISGlobeCloudRemap(
-                heightFraction,
-                0.2,
-                0.4);
-            float modifier = mix(
-                pow(detail, 6.0),
-                1.0 - detail,
-                heightBlend) * sampling.w * detailStrength;
-            density = sceneGISGlobeCloudRemap(
-                density * 2.0,
-                modifier * 0.5,
-                1.0);
-        }
-        float densityProfile = 0.75 * heightFraction + 0.25;
-        float weightedDensity = clamp(
-            density * densityProfile * descriptor.z,
-            0.0,
-            1.0);
-        accumulatedDensity += weightedDensity;
-        accumulatedGradient += weightedDensity *
-            mix(0.5, 1.0, heightFraction);
+        shapeAmounts[layer] = scales.z;
+        detailAmounts[layer] = sampling.w * detailStrength;
     }
-    activeLayerHeightGradient = accumulatedDensity > 1.0e-6 ?
-        accumulatedGradient / accumulatedDensity : 0.5;
-    return clamp(accumulatedDensity, 0.0, 1.0);
+
+    vec4 bottomWeights = vec4(
+        sceneGISGlobeCloudRemap(heightFractions.x, 0.3, 0.0),
+        sceneGISGlobeCloudRemap(heightFractions.y, 0.3, 0.0),
+        sceneGISGlobeCloudRemap(heightFractions.z, 0.3, 0.0),
+        sceneGISGlobeCloudRemap(heightFractions.w, 0.3, 0.0));
+    vec3 turbulence = vec3(0.0);
+    if (u_sceneGISGlobeCloudTurbulence) {
+        turbulence = (textureLod(
+            turbulenceTexture,
+            globeUv * 2000.0,
+            materialMipLevel).rgb * 2.0 - 1.0) *
+            350.0 * dot(weatherDensity, bottomWeights);
+    }
+    vec3 evolution = -normalize(globePosition) *
+        length(cloudOffset / SCENEGIS_GLOBE_CLOUD_WEATHER_SCALE) * 2.0e4;
+    vec3 shapePosition = globePosition + evolution + turbulence;
+    float shape = texture(
+        shapeTexture,
+        shapePosition / SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE).r;
+    vec4 density = clamp(
+        (weatherDensity - (1.0 - shape) * shapeAmounts) /
+            max(vec4(1.0) - (1.0 - shape) * shapeAmounts, vec4(1.0e-4)),
+        0.0,
+        1.0);
+    if (materialMipLevel * 0.5 + (jitter - 0.5) * 0.5 < 0.5 &&
+        any(greaterThan(detailAmounts, vec4(0.0)))) {
+        float detail = texture(
+            detailTexture,
+            (globePosition + turbulence) /
+                SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE).r;
+        vec4 heightBlend = clamp(
+            (heightFractions - 0.2) / 0.2,
+            0.0,
+            1.0);
+        vec4 modifier = mix(
+            vec4(pow(detail, 6.0)),
+            vec4(1.0 - detail),
+            heightBlend) * detailAmounts;
+        density = clamp(
+            (density * 2.0 - modifier * 0.5) /
+                max(vec4(1.0) - modifier * 0.5, vec4(1.0e-4)),
+            0.0,
+            1.0);
+    }
+    density = clamp(
+        density * densityScales *
+            (heightFractions * 0.75 + 0.25),
+        0.0,
+        1.0);
+    float densitySum = dot(density, vec4(1.0));
+    activeLayerHeightGradient = densitySum > 1.0e-6 ?
+        dot(density, heightFractions * 0.5 + 0.5) / densitySum : 0.5;
+    return max(densitySum, 0.0);
+}
+
+float sceneGISGlobeCloudDensitySample(
+    sampler3D shapeTexture,
+    sampler3D detailTexture,
+    sampler2D weatherTexture,
+    sampler2D turbulenceTexture,
+    vec3 globePosition,
+    vec3 globeOffset,
+    vec2 cloudOffset,
+    float cloudBaseHeight,
+    float cloudThickness,
+    float cloudCoverage,
+    int cloudPreset,
+    float detailStrength,
+    float mipLevel,
+    out float activeLayerHeightGradient)
+{
+    return sceneGISGlobeCloudDensitySampleInternal(
+        shapeTexture,
+        detailTexture,
+        weatherTexture,
+        turbulenceTexture,
+        globePosition,
+        globeOffset,
+        cloudOffset,
+        cloudBaseHeight,
+        cloudThickness,
+        cloudCoverage,
+        cloudPreset,
+        detailStrength,
+        mipLevel,
+        0.5,
+        false,
+        activeLayerHeightGradient);
+}
+
+float sceneGISGlobeCloudDensitySample(
+    sampler3D shapeTexture,
+    sampler3D detailTexture,
+    sampler2D weatherTexture,
+    sampler2D turbulenceTexture,
+    vec3 globePosition,
+    vec3 globeOffset,
+    vec2 cloudOffset,
+    float cloudBaseHeight,
+    float cloudThickness,
+    float cloudCoverage,
+    int cloudPreset,
+    float detailStrength,
+    float mipLevel,
+    float jitter,
+    out float activeLayerHeightGradient)
+{
+    return sceneGISGlobeCloudDensitySampleInternal(
+        shapeTexture,
+        detailTexture,
+        weatherTexture,
+        turbulenceTexture,
+        globePosition,
+        globeOffset,
+        cloudOffset,
+        cloudBaseHeight,
+        cloudThickness,
+        cloudCoverage,
+        cloudPreset,
+        detailStrength,
+        mipLevel,
+        jitter,
+        false,
+        activeLayerHeightGradient);
+}
+
+float sceneGISGlobeCloudShadowDensitySample(
+    sampler3D shapeTexture,
+    sampler3D detailTexture,
+    sampler2D weatherTexture,
+    sampler2D turbulenceTexture,
+    vec3 globePosition,
+    vec3 globeOffset,
+    vec2 cloudOffset,
+    float cloudBaseHeight,
+    float cloudThickness,
+    float cloudCoverage,
+    int cloudPreset,
+    float detailStrength,
+    float mipLevel,
+    float jitter,
+    out float activeLayerHeightGradient)
+{
+    return sceneGISGlobeCloudDensitySampleInternal(
+        shapeTexture,
+        detailTexture,
+        weatherTexture,
+        turbulenceTexture,
+        globePosition,
+        globeOffset,
+        cloudOffset,
+        cloudBaseHeight,
+        cloudThickness,
+        cloudCoverage,
+        cloudPreset,
+        detailStrength,
+        mipLevel,
+        jitter,
+        true,
+        activeLayerHeightGradient);
 }

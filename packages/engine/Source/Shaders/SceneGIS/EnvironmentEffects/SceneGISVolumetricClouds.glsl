@@ -6,10 +6,54 @@ const float SCENEGIS_CLOUD_SHAPE_SCALE = 12000.0;
 const float SCENEGIS_CLOUD_DETAIL_SCALE = 2000.0;
 const float SCENEGIS_CLOUD_WEATHER_SCALE = 240000.0;
 
-vec3 sceneGISGlobeCloudSurfaceAnchor(vec3 geodeticSurfaceNormal)
+#ifdef SCENEGIS_GLOBE
+#define SCENEGIS_CLOUD_TURBULENCE_SAMPLER sampler2D
+#else
+#define SCENEGIS_CLOUD_TURBULENCE_SAMPLER sampler3D
+#endif
+
+#ifdef SCENEGIS_GLOBE
+vec3 sceneGISGlobeCloudPosition(
+    vec3 localPosition,
+    vec3 surfacePosition,
+    vec3 east,
+    vec3 north,
+    vec3 vertical,
+    vec3 ellipsoidCenter,
+    vec3 ellipsoidRadii)
 {
-    return normalize(geodeticSurfaceNormal) * SCENEGIS_BOTTOM_RADIUS;
+    vec3 worldPosition = surfacePosition +
+        east * localPosition.x +
+        north * localPosition.y +
+        vertical * localPosition.z;
+    vec3 centeredPosition = worldPosition - ellipsoidCenter;
+    vec3 radiiSquared = ellipsoidRadii * ellipsoidRadii;
+    vec3 geodeticNormal = normalize(centeredPosition / radiiSquared);
+    float surfaceScale = inversesqrt(dot(
+        radiiSquared,
+        geodeticNormal * geodeticNormal));
+    vec3 ellipsoidSurface =
+        radiiSquared * geodeticNormal * surfaceScale;
+    float height = dot(
+        centeredPosition - ellipsoidSurface,
+        geodeticNormal);
+    return geodeticNormal * (SCENEGIS_BOTTOM_RADIUS + height);
 }
+
+vec3 sceneGISGlobeCloudOffset(
+    vec3 globePosition,
+    vec2 cloudOffset)
+{
+    vec3 normal = normalize(globePosition);
+    vec3 east = cross(vec3(0.0, 0.0, 1.0), normal);
+    if (dot(east, east) <= 1.0e-8) {
+        east = cross(vec3(0.0, 1.0, 0.0), normal);
+    }
+    east = normalize(east);
+    vec3 north = normalize(cross(normal, east));
+    return east * cloudOffset.x + north * cloudOffset.y;
+}
+#endif
 
 bool sceneGISIsClearResolvedDepth(float rawDepth)
 {
@@ -19,6 +63,16 @@ const int SCENEGIS_CLOUD_PRIMARY_MAX_STEPS = 64;
 const int SCENEGIS_CLOUD_FINE_MAX_STEPS = 4;
 const int SCENEGIS_CLOUD_SUN_MAX_STEPS = 4;
 const int SCENEGIS_CLOUD_SHADOW_VIEW_MAX_STEPS = 384;
+#ifdef SCENEGIS_GLOBE
+const int SCENEGIS_GLOBE_CLOUD_MARCH_MAX_STEPS = 500;
+const int SCENEGIS_GLOBE_CLOUD_LOW_MARCH_STEPS = 200;
+const float SCENEGIS_GLOBE_CLOUD_MIN_STEP = 50.0;
+const float SCENEGIS_GLOBE_CLOUD_LOW_MIN_STEP = 100.0;
+const float SCENEGIS_GLOBE_CLOUD_MAX_STEP = 1000.0;
+const float SCENEGIS_GLOBE_CLOUD_STEP_SCALE = 1.01;
+const float SCENEGIS_GLOBE_CLOUD_MAX_RAY_DISTANCE = 200000.0;
+const float SCENEGIS_GLOBE_CLOUD_LOW_MAX_RAY_DISTANCE = 100000.0;
+#endif
 
 bool sceneGISCloudSphereInterval(
     vec3 rayOrigin,
@@ -90,7 +144,9 @@ bool sceneGISCloudSegment(
     }
     #endif
     segmentEnd = min(segmentEnd, segmentStart + SCENEGIS_CLOUD_MAX_DISTANCE);
+    #ifndef SCENEGIS_GLOBE
     segmentEnd = min(segmentEnd, segmentStart + SCENEGIS_CLOUD_VISIBLE_END);
+    #endif
     return segmentEnd > segmentStart;
 }
 
@@ -105,14 +161,12 @@ bool sceneGISCloudShadowViewSegment(
     if (maximumDistance <= 0.0) {
         return false;
     }
-    vec3 virtualOrigin = vec3(
-        rayOrigin.xy, SCENEGIS_BOTTOM_RADIUS + rayOrigin.z);
     float shadowTopRadius =
         SCENEGIS_BOTTOM_RADIUS + u_sceneGISShadowCloudTop;
     float topNear;
     float topFar;
     if (!sceneGISCloudSphereInterval(
-            virtualOrigin,
+            rayOrigin,
             rayDirection,
             shadowTopRadius,
             topNear,
@@ -124,7 +178,7 @@ bool sceneGISCloudShadowViewSegment(
     float groundNear;
     float groundFar;
     if (sceneGISCloudSphereInterval(
-            virtualOrigin,
+            rayOrigin,
             rayDirection,
             SCENEGIS_BOTTOM_RADIUS,
             groundNear,
@@ -141,16 +195,47 @@ bool sceneGISCloudShadowViewSegment(
 float sceneGISCloudShadowViewLength(
     vec3 localRayOrigin,
     vec3 localRayDirection,
+    vec3 surfacePosition,
+    vec3 east,
+    vec3 north,
+    vec3 vertical,
+    vec3 ellipsoidCenter,
+    vec3 ellipsoidRadii,
+    vec3 worldCameraDirection,
     float maximumDistance)
 {
     if (!u_sceneGISShowCrepuscularRays) {
         return 0.0;
     }
+    vec3 globeRayOrigin = sceneGISGlobeCloudPosition(
+        localRayOrigin,
+        surfacePosition,
+        east,
+        north,
+        vertical,
+        ellipsoidCenter,
+        ellipsoidRadii);
+    vec3 globeRayPoint = sceneGISGlobeCloudPosition(
+        localRayOrigin + localRayDirection * 1000.0,
+        surfacePosition,
+        east,
+        north,
+        vertical,
+        ellipsoidCenter,
+        ellipsoidRadii);
+    vec3 globeRayDirection = normalize(globeRayPoint - globeRayOrigin);
+    vec3 localCameraDirection = normalize(vec3(
+        dot(worldCameraDirection, east),
+        dot(worldCameraDirection, north),
+        dot(worldCameraDirection, vertical)));
+    float viewProjection = max(
+        dot(localRayDirection, localCameraDirection),
+        0.0);
     float shadowSegmentStart;
     float shadowSegmentEnd;
     if (!sceneGISCloudShadowViewSegment(
-            localRayOrigin,
-            localRayDirection,
+            globeRayOrigin,
+            globeRayDirection,
             maximumDistance,
             shadowSegmentStart,
             shadowSegmentEnd)) {
@@ -171,10 +256,10 @@ float sceneGISCloudShadowViewLength(
         float actualIntervalLength = intervalEnd - intervalStart;
         float viewDistance = intervalStart + actualIntervalLength * 0.5;
         vec3 midpoint =
-            localRayOrigin + localRayDirection * viewDistance;
+            globeRayOrigin + globeRayDirection * viewDistance;
         float opticalDepth = sceneGISCloudShadowRawOpticalDepth(
             midpoint,
-            viewDistance);
+            viewDistance * viewProjection);
         shadowLength +=
             (1.0 - exp(-min(opticalDepth, 80.0))) *
             actualIntervalLength;
@@ -293,7 +378,11 @@ void sceneGISCloudPresetSupport(
     float supportTopHeight = cloudBaseHeight;
     supportBaseHeight = cloudBaseHeight + cloudThickness;
     for (int layer = 0; layer < 4; ++layer) {
+        #ifdef SCENEGIS_GLOBE
+        vec4 descriptor = sceneGISGlobeCloudLayerDescriptor(preset, layer);
+        #else
         vec4 descriptor = sceneGISCloudLayerDescriptor(preset, layer);
+        #endif
         if (descriptor.z <= 0.0) {
             continue;
         }
@@ -329,7 +418,7 @@ float sceneGISCloudDensitySample(
     sampler3D shapeTexture,
     sampler3D detailTexture,
     sampler2D weatherTexture,
-    sampler3D turbulenceTexture,
+    SCENEGIS_CLOUD_TURBULENCE_SAMPLER turbulenceTexture,
     vec3 localPosition,
     vec3 globePosition,
     vec3 globeOffset,
@@ -341,6 +430,7 @@ float sceneGISCloudDensitySample(
     int cloudPreset,
     float detailStrength,
     float footprintMeters,
+    float jitter,
     out float activeLayerHeightGradient)
 {
     #ifdef SCENEGIS_GLOBE
@@ -358,6 +448,7 @@ float sceneGISCloudDensitySample(
         cloudPreset,
         detailStrength,
         footprintMeters,
+        jitter,
         activeLayerHeightGradient);
     #else
     float materialHeight = localPosition.z;
@@ -479,6 +570,12 @@ float sceneGISCloudOccupancyBound(
     sampler3D occupancyTexture,
     vec3 intervalStartLocal,
     vec3 intervalEndLocal,
+    vec3 surfacePosition,
+    vec3 east,
+    vec3 north,
+    vec3 vertical,
+    vec3 ellipsoidCenter,
+    vec3 ellipsoidRadii,
     vec2 materialOrigin,
     vec2 cloudOffset,
     float cloudBaseHeight,
@@ -489,17 +586,58 @@ float sceneGISCloudOccupancyBound(
 {
     vec3 intervalMiddleLocal =
         (intervalStartLocal + intervalEndLocal) * 0.5;
+    #ifdef SCENEGIS_GLOBE
+    vec3 intervalStartGlobe = sceneGISGlobeCloudPosition(
+        intervalStartLocal,
+        surfacePosition,
+        east,
+        north,
+        vertical,
+        ellipsoidCenter,
+        ellipsoidRadii);
+    vec3 intervalEndGlobe = sceneGISGlobeCloudPosition(
+        intervalEndLocal,
+        surfacePosition,
+        east,
+        north,
+        vertical,
+        ellipsoidCenter,
+        ellipsoidRadii);
+    vec3 intervalMiddleGlobe = sceneGISGlobeCloudPosition(
+        intervalMiddleLocal,
+        surfacePosition,
+        east,
+        north,
+        vertical,
+        ellipsoidCenter,
+        ellipsoidRadii);
+    float startHeight =
+        length(intervalStartGlobe) - SCENEGIS_BOTTOM_RADIUS;
+    float endHeight =
+        length(intervalEndGlobe) - SCENEGIS_BOTTOM_RADIUS;
+    float middleHeight =
+        length(intervalMiddleGlobe) - SCENEGIS_BOTTOM_RADIUS;
+    vec3 texturePosition = intervalMiddleGlobe +
+        sceneGISGlobeCloudOffset(intervalMiddleGlobe, cloudOffset);
+    #else
     float startHeight = sceneGISCloudMaterialHeight(intervalStartLocal);
     float endHeight = sceneGISCloudMaterialHeight(intervalEndLocal);
     float middleHeight = sceneGISCloudMaterialHeight(intervalMiddleLocal);
-    float minimumHeight = min(startHeight, min(endHeight, middleHeight));
-    float maximumHeight = max(startHeight, max(endHeight, middleHeight));
     vec3 texturePosition = vec3(
         materialOrigin + intervalMiddleLocal.xy + cloudOffset,
         middleHeight);
+    #endif
+    float minimumHeight = min(startHeight, min(endHeight, middleHeight));
+    float maximumHeight = max(startHeight, max(endHeight, middleHeight));
     float bound = 0.0;
     for (int layer = 0; layer < 4; ++layer) {
+        #ifdef SCENEGIS_GLOBE
+        vec4 descriptor = sceneGISGlobeCloudLayerDescriptor(
+            cloudPreset,
+            layer);
+        #else
         vec4 descriptor = sceneGISCloudLayerDescriptor(cloudPreset, layer);
+        #endif
         if (descriptor.z <= 0.0) {
             continue;
         }
@@ -509,20 +647,30 @@ float sceneGISCloudOccupancyBound(
             minimumHeight >= layerBase + layerThickness) {
             continue;
         }
-        vec4 morphology = sceneGISCloudMorphologyParameters(
-            cloudPreset, layer);
-        vec2 morphologyAnisotropy = sceneGISCloudMorphologyAnisotropy(
-            cloudPreset, layer);
         float heightFraction = clamp(
             (middleHeight - layerBase) / max(layerThickness, 1.0),
             0.0,
             1.0);
+        #ifdef SCENEGIS_GLOBE
+        vec3 globeScales = sceneGISGlobeCloudLayerScales(
+            cloudPreset,
+            layer);
+        vec3 shapePosition = texturePosition;
+        float shapeScale = globeScales.x;
+        float maximumAnisotropy = 1.0;
+        #else
+        vec4 morphology = sceneGISCloudMorphologyParameters(
+            cloudPreset, layer);
+        vec2 morphologyAnisotropy = sceneGISCloudMorphologyAnisotropy(
+            cloudPreset, layer);
         vec3 shapePosition = texturePosition;
         shapePosition.xy *= morphologyAnisotropy;
         shapePosition.z = heightFraction * layerThickness;
-        float shapeTexelMeters = morphology.x / 128.0;
+        float shapeScale = morphology.x;
         float maximumAnisotropy = max(
             morphologyAnisotropy.x, morphologyAnisotropy.y);
+        #endif
+        float shapeTexelMeters = shapeScale / 128.0;
         // Turbulence displaces the actual material position by at most 700 m.
         // The max hierarchy has a one-cell halo at every level, so a nearest
         // sample at this conservative footprint also covers a mip-cell seam.
@@ -537,7 +685,7 @@ float sceneGISCloudOccupancyBound(
             7.0);
         float shapeBound = textureLod(
             occupancyTexture,
-            shapePosition / morphology.x,
+            shapePosition / shapeScale,
             occupancyLod).r;
         // The Globe reference remaps weather against the complete shape range,
         // so only an exact-zero max cell is empty. Planar retains its frozen
@@ -557,15 +705,30 @@ float sceneGISCloudMinimumRetainedFeature(
 {
     float minimumFeature = 1.0e9;
     for (int layer = 0; layer < 4; ++layer) {
+        #ifdef SCENEGIS_GLOBE
+        vec4 descriptor = sceneGISGlobeCloudLayerDescriptor(
+            cloudPreset,
+            layer);
+        #else
         vec4 descriptor = sceneGISCloudLayerDescriptor(cloudPreset, layer);
+        #endif
         if (descriptor.z <= 0.0) {
             continue;
         }
+        #ifdef SCENEGIS_GLOBE
+        vec3 globeScales = sceneGISGlobeCloudLayerScales(
+            cloudPreset,
+            layer);
+        minimumFeature = min(
+            minimumFeature,
+            useDetail ? globeScales.y : globeScales.x);
+        #else
         vec4 morphology = sceneGISCloudMorphologyParameters(
             cloudPreset, layer);
         minimumFeature = min(
             minimumFeature,
             useDetail ? morphology.y : morphology.x);
+        #endif
     }
     return max(minimumFeature, 1.0);
 }
@@ -620,63 +783,89 @@ float sceneGISCloudLocalPowder(float localExtinction)
         -max(localExtinction, 0.0) * powderDistanceMeters);
 }
 
-vec3 sceneGISCloudSkyIrradiance(
+void sceneGISCloudIncidentIrradiance(
+    sampler2D transmittanceTexture,
     sampler2D irradianceTexture,
     vec3 localPosition,
+    vec3 globePosition,
     vec3 sunDirection,
-    vec3 atmosphereSun)
+    out vec3 sunIrradiance,
+    out vec3 skyIrradiance)
 {
     #ifdef SCENEGIS_GLOBE
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
-    vec3 point = vec3(
-        localPosition.xy * 0.001,
-        atmosphere.bottom_radius + localPosition.z * 0.001);
-    float radius = max(length(point), atmosphere.bottom_radius);
-    float sunCosine = dot(point, sunDirection) / radius;
-    return max(GetIrradiance(
-        atmosphere, irradianceTexture, radius, sunCosine), vec3(0.0)) /
-        SCENEGIS_SOLAR_IRRADIANCE;
+    vec3 point = globePosition * 0.001;
+    sunIrradiance = max(GetSunAndSkyScalarIrradiance(
+        atmosphere,
+        transmittanceTexture,
+        irradianceTexture,
+        point,
+        sunDirection,
+        skyIrradiance), vec3(0.0));
+    skyIrradiance = max(skyIrradiance, vec3(0.0));
     #else
     vec3 totalIrradiance = max(sceneGISPlanarIrradiance(
         irradianceTexture, localPosition.z, sunDirection.z), vec3(0.0));
+    sunIrradiance = vec3(0.0);
+    if (sunDirection.z > 0.0 && localPosition.z >= 0.0 &&
+        localPosition.z <= SCENEGIS_PLANAR_TOP) {
+        sunIrradiance = max(sceneGISPlanarTransmittanceToBoundary(
+            transmittanceTexture, localPosition.z, sunDirection.z), vec3(0.0));
+    }
     vec3 directIrradiance = SCENEGIS_SOLAR_IRRADIANCE *
-        max(sunDirection.z, 0.0) * max(atmosphereSun, vec3(0.0));
-    return max(totalIrradiance - directIrradiance, vec3(0.0)) /
+        max(sunDirection.z, 0.0) * sunIrradiance;
+    skyIrradiance = max(totalIrradiance - directIrradiance, vec3(0.0)) /
         SCENEGIS_SOLAR_IRRADIANCE;
     #endif
 }
 
-vec3 sceneGISCloudSunIncident(
+vec3 sceneGISGlobeCloudGroundSource(
     sampler2D transmittanceTexture,
-    vec3 localPosition,
-    vec3 sunDirection)
+    sampler2D irradianceTexture,
+    vec3 globePosition,
+    vec3 sunDirection,
+    float cloudCoverage,
+    float groundOpticalDepth)
 {
     #ifdef SCENEGIS_GLOBE
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
-    vec3 point = vec3(
-        localPosition.xy * 0.001,
-        atmosphere.bottom_radius + localPosition.z * 0.001);
-    float radius = max(length(point), atmosphere.bottom_radius);
-    float sunCosine = dot(point, sunDirection) / radius;
-    return max(GetTransmittanceToSun(
-        atmosphere, transmittanceTexture, radius, sunCosine), vec3(0.0));
+    vec3 surfaceNormal = normalize(globePosition);
+    float height = length(globePosition) - SCENEGIS_BOTTOM_RADIUS;
+    vec3 groundPoint = (globePosition - surfaceNormal * height) * 0.001;
+    vec3 groundSkyIrradiance;
+    vec3 groundSunIrradiance = GetSunAndSkyIrradiance(
+        atmosphere,
+        transmittanceTexture,
+        irradianceTexture,
+        groundPoint,
+        surfaceNormal,
+        sunDirection,
+        groundSkyIrradiance);
+    const float groundAlbedo = 0.3;
+    vec3 groundIrradiance = max(groundSkyIrradiance, vec3(0.0)) +
+        (1.0 - clamp(cloudCoverage, 0.0, 1.0)) *
+            max(groundSunIrradiance, vec3(0.0));
+    return groundAlbedo / czm_pi * groundIrradiance *
+        exp(-clamp(groundOpticalDepth, 0.0, 80.0)) *
+        (1.0 / (4.0 * czm_pi));
     #else
-    if (sunDirection.z <= 0.0 || localPosition.z < 0.0 ||
-        localPosition.z > SCENEGIS_PLANAR_TOP) {
-        return vec3(0.0);
-    }
-    return max(sceneGISPlanarTransmittanceToBoundary(
-        transmittanceTexture, localPosition.z, sunDirection.z), vec3(0.0));
+    return vec3(0.0);
     #endif
 }
 
 void sceneGISCloudLightingComponents(
+    sampler2D transmittanceTexture,
     sampler2D irradianceTexture,
     vec3 sampleLocal,
+    vec3 sampleGlobePosition,
     vec3 localRayDirection,
-    vec3 sunDirection,
+    vec3 localSunDirection,
+    vec3 globeSunDirection,
     vec3 atmosphereSun,
+    vec3 skyIrradiance,
     float sunOpticalDepth,
+    float groundOpticalDepth,
+    float cloudCoverage,
     float activeLayerHeightGradient,
     float localExtinction,
     out vec3 solarScattering,
@@ -687,31 +876,198 @@ void sceneGISCloudLightingComponents(
     solarScattering = sceneGISCloudSolarScattering(
         atmosphereSun,
         sunOpticalDepth,
-        dot(localRayDirection, sunDirection));
-    vec3 skyIrradiance = sceneGISCloudSkyIrradiance(
-        irradianceTexture,
-        sampleLocal,
-        sunDirection,
-        atmosphereSun);
+        dot(localRayDirection, localSunDirection));
     float heightGradient = clamp(
         activeLayerHeightGradient, 0.5, 1.0);
     skySource = skyIrradiance *
         (1.0 / (4.0 * czm_pi)) * heightGradient;
+    vec3 groundSource = vec3(0.0);
+    #ifdef SCENEGIS_GLOBE
+    groundSource = sceneGISGlobeCloudGroundSource(
+        transmittanceTexture,
+        irradianceTexture,
+        sampleGlobePosition,
+        globeSunDirection,
+        cloudCoverage,
+        groundOpticalDepth);
+    #endif
     localPowder = sceneGISCloudLocalPowder(localExtinction);
-    totalSource = (solarScattering + skySource) * localPowder;
+    totalSource = (solarScattering + groundSource + skySource) * localPowder;
 }
 
-float sceneGISCloudSunOpticalDepth(
+#ifdef SCENEGIS_GLOBE
+float sceneGISGlobeCloudLocalSunOpticalDepth(
     sampler3D shapeTexture,
     sampler3D detailTexture,
     sampler2D weatherTexture,
-    sampler3D turbulenceTexture,
+    SCENEGIS_CLOUD_TURBULENCE_SAMPLER turbulenceTexture,
     vec3 localPosition,
     vec3 surfacePosition,
     vec3 east,
     vec3 north,
     vec3 vertical,
     vec3 ellipsoidCenter,
+    vec3 ellipsoidRadii,
+    vec2 materialOrigin,
+    vec3 sunDirection,
+    vec2 cloudOffset,
+    float cloudBaseHeight,
+    float cloudThickness,
+    float cloudCoverage,
+    float cloudDensity,
+    int cloudPreset,
+    int sunSteps,
+    float detailStrength,
+    float mipLevel,
+    float jitter,
+    out float coveredDistance)
+{
+    int referenceSunSteps = sunSteps >= 3 ? 2 : 1;
+    int iterationCount = int(max(
+        0.0,
+        mix(float(referenceSunSteps + 1), 1.0, clamp(mipLevel, 0.0, 1.0)) -
+            jitter));
+    if (iterationCount == 0) {
+        coveredDistance = 0.0;
+        return 0.5;
+    }
+    float stepLength = 100.0 / float(iterationCount);
+    float nextDistance = stepLength * jitter;
+    coveredDistance = nextDistance;
+    float opticalDepth = 0.0;
+    for (int step = 0; step < SCENEGIS_CLOUD_SUN_MAX_STEPS; ++step) {
+        if (step >= iterationCount) {
+            break;
+        }
+        float distance = nextDistance;
+        vec3 sampleLocal = localPosition + sunDirection * distance;
+        vec3 sampleGlobePosition = sceneGISGlobeCloudPosition(
+            sampleLocal,
+            surfacePosition,
+            east,
+            north,
+            vertical,
+            ellipsoidCenter,
+            ellipsoidRadii);
+        vec3 globeOffset = sceneGISGlobeCloudOffset(
+            sampleGlobePosition,
+            cloudOffset);
+        float unusedHeightGradient;
+        opticalDepth += sceneGISCloudDensitySample(
+            shapeTexture,
+            detailTexture,
+            weatherTexture,
+            turbulenceTexture,
+            sampleLocal,
+            sampleGlobePosition,
+            globeOffset,
+            materialOrigin,
+            cloudOffset,
+            cloudBaseHeight,
+            cloudThickness,
+            cloudCoverage,
+            cloudPreset,
+            detailStrength,
+            mipLevel,
+            jitter,
+            unusedHeightGradient) * cloudDensity * stepLength;
+        coveredDistance = distance;
+        nextDistance += stepLength;
+        stepLength *= 2.0;
+    }
+    return min(opticalDepth, 80.0);
+}
+
+float sceneGISGlobeCloudGroundOpticalDepth(
+    sampler3D shapeTexture,
+    sampler3D detailTexture,
+    sampler2D weatherTexture,
+    SCENEGIS_CLOUD_TURBULENCE_SAMPLER turbulenceTexture,
+    vec3 localPosition,
+    vec3 surfacePosition,
+    vec3 east,
+    vec3 north,
+    vec3 vertical,
+    vec3 ellipsoidCenter,
+    vec3 ellipsoidRadii,
+    vec2 materialOrigin,
+    vec2 cloudOffset,
+    float cloudBaseHeight,
+    float cloudThickness,
+    float cloudCoverage,
+    float cloudDensity,
+    int cloudPreset,
+    int groundSteps,
+    float detailStrength,
+    float mipLevel,
+    float jitter)
+{
+    int iterationCount = int(max(
+        0.0,
+        mix(float(groundSteps + 1), 1.0, clamp(mipLevel, 0.0, 1.0)) -
+            jitter));
+    if (iterationCount == 0) {
+        return 0.5;
+    }
+    float groundStepLength = 100.0 / float(iterationCount);
+    vec3 globeStart = sceneGISGlobeCloudPosition(
+        localPosition,
+        surfacePosition,
+        east,
+        north,
+        vertical,
+        ellipsoidCenter,
+        ellipsoidRadii);
+    vec3 groundDirection = -normalize(globeStart);
+    float nextDistance = groundStepLength * jitter;
+    float opticalDepth = 0.0;
+    for (int step = 0; step < SCENEGIS_CLOUD_SUN_MAX_STEPS; ++step) {
+        if (step >= iterationCount) {
+            break;
+        }
+        vec3 sampleGlobePosition = globeStart +
+            groundDirection * nextDistance;
+        vec3 globeOffset = sceneGISGlobeCloudOffset(
+            sampleGlobePosition,
+            cloudOffset);
+        float unusedHeightGradient;
+        opticalDepth += sceneGISCloudDensitySample(
+            shapeTexture,
+            detailTexture,
+            weatherTexture,
+            turbulenceTexture,
+            sampleGlobePosition,
+            sampleGlobePosition,
+            globeOffset,
+            materialOrigin,
+            cloudOffset,
+            cloudBaseHeight,
+            cloudThickness,
+            cloudCoverage,
+            cloudPreset,
+            detailStrength,
+            mipLevel,
+            jitter,
+            unusedHeightGradient) * cloudDensity * groundStepLength;
+        nextDistance += groundStepLength;
+        groundStepLength *= 2.0;
+    }
+    return min(opticalDepth, 80.0);
+}
+#endif
+
+float sceneGISCloudSunOpticalDepth(
+    sampler3D shapeTexture,
+    sampler3D detailTexture,
+    sampler2D weatherTexture,
+    SCENEGIS_CLOUD_TURBULENCE_SAMPLER turbulenceTexture,
+    vec3 localPosition,
+    vec3 surfacePosition,
+    vec3 east,
+    vec3 north,
+    vec3 vertical,
+    vec3 ellipsoidCenter,
+    vec3 ellipsoidRadii,
     vec2 materialOrigin,
     vec3 sunDirection,
     vec2 cloudOffset,
@@ -751,15 +1107,29 @@ float sceneGISCloudSunOpticalDepth(
         }
         float distance = segmentStart + (float(step) + 0.5) * stepLength;
         vec3 sampleLocal = localPosition + sunDirection * distance;
-        vec3 globeSurfacePosition = sceneGISGlobeCloudSurfaceAnchor(vertical);
-        vec3 sampleGlobePosition =
-            globeSurfacePosition +
-            east * sampleLocal.x +
-            north * sampleLocal.y +
-            vertical * sampleLocal.z;
-        vec3 globeOffset = east * cloudOffset.x + north * cloudOffset.y;
-        float visibility = 1.0 - smoothstep(
-            SCENEGIS_CLOUD_VISIBLE_START, SCENEGIS_CLOUD_VISIBLE_END, distance);
+        #ifdef SCENEGIS_GLOBE
+        vec3 sampleGlobePosition = sceneGISGlobeCloudPosition(
+            sampleLocal,
+            surfacePosition,
+            east,
+            north,
+            vertical,
+            ellipsoidCenter,
+            ellipsoidRadii);
+        vec3 globeOffset = sceneGISGlobeCloudOffset(
+            sampleGlobePosition,
+            cloudOffset);
+        #else
+        vec3 sampleGlobePosition = vec3(0.0);
+        vec3 globeOffset = vec3(0.0);
+        #endif
+        float visibility = 1.0;
+        #ifndef SCENEGIS_GLOBE
+        visibility = 1.0 - smoothstep(
+            SCENEGIS_CLOUD_VISIBLE_START,
+            SCENEGIS_CLOUD_VISIBLE_END,
+            distance);
+        #endif
         float unusedHeightGradient;
         opticalDepth += sceneGISCloudDensitySample(
             shapeTexture,
@@ -777,6 +1147,7 @@ float sceneGISCloudSunOpticalDepth(
             cloudPreset,
             detailStrength,
             stepLength,
+            0.5,
             unusedHeightGradient) * visibility * cloudDensity * stepLength;
     }
     return min(opticalDepth, 80.0);
@@ -789,16 +1160,18 @@ void sceneGISMarchClouds(
     sampler3D occupancyTexture,
     sampler3D detailTexture,
     sampler2D weatherTexture,
-    sampler3D turbulenceTexture,
+    SCENEGIS_CLOUD_TURBULENCE_SAMPLER turbulenceTexture,
     float rayDither,
     vec3 localRayOrigin,
     vec3 localRayDirection,
     vec3 worldCameraPosition,
+    vec3 worldCameraDirection,
     vec3 surfacePosition,
     vec3 east,
     vec3 north,
     vec3 worldVertical,
-    vec3 sunDirection,
+    vec3 localSunDirection,
+    vec3 globeSunDirection,
     vec3 ellipsoidCenter,
     vec3 ellipsoidRadii,
     vec2 cloudOffset,
@@ -815,6 +1188,7 @@ void sceneGISMarchClouds(
     bool useDetail,
     float rayAngularFootprint,
     float rayOriginFootprint,
+    float rayStartTexelsPerPixel,
     out vec4 cloudColor,
     out vec4 cloudDistances,
     out vec4 cloudSamplingDiagnostics)
@@ -845,6 +1219,13 @@ void sceneGISMarchClouds(
     accumulatedShadowLength = sceneGISCloudShadowViewLength(
         localRayOrigin,
         localRayDirection,
+        surfacePosition,
+        east,
+        north,
+        worldVertical,
+        ellipsoidCenter,
+        ellipsoidRadii,
+        worldCameraDirection,
         maximumDistance);
     #endif
     if (!hasCloudSegment) {
@@ -857,16 +1238,40 @@ void sceneGISMarchClouds(
     }
     vec2 materialOrigin = sceneGISCloudMaterialOrigin(
         worldCameraPosition, worldVertical);
+    float minimumRetainedFeature = sceneGISCloudMinimumRetainedFeature(
+        cloudPreset, useDetail);
+    #ifdef SCENEGIS_GLOBE
+    int progressiveStepLimit = primarySteps <
+        SCENEGIS_CLOUD_PRIMARY_MAX_STEPS ?
+        SCENEGIS_GLOBE_CLOUD_LOW_MARCH_STEPS :
+        SCENEGIS_GLOBE_CLOUD_MARCH_MAX_STEPS;
+    float progressiveMinimumStep = primarySteps <
+        SCENEGIS_CLOUD_PRIMARY_MAX_STEPS ?
+        SCENEGIS_GLOBE_CLOUD_LOW_MIN_STEP :
+        SCENEGIS_GLOBE_CLOUD_MIN_STEP;
+    float progressiveStepLength = min(
+        progressiveMinimumStep +
+            (SCENEGIS_GLOBE_CLOUD_STEP_SCALE - 1.0) * segmentStart,
+        SCENEGIS_GLOBE_CLOUD_MAX_STEP);
+    float progressiveDistance = segmentStart +
+        progressiveStepLength * clamp(rayDither, 0.0, 1.0) * 2.0;
+    float progressiveMaximumDistance = primarySteps <
+        SCENEGIS_CLOUD_PRIMARY_MAX_STEPS ?
+        SCENEGIS_GLOBE_CLOUD_LOW_MAX_RAY_DISTANCE :
+        SCENEGIS_GLOBE_CLOUD_MAX_RAY_DISTANCE;
+    segmentEnd = min(
+        segmentEnd,
+        segmentStart + progressiveMaximumDistance);
+    #else
     float coarseStepLength =
         (segmentEnd - segmentStart) / float(max(primarySteps, 1));
     float fineStepLength = coarseStepLength / float(max(fineSteps, 1));
-    float minimumRetainedFeature = sceneGISCloudMinimumRetainedFeature(
-        cloudPreset, useDetail);
     int intervalFineSteps = min(
         fineSteps,
         max(1, int(ceil(
             coarseStepLength / max(minimumRetainedFeature * 0.5, 1.0)))));
     fineStepLength = coarseStepLength / float(max(intervalFineSteps, 1));
+    #endif
     float accumulatedTransmittance = 1.0;
     vec3 accumulatedRadiance = vec3(0.0);
     float weightedDistance = 0.0;
@@ -879,11 +1284,46 @@ void sceneGISMarchClouds(
     float detailStrength = useDetail
         ? (primarySteps >= SCENEGIS_CLOUD_PRIMARY_MAX_STEPS ? 1.0 : 0.15)
         : 0.0;
+    #ifdef SCENEGIS_GLOBE
+    for (int step = 0;
+         step < SCENEGIS_GLOBE_CLOUD_MARCH_MAX_STEPS;
+         ++step) {
+        if (step >= progressiveStepLimit ||
+            progressiveDistance >= segmentEnd ||
+            accumulatedTransmittance <= 0.01) {
+    #else
     for (int step = 0; step < SCENEGIS_CLOUD_PRIMARY_MAX_STEPS; ++step) {
         if (step >= primarySteps || accumulatedTransmittance <= 0.01) {
+    #endif
             break;
         }
         visitedCoarseIntervals += 1.0;
+        #ifdef SCENEGIS_GLOBE
+        float coarseStartDistance = progressiveDistance;
+        float screenFootprint = max(
+            rayOriginFootprint,
+            coarseStartDistance * rayAngularFootprint);
+        float progressiveMipLevel = log2(max(
+            1.0,
+            screenFootprint / max(minimumRetainedFeature, 1.0)));
+        float nextProgressiveStepLength = min(
+            progressiveStepLength * SCENEGIS_GLOBE_CLOUD_STEP_SCALE,
+            SCENEGIS_GLOBE_CLOUD_MAX_STEP);
+        float emptyAdvance = mix(
+            nextProgressiveStepLength,
+            max(nextProgressiveStepLength, SCENEGIS_GLOBE_CLOUD_MAX_STEP),
+            clamp(progressiveMipLevel, 0.0, 1.0));
+        float coarseEndDistance = min(
+            coarseStartDistance + emptyAdvance,
+            segmentEnd);
+        float coarseFootprint = max(
+            rayOriginFootprint,
+            coarseEndDistance * rayAngularFootprint);
+        int intervalFineSteps = 1;
+        float fineStepLength = min(
+            progressiveStepLength,
+            segmentEnd - coarseStartDistance);
+        #else
         float coarseStartDistance = min(
             segmentStart + float(step) * coarseStepLength,
             segmentEnd);
@@ -892,17 +1332,24 @@ void sceneGISMarchClouds(
             segmentEnd);
         float coarseDistance =
             (coarseStartDistance + coarseEndDistance) * 0.5;
+        float coarseFootprint = max(
+            coarseStepLength,
+            max(rayOriginFootprint, coarseDistance * rayAngularFootprint));
+        #endif
         vec3 coarseStartLocal =
             localRayOrigin + localRayDirection * coarseStartDistance;
         vec3 coarseEndLocal =
             localRayOrigin + localRayDirection * coarseEndDistance;
-        float coarseFootprint = max(
-            coarseStepLength,
-            max(rayOriginFootprint, coarseDistance * rayAngularFootprint));
         float occupancy = sceneGISCloudOccupancyBound(
             occupancyTexture,
             coarseStartLocal,
             coarseEndLocal,
+            surfacePosition,
+            east,
+            north,
+            worldVertical,
+            ellipsoidCenter,
+            ellipsoidRadii,
             materialOrigin,
             cloudOffset,
             cloudBaseHeight,
@@ -912,6 +1359,10 @@ void sceneGISMarchClouds(
             coarseFootprint);
         if (occupancy <= 1.0e-5) {
             skippedCoarseIntervals += 1.0;
+            #ifdef SCENEGIS_GLOBE
+            progressiveStepLength = nextProgressiveStepLength;
+            progressiveDistance = coarseEndDistance;
+            #endif
             continue;
         }
         for (int fineStep = 0;
@@ -922,29 +1373,53 @@ void sceneGISMarchClouds(
                 break;
             }
             visitedFineSamples += 1.0;
+            #ifdef SCENEGIS_GLOBE
+            float distance = progressiveDistance;
+            #else
             float fineOffset =
                 (float(fineStep) + clamp(rayDither, 0.0, 1.0)) /
                 float(max(intervalFineSteps, 1));
             float distance = min(
                 segmentStart + (float(step) + fineOffset) * coarseStepLength,
                 segmentEnd);
+            #endif
             vec3 sampleLocal =
                 localRayOrigin + localRayDirection * distance;
-            vec3 globeSurfacePosition = sceneGISGlobeCloudSurfaceAnchor(
-                worldVertical);
-            vec3 sampleGlobePosition =
-                globeSurfacePosition +
-                east * sampleLocal.x +
-                north * sampleLocal.y +
-                worldVertical * sampleLocal.z;
-            vec3 globeOffset = east * cloudOffset.x + north * cloudOffset.y;
-            float visibility = 1.0 - smoothstep(
+            #ifdef SCENEGIS_GLOBE
+            vec3 sampleGlobePosition = sceneGISGlobeCloudPosition(
+                sampleLocal,
+                surfacePosition,
+                east,
+                north,
+                worldVertical,
+                ellipsoidCenter,
+                ellipsoidRadii);
+            vec3 globeOffset = sceneGISGlobeCloudOffset(
+                sampleGlobePosition,
+                cloudOffset);
+            #else
+            vec3 sampleGlobePosition = vec3(0.0);
+            vec3 globeOffset = vec3(0.0);
+            #endif
+            float visibility = 1.0;
+            #ifndef SCENEGIS_GLOBE
+            visibility = 1.0 - smoothstep(
                 SCENEGIS_CLOUD_VISIBLE_START,
                 SCENEGIS_CLOUD_VISIBLE_END,
                 distance);
+            #endif
+            #ifdef SCENEGIS_GLOBE
+            // Texture filtering follows the projected pixel footprint only.
+            // Coupling it to the integration step selected low mips whenever a
+            // long horizon segment was marched and erased the authored shape.
+            float footprint = log2(max(
+                1.0,
+                rayStartTexelsPerPixel + distance * 1.0e-5));
+            #else
             float footprint = max(
                 fineStepLength,
                 max(rayOriginFootprint, distance * rayAngularFootprint));
+            #endif
             float activeLayerHeightGradient;
             float normalizedDensity = sceneGISCloudDensitySample(
                 shapeTexture,
@@ -962,6 +1437,7 @@ void sceneGISMarchClouds(
                 cloudPreset,
                 detailStrength,
                 footprint,
+                rayDither,
                 activeLayerHeightGradient) * visibility;
             if (normalizedDensity <= 1.0e-4) {
                 continue;
@@ -978,6 +1454,75 @@ void sceneGISMarchClouds(
             #ifdef SCENEGIS_CLOUD_REPLAY_DENSITY_ONLY
             vec3 sourceRadiance = vec3(0.0);
             #else
+            #ifdef SCENEGIS_GLOBE
+            float localSunDistance;
+            float sunOpticalDepth =
+                sceneGISGlobeCloudLocalSunOpticalDepth(
+                shapeTexture,
+                detailTexture,
+                weatherTexture,
+                turbulenceTexture,
+                sampleLocal,
+                surfacePosition,
+                east,
+                north,
+                worldVertical,
+                ellipsoidCenter,
+                ellipsoidRadii,
+                materialOrigin,
+                localSunDirection,
+                cloudOffset,
+                cloudBaseHeight,
+                cloudThickness,
+                cloudCoverage,
+                cloudDensity,
+                cloudPreset,
+                sunSteps,
+                detailStrength,
+                footprint,
+                rayDither,
+                localSunDistance);
+            if (u_sceneGISShowCloudShadows ||
+                u_sceneGISShowCrepuscularRays) {
+                sunOpticalDepth = min(
+                    sunOpticalDepth + sceneGISCloudBodyShadowOpticalDepth(
+                        sampleGlobePosition,
+                        distance * max(dot(
+                            localRayDirection,
+                            normalize(vec3(
+                                dot(worldCameraDirection, east),
+                                dot(worldCameraDirection, north),
+                                dot(worldCameraDirection, worldVertical)))),
+                            0.0),
+                        localSunDistance),
+                    80.0);
+            }
+            float groundOpticalDepth = primarySteps >=
+                SCENEGIS_CLOUD_PRIMARY_MAX_STEPS ?
+                sceneGISGlobeCloudGroundOpticalDepth(
+                    shapeTexture,
+                    detailTexture,
+                    weatherTexture,
+                    turbulenceTexture,
+                    sampleLocal,
+                    surfacePosition,
+                    east,
+                    north,
+                    worldVertical,
+                    ellipsoidCenter,
+                    ellipsoidRadii,
+                    materialOrigin,
+                    cloudOffset,
+                    cloudBaseHeight,
+                    cloudThickness,
+                    cloudCoverage,
+                    cloudDensity,
+                    cloudPreset,
+                    sunSteps >= 4 ? 3 : (sunSteps >= 3 ? 1 : 0),
+                    detailStrength,
+                    footprint,
+                    rayDither) : 0.0;
+            #else
             float sunOpticalDepth = sceneGISCloudSunOpticalDepth(
                 shapeTexture,
                 detailTexture,
@@ -989,8 +1534,9 @@ void sceneGISMarchClouds(
                 north,
                 worldVertical,
                 ellipsoidCenter,
+                ellipsoidRadii,
                 materialOrigin,
-                sunDirection,
+                localSunDirection,
                 cloudOffset,
                 cloudBaseHeight,
                 cloudThickness,
@@ -999,19 +1545,40 @@ void sceneGISMarchClouds(
                 cloudPreset,
                 sunSteps,
                 detailStrength);
-            vec3 atmosphereSun = sceneGISCloudSunIncident(
-                transmittanceTexture, sampleLocal, sunDirection);
+            float groundOpticalDepth = 0.0;
+            #endif
+            vec3 atmosphereSun;
+            vec3 skyIrradiance;
+            #ifdef SCENEGIS_GLOBE
+            vec3 incidentSunDirection = globeSunDirection;
+            #else
+            vec3 incidentSunDirection = localSunDirection;
+            #endif
+            sceneGISCloudIncidentIrradiance(
+                transmittanceTexture,
+                irradianceTexture,
+                sampleLocal,
+                sampleGlobePosition,
+                incidentSunDirection,
+                atmosphereSun,
+                skyIrradiance);
             vec3 solarScattering;
             vec3 skySource;
             float localPowder;
             vec3 totalSource;
             sceneGISCloudLightingComponents(
+                transmittanceTexture,
                 irradianceTexture,
                 sampleLocal,
+                sampleGlobePosition,
                 localRayDirection,
-                sunDirection,
+                localSunDirection,
+                globeSunDirection,
                 atmosphereSun,
+                skyIrradiance,
                 sunOpticalDepth,
+                groundOpticalDepth,
+                cloudCoverage,
                 activeLayerHeightGradient,
                 extinction,
                 solarScattering,
@@ -1025,6 +1592,10 @@ void sceneGISMarchClouds(
             weightedDistance += opacityContribution * distance;
             accumulatedWeight += opacityContribution;
         }
+        #ifdef SCENEGIS_GLOBE
+        progressiveStepLength = nextProgressiveStepLength;
+        progressiveDistance += nextProgressiveStepLength;
+        #endif
     }
     cloudSamplingDiagnostics = vec4(
         visitedCoarseIntervals,

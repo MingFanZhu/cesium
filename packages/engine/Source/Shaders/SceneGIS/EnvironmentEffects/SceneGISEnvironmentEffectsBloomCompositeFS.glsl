@@ -10,6 +10,7 @@ in vec2 v_textureCoordinates;
 uniform sampler2D u_colorTexture;
 uniform sampler2D u_depthTexture;
 uniform sampler2D u_bloomTexture;
+uniform bool u_hasCurrentGlobeDepth;
 uniform bool u_showBloom;
 uniform bool u_showLensFlare;
 uniform bool u_sunLensVisible;
@@ -68,7 +69,8 @@ void main()
 
     float sunDepth = texture(u_depthTexture, u_sunViewportCoordinates).r;
     vec3 sunSignal = texture(u_colorTexture, u_sunViewportCoordinates).rgb;
-    bool clearSun = sunDepth == 0.0 || sunDepth == 1.0;
+    bool clearSun = !u_hasCurrentGlobeDepth ||
+        sunDepth == 0.0 || sunDepth == 1.0;
     float signal = smoothstep(
         u_bloomThreshold,
         u_bloomThreshold + 1.0,

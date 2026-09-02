@@ -281,3 +281,79 @@ the assigned `medium -> low` transition produced a clean spatial reset. A6-G is
 therefore complete with the frozen zero-resource, caller-owned tier and
 Globe-first decisions intact. The phase-closing commit containing this record
 is the unpublished local A6-G checkpoint.
+
+## A8-AR-011 Globe sampling-schedule clarification — 2026-08-31
+
+The quality table remains the public and renderer-side tier authority. Its
+Globe primary/fine values now define a maximum detailed-sample budget rather
+than a mandatory nested uniform grid: low `32x1` becomes at most `32`
+progressive samples, while medium/high `64x4` become at most `256`. Resolution,
+Sun steps, detail enablement, Beer cascades and atlas sizes are unchanged.
+
+Within that budget the Globe shader uses the reference-derived progressive
+`50/100 m`, `1.01`, `1000 m` schedule and conservative empty-space advance.
+Planar retains the pre-A8 nested uniform interpretation. No resource or public
+tier value changes, but interactive performance and final cloud appearance
+remain required owner observations because sample placement has changed.
+
+## A8-AR-014 stationary Globe and high-altitude filtering — 2026-09-01
+
+Globe STBN phase is a render-frame sequence, not a function of `cloudTime`.
+Exact-stationary Globe frames therefore advance their spatial sample pattern
+and reuse the existing A6 ping-pong history at weight `0.9`; they are reported
+as `exact-stationary-temporal`. Moving views retain the established reprojection
+and continuity policy. Planar keeps its pre-existing cloud-time slice and
+stationary spatial-only behavior.
+
+This amendment allocates no history, texture, FBO, attachment, program or
+command. High-altitude weather aliasing is handled by the A4 material's
+projected-footprint mip selection, not by a camera-height branch, fade,
+settling frame or screen-space fallback. A deterministic `LOD 0` mutation and
+the existing motion/history fixture are the bounded automated authorities;
+interactive shimmer remains a visual gate.
+
+## A8-AR-015 execution amendment — temporal boundary
+
+The corrected BSM world mapping is spatial: full ECEF forward/inverse matrices,
+view-depth cascade selection and global cloud-shell/material coordinates. It
+does not add a shadow history or alter the A6 cloud history. Existing cloud
+history modes, quality tiers, allocations and reset causes remain unchanged;
+any future BSM temporal resolve still requires a separately declared lifecycle
+and byte budget rather than masking projection drift.
+
+## A8-AR-017 execution amendment — shadow continuity policy
+
+The separately declared BSM history now uses the existing A6 continuity
+authorities: projection equality, bounded camera translation/orientation and
+frustum change, cloud-time continuity and Sun-direction continuity. A failed or
+non-finite bound invalidates history before sampling; resize and quality changes
+publish candidate resources only after complete allocation. History stores
+resolved Beer only, while current front depth and velocity remain producer
+attachments. This does not change A6 cloud-history modes, public quality tiers
+or Planar behavior.
+
+## A8-AR-019 execution amendment — BSM continuity specialization
+
+BSM history reuses the A6 bounded projection, translation, frustum, cloud-time
+and Sun authorities but does not apply the visible-cloud global orientation cut
+when full-ECEF reprojection remains valid. Its reusable snapshot additionally
+invalidates preset, coverage, density, layer, detail, ellipsoid and quality
+changes before history sampling. This specialization changes neither A6 cloud
+history nor any public quality tier.
+
+## A8 qualification amendment — current/resolved raster conversion
+
+Temporal cloud footprint authority distinguishes the actual current Cloud MRT
+dimensions from resolved output dimensions. The reference current raster is
+`ceil(resolved / 4)`; derivative conversion is applied per axis before the
+fixed temporal mip scale. This is a coordinate-unit conversion, not a dynamic
+quality coefficient, and does not alter the public low/medium/high tiers or
+history/resource topology.
+
+## A8 qualification amendment — fixed-world BSM witness
+
+BSM temporal qualification samples the real nonuniform producer and resolved
+atlas for one fixed ECEF receiver through substantial bounded rotation/orbit
+and a real cascade transition. Same-UV, wrong-coordinate and cascade mutations
+must fail. Published OD bounds derive from cascade texel footprint, structured
+integration and binary16 storage; arbitrary metre cushions are not authority.

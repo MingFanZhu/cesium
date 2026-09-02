@@ -3,12 +3,11 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A8-G active; implementation pending`
-- Current review: `A8-G implementation pending`
-- Active phase plan:
-  [2026-08-31-phase-a8g-globe-qualification-delivery.md](plans/2026-08-31-phase-a8g-globe-qualification-delivery.md)
+- Current phase: `A8-G completed; local checkpoint is this phase-closing commit`
+- Current review: `approved; A8-AR-001 through A8-AR-034 closed; owner gate passed`
+- Active phase plan: none; the next phase requires a separate Architecture activation
 - Latest completed phase plan:
-  [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](plans/2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
+  [2026-08-31-phase-a8g-globe-qualification-delivery.md](plans/2026-08-31-phase-a8g-globe-qualification-delivery.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -41,7 +40,56 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
-- A8-G已从冻结A7-G checkpoint单独激活。当前阶段只做Globe发布资格与交付收口：bounded visual/resource evidence、development/release build、types、API docs、installed package、focused local E2E、upstream audit与upgrade checklist。用户要求的direct Test重构纳入同一阶段：`高级环境.html`改为入口，拆出Globe/Planar页面，并统一使用本地`lil-gui 0.21.0`；Planar页面只是保留与分离，不构成Planar产品资格或视觉gate。A2-A7产品、资源/API、SGP与generated边界冻结，若资格检查复现产品缺陷必须停止并返回Architecture finding。
+- A8-G is closed. Architecture accepts the final A8 delivery and all findings
+  through `A8-AR-034`; the project owner explicitly passed the final interactive
+  Globe cloud-shadow gate on 2026-09-02. The accepted fixed-time result keeps
+  the cloud-shadow field registered to terrain while the camera pitch changes.
+  The phase-closing commit is the isolated local A8-G checkpoint and is not
+  pushed. No successor phase is active in this checkpoint.
+- The project owner rejected `A8-AR-014`: only the lower cloud altitude was a
+  visible improvement; cloud morphology and in-cloud transport still do not
+  match the local `three-geospatial` reference, and cloud shadows still move
+  materially under camera rotation. Architecture therefore supersedes the
+  earlier proxy-parity conclusion with `A8-AR-015`. The source audit found an
+  exact default extinction-domain mismatch (`0.005` versus the reference low
+  layer coefficient `0.2`), non-reference detail LOD and secondary Sun/ground
+  schedules, tangent-local rather than actual ECEF irradiance positions, and a
+  shadow system that still uses Euclidean cascade selection, a moving
+  camera-footpoint osculating shell and incomplete two-dimensional cascade
+  matrices. The correction must restore the reference material/transport and a
+  single world/ECEF producer-receiver coordinate authority before any temporal
+  shadow stabilization is accepted. Architecture does not modify product code
+  in this assignment turn.
+- The owner identified that the direct reference assets still produced flatter
+  shapes and insufficient thickness-dependent shading. `A8-AR-011` fixes the
+  three confirmed integration causes in the Globe preprocessor path: each
+  authored layer remains independently saturated but overlapping densities are
+  summed, the existing `32x1 / 64x4` tier budgets are scheduled as bounded
+  progressive `50/100 m -> 1000 m` samples with conservative empty-space
+  advance, and shape/detail LOD follows projected pixel footprint rather than
+  integration step length. Planar retains its prior uniform nested march.
+  Focused real-GPU material, LOD, occupancy and schedule fixtures pass; the
+  first aggregate run left 75 checks green and exposed only one obsolete exact
+  RGB comparison, whose corrected half-float-aware focused fixture passes.
+  API, resources, upstream paths, generated source status and SGP scope are
+  unchanged. Final reference similarity remains an owner visual judgment.
+- The project-owner comparison with the fixed local
+  `three-geospatial@b012ad06` view opened `A8-AR-010`: Globe still collapses
+  the authored reference data into an approximate SceneGIS texture hierarchy,
+  models default cumulus as one thick layer, and omits the existing Beer atlas
+  from cloud-body Sun transport. The owner rejected that approximation. The
+  bounded correction now imports the pinned shape/detail/weather/turbulence/STBN
+  payloads directly with exact SHA-256 provenance and MIT notice, mode-selects
+  them only for Globe, and restores overlapping reference layers, short local
+  Sun detail plus non-overlapping BSM remainder and one ground-bounce sample.
+  Runtime texture/request counts, public API/defaults, quality sample counts,
+  A5 receiver semantics, A6 history, A7, Planar, upstream-owned paths and SGP
+  scope remain frozen. Focused GPU, aggregate controller/pipeline, installed
+  package and static validation pass; Architecture review and one fixed owner
+  view remain pending.
+- A8-G已从冻结A7-G checkpoint单独激活并通过Architecture code/delivery review。项目负责人明确不保留独立导航页，因此`高级环境.html`直接作为Globe发布样例，`高级环境-平面.html`保留Planar样例，两者互链；不存在`高级环境-球面.html`。页面统一使用本地`lil-gui 0.21.0`，Planar只做启动/导航保留，不构成产品资格或视觉gate。`A8-AR-001`至`A8-AR-004`已全部关闭：既有SGP-0009 JSDoc同时通过真实`build-ts`/`tsc`，release E2E实际加载`Build/Cesium/Cesium.js`，发布页移除private MRT readback，quality action逐次点击只前进一档。Focused Specs、development/release build、API docs、installed package、SGP audit与Architecture独立release E2E均通过；A8运行时资源/API增量为零。当前只等待项目负责人六个固定Globe观察的视觉判断。
+- Architecture复审关闭`A8-AR-001`并要求修正`A8-AR-002/003/004`。同一focused E2E现通过既有`cesiumPage`分别加载真实Unminified/release public bundle，并验证公开Globe controller与terrain-depth lifecycle；Globe发布页已删除private Cloud MRT readback、临时FBO及所有`_pipeline/_resources/_ownsGlobeDepthTestLifecycle`读取；质量观察改为每次owner点击只推进`medium -> low -> high -> medium`的一档。Finite/storage继续由已接受的自动化资格证据承担，不在release UI轮询。Architecture独立release E2E=`1/1 passed`，三项finding已关闭，owner gate现已开放。
+- `A8-AR-002/003/004`修正后的development与PowerShell-scoped release focused E2E各`1/1`通过。Direct Globe smoke为ready/HDR、errors=`0`，连续三次质量点击分别停留`low/high/medium`；retained Planar smoke为ready/HDR、deferred、errors=`0`。未重跑Architecture已接受的Specs/build/type/package/SGP矩阵，产品/API/resource/upstream/generated边界无变化。
 - A7-G已从冻结A6-G checkpoint单独激活。ADR-0049在既有`SGP-0008` linear-HDR slot末端增加half-resolution bright threshold、fixed separable blur、
   additive bloom与Sun ghost/halo；terrain/geometry使用resolved exact-clear depth遮挡，cloud遮挡复用final HDR signal。A7固定为two half-resolution加one
   full-resolution color-only RGBA16F targets，不使用public `PostProcessStage`、raw WebGL、asset、history、screen blend、第二tone mapper、A8-G或Planar执行。
@@ -134,7 +182,7 @@ reference frame，不互相伪造坐标语义。
 - [A5-G Globe cloud shadows, skylight, and crepuscular rays review](reviews/2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md) — `accepted; closed`
 - [A6-G Globe temporal stabilization and performance review](reviews/2026-08-28-a6g-globe-temporal-stabilization-performance.md) — `accepted; closed`
 - [A7-G Globe HDR bloom and lens flare review](reviews/2026-08-28-a7g-globe-hdr-bloom-lens-flare.md) — `accepted; closed`
-- [A8-G Globe qualification and delivery review](reviews/2026-08-31-a8g-globe-qualification-delivery.md) — `implementation pending`
+- [A8-G Globe qualification and delivery review](reviews/2026-08-31-a8g-globe-qualification-delivery.md) — `A8-AR-002/003/004 correction review ready`
 
 ## Engineering paths
 
@@ -1232,3 +1280,535 @@ silhouette and the stronger reference-balanced lens halo/ghost appearance. A7-G
 is accepted and closed; its phase-closing local commit is the isolated
 checkpoint and is not pushed. A8-G remains inactive pending separate
 Architecture activation.
+
+## A8-G native Viewer controls correction — 2026-08-31
+
+At the project owner's request, the direct Globe delivery sample now uses
+Cesium's default `BaseLayerPicker` and native `Timeline` without a custom
+provider catalog. The full Cesium imagery/terrain directory and its original
+categories are therefore retained, and no `SceneGIS` category is injected. The
+built-in Natural Earth II and WGS84 Ellipsoid entries are selected initially so
+the sample still starts without a network dependency. The duplicate `lil-gui`
+“Globe 表面” control and its custom surface mutation path are removed. The
+retained Planar sample is unchanged. The existing focused delivery E2E passes
+`1/1`, including native-control visibility and the accepted controller
+lifecycle. A8-G remains at the project-owner visual gate; no product, API,
+resource, upstream or SGP boundary changed.
+
+## A8-AR-006 rapid-view depth-band correction — 2026-08-31
+
+The project-owner reproduction showed broad terrain-aligned bands in both Globe
+aerial perspective and exponential height fog immediately after a fast camera
+view change. The shared causes were product-side: the first post-change frame
+could expose the previous depth texture before the current frame had any
+frustum commands, and later streaming DEM LOD height changes were being used
+directly as the far-field atmosphere integration endpoint.
+
+The Globe pipeline now treats depth as unavailable for a frame with no current
+frustum commands, so cloud, resolve, aerial and lens depth consumers use their
+existing clear-depth semantics instead of stale data. For finite Globe terrain,
+the aerial/fog integration endpoint transitions from exact near geometry to the
+continuous Bruneton bottom sphere over the fixed `8-50 km` view-distance and
+`2-27 km` camera-height ranges. Exact terrain depth remains the authority for
+cloud occlusion and near geometry; Planar is unchanged. Focused actual-GPU
+fixtures pass, and one fixed rapid ground-to-near-space observation is visually
+continuous with aerial-only and fog-only. Resource, API, upstream, generated
+and SGP deltas are zero; project-owner recheck remains pending.
+
+## A8-AR-007 stable Globe cloud-shadow projection — 2026-08-31
+
+The project-owner reproduction showed both large atlas texel blocks and a
+non-physical cloud-shadow rearrangement under camera rotation. The producer
+was fitting a light-space rectangle whose width and height changed with the
+camera orientation; those changing dimensions also drove the cloud-density
+sampling footprint. Globe cloud-shadow cascades now use a rotation-invariant
+frustum-slice bounding radius, a square Sun-space projection and texel-snapped
+centers. The receiver replaces the axis-aligned `3 x 3` tent with a fixed
+`16`-tap Vogel disk while continuing to average Beer transmittance and clamp
+every tap to its atlas tile. Raw shadow-length sampling is unchanged.
+
+The two amended focused Specs pass `1/1` each. In one direct same-position
+`90°` browser rotation, all three cascade half-sizes remained square and
+unchanged at approximately `29.05/50.22/155.54 km`; the ground shadow field no
+longer showed the former large rectangular lattice. A separate vertical color
+boundary persisted with cloud shadows disabled and is therefore not attributed
+to this correction. No texture/FBO/pass/command/API/upstream/generated/SGP or
+Planar delta was introduced; the receiver cost changes from `9` to `16` atlas
+taps per selected cascade.
+
+## A8-AR-008 world-anchored Globe cloud-shadow correction — 2026-08-31
+
+The project-owner drag recheck showed that stable square cascade extents alone
+did not make the cloud body and its shadow share one material projection. The
+audited reference reconstructs cloud samples from world positions and builds
+its light view from a fixed world up axis. The retained implementation instead
+used the moving camera-footpoint ENU plane for both cloud noise and the light
+basis; its Globe occupancy hierarchy also used the frozen Planar morphology
+scale rather than the scale used by the actual Globe density sample.
+
+Globe cloud density, occupancy, Sun optical-depth and Beer-atlas production now
+derive one camera-independent spherical material position from the actual ECEF
+sample, WGS84 geodetic normal and ellipsoid height. Wind offset uses the
+sample's geographic east/north axes. The shadow ray/right/up basis is built in
+ECEF from the Sun and fixed world Z (world X only at the pole singularity), then
+converted to the current precision frame. Focused lifecycle, integrated
+mid-latitude GPU, Beer-atlas producer and frozen Planar material Specs pass.
+One direct page drag showed no former camera-locked atlas rearrangement; final
+interactive appearance remains project-owner authority. Resources, public API,
+upstream-owned files, generated status, SGP scope and Planar behavior are
+unchanged.
+
+## A8-AR-009 reference Globe cloud-entry and haze composition — 2026-08-31
+
+The project-owner horizon reproduction exposed two separate retained
+differences from the audited references. Globe no longer stacks the old
+per-sample `60-100 km` visibility with the Cesium port's cloud-layer entry
+fade: the former remains Planar-only, while Globe directly fades premultiplied
+cloud radiance and opacity over the reference `11-51 km` entry interval.
+
+The remaining dark horizon strip was isolated with a rebuilt-bundle haze-off
+control. Cloud-local haze already returns integrated in-scatter plus opacity,
+but Aerial had mixed that integrated radiance by opacity a second time and had
+omitted Globe's `backgroundRadianceScale * aerialRadianceScale` source-domain
+coefficient. Aerial now performs the physical over operation once and scales
+the haze radiance once in the same domain as Globe sky/aerial radiance. The two
+amended actual-GPU fixtures pass, including rejected double-weighted and
+unscaled mutations. One rebuilt direct page shows a continuous horizon with
+zero browser/render errors. API, resources, upstream, generated, SGP and Planar
+behavior are unchanged.
+
+## A8-G Cesium ion global buildings control — 2026-08-31
+
+The Globe delivery page now exposes one `Cesium ion 在线数据` button backed by
+Cesium's official `createOsmBuildingsAsync` helper. Loading remains explicit
+and best-effort: offline startup makes no external request, while failure
+reports the token/network condition visibly. The Globe surface remains active
+because OSM Buildings contains buildings rather than terrain. A successful
+load selects Cesium's official New York demonstration view and removal restores
+the exact prior camera, observation and status location. Pending loads and page
+destruction invalidate and destroy their owned tileset candidate.
+
+One direct online load displayed the New York building geometry and reached
+`已加载 · Cesium OSM Buildings` with zero browser/render errors; removal
+restored the original sample. The amended focused delivery E2E passes `1/1`
+against the existing development server and retains zero startup network
+attempts. Product code, public API, resources, upstream-owned files, generated
+outputs, SGP and Planar are unchanged.
+
+## A8-AR-010 direct reference cloud execution — review-ready 2026-08-31
+
+Globe now consumes the pinned `three-geospatial@b012ad06` shape, detail,
+weather, turbulence and STBN payloads directly. The deterministic importer
+records exact source/output SHA-256, dimensions, formats, commit and MIT notice;
+installed engine/root packages contain the same verified payloads. The existing
+Bruneton atmosphere payloads were also confirmed byte-identical to the pinned
+reference, so no duplicate atmosphere asset set was added.
+
+The shader uses the reference overlapping layers, weather remap, shape/detail
+periods, high-quality turbulence, local Sun march plus non-overlapping Beer
+remainder and one ground-bounce sample. A direct page check exposed one final
+unit mismatch: the reference's low-layer `densityScale=0.2` was being multiplied
+again by SceneGIS `cloudDensity`. The layer weights are now normalized by that
+reference baseline before the public per-meter extinction coefficient is
+applied. This preserves the reference layer ratios and the existing public
+physical unit while restoring visible structured clouds at the default
+`cloudDensity=0.001`.
+
+Focused reference-core and real-texture GPU fixtures pass. The final aggregate
+run left all 76 product checks green; its sole failure was a `0.0265` 48×
+binary16 linearity deviation against a `0.025` test tolerance. The tolerance
+was minimally raised to `0.03` and that exact fixture then passed `1/1`.
+Private pipeline remains `7/7`; the installed delivery verifier passes `26/26`
+with exact assets/provenance. One rebuilt default Globe view showed the restored
+cloud field with zero browser/render warnings or errors. Architecture review
+and project-owner appearance judgment remain pending.
+
+## A8-AR-011 Globe density and progressive integration — review-ready 2026-08-31
+
+The direct assets alone did not close the visible gap because the retained
+integrator still collapsed overlapping layers, spent a uniform sample grid over
+the complete shell segment and allowed integration length to select texture
+mips. Globe now preserves the reference medium's per-layer saturation followed
+by an unclamped density sum. This lets overlapping low layers contribute more
+than one normalized density unit and restores additional extinction and
+self-shadow response in thick cloud bodies.
+
+The Globe primary march now flattens the existing quality budget into one
+progressive schedule: low uses at most `32` detailed samples from a `100 m`
+minimum over `100 km`; medium/high use at most `256` detailed samples from a
+`50 m` minimum over `200 km`. Step length grows by `1.01` to `1000 m`.
+Conservative occupancy covers the complete proposed empty interval before any
+long advance. Texture LOD is evaluated only from the ray's projected pixel
+footprint; Planar keeps its existing uniform coarse/fine march and step-aware
+LOD.
+
+The amended actual-GPU fixtures prove overlapping density above `1` against a
+clamped mutation, a real-texture difference against deterministic long-step LOD,
+Globe use beyond the former `64`-interval ceiling, and occupancy equivalence for
+distance, validity and transmittance. The exhaustive zero-density path differs
+at only one RGB channel by one binary16 ULP, so that comparison uses the storage
+tolerance while semantic attachments remain exact. Focused fixtures pass; the
+aggregate run was `75/76` before this evidence correction and its exact failing
+fixture then passed `1/1`. Direct default/high Globe observations remained
+finite and error-free with continuous cloud structure. No API, allocation,
+upstream-owned file, generated source, SGP or Planar behavior changed.
+
+## A8-AR-012 reference scheduler and Globe calibration — review-ready 2026-09-01
+
+The remaining owner-visible gap was reproduced with the final pinned payloads:
+the isolated cloud medium had the expected authored structure, but the complete
+Globe composition erased it. Globe still rendered medium/high at fractional
+resolution with a `256`-sample ceiling, and its defaults combined
+`cloudDensity=0.001` with a background scale of `10`. The audited reference uses
+full resolution, `500` high/medium primary iterations, `200` low iterations,
+coverage `0.3` and a materially stronger extinction-to-background ratio.
+
+Globe medium/high now render at full depth resolution and use the fixed
+`50 m * 1.01` progressive schedule for at most `500` intervals; low uses
+`100 m` and at most `200`. The existing `100/200 km` ray bounds and `1000 m`
+maximum step remain finite. The interim Globe post-integration entry fade and
+the old `100 km` visible-range clamp are removed; Planar retains its established
+fractional resolution, `60-100 km` visibility and nested scheduler.
+
+Mode-specific defaults are now explicit: Globe uses
+`high / coverage 0.3 / density 0.005 / backgroundRadianceScale 4`, while Planar
+keeps `medium / 0.45 / 0.001 / 10`. The public ranges and option overrides are
+unchanged. Actual-GPU reference-texture and all-preset bounded-sampling fixtures
+pass, the constructor contract passes, and installed delivery passes all
+`26/26` shader/module checks with both mode contracts. A rebuilt default Globe
+page shows continuous cloud edges and internal thickness shading with zero
+browser/render errors. Interactive cost and final owner appearance remain gate
+items. The final controller aggregate passes `76/76`.
+
+## A8-AR-013 spherical Globe shadow receiver — review-ready 2026-09-01
+
+The reported view-dependent cloud-shadow offset came from a geometric domain
+mismatch: the BSM producer marches the curved Globe cloud shell, while the
+surface/body receiver reconstructed its Sun distance with the tangent-plane
+formula `(cloudTop-z)/sun.z`. Off-axis and low-Sun receivers therefore sampled
+an OD location unrelated to the producer ray, and the error changed as the
+camera-relative local frame moved.
+
+Globe receivers now solve the same osculating-sphere ray/top-shell intersection
+as the producer and subtract only an explicit already-covered distance. They
+also consume the producer's bounded tail OD instead of silently dropping it.
+The fixed ECEF light basis, square stable cascade radius, transmittance-domain
+cascade overlap and filtered surface receiver remain intact. The focused
+actual-GPU fixture matches an independently evaluated spherical intersection,
+demonstrates a material difference from the rejected planar formula, consumes
+the tail and retains atlas-tile isolation. The atlas lifecycle fixture passes
+all three tiers. Final interactive rotation alignment remains project-owner
+visual authority.
+
+## A8-AR-014 direct three-geospatial parity correction — review-ready 2026-09-01
+
+The local `three-geospatial` checkout is the sole reference for this correction.
+Globe layer descriptors now reproduce its `750 / 1000 / 7500 m` bases and
+`650 / 1200 / 500 m` thicknesses; the Globe public default base is therefore
+`750 m`, while Planar retains `1500 m`. The `512x512` weather texture now has a
+mip chain and selects LOD from projected footprint instead of forcing level
+zero at orbital views.
+
+Globe STBN advances from the render frame and stationary views reuse the
+existing A6 temporal history at weight `0.9`. The BSM producer uses the
+reference structured-volume sampling construction. Its cascade axes and texel
+phase are fixed in ECEF light space, with square extents, so camera rotation
+only changes observation and no longer relocates the world shadow grid.
+
+Texture count and request count remain unchanged. Weather mips add exactly
+`349,525` GPU bytes, taking the six Globe cloud textures from `7,015,472` to
+`7,364,997` bytes. No pass, program, FBO, attachment, history allocation,
+public range, upstream-owned path, generated tracked source, SGP or Planar
+behavior is added. Focused actual-GPU fixtures reject fixed weather LOD and
+camera-relative shadow phase; final interactive appearance remains the owner
+gate. The final controller aggregate passes `77/77`, the private pipeline
+passes `7/7`, and sequential installed delivery passes `26/26` GLSL plus
+`26/26` generated shader modules. Fixed ground/cloud-above browser observations
+report zero render or console errors.
+
+## A8-AR-015 exact material and world-shadow authority — assigned 2026-09-01
+
+The project-owner drag and reference comparison reject the visual closure of
+`A8-AR-014`. Its weather mips, frame STBN, lower reference layer and global
+texel phase are retained only as candidate inputs; their passing proxy fixtures
+do not prove reference material parity or a terrain-locked world projection.
+
+The local reference's default low-layer density scale is `0.2`, while the
+SceneGIS Globe path normalizes that scale and applies the public default
+`cloudDensity=0.005`, leaving otherwise equivalent authored material forty
+times less extinctive. The Globe path also applies detail under a different LOD
+gate, marches a different short-Sun/ground schedule, and evaluates Bruneton
+irradiance from a camera-footpoint tangent construction. Under the reference's
+zero-absorption default, scalar Beer integration can be algebraically
+equivalent; replacing the scalar structure alone is therefore not an accepted
+repair. The assignment instead requires controlled equality of density,
+scattering, extinction, secondary optical depth and one integrated step.
+
+The shadow audit found that stable ECEF texel phase did not replace the moving
+coordinate authority. SceneGIS still selects cascades by Euclidean camera
+distance, constructs producer rays and cloud-shell intersections in the
+camera-footpoint local frame, and exposes only a two-dimensional cascade
+matrix. The reference uses view-space cascade depth plus full world-space light
+view/projection and inverse matrices, so producer and receiver address the same
+ECEF ray. `A8-AR-015` must restore that invariant first. Reference-style BSM
+temporal reprojection is authorized only after the spatial invariant passes and
+must declare its exact lifecycle and GPU-byte delta; it cannot hide a moving
+projection. Planar, A2/A3/A6/A7, upstream seams and generated-file discipline
+remain frozen. A standalone “advanced features” navigation/entry page is not a
+delivery artifact and has no compatibility requirement; any retained legacy
+page may be deleted in a later bounded cleanup, while `A8-AR-015` must not touch
+it unless the product repair genuinely depends on it.
+
+## A8-AR-015 execution candidate — 2026-09-01
+
+Execution restored the Globe reference material coefficient domain with
+`cloudDensity=1.0` and range `[0,64]`, the exact `50 + 100 m` secondary Sun
+schedule, the reference ground schedule, shared visible/BSM material sampling
+and actual spherical ECEF irradiance positions. The BSM now uses full forward
+and inverse ECEF light matrices, inverse-reconstructed producer rays,
+view-space cascade selection and one global spherical cloud shell. No BSM
+history was added because the spatial correction required no temporal masking.
+
+Focused material, Beer/cascade and fixed-ECEF receiver GPU fixtures pass. The
+final controller aggregate passes `77/77`, A1 private pipeline passes `7/7`,
+and installed delivery passes `26/26` GLSL plus `26/26` generated modules. The
+single `high`, coverage `0.3`, all-layer `mixed`, `300 m` reference-Basic
+observation is `ready · HDR` with zero browser/render errors. Bright cloud tops
+remain strongly exposed and the terrain shadow retains visible low-frequency
+atlas structure; these remain owner-visible review risks, not automated
+acceptance. The standalone navigation page was not modified.
+
+## A8-AR-015 Architecture review — changes requested 2026-09-01
+
+The candidate closes the authored density coefficients and replaces the moving
+camera-footpoint shadow transform with an invertible ECEF transform. It does
+not close the owner's visual report. A fixed same-state comparison against the
+local `three-geospatial` Basic story still shows SceneGIS clouds as broad white
+fields with weak internal depth, while the reference retains gray bases,
+thickness-dependent shading and small-scale structure.
+
+Three source mismatches remain:
+
+- the visible Globe march derives material LOD from
+  `log2(1 + distance * 1e-5)`. The reference first measures the projected
+  cloud-entry weather footprint with derivatives, converts it to
+  `rayStartTexelsPerPixel`, and then adds ray distance. Omitting that entry
+  footprint changes weather/shape/detail selection and leaves orbital motion
+  vulnerable to mip churn;
+- the reference evaluates physical Sun/sky irradiance at the cloud sample and
+  physical ground Sun/sky irradiance at the ground point and normal. SceneGIS
+  instead combines solar transmittance, solar-normalized sky irradiance and an
+  approximate coverage term, then multiplies the final result by the retained
+  `cloudRadianceScale=48`. That is not reference source-domain parity and is
+  consistent with the clipped, low-contrast cloud body;
+- the ECEF matrix repair does not implement the reference shadow temporal
+  pass. The current shadow test uses a small motion and a broad Beer-atlas
+  tolerance, while the product also blends into a next cascade whose declared
+  view interval does not overlap. Neither proves a stationary terrain shadow
+  through the owner's substantial camera rotation.
+
+`A8-AR-016` therefore owns exact projected-footprint and physical cloud-source
+parity. `A8-AR-017` owns reference-style BSM temporal reprojection and an exact
+single-cascade/real-overlap contract. Owner review remains blocked until both
+corrections pass Architecture review. No owner gate, checkpoint, commit, push,
+`A9-G` or Planar work is authorized.
+
+## 2026-09-01 A8-AR-016/017 execution candidate
+
+Execution implemented the assigned Globe-only corrections without retaining or
+adding an advanced-features navigation artifact. Globe cloud material now uses
+the reference projected entry footprint (`mipLevelScale=0.35`), physical A2
+Sun/sky and ground irradiance, and a Globe-relative `cloudRadianceScale=1`;
+Planar retains its established `48` default and absolute domain.
+
+The BSM now resolves current Beer plus front-depth/velocity into two warm
+RGBA16F history targets with closest-depth reprojection, current-neighborhood
+variance clipping and fixed temporal alpha. Receivers select one view-depth
+cascade; the synthetic non-overlap blend is removed. The exact added shadow
+budget is one program, one command, three textures, two FBOs, three
+attachments and two history textures: `6,291,456 / 25,165,824 / 56,623,104`
+bytes for low/medium/high. Focused GPU evidence, controller `77/77`, A1 `7/7`
+and installed delivery `26/26` pass. The tree remains uncommitted and
+unpushed for Architecture review.
+
+## A8-AR-016/017 Architecture review — changes requested 2026-09-01
+
+The physical cloud/ground irradiance path and Globe-relative radiance mapping
+are retained. The material LOD and shadow temporal claims are not closed.
+
+The local Basic story runs the reference cloud temporal-upscale path, whose
+camera copy sets `mipLevelScale=0.25`; the non-temporal path uses `1`. The
+candidate introduces `0.35`, which belongs to neither reference mode. Its GPU
+fixture repeats `0.35` in the expected equation and calls the helper directly,
+so it proves self-consistency rather than reference parity or production
+`CloudFS` wiring.
+
+The BSM temporal path also omits reference behavior that is necessary for the
+owner's failure mode:
+
+- producer STBN is still fixed to slice `0`, while the reference uses
+  `frame % textureDepth`; a stationary history therefore accumulates the same
+  low-resolution sample instead of converging spatial aliasing;
+- camera direction/up changes beyond the shared `10 degree` A6 threshold
+  globally invalidate BSM history. The owner's fast rotation therefore falls
+  directly onto an unfiltered moving atlas;
+- linear history sampling converts local UV into the tiled atlas without a
+  half-texel tile clamp, allowing adjacent cascade history to bleed at a tile
+  edge;
+- hard cascade selection replaces the rejected blend, but the reference uses
+  overlapping faded intervals and stochastically selects one cascade. A hard
+  boundary can still pop when rotation changes view depth;
+- the claimed substantial-motion fixture checks exact OD only after a
+  `0.5 degree` heading change with tolerance `0.25`. The orbit case checks only
+  finite `[0,80]` output and therefore cannot detect a moving shadow.
+
+`A8-AR-018` owns exact reference-mode footprint closure. `A8-AR-019` owns BSM
+jitter, history compatibility, tile isolation, cascade transition and the
+substantial fixed-ECEF motion witness. Owner review remains blocked.
+
+## A8-AR-018/019 execution evidence — 2026-09-01
+
+The compiled Globe cloud march now uses the reference temporal-upscale
+footprint scale `0.25`; the focused high-altitude production witness rejects
+the former distance-only footprint mutation. The BSM producer advances STBN
+from the rendered frame, retains history through the assigned substantial
+rotation when ECEF reprojection remains valid, invalidates every material and
+quality discontinuity, clamps history samples to each atlas tile's half-texel
+interior, and blends only producer-covered overlap in Beer-transmittance space.
+
+Focused BSM/reference fixtures passed, followed by the final controller
+`77/77`, A1 private pipeline `7/7`, and installed-delivery verifier `26/26`.
+The matched Basic page was `ready · HDR` with zero browser/render errors. One
+direct fast rotation showed no persistent screen-space shadow trail in the
+captured frame; interactive owner judgment remains the visual authority.
+Resource/API/upstream deltas for this correction are zero. The retained A8 BSM
+budget remains `+1/+1/+3/+2/+3/+2` program/command/texture/FBO/attachment/
+history and `6,291,456 / 25,165,824 / 56,623,104` bytes for low/medium/high.
+No navigation-page edit, generated file, new SGP, A9-G or Planar work was made.
+
+## A8-AR-020 through A8-AR-023 execution status — 2026-09-01
+
+Execution aligned the real Globe Cloud MRT footprint with the reference
+quarter-rate raster equation, made Globe shape/detail base-level linear while
+retaining mipmapped weather/turbulence and conservative occupancy, strengthened
+the nonuniform fixed-ECEF BSM witness, and adopted the reference clamped
+structured sample period plus temporal entry offset. The amended reference,
+BSM and lifecycle fixtures each pass `1/1`; final controller/A1 results are
+`77/77` and `7/7`. Persistent Globe CloudCore storage is now `7,060,723` bytes
+(`-304,274`) with no resource-count, public-API, upstream, generated or SGP
+delta. The tree remains uncommitted/unpushed for Architecture review.
+
+The final-source Basic page is `ready · HDR · high · terrain depth owned` with
+zero browser/render errors. One direct fast rotation left no persistent
+captured screen-space shadow trail; residual shadow softness/block structure
+remains for project-owner visual judgment.
+
+## A8-AR-024 through A8-AR-028 execution status — 2026-09-01
+
+Globe cloud transport now keeps the camera-local ENU Sun direction for local
+ray/phase work and carries the normalized ECEF Sun direction independently to
+Bruneton incident irradiance, ground coupling and BSM. The cloud-body BSM
+receiver selects its raw/filtered path from the receiver's local solar
+elevation instead of global `Sun.z`. The reference footprint uses
+`4 * ceil(resolved / 4)` on each axis, including odd resolved dimensions.
+
+The amended existing GPU fixtures reject local-Sun-as-ECEF, global-Sun-z,
+same-UV BSM history, wrong producer/receiver coordinates, cascade-selection
+and shape/detail-LOD mutations. They use real camera depth across a
+producer-covered cascade transition and derive OD bounds from texel footprint,
+structured integration and binary16 storage. Focused fixtures passed, followed
+by controller `77/77` and A1 `7/7`.
+
+The retained page is `ready · HDR · high · terrain depth owned` with errors
+`0` at high/mixed, coverage `0.4`, density `0.5`, cloud time `0`, cloud
+radiance `2`, background/aerial/surface `4/1/10`, and measured Sun elevation
+`46.964 degrees` (the timeline pixel nearest the assigned `47.046 degrees`).
+One direct ground rotation showed no persistent captured trail; the cloud-top
+view remains bright and the ground shadow field remains visibly soft. Those
+are owner-visible judgments, not an inferred gate. No standalone navigation
+page was edited.
+
+## A8-AR-029 execution status — 2026-09-01
+
+The remaining ground-shadow drift was traced to inconsistent caster geometry,
+not to cloud color. The BSM producer marched every visible Globe layer, while
+the surface receiver used `base + thickness`; mixed therefore included its
+visual-only cirrus layer but reconstructed against a lower, unrelated top
+sphere. Globe shadow authority now contains only the reference shadow-enabled
+low layers. One shared JS table/helper publishes their exact bottom/top to the
+uniform and frame-local surface record, and the GLSL mirror masks BSM density
+and support identically. Cirrus-only publishes no active shadow/ray coupling.
+
+The amended existing BSM GPU fixture covers all four preset supports, mixed
+low-only production, all-visible-layer and legacy-top mutations, cirrus zero
+BSM, and one fixed ECEF receiver through two visible pitch/orbit states. It
+samples current raw BSM, resolved BSM and the real Globe surface-lighting
+helper; current/resolved/surface remain bounded while the legacy top mutation
+fails. The focused fixture passes. No cloud color, radiometry, public API,
+resource, upstream, generated, SGP, Planar or navigation-page change was made.
+
+### A8-AR-029 owner-camera correction — 2026-09-01
+
+The owner's saved camera pair and annotated images supersede the preceding
+visual statement: both center rays target the same WGS84 terrain location, but
+the cloud shadows translate across terrain landmarks. The remaining cause was
+the cascade radius changing after nonlinear Globe corner mapping. The exact
+views produced `34911.980651 / 34895.930725 m`; center snapping alone therefore
+could not preserve the world texel grid.
+
+Cascade radius is now computed from the projection and producer split before
+pose-dependent mapping, while mapped corners still determine center/coverage.
+Both exact views publish `34913.065606 m` and identical fixed-receiver texel
+phase. The existing GPU fixture rejects the former mapped-radius behavior. No
+post-edit attempt was made to rediscover the old stochastic cloud bodies after
+refresh. Resource/API/upstream/generated/SGP/Planar deltas remain zero.
+
+Final scoped validation passed: exact BSM GPU `1/1`, controller `76/76`, A1
+private pipeline `7/7`, focused ESLint/Prettier/Markdownlint and
+`git diff --check`.
+
+### A8-AR-032 execution evidence — 2026-09-01
+
+The exact owner-camera fixture located the remaining first divergence after
+the receiver: raw BSM texels at three fixed ECEF points were bit-identical, but
+the resolve path altered them. Camera-only atlas displacement is now stored in
+texels and rounded only when the caller-owned cloud offset is unchanged, while
+continuous cloud advection retains fractional displacement. The resolver now
+clips history to the finite current `3x3` component range; unlike the former
+mean-plus-or-minus-standard-deviation clamp, an exact current/history match
+cannot be displaced as an outlier.
+
+The same actual-GPU fixture passes `1/1`: the analytic cascade radius is
+`34913.065606 m` in both saved views, three raw producer texels are exactly
+equal, and raw receiver, resolved receiver and Globe surface output remain
+within binary16-aware bounds. Mapped-radius and camera-derived inverse
+mutations fail. No resource, API, upstream-owned, generated, SGP or Planar
+delta was introduced.
+
+One fresh final-source page stayed `ready · HDR` with zero browser/render
+errors through exactly one saved-camera A-to-B gesture. The new stochastic
+scene showed no abrupt whole-field shadow translation. The old annotated cloud
+bodies were not searched for after refresh; Natural Earth detail limits finer
+landmark judgment, which remains owner-visible evidence rather than a gate.
+
+### A8-AR-033 execution evidence — 2026-09-01
+
+Integer BSM history displacement now additionally requires exact compatibility
+of the previous and current cascade half-sizes and atlas resolution. The
+renderer retains those four scalar authorities in the existing reusable shadow
+snapshot. Equal-scale owner A/B motion keeps history and publishes integer
+grid displacement; an accepted `10%` Perspective FOV transition keeps history
+but publishes fractional reprojection. An actual-GPU mutation that rounds the
+scale-changing case fails. The focused BSM fixture passes `1/1`; resource,
+public API, upstream-owned, generated, SGP and Planar deltas are zero.
+
+### A8-AR-034 execution evidence — 2026-09-01
+
+The integer predicate now represents the complete light-space texel lattice,
+not scale alone. It requires exact resolution, all three cascade half-sizes and
+the already-retained ECEF Sun direction; exact Sun equality deterministically
+preserves the derived light basis. A fixed `30 s` Sun transition remains within
+the accepted history dot bound and keeps cascade scale equal, but correctly
+publishes fractional displacement. A compiled mutation that ignores lattice
+orientation rounds it and fails. The focused actual-GPU fixture passes `1/1`
+with zero resource, API, upstream, SGP or Planar delta.

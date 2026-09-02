@@ -150,9 +150,10 @@ class GlobeSurfaceShaderSet {
     const vectorData = surfaceTile.vectorData;
     const hasVectorLayer = vectorData?.show;
     // SCENEGIS_PATCH_BEGIN SGP-0009: Select one explicit frame-local SceneGIS Globe lighting variant.
-    const sceneGISGlobeLighting = /** @type {{
-      _sceneGISGlobeLighting?: { active?: boolean },
-    }} */ (frameState)._sceneGISGlobeLighting;
+    const sceneGISGlobeLighting =
+      /** @type {Partial.<{_sceneGISGlobeLighting: Partial.<{active: boolean}>}>} */ (
+        frameState
+      )._sceneGISGlobeLighting;
     const enableSceneGISGlobeLighting =
       defined(sceneGISGlobeLighting) && sceneGISGlobeLighting.active === true;
     // SCENEGIS_PATCH_END SGP-0009

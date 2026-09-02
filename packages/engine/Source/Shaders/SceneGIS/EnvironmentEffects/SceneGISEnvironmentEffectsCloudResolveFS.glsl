@@ -11,6 +11,9 @@ uniform sampler2D u_cloudLowDistanceTexture;
 uniform sampler2D u_cloudHistoryColorTexture;
 uniform sampler2D u_cloudHistoryDistanceTexture;
 uniform bool u_perspective;
+#ifdef SCENEGIS_GLOBE
+uniform bool u_hasCurrentGlobeDepth;
+#endif
 uniform vec4 u_frustum;
 uniform vec3 u_cameraPosition;
 uniform vec3 u_cameraDirection;
@@ -220,6 +223,9 @@ void main()
     float rawDepth = texture(u_depthTexture, v_textureCoordinates).r;
     float resolvedDepth = czm_readDepth(u_depthTexture, v_textureCoordinates);
     bool isClearDepth = sceneGISIsClearResolvedDepth(rawDepth);
+    #ifdef SCENEGIS_GLOBE
+    isClearDepth = isClearDepth || !u_hasCurrentGlobeDepth;
+    #endif
     float sceneDistanceMeters = SCENEGIS_PLANAR_BACKGROUND_DISTANCE;
     float sceneDistance = 1.0;
     if (!isClearDepth) {

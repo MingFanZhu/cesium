@@ -1,4 +1,22 @@
 const float SCENEGIS_CLOUD_SHADOW_MAX_LENGTH = 200000.0;
+
+float sceneGISCloudShadowStructuredSamplePeriod(
+    float maximumRayDistance,
+    int iterations)
+{
+    return clamp(
+        maximumRayDistance / float(max(iterations, 1)),
+        100.0,
+        1000.0);
+}
+
+float sceneGISCloudShadowTemporalRayDistance(
+    float structuredDistance,
+    float stepSize,
+    float jitter)
+{
+    return structuredDistance - stepSize * jitter;
+}
 const float SCENEGIS_CLOUD_SHADOW_CODE_MAX = 1023.0;
 
 uniform sampler2D u_sceneGISCloudShadowAtlas;
@@ -53,25 +71,78 @@ int sceneGISCloudShadowCascade(float viewDistance)
     return -1;
 }
 
+float sceneGISCloudShadowFadeHalfWidth(float splitDistance)
+{
+    float nearDistance = u_sceneGISCloudShadowIntervals[0].x;
+    float farDistance = u_sceneGISCloudShadowIntervals[
+        max(u_sceneGISCloudShadowCascadeCount - 1, 0)].y;
+    float normalizedSplit = splitDistance / max(farDistance, 1.0);
+    return 0.25 * normalizedSplit * normalizedSplit *
+        max(farDistance - nearDistance, 1.0);
+}
+
+void sceneGISCloudShadowCascadeTransition(
+    float viewDistance,
+    out int firstCascade,
+    out int secondCascade,
+    out float secondWeight)
+{
+    firstCascade = sceneGISCloudShadowCascade(viewDistance);
+    secondCascade = -1;
+    secondWeight = 0.0;
+    for (int cascade = 0; cascade < 2; ++cascade) {
+        if (cascade + 1 >= u_sceneGISCloudShadowCascadeCount) {
+            break;
+        }
+        float splitDistance = u_sceneGISCloudShadowIntervals[cascade].y;
+        float halfWidth = sceneGISCloudShadowFadeHalfWidth(splitDistance);
+        if (viewDistance >= splitDistance - halfWidth &&
+            viewDistance <= splitDistance + halfWidth) {
+            firstCascade = cascade;
+            secondCascade = cascade + 1;
+            secondWeight = clamp(
+                (viewDistance - (splitDistance - halfWidth)) /
+                    max(2.0 * halfWidth, 1.0e-6),
+                0.0,
+                1.0);
+            return;
+        }
+    }
+}
+
 vec2 sceneGISCloudShadowAtlasOffset(int cascade)
 {
     return vec2(float(cascade % 2), float(cascade / 2)) * 0.5;
 }
 
+float sceneGISCloudShadowDistanceToTop(vec3 globePosition)
+{
+    vec3 sunDirection = normalize(u_sceneGISShadowSunDirection);
+    float projected = dot(globePosition, sunDirection);
+    float topRadius = SCENEGIS_BOTTOM_RADIUS + u_sceneGISShadowCloudTop;
+    float discriminant = projected * projected -
+        dot(globePosition, globePosition) + topRadius * topRadius;
+    if (discriminant < 0.0) {
+        return 0.0;
+    }
+    return max(-projected + sqrt(max(discriminant, 0.0)), 0.0);
+}
+
 float sceneGISCloudShadowCascadeOpticalDepth(
-    vec3 localPosition,
-    int cascade)
+    vec3 globePosition,
+    int cascade,
+    float minimumDistance)
 {
     vec4 clip = u_sceneGISCloudShadowMatrices[cascade] *
-        vec4(localPosition, 1.0);
+        vec4(globePosition, 1.0);
     vec2 uv = clip.xy * 0.5 + 0.5;
     if (any(lessThan(uv, vec2(0.0))) ||
         any(greaterThan(uv, vec2(1.0)))) {
         return 0.0;
     }
-    float sunHeight = max(u_sceneGISShadowSunDirection.z, 1.0e-3);
     float distanceToTop = max(
-        (u_sceneGISShadowCloudTop - localPosition.z) / sunHeight,
+        sceneGISCloudShadowDistanceToTop(globePosition) -
+            max(minimumDistance, 0.0),
         0.0);
     vec2 atlasOffset = sceneGISCloudShadowAtlasOffset(cascade);
     vec2 atlasTexel = 1.0 /
@@ -80,42 +151,58 @@ float sceneGISCloudShadowCascadeOpticalDepth(
     vec2 tileMaximum = atlasOffset + vec2(0.5) - atlasTexel * 0.5;
     vec2 atlasUv = atlasOffset + uv * 0.5;
     float meanTransmittance = 0.0;
-    for (int y = -1; y <= 1; ++y) {
-        float weightY = y == 0 ? 2.0 : 1.0;
-        for (int x = -1; x <= 1; ++x) {
-            float weightX = x == 0 ? 2.0 : 1.0;
-            vec2 tapUv = clamp(
-                atlasUv + vec2(float(x), float(y)) * atlasTexel,
-                tileMinimum,
-                tileMaximum);
-            vec4 shadow = texture(u_sceneGISCloudShadowAtlas, tapUv);
-            float frontDepth = shadow.r *
-                SCENEGIS_CLOUD_SHADOW_MAX_LENGTH;
-            float opticalDepth = min(
-                shadow.b,
-                shadow.g * max(distanceToTop - frontDepth, 0.0));
-            meanTransmittance += weightX * weightY *
-                exp(-clamp(opticalDepth, 0.0, 80.0));
-        }
+    const int sampleCount = 16;
+    const float goldenAngle = 2.399963229728653;
+    const float filterRadius = 2.0;
+    for (int sampleIndex = 0; sampleIndex < sampleCount; ++sampleIndex) {
+        float sampleIndexFloat = float(sampleIndex);
+        float sampleRadius = filterRadius * sqrt(
+            (sampleIndexFloat + 0.5) / float(sampleCount));
+        float sampleAngle = sampleIndexFloat * goldenAngle;
+        vec2 sampleOffset = sampleRadius * vec2(
+            cos(sampleAngle),
+            sin(sampleAngle));
+        vec2 tapUv = clamp(
+            atlasUv + sampleOffset * atlasTexel,
+            tileMinimum,
+            tileMaximum);
+        vec4 shadow = texture(u_sceneGISCloudShadowAtlas, tapUv);
+        float frontDepth = shadow.r *
+            SCENEGIS_CLOUD_SHADOW_MAX_LENGTH;
+        float opticalDepth = min(
+            shadow.b + shadow.a,
+            shadow.g * max(distanceToTop - frontDepth, 0.0));
+        meanTransmittance += exp(-clamp(opticalDepth, 0.0, 80.0));
     }
-    meanTransmittance *= 1.0 / 16.0;
+    meanTransmittance /= float(sampleCount);
     return -log(clamp(meanTransmittance, exp(-80.0), 1.0));
 }
 
-float sceneGISCloudShadowCascadeRawOpticalDepth(
-    vec3 localPosition,
+float sceneGISCloudShadowCascadeOpticalDepth(
+    vec3 globePosition,
     int cascade)
 {
+    return sceneGISCloudShadowCascadeOpticalDepth(
+        globePosition,
+        cascade,
+        0.0);
+}
+
+float sceneGISCloudShadowCascadeRawOpticalDepth(
+    vec3 globePosition,
+    int cascade,
+    float minimumDistance)
+{
     vec4 clip = u_sceneGISCloudShadowMatrices[cascade] *
-        vec4(localPosition, 1.0);
+        vec4(globePosition, 1.0);
     vec2 uv = clip.xy * 0.5 + 0.5;
     if (any(lessThan(uv, vec2(0.0))) ||
         any(greaterThan(uv, vec2(1.0)))) {
         return 0.0;
     }
-    float sunHeight = max(u_sceneGISShadowSunDirection.z, 1.0e-3);
     float distanceToTop = max(
-        (u_sceneGISShadowCloudTop - localPosition.z) / sunHeight,
+        sceneGISCloudShadowDistanceToTop(globePosition) -
+            max(minimumDistance, 0.0),
         0.0);
     vec2 atlasOffset = sceneGISCloudShadowAtlasOffset(cascade);
     vec2 atlasTexel = 1.0 /
@@ -127,77 +214,134 @@ float sceneGISCloudShadowCascadeRawOpticalDepth(
     vec4 shadow = texture(u_sceneGISCloudShadowAtlas, atlasUv);
     float frontDepth = shadow.r * SCENEGIS_CLOUD_SHADOW_MAX_LENGTH;
     return min(
-        shadow.b,
+        shadow.b + shadow.a,
         shadow.g * max(distanceToTop - frontDepth, 0.0));
+}
+
+float sceneGISCloudShadowCascadeRawOpticalDepth(
+    vec3 globePosition,
+    int cascade)
+{
+    return sceneGISCloudShadowCascadeRawOpticalDepth(
+        globePosition,
+        cascade,
+        0.0);
 }
 
 float sceneGISCloudShadowOpticalDepth(
     vec3 localPosition,
     float viewDistance)
 {
-    int cascade = sceneGISCloudShadowCascade(viewDistance);
-    if (cascade < 0) {
+    int firstCascade;
+    int secondCascade;
+    float secondWeight;
+    sceneGISCloudShadowCascadeTransition(
+        viewDistance,
+        firstCascade,
+        secondCascade,
+        secondWeight);
+    if (firstCascade < 0) {
         return 0.0;
     }
-    float opticalDepth = sceneGISCloudShadowCascadeOpticalDepth(
+    float firstOpticalDepth = sceneGISCloudShadowCascadeOpticalDepth(
         localPosition,
-        cascade);
-    int nextCascade = cascade + 1;
-    if (nextCascade < u_sceneGISCloudShadowCascadeCount) {
-        vec2 interval = u_sceneGISCloudShadowIntervals[cascade];
-        float overlap = max((interval.y - interval.x) * 0.05, 1.0);
-        float blend = smoothstep(
-            interval.y - overlap,
-            interval.y,
-            viewDistance);
-        float nextOpticalDepth = sceneGISCloudShadowCascadeOpticalDepth(
-            localPosition,
-            nextCascade);
-        float transmittance = mix(
-            exp(-clamp(opticalDepth, 0.0, 80.0)),
-            exp(-clamp(nextOpticalDepth, 0.0, 80.0)),
-            blend);
-        opticalDepth = -log(clamp(transmittance, exp(-80.0), 1.0));
+        firstCascade);
+    if (secondCascade < 0) {
+        return firstOpticalDepth;
     }
-    return opticalDepth;
+    float secondOpticalDepth = sceneGISCloudShadowCascadeOpticalDepth(
+        localPosition,
+        secondCascade);
+    float transmittance = mix(
+        exp(-clamp(firstOpticalDepth, 0.0, 80.0)),
+        exp(-clamp(secondOpticalDepth, 0.0, 80.0)),
+        secondWeight);
+    return -log(clamp(transmittance, exp(-80.0), 1.0));
 }
 
 float sceneGISCloudShadowRawOpticalDepth(
     vec3 localPosition,
     float viewDistance)
 {
-    int cascade = sceneGISCloudShadowCascade(viewDistance);
-    if (cascade < 0) {
+    int firstCascade;
+    int secondCascade;
+    float secondWeight;
+    sceneGISCloudShadowCascadeTransition(
+        viewDistance,
+        firstCascade,
+        secondCascade,
+        secondWeight);
+    if (firstCascade < 0) {
         return 0.0;
     }
-    float opticalDepth = sceneGISCloudShadowCascadeRawOpticalDepth(
+    float firstOpticalDepth = sceneGISCloudShadowCascadeRawOpticalDepth(
         localPosition,
-        cascade);
-    int nextCascade = cascade + 1;
-    if (nextCascade < u_sceneGISCloudShadowCascadeCount) {
-        vec2 interval = u_sceneGISCloudShadowIntervals[cascade];
-        float overlap = max((interval.y - interval.x) * 0.05, 1.0);
-        float blend = smoothstep(
-            interval.y - overlap,
-            interval.y,
-            viewDistance);
-        float nextOpticalDepth = sceneGISCloudShadowCascadeRawOpticalDepth(
-            localPosition,
-            nextCascade);
-        float transmittance = mix(
-            exp(-clamp(opticalDepth, 0.0, 80.0)),
-            exp(-clamp(nextOpticalDepth, 0.0, 80.0)),
-            blend);
-        opticalDepth = -log(clamp(transmittance, exp(-80.0), 1.0));
+        firstCascade);
+    if (secondCascade < 0) {
+        return firstOpticalDepth;
     }
-    return opticalDepth;
+    float secondOpticalDepth = sceneGISCloudShadowCascadeRawOpticalDepth(
+        localPosition,
+        secondCascade);
+    float transmittance = mix(
+        exp(-clamp(firstOpticalDepth, 0.0, 80.0)),
+        exp(-clamp(secondOpticalDepth, 0.0, 80.0)),
+        secondWeight);
+    return -log(clamp(transmittance, exp(-80.0), 1.0));
 }
 
-vec3 sceneGISCloudShadowLocalPosition(vec3 worldPosition)
+float sceneGISCloudBodyShadowCascadeOpticalDepth(
+    vec3 globePosition,
+    int cascade,
+    float minimumDistance)
 {
-    vec3 offset = worldPosition - u_sceneGISShadowSurfacePosition;
-    return vec3(
-        dot(offset, u_sceneGISShadowEast),
-        dot(offset, u_sceneGISShadowNorth),
-        dot(offset, u_sceneGISShadowVertical));
+    // Match the fixed reference: cloud-body BSM sampling is raw for ordinary
+    // Sun elevations and uses the accepted receiver filter only near horizon.
+    float localSunElevation = dot(
+        normalize(globePosition),
+        normalize(u_sceneGISShadowSunDirection));
+    if (localSunElevation >= 0.1) {
+        return sceneGISCloudShadowCascadeRawOpticalDepth(
+            globePosition,
+            cascade,
+            minimumDistance);
+    }
+    return sceneGISCloudShadowCascadeOpticalDepth(
+        globePosition,
+        cascade,
+        minimumDistance);
+}
+
+float sceneGISCloudBodyShadowOpticalDepth(
+    vec3 localPosition,
+    float viewDistance,
+    float minimumDistance)
+{
+    int firstCascade;
+    int secondCascade;
+    float secondWeight;
+    sceneGISCloudShadowCascadeTransition(
+        viewDistance,
+        firstCascade,
+        secondCascade,
+        secondWeight);
+    if (firstCascade < 0) {
+        return 0.0;
+    }
+    float firstOpticalDepth = sceneGISCloudBodyShadowCascadeOpticalDepth(
+        localPosition,
+        firstCascade,
+        minimumDistance);
+    if (secondCascade < 0) {
+        return firstOpticalDepth;
+    }
+    float secondOpticalDepth = sceneGISCloudBodyShadowCascadeOpticalDepth(
+        localPosition,
+        secondCascade,
+        minimumDistance);
+    float transmittance = mix(
+        exp(-clamp(firstOpticalDepth, 0.0, 80.0)),
+        exp(-clamp(secondOpticalDepth, 0.0, 80.0)),
+        secondWeight);
+    return -log(clamp(transmittance, exp(-80.0), 1.0));
 }

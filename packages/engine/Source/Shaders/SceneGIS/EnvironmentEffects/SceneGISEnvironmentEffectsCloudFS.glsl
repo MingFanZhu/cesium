@@ -8,6 +8,9 @@ in vec2 v_textureCoordinates;
 
 uniform sampler2D u_depthTexture;
 uniform bool u_perspective;
+#ifdef SCENEGIS_GLOBE
+uniform bool u_hasCurrentGlobeDepth;
+#endif
 uniform vec4 u_frustum;
 uniform vec3 u_cameraPosition;
 uniform vec3 u_surfacePosition;
@@ -28,6 +31,7 @@ uniform float u_cloudBaseHeight;
 uniform float u_cloudThickness;
 uniform vec2 u_cloudOffset;
 uniform float u_cloudRadianceScale;
+uniform float u_backgroundRadianceScale;
 uniform int u_cloudPreset;
 uniform float u_cloudStbnSlice;
 uniform int u_cloudPrimarySteps;
@@ -41,7 +45,11 @@ uniform sampler3D u_cloudShapeTexture;
 uniform sampler3D u_cloudOccupancyTexture;
 uniform sampler3D u_cloudDetailTexture;
 uniform sampler2D u_cloudWeatherTexture;
+#ifdef SCENEGIS_GLOBE
+uniform sampler2D u_cloudTurbulenceTexture;
+#else
 uniform sampler3D u_cloudTurbulenceTexture;
+#endif
 uniform sampler3D u_cloudStbnTexture;
 
 void main()
@@ -53,6 +61,9 @@ void main()
     float rawDepth = texture(u_depthTexture, cloudCoordinates).r;
     float resolvedDepth = czm_readDepth(u_depthTexture, cloudCoordinates);
     bool isClearDepth = sceneGISIsClearResolvedDepth(rawDepth);
+    #ifdef SCENEGIS_GLOBE
+    isClearDepth = isClearDepth || !u_hasCurrentGlobeDepth;
+    #endif
     // Ray NDC belongs to the low-resolution cloud viewport. The resolved depth
     // and blue-noise lookup remain keyed to the matching full-resolution pixel.
     vec2 plane = mix(u_frustum.xz, u_frustum.yw, cloudCoordinates);
@@ -73,6 +84,7 @@ void main()
         dot(u_sunDirection, u_east),
         dot(u_sunDirection, u_north),
         dot(u_sunDirection, u_vertical)));
+    vec3 globeSunDirection = normalize(u_sunDirection);
     float distanceToGeometry = SCENEGIS_PLANAR_BACKGROUND_DISTANCE;
     if (!isClearDepth) {
         // Non-clear depth passes through the Cesium builtin exactly once to
@@ -108,6 +120,47 @@ void main()
     float rayOriginFootprint = u_perspective
         ? 0.0
         : max(viewportFootprint.x, viewportFootprint.y);
+    float rayStartTexelsPerPixel = 1.0;
+    #ifdef SCENEGIS_GLOBE
+    float footprintSupportBase;
+    float footprintSupportThickness;
+    sceneGISCloudPresetSupport(
+        u_cloudPreset,
+        cloudBase,
+        u_cloudThickness,
+        footprintSupportBase,
+        footprintSupportThickness);
+    float footprintSegmentStart = 0.0;
+    float footprintSegmentEnd = 0.0;
+    sceneGISCloudSegment(
+        localRayOrigin,
+        localRayDirection,
+        distanceToGeometry,
+        footprintSupportBase,
+        footprintSupportThickness,
+        footprintSegmentStart,
+        footprintSegmentEnd);
+    vec3 footprintEntryLocal = localRayOrigin +
+        localRayDirection * footprintSegmentStart;
+    vec3 footprintEntryGlobe = sceneGISGlobeCloudPosition(
+        footprintEntryLocal,
+        u_surfacePosition,
+        u_east,
+        u_north,
+        u_vertical,
+        u_ellipsoidCenter,
+        u_ellipsoidRadii);
+    rayStartTexelsPerPixel = sceneGISGlobeCloudEntryTexelsPerPixel(
+        footprintEntryGlobe,
+        u_cloudBufferDimensions,
+        vec2(textureSize(u_depthTexture, 0)),
+        u_altitude,
+        footprintSupportBase + footprintSupportThickness);
+    #endif
+    float cloudSceneRadianceScale = u_cloudRadianceScale;
+    #ifdef SCENEGIS_GLOBE
+    cloudSceneRadianceScale *= u_backgroundRadianceScale;
+    #endif
     vec4 cloudColor;
     vec4 cloudDistances;
     vec4 cloudSamplingDiagnostics;
@@ -123,11 +176,13 @@ void main()
         localRayOrigin,
         localRayDirection,
         u_cameraPosition,
+        u_cameraDirection,
         u_surfacePosition,
         u_east,
         u_north,
         u_vertical,
         localSunDirection,
+        globeSunDirection,
         u_ellipsoidCenter,
         u_ellipsoidRadii,
         u_cloudOffset,
@@ -136,7 +191,7 @@ void main()
         u_cloudThickness,
         u_cloudCoverage,
         u_cloudDensity,
-        u_cloudRadianceScale,
+        cloudSceneRadianceScale,
         u_cloudPreset,
         u_cloudPrimarySteps,
         u_cloudFineSteps,
@@ -144,6 +199,7 @@ void main()
         u_cloudUseDetail,
         rayAngularFootprint,
         rayOriginFootprint,
+        rayStartTexelsPerPixel,
         cloudColor,
         cloudDistances,
         cloudSamplingDiagnostics);

@@ -6,13 +6,12 @@
 - Status: `active`
 - Owner roles: Architecture Agent, Execution Agent
 - Created: `2026-08-14`
-- Updated: `2026-08-31`
+- Updated: `2026-09-02`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A8-G active; implementation pending`
-- Active phase plan:
-  [2026-08-31-phase-a8g-globe-qualification-delivery.md](2026-08-31-phase-a8g-globe-qualification-delivery.md)
+- Current phase: `A8-G completed; local checkpoint is this phase-closing commit`
+- Active phase plan: none; a successor requires separate Architecture activation
 - Latest completed phase plan:
-  [2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md](2026-08-28-phase-a7g-globe-hdr-bloom-lens-flare.md)
+  [2026-08-31-phase-a8g-globe-qualification-delivery.md](2026-08-31-phase-a8g-globe-qualification-delivery.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -32,6 +31,7 @@
 - A5-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A6-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A7-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
+- A8-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 
 ## Goal
 
@@ -322,3 +322,13 @@ Current program facts否定“raw与decoded是两个不稳定authority”的根�
 `czm_reverseLogDepth`只在`LOG_DEPTH`分支解码，且`DerivedCommand`看到read-only define会返回原program。因此两者的`czm_readDepth`都等于raw，raw-only改写
 不改变classifier。Architecture本轮controller虽为`57/57`，但这与修复前已有绿色run同样不能解释先前`56/57`。新增`A4-AR-022`，要求fixed immutable
 color/depth input的direct aerial identity fixture定位实际owner；不扩大测试边界。
+
+### A8-G completion — 2026-09-02
+
+Architecture closed all A8 findings through `A8-AR-034`, including reference
+Globe cloud material, physical cloud transport, fixed-ECEF Beer shadow
+production/reception, temporal Beer resolve, package delivery and direct Test
+qualification. The project owner explicitly passed the final fixed-time
+camera-pitch cloud-shadow gate. The phase-closing local commit containing this
+record is the isolated A8-G checkpoint and is not pushed. A successor Globe or
+Planar phase requires a separate Architecture activation.

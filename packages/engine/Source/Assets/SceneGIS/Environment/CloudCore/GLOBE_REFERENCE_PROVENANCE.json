@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "https://github.com/takram-design-engineering/three-geospatial",
+    "commit": "b012ad06d858fc035d88aacfd73f092f93c994e4",
+    "packages": ["packages/clouds", "packages/core"],
+    "license": "MIT",
+    "copyright": "Copyright (c) 2024 Shota Matsuda",
+    "files": [
+      {
+        "name": "shape.bin",
+        "path": "packages/clouds/assets/shape.bin",
+        "sha256": "EF65CF6156894720C00BF572C49E3E254F8899C4B5158246E5A35A1922E2519C"
+      },
+      {
+        "name": "shape_detail.bin",
+        "path": "packages/clouds/assets/shape_detail.bin",
+        "sha256": "C09112199C6E0281B74FF5283C11C2943AE082650B9B67978CF5D59ED2956E4F"
+      },
+      {
+        "name": "local_weather.png",
+        "path": "packages/clouds/assets/local_weather.png",
+        "sha256": "B84DAEF855DC5EEBCC9B174FE832BA75A98E44B846DDE201BCE354417CC08031"
+      },
+      {
+        "name": "turbulence.png",
+        "path": "packages/clouds/assets/turbulence.png",
+        "sha256": "EC2B1B0AF4A6A6104102B21E58BEB300B0A3D334C0281D84FDE8C91D322910F9"
+      },
+      {
+        "name": "stbn.bin",
+        "path": "packages/core/assets/stbn.bin",
+        "sha256": "51F52F21E5578384585050390821A0A486DCB81E11A716FA7B92FBB6515BA852"
+      }
+    ]
+  },
+  "importer": "scripts/scenegis/import-three-geospatial-cloud-assets.mjs",
+  "byteOrder": "raw texel order, x-fastest then y then z",
+  "outputs": [
+    {
+      "name": "globe-shape.bin",
+      "source": "shape.bin",
+      "format": "R8",
+      "dimensions": [128, 128, 128],
+      "bytes": 2097152,
+      "sha256": "EF65CF6156894720C00BF572C49E3E254F8899C4B5158246E5A35A1922E2519C"
+    },
+    {
+      "name": "globe-detail.bin",
+      "source": "shape_detail.bin",
+      "format": "R8",
+      "dimensions": [32, 32, 32],
+      "bytes": 32768,
+      "sha256": "C09112199C6E0281B74FF5283C11C2943AE082650B9B67978CF5D59ED2956E4F"
+    },
+    {
+      "name": "globe-weather.bin",
+      "source": "local_weather.png",
+      "format": "RGBA8",
+      "dimensions": [512, 512],
+      "bytes": 1048576,
+      "sha256": "BB590A69028389A1AE9B0861D5BF322194B5D94CE3D379034AD983C86E97A4AD"
+    },
+    {
+      "name": "globe-turbulence.bin",
+      "source": "turbulence.png",
+      "format": "RGBA8",
+      "dimensions": [128, 128],
+      "bytes": 65536,
+      "sha256": "4D2DB2189CDB43B4CF22B12969B1BE529140DA6A7A84D8B5633656A877390051"
+    },
+    {
+      "name": "globe-stbn.bin",
+      "source": "stbn.bin",
+      "format": "R8",
+      "dimensions": [128, 128, 64],
+      "bytes": 1048576,
+      "sha256": "51F52F21E5578384585050390821A0A486DCB81E11A716FA7B92FBB6515BA852"
+    }
+  ],
+  "totalBinaryBytes": 4292608
+}

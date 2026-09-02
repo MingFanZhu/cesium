@@ -468,3 +468,174 @@ Architecture independently accepted the final direct evidence path: a disabled
 or not-ready controller reports `valid=false`, while an enabled/ready high-Sun
 capture reports `valid=true` only with available, finite, bounded and
 storage-safe raw Cloud MRT plus an unchanged owner state. `A4-AR-032` is closed.
+
+## 2026-08-31 A8-AR-010 Globe reference-material amendment
+
+The project-owner fixed comparison against
+`three-geospatial@b012ad06d858fc035d88aacfd73f092f93c994e4` exposed a
+remaining Globe material-topology gap. This amendment does not reopen the
+solar-normalized radiance domain, public calibration, resource ownership or
+the deferred Planar track.
+
+The first draft attempted to reinterpret existing SceneGIS-owned RGBA volumes,
+but the owner correctly required direct use of the already supplied fixed
+reference data. A deterministic importer now verifies and copies the pinned MIT
+`shape.bin`, `shape_detail.bin`, `local_weather.png`, `turbulence.png` and core
+`stbn.bin` into five Globe-prefixed package payloads. Source and output SHA-256,
+dimensions, formats, commit, copyright and license are persisted beside the
+files. No runtime network or local-checkout dependency is introduced.
+
+Globe mode selects R8 `128³` shape, R8 `32³` detail, RGBA8 `512²` weather,
+RGBA8 `128²` turbulence and R8 `128×128×64` STBN. Planar mode continues to
+select the prior SceneGIS-generated payloads. Both modes still fetch five cloud
+files and bind exactly six cloud textures including the occupancy hierarchy;
+the reference payloads are alternatives, not simultaneous allocations. Globe
+cloud textures total `7,364,997` GPU bytes including mips. The five new package
+binaries total `4,292,608` bytes.
+
+Preset descriptors map the public base/thickness modifiers onto overlapping
+reference-relative low layers and use the pinned `0.2 / 0.2 / 0.003` density
+scales. Low-layer shape/detail periods are approximately
+`3.333 km / 166.667 m`; weather remap, linear density profile
+`0.75 * heightFraction + 0.25`, detail erosion and high-quality 2D turbulence
+follow the reference sampling equations.
+
+Cloud-body solar extinction follows the pinned reference division of work: a
+short bounded local density march preserves fine structure, then the existing
+filtered current-frame Beer atlas supplies only the remaining optical depth.
+The local covered distance is explicitly removed from the Beer reconstruction,
+so the two terms cannot double-count. One downward density sample and existing
+A2 Sun/sky irradiance provide the reference medium-tier ground-bounce topology.
+Eight-octave multiple scattering, sky gradient, powder, Beer-Lambert primary
+integration and `cloudRadianceScale` remain the accepted final transport.
+
+This amendment adds one private quality-controlled Globe turbulence uniform and
+five packaged binary alternatives, but no public API/default, runtime texture,
+FBO, attachment, pass, command, program, history, readback, upstream-owned path
+or SGP. Generated shader modules remain build outputs rather than source edits.
+A5 surface and ray receivers retain their zero-local-distance Beer semantics;
+A6 history continues to publish current cloud semantics; A7 and Planar product
+output remain frozen.
+
+The reference `densityScale` values are relative layer weights, not a second
+SceneGIS extinction coefficient. Globe divides them by the pinned low-cloud
+baseline `0.2` before multiplying by public `cloudDensity`. Thus low-layer
+weights are `1`, the high-layer weight is `0.015`, and `cloudDensity` preserves
+its documented per-meter meaning and default. This unit mapping was required
+after a real default-page observation showed that multiplying both domains made
+the imported material almost invisible.
+
+Execution evidence consists of focused production GPU fixtures, 76 green
+aggregate product checks plus the corrected focused binary16 tolerance fixture,
+private pipeline `7/7`, official unminified/minified builds and installed
+delivery verification of `26/26` GLSL, `26/26` generated modules and every
+reference payload/hash/license. A fixed default Globe view contains visible
+structured cloud material with zero browser/render warnings or errors. Final
+appearance remains an Architecture and project-owner visual judgment.
+
+## 2026-08-31 A8-AR-011 Globe integration amendment
+
+Direct reference assets do not authorize a different density algebra or an
+unrelated uniform marcher. The Globe medium therefore follows three additional
+rules. Each authored layer is saturated independently, then layer densities are
+summed without a final clamp. The public `cloudDensity` remains the sole
+per-meter extinction coefficient applied to that sum. Shape and detail texture
+LOD derive from projected pixel footprint only; the Beer integration step is
+not a material filtering footprint.
+
+Globe schedules the existing quality budget progressively. Low permits `32`
+detailed samples with a `100 m` minimum and `100 km` ray cap. Medium/high permit
+`256` detailed samples (the existing `64x4` budget) with a `50 m` minimum and
+`200 km` cap. Steps grow by `1.01` to at most `1000 m`. Long empty-space advance
+is legal only after the conservative occupancy hierarchy covers the complete
+candidate interval. This intentionally adopts the reference scheduling shape
+without silently importing its different `200/500` iteration budget.
+
+Planar keeps its established uniform coarse/fine scheduler and step-aware LOD.
+This amendment changes no public option, tier table, pass, program, texture,
+FBO, history, readback, upstream-owned path or SGP. Focused GPU evidence rejects
+the prior total-density clamp and long-step LOD coupling, observes execution
+beyond the former `64` Globe intervals, and preserves exact cloud support,
+distance and transmittance against schedule-aligned exhaustive sampling.
+
+## 2026-09-01 A8-AR-012 reference execution amendment
+
+The prior `256`-interval adaptation is superseded by direct reference execution
+for Globe: low is bounded to `200` progressive intervals and medium/high to
+`500`; medium/high render at full input-depth resolution. Minimum steps remain
+`100/50 m`, grow by `1.01`, cap at `1000 m`, and retain the existing
+`100/200 km` ray bounds plus conservative occupancy requirement. Globe does not
+apply the legacy visible-range clamp or a separate post-integration entry fade.
+Planar retains its established scheduler, quality scales and visibility fade.
+
+Default calibration is mode-specific because the two media have different
+material/radiance domains. Globe defaults to `high`, coverage `0.3`, extinction
+`0.005 m^-1` and `backgroundRadianceScale=4`. Planar retains `medium`, `0.45`,
+`0.001 m^-1` and `10`. Explicit options, inclusive ranges and warm setter
+semantics are unchanged. This is a default calibration and bounded scheduler
+decision, not a new resource or API shape.
+
+## 2026-09-01 A8-AR-014 reference layer and filtering amendment
+
+Globe layer placement follows the pinned local `three-geospatial` source
+directly: low layers start at `750 m` and `1000 m` with thicknesses `650 m` and
+`1200 m`; the high layer starts at `7500 m` with `500 m` thickness. The Globe
+default `cloudBaseHeight` is therefore `750 m`. Planar keeps its established
+`1500 m` default, and explicit options keep their existing meaning and range.
+
+The Globe `512x512` weather texture is mipmapped and selects LOD from projected
+pixel footprint. Together with the already mipmapped shape/detail/turbulence
+material, this prevents orbital pixels from undersampling base weather at
+fixed level zero. Texture count remains six and request count remains eight;
+the measured weather allocation changes from `1,048,576` to `1,398,101`
+bytes, making the exact Globe cloud-texture total `7,364,997` bytes. No pass,
+program, command, FBO, history, upstream-owned path or SGP is added.
+
+## A8-AR-015 execution amendment — exact Globe material domain
+
+Globe cloud density now preserves the reference authored layer coefficients
+directly. Its public `cloudDensity` is a dimensionless multiplier with default
+`1.0` and finite range `[0,64]`; Planar retains its absolute extinction-per-meter
+contract. Visible and BSM sampling share weather/layer/shape/detail algebra,
+material mip/jitter gating, actual spherical ECEF positions and the reference
+secondary Sun/ground schedules. `cloudRadianceScale` remains independent and is
+not used to compensate extinction. This changes no texture, pass, program, FBO,
+history or GPU-byte budget.
+
+## A8-AR-016 execution amendment — footprint and physical radiance domain
+
+Globe material LOD begins with the projected cloud-entry cube-weather
+footprint, including the reference `0.35` response and camera-height blend,
+then expands with ray distance. Globe cloud lighting consumes physical
+Bruneton Sun/sky irradiance at the cloud sample and physical ground irradiance
+at the projected ground point. `cloudRadianceScale` maps that result once into
+the background scene-linear HDR domain and therefore defaults to `1` for
+Globe. Planar retains its absolute default `48` and previous equations. No
+texture, asset, pass, history or upstream seam changes follow from this
+radiometric amendment.
+
+## A8-AR-018 execution amendment — exact temporal footprint mode
+
+The Globe temporal cloud path uses the audited reference footprint scale
+`0.25`; `1` remains the non-temporal reference mode. Production `CloudFS`
+evidence rejects the former distance-only footprint mutation at the fixed
+high-altitude witness. Physical Sun/sky/ground transport, radiance mapping,
+assets, Planar behavior and resource topology remain unchanged.
+
+## A8 qualification amendment — raster footprint and Globe volume topology
+
+For the Globe reference-temporal path, cloud-entry derivatives are converted
+from the actual current Cloud MRT raster to `ceil(resolved / 4)` per axis and
+then use the fixed reference mip scale `0.25`. Globe shape/detail volumes are
+base-level linear textures; weather/turbulence remain mipmapped and occupancy
+retains its explicit conservative hierarchy. Planar retains its established
+texture topology. This lowers persistent Globe CloudCore storage to
+`7,060,723` bytes without changing resource counts or public API.
+
+## A8 qualification amendment — dual Sun coordinate authority
+
+Globe cloud phase and local secondary rays consume camera-local ENU Sun, while
+Bruneton incident irradiance and Globe ground coupling consume normalized ECEF
+Sun. Both are explicit parameters of the shared march/lighting call chain.
+Odd resolved dimensions use `4 * ceil(resolved / 4)` as the reference raster
+before temporal footprint conversion. No Planar or resource topology changes.

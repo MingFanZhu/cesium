@@ -708,3 +708,100 @@ Architecture independently reviewed the local structural cast and reran engine
 the SGP-0009 path set. Together with the accepted owner visual gate, this closes
 A5-G. The phase-closing local commit is its checkpoint; A6-G and Planar remain
 separately gated.
+
+## 2026-09-01 A8-AR-013 spherical receiver amendment
+
+Globe BSM production and reception must use one ray geometry. The producer
+intersects the local osculating cloud shell, so surface, cloud-body and ray
+receivers may not reconstruct distance with the tangent-plane approximation
+`(cloudTop-z)/sun.z`. Receivers solve the positive Sun ray against the same top
+sphere and subtract only an explicit already-covered distance.
+
+OD reconstruction consumes the producer's front distance, mean extinction,
+bounded maximum OD and bounded tail; dropping the tail is not permitted. The
+fixed ECEF light basis, square stable cascade extent, texel snapping,
+transmittance-domain cascade overlap and receiver filtering remain authoritative.
+This correction adds no shadow translation, screen-space reprojection,
+camera-relative offset, temporal shadow history, resource, public API, upstream
+path or SGP.
+
+## 2026-09-01 A8-AR-014 world-grid and structured-sampling amendment
+
+Globe BSM cascade orientation and phase are world-space authorities. Light
+right/up axes are constructed in ECEF, cascade extents are square, and each
+center is snapped to a global ECEF light-plane texel lattice. The camera-local
+osculating frame may convert the resulting world center for shader execution,
+but it may not define or reset the lattice phase. Rotating the camera therefore
+cannot translate a fixed Sun/cloud shadow across the terrain.
+
+BSM integration adopts the pinned `three-geospatial` structured-volume sample
+construction with a stable world ray and per-frame STBN phase. This changes no
+atlas size, cascade count, filtered receiver, pass, program, texture, FBO,
+history allocation, API, upstream-owned path or SGP. The reference's separate
+temporal shadow pass is not imported; any remaining sub-texel blockiness is a
+project-owner visual risk rather than authority for an unbounded resource
+addition.
+
+## A8-AR-015 execution amendment — full ECEF BSM authority
+
+Each Globe BSM cascade now owns one full invertible ECEF light transform and
+its inverse. The producer reconstructs its ray from the inverse matrix; surface,
+cloud-body and shadow-length receivers project the same spherical ECEF material
+position with the forward matrix. Cascade selection uses camera view-space
+depth, and shell intersection is camera independent. Atlas dimensions,
+cascades, commands, programs, textures, FBOs, PCF and bytes are unchanged. No
+temporal BSM history was added after the spatial invariant passed.
+
+## A8-AR-017 execution amendment — temporal Beer atlas
+
+The later owner rotation evidence authorizes the audited temporal shadow pass.
+The producer retains one atlas draw topology but adds front depth and velocity
+as its second RGBA16F attachment. A single resolve program/command publishes
+Beer into two ping-pong history targets using closest-depth velocity,
+reprojection, current 3x3 mean/variance clipping and alpha `0.01`. Surface and
+cloud consumers continue to decode Beer and use the existing 3x3 surface PCF.
+
+Receivers select exactly one view-depth cascade; the former 5% blend between
+non-overlapping cascade domains is removed. Added low/medium/high storage is
+`6,291,456 / 25,165,824 / 56,623,104` bytes. Program/command/texture/FBO/
+attachment/history deltas are `+1/+1/+3/+2/+3/+2`. No API, asset, upstream
+path or SGP is added.
+
+## A8-AR-019 execution amendment — temporal BSM sampling and overlap
+
+The Beer-shadow producer advances its existing STBN volume by rendered frame.
+History remains valid through substantial rotation when full-ECEF reprojection
+and projection/frustum/translation/Sun/material/quality bounds remain valid.
+Linear history samples are clamped to their atlas tile's half-texel interior.
+Adjacent producer-covered cascades overlap and combine in Beer-transmittance
+space; surface PCF and the declared resource topology remain unchanged.
+
+## A8 qualification amendment — structured BSM sampling authority
+
+The Globe BSM producer uses the reference structured sample period
+`clamp(maxRayDistance / iterations, 100, 1000)` and subtracts
+`stepSize * jitter` from the structured entry before marching. The existing
+25/50 quality budgets and resource topology remain unchanged. Fixed-world
+qualification uses nonuniform material, real producer coverage, substantial
+camera motion and producer-covered cascade transitions; OD tolerances derive
+from cascade texel footprint, bounded interval size and binary16 quantization.
+
+## A8 qualification amendment — receiver-local elevation and OD ownership
+
+Cloud-body BSM filtering selects raw versus filtered reconstruction from the
+receiver-normal/ECEF-Sun dot product. The local Sun march owns only its reported
+covered interval; BSM reconstruction starts at that distance and contributes
+direct solar OD only. Sky/ambient, opacity, atlas topology and PCF remain
+unchanged.
+
+## A8 qualification amendment — shadow-enabled layer authority
+
+Globe BSM support is the union of reference layers explicitly enabled for
+shadow casting, not the union of all visible cloud layers. Cumulus, stratus and
+mixed use their low layers; cirrus/high layers remain visible but do not enter
+BSM density or support. One renderer table/helper and its GLSL mirror own the
+same offsets and thickness fractions. The resulting shadow top is published to
+both atlas receivers and the frame-local Globe surface seam. A preset without
+caster support publishes identity shadow/ray coupling. This changes no visual
+cloud density, color, atlas topology, filter, resource, public API, upstream
+path or SGP.

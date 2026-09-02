@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SceneGIS 平面高级环境（保留）</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/AdvancedEnvironment/environment.css" />
+  </head>
+  <body data-scenegis-page="planar">
+    <main class="sample-shell">
+      <div
+        id="cesiumContainer"
+        class="viewer"
+        aria-label="平面高级环境视图"
+      ></div>
+      <aside class="release-card deferred" aria-live="polite">
+        <strong>Planar · 保留样例</strong>
+        <span id="runtimeStatus">正在初始化本地资源……</span>
+        <span>本页不属于 A8-G Globe 资格结论，Planar 产品校准仍延期。</span>
+        <span id="errorStatus">浏览器/渲染错误：0</span>
+        <a id="globeSampleLink" href="/Test/高级环境.html"
+          >返回 A8-G Globe 交付样例</a
+        >
+      </aside>
+    </main>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="/Test/AdvancedEnvironment/planar.js"></script>
+  </body>
+</html>

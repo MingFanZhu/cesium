@@ -5,4 +5,4 @@
 - [2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md](2026-08-28-a5g-globe-cloud-shadows-skylight-rays.md) — `accepted; closed`。
 - [2026-08-28-a6g-globe-temporal-stabilization-performance.md](2026-08-28-a6g-globe-temporal-stabilization-performance.md) — `accepted; closed`。
 - [2026-08-28-a7g-globe-hdr-bloom-lens-flare.md](2026-08-28-a7g-globe-hdr-bloom-lens-flare.md) — `accepted; closed`。
-- [2026-08-31-a8g-globe-qualification-delivery.md](2026-08-31-a8g-globe-qualification-delivery.md) — `implementation pending`。
+- [2026-08-31-a8g-globe-qualification-delivery.md](2026-08-31-a8g-globe-qualification-delivery.md) — `accepted; closed`。

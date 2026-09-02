@@ -56,6 +56,7 @@ function validateAttachment(pipeline, scene) {
 function SceneGISEnvironmentEffectsPipeline() {
   this._scene = undefined;
   this._enabled = false;
+  this._currentFrameDepthAvailable = true;
 }
 
 Object.defineProperties(SceneGISEnvironmentEffectsPipeline.prototype, {
@@ -150,6 +151,8 @@ SceneGISEnvironmentEffectsPipeline.prototype._executeHdr = function (
   validateTexture("colorTexture", colorTexture, context);
   validateTexture("depthTexture", depthTexture, context);
   validateTexture("idTexture", idTexture, context);
+
+  this._currentFrameDepthAvailable = scene._view.frustumCommandsList.length > 0;
 
   const result = this.executeHdr(
     context,

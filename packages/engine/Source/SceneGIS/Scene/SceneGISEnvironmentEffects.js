@@ -17,16 +17,34 @@ const assetRoots = Object.freeze({
   planar: "Assets/SceneGIS/Environment/PlanarEarth/",
 });
 const cloudAssetRoot = "Assets/SceneGIS/Environment/CloudCore/";
-const assetFiles = Object.freeze([
+const worldAssetFiles = Object.freeze([
   { key: "transmittance", root: "world", name: "transmittance.bin" },
   { key: "scattering", root: "world", name: "scattering.bin" },
   { key: "irradiance", root: "world", name: "irradiance.bin" },
-  { key: "cloudShape", root: "cloud", name: "shape.bin" },
-  { key: "cloudDetail", root: "cloud", name: "detail.bin" },
-  { key: "cloudWeather", root: "cloud", name: "weather.bin" },
+]);
+const sharedCloudAssetFiles = Object.freeze([
   { key: "cloudTurbulence", root: "cloud", name: "turbulence.bin" },
   { key: "cloudStbn", root: "cloud", name: "stbn.bin" },
 ]);
+const cloudAssetFiles = Object.freeze({
+  globe: Object.freeze([
+    { key: "cloudShape", root: "cloud", name: "globe-shape.bin" },
+    { key: "cloudDetail", root: "cloud", name: "globe-detail.bin" },
+    { key: "cloudWeather", root: "cloud", name: "globe-weather.bin" },
+    {
+      key: "cloudTurbulence",
+      root: "cloud",
+      name: "globe-turbulence.bin",
+    },
+    { key: "cloudStbn", root: "cloud", name: "globe-stbn.bin" },
+  ]),
+  planar: Object.freeze([
+    { key: "cloudShape", root: "cloud", name: "shape.bin" },
+    { key: "cloudDetail", root: "cloud", name: "detail.bin" },
+    { key: "cloudWeather", root: "cloud", name: "weather.bin" },
+    ...sharedCloudAssetFiles,
+  ]),
+});
 const cloudQualities = Object.freeze(["low", "medium", "high"]);
 const cloudPresets = Object.freeze(["cumulus", "stratus", "cirrus", "mixed"]);
 
@@ -321,6 +339,7 @@ function isCurrentGeneration(controller, generation) {
 
 async function fetchEnvironmentAssets(controller, generation) {
   const assetRoot = assetRoots[controller._mode];
+  const assetFiles = [...worldAssetFiles, ...cloudAssetFiles[controller._mode]];
   try {
     const buffers = await Promise.all(
       assetFiles.map((file) =>
@@ -472,17 +491,23 @@ function SceneGISEnvironmentEffects(options) {
   const showCrepuscularRays = options.showCrepuscularRays ?? true;
   const showBloom = options.showBloom ?? true;
   const showLensFlare = options.showLensFlare ?? true;
-  const cloudQuality = options.cloudQuality ?? "medium";
+  const cloudQuality =
+    options.cloudQuality ?? (mode === globeMode ? "high" : "medium");
   const cloudPreset = options.cloudPreset ?? "cumulus";
-  const cloudCoverage = options.cloudCoverage ?? 0.45;
-  const cloudDensity = options.cloudDensity ?? 0.001;
-  const cloudBaseHeight = options.cloudBaseHeight ?? 1500.0;
+  const cloudCoverage =
+    options.cloudCoverage ?? (mode === globeMode ? 0.3 : 0.45);
+  const cloudDensity =
+    options.cloudDensity ?? (mode === globeMode ? 1.0 : 0.001);
+  const cloudBaseHeight =
+    options.cloudBaseHeight ?? (mode === globeMode ? 750.0 : 1500.0);
   const cloudThickness = options.cloudThickness ?? 4500.0;
   const cloudWindDirection = options.cloudWindDirection ?? 0.785398;
   const cloudWindSpeed = options.cloudWindSpeed ?? 20.0;
   const cloudTime = options.cloudTime ?? 0.0;
-  const cloudRadianceScale = options.cloudRadianceScale ?? 48.0;
-  const backgroundRadianceScale = options.backgroundRadianceScale ?? 10.0;
+  const cloudRadianceScale =
+    options.cloudRadianceScale ?? (mode === globeMode ? 1.0 : 48.0);
+  const backgroundRadianceScale =
+    options.backgroundRadianceScale ?? (mode === globeMode ? 4.0 : 10.0);
   const aerialRadianceScale = options.aerialRadianceScale ?? 1.0;
   const surfaceRadianceScale = options.surfaceRadianceScale ?? 10.0;
   const bloomThreshold = options.bloomThreshold ?? 10.0;
@@ -528,7 +553,12 @@ function SceneGISEnvironmentEffects(options) {
     );
   }
   validateRange("options.cloudCoverage", cloudCoverage, 0.0, 1.0);
-  validateRange("options.cloudDensity", cloudDensity, 0.0, 0.01);
+  validateRange(
+    "options.cloudDensity",
+    cloudDensity,
+    0.0,
+    mode === globeMode ? 64.0 : 0.01,
+  );
   validateRange("options.cloudBaseHeight", cloudBaseHeight, -500.0, 20000.0);
   validateRange("options.cloudThickness", cloudThickness, 0.0, 20000.0);
   validateRange(
@@ -1140,7 +1170,8 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets cloud extinction per meter.
+   * Gets or sets the Globe reference-material density multiplier or Planar
+   * cloud extinction per meter.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1150,7 +1181,13 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       return this._cloudDensity;
     },
     set: function (value) {
-      setWarmNumber(this, "_cloudDensity", value, 0.0, 0.01);
+      setWarmNumber(
+        this,
+        "_cloudDensity",
+        value,
+        0.0,
+        this._mode === globeMode ? 64.0 : 0.01,
+      );
     },
   },
   /**
@@ -1224,7 +1261,9 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets intrinsic scene-linear cloud radiance scale.
+   * Gets or sets cloud radiance calibration. Globe mode applies it relative
+   * to backgroundRadianceScale; Planar mode keeps the absolute scene-linear
+   * calibration.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1345,17 +1384,17 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [showCrepuscularRays=true] Whether cloud shadow length modulates atmosphere and fog Sun inscatter.
  * @property {boolean} [showBloom=true] Whether Globe scene-wide HDR bloom is shown.
  * @property {boolean} [showLensFlare=true] Whether Globe Sun-gated lens artifacts are shown.
- * @property {string} [cloudQuality="medium"] Exact "low", "medium", or "high" cloud budget.
+ * @property {string} [cloudQuality] Exact "low", "medium", or "high" cloud budget. Defaults to "high" on Globe and "medium" on Planar.
  * @property {string} [cloudPreset="cumulus"] Exact "cumulus", "stratus", "cirrus", or "mixed" immutable morphology preset.
- * @property {number} [cloudCoverage=0.45] Global cloud coverage bias in the inclusive range 0–1.
- * @property {number} [cloudDensity=0.001] Cloud extinction per meter in the inclusive range 0–0.01.
- * @property {number} [cloudBaseHeight=1500.0] Cloud base height in meters in the inclusive range -500–20000.
+ * @property {number} [cloudCoverage] Global cloud coverage bias in the inclusive range 0–1. Defaults to 0.3 on Globe and 0.45 on Planar.
+ * @property {number} [cloudDensity] Globe reference-material density multiplier in the inclusive range 0–64, or Planar cloud extinction per meter in the inclusive range 0–0.01. Defaults to 1.0 on Globe and 0.001 on Planar.
+ * @property {number} [cloudBaseHeight] Cloud base height in meters in the inclusive range -500–20000. Defaults to 750.0 on Globe and 1500.0 on Planar.
  * @property {number} [cloudThickness=4500.0] Cloud deck thickness in meters in the inclusive range 0–20000.
  * @property {number} [cloudWindDirection=0.785398] Clockwise wind direction from local North in radians, in the inclusive range -pi–pi.
  * @property {number} [cloudWindSpeed=20.0] Cloud advection speed in meters per second in the inclusive range 0–200.
  * @property {number} [cloudTime=0.0] Caller-owned simulation seconds in the inclusive range -1000000000–1000000000.
- * @property {number} [cloudRadianceScale=48.0] Intrinsic cloud radiance scale in the inclusive range 0–64.
- * @property {number} [backgroundRadianceScale=10.0] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64.
+ * @property {number} [cloudRadianceScale] Cloud radiance calibration in the inclusive range 0–64. On Globe, this is relative to backgroundRadianceScale and defaults to 1.0; on Planar, it remains the absolute scene-linear scale and defaults to 48.0.
+ * @property {number} [backgroundRadianceScale] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64. Defaults to 4.0 on Globe and 10.0 on Planar.
  * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64. On Globe, this is relative to backgroundRadianceScale; on Planar, it is the absolute scene-linear scale applied to physical aerial radiance.
  * @property {number} [surfaceRadianceScale=10.0] Globe surface scene-linear Sun and sky radiance scale, in the inclusive range 0–64.
  * @property {number} [bloomThreshold=10.0] Globe HDR bloom threshold in the inclusive RGBA16F range 0–65504.

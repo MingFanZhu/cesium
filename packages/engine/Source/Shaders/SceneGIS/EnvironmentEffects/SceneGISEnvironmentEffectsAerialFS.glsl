@@ -6,6 +6,10 @@ in vec2 v_textureCoordinates;
 uniform sampler2D u_colorTexture;
 uniform sampler2D u_depthTexture;
 uniform bool u_perspective;
+uniform vec4 u_frustum;
+#ifdef SCENEGIS_GLOBE
+uniform bool u_hasCurrentGlobeDepth;
+#endif
 uniform vec3 u_cameraDirection;
 uniform vec3 u_cameraRight;
 uniform vec3 u_cameraUp;
@@ -88,8 +92,10 @@ void main()
 {
     vec4 inputColor = texture(u_colorTexture, v_textureCoordinates);
     float rawDepth = texture(u_depthTexture, v_textureCoordinates).r;
-    float resolvedDepth = czm_readDepth(u_depthTexture, v_textureCoordinates);
     bool isClearDepth = sceneGISIsClearResolvedDepth(rawDepth);
+    #ifdef SCENEGIS_GLOBE
+    isClearDepth = isClearDepth || !u_hasCurrentGlobeDepth;
+    #endif
     if (isClearDepth && !u_showClouds
         #ifdef SCENEGIS_GLOBE
         && !u_showHeightFog
@@ -98,18 +104,42 @@ void main()
         out_FragColor = inputColor;
         return;
     }
+    #ifdef SCENEGIS_GLOBE
+    vec2 plane = mix(u_frustum.xz, u_frustum.yw, v_textureCoordinates);
+    vec3 eyeOffset = u_cameraRight * plane.x + u_cameraUp * plane.y;
+    vec3 worldOriginOffset = u_perspective ? vec3(0.0) : eyeOffset;
+    float distanceToPoint = SCENEGIS_PLANAR_BACKGROUND_DISTANCE;
+    if (!isClearDepth) {
+        float resolvedDepth = czm_readDepth(
+            u_depthTexture, v_textureCoordinates);
+        vec4 eye = czm_windowToEyeCoordinates(
+            vec4(gl_FragCoord.xy, resolvedDepth, 1.0));
+        eye /= eye.w;
+        distanceToPoint = u_perspective
+            ? length(eye.xyz)
+            : max(-eye.z, 0.0);
+    }
+    vec3 worldDirection = u_perspective
+        ? normalize(u_cameraDirection + eyeOffset)
+        : normalize(u_cameraDirection);
+    #else
+    float resolvedDepth = czm_readDepth(u_depthTexture, v_textureCoordinates);
     vec4 eye = czm_windowToEyeCoordinates(
         vec4(gl_FragCoord.xy, resolvedDepth, 1.0));
     eye /= eye.w;
     vec3 eyeOffset = u_cameraRight * eye.x + u_cameraUp * eye.y;
     vec3 worldOriginOffset = u_perspective ? vec3(0.0) : eyeOffset;
+    float distanceToPoint = isClearDepth
+        ? SCENEGIS_PLANAR_BACKGROUND_DISTANCE
+        : (u_perspective ? length(eye.xyz) : max(-eye.z, 0.0));
+    vec3 worldDirection = u_perspective
+        ? normalize(eyeOffset - u_cameraDirection * eye.z)
+        : normalize(u_cameraDirection);
+    #endif
     vec3 rayOrigin = vec3(
         dot(worldOriginOffset, u_east),
         dot(worldOriginOffset, u_north),
         u_altitude + dot(worldOriginOffset, u_vertical));
-    float distanceToPoint = isClearDepth
-        ? SCENEGIS_PLANAR_BACKGROUND_DISTANCE
-        : (u_perspective ? length(eye.xyz) : max(-eye.z, 0.0));
     float shadowLength = 0.0;
     #ifdef SCENEGIS_GLOBE
     if (u_showClouds && u_sceneGISShowCrepuscularRays) {
@@ -120,13 +150,19 @@ void main()
             shadowLength);
     }
     #endif
-    vec3 worldDirection = u_perspective
-        ? normalize(eyeOffset - u_cameraDirection * eye.z)
-        : normalize(u_cameraDirection);
     vec3 viewDirection = normalize(vec3(
         dot(worldDirection, u_east),
         dot(worldDirection, u_north),
         dot(worldDirection, u_vertical)));
+    float atmosphereDistanceToPoint = distanceToPoint;
+    #ifdef SCENEGIS_GLOBE
+    if (!isClearDepth) {
+        atmosphereDistanceToPoint = sceneGISGlobeStableTerrainDistance(
+            rayOrigin,
+            viewDirection,
+            distanceToPoint);
+    }
+    #endif
     vec3 sunDirection = normalize(vec3(
         dot(u_sunDirection, u_east),
         dot(u_sunDirection, u_north),
@@ -187,7 +223,7 @@ void main()
                 rayOrigin,
                 viewDirection,
                 sunDirection,
-                distanceToPoint,
+                atmosphereDistanceToPoint,
                 shadowLength,
                 transmittance);
         #else
@@ -220,7 +256,7 @@ void main()
             rayOrigin,
             viewDirection,
             sunDirection,
-            distanceToPoint,
+            atmosphereDistanceToPoint,
             shadowLength,
             u_heightFogDensity,
             u_heightFogHeightFalloff,
@@ -347,10 +383,9 @@ void main()
             hazeMaximumDistance,
             shadowLength,
             u_cloudCoverage);
-        sceneLinearRadiance = mix(
-            sceneLinearRadiance,
-            cloudHaze.rgb,
-            cloudHaze.a);
+        sceneLinearRadiance =
+            sceneLinearRadiance * (1.0 - cloudHaze.a) +
+            cloudHaze.rgb * globeAtmosphereRadianceScale;
     }
     #endif
     out_FragColor = vec4(

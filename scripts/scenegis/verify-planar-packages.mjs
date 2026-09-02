@@ -241,6 +241,13 @@ const cloudCoreArchiveFiles = [
   "turbulence.bin",
   "stbn.bin",
   "PROVENANCE.json",
+  "globe-shape.bin",
+  "globe-detail.bin",
+  "globe-weather.bin",
+  "globe-turbulence.bin",
+  "globe-stbn.bin",
+  "GLOBE_REFERENCE_PROVENANCE.json",
+  "THIRD_PARTY_LICENSE_three-geospatial.txt",
 ];
 const cloudCoreSourceArchiveRoot =
   "package/Source/Assets/SceneGIS/Environment/CloudCore";
@@ -388,6 +395,123 @@ function verifyCloudCoreDelivery(root) {
       file.name,
     );
   }
+
+  const globeProvenance = JSON.parse(
+    fs.readFileSync(path.join(root, "GLOBE_REFERENCE_PROVENANCE.json"), "utf8"),
+  );
+  assert.equal(globeProvenance.schemaVersion, 1);
+  assert.equal(
+    globeProvenance.source.commit,
+    "b012ad06d858fc035d88aacfd73f092f93c994e4",
+  );
+  assert.equal(globeProvenance.source.license, "MIT");
+  assert.deepEqual(globeProvenance.source.files, [
+    {
+      name: "shape.bin",
+      path: "packages/clouds/assets/shape.bin",
+      sha256:
+        "EF65CF6156894720C00BF572C49E3E254F8899C4B5158246E5A35A1922E2519C",
+    },
+    {
+      name: "shape_detail.bin",
+      path: "packages/clouds/assets/shape_detail.bin",
+      sha256:
+        "C09112199C6E0281B74FF5283C11C2943AE082650B9B67978CF5D59ED2956E4F",
+    },
+    {
+      name: "local_weather.png",
+      path: "packages/clouds/assets/local_weather.png",
+      sha256:
+        "B84DAEF855DC5EEBCC9B174FE832BA75A98E44B846DDE201BCE354417CC08031",
+    },
+    {
+      name: "turbulence.png",
+      path: "packages/clouds/assets/turbulence.png",
+      sha256:
+        "EC2B1B0AF4A6A6104102B21E58BEB300B0A3D334C0281D84FDE8C91D322910F9",
+    },
+    {
+      name: "stbn.bin",
+      path: "packages/core/assets/stbn.bin",
+      sha256:
+        "51F52F21E5578384585050390821A0A486DCB81E11A716FA7B92FBB6515BA852",
+    },
+  ]);
+  assert.equal(globeProvenance.totalBinaryBytes, 4292608);
+  assert.deepEqual(
+    globeProvenance.outputs.map(
+      ({ name, source, format, dimensions, bytes, sha256 }) => ({
+        name,
+        source,
+        format,
+        dimensions,
+        bytes,
+        sha256,
+      }),
+    ),
+    [
+      {
+        name: "globe-shape.bin",
+        source: "shape.bin",
+        format: "R8",
+        dimensions: [128, 128, 128],
+        bytes: 2097152,
+        sha256:
+          "EF65CF6156894720C00BF572C49E3E254F8899C4B5158246E5A35A1922E2519C",
+      },
+      {
+        name: "globe-detail.bin",
+        source: "shape_detail.bin",
+        format: "R8",
+        dimensions: [32, 32, 32],
+        bytes: 32768,
+        sha256:
+          "C09112199C6E0281B74FF5283C11C2943AE082650B9B67978CF5D59ED2956E4F",
+      },
+      {
+        name: "globe-weather.bin",
+        source: "local_weather.png",
+        format: "RGBA8",
+        dimensions: [512, 512],
+        bytes: 1048576,
+        sha256:
+          "BB590A69028389A1AE9B0861D5BF322194B5D94CE3D379034AD983C86E97A4AD",
+      },
+      {
+        name: "globe-turbulence.bin",
+        source: "turbulence.png",
+        format: "RGBA8",
+        dimensions: [128, 128],
+        bytes: 65536,
+        sha256:
+          "4D2DB2189CDB43B4CF22B12969B1BE529140DA6A7A84D8B5633656A877390051",
+      },
+      {
+        name: "globe-stbn.bin",
+        source: "stbn.bin",
+        format: "R8",
+        dimensions: [128, 128, 64],
+        bytes: 1048576,
+        sha256:
+          "51F52F21E5578384585050390821A0A486DCB81E11A716FA7B92FBB6515BA852",
+      },
+    ],
+  );
+  for (const file of globeProvenance.outputs) {
+    const contents = fs.readFileSync(path.join(root, file.name));
+    assert.equal(contents.byteLength, file.bytes, file.name);
+    assert.equal(
+      createHash("sha256").update(contents).digest("hex").toUpperCase(),
+      file.sha256,
+      file.name,
+    );
+  }
+  const globeLicense = fs.readFileSync(
+    path.join(root, "THIRD_PARTY_LICENSE_three-geospatial.txt"),
+    "utf8",
+  );
+  assert.match(globeLicense, /The MIT License \(MIT\)/u);
+  assert.match(globeLicense, /Copyright \(c\) 2024 Shota Matsuda/u);
 }
 
 function npmCommand(args) {
@@ -596,7 +720,7 @@ assert.equal(globeEffects.enabled, false);
 assert.equal(globeEffects.showAtmosphere, true);
 assert.equal(globeEffects.showAerialPerspective, true);
 assert.equal(globeEffects.showHeightFog, true);
-assert.equal(globeEffects.backgroundRadianceScale, 10.0);
+assert.equal(globeEffects.backgroundRadianceScale, 4.0);
 assert.equal(globeEffects.aerialRadianceScale, 1.0);
 assert.equal(globeEffects.surfaceRadianceScale, 10.0);
 assert.equal(globeEffects.heightFogDensity, 0.000008);
@@ -615,16 +739,16 @@ assert.equal(globeEffects.showLensFlare, true);
 assert.equal(globeEffects.bloomThreshold, 10.0);
 assert.equal(globeEffects.bloomIntensity, 0.05);
 assert.equal(globeEffects.lensFlareIntensity, 5.0);
-assert.equal(globeEffects.cloudQuality, "medium");
+assert.equal(globeEffects.cloudQuality, "high");
 assert.equal(globeEffects.cloudPreset, "cumulus");
-assert.equal(globeEffects.cloudCoverage, 0.45);
-assert.equal(globeEffects.cloudDensity, 0.001);
-assert.equal(globeEffects.cloudBaseHeight, 1500.0);
+assert.equal(globeEffects.cloudCoverage, 0.3);
+assert.equal(globeEffects.cloudDensity, 1.0);
+assert.equal(globeEffects.cloudBaseHeight, 750.0);
 assert.equal(globeEffects.cloudThickness, 4500.0);
 assert.equal(globeEffects.cloudWindDirection, 0.785398);
 assert.equal(globeEffects.cloudWindSpeed, 20.0);
 assert.equal(globeEffects.cloudTime, 0.0);
-assert.equal(globeEffects.cloudRadianceScale, 48.0);
+assert.equal(globeEffects.cloudRadianceScale, 1.0);
 assert.equal("radianceScale" in globeEffects, false);
 globeEffects.backgroundRadianceScale = 2.0;
 globeEffects.aerialRadianceScale = 0.5;
@@ -851,7 +975,7 @@ for (const name of ${softPrivateWidgets}) assert.notEqual(root[name], undefined,
 const effects = new root.SceneGISEnvironmentEffects({ mode: "globe" });
 assert.equal(effects.mode, "globe");
 assert.equal(effects.enabled, false);
-assert.equal(effects.backgroundRadianceScale, 10.0);
+assert.equal(effects.backgroundRadianceScale, 4.0);
 assert.equal(effects.aerialRadianceScale, 1.0);
 assert.equal(effects.surfaceRadianceScale, 10.0);
 assert.equal(effects.showHeightFog, true);
@@ -871,16 +995,16 @@ assert.equal(effects.showLensFlare, true);
 assert.equal(effects.bloomThreshold, 10.0);
 assert.equal(effects.bloomIntensity, 0.05);
 assert.equal(effects.lensFlareIntensity, 5.0);
-assert.equal(effects.cloudQuality, "medium");
+assert.equal(effects.cloudQuality, "high");
 assert.equal(effects.cloudPreset, "cumulus");
-assert.equal(effects.cloudCoverage, 0.45);
-assert.equal(effects.cloudDensity, 0.001);
-assert.equal(effects.cloudBaseHeight, 1500.0);
+assert.equal(effects.cloudCoverage, 0.3);
+assert.equal(effects.cloudDensity, 1.0);
+assert.equal(effects.cloudBaseHeight, 750.0);
 assert.equal(effects.cloudThickness, 4500.0);
 assert.equal(effects.cloudWindDirection, 0.785398);
 assert.equal(effects.cloudWindSpeed, 20.0);
 assert.equal(effects.cloudTime, 0.0);
-assert.equal(effects.cloudRadianceScale, 48.0);
+assert.equal(effects.cloudRadianceScale, 1.0);
 assert.equal("radianceScale" in effects, false);
 effects.backgroundRadianceScale = 2.0;
 effects.aerialRadianceScale = 0.5;
@@ -1348,7 +1472,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 26/26 GLSL, 26/26 generated shader modules, exact Bruneton, PlanarEarth, and CloudCore assets/provenance in engine/root, bare ESM/CJS, A4R-A7 public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 26/26 GLSL, 26/26 generated shader modules, exact Bruneton, PlanarEarth, generated CloudCore and pinned Globe reference assets/provenance in engine/root, bare ESM/CJS, A4R-A7 public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
   );
 }
 
