@@ -3,12 +3,12 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A10-G completed; successor not activated`
-- Current review: `closed; Architecture and owner gates passed`
+- Current phase: `P1 active; Planar integrated-medium restoration`
+- Current review: `implementation assigned; review pending`
 - Current phase plan:
-  [2026-09-02-phase-a10g-globe-native-moon-composition.md](plans/2026-09-02-phase-a10g-globe-native-moon-composition.md)
+  [2026-09-02-phase-p1-planar-integrated-medium-restoration.md](plans/2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
 - Previous completed phase plan:
-  [2026-09-02-phase-a9g-globe-readable-night-skylight.md](plans/2026-09-02-phase-a9g-globe-readable-night-skylight.md)
+  [2026-09-02-phase-a10g-globe-native-moon-composition.md](plans/2026-09-02-phase-a10g-globe-native-moon-composition.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -23,7 +23,8 @@
   [ADR-0048](../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md),
   [ADR-0049](../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md),
   [ADR-0050](../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md),
-  [ADR-0051](../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md)
+  [ADR-0051](../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md),
+  [ADR-0052](../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
@@ -35,6 +36,7 @@
 - A7-G checkpoint: `6f70b54c80ce174bf7befe49fe37262230288e61`（未push）
 - A8-G checkpoint: `eee8a8bbb241c2e71dc68397a6b324faa670862c`（未push）
 - A9-G checkpoint: `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`（未push）
+- A10-G checkpoint: `6afba87af181f3cdb7a20aff09b81af11eb302f4`（未push）
 
 ## Objective
 
@@ -45,6 +47,17 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- P1 is active from frozen A10-G checkpoint
+  `6afba87af181f3cdb7a20aff09b81af11eb302f4`. Fresh source discovery confirms
+  that the retained Planar path still owns independent flat-slab atmosphere,
+  fixed-Z fog, Planar cloud assets/scheduling and same-UV history. The historical
+  white-fill screenshot remains valid rejection evidence but does not establish
+  a current root cause, and the final A10 source does not reproduce that exact
+  fill on the deterministic Planar page. ADR-0052 therefore requires one
+  actual-GPU final-composition authority before any product correction. P1 is
+  limited to atmosphere/aerial/fog/cloud composition; all Globe A1–A10 output,
+  public API/defaults, resources, upstream paths, SGP-0008/0009 and Planar A5+
+  features remain frozen.
 - A10-G is complete from frozen A9-G checkpoint
   `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`. Source discovery confirms that
   Cesium already owns the Moon texture, physical ellipsoid, Simon1994 position,
@@ -62,8 +75,8 @@ reference frame，不互相伪造坐标语义。
   textured crescent centered above the horizon at azimuth `257.917 degrees`,
   elevation `7.443 degrees`, Sun `-20.120 degrees`, with zero browser/render
   errors. The project owner explicitly passed the visual gate; A10-G is closed
-  with no open finding. Moonlight, Moon shadows, alternate Moon assets, Planar
-  work and any successor phase remain inactive.
+  with no open finding. Moonlight, Moon shadows and alternate Moon assets remain
+  inactive; the separately activated P1 Planar phase is recorded above.
 - A9-G is closed at local checkpoint
   `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`, which remains unpushed. It started from frozen A8-G checkpoint
   `eee8a8bbb241c2e71dc68397a6b324faa670862c`. The project owner selected one
@@ -1948,3 +1961,13 @@ reported that it passes. Architecture closes A10-G with no open finding. The
 phase-closing local commit containing this record is the isolated unpushed
 A10-G checkpoint. No successor phase, moonlight, Moon shadow, alternate asset
 or Planar change is inferred.
+
+## P1 activation — 2026-09-02
+
+The project owner explicitly requested the next phase after accepting A10-G.
+Architecture froze checkpoint `6afba87af181f3cdb7a20aff09b81af11eb302f4`
+and reopened only the Planar A2/A3/A4 integrated-medium track. Current source
+and direct-page isolation do not reproduce the historical full-screen white
+fill exactly, so ADR-0052 requires a real final-composition witness before any
+product correction. P1 targets zero resource/API/upstream/generated/SGP delta;
+Globe A1–A10 and every Planar A5+ feature remain frozen.

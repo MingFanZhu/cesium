@@ -270,6 +270,12 @@ Scene environment pass exact-once执行，并继续使用Cesium culling与Globe 
 shadow、asset或Planar行为；完整ordering、conflict与ownership contract见
 [ADR-0051](Decisions/ADR-0051-globe-native-moon-composition.md)。
 
+P1在冻结A10-G后恢复Planar路线，但首阶段只重新资格化既有A2/A3/A4 integrated medium。Planar必须继续使用fixed `+Z` atmosphere/fog/cloud slab、
+独立Planar LUT/asset/scheduler与same-UV cloud history；不得借用Globe ellipsoid/ECEF、Beer atlas、surface seam、world reprojection或A7–A10效果。
+任何product修复前，必须先以同一resolved color/depth建立baseline、aerial-only、fog-only、cloud-only与combined actual-GPU final-composition
+authority；历史白屏截图不构成调参、hidden multiplier或球面替代的根因证据。完整阶段与零资源/API/upstream增量边界见
+[ADR-0052](Decisions/ADR-0052-planar-integrated-medium-restoration.md)。
+
 ### 平面地形 Core 契约
 
 平面地形使用独立的 `SceneGISPlanarTerrainProvider`、`SceneGISPlanarTerrainData` 和

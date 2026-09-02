@@ -8,11 +8,11 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-02`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A10-G completed; successor not activated`
+- Current phase: `P1 active; Planar integrated-medium restoration`
 - Current phase plan:
-  [2026-09-02-phase-a10g-globe-native-moon-composition.md](2026-09-02-phase-a10g-globe-native-moon-composition.md)
+  [2026-09-02-phase-p1-planar-integrated-medium-restoration.md](2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
 - Previous completed phase plan:
-  [2026-09-02-phase-a9g-globe-readable-night-skylight.md](2026-09-02-phase-a9g-globe-readable-night-skylight.md)
+  [2026-09-02-phase-a10g-globe-native-moon-composition.md](2026-09-02-phase-a10g-globe-native-moon-composition.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -25,7 +25,8 @@
   [ADR-0048](../../../Documentation/SceneGIS/Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md),
   [ADR-0049](../../../Documentation/SceneGIS/Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md),
   [ADR-0050](../../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md),
-  [ADR-0051](../../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md)
+  [ADR-0051](../../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md),
+  [ADR-0052](../../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md)
 - Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
 - A1 implementation: `completed`
 - A2 implementation: `completed`
@@ -37,6 +38,7 @@
 - A8-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A9-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A10-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
+- P1 implementation: `active; Architecture assignment ready`
 
 ## Goal
 
@@ -200,13 +202,24 @@ pre-tone-mapping HDR effects之前exact-once合成。不得复制Moon实现、�
 新SGP或Planar执行。Active plan为
 [A10-G Globe native Moon composition](2026-09-02-phase-a10g-globe-native-moon-composition.md)。
 
-### P1+ — Planar advanced-effects adaptation (`deferred`)
+### P1 — Planar integrated-medium restoration (`active`)
 
-Only after A8-G approval does Architecture source-discover the Planar track. It
-will begin by reproducing the retained exponential-height-fog plus volumetric-cloud
-composition failure, then adapt the accepted Globe optical contracts to fixed-Z
-slab geometry without pretending Planar is spherical. Detailed Planar phases are
-intentionally not guessed before that entry gate.
+P1 starts from frozen A10-G checkpoint
+`6afba87af181f3cdb7a20aff09b81af11eb302f4` and requalifies the retained
+fixed-Z atmosphere/aerial/height-fog/cloud composition. The historical white-fill
+owner rejection remains regression motivation but not an assumed current root
+cause. Execution must first add one actual-GPU final-composition authority over
+identical baseline/aerial/fog/cloud/combined inputs and then correct only the
+first proven Planar product divergence. A qualification-only result is valid if
+the final source already satisfies the contract. Active plan:
+[P1 Planar integrated-medium restoration](2026-09-02-phase-p1-planar-integrated-medium-restoration.md).
+
+### P2+ — Later Planar advanced-effects adaptation (`deferred`)
+
+Planar shadows/rays, temporal/performance evolution, HDR bloom/lens, readable
+night and celestial behavior remain unplanned until P1 passes Architecture and
+project-owner gates and receives its own checkpoint. Globe formulas/resources
+must not be copied into Planar without a separate source-based phase decision.
 
 ## Global acceptance criteria
 
@@ -232,8 +245,8 @@ intentionally not guessed before that entry gate.
 所有 phase 严格串行。Execution完成实现与最小充分验证后写 review-ready handoff并停止；Architecture review批准、项目负责人要求的
 manual gate通过且 Architecture建立独立本地 checkpoint后，才可创建/激活下一 phase。不得合并多个 phase提交。
 
-2026-09-02项目负责人继续Globe-first路线，当前串行顺序为A4-G → A5-G → A6-G → A7-G → A8-G → A9-G → A10-G → Planar
-adaptation。A10-G批准前不得以dual-world parity、Planar owner gate或Planar视觉修复阻塞Globe阶段，也不得提前修改Planar实现。
+2026-09-02项目负责人完成Globe-first路线并明确启动下一阶段。当前串行顺序为A4-G → A5-G → A6-G → A7-G → A8-G → A9-G → A10-G → P1。
+P1只恢复Planar A2/A3/A4 integrated-medium；任何Planar A5+能力仍需后续独立phase。
 
 ### A5-G completion — 2026-08-28
 
@@ -393,3 +406,14 @@ then explicitly passed the fixed native Moon visual gate. A10-G is complete;
 the phase-closing local commit containing this record is its isolated unpushed
 checkpoint. No successor phase, moonlight, Moon shadow, alternate Moon asset or
 Planar work is activated by this closure.
+
+### P1 activation — 2026-09-02
+
+After the project owner explicitly requested the next phase, Architecture froze
+A10-G checkpoint `6afba87af181f3cdb7a20aff09b81af11eb302f4` and reopened the
+deferred Planar track. Current source and direct-page isolation do not reproduce
+the historical full-screen white fill exactly; the page also contains intentional
+plane/box geometry that must be separated from effects deltas. ADR-0052 therefore
+activates an evidence-first P1 final-composition qualification before any product
+repair. Globe A1–A10, public API/defaults, resources, upstream paths, SGP-0008/
+0009 and all Planar A5+ behavior remain frozen.

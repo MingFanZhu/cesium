@@ -1,5 +1,6 @@
 # Discussions
 
+- [P1 Planar integrated-medium source discovery](2026-09-02-p1-planar-integrated-medium-source-discovery.md) — `resolved; P1 activated`
 - [A10-G native Moon source discovery](2026-09-02-a10g-globe-native-moon-source-discovery.md) — `resolved; A10-G activated`
 - [A9-G readable night skylight source discovery](2026-09-02-a9g-readable-night-skylight-source-discovery.md) — `resolved; A9-G activated`
 - [A8-G qualification and delivery source discovery](2026-08-31-a8g-qualification-source-discovery.md) — `resolved; A8-G activated`
