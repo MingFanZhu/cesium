@@ -357,3 +357,31 @@ atlas for one fixed ECEF receiver through substantial bounded rotation/orbit
 and a real cascade transition. Same-UV, wrong-coordinate and cascade mutations
 must fail. Published OD bounds derive from cascade texel footprint, structured
 integration and binary16 storage; arbitrary metre cushions are not authority.
+
+## A12-G amendment — bounded Globe variance clipping (2026-09-04)
+
+The owner accepted A11-G at checkpoint
+`53465cf9bc8f3af1e935b3225c81364e380ea528` and requested less fine cloud
+grain. Current Globe medium/high already use full input resolution, a 500-step
+budget and frame-index STBN with stationary history weight `0.9`. A direct
+stationary cloud-body crop does not support broad distance rejection as its
+dominant failure, so no distance threshold is reopened.
+
+A12-G may replace the Globe extrema-only history clamp with the pinned
+`three-geospatial@b012ad06` full-resolution variance-clipping approach: first
+and second moments of the existing finite 3x3 samples, fixed gamma `1.0`, and
+coherent mean-centered AABB clipping within the current finite outer range.
+Premultiplied radiance and transmittance remain finite, bounded and compatible
+with the existing blend. Uniform input remains identity. No extra texture
+lookup, resource, pass, history, API, sample budget or production readback is
+authorized.
+
+The spatial kernel, `0.9/0.82` weights, camera/scene/distance rejection,
+current-domain distance publication and independent packed shadow semantics
+remain frozen. Planar retains its prior path. First invalid/cut output remains
+complete without added request-render frames. Known-error GPU comparison
+against the old extrema-only mutation plus the owner's same-view quality and
+motion judgment must demonstrate benefit; a merely different or blurred image
+does not close the phase. Any broader sampling/denoising change requires a new
+evidence-backed amendment. Phase details are in
+[A12-G](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-04-phase-a12g-globe-cloud-noise-reduction.md).

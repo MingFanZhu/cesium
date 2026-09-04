@@ -3,12 +3,12 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A11-G completed; successor not yet activated`
-- Current review: `Architecture approved; owner visual gate passed 2026-09-04`
+- Current phase: `A12-G active; Globe cloud noise reduction`
+- Current review: `implementation assigned; A11-G remains accepted`
 - Current phase plan:
-  [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](plans/2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
+  [2026-09-04-phase-a12g-globe-cloud-noise-reduction.md](plans/2026-09-04-phase-a12g-globe-cloud-noise-reduction.md)
 - Previous completed phase plan:
-  [2026-09-02-phase-a10g-globe-native-moon-composition.md](plans/2026-09-02-phase-a10g-globe-native-moon-composition.md)
+  [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](plans/2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -38,6 +38,7 @@
 - A8-G checkpoint: `eee8a8bbb241c2e71dc68397a6b324faa670862c`（未push）
 - A9-G checkpoint: `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`（未push）
 - A10-G checkpoint: `6afba87af181f3cdb7a20aff09b81af11eb302f4`（未push）
+- A11-G checkpoint: `53465cf9bc8f3af1e935b3225c81364e380ea528`（未push）
 
 ## Objective
 
@@ -48,6 +49,13 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- A12-G addresses the owner's newly reported cloud grain after the A11 gate
+  passed. The current full-resolution, 500-step Globe path already advances
+  STBN and uses stationary history weight `0.9`. The first bounded change is
+  reference-derived variance clipping within the existing 3x3 resolve; no
+  shape, light/shadow, sample budget, resource, API or Planar change is allowed.
+  See [source discovery](discussions/2026-09-04-a12g-globe-cloud-noise-source-discovery.md)
+  and [review](reviews/2026-09-04-a12g-globe-cloud-noise-reduction.md).
 - A11-G is complete from frozen A10-G product checkpoint
   `6afba87af181f3cdb7a20aff09b81af11eb302f4`. The project owner corrected the
   accidental Planar route before P1 review and defined “Moon shadow” as

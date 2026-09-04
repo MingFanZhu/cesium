@@ -6,13 +6,13 @@
 - Status: `active`
 - Owner roles: Architecture Agent, Execution Agent
 - Created: `2026-08-14`
-- Updated: `2026-09-02`
+- Updated: `2026-09-04`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A11-G completed; successor not yet activated`
+- Current phase: `A12-G active; Globe cloud noise reduction`
 - Current phase plan:
-  [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
+  [2026-09-04-phase-a12g-globe-cloud-noise-reduction.md](2026-09-04-phase-a12g-globe-cloud-noise-reduction.md)
 - Previous completed phase plan:
-  [2026-09-02-phase-a10g-globe-native-moon-composition.md](2026-09-02-phase-a10g-globe-native-moon-composition.md)
+  [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -40,6 +40,7 @@
 - A9-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A10-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A11-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
+- A12-G implementation: `active; bounded variance-clipping assignment`
 - P1 implementation: `deferred before review; candidate not accepted`
 
 ## Goal
@@ -216,6 +217,16 @@ light/shadow/body, eclipse, displacement shader, new SGP or Planar execution.
 Active plan:
 [A11-G Globe Moonlight, directional shadows, and lunar surface](2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md).
 
+### A12-G — Globe cloud noise reduction (`active`)
+
+After accepting A11-G, the project owner requested less fine grain without
+rejecting the accepted cloud shapes or world-shadow registration. A12-G starts
+from `53465cf9bc8f3af1e935b3225c81364e380ea528` and first adapts the pinned
+reference's neighborhood variance clipping in the existing Globe cloud resolve.
+It preserves current sampling, geometry/history rejection, public/resource
+budgets, A11 lighting/shadows and Planar. Active plan:
+[A12-G Globe cloud noise reduction](2026-09-04-phase-a12g-globe-cloud-noise-reduction.md).
+
 ### P1 — Planar integrated-medium restoration (`deferred`)
 
 P1 was initially activated from frozen A10-G checkpoint
@@ -262,7 +273,8 @@ manual gate通过且 Architecture建立独立本地 checkpoint后，才可创建
 
 2026-09-02项目负责人完成A10-G后明确把A11-G作为下一Globe阶段。当前串行顺序为
 A4-G → A5-G → A6-G → A7-G → A8-G → A9-G → A10-G → A11-G。
-P1及任何Planar A5+能力延期，必须在A11-G独立checkpoint之后重新激活。
+2026-09-04负责人验收A11-G后选择先处理Globe云颗粒，顺序追加A12-G。
+P1及任何Planar A5+能力继续延期，不能由Globe阶段完成自动激活。
 
 ### A5-G completion — 2026-08-28
 
