@@ -3,8 +3,8 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A12-G active; Globe cloud noise reduction`
-- Current review: `implementation assigned; A11-G remains accepted`
+- Current phase: `A12-G completed; Globe cloud noise reduction`
+- Current review: `approved; owner visual gate passed; A12-AR-001/002 fixed; A12-AR-003 accepted`
 - Current phase plan:
   [2026-09-04-phase-a12g-globe-cloud-noise-reduction.md](plans/2026-09-04-phase-a12g-globe-cloud-noise-reduction.md)
 - Previous completed phase plan:
@@ -49,6 +49,17 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- A12 RGB/transmittance correction and bounded Spec repairs have passed
+  Architecture review. The last aggregate remains `78/79`; its one failed
+  time-matrix fixture now passes `1/1` after the approved Spec-only repair.
+  Automated qualification is closed without claiming an unrun `79/79`.
+- The owner removed mandatory same-view comparison and explicitly permits
+  near-view fine grain. Architecture loaded and inspected the final candidate,
+  retaining the original parameters/time and restoring the camera afterward.
+  Cloud structure remains visible, with residual fine grain and no obvious
+  broad trail in the bounded drag/stop inspection. The owner explicitly accepted
+  the current grain strength; A12 is complete. See
+  [A12 review](reviews/2026-09-04-a12g-globe-cloud-noise-reduction.md).
 - A12-G addresses the owner's newly reported cloud grain after the A11 gate
   passed. The current full-resolution, 500-step Globe path already advances
   STBN and uses stationary history weight `0.9`. The first bounded change is
@@ -2113,3 +2124,80 @@ checkpoint. Current-phase upstream changes are confined to
 implementation or Planar activation is included. The owner's newly reported
 cloud grain is a separate follow-up, not a reopening of the accepted light and
 shadow result.
+
+## A12-G execution candidate — 2026-09-04
+
+The existing Globe resolve now accumulates finite 3x3 RGBA moments and clips
+history coherently to the gamma-1 mean/sigma AABB inside the existing extrema.
+The implementation changes only CloudResolve GLSL and its existing history
+fixture. Shader lookups, spatial weights, temporal weights, distances, shadow
+packing, resources, APIs, A11 and Planar remain unchanged. Detailed validation
+and the same-view browser observation are recorded in the
+[A12 review](reviews/2026-09-04-a12g-globe-cloud-noise-reduction.md). This is an
+uncommitted candidate, not visual acceptance: visible fine grain remains and
+clear live improvement is not established.
+
+Final isolated history is `1/1 SUCCESS`; the one controller run reported three
+other existing fixture failures and then Chrome crashed, so no aggregate pass
+is claimed. Execution stopped without retry or expansion; Architecture review
+must address this validation result and the unresolved visual benefit.
+
+## A12 correction execution — 2026-09-04
+
+A12-AR-001 now uses RGB alone for the coherent clipping fraction and clamps
+transmittance independently. The existing actual-GPU history fixture retains
+the outlier/uniform/edge/motion checks and proves the recorded alpha-only ULP
+case returns RGB `0.3125` and alpha `0.75`, not RGB `0.25`.
+
+A12-AR-002 setup/oracle corrections stay in the existing Spec. The Beer
+fixture now passes the same fixed time to controller update and Scene render.
+The Moon oracle uses rotation-invariant inertial-frame phase instead of
+ICRF-readiness-dependent epoch goldens, retaining the mixed-frame mutation
+and existing tolerances. The readable-night probe now distinguishes local
+`+Z` from its virtual Globe point's `+X` zenith; its controlled surface atlas
+uses density `0.0001` so the 6 km zenith path has OD about `0.6`, rather than
+OD `60` erasing both direction witnesses in half-float output. Product
+lighting/shadow code is unchanged.
+
+All four corrected isolated fixtures passed sequentially on Chrome 152.
+A12-AR-003 remains unproven: this correction turn's browser discovery returns
+no accessible tab. No replacement page was opened and no refresh, camera,
+parameter or live-state mutation was performed. The earlier grain observation
+is not superseded by a new visual claim. Resource, lookup, API, upstream,
+generated and SGP deltas remain zero; the candidate stays uncommitted/unpushed.
+
+Final controller qualification is `78 SUCCESS, 1 FAILED` (79 executed), not a
+pass despite shell exit 0. The remaining unchanged
+`loads exact Globe assets and publishes the height/time/projection render matrix`
+fixture supplies its selected times only to Scene rendering, not to its
+directly connected controller inside the loop; its Sun-direction-change
+assertion fails. It is outside the three-fixture repair scope and is left
+untouched for Architecture. No rerun or scope expansion. A12-AR-002/003 remain
+open; exact commands and failure are appended to the A12 review.
+
+## A12-AR-002 final Spec follow-up execution — 2026-09-04
+
+Added only the two authorized `effects.update` calls before the existing
+selected-time and final Orthographic renders. No assertion, parameter or
+product change. Exact command
+`npm run test -- --includeName "loads exact Globe assets and publishes the height/time/projection render matrix"`
+passed `1/1 SUCCESS` on Chrome 152 (36.942 s Spec). The previous aggregate
+remains `78 SUCCESS / 1 FAILED`; no new aggregate or other fixture was run.
+
+A12-AR-003 remains open: original-tab discovery still returns zero accessible
+tabs. No replacement page, reload or live-state mutation; no visual benefit
+is claimed. New executable delta is only these two Spec lines.
+Upstream/generated/new SGP/API/resource/Planar deltas are zero. Shared
+candidate remains uncommitted/unpushed and returns for Architecture review.
+
+## A12-AR-003 execution access limitation — 2026-09-04
+
+After Architecture reported successful access to the original tab, Execution
+performed the required single read-only inventory. Its own browser surface
+still returned `tabs=[]`. Thus Architecture's successful access does not
+currently extend to this execution context. No tab was selected, opened,
+refreshed or polled again; no camera, time, parameter, loop or shader changed.
+Current-state capture, loaded-shader verification and a valid same-state
+comparison/drag observation could not be performed. A12-AR-003 remains open,
+with no visual benefit or acceptance claimed. A12-AR-001/002 stay frozen.
+This update changes records only; no tests, product edits, commit or push.

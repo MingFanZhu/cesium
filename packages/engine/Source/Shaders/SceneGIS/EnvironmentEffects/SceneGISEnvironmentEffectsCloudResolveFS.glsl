@@ -210,6 +210,57 @@ float sceneGISCloudHalfFloatPositionToleranceMeters(
     return max(binary16Tolerance, 16.0);
 }
 
+#ifdef SCENEGIS_GLOBE
+// Mean/sigma AABB clipping adapted from three-geospatial
+// b012ad06d858fc035d88aacfd73f092f93c994e4,
+// packages/clouds/src/shaders/varianceClipping.glsl (MIT).
+// Copyright (c) 2024 Shota Matsuda
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+vec4 sceneGISCloudVarianceClip(
+    vec4 historyColor,
+    vec4 moment1,
+    vec4 moment2,
+    float sampleCount,
+    vec4 minimumColor,
+    vec4 maximumColor)
+{
+    vec4 mean = moment1 / sampleCount;
+    vec4 sigma = sqrt(max(moment2 / sampleCount - mean * mean, vec4(0.0)));
+    vec4 lower = max(minimumColor, mean - sigma);
+    vec4 upper = min(maximumColor, mean + sigma);
+    lower.a = clamp(lower.a, 0.0, 1.0);
+    upper.a = clamp(upper.a, 0.0, 1.0);
+    vec4 center = 0.5 * (lower + upper);
+    vec4 extent = 0.5 * (upper - lower);
+    vec4 delta = historyColor - center;
+    float fraction = 1.0;
+    // RGB alone determines the common color trajectory. A quantized alpha
+    // discrepancy must not discard otherwise compatible color history.
+    for (int channel = 0; channel < 3; ++channel) {
+        if (abs(delta[channel]) > extent[channel]) {
+            fraction = min(fraction, extent[channel] / abs(delta[channel]));
+        }
+    }
+    return vec4(
+        center.rgb + delta.rgb * fraction,
+        clamp(historyColor.a, lower.a, upper.a));
+}
+#endif
+
 void main()
 {
     vec2 lowDimensions = vec2(textureSize(u_cloudLowDistanceTexture, 0));
@@ -249,6 +300,11 @@ void main()
     vec4 spatialColorMinimum = vec4(65504.0);
     vec4 spatialColorMaximum = vec4(-65504.0);
     bool spatialColorRangeValid = false;
+    #ifdef SCENEGIS_GLOBE
+    vec4 spatialColorMoment1 = vec4(0.0);
+    vec4 spatialColorMoment2 = vec4(0.0);
+    float spatialColorSampleCount = 0.0;
+    #endif
     ivec2 dimensions = textureSize(u_cloudLowDistanceTexture, 0);
     for (int y = -1; y <= 1; ++y) {
         for (int x = -1; x <= 1; ++x) {
@@ -262,6 +318,9 @@ void main()
                 spatialColorMinimum = min(spatialColorMinimum, colorSample);
                 spatialColorMaximum = max(spatialColorMaximum, colorSample);
                 spatialColorRangeValid = true;
+                spatialColorMoment1 += colorSample;
+                spatialColorMoment2 += colorSample * colorSample;
+                spatialColorSampleCount += 1.0;
             }
             #endif
             vec2 delta = vec2(x, y) - (fraction - vec2(0.5));
@@ -341,7 +400,13 @@ void main()
         u_cloudHistoryDistanceTexture, historyCoordinates);
     #ifdef SCENEGIS_GLOBE
     vec4 clippedHistoryColor = spatialColorRangeValid
-        ? clamp(historyColor, spatialColorMinimum, spatialColorMaximum)
+        ? sceneGISCloudVarianceClip(
+            historyColor,
+            spatialColorMoment1,
+            spatialColorMoment2,
+            spatialColorSampleCount,
+            spatialColorMinimum,
+            spatialColorMaximum)
         : spatialColor;
     bool previousValid;
     float previousShadowLength;

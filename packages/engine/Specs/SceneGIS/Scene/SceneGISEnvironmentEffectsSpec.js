@@ -121,6 +121,12 @@ void main()
         0.16 / 1.8504,
         0.22 / 1.91198);
     #endif
+    vec3 globePrimaryLightDirection = primaryLightDirection;
+    #if defined(SCENEGIS_PRIMARY_MOON_PROBE) && defined(SCENEGIS_GLOBE)
+    // This probe's virtual Globe point is on +X; local zenith remains +Z.
+    actualSunDirection = vec3(-1.0, 0.0, 0.0);
+    globePrimaryLightDirection = vec3(1.0, 0.0, 0.0);
+    #endif
     #ifdef SCENEGIS_ZERO_PRIMARY_LIGHT_PROBE
     primaryLightScale = vec3(0.0);
     #endif
@@ -141,7 +147,7 @@ void main()
         sampleLocal,
         sampleGlobePosition,
         actualSunDirection,
-        primaryLightDirection,
+        globePrimaryLightDirection,
         primaryLightScale,
         atmosphereSun,
         skyIrradiance);
@@ -161,7 +167,7 @@ void main()
         sampleGlobePosition,
         localRayDirection,
         primaryLightDirection,
-        primaryLightDirection,
+        globePrimaryLightDirection,
         actualSunDirection,
         primaryLightScale,
         atmosphereSun,
@@ -3397,13 +3403,14 @@ ${hardCascadeLibrary}`;
     effects.cloudPreset = "cumulus";
     effects.cloudCoverage = 1.0;
     effects.cloudDensity = 0.001;
-    scene.frameState.time = JulianDate.fromIso8601("2026-06-21T10:30:00Z");
+    const fixedTime = JulianDate.fromIso8601("2026-06-21T10:30:00Z");
+    scene.frameState.time = fixedTime;
     effects._pipeline._celestialFrameNumber = undefined;
-    effects.update(scene, scene.frameState.time);
+    effects.update(scene, fixedTime);
     const shadow = effects._pipeline._globeShadowResources;
     const execute = spyOn(shadow.command, "execute").and.callThrough();
     const resolve = spyOn(shadow.resolveCommand, "execute").and.callThrough();
-    scene.renderForSpecs();
+    scene.renderForSpecs(fixedTime);
     expect(execute).toHaveBeenCalledTimes(2);
     expect(resolve).toHaveBeenCalledTimes(1);
     expect(shadow.historyValid).toBe(true);
@@ -3936,8 +3943,8 @@ ${hardCascadeLibrary}`;
           up,
         },
       });
-      effects.update(scene, scene.frameState.time);
-      scene.renderForSpecs();
+      effects.update(scene, fixedTime);
+      scene.renderForSpecs(fixedTime);
     };
     for (const cascade of [0, 1]) {
       const transitionClip = Matrix4.multiplyByPoint(
@@ -3989,9 +3996,9 @@ ${hardCascadeLibrary}`;
       .withContext("producer-covered cascade transition Beer OD")
       .toEqualEpsilon(transitionNearPixel[0], transitionTolerance);
     scene.camera.lookRight(CesiumMath.toRadians(15.0));
-    effects.update(scene, scene.frameState.time);
+    effects.update(scene, fixedTime);
     expect(shadow.historyValid).toBe(true);
-    scene.renderForSpecs();
+    scene.renderForSpecs(fixedTime);
     expect(shadow.historyReadIndex).toBe(shadow.historyWriteIndex);
     const rotatedReceiverPixel = executeHalfFloatQuad(
       [cloudShadowTestSource, receiverFragmentSource],
@@ -4038,7 +4045,7 @@ ${hardCascadeLibrary}`;
         up: orbitUp,
       },
     });
-    effects.update(scene, scene.frameState.time);
+    effects.update(scene, fixedTime);
     expect(
       Cartesian3.dot(
         previousOrbitDirection,
@@ -4071,7 +4078,7 @@ ${hardCascadeLibrary}`;
     expect(currentReceiverTexel)
       .withContext("fixed ECEF receiver crosses atlas texels")
       .not.toBe(previousReceiverTexel);
-    scene.renderForSpecs();
+    scene.renderForSpecs(fixedTime);
     const orbitedReceiverWindow = SceneTransforms.worldToWindowCoordinates(
       scene,
       fixedReceiver,
@@ -4144,14 +4151,14 @@ ${hardCascadeLibrary}`;
       .toBe(true);
 
     scene.camera.moveRight(30000.0);
-    effects.update(scene, scene.frameState.time);
+    effects.update(scene, fixedTime);
     expect(shadow.historyValid)
       .withContext("camera cut rejects BSM history before sampling")
       .toBe(false);
-    scene.renderForSpecs();
+    scene.renderForSpecs(fixedTime);
 
     effects.cloudCoverage = 0.75;
-    effects.update(scene, scene.frameState.time);
+    effects.update(scene, fixedTime);
     expect(shadow.historyValid)
       .withContext("BSM material changes invalidate history")
       .toBe(false);
@@ -4266,8 +4273,8 @@ ${hardCascadeLibrary}`;
     effects.cloudPreset = "cumulus";
     effects.cloudCoverage = 1.0;
     effects.cloudDensity = 0.001;
-    effects.update(scene, scene.frameState.time);
-    scene.renderForSpecs();
+    effects.update(scene, fixedTime);
+    scene.renderForSpecs(fixedTime);
     const productWorldShadowProgram = shadow.command.shaderProgram;
     const originalShapeTexture = effects._pipeline._resources.cloudShapeTexture;
     const originalDetailTexture =
@@ -4330,8 +4337,8 @@ ${hardCascadeLibrary}`;
     );
     effects.cloudPreset = "mixed";
     effects.cloudCoverage = 1.0;
-    effects.update(scene, scene.frameState.time);
-    scene.renderForSpecs();
+    effects.update(scene, fixedTime);
+    scene.renderForSpecs(fixedTime);
     const expectedShadowBottom =
       effects._pipeline._frame.baseHeight + effects.cloudBaseHeight;
     const expectedShadowTop = expectedShadowBottom + 1450.0;
@@ -4398,7 +4405,7 @@ ${hardCascadeLibrary}`;
     receiverCloudTop = expectedShadowTop;
     receiverAtlasTexture = shadow.outputFramebuffer.getColorTexture(0);
     effects.cloudPreset = "cirrus";
-    effects.update(scene, scene.frameState.time);
+    effects.update(scene, fixedTime);
     expect(effects._pipeline._shadowCloudCasterActive).toBe(false);
     expect(effects._pipeline._globeLightingRecord.showCloudShadows).toBe(false);
     expect(effects._pipeline._globeLightingRecord.showCrepuscularRays).toBe(
@@ -4456,8 +4463,8 @@ ${hardCascadeLibrary}`;
         roll: 0.0,
       },
     });
-    effects.update(scene, scene.frameState.time);
-    scene.renderForSpecs();
+    effects.update(scene, fixedTime);
+    scene.renderForSpecs(fixedTime);
     installCloudWeatherRamp();
     const stbnTexture = effects._pipeline._resources.cloudStbnTexture;
     const stbnValues = new Uint8Array(
@@ -6401,8 +6408,21 @@ ${hardCascadeLibrary}`;
     };
     expect(lambertEndpoint(0.0)).toBe(1.0);
     expect(lambertEndpoint(Math.PI)).toEqualEpsilon(0.0, 1.0e-15);
-    expect(fixedPhase).toEqualEpsilon(0.9326044744950956, 1.0e-12);
-    expect(mixedFrameMutation).toEqualEpsilon(0.29384491398532053, 1.0e-12);
+    // The live transform may be ICRF or its documented TEME fallback.
+    // Compare in one inertial frame instead of baking a readiness-dependent
+    // ECEF observer phase into an epoch golden.
+    const observerInertial = Matrix3.multiplyByVector(
+      Matrix3.transpose(fixedTransform, new Matrix3()),
+      surfacePosition,
+      new Cartesian3(),
+    );
+    const inertialPhase = lambertPhase(
+      observerInertial,
+      sunInertial,
+      moonInertial,
+    );
+    expect(fixedPhase).toEqualEpsilon(inertialPhase, 1.0e-12);
+    expect(mixedFrameMutation).not.toEqualEpsilon(inertialPhase, 1.0e-6);
     expect(pipeline._moonPhase).toEqualEpsilon(fixedPhase, 1.0e-12);
     expect(pipeline._moonPhase).not.toEqualEpsilon(mixedFrameMutation, 1.0e-6);
 
@@ -7049,7 +7069,9 @@ ${hardCascadeLibrary}`;
     const atlasValues = new Uint16Array(4 * 4 * 4);
     for (let offset = 0; offset < atlasValues.length; offset += 4) {
       atlasValues[offset] = encodeFloat16(0.0);
-      atlasValues[offset + 1] = encodeFloat16(0.01);
+      // Zenith OD is about 0.6 over 6 km, not 60 (half-float zero T).
+      // The opposite-direction mutation still reaches the bounded OD cap.
+      atlasValues[offset + 1] = encodeFloat16(0.0001);
       atlasValues[offset + 2] = encodeFloat16(40.0);
       atlasValues[offset + 3] = encodeFloat16(40.0);
     }
@@ -8535,6 +8557,9 @@ ${hardCascadeLibrary}`;
       });
       effects.cloudTime = 0.0;
       effects._pipeline.invalidateCloudHistory("spec-semantic-history");
+      // This fixture connects the controller directly, without ControllerHost.
+      // Publish its fixed celestial time as well as the Scene render time.
+      effects.update(scene, fixedTime);
       scene.renderForSpecs(fixedTime);
     }
 
@@ -8561,6 +8586,163 @@ ${hardCascadeLibrary}`;
         "exact-stationary-temporal",
       );
       expect(effects._pipeline._cloudHistoryDiagnostics.weight).toBe(0.9);
+
+      const cleanColor = [0.125, 0.25, 0.375, 0.75];
+      const noisyColor = [0.5, 0.4375, 0.46875, 0.6875];
+      const noisyProgram = cloudSentinelProgram(
+        "bool outlier = all(equal(ivec2(gl_FragCoord.xy), ivec2(9, 5))); out_FragData_0 = outlier ? vec4(0.5, 0.4375, 0.46875, 0.6875) : vec4(0.125, 0.25, 0.375, 0.75);",
+        [0.025, 0.0245, 1.0, 1.0],
+      );
+      const extremaOnlySource = cloudResolveFragmentSource.replace(
+        /sceneGISCloudVarianceClip\(\s*historyColor,[\s\S]*?spatialColorMaximum\)/,
+        "clamp(historyColor, spatialColorMinimum, spatialColorMaximum)",
+      );
+      expect(extremaOnlySource).not.toBe(cloudResolveFragmentSource);
+      const extremaOnlyProgram = createEnvironmentEffectsProgramForSpecs(
+        scene.context,
+        extremaOnlySource,
+        true,
+      );
+      const clippedProbeSource = cloudResolveFragmentSource.replace(
+        "bool previousValid;",
+        "out_FragData_0 = clippedHistoryColor; out_FragData_1 = spatialDistance; return; bool previousValid;",
+      );
+      expect(clippedProbeSource).not.toBe(cloudResolveFragmentSource);
+      const clippedProbeProgram = createEnvironmentEffectsProgramForSpecs(
+        scene.context,
+        clippedProbeSource,
+        true,
+      );
+      activePrograms.push(
+        noisyProgram,
+        extremaOnlyProgram,
+        clippedProbeProgram,
+      );
+      resources.cloudProgram = noisyProgram;
+      resources.cloudLogDepthProgram = noisyProgram;
+      resetPreviousCamera(false);
+      const noisySpatial = readResolvedPixel();
+      copyHistory(
+        () => noisyColor,
+        () => [0.025, 0.0245, 1.0, 1.0],
+      );
+      scene.renderForSpecs(fixedTime);
+      const varianceResolved = readResolvedPixel();
+
+      resources.cloudResolveProgram = clippedProbeProgram;
+      resources.cloudResolveLogDepthProgram = clippedProbeProgram;
+      copyHistory(
+        () => noisyColor,
+        () => [0.025, 0.0245, 1.0, 1.0],
+      );
+      scene.renderForSpecs(fixedTime);
+      const varianceClipped = readResolvedPixel();
+      const independentFraction = (1.0 + Math.sqrt(8.0)) / 9.0;
+      for (let channel = 0; channel < 4; channel++) {
+        const expected =
+          cleanColor[channel] +
+          (noisyColor[channel] - cleanColor[channel]) * independentFraction;
+        expect(varianceClipped.color[channel]).toEqualEpsilon(expected, 0.0005);
+        expect(varianceResolved.color[channel]).toEqualEpsilon(
+          noisySpatial.color[channel] * 0.1 + expected * 0.9,
+          0.0005,
+        );
+      }
+      expect(varianceResolved.distance).toEqual(noisySpatial.distance);
+
+      resources.cloudResolveProgram = extremaOnlyProgram;
+      resources.cloudResolveLogDepthProgram = extremaOnlyProgram;
+      copyHistory(
+        () => noisyColor,
+        () => [0.025, 0.0245, 1.0, 1.0],
+      );
+      scene.renderForSpecs(fixedTime);
+      const extremaResolved = readResolvedPixel();
+      const varianceError = Math.abs(varianceResolved.color[0] - cleanColor[0]);
+      const extremaError = Math.abs(extremaResolved.color[0] - cleanColor[0]);
+      expect(varianceError).toBeLessThan(extremaError);
+
+      const uniformProgram = cloudSentinelProgram(
+        "out_FragData_0 = vec4(0.125, 0.25, 0.375, 0.75);",
+        [0.025, 0.0245, 1.0, 1.0],
+      );
+      activePrograms.push(uniformProgram);
+      resources.cloudProgram = uniformProgram;
+      resources.cloudLogDepthProgram = uniformProgram;
+      resources.cloudResolveProgram = productResolve;
+      resources.cloudResolveLogDepthProgram = productResolveLogarithmic;
+      resetPreviousCamera(false);
+      const uniformSpatial = readResolvedPixel();
+      copyHistory(
+        () => cleanColor,
+        () => [0.025, 0.0245, 1.0, 1.0],
+      );
+      scene.renderForSpecs(fixedTime);
+      expect(readResolvedPixel()).toEqual(uniformSpatial);
+
+      const constantAlphaProgram = cloudSentinelProgram(
+        "float value = 0.125 + 0.125 * mod(floor(gl_FragCoord.x), 3.0); out_FragData_0 = vec4(vec3(value), 0.75);",
+        [0.025, 0.0245, 1.0, 1.0],
+      );
+      activePrograms.push(constantAlphaProgram);
+      resources.cloudProgram = constantAlphaProgram;
+      resources.cloudLogDepthProgram = constantAlphaProgram;
+      resetPreviousCamera(false);
+      const constantAlphaSpatial = readResolvedPixel();
+      copyHistory(
+        () => [0.3125, 0.3125, 0.3125, 0.75048828125],
+        () => [0.025, 0.0245, 1.0, 1.0],
+      );
+      scene.renderForSpecs(fixedTime);
+      const constantAlphaResolved = readResolvedPixel();
+      for (let channel = 0; channel < 3; channel++) {
+        expect(constantAlphaResolved.color[channel]).toEqualEpsilon(
+          constantAlphaSpatial.color[channel] * 0.1 + 0.3125 * 0.9,
+          0.0005,
+        );
+      }
+      resources.cloudResolveProgram = clippedProbeProgram;
+      resources.cloudResolveLogDepthProgram = clippedProbeProgram;
+      copyHistory(
+        () => [0.3125, 0.3125, 0.3125, 0.75048828125],
+        () => [0.025, 0.0245, 1.0, 1.0],
+      );
+      scene.renderForSpecs(fixedTime);
+      expect(readResolvedPixel().color).toEqual([0.3125, 0.3125, 0.3125, 0.75]);
+      resources.cloudResolveProgram = productResolve;
+      resources.cloudResolveLogDepthProgram = productResolveLogarithmic;
+
+      // A true cloud/clear silhouette must reject prior cloud color, even
+      // when that color falls inside the neighborhood variance bounds.
+      const edgeProgram = cloudSentinelProgram(
+        "out_FragData_0 = gl_FragCoord.x < 8.0 ? vec4(0.0, 0.0, 0.0, 1.0) : vec4(0.125, 0.25, 0.375, 0.75);",
+        [0.025, 0.0245, 1.0, "step(8.0, gl_FragCoord.x)"],
+      );
+      activePrograms.push(edgeProgram);
+      resources.cloudProgram = edgeProgram;
+      resources.cloudLogDepthProgram = edgeProgram;
+      resetPreviousCamera(false);
+      const edgeSpatial = readResolvedPixel();
+      const clearSpatial = readHalfTexturePixel(
+        historyManager().getColorTexture(0),
+        6,
+        4,
+      );
+      expect(clearSpatial.slice(0, 3)).toEqual([0.0, 0.0, 0.0]);
+      copyHistory(
+        () => noisyColor,
+        () => [0.0, 0.0, 1.0, 0.0],
+      );
+      scene.renderForSpecs(fixedTime);
+      expect(readResolvedPixel().color).toEqual(edgeSpatial.color);
+      expect(
+        readHalfTexturePixel(historyManager().getColorTexture(0), 6, 4),
+      ).toEqual(clearSpatial);
+      console.info("A12 variance clipping", {
+        clipped: varianceClipped.color,
+        varianceError,
+        extremaError,
+      });
 
       const currentProgram = cloudSentinelProgram(
         "float stripe = step(1.0, mod(floor(gl_FragCoord.x), 2.0)); out_FragData_0 = vec4(mix(vec3(0.125), vec3(0.25), stripe), 0.75);",
@@ -14303,6 +14485,7 @@ ${hardCascadeLibrary}`;
         },
       });
       for (const time of times) {
+        effects.update(scene, time);
         scene.renderForSpecs(time);
         expect(effects._pipeline._frame.altitude).toEqualEpsilon(
           altitude,
@@ -14318,6 +14501,7 @@ ${hardCascadeLibrary}`;
     expect(aerialExecute).toHaveBeenCalledTimes(6);
     expect(matrixSunDirections[0]).not.toEqual(matrixSunDirections[1]);
     scene.camera.switchToOrthographicFrustum();
+    effects.update(scene, times[0]);
     scene.renderForSpecs(times[0]);
     expect(effects._pipeline._perspective).toBe(false);
     expect(backgroundExecute).toHaveBeenCalledTimes(7);

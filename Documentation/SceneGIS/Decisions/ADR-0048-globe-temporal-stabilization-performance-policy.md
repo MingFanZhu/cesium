@@ -380,8 +380,129 @@ The spatial kernel, `0.9/0.82` weights, camera/scene/distance rejection,
 current-domain distance publication and independent packed shadow semantics
 remain frozen. Planar retains its prior path. First invalid/cut output remains
 complete without added request-render frames. Known-error GPU comparison
-against the old extrema-only mutation plus the owner's same-view quality and
+against the old extrema-only mutation plus the owner's current-view quality and
 motion judgment must demonstrate benefit; a merely different or blurred image
 does not close the phase. Any broader sampling/denoising change requires a new
 evidence-backed amendment. Phase details are in
 [A12-G](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-04-phase-a12g-globe-cloud-noise-reduction.md).
+
+## A12-G execution candidate — 2026-09-04
+
+Globe now derives finite first/second moments from the existing 3x3 reads and
+uses gamma-1 bounds within current extrema. One AABB fraction clips RGB and
+transmittance coherently, including exact zero-width bounds. This adds only
+fixed ALU; no lookup, uniform, state, resource, command, pass, sample-budget,
+API or Planar change is introduced. Existing history weights and semantic
+compatibility/publication remain intact. Controlled GPU evidence is recorded
+in the A12 review. The single restored-view observation retains recognizable
+cloud detail but does not establish visible grain reduction; the candidate
+must not be treated as owner-accepted or extended without Architecture review.
+
+### A12 review clarification — 2026-09-04
+
+The candidate's extension of the RGB clip fraction to transmittance is
+rejected under A12-AR-001: zero transmittance variance can collapse valid RGB
+history for an alpha-only binary16 discrepancy. The corrected adaptation must
+derive its common clipping fraction from RGB, retaining color coherence, and
+bound transmittance separately in its finite variance/extrema interval and
+`[0,1]`. No new epsilon, weight, compatibility threshold, texture read or
+resource is authorized. The rest of the A12 amendment is unchanged; visual
+benefit and focused regression qualification are still open.
+
+## A12 correction execution — 2026-09-04
+
+A12-AR-001 now uses RGB alone for the coherent clipping fraction and clamps
+transmittance independently. The existing actual-GPU history fixture retains
+the outlier/uniform/edge/motion checks and proves the recorded alpha-only ULP
+case returns RGB `0.3125` and alpha `0.75`, not RGB `0.25`.
+
+A12-AR-002 setup/oracle corrections stay in the existing Spec. The Beer
+fixture now passes the same fixed time to controller update and Scene render.
+The Moon oracle uses rotation-invariant inertial-frame phase instead of
+ICRF-readiness-dependent epoch goldens, retaining the mixed-frame mutation
+and existing tolerances. The readable-night probe now distinguishes local
+`+Z` from its virtual Globe point's `+X` zenith; its controlled surface atlas
+uses density `0.0001` so the 6 km zenith path has OD about `0.6`, rather than
+OD `60` erasing both direction witnesses in half-float output. Product
+lighting/shadow code is unchanged.
+
+All four corrected isolated fixtures passed sequentially on Chrome 152.
+A12-AR-003 remains unproven: this correction turn's browser discovery returns
+no accessible tab. No replacement page was opened and no refresh, camera,
+parameter or live-state mutation was performed. The earlier grain observation
+is not superseded by a new visual claim. Resource, lookup, API, upstream,
+generated and SGP deltas remain zero; the candidate stays uncommitted/unpushed.
+
+Final controller qualification is `78 SUCCESS, 1 FAILED` (79 executed), not a
+pass despite shell exit 0. The remaining unchanged
+`loads exact Globe assets and publishes the height/time/projection render matrix`
+fixture supplies its selected times only to Scene rendering, not to its
+directly connected controller inside the loop; its Sun-direction-change
+assertion fails. It is outside the three-fixture repair scope and is left
+untouched for Architecture. No rerun or scope expansion. A12-AR-002/003 remain
+open; exact commands and failure are appended to the A12 review.
+
+### A12 correction code closure — 2026-09-04
+
+Architecture has accepted the RGB-derived clipping fraction and independently
+bounded transmittance, including the existing GPU fixture's exact alpha-only
+ULP witness. A12-AR-001 is fixed. This closes the adaptation defect, not the
+image-quality goal: A12-AR-002 has one Spec-only time-publication follow-up and
+A12-AR-003 still lacks the original-view visual evidence. All previously
+accepted resource, sample, semantic and Planar boundaries remain frozen.
+
+## A12-AR-002 final Spec follow-up execution — 2026-09-04
+
+Added only the two authorized `effects.update` calls before the existing
+selected-time and final Orthographic renders. No assertion, parameter or
+product change. Exact command
+`npm run test -- --includeName "loads exact Globe assets and publishes the height/time/projection render matrix"`
+passed `1/1 SUCCESS` on Chrome 152 (36.942 s Spec). The previous aggregate
+remains `78 SUCCESS / 1 FAILED`; no new aggregate or other fixture was run.
+
+A12-AR-003 remains open: original-tab discovery still returns zero accessible
+tabs. No replacement page, reload or live-state mutation; no visual benefit
+is claimed. New executable delta is only these two Spec lines.
+Upstream/generated/new SGP/API/resource/Planar deltas are zero. Shared
+candidate remains uncommitted/unpushed and returns for Architecture review.
+
+### A12 automated qualification closure — 2026-09-04
+
+Architecture accepts the final Spec-only explicit-time correction and its
+exact passing fixture together with the prior 78 aggregate passes. A12-AR-001
+and A12-AR-002 are fixed; no additional product amendment is required.
+A12-AR-003 remains open until the original-view grain comparison is available.
+This is not a claim of visual acceptance or a new aggregate run.
+
+## A12-AR-003 execution access limitation — 2026-09-04
+
+After Architecture reported successful access to the original tab, Execution
+performed the required single read-only inventory. Its own browser surface
+still returned `tabs=[]`. Thus Architecture's successful access does not
+currently extend to this execution context. No tab was selected, opened,
+refreshed or polled again; no camera, time, parameter, loop or shader changed.
+Current-state capture, loaded-shader verification and a valid same-state
+comparison/drag observation could not be performed. A12-AR-003 remains open,
+with no visual benefit or acceptance claimed. A12-AR-001/002 stay frozen.
+This update changes records only; no tests, product edits, commit or push.
+
+### A12 owner visual criterion revision — 2026-09-04
+
+The owner removes matched-view before/after evidence as a prerequisite and
+permits expected close-range fine grain. This supersedes the earlier strict
+same-view requirement: acceptance now considers current normal-distance
+appearance, cloud detail/internal shading and objectionable flicker/trails.
+The known-error GPU evidence remains required and unchanged. No zero-noise
+target, stronger filter, additional sampling, phase replay or parameter search
+is introduced. Architecture's bounded final-program observation supports
+presenting the candidate for explicit owner judgment; it is not a quantified
+relative-improvement or owner-pass claim. Existing product boundaries remain
+frozen.
+
+## A12-G owner acceptance — 2026-09-04
+
+The owner explicitly accepted the retained close-range grain after the final
+candidate observation. A12-G's RGB-only variance clipping and independently
+bounded transmittance are complete with no resource, lookup or sampling-budget
+change. Performance work follows separately from this accepted image-quality
+baseline; no quality-tier reduction is implied by this acceptance.
