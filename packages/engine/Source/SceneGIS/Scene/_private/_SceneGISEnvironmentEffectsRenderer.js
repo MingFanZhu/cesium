@@ -96,7 +96,7 @@ const cloudQualityProfiles = Object.freeze({
   },
   medium: {
     scale: 0.5,
-    globeScale: 1.0,
+    globeScale: 0.5,
     primarySteps: 64,
     fineSteps: 4,
     sunSteps: 3,
@@ -278,6 +278,7 @@ function createCloudOccupancySource(
   let levelDepth = depth;
   let level = new Uint8Array(width * height * depth);
   const base = level;
+  let allPositive = sourceChannels === 1;
   const unpackAlignment = PixelFormat.alignmentInBytes(
     PixelFormat.RED,
     PixelDatatype.UNSIGNED_BYTE,
@@ -286,6 +287,7 @@ function createCloudOccupancySource(
   for (let index = 0; index < level.length; index++) {
     if (sourceChannels === 1) {
       level[index] = shape[index];
+      allPositive = allPositive && level[index] > 0;
       continue;
     }
     const shapeIndex = index * sourceChannels;
@@ -351,7 +353,7 @@ function createCloudOccupancySource(
     levelHeight = nextHeight;
     levelDepth = nextDepth;
   }
-  return { arrayBufferView: base, mipLevels };
+  return { arrayBufferView: base, mipLevels, allPositive };
 }
 
 function createCloudOccupancyTexture3D(
@@ -386,7 +388,7 @@ function createCloudOccupancyTexture3D(
   // from generateMipmap(). The hierarchy is already complete and must not be
   // replaced with averaged levels.
   texture._hasMipmap = true;
-  return texture;
+  return { texture, allPositive: source.allPositive };
 }
 
 function createCloudTexture3D(context, width, height, depth, buffer, channels) {
@@ -1354,7 +1356,7 @@ function createResources(renderer, context, buffers) {
     candidate.cloudShapeTexture = (
       globe ? createCloudBaseLevelTexture3D : createCloudTexture3D
     )(context, 128, 128, 128, buffers.cloudShape, cloudShapeChannels);
-    candidate.cloudOccupancyTexture = createCloudOccupancyTexture3D(
+    const occupancy = createCloudOccupancyTexture3D(
       context,
       128,
       128,
@@ -1362,6 +1364,8 @@ function createResources(renderer, context, buffers) {
       buffers.cloudShape,
       cloudShapeChannels,
     );
+    candidate.cloudOccupancyTexture = occupancy.texture;
+    candidate.cloudOccupancyAllPositive = globe && occupancy.allPositive;
     candidate.cloudDetailTexture = (
       globe ? createCloudBaseLevelTexture3D : createCloudTexture3D
     )(
@@ -1829,6 +1833,9 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_cloudOffset: () => that._cloudOffset,
     u_cloudRadianceScale: () => that._owner._cloudRadianceScale,
     u_cloudPreset: () => cloudPresetIndices[that._owner._cloudPreset],
+    u_cloudTracePhased: () =>
+      that._mode === SceneGISAtmosphereReferenceFrame.GLOBE &&
+      that._owner._cloudQuality === "medium",
     u_cloudStbnSlice: () => {
       const phase =
         that._mode === SceneGISAtmosphereReferenceFrame.GLOBE
@@ -1873,6 +1880,8 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_irradianceTexture: () => that._resources?.irradianceTexture,
     u_cloudShapeTexture: () => that._resources?.cloudShapeTexture,
     u_cloudOccupancyTexture: () => that._resources?.cloudOccupancyTexture,
+    u_cloudOccupancyAllPositive: () =>
+      that._resources?.cloudOccupancyAllPositive,
     u_cloudDetailTexture: () => that._resources?.cloudDetailTexture,
     u_cloudWeatherTexture: () => that._resources?.cloudWeatherTexture,
     u_cloudTurbulenceTexture: () => that._resources?.cloudTurbulenceTexture,

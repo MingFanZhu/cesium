@@ -432,6 +432,11 @@ float sceneGISGlobeCloudDensitySampleInternal(
         detailAmounts[layer] = sampling.w * detailStrength;
     }
 
+    if (all(equal(weatherDensity, vec4(0.0)))) {
+        activeLayerHeightGradient = 0.5;
+        return 0.0;
+    }
+
     vec4 bottomWeights = vec4(
         sceneGISGlobeCloudRemap(heightFractions.x, 0.3, 0.0),
         sceneGISGlobeCloudRemap(heightFractions.y, 0.3, 0.0),

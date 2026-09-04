@@ -639,3 +639,94 @@ Bruneton incident irradiance and Globe ground coupling consume normalized ECEF
 Sun. Both are explicit parameters of the shared march/lighting call chain.
 Odd resolved dimensions use `4 * ceil(resolved / 4)` as the reference raster
 before temporal footprint conversion. No Planar or resource topology changes.
+
+## A13-G amendment — resource-proven Globe occupancy bypass (2026-09-04)
+
+Accepted in A13-G; the isolated measured benefit is inconclusive. The combined
+A13 candidate passed the owner gate on 2026-09-04. The existing
+Globe R8 shape feeds an exact-copy occupancy base and conservative max mips.
+When every base byte is strictly positive, its Globe exact-zero occupancy
+classification cannot reject a height-overlapping active-layer interval.
+The default asset is such a case, but runtime must prove this from loaded data.
+
+Derive one boolean in the existing base-construction loop and retain it on the
+SceneGIS candidate/current resource record, not on Cesium Texture3D or a global
+cache. One private Globe uniform may bypass query-only coordinate/LOD/texture
+work after existing active-layer/height tests. No active-layer overlap still
+returns empty. Any zero byte and all non-R8/Planar input retain the old path;
+byte value 1 is positive. Replacement recomputes the proof and publishes it
+atomically with its texture; failed candidates retain the last-good pair.
+
+Texture/mip contents, allocation, sampler, ownership and resource counts remain
+unchanged. Density, ray advancement, lighting, depth, history, public API and
+Planar behavior are not altered. No upstream/SGP/generated-file change. The
+existing occupancy and candidate-failure GPU fixtures provide equivalence and
+lifecycle evidence; Architecture owns performance/visual review. The separate
+owner-approved medium 2x2 tracing direction is not enabled by this amendment.
+Current assignment and gates are in
+[A13-G](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-04-phase-a13g-globe-performance.md).
+
+## Candidate 2 execution — 2026-09-04
+
+The existing R8 base-copy loop now derives strict positivity from the actual
+copied byte, including byte 1; non-R8 data is ineligible. The file-local
+creation result carries the proof to the SceneGIS candidate resource record.
+Successful publication swaps texture and proof together; the private
+`u_cloudOccupancyAllPositive` callback reads only current resources. No second
+scan, Texture3D metadata, retained buffer, independent cache or warm rescan.
+
+The Globe helper preserves start/end/middle heights and active-layer overlap.
+Only an overlapping layer may return 1 before query-only offset/coordinate,
+scale, LOD and texture work. No overlap returns 0; false and Planar paths
+retain their algorithms. Occupancy textures, max mips and upload padding remain.
+Candidate 1 is untouched.
+
+Only the two assigned existing fixtures are amended. Occupancy evidence uses
+published all-byte-1 R8, one-zero replacement and reverse replacement, checks
+Planar ineligibility, and compares compiled inside/below/above bounds exactly
+with a forced-query oracle. Existing mip conservatism and thin-data integrated
+MRT assertions remain. Failure evidence retains Planar checks and injects a
+Globe weather mip failure after occupancy allocation, checking last-good
+texture/proof/uniform identity, live resources and candidate cleanup.
+
+Executable scope is the private renderer, shared volumetric cloud GLSL and
+existing Spec. Persistent GPU bytes, textures/FBOs/history, program categories,
+commands/passes, public API/default/range, upstream-owned/generated/new SGP and
+Planar deltas are zero. CPU state adds one resource-owned boolean and the
+shader one private boolean. SGP-0008/0009 remain consume-only. No owner browser
+operation, service restart, candidate-3 implementation, commit or push.
+Architecture performance/visual review remains pending; no gain or owner
+acceptance is inferred.
+
+### Focused validation
+
+Sequential final-source commands on Chrome 152, each run once:
+
+- `npm run test -- --includeName "uploads conservative occupancy mips and matches exhaustive density support"`:
+  `1/1 SUCCESS`, 49.699 s Spec, exit 0.
+- `npm run test -- --includeName "destroys candidate 3D textures when cloud mip generation fails"`:
+  `1/1 SUCCESS`, 21.801 s Spec, exit 0. Globe failure destroys four candidate
+  3D textures, three 2D textures, seven program references and one VA/buffer;
+  the published generation stays live. These durations are not performance data.
+- `npx eslint` on the assigned renderer and Spec: exit 0.
+- Direct `npx prettier --check --ignore-path .gitignore` on
+  `SceneGISVolumetricClouds.glsl`: exit 1, no parser could be inferred.
+  Repository Prettier has no GLSL parser; no plugin/config/dependency was added.
+  GLSL uses existing indentation and passes the actual shader compilation.
+
+No additional fixture, aggregate, browser/performance, package, generator,
+type or release matrix was run. Implementation has no design deviation;
+GLSL Prettier support is the sole tooling limitation. Candidate 2 is submitted
+for Architecture review, not accepted; candidate 3 remains separately assigned
+only after Architecture design and candidate-2 closure.
+
+Final scoped Prettier (renderer/Spec and all six records), six-record
+Markdownlint and `git diff --check` pass; diff reports retained LF/CRLF
+warnings only. Initial appended duplicate blank lines were removed by scoped
+Prettier formatting. GLSL parser unavailability above remains explicit.
+
+Architecture independently closed candidate 2 after source/fixture review and
+a bounded live comparison (35.86 to 36.24 FPS, not a meaningful speedup claim).
+The current resource proof and loaded shader were verified. Candidate 3 changes
+only the Globe medium tracing/reconstruction policy under ADR-0048's separate
+A13 amendment; it preserves this occupancy proof and the accepted density core.

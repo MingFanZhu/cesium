@@ -252,6 +252,11 @@ spatial-only结果。Public `cloudQuality`是cloud/Beer/resolve唯一caller-owne
 settling render或建立第二套Beer history。A6-G不增加GPU resource/pass/command category，完整continuity、budget与Planar冻结边界见
 [ADR-0048](Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md)。
 
+后续 Globe temporal 行为以 ADR-0048 的已接受 amendment 为准：A8/A12 的 stationary Globe 允许现有 STBN/history；A13 允许仅 medium
+使用 2x2 phased cloud tracing 与 full-resolution depth-aware reconstruction。First/invalid/cut frame 必须立即发布完整 current spatial image，
+不得等待 phase 收敛、提高 history 权重、抖动 native scene camera 或引入自动 FPS 降档。High、low、Planar 与 world-space Beer 保持原路径；
+精确 sample-coordinate、distance-domain、resource 和视觉 gate 由 ADR-0048 的 A13 amendment 约束。
+
 A7-G在同一`SGP-0008` pre-tonemap linear-HDR slot末端执行Globe bright threshold、固定separable blur与additive bloom/ghost/halo composite。
 Lens artifact只消费final HDR Sun signal与resolved exact-clear depth完成terrain/cloud visibility；不得新增Sun、Cloud MRT或history authority。
 SceneGIS bloom启用时Cesium general bloom必须caller-owned地保持disabled，existing `scene.sunBloom=false` contract继续排除`SunPostProcess`。

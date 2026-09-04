@@ -60,6 +60,13 @@ void main()
 {
     vec2 cloudPixel = gl_FragCoord.xy;
     vec2 cloudCoordinates = cloudPixel / u_cloudBufferDimensions;
+    #ifdef SCENEGIS_GLOBE
+    if (u_cloudTracePhased) {
+        cloudCoordinates = (vec2(sceneGISCloudTraceFullPixel(
+            ivec2(cloudPixel), textureSize(u_depthTexture, 0),
+            u_cloudStbnSlice)) + 0.5) / vec2(textureSize(u_depthTexture, 0));
+    }
+    #endif
     vec2 fullPixel =
         cloudCoordinates * vec2(textureSize(u_depthTexture, 0));
     float rawDepth = texture(u_depthTexture, cloudCoordinates).r;
@@ -68,8 +75,8 @@ void main()
     #ifdef SCENEGIS_GLOBE
     isClearDepth = isClearDepth || !u_hasCurrentGlobeDepth;
     #endif
-    // Ray NDC belongs to the low-resolution cloud viewport. The resolved depth
-    // and blue-noise lookup remain keyed to the matching full-resolution pixel.
+    // Ray, depth and blue noise share one sample coordinate. Phased medium
+    // uses an explicit full-resolution pixel rather than the low-grid center.
     vec2 plane = mix(u_frustum.xz, u_frustum.yw, cloudCoordinates);
     vec3 eyeOffset = u_cameraRight * plane.x + u_cameraUp * plane.y;
     vec3 worldOriginOffset = u_perspective ? vec3(0.0) : eyeOffset;
@@ -100,8 +107,13 @@ void main()
         // Non-clear depth passes through the Cesium builtin exactly once to
         // clip the explicit A1/frustum ray. Clear sentinels never enter a
         // potentially undefined eye-space reconstruction.
-        vec4 eye = czm_windowToEyeCoordinates(
-            vec4(fullPixel, resolvedDepth, 1.0));
+        #ifdef SCENEGIS_GLOBE
+        vec4 eye = u_cloudTracePhased
+            ? czm_screenToEyeCoordinates(cloudCoordinates, rawDepth)
+            : czm_windowToEyeCoordinates(vec4(fullPixel, resolvedDepth, 1.0));
+        #else
+        vec4 eye = czm_windowToEyeCoordinates(vec4(fullPixel, resolvedDepth, 1.0));
+        #endif
         eye /= eye.w;
         distanceToGeometry = u_perspective
             ? length(eye.xyz)
@@ -121,9 +133,13 @@ void main()
     vec2 frustumSpan = vec2(
         u_frustum.y - u_frustum.x,
         u_frustum.w - u_frustum.z);
-    vec2 viewportFootprint = frustumSpan / max(
-        u_cloudBufferDimensions,
-        vec2(1.0));
+    vec2 footprintDimensions = u_cloudBufferDimensions;
+    #ifdef SCENEGIS_GLOBE
+    if (u_cloudTracePhased) {
+        footprintDimensions = vec2(textureSize(u_depthTexture, 0));
+    }
+    #endif
+    vec2 viewportFootprint = frustumSpan / max(footprintDimensions, vec2(1.0));
     float rayAngularFootprint = u_perspective
         ? max(viewportFootprint.x, viewportFootprint.y)
         : 0.0;
@@ -219,6 +235,12 @@ void main()
     out_FragData_0 = cloudSamplingDiagnostics;
     #else
     out_FragData_0 = cloudColor;
+    #endif
+    #ifdef SCENEGIS_GLOBE
+    if (u_cloudTracePhased) {
+        cloudDistances.z = isClearDepth ? 1.0 : clamp(
+            distanceToGeometry / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0);
+    }
     #endif
     out_FragData_1 = cloudDistances;
 }

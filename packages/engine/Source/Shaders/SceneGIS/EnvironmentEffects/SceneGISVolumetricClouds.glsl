@@ -8,11 +8,26 @@ const float SCENEGIS_CLOUD_WEATHER_SCALE = 240000.0;
 
 #ifdef SCENEGIS_GLOBE
 #define SCENEGIS_CLOUD_TURBULENCE_SAMPLER sampler2D
+uniform bool u_cloudOccupancyAllPositive;
+uniform bool u_cloudTracePhased;
 #else
 #define SCENEGIS_CLOUD_TURBULENCE_SAMPLER sampler3D
 #endif
 
 #ifdef SCENEGIS_GLOBE
+ivec2 sceneGISCloudTracePhase(float stbnSlice)
+{
+    int phase = int(floor(stbnSlice * 64.0)) % 4;
+    return ivec2(phase == 1 || phase == 2 ? 1 : 0,
+        phase == 1 || phase == 3 ? 1 : 0);
+}
+
+ivec2 sceneGISCloudTraceFullPixel(
+    ivec2 lowPixel, ivec2 fullSize, float stbnSlice)
+{
+    return min(2 * lowPixel + sceneGISCloudTracePhase(stbnSlice), fullSize - 1);
+}
+
 vec3 sceneGISGlobeCloudPosition(
     vec3 localPosition,
     vec3 surfacePosition,
@@ -617,8 +632,6 @@ float sceneGISCloudOccupancyBound(
         length(intervalEndGlobe) - SCENEGIS_BOTTOM_RADIUS;
     float middleHeight =
         length(intervalMiddleGlobe) - SCENEGIS_BOTTOM_RADIUS;
-    vec3 texturePosition = intervalMiddleGlobe +
-        sceneGISGlobeCloudOffset(intervalMiddleGlobe, cloudOffset);
     #else
     float startHeight = sceneGISCloudMaterialHeight(intervalStartLocal);
     float endHeight = sceneGISCloudMaterialHeight(intervalEndLocal);
@@ -647,6 +660,13 @@ float sceneGISCloudOccupancyBound(
             minimumHeight >= layerBase + layerThickness) {
             continue;
         }
+        #ifdef SCENEGIS_GLOBE
+        if (u_cloudOccupancyAllPositive) {
+            return 1.0;
+        }
+        vec3 texturePosition = intervalMiddleGlobe +
+            sceneGISGlobeCloudOffset(intervalMiddleGlobe, cloudOffset);
+        #endif
         float heightFraction = clamp(
             (middleHeight - layerBase) / max(layerThickness, 1.0),
             0.0,

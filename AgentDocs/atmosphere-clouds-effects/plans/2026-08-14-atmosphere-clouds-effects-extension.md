@@ -8,7 +8,12 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-04`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A13-G active; Globe performance investigation`
+- Current phase: `A13-G completed; local checkpoint preparation`
+- Current gate: A13-AR-001..007 independently fixed/code-approved; owner accepts
+  the corrected quality/performance result on 2026-09-04. Existing bounded
+  observations do not certify sustained/all-view 60 FPS. Architecture prepares
+  the independent A13 checkpoint; the new clock-linkage issue is separate and
+  has no implementation assignment yet.
 - Current phase plan:
   [2026-09-04-phase-a13g-globe-performance.md](2026-09-04-phase-a13g-globe-performance.md)
 - Previous completed phase plan:
@@ -41,7 +46,7 @@
 - A10-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A11-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A12-G implementation: `completed; Architecture approved; owner visual gate passed`
-- A13-G implementation: `not started; source/cost diagnosis assigned first`
+- A13-G implementation: `completed; Architecture approved; owner quality/performance gate passed`
 - P1 implementation: `deferred before review; candidate not accepted`
 
 ## Goal
@@ -231,16 +236,37 @@ budgets, A11 lighting/shadows and Planar. Completed plan:
 The owner accepts the remaining close-range fine grain. The isolated local
 checkpoint is `fd868387d4c38d6faf67a9395434cc9fccc6384c`; no push occurred.
 
-### A13-G — Globe performance investigation and bounded optimization (`active`)
+### A13-G — Globe performance investigation and bounded optimization (`completed`)
 
-Preserve the accepted A12 appearance while investigating the cost of the
-current Globe environment stack. First distinguish measured frame/main-thread
+Preserve the accepted A12 appearance while Architecture investigates the cost
+of the current Globe environment stack. First distinguish measured frame/main-thread
 behavior from inferred GPU work and produce a source-backed ranking. Only
-after Architecture reviews that evidence may this phase plan authorize one
-bounded optimization and its correctness, lifecycle and same-workload cost
+after Architecture establishes that evidence may this phase plan assign one
+concrete bounded optimization to Execution, with correctness, lifecycle and same-workload cost
 comparison. No automatic tier reduction, parameter recalibration, renewed
 zero-grain target or Planar activation is implied. Active plan:
 [A13-G Globe performance](2026-09-04-phase-a13g-globe-performance.md).
+
+Architecture completed bounded effect isolation and two source-backed
+proposals. The owner selected exact-zero weather early return as the first
+bounded implementation; occupancy-query optimization followed separately.
+The helper/Spec change is now code-approved, but medium's cloud-heavier 60 FPS
+target remains open. Architecture compared the pinned reference and primary
+industry sources and recorded medium 2x2 phased tracing/reconstruction as a
+larger candidate. The owner approved both follow-up steps. Equivalent
+occupancy-query removal now has independent code approval under ADR-0046; its
+35.86/36.24 FPS comparison is inconclusive. Medium 2x2 reconstruction is now
+the current Execution assignment under ADR-0048's explicit A13 temporal/depth/
+resource amendment, with candidates 1/2 preserved. No existing feature removal,
+automatic quality adaptation or accepted 60 FPS result is implied. Architecture
+retains diagnosis/design, performance measurement, independent review and
+visual gate.
+
+The owner accepts the final corrected result on 2026-09-04. All seven findings
+are fixed/code-approved; the independent local checkpoint contains candidates
+1/2/3, bounded GPU/visual/cost evidence and their records. Residual fine grain
+and workload-dependent cost are accepted limitations, not universal performance
+claims. A newly reported clock-linkage issue is outside this phase.
 
 ### P1 — Planar integrated-medium restoration (`deferred`)
 
@@ -562,3 +588,209 @@ Current-state capture, loaded-shader verification and a valid same-state
 comparison/drag observation could not be performed. A12-AR-003 remains open,
 with no visual benefit or acceptance claimed. A12-AR-001/002 stay frozen.
 This update changes records only; no tests, product edits, commit or push.
+
+## Candidate 1 execution — 2026-09-04
+
+Implemented only the assigned exact-zero weather return in
+`SceneGISGlobeCloudDensitySampleInternal`: after the layer loop,
+`all(equal(weatherDensity, vec4(0.0)))` returns density `0.0` and gradient
+`0.5`. The positive path and filtering are unchanged; no new threshold,
+sample advance, occupancy change or alternate optimization.
+
+The existing coverage/extinction Spec now compares compiled product and
+full evaluation (only this return block removed) over one four-column,
+two-row input: zero, positive, zero and formula-derived small positive weather.
+RGBA records primary density/gradient and shadow-only density/gradient.
+The outputs match exactly; empty columns return `0/0.5/0/0.5`.
+At layer height fraction `0.5`, zero weather texels yield
+`weatherDensity=(coverage*heightScale-0.4)/0.6`. Choosing coverage for
+`weatherDensity=2^-12`, shape/detail `1`, gives final density `2^-14`;
+it remains positive and matches the independent formula within `1e-7`.
+Temporary programs/textures are destroyed. Original Planar, coverage,
+extinction and MRT assertions remain; no standalone Spec was added.
+
+Sequential isolated results, Chrome 152:
+
+- `npm run test -- --includeName "keeps compiled coverage monotonic and isolates material density from extinction"`:
+  `1/1 SUCCESS` (32.847 s Spec).
+- `npm run test -- --includeName "marches controlled cloud density into the bounded Beer atlas on the actual GPU"`:
+  `1/1 SUCCESS` (50.761 s Spec); this fixture is unchanged.
+
+The first Spec lint caught a loop closure over mutable `scene`; capturing its
+local `context` fixed that warning without changing inputs/assertions.
+Spec ESLint then passed. These test durations are not performance evidence.
+
+New executable changes are confined to the one Globe GLSL and its existing
+Spec. The accepted Test FPS line and Architecture/role records are preserved.
+Upstream/generated/new SGP/API/program-category/command/texture/FBO/history/
+GPU-byte/Planar deltas are zero. No owner browser operation, service restart,
+aggregate/package/generator/type/release run, commit or push. Architecture
+performance measurement, independent review and visual judgment remain pending;
+no speedup or owner acceptance is claimed.
+
+## Candidate 2 execution — 2026-09-04
+
+The existing R8 base-copy loop now derives strict positivity from the actual
+copied byte, including byte 1; non-R8 data is ineligible. The file-local
+creation result carries the proof to the SceneGIS candidate resource record.
+Successful publication swaps texture and proof together; the private
+`u_cloudOccupancyAllPositive` callback reads only current resources. No second
+scan, Texture3D metadata, retained buffer, independent cache or warm rescan.
+
+The Globe helper preserves start/end/middle heights and active-layer overlap.
+Only an overlapping layer may return 1 before query-only offset/coordinate,
+scale, LOD and texture work. No overlap returns 0; false and Planar paths
+retain their algorithms. Occupancy textures, max mips and upload padding remain.
+Candidate 1 is untouched.
+
+Only the two assigned existing fixtures are amended. Occupancy evidence uses
+published all-byte-1 R8, one-zero replacement and reverse replacement, checks
+Planar ineligibility, and compares compiled inside/below/above bounds exactly
+with a forced-query oracle. Existing mip conservatism and thin-data integrated
+MRT assertions remain. Failure evidence retains Planar checks and injects a
+Globe weather mip failure after occupancy allocation, checking last-good
+texture/proof/uniform identity, live resources and candidate cleanup.
+
+Executable scope is the private renderer, shared volumetric cloud GLSL and
+existing Spec. Persistent GPU bytes, textures/FBOs/history, program categories,
+commands/passes, public API/default/range, upstream-owned/generated/new SGP and
+Planar deltas are zero. CPU state adds one resource-owned boolean and the
+shader one private boolean. SGP-0008/0009 remain consume-only. No owner browser
+operation, service restart, candidate-3 implementation, commit or push.
+Architecture performance/visual review remains pending; no gain or owner
+acceptance is inferred.
+
+### Focused validation
+
+Sequential final-source commands on Chrome 152, each run once:
+
+- `npm run test -- --includeName "uploads conservative occupancy mips and matches exhaustive density support"`:
+  `1/1 SUCCESS`, 49.699 s Spec, exit 0.
+- `npm run test -- --includeName "destroys candidate 3D textures when cloud mip generation fails"`:
+  `1/1 SUCCESS`, 21.801 s Spec, exit 0. Globe failure destroys four candidate
+  3D textures, three 2D textures, seven program references and one VA/buffer;
+  the published generation stays live. These durations are not performance data.
+- `npx eslint` on the assigned renderer and Spec: exit 0.
+- Direct `npx prettier --check --ignore-path .gitignore` on
+  `SceneGISVolumetricClouds.glsl`: exit 1, no parser could be inferred.
+  Repository Prettier has no GLSL parser; no plugin/config/dependency was added.
+  GLSL uses existing indentation and passes the actual shader compilation.
+
+No additional fixture, aggregate, browser/performance, package, generator,
+type or release matrix was run. Implementation has no design deviation;
+GLSL Prettier support is the sole tooling limitation. Candidate 2 is submitted
+for Architecture review, not accepted; candidate 3 remains separately assigned
+only after Architecture design and candidate-2 closure.
+
+Final scoped Prettier (renderer/Spec and all six records), six-record
+Markdownlint and `git diff --check` pass; diff reports retained LF/CRLF
+warnings only. Initial appended duplicate blank lines were removed by scoped
+Prettier formatting. GLSL parser unavailability above remains explicit.
+
+## A13 candidate 3 execution blocker — 2026-09-04
+
+Medium phased tracing is implemented but not qualified. The sole new GPU
+fixture still reports NaN RGB on history rejection; Architecture direction is
+requested before changing frozen A12 clipping or continuing validation. Exact
+evidence is in the [A13 review](../reviews/2026-09-04-a13g-globe-performance.md#candidate-3-execution-blocker--2026-09-04).
+Candidates 1/2 stay closed for code review. A13 performance/visual acceptance
+and checkpoint remain pending; no next-phase or Planar action.
+
+The blocker is now independently diagnosed as
+[A13-AR-001](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-001--inverted-finite-variance-interval).
+A bounded variance-interval arithmetic correction and finite-history evidence
+are assigned within candidate 3; this does not activate a new phase or change
+the accepted quality policy. Performance and owner gates remain pending.
+
+Execution's interval correction passes the new finite-history and retained
+history fixtures. Two lifecycle/resource fixture setup/API errors still prevent
+candidate qualification; see the [A13 results](../reviews/2026-09-04-a13g-globe-performance.md#final-focused-command-results).
+No phase closure, performance claim, commit or push.
+
+Architecture confirms A13-AR-001 fixed and assigns
+[A13-AR-002/003](../reviews/2026-09-04-a13g-globe-performance.md#current-spec-only-follow-up-assignment)
+within the existing Spec. Product source is frozen; only three affected
+qualification fixtures need rerun. A13 remains active with performance/owner
+gates pending.
+
+Execution's Spec-only follow-up passes the medium phased/cut and lazy-resource
+fixtures. Candidate cleanup is still unqualified (zero destroy calls under
+the retained global update injection); see the [review results](../reviews/2026-09-04-a13g-globe-performance.md#spec-only-follow-up-results).
+A13-AR-003 and overall qualification remain open. No product or phase change.
+
+Independent review closes A13-AR-002. The remaining Spec injection hits native
+GlobeDepth instead of the cloud candidate; the bounded
+[A13-AR-003 continuation](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-003-targeted-injection-continuation)
+targets the intended candidate and retains the current failure policy.
+Only that fixture needs rerun; performance/owner gates remain pending.
+
+The targeted failure fixture passes, completing the assigned focused evidence
+with the reused phased/lazy/history passes. See the [execution handoff](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-003-targeted-execution-result--2026-09-04).
+Independent review and performance/visual qualification remain pending; no
+phase closure, checkpoint or next-phase action.
+
+## A13 current reconstruction correction — 2026-09-04
+
+Architecture closes A13-AR-003 and completes the first same-state candidate-3
+medium cost observation: 31.89 -> 59.80 FPS. Visible alternating cloud holes
+over continuous sloped terrain nevertheless block acceptance. The bounded
+[A13-AR-004 assignment](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-004--continuous-sloped-receivers-rejected-as-depth-edges)
+corrects local receiver compatibility without changing the approved medium
+sampling/resource policy. A13 remains active; no owner gate, checkpoint,
+next-phase or Planar work is authorized.
+
+The bounded A13-AR-004 correction passes its fixed sloped-plane/mutation and
+retained history fixtures; [execution evidence](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-004-execution-result--2026-09-04)
+is review-ready. No resource-policy change or live performance claim accompanies
+it. Architecture/owner qualification and phase checkpoint remain pending.
+
+Architecture now closes all A13 findings and code-approves candidates 1/2/3.
+Corrected medium reaches 59.96 FPS in the retained same-view comparison, with
+the comb removed; [independent closure](../reviews/2026-09-04-a13g-globe-performance.md#independent-candidate-3-closure-and-owner-handoff)
+records bounded motion observations and remaining limits. A13 awaits explicit
+owner medium visual/performance acceptance, not more coding. No phase
+checkpoint, push, next-phase or Planar work is authorized yet.
+
+The subsequent owner report confirms the speed improvement but rejects the
+increased medium shimmer. The approved
+[A13-AR-005 assignment](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-005--interpolation-support-collapses-history-statistics)
+separates clipping statistics from phased interpolation without changing the
+sampling budget or accepted occlusion/history contracts. A13 remains active;
+prior findings remain fixed. Architecture owns analysis/review and Execution
+only the bounded resolve/Spec correction. No checkpoint or next-phase work.
+
+The bounded A13-AR-005 implementation now separates statistical support from
+current interpolation, with no resource/API delta. Its fixed four-phase GPU
+witness passes; [execution evidence](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-005-execution-result--2026-09-04)
+records the mutation, unchanged history-off output and geometric exclusion.
+This is not owner shimmer acceptance or a new performance claim.
+
+Architecture independently closes A13-AR-005 for code. The
+[bounded fresh-page review](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-005-independent-review-and-bounded-live-observation)
+records 53.70 FPS under different conditions from the prior comparison and
+leaves dynamic quality/sustained performance open. Execution holds the same
+uncommitted candidate; A13 is not completed and no next phase is activated.
+
+The owner then reports horizontal cloud gaps during rotation, specifically in
+medium. Architecture reproduces a current-frame failure with history disabled:
+the low trace and full resolve disagree on the same finite receiver distance
+after a lossy log-to-perspective-depth round trip. The existing precise Cesium
+overloads remove this discrepancy and the gaps in a temporary GPU diagnostic.
+[A13-AR-006](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-006--lossy-log-depth-round-trip-erases-medium-clouds)
+therefore reopens candidate 3 for a bounded two-shader/Spec correction, not a
+new optimization strategy. A13-AR-001..005 stay fixed. The sampling budget,
+occlusion tolerance, temporal policy, resources and other tiers remain frozen;
+Architecture retains live quality/performance review. No checkpoint or next
+phase is authorized.
+
+A13-AR-006 execution applies the existing native raw-depth overloads only to
+phased Globe reconstruction, preserving resource and temporal contracts.
+[Execution evidence](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-006-execution-result--2026-09-04)
+records the fixed analytic log-depth regression and native Orthographic linear
+witness. This is a bounded code handoff, not phase or owner acceptance.
+
+A13-AR-007 execution implements the prescribed phased cloud-depth support
+without changing receiver precision or resource budgets. The existing fixture
+uses actual jittered product estimates and a known-color error oracle; see
+[execution evidence](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-007-execution-result--2026-09-04).
+Live quality/cost and owner acceptance remain open; no phase advance is made.

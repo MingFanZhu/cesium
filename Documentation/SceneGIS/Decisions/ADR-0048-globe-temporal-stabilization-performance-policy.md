@@ -506,3 +506,407 @@ candidate observation. A12-G's RGB-only variance clipping and independently
 bounded transmittance are complete with no resource, lookup or sampling-budget
 change. Performance work follows separately from this accepted image-quality
 baseline; no quality-tier reduction is implied by this acceptance.
+
+## A13-G amendment — medium 2x2 phased tracing (2026-09-04)
+
+Accepted for implementation after owner direction approval and candidate-2
+code closure; performance and visual qualification remain pending. This
+supersedes the full-resolution Globe medium raster and its spatial-resolve
+assumptions only. It does not supersede the accepted material, lighting,
+high/low/Planar paths or world-space Beer shadow system.
+
+### Raster and phase authority
+
+Globe medium's current two-attachment Cloud MRT becomes
+`ceil(W/2) x ceil(H/2)`. Both existing resolved histories remain `W x H`.
+The existing native-frame STBN slice also selects four Bayer offsets, in order
+`(0,0), (1,1), (1,0), (0,1)`. One private Globe-medium boolean enables the path;
+no clock, second phase counter, native-camera jitter or extra render is added.
+For integer low texel `l`, the actual full-pixel index is
+`p = min(2*l + phase, fullSize-1)` and its UV is `(p+0.5)/fullSize`.
+The clamp explicitly handles odd/one-pixel dimensions. Producer and resolve
+must use the same shared coordinate helper.
+
+Raw depth classification, resolved depth reconstruction, Perspective or
+Orthographic ray, STBN pixel and Cloud MRT distances all belong to that exact
+sample coordinate. Invalid medium cloud samples also publish the known scene
+distance in z; exact clear publishes 1. The current distance encoding remains
+1,000,000 m. Per-ray angular/origin footprint uses full output dimensions for
+this phased path; the existing material entry-derivative conversion still
+receives actual current and resolved dimensions. Do not change density,
+optical steps, filtering coefficients, STBN assets or lighting budgets.
+
+### Complete current reconstruction
+
+Only the medium path replaces the old unshifted-grid spatial assumption.
+Gather the existing 3x3 low color/distance neighborhood around the phase-aware
+grid coordinate. Obtain each tap's actual full-pixel coordinate from the shared
+helper. Use separable tent weights
+`product(max(1-abs(targetFullPixel-sourceFullPixel)/2, 0))`, normalized over
+eligible taps. This gives exact current samples unit support and avoids the
+old low-tier broad blur being selected merely because the raster is smaller.
+
+Each tap uses exact source raw-depth clear/finite classification, allowing at
+most nine additional current-depth texel reads. Different source/target scene
+classes are rejected for both cloud reconstruction and shadow length. For
+finite geometry, reconstruct its source endpoint from source z and source ray;
+compare to the target's actual endpoint. The allowed spatial radius is the
+separation of those two rays at the target distance plus the existing binary16
+position tolerance. This is the actual sampling footprint, not a new metre or
+depth-percentage tuning constant. Reject cloud mean/front behind the target
+receiver beyond storage tolerance. Rejected geometry must not enter color
+moments or silhouette reconstruction.
+
+Convert accepted source mean/front world points into target-ray distances by
+projection onto the target ray before weighted accumulation. Publish current
+target scene z, never an average of neighboring geometry z. Cloud color/validity
+and decoded shadow length use independent eligible weights; preserve positive
+length on invalid clouds and repack only after selection. With no eligible
+current support, publish transparent cloud color, invalid cloud, current scene
+z and zero length, rather than copying an unrelated historical sample. This
+defines the conservative empty-support result at disocclusion boundaries.
+
+The full output is written on the first frame and every invalid/cut/resize
+frame. It may be spatially approximate at subpixel features; it must not wait
+for four frames, copy undefined history, or erase a broad cloud/terrain region.
+Owner visual judgment is required; interpolation is not claimed pixel-identical
+to a full-resolution march.
+
+### Existing temporal authority, coordinate-correct sampling
+
+The medium path retains A12 gamma-1 RGB-coherent clipping with independently
+bounded transmittance, weights 0.9/0.82, and all global continuity/reset causes.
+It does not use history-only nonfresh pixels or a larger variance gamma.
+Current valid cloud anchors use the converted target-domain mean/front;
+invalid finite/clear anchors and wind compensation retain their accepted roles.
+
+Reject out-of-frame reprojection before sampling. Medium reads the actual
+NEAREST full-history texel and reconstructs its ray at that texel center.
+Mean/front/finite-scene compatibility therefore includes the existing binary16
+position radius plus that full-history pixel's half-diagonal world footprint:
+`0.5*length(previousFrustumSpan/historySize)` for Orthographic, multiplied by
+the larger compared distance for Perspective. The frustum coordinates are the
+existing normalized Perspective-plane coordinates. This radius accounts only
+for NEAREST full-raster quantization, never for an entire low-resolution block;
+no continuity threshold or arbitrary cushion changes. Exact-clear scene
+classification and independent packed shadow-history decisions remain required.
+Successful xyz publication is always current-domain, never blended previous
+distances. High/low and Planar retain their pre-amendment behavior.
+
+### Resource and qualification boundary
+
+No added manager, attachment, texture, history, program category, command or
+pass. Current MRT bytes become `16*ceil(W/2)*ceil(H/2)` from `16*W*H` for medium;
+history remains `32*W*H`. Existing candidate-first resize, failure cleanup and
+disconnect ownership remain. No persistent CPU buffer or phase state is added.
+There is no public API/default, asset, upstream, SGP, Beer, Bloom or light-budget
+change. The exact new uniform and extra current-depth reads must be audited.
+
+One bounded GPU fixture proves all four phases, odd-size coordinate/depth
+alignment, complete first/cut frames, nonuniform current-domain reconstruction,
+meaningful temporal reuse and depth-edge rejection. Existing high/Planar history
+and cloud lifecycle/failure fixtures remain regression authorities. Exact paths,
+commands and owner performance/visual gates are in the
+[A13 plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-04-phase-a13g-globe-performance.md).
+
+### A13 candidate 3 execution limitation — 2026-09-04
+
+The current implementation is not qualified: the sole new GPU fixture still
+reports nonfinite RGB on history rejection. The frozen A12 variance helper
+has not been changed, and no tolerance or fallback was introduced. Exact
+development failures and the request for bounded Architecture direction are in
+the [A13 review](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#candidate-3-execution-blocker--2026-09-04).
+The five-path executable boundary is retained; resource/category/history/API,
+upstream/generated/new-SGP and Planar deltas remain zero except for the assigned
+medium current-target dimension reduction. Its byte formula is not an FPS claim.
+
+### A13 numerical interval correction — 2026-09-04
+
+Independent GPU diagnosis in
+[A13-AR-001](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-001--inverted-finite-variance-interval)
+demonstrates that finite constant channels and a weighted sample count of
+3.75 can round the mean outside the sampled extrema. A one-sided intersection
+then produces negative width and division by zero in coherent RGB clipping,
+poisoning history before the later depth-rejection witness.
+
+The approved narrow exception to frozen A12 arithmetic clamps both interval
+endpoints to the finite sampled extrema:
+
+```glsl
+vec4 lower = clamp(mean - sigma, minimumColor, maximumColor);
+vec4 upper = clamp(mean + sigma, minimumColor, maximumColor);
+```
+
+Monotonic clamping preserves an ordered interval for finite inputs and positive
+sample count; a constant channel has exact zero width. Keep the existing
+gamma-1 moments, coherent RGB fraction, separate transmittance clamp, history
+weights, semantic rejection and output packing. Do not substitute an epsilon,
+minimum variance, per-channel RGB clamp or nonfinite fallback. This correction
+applies to the shared Globe helper, including its high/low callers; their
+sampling policy and the Planar path do not change. It adds no resource, lookup,
+uniform, public API or continuity threshold. The existing phased fixture must
+prove finite output at each transition before claiming meaningful history use;
+the retained full-resolution history fixture remains the A12 regression check.
+Implementation and qualification remain pending the Execution correction.
+
+Execution has applied exactly these two endpoint clamps and retained all other
+clipping arithmetic. The phased and legacy history GPU fixtures pass, including
+finite full RGBA and positive bounded contribution at both fixed motion samples.
+Two retained resource-fixture setup/API failures keep full qualification pending;
+the [review](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#final-focused-command-results)
+records exact outcomes. No extra uniform, lookup, resource, API, upstream/SGP
+or Planar change; no fallback or numerical threshold was introduced.
+
+Architecture independently confirms A13-AR-001 fixed. The remaining
+[A13-AR-002/003 follow-up](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#current-spec-only-follow-up-assignment)
+corrects Spec tier selection and framebuffer-wrapper assertions only; it
+introduces no further algorithm or policy exception. Performance/visual
+qualification of the medium phased path is still pending.
+
+The Spec-only follow-up now verifies the actual medium camera cut and lazy
+resource transition. Last-good GPU objects remain live after the injected
+failure, but zero candidate destroy calls leave cleanup qualification open;
+see [exact results](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#spec-only-follow-up-results).
+No algorithm, resource, lookup, uniform or public contract changed in this turn.
+
+Architecture confirms the medium-cut/setup finding A13-AR-002 fixed. The
+remaining [A13-AR-003 continuation](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-003-targeted-injection-continuation)
+corrects which test update receives the injected failure; it does not change
+the renderer's candidate-first ownership or error policy. Candidate-wide
+qualification remains pending.
+
+The targeted Spec injection now passes, demonstrating candidate-first failure
+cleanup and last-good liveness without changing the product policy. The
+[execution record](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-003-targeted-execution-result--2026-09-04)
+reuses the accepted phased/lazy/history results; no runtime or resource delta.
+Candidate review and performance/visual acceptance remain pending.
+
+### A13 continuous-receiver reconstruction correction
+
+[A13-AR-004](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-004--continuous-sloped-receivers-rejected-as-depth-edges)
+demonstrates that equal-range angular separation does not bound positions on
+an oblique continuous receiver. It must not classify legitimate terrain slope
+as a disocclusion and erase untraced cloud rows. For phased-medium finite
+spatial support, use the local receiver-plane residual in the existing
+translation-free ray domain. Compute its normal from current-position screen
+derivatives in uniform control flow; require a finite positive normal magnitude
+and point-to-plane distance within the existing binary16/16 m position bound.
+No enlarged tolerance, assumed ellipsoid normal, new lookup/normal texture,
+resource or fallback is introduced.
+
+Raw finite/clear and cloud mean/front foreground gates remain independent and
+mandatory. Temporal compatibility, weights, phase schedule, first-frame
+publication, packing, high/low and Planar policies do not change. Validate the
+continuous sloped-plane case and retained silhouette rejection in the existing
+GPU fixture before another Architecture visual/cost observation. A13-AR-003
+is independently closed, but this newly observed quality regression keeps
+candidate 3 changes-requested; the measured short-run speedup is not acceptance.
+
+Execution has implemented the uniform-flow receiver derivatives and exact
+unnormalized plane residual with the existing storage radius. The fixed
+analytic plane and old-gate mutation pass in the existing phased fixture,
+including retained occlusion/temporal assertions; the legacy history fixture
+also passes. [Results](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-004-execution-result--2026-09-04).
+No implementation deviation, added lookup, resource or public-policy change.
+Independent review and corrected-source visual/performance judgment remain
+pending; Execution did not operate the owner page.
+
+Architecture independently confirms this implementation and its direct GPU
+regression evidence. Corrected-source live inspection removes the diagnosed
+comb while retaining the medium cost benefit; [closure and limitations](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#independent-candidate-3-closure-and-owner-handoff)
+record the representative result. No further policy or implementation exception
+is introduced. All A13 code findings are closed; phase acceptance remains the
+project owner's quality/performance decision.
+
+### A13 independent interpolation and clipping support
+
+The owner subsequently reports increased medium shimmer and approves
+[A13-AR-005](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-005--interpolation-support-collapses-history-statistics).
+Phased current reconstruction's tent weights must not define its history
+statistics: a directly traced phase otherwise collapses the statistical
+interval to one current value and nullifies temporal denoising.
+
+Use the existing clamped 3x3 samples, with unit statistical weight/count after
+finite color/distance, exact finite/clear, finite receiver-plane and valid-cloud
+foreground qualification. Zero tent weight is not a statistical rejection.
+Current color/distance and independent shadow reconstruction retain their
+original positive tent weights and ordering; statistical support cannot create
+current validity or bypass the no-support immediate output. Geometry may
+legitimately reduce the statistical neighborhood, without a variance floor.
+
+The accepted clipping formula, ordered interval correction, gamma, history
+weights/rejection, packing and current-domain publication remain frozen. No
+sampling/phase/STBN, footprint, high/low/Planar, API or persistent-resource
+change is authorized. Existing fetches are reused; extra qualification ALU
+must be checked against the medium performance objective. A fixed four-phase
+GPU witness must distinguish the old statistical rule and preserve history-off
+spatial/occlusion behavior. This decision authorizes implementation; neither
+complete shimmer removal nor owner acceptance is inferred. Subsequent live
+cost/quality and effective-history/noise analysis remain Architecture-owned.
+
+### A13 independent-support execution
+
+The bounded implementation reuses the phased 3x3 fetches for geometrically
+qualified unit-count statistics, leaving current positive-tent sums, clipping
+formula and history semantics unchanged. The actual-GPU four-phase witness
+passes and rejects the former statistical support on the aligned phase;
+history-off publications remain exact and incompatible zero-tent samples
+remain excluded. See the
+[execution record](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-005-execution-result--2026-09-04).
+No resource/API/upstream delta; added qualification ALU and residual shimmer
+still require Architecture's live review rather than inferred acceptance.
+
+Architecture independently confirms the implementation and discriminating GPU
+oracle, with no additional policy exception. The
+[bounded live review](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-005-independent-review-and-bounded-live-observation)
+does not establish sustained 60 FPS or complete dynamic stability; phase quality/
+performance acceptance remains open. Current interpolation, geometry, history
+weights and phase/STBN policies stay frozen pending any separately diagnosed
+and approved correction.
+
+### A13 precise phased receiver-depth reconstruction
+
+[A13-AR-006](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-006--lossy-log-depth-round-trip-erases-medium-clouds)
+shows that the reverse-log-to-normal-depth/vec4 inverse-projection round trip
+can make the medium low producer and full resolve disagree on the same finite
+receiver at the native small-near, long-range projection. Strict receiver
+qualification must not be loosened to compensate for inaccurate endpoints.
+
+For Globe `u_cloudTracePhased` only, reconstruct producer depth using
+`czm_screenToEyeCoordinates(cloudCoordinates, rawDepth)` and full-resolution
+depth using `czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth)`. These are
+the existing precise native `(vec2, float)` overloads. Pass raw depth once,
+retain exact-clear gating, and retain the native window builtin dependency.
+Do not feed already reversed depth to the raw-depth overload. No custom log
+formula, upstream change, alternate texture, larger tolerance or new resource
+is authorized. Nonphased Globe and Planar paths remain unchanged.
+
+Native `frameState.useLogDepth` remains the encoding authority. Orthographic
+uses the linear variant even when the scene's public log preference is true;
+the fixture must not preserve an artificial Orthographic/log combination by
+adding a product branch. Qualify a fixed small-near Perspective log case
+against analytic receiver distance and the former-expression mutation in the
+existing phased fixture, retaining Orthographic linear and existing occlusion/
+history tests. The diagnosed strip defect does not reopen the statistical,
+temporal, phase/STBN or resource policies. Product review and live medium
+quality/performance acceptance remain pending after the temporary diagnostic.
+
+### A13 precise-depth execution
+
+The two phased Globe expressions now use the specified native raw-depth
+overloads, retaining their window builtin dependency and ADR-0043 encoding
+authority. A fixed analytic small-near Perspective log-depth fixture passes
+and rejects the old expressions; Orthographic remains linear. The
+[execution record](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-006-execution-result--2026-09-04)
+details current support and retained semantic assertions. No resource, API,
+upstream, tolerance or temporal-policy delta; live acceptance remains pending.
+
+Architecture independently confirms the implementation and discriminating
+analytic GPU oracle. Corrected-source oblique and native rotation observations
+remove the diagnosed horizontal gaps; a single restored-view cadence window
+is 59.96 FPS. The
+[independent review](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-006-independent-review-and-corrected-source-observation)
+records state restoration and the limits of this evidence. A13-AR-006 is fixed
+without a new policy exception; owner quality/performance and phase checkpoint
+remain pending.
+
+### A13 stochastic cloud-depth support — A13-AR-007
+
+The owner approves the next noise correction. The Architecture-owned
+[diagnostic](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-007--stochastic-cloud-depth-rejects-stationary-history)
+isolates stochastic mean/front rejection in the current medium view. The
+[local UE5.2 audit](../../../AgentDocs/atmosphere-clouds-effects/discussions/2026-09-04-a13g-globe-performance-source-discovery.md#local-ue52-source-audit-and-a13-ar-007-decision)
+supports distinguishing approximate cloud reprojection depth from opaque
+scene depth; it does not authorize copying UE code, defaults or its resource
+protocol. This amendment authorizes implementation, not visual acceptance.
+
+Only Globe `u_cloudTracePhased` changes cloud-color history compatibility.
+The old mean/front three-dimensional point-equality tests are superseded by
+the following sampling-support model; nonphased Globe and Planar retain them.
+
+1. Reuse the existing geometrically qualified 3x3 current samples. After
+   finite checks, exact depth classification, receiver-plane qualification
+   and cloud-foreground rejection, accumulate two separate longitudinal
+   support intervals: mean and front. Only cloud-valid samples enter these
+   intervals, independently of positive tent interpolation weight. Do not
+   change current interpolation, color statistics or shadow-length ordering.
+2. For each semantic source distance `d` in metres, reuse the producer's
+   constants to compute `h(d)=min(1000, 50+(1.01-1)*max(d,0))`. This bounds
+   the progressive local step scale and reuses the existing two-step initial
+   jitter span. Project its radius `2*h(d)` onto the target ray by multiplying
+   by `abs(dot(sourceDirection,targetDirection))`. Extend that sample's
+   already-converted target distance by this radius, then take interval
+   extrema over eligible samples; clamp the lower bound to zero. Reuse the
+   named shared constants, not duplicated literals or a new tuning value.
+   This is a bounded reconstruction-support policy, not a proof that arbitrary
+   heterogeneous-density estimator errors are limited to one jitter span.
+   Unsupported samples may still reject history; no convergence promise follows.
+3. Keep the existing mean-anchor previous UV, advection, bounds rejection,
+   actual NEAREST texel-center selection and previous-ray reconstruction.
+   With `s` the current spatial semantic distance in metres, `Pprev` its
+   sampled previous-ray anchor and `Pcur` its current anchor expressed in the
+   previous-camera domain (already cloud-advected), compute
+   `p=s+dot(Pprev-Pcur,targetDirection)`. Compare each mean/front `p` against
+   its own current support interval, padded only by the existing semantic
+   binary16/16 m plus full-history-texel precision radius. Require nonnegative
+   `p`; for a finite receiver, also require both projected historical cloud
+   distances in front of the actual current scene distance within the old
+   precision radius. Cloud sampling uncertainty never pads receiver depth.
+4. Independently require the current advected mean anchor to lie within the
+   old mean precision radius of the selected previous ray. For
+   `v=currentMeanAnchor-previousRayOrigin`, the residual is
+   `length(v-previousRayDirection*dot(v,previousRayDirection))`. This guards
+   coordinate alignment without treating stochastic displacement along that
+   ray as a lateral error. Do not require the current front anchor to occupy
+   the mean-selected ray: under translation they are different volume points.
+   Front history instead has its own longitudinal support and foreground gate.
+5. Exact-clear scene classification and the finite scene-position check remain
+   unchanged and mandatory. Keep current/previous cloud validity, color and
+   transmittance compatibility, gamma-1 clipping, 0.9/0.82 weights, all global
+   camera/material/light cuts and immediate first/cut/no-support output.
+   Shadow-length compatibility remains independent and unchanged. Published
+   xyz stays exactly current spatial data; no depth interval is stored in MRT.
+
+The same model applies to stationary and continuous medium frames, with no
+stationary-only bypass. It adds fixed min/max/projection ALU within existing
+reads, not texture lookups, local sample arrays, uniforms, renderer state,
+attachments, resources, passes or history. Producer steps, STBN/phases,
+material/lighting, all quality budgets, Beer shadows and public API stay frozen.
+
+The existing phased GPU fixture must distinguish the old point gate using
+actual product-march jittered distance estimates and controlled known-error
+color, retain meaningful moved-history/wrong-UV and foreground/scene-edge
+witnesses, and reject cloud history outside the supported depth interval.
+The existing legacy history fixture protects nonphased paths. Architecture
+subsequently checks actual per-pixel reuse, visible grain/motion and bounded
+cost. Broad intervals can retain stale volume color, and residual sampling
+grain can remain; neither numerical history use nor a smooth still image
+alone closes the owner quality/performance gate. No stronger spatial filter
+or wider interval may be added without a separately diagnosed amendment.
+
+### A13-AR-007 support-model execution
+
+The implementation follows the five steps above with qualified mean/front
+intervals, shared step constants, current-ray projection and unchanged strict
+receiver precision. The real product-march jitter fixture verifies controlled
+color-error reduction, old-point-gate discrimination and unsupported/occluded
+history rejection; existing temporal/depth assertions remain. See
+[execution evidence](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-007-execution-result--2026-09-04).
+No lookup/resource/API/upstream delta or additional policy exception. Broader
+volume support still carries stale-color risk; live quality/cost is not approved
+by this controlled result.
+
+Architecture independently approves the five-step implementation and the
+discriminating product-estimator/controlled-color/occlusion evidence. The
+[live review](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-04-a13g-globe-performance.md#a13-ar-007-independent-review-and-live-observation)
+confirms effective stationary reuse and visible grain reduction without a
+short-window cadence loss. No additional policy exception is introduced.
+Rotation first-frame grain, subtle trails and sustained/all-view performance
+remain explicit owner-quality limits; this closes A13-AR-007 code review, not
+the A13 phase or its visual/performance gate.
+
+The owner subsequently accepts the corrected result on 2026-09-04, closing
+the A13 quality/performance gate. The bounded evidence and residual limitations
+above remain unchanged; acceptance does not establish a universal FPS target
+or a zero-grain guarantee. The separately reported cloud/Cesium-clock linkage
+does not change the accepted render-frame sampling/temporal policy.

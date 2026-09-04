@@ -40,6 +40,7 @@ Execution Agent 必须与 Architecture Agent 使用同一个 repository checkout
 
 ## 核心职责
 
+- 接收根因或目标行为、方案和边界已明确的具体编码及验证任务。初始排查、性能归因、参考研究与方案取舍由架构角色负责；不承担开放式诊断派工。
 - 只实现 current phase/standalone plan 的批准范围。
 - 修改前发现实际调用关系、构建入口、测试入口和生成文件边界。
 - 默认把主体实现放在 SceneGIS-owned paths；上游修改必须符合派工中的 SGP 决定。
@@ -70,7 +71,7 @@ Execution Agent 必须与 Architecture Agent 使用同一个 repository checkout
 
 如果在实现中发现 blocking defect：
 
-- 先完成安全的只读诊断并记录可重复事实；
+- 先在具体实现范围内完成必要的安全只读检查并记录可重复事实；需要重新判断根因或方案时交回架构角色，不扩展为独立调查；
 - 判断修复是否仍属于本 phase；
 - 超出范围、改变公共契约或需要新的架构决定时暂停并通知架构角色；
 - 不以临时 workaround 掩盖 blocker。

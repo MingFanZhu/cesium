@@ -794,6 +794,7 @@ try {
   viewer.timeline.zoomTo(observationDayStart, observationDayStop);
   configureNativeEnvironment(viewer.scene, "globe");
   viewer.scene.rethrowRenderErrors = true;
+  viewer.scene.debugShowFramesPerSecond = true;
   viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString("#26362f");
   effects = new Cesium.SceneGISEnvironmentEffects({
     mode: "globe",
