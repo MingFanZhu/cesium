@@ -1,12 +1,17 @@
 import buildModuleUrl from "../../Core/buildModuleUrl.js";
 import Check from "../../Core/Check.js";
+import Cartesian3 from "../../Core/Cartesian3.js";
+import Color from "../../Core/Color.js";
 import defined from "../../Core/defined.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import Event from "../../Core/Event.js";
 import Frozen from "../../Core/Frozen.js";
 import Resource from "../../Core/Resource.js";
 import ContextLimits from "../../Renderer/ContextLimits.js";
+import DirectionalLight from "../../Scene/DirectionalLight.js";
 import SceneMode from "../../Scene/SceneMode.js";
+import ShadowMode from "../../Scene/ShadowMode.js";
+import SunLight from "../../Scene/SunLight.js";
 import SceneGISPlanarWorld from "./SceneGISPlanarWorld.js";
 import SceneGISEnvironmentEffectsRenderer from "./_private/_SceneGISEnvironmentEffectsRenderer.js";
 
@@ -47,6 +52,7 @@ const cloudAssetFiles = Object.freeze({
 });
 const cloudQualities = Object.freeze(["low", "medium", "high"]);
 const cloudPresets = Object.freeze(["cumulus", "stratus", "cirrus", "mixed"]);
+const moonTextureAsset = "Assets/SceneGIS/Environment/Moon/color_large.webp";
 
 function validateLiveScene(scene) {
   //>>includeStart('debug', pragmas.debug);
@@ -111,6 +117,49 @@ function validateGlobeConflict(controller, scene) {
     throw new DeveloperError('mode "globe" must not use a planar world.');
   }
   if (
+    !controller._ownsGlobeCelestialLifecycle &&
+    defined(scene.light) &&
+    !(scene.light instanceof SunLight)
+  ) {
+    throw new DeveloperError(
+      "Advanced Globe Moonlight requires the initial scene.light to be undefined or a SunLight.",
+    );
+  }
+  if (controller._ownsGlobeCelestialLifecycle) {
+    if (scene.moon !== controller._celestialMoon) {
+      throw new DeveloperError(
+        "scene.moon must remain the captured Moon while advanced Globe Moonlight is active.",
+      );
+    }
+    if (scene.light !== controller._directionalLight) {
+      throw new DeveloperError(
+        "scene.light must remain the controller-owned DirectionalLight while advanced Globe Moonlight is active.",
+      );
+    }
+    if (
+      controller._changedMoonTextureUrl &&
+      (!defined(scene.moon) ||
+        scene.moon.textureUrl !== controller._celestialMoonTextureUrl)
+    ) {
+      throw new DeveloperError(
+        "scene.moon.textureUrl must remain controller-owned while advanced Globe Moonlight is active.",
+      );
+    }
+    if (controller._moonShadowActive && scene.shadowMap.enabled !== true) {
+      throw new DeveloperError(
+        "scene.shadowMap.enabled must remain true while Moon shadows are active.",
+      );
+    }
+    if (
+      controller._moonShadowActive &&
+      scene.globe.shadows !== ShadowMode.ENABLED
+    ) {
+      throw new DeveloperError(
+        "scene.globe.shadows must remain enabled while Moon shadows are active.",
+      );
+    }
+  }
+  if (
     controller._ownsGlobeDepthTestLifecycle &&
     scene.globe.depthTestAgainstTerrain !== true
   ) {
@@ -118,6 +167,120 @@ function validateGlobeConflict(controller, scene) {
       "scene.globe.depthTestAgainstTerrain must remain true while advanced Globe environment effects are active.",
     );
   }
+}
+
+function acquireGlobeCelestialLifecycle(controller, scene) {
+  if (
+    controller._mode !== globeMode ||
+    controller._ownsGlobeCelestialLifecycle
+  ) {
+    return;
+  }
+  controller._celestialPreviousLight = scene.light;
+  controller._celestialSunColor = Color.clone(
+    scene.light?.color ?? Color.WHITE,
+    controller._celestialSunColor,
+  );
+  controller._celestialSunIntensity = scene.light?.intensity ?? 2.0;
+  controller._celestialPreviousShadowMapEnabled = scene.shadowMap.enabled;
+  controller._celestialPreviousGlobeShadows = scene.globe.shadows;
+  controller._celestialMoon = scene.moon;
+  controller._celestialPreviousMoonTextureUrl = defined(scene.moon)
+    ? scene.moon.textureUrl
+    : undefined;
+  controller._celestialMoonTextureUrl = buildModuleUrl(moonTextureAsset);
+  controller._changedMoonTextureUrl =
+    defined(scene.moon) &&
+    scene.moon.textureUrl !== controller._celestialMoonTextureUrl;
+  controller._ownsGlobeCelestialLifecycle = true;
+  scene.light = controller._directionalLight;
+  if (controller._changedMoonTextureUrl) {
+    scene.moon.textureUrl = controller._celestialMoonTextureUrl;
+  }
+}
+
+function releaseMoonShadowLifecycle(controller) {
+  const scene = controller._scene;
+  if (!defined(scene) || scene.isDestroyed()) {
+    controller._ownsShadowMapEnabled = false;
+    controller._ownsGlobeShadowMode = false;
+    controller._moonShadowActive = false;
+    return;
+  }
+  if (controller._ownsShadowMapEnabled) {
+    if (scene.shadowMap.enabled === true) {
+      scene.shadowMap.enabled = controller._celestialPreviousShadowMapEnabled;
+    }
+    controller._ownsShadowMapEnabled = false;
+  }
+  if (controller._ownsGlobeShadowMode && defined(scene.globe)) {
+    if (scene.globe.shadows === ShadowMode.ENABLED) {
+      scene.globe.shadows = controller._celestialPreviousGlobeShadows;
+    }
+    controller._ownsGlobeShadowMode = false;
+  }
+  controller._moonShadowActive = false;
+}
+
+function updateGlobeCelestialLifecycle(controller) {
+  if (!controller._ownsGlobeCelestialLifecycle) {
+    return;
+  }
+  const state = controller._pipeline.getPrimaryLightState();
+  if (!defined(state)) {
+    return;
+  }
+  Cartesian3.negate(state.direction, controller._directionalLight.direction);
+  Color.clone(state.nativeColor, controller._directionalLight.color);
+  controller._directionalLight.intensity = state.nativeIntensity;
+  const moonShadows =
+    state.moonContribution > 0.0 &&
+    controller._showMoonlight &&
+    controller._showMoonShadows;
+  const scene = controller._scene;
+  if (!moonShadows) {
+    releaseMoonShadowLifecycle(controller);
+    return;
+  }
+  controller._moonShadowActive = true;
+  if (scene.shadowMap.enabled !== true) {
+    scene.shadowMap.enabled = true;
+    controller._ownsShadowMapEnabled = true;
+  }
+  if (scene.globe.shadows !== ShadowMode.ENABLED) {
+    scene.globe.shadows = ShadowMode.ENABLED;
+    controller._ownsGlobeShadowMode = true;
+  }
+}
+
+function releaseGlobeCelestialLifecycle(controller) {
+  if (!controller._ownsGlobeCelestialLifecycle) {
+    return;
+  }
+  const scene = controller._scene;
+  releaseMoonShadowLifecycle(controller);
+  if (defined(scene) && !scene.isDestroyed()) {
+    if (scene.light === controller._directionalLight) {
+      scene.light = controller._celestialPreviousLight;
+    }
+    if (
+      controller._changedMoonTextureUrl &&
+      defined(controller._celestialMoon) &&
+      controller._celestialMoon.textureUrl ===
+        controller._celestialMoonTextureUrl
+    ) {
+      controller._celestialMoon.textureUrl =
+        controller._celestialPreviousMoonTextureUrl;
+    }
+  }
+  controller._ownsGlobeCelestialLifecycle = false;
+  controller._changedMoonTextureUrl = false;
+  controller._celestialPreviousLight = undefined;
+  controller._celestialPreviousShadowMapEnabled = undefined;
+  controller._celestialPreviousGlobeShadows = undefined;
+  controller._celestialMoon = undefined;
+  controller._celestialPreviousMoonTextureUrl = undefined;
+  controller._celestialMoonTextureUrl = undefined;
 }
 
 function acquireGlobeDepthTestLifecycle(controller, scene) {
@@ -412,7 +575,7 @@ function publishPendingResources(controller, scene) {
   }
 }
 
-function activate(controller, scene) {
+function activate(controller, scene, time) {
   validateActive(controller, scene);
   if (defined(controller._scene) && controller._scene !== scene) {
     throw new DeveloperError(
@@ -421,6 +584,7 @@ function activate(controller, scene) {
   }
   controller._scene = scene;
   acquireGlobeDepthTestLifecycle(controller, scene);
+  acquireGlobeCelestialLifecycle(controller, scene);
   ensurePipeline(controller, scene);
   if (
     controller._mode !== globeMode &&
@@ -433,13 +597,19 @@ function activate(controller, scene) {
   }
   if (controller._pipeline.hasResources()) {
     controller._ready = true;
-    controller._pipeline.prepareGlobeLighting(scene.frameState);
+    controller._pipeline.prepareGlobeLighting(scene.frameState, time);
+    updateGlobeCelestialLifecycle(controller);
     return;
+  }
+  if (controller._mode === globeMode) {
+    controller._pipeline.prepareGlobeLighting(scene.frameState, time);
+    updateGlobeCelestialLifecycle(controller);
   }
   beginGeneration(controller, scene);
   publishPendingResources(controller, scene);
   if (controller._ready) {
-    controller._pipeline.prepareGlobeLighting(scene.frameState);
+    controller._pipeline.prepareGlobeLighting(scene.frameState, time);
+    updateGlobeCelestialLifecycle(controller);
   }
 }
 
@@ -490,6 +660,8 @@ function SceneGISEnvironmentEffects(options) {
   const showCrepuscularRays = options.showCrepuscularRays ?? true;
   const showBloom = options.showBloom ?? true;
   const showLensFlare = options.showLensFlare ?? true;
+  const showMoonlight = options.showMoonlight ?? true;
+  const showMoonShadows = options.showMoonShadows ?? true;
   const cloudQuality =
     options.cloudQuality ?? (mode === globeMode ? "high" : "medium");
   const cloudPreset = options.cloudPreset ?? "cumulus";
@@ -512,6 +684,7 @@ function SceneGISEnvironmentEffects(options) {
   const bloomThreshold = options.bloomThreshold ?? 10.0;
   const bloomIntensity = options.bloomIntensity ?? 0.05;
   const lensFlareIntensity = options.lensFlareIntensity ?? 5.0;
+  const moonlightIntensity = options.moonlightIntensity ?? 1.0;
   const heightFogDensity = options.heightFogDensity ?? 0.000008;
   const heightFogHeightFalloff = options.heightFogHeightFalloff ?? 0.0002;
   const heightFogBaseHeight = options.heightFogBaseHeight ?? 0.0;
@@ -534,6 +707,7 @@ function SceneGISEnvironmentEffects(options) {
   validateRange("options.bloomThreshold", bloomThreshold, 0.0, 65504.0);
   validateCalibrationScale("options.bloomIntensity", bloomIntensity);
   validateCalibrationScale("options.lensFlareIntensity", lensFlareIntensity);
+  validateCalibrationScale("options.moonlightIntensity", moonlightIntensity);
   validateRange("options.heightFogDensity", heightFogDensity, 0.0, 0.001);
   validateRange(
     "options.heightFogHeightFalloff",
@@ -611,6 +785,8 @@ function SceneGISEnvironmentEffects(options) {
   Check.typeOf.bool("options.showCrepuscularRays", showCrepuscularRays);
   Check.typeOf.bool("options.showBloom", showBloom);
   Check.typeOf.bool("options.showLensFlare", showLensFlare);
+  Check.typeOf.bool("options.showMoonlight", showMoonlight);
+  Check.typeOf.bool("options.showMoonShadows", showMoonShadows);
   //>>includeEnd('debug');
 
   this._mode = mode;
@@ -624,6 +800,8 @@ function SceneGISEnvironmentEffects(options) {
   this._showCrepuscularRays = showCrepuscularRays;
   this._showBloom = showBloom;
   this._showLensFlare = showLensFlare;
+  this._showMoonlight = showMoonlight;
+  this._showMoonShadows = showMoonShadows;
   this._cloudQuality = cloudQuality;
   this._cloudPreset = cloudPreset;
   this._cloudCoverage = cloudCoverage;
@@ -640,6 +818,7 @@ function SceneGISEnvironmentEffects(options) {
   this._bloomThreshold = bloomThreshold;
   this._bloomIntensity = bloomIntensity;
   this._lensFlareIntensity = lensFlareIntensity;
+  this._moonlightIntensity = moonlightIntensity;
   this._heightFogDensity = heightFogDensity;
   this._heightFogHeightFalloff = heightFogHeightFalloff;
   this._heightFogBaseHeight = heightFogBaseHeight;
@@ -658,6 +837,23 @@ function SceneGISEnvironmentEffects(options) {
   this._ownsGlobeDepthTestLifecycle = false;
   this._changedGlobeDepthTestAgainstTerrain = false;
   this._globeDepthTestAgainstTerrainPrevious = undefined;
+  this._directionalLight =
+    mode === globeMode
+      ? new DirectionalLight({ direction: Cartesian3.UNIT_X })
+      : undefined;
+  this._celestialSunColor = new Color();
+  this._celestialSunIntensity = 2.0;
+  this._ownsGlobeCelestialLifecycle = false;
+  this._celestialPreviousLight = undefined;
+  this._celestialPreviousShadowMapEnabled = undefined;
+  this._celestialPreviousGlobeShadows = undefined;
+  this._celestialMoon = undefined;
+  this._celestialPreviousMoonTextureUrl = undefined;
+  this._celestialMoonTextureUrl = undefined;
+  this._changedMoonTextureUrl = false;
+  this._ownsShadowMapEnabled = false;
+  this._ownsGlobeShadowMode = false;
+  this._moonShadowActive = false;
   this._generation = 0;
   this._generationStarted = false;
   this._pendingBuffers = undefined;
@@ -722,6 +918,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       this._errorGeneration = -1;
       if (!value) {
         setPipelineEnabled(this, false);
+        releaseGlobeCelestialLifecycle(this);
         releaseGlobeDepthTestLifecycle(this);
       }
       requestRender(this);
@@ -1275,6 +1472,48 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       setWarmNumber(this, "_cloudRadianceScale", value, 0.0, 64.0);
     },
   },
+  /**
+   * Gets or sets whether readable Globe Moonlight participates in the primary light.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
+  showMoonlight: {
+    get: function () {
+      return this._showMoonlight;
+    },
+    set: function (value) {
+      setRenderBoolean(this, "_showMoonlight", value);
+    },
+  },
+  /**
+   * Gets or sets whether positive Globe Moonlight enables native directional shadows.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   */
+  showMoonShadows: {
+    get: function () {
+      return this._showMoonShadows;
+    },
+    set: function (value) {
+      setRenderBoolean(this, "_showMoonShadows", value);
+    },
+  },
+  /**
+   * Gets or sets the readable full-phase Globe Moonlight scale.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
+  moonlightIntensity: {
+    get: function () {
+      return this._moonlightIntensity;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_moonlightIntensity", value, 0.0, 64.0);
+    },
+  },
 });
 
 SceneGISEnvironmentEffects.prototype.connectedCallback = function (element) {
@@ -1300,6 +1539,7 @@ SceneGISEnvironmentEffects.prototype.disconnectedCallback = function (element) {
   if (defined(this._pipeline) && !this._pipeline.isDestroyed()) {
     this._pipeline.destroy();
   }
+  releaseGlobeCelestialLifecycle(this);
   releaseGlobeDepthTestLifecycle(this);
   this._pipeline = undefined;
   this._scene = undefined;
@@ -1312,17 +1552,15 @@ SceneGISEnvironmentEffects.prototype.disconnectedCallback = function (element) {
 };
 
 SceneGISEnvironmentEffects.prototype.firstUpdate = function (scene, time) {
-  void time;
   if (!defined(this._element)) {
     throw new DeveloperError(
       "SceneGISEnvironmentEffects must be connected before firstUpdate.",
     );
   }
-  activate(this, scene);
+  activate(this, scene, time);
 };
 
 SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
-  void time;
   if (!defined(this._element)) {
     throw new DeveloperError(
       "SceneGISEnvironmentEffects must be connected before update.",
@@ -1332,7 +1570,7 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
     return;
   }
   if (!defined(this._scene) || !defined(this._pipeline?._scene)) {
-    activate(this, scene);
+    activate(this, scene, time);
     return;
   }
   try {
@@ -1342,6 +1580,10 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
     return;
   }
   ensurePipeline(this, scene);
+  if (this._mode === globeMode && !this._ready) {
+    this._pipeline.prepareGlobeLighting(scene.frameState, time);
+    updateGlobeCelestialLifecycle(this);
+  }
   if (
     !this._pipeline.hasResources() &&
     (this._mode === globeMode ||
@@ -1354,7 +1596,8 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
   }
   publishPendingResources(this, scene);
   if (this._ready) {
-    this._pipeline.prepareGlobeLighting(scene.frameState);
+    this._pipeline.prepareGlobeLighting(scene.frameState, time);
+    updateGlobeCelestialLifecycle(this);
   }
 };
 
@@ -1383,6 +1626,8 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [showCrepuscularRays=true] Whether cloud shadow length modulates atmosphere and fog Sun inscatter.
  * @property {boolean} [showBloom=true] Whether Globe scene-wide HDR bloom is shown.
  * @property {boolean} [showLensFlare=true] Whether Globe Sun-gated lens artifacts are shown.
+ * @property {boolean} [showMoonlight=true] Whether readable Globe Moonlight participates in the primary directional light.
+ * @property {boolean} [showMoonShadows=true] Whether positive Globe Moonlight enables native directional shadows.
  * @property {string} [cloudQuality] Exact "low", "medium", or "high" cloud budget. Defaults to "high" on Globe and "medium" on Planar.
  * @property {string} [cloudPreset="cumulus"] Exact "cumulus", "stratus", "cirrus", or "mixed" immutable morphology preset.
  * @property {number} [cloudCoverage] Global cloud coverage bias in the inclusive range 0–1. Defaults to 0.3 on Globe and 0.45 on Planar.
@@ -1399,6 +1644,7 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [bloomThreshold=10.0] Globe HDR bloom threshold in the inclusive RGBA16F range 0–65504.
  * @property {number} [bloomIntensity=0.05] Globe scene-wide bloom intensity in the inclusive range 0–64.
  * @property {number} [lensFlareIntensity=5.0] Globe Sun-gated lens artifact intensity in the inclusive range 0–64.
+ * @property {number} [moonlightIntensity=1.0] Readable full-phase Globe Moonlight scale in the inclusive range 0–64.
  * @property {number} [heightFogDensity=0.000008] Base-height extinction coefficient per meter, in the inclusive range 0–0.001.
  * @property {number} [heightFogHeightFalloff=0.0002] Exponential height falloff per meter, in the inclusive range 0–0.001.
  * @property {number} [heightFogBaseHeight=0.0] Density reference height in meters, in the inclusive range -60000–60000.

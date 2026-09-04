@@ -789,19 +789,29 @@ void sceneGISCloudIncidentIrradiance(
     vec3 localPosition,
     vec3 globePosition,
     vec3 sunDirection,
+    vec3 primaryLightDirection,
+    vec3 primaryLightScale,
     out vec3 sunIrradiance,
     out vec3 skyIrradiance)
 {
     #ifdef SCENEGIS_GLOBE
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
     vec3 point = globePosition * 0.001;
-    sunIrradiance = max(GetSunAndSkyScalarIrradiance(
+    vec3 unusedSunIrradiance = GetSunAndSkyScalarIrradiance(
         atmosphere,
         transmittanceTexture,
         irradianceTexture,
         point,
         sunDirection,
-        skyIrradiance), vec3(0.0));
+        skyIrradiance);
+    vec3 unusedPrimarySkyIrradiance;
+    sunIrradiance = max(GetSunAndSkyScalarIrradiance(
+        atmosphere,
+        transmittanceTexture,
+        irradianceTexture,
+        point,
+        primaryLightDirection,
+        unusedPrimarySkyIrradiance) * primaryLightScale, vec3(0.0));
     skyIrradiance = max(skyIrradiance, vec3(0.0)) +
         sceneGISReadableNightSkyIrradiance(
             normalize(globePosition),
@@ -827,6 +837,8 @@ vec3 sceneGISGlobeCloudGroundSource(
     sampler2D irradianceTexture,
     vec3 globePosition,
     vec3 sunDirection,
+    vec3 primaryLightDirection,
+    vec3 primaryLightScale,
     float cloudCoverage,
     float groundOpticalDepth)
 {
@@ -836,7 +848,7 @@ vec3 sceneGISGlobeCloudGroundSource(
     float height = length(globePosition) - SCENEGIS_BOTTOM_RADIUS;
     vec3 groundPoint = (globePosition - surfaceNormal * height) * 0.001;
     vec3 groundSkyIrradiance;
-    vec3 groundSunIrradiance = GetSunAndSkyIrradiance(
+    vec3 unusedGroundSunIrradiance = GetSunAndSkyIrradiance(
         atmosphere,
         transmittanceTexture,
         irradianceTexture,
@@ -844,6 +856,15 @@ vec3 sceneGISGlobeCloudGroundSource(
         surfaceNormal,
         sunDirection,
         groundSkyIrradiance);
+    vec3 unusedPrimaryGroundSkyIrradiance;
+    vec3 groundSunIrradiance = GetSunAndSkyIrradiance(
+        atmosphere,
+        transmittanceTexture,
+        irradianceTexture,
+        groundPoint,
+        surfaceNormal,
+        primaryLightDirection,
+        unusedPrimaryGroundSkyIrradiance) * primaryLightScale;
     float groundSkyHemisphere = 0.5 *
         (1.0 + dot(surfaceNormal, normalize(groundPoint)));
     groundSkyIrradiance += sceneGISReadableNightSkyIrradiance(
@@ -869,6 +890,8 @@ void sceneGISCloudLightingComponents(
     vec3 localRayDirection,
     vec3 localSunDirection,
     vec3 globeSunDirection,
+    vec3 actualSunDirection,
+    vec3 primaryLightScale,
     vec3 atmosphereSun,
     vec3 skyIrradiance,
     float sunOpticalDepth,
@@ -895,7 +918,9 @@ void sceneGISCloudLightingComponents(
         transmittanceTexture,
         irradianceTexture,
         sampleGlobePosition,
+        actualSunDirection,
         globeSunDirection,
+        primaryLightScale,
         cloudCoverage,
         groundOpticalDepth);
     #endif
@@ -1180,6 +1205,8 @@ void sceneGISMarchClouds(
     vec3 worldVertical,
     vec3 localSunDirection,
     vec3 globeSunDirection,
+    vec3 actualSunDirection,
+    vec3 primaryLightScale,
     vec3 ellipsoidCenter,
     vec3 ellipsoidRadii,
     vec2 cloudOffset,
@@ -1567,7 +1594,9 @@ void sceneGISMarchClouds(
                 irradianceTexture,
                 sampleLocal,
                 sampleGlobePosition,
+                actualSunDirection,
                 incidentSunDirection,
+                primaryLightScale,
                 atmosphereSun,
                 skyIrradiance);
             vec3 solarScattering;
@@ -1582,6 +1611,8 @@ void sceneGISMarchClouds(
                 localRayDirection,
                 localSunDirection,
                 globeSunDirection,
+                actualSunDirection,
+                primaryLightScale,
                 atmosphereSun,
                 skyIrradiance,
                 sunOpticalDepth,

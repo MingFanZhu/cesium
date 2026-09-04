@@ -1,6 +1,9 @@
 uniform sampler2D u_sceneGISTransmittanceTexture;
 uniform sampler2D u_sceneGISIrradianceTexture;
 uniform float u_surfaceRadianceScale;
+uniform vec3 u_sceneGISActualSunDirection;
+uniform vec3 u_sceneGISPrimaryLightDirection;
+uniform vec3 u_sceneGISPrimaryLightScale;
 
 vec3 sceneGISGlobeGeodeticSurfaceNormal(vec3 positionMC)
 {
@@ -29,11 +32,11 @@ vec3 sceneGISGlobeSurfaceLighting(
     vec3 globePosition = geodeticNormal *
         (SCENEGIS_BOTTOM_RADIUS + height);
     vec3 globeNormal = normalize(surfaceNormalWC);
-    vec3 globeSun = normalize(u_sceneGISShadowSunDirection);
+    vec3 globeSun = normalize(u_sceneGISActualSunDirection);
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
     vec3 virtualPoint = globePosition * 0.001;
     vec3 skyIrradiance;
-    vec3 sunIrradiance = GetSunAndSkyIrradiance(
+    vec3 unusedSunIrradiance = GetSunAndSkyIrradiance(
         atmosphere,
         u_sceneGISTransmittanceTexture,
         u_sceneGISIrradianceTexture,
@@ -41,6 +44,16 @@ vec3 sceneGISGlobeSurfaceLighting(
         globeNormal,
         globeSun,
         skyIrradiance);
+    vec3 unusedPrimarySkyIrradiance;
+    vec3 primaryIrradiance = GetSunAndSkyIrradiance(
+        atmosphere,
+        u_sceneGISTransmittanceTexture,
+        u_sceneGISIrradianceTexture,
+        virtualPoint,
+        globeNormal,
+        normalize(u_sceneGISPrimaryLightDirection),
+        unusedPrimarySkyIrradiance) *
+        max(u_sceneGISPrimaryLightScale, vec3(0.0));
     float skyHemisphere = 0.5 *
         (1.0 + dot(globeNormal, geodeticNormal));
     skyIrradiance += sceneGISReadableNightSkyIrradiance(
@@ -56,6 +69,7 @@ vec3 sceneGISGlobeSurfaceLighting(
             viewDistance));
     }
     return max(albedo, vec3(0.0)) * (1.0 / czm_pi) *
-        (sunIrradiance * cloudTransmittance + max(skyIrradiance, vec3(0.0))) *
+        (primaryIrradiance * cloudTransmittance +
+            max(skyIrradiance, vec3(0.0))) *
         u_surfaceRadianceScale;
 }

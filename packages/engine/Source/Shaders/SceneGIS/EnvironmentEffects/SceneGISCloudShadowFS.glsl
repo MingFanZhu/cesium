@@ -179,8 +179,7 @@ void main()
         supportBaseHeight,
         supportThickness);
     vec3 rayOrigin = sceneGISCloudShadowRayOrigin(
-        SCENEGIS_BOTTOM_RADIUS + supportBaseHeight + supportThickness +
-        u_sceneGISShadowRayOffset * 0.5,
+        SCENEGIS_BOTTOM_RADIUS + supportBaseHeight + supportThickness,
         gridCoordinate,
         cascadeIndex);
     float segmentStart;

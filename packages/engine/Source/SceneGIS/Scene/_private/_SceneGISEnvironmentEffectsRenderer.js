@@ -7,6 +7,7 @@ import Cartesian4 from "../../../Core/Cartesian4.js";
 import Color from "../../../Core/Color.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import defined from "../../../Core/defined.js";
+import JulianDate from "../../../Core/JulianDate.js";
 import Matrix3 from "../../../Core/Matrix3.js";
 import Matrix4 from "../../../Core/Matrix4.js";
 import Simon1994PlanetaryPositions from "../../../Core/Simon1994PlanetaryPositions.js";
@@ -1024,10 +1025,13 @@ function updateGlobeShadowCascades(renderer, frameState, profile) {
   );
   toLocalDirection(
     renderer._frame,
-    renderer._sunDirection,
+    renderer._primaryLightDirection,
     renderer._shadowSunLocal,
   );
-  Cartesian3.negate(renderer._sunDirection, renderer._shadowRayDirectionWorld);
+  Cartesian3.negate(
+    renderer._primaryLightDirection,
+    renderer._shadowRayDirectionWorld,
+  );
   const reference =
     Math.abs(renderer._shadowRayDirectionWorld.z) > 0.95
       ? Cartesian3.UNIT_X
@@ -1165,6 +1169,7 @@ function createShadowHistorySnapshot() {
     cameraUp: new Cartesian3(),
     frustum: new Cartesian4(),
     sunDirection: new Cartesian3(),
+    primaryLightScale: new Cartesian3(),
     ellipsoidCenter: new Cartesian3(),
     ellipsoidRadii: new Cartesian3(),
     cloudOffset: new Cartesian2(),
@@ -1192,7 +1197,7 @@ function shadowGridLatticeCompatible(renderer) {
     snapshot.shadowHalfSizes.x === renderer._shadowHalfSizes[0].x &&
     snapshot.shadowHalfSizes.y === renderer._shadowHalfSizes[1].x &&
     snapshot.shadowHalfSizes.z === renderer._shadowHalfSizes[2].x &&
-    Cartesian3.equals(snapshot.sunDirection, renderer._sunDirection)
+    Cartesian3.equals(snapshot.sunDirection, renderer._primaryLightDirection)
   );
 }
 
@@ -1221,7 +1226,7 @@ function shadowHistoryContinuous(renderer) {
       cloudHistoryMaximumTranslation &&
     shadowFrustumContinuous(snapshot.frustum, renderer._frustum) &&
     Math.abs(cloudTime - snapshot.cloudTime) < 1.0 &&
-    Cartesian3.dot(snapshot.sunDirection, renderer._sunDirection) >=
+    Cartesian3.dot(snapshot.sunDirection, renderer._primaryLightDirection) >=
       cloudHistoryMinimumSunDot &&
     Cartesian3.equals(snapshot.ellipsoidCenter, frame.ellipsoidCenter) &&
     Cartesian3.equals(snapshot.ellipsoidRadii, frame.ellipsoidRadii) &&
@@ -1232,7 +1237,8 @@ function shadowHistoryContinuous(renderer) {
     snapshot.cloudBaseHeight === owner._cloudBaseHeight &&
     snapshot.cloudThickness === owner._cloudThickness &&
     snapshot.baseHeight === frame.baseHeight &&
-    snapshot.detail === cloudQualityProfiles[owner._cloudQuality].detail
+    snapshot.detail === cloudQualityProfiles[owner._cloudQuality].detail &&
+    Cartesian3.equals(snapshot.primaryLightScale, renderer._primaryLightScale)
   );
 }
 
@@ -1245,7 +1251,8 @@ function publishShadowHistorySnapshot(renderer) {
   Cartesian3.clone(frame.cameraDirection, snapshot.cameraDirection);
   Cartesian3.clone(frame.cameraUp, snapshot.cameraUp);
   Cartesian4.clone(renderer._frustum, snapshot.frustum);
-  Cartesian3.clone(renderer._sunDirection, snapshot.sunDirection);
+  Cartesian3.clone(renderer._primaryLightDirection, snapshot.sunDirection);
+  Cartesian3.clone(renderer._primaryLightScale, snapshot.primaryLightScale);
   Cartesian3.clone(frame.ellipsoidCenter, snapshot.ellipsoidCenter);
   Cartesian3.clone(frame.ellipsoidRadii, snapshot.ellipsoidRadii);
   Cartesian2.clone(renderer._cloudOffset, snapshot.cloudOffset);
@@ -1455,6 +1462,26 @@ function updateFrustum(renderer, camera) {
 
 const sunFixedTransform = new Matrix3();
 const sunInertialPosition = new Cartesian3();
+const sunFixedPosition = new Cartesian3();
+const moonInertialPosition = new Cartesian3();
+const moonToObserver = new Cartesian3();
+const moonToSun = new Cartesian3();
+const primaryWeightedDirection = new Cartesian3();
+const solarIrradiance = new Cartesian3(1.474, 1.8504, 1.91198);
+const moonFullPhaseIrradiance = new Cartesian3(0.12, 0.16, 0.22);
+const sinNightStart = Math.sin((-6.0 * Math.PI) / 180.0);
+const sinNightEnd = Math.sin((-12.0 * Math.PI) / 180.0);
+const sinMoonHorizonEnd = Math.sin((3.0 * Math.PI) / 180.0);
+
+function smoothStep01(value) {
+  const t = Math.min(Math.max(value, 0.0), 1.0);
+  return t * t * (3.0 - 2.0 * t);
+}
+
+function luminance(value) {
+  return value.x * 0.2126 + value.y * 0.7152 + value.z * 0.0722;
+}
+
 function computeGlobeSunDirection(time, result) {
   Transforms.computeIcrfToCentralBodyFixedMatrix(time, sunFixedTransform);
   Simon1994PlanetaryPositions.computeSunPositionInEarthInertialFrame(
@@ -1464,12 +1491,141 @@ function computeGlobeSunDirection(time, result) {
   Matrix3.multiplyByVector(
     sunFixedTransform,
     sunInertialPosition,
-    sunInertialPosition,
+    sunFixedPosition,
   );
-  return Cartesian3.normalize(sunInertialPosition, result);
+  return Cartesian3.normalize(sunFixedPosition, result);
 }
 
-function updateFrame(renderer, scene, frameState) {
+function updateGlobeCelestialAuthority(renderer, frameState, time) {
+  if (
+    defined(frameState.frameNumber) &&
+    renderer._celestialFrameNumber === frameState.frameNumber &&
+    renderer._celestialTimeValid &&
+    JulianDate.equals(renderer._celestialTime, time)
+  ) {
+    return;
+  }
+  renderer._celestialFrameNumber = frameState.frameNumber;
+  JulianDate.clone(time, renderer._celestialTime);
+  renderer._celestialTimeValid = true;
+  computeGlobeSunDirection(time, renderer._sunDirection);
+  Simon1994PlanetaryPositions.computeMoonPositionInEarthInertialFrame(
+    time,
+    moonInertialPosition,
+  );
+  Matrix3.multiplyByVector(
+    sunFixedTransform,
+    moonInertialPosition,
+    renderer._moonPosition,
+  );
+  Cartesian3.subtract(
+    renderer._moonPosition,
+    renderer._frame.surfacePosition,
+    renderer._moonDirection,
+  );
+  Cartesian3.normalize(renderer._moonDirection, renderer._moonDirection);
+
+  const sunUp = Cartesian3.dot(
+    renderer._frame.vertical,
+    renderer._sunDirection,
+  );
+  const nightFactor = smoothStep01(
+    (sinNightStart - sunUp) / (sinNightStart - sinNightEnd),
+  );
+  const moonUp = Cartesian3.dot(
+    renderer._frame.vertical,
+    renderer._moonDirection,
+  );
+  const moonHorizonFactor = smoothStep01(moonUp / sinMoonHorizonEnd);
+  Cartesian3.subtract(
+    renderer._frame.surfacePosition,
+    renderer._moonPosition,
+    moonToObserver,
+  );
+  Cartesian3.subtract(sunFixedPosition, renderer._moonPosition, moonToSun);
+  Cartesian3.normalize(moonToObserver, moonToObserver);
+  Cartesian3.normalize(moonToSun, moonToSun);
+  const phaseAngle = Math.acos(
+    Math.min(Math.max(Cartesian3.dot(moonToObserver, moonToSun), -1.0), 1.0),
+  );
+  const moonPhase =
+    (Math.sin(phaseAngle) + (Math.PI - phaseAngle) * Math.cos(phaseAngle)) /
+    Math.PI;
+  const moonContribution =
+    nightFactor *
+    moonHorizonFactor *
+    moonPhase *
+    renderer._owner._moonlightIntensity *
+    (renderer._owner._showMoonlight ? 1.0 : 0.0);
+  renderer._nightFactor = nightFactor;
+  renderer._moonHorizonFactor = moonHorizonFactor;
+  renderer._moonPhase = moonPhase;
+  renderer._moonContribution = moonContribution;
+  Cartesian3.multiplyByScalar(
+    moonFullPhaseIrradiance,
+    moonContribution,
+    renderer._moonIrradiance,
+  );
+  renderer._primaryLightScale.x =
+    1.0 - nightFactor + renderer._moonIrradiance.x / solarIrradiance.x;
+  renderer._primaryLightScale.y =
+    1.0 - nightFactor + renderer._moonIrradiance.y / solarIrradiance.y;
+  renderer._primaryLightScale.z =
+    1.0 - nightFactor + renderer._moonIrradiance.z / solarIrradiance.z;
+
+  const sunWeight = luminance(solarIrradiance) * (1.0 - nightFactor);
+  const moonWeight = luminance(renderer._moonIrradiance);
+  Cartesian3.multiplyByScalar(
+    renderer._sunDirection,
+    sunWeight,
+    primaryWeightedDirection,
+  );
+  Cartesian3.multiplyByScalar(
+    renderer._moonDirection,
+    moonWeight,
+    renderer._primaryLightDirectionScratch,
+  );
+  Cartesian3.add(
+    primaryWeightedDirection,
+    renderer._primaryLightDirectionScratch,
+    primaryWeightedDirection,
+  );
+  if (Cartesian3.magnitudeSquared(primaryWeightedDirection) > 1.0e-24) {
+    Cartesian3.normalize(
+      primaryWeightedDirection,
+      renderer._primaryLightDirection,
+    );
+  }
+
+  const sunColor = renderer._owner._celestialSunColor;
+  const sunIntensity = renderer._owner._celestialSunIntensity;
+  if (nightFactor === 0.0) {
+    Color.clone(sunColor, renderer._nativeLightColor);
+    renderer._nativeLightIntensity = sunIntensity;
+  } else if (nightFactor === 1.0) {
+    renderer._nativeLightColor.red = renderer._moonIrradiance.x;
+    renderer._nativeLightColor.green = renderer._moonIrradiance.y;
+    renderer._nativeLightColor.blue = renderer._moonIrradiance.z;
+    renderer._nativeLightColor.alpha = 1.0;
+    renderer._nativeLightIntensity = 1.0;
+  } else {
+    renderer._nativeLightColor.red =
+      sunColor.red * sunIntensity * (1.0 - nightFactor) +
+      renderer._moonIrradiance.x;
+    renderer._nativeLightColor.green =
+      sunColor.green * sunIntensity * (1.0 - nightFactor) +
+      renderer._moonIrradiance.y;
+    renderer._nativeLightColor.blue =
+      sunColor.blue * sunIntensity * (1.0 - nightFactor) +
+      renderer._moonIrradiance.z;
+    renderer._nativeLightColor.alpha = 1.0;
+    renderer._nativeLightIntensity = 1.0;
+  }
+  renderer._primaryLightState.nativeIntensity = renderer._nativeLightIntensity;
+  renderer._primaryLightState.moonContribution = moonContribution;
+}
+
+function updateFrame(renderer, scene, frameState, time) {
   SceneGISAtmosphereReferenceFrame.publish(
     {
       mode: renderer._mode,
@@ -1481,9 +1637,17 @@ function updateFrame(renderer, scene, frameState) {
     renderer._scratchFrame,
   );
   updateFrustum(renderer, frameState.camera);
+  if (renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE) {
+    const celestialTime = defined(time)
+      ? time
+      : renderer._celestialTimeValid
+        ? renderer._celestialTime
+        : frameState.time;
+    updateGlobeCelestialAuthority(renderer, frameState, celestialTime);
+  }
   const sunDirection =
     renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
-      ? computeGlobeSunDirection(frameState.time, renderer._sunDirection)
+      ? renderer._sunDirection
       : renderer._world.environment._effectiveSunDirection;
   if (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
     Cartesian3.clone(sunDirection, renderer._sunDirection);
@@ -1529,6 +1693,28 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._scratchFrame = SceneGISAtmosphereReferenceFrame.createSnapshot();
   this._frustum = new Cartesian4();
   this._sunDirection = new Cartesian3();
+  this._moonPosition = new Cartesian3();
+  this._moonDirection = new Cartesian3();
+  this._primaryLightDirection = new Cartesian3(1.0, 0.0, 0.0);
+  this._primaryLightDirectionScratch = new Cartesian3();
+  this._primaryLightScale = new Cartesian3(1.0, 1.0, 1.0);
+  this._moonIrradiance = new Cartesian3();
+  this._nativeLightColor = new Color();
+  this._nativeLightIntensity = 2.0;
+  this._nightFactor = 0.0;
+  this._moonHorizonFactor = 0.0;
+  this._moonPhase = 0.0;
+  this._moonContribution = 0.0;
+  this._celestialFrameNumber = undefined;
+  this._celestialTime = new JulianDate();
+  this._celestialTimeValid = false;
+  this._primaryLightState = {
+    direction: this._primaryLightDirection,
+    scale: this._primaryLightScale,
+    nativeColor: this._nativeLightColor,
+    nativeIntensity: this._nativeLightIntensity,
+    moonContribution: 0.0,
+  };
   this._cloudOffset = new Cartesian2();
   this._perspective = true;
   this._hasCurrentGlobeDepth = true;
@@ -1624,6 +1810,8 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_north: () => that._frame.north,
     u_vertical: () => that._frame.vertical,
     u_sunDirection: () => that._sunDirection,
+    u_primaryLightDirection: () => that._primaryLightDirection,
+    u_primaryLightScale: () => that._primaryLightScale,
     u_altitude: () => that._frame.altitude,
     u_baseHeight: () => that._frame.baseHeight,
     u_ellipsoidCenter: () => that._frame.ellipsoidCenter,
@@ -1765,7 +1953,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_sceneGISShadowEast: () => that._frame.east,
     u_sceneGISShadowNorth: () => that._frame.north,
     u_sceneGISShadowVertical: () => that._frame.vertical,
-    u_sceneGISShadowSunDirection: () => that._sunDirection,
+    u_sceneGISShadowSunDirection: () => that._primaryLightDirection,
     u_sceneGISShadowCameraPosition: () => that._frame.cameraPosition,
     u_sceneGISShadowCloudTop: () => that._shadowCloudSupport.y,
     u_sceneGISShadowCascadeIndex: () => that._shadowCascadeIndex,
@@ -1814,16 +2002,17 @@ SceneGISEnvironmentEffectsRenderer.prototype.hasResources = function () {
 
 SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
   frameState,
+  time = frameState.time,
 ) {
-  if (
-    this._mode !== SceneGISAtmosphereReferenceFrame.GLOBE ||
-    !defined(this._resources) ||
-    !this._owner._ready
-  ) {
+  if (this._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
     this.releaseGlobeLighting();
     return;
   }
-  updateFrame(this, this._scene, frameState);
+  updateFrame(this, this._scene, frameState, time);
+  if (!defined(this._resources) || !this._owner._ready) {
+    this.releaseGlobeLighting();
+    return;
+  }
   updateGlobeCloudShadowSupport(this);
   const profile = cloudQualityProfiles[this._owner._cloudQuality];
   const shadow = ensureGlobeShadowResources(
@@ -1871,12 +2060,22 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
     north: this._frame.north,
     vertical: this._frame.vertical,
     sunDirection: this._sunDirection,
+    primaryLightDirection: this._primaryLightDirection,
+    primaryLightScale: this._primaryLightScale,
+    moonIrradiance: this._moonIrradiance,
     cameraPosition: this._frame.cameraPosition,
     cloudTop: this._shadowCloudSupport.y,
   });
   this._globeLightingRecord = record;
   frameState._sceneGISGlobeLighting = record;
 };
+
+SceneGISEnvironmentEffectsRenderer.prototype.getPrimaryLightState =
+  function () {
+    return this._mode === SceneGISAtmosphereReferenceFrame.GLOBE
+      ? this._primaryLightState
+      : undefined;
+  };
 
 SceneGISEnvironmentEffectsRenderer.prototype.releaseGlobeLighting =
   function () {
@@ -2156,8 +2355,15 @@ function createCloudHistorySnapshot() {
     frustum: new Cartesian4(),
     cloudOffset: new Cartesian2(),
     sunDirection: new Cartesian3(),
+    primaryLightScale: new Cartesian3(),
     frame: SceneGISAtmosphereReferenceFrame.createSnapshot(),
   };
+}
+
+function cloudHistoryLightDirection(renderer) {
+  return renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
+    ? renderer._primaryLightDirection
+    : renderer._sunDirection;
 }
 
 function cloudHistoryNumbersEqual(left, right) {
@@ -2208,7 +2414,9 @@ function cloudHistoryInputsFinite(renderer) {
     cloudHistoryVectorFinite(frame.vertical) &&
     cloudHistoryVectorFinite(frame.ellipsoidCenter) &&
     cloudHistoryVectorFinite(frame.ellipsoidRadii) &&
-    cloudHistoryVectorFinite(renderer._sunDirection) &&
+    cloudHistoryVectorFinite(cloudHistoryLightDirection(renderer)) &&
+    (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE ||
+      cloudHistoryVectorFinite(renderer._primaryLightScale)) &&
     Number.isFinite(renderer._cloudOffset.x) &&
     Number.isFinite(renderer._cloudOffset.y)
   );
@@ -2324,10 +2532,21 @@ function cloudHistoryContinuityFailure(renderer, width, height) {
     return "cloud-time";
   }
   if (
-    Cartesian3.dot(previous.sunDirection, renderer._sunDirection) <
-    cloudHistoryMinimumSunDot
+    Cartesian3.dot(
+      previous.sunDirection,
+      cloudHistoryLightDirection(renderer),
+    ) < cloudHistoryMinimumSunDot
   ) {
     return "sun-direction";
+  }
+  if (
+    renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE &&
+    !cloudHistoryVectorEqual(
+      previous.primaryLightScale,
+      renderer._primaryLightScale,
+    )
+  ) {
+    return "primary-light-energy";
   }
   if (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
     return undefined;
@@ -2373,7 +2592,15 @@ function cloudHistoryStationary(renderer) {
     ) &&
     cloudHistoryVectorEqual(frame.cameraUp, previous.frame.cameraUp) &&
     cloudHistoryVectorEqual(frame.cameraRight, previous.frame.cameraRight) &&
-    cloudHistoryVectorEqual(renderer._sunDirection, previous.sunDirection)
+    cloudHistoryVectorEqual(
+      cloudHistoryLightDirection(renderer),
+      previous.sunDirection,
+    ) &&
+    (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE ||
+      cloudHistoryVectorEqual(
+        renderer._primaryLightScale,
+        previous.primaryLightScale,
+      ))
   );
 }
 
@@ -2399,7 +2626,8 @@ function commitCloudHistorySnapshot(renderer, width, height) {
   snapshot.cloudTime = owner._cloudTime;
   Cartesian4.clone(renderer._frustum, snapshot.frustum);
   Cartesian2.clone(renderer._cloudOffset, snapshot.cloudOffset);
-  Cartesian3.clone(renderer._sunDirection, snapshot.sunDirection);
+  Cartesian3.clone(cloudHistoryLightDirection(renderer), snapshot.sunDirection);
+  Cartesian3.clone(renderer._primaryLightScale, snapshot.primaryLightScale);
   snapshot.frame.mode = frame.mode;
   snapshot.frame.projection = frame.projection;
   snapshot.frame.altitude = frame.altitude;

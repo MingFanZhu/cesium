@@ -21,6 +21,10 @@ uniform vec3 u_east;
 uniform vec3 u_north;
 uniform vec3 u_vertical;
 uniform vec3 u_sunDirection;
+#ifdef SCENEGIS_GLOBE
+uniform vec3 u_primaryLightDirection;
+uniform vec3 u_primaryLightScale;
+#endif
 uniform vec3 u_ellipsoidCenter;
 uniform vec3 u_ellipsoidRadii;
 uniform float u_altitude;
@@ -80,11 +84,17 @@ void main()
         dot(worldRayDirection, u_east),
         dot(worldRayDirection, u_north),
         dot(worldRayDirection, u_vertical)));
-    vec3 localSunDirection = normalize(vec3(
-        dot(u_sunDirection, u_east),
-        dot(u_sunDirection, u_north),
-        dot(u_sunDirection, u_vertical)));
     vec3 globeSunDirection = normalize(u_sunDirection);
+    vec3 globePrimaryLightDirection = globeSunDirection;
+    vec3 primaryLightScale = vec3(1.0);
+    #ifdef SCENEGIS_GLOBE
+    globePrimaryLightDirection = normalize(u_primaryLightDirection);
+    primaryLightScale = max(u_primaryLightScale, vec3(0.0));
+    #endif
+    vec3 localSunDirection = normalize(vec3(
+        dot(globePrimaryLightDirection, u_east),
+        dot(globePrimaryLightDirection, u_north),
+        dot(globePrimaryLightDirection, u_vertical)));
     float distanceToGeometry = SCENEGIS_PLANAR_BACKGROUND_DISTANCE;
     if (!isClearDepth) {
         // Non-clear depth passes through the Cesium builtin exactly once to
@@ -182,7 +192,9 @@ void main()
         u_north,
         u_vertical,
         localSunDirection,
+        globePrimaryLightDirection,
         globeSunDirection,
+        primaryLightScale,
         u_ellipsoidCenter,
         u_ellipsoidRadii,
         u_cloudOffset,

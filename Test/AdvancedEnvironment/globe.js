@@ -59,6 +59,7 @@ let observationBeforeGlobalBuildings;
 let locationBeforeGlobalBuildings;
 let globalBuildingsButton;
 let globalBuildingsStatusController;
+let moonShadowWitness;
 let currentObservation = "地面 · 高日 · high/mixed · reference Basic";
 
 const state = {
@@ -71,6 +72,8 @@ const state = {
   showCrepuscularRays: true,
   showBloom: true,
   showLensFlare: true,
+  showMoonlight: true,
+  showMoonShadows: true,
   showMoon: false,
   cloudQuality: "high",
   cloudPreset: "cumulus",
@@ -84,6 +87,7 @@ const state = {
   bloomThreshold: 10.0,
   bloomIntensity: 0.05,
   lensFlareIntensity: 5.0,
+  moonlightIntensity: 1.0,
   globalBuildingsStatus: "未加载",
   toggleGlobalBuildings: () => void toggleGlobalBuildings(),
   groundHighSun: () => applyObservation("groundHighSun"),
@@ -92,6 +96,7 @@ const state = {
   groundNight: () => applyObservation("groundNight"),
   readableNight: () => applyObservation("readableNight"),
   moonNight: () => applyMoonObservation(),
+  moonlightObservation: () => applyMoonlightObservation(),
   nearSpaceHighSun: () => applyObservation("nearSpaceHighSun"),
   qualityObservation: () => observeQualitySwitch(),
   destroySample: () => destroySample(),
@@ -273,6 +278,66 @@ function applyMoonObservation() {
     orientation: {
       heading: orientation.heading,
       pitch: orientation.pitch,
+      roll: 0.0,
+    },
+  });
+  gui
+    .controllersRecursive()
+    .forEach((controller) => controller.updateDisplay());
+  viewer.scene.requestRender();
+}
+
+function ensureMoonShadowWitness() {
+  if (moonShadowWitness) {
+    moonShadowWitness.forEach((entity) => (entity.show = true));
+    return;
+  }
+  moonShadowWitness = [
+    viewer.entities.add({
+      name: "A11 Moon shadow receiver",
+      position: Cesium.Cartesian3.fromDegrees(15.0217, 44.91, 1.0),
+      box: {
+        dimensions: new Cesium.Cartesian3(600.0, 600.0, 2.0),
+        material: Cesium.Color.WHITE,
+      },
+      shadows: Cesium.ShadowMode.ENABLED,
+    }),
+    viewer.entities.add({
+      name: "A11 Moon shadow caster",
+      position: Cesium.Cartesian3.fromDegrees(15.0217, 44.91, 126.0),
+      box: {
+        dimensions: new Cesium.Cartesian3(100.0, 100.0, 250.0),
+        material: Cesium.Color.fromCssColorString("#b7bfca"),
+      },
+      shadows: Cesium.ShadowMode.ENABLED,
+    }),
+  ];
+}
+
+function applyMoonlightObservation() {
+  const time = Cesium.JulianDate.fromIso8601("2026-07-02T00:00:00Z");
+  const destination = Cesium.Cartesian3.fromDegrees(15.0, 45.0, 500.0);
+  const orientation = moonCameraOrientation(destination, time);
+  currentStatusLocation = locations;
+  currentObservation = `A11 月光与阴影 · 方位 ${Cesium.Math.toDegrees(orientation.heading).toFixed(3)}° · 仰角 ${Cesium.Math.toDegrees(orientation.pitch).toFixed(3)}°`;
+  state.showMoon = true;
+  state.showMoonlight = true;
+  state.showMoonShadows = true;
+  state.moonlightIntensity = 1.0;
+  state.showClouds = false;
+  viewer.scene.moon.show = true;
+  effects.showMoonlight = true;
+  effects.showMoonShadows = true;
+  effects.moonlightIntensity = 1.0;
+  effects.showClouds = false;
+  ensureMoonShadowWitness();
+  viewer.clock.shouldAnimate = false;
+  viewer.clock.currentTime = time;
+  viewer.camera.setView({
+    destination,
+    orientation: {
+      heading: orientation.heading,
+      pitch: Cesium.Math.toRadians(10.0),
       roll: 0.0,
     },
   });
@@ -475,6 +540,22 @@ function createGui() {
     viewer.scene,
     "Lens flare",
   );
+  bindBoolean(
+    effectsFolder,
+    state,
+    "showMoonlight",
+    effects,
+    viewer.scene,
+    "月光",
+  );
+  bindBoolean(
+    effectsFolder,
+    state,
+    "showMoonShadows",
+    effects,
+    viewer.scene,
+    "月影",
+  );
   effectsFolder
     .add(state, "showMoon")
     .name("原生月亮")
@@ -543,6 +624,17 @@ function createGui() {
     effects,
     viewer.scene,
     "Cloud radiance",
+    0.0,
+    64.0,
+    0.1,
+  );
+  bindNumber(
+    cloudFolder,
+    state,
+    "moonlightIntensity",
+    effects,
+    viewer.scene,
+    "Moonlight intensity",
     0.0,
     64.0,
     0.1,
@@ -628,6 +720,11 @@ function createGui() {
   const moonObservation = gui.addFolder("A10-G 固定观察");
   moonObservation.add(state, "moonNight").name("A10 月亮夜景");
 
+  const moonlightObservation = gui.addFolder("A11-G 固定观察");
+  moonlightObservation
+    .add(state, "moonlightObservation")
+    .name("A11 月光 + 本地阴影");
+
   const onlineData = gui.addFolder("Cesium ion 在线数据");
   globalBuildingsButton = onlineData
     .add(state, "toggleGlobalBuildings")
@@ -650,6 +747,9 @@ function getState() {
     ready: effects?.ready === true,
     enabled: effects?.enabled === true,
     moonVisible: scene?.moon?.show === true,
+    showMoonlight: effects?.showMoonlight === true,
+    showMoonShadows: effects?.showMoonShadows === true,
+    moonlightIntensity: effects?.moonlightIntensity,
     hdr: scene?.highDynamicRange === true,
     baseLayerPicker: viewer?.baseLayerPicker !== undefined,
     timeline: viewer?.timeline !== undefined,
@@ -670,6 +770,10 @@ function destroySample() {
   }
   destroyed = true;
   removeGlobalBuildings("已释放");
+  if (moonShadowWitness) {
+    moonShadowWitness.forEach((entity) => viewer.entities.remove(entity));
+    moonShadowWitness = undefined;
+  }
   removePostRender?.();
   removeRenderError?.();
   removeControllerError?.();

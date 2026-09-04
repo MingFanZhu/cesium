@@ -253,6 +253,16 @@ const cloudCoreSourceArchiveRoot =
   "package/Source/Assets/SceneGIS/Environment/CloudCore";
 const cloudCoreReleaseArchiveRoot =
   "package/Build/Cesium/Assets/SceneGIS/Environment/CloudCore";
+const moonArchiveFiles = [
+  "color_large.webp",
+  "PROVENANCE.json",
+  "NASA_NOTICE.txt",
+  "THIRD_PARTY_LICENSE.txt",
+];
+const moonSourceArchiveRoot =
+  "package/Source/Assets/SceneGIS/Environment/Moon";
+const moonReleaseArchiveRoot =
+  "package/Build/Cesium/Assets/SceneGIS/Environment/Moon";
 
 function brunetonArchiveEntries(root) {
   return [...Object.keys(brunetonFiles), "provenance.json"].map(
@@ -268,6 +278,10 @@ function planarEarthArchiveEntries(root) {
 
 function cloudCoreArchiveEntries(root) {
   return cloudCoreArchiveFiles.map((name) => `${root}/${name}`);
+}
+
+function moonArchiveEntries(root) {
+  return moonArchiveFiles.map((name) => `${root}/${name}`);
 }
 
 function verifyBrunetonDelivery(root) {
@@ -514,6 +528,40 @@ function verifyCloudCoreDelivery(root) {
   assert.match(globeLicense, /Copyright \(c\) 2024 Shota Matsuda/u);
 }
 
+function verifyMoonDelivery(root) {
+  const payload = fs.readFileSync(path.join(root, "color_large.webp"));
+  assert.equal(payload.byteLength, 213446);
+  assert.equal(
+    createHash("sha256").update(payload).digest("hex").toUpperCase(),
+    "1709BA3B65991842CD84A8D338EF46AD942241EE056B1AC8AAD0D3776EDF7DBD",
+  );
+  const provenance = JSON.parse(
+    fs.readFileSync(path.join(root, "PROVENANCE.json"), "utf8"),
+  );
+  assert.equal(
+    provenance.source.commit,
+    "b012ad06d858fc035d88aacfd73f092f93c994e4",
+  );
+  assert.equal(
+    provenance.source.path,
+    "storybook-webgpu/assets/moon/color_large.webp",
+  );
+  assert.deepEqual(provenance.output.dimensions, [2048, 1024]);
+  assert.equal(provenance.output.bytes, 213446);
+  assert.equal(
+    provenance.output.sha256,
+    "1709BA3B65991842CD84A8D338EF46AD942241EE056B1AC8AAD0D3776EDF7DBD",
+  );
+  assert.match(
+    fs.readFileSync(path.join(root, "NASA_NOTICE.txt"), "utf8"),
+    /NASA CGI Moon Kit/u,
+  );
+  assert.match(
+    fs.readFileSync(path.join(root, "THIRD_PARTY_LICENSE.txt"), "utf8"),
+    /Copyright \(c\) 2024 Shota Matsuda/u,
+  );
+}
+
 function npmCommand(args) {
   if (process.platform === "win32") {
     return {
@@ -736,6 +784,9 @@ assert.equal(globeEffects.showCloudShadows, true);
 assert.equal(globeEffects.showCrepuscularRays, true);
 assert.equal(globeEffects.showBloom, true);
 assert.equal(globeEffects.showLensFlare, true);
+assert.equal(globeEffects.showMoonlight, true);
+assert.equal(globeEffects.showMoonShadows, true);
+assert.equal(globeEffects.moonlightIntensity, 1.0);
 assert.equal(globeEffects.bloomThreshold, 10.0);
 assert.equal(globeEffects.bloomIntensity, 0.05);
 assert.equal(globeEffects.lensFlareIntensity, 5.0);
@@ -767,6 +818,9 @@ globeEffects.showCloudShadows = false;
 globeEffects.showCrepuscularRays = false;
 globeEffects.showBloom = false;
 globeEffects.showLensFlare = false;
+globeEffects.showMoonlight = false;
+globeEffects.showMoonShadows = false;
+globeEffects.moonlightIntensity = 2.0;
 globeEffects.bloomThreshold = 12.0;
 globeEffects.bloomIntensity = 0.1;
 globeEffects.lensFlareIntensity = 2.0;
@@ -797,6 +851,9 @@ assert.equal(globeEffects.showCloudShadows, false);
 assert.equal(globeEffects.showCrepuscularRays, false);
 assert.equal(globeEffects.showBloom, false);
 assert.equal(globeEffects.showLensFlare, false);
+assert.equal(globeEffects.showMoonlight, false);
+assert.equal(globeEffects.showMoonShadows, false);
+assert.equal(globeEffects.moonlightIntensity, 2.0);
 assert.equal(globeEffects.bloomThreshold, 12.0);
 assert.equal(globeEffects.bloomIntensity, 0.1);
 assert.equal(globeEffects.lensFlareIntensity, 2.0);
@@ -992,6 +1049,9 @@ assert.equal(effects.showCloudShadows, true);
 assert.equal(effects.showCrepuscularRays, true);
 assert.equal(effects.showBloom, true);
 assert.equal(effects.showLensFlare, true);
+assert.equal(effects.showMoonlight, true);
+assert.equal(effects.showMoonShadows, true);
+assert.equal(effects.moonlightIntensity, 1.0);
 assert.equal(effects.bloomThreshold, 10.0);
 assert.equal(effects.bloomIntensity, 0.05);
 assert.equal(effects.lensFlareIntensity, 5.0);
@@ -1325,6 +1385,7 @@ async function verify() {
     ...brunetonArchiveEntries(brunetonSourceArchiveRoot),
     ...planarEarthArchiveEntries(planarEarthSourceArchiveRoot),
     ...cloudCoreArchiveEntries(cloudCoreSourceArchiveRoot),
+    ...moonArchiveEntries(moonSourceArchiveRoot),
     ...privateContentFiles,
   ]);
   assertArchive(widgetsArchive, [
@@ -1342,6 +1403,7 @@ async function verify() {
     ...brunetonArchiveEntries(brunetonReleaseArchiveRoot),
     ...planarEarthArchiveEntries(planarEarthReleaseArchiveRoot),
     ...cloudCoreArchiveEntries(cloudCoreReleaseArchiveRoot),
+    ...moonArchiveEntries(moonReleaseArchiveRoot),
   ]);
 
   const nodeModules = path.join(temporaryRoot, "node_modules");
@@ -1368,6 +1430,9 @@ async function verify() {
   verifyCloudCoreDelivery(
     path.join(engineDirectory, "Source/Assets/SceneGIS/Environment/CloudCore"),
   );
+  verifyMoonDelivery(
+    path.join(engineDirectory, "Source/Assets/SceneGIS/Environment/Moon"),
+  );
   verifyBrunetonDelivery(
     path.join(
       rootDirectory,
@@ -1384,6 +1449,12 @@ async function verify() {
     path.join(
       rootDirectory,
       "Build/Cesium/Assets/SceneGIS/Environment/CloudCore",
+    ),
+  );
+  verifyMoonDelivery(
+    path.join(
+      rootDirectory,
+      "Build/Cesium/Assets/SceneGIS/Environment/Moon",
     ),
   );
   verifyTrackingSources(engineDirectory, widgetsDirectory);
@@ -1417,6 +1488,12 @@ async function verify() {
     assert.match(declarations, /showHeightFog: boolean;/u);
     assert.match(declarations, /showClouds\?: boolean;/u);
     assert.match(declarations, /showClouds: boolean;/u);
+    assert.match(declarations, /showMoonlight\?: boolean;/u);
+    assert.match(declarations, /showMoonlight: boolean;/u);
+    assert.match(declarations, /showMoonShadows\?: boolean;/u);
+    assert.match(declarations, /showMoonShadows: boolean;/u);
+    assert.match(declarations, /moonlightIntensity\?: number;/u);
+    assert.match(declarations, /moonlightIntensity: number;/u);
     assert.match(declarations, /cloudQuality\?: string;/u);
     assert.match(declarations, /cloudQuality: string;/u);
     assert.match(declarations, /cloudPreset\?: string;/u);
@@ -1472,7 +1549,7 @@ async function verify() {
   fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackage));
   runConsumer(esmConsumer, false);
   process.stdout.write(
-    "SceneGIS installed delivery passed: 26/26 GLSL, 26/26 generated shader modules, exact Bruneton, PlanarEarth, generated CloudCore and pinned Globe reference assets/provenance in engine/root, bare ESM/CJS, A4R-A7 public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
+    "SceneGIS installed delivery passed: 26/26 GLSL, 26/26 generated shader modules, exact Bruneton, PlanarEarth, generated CloudCore and pinned Globe/Moon reference assets/provenance in engine/root, bare ESM/CJS, A4R-A11 public runtime/types, existing SceneGIS runtime properties, private tar and soft-private delivery with public hiding, Viewer framing/tracking declarations and API, and broken-entry fixtures.\n",
   );
 }
 

@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`accepted; A11-G active`
+- Status：`accepted; A11-G completed; owner visual gate passed 2026-09-04`
 - Date：`2026-09-02`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -165,3 +165,90 @@ upstream path count仍为3、new SGP count为0。Generated shader modules与Buil
   texture；Execution必须报告实测native resource delta，但这些资源不转移给SceneGIS。
 - Lunar displacement/normal relief、eclipse、stars/Milky Way、local artificial lights、city
   emissive、auto exposure与Planar celestial adaptation仍需后续独立phase。
+
+## 执行记录（2026-09-02）
+
+Implementation按本ADR完成：一个camera-independent primary record驱动Globe surface、
+cloud、A5 Beer atlas/rays与stable native `DirectionalLight`；actual Sun仍独立驱动
+atmosphere、native Moon phase和A7 lens gate。Controller只获取并恢复自己改变的light、
+native shadow开关、Globe `ShadowMode`与Moon texture URL。Moon packaged URL延迟到Globe
+activation时解析，bare Node/CJS import不再触发DOM base-URL发现。
+
+Pinned Moon payload精确为`2048 x 1024`、`213446` bytes及既定SHA-256，且随engine/root
+package交付provenance、NASA notice与MIT license。SceneGIS-owned pass/program/FBO/
+texture/history delta为0；运行时只激活Scene已有native four-cascade ShadowMap（默认
+`4096 x 4096` depth-stencil atlas，约`67,108,864` bytes）及native Moon所拥有的
+`8,388,608` byte decoded RGBA color texture。
+
+Focused controller `75/75`、A1 `7/7`、importer `2/2`、TypeScript、release build、
+installed-package/provenance verifier与upstream audit均通过。唯一fixed browser observation
+为`ready · HDR`、Moon `21.467 degrees`、Sun `-20.763 degrees`、errors `0`，并同时看到
+native Moon与bounded local caster/receiver。该记录不替代Architecture review或owner视觉
+验收。
+
+## 评审修正执行记录（2026-09-02）
+
+A11-AR-001..005修正保持本ADR资源/API边界不变。Sun/Moon phase统一在Earth-fixed frame，
+固定状态Lambert phase为`0.9326044744950956`，旧mixed-frame mutation为
+`0.29384491398532053`。Controller current `time`在asset loading阶段即更新stable
+DirectionalLight；renderer后续pass沿用该current authority。
+
+Beer atlas producer、cloud body与SGP-0009 surface receiver统一使用
+`primaryLightDirection`，actual Sun仍单独服务physical sky。Moon object/URL、light、native
+shadow enable与Globe ShadowMode采用identity/value-guarded release，external replacement或
+mutation fail-closed且不会被release覆盖。
+
+Compiled night surface/cloud、day identity、real Beer producer/receiver及一个native Model
+caster/Primitive receiver均通过。Camera-only rotation保持shadowed receiver pixel exact；time
+change保留同一Scene-owned ShadowMap但允许primary direction变化。最终controller
+`79/79`、A1 `7/7`、TypeScript与upstream audit通过；current-delivery upstream-owned仍仅
+existing SGP-0009 path，generated=`0`、new SGP=`0`、SceneGIS resource/API/Planar delta=`0`。
+
+## 最终评审修正执行（2026-09-02）
+
+SGP-0009 surface seam进一步明确拆分actual Sun与primary light：physical Bruneton sky和A9
+night ambient只使用actual Sun；direct irradiance与A5 Beer receiver只使用primary light。
+该拆分不改变frame-local protocol、资源或API数量。
+
+生命周期证据分别变更light、Moon、`shadowMap.enabled`与`globe.shadows`，每个路径独立
+fail-closed，release只恢复controller-owned identity/value。Moon horizon endpoint证明below
+horizon为零，固定`21.467 degrees`时factor为一。Native Model/Primitive witness在同一
+receiver和同一Scene ShadowMap下使用两个不同camera position/direction，两个视角均区分
+caster disabled/enabled。
+
+最终focused结果为primary/lifecycle `1/1`、night/native shadow `1/1`、Beer atlas `1/1`、
+controller `76/76`、A1 `7/7`与TypeScript exit `0`。唯一刷新后browser witness为
+`ready · HDR`、Moon `21.467 degrees`、Sun `-20.763 degrees`、errors `0`；其使用可重建
+local caster/receiver，不依赖恢复刷新前的cloud-shadow位置。
+
+## A11-AR-006隔离fixture修正（2026-09-02）
+
+Existing lifecycle Spec在A11首次activation前显式安装deterministic caller-owned native
+`Moon`及caller URL，消除bare Spec Scene中`scene.moon`缺失导致的test-order依赖；原有
+ownership、independent mutation、fail-closed与release assertions保持不变。Exact isolated
+lifecycle filter与compiled night/native-shadow filter均为`1/1 SUCCESS`，final controller为
+`78/78 SUCCESS`。该修正仅影响既有Spec，无product/resource/API/browser/Planar/upstream/SGP
+delta。
+
+## A11-AR-006/007最终执行（2026-09-02）
+
+Lifecycle fixture的test-local deferred resource authority在initial eight requests之后继续返回
+pending promise，使每次re-acquisition独立到达light、Moon、ShadowMap与Globe ShadowMode
+fail-closed contract；exact isolated result为`1/1 SUCCESS`。
+
+A11低角度Moon暴露了此前frozen A5/A8 Beer producer geometry defect：producer ray在cloud
+top径向外100 km开始，却把相同200 km同时作为approach与useful traversal cap。最终实现把
+ray origin直接置于Sun-facing cloud-top shell，200 km只约束useful in-shell traversal。
+Global ECEF lattice、primary direction、three cascades、atlas/resource、receiver与history
+protocol均保持不变。
+
+Amended actual-GPU atlas fixture保留high-Sun authority，并在fixed Sun
+`27.019736617450597 degrees`和Moon `21.467 degrees`证明finite positive atlas、receiver optical depth及
+packed crepuscular length；旧inflated-origin mutation在low-Sun endpoint确定性返回零。
+Final results为lifecycle `1/1`、Beer atlas `1/1`、compiled night/native shadow `1/1`与
+controller `79/79`。Bounded browser check在existing 2.175-degree low-Sun与fixed A11 Moon
+state均为`ready · HDR`、errors `0`，不替代owner visual judgment。
+
+Low-Sun endpoint固定为`2026-06-21T16:00:00Z`；compiled product在15E/45N的实际仰角为
+`27.019736617450597 degrees`。此前`26.725 degrees`仅为stale evidence label，本次校正不
+改变below-30-degree state或任何product source。

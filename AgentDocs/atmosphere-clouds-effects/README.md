@@ -3,8 +3,8 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A11-G active; Globe Moonlight, directional shadows, and lunar surface`
-- Current review: `implementation assigned; review pending`
+- Current phase: `A11-G completed; successor not yet activated`
+- Current review: `Architecture approved; owner visual gate passed 2026-09-04`
 - Current phase plan:
   [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](plans/2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
 - Previous completed phase plan:
@@ -48,7 +48,7 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
-- A11-G is active from frozen A10-G product checkpoint
+- A11-G is complete from frozen A10-G product checkpoint
   `6afba87af181f3cdb7a20aff09b81af11eb302f4`. The project owner corrected the
   accidental Planar route before P1 review and defined “Moon shadow” as
   directional Moon-light shadowing on terrain, 3D Tiles and models. ADR-0053
@@ -1993,3 +1993,115 @@ authority, stable light/shadow ownership, existing SGP-0009 surface publication
 and an exact pinned NASA CGI Moon Kit color asset. P1 remains deferred; lunar
 eclipse, displacement/normal Moon material, second light/shadow/body, Planar
 execution and unrelated A1-A10 recalibration are not authorized.
+
+## A11-G execution candidate — 2026-09-02
+
+Execution implemented one Globe primary-light authority shared by the accepted
+surface, cloud, Beer-shadow and native `DirectionalLight` consumers. The
+controller now owns and restores only the light, native shadow enablement,
+Globe `ShadowMode` and native Moon texture URL that it actually changes. The
+pinned `2048 x 1024` Moon color asset is delivered with exact provenance,
+NASA notice and MIT license; URL resolution is deferred until Globe activation
+so bare Node/CJS import remains browser-independent.
+
+Focused final validation is green: controller `75/75`, A1 pipeline `7/7`,
+Moon importer `2/2`, `packages/engine` TypeScript, release build, installed
+package/provenance verification and upstream-patch audit. The fixed 15E/45N
+observation reports Moon elevation `21.467 degrees`, Sun elevation
+`-20.763 degrees`, `ready · HDR` and zero browser/render errors; the native
+Moon and bounded local caster/receiver are visible together. Architecture
+review and project-owner visual judgment remain pending.
+
+## A11-G review correction candidate — 2026-09-02
+
+Execution corrected A11-AR-001 through A11-AR-005 without expanding the
+resource or ownership boundary. Sun and Moon phase vectors now share the
+Earth-fixed frame; the fixed Lambert phase is `0.9326044744950956` and the
+rejected mixed-frame mutation is `0.29384491398532053`. The controller's
+current `time` now reaches the renderer before resource publication, the Beer
+producer/body/surface receiver share `primaryLightDirection`, and Moon/light/
+shadow restoration is identity/value guarded.
+
+Compiled surface/cloud endpoints, the real Beer atlas path and one native
+Model-to-Primitive caster/receiver pass. The native result is unchanged by a
+camera-only rotation while the same Scene-owned ShadowMap remains shared with
+Globe. Final controller=`79/79`, A1=`7/7`, `npx tsc` and upstream audit pass.
+The one refreshed fixed A11 page remains `ready · HDR`, Moon `21.467 degrees`,
+Sun `-20.763 degrees`, errors `0`; this reproducible local witness does not
+reuse the project owner's earlier cloud-shadow screenshots.
+
+## A11-G final correction continuation — 2026-09-02
+
+The Globe surface seam now carries actual Sun and primary-light directions as
+separate frame-local uniforms. Physical Bruneton sky and A9 night ambient use
+the actual Sun; direct irradiance and every A5 Beer lookup retain the selected
+Sun-or-Moon primary direction. The compiled night fixture keeps the actual Sun
+fixed below the horizon while changing only the primary receiver direction.
+
+The bounded lifecycle fixture now exercises light replacement, Moon
+replacement, `shadowMap.enabled` mutation and `globe.shadows` mutation in four
+independent activation cycles. It also proves Moon below-horizon zero and the
+fixed 21.467-degree endpoint at full horizon factor. The native shadow witness
+uses two distinct camera positions and directions on one fixed receiver and
+one Scene-owned ShadowMap; both views distinguish caster disabled/enabled.
+
+Final focused results are primary/lifecycle `1/1`, night/native shadow `1/1`,
+Beer atlas `1/1`, controller `76/76`, A1 `7/7` and `npx tsc` exit `0`. The
+single refreshed fixed page remains `ready · HDR`, Moon `21.467 degrees`, Sun
+`-20.763 degrees`, errors `0`; it uses the reproducible local witness rather
+than attempting to recover pre-refresh cloud-shadow locations.
+
+## A11-AR-006 isolated fixture correction — 2026-09-02
+
+The lifecycle Spec now installs one deterministic caller-owned native `Moon`
+and URL before A11 activation. It no longer depends on a prior Viewer-backed
+test having populated `scene.moon`; all existing capture, mutation and release
+assertions remain unchanged. The exact isolated lifecycle filter passes `1/1`,
+the exact compiled night/native-shadow filter passes `1/1` rather than `0/0`,
+and the final controller include passes `78/78`. No product or browser path was
+changed or rerun.
+
+## A11-AR-006/007 final execution — 2026-09-02
+
+The isolated lifecycle helper now reuses pending deferred resources after its
+first eight requests, so every explicit re-acquisition reaches the intended
+light, Moon, ShadowMap or Globe ShadowMode validation. The exact isolated
+lifecycle filter is reproducibly `1/1`.
+
+The previously frozen A5/A8 Beer producer had a geometry defect exposed by
+A11's low Moon angles: its ray began 100 km above cloud top and spent the same
+200 km budget reaching the medium. The producer now starts directly on the
+Sun-facing cloud-top shell; the 200 km limit applies only to useful shell
+traversal. Global ECEF lattice, cascades, receiver/history protocol and all
+resources remain unchanged.
+
+The amended actual-GPU atlas fixture rejects the inflated-origin mutation and
+proves finite nonzero atlas, receiver optical depth and packed crepuscular
+length at the fixed 27.019736617450597-degree Sun and 21.467-degree Moon endpoints while
+retaining the existing high-Sun authority. Exact results are lifecycle `1/1`,
+Beer atlas `1/1`, compiled night/native shadow `1/1` and controller `79/79`.
+One browser reload shows the existing 2.175-degree low-Sun state and the fixed
+A11 Moon state `ready · HDR`, errors `0`; no historical cloud location was
+used.
+
+The low-Sun fixture timestamp is fixed at `2026-06-21T16:00:00Z`; its actual
+product elevation at 15E/45N is `27.019736617450597 degrees`. The earlier
+`26.725 degrees` label was corrected without changing the below-30-degree
+state or any product source.
+
+## A11-G project-owner acceptance — 2026-09-04
+
+The project owner explicitly passed the prepared A11-G visual gate, including
+the low-angle cloud-shadow and crepuscular-ray correction. Architecture closes
+A11-AR-001 through A11-AR-007 with no open finding. The exact final Beer-atlas
+GPU filter was independently verified as `1/1 SUCCESS`; the isolated lifecycle
+filter also passed `1/1`. Earlier accepted build, type, asset/package and native
+shadow evidence is retained without repeating unrelated validation.
+
+The phase-closing local commit containing this record is the isolated A11-G
+checkpoint. Current-phase upstream changes are confined to
+`packages/engine/Source/Scene/GlobeSurfaceTileProvider.js` under existing
+`SGP-0009`; generated changes and new SGP count are zero. No push, successor
+implementation or Planar activation is included. The owner's newly reported
+cloud grain is a separate follow-up, not a reopening of the accepted light and
+shadow result.

@@ -1779,7 +1779,16 @@ function createTileUniformMap(frameState, globeSurfaceTileProvider) {
       return frameState._sceneGISGlobeLighting.vertical;
     },
     u_sceneGISShadowSunDirection: function () {
+      return frameState._sceneGISGlobeLighting.primaryLightDirection;
+    },
+    u_sceneGISActualSunDirection: function () {
       return frameState._sceneGISGlobeLighting.sunDirection;
+    },
+    u_sceneGISPrimaryLightDirection: function () {
+      return frameState._sceneGISGlobeLighting.primaryLightDirection;
+    },
+    u_sceneGISPrimaryLightScale: function () {
+      return frameState._sceneGISGlobeLighting.primaryLightScale;
     },
     u_sceneGISShadowCameraPosition: function () {
       return frameState._sceneGISGlobeLighting.cameraPosition;

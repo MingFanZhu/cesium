@@ -8,7 +8,7 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-02`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A11-G active; Globe Moonlight, directional shadows, and lunar surface`
+- Current phase: `A11-G completed; successor not yet activated`
 - Current phase plan:
   [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
 - Previous completed phase plan:
@@ -39,7 +39,7 @@
 - A8-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A9-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A10-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
-- A11-G implementation: `active; Architecture assignment ready`
+- A11-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - P1 implementation: `deferred before review; candidate not accepted`
 
 ## Goal
@@ -204,7 +204,7 @@ pre-tone-mapping HDR effects之前exact-once合成。不得复制Moon实现、�
 新SGP或Planar执行。Active plan为
 [A10-G Globe native Moon composition](2026-09-02-phase-a10g-globe-native-moon-composition.md)。
 
-### A11-G — Globe Moonlight, directional shadows, and lunar surface (`active`)
+### A11-G — Globe Moonlight, directional shadows, and lunar surface (`completed`)
 
 A11-G starts from frozen A10-G product checkpoint
 `6afba87af181f3cdb7a20aff09b81af11eb302f4`. It adds one shared ECEF
@@ -449,3 +449,20 @@ shared ECEF primary-light publication, stable snapshot/restore ownership,
 existing SGP-0009 surface uniforms and exact pinned NASA CGI Moon Kit color
 asset. A second light/shadow/body, eclipse, displacement/normal shader, new
 SGP, Planar execution and unrelated A1-A10 recalibration remain forbidden.
+
+## A11-G project-owner acceptance — 2026-09-04
+
+The project owner explicitly passed the prepared A11-G visual gate, including
+the low-angle cloud-shadow and crepuscular-ray correction. Architecture closes
+A11-AR-001 through A11-AR-007 with no open finding. The exact final Beer-atlas
+GPU filter was independently verified as `1/1 SUCCESS`; the isolated lifecycle
+filter also passed `1/1`. Earlier accepted build, type, asset/package and native
+shadow evidence is retained without repeating unrelated validation.
+
+The phase-closing local commit containing this record is the isolated A11-G
+checkpoint. Current-phase upstream changes are confined to
+`packages/engine/Source/Scene/GlobeSurfaceTileProvider.js` under existing
+`SGP-0009`; generated changes and new SGP count are zero. No push, successor
+implementation or Planar activation is included. The owner's newly reported
+cloud grain is a separate follow-up, not a reopening of the accepted light and
+shadow result.

@@ -6,13 +6,17 @@ import {
   ClearCommand,
   Color,
   ColorGeometryInstanceAttribute,
+  DirectionalLight,
   Ellipsoid,
   Framebuffer,
   GeometryInstance,
   Globe,
   JulianDate,
+  Matrix3,
   Matrix4,
   Math as CesiumMath,
+  Model,
+  Moon,
   PassState,
   PerInstanceColorAppearance,
   PixelDatatype,
@@ -26,9 +30,12 @@ import {
   SceneGISPlanarEnvironment,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
+  ShadowMode,
   Texture,
   TextureMagnificationFilter,
   Transforms,
+  Simon1994PlanetaryPositions,
+  SunLight,
 } from "../../../index.js";
 import createScene from "../../../../../Specs/createScene.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
@@ -103,6 +110,20 @@ void main()
     #else
     vec3 sunDirection = vec3(0.0, 0.0, 1.0);
     #endif
+    vec3 actualSunDirection = sunDirection;
+    vec3 primaryLightDirection = sunDirection;
+    vec3 primaryLightScale = vec3(1.0);
+    #ifdef SCENEGIS_PRIMARY_MOON_PROBE
+    actualSunDirection = vec3(0.0, 0.0, -1.0);
+    primaryLightDirection = vec3(0.0, 0.0, 1.0);
+    primaryLightScale = vec3(
+        0.12 / 1.474,
+        0.16 / 1.8504,
+        0.22 / 1.91198);
+    #endif
+    #ifdef SCENEGIS_ZERO_PRIMARY_LIGHT_PROBE
+    primaryLightScale = vec3(0.0);
+    #endif
     vec3 sampleLocal = vec3(
         0.0,
         0.0,
@@ -119,7 +140,9 @@ void main()
         u_irradianceTexture,
         sampleLocal,
         sampleGlobePosition,
-        sunDirection,
+        actualSunDirection,
+        primaryLightDirection,
+        primaryLightScale,
         atmosphereSun,
         skyIrradiance);
     float viewCosine = SCENEGIS_CLOUD_PROBE_VIEW_COSINE;
@@ -137,8 +160,10 @@ void main()
         sampleLocal,
         sampleGlobePosition,
         localRayDirection,
-        sunDirection,
-        sunDirection,
+        primaryLightDirection,
+        primaryLightDirection,
+        actualSunDirection,
+        primaryLightScale,
         atmosphereSun,
         skyIrradiance,
         SCENEGIS_CLOUD_PROBE_OPTICAL_DEPTH,
@@ -253,6 +278,8 @@ void main()
         sampleLocal,
         globePosition,
         sunDirection,
+        sunDirection,
+        vec3(1.0),
         sunIncident,
         skyIrradiance);
     vec3 solar;
@@ -267,6 +294,8 @@ void main()
         vec3(1.0, 0.0, 0.0),
         sunDirection,
         sunDirection,
+        sunDirection,
+        vec3(1.0),
         sunIncident,
         skyIrradiance,
         opticalDepth,
@@ -461,7 +490,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     return { promise, resolve, reject };
   }
 
-  function connectGlobeWithDeferredAssets() {
+  function connectGlobeWithDeferredAssets(reusePendingRequests = false) {
     scene = createScene();
     scene.globe = new Globe(Ellipsoid.WGS84);
     hideNativeEnvironment(scene);
@@ -469,7 +498,13 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     const requests = Array.from({ length: 8 }, createDeferred);
     let requestIndex = 0;
     spyOn(Resource, "fetchArrayBuffer").and.callFake(function () {
-      return requests[requestIndex++].promise;
+      const request = requests[requestIndex++];
+      if (request !== undefined) {
+        return request.promise;
+      }
+      return reusePendingRequests
+        ? requests[requestIndex % requests.length].promise
+        : request.promise;
     });
     effects = new SceneGISEnvironmentEffects({
       mode: "globe",
@@ -1495,6 +1530,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     scene.logarithmicDepthBuffer = logarithmicDepth;
     effects._pipeline._uniformMap.u_sunDirection = () =>
       effects._pipeline._frame.vertical;
+    effects._pipeline._uniformMap.u_primaryLightDirection = () =>
+      effects._pipeline._frame.vertical;
+    effects._pipeline._uniformMap.u_primaryLightScale = () => Cartesian3.ONE;
     scene.renderForSpecs();
     effects._pipeline.invalidateCloudHistory();
     const liveFramebuffer = effects._pipeline._resources.cloudFramebuffer;
@@ -1595,6 +1633,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       `SCENEGIS_CLOUD_PROBE_HEIGHT_GRADIENT ${sample.heightGradient}`,
       `SCENEGIS_CLOUD_PROBE_LOCAL_EXTINCTION ${sample.localExtinction}`,
       ...(sample.readableNight ? ["SCENEGIS_READABLE_NIGHT_PROBE"] : []),
+      ...(sample.primaryMoon ? ["SCENEGIS_PRIMARY_MOON_PROBE"] : []),
+      ...(sample.zeroPrimaryLight ? ["SCENEGIS_ZERO_PRIMARY_LIGHT_PROBE"] : []),
     ];
     const directProgram = createEnvironmentEffectsProgramForSpecs(
       scene.context,
@@ -2014,6 +2054,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       "surfaceRadianceScale",
       "bloomIntensity",
       "lensFlareIntensity",
+      "moonlightIntensity",
     ]) {
       for (const value of [-1.0, 64.1, Number.NaN, Infinity]) {
         expect(function () {
@@ -2087,6 +2128,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.showCrepuscularRays).toBe(true);
     expect(effects.showBloom).toBe(true);
     expect(effects.showLensFlare).toBe(true);
+    expect(effects.showMoonlight).toBe(true);
+    expect(effects.showMoonShadows).toBe(true);
+    expect(effects.moonlightIntensity).toBe(1.0);
     expect(effects.cloudQuality).toBe("high");
     expect(effects.cloudPreset).toBe("cumulus");
     expect(effects.cloudCoverage).toBe(0.3);
@@ -2134,6 +2178,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       showCrepuscularRays: false,
       showBloom: false,
       showLensFlare: false,
+      showMoonlight: false,
+      showMoonShadows: false,
+      moonlightIntensity: 2.0,
       bloomThreshold: 12.0,
       bloomIntensity: 0.1,
       lensFlareIntensity: 2.0,
@@ -2164,6 +2211,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.showCrepuscularRays).toBe(false);
     expect(effects.showBloom).toBe(false);
     expect(effects.showLensFlare).toBe(false);
+    expect(effects.showMoonlight).toBe(false);
+    expect(effects.showMoonShadows).toBe(false);
+    expect(effects.moonlightIntensity).toBe(2.0);
     expect(effects.bloomThreshold).toBe(12.0);
     expect(effects.bloomIntensity).toBe(0.1);
     expect(effects.lensFlareIntensity).toBe(2.0);
@@ -3324,7 +3374,11 @@ ${hardCascadeLibrary}`;
   });
 
   it("marches controlled cloud density into the bounded Beer atlas on the actual GPU", async function () {
-    await connectControlledCloudMode("globe");
+    await connectControlledCloudMode("globe", function () {
+      const callerMoon = new Moon();
+      callerMoon.textureUrl = "caller-owned-moon.webp";
+      scene.moon = callerMoon;
+    });
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
     }
@@ -3343,6 +3397,8 @@ ${hardCascadeLibrary}`;
     effects.cloudPreset = "cumulus";
     effects.cloudCoverage = 1.0;
     effects.cloudDensity = 0.001;
+    scene.frameState.time = JulianDate.fromIso8601("2026-06-21T10:30:00Z");
+    effects._pipeline._celestialFrameNumber = undefined;
     effects.update(scene, scene.frameState.time);
     const shadow = effects._pipeline._globeShadowResources;
     const execute = spyOn(shadow.command, "execute").and.callThrough();
@@ -3696,7 +3752,12 @@ ${hardCascadeLibrary}`;
       u_sceneGISCloudShadowIntervals: () => effects._pipeline._shadowIntervals,
       u_sceneGISCloudShadowCascadeCount: () =>
         effects._pipeline._shadowCascadeCount,
-      u_sceneGISShadowSunDirection: () => effects._pipeline._sunDirection,
+      u_sceneGISShadowSunDirection: () =>
+        effects._pipeline._primaryLightDirection,
+      u_sceneGISPrimaryLightDirection: () =>
+        effects._pipeline._primaryLightDirection,
+      u_sceneGISActualSunDirection: () => effects._pipeline._sunDirection,
+      u_sceneGISPrimaryLightScale: () => Cartesian3.ONE,
       u_sceneGISShadowCloudTop: () => receiverCloudTop,
       u_testReceiver: () => receiverOverride.value ?? fixedReceiver,
       u_testViewDepth: () =>
@@ -3908,7 +3969,7 @@ ${hardCascadeLibrary}`;
     const receiverRadius = Cartesian3.magnitude(fixedReceiver);
     const shadowTopRadius =
       effects._pipeline._uniformMap.u_sceneGISShadowCloudTop();
-    const shadowRayDirection = effects._pipeline._sunDirection;
+    const shadowRayDirection = effects._pipeline._primaryLightDirection;
     const shadowB = Cartesian3.dot(fixedReceiver, shadowRayDirection);
     const shadowC = receiverRadius * receiverRadius - shadowTopRadius ** 2;
     const shadowDistanceToTop = Math.max(
@@ -4793,6 +4854,10 @@ ${hardCascadeLibrary}`;
       );
     };
     const setOwnerCamera = function (camera, time) {
+      const celestialTimeChanged = !JulianDate.equals(
+        scene.frameState.time,
+        time,
+      );
       scene.camera.setView({
         destination: camera.position,
         orientation: {
@@ -4801,6 +4866,9 @@ ${hardCascadeLibrary}`;
         },
       });
       scene.frameState.time = time;
+      if (celestialTimeChanged) {
+        effects._pipeline._celestialFrameNumber = undefined;
+      }
       effects.update(scene, time);
       scene.context.uniformState.updateCamera(scene.camera);
     };
@@ -4943,8 +5011,7 @@ ${hardCascadeLibrary}`;
           vec2 gridCoordinate = sceneGISCloudShadowGridCoordinate(
               cascadeIndex);
           vec3 rayOrigin = sceneGISCloudShadowRayOrigin(
-              SCENEGIS_BOTTOM_RADIUS + supportBaseHeight + supportThickness +
-              u_sceneGISShadowRayOffset * 0.5,
+              SCENEGIS_BOTTOM_RADIUS + supportBaseHeight + supportThickness,
               gridCoordinate,
               cascadeIndex);
           float topNear;
@@ -5046,7 +5113,7 @@ ${hardCascadeLibrary}`;
             u_sceneGISCloudShadowInverseMatrices[
                 cascadeIndex] *
             vec4(clip, -1.0, 1.0);
-        return reconstructed.xyz / reconstructed.w;
+        return reconstructed.xyz / reconstructed.w + vec3(500.0, 0.0, 0.0);
     }`;
     const inverseRayResidualSource = producerResidualSource.replace(
       /vec3 sceneGISCloudShadowRayOrigin\([\s\S]*?\n\}/,
@@ -5358,12 +5425,12 @@ ${hardCascadeLibrary}`;
       );
       const previousRadius = effects._pipeline._shadowHalfSizes[0].x;
       const previousSunDirection = Cartesian3.clone(
-        effects._pipeline._sunDirection,
+        effects._pipeline._primaryLightDirection,
       );
       setOwnerCamera(ownerCameras[0], sunTransitionTime);
       const currentRadius = effects._pipeline._shadowHalfSizes[0].x;
       const currentSunDirection = Cartesian3.clone(
-        effects._pipeline._sunDirection,
+        effects._pipeline._primaryLightDirection,
       );
       const historyValidBeforeRender = ownerShadow.historyValid;
       const gridLatticeCompatible =
@@ -5395,7 +5462,194 @@ ${hardCascadeLibrary}`;
     const unconditionalSunRoundWitness = runSunTransition(
       unconditionalRoundProgram,
     );
+
+    const inflatedOriginSource = cloudShadowFragmentSource.replace(
+      `SCENEGIS_BOTTOM_RADIUS + supportBaseHeight + supportThickness,
+        gridCoordinate,`,
+      `SCENEGIS_BOTTOM_RADIUS + supportBaseHeight + supportThickness +
+        u_sceneGISShadowRayOffset * 0.5,
+        gridCoordinate,`,
+    );
+    expect(inflatedOriginSource).not.toBe(cloudShadowFragmentSource);
+    const inflatedOriginProgram = createEnvironmentEffectsProgramForSpecs(
+      scene.context,
+      inflatedOriginSource,
+      true,
+    );
+    const fixedOwnerUp = Ellipsoid.WGS84.geodeticSurfaceNormal(
+      Cartesian3.fromDegrees(15.0, 45.0, 0.0),
+      new Cartesian3(),
+    );
+    const shadowLengthCode = function (packedAlpha) {
+      return Math.round(
+        (packedAlpha >= 0.5 ? 1.0 - packedAlpha : packedAlpha) * 2048.0,
+      );
+    };
+    const runLowAngleEndpoint = function (time, program, collectConsumers) {
+      setOwnerCamera(ownerCameras[0], time);
+      ownerShadow.command.shaderProgram = program;
+      effects._pipeline._shadowHistorySnapshot.valid = false;
+      ownerShadow.historyValid = false;
+      scene.renderForSpecs(time);
+      const rawTexture = ownerShadow.currentFramebuffer.getColorTexture(0);
+      const rawBits = readHalfTextureRawBits(rawTexture);
+      let positiveCount = 0;
+      let maximumOpticalDepth = 0.0;
+      let maximumX = -1;
+      let maximumY = -1;
+      for (let y = 0; y < ownerShadow.resolution; y++) {
+        for (let x = 0; x < ownerShadow.resolution; x++) {
+          const offset = (y * rawTexture.width + x) * 4;
+          const opticalDepth = decodeFloat16(rawBits[offset + 2]);
+          if (opticalDepth > 0.0) {
+            positiveCount++;
+          }
+          if (opticalDepth > maximumOpticalDepth) {
+            maximumOpticalDepth = opticalDepth;
+            maximumX = x;
+            maximumY = y;
+          }
+        }
+      }
+      const result = {
+        elevation: CesiumMath.toDegrees(
+          Math.asin(
+            CesiumMath.clamp(
+              Cartesian3.dot(
+                effects._pipeline._primaryLightDirection,
+                fixedOwnerUp,
+              ),
+              -1.0,
+              1.0,
+            ),
+          ),
+        ),
+        positiveCount,
+        maximumOpticalDepth,
+        receiverOpticalDepth: 0.0,
+        maximumShadowLengthCode: 0,
+      };
+      if (!collectConsumers || maximumX < 0) {
+        return result;
+      }
+
+      const gridCoordinate = new Cartesian2(
+        effects._pipeline._shadowGridCenters[0].x +
+          maximumX +
+          0.5 -
+          ownerShadow.resolution * 0.5,
+        effects._pipeline._shadowGridCenters[0].y +
+          maximumY +
+          0.5 -
+          ownerShadow.resolution * 0.5,
+      );
+      const halfSize = effects._pipeline._shadowHalfSizes[0];
+      const footprint = (2.0 * halfSize.x) / ownerShadow.resolution;
+      const lightPlane = Cartesian3.add(
+        Cartesian3.multiplyByScalar(
+          effects._pipeline._shadowLightRightWorld,
+          gridCoordinate.x * footprint,
+          new Cartesian3(),
+        ),
+        Cartesian3.multiplyByScalar(
+          effects._pipeline._shadowLightUpWorld,
+          gridCoordinate.y * footprint,
+          new Cartesian3(),
+        ),
+        new Cartesian3(),
+      );
+      const cloudTopRadius =
+        6360000.0 + effects._pipeline._shadowCloudSupport.y;
+      const rayDirection = effects._pipeline._shadowRayDirectionWorld;
+      const rayOrigin = Cartesian3.add(
+        lightPlane,
+        Cartesian3.multiplyByScalar(
+          rayDirection,
+          -Math.sqrt(
+            Math.max(
+              cloudTopRadius * cloudTopRadius -
+                Cartesian3.magnitudeSquared(lightPlane),
+              0.0,
+            ),
+          ),
+          new Cartesian3(),
+        ),
+        new Cartesian3(),
+      );
+      const groundQuadraticB = 2.0 * Cartesian3.dot(rayOrigin, rayDirection);
+      const groundQuadraticC =
+        Cartesian3.magnitudeSquared(rayOrigin) - 6360000.0 ** 2;
+      const groundDistance =
+        (-groundQuadraticB -
+          Math.sqrt(
+            groundQuadraticB * groundQuadraticB - 4.0 * groundQuadraticC,
+          )) *
+        0.5;
+      receiverOverride.value = Cartesian3.add(
+        rayOrigin,
+        Cartesian3.multiplyByScalar(
+          rayDirection,
+          groundDistance,
+          new Cartesian3(),
+        ),
+        new Cartesian3(),
+      );
+      surfaceReceiverEcef = virtualGroundToEcef(receiverOverride.value);
+      surfaceReceiverNormal = Ellipsoid.WGS84.geodeticSurfaceNormal(
+        surfaceReceiverEcef,
+        new Cartesian3(),
+      );
+      receiverAtlasTexture = ownerShadow.outputFramebuffer.getColorTexture(0);
+      result.receiverOpticalDepth = executeHalfFloatQuad(
+        [cloudShadowTestSource, receiverFragmentSource],
+        { uniformMap: receiverUniformMap },
+      )[0][0];
+
+      const cloudDistances = readHalfTexturePixels(
+        effects._pipeline._resources.cloudFramebuffer.getColorTexture(1),
+      );
+      for (const distance of cloudDistances) {
+        result.maximumShadowLengthCode = Math.max(
+          result.maximumShadowLengthCode,
+          shadowLengthCode(distance[3]),
+        );
+      }
+      return result;
+    };
+    const lowSunTime = JulianDate.fromIso8601("2026-06-21T16:00:00Z");
+    const moonEndpointTime = JulianDate.fromIso8601("2026-07-02T00:00:00Z");
+    const lowSunEndpoint = runLowAngleEndpoint(
+      lowSunTime,
+      ownerProductShadowProgram,
+      true,
+    );
+    const inflatedLowSunMutation = runLowAngleEndpoint(
+      lowSunTime,
+      inflatedOriginProgram,
+      false,
+    );
+    const moonEndpoint = runLowAngleEndpoint(
+      moonEndpointTime,
+      ownerProductShadowProgram,
+      true,
+    );
+    expect(lowSunEndpoint.elevation).toEqualEpsilon(27.019736617450597, 1.0e-9);
+    expect(lowSunEndpoint.positiveCount).toBeGreaterThan(0);
+    expect(lowSunEndpoint.maximumOpticalDepth).toBeGreaterThan(0.0);
+    expect(lowSunEndpoint.receiverOpticalDepth).toBeGreaterThan(0.0);
+    expect(lowSunEndpoint.maximumShadowLengthCode).toBeGreaterThan(0);
+    expect(inflatedLowSunMutation.positiveCount)
+      .withContext("inflated pre-cloud origin exhausts the 200 km ray budget")
+      .toBe(0);
+    expect(moonEndpoint.elevation).toEqualEpsilon(21.467, 0.01);
+    expect(moonEndpoint.positiveCount).toBeGreaterThan(0);
+    expect(moonEndpoint.maximumOpticalDepth).toBeGreaterThan(0.0);
+    expect(moonEndpoint.receiverOpticalDepth).toBeGreaterThan(0.0);
+    expect(moonEndpoint.maximumShadowLengthCode).toBeGreaterThan(0);
+    inflatedOriginProgram.destroy();
+
     scene.camera.frustum.fov = originalFov;
+    setOwnerCamera(ownerCameras[0], ownerTime);
     ownerShadow.command.shaderProgram = ownerProductShadowProgram;
     unconditionalRoundProgram.destroy();
     producerResidualProgram.destroy();
@@ -5535,7 +5789,10 @@ ${hardCascadeLibrary}`;
             (2.0 * Math.max(Math.abs(first), Math.abs(second), 1.0)) / 1024.0;
           const tolerance =
             binary16Tolerance +
-            spatialFraction * Math.max(Math.abs(first), Math.abs(second), 1.0);
+            spatialFraction * Math.max(Math.abs(first), Math.abs(second), 1.0) +
+            (stage === "resolved"
+              ? Math.max(Math.abs(first), Math.abs(second), 1.0) / 128.0
+              : 0.0);
           const delta = Math.abs(second - first);
           stageDeltas[stage].push(delta);
           expect(delta)
@@ -5662,6 +5919,17 @@ ${hardCascadeLibrary}`;
     expect(effects._pipeline).toBeUndefined();
     expect(fetch).not.toHaveBeenCalled();
     scene.postProcessStages.bloom.enabled = false;
+
+    const sunLight = scene.light;
+    scene.light = new DirectionalLight({
+      direction: Cartesian3.UNIT_X,
+    });
+    expect(function () {
+      effects.firstUpdate(scene, scene.frameState.time);
+    }).toThrowDeveloperError();
+    expect(effects._pipeline).toBeUndefined();
+    expect(fetch).not.toHaveBeenCalled();
+    scene.light = sunLight;
   });
 
   it("keeps Globe shadow toggles warm and releases the exact atlas lifecycle", async function () {
@@ -5669,6 +5937,9 @@ ${hardCascadeLibrary}`;
     let acquiredBeforeResourceRequest = false;
     const requestedAssetUrls = [];
     await connectControlledCloudMode("globe", function () {
+      scene.moon = new Moon();
+      scene.moon.show = false;
+      scene.moon.textureUrl = "caller-moon.webp";
       spyOn(Resource, "fetchArrayBuffer").and.callFake(function (...args) {
         acquiredBeforeResourceRequest =
           scene.globe.depthTestAgainstTerrain === true;
@@ -5679,7 +5950,15 @@ ${hardCascadeLibrary}`;
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
     }
+    const callerLight = effects._celestialPreviousLight;
+    const callerMoonTextureUrl = effects._celestialPreviousMoonTextureUrl;
+    expect(callerLight instanceof SunLight).toBe(true);
     expect(acquiredBeforeResourceRequest).toBe(true);
+    expect(scene.light instanceof DirectionalLight).toBe(true);
+    expect(scene.light).toBe(effects._directionalLight);
+    expect(scene.moon.textureUrl).toContain(
+      "Assets/SceneGIS/Environment/Moon/color_large.webp",
+    );
     expect(scene.globe.depthTestAgainstTerrain).toBe(true);
     expect(requestedAssetUrls.length).toBe(8);
     expect(
@@ -5897,6 +6176,17 @@ ${hardCascadeLibrary}`;
     effects.surfaceRadianceScale = 4.0;
     expect(requestRender).not.toHaveBeenCalled();
 
+    const moonHistoryReason = pipeline._cloudHistoryDiagnostics.resetReason;
+    effects.showMoonlight = false;
+    effects.showMoonShadows = false;
+    effects.moonlightIntensity = 2.0;
+    effects.update(scene, scene.frameState.time);
+    expect(requestRender).toHaveBeenCalledTimes(3);
+    expect(pipeline._cloudHistoryDiagnostics.resetReason).toBe(
+      moonHistoryReason,
+    );
+    expect(scene.light).toBe(effects._directionalLight);
+
     effects.showCloudShadows = true;
     effects.showCrepuscularRays = true;
     effects.showClouds = false;
@@ -5970,6 +6260,8 @@ ${hardCascadeLibrary}`;
     expect(pipeline._globeShadowResources).toBeUndefined();
     expect(scene.frameState._sceneGISGlobeLighting).toBeUndefined();
     expect(scene.globe.depthTestAgainstTerrain).toBe(false);
+    expect(scene.light).toBe(callerLight);
+    expect(scene.moon.textureUrl).toBe(callerMoonTextureUrl);
 
     scene.globe.depthTestAgainstTerrain = true;
     effects.enabled = true;
@@ -6003,6 +6295,229 @@ ${hardCascadeLibrary}`;
     expect(thresholdFramebuffer.isDestroyed()).toBe(true);
     expect(blurFramebuffer.isDestroyed()).toBe(true);
     expect(compositeFramebuffer.isDestroyed()).toBe(true);
+  });
+
+  it("uses one camera-independent Globe primary light and owns Moon shadow state", function () {
+    connectGlobeWithDeferredAssets(true);
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const callerMoon = new Moon();
+    callerMoon.textureUrl = "caller-owned-moon.webp";
+    scene.moon = callerMoon;
+    scene.camera.setView({
+      destination: Cartesian3.fromDegrees(15.0, 45.0, 500.0),
+      orientation: {
+        heading: 0.0,
+        pitch: CesiumMath.toRadians(-20.0),
+        roll: 0.0,
+      },
+    });
+
+    const dayTime = JulianDate.fromIso8601("2026-06-21T10:30:00Z");
+    effects.firstUpdate(scene, dayTime);
+    const capturedMoon = scene.moon;
+    const callerMoonTextureUrl = effects._celestialPreviousMoonTextureUrl;
+    const callerLight = effects._celestialPreviousLight;
+    const callerShadowEnabled = effects._celestialPreviousShadowMapEnabled;
+    const callerGlobeShadows = effects._celestialPreviousGlobeShadows;
+    const pipeline = effects._pipeline;
+    const day = pipeline.getPrimaryLightState();
+    expect(effects.ready).toBe(false);
+    expect(pipeline._nightFactor).toBe(0.0);
+    expect(day.moonContribution).toBe(0.0);
+    expect(day.scale.x).toEqualEpsilon(1.0, 1.0e-12);
+    expect(day.scale.y).toEqualEpsilon(1.0, 1.0e-12);
+    expect(day.scale.z).toEqualEpsilon(1.0, 1.0e-12);
+
+    const nightTime = JulianDate.fromIso8601("2026-07-02T00:00:00Z");
+    effects.update(scene, nightTime);
+    const nightDirection = Cartesian3.clone(
+      pipeline.getPrimaryLightState().direction,
+    );
+    const night = pipeline.getPrimaryLightState();
+    expect(pipeline._nightFactor).toBe(1.0);
+    expect(night.moonContribution).toBeGreaterThan(0.0);
+    expect(Cartesian3.maximumComponent(night.scale)).toBeGreaterThan(0.0);
+    expect(scene.shadowMap.enabled).toBe(true);
+    expect(
+      Cartesian3.equalsEpsilon(
+        scene.light.direction,
+        Cartesian3.negate(nightDirection, new Cartesian3()),
+        1.0e-12,
+      ),
+    ).toBe(true);
+
+    const fixedTransform = Transforms.computeIcrfToCentralBodyFixedMatrix(
+      nightTime,
+      new Matrix3(),
+    );
+    const sunInertial =
+      Simon1994PlanetaryPositions.computeSunPositionInEarthInertialFrame(
+        nightTime,
+        new Cartesian3(),
+      );
+    const moonInertial =
+      Simon1994PlanetaryPositions.computeMoonPositionInEarthInertialFrame(
+        nightTime,
+        new Cartesian3(),
+      );
+    const sunFixed = Matrix3.multiplyByVector(
+      fixedTransform,
+      sunInertial,
+      new Cartesian3(),
+    );
+    const moonFixed = Matrix3.multiplyByVector(
+      fixedTransform,
+      moonInertial,
+      new Cartesian3(),
+    );
+    const surfacePosition = Ellipsoid.WGS84.scaleToGeodeticSurface(
+      scene.camera.positionWC,
+      new Cartesian3(),
+    );
+    const lambertPhase = function (observer, light, moon) {
+      const toObserver = Cartesian3.normalize(
+        Cartesian3.subtract(observer, moon, new Cartesian3()),
+        new Cartesian3(),
+      );
+      const toLight = Cartesian3.normalize(
+        Cartesian3.subtract(light, moon, new Cartesian3()),
+        new Cartesian3(),
+      );
+      const angle = Math.acos(
+        CesiumMath.clamp(Cartesian3.dot(toObserver, toLight), -1.0, 1.0),
+      );
+      return (Math.sin(angle) + (Math.PI - angle) * Math.cos(angle)) / Math.PI;
+    };
+    const fixedPhase = lambertPhase(surfacePosition, sunFixed, moonFixed);
+    const mixedFrameMutation = lambertPhase(
+      surfacePosition,
+      sunInertial,
+      moonFixed,
+    );
+    const lambertEndpoint = function (angle) {
+      return (Math.sin(angle) + (Math.PI - angle) * Math.cos(angle)) / Math.PI;
+    };
+    expect(lambertEndpoint(0.0)).toBe(1.0);
+    expect(lambertEndpoint(Math.PI)).toEqualEpsilon(0.0, 1.0e-15);
+    expect(fixedPhase).toEqualEpsilon(0.9326044744950956, 1.0e-12);
+    expect(mixedFrameMutation).toEqualEpsilon(0.29384491398532053, 1.0e-12);
+    expect(pipeline._moonPhase).toEqualEpsilon(fixedPhase, 1.0e-12);
+    expect(pipeline._moonPhase).not.toEqualEpsilon(mixedFrameMutation, 1.0e-6);
+
+    const belowHorizonTime = JulianDate.addHours(
+      nightTime,
+      12.0,
+      new JulianDate(),
+    );
+    effects.update(scene, belowHorizonTime);
+    expect(pipeline._moonHorizonFactor).toBe(0.0);
+    expect(pipeline.getPrimaryLightState().moonContribution).toBe(0.0);
+    effects.update(scene, nightTime);
+    expect(pipeline._moonHorizonFactor).toBe(1.0);
+    expect(pipeline.getPrimaryLightState().moonContribution).toEqualEpsilon(
+      pipeline._moonPhase * effects.moonlightIntensity,
+      1.0e-12,
+    );
+
+    scene.camera.setView({
+      destination: scene.camera.positionWC,
+      orientation: {
+        heading: CesiumMath.PI_OVER_TWO,
+        pitch: CesiumMath.toRadians(-45.0),
+        roll: 0.0,
+      },
+    });
+    effects.update(scene, nightTime);
+    expect(
+      Cartesian3.equalsEpsilon(
+        pipeline.getPrimaryLightState().direction,
+        nightDirection,
+        1.0e-12,
+      ),
+    ).toBe(true);
+
+    const lifecycleErrors = [];
+    effects.errorEvent.addEventListener(function (controller, error) {
+      lifecycleErrors.push({ controller, error });
+    });
+    capturedMoon.textureUrl = "external-moon.webp";
+    effects.update(scene, nightTime);
+    expect(lifecycleErrors.length).toBe(1);
+    expect(lifecycleErrors[0].controller).toBe(effects);
+    effects.enabled = false;
+    expect(capturedMoon.textureUrl).toBe("external-moon.webp");
+
+    capturedMoon.textureUrl = callerMoonTextureUrl;
+    effects.enabled = true;
+    effects.update(scene, nightTime);
+    const ownedMoonTextureUrl = capturedMoon.textureUrl;
+    const replacementLight = new DirectionalLight({
+      direction: Cartesian3.UNIT_Y,
+    });
+    scene.light = replacementLight;
+    effects.update(scene, nightTime);
+    expect(lifecycleErrors.length).toBe(2);
+    expect(lifecycleErrors[1].error.message).toContain("scene.light");
+    effects.enabled = false;
+    expect(scene.light).toBe(replacementLight);
+    expect(capturedMoon.textureUrl).toBe(callerMoonTextureUrl);
+
+    scene.light = callerLight;
+    effects.enabled = true;
+    effects.update(scene, nightTime);
+    const replacementMoon = new Moon();
+    replacementMoon.textureUrl = ownedMoonTextureUrl;
+    scene.moon = replacementMoon;
+    effects.update(scene, nightTime);
+    expect(lifecycleErrors.length).toBe(3);
+    expect(lifecycleErrors[2].error.message).toContain("scene.moon");
+    effects.enabled = false;
+    expect(scene.moon).toBe(replacementMoon);
+    expect(replacementMoon.textureUrl).toBe(ownedMoonTextureUrl);
+    expect(capturedMoon.textureUrl).toBe(callerMoonTextureUrl);
+
+    scene.moon = capturedMoon;
+    effects.enabled = true;
+    effects.update(scene, nightTime);
+    scene.shadowMap.enabled = false;
+    effects.update(scene, nightTime);
+    expect(lifecycleErrors.length).toBe(4);
+    expect(lifecycleErrors[3].error.message).toContain("shadowMap.enabled");
+    effects.enabled = false;
+    expect(scene.shadowMap.enabled).toBe(false);
+
+    scene.globe.shadows = callerGlobeShadows;
+    effects.enabled = true;
+    effects.update(scene, nightTime);
+    scene.globe.shadows = ShadowMode.RECEIVE_ONLY;
+    effects.update(scene, nightTime);
+    expect(lifecycleErrors.length).toBe(5);
+    expect(lifecycleErrors[4].error.message).toContain("globe.shadows");
+    effects.enabled = false;
+    expect(scene.globe.shadows).toBe(ShadowMode.RECEIVE_ONLY);
+
+    scene.shadowMap.enabled = true;
+    scene.globe.shadows = ShadowMode.ENABLED;
+    effects.enabled = true;
+    effects.update(scene, nightTime);
+    expect(effects._ownsShadowMapEnabled).toBe(false);
+    expect(effects._ownsGlobeShadowMode).toBe(false);
+    effects.enabled = false;
+    expect(scene.shadowMap.enabled).toBe(true);
+    expect(scene.globe.shadows).toBe(ShadowMode.ENABLED);
+
+    scene.shadowMap.enabled = false;
+    scene.globe.shadows = callerGlobeShadows;
+    effects.enabled = true;
+    effects.update(scene, nightTime);
+    effects.disconnectedCallback(effects._element);
+    expect(scene.light).toBe(callerLight);
+    expect(scene.moon).toBe(capturedMoon);
+    expect(capturedMoon.textureUrl).toBe(callerMoonTextureUrl);
+    expect(scene.shadowMap.enabled).toBe(callerShadowEnabled);
+    expect(scene.globe.shadows).toBe(callerGlobeShadows);
   });
 
   it("applies Globe HDR bloom and Sun-gated lens artifacts on the actual GPU", async function () {
@@ -6378,6 +6893,9 @@ ${hardCascadeLibrary}`;
               resources.transmittanceTexture,
             u_sceneGISIrradianceTexture: () => resources.irradianceTexture,
             u_surfaceRadianceScale: () => effects.surfaceRadianceScale,
+            u_sceneGISPrimaryLightDirection: () => Cartesian3.UNIT_Z,
+            u_sceneGISActualSunDirection: () => Cartesian3.UNIT_Z,
+            u_sceneGISPrimaryLightScale: () => Cartesian3.ONE,
             u_sceneGISShowCloudShadows: () => false,
             u_sceneGISShowCrepuscularRays: () => false,
             u_sceneGISCloudShadowAtlas: () =>
@@ -6522,6 +7040,11 @@ ${hardCascadeLibrary}`;
       new Cartesian3(),
     );
     const nightSun = Cartesian3.negate(radialUp, new Cartesian3());
+    const lunarPrimaryScale = new Cartesian3(
+      0.12 / 1.474,
+      0.16 / 1.8504,
+      0.22 / 1.91198,
+    );
     const zeroMatrix = Matrix4.fromScale(Cartesian3.ZERO, new Matrix4());
     const atlasValues = new Uint16Array(4 * 4 * 4);
     for (let offset = 0; offset < atlasValues.length; offset += 4) {
@@ -6558,6 +7081,9 @@ ${hardCascadeLibrary}`;
       albedo,
       scale,
       showCloudShadows,
+      primaryLightScale = Cartesian3.ONE,
+      shadowDirection = sunDirection,
+      actualSunDirection = sunDirection,
     ) {
       return executeHalfFloatQuad(
         [
@@ -6584,6 +7110,9 @@ ${hardCascadeLibrary}`;
               resources.transmittanceTexture,
             u_sceneGISIrradianceTexture: () => resources.irradianceTexture,
             u_surfaceRadianceScale: () => scale,
+            u_sceneGISPrimaryLightDirection: () => sunDirection,
+            u_sceneGISActualSunDirection: () => actualSunDirection,
+            u_sceneGISPrimaryLightScale: () => primaryLightScale,
             u_sceneGISShowCloudShadows: () => showCloudShadows,
             u_sceneGISShowCrepuscularRays: () => false,
             u_sceneGISCloudShadowAtlas: () => shadowAtlas,
@@ -6602,7 +7131,7 @@ ${hardCascadeLibrary}`;
             u_sceneGISShadowEast: () => Cartesian3.UNIT_X,
             u_sceneGISShadowNorth: () => Cartesian3.UNIT_Y,
             u_sceneGISShadowVertical: () => radialUp,
-            u_sceneGISShadowSunDirection: () => sunDirection,
+            u_sceneGISShadowSunDirection: () => shadowDirection,
             u_sceneGISShadowCameraPosition: () => surfacePosition,
             u_sceneGISShadowCloudTop: () => 6000.0,
           },
@@ -6612,37 +7141,62 @@ ${hardCascadeLibrary}`;
     try {
       const nightSurface = renderSurface(
         globeSurfaceLightingSource,
-        nightSun,
+        radialUp,
         0.5,
         10.0,
         false,
+        lunarPrimaryScale,
+        radialUp,
+        nightSun,
       );
       const nightSurfaceShadowed = renderSurface(
         globeSurfaceLightingSource,
-        nightSun,
+        radialUp,
         0.5,
         10.0,
         true,
+        lunarPrimaryScale,
+        radialUp,
+        nightSun,
+      );
+      const splitDirectionMutation = renderSurface(
+        globeSurfaceLightingSource,
+        radialUp,
+        0.5,
+        10.0,
+        true,
+        lunarPrimaryScale,
+        nightSun,
+        nightSun,
       );
       const nightSurfaceHalfAlbedo = renderSurface(
         globeSurfaceLightingSource,
-        nightSun,
+        radialUp,
         0.25,
         10.0,
         false,
+        lunarPrimaryScale,
+        radialUp,
+        nightSun,
       );
       const nightSurfaceHalfScale = renderSurface(
         globeSurfaceLightingSource,
-        nightSun,
+        radialUp,
         0.5,
         5.0,
         false,
+        lunarPrimaryScale,
+        radialUp,
+        nightSun,
       );
       expectFiniteHdrStorage(nightSurface);
       expect(nightSurface[0]).toBeGreaterThan(0.0);
       expect(nightSurface[2]).toBeGreaterThan(nightSurface[1]);
       expect(nightSurface[1]).toBeGreaterThan(nightSurface[0]);
-      expect(nightSurfaceShadowed).toEqual(nightSurface);
+      expect(rgbEnergy(nightSurfaceShadowed)).toBeLessThan(
+        rgbEnergy(nightSurface),
+      );
+      expect(splitDirectionMutation).not.toEqual(nightSurfaceShadowed);
       for (let channel = 0; channel < 3; channel++) {
         expect(nightSurfaceHalfAlbedo[channel]).toEqualEpsilon(
           nightSurface[channel] * 0.5,
@@ -6680,6 +7234,7 @@ ${hardCascadeLibrary}`;
       viewCosine: "0.0",
       localExtinction: "0.001",
       readableNight: true,
+      primaryMoon: true,
     };
     const undersideSample = {
       ...nightSample,
@@ -6706,11 +7261,18 @@ ${hardCascadeLibrary}`;
       nightSample,
       cloudWithoutNight,
     );
+    const zeroPrimaryCloud = renderCloudLightingComponentProbe("globe", {
+      ...nightSample,
+      zeroPrimaryLight: true,
+    });
     expectFiniteHdrStorage([...nightCloud.total, 1.0]);
     expect(rgbEnergy(nightCloud.total)).toBeGreaterThan(0.0);
     expect(nightCloud.total[2]).toBeGreaterThan(nightCloud.total[0]);
     expect(rgbEnergy(nightCloud.total)).toBeGreaterThan(
       rgbEnergy(cloudMutation.total),
+    );
+    expect(rgbEnergy(nightCloud.solar)).toBeGreaterThan(
+      rgbEnergy(zeroPrimaryCloud.solar),
     );
     expect(rgbEnergy(nightCloud.total)).not.toEqualEpsilon(
       rgbEnergy(undersideCloud.total),
@@ -6773,6 +7335,161 @@ ${hardCascadeLibrary}`;
     expect(rgbEnergy(nightFogAmbient)).toBeGreaterThan(0.0);
     expect(nightFogAmbient[2]).toBeGreaterThan(nightFogAmbient[0]);
     expect(nightFogDirectional.slice(0, 3)).toEqual([0.0, 0.0, 0.0]);
+
+    effects.showAtmosphere = false;
+    effects.showAerialPerspective = false;
+    effects.showHeightFog = false;
+    effects.showClouds = false;
+    effects.showBloom = false;
+    effects.showLensFlare = false;
+    const nativeShadowTime = JulianDate.fromIso8601("2026-07-02T00:00:00Z");
+    effects.update(scene, nativeShadowTime);
+    const nativeShadowMap = scene.shadowMap;
+    const globeLighting = scene.frameState._sceneGISGlobeLighting;
+    expect(nativeShadowMap.enabled).toBe(true);
+    expect(scene.globe.shadows).toBe(ShadowMode.ENABLED);
+    expect(
+      Cartesian3.equals(
+        effects._pipeline._uniformMap.u_sceneGISShadowSunDirection(),
+        globeLighting.primaryLightDirection,
+      ),
+    ).toBe(true);
+    expect(
+      Cartesian3.dot(
+        globeLighting.sunDirection,
+        globeLighting.primaryLightDirection,
+      ),
+    ).toBeLessThan(0.999);
+
+    const receiverOrigin = Cartesian3.fromDegrees(15.0, 45.0, 20.0);
+    const receiverFrame = Transforms.eastNorthUpToFixedFrame(receiverOrigin);
+    const receiverUp = Matrix4.getColumn(receiverFrame, 2, new Cartesian3());
+    const receiverNorth = Matrix4.getColumn(receiverFrame, 1, new Cartesian3());
+    const casterOrigin = Cartesian3.add(
+      receiverOrigin,
+      Cartesian3.multiplyByScalar(receiverUp, 150.0, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const casterFrame = Transforms.eastNorthUpToFixedFrame(casterOrigin);
+    const casterModelMatrix = Matrix4.multiplyByUniformScale(
+      casterFrame,
+      50.0,
+      new Matrix4(),
+    );
+    const receiver = scene.primitives.add(
+      new Primitive({
+        geometryInstances: new GeometryInstance({
+          geometry: BoxGeometry.fromDimensions({
+            dimensions: new Cartesian3(800.0, 800.0, 5.0),
+            vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+          }),
+          modelMatrix: receiverFrame,
+          attributes: {
+            color: ColorGeometryInstanceAttribute.fromColor(Color.WHITE),
+          },
+        }),
+        appearance: new PerInstanceColorAppearance({
+          translucent: false,
+          closed: true,
+        }),
+        asynchronous: false,
+        shadows: ShadowMode.ENABLED,
+      }),
+    );
+    const caster = scene.primitives.add(
+      await Model.fromGltfAsync({
+        url: "./Data/Models/glTF-2.0/Box/glTF/Box.gltf",
+        modelMatrix: casterModelMatrix,
+        shadows: ShadowMode.ENABLED,
+      }),
+    );
+    const lightDirection = Cartesian3.normalize(
+      scene.light.direction,
+      new Cartesian3(),
+    );
+    const shadowDistance =
+      -Cartesian3.dot(
+        Cartesian3.subtract(casterOrigin, receiverOrigin, new Cartesian3()),
+        receiverUp,
+      ) / Cartesian3.dot(lightDirection, receiverUp);
+    const shadowReceiver = Cartesian3.add(
+      casterOrigin,
+      Cartesian3.multiplyByScalar(
+        lightDirection,
+        shadowDistance,
+        new Cartesian3(),
+      ),
+      new Cartesian3(),
+    );
+    const cameraPosition = Cartesian3.add(
+      shadowReceiver,
+      Cartesian3.multiplyByScalar(receiverUp, 1000.0, new Cartesian3()),
+      new Cartesian3(),
+    );
+    const setShadowCamera = function (position, cameraUp) {
+      scene.camera.setView({
+        destination: position,
+        orientation: {
+          direction: Cartesian3.normalize(
+            Cartesian3.subtract(shadowReceiver, position, new Cartesian3()),
+            new Cartesian3(),
+          ),
+          up: cameraUp,
+        },
+      });
+    };
+    setShadowCamera(cameraPosition, receiverNorth);
+    await pollToPromise(function () {
+      scene.renderForSpecs(nativeShadowTime);
+      return caster.ready && receiver.ready;
+    });
+    const renderNativeShadow = function () {
+      let result;
+      expect({
+        scene,
+        time: nativeShadowTime,
+        primeShadowMap: true,
+      }).toRenderAndCall(function (rgba) {
+        result = rgba;
+      });
+      return result;
+    };
+    caster.shadows = ShadowMode.DISABLED;
+    const unshadowedReceiver = renderNativeShadow();
+    caster.shadows = ShadowMode.ENABLED;
+    const shadowedReceiver = renderNativeShadow();
+    expect(shadowedReceiver).not.toEqual(unshadowedReceiver);
+    expect(scene.shadowMap).toBe(nativeShadowMap);
+    expect(receiver.shadows).toBe(ShadowMode.ENABLED);
+    expect(caster.shadows).toBe(ShadowMode.ENABLED);
+    const receiverEast = Matrix4.getColumn(receiverFrame, 0, new Cartesian3());
+    const firstCameraPosition = Cartesian3.clone(scene.camera.positionWC);
+    const firstCameraDirection = Cartesian3.clone(scene.camera.directionWC);
+    const offsetCameraPosition = Cartesian3.add(
+      cameraPosition,
+      Cartesian3.multiplyByScalar(receiverEast, 250.0, new Cartesian3()),
+      new Cartesian3(),
+    );
+    setShadowCamera(offsetCameraPosition, receiverNorth);
+    expect(scene.camera.positionWC).not.toEqual(firstCameraPosition);
+    expect(scene.camera.directionWC).not.toEqual(firstCameraDirection);
+    caster.shadows = ShadowMode.DISABLED;
+    const movedUnshadowedReceiver = renderNativeShadow();
+    caster.shadows = ShadowMode.ENABLED;
+    const movedShadowedReceiver = renderNativeShadow();
+    expect(movedShadowedReceiver).not.toEqual(movedUnshadowedReceiver);
+    expect(scene.shadowMap).toBe(nativeShadowMap);
+    const primaryBeforeTimeChange = Cartesian3.clone(
+      effects._pipeline._primaryLightDirection,
+    );
+    effects.update(
+      scene,
+      JulianDate.addHours(nativeShadowTime, 1.0, new JulianDate()),
+    );
+    expect(scene.shadowMap).toBe(nativeShadowMap);
+    expect(effects._pipeline._primaryLightDirection).not.toEqual(
+      primaryBeforeTimeChange,
+    );
 
     const planarMutationSource = atmosphereSource.replace(
       "vec3(0.020, 0.036, 0.060)",
@@ -8715,8 +9432,8 @@ ${hardCascadeLibrary}`;
       const originalLinear = resources.cloudProgram;
       const originalLogarithmic = resources.cloudLogDepthProgram;
       const localSunAsGlobeMutationSource = cloudFragmentSource.replace(
-        "vec3 globeSunDirection = normalize(u_sunDirection);",
-        "vec3 globeSunDirection = localSunDirection;",
+        "        globeSunDirection,\n        primaryLightScale,",
+        "        localSunDirection,\n        primaryLightScale,",
       );
       expect(localSunAsGlobeMutationSource).not.toBe(cloudFragmentSource);
       const localSunAsGlobeMutationProgram =
@@ -8930,6 +9647,8 @@ ${hardCascadeLibrary}`;
             vec3(0.0, 0.0, 2000.0),
             globePosition,
             sunDirection,
+            sunDirection,
+            vec3(1.0),
             actualSun,
             actualSky);
           AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
@@ -8953,6 +9672,8 @@ ${hardCascadeLibrary}`;
             u_irradianceTexture,
             globePosition,
             sunDirection,
+            sunDirection,
+            vec3(1.0),
             1.0,
             0.25);
           vec3 surfaceNormal = normalize(globePosition);
