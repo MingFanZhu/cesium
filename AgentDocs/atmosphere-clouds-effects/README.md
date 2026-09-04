@@ -3,12 +3,12 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A12-G completed; Globe cloud noise reduction`
-- Current review: `approved; owner visual gate passed; A12-AR-001/002 fixed; A12-AR-003 accepted`
+- Current phase: `A13-G active; Globe performance investigation`
+- Current review: `diagnostic assignment only; no optimization implementation authorized`
 - Current phase plan:
-  [2026-09-04-phase-a12g-globe-cloud-noise-reduction.md](plans/2026-09-04-phase-a12g-globe-cloud-noise-reduction.md)
+  [2026-09-04-phase-a13g-globe-performance.md](plans/2026-09-04-phase-a13g-globe-performance.md)
 - Previous completed phase plan:
-  [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](plans/2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
+  [2026-09-04-phase-a12g-globe-cloud-noise-reduction.md](plans/2026-09-04-phase-a12g-globe-cloud-noise-reduction.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -39,6 +39,7 @@
 - A9-G checkpoint: `f8d655ab75baf95b1421eddb35489a6a9d9dd62e`（未push）
 - A10-G checkpoint: `6afba87af181f3cdb7a20aff09b81af11eb302f4`（未push）
 - A11-G checkpoint: `53465cf9bc8f3af1e935b3225c81364e380ea528`（未push）
+- A12-G checkpoint: `fd868387d4c38d6faf67a9395434cc9fccc6384c`（未push）
 
 ## Objective
 
@@ -49,6 +50,13 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- A13-G starts from the accepted A12 checkpoint and first investigates cost,
+  without lowering the accepted quality or changing product code. The current
+  high/mixed page with OSM Buildings provides a short frame-cadence and CPU
+  sample, not per-pass GPU timing. Execution must return a source-backed cost
+  map and at most three ranked proposals before implementation is assigned.
+  See [A13 discussion](discussions/2026-09-04-a13g-globe-performance-source-discovery.md)
+  and [A13 review](reviews/2026-09-04-a13g-globe-performance.md).
 - A12 RGB/transmittance correction and bounded Spec repairs have passed
   Architecture review. The last aggregate remains `78/79`; its one failed
   time-matrix fixture now passes `1/1` after the approved Spec-only repair.
@@ -237,6 +245,7 @@ reference frame，不互相伪造坐标语义。
 
 ## Discussions
 
+- [A13-G Globe performance investigation](discussions/2026-09-04-a13g-globe-performance-source-discovery.md) — `open; diagnostic only`
 - [双世界环境渲染架构与参考项目取舍](discussions/2026-08-14-dual-world-render-architecture.md) — `resolved`
 - [A2 LUT 资产与 planar atmosphere 模型](discussions/2026-08-14-a2-lut-and-planar-model.md) — `resolved`
 - [A3 default height-fog washout](discussions/2026-08-15-a3-default-fog-washout.md) — `resolved`
@@ -251,6 +260,7 @@ reference frame，不互相伪造坐标语义。
 
 ## Reviews
 
+- [A13-G Globe performance review](reviews/2026-09-04-a13g-globe-performance.md) — `pending diagnostic report`
 - [A1 render foundation implementation review](reviews/2026-08-14-a1-render-foundation.md) — `approved`
 - [A2 Bruneton atmosphere and aerial perspective implementation review](reviews/2026-08-14-a2-bruneton-atmosphere-aerial-perspective.md) — `approved`
 - [A3 exponential height fog implementation review](reviews/2026-08-15-a3-exponential-height-fog.md) — `approved`
@@ -272,6 +282,17 @@ reference frame，不互相伪造坐标语义。
 - Specs/manual page：`packages/engine/Specs/SceneGIS/Scene/`、`Test/高级环境.html`
 
 ## Current handoff
+
+A12-G is accepted and frozen at
+`fd868387d4c38d6faf67a9395434cc9fccc6384c`. The owner requested performance
+investigation next. A13-G currently authorizes only read-only source/reference
+analysis and writeback to its records; product, Specs, Test UI, assets, tiers,
+light/shadow semantics and Planar remain unchanged. The
+[A13 phase plan](plans/2026-09-04-phase-a13g-globe-performance.md) is the current
+assignment authority. Execution returns a bounded diagnostic report; it does
+not implement, commit, push or reopen old accepted visual findings.
+
+## Historical handoff — A4
 
 Architecture fresh diagnosis已把owner可见云断层的主因定位到SceneGIS explicit `R8` occupancy mip upload：base width `128`选择
 `UNPACK_ALIGNMENT=4`，tight-packed LOD6 `2³`上传时被错误解释为4-byte row stride并在GPU保持全零。Execution已按正式派工保留tight max

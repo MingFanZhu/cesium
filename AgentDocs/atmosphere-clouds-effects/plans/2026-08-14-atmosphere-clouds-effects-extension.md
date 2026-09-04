@@ -8,11 +8,11 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-04`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A12-G completed; Globe cloud noise reduction`
+- Current phase: `A13-G active; Globe performance investigation`
 - Current phase plan:
-  [2026-09-04-phase-a12g-globe-cloud-noise-reduction.md](2026-09-04-phase-a12g-globe-cloud-noise-reduction.md)
+  [2026-09-04-phase-a13g-globe-performance.md](2026-09-04-phase-a13g-globe-performance.md)
 - Previous completed phase plan:
-  [2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md](2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md)
+  [2026-09-04-phase-a12g-globe-cloud-noise-reduction.md](2026-09-04-phase-a12g-globe-cloud-noise-reduction.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -41,6 +41,7 @@
 - A10-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A11-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A12-G implementation: `completed; Architecture approved; owner visual gate passed`
+- A13-G implementation: `not started; source/cost diagnosis assigned first`
 - P1 implementation: `deferred before review; candidate not accepted`
 
 ## Goal
@@ -217,15 +218,29 @@ light/shadow/body, eclipse, displacement shader, new SGP or Planar execution.
 Active plan:
 [A11-G Globe Moonlight, directional shadows, and lunar surface](2026-09-02-phase-a11g-globe-moonlight-shadow-surface.md).
 
-### A12-G — Globe cloud noise reduction (`active`)
+### A12-G — Globe cloud noise reduction (`completed`)
 
 After accepting A11-G, the project owner requested less fine grain without
 rejecting the accepted cloud shapes or world-shadow registration. A12-G starts
 from `53465cf9bc8f3af1e935b3225c81364e380ea528` and first adapts the pinned
 reference's neighborhood variance clipping in the existing Globe cloud resolve.
 It preserves current sampling, geometry/history rejection, public/resource
-budgets, A11 lighting/shadows and Planar. Active plan:
+budgets, A11 lighting/shadows and Planar. Completed plan:
 [A12-G Globe cloud noise reduction](2026-09-04-phase-a12g-globe-cloud-noise-reduction.md).
+
+The owner accepts the remaining close-range fine grain. The isolated local
+checkpoint is `fd868387d4c38d6faf67a9395434cc9fccc6384c`; no push occurred.
+
+### A13-G — Globe performance investigation and bounded optimization (`active`)
+
+Preserve the accepted A12 appearance while investigating the cost of the
+current Globe environment stack. First distinguish measured frame/main-thread
+behavior from inferred GPU work and produce a source-backed ranking. Only
+after Architecture reviews that evidence may this phase plan authorize one
+bounded optimization and its correctness, lifecycle and same-workload cost
+comparison. No automatic tier reduction, parameter recalibration, renewed
+zero-grain target or Planar activation is implied. Active plan:
+[A13-G Globe performance](2026-09-04-phase-a13g-globe-performance.md).
 
 ### P1 — Planar integrated-medium restoration (`deferred`)
 
