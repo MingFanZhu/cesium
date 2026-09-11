@@ -2,6 +2,38 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0010",
+      "title": "Connect optional SceneGIS physical lighting to native model PBR",
+      "status": "active",
+      "reason": "Native model PBR has no current-frame source hook for SceneGIS physical irradiance and Beer cloud transmittance; final-color relighting would incorrectly attenuate emissive and indirect light.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Model/Model.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Model/LightingPipelineStage.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ImageBasedLightingStageFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISModelEnvironmentLightingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISEnvironmentEffectsSpec.js",
+        "packages/engine/Specs/Scene/Model/LightingPipelineStageSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md",
+      "removalCondition": "Retire when native Model offers equivalent optional physical direct/diffuse source and cloud transmittance hooks with frame-local resources and variant lifecycle."
+    },
+    {
       "id": "SGP-0001",
       "title": "Add primary world lifecycle and integration slots",
       "status": "active",

@@ -2,6 +2,9 @@ import defined from "../../Core/defined.js";
 import ShaderDestination from "../../Renderer/ShaderDestination.js";
 import LightingStageFS from "../../Shaders/Model/LightingStageFS.js";
 import LightingModel from "./LightingModel.js";
+// SCENEGIS_PATCH_BEGIN SGP-0010: Bind the optional current-frame physical lighting source.
+import SceneGISModelEnvironmentLighting from "../../SceneGIS/Scene/_private/_SceneGISModelEnvironmentLighting.js";
+// SCENEGIS_PATCH_END SGP-0010
 
 /**
  * The lighting pipeline stage is responsible for taking a material and rendering
@@ -27,7 +30,13 @@ const LightingPipelineStage = {
  *
  * @private
  */
-LightingPipelineStage.process = function (renderResources, primitive) {
+// SCENEGIS_PATCH_BEGIN SGP-0010: Receive the frame record already supplied by ModelSceneGraph.
+LightingPipelineStage.process = function (
+  renderResources,
+  primitive,
+  frameState,
+) {
+  // SCENEGIS_PATCH_END SGP-0010
   const { model, lightingOptions, shaderBuilder } = renderResources;
 
   if (defined(model.lightColor)) {
@@ -67,6 +76,9 @@ LightingPipelineStage.process = function (renderResources, primitive) {
     );
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0010: Keep physical source implementation in SceneGIS-owned code.
+  SceneGISModelEnvironmentLighting.process(renderResources, frameState);
+  // SCENEGIS_PATCH_END SGP-0010
   shaderBuilder.addFragmentLines(LightingStageFS);
 };
 

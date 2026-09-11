@@ -2,6 +2,9 @@
 
 ## 状态
 
+- A16 amendment: [ADR-0054](ADR-0054-model-physical-lighting-and-explicit-shadows.md)
+  supersedes the Moon-only geometry-shadow API/ownership below. Geometry-shadow
+  switches remain wholly caller-owned; light and lunar texture authority remain.
 - Status：`accepted; A11-G completed; owner visual gate passed 2026-09-04`
 - Date：`2026-09-02`
 - Decision owners：Architecture Agent

@@ -246,6 +246,12 @@ resolved scene color不得被fullscreen relight。Crepuscular rays通过Bruneton
 blur、第二层haze或独立shadow history。最小Globe surface seam登记为`SGP-0009`；资源、packing、public options及Planar冻结边界见
 [ADR-0047](Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md)。
 
+A16-G通过[ADR-0054](Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md)和`SGP-0010`扩展上述初始consumer边界：
+PBR Models/3D Tiles在材质光照阶段共享physical primary irradiance、diffuse sky与Beer cloud shadow，禁止对最终颜色统一压暗。
+模型只借用current-frame资源，native材质和specular IBL保持原所有权。`surfaceRadianceScale`统一校准Globe与默认physical model光照。
+Geometry shadow完全由Cesium既有`Viewer.shadows`、`scene.shadowMap.enabled`和各receiver的`ShadowMode`控制。
+移除A11的`showMoonShadows`及自动开启/恢复逻辑，不增加SceneGIS阴影开关；primary light只提供日/月方向。
+
 A6-G只演进ADR-0046既有的two-target Cloud history：Globe resolve从现有mean/front/scene distance重建world position并投影到previous
 successful camera，cloud validity与A5 shadow length先semantic decode/filter再repack；invalid、exact-stationary与camera-cut frame均发布完整
 spatial-only结果。Public `cloudQuality`是cloud/Beer/resolve唯一caller-owned动态performance tier；renderer不得自动测FPS、按camera motion降档、增加
@@ -282,8 +288,8 @@ A11-G在冻结A10-G后增加一个Globe-only primary celestial light。Actual EC
 surface/cloud directional transport、A5 Beer atlas/rays及一个stable controller-owned `DirectionalLight`共享phase/horizon/night-weighted Moon endpoint。
 Moon direction由same Simon1994 + central-body-fixed transform和geodetic surface observer计算，不得读取camera orientation。Geometry shadow只复用
 Scene-owned `scene.shadowMap`与native Globe/3D Tiles/Model cast/receive commands；A5 Beer atlas仍是volumetric transmittance，禁止第二ShadowMap或
-把二者混用。Controller snapshot/restore `scene.light`、native shadow state、Globe ShadowMode与defined native `Moon.textureUrl`，active external
-mutation fail closed。更高分辨率月面只替换pinned NASA CGI Moon Kit color asset；Moon object/show/phase/orientation/ellipsoid ownership不变，不支持
+把二者混用。A16修订后，Controller只snapshot/restore `scene.light`与defined native `Moon.textureUrl`，这两个owned slot的active external
+mutation fail closed；native shadow state与Globe ShadowMode完全由caller控制。更高分辨率月面只替换pinned NASA CGI Moon Kit color asset；Moon object/show/phase/orientation/ellipsoid ownership不变，不支持
 displacement/normal/eclipses。Existing `SGP-0009`只扩展current frame-local surface uniforms，不增加upstream path或new SGP。完整API、resource、
 lifecycle与Planar冻结边界见[ADR-0053](Decisions/ADR-0053-globe-moonlight-shadow-surface.md)。
 

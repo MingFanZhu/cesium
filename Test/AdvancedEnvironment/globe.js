@@ -74,7 +74,6 @@ const state = {
   showBloom: true,
   showLensFlare: true,
   showMoonlight: true,
-  showMoonShadows: true,
   showMoon: false,
   cloudQuality: "high",
   cloudPreset: "cumulus",
@@ -332,15 +331,13 @@ function applyMoonlightObservation() {
   const destination = Cesium.Cartesian3.fromDegrees(15.0, 45.0, 500.0);
   const orientation = moonCameraOrientation(destination, time);
   currentStatusLocation = locations;
-  currentObservation = `A11 月光与阴影 · 方位 ${Cesium.Math.toDegrees(orientation.heading).toFixed(3)}° · 仰角 ${Cesium.Math.toDegrees(orientation.pitch).toFixed(3)}°`;
+  currentObservation = `A11 月光与本地模型 · 方位 ${Cesium.Math.toDegrees(orientation.heading).toFixed(3)}° · 仰角 ${Cesium.Math.toDegrees(orientation.pitch).toFixed(3)}°`;
   state.showMoon = true;
   state.showMoonlight = true;
-  state.showMoonShadows = true;
   state.moonlightIntensity = 1.0;
   state.showClouds = false;
   viewer.scene.moon.show = true;
   effects.showMoonlight = true;
-  effects.showMoonShadows = true;
   effects.moonlightIntensity = 1.0;
   effects.showClouds = false;
   ensureMoonShadowWitness();
@@ -562,14 +559,6 @@ function createGui() {
     viewer.scene,
     "月光",
   );
-  bindBoolean(
-    effectsFolder,
-    state,
-    "showMoonShadows",
-    effects,
-    viewer.scene,
-    "月影",
-  );
   effectsFolder
     .add(state, "showMoon")
     .name("原生月亮")
@@ -742,7 +731,7 @@ function createGui() {
   const moonlightObservation = gui.addFolder("A11-G 固定观察");
   moonlightObservation
     .add(state, "moonlightObservation")
-    .name("A11 月光 + 本地阴影");
+    .name("A11 月光 + 本地模型");
 
   const onlineData = gui.addFolder("Cesium ion 在线数据");
   globalBuildingsButton = onlineData
@@ -767,7 +756,6 @@ function getState() {
     enabled: effects?.enabled === true,
     moonVisible: scene?.moon?.show === true,
     showMoonlight: effects?.showMoonlight === true,
-    showMoonShadows: effects?.showMoonShadows === true,
     moonlightIntensity: effects?.moonlightIntensity,
     hdr: scene?.highDynamicRange === true,
     baseLayerPicker: viewer?.baseLayerPicker !== undefined,

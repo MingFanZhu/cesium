@@ -3,17 +3,17 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A15-G completed; successor not activated`
+- Current phase: `A16-G completed; no successor active`
 - Current review:
-  [A15 corrected; owner confirms substantial improvement](reviews/2026-09-11-a15g-cloud-edge-stability.md)
+  [A16 model lighting verification](reviews/2026-09-11-a16g-model-environment-lighting.md)
 - Current phase plan:
-  [A15 cloud edge stability](plans/2026-09-11-phase-a15g-cloud-edge-stability.md)
+  [A16 model environment lighting](plans/2026-09-11-phase-a16g-model-environment-lighting.md)
 - Latest completed phase plan:
-  [2026-09-04-phase-a14g-globe-clock-linkage.md](plans/2026-09-04-phase-a14g-globe-clock-linkage.md)
+  [A16 model environment lighting](plans/2026-09-11-phase-a16g-model-environment-lighting.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [2026-09-04-phase-a13g-globe-performance.md](plans/2026-09-04-phase-a13g-globe-performance.md)
+  [A15 cloud edge stability](plans/2026-09-11-phase-a15g-cloud-edge-stability.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -30,8 +30,9 @@
   [ADR-0050](../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md),
   [ADR-0051](../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md),
   [ADR-0052](../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md),
-  [ADR-0053](../../Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md)
-- Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5/A11 Globe surface seam）
+  [ADR-0053](../../Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md),
+  [ADR-0054](../../Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md)
+- Upstream patches: active `SGP-0008` / `SGP-0009`（consume only in A16）、active `SGP-0010`（model source seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
 - A2 checkpoint: `da2eb55743a46423e65b2047965907c05ea260b7`（未push）
@@ -47,6 +48,8 @@
 - A12-G checkpoint: `fd868387d4c38d6faf67a9395434cc9fccc6384c`（未push）
 - A13-G checkpoint: `ccd5affdc426016215bb443664dc653bba945d94`（未push）
 - A14-G checkpoint: `6e488bc50eb95535e39bcd2bb0c59268acbb9f7b`（未push）
+- A15-G checkpoint: `4d1d122b1c`（未push）
+- A16-G checkpoint: commit containing this acceptance record（未push）
 
 ## Objective
 
@@ -57,6 +60,16 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- A16 implements the [model diagnosis](discussions/2026-09-11-model-environment-lighting.md)
+  under [ADR-0054](../../Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md)
+  and SGP-0010. Native PBR receives physical direct/diffuse sky and cloud
+  transmittance. The owner's correction removes the Moon-only shadow API/UI;
+  only existing Cesium shadow switches remain. Focused GPU/native/lifecycle
+  checks, full build and types pass; the owner confirms "效果符合预期" on
+  2026-09-11. Architecture closes A16 with the recorded native specular-IBL
+  limit and +0.281 ms median isolated model draw cost in the current view.
+  Its independent local checkpoint contains this acceptance record; no push
+  or next-phase activation. Earlier pending A15 states below are historical.
 - A15 is closed on 2026-09-11 after positive owner visual feedback and the
   instruction to retain it and proceed to the next issue. Architecture accepts
   the bounded correction with the recorded residual sampling limitations;

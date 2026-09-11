@@ -2136,7 +2136,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.showBloom).toBe(true);
     expect(effects.showLensFlare).toBe(true);
     expect(effects.showMoonlight).toBe(true);
-    expect(effects.showMoonShadows).toBe(true);
+    expect("showMoonShadows" in effects).toBe(false);
+    expect("showShadows" in effects).toBe(false);
     expect(effects.moonlightIntensity).toBe(1.0);
     expect(effects.cloudQuality).toBe("high");
     expect(effects.cloudPreset).toBe("cumulus");
@@ -2186,7 +2187,6 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       showBloom: false,
       showLensFlare: false,
       showMoonlight: false,
-      showMoonShadows: false,
       moonlightIntensity: 2.0,
       bloomThreshold: 12.0,
       bloomIntensity: 0.1,
@@ -2219,7 +2219,6 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.showBloom).toBe(false);
     expect(effects.showLensFlare).toBe(false);
     expect(effects.showMoonlight).toBe(false);
-    expect(effects.showMoonShadows).toBe(false);
     expect(effects.moonlightIntensity).toBe(2.0);
     expect(effects.bloomThreshold).toBe(12.0);
     expect(effects.bloomIntensity).toBe(0.1);
@@ -6186,10 +6185,9 @@ ${hardCascadeLibrary}`;
 
     const moonHistoryReason = pipeline._cloudHistoryDiagnostics.resetReason;
     effects.showMoonlight = false;
-    effects.showMoonShadows = false;
     effects.moonlightIntensity = 2.0;
     effects.update(scene, scene.frameState.time);
-    expect(requestRender).toHaveBeenCalledTimes(3);
+    expect(requestRender).toHaveBeenCalledTimes(2);
     expect(pipeline._cloudHistoryDiagnostics.resetReason).toBe(
       moonHistoryReason,
     );
@@ -6305,7 +6303,7 @@ ${hardCascadeLibrary}`;
     expect(compositeFramebuffer.isDestroyed()).toBe(true);
   });
 
-  it("uses one camera-independent Globe primary light and owns Moon shadow state", function () {
+  it("uses one camera-independent Globe primary light and leaves native shadows caller-owned", function () {
     connectGlobeWithDeferredAssets(true);
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
@@ -6323,12 +6321,12 @@ ${hardCascadeLibrary}`;
     });
 
     const dayTime = JulianDate.fromIso8601("2026-06-21T10:30:00Z");
+    const callerShadowEnabled = scene.shadowMap.enabled;
+    const callerGlobeShadows = scene.globe.shadows;
     effects.firstUpdate(scene, dayTime);
     const capturedMoon = scene.moon;
     const callerMoonTextureUrl = effects._celestialPreviousMoonTextureUrl;
     const callerLight = effects._celestialPreviousLight;
-    const callerShadowEnabled = effects._celestialPreviousShadowMapEnabled;
-    const callerGlobeShadows = effects._celestialPreviousGlobeShadows;
     const pipeline = effects._pipeline;
     const day = pipeline.getPrimaryLightState();
     expect(effects.ready).toBe(false);
@@ -6347,7 +6345,8 @@ ${hardCascadeLibrary}`;
     expect(pipeline._nightFactor).toBe(1.0);
     expect(night.moonContribution).toBeGreaterThan(0.0);
     expect(Cartesian3.maximumComponent(night.scale)).toBeGreaterThan(0.0);
-    expect(scene.shadowMap.enabled).toBe(true);
+    expect(scene.shadowMap.enabled).toBe(callerShadowEnabled);
+    expect(scene.globe.shadows).toBe(callerGlobeShadows);
     expect(
       Cartesian3.equalsEpsilon(
         scene.light.direction,
@@ -6504,8 +6503,7 @@ ${hardCascadeLibrary}`;
     effects.update(scene, nightTime);
     scene.shadowMap.enabled = false;
     effects.update(scene, nightTime);
-    expect(lifecycleErrors.length).toBe(4);
-    expect(lifecycleErrors[3].error.message).toContain("shadowMap.enabled");
+    expect(lifecycleErrors.length).toBe(3);
     effects.enabled = false;
     expect(scene.shadowMap.enabled).toBe(false);
 
@@ -6514,8 +6512,7 @@ ${hardCascadeLibrary}`;
     effects.update(scene, nightTime);
     scene.globe.shadows = ShadowMode.RECEIVE_ONLY;
     effects.update(scene, nightTime);
-    expect(lifecycleErrors.length).toBe(5);
-    expect(lifecycleErrors[4].error.message).toContain("globe.shadows");
+    expect(lifecycleErrors.length).toBe(3);
     effects.enabled = false;
     expect(scene.globe.shadows).toBe(ShadowMode.RECEIVE_ONLY);
 
@@ -6523,8 +6520,13 @@ ${hardCascadeLibrary}`;
     scene.globe.shadows = ShadowMode.ENABLED;
     effects.enabled = true;
     effects.update(scene, nightTime);
-    expect(effects._ownsShadowMapEnabled).toBe(false);
-    expect(effects._ownsGlobeShadowMode).toBe(false);
+    effects.update(scene, dayTime);
+    expect(scene.shadowMap.enabled).toBe(true);
+    expect(scene.globe.shadows).toBe(ShadowMode.ENABLED);
+    effects.showMoonlight = false;
+    effects.update(scene, nightTime);
+    expect(scene.shadowMap.enabled).toBe(true);
+    expect(lifecycleErrors.length).toBe(3);
     effects.enabled = false;
     expect(scene.shadowMap.enabled).toBe(true);
     expect(scene.globe.shadows).toBe(ShadowMode.ENABLED);
@@ -7366,6 +7368,9 @@ ${hardCascadeLibrary}`;
     effects.showBloom = false;
     effects.showLensFlare = false;
     const nativeShadowTime = JulianDate.fromIso8601("2026-07-02T00:00:00Z");
+    // Native geometry shadows are explicitly enabled by this caller-owned fixture.
+    scene.shadowMap.enabled = true;
+    scene.globe.shadows = ShadowMode.ENABLED;
     effects.update(scene, nativeShadowTime);
     const nativeShadowMap = scene.shadowMap;
     const globeLighting = scene.frameState._sceneGISGlobeLighting;

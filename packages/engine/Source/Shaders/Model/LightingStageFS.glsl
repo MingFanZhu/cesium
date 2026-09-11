@@ -4,7 +4,13 @@ vec3 computeIBL(vec3 position, vec3 normal, vec3 lightDirection, vec3 lightColor
     #if defined(DIFFUSE_IBL) || defined(SPECULAR_IBL)
         // Environment maps were provided, use them for IBL
         vec3 viewDirection = -normalize(position);
-        vec3 iblColor = textureIBL(viewDirection, normal, material);
+        // SCENEGIS_PATCH_BEGIN SGP-0010: Supply receiver position for physical diffuse sky.
+        #ifdef SCENEGIS_MODEL_LIGHTING
+            vec3 iblColor = textureIBL(viewDirection, normal, material, position);
+        #else
+            vec3 iblColor = textureIBL(viewDirection, normal, material);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0010
         return iblColor;
     #endif
     
@@ -62,6 +68,12 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
     vec3 viewDirection = -normalize(position);
     vec3 normal = material.normalEC;
     vec3 lightDirection = normalize(czm_lightDirectionEC);
+
+    // SCENEGIS_PATCH_BEGIN SGP-0010: Apply physical irradiance and cloud attenuation before the BRDF.
+    #ifdef SCENEGIS_MODEL_LIGHTING
+        lightColorHdr = sceneGISModelDirectSource(position, lightColorHdr);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0010
 
     vec3 directLighting = czm_pbrLighting(viewDirection, normal, lightDirection, material);
     vec3 directColor = lightColorHdr * directLighting;

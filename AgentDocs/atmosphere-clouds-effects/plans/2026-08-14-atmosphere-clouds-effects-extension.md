@@ -8,18 +8,17 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-11`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A15-G completed; successor not activated`
-- Current gate: Architecture closes A15 after positive owner feedback and the
-  instruction to proceed. The current commit is its isolated checkpoint.
-  See [A15 review](../reviews/2026-09-11-a15g-cloud-edge-stability.md).
+- Current phase: `A16-G completed; no successor active`
+- Current gate: A16 code and owner model-view acceptance passed; independent
+  local checkpoint after A15 `4d1d122b1c`, without push or next-phase activation.
 - Current phase plan:
-  [A15 cloud edge stability](2026-09-11-phase-a15g-cloud-edge-stability.md)
+  [A16 model environment lighting](2026-09-11-phase-a16g-model-environment-lighting.md)
 - Latest completed phase plan:
-  [2026-09-04-phase-a14g-globe-clock-linkage.md](2026-09-04-phase-a14g-globe-clock-linkage.md)
+  [A16 model environment lighting](2026-09-11-phase-a16g-model-environment-lighting.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [2026-09-04-phase-a13g-globe-performance.md](2026-09-04-phase-a13g-globe-performance.md)
+  [A15 cloud edge stability](2026-09-11-phase-a15g-cloud-edge-stability.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -34,8 +33,9 @@
   [ADR-0050](../../../Documentation/SceneGIS/Decisions/ADR-0050-globe-readable-night-skylight.md),
   [ADR-0051](../../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md),
   [ADR-0052](../../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md),
-  [ADR-0053](../../../Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md)
-- Upstream patches: active `SGP-0008`（consume only）、active `SGP-0009`（A5-G surface seam）
+  [ADR-0053](../../../Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md),
+  [ADR-0054](../../../Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md)
+- Upstream patches: active `SGP-0008` / `SGP-0009`（consume only in A16）、active `SGP-0010`（model source seam）
 - A1 implementation: `completed`
 - A2 implementation: `completed`
 - A3 implementation: `completed`
@@ -50,6 +50,8 @@
 - A12-G implementation: `completed; Architecture approved; owner visual gate passed`
 - A13-G implementation: `completed; Architecture approved; owner quality/performance gate passed`
 - A14-G implementation: `completed; Architecture approved; owner gate passed`
+- A15-G implementation: `completed; bounded quality accepted; local checkpoint`
+- A16-G implementation: `completed; Architecture approved; owner gate passed`
 - P1 implementation: `deferred before review; candidate not accepted`
 
 ## Goal
@@ -306,6 +308,22 @@ and owner acceptance of stationary and moving edges without unacceptable
 trails. The owner authorizes implementation on 2026-09-11 through the
 [active phase](2026-09-11-phase-a15g-cloud-edge-stability.md). High/low,
 material/lighting, A14 and Planar remain outside the correction.
+
+### A16-G — Model physical lighting and native shadow ownership (`completed`)
+
+Extend the existing physical source and Beer atlas to native Model PBR direct
+and diffuse sky lighting through SGP-0010. Retain native material/specular IBL
+ownership. Remove A11's automatic Moon-only shadow policy and extra control;
+the owner requires Cesium's existing switches exclusively. Enter from A15
+`4d1d122b1c`; exit on focused GPU/lifecycle/native regression, bounded cost and
+owner model-view acceptance. See the [A16 phase](2026-09-11-phase-a16g-model-environment-lighting.md)
+and [ADR-0054](../../../Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md).
+
+The owner explicitly accepts the corrected model result on 2026-09-11. Focused
+GPU/native/lifecycle checks, full build and types pass. Architecture closes the
+phase with the recorded +0.281 ms isolated median model-draw cost and retained
+native specular-IBL limit. The commit containing this record is the independent
+local checkpoint; P1 stays deferred and no next phase is activated.
 
 ### P1 — Planar integrated-medium restoration (`deferred`)
 
