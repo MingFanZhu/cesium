@@ -3,20 +3,20 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P7 completed — Planar cloud solar filtering`
+- Current phase: `P8 completed — Planar cloud material`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P7 solar sampling](reviews/2026-09-12-p7-planar-cloud-solar-filtering.md)
+  [P8 cloud material](reviews/2026-09-12-p8-planar-cloud-material.md)
 - Current phase plan:
-  [P7 solar filtering](plans/2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
+  [P8 cloud material](plans/2026-09-12-phase-p8-planar-cloud-material.md)
 - Latest completed phase plan:
-  [P7 solar filtering](plans/2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
+  [P8 cloud material](plans/2026-09-12-phase-p8-planar-cloud-material.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P6 cloud sampling](plans/2026-09-12-phase-p6-planar-cloud-sampling.md)
+  [P7 solar filtering](plans/2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -64,6 +64,15 @@ HDR bloom/lens flare。两种世界共享光学参数、质量档、资源与合
 reference frame，不互相伪造坐标语义。
 
 ## Active work
+
+- P8 is accepted from P7 `3a93585efd`: shared authored material/assets, metric
+  fixed-Z phases, matching cloud shadows and physical cloud radiometry. The
+  experimental density/brightness defaults both become 1. Seventeen checks,
+  visual review and full build/types pass; medium cloud pass median is 2.884 ms,
+  with 7.02 MiB cloud textures. This record's commit is the local checkpoint.
+  Ground bounce, rays and directional Moon remain successors. Finite-resolution
+  grain remains a quality limit; the old macro-coarseness is materially improved.
+  No owner visual gate is pending.
 
 - P7 is accepted after seven GPU cases, visual correction of low-Sun stripes,
   full build/types and bounded cost review. It follows P6 `2ebce1700f`; this

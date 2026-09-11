@@ -38,9 +38,9 @@ const state = {
   cloudQuality: "medium",
   cloudPreset: "cumulus",
   cloudCoverage: 0.45,
-  cloudDensity: 0.001,
+  cloudDensity: 1.0,
   cloudTime: 0.0,
-  cloudRadianceScale: 48.0,
+  cloudRadianceScale: 1.0,
   backgroundRadianceScale: 10.0,
   aerialRadianceScale: 1.0,
   surfaceRadianceScale: 10.0,
@@ -302,8 +302,8 @@ function createGui() {
     viewer.scene,
     "云密度",
     0.0,
+    4.0,
     0.01,
-    0.0001,
   );
   bindNumber(
     cloudFolder,
@@ -398,7 +398,7 @@ function getState() {
   const scene = viewer?.isDestroyed() === false ? viewer.scene : undefined;
   return {
     page: "planar",
-    phase: "P7",
+    phase: "P8",
     compositionState: effects ? getCompositionState() : undefined,
     destroyed,
     ready: effects?.ready === true,

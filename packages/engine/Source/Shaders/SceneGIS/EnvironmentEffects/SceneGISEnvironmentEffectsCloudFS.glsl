@@ -49,11 +49,7 @@ uniform sampler3D u_cloudShapeTexture;
 uniform sampler3D u_cloudOccupancyTexture;
 uniform sampler3D u_cloudDetailTexture;
 uniform sampler2D u_cloudWeatherTexture;
-#ifdef SCENEGIS_GLOBE
 uniform sampler2D u_cloudTurbulenceTexture;
-#else
-uniform sampler3D u_cloudTurbulenceTexture;
-#endif
 uniform sampler3D u_cloudStbnTexture;
 
 void main()
@@ -186,10 +182,8 @@ void main()
         u_altitude,
         footprintSupportBase + footprintSupportThickness);
     #endif
-    float cloudSceneRadianceScale = u_cloudRadianceScale;
-    #ifdef SCENEGIS_GLOBE
-    cloudSceneRadianceScale *= u_backgroundRadianceScale;
-    #endif
+    float cloudSceneRadianceScale =
+        u_cloudRadianceScale * u_backgroundRadianceScale;
     vec4 cloudColor;
     vec4 cloudDistances;
     vec4 cloudSamplingDiagnostics;

@@ -1,4 +1,5 @@
-// Globe cloud density structure adapted from:
+// Shared authored cloud material with explicit Globe/Planar coordinates.
+// Cloud density structure adapted from:
 // yuwoniu03/cesium-clouds-atmosphere
 // commit 1f38602b84ab5c3f2bc289f9e4464df3db917155,
 // src/ThreeGeospatialPipeline.js, and its upstream source:
@@ -54,6 +55,7 @@ float sceneGISGlobeCloudRemap(
     float minimum,
     float maximum);
 
+#ifdef SCENEGIS_GLOBE
 float sceneGISGlobeCloudHazeRayDistance(
     vec3 rayOrigin,
     vec3 rayDirection,
@@ -238,6 +240,8 @@ float sceneGISGlobeCloudEntryTexelsPerPixel(
     return exp2(mipLevel);
 }
 
+#endif
+
 vec4 sceneGISGlobeCloudLayerDescriptor(int preset, int layer)
 {
     const float firstLowThickness = 650.0 / 4500.0;
@@ -375,13 +379,28 @@ float sceneGISGlobeCloudDensitySampleInternal(
     bool shadowLayersOnly,
     out float activeLayerHeightGradient)
 {
+    #ifdef SCENEGIS_GLOBE
     float height = length(globePosition) - SCENEGIS_BOTTOM_RADIUS;
     vec2 globeUv = sceneGISGlobeCloudCubeSphereUv(globePosition);
     vec2 weatherUv = globeUv * 100.0 +
         cloudOffset / SCENEGIS_GLOBE_CLOUD_WEATHER_SCALE;
     float materialMipLevel = max(mipLevel, 0.0);
-    vec4 weather = textureLod(
-        weatherTexture, weatherUv, materialMipLevel);
+    float weatherMipLevel = materialMipLevel;
+    float turbulenceMipLevel = materialMipLevel;
+    #else
+    // The adapter supplies advected metric XY and absolute world Z.
+    float height = globePosition.z;
+    vec2 globeUv = globePosition.xy /
+        (SCENEGIS_GLOBE_CLOUD_WEATHER_SCALE * 100.0);
+    vec2 weatherUv = globeUv * 100.0;
+    float footprint = max(mipLevel, 0.0);
+    float materialMipLevel = log2(max(footprint /
+        (SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE / 32.0), 1.0));
+    float weatherMipLevel = log2(max(footprint /
+        (SCENEGIS_GLOBE_CLOUD_WEATHER_SCALE / 512.0), 1.0));
+    float turbulenceMipLevel = log2(max(footprint / (12000.0 / 128.0), 1.0));
+    #endif
+    vec4 weather = textureLod(weatherTexture, weatherUv, weatherMipLevel);
     vec4 heightFractions = vec4(0.0);
     vec4 weatherDensity = vec4(0.0);
     vec4 densityScales = vec4(0.0);
@@ -447,26 +466,48 @@ float sceneGISGlobeCloudDensitySampleInternal(
         turbulence = (textureLod(
             turbulenceTexture,
             globeUv * 2000.0,
-            materialMipLevel).rgb * 2.0 - 1.0) *
+            turbulenceMipLevel).rgb * 2.0 - 1.0) *
             350.0 * dot(weatherDensity, bottomWeights);
     }
+    #ifdef SCENEGIS_GLOBE
     vec3 evolution = -normalize(globePosition) *
         length(cloudOffset / SCENEGIS_GLOBE_CLOUD_WEATHER_SCALE) * 2.0e4;
     vec3 shapePosition = globePosition + evolution + turbulence;
     float shape = texture(
         shapeTexture,
         shapePosition / SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE).r;
+    #else
+    // Planar wind is a translation shared with cloud/shadow reprojection.
+    vec3 shapePosition = globePosition + turbulence;
+    float shape = textureLod(shapeTexture,
+        shapePosition / SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE,
+        log2(max(footprint / (SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE / 128.0), 1.0))).r;
+    #endif
     vec4 density = clamp(
         (weatherDensity - (1.0 - shape) * shapeAmounts) /
             max(vec4(1.0) - (1.0 - shape) * shapeAmounts, vec4(1.0e-4)),
         0.0,
         1.0);
-    if (materialMipLevel * 0.5 + (jitter - 0.5) * 0.5 < 0.5 &&
-        any(greaterThan(detailAmounts, vec4(0.0)))) {
+    #ifdef SCENEGIS_GLOBE
+    bool useDetail = materialMipLevel * 0.5 + (jitter - 0.5) * 0.5 < 0.5;
+    #else
+    // Fade subpixel erosion continuously; STBN must not toggle detail.
+    detailAmounts *= 1.0 - smoothstep(
+        SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE * 0.5,
+        SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE, footprint);
+    bool useDetail = any(greaterThan(detailAmounts, vec4(0.0)));
+    #endif
+    if (useDetail && any(greaterThan(detailAmounts, vec4(0.0)))) {
+        #ifdef SCENEGIS_GLOBE
         float detail = texture(
             detailTexture,
             (globePosition + turbulence) /
                 SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE).r;
+        #else
+        float detail = textureLod(detailTexture,
+            (globePosition + turbulence) / SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE,
+            materialMipLevel).r;
+        #endif
         vec4 heightBlend = clamp(
             (heightFractions - 0.2) / 0.2,
             0.0,

@@ -8,15 +8,13 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P7 completed — Planar cloud solar filtering`
-- Current gate: P7 source/GPU/visual/performance and full build/types accepted.
-  The commit containing this record is its independent checkpoint. Cloud
-  coarseness remains open: material/detail/lighting are the next priority,
-  followed by rays and directional Moon. No owner visual gate is pending.
+- Current phase: `P8 completed — Planar cloud material`
+- Current gate: P8 source/GPU/visual/performance and full build/types accepted;
+  independent local checkpoint. Ground bounce, rays and Moon remain successors.
 - Current phase plan:
-  [P7 solar filtering](2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
+  [P8 cloud material](2026-09-12-phase-p8-planar-cloud-material.md)
 - Latest completed phase plan:
-  [P7 solar filtering](2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
+  [P8 cloud material](2026-09-12-phase-p8-planar-cloud-material.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
@@ -61,6 +59,7 @@
 - P5 implementation: `completed; causal GPU/visual/performance/build/types accepted; local checkpoint`
 - P6 implementation: `completed; primary sampling GPU/visual/performance accepted; coarse material remains open`
 - P7 implementation: `completed; local solar sampling/Beer remainder accepted; coarse material remains open`
+- P8 implementation: `completed; authored material, metric phases, physical radiometry and cloud shadows accepted`
 
 ## Goal
 
@@ -395,16 +394,23 @@ see the [phase plan](2026-09-11-phase-p3-planar-hdr-bloom-lens.md).
 GPU, lifecycle, delegated visual and performance review pass, including the
 reproduced Planar Sun-footprint correction. This closure forms the P3 checkpoint.
 
-### P4+ — Remaining Planar advanced-effects adaptation (`deferred`)
+### P8 — Planar authored cloud material (`completed`)
 
-After P1's independent checkpoint, adapt the remaining stack in bounded phases:
-cloud material/detail and further temporal quality beyond P1 reprojection; physical Sun/sky lighting with
-cloud shadows and rays; HDR bloom/lens; then night/celestial behavior. Their
-exact ordering follows P1's visual findings. Each phase requires current-source
-design and a separate acceptance/checkpoint. Preserve fixed-Z geometry and
-manual Planar celestial directions; Globe shell/ECEF assumptions cannot be
-copied into Planar. Existing Cesium shadow controls remain the user-facing
-authority where supported; do not add an extra SceneGIS shadow switch.
+P8 follows the completed P4–P7 corrections and P7 checkpoint `3a93585efd`,
+reusing reference assets and density with metric XY/absolute Z, coherent shadow
+support and physical cloud radiometry. Both experimental density and brightness
+defaults become 1. Seventeen focused cases, visual review, bounded cost and full
+build/types pass. See [P8 plan](2026-09-12-phase-p8-planar-cloud-material.md) and
+[review](../reviews/2026-09-12-p8-planar-cloud-material.md).
+
+### P9+ — Remaining Planar advanced-effects adaptation (`deferred`)
+
+Ground-bounce parity, crepuscular rays and directional Moon remain successors.
+Finite-resolution cloud grain is a retained quality limit. Select the next
+bounded phase from current-source evidence after the P8 checkpoint. Preserve
+fixed-Z geometry, manual Planar celestial directions and native shadow controls.
+Each phase retains separate validation, review and local checkpoint; no owner
+visual gate is pending and no successor is activated by this record.
 
 ## Global acceptance criteria
 

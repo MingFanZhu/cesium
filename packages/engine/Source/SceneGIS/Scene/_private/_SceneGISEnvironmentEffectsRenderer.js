@@ -145,24 +145,19 @@ const globeCloudShadowLayerProfiles = Object.freeze({
   ]),
 });
 
-const planarCloudShadowLayerProfiles = Object.freeze({
-  cumulus: [[0.0, 1.0]],
-  stratus: [[500.0, 0.4]],
-  cirrus: [],
-  mixed: [
-    [0.0, 0.85],
-    [4200.0, 0.34],
-  ],
-});
+// Every authored Planar texture period divides 240 km. Reduce the origin in
+// CPU double precision before adding local ray offsets in the shader.
+function planarCloudMaterialOrigin(position, result) {
+  const period = 240000.0;
+  result.x = ((position.x % period) + period) % period;
+  result.y = ((position.y % period) + period) % period;
+  return result;
+}
 
 function updateGlobeCloudShadowSupport(renderer) {
   const cloudBaseHeight =
     renderer._frame.baseHeight + renderer._owner._cloudBaseHeight;
-  const profiles =
-    renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
-      ? globeCloudShadowLayerProfiles
-      : planarCloudShadowLayerProfiles;
-  const layers = profiles[renderer._owner._cloudPreset];
+  const layers = globeCloudShadowLayerProfiles[renderer._owner._cloudPreset];
   let bottom = Number.POSITIVE_INFINITY;
   let top = Number.NEGATIVE_INFINITY;
   for (let index = 0; index < layers.length; index++) {
@@ -451,19 +446,6 @@ function createCloudBaseLevelTexture3D(
   });
 }
 
-function createCloudTexture2D(context, width, height, buffer) {
-  return new Texture({
-    context,
-    width,
-    height,
-    pixelFormat: PixelFormat.RGBA,
-    pixelDatatype: PixelDatatype.UNSIGNED_BYTE,
-    source: { arrayBufferView: new Uint8Array(buffer) },
-    sampler: volumeBaseLevelSampler,
-    flipY: false,
-  });
-}
-
 function createCloudMipmappedTexture2D(context, width, height, buffer) {
   let texture;
   try {
@@ -540,6 +522,7 @@ function createProgram(
         atmosphereSource,
         cloudShadowSource,
         heightFogSource,
+        globeCloudLibrarySource,
         cloudLibrarySource,
         fragmentSource,
       ];
@@ -1386,54 +1369,47 @@ function createResources(renderer, context, buffers) {
       16,
       buffers.irradiance,
     );
-    const cloudShapeChannels = globe ? 1 : 4;
-    const cloudDetailSize = globe ? 32 : 64;
-    const cloudDetailChannels = globe ? 1 : 4;
-    const cloudWeatherSize = globe ? 512 : 256;
-    candidate.cloudShapeTexture = (
-      globe ? createCloudBaseLevelTexture3D : createCloudTexture3D
-    )(context, 128, 128, 128, buffers.cloudShape, cloudShapeChannels);
+    const createVolume = globe
+      ? createCloudBaseLevelTexture3D
+      : createCloudTexture3D;
+    candidate.cloudShapeTexture = createVolume(
+      context,
+      128,
+      128,
+      128,
+      buffers.cloudShape,
+      1,
+    );
     const occupancy = createCloudOccupancyTexture3D(
       context,
       128,
       128,
       128,
       buffers.cloudShape,
-      cloudShapeChannels,
+      1,
     );
     candidate.cloudOccupancyTexture = occupancy.texture;
-    candidate.cloudOccupancyAllPositive = globe && occupancy.allPositive;
-    candidate.cloudDetailTexture = (
-      globe ? createCloudBaseLevelTexture3D : createCloudTexture3D
-    )(
+    candidate.cloudOccupancyAllPositive = occupancy.allPositive;
+    candidate.cloudDetailTexture = createVolume(
       context,
-      cloudDetailSize,
-      cloudDetailSize,
-      cloudDetailSize,
+      32,
+      32,
+      32,
       buffers.cloudDetail,
-      cloudDetailChannels,
+      1,
     );
-    candidate.cloudWeatherTexture = globe
-      ? createCloudMipmappedTexture2D(
-          context,
-          cloudWeatherSize,
-          cloudWeatherSize,
-          buffers.cloudWeather,
-        )
-      : createCloudTexture2D(
-          context,
-          cloudWeatherSize,
-          cloudWeatherSize,
-          buffers.cloudWeather,
-        );
-    candidate.cloudTurbulenceTexture = globe
-      ? createCloudMipmappedTexture2D(
-          context,
-          128,
-          128,
-          buffers.cloudTurbulence,
-        )
-      : createCloudTexture3D(context, 64, 64, 64, buffers.cloudTurbulence, 4);
+    candidate.cloudWeatherTexture = createCloudMipmappedTexture2D(
+      context,
+      512,
+      512,
+      buffers.cloudWeather,
+    );
+    candidate.cloudTurbulenceTexture = createCloudMipmappedTexture2D(
+      context,
+      128,
+      128,
+      buffers.cloudTurbulence,
+    );
     candidate.cloudStbnTexture = createCloudStbnTexture(
       context,
       buffers.cloudStbn,
@@ -1758,6 +1734,8 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     moonContribution: 0.0,
   };
   this._cloudOffset = new Cartesian2();
+  this._planarCloudMaterialOrigin = new Cartesian2();
+  this._planarShadowMaterialOrigin = new Cartesian2();
   this._perspective = true;
   this._hasCurrentGlobeDepth = true;
   this._inputColorTexture = undefined;
@@ -1873,6 +1851,16 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_cloudBaseHeight: () => that._owner._cloudBaseHeight,
     u_cloudThickness: () => that._owner._cloudThickness,
     u_cloudOffset: () => that._cloudOffset,
+    u_planarCloudMaterialOrigin: () =>
+      planarCloudMaterialOrigin(
+        that._frame.cameraPosition,
+        that._planarCloudMaterialOrigin,
+      ),
+    u_planarShadowMaterialOrigin: () =>
+      planarCloudMaterialOrigin(
+        that._shadowOrigin,
+        that._planarShadowMaterialOrigin,
+      ),
     u_cloudRadianceScale: () => that._owner._cloudRadianceScale,
     u_cloudPreset: () => cloudPresetIndices[that._owner._cloudPreset],
     u_cloudTracePhased: () =>

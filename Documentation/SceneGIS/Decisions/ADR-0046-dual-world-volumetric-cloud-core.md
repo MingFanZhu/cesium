@@ -776,3 +776,44 @@ are unchanged. The
 [P7 plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
 requires a real mipmapped density witness with rejection of the former rule,
 visual quality and bounded GPU cost evidence.
+
+## P8 — Planar authored material adaptation (2026-09-12)
+
+The owner activates Planar material migration after P7. Both worlds consume
+one reference density algebra and existing pinned `globe-*.bin` CloudCore
+payloads; historical filenames/provenance remain unchanged. Planar supplies
+metric XY, absolute Z and horizontal wind advection. Sphere/haze helpers are
+compiled only for Globe. The two low authored layers and optional non-casting
+high layer apply to both worlds, including CPU shadow support.
+
+`cloudDensity` becomes a dimensionless multiplier of authored per-metre density
+(default 1, range 0–64) in both worlds. This supersedes the experimental Planar
+per-metre default 0.001; callers using that default should use 1. Planar base
+height 1500 m and coverage 0.45 remain unchanged. The initial radiance-scale
+48 deferral is superseded by the P8 physical-radiometry amendment below.
+
+Planar R8 shape 128-cubed/detail 32-cubed use complete linear mip chains.
+Weather RGBA8 512-square and turbulence RGBA8 128-square have complete mips;
+STBN is R8 128x128x64. Explicit metric pixel footprints select each texture's
+LOD by texel size. Globe retains its accepted base-volume/raster policy.
+Planar occupancy uses exact-zero support from the matching R8 material;
+high layers whose shape blend can retain density cannot be rejected by shape.
+Resource ownership/candidate atomicity and P6/P7 integration remain in force.
+No upstream seam or SGP changes.
+
+P8 precision: all Planar authored texture periods divide 240 km. CPU double
+precision reduces camera and shadow XY origins modulo that shared period into
+two reusable vec2 uniforms. Local ray offsets and absolute Z remain unchanged.
+This preserves material phase during sub-metre movement at global/custom-CRS
+coordinates without quantizing large XY to float before texture addressing.
+
+### P8 visual correction: physical cloud radiometry
+
+Daylight above-cloud review of the material-only candidate exposes flattened
+white tops under the legacy Planar gain 48. Supersede the initial radiometry
+deferral: Planar cloud incident Sun and sky now use physical RGB irradiance,
+then multiply intrinsic cloud radiance by backgroundRadianceScale and the
+independent cloudRadianceScale (default 1 in both worlds), as Globe does.
+This is an explicit unit conversion, not a hidden scalar tuned to a fixture.
+The sample migrates its old cloudRadianceScale 48 to 1. Night ambient follows
+the same physical units. Ground bounce and directional Moon remain successors.

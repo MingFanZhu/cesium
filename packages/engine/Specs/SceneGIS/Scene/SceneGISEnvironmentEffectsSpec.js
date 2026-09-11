@@ -565,27 +565,22 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     });
   }
 
-  function createLutBuffers(mode = "planar") {
-    const globe = mode === "globe";
+  function createLutBuffers() {
     return {
       transmittance: new ArrayBuffer(256 * 64 * 4 * 2),
       scattering: new ArrayBuffer(256 * 128 * 32 * 4 * 2),
       irradiance: new ArrayBuffer(64 * 16 * 4 * 2),
-      cloudShape: new ArrayBuffer(128 * 128 * 128 * (globe ? 1 : 4)),
-      cloudDetail: new ArrayBuffer(
-        (globe ? 32 * 32 * 32 : 64 * 64 * 64) * (globe ? 1 : 4),
-      ),
-      cloudWeather: new ArrayBuffer((globe ? 512 * 512 : 256 * 256) * 4),
-      cloudTurbulence: new ArrayBuffer(
-        globe ? 128 * 128 * 4 : 64 * 64 * 64 * 4,
-      ),
+      cloudShape: new ArrayBuffer(128 * 128 * 128),
+      cloudDetail: new ArrayBuffer(32 * 32 * 32),
+      cloudWeather: new ArrayBuffer(512 * 512 * 4),
+      cloudTurbulence: new ArrayBuffer(128 * 128 * 4),
       cloudStbn: new ArrayBuffer(128 * 128 * 64),
     };
   }
 
   function createThinCloudBuffers(mode) {
     const buffers = createLutBuffers(mode);
-    const channels = mode === "globe" ? 1 : 4;
+    const channels = 1;
     const shape = new Uint8Array(buffers.cloudShape);
     for (let z = 0; z < 128; z++) {
       for (let y = 0; y < 128; y++) {
@@ -757,6 +752,18 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
   }
 
   function executeHalfFloatQuad(sources, options = {}) {
+    const materialIndex = sources.findIndex((source) =>
+      source.includes("float sceneGISCloudDensitySample("),
+    );
+    if (
+      materialIndex >= 0 &&
+      !sources.some((source) =>
+        source.includes("vec4 sceneGISGlobeCloudLayerDescriptor("),
+      )
+    ) {
+      sources = [...sources];
+      sources.splice(materialIndex, 0, globeCloudSource);
+    }
     const width = options.width ?? 1;
     const height = options.height ?? 1;
     const texture = new Texture({
@@ -1131,47 +1138,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
   }
 
   function installSolidCloudTestTextures() {
-    const resources = effects._pipeline._resources;
-    const fillVolume = function (texture) {
-      texture.copyFrom({
-        source: {
-          width: texture.width,
-          height: texture.height,
-          depth: texture.depth,
-          arrayBufferView: new Uint8Array(
-            texture.width * texture.height * texture.depth * 4,
-          ).fill(255),
-        },
-      });
-      texture.generateMipmap();
-    };
-    fillVolume(resources.cloudShapeTexture);
-    installSolidCloudOccupancy();
-    fillVolume(resources.cloudDetailTexture);
-    fillVolume(resources.cloudTurbulenceTexture);
-    resources.cloudWeatherTexture.copyFrom({
-      source: {
-        width: resources.cloudWeatherTexture.width,
-        height: resources.cloudWeatherTexture.height,
-        arrayBufferView: new Uint8Array(
-          resources.cloudWeatherTexture.width *
-            resources.cloudWeatherTexture.height *
-            4,
-        ).fill(255),
-      },
-    });
-    resources.cloudStbnTexture.copyFrom({
-      source: {
-        width: resources.cloudStbnTexture.width,
-        height: resources.cloudStbnTexture.height,
-        depth: resources.cloudStbnTexture.depth,
-        arrayBufferView: new Uint8Array(
-          resources.cloudStbnTexture.width *
-            resources.cloudStbnTexture.height *
-            resources.cloudStbnTexture.depth,
-        ),
-      },
-    });
+    installControlledCloudTestTextures("planar");
   }
 
   function installSolidCloudOccupancy() {
@@ -3396,6 +3363,7 @@ ${hardCascadeLibrary}`;
     scene.canvas.height = 16;
     scene.world.baseColor = new Color(0.4, 0.4, 0.4, 1);
     effects.cloudQuality = "low";
+    effects.cloudDensity = 1.0;
     effects.surfaceRadianceScale = 1;
     installSolidCloudTestTextures();
     installControlledAtmosphereTextures("planar");
@@ -8013,7 +7981,7 @@ ${hardCascadeLibrary}`;
             sceneGISCloudIncidentIrradiance(u_sceneGISTransmittanceTexture,
               u_sceneGISIrradianceTexture, u_testPosition, vec3(0.0), sun,
               sun, vec3(1.0), beam, sky);
-            result = gl_FragCoord.x < 3.0 ? beam : sky * SCENEGIS_SOLAR_IRRADIANCE;
+            result = gl_FragCoord.x < 3.0 ? beam : sky;
           } else {
             bool ambient = gl_FragCoord.x < 5.0;
             result = sceneGISApplyExponentialHeightFog(
@@ -11267,10 +11235,7 @@ ${hardCascadeLibrary}`;
               const calibratedValue = decodeFloat16(
                 isolatedCalibration.color[offset + channel],
               );
-              const expected =
-                mode === "globe"
-                  ? baselineValue * (3.0 / backgroundScale)
-                  : baselineValue;
+              const expected = baselineValue * (3.0 / backgroundScale);
               expect(Math.abs(calibratedValue - expected))
                 .withContext(
                   `${mode}/${logarithmicDepth}/background domain pixel=${
@@ -11351,6 +11316,11 @@ ${hardCascadeLibrary}`;
     }
 
     function lightingReference(incident, sample) {
+      const solarIrradiance = [1.474, 1.8504, 1.91198];
+      incident = {
+        sun: incident.sun.map((value, c) => value * solarIrradiance[c]),
+        sky: incident.sky.map((value, c) => value * solarIrradiance[c]),
+      };
       const solar = solarScattering(
         incident.sun,
         sample.opticalDepth,
@@ -11449,8 +11419,8 @@ ${hardCascadeLibrary}`;
     ];
 
     // Globe physical A2 Sun/sky/ground units are covered by the adjacent
-    // reference-derived core fixture. Keep this normalized-unit matrix as the
-    // frozen Planar authority.
+    // reference-derived core fixture. This matrix validates Planar physical
+    // incident units and the shared scattering equations.
     for (const mode of ["planar"]) {
       await connectControlledCloudMode(mode);
       if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -12839,7 +12809,7 @@ ${hardCascadeLibrary}`;
       disconnectControlledCloudMode();
     }
   });
-  it("keeps compiled Globe and frozen Planar cloud material valid under controlled incidents", async function () {
+  it("keeps compiled Globe and adapted Planar cloud material valid under controlled incidents", async function () {
     for (const mode of ["planar", "globe"]) {
       await connectControlledCloudMode(mode);
       if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -13168,12 +13138,8 @@ ${hardCascadeLibrary}`;
 
       const uploadedLevels = [];
       const renderer = effects._pipeline;
-      expect(renderer._resources.cloudOccupancyAllPositive).toBe(
-        mode === "globe",
-      );
-      expect(renderer._uniformMap.u_cloudOccupancyAllPositive()).toBe(
-        mode === "globe",
-      );
+      expect(renderer._resources.cloudOccupancyAllPositive).toBe(true);
+      expect(renderer._uniformMap.u_cloudOccupancyAllPositive()).toBe(true);
       for (const lod of [5, 6, 7]) {
         const size = 1 << (7 - lod);
         uploadedLevels.push(
@@ -13400,7 +13366,7 @@ ${hardCascadeLibrary}`;
     }
   });
 
-  it("replays sixteen compiled real-asset material phases in Globe and frozen Planar", async function () {
+  it("replays sixteen compiled real-asset material phases in Globe and adapted Planar", async function () {
     const localDirection = new Cartesian3(0.0, 0.94, 0.342);
     const phases = [];
     for (const y of [0.0, 60000.0, 120000.0, 180000.0]) {
@@ -13570,6 +13536,182 @@ ${hardCascadeLibrary}`;
     }
   });
 
+  it("adapts P8 authored density, fixed-Z phases and shadow layers on the actual GPU", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      disconnectControlledCloudMode();
+      return;
+    }
+    const renderer = effects._pipeline;
+    const resources = renderer._resources;
+    try {
+      expect(
+        new SceneGISEnvironmentEffects({
+          mode: "planar",
+          world: effects._world,
+        }).cloudDensity,
+      ).toBe(1.0);
+      installControlledCloudTestTextures("planar");
+      let origin = new Cartesian2(17, 23);
+      let local = new Cartesian3(0, 0, 1800);
+      const offset = new Cartesian2();
+      let coverage = 1.0;
+      let preset = 0;
+      let footprint = 1.0;
+      const fragment = `precision highp float;
+        precision highp sampler3D;
+        uniform sampler3D u_cloudShapeTexture;
+        uniform sampler3D u_cloudDetailTexture;
+        uniform sampler2D u_cloudWeatherTexture;
+        uniform sampler2D u_cloudTurbulenceTexture;
+        uniform vec2 u_specOrigin;
+        uniform vec2 u_specOffset;
+        uniform vec3 u_specLocal;
+        uniform float u_specCoverage;
+        uniform float u_specFootprint;
+        uniform int u_specPreset;
+        void main() {
+          float gradient;
+          float density = sceneGISCloudDensitySample(
+            u_cloudShapeTexture, u_cloudDetailTexture,
+            u_cloudWeatherTexture, u_cloudTurbulenceTexture,
+            u_specLocal, vec3(0.0), vec3(0.0), u_specOrigin, u_specOffset,
+            1500.0, 4500.0, u_specCoverage, u_specPreset, 1.0,
+            u_specFootprint, 0.5, gradient);
+          float bottom; float thickness;
+          sceneGISCloudPresetSupport(u_specPreset, 1500.0, 4500.0, bottom, thickness);
+          out_FragColor = vec4(density, gradient, bottom / 10000.0, thickness / 10000.0);
+        }`;
+      const uniformMap = {
+        ...renderer._uniformMap,
+        u_specOrigin: () => origin,
+        u_specOffset: () => offset,
+        u_specLocal: () => local,
+        u_specCoverage: () => coverage,
+        u_specFootprint: () => footprint,
+        u_specPreset: () => preset,
+      };
+      const probe = (shadow = false) =>
+        executeHalfFloatQuad(
+          [atmosphereSource, cloudShadowSource, cloudSource, fragment],
+          { uniformMap, defines: shadow ? ["SCENEGIS_CLOUD_SHADOW_PASS"] : [] },
+        )[0];
+      // A solid authored stratus sample halfway up its sole layer has sigma
+      // 0.2 * (0.5 * 0.75 + 0.25), independently of the public multiplier.
+      preset = 1;
+      local.z = 2350;
+      expect(probe()[0]).toBeCloseTo(0.125, 3);
+      expect(probe()[1]).toBeCloseTo(0.75, 3);
+      expect(probe(true).slice(0, 2)).toEqual(probe().slice(0, 2));
+      coverage = 0;
+      expect(probe()[0]).toBe(0);
+      coverage = 1;
+      local.z = 1750;
+      expect(probe()[0]).toBe(0);
+      local.z = 2950;
+      expect(probe()[0]).toBe(0);
+      preset = 2;
+      local.z = 8500;
+      expect(probe()[0]).toBeCloseTo(0.003 * 0.625, 5);
+      expect(probe(true)[0]).toBe(0);
+      preset = 3;
+      expect(probe(true)[0]).toBe(0);
+      local.z = 2100;
+      expect(probe()[0]).toBeGreaterThan(0.125);
+      expect(probe(true).slice(0, 2)).toEqual(probe().slice(0, 2));
+      expect(probe(true)[2]).toBeCloseTo(0.15, 3);
+      expect(probe(true)[3]).toBeCloseTo(0.145, 3);
+
+      // A periodic R8 volume: the CPU phase reduction must preserve sub-metre
+      // motion at large custom XY, and shadow/cloud adapters must agree.
+      renderer.publishResources(
+        scene.context,
+        createThinCloudBuffers("planar"),
+      );
+      preset = 1;
+      local = new Cartesian3(11.25, 0.5, 2350);
+      Cartesian3.fromElements(
+        2000000017.25,
+        -1700000023.5,
+        99,
+        renderer._frame.cameraPosition,
+      );
+      const phase = renderer._uniformMap.u_planarCloudMaterialOrigin();
+      expect(renderer._uniformMap.u_planarCloudMaterialOrigin()).toBe(phase);
+      Cartesian3.clone(renderer._frame.cameraPosition, renderer._shadowOrigin);
+      expect(renderer._uniformMap.u_planarShadowMaterialOrigin()).toEqual(
+        phase,
+      );
+      expect(phase.x).toBe(80017.25);
+      expect(phase.y).toBe(159976.5);
+      origin = Cartesian2.clone(phase);
+      const large = probe();
+      renderer._frame.cameraPosition.x += 0.25;
+      origin = Cartesian2.clone(
+        renderer._uniformMap.u_planarCloudMaterialOrigin(),
+      );
+      local.x -= 0.25;
+      expect(probe()).toEqual(large);
+      origin.x += 125;
+      offset.x -= 125;
+      expect(probe()).toEqual(large);
+      expect(probe(true).slice(0, 2)).toEqual(probe().slice(0, 2));
+      footprint = 5000;
+      expect(probe().every(Number.isFinite)).toBe(true);
+
+      installControlledAtmosphereTextures("planar", {
+        sun: [0.8, 0.7, 0.6],
+        sky: [0.1, 0.12, 0.16],
+      });
+      const incidentFragment = `precision highp float;
+        uniform sampler2D u_transmittanceTexture;
+        uniform sampler2D u_irradianceTexture;
+        void main() {
+          vec3 sun; vec3 sky;
+          sceneGISCloudIncidentIrradiance(u_transmittanceTexture,
+            u_irradianceTexture, vec3(0.0, 0.0, 2000.0), vec3(0.0),
+            vec3(0.0, 0.0, 1.0), vec3(0.0, 0.0, 1.0), vec3(1.0), sun, sky);
+          out_FragColor = vec4(gl_FragCoord.x < 1.0 ? sun : sky, 1.0);
+        }`;
+      const incidents = executeHalfFloatQuad(
+        [atmosphereSource, cloudShadowSource, cloudSource, incidentFragment],
+        { width: 2, uniformMap: renderer._uniformMap },
+      );
+      const solar = [1.474, 1.8504, 1.91198];
+      for (let c = 0; c < 3; c++) {
+        expect(incidents[0][c]).toBeCloseTo([0.8, 0.7, 0.6][c] * solar[c], 2);
+        expect(incidents[1][c]).toBeCloseTo([0.1, 0.12, 0.16][c] * solar[c], 2);
+      }
+
+      // Current formats and mip budget are asserted on the actual resources.
+      const current = renderer._resources;
+      expect(current.cloudShapeTexture.pixelFormat).toBe(PixelFormat.RED);
+      expect(current.cloudShapeTexture.sizeInBytes).toBe(2396745);
+      expect(current.cloudDetailTexture.sizeInBytes).toBe(37449);
+      expect(current.cloudWeatherTexture.sizeInBytes).toBe(1398101);
+      expect(current.cloudTurbulenceTexture.sizeInBytes).toBe(87381);
+      expect(current.cloudTurbulenceTexture.depth).toBeUndefined();
+      expect(current.cloudStbnTexture.sizeInBytes).toBe(1048576);
+      expect(resources.cloudShapeTexture.isDestroyed()).toBe(true);
+      const textures = [
+        current.cloudShapeTexture,
+        current.cloudOccupancyTexture,
+        current.cloudDetailTexture,
+        current.cloudWeatherTexture,
+        current.cloudTurbulenceTexture,
+        current.cloudStbnTexture,
+      ];
+      disconnectControlledCloudMode();
+      for (const texture of textures) {
+        expect(texture.isDestroyed()).toBe(true);
+      }
+    } finally {
+      if (scene !== undefined) {
+        disconnectControlledCloudMode();
+      }
+    }
+  });
+
   it("integrates Planar P6 thin near clouds and the complete far segment on the actual GPU", async function () {
     await connectControlledCloudMode("planar");
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -13670,18 +13812,25 @@ ${hardCascadeLibrary}`;
       return;
     }
     try {
-      // Real trilinear mipmaps average thin occupied cells below the authored
-      // shape threshold. Small visible footprints must retain those cells.
-      effects._pipeline.publishResources(
-        scene.context,
-        createThinCloudBuffers("planar"),
-      );
+      // A single occupied texel per period isolates projected-footprint loss.
+      const buffers = createThinCloudBuffers("planar");
+      const shape = new Uint8Array(buffers.cloudShape);
+      for (let z = 0; z < 128; z++) {
+        for (let y = 0; y < 128; y++) {
+          shape.fill(
+            y % 20 === 0 ? 255 : 0,
+            (z * 128 + y) * 128,
+            (z * 128 + y + 1) * 128,
+          );
+        }
+      }
+      effects._pipeline.publishResources(scene.context, buffers);
       const fragment = `precision highp float;
         precision highp sampler3D;
         uniform sampler3D u_cloudShapeTexture;
         uniform sampler3D u_cloudDetailTexture;
         uniform sampler2D u_cloudWeatherTexture;
-        uniform sampler3D u_cloudTurbulenceTexture;
+        uniform sampler2D u_cloudTurbulenceTexture;
         uniform float u_specFootprint;
         uniform float u_specThickness;
         void main() {
@@ -13692,8 +13841,8 @@ ${hardCascadeLibrary}`;
             vec3(0.0, 0.0, 1000.0), vec3(0.0),
             vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0),
             vec3(0.0, 0.0, 1.0), vec3(0.0), vec3(1.0),
-            vec2(0.0, 312.5), vec3(0.0, 0.0, 1.0), vec2(0.0),
-            0.0, u_specThickness, 1.0, 0.001, 0, 3, 1.0,
+            vec2(0.0, 13.020833), vec3(0.0, 0.0, 1.0), vec2(0.0),
+            0.0, u_specThickness, 0.45, 0.001, 0, 3, 1.0,
             u_specFootprint, coveredDistance);
           out_FragColor = vec4(tau, coveredDistance, 0.0, 1.0);
         }`;
@@ -13716,11 +13865,11 @@ ${hardCascadeLibrary}`;
           },
         )[0];
       const local = probe(cloudSource);
-      expect(Math.abs(local[0] - 0.001 * (700.0 / 3.0)))
+      expect(local[0])
         .withContext(
           "resolvable occupied column casts internal solar extinction",
         )
-        .toBeLessThan(0.002);
+        .toBeGreaterThan(0.005);
       expect(Math.abs(local[1] - 700.0 / 3.0)).toBeLessThan(0.2);
       expect(probe(oldFootprint)[0])
         .withContext(
@@ -13731,10 +13880,10 @@ ${hardCascadeLibrary}`;
       expect(probe(cloudSource)[0])
         .withContext("actual subpixel detail still receives mip filtering")
         .toBeLessThan(0.001);
-      thickness = 1050.0;
+      thickness = 3000.0;
       expect(probe(cloudSource)[1])
         .withContext("clip local coverage to layer top")
-        .toBe(50.0);
+        .toBeCloseTo(50.0, 1);
       thickness = 500.0;
       expect(probe(cloudSource)[1])
         .withContext("no upward intersection")
@@ -14554,10 +14703,10 @@ ${hardCascadeLibrary}`;
     expect(cloudSource).toContain("ceil(log2(max(");
     expect(cloudSource).toContain("minimumRetainedFeature * 0.5");
     expect(cloudSource).toContain("fineStep >= intervalFineSteps");
-    expect(cloudSource).toMatch(/textureLod\(\s*shapeTexture/);
-    expect(cloudSource).toMatch(/textureLod\(\s*detailTexture/);
-    expect(cloudSource).toMatch(/textureLod\(\s*turbulenceTexture/);
-    expect(cloudSource).toMatch(/textureLod\(\s*weatherTexture/);
+    expect(globeCloudSource).toMatch(/textureLod\(\s*shapeTexture/);
+    expect(globeCloudSource).toMatch(/textureLod\(\s*detailTexture/);
+    expect(globeCloudSource).toMatch(/textureLod\(\s*turbulenceTexture/);
+    expect(globeCloudSource).toMatch(/textureLod\(\s*weatherTexture/);
     expect(cloudSource.match(/float radialDelta =/g).length).toBe(1);
     expect(globeCloudSource).toContain(
       "length(globePosition) - SCENEGIS_BOTTOM_RADIUS",
@@ -14576,7 +14725,7 @@ ${hardCascadeLibrary}`;
     expect(
       cloudSource.match(/supportThickness,/g).length,
     ).toBeGreaterThanOrEqual(2);
-    expect(cloudSource).toContain("localCoverage");
+    expect(globeCloudSource).toContain("weatherDensity[layer]");
     expect(cloudSource).toContain("octave < 8");
     expect(cloudSource).toContain("sceneGISCloudSolarScattering");
     expect(cloudSource).not.toContain("threshold = 1.11 - cloudCoverage");
@@ -14650,32 +14799,6 @@ ${hardCascadeLibrary}`;
     expect(cloudSource).not.toContain("heightFogInscatteringScale");
   });
 
-  it("keeps every cloud preset layer inside its marched support union", function () {
-    const descriptors = {
-      cumulus: [[0.0, 1.0]],
-      stratus: [[500.0, 0.4]],
-      cirrus: [[6500.0, 0.32]],
-      mixed: [
-        [0.0, 0.85],
-        [4200.0, 0.34],
-        [7800.0, 0.24],
-      ],
-    };
-    function support(preset, base, thickness) {
-      const layers = descriptors[preset];
-      return [
-        Math.min(...layers.map(([offset]) => base + offset)),
-        Math.max(
-          ...layers.map(([offset, scale]) => base + offset + thickness * scale),
-        ),
-      ];
-    }
-    expect(support("cumulus", 1500.0, 4500.0)).toEqual([1500.0, 6000.0]);
-    expect(support("stratus", 1500.0, 4500.0)).toEqual([2000.0, 3800.0]);
-    expect(support("cirrus", 1500.0, 4500.0)).toEqual([8000.0, 9440.0]);
-    expect(support("mixed", 1500.0, 4500.0)).toEqual([1500.0, 10380.0]);
-  });
-
   it("matches bounded cloud support and energy-conserving segment references", function () {
     function planarSegment(originZ, directionZ, maximumDistance, base, top) {
       if (Math.abs(directionZ) < 1.0e-7) {
@@ -14732,109 +14855,11 @@ ${hardCascadeLibrary}`;
     expect(weightedDistance / weight).toBeLessThan(4000.0);
   });
 
-  it("matches the source-backed CloudCore coverage, type, and erosion remap", function () {
-    function smoothstep(minimum, maximum, value) {
-      const normalized = Math.min(
-        Math.max((value - minimum) / (maximum - minimum), 0.0),
-        1.0,
-      );
-      return normalized * normalized * (3.0 - 2.0 * normalized);
-    }
-
-    function densitySample({
-      shape,
-      columnCoverage,
-      cloudCoverage,
-      cloudType,
-      weatherDensity,
-      heightFraction,
-      erosion,
-      useDetail,
-    }) {
-      const lowerTransition = 0.04 * (1.0 - cloudType) + 0.14 * cloudType;
-      const upperTransition = 0.58 * (1.0 - cloudType) + 0.82 * cloudType;
-      const heightProfile =
-        smoothstep(0.0, lowerTransition, heightFraction) *
-        (1.0 - smoothstep(upperTransition, 1.0, heightFraction));
-      const lowFrequencyFbm =
-        shape[1] * 0.625 + shape[2] * 0.25 + shape[3] * 0.125;
-      const worleyErosionFloor = (1.0 - lowFrequencyFbm) * 0.15;
-      const baseShape = Math.min(
-        Math.max(
-          (shape[0] - worleyErosionFloor) /
-            Math.max(1.0 - worleyErosionFloor, 1.0e-3),
-          0.0,
-        ),
-        1.0,
-      );
-      const coverageCenter = 1.0 - cloudCoverage * cloudCoverage;
-      const coverageWidth = 0.04 * (1.0 - cloudCoverage) + 0.08 * cloudCoverage;
-      const localCoverage =
-        cloudCoverage <= 0.0
-          ? 0.0
-          : smoothstep(
-              coverageCenter - coverageWidth,
-              coverageCenter + coverageWidth,
-              columnCoverage,
-            );
-      const shapeLower = 0.65 * (1.0 - localCoverage) + 0.35 * localCoverage;
-      const shapeUpper = 0.82 * (1.0 - localCoverage) + 0.58 * localCoverage;
-      const shapeSignal = smoothstep(shapeLower, shapeUpper, baseShape);
-      let density =
-        shapeSignal *
-        localCoverage *
-        heightProfile *
-        (0.3 * (1.0 - weatherDensity) + weatherDensity);
-      if (density <= 1.0e-4 || !useDetail) {
-        return Math.min(Math.max(density, 0.0), 1.0);
-      }
-      const erosionStrength =
-        0.28 * (1.0 - heightFraction) + 0.12 * heightFraction;
-      density =
-        (density - (1.0 - erosion) * erosionStrength) /
-        Math.max(1.0 - erosionStrength, 1.0e-3);
-      return Math.min(Math.max(density, 0.0), 1.0);
-    }
-
-    const sample = {
-      shape: [0.95, 0.9, 0.8, 0.7],
-      columnCoverage: 0.92,
-      cloudCoverage: 0.45,
-      cloudType: 0.6,
-      weatherDensity: 0.7,
-      heightFraction: 0.5,
-      erosion: 0.85,
-      useDetail: true,
-    };
-    const baseline = densitySample(sample);
-    expect(baseline).toBeGreaterThan(0.0);
-    expect(baseline).toBeLessThanOrEqual(1.0);
-    expect(densitySample({ ...sample, cloudCoverage: 0.0 })).toBeLessThan(
-      baseline,
-    );
-    expect(densitySample({ ...sample, shape: [0.2, 0.1, 0.1, 0.1] })).toBe(0.0);
-    expect(densitySample({ ...sample, heightFraction: 0.0 })).toBe(0.0);
-    expect(densitySample({ ...sample, heightFraction: 1.0 })).toBe(0.0);
-    expect(densitySample({ ...sample, erosion: 0.2 })).toBeLessThan(baseline);
-    expect(baseline).toBeGreaterThan(
-      densitySample({ ...sample, useDetail: false }),
-    );
-  });
-
-  it("freezes preset morphology, quality detail, and lighting contrast", function () {
-    expect(cloudSource).toContain("sceneGISCloudMorphologyParameters");
-    expect(cloudSource).toContain("sceneGISCloudDetailErosion");
-    expect(cloudSource).not.toContain("sceneGISCloudLightingParameters");
-    expect(cloudSource).toContain("vec4(10000.0, 900.0, 0.56, 0.16)");
-    expect(cloudSource).toContain("vec4(22000.0, 2800.0, 0.48, 0.18)");
-    expect(cloudSource).toContain("vec4(30000.0, 900.0, 0.48, 0.16)");
-    expect(cloudSource).toContain("sceneGISCloudMorphologyAnisotropy");
-    expect(cloudSource).toContain(
-      "primarySteps >= SCENEGIS_CLOUD_PRIMARY_MAX_STEPS ? 1.0 : 0.15",
-    );
-    expect(cloudSource).toContain(
-      "float qualityDetailScale = detailStrength > 0.9 ? 0.5 : 3.0",
-    );
+  it("shares authored preset morphology while retaining lighting contrast", function () {
+    expect(cloudSource).toContain("return sceneGISGlobeCloudLayerDescriptor");
+    expect(cloudSource).not.toContain("sceneGISCloudMorphologyParameters");
+    expect(globeCloudSource).toContain("float height = globePosition.z");
+    expect(globeCloudSource).toContain("float shape = textureLod(shapeTexture");
     expect(cloudResolveFragmentSource).toContain(
       "float spatialSharpness = lowDimensions.x / max(fullDimensions.x, 1.0) > 0.6",
     );

@@ -4,12 +4,12 @@ const float SCENEGIS_CLOUD_SHAPE_SCALE = 12000.0;
 const float SCENEGIS_CLOUD_DETAIL_SCALE = 2000.0;
 const float SCENEGIS_CLOUD_WEATHER_SCALE = 240000.0;
 
-#ifdef SCENEGIS_GLOBE
 #define SCENEGIS_CLOUD_TURBULENCE_SAMPLER sampler2D
 uniform bool u_cloudOccupancyAllPositive;
+#ifdef SCENEGIS_GLOBE
 uniform bool u_cloudTracePhased;
 #else
-#define SCENEGIS_CLOUD_TURBULENCE_SAMPLER sampler3D
+uniform vec2 u_planarCloudMaterialOrigin;
 #endif
 
 #ifdef SCENEGIS_GLOBE
@@ -295,7 +295,7 @@ vec2 sceneGISCloudMaterialOrigin(
         longitude * SCENEGIS_BOTTOM_RADIUS,
         latitude * SCENEGIS_BOTTOM_RADIUS);
     #else
-    return worldCameraPosition.xy;
+    return u_planarCloudMaterialOrigin;
     #endif
 }
 
@@ -316,69 +316,7 @@ float sceneGISCloudHeightFraction(
 
 vec4 sceneGISCloudLayerDescriptor(int preset, int layer)
 {
-    if (preset == 0) {
-        return layer == 0 ? vec4(0.0, 1.0, 1.0, 0.0) : vec4(0.0);
-    }
-    if (preset == 1) {
-        return layer == 0 ? vec4(500.0, 0.4, 0.42, 0.12) : vec4(0.0);
-    }
-    if (preset == 2) {
-        return layer == 0 ? vec4(6500.0, 0.32, 0.10, -0.08) : vec4(0.0);
-    }
-    if (layer == 0) {
-        return vec4(0.0, 0.85, 0.72, -0.03);
-    }
-    if (layer == 1) {
-        return vec4(4200.0, 0.34, 0.28, 0.04);
-    }
-    return layer == 2 ? vec4(7800.0, 0.24, 0.08, -0.10) : vec4(0.0);
-}
-
-vec4 sceneGISCloudLayerProfile(int preset, int layer)
-{
-    if (preset == 1 || (preset == 3 && layer == 1)) {
-        return vec4(0.01, 0.06, 0.90, 0.99);
-    }
-    if (preset == 2 || (preset == 3 && layer == 2)) {
-        return vec4(0.02, 0.12, 0.88, 0.99);
-    }
-    return vec4(0.02, 0.16, 0.62, 0.98);
-}
-
-vec4 sceneGISCloudMorphologyParameters(int preset, int layer)
-{
-    if (preset == 1 || (preset == 3 && layer == 1)) {
-        return vec4(22000.0, 2800.0, 0.48, 0.18);
-    }
-    if (preset == 2 || (preset == 3 && layer == 2)) {
-        return vec4(30000.0, 900.0, 0.48, 0.16);
-    }
-    if (preset == 3) {
-        return vec4(13000.0, 1200.0, 0.53, 0.15);
-    }
-    return vec4(10000.0, 900.0, 0.56, 0.16);
-}
-
-vec2 sceneGISCloudMorphologyAnisotropy(int preset, int layer)
-{
-    if (preset == 1 || (preset == 3 && layer == 1)) {
-        return vec2(0.55, 1.25);
-    }
-    if (preset == 2 || (preset == 3 && layer == 2)) {
-        return vec2(0.28, 2.4);
-    }
-    return preset == 3 ? vec2(0.85, 1.1) : vec2(1.0);
-}
-
-float sceneGISCloudDetailErosion(int preset, int layer)
-{
-    if (preset == 1 || (preset == 3 && layer == 1)) {
-        return 0.55;
-    }
-    if (preset == 2 || (preset == 3 && layer == 2)) {
-        return 0.65;
-    }
-    return preset == 3 ? 0.80 : 0.90;
+    return sceneGISGlobeCloudLayerDescriptor(preset, layer);
 }
 
 void sceneGISCloudPresetSupport(
@@ -410,26 +348,6 @@ void sceneGISCloudPresetSupport(
         supportTopHeight = max(supportTopHeight, layerTopHeight);
     }
     supportThickness = max(supportTopHeight - supportBaseHeight, 0.0);
-}
-
-vec2 sceneGISCloudWeatherParameters(int preset, int layer)
-{
-    if (preset == 0) {
-        return vec2(2.2, 0.04);
-    }
-    if (preset == 1) {
-        return vec2(0.75, 0.12);
-    }
-    if (preset == 2) {
-        return vec2(2.0, 0.035);
-    }
-    if (layer == 0) {
-        return vec2(1.7, 0.04);
-    }
-    if (layer == 1) {
-        return vec2(0.8, 0.10);
-    }
-    return vec2(2.2, 0.03);
 }
 
 float sceneGISCloudDensitySample(
@@ -469,106 +387,18 @@ float sceneGISCloudDensitySample(
         jitter,
         activeLayerHeightGradient);
     #else
-    float materialHeight = localPosition.z;
-    vec3 texturePosition = vec3(
-        materialOrigin + localPosition.xy + cloudOffset,
-        materialHeight);
-    float turbulenceLod = clamp(
-        log2(max(footprintMeters / 250.0, 1.0)), 0.0, 6.0);
-    vec3 turbulence = (textureLod(
-        turbulenceTexture, texturePosition / 16000.0, turbulenceLod).rgb -
-        vec3(128.0 / 255.0)) *
-        (255.0 / 127.0);
-    texturePosition += turbulence * 700.0;
-    // Density sampling runs inside a dynamically bounded march. Use an
-    // explicit base level so weather lookup never depends on undefined
-    // implicit derivatives from non-uniform control flow.
-    vec4 weather = textureLod(
-        weatherTexture,
-        texturePosition.xy / SCENEGIS_CLOUD_WEATHER_SCALE,
-        0.0);
-    float accumulated = 0.0;
-    float accumulatedHeightGradient = 0.0;
-    for (int layer = 0; layer < 4; ++layer) {
-        vec4 descriptor = sceneGISCloudLayerDescriptor(cloudPreset, layer);
-        #ifdef SCENEGIS_CLOUD_SHADOW_PASS
-        if (cloudPreset == 2 || (cloudPreset == 3 && layer >= 2)) {
-            continue;
-        }
-        #endif
-        if (descriptor.z <= 0.0) {
-            continue;
-        }
-        float layerBase = cloudBaseHeight + descriptor.x;
-        float layerThickness = cloudThickness * descriptor.y;
-        float heightFraction = sceneGISCloudHeightFraction(
-            localPosition, layerBase, layerThickness);
-        vec4 profile = sceneGISCloudLayerProfile(cloudPreset, layer);
-        float heightProfile = smoothstep(profile.x, profile.y, heightFraction) *
-            (1.0 - smoothstep(profile.z, profile.w, heightFraction));
-        float weatherValue = layer == 0 ? weather.r :
-            (layer == 1 ? weather.g : weather.b);
-        float localCoverageValue = clamp(cloudCoverage + descriptor.w, 0.0, 1.0);
-        vec2 weatherParameters = sceneGISCloudWeatherParameters(cloudPreset, layer);
-        float weatherExponent = weatherParameters.x;
-        float coverageThreshold = 1.0 - localCoverageValue;
-        float weatherSignal = pow(max(weatherValue, 0.0), weatherExponent);
-        float localCoverage = cloudCoverage <= 0.0 ? 0.0 : smoothstep(
-            coverageThreshold - weatherParameters.y,
-            coverageThreshold + weatherParameters.y,
-            weatherSignal);
-        vec4 morphology = sceneGISCloudMorphologyParameters(
-            cloudPreset, layer);
-        vec2 morphologyAnisotropy = sceneGISCloudMorphologyAnisotropy(
-            cloudPreset, layer);
-        float shapeScale = morphology.x;
-        vec3 layerPosition = texturePosition;
-        layerPosition.z = heightFraction * layerThickness;
-        vec3 shapePosition = layerPosition;
-        shapePosition.xy *= morphologyAnisotropy;
-        float shapeTexelMeters = shapeScale / 128.0;
-        float shapeLod = clamp(
-            log2(max(footprintMeters / shapeTexelMeters, 1.0)), 0.0, 7.0);
-        vec4 shape = textureLod(
-            shapeTexture, shapePosition / shapeScale, shapeLod);
-        float fbm = dot(shape.gba, vec3(0.625, 0.25, 0.125));
-        float baseShape = clamp(
-            (shape.r - (1.0 - fbm) * 0.15) /
-            max(0.85 + fbm * 0.15, 1.0e-3), 0.0, 1.0);
-        float density = smoothstep(
-            morphology.z, morphology.z + morphology.w, baseShape) *
-            localCoverage * heightProfile;
-        if (density > 1.0e-4 && detailStrength > 0.0) {
-            float qualityDetailScale = detailStrength > 0.9 ? 0.5 : 3.0;
-            float detailScale = morphology.y * qualityDetailScale;
-            float detailTexelMeters = detailScale / 64.0;
-            float detailLod = clamp(
-                log2(max(footprintMeters / detailTexelMeters, 1.0)),
-                0.0,
-                6.0);
-            vec4 detail = textureLod(
-                detailTexture,
-                vec3(
-                    layerPosition.xy * morphologyAnisotropy.yx,
-                    layerPosition.z) / detailScale,
-                detailLod);
-            float erosion = dot(detail.rgb, vec3(0.5, 0.3, 0.2));
-            float erosionAmount = sceneGISCloudDetailErosion(
-                cloudPreset, layer) * detailStrength;
-            density = clamp(
-                (density - (1.0 - erosion) * erosionAmount) /
-                    max(1.0 - erosionAmount, 1.0e-3),
-                0.0,
-                1.0);
-        }
-        float weightedDensity = density * descriptor.z;
-        accumulated += weightedDensity;
-        accumulatedHeightGradient += weightedDensity *
-            mix(0.5, 1.0, heightFraction);
-    }
-    activeLayerHeightGradient = accumulated > 1.0e-6 ?
-        accumulatedHeightGradient / accumulated : 0.5;
-    return clamp(accumulated, 0.0, 1.0);
+    vec3 materialPosition = vec3(
+        materialOrigin + localPosition.xy + cloudOffset, localPosition.z);
+    #ifdef SCENEGIS_CLOUD_SHADOW_PASS
+    const bool shadowLayersOnly = true;
+    #else
+    const bool shadowLayersOnly = false;
+    #endif
+    return sceneGISGlobeCloudDensitySampleInternal(
+        shapeTexture, detailTexture, weatherTexture, turbulenceTexture,
+        materialPosition, vec3(0.0), cloudOffset, cloudBaseHeight,
+        cloudThickness, cloudCoverage, cloudPreset, detailStrength,
+        footprintMeters, jitter, shadowLayersOnly, activeLayerHeightGradient);
     #endif
 }
 
@@ -687,16 +517,14 @@ float sceneGISCloudOccupancyBound(
         float shapeScale = globeScales.x;
         float maximumAnisotropy = 1.0;
         #else
-        vec4 morphology = sceneGISCloudMorphologyParameters(
-            cloudPreset, layer);
-        vec2 morphologyAnisotropy = sceneGISCloudMorphologyAnisotropy(
-            cloudPreset, layer);
+        // High layers retain density even when shape is zero.
+        if (u_cloudOccupancyAllPositive ||
+            sceneGISGlobeCloudLayerScales(cloudPreset, layer).z < 1.0) {
+            return 1.0;
+        }
         vec3 shapePosition = texturePosition;
-        shapePosition.xy *= morphologyAnisotropy;
-        shapePosition.z = heightFraction * layerThickness;
-        float shapeScale = morphology.x;
-        float maximumAnisotropy = max(
-            morphologyAnisotropy.x, morphologyAnisotropy.y);
+        float shapeScale = SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE;
+        float maximumAnisotropy = 1.0;
         #endif
         float shapeTexelMeters = shapeScale / 128.0;
         // Turbulence displaces the actual material position by at most 700 m.
@@ -715,14 +543,8 @@ float sceneGISCloudOccupancyBound(
             occupancyTexture,
             shapePosition / shapeScale,
             occupancyLod).r;
-        // The Globe reference remaps weather against the complete shape range,
-        // so only an exact-zero max cell is empty. Planar retains its frozen
-        // morphology threshold until the later adaptation track.
-        #ifdef SCENEGIS_GLOBE
+        // Authored low layers can be empty only at exact-zero shape support.
         bound = max(bound, step(0.5 / 255.0, shapeBound));
-        #else
-        bound = max(bound, step(morphology.z - 0.5 / 255.0, shapeBound));
-        #endif
     }
     return bound;
 }
@@ -751,11 +573,8 @@ float sceneGISCloudMinimumRetainedFeature(
             minimumFeature,
             useDetail ? globeScales.y : globeScales.x);
         #else
-        vec4 morphology = sceneGISCloudMorphologyParameters(
-            cloudPreset, layer);
-        minimumFeature = min(
-            minimumFeature,
-            useDetail ? morphology.y : morphology.x);
+        minimumFeature = min(minimumFeature, useDetail ?
+            SCENEGIS_GLOBE_CLOUD_DETAIL_SCALE : SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE);
         #endif
     }
     return max(minimumFeature, 1.0);
@@ -855,9 +674,9 @@ void sceneGISCloudIncidentIrradiance(
     }
     vec3 directIrradiance = SCENEGIS_SOLAR_IRRADIANCE *
         max(sunDirection.z, 0.0) * sunIrradiance;
-    skyIrradiance = (max(totalIrradiance - directIrradiance, vec3(0.0)) +
-        sceneGISReadableNightSkyIrradiance(vec3(0.0, 0.0, 1.0), sunDirection)) /
-        SCENEGIS_SOLAR_IRRADIANCE;
+    skyIrradiance = max(totalIrradiance - directIrradiance, vec3(0.0)) +
+        sceneGISReadableNightSkyIrradiance(vec3(0.0, 0.0, 1.0), sunDirection);
+    sunIrradiance *= SCENEGIS_SOLAR_IRRADIANCE;
     #endif
 }
 

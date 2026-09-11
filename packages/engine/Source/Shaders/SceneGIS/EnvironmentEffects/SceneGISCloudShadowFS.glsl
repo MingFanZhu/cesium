@@ -46,6 +46,7 @@ uniform sampler3D u_cloudStbnTexture;
 uniform float u_cloudStbnSlice;
 #ifndef SCENEGIS_GLOBE
 uniform vec3 u_sceneGISShadowOrigin;
+uniform vec2 u_planarShadowMaterialOrigin;
 uniform vec3 u_sceneGISShadowOriginDelta;
 #endif
 
@@ -314,7 +315,7 @@ void main()
         float normalizedDensity = sceneGISCloudDensitySample(
             u_cloudShapeTexture, u_cloudDetailTexture, u_cloudWeatherTexture,
             u_cloudTurbulenceTexture, globePosition, vec3(0.0), vec3(0.0),
-            u_sceneGISShadowOrigin.xy, u_cloudOffset, u_cloudBaseHeight,
+            u_planarShadowMaterialOrigin, u_cloudOffset, u_cloudBaseHeight,
             u_cloudThickness, u_cloudCoverage, u_cloudPreset,
             u_cloudUseDetail ? 1.0 : 0.0, u_sceneGISShadowFootprint,
             jitter, unusedHeightGradient);
