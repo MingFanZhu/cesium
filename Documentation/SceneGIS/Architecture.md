@@ -231,6 +231,10 @@ transmittance、combined scattering 与 irradiance RGBA16F LUT；planar atmosphe
 但在固定 `+Z` slab 中独立积分，不读取 spherical LUT、不制造 curved horizon。两条路径提供同一 physical sky、Sun disk 与
 depth-aware aerial-perspective capability family，但不承诺 pixel-identical 或相同 multiple-scattering order。
 
+Planar 高级环境以 m 为长度单位，支持 World 的多种及自定义 CRS；高度直接使用世界 `position.z`，零高度固定为 `z = 0`，
+不增加环境 `baseHeight` 偏移。云底高度直接对应世界 Z，地形保留其真实高度。详见
+[ADR-0040](Decisions/ADR-0040-dual-world-advanced-environment-rendering.md) 的米制平面高度说明。
+
 Advanced effects 默认不接管 `scene.light`，也不自动修改或恢复 native/simple environment；唯一例外是ADR-0053明确授权的
 Globe A11-G primary celestial-light lifecycle。Caller 必须在启用前显式关闭会造成
 double energy 的 native `SkyAtmosphere`、ground atmosphere、Fog、Sun body/bloom、SkyBox 或 planar lightweight
@@ -293,9 +297,10 @@ mutation fail closed；native shadow state与Globe ShadowMode完全由caller控�
 displacement/normal/eclipses。Existing `SGP-0009`只扩展current frame-local surface uniforms，不增加upstream path或new SGP。完整API、resource、
 lifecycle与Planar冻结边界见[ADR-0053](Decisions/ADR-0053-globe-moonlight-shadow-surface.md)。
 
-P1设计在冻结A10-G后恢复Planar路线，但已在review/owner gate前延期；重新激活时首阶段仍只重新资格化既有A2/A3/A4 integrated medium。
+P1在A17-G验收后恢复Planar路线，首阶段仍只重新资格化既有A2/A3/A4 integrated medium。
 Planar必须继续使用fixed `+Z` atmosphere/fog/cloud slab、
-独立Planar LUT/asset/scheduler与same-UV cloud history；不得借用Globe ellipsoid/ECEF、Beer atlas、surface seam、world reprojection或A7–A10效果。
+独立Planar LUT/asset/scheduler；ADR-0052 的 September 11 amendment 已允许相机/风重投影、历史颜色裁剪、直接 Z 高度、
+像素 footprint filtering 和移除距离密度淡出。不得借用 Globe ellipsoid/ECEF；Beer atlas、surface lighting 与 A7–A10 效果需后续阶段独立设计。
 任何product修复前，必须先以同一resolved color/depth建立baseline、aerial-only、fog-only、cloud-only与combined actual-GPU final-composition
 authority；历史白屏截图不构成调参、hidden multiplier或球面替代的根因证据。完整阶段与零资源/API/upstream增量边界见
 [ADR-0052](Decisions/ADR-0052-planar-integrated-medium-restoration.md)。

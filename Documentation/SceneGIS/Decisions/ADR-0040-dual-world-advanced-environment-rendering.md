@@ -2,7 +2,7 @@
 
 ## 状态
 
-- Status：`approved; 2026-08-27 Globe-first delivery amendment`
+- Status：`approved; 2026-09-11 metric Planar height clarification`
 - Date：`2026-08-14`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -39,8 +39,9 @@ build/package delivery与failure atomicity。
 - 高级环境渲染建立SceneGIS-owned shared optical core，统一physical coefficients、Sun/time authority接口、LUT/noise resource、
   quality tier、HDR compositor与debug/qualification状态。
 - Globe adapter显式使用live Globe Scene的ellipsoid center/radii、radial altitude、surface normal与atmosphere/cloud shell。
-- Planar adapter显式使用live `SceneGISPlanarWorld`的`+X East/+Y North/+Z Up`、planar Z、explicit base height与layered
-  atmosphere/cloud slab。不得从CRS、数值范围、ellipsoid identity或`Camera.positionCartographic`推断planar状态。
+- Planar adapter显式使用live `SceneGISPlanarWorld`的`+X East/+Y North/+Z Up`、米制高度 `height = position.z` 与layered
+  atmosphere/cloud slab。环境零高度固定为 `z = 0`，不引入可配置 `baseHeight` 偏移。不得从CRS、数值范围、ellipsoid identity或
+  `Camera.positionCartographic`推断planar状态。
 - 两种adapter必须提供同一capability family与units，但不要求pixel-identical或用同一几何积分式。Planar模型的近似与误差必须单独
   记录，不能宣称spherical Bruneton物理等价。
 
@@ -158,6 +159,25 @@ The final architecture remains dual-world. Delivery order changes as follows:
 Planar work resumes as a later adaptation track against the accepted Globe
 optical contract. The reported fog/cloud composition defect remains a known issue
 and must not be hidden by a Planar-only tint, scale, fallback, or geometry fiction.
+
+## 2026-09-11 metric Planar height clarification
+
+项目负责人确认全球米制平面用途，支持多种及自定义坐标系；EPSG:3857 仅为示例。环境系统消费当前 World 的米制
+笛卡尔坐标和明确的光照方向，不依赖 CRS 名称，不反算经纬度或追加纬度缩放。
+
+项目负责人进一步要求高度直接使用 `z`，不必减去 `baseHeight`。本节取代早期 explicit base-height 参数化设计：
+
+- Planar atmosphere、fog 与 clouds 采用世界 `z = 0` 的共同零高度，高度直接为 `position.z`，单位 m。
+- `cloudBaseHeight` 继续控制云底，Planar 上直接对应世界 Z；云顶为该高度加 `cloudThickness`。
+  例如云底 2000 m 表示 `z = 2000`，不自动加地形高度或另一环境基准偏移。
+- 地形和模型仍使用各自真实的世界 Z。环境零高度不要求地形必须平坦或位于 Z=0；相对地形的净空与环境高度分开。
+- 当前 `_SceneGISEnvironmentEffectsRenderer.js::updateFrame` 已固定向 private reference-frame helper 传入
+  `baseHeight: 0.0`，公开 Controller 没有独立 `baseHeight` 配置。当前渲染行为与该高度契约一致；后续 Planar 适配可
+  简化冗余内部偏移表达，但不能把 private helper 的旧可变参数重新提升为产品需求。
+
+本次只明确高度、单位和坐标系边界，不修改 runtime、公开 API、Globe、LUT、资源或上游 SGP。
+既有 P1 candidate 与未完成视觉 gate 保留；参见
+[Planar spatial-model discussion](../../../AgentDocs/atmosphere-clouds-effects/discussions/2026-09-11-planar-atmosphere-space-model.md)。
 
 ## 参考资料
 

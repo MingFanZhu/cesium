@@ -1635,7 +1635,6 @@ function updateFrame(renderer, scene, frameState, time) {
       mode: renderer._mode,
       scene,
       world: renderer._world,
-      baseHeight: 0.0,
     },
     renderer._frame,
     renderer._scratchFrame,
@@ -1742,6 +1741,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._cloudHistoryValid = false;
   this._cloudHistoryReadIndex = 0;
   this._cloudHistorySnapshot = createCloudHistorySnapshot();
+  this._cloudCameraDelta = new Cartesian3();
   this._cloudHistoryWeight = 0.0;
   this._cloudHistoryStationary = false;
   this._cloudHistoryReprojection = false;
@@ -1903,6 +1903,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_cloudPreviousFrustum: () => that._cloudHistorySnapshot.frustum,
     u_cloudPreviousCameraPosition: () =>
       that._cloudHistorySnapshot.frame.cameraPosition,
+    u_cloudCameraDelta: () => that._cloudCameraDelta,
     u_cloudPreviousCameraDirection: () =>
       that._cloudHistorySnapshot.frame.cameraDirection,
     u_cloudPreviousCameraRight: () =>
@@ -2470,35 +2471,6 @@ function cloudHistoryMaterialCompatible(renderer, width, height) {
   );
 }
 
-function cloudHistoryPlanarCompatible(renderer) {
-  const previous = renderer._cloudHistorySnapshot;
-  const frame = renderer._frame;
-  return (
-    cloudHistoryNumbersEqual(previous.frame.altitude, frame.altitude) &&
-    cloudHistoryNumbersEqual(previous.frustum.x, renderer._frustum.x) &&
-    cloudHistoryNumbersEqual(previous.frustum.y, renderer._frustum.y) &&
-    cloudHistoryNumbersEqual(previous.frustum.z, renderer._frustum.z) &&
-    cloudHistoryNumbersEqual(previous.frustum.w, renderer._frustum.w) &&
-    cloudHistoryVectorEqual(
-      previous.frame.cameraPosition,
-      frame.cameraPosition,
-    ) &&
-    cloudHistoryVectorEqual(
-      previous.frame.cameraDirection,
-      frame.cameraDirection,
-    ) &&
-    cloudHistoryVectorEqual(previous.frame.cameraUp, frame.cameraUp) &&
-    cloudHistoryVectorEqual(previous.frame.cameraRight, frame.cameraRight) &&
-    cloudHistoryVectorEqual(
-      previous.frame.surfacePosition,
-      frame.surfacePosition,
-    ) &&
-    cloudHistoryVectorEqual(previous.frame.east, frame.east) &&
-    cloudHistoryVectorEqual(previous.frame.north, frame.north) &&
-    cloudHistoryVectorEqual(previous.frame.vertical, frame.vertical)
-  );
-}
-
 function cloudHistoryFrustumContinuous(renderer) {
   const previous = renderer._cloudHistorySnapshot.frustum;
   const current = renderer._frustum;
@@ -2531,12 +2503,6 @@ function cloudHistoryContinuityFailure(renderer, width, height) {
   if (!cloudHistoryMaterialCompatible(renderer, width, height)) {
     return "structured-compatibility";
   }
-  if (
-    renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE &&
-    !cloudHistoryPlanarCompatible(renderer)
-  ) {
-    return "history-state";
-  }
   if (!Number.isFinite(time) || Math.abs(time - previous.cloudTime) > 1.0) {
     return "cloud-time";
   }
@@ -2556,9 +2522,6 @@ function cloudHistoryContinuityFailure(renderer, width, height) {
     )
   ) {
     return "primary-light-energy";
-  }
-  if (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
-    return undefined;
   }
   if (
     Cartesian3.distance(previous.frame.cameraPosition, frame.cameraPosition) >
@@ -2685,9 +2648,13 @@ function executeCloudResolve(renderer, context, depthTexture) {
       : 0.82
     : 0.0;
   renderer._cloudHistoryReprojection =
-    renderer._cloudHistoryValid &&
-    !renderer._cloudHistoryStationary &&
-    renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
+    renderer._cloudHistoryValid && !renderer._cloudHistoryStationary;
+  // Subtract in CPU double precision before publishing large Planar motion.
+  Cartesian3.subtract(
+    renderer._frame.cameraPosition,
+    renderer._cloudHistorySnapshot.frame.cameraPosition,
+    renderer._cloudCameraDelta,
+  );
   renderer._cloudHistoryDiagnostics.stationary =
     renderer._cloudHistoryStationary;
   renderer._cloudHistoryDiagnostics.mode = !renderer._cloudHistoryValid

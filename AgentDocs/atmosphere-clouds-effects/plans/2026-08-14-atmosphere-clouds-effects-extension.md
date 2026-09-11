@@ -8,11 +8,16 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-11`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A17-G completed; no successor active`
-- Current gate: A17 code, scoped regressions and owner visual acceptance pass.
-  Its independent local checkpoint follows A16 `93540ca075`; P1 remains deferred.
+- Current phase: `P1 completed; successor discovery next`
+- Current gate: P1 checkpoint after delegated visual review and owner confirmation of global
+  metric Planar use across multiple/custom CRS; EPSG:3857 is only the sample.
+  See
+  [Planar spatial-model discussion](../discussions/2026-09-11-planar-atmosphere-space-model.md)
+  under ADR-0040/0042. P1 candidate and evidence retained after accepted A17
+  `3cdd2958d1`; Architecture has accepted its foundational visual result under
+  the owner's September 11 delegation.
 - Current phase plan:
-  [A17 far cloud depth](2026-09-11-phase-a17g-far-cloud-depth.md)
+  [P1 Planar restoration](2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
 - Latest completed phase plan:
   [A17 far cloud depth](2026-09-11-phase-a17g-far-cloud-depth.md)
 - A15 diagnosis:
@@ -97,8 +102,9 @@ phase sequencing, not the final dual-world product goal.
 
 1. **Pass graph**：advanced background在 ordinary geometry 前；aerial/cloud/fog/lens optical composite在 resolved scene color/depth
    之后、Cesium built-in bloom/tone mapping之前。Pick/shadow/classification/offscreen pass不得误执行。
-2. **Reference frames**：Globe只使用 ellipsoid center/radii/radial altitude；planar只使用 fixed ENU axes、显式 base height 与
-   resident planar terrain。不得从数值范围、CRS或 `Camera.positionCartographic` 推断模式。
+2. **Reference frames**：Globe只使用 ellipsoid center/radii/radial altitude；planar使用 fixed ENU axes、米制 `height = world Z` 与
+   resident planar terrain，环境零高度固定为 Z=0，不增加 base-height offset。不得从数值范围、CRS或
+   `Camera.positionCartographic` 推断模式。高度说明见 ADR-0040 的 2026-09-11 clarification。
 3. **Ownership**：每个 GPU resource 属于一个 Cesium `Context`与一个 SceneGIS owner；candidate 完整成功后才发布，destroy exactly
    once。不得让 SceneGIS-owned resource 泄漏到 native Scene slots，也不得销毁 caller-owned environment/skybox。
 4. **Disabled fast path**：默认关闭时零 LUT/noise/FBO/temporal allocation、零额外 command、零常驻 listener/timer/network，且不改变
@@ -340,7 +346,7 @@ final-composite cost and verification limits. The commit containing its
 acceptance record is the independent local checkpoint; no push or next-phase
 activation accompanies closure.
 
-### P1 — Planar integrated-medium restoration (`deferred`)
+### P1 — Planar integrated-medium restoration (`completed`)
 
 P1 was initially activated from frozen A10-G checkpoint
 `6afba87af181f3cdb7a20aff09b81af11eb302f4` and requalifies the retained
@@ -353,12 +359,30 @@ corrected the route to A11-G. The P1 design and unaccepted candidate are
 preserved but deferred outside committed delivery. Deferred plan:
 [P1 Planar integrated-medium restoration](2026-09-02-phase-p1-planar-integrated-medium-restoration.md).
 
+The owner resumes Planar work on 2026-09-11 after A17 `3cdd2958d1`. Current
+source, preserved candidate and direct visual behavior are rechecked under the
+same fixed-Z/no-new-resource contract. The old deferral is historical; current
+composition and cloud-deck quality evidence determine P1 closure.
+
+Three Planar depth expressions are now corrected against actual-GPU evidence;
+composition, native opaque depth and MRT/lifecycle regressions pass. Owner
+judgment remains pending on the basic-medium candidate with disclosed coarse
+material. The authorized September 11 amendment removes the old 60–100 km fade,
+uses direct metric Z and pixel footprint filtering, and adds Planar camera/wind
+reprojection with history clipping. Architecture accepts this foundation under
+the owner's delegated visual-review authority; the commit containing this
+record is its independent checkpoint.
+
 ### P2+ — Later Planar advanced-effects adaptation (`deferred`)
 
-Planar shadows/rays, temporal/performance evolution, HDR bloom/lens, readable
-night and celestial behavior remain unplanned until P1 passes Architecture and
-project-owner gates and receives its own checkpoint. Globe formulas/resources
-must not be copied into Planar without a separate source-based phase decision.
+After P1's independent checkpoint, adapt the remaining stack in bounded phases:
+cloud material/detail and further temporal quality beyond P1 reprojection; physical Sun/sky lighting with
+cloud shadows and rays; HDR bloom/lens; then night/celestial behavior. Their
+exact ordering follows P1's visual findings. Each phase requires current-source
+design and a separate acceptance/checkpoint. Preserve fixed-Z geometry and
+manual Planar celestial directions; Globe shell/ECEF assumptions cannot be
+copied into Planar. Existing Cesium shadow controls remain the user-facing
+authority where supported; do not add an extra SceneGIS shadow switch.
 
 ## Global acceptance criteria
 

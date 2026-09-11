@@ -3,11 +3,14 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A17-G completed; no successor active`
+- Current phase: `P1 completed; successor source discovery next`
+- Current discussion:
+  [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
+  — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [A17 far cloud depth](reviews/2026-09-11-a17g-far-cloud-depth.md)
+  [P1 Planar restoration](reviews/2026-09-02-p1-planar-integrated-medium-restoration.md)
 - Current phase plan:
-  [A17 far cloud depth](plans/2026-09-11-phase-a17g-far-cloud-depth.md)
+  [P1 Planar restoration](plans/2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
 - Latest completed phase plan:
   [A17 far cloud depth](plans/2026-09-11-phase-a17g-far-cloud-depth.md)
 - A15 diagnosis:
@@ -50,7 +53,7 @@
 - A14-G checkpoint: `6e488bc50eb95535e39bcd2bb0c59268acbb9f7b`（未push）
 - A15-G checkpoint: `4d1d122b1c`（未push）
 - A16-G checkpoint: `93540ca075`（未push）
-- A17-G checkpoint: the independent local commit containing the owner acceptance record（未push）
+- A17-G checkpoint: `3cdd2958d1`（未push）
 
 ## Objective
 
@@ -61,6 +64,49 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- On 2026-09-11 the owner delegates visual acceptance of the remaining Planar
+  adaptation stages to the current agent and authorizes continuous progress
+  after each verified stage. Repeated owner visual approval is no longer a
+  phase gate for this extension. Architecture retains code/GPU/visual/performance
+  review and separate local checkpoints; explicit design uncertainties still
+  follow the agreed metric, custom-CRS, fixed-Z and native shadow-control contract.
+- P1 is accepted by Architecture under that delegation, using the recorded
+  13 focused checks and actual ground/above-cloud/high observations. Coarse
+  legacy cloud morphology remains an accepted foundation limitation with
+  follow-up in the Planar roadmap. The commit containing this record is the
+  isolated P1 checkpoint. No push.
+
+- The owner authorizes implementation under the agreed direct-Z metric/custom
+  CRS contract. P1's current assignment extends the existing unaccepted
+  foundation candidate to far-cloud visibility, pixel-footprint filtering and
+  Planar camera/wind temporal stabilization, with unchanged assets/resources.
+  The phase plan and ADR-0052 record this scope. The implementation is on the
+  direct Planar page. All 13 distinct focused checks pass, including the Globe
+  phased regression; code and delegated visual review are complete.
+
+- The owner confirms global metric Planar use with multiple/custom coordinate
+  systems and selects fixed-Z atmosphere/cloud geometry. EPSG:3857 is only the
+  sample CRS. Height is directly world Z with no environment base-height offset;
+  see the ADR-0040 height clarification. Environment inputs use metres, seconds
+  and explicit frame/light data; no CRS-name or latitude-dependent algorithm is introduced. This resolves
+  geometry and units under ADR-0040/0042. The authorized P1 implementation now
+  applies these decisions. Large-coordinate precision is improved specifically
+  for camera history deltas; absolute weather sampling is still float-based.
+- The owner asks to discuss Globe-to-Planar spatial adaptation and UE practice
+  before implementation. The resolved spatial-model discussion separates
+  fixed-Z geometry from transferable material/lighting/temporal quality.
+  P1 remains unaccepted and uncommitted; successor phases remain deferred.
+- The owner resumes Planar adaptation on 2026-09-11. P1 requalifies the existing
+  fixed-Z atmosphere/aerial/fog/cloud core on A17; its preserved candidate is
+  selectively reviewed and tested. Composition and coarse cloud-deck visual
+  quality remain separate open findings. Later Planar advanced capabilities
+  stay in the extension roadmap; prior deferral statements below are historical.
+- P1 implementation now corrects three Planar depth paths after a compiled
+  approximately 10 km far-receiver error. Composition, native opaque depth and
+  MRT/lifecycle regressions pass. The direct page
+  provides Chinese component comparisons. Owner visual judgment remains open:
+  retained cloud detail is coarse. The 120 km preset now shows clouds after
+  removing the old distance fade. No P1 checkpoint or successor implementation.
 - A17 addresses the owner's far horizontal cloud bands. The isolated native
   reproduction identifies lossy depth reconstruction in final composition
   and high/low cloud tracing. The [A17 phase](plans/2026-09-11-phase-a17g-far-cloud-depth.md)

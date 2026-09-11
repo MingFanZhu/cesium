@@ -93,7 +93,7 @@ describe("SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrame", function ()
     expect(result.projection).toBe("orthographic");
   });
 
-  it("publishes planar fixed axes and explicit base height for orthographic", function () {
+  it("publishes direct metric Planar Z for a custom coordinate system in both projections", function () {
     scene = createScene({ scene3DOnly: true });
     const world = createPlanarWorld();
     scene._initializeWorld(world);
@@ -116,7 +116,6 @@ describe("SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrame", function ()
         mode: SceneGISAtmosphereReferenceFrame.PLANAR,
         scene,
         world,
-        baseHeight: 20.0,
       },
       result,
       scratch,
@@ -124,9 +123,9 @@ describe("SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrame", function ()
 
     expect(result.mode).toBe("planar");
     expect(result.projection).toBe("orthographic");
-    expect(result.altitude).toBe(100.0);
-    expect(result.baseHeight).toBe(20.0);
-    expect(result.surfacePosition).toEqual(new Cartesian3(25.0, -40.0, 20.0));
+    expect(result.altitude).toBe(120.0);
+    expect(result.baseHeight).toBe(0.0);
+    expect(result.surfacePosition).toEqual(new Cartesian3(25.0, -40.0, 0.0));
     expect(result.east).toEqual(Cartesian3.UNIT_X);
     expect(result.north).toEqual(Cartesian3.UNIT_Y);
     expect(result.vertical).toEqual(Cartesian3.UNIT_Z);
@@ -151,7 +150,6 @@ describe("SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrame", function ()
           mode: SceneGISAtmosphereReferenceFrame.PLANAR,
           scene,
           world,
-          baseHeight: 20.0,
         },
         result,
         scratch,
@@ -160,7 +158,7 @@ describe("SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrame", function ()
       scene._ellipsoid = ellipsoid;
     }
     expect(result.projection).toBe("perspective");
-    expect(result.altitude).toBe(100.0);
+    expect(result.altitude).toBe(120.0);
   });
 
   it("keeps the last good result when planar publication fails", function () {
@@ -181,7 +179,6 @@ describe("SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrame", function ()
         mode: SceneGISAtmosphereReferenceFrame.PLANAR,
         scene,
         world,
-        baseHeight: 5.0,
       },
       result,
       scratch,
@@ -194,8 +191,7 @@ describe("SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrame", function ()
         {
           mode: SceneGISAtmosphereReferenceFrame.PLANAR,
           scene,
-          world,
-          baseHeight: Number.NaN,
+          world: undefined,
         },
         result,
         scratch,
@@ -214,7 +210,7 @@ describe("SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrame", function ()
 
     expect(function () {
       SceneGISAtmosphereReferenceFrame.publish(
-        { mode: "automatic", scene, world, baseHeight: 0.0 },
+        { mode: "automatic", scene, world },
         result,
         scratch,
       );

@@ -8322,6 +8322,188 @@ ${hardCascadeLibrary}`;
     disconnectControlledCloudMode();
   });
 
+  it("renders Planar P1 clouds above 100 km without a camera-distance density fade", async function () {
+    await connectControlledCloudMode("planar");
+    try {
+      if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+        return;
+      }
+      scene.canvas.width = 9;
+      scene.canvas.height = 5;
+      installSolidCloudTestTextures();
+      for (const orthographic of [false, true]) {
+        const sample = renderControlledCloudSample(
+          "planar",
+          { x: 20000000.0, y: -17000000.0 },
+          orthographic,
+          !orthographic,
+          new Cartesian3(0.0, 0.0, -1.0),
+          1000000.0,
+          120000.0,
+        );
+        expect(sample.color[3]).toBeLessThan(0.99);
+        expect(sample.distances[3]).toBe(1.0);
+        expect(sample.distances[0] * 1000000.0).toBeGreaterThan(110000.0);
+        expect(sample.distances[0] * 1000000.0).toBeLessThan(125000.0);
+        expectFiniteHdrStorage(sample.color);
+      }
+    } finally {
+      disconnectControlledCloudMode();
+    }
+  });
+
+  it("reprojects Planar P1 cloud history with metric camera and wind motion and rejects foreground history", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      disconnectControlledCloudMode();
+      return;
+    }
+    const context = scene.context;
+    const width = 9;
+    const height = 5;
+    const textures = [];
+    scene.canvas.width = width;
+    scene.canvas.height = height;
+    scene.camera.switchToOrthographicFrustum();
+    scene.camera.frustum.width = 900.0;
+    scene.camera.frustum.aspectRatio = width / height;
+    scene.camera.frustum.near = 100.0;
+    scene.camera.frustum.far = 20000.0;
+    scene.renderForSpecs();
+    context.uniformState.updateCamera(scene.camera);
+    context.uniformState.updateFrustum(scene.camera.frustum);
+    const frustum = new Cartesian4(-450.0, 450.0, -250.0, 250.0);
+    function texture(get, datatype = PixelDatatype.HALF_FLOAT) {
+      const values = Array.from({ length: width * height }, (_, i) =>
+        get(i % width, Math.floor(i / width)),
+      ).flat();
+      const result = new Texture({
+        context,
+        width,
+        height,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: datatype,
+        sampler: Sampler.NEAREST,
+        flipY: false,
+        source: {
+          arrayBufferView:
+            datatype === PixelDatatype.FLOAT
+              ? new Float32Array(values)
+              : new Uint16Array(values.map(encodeFloat16)),
+        },
+      });
+      textures.push(result);
+      return result;
+    }
+    let depth = texture(() => [1, 0, 0, 0], PixelDatatype.FLOAT);
+    let lowColor = texture((x) => [0.2 + x * 0.02, 0.1, 0.05, 0.6]);
+    let lowDistance = texture(() => [0.005, 0.004, 1, 1]);
+    let historyColor = lowColor;
+    let historyDistance = lowDistance;
+    let historyValid = false;
+    let cameraDelta = new Cartesian3();
+    let windDelta = new Cartesian2();
+    const uniforms = {
+      ...effects._pipeline._uniformMap,
+      u_depthTexture: () => depth,
+      u_perspective: () => false,
+      u_frustum: () => frustum,
+      u_cameraPosition: () => new Cartesian3(1.0e12, -1.0e12, 12000),
+      u_cameraDirection: () => new Cartesian3(0, 0, -1),
+      u_cameraRight: () => Cartesian3.UNIT_X,
+      u_cameraUp: () => Cartesian3.UNIT_Y,
+      u_east: () => Cartesian3.UNIT_X,
+      u_north: () => Cartesian3.UNIT_Y,
+      u_cloudOffset: () => windDelta,
+      u_cloudCameraDelta: () => cameraDelta,
+      u_cloudLowColorTexture: () => lowColor,
+      u_cloudLowDistanceTexture: () => lowDistance,
+      u_cloudHistoryColorTexture: () => historyColor,
+      u_cloudHistoryDistanceTexture: () => historyDistance,
+      u_cloudHistoryValid: () => historyValid,
+      u_cloudHistoryWeight: () => (historyValid ? 0.82 : 0.0),
+      u_cloudHistoryReprojection: () => true,
+      u_cloudPreviousPerspective: () => false,
+      u_cloudPreviousFrustum: () => frustum,
+      u_cloudPreviousCameraPosition: () =>
+        new Cartesian3(1.0e12, -1.0e12, 12000),
+      u_cloudPreviousCameraDirection: () => new Cartesian3(0, 0, -1),
+      u_cloudPreviousCameraRight: () => Cartesian3.UNIT_X,
+      u_cloudPreviousCameraUp: () => Cartesian3.UNIT_Y,
+      u_cloudPreviousEast: () => Cartesian3.UNIT_X,
+      u_cloudPreviousNorth: () => Cartesian3.UNIT_Y,
+      u_cloudPreviousCloudOffset: () => Cartesian2.ZERO,
+    };
+    function draw() {
+      const outputColor = texture(() => [0, 0, 0, 0]);
+      const outputDistance = texture(() => [0, 0, 0, 0]);
+      const framebuffer = new Framebuffer({
+        context,
+        colorTextures: [outputColor, outputDistance],
+        destroyAttachments: false,
+      });
+      const program = createEnvironmentEffectsProgramForSpecs(
+        context,
+        cloudResolveFragmentSource,
+        false,
+      );
+      const command = context.createViewportQuadCommand(
+        program._fragmentShaderSource,
+        { framebuffer, uniformMap: uniforms },
+      );
+      const passState = new PassState(context);
+      passState.viewport = new BoundingRectangle(0, 0, width, height);
+      try {
+        command.execute(context, passState);
+        return {
+          color: readHalfTexturePixels(outputColor),
+          distance: readHalfTexturePixels(outputDistance),
+        };
+      } finally {
+        command.shaderProgram.destroy();
+        program.destroy();
+        framebuffer.destroy();
+      }
+    }
+    try {
+      const spatial = draw();
+      historyValid = true;
+      const samePosition = draw();
+      cameraDelta = new Cartesian3(100, 0, 0);
+      const cameraMoved = draw();
+      expect(cameraMoved.color[22][0]).toBeGreaterThan(
+        samePosition.color[22][0] + 0.003,
+      );
+      cameraDelta = new Cartesian3();
+      windDelta = new Cartesian2(100, 0);
+      expect(draw().color[22]).toEqual(cameraMoved.color[22]);
+      historyDistance = texture(() => [0.005, 0.004, 0.004, 1]);
+      expect(draw().color[22]).toEqual(spatial.color[22]);
+      historyDistance = lowDistance;
+      historyColor = texture(() => [8, 8, 8, 0.6]);
+      const clipped = draw().color[22];
+      expect(clipped[0]).toBeLessThanOrEqual(0.321);
+      expect(clipped[1]).toEqualEpsilon(0.1, 0.001);
+      expect(clipped[2]).toEqualEpsilon(0.05, 0.001);
+
+      // A receiver in front of the cloud rejects both spatial cloud samples
+      // and stale history. Native linear depth encodes a 1 km receiver.
+      depth = texture(
+        () => [(1000 - 100) / (20000 - 100), 0, 0, 0],
+        PixelDatatype.FLOAT,
+      );
+      lowDistance = texture(() => [0.005, 0.004, 0.001, 1]);
+      expect(draw().color[22]).toEqual([0, 0, 0, 1]);
+      depth = texture(() => [1, 0, 0, 0], PixelDatatype.FLOAT);
+      lowColor = texture(() => [0, 0, 0, 1]);
+      lowDistance = texture(() => [0, 0, 1, 0]);
+      expect(draw().color[22]).toEqualEpsilon([0, 0, 0, 1], 0.0005);
+    } finally {
+      textures.forEach((t) => t.destroy());
+      disconnectControlledCloudMode();
+    }
+  });
+
   it("invalidates cloud history for every warm discontinuity", async function () {
     connectPlanar();
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -8362,6 +8544,9 @@ ${hardCascadeLibrary}`;
     scene.renderForSpecs();
     scene.camera.moveRight(1.0);
     scene.renderForSpecs();
+    expect(effects._pipeline._cloudHistoryDiagnostics.mode).toBe(
+      "continuous-reprojected",
+    );
     effects.cloudRadianceScale = 2.0;
     scene.renderForSpecs();
     scene.camera.frustum.fov *= 0.95;
@@ -8386,13 +8571,13 @@ ${hardCascadeLibrary}`;
       false,
       false,
       false,
+      true,
       false,
-      false,
-      false,
+      true,
       false,
     ]);
     expect(weights).toEqual([
-      0.0, 0.82, 0.82, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.82, 0.82, 0.0, 0.0, 0.0, 0.82, 0.0, 0.82, 0.0,
     ]);
   });
 
@@ -13584,10 +13769,7 @@ ${hardCascadeLibrary}`;
     expect(cloudSource).toContain("distance * rayAngularFootprint");
     expect(cloudSource).toContain("1.0 - stepTransmittance");
     expect(cloudSource).toContain("sampler2D weatherTexture");
-    expect(cloudSource).toContain("SCENEGIS_CLOUD_VISIBLE_START = 60000.0");
-    expect(cloudSource).toContain("SCENEGIS_CLOUD_VISIBLE_END = 100000.0");
     expect(cloudSource).not.toContain("SCENEGIS_CLOUD_ENTRY_FADE");
-    expect(cloudSource).toContain("#ifndef SCENEGIS_GLOBE");
     expect(cloudSource).toContain("SCENEGIS_CLOUD_WEATHER_SCALE = 240000.0");
     expect(cloudSource).toContain("sceneGISCloudLayerDescriptor");
     expect(cloudSource).toContain("sceneGISCloudPresetSupport");
@@ -13614,9 +13796,7 @@ ${hardCascadeLibrary}`;
     expect(cloudFragmentSource).toContain(
       "sceneGISIsClearResolvedDepth(rawDepth)",
     );
-    expect(cloudFragmentSource).toContain(
-      "vec4(fullPixel, resolvedDepth, 1.0)",
-    );
+    expect(cloudFragmentSource).toContain("gl_FragCoord.xy, rawDepth");
     expect(cloudFragmentSource).toContain("ivec2 stbnPixel");
     expect(cloudFragmentSource).toMatch(/texelFetch\(\s*u_cloudStbnTexture/);
     expect(cloudFragmentSource).not.toContain("LOG_DEPTH");
@@ -13628,9 +13808,7 @@ ${hardCascadeLibrary}`;
     );
     expect(cloudResolveFragmentSource).toContain("float sceneDistance = 1.0");
     expect(cloudResolveFragmentSource).toContain("if (!isClearDepth)");
-    expect(cloudResolveFragmentSource).toContain(
-      "vec4(gl_FragCoord.xy, resolvedDepth, 1.0)",
-    );
+    expect(cloudResolveFragmentSource).toContain("gl_FragCoord.xy, rawDepth");
     expect(cloudResolveFragmentSource).toContain("distanceWeightSum");
     expect(cloudResolveFragmentSource).toContain(
       "spatialDistance.a = step(1.0e-6, distanceWeightSum)",
@@ -13639,9 +13817,7 @@ ${hardCascadeLibrary}`;
     expect(aerialFragmentSource).toContain(
       "sceneGISIsClearResolvedDepth(rawDepth)",
     );
-    expect(aerialFragmentSource).toContain(
-      "vec4(gl_FragCoord.xy, resolvedDepth, 1.0)",
-    );
+    expect(aerialFragmentSource).toContain("gl_FragCoord.xy, rawDepth");
     expect(aerialFragmentSource).toContain("fwidth(frontDelta)");
     const cloudSelectionSource = aerialFragmentSource.slice(
       aerialFragmentSource.indexOf("bool sceneGISSelectCloudSample"),
@@ -13707,7 +13883,7 @@ ${hardCascadeLibrary}`;
     function planarSegment(originZ, directionZ, maximumDistance, base, top) {
       if (Math.abs(directionZ) < 1.0e-7) {
         return originZ >= base && originZ <= top
-          ? [0.0, Math.min(maximumDistance, 100000.0)]
+          ? [0.0, Math.min(maximumDistance, 300000.0)]
           : undefined;
       }
       const first = (base - originZ) / directionZ;
@@ -13717,7 +13893,6 @@ ${hardCascadeLibrary}`;
         Math.max(first, second),
         maximumDistance,
         start + 300000.0,
-        start + 100000.0,
       );
       return end > start ? [start, end] : undefined;
     }
@@ -13725,7 +13900,7 @@ ${hardCascadeLibrary}`;
       500.0, 5000.0,
     ]);
     expect(planarSegment(3000.0, 0.0, 500000.0, 1500.0, 6000.0)).toEqual([
-      0.0, 100000.0,
+      0.0, 300000.0,
     ]);
     expect(planarSegment(120000.0, -0.2, 1000000.0, 1500.0, 6000.0)).toEqual([
       570000.0, 592500.0,
@@ -15134,6 +15309,316 @@ ${hardCascadeLibrary}`;
       effects._pipeline._resources.backgroundCommand.framebuffer = undefined;
       framebuffer.destroy();
       colorTexture.destroy();
+    }
+  });
+
+  it("qualifies the Planar final medium composition on immutable HDR inputs", async function () {
+    connectPlanar();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    await publishPlanarResources();
+
+    const width = 4;
+    const alpha = 0.375;
+    const makeHalfTexture = (pixels) =>
+      new Texture({
+        context: scene.context,
+        width,
+        height: 1,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: PixelDatatype.HALF_FLOAT,
+        source: {
+          width,
+          height: 1,
+          arrayBufferView: new Uint16Array(pixels.flat().map(encodeFloat16)),
+        },
+      });
+    const makeDepthTexture = (depth) => {
+      const depthTexture = new Texture({
+        context: scene.context,
+        width,
+        height: 1,
+        pixelFormat: PixelFormat.DEPTH_COMPONENT,
+        pixelDatatype: PixelDatatype.UNSIGNED_INT,
+      });
+      const colorTexture = new Texture({
+        context: scene.context,
+        width,
+        height: 1,
+      });
+      const framebuffer = new Framebuffer({
+        context: scene.context,
+        colorTextures: [colorTexture],
+        depthTexture,
+        destroyAttachments: false,
+      });
+      try {
+        new ClearCommand({
+          color: Color.BLACK,
+          depth,
+          framebuffer,
+        }).execute(scene.context);
+      } finally {
+        framebuffer.destroy();
+        colorTexture.destroy();
+      }
+      return depthTexture;
+    };
+
+    scene.logarithmicDepthBuffer = false;
+    scene.camera.switchToPerspectiveFrustum();
+    scene.camera.frustum.near = 1.0;
+    scene.camera.frustum.far = 100000.0;
+    scene.camera.setView({
+      destination: new Cartesian3(0.0, -10000.0, 30000.0),
+      orientation: {
+        direction: Cartesian3.normalize(
+          new Cartesian3(0.0, 1.0, -0.2),
+          new Cartesian3(),
+        ),
+        up: Cartesian3.normalize(
+          new Cartesian3(0.0, 0.2, 1.0),
+          new Cartesian3(),
+        ),
+      },
+    });
+    scene.renderForSpecs();
+    scene.context.uniformState.updateCamera(scene.camera);
+    scene.context.uniformState.updateFrustum(scene.camera.frustum);
+
+    const inputPixels = Array.from({ length: width }, () => [
+      0.2,
+      0.3,
+      0.4,
+      alpha,
+    ]);
+    const inputTexture = makeHalfTexture(inputPixels);
+    const cloudColorTexture = makeHalfTexture([
+      [0.0, 0.0, 0.0, 1.0],
+      [0.4, 0.2, 0.1, 0.5],
+      [0.1, 0.35, 0.15, 0.65],
+      [0.25, 0.15, 0.35, 0.4],
+    ]);
+    const encodeDistance = (distance) => distance / 1000000.0;
+    const cloudDistanceTexture = makeHalfTexture([
+      [0.0, 0.0, 0.0, 0.0],
+      [encodeDistance(6000.0), encodeDistance(4000.0), 1.0, 1.0],
+      [encodeDistance(95000.0), encodeDistance(90000.0), 1.0, 1.0],
+      [encodeDistance(98000.0), encodeDistance(90000.0), 1.0, 1.0],
+    ]);
+    const clearDepthTexture = makeDepthTexture(1.0);
+    const finiteDistance = 20000.0;
+    const near = scene.camera.frustum.near;
+    const far = scene.camera.frustum.far;
+    const finiteDepth =
+      (far * (finiteDistance - near)) / (finiteDistance * (far - near));
+    const finiteDepthTexture = makeDepthTexture(finiteDepth);
+    const resources = effects._pipeline._resources;
+    const states = {
+      baseline: [false, false, false],
+      aerial: [true, false, false],
+      fog: [false, true, false],
+      aerialFog: [true, true, false],
+      cloud: [false, false, true],
+      combined: [true, true, true],
+    };
+    const render = (depthTexture, state, colorTexture = inputTexture) =>
+      executeHalfFloatQuad(
+        [atmosphereSource, heightFogSource, cloudSource, aerialFragmentSource],
+        {
+          width,
+          uniformMap: {
+            u_colorTexture: () => colorTexture,
+            u_depthTexture: () => depthTexture,
+            u_perspective: () => true,
+            u_cameraDirection: () => scene.camera.directionWC,
+            u_cameraRight: () => scene.camera.rightWC,
+            u_cameraUp: () => scene.camera.upWC,
+            u_east: () => Cartesian3.UNIT_X,
+            u_north: () => Cartesian3.UNIT_Y,
+            u_vertical: () => Cartesian3.UNIT_Z,
+            u_sunDirection: () =>
+              Cartesian3.normalize(
+                new Cartesian3(0.4, 0.2, 0.89),
+                new Cartesian3(),
+              ),
+            u_altitude: () => 30000.0,
+            u_aerialRadianceScale: () => 1.0,
+            u_backgroundRadianceScale: () => 10.0,
+            u_showAerialPerspective: () => state[0],
+            u_showHeightFog: () => state[1],
+            u_showClouds: () => state[2],
+            u_heightFogDensity: () => 0.00003,
+            u_heightFogHeightFalloff: () => 0.0001,
+            u_heightFogBaseHeight: () => 0.0,
+            u_heightFogStartDistance: () => 0.0,
+            u_heightFogMaximumOpacity: () => 1.0,
+            u_heightFogInscatteringScale: () => 1.0,
+            u_heightFogDirectionalInscatteringScale: () => 0.6,
+            u_heightFogDirectionalInscatteringExponent: () => 4.0,
+            u_transmittanceTexture: () => resources.transmittanceTexture,
+            u_scatteringTexture: () => resources.scatteringTexture,
+            u_irradianceTexture: () => resources.irradianceTexture,
+            u_cloudColorTexture: () => cloudColorTexture,
+            u_cloudDistanceTexture: () => cloudDistanceTexture,
+          },
+        },
+      );
+
+    try {
+      const clear = {};
+      const finite = {};
+      for (const [name, state] of Object.entries(states)) {
+        clear[name] = render(clearDepthTexture, state);
+        finite[name] = render(finiteDepthTexture, state);
+        for (const pixel of [...clear[name], ...finite[name]]) {
+          expect(pixel.every(Number.isFinite)).toBe(true);
+          expect(pixel.slice(0, 3).every((value) => value >= 0.0)).toBe(true);
+          expectFiniteHdrStorage(pixel);
+          expect(pixel[3]).toBe(alpha);
+        }
+      }
+
+      const storedInput = inputPixels[0].map((value) =>
+        decodeFloat16(encodeFloat16(value)),
+      );
+      for (const pixel of [...clear.baseline, ...finite.baseline]) {
+        expect(pixel).toEqual(storedInput);
+      }
+      expect(clear.aerial[0]).toEqual(clear.baseline[0]);
+      expect(clear.fog[0]).toEqual(clear.baseline[0]);
+      expect(clear.combined[0]).toEqual(clear.baseline[0]);
+      expect(finite.aerial[0]).not.toEqual(finite.baseline[0]);
+      expect(finite.fog[0]).not.toEqual(finite.baseline[0]);
+      expect(rgbEnergy(finite.combined[0])).toBeGreaterThan(0.0);
+
+      // Separate passes establish atmosphere-before-fog order independently
+      // of the production combined branch, allowing one half-float rounding.
+      const aerialInput = makeHalfTexture(finite.aerial);
+      try {
+        const sequential = render(finiteDepthTexture, states.fog, aerialInput);
+        for (let x = 0; x < width; x++) {
+          expect(finite.aerialFog[x]).toEqualEpsilon(sequential[x], 0.002);
+        }
+      } finally {
+        aerialInput.destroy();
+      }
+
+      // Empty and occluded cloud samples preserve the complete opaque medium
+      // result, while a visible foreground cloud must change it.
+      for (const x of [0, 2, 3]) {
+        expect(finite.combined[x]).toEqual(finite.aerialFog[x]);
+      }
+      expect(finite.combined[1]).not.toEqual(finite.aerialFog[1]);
+
+      expect(clear.cloud[0]).toEqual(clear.baseline[0]);
+      expect(clear.cloud[1]).not.toEqual(clear.baseline[1]);
+      expect(clear.cloud[1]).not.toEqual(clear.cloud[2]);
+      expect(clear.cloud[2]).not.toEqual(clear.cloud[3]);
+      expect(finite.cloud[0]).toEqual(finite.baseline[0]);
+      expect(finite.cloud[1]).not.toEqual(finite.baseline[1]);
+      expect(finite.cloud[2]).toEqual(finite.baseline[2]);
+      expect(finite.cloud[3]).toEqual(finite.baseline[3]);
+      const storedClouds = readHalfTexturePixels(cloudColorTexture);
+      for (let x = 1; x < width; x++) {
+        for (let channel = 0; channel < 3; channel++) {
+          const expected =
+            storedInput[channel] * storedClouds[x][3] +
+            storedClouds[x][channel];
+          expect(clear.cloud[x][channel]).toEqualEpsilon(expected, 0.001);
+        }
+      }
+      for (const pixel of [...clear.cloud, ...finite.cloud]) {
+        expect(Math.max(...pixel.slice(0, 3))).toBeLessThan(2.0);
+      }
+
+      // The native Planar page uses a 0.1 m near plane over a continental
+      // extent. Expose the production distance before medium composition.
+      scene.camera.frustum.near = 0.1;
+      scene.camera.frustum.far = 30000000.0;
+      scene.context.uniformState.updateFrustum(scene.camera.frustum);
+      const farForwardDistance = 200000.0;
+      const logDepth =
+        Math.log2(farForwardDistance - scene.camera.frustum.near + 1.0) /
+        Math.log2(scene.camera.frustum.far - scene.camera.frustum.near + 1.0);
+      const farDepthTexture = makeDepthTexture(logDepth);
+      const distancePrefix = aerialFragmentSource.slice(
+        0,
+        aerialFragmentSource.indexOf("    float shadowLength = 0.0;"),
+      );
+      const producerPrefix = cloudFragmentSource
+        .slice(0, cloudFragmentSource.indexOf("    float cloudBase ="))
+        .replace(/layout \(location = [01]\) out vec4 out_FragData_[01];/g, "");
+      const resolvePrefix = cloudResolveFragmentSource
+        .slice(0, cloudResolveFragmentSource.indexOf("    vec4 colorSum ="))
+        .replace(/layout \(location = [01]\) out vec4 out_FragData_[01];/g, "");
+      const lossyPrefix = distancePrefix.replaceAll(
+        "gl_FragCoord.xy, rawDepth",
+        "vec4(gl_FragCoord.xy, czm_readDepth(u_depthTexture, v_textureCoordinates), 1.0)",
+      );
+      expect(lossyPrefix).not.toBe(distancePrefix);
+      const projectionX = scene.camera.frustum.projectionMatrix[0];
+      function maximumDistanceError(prefix, value, targetWidth) {
+        const dimensions = new Cartesian2(targetWidth, 1);
+        const distances = executeHalfFloatQuad(
+          [
+            atmosphereSource,
+            cloudSource,
+            `${prefix}
+    out_FragColor = vec4(${value} / 1000000.0, 0.0, 0.0, 1.0);
+}`,
+          ],
+          {
+            width: targetWidth,
+            defines: ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
+            uniformMap: {
+              u_colorTexture: () => inputTexture,
+              u_depthTexture: () => farDepthTexture,
+              u_cloudLowDistanceTexture: () => cloudDistanceTexture,
+              u_cloudBufferDimensions: () => dimensions,
+              u_perspective: () => true,
+              u_showClouds: () => true,
+              u_cameraDirection: () => scene.camera.directionWC,
+              u_cameraRight: () => scene.camera.rightWC,
+              u_cameraUp: () => scene.camera.upWC,
+            },
+          },
+        );
+        let maximumError = 0;
+        for (let x = 0; x < targetWidth; x++) {
+          const eyeX = ((2.0 * (x + 0.5)) / targetWidth - 1.0) / projectionX;
+          const expected = farForwardDistance * Math.hypot(eyeX, 1.0);
+          expect(distances[x].every(Number.isFinite)).toBe(true);
+          maximumError = Math.max(
+            maximumError,
+            Math.abs(distances[x][0] * 1000000.0 - expected),
+          );
+        }
+        return maximumError;
+      }
+      try {
+        for (const [name, prefix, value, targetWidth] of [
+          ["aerial", distancePrefix, "distanceToPoint", width],
+          ["producer", producerPrefix, "distanceToGeometry", width / 2],
+          ["resolve", resolvePrefix, "sceneDistanceMeters", width],
+        ]) {
+          expect(maximumDistanceError(prefix, value, targetWidth))
+            .withContext(`Planar log-depth ${name}`)
+            .toBeLessThan(260.0);
+        }
+        expect(maximumDistanceError(lossyPrefix, "distanceToPoint", width))
+          .withContext("old Planar inverse-projection precision loss")
+          .toBeGreaterThan(1000.0);
+      } finally {
+        farDepthTexture.destroy();
+      }
+    } finally {
+      inputTexture.destroy();
+      cloudColorTexture.destroy();
+      cloudDistanceTexture.destroy();
+      clearDepthTexture.destroy();
+      finiteDepthTexture.destroy();
     }
   });
 

@@ -111,14 +111,18 @@ void main()
         // Preserve log-depth precision for every Globe quality tier.
         vec4 eye = czm_screenToEyeCoordinates(cloudCoordinates, rawDepth);
         #else
-        vec4 eye = czm_windowToEyeCoordinates(vec4(fullPixel, resolvedDepth, 1.0));
+        // The native viewport is the low grid, so use its own pixel coordinate.
+        vec4 eye = czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth);
         #endif
         eye /= eye.w;
         distanceToGeometry = u_perspective
             ? length(eye.xyz)
             : max(-eye.z, 0.0);
     }
-    float cloudBase = u_baseHeight + u_cloudBaseHeight;
+    float cloudBase = u_cloudBaseHeight;
+    #ifdef SCENEGIS_GLOBE
+    cloudBase += u_baseHeight;
+    #endif
     ivec3 stbnSize = textureSize(u_cloudStbnTexture, 0);
     ivec2 stbnPixel = ivec2(mod(floor(fullPixel), vec2(stbnSize.xy)));
     int stbnSlice = clamp(

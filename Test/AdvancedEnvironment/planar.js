@@ -44,8 +44,44 @@ const state = {
   ground: () => applyCamera("ground"),
   aboveCloud: () => applyCamera("aboveCloud"),
   nearSpace: () => applyCamera("nearSpace"),
+  baseline: () => applyCompositionState("baseline"),
+  aerialOnly: () => applyCompositionState("aerial"),
+  fogOnly: () => applyCompositionState("fog"),
+  cloudOnly: () => applyCompositionState("cloud"),
+  combined: () => applyCompositionState("combined"),
   destroySample: () => destroySample(),
 };
+
+const compositionStates = Object.freeze({
+  baseline: [false, false, false, false],
+  aerial: [true, true, false, false],
+  fog: [false, false, true, false],
+  cloud: [false, false, false, true],
+  combined: [true, true, true, true],
+});
+
+const compositionLabels = Object.freeze({
+  baseline: "基础场景",
+  aerial: "大气与空气透视",
+  fog: "仅高度雾",
+  cloud: "仅体积云",
+  combined: "全部组合",
+  custom: "自定义组合",
+});
+
+function getCompositionState() {
+  const actual = [
+    effects.showAtmosphere,
+    effects.showAerialPerspective,
+    effects.showHeightFog,
+    effects.showClouds,
+  ];
+  return (
+    Object.keys(compositionStates).find((name) =>
+      compositionStates[name].every((value, index) => value === actual[index]),
+    ) ?? "custom"
+  );
+}
 
 const lighting = Object.freeze({
   day: [0.45, 0.2, 0.87],
@@ -92,6 +128,18 @@ function applyCamera(name) {
   viewer.scene.requestRender();
 }
 
+function applyCompositionState(name) {
+  const [atmosphere, aerial, fog, clouds] = compositionStates[name];
+  state.showAtmosphere = effects.showAtmosphere = atmosphere;
+  state.showAerialPerspective = effects.showAerialPerspective = aerial;
+  state.showHeightFog = effects.showHeightFog = fog;
+  state.showClouds = effects.showClouds = clouds;
+  gui
+    ?.controllersRecursive()
+    .forEach((controller) => controller.updateDisplay());
+  viewer.scene.requestRender();
+}
+
 function addLocalGeometry(scene) {
   return scene.primitives.add(
     new Cesium.Primitive({
@@ -122,7 +170,7 @@ function addLocalGeometry(scene) {
 }
 
 function createGui() {
-  gui = new GUI({ title: "Planar 高级环境 · 保留", width: 330 });
+  gui = new GUI({ title: "平面天空与体积云", width: 330 });
   const effectsFolder = gui.addFolder("效果");
   bindBoolean(effectsFolder, state, "enabled", effects, viewer.scene, "启用");
   bindBoolean(
@@ -158,22 +206,22 @@ function createGui() {
     "体积云",
   );
 
-  const cloudFolder = gui.addFolder("保留的云参数");
+  const cloudFolder = gui.addFolder("云与大气参数");
   cloudFolder
-    .add(state, "cloudQuality", { low: "low", medium: "medium", high: "high" })
-    .name("Cloud quality")
+    .add(state, "cloudQuality", { 低: "low", 中: "medium", 高: "high" })
+    .name("云质量")
     .onChange((value) => {
       effects.cloudQuality = value;
       viewer.scene.requestRender();
     });
   cloudFolder
     .add(state, "cloudPreset", {
-      cumulus: "cumulus",
-      stratus: "stratus",
-      cirrus: "cirrus",
-      mixed: "mixed",
+      积云: "cumulus",
+      层云: "stratus",
+      卷云: "cirrus",
+      混合: "mixed",
     })
-    .name("Cloud preset")
+    .name("云型")
     .onChange((value) => {
       effects.cloudPreset = value;
       viewer.scene.requestRender();
@@ -184,7 +232,7 @@ function createGui() {
     "cloudCoverage",
     effects,
     viewer.scene,
-    "Cloud coverage",
+    "云覆盖率",
     0.0,
     1.0,
     0.01,
@@ -195,7 +243,7 @@ function createGui() {
     "cloudDensity",
     effects,
     viewer.scene,
-    "Cloud density",
+    "云密度",
     0.0,
     0.01,
     0.0001,
@@ -206,7 +254,7 @@ function createGui() {
     "cloudTime",
     effects,
     viewer.scene,
-    "Cloud time",
+    "云时间",
     -3600.0,
     3600.0,
     1.0,
@@ -217,7 +265,7 @@ function createGui() {
     "cloudRadianceScale",
     effects,
     viewer.scene,
-    "Cloud radiance",
+    "云亮度",
     0.0,
     64.0,
     0.1,
@@ -228,7 +276,7 @@ function createGui() {
     "backgroundRadianceScale",
     effects,
     viewer.scene,
-    "Background radiance",
+    "天空亮度",
     0.0,
     64.0,
     0.1,
@@ -239,13 +287,20 @@ function createGui() {
     "aerialRadianceScale",
     effects,
     viewer.scene,
-    "Aerial radiance",
+    "空气透视亮度",
     0.0,
     64.0,
     0.1,
   );
 
-  const presets = gui.addFolder("直接观察");
+  const comparison = gui.addFolder("组合对比（保持当前视角）");
+  comparison.add(state, "baseline").name("基础场景");
+  comparison.add(state, "aerialOnly").name("大气与空气透视");
+  comparison.add(state, "fogOnly").name("仅高度雾");
+  comparison.add(state, "cloudOnly").name("仅体积云");
+  comparison.add(state, "combined").name("全部组合");
+  cloudFolder.close();
+  const presets = gui.addFolder("光照与视角");
   presets.add(state, "day").name("白昼");
   presets.add(state, "sunset").name("低日照");
   presets.add(state, "night").name("夜间");
@@ -259,7 +314,8 @@ function getState() {
   const scene = viewer?.isDestroyed() === false ? viewer.scene : undefined;
   return {
     page: "planar",
-    deferred: true,
+    phase: "P1",
+    compositionState: effects ? getCompositionState() : undefined,
     destroyed,
     ready: effects?.ready === true,
     hdr: scene?.highDynamicRange === true,
@@ -283,7 +339,7 @@ function destroySample() {
     viewer.removeController(environment);
     viewer = viewer.destroy();
   }
-  runtimeStatus.textContent = "destroyed · resources released";
+  runtimeStatus.textContent = "场景已释放";
 }
 
 try {
@@ -329,6 +385,7 @@ try {
   addLocalGeometry(viewer.scene);
   createGui();
   applyCamera("ground");
+  applyCompositionState("combined");
   removeRenderError = viewer.scene.renderError.addEventListener(
     (scene, error) => {
       void scene;
@@ -342,9 +399,15 @@ try {
     },
   );
   removePostRender = viewer.scene.postRender.addEventListener(() => {
-    runtimeStatus.textContent = `${controllerStatus(effects, viewer.scene)} · retained Planar · ${effects.cloudQuality}/${effects.cloudPreset}`;
+    runtimeStatus.textContent = `${controllerStatus(effects, viewer.scene)} · ${compositionLabels[getCompositionState()]} · ${effects.cloudQuality}/${effects.cloudPreset}`;
   });
-  window.sceneGISPlanarSample = { viewer, environment, effects, getState };
+  window.sceneGISPlanarSample = {
+    viewer,
+    environment,
+    effects,
+    getState,
+    destroy: destroySample,
+  };
 } catch (error) {
   errorTracker.record(error);
   runtimeStatus.textContent = `初始化失败 · ${error?.message ?? error}`;

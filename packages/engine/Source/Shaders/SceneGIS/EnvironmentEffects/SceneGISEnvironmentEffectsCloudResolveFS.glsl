@@ -29,6 +29,9 @@ uniform bool u_cloudHistoryReprojection;
 uniform bool u_cloudPreviousPerspective;
 uniform vec4 u_cloudPreviousFrustum;
 uniform vec3 u_cloudPreviousCameraPosition;
+#ifndef SCENEGIS_GLOBE
+uniform vec3 u_cloudCameraDelta;
+#endif
 uniform vec3 u_cloudPreviousCameraDirection;
 uniform vec3 u_cloudPreviousCameraRight;
 uniform vec3 u_cloudPreviousCameraUp;
@@ -141,14 +144,21 @@ bool sceneGISCloudHistoryCoordinates(
         v_textureCoordinates,
         u_perspective,
         u_frustum,
+        #ifdef SCENEGIS_GLOBE
         u_cameraPosition,
+        #else
+        vec3(0.0),
+        #endif
         u_cameraDirection,
         u_cameraRight,
         u_cameraUp,
         currentRayOrigin,
         currentRayDirection);
-    vec3 currentRayOriginRelative =
-        currentRayOrigin - u_cloudPreviousCameraPosition;
+    #ifdef SCENEGIS_GLOBE
+    vec3 currentRayOriginRelative = currentRayOrigin - u_cloudPreviousCameraPosition;
+    #else
+    vec3 currentRayOriginRelative = currentRayOrigin + u_cloudCameraDelta;
+    #endif
     currentMeanAnchor = currentRayOriginRelative + currentRayDirection *
         (cloudDistances.x * SCENEGIS_CLOUD_DISTANCE_ENCODING);
     currentFrontAnchor = currentRayOriginRelative + currentRayDirection *
@@ -159,6 +169,12 @@ bool sceneGISCloudHistoryCoordinates(
         return true;
     }
     if (!cloudValid && clearDepth) {
+        #ifndef SCENEGIS_GLOBE
+        if (!u_perspective) {
+            return sceneGISCloudProjectPrevious(
+                currentRayOriginRelative, historyCoordinates);
+        }
+        #endif
         return sceneGISCloudProjectPreviousDirection(
             currentRayOrigin,
             currentRayDirection,
@@ -211,10 +227,10 @@ float sceneGISCloudHalfFloatPositionToleranceMeters(
     return max(binary16Tolerance, 16.0);
 }
 
-#ifdef SCENEGIS_GLOBE
 float sceneGISCloudHistoryPositionToleranceMeters(float previous, float current)
 {
     float tolerance = sceneGISCloudHalfFloatPositionToleranceMeters(previous, current);
+    #ifdef SCENEGIS_GLOBE
     if (u_cloudTracePhased) {
         vec2 span = u_cloudPreviousFrustum.yw - u_cloudPreviousFrustum.xz;
         float radius = 0.5 * length(span /
@@ -223,6 +239,7 @@ float sceneGISCloudHistoryPositionToleranceMeters(float previous, float current)
             ? radius * max(previous, current) * SCENEGIS_CLOUD_DISTANCE_ENCODING
             : radius;
     }
+    #endif
     return tolerance;
 }
 
@@ -275,7 +292,6 @@ vec4 sceneGISCloudVarianceClip(
         center.rgb + delta.rgb * fraction,
         clamp(historyColor.a, lower.a, upper.a));
 }
-#endif
 
 void main()
 {
@@ -306,7 +322,7 @@ void main()
         vec4 eye = czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth);
         #else
         vec4 eye = czm_windowToEyeCoordinates(
-            vec4(gl_FragCoord.xy, resolvedDepth, 1.0));
+            gl_FragCoord.xy, rawDepth);
         #endif
         eye /= eye.w;
         sceneDistanceMeters = u_perspective
@@ -326,17 +342,16 @@ void main()
     vec4 spatialColorMinimum = vec4(65504.0);
     vec4 spatialColorMaximum = vec4(-65504.0);
     bool spatialColorRangeValid = false;
-    #ifdef SCENEGIS_GLOBE
     vec4 spatialColorMoment1 = vec4(0.0);
     vec4 spatialColorMoment2 = vec4(0.0);
     float spatialColorSampleCount = 0.0;
     vec2 cloudSupportMinimum = vec2(SCENEGIS_CLOUD_DISTANCE_ENCODING);
     vec2 cloudSupportMaximum = vec2(0.0);
+    #ifdef SCENEGIS_GLOBE
     vec2 cloudAnchorSum = vec2(0.0);
     float cloudAnchorCount = 0.0;
     #endif
     ivec2 dimensions = textureSize(u_cloudLowDistanceTexture, 0);
-    #ifdef SCENEGIS_GLOBE
     vec3 targetOrigin;
     vec3 targetDirection;
     sceneGISCloudResolveRay(v_textureCoordinates, u_perspective, u_frustum,
@@ -346,7 +361,6 @@ void main()
     // Evaluate receiver derivatives uniformly, before any neighbor rejection.
     vec3 receiverNormal = cross(dFdx(targetScene), dFdy(targetScene));
     float receiverNormalMagnitude = length(receiverNormal);
-    #endif
     for (int y = -1; y <= 1; ++y) {
         for (int x = -1; x <= 1; ++x) {
             ivec2 texel = clamp(center + ivec2(x, y), ivec2(0), dimensions - 1);
@@ -449,6 +463,51 @@ void main()
                 spatialColorMoment2 += colorSample * colorSample;
                 spatialColorSampleCount += 1.0;
             }
+            #else
+            // Qualify the source receiver before it contributes color or history bounds.
+            vec2 sourceUv = (vec2(texel) + 0.5) / lowDimensions;
+            float sourceRawDepth = texture(u_depthTexture, sourceUv).r;
+            if (sceneGISIsClearResolvedDepth(sourceRawDepth) != isClearDepth) {
+                continue;
+            }
+            vec3 sourceOrigin;
+            vec3 sourceDirection;
+            sceneGISCloudResolveRay(sourceUv, u_perspective, u_frustum,
+                vec3(0.0), u_cameraDirection, u_cameraRight, u_cameraUp,
+                sourceOrigin, sourceDirection);
+            if (!isClearDepth) {
+                vec3 sourceScene = sourceOrigin + sourceDirection *
+                    (distanceSample.z * SCENEGIS_CLOUD_DISTANCE_ENCODING);
+                if (!(receiverNormalMagnitude > 0.0) ||
+                    abs(dot(receiverNormal, sourceScene - targetScene)) >
+                        receiverNormalMagnitude *
+                        sceneGISCloudHalfFloatPositionToleranceMeters(
+                            distanceSample.z, sceneDistance)) {
+                    continue;
+                }
+            }
+            if (distanceSample.a > 0.5) {
+                vec2 targetDistances = vec2(
+                    dot(sourceOrigin - targetOrigin + sourceDirection *
+                        (distanceSample.x * SCENEGIS_CLOUD_DISTANCE_ENCODING), targetDirection),
+                    dot(sourceOrigin - targetOrigin + sourceDirection *
+                        (distanceSample.y * SCENEGIS_CLOUD_DISTANCE_ENCODING), targetDirection));
+                if (!isClearDepth && any(greaterThan(targetDistances,
+                    vec2(sceneDistanceMeters + sceneGISCloudHalfFloatPositionToleranceMeters(
+                        distanceSample.x, sceneDistance))))) {
+                    continue;
+                }
+                distanceSample.xy = max(targetDistances, vec2(0.0)) /
+                    SCENEGIS_CLOUD_DISTANCE_ENCODING;
+                cloudSupportMinimum = min(cloudSupportMinimum, targetDistances);
+                cloudSupportMaximum = max(cloudSupportMaximum, targetDistances);
+            }
+            spatialColorMinimum = min(spatialColorMinimum, colorSample);
+            spatialColorMaximum = max(spatialColorMaximum, colorSample);
+            spatialColorRangeValid = true;
+            spatialColorMoment1 += colorSample;
+            spatialColorMoment2 += colorSample * colorSample;
+            spatialColorSampleCount += 1.0;
             #endif
             vec2 delta = vec2(x, y) - (fraction - vec2(0.5));
             float spatialWeight = sceneGISCloudDeterministicExp2Negative(
@@ -508,6 +567,10 @@ void main()
     }
     #else
     spatialDistance.a = step(1.0e-6, distanceWeightSum);
+    spatialDistance.z = sceneDistance;
+    if (weightSum <= 0.0) {
+        spatialColor = vec4(0.0, 0.0, 0.0, 1.0);
+    }
     #endif
     #ifdef SCENEGIS_GLOBE
     if (u_cloudTracePhased && weightSum <= 0.0) {
@@ -552,13 +615,17 @@ void main()
         historyCoordinates = (min(floor(historyCoordinates * historySize),
             historySize - 1.0) + 0.5) / historySize;
     }
+    #else
+    bool currentValid = spatialDistance.a > 0.5;
+    reprojectedPositionValid = sceneGISCloudHistoryCoordinates(
+        currentValid, isClearDepth, spatialDistance.xyz, historyCoordinates,
+        currentMeanAnchor, currentFrontAnchor, currentSceneAnchor);
     #endif
     historyWeight *= reprojectedPositionValid ? 1.0 : 0.0;
     vec4 historyColor = texture(
         u_cloudHistoryColorTexture, historyCoordinates);
     vec4 historyDistance = texture(
         u_cloudHistoryDistanceTexture, historyCoordinates);
-    #ifdef SCENEGIS_GLOBE
     vec4 clippedHistoryColor = spatialColorRangeValid
         ? sceneGISCloudVarianceClip(
             historyColor,
@@ -568,12 +635,16 @@ void main()
             spatialColorMinimum,
             spatialColorMaximum)
         : spatialColor;
+    #ifdef SCENEGIS_GLOBE
     bool previousValid;
     float previousShadowLength;
     sceneGISDecodeCloudShadowLength(
         historyDistance.a,
         previousValid,
         previousShadowLength);
+    #else
+    bool previousValid = historyDistance.a > 0.5;
+    #endif
     vec3 previousRayOrigin;
     vec3 previousRayDirection;
     sceneGISCloudResolveRay(
@@ -592,10 +663,6 @@ void main()
         (historyDistance.y * SCENEGIS_CLOUD_DISTANCE_ENCODING);
     vec3 previousSceneAnchor = previousRayOrigin + previousRayDirection *
         (historyDistance.z * SCENEGIS_CLOUD_DISTANCE_ENCODING);
-    #else
-    bool currentValid = spatialDistance.a > 0.5;
-    bool previousValid = historyDistance.a > 0.5;
-    #endif
     #ifdef SCENEGIS_GLOBE
     bool sceneDistanceCompatible = isClearDepth
         ? historyDistance.z == 1.0
@@ -634,11 +701,21 @@ void main()
             (!previousValid || cloudDistanceCompatible);
     }
     #else
-    vec4 clippedHistoryColor = historyColor;
+    bool sceneDistanceCompatible = isClearDepth
+        ? historyDistance.z == 1.0
+        : distance(previousSceneAnchor, currentSceneAnchor) <=
+            sceneGISCloudHistoryPositionToleranceMeters(
+                historyDistance.z, spatialDistance.z);
+    vec2 precisionRadius = vec2(
+        sceneGISCloudHistoryPositionToleranceMeters(historyDistance.x, spatialDistance.x),
+        sceneGISCloudHistoryPositionToleranceMeters(historyDistance.y, spatialDistance.y));
+    vec2 projectedHistory = spatialDistance.xy * SCENEGIS_CLOUD_DISTANCE_ENCODING + vec2(
+        dot(previousMeanAnchor - currentMeanAnchor, targetDirection),
+        dot(previousFrontAnchor - currentFrontAnchor, targetDirection));
     bool distanceCompatible =
-        abs(historyDistance.x - spatialDistance.x) <= 8.0e-6 &&
-        abs(historyDistance.y - spatialDistance.y) <= 8.0e-6 &&
-        abs(historyDistance.z - spatialDistance.z) <= 2.0 / 65535.0;
+        sceneDistanceCompatible &&
+        all(greaterThanEqual(projectedHistory, cloudSupportMinimum - precisionRadius)) &&
+        all(lessThanEqual(projectedHistory, cloudSupportMaximum + precisionRadius));
     #endif
     bool transmittanceCompatible =
         abs(clippedHistoryColor.a - spatialColor.a) <= 0.08;

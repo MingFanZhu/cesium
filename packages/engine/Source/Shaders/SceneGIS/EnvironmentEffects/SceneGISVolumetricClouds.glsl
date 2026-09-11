@@ -1,6 +1,4 @@
 const float SCENEGIS_CLOUD_MAX_DISTANCE = 300000.0;
-const float SCENEGIS_CLOUD_VISIBLE_START = 60000.0;
-const float SCENEGIS_CLOUD_VISIBLE_END = 100000.0;
 const float SCENEGIS_CLOUD_DISTANCE_ENCODING = 1000000.0;
 const float SCENEGIS_CLOUD_SHAPE_SCALE = 12000.0;
 const float SCENEGIS_CLOUD_DETAIL_SCALE = 2000.0;
@@ -159,9 +157,6 @@ bool sceneGISCloudSegment(
     }
     #endif
     segmentEnd = min(segmentEnd, segmentStart + SCENEGIS_CLOUD_MAX_DISTANCE);
-    #ifndef SCENEGIS_GLOBE
-    segmentEnd = min(segmentEnd, segmentStart + SCENEGIS_CLOUD_VISIBLE_END);
-    #endif
     return segmentEnd > segmentStart;
 }
 
@@ -1177,12 +1172,6 @@ float sceneGISCloudSunOpticalDepth(
         vec3 globeOffset = vec3(0.0);
         #endif
         float visibility = 1.0;
-        #ifndef SCENEGIS_GLOBE
-        visibility = 1.0 - smoothstep(
-            SCENEGIS_CLOUD_VISIBLE_START,
-            SCENEGIS_CLOUD_VISIBLE_END,
-            distance);
-        #endif
         float unusedHeightGradient;
         opticalDepth += sceneGISCloudDensitySample(
             shapeTexture,
@@ -1457,12 +1446,6 @@ void sceneGISMarchClouds(
             vec3 globeOffset = vec3(0.0);
             #endif
             float visibility = 1.0;
-            #ifndef SCENEGIS_GLOBE
-            visibility = 1.0 - smoothstep(
-                SCENEGIS_CLOUD_VISIBLE_START,
-                SCENEGIS_CLOUD_VISIBLE_END,
-                distance);
-            #endif
             #ifdef SCENEGIS_GLOBE
             // Texture filtering follows the projected pixel footprint only.
             // Coupling it to the integration step selected low mips whenever a
@@ -1471,9 +1454,9 @@ void sceneGISMarchClouds(
                 1.0,
                 rayStartTexelsPerPixel + distance * 1.0e-5));
             #else
+            // Sampling budget and visible texture frequency are independent.
             float footprint = max(
-                fineStepLength,
-                max(rayOriginFootprint, distance * rayAngularFootprint));
+                rayOriginFootprint, distance * rayAngularFootprint);
             #endif
             float activeLayerHeightGradient;
             float normalizedDensity = sceneGISCloudDensitySample(

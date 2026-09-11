@@ -147,7 +147,7 @@ function publishGlobe(scene, candidate) {
   candidate.mode = globeMode;
 }
 
-function publishPlanar(scene, world, baseHeight, candidate) {
+function publishPlanar(scene, world, candidate) {
   //>>includeStart('debug', pragmas.debug);
   if (
     !defined(world) ||
@@ -160,16 +160,13 @@ function publishPlanar(scene, world, baseHeight, candidate) {
       "planar mode requires the Scene's live SceneGISPlanarWorld.",
     );
   }
-  if (!Number.isFinite(baseHeight)) {
-    throw new DeveloperError("options.baseHeight must be finite.");
-  }
   //>>includeEnd('debug');
 
   const position = candidate.cameraPosition;
   Cartesian3.fromElements(
     position.x,
     position.y,
-    baseHeight,
+    0.0,
     candidate.surfacePosition,
   );
   Cartesian3.clone(Cartesian3.UNIT_X, candidate.east);
@@ -177,8 +174,8 @@ function publishPlanar(scene, world, baseHeight, candidate) {
   Cartesian3.clone(Cartesian3.UNIT_Z, candidate.vertical);
   Cartesian3.clone(Cartesian3.ZERO, candidate.ellipsoidCenter);
   Cartesian3.clone(Cartesian3.ZERO, candidate.ellipsoidRadii);
-  candidate.altitude = position.z - baseHeight;
-  candidate.baseHeight = baseHeight;
+  candidate.altitude = position.z;
+  candidate.baseHeight = 0.0;
   candidate.mode = planarMode;
 }
 
@@ -269,7 +266,7 @@ function publish(options, result, scratch) {
   if (options.mode === globeMode) {
     publishGlobe(scene, scratch);
   } else {
-    publishPlanar(scene, options.world, options.baseHeight, scratch);
+    publishPlanar(scene, options.world, scratch);
   }
   validateCandidate(scratch);
   commit(scratch, result);

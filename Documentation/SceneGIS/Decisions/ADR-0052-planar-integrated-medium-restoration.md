@@ -1,8 +1,20 @@
 # ADR-0052：Planar Integrated-medium Restoration and Requalification
 
+2026-09-11 implementation amendment: the owner authorizes Planar development
+under the confirmed metric/custom-CRS, fixed-Z and direct-Z contract. P1 now
+also corrects the retained far-cloud visibility, footprint filtering and
+same-UV temporal limitations before its first acceptance/checkpoint. This
+supersedes only their freezes below; the independent Planar LUT/cloud assets,
+public calibration, quality sample budgets and resource counts stay unchanged.
+The existing camera/wind reprojection and HDR variance clipping are adapted to
+Planar with CPU-computed camera deltas and strict receiver/cut handling.
+The 300 km medium budget starts at slab entry; camera distance is not a density
+fade. Surface cloud shadows/rays, HDR/celestial work remain later phases.
+Current assignment and validation are in the existing P1 phase plan.
+
 ## 状态
 
-- Status：`accepted design; execution deferred before acceptance`
+- Status：`accepted design; execution resumed after A17`
 - Date：`2026-09-02`
 - Decision owners：Architecture Agent
 - Related extension：
@@ -39,17 +51,17 @@ authority，而不是按旧截图猜测根因或直接调参。
 
 - fixed-Z atmosphere background与resolved-depth aerial perspective；
 - fixed-Z exponential height fog；
-- Planar volumetric cloud MRT、spatial resolve、existing same-UV history；
+- Planar volumetric cloud MRT、spatial resolve、camera/wind reprojection history（September 11 amendment）；
 - clear sky、finite ground/geometry与cloud前后层序上的single linear-HDR composition。
 
-P1不实现Planar cloud shadow、crepuscular rays、Globe-style world reprojection、dynamic
+P1不实现Planar cloud shadow、crepuscular rays、dynamic
 performance policy、Bloom/Lens、readable night skylight、native Moon或其他A5–A10迁移。
 这些能力只能在P1关闭后按新的Planar phase逐项source-discover。
 
 ### Geometry and optical authority
 
 Planar继续使用registered `SceneGISPlanarWorld`的`+X East/+Y North/+Z Up`、explicit
-base Z、flat atmosphere slab与cloud slabs。不得调用Globe ellipsoid shell、radial height、
+zero reference-ground Z、direct world-Z height、flat atmosphere slab与cloud slabs。不得调用Globe ellipsoid shell、radial height、
 ECEF Sun/receiver、Globe reference assets、Beer shadow atlas、surface-lighting seam或
 `SCENEGIS_GLOBE`专用校准来制造视觉相似。
 
@@ -124,3 +136,17 @@ Globe product path、upstream hunk或Planar A5+能力，Execution必须停止并
 Globe-first，先实现Moon directional light、作用于terrain/3D Tiles/models的方向光阴影与
 更高质量月面。P1设计本身仍有效，但执行延期；未验收candidate保存在committed delivery
 之外，不成为A11-G基线，也不改变冻结A10-G product checkpoint。
+
+## 恢复执行（2026-09-11）
+
+项目负责人验收 A17-G `3cdd2958d1` 后明确转回 Planar 天空大气与体积云。
+P1 在当前源码上重新激活；本 ADR 的 fixed-Z、独立 LUT、先验证合成再修复与
+资源边界保持有效。Globe 冻结范围更新为 A1–A17。旧 stash 只作为未验收候选，
+不能用旧测试结论替代当前源码验证。页面组合比较与视觉质量分别记录；后续
+Planar 云影、光束、时序与性能及天体效果仍须经过各自的阶段设计。
+
+当前原生平面页的极大 far/near 比暴露了三处旧深度路径：GPU 复现中，200 km
+前向接收点的径向距离误差约为 9.7–10.6 km。P1 因此将三处 Planar consumer
+改用 Cesium 原生 raw-depth 重载；低分辨率 producer 使用自身 viewport 的
+`gl_FragCoord.xy`，由原生接口归一化，避免把 full-resolution pixel 交给 low-resolution viewport。
+这只修正深度/坐标还原，不迁移球面光学、云材质或时序政策，不增加资源或 SGP。

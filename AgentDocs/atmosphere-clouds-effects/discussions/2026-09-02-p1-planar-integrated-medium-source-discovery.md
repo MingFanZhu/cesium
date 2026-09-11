@@ -2,8 +2,8 @@
 
 ## Status
 
-- State: `resolved; P1 activation superseded and deferred`
-- Date: `2026-09-02`
+- State: `resolved; P1 resumed after A17`
+- Date: `2026-09-02`; updated: `2026-09-11`
 - Frozen predecessor: A10-G
   `6afba87af181f3cdb7a20aff09b81af11eb302f4`
 - Decision:
@@ -75,3 +75,21 @@ must remain Globe-first and deliver Moon lighting, directional Moon shadows and
 an improved lunar surface. P1 is therefore deferred rather than rejected. Its
 unaccepted implementation candidate is preserved outside committed delivery;
 none of its product or evidence changes become the A11-G baseline.
+
+## Current-source resumption — 2026-09-11
+
+The owner explicitly returns to Planar adaptation after A17 `3cdd2958d1`.
+Current source retains the same Planar optical/resource authority; Globe
+depth precision, material, model lighting and temporal evolution did not
+automatically migrate it. The preserved stash is reviewed selectively, not
+applied wholesale. The default page reaches ready/HDR without errors but shows
+a coarse horizontal cloud deck. The resumed P1 plan and review track current
+composition evidence separately from that unresolved material/visual quality.
+
+The current-source fixture subsequently exposes a real far/near precision
+defect: 200 km forward depth has roughly 10 km radial error. Three Planar
+native raw-depth corrections qualify; the low-resolution producer must use
+its own viewport pixel, not full-resolution pixels. The remaining coarse
+cloud appearance and cloud disappearance at the 120 km preset trace to the
+retained Planar material and explicit 60–100 km visibility fade. These are
+separate from the corrected depth path and remain disclosed quality limits.

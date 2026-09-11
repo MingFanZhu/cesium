@@ -122,9 +122,9 @@ void main()
         ? normalize(u_cameraDirection + eyeOffset)
         : normalize(u_cameraDirection);
     #else
-    float resolvedDepth = czm_readDepth(u_depthTexture, v_textureCoordinates);
+    // Preserve native log-depth precision across large Planar extents.
     vec4 eye = czm_windowToEyeCoordinates(
-        vec4(gl_FragCoord.xy, resolvedDepth, 1.0));
+        gl_FragCoord.xy, rawDepth);
     eye /= eye.w;
     vec3 eyeOffset = u_cameraRight * eye.x + u_cameraUp * eye.y;
     vec3 worldOriginOffset = u_perspective ? vec3(0.0) : eyeOffset;
