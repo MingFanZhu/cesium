@@ -3,20 +3,20 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P8 completed — Planar cloud material`
+- Current phase: `P9 completed — Planar cloud reconstruction`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P8 cloud material](reviews/2026-09-12-p8-planar-cloud-material.md)
+  [P9 cloud reconstruction](reviews/2026-09-12-p9-planar-cloud-reconstruction.md)
 - Current phase plan:
-  [P8 cloud material](plans/2026-09-12-phase-p8-planar-cloud-material.md)
+  [P9 cloud reconstruction](plans/2026-09-12-phase-p9-planar-cloud-reconstruction.md)
 - Latest completed phase plan:
-  [P8 cloud material](plans/2026-09-12-phase-p8-planar-cloud-material.md)
+  [P9 cloud reconstruction](plans/2026-09-12-phase-p9-planar-cloud-reconstruction.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P7 solar filtering](plans/2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
+  [P8 cloud material](plans/2026-09-12-phase-p8-planar-cloud-material.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -65,13 +65,20 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- P9 is accepted from P8 `f19b7a271c`: the owner's grain report supersedes P8's
+  retained quality limit. Planar shares Globe medium phases and temporal
+  reconstruction; Beer shadow sampling stays independent. Eight regression
+  cases, delegated visual review and scoped checks pass. Cloud plus resolve
+  median cost changes from 6.733 to 7.463 ms, without new GPU resources.
+  This commit is the independent local checkpoint. No owner gate is pending.
+
 - P8 is accepted from P7 `3a93585efd`: shared authored material/assets, metric
   fixed-Z phases, matching cloud shadows and physical cloud radiometry. The
   experimental density/brightness defaults both become 1. Seventeen checks,
   visual review and full build/types pass; medium cloud pass median is 2.884 ms,
   with 7.02 MiB cloud textures. This record's commit is the local checkpoint.
   Ground bounce, rays and directional Moon remain successors. Finite-resolution
-  grain remains a quality limit; the old macro-coarseness is materially improved.
+  grain was retained at P8 and is reopened by P9; macro material coarseness improved.
   No owner visual gate is pending.
 
 - P7 is accepted after seven GPU cases, visual correction of low-Sun stripes,

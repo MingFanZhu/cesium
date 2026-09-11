@@ -398,7 +398,7 @@ function getState() {
   const scene = viewer?.isDestroyed() === false ? viewer.scene : undefined;
   return {
     page: "planar",
-    phase: "P8",
+    phase: "P9",
     compositionState: effects ? getCompositionState() : undefined,
     destroyed,
     ready: effects?.ready === true,

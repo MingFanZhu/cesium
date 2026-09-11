@@ -1,5 +1,32 @@
 # ADR-0048：Globe Temporal Stabilization and Performance Policy
 
+## P9 amendment — shared Planar medium reconstruction
+
+P9 supersedes the historical Planar stationary-spatial-only restriction after
+the owner reports unacceptable blocky grain in P8. Both worlds select STBN
+from the rendered frame number, independently of caller-owned cloudTime.
+Medium shares four full-resolution pixel phases, geometric tent reconstruction,
+qualified neighborhood variance clipping and stationary history weight 0.9.
+The existing two history targets alternate on every valid temporal publication;
+cuts/configuration changes still publish current spatial data first. There are
+no additional frames requested, timers, passes, allocations or public controls.
+
+Planar retains CPU double-precision camera subtraction, absolute Z and metric
+wind reprojection. Producer ray, depth and STBN use the same selected full
+pixel; raw logarithmic depth remains intact. Planar validity 0/1 is the
+zero-shadow-length subset of the existing encoding. Its low/high spatial
+reconstruction uses correctly centered tent weights and does not privilege
+occupied samples over transparent ones. Globe low/high behavior is unchanged.
+Stationary cloud distances may differ between stochastic samples; current
+volume support, foreground depth and variance bounds qualify history as in
+accepted Globe medium. No change to P6/P7/P8 density or integration equations. A separate private
+shadow-slice binding preserves the accepted Planar cloudTime-based Beer atlas
+phase; this change advances view sampling only.
+
+See the [P9 plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-12-phase-p9-planar-cloud-reconstruction.md)
+and [ADR-0052](ADR-0052-planar-integrated-medium-restoration.md). No upstream
+file or SGP change is required.
+
 A17's [ADR-0043 amendment](ADR-0043-atmosphere-log-depth-and-radiance-mapping.md#a17-g-amendment--preserve-raw-depth-precision-through-globe-clouds)
 extends precise raw-depth reconstruction to high/low Globe and final aerial
 composition. This supersedes only the earlier nonphased depth-expression

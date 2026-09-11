@@ -1,5 +1,11 @@
 # ADR-0052：Planar Integrated-medium Restoration and Requalification
 
+P9 supersedes only this decision's retained stationary spatial reconstruction
+and cloudTime-based STBN policy. See the [ADR-0048 P9 amendment](ADR-0048-globe-temporal-stabilization-performance-policy.md#p9-amendment--shared-planar-medium-reconstruction)
+for shared medium pixel phases and existing-history temporal accumulation.
+Absolute-Z geometry, metric CRS independence, origin-relative reprojection,
+continuity cuts and caller-owned rendering remain unchanged.
+
 2026-09-11 implementation amendment: the owner authorizes Planar development
 under the confirmed metric/custom-CRS, fixed-Z and direct-Z contract. P1 now
 also corrects the retained far-cloud visibility, footprint filtering and

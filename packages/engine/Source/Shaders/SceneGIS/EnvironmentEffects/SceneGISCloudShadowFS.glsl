@@ -43,7 +43,7 @@ uniform sampler3D u_cloudDetailTexture;
 uniform sampler2D u_cloudWeatherTexture;
 uniform SCENEGIS_CLOUD_TURBULENCE_SAMPLER u_cloudTurbulenceTexture;
 uniform sampler3D u_cloudStbnTexture;
-uniform float u_cloudStbnSlice;
+uniform float u_cloudShadowStbnSlice;
 #ifndef SCENEGIS_GLOBE
 uniform vec3 u_sceneGISShadowOrigin;
 uniform vec2 u_planarShadowMaterialOrigin;
@@ -242,7 +242,7 @@ void main()
     ivec3 stbnSize = textureSize(u_cloudStbnTexture, 0);
     ivec2 stbnPixel = ivec2(mod(gridCoordinate, vec2(stbnSize.xy)));
     int stbnSlice = clamp(
-        int(floor(u_cloudStbnSlice * float(stbnSize.z))),
+        int(floor(u_cloudShadowStbnSlice * float(stbnSize.z))),
         0,
         stbnSize.z - 1);
     float jitter = texelFetch(

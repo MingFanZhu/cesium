@@ -1863,10 +1863,14 @@ function SceneGISEnvironmentEffectsRenderer(options) {
       ),
     u_cloudRadianceScale: () => that._owner._cloudRadianceScale,
     u_cloudPreset: () => cloudPresetIndices[that._owner._cloudPreset],
-    u_cloudTracePhased: () =>
-      that._mode === SceneGISAtmosphereReferenceFrame.GLOBE &&
-      that._owner._cloudQuality === "medium",
+    u_cloudTracePhased: () => that._owner._cloudQuality === "medium",
     u_cloudStbnSlice: () => {
+      const phase = that._scene.frameState.frameNumber;
+      const slice = ((phase % 64) + 64) % 64;
+      return (slice + 0.5) / 64.0;
+    },
+    // Preserve the accepted Beer atlas phase independently of view reconstruction.
+    u_cloudShadowStbnSlice: () => {
       const phase =
         that._mode === SceneGISAtmosphereReferenceFrame.GLOBE
           ? that._scene.frameState.frameNumber
@@ -1922,10 +1926,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
       that._cloudHistoryColorTexture ?? that._cloudLowColorTexture,
     u_cloudHistoryDistanceTexture: () =>
       that._cloudHistoryDistanceTexture ?? that._cloudLowDistanceTexture,
-    u_cloudHistoryValid: () =>
-      that._cloudHistoryValid &&
-      (!that._cloudHistoryStationary ||
-        that._mode === SceneGISAtmosphereReferenceFrame.GLOBE),
+    u_cloudHistoryValid: () => that._cloudHistoryValid,
     u_cloudHistoryWeight: () => that._cloudHistoryWeight,
     u_cloudHistoryReprojection: () => that._cloudHistoryReprojection,
     u_cloudPreviousPerspective: () =>
@@ -2703,11 +2704,8 @@ function executeCloudResolve(renderer, context, depthTexture) {
   renderer._cloudHistoryValid = previousValid && !defined(failure);
   renderer._cloudHistoryStationary =
     renderer._cloudHistoryValid && cloudHistoryStationary(renderer);
-  const globeStationary =
-    renderer._cloudHistoryStationary &&
-    renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
   renderer._cloudHistoryWeight = renderer._cloudHistoryValid
-    ? globeStationary
+    ? renderer._cloudHistoryStationary
       ? 0.9
       : 0.82
     : 0.0;
@@ -2726,9 +2724,7 @@ function executeCloudResolve(renderer, context, depthTexture) {
       ? "camera-cut-spatial-only"
       : "invalid-spatial-only"
     : renderer._cloudHistoryStationary
-      ? globeStationary
-        ? "exact-stationary-temporal"
-        : "exact-stationary-spatial-only"
+      ? "exact-stationary-temporal"
       : renderer._cloudHistoryReprojection
         ? "continuous-reprojected"
         : "continuous-same-uv";
@@ -2737,9 +2733,7 @@ function executeCloudResolve(renderer, context, depthTexture) {
   }
   renderer._cloudHistoryDiagnostics.historyValid = renderer._cloudHistoryValid;
   renderer._cloudHistoryDiagnostics.weight = renderer._cloudHistoryWeight;
-  const spatialOnly =
-    !renderer._cloudHistoryValid ||
-    (renderer._cloudHistoryStationary && !globeStationary);
+  const spatialOnly = !renderer._cloudHistoryValid;
   const writeIndex = spatialOnly ? 0 : 1 - renderer._cloudHistoryReadIndex;
   const readIndex = spatialOnly ? 1 : renderer._cloudHistoryReadIndex;
   const read =

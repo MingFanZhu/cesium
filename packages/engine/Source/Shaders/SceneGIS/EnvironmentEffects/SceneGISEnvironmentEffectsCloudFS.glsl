@@ -56,13 +56,11 @@ void main()
 {
     vec2 cloudPixel = gl_FragCoord.xy;
     vec2 cloudCoordinates = cloudPixel / u_cloudBufferDimensions;
-    #ifdef SCENEGIS_GLOBE
     if (u_cloudTracePhased) {
         cloudCoordinates = (vec2(sceneGISCloudTraceFullPixel(
             ivec2(cloudPixel), textureSize(u_depthTexture, 0),
             u_cloudStbnSlice)) + 0.5) / vec2(textureSize(u_depthTexture, 0));
     }
-    #endif
     vec2 fullPixel =
         cloudCoordinates * vec2(textureSize(u_depthTexture, 0));
     float rawDepth = texture(u_depthTexture, cloudCoordinates).r;
@@ -107,8 +105,10 @@ void main()
         // Preserve log-depth precision for every Globe quality tier.
         vec4 eye = czm_screenToEyeCoordinates(cloudCoordinates, rawDepth);
         #else
-        // The native viewport is the low grid, so use its own pixel coordinate.
-        vec4 eye = czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth);
+        // Phased rays belong to the selected full-resolution depth pixel.
+        vec4 eye = u_cloudTracePhased
+            ? czm_screenToEyeCoordinates(cloudCoordinates, rawDepth)
+            : czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth);
         #endif
         eye /= eye.w;
         distanceToGeometry = u_perspective
@@ -133,11 +133,9 @@ void main()
         u_frustum.y - u_frustum.x,
         u_frustum.w - u_frustum.z);
     vec2 footprintDimensions = u_cloudBufferDimensions;
-    #ifdef SCENEGIS_GLOBE
     if (u_cloudTracePhased) {
         footprintDimensions = vec2(textureSize(u_depthTexture, 0));
     }
-    #endif
     vec2 viewportFootprint = frustumSpan / max(footprintDimensions, vec2(1.0));
     float rayAngularFootprint = u_perspective
         ? max(viewportFootprint.x, viewportFootprint.y)
@@ -233,11 +231,9 @@ void main()
     #else
     out_FragData_0 = cloudColor;
     #endif
-    #ifdef SCENEGIS_GLOBE
     if (u_cloudTracePhased) {
         cloudDistances.z = isClearDepth ? 1.0 : clamp(
             distanceToGeometry / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0);
     }
-    #endif
     out_FragData_1 = cloudDistances;
 }

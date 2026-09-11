@@ -6,13 +6,11 @@ const float SCENEGIS_CLOUD_WEATHER_SCALE = 240000.0;
 
 #define SCENEGIS_CLOUD_TURBULENCE_SAMPLER sampler2D
 uniform bool u_cloudOccupancyAllPositive;
-#ifdef SCENEGIS_GLOBE
 uniform bool u_cloudTracePhased;
-#else
+#ifndef SCENEGIS_GLOBE
 uniform vec2 u_planarCloudMaterialOrigin;
 #endif
 
-#ifdef SCENEGIS_GLOBE
 ivec2 sceneGISCloudTracePhase(float stbnSlice)
 {
     int phase = int(floor(stbnSlice * 64.0)) % 4;
@@ -26,6 +24,7 @@ ivec2 sceneGISCloudTraceFullPixel(
     return min(2 * lowPixel + sceneGISCloudTracePhase(stbnSlice), fullSize - 1);
 }
 
+#ifdef SCENEGIS_GLOBE
 vec3 sceneGISGlobeCloudPosition(
     vec3 localPosition,
     vec3 surfacePosition,
@@ -79,13 +78,13 @@ const int SCENEGIS_CLOUD_SHADOW_VIEW_MAX_STEPS = 384;
 #ifndef SCENEGIS_GLOBE
 const int SCENEGIS_PLANAR_CLOUD_MARCH_MAX_STEPS = 512;
 #endif
+const float SCENEGIS_GLOBE_CLOUD_MIN_STEP = 50.0;
+const float SCENEGIS_GLOBE_CLOUD_MAX_STEP = 1000.0;
+const float SCENEGIS_GLOBE_CLOUD_STEP_SCALE = 1.01;
 #ifdef SCENEGIS_GLOBE
 const int SCENEGIS_GLOBE_CLOUD_MARCH_MAX_STEPS = 500;
 const int SCENEGIS_GLOBE_CLOUD_LOW_MARCH_STEPS = 200;
-const float SCENEGIS_GLOBE_CLOUD_MIN_STEP = 50.0;
 const float SCENEGIS_GLOBE_CLOUD_LOW_MIN_STEP = 100.0;
-const float SCENEGIS_GLOBE_CLOUD_MAX_STEP = 1000.0;
-const float SCENEGIS_GLOBE_CLOUD_STEP_SCALE = 1.01;
 const float SCENEGIS_GLOBE_CLOUD_MAX_RAY_DISTANCE = 200000.0;
 const float SCENEGIS_GLOBE_CLOUD_LOW_MAX_RAY_DISTANCE = 100000.0;
 #endif

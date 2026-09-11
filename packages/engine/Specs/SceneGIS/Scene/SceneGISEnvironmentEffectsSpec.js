@@ -8630,6 +8630,8 @@ ${hardCascadeLibrary}`;
     await publishPlanarResources();
     const resources = effects._pipeline._resources;
     installSolidCloudTestTextures();
+    // Compare Sun states on the same integration ray and stochastic sample.
+    effects._pipeline._uniformMap.u_cloudStbnSlice = () => 0.5 / 64;
     expect(resources.cloudFramebuffer).toBeUndefined();
     const cloudExecute = spyOn(
       resources.cloudCommand,
@@ -8708,6 +8710,9 @@ ${hardCascadeLibrary}`;
     scene.renderForSpecs();
     expect(resolveHistoryValidity.at(-1)).toBe(true);
 
+    // The constant daytime LUT includes direct solar irradiance. Supply the
+    // corresponding night LUT instead of reinterpreting daytime energy as sky.
+    copyConstantHalfTexture(resources.irradianceTexture, [0, 0, 0, 1]);
     environment.sunDirection = Cartesian3.normalize(
       new Cartesian3(-0.4, -0.2, -0.9),
       new Cartesian3(),
@@ -8721,6 +8726,7 @@ ${hardCascadeLibrary}`;
     expectFiniteHdrStorage(nightCloudColor);
     expect(nightCloudColor[3]).toBeLessThan(1.0);
     expect(rgbEnergy(nightCloudColor)).toBeLessThan(rgbEnergy(cloudColor));
+    installControlledAtmosphereTextures("planar");
     environment.sunDirection = Cartesian3.normalize(
       new Cartesian3(0.4, 0.2, 0.9),
       new Cartesian3(),
@@ -8910,6 +8916,7 @@ ${hardCascadeLibrary}`;
     let windDelta = new Cartesian2();
     const uniforms = {
       ...effects._pipeline._uniformMap,
+      u_cloudTracePhased: () => false,
       u_depthTexture: () => depth,
       u_perspective: () => false,
       u_frustum: () => frustum,
@@ -9038,7 +9045,23 @@ ${hardCascadeLibrary}`;
     });
 
     scene.renderForSpecs();
+    const firstPhase = effects._pipeline._uniformMap.u_cloudStbnSlice();
+    const firstHistoryIndex = effects._pipeline._cloudHistoryReadIndex;
+    const firstHistory = effects._pipeline._resources.cloudHistoryFramebuffer0;
     scene.renderForSpecs();
+    expect(effects._pipeline._uniformMap.u_cloudStbnSlice()).not.toBe(
+      firstPhase,
+    );
+    expect(effects._pipeline._cloudHistoryReadIndex).not.toBe(
+      firstHistoryIndex,
+    );
+    expect(effects._pipeline._resources.cloudHistoryFramebuffer0).toBe(
+      firstHistory,
+    );
+    expect(effects._pipeline._uniformMap.u_cloudHistoryValid()).toBe(true);
+    expect(effects._pipeline._cloudHistoryDiagnostics.mode).toBe(
+      "exact-stationary-temporal",
+    );
     effects.cloudTime = 0.5;
     scene.renderForSpecs();
     effects.cloudTime = 2.0;
@@ -9082,12 +9105,12 @@ ${hardCascadeLibrary}`;
       false,
     ]);
     expect(weights).toEqual([
-      0.0, 0.82, 0.82, 0.0, 0.0, 0.0, 0.82, 0.0, 0.82, 0.0,
+      0.0, 0.9, 0.82, 0.0, 0.0, 0.0, 0.82, 0.0, 0.82, 0.0,
     ]);
   });
 
-  it("reconstructs phased Globe medium clouds across depth and camera transitions", async function () {
-    await connectControlledCloudMode("globe", function () {
+  async function checkPhasedCloudReconstruction(mode) {
+    await connectControlledCloudMode(mode, function () {
       effects.cloudQuality = "medium";
     });
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -9193,6 +9216,8 @@ ${hardCascadeLibrary}`;
       u_cloudHistoryReprojection: () => reproject,
       u_cloudPreviousPerspective: () => perspective,
       u_cloudPreviousFrustum: () => frustum,
+      u_cloudCameraDelta: () =>
+        Cartesian3.subtract(camera, previousCamera, new Cartesian3()),
       u_cloudPreviousCameraPosition: () => previousCamera,
       u_cloudPreviousCameraDirection: () => previousDirection,
       u_cloudPreviousCameraRight: () => previousRight,
@@ -9226,7 +9251,7 @@ ${hardCascadeLibrary}`;
       const program = createEnvironmentEffectsProgramForSpecs(
         context,
         source,
-        true,
+        mode === "globe",
         defines,
         library,
       );
@@ -9429,11 +9454,11 @@ ${hardCascadeLibrary}`;
           vec2(-1000.0, -800.0) / worldRayDirection.z / SCENEGIS_CLOUD_DISTANCE_ENCODING,
           distanceToGeometry / SCENEGIS_CLOUD_DISTANCE_ENCODING, 1.0);
       }`;
-      const oldProducerDepth = controlledProducer.replace(
+      const oldProducerDepth = controlledProducer.replaceAll(
         "czm_screenToEyeCoordinates(cloudCoordinates, rawDepth)",
         "czm_screenToEyeCoordinates(vec4(cloudCoordinates, resolvedDepth, 1.0))",
       );
-      const oldResolveDepth = cloudResolveFragmentSource.replace(
+      const oldResolveDepth = cloudResolveFragmentSource.replaceAll(
         "czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth)",
         "czm_windowToEyeCoordinates(vec4(gl_FragCoord.xy, resolvedDepth, 1.0))",
       );
@@ -9585,7 +9610,10 @@ ${hardCascadeLibrary}`;
       stochasticDistances.forEach((value, i) => {
         expect(value[3]).toBeGreaterThan(0.5);
         expect(value[0]).toBeGreaterThan(value[1]);
-        closeHalf(value[1], (1000 + 60 * ((i * 2 + 1) / 8) * 2) / 1000000);
+        closeHalf(
+          value[1],
+          (1000 + (mode === "globe" ? 120 : 50) * ((i * 2 + 1) / 8)) / 1000000,
+        );
       });
       const oldCloudPointGate = cloudResolveFragmentSource.replace(
         "if (u_cloudTracePhased) {\n        vec2 precisionRadius",
@@ -9631,12 +9659,12 @@ ${hardCascadeLibrary}`;
         expect(accumulated.distance[22].slice(0, 3)).toEqual(
           current.distance[22].slice(0, 3),
         );
-        if (phase === 0) {
+        if (phase === 0 && mode === "globe") {
           // A 90 m stochastic front shift exceeds the unchanged storage/ray
           // precision allowance at this fixed camera, with exact clear scene.
           expect(
             (stochasticDistances[3][1] - stochasticDistances[0][1]) * 1000000,
-          ).toBeGreaterThan(80);
+          ).toBeGreaterThan(mode === "globe" ? 80 : 30);
           expect(pointGated.color[22]).toEqual(current.color[22]);
           expect(Math.abs(accumulated.color[22][0] - knownRed)).toBeLessThan(
             Math.abs(pointGated.color[22][0] - knownRed),
@@ -10117,40 +10145,42 @@ ${hardCascadeLibrary}`;
       expect(oblique.color[untracedPlanePixel][0]).toBeGreaterThan(0);
       depth = clear;
       historyValid = false;
-      const packedInvalid = 100 / 2048;
-      fillLow(
-        () => [0, 0, 1, packedInvalid],
-        () => [0, 0, 0, 1],
-      );
-      const shadow = draw(cloudResolveFragmentSource);
-      shadow.distance.forEach((v) => expect(v[3]).toBe(packedInvalid));
-      expect(shadow.color[22]).toEqual([0, 0, 0, 1]);
+      if (mode === "globe") {
+        const packedInvalid = 100 / 2048;
+        fillLow(
+          () => [0, 0, 1, packedInvalid],
+          () => [0, 0, 0, 1],
+        );
+        const shadow = draw(cloudResolveFragmentSource);
+        shadow.distance.forEach((v) => expect(v[3]).toBe(packedInvalid));
+        expect(shadow.color[22]).toEqual([0, 0, 0, 1]);
 
-      // Length changes cannot veto otherwise reusable cloud RGB.
-      phase = 1;
-      fillLow((x, y) => {
-        const value = planeDistances(x, y);
-        value[3] = 1 - 100 / 2048;
-        return value;
-      });
-      previousCamera = Cartesian3.clone(camera);
-      previousDirection = Cartesian3.clone(direction);
-      previousRight = Cartesian3.clone(right);
-      historyColor = texture(
-        width,
-        height,
-        stationarySpatial.color.map((c) => [c[0] + 0.01, c[1], c[2], c[3]]),
-      );
-      historyDistance = stationarySpatial.distanceTexture;
-      historyValid = true;
-      const changedLength = draw(cloudResolveFragmentSource);
-      historyValid = false;
-      const noHistory = draw(cloudResolveFragmentSource);
-      expect(changedLength.color[22][0]).toBeGreaterThan(
-        noHistory.color[22][0],
-      );
-      expect(changedLength.distance[22][3]).toBe(noHistory.distance[22][3]);
-      expect(draw(cloudResolveFragmentSource).color).toEqual(noHistory.color);
+        // Length changes cannot veto otherwise reusable cloud RGB.
+        phase = 1;
+        fillLow((x, y) => {
+          const value = planeDistances(x, y);
+          value[3] = 1 - 100 / 2048;
+          return value;
+        });
+        previousCamera = Cartesian3.clone(camera);
+        previousDirection = Cartesian3.clone(direction);
+        previousRight = Cartesian3.clone(right);
+        historyColor = texture(
+          width,
+          height,
+          stationarySpatial.color.map((c) => [c[0] + 0.01, c[1], c[2], c[3]]),
+        );
+        historyDistance = stationarySpatial.distanceTexture;
+        historyValid = true;
+        const changedLength = draw(cloudResolveFragmentSource);
+        historyValid = false;
+        const noHistory = draw(cloudResolveFragmentSource);
+        expect(changedLength.color[22][0]).toBeGreaterThan(
+          noHistory.color[22][0],
+        );
+        expect(changedLength.distance[22][3]).toBe(noHistory.distance[22][3]);
+        expect(draw(cloudResolveFragmentSource).color).toEqual(noHistory.color);
+      }
 
       // Transparent volume estimates must participate in temporal coverage.
       // The traced center alternates hit/miss while a nearby cloud column
@@ -10370,6 +10400,14 @@ ${hardCascadeLibrary}`;
       textures.forEach((t) => t.destroy());
       disconnectControlledCloudMode();
     }
+  }
+
+  it("reconstructs phased Globe medium clouds across depth and camera transitions", async function () {
+    await checkPhasedCloudReconstruction("globe");
+  }, 300000);
+
+  it("reconstructs Planar P9 phased clouds and accumulates transparent edges without foreground leaks", async function () {
+    await checkPhasedCloudReconstruction("planar");
   }, 300000);
 
   it("isolates cloud radiance scale transitions from temporal history", async function () {
@@ -10392,7 +10430,9 @@ ${hardCascadeLibrary}`;
     expect(cloudResolveFragmentSource).toContain(
       "u_cloudPreviousCameraPosition",
     );
-    expect(cloudResolveFragmentSource).toContain("spatialDistance.a > 0.5");
+    expect(cloudResolveFragmentSource).toContain(
+      "sceneGISDecodeCloudShadowLength",
+    );
     expect(cloudResolveFragmentSource).toContain(
       "abs(clippedHistoryColor.a - spatialColor.a)",
     );
@@ -10413,6 +10453,8 @@ ${hardCascadeLibrary}`;
       },
     });
     await publishPlanarResources();
+    // Isolate invalidation from the independently tested rendered sampling phase.
+    effects._pipeline._uniformMap.u_cloudStbnSlice = () => 0.5 / 64;
     const validity = [];
     const resolveCommand = effects._pipeline._resources.cloudResolveCommand;
     const execute = resolveCommand.execute;
@@ -10468,7 +10510,7 @@ ${hardCascadeLibrary}`;
       expect(readResolvedColor()).toEqual(spatialOnly);
       expect(effects._pipeline._cloudHistoryDiagnostics.stationary).toBe(true);
       expect(effects._pipeline._cloudHistoryDiagnostics.mode).toBe(
-        "exact-stationary-spatial-only",
+        "exact-stationary-temporal",
       );
       expect(effects._pipeline._cloudHistoryDiagnostics.compatibility).toBe(
         "structured-full-attachments",
@@ -14182,6 +14224,8 @@ ${hardCascadeLibrary}`;
     scene.canvas.height = 8;
     await publishPlanarResources();
     installSolidCloudTestTextures();
+    // This oracle measures the nonphased grid; P9 covers all full-pixel phases.
+    effects._pipeline._uniformMap.u_cloudTracePhased = () => false;
 
     const inputTexture = new Texture({
       context: scene.context,

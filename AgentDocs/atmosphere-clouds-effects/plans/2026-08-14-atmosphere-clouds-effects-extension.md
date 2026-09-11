@@ -8,17 +8,17 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P8 completed — Planar cloud material`
-- Current gate: P8 source/GPU/visual/performance and full build/types accepted;
-  independent local checkpoint. Ground bounce, rays and Moon remain successors.
+- Current phase: `P9 completed — Planar cloud reconstruction`
+- Current gate: P9 source/GPU/visual/performance accepted; separate local
+  checkpoint. Ground bounce, rays and Moon remain successors.
 - Current phase plan:
-  [P8 cloud material](2026-09-12-phase-p8-planar-cloud-material.md)
+  [P9 cloud reconstruction](2026-09-12-phase-p9-planar-cloud-reconstruction.md)
 - Latest completed phase plan:
-  [P8 cloud material](2026-09-12-phase-p8-planar-cloud-material.md)
+  [P9 cloud reconstruction](2026-09-12-phase-p9-planar-cloud-reconstruction.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P6 cloud sampling](2026-09-12-phase-p6-planar-cloud-sampling.md)
+  [P8 cloud material](2026-09-12-phase-p8-planar-cloud-material.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -60,6 +60,7 @@
 - P6 implementation: `completed; primary sampling GPU/visual/performance accepted; coarse material remains open`
 - P7 implementation: `completed; local solar sampling/Beer remainder accepted; coarse material remains open`
 - P8 implementation: `completed; authored material, metric phases, physical radiometry and cloud shadows accepted`
+- P9 implementation: `completed; shared medium phase reconstruction, stationary temporal filtering and independent Beer sampling accepted`
 
 ## Goal
 
@@ -403,11 +404,19 @@ defaults become 1. Seventeen focused cases, visual review, bounded cost and full
 build/types pass. See [P8 plan](2026-09-12-phase-p8-planar-cloud-material.md) and
 [review](../reviews/2026-09-12-p8-planar-cloud-material.md).
 
-### P9+ — Remaining Planar advanced-effects adaptation (`deferred`)
+### P9 — Planar cloud reconstruction (`completed`)
+
+The owner reopens P8's grain limit. Reuse the accepted Globe medium pixel
+phases and temporal reconstruction with metric Planar reprojection, preserving
+cloud material, integration budgets and independent Beer atlas sampling. See
+[P9 plan](2026-09-12-phase-p9-planar-cloud-reconstruction.md) and
+[review](../reviews/2026-09-12-p9-planar-cloud-reconstruction.md).
+
+### P10+ — Remaining Planar advanced-effects adaptation (`deferred`)
 
 Ground-bounce parity, crepuscular rays and directional Moon remain successors.
 Finite-resolution cloud grain is a retained quality limit. Select the next
-bounded phase from current-source evidence after the P8 checkpoint. Preserve
+bounded phase from current-source evidence after the P9 checkpoint. Preserve
 fixed-Z geometry, manual Planar celestial directions and native shadow controls.
 Each phase retains separate validation, review and local checkpoint; no owner
 visual gate is pending and no successor is activated by this record.
