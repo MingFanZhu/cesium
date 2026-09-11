@@ -937,9 +937,8 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the aerial radiance scale. On Globe, this is relative to
-   * {@link SceneGISEnvironmentEffects#backgroundRadianceScale}; on Planar, it
-   * is the absolute scene-linear scale applied to physical aerial radiance.
+   * Gets or sets the aerial radiance scale, relative to
+   * {@link SceneGISEnvironmentEffects#backgroundRadianceScale} on both worlds.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1548,7 +1547,7 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [cloudTime=0.0] Caller-owned simulation seconds in the inclusive range -1000000000–1000000000.
  * @property {number} [cloudRadianceScale] Cloud radiance calibration in the inclusive range 0–64. On Globe, this is relative to backgroundRadianceScale and defaults to 1.0; on Planar, it remains the absolute scene-linear scale and defaults to 48.0.
  * @property {number} [backgroundRadianceScale] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64. Defaults to 4.0 on Globe and 10.0 on Planar.
- * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64. On Globe, this is relative to backgroundRadianceScale; on Planar, it is the absolute scene-linear scale applied to physical aerial radiance.
+ * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64, relative to backgroundRadianceScale on both worlds.
  * @property {number} [surfaceRadianceScale=10.0] Globe, Planar surface and physical model direct/diffuse sky radiance scale, in the inclusive range 0–64.
  * @property {number} [bloomThreshold=10.0] HDR bloom threshold in the inclusive RGBA16F range 0–65504.
  * @property {number} [bloomIntensity=0.05] Scene-wide bloom intensity in the inclusive range 0–64.

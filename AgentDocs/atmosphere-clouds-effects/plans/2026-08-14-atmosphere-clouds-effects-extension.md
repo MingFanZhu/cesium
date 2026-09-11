@@ -8,19 +8,19 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P4 completed — Planar readable night`
-- Current gate: P4 code/GPU/resource/visual review accepted; the commit containing
-  this record is its independent local checkpoint. No owner gate is pending.
-  Far-horizon aerial hue, cloud material/detail, rays and directional Moon
-  remain explicit successors requiring current-source plans before edits.
+- Current phase: `P5 completed — Planar far aerial quality`
+- Current gate: P5 source/GPU/visual/performance and full build/type review
+  accepted. The commit containing this record is its independent checkpoint.
+  Cloud material/radiometry, rays and directional Moon remain successors;
+  no owner visual gate is pending.
 - Current phase plan:
-  [P4 readable night](2026-09-12-phase-p4-planar-readable-night.md)
+  [P5 far aerial](2026-09-12-phase-p5-planar-far-aerial-quality.md)
 - Latest completed phase plan:
-  [P4 readable night](2026-09-12-phase-p4-planar-readable-night.md)
+  [P5 far aerial](2026-09-12-phase-p5-planar-far-aerial-quality.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P3 HDR](2026-09-11-phase-p3-planar-hdr-bloom-lens.md)
+  [P4 readable night](2026-09-12-phase-p4-planar-readable-night.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -58,6 +58,7 @@
 - P2 implementation: `completed; source/GPU/visual/build/types accepted; local checkpoint`
 - P3 implementation: `completed; source/GPU/visual/performance accepted; local checkpoint`
 - P4 implementation: `completed; source/GPU/resource/visual accepted; local checkpoint`
+- P5 implementation: `completed; causal GPU/visual/performance/build/types accepted; local checkpoint`
 
 ## Goal
 

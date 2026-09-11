@@ -7814,6 +7814,133 @@ ${hardCascadeLibrary}`;
     ]);
   });
 
+  it("keeps Planar P5 far transport complete and aerial sources continuous on the actual GPU", async function () {
+    connectPlanar();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    await publishPlanarResources();
+    const paths = executeHalfFloatQuad(
+      [
+        atmosphereSource,
+        `void main() {
+        float index = floor(gl_FragCoord.x);
+        float distance = index < 1.0 ? 100000.0 : index < 2.0 ? 300000.0 :
+          index < 3.0 ? 600000.0 : index < 4.0 ? 1000000.0 :
+          index < 5.0 ? 3000000.0 : 20000000.0;
+        vec3 origin = vec3(0.0, 0.0, 10000.0);
+        vec3 direction = vec3(0.0, sqrt(1.0 - 1.0e8 / (distance * distance)),
+          -10000.0 / distance);
+        if (gl_FragCoord.y > 1.0) {
+          direction = vec3(0.0, 1.0, 0.0);
+        }
+        float start;
+        float end;
+        sceneGISPlanarSlabSegment(origin, direction, distance, start, end);
+        out_FragColor = vec4(sceneGISPlanarSegmentTransmittance(
+          origin.z, direction.z, end - start), (end - start) / distance);
+      }`,
+      ],
+      { width: 6, height: 2 },
+    );
+    paths.forEach(expectFiniteHdrStorage);
+    const distances = [100000, 300000, 600000, 1000000, 3000000, 20000000];
+    for (let row = 0; row < 2; row++) {
+      for (let i = 0; i < distances.length; i++) {
+        const pixel = paths[row * 6 + i];
+        expect(pixel[3]).toEqualEpsilon(1, 0.001);
+        // Closed-form column density for the independently specified geometry.
+        const rayleigh =
+          row === 0 ? (8000 * (1 - Math.exp(-1.25))) / 10000 : Math.exp(-1.25);
+        const mie =
+          row === 0
+            ? (1200 * (1 - Math.exp(-10000 / 1200))) / 10000
+            : Math.exp(-10000 / 1200);
+        const red = Math.exp(
+          -distances[i] * (5.802e-6 * rayleigh + 4.44e-6 * mie),
+        );
+        expect(pixel[0]).toEqualEpsilon(red, 0.0005);
+        if (i > 0) {
+          expect(pixel[0]).toBeLessThanOrEqual(paths[row * 6 + i - 1][0]);
+        }
+      }
+    }
+    scene.logarithmicDepthBuffer = false;
+    scene.camera.switchToOrthographicFrustum();
+    scene.camera.frustum.width = 2;
+    scene.camera.frustum.near = 1;
+    scene.camera.frustum.far = 40000000;
+    scene.camera.setView({
+      destination: new Cartesian3(800000, 600000, 10000),
+      orientation: { direction: Cartesian3.UNIT_Y, up: Cartesian3.UNIT_Z },
+    });
+    environment.sunDirection = Cartesian3.UNIT_Z;
+    environment.update(scene, scene.frameState.time);
+    effects.update(scene, scene.frameState.time);
+    scene.context.uniformState.updateCamera(scene.camera);
+    scene.context.uniformState.updateFrustum(scene.camera.frustum);
+    const textures = [];
+    function constant(value) {
+      const texture = new Texture({
+        context: scene.context,
+        width: 1,
+        height: 1,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: PixelDatatype.HALF_FLOAT,
+      });
+      copyConstantHalfTexture(texture, value);
+      textures.push(texture);
+      return texture;
+    }
+    const input = constant([0.25, 0.5, 0.75, 1]);
+    const depth = constant([0.5, 0, 0, 1]);
+    const cloud = constant([0, 0, 0, 0]);
+    const cloudDistance = constant([0.1, 0.1, 0.1, 1]);
+    let showClouds = false;
+    let backgroundScale = 10;
+    const uniforms = {
+      ...effects._pipeline._uniformMap,
+      u_colorTexture: () => input,
+      u_depthTexture: () => depth,
+      u_cloudColorTexture: () => cloud,
+      u_cloudDistanceTexture: () => cloudDistance,
+      u_showAerialPerspective: () => true,
+      u_showClouds: () => showClouds,
+      u_showHeightFog: () => false,
+      u_backgroundRadianceScale: () => backgroundScale,
+      u_aerialRadianceScale: () => 1,
+    };
+    const sources = [
+      atmosphereSource,
+      cloudShadowSource,
+      heightFogSource,
+      cloudSource,
+    ];
+    function render(fragment) {
+      return executeHalfFloatQuad([...sources, fragment], {
+        uniformMap: uniforms,
+      })[0];
+    }
+    try {
+      const background = render(backgroundFragmentSource);
+      const distant = render(aerialFragmentSource);
+      expectFiniteHdrStorage(distant);
+      expect(rgbEnergy(background)).toBeGreaterThan(0.1);
+      expect(distant).toEqualEpsilon(background, 0.002);
+      // A fully absorbing test cloud isolates its additive aerial source.
+      showClouds = true;
+      copyConstantHalfTexture(depth, [1, 0, 0, 1]);
+      const cloudAerial = render(aerialFragmentSource);
+      backgroundScale = 5;
+      expect(render(aerialFragmentSource).slice(0, 3)).toEqualEpsilon(
+        cloudAerial.slice(0, 3).map((value) => value * 0.5),
+        0.002,
+      );
+    } finally {
+      textures.forEach((texture) => texture.destroy());
+    }
+  });
+
   it("adds Planar P4 readable night to fixed-Z ambient consumers on the actual GPU", async function () {
     await connectControlledCloudMode("planar");
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -14942,7 +15069,7 @@ ${hardCascadeLibrary}`;
     }
   });
 
-  it("keeps orthographic origins and untruncated slab entry before the medium cap", function () {
+  it("keeps orthographic origins and complete analytic atmosphere slab paths", function () {
     expect(backgroundFragmentSource).toContain(
       "u_cameraRight * plane.x + u_cameraUp * plane.y",
     );
@@ -14955,9 +15082,6 @@ ${hardCascadeLibrary}`;
     expect(aerialFragmentSource).toContain(": normalize(u_cameraDirection)");
     expect(backgroundFragmentSource).toContain(
       "physicalRadiance * u_backgroundRadianceScale",
-    );
-    expect(aerialFragmentSource).toContain(
-      "inputColor.rgb * transmittance + radiance * u_aerialRadianceScale",
     );
     expect(backgroundFragmentSource).not.toContain("u_aerialRadianceScale");
     expect(aerialFragmentSource).toContain(
@@ -14980,9 +15104,6 @@ ${hardCascadeLibrary}`;
     expect(atmosphereSource).toContain("sceneGISPlanarSlabSegment");
     expect(atmosphereSource).toContain(
       "float distanceLimit = max(maximumDistance, 0.0)",
-    );
-    expect(atmosphereSource).toContain(
-      "segmentEnd = min(segmentEnd, segmentStart + SCENEGIS_PLANAR_MAX_DISTANCE)",
     );
     expect(atmosphereSource).toContain(
       "startRadiance - transmittance * endRadiance",

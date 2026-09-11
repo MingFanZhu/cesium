@@ -245,7 +245,8 @@ void main()
             radiance * globeAtmosphereRadianceScale;
         #else
         sceneLinearRadiance =
-            inputColor.rgb * transmittance + radiance * u_aerialRadianceScale;
+            inputColor.rgb * transmittance +
+            radiance * (u_backgroundRadianceScale * u_aerialRadianceScale);
         #endif
     }
     if (!isClearDepth && u_showHeightFog) {
@@ -328,7 +329,8 @@ void main()
                     cloudOpacity;
                 #else
                 cloudOptical = cloudOptical * cloudTransmittance +
-                    cloudAtmosphere * u_aerialRadianceScale * cloudOpacity;
+                    cloudAtmosphere * (u_backgroundRadianceScale * u_aerialRadianceScale) *
+                    cloudOpacity;
                 #endif
             }
             if (u_showHeightFog && cloudOpacity > 1.0e-6) {

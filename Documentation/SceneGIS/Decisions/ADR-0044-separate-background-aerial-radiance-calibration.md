@@ -138,3 +138,22 @@ height-fog helper receives an explicit source-domain coefficient: Globe
 Background/Aerial/cloud-body calls pass `backgroundRadianceScale`, while Planar
 passes `1.0`. The amended actual-GPU fixtures pass and public defaults/ranges
 remain unchanged.
+
+## P5 Planar horizon-continuity amendment — 2026-09-12
+
+Planar P2/P4 now supply physical surface/model lighting. The original absolute
+aerial mapping leaves a 10:1 source-domain step between extinguished distant
+geometry and clear sky at default settings. Removing the obsolete atmosphere
+distance clip (ADR-0042 P5) exposes this separate discontinuity in the fixed
+daytime view. The same accepted A5-AR-015 solution now applies to Planar:
+`backgroundRadianceScale * aerialRadianceScale` scales physical aerial radiance
+for both finite geometry and cloud optical composition. Thus aerial scale is
+relative to background scale on both worlds, with existing defaults/ranges.
+
+Only additive atmospheric radiance changes. Input attenuation, LUTs, optical
+coefficients, surface/cloud material scales, fog calibration, HDR and native
+shadow ownership remain unchanged. Near-path in-scattering naturally tends to
+zero; do not add distance-dependent artistic blending. This supersedes the
+Planar absolute semantics above. Document the public property meaning and run
+full build/types plus actual background/finite/cloud GPU endpoint tests and
+near/far visual review. No new upstream path, SGP, uniform or resource.

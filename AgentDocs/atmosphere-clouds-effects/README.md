@@ -3,20 +3,20 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P4 completed — Planar readable night`
+- Current phase: `P5 completed — Planar far aerial quality`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P4 readable night](reviews/2026-09-12-p4-planar-readable-night.md)
+  [P5 far aerial](reviews/2026-09-12-p5-planar-far-aerial-quality.md)
 - Current phase plan:
-  [P4 readable night](plans/2026-09-12-phase-p4-planar-readable-night.md)
+  [P5 far aerial](plans/2026-09-12-phase-p5-planar-far-aerial-quality.md)
 - Latest completed phase plan:
-  [P4 readable night](plans/2026-09-12-phase-p4-planar-readable-night.md)
+  [P5 far aerial](plans/2026-09-12-phase-p5-planar-far-aerial-quality.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P3 HDR](plans/2026-09-11-phase-p3-planar-hdr-bloom-lens.md)
+  [P4 readable night](plans/2026-09-12-phase-p4-planar-readable-night.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -64,6 +64,12 @@ HDR bloom/lens flare。两种世界共享光学参数、质量档、资源与合
 reference frame，不互相伪造坐标语义。
 
 ## Active work
+
+- P5 is accepted after causal GPU checks, eight regressions, full build/types,
+  delegated visual review and bounded GPU timing. It follows P4 `b0ed3e2149`;
+  the commit containing this record is its checkpoint. Complete atmospheric
+  paths and consistent background/aerial units close the transport defect.
+  Cloud material/radiometry, rays and Moon remain successors with no owner gate.
 
 - P4 is accepted after 5/5 actual GPU cases, source/resource/visual review and
   build/ownership checks. The commit containing this record is its checkpoint.

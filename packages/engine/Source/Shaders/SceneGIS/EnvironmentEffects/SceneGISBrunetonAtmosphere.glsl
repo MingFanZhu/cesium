@@ -58,7 +58,6 @@
 const float SCENEGIS_BOTTOM_RADIUS = 6360000.0;
 const float SCENEGIS_TOP_RADIUS = 6420000.0;
 const float SCENEGIS_PLANAR_TOP = 60000.0;
-const float SCENEGIS_PLANAR_MAX_DISTANCE = 300000.0;
 const float SCENEGIS_PLANAR_BACKGROUND_DISTANCE = 1000000000.0;
 const float SCENEGIS_SUN_ANGULAR_RADIUS = 0.004675;
 const vec3 SCENEGIS_RAYLEIGH = vec3(5.802e-6, 1.3558e-5, 3.31e-5);
@@ -355,7 +354,7 @@ bool sceneGISPlanarSlabSegment(
     float distanceLimit = max(maximumDistance, 0.0);
     if (abs(viewDirection.z) < 1.0e-6) {
         segmentStart = 0.0;
-        segmentEnd = min(distanceLimit, SCENEGIS_PLANAR_MAX_DISTANCE);
+        segmentEnd = distanceLimit;
         return rayOrigin.z >= 0.0 && rayOrigin.z <= SCENEGIS_PLANAR_TOP && segmentEnd > 0.0;
     }
     float first = -rayOrigin.z / viewDirection.z;
@@ -365,7 +364,7 @@ bool sceneGISPlanarSlabSegment(
     if (segmentEnd <= segmentStart) {
         return false;
     }
-    segmentEnd = min(segmentEnd, segmentStart + SCENEGIS_PLANAR_MAX_DISTANCE);
+    // Analytic transport has constant cost; retain the complete dense lower path.
     return segmentEnd > segmentStart;
 }
 

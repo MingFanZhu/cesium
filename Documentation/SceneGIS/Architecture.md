@@ -315,6 +315,9 @@ Planar lens使用显式Sun方向并要求Sun.z大于0，继续遵守视口、有
 P4按ADR-0050的Planar amendment以fixed +Z复用同一readable-night source与-6°/-12°过渡，
 只进入地表/模型sky、cloud incident sky和fog ambient；保留直接Z高度、原有radiometry与全部directional/shadow控制，
 不增加API、uniform、pass、resource或history。夜间天体与directional moonlight仍需后续适配。
+P5按ADR-0042/0044修订计算完整Planar atmosphere slab路径，解析积分不得再按cloud/fog march预算裁剪。
+Planar aerial与Globe一样使用`backgroundRadianceScale * aerialRadianceScale`，统一远景和天空的scene-linear source单位；
+surface/cloud material与fog标定、光学系数和LUT不变，资源与lookup数量不增加。
 
 ### 平面地形 Core 契约
 

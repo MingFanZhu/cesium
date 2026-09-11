@@ -54,6 +54,11 @@ restored after inspection.
   Primitives use their authored native appearance and remain outside the PBR
   source integration; they must not be mistaken for physical model evidence.
 
+P5 follow-up: the [far-aerial review](2026-09-12-p5-planar-far-aerial-quality.md)
+closes the transport finding above after identifying the 300 km path clip and
+background/aerial source mismatch, with failing/passing GPU and visual evidence.
+Residual extreme-distance cloud hue remains part of successor cloud quality.
+
 Architecture accepts P4 under delegation and creates its independent local
 checkpoint. No upstream-owned files changed; SGP-0008 and SGP-0010 are consumed
 without new hunks. The current agent retains ownership of the roadmap limits.

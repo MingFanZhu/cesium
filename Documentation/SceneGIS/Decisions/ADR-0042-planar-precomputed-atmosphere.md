@@ -119,3 +119,21 @@ Execution必须停止并提交Architecture discussion。Generated shader modules
 
 - [Eric Bruneton: Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/)
 - [ADR-0041](ADR-0041-bruneton-atmosphere-aerial-perspective.md)
+
+## P5 full-segment amendment（2026-09-12）
+
+P4 far-horizon观察和P5 actual-GPU probe确认：Z=10 km相机看向Z=0远处地表时，
+300 km裁剪会丢弃ray末端的浓密低空介质。Red transmittance从300 km处0.315反向上升到
+20,000 km处0.604，形成远景颜色回升和条带。完整路径给出600 km处0.0995、1,000 km处
+0.0214、20,000 km处0，符合相同高度差下optical depth随距离增长的契约。
+
+当前runtime已经使用closed-form Rayleigh/Mie/ozone integral与true-boundary LUT差分，
+没有随路径长度增长的raymarch成本。因此本修订取消**大气**的300 km长度预算：
+先求真实`[0, 60 km]` slab entry/exit，再与caller actual endpoint相交，计算完整区间。
+Horizontal finite ray使用完整endpoint distance；background保留既有finite distance limit。
+云和height-fog各自的采样/积分预算不变，不将本修订传播到它们的marcher。
+
+LUT、generator、asset bytes、物理系数和边界均不变；不增加lookup、loop、uniform、pass、
+resource或GPU bytes。Globe transport不变。Actual-GPU回归覆盖远处透射率单调性、超过
+300 km的ground/horizontal路径、vacuum entry与slab外不相交，并检查相同原始昼夜视角。
+本修订替代上述runtime `300 km medium budget`，只消费SGP-0008，没有upstream文件改动。
