@@ -165,3 +165,22 @@ viewport-wide fill或seam。`A9-AR-001`关闭并重新开放owner visual gate；
 项目负责人检查exact 2x fixed night state后明确接受当前亮度。A9-G owner visual
 gate通过，Architecture findings全部关闭；本决定的source、transition、consumer与
 边界成为A9-G冻结基线。
+
+## P4 Planar amendment（2026-09-12）
+
+P3 checkpoint后，将上述fixed source与transition用于Planar。此前Planar不调用helper
+的限制由本修订替代；Globe分支保持不变。Planar以fixed `vec3(0,0,1)`为up，消费
+显式world Sun direction，不依赖camera、CRS、经纬度或虚拟球面。
+
+Source仅进入三个既有ambient入口：P2地表/模型shared sky irradiance、Planar cloud
+incident sky、height-fog ambient。Cloud入口保留既有solar-normalized radiometry，
+先加入canonical night irradiance，再除以solar RGB。地表沿用normal hemisphere、
+albedo/pi和surfaceRadianceScale；高度仍为absolute Z，60 km以上既有sky cutoff不变。
+
+不改变direct Sun、Beer、geometry shadow控制、fog directional、background/aerial、
+HDR、调用方model lightColor/SH/emissive；不增加API、uniform、asset、resource、history、
+pass或GPU bytes。Moon显示与directional moonlight后续独立适配。复用SGP-0008和SGP-0010，
+本阶段不修改upstream-owned文件。
+
+以actual-GPU Planar source/consumer、day identity、native PBR与Globe回归，加上代理验收
+day/twilight/night可复现画面为本阶段gate。用户已授权代理视觉验收及阶段间持续推进。

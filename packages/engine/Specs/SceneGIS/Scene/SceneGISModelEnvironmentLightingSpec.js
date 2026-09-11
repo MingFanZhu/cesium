@@ -186,6 +186,20 @@ describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
         expect(pixel()[0]).toBeGreaterThan(sky[0]);
         expect(modelProgram()).toBe(physicalProgram);
 
+        if (planar) {
+          const physicalIrradiance = record.irradianceTexture;
+          record.irradianceTexture = texture([0, 0, 0, 255]);
+          record.sunDirection = new Cartesian3(0, 0, -1);
+          const readableNight = pixel();
+          expect(readableNight[0]).toBeGreaterThan(0);
+          expect(readableNight[2]).toBeGreaterThan(readableNight[0]);
+          record.showCloudShadows = !record.showCloudShadows;
+          expect(pixel()).toEqual(readableNight);
+          expect(modelProgram()).toBe(physicalProgram);
+          record.irradianceTexture = physicalIrradiance;
+          record.sunDirection = Cartesian3.UNIT_Z;
+        }
+
         shader.setUniform("u_testDiffuse", 0);
         shader.setUniform("u_testEmissive", 0.2);
         const emissive = pixel();

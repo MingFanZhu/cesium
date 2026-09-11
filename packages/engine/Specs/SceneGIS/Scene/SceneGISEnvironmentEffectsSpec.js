@@ -7806,14 +7806,134 @@ ${hardCascadeLibrary}`;
       primaryBeforeTimeChange,
     );
 
-    const planarMutationSource = atmosphereSource.replace(
+    // P4 extends the same source to fixed-Z ambient, never directional fog.
+    const planarFog = renderFog(atmosphereSource, false, 1.0, 0.0);
+    expect(rgbEnergy(planarFog)).toBeGreaterThan(0.0);
+    expect(renderFog(atmosphereSource, false, 0.0, 1.0).slice(0, 3)).toEqual([
+      0.0, 0.0, 0.0,
+    ]);
+  });
+
+  it("adds Planar P4 readable night to fixed-Z ambient consumers on the actual GPU", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    scene.canvas.width = 16;
+    scene.canvas.height = 16;
+    scene.world.baseColor = new Color(0.4, 0.4, 0.4, 1);
+    effects.showClouds = false;
+    effects.surfaceRadianceScale = 10;
+    const time = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
+    const resources = effects._pipeline._resources;
+    // Zero physical LUTs isolate the ambient source from precomputed twilight.
+    copyConstantHalfTexture(resources.transmittanceTexture, [0, 0, 0, 1]);
+    copyConstantHalfTexture(resources.irradianceTexture, [0, 0, 0, 1]);
+    function renderSurface(x, sunZ) {
+      environment.sunDirection = new Cartesian3(
+        Math.sqrt(1 - sunZ * sunZ),
+        0,
+        sunZ,
+      );
+      scene.camera.setView({
+        destination: new Cartesian3(x, 100000, 500),
+        orientation: {
+          direction: new Cartesian3(0, 0, -1),
+          up: Cartesian3.UNIT_Y,
+        },
+      });
+      environment.update(scene, time);
+      effects.update(scene, time);
+      scene.renderForSpecs(time);
+      return readCenterPixel();
+    }
+    const night = renderSurface(200000, -1);
+    expect(night[0]).toBeGreaterThan(0);
+    expect(night[2]).toBeGreaterThan(night[0]);
+    expect(renderSurface(-200000, -1)).toEqual(night);
+    effects.showCloudShadows = false;
+    expect(renderSurface(200000, -1)).toEqual(night);
+    expect(renderSurface(200000, 1).slice(0, 3)).toEqual([0, 0, 0]);
+    expect(effects._pipeline._resources).toBe(resources);
+    expect(scene.shadowMap.enabled).toBe(false);
+
+    const record = { ...scene.frameState._sceneGISPlanarLighting };
+    let position = new Cartesian3(0, 0, 2500);
+    const withoutNight = planarLighting.source.replace(
       "vec3(0.020, 0.036, 0.060)",
-      "vec3(64000.0)",
+      "vec3(0.0)",
     );
-    expect(planarMutationSource).not.toBe(atmosphereSource);
-    const planarFog = renderFog(atmosphereSource, false, 1.0, 1.0);
-    const planarFogMutation = renderFog(planarMutationSource, false, 1.0, 1.0);
-    expect(planarFogMutation).toEqual(planarFog);
+    expect(withoutNight).not.toBe(planarLighting.source);
+    function probe(sunZ, source = planarLighting.source) {
+      record.sunDirection = new Cartesian3(Math.sqrt(1 - sunZ * sunZ), 0, sunZ);
+      return executeHalfFloatQuad(
+        [
+          source,
+          heightFogSource,
+          cloudSource,
+          `precision highp float;
+        precision highp sampler3D;
+        uniform vec3 u_testPosition;
+        void main() {
+          vec3 sun = u_sceneGISActualSunDirection;
+          vec3 beam;
+          vec3 sky;
+          vec3 result;
+          if (gl_FragCoord.x < 2.0) {
+            sceneGISPlanarSurfaceIrradiance(u_testPosition.z, beam, sky);
+            result = gl_FragCoord.x < 1.0 ? beam : sky;
+          } else if (gl_FragCoord.x < 4.0) {
+            sceneGISCloudIncidentIrradiance(u_sceneGISTransmittanceTexture,
+              u_sceneGISIrradianceTexture, u_testPosition, vec3(0.0), sun,
+              sun, vec3(1.0), beam, sky);
+            result = gl_FragCoord.x < 3.0 ? beam : sky * SCENEGIS_SOLAR_IRRADIANCE;
+          } else {
+            bool ambient = gl_FragCoord.x < 5.0;
+            result = sceneGISApplyExponentialHeightFog(
+              u_sceneGISTransmittanceTexture, vec3(0.0), u_testPosition,
+              vec3(0.0, 1.0, 0.0), sun, 10000.0, 0.0,
+              3.0e-5, 1.0e-3, 0.0, 0.0, 1.0, 1.0,
+              ambient ? 1.0 : 0.0, ambient ? 0.0 : 1.0, 4.0);
+          }
+          out_FragColor = vec4(result, 1.0);
+        }`,
+        ],
+        {
+          width: 6,
+          uniformMap: {
+            ...planarLighting.createUniformMap(() => record),
+            u_testPosition: () => position,
+          },
+        },
+      );
+    }
+    const fullNight = probe(-1);
+    fullNight.forEach(expectFiniteHdrStorage);
+    const canonical = [0.02, 0.036, 0.06];
+    expect(fullNight[1].slice(0, 3)).toEqualEpsilon(canonical, 0.00005);
+    expect(fullNight[3].slice(0, 3)).toEqualEpsilon(canonical, 0.00005);
+    expect(rgbEnergy(fullNight[4])).toBeGreaterThan(0);
+    for (const index of [0, 2, 5]) {
+      expect(fullNight[index].slice(0, 3)).toEqual([0, 0, 0]);
+    }
+    expect(probe(-0.2079116908)).toEqual(fullNight);
+    const twilight = probe(-0.15);
+    const dark = probe(-1, withoutNight);
+    for (const index of [1, 3, 4]) {
+      expect(rgbEnergy(twilight[index])).toBeGreaterThan(0);
+      expect(rgbEnergy(twilight[index])).toBeLessThan(
+        rgbEnergy(fullNight[index]),
+      );
+      expect(dark[index].slice(0, 3)).toEqual([0, 0, 0]);
+    }
+    position = new Cartesian3(20000000, -30000000, 2500);
+    expect(probe(-1)).toEqual(fullNight);
+    // Nonzero physical sources prove day identity beyond a black-LUT fixture.
+    copyConstantHalfTexture(resources.transmittanceTexture, [0.2, 0.2, 0.2, 1]);
+    copyConstantHalfTexture(resources.irradianceTexture, [0.5, 0.5, 0.5, 1]);
+    for (const sunZ of [1, -0.1045284633]) {
+      expect(probe(sunZ)).toEqual(probe(sunZ, withoutNight));
+    }
   });
 
   it("uses the WGS84 geodetic fallback normal at mid latitude on the actual GPU", function () {

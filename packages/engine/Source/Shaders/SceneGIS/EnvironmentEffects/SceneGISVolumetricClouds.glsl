@@ -852,7 +852,8 @@ void sceneGISCloudIncidentIrradiance(
     }
     vec3 directIrradiance = SCENEGIS_SOLAR_IRRADIANCE *
         max(sunDirection.z, 0.0) * sunIrradiance;
-    skyIrradiance = max(totalIrradiance - directIrradiance, vec3(0.0)) /
+    skyIrradiance = (max(totalIrradiance - directIrradiance, vec3(0.0)) +
+        sceneGISReadableNightSkyIrradiance(vec3(0.0, 0.0, 1.0), sunDirection)) /
         SCENEGIS_SOLAR_IRRADIANCE;
     #endif
 }

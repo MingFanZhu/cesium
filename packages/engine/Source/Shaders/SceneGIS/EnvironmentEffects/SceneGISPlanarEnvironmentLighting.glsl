@@ -33,6 +33,7 @@ void sceneGISPlanarSurfaceIrradiance(
     // cosine term before using it as a diffuse hemispherical source.
     sky = max(sceneGISPlanarIrradiance(
         u_sceneGISIrradianceTexture, height, sun.z) - beam * max(sun.z, 0.0), vec3(0.0));
+    sky += sceneGISReadableNightSkyIrradiance(vec3(0.0, 0.0, 1.0), sun);
 }
 
 vec3 sceneGISPlanarDirectSource(vec3 positionEC)

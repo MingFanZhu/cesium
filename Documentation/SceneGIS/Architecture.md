@@ -312,6 +312,9 @@ Beer producer与receiver均采用固定Z云底/云顶，阴影矩阵使用CPU水
 地表预检必须计入3个环境sampler。Planar rays与夜间天体后续独立适配。
 P3按ADR-0049的Planar amendment复用同一scene-linear HDR bloom/lens链路；保持原参数、alpha、预算与资源所有权，
 Planar lens使用显式Sun方向并要求Sun.z大于0，继续遵守视口、有效深度与最终亮度门控。
+P4按ADR-0050的Planar amendment以fixed +Z复用同一readable-night source与-6°/-12°过渡，
+只进入地表/模型sky、cloud incident sky和fog ambient；保留直接Z高度、原有radiometry与全部directional/shadow控制，
+不增加API、uniform、pass、resource或history。夜间天体与directional moonlight仍需后续适配。
 
 ### 平面地形 Core 契约
 

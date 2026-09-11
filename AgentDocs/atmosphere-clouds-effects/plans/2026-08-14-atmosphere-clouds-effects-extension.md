@@ -6,21 +6,21 @@
 - Status: `active`
 - Owner roles: Architecture Agent, Execution Agent
 - Created: `2026-08-14`
-- Updated: `2026-09-11`
+- Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P3 completed — Planar HDR bloom and lens artifacts`
-- Current gate: P3 code/GPU/visual/performance and local checkpoint complete.
-  No owner visual approval is pending. Remaining cloud material/detail, rays
-  and night/celestial stages require current-source phase plans before edits;
-  metric/custom-CRS fixed-Z and native shadow ownership remain binding.
+- Current phase: `P4 completed — Planar readable night`
+- Current gate: P4 code/GPU/resource/visual review accepted; the commit containing
+  this record is its independent local checkpoint. No owner gate is pending.
+  Far-horizon aerial hue, cloud material/detail, rays and directional Moon
+  remain explicit successors requiring current-source plans before edits.
 - Current phase plan:
-  [P3 HDR](2026-09-11-phase-p3-planar-hdr-bloom-lens.md)
+  [P4 readable night](2026-09-12-phase-p4-planar-readable-night.md)
 - Latest completed phase plan:
-  [P3 HDR](2026-09-11-phase-p3-planar-hdr-bloom-lens.md)
+  [P4 readable night](2026-09-12-phase-p4-planar-readable-night.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P2 lighting and shadows](2026-09-11-phase-p2-planar-lighting-cloud-shadows.md)
+  [P3 HDR](2026-09-11-phase-p3-planar-hdr-bloom-lens.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -57,6 +57,7 @@
 - P1 implementation: `completed; delegated visual review; checkpoint 4c847d6def`
 - P2 implementation: `completed; source/GPU/visual/build/types accepted; local checkpoint`
 - P3 implementation: `completed; source/GPU/visual/performance accepted; local checkpoint`
+- P4 implementation: `completed; source/GPU/resource/visual accepted; local checkpoint`
 
 ## Goal
 
