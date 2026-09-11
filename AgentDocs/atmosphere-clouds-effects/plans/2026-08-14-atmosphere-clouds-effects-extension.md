@@ -6,18 +6,19 @@
 - Status: `active`
 - Owner roles: Architecture Agent, Execution Agent
 - Created: `2026-08-14`
-- Updated: `2026-09-04`
+- Updated: `2026-09-11`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A13-G completed; local checkpoint preparation`
-- Current gate: A13-AR-001..007 independently fixed/code-approved; owner accepts
-  the corrected quality/performance result on 2026-09-04. Existing bounded
-  observations do not certify sustained/all-view 60 FPS. Architecture prepares
-  the independent A13 checkpoint; the new clock-linkage issue is separate and
-  has no implementation assignment yet.
-- Current phase plan:
-  [2026-09-04-phase-a13g-globe-performance.md](2026-09-04-phase-a13g-globe-performance.md)
+- Current phase: `None; A14-G completed; successor not activated`
+- Current gate: A14 Architecture review and owner acceptance are complete.
+  The owner accepts the linkage on 2026-09-11 using the existing focused E2E
+  and direct playback/paused-timeline evidence. This acceptance record belongs
+  to the isolated A14 local checkpoint. No product time-authority or
+  temporal-policy change; no push or next-phase activation.
+- Current phase plan: None
+- Latest completed phase plan:
+  [2026-09-04-phase-a14g-globe-clock-linkage.md](2026-09-04-phase-a14g-globe-clock-linkage.md)
 - Previous completed phase plan:
-  [2026-09-04-phase-a12g-globe-cloud-noise-reduction.md](2026-09-04-phase-a12g-globe-cloud-noise-reduction.md)
+  [2026-09-04-phase-a13g-globe-performance.md](2026-09-04-phase-a13g-globe-performance.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -47,6 +48,7 @@
 - A11-G implementation: `completed; Architecture approved; owner visual gate passed; local checkpoint`
 - A12-G implementation: `completed; Architecture approved; owner visual gate passed`
 - A13-G implementation: `completed; Architecture approved; owner quality/performance gate passed`
+- A14-G implementation: `completed; Architecture approved; owner gate passed`
 - P1 implementation: `deferred before review; candidate not accepted`
 
 ## Goal
@@ -267,6 +269,25 @@ are fixed/code-approved; the independent local checkpoint contains candidates
 1/2/3, bounded GPU/visual/cost evidence and their records. Residual fine grain
 and workload-dependent cost are accepted limitations, not universal performance
 claims. A newly reported clock-linkage issue is outside this phase.
+
+The isolated local checkpoint is
+`ccd5affdc426016215bb443664dc653bba945d94`; no push occurred.
+
+### A14-G — Globe sample Cesium-clock linkage (`completed`)
+
+Connect the existing caller-owned cloud simulation time to the Globe sample's
+Cesium Clock, including playback, pause, multiplier, reverse and paused seeks.
+Preserve a deterministic epoch and manual time offset without modifying
+product shaders, wind/material parameters, render-frame sampling, history
+policy, API or Planar. Native Clock remains the only progressing time source;
+the page owns and releases its listener. Details and the bounded E2E gate:
+[A14-G Globe clock linkage](2026-09-04-phase-a14g-globe-clock-linkage.md).
+
+Architecture independently approves the sample/E2E implementation and confirms
+native playback and paused scrubbing on the current owner page. Its original
+camera, parameters and 1x paused time are restored. The owner explicitly accepts
+the linkage on 2026-09-11. The commit containing this acceptance record is the
+isolated A14 checkpoint; no next phase is active and no push accompanies closure.
 
 ### P1 — Planar integrated-medium restoration (`deferred`)
 
@@ -794,3 +815,27 @@ without changing receiver precision or resource budgets. The existing fixture
 uses actual jittered product estimates and a known-color error oracle; see
 [execution evidence](../reviews/2026-09-04-a13g-globe-performance.md#a13-ar-007-execution-result--2026-09-04).
 Live quality/cost and owner acceptance remain open; no phase advance is made.
+
+## A14-G execution handoff
+
+Following the frozen A13 checkpoint, the Globe sample now maps native Cesium
+Clock time to caller-owned cloudTime with a fixed epoch and editable offset.
+The single focused Chromium E2E and scoped static checks pass; see
+[A14 execution evidence](../reviews/2026-09-04-a14g-globe-clock-linkage.md#execution-result--2026-09-04).
+Only sample/E2E assembly and five records change; no product, GPU resource or
+upstream delta. Independent review/owner observation remain pending, with no
+commit, push or next-phase activation.
+
+## A14-G project-owner acceptance — 2026-09-11
+
+The owner explicitly accepts A14. Architecture closes the phase after the
+existing independent code approval, focused Chromium E2E (1/1, 34.7 s) and
+live playback/paused-seek observation. These results are reused without a
+new GPU/browser run. The earlier A14 pending-owner and execution-hold states
+are superseded; see the [final review record](../reviews/2026-09-04-a14g-globe-clock-linkage.md#project-owner-acceptance--2026-09-11).
+
+The isolated checkpoint contains the two approved sample/E2E paths and five
+records. Upstream-owned files, generated files and new SGP are all zero.
+Existing large-date validation and temporal cuts remain accepted limits.
+This closure neither pushes the branch nor activates a successor; P1 and
+later Planar effects remain deferred.

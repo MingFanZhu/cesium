@@ -3,6 +3,152 @@ import { test, expect } from "./test.js";
 test.describe.configure({ retries: 0 });
 test.use({ launchOptions: { args: [] } });
 
+test("links Globe cloud motion to the Cesium simulation clock", async ({
+  page,
+}) => {
+  test.setTimeout(120000);
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(String(error)));
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      errors.push(message.text());
+    }
+  });
+  await page.goto("/Test/%E9%AB%98%E7%BA%A7%E7%8E%AF%E5%A2%83.html");
+  await page.waitForFunction(
+    () => window.sceneGISGlobeSample?.getState().ready === true,
+  );
+  const sequence = await page.evaluate(async () => {
+    const Cesium = await import("/Build/CesiumUnminified/index.js");
+    const { viewer, effects } = window.sceneGISGlobeSample;
+    viewer.useDefaultRenderLoop = false;
+    const clock = viewer.clock;
+    const epoch = Cesium.JulianDate.clone(clock.currentTime);
+    const values = [effects.cloudTime];
+    const initialPaused = !clock.shouldAnimate;
+    clock.clockStep = Cesium.ClockStep.TICK_DEPENDENT;
+    clock.tick();
+    values.push(effects.cloudTime);
+    clock.shouldAnimate = true;
+    clock.multiplier = 2;
+    clock.tick();
+    values.push(effects.cloudTime);
+    clock.multiplier = 3;
+    clock.tick();
+    values.push(effects.cloudTime);
+    clock.multiplier = -4;
+    clock.tick();
+    values.push(effects.cloudTime);
+    clock.shouldAnimate = false;
+    clock.tick();
+    values.push(effects.cloudTime);
+    clock.canAnimate = false;
+    clock.shouldAnimate = true;
+    clock.tick();
+    values.push(effects.cloudTime);
+    clock.shouldAnimate = false;
+    clock.currentTime = Cesium.JulianDate.addSeconds(
+      epoch,
+      -120,
+      new Cesium.JulianDate(),
+    );
+    clock.tick();
+    values.push(effects.cloudTime);
+    clock.currentTime = Cesium.JulianDate.addSeconds(
+      epoch,
+      5,
+      new Cesium.JulianDate(),
+    );
+    clock.tick();
+    values.push(effects.cloudTime);
+    clock.canAnimate = true;
+    return { initialPaused, values };
+  });
+  expect(sequence).toEqual({
+    initialPaused: true,
+    values: [0, 0, 2, 5, 1, 1, 1, -120, 5],
+  });
+  const control = (name) => page.getByLabel(name, { exact: true });
+  const offset = control("云时间偏移（秒）");
+  await offset.fill("37");
+  await offset.press("Tab");
+  expect(
+    await page.evaluate(() => window.sceneGISGlobeSample.effects.cloudTime),
+  ).toBe(42);
+  await expect(control("云仿真时间（秒）")).toBeDisabled();
+  await expect(control("播放")).not.toBeChecked();
+  await control("播放").check();
+  await control("时间倍速").fill("4");
+  await control("时间倍速").press("Tab");
+  const warm = await page.evaluate(() => {
+    const sample = window.sceneGISGlobeSample;
+    const clock = sample.viewer.clock;
+    const listeners = clock.onTick.numberOfListeners;
+    clock.tick();
+    const playing = sample.effects.cloudTime;
+    sample.setEnabled(false);
+    sample.effects.showClouds = false;
+    clock.tick();
+    const disabled = sample.effects.cloudTime;
+    sample.setEnabled(true);
+    sample.effects.showClouds = true;
+    clock.tick();
+    return {
+      playing,
+      disabled,
+      restored: sample.effects.cloudTime,
+      sameListeners: clock.onTick.numberOfListeners === listeners,
+      multiplier: clock.multiplier,
+      shouldAnimate: clock.shouldAnimate,
+    };
+  });
+  expect(warm).toEqual({
+    playing: 46,
+    disabled: 50,
+    restored: 54,
+    sameListeners: true,
+    multiplier: 4,
+    shouldAnimate: true,
+  });
+  await page.getByText("地面 · 真日落", { exact: true }).click();
+  expect(
+    await page.evaluate(() => window.sceneGISGlobeSample.effects.cloudTime),
+  ).toBe(28837);
+  await expect(control("播放")).not.toBeChecked();
+  await expect(offset).toHaveValue("37");
+  await page.getByText("A10 月亮夜景", { exact: true }).click();
+  expect(
+    await page.evaluate(() => window.sceneGISGlobeSample.effects.cloudTime),
+  ).toBe(41437);
+  await page.getByText("A11 月光 + 本地阴影", { exact: true }).click();
+  const released = await page.evaluate(async () => {
+    const Cesium = await import("/Build/CesiumUnminified/index.js");
+    const sample = window.sceneGISGlobeSample;
+    const clock = sample.viewer.clock;
+    const effects = sample.effects;
+    const expected =
+      Cesium.JulianDate.secondsDifference(
+        clock.currentTime,
+        Cesium.JulianDate.fromIso8601("2026-06-21T10:30:00Z"),
+      ) + 37;
+    const actual = effects.cloudTime;
+    sample.destroy();
+    sample.destroy();
+    clock.shouldAnimate = true;
+    clock.tick();
+    return {
+      actual,
+      expected,
+      afterTick: effects.cloudTime,
+      state: sample.getState(),
+    };
+  });
+  expect(released.actual).toBe(released.expected);
+  expect(released.afterTick).toBe(released.actual);
+  expect(released.state).toMatchObject({ destroyed: true, errors: [] });
+  expect(errors).toEqual([]);
+});
+
 test("qualifies the direct Globe environment sample and retained Planar navigation", async ({
   page,
   cesiumPage,

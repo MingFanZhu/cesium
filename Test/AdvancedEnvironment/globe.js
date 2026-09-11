@@ -49,6 +49,7 @@ let gui;
 let removePostRender;
 let removeRenderError;
 let removeControllerError;
+let removeClockTick;
 let destroyed = false;
 let restoredDepthValue;
 let globalBuildingsTileset;
@@ -79,7 +80,7 @@ const state = {
   cloudPreset: "cumulus",
   cloudCoverage: 0.3,
   cloudDensity: 1.0,
-  cloudTime: 0.0,
+  cloudTimeOffset: 0.0,
   cloudRadianceScale: 1.0,
   backgroundRadianceScale: 4.0,
   aerialRadianceScale: 1.0,
@@ -165,6 +166,16 @@ const observationDefinitions = Object.freeze({
   },
 });
 
+const cloudEpoch = Cesium.JulianDate.fromIso8601(
+  observationDefinitions.groundHighSun.time,
+);
+
+function synchronizeCloudTime() {
+  effects.cloudTime =
+    Cesium.JulianDate.secondsDifference(viewer.clock.currentTime, cloudEpoch) +
+    state.cloudTimeOffset;
+}
+
 function solarElevation() {
   const surface = Cesium.Cartesian3.fromDegrees(
     currentStatusLocation.longitude,
@@ -237,6 +248,7 @@ function applyObservation(name) {
   viewer.scene.moon.show = false;
   viewer.clock.shouldAnimate = false;
   viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(definition.time);
+  synchronizeCloudTime();
   viewer.camera.setView({
     destination: Cesium.Cartesian3.fromDegrees(
       locations.longitude,
@@ -273,6 +285,7 @@ function applyMoonObservation() {
   effects.showHeightFog = false;
   viewer.clock.shouldAnimate = false;
   viewer.clock.currentTime = time;
+  synchronizeCloudTime();
   viewer.camera.setView({
     destination,
     orientation: {
@@ -333,6 +346,7 @@ function applyMoonlightObservation() {
   ensureMoonShadowWitness();
   viewer.clock.shouldAnimate = false;
   viewer.clock.currentTime = time;
+  synchronizeCloudTime();
   viewer.camera.setView({
     destination,
     orientation: {
@@ -606,17 +620,15 @@ function createGui() {
     64.0,
     0.01,
   );
-  bindNumber(
-    cloudFolder,
-    state,
-    "cloudTime",
-    effects,
-    viewer.scene,
-    "Cloud time",
-    -3600.0,
-    3600.0,
-    1.0,
-  );
+  cloudFolder
+    .add(state, "cloudTimeOffset", -3600.0, 3600.0, 1.0)
+    .name("云时间偏移（秒）")
+    .onChange(synchronizeCloudTime);
+  cloudFolder
+    .add(effects, "cloudTime")
+    .name("云仿真时间（秒）")
+    .listen()
+    .disable();
   bindNumber(
     cloudFolder,
     state,
@@ -706,6 +718,13 @@ function createGui() {
     0.1,
   );
 
+  const timeFolder = gui.addFolder("时间");
+  timeFolder.add(viewer.clock, "shouldAnimate").name("播放").listen();
+  timeFolder
+    .add(viewer.clock, "multiplier", -120.0, 120.0, 1.0)
+    .name("时间倍速")
+    .listen();
+
   const observations = gui.addFolder("A8-G 固定观察");
   observations.add(state, "groundHighSun").name("地面 · 高日");
   observations.add(state, "aboveHighSun").name("云上 · 高日 mixed");
@@ -769,6 +788,7 @@ function destroySample() {
     return;
   }
   destroyed = true;
+  removeClockTick?.();
   removeGlobalBuildings("已释放");
   if (moonShadowWitness) {
     moonShadowWitness.forEach((entity) => viewer.entities.remove(entity));
@@ -780,7 +800,9 @@ function destroySample() {
   errorTracker.destroy();
   gui?.destroy();
   if (viewer && !viewer.isDestroyed()) {
-    viewer.removeController(effects);
+    if (effects) {
+      viewer.removeController(effects);
+    }
     restoredDepthValue = viewer.scene.globe.depthTestAgainstTerrain;
     viewer = viewer.destroy();
   }
@@ -819,6 +841,7 @@ try {
     updateObservationStatus();
   });
   applyObservation("groundHighSun");
+  removeClockTick = viewer.clock.onTick.addEventListener(synchronizeCloudTime);
   window.sceneGISGlobeSample = {
     viewer,
     effects,
@@ -836,6 +859,7 @@ try {
   };
 } catch (error) {
   errorTracker.record(error);
+  destroySample();
   runtimeStatus.textContent = "初始化失败";
   console.error(error);
 }

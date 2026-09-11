@@ -3,12 +3,13 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A13-G completed; local checkpoint preparation`
-- Current review: `approved; A13-AR-001..007 fixed; owner quality/performance gate passed`
-- Current phase plan:
-  [2026-09-04-phase-a13g-globe-performance.md](plans/2026-09-04-phase-a13g-globe-performance.md)
+- Current phase: `None; A14-G completed; successor not activated`
+- Current review: `A14 approved; owner gate passed on 2026-09-11`
+- Current phase plan: None
+- Latest completed phase plan:
+  [2026-09-04-phase-a14g-globe-clock-linkage.md](plans/2026-09-04-phase-a14g-globe-clock-linkage.md)
 - Previous completed phase plan:
-  [2026-09-04-phase-a12g-globe-cloud-noise-reduction.md](plans/2026-09-04-phase-a12g-globe-cloud-noise-reduction.md)
+  [2026-09-04-phase-a13g-globe-performance.md](plans/2026-09-04-phase-a13g-globe-performance.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -40,6 +41,8 @@
 - A10-G checkpoint: `6afba87af181f3cdb7a20aff09b81af11eb302f4`（未push）
 - A11-G checkpoint: `53465cf9bc8f3af1e935b3225c81364e380ea528`（未push）
 - A12-G checkpoint: `fd868387d4c38d6faf67a9395434cc9fccc6384c`（未push）
+- A13-G checkpoint: `ccd5affdc426016215bb443664dc653bba945d94`（未push）
+- A14-G checkpoint: the commit containing the 2026-09-11 owner-acceptance record（未push）
 
 ## Objective
 
@@ -50,6 +53,36 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- The owner explicitly accepts A14 on 2026-09-11. Architecture closes the
+  phase using the approved seven-path candidate, existing focused E2E and
+  direct linkage evidence. The commit containing this acceptance record is
+  the isolated A14 checkpoint; no push or successor activation accompanies
+  closure. P1 and later Planar effects remain deferred. Earlier pending-gate
+  and execution-hold entries below are historical and superseded by this
+  [owner acceptance](reviews/2026-09-04-a14g-globe-clock-linkage.md#project-owner-acceptance--2026-09-11).
+- A14 has independent Architecture code approval. The existing owner page
+  shows both cloud and ground-shadow displacement during native Clock playback;
+  pause freezes cloud time and a real native timeline drag publishes the exact
+  new simulation seconds while staying paused. The original camera, effect
+  parameters, time and 1x paused state are restored with zero browser/render
+  errors. See [independent review](reviews/2026-09-04-a14g-globe-clock-linkage.md#independent-architecture-review--2026-09-04).
+  The single focused E2E passes; no product/GPU/upstream/generated/SGP change.
+  Owner acceptance is now recorded on 2026-09-11; the phase is complete.
+- A14-G addresses the missing sample-level publication from Cesium Clock to
+  existing caller-owned `cloudTime`. Architecture confirms `clock.tick()`
+  emits `onTick` before `scene.render(time)`, including paused seeks. The
+  [design](plans/2026-09-04-phase-a14g-globe-clock-linkage.md) uses one fixed
+  epoch plus an editable offset, preserves native timeline/layer controls and
+  adds playback/multiplier controls to lil-gui. Product source, shaders, STBN,
+  temporal policy and Planar remain frozen. See the
+  [source diagnosis](discussions/2026-09-04-a14g-globe-clock-linkage.md) and
+  [review target](reviews/2026-09-04-a14g-globe-clock-linkage.md). Execution
+  received only the bounded sample/E2E task; Architecture completed review and
+  live observation before the owner's explicit acceptance.
+- A13 is frozen at `ccd5affdc426016215bb443664dc653bba945d94`; the working tree
+  was clean after checkpoint. The normal pre-commit ESLint, Prettier,
+  Markdownlint and engine TypeScript checks passed. No GPU/browser rerun or
+  push accompanied closure. Entries below retain historical A13 gate states.
 - The owner accepts the corrected A13 result on 2026-09-04. Architecture closes
   the quality/performance gate with the existing bounded evidence; this is not
   a sustained or all-view 60 FPS guarantee. All seven code findings are fixed.
@@ -2516,6 +2549,14 @@ witness passes, with old-expression rejection and full current cloud support.
 See [execution evidence](reviews/2026-09-04-a13g-globe-performance.md#a13-ar-006-execution-result--2026-09-04).
 No resource/tolerance/history change or owner-page operation; independent live
 rotation/cost review and owner acceptance remain pending.
+
+### A14-G execution handoff
+
+The sample Clock link and real GUI controls are implemented; one focused
+Chromium E2E passes in 34.7 s, including reverse/paused seeks and cleanup.
+[Exact results and scope](reviews/2026-09-04-a14g-globe-clock-linkage.md#execution-result--2026-09-04).
+No product/resource/upstream change or owner-page operation. A14 is review-ready,
+uncommitted/unpushed; Architecture retains the direct observation and owner gate.
 
 A13-AR-007's bounded cloud-depth support implementation and real stochastic
 product-march fixture are now ready for independent review. The fixed known-color
