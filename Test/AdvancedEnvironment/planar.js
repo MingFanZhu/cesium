@@ -31,6 +31,10 @@ const state = {
   showHeightFog: true,
   showClouds: true,
   showCloudShadows: true,
+  showBloom: true,
+  showLensFlare: true,
+  bloomIntensity: 0.05,
+  lensFlareIntensity: 5.0,
   cloudQuality: "medium",
   cloudPreset: "cumulus",
   cloudCoverage: 0.45,
@@ -347,6 +351,32 @@ function createGui() {
   );
 
   const comparison = gui.addFolder("组合对比（保持当前视角）");
+  const hdr = gui.addFolder("泛光与镜头光晕");
+  bindBoolean(hdr, state, "showBloom", effects, viewer.scene, "泛光");
+  bindBoolean(hdr, state, "showLensFlare", effects, viewer.scene, "镜头光晕");
+  bindNumber(
+    hdr,
+    state,
+    "bloomIntensity",
+    effects,
+    viewer.scene,
+    "泛光强度",
+    0,
+    1,
+    0.01,
+  );
+  bindNumber(
+    hdr,
+    state,
+    "lensFlareIntensity",
+    effects,
+    viewer.scene,
+    "光晕强度",
+    0,
+    64,
+    0.1,
+  );
+  hdr.close();
   comparison.add(state, "baseline").name("基础场景");
   comparison.add(state, "aerialOnly").name("大气与空气透视");
   comparison.add(state, "fogOnly").name("仅高度雾");
@@ -368,7 +398,7 @@ function getState() {
   const scene = viewer?.isDestroyed() === false ? viewer.scene : undefined;
   return {
     page: "planar",
-    phase: "P2",
+    phase: "P3",
     compositionState: effects ? getCompositionState() : undefined,
     destroyed,
     ready: effects?.ready === true,

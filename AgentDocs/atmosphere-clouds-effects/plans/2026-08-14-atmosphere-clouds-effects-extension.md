@@ -8,22 +8,19 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-11`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P2 completed — Planar lighting and cloud shadows`
-- Current gate: P1 checkpoint after delegated visual review and owner confirmation of global
-  metric Planar use across multiple/custom CRS; EPSG:3857 is only the sample.
-  See
-  [Planar spatial-model discussion](../discussions/2026-09-11-planar-atmosphere-space-model.md)
-  under ADR-0040/0042. P1 candidate and evidence retained after accepted A17
-  `3cdd2958d1`; Architecture has accepted its foundational visual result under
-  the owner's September 11 delegation.
+- Current phase: `P3 completed — Planar HDR bloom and lens artifacts`
+- Current gate: P3 code/GPU/visual/performance and local checkpoint complete.
+  No owner visual approval is pending. Remaining cloud material/detail, rays
+  and night/celestial stages require current-source phase plans before edits;
+  metric/custom-CRS fixed-Z and native shadow ownership remain binding.
 - Current phase plan:
-  [P2 lighting and shadows](2026-09-11-phase-p2-planar-lighting-cloud-shadows.md)
+  [P3 HDR](2026-09-11-phase-p3-planar-hdr-bloom-lens.md)
 - Latest completed phase plan:
-  [A17 far cloud depth](2026-09-11-phase-a17g-far-cloud-depth.md)
+  [P3 HDR](2026-09-11-phase-p3-planar-hdr-bloom-lens.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [A16 model environment lighting](2026-09-11-phase-a16g-model-environment-lighting.md)
+  [P2 lighting and shadows](2026-09-11-phase-p2-planar-lighting-cloud-shadows.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -59,6 +56,7 @@
 - A16-G implementation: `completed; Architecture approved; owner gate passed`
 - P1 implementation: `completed; delegated visual review; checkpoint 4c847d6def`
 - P2 implementation: `completed; source/GPU/visual/build/types accepted; local checkpoint`
+- P3 implementation: `completed; source/GPU/visual/performance accepted; local checkpoint`
 
 ## Goal
 
@@ -385,7 +383,15 @@ All planned P2 work and Architecture review are complete. The independent
 commit containing this closure is the P2 checkpoint; review retains remaining
 cloud morphology, rays, HDR and night/celestial scope for successor phases.
 
-### P3+ — Remaining Planar advanced-effects adaptation (`deferred`)
+### P3 — Planar HDR bloom and lens artifacts (`completed`)
+
+P2 checkpoint `b09a3d5ce2` precedes activation. P3 reuses the existing screen-space
+HDR chain with explicit Planar Sun/depth gates and unchanged resource contracts;
+see the [phase plan](2026-09-11-phase-p3-planar-hdr-bloom-lens.md).
+GPU, lifecycle, delegated visual and performance review pass, including the
+reproduced Planar Sun-footprint correction. This closure forms the P3 checkpoint.
+
+### P4+ — Remaining Planar advanced-effects adaptation (`deferred`)
 
 After P1's independent checkpoint, adapt the remaining stack in bounded phases:
 cloud material/detail and further temporal quality beyond P1 reprojection; physical Sun/sky lighting with

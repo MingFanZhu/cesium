@@ -1,5 +1,32 @@
 # ADR-0049：Globe HDR Bloom and Lens Flare
 
+## Planar amendment — 2026-09-11
+
+P3 starts after P2 `b09a3d5ce2` and extends this same HDR contract to Planar.
+The former Planar bypass is superseded only for bloom and lens artifacts.
+All existing threshold/blur/additive RGB/alpha/resource rules below apply.
+No sphere/ECEF conversion enters this screen-space chain. Planar Sun projection
+uses its explicit effective direction; additionally require Sun.z > 0, then
+retain perspective/viewport, exact-clear resolved depth and bright-signal gates.
+Planar native bloom conflicts fail before resource mutation, without rewriting
+caller settings. Existing public defaults/ranges are unchanged. No new API,
+asset, history or upstream hook; SGP-0008 is consume-only.
+Current source retains allocated HDR resources warm across disable/re-enable;
+disable detaches execution, and disconnect/destroy releases them. P3 preserves
+that tested lifecycle rather than introducing a different Planar policy.
+See [P3](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-11-phase-p3-planar-hdr-bloom-lens.md).
+
+P3 visual qualification reproduces a saturated rounded square around the
+Planar Sun with the inherited axis-aligned finite blur. Switching HDR off shows
+a circular source disk, isolating this to the blur footprint. For Planar only,
+use the same normalized shader and six passes along directions 0/90, 30/120,
+60/150 degrees at radius sqrt(7). Their summed directional covariance is
+21 times the identity, matching the original radii 1/2/4 horizontal/vertical
+chain, while distributing the finite support around six axes. This changes
+neither source radiometry, public intensity nor program/pass/storage budgets.
+Globe retains its accepted original schedule. Actual pixels and the same Sun
+view must verify this correction before P3 acceptance.
+
 ## 状态
 
 - Status：`accepted; A7-G completed`

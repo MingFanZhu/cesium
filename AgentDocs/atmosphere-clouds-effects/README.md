@@ -3,20 +3,20 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P2 completed — Planar physical lighting and cloud shadows`
+- Current phase: `P3 completed — Planar HDR bloom and lens artifacts`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P2 lighting and shadows](reviews/2026-09-11-p2-planar-lighting-cloud-shadows.md)
+  [P3 HDR](reviews/2026-09-11-p3-planar-hdr-bloom-lens.md)
 - Current phase plan:
-  [P2 lighting and shadows](plans/2026-09-11-phase-p2-planar-lighting-cloud-shadows.md)
+  [P3 HDR](plans/2026-09-11-phase-p3-planar-hdr-bloom-lens.md)
 - Latest completed phase plan:
-  [P1 Planar restoration](plans/2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
+  [P3 HDR](plans/2026-09-11-phase-p3-planar-hdr-bloom-lens.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [A16 model environment lighting](plans/2026-09-11-phase-a16g-model-environment-lighting.md)
+  [P2 lighting and shadows](plans/2026-09-11-phase-p2-planar-lighting-cloud-shadows.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -65,6 +65,12 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- P3 is accepted under delegated visual review after actual GPU, lifecycle,
+  round-Sun correction, bounded cost and build/type checks. Its review records
+  the remaining cloud/ray/night roadmap. This record is its local checkpoint.
+- P2 checkpoint: `b09a3d5ce2` (local, not pushed). P3 activates the existing
+  screen-space HDR chain with Planar explicit-Sun/depth and native ownership
+  qualification. The active P3 plan and ADR-0049 amendment define this scope.
 - P1 checkpoint: `4c847d6def` (local, not pushed). P2 activates from current
   source under ADR-0055: Planar Beer atlas, physical model/surface lighting,
   horizontal-origin precision and borrowed-resource lifecycle. Globe hooks

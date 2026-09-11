@@ -309,7 +309,9 @@ P2依据[ADR-0055](Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows
 独立frame-local Planar record借用物理LUT与Beer atlas，模型复用`SGP-0010`源光照接口，地表在imagery/material合成后应用Sun/sky。
 Beer producer与receiver均采用固定Z云底/云顶，阴影矩阵使用CPU水平原点差，Z保持绝对高度；不得转换为ECEF。
 云影仅衰减direct光，保留原生PBR/emissive、调用方SH/lightColor与Cesium几何阴影控制。
-地表预检必须计入3个环境sampler。Planar rays、HDR后处理与夜间天体后续独立适配。
+地表预检必须计入3个环境sampler。Planar rays与夜间天体后续独立适配。
+P3按ADR-0049的Planar amendment复用同一scene-linear HDR bloom/lens链路；保持原参数、alpha、预算与资源所有权，
+Planar lens使用显式Sun方向并要求Sun.z大于0，继续遵守视口、有效深度与最终亮度门控。
 
 ### 平面地形 Core 契约
 

@@ -2837,7 +2837,11 @@ function updateSunViewportCoordinates(renderer) {
   renderer._sunLensVisible = false;
   renderer._sunViewportCoordinates.x = 0.5;
   renderer._sunViewportCoordinates.y = 0.5;
-  if (!renderer._perspective) {
+  if (
+    !renderer._perspective ||
+    (renderer._mode === SceneGISAtmosphereReferenceFrame.PLANAR &&
+      renderer._sunDirection.z <= 0.0)
+  ) {
     return;
   }
   const forward = Cartesian3.dot(
@@ -2904,11 +2908,17 @@ function executeBloom(renderer, context, colorTexture, depthTexture) {
     resources.thresholdCommand.execute(context, renderer._bloomHalfPassState);
 
     for (let octave = 0; octave < 3; ++octave) {
-      const radius = 2 ** octave;
+      // Equal covariance to the Globe 1/2/4 schedule, with six evenly spaced
+      // axes to avoid a square finite-support footprint around the Planar Sun.
+      const planar = renderer._mode === SceneGISAtmosphereReferenceFrame.PLANAR;
+      const radius = planar ? Math.sqrt(7.0) : 2 ** octave;
+      const angle = planar ? (octave * Math.PI) / 6.0 : 0.0;
+      const offsetX = radius * Math.cos(angle);
+      const offsetY = radius * Math.sin(angle);
       renderer._bloomTexture =
         resources.thresholdFramebuffer.getColorTexture(0);
-      renderer._bloomDirection.x = radius;
-      renderer._bloomDirection.y = 0.0;
+      renderer._bloomDirection.x = offsetX;
+      renderer._bloomDirection.y = offsetY;
       resources.horizontalBlurCommand.framebuffer =
         resources.blurFramebuffer.framebuffer;
       resources.horizontalBlurCommand.execute(
@@ -2917,8 +2927,8 @@ function executeBloom(renderer, context, colorTexture, depthTexture) {
       );
 
       renderer._bloomTexture = resources.blurFramebuffer.getColorTexture(0);
-      renderer._bloomDirection.x = 0.0;
-      renderer._bloomDirection.y = radius;
+      renderer._bloomDirection.x = -offsetY;
+      renderer._bloomDirection.y = offsetX;
       resources.verticalBlurCommand.framebuffer =
         resources.thresholdFramebuffer.framebuffer;
       resources.verticalBlurCommand.execute(
@@ -2945,9 +2955,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
   depthTexture,
   idTexture,
 ) {
-  const bloomActive =
-    this._mode === SceneGISAtmosphereReferenceFrame.GLOBE &&
-    (this._owner._showBloom || this._owner._showLensFlare);
+  const bloomActive = this._owner._showBloom || this._owner._showLensFlare;
   if (
     (!this._showAerialPerspective &&
       !this._showHeightFog &&

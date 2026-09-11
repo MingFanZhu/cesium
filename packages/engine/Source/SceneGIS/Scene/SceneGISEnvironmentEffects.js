@@ -270,6 +270,14 @@ function validatePlanarConflict(controller, scene) {
       'mode "planar" requires the Scene\'s exact live SCENE3D SceneGISPlanarWorld.',
     );
   }
+  if (
+    controller._showBloom &&
+    scene.postProcessStages.bloom.enabled !== false
+  ) {
+    throw new DeveloperError(
+      "Advanced planar HDR bloom requires native post-process bloom to be disabled.",
+    );
+  }
   const environment = world.environment;
   if (
     !defined(environment) ||
@@ -1174,7 +1182,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether Globe scene-wide HDR bloom is shown.
+   * Gets or sets whether scene-wide HDR bloom is shown.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1188,7 +1196,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether Globe Sun-gated lens artifacts are shown.
+   * Gets or sets whether Sun-gated lens artifacts are shown.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1526,8 +1534,8 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [showClouds=true] Whether to render the single-deck volumetric cloud core.
  * @property {boolean} [showCloudShadows=true] Whether volumetric clouds attenuate direct light on supported surfaces and models.
  * @property {boolean} [showCrepuscularRays=true] Whether cloud shadow length modulates atmosphere and fog Sun inscatter.
- * @property {boolean} [showBloom=true] Whether Globe scene-wide HDR bloom is shown.
- * @property {boolean} [showLensFlare=true] Whether Globe Sun-gated lens artifacts are shown.
+ * @property {boolean} [showBloom=true] Whether scene-wide HDR bloom is shown.
+ * @property {boolean} [showLensFlare=true] Whether Sun-gated lens artifacts are shown.
  * @property {boolean} [showMoonlight=true] Whether readable Globe Moonlight participates in the primary directional light.
  * @property {string} [cloudQuality] Exact "low", "medium", or "high" cloud budget. Defaults to "high" on Globe and "medium" on Planar.
  * @property {string} [cloudPreset="cumulus"] Exact "cumulus", "stratus", "cirrus", or "mixed" immutable morphology preset.
@@ -1542,9 +1550,9 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [backgroundRadianceScale] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64. Defaults to 4.0 on Globe and 10.0 on Planar.
  * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64. On Globe, this is relative to backgroundRadianceScale; on Planar, it is the absolute scene-linear scale applied to physical aerial radiance.
  * @property {number} [surfaceRadianceScale=10.0] Globe, Planar surface and physical model direct/diffuse sky radiance scale, in the inclusive range 0–64.
- * @property {number} [bloomThreshold=10.0] Globe HDR bloom threshold in the inclusive RGBA16F range 0–65504.
- * @property {number} [bloomIntensity=0.05] Globe scene-wide bloom intensity in the inclusive range 0–64.
- * @property {number} [lensFlareIntensity=5.0] Globe Sun-gated lens artifact intensity in the inclusive range 0–64.
+ * @property {number} [bloomThreshold=10.0] HDR bloom threshold in the inclusive RGBA16F range 0–65504.
+ * @property {number} [bloomIntensity=0.05] Scene-wide bloom intensity in the inclusive range 0–64.
+ * @property {number} [lensFlareIntensity=5.0] Sun-gated lens artifact intensity in the inclusive range 0–64.
  * @property {number} [moonlightIntensity=1.0] Readable full-phase Globe Moonlight scale in the inclusive range 0–64.
  * @property {number} [heightFogDensity=0.000008] Base-height extinction coefficient per meter, in the inclusive range 0–0.001.
  * @property {number} [heightFogHeightFalloff=0.0002] Exponential height falloff per meter, in the inclusive range 0–0.001.

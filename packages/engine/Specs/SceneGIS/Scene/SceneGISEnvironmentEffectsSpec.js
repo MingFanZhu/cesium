@@ -549,6 +549,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       enabled: true,
       showHeightFog: false,
       showClouds: false,
+      // These fixtures isolate physical media; HDR artifacts have their own fixture.
+      showBloom: false,
+      showLensFlare: false,
     });
     effects.connectedCallback({});
     return world;
@@ -6722,8 +6725,108 @@ ${hardCascadeLibrary}`;
     expect(scene.globe.shadows).toBe(callerGlobeShadows);
   });
 
-  it("applies Globe HDR bloom and Sun-gated lens artifacts on the actual GPU", async function () {
-    await connectControlledCloudMode("globe");
+  it("keeps Planar P3 HDR lazy and warm, gates below-plane Sun, rejects native conflict and releases resized resources", async function () {
+    connectPlanar();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    effects.showAtmosphere = false;
+    effects.showAerialPerspective = false;
+    effects.showBloom = true;
+    scene.postProcessStages.bloom.enabled = true;
+    expect(() =>
+      effects.firstUpdate(scene, scene.frameState.time),
+    ).toThrowDeveloperError();
+    expect(effects._pipeline).toBeUndefined();
+    expect(scene.postProcessStages.bloom.enabled).toBe(true);
+    scene.postProcessStages.bloom.enabled = false;
+    effects.showBloom = false;
+    await publishPlanarResources();
+    const pipeline = effects._pipeline;
+    const input = scene.context.defaultTexture;
+    expect(pipeline.executeHdr(scene.context, input, input, input)).toBe(input);
+    expect(pipeline._bloomResources).toBeUndefined();
+
+    const resizeInput = new Texture({
+      context: scene.context,
+      width: 5,
+      height: 3,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+    });
+    try {
+      effects.showLensFlare = true;
+      environment.sunDirection = Cartesian3.UNIT_Z;
+      environment.update(scene, scene.frameState.time);
+      scene.camera.setView({
+        destination: new Cartesian3(20000000, -30000000, 500),
+        orientation: { direction: Cartesian3.UNIT_Z, up: Cartesian3.UNIT_Y },
+      });
+      const first = pipeline.executeHdr(scene.context, input, input, input);
+      expect(first).not.toBe(input);
+      expect(pipeline._sunLensVisible).toBe(true);
+      const resources = pipeline._bloomResources;
+      const firstFbos = [
+        resources.thresholdFramebuffer.framebuffer,
+        resources.blurFramebuffer.framebuffer,
+        resources.compositeFramebuffer.framebuffer,
+      ];
+      const resizeResult = pipeline.executeHdr(
+        scene.context,
+        resizeInput,
+        input,
+        input,
+      );
+      expect(resizeResult.width).toBe(5);
+      expect(resizeResult.height).toBe(3);
+      expect(pipeline._bloomResources).toBe(resources);
+      firstFbos.forEach((framebuffer) =>
+        expect(framebuffer.isDestroyed()).toBe(true),
+      );
+      const textures = [
+        resources.thresholdFramebuffer.getColorTexture(0),
+        resources.blurFramebuffer.getColorTexture(0),
+        resources.compositeFramebuffer.getColorTexture(0),
+      ];
+      expect(
+        textures.reduce((bytes, texture) => bytes + texture.sizeInBytes, 0),
+      ).toBe(216);
+      const originalReason = pipeline._cloudHistoryDiagnostics.resetReason;
+      effects.showBloom = true;
+      effects.bloomIntensity = 0.2;
+      effects.lensFlareIntensity = 2;
+      expect(pipeline._cloudHistoryDiagnostics.resetReason).toBe(
+        originalReason,
+      );
+      environment.sunDirection = new Cartesian3(0, 0, -1);
+      environment.update(scene, scene.frameState.time);
+      scene.camera.setView({
+        destination: new Cartesian3(20000000, -30000000, 500),
+        orientation: {
+          direction: new Cartesian3(0, 0, -1),
+          up: Cartesian3.UNIT_Y,
+        },
+      });
+      pipeline.executeHdr(scene.context, resizeInput, input, input);
+      expect(pipeline._sunLensVisible).toBe(false);
+      effects.showBloom = false;
+      effects.showLensFlare = false;
+      expect(
+        pipeline.executeHdr(scene.context, resizeInput, input, input),
+      ).toBe(resizeInput);
+      expect(pipeline._bloomResources).toBe(resources);
+      effects.enabled = false;
+      expect(pipeline._bloomResources).toBe(resources);
+      effects.disconnectedCallback(effects._element);
+      textures.forEach((texture) => expect(texture.isDestroyed()).toBe(true));
+      expect(resizeInput.isDestroyed()).toBe(false);
+    } finally {
+      resizeInput.destroy();
+    }
+  });
+
+  async function verifyHdrArtifacts(mode) {
+    await connectControlledCloudMode(mode);
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
     }
@@ -6973,7 +7076,12 @@ ${hardCascadeLibrary}`;
       clearDepth.destroy();
       finiteDepth.destroy();
     }
-  });
+  }
+
+  for (const mode of ["globe", "planar"]) {
+    it(`applies ${mode} HDR bloom and Sun-gated lens artifacts on the actual GPU`, () =>
+      verifyHdrArtifacts(mode));
+  }
 
   it("compiles the frame-local Globe surface variant and restores the native variant", async function () {
     await connectControlledCloudMode("globe");
