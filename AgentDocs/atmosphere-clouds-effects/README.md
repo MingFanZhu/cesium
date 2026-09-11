@@ -3,20 +3,20 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P6 completed — Planar cloud sampling quality`
+- Current phase: `P7 completed — Planar cloud solar filtering`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P6 cloud sampling](reviews/2026-09-12-p6-planar-cloud-sampling.md)
+  [P7 solar sampling](reviews/2026-09-12-p7-planar-cloud-solar-filtering.md)
 - Current phase plan:
-  [P6 cloud sampling](plans/2026-09-12-phase-p6-planar-cloud-sampling.md)
+  [P7 solar filtering](plans/2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
 - Latest completed phase plan:
-  [P6 cloud sampling](plans/2026-09-12-phase-p6-planar-cloud-sampling.md)
+  [P7 solar filtering](plans/2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P4 readable night](plans/2026-09-12-phase-p4-planar-readable-night.md)
+  [P6 cloud sampling](plans/2026-09-12-phase-p6-planar-cloud-sampling.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -64,6 +64,14 @@ HDR bloom/lens flare。两种世界共享光学参数、质量档、资源与合
 reference frame，不互相伪造坐标语义。
 
 ## Active work
+
+- P7 is accepted after seven GPU cases, visual correction of low-Sun stripes,
+  full build/types and bounded cost review. It follows P6 `2ebce1700f`; this
+  record's commit is its checkpoint. Planar local solar sampling preserves
+  detail, and the existing origin-relative Beer atlas supplies remaining depth.
+  Cost is 4.662 -> 5.899 ms for the fixed cloud pass, with zero new GPU bytes.
+  **Cloud coarseness remains open at the material topology level**; authored
+  material/detail and radiometric parity are next, before rays and Moon.
 
 - P6 is accepted as a bounded primary sampling repair after 7/7 focused GPU
   cases, same-view visual comparison, build and resource/ownership checks.

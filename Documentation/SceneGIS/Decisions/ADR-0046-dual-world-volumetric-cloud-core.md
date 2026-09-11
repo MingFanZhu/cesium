@@ -749,3 +749,30 @@ policy and resource topology are unchanged. This raises the Planar medium/high
 maximum density budget from 256 to 512; actual GPU timing and delegated visual
 review are required. The [P6 plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-12-phase-p6-planar-cloud-sampling.md)
 defines the causal GPU and endpoint checks. No upstream seam or API is added.
+
+## P7 Planar secondary material footprint — 2026-09-12
+
+Planar Sun optical-depth sampling now receives the same projected pixel
+footprint as its primary density sample. Secondary integration length continues
+to weight Beer optical depth but no longer selects the material mip. Long Sun
+paths must not erase resolvable self-shadowing merely because the bounded
+secondary schedule has long steps. Large actual pixel footprints still filter
+subpixel detail. This extends the already accepted separation of material LOD
+and integration budget to the retained Planar solar path.
+
+Filtering alone reveals low-Sun aliasing in the sparse full-segment secondary
+march. Planar therefore adopts Globe's division into a bounded local density
+march and current-frame Beer remainder. The existing 2/3/4 tier sample count
+uses consecutive doubling intervals, starting at 100 / sample-count metres.
+Their clipped total covered distance is removed from atlas reconstruction.
+When cloud shadows are off or the atlas does not cover the receiver, only the
+local term remains, as in the Globe path. No fabricated distant extinction.
+
+One private vec3 callback borrows the existing CPU camera-relative shadow-origin
+vector. Add its XY to local cloud XY and preserve absolute Z for the Planar
+atlas lookup. No texture, pass, public parameter, density or radiometric
+coefficient changes. Globe and Planar primary/atlas-production/history policies
+are unchanged. The
+[P7 plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
+requires a real mipmapped density witness with rejection of the former rule,
+visual quality and bounded GPU cost evidence.

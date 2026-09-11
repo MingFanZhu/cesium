@@ -2007,6 +2007,8 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_sceneGISShadowVertical: () => that._frame.vertical,
     u_sceneGISShadowSunDirection: () => that._primaryLightDirection,
     u_sceneGISShadowCameraPosition: () => that._frame.cameraPosition,
+    u_sceneGISCloudShadowCameraRelativePosition: () =>
+      that._shadowCameraRelative,
     u_sceneGISShadowCloudTop: () => that._shadowCloudSupport.y,
     u_sceneGISShadowOrigin: () => that._shadowOrigin,
     u_sceneGISShadowOriginDelta: () => that._shadowOriginDelta,

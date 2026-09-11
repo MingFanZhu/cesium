@@ -31,6 +31,7 @@ uniform vec3 u_sceneGISShadowNorth;
 uniform vec3 u_sceneGISShadowVertical;
 uniform vec3 u_sceneGISShadowSunDirection;
 uniform vec3 u_sceneGISShadowCameraPosition;
+uniform vec3 u_sceneGISCloudShadowCameraRelativePosition;
 uniform float u_sceneGISShadowCloudTop;
 
 void sceneGISDecodeCloudShadowLength(
@@ -355,3 +356,16 @@ float sceneGISCloudBodyShadowOpticalDepth(
         secondWeight);
     return -log(clamp(transmittance, exp(-80.0), 1.0));
 }
+
+#ifndef SCENEGIS_GLOBE
+float sceneGISPlanarCloudBodyShadowOpticalDepth(
+    vec3 localPosition, float viewDistance, float minimumDistance)
+{
+    // The CPU origin is horizontal. Cloud-local Z is already absolute height.
+    vec3 shadowPosition = vec3(
+        localPosition.xy + u_sceneGISCloudShadowCameraRelativePosition.xy,
+        localPosition.z);
+    return sceneGISCloudBodyShadowOpticalDepth(
+        shadowPosition, viewDistance, minimumDistance);
+}
+#endif

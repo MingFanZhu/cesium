@@ -1154,6 +1154,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
   },
   /**
    * Gets or sets whether volumetric clouds attenuate direct light on supported surfaces and models.
+   * Also supplies distant cloud self-shadowing; local cloud self-shadowing remains active when disabled.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1531,7 +1532,7 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [showAerialPerspective=true] Whether to composite opaque geometry aerial perspective.
  * @property {boolean} [showHeightFog=true] Whether to apply single-layer exponential height fog.
  * @property {boolean} [showClouds=true] Whether to render the single-deck volumetric cloud core.
- * @property {boolean} [showCloudShadows=true] Whether volumetric clouds attenuate direct light on supported surfaces and models.
+ * @property {boolean} [showCloudShadows=true] Whether volumetric clouds attenuate direct light on supported surfaces and models and supply distant cloud self-shadowing.
  * @property {boolean} [showCrepuscularRays=true] Whether cloud shadow length modulates atmosphere and fog Sun inscatter.
  * @property {boolean} [showBloom=true] Whether scene-wide HDR bloom is shown.
  * @property {boolean} [showLensFlare=true] Whether Sun-gated lens artifacts are shown.

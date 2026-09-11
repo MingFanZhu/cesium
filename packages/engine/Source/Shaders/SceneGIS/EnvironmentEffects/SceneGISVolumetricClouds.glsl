@@ -1139,8 +1139,11 @@ float sceneGISCloudSunOpticalDepth(
     float cloudDensity,
     int cloudPreset,
     int sunSteps,
-    float detailStrength)
+    float detailStrength,
+    float footprintMeters,
+    out float coveredDistance)
 {
+    coveredDistance = 0.0;
     float supportBaseHeight;
     float supportThickness;
     sceneGISCloudPresetSupport(
@@ -1161,13 +1164,16 @@ float sceneGISCloudSunOpticalDepth(
             segmentEnd)) {
         return 0.0;
     }
-    float stepLength = (segmentEnd - segmentStart) / float(max(sunSteps, 1));
+    float stepLength = 100.0 / float(max(sunSteps, 1));
+    float intervalStart = segmentStart;
     float opticalDepth = 0.0;
     for (int step = 0; step < SCENEGIS_CLOUD_SUN_MAX_STEPS; ++step) {
-        if (step >= sunSteps) {
+        if (step >= sunSteps || intervalStart >= segmentEnd) {
             break;
         }
-        float distance = segmentStart + (float(step) + 0.5) * stepLength;
+        float intervalEnd = min(intervalStart + stepLength, segmentEnd);
+        float intervalLength = intervalEnd - intervalStart;
+        float distance = (intervalStart + intervalEnd) * 0.5;
         vec3 sampleLocal = localPosition + sunDirection * distance;
         #ifdef SCENEGIS_GLOBE
         vec3 sampleGlobePosition = sceneGISGlobeCloudPosition(
@@ -1202,9 +1208,12 @@ float sceneGISCloudSunOpticalDepth(
             cloudCoverage,
             cloudPreset,
             detailStrength,
-            stepLength,
+            footprintMeters,
             0.5,
-            unusedHeightGradient) * visibility * cloudDensity * stepLength;
+            unusedHeightGradient) * visibility * cloudDensity * intervalLength;
+        coveredDistance = intervalEnd;
+        intervalStart = intervalEnd;
+        stepLength *= 2.0;
     }
     return min(opticalDepth, 80.0);
 }
@@ -1586,6 +1595,7 @@ void sceneGISMarchClouds(
                     footprint,
                     rayDither) : 0.0;
             #else
+            float localSunDistance;
             float sunOpticalDepth = sceneGISCloudSunOpticalDepth(
                 shapeTexture,
                 detailTexture,
@@ -1607,7 +1617,16 @@ void sceneGISMarchClouds(
                 cloudDensity,
                 cloudPreset,
                 sunSteps,
-                detailStrength);
+                detailStrength,
+                footprint,
+                localSunDistance);
+            if (u_sceneGISShowCloudShadows) {
+                float viewDistance = distance * max(dot(
+                    localRayDirection, worldCameraDirection), 0.0);
+                sunOpticalDepth = min(sunOpticalDepth +
+                    sceneGISPlanarCloudBodyShadowOpticalDepth(
+                        sampleLocal, viewDistance, localSunDistance), 80.0);
+            }
             float groundOpticalDepth = 0.0;
             #endif
             vec3 atmosphereSun;

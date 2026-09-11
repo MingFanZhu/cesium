@@ -13623,10 +13623,13 @@ ${hardCascadeLibrary}`;
       u_specDensityRange: () => densityRange,
     };
     const probe = (library = analyticSource) =>
-      executeHalfFloatQuad([atmosphereSource, library, probeFragment], {
-        defines: ["SCENEGIS_CLOUD_REPLAY_DENSITY_ONLY"],
-        uniformMap,
-      })[0];
+      executeHalfFloatQuad(
+        [atmosphereSource, cloudShadowSource, library, probeFragment],
+        {
+          defines: ["SCENEGIS_CLOUD_REPLAY_DENSITY_ONLY"],
+          uniformMap,
+        },
+      )[0];
     try {
       const thin = probe();
       expect(Math.abs(thin[0] - Math.exp(-0.2)))
@@ -13656,6 +13659,175 @@ ${hardCascadeLibrary}`;
       expect(low[1]).toBe(32);
       expect(Math.abs(low[0] - Math.exp(-0.3))).toBeLessThan(0.001);
     } finally {
+      disconnectControlledCloudMode();
+    }
+  });
+
+  it("preserves resolved Planar P7 cloud solar extinction independently of the secondary step length", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      disconnectControlledCloudMode();
+      return;
+    }
+    try {
+      // Real trilinear mipmaps average thin occupied cells below the authored
+      // shape threshold. Small visible footprints must retain those cells.
+      effects._pipeline.publishResources(
+        scene.context,
+        createThinCloudBuffers("planar"),
+      );
+      const fragment = `precision highp float;
+        precision highp sampler3D;
+        uniform sampler3D u_cloudShapeTexture;
+        uniform sampler3D u_cloudDetailTexture;
+        uniform sampler2D u_cloudWeatherTexture;
+        uniform sampler3D u_cloudTurbulenceTexture;
+        uniform float u_specFootprint;
+        uniform float u_specThickness;
+        void main() {
+          float coveredDistance;
+          float tau = sceneGISCloudSunOpticalDepth(
+            u_cloudShapeTexture, u_cloudDetailTexture,
+            u_cloudWeatherTexture, u_cloudTurbulenceTexture,
+            vec3(0.0, 0.0, 1000.0), vec3(0.0),
+            vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0),
+            vec3(0.0, 0.0, 1.0), vec3(0.0), vec3(1.0),
+            vec2(0.0, 312.5), vec3(0.0, 0.0, 1.0), vec2(0.0),
+            0.0, u_specThickness, 1.0, 0.001, 0, 3, 1.0,
+            u_specFootprint, coveredDistance);
+          out_FragColor = vec4(tau, coveredDistance, 0.0, 1.0);
+        }`;
+      const oldFootprint = cloudSource.replace(
+        "            footprintMeters,\n            0.5,\n            unusedHeightGradient)",
+        "            (segmentEnd - segmentStart) / float(max(sunSteps, 1)),\n            0.5,\n            unusedHeightGradient)",
+      );
+      expect(oldFootprint).not.toBe(cloudSource);
+      let footprint = 10.0;
+      let thickness = 4500.0;
+      const probe = (library) =>
+        executeHalfFloatQuad(
+          [atmosphereSource, cloudShadowSource, library, fragment],
+          {
+            uniformMap: {
+              ...effects._pipeline._uniformMap,
+              u_specFootprint: () => footprint,
+              u_specThickness: () => thickness,
+            },
+          },
+        )[0];
+      const local = probe(cloudSource);
+      expect(Math.abs(local[0] - 0.001 * (700.0 / 3.0)))
+        .withContext(
+          "resolvable occupied column casts internal solar extinction",
+        )
+        .toBeLessThan(0.002);
+      expect(Math.abs(local[1] - 700.0 / 3.0)).toBeLessThan(0.2);
+      expect(probe(oldFootprint)[0])
+        .withContext(
+          "old kilometre integration footprint erases the same column",
+        )
+        .toBeLessThan(0.001);
+      footprint = 5000.0;
+      expect(probe(cloudSource)[0])
+        .withContext("actual subpixel detail still receives mip filtering")
+        .toBeLessThan(0.001);
+      thickness = 1050.0;
+      expect(probe(cloudSource)[1])
+        .withContext("clip local coverage to layer top")
+        .toBe(50.0);
+      thickness = 500.0;
+      expect(probe(cloudSource)[1])
+        .withContext("no upward intersection")
+        .toBe(0.0);
+    } finally {
+      disconnectControlledCloudMode();
+    }
+  });
+
+  it("combines Planar P7 local solar depth with the origin-relative Beer remainder", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      disconnectControlledCloudMode();
+      return;
+    }
+    const renderer = effects._pipeline;
+    expect(
+      renderer._uniformMap.u_sceneGISCloudShadowCameraRelativePosition(),
+    ).toBe(renderer._shadowCameraRelative);
+    const atlas = new Texture({
+      context: scene.context,
+      width: 2,
+      height: 2,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+    });
+    const matrix = Matrix4.clone(Matrix4.IDENTITY);
+    matrix[0] = 0.1;
+    matrix[5] = 0.1;
+    matrix[12] = -2.0;
+    matrix[13] = 1.9;
+    const relativeCamera = new Cartesian3(17.0, -23.0, 9876.0);
+    let shadowTop = 3000.0;
+    const shadowUniforms = {
+      u_sceneGISCloudShadowAtlas: () => atlas,
+      u_sceneGISCloudShadowMatrices: () => [matrix, matrix, matrix],
+      u_sceneGISCloudShadowIntervals: () => [
+        new Cartesian2(0.0, 10000.0),
+        new Cartesian2(10000.0, 20000.0),
+        new Cartesian2(20000.0, 30000.0),
+      ],
+      u_sceneGISCloudShadowCascadeCount: () => 1,
+      u_sceneGISShadowSunDirection: () => Cartesian3.UNIT_Z,
+      u_sceneGISShadowCloudTop: () => shadowTop,
+      u_sceneGISCloudShadowCameraRelativePosition: () => relativeCamera,
+    };
+    const originalUniforms = { ...renderer._uniformMap };
+    try {
+      copyConstantHalfTexture(atlas, [0.0, 0.002, 80.0, 0.0]);
+      const values = executeHalfFloatQuad(
+        [
+          cloudShadowSource,
+          `
+        void main() {
+          int column = int(gl_FragCoord.x);
+          vec3 position = vec3(column == 3 ? 1000.0 : 3.0, 4.0, 1500.0);
+          float distance = column == 2 ? 20000.0 : 1000.0;
+          float covered = column == 1 ? 200.0 : 0.0;
+          out_FragColor = vec4(sceneGISPlanarCloudBodyShadowOpticalDepth(
+              position, distance, covered));
+        }`,
+        ],
+        { width: 4, uniformMap: shadowUniforms },
+      );
+      expect(Math.abs(values[0][0] - 3.0))
+        .withContext("relative XY and absolute Z")
+        .toBeLessThan(0.005);
+      expect(Math.abs(values[1][0] - 2.6))
+        .withContext("exclude the entire local covered distance")
+        .toBeLessThan(0.005);
+      expect(values[2][0]).withContext("outside cascade distance").toBe(0.0);
+      expect(values[3][0]).withContext("outside shadow UV").toBe(0.0);
+
+      // Exercise the actual CloudFS call site; only intrinsic RGB can respond.
+      installSolidCloudTestTextures();
+      installControlledAtmosphereTextures("planar");
+      scene.canvas.width = 8;
+      scene.canvas.height = 8;
+      shadowTop = 10000.0;
+      matrix[0] = matrix[5] = matrix[12] = matrix[13] = 0.0;
+      Object.assign(renderer._uniformMap, shadowUniforms);
+      renderer._uniformMap.u_sceneGISShowCloudShadows = () => false;
+      const local = renderControlledCloudSample("planar", 0.0, false, false);
+      renderer._uniformMap.u_sceneGISShowCloudShadows = () => true;
+      const combined = renderControlledCloudSample("planar", 0.0, false, false);
+      expect(rgbEnergy(combined.color)).toBeLessThan(
+        rgbEnergy(local.color) * 0.95,
+      );
+      expect(combined.color[3]).toBe(local.color[3]);
+      expect(combined.distances).toEqual(local.distances);
+    } finally {
+      Object.assign(renderer._uniformMap, originalUniforms);
+      atlas.destroy();
       disconnectControlledCloudMode();
     }
   });
@@ -16044,7 +16216,13 @@ ${hardCascadeLibrary}`;
     };
     const render = (depthTexture, state, colorTexture = inputTexture) =>
       executeHalfFloatQuad(
-        [atmosphereSource, heightFogSource, cloudSource, aerialFragmentSource],
+        [
+          atmosphereSource,
+          cloudShadowSource,
+          heightFogSource,
+          cloudSource,
+          aerialFragmentSource,
+        ],
         {
           width,
           uniformMap: {
@@ -16183,6 +16361,7 @@ ${hardCascadeLibrary}`;
         const distances = executeHalfFloatQuad(
           [
             atmosphereSource,
+            cloudShadowSource,
             cloudSource,
             `${prefix}
     out_FragColor = vec4(${value} / 1000000.0, 0.0, 0.0, 1.0);

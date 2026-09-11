@@ -8,19 +8,19 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P6 completed — Planar cloud sampling quality`
-- Current gate: P6 source/GPU/visual/performance and build review accepted.
+- Current phase: `P7 completed — Planar cloud solar filtering`
+- Current gate: P7 source/GPU/visual/performance and full build/types accepted.
   The commit containing this record is its independent checkpoint. Cloud
   coarseness remains open: material/detail/lighting are the next priority,
   followed by rays and directional Moon. No owner visual gate is pending.
 - Current phase plan:
-  [P6 cloud sampling](2026-09-12-phase-p6-planar-cloud-sampling.md)
+  [P7 solar filtering](2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
 - Latest completed phase plan:
-  [P6 cloud sampling](2026-09-12-phase-p6-planar-cloud-sampling.md)
+  [P7 solar filtering](2026-09-12-phase-p7-planar-cloud-solar-filtering.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P4 readable night](2026-09-12-phase-p4-planar-readable-night.md)
+  [P6 cloud sampling](2026-09-12-phase-p6-planar-cloud-sampling.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -60,6 +60,7 @@
 - P4 implementation: `completed; source/GPU/resource/visual accepted; local checkpoint`
 - P5 implementation: `completed; causal GPU/visual/performance/build/types accepted; local checkpoint`
 - P6 implementation: `completed; primary sampling GPU/visual/performance accepted; coarse material remains open`
+- P7 implementation: `completed; local solar sampling/Beer remainder accepted; coarse material remains open`
 
 ## Goal
 
