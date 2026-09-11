@@ -1,5 +1,10 @@
 # ADR-0048：Globe Temporal Stabilization and Performance Policy
 
+A17's [ADR-0043 amendment](ADR-0043-atmosphere-log-depth-and-radiance-mapping.md#a17-g-amendment--preserve-raw-depth-precision-through-globe-clouds)
+extends precise raw-depth reconstruction to high/low Globe and final aerial
+composition. This supersedes only the earlier nonphased depth-expression
+freeze; temporal policy, sampling budgets and Planar remain unchanged.
+
 ## 状态
 
 - Status：`accepted; A6-G completed`

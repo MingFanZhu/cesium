@@ -110,10 +110,9 @@ void main()
     vec3 worldOriginOffset = u_perspective ? vec3(0.0) : eyeOffset;
     float distanceToPoint = SCENEGIS_PLANAR_BACKGROUND_DISTANCE;
     if (!isClearDepth) {
-        float resolvedDepth = czm_readDepth(
-            u_depthTexture, v_textureCoordinates);
+        // Avoid a lossy log-to-perspective-depth round trip at distant receivers.
         vec4 eye = czm_windowToEyeCoordinates(
-            vec4(gl_FragCoord.xy, resolvedDepth, 1.0));
+            gl_FragCoord.xy, rawDepth);
         eye /= eye.w;
         distanceToPoint = u_perspective
             ? length(eye.xyz)

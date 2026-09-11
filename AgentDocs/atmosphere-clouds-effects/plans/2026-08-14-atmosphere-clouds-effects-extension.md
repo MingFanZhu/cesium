@@ -8,17 +8,17 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-11`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `A16-G completed; no successor active`
-- Current gate: A16 code and owner model-view acceptance passed; independent
-  local checkpoint after A15 `4d1d122b1c`, without push or next-phase activation.
+- Current phase: `A17-G completed; no successor active`
+- Current gate: A17 code, scoped regressions and owner visual acceptance pass.
+  Its independent local checkpoint follows A16 `93540ca075`; P1 remains deferred.
 - Current phase plan:
-  [A16 model environment lighting](2026-09-11-phase-a16g-model-environment-lighting.md)
+  [A17 far cloud depth](2026-09-11-phase-a17g-far-cloud-depth.md)
 - Latest completed phase plan:
-  [A16 model environment lighting](2026-09-11-phase-a16g-model-environment-lighting.md)
+  [A17 far cloud depth](2026-09-11-phase-a17g-far-cloud-depth.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [A15 cloud edge stability](2026-09-11-phase-a15g-cloud-edge-stability.md)
+  [A16 model environment lighting](2026-09-11-phase-a16g-model-environment-lighting.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -324,6 +324,21 @@ GPU/native/lifecycle checks, full build and types pass. Architecture closes the
 phase with the recorded +0.281 ms isolated median model-draw cost and retained
 native specular-IBL limit. The commit containing this record is the independent
 local checkpoint; P1 stays deferred and no next phase is activated.
+
+### A17-G — Far cloud depth continuity (`completed`)
+
+Use precise native raw-depth interfaces in all three Globe cloud consumers
+to remove reproduced false-occlusion bands at large far/near ratios. Preserve
+Planar, temporal policy, sample/resource budgets and A16. The
+[A17 phase](2026-09-11-phase-a17g-far-cloud-depth.md) requires discriminating
+GPU output, foreground behavior, bounded cost and owner judgment.
+
+Implementation and Architecture code review are complete. Two focused GPU
+selections and the corrected high/medium reproduction pass. The owner confirms
+“通过” on 2026-09-11. Architecture closes A17 with the recorded bounded
+final-composite cost and verification limits. The commit containing its
+acceptance record is the independent local checkpoint; no push or next-phase
+activation accompanies closure.
 
 ### P1 — Planar integrated-medium restoration (`deferred`)
 

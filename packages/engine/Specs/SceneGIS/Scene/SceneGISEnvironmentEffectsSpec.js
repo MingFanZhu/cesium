@@ -15626,6 +15626,220 @@ ${hardCascadeLibrary}`;
     }
   });
 
+  it("preserves far Globe cloud depth and continuous coverage with a small near plane", async function () {
+    await connectControlledCloudMode("globe");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const context = scene.context;
+    const width = 24;
+    const height = 48;
+    const textures = [];
+    scene.canvas.width = width;
+    scene.canvas.height = height;
+    scene.renderForSpecs();
+    let perspective = true;
+    let depth;
+    let cloudDistance;
+    let frustum;
+    const dimensions = new Cartesian2(width, height);
+    function texture(get) {
+      const values = Array.from({ length: width * height }, (_, i) =>
+        get(i % width, Math.floor(i / width)),
+      );
+      const result = new Texture({
+        context,
+        width,
+        height,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: PixelDatatype.FLOAT,
+        sampler: Sampler.NEAREST,
+        flipY: false,
+        source: { arrayBufferView: new Float32Array(values.flat()) },
+      });
+      textures.push(result);
+      return result;
+    }
+    const input = texture(() => [0.2, 0.3, 0.4, 1]);
+    const cloudColor = texture(() => [0.3, 0.2, 0.1, 0.5]);
+    const uniforms = {
+      ...effects._pipeline._uniformMap,
+      u_perspective: () => perspective,
+      u_frustum: () => frustum,
+      u_cameraDirection: () => new Cartesian3(0, 0, -1),
+      u_cameraRight: () => Cartesian3.UNIT_X,
+      u_cameraUp: () => Cartesian3.UNIT_Y,
+      u_east: () => Cartesian3.UNIT_X,
+      u_north: () => Cartesian3.UNIT_Y,
+      u_vertical: () => Cartesian3.UNIT_Z,
+      u_altitude: () => 200000,
+      u_hasCurrentGlobeDepth: () => true,
+      u_depthTexture: () => depth,
+      u_colorTexture: () => input,
+      u_cloudColorTexture: () => cloudColor,
+      u_cloudDistanceTexture: () => cloudDistance,
+      u_cloudLowDistanceTexture: () => cloudDistance,
+      u_cloudTracePhased: () => false,
+      u_cloudBufferDimensions: () => dimensions,
+      u_showClouds: () => true,
+      u_showAerialPerspective: () => false,
+      u_showHeightFog: () => false,
+      u_sceneGISShowCrepuscularRays: () => false,
+      u_cloudCoverage: () => 0,
+    };
+    function draw(source, defines) {
+      const program = createEnvironmentEffectsProgramForSpecs(
+        context,
+        source,
+        true,
+        defines,
+      );
+      try {
+        return executeHalfFloatQuad(program._fragmentShaderSource.sources, {
+          width,
+          height,
+          defines: program._fragmentShaderSource.defines,
+          uniformMap: uniforms,
+        });
+      } finally {
+        program.destroy();
+      }
+    }
+    function depthProbe(source, boundary, distanceExpression) {
+      // Preserve the product's complete ray/depth block, exposing its result
+      // before unrelated marching/reconstruction work in a single attachment.
+      const prefix = source
+        .slice(0, source.indexOf(boundary))
+        .replace(/layout \(location = [01]\) out vec4 out_FragData_[01];/g, "");
+      return `${prefix}
+        out_FragColor = vec4(${distanceExpression} / 1000000.0, 0.0, 0.0, 1.0);
+      }`;
+    }
+    const producerProbe = depthProbe(
+      cloudFragmentSource,
+      "    float cloudBase =",
+      "distanceToGeometry",
+    );
+    const resolveProbe = depthProbe(
+      cloudResolveFragmentSource,
+      "    vec4 colorSum =",
+      "sceneDistanceMeters",
+    );
+    const oldAerial = aerialFragmentSource.replace(
+      "gl_FragCoord.xy, rawDepth",
+      "vec4(gl_FragCoord.xy, czm_readDepth(u_depthTexture, v_textureCoordinates), 1.0)",
+    );
+    expect(oldAerial).not.toBe(aerialFragmentSource);
+    try {
+      for (const logarithmicDepth of [true, false]) {
+        perspective = logarithmicDepth;
+        if (perspective) {
+          scene.camera.switchToPerspectiveFrustum();
+          scene.camera.frustum.fov = 0.5;
+        } else {
+          scene.camera.switchToOrthographicFrustum();
+          scene.camera.frustum.width = 120000;
+        }
+        const cameraFrustum = scene.camera.frustum;
+        cameraFrustum.near = 0.1;
+        cameraFrustum.far = 1000000;
+        cameraFrustum.aspectRatio = width / height;
+        context.uniformState.updateCamera(scene.camera);
+        context.uniformState.updateFrustum(cameraFrustum);
+        const offCenter = cameraFrustum._offCenterFrustum;
+        const divisor = perspective ? cameraFrustum.near : 1;
+        frustum = new Cartesian4(
+          offCenter.left / divisor,
+          offCenter.right / divisor,
+          offCenter.bottom / divisor,
+          offCenter.top / divisor,
+        );
+        function forwardDistance(y) {
+          return 180000 + (y + 0.5) * 4000;
+        }
+        const currentFrustum = frustum;
+        const isPerspective = perspective;
+        function distance(x, y) {
+          const px =
+            currentFrustum.x +
+            ((x + 0.5) / width) * (currentFrustum.y - currentFrustum.x);
+          const py =
+            currentFrustum.z +
+            ((y + 0.5) / height) * (currentFrustum.w - currentFrustum.z);
+          return (
+            forwardDistance(y) * (isPerspective ? Math.hypot(px, py, 1) : 1)
+          );
+        }
+        depth = texture((x, y) => {
+          const near = cameraFrustum.near;
+          const far = cameraFrustum.far;
+          const z = forwardDistance(y);
+          return [
+            logarithmicDepth
+              ? Math.log2(z - near + 1) / Math.log2(far - near + 1)
+              : (z - near) / (far - near),
+            0,
+            0,
+            0,
+          ];
+        });
+        cloudDistance = texture((x, y) => {
+          const receiver = distance(x, y);
+          const cloud = receiver + (x < width / 2 ? 5000 : -2000);
+          return [cloud / 1000000, cloud / 1000000, receiver / 1000000, 1];
+        });
+        const defines = logarithmicDepth ? ["LOG_DEPTH_READ_ONLY"] : [];
+        const producer = draw(producerProbe, defines);
+        const resolve = draw(resolveProbe, defines);
+        const composite = draw(aerialFragmentSource, defines);
+        let maximumDepthError = 0;
+        let maximumColorError = 0;
+        for (let y = 1; y < height - 1; y++) {
+          for (let x = 2; x < width - 2; x++) {
+            const index = y * width + x;
+            for (const sample of [producer[index], resolve[index]]) {
+              maximumDepthError = Math.max(
+                maximumDepthError,
+                Math.abs(sample[0] * 1000000 - distance(x, y)),
+              );
+            }
+            // Exclude the two-pixel derivative footprint at the deliberate
+            // foreground discontinuity; all other rows must remain continuous.
+            if (Math.abs(x + 0.5 - width / 2) < 2) {
+              continue;
+            }
+            const expected = x < width / 2 ? [0.2, 0.3, 0.4] : [0.4, 0.35, 0.3];
+            for (let channel = 0; channel < 3; channel++) {
+              maximumColorError = Math.max(
+                maximumColorError,
+                Math.abs(composite[index][channel] - expected[channel]),
+              );
+            }
+          }
+        }
+        // Half-float diagnostic output contributes at most half an ULP here.
+        expect(maximumDepthError)
+          .withContext(`log=${logarithmicDepth}`)
+          .toBeLessThan(260);
+        expect(maximumColorError)
+          .withContext(`log=${logarithmicDepth}`)
+          .toBeLessThan(0.002);
+        if (logarithmicDepth) {
+          const oldComposite = draw(oldAerial, defines);
+          const missing = oldComposite.filter(
+            (pixel, index) => index % width > width / 2 + 2 && pixel[0] < 0.3,
+          );
+          expect(missing.length).toBeGreaterThan(height);
+        }
+      }
+    } finally {
+      for (const value of textures) {
+        value.destroy();
+      }
+      disconnectControlledCloudMode();
+    }
+  }, 120000);
+
   it("renders every far opaque Globe pixel through linear and log aerial variants", async function () {
     await connectControlledCloudMode("globe");
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {

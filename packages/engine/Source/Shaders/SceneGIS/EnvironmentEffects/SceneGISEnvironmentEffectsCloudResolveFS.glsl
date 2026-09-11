@@ -303,9 +303,7 @@ void main()
     float sceneDistance = 1.0;
     if (!isClearDepth) {
         #ifdef SCENEGIS_GLOBE
-        vec4 eye = u_cloudTracePhased
-            ? czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth)
-            : czm_windowToEyeCoordinates(vec4(gl_FragCoord.xy, resolvedDepth, 1.0));
+        vec4 eye = czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth);
         #else
         vec4 eye = czm_windowToEyeCoordinates(
             vec4(gl_FragCoord.xy, resolvedDepth, 1.0));

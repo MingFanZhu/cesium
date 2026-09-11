@@ -112,6 +112,23 @@ RGBA16F，而Cesium在支持half-float时也把HDR scene framebuffer建为`HALF_
 若正确log-depth decode需要修改Cesium builtin、PostProcessStageCollection、FramebufferManager或除现有`Scene.js` paired ranges之外的
 upstream-owned file，Execution必须停止并提交Architecture discussion。A2R2通过Architecture review与owner gate前不得checkpoint或激活A3。
 
+## A17-G amendment — preserve raw-depth precision through Globe clouds
+
+The [A17 diagnosis](../../../AgentDocs/atmosphere-clouds-effects/discussions/2026-09-11-far-cloud-bands.md)
+reproduces horizontal false cloud occlusion at a large far/near ratio. Globe
+cloud tracing, resolve and aerial composition must pass raw texture depth to
+Cesium's precise `(vec2, float)` eye-coordinate overload. The intermediate
+float32 perspective depth loses distance precision even when decoded once.
+
+CloudFS uses normalized cloudCoordinates with czm_screenToEyeCoordinates;
+ResolveFS and AerialFS use gl_FragCoord.xy with czm_windowToEyeCoordinates.
+This extends A13's medium correction to all Globe tiers and final composition.
+Keep native LOG_DEPTH_READ_ONLY selection, exact-clear gating, Orthographic
+linear handling, ray/sample coordinates and receiver tolerances. No custom
+formula, new GPU resource, upstream hunk or SGP is needed. Planar is unchanged.
+The [A17 phase](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-11-phase-a17g-far-cloud-depth.md)
+owns far-depth/foreground regression and owner quality gates.
+
 ## 参考
 
 - [Bruneton atmosphere demo shader](https://ebruneton.github.io/precomputed_atmospheric_scattering/atmosphere/demo/demo.glsl.html)

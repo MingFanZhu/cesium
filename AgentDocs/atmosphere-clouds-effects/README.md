@@ -3,17 +3,17 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `A16-G completed; no successor active`
+- Current phase: `A17-G completed; no successor active`
 - Current review:
-  [A16 model lighting verification](reviews/2026-09-11-a16g-model-environment-lighting.md)
+  [A17 far cloud depth](reviews/2026-09-11-a17g-far-cloud-depth.md)
 - Current phase plan:
-  [A16 model environment lighting](plans/2026-09-11-phase-a16g-model-environment-lighting.md)
+  [A17 far cloud depth](plans/2026-09-11-phase-a17g-far-cloud-depth.md)
 - Latest completed phase plan:
-  [A16 model environment lighting](plans/2026-09-11-phase-a16g-model-environment-lighting.md)
+  [A17 far cloud depth](plans/2026-09-11-phase-a17g-far-cloud-depth.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [A15 cloud edge stability](plans/2026-09-11-phase-a15g-cloud-edge-stability.md)
+  [A16 model environment lighting](plans/2026-09-11-phase-a16g-model-environment-lighting.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -49,7 +49,8 @@
 - A13-G checkpoint: `ccd5affdc426016215bb443664dc653bba945d94`（未push）
 - A14-G checkpoint: `6e488bc50eb95535e39bcd2bb0c59268acbb9f7b`（未push）
 - A15-G checkpoint: `4d1d122b1c`（未push）
-- A16-G checkpoint: commit containing this acceptance record（未push）
+- A16-G checkpoint: `93540ca075`（未push）
+- A17-G checkpoint: the independent local commit containing the owner acceptance record（未push）
 
 ## Objective
 
@@ -60,6 +61,16 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- A17 addresses the owner's far horizontal cloud bands. The isolated native
+  reproduction identifies lossy depth reconstruction in final composition
+  and high/low cloud tracing. The [A17 phase](plans/2026-09-11-phase-a17g-far-cloud-depth.md)
+  applies existing precise native interfaces without temporal/resource changes.
+  Focused far-depth and native aerial/fog regressions pass; Architecture
+  code review and corrected high/medium reproduction are complete. Final
+  composition adds 0.022 ms median in the bounded comparison. On 2026-09-11,
+  the owner confirms “通过”; Architecture closes A17 using the existing evidence.
+  Its independent local checkpoint includes the acceptance record. No push or
+  successor activation accompanies closure; P1 remains deferred.
 - A16 implements the [model diagnosis](discussions/2026-09-11-model-environment-lighting.md)
   under [ADR-0054](../../Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md)
   and SGP-0010. Native PBR receives physical direct/diffuse sky and cloud

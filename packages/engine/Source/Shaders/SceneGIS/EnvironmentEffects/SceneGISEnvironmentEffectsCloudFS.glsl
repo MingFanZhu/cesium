@@ -108,9 +108,8 @@ void main()
         // clip the explicit A1/frustum ray. Clear sentinels never enter a
         // potentially undefined eye-space reconstruction.
         #ifdef SCENEGIS_GLOBE
-        vec4 eye = u_cloudTracePhased
-            ? czm_screenToEyeCoordinates(cloudCoordinates, rawDepth)
-            : czm_windowToEyeCoordinates(vec4(fullPixel, resolvedDepth, 1.0));
+        // Preserve log-depth precision for every Globe quality tier.
+        vec4 eye = czm_screenToEyeCoordinates(cloudCoordinates, rawDepth);
         #else
         vec4 eye = czm_windowToEyeCoordinates(vec4(fullPixel, resolvedDepth, 1.0));
         #endif
