@@ -3,16 +3,16 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P1 completed; successor source discovery next`
+- Current phase: `P2 completed — Planar physical lighting and cloud shadows`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P1 Planar restoration](reviews/2026-09-02-p1-planar-integrated-medium-restoration.md)
+  [P2 lighting and shadows](reviews/2026-09-11-p2-planar-lighting-cloud-shadows.md)
 - Current phase plan:
-  [P1 Planar restoration](plans/2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
+  [P2 lighting and shadows](plans/2026-09-11-phase-p2-planar-lighting-cloud-shadows.md)
 - Latest completed phase plan:
-  [A17 far cloud depth](plans/2026-09-11-phase-a17g-far-cloud-depth.md)
+  [P1 Planar restoration](plans/2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
@@ -34,7 +34,8 @@
   [ADR-0051](../../Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md),
   [ADR-0052](../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md),
   [ADR-0053](../../Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md),
-  [ADR-0054](../../Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md)
+  [ADR-0054](../../Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md),
+  [ADR-0055](../../Documentation/SceneGIS/Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md)
 - Upstream patches: active `SGP-0008` / `SGP-0009`（consume only in A16）、active `SGP-0010`（model source seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
@@ -63,6 +64,14 @@ HDR bloom/lens flare。两种世界共享光学参数、质量档、资源与合
 reference frame，不互相伪造坐标语义。
 
 ## Active work
+
+- P1 checkpoint: `4c847d6def` (local, not pushed). P2 activates from current
+  source under ADR-0055: Planar Beer atlas, physical model/surface lighting,
+  horizontal-origin precision and borrowed-resource lifecycle. Globe hooks
+  are consumed without new upstream changes. Agent performs visual acceptance.
+- P2 is completed and accepted after actual GPU, day/low-Sun visual, build/type
+  and ownership checks. See the current review for evidence and remaining
+  roadmap limits. The commit containing this record is its local checkpoint.
 
 - On 2026-09-11 the owner delegates visual acceptance of the remaining Planar
   adaptation stages to the current agent and authorizes continuous progress

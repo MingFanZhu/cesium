@@ -7,12 +7,14 @@ import {
   ClearCommand,
   Color,
   ColorGeometryInstanceAttribute,
+  ContextLimits,
   DirectionalLight,
   Ellipsoid,
   Framebuffer,
   GeometryInstance,
   Globe,
   JulianDate,
+  Material,
   Matrix3,
   Matrix4,
   Math as CesiumMath,
@@ -61,6 +63,7 @@ import cloudShadowSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffec
 import cloudShadowResolveSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISCloudShadowResolveFS.js";
 import globeSurfaceLightingSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISGlobeSurfaceLighting.js";
 import heightFogSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISExponentialHeightFog.js";
+import planarLighting from "../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarEnvironmentLighting.js";
 import globeCloudSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISGlobeClouds.js";
 import cloudSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISVolumetricClouds.js";
 
@@ -81,6 +84,7 @@ const globeShapeDetailLodMutationSource = globeCloudSource
   );
 
 const cloudShadowTestSource = `
+#define SCENEGIS_GLOBE
 const float SCENEGIS_BOTTOM_RADIUS = 6360000.0;
 ${cloudShadowSource}`;
 
@@ -3152,6 +3156,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     );
     expect(hardCascadeLibrary).not.toBe(cloudShadowSource);
     const hardCascadeTestSource = `
+#define SCENEGIS_GLOBE
 const float SCENEGIS_BOTTOM_RADIUS = 6360000.0;
 ${hardCascadeLibrary}`;
     const distances = [90.0, 99.9, 100.1, 110.0];
@@ -3378,6 +3383,180 @@ ${hardCascadeLibrary}`;
       atlas.destroy();
     }
   });
+
+  it("renders Planar P2 Beer shadows on the real surface with fixed Z, large XY, warm history and exact atlas lifetime", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    scene.canvas.width = 16;
+    scene.canvas.height = 16;
+    scene.world.baseColor = new Color(0.4, 0.4, 0.4, 1);
+    effects.cloudQuality = "low";
+    effects.surfaceRadianceScale = 1;
+    installSolidCloudTestTextures();
+    installControlledAtmosphereTextures("planar");
+    const time = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
+    const pipeline = effects._pipeline;
+    function render(x = 200000, y = 100000, z = 500) {
+      scene.camera.setView({
+        destination: new Cartesian3(x, y, z),
+        orientation: {
+          direction: new Cartesian3(0, 0, -1),
+          up: Cartesian3.UNIT_Y,
+        },
+      });
+      environment.update(scene, time);
+      effects.update(scene, time);
+      scene.renderForSpecs(time);
+      return readCenterPixel();
+    }
+    effects.showCloudShadows = false;
+    const lit = render();
+    scene.camera.setView({
+      destination: new Cartesian3(200000, 100000, 500),
+      orientation: {
+        direction: new Cartesian3(0, 0.87, -0.493),
+        up: new Cartesian3(0, 0.493, 0.87),
+      },
+    });
+    environment.update(scene, time);
+    effects.update(scene, time);
+    scene.renderForSpecs(time);
+    expect(readCenterPixel()).toEqualEpsilon(lit, 1);
+    render();
+    expect(scene.world.enableLighting).toBe(false);
+    const record = scene.frameState._sceneGISPlanarLighting;
+    expect(record.active).toBe(true);
+    expect(record.cameraRelativePosition).toEqual(new Cartesian3(0, 0, 500));
+    const surfaceProgram = scene.frameState.commandList.find((command) =>
+      command.shaderProgram?._fragmentShaderSource.sources.some((source) =>
+        source.includes("SCENEGIS_ADVANCED_LIGHTING"),
+      ),
+    ).shaderProgram;
+    const shadow = pipeline._globeShadowResources;
+    const producer = spyOn(shadow.command, "execute").and.callThrough();
+    const resolve = spyOn(shadow.resolveCommand, "execute").and.callThrough();
+    effects.showCloudShadows = true;
+    const dark = render();
+    expect(dark[0]).toBeLessThan(lit[0]);
+    expect(dark[0]).toBeGreaterThan(0);
+    expect(producer).toHaveBeenCalledTimes(2);
+    expect(resolve).toHaveBeenCalledTimes(1);
+    expect(pipeline._globeShadowResources).toBe(shadow);
+
+    function receiverHeights() {
+      return executeHalfFloatQuad(
+        [
+          planarLighting.source,
+          `
+        void main() {
+          float height = gl_FragCoord.x < 1.0 ? 0.0 : 10000.0;
+          float opticalDepth = sceneGISCloudShadowOpticalDepth(vec3(0.0, 0.0, height), 500.0);
+          out_FragColor = vec4(opticalDepth, exp(-opticalDepth), 0.0, 1.0);
+        }`,
+        ],
+        {
+          width: 2,
+          uniformMap: planarLighting.createUniformMap(
+            () => scene.frameState._sceneGISPlanarLighting,
+          ),
+        },
+      );
+    }
+    const heights = receiverHeights();
+    expect(heights[0][0]).toBeGreaterThan(0.1);
+    expect(heights[1][0]).toBe(0);
+    expect(heights[1][1]).toBe(1);
+    const material = Material.fromType(Material.ColorType, {
+      color: Color.RED,
+    });
+    scene.world.material = material;
+    const styled = render();
+    expect(styled[0]).toBeGreaterThan(0);
+    expect(styled[1]).toBe(0);
+    // Material preflight eagerly compiles both geometric and smooth variants.
+    const surface = scene.world._surface;
+    expect(surface._materialShaderSources.size).toBe(2);
+    const priorCommands = surface._renderCommands.slice();
+    const priorRecord = surface._environmentLighting;
+    const samplerLimit = ContextLimits._maximumTextureImageUnits;
+    try {
+      ContextLimits._maximumTextureImageUnits = 2;
+      const frame = {
+        ...scene.frameState,
+        frameNumber: scene.frameState.frameNumber + 1,
+        passes: { render: true },
+        commandList: [],
+      };
+      scene.world.beginFrame(frame);
+      expect(() => scene.world.render(frame)).toThrowDeveloperError();
+      expect(surface._renderCommands).toEqual(priorCommands);
+      expect(surface._environmentLighting).toBe(priorRecord);
+      expect(frame.commandList).toEqual([]);
+    } finally {
+      ContextLimits._maximumTextureImageUnits = samplerLimit;
+      scene.world.material = undefined;
+      material.destroy();
+    }
+
+    render(20000000, -30000000);
+    expect(receiverHeights()[0][0]).toBeGreaterThan(0.1);
+    effects.cloudTime = 0.5;
+    render(20000001, -30000000);
+    expect(shadow.historyValid).toBe(true);
+    expect(pipeline._shadowOriginDelta).toEqual(new Cartesian3(1, 0, 0));
+    expect(receiverHeights()[0].every(Number.isFinite)).toBe(true);
+    const velocity = executeHalfFloatQuad(
+      [
+        `uniform sampler2D u_velocity;
+      void main() {out_FragColor = texture(u_velocity, vec2(0.25));}`,
+      ],
+      {
+        uniformMap: {
+          u_velocity: () => shadow.currentFramebuffer.getColorTexture(1),
+        },
+      },
+    )[0];
+    expect(velocity.every(Number.isFinite)).toBe(true);
+    expect(Math.abs(velocity[1]) + Math.abs(velocity[2])).toBeGreaterThan(0);
+
+    effects.cloudPreset = "cirrus";
+    render();
+    expect(scene.frameState._sceneGISPlanarLighting.showCloudShadows).toBe(
+      false,
+    );
+    expect(pipeline._globeShadowResources).toBe(shadow);
+    const shadowFramebuffers = [
+      shadow.currentFramebuffer,
+      shadow.historyFramebuffer0,
+      shadow.historyFramebuffer1,
+    ].map((manager) => manager.framebuffer);
+    const shadowTextures = [
+      shadow.currentFramebuffer.getColorTexture(0),
+      shadow.currentFramebuffer.getColorTexture(1),
+      shadow.historyFramebuffer0.getColorTexture(0),
+      shadow.historyFramebuffer1.getColorTexture(0),
+    ];
+    expect(
+      shadowTextures.reduce((sum, texture) => sum + texture.sizeInBytes, 0),
+    ).toBe(8388608);
+    effects.enabled = false;
+    expect(scene.frameState._sceneGISPlanarLighting).toBeUndefined();
+    shadowFramebuffers.forEach((framebuffer) =>
+      expect(framebuffer.isDestroyed()).toBe(true),
+    );
+    shadowTextures.forEach((texture) =>
+      expect(texture.isDestroyed()).toBe(true),
+    );
+    scene.renderForSpecs(time);
+    expect(
+      scene.frameState.commandList.some(
+        (command) => command.shaderProgram === surfaceProgram,
+      ),
+    ).toBe(false);
+    expect(pipeline._resources.transmittanceTexture.isDestroyed()).toBe(false);
+  }, 120000);
 
   it("marches controlled cloud density into the bounded Beer atlas on the actual GPU", async function () {
     await connectControlledCloudMode("globe", function () {
@@ -7701,17 +7880,19 @@ ${hardCascadeLibrary}`;
     await publishPlanarResources();
   });
 
-  it("keeps both hidden at zero work and allocates aerial HDR only on demand", async function () {
+  it("keeps hidden Planar medium passes idle while physical lighting is ready and allocates aerial HDR only on demand", async function () {
     connectPlanar();
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
     }
     effects.showAtmosphere = false;
     effects.showAerialPerspective = false;
-    effects.firstUpdate(scene, scene.frameState.time);
-    effects.update(scene, scene.frameState.time);
-    expect(effects.ready).toBe(false);
-    expect(effects._pipeline._resources).toBeUndefined();
+    await publishPlanarResources();
+    expect(effects.ready).toBe(true);
+    expect(scene.frameState._sceneGISPlanarLighting.active).toBe(true);
+    const resources = effects._pipeline._resources;
+    expect(resources.aerialFramebuffer).toBeUndefined();
+    expect(resources.cloudFramebuffer).toBeUndefined();
 
     effects.showAtmosphere = true;
     await pollToPromise(function () {
@@ -7719,6 +7900,7 @@ ${hardCascadeLibrary}`;
       return effects.ready;
     });
     scene.renderForSpecs();
+    expect(effects._pipeline._resources).toBe(resources);
     expect(effects._pipeline._resources.aerialFramebuffer).toBeUndefined();
 
     effects.showAerialPerspective = true;

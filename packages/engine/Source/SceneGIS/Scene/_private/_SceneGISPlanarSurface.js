@@ -15,6 +15,7 @@ import ShaderProgram from "../../../Renderer/ShaderProgram.js";
 import Texture from "../../../Renderer/Texture.js";
 import VertexArray from "../../../Renderer/VertexArray.js";
 import SceneGISPlanarImagery from "./_SceneGISPlanarImagery.js";
+import SceneGISPlanarEnvironmentLighting from "./_SceneGISPlanarEnvironmentLighting.js";
 import SceneGISPlanarQuadtree from "./_SceneGISPlanarQuadtree.js";
 import SceneGISPlanarSurfaceShader from "./_SceneGISPlanarSurfaceShader.js";
 import SceneGISPlanarTerrain from "./_SceneGISPlanarTerrain.js";
@@ -61,6 +62,7 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
   this._renderState = undefined;
   this._baseColor = undefined;
   this._lambertDiffuseMultiplier = 0.9;
+  this._environmentLighting = undefined;
   this._frameNumber = -1;
   this._renderedFrameNumber = -1;
   this._renderCommands = [];
@@ -230,12 +232,14 @@ function getShaderProgram(
   enableLighting,
   normalMode,
   materialSource,
+  advancedLighting,
 ) {
   const key = getShaderKey(
     layerCount,
     enableLighting,
     normalMode,
     materialSource,
+    advancedLighting,
   );
   let shader = surface._shaderPrograms.get(key);
   if (!shader) {
@@ -245,6 +249,7 @@ function getShaderProgram(
       enableLighting,
       normalMode,
       materialSource,
+      advancedLighting,
     );
     surface._shaderPrograms.set(key, shader);
     if (defined(materialSource)) {
@@ -256,11 +261,17 @@ function getShaderProgram(
   return shader;
 }
 
-function getShaderKey(layerCount, enableLighting, normalMode, materialSource) {
+function getShaderKey(
+  layerCount,
+  enableLighting,
+  normalMode,
+  materialSource,
+  advancedLighting,
+) {
   const materialKey = defined(materialSource)
     ? `/material/${materialSource}`
     : "";
-  return `${layerCount}/${enableLighting ? 1 : 0}/${normalMode}${materialKey}`;
+  return `${layerCount}/${enableLighting ? 1 : 0}/${normalMode}/${advancedLighting ? 1 : 0}${materialKey}`;
 }
 
 function createShaderProgram(
@@ -269,6 +280,7 @@ function createShaderProgram(
   enableLighting,
   normalMode,
   materialSource,
+  advancedLighting,
 ) {
   return ShaderProgram.fromCache({
     context,
@@ -276,12 +288,14 @@ function createShaderProgram(
       enableLighting,
       normalMode,
       defined(materialSource),
+      advancedLighting,
     ),
     fragmentShaderSource: SceneGISPlanarSurfaceShader.createFragmentShader(
       layerCount,
       enableLighting,
       normalMode,
       materialSource,
+      advancedLighting,
     ),
     attributeLocations:
       normalMode === "smooth" ? { position: 0, normal: 1 } : { position: 0 },
@@ -294,6 +308,7 @@ function preflightMaterialShaders(
   layerCount,
   enableLighting,
   materialSource,
+  advancedLighting,
 ) {
   if (!defined(materialSource)) {
     return;
@@ -306,6 +321,7 @@ function preflightMaterialShaders(
         enableLighting,
         normalMode,
         materialSource,
+        advancedLighting,
       );
       if (surface._shaderPrograms.has(key)) {
         continue;
@@ -316,6 +332,7 @@ function preflightMaterialShaders(
         enableLighting,
         normalMode,
         materialSource,
+        advancedLighting,
       );
       candidates.push({ key, shader });
       shader._bind();
@@ -333,13 +350,27 @@ function preflightMaterialShaders(
   }
 }
 
-function createUniformMap(surface, tile, layerCount, enableLighting, material) {
+function createUniformMap(
+  surface,
+  tile,
+  layerCount,
+  enableLighting,
+  material,
+  advancedLighting,
+) {
   const uniformMap = {
     u_color: function () {
       return surface._baseColor;
     },
   };
-  if (enableLighting) {
+  if (advancedLighting) {
+    Object.assign(
+      uniformMap,
+      SceneGISPlanarEnvironmentLighting.createUniformMap(
+        () => surface._environmentLighting,
+      ),
+    );
+  } else if (enableLighting) {
     uniformMap.u_lambertDiffuseMultiplier = function () {
       return surface._lambertDiffuseMultiplier;
     };
@@ -376,10 +407,17 @@ function createUniformMap(surface, tile, layerCount, enableLighting, material) {
   return uniformMap;
 }
 
-function getCommand(surface, tile, layerCount, enableLighting, material) {
+function getCommand(
+  surface,
+  tile,
+  layerCount,
+  enableLighting,
+  material,
+  advancedLighting,
+) {
   const terrainContent = tile.terrainEntry?.activeContent;
   const terrainReady = defined(terrainContent?.mesh);
-  const needsNormal = enableLighting || defined(material);
+  const needsNormal = enableLighting || advancedLighting || defined(material);
   const normalMode = needsNormal
     ? terrainReady
       ? "smooth"
@@ -393,6 +431,7 @@ function getCommand(surface, tile, layerCount, enableLighting, material) {
     enableLighting,
     normalMode,
     materialSource,
+    advancedLighting,
   );
   if (!defined(tile.command)) {
     tile.command = new DrawCommand({
@@ -408,6 +447,7 @@ function getCommand(surface, tile, layerCount, enableLighting, material) {
         layerCount,
         enableLighting,
         material,
+        advancedLighting,
       ),
       renderState: surface._renderState,
       pass: Pass.GLOBE,
@@ -436,6 +476,7 @@ function getCommand(surface, tile, layerCount, enableLighting, material) {
       layerCount,
       enableLighting,
       material,
+      advancedLighting,
     );
     tile._imageryCommandLayerCount = layerCount;
     tile._lightingCommandEnabled = enableLighting;
@@ -605,12 +646,15 @@ SceneGISPlanarSurface.prototype.render = function (
     ? countMaterialSamplers(material.shaderSource)
     : 0;
   const shownLayerCount = getShownLayerCount(this);
+  const environmentLighting = frameState._sceneGISPlanarLighting;
+  const advancedLighting = environmentLighting?.active === true;
+  const lightingSamplerCount = advancedLighting ? 3 : 0;
   if (
-    shownLayerCount + materialSamplerCount >
+    shownLayerCount + materialSamplerCount + lightingSamplerCount >
     ContextLimits.maximumTextureImageUnits
   ) {
     throw new DeveloperError(
-      "The combined planar imagery and Material sampler count exceeds maximumTextureImageUnits.",
+      "The combined planar imagery, Material and environment sampler count exceeds maximumTextureImageUnits.",
     );
   }
   if (defined(material)) {
@@ -621,6 +665,7 @@ SceneGISPlanarSurface.prototype.render = function (
       shownLayerCount,
       enableLighting,
       material.shaderSource,
+      advancedLighting,
     );
   }
   const shownLayers = getShownLayers(this);
@@ -629,6 +674,7 @@ SceneGISPlanarSurface.prototype.render = function (
   this._renderCommands.length = 0;
   this._baseColor = baseColor;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
+  this._environmentLighting = environmentLighting;
   const desiredTiles = this._quadtree.selectTiles(
     frameState,
     maximumLevel,
@@ -694,6 +740,7 @@ SceneGISPlanarSurface.prototype.render = function (
       shownLayers.length,
       enableLighting,
       material,
+      advancedLighting,
     );
     frameState.commandList.push(command);
     this._renderCommands.push(command);

@@ -392,6 +392,11 @@ void sceneGISCloudPresetSupport(
         vec4 descriptor = sceneGISGlobeCloudLayerDescriptor(preset, layer);
         #else
         vec4 descriptor = sceneGISCloudLayerDescriptor(preset, layer);
+        #ifdef SCENEGIS_CLOUD_SHADOW_PASS
+        if (preset == 2 || (preset == 3 && layer >= 2)) {
+            continue;
+        }
+        #endif
         #endif
         if (descriptor.z <= 0.0) {
             continue;
@@ -483,6 +488,11 @@ float sceneGISCloudDensitySample(
     float accumulatedHeightGradient = 0.0;
     for (int layer = 0; layer < 4; ++layer) {
         vec4 descriptor = sceneGISCloudLayerDescriptor(cloudPreset, layer);
+        #ifdef SCENEGIS_CLOUD_SHADOW_PASS
+        if (cloudPreset == 2 || (cloudPreset == 3 && layer >= 2)) {
+            continue;
+        }
+        #endif
         if (descriptor.z <= 0.0) {
             continue;
         }

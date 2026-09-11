@@ -30,6 +30,7 @@ const state = {
   showAerialPerspective: true,
   showHeightFog: true,
   showClouds: true,
+  showCloudShadows: true,
   cloudQuality: "medium",
   cloudPreset: "cumulus",
   cloudCoverage: 0.45,
@@ -38,12 +39,14 @@ const state = {
   cloudRadianceScale: 48.0,
   backgroundRadianceScale: 10.0,
   aerialRadianceScale: 1.0,
+  surfaceRadianceScale: 10.0,
   day: () => applyLighting("day"),
   sunset: () => applyLighting("sunset"),
   night: () => applyLighting("night"),
   ground: () => applyCamera("ground"),
   aboveCloud: () => applyCamera("aboveCloud"),
   nearSpace: () => applyCamera("nearSpace"),
+  models: () => applyCamera("models"),
   baseline: () => applyCompositionState("baseline"),
   aerialOnly: () => applyCompositionState("aerial"),
   fogOnly: () => applyCompositionState("fog"),
@@ -70,6 +73,9 @@ const compositionLabels = Object.freeze({
 });
 
 function getCompositionState() {
+  if (!effects.enabled) {
+    return "baseline";
+  }
   const actual = [
     effects.showAtmosphere,
     effects.showAerialPerspective,
@@ -90,6 +96,11 @@ const lighting = Object.freeze({
 });
 
 const cameras = Object.freeze({
+  models: {
+    destination: new Cesium.Cartesian3(90000, -146000, 2000),
+    direction: new Cesium.Cartesian3(0, 0.87, -0.493),
+    up: new Cesium.Cartesian3(0, 0.493, 0.87),
+  },
   ground: {
     destination: new Cesium.Cartesian3(0.0, -180000.0, 5000.0),
     direction: new Cesium.Cartesian3(0.0, 0.98, -0.2),
@@ -129,6 +140,7 @@ function applyCamera(name) {
 }
 
 function applyCompositionState(name) {
+  state.enabled = effects.enabled = name !== "baseline";
   const [atmosphere, aerial, fog, clouds] = compositionStates[name];
   state.showAtmosphere = effects.showAtmosphere = atmosphere;
   state.showAerialPerspective = effects.showAerialPerspective = aerial;
@@ -169,6 +181,28 @@ function addLocalGeometry(scene) {
   );
 }
 
+async function addLightingModels(scene) {
+  for (const x of [88000, 90000, 92000]) {
+    const model = await Cesium.Model.fromGltfAsync({
+      url: "/Specs/Data/Models/glTF-2.0/Box/glTF/Box.gltf",
+      modelMatrix: Cesium.Matrix4.fromTranslation(
+        new Cesium.Cartesian3(x, -143000, 400),
+      ),
+      scale: 800,
+      imageBasedLighting: new Cesium.ImageBasedLighting({
+        imageBasedLightingFactor: new Cesium.Cartesian2(1, 0),
+      }),
+    });
+    if (destroyed) {
+      model.destroy();
+      return;
+    }
+    model.environmentMapManager.enabled = false;
+    scene.primitives.add(model);
+    scene.requestRender();
+  }
+}
+
 function createGui() {
   gui = new GUI({ title: "平面天空与体积云", width: 330 });
   const effectsFolder = gui.addFolder("效果");
@@ -207,6 +241,25 @@ function createGui() {
   );
 
   const cloudFolder = gui.addFolder("云与大气参数");
+  bindBoolean(
+    effectsFolder,
+    state,
+    "showCloudShadows",
+    effects,
+    viewer.scene,
+    "云影",
+  );
+  bindNumber(
+    cloudFolder,
+    state,
+    "surfaceRadianceScale",
+    effects,
+    viewer.scene,
+    "地表与模型亮度",
+    0,
+    64,
+    0.1,
+  );
   cloudFolder
     .add(state, "cloudQuality", { 低: "low", 中: "medium", 高: "high" })
     .name("云质量")
@@ -307,6 +360,7 @@ function createGui() {
   presets.add(state, "ground").name("地面");
   presets.add(state, "aboveCloud").name("云上");
   presets.add(state, "nearSpace").name("高空");
+  presets.add(state, "models").name("模型光照");
   presets.add(state, "destroySample").name("释放场景");
 }
 
@@ -314,7 +368,7 @@ function getState() {
   const scene = viewer?.isDestroyed() === false ? viewer.scene : undefined;
   return {
     page: "planar",
-    phase: "P1",
+    phase: "P2",
     compositionState: effects ? getCompositionState() : undefined,
     destroyed,
     ready: effects?.ready === true,
@@ -383,6 +437,7 @@ try {
   viewer.addController(environment);
   viewer.addController(effects);
   addLocalGeometry(viewer.scene);
+  addLightingModels(viewer.scene).catch((error) => errorTracker.record(error));
   createGui();
   applyCamera("ground");
   applyCompositionState("combined");

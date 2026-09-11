@@ -526,15 +526,6 @@ function activate(controller, scene, time) {
   acquireGlobeDepthTestLifecycle(controller, scene);
   acquireGlobeCelestialLifecycle(controller, scene);
   ensurePipeline(controller, scene);
-  if (
-    controller._mode !== globeMode &&
-    !controller._showAtmosphere &&
-    !controller._showAerialPerspective &&
-    !controller._showHeightFog &&
-    !controller._showClouds
-  ) {
-    return;
-  }
   if (controller._pipeline.hasResources()) {
     controller._ready = true;
     controller._pipeline.prepareGlobeLighting(scene.frameState, time);
@@ -959,7 +950,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the Globe and physical model scene-linear direct and diffuse sky radiance scale.
+   * Gets or sets the Globe, Planar surface and physical model direct and diffuse sky radiance scale.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
@@ -1155,7 +1146,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether volumetric clouds attenuate direct Sun on the Globe.
+   * Gets or sets whether volumetric clouds attenuate direct light on supported surfaces and models.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1502,14 +1493,7 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
     this._pipeline.prepareGlobeLighting(scene.frameState, time);
     updateGlobeCelestialLifecycle(this);
   }
-  if (
-    !this._pipeline.hasResources() &&
-    (this._mode === globeMode ||
-      this._showAtmosphere ||
-      this._showAerialPerspective ||
-      this._showHeightFog ||
-      this._showClouds)
-  ) {
+  if (!this._pipeline.hasResources()) {
     beginGeneration(this, scene);
   }
   publishPendingResources(this, scene);
@@ -1540,7 +1524,7 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [showAerialPerspective=true] Whether to composite opaque geometry aerial perspective.
  * @property {boolean} [showHeightFog=true] Whether to apply single-layer exponential height fog.
  * @property {boolean} [showClouds=true] Whether to render the single-deck volumetric cloud core.
- * @property {boolean} [showCloudShadows=true] Whether volumetric clouds attenuate direct Sun on the Globe.
+ * @property {boolean} [showCloudShadows=true] Whether volumetric clouds attenuate direct light on supported surfaces and models.
  * @property {boolean} [showCrepuscularRays=true] Whether cloud shadow length modulates atmosphere and fog Sun inscatter.
  * @property {boolean} [showBloom=true] Whether Globe scene-wide HDR bloom is shown.
  * @property {boolean} [showLensFlare=true] Whether Globe Sun-gated lens artifacts are shown.
@@ -1557,7 +1541,7 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [cloudRadianceScale] Cloud radiance calibration in the inclusive range 0–64. On Globe, this is relative to backgroundRadianceScale and defaults to 1.0; on Planar, it remains the absolute scene-linear scale and defaults to 48.0.
  * @property {number} [backgroundRadianceScale] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64. Defaults to 4.0 on Globe and 10.0 on Planar.
  * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64. On Globe, this is relative to backgroundRadianceScale; on Planar, it is the absolute scene-linear scale applied to physical aerial radiance.
- * @property {number} [surfaceRadianceScale=10.0] Globe and physical model direct/diffuse sky radiance scale, in the inclusive range 0–64.
+ * @property {number} [surfaceRadianceScale=10.0] Globe, Planar surface and physical model direct/diffuse sky radiance scale, in the inclusive range 0–64.
  * @property {number} [bloomThreshold=10.0] Globe HDR bloom threshold in the inclusive RGBA16F range 0–65504.
  * @property {number} [bloomIntensity=0.05] Globe scene-wide bloom intensity in the inclusive range 0–64.
  * @property {number} [lensFlareIntensity=5.0] Globe Sun-gated lens artifact intensity in the inclusive range 0–64.

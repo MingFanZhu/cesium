@@ -1,3 +1,4 @@
+#ifdef SCENEGIS_GLOBE
 uniform sampler2D u_sceneGISTransmittanceTexture;
 uniform sampler2D u_sceneGISIrradianceTexture;
 uniform float u_surfaceRadianceScale;
@@ -62,3 +63,19 @@ vec3 sceneGISModelSkyIrradiance(vec3 positionEC, vec3 normalEC)
     // Native diffuse IBL expects irradiance/pi before its material weighting.
     return max(sky, vec3(0.0)) * (u_surfaceRadianceScale / czm_pi);
 }
+#else
+vec3 sceneGISModelDirectSource(vec3 positionEC, vec3 nativeSource)
+{
+    #ifdef USE_CUSTOM_LIGHT_COLOR
+    vec3 source = nativeSource;
+    #else
+    vec3 source = sceneGISPlanarDirectSource(positionEC);
+    #endif
+    return source * sceneGISPlanarCloudTransmittance(positionEC);
+}
+
+vec3 sceneGISModelSkyIrradiance(vec3 positionEC, vec3 normalEC)
+{
+    return sceneGISPlanarSkySource(positionEC, normalEC);
+}
+#endif

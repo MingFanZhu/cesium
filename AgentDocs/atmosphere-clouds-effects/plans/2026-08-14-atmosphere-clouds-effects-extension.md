@@ -8,7 +8,7 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-11`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P1 completed; successor discovery next`
+- Current phase: `P2 completed — Planar lighting and cloud shadows`
 - Current gate: P1 checkpoint after delegated visual review and owner confirmation of global
   metric Planar use across multiple/custom CRS; EPSG:3857 is only the sample.
   See
@@ -17,7 +17,7 @@
   `3cdd2958d1`; Architecture has accepted its foundational visual result under
   the owner's September 11 delegation.
 - Current phase plan:
-  [P1 Planar restoration](2026-09-02-phase-p1-planar-integrated-medium-restoration.md)
+  [P2 lighting and shadows](2026-09-11-phase-p2-planar-lighting-cloud-shadows.md)
 - Latest completed phase plan:
   [A17 far cloud depth](2026-09-11-phase-a17g-far-cloud-depth.md)
 - A15 diagnosis:
@@ -57,7 +57,8 @@
 - A14-G implementation: `completed; Architecture approved; owner gate passed`
 - A15-G implementation: `completed; bounded quality accepted; local checkpoint`
 - A16-G implementation: `completed; Architecture approved; owner gate passed`
-- P1 implementation: `deferred before review; candidate not accepted`
+- P1 implementation: `completed; delegated visual review; checkpoint 4c847d6def`
+- P2 implementation: `completed; source/GPU/visual/build/types accepted; local checkpoint`
 
 ## Goal
 
@@ -373,7 +374,18 @@ reprojection with history clipping. Architecture accepts this foundation under
 the owner's delegated visual-review authority; the commit containing this
 record is its independent checkpoint.
 
-### P2+ — Later Planar advanced-effects adaptation (`deferred`)
+### P2 — Planar physical lighting and cloud shadows (`completed`)
+
+P1 checkpoint `4c847d6def` closes the foundation. Current-source discovery
+activates [P2](2026-09-11-phase-p2-planar-lighting-cloud-shadows.md) under
+ADR-0055: shared Beer resources with fixed-Z producer/receiver geometry,
+Planar surface and native PBR lighting, precision and lifecycle qualification.
+The owner delegates visual acceptance and continuation after verified stages.
+All planned P2 work and Architecture review are complete. The independent
+commit containing this closure is the P2 checkpoint; review retains remaining
+cloud morphology, rays, HDR and night/celestial scope for successor phases.
+
+### P3+ — Remaining Planar advanced-effects adaptation (`deferred`)
 
 After P1's independent checkpoint, adapt the remaining stack in bounded phases:
 cloud material/detail and further temporal quality beyond P1 reprojection; physical Sun/sky lighting with

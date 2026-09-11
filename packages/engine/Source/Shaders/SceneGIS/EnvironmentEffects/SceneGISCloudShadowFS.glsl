@@ -41,9 +41,13 @@ uniform bool u_cloudUseDetail;
 uniform sampler3D u_cloudShapeTexture;
 uniform sampler3D u_cloudDetailTexture;
 uniform sampler2D u_cloudWeatherTexture;
-uniform sampler2D u_cloudTurbulenceTexture;
+uniform SCENEGIS_CLOUD_TURBULENCE_SAMPLER u_cloudTurbulenceTexture;
 uniform sampler3D u_cloudStbnTexture;
 uniform float u_cloudStbnSlice;
+#ifndef SCENEGIS_GLOBE
+uniform vec3 u_sceneGISShadowOrigin;
+uniform vec3 u_sceneGISShadowOriginDelta;
+#endif
 
 void sceneGISShadowIcosahedralVertices(
     vec3 direction,
@@ -172,6 +176,7 @@ void main()
     vec3 rayDirection = normalize(u_sceneGISShadowRayDirection);
     float supportBaseHeight;
     float supportThickness;
+    #ifdef SCENEGIS_GLOBE
     sceneGISGlobeCloudShadowPresetSupport(
         u_cloudPreset,
         u_baseHeight + u_cloudBaseHeight,
@@ -208,6 +213,21 @@ void main()
             bottomFar) && bottomNear > segmentStart) {
         segmentEnd = min(segmentEnd, bottomNear);
     }
+    #else
+    sceneGISCloudPresetSupport(u_cloudPreset, u_cloudBaseHeight, u_cloudThickness,
+        supportBaseHeight, supportThickness);
+    if (rayDirection.z >= 0.0 || supportThickness <= 0.0) {
+        out_FragData_0 = vec4(0.0);
+        out_FragData_1 = vec4(0.0);
+        return;
+    }
+    vec3 rayOrigin = (u_sceneGISCloudShadowInverseMatrices[cascadeIndex] *
+        vec4(v_textureCoordinates * 2.0 - 1.0, 0.0, 1.0)).xyz;
+    rayOrigin += rayDirection *
+        ((supportBaseHeight + supportThickness - rayOrigin.z) / rayDirection.z);
+    float segmentStart = 0.0;
+    float segmentEnd = min(supportThickness / -rayDirection.z, SCENEGIS_CLOUD_SHADOW_MAX_LENGTH);
+    #endif
     if (segmentEnd <= segmentStart) {
         out_FragData_0 = vec4(0.0);
         out_FragData_1 = vec4(0.0);
@@ -235,7 +255,11 @@ void main()
     float stepLength;
     sceneGISShadowStructuredPlanes(
         structureNormal,
+        #ifdef SCENEGIS_GLOBE
         segmentOriginWorld,
+        #else
+        segmentOriginWorld + u_sceneGISShadowOrigin,
+        #endif
         rayDirection,
         samplePeriod,
         stepOffset,
@@ -264,6 +288,7 @@ void main()
         }
         float distance = segmentStart + rayDistance;
         vec3 globePosition = rayOrigin + rayDirection * distance;
+        #ifdef SCENEGIS_GLOBE
         vec3 globeOffset = sceneGISGlobeCloudOffset(
             globePosition,
             u_cloudOffset);
@@ -284,6 +309,16 @@ void main()
             materialMipLevel,
             jitter,
             unusedHeightGradient);
+        #else
+        float unusedHeightGradient;
+        float normalizedDensity = sceneGISCloudDensitySample(
+            u_cloudShapeTexture, u_cloudDetailTexture, u_cloudWeatherTexture,
+            u_cloudTurbulenceTexture, globePosition, vec3(0.0), vec3(0.0),
+            u_sceneGISShadowOrigin.xy, u_cloudOffset, u_cloudBaseHeight,
+            u_cloudThickness, u_cloudCoverage, u_cloudPreset,
+            u_cloudUseDetail ? 1.0 : 0.0, u_sceneGISShadowFootprint,
+            jitter, unusedHeightGradient);
+        #endif
         float extinction = max(normalizedDensity * u_cloudDensity, 0.0);
         if (extinction > 1.0e-5) {
             float stepOpticalDepth = extinction * stepLength;
@@ -314,6 +349,7 @@ void main()
         min(tail, 80.0));
     vec3 frontPosition = rayOrigin + rayDirection *
         (segmentStart + frontDepth);
+    #ifdef SCENEGIS_GLOBE
     vec3 currentMaterialOffset = sceneGISGlobeCloudOffset(
         frontPosition,
         u_cloudOffset);
@@ -322,6 +358,10 @@ void main()
         u_sceneGISCloudShadowPreviousCloudOffset);
     vec3 previousFrontPosition = frontPosition +
         currentMaterialOffset - previousMaterialOffset;
+    #else
+    vec3 previousFrontPosition = frontPosition + u_sceneGISShadowOriginDelta +
+        vec3(u_cloudOffset - u_sceneGISCloudShadowPreviousCloudOffset, 0.0);
+    #endif
     vec4 previousClip =
         u_sceneGISCloudShadowPreviousMatrices[
             cascadeIndex] *

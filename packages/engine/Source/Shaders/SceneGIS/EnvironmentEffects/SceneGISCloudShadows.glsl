@@ -118,6 +118,11 @@ vec2 sceneGISCloudShadowAtlasOffset(int cascade)
 float sceneGISCloudShadowDistanceToTop(vec3 globePosition)
 {
     vec3 sunDirection = normalize(u_sceneGISShadowSunDirection);
+    #ifndef SCENEGIS_GLOBE
+    return sunDirection.z > 0.0
+        ? max((u_sceneGISShadowCloudTop - globePosition.z) / sunDirection.z, 0.0)
+        : 0.0;
+    #else
     float projected = dot(globePosition, sunDirection);
     float topRadius = SCENEGIS_BOTTOM_RADIUS + u_sceneGISShadowCloudTop;
     float discriminant = projected * projected -
@@ -126,6 +131,7 @@ float sceneGISCloudShadowDistanceToTop(vec3 globePosition)
         return 0.0;
     }
     return max(-projected + sqrt(max(discriminant, 0.0)), 0.0);
+    #endif
 }
 
 float sceneGISCloudShadowCascadeOpticalDepth(
@@ -297,9 +303,13 @@ float sceneGISCloudBodyShadowCascadeOpticalDepth(
 {
     // Match the fixed reference: cloud-body BSM sampling is raw for ordinary
     // Sun elevations and uses the accepted receiver filter only near horizon.
+    #ifdef SCENEGIS_GLOBE
     float localSunElevation = dot(
         normalize(globePosition),
         normalize(u_sceneGISShadowSunDirection));
+    #else
+    float localSunElevation = normalize(u_sceneGISShadowSunDirection).z;
+    #endif
     if (localSunElevation >= 0.1) {
         return sceneGISCloudShadowCascadeRawOpticalDepth(
             globePosition,

@@ -305,6 +305,12 @@ Planar必须继续使用fixed `+Z` atmosphere/fog/cloud slab、
 authority；历史白屏截图不构成调参、hidden multiplier或球面替代的根因证据。完整阶段与零资源/API/upstream增量边界见
 [ADR-0052](Decisions/ADR-0052-planar-integrated-medium-restoration.md)。
 
+P2依据[ADR-0055](Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md)扩展平面光照：
+独立frame-local Planar record借用物理LUT与Beer atlas，模型复用`SGP-0010`源光照接口，地表在imagery/material合成后应用Sun/sky。
+Beer producer与receiver均采用固定Z云底/云顶，阴影矩阵使用CPU水平原点差，Z保持绝对高度；不得转换为ECEF。
+云影仅衰减direct光，保留原生PBR/emissive、调用方SH/lightColor与Cesium几何阴影控制。
+地表预检必须计入3个环境sampler。Planar rays、HDR后处理与夜间天体后续独立适配。
+
 ### 平面地形 Core 契约
 
 平面地形使用独立的 `SceneGISPlanarTerrainProvider`、`SceneGISPlanarTerrainData` 和

@@ -8,6 +8,7 @@ import runtime from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunet
 import atmosphere from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
 import shadows from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISCloudShadows.js";
 import lighting from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISModelEnvironmentLighting.js";
+import planarLighting from "./_SceneGISPlanarEnvironmentLighting.js";
 
 const uniforms = {
   u_sceneGISCloudShadowAtlas: "atlasTexture",
@@ -26,17 +27,22 @@ const uniforms = {
 };
 
 /**
- * Borrows the active Globe lighting record for native model PBR.
+ * Borrows the active world lighting record for native model PBR.
  * @private
  */
 const SceneGISModelEnvironmentLighting = {
   update(model, frameState) {
+    const planar = frameState._sceneGISPlanarLighting?.active === true;
     const active =
       frameState.mode === SceneMode.SCENE3D &&
-      frameState._sceneGISGlobeLighting?.active === true &&
+      (frameState._sceneGISGlobeLighting?.active === true || planar) &&
       !defined(model.classificationType);
-    if (active !== (model._sceneGISEnvironmentLighting === true)) {
+    if (
+      active !== (model._sceneGISEnvironmentLighting === true) ||
+      (active && planar !== (model._sceneGISPlanarEnvironmentLighting === true))
+    ) {
       model._sceneGISEnvironmentLighting = active;
+      model._sceneGISPlanarEnvironmentLighting = active && planar;
       model.resetDrawCommands();
     }
   },
@@ -60,6 +66,16 @@ const SceneGISModelEnvironmentLighting = {
         fragment,
       );
       shaderBuilder.addDefine("DIFFUSE_IBL", undefined, fragment);
+    }
+    if (model._sceneGISPlanarEnvironmentLighting === true) {
+      shaderBuilder.addFragmentLines([planarLighting.source, lighting]);
+      Object.assign(
+        uniformMap,
+        planarLighting.createUniformMap(
+          () => frameState._sceneGISPlanarLighting,
+        ),
+      );
+      return;
     }
     for (const [name, value] of Object.entries({
       SCENEGIS_GLOBE: undefined,

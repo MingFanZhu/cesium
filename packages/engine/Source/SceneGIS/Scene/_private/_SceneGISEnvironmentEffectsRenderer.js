@@ -145,10 +145,24 @@ const globeCloudShadowLayerProfiles = Object.freeze({
   ]),
 });
 
+const planarCloudShadowLayerProfiles = Object.freeze({
+  cumulus: [[0.0, 1.0]],
+  stratus: [[500.0, 0.4]],
+  cirrus: [],
+  mixed: [
+    [0.0, 0.85],
+    [4200.0, 0.34],
+  ],
+});
+
 function updateGlobeCloudShadowSupport(renderer) {
   const cloudBaseHeight =
     renderer._frame.baseHeight + renderer._owner._cloudBaseHeight;
-  const layers = globeCloudShadowLayerProfiles[renderer._owner._cloudPreset];
+  const profiles =
+    renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
+      ? globeCloudShadowLayerProfiles
+      : planarCloudShadowLayerProfiles;
+  const layers = profiles[renderer._owner._cloudPreset];
   let bottom = Number.POSITIVE_INFINITY;
   let top = Number.NEGATIVE_INFINITY;
   for (let index = 0; index < layers.length; index++) {
@@ -522,7 +536,13 @@ function createProgram(
         cloudLibrarySource,
         fragmentSource,
       ]
-    : [atmosphereSource, heightFogSource, cloudLibrarySource, fragmentSource];
+    : [
+        atmosphereSource,
+        cloudShadowSource,
+        heightFogSource,
+        cloudLibrarySource,
+        fragmentSource,
+      ];
   const fragmentShaderSource = new ShaderSource({
     defines,
     sources,
@@ -743,7 +763,12 @@ function createGlobeShadowResources(renderer, context, resolution) {
   const atlasSize = resolution * 2;
   const candidate = {};
   try {
-    candidate.program = createProgram(context, cloudShadowFragmentSource, true);
+    candidate.program = createProgram(
+      context,
+      cloudShadowFragmentSource,
+      renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE,
+      ["SCENEGIS_CLOUD_SHADOW_PASS"],
+    );
     candidate.resolveProgram = createPostProgram(
       context,
       cloudShadowResolveFragmentSource,
@@ -883,6 +908,10 @@ function addFrustumCorner(
   Cartesian3.multiplyByScalar(up, vertical, renderer._shadowScratch0);
   Cartesian3.add(corner, renderer._shadowScratch0, corner);
   const frame = renderer._frame;
+  if (frame.mode === SceneGISAtmosphereReferenceFrame.PLANAR) {
+    corners.push(corner);
+    return;
+  }
   Cartesian3.subtract(corner, frame.ellipsoidCenter, renderer._shadowScratch0);
   const centered = renderer._shadowScratch0;
   const radii = frame.ellipsoidRadii;
@@ -1149,7 +1178,13 @@ function updateGlobeShadowCascades(renderer, frameState, profile) {
       renderer._shadowLightRightWorld,
       renderer._shadowLightUpWorld,
       renderer._shadowRayDirectionWorld,
-      center,
+      renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
+        ? center
+        : Cartesian3.subtract(
+            center,
+            renderer._shadowOrigin,
+            renderer._shadowScratch0,
+          ),
       radius,
       radius,
       cloudShadowMaximumDistance,
@@ -1167,6 +1202,7 @@ function createShadowHistorySnapshot() {
     valid: false,
     projection: undefined,
     cameraPosition: new Cartesian3(),
+    shadowOrigin: new Cartesian3(),
     cameraDirection: new Cartesian3(),
     cameraUp: new Cartesian3(),
     frustum: new Cartesian4(),
@@ -1250,6 +1286,7 @@ function publishShadowHistorySnapshot(renderer) {
   snapshot.valid = true;
   snapshot.projection = frame.projection;
   Cartesian3.clone(frame.cameraPosition, snapshot.cameraPosition);
+  Cartesian3.clone(renderer._shadowOrigin, snapshot.shadowOrigin);
   Cartesian3.clone(frame.cameraDirection, snapshot.cameraDirection);
   Cartesian3.clone(frame.cameraUp, snapshot.cameraUp);
   Cartesian4.clone(renderer._frustum, snapshot.frustum);
@@ -1654,6 +1691,8 @@ function updateFrame(renderer, scene, frameState, time) {
       : renderer._world.environment._effectiveSunDirection;
   if (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
     Cartesian3.clone(sunDirection, renderer._sunDirection);
+    Cartesian3.clone(sunDirection, renderer._primaryLightDirection);
+    Cartesian3.clone(Cartesian3.ONE, renderer._primaryLightScale);
   }
   const owner = renderer._owner;
   const wrappedDistance =
@@ -1742,6 +1781,9 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._cloudHistoryReadIndex = 0;
   this._cloudHistorySnapshot = createCloudHistorySnapshot();
   this._cloudCameraDelta = new Cartesian3();
+  this._shadowOrigin = new Cartesian3();
+  this._shadowOriginDelta = new Cartesian3();
+  this._shadowCameraRelative = new Cartesian3();
   this._cloudHistoryWeight = 0.0;
   this._cloudHistoryStationary = false;
   this._cloudHistoryReprojection = false;
@@ -1966,6 +2008,8 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_sceneGISShadowSunDirection: () => that._primaryLightDirection,
     u_sceneGISShadowCameraPosition: () => that._frame.cameraPosition,
     u_sceneGISShadowCloudTop: () => that._shadowCloudSupport.y,
+    u_sceneGISShadowOrigin: () => that._shadowOrigin,
+    u_sceneGISShadowOriginDelta: () => that._shadowOriginDelta,
     u_sceneGISShadowCascadeIndex: () => that._shadowCascadeIndex,
     u_sceneGISShadowRayCenter: () =>
       that._shadowCenters[that._shadowCascadeIndex],
@@ -2014,16 +2058,23 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
   frameState,
   time = frameState.time,
 ) {
-  if (this._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
-    this.releaseGlobeLighting();
-    return;
-  }
+  const globe = this._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
   updateFrame(this, this._scene, frameState, time);
   if (!defined(this._resources) || !this._owner._ready) {
     this.releaseGlobeLighting();
     return;
   }
   updateGlobeCloudShadowSupport(this);
+  if (!globe) {
+    Cartesian3.clone(this._frame.surfacePosition, this._shadowOrigin);
+    this._shadowCloudCasterActive =
+      this._shadowCloudCasterActive && this._sunDirection.z > 0.0;
+  }
+  Cartesian3.subtract(
+    this._frame.cameraPosition,
+    this._shadowOrigin,
+    this._shadowCameraRelative,
+  );
   const profile = cloudQualityProfiles[this._owner._cloudQuality];
   const shadow = ensureGlobeShadowResources(
     this,
@@ -2032,12 +2083,18 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
   );
   updateGlobeShadowCascades(this, frameState, profile);
   shadow.historyValid = shadowHistoryContinuous(this);
+  Cartesian3.subtract(
+    this._shadowOrigin,
+    this._shadowHistorySnapshot.shadowOrigin,
+    this._shadowOriginDelta,
+  );
   shadow.historyWriteIndex = 1 - shadow.historyReadIndex;
   shadow.outputFramebuffer =
     shadow.historyWriteIndex === 0
       ? shadow.historyFramebuffer0
       : shadow.historyFramebuffer1;
   if (!shadow.historyValid) {
+    Cartesian3.clone(Cartesian3.ZERO, this._shadowOriginDelta);
     for (let cascade = 0; cascade < 3; cascade++) {
       Matrix4.clone(
         this._shadowMatrices[cascade],
@@ -2061,6 +2118,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
       this._owner._showCloudShadows &&
       this._shadowCloudCasterActive,
     showCrepuscularRays:
+      globe &&
       this._showClouds &&
       this._owner._showCrepuscularRays &&
       this._shadowCloudCasterActive,
@@ -2075,9 +2133,15 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
     moonIrradiance: this._moonIrradiance,
     cameraPosition: this._frame.cameraPosition,
     cloudTop: this._shadowCloudSupport.y,
+    cameraRelativePosition: this._shadowCameraRelative,
+    shadowOrigin: this._shadowOrigin,
   });
   this._globeLightingRecord = record;
-  frameState._sceneGISGlobeLighting = record;
+  if (globe) {
+    frameState._sceneGISGlobeLighting = record;
+  } else {
+    frameState._sceneGISPlanarLighting = record;
+  }
 };
 
 SceneGISEnvironmentEffectsRenderer.prototype.getPrimaryLightState =
@@ -2089,6 +2153,13 @@ SceneGISEnvironmentEffectsRenderer.prototype.getPrimaryLightState =
 
 SceneGISEnvironmentEffectsRenderer.prototype.releaseGlobeLighting =
   function () {
+    if (
+      defined(this._scene) &&
+      this._scene.frameState._sceneGISPlanarLighting ===
+        this._globeLightingRecord
+    ) {
+      this._scene.frameState._sceneGISPlanarLighting = undefined;
+    }
     if (
       defined(this._scene) &&
       this._scene.frameState._sceneGISGlobeLighting ===
@@ -2147,7 +2218,10 @@ SceneGISEnvironmentEffectsRenderer.prototype.renderBackground = function (
   if (isUnderground(this)) {
     return;
   }
-  const record = frameState._sceneGISGlobeLighting;
+  const record =
+    this._mode === SceneGISAtmosphereReferenceFrame.GLOBE
+      ? frameState._sceneGISGlobeLighting
+      : frameState._sceneGISPlanarLighting;
   if (
     defined(record) &&
     record === this._globeLightingRecord &&
