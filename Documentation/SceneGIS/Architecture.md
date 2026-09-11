@@ -256,6 +256,8 @@ settling render或建立第二套Beer history。A6-G不增加GPU resource/pass/c
 使用 2x2 phased cloud tracing 与 full-resolution depth-aware reconstruction。First/invalid/cut frame 必须立即发布完整 current spatial image，
 不得等待 phase 收敛、提高 history 权重、抖动 native scene camera 或引入自动 FPS 降档。High、low、Planar 与 world-space Beer 保持原路径；
 精确 sample-coordinate、distance-domain、resource 和视觉 gate 由 ADR-0048 的 A13 amendment 约束。
+ADR-0048 的 A15 amendment 允许 medium 对透明体积估计连续累积，并以本帧合格邻域提供漏采像素的 cloud anchor；
+opaque depth 与 cloud support 检查必须独立保留，没有本帧局部支撑时立即移除历史，不得发布历史 distance。
 
 A7-G在同一`SGP-0008` pre-tonemap linear-HDR slot末端执行Globe bright threshold、固定separable blur与additive bloom/ghost/halo composite。
 Lens artifact只消费final HDR Sun signal与resolved exact-clear depth完成terrain/cloud visibility；不得新增Sun、Cloud MRT或history authority。

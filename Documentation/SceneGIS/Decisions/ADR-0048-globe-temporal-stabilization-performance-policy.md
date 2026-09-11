@@ -910,3 +910,69 @@ the A13 quality/performance gate. The bounded evidence and residual limitations
 above remain unchanged; acceptance does not establish a universal FPS target
 or a zero-grain guarantee. The separately reported cloud/Cesium-clock linkage
 does not change the accepted render-frame sampling/temporal policy.
+
+## A15-G amendment — continuous medium cloud coverage
+
+The [A15 diagnosis](../../../AgentDocs/atmosphere-clouds-effects/discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
+establishes frequent hit/transparent history rejection at a fixed thin fringe.
+The owner authorizes the [A15 phase](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-11-phase-a15g-cloud-edge-stability.md).
+This amendment supersedes A13's requirement for both estimates to contain a
+cloud and its fixed 0.08 transmittance gate **only for phased Globe medium**.
+
+The resolve represents continuous premultiplied radiance and transmittance.
+An available transparent volume estimate is legitimate history. Opaque scene
+depth compatibility is mandatory independently of cloud presence; previous
+cloud-bearing estimates retain A13 longitudinal support, nonnegative/front
+distance and mean-ray alignment checks. UV bounds, global cuts, gamma-1
+neighborhood clipping and radiance compatibility remain. Medium alpha uses
+that qualified clipping domain directly, with no second fixed difference
+cutoff. The stationary/moving weights remain 0.9/0.82.
+
+The packed resolved validity bit denotes a current locally supported cloud
+anchor, rather than requiring positive current tent opacity. When tent samples
+contain a cloud, their existing mean/front distances remain unchanged. When
+they are transparent, use the mean of the current geometrically qualified
+cloud-hit neighbors' projected mean/front distances from the same 3x3
+neighborhood used for clipping. This supplies the cloud/advection reprojection
+anchor and lets aerial composition consume filtered coverage. It does not
+change current spatial RGBA or invent opacity on first/cut frames. No qualified
+cloud neighbor means invalid/transparent output and immediate history removal.
+No positive tent support still returns immediately. Published xyz remains
+entirely current-domain data; no historical distance is published or blended.
+
+This adds fixed accumulations to existing reads without new texture lookups,
+uniforms, resources or passes. Scene-depth qualification and cloud-foreground
+precision do not widen; shadow length stays independently filtered. STBN,
+trace phases, producer/material/detail, public options, Clock, high/low and
+Planar remain unchanged. Remaining risks are simultaneous neighborhood misses
+and adjacent-volume association during motion. Controlled hit/miss, removed
+support, moved-anchor and opaque-depth witnesses plus the owner's stationary
+and moving visual judgment are required; numerical reuse cannot approve
+quality. No UE code is copied and no upstream file or SGP is changed.
+
+The [A15 review](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-09-11-a15g-cloud-edge-stability.md)
+qualifies the implementation, alternating-coverage/depth/motion regressions
+and bounded native quality/GPU-cost comparison. Owner visual acceptance remains
+open; the amendment does not claim universal zero grain or sustained FPS.
+
+### A15 residual HDR flashes and identical integration rays
+
+The owner rejects the initial A15 image: near and horizon edges still jump.
+The [active correction](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-11-phase-a15g-cloud-edge-stability.md#owner-reported-residual-flashes-second-correction)
+identifies two remaining binary rejection paths. For phased medium, qualified
+gamma-1 RGB clipping now also supersedes the fixed radiance-difference cutoff;
+global radiance/light/material cuts remain unchanged. A valid clipped HDR
+estimate must not lose all temporal filtering because its magnitude exceeds
+an additional fixed threshold.
+
+When the renderer's existing continuity snapshot proves exact camera and
+cloud-time/offset stationarity (`u_cloudHistoryReprojection == false`), each
+pixel integrates the same volume along the same ray. Its random front/mean
+estimates need not occupy the current neighborhood's longitudinal interval.
+Skip only that interval check in this case. Independently retain nonnegative
+historical distances, current opaque-foreground rejection, exact-clear/finite
+scene compatibility, mean-ray alignment, qualified clipping and current local
+support. Moving/advection frames continue to require the existing intervals.
+This supersedes A13's uniform stationary/moving interval rule; it does not
+freeze STBN, change weights, publish historical distances or retain unsupported
+clouds. High/low, Planar, resources and public API remain unchanged.

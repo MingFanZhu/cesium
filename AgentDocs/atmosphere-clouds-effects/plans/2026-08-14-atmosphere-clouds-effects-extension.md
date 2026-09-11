@@ -8,15 +8,16 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-11`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `None; A14-G completed; successor not activated`
-- Current gate: A14 Architecture review and owner acceptance are complete.
-  The owner accepts the linkage on 2026-09-11 using the existing focused E2E
-  and direct playback/paused-timeline evidence. This acceptance record belongs
-  to the isolated A14 local checkpoint. No product time-authority or
-  temporal-policy change; no push or next-phase activation.
-- Current phase plan: None
+- Current phase: `A15-G completed; successor not activated`
+- Current gate: Architecture closes A15 after positive owner feedback and the
+  instruction to proceed. The current commit is its isolated checkpoint.
+  See [A15 review](../reviews/2026-09-11-a15g-cloud-edge-stability.md).
+- Current phase plan:
+  [A15 cloud edge stability](2026-09-11-phase-a15g-cloud-edge-stability.md)
 - Latest completed phase plan:
   [2026-09-04-phase-a14g-globe-clock-linkage.md](2026-09-04-phase-a14g-globe-clock-linkage.md)
+- A15 diagnosis:
+  [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
   [2026-09-04-phase-a13g-globe-performance.md](2026-09-04-phase-a13g-globe-performance.md)
 - Architecture decisions:
@@ -288,6 +289,23 @@ native playback and paused scrubbing on the current owner page. Its original
 camera, parameters and 1x paused time are restored. The owner explicitly accepts
 the linkage on 2026-09-11. The commit containing this acceptance record is the
 isolated A14 checkpoint; no next phase is active and no push accompanies closure.
+
+### A15-G — Globe cloud edge temporal stability (`completed`)
+
+The owner reports visible cloud-edge jitter after A14. The
+[source/GPU diagnosis](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
+finds frequent history rejection at stochastic cloud-hit/transparent transitions
+in the paused medium view. The proposed goal is continuous fringe RGB and
+transmittance reconstruction while preserving opaque occlusion, motion
+correctness and the existing time authority.
+
+Entry requires a source-based phase plan and ADR-0048 amendment defining
+transparent-sample validity, reprojection anchors and temporal confidence.
+Exit requires discriminating GPU regressions, resource checks, bounded cost,
+and owner acceptance of stationary and moving edges without unacceptable
+trails. The owner authorizes implementation on 2026-09-11 through the
+[active phase](2026-09-11-phase-a15g-cloud-edge-stability.md). High/low,
+material/lighting, A14 and Planar remain outside the correction.
 
 ### P1 — Planar integrated-medium restoration (`deferred`)
 

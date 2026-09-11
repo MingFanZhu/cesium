@@ -8640,6 +8640,9 @@ ${hardCascadeLibrary}`;
         PixelDatatype.FLOAT,
       );
       for (phase = 0; phase < 4; phase++) {
+        // Yield between synchronous GPU batches so Karma can service its
+        // heartbeat. This does not render or settle an additional frame.
+        await new Promise((resolve) => setTimeout(resolve, 0));
         const traced = draw(probeSource, 5, 3);
         for (let y = 0; y < 3; y++) {
           for (let x = 0; x < 5; x++) {
@@ -8743,6 +8746,7 @@ ${hardCascadeLibrary}`;
       expect(oldResolveDepth).not.toBe(cloudResolveFragmentSource);
       let oldDepthMismatch = false;
       for (phase = 0; phase < 4; phase++) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
         const produced = draw(controlledProducer, 5, 3, logDefines);
         lowColor = produced.colorTexture;
         lowDistance = produced.distanceTexture;
@@ -8866,6 +8870,7 @@ ${hardCascadeLibrary}`;
       const savedStochasticDensity = uniforms.u_cloudDensity;
       uniforms.u_cloudDensity = () => 0.002;
       for (const jitter of [1 / 8, 3 / 8, 5 / 8, 7 / 8]) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
         const stochasticProducer = cloudFragmentSource.replace(
           /float dither = texelFetch\([\s\S]*?0\)\.r;/,
           `float dither = ${jitter};`,
@@ -8899,6 +8904,7 @@ ${hardCascadeLibrary}`;
         image(width, height, () => [0.8, 0.2, 0.3, 0.75]),
       );
       for (phase = 0; phase < 4; phase++) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
         fillLow();
         lowDistance = stochasticOutputs[phase].distanceTexture;
         historyDistance = texture(
@@ -8944,6 +8950,9 @@ ${hardCascadeLibrary}`;
       }
       phase = 0;
       const baseEstimate = stochasticDistances[0];
+      // During advection, current volume support must still qualify history.
+      reproject = true;
+      cloudOffset.x = 1;
       const shiftedEstimate = baseEstimate.map((value, channel) =>
         channel < 2 ? value + 400 / 1000000 : value,
       );
@@ -9004,6 +9013,9 @@ ${hardCascadeLibrary}`;
 
       // Qualified zero-tent support reaches beyond this finite receiver, but
       // historical foreground still uses precision only, not cloud uncertainty.
+      // This rejection also applies to identical stationary integration rays.
+      reproject = false;
+      cloudOffset.x = 0;
       depth = texture(
         width,
         height,
@@ -9079,6 +9091,7 @@ ${hardCascadeLibrary}`;
         image(width, height, () => [0.26, 0.2, 0.3, 0.75]),
       );
       for (phase = 0; phase < 4; phase++) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
         fillLow();
         historyValid = false;
         const spatial = draw(cloudResolveFragmentSource);
@@ -9443,6 +9456,170 @@ ${hardCascadeLibrary}`;
       );
       expect(changedLength.distance[22][3]).toBe(noHistory.distance[22][3]);
       expect(draw(cloudResolveFragmentSource).color).toEqual(noHistory.color);
+
+      // Transparent volume estimates must participate in temporal coverage.
+      // The traced center alternates hit/miss while a nearby cloud column
+      // supplies a current, geometrically qualified reconstruction anchor.
+      Cartesian3.clone(Cartesian3.ZERO, camera);
+      Cartesian3.clone(new Cartesian3(0, 0, -1), direction);
+      Cartesian3.clone(Cartesian3.UNIT_X, right);
+      previousCamera = Cartesian3.clone(camera);
+      previousDirection = Cartesian3.clone(direction);
+      previousRight = Cartesian3.clone(right);
+      cloudOffset = new Cartesian2();
+      previousOffset = new Cartesian2();
+      reproject = false;
+      perspective = true;
+      phase = 0;
+      depth = clear;
+      historyValid = false;
+      fillLow(
+        () => [0, 0, 1, 0],
+        () => [0, 0, 0, 1],
+      );
+      let coverageHistory = draw(cloudResolveFragmentSource);
+      const spatialAlphas = [];
+      const filteredAlphas = [];
+      const hitOnlySource = cloudResolveFragmentSource
+        .replace("cloudAnchorCount > 0.0", "cloudAnchorCount < 0.0")
+        .replace(
+          "cloudPresenceCompatible = currentValid;",
+          "cloudPresenceCompatible = currentValid && previousValid;",
+        )
+        .replace(
+          "transmittanceCompatible = true;",
+          "transmittanceCompatible = abs(clippedHistoryColor.a - spatialColor.a) <= 0.08;",
+        );
+      expect(hitOnlySource).not.toBe(cloudResolveFragmentSource);
+      for (let frame = 0; frame < 8; frame++) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        const hits = (x, y) =>
+          x === 2 || (x === 4 && y === 2 && frame % 2 === 0);
+        fillLow(
+          (x, y) => (hits(x, y) ? planeDistances(x, y) : [0, 0, 1, 0]),
+          (x, y) => (hits(x, y) ? [0.16, 0.08, 0.04, 0.6] : [0, 0, 0, 1]),
+        );
+        historyValid = false;
+        const current = draw(cloudResolveFragmentSource);
+        historyColor = coverageHistory.colorTexture;
+        historyDistance = coverageHistory.distanceTexture;
+        historyValid = true;
+        const filtered = draw(cloudResolveFragmentSource);
+        if (frame < 2) {
+          expect(draw(hitOnlySource).color[22]).toEqual(current.color[22]);
+          expect(filtered.color[22]).not.toEqual(current.color[22]);
+        }
+        const alpha = filtered.color[22][3];
+        spatialAlphas.push(current.color[22][3]);
+        filteredAlphas.push(alpha);
+        // These history colors lie inside the independent 3x3 mean/sigma
+        // interval, so the expected recurrence needs no shader-derived oracle.
+        for (let channel = 0; channel < 4; channel++) {
+          closeHalf(
+            filtered.color[22][channel],
+            current.color[22][channel] * 0.1 +
+              coverageHistory.color[22][channel] * 0.9,
+          );
+        }
+        expect(filtered.distance[22][3]).toBe(1);
+        expect(filtered.distance[22].slice(0, 3)).toEqual(
+          current.distance[22].slice(0, 3),
+        );
+        closeHalf(filtered.distance[22][0], 0.001);
+        closeHalf(filtered.distance[22][1], 0.0008);
+        if (frame % 2 === 1) {
+          expect(current.color[22]).toEqual([0, 0, 0, 1]);
+          expect(alpha).toBeLessThan(1);
+          expect(filtered.color[22][0]).toBeGreaterThan(0);
+        }
+        coverageHistory = filtered;
+      }
+      const temporalVariation = (values) =>
+        values
+          .slice(1)
+          .reduce((sum, value, i) => sum + Math.abs(value - values[i]), 0);
+      expect(temporalVariation(filteredAlphas)).toBeLessThan(
+        temporalVariation(spatialAlphas) * 0.15,
+      );
+
+      // HDR history already inside the qualified clipping interval must not
+      // be rejected by a second fixed radiance-difference threshold.
+      fillLow(
+        (x, y) => (x === 2 || x === 6 ? planeDistances(x, y) : [0, 0, 1, 0]),
+        (x) => (x === 2 || x === 6 ? [4, 4, 4, 0.6] : [0, 0, 0, 1]),
+      );
+      historyColor = texture(
+        width,
+        height,
+        image(width, height, () => [2, 2, 2, 0.8]),
+      );
+      historyDistance = texture(
+        width,
+        height,
+        image(width, height, planeDistances),
+      );
+      const hdrFiltered = draw(cloudResolveFragmentSource);
+      closeHalf(hdrFiltered.color[22][0], 1.8);
+      closeHalf(hdrFiltered.color[22][3], 0.82);
+      const fixedRgbGate = cloudResolveFragmentSource.replace(
+        "        radianceCompatible = true;",
+        "",
+      );
+      expect(fixedRgbGate).not.toBe(cloudResolveFragmentSource);
+      expect(draw(fixedRgbGate).color[22]).toEqual([0, 0, 0, 1]);
+
+      // A fixed ray integrates the same volume despite stochastic distances.
+      // The same unsupported history is rejected once the volume advects.
+      historyDistance = texture(
+        width,
+        height,
+        image(width, height, () => [0.005, 0.0048, 1, 1]),
+      );
+      const fixedRay = draw(cloudResolveFragmentSource);
+      expect(fixedRay.color[22]).toEqual(hdrFiltered.color[22]);
+      expect(fixedRay.distance[22]).toEqual(hdrFiltered.distance[22]);
+      const intervalOnFixedRay = cloudResolveFragmentSource.replace(
+        "!u_cloudHistoryReprojection || (",
+        "false || (",
+      );
+      expect(intervalOnFixedRay).not.toBe(cloudResolveFragmentSource);
+      expect(draw(intervalOnFixedRay).color[22]).toEqual([0, 0, 0, 1]);
+      reproject = true;
+      cloudOffset.x = 1;
+      expect(draw(cloudResolveFragmentSource).color[22]).toEqual([0, 0, 0, 1]);
+
+      // A transparent current sample still uses the cloud/advection anchor
+      // during motion; a previous scene-depth disagreement cannot leak color.
+      reproject = true;
+      camera.x = 4;
+      cloudOffset.x = 2;
+      fillLow(
+        (x, y) => (x === 2 ? planeDistances(x, y) : [0, 0, 1, 0]),
+        (x) => (x === 2 ? [0.16, 0.08, 0.04, 0.6] : [0, 0, 0, 1]),
+      );
+      historyColor = coverageHistory.colorTexture;
+      historyDistance = coverageHistory.distanceTexture;
+      const movedCoverage = draw(cloudResolveFragmentSource);
+      expect(movedCoverage.color[22][3]).toBeLessThan(1);
+      expect(movedCoverage.distance[22][3]).toBe(1);
+      historyDistance = texture(
+        width,
+        height,
+        coverageHistory.distance.map((v) => [v[0], v[1], 0.004, v[3]]),
+      );
+      expect(draw(cloudResolveFragmentSource).color[22]).toEqual([0, 0, 0, 1]);
+
+      // No local volume support immediately removes history, including its
+      // anchor; isolated old clouds must not persist as trails.
+      historyDistance = coverageHistory.distanceTexture;
+      fillLow(
+        () => [0, 0, 1, 0],
+        () => [0, 0, 0, 1],
+      );
+      const removedCoverage = draw(cloudResolveFragmentSource);
+      expect(removedCoverage.color[22]).toEqual([0, 0, 0, 1]);
+      expect(removedCoverage.distance[22]).toEqual([0, 0, 1, 0]);
+
       const cutTime = JulianDate.fromIso8601("2026-06-21T10:30:00Z");
       const cutDestination = Cartesian3.fromDegrees(15, 45, 6000);
       scene.camera.setView({
@@ -9498,7 +9675,7 @@ ${hardCascadeLibrary}`;
       textures.forEach((t) => t.destroy());
       disconnectControlledCloudMode();
     }
-  });
+  }, 300000);
 
   it("isolates cloud radiance scale transitions from temporal history", async function () {
     expect(cloudResolveFragmentSource).toContain(

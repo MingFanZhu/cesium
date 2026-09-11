@@ -3,11 +3,15 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `None; A14-G completed; successor not activated`
-- Current review: `A14 approved; owner gate passed on 2026-09-11`
-- Current phase plan: None
+- Current phase: `A15-G completed; successor not activated`
+- Current review:
+  [A15 corrected; owner confirms substantial improvement](reviews/2026-09-11-a15g-cloud-edge-stability.md)
+- Current phase plan:
+  [A15 cloud edge stability](plans/2026-09-11-phase-a15g-cloud-edge-stability.md)
 - Latest completed phase plan:
   [2026-09-04-phase-a14g-globe-clock-linkage.md](plans/2026-09-04-phase-a14g-globe-clock-linkage.md)
+- A15 diagnosis:
+  [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
   [2026-09-04-phase-a13g-globe-performance.md](plans/2026-09-04-phase-a13g-globe-performance.md)
 - Extension plan:
@@ -42,7 +46,7 @@
 - A11-G checkpoint: `53465cf9bc8f3af1e935b3225c81364e380ea528`（未push）
 - A12-G checkpoint: `fd868387d4c38d6faf67a9395434cc9fccc6384c`（未push）
 - A13-G checkpoint: `ccd5affdc426016215bb443664dc653bba945d94`（未push）
-- A14-G checkpoint: the commit containing the 2026-09-11 owner-acceptance record（未push）
+- A14-G checkpoint: `6e488bc50eb95535e39bcd2bb0c59268acbb9f7b`（未push）
 
 ## Objective
 
@@ -53,6 +57,16 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- A15 is closed on 2026-09-11 after positive owner visual feedback and the
+  instruction to retain it and proceed to the next issue. Architecture accepts
+  the bounded correction with the recorded residual sampling limitations;
+  the commit containing this record is its isolated local checkpoint. No push.
+- The second A15 correction is applied to the owner page. On 2026-09-11 the
+  owner reports “已经好很多了”; retain this candidate. HDR history clipping and
+  stationary interval handling pass the focused GPU regressions, with no
+  observed paired resolve-cost increase. A15-AR-002 records this positive
+  feedback and the remaining phase acceptance boundary; no further tuning or
+  successor phase is assigned. No upstream change, new SGP, phase commit or push.
 - The owner explicitly accepts A14 on 2026-09-11. Architecture closes the
   phase using the approved seven-path candidate, existing focused E2E and
   direct linkage evidence. The commit containing this acceptance record is

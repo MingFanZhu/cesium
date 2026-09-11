@@ -334,6 +334,8 @@ void main()
     float spatialColorSampleCount = 0.0;
     vec2 cloudSupportMinimum = vec2(SCENEGIS_CLOUD_DISTANCE_ENCODING);
     vec2 cloudSupportMaximum = vec2(0.0);
+    vec2 cloudAnchorSum = vec2(0.0);
+    float cloudAnchorCount = 0.0;
     #endif
     ivec2 dimensions = textureSize(u_cloudLowDistanceTexture, 0);
     #ifdef SCENEGIS_GLOBE
@@ -417,6 +419,8 @@ void main()
                     }
                 }
                 if (sampleValid) {
+                    cloudAnchorSum += max(targetDistances, vec2(0.0));
+                    cloudAnchorCount += 1.0;
                     vec2 sourceDistances = distanceSample.xy * SCENEGIS_CLOUD_DISTANCE_ENCODING;
                     vec2 localStep = min(vec2(SCENEGIS_GLOBE_CLOUD_MAX_STEP),
                         vec2(SCENEGIS_GLOBE_CLOUD_MIN_STEP) +
@@ -480,6 +484,15 @@ void main()
     vec4 spatialDistance = distanceSum / max(distanceWeightSum, 1.0e-6);
     #ifdef SCENEGIS_GLOBE
     bool spatialValid = distanceWeightSum > 1.0e-6;
+    if (u_cloudTracePhased && !spatialValid &&
+        weightSum > 0.0 && cloudAnchorCount > 0.0) {
+        // A transparent tent estimate still belongs to the locally sampled
+        // volume. Supply a current anchor for reprojection and composition,
+        // without changing its RGBA or carrying forward historical distance.
+        spatialDistance.xy = cloudAnchorSum /
+            (cloudAnchorCount * SCENEGIS_CLOUD_DISTANCE_ENCODING);
+        spatialValid = true;
+    }
     float spatialShadowLength = shadowLengthSum /
         max(shadowLengthWeightSum, 1.0e-6);
     spatialDistance.a = sceneGISEncodeCloudShadowLength(
@@ -609,13 +622,18 @@ void main()
         vec3 meanFromPreviousOrigin = currentMeanAnchor - previousRayOrigin;
         float meanRayResidual = length(meanFromPreviousOrigin - previousRayDirection *
             dot(meanFromPreviousOrigin, previousRayDirection));
-        distanceCompatible = sceneDistanceCompatible &&
-            meanRayResidual <= precisionRadius.x &&
+        bool cloudDistanceCompatible =
             all(greaterThanEqual(projectedHistory, vec2(0.0))) &&
-            all(greaterThanEqual(projectedHistory, cloudSupportMinimum - precisionRadius)) &&
-            all(lessThanEqual(projectedHistory, cloudSupportMaximum + precisionRadius)) &&
+            // Identical integration rays need not agree on stochastic cloud
+            // depths. Scene occlusion stays independent of this interval test.
+            (!u_cloudHistoryReprojection || (
+                all(greaterThanEqual(projectedHistory, cloudSupportMinimum - precisionRadius)) &&
+                all(lessThanEqual(projectedHistory, cloudSupportMaximum + precisionRadius)))) &&
             (isClearDepth || all(lessThanEqual(projectedHistory,
                 vec2(sceneDistanceMeters) + precisionRadius)));
+        distanceCompatible = sceneDistanceCompatible &&
+            meanRayResidual <= precisionRadius.x &&
+            (!previousValid || cloudDistanceCompatible);
     }
     #else
     vec4 clippedHistoryColor = historyColor;
@@ -629,7 +647,18 @@ void main()
     bool radianceCompatible = all(lessThanEqual(
         abs(clippedHistoryColor.rgb - spatialColor.rgb),
         vec3(0.25) + 0.25 * max(clippedHistoryColor.rgb, spatialColor.rgb)));
-    float historyCompatible = currentValid && previousValid &&
+    bool cloudPresenceCompatible = currentValid && previousValid;
+    #ifdef SCENEGIS_GLOBE
+    if (u_cloudTracePhased) {
+        // Available transparent history is a volume estimate, not a history
+        // failure. Qualified neighborhood clipping bounds HDR color and
+        // coverage without a second magnitude-dependent rejection threshold.
+        cloudPresenceCompatible = currentValid;
+        transmittanceCompatible = true;
+        radianceCompatible = true;
+    }
+    #endif
+    float historyCompatible = cloudPresenceCompatible &&
             distanceCompatible && transmittanceCompatible && radianceCompatible
         ? 1.0
         : 0.0;
