@@ -730,3 +730,22 @@ a bounded live comparison (35.86 to 36.24 FPS, not a meaningful speedup claim).
 The current resource proof and loaded shader were verified. Candidate 3 changes
 only the Globe medium tracing/reconstruction policy under ADR-0048's separate
 A13 amendment; it preserves this occupancy proof and the accepted density core.
+
+## P6 Planar primary sampling amendment — 2026-09-12
+
+The owner's coarse-cloud report and same-view medium/high observation expose
+primary integration aliasing in the retained Planar uniform scheduler. This
+supersedes that scheduler only for medium/high. Adopt the accepted Globe
+50 m minimum, 1.01 growth and 1000 m maximum step shape in fixed-Z geometry.
+Planar uses consecutive intervals with one STBN sample inside each and the
+actual clipped interval length for Beer integration. Its 512-interval ceiling
+covers the complete existing 300 km segment from the minimum step. Occupancy
+must conservatively cover that same interval; material LOD remains derived
+from the pixel footprint, independent of integration length.
+
+Planar low retains its 32-sample policy. Globe, density algebra, assets,
+radiometric units/defaults, shadow material, native shadow switches, temporal
+policy and resource topology are unchanged. This raises the Planar medium/high
+maximum density budget from 256 to 512; actual GPU timing and delegated visual
+review are required. The [P6 plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-12-phase-p6-planar-cloud-sampling.md)
+defines the causal GPU and endpoint checks. No upstream seam or API is added.

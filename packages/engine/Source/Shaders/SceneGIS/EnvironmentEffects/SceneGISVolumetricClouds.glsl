@@ -76,6 +76,9 @@ const int SCENEGIS_CLOUD_PRIMARY_MAX_STEPS = 64;
 const int SCENEGIS_CLOUD_FINE_MAX_STEPS = 4;
 const int SCENEGIS_CLOUD_SUN_MAX_STEPS = 4;
 const int SCENEGIS_CLOUD_SHADOW_VIEW_MAX_STEPS = 384;
+#ifndef SCENEGIS_GLOBE
+const int SCENEGIS_PLANAR_CLOUD_MARCH_MAX_STEPS = 512;
+#endif
 #ifdef SCENEGIS_GLOBE
 const int SCENEGIS_GLOBE_CLOUD_MARCH_MAX_STEPS = 500;
 const int SCENEGIS_GLOBE_CLOUD_LOW_MARCH_STEPS = 200;
@@ -1320,12 +1323,13 @@ void sceneGISMarchClouds(
     #else
     float coarseStepLength =
         (segmentEnd - segmentStart) / float(max(primarySteps, 1));
-    float fineStepLength = coarseStepLength / float(max(fineSteps, 1));
-    int intervalFineSteps = min(
+    int uniformFineSteps = min(
         fineSteps,
         max(1, int(ceil(
             coarseStepLength / max(minimumRetainedFeature * 0.5, 1.0)))));
-    fineStepLength = coarseStepLength / float(max(intervalFineSteps, 1));
+    bool planarProgressive = fineSteps > 1;
+    float planarDistance = segmentStart;
+    float planarStepLength = 50.0;
     #endif
     float accumulatedTransmittance = 1.0;
     vec3 accumulatedRadiance = vec3(0.0);
@@ -1347,8 +1351,9 @@ void sceneGISMarchClouds(
             progressiveDistance >= segmentEnd ||
             accumulatedTransmittance <= 0.01) {
     #else
-    for (int step = 0; step < SCENEGIS_CLOUD_PRIMARY_MAX_STEPS; ++step) {
-        if (step >= primarySteps || accumulatedTransmittance <= 0.01) {
+    for (int step = 0; step < SCENEGIS_PLANAR_CLOUD_MARCH_MAX_STEPS; ++step) {
+        if ((!planarProgressive && step >= primarySteps) ||
+            planarDistance >= segmentEnd || accumulatedTransmittance <= 0.01) {
     #endif
             break;
         }
@@ -1379,16 +1384,24 @@ void sceneGISMarchClouds(
             progressiveStepLength,
             segmentEnd - coarseStartDistance);
         #else
-        float coarseStartDistance = min(
-            segmentStart + float(step) * coarseStepLength,
-            segmentEnd);
+        float coarseStartDistance = planarProgressive ? planarDistance : min(
+            segmentStart + float(step) * coarseStepLength, segmentEnd);
         float coarseEndDistance = min(
-            coarseStartDistance + coarseStepLength,
+            coarseStartDistance +
+                (planarProgressive ? planarStepLength : coarseStepLength),
             segmentEnd);
+        int intervalFineSteps = planarProgressive ? 1 : uniformFineSteps;
+        float fineStepLength = (coarseEndDistance - coarseStartDistance) /
+            float(max(intervalFineSteps, 1));
+        // Consecutive intervals cover the complete slab/receiver segment.
+        // Unlike the legacy uniform budget, a long horizon path cannot make
+        // the first nearby material samples kilometres apart.
+        planarDistance = coarseEndDistance;
+        planarStepLength = min(planarStepLength * 1.01, 1000.0);
         float coarseDistance =
             (coarseStartDistance + coarseEndDistance) * 0.5;
         float coarseFootprint = max(
-            coarseStepLength,
+            coarseEndDistance - coarseStartDistance,
             max(rayOriginFootprint, coarseDistance * rayAngularFootprint));
         #endif
         vec3 coarseStartLocal =
@@ -1435,7 +1448,8 @@ void sceneGISMarchClouds(
                 (float(fineStep) + clamp(rayDither, 0.0, 1.0)) /
                 float(max(intervalFineSteps, 1));
             float distance = min(
-                segmentStart + (float(step) + fineOffset) * coarseStepLength,
+                coarseStartDistance + fineOffset *
+                    (coarseEndDistance - coarseStartDistance),
                 segmentEnd);
             #endif
             vec3 sampleLocal =

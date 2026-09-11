@@ -8,15 +8,15 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P5 completed — Planar far aerial quality`
-- Current gate: P5 source/GPU/visual/performance and full build/type review
-  accepted. The commit containing this record is its independent checkpoint.
-  Cloud material/radiometry, rays and directional Moon remain successors;
-  no owner visual gate is pending.
+- Current phase: `P6 completed — Planar cloud sampling quality`
+- Current gate: P6 source/GPU/visual/performance and build review accepted.
+  The commit containing this record is its independent checkpoint. Cloud
+  coarseness remains open: material/detail/lighting are the next priority,
+  followed by rays and directional Moon. No owner visual gate is pending.
 - Current phase plan:
-  [P5 far aerial](2026-09-12-phase-p5-planar-far-aerial-quality.md)
+  [P6 cloud sampling](2026-09-12-phase-p6-planar-cloud-sampling.md)
 - Latest completed phase plan:
-  [P5 far aerial](2026-09-12-phase-p5-planar-far-aerial-quality.md)
+  [P6 cloud sampling](2026-09-12-phase-p6-planar-cloud-sampling.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
@@ -59,6 +59,7 @@
 - P3 implementation: `completed; source/GPU/visual/performance accepted; local checkpoint`
 - P4 implementation: `completed; source/GPU/resource/visual accepted; local checkpoint`
 - P5 implementation: `completed; causal GPU/visual/performance/build/types accepted; local checkpoint`
+- P6 implementation: `completed; primary sampling GPU/visual/performance accepted; coarse material remains open`
 
 ## Goal
 

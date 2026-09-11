@@ -3,16 +3,16 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P5 completed — Planar far aerial quality`
+- Current phase: `P6 completed — Planar cloud sampling quality`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P5 far aerial](reviews/2026-09-12-p5-planar-far-aerial-quality.md)
+  [P6 cloud sampling](reviews/2026-09-12-p6-planar-cloud-sampling.md)
 - Current phase plan:
-  [P5 far aerial](plans/2026-09-12-phase-p5-planar-far-aerial-quality.md)
+  [P6 cloud sampling](plans/2026-09-12-phase-p6-planar-cloud-sampling.md)
 - Latest completed phase plan:
-  [P5 far aerial](plans/2026-09-12-phase-p5-planar-far-aerial-quality.md)
+  [P6 cloud sampling](plans/2026-09-12-phase-p6-planar-cloud-sampling.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
@@ -64,6 +64,13 @@ HDR bloom/lens flare。两种世界共享光学参数、质量档、资源与合
 reference frame，不互相伪造坐标语义。
 
 ## Active work
+
+- P6 is accepted as a bounded primary sampling repair after 7/7 focused GPU
+  cases, same-view visual comparison, build and resource/ownership checks.
+  At the saved medium view the primary cloud pass costs 3.697 -> 4.577 ms.
+  It follows P5 `b2c7655872`; this record's commit is its independent checkpoint.
+  **Cloud coarseness remains open**: material/detail and lighting adaptation
+  are the next priority, ahead of rays and Moon. No owner visual gate is pending.
 
 - P5 is accepted after causal GPU checks, eight regressions, full build/types,
   delegated visual review and bounded GPU timing. It follows P4 `b0ed3e2149`;

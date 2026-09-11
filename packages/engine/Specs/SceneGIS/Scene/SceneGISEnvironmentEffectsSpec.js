@@ -13570,6 +13570,96 @@ ${hardCascadeLibrary}`;
     }
   });
 
+  it("integrates Planar P6 thin near clouds and the complete far segment on the actual GPU", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      disconnectControlledCloudMode();
+      return;
+    }
+    // Isolate quadrature from texture authoring with an analytic density box.
+    // The actual product march, slab clipping, jitter and Beer integration run.
+    const analyticSource = `uniform vec2 u_specDensityRange;\n${cloudSource}`
+      .replace(
+        /float occupancy = sceneGISCloudOccupancyBound\([\s\S]*?coarseFootprint\);/,
+        "float occupancy = 1.0;",
+      )
+      .replace(
+        /float normalizedDensity = sceneGISCloudDensitySample\([\s\S]*?\) \* visibility;/,
+        `float normalizedDensity = distance >= u_specDensityRange.x &&
+            distance < u_specDensityRange.y ? 1.0 : 0.0;`,
+      );
+    const legacySource = analyticSource.replace(
+      "bool planarProgressive = fineSteps > 1;",
+      "bool planarProgressive = false;",
+    );
+    expect(analyticSource).not.toBe(cloudSource);
+    expect(legacySource).not.toBe(analyticSource);
+    const probeFragment =
+      `uniform float u_specDistance;\n${cloudFragmentSource}`
+        .replace(
+          "    sceneGISMarchClouds(",
+          `    localRayOrigin = vec3(0.0, 0.0, 1600.0);
+    localRayDirection = vec3(1.0, 0.0, 0.0);
+    distanceToGeometry = u_specDistance;
+    dither = 0.5;
+    sceneGISMarchClouds(`,
+        )
+        .replace(
+          "out_FragData_0 = cloudColor;",
+          "out_FragData_0 = vec4(cloudColor.a, cloudSamplingDiagnostics.xyz);",
+        );
+    let maximumDistance = 300000.0;
+    let densityRange = new Cartesian2(100.0, 300.0);
+    let density = 0.001;
+    let fineSteps = 4;
+    const uniformMap = {
+      ...effects._pipeline._uniformMap,
+      u_depthTexture: () => scene.context.defaultTexture,
+      u_cloudBufferDimensions: () => new Cartesian2(1.0, 1.0),
+      u_cloudDensity: () => density,
+      u_cloudPrimarySteps: () => (fineSteps === 1 ? 32 : 64),
+      u_cloudFineSteps: () => fineSteps,
+      u_specDistance: () => maximumDistance,
+      u_specDensityRange: () => densityRange,
+    };
+    const probe = (library = analyticSource) =>
+      executeHalfFloatQuad([atmosphereSource, library, probeFragment], {
+        defines: ["SCENEGIS_CLOUD_REPLAY_DENSITY_ONLY"],
+        uniformMap,
+      })[0];
+    try {
+      const thin = probe();
+      expect(Math.abs(thin[0] - Math.exp(-0.2)))
+        .withContext("200 m near support within a 300 km horizontal path")
+        .toBeLessThan(0.012);
+      expect(Math.abs(probe(legacySource)[0] - Math.exp(-0.2)))
+        .withContext("legacy kilometre steps miss the entire near cloud")
+        .toBeGreaterThan(0.15);
+      expect(thin[1]).toBeGreaterThan(256);
+      expect(thin[1]).toBeLessThanOrEqual(512);
+
+      // Constant density measures every metre, including the last interval.
+      densityRange = new Cartesian2(0.0, 1000000.0);
+      density = 0.000001;
+      for (const length of [125.0, 20333.0, 300000.0, 600000.0]) {
+        maximumDistance = length;
+        const value = probe();
+        expect(
+          Math.abs(value[0] - Math.exp(-Math.min(length, 300000) * density)),
+        )
+          .withContext(`complete clipped length ${length}`)
+          .toBeLessThan(0.001);
+        expect(value[1]).toBeLessThanOrEqual(512);
+      }
+      fineSteps = 1;
+      const low = probe();
+      expect(low[1]).toBe(32);
+      expect(Math.abs(low[0] - Math.exp(-0.3))).toBeLessThan(0.001);
+    } finally {
+      disconnectControlledCloudMode();
+    }
+  });
+
   it("reports bounded conservative cloud sampling across both worlds and every preset", async function () {
     const localDirection = new Cartesian3(0.0, 0.94, 0.342);
     const phases = [
@@ -13657,13 +13747,11 @@ ${hardCascadeLibrary}`;
           expect(summary.rays).withContext(context).toBeGreaterThan(0);
           expect(summary.coarse)
             .withContext(context)
-            .toBeLessThanOrEqual(summary.rays * (mode === "globe" ? 500 : 64));
+            .toBeLessThanOrEqual(summary.rays * (mode === "globe" ? 500 : 512));
           expect(summary.fine).withContext(context).toBeGreaterThan(0);
           expect(summary.fine)
             .withContext(context)
-            .toBeLessThanOrEqual(
-              (summary.coarse - summary.skipped) * (mode === "globe" ? 1 : 4),
-            );
+            .toBeLessThanOrEqual(summary.coarse - summary.skipped);
           expect(summary.skipped)
             .withContext(context)
             .toBeLessThan(summary.coarse);
@@ -13688,8 +13776,8 @@ ${hardCascadeLibrary}`;
             .toBeGreaterThan(64);
         } else {
           expect(maximumCoarse)
-            .withContext("Planar retains the frozen uniform schedule")
-            .toBeLessThanOrEqual(64);
+            .withContext("Planar progressive schedule exceeds the old ceiling")
+            .toBeGreaterThan(64);
         }
       } finally {
         resources.cloudProgram = originalLinear;
