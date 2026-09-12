@@ -1,0 +1,55 @@
+# Vector Tiles
+
+## Metadata
+
+| Field                  | Value                                                  |
+| ---------------------- | ------------------------------------------------------ |
+| Extension slug         | `vector-tiles`                                         |
+| Status                 | `active`                                               |
+| Planning model         | `extension`                                            |
+| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
+| Current phase          | `V0 completed — 待创建 V1`                             |
+| Active phase plan      | [V0 计划](plans/2026-09-12-v0-architecture-audit.md)   |
+| Active standalone plan | None                                                   |
+| Architecture contact   | 当前 Agent                                             |
+| Execution contact      | 当前 Agent；实现尚未启动                               |
+| Last updated           | `2026-09-12`                                           |
+
+## Scope
+
+实现类似 Mapbox 的矢量瓦片能力：MVT、声明式样式、按需调度、批量渲染、贴地和标注。
+首个产品里程碑在 `SceneGISPlanarWorld` 验收，共享数据与样式前端考虑 Globe 复用。
+
+已确认：完全独立于 Cesium 实验性 MVT 支持，包括 decoder、provider、vector glTF、
+Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile matrix 限定 `1×1` root，
+首轮使用 3857。参考用户已有 MapLibre 任意坐标系实现，见
+[参考审计与地形讨论](discussions/2026-09-12-maplibre-reference-and-surface.md)。
+用户优先要求保留矢量直接绘制并支持贴地，不采用先合成地图颜色纹理的主路线。
+
+项目负责人本轮明确允许同一 Agent 讨论、设计并在讨论完成后编码。本扩展由当前 Agent
+承担架构、执行与自审，保留阶段证据、人工视觉 gate 和独立本地 checkpoint；
+不要求绑定第二个任务，不把自审描述为独立评审，也不改写其他扩展的双角色记录。
+
+## Engineering links
+
+- Branch：`feature/vector-tiles`。
+- Base：本地 `scenegis/develop@e1244451613f4d0b8a5c6986f69ae56123d4267c`。
+- Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
+- Source：计划使用 `packages/engine/Source/SceneGIS/{Core,Renderer,Scene}/`，尚未新增。
+- Specs：计划使用 `packages/engine/Specs/SceneGIS/`，镜像实际源码。
+- 人工页面与场景数据：计划使用 `Test/vector-tiles/`，有明确 HTML 入口，尚未创建。
+- E2E：计划使用 `Specs/e2e/scenegis-vector-tiles*.spec.js`。
+- Sandcastle：不新建；使用根服务器直接访问 `Test/**`。
+- ADR：[ADR-0057](../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)。
+- SGP：本轮无新增或修改；upstream-owned file 改动为零。
+
+## Current handoff
+
+- 源码事实：[Cesium 与平面能力审计](discussions/2026-09-12-cesium-mvt-and-planar-audit.md)。
+- 已解决 discussion：[实现边界与取舍](discussions/2026-09-12-rendering-boundaries.md)。
+- 地形专题：[MapLibre 与 surface 方案](discussions/2026-09-12-maplibre-reference-and-surface.md)；
+  优先验证矢量直接贴地；depth/stencil 为候选，批量正确性仍待证明，RTT 不作为主路线。
+- 当前 gate：`V0 completed`，用户已批准路线，先形成独立本地 checkpoint，再激活 V1。
+- 下一步：按当前源码细化 V1 的独立 decoder、source、坐标和样式 profile，并进入实现。
+- Latest review：[V0 review](reviews/2026-09-12-v0-architecture-review.md)；无未解决 V0 gate finding，V2 ground 风险已显式分配。
+- 风险：层序与 Cesium pass sorting、批量贴地、跨瓦片标注、字体/图标来源和性能验收集待细化。

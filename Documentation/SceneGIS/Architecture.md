@@ -739,6 +739,19 @@ Primitive、warm/mutation/provider convergence与lifecycle。Dev/release E2E和p
 Sandcastle只作为best-effort人工展示。Timing只记录同机diagnostic median/P95，不是跨机器hard gate。Architecture
 review不能代替项目负责人的真实浏览器/GPU人工验收。完整决定见ADR-0022。
 
+### 独立矢量瓦片
+
+`vector-tiles` 遵循 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
+不依赖 Cesium experimental MVT decoder/provider/vector GLB/Buffer vector/VectorProvider。
+MVT 保持 CRS 无关，source/World 显式匹配单根 tile matrix；首轮 EPSG:3857 平面验收。
+数据/样式/layout、tile batch、World adapter 与 symbol placement 分层；
+禁止以逐 feature Entity 或整棵预建 tile tree 作为地图 runtime。
+
+地形优先矢量直接绘制，不采用地图颜色 RTT 主路线。
+Depth/stencil ground 是需证明批量、层序、alpha 和 pick 的候选，
+既有 single-instance GroundPrimitive 契约不被自动扩宽。
+Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代表 Globe 已支持。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：
