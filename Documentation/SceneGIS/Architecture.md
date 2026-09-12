@@ -56,6 +56,7 @@ SceneGIS 的主要目标是：
 ```text
 packages/engine/Source/SceneGIS/**
 packages/engine/Source/Shaders/SceneGIS/**/*.glsl
+packages/engine/Source/Assets/SceneGIS/**
 packages/engine/Specs/SceneGIS/**
 packages/widgets/Source/SceneGIS/**
 packages/widgets/Specs/SceneGIS/**
@@ -78,6 +79,10 @@ packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js
 `packages/engine/Source/Shaders/SceneGIS/**/*.glsl` 是 ADR-0030 批准的 SceneGIS shader source root。
 它复用 Cesium 现有 `Source/Shaders/**` GLSL-to-JS 构建链；相邻生成 `.js` 是忽略的 build artifact，
 不得手工编辑或提交。SceneGIS runtime 通过显式相对 import 使用生成模块，不依赖 side-effect 注册。
+
+`packages/engine/Source/Assets/SceneGIS/**` 是 ADR-0041 批准的 SceneGIS runtime asset root。只允许保存经过
+license/provenance、format、尺寸和资源预算审计的版本化静态资源及其机器可读 manifest；许可证文本必须随衍生资源进入
+build/npm 产物。Runtime 使用 `buildModuleUrl("Assets/SceneGIS/...")` 定位，不依赖公网 URL、本机路径或临时 clone。
 
 ## Agent 协作文档边界
 
@@ -190,15 +195,16 @@ proposed ranges的并集覆盖changed lines，使任一retired登记可独立移
 
 当前已确认的构建行为：
 
-| 扩展类型                       | 当前行为                                    | 架构要求                                                       |
-| ------------------------------ | ------------------------------------------- | -------------------------------------------------------------- |
-| 普通 `Source/SceneGIS/**/*.js` | 自动进入 engine 与根 Cesium barrel          | default export；basename 唯一                                  |
-| `Specs/SceneGIS/**/*Spec.js`   | 自动进入 SpecList                           | 镜像源码目录                                                   |
-| SceneGIS GLSL                  | 扫描 `Source/Shaders/SceneGIS/**/*.glsl`    | basename 全局唯一；生成 `.js` 不提交；验证 dev、release 与 npm |
-| Worker                         | 扫描 `Source/Workers/**` 并输出多种构建形态 | 每个新入口单独审计 URL、transfer 与 package 边界               |
-| 静态资源、WASM、图片           | 发布复制与测试访问链路不同                  | 同时验证 workspace、release、npm 和 Sandcastle                 |
-| CSS 与 UI                      | engine 与 widgets 规则不同                  | UI 保持在 widgets 包边界内                                     |
-| 模块副作用                     | 受 tree-shaking 和 `sideEffects` 影响       | 优先显式安装或注册 API                                         |
+| 扩展类型                       | 当前行为                                              | 架构要求                                                                        |
+| ------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 普通 `Source/SceneGIS/**/*.js` | 自动进入 engine 与根 Cesium barrel                    | default export；basename 唯一                                                   |
+| `Specs/SceneGIS/**/*Spec.js`   | 自动进入 SpecList                                     | 镜像源码目录                                                                    |
+| SceneGIS GLSL                  | 扫描 `Source/Shaders/SceneGIS/**/*.glsl`              | basename 全局唯一；生成 `.js` 不提交；验证 dev、release 与 npm                  |
+| Worker                         | 扫描 `Source/Workers/**` 并输出多种构建形态           | 每个新入口单独审计 URL、transfer 与 package 边界                                |
+| SceneGIS runtime asset         | `copyEngineAssets` 保持 `Assets/SceneGIS/**` 相对路径 | 验证 workspace、dev/release、root 与 installed npm；随包携带 license/provenance |
+| 其他静态资源、WASM、图片       | 发布复制与测试访问链路不同                            | 首次接入时重新审计 workspace、release、npm 和 Sandcastle                        |
+| CSS 与 UI                      | engine 与 widgets 规则不同                            | UI 保持在 widgets 包边界内                                                      |
+| 模块副作用                     | 受 tree-shaking 和 `sideEffects` 影响                 | 优先显式安装或注册 API                                                          |
 
 Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前仍是延迟决策，不在没有真实功能和源码证据时预设答案。SceneGIS GLSL source/delivery 以 ADR-0030 为准；A4 已批准的唯一 terrain Worker 入口以 ADR-0027 为准。
 
@@ -212,6 +218,106 @@ Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前�
 - 明确 GPU/CPU 资源的创建、所有权、复用、失效和销毁时机。
 - 热路径避免无依据的逐帧对象分配、Shader 重编译和状态抖动。
 - 影响默认画面时提供稳定的像素回归场景；影响性能时记录可重复的基线和对比条件。
+
+### 双世界高级环境渲染
+
+高级 atmosphere/cloud/fog/god-ray/lens stack 使用 ADR-0040 的 SceneGIS-owned advanced background 与
+pre-tonemap linear-HDR 两个 slot。Public `SceneGISEnvironmentEffects` 是 caller-created、caller-registered Controller；
+`mode="globe"|"planar"` 必须显式给出，planar 还必须绑定 live `SceneGISPlanarWorld`。Controller 默认
+`enabled=false`，注册本身不得 attach pipeline、fetch asset 或分配 GPU resource；每个 live Scene 最多一个 active pipeline。
+
+A2 的 Globe atmosphere 把 Cesium geodetic altitude/local vertical 映射到固定 Earth Bruneton sphere，使用随包交付的
+transmittance、combined scattering 与 irradiance RGBA16F LUT；planar atmosphere 使用同一 Rayleigh/Mie/ozone coefficients，
+但在固定 `+Z` slab 中独立积分，不读取 spherical LUT、不制造 curved horizon。两条路径提供同一 physical sky、Sun disk 与
+depth-aware aerial-perspective capability family，但不承诺 pixel-identical 或相同 multiple-scattering order。
+
+Planar 高级环境以 m 为长度单位，支持 World 的多种及自定义 CRS；高度直接使用世界 `position.z`，零高度固定为 `z = 0`，
+不增加环境 `baseHeight` 偏移。云底高度直接对应世界 Z，地形保留其真实高度。详见
+[ADR-0040](Decisions/ADR-0040-dual-world-advanced-environment-rendering.md) 的米制平面高度说明。
+
+Advanced effects 默认不接管 `scene.light`，也不自动修改或恢复 native/simple environment；唯一例外是ADR-0053明确授权的
+Globe A11-G primary celestial-light lifecycle。Caller 必须在启用前显式关闭会造成
+double energy 的 native `SkyAtmosphere`、ground atmosphere、Fog、Sun body/bloom、SkyBox 或 planar lightweight
+atmosphere/body；冲突和 capability failure 必须先于 asset/GPU mutation fail closed。A10-G 起，Globe 的 caller-owned native
+`scene.moon` 是唯一 body 例外：它复用 Cesium 星历、月面朝向、Sun-only lighting 与 Globe occlusion，并通过 `SGP-0008` 在 advanced
+background 之后、ordinary geometry 之前执行；Planar 仍禁止 native Moon。完整基础 contract 见
+[ADR-0041](Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md)，Moon 例外见
+[ADR-0051](Decisions/ADR-0051-globe-native-moon-composition.md)。
+
+A5-G遵循Globe-first边界：volumetric cloud shadow使用SceneGIS-owned current-frame Beer optical-depth atlas，不复用Cesium native
+geometry `ShadowMap`；Globe surface是唯一获准消费A2 Sun/sky irradiance与cloud transmittance的scene albedo consumer，Models、3D Tiles和
+resolved scene color不得被fullscreen relight。Crepuscular rays通过Bruneton `shadow_length`与A3 directional fog inscatter耦合，不使用radial
+blur、第二层haze或独立shadow history。最小Globe surface seam登记为`SGP-0009`；资源、packing、public options及Planar冻结边界见
+[ADR-0047](Decisions/ADR-0047-globe-cloud-shadows-skylight-crepuscular-rays.md)。
+
+A16-G通过[ADR-0054](Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md)和`SGP-0010`扩展上述初始consumer边界：
+PBR Models/3D Tiles在材质光照阶段共享physical primary irradiance、diffuse sky与Beer cloud shadow，禁止对最终颜色统一压暗。
+模型只借用current-frame资源，native材质和specular IBL保持原所有权。`surfaceRadianceScale`统一校准Globe与默认physical model光照。
+Geometry shadow完全由Cesium既有`Viewer.shadows`、`scene.shadowMap.enabled`和各receiver的`ShadowMode`控制。
+移除A11的`showMoonShadows`及自动开启/恢复逻辑，不增加SceneGIS阴影开关；primary light只提供日/月方向。
+
+A6-G只演进ADR-0046既有的two-target Cloud history：Globe resolve从现有mean/front/scene distance重建world position并投影到previous
+successful camera，cloud validity与A5 shadow length先semantic decode/filter再repack；invalid、exact-stationary与camera-cut frame均发布完整
+spatial-only结果。Public `cloudQuality`是cloud/Beer/resolve唯一caller-owned动态performance tier；renderer不得自动测FPS、按camera motion降档、增加
+settling render或建立第二套Beer history。A6-G不增加GPU resource/pass/command category，完整continuity、budget与Planar冻结边界见
+[ADR-0048](Decisions/ADR-0048-globe-temporal-stabilization-performance-policy.md)。
+
+后续 Globe temporal 行为以 ADR-0048 的已接受 amendment 为准：A8/A12 的 stationary Globe 允许现有 STBN/history；A13 允许仅 medium
+使用 2x2 phased cloud tracing 与 full-resolution depth-aware reconstruction。First/invalid/cut frame 必须立即发布完整 current spatial image，
+不得等待 phase 收敛、提高 history 权重、抖动 native scene camera 或引入自动 FPS 降档。High、low、Planar 与 world-space Beer 保持原路径；
+精确 sample-coordinate、distance-domain、resource 和视觉 gate 由 ADR-0048 的 A13 amendment 约束。
+ADR-0048 的 A15 amendment 允许 medium 对透明体积估计连续累积，并以本帧合格邻域提供漏采像素的 cloud anchor；
+opaque depth 与 cloud support 检查必须独立保留，没有本帧局部支撑时立即移除历史，不得发布历史 distance。
+
+A7-G在同一`SGP-0008` pre-tonemap linear-HDR slot末端执行Globe bright threshold、固定separable blur与additive bloom/ghost/halo composite。
+Lens artifact只消费final HDR Sun signal与resolved exact-clear depth完成terrain/cloud visibility；不得新增Sun、Cloud MRT或history authority。
+SceneGIS bloom启用时Cesium general bloom必须caller-owned地保持disabled，existing `scene.sunBloom=false` contract继续排除`SunPostProcess`。
+A7固定使用two half-resolution加one full-resolution color-only RGBA16F targets，不使用public `PostProcessStage`、raw WebGL、screen blend、asset、
+tone mapping或Planar执行；完整public、resource与lifecycle contract见
+[ADR-0049](Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md)。
+
+A9-G在同一physical irradiance/source domain为Globe natural environment增加一种固定`readable` night skylight。它按每个
+receiver/sample的actual radial up与ECEF Sun direction在local solar elevation `-6°`到`-12°`之间平滑接管，只进入terrain、cloud body/
+ground bounce/haze与height-fog ambient；direct Sun、Beer shadow、directional fog/rays、background atmosphere、Models/3D Tiles、Planar及
+HDR display transfer保持不变。A9不增加public mode/property、uniform、resource、history、upstream hunk或SGP；完整source与consumer contract见
+[ADR-0050](Decisions/ADR-0050-globe-readable-night-skylight.md)。
+
+A10-G复用Cesium caller-owned native `scene.moon`，不复制Moon primitive、Simon1994星历、IAU orientation或
+`Assets/Textures/moonSmall.jpg`。Active advanced pipeline通过既有`SGP-0008`把advanced background排在native Moon command之前；Moon随后仍由
+Scene environment pass exact-once执行，并继续使用Cesium culling与Globe occluder。A10不增加SceneGIS GPU resource、controller property、moonlight、
+shadow、asset或Planar行为；完整ordering、conflict与ownership contract见
+[ADR-0051](Decisions/ADR-0051-globe-native-moon-composition.md)。
+
+A11-G在冻结A10-G后增加一个Globe-only primary celestial light。Actual ECEF Sun继续作为background/aerial/native Moon phase与A7 Sun gate；
+surface/cloud directional transport、A5 Beer atlas/rays及一个stable controller-owned `DirectionalLight`共享phase/horizon/night-weighted Moon endpoint。
+Moon direction由same Simon1994 + central-body-fixed transform和geodetic surface observer计算，不得读取camera orientation。Geometry shadow只复用
+Scene-owned `scene.shadowMap`与native Globe/3D Tiles/Model cast/receive commands；A5 Beer atlas仍是volumetric transmittance，禁止第二ShadowMap或
+把二者混用。A16修订后，Controller只snapshot/restore `scene.light`与defined native `Moon.textureUrl`，这两个owned slot的active external
+mutation fail closed；native shadow state与Globe ShadowMode完全由caller控制。更高分辨率月面只替换pinned NASA CGI Moon Kit color asset；Moon object/show/phase/orientation/ellipsoid ownership不变，不支持
+displacement/normal/eclipses。Existing `SGP-0009`只扩展current frame-local surface uniforms，不增加upstream path或new SGP。完整API、resource、
+lifecycle与Planar冻结边界见[ADR-0053](Decisions/ADR-0053-globe-moonlight-shadow-surface.md)。
+
+P1在A17-G验收后恢复Planar路线，首阶段仍只重新资格化既有A2/A3/A4 integrated medium。
+Planar必须继续使用fixed `+Z` atmosphere/fog/cloud slab、
+独立Planar LUT/asset/scheduler；ADR-0052 的 September 11 amendment 已允许相机/风重投影、历史颜色裁剪、直接 Z 高度、
+像素 footprint filtering 和移除距离密度淡出。不得借用 Globe ellipsoid/ECEF；Beer atlas、surface lighting 与 A7–A10 效果需后续阶段独立设计。
+任何product修复前，必须先以同一resolved color/depth建立baseline、aerial-only、fog-only、cloud-only与combined actual-GPU final-composition
+authority；历史白屏截图不构成调参、hidden multiplier或球面替代的根因证据。完整阶段与零资源/API/upstream增量边界见
+[ADR-0052](Decisions/ADR-0052-planar-integrated-medium-restoration.md)。
+
+P2依据[ADR-0055](Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md)扩展平面光照：
+独立frame-local Planar record借用物理LUT与Beer atlas，模型复用`SGP-0010`源光照接口，地表在imagery/material合成后应用Sun/sky。
+Beer producer与receiver均采用固定Z云底/云顶，阴影矩阵使用CPU水平原点差，Z保持绝对高度；不得转换为ECEF。
+云影仅衰减direct光，保留原生PBR/emissive、调用方SH/lightColor与Cesium几何阴影控制。
+地表预检必须计入3个环境sampler。Planar rays与夜间天体后续独立适配。
+P3按ADR-0049的Planar amendment复用同一scene-linear HDR bloom/lens链路；保持原参数、alpha、预算与资源所有权，
+Planar lens使用显式Sun方向并要求Sun.z大于0，继续遵守视口、有效深度与最终亮度门控。
+P4按ADR-0050的Planar amendment以fixed +Z复用同一readable-night source与-6°/-12°过渡，
+只进入地表/模型sky、cloud incident sky和fog ambient；保留直接Z高度、原有radiometry与全部directional/shadow控制，
+不增加API、uniform、pass、resource或history。夜间天体与directional moonlight仍需后续适配。
+P5按ADR-0042/0044修订计算完整Planar atmosphere slab路径，解析积分不得再按cloud/fog march预算裁剪。
+Planar aerial与Globe一样使用`backgroundRadianceScale * aerialRadianceScale`，统一远景和天空的scene-linear source单位；
+surface/cloud material与fog标定、光学系数和LUT不变，资源与lookup数量不增加。
 
 ### 平面地形 Core 契约
 
@@ -696,7 +802,6 @@ ADR 放在 `Documentation/SceneGIS/Decisions/ADR-####-short-title.md`。首次�
 - SceneGIS `czm_*` builtin 的接入与生成方式；普通 SceneGIS GLSL source/delivery 已由 ADR-0030 决定。
 - 除 ADR-0027 唯一 terrain entry 外，其他 SceneGIS Worker 的入口、协议与发布行为。
 - 是否从根 JS barrel 严格排除 `_` 私有模块。
-- SceneGIS 静态资源在 workspace、release、npm 和 CDN 中的统一定位方式。
 - 持久视觉基线和性能基线的 CI 执行环境。
 
 处理这些问题时必须以届时的 Cesium 源码为准；本文档不把当前推测升级为约束。

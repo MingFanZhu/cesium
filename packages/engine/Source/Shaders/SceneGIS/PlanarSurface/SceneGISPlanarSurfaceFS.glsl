@@ -8,7 +8,7 @@ in vec3 v_normalWC;
     #endif
 #endif
 
-#if defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
+#if defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
 in vec3 v_positionEC;
 #endif
 
@@ -16,7 +16,7 @@ in vec3 v_positionEC;
 in vec3 v_normalEC;
 #endif
 
-#ifdef SCENEGIS_LIGHTING
+#if defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_ADVANCED_LIGHTING)
 uniform float u_lambertDiffuseMultiplier;
 #endif
 
@@ -93,7 +93,9 @@ void main()
     );
     color.rgb = mix(color.rgb, material.diffuse, material.alpha);
 #endif
-#ifdef SCENEGIS_LIGHTING
+#ifdef SCENEGIS_ADVANCED_LIGHTING
+    color.rgb = sceneGISPlanarSurfaceRadiance(color.rgb, v_positionEC, normalEC);
+#elif defined(SCENEGIS_LIGHTING)
     float diffuse = czm_getLambertDiffuse(czm_lightDirectionEC, normalEC);
     float intensity = clamp(
         diffuse * u_lambertDiffuseMultiplier + 0.3,

@@ -1,4 +1,7 @@
 import BoundingSphere from "../../Core/BoundingSphere.js";
+// SCENEGIS_PATCH_BEGIN SGP-0010: Track the optional physical model lighting variant.
+import SceneGISModelEnvironmentLighting from "../../SceneGIS/Scene/_private/_SceneGISModelEnvironmentLighting.js";
+// SCENEGIS_PATCH_END SGP-0010
 import Cartesian3 from "../../Core/Cartesian3.js";
 import Cartographic from "../../Core/Cartographic.js";
 import Check from "../../Core/Check.js";
@@ -1948,6 +1951,9 @@ Model.prototype.update = function (frameState) {
   updateCustomShader(this, frameState);
 
   // Environment maps, specular maps, and spherical harmonics may need to be updated or regenerated
+  // SCENEGIS_PATCH_BEGIN SGP-0010: Rebuild native commands only when the lighting variant changes.
+  SceneGISModelEnvironmentLighting.update(this, frameState);
+  // SCENEGIS_PATCH_END SGP-0010
   updateEnvironmentMap(this, frameState);
 
   // The image-based lighting may have to load texture uniforms

@@ -1,3 +1,8 @@
+// SCENEGIS_PATCH_BEGIN SGP-0010: The source library is supplied by the primitive lighting stage.
+#ifdef SCENEGIS_MODEL_DIFFUSE_SKY
+vec3 sceneGISModelSkyIrradiance(vec3 positionEC, vec3 normalEC);
+#endif
+// SCENEGIS_PATCH_END SGP-0010
 #ifdef DIFFUSE_IBL
 vec3 sampleDiffuseEnvironment(vec3 cubeDir)
 {
@@ -45,7 +50,13 @@ vec3 computeSpecularIBL(vec3 cubeDir, float NdotV, vec3 f0, float roughness)
  * @param {czm_modelMaterial} The material properties.
  * @return {vec3} The computed HDR color.
  */
+// SCENEGIS_PATCH_BEGIN SGP-0010: Retain the native signature outside the physical lighting variant.
+#ifdef SCENEGIS_MODEL_LIGHTING
+vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material, vec3 positionEC) {
+#else
 vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material) {
+#endif
+// SCENEGIS_PATCH_END SGP-0010
     vec3 f0 = material.specular;
     float roughness = material.roughness;
     float specularWeight = 1.0;
@@ -65,6 +76,11 @@ vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material)
     #ifdef DIFFUSE_IBL
         vec3 normalMC = normalize(model_iblReferenceFrameMatrix * normalEC);
         vec3 irradiance = sampleDiffuseEnvironment(normalMC);
+        // SCENEGIS_PATCH_BEGIN SGP-0010: Replace only default diffuse irradiance, preserving native material weighting.
+        #ifdef SCENEGIS_MODEL_DIFFUSE_SKY
+            irradiance = sceneGISModelSkyIrradiance(positionEC, normalEC);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0010
 
         vec3 averageFresnel = f0 + (1.0 - f0) / 21.0;
         float Ems = specularWeight * (1.0 - brdfLut.x - brdfLut.y);

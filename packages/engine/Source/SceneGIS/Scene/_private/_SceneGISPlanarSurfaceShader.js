@@ -2,6 +2,7 @@ import fragmentShaderTemplate from "../../../Shaders/SceneGIS/PlanarSurface/Scen
 import geometricLitVertexShader from "../../../Shaders/SceneGIS/PlanarSurface/SceneGISPlanarSurfaceGeometricLitVS.js";
 import smoothLitVertexShader from "../../../Shaders/SceneGIS/PlanarSurface/SceneGISPlanarSurfaceSmoothLitVS.js";
 import unlitVertexShader from "../../../Shaders/SceneGIS/PlanarSurface/SceneGISPlanarSurfaceUnlitVS.js";
+import planarLighting from "./_SceneGISPlanarEnvironmentLighting.js";
 
 const dynamicLayersToken = "SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS";
 const materialSourceToken = "SCENEGIS_PLANAR_SURFACE_MATERIAL_SOURCE";
@@ -10,13 +11,15 @@ function createVertexShader(
   enableLighting,
   normalMode = "geometric",
   enableMaterial = false,
+  advancedLighting = false,
 ) {
-  if (!enableLighting && !enableMaterial) {
+  if (!enableLighting && !enableMaterial && !advancedLighting) {
     return unlitVertexShader;
   }
   const shader =
     normalMode === "smooth" ? smoothLitVertexShader : geometricLitVertexShader;
-  return enableMaterial ? `#define SCENEGIS_MATERIAL\n${shader}` : shader;
+  const defines = `${enableMaterial ? "#define SCENEGIS_MATERIAL\n" : ""}${advancedLighting ? "#define SCENEGIS_ADVANCED_LIGHTING\n" : ""}`;
+  return `${defines}${shader}`;
 }
 
 function createFragmentShader(
@@ -24,6 +27,7 @@ function createFragmentShader(
   enableLighting = false,
   normalMode = "geometric",
   materialSource,
+  advancedLighting = false,
 ) {
   const declarations = [];
   const composition = [];
@@ -76,12 +80,19 @@ ${composition.join("\n")}
     return color;
 }`;
   const enableMaterial = materialSource !== undefined;
-  let defines = enableLighting ? "#define SCENEGIS_LIGHTING\n" : "";
-  if (normalMode === "smooth" && (enableLighting || enableMaterial)) {
+  let defines =
+    enableLighting || advancedLighting ? "#define SCENEGIS_LIGHTING\n" : "";
+  if (
+    normalMode === "smooth" &&
+    (enableLighting || enableMaterial || advancedLighting)
+  ) {
     defines += "#define SCENEGIS_SMOOTH_NORMALS\n";
   }
   if (enableMaterial) {
     defines += "#define SCENEGIS_MATERIAL\n";
+  }
+  if (advancedLighting) {
+    defines += `#define SCENEGIS_ADVANCED_LIGHTING\n${planarLighting.source}\n`;
   }
 
   return `${defines}${fragmentShaderTemplate

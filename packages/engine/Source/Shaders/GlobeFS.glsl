@@ -341,10 +341,12 @@ void main()
     float clipDistance = clip(gl_FragCoord, u_clippingPlanes, u_clippingPlanesMatrix);
 #endif
 
-#if defined(SHOW_REFLECTIVE_OCEAN) || defined(ENABLE_DAYNIGHT_SHADING) || defined(HDR)
+// SCENEGIS_PATCH_BEGIN SGP-0009: Prepare the geodetic normal for the optional physical surface branch.
+#if defined(SHOW_REFLECTIVE_OCEAN) || defined(ENABLE_DAYNIGHT_SHADING) || defined(HDR) || defined(SCENEGIS_GLOBE_SURFACE_LIGHTING)
     vec3 normalMC = czm_geodeticSurfaceNormal(v_positionMC, vec3(0.0), vec3(1.0));   // normalized surface normal in model coordinates
     vec3 normalEC = czm_normal3D * normalMC;                                         // normalized surface normal in eye coordinates
 #endif
+// SCENEGIS_PATCH_END SGP-0009
 
 #if defined(APPLY_DAY_NIGHT_ALPHA) && defined(ENABLE_DAYNIGHT_SHADING)
     float nightBlend = 1.0 - clamp(czm_getLambertDiffuse(czm_lightDirectionEC, normalEC) * 5.0, 0.0, 1.0);
@@ -434,7 +436,19 @@ void main()
     color = alphaBlend(materialColor, color);
 #endif
 
-#ifdef ENABLE_VERTEX_LIGHTING
+// SCENEGIS_PATCH_BEGIN SGP-0009: Select the mutually exclusive SceneGIS physical Globe surface branch.
+#ifdef SCENEGIS_GLOBE_SURFACE_LIGHTING
+    #ifdef SCENEGIS_GLOBE_SURFACE_TERRAIN_NORMAL
+    vec3 sceneGISSurfaceNormalMC = normalize(v_normalMC);
+    #else
+    vec3 sceneGISSurfaceNormalMC = sceneGISGlobeGeodeticSurfaceNormal(
+        v_positionMC);
+    #endif
+    vec4 finalColor = vec4(sceneGISGlobeSurfaceLighting(
+        color.rgb,
+        v_positionMC,
+        sceneGISSurfaceNormalMC), color.a);
+#elif defined(ENABLE_VERTEX_LIGHTING)
     float diffuseIntensity = clamp(czm_getLambertDiffuse(czm_lightDirectionEC, normalize(v_normalEC)) * u_lambertDiffuseMultiplier + u_vertexShadowDarkness, 0.0, 1.0);
     vec4 finalColor = vec4(color.rgb * czm_lightColor * diffuseIntensity, color.a);
 #elif defined(ENABLE_DAYNIGHT_SHADING)
@@ -444,6 +458,7 @@ void main()
 #else
     vec4 finalColor = color;
 #endif
+// SCENEGIS_PATCH_END SGP-0009
 
 #ifdef ENABLE_CLIPPING_PLANES
     vec4 clippingPlanesEdgeColor = vec4(1.0);

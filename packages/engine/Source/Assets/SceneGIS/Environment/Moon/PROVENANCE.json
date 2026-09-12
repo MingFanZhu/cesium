@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "https://github.com/takram-design-engineering/three-geospatial",
+    "commit": "b012ad06d858fc035d88aacfd73f092f93c994e4",
+    "path": "storybook-webgpu/assets/moon/color_large.webp",
+    "license": "MIT",
+    "copyright": "Copyright (c) 2024 Shota Matsuda",
+    "assetSource": "NASA CGI Moon Kit",
+    "assetSourceUrl": "https://svs.gsfc.nasa.gov/4720/",
+    "credit": "NASA",
+    "usageGuidelines": "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+  },
+  "importer": "scripts/scenegis/import-three-geospatial-moon-asset.mjs",
+  "output": {
+    "name": "color_large.webp",
+    "format": "WebP sRGB color",
+    "dimensions": [
+      2048,
+      1024
+    ],
+    "bytes": 213446,
+    "sha256": "1709BA3B65991842CD84A8D338EF46AD942241EE056B1AC8AAD0D3776EDF7DBD"
+  }
+}

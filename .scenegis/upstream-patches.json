@@ -2,6 +2,38 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0010",
+      "title": "Connect optional SceneGIS physical lighting to native model PBR",
+      "status": "active",
+      "reason": "Native model PBR has no current-frame source hook for SceneGIS physical irradiance and Beer cloud transmittance; final-color relighting would incorrectly attenuate emissive and indirect light.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Model/Model.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Model/LightingPipelineStage.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ImageBasedLightingStageFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISModelEnvironmentLightingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISEnvironmentEffectsSpec.js",
+        "packages/engine/Specs/Scene/Model/LightingPipelineStageSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md",
+      "removalCondition": "Retire when native Model offers equivalent optional physical direct/diffuse source and cloud transmittance hooks with frame-local resources and variant lifecycle."
+    },
+    {
       "id": "SGP-0001",
       "title": "Add primary world lifecycle and integration slots",
       "status": "active",
@@ -153,6 +185,54 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0039-planar-scene-api-qualification-and-safety.md",
       "removalCondition": "Retire when upstream Scene exposes equivalent primary-world-aware height/clamp capability reporting and pre-frame native environment effect validation for non-Globe worlds."
+    },
+    {
+      "id": "SGP-0008",
+      "title": "Add advanced environment background, celestial ordering, and HDR render slots",
+      "status": "active",
+      "reason": "Scene has no optional scene-wide slot that can render an advanced environment for both Globe and non-Globe worlds before native celestial bodies and geometry, then composite resolved scene color and depth before built-in bloom and tone mapping.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISAdvancedEnvironmentRenderSlotSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISEnvironmentEffectsSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISEnvironmentEffectsPipelineSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISAtmosphereReferenceFrameSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0051-globe-native-moon-composition.md",
+      "removalCondition": "Retire when upstream Scene exposes equivalent optional pre-celestial/pre-geometry advanced-environment and pre-tone-mapping resolved color/depth extension slots with explicit lifecycle ownership and native celestial ordering."
+    },
+    {
+      "id": "SGP-0009",
+      "title": "Add optional SceneGIS Globe surface lighting seam",
+      "status": "active",
+      "reason": "Cesium Globe surface shaders have no explicit frame-local extension seam for a caller-owned physical Sun/sky irradiance source and volumetric Beer cloud transmittance, while post-process relighting would incorrectly light already shaded scene primitives.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/GlobeSurfaceShaderSet.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/GlobeSurfaceTileProvider.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/GlobeFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISEnvironmentEffectsSpec.js",
+        "packages/engine/Specs/Scene/GlobeSurfaceTileProviderSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md",
+      "removalCondition": "Retire when upstream Globe surface rendering exposes an equivalent optional frame-local material-lighting extension with shader-source and uniform ownership hooks."
     }
   ]
 }

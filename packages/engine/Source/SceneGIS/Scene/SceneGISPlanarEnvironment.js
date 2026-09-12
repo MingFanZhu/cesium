@@ -356,11 +356,18 @@ function syncLight(environment) {
   const light = environment._light;
   light.direction = environment._lightDirection;
   light.color = environment._lightColor;
-  environment._lightDirection.x = -environment._effectiveSunDirection.x;
-  environment._lightDirection.y = -environment._effectiveSunDirection.y;
-  environment._lightDirection.z = -environment._effectiveSunDirection.z;
-  Color.clone(environment._sunColor, environment._lightColor);
-  light.intensity = environment._sunIntensity;
+  const primary = environment._advancedLightState;
+  const direction = defined(primary)
+    ? primary.direction
+    : environment._effectiveSunDirection;
+  Cartesian3.negate(direction, environment._lightDirection);
+  Color.clone(
+    defined(primary) ? primary.nativeColor : environment._sunColor,
+    environment._lightColor,
+  );
+  light.intensity = defined(primary)
+    ? primary.nativeIntensity
+    : environment._sunIntensity;
 }
 
 function acquireAuthority(environment) {
@@ -372,6 +379,8 @@ function acquireAuthority(environment) {
 }
 
 function releaseAuthority(environment) {
+  environment._advancedLightOwner = undefined;
+  environment._advancedLightState = undefined;
   if (!environment._hasAuthority) {
     return;
   }
@@ -397,7 +406,7 @@ function releaseAuthority(environment) {
  * @param {object} options Object with the following properties:
  * @param {SceneGISPlanarWorld} options.world The live planar world controlled by this environment.
  * @param {Cartesian3} options.sunDirection The finite non-zero observer-to-sun direction in +X east, +Y north, +Z up world axes.
- * @param {Cartesian3} options.moonDirection The finite non-zero observer-to-moon direction retained for future visual stages.
+ * @param {Cartesian3} options.moonDirection The finite non-zero observer-to-moon direction used by the lightweight Moon and advanced Moonlight.
  * @param {Color} [options.sunColor=Color.WHITE] The finite directional-light color.
  * @param {number} [options.sunIntensity=2.0] The finite non-negative directional-light intensity.
  * @param {"manual"|"astronomical"} [options.directionMode="manual"] The source of effective celestial directions.
@@ -520,6 +529,8 @@ function SceneGISPlanarEnvironment(options) {
   this._element = undefined;
   this._scene = undefined;
   this._capturedLight = undefined;
+  this._advancedLightOwner = undefined;
+  this._advancedLightState = undefined;
   this._hasAuthority = false;
 
   const lightDirection = Cartesian3.negate(sunDirection, new Cartesian3());
@@ -531,6 +542,31 @@ function SceneGISPlanarEnvironment(options) {
   this._lightDirection = this._light.direction;
   this._lightColor = this._light.color;
 }
+
+/**
+ * Borrows advanced radiometry while retaining the Environment's stable light.
+ * @private
+ */
+SceneGISPlanarEnvironment.prototype._setAdvancedLight = function (
+  owner,
+  state,
+) {
+  this._advancedLightOwner = owner;
+  this._advancedLightState = state;
+  syncLight(this);
+};
+
+/**
+ * Releases only the advanced renderer that supplied the current state.
+ * @private
+ */
+SceneGISPlanarEnvironment.prototype._clearAdvancedLight = function (owner) {
+  if (this._advancedLightOwner === owner) {
+    this._advancedLightOwner = undefined;
+    this._advancedLightState = undefined;
+    syncLight(this);
+  }
+};
 
 Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   /**
@@ -713,8 +749,8 @@ Object.defineProperties(SceneGISPlanarEnvironment.prototype, {
   },
 
   /**
-   * Gets or sets the finite non-zero observer-to-moon world direction. E1
-   * retains this state but does not display the Moon or create a moon light.
+   * Gets or sets the finite non-zero observer-to-moon world direction.
+   * Advanced environment effects use its effective direction for Moonlight.
    *
    * @memberof SceneGISPlanarEnvironment.prototype
    * @type {Cartesian3}

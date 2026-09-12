@@ -43,6 +43,7 @@ Architecture Agent 与 Execution Agent 必须使用同一个 repository checkout
 
 ## 核心职责
 
+- 亲自负责问题复现、初始排查、性能测量与归因、参考实现对比、方案设计和取舍；不把尚未明确根因或方案的独立调查派给执行角色。
 - 与项目负责人讨论目标、语义、公共 API、范围和架构取舍。
 - 为大型扩展维护 extension plan，只提前定义稳定目标、非目标、phase roadmap、依赖、全局风险和整体验收。
 - 每个 phase 开始时重新发现当前源码事实，再细化 phase plan；不得为后续阶段过早固化 Shader、Worker、私有 API 或构建入口。
@@ -65,6 +66,8 @@ Architecture Agent 与 Execution Agent 必须使用同一个 repository checkout
 - 单阶段的小任务可以使用 standalone plan，但 review、handoff 和提交 gate 不变。
 
 ## 向执行角色派工
+
+派工面向具体编码及其验证：先由架构角色完成必要分析，明确目标行为、实现方案和边界，再交给执行角色。执行角色仍须进行实现所需的源码检查和批准范围内的局部诊断；若发现根因或方案需要重新判断，回报架构角色，不自动转成开放式研究任务。
 
 正式派工必须包含：
 

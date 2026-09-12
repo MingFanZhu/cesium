@@ -1741,6 +1741,65 @@ const scratchInverseTransposeClippingPlanesMatrix = new Matrix4();
  */
 function createTileUniformMap(frameState, globeSurfaceTileProvider) {
   const uniformMap = {
+    // SCENEGIS_PATCH_BEGIN SGP-0009: Read the explicit current-frame SceneGIS Globe lighting record.
+    u_sceneGISCloudShadowAtlas: function () {
+      return frameState._sceneGISGlobeLighting.atlasTexture;
+    },
+    u_sceneGISTransmittanceTexture: function () {
+      return frameState._sceneGISGlobeLighting.transmittanceTexture;
+    },
+    u_sceneGISIrradianceTexture: function () {
+      return frameState._sceneGISGlobeLighting.irradianceTexture;
+    },
+    u_sceneGISCloudShadowMatrices: function () {
+      return frameState._sceneGISGlobeLighting.matrices;
+    },
+    u_sceneGISCloudShadowIntervals: function () {
+      return frameState._sceneGISGlobeLighting.intervals;
+    },
+    u_sceneGISCloudShadowCascadeCount: function () {
+      return frameState._sceneGISGlobeLighting.cascadeCount;
+    },
+    u_sceneGISShowCloudShadows: function () {
+      return frameState._sceneGISGlobeLighting.showCloudShadows;
+    },
+    u_sceneGISShowCrepuscularRays: function () {
+      return frameState._sceneGISGlobeLighting.showCrepuscularRays;
+    },
+    u_sceneGISShadowSurfacePosition: function () {
+      return frameState._sceneGISGlobeLighting.surfacePosition;
+    },
+    u_sceneGISShadowEast: function () {
+      return frameState._sceneGISGlobeLighting.east;
+    },
+    u_sceneGISShadowNorth: function () {
+      return frameState._sceneGISGlobeLighting.north;
+    },
+    u_sceneGISShadowVertical: function () {
+      return frameState._sceneGISGlobeLighting.vertical;
+    },
+    u_sceneGISShadowSunDirection: function () {
+      return frameState._sceneGISGlobeLighting.primaryLightDirection;
+    },
+    u_sceneGISActualSunDirection: function () {
+      return frameState._sceneGISGlobeLighting.sunDirection;
+    },
+    u_sceneGISPrimaryLightDirection: function () {
+      return frameState._sceneGISGlobeLighting.primaryLightDirection;
+    },
+    u_sceneGISPrimaryLightScale: function () {
+      return frameState._sceneGISGlobeLighting.primaryLightScale;
+    },
+    u_sceneGISShadowCameraPosition: function () {
+      return frameState._sceneGISGlobeLighting.cameraPosition;
+    },
+    u_sceneGISShadowCloudTop: function () {
+      return frameState._sceneGISGlobeLighting.cloudTop;
+    },
+    u_surfaceRadianceScale: function () {
+      return frameState._sceneGISGlobeLighting.surfaceRadianceScale;
+    },
+    // SCENEGIS_PATCH_END SGP-0009
     u_initialColor: function () {
       return this.properties.initialColor;
     },

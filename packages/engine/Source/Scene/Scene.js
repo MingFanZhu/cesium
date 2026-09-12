@@ -3256,6 +3256,22 @@ function renderEnvironment(scene, passState) {
     }
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0008: Render an optional scene-wide advanced background before native celestial bodies and the primary world.
+  const environmentEffectsPipeline = scene._sceneGISEnvironmentEffectsPipeline;
+  if (defined(environmentEffectsPipeline)) {
+    if (typeof environmentEffectsPipeline._renderBackground !== "function") {
+      throw new DeveloperError(
+        "The Scene advanced-environment pipeline authority is invalid.",
+      );
+    }
+    environmentEffectsPipeline._renderBackground(
+      scene,
+      scene.frameState,
+      passState,
+    );
+  }
+  // SCENEGIS_PATCH_END SGP-0008
+
   // Moon can be seen through the atmosphere, since the sun is rendered after the atmosphere.
   if (environmentState.isMoonVisible) {
     environmentState.moonCommand.execute(context, passState);
@@ -4189,12 +4205,30 @@ Scene.prototype.resolveFramebuffers = function (passState) {
       inputFramebuffer = globeFramebuffer;
     }
 
+    // SCENEGIS_PATCH_BEGIN SGP-0008: Composite optional advanced effects before built-in postprocessing.
     const postProcess = this.postProcessStages;
-    const colorTexture = inputFramebuffer.getColorTexture(0);
+    let colorTexture = inputFramebuffer.getColorTexture(0);
     const idTexture = idFramebuffer.getColorTexture(0);
     const depthTexture = (
       globeFramebuffer ?? sceneFramebuffer
     ).getDepthStencilTexture();
+    const environmentEffectsPipeline = this._sceneGISEnvironmentEffectsPipeline;
+    if (defined(environmentEffectsPipeline)) {
+      if (typeof environmentEffectsPipeline._executeHdr !== "function") {
+        throw new DeveloperError(
+          "The Scene advanced-environment pipeline authority is invalid.",
+        );
+      }
+      colorTexture = environmentEffectsPipeline._executeHdr(
+        this,
+        context,
+        colorTexture,
+        depthTexture,
+        idTexture,
+      );
+    }
+    // SCENEGIS_PATCH_END SGP-0008
+
     postProcess.execute(context, colorTexture, depthTexture, idTexture);
     postProcess.copy(context, originalFramebuffer);
   }
