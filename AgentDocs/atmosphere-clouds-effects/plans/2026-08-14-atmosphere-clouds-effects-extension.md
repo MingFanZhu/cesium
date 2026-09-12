@@ -8,16 +8,16 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P13 completed — Planar sample Clock and Timeline`
-- Current gate: P13 sample integration, focused E2E and self-review accepted; local checkpoint.
+- Current phase: `P14 completed — Planar Nanjing public data sample`
+- Current gate: P14 public data, offline E2E, live view and self-review accepted; local checkpoint.
 - Current phase plan:
-  [P13 sample Clock](2026-09-12-phase-p13-planar-sample-clock.md)
+  [P14 Nanjing data](2026-09-12-phase-p14-planar-nanjing-data.md)
 - Latest completed phase plan:
-  [P13 sample Clock](2026-09-12-phase-p13-planar-sample-clock.md)
+  [P14 Nanjing data](2026-09-12-phase-p14-planar-nanjing-data.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P12 receiver seams](2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
+  [P13 sample Clock](2026-09-12-phase-p13-planar-sample-clock.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -439,7 +439,13 @@ synchronize cloud motion and preset times without changing engine behavior.
 Focused E2E and delegated live layout verification pass.
 See [P13 sample Clock](2026-09-12-phase-p13-planar-sample-clock.md).
 
-### P14+ — Remaining Planar advanced-effects adaptation (`deferred`)
+### P14 — Planar Nanjing public data sample (`completed`)
+
+Default Esri Web Mercator imagery/LERC terrain and Zijin Mountain view now use an
+explicit Nanjing celestial reference. Public visual checks and blocked-network
+E2E pass. See [P14](2026-09-12-phase-p14-planar-nanjing-data.md).
+
+### P15+ — Remaining Planar advanced-effects adaptation (`deferred`)
 
 Ground-bounce parity and detailed Moon-disc rendering remain successors. Preserve fixed-Z
 geometry, manual celestial directions and independent phase checkpoints.

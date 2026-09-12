@@ -3,20 +3,20 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P13 completed — Planar sample Clock and Timeline`
+- Current phase: `P14 completed — Planar Nanjing public data sample`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P13 sample Clock](reviews/2026-09-12-p13-planar-sample-clock.md)
+  [P14 Nanjing data](reviews/2026-09-12-p14-planar-nanjing-data.md)
 - Current phase plan:
-  [P13 sample Clock](plans/2026-09-12-phase-p13-planar-sample-clock.md)
+  [P14 Nanjing data](plans/2026-09-12-phase-p14-planar-nanjing-data.md)
 - Latest completed phase plan:
-  [P13 sample Clock](plans/2026-09-12-phase-p13-planar-sample-clock.md)
+  [P14 Nanjing data](plans/2026-09-12-phase-p14-planar-nanjing-data.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P12 receiver seams](plans/2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
+  [P13 sample Clock](plans/2026-09-12-phase-p13-planar-sample-clock.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -66,11 +66,17 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- P14 is accepted after P13 `301916e4a5`: default Esri Mercator imagery/LERC
+  terrain, Zijin Mountain camera and explicit Nanjing astronomical reference.
+  Live public tiles/non-flat terrain, offline E2E, local-day lighting and listener
+  cleanup pass. Sample surface radiance defaults to 1 for satellite imagery.
+  The containing commit is the local checkpoint; no successor is activated.
+
 - P13 is accepted after P12 `3a5710390b`: the Planar sample uses native
   Clock/Timeline, existing astronomical directions and clock-driven cloud motion.
   Focused real-browser E2E, live layout and static/ownership checks pass. The
-  latest owner camera and effect settings are restored. The containing commit
-  is the local checkpoint; no successor phase is activated.
+  latest owner camera and effect settings were restored. Its local checkpoint
+  is `301916e4a5`.
 
 - P12 is accepted after P11 `39c440237c`: raw current receiver positions and
   one-sided depth normals remove the reported horizon/silhouette cloud holes.

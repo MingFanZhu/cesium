@@ -3,7 +3,7 @@ import { test, expect } from "./test.js";
 test.describe.configure({ retries: 0 });
 test.use({ launchOptions: { args: [] } });
 
-test("links Planar celestial lighting and clouds to the native Clock and Timeline", async ({
+test("links the Nanjing Planar sample to public data, astronomical Clock and Timeline", async ({
   page,
 }) => {
   test.setTimeout(120000);
@@ -27,6 +27,7 @@ test("links Planar celestial lighting and clouds to the native Clock and Timelin
     "初始化失败",
   );
   await expect(page.locator(".cesium-timeline-main")).toBeVisible();
+  await expect(page.locator("#providerStatus")).toContainText("不可用");
   const initial = await page.evaluate(async () => {
     const C = await import("/Build/CesiumUnminified/index.js");
     const { viewer, environment, effects } = window.sceneGISPlanarSample;
@@ -57,6 +58,24 @@ test("links Planar celestial lighting and clouds to the native Clock and Timelin
     clock.currentTime = epoch;
     viewer.render();
     return {
+      reference: [environment.originLongitude, environment.originLatitude].map(
+        C.Math.toDegrees,
+      ),
+      location: new C.WebMercatorProjection().unproject(viewer.camera.position),
+      data: {
+        imagery:
+          viewer.planarWorld.imageryLayers.get(0).imageryProvider instanceof
+          C.SceneGISPlanarUrlTemplateImageryProvider,
+        terrain:
+          viewer.planarWorld.terrainProvider instanceof
+          C.SceneGISPlanarUrlTemplateHeightmapTerrainProvider,
+        sameScheme:
+          viewer.planarWorld.terrainProvider.tilingScheme ===
+            viewer.planarWorld.tilingScheme &&
+          viewer.planarWorld.imageryLayers.get(0).imageryProvider
+            .tilingScheme === viewer.planarWorld.tilingScheme,
+        lit: viewer.planarWorld.enableLighting,
+      },
       paused,
       values,
       mode: environment.directionMode,
@@ -67,6 +86,17 @@ test("links Planar celestial lighting and clouds to the native Clock and Timelin
     };
   });
   expect(initial.paused).toBe(true);
+  expect(initial.reference[0]).toBeCloseTo(118.8406, 6);
+  expect(initial.reference[1]).toBeCloseTo(32.0725, 6);
+  expect((initial.location.longitude * 180) / Math.PI).toBeCloseTo(118.8406, 5);
+  expect((initial.location.latitude * 180) / Math.PI).toBeGreaterThan(32.04);
+  expect((initial.location.latitude * 180) / Math.PI).toBeLessThan(32.08);
+  expect(initial.data).toEqual({
+    imagery: true,
+    terrain: true,
+    sameScheme: true,
+    lit: true,
+  });
   expect(initial.mode).toBe("astronomical");
   expect(initial.values).toEqual([0, 0, 2, -1, -1, -1]);
   const control = (name) => page.getByLabel(name, { exact: true });
@@ -98,7 +128,7 @@ test("links Planar celestial lighting and clouds to the native Clock and Timelin
       expected:
         C.JulianDate.secondsDifference(
           viewer.clock.currentTime,
-          C.JulianDate.fromIso8601("2026-06-21T10:30:00Z"),
+          C.JulianDate.fromIso8601("2026-06-21T02:30:00Z"),
         ) + 37,
       sun: environment.effectiveSunDirection,
       moon: environment.effectiveMoonDirection,
@@ -114,6 +144,14 @@ test("links Planar celestial lighting and clouds to the native Clock and Timelin
   expect(scrubbed.position).toEqual(initial.position);
   expect(scrubbed.direction).toEqual(initial.direction);
   await page.getByText("云与大气参数", { exact: true }).click();
+  await page.getByText("低日照", { exact: true }).click();
+  const sunset = await page.evaluate(() => {
+    const { viewer, environment } = window.sceneGISPlanarSample;
+    viewer.render();
+    return environment.effectiveSunDirection.z;
+  });
+  expect(sunset).toBeGreaterThan(0);
+  expect(sunset).toBeLessThan(0.2);
   await page.getByText("夜间", { exact: true }).click();
   const night = await page.evaluate(() => {
     const { viewer, environment, effects } = window.sceneGISPlanarSample;
@@ -137,6 +175,8 @@ test("links Planar celestial lighting and clouds to the native Clock and Timelin
     const s = window.sceneGISPlanarSample,
       { clock } = s.viewer,
       effects = s.effects;
+    const imagery = s.viewer.planarWorld.imageryLayers.get(0).imageryProvider;
+    const terrain = s.viewer.planarWorld.terrainProvider;
     s.destroy();
     s.destroy();
     const cloudTime = effects.cloudTime;
@@ -146,10 +186,15 @@ test("links Planar celestial lighting and clouds to the native Clock and Timelin
       state: s.getState(),
       listeners: clock.onTick.numberOfListeners,
       unchanged: effects.cloudTime === cloudTime,
+      providerListeners: [
+        imagery.errorEvent.numberOfListeners,
+        terrain.errorEvent.numberOfListeners,
+      ],
     };
   });
   expect(released.listeners).toBe(0);
   expect(released.unchanged).toBe(true);
+  expect(released.providerListeners).toEqual([0, 0]);
   expect(released.state.destroyed).toBe(true);
   expect(released.state.errors).toEqual([]);
   await expect(page.locator(".cesium-timeline-main")).toHaveCount(0);

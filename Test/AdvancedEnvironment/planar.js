@@ -12,7 +12,16 @@ import {
 } from "/Test/AdvancedEnvironment/common.js";
 
 const WEB_MERCATOR_LIMIT = 20037508.342789244;
+const NANJING = Object.freeze({ longitude: 118.8406, latitude: 32.0725 });
+const mountain = new Cesium.WebMercatorProjection().project(
+  Cesium.Cartographic.fromDegrees(NANJING.longitude, NANJING.latitude, 430.0),
+);
+const IMAGERY_SERVICE =
+  "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer";
+const TERRAIN_SERVICE =
+  "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer";
 const runtimeStatus = document.querySelector("#runtimeStatus");
+const providerStatus = document.querySelector("#providerStatus");
 const errorTracker = createErrorTracker(document.querySelector("#errorStatus"));
 
 let viewer;
@@ -23,6 +32,11 @@ let removePostRender;
 let removeRenderError;
 let removeControllerError;
 let removeClockTick;
+let imageryProvider;
+let terrainProvider;
+let removeImageryError;
+let removeTerrainError;
+const providerFailures = { imagery: false, terrain: false };
 let destroyed = false;
 
 const state = {
@@ -47,7 +61,7 @@ const state = {
   cloudRadianceScale: 1.0,
   backgroundRadianceScale: 10.0,
   aerialRadianceScale: 1.0,
-  surfaceRadianceScale: 10.0,
+  surfaceRadianceScale: 1.0,
   day: () => applyLighting("day"),
   sunset: () => applyLighting("sunset"),
   night: () => applyLighting("night"),
@@ -98,13 +112,13 @@ function getCompositionState() {
 }
 
 const lighting = Object.freeze({
-  day: "2026-06-21T10:30:00Z",
-  sunset: "2026-06-21T17:45:00Z",
-  night: "2026-06-21T21:00:00Z",
+  day: "2026-06-21T10:30:00+08:00",
+  sunset: "2026-06-21T18:45:00+08:00",
+  night: "2026-06-21T21:00:00+08:00",
 });
 const cloudEpoch = Cesium.JulianDate.fromIso8601(lighting.day);
 const observationDayStart = Cesium.JulianDate.fromIso8601(
-  "2026-06-21T00:00:00Z",
+  "2026-06-21T00:00:00+08:00",
 );
 const observationDayStop = Cesium.JulianDate.addDays(
   observationDayStart,
@@ -118,22 +132,88 @@ const cameras = Object.freeze({
     direction: new Cesium.Cartesian3(0, 0.87, -0.493),
     up: new Cesium.Cartesian3(0, 0.493, 0.87),
   },
-  ground: {
-    destination: new Cesium.Cartesian3(0.0, -180000.0, 5000.0),
-    direction: new Cesium.Cartesian3(0.0, 0.98, -0.2),
-    up: new Cesium.Cartesian3(0.0, 0.2, 0.98),
-  },
-  aboveCloud: {
-    destination: new Cesium.Cartesian3(0.0, -250000.0, 15000.0),
-    direction: new Cesium.Cartesian3(0.0, 0.98, -0.2),
-    up: new Cesium.Cartesian3(0.0, 0.2, 0.98),
-  },
-  nearSpace: {
-    destination: new Cesium.Cartesian3(0.0, -900000.0, 120000.0),
-    direction: new Cesium.Cartesian3(0.0, 0.98, -0.2),
-    up: new Cesium.Cartesian3(0.0, 0.2, 0.98),
-  },
+  ground: mountainCamera(3500.0, 1200.0),
+  aboveCloud: mountainCamera(18000.0, 15000.0),
+  nearSpace: mountainCamera(90000.0, 120000.0),
 });
+
+function mountainCamera(southOffset, height) {
+  const destination = new Cesium.Cartesian3(
+    mountain.x,
+    mountain.y - southOffset,
+    height,
+  );
+  const direction = Cesium.Cartesian3.normalize(
+    Cesium.Cartesian3.subtract(mountain, destination, new Cesium.Cartesian3()),
+    new Cesium.Cartesian3(),
+  );
+  return {
+    destination,
+    direction,
+    up: new Cesium.Cartesian3(0.0, -direction.z, direction.y),
+  };
+}
+
+function updateProviderStatus() {
+  const messages = [];
+  if (providerFailures.imagery) {
+    messages.push("部分影像不可用，保留已加载影像或底色");
+  }
+  if (providerFailures.terrain) {
+    messages.push("部分地形不可用，保留已有地形或平面");
+  }
+  providerStatus.textContent =
+    messages.length > 0
+      ? messages.join("；")
+      : viewer.planarWorld.tilesLoaded
+        ? "公开影像与地形：当前视图已就绪"
+        : "公开影像与地形：加载中……";
+}
+
+function addPublicData() {
+  const world = viewer.planarWorld;
+  imageryProvider = new Cesium.SceneGISPlanarUrlTemplateImageryProvider({
+    url: `${IMAGERY_SERVICE}/tile/{z}/{y}/{x}`,
+    tilingScheme: world.tilingScheme,
+    urlScheme: "xyz",
+    tileWidth: 256,
+    tileHeight: 256,
+    maximumLevel: 16,
+    hasAlphaChannel: false,
+    credit: new Cesium.Credit(
+      `<a href="${IMAGERY_SERVICE}" target="_blank">影像：Esri, Vantor, Earthstar Geographics, GIS User Community</a>`,
+      true,
+    ),
+  });
+  terrainProvider =
+    new Cesium.SceneGISPlanarUrlTemplateHeightmapTerrainProvider({
+      url: `${TERRAIN_SERVICE}/tile/{z}/{y}/{x}`,
+      tilingScheme: world.tilingScheme,
+      urlScheme: "xyz",
+      heightmapWidth: 257,
+      heightmapHeight: 257,
+      format: "lerc",
+      minimumHeight: -450.0,
+      maximumHeight: 8700.0,
+      maximumLevel: 16,
+      credit: new Cesium.Credit(
+        `<a href="${TERRAIN_SERVICE}" target="_blank">地形：Esri World Elevation 及数据贡献者</a>`,
+        true,
+      ),
+    });
+  removeImageryError = imageryProvider.errorEvent.addEventListener((error) => {
+    providerFailures.imagery = true;
+    error.retry = false;
+    updateProviderStatus();
+  });
+  removeTerrainError = terrainProvider.errorEvent.addEventListener((error) => {
+    providerFailures.terrain = true;
+    error.retry = false;
+    updateProviderStatus();
+  });
+  world.imageryLayers.addImageryProvider(imageryProvider);
+  world.terrainProvider = terrainProvider;
+}
 
 function synchronizeCloudTime() {
   effects.cloudTime =
@@ -432,7 +512,7 @@ function createGui() {
   presets.add(state, "day").name("白昼");
   presets.add(state, "sunset").name("低日照");
   presets.add(state, "night").name("夜间");
-  presets.add(state, "ground").name("地面");
+  presets.add(state, "ground").name("紫金山");
   presets.add(state, "aboveCloud").name("云上");
   presets.add(state, "nearSpace").name("高空");
   presets.add(state, "models").name("模型光照");
@@ -443,7 +523,8 @@ function getState() {
   const scene = viewer?.isDestroyed() === false ? viewer.scene : undefined;
   return {
     page: "planar",
-    phase: "P13",
+    phase: "P14",
+    providerFailures: { ...providerFailures },
     timeline: viewer?.timeline !== undefined,
     compositionState: effects ? getCompositionState() : undefined,
     destroyed,
@@ -460,6 +541,8 @@ function destroySample() {
   }
   destroyed = true;
   removeClockTick?.();
+  removeImageryError?.();
+  removeTerrainError?.();
   removePostRender?.();
   removeRenderError?.();
   removeControllerError?.();
@@ -470,6 +553,9 @@ function destroySample() {
     viewer.removeController(environment);
     viewer = viewer.destroy();
   }
+  imageryProvider = undefined;
+  terrainProvider = undefined;
+  providerStatus.textContent = "公开数据已释放";
   runtimeStatus.textContent = "场景已释放";
 }
 
@@ -492,7 +578,8 @@ try {
         maximumX: WEB_MERCATOR_LIMIT,
         maximumY: WEB_MERCATOR_LIMIT,
       },
-      maximumLevel: 0,
+      maximumLevel: 16,
+      enableLighting: true,
       baseColor: Cesium.Color.fromCssColorString("#26362f"),
     },
   });
@@ -509,14 +596,15 @@ try {
     sunDirection: new Cesium.Cartesian3(0.45, 0.2, 0.87),
     moonDirection: new Cesium.Cartesian3(-0.5, -0.2, 0.8),
     directionMode: "astronomical",
-    // Explicit sample reference; never infer celestial coordinates from the CRS.
-    originLongitude: 0.0,
-    originLatitude: 0.0,
+    // Explicit Nanjing reference; never infer celestial coordinates from the CRS.
+    originLongitude: Cesium.Math.toRadians(NANJING.longitude),
+    originLatitude: Cesium.Math.toRadians(NANJING.latitude),
   });
   effects = new Cesium.SceneGISEnvironmentEffects({
     mode: "planar",
     world: viewer.scene.world,
     enabled: true,
+    surfaceRadianceScale: state.surfaceRadianceScale,
   });
   viewer.addController(environment);
   viewer.addController(effects);
@@ -526,6 +614,7 @@ try {
   addLightingModels(viewer.scene).catch((error) => errorTracker.record(error));
   createGui();
   applyCamera("ground");
+  addPublicData();
   applyCompositionState("combined");
   removeRenderError = viewer.scene.renderError.addEventListener(
     (scene, error) => {
@@ -540,6 +629,7 @@ try {
     },
   );
   removePostRender = viewer.scene.postRender.addEventListener(() => {
+    updateProviderStatus();
     runtimeStatus.textContent = `${controllerStatus(effects, viewer.scene)} · ${compositionLabels[getCompositionState()]} · ${effects.cloudQuality}/${effects.cloudPreset}`;
   });
   window.sceneGISPlanarSample = {
