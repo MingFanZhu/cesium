@@ -8,12 +8,12 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V0 completed — 待创建 V1`                             |
-| Active phase plan      | [V0 计划](plans/2026-09-12-v0-architecture-audit.md)   |
+| Current phase          | `V1 completed — 独立数据与样式前端`                    |
+| Active phase plan      | [V1 计划](plans/2026-09-12-v1-vector-frontend.md)      |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
-| Execution contact      | 当前 Agent；实现尚未启动                               |
-| Last updated           | `2026-09-12`                                           |
+| Execution contact      | 当前 Agent                                             |
+| Last updated           | `2026-09-13`                                           |
 
 ## Scope
 
@@ -35,13 +35,15 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - Branch：`feature/vector-tiles`。
 - Base：本地 `scenegis/develop@e1244451613f4d0b8a5c6986f69ae56123d4267c`。
 - Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
-- Source：计划使用 `packages/engine/Source/SceneGIS/{Core,Renderer,Scene}/`，尚未新增。
-- Specs：计划使用 `packages/engine/Specs/SceneGIS/`，镜像实际源码。
+- Source：`packages/engine/Source/SceneGIS/Core/SceneGISVectorTile*.js`，四个公共前端入口。
+- Specs：`packages/engine/Specs/SceneGIS/Core/SceneGISVectorTile*Spec.js`，35 项通过。
+- 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面与场景数据：计划使用 `Test/vector-tiles/`，有明确 HTML 入口，尚未创建。
 - E2E：计划使用 `Specs/e2e/scenegis-vector-tiles*.spec.js`。
 - Sandcastle：不新建；使用根服务器直接访问 `Test/**`。
 - ADR：[ADR-0057](../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)。
-- SGP：本轮无新增或修改；upstream-owned file 改动为零。
+- SGP：`SGP-0011`；upstream-owned files 为 `packages/engine/package.json`、`ThirdParty.extra.json`。
+- V1 ADR：[ADR-0058](../../Documentation/SceneGIS/Decisions/ADR-0058-vector-tile-frontend-contract.md)。
 
 ## Current handoff
 
@@ -49,7 +51,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - 已解决 discussion：[实现边界与取舍](discussions/2026-09-12-rendering-boundaries.md)。
 - 地形专题：[MapLibre 与 surface 方案](discussions/2026-09-12-maplibre-reference-and-surface.md)；
   优先验证矢量直接贴地；depth/stencil 为候选，批量正确性仍待证明，RTT 不作为主路线。
-- 当前 gate：`V0 completed`，用户已批准路线，先形成独立本地 checkpoint，再激活 V1。
-- 下一步：按当前源码细化 V1 的独立 decoder、source、坐标和样式 profile，并进入实现。
-- Latest review：[V0 review](reviews/2026-09-12-v0-architecture-review.md)；无未解决 V0 gate finding，V2 ground 风险已显式分配。
+- 当前 gate：V0 checkpoint `122cd2db2e`；V1 review 通过，形成独立 checkpoint 后才进入 V2。
+- 下一步：建立 V2 phase plan，完成 flat 批量闭环与直接贴地可行性验证。
+- Latest review：[V1 review](reviews/2026-09-13-v1-frontend-review.md)；无未解决 V1 gate finding，V2 ground 风险已显式分配。
 - 风险：层序与 Cesium pass sorting、批量贴地、跨瓦片标注、字体/图标来源和性能验收集待细化。

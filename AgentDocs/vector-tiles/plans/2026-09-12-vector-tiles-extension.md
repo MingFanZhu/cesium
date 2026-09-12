@@ -8,14 +8,14 @@
 - Architecture review: `approved`
 - Architecture reviewer: 当前 Agent；项目负责人确认产品边界
 - Created: `2026-09-12`
-- Updated: `2026-09-12`
-- Current phase: [V0](2026-09-12-v0-architecture-audit.md)
+- Updated: `2026-09-13`
+- Current phase: [V1](2026-09-12-v1-vector-frontend.md)
 - Related discussions: [源码审计](../discussions/2026-09-12-cesium-mvt-and-planar-audit.md)、
   [实现边界](../discussions/2026-09-12-rendering-boundaries.md)、
   [MapLibre 与贴地](../discussions/2026-09-12-maplibre-reference-and-surface.md)
 - Related reviews: [V0 review](../reviews/2026-09-12-v0-architecture-review.md)
 - ADR: [ADR-0057](../../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)；既有依赖见下文
-- SGP: None
+- SGP: SGP-0011（V1 独立样式依赖）
 
 项目负责人已批准阶段路线；稳定边界见 ADR-0057，各 phase 才冻结具体 API 和能力 profile。
 
@@ -43,7 +43,7 @@ Globe 从数据/样式/调度职责分离开始考虑，实际渲染资格另设
 - 不依赖或修改 Cesium 实验性 MVT decoder/provider/vector GLB/Buffer/VectorProvider 作为本扩展实现。
 - 不通过逐 feature Entity 或逐 feature public planar wrapper 实现地图 batching。
 - 不让 `Test/**` 承载产品实现或替代 Specs。
-- 本轮不修改已有平面 API、上游文件或生成产物。
+- 不修改已有平面 API；上游变动限经 SGP 登记的必要集成，生成产物不提交。
 
 ## Stable architecture boundaries
 
@@ -93,7 +93,7 @@ Globe 从数据/样式/调度职责分离开始考虑，实际渲染资格另设
 | Phase | Objective                           | Dependencies  | Entry gate                                 | Exit gate                                                                    | Status    | Phase plan                                |
 | ----- | ----------------------------------- | ------------- | ------------------------------------------ | ---------------------------------------------------------------------------- | --------- | ----------------------------------------- |
 | V0    | 源码审计、边界讨论                  | 当前 develop  | 干净基线与独立分支                         | 用户确认边界；ADR、review、本地 checkpoint                                   | completed | [V0](2026-09-12-v0-architecture-audit.md) |
-| V1    | MVT/source/style/坐标契约与兼容前端 | V0 checkpoint | 审计独立 decoder 候选、依赖与目标数据      | 数据/identity/诊断/坐标 Specs；公开入口和类型资格                            | planned   | 未激活                                    |
+| V1    | MVT/source/style/坐标契约与兼容前端 | V0 checkpoint | 审计独立 decoder 候选、依赖与目标数据      | 数据/identity/诊断/坐标 Specs；公开入口和类型资格                            | completed | [V1](2026-09-12-v1-vector-frontend.md)    |
 | V2    | 平面 flat 批量闭环与直接贴地可行性  | V1 checkpoint | 重查 primitive、pass、精度、pick           | flat 画面、层序、接缝、pick、销毁成立；ground 重叠/样式/拾取的最小证据与选择 | planned   | 未激活                                    |
 | V3    | 常见样式质量、流式调度与性能        | V2 checkpoint | 固定密集数据与 V2 baseline                 | 已选样式 profile；LOD/overzoom；cache/upload 有界；针对已测热点处理线程任务  | planned   | 未激活                                    |
 | V4    | 平面矢量直接贴地生产资格            | V3 checkpoint | V2 ground 可行性已验证；重查批量与层序边界 | 起伏地形、LOD/provider 变化下连续贴地；线宽/样式/逐要素交互与资源稳定        | planned   | 未激活                                    |
@@ -147,5 +147,6 @@ M1 包含约定直接贴地与基础点/沿线标注；V2 的 flat 画面是早�
 
 ## Progress and handoff
 
-V0 已通过用户确认与 architecture review。先完成独立 V0 checkpoint，再激活 V1。
-后续算法/资产选择按 roadmap 分配到对应 phase，不再重复请求既有架构方向的批准。
+V0 checkpoint 为 `122cd2db2e`；V1 前端实现与资格通过，见
+[V1 review](../reviews/2026-09-13-v1-frontend-review.md)。创建独立 V1 checkpoint 后进入 V2。
+后续 ground 算法/资产选择按 roadmap 分配到对应 phase，不重复请求已批准架构方向的确认。

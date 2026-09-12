@@ -233,6 +233,30 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md",
       "removalCondition": "Retire when upstream Globe surface rendering exposes an equivalent optional frame-local material-lighting extension with shader-source and uniform ownership hooks."
+    },
+    {
+      "id": "SGP-0011",
+      "title": "Declare the independent vector-tile style frontend dependency",
+      "status": "active",
+      "reason": "SceneGIS vector tiles require an independently versioned style validator and expression frontend, separate from Cesium experimental MVT support.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/package.json",
+          "markerMode": "manifest-only",
+          "reason": "JSON dependency declarations and license-generator input cannot contain paired comments."
+        },
+        {
+          "path": "ThirdParty.extra.json",
+          "markerMode": "manifest-only",
+          "reason": "JSON dependency declarations and license-generator input cannot contain paired comments."
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Core/SceneGISVectorTileStyleSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0058-vector-tile-frontend-contract.md",
+      "removalCondition": "Retire if the independent style frontend dependency is removed or upstream declares the exact required dependency and delivery metadata."
     }
   ]
 }

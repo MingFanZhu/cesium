@@ -1,5 +1,8 @@
 [
     {
+        "name": "@maplibre/maplibre-gl-style-spec"
+    },
+    {
       "name": "autolinker"
     },
     {
