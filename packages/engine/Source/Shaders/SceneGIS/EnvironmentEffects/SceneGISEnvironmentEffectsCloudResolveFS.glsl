@@ -520,7 +520,6 @@ void main()
                 abs(distanceSample.z - sceneDistance) * 96.0);
             #endif
             float weight = spatialWeight * frontWeight;
-            #ifdef SCENEGIS_GLOBE
             bool sampleValid;
             float sampleShadowLength;
             sceneGISDecodeCloudShadowLength(
@@ -531,9 +530,7 @@ void main()
             float shadowLengthWeight = spatialWeight;
             shadowLengthSum += sampleShadowLength * shadowLengthWeight;
             shadowLengthWeightSum += shadowLengthWeight;
-            #else
-            float distanceWeight = weight * step(0.5, distanceSample.a);
-            #endif
+
             colorSum += colorSample * weight;
             distanceSum += distanceSample * distanceWeight;
             weightSum += weight;
@@ -630,16 +627,13 @@ void main()
             spatialColorMinimum,
             spatialColorMaximum)
         : spatialColor;
-    #ifdef SCENEGIS_GLOBE
     bool previousValid;
     float previousShadowLength;
     sceneGISDecodeCloudShadowLength(
         historyDistance.a,
         previousValid,
         previousShadowLength);
-    #else
-    bool previousValid = historyDistance.a > 0.5;
-    #endif
+
     vec3 previousRayOrigin;
     vec3 previousRayDirection;
     sceneGISCloudResolveRay(
@@ -731,7 +725,6 @@ void main()
         ? 1.0
         : 0.0;
     historyWeight *= historyCompatible;
-    #ifdef SCENEGIS_GLOBE
     float shadowHistoryCompatible =
         abs(previousShadowLength - currentShadowLength) <=
             2.0 * SCENEGIS_CLOUD_SHADOW_MAX_LENGTH /
@@ -749,13 +742,11 @@ void main()
     float shadowHistoryWeight =
         u_cloudHistoryWeight * shadowHistoryCompatible *
         (reprojectedPositionValid ? 1.0 : 0.0);
-    #endif
     out_FragData_0 = mix(
         spatialColor,
         clippedHistoryColor,
         historyWeight);
     out_FragData_1 = spatialDistance;
-    #ifdef SCENEGIS_GLOBE
     float resolvedShadowLength = mix(
         currentShadowLength,
         previousShadowLength,
@@ -763,5 +754,4 @@ void main()
     out_FragData_1.a = sceneGISEncodeCloudShadowLength(
         currentValid,
         resolvedShadowLength);
-    #endif
 }

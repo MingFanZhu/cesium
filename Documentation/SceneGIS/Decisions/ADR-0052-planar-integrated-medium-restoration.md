@@ -156,3 +156,13 @@ Planar 云影、光束、时序与性能及天体效果仍须经过各自的阶�
 改用 Cesium 原生 raw-depth 重载；低分辨率 producer 使用自身 viewport 的
 `gl_FragCoord.xy`，由原生接口归一化，避免把 full-resolution pixel 交给 low-resolution viewport。
 这只修正深度/坐标还原，不迁移球面光学、云材质或时序政策，不增加资源或 SGP。
+
+## P10 participating-medium continuation (2026-09-12)
+
+After P9, the owner activates Planar volumetric light. ADR-0047's P10 amendment
+specifies fixed-Z shadow-prefix transport and authored cloud-local haze in the
+existing composition. Planar Background retains ownership of zero-length fog;
+clear Aerial adds only the shadow correction. Cloud haze is the coverage-coupled
+reference cloud effect and preserves its lit baseline with rays off. This phase
+adds no pass, GPU allocation, public property, coordinate conversion or upstream
+integration seam. Ground bounce and directional Moon remain deferred.

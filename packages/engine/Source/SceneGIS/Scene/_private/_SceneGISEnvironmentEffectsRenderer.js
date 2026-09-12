@@ -46,6 +46,7 @@ import cloudResolveFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEff
 import heightFogSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISExponentialHeightFog.js";
 import globeCloudSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISGlobeClouds.js";
 import cloudSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISVolumetricClouds.js";
+import planarCloudTransportSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISPlanarCloudTransport.js";
 import vertexSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsVS.js";
 import SceneGISAtmosphereReferenceFrame from "./_SceneGISAtmosphereReferenceFrame.js";
 import SceneGISEnvironmentEffectsPipeline from "./_SceneGISEnvironmentEffectsPipeline.js";
@@ -524,6 +525,7 @@ function createProgram(
         heightFogSource,
         globeCloudLibrarySource,
         cloudLibrarySource,
+        planarCloudTransportSource,
         fragmentSource,
       ];
   const fragmentShaderSource = new ShaderSource({
@@ -2109,7 +2111,6 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
       this._owner._showCloudShadows &&
       this._shadowCloudCasterActive,
     showCrepuscularRays:
-      globe &&
       this._showClouds &&
       this._owner._showCrepuscularRays &&
       this._shadowCloudCasterActive,

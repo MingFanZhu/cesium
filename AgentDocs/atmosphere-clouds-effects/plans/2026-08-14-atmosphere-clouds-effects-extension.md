@@ -412,14 +412,20 @@ cloud material, integration budgets and independent Beer atlas sampling. See
 [P9 plan](2026-09-12-phase-p9-planar-cloud-reconstruction.md) and
 [review](../reviews/2026-09-12-p9-planar-cloud-reconstruction.md).
 
-### P10+ — Remaining Planar advanced-effects adaptation (`deferred`)
+### P10 — Planar crepuscular rays (`completed`)
 
-Ground-bounce parity, crepuscular rays and directional Moon remain successors.
-Finite-resolution cloud grain is a retained quality limit. Select the next
-bounded phase from current-source evidence after the P9 checkpoint. Preserve
-fixed-Z geometry, manual Planar celestial directions and native shadow controls.
-Each phase retains separate validation, review and local checkpoint; no owner
-visual gate is pending and no successor is activated by this record.
+Adapt the existing Beer view-length producer and packed reconstruction to
+fixed-Z geometry, then connect Planar atmosphere, directional fog and authored
+cloud haze. Reuse resources and the current rays property; retain native shadow
+controls. Twelve relevant cases and delegated visual review pass with no new
+GPU resources. See the [P10 plan](2026-09-12-phase-p10-planar-crepuscular-rays.md)
+and [review](../reviews/2026-09-12-p10-planar-crepuscular-rays.md).
+
+### P11+ — Remaining Planar advanced-effects adaptation (`deferred`)
+
+Ground-bounce parity and directional Moon remain successors. Preserve fixed-Z
+geometry, manual celestial directions and independent phase checkpoints.
+No successor is activated by this record.
 
 ## Global acceptance criteria
 

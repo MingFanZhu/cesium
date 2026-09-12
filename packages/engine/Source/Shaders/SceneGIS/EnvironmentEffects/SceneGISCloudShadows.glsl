@@ -369,3 +369,26 @@ float sceneGISPlanarCloudBodyShadowOpticalDepth(
         shadowPosition, viewDistance, minimumDistance);
 }
 #endif
+
+#ifndef SCENEGIS_GLOBE
+bool sceneGISPlanarCloudShadowSegment(
+    vec3 origin, vec3 direction, float maximumDistance,
+    out float segmentStart, out float segmentEnd)
+{
+    segmentStart = 0.0;
+    segmentEnd = max(maximumDistance, 0.0);
+    if (abs(direction.z) < 1.0e-7) {
+        if (origin.z < 0.0 || origin.z > u_sceneGISShadowCloudTop) {
+            return false;
+        }
+    } else {
+        float ground = -origin.z / direction.z;
+        float top = (u_sceneGISShadowCloudTop - origin.z) / direction.z;
+        segmentStart = max(min(ground, top), 0.0);
+        segmentEnd = min(max(ground, top), segmentEnd);
+    }
+    segmentEnd = min(segmentEnd, segmentStart + SCENEGIS_CLOUD_SHADOW_MAX_LENGTH);
+    return segmentEnd > segmentStart;
+}
+
+#endif

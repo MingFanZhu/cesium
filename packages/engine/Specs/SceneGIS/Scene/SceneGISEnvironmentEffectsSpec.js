@@ -66,6 +66,7 @@ import heightFogSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects
 import planarLighting from "../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarEnvironmentLighting.js";
 import globeCloudSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISGlobeClouds.js";
 import cloudSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISVolumetricClouds.js";
+import planarCloudTransportSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISPlanarCloudTransport.js";
 
 const globeShapeDetailLodMutationSource = globeCloudSource
   .replace(
@@ -2453,6 +2454,329 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       expect(filteredUniformMutation[3]).toBe(0.0);
     } finally {
       atlas.destroy();
+    }
+  });
+
+  it("integrates Planar P10 fixed-Z shadow length independently of cloud hits on the actual GPU", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const atlas = new Texture({
+      context: scene.context,
+      width: 2,
+      height: 2,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+      sampler: Sampler.NEAREST,
+      source: {
+        arrayBufferView: new Uint16Array(
+          Array(4).fill([0, 1, 4, 0]).flat().map(encodeFloat16),
+        ),
+      },
+    });
+    let origin = new Cartesian3(0, 0, 1000);
+    let direction = Cartesian3.UNIT_X;
+    let distance = 10000;
+    let enabled = true;
+    let relative = new Cartesian3(12000, -45000, 1000);
+    const matrix = Matrix4.fromScale(
+      new Cartesian3(0.00001, 0.00001, 0),
+      new Matrix4(),
+    );
+    matrix[12] = -0.12;
+    matrix[13] = 0.45;
+    const matrices = [matrix, matrix, matrix];
+    const uniforms = {
+      ...effects._pipeline._uniformMap,
+      u_origin: () => origin,
+      u_direction: () => direction,
+      u_distance: () => distance,
+      u_sceneGISCloudShadowAtlas: () => atlas,
+      u_sceneGISCloudShadowMatrices: () => matrices,
+      u_sceneGISCloudShadowIntervals: () => [
+        new Cartesian2(0, 300000),
+        new Cartesian2(),
+        new Cartesian2(),
+      ],
+      u_sceneGISCloudShadowCascadeCount: () => 1,
+      u_sceneGISShowCrepuscularRays: () => enabled,
+      u_sceneGISShadowSunDirection: () => Cartesian3.UNIT_Z,
+      u_sceneGISShadowCloudTop: () => 3000,
+      u_sceneGISCloudShadowCameraRelativePosition: () => relative,
+    };
+    const fragment = `uniform vec3 u_origin;
+      uniform vec3 u_direction;
+      uniform float u_distance;
+      void main() {
+        float start; float end;
+        bool hit = sceneGISCloudShadowViewSegment(u_origin, u_direction, u_distance, start, end);
+        float length = sceneGISCloudShadowViewLength(u_origin, u_direction,
+          vec3(0), vec3(1,0,0), vec3(0,1,0), vec3(0,0,1), vec3(0), vec3(1),
+          u_direction, u_distance);
+        out_FragColor = vec4(length / 200000.0, hit ? start / 200000.0 : -1.0,
+          hit ? end / 200000.0 : -1.0, sceneGISEncodeCloudShadowLength(false, length));
+      }`;
+    const render = () =>
+      executeHalfFloatQuad(
+        [atmosphereSource, cloudShadowSource, cloudSource, fragment],
+        { uniformMap: uniforms },
+      )[0];
+    try {
+      const horizontal = render();
+      expect(horizontal[0]).toEqualEpsilon(
+        (10000 * (1 - Math.exp(-4))) / 200000,
+        0.0001,
+      );
+      expect(horizontal[3]).toBeGreaterThan(0);
+      expect(horizontal[3]).toBeLessThan(0.5);
+      direction = Cartesian3.UNIT_Z;
+      const up = render();
+      expect(up[0]).toEqualEpsilon(
+        (2000 * (1 - Math.exp(-4))) / 200000,
+        0.0001,
+      );
+      expect(up[2]).toEqualEpsilon(0.01, 0.00001);
+      origin = new Cartesian3(0, 0, 5000);
+      direction = new Cartesian3(0, 0, -1);
+      const above = render();
+      expect(above[1]).toEqualEpsilon(0.01, 0.00001);
+      expect(above[2]).toEqualEpsilon(0.025, 0.00003);
+      expect(above[0]).toEqualEpsilon(
+        (3000 * (1 - Math.exp(-4))) / 200000,
+        0.0001,
+      );
+      distance = 1000;
+      expect(render()[0]).toBe(0);
+      distance = 10000;
+      enabled = false;
+      expect(render()[0]).toBe(0);
+      enabled = true;
+      relative = new Cartesian3(1e8, 1e8, 1000);
+      expect(render()[0]).toBe(0);
+
+      // A real cloud-body miss must publish length through the distance MRT.
+      relative = new Cartesian3(12000, -45000, 1000);
+      Object.assign(
+        effects._pipeline._uniformMap,
+        Object.fromEntries(
+          Object.entries(uniforms).filter(([key]) =>
+            key.startsWith("u_sceneGIS"),
+          ),
+        ),
+      );
+      effects.cloudCoverage = 0;
+      const sample = renderControlledCloudSample(
+        "planar",
+        0,
+        true,
+        false,
+        Cartesian3.UNIT_X,
+      );
+      expect(sample.color[3]).toBe(1);
+      expect(sample.distances[3]).toBeGreaterThan(0);
+      expect(sample.distances[3]).toBeLessThan(0.5);
+    } finally {
+      atlas.destroy();
+      disconnectControlledCloudMode();
+    }
+  });
+
+  it("transports Planar P10 shadow prefixes through atmosphere fog and cloud haze on the actual GPU", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    installControlledAtmosphereTextures("planar", {
+      sun: [1, 1, 1],
+      sky: [0.1, 0.1, 0.1],
+    });
+    const resources = effects._pipeline._resources;
+    const scattering = resources.scatteringTexture;
+    scattering.copyFrom({
+      source: {
+        width: scattering.width,
+        height: scattering.height,
+        depth: scattering.depth,
+        arrayBufferView: new Uint16Array(
+          scattering.width * scattering.height * scattering.depth * 4,
+        ).fill(encodeFloat16(0.5)),
+      },
+    });
+    let shadowLength = 0;
+    let component = 0;
+    let height = 1000;
+    let direction = Cartesian3.UNIT_X;
+    let ambient = 0;
+    let directional = 1;
+    const uniforms = {
+      ...effects._pipeline._uniformMap,
+      u_testLength: () => shadowLength,
+      u_testComponent: () => component,
+      u_testHeight: () => height,
+      u_testDirection: () => direction,
+      u_testAmbient: () => ambient,
+      u_testDirectional: () => directional,
+      u_sceneGISShadowCloudTop: () => 3000,
+    };
+    const fragment = `uniform sampler2D u_transmittanceTexture;
+      uniform sampler3D u_scatteringTexture;
+      uniform sampler2D u_irradianceTexture;
+      uniform float u_testLength; uniform int u_testComponent;
+      uniform float u_testHeight; uniform vec3 u_testDirection;
+      uniform float u_testAmbient; uniform float u_testDirectional;
+      void main() {
+        vec3 origin = vec3(0,0,u_testHeight);
+        vec3 direction = u_testDirection;
+        if (u_testComponent == 0) {
+          out_FragColor = sceneGISPlanarCloudHaze(u_transmittanceTexture, u_irradianceTexture,
+            origin, direction, vec3(0,0,1), 10000.0, u_testLength, 0.4);
+        } else if (u_testComponent == 1) {
+          out_FragColor = vec4(sceneGISApplyExponentialHeightFog(u_transmittanceTexture,
+            vec3(0), origin, direction, direction, 10000.0, u_testLength,
+            0.00004, 0.0002, 0.0, 250.0, 1.0, 1.0, u_testAmbient, u_testDirectional, 8.0), 1);
+        } else {
+          bool hit; vec3 transmittance;
+          vec3 radiance = sceneGISPlanarRadianceToPoint(u_transmittanceTexture,
+            u_scatteringTexture, u_irradianceTexture, origin, direction, vec3(0,0,1),
+            10000.0, false, hit, transmittance);
+          vec3 removed = sceneGISPlanarCloudShadowRadiance(u_transmittanceTexture,
+            u_scatteringTexture, u_irradianceTexture, origin, direction, vec3(0,0,1), 10000.0, u_testLength);
+          out_FragColor = vec4(radiance - removed, transmittance.r);
+        }
+      }`;
+    const render = () =>
+      executeHalfFloatQuad(
+        [
+          atmosphereSource,
+          cloudShadowSource,
+          heightFogSource,
+          cloudSource,
+          planarCloudTransportSource,
+          fragment,
+        ],
+        { uniformMap: uniforms },
+      )[0];
+    try {
+      const lit = render();
+      shadowLength = 2500;
+      const shadowed = render();
+      const opacity = 1 - Math.exp(-3e-5 * Math.exp(-1) * 10000);
+      expect(lit[3]).toEqualEpsilon(opacity, 0.0001);
+      expect(shadowed[3]).toBe(lit[3]);
+      for (let c = 0; c < 3; c++) {
+        expect(shadowed[c]).toBeLessThan(lit[c]);
+      }
+      copyConstantHalfTexture(resources.transmittanceTexture, [0, 0, 0, 1]);
+      const ambientShadow = render();
+      shadowLength = 0;
+      expect(render()).toEqual(ambientShadow);
+      installControlledAtmosphereTextures("planar", {
+        sun: [1, 1, 1],
+        sky: [0.1, 0.1, 0.1],
+      });
+      direction = Cartesian3.UNIT_Z;
+      height = 5000;
+      expect(render()).toEqual([0, 0, 0, 0]);
+      direction = new Cartesian3(0, 0, -1);
+      expect(render()[3]).toBeGreaterThan(0);
+      height = 1000;
+      direction = Cartesian3.normalize(
+        new Cartesian3(1, 0, 0.1),
+        new Cartesian3(),
+      );
+      component = 1;
+      const fogLit = render();
+      shadowLength = 10000;
+      expect(render().slice(0, 3)).toEqual([0, 0, 0]);
+      ambient = 1;
+      directional = 0;
+      const fogAmbient = render();
+      shadowLength = 0;
+      expect(render()).toEqual(fogAmbient);
+      expect(fogLit[0]).toBeGreaterThan(0);
+      component = 2;
+      direction = Cartesian3.UNIT_X;
+      const atmosphereLit = render();
+      shadowLength = 2500;
+      const atmosphereShadow = render();
+      expect(atmosphereShadow[3]).toBe(atmosphereLit[3]);
+      const densityR = Math.exp(-1000 / 8000);
+      const densityM = Math.exp(-1000 / 1200);
+      const extinction = 5.802e-6 * densityR + 4.44e-6 * densityM;
+      expect(atmosphereShadow[0]).toEqualEpsilon(
+        0.5 * (Math.exp(-extinction * 2500) - Math.exp(-extinction * 10000)),
+        0.0002,
+      );
+      shadowLength = 10000;
+      expect(render().slice(0, 3)).toEqual([0, 0, 0]);
+
+      // Exercise the actual clear-depth Aerial composition. Zero-length clouds
+      // preserve the input; shadow length changes clear sky even without a cloud hit.
+      const temporary = [];
+      const tex = (values) => {
+        const texture = new Texture({
+          context: scene.context,
+          width: 1,
+          height: 1,
+          pixelFormat: PixelFormat.RGBA,
+          pixelDatatype: PixelDatatype.HALF_FLOAT,
+          source: {
+            arrayBufferView: new Uint16Array(values.map(encodeFloat16)),
+          },
+        });
+        temporary.push(texture);
+        return texture;
+      };
+      const input = tex([0.25, 0.25, 0.25, 1]);
+      const clearDepth = tex([1, 0, 0, 0]);
+      const noCloud = tex([0, 0, 0, 1]);
+      let packedDistance = tex([0, 0, 1, 0]);
+      let clearFogAmbient = 0;
+      const aerialUniforms = {
+        ...uniforms,
+        u_colorTexture: () => input,
+        u_depthTexture: () => clearDepth,
+        u_cloudColorTexture: () => noCloud,
+        u_cloudDistanceTexture: () => packedDistance,
+        u_showClouds: () => true,
+        u_sceneGISShowCrepuscularRays: () => true,
+        u_cloudCoverage: () => 0,
+        u_showAerialPerspective: () => true,
+        u_showHeightFog: () => true,
+        u_perspective: () => true,
+        u_cameraDirection: () => Cartesian3.UNIT_Z,
+        u_cameraRight: () => Cartesian3.UNIT_X,
+        u_cameraUp: () => Cartesian3.UNIT_Y,
+        u_altitude: () => 1000,
+        u_sunDirection: () => Cartesian3.UNIT_Z,
+        u_heightFogInscatteringScale: () => clearFogAmbient,
+      };
+      const aerial = () =>
+        executeHalfFloatQuad(
+          [
+            atmosphereSource,
+            cloudShadowSource,
+            heightFogSource,
+            globeCloudSource,
+            cloudSource,
+            planarCloudTransportSource,
+            aerialFragmentSource,
+          ],
+          { uniformMap: aerialUniforms },
+        )[0];
+      try {
+        expect(aerial()).toEqual([0.25, 0.25, 0.25, 1]);
+        packedDistance = tex([0, 0, 1, 10 / 2048]);
+        const shadowedClear = aerial();
+        expect(shadowedClear[0]).toBeLessThan(0.25);
+        clearFogAmbient = 1;
+        expect(aerial()).toEqual(shadowedClear);
+      } finally {
+        temporary.forEach((texture) => texture.destroy());
+      }
+    } finally {
+      disconnectControlledCloudMode();
     }
   });
 
@@ -7598,7 +7922,12 @@ ${hardCascadeLibrary}`;
               heightFogSource,
               fogFragment,
             ]
-          : [readableAtmosphereSource, heightFogSource, fogFragment],
+          : [
+              readableAtmosphereSource,
+              cloudShadowSource,
+              heightFogSource,
+              fogFragment,
+            ],
         {
           defines: globe ? shaderDefines : [],
           uniformMap: {
@@ -7883,6 +8212,7 @@ ${hardCascadeLibrary}`;
       cloudShadowSource,
       heightFogSource,
       cloudSource,
+      planarCloudTransportSource,
     ];
     function render(fragment) {
       return executeHalfFloatQuad([...sources, fragment], {
@@ -8703,7 +9033,8 @@ ${hardCascadeLibrary}`;
     expectFiniteHdrStorage(cloudColor);
     expect(cloudColor[3]).toBeGreaterThanOrEqual(0.0);
     expect(cloudColor[3]).toBeLessThan(1.0);
-    expect(cloudDistances[3]).toBe(1.0);
+    // Validity occupies the upper half; P10 also packs shadow length.
+    expect(cloudDistances[3]).toBeGreaterThanOrEqual(0.5);
     expect(cloudDistances[3]).toBeGreaterThanOrEqual(0.0);
     expect(cloudDistances[3]).toBeLessThanOrEqual(1.0);
 
@@ -10145,7 +10476,7 @@ ${hardCascadeLibrary}`;
       expect(oblique.color[untracedPlanePixel][0]).toBeGreaterThan(0);
       depth = clear;
       historyValid = false;
-      if (mode === "globe") {
+      {
         const packedInvalid = 100 / 2048;
         fillLow(
           () => [0, 0, 1, packedInvalid],
@@ -10154,6 +10485,27 @@ ${hardCascadeLibrary}`;
         const shadow = draw(cloudResolveFragmentSource);
         shadow.distance.forEach((v) => expect(v[3]).toBe(packedInvalid));
         expect(shadow.color[22]).toEqual([0, 0, 0, 1]);
+        if (mode === "planar") {
+          uniforms.u_cloudTracePhased = () => false;
+          const unphasedShadow = draw(cloudResolveFragmentSource);
+          unphasedShadow.distance.forEach((v) =>
+            expect(v[3]).toBe(packedInvalid),
+          );
+          uniforms.u_cloudTracePhased = () => true;
+        }
+        const priorReproject = reproject;
+        reproject = false;
+        historyValid = true;
+        historyColor = shadow.colorTexture;
+        historyDistance = texture(
+          width,
+          height,
+          image(width, height, () => [0, 0, 1, 101 / 2048]),
+        );
+        const shadowHistory = draw(cloudResolveFragmentSource);
+        shadowHistory.distance.forEach((v) => expect(v[3]).toBe(101 / 2048));
+        historyValid = false;
+        reproject = priorReproject;
 
         // Length changes cannot veto otherwise reusable cloud RGB.
         phase = 1;
@@ -14374,11 +14726,19 @@ ${hardCascadeLibrary}`;
             expect(sample.color[3]).toBeLessThan(1.0);
           }
           for (const sample of near) {
-            expect(sample.distances).toEqual([0.0, 0.0, 0.0, 0.0]);
+            expect(sample.distances.slice(0, 2)).toEqual([0.0, 0.0]);
+            // Empty cloud pixels retain the finite receiver for P10 reconstruction.
+            expect(sample.distances[2]).toBeGreaterThan(0.0);
+            expect(sample.distances[2]).toBeLessThan(1.0);
+            expect(sample.distances[3]).toBe(0.0);
             expect(sample.color).toEqual([0.0, 0.0, 0.0, 1.0]);
           }
           for (const sample of nearThresholdGeometry) {
-            expect(sample.distances).toEqual([0.0, 0.0, 0.0, 0.0]);
+            expect(sample.distances.slice(0, 2)).toEqual([0.0, 0.0]);
+            // Empty cloud pixels retain the finite receiver for P10 reconstruction.
+            expect(sample.distances[2]).toBeGreaterThan(0.0);
+            expect(sample.distances[2]).toBeLessThan(1.0);
+            expect(sample.distances[3]).toBe(0.0);
             expect(sample.color).toEqual([0.0, 0.0, 0.0, 1.0]);
           }
           expect(

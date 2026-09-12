@@ -805,3 +805,22 @@ both atlas receivers and the frame-local Globe surface seam. A preset without
 caster support publishes identity shadow/ray coupling. This changes no visual
 cloud density, color, atlas topology, filter, resource, public API, upstream
 path or SGP.
+
+## Planar P10 activation — 2026-09-12
+
+The owner authorizes the Planar volumetric-light successor to P9. Reuse the
+accepted packed equivalent-length transport, raw progressive Beer view march,
+independent shadow history and cloud-local haze in the existing programs.
+Planar uses absolute metric Z and a shadow interval bounded by zero and the
+low-layer caster top; its atlas coordinates retain CPU origin subtraction.
+Equivalent length denotes a camera-near prefix within that interval, including
+above-cloud entry. The Planar LUT correction removes prefix scattering with
+entry transmittance and preserves whole-path extinction and ground radiance.
+Generic fog removes directional source only over the overlapping prefix.
+Because Planar Background already applies fog, clear Aerial adds the source
+and atmosphere delta attenuated by that fog, without applying fog twice.
+The reference cloud haze retains coverage, albedo and phase coefficients but
+uses exact fixed-Z density integration and physical Planar Sun/diffuse sky.
+Zero length preserves its lit baseline. Native geometry shadows, Globe behavior,
+public defaults, resources and upstream seams remain unchanged. The equivalent
+prefix remains an approximation; it does not store individual shadow intervals.

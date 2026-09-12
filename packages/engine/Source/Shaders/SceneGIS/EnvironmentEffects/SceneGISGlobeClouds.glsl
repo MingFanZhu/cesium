@@ -89,6 +89,8 @@ float sceneGISGlobeCloudHazeRayDistance(
     return max(rayDistance, 0.0);
 }
 
+#endif
+
 float sceneGISGlobeCloudHazeClampToCloudFront(
     float rayDistance,
     float cloudFrontDistance,
@@ -102,6 +104,7 @@ float sceneGISGlobeCloudHazeClampToCloudFront(
         clamp(cloudOpacity, 0.0, 1.0));
 }
 
+#ifdef SCENEGIS_GLOBE
 vec4 sceneGISGlobeCloudHaze(
     sampler2D transmittanceTexture,
     sampler2D irradianceTexture,

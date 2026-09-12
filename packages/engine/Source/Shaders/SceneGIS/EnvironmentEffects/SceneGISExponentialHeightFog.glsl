@@ -404,6 +404,22 @@ vec3 sceneGISApplyExponentialHeightFog(
             1.0);
     }
     directionalSource *= directionalShadowFraction;
+    #else
+    float shadowStart;
+    float shadowEnd;
+    if (shadowLength > 0.0 && opticalDepth > 0.0 &&
+        sceneGISPlanarCloudShadowSegment(rayOrigin, viewDirection,
+            maximumDistance, shadowStart, shadowEnd)) {
+        shadowEnd = min(min(shadowEnd, shadowStart + shadowLength), segmentEnd);
+        shadowStart = max(shadowStart, segmentStart);
+        if (shadowEnd > shadowStart) {
+            float shadowOpticalDepth = sceneGISHeightFogPlanarOpticalDepth(
+                rayOrigin, viewDirection, shadowStart, shadowEnd,
+                density, heightFalloff, baseHeight);
+            directionalSource *= clamp(
+                (opticalDepth - shadowOpticalDepth) / opticalDepth, 0.0, 1.0);
+        }
+    }
     #endif
     float directionalLobe = pow(
         max(dot(viewDirection, sunDirection), 0.0),

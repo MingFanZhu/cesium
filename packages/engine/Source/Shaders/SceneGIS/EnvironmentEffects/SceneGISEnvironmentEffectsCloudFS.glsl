@@ -231,7 +231,11 @@ void main()
     #else
     out_FragData_0 = cloudColor;
     #endif
-    if (u_cloudTracePhased) {
+    bool publishSceneDistance = true;
+    #ifdef SCENEGIS_GLOBE
+    publishSceneDistance = u_cloudTracePhased;
+    #endif
+    if (publishSceneDistance) {
         cloudDistances.z = isClearDepth ? 1.0 : clamp(
             distanceToGeometry / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0);
     }

@@ -50,16 +50,12 @@ bool sceneGISSelectCloudSample(
     float encodedSceneDistance = clamp(
         sceneDistance / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0);
     vec4 distances = texture(u_cloudDistanceTexture, textureCoordinates);
-    #ifdef SCENEGIS_GLOBE
     bool cloudValid;
     sceneGISDecodeCloudShadowLength(
         distances.a,
         cloudValid,
         shadowLength);
-    #else
-    bool cloudValid = distances.a >= 0.5;
-    shadowLength = 0.0;
-    #endif
+
     float frontDelta = encodedSceneDistance - distances.y;
     float reconstructionFootprint =
         fwidth(frontDelta) + 1.0 / SCENEGIS_CLOUD_DISTANCE_ENCODING;
@@ -140,7 +136,6 @@ void main()
         dot(worldOriginOffset, u_north),
         u_altitude + dot(worldOriginOffset, u_vertical));
     float shadowLength = 0.0;
-    #ifdef SCENEGIS_GLOBE
     if (u_showClouds && u_sceneGISShowCrepuscularRays) {
         bool unusedShadowSampleValid;
         sceneGISDecodeCloudShadowLength(
@@ -148,7 +143,6 @@ void main()
             unusedShadowSampleValid,
             shadowLength);
     }
-    #endif
     vec3 viewDirection = normalize(vec3(
         dot(worldDirection, u_east),
         dot(worldDirection, u_north),
@@ -213,6 +207,34 @@ void main()
             u_heightFogDirectionalInscatteringExponent);
     }
     #endif
+    #ifndef SCENEGIS_GLOBE
+    if (isClearDepth && shadowLength > 0.0) {
+        vec3 delta = vec3(0.0);
+        if (u_showAerialPerspective) {
+            delta = -sceneGISPlanarCloudShadowRadiance(
+                u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
+                rayOrigin, viewDirection, sunDirection, distanceToPoint, shadowLength) *
+                (u_backgroundRadianceScale * u_aerialRadianceScale);
+        }
+        if (u_showHeightFog) {
+            // Background already contains the lit fog. Its affine difference
+            // attenuates the atmosphere correction and changes directional fog once.
+            delta = sceneGISApplyExponentialHeightFog(
+                u_transmittanceTexture, delta, rayOrigin, viewDirection, sunDirection,
+                distanceToPoint, shadowLength, u_heightFogDensity,
+                u_heightFogHeightFalloff, u_heightFogBaseHeight, u_heightFogStartDistance,
+                u_heightFogMaximumOpacity, 1.0, u_heightFogInscatteringScale,
+                u_heightFogDirectionalInscatteringScale, u_heightFogDirectionalInscatteringExponent) -
+                sceneGISApplyExponentialHeightFog(
+                u_transmittanceTexture, vec3(0.0), rayOrigin, viewDirection, sunDirection,
+                distanceToPoint, 0.0, u_heightFogDensity,
+                u_heightFogHeightFalloff, u_heightFogBaseHeight, u_heightFogStartDistance,
+                u_heightFogMaximumOpacity, 1.0, u_heightFogInscatteringScale,
+                u_heightFogDirectionalInscatteringScale, u_heightFogDirectionalInscatteringExponent);
+        }
+        sceneLinearRadiance += delta;
+    }
+    #endif
     if (!isClearDepth && u_showAerialPerspective) {
         vec3 transmittance;
         #ifdef SCENEGIS_GLOBE
@@ -238,6 +260,9 @@ void main()
                 false,
                 intersectsAtmosphere,
                 transmittance);
+        radiance = max(radiance - sceneGISPlanarCloudShadowRadiance(
+            u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
+            rayOrigin, viewDirection, sunDirection, distanceToPoint, shadowLength), vec3(0.0));
         #endif
         #ifdef SCENEGIS_GLOBE
         sceneLinearRadiance =
@@ -272,11 +297,9 @@ void main()
             u_heightFogDirectionalInscatteringScale,
             u_heightFogDirectionalInscatteringExponent);
     }
-    #ifdef SCENEGIS_GLOBE
     float hazeCloudFrontDistance = 0.0;
     float hazeCloudOpacity = 0.0;
     bool hazeHasVisibleCloud = false;
-    #endif
     if (u_showClouds) {
         vec4 cloudColor;
         float cloudMeanDistance;
@@ -291,11 +314,9 @@ void main()
                 cloudFrontDistance,
                 cloudShadowLength)) {
             float cloudOpacity = 1.0 - cloudColor.a;
-            #ifdef SCENEGIS_GLOBE
             hazeCloudFrontDistance = cloudFrontDistance;
             hazeCloudOpacity = cloudOpacity;
             hazeHasVisibleCloud = true;
-            #endif
             vec3 cloudOptical = cloudColor.rgb;
             if (u_showAerialPerspective) {
                 vec3 cloudTransmittance;
@@ -322,6 +343,9 @@ void main()
                     false,
                     cloudIntersectsAtmosphere,
                     cloudTransmittance);
+                cloudAtmosphere = max(cloudAtmosphere - sceneGISPlanarCloudShadowRadiance(
+                    u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
+                    rayOrigin, viewDirection, sunDirection, cloudMeanDistance, cloudShadowLength), vec3(0.0));
                 #endif
                 #ifdef SCENEGIS_GLOBE
                 cloudOptical = cloudOptical * cloudTransmittance +
@@ -360,14 +384,17 @@ void main()
                 sceneLinearRadiance * cloudColor.a + cloudOptical;
         }
     }
-    #ifdef SCENEGIS_GLOBE
     if (u_showClouds && (isClearDepth || hazeHasVisibleCloud)) {
         float hazeCameraNear = max(czm_currentFrustum.x, 0.0);
         vec3 hazeRayOrigin = rayOrigin + viewDirection * hazeCameraNear;
+        #ifdef SCENEGIS_GLOBE
         float hazeMaximumDistance = sceneGISGlobeCloudHazeRayDistance(
             hazeRayOrigin,
             viewDirection,
             max(distanceToPoint - hazeCameraNear, 0.0));
+        #else
+        float hazeMaximumDistance = max(distanceToPoint - hazeCameraNear, 0.0);
+        #endif
         if (hazeCloudOpacity > 0.0) {
             hazeMaximumDistance = sceneGISGlobeCloudHazeClampToCloudFront(
                 hazeMaximumDistance,
@@ -375,6 +402,7 @@ void main()
                 hazeCameraNear,
                 hazeCloudOpacity);
         }
+        #ifdef SCENEGIS_GLOBE
         vec4 cloudHaze = sceneGISGlobeCloudHaze(
             u_transmittanceTexture,
             u_irradianceTexture,
@@ -387,8 +415,22 @@ void main()
         sceneLinearRadiance =
             sceneLinearRadiance * (1.0 - cloudHaze.a) +
             cloudHaze.rgb * globeAtmosphereRadianceScale;
+        #else
+        float shadowStart;
+        float shadowEnd;
+        float hazeShadowLength = shadowLength;
+        if (sceneGISPlanarCloudShadowSegment(rayOrigin, viewDirection,
+                distanceToPoint, shadowStart, shadowEnd)) {
+            hazeShadowLength = max(shadowLength - max(hazeCameraNear - shadowStart, 0.0), 0.0);
+        }
+        vec4 cloudHaze = sceneGISPlanarCloudHaze(
+            u_transmittanceTexture, u_irradianceTexture,
+            hazeRayOrigin, viewDirection, sunDirection,
+            hazeMaximumDistance, hazeShadowLength, u_cloudCoverage);
+        sceneLinearRadiance = sceneLinearRadiance * (1.0 - cloudHaze.a) +
+            cloudHaze.rgb * (u_backgroundRadianceScale * u_aerialRadianceScale);
+        #endif
     }
-    #endif
     out_FragColor = vec4(
         sceneGISGuardHdrStorage(sceneLinearRadiance), inputColor.a);
 }

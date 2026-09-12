@@ -31,6 +31,7 @@ const state = {
   showHeightFog: true,
   showClouds: true,
   showCloudShadows: true,
+  showCrepuscularRays: true,
   showBloom: true,
   showLensFlare: true,
   bloomIntensity: 0.05,
@@ -253,6 +254,14 @@ function createGui() {
     viewer.scene,
     "云影",
   );
+  bindBoolean(
+    effectsFolder,
+    state,
+    "showCrepuscularRays",
+    effects,
+    viewer.scene,
+    "体积光",
+  );
   bindNumber(
     cloudFolder,
     state,
@@ -398,7 +407,7 @@ function getState() {
   const scene = viewer?.isDestroyed() === false ? viewer.scene : undefined;
   return {
     page: "planar",
-    phase: "P9",
+    phase: "P10",
     compositionState: effects ? getCompositionState() : undefined,
     destroyed,
     ready: effects?.ready === true,

@@ -162,7 +162,6 @@ bool sceneGISCloudSegment(
     return segmentEnd > segmentStart;
 }
 
-#ifdef SCENEGIS_GLOBE
 bool sceneGISCloudShadowViewSegment(
     vec3 rayOrigin,
     vec3 rayDirection,
@@ -173,6 +172,10 @@ bool sceneGISCloudShadowViewSegment(
     if (maximumDistance <= 0.0) {
         return false;
     }
+    #ifndef SCENEGIS_GLOBE
+    return sceneGISPlanarCloudShadowSegment(
+        rayOrigin, rayDirection, maximumDistance, segmentStart, segmentEnd);
+    #else
     float shadowTopRadius =
         SCENEGIS_BOTTOM_RADIUS + u_sceneGISShadowCloudTop;
     float topNear;
@@ -202,6 +205,7 @@ bool sceneGISCloudShadowViewSegment(
         segmentEnd,
         segmentStart + SCENEGIS_CLOUD_SHADOW_MAX_LENGTH);
     return segmentEnd > segmentStart;
+    #endif
 }
 
 float sceneGISCloudShadowViewLength(
@@ -219,6 +223,7 @@ float sceneGISCloudShadowViewLength(
     if (!u_sceneGISShowCrepuscularRays) {
         return 0.0;
     }
+    #ifdef SCENEGIS_GLOBE
     vec3 globeRayOrigin = sceneGISGlobeCloudPosition(
         localRayOrigin,
         surfacePosition,
@@ -236,6 +241,12 @@ float sceneGISCloudShadowViewLength(
         ellipsoidCenter,
         ellipsoidRadii);
     vec3 globeRayDirection = normalize(globeRayPoint - globeRayOrigin);
+    #else
+    vec3 globeRayOrigin = vec3(
+        localRayOrigin.xy + u_sceneGISCloudShadowCameraRelativePosition.xy,
+        localRayOrigin.z);
+    vec3 globeRayDirection = localRayDirection;
+    #endif
     vec3 localCameraDirection = normalize(vec3(
         dot(worldCameraDirection, east),
         dot(worldCameraDirection, north),
@@ -280,7 +291,6 @@ float sceneGISCloudShadowViewLength(
     }
     return min(shadowLength, SCENEGIS_CLOUD_SHADOW_MAX_LENGTH);
 }
-#endif
 
 vec2 sceneGISCloudMaterialOrigin(
     vec3 worldCameraPosition,
@@ -1100,7 +1110,6 @@ void sceneGISMarchClouds(
             segmentStart,
             segmentEnd);
     float accumulatedShadowLength = 0.0;
-    #ifdef SCENEGIS_GLOBE
     accumulatedShadowLength = sceneGISCloudShadowViewLength(
         localRayOrigin,
         localRayDirection,
@@ -1112,13 +1121,10 @@ void sceneGISMarchClouds(
         ellipsoidRadii,
         worldCameraDirection,
         maximumDistance);
-    #endif
     if (!hasCloudSegment) {
-        #ifdef SCENEGIS_GLOBE
         cloudDistances.a = sceneGISEncodeCloudShadowLength(
             false,
             accumulatedShadowLength);
-        #endif
         return;
     }
     vec2 materialOrigin = sceneGISCloudMaterialOrigin(
@@ -1507,13 +1513,11 @@ void sceneGISMarchClouds(
         skippedCoarseIntervals,
         accumulatedTransmittance <= 0.01 ? 1.0 : 0.0);
     if (!hasFront || accumulatedWeight <= 1.0e-6) {
-        #ifdef SCENEGIS_GLOBE
         cloudDistances.a = sceneGISEncodeCloudShadowLength(
             false,
             u_sceneGISShowCrepuscularRays
                 ? min(accumulatedShadowLength, SCENEGIS_CLOUD_SHADOW_MAX_LENGTH)
                 : 0.0);
-        #endif
         return;
     }
     float meanDistance = max(
@@ -1526,14 +1530,10 @@ void sceneGISMarchClouds(
         clamp(meanDistance / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0),
         clamp(frontDistance / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0),
         clamp(maximumDistance / SCENEGIS_CLOUD_DISTANCE_ENCODING, 0.0, 1.0),
-        #ifdef SCENEGIS_GLOBE
         sceneGISEncodeCloudShadowLength(
             true,
             u_sceneGISShowCrepuscularRays
                 ? min(accumulatedShadowLength, SCENEGIS_CLOUD_SHADOW_MAX_LENGTH)
                 : 0.0)
-        #else
-        1.0
-        #endif
         );
 }

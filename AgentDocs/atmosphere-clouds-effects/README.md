@@ -3,20 +3,20 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P9 completed — Planar cloud reconstruction`
+- Current phase: `P10 completed — Planar crepuscular rays`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P9 cloud reconstruction](reviews/2026-09-12-p9-planar-cloud-reconstruction.md)
+  [P10 crepuscular rays](reviews/2026-09-12-p10-planar-crepuscular-rays.md)
 - Current phase plan:
-  [P9 cloud reconstruction](plans/2026-09-12-phase-p9-planar-cloud-reconstruction.md)
+  [P10 crepuscular rays](plans/2026-09-12-phase-p10-planar-crepuscular-rays.md)
 - Latest completed phase plan:
-  [P9 cloud reconstruction](plans/2026-09-12-phase-p9-planar-cloud-reconstruction.md)
+  [P10 crepuscular rays](plans/2026-09-12-phase-p10-planar-crepuscular-rays.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P8 cloud material](plans/2026-09-12-phase-p8-planar-cloud-material.md)
+  [P9 cloud reconstruction](plans/2026-09-12-phase-p9-planar-cloud-reconstruction.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -64,6 +64,14 @@ HDR bloom/lens flare。两种世界共享光学参数、质量档、资源与合
 reference frame，不互相伪造坐标语义。
 
 ## Active work
+
+- P10 is accepted after P9 `efb478b971`: fixed-Z equivalent shadow length,
+  atmosphere/directional fog and reference cloud haze reuse existing resources.
+  Twelve relevant cases and delegated off/on, above-cloud and night review pass.
+  Median cloud + resolve + Aerial cost is 6.755 ms off and 8.753 ms on at the
+  recorded medium owner view. Native geometry-shadow controls remain unchanged.
+  This commit is the separate local checkpoint; ground bounce and Moon remain
+  successors and no owner visual gate is pending.
 
 - P9 is accepted from P8 `f19b7a271c`: the owner's grain report supersedes P8's
   retained quality limit. Planar shares Globe medium phases and temporal
