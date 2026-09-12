@@ -12,6 +12,7 @@
 - Created: `2026-09-12`
 - Updated: `2026-09-13`
 - Entry checkpoint: `122cd2db2e`（V0）
+- Delivery checkpoint: `80089a0a91`（V1）
 - ADR: [ADR-0058](../../../Documentation/SceneGIS/Decisions/ADR-0058-vector-tile-frontend-contract.md)
 - SGP: `SGP-0011`（独立样式依赖声明）
 
@@ -78,7 +79,8 @@ Style 编译复制输入 JSON，隐藏依赖库对象；source 克隆 Resource �
 V1 profile 是计算前端资格，rendered stroke/alpha/pick 仍由 V2 验证。
 不做一般计算几何拓扑修复、跨 tile identity 推断、TileJSON/托管服务或任意重投影。
 后续若需超出 profile，先扩矩阵与 Specs，再扩 renderer。
-自动验证与 [V1 review](../reviews/2026-09-13-v1-frontend-review.md) 已通过；创建独立 V1 checkpoint 后才激活 V2。
+自动验证与 [V1 review](../reviews/2026-09-13-v1-frontend-review.md) 已通过；V1 checkpoint 为 `80089a0a91`。
+后续工作见 [V2 plan](2026-09-13-v2-planar-batch-and-ground.md)。
 
 仓库 `.npmrc` 设置 `package-lock=false`，Git 忽略 lockfile；遵循既有策略，
 仅在 engine 声明固定样式库版本，不新增或提交 lockfile。间接依赖仍服从既有 npm 解析策略。

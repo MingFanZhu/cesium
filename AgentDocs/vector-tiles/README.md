@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                  |
-| ---------------------- | ------------------------------------------------------ |
-| Extension slug         | `vector-tiles`                                         |
-| Status                 | `active`                                               |
-| Planning model         | `extension`                                            |
-| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V1 completed — 独立数据与样式前端`                    |
-| Active phase plan      | [V1 计划](plans/2026-09-12-v1-vector-frontend.md)      |
-| Active standalone plan | None                                                   |
-| Architecture contact   | 当前 Agent                                             |
-| Execution contact      | 当前 Agent                                             |
-| Last updated           | `2026-09-13`                                           |
+| Field                  | Value                                                     |
+| ---------------------- | --------------------------------------------------------- |
+| Extension slug         | `vector-tiles`                                            |
+| Status                 | `active`                                                  |
+| Planning model         | `extension`                                               |
+| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md)    |
+| Current phase          | `V2 active — 架构验证准备`                                |
+| Active phase plan      | [V2 计划](plans/2026-09-13-v2-planar-batch-and-ground.md) |
+| Active standalone plan | None                                                      |
+| Architecture contact   | 当前 Agent                                                |
+| Execution contact      | 当前 Agent                                                |
+| Last updated           | `2026-09-13`                                              |
 
 ## Scope
 
@@ -51,7 +51,8 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - 已解决 discussion：[实现边界与取舍](discussions/2026-09-12-rendering-boundaries.md)。
 - 地形专题：[MapLibre 与 surface 方案](discussions/2026-09-12-maplibre-reference-and-surface.md)；
   优先验证矢量直接贴地；depth/stencil 为候选，批量正确性仍待证明，RTT 不作为主路线。
-- 当前 gate：V0 checkpoint `122cd2db2e`；V1 review 通过，形成独立 checkpoint 后才进入 V2。
-- 下一步：建立 V2 phase plan，完成 flat 批量闭环与直接贴地可行性验证。
+- 当前 gate：V0 checkpoint `122cd2db2e`；V1 checkpoint `80089a0a91`，review 与提交 hook 均通过。
+- 下一步：按 V2 plan 先做真实 Context 的层序与 ground 合批实验，再冻结 renderer 契约与实现。
+- V2 当前只有源码复查和计划，尚无地图渲染器、Test 页面或 ground batch 资格。
 - Latest review：[V1 review](reviews/2026-09-13-v1-frontend-review.md)；无未解决 V1 gate finding，V2 ground 风险已显式分配。
 - 风险：层序与 Cesium pass sorting、批量贴地、跨瓦片标注、字体/图标来源和性能验收集待细化。
