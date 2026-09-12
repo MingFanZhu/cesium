@@ -135,3 +135,60 @@ test("renders local MVT with request-render mode, picking and layer recreation",
   expect(errors).toEqual([]);
   await expect(page.locator("#error")).toBeEmpty();
 });
+
+test("keeps the city visible while delayed child tiles replace a resident ancestor", async ({
+  page,
+}, testInfo) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/Test/vector-tiles/index.html");
+  await page.waitForFunction(() => window.vectorTilePreview?.layer.tilesLoaded);
+  await page.getByRole("button", { name: "逐块加载演示" }).click();
+  await page.waitForFunction(() => {
+    const layer = window.vectorTilePreview.layer;
+    return (
+      !layer.tilesLoaded &&
+      layer.statistics.fallbackTiles === 1 &&
+      layer.statistics.visibleTiles === 4
+    );
+  });
+  const intermediate = await page.evaluate(async () => {
+    const C = await import("/Build/CesiumUnminified/index.js");
+    const { viewer, layer } = window.vectorTilePreview;
+    const position = C.SceneTransforms.worldToWindowCoordinates(
+      viewer.scene,
+      new C.Cartesian3(0, 0, 0),
+    );
+    const pick = viewer.scene.pick(position);
+    return { ...layer.statistics, id: pick?.id, point: position };
+  });
+  expect(intermediate.id.properties.name).toBe("中央广场");
+  expect(intermediate.id.tile.level).toBe(0);
+  expect(intermediate.drawCommands).toBeGreaterThan(0);
+  await page.screenshot({
+    path: testInfo.outputPath("ancestor-during-load.png"),
+  });
+  await page.waitForFunction(() => {
+    const stats = window.vectorTilePreview.layer.statistics;
+    return stats.fallbackTiles === 1 && stats.renderedTiles > 1;
+  });
+  await page.screenshot({
+    path: testInfo.outputPath("partial-replacement.png"),
+  });
+  await page.waitForFunction(() => window.vectorTilePreview.layer.tilesLoaded);
+  const final = await page.evaluate(async () => {
+    const C = await import("/Build/CesiumUnminified/index.js");
+    const { viewer, layer } = window.vectorTilePreview;
+    const position = C.SceneTransforms.worldToWindowCoordinates(
+      viewer.scene,
+      new C.Cartesian3(0, 0, 0),
+    );
+    return { ...layer.statistics, id: viewer.scene.pick(position)?.id };
+  });
+  expect(final.fallbackTiles).toBe(0);
+  expect(final.id.properties.name).toBe("中央广场");
+  expect(final.id.tile.level).toBe(2);
+  expect(final.failedTiles).toBe(0);
+  expect(errors).toEqual([]);
+  await expect(page.locator("#error")).toBeEmpty();
+});

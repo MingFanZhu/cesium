@@ -25,6 +25,12 @@
 - 湖心岛是 polygon hole；河道跨 tile，观察透明水域在共享边是否变深或断裂。
 - 点击中央广场、道路、水域，确认返回业务属性、style layer、tile 和 feature ID。
 - 隐藏/显示、移除并重建：确认命令消失、恢复和无控制台错误。
+- 逐块加载演示：重新加载全图，再自动放大并让子瓦片分批完成。观察旧图保留、
+  每块独立替换且透明颜色不加深；最终“替代瓦片”归零，再点击中央广场确认源 tile 切换。
+
+演示通过页面的 source 子类延迟返回真实 PBF 的解析结果；延迟仅用于此 Test 页面，
+产品没有模拟延迟或特殊测试分支。不同 LOD 的 MVT 量化可造成小幅边缘跳动。
+V2 画面及 V3A 逐块加载过渡均已由项目负责人验收通过。
 
 当前没有 terrainProvider 或 symbol 渲染。V2 不支持任意非默认 cap/join/dash/blur，
 也不承诺 Mapbox 抗锯齿像素一致性。颜色与样式契约见
@@ -33,7 +39,8 @@
 ## 自动化与测量
 
 `Specs/e2e/scenegis-vector-tiles.spec.js` 覆盖真实 PBF、颜色像素、requestRenderMode、
-拾取、倾斜和重建；单元和真实 Context 回归在 `packages/engine/Specs/SceneGIS/`。
+拾取、倾斜、重建和父子替换中间状态，共 2 项；67 项单元和真实 Context 回归在
+`packages/engine/Specs/SceneGIS/`。
 E2E 使用仓库默认配置时，需要释放 8080/8081 给其根服务器，不能同时运行第二个开发服务器。
 
 “测量 60 帧”记录 preRender 到 postRender 的 CPU 提交时间，包含该页正常组装开销，

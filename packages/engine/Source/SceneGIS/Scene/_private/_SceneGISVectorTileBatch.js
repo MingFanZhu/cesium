@@ -1,4 +1,4 @@
-import Cartesian2 from "../../../Core/Cartesian2.js";
+import Cartesian4 from "../../../Core/Cartesian4.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import BoundingSphere from "../../../Core/BoundingSphere.js";
 import Matrix4 from "../../../Core/Matrix4.js";
@@ -27,7 +27,9 @@ const pickState = {
 /** Owns one tile/style geometry batch and its last published commands. @private */
 function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking) {
   this.commands = [];
-  this.pickCommands = [];
+  this.renderCommands = [];
+  this._regionCommands = [];
+  this._tileBounds = tile.bounds;
   this._allowPicking = allowPicking;
   this._bounds = BoundingSphere.fromCornerPoints(
     new Cartesian3(tile.bounds.minimumX, tile.bounds.minimumY, 0),
@@ -53,9 +55,11 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking) {
           renderState: colorState,
         });
   appearance.uniforms = {
-    u_sceneGISVectorTileSize: new Cartesian2(
+    u_sceneGISVectorTileClip: new Cartesian4(
+      0,
+      -tile.bounds.height,
       tile.bounds.width,
-      tile.bounds.height,
+      0,
     ),
   };
   this.primitive = new Primitive({
@@ -77,7 +81,6 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking) {
       matrix,
     ) => {
       this.commands.length = commands.length;
-      this.pickCommands.length = allowPicking ? commands.length : 0;
       for (let i = 0; i < commands.length; i++) {
         const command = commands[i];
         command.modelMatrix = matrix;
@@ -91,12 +94,6 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking) {
         command.receiveShadows = false;
         command.pickId = undefined;
         this.commands[i] = command;
-        if (allowPicking) {
-          const pick = DrawCommand.shallowClone(command, this.pickCommands[i]);
-          pick.renderState = RenderState.fromCache(pickState);
-          pick.pickId = "v_pickColor";
-          this.pickCommands[i] = pick;
-        }
       }
     },
   });
@@ -106,21 +103,70 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
   this.primitive.update(frameState);
 };
 
+SceneGISVectorTileBatch.prototype.setRegions = function (regions) {
+  this.renderCommands.length = 0;
+  const count = regions.length * this.commands.length;
+  this._regionCommands.length = count;
+  const bounds = this._tileBounds;
+  let index = 0;
+  for (const region of regions) {
+    for (const source of this.commands) {
+      let published = this._regionCommands[index];
+      if (published === undefined) {
+        const clip = new Cartesian4();
+        published = { clip, uniformMap: {}, sourceMap: undefined };
+        this._regionCommands[index] = published;
+      }
+      const clip = published.clip;
+      Cartesian4.fromElements(
+        region.minimumX - bounds.minimumX,
+        region.minimumY - bounds.maximumY,
+        region.maximumX - bounds.minimumX,
+        region.maximumY - bounds.maximumY,
+        clip,
+      );
+      if (published.sourceMap !== source.uniformMap) {
+        published.sourceMap = source.uniformMap;
+        published.uniformMap = {
+          ...source.uniformMap,
+          u_sceneGISVectorTileClip: () => clip,
+        };
+      }
+      published.render = DrawCommand.shallowClone(source, published.render);
+      published.render.uniformMap = published.uniformMap;
+      this.renderCommands.push(published.render);
+      if (this._allowPicking) {
+        published.pick = DrawCommand.shallowClone(source, published.pick);
+        published.pick.uniformMap = published.uniformMap;
+        published.pick.renderState = RenderState.fromCache(pickState);
+        published.pick.pickId = "v_pickColor";
+      }
+      index++;
+    }
+  }
+};
+
 SceneGISVectorTileBatch.prototype.queue = function (frameState) {
-  const commands = frameState.passes.render
-    ? this.commands
-    : frameState.passes.pick && !frameState.passes.depth
-      ? this.pickCommands
-      : [];
-  for (const command of commands) {
-    frameState.commandList.push(command);
+  if (frameState.passes.render) {
+    for (const command of this.renderCommands) {
+      frameState.commandList.push(command);
+    }
+  } else if (
+    frameState.passes.pick &&
+    !frameState.passes.depth &&
+    this._allowPicking
+  ) {
+    for (const published of this._regionCommands) {
+      frameState.commandList.push(published.pick);
+    }
   }
 };
 
 SceneGISVectorTileBatch.prototype.destroy = function () {
   this.primitive.destroy();
   this.commands.length = 0;
-  this.pickCommands.length = 0;
+  this.renderCommands.length = 0;
+  this._regionCommands.length = 0;
 };
 
 export default SceneGISVectorTileBatch;

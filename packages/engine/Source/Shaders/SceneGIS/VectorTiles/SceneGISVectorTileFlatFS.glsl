@@ -1,5 +1,5 @@
 in vec4 v_color;
-uniform vec2 u_sceneGISVectorTileSize;
+uniform vec4 u_sceneGISVectorTileClip;
 
 #ifdef SCENEGIS_VECTOR_CIRCLE
 in vec2 v_circleCoordinate;
@@ -20,8 +20,8 @@ void main()
     if (dz == 0.0) discard;
     float t = -a.z / dz;
     vec2 local = a.xy + direction.xy * t;
-    if (t < 0.0 || local.x < 0.0 || local.x >= u_sceneGISVectorTileSize.x ||
-        local.y > 0.0 || local.y <= -u_sceneGISVectorTileSize.y) discard;
+    if (t < 0.0 || local.x < u_sceneGISVectorTileClip.x || local.x >= u_sceneGISVectorTileClip.z ||
+        local.y > u_sceneGISVectorTileClip.w || local.y <= u_sceneGISVectorTileClip.y) discard;
 
     vec4 fill = czm_gammaCorrect(v_color);
     fill.rgb *= fill.a;

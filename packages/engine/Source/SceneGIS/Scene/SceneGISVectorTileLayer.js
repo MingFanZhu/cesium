@@ -11,6 +11,7 @@ import SceneGISVectorTileStyle from "../Core/SceneGISVectorTileStyle.js";
 import geometry from "../Core/_private/_SceneGISVectorTileGeometry.js";
 import VectorBatch from "./_private/_SceneGISVectorTileBatch.js";
 import cover from "./_private/_SceneGISVectorTileCover.js";
+import renderCover from "../Core/_private/_SceneGISVectorTileRenderCover.js";
 
 function integerOption(options, name, fallback) {
   const value = options[name] ?? fallback;
@@ -116,7 +117,13 @@ function prepareSources(world, style, overrides) {
         `Source ${id} must use the world's canonical tilingScheme.`,
       );
     }
-    result.set(id, { source, entries: new Map(), visible: [], records: [] });
+    result.set(id, {
+      source,
+      entries: new Map(),
+      visible: [],
+      records: [],
+      render: new Map(),
+    });
   }
   return result;
 }
@@ -129,6 +136,18 @@ function cancel(layer, entry) {
   entry.request = undefined;
   entry.state = "idle";
   layer._pendingRequests--;
+}
+
+function clearView(layer) {
+  for (const state of layer._sources.values()) {
+    for (const entry of state.entries.values()) {
+      cancel(layer, entry);
+    }
+    state.visible.length = 0;
+    state.render.clear();
+  }
+  layer._drawOrder.length = 0;
+  layer._tilesLoaded = true;
 }
 
 function release(layer, entry) {
@@ -275,7 +294,54 @@ function updateBackgrounds(layer, zoom, frameState) {
     } else {
       record.batch?.update(frameState);
     }
+    record.batch?.setRegions([layer._world.coordinateSystem.extent]);
   }
+}
+
+function selectRender(state) {
+  state.render.clear();
+  const regions = renderCover.select(
+    state.visible,
+    Array.from(state.entries.values()),
+  );
+  for (const { entry, region } of regions) {
+    let bounds = state.render.get(entry);
+    if (bounds === undefined) {
+      bounds = [];
+      state.render.set(entry, bounds);
+    }
+    bounds.push(region.bounds);
+  }
+}
+
+function updateEntry(layer, id, state, entry, zoom, frameState, uploads) {
+  const needsUpload =
+    entry.state === "decoded" ||
+    (entry.state === "ready" && entry.signature !== state.signature);
+  if (needsUpload && uploads < layer._maximumUploadsPerFrame) {
+    try {
+      createBatches(layer, state, entry, zoom);
+    } catch (error) {
+      fail(entry, error);
+    }
+    uploads++;
+  } else {
+    for (const group of entry.batches.values()) {
+      for (const batch of group) {
+        batch.update(frameState);
+      }
+    }
+  }
+  if (entry.state === "failed" && !entry.notified) {
+    entry.notified = true;
+    layer._errorEvent.raiseEvent({
+      layer,
+      source: id,
+      tile: { x: entry.x, y: entry.y, level: entry.level },
+      error: entry.error,
+    });
+  }
+  return uploads;
 }
 
 function updateSources(layer, zoom, frameState) {
@@ -309,10 +375,21 @@ function updateSources(layer, zoom, frameState) {
       entry.lastUsed = frameState.frameNumber;
       state.visible.push(entry);
     }
+    selectRender(state);
+    let spareSlots = layer._tileCacheSize - state.visible.length;
+    for (const entry of state.render.keys()) {
+      if (!protectedKeys.has(entry.key) && spareSlots > 0) {
+        protectedKeys.add(entry.key);
+        spareSlots--;
+      }
+    }
+    const desiredEntries = new Set(state.visible);
     const candidates = [];
     for (const entry of state.entries.values()) {
-      if (!protectedKeys.has(entry.key)) {
+      if (!desiredEntries.has(entry)) {
         cancel(layer, entry);
+      }
+      if (!protectedKeys.has(entry.key)) {
         candidates.push(entry);
       }
     }
@@ -324,6 +401,7 @@ function updateSources(layer, zoom, frameState) {
       release(layer, entry);
       state.entries.delete(entry.key);
     }
+    selectRender(state);
     if (desired.length > 0 && state.source.credit !== undefined) {
       frameState.creditDisplay.addCreditToNextFrame(state.source.credit);
     }
@@ -339,31 +417,21 @@ function updateSources(layer, zoom, frameState) {
   let uploads = 0;
   for (const [id, state] of layer._sources) {
     for (const entry of state.visible) {
-      const needsUpload =
-        entry.state === "decoded" ||
-        (entry.state === "ready" && entry.signature !== state.signature);
-      if (needsUpload && uploads < layer._maximumUploadsPerFrame) {
-        try {
-          createBatches(layer, state, entry, zoom);
-        } catch (error) {
-          fail(entry, error);
-        }
-        uploads++;
-      } else {
-        for (const group of entry.batches.values()) {
-          for (const batch of group) {
-            batch.update(frameState);
-          }
-        }
-      }
-      if (entry.state === "failed" && !entry.notified) {
-        entry.notified = true;
-        layer._errorEvent.raiseEvent({
+      uploads = updateEntry(layer, id, state, entry, zoom, frameState, uploads);
+    }
+    selectRender(state);
+    for (const entry of state.render.keys()) {
+      if (!state.visible.includes(entry)) {
+        uploads = updateEntry(
           layer,
-          source: id,
-          tile: { x: entry.x, y: entry.y, level: entry.level },
-          error: entry.error,
-        });
+          id,
+          state,
+          entry,
+          zoom,
+          frameState,
+          uploads,
+        );
+        entry.lastUsed = frameState.frameNumber;
       }
     }
   }
@@ -379,8 +447,9 @@ function publishOrder(layer) {
       continue;
     }
     const state = layer._sources.get(record.definition.source);
-    for (const entry of state.visible) {
+    for (const [entry, regions] of state.render) {
       for (const batch of entry.batches.get(record.definition.id) ?? []) {
+        batch.setRegions(regions);
         layer._drawOrder.push(batch);
       }
     }
@@ -395,6 +464,11 @@ function publishOrder(layer) {
         layer._tilesLoaded = false;
       }
     }
+    for (const entry of state.render.keys()) {
+      if (entry.state !== "failed" && entry.signature !== state.signature) {
+        layer._tilesLoaded = false;
+      }
+    }
   }
 }
 
@@ -403,7 +477,9 @@ function publishOrder(layer) {
  * Add this object to scene.primitives. The collection then owns its lifetime.
  * Construction does not request data or allocate GPU resources. Scene, World,
  * style, and source overrides are borrowed. Style/source configuration is fixed.
- * This V2 renderer requires a world without a terrainProvider.
+ * This flat renderer requires a world without a terrainProvider.
+ * Published resident ancestors or descendants cover pending desired tiles
+ * within the cache budget. A cache without spare slots may evict that coverage.
  * @alias SceneGISVectorTileLayer
  * @constructor
  * @experimental This API is experimental and subject to change.
@@ -577,20 +653,33 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
       let residentTiles = 0;
       let visibleTiles = 0;
       let failedTiles = 0;
+      let renderedTiles = 0;
+      let fallbackTiles = 0;
+      let renderRegions = 0;
       for (const state of this._sources.values()) {
         residentTiles += state.entries.size;
         visibleTiles += state.visible.length;
         failedTiles += state.visible.filter(
           (entry) => entry.state === "failed",
         ).length;
+        renderedTiles += state.render.size;
+        for (const [entry, regions] of state.render) {
+          renderRegions += regions.length;
+          if (!state.visible.includes(entry)) {
+            fallbackTiles++;
+          }
+        }
       }
       return {
         residentTiles,
         visibleTiles,
         failedTiles,
+        renderedTiles,
+        fallbackTiles,
+        renderRegions,
         pendingRequests: this._pendingRequests,
         drawCommands: this._drawOrder.reduce(
-          (count, batch) => count + batch.commands.length,
+          (count, batch) => count + batch.renderCommands.length,
           0,
         ),
         uploads: this._uploads,
@@ -619,14 +708,7 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
   }
   if (!this._show || !this._world.show) {
     if (frameState.passes.render) {
-      for (const state of this._sources.values()) {
-        for (const entry of state.entries.values()) {
-          cancel(this, entry);
-        }
-        state.visible.length = 0;
-      }
-      this._drawOrder.length = 0;
-      this._tilesLoaded = true;
+      clearView(this);
     }
     return;
   }
@@ -637,8 +719,7 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
     );
     this._zoom = zoom;
     if (zoom === undefined) {
-      this._drawOrder.length = 0;
-      this._tilesLoaded = true;
+      clearView(this);
       return;
     }
     updateBackgrounds(this, zoom, frameState);
@@ -677,6 +758,7 @@ SceneGISVectorTileLayer.prototype.destroy = function () {
     }
     state.entries.clear();
     state.visible.length = 0;
+    state.render.clear();
   }
   this._drawOrder.length = 0;
   return destroyObject(this);

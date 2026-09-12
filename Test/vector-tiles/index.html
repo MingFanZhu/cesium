@@ -27,6 +27,8 @@
         left: 24px;
         width: 238px;
         padding: 22px;
+        max-height: calc(100% - 94px);
+        overflow: auto;
         background: #fffefaef;
         border: 1px solid #d8dcd4;
         border-radius: 8px;
@@ -126,7 +128,7 @@
     <aside>
       <div class="eyebrow">SCENEGIS / VECTOR TILES</div>
       <h1>一座矢量城市</h1>
-      <p class="muted">平面场景 · 本地 MVT · V2 预览</p>
+      <p class="muted">平面场景 · 本地 MVT · V3A 预览</p>
       <div class="legend">
         <span style="--color: #bdd4ad">公园</span
         ><span style="--color: #8ebeca">水域</span
@@ -139,6 +141,7 @@
         ><button id="visibility">隐藏矢量</button>
         <button id="recreate">移除并重建</button
         ><button id="measure">测量 60 帧</button>
+        <button id="delayed" style="grid-column: 1 / -1">逐块加载演示</button>
       </div>
       <div id="status">正在初始化…</div>
       <p class="muted">
@@ -146,6 +149,7 @@
       </p>
       <div id="picked">尚未选择要素</div>
       <p id="timing" class="muted"></p>
+      <p id="transition" class="muted"></p>
       <p id="error" role="alert"></p>
       <p class="muted">
         当前验收 fill / line / circle；地形与文字标注在后续阶段。

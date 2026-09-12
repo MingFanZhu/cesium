@@ -41,6 +41,37 @@ scene.renderError.addEventListener((...args) => {
   element("error").textContent = args[1].message;
 });
 const style = await (await fetch("./style.json")).json();
+let simulateDelay = false;
+let finishDemo;
+const delayed = new Map();
+// Preview-only latency control; the product source and decoder still fetch real PBF.
+class PreviewSource extends Cesium.SceneGISVectorTileSource {
+  requestTile(x, y, level, request) {
+    const promise = super.requestTile(x, y, level, request);
+    if (promise === undefined || !simulateDelay || level === 0) {
+      return promise;
+    }
+    return promise.then(
+      (data) =>
+        new Promise((resolve, reject) => {
+          const timer = window.setTimeout(
+            () => {
+              delayed.delete(timer);
+              resolve(data);
+            },
+            600 * (1 + x + y * 2),
+          );
+          delayed.set(timer, reject);
+        }),
+    );
+  }
+}
+const previewSource = new PreviewSource({
+  url: style.sources.city.tiles[0],
+  maximumLevel: 2,
+  tilingScheme: viewer.planarWorld.tilingScheme,
+  credit: style.sources.city.attribution,
+});
 let layer;
 let started;
 let firstReadyMs;
@@ -51,6 +82,7 @@ function addLayer() {
     new Cesium.SceneGISVectorTileLayer({
       scene,
       style,
+      sources: { city: previewSource },
       maximumVisibleTiles: 16,
       tileCacheSize: 24,
       maximumRequests: 4,
@@ -97,10 +129,40 @@ element("visibility").onclick = () => {
   element("visibility").textContent = layer.show ? "隐藏矢量" : "显示矢量";
 };
 element("recreate").onclick = () => {
+  finishDemo?.();
+  finishDemo = undefined;
+  simulateDelay = false;
   scene.primitives.remove(layer);
   element("error").textContent = "";
   element("picked").textContent = "已释放原图层，正在加载新图层";
   addLayer();
+};
+element("delayed").onclick = () => {
+  finishDemo?.();
+  scene.primitives.remove(layer);
+  addLayer();
+  view();
+  simulateDelay = true;
+  let zoomed = false;
+  element("transition").textContent =
+    "准备全图；随后放大并模拟子瓦片分批到达。";
+  finishDemo = scene.postRender.addEventListener(() => {
+    if (!layer.tilesLoaded) {
+      return;
+    }
+    if (!zoomed) {
+      zoomed = true;
+      element("transition").textContent =
+        "子瓦片分批到达中：观察地图保持覆盖，以及“替代瓦片”计数归零。";
+      view(true);
+    } else {
+      simulateDelay = false;
+      finishDemo();
+      finishDemo = undefined;
+      element("transition").textContent =
+        "逐块替换完成；可再次演示或自由缩放。";
+    }
+  });
 };
 const handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
 handler.setInputAction(({ position }) => {
@@ -126,7 +188,7 @@ scene.postRender.addEventListener(() => {
     stats.visibleTiles
   } · 缓存 ${stats.residentTiles} · 请求 ${stats.pendingRequests}\n绘制命令 ${
     stats.drawCommands
-  }`;
+  } · 替代瓦片 ${stats.fallbackTiles} · 覆盖区域 ${stats.renderRegions}`;
 });
 
 // Deliberate user-triggered diagnostic; warm-frame CPU submission, not GPU duration.
@@ -184,4 +246,10 @@ window.addEventListener("pagehide", (event) => {
   }
   handler.destroy();
   viewer.destroy();
+  finishDemo?.();
+  for (const [timer, reject] of delayed) {
+    window.clearTimeout(timer);
+    reject(new Error("Preview closed."));
+  }
+  delayed.clear();
 });

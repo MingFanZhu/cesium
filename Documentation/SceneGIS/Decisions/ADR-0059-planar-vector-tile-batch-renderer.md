@@ -79,7 +79,9 @@ Flat 阶段不使用 stencil，不写深度；片段在 tile 的 Z=0 平面进�
 Style zoom 由参考平面在相机正下方的 CSS meters-per-pixel 确定；source LOD 单独取整并限制到可用层级。
 每个 source 独立选取同一级的可见平面 tile。遍历按 frustum 裁剪，命中可见 tile 上限立即停止，
 并依明确预算逐级降低 LOD；不预建完整树。到 minimumLevel 仍超预算时明确报错，
-不发布不完整地图。V2 不做父子重叠、祖先底图或跨层级 fade。
+不发布不完整 desired 集合。V2 不做父子重叠、祖先底图或跨层级 fade。
+V3A 通过 [ADR-0060](ADR-0060-vector-tile-resident-render-cover.md) 扩展实际覆盖：
+保持单级 desired 集合，允许 resident ancestor/descendant 按不重叠区域替换。
 
 tileCacheSize 和 maximumVisibleTiles 是每 source 的 tile-count 上限，前者不得小于后者；
 maximumRequests 和每 normal frame 的 upload tile 数为整个 layer 的上限。

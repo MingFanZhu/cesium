@@ -127,6 +127,234 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     return feature(3, [[1888, 1888, 2208, 1888, 2208, 2208, 1888, 2208]]);
   }
 
+  function streaming() {
+    source = new SceneGISVectorTileSource({
+      url: "https://example.invalid/{z}/{x}/{y}",
+      tilingScheme: world.tilingScheme,
+      maximumLevel: 1,
+    });
+    const pending = new Map();
+    spyOn(source, "requestTile").and.callFake(
+      (x, y, level, request) =>
+        new Promise((resolve, reject) => {
+          pending.set(`${level}/${x}/${y}`, { resolve, reject, request });
+        }),
+    );
+    return pending;
+  }
+  function whole(id, color = "#ff0000") {
+    return data([
+      feature(3, [[-4096, -4096, 8192, -4096, 8192, 8192, -4096, 8192]], id, {
+        color,
+      }),
+    ]);
+  }
+
+  it("clears coverage and cancels replacements when the camera has no planar scale", async function () {
+    const pending = streaming();
+    const layer = add([definition("fill")], {
+      maximumVisibleTiles: 4,
+      tileCacheSize: 8,
+    });
+    scene.renderForSpecs();
+    pending.get("0/0/0").resolve(whole("parent"));
+    await loaded(layer);
+    scene.camera.position.z = 40;
+    scene.renderForSpecs();
+    const stale = Array.from(pending.values()).slice(1);
+    expect(layer.statistics.fallbackTiles).toBe(1);
+    expect(layer.statistics.pendingRequests).toBe(4);
+    scene.camera.position.z = 0;
+    scene.renderForSpecs();
+    const cleared = layer.statistics;
+    expect(cleared.visibleTiles).toBe(0);
+    expect(cleared.renderedTiles).toBe(0);
+    expect(cleared.renderRegions).toBe(0);
+    expect(cleared.drawCommands).toBe(0);
+    expect(cleared.pendingRequests).toBe(0);
+    expect(layer.tilesLoaded).toBeTrue();
+    for (const completion of stale) {
+      expect(completion.request.cancelled).toBeTrue();
+      completion.resolve(whole("stale"));
+    }
+    await Promise.resolve();
+    scene.camera.position.z = 40;
+    scene.renderForSpecs();
+    expect(layer.statistics.uploads).toBe(1);
+    expect(layer.statistics.fallbackTiles).toBe(1);
+    expect(layer.statistics.pendingRequests).toBe(4);
+    expect(source.requestTile.calls.count()).toBe(9);
+  });
+
+  it("replaces ancestor regions individually without double alpha, retaining failure and clearing empty children", async function () {
+    const pending = streaming();
+    const layer = add(
+      [
+        definition(
+          "fill",
+          { "fill-color": ["get", "color"], "fill-opacity": 0.5 },
+          "base",
+        ),
+        definition(
+          "fill",
+          { "fill-color": "#00ff00", "fill-opacity": 0.5 },
+          "overlay",
+        ),
+      ],
+      { maximumVisibleTiles: 4, tileCacheSize: 8 },
+    );
+    const errors = [];
+    layer.errorEvent.addEventListener((event) => errors.push(event));
+    scene.renderForSpecs();
+    pending.get("0/0/0").resolve(whole("parent"));
+    await loaded(layer);
+    const parent = layer._drawOrder[0];
+    const va = parent.primitive._va[0];
+    scene.camera.position.z = 40;
+    scene.renderForSpecs();
+    expect(layer.statistics.fallbackTiles).toBe(1);
+    expect(layer.statistics.renderRegions).toBe(4);
+    expect(layer.tilesLoaded).toBeFalse();
+    expect(
+      new Set(parent.renderCommands.map((command) => command.uniformMap)).size,
+    ).toBe(4);
+    expect(
+      parent.renderCommands.every((command) => command.vertexArray === va),
+    ).toBeTrue();
+    expect(read(-10, 10).color).toEqualEpsilon([64, 128, 0, 255], 1);
+    pending.get("1/0/0").resolve(whole("child", "#0000ff"));
+    await Promise.resolve();
+    scene.renderForSpecs();
+    const child = read(-10, 10);
+    expect(child.color).toEqualEpsilon([0, 128, 64, 255], 1);
+    expect(child.pick?.id.featureId).toBe("child");
+    expect(child.pick?.id.styleLayer).toBe("overlay");
+    expect(read(10, 10).color).toEqualEpsilon([64, 128, 0, 255], 1);
+    expect(read(10, 10).pick?.id.tile.level).toBe(0);
+    expect(parent.primitive._va[0]).toBe(va);
+    pending.get("1/1/0").resolve({ layers: [] });
+    pending.get("1/0/1").reject(new Error("deliberate child failure"));
+    pending.get("1/1/1").resolve(whole("southeast", "#0000ff"));
+    await Promise.resolve();
+    scene.renderForSpecs();
+    expect(read(10, 10).color).toEqual([0, 0, 0, 255]);
+    expect(read(10, 10).pick?.primitive).not.toBe(layer);
+    expect(read(-10, -10).color).toEqualEpsilon([64, 128, 0, 255], 1);
+    expect(read(10, -10).color).toEqualEpsilon([0, 128, 64, 255], 1);
+    expect(layer.tilesLoaded).toBeTrue();
+    expect(layer.statistics.failedTiles).toBe(1);
+    expect(errors.length).toBe(1);
+    expect(layer.statistics.fallbackTiles).toBe(1);
+    const uploads = layer.statistics.uploads;
+    const command = parent.renderCommands[0];
+    scene.pick(new Cartesian2(20, 40));
+    if (scene.pickPositionSupported) {
+      scene.pickPosition(new Cartesian2(20, 40));
+    }
+    scene.renderForSpecs();
+    expect(parent.renderCommands[0]).toBe(command);
+    expect(layer.statistics.uploads).toBe(uploads);
+    expect(source.requestTile.calls.count()).toBe(5);
+    layer.show = false;
+    scene.renderForSpecs();
+    expect(layer.statistics.renderRegions).toBe(0);
+    layer.show = true;
+    scene.renderForSpecs();
+    expect(layer.statistics.fallbackTiles).toBe(1);
+    expect(source.requestTile.calls.count()).toBe(5);
+    scene.primitives.remove(layer);
+    expect(va.isDestroyed()).toBeTrue();
+  });
+
+  it("retains disjoint descendants during zoom-out and atomically accepts an empty parent", async function () {
+    const pending = streaming();
+    scene.camera.position.z = 40;
+    const layer = add(
+      [definition("fill", { "fill-color": "#0000ff", "fill-opacity": 0.5 })],
+      { maximumVisibleTiles: 4, tileCacheSize: 8 },
+    );
+    scene.renderForSpecs();
+    for (const completion of pending.values()) {
+      completion.resolve(whole("child"));
+    }
+    await loaded(layer);
+    scene.camera.position.z = 80;
+    scene.renderForSpecs();
+    expect(layer.statistics.fallbackTiles).toBe(4);
+    expect(layer.statistics.renderRegions).toBe(4);
+    expect(layer.tilesLoaded).toBeFalse();
+    expect(read().color).toEqualEpsilon([0, 0, 128, 255], 1);
+    pending.get("0/0/0").resolve({ layers: [] });
+    await loaded(layer);
+    expect(layer.statistics.renderedTiles).toBe(1);
+    expect(layer.statistics.fallbackTiles).toBe(0);
+    expect(layer.statistics.drawCommands).toBe(0);
+    expect(read().color).toEqual([0, 0, 0, 255]);
+    scene.camera.position.z = 40;
+    scene.renderForSpecs();
+    expect(layer.tilesLoaded).toBeTrue();
+    expect(read().color).toEqualEpsilon([0, 0, 128, 255], 1);
+    expect(source.requestTile.calls.count()).toBe(5);
+  });
+
+  it("respects a cache with no fallback slots and cancels late child requests on view replacement", async function () {
+    const pending = streaming();
+    const layer = add([definition("fill")], {
+      maximumVisibleTiles: 4,
+      tileCacheSize: 4,
+    });
+    scene.renderForSpecs();
+    pending.get("0/0/0").resolve(whole("parent"));
+    await loaded(layer);
+    const parent = layer._drawOrder[0].primitive;
+    scene.camera.position.z = 40;
+    scene.renderForSpecs();
+    expect(layer.statistics.residentTiles).toBe(4);
+    expect(layer.statistics.fallbackTiles).toBe(0);
+    expect(parent.isDestroyed()).toBeTrue();
+    const child = pending.get("1/0/0");
+    scene.camera.position.z = 80;
+    scene.renderForSpecs();
+    expect(child.request.cancelled).toBeTrue();
+    child.resolve(whole("stale"));
+    await Promise.resolve();
+    scene.renderForSpecs();
+    expect(layer.statistics.drawCommands).toBe(0);
+    expect(layer.statistics.uploads).toBe(1);
+  });
+
+  it("refreshes camera paint on retained ancestors within the upload budget", async function () {
+    const pending = streaming();
+    const layer = add(
+      [
+        definition("fill", {
+          "fill-color": "#ff0000",
+          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.2, 4, 1],
+        }),
+      ],
+      { maximumUploadsPerFrame: 1 },
+    );
+    scene.renderForSpecs();
+    pending.get("0/0/0").resolve(whole("parent"));
+    await loaded(layer);
+    const before = read().color[0];
+    scene.camera.position.z = 40;
+    scene.renderForSpecs();
+    expect(layer.statistics.uploads).toBe(2);
+    expect(read().color[0]).toBeGreaterThan(before);
+    expect(layer.statistics.uploads).toBe(2);
+    for (const [key, completion] of pending) {
+      if (key !== "0/0/0") {
+        completion.reject(new Error("terminal"));
+      }
+    }
+    await Promise.resolve();
+    scene.renderForSpecs();
+    expect(layer.tilesLoaded).toBeTrue();
+    expect(layer.statistics.failedTiles).toBe(4);
+    expect(layer.statistics.fallbackTiles).toBe(1);
+  });
+
   it("validates configuration before requesting or allocating and exposes frozen layer metadata", function () {
     const request = spyOn(source, "requestTile");
     const compiled = new SceneGISVectorTileStyle(style([definition("fill")]));

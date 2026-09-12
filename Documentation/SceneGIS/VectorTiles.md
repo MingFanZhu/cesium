@@ -5,10 +5,12 @@
 V1 提供独立的 MVT 数据、坐标、URL source 与 Style v8 子集计算前端。
 V2 在此基础上提供无 terrainProvider 的平面批量 renderer；不依赖 Cesium experimental MVT。
 `Test/vector-tiles/index.html` 的实际 flat 画面已于 2026-09-13 通过项目负责人验收。
+V3A 增加缓存瓦片的逐区域替换，自动化与项目负责人加载过渡画面验收均已通过。
 生产贴地、标注与 Globe 尚未支持；凸矩形直接贴地实验不代表完整地形渲染资格。
 整体边界见 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
 公共契约见 [ADR-0058](Decisions/ADR-0058-vector-tile-frontend-contract.md)。
 渲染与调度契约见 [ADR-0059](Decisions/ADR-0059-planar-vector-tile-batch-renderer.md)。
+Resident coverage 见 [ADR-0060](Decisions/ADR-0060-vector-tile-resident-render-cover.md)。
 
 ## 数据与坐标
 
@@ -109,18 +111,18 @@ Style zoom 与 source level 独立。`computeStyleZoom(rootWidth, metersPerPixel
 
 ## 验证与维护
 
-目前 59 项 focused Specs 覆盖 V1 前端、V2 几何/cover、10 项真实图层测试和 10 项后端实验。
-另有本地页面 E2E，实际检查颜色像素、拾取、requestRenderMode、倾斜、显隐和移除重建。
+目前 67 项 focused Specs 覆盖 V1 前端、V2 几何/cover、V3A coverage、15 项真实图层测试和 10 项后端实验。
+另有 2 项本地页面 E2E，实际检查颜色像素、拾取、requestRenderMode、倾斜、显隐、移除重建与延迟替换。
 完整 build/build-ts/tsc/release、独立 engine 安装后的五个入口与两份固定 Shader 已验证。
-V2 的低密度数据 baseline 与剩余 gate 见
-[V2 review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v2-flat-review.md)。
+V2 的低密度数据 baseline 见 [V2 review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v2-flat-review.md)，
+V3A 对比、边界与剩余 gate 见 [V3A review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v3a-cover-review.md)。
 
 依赖与第三方名录的最小 upstream-owned 改动登记 `SGP-0011`。
 仓库不跟踪 lockfile；顶层样式依赖固定版本，间接依赖按既有 npm 策略解析。
 每阶段都保留独立 review/checkpoint，阶段状态见
 [extension plan](../../AgentDocs/vector-tiles/plans/2026-09-12-vector-tiles-extension.md)。
 
-## V2 平面图层
+## 平面图层
 
 `scene` 必须已创建 `SceneGISPlanarWorld`，数据与其 canonical tilingScheme 对齐。
 实际平面示例见 [Test/vector-tiles](../../Test/vector-tiles/README.md)。
@@ -164,7 +166,28 @@ Fill/line 初期使用 Context 抗锯齿；不把 `fill-antialias=true` 描述�
 瓦片原点与高低位坐标保留大坐标精度；裁剪射线在 eye space 求方向，避免平移后做差丢失有效位。
 普通前景对象在平面地图之后绘制，surface 保留 Z=0 深度。
 
-当前使用单级 view cover，按预算 coarsen；超出 source maximumLevel 时复用该级几何。
-没有祖先补图、父子 fade 或无缝 LOD replacement；切换中允许等待新 tile，V3 完善。
+Desired tiles 使用单级 view cover，按预算 coarsen；超出 source maximumLevel 时复用该级几何。
+V3A 在 desired tile 就绪前，借用缓存中已发布的最近 ancestor；没有 ancestor 时保留不重叠的 descendants。
+Ancestor 只绘制尚未被 exact tile 替换的区域，每块就绪后在正常帧独立替换，颜色和拾取使用同一覆盖。
+合法空 tile 会清除对应替代区域；失败不会冒充空内容，仍通过 errorEvent/failedTiles 报告。
+Pick 中的 tile 始终指实际源瓦片，替换时可能从父级切到子级。
+
+只复用 resident 数据，不主动请求祖先链；首图或未缓存区域仍可能等待数据。
+tileCacheSize 是硬上限，desired 优先，剩余容量才保留替代瓦片；容量不足时允许失去旧覆盖。
+不做父子 fade，也不消除不同层级数据量化、拓扑或属性变化带来的几何跳变。
 瓦片数、并发请求与每帧上传有界；目前没有任意 payload 的 byte budget。
 Warm frames 和 pick/depth 不重复上传；zoom-dependent paint 的重建受上传预算约束。
+
+`statistics` 中各覆盖计数均跨 source 累加；空 tile 也可发布有效空覆盖。
+
+| 字段          | 意义                                          |
+| ------------- | --------------------------------------------- |
+| visibleTiles  | 当前 desired tile 数，不表示已加载            |
+| residentTiles | 缓存条目数，包含 pending 与历史数据           |
+| renderedTiles | 实际覆盖引用的独立源瓦片数                    |
+| fallbackTiles | renderedTiles 中替代 desired 的源瓦片数       |
+| renderRegions | 实际不重叠的覆盖区域数                        |
+| drawCommands  | 实际提交的 region 绘制命令数，包含 background |
+
+共享 GPU buffer 不等于一条 command；同一 ancestor 可借给多个裁剪区域。
+隐藏或无法计算平面比例时清空 desired/render coverage 并取消 pending；缓存内容保留以供恢复。
