@@ -417,6 +417,16 @@ SceneGISVectorTileStyle.prototype.getPropertyKind = function (
 };
 
 /**
+ * Gets the immutable JSON definition of a layer without evaluating a feature.
+ * @param {string} layerId Style layer ID.
+ * @returns {object} The recursively frozen layer snapshot.
+ * @exception {DeveloperError} The layer does not exist.
+ */
+SceneGISVectorTileStyle.prototype.getLayerDefinition = function (layerId) {
+  return getLayer(this, layerId).definition;
+};
+
+/**
  * An evaluated layer. Paint colors are unpremultiplied Cesium Color values.
  * @typedef {object} SceneGISVectorTileStyle.EvaluatedLayer
  * @property {string} id Style layer ID.

@@ -16,6 +16,7 @@ http://localhost:8092/Test/index.html
 
 受管页面按大扩展拆分：
 
+- `vector-tiles/index.html`：独立 MVT 平面渲染、本地城市数据与 feature pick；无公网依赖。
 - `平面Viewer.html`：声明式`Viewer({ planarWorld })`、EPSG:3857公开数据与基础导航。
 - `平面地表样式.html`：影像颜色滤镜与terrain `Material`样式。
 - `平面环境.html`：天文方向、原生Clock、可见天体、平面大气与SkyBox。

@@ -1,0 +1,86 @@
+{
+  "version": 8,
+  "name": "SceneGIS 本地矢量城市",
+  "sources": {
+    "city": {
+      "type": "vector",
+      "tiles": ["/Test/vector-tiles/tiles/{z}/{x}/{y}.pbf"],
+      "maxzoom": 2,
+      "attribution": "SceneGIS 合成测试数据"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": { "background-color": "#f2efe7" }
+    },
+    {
+      "id": "land",
+      "type": "fill",
+      "source": "city",
+      "source-layer": "land",
+      "paint": {
+        "fill-color": ["match", ["get", "kind"], "park", "#bdd4ad", "#e4e1d8"]
+      }
+    },
+    {
+      "id": "buildings",
+      "type": "fill",
+      "source": "city",
+      "source-layer": "buildings",
+      "paint": { "fill-color": "#c7c1b5", "fill-opacity": 0.8 }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "city",
+      "source-layer": "water",
+      "paint": { "fill-color": "#8ebeca", "fill-opacity": 0.92 }
+    },
+    {
+      "id": "road-casing",
+      "type": "line",
+      "source": "city",
+      "source-layer": "roads",
+      "paint": {
+        "line-color": "#c9bba5",
+        "line-width": ["match", ["get", "kind"], "primary", 9, 5]
+      }
+    },
+    {
+      "id": "roads",
+      "type": "line",
+      "source": "city",
+      "source-layer": "roads",
+      "paint": {
+        "line-color": [
+          "match",
+          ["get", "kind"],
+          "primary",
+          "#f9dfac",
+          "#fffdf8"
+        ],
+        "line-width": ["match", ["get", "kind"], "primary", 6, 3]
+      }
+    },
+    {
+      "id": "places",
+      "type": "circle",
+      "source": "city",
+      "source-layer": "places",
+      "paint": {
+        "circle-color": [
+          "match",
+          ["get", "kind"],
+          "landmark",
+          "#397f89",
+          "#658455"
+        ],
+        "circle-radius": ["match", ["get", "kind"], "landmark", 5, 3],
+        "circle-stroke-color": "#fffdf8",
+        "circle-stroke-width": 1.5
+      }
+    }
+  ]
+}

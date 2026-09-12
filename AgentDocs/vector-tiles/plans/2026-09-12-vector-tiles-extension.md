@@ -94,7 +94,7 @@ Globe 从数据/样式/调度职责分离开始考虑，实际渲染资格另设
 | ----- | ----------------------------------- | ------------- | ------------------------------------------ | ---------------------------------------------------------------------------- | --------- | ---------------------------------------------- |
 | V0    | 源码审计、边界讨论                  | 当前 develop  | 干净基线与独立分支                         | 用户确认边界；ADR、review、本地 checkpoint                                   | completed | [V0](2026-09-12-v0-architecture-audit.md)      |
 | V1    | MVT/source/style/坐标契约与兼容前端 | V0 checkpoint | 审计独立 decoder 候选、依赖与目标数据      | 数据/identity/诊断/坐标 Specs；公开入口和类型资格                            | completed | [V1](2026-09-12-v1-vector-frontend.md)         |
-| V2    | 平面 flat 批量闭环与直接贴地可行性  | V1 checkpoint | 重查 primitive、pass、精度、pick           | flat 画面、层序、接缝、pick、销毁成立；ground 重叠/样式/拾取的最小证据与选择 | active    | [V2](2026-09-13-v2-planar-batch-and-ground.md) |
+| V2    | 平面 flat 批量闭环与直接贴地可行性  | V1 checkpoint | 重查 primitive、pass、精度、pick           | flat 画面、层序、接缝、pick、销毁成立；ground 重叠/样式/拾取的最小证据与选择 | completed | [V2](2026-09-13-v2-planar-batch-and-ground.md) |
 | V3    | 常见样式质量、流式调度与性能        | V2 checkpoint | 固定密集数据与 V2 baseline                 | 已选样式 profile；LOD/overzoom；cache/upload 有界；针对已测热点处理线程任务  | planned   | 未激活                                         |
 | V4    | 平面矢量直接贴地生产资格            | V3 checkpoint | V2 ground 可行性已验证；重查批量与层序边界 | 起伏地形、LOD/provider 变化下连续贴地；线宽/样式/逐要素交互与资源稳定        | planned   | 未激活                                         |
 | V5    | symbol 与跨瓦片 placement           | V4 checkpoint | 字体/图标来源和中文验收集明确              | 约定点/沿线标注、碰撞/去重、缩放稳定性、遮挡、销毁                           | planned   | 未激活                                         |
@@ -149,5 +149,8 @@ M1 包含约定直接贴地与基础点/沿线标注；V2 的 flat 画面是早�
 
 V0 checkpoint 为 `122cd2db2e`；V1 checkpoint 为 `80089a0a91`，前端实现与资格通过，见
 [V1 review](../reviews/2026-09-13-v1-frontend-review.md)。V2 已建立基于当前源码的
-[phase plan](2026-09-13-v2-planar-batch-and-ground.md)，处于架构验证准备，尚无渲染实现。
+[phase plan](2026-09-13-v2-planar-batch-and-ground.md)，已完成 flat 候选与自动验证，
+项目负责人于 2026-09-13 确认实际画面验收通过，见 [V2 review](../reviews/2026-09-13-v2-flat-review.md)。
+共享 stencil 地图合批已证伪，surface-depth 凸体候选保留为 V4 入口；
+不把有限地形实验描述为已支持公共 terrain 模式。V2 checkpoint 与 V3 激活尚未发生。
 后续 ground 算法/资产选择按 roadmap 分配到对应 phase，不重复请求已批准架构方向的确认。

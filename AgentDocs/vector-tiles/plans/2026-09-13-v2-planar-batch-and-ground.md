@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `phase`
-- Status: `active`（架构验证准备；尚无 V2 渲染实现）
+- Status: `completed`（项目负责人于 2026-09-13 确认实际画面验收通过）
 - Parent plan: [Vector Tiles](2026-09-12-vector-tiles-extension.md)
 - Phase: `V2`
 - Owner role: `architecture/execution`
@@ -14,9 +14,10 @@
 - Entry checkpoint: `80089a0a91`（V1）
 - Related discussions: [实现边界](../discussions/2026-09-12-rendering-boundaries.md)、
   [MapLibre 与直接贴地](../discussions/2026-09-12-maplibre-reference-and-surface.md)
-- Related reviews: [V1 review](../reviews/2026-09-13-v1-frontend-review.md)
+- Related reviews: [V2 review](../reviews/2026-09-13-v2-flat-review.md)
 - ADR: [ADR-0057](../../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)、
-  [ADR-0058](../../../Documentation/SceneGIS/Decisions/ADR-0058-vector-tile-frontend-contract.md)
+  [ADR-0058](../../../Documentation/SceneGIS/Decisions/ADR-0058-vector-tile-frontend-contract.md)、
+  [ADR-0059](../../../Documentation/SceneGIS/Decisions/ADR-0059-planar-vector-tile-batch-renderer.md)
 - SGP: None（V2 尚未修改上游；必要 seam 另登记）
 
 ## Objective and non-goals
@@ -139,6 +140,17 @@ overzoom、预算调优与 Worker 决策属于 V3，不能由 V2 的静态首图
 V2 exit 要同时具备 flat 画面、层序/alpha、接缝、pick、资源释放，以及直接贴地的最小证据和方案选择。
 源数据/样式前端通过不替代画面验收，直接贴地单对象成功不替代多要素合批资格。
 
-当前仅完成 V2 的源码复查与执行计划；上述 WebGL 验证、renderer ADR、产品实现和 Test 页面尚未完成。
-下一步从步骤 1、2 的最小真实 Context 实验开始；当前没有需要项目负责人重复确认的已批准方向，
-也没有已复现的 V2 阻断或新增上游修改。
+10 项真实 Context 实验通过：flat 同 batch/跨 layer 的颜色与 pick、多 frustum、opaque 前景，
+以及 ground 共享 stencil 反例和 surface-depth 凸体候选。固定 readonly style 的 flat 公共入口、
+tile/source 预算、覆盖裁剪与 rendered profile 见
+[ADR-0059](../../../Documentation/SceneGIS/Decisions/ADR-0059-planar-vector-tile-batch-renderer.md)。
+ADR-0059 的平面闭环与 Test 页面已实现；无新增上游修改。
+59 项 focused Specs、1 项本地 E2E、完整 build/types/release 与 installed package 已通过。
+已修复 alpha 混合状态、Mercator 尺度裁剪射线精度和退化线段上传问题；
+精确证据、性能 baseline 与剩余 gate 见 [V2 review](../reviews/2026-09-13-v2-flat-review.md)。
+
+Ground 原计划的 line/provider 完整矩阵不在已证伪的共享 stencil 方案上继续叠加；
+替代候选已在倾斜地形验证异色透明重叠与逐 feature 片段归属。凹面、孔洞、线型和完整 envelope/LOD
+属于 V4 的生产资格，不能把当前凸矩形证据描述为完成贴地。
+项目负责人于 2026-09-13 确认实际画面验收通过；本阶段全部 gate 关闭。
+本记录随 V2 实现形成独立本地 checkpoint，之后才激活 V3。
