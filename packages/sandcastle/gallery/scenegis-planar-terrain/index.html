@@ -1,0 +1,70 @@
+<style>
+  @import url(../templates/bucket.css);
+
+  #toolbar {
+    position: absolute;
+    z-index: 2;
+    top: 5px;
+    left: 5px;
+    max-width: min(390px, calc(100% - 20px));
+    max-height: calc(100% - 70px);
+    overflow: auto;
+  }
+</style>
+<div id="cesiumContainer" class="fullSize"></div>
+<div id="loadingOverlay"><h1>正在加载……</h1></div>
+<div id="toolbar">
+  <strong>平面地形样式与导航</strong>
+  <label>
+    地形样式
+    <select id="terrainStyle">
+      <option value="none" selected>无样式</option>
+      <option value="contour">等高线</option>
+      <option value="height">高程</option>
+      <option value="slope">坡度</option>
+      <option value="aspect">坡向</option>
+    </select>
+  </label>
+  <button id="resetStyle" type="button">重置样式</button>
+  <label>
+    等高线间距（米）
+    <input id="contourSpacing" type="number" min="1" step="25" value="250" />
+  </label>
+  <label>
+    等高线宽度
+    <input
+      id="contourWidth"
+      type="range"
+      min="0.5"
+      max="8"
+      step="0.5"
+      value="1.5"
+    />
+  </label>
+  <label
+    >色带低值 <input id="rampLowColor" type="color" value="#263238"
+  /></label>
+  <label
+    >色带高值 <input id="rampHighColor" type="color" value="#ffffff"
+  /></label>
+  <label><input id="lightingToggle" type="checkbox" checked /> 地形光照</label>
+  <label>
+    导航模式
+    <select id="navigationMode">
+      <option value="surface" selected>地表</option>
+      <option value="underground">地下</option>
+    </select>
+  </label>
+  <button id="mountainView" type="button">山地视角</button>
+  <button id="undergroundView" type="button">地下视角</button>
+  <button id="surfaceClearance" type="button">演示地表净空</button>
+  <button id="homeView" type="button">返回初始视角</button>
+  <span id="navigationStatus">当前导航模式：地表。</span>
+  <span id="terrainStatus">地形瓦片将按当前视图加载。</span>
+  <span>
+    地表模式默认沿局部 +Z
+    保持地形净空，不会自动返回初始视角。地下视角会切换到地下模式，并把山地视角镜像到地形下方。
+    “演示地表净空”会把地表模式相机放到局部地形下方，由下一控制器帧展示向上推出。返回初始视角会保留当前导航模式。
+    在地下模式中，可围绕选定支点纵向拖动鼠标中键，从任一方向穿越地形；该操作是轨道旋转，不是自由观察或连续扫掠碰撞。
+  </span>
+</div>

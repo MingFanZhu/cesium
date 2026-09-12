@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SceneGIS 独立开发示例</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: system-ui, "Microsoft YaHei", sans-serif;
+        background: #101820;
+        color: #eef4f8;
+      }
+      body {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+      h1 {
+        margin-bottom: 8px;
+      }
+      .intro {
+        color: #b9c8d3;
+        margin-bottom: 28px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 18px;
+      }
+      a {
+        display: block;
+        min-height: 150px;
+        padding: 22px;
+        color: inherit;
+        text-decoration: none;
+        border: 1px solid #35536a;
+        border-radius: 12px;
+        background: #192733;
+      }
+      a:hover,
+      a:focus-visible {
+        border-color: #67b7e8;
+        background: #203747;
+      }
+      h2 {
+        margin: 0 0 12px;
+        color: #8fd3ff;
+      }
+      p {
+        line-height: 1.6;
+      }
+      code {
+        color: #ffd580;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SceneGIS 独立开发示例</h1>
+    <p class="intro">
+      这些页面由 Cesium
+      根开发服务器直接交付。每页只聚焦一个大扩展，刷新后读取最新
+      <code>/Build/CesiumUnminified/index.js</code>。
+    </p>
+    <main class="cards">
+      <a href="/Test/平面Viewer.html">
+        <h2>平面 Viewer</h2>
+        <p>声明式创建 EPSG:3857 平面 World、公开影像/地形与基础平面导航。</p>
+      </a>
+      <a href="/Test/平面地表样式.html">
+        <h2>平面地表样式</h2>
+        <p>影像颜色滤镜、等高线与高程/坡度/坡向 Material 样式。</p>
+      </a>
+      <a href="/Test/平面环境.html">
+        <h2>平面环境</h2>
+        <p>手动/天文方向、原生 Clock、太阳月亮、平面大气与本地 SkyBox。</p>
+      </a>
+      <a href="/Test/平面API集成.html">
+        <h2>平面 API 集成</h2>
+        <p>公共 Camera 视图/飞行以及 Entity/DataSource 定位与 InfoBox zoom。</p>
+      </a>
+    </main>
+  </body>
+</html>

@@ -19,6 +19,16 @@ import DataSourceDisplay from "../DataSources/DataSourceDisplay.js";
 import EntityView from "../DataSources/EntityView.js";
 import getElement from "../DataSources/getElement.js";
 import Property from "../DataSources/Property.js";
+// SCENEGIS_PATCH_BEGIN SGP-0001: Install the instance-local planar DataSource visualizer factory.
+import createSceneGISPlanarVisualizersCallback from "../SceneGIS/DataSources/_private/_SceneGISPlanarVisualizersCallback.js";
+import SceneGISPlanarSceneApi from "../SceneGIS/Scene/_private/_SceneGISPlanarSceneApi.js";
+// SCENEGIS_PATCH_END SGP-0001
+// SCENEGIS_PATCH_BEGIN SGP-0005: Dispatch planar Entity framing through an operation-isolated helper.
+import SceneGISPlanarEntityFraming from "../SceneGIS/DataSources/_private/_SceneGISPlanarEntityFraming.js";
+// SCENEGIS_PATCH_END SGP-0005
+// SCENEGIS_PATCH_BEGIN SGP-0006: Dispatch fixed-axis planar Entity tracking through ControllerHost.
+import SceneGISPlanarEntityTracker from "../SceneGIS/DataSources/_private/_SceneGISPlanarEntityTracker.js";
+// SCENEGIS_PATCH_END SGP-0006
 import Cesium3DTileset from "../Scene/Cesium3DTileset.js";
 import computeFlyToLocationForRectangle from "../Scene/computeFlyToLocationForRectangle.js";
 import Globe from "../Scene/Globe.js";
@@ -34,6 +44,10 @@ import Sun from "../Scene/Sun.js";
 import TimeDynamicPointCloud from "../Scene/TimeDynamicPointCloud.js";
 import VoxelPrimitive from "../Scene/VoxelPrimitive.js";
 import BufferPrimitiveCollection from "../Scene/BufferPrimitiveCollection.js";
+
+// SCENEGIS_PATCH_BEGIN SGP-0001: Type the non-Globe world construction option.
+/** @import SceneGISWorld from "../SceneGIS/Scene/SceneGISWorld.js"; */
+// SCENEGIS_PATCH_END SGP-0001
 
 function trackDataSourceClock(clock, dataSource) {
   if (defined(dataSource)) {
@@ -134,6 +148,7 @@ function configureCameraFrustum(widget) {
   }
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0001: Document the primary world construction contract.
 /**
  * A widget containing a Cesium scene.
  *
@@ -155,6 +170,7 @@ function configureCameraFrustum(widget) {
  * @param {boolean} [options.orderIndependentTranslucency=true] If true and the configuration supports it, use order independent translucency.
  * @param {MapProjection} [options.mapProjection=new GeographicProjection(options.ellipsoid)] The map projection to use in 2D and Columbus View modes.
  * @param {Globe | false} [options.globe=new Globe(options.ellipsoid)] The globe to use in the scene.  If set to <code>false</code>, no globe will be added and the sky atmosphere will be hidden by default.
+ * @param {SceneGISWorld | false} [options.world] A non-Globe primary world to use in the scene. This option is mutually exclusive with <code>options.globe</code>. If set to <code>false</code>, no primary world or default Earth environment is created.
  * @param {boolean} [options.useDefaultRenderLoop=true] True if this widget should control the render loop, false otherwise.
  * @param {boolean} [options.useBrowserRecommendedResolution=true] If true, render at the browser's recommended resolution and ignore <code>window.devicePixelRatio</code>.
  * @param {number} [options.targetFrameRate] The target frame rate when using the default render loop.
@@ -175,6 +191,8 @@ function configureCameraFrustum(widget) {
  * @param {number} [options.msaaSamples=4] If provided, this value controls the rate of multisample antialiasing. Typical multisampling rates are 2, 4, and sometimes 8 samples per pixel. Higher sampling rates of MSAA may impact performance in exchange for improved visual quality. This value only applies to WebGL2 contexts that support multisample render targets. Set to 1 to disable MSAA.
  *
  * @exception {DeveloperError} Element with id "container" does not exist in the document.
+ * @exception {DeveloperError} <code>options.world</code> and <code>options.globe</code> are both specified.
+ * @exception {DeveloperError} A non-Globe <code>options.world</code> is specified with the Globe-only <code>options.baseLayer</code>, <code>options.terrainProvider</code>, <code>options.terrain</code>, or <code>options.terrainShadows</code> option.
  *
  * @demo {@link https://sandcastle.cesium.com/index.html?id=cesium-widget|Cesium Sandcastle Cesium Widget Demo}
  *
@@ -204,6 +222,7 @@ function configureCameraFrustum(widget) {
  *     mapProjection: new Cesium.WebMercatorProjection()
  * });
  */
+// SCENEGIS_PATCH_END SGP-0001
 function CesiumWidget(container, options) {
   //>>includeStart('debug', pragmas.debug);
   if (!defined(container)) {
@@ -214,6 +233,35 @@ function CesiumWidget(container, options) {
   container = getElement(container);
 
   options = options ?? Frozen.EMPTY_OBJECT;
+
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Validate mutually exclusive world construction before allocating DOM state.
+  const hasWorldOption = defined(options.world);
+  const hasCustomWorld = hasWorldOption && options.world !== false;
+
+  if (hasWorldOption && defined(options.globe)) {
+    throw new DeveloperError(
+      "Specify either options.world or options.globe, but not both.",
+    );
+  }
+
+  if (hasCustomWorld) {
+    SceneGISPlanarSceneApi.validateConstructionOptions(options);
+    const globeOnlyOptions = [
+      "baseLayer",
+      "terrainProvider",
+      "terrain",
+      "terrainShadows",
+    ];
+    for (let i = 0; i < globeOnlyOptions.length; ++i) {
+      const optionName = globeOnlyOptions[i];
+      if (defined(options[optionName])) {
+        throw new DeveloperError(
+          `options.${optionName} is not supported with a non-Globe options.world.`,
+        );
+      }
+    }
+  }
+  // SCENEGIS_PATCH_END SGP-0001
 
   //Configure the widget DOM elements
   const element = document.createElement("div");
@@ -321,7 +369,9 @@ function CesiumWidget(container, options) {
       ellipsoid: ellipsoid,
       mapProjection: options.mapProjection,
       orderIndependentTranslucency: options.orderIndependentTranslucency,
-      scene3DOnly: options.scene3DOnly ?? false,
+      // SCENEGIS_PATCH_BEGIN SGP-0001: Keep a non-Globe primary world permanently in 3D-only mode.
+      scene3DOnly: hasCustomWorld ? true : (options.scene3DOnly ?? false),
+      // SCENEGIS_PATCH_END SGP-0001
       shadows: options.shadows,
       mapMode2D: options.mapMode2D,
       requestRenderMode: options.requestRenderMode,
@@ -336,31 +386,49 @@ function CesiumWidget(container, options) {
     configurePixelRatio(this);
     configureCameraFrustum(this);
 
-    let globe = options.globe;
-    if (!defined(globe)) {
-      globe = new Globe(ellipsoid);
+    // SCENEGIS_PATCH_BEGIN SGP-0001: Select one primary world without creating a temporary Globe.
+    let globe;
+    if (hasWorldOption) {
+      if (options.world !== false) {
+        scene._initializeWorld(options.world);
+      }
+    } else {
+      globe = options.globe;
+      if (!defined(globe)) {
+        globe = new Globe(ellipsoid);
+      }
+      if (globe !== false) {
+        scene.globe = globe;
+        scene.globe.shadows = options.terrainShadows ?? ShadowMode.RECEIVE_ONLY;
+      }
     }
-    if (globe !== false) {
-      scene.globe = globe;
-      scene.globe.shadows = options.terrainShadows ?? ShadowMode.RECEIVE_ONLY;
-    }
+    // SCENEGIS_PATCH_END SGP-0001
 
     let skyBox = options.skyBox;
-    if (!defined(skyBox) && Ellipsoid.WGS84.equals(ellipsoid)) {
+    // SCENEGIS_PATCH_BEGIN SGP-0001: Keep automatic Earth environment out of non-Globe construction.
+    if (
+      !defined(skyBox) &&
+      !hasWorldOption &&
+      Ellipsoid.WGS84.equals(ellipsoid)
+    ) {
       skyBox = SkyBox.createEarthSkyBox();
     }
-    if (skyBox !== false) {
+    if (defined(skyBox) && skyBox !== false) {
       scene.skyBox = skyBox;
       scene.sun = new Sun();
 
-      if (Ellipsoid.WGS84.equals(ellipsoid)) {
+      if (!hasWorldOption && Ellipsoid.WGS84.equals(ellipsoid)) {
         scene.moon = new Moon();
       }
     }
 
     // Blue sky, and the glow around the Earth's limb.
     let skyAtmosphere = options.skyAtmosphere;
-    if (!defined(skyAtmosphere) && Ellipsoid.WGS84.equals(ellipsoid)) {
+    if (
+      !defined(skyAtmosphere) &&
+      !hasWorldOption &&
+      Ellipsoid.WGS84.equals(ellipsoid)
+    ) {
       skyAtmosphere = new SkyAtmosphere(ellipsoid);
       skyAtmosphere.show = options.globe !== false && globe.show;
     }
@@ -370,7 +438,7 @@ function CesiumWidget(container, options) {
 
     // Set the base imagery layer
     let baseLayer = options.baseLayer;
-    if (options.globe !== false && baseLayer !== false) {
+    if (!hasWorldOption && options.globe !== false && baseLayer !== false) {
       if (!defined(baseLayer)) {
         baseLayer = ImageryLayer.fromWorldImagery();
       }
@@ -378,11 +446,19 @@ function CesiumWidget(container, options) {
     }
 
     // Set the terrain provider if one is provided.
-    if (defined(options.terrainProvider) && options.globe !== false) {
+    if (
+      !hasWorldOption &&
+      defined(options.terrainProvider) &&
+      options.globe !== false
+    ) {
       scene.terrainProvider = options.terrainProvider;
     }
 
-    if (defined(options.terrain) && options.globe !== false) {
+    if (
+      !hasWorldOption &&
+      defined(options.terrain) &&
+      options.globe !== false
+    ) {
       //>>includeStart('debug', pragmas.debug);
       if (defined(options.terrainProvider)) {
         throw new DeveloperError(
@@ -393,6 +469,7 @@ function CesiumWidget(container, options) {
 
       scene.setTerrain(options.terrain);
     }
+    // SCENEGIS_PATCH_END SGP-0001
 
     this._screenSpaceEventHandler = new ScreenSpaceEventHandler(canvas);
 
@@ -433,6 +510,11 @@ function CesiumWidget(container, options) {
     const dataSourceDisplay = new DataSourceDisplay({
       scene: scene,
       dataSourceCollection: dataSourceCollection,
+      // SCENEGIS_PATCH_BEGIN SGP-0001: Select planar visualizers without changing the default callback.
+      visualizersCallback: createSceneGISPlanarVisualizersCallback(
+        options.world,
+      ),
+      // SCENEGIS_PATCH_END SGP-0001
     });
 
     const eventHelper = new EventHelper();
@@ -818,16 +900,42 @@ Object.defineProperties(CesiumWidget.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Document the exact planar tracked Entity profile.
   /**
    * Gets or sets the Entity instance currently being tracked by the camera.
    * @memberof CesiumWidget.prototype
    * @type {Entity | undefined}
+   * @exception {DeveloperError} In a planar world, the value is not an Entity with a FIXED position and an AUTODETECT or ENU tracking reference frame.
    */
+  // SCENEGIS_PATCH_END SGP-0006
   trackedEntity: {
     get: function () {
       return this._trackedEntity;
     },
     set: function (value) {
+      // SCENEGIS_PATCH_BEGIN SGP-0006: Validate and publish planar tracking without constructing Earth EntityView.
+      if (SceneGISPlanarEntityTracker.isLivePlanarWidget(this)) {
+        if (this._trackedEntity === value) {
+          return;
+        }
+        if (defined(value)) {
+          SceneGISPlanarEntityTracker.validateStaticTarget(value);
+        }
+
+        cancelZoom(this);
+        if (defined(value)) {
+          SceneGISPlanarEntityTracker.setTarget(this, value);
+        } else {
+          SceneGISPlanarEntityTracker.clear(this);
+        }
+        this._trackedEntity = value;
+        this._needTrackedEntityUpdate = false;
+        this._entityView = undefined;
+        this._trackedEntityChanged.raiseEvent(value);
+        this.scene.requestRender();
+        return;
+      }
+      // SCENEGIS_PATCH_END SGP-0006
       if (this._trackedEntity !== value) {
         this._trackedEntity = value;
 
@@ -1019,6 +1127,12 @@ CesiumWidget.prototype.isDestroyed = function () {
  * removing the widget from layout.
  */
 CesiumWidget.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Release planar tracking authority before DataSource and Scene destruction.
+  SceneGISPlanarEntityTracker.destroy(this);
+  // SCENEGIS_PATCH_END SGP-0006
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Settle and detach planar framing before destroying DataSource and Scene state.
+  SceneGISPlanarEntityFraming.cancel(this);
+  // SCENEGIS_PATCH_END SGP-0005
   // Unsubscribe from data sources
   const dataSources = this.dataSources;
   const dataSourceLength = dataSources.length;
@@ -1257,6 +1371,13 @@ CesiumWidget.prototype.removeController = function (controller) {
   );
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0006: Expose a side-effect-free planar trackability query to Viewer integration.
+CesiumWidget.prototype._canTrackSceneGISPlanarEntity = function (entity, time) {
+  return SceneGISPlanarEntityTracker.canTrack(this, entity, time);
+};
+// SCENEGIS_PATCH_END SGP-0006
+
+// SCENEGIS_PATCH_BEGIN SGP-0005: Document the exact planar Entity/DataSource zoom profile.
 /**
  * Asynchronously sets the camera to view the provided entity, entities, or data source.
  * If the data source is still in the process of loading or the visualization is otherwise still loading,
@@ -1272,9 +1393,10 @@ CesiumWidget.prototype.removeController = function (controller) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The entity, array of entities, entity collection, data source, Cesium3DTileset, point cloud, or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar world, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
  * @param {HeadingPitchRange} [offset] The offset from the center of the entity in the local east-north-up reference frame.
  * @returns {Promise<boolean>} A Promise that resolves to true if the zoom was successful or false if the target is not currently visualized in the scene or the zoom was cancelled.
+ * @exception {DeveloperError} In a planar world, the resolved target or offset does not belong to the supported planar profile.
  */
 CesiumWidget.prototype.zoomTo = function (target, offset) {
   const options = {
@@ -1282,7 +1404,9 @@ CesiumWidget.prototype.zoomTo = function (target, offset) {
   };
   return zoomToOrFly(this, target, options, false);
 };
+// SCENEGIS_PATCH_END SGP-0005
 
+// SCENEGIS_PATCH_BEGIN SGP-0005: Document the exact planar Entity/DataSource flight profile.
 /**
  * Flies the camera to the provided entity, entities, or data source.
  * If the data source is still in the process of loading or the visualization is otherwise still loading,
@@ -1298,16 +1422,18 @@ CesiumWidget.prototype.zoomTo = function (target, offset) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The entity, array of entities, entity collection, data source, Cesium3DTileset, point cloud, or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar world, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
  * @param {object} [options] Object with the following properties:
  * @param {number} [options.duration=3.0] The duration of the flight in seconds.
  * @param {number} [options.maximumHeight] The maximum height at the peak of the flight.
  * @param {HeadingPitchRange} [options.offset] The offset from the target in the local east-north-up reference frame centered at the target.
  * @returns {Promise<boolean>} A Promise that resolves to true if the flight was successful or false if the target is not currently visualized in the scene or the flight was cancelled. //TODO: Cleanup entity mentions
+ * @exception {DeveloperError} In a planar world, the resolved target, offset, duration, or maximumHeight does not belong to the supported planar profile.
  */
 CesiumWidget.prototype.flyTo = function (target, options) {
   return zoomToOrFly(this, target, options, true);
 };
+// SCENEGIS_PATCH_END SGP-0005
 
 function zoomToOrFly(that, zoomTarget, options, isFlight) {
   //>>includeStart('debug', pragmas.debug);
@@ -1315,6 +1441,17 @@ function zoomToOrFly(that, zoomTarget, options, isFlight) {
     throw new DeveloperError("zoomTarget is required.");
   }
   //>>includeEnd('debug');
+
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Keep planar target validation and lifecycle independent from Globe overloads.
+  if (SceneGISPlanarEntityFraming.isPlanarWidget(that)) {
+    return SceneGISPlanarEntityFraming.start(
+      that,
+      zoomTarget,
+      options,
+      isFlight,
+    );
+  }
+  // SCENEGIS_PATCH_END SGP-0005
 
   cancelZoom(that);
 
@@ -1421,6 +1558,11 @@ function clearZoom(widget) {
 }
 
 function cancelZoom(widget) {
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Settle only the current planar operation and ignore stale callbacks.
+  if (SceneGISPlanarEntityFraming.cancel(widget)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0005
   const zoomPromise = widget._zoomPromise;
   if (defined(zoomPromise)) {
     clearZoom(widget);
@@ -1439,6 +1581,12 @@ CesiumWidget.prototype._postRender = function () {
 const zoomTargetBoundingSphereScratch = new BoundingSphere();
 
 function updateZoomTarget(widget) {
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Aggregate planar Entity bounds without entering Globe target branches.
+  if (SceneGISPlanarEntityFraming.isPlanarWidget(widget)) {
+    SceneGISPlanarEntityFraming.update(widget);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0005
   const target = widget._zoomTarget;
   if (!defined(target) || widget.scene.mode === SceneMode.MORPHING) {
     return;

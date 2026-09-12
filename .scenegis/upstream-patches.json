@@ -1,4 +1,158 @@
 {
   "schemaVersion": 1,
-  "patches": []
+  "patches": [
+    {
+      "id": "SGP-0001",
+      "title": "Add primary world lifecycle and integration slots",
+      "status": "active",
+      "reason": "Scene and CesiumWidget currently route primary-world lifecycle and DataSource visualization exclusively through Globe-oriented defaults, so a non-Globe world cannot participate without impersonating Globe.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Widget/CesiumWidget.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISWorldSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISWorldCesiumWidgetSpec.js",
+        "packages/engine/Specs/SceneGIS/DataSources/_SceneGISPlanarVisualizersCallbackSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarContentCesiumWidgetSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarContentViewerSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0001-scene-world-contract.md",
+      "removalCondition": "Retire when upstream Scene and CesiumWidget expose equivalent mutually exclusive primary-world construction, lifecycle, and world-aware per-instance DataSource visualization contracts."
+    },
+    {
+      "id": "SGP-0003",
+      "title": "Add primary-world environment render slot",
+      "status": "active",
+      "reason": "Scene's environment pass has no structural slot for procedural environment content owned by a non-Globe primary world.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISWorldSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarEnvironmentCesiumWidgetSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0035-planar-visible-celestial-bodies.md",
+      "removalCondition": "Retire when upstream Scene exposes an equivalent optional primary-world environment render slot before ordinary geometry."
+    },
+    {
+      "id": "SGP-0002",
+      "title": "Add planar Viewer integration",
+      "status": "active",
+      "reason": "Viewer currently constructs Globe-oriented widgets, navigation, and entity camera behavior without a planar-world construction and ownership path.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/widgets/Source/Viewer/Viewer.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarHomeButtonSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarHomeButtonViewModelSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0006-planar-viewer-and-widget-integration.md",
+      "removalCondition": "Retire when upstream Viewer exposes an equivalent planar-world construction path, controller ownership lifecycle, planar Home integration, and compatible widget capability guards."
+    },
+    {
+      "id": "SGP-0004",
+      "title": "Add planar Camera view and flight dispatch",
+      "status": "active",
+      "reason": "Camera public view and flight APIs currently route SCENE3D positions and orientations through ellipsoid ENU and Cartographic interpolation, so a live planar primary world requires an explicit fixed-axis dispatch.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Camera.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISPlanarCameraSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISPlanarCameraFlightSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarCameraControllerSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarCameraCesiumWidgetSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0037-planar-camera-view-and-flight.md",
+      "removalCondition": "Retire when upstream Camera exposes equivalent non-ellipsoid fixed-axis view, framing, Cartesian flight, and external controller input-suspension hooks for a custom primary world."
+    },
+    {
+      "id": "SGP-0005",
+      "title": "Add planar Entity and DataSource framing dispatch",
+      "status": "active",
+      "reason": "CesiumWidget and Viewer currently normalize zoom targets through Globe-specific overloads and share mutable completion state, while planar Entity framing requires an exact target profile, isolated operation lifecycle, and zoom-only InfoBox behavior.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Widget/CesiumWidget.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/widgets/Source/Viewer/Viewer.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarEntityZoomCesiumWidgetSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0006-planar-viewer-and-widget-integration.md",
+      "removalCondition": "Retire when upstream CesiumWidget and Viewer expose equivalent custom-world Entity/DataSource target validation, operation-isolated zoom lifecycle, and configurable zoom-only InfoBox camera behavior."
+    },
+    {
+      "id": "SGP-0006",
+      "title": "Add planar Entity tracking dispatch",
+      "status": "active",
+      "reason": "CesiumWidget and Viewer route Entity tracking through ellipsoid EntityView semantics, while a planar primary world requires fixed-axis tracking, ControllerHost camera authority, and operation-isolated framing interaction.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Widget/CesiumWidget.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/widgets/Source/Viewer/Viewer.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/DataSources/_private/SceneGISPlanarEntityTrackerSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarEntityTrackingCesiumWidgetSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarCameraControllerSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0038-planar-entity-tracking.md",
+      "removalCondition": "Retire when upstream CesiumWidget and Viewer expose equivalent custom-world fixed-axis Entity tracking, controller-authority coordination, and configurable InfoBox/double-click tracking behavior."
+    },
+    {
+      "id": "SGP-0007",
+      "title": "Add non-Globe Scene API and native-effect safety",
+      "status": "active",
+      "reason": "Scene height/clamp APIs and native Earth environment effects silently retain ellipsoid or Globe semantics for a non-Globe primary world, so Scene needs explicit capability guards at API and frame boundaries.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarSceneApiCesiumWidgetSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISWorldCesiumWidgetSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0039-planar-scene-api-qualification-and-safety.md",
+      "removalCondition": "Retire when upstream Scene exposes equivalent primary-world-aware height/clamp capability reporting and pre-frame native environment effect validation for non-Globe worlds."
+    }
+  ]
 }

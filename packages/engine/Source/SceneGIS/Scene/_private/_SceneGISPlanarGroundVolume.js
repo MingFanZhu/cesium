@@ -1,0 +1,284 @@
+import BoundingSphere from "../../../Core/BoundingSphere.js";
+import Cartesian3 from "../../../Core/Cartesian3.js";
+import ComponentDatatype from "../../../Core/ComponentDatatype.js";
+import Geometry from "../../../Core/Geometry.js";
+import GeometryAttribute from "../../../Core/GeometryAttribute.js";
+import GeometryAttributes from "../../../Core/GeometryAttributes.js";
+import IndexDatatype from "../../../Core/IndexDatatype.js";
+import Matrix4 from "../../../Core/Matrix4.js";
+import PrimitiveType from "../../../Core/PrimitiveType.js";
+import SceneGISPlanarPolygonGeometry from "../../Core/SceneGISPlanarPolygonGeometry.js";
+
+const MINIMUM_PADDING = 1.0;
+
+function getEnvelope(world) {
+  const provider = world.terrainProvider;
+  const minimum = provider?.minimumHeight ?? 0.0;
+  const maximum = provider?.maximumHeight ?? 0.0;
+  const span = maximum - minimum;
+  const padding = Math.max(MINIMUM_PADDING, span * 0.01);
+  return {
+    minimum: minimum - padding,
+    maximum: maximum + padding,
+  };
+}
+
+function getEnvelopeMatrix(world, origin, result) {
+  const envelope = getEnvelope(world);
+  const center = (envelope.minimum + envelope.maximum) * 0.5;
+  const scale = envelope.maximum - envelope.minimum;
+  Matrix4.fromTranslation(new Cartesian3(origin.x, origin.y, center), result);
+  Matrix4.multiplyByScale(result, new Cartesian3(1.0, 1.0, scale), result);
+  return envelope;
+}
+
+function addVertex(values, point, z, origin) {
+  values.push(point.x - origin.x, point.y - origin.y, z);
+  return values.length / 3 - 1;
+}
+
+function createPolygonVolume(geometry) {
+  const source = geometry._getDrapeSource();
+  const origin = source.origin;
+  const values = [];
+  const indices = [];
+  const flattened = source.rings.flat();
+  const bottom = new Array(flattened.length);
+  const top = new Array(flattened.length);
+  for (let i = 0; i < flattened.length; ++i) {
+    bottom[i] = addVertex(values, flattened[i], -0.5, origin);
+    top[i] = addVertex(values, flattened[i], 0.5, origin);
+  }
+  for (let i = 0; i < source.topTriangles.length; i += 3) {
+    const a = source.topTriangles[i];
+    let b = source.topTriangles[i + 1];
+    let c = source.topTriangles[i + 2];
+    const pa = flattened[a];
+    const pb = flattened[b];
+    const pc = flattened[c];
+    if ((pb.x - pa.x) * (pc.y - pa.y) - (pb.y - pa.y) * (pc.x - pa.x) < 0.0) {
+      const swap = b;
+      b = c;
+      c = swap;
+    }
+    indices.push(top[a], top[b], top[c], bottom[a], bottom[c], bottom[b]);
+  }
+  let offset = 0;
+  for (const ring of source.rings) {
+    let area = 0.0;
+    for (let i = 0; i < ring.length; ++i) {
+      const next = ring[(i + 1) % ring.length];
+      area += ring[i].x * next.y - next.x * ring[i].y;
+    }
+    for (let i = 0; i < ring.length; ++i) {
+      const a = offset + i;
+      const b = offset + ((i + 1) % ring.length);
+      if (area > 0.0) {
+        indices.push(bottom[a], bottom[b], top[b], bottom[a], top[b], top[a]);
+      } else {
+        indices.push(bottom[a], top[b], bottom[b], bottom[a], top[a], top[b]);
+      }
+    }
+    offset += ring.length;
+  }
+  return { values, indices, origin, footprintPoints: flattened };
+}
+
+function createPolylineVolume(geometry) {
+  const source = geometry._getDrapeSource();
+  const origin = source.origin;
+  const values = [];
+  const previousValues = [];
+  const nextValues = [];
+  const expandDirections = [];
+  const indices = [];
+  // Inside-out winding matches the shadow-volume role used by Cesium's
+  // GroundPolylineGeometry at the documented upstream baseline.
+  const boxIndices = [
+    0, 2, 1, 0, 3, 2, 0, 7, 3, 0, 4, 7, 0, 5, 4, 0, 1, 5, 5, 7, 4, 5, 6, 7, 5,
+    2, 6, 5, 1, 2, 3, 6, 2, 3, 7, 6,
+  ];
+  const positions = source.positions;
+  const last = positions.length - 1;
+  const closed =
+    positions[0].x === positions[last].x &&
+    positions[0].y === positions[last].y;
+  for (let i = 0; i < last; ++i) {
+    const a = positions[i];
+    const b = positions[i + 1];
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const magnitude = Math.hypot(dx, dy);
+    if (magnitude === 0.0) {
+      continue;
+    }
+    const start = values.length / 3;
+    const endpoints = [a, b, b, a, a, b, b, a];
+    const previous =
+      i > 0 ? positions[i - 1] : closed ? positions[last - 1] : a;
+    const next =
+      i + 2 < positions.length ? positions[i + 2] : closed ? positions[1] : b;
+    const previousPoints = [previous, a, a, previous, previous, a, a, previous];
+    const nextPoints = [b, next, next, b, b, next, next, b];
+    const sides = [1, 1, 1, 1, -1, -1, -1, -1];
+    const heights = [-0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5];
+    for (let vertex = 0; vertex < 8; ++vertex) {
+      const z = heights[vertex];
+      addVertex(values, endpoints[vertex], z, origin);
+      previousValues.push(
+        previousPoints[vertex].x - origin.x,
+        previousPoints[vertex].y - origin.y,
+        z,
+      );
+      nextValues.push(
+        nextPoints[vertex].x - origin.x,
+        nextPoints[vertex].y - origin.y,
+        z,
+      );
+      expandDirections.push(sides[vertex]);
+    }
+    for (const index of boxIndices) {
+      indices.push(start + index);
+    }
+  }
+  return {
+    values,
+    indices,
+    origin,
+    previousValues,
+    nextValues,
+    expandDirections,
+    width: source.width,
+    footprintPoints: positions,
+  };
+}
+
+function createPresentationBounds(points) {
+  let minimumX = points[0].x;
+  let minimumY = points[0].y;
+  let maximumX = minimumX;
+  let maximumY = minimumY;
+  for (let i = 1; i < points.length; ++i) {
+    const point = points[i];
+    minimumX = Math.min(minimumX, point.x);
+    minimumY = Math.min(minimumY, point.y);
+    maximumX = Math.max(maximumX, point.x);
+    maximumY = Math.max(maximumY, point.y);
+  }
+  const center = new Cartesian3(
+    minimumX * 0.5 + maximumX * 0.5,
+    minimumY * 0.5 + maximumY * 0.5,
+    0.0,
+  );
+  let horizontalRadius = 0.0;
+  for (const point of points) {
+    horizontalRadius = Math.max(
+      horizontalRadius,
+      Math.hypot(point.x - center.x, point.y - center.y),
+    );
+  }
+  return { center, horizontalRadius };
+}
+
+/**
+ * Builds the stable coordinate-neutral volume consumed by planar classification.
+ *
+ * The z-fail command structure follows the algorithmic roles in Cesium's
+ * ClassificationPrimitive and GroundPolylinePrimitive at upstream baseline
+ * 6d5d8b1f0725b6f831b336463f4b11c98023427b. Recheck those sources when their
+ * stencil masks, pass ordering, or shadow-volume shader contracts change.
+ *
+ * @private
+ */
+const SceneGISPlanarGroundVolume = {};
+
+SceneGISPlanarGroundVolume.createPresentationBounds = function (geometry) {
+  const source = geometry._getDrapeSource();
+  const points =
+    geometry instanceof SceneGISPlanarPolygonGeometry
+      ? source.rings.flat()
+      : source.positions;
+  return createPresentationBounds(points);
+};
+
+SceneGISPlanarGroundVolume.create = function (world, geometry) {
+  const data =
+    geometry instanceof SceneGISPlanarPolygonGeometry
+      ? createPolygonVolume(geometry)
+      : createPolylineVolume(geometry);
+  const envelope = getEnvelope(world);
+  const typedValues = new Float64Array(data.values);
+  const points = new Array(typedValues.length / 3);
+  for (let i = 0; i < points.length; ++i) {
+    points[i] = Cartesian3.unpack(typedValues, i * 3, new Cartesian3());
+  }
+  const attributes = new GeometryAttributes({
+    position: new GeometryAttribute({
+      componentDatatype: ComponentDatatype.DOUBLE,
+      componentsPerAttribute: 3,
+      values: typedValues,
+    }),
+  });
+  if (data.nextValues !== undefined) {
+    attributes.previousPosition = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 3,
+      values: new Float32Array(data.previousValues),
+    });
+    attributes.nextPosition = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 3,
+      values: new Float32Array(data.nextValues),
+    });
+    attributes.expandDirection = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 1,
+      values: new Float32Array(data.expandDirections),
+    });
+  }
+  const raw = new Geometry({
+    attributes,
+    indices: IndexDatatype.createTypedArray(points.length, data.indices),
+    primitiveType: PrimitiveType.TRIANGLES,
+    boundingSphere: BoundingSphere.fromPoints(points),
+  });
+  const modelMatrix = new Matrix4();
+  getEnvelopeMatrix(world, data.origin, modelMatrix);
+  return {
+    geometry: raw,
+    modelMatrix,
+    envelope,
+    origin: data.origin,
+    width: data.width,
+    presentationBounds: createPresentationBounds(data.footprintPoints),
+  };
+};
+
+SceneGISPlanarGroundVolume.updatePresentationBoundingSphere = function (
+  world,
+  presentationBounds,
+  result,
+) {
+  Cartesian3.clone(presentationBounds.center, result.center);
+  result.center.z = world.getTerrainHeight(result.center) ?? 0.0;
+  const envelope = getEnvelope(world);
+  const verticalRadius = Math.max(
+    Math.abs(envelope.minimum - result.center.z),
+    Math.abs(envelope.maximum - result.center.z),
+  );
+  result.radius = Math.hypot(
+    presentationBounds.horizontalRadius,
+    verticalRadius,
+  );
+  return result;
+};
+
+SceneGISPlanarGroundVolume.updateEnvelope = function (
+  world,
+  origin,
+  modelMatrix,
+) {
+  return getEnvelopeMatrix(world, origin, modelMatrix);
+};
+
+export default SceneGISPlanarGroundVolume;

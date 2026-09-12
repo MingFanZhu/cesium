@@ -19,6 +19,11 @@ import {
   JulianDate,
   Math as CesiumMath,
   Property,
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Import the planar Viewer integration types.
+  SceneGISPlanarCameraController,
+  SceneGISPlanarWorld,
+  SceneMode,
+  // SCENEGIS_PATCH_END SGP-0002
   ScreenSpaceEventType,
   IonGeocoderService,
 } from "@cesium/engine";
@@ -31,6 +36,10 @@ import ClockViewModel from "../ClockViewModel.js";
 import FullscreenButton from "../FullscreenButton/FullscreenButton.js";
 import Geocoder from "../Geocoder/Geocoder.js";
 import HomeButton from "../HomeButton/HomeButton.js";
+// SCENEGIS_PATCH_BEGIN SGP-0002: Use a SceneGIS-owned Home widget for planar navigation.
+import createSceneGISPlanarViewerWorld from "../SceneGIS/_SceneGISPlanarViewerBootstrap.js";
+import SceneGISPlanarHomeButton from "../SceneGIS/SceneGISPlanarHomeButton.js";
+// SCENEGIS_PATCH_END SGP-0002
 import InfoBox from "../InfoBox/InfoBox.js";
 import NavigationHelpButton from "../NavigationHelpButton/NavigationHelpButton.js";
 import ProjectionPicker from "../ProjectionPicker/ProjectionPicker.js";
@@ -303,6 +312,119 @@ function enableVRUI(viewer, enabled) {
   }
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0002: Reject incompatible planar Viewer options before creating child state.
+function validatePlanarViewerOptions(options, hasWorld, hasPlanarWorldOptions) {
+  if (hasWorld && hasPlanarWorldOptions) {
+    throw new DeveloperError(
+      "options.world and options.planarWorld cannot both be provided.",
+    );
+  }
+
+  if (
+    hasWorld &&
+    (!(options.world instanceof SceneGISPlanarWorld) ||
+      options.world.isDestroyed())
+  ) {
+    throw new DeveloperError(
+      "options.world must be a live SceneGISPlanarWorld instance.",
+    );
+  }
+
+  if (defined(options.globe)) {
+    throw new DeveloperError("A planar Viewer cannot define options.globe.");
+  }
+  if (defined(options.sceneMode) && options.sceneMode !== SceneMode.SCENE3D) {
+    throw new DeveloperError(
+      "A planar Viewer only supports SceneMode.SCENE3D.",
+    );
+  }
+  if (defined(options.scene3DOnly) && options.scene3DOnly !== true) {
+    throw new DeveloperError(
+      "options.scene3DOnly must be true for a planar Viewer.",
+    );
+  }
+
+  const rejectedOptions = [
+    "baseLayer",
+    "imageryProvider",
+    "selectedImageryProviderViewModel",
+    "imageryProviderViewModels",
+    "terrainProvider",
+    "terrain",
+    "terrainShadows",
+    "selectedTerrainProviderViewModel",
+    "terrainProviderViewModels",
+    "ellipsoid",
+    "mapProjection",
+    "mapMode2D",
+    "depthPlaneEllipsoidOffset",
+    "navigationInstructionsInitiallyVisible",
+  ];
+  for (let i = 0; i < rejectedOptions.length; i++) {
+    const name = rejectedOptions[i];
+    if (defined(options[name])) {
+      throw new DeveloperError(
+        `options.${name} is not supported by a planar Viewer.`,
+      );
+    }
+  }
+
+  const disabledNativeOptions = ["shadows", "skyBox", "skyAtmosphere"];
+  for (let i = 0; i < disabledNativeOptions.length; i++) {
+    const name = disabledNativeOptions[i];
+    if (defined(options[name]) && options[name] !== false) {
+      throw new DeveloperError(
+        `options.${name} must be false for a planar Viewer.`,
+      );
+    }
+  }
+
+  const suppressedWidgets = [
+    "baseLayerPicker",
+    "geocoder",
+    "sceneModePicker",
+    "projectionPicker",
+    "navigationHelpButton",
+    "vrButton",
+  ];
+  for (let i = 0; i < suppressedWidgets.length; i++) {
+    const name = suppressedWidgets[i];
+    if (defined(options[name]) && options[name] !== false) {
+      throw new DeveloperError(
+        `options.${name} cannot be enabled for a planar Viewer.`,
+      );
+    }
+  }
+}
+// SCENEGIS_PATCH_END SGP-0002
+
+// SCENEGIS_PATCH_BEGIN SGP-0002: Declare the planar Viewer construction option without leaking patch markers into generated docs.
+/**
+ * @typedef {object} Viewer.PlanarExtentOptions
+ *
+ * Raw square planar extent options measured in meters.
+ *
+ * @property {number} minimumX The minimum X coordinate.
+ * @property {number} minimumY The minimum Y coordinate.
+ * @property {number} maximumX The maximum X coordinate.
+ * @property {number} maximumY The maximum Y coordinate.
+ */
+
+/**
+ * @typedef {object} Viewer.PlanarWorldOptions
+ *
+ * Declarative options used to synchronously create a SceneGIS planar world.
+ *
+ * @property {Viewer.PlanarExtentOptions} extent The strictly square planar extent.
+ * @property {number} maximumLevel The highest selectable surface level.
+ * @property {string} [crs] An optional non-empty opaque CRS identifier.
+ * @property {number} [maximumScreenSpaceError=2.0] The refinement threshold in pixels.
+ * @property {number} [tileCacheSize=100] The number of unprotected tiles retained after a frame.
+ * @property {Color} [baseColor=Color.GRAY] The opaque surface color.
+ * @property {boolean} [enableLighting=false] Whether geometric Lambert lighting is enabled.
+ * @property {number} [lambertDiffuseMultiplier=0.9] The non-negative multiplier applied to Lambert diffuse lighting.
+ */
+
 /**
  * @typedef {object} Viewer.ConstructorOptions
  *
@@ -343,6 +465,8 @@ function enableVRUI(viewer, enabled) {
  * @property {SceneMode} [sceneMode=SceneMode.SCENE3D] The initial scene mode.
  * @property {MapProjection} [mapProjection=new GeographicProjection(options.ellipsoid)] The map projection to use in 2D and Columbus View modes.
  * @property {Globe|false} [globe=new Globe(options.ellipsoid)] The globe to use in the scene.  If set to <code>false</code>, no globe will be added and the sky atmosphere will be hidden by default.
+ * @property {SceneGISPlanarWorld} [world] The live planar world to use. This option is mutually exclusive with <code>planarWorld</code> and every defined <code>globe</code> value.
+ * @property {Viewer.PlanarWorldOptions} [planarWorld] Declarative options used to synchronously create a planar world. This option is mutually exclusive with <code>world</code> and every defined <code>globe</code> value.
  * @property {boolean} [orderIndependentTranslucency=true] If true and the configuration supports it, use order independent translucency.
  * @property {Element|string} [creditContainer] The DOM element or ID that will contain the {@link CreditDisplay}.  If not specified, the credits are added to the bottom of the widget itself.
  * @property {Element|string} [creditViewport] The DOM element or ID that will contain the credit pop up created by the {@link CreditDisplay}.  If not specified, it will appear over the widget itself.
@@ -358,7 +482,9 @@ function enableVRUI(viewer, enabled) {
  * @property {number} [depthPlaneEllipsoidOffset=0.0] Adjust the DepthPlane to address rendering artefacts below ellipsoid zero elevation.
  * @property {number} [msaaSamples=4] If provided, this value controls the rate of multisample antialiasing. Typical multisampling rates are 2, 4, and sometimes 8 samples per pixel. Higher sampling rates of MSAA may impact performance in exchange for improved visual quality. This value only applies to WebGL2 contexts that support multisample render targets. Set to 1 to disable MSAA.
  */
+// SCENEGIS_PATCH_END SGP-0002
 
+// SCENEGIS_PATCH_BEGIN SGP-0002: Document deterministic planar Viewer construction errors.
 /**
  * A base widget for building applications.  It composites all of the standard Cesium widgets into one reusable package.
  * The widget can always be extended by using mixins, which add functionality useful for a variety of applications.
@@ -372,6 +498,7 @@ function enableVRUI(viewer, enabled) {
  * @exception {DeveloperError} Element with id "container" does not exist in the document.
  * @exception {DeveloperError} options.selectedImageryProviderViewModel is not available when not using the BaseLayerPicker widget, specify options.baseLayer instead.
  * @exception {DeveloperError} options.selectedTerrainProviderViewModel is not available when not using the BaseLayerPicker widget, specify options.terrainProvider instead.
+ * @exception {DeveloperError} options.world is not a live SceneGISPlanarWorld, options.planarWorld is invalid, the planar entries conflict with each other or options.globe, or a planar entry is combined with a planar-incompatible option.
  *
  * @see Animation
  * @see BaseLayerPicker
@@ -424,6 +551,7 @@ function enableVRUI(viewer, enabled) {
  *   window.alert(error);
  * });
  */
+// SCENEGIS_PATCH_END SGP-0002
 function Viewer(container, options) {
   //>>includeStart('debug', pragmas.debug);
   if (!defined(container)) {
@@ -433,6 +561,19 @@ function Viewer(container, options) {
 
   container = getElement(container);
   options = options ?? Frozen.EMPTY_OBJECT;
+
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Complete planar preflight before child DOM or runtime mutation.
+  const hasWorld = defined(options.world);
+  const hasPlanarWorldOptions = options.planarWorld !== undefined;
+  const isPlanarViewer = hasWorld || hasPlanarWorldOptions;
+  let planarWorld;
+  if (isPlanarViewer) {
+    validatePlanarViewerOptions(options, hasWorld, hasPlanarWorldOptions);
+    planarWorld = hasWorld
+      ? options.world
+      : createSceneGISPlanarViewerWorld(options.planarWorld);
+  }
+  // SCENEGIS_PATCH_END SGP-0002
 
   //>>includeStart('debug', pragmas.debug);
   if (
@@ -444,9 +585,12 @@ function Viewer(container, options) {
   }
   //>>includeEnd('debug');
 
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Suppress the Globe base-layer path for planar Viewer construction.
   const createBaseLayerPicker =
+    !isPlanarViewer &&
     (!defined(options.globe) || options.globe !== false) &&
     (!defined(options.baseLayerPicker) || options.baseLayerPicker !== false);
+  // SCENEGIS_PATCH_END SGP-0002
 
   //>>includeStart('debug', pragmas.debug);
   // If not using BaseLayerPicker, selectedImageryProviderViewModel is an invalid option
@@ -489,7 +633,9 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
 
   viewerContainer.appendChild(bottomContainer);
 
-  const scene3DOnly = options.scene3DOnly ?? false;
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Planar Viewer is permanently 3D-only.
+  const scene3DOnly = isPlanarViewer ? true : (options.scene3DOnly ?? false);
+  // SCENEGIS_PATCH_END SGP-0002
 
   let clock;
   let clockViewModel;
@@ -505,6 +651,9 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
 
   // Cesium widget
   const cesiumWidget = new CesiumWidget(cesiumWidgetContainer, {
+    // SCENEGIS_PATCH_BEGIN SGP-0002: Forward the validated planar world into the existing CesiumWidget seam.
+    world: planarWorld,
+    // SCENEGIS_PATCH_END SGP-0002
     baseLayer:
       (createBaseLayerPicker &&
         defined(options.selectedImageryProviderViewModel)) ||
@@ -545,6 +694,52 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
   });
 
   const scene = cesiumWidget.scene;
+
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Pair planar controller registration with failure cleanup.
+  let planarCameraController;
+  if (isPlanarViewer) {
+    scene.screenSpaceCameraController.enableInputs = false;
+    const controllerHost = scene.controllerHost;
+    const controllerCountBeforeRegistration = controllerHost.controllerCount;
+    try {
+      planarCameraController = new SceneGISPlanarCameraController({
+        world: planarWorld,
+      });
+      cesiumWidget.addController(planarCameraController);
+    } catch (error) {
+      if (
+        defined(planarCameraController) &&
+        controllerHost.controllerCount > controllerCountBeforeRegistration
+      ) {
+        try {
+          cesiumWidget.removeController(planarCameraController);
+        } catch (cleanupError) {
+          // The host may reject removal when registration failed before insertion.
+        }
+      }
+      try {
+        cesiumWidget.destroy();
+      } catch {
+        // Preserve the original construction or registration error.
+      }
+      if (viewerContainer.parentNode === container) {
+        try {
+          container.removeChild(viewerContainer);
+        } catch {
+          // Preserve the original construction or registration error.
+        }
+      }
+      if (destroyClockViewModel) {
+        try {
+          clockViewModel.destroy();
+        } catch {
+          // Preserve the original construction or registration error.
+        }
+      }
+      throw error;
+    }
+  }
+  // SCENEGIS_PATCH_END SGP-0002
 
   const eventHelper = new EventHelper();
 
@@ -594,7 +789,11 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
 
   // Geocoder
   let geocoder;
-  if (!defined(options.geocoder) || options.geocoder !== false) {
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Keep Earth geocoding absent from a planar Viewer.
+  if (
+    !isPlanarViewer &&
+    (!defined(options.geocoder) || options.geocoder !== false)
+  ) {
     const geocoderContainer = document.createElement("div");
     geocoderContainer.className = "cesium-viewer-geocoderContainer";
     toolbar.appendChild(geocoderContainer);
@@ -626,11 +825,16 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
       this,
     );
   }
+  // SCENEGIS_PATCH_END SGP-0002
 
   // HomeButton
   let homeButton;
   if (!defined(options.homeButton) || options.homeButton !== false) {
-    homeButton = new HomeButton(toolbar, scene);
+    // SCENEGIS_PATCH_BEGIN SGP-0002: Route planar Home through the owned planar controller.
+    homeButton = isPlanarViewer
+      ? new SceneGISPlanarHomeButton(toolbar, scene, planarCameraController)
+      : new HomeButton(toolbar, scene);
+    // SCENEGIS_PATCH_END SGP-0002
     if (defined(geocoder)) {
       eventHelper.add(homeButton.viewModel.command.afterExecute, function () {
         const viewModel = geocoder.viewModel;
@@ -660,7 +864,9 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
   //>>includeEnd('debug');
 
   let sceneModePicker;
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Keep mode and projection controls absent from a planar Viewer.
   if (
+    !isPlanarViewer &&
     !scene3DOnly &&
     (!defined(options.sceneModePicker) || options.sceneModePicker !== false)
   ) {
@@ -668,9 +874,10 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
   }
 
   let projectionPicker;
-  if (options.projectionPicker) {
+  if (!isPlanarViewer && options.projectionPicker) {
     projectionPicker = new ProjectionPicker(toolbar, scene);
   }
+  // SCENEGIS_PATCH_END SGP-0002
 
   // BaseLayerPicker
   let baseLayerPicker;
@@ -735,9 +942,11 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
 
   // Navigation Help Button
   let navigationHelpButton;
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Keep Earth navigation help absent from a planar Viewer.
   if (
-    !defined(options.navigationHelpButton) ||
-    options.navigationHelpButton !== false
+    !isPlanarViewer &&
+    (!defined(options.navigationHelpButton) ||
+      options.navigationHelpButton !== false)
   ) {
     let showNavHelp = true;
     try {
@@ -762,6 +971,7 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
         options.navigationInstructionsInitiallyVisible ?? showNavHelp,
     });
   }
+  // SCENEGIS_PATCH_END SGP-0002
 
   // Animation
   let animation;
@@ -864,6 +1074,11 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
   this._bottomContainer = bottomContainer;
   this._element = viewerContainer;
   this._cesiumWidget = cesiumWidget;
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Retain resolved planar capabilities for public guards and teardown.
+  this._isPlanarViewer = isPlanarViewer;
+  this._planarWorld = planarWorld;
+  this._planarCameraController = planarCameraController;
+  // SCENEGIS_PATCH_END SGP-0002
   this._selectionIndicator = selectionIndicator;
   this._infoBox = infoBox;
   this._clockViewModel = clockViewModel;
@@ -929,6 +1144,21 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
   function pickAndTrackObject(e) {
     const entity = pickEntity(that, e);
     if (defined(entity)) {
+      // SCENEGIS_PATCH_BEGIN SGP-0006: Route planar double-click through the exact fixed-axis tracking profile.
+      if (isPlanarViewer) {
+        if (
+          cesiumWidget._canTrackSceneGISPlanarEntity(
+            entity,
+            that.clock.currentTime,
+          )
+        ) {
+          that.trackedEntity = entity;
+        } else {
+          that.zoomTo(entity);
+        }
+        return;
+      }
+      // SCENEGIS_PATCH_END SGP-0006
       //Only track the entity if it has a valid position at the current time.
       if (
         Property.getValueOrUndefined(entity.position, that.clock.currentTime)
@@ -950,10 +1180,12 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
     pickAndSelectObject,
     ScreenSpaceEventType.LEFT_CLICK,
   );
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Enable exact-profile Entity tracking for planar double-click.
   cesiumWidget.screenSpaceEventHandler.setInputAction(
     pickAndTrackObject,
     ScreenSpaceEventType.LEFT_DOUBLE_CLICK,
   );
+  // SCENEGIS_PATCH_END SGP-0006
 
   // This allows to update the Viewer's _clockViewModel instead of the CesiumWidget's _clock
   // when CesiumWidget is created from the Viewer.
@@ -1046,10 +1278,11 @@ Object.defineProperties(Viewer.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Reflect both Home widget implementations in the public Viewer type.
   /**
    * Gets the HomeButton.
    * @memberof Viewer.prototype
-   * @type {HomeButton}
+   * @type {HomeButton|SceneGISPlanarHomeButton|undefined}
    * @readonly
    */
   homeButton: {
@@ -1057,6 +1290,37 @@ Object.defineProperties(Viewer.prototype, {
       return this._homeButton;
     },
   },
+  // SCENEGIS_PATCH_END SGP-0002
+
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Expose the Viewer-owned planar controller as a readonly capability.
+  /**
+   * Gets the planar camera controller owned by this Viewer.
+   *
+   * @memberof Viewer.prototype
+   * @type {SceneGISPlanarCameraController|undefined}
+   * @readonly
+   */
+  planarCameraController: {
+    get: function () {
+      return this._planarCameraController;
+    },
+  },
+  // SCENEGIS_PATCH_END SGP-0002
+
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Expose the resolved planar world as a readonly capability.
+  /**
+   * Gets the resolved planar world used by this Viewer.
+   *
+   * @memberof Viewer.prototype
+   * @type {SceneGISPlanarWorld|undefined}
+   * @readonly
+   */
+  planarWorld: {
+    get: function () {
+      return this._planarWorld;
+    },
+  },
+  // SCENEGIS_PATCH_END SGP-0002
 
   /**
    * Gets the SceneModePicker.
@@ -1461,10 +1725,12 @@ Object.defineProperties(Viewer.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Delegate planar tracking validation and lifecycle to CesiumWidget.
   /**
    * Gets or sets the Entity instance currently being tracked by the camera.
    * @memberof Viewer.prototype
    * @type {Entity | undefined}
+   * @exception {DeveloperError} In a planar Viewer, the value is not an Entity with a FIXED position and an AUTODETECT or ENU tracking reference frame.
    */
   trackedEntity: {
     get: function () {
@@ -1474,6 +1740,7 @@ Object.defineProperties(Viewer.prototype, {
       this._cesiumWidget.trackedEntity = value;
     },
   },
+  // SCENEGIS_PATCH_END SGP-0006
   /**
    * Gets or sets the object instance for which to display a selection indicator.
    *
@@ -1704,6 +1971,12 @@ Viewer.prototype.isDestroyed = function () {
  * removing the widget from layout.
  */
 Viewer.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0002: Disconnect the planar controller before destroying its widget and world.
+  if (defined(this._planarCameraController)) {
+    this._cesiumWidget.removeController(this._planarCameraController);
+    this._planarCameraController = undefined;
+  }
+  // SCENEGIS_PATCH_END SGP-0002
   if (
     defined(this.screenSpaceEventHandler) &&
     !this.screenSpaceEventHandler.isDestroyed()
@@ -1840,6 +2113,9 @@ Viewer.prototype._onTick = function (clock) {
 
   let position;
   let enableCamera = false;
+  // SCENEGIS_PATCH_BEGIN SGP-0005: Track complete planar bounds independently from fallback position.
+  let boundingSphereState;
+  // SCENEGIS_PATCH_END SGP-0005
   const selectedEntity = this.selectedEntity;
   const showSelection = defined(selectedEntity) && this._enableInfoOrSelection;
 
@@ -1848,17 +2124,39 @@ Viewer.prototype._onTick = function (clock) {
     selectedEntity.isShowing &&
     selectedEntity.isAvailable(time)
   ) {
-    const state = this._cesiumWidget.dataSourceDisplay.getBoundingSphere(
-      selectedEntity,
-      true,
-      boundingSphereScratch,
-    );
-    if (state !== BoundingSphereState.FAILED) {
+    // SCENEGIS_PATCH_BEGIN SGP-0005: Require complete planar bounds before enabling InfoBox zoom.
+    boundingSphereState =
+      this._cesiumWidget.dataSourceDisplay.getBoundingSphere(
+        selectedEntity,
+        this._isPlanarViewer ? false : true,
+        boundingSphereScratch,
+      );
+    if (
+      (this._isPlanarViewer &&
+        boundingSphereState === BoundingSphereState.DONE) ||
+      (!this._isPlanarViewer &&
+        boundingSphereState !== BoundingSphereState.FAILED)
+    ) {
       position = boundingSphereScratch.center;
-    } else if (defined(selectedEntity.position)) {
+    } else if (
+      boundingSphereState === BoundingSphereState.FAILED &&
+      defined(selectedEntity.position)
+    ) {
       position = selectedEntity.position.getValue(time, position);
     }
-    enableCamera = defined(position);
+    enableCamera = this._isPlanarViewer
+      ? boundingSphereState === BoundingSphereState.DONE
+      : defined(position);
+    // SCENEGIS_PATCH_END SGP-0005
+    // SCENEGIS_PATCH_BEGIN SGP-0006: Allow planar InfoBox tracking when the current fixed sample is valid.
+    if (
+      this._isPlanarViewer &&
+      (this.trackedEntity === selectedEntity ||
+        this._cesiumWidget._canTrackSceneGISPlanarEntity(selectedEntity, time))
+    ) {
+      enableCamera = true;
+    }
+    // SCENEGIS_PATCH_END SGP-0006
   }
 
   const selectionIndicatorViewModel = defined(this._selectionIndicator)
@@ -1869,7 +2167,10 @@ Viewer.prototype._onTick = function (clock) {
       position,
       selectionIndicatorViewModel.position,
     );
-    selectionIndicatorViewModel.showSelection = showSelection && enableCamera;
+    // SCENEGIS_PATCH_BEGIN SGP-0005: Keep fallback selection independent from planar InfoBox capability.
+    selectionIndicatorViewModel.showSelection =
+      showSelection && defined(position);
+    // SCENEGIS_PATCH_END SGP-0005
     selectionIndicatorViewModel.update();
   }
 
@@ -1878,7 +2179,9 @@ Viewer.prototype._onTick = function (clock) {
     : undefined;
   if (defined(infoBoxViewModel)) {
     infoBoxViewModel.showInfo = showSelection;
+    // SCENEGIS_PATCH_BEGIN SGP-0005: Publish the exact planar DONE-bounds camera capability.
     infoBoxViewModel.enableCamera = enableCamera;
+    // SCENEGIS_PATCH_END SGP-0005
     infoBoxViewModel.isCameraTracking =
       this.trackedEntity === this.selectedEntity;
 
@@ -1917,6 +2220,24 @@ Viewer.prototype._onEntityCollectionChanged = function (
  * @private
  */
 Viewer.prototype._onInfoBoxCameraClicked = function (infoBoxViewModel) {
+  // SCENEGIS_PATCH_BEGIN SGP-0006: Toggle exact-profile planar tracking with DONE-bounds zoom fallback.
+  if (this._isPlanarViewer) {
+    const selectedEntity = this.selectedEntity;
+    if (this.trackedEntity === selectedEntity) {
+      this.trackedEntity = undefined;
+    } else if (
+      this._cesiumWidget._canTrackSceneGISPlanarEntity(
+        selectedEntity,
+        this.clock.currentTime,
+      )
+    ) {
+      this.trackedEntity = selectedEntity;
+    } else {
+      this.zoomTo(selectedEntity);
+    }
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0006
   if (
     infoBoxViewModel.isCameraTracking &&
     this.trackedEntity === this.selectedEntity
@@ -2024,6 +2345,7 @@ Viewer.prototype.removeController = function (controller) {
   return this._cesiumWidget.removeController(controller);
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0005: Document the exact planar Viewer zoom profile.
 /**
  * Asynchronously sets the camera to view the provided entity, entities, or data source.
  * If the data source is still in the process of loading or the visualization is otherwise still loading,
@@ -2039,14 +2361,17 @@ Viewer.prototype.removeController = function (controller) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The entity, array of entities, entity collection, data source, Cesium3DTileset, point cloud, or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar Viewer, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
  * @param {HeadingPitchRange} [offset] The offset from the center of the entity in the local east-north-up reference frame.
  * @returns {Promise<boolean>} A Promise that resolves to true if the zoom was successful or false if the target is not currently visualized in the scene or the zoom was cancelled.
+ * @exception {DeveloperError} In a planar Viewer, the resolved target or offset does not belong to the supported planar profile.
  */
+// SCENEGIS_PATCH_END SGP-0005
 Viewer.prototype.zoomTo = function (target, offset) {
   return this._cesiumWidget.zoomTo(target, offset);
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0005: Document the exact planar Viewer flight profile.
 /**
  * Flies the camera to the provided entity, entities, or data source.
  * If the data source is still in the process of loading or the visualization is otherwise still loading,
@@ -2062,13 +2387,15 @@ Viewer.prototype.zoomTo = function (target, offset) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The entity, array of entities, entity collection, data source, Cesium3DTileset, point cloud, or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar Viewer, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
  * @param {object} [options] Object with the following properties:
  * @param {number} [options.duration=3.0] The duration of the flight in seconds.
  * @param {number} [options.maximumHeight] The maximum height at the peak of the flight.
  * @param {HeadingPitchRange} [options.offset] The offset from the target in the local east-north-up reference frame centered at the target.
  * @returns {Promise<boolean>} A Promise that resolves to true if the flight was successful or false if the target is not currently visualized in the scene or the flight was cancelled. //TODO: Cleanup entity mentions
+ * @exception {DeveloperError} In a planar Viewer, the resolved target, offset, duration, or maximumHeight does not belong to the supported planar profile.
  */
+// SCENEGIS_PATCH_END SGP-0005
 Viewer.prototype.flyTo = function (target, options) {
   return this._cesiumWidget.flyTo(target, options);
 };

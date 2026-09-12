@@ -84,6 +84,14 @@ import getMetadataClassProperty from "./getMetadataClassProperty.js";
 import PickedMetadataInfo from "./PickedMetadataInfo.js";
 import getMetadataProperty from "./getMetadataProperty.js";
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Guard non-Globe Scene APIs and native effects.
+import SceneGISPlanarSceneApi from "../SceneGIS/Scene/_private/_SceneGISPlanarSceneApi.js";
+// SCENEGIS_PATCH_END SGP-0007
+
+// SCENEGIS_PATCH_BEGIN SGP-0001: Type the primary world lifecycle slot.
+/** @import SceneGISWorld from "../SceneGIS/Scene/SceneGISWorld.js"; */
+// SCENEGIS_PATCH_END SGP-0001
+
 const requestRenderAfterFrame = function (scene) {
   return function () {
     scene.frameState.afterRender.push(function () {
@@ -180,6 +188,9 @@ function Scene(options) {
   this._computeEngine = new ComputeEngine(context);
 
   this._ellipsoid = options.ellipsoid ?? Ellipsoid.default;
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Track one mutually exclusive primary world.
+  this._world = undefined;
+  // SCENEGIS_PATCH_END SGP-0001
   this._globe = undefined;
   this._globeTranslucencyState = new GlobeTranslucencyState();
   this._primitives = new PrimitiveCollection({ countReferences });
@@ -817,6 +828,26 @@ function updateGlobeListeners(scene, globe) {
   scene._removeGlobeCallbacks = removeGlobeCallbacks;
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0001: Centralize primary world ownership transitions.
+function setPrimaryWorld(scene, world, globe) {
+  if (scene._world === world && scene._globe === globe) {
+    return;
+  }
+
+  updateGlobeListeners(scene, undefined);
+
+  const previousWorld = scene._world;
+  scene._world = world;
+  scene._globe = globe;
+
+  if (defined(previousWorld) && previousWorld !== world) {
+    previousWorld.destroy();
+  }
+
+  updateGlobeListeners(scene, globe);
+}
+// SCENEGIS_PATCH_END SGP-0001
+
 Object.defineProperties(Scene.prototype, {
   /**
    * Gets the canvas element to which this scene is bound.
@@ -918,6 +949,11 @@ Object.defineProperties(Scene.prototype, {
    */
   sampleHeightSupported: {
     get: function () {
+      // SCENEGIS_PATCH_BEGIN SGP-0007: Report ellipsoid height sampling as unsupported for non-Globe worlds.
+      if (SceneGISPlanarSceneApi.isLiveNonGlobeScene(this)) {
+        return false;
+      }
+      // SCENEGIS_PATCH_END SGP-0007
       return this._context.depthTexture;
     },
   },
@@ -934,6 +970,11 @@ Object.defineProperties(Scene.prototype, {
    */
   clampToHeightSupported: {
     get: function () {
+      // SCENEGIS_PATCH_BEGIN SGP-0007: Report ellipsoid height clamping as unsupported for non-Globe worlds.
+      if (SceneGISPlanarSceneApi.isLiveNonGlobeScene(this)) {
+        return false;
+      }
+      // SCENEGIS_PATCH_END SGP-0007
       return this._context.depthTexture;
     },
   },
@@ -981,11 +1022,13 @@ Object.defineProperties(Scene.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Preserve and document Globe mutation beside a custom world.
   /**
    * Gets or sets the depth-test ellipsoid.
    * @memberof Scene.prototype
    *
    * @type {Globe}
+   * @exception {DeveloperError} Assigning a defined Globe is not supported while a non-Globe world is active.
    */
   globe: {
     get: function () {
@@ -993,12 +1036,34 @@ Object.defineProperties(Scene.prototype, {
     },
 
     set: function (globe) {
-      this._globe = this._globe && this._globe.destroy();
-      this._globe = globe;
+      if (defined(this._world) && !defined(this._globe)) {
+        if (defined(globe)) {
+          throw new DeveloperError(
+            "scene.globe cannot be assigned while a non-Globe world is active.",
+          );
+        }
+        return;
+      }
 
-      updateGlobeListeners(this, globe);
+      setPrimaryWorld(this, globe, globe);
     },
   },
+  // SCENEGIS_PATCH_END SGP-0001
+
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Expose the primary world as a read-only property.
+  /**
+   * Gets the primary world owned by this scene.
+   *
+   * @memberof Scene.prototype
+   * @type {SceneGISWorld|undefined}
+   * @readonly
+   */
+  world: {
+    get: function () {
+      return this._world;
+    },
+  },
+  // SCENEGIS_PATCH_END SGP-0001
 
   /**
    * Gets the collection of primitives.
@@ -2034,6 +2099,9 @@ function updateFrameNumber(scene, frameNumber, time) {
  * @private
  */
 Scene.prototype.updateFrameState = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Reject native Earth effects before publishing non-Globe frame state.
+  SceneGISPlanarSceneApi.validateFrameState(this);
+  // SCENEGIS_PATCH_END SGP-0007
   const camera = this.camera;
 
   const frameState = this._frameState;
@@ -3204,6 +3272,15 @@ function renderEnvironment(scene, passState) {
       panoramaCommandList.splice(i, 1);
     }
   }
+
+  // SCENEGIS_PATCH_BEGIN SGP-0003: Render optional primary-world environment content.
+  if (
+    defined(scene._world) &&
+    typeof scene._world.renderEnvironment === "function"
+  ) {
+    scene._world.renderEnvironment(scene.frameState, passState);
+  }
+  // SCENEGIS_PATCH_END SGP-0003
 }
 
 /**
@@ -3893,9 +3970,11 @@ function updateAndRenderPrimitives(scene) {
   updateDebugFrustumPlanes(scene);
   updateShadowMaps(scene);
 
-  if (scene._globe) {
-    scene._globe.render(frameState);
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Render through the primary world lifecycle slot.
+  if (defined(scene._world)) {
+    scene._world.render(frameState);
   }
+  // SCENEGIS_PATCH_END SGP-0001
 }
 
 function updateAndClearFramebuffers(scene, passState, clearColor) {
@@ -4441,9 +4520,11 @@ function prePassesUpdate(scene) {
   const frameState = scene._frameState;
   scene.primitives.prePassesUpdate(frameState);
 
-  if (defined(scene.globe)) {
-    scene.globe.update(frameState);
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Update through the primary world lifecycle slot.
+  if (defined(scene._world)) {
+    scene._world.update(frameState);
   }
+  // SCENEGIS_PATCH_END SGP-0001
 
   scene._picking.update();
   frameState.creditDisplay.update();
@@ -4521,9 +4602,11 @@ function render(scene) {
 
   context.beginFrame();
 
-  if (defined(scene.globe)) {
-    scene.globe.beginFrame(frameState);
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Begin frames through the primary world lifecycle slot.
+  if (defined(scene._world)) {
+    scene._world.beginFrame(frameState);
   }
+  // SCENEGIS_PATCH_END SGP-0001
 
   scene.updateEnvironment();
   scene.updateAndExecuteCommands(passState, backgroundColor);
@@ -4532,13 +4615,15 @@ function render(scene) {
   passState.framebuffer = undefined;
   executeOverlayCommands(scene, passState);
 
-  if (defined(scene.globe)) {
-    scene.globe.endFrame(frameState);
+  // SCENEGIS_PATCH_BEGIN SGP-0001: End frames and request loading frames through the primary world.
+  if (defined(scene._world)) {
+    scene._world.endFrame(frameState);
 
-    if (!scene.globe.tilesLoaded) {
+    if (!scene._world.tilesLoaded) {
       scene._renderRequested = true;
     }
   }
+  // SCENEGIS_PATCH_END SGP-0001
 
   context.endFrame();
 }
@@ -5155,6 +5240,7 @@ Scene.prototype.drillPickFromRayMostDetailed = function (
   );
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Document non-Globe height sampling safety.
 /**
  * Returns the height of scene geometry at the given cartographic position or <code>undefined</code> if there was no
  * scene geometry to sample height from. The height of the input position is ignored. May be used to clamp objects to
@@ -5180,11 +5266,17 @@ Scene.prototype.drillPickFromRayMostDetailed = function (
  *
  * @exception {DeveloperError} sampleHeight is only supported in 3D mode.
  * @exception {DeveloperError} sampleHeight requires depth texture support. Check sampleHeightSupported.
+ * @exception {DeveloperError} sampleHeight is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0007
 Scene.prototype.sampleHeight = function (position, objectsToExclude, width) {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Fail before delegating ellipsoid height sampling for a non-Globe world.
+  SceneGISPlanarSceneApi.throwIfHeightApiUnsupported(this, "sampleHeight");
+  // SCENEGIS_PATCH_END SGP-0007
   return this._picking.sampleHeight(this, position, objectsToExclude, width);
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Document non-Globe height clamping safety.
 /**
  * Clamps the given cartesian position to the scene geometry along the geodetic surface normal. Returns the
  * clamped position or <code>undefined</code> if there was no scene geometry to clamp to. May be used to clamp
@@ -5211,13 +5303,18 @@ Scene.prototype.sampleHeight = function (position, objectsToExclude, width) {
  *
  * @exception {DeveloperError} clampToHeight is only supported in 3D mode.
  * @exception {DeveloperError} clampToHeight requires depth texture support. Check clampToHeightSupported.
+ * @exception {DeveloperError} clampToHeight is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0007
 Scene.prototype.clampToHeight = function (
   cartesian,
   objectsToExclude,
   width,
   result,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Fail before delegating ellipsoid height clamping for a non-Globe world.
+  SceneGISPlanarSceneApi.throwIfHeightApiUnsupported(this, "clampToHeight");
+  // SCENEGIS_PATCH_END SGP-0007
   return this._picking.clampToHeight(
     this,
     cartesian,
@@ -5227,6 +5324,7 @@ Scene.prototype.clampToHeight = function (
   );
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Document non-Globe detailed height sampling safety.
 /**
  * Initiates an asynchronous {@link Scene#sampleHeight} query for an array of {@link Cartographic} positions
  * using the maximum level of detail for 3D Tilesets in the scene. The height of the input positions is ignored.
@@ -5254,12 +5352,20 @@ Scene.prototype.clampToHeight = function (
  *
  * @exception {DeveloperError} sampleHeightMostDetailed is only supported in 3D mode.
  * @exception {DeveloperError} sampleHeightMostDetailed requires depth texture support. Check sampleHeightSupported.
+ * @exception {DeveloperError} sampleHeightMostDetailed is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0007
 Scene.prototype.sampleHeightMostDetailed = function (
   positions,
   objectsToExclude,
   width,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Fail before queuing detailed ellipsoid height sampling for a non-Globe world.
+  SceneGISPlanarSceneApi.throwIfHeightApiUnsupported(
+    this,
+    "sampleHeightMostDetailed",
+  );
+  // SCENEGIS_PATCH_END SGP-0007
   return this._picking.sampleHeightMostDetailed(
     this,
     positions,
@@ -5268,6 +5374,7 @@ Scene.prototype.sampleHeightMostDetailed = function (
   );
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0007: Document non-Globe detailed height clamping safety.
 /**
  * Initiates an asynchronous {@link Scene#clampToHeight} query for an array of {@link Cartesian3} positions
  * using the maximum level of detail for 3D Tilesets in the scene. Returns a promise that is resolved when
@@ -5294,12 +5401,20 @@ Scene.prototype.sampleHeightMostDetailed = function (
  *
  * @exception {DeveloperError} clampToHeightMostDetailed is only supported in 3D mode.
  * @exception {DeveloperError} clampToHeightMostDetailed requires depth texture support. Check clampToHeightSupported.
+ * @exception {DeveloperError} clampToHeightMostDetailed is not supported with a non-Globe primary world.
  */
+// SCENEGIS_PATCH_END SGP-0007
 Scene.prototype.clampToHeightMostDetailed = function (
   cartesians,
   objectsToExclude,
   width,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0007: Fail before queuing detailed ellipsoid height clamping for a non-Globe world.
+  SceneGISPlanarSceneApi.throwIfHeightApiUnsupported(
+    this,
+    "clampToHeightMostDetailed",
+  );
+  // SCENEGIS_PATCH_END SGP-0007
   return this._picking.clampToHeightMostDetailed(
     this,
     cartesians,
@@ -5431,6 +5546,23 @@ Scene.prototype.isDestroyed = function () {
   return false;
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0001: Provide a construction-only internal world initializer.
+/**
+ * Installs a non-Globe primary world during owner construction.
+ *
+ * @param {SceneGISWorld} world The world to install.
+ * @private
+ */
+Scene.prototype._initializeWorld = function (world) {
+  if (defined(this._world) || defined(this._globe)) {
+    throw new DeveloperError("The scene already has a primary world.");
+  }
+
+  setPrimaryWorld(this, world, undefined);
+  SceneGISPlanarSceneApi.prepareScene(this);
+};
+// SCENEGIS_PATCH_END SGP-0001
+
 /**
  * Destroys the WebGL resources held by this object.  Destroying an object allows for deterministic
  * release of WebGL resources, instead of relying on the garbage collector to destroy this object.
@@ -5460,7 +5592,9 @@ Scene.prototype.destroy = function () {
   this._primitives = this._primitives && this._primitives.destroy();
   this._groundPrimitives =
     this._groundPrimitives && this._groundPrimitives.destroy();
-  this._globe = this._globe && this._globe.destroy();
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Destroy the owned primary world exactly once.
+  setPrimaryWorld(this, undefined, undefined);
+  // SCENEGIS_PATCH_END SGP-0001
   this._removeTerrainProviderReadyListener =
     this._removeTerrainProviderReadyListener &&
     this._removeTerrainProviderReadyListener();

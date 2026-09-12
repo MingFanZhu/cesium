@@ -1,0 +1,14 @@
+title: SceneGIS Planar Viewer
+description: >-
+  Uses the high-level Viewer integration with an EPSG:3857 planar world,
+  explicit best-effort OpenStreetMap imagery, visible attribution, planar Home,
+  PC navigation, and an application-selected Earth skybox. The skybox is not an
+  implicit planar-world environment. The demo requests only tiles needed by the current view;
+  it does not prefetch or download tiles for offline use. If the service is
+  unavailable, the planar base color or a ready cached ancestor remains visible.
+  Policy: https://operations.osmfoundation.org/policies/tiles/
+labels:
+  - SceneGIS
+  - Imagery
+  - Viewer
+development: false

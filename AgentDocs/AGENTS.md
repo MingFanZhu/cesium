@@ -56,13 +56,19 @@ Sandcastle 路径。链接使用仓库相对路径，不写本机绝对路径。
 
 ## 角色与交接
 
+- 默认的双角色启动和任务间通信协议见
+  `Documentation/SceneGIS/AgentRoles/ArchitectureAgent.md` 与
+  `Documentation/SceneGIS/AgentRoles/ExecutionAgent.md`。任务间消息只负责通知和派工，长期状态仍必须回写本目录。
 - 架构 Agent 维护 extension plan 的范围、非目标、阶段边界、依赖关系和 ADR/SGP
-  触发条件，并确认需要 architecture review 的 phase/standalone plan。
+  触发条件，确认需要 architecture review 的 phase/standalone plan，并默认承担 Architecture/code review。
 - 执行 Agent 维护 current phase plan、实际偏差、验证结果和 current handoff，并负责
   phase/standalone plan 的 `draft -> active -> completed` 状态流转。
 - phase 完成、延期或被替代时，执行 Agent 同步更新 extension plan 的 phase roadmap；
   被替代的未完成 plan 转为 `superseded` 并链接后继 plan。
-- 评审 Agent 新建 review，逐项记录 finding；执行 Agent 回填处置，评审 Agent 或后续维护者确认结论。
+- phase 实现、验证和 review 全部完成后，Architecture Agent 负责把该阶段代码、
+  Specs、正式决策/补丁记录与 AgentDocs 创建为独立本地提交。该提交完成前不得激活
+  或实现下一 phase；下一阶段规划已经开始时，必须与已完成阶段分开提交。
+- 架构 Agent 新建 review 并逐项记录 finding；执行 Agent 回填处置，架构 Agent 确认结论。项目负责人明确启用独立评审 Agent 时可由其记录和复核 finding，但 Architecture Agent 仍负责最终 phase gate。
 - review finding 标记为 `fixed` 时必须附验证证据；标记为 `accepted` 或 `deferred` 时必须附理由，并在需要后续工作时链接后继 plan。
 - 完成任务前更新扩展索引，并使所有未完成事项都有明确状态、负责人角色和下一步文档链接。
 

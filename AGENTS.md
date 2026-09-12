@@ -4,13 +4,16 @@
 
 ## 必读路由
 
+- 用户在新对话中指定“SceneGIS 架构角色”或等价表述时，完整阅读
+  `Documentation/SceneGIS/AgentRoles/ArchitectureAgent.md` 并按其启动恢复协议工作；指定“SceneGIS 执行角色”时，完整阅读
+  `Documentation/SceneGIS/AgentRoles/ExecutionAgent.md`。角色规则不能覆盖本文件或作用域内更具体的 `AGENTS.md`。
 - 开始任何 SceneGIS 实现前，阅读 `Documentation/SceneGIS/DevelopmentGuide.md` 中与任务相关的章节。
 - 开发新的扩展或继续已有扩展前，阅读 `AgentDocs/README.md`；新扩展先从
   `AgentDocs/_template/` 建立稳定的扩展目录，已有扩展先阅读其索引、active
   extension/standalone plan、current phase plan、open discussion 和未解决 review。
 - 新增子系统、公共 API，或修改渲染管线、Shader、Worker、构建、发布和官方版本基线前，完整阅读 `Documentation/SceneGIS/Architecture.md` 以及相关 ADR。
 - 修改任何上游已有文件前，读取 `.scenegis/upstream-base.json` 和 `.scenegis/upstream-patches.json`，创建或复用一个 `SGP-####` 条目。
-- 在 `packages/engine` 或 `packages/sandcastle` 下工作时，同时遵守对应目录中的 `AGENTS.md`。
+- 在 `packages/engine`、`packages/sandcastle` 或 `Test` 下工作时，同时遵守对应目录中的 `AGENTS.md`。
 
 ## 代码发现
 
@@ -27,6 +30,7 @@
 - `packages/widgets/Source/SceneGIS/**`
 - `packages/widgets/Specs/SceneGIS/**`
 - `packages/sandcastle/gallery/scenegis-*/**`
+- `Test/**`
 - `Specs/e2e/scenegis-*.spec.js`
 - `Documentation/SceneGIS/**`
 - `AgentDocs/**`
@@ -48,7 +52,7 @@
   设计、影响路径、步骤和验证。不得为尚未进入的阶段提前猜测易变实现细节。
 - 小型、单阶段且可一次验证的工作可以只使用一个 `standalone plan`。
 - AgentDocs 只保存提炼后的计划、讨论、评审和交接状态，不保存原始聊天转录、secret、本机绝对路径、大型日志、二进制和生成产物。
-- 架构 Agent 负责明确边界和待决问题；执行 Agent 必须记录实现偏差与验证结果；评审 Agent 必须记录发现项及其处理状态。未解决事项不得通过删除文档来表示完成。
+- 架构 Agent 负责明确边界和待决问题，并默认承担 Architecture/code review；执行 Agent 必须记录实现偏差与验证结果。项目负责人明确启用独立评审 Agent 时，由其记录发现项，最终阶段 gate 仍由架构 Agent 确认。未解决事项不得通过删除文档来表示完成。
 - AgentDocs 不是新的规范或实现事实源。长期架构决定提升到 ADR，通用强制规则提升到 `Architecture.md` 或相应 `AGENTS.md`，上游补丁继续登记 SGP。
 
 ## 上游修改纪律
@@ -90,6 +94,9 @@
 - 大型、跨模块、实验性、长期未完成、难回退或多人并行的工作使用 `feature/*`。
 - 官方版本升级必须使用 `upgrade/cesium-*`；发布维护使用 `release/*`。
 - 上游同步和 SceneGIS 功能开发不得混在同一个提交中。
+- 大型扩展的每个 phase 在实现、验证和 review 完成后，必须由 Architecture Agent
+  将该阶段代码、Specs、ADR/SGP 与 AgentDocs 形成独立的本地提交检查点，再讨论、
+  激活或实现下一阶段。禁止把多个阶段混入同一提交。
 - 不得 force-push `main` 或 `scenegis/develop`。
 - SGP 与分支相互独立：大型 SceneGIS 自有功能可以没有 SGP；两行上游改动也可能需要 SGP。
 
@@ -102,12 +109,15 @@
 
 ## 验证与交付
 
-- 每个行为变化必须有与风险相称的自动化测试。Sandcastle 是可执行示例和视觉验收页，不能替代 Specs。
+- 每个行为变化必须有与风险相称的自动化测试。`Test/**` 开发示例以及保留的 legacy Sandcastle
+  案例只用于组装、调试和视觉验收，不能替代 Specs。
 - 渲染热路径修改必须验证画面正确性、资源生命周期，并提供性能或回归证据。
 - 只运行与任务相关的最小充分检查；扩大到公共 API、构建或发布时，必须运行相应的完整构建和类型检查。
 - 最终报告必须列出：修改内容、验证结果、所有改动过的 upstream-owned files、对应 SGP，以及尚未解决的风险。
+- 减少不必要的全量验证，做到验证有边界，不浪费大量时间在验证上。
 
 ## 语言
 
-- JavaScript、GLSL、JSDoc、源码注释、标识符、提交信息和 SGP 标记说明使用英文。
+- JavaScript、GLSL、JSDoc、源码注释、标识符和 SGP 标记说明使用英文。
+- SceneGIS 提交信息使用中文；上游同步提交可保留其原始提交信息。
 - SceneGIS 架构与开发文档可以使用中文，但关键术语、路径、命令和 API 名称保持英文原文。
