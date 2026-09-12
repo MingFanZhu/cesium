@@ -2617,6 +2617,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       u_testDirection: () => direction,
       u_testAmbient: () => ambient,
       u_testDirectional: () => directional,
+      u_sceneGISShadowSunDirection: () =>
+        component === 1 ? direction : Cartesian3.UNIT_Z,
       u_sceneGISShadowCloudTop: () => 3000,
     };
     const fragment = `uniform sampler2D u_transmittanceTexture;
@@ -6775,6 +6777,237 @@ ${hardCascadeLibrary}`;
     expect(thresholdFramebuffer.isDestroyed()).toBe(true);
     expect(blurFramebuffer.isDestroyed()).toBe(true);
     expect(compositeFramebuffer.isDestroyed()).toBe(true);
+  });
+
+  it("publishes Planar P11 Moon phase and primary light with stable ownership and warm history", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const time = scene.frameState.time;
+    const pipeline = effects._pipeline;
+    const resources = pipeline._resources;
+    const light = scene.light;
+    const callerLight = environment._capturedLight;
+    const dayColor = Color.clone(light.color);
+    const dayIntensity = light.intensity;
+    const update = () => {
+      environment.update(scene, time);
+      effects.update(scene, time);
+    };
+    expect(pipeline._primaryLightScale).toEqual(Cartesian3.ONE);
+    environment.sunDirection = new Cartesian3(0, 0, -1);
+    environment.moonDirection = Cartesian3.UNIT_Z;
+    update();
+    expect(pipeline._nightFactor).toBe(1);
+    expect(pipeline._moonPhase).toBe(1);
+    expect(pipeline._moonContribution).toBe(1);
+    expect(pipeline._moonIrradiance).toEqual(new Cartesian3(0.12, 0.16, 0.22));
+    expect(scene.light).toBe(light);
+    expect(light.direction).toEqual(new Cartesian3(0, 0, -1));
+    expect(light.color).toEqual(new Color(0.12, 0.16, 0.22, 1));
+    environment.update(scene, time);
+    expect(light.color).toEqual(new Color(0.12, 0.16, 0.22, 1));
+    expect(scene.frameState._sceneGISPlanarLighting.showCloudShadows).toBe(
+      true,
+    );
+    expect(scene.frameState._sceneGISPlanarLighting.showCrepuscularRays).toBe(
+      true,
+    );
+    scene.camera.setView({
+      destination: new Cartesian3(2e7, -3e7, 1000),
+      orientation: {
+        direction: new Cartesian3(0, 0.95, 0.3122499),
+        up: new Cartesian3(0, -0.3122499, 0.95),
+      },
+    });
+    update();
+    expect(pipeline._moonContribution).toBe(1);
+    scene.renderForSpecs(time);
+    scene.renderForSpecs(time);
+    expect(pipeline._cloudHistoryValid).toBe(true);
+    const history = resources.cloudHistoryFramebuffer0;
+    const shadow = pipeline._globeShadowResources;
+    effects.moonlightIntensity = 2;
+    update();
+    scene.renderForSpecs(time);
+    expect(pipeline._cloudHistoryDiagnostics.resetReason).toBe(
+      "primary-light-energy",
+    );
+    expect(pipeline._moonContribution).toBe(2);
+    expect(pipeline._resources).toBe(resources);
+    expect(resources.cloudHistoryFramebuffer0).toBe(history);
+    expect(pipeline._globeShadowResources).toBe(shadow);
+    effects.showMoonlight = false;
+    update();
+    expect(pipeline._primaryLightScale).toEqual(Cartesian3.ZERO);
+    expect(scene.frameState._sceneGISPlanarLighting.showCloudShadows).toBe(
+      false,
+    );
+    expect(scene.frameState._sceneGISPlanarLighting.showCrepuscularRays).toBe(
+      false,
+    );
+    expect(light.color).toEqual(Color.BLACK);
+    effects.showMoonlight = true;
+    effects.moonlightIntensity = 1;
+    environment.sunDirection = new Cartesian3(-0.6, 0, -0.8);
+    environment.moonDirection = new Cartesian3(-0.8, 0, 0.6);
+    update();
+    expect(pipeline._moonPhase).toEqualEpsilon(1 / Math.PI, 1e-12);
+    expect(pipeline._primaryLightDirection).toEqualEpsilon(
+      environment.moonDirection,
+      1e-12,
+    );
+    environment.moonDirection = Cartesian3.UNIT_X;
+    update();
+    expect(pipeline._moonContribution).toBe(0);
+    environment.moonDirection = environment.sunDirection;
+    update();
+    expect(pipeline._moonPhase).toEqualEpsilon(0, 1e-12);
+    environment.moonDirection = Cartesian3.UNIT_Z;
+    environment.sunDirection = Cartesian3.UNIT_Z;
+    update();
+    expect(pipeline._primaryLightScale).toEqual(Cartesian3.ONE);
+    expect(light.color).toEqual(dayColor);
+    expect(light.intensity).toBe(dayIntensity);
+    environment.sunDirection = new Cartesian3(0, 0, -1);
+    update();
+    effects.enabled = false;
+    expect(scene.light).toBe(light);
+    expect(light.color).toEqual(dayColor);
+    expect(light.direction).toEqual(Cartesian3.UNIT_Z);
+    effects.enabled = true;
+    update();
+    expect(light.color).toEqual(new Color(0.12, 0.16, 0.22, 1));
+    expect(scene.shadowMap.enabled).toBe(false);
+    effects.disconnectedCallback(effects._element);
+    expect(environment._advancedLightState).toBeUndefined();
+    expect(light.color).toEqual(dayColor);
+    environment.disconnectedCallback(environment._element);
+    expect(scene.light).toBe(callerLight);
+  });
+
+  it("lights Planar P11 surface clouds fog and haze from the Moon on the actual GPU", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const pipeline = effects._pipeline;
+    environment.sunDirection = new Cartesian3(0, 0, -1);
+    environment.moonDirection = Cartesian3.UNIT_Z;
+    const time = scene.frameState.time;
+    const update = () => {
+      environment.update(scene, time);
+      effects.update(scene, time);
+    };
+    update();
+    copyConstantHalfTexture(
+      pipeline._resources.transmittanceTexture,
+      [1, 1, 1, 1],
+    );
+    copyConstantHalfTexture(
+      pipeline._resources.irradianceTexture,
+      [0, 0, 0, 1],
+    );
+    let length = 0;
+    const fragment = `void main() {
+      vec3 sun = u_sceneGISActualSunDirection;
+      vec3 primary = normalize(u_sceneGISShadowSunDirection);
+      vec3 position = vec3(0,0,1000);
+      vec3 beam; vec3 sky; vec3 result;
+      if (gl_FragCoord.x < 2.0) {
+        sceneGISPlanarSurfaceIrradiance(position.z, beam, sky);
+        result = gl_FragCoord.x < 1.0 ? beam * u_sceneGISPrimaryLightScale : sky;
+      } else if (gl_FragCoord.x < 4.0) {
+        sceneGISCloudIncidentIrradiance(u_sceneGISTransmittanceTexture,
+          u_sceneGISIrradianceTexture, position, vec3(0), sun, primary,
+          u_sceneGISPrimaryLightScale, beam, sky);
+        result = gl_FragCoord.x < 3.0 ? beam : sky;
+      } else if (gl_FragCoord.x < 5.0) {
+        result = sceneGISApplyExponentialHeightFog(u_sceneGISTransmittanceTexture,
+          vec3(0), position, primary, sun, 1000.0, u_testLength,
+          0.0001, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 8.0);
+      } else {
+        out_FragColor = sceneGISPlanarCloudHaze(u_sceneGISTransmittanceTexture,
+          u_sceneGISIrradianceTexture, position, primary, sun, 1000.0, u_testLength, 0.4);
+        return;
+      }
+      out_FragColor = vec4(result, 1);
+    }`;
+    const render = () =>
+      executeHalfFloatQuad(
+        [
+          planarLighting.source,
+          heightFogSource,
+          cloudSource,
+          planarCloudTransportSource,
+          "uniform float u_testLength;",
+          fragment,
+        ],
+        {
+          width: 6,
+          uniformMap: {
+            ...planarLighting.createUniformMap(
+              () => scene.frameState._sceneGISPlanarLighting,
+            ),
+            u_testLength: () => length,
+          },
+        },
+      );
+    const lit = render();
+    for (const index of [0, 2]) {
+      expect(lit[index].slice(0, 3)).toEqualEpsilon([0.12, 0.16, 0.22], 0.0002);
+    }
+    expect(lit[1].slice(0, 3)).toEqualEpsilon([0.02, 0.036, 0.06], 0.00005);
+    expect(lit[3]).toEqual(lit[1]);
+    expect(rgbEnergy(lit[4])).toBeGreaterThan(0);
+    length = 1000;
+    const shadowed = render();
+    expect(shadowed[4].slice(0, 3)).toEqual([0, 0, 0]);
+    expect(rgbEnergy(shadowed[5])).toBeLessThan(rgbEnergy(lit[5]));
+    expect(shadowed[5][3]).toBe(lit[5][3]);
+    effects.showMoonlight = false;
+    update();
+    length = 0;
+    const off = render();
+    for (const index of [0, 2, 4]) {
+      expect(off[index].slice(0, 3)).toEqual([0, 0, 0]);
+    }
+    expect(off[1]).toEqual(lit[1]);
+    expect(off[3]).toEqual(lit[3]);
+    expect(off[5]).toEqual(shadowed[5]);
+    // Real receiver and Beer producer exercise the CPU/shader connection.
+    effects.showMoonlight = true;
+    effects.surfaceRadianceScale = 10;
+    effects.cloudDensity = 1;
+    effects.cloudQuality = "low";
+    installSolidCloudTestTextures();
+    scene.canvas.width = 16;
+    scene.canvas.height = 16;
+    scene.world.baseColor = new Color(0.4, 0.4, 0.4, 1);
+    scene.camera.setView({
+      destination: new Cartesian3(200000, 100000, 500),
+      orientation: {
+        direction: new Cartesian3(0, 0, -1),
+        up: Cartesian3.UNIT_Y,
+      },
+    });
+    const surface = () => {
+      update();
+      scene.renderForSpecs(time);
+      return readCenterPixel();
+    };
+    effects.showCloudShadows = false;
+    const surfaceLit = surface();
+    effects.showCloudShadows = true;
+    const surfaceShadow = surface();
+    expect(rgbEnergy(surfaceShadow)).toBeLessThan(rgbEnergy(surfaceLit));
+    effects.showMoonlight = false;
+    const ambient = surface();
+    expect(rgbEnergy(ambient)).toBeGreaterThan(0);
+    expect(rgbEnergy(ambient)).toBeLessThan(rgbEnergy(surfaceLit));
+    effects.showCloudShadows = false;
+    expect(surface()).toEqual(ambient);
   });
 
   it("uses one camera-independent Globe primary light and leaves native shadows caller-owned", function () {

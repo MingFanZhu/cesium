@@ -8,17 +8,16 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P9 completed — Planar cloud reconstruction`
-- Current gate: P9 source/GPU/visual/performance accepted; separate local
-  checkpoint. Ground bounce, rays and Moon remain successors.
+- Current phase: `P11 completed — Planar Moonlight`
+- Current gate: P11 source/GPU/visual/performance accepted; independent local checkpoint.
 - Current phase plan:
-  [P9 cloud reconstruction](2026-09-12-phase-p9-planar-cloud-reconstruction.md)
+  [P11 Moonlight](2026-09-12-phase-p11-planar-moonlight.md)
 - Latest completed phase plan:
-  [P9 cloud reconstruction](2026-09-12-phase-p9-planar-cloud-reconstruction.md)
+  [P11 Moonlight](2026-09-12-phase-p11-planar-moonlight.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P8 cloud material](2026-09-12-phase-p8-planar-cloud-material.md)
+  [P10 crepuscular rays](2026-09-12-phase-p10-planar-crepuscular-rays.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -421,9 +420,14 @@ controls. Twelve relevant cases and delegated visual review pass with no new
 GPU resources. See the [P10 plan](2026-09-12-phase-p10-planar-crepuscular-rays.md)
 and [review](../reviews/2026-09-12-p10-planar-crepuscular-rays.md).
 
-### P11+ — Remaining Planar advanced-effects adaptation (`deferred`)
+### P11 — Planar Moonlight (`completed`)
 
-Ground-bounce parity and directional Moon remain successors. Preserve fixed-Z
+Effective Moon direction now drives shared primary lighting, cloud shadows
+and directional fog/haze. Thirty-two relevant cases and delegated review pass. See [P11 plan](2026-09-12-phase-p11-planar-moonlight.md).
+
+### P12+ — Remaining Planar advanced-effects adaptation (`deferred`)
+
+Ground-bounce parity and detailed Moon-disc rendering remain successors. Preserve fixed-Z
 geometry, manual celestial directions and independent phase checkpoints.
 No successor is activated by this record.
 

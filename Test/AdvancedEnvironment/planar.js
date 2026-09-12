@@ -32,6 +32,8 @@ const state = {
   showClouds: true,
   showCloudShadows: true,
   showCrepuscularRays: true,
+  showMoonlight: true,
+  moonlightIntensity: 1.0,
   showBloom: true,
   showLensFlare: true,
   bloomIntensity: 0.05,
@@ -249,6 +251,25 @@ function createGui() {
   bindBoolean(
     effectsFolder,
     state,
+    "showMoonlight",
+    effects,
+    viewer.scene,
+    "月光",
+  );
+  bindNumber(
+    cloudFolder,
+    state,
+    "moonlightIntensity",
+    effects,
+    viewer.scene,
+    "月光强度",
+    0,
+    64,
+    0.1,
+  );
+  bindBoolean(
+    effectsFolder,
+    state,
     "showCloudShadows",
     effects,
     viewer.scene,
@@ -407,7 +428,7 @@ function getState() {
   const scene = viewer?.isDestroyed() === false ? viewer.scene : undefined;
   return {
     page: "planar",
-    phase: "P10",
+    phase: "P11",
     compositionState: effects ? getCompositionState() : undefined,
     destroyed,
     ready: effects?.ready === true,

@@ -685,7 +685,13 @@ void sceneGISCloudIncidentIrradiance(
         max(sunDirection.z, 0.0) * sunIrradiance;
     skyIrradiance = max(totalIrradiance - directIrradiance, vec3(0.0)) +
         sceneGISReadableNightSkyIrradiance(vec3(0.0, 0.0, 1.0), sunDirection);
-    sunIrradiance *= SCENEGIS_SOLAR_IRRADIANCE;
+    sunIrradiance = vec3(0.0);
+    if (primaryLightDirection.z > 0.0 && localPosition.z >= 0.0 &&
+        localPosition.z <= SCENEGIS_PLANAR_TOP) {
+        sunIrradiance = max(sceneGISPlanarTransmittanceToBoundary(
+            transmittanceTexture, localPosition.z, primaryLightDirection.z), vec3(0.0)) *
+            SCENEGIS_SOLAR_IRRADIANCE * primaryLightScale;
+    }
     #endif
 }
 

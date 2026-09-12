@@ -30,6 +30,9 @@ uniform vec3 u_sceneGISShadowEast;
 uniform vec3 u_sceneGISShadowNorth;
 uniform vec3 u_sceneGISShadowVertical;
 uniform vec3 u_sceneGISShadowSunDirection;
+#ifndef SCENEGIS_GLOBE
+uniform vec3 u_sceneGISPrimaryLightScale;
+#endif
 uniform vec3 u_sceneGISShadowCameraPosition;
 uniform vec3 u_sceneGISCloudShadowCameraRelativePosition;
 uniform float u_sceneGISShadowCloudTop;

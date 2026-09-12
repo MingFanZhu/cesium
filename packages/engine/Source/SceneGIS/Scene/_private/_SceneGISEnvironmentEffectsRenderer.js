@@ -1570,6 +1570,60 @@ function updateGlobeCelestialAuthority(renderer, frameState, time) {
   const moonPhase =
     (Math.sin(phaseAngle) + (Math.PI - phaseAngle) * Math.cos(phaseAngle)) /
     Math.PI;
+  updatePrimaryLight(
+    renderer,
+    nightFactor,
+    moonHorizonFactor,
+    moonPhase,
+    renderer._owner._celestialSunColor,
+    renderer._owner._celestialSunIntensity,
+  );
+}
+
+function updatePlanarCelestialAuthority(renderer) {
+  const environment = renderer._world.environment;
+  Cartesian3.clone(environment._effectiveSunDirection, renderer._sunDirection);
+  Cartesian3.clone(
+    environment._effectiveMoonDirection,
+    renderer._moonDirection,
+  );
+  const nightFactor = smoothStep01(
+    (sinNightStart - renderer._sunDirection.z) / (sinNightStart - sinNightEnd),
+  );
+  const moonHorizonFactor = smoothStep01(
+    renderer._moonDirection.z / sinMoonHorizonEnd,
+  );
+  // Directional phase is independent of projected XY and camera orientation.
+  const phaseAngle = Math.acos(
+    Math.min(
+      Math.max(
+        -Cartesian3.dot(renderer._sunDirection, renderer._moonDirection),
+        -1.0,
+      ),
+      1.0,
+    ),
+  );
+  const moonPhase =
+    (Math.sin(phaseAngle) + (Math.PI - phaseAngle) * Math.cos(phaseAngle)) /
+    Math.PI;
+  updatePrimaryLight(
+    renderer,
+    nightFactor,
+    moonHorizonFactor,
+    moonPhase,
+    environment._sunColor,
+    environment._sunIntensity,
+  );
+}
+
+function updatePrimaryLight(
+  renderer,
+  nightFactor,
+  moonHorizonFactor,
+  moonPhase,
+  sunColor,
+  sunIntensity,
+) {
   const moonContribution =
     nightFactor *
     moonHorizonFactor *
@@ -1616,8 +1670,6 @@ function updateGlobeCelestialAuthority(renderer, frameState, time) {
     );
   }
 
-  const sunColor = renderer._owner._celestialSunColor;
-  const sunIntensity = renderer._owner._celestialSunIntensity;
   if (nightFactor === 0.0) {
     Color.clone(sunColor, renderer._nativeLightColor);
     renderer._nativeLightIntensity = sunIntensity;
@@ -1663,14 +1715,8 @@ function updateFrame(renderer, scene, frameState, time) {
         : frameState.time;
     updateGlobeCelestialAuthority(renderer, frameState, celestialTime);
   }
-  const sunDirection =
-    renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
-      ? renderer._sunDirection
-      : renderer._world.environment._effectiveSunDirection;
   if (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
-    Cartesian3.clone(sunDirection, renderer._sunDirection);
-    Cartesian3.clone(sunDirection, renderer._primaryLightDirection);
-    Cartesian3.clone(Cartesian3.ONE, renderer._primaryLightScale);
+    updatePlanarCelestialAuthority(renderer);
   }
   const owner = renderer._owner;
   const wrappedDistance =
@@ -1728,6 +1774,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._celestialFrameNumber = undefined;
   this._celestialTime = new JulianDate();
   this._celestialTimeValid = false;
+  this._planarLightEnvironment = undefined;
   this._primaryLightState = {
     direction: this._primaryLightDirection,
     scale: this._primaryLightScale,
@@ -1997,6 +2044,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_sceneGISShadowNorth: () => that._frame.north,
     u_sceneGISShadowVertical: () => that._frame.vertical,
     u_sceneGISShadowSunDirection: () => that._primaryLightDirection,
+    u_sceneGISPrimaryLightScale: () => that._primaryLightScale,
     u_sceneGISShadowCameraPosition: () => that._frame.cameraPosition,
     u_sceneGISCloudShadowCameraRelativePosition: () =>
       that._shadowCameraRelative,
@@ -2061,7 +2109,9 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
   if (!globe) {
     Cartesian3.clone(this._frame.surfacePosition, this._shadowOrigin);
     this._shadowCloudCasterActive =
-      this._shadowCloudCasterActive && this._sunDirection.z > 0.0;
+      this._shadowCloudCasterActive &&
+      this._primaryLightDirection.z > 0.0 &&
+      Cartesian3.maximumComponent(this._primaryLightScale) > 0.0;
   }
   Cartesian3.subtract(
     this._frame.cameraPosition,
@@ -2133,6 +2183,11 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
     frameState._sceneGISGlobeLighting = record;
   } else {
     frameState._sceneGISPlanarLighting = record;
+    this._planarLightEnvironment = this._world.environment;
+    this._planarLightEnvironment._setAdvancedLight(
+      this,
+      this._primaryLightState,
+    );
   }
 };
 
@@ -2145,6 +2200,10 @@ SceneGISEnvironmentEffectsRenderer.prototype.getPrimaryLightState =
 
 SceneGISEnvironmentEffectsRenderer.prototype.releaseGlobeLighting =
   function () {
+    if (defined(this._planarLightEnvironment)) {
+      this._planarLightEnvironment._clearAdvancedLight(this);
+      this._planarLightEnvironment = undefined;
+    }
     if (
       defined(this._scene) &&
       this._scene.frameState._sceneGISPlanarLighting ===
@@ -2437,9 +2496,7 @@ function createCloudHistorySnapshot() {
 }
 
 function cloudHistoryLightDirection(renderer) {
-  return renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
-    ? renderer._primaryLightDirection
-    : renderer._sunDirection;
+  return renderer._primaryLightDirection;
 }
 
 function cloudHistoryNumbersEqual(left, right) {
@@ -2491,8 +2548,7 @@ function cloudHistoryInputsFinite(renderer) {
     cloudHistoryVectorFinite(frame.ellipsoidCenter) &&
     cloudHistoryVectorFinite(frame.ellipsoidRadii) &&
     cloudHistoryVectorFinite(cloudHistoryLightDirection(renderer)) &&
-    (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE ||
-      cloudHistoryVectorFinite(renderer._primaryLightScale)) &&
+    cloudHistoryVectorFinite(renderer._primaryLightScale) &&
     Number.isFinite(renderer._cloudOffset.x) &&
     Number.isFinite(renderer._cloudOffset.y)
   );
@@ -2581,7 +2637,6 @@ function cloudHistoryContinuityFailure(renderer, width, height) {
     return "sun-direction";
   }
   if (
-    renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE &&
     !cloudHistoryVectorEqual(
       previous.primaryLightScale,
       renderer._primaryLightScale,
@@ -2634,11 +2689,10 @@ function cloudHistoryStationary(renderer) {
       cloudHistoryLightDirection(renderer),
       previous.sunDirection,
     ) &&
-    (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE ||
-      cloudHistoryVectorEqual(
-        renderer._primaryLightScale,
-        previous.primaryLightScale,
-      ))
+    cloudHistoryVectorEqual(
+      renderer._primaryLightScale,
+      previous.primaryLightScale,
+    )
   );
 }
 

@@ -3,20 +3,20 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P10 completed — Planar crepuscular rays`
+- Current phase: `P11 completed — Planar Moonlight`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P10 crepuscular rays](reviews/2026-09-12-p10-planar-crepuscular-rays.md)
+  [P11 Moonlight](reviews/2026-09-12-p11-planar-moonlight.md)
 - Current phase plan:
-  [P10 crepuscular rays](plans/2026-09-12-phase-p10-planar-crepuscular-rays.md)
+  [P11 Moonlight](plans/2026-09-12-phase-p11-planar-moonlight.md)
 - Latest completed phase plan:
-  [P10 crepuscular rays](plans/2026-09-12-phase-p10-planar-crepuscular-rays.md)
+  [P11 Moonlight](plans/2026-09-12-phase-p11-planar-moonlight.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P9 cloud reconstruction](plans/2026-09-12-phase-p9-planar-cloud-reconstruction.md)
+  [P10 crepuscular rays](plans/2026-09-12-phase-p10-planar-crepuscular-rays.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -35,7 +35,8 @@
   [ADR-0052](../../Documentation/SceneGIS/Decisions/ADR-0052-planar-integrated-medium-restoration.md),
   [ADR-0053](../../Documentation/SceneGIS/Decisions/ADR-0053-globe-moonlight-shadow-surface.md),
   [ADR-0054](../../Documentation/SceneGIS/Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md),
-  [ADR-0055](../../Documentation/SceneGIS/Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md)
+  [ADR-0055](../../Documentation/SceneGIS/Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md),
+  [ADR-0056](../../Documentation/SceneGIS/Decisions/ADR-0056-planar-moonlight-authority.md)
 - Upstream patches: active `SGP-0008` / `SGP-0009`（consume only in A16）、active `SGP-0010`（model source seam）
 - Branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
@@ -64,6 +65,12 @@ HDR bloom/lens flare。两种世界共享光学参数、质量档、资源与合
 reference frame，不互相伪造坐标语义。
 
 ## Active work
+
+- P11 is accepted after P10 `ed4b32fd31`: Planar directional Moonlight feeds
+  the existing primary-light, model/surface/cloud, Beer shadow and fog/haze paths.
+  Thirty-two relevant cases, delegated day/night/model inspection and bounded
+  GPU/resource checks pass. Native geometry-shadow qualification and detailed
+  Moon-disc rendering remain outside this phase. No owner visual gate is pending.
 
 - P10 is accepted after P9 `efb478b971`: fixed-Z equivalent shadow length,
   atmosphere/directional fog and reference cloud haze reuse existing resources.

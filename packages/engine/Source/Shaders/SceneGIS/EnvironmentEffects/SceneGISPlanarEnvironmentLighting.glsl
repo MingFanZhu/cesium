@@ -2,7 +2,6 @@ uniform sampler2D u_sceneGISTransmittanceTexture;
 uniform sampler2D u_sceneGISIrradianceTexture;
 uniform float u_surfaceRadianceScale;
 uniform vec3 u_sceneGISActualSunDirection;
-uniform vec3 u_sceneGISPrimaryLightScale;
 uniform vec3 u_sceneGISCameraRelativePosition;
 
 vec3 sceneGISPlanarLightPosition(vec3 positionEC)
@@ -17,12 +16,13 @@ void sceneGISPlanarSurfaceIrradiance(
     out vec3 sky)
 {
     vec3 sun = normalize(u_sceneGISActualSunDirection);
+    vec3 primary = normalize(u_sceneGISShadowSunDirection);
     beam = vec3(0.0);
     sky = vec3(0.0);
     // Sample the lower boundary continuously, including receiver reconstruction
     // roundoff at Z = 0. The LUT already clamps below-ground heights to zero.
     if (height >= SCENEGIS_PLANAR_TOP) {
-        beam = sun.z > 0.0 ? SCENEGIS_SOLAR_IRRADIANCE : vec3(0.0);
+        beam = primary.z > 0.0 ? SCENEGIS_SOLAR_IRRADIANCE : vec3(0.0);
         return;
     }
     if (sun.z > 0.0) {
@@ -34,6 +34,10 @@ void sceneGISPlanarSurfaceIrradiance(
     sky = max(sceneGISPlanarIrradiance(
         u_sceneGISIrradianceTexture, height, sun.z) - beam * max(sun.z, 0.0), vec3(0.0));
     sky += sceneGISReadableNightSkyIrradiance(vec3(0.0, 0.0, 1.0), sun);
+    // Directional Moonlight uses its own optical path; the sky remains solar.
+    beam = primary.z > 0.0 ? SCENEGIS_SOLAR_IRRADIANCE *
+        sceneGISPlanarTransmittanceToBoundary(
+            u_sceneGISTransmittanceTexture, height, primary.z) : vec3(0.0);
 }
 
 vec3 sceneGISPlanarDirectSource(vec3 positionEC)
@@ -64,7 +68,7 @@ float sceneGISPlanarCloudTransmittance(vec3 positionEC)
 vec3 sceneGISPlanarSurfaceRadiance(vec3 albedo, vec3 positionEC, vec3 normalEC)
 {
     float cosine = max(dot(normalize(czm_inverseViewRotation * normalEC),
-        normalize(u_sceneGISActualSunDirection)), 0.0);
+        normalize(u_sceneGISShadowSunDirection)), 0.0);
     return albedo * (sceneGISPlanarDirectSource(positionEC) *
         (cosine / czm_pi) * sceneGISPlanarCloudTransmittance(positionEC) +
         sceneGISPlanarSkySource(positionEC, normalEC));

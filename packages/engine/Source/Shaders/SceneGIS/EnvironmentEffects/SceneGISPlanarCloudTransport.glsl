@@ -23,9 +23,10 @@ vec4 sceneGISPlanarCloudHaze(
     sceneGISCloudIncidentIrradiance(
         transmittanceTexture, irradianceTexture,
         rayOrigin + rayDirection * start, vec3(0.0), sunDirection,
-        sunDirection, vec3(1.0), sunIrradiance, skyIrradiance);
+        normalize(u_sceneGISShadowSunDirection), u_sceneGISPrimaryLightScale,
+        sunIrradiance, skyIrradiance);
     vec3 inscatter = sunIrradiance *
-        sceneGISCloudDualPhase(dot(sunDirection, rayDirection), 1.0) * directionalOpacity;
+        sceneGISCloudDualPhase(dot(normalize(u_sceneGISShadowSunDirection), rayDirection), 1.0) * directionalOpacity;
     inscatter += skyIrradiance * (1.0 / (4.0 * czm_pi)) * opacity;
     return vec4(max(inscatter * (0.9 / 1.4), vec3(0.0)), opacity);
 }

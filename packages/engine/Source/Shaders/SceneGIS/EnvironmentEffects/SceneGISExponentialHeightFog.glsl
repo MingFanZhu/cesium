@@ -380,6 +380,13 @@ vec3 sceneGISApplyExponentialHeightFog(
         vec3(0.0, 0.0, 1.0), sunDirection);
     #endif
     vec3 ambientSource = sceneGISHeightFogAmbientSource(ambientIrradiance);
+    vec3 directionalLight = sunDirection;
+    #ifndef SCENEGIS_GLOBE
+    directionalLight = normalize(u_sceneGISShadowSunDirection);
+    sunColor = SCENEGIS_SOLAR_IRRADIANCE * u_sceneGISPrimaryLightScale *
+        sceneGISHeightFogSunTransmittance(transmittanceTexture, rayOrigin,
+            viewDirection, directionalLight, representativeDistance);
+    #endif
     vec3 directionalSource = sceneGISHeightFogDirectionalSource(sunColor);
     ambientSource *= sourceRadianceScale;
     directionalSource *= sourceRadianceScale;
@@ -422,7 +429,7 @@ vec3 sceneGISApplyExponentialHeightFog(
     }
     #endif
     float directionalLobe = pow(
-        max(dot(viewDirection, sunDirection), 0.0),
+        max(dot(viewDirection, directionalLight), 0.0),
         directionalInscatteringExponent);
     vec3 fogSource = ambientSource * inscatteringScale +
         directionalSource * directionalLobe * directionalInscatteringScale;

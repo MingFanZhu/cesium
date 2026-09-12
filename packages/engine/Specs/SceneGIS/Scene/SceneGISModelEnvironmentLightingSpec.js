@@ -196,6 +196,23 @@ describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
           record.showCloudShadows = !record.showCloudShadows;
           expect(pixel()).toEqual(readableNight);
           expect(modelProgram()).toBe(physicalProgram);
+          // P11: the real PBR cosine and direct optical path follow Moonlight
+          // even though the actual Sun remains below the plane.
+          record.showCloudShadows = false;
+          record.primaryLightScale = new Cartesian3(
+            0.12 / 1.474,
+            0.16 / 1.8504,
+            0.22 / 1.91198,
+          );
+          const moonlit = pixel();
+          expect(moonlit[0]).toBeGreaterThan(readableNight[0]);
+          record.showCloudShadows = true;
+          expect(pixel()[0]).toBeLessThan(moonlit[0]);
+          scene.light.direction = Cartesian3.UNIT_Z;
+          expect(pixel()).toEqual(readableNight);
+          scene.light.direction = new Cartesian3(0, 0, -1);
+          record.primaryLightScale = Cartesian3.ZERO;
+          expect(modelProgram()).toBe(physicalProgram);
           record.irradianceTexture = physicalIrradiance;
           record.sunDirection = Cartesian3.UNIT_Z;
         }
