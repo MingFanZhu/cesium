@@ -8,16 +8,16 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P11 completed — Planar Moonlight`
-- Current gate: P11 source/GPU/visual/performance accepted; independent local checkpoint.
+- Current phase: `P12 completed — Planar cloud receiver seams`
+- Current gate: P12 implementation, self-review and delegated visual verification accepted; local checkpoint.
 - Current phase plan:
-  [P11 Moonlight](2026-09-12-phase-p11-planar-moonlight.md)
+  [P12 receiver seams](2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
 - Latest completed phase plan:
-  [P11 Moonlight](2026-09-12-phase-p11-planar-moonlight.md)
+  [P12 receiver seams](2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P10 crepuscular rays](2026-09-12-phase-p10-planar-crepuscular-rays.md)
+  [P11 Moonlight](2026-09-12-phase-p11-planar-moonlight.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -425,7 +425,14 @@ and [review](../reviews/2026-09-12-p10-planar-crepuscular-rays.md).
 Effective Moon direction now drives shared primary lighting, cloud shadows
 and directional fog/haze. Thirty-two relevant cases and delegated review pass. See [P11 plan](2026-09-12-phase-p11-planar-moonlight.md).
 
-### P12+ — Remaining Planar advanced-effects adaptation (`deferred`)
+### P12 — Planar cloud receiver seams (`completed`)
+
+Raw receiver depth and one-sided silhouette normals correct spatial rejection.
+Five relevant GPU cases, delegated visual inspection and bounded timing pass
+without new resources or upstream edits.
+See [P12 receiver seams](2026-09-12-phase-p12-planar-cloud-receiver-seams.md).
+
+### P13+ — Remaining Planar advanced-effects adaptation (`deferred`)
 
 Ground-bounce parity and detailed Moon-disc rendering remain successors. Preserve fixed-Z
 geometry, manual celestial directions and independent phase checkpoints.

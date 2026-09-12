@@ -166,3 +166,19 @@ clear Aerial adds only the shadow correction. Cloud haze is the coverage-coupled
 reference cloud effect and preserves its lit baseline with rays off. This phase
 adds no pass, GPU allocation, public property, coordinate conversion or upstream
 integration seam. Ground bounce and directional Moon remain deferred.
+
+## P12 current receiver continuity (2026-09-12)
+
+The owner-reported cloud/horizon seam is a spatial receiver qualification error.
+Current Planar source receivers must be reconstructed from current raw depth;
+the packed cloud receiver distance saturates at 1,000 km and cannot serve as an
+unbounded current geometry position. Packed history/mean/front ranges remain.
+
+Depth-derived receiver normals must use one-sided adjacent samples from the
+closest eye-depth side, excluding clear/out-of-viewport samples. A GPU quad
+crossing a silhouette is not a single geometric plane. This correction retains
+strict receiver/foreground tolerance and clear/finite classification; it does
+not authorize cloud bleeding, a larger rejection threshold or a horizon fade.
+Four extra raw-depth reads for finite Planar pixels fit the existing resolve
+pass and are measured in [P12](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-12-phase-p12-planar-cloud-receiver-seams.md).
+Globe, cloud integration, temporal policy, allocations and public API are unchanged.

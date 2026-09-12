@@ -291,6 +291,43 @@ vec4 sceneGISCloudVarianceClip(
         clamp(historyColor.a, lower.a, upper.a));
 }
 
+#ifndef SCENEGIS_GLOBE
+vec3 sceneGISPlanarCloudReceiverEye(vec2 pixel, float rawDepth)
+{
+    vec4 eye = czm_windowToEyeCoordinates(pixel, rawDepth);
+    return eye.xyz / eye.w;
+}
+
+vec3 sceneGISPlanarCloudReceiverDerivative(
+    vec2 pixel, vec2 axis, vec2 dimensions, vec3 centerEye)
+{
+    vec2 lowerPixel = clamp(pixel - axis, vec2(0.5), dimensions - 0.5);
+    vec2 upperPixel = clamp(pixel + axis, vec2(0.5), dimensions - 0.5);
+    float lowerDepth = texture(u_depthTexture, lowerPixel / dimensions).r;
+    float upperDepth = texture(u_depthTexture, upperPixel / dimensions).r;
+    bool lowerValid = !sceneGISIsClearResolvedDepth(lowerDepth) &&
+        any(notEqual(lowerPixel, pixel));
+    bool upperValid = !sceneGISIsClearResolvedDepth(upperDepth) &&
+        any(notEqual(upperPixel, pixel));
+    vec3 lowerDelta = vec3(0.0);
+    vec3 upperDelta = vec3(0.0);
+    if (lowerValid) {
+        lowerDelta = centerEye - sceneGISPlanarCloudReceiverEye(lowerPixel, lowerDepth);
+    }
+    if (upperValid) {
+        upperDelta = sceneGISPlanarCloudReceiverEye(upperPixel, upperDepth) - centerEye;
+    }
+    if (!lowerValid) {
+        return upperDelta;
+    }
+    if (!upperValid) {
+        return lowerDelta;
+    }
+    // A silhouette spans different surfaces. Use the side closest in eye depth.
+    return abs(lowerDelta.z) < abs(upperDelta.z) ? lowerDelta : upperDelta;
+}
+#endif
+
 void main()
 {
     vec2 lowDimensions = vec2(textureSize(u_cloudLowDistanceTexture, 0));
@@ -352,8 +389,22 @@ void main()
         vec3(0.0), u_cameraDirection, u_cameraRight, u_cameraUp,
         targetOrigin, targetDirection);
     vec3 targetScene = targetOrigin + targetDirection * sceneDistanceMeters;
+    #ifdef SCENEGIS_GLOBE
     // Evaluate receiver derivatives uniformly, before any neighbor rejection.
     vec3 receiverNormal = cross(dFdx(targetScene), dFdy(targetScene));
+    #else
+    vec3 receiverNormal = vec3(0.0);
+    if (!isClearDepth) {
+        vec3 centerEye = sceneGISPlanarCloudReceiverEye(gl_FragCoord.xy, rawDepth);
+        vec3 normalEC = cross(
+            sceneGISPlanarCloudReceiverDerivative(gl_FragCoord.xy,
+                vec2(1.0, 0.0), fullDimensions, centerEye),
+            sceneGISPlanarCloudReceiverDerivative(gl_FragCoord.xy,
+                vec2(0.0, 1.0), fullDimensions, centerEye));
+        receiverNormal = u_cameraRight * normalEC.x +
+            u_cameraUp * normalEC.y - u_cameraDirection * normalEC.z;
+    }
+    #endif
     float receiverNormalMagnitude = length(receiverNormal);
     for (int y = -1; y <= 1; ++y) {
         for (int x = -1; x <= 1; ++x) {
@@ -386,8 +437,16 @@ void main()
                     vec3(0.0), u_cameraDirection, u_cameraRight, u_cameraUp,
                     sourceOrigin, sourceDirection);
                 if (!isClearDepth) {
+                    #ifdef SCENEGIS_GLOBE
                     vec3 sourceScene = sourceOrigin + sourceDirection *
                         (distanceSample.z * SCENEGIS_CLOUD_DISTANCE_ENCODING);
+                    #else
+                    // Current raw depth remains valid beyond the packed 1,000 km range.
+                    vec3 sourceEye = sceneGISPlanarCloudReceiverEye(
+                        vec2(sourcePixel) + 0.5, sourceRawDepth);
+                    vec3 sourceScene = sourceOrigin + sourceDirection *
+                        (u_perspective ? length(sourceEye) : max(-sourceEye.z, 0.0));
+                    #endif
                     if (!(receiverNormalMagnitude > 0.0) ||
                         isinf(receiverNormalMagnitude) || isnan(receiverNormalMagnitude) ||
                         abs(dot(receiverNormal, sourceScene - targetScene)) >
@@ -472,8 +531,10 @@ void main()
                 vec3(0.0), u_cameraDirection, u_cameraRight, u_cameraUp,
                 sourceOrigin, sourceDirection);
             if (!isClearDepth) {
+                vec3 sourceEye = sceneGISPlanarCloudReceiverEye(
+                    sourceUv * fullDimensions, sourceRawDepth);
                 vec3 sourceScene = sourceOrigin + sourceDirection *
-                    (distanceSample.z * SCENEGIS_CLOUD_DISTANCE_ENCODING);
+                    (u_perspective ? length(sourceEye) : max(-sourceEye.z, 0.0));
                 if (!(receiverNormalMagnitude > 0.0) ||
                     abs(dot(receiverNormal, sourceScene - targetScene)) >
                         receiverNormalMagnitude *

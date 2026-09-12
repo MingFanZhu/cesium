@@ -10023,7 +10023,7 @@ ${hardCascadeLibrary}`;
         "czm_screenToEyeCoordinates(vec4(cloudCoordinates, resolvedDepth, 1.0))",
       );
       const oldResolveDepth = cloudResolveFragmentSource.replaceAll(
-        "czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth)",
+        /czm_windowToEyeCoordinates\(\s*gl_FragCoord.xy,\s*rawDepth\)/g,
         "czm_windowToEyeCoordinates(vec4(gl_FragCoord.xy, resolvedDepth, 1.0))",
       );
       expect(oldProducerDepth).not.toBe(controlledProducer);
@@ -10990,6 +10990,219 @@ ${hardCascadeLibrary}`;
   it("reconstructs phased Globe medium clouds across depth and camera transitions", async function () {
     await checkPhasedCloudReconstruction("globe");
   }, 300000);
+
+  it("keeps Planar P12 clouds continuous beyond packed receiver range and across silhouettes on the actual GPU", async function () {
+    await connectControlledCloudMode("planar");
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const context = scene.context;
+    const width = 8;
+    const height = 8;
+    const textures = [];
+    scene.canvas.width = width;
+    scene.canvas.height = height;
+    scene.renderForSpecs();
+    scene.camera.setView({
+      destination: new Cartesian3(0, 0, 1000),
+      orientation: {
+        direction: new Cartesian3(0, 0, -1),
+        up: Cartesian3.UNIT_Y,
+      },
+    });
+    const cameraFrustum = scene.camera.frustum;
+    cameraFrustum.near = 0.1;
+    cameraFrustum.far = 1e10;
+    cameraFrustum.fov = 0.4;
+    cameraFrustum.aspectRatio = 1;
+    context.uniformState.updateCamera(scene.camera);
+    context.uniformState.updateFrustum(cameraFrustum);
+    const f = cameraFrustum._offCenterFrustum;
+    const frustum = new Cartesian4(
+      f.left / 0.1,
+      f.right / 0.1,
+      f.bottom / 0.1,
+      f.top / 0.1,
+    );
+    const phases = [
+      [0, 0],
+      [1, 1],
+      [1, 0],
+      [0, 1],
+    ];
+    let phase = 0;
+    let phased = true;
+    let depth;
+    let lowColor;
+    let lowDistance;
+    const color = [0.25, 0.5, 0.75, 0.25];
+    const clearColor = [0, 0, 0, 1];
+    function texture(w, h, get, datatype = PixelDatatype.HALF_FLOAT) {
+      const values = Array.from({ length: w * h }, (_, i) =>
+        get(i % w, Math.floor(i / w)),
+      ).flat();
+      const result = new Texture({
+        context,
+        width: w,
+        height: h,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: datatype,
+        sampler: Sampler.NEAREST,
+        flipY: false,
+        source: {
+          arrayBufferView:
+            datatype === PixelDatatype.FLOAT
+              ? new Float32Array(values)
+              : new Uint16Array(values.map(encodeFloat16)),
+        },
+      });
+      textures.push(result);
+      return result;
+    }
+    const dummy = texture(1, 1, () => clearColor);
+    const uniforms = {
+      ...effects._pipeline._uniformMap,
+      u_depthTexture: () => depth,
+      u_cloudLowColorTexture: () => lowColor,
+      u_cloudLowDistanceTexture: () => lowDistance,
+      u_cloudHistoryColorTexture: () => dummy,
+      u_cloudHistoryDistanceTexture: () => dummy,
+      u_cloudHistoryValid: () => false,
+      u_cloudHistoryWeight: () => 0,
+      u_cloudTracePhased: () => phased,
+      u_cloudStbnSlice: () => (phase + 0.5) / 64,
+      u_perspective: () => true,
+      u_frustum: () => frustum,
+      u_cameraDirection: () => new Cartesian3(0, 0, -1),
+      u_cameraRight: () => Cartesian3.UNIT_X,
+      u_cameraUp: () => Cartesian3.UNIT_Y,
+    };
+    function draw(source = cloudResolveFragmentSource) {
+      const outputColor = texture(width, height, () => clearColor);
+      const outputDistance = texture(width, height, () => clearColor);
+      const framebuffer = new Framebuffer({
+        context,
+        colorTextures: [outputColor, outputDistance],
+        destroyAttachments: false,
+      });
+      const program = createEnvironmentEffectsProgramForSpecs(
+        context,
+        source,
+        false,
+        ["LOG_DEPTH_READ_ONLY"],
+      );
+      const command = context.createViewportQuadCommand(
+        program._fragmentShaderSource,
+        { framebuffer, uniformMap: uniforms },
+      );
+      const passState = new PassState(context);
+      passState.viewport = new BoundingRectangle(0, 0, width, height);
+      try {
+        command.execute(context, passState);
+        return readHalfTexturePixels(outputColor);
+      } finally {
+        command.shaderProgram.destroy();
+        program.destroy();
+        framebuffer.destroy();
+      }
+    }
+    const packedMutation = cloudResolveFragmentSource.replace(
+      "(u_perspective ? length(sourceEye) : max(-sourceEye.z, 0.0))",
+      "(distanceSample.z * SCENEGIS_CLOUD_DISTANCE_ENCODING)",
+    );
+    const quadMutation = cloudResolveFragmentSource
+      .replace(
+        "    #ifdef SCENEGIS_GLOBE\n    // Evaluate receiver derivatives uniformly, before any neighbor rejection.",
+        "    vec3 legacyReceiverNormal = cross(dFdx(targetScene), dFdy(targetScene));\n    #ifdef SCENEGIS_GLOBE\n    // Evaluate receiver derivatives uniformly, before any neighbor rejection.",
+      )
+      .replace(
+        "receiverNormal = u_cameraRight * normalEC.x +\n            u_cameraUp * normalEC.y - u_cameraDirection * normalEC.z;",
+        "receiverNormal = legacyReceiverNormal;",
+      );
+    expect(packedMutation).not.toBe(cloudResolveFragmentSource);
+    expect(quadMutation).not.toBe(cloudResolveFragmentSource);
+    try {
+      for (const scenario of ["far", "edge", "foreground"]) {
+        const z = (x, y) =>
+          scenario === "far"
+            ? 2e6
+            : y >= 3
+              ? undefined
+              : x < 3
+                ? scenario === "foreground"
+                  ? 100
+                  : 4000
+                : 8000;
+        depth = texture(
+          width,
+          height,
+          (x, y) => {
+            const distance = z(x, y);
+            return [
+              distance === undefined
+                ? 1
+                : Math.log2(distance - 0.1 + 1) / Math.log2(1e10 - 0.1 + 1),
+              0,
+              0,
+              0,
+            ];
+          },
+          PixelDatatype.FLOAT,
+        );
+        for (phased of [true, false]) {
+          for (phase = 0; phase < (phased ? 4 : 1); phase++) {
+            const offset = phased ? phases[phase] : [1, 1];
+            const sample = (get) => (x, y) =>
+              get(x * 2 + offset[0], y * 2 + offset[1]);
+            lowColor = texture(
+              4,
+              4,
+              sample((x, y) => (z(x, y) === 100 ? clearColor : color)),
+            );
+            lowDistance = texture(
+              4,
+              4,
+              sample((x, y) => {
+                const distance = z(x, y);
+                const px =
+                  frustum.x + ((frustum.y - frustum.x) * (x + 0.5)) / width;
+                const py =
+                  frustum.z + ((frustum.w - frustum.z) * (y + 0.5)) / height;
+                const receiver =
+                  distance === undefined
+                    ? 1
+                    : Math.min((distance * Math.hypot(px, py, 1)) / 1e6, 1);
+                return distance === 100
+                  ? [0, 0, receiver, 0]
+                  : [0.0005, 0.0003, receiver, 0.5];
+              }),
+            );
+            const actual = draw();
+            for (let y = 0; y < height; y++) {
+              for (let x = 0; x < width; x++) {
+                expect(actual[y * width + x])
+                  .withContext(
+                    `${scenario} phased=${phased} phase=${phase} pixel=${x},${y}`,
+                  )
+                  .toEqualEpsilon(z(x, y) === 100 ? clearColor : color, 0.002);
+              }
+            }
+            if (phased && phase === 1 && scenario !== "foreground") {
+              const old = draw(
+                scenario === "far" ? packedMutation : quadMutation,
+              );
+              expect(old.filter((pixel) => pixel[3] === 1).length)
+                .withContext(scenario)
+                .toBeGreaterThan(0);
+            }
+          }
+        }
+      }
+    } finally {
+      textures.forEach((value) => value.destroy());
+      disconnectControlledCloudMode();
+    }
+  });
 
   it("reconstructs Planar P9 phased clouds and accumulates transparent edges without foreground leaks", async function () {
     await checkPhasedCloudReconstruction("planar");
