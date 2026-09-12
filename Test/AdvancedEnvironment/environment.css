@@ -77,6 +77,10 @@ body[data-scenegis-page="globe"] .cesium-viewer-toolbar {
   z-index: 20;
 }
 
+body[data-scenegis-page="planar"] > .lil-gui.lil-root {
+  max-height: calc(100% - 48px) !important;
+}
+
 @media (max-width: 760px) {
   .release-card {
     top: auto;
@@ -84,5 +88,9 @@ body[data-scenegis-page="globe"] .cesium-viewer-toolbar {
     bottom: 10px;
     left: 10px;
     width: auto;
+  }
+
+  body[data-scenegis-page="planar"] .release-card {
+    bottom: 38px;
   }
 }

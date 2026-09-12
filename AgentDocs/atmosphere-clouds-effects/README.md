@@ -3,20 +3,20 @@
 ## Status
 
 - Extension: `active`
-- Current phase: `P12 completed — Planar cloud receiver seams`
+- Current phase: `P13 completed — Planar sample Clock and Timeline`
 - Current discussion:
   [Planar spatial model and UE reference](discussions/2026-09-11-planar-atmosphere-space-model.md)
   — global metric Planar use confirms fixed-Z geometry and direct-Z height across custom CRS.
 - Current review:
-  [P12 receiver seams](reviews/2026-09-12-p12-planar-cloud-receiver-seams.md)
+  [P13 sample Clock](reviews/2026-09-12-p13-planar-sample-clock.md)
 - Current phase plan:
-  [P12 receiver seams](plans/2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
+  [P13 sample Clock](plans/2026-09-12-phase-p13-planar-sample-clock.md)
 - Latest completed phase plan:
-  [P12 receiver seams](plans/2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
+  [P13 sample Clock](plans/2026-09-12-phase-p13-planar-sample-clock.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P11 Moonlight](plans/2026-09-12-phase-p11-planar-moonlight.md)
+  [P12 receiver seams](plans/2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
 - Extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](plans/2026-08-14-atmosphere-clouds-effects-extension.md)
 - Architecture decisions:
@@ -66,11 +66,17 @@ reference frame，不互相伪造坐标语义。
 
 ## Active work
 
+- P13 is accepted after P12 `3a5710390b`: the Planar sample uses native
+  Clock/Timeline, existing astronomical directions and clock-driven cloud motion.
+  Focused real-browser E2E, live layout and static/ownership checks pass. The
+  latest owner camera and effect settings are restored. The containing commit
+  is the local checkpoint; no successor phase is activated.
+
 - P12 is accepted after P11 `39c440237c`: raw current receiver positions and
   one-sided depth normals remove the reported horizon/silhouette cloud holes.
   Five relevant GPU cases, delegated visual inspection and bounded timing pass;
-  resource identities and foreground qualification are retained. The containing
-  commit is the local checkpoint; no successor phase is activated.
+  resource identities and foreground qualification are retained. Its local
+  checkpoint is `3a5710390b`.
 
 - P11 is accepted after P10 `ed4b32fd31`: Planar directional Moonlight feeds
   the existing primary-light, model/surface/cloud, Beer shadow and fog/haze paths.

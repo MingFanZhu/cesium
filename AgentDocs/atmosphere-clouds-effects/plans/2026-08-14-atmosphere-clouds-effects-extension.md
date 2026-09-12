@@ -8,16 +8,16 @@
 - Created: `2026-08-14`
 - Updated: `2026-09-12`
 - Branch: `feature/atmosphere-clouds-effects`
-- Current phase: `P12 completed — Planar cloud receiver seams`
-- Current gate: P12 implementation, self-review and delegated visual verification accepted; local checkpoint.
+- Current phase: `P13 completed — Planar sample Clock and Timeline`
+- Current gate: P13 sample integration, focused E2E and self-review accepted; local checkpoint.
 - Current phase plan:
-  [P12 receiver seams](2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
+  [P13 sample Clock](2026-09-12-phase-p13-planar-sample-clock.md)
 - Latest completed phase plan:
-  [P12 receiver seams](2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
+  [P13 sample Clock](2026-09-12-phase-p13-planar-sample-clock.md)
 - A15 diagnosis:
   [Globe cloud edge temporal stability](../discussions/2026-09-11-globe-cloud-edge-temporal-stability.md)
 - Previous completed phase plan:
-  [P11 Moonlight](2026-09-12-phase-p11-planar-moonlight.md)
+  [P12 receiver seams](2026-09-12-phase-p12-planar-cloud-receiver-seams.md)
 - Architecture decisions:
   [ADR-0040](../../../Documentation/SceneGIS/Decisions/ADR-0040-dual-world-advanced-environment-rendering.md),
   [ADR-0041](../../../Documentation/SceneGIS/Decisions/ADR-0041-bruneton-atmosphere-aerial-perspective.md),
@@ -432,7 +432,14 @@ Five relevant GPU cases, delegated visual inspection and bounded timing pass
 without new resources or upstream edits.
 See [P12 receiver seams](2026-09-12-phase-p12-planar-cloud-receiver-seams.md).
 
-### P13+ — Remaining Planar advanced-effects adaptation (`deferred`)
+### P13 — Planar sample Clock and Timeline (`completed`)
+
+Viewer time controls and the existing astronomical Planar environment now
+synchronize cloud motion and preset times without changing engine behavior.
+Focused E2E and delegated live layout verification pass.
+See [P13 sample Clock](2026-09-12-phase-p13-planar-sample-clock.md).
+
+### P14+ — Remaining Planar advanced-effects adaptation (`deferred`)
 
 Ground-bounce parity and detailed Moon-disc rendering remain successors. Preserve fixed-Z
 geometry, manual celestial directions and independent phase checkpoints.

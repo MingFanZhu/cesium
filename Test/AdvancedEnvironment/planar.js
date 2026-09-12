@@ -22,6 +22,7 @@ let gui;
 let removePostRender;
 let removeRenderError;
 let removeControllerError;
+let removeClockTick;
 let destroyed = false;
 
 const state = {
@@ -42,7 +43,7 @@ const state = {
   cloudPreset: "cumulus",
   cloudCoverage: 0.45,
   cloudDensity: 1.0,
-  cloudTime: 0.0,
+  cloudTimeOffset: 0.0,
   cloudRadianceScale: 1.0,
   backgroundRadianceScale: 10.0,
   aerialRadianceScale: 1.0,
@@ -97,10 +98,19 @@ function getCompositionState() {
 }
 
 const lighting = Object.freeze({
-  day: [0.45, 0.2, 0.87],
-  sunset: [0.95, 0.1, 0.08],
-  night: [-0.45, -0.2, -0.87],
+  day: "2026-06-21T10:30:00Z",
+  sunset: "2026-06-21T17:45:00Z",
+  night: "2026-06-21T21:00:00Z",
 });
+const cloudEpoch = Cesium.JulianDate.fromIso8601(lighting.day);
+const observationDayStart = Cesium.JulianDate.fromIso8601(
+  "2026-06-21T00:00:00Z",
+);
+const observationDayStop = Cesium.JulianDate.addDays(
+  observationDayStart,
+  1,
+  new Cesium.JulianDate(),
+);
 
 const cameras = Object.freeze({
   models: {
@@ -125,15 +135,16 @@ const cameras = Object.freeze({
   },
 });
 
-function normalizedDirection(values) {
-  return Cesium.Cartesian3.normalize(
-    new Cesium.Cartesian3(...values),
-    new Cesium.Cartesian3(),
-  );
+function synchronizeCloudTime() {
+  effects.cloudTime =
+    Cesium.JulianDate.secondsDifference(viewer.clock.currentTime, cloudEpoch) +
+    state.cloudTimeOffset;
 }
 
 function applyLighting(name) {
-  environment.sunDirection = normalizedDirection(lighting[name]);
+  viewer.clock.shouldAnimate = false;
+  viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(lighting[name]);
+  synchronizeCloudTime();
   viewer.scene.requestRender();
 }
 
@@ -335,17 +346,15 @@ function createGui() {
     4.0,
     0.01,
   );
-  bindNumber(
-    cloudFolder,
-    state,
-    "cloudTime",
-    effects,
-    viewer.scene,
-    "云时间",
-    -3600.0,
-    3600.0,
-    1.0,
-  );
+  cloudFolder
+    .add(state, "cloudTimeOffset", -3600.0, 3600.0, 1.0)
+    .name("云时间偏移（秒）")
+    .onChange(synchronizeCloudTime);
+  cloudFolder
+    .add(effects, "cloudTime")
+    .name("云仿真时间（秒）")
+    .listen()
+    .disable();
   bindNumber(
     cloudFolder,
     state,
@@ -413,6 +422,12 @@ function createGui() {
   comparison.add(state, "cloudOnly").name("仅体积云");
   comparison.add(state, "combined").name("全部组合");
   cloudFolder.close();
+  const timeFolder = gui.addFolder("时间");
+  timeFolder.add(viewer.clock, "shouldAnimate").name("播放").listen();
+  timeFolder
+    .add(viewer.clock, "multiplier", -120.0, 120.0, 1.0)
+    .name("时间倍速")
+    .listen();
   const presets = gui.addFolder("光照与视角");
   presets.add(state, "day").name("白昼");
   presets.add(state, "sunset").name("低日照");
@@ -428,7 +443,8 @@ function getState() {
   const scene = viewer?.isDestroyed() === false ? viewer.scene : undefined;
   return {
     page: "planar",
-    phase: "P11",
+    phase: "P13",
+    timeline: viewer?.timeline !== undefined,
     compositionState: effects ? getCompositionState() : undefined,
     destroyed,
     ready: effects?.ready === true,
@@ -443,6 +459,7 @@ function destroySample() {
     return;
   }
   destroyed = true;
+  removeClockTick?.();
   removePostRender?.();
   removeRenderError?.();
   removeControllerError?.();
@@ -466,7 +483,7 @@ try {
     infoBox: false,
     navigationHelpButton: false,
     selectionIndicator: false,
-    timeline: false,
+    timeline: true,
     planarWorld: {
       crs: "EPSG:3857",
       extent: {
@@ -479,6 +496,9 @@ try {
       baseColor: Cesium.Color.fromCssColorString("#26362f"),
     },
   });
+  viewer.clock.startTime = observationDayStart;
+  viewer.clock.stopTime = observationDayStop;
+  viewer.timeline.zoomTo(observationDayStart, observationDayStop);
   configureNativeEnvironment(viewer.scene, "planar");
   viewer.scene.rethrowRenderErrors = true;
   environment = new Cesium.SceneGISPlanarEnvironment({
@@ -486,8 +506,12 @@ try {
     showAtmosphere: false,
     showSun: false,
     showMoon: false,
-    sunDirection: normalizedDirection(lighting.day),
+    sunDirection: new Cesium.Cartesian3(0.45, 0.2, 0.87),
     moonDirection: new Cesium.Cartesian3(-0.5, -0.2, 0.8),
+    directionMode: "astronomical",
+    // Explicit sample reference; never infer celestial coordinates from the CRS.
+    originLongitude: 0.0,
+    originLatitude: 0.0,
   });
   effects = new Cesium.SceneGISEnvironmentEffects({
     mode: "planar",
@@ -496,6 +520,8 @@ try {
   });
   viewer.addController(environment);
   viewer.addController(effects);
+  applyLighting("day");
+  removeClockTick = viewer.clock.onTick.addEventListener(synchronizeCloudTime);
   addLocalGeometry(viewer.scene);
   addLightingModels(viewer.scene).catch((error) => errorTracker.record(error));
   createGui();
