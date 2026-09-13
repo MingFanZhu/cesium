@@ -33,14 +33,25 @@
 V2 画面及 V3A 逐块加载过渡均已由项目负责人验收通过。
 V3B0 改用自有 GPU 图元，保留上述视觉基线；拾取复用 Cesium 的 DrawCommand 自动派生。
 
-当前没有 terrainProvider 或 symbol 渲染。V2 不支持任意非默认 cap/join/dash/blur，
-也不承诺 Mapbox 抗锯齿像素一致性。颜色与样式契约见
+V3B1 新增 `/Test/vector-tiles/styles.html` 样式图集，城市页面顶部可直接进入。
+`style-cases.mjs` 定义 12 个案例、17 个要素；`generate-style-fixture.mjs` 编码
+`styles.pbf`，重新生成命令为 `node Test/vector-tiles/generate-style-fixture.mjs`。
+使用独立的本地米制 World 验证同一 MVT 数值契约，城市页面继续验收 3857。
+全部案例关闭 MSAA/FXAA，以便直接检查自有 coverage：
+
+- 三种 cap 与三种 join，半透明拐角保持普通连接处颜色一致。
+- 同一 batch 内不同周期虚线、零长度圆点虚线、带 offset 的 gap 双轨。
+- 带孔洞的面边界 AA、不同 circle blur 和 line blur。
+- 俯视/倾斜、逐要素拾取、移除重建；页面标题采用 DOM 标签，不代表 symbol 已实现。
+
+当前没有 terrainProvider 或 symbol 渲染；拐角 dash 随网格变形，跨 tile 相位不保证连续，
+也不承诺 MapLibre 逐像素一致性。新增图集已于 2026-09-13 通过负责人视觉验收。颜色与样式契约见
 [VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 
 ## 自动化与测量
 
 `Specs/e2e/scenegis-vector-tiles.spec.js` 覆盖真实 PBF、颜色像素、requestRenderMode、
-拾取、倾斜、重建和父子替换中间状态，共 2 项；71 项单元和真实 Context 回归在
+拾取、倾斜、重建、父子替换中间状态和样式图集，共 3 项；87 项单元和真实 Context 回归在
 `packages/engine/Specs/SceneGIS/`。
 E2E 使用仓库默认配置时，需要释放 8080/8081 给其根服务器，不能同时运行第二个开发服务器。
 

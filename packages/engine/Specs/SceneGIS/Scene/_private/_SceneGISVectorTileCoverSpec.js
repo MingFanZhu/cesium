@@ -56,7 +56,8 @@ describe("SceneGIS/Scene/_private/SceneGISVectorTileCover", function () {
     const zoom = cover.computeZoom(frame, 8192);
     frame.context.drawingBufferWidth *= 2;
     frame.context.drawingBufferHeight *= 2;
-    frame.camera.getPixelSize = () => 1;
+    // Camera.getPixelSize already applies scene.pixelRatio.
+    frame.camera.getPixelSize = () => 2;
     frame.pixelRatio = 2;
     expect(cover.computeZoom(frame, 8192)).toBe(zoom);
     frame.context.drawingBufferHeight = 0;

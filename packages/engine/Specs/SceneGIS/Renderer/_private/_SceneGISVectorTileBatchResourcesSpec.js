@@ -10,8 +10,10 @@ import {
   IndexDatatype,
   PrimitiveType,
   ShaderProgram,
+  Texture,
 } from "../../../../index.js";
 import Resources from "../../../../Source/SceneGIS/Renderer/_private/_SceneGISVectorTileBatchResources.js";
+import stroke from "../../../../Source/SceneGIS/Core/_private/_SceneGISVectorTileStroke.js";
 import createContext from "../../../../../../Specs/createContext.js";
 
 describe("SceneGIS/Renderer/_private/SceneGISVectorTileBatchResources", function () {
@@ -126,6 +128,38 @@ describe("SceneGIS/Renderer/_private/SceneGISVectorTileBatchResources", function
     return { buffers, picks };
   }
 
+  function dashedLine() {
+    return {
+      kind: "line",
+      dashIntervals: [0, 2, 0, 0],
+      instances: [
+        new GeometryInstance({
+          id: "dashed",
+          geometry: stroke(
+            new Float64Array([0, 0, 10, 0]),
+            { toLocal: (x, y) => ({ x, y, z: 0 }) },
+            false,
+            { "line-width": 6 },
+            {},
+            [0, 1, 4],
+          ),
+          attributes: {
+            color: ColorGeometryInstanceAttribute.fromColor(Color.RED),
+          },
+        }),
+      ],
+    };
+  }
+
+  it("owns and releases a numeric dash texture with its geometry", function () {
+    resources = new Resources(context, dashedLine(), {}, true);
+    const texture = resources._dashTexture;
+    expect(texture).toBeDefined();
+    expect(texture.width * texture.height).toBe(1);
+    resources.destroy();
+    expect(texture.isDestroyed()).toBeTrue();
+  });
+
   it("cleans untransferred vertex buffers and pick IDs when index allocation fails", function () {
     const { buffers, picks } = observeAllocations();
     Buffer.createIndexBuffer.and.throwError("deliberate allocation failure");
@@ -146,21 +180,20 @@ describe("SceneGIS/Renderer/_private/SceneGISVectorTileBatchResources", function
 
   it("cleans transferred VA buffers and pick IDs when shader preflight fails", function () {
     const { buffers, picks } = observeAllocations();
+    const releaseTexture = spyOn(
+      Texture.prototype,
+      "destroy",
+    ).and.callThrough();
     spyOn(ShaderProgram.prototype, "_bind").and.throwError(
       "deliberate compile failure",
     );
-    expect(
-      () =>
-        new Resources(
-          context,
-          { kind: "fill", instances: [triangle("failed")] },
-          {},
-          true,
-        ),
-    ).toThrowError("deliberate compile failure");
+    expect(() => new Resources(context, dashedLine(), {}, true)).toThrowError(
+      "deliberate compile failure",
+    );
     expect(buffers.length).toBeGreaterThan(0);
     expect(buffers.every((buffer) => buffer.isDestroyed())).toBeTrue();
     expect(context.getObjectByPickColor(picks[0])).toBeUndefined();
+    expect(releaseTexture).toHaveBeenCalledTimes(1);
     context.shaderCache.destroyReleasedShaderPrograms();
   });
 });

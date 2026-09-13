@@ -50,6 +50,9 @@ feature identity 仍包含真实 source tile 与业务属性，allowPicking=fals
 同步条件：在 V3B1 移除桥接前，Cesium 升级必须复核 width + 0.5、近裁剪与 viewport/RTE 行为；
 不得为支持新 cap/join/dash 修改该上游 Shader。该桥接不代表完成自有 stroke。
 
+后继 [ADR-0062](ADR-0062-vector-stroke-and-coverage.md) 已在 V3B1 移除上述临时桥接；
+stroke mesh 与 Shader 均为自有实现。这里保留 V3B0 的来源与阶段迁移事实。
+
 ## Ownership and publication
 
 公共 layer 构造仍不请求数据、不分配 GPU。候选 batch 只在正常帧创建；

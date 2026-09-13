@@ -1,5 +1,6 @@
 import Cartesian4 from "../../../Core/Cartesian4.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
+import Cartesian2 from "../../../Core/Cartesian2.js";
 import BoundingSphere from "../../../Core/BoundingSphere.js";
 import Matrix4 from "../../../Core/Matrix4.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
@@ -46,6 +47,22 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
     this._allowPicking,
   );
   this._prepared = undefined;
+  const depthRange = new Cartesian2();
+  const uniformMap = {
+    u_sceneGISVectorMetersPerPixel: () => this._owner._metersPerPixel,
+    u_sceneGISVectorDepthRange: () => {
+      const splits = frameState.frustumSplits;
+      const far = frameState.context.uniformState.currentFrustum.y;
+      const index = splits.indexOf(far);
+      depthRange.x = splits[index - 1];
+      depthRange.y = far;
+      return depthRange;
+    },
+  };
+  if (this._resources._dashTexture !== undefined) {
+    uniformMap.u_sceneGISVectorDashTable = () => this._resources._dashTexture;
+    uniformMap.u_sceneGISVectorDashSize = () => this._resources._dashSize;
+  }
   for (const vertexArray of this._resources._vertexArrays) {
     this.commands.push(
       new DrawCommand({
@@ -54,7 +71,7 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
         shaderProgram: this._resources._shaderProgram,
         modelMatrix: this._modelMatrix,
         boundingVolume: this._bounds,
-        uniformMap: {},
+        uniformMap,
         renderState: RenderState.fromCache(colorState),
         pickId: this._allowPicking ? "v_pickColor" : undefined,
         primitiveType: PrimitiveType.TRIANGLES,

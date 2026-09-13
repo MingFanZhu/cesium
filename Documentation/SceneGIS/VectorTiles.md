@@ -8,12 +8,15 @@ V2 在此基础上提供无 terrainProvider 的平面批量 renderer；不依赖
 V3A 增加缓存瓦片的逐区域替换，自动化与项目负责人加载过渡画面验收均已通过。
 V3B0 将资源与命令迁入自有地图图元，保持已验收样式范围；
 不再依赖原生 Primitive/Appearance/BatchTable，通用 Renderer 与拾取派生继续复用。
+V3B1 增加自有 stroke、虚线数值表、fill fringe 与 circle blur；代码和自动验证已完成，
+新增样式图集已于 2026-09-13 通过项目负责人视觉验收。
 生产贴地、标注与 Globe 尚未支持；凸矩形直接贴地实验不代表完整地形渲染资格。
 整体边界见 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
 公共契约见 [ADR-0058](Decisions/ADR-0058-vector-tile-frontend-contract.md)。
 渲染与调度契约见 [ADR-0059](Decisions/ADR-0059-planar-vector-tile-batch-renderer.md)。
 Resident coverage 见 [ADR-0060](Decisions/ADR-0060-vector-tile-resident-render-cover.md)。
 自有图元边界见 [ADR-0061](Decisions/ADR-0061-owned-vector-tile-primitives.md)。
+基础样式与覆盖协议见 [ADR-0062](Decisions/ADR-0062-vector-stroke-and-coverage.md)。
 
 ## 数据与坐标
 
@@ -92,7 +95,7 @@ profile 为 `scenegis-vector-v1`，构造复制输入 JSON，预检失败带路�
 | Expressions  | 经 profile 允许并测试的属性、分支、类型、算术与 zoom 表达式；完整清单见 ADR-0058                                                 |
 | 未支持       | symbol/glyph/sprite、extrusion、pattern、feature-state/global-state、geometry-dependent filter、旧 style function、imports/slots |
 
-这些是前端求值能力；V2 实际渲染范围见下节，前端可计算不代表 renderer 已支持。
+这些是前端求值能力；当前 V3B1 实际渲染语义与限制见下节。
 `version:8` 不代表支持任意 Mapbox/MapLibre 样式。
 
 ```js
@@ -114,13 +117,14 @@ Style zoom 与 source level 独立。`computeStyleZoom(rootWidth, metersPerPixel
 
 ## 验证与维护
 
-目前 71 项 focused Specs 覆盖 V1 前端、V2 几何/cover、V3A coverage、
-15 项真实图层测试、10 项后端实验及 4 项自有 GPU 资源测试。
-另有 2 项本地页面 E2E，实际检查颜色像素、拾取、requestRenderMode、倾斜、显隐、移除重建与延迟替换。
+目前 87 项 focused Specs 覆盖前端、几何/cover、真实 Scene 样式、DPR、多视锥和 GPU 资源。
+另有 3 项本地页面 E2E，实际检查城市颜色、拾取、requestRenderMode、倾斜、显隐、
+重建、延迟替换与新样式图集。
 完整 build/build-ts/tsc/release、独立 engine 安装后的五个入口与四份固定 Shader 已验证。
 V2 的低密度数据 baseline 见 [V2 review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v2-flat-review.md)，
 V3A 对比、边界与剩余 gate 见 [V3A review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v3a-cover-review.md)。
 V3B0 迁移与资源验证见 [V3B0 review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v3b0-owned-primitives-review.md)。
+V3B1 样式资格与视觉 gate 见 [V3B1 review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v3b1-style-primitives-review.md)。
 
 依赖与第三方名录的最小 upstream-owned 改动登记 `SGP-0011`。
 仓库不跟踪 lockfile；顶层样式依赖固定版本，间接依赖按既有 npm 策略解析。
@@ -155,24 +159,33 @@ scene.primitives.remove(layer);
 `show` 控制显隐；`ready` 表示已完成一次正常更新，`tilesLoaded` 表示当前 cover 无待处理工作，
 失败会通过 errorEvent 报告，也计入 `statistics.failedTiles`。
 
-| 渲染范围        | V2 行为                                                                                         |
-| --------------- | ----------------------------------------------------------------------------------------------- |
-| background/fill | color、opacity、polygon holes/multipolygon；显式一像素 outline                                  |
-| line            | color、opacity、CSS width、butt cap、原生受限 miter；不保证急角 Mapbox 像素一致                 |
-| circle          | 屏幕圆形、CSS radius/stroke、color/opacity；边缘覆盖 AA                                         |
-| style           | 属性/zoom 表达式、filter、visibility、min/maxzoom；全 tile 的 style layer 顺序优先              |
-| pick            | primitive 为图层；id 含 source/sourceLayer/styleLayer/tile/featureIndex/featureId/properties    |
-| 明确拒绝        | 非默认 cap/join/miter、gap/offset/dash/blur、circle blur、fill-antialias=false、terrainProvider |
+| 渲染范围        | V3B1 行为                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------------ |
+| background/fill | color、opacity、polygon holes/multipolygon；显式一像素 outline；边界 fringe 与 fill-antialias=false          |
+| line            | color/opacity/width、butt/square/round cap、miter/bevel/round join、miter/round limits、gap/offset/blur/dash |
+| circle          | 屏幕圆形、CSS radius/stroke、color/opacity/blur；DPR 感知 AA                                                 |
+| style           | 属性/zoom 表达式、filter、visibility、min/maxzoom；全 tile 的 style layer 顺序优先                           |
+| pick            | primitive 为图层；id 含 source/sourceLayer/styleLayer/tile/featureIndex/featureId/properties                 |
+| 明确拒绝        | profile 之外的属性和类型，包括 symbol、pattern、gradient、extrusion、heatmap、raster、terrainProvider        |
 
-Fill/line 初期使用 Context 抗锯齿；不把 `fill-antialias=true` 描述为已有 Mapbox fringe。
-默认值以外的配置不静默忽略。Map color 直接矢量绘制，不经过地图颜色 RTT。
+Line width/gap/offset 从参考平面的 CSS pixel 换算为米，再参与投影；
+俯视缩放保持参考宽度，倾斜时随地图透视变化。正 offset 向线方向右侧移动。
+Circle 保持屏幕对齐与 CSS 尺寸。Fill AA 关闭时仅绘制 interior，显式 outline 也遵循该开关。
+内建 coverage 在关闭 MSAA/FXAA 的 Context 下验证，Map color 始终直接矢量绘制。
+
+Dash 数组交替为 dash/gap，以当前 line-width 为单位；允许零长 dash 的圆点，
+周期必须为正。不同数组在同一 batch 共享数值 Texture，不是地图颜色纹理。
+相位从每个 decoded part 起点累计；不保证跨瓦片/LOD 接续，
+不实现 MapLibre floorwidth/crossfade 的逐像素过渡。拐角附近的 dash 随 stroke 网格变形，
+不承诺圆点在所有转折处都是独立正圆；自相交也不执行几何 union。
 
 每 tile/style layer/kind 合批；共享边使用半开平面覆盖，buffer 几何不会在邻接瓦片重复合成。
-V3B0 的自有图元持有 GPU buffers/VA/Shader，按 feature 顶点属性保存颜色和 pick color。
+自有图元持有 GPU buffers/VA/Shader 和必要的 dash Texture，按 feature 顶点属性保存颜色和 pick color。
 同一 region DrawCommand 设置 pickId，由 Cesium 自动派生拾取命令；颜色与拾取共享裁剪。
-线条仍临时借用 PolylineGeometry/PolylineCommon 的既有数学，V3B1 再实现自有 stroke/AA。
+线条由自有连续 strip 与 coverage Shader 实现，不再依赖 PolylineGeometry/PolylineCommon。
 瓦片原点与高低位坐标保留大坐标精度；裁剪射线在 eye space 求方向，避免平移后做差丢失有效位。
 普通前景对象在平面地图之后绘制，surface 保留 Z=0 深度。
+多视锥通过参考平面交点的 canonical depth 区间排除重复颜色贡献，保持透明度与前景层序。
 
 Desired tiles 使用单级 view cover，按预算 coarsen；超出 source maximumLevel 时复用该级几何。
 V3A 在 desired tile 就绪前，借用缓存中已发布的最近 ancestor；没有 ancestor 时保留不重叠的 descendants。

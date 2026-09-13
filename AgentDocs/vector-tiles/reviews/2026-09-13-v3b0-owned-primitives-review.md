@@ -66,3 +66,6 @@ GPU 完成、浏览器合成、密集 payload 与 Worker 的资格仍属于 V3C�
 渲染、资源、release/package 与范围验证通过，本阶段自审关闭并形成独立本地提交。
 随后再细化 V3B1 线型/AA，保留生产 terrain、symbol 与 Globe 的独立阶段边界。
 没有新增 upstream-owned 文件或 SGP。
+
+后继状态：V3B0 checkpoint 为 `d2667e6ad4`。V3B0-R04 的临时线数学依赖已由
+[V3B1 review](2026-09-13-v3b1-style-primitives-review.md) 记录解决；上表保留本阶段交付时的状态。

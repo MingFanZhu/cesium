@@ -21,19 +21,6 @@ function integerOption(options, name, fallback) {
   return value;
 }
 
-function checkDefault(definition, scope, name, value) {
-  const input = definition[scope];
-  if (
-    input !== undefined &&
-    Object.hasOwn(input, name) &&
-    input[name] !== value
-  ) {
-    throw new DeveloperError(
-      `Layer ${definition.id}.${scope}.${name} is outside scenegis-vector-flat-v2.`,
-    );
-  }
-}
-
 function hasZoom(expression) {
   return (
     Array.isArray(expression) &&
@@ -43,24 +30,6 @@ function hasZoom(expression) {
 
 function layerRecord(style, id) {
   const definition = style.getLayerDefinition(id);
-  if (definition.type === "line") {
-    for (const [name, value] of Object.entries({
-      "line-cap": "butt",
-      "line-join": "miter",
-      "line-miter-limit": 2,
-      "line-round-limit": 1.05,
-    })) {
-      checkDefault(definition, "layout", name, value);
-    }
-    for (const name of ["line-gap-width", "line-offset", "line-blur"]) {
-      checkDefault(definition, "paint", name, 0);
-    }
-    checkDefault(definition, "paint", "line-dasharray", undefined);
-  } else if (definition.type === "circle") {
-    checkDefault(definition, "paint", "circle-blur", 0);
-  } else if (definition.type === "fill") {
-    checkDefault(definition, "paint", "fill-antialias", true);
-  }
   const zoomProperty = (scope) =>
     Object.keys(definition[scope] ?? {}).some((name) => {
       const kind = style.getPropertyKind(id, scope, name);
@@ -485,7 +454,7 @@ function publishOrder(layer) {
  * @experimental This API is experimental and subject to change.
  * @param {object} options Layer configuration.
  * @param {Scene} options.scene The live planar Scene.
- * @param {SceneGISVectorTileStyle|object} options.style A V1 style within the flat V2 rendered profile.
+ * @param {SceneGISVectorTileStyle|object} options.style A V1 style within the flat V3B1 rendered profile.
  * @param {Object.<string, SceneGISVectorTileSource>} [options.sources] Source overrides using the world's scheme.
  * @param {number} [options.tileCacheSize=64] Maximum resident tiles per source, including visible tiles.
  * @param {number} [options.maximumVisibleTiles=32] Maximum desired tiles per source; coarsen LOD within availability to fit.
@@ -508,7 +477,7 @@ function SceneGISVectorTileLayer(options) {
   }
   if (scene.world.terrainProvider !== undefined) {
     throw new DeveloperError(
-      "The flat V2 vector renderer does not support a terrainProvider.",
+      "The flat vector renderer does not support a terrainProvider.",
     );
   }
   const style =
@@ -703,7 +672,7 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
   }
   if (this._world.terrainProvider !== undefined) {
     throw new DeveloperError(
-      "The flat V2 vector renderer does not support a terrainProvider.",
+      "The flat vector renderer does not support a terrainProvider.",
     );
   }
   if (!this._show || !this._world.show) {
@@ -722,6 +691,8 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
       clearView(this);
       return;
     }
+    this._metersPerPixel =
+      this._world.coordinateSystem.extent.width / (512 * 2 ** zoom);
     updateBackgrounds(this, zoom, frameState);
     updateSources(this, zoom, frameState);
     publishOrder(this);

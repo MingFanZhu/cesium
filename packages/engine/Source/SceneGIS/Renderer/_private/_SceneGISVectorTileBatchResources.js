@@ -1,4 +1,7 @@
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
+import Cartesian2 from "../../../Core/Cartesian2.js";
+import PixelFormat from "../../../Core/PixelFormat.js";
+import RuntimeError from "../../../Core/RuntimeError.js";
 import Geometry from "../../../Core/Geometry.js";
 import GeometryAttribute from "../../../Core/GeometryAttribute.js";
 import GeometryInstance from "../../../Core/GeometryInstance.js";
@@ -10,7 +13,12 @@ import BufferUsage from "../../../Renderer/BufferUsage.js";
 import ShaderProgram from "../../../Renderer/ShaderProgram.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
 import VertexArray from "../../../Renderer/VertexArray.js";
-import polylineCommon from "../../../Shaders/PolylineCommon.js";
+import ContextLimits from "../../../Renderer/ContextLimits.js";
+import Texture from "../../../Renderer/Texture.js";
+import PixelDatatype from "../../../Renderer/PixelDatatype.js";
+import Sampler from "../../../Renderer/Sampler.js";
+import TextureMinificationFilter from "../../../Renderer/TextureMinificationFilter.js";
+import TextureMagnificationFilter from "../../../Renderer/TextureMagnificationFilter.js";
 import flatFragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTileFlatFS.js";
 import flatVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTileFlatVS.js";
 import circleVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTileCircleVS.js";
@@ -132,6 +140,8 @@ function SceneGISVectorTileBatchResources(
   this._vertexArrays = [];
   this._pickIds = [];
   this._shaderProgram = undefined;
+  this._dashTexture = undefined;
+  this._dashSize = undefined;
   try {
     const geometries = prepare(
       this,
@@ -145,12 +155,46 @@ function SceneGISVectorTileBatchResources(
       this._vertexArrays.push(createVertexArray(context, geometry, locations));
     }
     const defines = allowPicking ? ["SCENEGIS_VECTOR_PICKING"] : [];
+    if (prepared.kind === "line") {
+      defines.push("SCENEGIS_VECTOR_LINE");
+    } else if (prepared.instances[0].geometry.attributes.fringe !== undefined) {
+      defines.push("SCENEGIS_VECTOR_FRINGE");
+    }
+    if (prepared.dashIntervals?.length > 0) {
+      const count = prepared.dashIntervals.length / 4;
+      const limit = ContextLimits.maximumTextureSize;
+      if (
+        !context.floatingPointTexture ||
+        count > Math.min(limit * limit, 16777216)
+      ) {
+        throw new RuntimeError(
+          "Vector dash data exceeds this Context's float texture capacity.",
+        );
+      }
+      const width = Math.min(limit, Math.ceil(Math.sqrt(count)));
+      const height = Math.ceil(count / width);
+      const values = new Float32Array(width * height * 4);
+      values.set(prepared.dashIntervals);
+      this._dashTexture = new Texture({
+        context,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: PixelDatatype.FLOAT,
+        flipY: false,
+        sampler: new Sampler({
+          minificationFilter: TextureMinificationFilter.NEAREST,
+          magnificationFilter: TextureMagnificationFilter.NEAREST,
+        }),
+        source: { width, height, arrayBufferView: values },
+      });
+      this._dashSize = new Cartesian2(width, height);
+      defines.push("SCENEGIS_VECTOR_DASH");
+    }
     if (prepared.kind === "circle") {
       defines.push("SCENEGIS_VECTOR_CIRCLE");
     }
     const sources =
       prepared.kind === "line"
-        ? [polylineCommon, lineVertex]
+        ? [lineVertex]
         : [prepared.kind === "circle" ? circleVertex : flatVertex];
     this._shaderProgram = ShaderProgram.fromCache({
       context,
@@ -179,6 +223,7 @@ SceneGISVectorTileBatchResources.prototype.destroy = function () {
   }
   this._vertexArrays.length = 0;
   this._shaderProgram?.destroy();
+  this._dashTexture?.destroy();
   for (const pick of this._pickIds) {
     pick.destroy();
   }

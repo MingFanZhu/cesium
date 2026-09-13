@@ -192,3 +192,69 @@ test("keeps the city visible while delayed child tiles replace a resident ancest
   expect(errors).toEqual([]);
   await expect(page.locator("#error")).toBeEmpty();
 });
+
+test("renders the vector style gallery with analytic edges, picking and tilted multi-frustum coverage", async ({
+  page,
+}, testInfo) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/Test/vector-tiles/styles.html");
+  await page.waitForFunction(
+    () => window.vectorStylePreview?.layer.tilesLoaded,
+  );
+  await expect(page.locator("#error")).toBeEmpty();
+  await expect(page.locator(".label")).toHaveCount(12);
+  expect(
+    await page.evaluate(
+      () => window.vectorStylePreview.layer.statistics.failedTiles,
+    ),
+  ).toBe(0);
+  const result = await page.evaluate(async () => {
+    const C = await import("/Build/CesiumUnminified/index.js");
+    const { viewer, layer, cases } = window.vectorStylePreview;
+    const sample = cases[2];
+    const point = C.SceneTransforms.worldToWindowCoordinates(
+      viewer.scene,
+      new C.Cartesian3(sample.x, sample.y, 0),
+    );
+    return {
+      point,
+      id: viewer.scene.pick(point)?.id,
+      commands: layer.statistics.drawCommands,
+    };
+  });
+  expect(result.id.styleLayer).toBe("cap-round");
+  expect(result.commands).toBeLessThan(20);
+  const canvas = await page.locator("canvas").first().boundingBox();
+  await page.mouse.click(canvas.x + result.point.x, canvas.y + result.point.y);
+  await expect(page.locator("#picked")).toContainText("圆头");
+  await page.screenshot({
+    path: testInfo.outputPath("style-gallery.png"),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "倾斜", exact: true }).click();
+  await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const scene = window.vectorStylePreview.viewer.scene;
+        const remove = scene.postRender.addEventListener(() => {
+          remove();
+          resolve();
+        });
+        scene.requestRender();
+      }),
+  );
+  await page.screenshot({
+    path: testInfo.outputPath("style-gallery-tilted.png"),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "重建图层", exact: true }).click();
+  await page.waitForFunction(() => window.vectorStylePreview.layer.tilesLoaded);
+  expect(
+    await page.evaluate(
+      () => window.vectorStylePreview.layer.statistics.failedTiles,
+    ),
+  ).toBe(0);
+  await expect(page.locator("#error")).toBeEmpty();
+  expect(errors).toEqual([]);
+});

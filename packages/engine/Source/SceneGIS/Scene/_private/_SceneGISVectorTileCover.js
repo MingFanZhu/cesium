@@ -71,12 +71,11 @@ SceneGISVectorTileCover.computeZoom = function (frameState, rootWidth) {
     return undefined;
   }
   Cartesian3.fromElements(position.x, position.y, 0, scratchSphere.center);
-  const metersPerPixel =
-    frameState.camera.getPixelSize(
-      scratchSphere,
-      frameState.context.drawingBufferWidth,
-      frameState.context.drawingBufferHeight,
-    ) * frameState.pixelRatio;
+  const metersPerPixel = frameState.camera.getPixelSize(
+    scratchSphere,
+    frameState.context.drawingBufferWidth,
+    frameState.context.drawingBufferHeight,
+  );
   return SceneGISVectorTileCoordinates.computeStyleZoom(
     rootWidth,
     metersPerPixel,
