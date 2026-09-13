@@ -50,11 +50,34 @@ V3B1 新增 `/Test/vector-tiles/styles.html` 样式图集，城市页面顶部�
 
 ## 自动化与测量
 
+新增 `/Test/vector-tiles/public.html` 直接加载在线 MVT，支持柏林、纽约、上海与北京定位，
+俯视/倾斜、16 级街道细节、拾取、重建、样式排除清单和 CPU 测量。
+默认使用免 token 的 OpenFreeMap / Bright，与用户参考项目的
+`test/examples/display-buildings-in-3d.html` 和 `add-a-vector-tile-source.html` 相同。
+可切换 Liberty 作样式对照；不需要 Mapbox 账户或 token。
+连接失败明确显示错误并保留原地图，不自动更换数据。
+
+Bright 接入 93/119 层，Liberty 接入 82/111 层；这是当前选用范围，未渲染的层有逐项原因。
+参见 [参考、差距和授权](reference/README.md)。Streets 固定 JSON 仅作后续离线样式参考，
+官方 Mapbox 数据已移出本轮范围；当前真实公网 smoke 为 OpenFreeMap。
+按用户本轮要求启用公网示例；服务不可用时可手动返回本地城市，不自动切换数据。
+
 `Specs/e2e/scenegis-vector-tiles.spec.js` 覆盖真实 PBF、颜色像素、requestRenderMode、
 拾取、倾斜、重建、父子替换中间状态和样式图集，共 3 项；87 项单元和真实 Context 回归在
 `packages/engine/Specs/SceneGIS/`。
 E2E 使用仓库默认配置时，需要释放 8080/8081 给其根服务器，不能同时运行第二个开发服务器。
 
+新增 `Specs/e2e/scenegis-vector-public.spec.js` 的 2 项 E2E 拦截外网，使用本地
+`public-fixture.pbf` 与固定样式快照，覆盖两个入口、实际选层、pick、重建、
+Bright/Liberty 切换销毁旧图和 HTTP 503 连接失败保留旧图。生成命令为
+`node Test/vector-tiles/generate-public-fixture.mjs`。
+
 “测量 60 帧”记录 preRender 到 postRender 的 CPU 提交时间，包含该页正常组装开销，
 不含 GPU 完成、浏览器合成或初次 bundle 下载。诊断暴露为 `window.vectorTilePreview`。
 该小数据集用于建立 V2 baseline，不代表密集真实地图的吞吐量。
+
+公开地图暴露 `window.publicVectorPreview`。其 60 帧测量记录
+preRender 到 postRender 的 CPU 提交、正常视图统计、请求数、接收字节和解码耗时。
+firstReadyMs 从创建图层到当前视图首次无失败就绪，排除页面 bundle 与样式/TileJSON 获取；
+要素数包含解码但尚未渲染的 POI/标注。指标是一次图层生命周期的累计值；
+如需独立地点/zoom 的冷启动对比，定位后使用“重建图层”，不要把累计数当作当前可见要素。

@@ -5,7 +5,7 @@
 - Status: `resolved`
 - Owner role: `architecture`
 - Created: `2026-09-12`
-- Updated: `2026-09-12`
+- Updated: `2026-09-13`
 - Related plan: [Extension plan](../plans/2026-09-12-vector-tiles-extension.md)
 - Related discussion: [实现边界](2026-09-12-rendering-boundaries.md)
 - Resulting ADR: [ADR-0057](../../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)
@@ -44,6 +44,26 @@ circle/symbol 不在该表中。当前代码按非 RTT layer 分隔 stacks，
 用户的 `test/examples/display-planar-raster-and-vector-tiles.html` 组合本地 raster 与 MVT buildings，
 配置 NJ08 bounds 和 tileMatrixSet，同一 geometry 展示 fill、line 与 fill-extrusion。
 本轮只读页面组装，没有验证相关数据文件可用或实际画面。
+
+### V3C0 测试页面与公开数据复查
+
+负责人要求改用参考项目的公开数据路线，已只读复查以下 HTML；未修改或启动参考项目：
+
+- `test/examples/display-a-map.html` 与 `display-a-globe-with-a-vector-map.html`：
+  使用 `https://demotiles.maplibre.org/style.json`，主要是 countries/geolines 世界地图，
+  适合基础地图演示，不作为本轮密集街区基线。
+- `test/examples/display-buildings-in-3d.html` 与 `add-a-vector-tile-source.html`：
+  基础样式为 `https://tiles.openfreemap.org/styles/bright`；
+  前者另接 `https://tiles.openfreemap.org/planet` 并显示 building extrusion。
+- `debug/planar-nj08-vector.html` 与前述 planar raster/vector 页面：
+  NJ08 单根矩阵，本地 `debug/data/buildings/{z}/{x}/{y}.pbf`，属于自定义 CRS 参考；
+  本轮不搬运其数据或将 NJ08 数值冒充 EPSG:3857。
+
+据此 [V3C0](../plans/2026-09-13-v3c0-public-map-and-style-baseline.md) 默认改用
+OpenFreeMap / Bright，保留 Liberty 对照，移除 Mapbox token 入口。
+只复用数据/样式来源，仍由 SceneGIS 独立 decoder 与自有图元直接渲染。
+Bright 93/119 层通过当前前端，25 symbol 与 1 fill-translate 层显式列为待实现；
+参考示例的 3D building 不代表本扩展已支持 extrusion。
 
 ### SceneGIS 应保留自己的契约
 

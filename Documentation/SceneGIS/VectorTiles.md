@@ -10,6 +10,11 @@ V3B0 将资源与命令迁入自有地图图元，保持已验收样式范围；
 不再依赖原生 Primitive/Appearance/BatchTable，通用 Renderer 与拾取派生继续复用。
 V3B1 增加自有 stroke、虚线数值表、fill fringe 与 circle blur；代码和自动验证已完成，
 新增样式图集已于 2026-09-13 通过项目负责人视觉验收。
+V3C0 新增 [公开地图 Test 页面](../../Test/vector-tiles/public.html)，以真实数据建立样式与性能基线；
+现有 runtime/API 没有变化。按负责人选择，采用 MapLibre 示例使用的 OpenFreeMap / Bright，
+接入 93/119 层，另保留 Liberty 82/111 层对照；Streets v12 仅保留离线样式参考。
+未支持层及来源见 [参考说明](../../Test/vector-tiles/reference/README.md)。
+Bright 在线俯视/倾斜/16 级数据已 smoke，无需 token，公开页已于 2026-09-13 通过负责人验收。
 生产贴地、标注与 Globe 尚未支持；凸矩形直接贴地实验不代表完整地形渲染资格。
 整体边界见 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
 公共契约见 [ADR-0058](Decisions/ADR-0058-vector-tile-frontend-contract.md)。

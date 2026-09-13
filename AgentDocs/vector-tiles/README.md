@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                  |
-| ---------------------- | ------------------------------------------------------ |
-| Extension slug         | `vector-tiles`                                         |
-| Status                 | `active`                                               |
-| Planning model         | `extension`                                            |
-| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V3B1 completed — 基础矢量样式图元`                    |
-| Active phase plan      | None；下一阶段 V3C 尚未激活                            |
-| Active standalone plan | None                                                   |
-| Architecture contact   | 当前 Agent                                             |
-| Execution contact      | 当前 Agent                                             |
-| Last updated           | `2026-09-13`                                           |
+| Field                  | Value                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| Extension slug         | `vector-tiles`                                                                |
+| Status                 | `active`                                                                      |
+| Planning model         | `extension`                                                                   |
+| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md)                        |
+| Current phase          | `V3C0 completed — 后继阶段尚未激活`                                           |
+| Active phase plan      | None；最近完成 [V3C0](plans/2026-09-13-v3c0-public-map-and-style-baseline.md) |
+| Active standalone plan | None                                                                          |
+| Architecture contact   | 当前 Agent                                                                    |
+| Execution contact      | 当前 Agent                                                                    |
+| Last updated           | `2026-09-13`                                                                  |
 
 ## Scope
 
@@ -41,7 +41,10 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面：[城市](../../Test/vector-tiles/index.html) 与 [样式图集](../../Test/vector-tiles/styles.html)，
   21 个城市 MVT fixtures 加 1 个样式 MVT。
+- 新页面：[公开地图](../../Test/vector-tiles/public.html)，默认 MapLibre 示例使用的 OpenFreeMap / Bright，
+  保留 Liberty 对照，无需 token；来源和样式差距见 [参考](../../Test/vector-tiles/reference/README.md)。
 - E2E：`Specs/e2e/scenegis-vector-tiles.spec.js`，3 项通过。
+- 公开页 E2E：`Specs/e2e/scenegis-vector-public.spec.js`，2 项通过；使用本地数据拦截外网。
 - Sandcastle：不新建；使用根服务器直接访问 `Test/**`。
 - ADR：[ADR-0057](../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)。
 - SGP：`SGP-0011`；upstream-owned files 为 `packages/engine/package.json`、`ThirdParty.extra.json`。
@@ -65,11 +68,15 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   Checkpoint：`d2667e6ad4`。
 - [V3B1](plans/2026-09-13-v3b1-vector-style-primitives.md) 自有 stroke、dash 数值表、fill fringe 与
   circle blur 已实现；87 项 Specs 和 3 项 E2E 通过。项目负责人于 2026-09-13 确认
-  新增样式图集验收通过，阶段与 review 已关闭；本次提交构成 V3B1 独立 checkpoint。
-  下一阶段按总体计划细化 V3C 的真实负载、字节预算与必要线程。
+  新增样式图集验收通过，阶段与 review 已关闭；checkpoint：`e7be6ef61a`。
+- 当前 [V3C0](plans/2026-09-13-v3c0-public-map-and-style-baseline.md) 已实现公开地图、
+  Bright/Liberty、固定 Streets 离线参考、显式样式排除清单和真实负载测量；
+  两项新 E2E 与 Bright 在线 smoke 通过，负责人于 2026-09-13 确认公开页并转入标注架构讨论。
+  负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[V3B1 review](reviews/2026-09-13-v3b1-style-primitives-review.md)；
+- Latest review：[V3C0 review](reviews/2026-09-13-v3c0-public-map-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - 风险：dash 拐角变形与跨 tile 相位、无历史数据/紧 cache 的缺图、mixed LOD 量化差异；
-  V3C 密集性能、V4 生产贴地、V5 字体/跨瓦片 placement。V2-R05 与 V3B1-R08 已关闭。
+  V3C1 密集性能、V4 生产贴地、V5 字体/跨瓦片 placement。
+  V2-R05 与 V3B1-R08 已关闭。

@@ -9,7 +9,7 @@
 - Architecture reviewer: 当前 Agent；项目负责人确认产品边界
 - Created: `2026-09-12`
 - Updated: `2026-09-13`
-- Current phase: [V3B1 completed](2026-09-13-v3b1-vector-style-primitives.md)；V3C 尚未激活
+- Current phase: [V3C0 completed](2026-09-13-v3c0-public-map-and-style-baseline.md)；后继阶段尚未激活
 - Related discussions: [源码审计](../discussions/2026-09-12-cesium-mvt-and-planar-audit.md)、
   [实现边界](../discussions/2026-09-12-rendering-boundaries.md)、
   [MapLibre 与贴地](../discussions/2026-09-12-maplibre-reference-and-surface.md)
@@ -90,24 +90,29 @@ Globe 从数据/样式/调度职责分离开始考虑，实际渲染资格另设
 
 ## Phase roadmap
 
-| Phase | Objective                           | Dependencies    | Entry gate                                 | Exit gate                                                                    | Status    | Phase plan                                         |
-| ----- | ----------------------------------- | --------------- | ------------------------------------------ | ---------------------------------------------------------------------------- | --------- | -------------------------------------------------- |
-| V0    | 源码审计、边界讨论                  | 当前 develop    | 干净基线与独立分支                         | 用户确认边界；ADR、review、本地 checkpoint                                   | completed | [V0](2026-09-12-v0-architecture-audit.md)          |
-| V1    | MVT/source/style/坐标契约与兼容前端 | V0 checkpoint   | 审计独立 decoder 候选、依赖与目标数据      | 数据/identity/诊断/坐标 Specs；公开入口和类型资格                            | completed | [V1](2026-09-12-v1-vector-frontend.md)             |
-| V2    | 平面 flat 批量闭环与直接贴地可行性  | V1 checkpoint   | 重查 primitive、pass、精度、pick           | flat 画面、层序、接缝、pick、销毁成立；ground 重叠/样式/拾取的最小证据与选择 | completed | [V2](2026-09-13-v2-planar-batch-and-ground.md)     |
-| V3A   | 有界流式瓦片替换                    | V2 checkpoint   | 重查 desired/render/cache 与裁剪           | ancestor/descendant 替换无重复覆盖；失败、空数据、取消与资源有界             | completed | [V3A](2026-09-13-v3a-streaming-cover.md)           |
-| V3B0  | 自有地图图元与资源迁移              | V3A checkpoint  | 用户明确自有图元方向；底层接口审计         | 已验收画面、覆盖与拾取保持；资源与包交付通过                                 | completed | [V3B0](2026-09-13-v3b0-owned-primitives.md)        |
-| V3B1  | MapLibre 常见线型与 AA              | V3B0 checkpoint | 自有图元就绪；重新冻结样式 profile         | cap/join/dash/AA 的画面、兼容诊断与资源通过                                  | completed | [V3B1](2026-09-13-v3b1-vector-style-primitives.md) |
-| V3C   | 密集数据性能与必要线程              | V3B1 checkpoint | 固定真实负载与已测热点                     | byte accounting、预算与必要 Worker 资格；性能/资源稳定                       | planned   | 未激活                                             |
-| V4    | 平面矢量直接贴地生产资格            | V3C checkpoint  | V2 ground 可行性已验证；重查批量与层序边界 | 起伏地形、LOD/provider 变化下连续贴地；线宽/样式/逐要素交互与资源稳定        | planned   | 未激活                                             |
-| V5    | symbol 与跨瓦片 placement           | V4 checkpoint   | 字体/图标来源和中文验收集明确              | 约定点/沿线标注、碰撞/去重、缩放稳定性、遮挡、销毁                           | planned   | 未激活                                             |
-| V6    | M1 平面交付资格                     | V5 checkpoint   | 冻结支持矩阵与数据集                       | Test 人工 gate、Specs/E2E、build/types/docs/package、升级检查                | planned   | 未激活                                             |
-| G1    | Globe 复用和资格验证                | M1；另行激活    | 重审 ECEF、曲率、terrain、horizon          | 共享前端复用与 Globe 自身画面/资源验收                                       | deferred  | 不属于 M1 gate                                     |
+| Phase | Objective                           | Dependencies    | Entry gate                                 | Exit gate                                                                    | Status    | Phase plan                                               |
+| ----- | ----------------------------------- | --------------- | ------------------------------------------ | ---------------------------------------------------------------------------- | --------- | -------------------------------------------------------- |
+| V0    | 源码审计、边界讨论                  | 当前 develop    | 干净基线与独立分支                         | 用户确认边界；ADR、review、本地 checkpoint                                   | completed | [V0](2026-09-12-v0-architecture-audit.md)                |
+| V1    | MVT/source/style/坐标契约与兼容前端 | V0 checkpoint   | 审计独立 decoder 候选、依赖与目标数据      | 数据/identity/诊断/坐标 Specs；公开入口和类型资格                            | completed | [V1](2026-09-12-v1-vector-frontend.md)                   |
+| V2    | 平面 flat 批量闭环与直接贴地可行性  | V1 checkpoint   | 重查 primitive、pass、精度、pick           | flat 画面、层序、接缝、pick、销毁成立；ground 重叠/样式/拾取的最小证据与选择 | completed | [V2](2026-09-13-v2-planar-batch-and-ground.md)           |
+| V3A   | 有界流式瓦片替换                    | V2 checkpoint   | 重查 desired/render/cache 与裁剪           | ancestor/descendant 替换无重复覆盖；失败、空数据、取消与资源有界             | completed | [V3A](2026-09-13-v3a-streaming-cover.md)                 |
+| V3B0  | 自有地图图元与资源迁移              | V3A checkpoint  | 用户明确自有图元方向；底层接口审计         | 已验收画面、覆盖与拾取保持；资源与包交付通过                                 | completed | [V3B0](2026-09-13-v3b0-owned-primitives.md)              |
+| V3B1  | MapLibre 常见线型与 AA              | V3B0 checkpoint | 自有图元就绪；重新冻结样式 profile         | cap/join/dash/AA 的画面、兼容诊断与资源通过                                  | completed | [V3B1](2026-09-13-v3b1-vector-style-primitives.md)       |
+| V3C0  | 公开地图与样式差距基线              | V3B1 checkpoint | 固定实际数据来源与目标 style               | 在线 Test 页面、样式支持清单与真实负载基线；负责人视觉 gate                  | completed | [V3C0](2026-09-13-v3c0-public-map-and-style-baseline.md) |
+| V3C1  | 密集数据性能与必要线程              | V3C0 checkpoint | 固定真实负载与已测热点                     | byte accounting、预算与必要 Worker 资格；性能/资源稳定                       | planned   | 未激活                                                   |
+| V3D   | MapLibre / Streets 非标注样式增量   | V3C1 checkpoint | 当前公开样式差距与资源预算已明确           | translate/anchor、map-aligned circle、pattern 的约定 profile、画面与资源资格 | planned   | 未激活                                                   |
+| V4    | 平面矢量直接贴地生产资格            | V3D checkpoint  | V2 ground 可行性已验证；重查批量与层序边界 | 起伏地形、LOD/provider 变化下连续贴地；线宽/样式/逐要素交互与资源稳定        | planned   | 未激活                                                   |
+| V5    | symbol 与跨瓦片 placement           | V4 checkpoint   | 字体/图标来源和中文验收集明确              | 约定点/沿线标注、碰撞/去重、缩放稳定性、遮挡、销毁                           | planned   | 未激活                                                   |
+| V6    | M1 平面交付资格                     | V5 checkpoint   | 冻结支持矩阵与数据集                       | Test 人工 gate、Specs/E2E、build/types/docs/package、升级检查                | planned   | 未激活                                                   |
+| G1    | Globe 复用和资格验证                | M1；另行激活    | 重审 ECEF、曲率、terrain、horizon          | 共享前端复用与 Globe 自身画面/资源验收                                       | deferred  | 不属于 M1 gate                                           |
 
 V2 从开始就采用 tile batch 和 lazy scheduling；V3 完善质量与性能，不以逐 Entity 实现作为长期过渡。
 V2 验收后将 V3 分为 V3A/B/C：覆盖、样式与密集性能分别有独立的改动面和 gate，
 保留原 V3 目标，按顺序形成可验证 checkpoint。用户进一步明确自有地图图元方向后，
 V3B 拆为 V3B0 资源迁移与 V3B1 图形质量，两阶段均已完成，稳定产品目标不变。
+负责人随后要求公开地图 Test 与默认样式渐进兼容，V3C 拆为 V3C0 数据/样式基线、
+V3C1 字节预算与必要线程；V3D 根据实际差距补齐 MapLibre / Streets 非标注样式，
+symbol 仍属于 V5，不把样式新增混入性能提交。
 未来 phase 不预先锁定类名、Shader attributes、Worker payload 或 pass hook。
 V5 如需拆分，应先修订 roadmap，再分阶段提交，不一次实现多个未批准 phase。
 V2 的直接贴地验证是后续地图架构的选择依据，不等于提前完成 V4 的生产能力。
@@ -138,7 +143,10 @@ V4 完成 M1 生产贴地资格；具体算法在 V2 依据最小证据确定。
 - tile buffer、线端/join、父子覆盖切换和 alpha 必须共同处理。
 - 新 Worker entry 需 ADR/所有权审计；新增依赖若改上游 package/lockfile，需 SGP manifest-only。
 - Globe 曲率/遮挡/高程不能从 Planar 测试推断，G1 单独验收。
-- 用户没有必须兼容的服务/style；以本地确定性 fixtures 验收，字体集仍待选。
+- 用户新增公开数据与默认样式渐进目标，随后明确采用 MapLibre 参考项目的示例来源：
+  OpenFreeMap / Bright 为街区基线、Liberty 作对照，无需 token。
+  Streets v12 单文档仅保留离线差距参考；Standard imports/config/slots 与官方托管数据不在本轮。
+  CI 继续使用本地确定性 fixtures，字体集仍待选。
 
 ## Overall acceptance criteria
 
@@ -166,6 +174,9 @@ V3A checkpoint 已形成：`ad3ea51f13`。V3B0 按 ADR-0061 完成，71 项 Spec
 V3B0 checkpoint 为 `d2667e6ad4`。V3B1 自有 stroke、虚线、fill/circle coverage 已实现，
 87 项 Specs 与 3 项页面 E2E 通过；负责人于 2026-09-13 确认新增样式图集验收通过，见
 [V3B1 review](../reviews/2026-09-13-v3b1-style-primitives-review.md)。
-V3B1 gate 已关闭，本次代码与记录形成独立提交；下一步依据实际负载细化 V3C，
-不把当前样式验收扩大为密集性能或后续 terrain/symbol 资格。
+V3B1 checkpoint 为 `e7be6ef61a`；V3C0 公开页和样式基线已实现，
+2 项新 E2E 与 OpenFreeMap 真实在线检查通过，负责人已于 2026-09-13 确认公开页。
+负责人已选择 MapLibre 示例来源，Mapbox token 不再构成前提；
+具体边界见 [V3C0 review](../reviews/2026-09-13-v3c0-public-map-review.md)。
+此阶段独立提交完成后再依据实测负载细化 V3C1，不把样式接入扩大为密集性能或后续 terrain/symbol 资格。
 后续 ground 算法/资产选择按 roadmap 分配到对应 phase，不重复请求已批准架构方向的确认。

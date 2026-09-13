@@ -1,0 +1,33 @@
+{
+  "reference": "https://tiles.openfreemap.org/styles/bright",
+  "audited": "2026-09-13",
+  "layerCount": 119,
+  "excluded": {
+    "building-top": "fill-translate / anchor",
+    "road_oneway": "symbol / glyph / placement",
+    "road_oneway_opposite": "symbol / glyph / placement",
+    "waterway_line_label": "symbol / glyph / placement",
+    "water_name_point_label": "symbol / glyph / placement",
+    "water_name_line_label": "symbol / glyph / placement",
+    "poi_r20": "symbol / glyph / placement",
+    "poi_r7": "symbol / glyph / placement",
+    "poi_r1": "symbol / glyph / placement",
+    "poi_transit": "symbol / glyph / placement",
+    "highway-name-path": "symbol / glyph / placement",
+    "highway-name-minor": "symbol / glyph / placement",
+    "highway-name-major": "symbol / glyph / placement",
+    "highway-shield-non-us": "symbol / glyph / placement",
+    "highway-shield-us-interstate": "symbol / glyph / placement",
+    "road_shield_us": "symbol / glyph / placement",
+    "airport": "symbol / glyph / placement",
+    "label_other": "symbol / glyph / placement",
+    "label_village": "symbol / glyph / placement",
+    "label_town": "symbol / glyph / placement",
+    "label_state": "symbol / glyph / placement",
+    "label_city": "symbol / glyph / placement",
+    "label_city_capital": "symbol / glyph / placement",
+    "label_country_3": "symbol / glyph / placement",
+    "label_country_2": "symbol / glyph / placement",
+    "label_country_1": "symbol / glyph / placement"
+  }
+}
