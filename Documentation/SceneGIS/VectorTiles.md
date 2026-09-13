@@ -6,11 +6,14 @@ V1 提供独立的 MVT 数据、坐标、URL source 与 Style v8 子集计算前
 V2 在此基础上提供无 terrainProvider 的平面批量 renderer；不依赖 Cesium experimental MVT。
 `Test/vector-tiles/index.html` 的实际 flat 画面已于 2026-09-13 通过项目负责人验收。
 V3A 增加缓存瓦片的逐区域替换，自动化与项目负责人加载过渡画面验收均已通过。
+V3B0 将资源与命令迁入自有地图图元，保持已验收样式范围；
+不再依赖原生 Primitive/Appearance/BatchTable，通用 Renderer 与拾取派生继续复用。
 生产贴地、标注与 Globe 尚未支持；凸矩形直接贴地实验不代表完整地形渲染资格。
 整体边界见 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
 公共契约见 [ADR-0058](Decisions/ADR-0058-vector-tile-frontend-contract.md)。
 渲染与调度契约见 [ADR-0059](Decisions/ADR-0059-planar-vector-tile-batch-renderer.md)。
 Resident coverage 见 [ADR-0060](Decisions/ADR-0060-vector-tile-resident-render-cover.md)。
+自有图元边界见 [ADR-0061](Decisions/ADR-0061-owned-vector-tile-primitives.md)。
 
 ## 数据与坐标
 
@@ -111,11 +114,13 @@ Style zoom 与 source level 独立。`computeStyleZoom(rootWidth, metersPerPixel
 
 ## 验证与维护
 
-目前 67 项 focused Specs 覆盖 V1 前端、V2 几何/cover、V3A coverage、15 项真实图层测试和 10 项后端实验。
+目前 71 项 focused Specs 覆盖 V1 前端、V2 几何/cover、V3A coverage、
+15 项真实图层测试、10 项后端实验及 4 项自有 GPU 资源测试。
 另有 2 项本地页面 E2E，实际检查颜色像素、拾取、requestRenderMode、倾斜、显隐、移除重建与延迟替换。
-完整 build/build-ts/tsc/release、独立 engine 安装后的五个入口与两份固定 Shader 已验证。
+完整 build/build-ts/tsc/release、独立 engine 安装后的五个入口与四份固定 Shader 已验证。
 V2 的低密度数据 baseline 见 [V2 review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v2-flat-review.md)，
 V3A 对比、边界与剩余 gate 见 [V3A review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v3a-cover-review.md)。
+V3B0 迁移与资源验证见 [V3B0 review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v3b0-owned-primitives-review.md)。
 
 依赖与第三方名录的最小 upstream-owned 改动登记 `SGP-0011`。
 仓库不跟踪 lockfile；顶层样式依赖固定版本，间接依赖按既有 npm 策略解析。
@@ -163,6 +168,9 @@ Fill/line 初期使用 Context 抗锯齿；不把 `fill-antialias=true` 描述�
 默认值以外的配置不静默忽略。Map color 直接矢量绘制，不经过地图颜色 RTT。
 
 每 tile/style layer/kind 合批；共享边使用半开平面覆盖，buffer 几何不会在邻接瓦片重复合成。
+V3B0 的自有图元持有 GPU buffers/VA/Shader，按 feature 顶点属性保存颜色和 pick color。
+同一 region DrawCommand 设置 pickId，由 Cesium 自动派生拾取命令；颜色与拾取共享裁剪。
+线条仍临时借用 PolylineGeometry/PolylineCommon 的既有数学，V3B1 再实现自有 stroke/AA。
 瓦片原点与高低位坐标保留大坐标精度；裁剪射线在 eye space 求方向，避免平移后做差丢失有效位。
 普通前景对象在平面地图之后绘制，surface 保留 Z=0 深度。
 

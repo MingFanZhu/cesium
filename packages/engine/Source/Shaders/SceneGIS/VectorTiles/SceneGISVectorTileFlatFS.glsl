@@ -1,4 +1,7 @@
 in vec4 v_color;
+#ifdef SCENEGIS_VECTOR_PICKING
+in vec4 v_pickColor;
+#endif
 uniform vec4 u_sceneGISVectorTileClip;
 
 #ifdef SCENEGIS_VECTOR_CIRCLE

@@ -750,6 +750,9 @@ MVT 保持 CRS 无关，source/World 显式匹配单根 tile matrix；首轮 EPS
 地形优先矢量直接绘制，不采用地图颜色 RTT 主路线。
 Depth/stencil ground 是需证明批量、层序、alpha 和 pick 的候选，
 既有 single-instance GroundPrimitive 契约不被自动扩宽。
+地图图元按 [ADR-0061](Decisions/ADR-0061-owned-vector-tile-primitives.md) 自行管理
+geometry、GPU buffers、Shader、DrawCommand 与 feature pick；复用 Cesium 通用 Renderer/Scene，
+不通过大量修改 native Primitive/Polyline 来扩展地图样式能力。
 Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代表 Globe 已支持。
 
 ## 验证架构

@@ -209,7 +209,7 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     pending.get("0/0/0").resolve(whole("parent"));
     await loaded(layer);
     const parent = layer._drawOrder[0];
-    const va = parent.primitive._va[0];
+    const va = parent._resources._vertexArrays[0];
     scene.camera.position.z = 40;
     scene.renderForSpecs();
     expect(layer.statistics.fallbackTiles).toBe(1);
@@ -231,7 +231,7 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     expect(child.pick?.id.styleLayer).toBe("overlay");
     expect(read(10, 10).color).toEqualEpsilon([64, 128, 0, 255], 1);
     expect(read(10, 10).pick?.id.tile.level).toBe(0);
-    expect(parent.primitive._va[0]).toBe(va);
+    expect(parent._resources._vertexArrays[0]).toBe(va);
     pending.get("1/1/0").resolve({ layers: [] });
     pending.get("1/0/1").reject(new Error("deliberate child failure"));
     pending.get("1/1/1").resolve(whole("southeast", "#0000ff"));
@@ -306,7 +306,7 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     scene.renderForSpecs();
     pending.get("0/0/0").resolve(whole("parent"));
     await loaded(layer);
-    const parent = layer._drawOrder[0].primitive;
+    const parent = layer._drawOrder[0]._resources;
     scene.camera.position.z = 40;
     scene.renderForSpecs();
     expect(layer.statistics.residentTiles).toBe(4);
@@ -470,11 +470,19 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     const layer = add([definition("fill", { "fill-color": "#ff0000" })]);
     await loaded(layer);
     const batch = layer._drawOrder[0];
-    const primitive = batch.primitive;
-    const vertexArray = primitive._va[0];
-    const shader = primitive._sp;
+    const resources = batch._resources;
+    const vertexArray = resources._vertexArrays[0];
+    const shader = resources._shaderProgram;
     const uploads = layer.statistics.uploads;
     read();
+    const command = batch.renderCommands[0];
+    const pickCommand = command.derivedCommands.picking.pickCommand;
+    expect(command.pickId).toBe("v_pickColor");
+    expect(pickCommand.vertexArray).toBe(vertexArray);
+    expect(pickCommand.uniformMap).toBe(command.uniformMap);
+    expect(command.renderState.blending.enabled).toBeTrue();
+    expect(pickCommand.renderState.blending.enabled).toBeFalse();
+    expect(pickCommand.renderState.depthTest.enabled).toBeFalse();
     if (scene.pickPositionSupported) {
       scene.pickPosition(new Cartesian2(32, 32));
     }
@@ -482,13 +490,15 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
       scene.renderForSpecs();
     }
     expect(layer._drawOrder[0]).toBe(batch);
-    expect(primitive._va[0]).toBe(vertexArray);
-    expect(primitive._sp).toBe(shader);
+    expect(resources._vertexArrays[0]).toBe(vertexArray);
+    expect(resources._shaderProgram).toBe(shader);
+    expect(batch.renderCommands[0]).toBe(command);
+    expect(command.derivedCommands.picking.pickCommand).toBe(pickCommand);
     expect(layer.statistics.uploads).toBe(uploads);
     expect(request.calls.count()).toBe(1);
     scene.primitives.remove(layer);
     expect(layer.isDestroyed()).toBeTrue();
-    expect(primitive.isDestroyed()).toBeTrue();
+    expect(resources.isDestroyed()).toBeTrue();
     expect(vertexArray.isDestroyed()).toBeTrue();
     expect(world.isDestroyed()).toBeFalse();
   });
@@ -612,7 +622,7 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
       tileCacheSize: 1,
     });
     await loaded(one);
-    const old = one._drawOrder[0].primitive;
+    const old = one._drawOrder[0]._resources;
     scene.camera.position = new Cartesian3(256, -256, 80);
     await loaded(one);
     expect(one.statistics.residentTiles).toBe(1);
@@ -630,7 +640,7 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
       }),
     ]);
     await loaded(layer);
-    const original = layer._drawOrder[0].primitive;
+    const original = layer._drawOrder[0]._resources;
     const before = read().color[0];
     scene.camera.position.z /= 2;
     await loaded(layer);

@@ -8,8 +8,8 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V3A completed — 实现、自审与视觉验收通过`             |
-| Active phase plan      | [V3A 计划](plans/2026-09-13-v3a-streaming-cover.md)    |
+| Current phase          | `V3B0 completed — 自有地图图元与资源迁移`              |
+| Active phase plan      | None；V3B1 尚未激活                                    |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
@@ -37,7 +37,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
 - Source：`packages/engine/Source/SceneGIS/Core/SceneGISVectorTile*.js` 和
   `packages/engine/Source/SceneGIS/Scene/SceneGISVectorTileLayer.js`，五个公共入口。
-- Specs：Core/Scene 镜像测试，67 项通过。
+- Specs：Core/Renderer/Scene 镜像测试，71 项通过。
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面：[Test/vector-tiles/index.html](../../Test/vector-tiles/index.html)，21 个本地 MVT fixtures。
 - E2E：`Specs/e2e/scenegis-vector-tiles.spec.js`，2 项通过。
@@ -57,7 +57,13 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - 当前 gate：V0 checkpoint `122cd2db2e`；V1 checkpoint `80089a0a91`，review 与提交 hook 均通过。
 - V2 checkpoint：`a6e4383cfc`，项目负责人视觉验收与提交 hook 通过。
 - V3A 已实现 resident coverage 与逐块替换，67 项 Specs 和 2 项页面 E2E 通过。
-- 下一步：建立 V3A 独立 checkpoint，再审计并细化 V3B；V3B/C 尚未激活。
-- Latest review：[V3A review](reviews/2026-09-13-v3a-cover-review.md)；V3A-R03 已由项目负责人确认通过。
+- V3A checkpoint：`ad3ea51f13`，提交检查通过。
+- [V3B0](plans/2026-09-13-v3b0-owned-primitives.md) 自有图元已实现并自审通过；
+  71 项 Specs、2 项 E2E、构建/类型/release/安装包通过，延用 V3A 已验收视觉基线。
+  Architecture Agent 建立本阶段独立 checkpoint 后，再进入 V3B1 的线型/AA 设计。
+- 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
+  正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
+- Latest review：[V3B0 review](reviews/2026-09-13-v3b0-owned-primitives-review.md)；
+  自有命令复用 Cesium pick 派生，V3B0-R04 的临时线数学桥接交 V3B1。
 - 风险：无历史数据/紧 cache 的缺图、mixed LOD 量化差异；V3B 线型/AA、V3C 密集性能、
   V4 生产贴地、V5 字体/跨瓦片 placement。V2-R05 已关闭，不重复验收 V2。
