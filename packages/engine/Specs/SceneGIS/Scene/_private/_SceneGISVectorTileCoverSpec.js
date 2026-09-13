@@ -81,6 +81,57 @@ describe("SceneGIS/Scene/_private/SceneGISVectorTileCover", function () {
       quadtree.destroy();
     }
   });
+  it("shares shallow-view distance selection with the surface while preserving top-down and source minimum levels", function () {
+    const tiles = source(0, 6);
+    const frustum = new PerspectiveFrustum({
+      fov: Math.PI / 3,
+      aspectRatio: 1,
+      near: 1,
+      far: 4000,
+    });
+    const position = new Cartesian3(1000000256, 1000000256, 10);
+    const direction = new Cartesian3(
+      0,
+      Math.cos(Math.PI / 36),
+      -Math.sin(Math.PI / 36),
+    );
+    const frame = {
+      camera: { positionWC: position, directionWC: direction, frustum },
+      context: { drawingBufferWidth: 1024, drawingBufferHeight: 1024 },
+      pixelRatio: 1,
+      cullingVolume: { computeVisibility: () => Intersect.INSIDE },
+    };
+    const quadtree = new PlanarQuadtree(tiles.tilingScheme);
+    const baseline = cover.select(frame, tiles, 1024);
+    const limited = cover.select(frame, tiles, 1024, 20);
+    expect(limited.length).toBeLessThan(baseline.length);
+    quadtree.beginFrame(1);
+    const errors = Array.from({ length: 7 }, (_, level) => 2 / 2 ** level);
+    const keys = (selected) => selected.map((t) => t.key).sort();
+    expect(keys(limited)).toEqual(
+      keys(quadtree.selectTiles(frame, 6, 2, errors, 20)),
+    );
+    frame.pixelRatio = 2;
+    frame.context.drawingBufferWidth *= 2;
+    frame.context.drawingBufferHeight *= 2;
+    expect(keys(cover.select(frame, tiles, 1024, 20))).toEqual(keys(limited));
+    for (const height of [10, 1000, 10000]) {
+      frame.camera.positionWC.z = height;
+      frame.camera.directionWC = new Cartesian3(0, 0, -1);
+      expect(keys(cover.select(frame, tiles, 1024, 100))).toEqual(
+        keys(cover.select(frame, tiles, 1024)),
+      );
+    }
+    frame.camera.directionWC = direction;
+    expect(
+      cover.select(frame, source(2, 6), 64, 1).every((t) => t.level >= 2),
+    ).toBe(true);
+    expect(() =>
+      cover.select(frame, source(2, 6), 4, 1),
+    ).toThrowDeveloperError();
+    quadtree.destroy();
+  });
+
   it("bounds high-LOD traversal and coarsens to the source availability without building the full tree", function () {
     const visibility = jasmine
       .createSpy("visibility")

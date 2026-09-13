@@ -730,6 +730,98 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(line.isDestroyed()).toBeTrue();
   });
 
+  it("limits shallow-view terrain and imagery work while retaining rendered coverage and depth", async function () {
+    async function sample(distance) {
+      const world = createWorld({
+        minimum: -2048,
+        size: 4096,
+        maximumLevel: 4,
+      });
+      world.maximumTiltedTileDistance = distance;
+      const terrainRequests = new Set();
+      const imageryRequests = new Set();
+      const data = new SceneGISPlanarHeightmapTerrainData({
+        buffer: new Float32Array([2, 2, 2, 2]),
+        width: 2,
+        height: 2,
+      });
+      const provider = {
+        tilingScheme: world.tilingScheme,
+        minimumHeight: 2,
+        maximumHeight: 2,
+        maximumLevel: 4,
+        errorEvent: new Event(),
+        credit: undefined,
+        getLevelMaximumGeometricError: (level) => 16 / 2 ** level,
+        requestTileGeometry: (x, y, level) => {
+          terrainRequests.add(`${level}/${x}/${y}`);
+          return Promise.resolve(data);
+        },
+        getTileDataAvailable: () => true,
+        loadTileDataAvailability: () => undefined,
+        destroy: jasmine.createSpy("destroyProvider"),
+      };
+      world.terrainProvider = provider;
+      const image = document.createElement("canvas");
+      image.width = image.height = 1;
+      const context = image.getContext("2d");
+      context.fillStyle = "red";
+      context.fillRect(0, 0, 1, 1);
+      world.imageryLayers.addImageryProvider({
+        tilingScheme: world.tilingScheme,
+        minimumLevel: 0,
+        maximumLevel: 4,
+        tileWidth: 1,
+        tileHeight: 1,
+        hasAlphaChannel: false,
+        errorEvent: new Event(),
+        credit: undefined,
+        requestImage: (x, y, level) => {
+          imageryRequests.add(`${level}/${x}/${y}`);
+          return Promise.resolve(image);
+        },
+      });
+      scene = createPlanarScene(world, 128, 128);
+      scene.camera.frustum = new PerspectiveFrustum({
+        fov: Math.PI / 3,
+        aspectRatio: 1,
+        near: 1,
+        far: 10000,
+      });
+      aimCamera(
+        new Cartesian3(0, -1000, 20),
+        new Cartesian3(0, -794, 2),
+        Cartesian3.UNIT_Z,
+      );
+      await renderUntil(() => world.tilesLoaded);
+      const quadtree = world._surface._quadtree;
+      const keys = quadtree._idealTiles.map((tile) => tile.key).sort();
+      expect(quadtree._renderTiles.map((tile) => tile.key).sort()).toEqual(
+        keys,
+      );
+      const center = new Cartesian2(64.5, 63.5);
+      expect(readWindowPixel(center)).toEqual([255, 0, 0, 255]);
+      const requests = [terrainRequests.size, imageryRequests.size];
+      if (scene.pickPositionSupported) {
+        expect(scene.pickPosition(center).z).toBeCloseTo(2, 1);
+        expect([terrainRequests.size, imageryRequests.size]).toEqual(requests);
+      }
+      scene.renderForSpecs();
+      expect([terrainRequests.size, imageryRequests.size]).toEqual(requests);
+      const result = { requests, selected: keys.length };
+      scene.destroyForSpecs();
+      scene = undefined;
+      expect(provider.destroy).not.toHaveBeenCalled();
+      expect(quadtree._tiles.size).toBe(0);
+      return result;
+    }
+    const unrestricted = await sample(Infinity);
+    const limited = await sample(10);
+    expect(limited.selected).toBeLessThan(unrestricted.selected);
+    expect(limited.requests[0]).toBeLessThan(unrestricted.requests[0]);
+    expect(limited.requests[1]).toBeLessThan(unrestricted.requests[1]);
+  });
+
   it("lazily creates one shared unit quad and renders the base color", function () {
     const world = createWorld({ maximumLevel: 0 });
     scene = createPlanarScene(world);
@@ -1555,7 +1647,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     const command = tile.command;
     const unlitShader = command.shaderProgram;
     expect(tile._lightingCommandNormalMode).toBe("unlit");
-    expect(surface._shaderPrograms.has("0/0/unlit")).toBe(true);
+    expect(surface._shaderPrograms.has("0/0/unlit/0")).toBe(true);
     const allocationBefore = {
       commands: surface._debug.createdCommands,
       buffers: surface._debug.createdBuffers,
@@ -1570,7 +1662,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(tile.command).toBe(command);
     expect(litShader).not.toBe(unlitShader);
     expect(tile._lightingCommandNormalMode).toBe("geometric");
-    expect(surface._shaderPrograms.has("0/1/geometric")).toBe(true);
+    expect(surface._shaderPrograms.has("0/1/geometric/0")).toBe(true);
     expect(surface._shaderPrograms.size).toBe(2);
     expect(command.uniformMap.u_lambertDiffuseMultiplier()).toBe(0.9);
     expect(surface._debug.createdCommands).toBe(allocationBefore.commands);

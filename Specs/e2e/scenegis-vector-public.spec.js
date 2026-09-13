@@ -337,6 +337,43 @@ test("retains foreground coverage and map scale while culling distant labels at 
   expect(cover.count).toBeLessThanOrEqual(64);
   expect(Math.max(...cover.levels)).toBeGreaterThanOrEqual(12);
   expect(Math.min(...cover.levels)).toBeLessThan(10);
+  const limitedSurface = await page.evaluate(() => {
+    const world = window.publicVectorPreview.viewer.planarWorld;
+    return {
+      distance: world.maximumTiltedTileDistance,
+      selected: world._surface._quadtree._idealTiles.length,
+      load: world._surface._quadtree.getLoadTiles().length,
+    };
+  });
+  expect(limitedSurface.distance).toBe(100000);
+  await page.evaluate(() => {
+    window.publicVectorPreview.viewer.planarWorld.maximumTiltedTileDistance =
+      Infinity;
+  });
+  await page.waitForFunction(
+    (selected) =>
+      window.publicVectorPreview.viewer.planarWorld._surface._quadtree
+        ._idealTiles.length > selected,
+    limitedSurface.selected,
+  );
+  await ready(page);
+  const unrestricted = await page.evaluate(() => ({
+    vector: window.publicVectorPreview.layer.statistics.visibleTiles,
+    load: window.publicVectorPreview.viewer.planarWorld._surface._quadtree.getLoadTiles()
+      .length,
+  }));
+  expect(cover.count).toBeLessThan(unrestricted.vector);
+  expect(limitedSurface.load).toBeLessThan(unrestricted.load);
+  await page.evaluate(() => {
+    window.publicVectorPreview.viewer.planarWorld.maximumTiltedTileDistance = 100000;
+  });
+  await page.waitForFunction(
+    (selected) =>
+      window.publicVectorPreview.viewer.planarWorld._surface._quadtree
+        ._idealTiles.length === selected,
+    limitedSurface.selected,
+  );
+  await ready(page);
   const symbols = await page.evaluate(() => {
     const { viewer, layer } = window.publicVectorPreview;
     const camera = viewer.scene.camera;
@@ -386,4 +423,115 @@ test("retains foreground coverage and map scale while culling distant labels at 
     path: testInfo.outputPath("public-fixture-shallow.png"),
   });
   await expect(page.locator("#error")).toBeEmpty();
+});
+
+test("keeps top-down tile selection unchanged when zooming far away", async ({
+  page,
+}) => {
+  await routes(page);
+  await page.goto("/Test/vector-tiles/public.html");
+  await ready(page);
+  const comparisons = await page.evaluate(async () => {
+    const C = await import("/Build/CesiumUnminified/index.js");
+    const { viewer, layer } = window.publicVectorPreview;
+    const world = viewer.planarWorld;
+    const scene = viewer.scene;
+    const render = () =>
+      new Promise((resolve) => {
+        const remove = scene.postRender.addEventListener(() => {
+          remove();
+          resolve();
+        });
+        scene.requestRender();
+      });
+    const keys = () => ({
+      surface: world._surface._quadtree._idealTiles.map((t) => t.key).sort(),
+      vector: [...layer._sources.values()][0].visible.map((t) => t.key).sort(),
+    });
+    const result = [];
+    for (const height of [5000, 500000, 5000000]) {
+      scene.camera.setView({
+        destination: new C.Cartesian3(1494601.77, 6882284.68, height),
+        orientation: {
+          direction: new C.Cartesian3(0, 0, -1),
+          up: C.Cartesian3.UNIT_Y,
+        },
+      });
+      world.maximumTiltedTileDistance = Infinity;
+      await render();
+      const before = keys();
+      world.maximumTiltedTileDistance = 100000;
+      await render();
+      result.push({ height, before, after: keys() });
+    }
+    return result;
+  });
+  for (const { before, after } of comparisons) {
+    expect(after).toEqual(before);
+    expect(after.surface.length).toBeGreaterThan(0);
+    expect(after.vector.length).toBeGreaterThan(0);
+  }
+  await expect(page.locator("#error")).toBeEmpty();
+});
+
+test("renders the local terrain and imagery distance comparison through a near-horizontal view", async ({
+  page,
+}, testInfo) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/Test/vector-tiles/distance.html");
+  await page.waitForFunction(
+    () => window.tiltedDistancePreview?.viewer.planarWorld.tilesLoaded,
+  );
+  const limited = await page.evaluate(
+    () =>
+      window.tiltedDistancePreview.viewer.planarWorld._surface._quadtree
+        ._idealTiles.length,
+  );
+  await page.locator("#limit").uncheck();
+  await page.waitForFunction(
+    (count) =>
+      window.tiltedDistancePreview.viewer.planarWorld._surface._quadtree
+        ._idealTiles.length > count,
+    limited,
+  );
+  await page.waitForFunction(
+    () => window.tiltedDistancePreview.viewer.planarWorld.tilesLoaded,
+  );
+  await page.locator("#limit").check();
+  await page.getByRole("button", { name: "接近水平 0.5°" }).click();
+  await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const remove =
+          window.tiltedDistancePreview.viewer.scene.postRender.addEventListener(
+            () => {
+              remove();
+              resolve();
+            },
+          );
+      }),
+  );
+  await page.waitForFunction(
+    () => window.tiltedDistancePreview.viewer.planarWorld.tilesLoaded,
+  );
+  const state = await page.evaluate(() => {
+    const { viewer, requests } = window.tiltedDistancePreview;
+    const q = viewer.planarWorld._surface._quadtree;
+    return {
+      sine: viewer.scene.camera.directionWC.z,
+      requests,
+      selected: q._idealTiles.map((t) => t.key).sort(),
+      rendered: q._renderTiles.map((t) => t.key).sort(),
+    };
+  });
+  expect(state.sine).toBeCloseTo(-Math.sin(Math.PI / 360), 10);
+  expect(state.requests.terrain).toBeGreaterThan(0);
+  expect(state.requests.imagery).toBeGreaterThan(0);
+  expect(state.rendered).toEqual(state.selected);
+  await expect(page.locator("#error")).toBeEmpty();
+  await page.screenshot({
+    path: testInfo.outputPath("local-terrain-distance.png"),
+  });
+  expect(errors).toEqual([]);
 });

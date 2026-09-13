@@ -62,6 +62,14 @@ function validateTileCacheSize(value) {
   }
 }
 
+function validateMaximumTiltedTileDistance(value) {
+  if (typeof value !== "number" || !(value > 0.0)) {
+    throw new DeveloperError(
+      "maximumTiltedTileDistance must be positive or Infinity.",
+    );
+  }
+}
+
 function validateBaseColor(value) {
   if (!(value instanceof Color) || value.alpha !== 1.0) {
     throw new DeveloperError("baseColor must be an opaque Color.");
@@ -172,6 +180,7 @@ function SceneGISPlanarWorld(options) {
   this._tilingScheme = tilingScheme;
   this._maximumLevel = options.maximumLevel;
   this._maximumScreenSpaceError = maximumScreenSpaceError;
+  this._maximumTiltedTileDistance = Infinity;
   this._tileCacheSize = tileCacheSize;
   this._baseColor = Color.clone(baseColor);
   this._enableLighting = enableLighting;
@@ -364,6 +373,28 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
+   * Gets or sets the tile detail distance in planar meters for shallow
+   * perspective views. Tiles beyond this distance retain coarse coverage.
+   * The limit applies fully within 10 degrees of the horizontal plane and
+   * relaxes smoothly until disabled at 20 degrees. Orthographic and top-down
+   * views are unchanged. This does not modify camera visibility or clipping.
+   * Set Infinity to retain unrestricted screen-space-error refinement.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {number}
+   * @default Infinity
+   * @exception {DeveloperError} The assigned value is not positive or Infinity.
+   */
+  maximumTiltedTileDistance: {
+    get: function () {
+      return this._maximumTiltedTileDistance;
+    },
+    set: function (value) {
+      validateMaximumTiltedTileDistance(value);
+      this._maximumTiltedTileDistance = value;
+    },
+  },
+  /**
    * Gets or sets the number of unprotected tile records retained after a frame.
    *
    * @memberof SceneGISPlanarWorld.prototype
@@ -484,6 +515,7 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
     this._enableLighting,
     this._lambertDiffuseMultiplier,
     this._material,
+    this._maximumTiltedTileDistance,
   );
 };
 

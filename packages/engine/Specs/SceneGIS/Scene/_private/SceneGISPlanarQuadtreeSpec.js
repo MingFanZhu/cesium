@@ -44,6 +44,100 @@ describe("SceneGIS/Scene/SceneGISPlanarQuadtree", function () {
     };
   }
 
+  it("preserves top-down selection at every camera distance and bypasses orthographic views", function () {
+    const quadtree = createQuadtree();
+    const frame = createFrameState({
+      frustum: new PerspectiveFrustum({
+        fov: Math.PI / 3,
+        aspectRatio: 1,
+        near: 1,
+        far: 10000,
+      }),
+    });
+    frame.camera.directionWC = new Cartesian3(0, 0, -1);
+    const select = (distance) => {
+      quadtree.beginFrame(1);
+      return quadtree
+        .selectTiles(frame, 6, 2, undefined, distance)
+        .map((t) => t.key);
+    };
+    for (const height of [32, 256, 2048]) {
+      frame.camera.positionWC.z = height;
+      expect(select(8)).toEqual(select(Infinity));
+    }
+    frame.camera.frustum = new OrthographicFrustum({
+      width: 128,
+      aspectRatio: 1,
+    });
+    frame.camera.directionWC = new Cartesian3(0, 1, 0);
+    expect(select(8)).toEqual(select(Infinity));
+    quadtree.destroy();
+  });
+
+  it("keeps complete coarse coverage while reducing shallow-view refinement and load dependencies", function () {
+    const quadtree = createQuadtree();
+    const frame = createFrameState({ position: new Cartesian3(-100, -100, 5) });
+    frame.camera.directionWC = new Cartesian3(
+      0,
+      Math.cos(Math.PI / 36),
+      -Math.sin(Math.PI / 36),
+    );
+    quadtree.beginFrame(1);
+    const before = quadtree.selectTiles(frame, 6, 0.5).slice();
+    const beforeLoad = quadtree.getLoadTiles().length;
+    quadtree.beginFrame(2);
+    const after = quadtree.selectTiles(frame, 6, 0.5, undefined, 40).slice();
+    expect(after.length).toBeLessThan(before.length);
+    expect(quadtree.getLoadTiles().length).toBeLessThan(beforeLoad);
+    expect(after.reduce((area, t) => area + t.extent.width ** 2, 0)).toBe(
+      256 ** 2,
+    );
+    const levelAt = (tiles, x, y) =>
+      tiles.find(
+        ({ extent: e }) =>
+          x >= e.minimumX &&
+          x < e.maximumX &&
+          y >= e.minimumY &&
+          y < e.maximumY,
+      ).level;
+    expect(levelAt(after, -99, -99)).toBe(levelAt(before, -99, -99));
+    expect(levelAt(after, 100, 100)).toBeLessThan(levelAt(before, 100, 100));
+    expect(quadtree.resolveRenderTiles(() => true)).toEqual(after);
+    quadtree.destroy();
+  });
+
+  it("uses closed three-dimensional bounds for the distance boundary", function () {
+    const quadtree = createQuadtree();
+    const tile = quadtree.getOrCreateTile(0, 0, 0);
+    const frame = createFrameState({ position: new Cartesian3(158, 0, 40) });
+    const sse = SceneGISPlanarQuadtree.computeScreenSpaceError;
+    expect(sse(frame, tile, 1, 50)).toBeGreaterThan(0);
+    expect(sse(frame, tile, 1, 49.9)).toBe(0);
+    tile.updateHeightRange(-20, 50);
+    expect(sse(frame, tile, 1, 30)).toBeGreaterThan(0);
+    expect(sse(frame, tile, 1, 29.9)).toBe(0);
+    quadtree.destroy();
+  });
+
+  it("relaxes the limit towards twenty degrees and stays finite at the horizon", function () {
+    const frame = createFrameState();
+    frame.camera.directionWC = new Cartesian3();
+    const rangeAt = (degrees) => {
+      frame.camera.directionWC.z = Math.sin((degrees * Math.PI) / 180);
+      return SceneGISPlanarQuadtree.computeMaximumTiltedTileDistance(
+        frame,
+        100,
+      );
+    };
+    expect(rangeAt(0)).toBe(100);
+    expect(rangeAt(-5)).toBe(100);
+    expect(rangeAt(5)).toBe(100);
+    expect(rangeAt(-15)).toBeGreaterThan(100);
+    expect(rangeAt(-19)).toBeGreaterThan(rangeAt(-15));
+    expect(rangeAt(-20)).toBe(Infinity);
+    expect(rangeAt(-90)).toBe(Infinity);
+  });
+
   it("looks up resident tiles without creating cache entries", function () {
     const quadtree = createQuadtree();
     expect(quadtree.getTile(0, 0, 0)).toBeUndefined();

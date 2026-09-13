@@ -8,8 +8,8 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V5B completed — 准备共享远景选层阶段`                 |
-| Active phase plan      | [V5B](plans/2026-09-13-v5b-line-symbols.md)            |
+| Current phase          | `V3C1A completed — 低角度远景选层`                     |
+| Active phase plan      | [V3C1A](plans/2026-09-13-v3c1a-tilted-distance.md)     |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
@@ -75,7 +75,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[V5B review](reviews/2026-09-13-v5b-line-symbol-review.md)；
+- Latest review：[V3C1A review](reviews/2026-09-13-v3c1a-tilted-distance-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
 - Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
@@ -110,10 +110,17 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   相机接近后恢复；正交和俯视保持。柏林 5° 同视角去掉 34 个地平线远景标注，
   保留 87 个近景标注与 64 块地图瓦片；最新 engine 构建的 20 项 symbol Specs 通过。
   构建入口与完整证据见当前 review，视觉 gate 仍 pending。
-- Open discussion：[平面远景加载范围](discussions/2026-09-13-planar-distant-tile-loading.md)。
+- Resolved discussion：[平面远景加载范围](discussions/2026-09-13-planar-distant-tile-loading.md)。
   负责人要求保持浅俯角三维能力，在选取阶段限制远处瓦片，供 MVT、影像和地形共同使用。
   已完成共享四叉树、独立 MVT cover 和 terrain dependency 审计；建议保留粗远景、限制细分。
-  当前只有架构提案，尚未修改加载策略；范围语义和远景覆盖待讨论后再进入阶段实现。
+  负责人已批准低角度专用策略，当前实现与验证见 V3C1A。
 - 负责人于 2026-09-13 批准实施远景处理，新增硬边界：只针对低角度倾斜视图，
   俯视拉远不能触发。V5B 按推进授权关闭 gate，先形成独立本地 checkpoint；
   上述 pending 记录为历史交付状态，当前以此结论与 completed review 为准。
+
+- V5B checkpoint：`bb007b3518`；当前进入 [V3C1A](plans/2026-09-13-v3c1a-tilted-distance.md)，仅低角度透视启用共享细节距离，俯视拉远保持。
+- V3C1A 已实现并技术自审通过，World 距离默认 Infinity；公开页启用 100000 米。
+  197 项相关 Specs、131 项既有 vector 回归及 5 项页面 E2E 已覆盖通过，build / buildTs / tsc 通过。
+  柏林 5° 的 MVT 64→47，surface 219→105，load dependencies 473→241；俯视拉远 keys 一致。
+  新增 [本地地形/影像对照](../../Test/vector-tiles/distance.html)，详情与剩余近景性能风险见最新 review。
+  负责人已明确要求推进异步 Worker，按推进授权关闭 V3C1A gate；先形成独立 checkpoint，再激活 V3C1B。

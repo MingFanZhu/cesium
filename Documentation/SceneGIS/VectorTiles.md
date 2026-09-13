@@ -128,6 +128,12 @@ Style zoom 与 source level 独立。`computeStyleZoom(rootWidth, metersPerPixel
 达到数量预算时保留对应父 tile，不降低全视图层级。策略和边界见
 [ADR-0064](Decisions/ADR-0064-vector-perspective-lod.md)。
 
+MVT 选层还消费 `world.maximumTiltedTileDistance`，和地表共享低角度细节距离规则。
+默认 Infinity；公开页设置为 100000 米。仅低于 20° 的透视视图启用，远处保留粗 tile；
+俯视拉远与正交保持原选层，style zoom 和相机可见范围不变。它不解除当前 MVT 的 flat-only
+限制，也不改变 source minimumLevel / maximumVisibleTiles。见
+[ADR-0066](Decisions/ADR-0066-planar-tilted-tile-distance.md)。
+
 ## 验证与维护
 
 目前 126 项 focused Specs 覆盖前端、几何/cover、真实 Scene 样式、DPR、多视锥、symbol 与 GPU 资源。

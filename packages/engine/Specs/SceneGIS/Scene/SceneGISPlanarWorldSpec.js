@@ -98,6 +98,7 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.tilingScheme.coordinateSystem).toBe(coordinateSystem);
     expect(world.maximumLevel).toBe(4);
     expect(world.maximumScreenSpaceError).toBe(2.0);
+    expect(world.maximumTiltedTileDistance).toBe(Infinity);
     expect(world.tileCacheSize).toBe(100);
     expect(world.baseColor).toEqual(Color.GRAY);
     expect(world.enableLighting).toBe(false);
@@ -108,6 +109,23 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.terrainProvider).toBeUndefined();
     expect(world.material).toBeUndefined();
     expect(world.environment).toBeUndefined();
+    world.destroy();
+  });
+
+  it("validates the shallow-view detail distance without mutating terrain or camera state", function () {
+    const world = createWorld();
+    world.maximumTiltedTileDistance = 100000;
+    expect(world.maximumTiltedTileDistance).toBe(100000);
+    for (const value of [0, -1, -Infinity, NaN, undefined, null, "100", {}]) {
+      expect(() => {
+        world.maximumTiltedTileDistance = value;
+      }).toThrowDeveloperError();
+      expect(world.maximumTiltedTileDistance).toBe(100000);
+    }
+    expect(world._surface._quadtree._tiles.size).toBe(0);
+    expect(world._frameState).toBeUndefined();
+    world.maximumTiltedTileDistance = Infinity;
+    expect(world.maximumTiltedTileDistance).toBe(Infinity);
     world.destroy();
   });
 

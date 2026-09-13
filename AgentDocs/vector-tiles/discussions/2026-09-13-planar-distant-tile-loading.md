@@ -3,16 +3,26 @@
 ## Metadata
 
 - Type: `discussion`
-- Status: `open`，完成源码审计，加载策略尚未实现
+- Status: `resolved`，负责人已批准低角度专用策略，正式决定见 ADR-0066
 - Author role: `architecture`，当前 Agent
 - Created / Updated: `2026-09-13`
 - Parent: [Vector Tiles](../plans/2026-09-12-vector-tiles-extension.md)
-- Current phase: [V5B](../plans/2026-09-13-v5b-line-symbols.md)
+- Current phase: [V3C1A](../plans/2026-09-13-v3c1a-tilted-distance.md)
 - Review: [V5B-R13](../reviews/2026-09-13-v5b-line-symbol-review.md)
 - Related: [Planar World](../../planar-world/README.md)、[Planar Terrain](../../planar-terrain/README.md)
 - ADR: [ADR-0064](../../../Documentation/SceneGIS/Decisions/ADR-0064-vector-perspective-lod.md)、
   [ADR-0009](../../../Documentation/SceneGIS/Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)
 - SGP: None，当前无上游改动
+
+## Resolution
+
+负责人已批准保留粗远景的实现，并明确俯视拉远不能触发。V5B checkpoint 为 `bb007b3518`。
+采用 World 可写距离属性，默认 Infinity，仅低于 20° 的透视启用，10° 以下完全采用距离，
+中间逐渐放宽；三维 closed tile bounds 判断，source / ready cover / 依赖协议保持。
+公开页显式设置 100000 米，不增加 Viewer 构造字段；当前没有自动距离推导。
+这些选择及先前 open decisions 的处置已提升到
+[ADR-0066](../../../Documentation/SceneGIS/Decisions/ADR-0066-planar-tilted-tile-distance.md)。
+下文保留最初审计与方案权衡，不再表示当前未实现状态。
 
 ## Problem and confirmed direction
 

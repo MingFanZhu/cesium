@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>低角度远景 · SceneGIS</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="./public.css" />
+  </head>
+  <body>
+    <aside>
+      <div class="eyebrow">SCENEGIS · TILE SELECTION</div>
+      <h1>低角度远景</h1>
+      <p class="intro">
+        本地地形与影像共用选层。保留远处粗覆盖，俯视拉远保持原行为。
+      </p>
+      <label
+        ><input id="limit" type="checkbox" checked /> 限制低角度远景细节</label
+      >
+      <p class="hint">细节距离 2 千米；10° 以下完全启用，20° 以上停用。</p>
+      <div class="buttons">
+        <button id="top">俯视</button>
+        <button id="far-top">俯视拉远</button>
+        <button id="tilt">低角度 5°</button>
+        <button id="horizon">接近水平 0.5°</button>
+      </div>
+      <dl>
+        <div>
+          <dt>选取 / 绘制瓦片</dt>
+          <dd id="tiles">—</dd>
+        </div>
+        <div>
+          <dt>地形 / 影像请求</dt>
+          <dd id="requests">—</dd>
+        </div>
+      </dl>
+      <p id="status">准备本地数据…</p>
+      <p class="hint">
+        请求数为页面生命周期累计值。瓦片颜色与编号表示层级；关闭限制可比较远景细节。
+      </p>
+      <pre id="error"></pre>
+      <a href="./public.html">返回公开矢量地图</a>
+    </aside>
+    <main><div id="map"></div></main>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./distance.js"></script>
+  </body>
+</html>

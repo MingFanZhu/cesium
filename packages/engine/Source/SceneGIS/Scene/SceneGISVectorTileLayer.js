@@ -355,7 +355,12 @@ function updateSources(layer, zoom, frameState) {
     const desired =
       state.records.length === 0
         ? []
-        : cover.select(frameState, state.source, layer._maximumVisibleTiles);
+        : cover.select(
+            frameState,
+            state.source,
+            layer._maximumVisibleTiles,
+            layer._world.maximumTiltedTileDistance,
+          );
     const protectedKeys = new Set();
     state.visible.length = 0;
     for (const tile of desired) {

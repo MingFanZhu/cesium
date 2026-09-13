@@ -37,6 +37,7 @@ const viewer = new C.Viewer("map", {
   vrButton: false,
 });
 const scene = viewer.scene;
+viewer.planarWorld.maximumTiltedTileDistance = 100000;
 scene.debugShowFramesPerSecond = true;
 scene.msaaSamples = 1;
 scene.postProcessStages.fxaa.enabled = false;

@@ -390,6 +390,11 @@ actual render tiles，pick+depth 继续精确 replay 最近 normal-render comman
 仍保持 zero terrain allocation，public World/camera picking 仍是 Z=0 reference plane。完整决定见
 [ADR-0009](Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)。
 
+`World.maximumTiltedTileDistance` 按 [ADR-0066](Decisions/ADR-0066-planar-tilted-tile-distance.md)
+可选约束低角度透视的细节距离；surface 与 MVT 在 desired selection 前共用判定。
+默认 Infinity；俯视、俯视拉远及正交保持原 SSE。超过距离保留粗 tile，仍遵守 terrain
+祖先/四兄弟依赖和各自 ready cover；不得把它变成 Camera far、相机俯角限制或全场景距离剔除。
+
 ### 平面地形查询、拾取与独立采样
 
 平面地形的读取接口必须区分数据来源。`SceneGISPlanarWorld.getTerrainHeight` 只读取 canonical

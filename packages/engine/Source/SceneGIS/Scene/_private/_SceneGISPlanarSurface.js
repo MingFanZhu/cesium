@@ -605,6 +605,7 @@ SceneGISPlanarSurface.prototype.render = function (
   enableLighting = false,
   lambertDiffuseMultiplier = 0.9,
   material,
+  maximumTiltedTileDistance = Infinity,
 ) {
   validateContext(this, frameState.context);
   const passes = frameState.passes;
@@ -680,6 +681,7 @@ SceneGISPlanarSurface.prototype.render = function (
     maximumLevel,
     maximumScreenSpaceError,
     this._terrain?.geometricErrors,
+    maximumTiltedTileDistance,
   );
   if (desiredTiles.length === 0) {
     this._tilesLoaded = true;

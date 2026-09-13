@@ -94,6 +94,12 @@ firstReadyMs 从创建图层到当前视图首次无失败就绪，排除页面 
 原生 MS 表示帧间隔，和“测量 60 帧”的 CPU 提交耗时不同。
 公开页本地 E2E 验证原生面板、持续渲染默认值及原有倾斜、拾取和重建。
 
+公开页启用 `world.maximumTiltedTileDistance = 100000`，只对低角度透视限制远景细分，
+俯视拉远保持原选层；10° 以下完全启用，10°–20° 逐渐放宽。
+[distance.html](distance.html) 是完全本地的地形/影像对照页，使用 2 千米细节距离、
+固定高度函数和带层级编号的影像；可以切换限制、5°、0.5° 和俯视拉远。
+累计请求数不会因相机切换清零，冷启动对比需分别刷新页面。
+
 交互 profiling 工具：复用开发服务器后执行 `node Test/vector-tiles/profile-motion.mjs before`。
 固定南京、1141×1150 CSS、DPR=1、60 帧 pan/zoom/rotate，先预热再采样，输出 HAR、CPU profile、
 JSON 与截图到忽略的 `Build/Specs/vector-motion/`。修复后执行

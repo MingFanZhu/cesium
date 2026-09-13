@@ -64,13 +64,14 @@ function selectLevel(frameState, scheme, level, limit) {
   return tiles;
 }
 
-function screenSpaceError(frameState, tile) {
+function screenSpaceError(frameState, tile, maximumDistance) {
   scratchLodTile.extent = tile.bounds;
   // Vector sources use a canonical 512-pixel tile, independent of MVT extent.
   return SceneGISPlanarQuadtree.computeScreenSpaceError(
     frameState,
     scratchLodTile,
     tile.bounds.width / 512,
+    maximumDistance,
   );
 }
 
@@ -78,7 +79,12 @@ function compareTiles(a, b) {
   return a.level - b.level || a.y - b.y || a.x - b.x;
 }
 
-function selectAdaptive(frameState, source, limit) {
+function selectAdaptive(frameState, source, limit, maximumTiltedTileDistance) {
+  const maximumDistance =
+    SceneGISPlanarQuadtree.computeMaximumTiltedTileDistance(
+      frameState,
+      maximumTiltedTileDistance,
+    );
   const scheme = source.tilingScheme;
   const roots = selectLevel(frameState, scheme, source.minimumLevel, limit);
   if (roots === undefined) {
@@ -87,7 +93,7 @@ function selectAdaptive(frameState, source, limit) {
   const leaves = new Map(roots.map((tile) => [tile.key, tile]));
   const queue = [];
   function enqueue(tile) {
-    const error = screenSpaceError(frameState, tile);
+    const error = screenSpaceError(frameState, tile, maximumDistance);
     // Use the same strict refinement threshold as planar imagery and terrain.
     if (tile.level < source.maximumLevel && error > 2) {
       queue.push({ tile, error });
@@ -122,8 +128,8 @@ function selectAdaptive(frameState, source, limit) {
   }
   return [...leaves.values()].sort(
     (a, b) =>
-      screenSpaceError(frameState, b) - screenSpaceError(frameState, a) ||
-      compareTiles(a, b),
+      screenSpaceError(frameState, b, maximumDistance) -
+        screenSpaceError(frameState, a, maximumDistance) || compareTiles(a, b),
   );
 }
 
@@ -165,8 +171,18 @@ SceneGISVectorTileCover.computeZoom = function (frameState, rootWidth) {
   return Math.abs(zoom - integer) < 1e-10 ? integer : zoom;
 };
 
-SceneGISVectorTileCover.select = function (frameState, source, limit) {
-  const tiles = selectAdaptive(frameState, source, limit);
+SceneGISVectorTileCover.select = function (
+  frameState,
+  source,
+  limit,
+  maximumTiltedTileDistance = Infinity,
+) {
+  const tiles = selectAdaptive(
+    frameState,
+    source,
+    limit,
+    maximumTiltedTileDistance,
+  );
   if (tiles !== undefined) {
     return tiles;
   }
