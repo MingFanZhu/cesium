@@ -16,17 +16,17 @@ const scratchLodTile = {
   maximumHeight: 0,
 };
 
-function visible(frameState, bounds) {
+function visible(frameState, bounds, heights) {
   Cartesian3.fromElements(
     bounds.minimumX + bounds.width * 0.5,
     bounds.minimumY + bounds.height * 0.5,
-    0,
+    heights ? (heights.x + heights.y) * 0.5 : 0,
     scratchBox.center,
   );
   Cartesian3.fromElements(
     bounds.width * 0.5,
     bounds.height * 0.5,
-    0,
+    heights ? (heights.y - heights.x) * 0.5 : 0,
     scratchScale,
   );
   Matrix3.fromScale(scratchScale, scratchBox.halfAxes);
@@ -35,13 +35,13 @@ function visible(frameState, bounds) {
   );
 }
 
-function selectLevel(frameState, scheme, level, limit) {
+function selectLevel(frameState, scheme, level, limit, heights) {
   const tiles = [];
   const stack = [{ x: 0, y: 0, level: 0 }];
   while (stack.length > 0) {
     const tile = stack.pop();
     const bounds = scheme.tileXYToExtent(tile.x, tile.y, tile.level);
-    if (!visible(frameState, bounds)) {
+    if (!visible(frameState, bounds, heights)) {
       continue;
     }
     if (tile.level === level) {
@@ -64,8 +64,10 @@ function selectLevel(frameState, scheme, level, limit) {
   return tiles;
 }
 
-function screenSpaceError(frameState, tile, maximumDistance) {
+function screenSpaceError(frameState, tile, maximumDistance, heights) {
   scratchLodTile.extent = tile.bounds;
+  scratchLodTile.minimumHeight = heights?.x ?? 0;
+  scratchLodTile.maximumHeight = heights?.y ?? 0;
   // Vector sources use a canonical 512-pixel tile, independent of MVT extent.
   return SceneGISPlanarQuadtree.computeScreenSpaceError(
     frameState,
@@ -79,21 +81,33 @@ function compareTiles(a, b) {
   return a.level - b.level || a.y - b.y || a.x - b.x;
 }
 
-function selectAdaptive(frameState, source, limit, maximumTiltedTileDistance) {
+function selectAdaptive(
+  frameState,
+  source,
+  limit,
+  maximumTiltedTileDistance,
+  heights,
+) {
   const maximumDistance =
     SceneGISPlanarQuadtree.computeMaximumTiltedTileDistance(
       frameState,
       maximumTiltedTileDistance,
     );
   const scheme = source.tilingScheme;
-  const roots = selectLevel(frameState, scheme, source.minimumLevel, limit);
+  const roots = selectLevel(
+    frameState,
+    scheme,
+    source.minimumLevel,
+    limit,
+    heights,
+  );
   if (roots === undefined) {
     return undefined;
   }
   const leaves = new Map(roots.map((tile) => [tile.key, tile]));
   const queue = [];
   function enqueue(tile) {
-    const error = screenSpaceError(frameState, tile, maximumDistance);
+    const error = screenSpaceError(frameState, tile, maximumDistance, heights);
     // Use the same strict refinement threshold as planar imagery and terrain.
     if (tile.level < source.maximumLevel && error > 2) {
       queue.push({ tile, error });
@@ -110,7 +124,7 @@ function selectAdaptive(frameState, source, limit, maximumTiltedTileDistance) {
         const x = tile.x * 2 + dx;
         const y = tile.y * 2 + dy;
         const bounds = scheme.tileXYToExtent(x, y, level);
-        if (visible(frameState, bounds)) {
+        if (visible(frameState, bounds, heights)) {
           children.push({ x, y, level, bounds, key: `${level}/${x}/${y}` });
         }
       }
@@ -128,8 +142,9 @@ function selectAdaptive(frameState, source, limit, maximumTiltedTileDistance) {
   }
   return [...leaves.values()].sort(
     (a, b) =>
-      screenSpaceError(frameState, b, maximumDistance) -
-        screenSpaceError(frameState, a, maximumDistance) || compareTiles(a, b),
+      screenSpaceError(frameState, b, maximumDistance, heights) -
+        screenSpaceError(frameState, a, maximumDistance, heights) ||
+      compareTiles(a, b),
   );
 }
 
@@ -176,12 +191,14 @@ SceneGISVectorTileCover.select = function (
   source,
   limit,
   maximumTiltedTileDistance = Infinity,
+  heights,
 ) {
   const tiles = selectAdaptive(
     frameState,
     source,
     limit,
     maximumTiltedTileDistance,
+    heights,
   );
   if (tiles !== undefined) {
     return tiles;

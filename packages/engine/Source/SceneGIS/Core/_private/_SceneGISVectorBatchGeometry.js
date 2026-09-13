@@ -3,6 +3,7 @@ import Geometry from "../../../Core/Geometry.js";
 import GeometryAttribute from "../../../Core/GeometryAttribute.js";
 import GeometryInstance from "../../../Core/GeometryInstance.js";
 import GeometryPipeline from "../../../Core/GeometryPipeline.js";
+import packGround from "./_SceneGISVectorGroundGeometry.js";
 
 function repeated(bytes, count) {
   const values = new Uint8Array(count * 4);
@@ -18,7 +19,7 @@ function repeated(bytes, count) {
 }
 
 /** CPU-only combination and precision encoding; pick tokens are resolved at upload. @private */
-function prepareVectorBatch(item, allowPicking) {
+function prepareVectorBatch(item, allowPicking, ground = false) {
   const identities = [],
     indices = new Map();
   const copies = item.instances.map((instance) => {
@@ -77,15 +78,21 @@ function prepareVectorBatch(item, allowPicking) {
           );
         }
       }
-      const bytes =
-        part.indices.byteLength +
-        Object.values(part.attributes).reduce(
-          (sum, attribute) => sum + attribute.values.byteLength,
-          0,
-        );
+      const packed =
+        ground && item.kind !== "circle"
+          ? packGround(part, item.kind, allowPicking)
+          : undefined;
+      const bytes = packed
+        ? packed.vertices.byteLength + packed.triangles.byteLength
+        : part.indices.byteLength +
+          Object.values(part.attributes).reduce(
+            (sum, attribute) => sum + attribute.values.byteLength,
+            0,
+          );
       result.push({
         kind: item.kind,
-        geometries: [part],
+        geometries: packed ? undefined : [part],
+        ground: packed,
         identities,
         fringe: part.attributes.fringe !== undefined,
         uniformPaint: item.uniformPaint,

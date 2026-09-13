@@ -1,4 +1,5 @@
 import DeveloperError from "../../Core/DeveloperError.js";
+import Cartesian2 from "../../Core/Cartesian2.js";
 import WorkerPool from "../Core/_private/_SceneGISVectorWorkerPool.js";
 import Event from "../../Core/Event.js";
 import Request from "../../Core/Request.js";
@@ -13,6 +14,7 @@ import VectorBatch from "./_private/_SceneGISVectorTileBatch.js";
 import Symbols from "./_private/_SceneGISVectorSymbols.js";
 import cover from "./_private/_SceneGISVectorTileCover.js";
 import renderCover from "../Core/_private/_SceneGISVectorTileRenderCover.js";
+import updateTerrain from "./_private/_SceneGISVectorTerrain.js";
 
 function integerOption(options, name, fallback) {
   const value = options[name] ?? fallback;
@@ -230,14 +232,27 @@ function validatePreparedTile(result, records, allowPicking) {
     }
     for (const item of group.batches) {
       if (
-        !item.geometries?.length ||
+        (!item.geometries?.length && !item.ground) ||
         !["fill", "line", "circle"].includes(item.kind) ||
         !Array.isArray(item.identities)
       ) {
         throw new DeveloperError("Invalid vector Worker geometry.");
       }
       let itemBytes = 0;
-      for (const geometry of item.geometries) {
+      if (item.ground) {
+        const { vertices, triangles, stride } = item.ground;
+        if (
+          !(vertices instanceof Float32Array) ||
+          !(triangles instanceof Float32Array) ||
+          stride !== (item.kind === "line" ? 7 : 3) ||
+          vertices.length % (stride * 4) ||
+          triangles.length % 4
+        ) {
+          throw new DeveloperError("Invalid vector Worker ground tables.");
+        }
+        itemBytes = vertices.byteLength + triangles.byteLength;
+      }
+      for (const geometry of item.geometries ?? []) {
         const high = geometry.attributes?.position3DHigh?.values;
         const low = geometry.attributes?.position3DLow?.values;
         if (
@@ -321,6 +336,7 @@ function prepareEntry(layer, state, entry, zoom) {
   }
   const parameters = {
     kind: "tile",
+    ground: layer._ground,
     records,
     zoom,
     maximumLevel: state.source.maximumLevel,
@@ -564,6 +580,7 @@ function updateSources(layer, zoom, frameState) {
             state.source,
             layer._maximumVisibleTiles,
             layer._world.maximumTiltedTileDistance,
+            layer._ground ? layer._groundHeights : undefined,
           );
     const protectedKeys = new Set();
     state.visible.length = 0;
@@ -705,11 +722,12 @@ function publishOrder(layer) {
 }
 
 /**
- * Renders independently decoded vector tiles on a SceneGIS Z=0 planar world.
+ * Renders independently decoded vector tiles on a SceneGIS planar world.
  * Add this object to scene.primitives. The collection then owns its lifetime.
  * Construction does not request data or allocate GPU resources. Scene, World,
  * style, and source overrides are borrowed. Style/source configuration is fixed.
- * This flat renderer requires a world without a terrainProvider.
+ * Uses a flat fast path without a terrainProvider, and direct ground rendering
+ * with a provider. Ground rendering requires WebGL2, float and depth textures.
  * Published resident ancestors or descendants cover pending desired tiles
  * within the cache budget. A cache without spare slots may evict that coverage.
  * @alias SceneGISVectorTileLayer
@@ -742,11 +760,6 @@ function SceneGISVectorTileLayer(options) {
     scene.world.isDestroyed()
   ) {
     throw new DeveloperError("scene must have a live SceneGISPlanarWorld.");
-  }
-  if (scene.world.terrainProvider !== undefined) {
-    throw new DeveloperError(
-      "The flat vector renderer does not support a terrainProvider.",
-    );
   }
   const style =
     options.style instanceof SceneGISVectorTileStyle
@@ -808,6 +821,8 @@ function SceneGISVectorTileLayer(options) {
   }
   this._scene = scene;
   this._world = scene.world;
+  this._ground = scene.world.terrainProvider !== undefined;
+  this._groundHeights = new Cartesian2();
   this._style = style;
   this._show = options.show ?? true;
   this._allowPicking = options.allowPicking ?? true;
@@ -1028,11 +1043,6 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
       "The vector layer must update in its original planar Scene.",
     );
   }
-  if (this._world.terrainProvider !== undefined) {
-    throw new DeveloperError(
-      "The flat vector renderer does not support a terrainProvider.",
-    );
-  }
   if (!this._show || !this._world.show) {
     if (frameState.passes.render) {
       clearView(this);
@@ -1040,6 +1050,42 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
     return;
   }
   if (frameState.passes.render) {
+    const provider = this._world.terrainProvider;
+    const ground = provider !== undefined;
+    if (ground !== this._ground) {
+      this._ground = ground;
+      this._symbols?.clear();
+      this._drawOrder.length = 0;
+      for (const record of this._backgrounds) {
+        record.batch?.destroy();
+        record.batch = undefined;
+        record.signature = undefined;
+      }
+      for (const state of this._sources.values()) {
+        state.render.clear();
+        for (const entry of state.entries.values()) {
+          discardPreparation(entry);
+          for (const batches of entry.batches.values()) {
+            for (const batch of batches) {
+              batch.destroy();
+            }
+          }
+          entry.batches.clear();
+          entry.layerSignatures = undefined;
+          entry.signature = undefined;
+          if (entry.data) {
+            entry.state = "received";
+          }
+        }
+      }
+    }
+    if (ground) {
+      // The volume envelope includes the pending zero-height surface. The one
+      // metre guard encloses boundary samples; it never offsets map geometry.
+      this._groundHeights.x = Math.min(0, provider.minimumHeight) - 1;
+      this._groundHeights.y = Math.max(0, provider.maximumHeight) + 1;
+    }
+    updateTerrain(this);
     const zoom = cover.computeZoom(
       frameState,
       this._world.coordinateSystem.extent.width,
@@ -1100,6 +1146,8 @@ SceneGISVectorTileLayer.prototype.destroy = function () {
     state.render.clear();
   }
   this._drawOrder.length = 0;
+  this._terrain = undefined;
+  this._groundRanges = undefined;
   return destroyObject(this);
 };
 

@@ -41,6 +41,7 @@ function writeSlot(batch, slot, initialize) {
   if (
     initialize ||
     slot.quad !== quad ||
+    slot.encoded !== candidate.encoded ||
     slot.visible !== visible ||
     slot.scale !== scale ||
     slot.haloWidth !== haloWidth ||
@@ -68,6 +69,7 @@ function writeSlot(batch, slot, initialize) {
       ]);
     }
     slot.quad = quad;
+    slot.encoded = candidate.encoded;
     slot.visible = visible;
     slot.scale = scale;
     slot.haloWidth = haloWidth;
@@ -250,6 +252,7 @@ function publish(runtime, candidates, frameState) {
           frameState.context,
           group.fixed,
           group.staging,
+          runtime.owner._ground,
         );
         allocated.push(batch);
         batch.command = command(runtime, batch, frameState);

@@ -1,24 +1,37 @@
-in vec4 v_color;
+#ifdef SCENEGIS_VECTOR_GROUND
+#define SCENEGIS_VECTOR_INPUT
+vec2 groundCoordinates();
+uniform bool u_sceneGISGroundLighting;
+float groundLight;
+#else
+#define SCENEGIS_VECTOR_INPUT in
+#endif
+SCENEGIS_VECTOR_INPUT vec4 v_color;
 #ifdef SCENEGIS_VECTOR_PICKING
-in vec4 v_pickColor;
+SCENEGIS_VECTOR_INPUT vec4 v_pickColor;
 #endif
 uniform vec4 u_sceneGISVectorTileClip;
 uniform vec2 u_sceneGISVectorDepthRange;
+#ifdef SCENEGIS_VECTOR_TERRAIN_ANCHOR
+in vec2 v_anchorLocal;
+in float v_anchorDepth;
+in float v_groundVisibility;
+#endif
 
 #ifdef SCENEGIS_VECTOR_CIRCLE
-in vec2 v_circleCoordinate;
-in vec3 v_dimensions;
-in vec4 v_strokeColor;
+SCENEGIS_VECTOR_INPUT vec2 v_circleCoordinate;
+SCENEGIS_VECTOR_INPUT vec3 v_dimensions;
+SCENEGIS_VECTOR_INPUT vec4 v_strokeColor;
 #endif
 #ifdef SCENEGIS_VECTOR_FRINGE
-in float v_fringe;
+SCENEGIS_VECTOR_INPUT float v_fringe;
 #endif
 #ifdef SCENEGIS_VECTOR_LINE
-in vec4 v_lineCoordinate;
-in vec4 v_lineStyle;
-in vec3 v_lineDash;
-in vec2 v_lineEnds;
-in float v_lineProgress;
+SCENEGIS_VECTOR_INPUT vec4 v_lineCoordinate;
+SCENEGIS_VECTOR_INPUT vec4 v_lineStyle;
+SCENEGIS_VECTOR_INPUT vec3 v_lineDash;
+SCENEGIS_VECTOR_INPUT vec2 v_lineEnds;
+SCENEGIS_VECTOR_INPUT float v_lineProgress;
 #ifdef SCENEGIS_VECTOR_DASH
 uniform sampler2D u_sceneGISVectorDashTable;
 uniform vec2 u_sceneGISVectorDashSize;
@@ -69,6 +82,12 @@ float lineCoverage()
 
 void main()
 {
+#ifdef SCENEGIS_VECTOR_GROUND
+    vec2 local = groundCoordinates();
+#elif defined(SCENEGIS_VECTOR_TERRAIN_ANCHOR)
+    if (v_groundVisibility < 0.5 || v_anchorDepth <= u_sceneGISVectorDepthRange.x || v_anchorDepth > u_sceneGISVectorDepthRange.y) discard;
+    vec2 local = v_anchorLocal;
+#else
     vec4 eyeA = czm_windowToEyeCoordinates(vec4(gl_FragCoord.xy, 0.0, 1.0));
     vec4 eyeB = czm_windowToEyeCoordinates(vec4(gl_FragCoord.xy, 0.5, 1.0));
     eyeA /= eyeA.w;
@@ -83,10 +102,15 @@ void main()
     float viewDepth = -(eyeA.z + (eyeB.z - eyeA.z) * t);
     if (viewDepth <= u_sceneGISVectorDepthRange.x || viewDepth > u_sceneGISVectorDepthRange.y) discard;
     vec2 local = a.xy + direction.xy * t;
-    if (t < 0.0 || local.x < u_sceneGISVectorTileClip.x || local.x >= u_sceneGISVectorTileClip.z ||
+    if (t < 0.0) discard;
+#endif
+    if (local.x < u_sceneGISVectorTileClip.x || local.x >= u_sceneGISVectorTileClip.z ||
         local.y > u_sceneGISVectorTileClip.w || local.y <= u_sceneGISVectorTileClip.y) discard;
 
     vec4 fill = czm_gammaCorrect(v_color);
+#ifdef SCENEGIS_VECTOR_GROUND
+    fill.rgb *= groundLight;
+#endif
     fill.rgb *= fill.a;
 #ifdef SCENEGIS_VECTOR_CIRCLE
     float distanceToCenter = length(v_circleCoordinate);

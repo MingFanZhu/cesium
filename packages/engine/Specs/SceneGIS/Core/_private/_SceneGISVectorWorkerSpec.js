@@ -143,6 +143,67 @@ describe("SceneGIS/Core/SceneGISVectorWorker", function () {
     expect(result.image.arrayBufferView.byteLength).toBeGreaterThan(0);
   });
 
+  it("transfers ground triangle tables with exact feature tokens and byte accounting", async function () {
+    const bytes = fixture([
+      {
+        features: [
+          {
+            id: "99",
+            type: 3,
+            geometry: [9, 0, 0, 26, 8192, 0, 0, 8192, 8191, 0, 15],
+          },
+        ],
+      },
+    ]);
+    const result = await processor.scheduleTask(
+      {
+        kind: "tile",
+        ground: true,
+        allowPicking: true,
+        buffer: bytes.buffer,
+        configuration: {
+          extent: {
+            minimumX: -512,
+            minimumY: -512,
+            maximumX: 512,
+            maximumY: 512,
+          },
+          style: {
+            ...style,
+            layers: [
+              {
+                id: "land",
+                type: "fill",
+                source: "test",
+                "source-layer": "data",
+                paint: { "fill-antialias": false },
+              },
+            ],
+          },
+        },
+        tile: { x: 0, y: 0, level: 0 },
+        maximumLevel: 0,
+        zoom: 0,
+        records: [{ id: "land", signature: "ground" }],
+      },
+      [bytes.buffer],
+    );
+    expect(bytes.byteLength).toBe(0);
+    const batch = result.layers[0].batches[0];
+    expect(batch.geometries).toBeUndefined();
+    expect(batch.identities[0].featureId).toBe("99");
+    expect(batch.ground.stride).toBe(3);
+    expect(batch.ground.triangles.length).toBe(8);
+    expect(batch.ground.vertices instanceof Float32Array).toBeTrue();
+    expect(batch.ground.triangles instanceof Float32Array).toBeTrue();
+    for (let i = 2; i < batch.ground.vertices.length; i += 12) {
+      expect(batch.ground.vertices[i]).toBe(0);
+    }
+    expect(result.byteLength).toBe(
+      batch.ground.vertices.byteLength + batch.ground.triangles.byteLength,
+    );
+  });
+
   it("returns typed transferable buffers when a dense tile exceeds the Uint16 vertex limit", async function () {
     const count = 17000;
     const geometry = [count * 8 + 1];

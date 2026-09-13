@@ -120,6 +120,7 @@ function* collect(runtime, job) {
     for (const [entry, regions] of job.cover.get(definition.source) ?? []) {
       for (const base of tileCandidates(runtime, entry, order)) {
         yield;
+        Projection.attach(job.projection, base);
         if (!regions.some((region) => inRegion(base.position, region, world))) {
           continue;
         }
@@ -417,6 +418,7 @@ function viewSignature(runtime, zoom) {
   const view = camera.viewMatrix,
     projection = camera.frustum.projectionMatrix;
   return [
+    runtime.owner._terrain?.revision,
     ...Array.from({ length: 16 }, (_, i) => view[i]),
     ...Array.from({ length: 16 }, (_, i) => projection[i]),
     zoom,
@@ -448,6 +450,7 @@ function drawCandidates(runtime, candidates, zoom) {
     if (!candidate.selection) {
       continue;
     }
+    Projection.attach(projection, candidate);
     candidate._visible = false;
     candidate.placed = undefined;
     if (
@@ -651,7 +654,7 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
   const content = coverSignature(this);
   const resource = `${this.assets.revision}/${this._shaping.revision}`;
   const signature = `${view}|${content}|${resource}`;
-  this._projection = Projection.snapshot(this.owner.scene);
+  this._projection = Projection.snapshot(this.owner.scene, this.owner._terrain);
   this._metersPerPixel = metersPerPixel(this, zoom);
   let changed = view !== this._drawView || content !== this._drawContent;
   if (changed) {
@@ -740,6 +743,7 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
 SceneGISVectorSymbols.prototype.clear = function () {
   this._placement?.iterator.return();
   this._placement = undefined;
+  this._projection = undefined;
   for (const batch of this._groups.values()) {
     batch.resources.destroy();
   }

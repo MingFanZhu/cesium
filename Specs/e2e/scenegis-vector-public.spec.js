@@ -87,6 +87,100 @@ async function ready(page) {
   await expect(page.locator("#error")).toBeEmpty();
 }
 
+test("toggles real terrain while preserving the vector layer and Worker ownership", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  const observed = await routes(page);
+  await page.goto("/Test/vector-tiles/public.html");
+  await ready(page);
+  await page.evaluate(async () => {
+    const C = await import("/Build/CesiumUnminified/index.js");
+    const p = window.publicVectorPreview;
+    window.terrainLayer = p.layer;
+    window.terrainWorkers = p.layer._workers;
+    document.querySelector("#terrain").click();
+    const world = p.viewer.planarWorld;
+    // Keep this integration test offline. The real Esri provider is selected by
+    // the control, then substituted with deterministic public TerrainProvider data.
+    window.terrainProviderClass = world.terrainProvider.constructor.name;
+    world.terrainProvider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: 300,
+      maximumHeight: 300,
+      maximumLevel: 12,
+      errorEvent: new C.Event(),
+      getLevelMaximumGeometricError: (level) => 20037508 / 2 ** level,
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+      requestTileGeometry: () =>
+        Promise.resolve(
+          new C.SceneGISPlanarHeightmapTerrainData({
+            width: 9,
+            height: 9,
+            buffer: new Float32Array(81).fill(300),
+          }),
+        ),
+    };
+  });
+  await page.waitForFunction(() => {
+    const p = window.publicVectorPreview;
+    return (
+      p.layer._ground &&
+      p.layer.tilesLoaded &&
+      p.viewer.planarWorld.tilesLoaded &&
+      p.layer._terrain?.entries.some((e) => e.mesh?.minimumHeight === 300)
+    );
+  });
+  await expect(page.locator("#terrain")).toBeChecked();
+  await expect(page.locator("#terrain-status")).toContainText("真实地形已就绪");
+  const ground = await page.evaluate(async () => {
+    const C = await import("/Build/CesiumUnminified/index.js");
+    const p = window.publicVectorPreview;
+    const scene = p.viewer.scene;
+    const point = new C.Cartesian2(
+      scene.canvas.clientWidth / 2,
+      scene.canvas.clientHeight / 2,
+    );
+    const position = scene.pickPosition(point);
+    return {
+      same: p.layer === window.terrainLayer,
+      workers: p.layer._workers === window.terrainWorkers,
+      provider: window.terrainProviderClass,
+      height: position?.z,
+      commands: p.layer.statistics.drawCommands,
+      failures: p.layer.statistics.failedTiles,
+      anchors: p.layer._symbols._placed.map((c) => c.position.z),
+    };
+  });
+  expect(ground.same && ground.workers).toBe(true);
+  expect(ground.provider).toBe(
+    "SceneGISPlanarUrlTemplateHeightmapTerrainProvider",
+  );
+  expect(ground.height).toBeCloseTo(300, 0);
+  expect(ground.commands).toBeGreaterThan(0);
+  expect(ground.failures).toBe(0);
+  expect(ground.anchors.length).toBeGreaterThan(0);
+  expect(ground.anchors.every((z) => Math.abs(z - 300) < 0.1)).toBe(true);
+  await page.locator("#terrain").uncheck();
+  await page.waitForFunction(
+    () =>
+      !window.publicVectorPreview.layer._ground &&
+      window.publicVectorPreview.layer.tilesLoaded,
+  );
+  await ready(page);
+  expect(
+    await page.evaluate(
+      () =>
+        window.publicVectorPreview.layer === window.terrainLayer &&
+        window.publicVectorPreview.layer._workers === window.terrainWorkers,
+    ),
+  ).toBe(true);
+  expect(errors).toEqual([]);
+  expect(observed.unexpected).toEqual([]);
+});
+
 test("renders the public-map page with deterministic data, picking, tilt and resource recreation", async ({
   page,
 }, testInfo) => {

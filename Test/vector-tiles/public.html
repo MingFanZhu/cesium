@@ -28,7 +28,15 @@
         <option value="newyork">纽约 · 曼哈顿</option>
         <option value="shanghai">上海 · 外滩</option>
         <option value="beijing">北京 · 故宫</option>
+        <option value="nanjing">南京 · 紫金山（地形）</option>
+        <option value="alps">阿尔卑斯 · 因斯布鲁克（地形）</option>
       </select>
+      <label class="toggle"
+        ><input id="terrain" type="checkbox" />真实地形 · 矢量贴地</label
+      >
+      <p id="terrain-status" class="hint">
+        零高程地表；可切换至 Esri 全球高程。网络不可用时可关闭地形。
+      </p>
       <div class="actions">
         <button id="top" type="button">俯视</button>
         <button id="tilt" type="button">倾斜</button>

@@ -24,6 +24,8 @@ import flatFragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTi
 import flatVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTileFlatVS.js";
 import circleVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTileCircleVS.js";
 import lineVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTileLineVS.js";
+import GroundResources from "./_SceneGISVectorGroundResources.js";
+import anchorVisibility from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorAnchorVisibility.js";
 
 function repeatedColor(bytes, count) {
   const values = new Uint8Array(count * 4);
@@ -94,6 +96,7 @@ function createVertexArray(
   locations,
   resources,
   uniformPaint,
+  terrainAnchors,
 ) {
   const buffers = [];
   let indexBuffer;
@@ -119,6 +122,16 @@ function createVertexArray(
         componentsPerAttribute: attribute.componentsPerAttribute,
         normalize: attribute.normalize,
       });
+      if (
+        terrainAnchors &&
+        (name === "position3DHigh" || name === "position3DLow")
+      ) {
+        resources._anchorBuffers.push({
+          name,
+          buffer,
+          values: attribute.values,
+        });
+      }
     }
     indexBuffer = Buffer.createIndexBuffer({
       context,
@@ -160,6 +173,9 @@ function SceneGISVectorTileBatchResources(
   owner,
   allowPicking,
 ) {
+  if (prepared.ground) {
+    return new GroundResources(context, prepared, owner, allowPicking);
+  }
   this._vertexArrays = [];
   this._pickIds = [];
   this._shaderProgram = undefined;
@@ -167,6 +183,7 @@ function SceneGISVectorTileBatchResources(
   this._dashSize = undefined;
   this._paintAttributes = [];
   this._paintPrefix = prepared.kind;
+  this._anchorBuffers = [];
   try {
     const geometries =
       prepared.geometries ??
@@ -210,6 +227,7 @@ function SceneGISVectorTileBatchResources(
           locations,
           this,
           prepared.uniformPaint,
+          owner._ground && prepared.kind === "circle",
         ),
       );
     }
@@ -256,11 +274,17 @@ function SceneGISVectorTileBatchResources(
     }
     if (prepared.kind === "circle") {
       defines.push("SCENEGIS_VECTOR_CIRCLE");
+      if (owner._ground) {
+        defines.push("SCENEGIS_VECTOR_TERRAIN_ANCHOR");
+      }
     }
     const sources =
       prepared.kind === "line"
         ? [lineVertex]
         : [prepared.kind === "circle" ? circleVertex : flatVertex];
+    if (owner._ground && prepared.kind === "circle") {
+      sources.unshift(anchorVisibility);
+    }
     this._shaderProgram = ShaderProgram.fromCache({
       context,
       vertexShaderSource: new ShaderSource({ defines, sources }),
@@ -314,6 +338,7 @@ SceneGISVectorTileBatchResources.prototype.destroy = function () {
   }
   this._pickIds.length = 0;
   this._paintAttributes.length = 0;
+  this._anchorBuffers.length = 0;
   return destroyObject(this);
 };
 

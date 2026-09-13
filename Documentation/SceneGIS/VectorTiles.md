@@ -19,7 +19,8 @@ V5A 增加独立平面点标注与 [本地点标注图集](../../Test/vector-til
 当时 Bright 接入 108/119 层，Liberty 97/111 层，各新增 15 个 point symbol layers。
 V5B 继续接入各 10 个沿线名称、路牌与箭头层：当前 Bright 118/119、Liberty 107/111。
 新增 [沿线标注图集](../../Test/vector-tiles/line-symbols.html)；语义和限制见 [标注文档](VectorTileSymbols.md)。
-生产贴地与 Globe 尚未支持；凸矩形直接贴地实验不代表完整地形渲染资格。
+V4A 已实现平面直接贴地、terrain anchors 和公开页地形开关，技术资格见下文；
+负责人视觉 gate 待验收。Globe 和完整连续曲面字形仍未支持。
 整体边界见 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
 公共契约见 [ADR-0058](Decisions/ADR-0058-vector-tile-frontend-contract.md)。
 渲染与调度契约见 [ADR-0059](Decisions/ADR-0059-planar-vector-tile-batch-renderer.md)。
@@ -160,7 +161,7 @@ Worker 入口/通信失败和任务错误显式上报，没有主线程回退或
 
 ## 验证与维护
 
-目前 143 项 focused Specs 覆盖前端、几何/cover、真实 Scene 样式、DPR、多视锥、symbol 与 GPU 资源。
+目前 156 项 focused Specs 覆盖前端、几何/cover、真实 Scene 样式、DPR、多视锥、symbol、ground 与 GPU 资源。
 另有 11 项页面 E2E，实际检查城市颜色、拾取、requestRenderMode、倾斜、显隐、
 重建、延迟替换、样式图集、公开地图、中英文点标注与曲线/路牌/箭头。
 完整 build/build-ts/tsc/release、独立 engine 安装后的五个入口与四份固定 Shader 已验证。
@@ -177,6 +178,31 @@ V3B1 样式资格与视觉 gate 见 [V3B1 review](../../AgentDocs/vector-tiles/r
 [extension plan](../../AgentDocs/vector-tiles/plans/2026-09-12-vector-tiles-extension.md)。
 
 ## 平面图层
+
+### 真实地形
+
+`world.terrainProvider` 有值时，Layer 自动使用直接 ground 后端；设回 `undefined` 恢复 flat。
+共享 source 缓存、MVT/style/Worker 和瓦片调度，切换只重建 GPU 批次与 placement。
+不同 terrainProvider 之间切换复用 ground 几何；地形 LOD 改变不重新三角化道路或面。
+
+ground 要求 WebGL2、float textures 与 depth textures。Worker 把已有 fill/line 三角化
+打包成数值表，GPU 使用批量垂直三角凸体，从地表深度重建真实位置并恢复 coverage。
+孔洞、线型、颜色、透明度与逐要素拾取沿用既有语义；不先渲染地图颜色纹理，不通过抬高 Z
+避免冲突。`pickPosition` 返回地形位置。开启 `world.enableLighting` 时，地图颜色采用
+地表深度法线的环境光加漫反射，关闭时保持原 style 颜色；不是高级材质/阴影集成资格。
+
+可见性使用 provider 声明的全局高度包络；实际栅格化凸体在命令执行时根据当前已发布
+terrain cover 收紧，含零高程等待地表及 skirts。只改高度 uniform，不重建 geometry。
+圆点与文字使用独立 terrain anchor，详见 [地形标注](VectorTileSymbols.md#地形标注)。
+
+`Test/vector-tiles/public.html` 提供“真实地形 · 矢量贴地”开关，以及紫金山、因斯布鲁克定位。
+地形使用既有示例的 Esri WorldElevation3D LERC 服务；失败显示提示，关闭恢复零高程。
+不限定用户相机的 pitch；style 比例仍沿用视轴与 Z=0 参考面的契约，视轴完全不再朝向参考面
+时不显示地图，此既有比例限制尚需后续三维比例契约解决。Globe 仍属 G1，不能由平面结果推断。
+
+契约与取舍见 [ADR-0069](Decisions/ADR-0069-planar-vector-ground-rendering.md)。
+
+### 配置与样式
 
 `scene` 必须已创建 `SceneGISPlanarWorld`，数据与其 canonical tilingScheme 对齐。
 实际平面示例见 [Test/vector-tiles](../../Test/vector-tiles/README.md)。
@@ -211,7 +237,7 @@ scene.primitives.remove(layer);
 | circle          | 屏幕圆形、CSS radius/stroke、color/opacity/blur；DPR 感知 AA                                                 |
 | style           | 属性/zoom 表达式、filter、visibility、min/maxzoom；全 tile 的 style layer 顺序优先                           |
 | pick            | primitive 为图层；id 含 source/sourceLayer/styleLayer/tile/featureIndex/featureId/properties                 |
-| 明确拒绝        | profile 之外的属性和类型，包括 symbol、pattern、gradient、extrusion、heatmap、raster、terrainProvider        |
+| 明确拒绝        | profile 之外的属性和类型，包括 pattern、gradient、extrusion、heatmap、raster；symbol 支持见专门文档          |
 
 Line width/gap/offset 从参考平面的 CSS pixel 换算为米，再参与投影；
 俯视缩放保持参考宽度，倾斜时随地图透视变化。正 offset 向线方向右侧移动。
@@ -229,7 +255,7 @@ Dash 数组交替为 dash/gap，以当前 line-width 为单位；允许零长 da
 同一 region DrawCommand 设置 pickId，由 Cesium 自动派生拾取命令；颜色与拾取共享裁剪。
 线条由自有连续 strip 与 coverage Shader 实现，不再依赖 PolylineGeometry/PolylineCommon。
 瓦片原点与高低位坐标保留大坐标精度；裁剪射线在 eye space 求方向，避免平移后做差丢失有效位。
-普通前景对象在平面地图之后绘制，surface 保留 Z=0 深度。
+普通前景对象在平面地图之后绘制，surface 保留自己的真实深度；无 provider 时为 Z=0。
 多视锥通过参考平面交点的 canonical depth 区间排除重复颜色贡献，保持透明度与前景层序。
 
 Desired tiles 使用单级 view cover，按预算 coarsen；超出 source maximumLevel 时复用该级几何。

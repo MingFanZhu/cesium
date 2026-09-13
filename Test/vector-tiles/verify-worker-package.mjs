@@ -196,6 +196,19 @@ try {
             extent: 4096,
             features: [
               {
+                id: "land",
+                type: 3,
+                properties: {},
+                geometry: {
+                  parts: [
+                    new Float64Array([
+                      1536, 1536, 2560, 1536, 2560, 2560, 1536, 2560,
+                    ]),
+                  ],
+                  polygonStarts: new Uint32Array([0]),
+                },
+              },
+              {
                 id: "symbol",
                 type: 1,
                 properties: {},
@@ -224,10 +237,19 @@ try {
             },
             layers: [
               {
+                id: "land",
+                type: "fill",
+                source: "test",
+                "source-layer": "labels",
+                filter: ["==", ["geometry-type"], "Polygon"],
+                paint: { "fill-color": "blue", "fill-antialias": false },
+              },
+              {
                 id: "labels",
                 type: "symbol",
                 source: "test",
                 "source-layer": "labels",
+                filter: ["==", ["geometry-type"], "Point"],
                 layout: {
                   "text-field": "A",
                   "text-font": ["Test"],
@@ -262,6 +284,50 @@ try {
       scene.camera.position.x += 1;
       render();
       const stable = batch.resources.uploadedBytes === uploads;
+      world.terrainProvider = {
+        tilingScheme: world.tilingScheme,
+        minimumHeight: 12,
+        maximumHeight: 12,
+        maximumLevel: 0,
+        errorEvent: new C.Event(),
+        getLevelMaximumGeometricError: () => 1,
+        getTileDataAvailable: () => true,
+        loadTileDataAvailability: () => undefined,
+        requestTileGeometry: () =>
+          Promise.resolve(
+            new C.SceneGISPlanarHeightmapTerrainData({
+              width: 3,
+              height: 3,
+              buffer: new Float32Array(9).fill(12),
+            }),
+          ),
+      };
+      const groundStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - groundStart > 10000) {
+          throw new Error("Ground package preparation did not finish.");
+        }
+      } while (
+        !layer.tilesLoaded ||
+        layer._symbols._placed[0]?.position.z !== 12
+      );
+      const location = C.SceneTransforms.worldToWindowCoordinates(
+        scene,
+        new C.Cartesian3(-20, 0, 12),
+      );
+      const groundColor = Array.from(
+        scene.context.readPixels({
+          x: Math.floor(location.x),
+          y: 63 - Math.floor(location.y),
+          width: 1,
+          height: 1,
+        }),
+      );
+      const groundPick = scene.pick(location)?.id.featureId;
+      const groundResources = layer._drawOrder[0]._resources;
+      const groundTextures = groundResources._textures.slice();
       scene.destroy();
       canvas.remove();
       return {
@@ -286,6 +352,11 @@ try {
           separate: fixed !== dynamic,
           released: fixed.isDestroyed() && dynamic.isDestroyed(),
         },
+        ground: {
+          color: groundColor,
+          picked: groundPick,
+          released: groundTextures.every((t) => t.isDestroyed()),
+        },
       };
     }, mode);
     assert(result.layers > 0 && result.features > 0);
@@ -295,6 +366,9 @@ try {
     assert.deepEqual(errors, []);
     assert.deepEqual(result.symbol.pixel, [255, 0, 0, 255]);
     assert.equal(result.symbol.picked, "symbol");
+    assert.deepEqual(result.ground.color, [0, 0, 255, 255]);
+    assert.equal(result.ground.picked, "land");
+    assert(result.ground.released);
     assert(
       result.symbol.stable && result.symbol.separate && result.symbol.released,
     );

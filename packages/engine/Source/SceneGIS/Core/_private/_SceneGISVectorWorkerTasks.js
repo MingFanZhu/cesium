@@ -151,7 +151,9 @@ function createVectorTaskHandler() {
             coordinates,
             parameters.zoom,
             tile,
-          ).flatMap((item) => prepareBatch(item, parameters.allowPicking));
+          ).flatMap((item) =>
+            prepareBatch(item, parameters.allowPicking, parameters.ground),
+          );
           layers.push({ id: record.id, signature: record.signature, batches });
         }
       }

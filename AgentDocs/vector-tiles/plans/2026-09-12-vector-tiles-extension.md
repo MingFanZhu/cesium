@@ -105,6 +105,7 @@ Globe 从数据/样式/调度职责分离开始考虑，实际渲染资格另设
 | V3C1A | 低角度远景共享选层                  | V5B checkpoint   | 批准低角度专用距离，俯视拉远保持           | 选取/请求减少，完整粗覆盖，俯视一致，资源与视觉资格                          | completed | [V3C1A](2026-09-13-v3c1a-tilted-distance.md)             |
 | V3C1B | 密集数据性能与必要线程              | V3C1A checkpoint | 真实含标注负载                             | 字节预算、必要 Worker 与性能/资源资格                                        | completed | [phase plan](2026-09-13-v3c1b-worker-preparation.md)     |
 | V3C1C | 标注交互更新                        | V3C1B checkpoint | 负责人批准持久布局、碰撞代理和分流 buffers | 当前帧绘制与拾取、布局收敛、资源和交互性能；负责人视觉 gate                  | completed | [V3C1C](2026-09-13-v3c1c-symbol-motion.md)               |
+| V4A   | 平面真实贴地与公开地形开关          | V3C1C checkpoint | 负责人批准，V2 证据已复核                  | 起伏/层序/pick/anchors/资源，技术 review 与负责人视觉 gate                   | completed | [V4A](2026-09-13-v4a-planar-terrain.md)                  |
 | V3D   | MapLibre / Streets 非标注样式增量   | V3C1C checkpoint | 当前公开样式差距与资源预算已明确           | translate/anchor、map-aligned circle、pattern 的约定 profile、画面与资源资格 | planned   | 未激活                                                   |
 | V4    | 平面矢量直接贴地生产资格            | V3D checkpoint   | V2 ground 可行性已验证；重查批量与层序边界 | 起伏地形、LOD/provider 变化下连续贴地；线宽/样式/逐要素交互与资源稳定        | planned   | 未激活                                                   |
 | V5C   | 地形标注                            | V4 checkpoint    | 生产地形已具备                             | 高程、遮挡、LOD 与标注稳定                                                   | planned   | 未激活                                                   |
@@ -212,3 +213,5 @@ V3C1B checkpoint：`065c345efd`。负责人批准新增 [V3C1C](2026-09-13-v3c1c
 负责人于 2026-09-13 确认 V3C1C 验收通过，技术 review 与视觉/交互 gate 已关闭；实现、Specs、
 ADR 与 AgentDocs 作为独立本地 checkpoint 提交。当前未激活下一 phase，地形共存仍以 V4 的
 生产资格为边界，不能由 flat 地图或共享选层推断已完成。
+
+负责人最新明确授权真实贴地，当前提前激活 [V4A](2026-09-13-v4a-planar-terrain.md)：平面 ground 后端、terrain anchors 与公开页开关。V3D 仍 planned；完整地形字形质量由 V5C 承接，Globe 仍为 G1。执行顺序调整为 V3C1C → V4A → V3D → 剩余 V4/V5C → V6，各阶段独立 gate。

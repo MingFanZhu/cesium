@@ -140,3 +140,13 @@ terrain/Globe 和跨 tile 语义道路拼接限制见 [标注文档](../../Docum
 Worker 发布路径验证：完成 `npm run build-release` 与 `npm run build-ts` 后运行
 `node Test/vector-tiles/verify-worker-package.mjs`。脚本只使用本地 fixture，分别启动独立
 installed engine / release ESM / release IIFE consumer，不混用 runtime identity；临时 npm 安装保留在系统临时目录。
+
+## V4A 真实地形
+
+公开页的“真实地形 · 矢量贴地”开关使用 Esri WorldElevation3D / Terrain3D ImageServer，
+与既有 planar terrain 示例相同：3857 单根 XYZ，LERC 257×257 高程边界样本，最高 16 级。
+紫金山和因斯布鲁克便于观察起伏；俯视、倾斜、道路/面拾取、开关往返保留同一 vector layer。
+native FPS 持续显示。公开网络失败显示提示，可关闭地形；本地 terrain/imagery 对照仍可离线运行。
+
+自动化以确定性坡面、山脊和 300 米高程 fixture 验证；发布包脚本新增真实 ground 色彩、pick
+与数值纹理释放检查。平面 terrain 资格不代表 Globe 或完整地形文字质量。

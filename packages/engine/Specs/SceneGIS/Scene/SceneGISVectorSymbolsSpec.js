@@ -2,6 +2,8 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  Event,
+  SceneGISPlanarHeightmapTerrainData,
   OrthographicFrustum,
   PerspectiveFrustum,
   Resource,
@@ -164,6 +166,115 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(layer.statistics.symbolFailures).toBe(0);
     expect(request.calls.count()).toBe(1);
     expect(pixel()).toEqual([255, 0, 0, 255]);
+  });
+
+  it("updates terrain text anchors and map-pitched glyph corners without replacing the atlas", async function () {
+    function provider(raise) {
+      return {
+        tilingScheme: world.tilingScheme,
+        minimumHeight: raise,
+        maximumHeight: 24 + raise,
+        maximumLevel: 0,
+        errorEvent: new Event(),
+        getLevelMaximumGeometricError: () => 1,
+        getTileDataAvailable: () => true,
+        loadTileDataAvailability: () => undefined,
+        requestTileGeometry: () =>
+          Promise.resolve(
+            new SceneGISPlanarHeightmapTerrainData({
+              width: 3,
+              height: 3,
+              buffer: Float32Array.from(
+                [0, 12, 24, 0, 12, 24, 0, 12, 24],
+                (n) => n + raise,
+              ),
+            }),
+          ),
+      };
+    }
+    world.terrainProvider = provider(0);
+    spyOn(source, "requestTile").and.resolveTo(tile());
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([
+      definition("labels", { "text-pitch-alignment": "map" }),
+    ]);
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return layer.tilesLoaded && layer._symbols._placed[0]?.position.z === 12;
+    });
+    const symbols = layer._symbols;
+    const candidate = symbols._placed[0];
+    const atlas = [...symbols.assets.pages.values()][0].texture;
+    for (const point of candidate.projected.text.quads[0].positions) {
+      expect(point.z).toEqualEpsilon(12 + (point.x * 24) / 1024, 0.001);
+    }
+    expect(scene.pick(glyphCenter(candidate))?.id.featureId).toBe("1");
+    world.terrainProvider = provider(10);
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return layer.tilesLoaded && symbols._placed[0]?.position.z === 22;
+    });
+    expect([...symbols.assets.pages.values()][0].texture).toBe(atlas);
+    expect(scene.pick(glyphCenter(symbols._placed[0]))?.id.featureId).toBe("1");
+    expect(layer.statistics.symbolFailures).toBe(0);
+    scene.primitives.remove(layer);
+    expect(layer._terrain).toBeUndefined();
+    expect(symbols._projection).toBeUndefined();
+  });
+
+  it("occludes a viewport label behind a terrain ridge in both color and pick", async function () {
+    const heights = new Float32Array(33 * 33).fill(12);
+    for (let row = 17; row <= 18; row++) {
+      heights.fill(60, row * 33, (row + 1) * 33);
+    }
+    world.terrainProvider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: 12,
+      maximumHeight: 60,
+      maximumLevel: 0,
+      errorEvent: new Event(),
+      getLevelMaximumGeometricError: () => 1,
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+      requestTileGeometry: () =>
+        Promise.resolve(
+          new SceneGISPlanarHeightmapTerrainData({
+            width: 33,
+            height: 33,
+            buffer: heights,
+          }),
+        ),
+    };
+    spyOn(source, "requestTile").and.resolveTo(tile());
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    scene.camera.position = new Cartesian3(0, -100, 50);
+    scene.camera.direction = Cartesian3.normalize(
+      new Cartesian3(0, 100, -38),
+      new Cartesian3(),
+    );
+    scene.camera.up = Cartesian3.cross(
+      scene.camera.right,
+      scene.camera.direction,
+      new Cartesian3(),
+    );
+    scene.camera.frustum.fov = Math.PI / 4;
+    const layer = add();
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return layer.tilesLoaded && layer._symbols._placed[0]?.position.z === 12;
+    });
+    const point = glyphCenter(layer._symbols._placed[0]);
+    expect(scene.pick(point)).toBeUndefined();
+    expect(pixel(Math.floor(point.x), Math.floor(point.y))).toEqual([
+      0, 0, 0, 255,
+    ]);
+    scene.camera.position = new Cartesian3(0, 0, 100);
+    scene.camera.direction = new Cartesian3(0, 0, -1);
+    scene.camera.up = new Cartesian3(0, 1, 0);
+    await loaded(layer);
+    expect(
+      scene.pick(glyphCenter(layer._symbols._placed[0]))?.id.featureId,
+    ).toBe("1");
   });
 
   it("reuses normalized Worker shapes across sizes and invalidates reloaded glyph metrics", async function () {

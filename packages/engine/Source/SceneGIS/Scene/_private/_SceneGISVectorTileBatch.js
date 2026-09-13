@@ -9,6 +9,8 @@ import RenderState from "../../../Renderer/RenderState.js";
 import BlendingState from "../../../Scene/BlendingState.js";
 import PrimitiveType from "../../../Core/PrimitiveType.js";
 import BatchResources from "../../Renderer/_private/_SceneGISVectorTileBatchResources.js";
+import prepareBatch from "../../Core/_private/_SceneGISVectorBatchGeometry.js";
+import CullFace from "../../../Scene/CullFace.js";
 
 const colorState = {
   depthTest: { enabled: false },
@@ -16,9 +18,93 @@ const colorState = {
   cull: { enabled: false },
   blending: BlendingState.PRE_MULTIPLIED_ALPHA_BLEND,
 };
+const minimumCorner = new Cartesian3();
+const maximumCorner = new Cartesian3();
+
+function groundHeights(batch, frameState) {
+  const owner = batch._owner;
+  const bounds = batch._tileBounds;
+  const ranges = (owner._groundRanges ??= new WeakMap());
+  let range = ranges.get(bounds);
+  if (range?.frame === frameState.frameNumber) {
+    return range.heights;
+  }
+  if (!range) {
+    range = { heights: new Cartesian2() };
+    ranges.set(bounds, range);
+  }
+  // Uniforms run after World.render publishes this frame's terrain cover. Tighten
+  // only the raster volume, never the earlier conservative frustum bounds.
+  const surface = owner._world._surface;
+  let minimum = 0,
+    maximum = 0;
+  for (let i = 0; i < surface._terrainQuerySnapshotCount; i++) {
+    const entry = surface._terrainQuerySnapshot[i];
+    if (entry.source === "FLAT") {
+      continue;
+    }
+    const extent = entry.tile.extent;
+    if (
+      extent.maximumX < bounds.minimumX ||
+      extent.minimumX > bounds.maximumX ||
+      extent.maximumY < bounds.minimumY ||
+      extent.minimumY > bounds.maximumY
+    ) {
+      continue;
+    }
+    minimum = Math.min(minimum, entry.mesh.skirtMinimumHeight);
+    maximum = Math.max(maximum, entry.mesh.maximumHeight);
+  }
+  range.frame = frameState.frameNumber;
+  range.heights.x = minimum - 1;
+  range.heights.y = maximum + 1;
+  return range.heights;
+}
+
+function updateAnchors(batch) {
+  const terrain = batch._owner._terrain;
+  const streams = batch._resources._anchorBuffers;
+  if (!streams?.length || !terrain || batch._anchorTerrain === terrain) {
+    return;
+  }
+  batch._anchorTerrain = terrain;
+  for (let i = 0; i < streams.length; i += 2) {
+    const high = streams[i].values;
+    const low = streams[i + 1].values;
+    let start = Infinity,
+      end = 0,
+      lastX,
+      lastY,
+      height;
+    for (let j = 0; j < low.length; j += 3) {
+      const x = high[j] + low[j] + batch._tileBounds.minimumX;
+      const y = high[j + 1] + low[j + 1] + batch._tileBounds.maximumY;
+      if (x !== lastX || y !== lastY) {
+        height = Math.fround(terrain.height(x, y));
+        lastX = x;
+        lastY = y;
+      }
+      if (low[j + 2] !== height) {
+        low[j + 2] = height;
+        start = Math.min(start, j + 2);
+        end = j + 3;
+      }
+    }
+    if (end > start) {
+      streams[i + 1].buffer.copyFromArrayView(
+        low.subarray(start, end),
+        start * 4,
+      );
+    }
+  }
+}
 
 /** Owns one tile/style geometry batch and its last published commands. @private */
 function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
+  if (owner._ground && prepared.instances && prepared.kind !== "circle") {
+    prepared = prepareBatch(prepared, allowPicking, true)[0];
+  }
+  this._ground = !!prepared.ground;
   this.commands = [];
   this.renderCommands = [];
   this._regionCommands = [];
@@ -39,7 +125,25 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
 }
 
 SceneGISVectorTileBatch.prototype.update = function (frameState) {
+  if (this._owner._ground) {
+    const bounds = this._tileBounds,
+      heights = this._owner._groundHeights;
+    Cartesian3.fromElements(
+      bounds.minimumX,
+      bounds.minimumY,
+      heights.x,
+      minimumCorner,
+    );
+    Cartesian3.fromElements(
+      bounds.maximumX,
+      bounds.maximumY,
+      heights.y,
+      maximumCorner,
+    );
+    BoundingSphere.fromCornerPoints(minimumCorner, maximumCorner, this._bounds);
+  }
   if (this._resources !== undefined) {
+    updateAnchors(this);
     if (this._record?.uniformPaint && this._record.key === this._geometryKey) {
       this._resources.updatePaint(this._record.uniformPaint);
     }
@@ -52,8 +156,12 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
     this._allowPicking,
   );
   this._prepared = undefined;
+  updateAnchors(this);
   const depthRange = new Cartesian2();
   const uniformMap = {
+    ...this._resources.uniformMap,
+    u_sceneGISGroundHeights: () => groundHeights(this, frameState),
+    u_sceneGISGroundLighting: () => this._owner._world.enableLighting,
     u_sceneGISVectorMetersPerPixel: () => this._owner._metersPerPixel,
     u_sceneGISVectorDepthRange: () => {
       const splits = frameState.frustumSplits;
@@ -77,7 +185,15 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
         modelMatrix: this._modelMatrix,
         boundingVolume: this._bounds,
         uniformMap,
-        renderState: RenderState.fromCache(colorState),
+        renderState: RenderState.fromCache(
+          this._ground
+            ? {
+                ...colorState,
+                cull: { enabled: true, face: CullFace.FRONT },
+              }
+            : colorState,
+        ),
+        instanceCount: this._resources.instanceCount ?? 0,
         pickId: this._allowPicking ? "v_pickColor" : undefined,
         primitiveType: PrimitiveType.TRIANGLES,
         pass: Pass.TERRAIN_CLASSIFICATION,
@@ -139,6 +255,7 @@ SceneGISVectorTileBatch.prototype.queue = function (frameState) {
 
 SceneGISVectorTileBatch.prototype.destroy = function () {
   this._resources?.destroy();
+  this._anchorTerrain = undefined;
   this._prepared = undefined;
   this.commands.length = 0;
   this.renderCommands.length = 0;

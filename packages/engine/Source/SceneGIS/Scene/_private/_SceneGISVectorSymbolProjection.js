@@ -5,7 +5,7 @@ import EncodedCartesian3 from "../../../Core/EncodedCartesian3.js";
 import Matrix4 from "../../../Core/Matrix4.js";
 import Line from "../../Core/_private/_SceneGISVectorSymbolLine.js";
 
-function snapshot(scene) {
+function snapshot(scene, terrain) {
   const camera = scene.camera,
     frustum = camera.frustum;
   const position = camera.positionWC,
@@ -14,6 +14,7 @@ function snapshot(scene) {
   // Camera getters update their derived members. Read once for a placement pass,
   // instead of invoking that work for every anchor and glyph corner.
   return {
+    terrain,
     camera: {
       positionWC: Cartesian3.clone(position),
       directionWC: Cartesian3.clone(direction),
@@ -36,6 +37,20 @@ function snapshot(scene) {
       clientHeight: scene.canvas.clientHeight,
     },
   };
+}
+
+function terrainPoint(scene, x, y) {
+  return new Cartesian3(x, y, scene.terrain?.height(x, y) ?? 0);
+}
+
+function attach(scene, candidate) {
+  if (candidate.terrain === scene.terrain) {
+    return;
+  }
+  const position = candidate.anchor.position;
+  candidate.position = terrainPoint(scene, position.x, position.y);
+  candidate.encoded = EncodedCartesian3.fromCartesian(candidate.position);
+  candidate.terrain = scene.terrain;
 }
 
 function depth(scene, point) {
@@ -111,7 +126,9 @@ function screenPath(scene, candidate) {
       i >= 0 && i < points.length;
       i += step
     ) {
-      let point = points[i];
+      let point = scene.terrain
+        ? terrainPoint(scene, points[i].x, points[i].y)
+        : points[i];
       const a = depth(scene, previous),
         b = depth(scene, point);
       const { near, far } = scene.camera.frustum;
@@ -121,7 +138,7 @@ function screenPath(scene, candidate) {
         point = {
           x: previous.x + (point.x - previous.x) * t,
           y: previous.y + (point.y - previous.y) * t,
-          z: 0,
+          z: previous.z + ((point.z ?? 0) - previous.z) * t,
         };
       }
       // The boundary is known to be inside; avoid a second rounded depth test.
@@ -195,10 +212,10 @@ function alignment(scene, candidate, text, metersPerPixel) {
   } else if (!mapPitch && alignment === "map") {
     const next = project(
       scene,
-      new Cartesian3(
+      terrainPoint(
+        scene,
         candidate.position.x + metersPerPixel,
         candidate.position.y,
-        0,
       ),
     );
     if (!next) {
@@ -213,10 +230,10 @@ function alignment(scene, candidate, text, metersPerPixel) {
   if (mapPitch) {
     const next = project(
       scene,
-      new Cartesian3(
+      terrainPoint(
+        scene,
         candidate.position.x + Math.cos(angle) * metersPerPixel,
         candidate.position.y - Math.sin(angle) * metersPerPixel,
-        0,
       ),
     );
     if (!next) {
@@ -246,6 +263,7 @@ function geometry(scene, candidate, shaped, text, metersPerPixel) {
     !reusable ||
     !cached ||
     cached.anchor !== candidate.anchor ||
+    cached.terrain !== scene.terrain ||
     (mapPitch && cached.metersPerPixel !== metersPerPixel) ||
     cached.angle !== angle ||
     cached.flip !== flip ||
@@ -278,13 +296,12 @@ function geometry(scene, candidate, shaped, text, metersPerPixel) {
     }
     if (mapPitch) {
       for (const quad of quads) {
-        quad.positions = quad.corners.map(
-          ([x, y]) =>
-            new Cartesian3(
-              candidate.position.x + x * metersPerPixel,
-              candidate.position.y - y * metersPerPixel,
-              0,
-            ),
+        quad.positions = quad.corners.map(([x, y]) =>
+          terrainPoint(
+            scene,
+            candidate.position.x + x * metersPerPixel,
+            candidate.position.y - y * metersPerPixel,
+          ),
         );
         quad.encodedPositions = quad.positions.map((point) =>
           EncodedCartesian3.fromCartesian(point),
@@ -292,6 +309,7 @@ function geometry(scene, candidate, shaped, text, metersPerPixel) {
       }
     }
     cached = {
+      terrain: scene.terrain,
       anchor: candidate.anchor,
       metersPerPixel,
       angle,
@@ -460,11 +478,14 @@ function collision(scene, candidate, shaped, text, metersPerPixel) {
     if (mapPitch) {
       const projected = [];
       for (const [x, y] of corners) {
-        const screen = project(scene, {
-          x: candidate.position.x + x * metersPerPixel,
-          y: candidate.position.y - y * metersPerPixel,
-          z: 0,
-        });
+        const screen = project(
+          scene,
+          terrainPoint(
+            scene,
+            candidate.position.x + x * metersPerPixel,
+            candidate.position.y - y * metersPerPixel,
+          ),
+        );
         if (!screen) {
           return undefined;
         }
@@ -488,5 +509,6 @@ const SceneGISVectorSymbolProjection = {
   geometry,
   collision,
   snapshot,
+  attach,
 };
 export default SceneGISVectorSymbolProjection;

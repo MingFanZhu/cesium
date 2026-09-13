@@ -202,3 +202,14 @@ main {
     font-size: 22px;
   }
 }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.toggle input {
+  width: auto;
+  margin: 0;
+}

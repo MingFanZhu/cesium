@@ -8,12 +8,12 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V3C1C completed — 标注交互更新`                       |
-| Active phase plan      | None；后续阶段未激活                                   |
+| Current phase          | `V4A completed — 平面真实贴地`                         |
+| Active phase plan      | [V4A](plans/2026-09-13-v4a-planar-terrain.md)          |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
-| Last updated           | `2026-09-13`                                           |
+| Last updated           | `2026-09-14`                                           |
 
 ## Scope
 
@@ -37,7 +37,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
 - Source：`packages/engine/Source/SceneGIS/Core/SceneGISVectorTile*.js` 和
   `packages/engine/Source/SceneGIS/Scene/SceneGISVectorTileLayer.js`，五个公共入口。
-- Specs：Core/Renderer/Scene 镜像测试，146 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
+- Specs：Core/Renderer/Scene 镜像测试，156 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面：[城市](../../Test/vector-tiles/index.html) 与 [样式图集](../../Test/vector-tiles/styles.html)，
   21 个城市 MVT fixtures 加 1 个样式 MVT。
@@ -75,7 +75,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[V3C1C review](reviews/2026-09-13-v3c1c-symbol-motion-review.md)；
+- Latest review：[V4A review](reviews/2026-09-14-v4a-planar-terrain-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
 - Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
@@ -154,3 +154,5 @@ V3C1C gate 已关闭，本阶段实现与记录形成独立本地 checkpoint；�
 默认地表/Globe 共存的源码复核已补入[地形讨论](discussions/2026-09-12-maplibre-reference-and-surface.md#默认地表共存与-globe-复用复核)：
 当前 flat 并未删除 World surface；后续保留 Globe/terrain，以地表深度支持自有矢量贴附。
 这是架构澄清，V4/G1 尚未激活，不表示公开图层已支持 terrainProvider 或 Globe。
+
+V4A 已实现并技术自审通过：平面 direct ground、terrain anchors、公开 Esri 地形开关与山地定位。156 项相关 Specs、9 项 E2E、build/types/release/installed-package 通过。本阶段无 upstream-owned 修改、无新 SGP。负责人于 2026-09-14 确认验收通过，技术与视觉 gate 已关闭，详见 [V4A review](reviews/2026-09-14-v4a-planar-terrain-review.md)；不把本阶段结果扩展为完整曲面文字或 Globe 资格。

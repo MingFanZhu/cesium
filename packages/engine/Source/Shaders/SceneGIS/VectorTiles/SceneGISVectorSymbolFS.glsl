@@ -6,9 +6,15 @@ in vec4 v_haloColor;
 in vec3 v_parameters;
 in vec4 v_pickColor;
 in float v_eyeDepth;
+#ifdef SCENEGIS_VECTOR_TERRAIN_ANCHOR
+in float v_groundVisibility;
+#endif
 void main()
 {
     if (v_eyeDepth <= u_symbolDepthRange.x || v_eyeDepth > u_symbolDepthRange.y) discard;
+#ifdef SCENEGIS_VECTOR_TERRAIN_ANCHOR
+    if (v_groundVisibility < 0.5) discard;
+#endif
     vec4 sampleColor = texture(u_symbolAtlas, v_uv);
     vec4 color = czm_gammaCorrect(v_color);
     color.rgb *= color.a;

@@ -12,11 +12,17 @@ out vec4 v_haloColor;
 out vec3 v_parameters;
 out vec4 v_pickColor;
 out float v_eyeDepth;
+#ifdef SCENEGIS_VECTOR_TERRAIN_ANCHOR
+out float v_groundVisibility;
+#endif
 void main()
 {
     vec4 anchor = czm_translateRelativeToEye(anchorHigh, anchorLow);
     vec4 p = czm_modelViewProjectionRelativeToEye * anchor;
     v_eyeDepth = -(czm_modelViewRelativeToEye * anchor).z;
+#ifdef SCENEGIS_VECTOR_TERRAIN_ANCHOR
+    v_groundVisibility = sceneGISAnchorVisibility(p, v_eyeDepth);
+#endif
     p.xy += vec2(offset.x, -offset.y) * czm_pixelRatio * 2.0 / czm_viewport.zw * p.w;
     gl_Position = p;
     gl_Position.z = clamp(p.z, -p.w, p.w);

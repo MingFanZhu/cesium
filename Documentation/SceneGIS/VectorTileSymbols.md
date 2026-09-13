@@ -6,6 +6,20 @@ V5A 使用自有 glyph PBF parser、metrics layout、collision、glyph/icon GPU 
 V5B 增加曲线文字、路牌与有向箭头；长期边界见
 [ADR-0063](Decisions/ADR-0063-point-symbol-renderer.md) 和 [ADR-0065](Decisions/ADR-0065-line-symbol-placement.md)。
 
+## 地形标注
+
+V4A 在 World 有 terrainProvider 时，从最近正常帧发布的 terrain cover 采样点 anchor；
+map-pitched 文字/图标的各角点也采样真实高程，viewport 字号与朝向保持原样。
+按 cover/content revision 更新高度与必要 dynamic buffers，不额外发起 terrain 请求，
+不把最高驻留但尚未绘制的 LOD 当成地表。surface 发布位于 primitives 更新之后，
+因此 anchors 跟随最近已发布结果，地形替换期间可能有一帧更新差。
+
+GPU 根据 anchor 所在像素周围四个地形深度样本判断遮挡，普通点标注整组遮挡；
+map-pitched 四角的可见性在字形片元间插值。拾取使用相同结果，山后标注不可拾取。
+这不是连续曲面字形的完全贴合：跨陡坡/山脊的大字形可能局部穿插或裁缺，terrain 上的
+collision proxies 也不承诺包含起伏曲线的全部投影。精细地形文字质量和稳定过渡留给 V5C。
+相关决定见 [ADR-0069](Decisions/ADR-0069-planar-vector-ground-rendering.md)。
+
 ## 样式与坐标
 
 Style root 可指定 `glyphs: "/fonts/{fontstack}/{range}.pbf"` 和单个 `sprite: "/sprite"`。

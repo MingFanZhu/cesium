@@ -8,6 +8,8 @@ const locations = {
   newyork: [-73.9857, 40.7484],
   shanghai: [121.491, 31.24],
   beijing: [116.397, 39.918],
+  nanjing: [118.8406, 32.0725, 430],
+  alps: [11.4041, 47.2692, 580],
 };
 const viewer = new C.Viewer("map", {
   planarWorld: {
@@ -53,6 +55,50 @@ let cancelMeasurement;
 let supported;
 let zoom = 14;
 let tilted = false;
+let removeTerrainError;
+let terrainError;
+
+function setTerrain(enabled) {
+  removeTerrainError?.();
+  removeTerrainError = undefined;
+  terrainError = undefined;
+  cancelMeasurement?.();
+  const world = viewer.planarWorld;
+  if (enabled) {
+    // Use the same heightmap and tile matrix contract as the planar terrain example.
+    const provider = new C.SceneGISPlanarUrlTemplateHeightmapTerrainProvider({
+      url: "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer/tile/{z}/{y}/{x}",
+      tilingScheme: world.tilingScheme,
+      urlScheme: "xyz",
+      format: "lerc",
+      heightmapWidth: 257,
+      heightmapHeight: 257,
+      minimumHeight: -450,
+      maximumHeight: 8700,
+      maximumLevel: 16,
+      credit: new C.Credit(
+        '<a href="https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer" target="_blank">World Elevation services by Esri and listed contributors</a>',
+        true,
+      ),
+    });
+    removeTerrainError = provider.errorEvent.addEventListener((error) => {
+      error.retry = false;
+      terrainError = `地形加载失败：${error.message}；可关闭地形恢复零高程。`;
+    });
+    world.terrainProvider = provider;
+    scene.light = new C.DirectionalLight({
+      direction: C.Cartesian3.normalize(
+        new C.Cartesian3(-1, -0.5, -1.5),
+        new C.Cartesian3(),
+      ),
+    });
+  } else {
+    world.terrainProvider = undefined;
+  }
+  world.enableLighting = enabled;
+  element("terrain").checked = enabled;
+  scene.requestRender();
+}
 
 function report(error) {
   element("error").textContent = error.message;
@@ -81,7 +127,8 @@ class MeasuredSource extends C.SceneGISVectorTileSource {
 }
 
 function view() {
-  const [longitude, latitude] = locations[element("location").value];
+  const [longitude, latitude, referenceHeight = 0] =
+    locations[element("location").value];
   const x = (half * longitude) / 180;
   const y =
     (half / Math.PI) *
@@ -108,7 +155,8 @@ function view() {
     destination: new C.Cartesian3(
       x,
       y - range * Math.cos(pitch),
-      range * Math.sin(pitch),
+      range * Math.sin(pitch) +
+        (viewer.planarWorld.terrainProvider ? referenceHeight : 0),
     ),
     orientation: {
       direction: new C.Cartesian3(0, Math.cos(pitch), -Math.sin(pitch)),
@@ -262,6 +310,14 @@ async function connect() {
 }
 
 scene.postRender.addEventListener(() => {
+  const world = viewer.planarWorld;
+  element("terrain-status").textContent =
+    terrainError ??
+    (world.terrainProvider
+      ? world.tilesLoaded
+        ? "真实地形已就绪 · 道路与面直接贴地"
+        : "加载 Esri 高程…已就绪地表持续绘制"
+      : "零高程地表；可切换至 Esri 全球高程。网络不可用时可关闭地形。");
   if (layer === undefined) {
     return;
   }
@@ -305,9 +361,10 @@ element("connect").onsubmit = (event) => {
   connect();
 };
 element("location").onchange = () => {
-  zoom = 14;
+  zoom = element("location").value === "alps" ? 12 : 14;
   view();
 };
+element("terrain").onchange = () => setTerrain(element("terrain").checked);
 element("top").onclick = () => {
   tilted = false;
   view();
@@ -406,6 +463,7 @@ window.addEventListener("pagehide", (event) => {
   }
   generation++;
   pending?.abort();
+  removeTerrainError?.();
   cancelMeasurement?.();
   connection = undefined;
   handler.destroy();

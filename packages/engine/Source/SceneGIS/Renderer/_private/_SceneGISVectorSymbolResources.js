@@ -3,6 +3,8 @@ import Buffer from "../../../Renderer/Buffer.js";
 import BufferUsage from "../../../Renderer/BufferUsage.js";
 import VertexArray from "../../../Renderer/VertexArray.js";
 import ShaderProgram from "../../../Renderer/ShaderProgram.js";
+import ShaderSource from "../../../Renderer/ShaderSource.js";
+import anchorVisibility from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorAnchorVisibility.js";
 import vertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorSymbolVS.js";
 import fragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorSymbolFS.js";
 
@@ -20,7 +22,12 @@ const attributes = [
 ];
 
 /** Owns independent static and dynamic symbol streams. Atlas and picks are borrowed. @private */
-function SceneGISVectorSymbolResources(context, staticValues, dynamicValues) {
+function SceneGISVectorSymbolResources(
+  context,
+  staticValues,
+  dynamicValues,
+  ground = false,
+) {
   this.capacity = staticValues.length / staticStride;
   this.staticUploads = 0;
   this.dynamicUploads = 0;
@@ -49,8 +56,14 @@ function SceneGISVectorSymbolResources(context, staticValues, dynamicValues) {
     });
     this.shader = ShaderProgram.fromCache({
       context,
-      vertexShaderSource: vertex,
-      fragmentShaderSource: fragment,
+      vertexShaderSource: new ShaderSource({
+        defines: ground ? ["SCENEGIS_VECTOR_TERRAIN_ANCHOR"] : [],
+        sources: ground ? [anchorVisibility, vertex] : [vertex],
+      }),
+      fragmentShaderSource: new ShaderSource({
+        defines: ground ? ["SCENEGIS_VECTOR_TERRAIN_ANCHOR"] : [],
+        sources: [fragment],
+      }),
       attributeLocations: Object.fromEntries(
         attributes.map(([name], index) => [name, index]),
       ),
