@@ -1,11 +1,11 @@
 import DeveloperError from "../../Core/DeveloperError.js";
+import WorkerPool from "../Core/_private/_SceneGISVectorWorkerPool.js";
 import Event from "../../Core/Event.js";
 import Request from "../../Core/Request.js";
 import RequestType from "../../Core/RequestType.js";
 import destroyObject from "../../Core/destroyObject.js";
 import Scene from "../../Scene/Scene.js";
 import SceneGISPlanarWorld from "./SceneGISPlanarWorld.js";
-import SceneGISVectorTileCoordinates from "../Core/SceneGISVectorTileCoordinates.js";
 import SceneGISVectorTileSource from "../Core/SceneGISVectorTileSource.js";
 import SceneGISVectorTileStyle from "../Core/SceneGISVectorTileStyle.js";
 import geometry from "../Core/_private/_SceneGISVectorTileGeometry.js";
@@ -116,6 +116,7 @@ function clearView(layer) {
   for (const state of layer._sources.values()) {
     for (const entry of state.entries.values()) {
       cancel(layer, entry);
+      discardPreparation(entry);
     }
     state.visible.length = 0;
     state.render.clear();
@@ -127,6 +128,8 @@ function clearView(layer) {
 
 function release(layer, entry) {
   cancel(layer, entry);
+  discardPreparation(entry);
+  entry.symbols = undefined;
   for (const batches of entry.batches.values()) {
     for (const batch of batches) {
       batch.destroy();
@@ -150,7 +153,13 @@ function requestTile(layer, state, entry) {
   });
   let promise;
   try {
-    promise = state.source.requestTile(entry.x, entry.y, entry.level, request);
+    promise = state.source.requestTile(
+      entry.x,
+      entry.y,
+      entry.level,
+      request,
+      false,
+    );
   } catch (error) {
     fail(entry, error);
     return;
@@ -171,7 +180,7 @@ function requestTile(layer, state, entry) {
       fail(entry, error);
     } else {
       entry.data = data;
-      entry.state = "decoded";
+      entry.state = "received";
     }
     layer._scene.requestRender();
   };
@@ -181,86 +190,262 @@ function requestTile(layer, state, entry) {
   );
 }
 
-function createBatches(layer, state, entry, zoom) {
-  const batches = new Map();
-  const layerSignatures = new Map();
-  try {
-    for (const record of state.records) {
-      const { definition } = record;
-      if (definition.type === "symbol") {
-        continue;
-      }
-      const desired = signature([record], zoom);
-      layerSignatures.set(definition.id, desired);
-      if (entry.layerSignatures?.get(definition.id) === desired) {
-        const existing = entry.batches.get(definition.id);
-        if (existing) {
-          batches.set(definition.id, existing);
-        }
-        continue;
-      }
-      const sourceLayer = entry.data.layers.find(
-        (candidate) => candidate.name === definition["source-layer"],
-      );
-      if (sourceLayer === undefined) {
-        continue;
-      }
-      const coordinates = new SceneGISVectorTileCoordinates({
-        tilingScheme: state.source.tilingScheme,
-        x: entry.x,
-        y: entry.y,
-        level: entry.level,
-        extent: sourceLayer.extent,
-      });
-      const prepared = geometry.build(
-        sourceLayer,
-        definition,
-        layer._style,
-        coordinates,
-        zoom,
-        entry,
-      );
-      const group = [];
-      batches.set(definition.id, group);
-      for (const item of prepared) {
-        const batch = new VectorBatch(
-          layer,
-          entry,
-          item,
-          layer._allowPicking,
-          record,
-        );
-        group.push(batch);
-        batch.update(layer._scene.frameState);
-      }
-    }
-  } catch (error) {
-    for (const [id, group] of batches) {
-      if (group !== entry.batches.get(id)) {
-        for (const batch of group) {
-          batch.destroy();
-        }
-      }
-    }
-    throw error;
+function discardPreparation(entry) {
+  const work = entry.work;
+  if (!work) {
+    return;
   }
-  for (const [id, group] of entry.batches) {
-    if (group !== batches.get(id)) {
-      for (const batch of group) {
+  for (const [id, batches] of work.batches) {
+    if (batches !== entry.batches.get(id)) {
+      for (const batch of batches) {
         batch.destroy();
       }
     }
   }
-  entry.batches = batches;
-  entry.layerSignatures = layerSignatures;
-  for (const group of batches.values()) {
-    for (const batch of group) {
-      batch.update(layer._scene.frameState);
+  entry.work = undefined;
+}
+
+function validatePreparedTile(result, records, allowPicking) {
+  if (
+    result.kind !== "tile" ||
+    !Array.isArray(result.layers) ||
+    !Array.isArray(result.symbols) ||
+    !Array.isArray(result.errors) ||
+    !Number.isSafeInteger(result.features) ||
+    !Number.isSafeInteger(result.byteLength) ||
+    result.byteLength < 0
+  ) {
+    throw new DeveloperError("Invalid vector Worker tile result.");
+  }
+  let bytes = 0;
+  for (const group of result.layers) {
+    if (
+      !records.some(
+        (record) =>
+          record.id === group.id && record.signature === group.signature,
+      ) ||
+      !Array.isArray(group.batches)
+    ) {
+      throw new DeveloperError("Invalid vector Worker style batch.");
+    }
+    for (const item of group.batches) {
+      if (
+        !item.geometries?.length ||
+        !["fill", "line", "circle"].includes(item.kind) ||
+        !Array.isArray(item.identities)
+      ) {
+        throw new DeveloperError("Invalid vector Worker geometry.");
+      }
+      let itemBytes = 0;
+      for (const geometry of item.geometries) {
+        const high = geometry.attributes?.position3DHigh?.values;
+        const low = geometry.attributes?.position3DLow?.values;
+        if (
+          !(high instanceof Float32Array) ||
+          !(low instanceof Float32Array) ||
+          high.length !== low.length ||
+          high.length % 3 ||
+          !(geometry.indices instanceof Uint16Array) ||
+          geometry.indices.length % 3
+        ) {
+          throw new DeveloperError(
+            "Invalid vector Worker position/index buffers.",
+          );
+        }
+        const count = high.length / 3;
+        for (const attribute of Object.values(geometry.attributes)) {
+          if (
+            !ArrayBuffer.isView(attribute.values) ||
+            attribute.values.length !== count * attribute.componentsPerAttribute
+          ) {
+            throw new DeveloperError("Invalid vector Worker vertex attribute.");
+          }
+          itemBytes += attribute.values.byteLength;
+        }
+        if (
+          allowPicking &&
+          !(geometry.attributes.pickColor?.values instanceof Uint8Array)
+        ) {
+          throw new DeveloperError("Invalid vector Worker pick buffer.");
+        }
+        itemBytes += geometry.indices.byteLength;
+      }
+      if (itemBytes !== item.byteLength) {
+        throw new DeveloperError("Invalid vector Worker byte count.");
+      }
+      bytes += itemBytes;
+    }
+  }
+  if (bytes !== result.byteLength) {
+    throw new DeveloperError("Invalid vector Worker tile byte count.");
+  }
+}
+
+function prepareEntry(layer, state, entry, zoom) {
+  if (entry.work || layer._preparing >= 2 || !layer._workers.available) {
+    return;
+  }
+  let retained = 0;
+  for (const source of layer._sources.values()) {
+    for (const tile of source.entries.values()) {
+      retained += Number(!!tile.work?.result);
+    }
+  }
+  if (retained + layer._preparing >= 2) {
+    return;
+  }
+  const records = [],
+    signatures = new Map(),
+    batches = new Map();
+  const symbolZoom = Math.floor(zoom);
+  for (const record of state.records) {
+    const definition = record.definition;
+    if (definition.type === "symbol") {
+      if (entry.symbolZoom !== symbolZoom) {
+        records.push({
+          id: definition.id,
+          order: layer._records.indexOf(record),
+        });
+      }
+      continue;
+    }
+    const key = signature([record], zoom);
+    signatures.set(definition.id, key);
+    if (entry.layerSignatures?.get(definition.id) === key) {
+      if (entry.batches.has(definition.id)) {
+        batches.set(definition.id, entry.batches.get(definition.id));
+      }
+    } else {
+      records.push({ id: definition.id, signature: key });
+    }
+  }
+  const parameters = {
+    kind: "tile",
+    records,
+    zoom,
+    maximumLevel: state.source.maximumLevel,
+    allowPicking: layer._allowPicking,
+    tile: { x: entry.x, y: entry.y, level: entry.level },
+  };
+  const transfers = [];
+  if (entry.data instanceof ArrayBuffer || ArrayBuffer.isView(entry.data)) {
+    const data = entry.data;
+    parameters.buffer =
+      data instanceof ArrayBuffer
+        ? data.slice(0)
+        : data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+    transfers.push(parameters.buffer);
+  } else {
+    parameters.data = entry.data;
+  }
+  const promise = layer._workers.schedule(parameters, transfers);
+  if (!promise) {
+    return;
+  }
+  const work = {
+    signature: state.signature,
+    symbolZoom,
+    replaceSymbols: entry.symbolZoom !== symbolZoom,
+    signatures,
+    batches,
+    cursor: 0,
+  };
+  entry.work = work;
+  layer._preparing++;
+  promise.then(
+    (result) => {
+      if (layer.isDestroyed()) {
+        return;
+      }
+      layer._preparing--;
+      if (entry.work !== work) {
+        return;
+      }
+      try {
+        validatePreparedTile(result, records, layer._allowPicking);
+      } catch (error) {
+        discardPreparation(entry);
+        fail(entry, error);
+        layer._scene.requestRender();
+        return;
+      }
+      {
+        work.result = result;
+        work.items = result.layers.flatMap((group) => {
+          batches.set(group.id, []);
+          return group.batches.map((item) => ({ id: group.id, item }));
+        });
+        if (!entry.counted) {
+          layer._decodedFeatures += result.features;
+          entry.counted = true;
+        }
+        layer._decodeMs += result.decodeMs;
+      }
+      layer._scene.requestRender();
+    },
+    (error) => {
+      if (layer.isDestroyed()) {
+        return;
+      }
+      layer._preparing--;
+      if (entry.work !== work) {
+        return;
+      }
+      discardPreparation(entry);
+      fail(entry, error);
+      layer._scene.requestRender();
+    },
+  );
+}
+
+function createBatches(layer, state, entry, frameState, budget) {
+  const work = entry.work;
+  if (!work?.result) {
+    return false;
+  }
+  while (work.cursor < work.items.length) {
+    const { id, item } = work.items[work.cursor];
+    if (
+      budget.bytes > 0 &&
+      (performance.now() >= budget.deadline ||
+        budget.bytes + item.byteLength > layer._maximumUploadBytesPerFrame)
+    ) {
+      return false;
+    }
+    const record = state.records.find((record) => record.definition.id === id);
+    const batch = new VectorBatch(
+      layer,
+      entry,
+      item,
+      layer._allowPicking,
+      record,
+    );
+    work.batches.get(id).push(batch);
+    batch.update(frameState);
+    budget.bytes += item.byteLength;
+    work.cursor++;
+  }
+  for (const [id, batches] of entry.batches) {
+    if (batches !== work.batches.get(id)) {
+      for (const batch of batches) {
+        batch.destroy();
+      }
+    }
+  }
+  entry.batches = work.batches;
+  entry.layerSignatures = work.signatures;
+  if (work.replaceSymbols) {
+    entry.symbols = new Map(work.result.symbols);
+    entry.symbolZoom = work.symbolZoom;
+    for (const error of work.result.errors) {
+      layer._symbols?.report(error.key, new DeveloperError(error.message));
     }
   }
   entry.state = "ready";
-  entry.signature = state.signature;
+  entry.signature = work.signature;
+  entry.work = undefined;
   layer._uploads++;
+  return true;
 }
 
 function updateBackgrounds(layer, zoom, frameState) {
@@ -319,22 +504,39 @@ function selectRender(state) {
   }
 }
 
-function updateEntry(layer, id, state, entry, zoom, frameState, uploads) {
+function updateEntry(
+  layer,
+  id,
+  state,
+  entry,
+  zoom,
+  frameState,
+  uploads,
+  budget,
+) {
+  if (entry.work && entry.work.signature !== state.signature) {
+    discardPreparation(entry);
+  }
   const needsUpload =
-    entry.state === "decoded" ||
+    entry.state === "received" ||
     (entry.state === "ready" && entry.signature !== state.signature);
-  if (needsUpload && uploads < layer._maximumUploadsPerFrame) {
+  if (needsUpload) {
     try {
-      createBatches(layer, state, entry, zoom);
+      prepareEntry(layer, state, entry, zoom);
+      if (
+        uploads < layer._maximumUploadsPerFrame &&
+        createBatches(layer, state, entry, frameState, budget)
+      ) {
+        uploads++;
+      }
     } catch (error) {
+      discardPreparation(entry);
       fail(entry, error);
     }
-    uploads++;
-  } else {
-    for (const group of entry.batches.values()) {
-      for (const batch of group) {
-        batch.update(frameState);
-      }
+  }
+  for (const group of entry.batches.values()) {
+    for (const batch of group) {
+      batch.update(frameState);
     }
   }
   if (entry.state === "failed" && !entry.notified) {
@@ -351,7 +553,9 @@ function updateEntry(layer, id, state, entry, zoom, frameState, uploads) {
 
 function updateSources(layer, zoom, frameState) {
   for (const state of layer._sources.values()) {
-    state.signature = signature(state.records, zoom);
+    state.signature =
+      signature(state.records, zoom) +
+      (layer._symbols ? `/symbols/${Math.floor(zoom)}` : "");
     const desired =
       state.records.length === 0
         ? []
@@ -393,6 +597,9 @@ function updateSources(layer, zoom, frameState) {
     for (const entry of state.entries.values()) {
       if (!desiredEntries.has(entry)) {
         cancel(layer, entry);
+        if (!state.render.has(entry)) {
+          discardPreparation(entry);
+        }
       }
       if (!protectedKeys.has(entry.key)) {
         candidates.push(entry);
@@ -420,9 +627,22 @@ function updateSources(layer, zoom, frameState) {
     }
   }
   let uploads = 0;
+  const budget = {
+    deadline: performance.now() + layer._maximumUploadTimePerFrame,
+    bytes: 0,
+  };
   for (const [id, state] of layer._sources) {
     for (const entry of state.visible) {
-      uploads = updateEntry(layer, id, state, entry, zoom, frameState, uploads);
+      uploads = updateEntry(
+        layer,
+        id,
+        state,
+        entry,
+        zoom,
+        frameState,
+        uploads,
+        budget,
+      );
     }
     selectRender(state);
     for (const entry of state.render.keys()) {
@@ -435,6 +655,7 @@ function updateSources(layer, zoom, frameState) {
           zoom,
           frameState,
           uploads,
+          budget,
         );
         entry.lastUsed = frameState.frameNumber;
       }
@@ -502,6 +723,8 @@ function publishOrder(layer) {
  * @param {number} [options.maximumVisibleTiles=32] Maximum desired tiles per source; coarsen LOD within availability to fit.
  * @param {number} [options.maximumRequests=8] Maximum in-flight requests for this layer.
  * @param {number} [options.maximumUploadsPerFrame=2] Maximum tile batch publications per normal frame.
+ * @param {number} [options.maximumUploadTimePerFrame=4] Soft CPU milliseconds for tile GPU publication per normal frame.
+ * @param {number} [options.maximumUploadBytesPerFrame=4194304] Soft tile buffer upload byte budget per normal frame. One indivisible batch may exceed it.
  * @param {number} [options.maximumSymbolCandidates=2048] Maximum point-symbol candidates per view, selected by style priority.
  * @param {number} [options.maximumGlyphRanges=64] Maximum cached 256-code-point glyph pages; active pages cannot be evicted.
  * @param {number} [options.maximumSymbolRequests=4] Maximum concurrent glyph/sprite resource jobs.
@@ -530,6 +753,23 @@ function SceneGISVectorTileLayer(options) {
       ? options.style
       : new SceneGISVectorTileStyle(options.style);
   this._tileCacheSize = integerOption(options, "tileCacheSize", 64);
+  this._maximumUploadTimePerFrame = options.maximumUploadTimePerFrame ?? 4;
+  if (
+    !Number.isFinite(this._maximumUploadTimePerFrame) ||
+    this._maximumUploadTimePerFrame <= 0
+  ) {
+    throw new DeveloperError(
+      "maximumUploadTimePerFrame must be finite and positive.",
+    );
+  }
+  this._maximumUploadBytesPerFrame = integerOption(
+    options,
+    "maximumUploadBytesPerFrame",
+    4194304,
+  );
+  this._preparing = 0;
+  this._decodedFeatures = 0;
+  this._decodeMs = 0;
   this._maximumVisibleTiles = integerOption(options, "maximumVisibleTiles", 32);
   this._maximumRequests = integerOption(options, "maximumRequests", 8);
   this._maximumUploadsPerFrame = integerOption(
@@ -589,6 +829,24 @@ function SceneGISVectorTileLayer(options) {
     "maximumSymbolRequests",
     4,
   );
+  const extent = this._world.coordinateSystem.extent;
+  this._workers = new WorkerPool({
+    extent: {
+      minimumX: extent.minimumX,
+      minimumY: extent.minimumY,
+      maximumX: extent.maximumX,
+      maximumY: extent.maximumY,
+    },
+    style: {
+      version: 8,
+      ...(this._style.glyphs ? { glyphs: this._style.glyphs } : {}),
+      ...(this._style.sprite ? { sprite: this._style.sprite } : {}),
+      sources: this._style.sources,
+      layers: this._style.layerIds.map((id) =>
+        this._style.getLayerDefinition(id),
+      ),
+    },
+  });
   this._symbols = this._records.some(
     (record) => record.definition.type === "symbol",
   )
@@ -706,6 +964,11 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
         }
       }
       return {
+        decodedFeatures: this._decodedFeatures,
+        decodeMs: this._decodeMs,
+        preparationTasks: this._preparing,
+        workerTasks: this._workers.statistics.completed,
+        workerMs: this._workers.statistics.workerMs,
         residentTiles,
         visibleTiles,
         failedTiles,
@@ -823,6 +1086,7 @@ SceneGISVectorTileLayer.prototype.isDestroyed = function () {
  * @returns {undefined}
  */
 SceneGISVectorTileLayer.prototype.destroy = function () {
+  this._workers.destroy();
   this._symbols?.destroy();
   for (const record of this._backgrounds) {
     record.batch?.destroy();

@@ -92,9 +92,25 @@ test("renders the public-map page with deterministic data, picking, tilt and res
 }, testInfo) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
+  const workers = [];
+  page.on("worker", (worker) => {
+    if (worker.url().endsWith("/SceneGISVectorTileWorker.js")) {
+      const record = { worker, closed: false };
+      worker.on("close", () => {
+        record.closed = true;
+      });
+      workers.push(record);
+    }
+  });
   const observed = await routes(page);
   await page.goto("/Test/vector-tiles/public.html");
   await ready(page);
+  expect(workers.length).toBe(2);
+  expect(
+    await page.evaluate(
+      () => window.publicVectorPreview.layer.statistics.workerTasks,
+    ),
+  ).toBeGreaterThan(0);
   await expect(page.locator("#support-summary")).toHaveText(
     "118 / 119 个样式层已接入",
   );
@@ -153,6 +169,10 @@ test("renders the public-map page with deterministic data, picking, tilt and res
   expect(await page.evaluate(() => window.oldPublicLayer.isDestroyed())).toBe(
     true,
   );
+  await expect
+    .poll(() => workers.slice(0, 2).every((item) => item.closed))
+    .toBe(true);
+  expect(workers.length).toBe(4);
   expect(observed.tileRequests).toBeGreaterThan(0);
   expect(observed.unexpected).toEqual([]);
   expect(errors).toEqual([]);
@@ -202,7 +222,11 @@ test("switches between Bright and Liberty and preserves the map when the public 
         camera.positionWC.y >= bounds.minimumY &&
         camera.positionWC.y < bounds.maximumY,
     );
-    const data = entry.data.layers.find((item) => item.name === "poi");
+    const decoded =
+      entry.data instanceof ArrayBuffer
+        ? C.SceneGISVectorTile.decode(entry.data)
+        : entry.data;
+    const data = decoded.layers.find((item) => item.name === "poi");
     const point = data.features[0].geometry.parts[0];
     const coordinates = new C.SceneGISVectorTileCoordinates({
       tilingScheme: state.source.tilingScheme,

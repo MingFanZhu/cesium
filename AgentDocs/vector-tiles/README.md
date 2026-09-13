@@ -8,8 +8,8 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V3C1A completed — 低角度远景选层`                     |
-| Active phase plan      | [V3C1A](plans/2026-09-13-v3c1a-tilted-distance.md)     |
+| Current phase          | `V3C1B active — 异步矢量准备`                          |
+| Active phase plan      | [V3C1B](plans/2026-09-13-v3c1b-worker-preparation.md)  |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
@@ -37,14 +37,14 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
 - Source：`packages/engine/Source/SceneGIS/Core/SceneGISVectorTile*.js` 和
   `packages/engine/Source/SceneGIS/Scene/SceneGISVectorTileLayer.js`，五个公共入口。
-- Specs：Core/Renderer/Scene 镜像测试，131 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
+- Specs：Core/Renderer/Scene 镜像测试，143 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面：[城市](../../Test/vector-tiles/index.html) 与 [样式图集](../../Test/vector-tiles/styles.html)，
   21 个城市 MVT fixtures 加 1 个样式 MVT。
 - 新页面：[公开地图](../../Test/vector-tiles/public.html)，默认 MapLibre 示例使用的 OpenFreeMap / Bright，
   保留 Liberty 对照，无需 token；来源和样式差距见 [参考](../../Test/vector-tiles/reference/README.md)。
 - E2E：`Specs/e2e/scenegis-vector-tiles.spec.js`，3 项通过。
-- 公开页 E2E：`Specs/e2e/scenegis-vector-public.spec.js`，3 项通过；使用本地数据拦截外网。
+- 公开页 E2E：`Specs/e2e/scenegis-vector-public.spec.js`，5 项通过；使用本地数据拦截外网。
 - Sandcastle：不新建；使用根服务器直接访问 `Test/**`。
 - ADR：[ADR-0057](../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)。
 - SGP：`SGP-0011`；upstream-owned files 为 `packages/engine/package.json`、`ThirdParty.extra.json`。
@@ -124,3 +124,16 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   柏林 5° 的 MVT 64→47，surface 219→105，load dependencies 473→241；俯视拉远 keys 一致。
   新增 [本地地形/影像对照](../../Test/vector-tiles/distance.html)，详情与剩余近景性能风险见最新 review。
   负责人已明确要求推进异步 Worker，按推进授权关闭 V3C1A gate；先形成独立 checkpoint，再激活 V3C1B。
+
+V3C1A checkpoint：`413b7ffcc6`。负责人明确授权 Worker 实现，当前 [V3C1B](plans/2026-09-13-v3c1b-worker-preparation.md) active。
+
+V3C1B 技术资格完成：143 项 Specs、11 项 E2E、完整 build/types/release 与实际 installed-package
+Worker transfer 通过；[最新 review](reviews/2026-09-13-v3c1b-worker-review.md) 记录冷加载收益、
+首次完整就绪代价与未解决的主线程/GPU 性能边界。当前等待负责人浏览器验收，不激活下一阶段。
+
+负责人反馈持续交互低帧后继续修复：143 项 Specs、8 项相关 E2E 通过；真实浅角 pan/rotate CPU
+median 从约 36 ms 降至 22.0/22.8 ms，密集 tile 拆分 Worker 错误已修复。最新 review 的
+Owner motion feedback 记录完整条件与剩余 R07，阶段 gate 仍保持打开。
+
+负责人已授权继续三项标注交互优化。V3C1B 按推进授权关闭 gate，先形成独立 Worker checkpoint；
+R07 的 placement/碰撞/buffer 部分由后继 V3C1C 承接，其余预算/GPU 资格保留，不宣称稳定 60 FPS。

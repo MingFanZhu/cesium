@@ -6,7 +6,6 @@ import Texture from "../../../Renderer/Texture.js";
 import Sampler from "../../../Renderer/Sampler.js";
 import TextureMinificationFilter from "../../../Renderer/TextureMinificationFilter.js";
 import TextureMagnificationFilter from "../../../Renderer/TextureMagnificationFilter.js";
-import Glyphs from "../../Core/_private/_SceneGISVectorGlyphs.js";
 
 function resource(url, entry) {
   const request = new Request({ throttle: false });
@@ -34,6 +33,7 @@ function SceneGISVectorSymbolAssets(owner, maximumRanges, maximumRequests) {
   this.errors = [];
   this.destroyed = false;
   this.clock = 0;
+  this._nextGeneration = 0;
 }
 SceneGISVectorSymbolAssets.key = function (font, code) {
   return `${font}/${Math.floor(code / 256)}`;
@@ -67,13 +67,25 @@ SceneGISVectorSymbolAssets.prototype.prepare = function (
         release(victim);
         this.pages.delete(victim.key);
       }
-      entry = { ...requirement, key, state: "idle", requests: [], used: now };
+      entry = {
+        ...requirement,
+        key,
+        state: "idle",
+        requests: [],
+        used: now,
+        generation: ++this._nextGeneration,
+      };
       this.pages.set(key, entry);
     }
     entry.used = now;
   }
   if (spriteNeeded && !this.sprite) {
-    this.sprite = { key: "sprite", state: "idle", requests: [] };
+    this.sprite = {
+      key: "sprite",
+      state: "idle",
+      requests: [],
+      generation: ++this._nextGeneration,
+    };
   }
   const entries = [...needed].map((key) => this.pages.get(key));
   if (spriteNeeded) {
@@ -112,15 +124,25 @@ SceneGISVectorSymbolAssets.prototype.prepare = function (
       if (this.destroyed || entry.released) {
         return;
       }
-      entry.glyphs = Glyphs.decode(bytes);
-      for (const code of entry.glyphs.keys()) {
-        if (Math.floor(code / 256) !== entry.range) {
-          throw new RuntimeError(
-            "Glyph response contains a code outside its requested range.",
-          );
-        }
+      const buffer = bytes.slice(0);
+      const result = await this.owner._workers.enqueue(
+        { kind: "glyphs", buffer, range: entry.range },
+        [ArrayBuffer.isView(buffer) ? buffer.buffer : buffer],
+      );
+      if (this.destroyed || entry.released) {
+        return;
       }
-      entry.image = Glyphs.pack(entry.glyphs);
+      if (
+        result.kind !== "glyphs" ||
+        !(result.glyphs instanceof Map) ||
+        !(result.image?.arrayBufferView instanceof Uint8Array) ||
+        result.image.width * result.image.height !==
+          result.image.arrayBufferView.length
+      ) {
+        throw new RuntimeError("Invalid vector Worker glyph result.");
+      }
+      entry.glyphs = result.glyphs;
+      entry.image = result.image;
     };
     const settle = (error) => {
       if (this.destroyed) {

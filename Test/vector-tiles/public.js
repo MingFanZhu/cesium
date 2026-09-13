@@ -65,32 +65,15 @@ class MeasuredSource extends C.SceneGISVectorTileSource {
     super(options);
     this._metrics = metrics;
   }
-  requestTile(x, y, level, request) {
-    const promise = this.getTileResource(
-      x,
-      y,
-      level,
-      request,
-    ).fetchArrayBuffer();
+  requestTile(x, y, level, request, decode = true) {
+    const promise = super.requestTile(x, y, level, request, decode);
     if (promise === undefined) {
       return undefined;
     }
     const metrics = this._metrics;
     metrics.requests++;
-    return promise.then((bytes) => {
-      const begin = performance.now();
-      const data =
-        bytes === undefined
-          ? { layers: [] }
-          : C.SceneGISVectorTile.decode(bytes);
-      const duration = performance.now() - begin;
-      metrics.receivedBytes += bytes?.byteLength ?? 0;
-      metrics.features += data.layers.reduce(
-        (total, item) => total + item.features.length,
-        0,
-      );
-      metrics.decodeMs += duration;
-      metrics.maxDecodeMs = Math.max(metrics.maxDecodeMs, duration);
+    return promise.then((data) => {
+      metrics.receivedBytes += data.byteLength ?? 0;
       metrics.completed++;
       return data;
     });
@@ -153,7 +136,6 @@ function replaceLayer(next = connection) {
     receivedBytes: 0,
     features: 0,
     decodeMs: 0,
-    maxDecodeMs: 0,
   };
   const source = new MeasuredSource(
     {
@@ -303,8 +285,9 @@ scene.postRender.addEventListener(() => {
   element("commands").textContent = stats.drawCommands;
   element("tiles").textContent =
     `${stats.visibleTiles} / ${stats.residentTiles}`;
-  element("features").textContent =
-    connection.metrics.features.toLocaleString();
+  connection.metrics.features = stats.decodedFeatures;
+  connection.metrics.decodeMs = stats.decodeMs;
+  element("features").textContent = stats.decodedFeatures.toLocaleString();
   element("symbols").textContent =
     `${stats.placedSymbols ?? 0} / ${stats.symbolCandidates ?? 0}`;
   const missingImages = stats.missingSymbolImages ?? [];

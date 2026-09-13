@@ -168,13 +168,39 @@ function SceneGISVectorTileBatchResources(
   this._paintAttributes = [];
   this._paintPrefix = prepared.kind;
   try {
-    const geometries = prepare(
-      this,
-      context,
-      prepared.instances,
-      owner,
-      allowPicking,
-    );
+    const geometries =
+      prepared.geometries ??
+      prepare(this, context, prepared.instances, owner, allowPicking);
+    if (prepared.geometries && allowPicking) {
+      const colors = new Uint32Array(prepared.identities.length);
+      const bytes = new Uint8Array(colors.buffer);
+      for (let i = 0; i < prepared.identities.length; i++) {
+        const identity = prepared.identities[i];
+        Object.freeze(identity.properties);
+        Object.freeze(identity.tile);
+        Object.freeze(identity);
+        const pick = context.createPickId({
+          primitive: owner,
+          id: identity,
+        });
+        this._pickIds.push(pick);
+        bytes.set(pick.color.toBytes(), i * 4);
+      }
+      for (const geometry of geometries) {
+        const values = geometry.attributes.pickColor.values;
+        const tokens = new Uint32Array(
+          values.buffer,
+          values.byteOffset,
+          values.length / 4,
+        );
+        for (let i = 0; i < tokens.length; i++) {
+          if (tokens[i] >= colors.length) {
+            throw new RuntimeError("Invalid vector feature pick token.");
+          }
+          tokens[i] = colors[tokens[i]];
+        }
+      }
+    }
     const locations = GeometryPipeline.createAttributeLocations(geometries[0]);
     for (const geometry of geometries) {
       this._vertexArrays.push(
@@ -193,7 +219,10 @@ function SceneGISVectorTileBatchResources(
     const defines = allowPicking ? ["SCENEGIS_VECTOR_PICKING"] : [];
     if (prepared.kind === "line") {
       defines.push("SCENEGIS_VECTOR_LINE");
-    } else if (prepared.instances[0].geometry.attributes.fringe !== undefined) {
+    } else if (
+      prepared.fringe ??
+      prepared.instances?.[0].geometry.attributes.fringe !== undefined
+    ) {
       defines.push("SCENEGIS_VECTOR_FRINGE");
     }
     if (prepared.dashIntervals?.length > 0) {

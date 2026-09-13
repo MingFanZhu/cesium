@@ -103,7 +103,13 @@ pendingSymbolRequests、symbolFailures、glyphRanges、glyphCpuBytes 与 symbolT
 它不是文字像素计数；完整 glyph 可跨 tile/屏幕边界。视口外 anchor 的局部入屏暂未支持，
 见 [ADR-0064](Decisions/ADR-0064-vector-perspective-lod.md)。
 missingSymbolImages/symbolFailures 是本 Layer 生命周期累计诊断。
-大负载的 Worker、buffer 分块和整体吞吐量属于 V3C1；terrain/Globe 另行资格验证。
+V3C1B 已将整数 anchors、glyph decode/pack 和 normalized shaping 迁入 Worker。
+同一文本的排版按标准字号缓存，fractional size 只缩放；glyph/sprite 重载使用 generation 使旧排版失效。
+Worker 提前整理去重的 font/range dependencies；交互时复用不变的世界字形几何、高低位编码和顶点暂存区，
+减少临时对象与 GC。地图方向、字号或 anchor 改变时重新准备相关几何。
+屏幕投影、keep-upright、碰撞和最终 quads 仍随当前相机在主线程计算，不能用过时相机结果代替。
+Worker 待处理任务也计入 tilesLoaded；完成回调只存 CPU 状态。主线程 GPU/pick/placement 仍可能成为
+密集视图瓶颈，整体内存硬上限与 terrain/Globe 另行验证。见 [ADR-0067](Decisions/ADR-0067-vector-worker-preparation.md)。
 
 ## 验收入口
 

@@ -12,6 +12,7 @@ import {
   SceneGISVectorTileLayer,
   SceneGISVectorTileSource,
 } from "../../../index.js";
+import WorkerPool from "../../../Source/SceneGIS/Core/_private/_SceneGISVectorWorkerPool.js";
 import Assets from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorSymbolAssets.js";
 import { encodeGlyphs, glyph } from "../Core/vectorSymbolFixture.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
@@ -164,6 +165,34 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(pixel()).toEqual([255, 0, 0, 255]);
   });
 
+  it("reuses normalized Worker shapes across sizes and invalidates reloaded glyph metrics", async function () {
+    spyOn(source, "requestTile").and.resolveTo(tile());
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add();
+    await loaded(layer);
+    const symbols = layer._symbols;
+    const candidate = symbols._previous[0];
+    const layout = layer.style.evaluateLayer("labels", feature(), 0).layout;
+    const shape = symbols._shaping.get(candidate, layout);
+    const larger = symbols._shaping.get(candidate, {
+      ...layout,
+      "text-size": 48,
+    });
+    expect(larger.text.span).toEqual(shape.text.span.map((value) => value * 2));
+    const page = symbols.assets.pages.get("Test/0");
+    page.generation++;
+    page.glyphs.get(65).advance *= 2;
+    expect(symbols._shaping.get(candidate, layout)).toBeUndefined();
+    symbols._shaping.flush();
+    let reloaded;
+    await pollToPromise(() => {
+      reloaded = symbols._shaping.get(candidate, layout);
+      return reloaded !== undefined;
+    });
+    expect(reloaded.text.span).toEqual(larger.text.span);
+    expect(page.image.arrayBufferView.byteLength).toBeGreaterThan(0);
+  });
+
   it("excludes distant perspective labels before glyph requests and picking, and restores them when approached", async function () {
     const far = feature("far", 2048, "中");
     far.geometry.parts[0][1] = (512 - 450) * 4;
@@ -300,7 +329,7 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect([...runtime._groups.values()][0].command).toBe(command);
     expect([...runtime._pickIds.values()][0]).toBe(pickId);
     scene.camera.position.z *= 0.5;
-    scene.renderForSpecs();
+    await loaded(layer);
     expect([...runtime._tileLayouts.values()][0]).not.toBe(layouts);
     expect(filter).toHaveBeenCalled();
     scene.primitives.remove(layer);
@@ -344,6 +373,19 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     const upload = spyOn(batch.resources, "update").and.callThrough();
     scene.renderForSpecs();
     expect(upload).not.toHaveBeenCalled();
+    const staging = batch.staging;
+    const positions = quads[0].positions;
+    const encoded = quads[0].encodedPositions;
+    scene.camera.position.x = 1;
+    scene.renderForSpecs();
+    const movedQuad = runtime._previous[0].projected.text.quads[0];
+    expect(movedQuad.positions).toBe(positions);
+    expect(movedQuad.encodedPositions).toBe(encoded);
+    expect(batch.staging).toBe(staging);
+    expect(staging instanceof Float32Array).toBeTrue();
+    expect(
+      scene.pick(glyphCenter(runtime._previous[0]), 1, 1).id.featureId,
+    ).toBe("road");
     scene.camera.up = new Cartesian3(0, -1, 0);
     scene.camera.right = new Cartesian3(-1, 0, 0);
     scene.renderForSpecs();
@@ -804,6 +846,7 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     const owner = {
       scene,
       style: { glyphs: "https://example.invalid/{fontstack}/{range}.pbf" },
+      _workers: new WorkerPool(),
     };
     const assets = new Assets(owner, 1, 1),
       first = new Map([["Test/0", { font: "Test", range: 0 }]]),
@@ -826,5 +869,6 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
       assets.prepare(first, false, new Set(["Test/1"])),
     ).toThrowError(RuntimeError);
     assets.destroy();
+    owner._workers.destroy();
   });
 });

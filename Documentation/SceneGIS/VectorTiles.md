@@ -78,7 +78,10 @@ if (pending !== undefined) {
 
 构造不发请求；URL 可为 string 或 Resource，Resource 配置被克隆。
 TMS 只改变 URL row，不改变 geometry。调用方拥有 Request、取消与缓存；
-本对象不拥有 World/GPU，也不提供 destroy。
+本对象不拥有 World/GPU，也不提供 destroy。默认 decoded 请求使用模块共享的 lazy 双 Worker 池，
+与页面同生命周期；构造不启动 Worker。`requestTile(x, y, level, request, false)` 返回 raw ArrayBuffer，
+供 Layer 使用其 owned Worker 池准备；自定义 source 覆盖方法应透传第五个参数，
+继续返回 decoded Data 的已有覆盖也可消费，但需要 structured clone，不能 detach 调用方数据。
 
 | 结果                    | 意义                                          |
 | ----------------------- | --------------------------------------------- |
@@ -134,10 +137,31 @@ MVT 选层还消费 `world.maximumTiltedTileDistance`，和地表共享低角度
 限制，也不改变 source minimumLevel / maximumVisibleTiles。见
 [ADR-0066](Decisions/ADR-0066-planar-tilted-tile-distance.md)。
 
+## 异步准备与上传预算
+
+V3C1B 将 MVT decode、style/filter、面三角化、线网格、geometry combine/high-low encode 与
+整数 zoom symbol anchors 移到 Layer 自有的两个 lazy Workers。Glyph decode/atlas packing 与
+normalized text/icon shaping 使用同一池；当前相机投影、沿线方向、碰撞、pick IDs 和 GPU 留在主线程。
+
+最多两块 tile 处于准备或待上传状态；原始 payload 保留在 `tileCacheSize` 控制的缓存中，
+独立副本 transfer 给 Worker。Worker 复用编译后的 style，几何或整数 layout 失效时重新解码；
+目前没有 Worker 内 decoded tile cache，也没有总驻留内存字节硬上限。
+
+`maximumUploadTimePerFrame` 默认 4 毫秒，`maximumUploadBytesPerFrame` 默认 4194304 字节，
+均为构造选项。每帧按 Uint16 geometry batch 粒度限制 GPU 提交，单个不可分割 batch 可超过软预算；
+`maximumUploadsPerFrame` 继续限制每帧整块 tile 的发布数。新 tile 全部上传后才切换 cover，
+过程保留旧批次；隐藏、淘汰、destroy 丢弃过时结果并释放已上传的临时资源。
+Worker 入口/通信失败和任务错误显式上报，没有主线程回退或自动重试。
+
+`statistics` 增加 `preparationTasks`、`workerTasks`、`workerMs`、`decodedFeatures` 和 `decodeMs`。
+后两项分别为首次有效解码的累计 feature 数与 Worker 内累计解码耗时；Worker 耗时之和不是页面阻塞时间。
+部署继续配置 Cesium 的 `CESIUM_BASE_URL`，并保留构建产物的 Workers 和 chunk 目录；
+详细边界见 [ADR-0067](Decisions/ADR-0067-vector-worker-preparation.md)。
+
 ## 验证与维护
 
-目前 126 项 focused Specs 覆盖前端、几何/cover、真实 Scene 样式、DPR、多视锥、symbol 与 GPU 资源。
-另有 9 项页面 E2E，实际检查城市颜色、拾取、requestRenderMode、倾斜、显隐、
+目前 143 项 focused Specs 覆盖前端、几何/cover、真实 Scene 样式、DPR、多视锥、symbol 与 GPU 资源。
+另有 11 项页面 E2E，实际检查城市颜色、拾取、requestRenderMode、倾斜、显隐、
 重建、延迟替换、样式图集、公开地图、中英文点标注与曲线/路牌/箭头。
 完整 build/build-ts/tsc/release、独立 engine 安装后的五个入口与四份固定 Shader 已验证。
 V5A 新增的两份 symbol Shader 和类型/资源协议见 [标注文档](VectorTileSymbols.md)；

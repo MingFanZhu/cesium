@@ -3,7 +3,9 @@ import DeveloperError from "../../Core/DeveloperError.js";
 import Request from "../../Core/Request.js";
 import Resource from "../../Core/Resource.js";
 import SceneGISPlanarTilingScheme from "./SceneGISPlanarTilingScheme.js";
-import SceneGISVectorTile from "./SceneGISVectorTile.js";
+import WorkerPool from "./_private/_SceneGISVectorWorkerPool.js";
+
+let decodePool;
 
 /**
  * An independently decoded MVT URL source with explicit single-root planar addressing.
@@ -168,7 +170,8 @@ SceneGISVectorTileSource.prototype.getTileResource = function (
  * @param {number} y Canonical XYZ row.
  * @param {number} level Canonical level.
  * @param {Request} [request] Caller-owned request.
- * @returns {Promise<SceneGISVectorTile.Data>|undefined} Decoded data, or undefined when scheduling was deferred.
+ * @param {boolean} [decode=true] Decode in a Worker; false returns raw MVT bytes for asynchronous preparation.
+ * @returns {Promise<SceneGISVectorTile.Data|ArrayBuffer>|undefined} Tile content, or undefined when network scheduling was deferred.
  * @exception {DeveloperError} The address or request is invalid.
  */
 SceneGISVectorTileSource.prototype.requestTile = function (
@@ -176,14 +179,25 @@ SceneGISVectorTileSource.prototype.requestTile = function (
   y,
   level,
   request,
+  decode = true,
 ) {
+  if (typeof decode !== "boolean") {
+    throw new DeveloperError("decode must be a boolean.");
+  }
   const promise = this.getTileResource(x, y, level, request).fetchArrayBuffer();
   if (promise === undefined) {
     return undefined;
   }
-  return promise.then((buffer) =>
-    buffer === undefined ? { layers: [] } : SceneGISVectorTile.decode(buffer),
-  );
+  return promise.then((buffer) => {
+    buffer ??= new ArrayBuffer(0);
+    if (!decode) {
+      return buffer;
+    }
+    decodePool ??= new WorkerPool();
+    return decodePool
+      .enqueue({ kind: "decode", buffer }, [buffer])
+      .then((result) => result.data);
+  });
 };
 
 export default SceneGISVectorTileSource;

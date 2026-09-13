@@ -68,13 +68,15 @@ AgentDocs/**
 .scenegis/**
 scripts/scenegis/**
 packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js
+packages/engine/Source/Workers/SceneGISVectorTileWorker.js
 ```
 
 所有权按照“上游基线中是否已经存在该路径”判断，而不是按照当前分支中文件所在目录判断。修改 upstream-owned file 必须登记 SGP；新增 SceneGIS-owned file 不需要 SGP。
 
-`packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js`是ADR-0027批准的唯一特殊Worker entry：
-它不在上游基线中，只负责接入Cesium现有Worker构建链，实际算法继续位于`Source/SceneGIS/**`。该精确例外
-不自动授权其他`Source/Workers`文件；新增entry仍需重新审计、ADR与所有权说明。
+`packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js`（ADR-0027）与
+`packages/engine/Source/Workers/SceneGISVectorTileWorker.js`（ADR-0067）是批准的精确 owned Worker entries。
+它们不在上游基线中，只接入 Cesium 现有 Worker 构建链，算法继续位于 `Source/SceneGIS/**`。
+这些例外不授权其他 `Source/Workers` 文件；新增 entry 仍需重新审计、ADR 与所有权说明。
 
 `packages/engine/Source/Shaders/SceneGIS/**/*.glsl` 是 ADR-0030 批准的 SceneGIS shader source root。
 它复用 Cesium 现有 `Source/Shaders/**` GLSL-to-JS 构建链；相邻生成 `.js` 是忽略的 build artifact，
@@ -206,7 +208,7 @@ proposed ranges的并集覆盖changed lines，使任一retired登记可独立移
 | CSS 与 UI                      | engine 与 widgets 规则不同                            | UI 保持在 widgets 包边界内                                                      |
 | 模块副作用                     | 受 tree-shaking 和 `sideEffects` 影响                 | 优先显式安装或注册 API                                                          |
 
-Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前仍是延迟决策，不在没有真实功能和源码证据时预设答案。SceneGIS GLSL source/delivery 以 ADR-0030 为准；A4 已批准的唯一 terrain Worker 入口以 ADR-0027 为准。
+Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前仍是延迟决策，不在没有真实功能和源码证据时预设答案。SceneGIS GLSL source/delivery 以 ADR-0030 为准；已批准的 terrain 与 vector Worker 入口分别以 ADR-0027、ADR-0067 为准。
 
 ## 渲染扩展原则
 
@@ -766,6 +768,11 @@ Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代�
 碰撞投影与绘制使用同一组顶点，有向箭头不随文字阅读方向翻转。
 具体语义、source LOD 间距与道路拼接边界见 [ADR-0065](Decisions/ADR-0065-line-symbol-placement.md)。
 
+矢量准备按 [ADR-0067](Decisions/ADR-0067-vector-worker-preparation.md) 使用独立 Worker：
+MVT、geometry buffers、整数 zoom anchors、glyph atlas 和 normalized shaping 异步准备。
+主线程保留请求、当前视图 placement/picking 和有预算的 GPU 提交；异步结果不得直接发布 draw commands。
+Layer 销毁终止 owned Workers，过时 tile 结果按 token 丢弃，不引入主线程 fallback 或自动 retry。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：
@@ -827,7 +834,7 @@ ADR 放在 `Documentation/SceneGIS/Decisions/ADR-####-short-title.md`。首次�
 ## 当前延迟决策
 
 - SceneGIS `czm_*` builtin 的接入与生成方式；普通 SceneGIS GLSL source/delivery 已由 ADR-0030 决定。
-- 除 ADR-0027 唯一 terrain entry 外，其他 SceneGIS Worker 的入口、协议与发布行为。
+- 除 ADR-0027 terrain、ADR-0067 vector entries 外，其他 SceneGIS Worker 的入口、协议与发布行为。
 - 是否从根 JS barrel 严格排除 `_` 私有模块。
 - 持久视觉基线和性能基线的 CI 执行环境。
 

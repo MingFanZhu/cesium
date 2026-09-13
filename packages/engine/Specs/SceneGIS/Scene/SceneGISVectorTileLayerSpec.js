@@ -127,6 +127,79 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     return feature(3, [[1888, 1888, 2208, 1888, 2208, 2208, 1888, 2208]]);
   }
 
+  it("publishes a complete tile only after bounded batch uploads and leaves Worker completions CPU-only", async function () {
+    const decoded = data([polygon()]);
+    spyOn(source, "requestTile").and.resolveTo(decoded);
+    const layer = add(
+      [
+        definition(
+          "fill",
+          { "fill-color": "red", "fill-antialias": false },
+          "base",
+        ),
+        definition(
+          "fill",
+          { "fill-color": "blue", "fill-antialias": false },
+          "overlay",
+        ),
+      ],
+      { maximumUploadBytesPerFrame: 1 },
+    );
+    const schedule = spyOn(layer._workers, "schedule").and.callThrough();
+    scene.renderForSpecs();
+    await Promise.resolve();
+    scene.renderForSpecs();
+    const entry = layer._sources.get("test").visible[0];
+    await schedule.calls.mostRecent().returnValue;
+    expect(entry.work.result).toBeDefined();
+    expect(entry.batches.size).toBe(0);
+    expect(layer.statistics.uploads).toBe(0);
+    const work = entry.work;
+    scene.renderForSpecs();
+    expect(work.cursor).toBe(1);
+    expect(entry.signature).toBeUndefined();
+    expect(layer._drawOrder.length).toBe(0);
+    expect(layer.tilesLoaded).toBeFalse();
+    scene.renderForSpecs();
+    expect(layer.tilesLoaded).toBeTrue();
+    expect(read().color).toEqual([0, 0, 255, 255]);
+    expect(
+      decoded.layers[0].features[0].geometry.parts[0].byteLength,
+    ).toBeGreaterThan(0);
+  });
+
+  it("discards a hidden tile's active Worker result and destroys partially uploaded resources", async function () {
+    spyOn(source, "requestTile").and.resolveTo(data([polygon()]));
+    const layer = add(
+      [
+        definition("fill", { "fill-antialias": false }, "base"),
+        definition("fill", { "fill-antialias": false }, "overlay"),
+      ],
+      { maximumUploadBytesPerFrame: 1 },
+    );
+    const schedule = spyOn(layer._workers, "schedule").and.callThrough();
+    scene.renderForSpecs();
+    await Promise.resolve();
+    scene.renderForSpecs();
+    const entry = layer._sources.get("test").visible[0];
+    const pending = schedule.calls.mostRecent().returnValue;
+    layer.show = false;
+    scene.renderForSpecs();
+    await pending;
+    expect(entry.work).toBeUndefined();
+    expect(entry.signature).toBeUndefined();
+    layer.show = true;
+    scene.renderForSpecs();
+    await schedule.calls.mostRecent().returnValue;
+    scene.renderForSpecs();
+    const resource = entry.work.batches.get("base")[0]._resources;
+    layer.show = false;
+    scene.renderForSpecs();
+    expect(resource.isDestroyed()).toBeTrue();
+    expect(entry.work).toBeUndefined();
+    expect(layer.statistics.preparationTasks).toBe(0);
+  });
+
   function streaming() {
     source = new SceneGISVectorTileSource({
       url: "https://example.invalid/{z}/{x}/{y}",
@@ -322,8 +395,10 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     ).toBeTrue();
     expect(read(-10, 10).color).toEqualEpsilon([64, 128, 0, 255], 1);
     pending.get("1/0/0").resolve(whole("child", "#0000ff"));
-    await Promise.resolve();
-    scene.renderForSpecs();
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return layer._sources.get("test").entries.get("1/0/0").state === "ready";
+    });
     const child = read(-10, 10);
     expect(child.color).toEqualEpsilon([0, 128, 64, 255], 1);
     expect(child.pick?.id.featureId).toBe("child");
@@ -334,8 +409,10 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     pending.get("1/1/0").resolve({ layers: [] });
     pending.get("1/0/1").reject(new Error("deliberate child failure"));
     pending.get("1/1/1").resolve(whole("southeast", "#0000ff"));
-    await Promise.resolve();
-    scene.renderForSpecs();
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return layer.tilesLoaded;
+    });
     expect(read(10, 10).color).toEqual([0, 0, 0, 255]);
     expect(read(10, 10).pick?.primitive).not.toBe(layer);
     expect(read(-10, -10).color).toEqualEpsilon([64, 128, 0, 255], 1);
@@ -746,10 +823,15 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     scene.renderForSpecs();
     expect(pending.length).toBe(1);
     expect(layer.statistics.pendingRequests).toBe(1);
+    const activeScene = scene;
     for (let index = 0; index < 4; index++) {
       pending[index](data([polygon()]));
-      await Promise.resolve();
-      scene.renderForSpecs();
+      await pollToPromise(() => {
+        const before = layer.statistics.uploads;
+        activeScene.renderForSpecs();
+        expect(layer.statistics.uploads - before).toBeLessThanOrEqual(1);
+        return layer.statistics.uploads === index + 1;
+      });
       expect(layer.statistics.uploads).toBe(index + 1);
       expect(layer.statistics.pendingRequests).toBeLessThanOrEqual(1);
     }

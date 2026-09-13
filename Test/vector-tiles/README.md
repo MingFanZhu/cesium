@@ -66,7 +66,7 @@ V3C0 基线接入 Bright 93/119 层、Liberty 82/111 层；V5A 点标注扩展�
 按用户本轮要求启用公网示例；服务不可用时可手动返回本地城市，不自动切换数据。
 
 `Specs/e2e/scenegis-vector-tiles.spec.js` 覆盖真实 PBF、颜色像素、requestRenderMode、
-拾取、倾斜、重建、父子替换中间状态和样式图集，共 3 项；131 项矢量单元和真实 Context 回归在
+拾取、倾斜、重建、父子替换中间状态和样式图集，共 3 项；143 项矢量单元和真实 Context 回归在
 `packages/engine/Specs/SceneGIS/`。
 修改源码或 Specs 后先执行 `npm run build -- --workspace @cesium/engine`，再执行
 `npm run test -- --workspace engine --includeName SceneGISVector --browsers ChromeHeadless --failTaskOnError`。
@@ -74,7 +74,7 @@ V3C0 基线接入 Bright 93/119 层、Liberty 82/111 层；V5A 点标注扩展�
 省略前置构建会误测旧文件；直接跑 root 混合包也不能替代 engine 的模块 identity 验证。
 E2E 使用仓库默认配置时，需要释放 8080/8081 给其根服务器，不能同时运行第二个开发服务器。
 
-新增 `Specs/e2e/scenegis-vector-public.spec.js` 的 3 项 E2E 拦截外网，使用本地
+新增 `Specs/e2e/scenegis-vector-public.spec.js` 的 5 项 E2E 拦截外网，使用本地
 `public-fixture.pbf` 与固定样式快照，覆盖两个入口、实际选层、pick、重建、
 Bright/Liberty 切换销毁旧图和 HTTP 503 连接失败保留旧图。生成命令为
 `node Test/vector-tiles/generate-public-fixture.mjs`。
@@ -84,7 +84,10 @@ Bright/Liberty 切换销毁旧图和 HTTP 503 连接失败保留旧图。生成�
 该小数据集用于建立 V2 baseline，不代表密集真实地图的吞吐量。
 
 公开地图暴露 `window.publicVectorPreview`。其 60 帧测量记录
-preRender 到 postRender 的 CPU 提交、正常视图统计、请求数、接收字节和解码耗时。
+preRender 到 postRender 的 CPU 提交、正常视图统计、请求数、接收字节和 Worker 内解码耗时。
+V3C1B 默认启用异步准备，无需开关；MVT/geometry/glyph/shaping 使用 Worker，页面不再包裹同步 decoder。
+Worker tasks/ms 可在 layer.statistics 查看；它们不是主线程耗时或 FPS。
+新增 Worker 文件后，运行中的开发服务器需要重启一次以刷新构建入口列表；本轮已处理。
 firstReadyMs 从创建图层到当前视图首次无失败就绪，排除页面 bundle 与样式/TileJSON 获取；
 要素数包含解码但尚未渲染的 POI/标注。指标是一次图层生命周期的累计值；
 如需独立地点/zoom 的冷启动对比，定位后使用“重建图层”，不要把累计数当作当前可见要素。
@@ -132,4 +135,8 @@ glyph/icon DrawCommand。7 个合成候选显示 6 条，左下低优先级文�
 公开 Bright 当前接入 118/119、Liberty 107/111 层，各增加 10 个道路/水系名称、路牌与箭头层。
 原始 filter/layout/paint 保持完整；未支持的特殊 shaping、variable anchors、text-fit、
 terrain/Globe 和跨 tile 语义道路拼接限制见 [标注文档](../../Documentation/SceneGIS/VectorTileSymbols.md)。
-9 项页面 E2E 使用本地数据，公开服务仅用于人工检查。
+11 项页面 E2E 使用本地数据，公开服务仅用于人工检查。
+
+Worker 发布路径验证：完成 `npm run build-release` 与 `npm run build-ts` 后运行
+`node Test/vector-tiles/verify-worker-package.mjs`。脚本只使用本地 fixture，分别启动独立
+installed engine / release ESM / release IIFE consumer，不混用 runtime identity；临时 npm 安装保留在系统临时目录。

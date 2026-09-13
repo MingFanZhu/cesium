@@ -1,6 +1,7 @@
 import Cartesian2 from "../../../Core/Cartesian2.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import Cartesian4 from "../../../Core/Cartesian4.js";
+import EncodedCartesian3 from "../../../Core/EncodedCartesian3.js";
 import Matrix4 from "../../../Core/Matrix4.js";
 import Line from "../../Core/_private/_SceneGISVectorSymbolLine.js";
 
@@ -145,12 +146,17 @@ function screenPath(scene, candidate) {
 }
 
 function bounds(points) {
-  return [
-    Math.min(...points.map((p) => p[0])),
-    Math.min(...points.map((p) => p[1])),
-    Math.max(...points.map((p) => p[0])),
-    Math.max(...points.map((p) => p[1])),
-  ];
+  let left = Infinity,
+    top = Infinity,
+    right = -Infinity,
+    bottom = -Infinity;
+  for (const point of points) {
+    left = Math.min(left, point[0]);
+    top = Math.min(top, point[1]);
+    right = Math.max(right, point[0]);
+    bottom = Math.max(bottom, point[1]);
+  }
+  return [left, top, right, bottom];
 }
 
 function shape(scene, candidate, shaped, text, metersPerPixel) {
@@ -171,22 +177,21 @@ function shape(scene, candidate, shaped, text, metersPerPixel) {
   let plane,
     angle = rotation;
   if (along) {
-    plane = mapPitch
-      ? {
-          line: Line.path(
-            candidate.line.points.map((point) => ({
-              x: (point.x - candidate.position.x) / metersPerPixel,
-              y: (candidate.position.y - point.y) / metersPerPixel,
-            })),
-          ),
-          station: candidate.station / metersPerPixel,
-        }
-      : screenPath(scene, candidate);
-    const tangent = Line.sample(plane.line, plane.station);
-    if (!tangent) {
-      return undefined;
+    if (mapPitch) {
+      // World path metrics are already available from tile preparation.
+      const tangent = Line.sample(candidate.line, candidate.station);
+      if (!tangent) {
+        return undefined;
+      }
+      angle -= tangent.angle;
+    } else {
+      plane = screenPath(scene, candidate);
+      const tangent = Line.sample(plane.line, plane.station);
+      if (!tangent) {
+        return undefined;
+      }
+      angle += tangent.angle;
     }
-    angle += tangent.angle;
   } else if (mapPitch && alignment === "viewport") {
     const right = scene.camera.rightWC;
     angle += Math.atan2(-right.y, right.x);
@@ -224,58 +229,124 @@ function shape(scene, candidate, shaped, text, metersPerPixel) {
   }
   const flip =
     along && layout[`${prefix}-keep-upright`] && screenDirectionX < 0;
-  const quads = along
-    ? Line.bend(
-        shaped,
-        plane.line,
-        plane.station,
-        flip,
-        rotation,
-        text ? (layout["text-max-angle"] * Math.PI) / 180 : Infinity,
-      )
-    : shaped.quads.map((quad) => ({
-        ...quad,
-        corners: Line.corners(quad.box, 0, 0, angle),
-      }));
-  if (!quads) {
-    return undefined;
-  }
-  const boxes = [];
-  for (const quad of quads) {
-    if (mapPitch) {
-      quad.positions = quad.corners.map(
-        ([x, y]) =>
-          new Cartesian3(
-            candidate.position.x + x * metersPerPixel,
-            candidate.position.y - y * metersPerPixel,
-            0,
-          ),
-      );
-      const projected = quad.positions.map((point) => project(scene, point));
-      if (projected.some((point) => !point)) {
-        return undefined;
-      }
-      quad.corners = projected.map((point) => [
-        point.x - candidate.screen.x,
-        point.y - candidate.screen.y,
-      ]);
+  const maxAngle = text ? (layout["text-max-angle"] * Math.PI) / 180 : Infinity;
+  let cached = shaped._projectionGeometry;
+  const reusable = mapPitch || !along;
+  if (
+    !reusable ||
+    !cached ||
+    cached.anchor !== candidate.anchor ||
+    (mapPitch && cached.metersPerPixel !== metersPerPixel) ||
+    cached.angle !== angle ||
+    cached.flip !== flip ||
+    cached.mapPitch !== mapPitch ||
+    cached.along !== !!along ||
+    cached.rotation !== rotation ||
+    cached.maxAngle !== maxAngle
+  ) {
+    if (along && mapPitch) {
+      plane = {
+        line: Line.path(
+          candidate.line.points.map((point) => ({
+            x: (point.x - candidate.position.x) / metersPerPixel,
+            y: (candidate.position.y - point.y) / metersPerPixel,
+          })),
+        ),
+        station: candidate.station / metersPerPixel,
+      };
     }
-    boxes.push(bounds(quad.corners));
+    const quads = along
+      ? Line.bend(shaped, plane.line, plane.station, flip, rotation, maxAngle)
+      : shaped.quads.map((quad) => ({
+          page: quad.page,
+          rect: quad.rect,
+          scale: quad.scale,
+          corners: Line.corners(quad.box, 0, 0, angle),
+        }));
+    if (!quads) {
+      return undefined;
+    }
+    if (mapPitch) {
+      for (const quad of quads) {
+        quad.positions = quad.corners.map(
+          ([x, y]) =>
+            new Cartesian3(
+              candidate.position.x + x * metersPerPixel,
+              candidate.position.y - y * metersPerPixel,
+              0,
+            ),
+        );
+        quad.encodedPositions = quad.positions.map((point) =>
+          EncodedCartesian3.fromCartesian(point),
+        );
+      }
+    }
+    cached = {
+      anchor: candidate.anchor,
+      metersPerPixel,
+      angle,
+      flip,
+      mapPitch,
+      along: !!along,
+      rotation,
+      maxAngle,
+      quads,
+    };
+    if (reusable) {
+      shaped._projectionGeometry = cached;
+    }
   }
-  // Point labels retain one collision box; curved labels use the actual glyph corridor.
-  return {
-    quads,
-    boxes: along
-      ? boxes
-      : [
-          bounds(
-            boxes.flatMap((box) => [
-              [box[0], box[1]],
-              [box[2], box[3]],
-            ]),
-          ),
-        ],
-  };
+  if (!mapPitch && cached.projected) {
+    return cached.projected;
+  }
+  const boxes = [],
+    quads = [];
+  let left = Infinity,
+    top = Infinity,
+    right = -Infinity,
+    bottom = -Infinity;
+  for (const quad of cached.quads) {
+    let projectedQuad = quad;
+    if (mapPitch) {
+      const corners = [];
+      for (const point of quad.positions) {
+        const screen = project(scene, point);
+        if (!screen) {
+          return undefined;
+        }
+        corners.push([
+          screen.x - candidate.screen.x,
+          screen.y - candidate.screen.y,
+        ]);
+      }
+      projectedQuad = {
+        page: quad.page,
+        rect: quad.rect,
+        scale: quad.scale,
+        positions: quad.positions,
+        encodedPositions: quad.encodedPositions,
+        corners,
+      };
+    }
+    quads.push(projectedQuad);
+    const box = bounds(projectedQuad.corners);
+    if (along) {
+      boxes.push(box);
+    } else {
+      left = Math.min(left, box[0]);
+      top = Math.min(top, box[1]);
+      right = Math.max(right, box[2]);
+      bottom = Math.max(bottom, box[3]);
+    }
+  }
+  if (!along) {
+    boxes.push([left, top, right, bottom]);
+  }
+  const projected = { quads, boxes };
+  if (!mapPitch && reusable) {
+    cached.projected = projected;
+  }
+  return projected;
 }
 
 /** Projects the same glyph vertices used by rendering and collision. @private */

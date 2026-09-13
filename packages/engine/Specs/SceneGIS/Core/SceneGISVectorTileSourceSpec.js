@@ -61,6 +61,17 @@ describe("SceneGIS/Core/SceneGISVectorTileSource", function () {
     );
   });
 
+  it("returns raw bytes without decoding when the consuming layer requests Worker preparation", async function () {
+    const bytes = fixture().buffer;
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const source = new SceneGISVectorTileSource(options());
+    expect(await source.requestTile(0, 0, 0, undefined, false)).toBe(bytes);
+    expect(bytes.byteLength).toBeGreaterThan(0);
+    expect(() =>
+      source.requestTile(0, 0, 0, undefined, "raw"),
+    ).toThrowDeveloperError();
+  });
+
   it("distinguishes scheduling deferral from a fulfilled empty response", async function () {
     const fetch = spyOn(Resource.prototype, "fetchArrayBuffer").and.returnValue(
       undefined,
