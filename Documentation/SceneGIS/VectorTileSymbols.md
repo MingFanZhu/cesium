@@ -28,7 +28,8 @@ icon-text-fit、SDF icon 或 fade transition。不支持的显式属性在构造
 Polygon geometry、缺字、已识别的复杂 shaping 文本在运行时提供诊断。
 该范围不承诺与 MapLibre 的自动均衡换行、复杂字体 shaping 或任意宽 halo 逐像素相同。
 
-文字/图标 size 按精确 fractional zoom 表达式求值，排版与 collision 使用同一值；
+文字/图标 size 按精确 fractional zoom 表达式求值；每轮 collision 使用该轮快照 zoom，
+实际绘制继续使用当前 zoom，短期避让延迟见下文。
 其余 layout/filter 按 floor zoom。这是本 profile 的选择，和 MapLibre stop-pair 插值可能存在差别。
 MVT 内坐标保持 CRS 无关，先按 source tile matrix 转世界 anchor，再投影为屏幕 CSS pixels；
 GPU 使用 RTE 和 DPR，glyph 不按基础瓦片区域裁切。
@@ -59,8 +60,9 @@ icon-rotate 可表达反向交通。路牌使用 viewport rotation，编号和�
 道路编号使用原始样式选择的预制普通 sprite，不需要 text-fit。
 
 同一 source/style/content 的沿线文字受半个 symbol-spacing 的屏幕重复距离约束，
-抑制邻 tile / LOD 的密集重复；不同内容不合并。曲线 collision 使用逐 glyph 投影盒，
-不把整条弯曲文字的空白内部全部占满。相机 near/far 外的路径先裁切再做 viewport 排布。
+抑制邻 tile / LOD 的密集重复；不同内容不合并。曲线 collision 使用沿路径分段的保守包络，
+直线路段不逐字投影四角；包络覆盖字形旋转外扩，可能比逐 glyph 盒产生额外避让。
+Point 使用整组 layout box。相机 near/far 外的路径先裁切再做 viewport 排布。
 anchor ownership 继续使用 resident cover 半开区域，完整 glyph 可跨 tile 边界。
 
 anchor 的世界间距为 symbol-spacing 乘以整数 style zoom 与 source canonical LOD/overzoom
@@ -85,9 +87,14 @@ anchor 的世界间距为 symbol-spacing 乘以整数 style zoom 与 source cano
 过期请求可取消；迟到结果不能恢复已销毁资源。异步完成只准备 CPU 数据并 requestRender，
 GPU 与布局只在 normal update 发布，pick/depth 复用快照。
 基础地图不等待字体；同内容标注在延迟 LOD 替换时保留身份。
-热帧保持排版、纹理、buffer 与 command；camera 变化重新投影和碰撞。
+热帧保持候选、排版、纹理、buffer 与 command；camera 变化立即更新已发布标注的真实绘制。
+Placement 使用不可变相机快照，按约 2 ms 的步骤粒度软预算跨帧推进；普通交互在提交后
+最多复用 100 ms，再启动下一轮。持续移动不重启在途布局，避免饥饿；完成后处理最新视图。
+单个不可分割步骤可能超过预算，100 ms 也不是包含计算时间的硬完成期限。
+离开当前 owner/视口、near/far 或远景范围的已发布标注当前帧隐藏。
 
-`tilesLoaded` 表示当前 base 与 symbol 请求均已终结，不保证没有失败；隐藏 Layer 没有当前需求。
+`tilesLoaded` 表示当前 base 与 symbol 请求、Worker 和最新视图 placement 均已终结，
+不保证没有失败；隐藏 Layer 没有当前需求。
 `errorEvent` 的资源错误形如 `{layer, resource, error}`，`tile` 可 undefined。
 无自动字体替代或额外 retry；缺字不会伪装为成功的完整文字。
 
@@ -107,7 +114,11 @@ V3C1B 已将整数 anchors、glyph decode/pack 和 normalized shaping 迁入 Wor
 同一文本的排版按标准字号缓存，fractional size 只缩放；glyph/sprite 重载使用 generation 使旧排版失效。
 Worker 提前整理去重的 font/range dependencies；交互时复用不变的世界字形几何、高低位编码和顶点暂存区，
 减少临时对象与 GC。地图方向、字号或 anchor 改变时重新准备相关几何。
-屏幕投影、keep-upright、碰撞和最终 quads 仍随当前相机在主线程计算，不能用过时相机结果代替。
+V3C1C 按 [ADR-0068](Decisions/ADR-0068-symbol-placement-and-dynamic-buffers.md) 分离碰撞与绘制：
+先用代理做碰撞预检，再为通过的候选验证真实曲线字形和 max-angle；每帧只更新已发布字形。
+Static buffer 保存 UV、颜色与 pick，dynamic buffer 保存位置、offset、size/halo 参数和 visibility。
+数据不变不上传；平移只更新矩阵时不会重写这些 buffers，旋转、缩放与 paint 只写 dirty 范围。
+保留原 non-indexed quad 和批次顺序；未合并底图命令，也未改变 depth/blending 策略。
 Worker 待处理任务也计入 tilesLoaded；完成回调只存 CPU 状态。主线程 GPU/pick/placement 仍可能成为
 密集视图瓶颈，整体内存硬上限与 terrain/Globe 另行验证。见 [ADR-0067](Decisions/ADR-0067-vector-worker-preparation.md)。
 

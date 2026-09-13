@@ -8,8 +8,8 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V3C1B active — 异步矢量准备`                          |
-| Active phase plan      | [V3C1B](plans/2026-09-13-v3c1b-worker-preparation.md)  |
+| Current phase          | `V3C1C completed — 标注交互更新`                       |
+| Active phase plan      | None；后续阶段未激活                                   |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
@@ -37,7 +37,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
 - Source：`packages/engine/Source/SceneGIS/Core/SceneGISVectorTile*.js` 和
   `packages/engine/Source/SceneGIS/Scene/SceneGISVectorTileLayer.js`，五个公共入口。
-- Specs：Core/Renderer/Scene 镜像测试，143 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
+- Specs：Core/Renderer/Scene 镜像测试，146 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面：[城市](../../Test/vector-tiles/index.html) 与 [样式图集](../../Test/vector-tiles/styles.html)，
   21 个城市 MVT fixtures 加 1 个样式 MVT。
@@ -75,7 +75,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[V3C1A review](reviews/2026-09-13-v3c1a-tilted-distance-review.md)；
+- Latest review：[V3C1C review](reviews/2026-09-13-v3c1c-symbol-motion-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
 - Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
@@ -137,3 +137,16 @@ Owner motion feedback 记录完整条件与剩余 R07，阶段 gate 仍保持打
 
 负责人已授权继续三项标注交互优化。V3C1B 按推进授权关闭 gate，先形成独立 Worker checkpoint；
 R07 的 placement/碰撞/buffer 部分由后继 V3C1C 承接，其余预算/GPU 资格保留，不宣称稳定 60 FPS。
+
+V3C1B checkpoint：`065c345efd`。当前 [V3C1C](plans/2026-09-13-v3c1c-symbol-motion.md) 已获授权，按 ADR-0068 实施标注交互优化。
+
+V3C1C 技术自审通过：候选持久缓存、2 ms 软预算 placement、独立 collision proxies 与
+static/dynamic dirty buffers 已实现。146 项 vector Specs、8 项相关 E2E、engine/root/release
+构建及三种实际安装/发布入口的文字绘制、pick、平移无上传和销毁检查通过。
+同机浅角 pan/rotate CPU median 从 23.0/23.5 ms 降到 12.9/13.3 ms；原视角为 7.6/8.0 ms。
+保守碰撞使浅角静止标注 201→189，布局更新存在预算延迟；详见最新 review 和
+[ADR-0068](../../Documentation/SceneGIS/Decisions/ADR-0068-symbol-placement-and-dynamic-buffers.md)。
+公开页已刷新并恢复原相机，资源就绪且无错误。负责人于 2026-09-13 明确确认验收通过，
+V3C1C gate 已关闭，本阶段实现与记录形成独立本地 checkpoint；不激活 V3D，
+不把 CPU 指标当作稳定 60 FPS 或 GPU 吞吐资格。当前地形问题属于架构说明：公开矢量图层仍为
+无 terrainProvider 的 Z=0 flat 后端，surface-depth 只有 V2 可行性证据，生产贴地仍属 V4。

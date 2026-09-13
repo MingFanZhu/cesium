@@ -765,13 +765,17 @@ Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代�
 请求与内容缓存保持独立。Style zoom 以视轴在 Z=0 的前向交点为参考，不把倾斜造成的
 采样距离变化误认为用户缩放；具体边界见 [ADR-0064](Decisions/ADR-0064-vector-perspective-lod.md)。
 沿线标注按 glyph advance 逐字布置，map pitch 使用真实世界 quad corners，viewport pitch 使用 CSS offsets；
-碰撞投影与绘制使用同一组顶点，有向箭头不随文字阅读方向翻转。
+有向箭头不随文字阅读方向翻转。按 ADR-0068，碰撞使用独立保守包络，
+布局按快照与软预算跨帧更新，实际字形绘制和拾取始终使用当前相机与真实顶点。
 具体语义、source LOD 间距与道路拼接边界见 [ADR-0065](Decisions/ADR-0065-line-symbol-placement.md)。
 
 矢量准备按 [ADR-0067](Decisions/ADR-0067-vector-worker-preparation.md) 使用独立 Worker：
 MVT、geometry buffers、整数 zoom anchors、glyph atlas 和 normalized shaping 异步准备。
 主线程保留请求、当前视图 placement/picking 和有预算的 GPU 提交；异步结果不得直接发布 draw commands。
 Layer 销毁终止 owned Workers，过时 tile 结果按 token 丢弃，不引入主线程 fallback 或自动 retry。
+标注按 [ADR-0068](Decisions/ADR-0068-symbol-placement-and-dynamic-buffers.md) 分离 persistent candidates、
+budgeted placement 与 current-camera drawing；静态 UV/paint/pick 和动态 geometry/visibility 分流，
+只上传改变的范围。短期避让延迟与保守碰撞造成的密度差异是显式资格边界。
 
 ## 验证架构
 

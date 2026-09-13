@@ -13,6 +13,10 @@
 
 ## Decision
 
+V3C1C amendment：[ADR-0068](ADR-0068-symbol-placement-and-dynamic-buffers.md) 取代下文
+“不延后交互排布”及“碰撞使用同一组最终顶点”的历史要求。碰撞改为独立保守包络和
+有预算的快照布局；当前相机的真实字形、keep-upright、size、可见性和 pick 仍逐帧更新。
+
 2026-09-13 交互修正：renderer 在 paint/layout 求值前检查 filter；public evaluateLayer 保持原契约。
 可见要素的 integer layout、路径/anchors、编码位置与内容 key 按当前 render tile 缓存，
 相机移动只重新投影/避让，fractional size/paint 仍按当前 zoom 求值。Viewport 外 anchors 不触发额外求值。

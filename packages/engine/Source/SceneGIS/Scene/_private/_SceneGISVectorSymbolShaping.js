@@ -103,6 +103,7 @@ SceneGISVectorSymbolShaping.prototype.get = function (
   return {
     text: scaled(record.result.text, layout["text-size"] / 24, this.assets),
     icon: scaled(record.result.icon, layout["icon-size"], this.assets),
+    pages: record.pages,
   };
 };
 SceneGISVectorSymbolShaping.prototype.flush = function () {

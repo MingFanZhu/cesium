@@ -9,7 +9,7 @@
 - Architecture reviewer: 当前 Agent；项目负责人确认产品边界
 - Created: `2026-09-12`
 - Updated: `2026-09-13`
-- Current phase: [V3C1B](2026-09-13-v3c1b-worker-preparation.md)
+- Current phase: [V3C1C completed](2026-09-13-v3c1c-symbol-motion.md)；后续未激活
 - Related discussions: [源码审计](../discussions/2026-09-12-cesium-mvt-and-planar-audit.md)、
   [实现边界](../discussions/2026-09-12-rendering-boundaries.md)、
   [MapLibre 与贴地](../discussions/2026-09-12-maplibre-reference-and-surface.md)、
@@ -103,8 +103,9 @@ Globe 从数据/样式/调度职责分离开始考虑，实际渲染资格另设
 | V5A   | 平面点标注                          | V3C0 checkpoint  | 独立 symbol 方向已批准                     | 中文/Latin、POI 图文、collision、跨 tile、pick/资源                          | completed | [V5A](2026-09-13-v5a-point-symbols.md)                   |
 | V5B   | 平面沿线标注                        | V5A checkpoint   | 点标注资源和布局资格                       | 曲线文字、路牌、箭头、重复距离与缩放切换                                     | completed | [V5B](2026-09-13-v5b-line-symbols.md)                    |
 | V3C1A | 低角度远景共享选层                  | V5B checkpoint   | 批准低角度专用距离，俯视拉远保持           | 选取/请求减少，完整粗覆盖，俯视一致，资源与视觉资格                          | completed | [V3C1A](2026-09-13-v3c1a-tilted-distance.md)             |
-| V3C1B | 密集数据性能与必要线程              | V3C1A checkpoint | 真实含标注负载                             | 字节预算、必要 Worker 与性能/资源资格                                        | active    | [phase plan](2026-09-13-v3c1b-worker-preparation.md)     |
-| V3D   | MapLibre / Streets 非标注样式增量   | V3C1B checkpoint | 当前公开样式差距与资源预算已明确           | translate/anchor、map-aligned circle、pattern 的约定 profile、画面与资源资格 | planned   | 未激活                                                   |
+| V3C1B | 密集数据性能与必要线程              | V3C1A checkpoint | 真实含标注负载                             | 字节预算、必要 Worker 与性能/资源资格                                        | completed | [phase plan](2026-09-13-v3c1b-worker-preparation.md)     |
+| V3C1C | 标注交互更新                        | V3C1B checkpoint | 负责人批准持久布局、碰撞代理和分流 buffers | 当前帧绘制与拾取、布局收敛、资源和交互性能；负责人视觉 gate                  | completed | [V3C1C](2026-09-13-v3c1c-symbol-motion.md)               |
+| V3D   | MapLibre / Streets 非标注样式增量   | V3C1C checkpoint | 当前公开样式差距与资源预算已明确           | translate/anchor、map-aligned circle、pattern 的约定 profile、画面与资源资格 | planned   | 未激活                                                   |
 | V4    | 平面矢量直接贴地生产资格            | V3D checkpoint   | V2 ground 可行性已验证；重查批量与层序边界 | 起伏地形、LOD/provider 变化下连续贴地；线宽/样式/逐要素交互与资源稳定        | planned   | 未激活                                                   |
 | V5C   | 地形标注                            | V4 checkpoint    | 生产地形已具备                             | 高程、遮挡、LOD 与标注稳定                                                   | planned   | 未激活                                                   |
 | V6    | M1 平面交付资格                     | V5C checkpoint   | 冻结支持矩阵与数据集                       | Test 人工 gate、Specs/E2E、build/types/docs/package、升级检查                | planned   | 未激活                                                   |
@@ -205,3 +206,9 @@ V5B 按继续授权关闭 gate，先形成独立 checkpoint；下一阶段以该
 V5B checkpoint 已完成：`bb007b3518`。V3C1 按负责人批准细分为 V3C1A 共享低角度选层和 V3C1B 原定密集预算/必要线程；当前只激活 [V3C1A](2026-09-13-v3c1a-tilted-distance.md)，后者保留 planned，V3D 仍依赖性能阶段完成。
 
 V3C1A checkpoint：`413b7ffcc6`。Worker 迁移按负责人授权进入 [V3C1B](2026-09-13-v3c1b-worker-preparation.md)。
+
+V3C1B checkpoint：`065c345efd`。负责人批准新增 [V3C1C](2026-09-13-v3c1c-symbol-motion.md)，专门处理 placement、collision proxies 与 static/dynamic buffers；V3D 顺延到 V3C1C checkpoint 后，不提前实施底图命令/深度优化。
+
+负责人于 2026-09-13 确认 V3C1C 验收通过，技术 review 与视觉/交互 gate 已关闭；实现、Specs、
+ADR 与 AgentDocs 作为独立本地 checkpoint 提交。当前未激活下一 phase，地形共存仍以 V4 的
+生产资格为边界，不能由 flat 地图或共享选层推断已完成。

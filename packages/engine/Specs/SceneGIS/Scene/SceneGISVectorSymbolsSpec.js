@@ -14,6 +14,7 @@ import {
 } from "../../../index.js";
 import WorkerPool from "../../../Source/SceneGIS/Core/_private/_SceneGISVectorWorkerPool.js";
 import Assets from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorSymbolAssets.js";
+import Projection from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorSymbolProjection.js";
 import { encodeGlyphs, glyph } from "../Core/vectorSymbolFixture.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -374,6 +375,16 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     scene.renderForSpecs();
     expect(upload).not.toHaveBeenCalled();
     const staging = batch.staging;
+    const fixedBuffer = batch.resources._staticBuffer;
+    const dynamicBuffer = batch.resources._dynamicBuffer;
+    const fixedUpload = spyOn(
+      fixedBuffer,
+      "copyFromArrayView",
+    ).and.callThrough();
+    const dynamicUpload = spyOn(
+      dynamicBuffer,
+      "copyFromArrayView",
+    ).and.callThrough();
     const positions = quads[0].positions;
     const encoded = quads[0].encodedPositions;
     scene.camera.position.x = 1;
@@ -383,6 +394,8 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(movedQuad.encodedPositions).toBe(encoded);
     expect(batch.staging).toBe(staging);
     expect(staging instanceof Float32Array).toBeTrue();
+    expect(fixedUpload).not.toHaveBeenCalled();
+    expect(dynamicUpload).not.toHaveBeenCalled();
     expect(
       scene.pick(glyphCenter(runtime._previous[0]), 1, 1).id.featureId,
     ).toBe("road");
@@ -395,8 +408,145 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     );
     expect(scene.pick(glyphCenter(turned), 1, 1).id.featureId).toBe("road");
     expect([...runtime._groups.values()][0].resources.vertexArray).toBe(va);
+    expect(fixedUpload).not.toHaveBeenCalled();
+    expect(dynamicUpload).toHaveBeenCalled();
     scene.primitives.remove(layer);
     expect(va.isDestroyed()).toBeTrue();
+    expect(fixedBuffer.isDestroyed()).toBeTrue();
+    expect(dynamicBuffer.isDestroyed()).toBeTrue();
+  });
+
+  it("finishes a budgeted cohort during continuous motion while drawing and picking the current camera", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile(
+        Array.from({ length: 24 }, (_, index) =>
+          feature(`${index}`, 2048 + index, "A", index),
+        ),
+      ),
+    );
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add();
+    await loaded(layer);
+    const runtime = layer._symbols;
+    const builds = runtime.statistics.candidateBuilds;
+    const commits = runtime.statistics.placementCommits;
+    const base = runtime._previous[0].base;
+    runtime._placementBudget = 0;
+    runtime._nextPlacementTime = 0;
+    scene.camera.position.x += 0.01;
+    scene.renderForSpecs();
+    const job = runtime._placement;
+    const savedX = job.projection.camera.positionWC.x;
+    expect(job).toBeDefined();
+    expect(layer.tilesLoaded).toBeFalse();
+    scene.camera.position.x += 1;
+    scene.renderForSpecs();
+    expect(runtime._placement).toBe(job);
+    expect(job.projection.camera.positionWC.x).toBe(savedX);
+    const steps = runtime.statistics.placementSteps;
+    const shown = runtime._previous.find((candidate) => candidate.placed);
+    expect(scene.pick(glyphCenter(shown), 1, 1).id.featureId).toBe(
+      shown.identity.featureId,
+    );
+    expect(runtime.statistics.placementSteps).toBe(steps);
+    for (
+      let i = 0;
+      i < 100 && runtime.statistics.placementCommits === commits;
+      i++
+    ) {
+      scene.camera.position.x += 0.001;
+      scene.renderForSpecs();
+    }
+    expect(runtime.statistics.placementCommits).toBe(commits + 1);
+    expect(runtime.statistics.candidateBuilds).toBe(builds);
+    expect(runtime._previous[0].base).toBe(base);
+    runtime._placementBudget = 2;
+    await loaded(layer);
+    expect(layer.statistics.symbolFailures).toBe(0);
+    runtime._placementBudget = 0;
+    runtime._nextPlacementTime = 0;
+    scene.camera.position.x += 0.01;
+    scene.renderForSpecs();
+    expect(runtime._placement).toBeDefined();
+    const resources = [...runtime._groups.values()].map(
+      (batch) => batch.resources.vertexArray,
+    );
+    layer.show = false;
+    scene.renderForSpecs();
+    expect(runtime._placement).toBeUndefined();
+    expect(runtime._previous.length).toBe(0);
+    expect(runtime._pickIds.size).toBe(0);
+    expect(resources.every((va) => va.isDestroyed())).toBeTrue();
+    layer.show = true;
+    runtime._placementBudget = 2;
+    await loaded(layer);
+    expect(layer.statistics.placedSymbols).toBeGreaterThan(0);
+  });
+
+  it("uses one conservative straight-line collision envelope without projecting every glyph", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([
+        road(
+          [
+            [-200, 0],
+            [200, 0],
+          ],
+          "AAAAAAAAAAAA",
+        ),
+      ]),
+    );
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([
+      definition("line", {
+        "symbol-placement": "line-center",
+        "text-size": 12,
+      }),
+    ]);
+    await loaded(layer);
+    const runtime = layer._symbols;
+    const candidate = runtime._previous.find((item) => item.placed);
+    const proxy = Projection.collision(
+      runtime._projection,
+      candidate,
+      candidate.shaped.text,
+      true,
+      runtime._metersPerPixel,
+    );
+    const glyphs = candidate.projected.text.quads;
+    expect(proxy.boxes.length).toBe(1);
+    expect(glyphs.length).toBe(12);
+    const box = proxy.boxes[0];
+    for (const glyph of glyphs) {
+      for (const [x, y] of glyph.corners) {
+        expect(x).toBeGreaterThanOrEqual(box[0]);
+        expect(x).toBeLessThanOrEqual(box[2]);
+        expect(y).toBeGreaterThanOrEqual(box[1]);
+        expect(y).toBeLessThanOrEqual(box[3]);
+      }
+    }
+  });
+
+  it("retires a failed placement iterator without retrying the same view", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([feature("1", 2048, "A中")]),
+    );
+    const request = spyOn(Resource.prototype, "fetchArrayBuffer");
+    const layer = add(undefined, { maximumGlyphRanges: 1 });
+    const error = jasmine.createSpy("symbol error");
+    layer.errorEvent.addEventListener(error);
+    await loaded(layer);
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error.calls.first().args[0].error.message).toContain(
+      "maximumGlyphRanges",
+    );
+    expect(layer._symbols._placement).toBeUndefined();
+    const steps = layer._symbols.statistics.placementSteps;
+    for (let i = 0; i < 3; i++) {
+      scene.renderForSpecs();
+    }
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(request).not.toHaveBeenCalled();
+    expect(layer._symbols.statistics.placementSteps).toBe(steps);
   });
 
   it("projects map-pitched text onto the tilted plane while viewport text retains its height", async function () {

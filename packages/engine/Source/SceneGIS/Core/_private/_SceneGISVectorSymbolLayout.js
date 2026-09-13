@@ -184,7 +184,7 @@ const SceneGISVectorSymbolLayout = {
       },
     };
   },
-  place(textBox, iconBox, layout, collision) {
+  place(textBox, iconBox, layout, collision, commit = true) {
     const textBoxes = !textBox
       ? []
       : typeof textBox[0] === "number"
@@ -211,10 +211,10 @@ const SceneGISVectorSymbolLayout = {
         text = false;
       }
     }
-    if (text && !layout["text-ignore-placement"]) {
+    if (commit && text && !layout["text-ignore-placement"]) {
       textBoxes.forEach((box) => collision.insert(box));
     }
-    if (icon && !layout["icon-ignore-placement"]) {
+    if (commit && icon && !layout["icon-ignore-placement"]) {
       iconBoxes.forEach((box) => collision.insert(box));
     }
     return { text, icon };

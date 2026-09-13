@@ -15,14 +15,14 @@ function snapshot(scene) {
   // instead of invoking that work for every anchor and glyph corner.
   return {
     camera: {
-      positionWC: position,
-      directionWC: direction,
-      upWC: camera.upWC,
-      rightWC: camera.rightWC,
+      positionWC: Cartesian3.clone(position),
+      directionWC: Cartesian3.clone(direction),
+      upWC: Cartesian3.clone(camera.upWC),
+      rightWC: Cartesian3.clone(camera.rightWC),
       frustum: {
         near: frustum.near,
         far: frustum.far,
-        projectionMatrix: projection,
+        projectionMatrix: Matrix4.clone(projection),
       },
     },
     // Beyond four reference depths, ground scale is over two zoom levels coarser.
@@ -159,10 +159,7 @@ function bounds(points) {
   return [left, top, right, bottom];
 }
 
-function shape(scene, candidate, shaped, text, metersPerPixel) {
-  if (!shaped.quads.length) {
-    return { quads: [], boxes: [] };
-  }
+function alignment(scene, candidate, text, metersPerPixel) {
   const layout = candidate.evaluated.layout,
     prefix = text ? "text" : "icon";
   const placement = layout["symbol-placement"];
@@ -230,6 +227,19 @@ function shape(scene, candidate, shaped, text, metersPerPixel) {
   const flip =
     along && layout[`${prefix}-keep-upright`] && screenDirectionX < 0;
   const maxAngle = text ? (layout["text-max-angle"] * Math.PI) / 180 : Infinity;
+  return { mapPitch, along, rotation, plane, angle, flip, maxAngle };
+}
+
+function geometry(scene, candidate, shaped, text, metersPerPixel) {
+  if (!shaped.quads.length) {
+    return { quads: [] };
+  }
+  const settings = alignment(scene, candidate, text, metersPerPixel);
+  if (!settings) {
+    return undefined;
+  }
+  let { plane } = settings;
+  const { mapPitch, along, rotation, angle, flip, maxAngle } = settings;
   let cached = shaped._projectionGeometry;
   const reusable = mapPitch || !along;
   if (
@@ -296,6 +306,19 @@ function shape(scene, candidate, shaped, text, metersPerPixel) {
       shaped._projectionGeometry = cached;
     }
   }
+  return cached;
+}
+
+function shape(scene, candidate, shaped, text, metersPerPixel) {
+  const cached = geometry(scene, candidate, shaped, text, metersPerPixel);
+  if (!cached) {
+    return undefined;
+  }
+  if (!cached.quads.length) {
+    return { quads: [], boxes: [] };
+  }
+  const { mapPitch, along } = cached;
+  const reusable = mapPitch || !along;
   if (!mapPitch && cached.projected) {
     return cached.projected;
   }
@@ -349,6 +372,121 @@ function shape(scene, candidate, shaped, text, metersPerPixel) {
   return projected;
 }
 
-/** Projects the same glyph vertices used by rendering and collision. @private */
-const SceneGISVectorSymbolProjection = { visible, shape, snapshot };
+function collision(scene, candidate, shaped, text, metersPerPixel) {
+  if (!shaped.quads.length) {
+    return { boxes: [] };
+  }
+  const settings = alignment(scene, candidate, text, metersPerPixel);
+  if (!settings) {
+    return undefined;
+  }
+  const { mapPitch, along, angle, flip } = settings;
+  let plane = settings.plane;
+  let proxies;
+  if (!along) {
+    proxies = [Line.corners(shaped.box, 0, 0, angle)];
+  } else {
+    if (mapPitch) {
+      plane = {
+        line: Line.path(
+          candidate.line.points.map((point) => ({
+            x: (point.x - candidate.position.x) / metersPerPixel,
+            y: (candidate.position.y - point.y) / metersPerPixel,
+          })),
+        ),
+        station: candidate.station / metersPerPixel,
+      };
+    }
+    let metrics = shaped._collisionMetrics;
+    if (!metrics) {
+      let radius = 0,
+        first = Infinity,
+        last = -Infinity;
+      for (const quad of shaped.quads) {
+        const center = quad.center ?? 0;
+        radius = Math.max(
+          radius,
+          Math.hypot(
+            Math.max(
+              Math.abs(quad.box[0] - center),
+              Math.abs(quad.box[2] - center),
+            ),
+            Math.max(Math.abs(quad.box[1]), Math.abs(quad.box[3])),
+          ),
+        );
+        first = Math.min(first, center);
+        last = Math.max(last, center);
+      }
+      metrics = shaped._collisionMetrics = { radius, first, last };
+    }
+    const direction = flip ? -1 : 1;
+    const span = shaped.span ?? [shaped.box[0], shaped.box[2]];
+    if (
+      !Line.sample(plane.line, plane.station + direction * span[0]) ||
+      !Line.sample(plane.line, plane.station + direction * span[1])
+    ) {
+      return undefined;
+    }
+    const a = plane.station + direction * metrics.first;
+    const b = plane.station + direction * metrics.last;
+    const first = Line.sample(plane.line, Math.min(a, b));
+    const last = Line.sample(plane.line, Math.max(a, b));
+    const points = [first];
+    for (let i = first.index + 1; i <= last.index; i++) {
+      points.push(plane.line.points[i]);
+    }
+    points.push(last);
+    proxies = [];
+    // The swept circumradius contains glyphs at every bisector orientation.
+    // A straight run needs one envelope instead of four projections per glyph.
+    const radius = metrics.radius;
+    for (let i = 1; i < points.length; i++) {
+      const p = points[i - 1],
+        q = points[i];
+      const length = Math.hypot(q.x - p.x, q.y - p.y);
+      const angle = Math.atan2(q.y - p.y, q.x - p.x);
+      proxies.push(
+        Line.corners(
+          [-radius, -radius, length + radius, radius],
+          p.x,
+          p.y,
+          angle,
+        ),
+      );
+    }
+  }
+  const boxes = [];
+  for (const corners of proxies) {
+    if (mapPitch) {
+      const projected = [];
+      for (const [x, y] of corners) {
+        const screen = project(scene, {
+          x: candidate.position.x + x * metersPerPixel,
+          y: candidate.position.y - y * metersPerPixel,
+          z: 0,
+        });
+        if (!screen) {
+          return undefined;
+        }
+        projected.push([
+          screen.x - candidate.screen.x,
+          screen.y - candidate.screen.y,
+        ]);
+      }
+      boxes.push(bounds(projected));
+    } else {
+      boxes.push(bounds(corners));
+    }
+  }
+  return { boxes };
+}
+
+/** Separates current glyph drawing from placement collision envelopes. @private */
+const SceneGISVectorSymbolProjection = {
+  visible,
+  shape,
+  geometry,
+  collision,
+  snapshot,
+};
 export default SceneGISVectorSymbolProjection;

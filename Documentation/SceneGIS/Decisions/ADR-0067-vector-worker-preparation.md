@@ -15,6 +15,10 @@ MapLibre 5.24.0 的 VectorTileWorkerSource / WorkerTile / performSymbolLayout �
 
 ## Decision
 
+V3C1C amendment：[ADR-0068](ADR-0068-symbol-placement-and-dynamic-buffers.md) 取代本阶段
+逐帧完整碰撞与单个交错动态 buffer 的历史选择。Placement 可以使用固定快照跨帧推进，
+绘制/pick 必须继续使用当前相机；Worker、请求、transfer、取消与资源所有权保持。
+
 新增精确 owned entry `packages/engine/Source/Workers/SceneGISVectorTileWorker.js`，只包装
 SceneGIS Core private handler。它沿用 TaskProcessor message/error/transfer 与现有 bundleWorkers
 自动发现，不修改上游构建、package 或 experimental MVT。实际算法保持 SceneGIS/Core 单向依赖。

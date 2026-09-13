@@ -1,4 +1,4 @@
-/* global window, document */
+/* global window, document, performance, requestAnimationFrame */
 import assert from "node:assert/strict";
 import process from "node:process";
 import console from "node:console";
@@ -10,6 +10,7 @@ import path from "node:path";
 import { fileURLToPath, URL } from "node:url";
 import { build } from "esbuild";
 import { chromium } from "playwright";
+import { encodeGlyphs } from "../../packages/engine/Specs/SceneGIS/Core/vectorSymbolFixture.js";
 
 // Run after build-release and build-ts. No external map service is used.
 const repo = fileURLToPath(new URL("../../", import.meta.url));
@@ -71,6 +72,7 @@ await copyFile(
   new URL("public-fixture.pbf", import.meta.url),
   path.join(temporary, "tile.pbf"),
 );
+await writeFile(path.join(temporary, "glyph.pbf"), encodeGlyphs());
 await writeFile(
   path.join(temporary, "index.html"),
   "<!doctype html><title>Vector Worker package qualification</title>",
@@ -154,6 +156,114 @@ try {
         [raw],
       );
       processor.destroy();
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 64;
+      canvas.style.cssText = "width:64px;height:64px";
+      document.body.append(canvas);
+      const scene = new C.Scene({
+        canvas,
+        scene3DOnly: true,
+        contextOptions: { webgl: { antialias: false, stencil: true } },
+      });
+      const world = new C.SceneGISPlanarWorld({
+        coordinateSystem: scheme.coordinateSystem,
+        maximumLevel: 0,
+        baseColor: C.Color.BLACK,
+      });
+      scene._initializeWorld(world);
+      scene.msaaSamples = 1;
+      scene.postProcessStages.fxaa.enabled = false;
+      scene.rethrowRenderErrors = true;
+      scene.camera.setView({
+        destination: new C.Cartesian3(0, 0, 80),
+        orientation: {
+          direction: new C.Cartesian3(0, 0, -1),
+          up: new C.Cartesian3(0, 1, 0),
+        },
+      });
+      scene.camera.frustum.near = 1;
+      scene.camera.frustum.far = 1000;
+      const symbolSource = new C.SceneGISVectorTileSource({
+        url: "/unused/{z}/{x}/{y}",
+        tilingScheme: world.tilingScheme,
+        maximumLevel: 0,
+      });
+      symbolSource.requestTile = async () => ({
+        layers: [
+          {
+            name: "labels",
+            version: 2,
+            extent: 4096,
+            features: [
+              {
+                id: "symbol",
+                type: 1,
+                properties: {},
+                geometry: {
+                  parts: [new Float64Array([2048, 2048])],
+                  polygonStarts: new Uint32Array(),
+                },
+              },
+            ],
+          },
+        ],
+      });
+      const layer = scene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene,
+          sources: { test: symbolSource },
+          style: {
+            version: 8,
+            glyphs: "/glyph.pbf?f={fontstack}&r={range}",
+            sources: {
+              test: {
+                type: "vector",
+                tiles: ["/unused/{z}/{x}/{y}"],
+                maxzoom: 0,
+              },
+            },
+            layers: [
+              {
+                id: "labels",
+                type: "symbol",
+                source: "test",
+                "source-layer": "labels",
+                layout: {
+                  "text-field": "A",
+                  "text-font": ["Test"],
+                  "text-size": 24,
+                },
+                paint: { "text-color": "red" },
+              },
+            ],
+          },
+        }),
+      );
+      const render = () => {
+        scene.initializeFrame();
+        scene.render();
+      };
+      const start = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - start > 10000) {
+          throw new Error("Symbol package preparation did not finish.");
+        }
+      } while (!layer.tilesLoaded);
+      const pixel = Array.from(
+        scene.context.readPixels({ x: 30, y: 31, width: 1, height: 1 }),
+      );
+      const picked = scene.pick(new C.Cartesian2(30, 32), 1, 1)?.id.featureId;
+      const batch = [...layer._symbols._groups.values()][0];
+      const fixed = batch.resources._staticBuffer,
+        dynamic = batch.resources._dynamicBuffer;
+      const uploads = batch.resources.uploadedBytes;
+      scene.camera.position.x += 1;
+      render();
+      const stable = batch.resources.uploadedBytes === uploads;
+      scene.destroy();
+      canvas.remove();
       return {
         mode,
         layers: decoded.layers.length,
@@ -169,6 +279,13 @@ try {
           ),
         ),
         destroyed: processor.isDestroyed(),
+        symbol: {
+          pixel,
+          picked,
+          stable,
+          separate: fixed !== dynamic,
+          released: fixed.isDestroyed() && dynamic.isDestroyed(),
+        },
       };
     }, mode);
     assert(result.layers > 0 && result.features > 0);
@@ -176,6 +293,11 @@ try {
       result.same && result.transferred && result.typed && result.destroyed,
     );
     assert.deepEqual(errors, []);
+    assert.deepEqual(result.symbol.pixel, [255, 0, 0, 255]);
+    assert.equal(result.symbol.picked, "symbol");
+    assert(
+      result.symbol.stable && result.symbol.separate && result.symbol.released,
+    );
     results.push(result);
     await page.close();
   }
