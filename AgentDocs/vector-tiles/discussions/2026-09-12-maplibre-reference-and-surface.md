@@ -166,3 +166,34 @@ M1 是完整平面目标。颜色 RTT 不作为主路线，具体 ground 算法�
 本轮使用代码图谱发现和 trace，并用当前文件复核；图谱中的部分 Planar method 行号已经过时，
 没有把截错范围的 snippet 当作当前源码。参考仓库未发生本 Agent 修改。
 没有运行其测试、dev server 或 GPU 验收；此记录属于架构证据，不是渲染效果保证。
+
+## 默认地表共存与 Globe 复用复核
+
+V3C1C 验收后，负责人强调默认零高程 Globe 必须保留，并询问与矢量共存的可行性。
+本次只复核源码与澄清边界，不激活 V4/G1，也不将已有 flat 资格扩大到真实地形。
+
+- 当前 `SceneGISPlanarWorld` 即使没有 terrainProvider，也创建并绘制 `_SceneGISPlanarSurface`；
+  surface commands 使用 `Pass.GLOBE`、depthMask true。矢量在其后按样式叠色，不写地表深度。
+  因而已经与默认 Z=0 地表共存，尚不支持的是有起伏的 terrainProvider；并非通过删除地表实现地图。
+- `Globe` 默认创建 `EllipsoidTerrainProvider` 和完整 surface quadtree。零高程指相对椭球高程，
+  不是 ECEF Z=0。复用方案保留 Globe、默认或真实 terrainProvider 及已有 imagery surface。
+- 当前 `Scene.executeCommands` 顺序为 GLOBE、globeDepth copy、TERRAIN_CLASSIFICATION，之后才
+  根据 clearGlobeDepth 清深度并执行普通内容。`depthTestAgainstTerrain=false` 不会提前取消
+  classification 所需的地表深度；不能把自有贴地命令任意追加到普通场景渲染末尾。
+- `GroundPrimitive`/`GroundPolylinePrimitive` 已证明默认椭球或地形与直接矢量共存的基本方向，
+  但地图多要素批次、完整样式和透明层序仍需自有表达；不改用 experimental VectorProvider。
+
+候选职责保持：地表负责实际可见位置/深度，地图负责 footprint、样式和 feature identity。
+沿用 ADR-0059 的稳定覆盖体与 surface-depth 重建思路；只有深度是纹理输入，不把地图颜色 RTT
+作为实现条件。V2 已有凸矩形倾斜地形、透明重叠与逐要素拾取证据；共享 stencil 的错误归属
+反例意味着不能把 single-instance ground wrapper 直接当成地图合批后端。
+
+平面适配需要将 surface point 映射到 XY/tile-local；Globe 还需要球面地表点到 MVT 坐标的映射、
+覆盖体曲率与高度范围、跨经线/瓦片接缝、多 frustum 和对数深度资格。数据解码/样式/Worker
+可复用不代表 flat GPU 几何可直接复用。标注另外处理地形 anchor 与遮挡，拉伸建筑走真实三维
+几何，不以平面文字成功推断完成贴地标注。
+
+后续具体 phase 仍依据源码重新细化。建议生产验证覆盖默认平面、起伏平面，以及保留默认
+EllipsoidTerrainProvider 的 Globe 原型；正式 Globe 交付仍由 G1 gate 约束。验收需要证明地表
+保留、无穿插/闪烁、山体遮挡、透明层序、pick/pickPosition 和 provider/LOD 变化后的连续性。
+本次无运行时、Shader、上游文件或 SGP 变更，不重复渲染测试作为未实现能力的证据。

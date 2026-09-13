@@ -150,3 +150,7 @@ static/dynamic dirty buffers 已实现。146 项 vector Specs、8 项相关 E2E�
 V3C1C gate 已关闭，本阶段实现与记录形成独立本地 checkpoint；不激活 V3D，
 不把 CPU 指标当作稳定 60 FPS 或 GPU 吞吐资格。当前地形问题属于架构说明：公开矢量图层仍为
 无 terrainProvider 的 Z=0 flat 后端，surface-depth 只有 V2 可行性证据，生产贴地仍属 V4。
+
+默认地表/Globe 共存的源码复核已补入[地形讨论](discussions/2026-09-12-maplibre-reference-and-surface.md#默认地表共存与-globe-复用复核)：
+当前 flat 并未删除 World surface；后续保留 Globe/terrain，以地表深度支持自有矢量贴附。
+这是架构澄清，V4/G1 尚未激活，不表示公开图层已支持 terrainProvider 或 Globe。
