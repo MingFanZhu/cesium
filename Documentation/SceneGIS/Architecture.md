@@ -757,6 +757,9 @@ Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代�
 矢量瓦片与平面影像/地形共享私有 SSE 数值判据，MVT 选取预算内互不包含的近细远粗 leaves，
 请求与内容缓存保持独立。Style zoom 以视轴在 Z=0 的前向交点为参考，不把倾斜造成的
 采样距离变化误认为用户缩放；具体边界见 [ADR-0064](Decisions/ADR-0064-vector-perspective-lod.md)。
+沿线标注按 glyph advance 逐字布置，map pitch 使用真实世界 quad corners，viewport pitch 使用 CSS offsets；
+碰撞投影与绘制使用同一组顶点，有向箭头不随文字阅读方向翻转。
+具体语义、source LOD 间距与道路拼接边界见 [ADR-0065](Decisions/ADR-0065-line-symbol-placement.md)。
 
 ## 验证架构
 

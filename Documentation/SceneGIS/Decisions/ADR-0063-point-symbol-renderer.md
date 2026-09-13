@@ -31,6 +31,8 @@ symbol 按 anchor ownership 与稳定空间/内容 identity 去重，允许完�
 层优先级、sort key 与稳定位置排序共同决定选择，不以请求完成顺序为优先级。
 首轮固定 viewport-aligned point placement；沿线、map-aligned、复杂文字 shaping、variable placement、
 动画淡入淡出、terrain/Globe 在独立阶段资格验证。
+V5B 已通过 [ADR-0065](ADR-0065-line-symbol-placement.md) 扩展沿线与 map alignment；
+本 ADR 的首轮限制作为 V5A 历史范围保留，其他资源和 ownership 决定继续适用。
 
 text-size/icon-size 在本 profile 按精确 fractional zoom 表达式求值，
 其余 layout/filter 按 floor zoom；这是显式选择，不宣称与 MapLibre stop-pair 插值逐像素相同。

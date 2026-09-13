@@ -35,6 +35,14 @@ Circle 保持屏幕尺寸，不把其 screen alignment 暗改为 map alignment�
 连续拓扑表达连接处，避免把普通拐角当独立 segment 重叠绘制。
 Miter 超限转 bevel；round join 按角度生成扇形，极锐/反向转折保留有限网格。
 Geometry 保存逐 feature paint 与 pick 属性，不按颜色或 dash 值生成独立 command。
+2026-09-13 交互修正：feature-independent 的 line paint 与无显式 outline 的 fill paint 使用
+Cesium VertexArray 的 constant attributes，normal update 更新相同 VA 上的数值；color 保留既有
+normalized byte 精度。Source/composite paint 继续逐 feature attributes，不增加按值拆批。
+圆角网格按当前外半径的二次幂上界保留不超过 0.25 CSS pixel 的 chord error；同一上界内
+width/gap/offset/color/opacity 变化只更新 paint，上界、filter/layout、dash 或可绘制状态变化才重建。
+失效按 style layer 隔离，不重建整 tile 的无关层；camera 表达式按实际求值结果而非 raw zoom 失效。
+新 geometry 尚未按 upload budget 发布时，旧 batch 保持旧 paint，不能超过其圆角精度包络。
+Scene 只在 normal render 更新 constant attributes；pick/depth 继续使用最后发布的值。
 颜色与拾取共享 coverage、半开 tile clip 和 discard，继续由 Cesium 自动派生 pick command。
 
 ### Multi-frustum and DPR correction

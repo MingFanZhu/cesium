@@ -9,7 +9,7 @@
 - Architecture reviewer: 当前 Agent；项目负责人确认产品边界
 - Created: `2026-09-12`
 - Updated: `2026-09-13`
-- Current phase: [V5A](2026-09-13-v5a-point-symbols.md)
+- Current phase: [V5B](2026-09-13-v5b-line-symbols.md)
 - Related discussions: [源码审计](../discussions/2026-09-12-cesium-mvt-and-planar-audit.md)、
   [实现边界](../discussions/2026-09-12-rendering-boundaries.md)、
   [MapLibre 与贴地](../discussions/2026-09-12-maplibre-reference-and-surface.md)、
@@ -101,7 +101,7 @@ Globe 从数据/样式/调度职责分离开始考虑，实际渲染资格另设
 | V3B1  | MapLibre 常见线型与 AA              | V3B0 checkpoint | 自有图元就绪；重新冻结样式 profile         | cap/join/dash/AA 的画面、兼容诊断与资源通过                                  | completed | [V3B1](2026-09-13-v3b1-vector-style-primitives.md)       |
 | V3C0  | 公开地图与样式差距基线              | V3B1 checkpoint | 固定实际数据来源与目标 style               | 在线 Test 页面、样式支持清单与真实负载基线；负责人视觉 gate                  | completed | [V3C0](2026-09-13-v3c0-public-map-and-style-baseline.md) |
 | V5A   | 平面点标注                          | V3C0 checkpoint | 独立 symbol 方向已批准                     | 中文/Latin、POI 图文、collision、跨 tile、pick/资源                          | completed | [V5A](2026-09-13-v5a-point-symbols.md)                   |
-| V5B   | 平面沿线标注                        | V5A checkpoint  | 点标注资源和布局资格                       | 曲线文字、路牌、箭头、重复距离与缩放切换                                     | planned   | 未激活                                                   |
+| V5B   | 平面沿线标注                        | V5A checkpoint  | 点标注资源和布局资格                       | 曲线文字、路牌、箭头、重复距离与缩放切换                                     | completed | [V5B](2026-09-13-v5b-line-symbols.md)                    |
 | V3C1  | 密集数据性能与必要线程              | V5B checkpoint  | 真实含标注负载                             | 字节预算、必要 Worker 与性能/资源资格                                        | planned   | 未激活                                                   |
 | V3D   | MapLibre / Streets 非标注样式增量   | V3C1 checkpoint | 当前公开样式差距与资源预算已明确           | translate/anchor、map-aligned circle、pattern 的约定 profile、画面与资源资格 | planned   | 未激活                                                   |
 | V4    | 平面矢量直接贴地生产资格            | V3D checkpoint  | V2 ground 可行性已验证；重查批量与层序边界 | 起伏地形、LOD/provider 变化下连续贴地；线宽/样式/逐要素交互与资源稳定        | planned   | 未激活                                                   |
@@ -185,5 +185,18 @@ V3B1 checkpoint 为 `e7be6ef61a`；V3C0 公开页和样式基线已实现，
 此阶段独立提交完成后再依据实测负载细化 V3C1，不把样式接入扩大为密集性能或后续 terrain/symbol 资格。
 V3C0 checkpoint 已形成：`0bec9cbe56`。负责人随后要求讨论标注实现；
 [标注架构提案](../discussions/2026-09-13-symbol-architecture.md) 建议把 V5 的平面部分提前，
-负责人已批准方案与顺序：V5A → V5B → V3C1 → V3D → V4 → V5C；本轮激活 V5A。
+负责人已批准方案与顺序：V5A → V5B → V3C1 → V3D → V4 → V5C。
+V5A 已独立提交 `50ab83b96f`；当前 V5B 已实现并技术自审通过，126 项 Specs 与 9 项 E2E 通过，
+等待新沿线图集与公开道路/路牌/箭头画面的负责人视觉 gate。
+交互验收随后复现掉帧，已在 V5B 内修正重复样式/布局与 GPU 重建；129 项 Specs、9 项 E2E 通过，
+不提前激活 V3C1 的通用 Worker/字节预算。性能对比和剩余事项记录在当前 V5B review。
+负责人又要求隐藏浅俯角远景注记；V5B 已加透视相对深度筛选，保留近景与地图 cover，
+131 项 vector Specs 已覆盖通过，仍由当前 review 记录视觉 gate。
+负责人进一步要求平面远景加载在瓦片选取阶段受限，并供影像/地形复用，同时保留近水平视角。
+已建立[共享加载范围讨论](../discussions/2026-09-13-planar-distant-tile-loading.md)，
+推荐远处保留粗覆盖、限制细分；当前未改变选取或加载行为，未激活下一 phase。
+范围契约确定后据此调整 V3C1 的 entry / scope，并先完成 V5B 独立 checkpoint。
 后续 ground 算法/资产选择按 roadmap 分配到对应 phase，不重复请求已批准架构方向的确认。
+
+负责人于 2026-09-13 批准实施共享远景限制，并要求仅在低角度倾斜启用、俯视拉远保持现有行为。
+V5B 按继续授权关闭 gate，先形成独立 checkpoint；下一阶段以该硬边界细化选层方案。

@@ -37,6 +37,7 @@ const definitions = [
       name: "SceneGIS test road",
       class: "primary",
       brunnel: "none",
+      oneway: 1,
     },
     points: [
       [0, 2048],
@@ -59,6 +60,25 @@ const definitions = [
       [1700, 600],
       [1700, 1100],
       [1200, 1100],
+    ],
+  },
+  {
+    name: "transportation_name",
+    type: 2,
+    id: 601,
+    properties: {
+      name: "Test Avenue",
+      "name:latin": "Test Avenue",
+      class: "primary",
+      ref: "A12",
+      ref_length: 3,
+      network: "test",
+    },
+    points: [
+      [0, 2048],
+      [1500, 2048],
+      [2600, 1700],
+      [4096, 1700],
     ],
   },
 ];

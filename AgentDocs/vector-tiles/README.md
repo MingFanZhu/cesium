@@ -8,8 +8,8 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V5A completed — 平面点标注`                           |
-| Active phase plan      | [V5A](plans/2026-09-13-v5a-point-symbols.md)           |
+| Current phase          | `V5B completed — 准备共享远景选层阶段`                 |
+| Active phase plan      | [V5B](plans/2026-09-13-v5b-line-symbols.md)            |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
@@ -37,7 +37,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
 - Source：`packages/engine/Source/SceneGIS/Core/SceneGISVectorTile*.js` 和
   `packages/engine/Source/SceneGIS/Scene/SceneGISVectorTileLayer.js`，五个公共入口。
-- Specs：Core/Renderer/Scene 镜像测试，112 项通过；另有 14 项既有 planar quadtree 回归通过。
+- Specs：Core/Renderer/Scene 镜像测试，131 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面：[城市](../../Test/vector-tiles/index.html) 与 [样式图集](../../Test/vector-tiles/styles.html)，
   21 个城市 MVT fixtures 加 1 个样式 MVT。
@@ -75,14 +75,14 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[V5A review](reviews/2026-09-13-v5a-point-symbol-review.md)；
+- Latest review：[V5B review](reviews/2026-09-13-v5b-line-symbol-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
 - Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
   已审计 MapLibre 资源/排版/placement/跨 tile 与 Bright 的 25 个 symbol layers。
   建议将平面点标注、沿线标注提前，地形标注在 V4 后验收；负责人已批准，进入 [V5A](plans/2026-09-13-v5a-point-symbols.md)，契约见 [ADR-0063](../../Documentation/SceneGIS/Decisions/ADR-0063-point-symbol-renderer.md)。
 - V5A 已实现独立字体/图标资源、横排文字、统一 collision、跨 tile identity 和自有 GPU 图元；
-  [本地点标注图集](../../Test/vector-tiles/symbols.html) 与公开地图 Bright/Liberty 各 15 个 point layers 待负责人视觉验收。
+  [本地点标注图集](../../Test/vector-tiles/symbols.html) 与公开地图 Bright/Liberty 各 15 个 point layers 已交付。
   108 项 Specs、7 项 E2E 已通过；北京 14 级 555 candidates / 278 placed，72 ranges，无资源失败。
   build/types/tsc/release/独立安装包、修改范围格式、全 AgentDocs Markdownlint 与上游审计通过。
   [正式点标注能力](../../Documentation/SceneGIS/VectorTileSymbols.md) 列出支持属性、缓存与失败语义。
@@ -94,4 +94,26 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   126 项 Specs（112 vector + 14 planar quadtree）、8 项 E2E 通过；在线原 5° 视角保持中心/heading/zoom，
   64 tiles 横跨 level 3–14，无资源错误，CPU median/P95 10.3/11.8 ms。
   当前页面已刷新并保留该视角；见 [ADR-0064](../../Documentation/SceneGIS/Decisions/ADR-0064-vector-perspective-lod.md)。
-- 负责人在修正交付后要求继续特殊标注，V5A 按推进授权关闭 gate；先建立独立 checkpoint，随后进入 V5B。
+- 负责人在修正交付后要求继续特殊标注，V5A 按推进授权关闭 gate；独立 checkpoint `50ab83b96f` 与 hook 通过。
+- [V5B](plans/2026-09-13-v5b-line-symbols.md) 已实现逐字曲线、map/viewport 对齐、路牌、箭头、
+  keep-upright、max-angle、间距和邻 tile 重复抑制；不做跨 tile 语义道路拼接。
+  [沿线验收页](../../Test/vector-tiles/line-symbols.html) 完全本地；公开 Bright 118/119、Liberty 107/111 层。
+  126 项 Specs、9 项页面 E2E、build/ESLint/tsc 通过；技术自审通过，负责人视觉 gate pending。
+  正式决定见 [ADR-0065](../../Documentation/SceneGIS/Decisions/ADR-0065-line-symbol-placement.md)。
+- 公开页按负责人最新要求采用 Viewer 默认持续渲染和原生 `debugShowFramesPerSecond`；
+  已移除自定义 FPS 面板与渲染模式开关。原生 MS 是帧间隔，独立保留 60 帧 CPU 测量。
+  相关公开页 3 项本地 E2E 与 ESLint 通过；V5B 视觉 gate 仍 pending。
+- V5B 交互掉帧已复现并修正：预过滤/缓存、Camera 投影快照、稳定比例，以及单 style layer
+  失效和 constant paint attributes；129 项 Specs、9 项 E2E 通过。实测对比与剩余边界见
+  [V5B review](reviews/2026-09-13-v5b-line-symbol-review.md)，阶段仍等待负责人验收。
+- 负责人追加远景注记筛选：透视 anchor 深度超过中心地面参考的四倍时整组剔除，
+  相机接近后恢复；正交和俯视保持。柏林 5° 同视角去掉 34 个地平线远景标注，
+  保留 87 个近景标注与 64 块地图瓦片；最新 engine 构建的 20 项 symbol Specs 通过。
+  构建入口与完整证据见当前 review，视觉 gate 仍 pending。
+- Open discussion：[平面远景加载范围](discussions/2026-09-13-planar-distant-tile-loading.md)。
+  负责人要求保持浅俯角三维能力，在选取阶段限制远处瓦片，供 MVT、影像和地形共同使用。
+  已完成共享四叉树、独立 MVT cover 和 terrain dependency 审计；建议保留粗远景、限制细分。
+  当前只有架构提案，尚未修改加载策略；范围语义和远景覆盖待讨论后再进入阶段实现。
+- 负责人于 2026-09-13 批准实施远景处理，新增硬边界：只针对低角度倾斜视图，
+  俯视拉远不能触发。V5B 按推进授权关闭 gate，先形成独立本地 checkpoint；
+  上述 pending 记录为历史交付状态，当前以此结论与 completed review 为准。

@@ -3,16 +3,6 @@
   "audited": "2026-09-13",
   "layerCount": 119,
   "excluded": {
-    "building-top": "fill-translate / anchor",
-    "road_oneway": "symbol-placement: line / zoom-dependent placement (V5B)",
-    "road_oneway_opposite": "symbol-placement: line / zoom-dependent placement (V5B)",
-    "waterway_line_label": "symbol-placement: line / zoom-dependent placement (V5B)",
-    "water_name_line_label": "symbol-placement: line / zoom-dependent placement (V5B)",
-    "highway-name-path": "symbol-placement: line / zoom-dependent placement (V5B)",
-    "highway-name-minor": "symbol-placement: line / zoom-dependent placement (V5B)",
-    "highway-name-major": "symbol-placement: line / zoom-dependent placement (V5B)",
-    "highway-shield-non-us": "symbol-placement: line / zoom-dependent placement (V5B)",
-    "highway-shield-us-interstate": "symbol-placement: line / zoom-dependent placement (V5B)",
-    "road_shield_us": "symbol-placement: line / zoom-dependent placement (V5B)"
+    "building-top": "fill-translate / anchor"
   }
 }

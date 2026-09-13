@@ -15,8 +15,8 @@ async function routes(page) {
       readFile(new URL("reference/openfreemap-bright.json", fixtureRoot)),
       readFile(new URL("reference/openfreemap-liberty.json", fixtureRoot)),
       readFile(new URL("symbol-assets/0-255.pbf", fixtureRoot)),
-      readFile(new URL("symbol-assets/sprite.json", fixtureRoot)),
-      readFile(new URL("symbol-assets/sprite.png", fixtureRoot)),
+      readFile(new URL("line-symbol-assets/sprite.json", fixtureRoot)),
+      readFile(new URL("line-symbol-assets/sprite.png", fixtureRoot)),
     ]);
   const styles = { "/styles/bright": bright, "/styles/liberty": liberty };
   const observed = {
@@ -96,8 +96,18 @@ test("renders the public-map page with deterministic data, picking, tilt and res
   await page.goto("/Test/vector-tiles/public.html");
   await ready(page);
   await expect(page.locator("#support-summary")).toHaveText(
-    "108 / 119 个样式层已接入",
+    "118 / 119 个样式层已接入",
   );
+  expect(
+    await page.evaluate(() => {
+      const placed = window.publicVectorPreview.layer._symbols._previous.filter(
+        (c) => c.placed,
+      );
+      return ["highway-name-major", "highway-shield-non-us"].every((name) =>
+        placed.some((c) => c.identity.styleLayer === name),
+      );
+    }),
+  ).toBe(true);
   expect(
     await page.evaluate(
       () => window.publicVectorPreview.layer.statistics.failedTiles,
@@ -116,6 +126,20 @@ test("renders the public-map page with deterministic data, picking, tilt and res
   expect(measurement.receivedBytes).toBeGreaterThan(0);
   expect(measurement.features).toBeGreaterThan(0);
   expect(measurement.statistics.drawCommands).toBeGreaterThan(0);
+  await expect(page.getByRole("button", { name: "测量 60 帧" })).toBeEnabled();
+  await expect(page.locator(".cesium-performanceDisplay-fps")).toHaveText(
+    /\d+ FPS/,
+  );
+  await expect(page.locator(".cesium-performanceDisplay-ms")).toHaveText(
+    /\d+\.\d+ MS/,
+  );
+  await expect(page.locator("#continuous-render")).toHaveCount(0);
+  expect(
+    await page.evaluate(() => {
+      const scene = window.publicVectorPreview.viewer.scene;
+      return !scene.requestRenderMode && scene.debugShowFramesPerSecond;
+    }),
+  ).toBe(true);
   await page.getByRole("button", { name: "倾斜", exact: true }).click();
   await ready(page);
   await page.screenshot({
@@ -154,7 +178,7 @@ test("switches between Bright and Liberty and preserves the map when the public 
     true,
   );
   await expect(page.locator("#support-summary")).toHaveText(
-    "97 / 111 个样式层已接入",
+    "107 / 111 个样式层已接入",
   );
   expect(
     await page.evaluate(() => window.publicVectorPreview.layer.style.layerIds),
@@ -194,11 +218,21 @@ test("switches between Bright and Liberty and preserves the map when the public 
     camera.position.y = anchor.y;
     viewer.scene.requestRender();
   });
-  await page.waitForFunction(
-    () =>
-      window.publicVectorPreview.layer.statistics.placedSymbols > 0 &&
-      window.publicVectorPreview.layer.tilesLoaded,
-  );
+  await page.waitForFunction(() => {
+    const { viewer, layer } = window.publicVectorPreview;
+    return (
+      layer.tilesLoaded &&
+      layer._symbols._previous.some(
+        (c) =>
+          c.placed &&
+          c.identity.featureId === "501" &&
+          Math.hypot(
+            c.screen.x - viewer.scene.canvas.clientWidth / 2,
+            c.screen.y - viewer.scene.canvas.clientHeight / 2,
+          ) < 2,
+      )
+    );
+  });
   await ready(page);
   expect(
     await page.evaluate(
@@ -208,10 +242,22 @@ test("switches between Bright and Liberty and preserves the map when the public 
   expect(
     await page.evaluate(() => {
       const { viewer, layer } = window.publicVectorPreview;
-      return viewer.scene.pick(layer._symbols._previous[0].screen, 1, 1)?.id
-        .featureId;
+      const poi = layer._symbols._previous.find(
+        (c) => c.placed && c.identity.featureId === "501",
+      );
+      return viewer.scene.pick(poi.screen, 1, 1)?.id.featureId;
     }),
   ).toBe("501");
+  expect(
+    await page.evaluate(() => {
+      const { layer } = window.publicVectorPreview;
+      return layer.style.evaluateLayer(
+        "road_one_way_arrow",
+        { type: 2, properties: { oneway: 1 } },
+        layer.statistics.zoom,
+      ).show;
+    }),
+  ).toBe(true);
   expect(observed.fontRequests).toBeGreaterThan(0);
   await page.evaluate(() => {
     window.oldPublicLayer = window.publicVectorPreview.layer;
@@ -232,7 +278,7 @@ test("switches between Bright and Liberty and preserves the map when the public 
   expect(errors).toEqual([]);
 });
 
-test("retains foreground coverage and map scale at the shallowest surface pitch", async ({
+test("retains foreground coverage and map scale while culling distant labels at the shallowest surface pitch", async ({
   page,
 }, testInfo) => {
   await routes(page);
@@ -291,6 +337,26 @@ test("retains foreground coverage and map scale at the shallowest surface pitch"
   expect(cover.count).toBeLessThanOrEqual(64);
   expect(Math.max(...cover.levels)).toBeGreaterThanOrEqual(12);
   expect(Math.min(...cover.levels)).toBeLessThan(10);
+  const symbols = await page.evaluate(() => {
+    const { viewer, layer } = window.publicVectorPreview;
+    const camera = viewer.scene.camera;
+    const referenceDepth = -camera.positionWC.z / camera.directionWC.z;
+    const placed = layer._symbols._previous.filter(
+      (candidate) => candidate.placed,
+    );
+    return {
+      count: placed.length,
+      maximumDepth: Math.max(
+        ...placed.map(
+          (candidate) =>
+            -camera.worldToCameraCoordinatesPoint(candidate.position).z /
+            referenceDepth,
+        ),
+      ),
+    };
+  });
+  expect(symbols.count).toBeGreaterThan(0);
+  expect(symbols.maximumDepth).toBeLessThanOrEqual(4);
   const pixels = await page.evaluate(
     () =>
       new Promise((resolve) => {

@@ -22,7 +22,7 @@ function bounds(quads) {
   ];
 }
 
-/** Pure point-symbol metrics and screen-space collision. Units are CSS pixels. @private */
+/** Pure symbol metrics and screen-space collision. Units are CSS pixels. @private */
 const SceneGISVectorSymbolLayout = {
   text(text, layout, lookup) {
     const size = layout["text-size"];
@@ -32,7 +32,9 @@ const SceneGISVectorSymbolLayout = {
     const scale = size / 24;
     const spacing = layout["text-letter-spacing"] * size;
     const limit =
-      layout["text-max-width"] > 0 ? layout["text-max-width"] * size : Infinity;
+      layout["symbol-placement"] === "point" && layout["text-max-width"] > 0
+        ? layout["text-max-width"] * size
+        : Infinity;
     const lines = [[]];
     let width = 0;
     // Latin words stay together; ideographs are legal break positions.
@@ -110,12 +112,21 @@ const SceneGISVectorSymbolLayout = {
               top + rect.height * scale,
             ],
             scale,
+            center: x + glyph.advance * scale * 0.5,
+            row,
           });
         }
         x += glyph.advance * scale + spacing;
       }
     }
-    return { quads, box: bounds(quads) };
+    return {
+      quads,
+      box: bounds(quads),
+      span: [
+        -maxWidth * anchor[0] + offset[0] * size,
+        maxWidth * (1 - anchor[0]) + offset[0] * size,
+      ],
+    };
   },
   icon(image, page, layout) {
     if (!image || layout["icon-size"] <= 0) {
@@ -174,13 +185,25 @@ const SceneGISVectorSymbolLayout = {
     };
   },
   place(textBox, iconBox, layout, collision) {
+    const textBoxes = !textBox
+      ? []
+      : typeof textBox[0] === "number"
+        ? [textBox]
+        : textBox;
+    const iconBoxes = !iconBox
+      ? []
+      : typeof iconBox[0] === "number"
+        ? [iconBox]
+        : iconBox;
     let text =
-      textBox !== undefined &&
-      (layout["text-allow-overlap"] || !collision.hits(textBox));
+      textBoxes.length > 0 &&
+      (layout["text-allow-overlap"] ||
+        !textBoxes.some((box) => collision.hits(box)));
     let icon =
-      iconBox !== undefined &&
-      (layout["icon-allow-overlap"] || !collision.hits(iconBox));
-    if (textBox && iconBox) {
+      iconBoxes.length > 0 &&
+      (layout["icon-allow-overlap"] ||
+        !iconBoxes.some((box) => collision.hits(box)));
+    if (textBoxes.length && iconBoxes.length) {
       if (!text && !layout["text-optional"]) {
         icon = false;
       }
@@ -189,10 +212,10 @@ const SceneGISVectorSymbolLayout = {
       }
     }
     if (text && !layout["text-ignore-placement"]) {
-      collision.insert(textBox);
+      textBoxes.forEach((box) => collision.insert(box));
     }
     if (icon && !layout["icon-ignore-placement"]) {
-      collision.insert(iconBox);
+      iconBoxes.forEach((box) => collision.insert(box));
     }
     return { text, icon };
   },

@@ -1,15 +1,17 @@
 import Cartesian2 from "../../../Core/Cartesian2.js";
+import Cartesian3 from "../../../Core/Cartesian3.js";
 import EncodedCartesian3 from "../../../Core/EncodedCartesian3.js";
 import RuntimeError from "../../../Core/RuntimeError.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
 import RenderState from "../../../Renderer/RenderState.js";
 import Pass from "../../../Renderer/Pass.js";
 import BlendingState from "../../../Scene/BlendingState.js";
-import SceneTransforms from "../../../Scene/SceneTransforms.js";
 import Coordinates from "../../Core/SceneGISVectorTileCoordinates.js";
 import Layout from "../../Core/_private/_SceneGISVectorSymbolLayout.js";
+import Line from "../../Core/_private/_SceneGISVectorSymbolLine.js";
 import Resources from "../../Renderer/_private/_SceneGISVectorSymbolResources.js";
 import Assets from "./_SceneGISVectorSymbolAssets.js";
+import Projection from "./_SceneGISVectorSymbolProjection.js";
 
 function inRegion(point, bounds, world) {
   return (
@@ -61,13 +63,11 @@ const white = { red: 1, green: 1, blue: 1, alpha: 1 };
 const corners = [0, 1, 2, 0, 2, 3];
 
 function appendQuad(values, candidate, quad, text, pick) {
-  const high = candidate.encoded.high,
-    low = candidate.encoded.low;
   const rect = quad.rect,
     page = quad.page;
   const width = page.image.width,
     height = page.image.height;
-  const boxes = [
+  const boxes = quad.corners ?? [
     [quad.box[0], quad.box[1]],
     [quad.box[2], quad.box[1]],
     [quad.box[2], quad.box[3]],
@@ -87,6 +87,11 @@ function appendQuad(values, candidate, quad, text, pick) {
     text ? opacity : 0,
   );
   for (const corner of corners) {
+    const encoded = quad.positions
+      ? EncodedCartesian3.fromCartesian(quad.positions[corner])
+      : candidate.encoded;
+    const high = encoded.high,
+      low = encoded.low;
     values.push(
       high.x,
       high.y,
@@ -94,7 +99,7 @@ function appendQuad(values, candidate, quad, text, pick) {
       low.x,
       low.y,
       low.z,
-      ...boxes[corner],
+      ...(quad.positions ? [0, 0] : boxes[corner]),
       ...uv[corner],
       ...color,
       ...halo,
@@ -210,14 +215,142 @@ function orderBatches(runtime) {
   }
 }
 
-function collect(runtime, zoom) {
-  const owner = runtime.owner,
-    scene = owner.scene;
-  const world = owner._world.coordinateSystem.extent;
-  const camera = scene.camera;
-  const eye = camera.positionWC;
-  const direction = camera.directionWC;
+function featureAnchors(
+  feature,
+  layout,
+  coordinates,
+  entry,
+  state,
+  metersPerPixel,
+  zoom,
+) {
   const result = [];
+  const placement = layout["symbol-placement"];
+  for (const part of feature.geometry.parts) {
+    if (feature.type === 1) {
+      if (placement === "point") {
+        for (let i = 0; i < part.length; i += 2) {
+          result.push({ position: coordinates.toWorld(part[i], part[i + 1]) });
+        }
+      }
+      continue;
+    }
+    const points = [];
+    for (let i = 0; i < part.length; i += 2) {
+      points.push(coordinates.toWorld(part[i], part[i + 1]));
+    }
+    if (placement === "point") {
+      result.push({ position: points[0] });
+      continue;
+    }
+    const overzoom = Math.max(0, Math.floor(zoom) - state.source.maximumLevel);
+    const tilePixel =
+      (entry.bounds.maximumX - entry.bounds.minimumX) / (512 * 2 ** overzoom);
+    const spacing =
+      layout["symbol-spacing"] * Math.max(metersPerPixel, tilePixel);
+    for (const clipped of placement === "line"
+      ? Line.clip(points, entry.bounds)
+      : [points]) {
+      const line = Line.path(clipped);
+      for (const station of Line.anchors(line, spacing, placement)) {
+        const anchor = Line.sample(line, station);
+        result.push({
+          position: new Cartesian3(anchor.x, anchor.y, 0),
+          line,
+          station,
+        });
+      }
+    }
+  }
+  return result;
+}
+
+function tileLabels(
+  runtime,
+  state,
+  entry,
+  order,
+  sourceLayer,
+  zoom,
+  metersPerPixel,
+) {
+  let cached = runtime._tileLayouts.get(entry);
+  const integerZoom = Math.floor(zoom);
+  if (!cached || cached.data !== entry.data || cached.zoom !== integerZoom) {
+    cached = { data: entry.data, zoom: integerZoom, layers: new Map() };
+    runtime._tileLayouts.set(entry, cached);
+  }
+  if (cached.layers.has(order)) {
+    return cached.layers.get(order);
+  }
+  const definition = runtime.owner._records[order].definition;
+  const coordinates = new Coordinates({
+    tilingScheme: state.source.tilingScheme,
+    x: entry.x,
+    y: entry.y,
+    level: entry.level,
+    extent: sourceLayer.extent,
+  });
+  const labels = [];
+  for (const feature of sourceLayer.features) {
+    const evaluation = runtime.owner.style._evaluateVisibleLayer(
+      definition.id,
+      feature,
+      zoom,
+    );
+    if (!evaluation) {
+      continue;
+    }
+    const names = content(evaluation.value.layout);
+    if (!names.text && !names.icon) {
+      continue;
+    }
+    if (feature.type === 3) {
+      runtime.report(
+        `${definition.id}/geometry`,
+        new RuntimeError(
+          `Symbol profile requires MVT Point or LineString geometry: ${definition.id}`,
+        ),
+      );
+      continue;
+    }
+    const anchors = featureAnchors(
+      feature,
+      evaluation.value.layout,
+      coordinates,
+      entry,
+      state,
+      metersPerPixel,
+      zoom,
+    );
+    for (const anchor of anchors) {
+      anchor.encoded = EncodedCartesian3.fromCartesian(anchor.position);
+    }
+    labels.push({
+      feature,
+      evaluation,
+      names,
+      anchors,
+      key: JSON.stringify([
+        definition.source,
+        definition.id,
+        names.text,
+        names.icon,
+        names.font,
+      ]),
+    });
+  }
+  cached.layers.set(order, labels);
+  return labels;
+}
+
+function collect(runtime, zoom, projection) {
+  const owner = runtime.owner;
+  const world = owner._world.coordinateSystem.extent;
+  const metersPerPixel =
+    (world.maximumX - world.minimumX) / (512 * 2 ** Math.floor(zoom));
+  const result = [];
+  const activeEntries = new Set();
   for (let order = 0; order < owner._records.length; order++) {
     const definition = owner._records[order].definition;
     if (
@@ -229,108 +362,93 @@ function collect(runtime, zoom) {
     }
     const state = owner._sources.get(definition.source);
     for (const [entry, regions] of state.render) {
+      activeEntries.add(entry);
       const sourceLayer = entry.data.layers.find(
         (layer) => layer.name === definition["source-layer"],
       );
       if (!sourceLayer) {
         continue;
       }
-      const coordinates = new Coordinates({
-        tilingScheme: state.source.tilingScheme,
-        x: entry.x,
-        y: entry.y,
-        level: entry.level,
-        extent: sourceLayer.extent,
-      });
-      for (const feature of sourceLayer.features) {
-        const evaluated = owner.style.evaluateLayer(
+      for (const label of tileLabels(
+        runtime,
+        state,
+        entry,
+        order,
+        sourceLayer,
+        zoom,
+        metersPerPixel,
+      )) {
+        const { feature, names } = label;
+        const visible = [];
+        for (const anchor of label.anchors) {
+          if (
+            !regions.some((region) => inRegion(anchor.position, region, world))
+          ) {
+            continue;
+          }
+          const screen = Projection.visible(projection, anchor.position);
+          if (screen) {
+            visible.push({ anchor, screen });
+          }
+        }
+        if (visible.length === 0) {
+          continue;
+        }
+        const previousLayout = label.evaluation.value.layout;
+        label.evaluation = owner.style._evaluateVisibleLayer(
           definition.id,
           feature,
           zoom,
+          label.evaluation,
         );
-        if (!evaluated.show) {
-          continue;
+        const evaluated = label.evaluation.value;
+        if (!label.shapeKey || evaluated.layout !== previousLayout) {
+          label.shapeKey = JSON.stringify([
+            names.text,
+            names.icon,
+            names.font,
+            evaluated.layout,
+          ]);
         }
-        const names = content(evaluated.layout);
-        if (!names.text && !names.icon) {
-          continue;
-        }
-        if (feature.type !== 1) {
-          runtime.report(
-            `${definition.id}/geometry`,
-            new RuntimeError(
-              `Point symbol profile requires MVT Point geometry: ${
-                definition.id
-              }`,
-            ),
-          );
-          continue;
-        }
-        for (const part of feature.geometry.parts) {
-          for (let i = 0; i < part.length; i += 2) {
-            const position = coordinates.toWorld(part[i], part[i + 1]);
-            if (!regions.some((region) => inRegion(position, region, world))) {
-              continue;
-            }
-            const depth =
-              (position.x - eye.x) * direction.x +
-              (position.y - eye.y) * direction.y +
-              (position.z - eye.z) * direction.z;
-            if (depth <= camera.frustum.near || depth > camera.frustum.far) {
-              continue;
-            }
-            const screen = SceneTransforms.worldToWindowCoordinates(
-              scene,
-              position,
-              new Cartesian2(),
+        for (const { anchor, screen } of visible) {
+          if (/[\u0590-\u109f]/u.test(names.text)) {
+            runtime.report(
+              `${definition.id}/shaping`,
+              new RuntimeError(
+                `This text requires shaping outside the horizontal Latin/CJK profile: ${definition.id}`,
+              ),
             );
-            if (
-              !screen ||
-              screen.x < 0 ||
-              screen.y < 0 ||
-              screen.x >= scene.canvas.clientWidth ||
-              screen.y >= scene.canvas.clientHeight
-            ) {
-              continue;
-            }
-            if (/[\u0590-\u109f]/u.test(names.text)) {
-              runtime.report(
-                `${definition.id}/shaping`,
-                new RuntimeError(
-                  `This text requires shaping outside the horizontal Latin/CJK profile: ${definition.id}`,
-                ),
-              );
-              continue;
-            }
-            result.push({
-              ...names,
-              position,
-              screen,
-              evaluated,
-              order,
-              tileKey: entry.key,
-              key: JSON.stringify([
-                definition.source,
-                definition.id,
-                names.text,
-                names.icon,
-                names.font,
-              ]),
-              tolerance:
-                (2 * (entry.bounds.maximumX - entry.bounds.minimumX)) /
-                sourceLayer.extent,
-              identity: {
-                source: definition.source,
-                sourceLayer: sourceLayer.name,
-                styleLayer: definition.id,
-                featureId: feature.id,
-                properties: feature.properties,
-                tile: { x: entry.x, y: entry.y, level: entry.level },
-              },
-            });
+            continue;
           }
+          result.push({
+            ...names,
+            ...anchor,
+            anchor,
+            shapeKey: label.shapeKey,
+            screen,
+            evaluated,
+            order,
+            tileKey: entry.key,
+            key: label.key,
+            tolerance:
+              (2 * (entry.bounds.maximumX - entry.bounds.minimumX)) /
+              sourceLayer.extent,
+            identity: {
+              source: definition.source,
+              sourceLayer: sourceLayer.name,
+              styleLayer: definition.id,
+              featureId: feature.id,
+              properties: feature.properties,
+              tile: { x: entry.x, y: entry.y, level: entry.level },
+            },
+          });
         }
       }
+    }
+  }
+  for (const entry of runtime._tileLayouts.keys()) {
+    if (!activeEntries.has(entry)) {
+      runtime._tileLayouts.delete(entry);
     }
   }
   result.sort(
@@ -350,7 +468,7 @@ function collect(runtime, zoom) {
   return result.slice(0, runtime.maximumCandidates);
 }
 
-/** View-wide point placement and symbol command publication. @private */
+/** View-wide placement and symbol command publication. @private */
 function SceneGISVectorSymbols(
   owner,
   maximumCandidates,
@@ -364,6 +482,7 @@ function SceneGISVectorSymbols(
   this._groups = new Map();
   this._pickIds = new Map();
   this._previous = [];
+  this._tileLayouts = new Map();
   this._nextId = 0;
   this._reported = new Set();
   this._missingImages = new Set();
@@ -420,7 +539,8 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
     this.loaded = this.assets.loaded;
     return;
   }
-  const candidates = collect(this, zoom),
+  const projection = Projection.snapshot(owner.scene);
+  const candidates = collect(this, zoom, projection),
     requirements = new Map();
   let spriteNeeded = false;
   for (const candidate of candidates) {
@@ -459,12 +579,14 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
   }
   const byKey = new Map(),
     previous = new Map(),
+    previousAnchors = new Map(),
     activePicks = new Set(),
     matched = new Set(),
     createdPicks = [],
     pickObjects = new Map(),
     protectedKeys = new Set();
   for (const candidate of this._previous) {
+    previousAnchors.set(candidate.anchor, candidate);
     if (!previous.has(candidate.key)) {
       previous.set(candidate.key, []);
     }
@@ -472,7 +594,11 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
   }
   const collision = Layout.collision(),
     groups = new Map(),
-    retained = [];
+    retained = [],
+    repeats = new Map();
+  const extent = owner._world.coordinateSystem.extent;
+  const metersPerPixel =
+    (extent.maximumX - extent.minimumX) / (512 * 2 ** zoom);
   // Collision-free labels may share page batches. Overlapping labels must keep
   // feature paint order even when consecutive glyphs use different atlas pages.
   const orderedLayers = new Set(
@@ -502,18 +628,16 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
     }
     peers.push(candidate);
     byKey.set(candidate.key, peers);
-    const old = (previous.get(candidate.key) ?? []).find(
-      (other) => close(candidate, other) && !matched.has(other.id),
-    );
+    const exact = previousAnchors.get(candidate.anchor);
+    const old =
+      (exact && !matched.has(exact.id) ? exact : undefined) ??
+      (previous.get(candidate.key) ?? []).find(
+        (other) => close(candidate, other) && !matched.has(other.id),
+      );
     candidate.id = old?.id ?? ++this._nextId;
     matched.add(candidate.id);
     const layout = candidate.evaluated.layout;
-    const shapeKey = JSON.stringify([
-      candidate.text,
-      candidate.icon,
-      candidate.font,
-      layout,
-    ]);
+    const shapeKey = candidate.shapeKey;
     let pending = false;
     for (const character of candidate.text) {
       if (character === "\n" || character === "\r") {
@@ -578,20 +702,53 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
         };
       }
       candidate.shapeKey = pending ? old.shapeKey : shapeKey;
-      candidate.encoded = EncodedCartesian3.fromCartesian(candidate.position);
       const shaped = candidate.shaped,
         effective = candidate.evaluated.layout;
-      const textBox = shifted(
-        shaped.text.box,
-        candidate.screen,
-        effective["text-padding"],
-      );
-      const iconBox = shifted(
-        shaped.icon.box,
-        candidate.screen,
-        effective["icon-padding"],
-      );
-      const placement = Layout.place(textBox, iconBox, effective, collision);
+      const projected = {
+        text: Projection.shape(
+          projection,
+          candidate,
+          shaped.text,
+          true,
+          metersPerPixel,
+        ),
+        icon: Projection.shape(
+          projection,
+          candidate,
+          shaped.icon,
+          false,
+          metersPerPixel,
+        ),
+      };
+      candidate.projected = projected;
+      const blockedText = !projected.text && !effective["text-optional"];
+      const blockedIcon = !projected.icon && !effective["icon-optional"];
+      const textBoxes = blockedIcon
+        ? []
+        : (projected.text?.boxes ?? []).map((box) =>
+            shifted(box, candidate.screen, effective["text-padding"]),
+          );
+      const iconBoxes = blockedText
+        ? []
+        : (projected.icon?.boxes ?? []).map((box) =>
+            shifted(box, candidate.screen, effective["icon-padding"]),
+          );
+      const peers = repeats.get(candidate.key) ?? [];
+      const repeated =
+        candidate.line &&
+        candidate.text &&
+        peers.some(
+          (other) =>
+            Math.hypot(
+              candidate.screen.x - other.screen.x,
+              candidate.screen.y - other.screen.y,
+            ) <
+            effective["symbol-spacing"] * 0.5,
+        );
+      const placement = repeated
+        ? { text: false, icon: false }
+        : Layout.place(textBoxes, iconBoxes, effective, collision);
+      duplicates += Number(!!repeated);
       retained.push(candidate);
       for (const shapedPart of [shaped.text, shaped.icon]) {
         for (const quad of shapedPart.quads) {
@@ -602,6 +759,9 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
         continue;
       }
       placed++;
+      candidate.placed = placement;
+      peers.push(candidate);
+      repeats.set(candidate.key, peers);
       activePicks.add(candidate.id);
       let pick = this._pickIds.get(candidate.id);
       if (!pick && owner._allowPicking) {
@@ -620,7 +780,7 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
         if (!(text ? placement.text : placement.icon)) {
           continue;
         }
-        for (const quad of (text ? shaped.text : shaped.icon).quads) {
+        for (const quad of (text ? projected.text : projected.icon).quads) {
           const key = `${candidate.order}/${Number(text)}/${quad.page.key}/${orderedLayers.has(candidate.order) ? candidate.id : "batch"}`;
           let group = groups.get(key);
           if (!group) {
@@ -668,6 +828,7 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
 SceneGISVectorSymbols.prototype.clear = function () {
   this._signature = undefined;
   this.batches.clear();
+  this._tileLayouts.clear();
   this.loaded = true;
   this.statistics = { candidates: 0, placed: 0, truncated: 0, duplicates: 0 };
 };
@@ -682,5 +843,6 @@ SceneGISVectorSymbols.prototype.destroy = function () {
   this._groups.clear();
   this._pickIds.clear();
   this._previous.length = 0;
+  this._tileLayouts.clear();
 };
 export default SceneGISVectorSymbols;

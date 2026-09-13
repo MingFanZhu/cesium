@@ -80,7 +80,14 @@ function fillGeometry(feature, coordinates) {
       });
 }
 
-function lineGeometries(feature, coordinates, paint, layout, dash) {
+function lineGeometries(
+  feature,
+  coordinates,
+  paint,
+  layout,
+  dash,
+  radiusLimit,
+) {
   return feature.geometry.parts
     .map((part) =>
       strokeGeometry(
@@ -90,6 +97,7 @@ function lineGeometries(feature, coordinates, paint, layout, dash) {
         paint,
         layout,
         dash,
+        radiusLimit,
       ),
     )
     .filter((geometry) => geometry !== undefined);
@@ -228,6 +236,14 @@ SceneGISVectorTileGeometry.build = function (
   const main = [];
   const outlines = [];
   const dashes = new Dashes();
+  const uniformPaint = style._getUniformPaint(definition.id, zoom);
+  const radius =
+    uniformPaint &&
+    uniformPaint["line-gap-width"] * 0.5 +
+      uniformPaint["line-width"] *
+        (uniformPaint["line-gap-width"] > 0 ? 1 : 0.5);
+  const radiusLimit =
+    radius > 0 ? 2 ** Math.ceil(Math.log2(radius)) : undefined;
   if (sourceLayer === undefined) {
     return [];
   }
@@ -240,10 +256,11 @@ SceneGISVectorTileGeometry.build = function (
     ) {
       continue;
     }
-    const evaluated = style.evaluateLayer(definition.id, feature, zoom);
-    if (!evaluated.show) {
+    const cached = style._evaluateVisibleLayer(definition.id, feature, zoom);
+    if (!cached) {
       continue;
     }
+    const evaluated = cached.value;
     const paint = evaluated.paint;
     const id = Object.freeze({
       source: definition.source,
@@ -291,6 +308,7 @@ SceneGISVectorTileGeometry.build = function (
           paint,
           evaluated.layout,
           dashes.add(paint["line-dasharray"]),
+          radiusLimit,
         )) {
           main.push(makeInstance(line, id, color));
         }
@@ -308,6 +326,7 @@ SceneGISVectorTileGeometry.build = function (
       kind: definition.type,
       instances: main,
       dashIntervals: dashes.values,
+      uniformPaint,
     });
   }
   if (outlines.length > 0) {

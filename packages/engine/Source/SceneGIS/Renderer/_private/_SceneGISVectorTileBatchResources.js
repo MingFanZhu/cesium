@@ -1,5 +1,6 @@
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import Cartesian2 from "../../../Core/Cartesian2.js";
+import Color from "../../../Core/Color.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
 import RuntimeError from "../../../Core/RuntimeError.js";
 import Geometry from "../../../Core/Geometry.js";
@@ -87,12 +88,24 @@ function prepare(resources, context, instances, owner, allowPicking) {
   return result;
 }
 
-function createVertexArray(context, geometry, locations) {
+function createVertexArray(
+  context,
+  geometry,
+  locations,
+  resources,
+  uniformPaint,
+) {
   const buffers = [];
   let indexBuffer;
   try {
     const attributes = [];
+    const constantIndices = {};
     for (const [name, attribute] of Object.entries(geometry.attributes)) {
+      if (uniformPaint && (name === "color" || name === "linePaint")) {
+        constantIndices[name] = attributes.length;
+        attributes.push({ index: locations[name], value: [0, 0, 0, 0] });
+        continue;
+      }
       const buffer = Buffer.createVertexBuffer({
         context,
         typedArray: attribute.values,
@@ -116,7 +129,17 @@ function createVertexArray(context, geometry, locations) {
           ? IndexDatatype.UNSIGNED_INT
           : IndexDatatype.UNSIGNED_SHORT,
     });
-    return new VertexArray({ context, attributes, indexBuffer });
+    const vertexArray = new VertexArray({ context, attributes, indexBuffer });
+    if (uniformPaint) {
+      resources._paintAttributes.push({
+        color: vertexArray.getAttribute(constantIndices.color).value,
+        dimensions:
+          constantIndices.linePaint === undefined
+            ? undefined
+            : vertexArray.getAttribute(constantIndices.linePaint).value,
+      });
+    }
+    return vertexArray;
   } catch (error) {
     for (const buffer of buffers) {
       buffer.destroy();
@@ -142,6 +165,8 @@ function SceneGISVectorTileBatchResources(
   this._shaderProgram = undefined;
   this._dashTexture = undefined;
   this._dashSize = undefined;
+  this._paintAttributes = [];
+  this._paintPrefix = prepared.kind;
   try {
     const geometries = prepare(
       this,
@@ -152,7 +177,18 @@ function SceneGISVectorTileBatchResources(
     );
     const locations = GeometryPipeline.createAttributeLocations(geometries[0]);
     for (const geometry of geometries) {
-      this._vertexArrays.push(createVertexArray(context, geometry, locations));
+      this._vertexArrays.push(
+        createVertexArray(
+          context,
+          geometry,
+          locations,
+          this,
+          prepared.uniformPaint,
+        ),
+      );
+    }
+    if (prepared.uniformPaint) {
+      this.updatePaint(prepared.uniformPaint);
     }
     const defines = allowPicking ? ["SCENEGIS_VECTOR_PICKING"] : [];
     if (prepared.kind === "line") {
@@ -217,6 +253,26 @@ SceneGISVectorTileBatchResources.prototype.isDestroyed = function () {
   return false;
 };
 
+SceneGISVectorTileBatchResources.prototype.updatePaint = function (paint) {
+  const prefix = this._paintPrefix;
+  const color = paint[`${prefix}-color`];
+  for (const attribute of this._paintAttributes) {
+    // Match the existing normalized byte color exactly, including alpha picking.
+    attribute.color[0] = Color.floatToByte(color.red) / 255;
+    attribute.color[1] = Color.floatToByte(color.green) / 255;
+    attribute.color[2] = Color.floatToByte(color.blue) / 255;
+    attribute.color[3] =
+      Color.floatToByte(color.alpha * paint[`${prefix}-opacity`]) / 255;
+    if (!attribute.dimensions) {
+      continue;
+    }
+    attribute.dimensions[0] = paint["line-width"];
+    attribute.dimensions[1] = paint["line-gap-width"];
+    attribute.dimensions[2] = paint["line-offset"];
+    attribute.dimensions[3] = paint["line-blur"];
+  }
+};
+
 SceneGISVectorTileBatchResources.prototype.destroy = function () {
   for (const vertexArray of this._vertexArrays) {
     vertexArray.destroy();
@@ -228,6 +284,7 @@ SceneGISVectorTileBatchResources.prototype.destroy = function () {
     pick.destroy();
   }
   this._pickIds.length = 0;
+  this._paintAttributes.length = 0;
   return destroyObject(this);
 };
 

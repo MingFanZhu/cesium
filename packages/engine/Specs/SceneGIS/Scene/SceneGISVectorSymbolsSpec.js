@@ -2,6 +2,8 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  OrthographicFrustum,
+  PerspectiveFrustum,
   Resource,
   RuntimeError,
   SceneGISPlanarCoordinateSystem,
@@ -32,6 +34,27 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
   }
   function tile(features = [feature()]) {
     return { layers: [{ name: "data", version: 2, extent: 4096, features }] };
+  }
+  function road(points, text = "AAA", id = "road") {
+    return {
+      ...feature(id, 2048, text),
+      type: 2,
+      geometry: {
+        parts: [
+          new Float64Array(
+            points.flatMap(([x, y]) => [(x + 512) * 4, (512 - y) * 4]),
+          ),
+        ],
+        polygonStarts: new Uint32Array(),
+      },
+    };
+  }
+  function glyphCenter(candidate, text = true, index = 0) {
+    const quad = candidate.projected[text ? "text" : "icon"].quads[index];
+    return new Cartesian2(
+      candidate.screen.x + quad.corners.reduce((sum, p) => sum + p[0], 0) / 4,
+      candidate.screen.y + quad.corners.reduce((sum, p) => sum + p[1], 0) / 4,
+    );
   }
   function definition(id = "labels", layout = {}, paint = {}) {
     return {
@@ -141,6 +164,102 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(pixel()).toEqual([255, 0, 0, 255]);
   });
 
+  it("excludes distant perspective labels before glyph requests and picking, and restores them when approached", async function () {
+    const far = feature("far", 2048, "中");
+    far.geometry.parts[0][1] = (512 - 450) * 4;
+    spyOn(source, "requestTile").and.resolveTo(tile([feature(), far]));
+    const request = spyOn(Resource.prototype, "fetchArrayBuffer").and.callFake(
+      function () {
+        const code = this.url.endsWith("/0-255.pbf") ? 65 : "中".codePointAt(0);
+        return Promise.resolve(encodeGlyphs([glyph(code)]));
+      },
+    );
+    const direction = Cartesian3.normalize(
+      new Cartesian3(0, 1, -0.1),
+      new Cartesian3(),
+    );
+    const up = Cartesian3.normalize(
+      new Cartesian3(0, 0.1, 1),
+      new Cartesian3(),
+    );
+    scene.camera.setView({
+      destination: new Cartesian3(0, -30, 3),
+      orientation: { direction, up },
+    });
+    const layer = add();
+    await loaded(layer);
+    expect(layer.statistics.symbolCandidates).toBe(1);
+    expect(layer.statistics.placedSymbols).toBe(1);
+    expect(layer.statistics.symbolFailures).toBe(0);
+    expect(request.calls.count()).toBe(1);
+    expect(pixel()).toEqual([255, 0, 0, 255]);
+    const runtime = layer._symbols;
+    expect(runtime._pickIds.size).toBe(1);
+    expect(
+      scene.pick(glyphCenter(runtime._previous[0]), 1, 1).id.featureId,
+    ).toBe("1");
+
+    scene.camera.position.y = 420;
+    await loaded(layer);
+    expect(layer.statistics.symbolCandidates).toBe(1);
+    expect(layer.statistics.placedSymbols).toBe(1);
+    expect(request.calls.count()).toBe(2);
+    expect(pixel()).toEqual([255, 0, 0, 255]);
+    expect(
+      scene.pick(glyphCenter(runtime._previous[0]), 1, 1).id.featureId,
+    ).toBe("far");
+    const farPick = [...runtime._pickIds.values()][0];
+    scene.camera.position.y = -30;
+    await loaded(layer);
+    expect(runtime._previous[0].identity.featureId).toBe("1");
+    expect(farPick.object).toBeUndefined();
+    expect(request.calls.count()).toBe(2);
+  });
+
+  it("keeps all in-view planar labels in orthographic and top-down perspective views", async function () {
+    const far = feature("far", 2048);
+    far.geometry.parts[0][1] = (512 - 45) * 4;
+    spyOn(source, "requestTile").and.resolveTo(tile([feature(), far]));
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 64,
+      aspectRatio: 1,
+      near: 1,
+      far: 2000,
+    });
+    scene.camera.setView({
+      destination: new Cartesian3(0, -3, 0.3),
+      orientation: {
+        direction: Cartesian3.normalize(
+          new Cartesian3(0, 1, -0.1),
+          new Cartesian3(),
+        ),
+        up: Cartesian3.normalize(new Cartesian3(0, 0.1, 1), new Cartesian3()),
+      },
+    });
+    const layer = add([definition("labels", { "text-allow-overlap": true })]);
+    await loaded(layer);
+    expect(layer.statistics.symbolCandidates).toBe(2);
+    expect(layer.statistics.placedSymbols).toBe(2);
+
+    scene.camera.frustum = new PerspectiveFrustum({
+      fov: Math.PI / 3,
+      aspectRatio: 1,
+      near: 1,
+      far: 2000,
+    });
+    scene.camera.setView({
+      destination: new Cartesian3(0, 22.5, 60),
+      orientation: {
+        direction: new Cartesian3(0, 0, -1),
+        up: new Cartesian3(0, 1, 0),
+      },
+    });
+    await loaded(layer);
+    expect(layer.statistics.symbolCandidates).toBe(2);
+    expect(layer.statistics.placedSymbols).toBe(2);
+  });
+
   it("renders SDF pixels and alpha-aware native picking, reuses warm commands, and destroys owned resources", async function () {
     spyOn(source, "requestTile").and.resolveTo(tile());
     const request = spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(
@@ -163,6 +282,11 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(command.derivedCommands.picking.pickCommand.vertexArray).toBe(va);
     const upload = spyOn(batch.resources, "update").and.callThrough();
     const shape = runtime._previous[0].shaped;
+    const layouts = [...runtime._tileLayouts.values()][0];
+    const filter = spyOn(
+      layer.style._compiled.get("labels").filter,
+      "filter",
+    ).and.callThrough();
     for (let i = 0; i < 3; i++) {
       scene.renderForSpecs();
     }
@@ -170,15 +294,295 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(request.calls.count()).toBe(1);
     scene.camera.position.x = 1;
     scene.renderForSpecs();
+    expect([...runtime._tileLayouts.values()][0]).toBe(layouts);
+    expect(filter).not.toHaveBeenCalled();
     expect(runtime._previous[0].shaped).toBe(shape);
     expect([...runtime._groups.values()][0].command).toBe(command);
     expect([...runtime._pickIds.values()][0]).toBe(pickId);
+    scene.camera.position.z *= 0.5;
+    scene.renderForSpecs();
+    expect([...runtime._tileLayouts.values()][0]).not.toBe(layouts);
+    expect(filter).toHaveBeenCalled();
     scene.primitives.remove(layer);
+    expect(runtime._tileLayouts.size).toBe(0);
     expect(va.isDestroyed()).toBeTrue();
     expect(atlas.isDestroyed()).toBeTrue();
     expect(pickId.object).toBeUndefined();
     expect(world.isDestroyed()).toBeFalse();
   });
+  it("renders real world glyph corners along a curve, stays upright after heading reversal, and releases the batch", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([
+        road([
+          [-60, -20],
+          [-10, 0],
+          [10, 0],
+          [60, 20],
+        ]),
+      ]),
+    );
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([
+      definition("line", {
+        "symbol-placement": "line-center",
+        "text-size": 20,
+      }),
+    ]);
+    await loaded(layer);
+    expect(layer.statistics.placedSymbols).toBe(1);
+    const runtime = layer._symbols,
+      candidate = runtime._previous[0];
+    const quads = candidate.projected.text.quads;
+    expect(quads.every((q) => q.positions?.length === 4)).toBeTrue();
+    expect(quads[0].corners[1][1] - quads[0].corners[0][1]).not.toBeCloseTo(
+      quads[1].corners[1][1] - quads[1].corners[0][1],
+      3,
+    );
+    expect(scene.pick(glyphCenter(candidate), 1, 1).id.featureId).toBe("road");
+    const batch = [...runtime._groups.values()][0],
+      va = batch.resources.vertexArray;
+    const upload = spyOn(batch.resources, "update").and.callThrough();
+    scene.renderForSpecs();
+    expect(upload).not.toHaveBeenCalled();
+    scene.camera.up = new Cartesian3(0, -1, 0);
+    scene.camera.right = new Cartesian3(-1, 0, 0);
+    scene.renderForSpecs();
+    const turned = runtime._previous[0];
+    expect(glyphCenter(turned, true, 0).x).toBeLessThan(
+      glyphCenter(turned, true, 2).x,
+    );
+    expect(scene.pick(glyphCenter(turned), 1, 1).id.featureId).toBe("road");
+    expect([...runtime._groups.values()][0].resources.vertexArray).toBe(va);
+    scene.primitives.remove(layer);
+    expect(va.isDestroyed()).toBeTrue();
+  });
+
+  it("projects map-pitched text onto the tilted plane while viewport text retains its height", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([
+        road(
+          [
+            [-150, 0],
+            [150, 0],
+          ],
+          "A",
+        ),
+      ]),
+    );
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([
+      definition("map", {
+        "symbol-placement": "line-center",
+        "text-allow-overlap": true,
+      }),
+      definition("viewport", {
+        "symbol-placement": "line-center",
+        "text-rotation-alignment": "viewport",
+        "text-allow-overlap": true,
+      }),
+    ]);
+    await loaded(layer);
+    const height = (id) => {
+      const box = layer._symbols._previous.find(
+        (c) => c.identity.styleLayer === id,
+      ).projected.text.boxes[0];
+      return box[3] - box[1];
+    };
+    const mapHeight = height("map"),
+      screenHeight = height("viewport");
+    scene.camera.position = new Cartesian3(
+      0,
+      -80 / Math.sqrt(2),
+      80 / Math.sqrt(2),
+    );
+    scene.camera.direction = new Cartesian3(0, Math.SQRT1_2, -Math.SQRT1_2);
+    scene.camera.up = new Cartesian3(0, Math.SQRT1_2, Math.SQRT1_2);
+    scene.renderForSpecs();
+    expect(height("map")).toBeLessThan(mapHeight * 0.8);
+    expect(height("viewport")).toBeCloseTo(screenHeight, 8);
+    expect(layer.statistics.placedSymbols).toBe(2);
+    const candidate = layer._symbols._previous.find(
+      (c) => c.identity.styleLayer === "viewport",
+    );
+    expect(scene.pick(glyphCenter(candidate), 1, 1).id.styleLayer).toBe(
+      "viewport",
+    );
+  });
+
+  it("rejects short and sharp paths and suppresses repeated names without suppressing distinct names", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([
+        road(
+          [
+            [-4, 0],
+            [4, 0],
+          ],
+          "AAA",
+          "short",
+        ),
+        road(
+          [
+            [-80, -10],
+            [0, -10],
+            [0, 70],
+          ],
+          "AAA",
+          "sharp",
+        ),
+        road(
+          [
+            [-80, 5],
+            [80, 5],
+          ],
+          "A",
+          "first",
+        ),
+        road(
+          [
+            [-80, 7],
+            [80, 7],
+          ],
+          "A",
+          "repeat",
+        ),
+        road(
+          [
+            [-80, -20],
+            [80, -20],
+          ],
+          "AA",
+          "distinct",
+        ),
+      ]),
+    );
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([
+      definition("line", {
+        "symbol-placement": "line-center",
+        "text-max-angle": 30,
+        "text-allow-overlap": true,
+      }),
+    ]);
+    await loaded(layer);
+    expect(layer.statistics.placedSymbols).toBe(2);
+    expect(layer.statistics.duplicateSymbols).toBe(1);
+    expect(
+      layer._symbols._previous
+        .filter((c) => c.placed)
+        .map((c) => c.text)
+        .sort(),
+    ).toEqual(["A", "AA"]);
+  });
+
+  it("uses the first LineString vertex for point placement and the path center for line-center", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([
+        road(
+          [
+            [-20, 0],
+            [20, 0],
+          ],
+          "A",
+        ),
+      ]),
+    );
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([
+      definition("point", { "text-size": 10, "text-allow-overlap": true }),
+      definition("line", {
+        "symbol-placement": "line-center",
+        "text-size": 10,
+        "text-allow-overlap": true,
+      }),
+    ]);
+    await loaded(layer);
+    expect(
+      layer._symbols._previous.find((c) => c.identity.styleLayer === "point")
+        .position.x,
+    ).toBe(-20);
+    expect(
+      layer._symbols._previous.find((c) => c.identity.styleLayer === "line")
+        .position.x,
+    ).toBe(0);
+    expect(layer.statistics.placedSymbols).toBe(2);
+  });
+
+  it("suppresses adjacent tile repetitions and lets a complete line label cross its anchor ownership boundary", async function () {
+    source = new SceneGISVectorTileSource({
+      url: "https://example.invalid/{z}/{x}/{y}",
+      tilingScheme: world.tilingScheme,
+      minimumLevel: 1,
+      maximumLevel: 1,
+    });
+    spyOn(source, "requestTile").and.callFake((x, y) => {
+      const f = feature(`tile-${x}`);
+      f.type = 2;
+      f.geometry.parts = [
+        new Float64Array(
+          x === 0 ? [3920, 4056, 4256, 4056] : [-160, 4056, 176, 4056],
+        ),
+      ];
+      return Promise.resolve(tile(y === 0 ? [f] : []));
+    });
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([
+      definition("line", { "symbol-placement": "line-center" }),
+    ]);
+    await loaded(layer);
+    expect(layer.statistics.symbolCandidates).toBe(2);
+    expect(layer.statistics.placedSymbols).toBe(1);
+    expect(layer.statistics.duplicateSymbols).toBe(1);
+    const left = scene.pick(new Cartesian2(31, 28), 1, 1),
+      right = scene.pick(new Cartesian2(33, 28), 1, 1);
+    expect(left.id.featureId).toBe("tile-0");
+    expect(right.id.featureId).toBe(left.id.featureId);
+    expect(layer.statistics.symbolFailures).toBe(0);
+  });
+
+  it("clips a viewport label path at the camera near plane before projecting its vertices", async function () {
+    scene.camera.position = new Cartesian3(
+      0,
+      -80 / Math.sqrt(2),
+      80 / Math.sqrt(2),
+    );
+    scene.camera.direction = new Cartesian3(0, Math.SQRT1_2, -Math.SQRT1_2);
+    scene.camera.up = new Cartesian3(0, Math.SQRT1_2, Math.SQRT1_2);
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([
+        road(
+          [
+            [0, -200],
+            [0, 200],
+          ],
+          "A",
+        ),
+      ]),
+    );
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([
+      definition("line", {
+        "symbol-placement": "line-center",
+        "text-pitch-alignment": "viewport",
+      }),
+    ]);
+    const errors = [];
+    layer.errorEvent.addEventListener(({ error }) =>
+      errors.push(error.message),
+    );
+    await loaded(layer);
+    expect(errors).toEqual([]);
+    expect(layer.statistics.symbolCandidates).toBe(1);
+    expect(layer.statistics.placedSymbols).toBe(1);
+    const candidate = layer._symbols._previous[0];
+    expect(
+      candidate.projected.text.quads.every((q) =>
+        q.corners.flat().every(Number.isFinite),
+      ),
+    ).toBeTrue();
+    expect(scene.pick(glyphCenter(candidate), 1, 1).id.featureId).toBe("road");
+    expect(layer.statistics.symbolFailures).toBe(0);
+  });
+
   it("renders ordinary sprite RGBA and leaves transparent texels unpickable", async function () {
     spyOn(source, "requestTile").and.resolveTo(tile());
     spyOn(Resource.prototype, "fetchJson").and.resolveTo({

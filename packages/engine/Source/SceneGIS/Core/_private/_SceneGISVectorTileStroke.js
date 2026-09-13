@@ -35,6 +35,7 @@ function SceneGISVectorTileStroke(
   paint,
   layout,
   dash,
+  radiusLimit,
 ) {
   const width = paint["line-width"];
   if (width <= 0) {
@@ -214,7 +215,7 @@ function SceneGISVectorTileStroke(
       pair(point, incoming, distance, endLeft, endRight, false, offset);
       if (kind === "round") {
         const angle = Math.acos(dot);
-        const radius = gap / 2 + width * (gap > 0 ? 1 : 0.5);
+        const radius = radiusLimit ?? gap / 2 + width * (gap > 0 ? 1 : 0.5);
         // Bound round-join chord error to a quarter CSS pixel at the reference scale.
         const step =
           2 * Math.acos(1 - Math.min(0.25 / Math.max(radius, 0.25), 1));

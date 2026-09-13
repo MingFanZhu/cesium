@@ -18,7 +18,7 @@ const colorState = {
 };
 
 /** Owns one tile/style geometry batch and its last published commands. @private */
-function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking) {
+function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
   this.commands = [];
   this.renderCommands = [];
   this._regionCommands = [];
@@ -30,6 +30,8 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking) {
   );
   this._owner = owner;
   this._prepared = prepared;
+  this._record = record;
+  this._geometryKey = record?.key;
   this._resources = undefined;
   this._modelMatrix = Matrix4.fromTranslation(
     new Cartesian3(tile.bounds.minimumX, tile.bounds.maximumY, 0),
@@ -38,6 +40,9 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking) {
 
 SceneGISVectorTileBatch.prototype.update = function (frameState) {
   if (this._resources !== undefined) {
+    if (this._record?.uniformPaint && this._record.key === this._geometryKey) {
+      this._resources.updatePaint(this._record.uniformPaint);
+    }
     return;
   }
   this._resources = new BatchResources(

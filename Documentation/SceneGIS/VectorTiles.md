@@ -16,8 +16,10 @@ V3C0 新增 [公开地图 Test 页面](../../Test/vector-tiles/public.html)，�
 未支持层及来源见 [参考说明](../../Test/vector-tiles/reference/README.md)。
 Bright 在线俯视/倾斜/16 级数据已 smoke，无需 token，公开页已于 2026-09-13 通过负责人验收。
 V5A 增加独立平面点标注与 [本地点标注图集](../../Test/vector-tiles/symbols.html)，
-Bright 当前接入 108/119 层，Liberty 97/111 层，各新增 15 个 point symbol layers。
-生产贴地、沿线标注与 Globe 尚未支持；凸矩形直接贴地实验不代表完整地形渲染资格。
+当时 Bright 接入 108/119 层，Liberty 97/111 层，各新增 15 个 point symbol layers。
+V5B 继续接入各 10 个沿线名称、路牌与箭头层：当前 Bright 118/119、Liberty 107/111。
+新增 [沿线标注图集](../../Test/vector-tiles/line-symbols.html)；语义和限制见 [标注文档](VectorTileSymbols.md)。
+生产贴地与 Globe 尚未支持；凸矩形直接贴地实验不代表完整地形渲染资格。
 整体边界见 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
 公共契约见 [ADR-0058](Decisions/ADR-0058-vector-tile-frontend-contract.md)。
 渲染与调度契约见 [ADR-0059](Decisions/ADR-0059-planar-vector-tile-batch-renderer.md)。
@@ -94,13 +96,13 @@ TMS 只改变 URL row，不改变 geometry。调用方拥有 Request、取消与
 profile 为 `scenegis-vector-v1`，构造复制输入 JSON，预检失败带路径抛 DeveloperError。
 `validate(style)` 返回诊断字符串数组；编译成功后不会因调用者修改原 JSON 而变化。
 
-| 范围         | V1 计算能力                                                                                                                   |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| Root/source  | version/name/metadata/sources/layers/glyphs/sprite；vector tiles/minzoom/maxzoom/scheme/attribution                           |
-| Layers       | background、fill、line、circle、point symbol；source-layer、顺序、filter、min/maxzoom、visibility                             |
-| Paint/layout | 颜色/opacity、基础 fill outline/antialias、line width/gap/offset/blur/dash/cap/join、circle radius/stroke/blur                |
-| Expressions  | 经 profile 允许并测试的属性、分支、类型、算术与 zoom 表达式；完整清单见 ADR-0058                                              |
-| 未支持       | 沿线/复杂 symbol、extrusion、pattern、feature-state/global-state、geometry-dependent filter、旧 style function、imports/slots |
+| 范围         | V1 计算能力                                                                                                                               |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Root/source  | version/name/metadata/sources/layers/glyphs/sprite；vector tiles/minzoom/maxzoom/scheme/attribution                                       |
+| Layers       | background、fill、line、circle、point/line symbol；source-layer、顺序、filter、min/maxzoom、visibility                                    |
+| Paint/layout | 颜色/opacity、基础 fill outline/antialias、line width/gap/offset/blur/dash/cap/join、circle radius/stroke/blur                            |
+| Expressions  | 经 profile 允许并测试的属性、分支、类型、算术与 zoom 表达式；完整清单见 ADR-0058                                                          |
+| 未支持       | 复杂 shaping/variable anchor、extrusion、pattern、feature-state/global-state、geometry-dependent filter、旧 style function、imports/slots |
 
 这些是前端求值能力；当前 V3B1 实际渲染语义与限制见下节。
 `version:8` 不代表支持任意 Mapbox/MapLibre 样式。
@@ -128,11 +130,12 @@ Style zoom 与 source level 独立。`computeStyleZoom(rootWidth, metersPerPixel
 
 ## 验证与维护
 
-目前 112 项 focused Specs 覆盖前端、几何/cover、真实 Scene 样式、DPR、多视锥、symbol 与 GPU 资源。
-另有 3 项本地页面 E2E，实际检查城市颜色、拾取、requestRenderMode、倾斜、显隐、
-重建、延迟替换与新样式图集。
+目前 126 项 focused Specs 覆盖前端、几何/cover、真实 Scene 样式、DPR、多视锥、symbol 与 GPU 资源。
+另有 9 项页面 E2E，实际检查城市颜色、拾取、requestRenderMode、倾斜、显隐、
+重建、延迟替换、样式图集、公开地图、中英文点标注与曲线/路牌/箭头。
 完整 build/build-ts/tsc/release、独立 engine 安装后的五个入口与四份固定 Shader 已验证。
-V5A 新增的两份 symbol Shader 和类型/资源协议见 [点标注文档](VectorTileSymbols.md)。
+V5A 新增的两份 symbol Shader 和类型/资源协议见 [标注文档](VectorTileSymbols.md)；
+V5B 复用同一 vertex protocol 和 Shader，没有新增公共入口或上游改动。
 V2 的低密度数据 baseline 见 [V2 review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v2-flat-review.md)，
 V3A 对比、边界与剩余 gate 见 [V3A review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v3a-cover-review.md)。
 V3B0 迁移与资源验证见 [V3B0 review](../../AgentDocs/vector-tiles/reviews/2026-09-13-v3b0-owned-primitives-review.md)。

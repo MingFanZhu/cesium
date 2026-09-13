@@ -137,6 +137,47 @@ describe("SceneGIS/Core/SceneGISVectorTileStyle", function () {
     expect(hidden.evaluateLayer("roads", feature(), 3).show).toBe(false);
   });
 
+  it("filters renderer features before property evaluation and preserves fractional paint with cached integer layout", function () {
+    const style = new SceneGISVectorTileStyle(
+      json({
+        filter: ["==", ["get", "kind"], "road"],
+        layout: { "line-cap": ["step", ["zoom"], "butt", 3, "round"] },
+        paint: {
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            0,
+            ["get", "width"],
+            10,
+            ["*", ["get", "width"], 2],
+          ],
+        },
+      }),
+    );
+    const compiled = style._compiled.get("roads");
+    const width = spyOn(
+      compiled.paint["line-width"],
+      "evaluate",
+    ).and.callThrough();
+    expect(
+      style._evaluateVisibleLayer("roads", feature({ kind: "water" }), 2),
+    ).toBeUndefined();
+    expect(width).not.toHaveBeenCalled();
+    const input = feature({ kind: "road", width: 4 });
+    const old = style._evaluateVisibleLayer("roads", input, 2.1);
+    const next = style._evaluateVisibleLayer("roads", input, 2.7, old);
+    expect(next.value).toEqual(style.evaluateLayer("roads", input, 2.7));
+    expect(next.value.layout["line-cap"]).toBe("butt");
+    expect(next.value.paint["line-width"]).toBeGreaterThan(
+      old.value.paint["line-width"],
+    );
+    const changed = style._evaluateVisibleLayer("roads", input, 3, next);
+    expect(changed.value.layout["line-cap"]).toBe("round");
+    input.properties.width = 9;
+    expect(style.evaluateLayer("roads", input, 0).paint["line-width"]).toBe(9);
+  });
+
   it("keeps IDs and unsafe integer properties lossless in style matching", function () {
     const style = new SceneGISVectorTileStyle(
       json({

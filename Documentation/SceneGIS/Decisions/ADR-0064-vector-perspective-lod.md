@@ -25,6 +25,10 @@ CSS meters-per-pixel；相机无前向交点时不发布地图。它是视轴参
 异性误写为整个地面的恒定分辨率。公开 Test 页使用垂直 FOV `2*atan(1/3)` 的透视相机，
 由目标 zoom 与视口高度推导 orbit range；切换 pitch 保持中心比例。Layer 不修改 Camera。
 
+交互回归证明先构造大坐标交点再经 Camera.getPixelSize 重算距离会引入 heading 相关舍入误差，
+进而使 camera paint 无效重建。实现直接将 `-positionWC.z / directionWC.z` 的已知 eye distance
+传给 frustum.getPixelDimensions；style scale 的参考点和 CSS/DPR 契约不变。
+
 共享 `_SceneGISPlanarQuadtree.computeScreenSpaceError(frameState, tile, geometricError)`：
 
 - 从既有 imagery/terrain 方法提取私有纯计算入口，原 quadtree 仍维护自身计数和状态。

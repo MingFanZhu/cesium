@@ -25,6 +25,7 @@ const profile = {
       "visibility",
       "symbol-placement",
       "symbol-sort-key",
+      "symbol-spacing",
       "text-field",
       "text-font",
       "text-size",
@@ -41,6 +42,9 @@ const profile = {
       "text-optional",
       "text-rotation-alignment",
       "text-pitch-alignment",
+      "text-rotate",
+      "text-keep-upright",
+      "text-max-angle",
       "icon-image",
       "icon-size",
       "icon-anchor",
@@ -51,6 +55,8 @@ const profile = {
       "icon-optional",
       "icon-rotation-alignment",
       "icon-pitch-alignment",
+      "icon-rotate",
+      "icon-keep-upright",
     ],
   },
   background: {
@@ -312,28 +318,6 @@ function validate(style) {
         }
       }
       checkExpression(layer.filter, `${path}.filter`, errors);
-      if (layer.type === "symbol") {
-        const layout = layer.layout ?? {};
-        if ((layout["symbol-placement"] ?? "point") !== "point") {
-          errors.push(
-            `${
-              path
-            }.layout.symbol-placement: only point placement is supported.`,
-          );
-        }
-        for (const name of [
-          "text-rotation-alignment",
-          "text-pitch-alignment",
-          "icon-rotation-alignment",
-          "icon-pitch-alignment",
-        ]) {
-          if (!["auto", "viewport"].includes(layout[name] ?? "auto")) {
-            errors.push(
-              `${path}.layout.${name}: only viewport alignment is supported.`,
-            );
-          }
-        }
-      }
     });
   }
   try {
@@ -393,9 +377,29 @@ function styleFeature(feature) {
   return { type: feature.type, id: feature.id, properties };
 }
 
-function evaluateProperties(properties, globals, feature) {
-  const result = {};
+function evaluateProperties(
+  properties,
+  globals,
+  feature,
+  previous,
+  changed = true,
+) {
+  if (previous && !changed) {
+    return previous;
+  }
+  let result = previous ?? {};
   for (const [name, expression] of Object.entries(properties)) {
+    if (
+      previous &&
+      (!changed ||
+        expression.kind === "constant" ||
+        expression.kind === "source")
+    ) {
+      continue;
+    }
+    if (result === previous) {
+      result = { ...previous };
+    }
     const value = expression.evaluate(globals, feature);
     if (value instanceof StyleColor) {
       const [r, g, b, a] = value.rgb;
@@ -599,6 +603,137 @@ SceneGISVectorTileStyle.prototype.evaluateLayer = function (
     show,
     layout,
     paint: evaluateProperties(compiled.paint, { zoom }, input),
+  };
+};
+
+/** Camera-only values, rather than raw zoom, invalidate a geometry batch. @private */
+SceneGISVectorTileStyle.prototype._getGeometryKey = function (layerId, zoom) {
+  const compiled = getLayer(this, layerId);
+  const values = [];
+  const uniform = this._getUniformPaint(layerId, zoom);
+  if (uniform) {
+    const type = compiled.definition.type;
+    const width = uniform["line-width"],
+      gap = uniform["line-gap-width"];
+    values.push(
+      uniform[`${type}-opacity`] * uniform[`${type}-color`].alpha > 0 &&
+        (type === "fill" || width > 0)
+        ? type === "fill"
+          ? "visible"
+          : Math.ceil(Math.log2(gap * 0.5 + width * (gap > 0 ? 1 : 0.5)))
+        : "hidden",
+    );
+  }
+  for (const scope of ["layout", "paint"]) {
+    const globals = { zoom: scope === "layout" ? Math.floor(zoom) : zoom };
+    for (const [name, expression] of Object.entries(compiled[scope])) {
+      if (
+        uniform &&
+        scope === "paint" &&
+        (compiled.definition.type === "line"
+          ? name !== "line-dasharray"
+          : name === "fill-color" || name === "fill-opacity")
+      ) {
+        continue;
+      }
+      if (expression.kind === "camera") {
+        values.push(expression.evaluate(globals));
+      } else if (expression.kind === "composite") {
+        values.push(globals.zoom);
+      }
+    }
+  }
+  return JSON.stringify(values);
+};
+
+/** Feature-independent paint can use constant vertex attributes. @private */
+SceneGISVectorTileStyle.prototype._getUniformPaint = function (layerId, zoom) {
+  const compiled = getLayer(this, layerId);
+  if (
+    !["line", "fill"].includes(compiled.definition.type) ||
+    compiled.paint["fill-outline-color"] !== undefined ||
+    Object.values(compiled.paint).some(
+      (expression) =>
+        expression.kind === "source" || expression.kind === "composite",
+    )
+  ) {
+    return undefined;
+  }
+  return evaluateProperties(compiled.paint, { zoom });
+};
+
+/**
+ * Evaluates visible renderer features, reusing a caller-owned tile cache.
+ * Decoded tile data is immutable for its residency. Public evaluation stays uncached.
+ * @private
+ */
+SceneGISVectorTileStyle.prototype._evaluateVisibleLayer = function (
+  layerId,
+  feature,
+  zoom,
+  previous,
+) {
+  const compiled = getLayer(this, layerId);
+  const layer = compiled.definition;
+  if (zoom < (layer.minzoom ?? 0) || zoom >= (layer.maxzoom ?? 24)) {
+    return undefined;
+  }
+  const input = previous?.input ?? styleFeature(feature);
+  const globals = { zoom: Math.floor(zoom) };
+  const layoutChanged = !previous || Math.floor(previous.zoom) !== globals.zoom;
+  if (
+    layoutChanged &&
+    (compiled.layout.visibility.evaluate(globals, input) === "none" ||
+      !compiled.filter.filter(globals, input))
+  ) {
+    return undefined;
+  }
+  if (previous?.zoom === zoom) {
+    return previous;
+  }
+  let layout = evaluateProperties(
+    compiled.layout,
+    globals,
+    input,
+    previous?.value.layout,
+    layoutChanged,
+  );
+  if (layer.type === "symbol") {
+    for (const name of ["text-size", "icon-size"]) {
+      const value = compiled.layout[name].evaluate({ zoom }, input);
+      if (layout[name] !== value) {
+        if (layout === previous?.value.layout) {
+          layout = { ...layout };
+        }
+        layout[name] = value;
+      }
+    }
+    for (const name of ["text-field", "icon-image"]) {
+      if (layoutChanged && typeof layer.layout?.[name] === "string") {
+        layout[name] = layer.layout[name].replace(
+          /\{([^}]+)\}/g,
+          (match, property) => String(input.properties[property] ?? ""),
+        );
+      }
+    }
+  }
+  return {
+    input,
+    zoom,
+    value: {
+      id: layer.id,
+      type: layer.type,
+      source: layer.source,
+      sourceLayer: layer["source-layer"],
+      show: true,
+      layout,
+      paint: evaluateProperties(
+        compiled.paint,
+        { zoom },
+        input,
+        previous?.value.paint,
+      ),
+    },
   };
 };
 

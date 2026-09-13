@@ -66,8 +66,12 @@ V3C0 基线接入 Bright 93/119 层、Liberty 82/111 层；V5A 点标注扩展�
 按用户本轮要求启用公网示例；服务不可用时可手动返回本地城市，不自动切换数据。
 
 `Specs/e2e/scenegis-vector-tiles.spec.js` 覆盖真实 PBF、颜色像素、requestRenderMode、
-拾取、倾斜、重建、父子替换中间状态和样式图集，共 3 项；112 项矢量单元和真实 Context 回归在
+拾取、倾斜、重建、父子替换中间状态和样式图集，共 3 项；131 项矢量单元和真实 Context 回归在
 `packages/engine/Specs/SceneGIS/`。
+修改源码或 Specs 后先执行 `npm run build -- --workspace @cesium/engine`，再执行
+`npm run test -- --workspace engine --includeName SceneGISVector --browsers ChromeHeadless --failTaskOnError`。
+当前 `gulp test --workspace engine` 只刷新 root bundle，却运行已有的 engine Specs bundle，
+省略前置构建会误测旧文件；直接跑 root 混合包也不能替代 engine 的模块 identity 验证。
 E2E 使用仓库默认配置时，需要释放 8080/8081 给其根服务器，不能同时运行第二个开发服务器。
 
 新增 `Specs/e2e/scenegis-vector-public.spec.js` 的 3 项 E2E 拦截外网，使用本地
@@ -85,6 +89,18 @@ firstReadyMs 从创建图层到当前视图首次无失败就绪，排除页面 
 要素数包含解码但尚未渲染的 POI/标注。指标是一次图层生命周期的累计值；
 如需独立地点/zoom 的冷启动对比，定位后使用“重建图层”，不要把累计数当作当前可见要素。
 
+公开页使用 Viewer 默认的持续渲染，通过 `scene.debugShowFramesPerSecond = true`
+开启 Cesium 原生 FPS / MS 面板；不再提供渲染模式开关或自定义帧率计时器。
+原生 MS 表示帧间隔，和“测量 60 帧”的 CPU 提交耗时不同。
+公开页本地 E2E 验证原生面板、持续渲染默认值及原有倾斜、拾取和重建。
+
+交互 profiling 工具：复用开发服务器后执行 `node Test/vector-tiles/profile-motion.mjs before`。
+固定南京、1141×1150 CSS、DPR=1、60 帧 pan/zoom/rotate，先预热再采样，输出 HAR、CPU profile、
+JSON 与截图到忽略的 `Build/Specs/vector-motion/`。修复后执行
+`node Test/vector-tiles/profile-motion.mjs after Build/Specs/vector-motion/before.har` 重放相同外部响应。
+HAR 是本机临时测量数据，不提交。Profiler 会影响耗时，headless 帧间隔不代表应用浏览器 FPS；
+用户帧率另外在实际应用浏览器中，以相同视图和轨迹、不启动 Profiler 测量。
+
 ## V5A 点标注
 
 `/Test/vector-tiles/symbols.html` 完全本地运行，中英文、描边、图文 POI 与排序避让均来自自有
@@ -98,3 +114,16 @@ glyph/icon DrawCommand。7 个合成候选显示 6 条，左下低优先级文�
 “街道细节”显示 16 级 POI；字体/sprite 请求失败与 sprite 缺少名称分别显示错误和提示。
 公开页显式使用 `maximumGlyphRanges: 192`，供多字体中文街区；Layer 默认仍为 64。
 支持范围和限制见 [点标注文档](../../Documentation/SceneGIS/VectorTileSymbols.md)。
+
+## V5B 沿线与特殊标注
+
+`/Test/vector-tiles/line-symbols.html` 是完全本地的曲线文字、反向道路、方向箭头与绿色路牌。
+底部灰色锐角和短线不应显示名称；俯视/倾斜/旋转/连续缩放用于检查地图与屏幕两种对齐。
+新增 `scenegis-vector-line-symbols.spec.js` E2E 验证真实 glyph/icon alpha 拾取与资源释放。
+数据与普通 RGBA 图标由 `node Test/vector-tiles/generate-line-symbol-fixture.mjs` 本地生成，
+字体复用 V5A ASCII subset；没有网络前提。
+
+公开 Bright 当前接入 118/119、Liberty 107/111 层，各增加 10 个道路/水系名称、路牌与箭头层。
+原始 filter/layout/paint 保持完整；未支持的特殊 shaping、variable anchors、text-fit、
+terrain/Globe 和跨 tile 语义道路拼接限制见 [标注文档](../../Documentation/SceneGIS/VectorTileSymbols.md)。
+9 项页面 E2E 使用本地数据，公开服务仅用于人工检查。

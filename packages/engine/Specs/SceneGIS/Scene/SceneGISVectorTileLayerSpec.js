@@ -422,7 +422,47 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     expect(layer.statistics.uploads).toBe(1);
   });
 
-  it("refreshes camera paint on retained ancestors within the upload budget", async function () {
+  it("updates fractional line paint in place and rebuilds only the layer whose round-join envelope grows", async function () {
+    const request = spyOn(source, "requestTile").and.resolveTo(
+      data([
+        polygon(),
+        feature(2, [[1500, 2048, 2048, 2048, 2600, 1800]], "road"),
+      ]),
+    );
+    const line = definition("line", {
+      "line-width": ["interpolate", ["linear"], ["zoom"], 0, 4, 4, 20],
+      "line-color": ["interpolate", ["linear"], ["zoom"], 0, "red", 4, "blue"],
+    });
+    line.layout = { "line-join": "round" };
+    const layer = add([definition("fill", { "fill-color": "green" }), line]);
+    await loaded(layer);
+    const entry = [...layer._sources.values()][0].visible[0];
+    const fill = entry.batches.get("fill")[0]._resources;
+    const road = entry.batches.get("line")[0];
+    const resources = road._resources,
+      va = resources._vertexArrays[0];
+    const pick = resources._pickIds[0];
+    const initial = read(-20, 0).color;
+    const width = resources._paintAttributes[0].dimensions[0];
+    scene.camera.position.z /= 2 ** 0.2;
+    await loaded(layer);
+    expect(entry.batches.get("line")[0]).toBe(road);
+    expect(road._resources._vertexArrays[0]).toBe(va);
+    expect(resources._pickIds[0]).toBe(pick);
+    expect(resources._paintAttributes[0].dimensions[0]).toBeGreaterThan(width);
+    expect(read(-20, 0).color[0]).toBeLessThan(initial[0]);
+    expect(read(-20, 0).pick.id.featureId).toBe("road");
+    scene.camera.position.z = 20;
+    await loaded(layer);
+    expect(resources.isDestroyed()).toBeTrue();
+    expect(entry.batches.get("fill")[0]._resources).toBe(fill);
+    expect(fill.isDestroyed()).toBeFalse();
+    expect(request.calls.count()).toBe(1);
+    scene.primitives.remove(layer);
+    expect(fill.isDestroyed()).toBeTrue();
+  });
+
+  it("refreshes camera paint on retained ancestors without rebuilding GPU geometry", async function () {
     const pending = streaming();
     const layer = add(
       [
@@ -437,11 +477,13 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     pending.get("0/0/0").resolve(whole("parent"));
     await loaded(layer);
     const before = read().color[0];
+    const resources = layer._drawOrder[0]._resources;
     scene.camera.position.z = 40;
     scene.renderForSpecs();
-    expect(layer.statistics.uploads).toBe(2);
+    expect(layer.statistics.uploads).toBe(1);
     expect(read().color[0]).toBeGreaterThan(before);
-    expect(layer.statistics.uploads).toBe(2);
+    expect(layer.statistics.uploads).toBe(1);
+    expect(layer._drawOrder[0]._resources).toBe(resources);
     for (const [key, completion] of pending) {
       if (key !== "0/0/0") {
         completion.reject(new Error("terminal"));
@@ -744,9 +786,12 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     scene.camera.position.z /= 2;
     await loaded(layer);
     expect(read().color[0]).toBeGreaterThan(before);
-    expect(original.isDestroyed()).toBeTrue();
+    expect(original.isDestroyed()).toBeFalse();
+    expect(layer._drawOrder[0]._resources).toBe(original);
     expect(request.calls.count()).toBe(1);
     scene.primitives.remove(layer);
+
+    expect(original.isDestroyed()).toBeTrue();
 
     const completions = [];
     const requests = [];

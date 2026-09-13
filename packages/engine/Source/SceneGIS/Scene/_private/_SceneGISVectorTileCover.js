@@ -1,4 +1,4 @@
-import BoundingSphere from "../../../Core/BoundingSphere.js";
+import Cartesian2 from "../../../Core/Cartesian2.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import Intersect from "../../../Core/Intersect.js";
@@ -7,7 +7,7 @@ import OrientedBoundingBox from "../../../Core/OrientedBoundingBox.js";
 import SceneGISVectorTileCoordinates from "../../Core/SceneGISVectorTileCoordinates.js";
 import SceneGISPlanarQuadtree from "./_SceneGISPlanarQuadtree.js";
 
-const scratchSphere = new BoundingSphere(new Cartesian3(), 0);
+const scratchPixelSize = new Cartesian2();
 const scratchBox = new OrientedBoundingBox();
 const scratchScale = new Cartesian3();
 const scratchLodTile = {
@@ -146,17 +146,23 @@ SceneGISVectorTileCover.computeZoom = function (frameState, rootWidth) {
   // Measure at the forward reference-plane target. The point directly below
   // the camera has a different eye depth when pitched (sin(pitch)^2 as large).
   const distance = -position.z / direction.z;
-  Cartesian3.multiplyByScalar(direction, distance, scratchSphere.center);
-  Cartesian3.add(position, scratchSphere.center, scratchSphere.center);
-  const metersPerPixel = camera.getPixelSize(
-    scratchSphere,
+  // The eye distance is already known. A round trip through a large world-space
+  // target and Camera.getPixelSize adds translation/heading roundoff to zoom.
+  const pixelSize = camera.frustum.getPixelDimensions(
     frameState.context.drawingBufferWidth,
     frameState.context.drawingBufferHeight,
+    distance,
+    frameState.pixelRatio,
+    scratchPixelSize,
   );
-  return SceneGISVectorTileCoordinates.computeStyleZoom(
+  const zoom = SceneGISVectorTileCoordinates.computeStyleZoom(
     rootWidth,
-    metersPerPixel,
+    Math.max(pixelSize.x, pixelSize.y),
   );
+  // Mercator camera subtraction can turn an exact z16 orbit into 15.9999999999999,
+  // changing integer layout and minzoom gates without an actual zoom gesture.
+  const integer = Math.round(zoom);
+  return Math.abs(zoom - integer) < 1e-10 ? integer : zoom;
 };
 
 SceneGISVectorTileCover.select = function (frameState, source, limit) {

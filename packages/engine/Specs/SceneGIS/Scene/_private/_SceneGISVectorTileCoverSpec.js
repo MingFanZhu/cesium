@@ -111,7 +111,10 @@ describe("SceneGIS/Scene/_private/SceneGISVectorTileCover", function () {
       camera: {
         positionWC: new Cartesian3(10, 20, 100),
         directionWC: new Cartesian3(0, 0, -1),
-        getPixelSize: () => 2,
+        frustum: new OrthographicFrustum({
+          width: 1600,
+          aspectRatio: 800 / 600,
+        }),
       },
       context: { drawingBufferWidth: 800, drawingBufferHeight: 600 },
       pixelRatio: 1,
@@ -119,11 +122,45 @@ describe("SceneGIS/Scene/_private/SceneGISVectorTileCover", function () {
     const zoom = cover.computeZoom(frame, 8192);
     frame.context.drawingBufferWidth *= 2;
     frame.context.drawingBufferHeight *= 2;
-    // Camera.getPixelSize already applies scene.pixelRatio.
-    frame.camera.getPixelSize = () => 2;
     frame.pixelRatio = 2;
     expect(cover.computeZoom(frame, 8192)).toBe(zoom);
     frame.context.drawingBufferHeight = 0;
     expect(cover.computeZoom(frame, 8192)).toBeUndefined();
+  });
+  it("preserves integer style gates under camera roundoff without quantizing continuous zoom", function () {
+    const width = 40075016.68557849;
+    const frame = {
+      camera: {
+        positionWC: new Cartesian3(1492168, 6894699, 1000),
+        directionWC: new Cartesian3(0, Math.SQRT1_2, -Math.SQRT1_2),
+        frustum: new OrthographicFrustum({
+          width: (1308 * width) / (512 * 2 ** 15.999999999999869),
+          aspectRatio: 1.308,
+        }),
+      },
+      context: { drawingBufferWidth: 1308, drawingBufferHeight: 1000 },
+      pixelRatio: 1,
+    };
+    expect(cover.computeZoom(frame, width)).toBe(16);
+    frame.camera.frustum.width = (1308 * width) / (512 * 2 ** 15.99);
+    expect(cover.computeZoom(frame, width)).toBeCloseTo(15.99, 12);
+    expect(Math.floor(cover.computeZoom(frame, width))).toBe(15);
+  });
+  it("keeps fractional scale identical across large-origin pan and heading changes", function () {
+    const frame = {
+      camera: {
+        positionWC: new Cartesian3(13222558, 3769268, 1136),
+        directionWC: new Cartesian3(0, 0.6, -0.8),
+        frustum: new PerspectiveFrustum({ fov: 0.65, aspectRatio: 1.3 }),
+      },
+      context: { drawingBufferWidth: 1300, drawingBufferHeight: 1000 },
+      pixelRatio: 1,
+    };
+    const zoom = cover.computeZoom(frame, 40075016.68557849);
+    frame.camera.positionWC.x += 400;
+    frame.camera.positionWC.y -= 320;
+    expect(cover.computeZoom(frame, 40075016.68557849)).toBe(zoom);
+    frame.camera.directionWC = new Cartesian3(0.6, 0, -0.8);
+    expect(cover.computeZoom(frame, 40075016.68557849)).toBe(zoom);
   });
 });

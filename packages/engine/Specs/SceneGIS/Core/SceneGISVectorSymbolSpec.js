@@ -88,10 +88,8 @@ describe("SceneGIS/Core/SceneGISVectorSymbol", function () {
     expect(l["icon-size"]).toBe(1.5);
     expect(l["text-offset"]).toEqual([0, 0]);
   });
-  it("rejects unimplemented placement, alignment, rich text and variable anchors at construction", function () {
+  it("rejects unimplemented rich text, text-fit and variable anchors at construction", function () {
     for (const l of [
-      { "symbol-placement": "line" },
-      { "text-rotation-alignment": "map" },
       { "text-variable-anchor": ["top", "bottom"] },
       { "text-field": ["format", "A", {}] },
       { "icon-text-fit": "both" },

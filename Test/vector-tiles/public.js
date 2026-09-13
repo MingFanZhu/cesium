@@ -35,10 +35,9 @@ const viewer = new C.Viewer("map", {
   projectionPicker: false,
   navigationHelpButton: false,
   vrButton: false,
-  requestRenderMode: true,
-  maximumRenderTimeChange: Infinity,
 });
 const scene = viewer.scene;
+scene.debugShowFramesPerSecond = true;
 scene.msaaSamples = 1;
 scene.postProcessStages.fxaa.enabled = false;
 scene.rethrowRenderErrors = true;
@@ -254,7 +253,7 @@ async function connect() {
       excluded: profile.excluded,
     };
     const title = `OpenFreeMap · ${provider === "bright" ? "Bright" : "Liberty"}`;
-    element("map-title").textContent = `${title} · 地图与点标注`;
+    element("map-title").textContent = `${title} · 道路与地图标注`;
     element("source").textContent = "OpenMapTiles schema · 免 token 公共 MVT";
     element("support-summary").textContent =
       `${layers.length} / ${reference.layers.length} 个样式层已接入`;
@@ -382,6 +381,8 @@ element("measure").onclick = () => {
     removePre();
     removePost();
     cancelMeasurement = undefined;
+    element("measure").disabled =
+      !layer.tilesLoaded || layer.statistics.failedTiles > 0;
   };
   scene.requestRender();
 };

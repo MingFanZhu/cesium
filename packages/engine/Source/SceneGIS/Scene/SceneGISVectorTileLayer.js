@@ -31,28 +31,31 @@ function hasZoom(expression) {
 
 function layerRecord(style, id) {
   const definition = style.getLayerDefinition(id);
-  const zoomProperty = (scope) =>
-    Object.keys(definition[scope] ?? {}).some((name) => {
-      const kind = style.getPropertyKind(id, scope, name);
-      return kind === "camera" || kind === "composite";
-    });
   return {
     definition,
-    paintZoom: zoomProperty("paint"),
-    layoutZoom: zoomProperty("layout") || hasZoom(definition.filter),
+    style,
+    filterZoom: hasZoom(definition.filter),
   };
+}
+
+function recordSignature(record, zoom) {
+  if (record.keyZoom !== zoom) {
+    const definition = record.definition;
+    record.key = [
+      zoom >= (definition.minzoom ?? 0) && zoom < (definition.maxzoom ?? 24),
+      record.style._getGeometryKey(definition.id, zoom),
+      record.filterZoom ? Math.floor(zoom) : "",
+    ].join(":");
+    record.keyZoom = zoom;
+    record.uniformPaint = record.style._getUniformPaint(definition.id, zoom);
+  }
+  return record.key;
 }
 
 function signature(records, zoom) {
   return records
     .filter(({ definition }) => definition.type !== "symbol")
-    .map(({ definition, paintZoom, layoutZoom }) =>
-      [
-        zoom >= (definition.minzoom ?? 0) && zoom < (definition.maxzoom ?? 24),
-        paintZoom ? zoom : "",
-        layoutZoom ? Math.floor(zoom) : "",
-      ].join(":"),
-    )
+    .map((record) => recordSignature(record, zoom))
     .join("|");
 }
 
@@ -180,9 +183,20 @@ function requestTile(layer, state, entry) {
 
 function createBatches(layer, state, entry, zoom) {
   const batches = new Map();
+  const layerSignatures = new Map();
   try {
-    for (const { definition } of state.records) {
+    for (const record of state.records) {
+      const { definition } = record;
       if (definition.type === "symbol") {
+        continue;
+      }
+      const desired = signature([record], zoom);
+      layerSignatures.set(definition.id, desired);
+      if (entry.layerSignatures?.get(definition.id) === desired) {
+        const existing = entry.batches.get(definition.id);
+        if (existing) {
+          batches.set(definition.id, existing);
+        }
         continue;
       }
       const sourceLayer = entry.data.layers.find(
@@ -209,25 +223,41 @@ function createBatches(layer, state, entry, zoom) {
       const group = [];
       batches.set(definition.id, group);
       for (const item of prepared) {
-        const batch = new VectorBatch(layer, entry, item, layer._allowPicking);
+        const batch = new VectorBatch(
+          layer,
+          entry,
+          item,
+          layer._allowPicking,
+          record,
+        );
         group.push(batch);
         batch.update(layer._scene.frameState);
       }
     }
   } catch (error) {
-    for (const group of batches.values()) {
-      for (const batch of group) {
-        batch.destroy();
+    for (const [id, group] of batches) {
+      if (group !== entry.batches.get(id)) {
+        for (const batch of group) {
+          batch.destroy();
+        }
       }
     }
     throw error;
   }
-  for (const group of entry.batches.values()) {
-    for (const batch of group) {
-      batch.destroy();
+  for (const [id, group] of entry.batches) {
+    if (group !== batches.get(id)) {
+      for (const batch of group) {
+        batch.destroy();
+      }
     }
   }
   entry.batches = batches;
+  entry.layerSignatures = layerSignatures;
+  for (const group of batches.values()) {
+    for (const batch of group) {
+      batch.update(layer._scene.frameState);
+    }
+  }
   entry.state = "ready";
   entry.signature = state.signature;
   layer._uploads++;
