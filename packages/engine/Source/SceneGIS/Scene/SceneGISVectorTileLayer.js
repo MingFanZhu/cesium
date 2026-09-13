@@ -10,6 +10,7 @@ import SceneGISVectorTileSource from "../Core/SceneGISVectorTileSource.js";
 import SceneGISVectorTileStyle from "../Core/SceneGISVectorTileStyle.js";
 import geometry from "../Core/_private/_SceneGISVectorTileGeometry.js";
 import VectorBatch from "./_private/_SceneGISVectorTileBatch.js";
+import Symbols from "./_private/_SceneGISVectorSymbols.js";
 import cover from "./_private/_SceneGISVectorTileCover.js";
 import renderCover from "../Core/_private/_SceneGISVectorTileRenderCover.js";
 
@@ -44,6 +45,7 @@ function layerRecord(style, id) {
 
 function signature(records, zoom) {
   return records
+    .filter(({ definition }) => definition.type !== "symbol")
     .map(({ definition, paintZoom, layoutZoom }) =>
       [
         zoom >= (definition.minzoom ?? 0) && zoom < (definition.maxzoom ?? 24),
@@ -116,6 +118,7 @@ function clearView(layer) {
     state.render.clear();
   }
   layer._drawOrder.length = 0;
+  layer._symbols?.clear();
   layer._tilesLoaded = true;
 }
 
@@ -179,6 +182,9 @@ function createBatches(layer, state, entry, zoom) {
   const batches = new Map();
   try {
     for (const { definition } of state.records) {
+      if (definition.type === "symbol") {
+        continue;
+      }
       const sourceLayer = entry.data.layers.find(
         (candidate) => candidate.name === definition["source-layer"],
       );
@@ -319,12 +325,7 @@ function updateSources(layer, zoom, frameState) {
     const desired =
       state.records.length === 0
         ? []
-        : cover.select(
-            frameState,
-            state.source,
-            zoom,
-            layer._maximumVisibleTiles,
-          );
+        : cover.select(frameState, state.source, layer._maximumVisibleTiles);
     const protectedKeys = new Set();
     state.visible.length = 0;
     for (const tile of desired) {
@@ -409,6 +410,12 @@ function updateSources(layer, zoom, frameState) {
 function publishOrder(layer) {
   layer._drawOrder.length = 0;
   for (const record of layer._records) {
+    if (record.definition.type === "symbol") {
+      layer._drawOrder.push(
+        ...(layer._symbols.batches.get(record.definition.id) ?? []),
+      );
+      continue;
+    }
     if (record.definition.type === "background") {
       if (record.batch !== undefined) {
         layer._drawOrder.push(record.batch);
@@ -460,6 +467,9 @@ function publishOrder(layer) {
  * @param {number} [options.maximumVisibleTiles=32] Maximum desired tiles per source; coarsen LOD within availability to fit.
  * @param {number} [options.maximumRequests=8] Maximum in-flight requests for this layer.
  * @param {number} [options.maximumUploadsPerFrame=2] Maximum tile batch publications per normal frame.
+ * @param {number} [options.maximumSymbolCandidates=2048] Maximum point-symbol candidates per view, selected by style priority.
+ * @param {number} [options.maximumGlyphRanges=64] Maximum cached 256-code-point glyph pages; active pages cannot be evicted.
+ * @param {number} [options.maximumSymbolRequests=4] Maximum concurrent glyph/sprite resource jobs.
  * @param {boolean} [options.show=true] Whether the layer is shown.
  * @param {boolean} [options.allowPicking=true] Whether feature pick resources are created.
  * @exception {DeveloperError} Scene, style, sources, or budget configuration is invalid.
@@ -533,6 +543,27 @@ function SceneGISVectorTileLayer(options) {
   this._drawOrder = [];
   this._uploads = 0;
   this._zoom = undefined;
+  const maximumSymbolCandidates = integerOption(
+    options,
+    "maximumSymbolCandidates",
+    2048,
+  );
+  const maximumGlyphRanges = integerOption(options, "maximumGlyphRanges", 64);
+  const maximumSymbolRequests = integerOption(
+    options,
+    "maximumSymbolRequests",
+    4,
+  );
+  this._symbols = this._records.some(
+    (record) => record.definition.type === "symbol",
+  )
+    ? new Symbols(
+        this,
+        maximumSymbolCandidates,
+        maximumGlyphRanges,
+        maximumSymbolRequests,
+      )
+    : undefined;
 }
 
 Object.defineProperties(SceneGISVectorTileLayer.prototype, {
@@ -597,11 +628,11 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
    */
   tilesLoaded: {
     get: function () {
-      return this._tilesLoaded;
+      return this._tilesLoaded && (this._symbols?.loaded ?? true);
     },
   },
   /**
-   * Reports a failed tile as {layer, source, tile, error}, once per attempt, during normal update.
+   * Reports failures during normal update. Tile errors contain source/tile; symbol errors contain resource instead.
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {Event}
    * @readonly
@@ -653,6 +684,35 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
         ),
         uploads: this._uploads,
         zoom: this._zoom,
+        ...(this._symbols
+          ? {
+              symbolCandidates: this._symbols.statistics.candidates,
+              placedSymbols: this._symbols.statistics.placed,
+              truncatedSymbols: this._symbols.statistics.truncated,
+              duplicateSymbols: this._symbols.statistics.duplicates,
+              pendingSymbolRequests: this._symbols.assets.pending,
+              symbolFailures: this._symbols._reported.size,
+              missingSymbolImages: [...this._symbols._missingImages],
+              glyphRanges: this._symbols.assets.pages.size,
+              glyphCpuBytes: [...this._symbols.assets.pages.values()].reduce(
+                (sum, page) =>
+                  sum +
+                  (page.image?.arrayBufferView.byteLength ?? 0) +
+                  [...(page.glyphs?.values() ?? [])].reduce(
+                    (bytes, glyph) => bytes + glyph.bitmap.byteLength,
+                    0,
+                  ),
+                0,
+              ),
+              symbolTextureBytes: [
+                ...this._symbols.assets.pages.values(),
+                this._symbols.assets.sprite,
+              ].reduce(
+                (sum, page) => sum + (page?.texture?.sizeInBytes ?? 0),
+                0,
+              ),
+            }
+          : {}),
       };
     },
   },
@@ -695,9 +755,17 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
       this._world.coordinateSystem.extent.width / (512 * 2 ** zoom);
     updateBackgrounds(this, zoom, frameState);
     updateSources(this, zoom, frameState);
+    if (this._symbols) {
+      try {
+        this._symbols.update(frameState, zoom);
+      } catch (error) {
+        this._symbols.report("symbol-runtime", error);
+        this._symbols.loaded = true;
+      }
+    }
     publishOrder(this);
     this._ready = true;
-    if (!this._tilesLoaded) {
+    if (!this.tilesLoaded) {
       this._scene.requestRender();
     }
   }
@@ -720,6 +788,7 @@ SceneGISVectorTileLayer.prototype.isDestroyed = function () {
  * @returns {undefined}
  */
 SceneGISVectorTileLayer.prototype.destroy = function () {
+  this._symbols?.destroy();
   for (const record of this._backgrounds) {
     record.batch?.destroy();
   }

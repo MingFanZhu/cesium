@@ -104,26 +104,32 @@ function view() {
     (half / Math.PI) *
     Math.log(Math.tan(Math.PI / 4 + (latitude * Math.PI) / 360));
   const metersPerPixel = (half * 2) / (512 * 2 ** zoom);
-  scene.camera.frustum = new C.OrthographicFrustum({
-    width: metersPerPixel * scene.canvas.clientWidth,
-    aspectRatio: scene.canvas.clientWidth / scene.canvas.clientHeight,
+  const aspectRatio = scene.canvas.clientWidth / scene.canvas.clientHeight;
+  const verticalFov = 2 * Math.atan(1 / 3);
+  scene.camera.frustum = new C.PerspectiveFrustum({
+    fov:
+      aspectRatio > 1
+        ? 2 * Math.atan(Math.tan(verticalFov * 0.5) * aspectRatio)
+        : verticalFov,
+    aspectRatio,
     near: 1,
-    far: 100000,
+    far: half * 4,
   });
-  const height = 5000;
+  // Keep the same center map scale when orbiting. Orthographic width is useful
+  // for the style gallery, but clips this map into a strip at a shallow pitch.
+  const range =
+    (metersPerPixel * scene.canvas.clientHeight) /
+    (2 * Math.tan(verticalFov * 0.5));
+  const pitch = tilted ? Math.PI / 4 : Math.PI / 2;
   scene.camera.setView({
-    destination: new C.Cartesian3(x, y - (tilted ? height * 0.6 : 0), height),
+    destination: new C.Cartesian3(
+      x,
+      y - range * Math.cos(pitch),
+      range * Math.sin(pitch),
+    ),
     orientation: {
-      direction: new C.Cartesian3(
-        0,
-        tilted ? 0.5144957554 : 0,
-        tilted ? -0.8574929257 : -1,
-      ),
-      up: new C.Cartesian3(
-        0,
-        tilted ? 0.8574929257 : 1,
-        tilted ? 0.5144957554 : 0,
-      ),
+      direction: new C.Cartesian3(0, Math.cos(pitch), -Math.sin(pitch)),
+      up: new C.Cartesian3(0, Math.sin(pitch), Math.cos(pitch)),
     },
   });
   scene.requestRender();
@@ -163,10 +169,11 @@ function replaceLayer(next = connection) {
     scene,
     style: next.style,
     sources: { [next.sourceId]: source },
-    maximumVisibleTiles: 12,
-    tileCacheSize: 24,
+    maximumVisibleTiles: 64,
+    tileCacheSize: 128,
     maximumRequests: 4,
     maximumUploadsPerFrame: 1,
+    maximumGlyphRanges: 192,
   });
   if (layer !== undefined) {
     scene.primitives.remove(layer);
@@ -181,9 +188,11 @@ function replaceLayer(next = connection) {
   element("picked").textContent = "点击水面、道路或建筑。";
   element("measurement").textContent =
     "CPU 提交时间；不含 GPU 完成和浏览器合成。";
-  layer.errorEvent.addEventListener(({ error, tile }) => {
+  layer.errorEvent.addEventListener(({ error, tile, resource }) => {
     report(
-      new Error(`瓦片 ${tile.level}/${tile.x}/${tile.y}：${error.message}`),
+      new Error(
+        `${tile ? `瓦片 ${tile.level}/${tile.x}/${tile.y}` : `标注资源 ${resource}`}：${error.message}`,
+      ),
     );
   });
   scene.requestRender();
@@ -220,6 +229,8 @@ async function connect() {
     );
     const style = new C.SceneGISVectorTileStyle({
       version: 8,
+      glyphs: reference.glyphs,
+      sprite: reference.sprite,
       sources: { [sourceId]: sourceDefinition },
       layers,
     });
@@ -243,7 +254,7 @@ async function connect() {
       excluded: profile.excluded,
     };
     const title = `OpenFreeMap · ${provider === "bright" ? "Bright" : "Liberty"}`;
-    element("map-title").textContent = `${title} · 基础图层`;
+    element("map-title").textContent = `${title} · 地图与点标注`;
     element("source").textContent = "OpenMapTiles schema · 免 token 公共 MVT";
     element("support-summary").textContent =
       `${layers.length} / ${reference.layers.length} 个样式层已接入`;
@@ -282,8 +293,8 @@ scene.postRender.addEventListener(() => {
   }
   if (pending === undefined) {
     element("status").textContent =
-      stats.failedTiles > 0
-        ? "部分瓦片失败，详见下方"
+      stats.failedTiles > 0 || stats.symbolFailures > 0
+        ? "部分瓦片或标注失败，详见下方"
         : layer.tilesLoaded
           ? "当前视图已就绪"
           : "加载并构建瓦片…";
@@ -294,6 +305,12 @@ scene.postRender.addEventListener(() => {
     `${stats.visibleTiles} / ${stats.residentTiles}`;
   element("features").textContent =
     connection.metrics.features.toLocaleString();
+  element("symbols").textContent =
+    `${stats.placedSymbols ?? 0} / ${stats.symbolCandidates ?? 0}`;
+  const missingImages = stats.missingSymbolImages ?? [];
+  element("symbol-warning").textContent = missingImages.length
+    ? `图集中未提供 ${missingImages.length} 种图标，保留文字标注：${missingImages.join("、")}`
+    : "";
   element("measure").disabled =
     !layer.tilesLoaded ||
     stats.failedTiles > 0 ||

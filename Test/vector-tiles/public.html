@@ -35,7 +35,7 @@
         <button id="detail" type="button">街道细节</button>
         <button id="recreate" type="button">重建图层</button>
       </div>
-      <p class="hint">拖动平移 · 滚轮缩放 · 点击查看要素</p>
+      <p class="hint">拖动平移 · 中键倾斜 · 滚轮缩放 · 点击查看要素</p>
       <div id="status" role="status">初始化…</div>
       <dl class="metrics">
         <div>
@@ -54,6 +54,10 @@
           <dt>已解码要素</dt>
           <dd id="features">—</dd>
         </div>
+        <div>
+          <dt>标注 / 候选</dt>
+          <dd id="symbols">—</dd>
+        </div>
       </dl>
       <button id="measure" type="button" disabled>测量 60 帧</button>
       <p id="measurement" class="hint">
@@ -71,9 +75,11 @@
         <pre id="picked">点击水面、道路或建筑。</pre>
       </details>
       <div id="error" role="alert"></div>
+      <p id="symbol-warning" class="hint"></p>
       <footer>
         <a href="./index.html">本地城市</a>
         <a href="./styles.html">样式图集</a>
+        <a href="./symbols.html">点标注图集</a>
         <a href="./reference/README.md">来源与授权</a>
       </footer>
     </aside>
@@ -81,7 +87,7 @@
       <div id="map"></div>
       <div class="map-note">
         <strong id="map-title">在线基础地图</strong
-        ><span>直接矢量绘制 · EPSG:3857</span>
+        ><span>直接矢量绘制 · 透视视图 · EPSG:3857</span>
       </div>
     </main>
     <script>

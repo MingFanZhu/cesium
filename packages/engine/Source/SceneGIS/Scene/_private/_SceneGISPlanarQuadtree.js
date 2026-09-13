@@ -74,14 +74,31 @@ function getPerspectiveSseDenominator(frustum) {
 
 function computeScreenSpaceError(quadtree, tile, frameState, geometricErrors) {
   ++quadtree._debug.sseComputations;
-  const height = frameState.context.drawingBufferHeight;
-  if (height === 0) {
-    return 0.0;
-  }
   const geometricError = defined(geometricErrors)
     ? geometricErrors[tile.level]
     : quadtree._tilingScheme.coordinateSystem.extent.width /
       (256.0 * 2 ** tile.level);
+  return SceneGISPlanarQuadtree.computeScreenSpaceError(
+    frameState,
+    tile,
+    geometricError,
+  );
+}
+
+/**
+ * Shared imagery, terrain and vector-tile LOD metric. This reads closed tile
+ * bounds and the camera only; it does not create tiles or mutate a quadtree.
+ * @private
+ */
+SceneGISPlanarQuadtree.computeScreenSpaceError = function (
+  frameState,
+  tile,
+  geometricError,
+) {
+  const height = frameState.context.drawingBufferHeight;
+  if (height === 0) {
+    return 0.0;
+  }
   const pixelRatio = frameState.pixelRatio;
   const frustum = frameState.camera.frustum;
   const orthographicHeight = getOrthographicHeight(frustum);
@@ -95,7 +112,7 @@ function computeScreenSpaceError(quadtree, tile, frameState, geometricErrors) {
   }
   const sseDenominator = getPerspectiveSseDenominator(frustum);
   return (geometricError * height) / (distance * sseDenominator) / pixelRatio;
-}
+};
 
 function compareEvictionCandidates(left, right) {
   return (

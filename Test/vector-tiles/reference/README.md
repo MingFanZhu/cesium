@@ -14,8 +14,9 @@ Bright 与 Liberty 均从 [公开 TileJSON](https://tiles.openfreemap.org/planet
 按负责人选择，已移除 Mapbox 在线入口。Streets 文件保留作离线样式参考。
 
 `openfreemap-bright.json` 是 2026-09-13 获取的完整 119 层快照，仅统一缩进，供离线 E2E 使用。
-`bright-profile.json` 显式排除 26 层：25 symbol 与 `building-top` 的 fill-translate；
-其余 93 层保留原顺序、filter、layout 和 paint。该数量不代表视觉完成比例。
+`bright-profile.json` 当前显式排除 11 层：10 个沿线/zoom-dependent placement symbol 与
+`building-top` 的 fill-translate；其余 108 层保留原顺序、filter、layout 和 paint。
+V5A 新增 15 个 point symbol layers。该数量不代表视觉完成比例。
 线上页面读取公开 style URL，遇到新的不支持配置会报错，不静默删属性。
 
 Bright 由 [OpenFreeMap Styles](https://github.com/hyperknot/openfreemap-styles) 维护，
@@ -24,7 +25,7 @@ Style code 按 BSD 3-Clause，设计按 CC BY 4.0；版权归 MapTiler.com、Ope
 Mapbox 及相应修改作者。全文见 [BRIGHT-LICENSE.txt](BRIGHT-LICENSE.txt)、
 [OPENFREEMAP-LICENSE.txt](OPENFREEMAP-LICENSE.txt) 和 [MAPBOX-LICENSE.txt](MAPBOX-LICENSE.txt)。
 页面提供此署名入口，地图角落保留 TileJSON 的 OpenFreeMap / OpenMapTiles / OpenStreetMap attribution。
-只采用约定基础层，不表示参考示例中的 3D extrusion 已实现。
+采用约定基础层和点标注，不表示参考示例中的 3D extrusion 已实现。
 
 ## Mapbox Streets v12：离线参考
 
@@ -58,8 +59,9 @@ Mapbox SDK 当前默认是 [Standard](https://docs.mapbox.com/mapbox-gl-js/guide
 [公开 TileJSON](https://tiles.openfreemap.org/planet)，采用 OpenMapTiles schema；
 不会把它们改名为 Mapbox Streets 数据或套用 Streets 的字段假设。
 `openfreemap-liberty.json` 是 2026-09-13 获取的同一 111 层样式快照，仅用于无需公网的 E2E。
-`liberty-profile.json` 显式排除 29 层：25 symbol、1 raster、1 fill-extrusion、2 pattern；
-其余 82 层接入。以后线上样式出现新的不支持配置会报错，不静默删属性。
+`liberty-profile.json` 当前显式排除 14 层：10 个沿线/zoom-dependent placement symbol、
+1 raster、1 fill-extrusion、2 pattern；其余 97 层接入。
+以后线上样式出现新的不支持配置会报错，不静默删属性。
 
 Liberty 由 [OpenFreeMap Styles](https://github.com/hyperknot/openfreemap-styles) 维护，
 源自 [OSM Liberty](https://github.com/maputnik/osm-liberty)，后者源自 OSM Bright / Mapbox Open Styles。
@@ -72,7 +74,11 @@ OpenFreeMap 代码为 MIT，继承的 style JSON 为 BSD；设计保留其 CC BY
 ## 本地自动化数据
 
 `../public-fixture.pbf` 由 SceneGIS 自行编写的
-[generate-public-fixture.mjs](../generate-public-fixture.mjs) 生成，只有三个合成要素，
-分别验证 transportation、water 与 building；不含下载的地图内容，不表示真实地理对象。
+[generate-public-fixture.mjs](../generate-public-fixture.mjs) 生成，包含四个合成要素，
+分别验证 transportation、water、building 与 poi；不含下载的地图内容，不表示真实地理对象。
 E2E 拦截网络并使用该 MVT 和固定 Bright/Liberty 样式快照；所有外部请求均被拦截。
 公网 smoke 是单独、有限的在线检查，不是 CI 的运行前提。
+
+V5A 在线页面使用 style 声明的 OpenFreeMap glyphs/sprite；无额外字体 fallback。
+sprite 中缺少某些 POI image entry 时保留文字，并在页面提示名称，和 MapLibre 的行为一致。
+本地 CI 使用 [点标注资源](../symbol-assets/README.md)，保留 Noto 的 SIL OFL 许可。

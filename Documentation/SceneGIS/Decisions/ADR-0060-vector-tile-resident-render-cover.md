@@ -56,6 +56,9 @@ Pick ID 中的 tile 始终是真实 source tile，而非裁剪目标。
 
 ## Build, validation and upgrades
 
+V5A 浅俯角修正通过 [ADR-0064](ADR-0064-vector-perspective-lod.md) 将 desired selection 改为
+共享 planar SSE 的 mixed leaves；本 ADR 的 region resolution、资源 ownership 与发布优先级保持。
+
 沿用 ADR-0030 固定 GLSL 与普通 JS 构建，不新增 upstream-owned 文件。
 Pure coverage、部分到达/空数据/失败的 WebGL alpha/pick、bounded cache 和生命周期共同验收。
 实际页面加可控延迟，检查 replacement 中间状态；不采用额外 settling frames。

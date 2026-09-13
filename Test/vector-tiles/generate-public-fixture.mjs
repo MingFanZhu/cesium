@@ -5,6 +5,19 @@ import protobuf from "protobufjs/minimal.js";
 // Authored schema fixture for isolated HTTP/E2E tests; contains no downloaded map data.
 const definitions = [
   {
+    name: "poi",
+    type: 1,
+    id: 501,
+    properties: {
+      name: "City Hospital",
+      "name:latin": "City Hospital",
+      class: "hospital",
+      subclass: "hospital",
+      rank: 1,
+    },
+    points: [[2400, 2400]],
+  },
+  {
     name: "water",
     type: 3,
     id: 101,

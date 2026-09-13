@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                         |
-| ---------------------- | ----------------------------------------------------------------------------- |
-| Extension slug         | `vector-tiles`                                                                |
-| Status                 | `active`                                                                      |
-| Planning model         | `extension`                                                                   |
-| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md)                        |
-| Current phase          | `V3C0 completed — 后继阶段尚未激活`                                           |
-| Active phase plan      | None；最近完成 [V3C0](plans/2026-09-13-v3c0-public-map-and-style-baseline.md) |
-| Active standalone plan | None                                                                          |
-| Architecture contact   | 当前 Agent                                                                    |
-| Execution contact      | 当前 Agent                                                                    |
-| Last updated           | `2026-09-13`                                                                  |
+| Field                  | Value                                                  |
+| ---------------------- | ------------------------------------------------------ |
+| Extension slug         | `vector-tiles`                                         |
+| Status                 | `active`                                               |
+| Planning model         | `extension`                                            |
+| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
+| Current phase          | `V5A completed — 平面点标注`                           |
+| Active phase plan      | [V5A](plans/2026-09-13-v5a-point-symbols.md)           |
+| Active standalone plan | None                                                   |
+| Architecture contact   | 当前 Agent                                             |
+| Execution contact      | 当前 Agent                                             |
+| Last updated           | `2026-09-13`                                           |
 
 ## Scope
 
@@ -37,14 +37,14 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
 - Source：`packages/engine/Source/SceneGIS/Core/SceneGISVectorTile*.js` 和
   `packages/engine/Source/SceneGIS/Scene/SceneGISVectorTileLayer.js`，五个公共入口。
-- Specs：Core/Renderer/Scene 镜像测试，87 项通过。
+- Specs：Core/Renderer/Scene 镜像测试，112 项通过；另有 14 项既有 planar quadtree 回归通过。
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面：[城市](../../Test/vector-tiles/index.html) 与 [样式图集](../../Test/vector-tiles/styles.html)，
   21 个城市 MVT fixtures 加 1 个样式 MVT。
 - 新页面：[公开地图](../../Test/vector-tiles/public.html)，默认 MapLibre 示例使用的 OpenFreeMap / Bright，
   保留 Liberty 对照，无需 token；来源和样式差距见 [参考](../../Test/vector-tiles/reference/README.md)。
 - E2E：`Specs/e2e/scenegis-vector-tiles.spec.js`，3 项通过。
-- 公开页 E2E：`Specs/e2e/scenegis-vector-public.spec.js`，2 项通过；使用本地数据拦截外网。
+- 公开页 E2E：`Specs/e2e/scenegis-vector-public.spec.js`，3 项通过；使用本地数据拦截外网。
 - Sandcastle：不新建；使用根服务器直接访问 `Test/**`。
 - ADR：[ADR-0057](../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)。
 - SGP：`SGP-0011`；upstream-owned files 为 `packages/engine/package.json`、`ThirdParty.extra.json`。
@@ -75,8 +75,23 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[V3C0 review](reviews/2026-09-13-v3c0-public-map-review.md)；
+- Latest review：[V5A review](reviews/2026-09-13-v5a-point-symbol-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
+- V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
+- Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
+  已审计 MapLibre 资源/排版/placement/跨 tile 与 Bright 的 25 个 symbol layers。
+  建议将平面点标注、沿线标注提前，地形标注在 V4 后验收；负责人已批准，进入 [V5A](plans/2026-09-13-v5a-point-symbols.md)，契约见 [ADR-0063](../../Documentation/SceneGIS/Decisions/ADR-0063-point-symbol-renderer.md)。
+- V5A 已实现独立字体/图标资源、横排文字、统一 collision、跨 tile identity 和自有 GPU 图元；
+  [本地点标注图集](../../Test/vector-tiles/symbols.html) 与公开地图 Bright/Liberty 各 15 个 point layers 待负责人视觉验收。
+  108 项 Specs、7 项 E2E 已通过；北京 14 级 555 candidates / 278 placed，72 ranges，无资源失败。
+  build/types/tsc/release/独立安装包、修改范围格式、全 AgentDocs Markdownlint 与上游审计通过。
+  [正式点标注能力](../../Documentation/SceneGIS/VectorTileSymbols.md) 列出支持属性、缓存与失败语义。
 - 风险：dash 拐角变形与跨 tile 相位、无历史数据/紧 cache 的缺图、mixed LOD 量化差异；
-  V3C1 密集性能、V4 生产贴地、V5 字体/跨瓦片 placement。
+  V3C1 密集性能、V4 生产贴地、V5B 沿线与复杂 placement。
   V2-R05 与 V3B1-R08 已关闭。
+- 浅俯角反馈已修正：负责人确认透视投影并要求遵循现有影像/地形选层。
+  共享 planar SSE、预算内 mixed desired leaves、视轴交点 style 比例和不可见 point anchor 剔除已完成。
+  126 项 Specs（112 vector + 14 planar quadtree）、8 项 E2E 通过；在线原 5° 视角保持中心/heading/zoom，
+  64 tiles 横跨 level 3–14，无资源错误，CPU median/P95 10.3/11.8 ms。
+  当前页面已刷新并保留该视角；见 [ADR-0064](../../Documentation/SceneGIS/Decisions/ADR-0064-vector-perspective-lod.md)。
+- 负责人在修正交付后要求继续特殊标注，V5A 按推进授权关闭 gate；先建立独立 checkpoint，随后进入 V5B。

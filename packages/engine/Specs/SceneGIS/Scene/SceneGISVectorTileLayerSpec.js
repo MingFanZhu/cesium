@@ -150,6 +150,105 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     ]);
   }
 
+  it("keeps perspective style scale and forward map coverage through a shallow orbit", async function () {
+    spyOn(source, "requestTile").and.resolveTo(whole("ground"));
+    const layer = add([definition("fill", { "fill-color": "red" })]);
+    await loaded(layer);
+    const zoom = layer.statistics.zoom;
+    const range = 80;
+    for (const degrees of [45, 5]) {
+      const pitch = (degrees * Math.PI) / 180;
+      scene.camera.position = new Cartesian3(
+        0,
+        -range * Math.cos(pitch),
+        range * Math.sin(pitch),
+      );
+      scene.camera.direction = new Cartesian3(
+        0,
+        Math.cos(pitch),
+        -Math.sin(pitch),
+      );
+      scene.camera.up = new Cartesian3(0, Math.sin(pitch), Math.cos(pitch));
+      await loaded(layer);
+      expect(layer.statistics.zoom).toEqualEpsilon(zoom, 1e-12);
+      for (const y of [40, 56]) {
+        const windowPosition = new Cartesian2(32, y);
+        const color = Array.from(
+          scene.context.readPixels({ x: 32, y: 63 - y, width: 1, height: 1 }),
+        );
+        expect(color).toEqual([255, 0, 0, 255]);
+        expect(scene.pick(windowPosition).id.featureId).toBe("ground");
+        scene.renderForSpecs();
+      }
+    }
+    scene.camera.direction = new Cartesian3(0, 1, 0);
+    scene.camera.up = new Cartesian3(0, 0, 1);
+    scene.renderForSpecs();
+    expect(layer.statistics.visibleTiles).toBe(0);
+    expect(layer.statistics.drawCommands).toBe(0);
+  });
+
+  it("refines nearby perspective tiles within budget while preserving distant coverage and single alpha", async function () {
+    scene.destroyForSpecs();
+    setup(65536, 128);
+    source = new SceneGISVectorTileSource({
+      url: "https://example.invalid/{z}/{x}/{y}",
+      tilingScheme: world.tilingScheme,
+      maximumLevel: 8,
+    });
+    spyOn(source, "requestTile").and.callFake((x, y, level) =>
+      Promise.resolve(whole(`${level}/${x}/${y}`)),
+    );
+    const pitch = (5 * Math.PI) / 180;
+    scene.camera.position = new Cartesian3(
+      5000,
+      5000 - 80 * Math.cos(pitch),
+      80 * Math.sin(pitch),
+    );
+    scene.camera.direction = new Cartesian3(
+      0,
+      Math.cos(pitch),
+      -Math.sin(pitch),
+    );
+    scene.camera.up = new Cartesian3(0, Math.sin(pitch), Math.cos(pitch));
+    scene.camera.frustum.far = 100000;
+    const layer = add(
+      [definition("fill", { "fill-color": "red", "fill-opacity": 0.5 })],
+      {
+        maximumVisibleTiles: 64,
+        tileCacheSize: 128,
+      },
+    );
+    await loaded(layer);
+    const state = [...layer._sources.values()][0];
+    expect(state.visible.length).toBeLessThanOrEqual(64);
+    const levels = state.visible.map((tile) => tile.level);
+    expect(Math.max(...levels)).toBe(8);
+    expect(Math.min(...levels)).toBeLessThan(6);
+    for (const a of state.visible) {
+      for (const b of state.visible) {
+        if (a === b || a.level > b.level) {
+          continue;
+        }
+        const scale = 2 ** (b.level - a.level);
+        expect(
+          a.x === Math.floor(b.x / scale) && a.y === Math.floor(b.y / scale),
+        ).toBeFalse();
+      }
+    }
+    const pickedLevels = [];
+    for (const y of [55, 110]) {
+      scene.renderForSpecs();
+      expect(
+        Array.from(
+          scene.context.readPixels({ x: 64, y: 127 - y, width: 1, height: 1 }),
+        ),
+      ).toEqual([128, 0, 0, 255]);
+      pickedLevels.push(scene.pick(new Cartesian2(64, y)).id.tile.level);
+    }
+    expect(pickedLevels[1]).toBeGreaterThan(pickedLevels[0]);
+  });
+
   it("clears coverage and cancels replacements when the camera has no planar scale", async function () {
     const pending = streaming();
     const layer = add([definition("fill")], {

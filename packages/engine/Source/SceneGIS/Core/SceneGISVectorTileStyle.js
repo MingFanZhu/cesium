@@ -1,5 +1,8 @@
 import {
   Color as StyleColor,
+  Formatted,
+  Padding,
+  ResolvedImage,
   featureFilter,
   latest,
   normalizePropertyExpression,
@@ -9,6 +12,47 @@ import Color from "../../Core/Color.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 
 const profile = {
+  symbol: {
+    paint: [
+      "text-color",
+      "text-opacity",
+      "text-halo-color",
+      "text-halo-width",
+      "text-halo-blur",
+      "icon-opacity",
+    ],
+    layout: [
+      "visibility",
+      "symbol-placement",
+      "symbol-sort-key",
+      "text-field",
+      "text-font",
+      "text-size",
+      "text-max-width",
+      "text-line-height",
+      "text-letter-spacing",
+      "text-anchor",
+      "text-justify",
+      "text-offset",
+      "text-padding",
+      "text-transform",
+      "text-allow-overlap",
+      "text-ignore-placement",
+      "text-optional",
+      "text-rotation-alignment",
+      "text-pitch-alignment",
+      "icon-image",
+      "icon-size",
+      "icon-anchor",
+      "icon-offset",
+      "icon-padding",
+      "icon-allow-overlap",
+      "icon-ignore-placement",
+      "icon-optional",
+      "icon-rotation-alignment",
+      "icon-pitch-alignment",
+    ],
+  },
   background: {
     paint: ["background-color", "background-opacity"],
     layout: ["visibility"],
@@ -95,7 +139,15 @@ const operators = new Set([
   "rgb",
   "rgba",
 ]);
-const rootKeys = ["version", "name", "metadata", "sources", "layers"];
+const rootKeys = [
+  "version",
+  "name",
+  "metadata",
+  "sources",
+  "layers",
+  "glyphs",
+  "sprite",
+];
 const sourceKeys = [
   "type",
   "tiles",
@@ -204,6 +256,9 @@ function validate(style) {
   if (!style || typeof style !== "object") {
     return errors;
   }
+  if (style.sprite !== undefined && typeof style.sprite !== "string") {
+    errors.push("style.sprite: only a single sprite URL is supported.");
+  }
   if (style.sources && typeof style.sources === "object") {
     for (const [name, source] of Object.entries(style.sources)) {
       const path = `sources.${name}`;
@@ -247,10 +302,38 @@ function validate(style) {
               }: legacy style function objects are not supported.`,
             );
           }
-          checkExpression(value, propertyPath, errors);
+          if (!(
+            name === "text-font" &&
+            Array.isArray(value) &&
+            value.every((v) => typeof v === "string")
+          )) {
+            checkExpression(value, propertyPath, errors);
+          }
         }
       }
       checkExpression(layer.filter, `${path}.filter`, errors);
+      if (layer.type === "symbol") {
+        const layout = layer.layout ?? {};
+        if ((layout["symbol-placement"] ?? "point") !== "point") {
+          errors.push(
+            `${
+              path
+            }.layout.symbol-placement: only point placement is supported.`,
+          );
+        }
+        for (const name of [
+          "text-rotation-alignment",
+          "text-pitch-alignment",
+          "icon-rotation-alignment",
+          "icon-pitch-alignment",
+        ]) {
+          if (!["auto", "viewport"].includes(layout[name] ?? "auto")) {
+            errors.push(
+              `${path}.layout.${name}: only viewport alignment is supported.`,
+            );
+          }
+        }
+      }
     });
   }
   try {
@@ -317,6 +400,12 @@ function evaluateProperties(properties, globals, feature) {
     if (value instanceof StyleColor) {
       const [r, g, b, a] = value.rgb;
       result[name] = new Color(r, g, b, a);
+    } else if (value instanceof Formatted) {
+      result[name] = value.toString();
+    } else if (value instanceof Padding) {
+      result[name] = value.values.slice();
+    } else if (value instanceof ResolvedImage) {
+      result[name] = value.name;
     } else {
       result[name] = Array.isArray(value) ? value.slice() : value;
     }
@@ -343,11 +432,35 @@ function SceneGISVectorTileStyle(style) {
     snapshot.layers.map((layer) => [layer.id, compileLayer(layer)]),
   );
   this._sources = freezeJson(snapshot.sources);
+  this._glyphs = snapshot.glyphs;
+  this._sprite = snapshot.sprite;
   this._layerIds = Object.freeze(snapshot.layers.map((layer) => layer.id));
   freezeJson(snapshot.layers);
 }
 
 Object.defineProperties(SceneGISVectorTileStyle.prototype, {
+  /**
+   * The glyph PBF URL template, or undefined.
+   * @memberof SceneGISVectorTileStyle.prototype
+   * @type {string|undefined}
+   * @readonly
+   */
+  glyphs: {
+    get: function () {
+      return this._glyphs;
+    },
+  },
+  /**
+   * The single sprite URL base, or undefined.
+   * @memberof SceneGISVectorTileStyle.prototype
+   * @type {string|undefined}
+   * @readonly
+   */
+  sprite: {
+    get: function () {
+      return this._sprite;
+    },
+  },
   /**
    * The versioned computation profile. Renderer qualification is separate.
    * @memberof SceneGISVectorTileStyle.prototype
@@ -444,7 +557,7 @@ SceneGISVectorTileStyle.prototype.getLayerDefinition = function (layerId) {
  * @param {string} layerId Style layer ID.
  * @param {SceneGISVectorTile.Feature|undefined} feature A decoded feature, or undefined for background.
  * @param {number} zoom Continuous style zoom, independent of source LOD.
- * @returns {SceneGISVectorTileStyle.EvaluatedLayer} Layer values; paint uses fractional zoom, layout/filter integer zoom.
+ * @returns {SceneGISVectorTileStyle.EvaluatedLayer} Layer values; paint and symbol sizes use fractional zoom, other layout/filter values use integer zoom.
  * @exception {DeveloperError} The layer, feature, or zoom is invalid.
  */
 SceneGISVectorTileStyle.prototype.evaluateLayer = function (
@@ -460,6 +573,19 @@ SceneGISVectorTileStyle.prototype.evaluateLayer = function (
   const input = layer.type === "background" ? undefined : styleFeature(feature);
   const layoutGlobals = { zoom: Math.floor(zoom) };
   const layout = evaluateProperties(compiled.layout, layoutGlobals, input);
+  if (layer.type === "symbol") {
+    for (const name of ["text-size", "icon-size"]) {
+      layout[name] = compiled.layout[name].evaluate({ zoom }, input);
+    }
+    for (const name of ["text-field", "icon-image"]) {
+      if (typeof layer.layout?.[name] === "string") {
+        layout[name] = (layout[name] ?? "").replace(
+          /\{([^}]+)\}/g,
+          (match, property) => String(input.properties[property] ?? ""),
+        );
+      }
+    }
+  }
   const show =
     zoom >= (layer.minzoom ?? 0) &&
     zoom < (layer.maxzoom ?? 24) &&

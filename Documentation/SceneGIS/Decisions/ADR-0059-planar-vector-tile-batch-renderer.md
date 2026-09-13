@@ -76,12 +76,13 @@ Flat 阶段不使用 stencil，不写深度；片段在 tile 的 Z=0 平面进�
 
 ## 调度、失效和所有权
 
-Style zoom 由参考平面在相机正下方的 CSS meters-per-pixel 确定；source LOD 单独取整并限制到可用层级。
-每个 source 独立选取同一级的可见平面 tile。遍历按 frustum 裁剪，命中可见 tile 上限立即停止，
-并依明确预算逐级降低 LOD；不预建完整树。到 minimumLevel 仍超预算时明确报错，
-不发布不完整 desired 集合。V2 不做父子重叠、祖先底图或跨层级 fade。
+V2 原先使用相机正下方的 style 比例与单级 desired cover；该部分已由
+[ADR-0064](ADR-0064-vector-perspective-lod.md) 修正：style zoom 取视轴与参考平面的前向交点，
+source LOD 复用 planar imagery/terrain SSE，选择预算内互不包含的 mixed leaves。
+不预建完整树；minimumLevel 本身超预算仍报错，不发布不完整 desired 集合。
+V2 不做父子重叠、祖先底图或跨层级 fade。
 V3A 通过 [ADR-0060](ADR-0060-vector-tile-resident-render-cover.md) 扩展实际覆盖：
-保持单级 desired 集合，允许 resident ancestor/descendant 按不重叠区域替换。
+允许 resident ancestor/descendant 按不重叠区域替换，同样适用于 ADR-0064 的 mixed desired 集合。
 
 tileCacheSize 和 maximumVisibleTiles 是每 source 的 tile-count 上限，前者不得小于后者；
 maximumRequests 和每 normal frame 的 upload tile 数为整个 layer 的上限。
