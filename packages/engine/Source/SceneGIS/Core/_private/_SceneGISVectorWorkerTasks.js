@@ -11,6 +11,8 @@ import prepareBatch from "./_SceneGISVectorBatchGeometry.js";
 import prepareSymbols from "./_SceneGISVectorSymbolPreparation.js";
 import Glyphs from "./_SceneGISVectorGlyphs.js";
 import Layout from "./_SceneGISVectorSymbolLayout.js";
+import prepareGlobeGeometry from "./_SceneGISVectorGlobeGeometry.js";
+import TerrainIndex from "./_SceneGISVectorGlobeTerrainIndex.js";
 
 function transfer(value, objects, seen = new Set()) {
   if (!value || typeof value !== "object" || seen.has(value)) {
@@ -47,7 +49,9 @@ function createVectorTaskHandler() {
       });
     }
     let result;
-    if (parameters.kind === "decode") {
+    if (parameters.kind === "terrain") {
+      result = TerrainIndex.build(parameters);
+    } else if (parameters.kind === "decode") {
       result = { data: Tile.decode(parameters.buffer) };
     } else if (parameters.kind === "glyphs") {
       const glyphs = Glyphs.decode(parameters.buffer);
@@ -154,6 +158,11 @@ function createVectorTaskHandler() {
           ).flatMap((item) =>
             prepareBatch(item, parameters.allowPicking, parameters.ground),
           );
+          if (parameters.globe) {
+            for (const batch of batches) {
+              prepareGlobeGeometry(batch, tile.bounds);
+            }
+          }
           layers.push({ id: record.id, signature: record.signature, batches });
         }
       }

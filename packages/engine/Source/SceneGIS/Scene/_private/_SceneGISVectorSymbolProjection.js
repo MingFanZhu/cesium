@@ -4,8 +4,10 @@ import Cartesian4 from "../../../Core/Cartesian4.js";
 import EncodedCartesian3 from "../../../Core/EncodedCartesian3.js";
 import Matrix4 from "../../../Core/Matrix4.js";
 import Line from "../../Core/_private/_SceneGISVectorSymbolLine.js";
+import EllipsoidalOccluder from "../../../Core/EllipsoidalOccluder.js";
+import GlobeCoordinates from "../../Core/_private/_SceneGISVectorGlobeCoordinates.js";
 
-function snapshot(scene, terrain) {
+function snapshot(scene, terrain, referenceDepth) {
   const camera = scene.camera,
     frustum = camera.frustum;
   const position = camera.positionWC,
@@ -15,6 +17,9 @@ function snapshot(scene, terrain) {
   // instead of invoking that work for every anchor and glyph corner.
   return {
     terrain,
+    horizon: terrain?.ellipsoid
+      ? new EllipsoidalOccluder(terrain.ellipsoid, position)
+      : undefined,
     camera: {
       positionWC: Cartesian3.clone(position),
       directionWC: Cartesian3.clone(direction),
@@ -30,7 +35,10 @@ function snapshot(scene, terrain) {
     // Cull the whole label before asset requests; do not clip individual glyphs.
     maximumAnchorDepth:
       projection[15] === 0
-        ? Math.min(frustum.far, (-position.z / direction.z) * 4)
+        ? Math.min(
+            frustum.far,
+            (referenceDepth ?? -position.z / direction.z) * 4,
+          )
         : frustum.far,
     canvas: {
       clientWidth: scene.canvas.clientWidth,
@@ -40,6 +48,9 @@ function snapshot(scene, terrain) {
 }
 
 function terrainPoint(scene, x, y) {
+  if (scene.terrain?.ellipsoid) {
+    return GlobeCoordinates.position(x, y, scene.terrain.height(x, y));
+  }
   return new Cartesian3(x, y, scene.terrain?.height(x, y) ?? 0);
 }
 
@@ -95,6 +106,9 @@ function project(scene, point) {
 }
 
 function visible(scene, point) {
+  if (scene.horizon && !scene.horizon.isPointVisible(point)) {
+    return undefined;
+  }
   const distance = depth(scene, point);
   if (
     distance <= scene.camera.frustum.near ||
@@ -208,14 +222,28 @@ function alignment(scene, candidate, text, metersPerPixel) {
     }
   } else if (mapPitch && alignment === "viewport") {
     const right = scene.camera.rightWC;
-    angle += Math.atan2(-right.y, right.x);
+    if (scene.terrain?.ellipsoid) {
+      const ll = GlobeCoordinates.cartographic(
+        candidate.anchor.position.x,
+        candidate.anchor.position.y,
+      );
+      const sin = Math.sin(ll.longitude),
+        cos = Math.cos(ll.longitude);
+      const east = -right.x * sin + right.y * cos;
+      const north =
+        -(right.x * cos + right.y * sin) * Math.sin(ll.latitude) +
+        right.z * Math.cos(ll.latitude);
+      angle += Math.atan2(-north, east);
+    } else {
+      angle += Math.atan2(-right.y, right.x);
+    }
   } else if (!mapPitch && alignment === "map") {
     const next = project(
       scene,
       terrainPoint(
         scene,
-        candidate.position.x + metersPerPixel,
-        candidate.position.y,
+        candidate.anchor.position.x + metersPerPixel,
+        candidate.anchor.position.y,
       ),
     );
     if (!next) {
@@ -232,8 +260,8 @@ function alignment(scene, candidate, text, metersPerPixel) {
       scene,
       terrainPoint(
         scene,
-        candidate.position.x + Math.cos(angle) * metersPerPixel,
-        candidate.position.y - Math.sin(angle) * metersPerPixel,
+        candidate.anchor.position.x + Math.cos(angle) * metersPerPixel,
+        candidate.anchor.position.y - Math.sin(angle) * metersPerPixel,
       ),
     );
     if (!next) {
@@ -276,8 +304,8 @@ function geometry(scene, candidate, shaped, text, metersPerPixel) {
       plane = {
         line: Line.path(
           candidate.line.points.map((point) => ({
-            x: (point.x - candidate.position.x) / metersPerPixel,
-            y: (candidate.position.y - point.y) / metersPerPixel,
+            x: (point.x - candidate.anchor.position.x) / metersPerPixel,
+            y: (candidate.anchor.position.y - point.y) / metersPerPixel,
           })),
         ),
         station: candidate.station / metersPerPixel,
@@ -299,8 +327,8 @@ function geometry(scene, candidate, shaped, text, metersPerPixel) {
         quad.positions = quad.corners.map(([x, y]) =>
           terrainPoint(
             scene,
-            candidate.position.x + x * metersPerPixel,
-            candidate.position.y - y * metersPerPixel,
+            candidate.anchor.position.x + x * metersPerPixel,
+            candidate.anchor.position.y - y * metersPerPixel,
           ),
         );
         quad.encodedPositions = quad.positions.map((point) =>
@@ -408,8 +436,8 @@ function collision(scene, candidate, shaped, text, metersPerPixel) {
       plane = {
         line: Line.path(
           candidate.line.points.map((point) => ({
-            x: (point.x - candidate.position.x) / metersPerPixel,
-            y: (candidate.position.y - point.y) / metersPerPixel,
+            x: (point.x - candidate.anchor.position.x) / metersPerPixel,
+            y: (candidate.anchor.position.y - point.y) / metersPerPixel,
           })),
         ),
         station: candidate.station / metersPerPixel,
@@ -482,8 +510,8 @@ function collision(scene, candidate, shaped, text, metersPerPixel) {
           scene,
           terrainPoint(
             scene,
-            candidate.position.x + x * metersPerPixel,
-            candidate.position.y - y * metersPerPixel,
+            candidate.anchor.position.x + x * metersPerPixel,
+            candidate.anchor.position.y - y * metersPerPixel,
           ),
         );
         if (!screen) {

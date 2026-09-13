@@ -3,7 +3,7 @@ flat out ivec3 v_groundIndices;
 
 void main()
 {
-    ivec3 indices = ivec3(groundFetch(u_sceneGISGroundTriangles, u_sceneGISGroundTriangleSize, gl_InstanceID).xyz);
+    ivec3 indices = ivec3(groundTriangle(gl_InstanceID).xyz);
     vec2 a = groundPosition(indices.x);
     vec2 b = groundPosition(indices.y);
     vec2 c = groundPosition(indices.z);

@@ -11,6 +11,11 @@ import PrimitiveType from "../../../Core/PrimitiveType.js";
 import BatchResources from "../../Renderer/_private/_SceneGISVectorTileBatchResources.js";
 import prepareBatch from "../../Core/_private/_SceneGISVectorBatchGeometry.js";
 import CullFace from "../../../Scene/CullFace.js";
+import EncodedCartesian3 from "../../../Core/EncodedCartesian3.js";
+import EllipsoidTerrainProvider from "../../../Core/EllipsoidTerrainProvider.js";
+import GlobeCoordinates from "../../Core/_private/_SceneGISVectorGlobeCoordinates.js";
+import GlobeCover from "./_SceneGISVectorGlobeCover.js";
+import GlobeTerrain from "./_SceneGISVectorGlobeTerrain.js";
 
 const colorState = {
   depthTest: { enabled: false },
@@ -20,6 +25,19 @@ const colorState = {
 };
 const minimumCorner = new Cartesian3();
 const maximumCorner = new Cartesian3();
+
+function shaderProgram(batch) {
+  const resources = batch._resources;
+  return resources.getShaderProgram
+    ? resources.getShaderProgram(
+        batch._owner._globe &&
+          !(
+            batch._owner._world.terrainProvider instanceof
+            EllipsoidTerrainProvider
+          ),
+      )
+    : resources._shaderProgram;
+}
 
 function groundHeights(batch, frameState) {
   const owner = batch._owner;
@@ -32,6 +50,10 @@ function groundHeights(batch, frameState) {
   if (!range) {
     range = { heights: new Cartesian2() };
     ranges.set(bounds, range);
+  }
+  if (owner._globe) {
+    range.frame = frameState.frameNumber;
+    return GlobeTerrain.heights(owner, bounds, range.heights);
   }
   // Uniforms run after World.render publishes this frame's terrain cover. Tighten
   // only the raster volume, never the earlier conservative frustum bounds.
@@ -68,6 +90,48 @@ function updateAnchors(batch) {
     return;
   }
   batch._anchorTerrain = terrain;
+  if (batch._owner._globe) {
+    const point = new Cartesian3();
+    const encoded = new EncodedCartesian3();
+    for (let i = 0; i < streams.length; i += 2) {
+      const coordinates = batch._resources._anchorCoordinates[i / 2];
+      const high = streams[i].values,
+        low = streams[i + 1].values;
+      let first = Infinity,
+        last = 0;
+      for (let j = 0; j < high.length / 3; j++) {
+        const x = coordinates[j * 2] + batch._tileBounds.minimumX;
+        const y = coordinates[j * 2 + 1] + batch._tileBounds.maximumY;
+        GlobeCoordinates.position(x, y, terrain.height(x, y), point);
+        Cartesian3.subtract(point, batch._origin, point);
+        EncodedCartesian3.fromCartesian(point, encoded);
+        for (let axis = 0; axis < 3; axis++) {
+          const key = axis === 0 ? "x" : axis === 1 ? "y" : "z";
+          const offset = j * 3 + axis;
+          if (
+            high[offset] !== Math.fround(encoded.high[key]) ||
+            low[offset] !== Math.fround(encoded.low[key])
+          ) {
+            high[offset] = encoded.high[key];
+            low[offset] = encoded.low[key];
+            first = Math.min(first, offset);
+            last = offset + 1;
+          }
+        }
+      }
+      if (last > first) {
+        streams[i].buffer.copyFromArrayView(
+          high.subarray(first, last),
+          first * 4,
+        );
+        streams[i + 1].buffer.copyFromArrayView(
+          low.subarray(first, last),
+          first * 4,
+        );
+      }
+    }
+    return;
+  }
   for (let i = 0; i < streams.length; i += 2) {
     const high = streams[i].values;
     const low = streams[i + 1].values;
@@ -122,10 +186,29 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
   this._modelMatrix = Matrix4.fromTranslation(
     new Cartesian3(tile.bounds.minimumX, tile.bounds.maximumY, 0),
   );
+  if (owner._globe) {
+    this._origin = this._ground
+      ? new Cartesian3()
+      : GlobeCoordinates.position(
+          tile.bounds.minimumX + tile.bounds.width * 0.5,
+          tile.bounds.minimumY + tile.bounds.height * 0.5,
+        );
+    this._modelMatrix = Matrix4.fromTranslation(this._origin);
+  }
 }
 
 SceneGISVectorTileBatch.prototype.update = function (frameState) {
-  if (this._owner._ground) {
+  if (this._owner._globe) {
+    const heights = this._owner._groundHeights;
+    if (
+      !this._globeRegion ||
+      this._globeRegion.minimumHeight !== heights.x ||
+      this._globeRegion.maximumHeight !== heights.y
+    ) {
+      this._globeRegion = GlobeCover.region(this._tileBounds, heights);
+      BoundingSphere.clone(this._globeRegion.boundingSphere, this._bounds);
+    }
+  } else if (this._owner._ground) {
     const bounds = this._tileBounds,
       heights = this._owner._groundHeights;
     Cartesian3.fromElements(
@@ -143,6 +226,10 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
     BoundingSphere.fromCornerPoints(minimumCorner, maximumCorner, this._bounds);
   }
   if (this._resources !== undefined) {
+    const program = shaderProgram(this);
+    for (const command of this.commands) {
+      command.shaderProgram = program;
+    }
     updateAnchors(this);
     if (this._record?.uniformPaint && this._record.key === this._geometryKey) {
       this._resources.updatePaint(this._record.uniformPaint);
@@ -154,6 +241,7 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
     this._prepared,
     this._owner,
     this._allowPicking,
+    this._owner._groundGeometry,
   );
   this._prepared = undefined;
   updateAnchors(this);
@@ -181,7 +269,7 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
       new DrawCommand({
         owner: this._owner,
         vertexArray,
-        shaderProgram: this._resources._shaderProgram,
+        shaderProgram: shaderProgram(this),
         modelMatrix: this._modelMatrix,
         boundingVolume: this._bounds,
         uniformMap,
@@ -227,15 +315,20 @@ SceneGISVectorTileBatch.prototype.setRegions = function (regions) {
         region.maximumY - bounds.maximumY,
         clip,
       );
-      if (published.sourceMap !== source.uniformMap) {
+      if (
+        published.source !== source ||
+        published.sourceMap !== source.uniformMap
+      ) {
+        published.source = source;
         published.sourceMap = source.uniformMap;
         published.uniformMap = {
           ...source.uniformMap,
           u_sceneGISVectorTileClip: () => clip,
         };
+        published.render = DrawCommand.shallowClone(source, published.render);
+        published.render.uniformMap = published.uniformMap;
       }
-      published.render = DrawCommand.shallowClone(source, published.render);
-      published.render.uniformMap = published.uniformMap;
+      published.render.shaderProgram = source.shaderProgram;
       this.renderCommands.push(published.render);
       index++;
     }

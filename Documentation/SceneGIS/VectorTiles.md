@@ -20,7 +20,8 @@ V5A 增加独立平面点标注与 [本地点标注图集](../../Test/vector-til
 V5B 继续接入各 10 个沿线名称、路牌与箭头层：当前 Bright 118/119、Liberty 107/111。
 新增 [沿线标注图集](../../Test/vector-tiles/line-symbols.html)；语义和限制见 [标注文档](VectorTileSymbols.md)。
 V4A 已实现平面直接贴地、terrain anchors 和公开页地形开关，技术资格见下文；
-负责人视觉 gate 待验收。Globe 和完整连续曲面字形仍未支持。
+负责人已于 2026-09-14 确认视觉验收。G1 增加 Globe 适配，技术验证与人工页见下文；
+G1 负责人于 2026-09-14 确认视觉与性能结果可接受，完整连续曲面字形仍未支持。
 整体边界见 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
 公共契约见 [ADR-0058](Decisions/ADR-0058-vector-tile-frontend-contract.md)。
 渲染与调度契约见 [ADR-0059](Decisions/ADR-0059-planar-vector-tile-batch-renderer.md)。
@@ -29,6 +30,34 @@ Resident coverage 见 [ADR-0060](Decisions/ADR-0060-vector-tile-resident-render-
 基础样式与覆盖协议见 [ADR-0062](Decisions/ADR-0062-vector-stroke-and-coverage.md)。
 
 ## 数据与坐标
+
+### Globe 使用范围
+
+`SceneGISVectorTileLayer` 可加入保留原生 `Globe` 的 WGS84 / SCENE3D 场景。零高程椭球和真实
+terrainProvider 使用同一直接贴地后端；Planar 无地形的 flat 快速路径保持独立。透明地球、
+morph/SCENE2D、非 WGS84 不在本阶段范围，构造或 update 会明确拒绝。
+
+```js
+const layer = scene.primitives.add(
+  new Cesium.SceneGISVectorTileLayer({ scene, style }),
+);
+```
+
+省略 `tilingScheme` 时 Globe 自动创建 EPSG:3857 / ±π×6378137 米的单根 source matrix。
+显式 source override 必须与传入的 `tilingScheme` 共享 identity；不能传 Globe 的 geographic
+terrain scheme。MVT 数值和 style/layout 不重投影；渲染 adapter 映射到 ECEF。矢量 cover 独立使用
+地理包围体、horizon、三维 SSE 与现有 tile budget，保留近细远粗与 resident parent coverage。
+Style zoom 以视轴椭球交点和当地 Mercator 比例计算；越过地平线时采用前向最近点，不限制相机俯角。
+
+面和线读取 native Globe depth，按独立 Worker 准备的数值几何做覆盖、透明混合和拾取，
+不合成地图颜色纹理。真实地形的圆点和文字使用 Worker 构建的已渲染 mesh BVH 查询高度，
+地形 LOD/provider 变化保留地图几何与 glyph atlas；待索引就绪前的锚点受真实地表遮挡。
+该阶段不承诺完整环境材质融合、陡坡大字形连续曲面贴合或稳定 60 FPS。
+
+[Globe 离线入口](../../Test/vector-tiles/globe.html) 默认使用本地构造 MVT / Bright 样式，
+可切换公共 Bright/Liberty 与 Esri 高程。范围与数值协议见 [ADR-0070](Decisions/ADR-0070-globe-vector-ground-rendering.md)。
+
+### 原始瓦片坐标
 
 `SceneGISVectorTile.decode(buffer)` 接受解压后的 ArrayBuffer 或 Uint8Array。
 返回 `{layers}`，每层有 name/version/extent/features；每个 feature 有 id/type/properties/geometry。
@@ -198,9 +227,34 @@ terrain cover 收紧，含零高程等待地表及 skirts。只改高度 uniform
 `Test/vector-tiles/public.html` 提供“真实地形 · 矢量贴地”开关，以及紫金山、因斯布鲁克定位。
 地形使用既有示例的 Esri WorldElevation3D LERC 服务；失败显示提示，关闭恢复零高程。
 不限定用户相机的 pitch；style 比例仍沿用视轴与 Z=0 参考面的契约，视轴完全不再朝向参考面
-时不显示地图，此既有比例限制尚需后续三维比例契约解决。Globe 仍属 G1，不能由平面结果推断。
+时不显示地图，此既有比例限制尚需后续三维比例契约解决。Globe 的独立 G1 资格见前述 Globe 使用范围。
 
 契约与取舍见 [ADR-0069](Decisions/ADR-0069-planar-vector-ground-rendering.md)。
+
+### 地形明暗、hillshade 与高级环境
+
+Style `type: "hillshade"` 是基于 `raster-dem` 高程源生成的制图晕渲，可以使用固定光向而不改变
+三维地形，见 [MapLibre style spec](https://maplibre.org/maplibre-style-spec/layers/#hillshade)。
+当前 vector source/style profile 未接入该类型。也存在预计算成矢量面的晕渲：本仓库固定 Streets v12
+参考的 `id: "hillshade"` 实际是 `type: "fill"`、`source-layer: "hillshade"`；名称不等于渲染类型。
+
+当前平面/Globe ground 的山体明暗来自实际地表深度的 geometric normal，与场景光方向做
+`0.4 + 0.6 * max(N·L, 0)` 基础光照，作用于地图面线颜色；Globe background 同样处理。
+它跟随 `world.enableLighting`，没有复用平面 terrain 的 Worker smooth normals、完整 light color/
+intensity、物理 irradiance 或云影数据。文字/图标保持其独立样式显示。公开地形示例用显式
+DirectionalLight 做观察光照；没有启动高级环境 controller，也没有启用几何阴影。
+
+原生地表先渲染，矢量借用地表 depth 后在 TERRAIN_CLASSIFICATION 绘制，深度共享只保证贴附与遮挡。
+不透明矢量颜色会覆盖地表已经计算的照明和阴影，不能自动继承 native Globe/Planar material lighting。
+Vector command 当前明确 `castShadows=false`、`receiveShadows=false`，覆盖凸体也不能作为真实 caster。
+
+高级环境现有 pre-tonemap HDR slot 位于场景颜色之后，具备为地图统一合成 aerial/fog/cloud 的顺序基础；
+这不代表本阶段完成集成验证。后续必须让地表矢量在自身着色时消费同一 World 的物理 Sun/sky、Beer
+transmittance 与真实 receiver 位置，替换基础 Lambert；几何阴影需要明确的 surface receiver 接入。
+云影/几何阴影应衰减 direct 项，不能把整个已渲染地图或 emissive/indirect 统一压暗。大气只合成一次，
+style hillshade 作为制图效果的启用策略须与三维光照明确区分。既有光照约束见
+[ADR-0054](Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md) 与
+[ADR-0055](Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md)；此处记录未完成边界，不新增 API。
 
 ### 配置与样式
 

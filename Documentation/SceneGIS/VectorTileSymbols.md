@@ -1,5 +1,11 @@
 # 矢量瓦片标注
 
+G1 将既有点、沿线、图标和路牌前端接入 WGS84 / SCENE3D Globe。原始 anchors 保留 Mercator
+坐标用于 region ownership 和跨 tile 去重，绘制坐标独立映射为 ECEF；layout、glyph atlas 与
+native derived pick 共用。默认椭球直接使用 geodetic zero；真实地形借用已渲染 mesh 的 Worker
+BVH 查询高度，并通过实际地表 depth 遮挡。小范围 quad 随锚点贴地不等于完整曲面字形；
+大字形跨陡坡、跨瓦片道路语义拼接和全球所有字体覆盖仍保留原边界。见 [ADR-0070](Decisions/ADR-0070-globe-vector-ground-rendering.md)。
+
 V5A 使用自有 glyph PBF parser、metrics layout、collision、glyph/icon GPU buffers 和 shaders，
 仅复用 Cesium 通用 Scene/Renderer 与自动 pick command 派生。
 不依赖 Cesium experimental MVT、LabelCollection、BillboardCollection 或地图颜色 RTT。

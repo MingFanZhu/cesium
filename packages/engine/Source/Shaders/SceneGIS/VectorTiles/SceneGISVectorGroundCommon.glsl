@@ -1,10 +1,36 @@
-uniform sampler2D u_sceneGISGroundVertices;
-uniform sampler2D u_sceneGISGroundTriangles;
+uniform sampler2D u_sceneGISGroundData;
 uniform sampler2D u_sceneGISGroundPicks;
-uniform vec2 u_sceneGISGroundVertexSize;
-uniform vec2 u_sceneGISGroundTriangleSize;
+uniform vec2 u_sceneGISGroundDataSize;
+uniform vec2 u_sceneGISGroundOffsets;
 uniform vec2 u_sceneGISGroundPickSize;
 uniform vec2 u_sceneGISGroundHeights;
+#ifdef SCENEGIS_VECTOR_GLOBE_TERRAIN
+#ifdef SCENEGIS_VECTOR_GLOBE_VERTEX
+#define SCENEGIS_TERRAIN_VARYING out
+#else
+#define SCENEGIS_TERRAIN_VARYING in
+#endif
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainReference;
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainFrame;
+flat SCENEGIS_TERRAIN_VARYING vec3 v_terrainOriginEye;
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainAB;
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainC;
+#ifndef SCENEGIS_VECTOR_UNIFORM_PAINT
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainColor;
+#endif
+#ifdef SCENEGIS_VECTOR_FRINGE
+flat SCENEGIS_TERRAIN_VARYING vec3 v_terrainFringe;
+#endif
+#ifdef SCENEGIS_VECTOR_LINE
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainMetrics0;
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainMetrics1;
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainMetrics2;
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainDash;
+#ifndef SCENEGIS_VECTOR_UNIFORM_PAINT
+flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainPaint;
+#endif
+#endif
+#endif
 uniform float u_sceneGISVectorMetersPerPixel;
 #ifdef SCENEGIS_VECTOR_UNIFORM_PAINT
 uniform vec4 u_sceneGISGroundColor;
@@ -22,7 +48,11 @@ vec4 groundVertex(int index, int field)
 #else
     const int stride = 3;
 #endif
-    return groundFetch(u_sceneGISGroundVertices, u_sceneGISGroundVertexSize, index * stride + field);
+    return groundFetch(u_sceneGISGroundData, u_sceneGISGroundDataSize, index * stride + field);
+}
+vec4 groundTriangle(int index)
+{
+    return groundFetch(u_sceneGISGroundData, u_sceneGISGroundDataSize, int(u_sceneGISGroundOffsets.x) + index);
 }
 vec4 groundPaint(int index)
 {

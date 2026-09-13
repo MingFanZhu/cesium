@@ -1,4 +1,41 @@
-# 矢量瓦片平面验收
+# 矢量瓦片验收
+
+## Globe
+
+`/Test/vector-tiles/globe.html` 默认使用本地构造数据与 Bright 样式，网络断开也能启动。
+数据仅用于验证，不表示真实地理要素；地形开关在本地模式使用连续的构造高度函数。
+`/Test/vector-tiles/globe.html?provider=bright` 直接打开 OpenFreeMap 公开地图，地形开关使用
+Esri 原生高程 provider；网络或公共字体缺字会明确报告，不自动改变数据源。
+
+验收街区俯视/倾斜、阿尔卑斯真实地形、街道细节、整球缩放、拾取与重建。原生 Globe 始终
+保留；地形关闭后回到 EllipsoidTerrainProvider。使用 Viewer 默认持续渲染与原生 FPS。
+G1 已于 2026-09-14 通过负责人视觉与性能验收，不代表透明地球、非 WGS84 或完整曲面文字已支持。
+
+复用开发服务器运行页面回归：
+
+```powershell
+npx playwright test -c Test/vector-tiles/playwright.config.mjs
+```
+
+此配置只运行矢量页面，不启动 Sandcastle；Globe 测试明确阻断外网，以本地 MVT、字库、图标
+和起伏地形验证。`verify-worker-package.mjs` 同时验证独立 engine 安装包和两种 release 入口的
+Globe 贴地、圆点、拾取及资源释放。
+
+性能回归使用 1432×1150 的地图 canvas、pixelRatio 1。公开 Bright、地形关闭时可在页面控制台
+恢复南京浅倾角案例；必须先等待地图就绪，再使用原生 FPS 或 CPU 测量按钮：
+
+```js
+publicVectorPreview.viewer.camera.setView(
+  await fetch("./globe-performance-camera.json").then((response) =>
+    response.json(),
+  ),
+);
+```
+
+真实地形对照选择阿尔卑斯并开启地形、倾斜。同机 GPU timer、CPU、旋转/平移与剩余帧时波动
+见 [G1 review](../../AgentDocs/vector-tiles/reviews/2026-09-14-g1-globe-review.md)；不得把 CPU 时间当作 FPS。
+
+## 平面入口
 
 根开发服务器入口：`/Test/vector-tiles/index.html`。当前页面直接使用
 `/Build/CesiumUnminified/index.js`，不需要打开 Sandcastle。

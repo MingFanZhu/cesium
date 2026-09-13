@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Globe 矢量地图 · SceneGIS</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="./public.css" />
+  </head>
+  <body data-world="globe">
+    <aside>
+      <div class="eyebrow">SCENEGIS · VECTOR TILES</div>
+      <h1>Globe 矢量地图</h1>
+      <p class="intro">保留原生椭球与地形，直接绘制道路、面和地图标注。</p>
+      <form id="connect">
+        <label for="provider">数据与样式</label>
+        <select id="provider">
+          <option value="local">本地构造地图 · 离线验收</option>
+          <option value="bright">Bright · MapLibre 示例</option>
+          <option value="liberty">Liberty · 对照样式</option>
+        </select>
+        <p class="hint">
+          本地数据可离线启动；Bright / Liberty 使用无需 token 的公开服务。
+        </p>
+        <button class="primary" type="submit">加载地图</button>
+      </form>
+      <div id="source" class="source">正在连接公开数据…</div>
+      <label for="location">定位街区</label>
+      <select id="location">
+        <option value="berlin">柏林 · 博物馆岛</option>
+        <option value="newyork">纽约 · 曼哈顿</option>
+        <option value="shanghai">上海 · 外滩</option>
+        <option value="beijing">北京 · 故宫</option>
+        <option value="nanjing">南京 · 紫金山（地形）</option>
+        <option value="alps">阿尔卑斯 · 因斯布鲁克（地形）</option>
+      </select>
+      <label class="toggle"
+        ><input id="terrain" type="checkbox" />真实地形 · 矢量贴地</label
+      >
+      <p id="terrain-status" class="hint">
+        零高程地表；可切换至 Esri 全球高程。网络不可用时可关闭地形。
+      </p>
+      <div class="actions">
+        <button id="top" type="button">俯视</button>
+        <button id="tilt" type="button">倾斜</button>
+        <button id="detail" type="button">街道细节</button>
+        <button id="whole" type="button">地球全景</button>
+        <button id="recreate" type="button">重建图层</button>
+      </div>
+      <p class="hint">拖动平移 · 中键倾斜 · 滚轮缩放 · 点击查看要素</p>
+      <div id="status" role="status">初始化…</div>
+      <dl class="metrics">
+        <div>
+          <dt>样式缩放</dt>
+          <dd id="zoom">—</dd>
+        </div>
+        <div>
+          <dt>绘制命令</dt>
+          <dd id="commands">—</dd>
+        </div>
+        <div>
+          <dt>可见 / 缓存瓦片</dt>
+          <dd id="tiles">—</dd>
+        </div>
+        <div>
+          <dt>已解码要素</dt>
+          <dd id="features">—</dd>
+        </div>
+        <div>
+          <dt>标注 / 候选</dt>
+          <dd id="symbols">—</dd>
+        </div>
+      </dl>
+      <button id="measure" type="button" disabled>测量 60 帧</button>
+      <p id="measurement" class="hint">
+        CPU 提交时间；不含 GPU 完成和浏览器合成。
+      </p>
+      <details id="support">
+        <summary id="support-summary">样式支持清单</summary>
+        <p class="hint">
+          保留选中层的原始顺序、过滤器与表达式；以下层尚未绘制。
+        </p>
+        <ul id="excluded"></ul>
+      </details>
+      <details open>
+        <summary>拾取结果</summary>
+        <pre id="picked">点击水面、道路或建筑。</pre>
+      </details>
+      <div id="error" role="alert"></div>
+      <p id="symbol-warning" class="hint"></p>
+      <footer>
+        <a href="./globe.html?provider=bright">公开球面地图</a>
+        <a href="./public.html">平面对照</a>
+        <a href="./index.html">本地城市</a>
+        <a href="./styles.html">样式图集</a>
+        <a href="./symbols.html">点标注图集</a>
+        <a href="./line-symbols.html">沿线与特殊标注</a>
+        <a href="./distance.html">地形与影像远景</a>
+        <a href="./reference/README.md">来源与授权</a>
+      </footer>
+    </aside>
+    <main>
+      <div id="map"></div>
+      <div class="map-note">
+        <strong id="map-title">在线基础地图</strong
+        ><span>WGS84 Globe · 原生地表 · 矢量直接贴地</span>
+      </div>
+    </main>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./public.js"></script>
+  </body>
+</html>

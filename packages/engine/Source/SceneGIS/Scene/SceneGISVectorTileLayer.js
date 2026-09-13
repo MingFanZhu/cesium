@@ -6,6 +6,10 @@ import Request from "../../Core/Request.js";
 import RequestType from "../../Core/RequestType.js";
 import destroyObject from "../../Core/destroyObject.js";
 import Scene from "../../Scene/Scene.js";
+import Globe from "../../Scene/Globe.js";
+import SceneMode from "../../Scene/SceneMode.js";
+import Ellipsoid from "../../Core/Ellipsoid.js";
+import EllipsoidTerrainProvider from "../../Core/EllipsoidTerrainProvider.js";
 import SceneGISPlanarWorld from "./SceneGISPlanarWorld.js";
 import SceneGISVectorTileSource from "../Core/SceneGISVectorTileSource.js";
 import SceneGISVectorTileStyle from "../Core/SceneGISVectorTileStyle.js";
@@ -15,6 +19,10 @@ import Symbols from "./_private/_SceneGISVectorSymbols.js";
 import cover from "./_private/_SceneGISVectorTileCover.js";
 import renderCover from "../Core/_private/_SceneGISVectorTileRenderCover.js";
 import updateTerrain from "./_private/_SceneGISVectorTerrain.js";
+import GlobeCoordinates from "../Core/_private/_SceneGISVectorGlobeCoordinates.js";
+import GlobeCover from "./_private/_SceneGISVectorGlobeCover.js";
+import GlobeTerrain from "./_private/_SceneGISVectorGlobeTerrain.js";
+import GlobeBackground from "./_private/_SceneGISVectorGlobeBackground.js";
 
 function integerOption(options, name, fallback) {
   const value = options[name] ?? fallback;
@@ -61,7 +69,7 @@ function signature(records, zoom) {
     .join("|");
 }
 
-function prepareSources(world, style, overrides) {
+function prepareSources(tilingScheme, style, overrides) {
   const result = new Map();
   for (const id of Object.keys(overrides)) {
     if (!Object.hasOwn(style.sources, id)) {
@@ -78,7 +86,7 @@ function prepareSources(world, style, overrides) {
       }
       source = new SceneGISVectorTileSource({
         url: definition.tiles[0],
-        tilingScheme: world.tilingScheme,
+        tilingScheme,
         minimumLevel: definition.minzoom,
         maximumLevel: definition.maxzoom,
         scheme: definition.scheme,
@@ -87,10 +95,10 @@ function prepareSources(world, style, overrides) {
     }
     if (
       !(source instanceof SceneGISVectorTileSource) ||
-      source.tilingScheme !== world.tilingScheme
+      source.tilingScheme !== tilingScheme
     ) {
       throw new DeveloperError(
-        `Source ${id} must use the world's canonical tilingScheme.`,
+        `Source ${id} must use the layer's canonical tilingScheme.`,
       );
     }
     result.set(id, {
@@ -240,7 +248,7 @@ function validatePreparedTile(result, records, allowPicking) {
       }
       let itemBytes = 0;
       if (item.ground) {
-        const { vertices, triangles, stride } = item.ground;
+        const { vertices, triangles, stride, frames } = item.ground;
         if (
           !(vertices instanceof Float32Array) ||
           !(triangles instanceof Float32Array) ||
@@ -251,6 +259,15 @@ function validatePreparedTile(result, records, allowPicking) {
           throw new DeveloperError("Invalid vector Worker ground tables.");
         }
         itemBytes = vertices.byteLength + triangles.byteLength;
+        if (frames !== undefined) {
+          if (
+            !(frames instanceof Float32Array) ||
+            frames.length !== triangles.length * 4
+          ) {
+            throw new DeveloperError("Invalid vector Worker Globe frames.");
+          }
+          itemBytes += frames.byteLength;
+        }
       }
       for (const geometry of item.geometries ?? []) {
         const high = geometry.attributes?.position3DHigh?.values;
@@ -337,6 +354,7 @@ function prepareEntry(layer, state, entry, zoom) {
   const parameters = {
     kind: "tile",
     ground: layer._ground,
+    globe: layer._globe,
     records,
     zoom,
     maximumLevel: state.source.maximumLevel,
@@ -475,18 +493,20 @@ function updateBackgrounds(layer, zoom, frameState) {
       );
       let candidate;
       if (evaluated.show && evaluated.paint["background-opacity"] > 0) {
-        const bounds = layer._world.coordinateSystem.extent;
+        const bounds = layer._extent;
         const instance = geometry.background(
           bounds.width,
           bounds.height,
           evaluated,
         );
-        candidate = new VectorBatch(
-          layer,
-          { bounds },
-          { kind: "fill", instances: [instance] },
-          false,
-        );
+        candidate = layer._globe
+          ? new GlobeBackground(layer, evaluated)
+          : new VectorBatch(
+              layer,
+              { bounds },
+              { kind: "fill", instances: [instance] },
+              false,
+            );
         try {
           candidate.update(frameState);
         } catch (error) {
@@ -500,7 +520,7 @@ function updateBackgrounds(layer, zoom, frameState) {
     } else {
       record.batch?.update(frameState);
     }
-    record.batch?.setRegions([layer._world.coordinateSystem.extent]);
+    record.batch?.setRegions([layer._extent]);
   }
 }
 
@@ -575,13 +595,15 @@ function updateSources(layer, zoom, frameState) {
     const desired =
       state.records.length === 0
         ? []
-        : cover.select(
-            frameState,
-            state.source,
-            layer._maximumVisibleTiles,
-            layer._world.maximumTiltedTileDistance,
-            layer._ground ? layer._groundHeights : undefined,
-          );
+        : layer._globe
+          ? GlobeCover.select(layer, frameState, state.source)
+          : cover.select(
+              frameState,
+              state.source,
+              layer._maximumVisibleTiles,
+              layer._world.maximumTiltedTileDistance,
+              layer._ground ? layer._groundHeights : undefined,
+            );
     const protectedKeys = new Set();
     state.visible.length = 0;
     for (const tile of desired) {
@@ -722,7 +744,7 @@ function publishOrder(layer) {
 }
 
 /**
- * Renders independently decoded vector tiles on a SceneGIS planar world.
+ * Renders independently decoded vector tiles on a SceneGIS planar world or WGS84 Globe.
  * Add this object to scene.primitives. The collection then owns its lifetime.
  * Construction does not request data or allocate GPU resources. Scene, World,
  * style, and source overrides are borrowed. Style/source configuration is fixed.
@@ -734,7 +756,8 @@ function publishOrder(layer) {
  * @constructor
  * @experimental This API is experimental and subject to change.
  * @param {object} options Layer configuration.
- * @param {Scene} options.scene The live planar Scene.
+ * @param {Scene} options.scene The live SCENE3D Scene with a planar world or opaque WGS84 Globe.
+ * @param {SceneGISPlanarTilingScheme} [options.tilingScheme] Vector source matrix. Planar uses the World identity; Globe defaults to the EPSG:3857 single-root matrix.
  * @param {SceneGISVectorTileStyle|object} options.style A V1 style within the flat V3B1 rendered profile.
  * @param {Object.<string, SceneGISVectorTileSource>} [options.sources] Source overrides using the world's scheme.
  * @param {number} [options.tileCacheSize=64] Maximum resident tiles per source, including visible tiles.
@@ -756,10 +779,36 @@ function SceneGISVectorTileLayer(options) {
   if (
     !(scene instanceof Scene) ||
     scene.isDestroyed() ||
-    !(scene.world instanceof SceneGISPlanarWorld) ||
+    (!(scene.world instanceof SceneGISPlanarWorld) &&
+      !(scene.world instanceof Globe)) ||
     scene.world.isDestroyed()
   ) {
-    throw new DeveloperError("scene must have a live SceneGISPlanarWorld.");
+    throw new DeveloperError(
+      "scene must have a live SceneGISPlanarWorld or Globe.",
+    );
+  }
+  const globe = scene.world instanceof Globe;
+  if (
+    globe &&
+    (!scene.world.ellipsoid.equals(Ellipsoid.WGS84) ||
+      scene.mode !== SceneMode.SCENE3D ||
+      scene.world.translucency.enabled)
+  ) {
+    throw new DeveloperError(
+      "Globe vector rendering requires opaque WGS84 in SCENE3D.",
+    );
+  }
+  const tilingScheme = globe
+    ? GlobeCoordinates.scheme(options.tilingScheme)
+    : scene.world.tilingScheme;
+  if (
+    !globe &&
+    options.tilingScheme !== undefined &&
+    options.tilingScheme !== tilingScheme
+  ) {
+    throw new DeveloperError(
+      "Planar vector sources must use the World's canonical tilingScheme.",
+    );
   }
   const style =
     options.style instanceof SceneGISVectorTileStyle
@@ -810,7 +859,7 @@ function SceneGISVectorTileLayer(options) {
   ) {
     throw new DeveloperError("sources must be an object of source overrides.");
   }
-  this._sources = prepareSources(scene.world, style, options.sources ?? {});
+  this._sources = prepareSources(tilingScheme, style, options.sources ?? {});
   this._backgrounds = [];
   for (const record of this._records) {
     if (record.definition.type === "background") {
@@ -821,8 +870,12 @@ function SceneGISVectorTileLayer(options) {
   }
   this._scene = scene;
   this._world = scene.world;
+  this._globe = globe;
+  this._tilingScheme = tilingScheme;
+  this._extent = tilingScheme.coordinateSystem.extent;
   this._ground = scene.world.terrainProvider !== undefined;
   this._groundHeights = new Cartesian2();
+  this._groundGeometry = new Map();
   this._style = style;
   this._show = options.show ?? true;
   this._allowPicking = options.allowPicking ?? true;
@@ -844,7 +897,7 @@ function SceneGISVectorTileLayer(options) {
     "maximumSymbolRequests",
     4,
   );
-  const extent = this._world.coordinateSystem.extent;
+  const extent = this._extent;
   this._workers = new WorkerPool({
     extent: {
       minimumX: extent.minimumX,
@@ -936,7 +989,11 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
    */
   tilesLoaded: {
     get: function () {
-      return this._tilesLoaded && (this._symbols?.loaded ?? true);
+      return (
+        this._tilesLoaded &&
+        (this._symbols?.loaded ?? true) &&
+        (!this._globe || !GlobeTerrain.pending(this))
+      );
     },
   },
   /**
@@ -1037,10 +1094,11 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
     frameState !== this._scene.frameState ||
     this._scene.world !== this._world ||
     this._world.isDestroyed() ||
-    frameState.scene3DOnly !== true
+    frameState.mode !== SceneMode.SCENE3D ||
+    (this._globe && this._world.translucency.enabled)
   ) {
     throw new DeveloperError(
-      "The vector layer must update in its original planar Scene.",
+      "The vector layer must update in its original opaque SCENE3D World.",
     );
   }
   if (!this._show || !this._world.show) {
@@ -1082,21 +1140,35 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
     if (ground) {
       // The volume envelope includes the pending zero-height surface. The one
       // metre guard encloses boundary samples; it never offsets map geometry.
-      this._groundHeights.x = Math.min(0, provider.minimumHeight) - 1;
-      this._groundHeights.y = Math.max(0, provider.maximumHeight) + 1;
+      if (this._globe) {
+        GlobeTerrain.heights(this, undefined, this._groundHeights);
+        this._globeSelectionHeights = Cartesian2.clone(
+          this._groundHeights,
+          this._globeSelectionHeights,
+        );
+        if (!(provider instanceof EllipsoidTerrainProvider)) {
+          this._groundHeights.x = Math.min(-100000, this._groundHeights.x);
+          this._groundHeights.y = Math.max(10000, this._groundHeights.y);
+        }
+      } else {
+        this._groundHeights.x = Math.min(0, provider.minimumHeight) - 1;
+        this._groundHeights.y = Math.max(0, provider.maximumHeight) + 1;
+      }
     }
-    updateTerrain(this);
-    const zoom = cover.computeZoom(
-      frameState,
-      this._world.coordinateSystem.extent.width,
-    );
+    if (this._globe) {
+      GlobeTerrain.update(this);
+    } else {
+      updateTerrain(this);
+    }
+    const zoom = this._globe
+      ? GlobeCover.computeZoom(this, frameState)
+      : cover.computeZoom(frameState, this._extent.width);
     this._zoom = zoom;
     if (zoom === undefined) {
       clearView(this);
       return;
     }
-    this._metersPerPixel =
-      this._world.coordinateSystem.extent.width / (512 * 2 ** zoom);
+    this._metersPerPixel = this._extent.width / (512 * 2 ** zoom);
     updateBackgrounds(this, zoom, frameState);
     updateSources(this, zoom, frameState);
     if (this._symbols) {
@@ -1108,6 +1180,9 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
       }
     }
     publishOrder(this);
+    if (this._globe) {
+      GlobeTerrain.schedule(this);
+    }
     this._ready = true;
     if (!this.tilesLoaded) {
       this._scene.requestRender();
@@ -1148,6 +1223,9 @@ SceneGISVectorTileLayer.prototype.destroy = function () {
   this._drawOrder.length = 0;
   this._terrain = undefined;
   this._groundRanges = undefined;
+  this._globeCoverCache = undefined;
+  this._globeTerrainCache = undefined;
+  this._globeTerrainEntries = undefined;
   return destroyObject(this);
 };
 

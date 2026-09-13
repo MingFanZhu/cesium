@@ -4,6 +4,9 @@ in vec4 color;
 in vec2 corner;
 in vec3 dimensions;
 in vec4 strokeColor;
+#ifdef SCENEGIS_VECTOR_GLOBE
+in vec2 vectorAnchor;
+#endif
 out vec4 v_color;
 out vec2 v_circleCoordinate;
 out vec3 v_dimensions;
@@ -23,7 +26,11 @@ void main()
     vec4 p = czm_modelViewProjectionRelativeToEye *
         czm_translateRelativeToEye(position3DHigh, position3DLow);
 #ifdef SCENEGIS_VECTOR_TERRAIN_ANCHOR
+#ifdef SCENEGIS_VECTOR_GLOBE
+    v_anchorLocal = vectorAnchor;
+#else
     v_anchorLocal = position3DHigh.xy + position3DLow.xy;
+#endif
     v_anchorDepth = -(czm_modelViewRelativeToEye * czm_translateRelativeToEye(position3DHigh, position3DLow)).z;
     v_groundVisibility = sceneGISAnchorVisibility(p, v_anchorDepth);
 #endif

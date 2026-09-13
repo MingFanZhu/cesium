@@ -765,6 +765,11 @@ Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代�
 几何数值表与批量凸体，从实际 surface depth 恢复 coverage；default flat 保留独立快速路径。
 模式切换保留 source/Worker，ground 地形 LOD 只更新地表包络和 anchors，不重新三角化地图。
 圆点/文字的 terrain anchors 与连续曲面字形质量分开验收。
+按 [ADR-0070](Decisions/ADR-0070-globe-vector-ground-rendering.md)，Globe 使用独立 WGS84 / SCENE3D
+适配，保留原生椭球和 terrain；矢量 source 固定为独立 EPSG:3857 单根矩阵。曲面三角形细分和
+局部 ENU 数值表由 Worker 准备，从实际地表 depth 逆投影恢复覆盖与拾取。Globe cover 使用
+地理包围体、horizon 和三维 SSE，不能套用 planar Z=0 的相机比例或地形 tile matrix。
+真实地形的标注索引由 vector Worker 异步构建；只借用已发布 native mesh，不请求或修改地形。
 矢量瓦片与平面影像/地形共享私有 SSE 数值判据，MVT 选取预算内互不包含的近细远粗 leaves，
 请求与内容缓存保持独立。Style zoom 以视轴在 Z=0 的前向交点为参考，不把倾斜造成的
 采样距离变化误认为用户缩放；具体边界见 [ADR-0064](Decisions/ADR-0064-vector-perspective-lod.md)。

@@ -2,6 +2,7 @@ import Cartesian4 from "../../../Core/Cartesian4.js";
 import Cartesian2 from "../../../Core/Cartesian2.js";
 import Color from "../../../Core/Color.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
+import IndexDatatype from "../../../Core/IndexDatatype.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
 import RuntimeError from "../../../Core/RuntimeError.js";
 import destroyObject from "../../../Core/destroyObject.js";
@@ -20,6 +21,8 @@ import common from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorGroundCo
 import vertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorGroundVS.js";
 import fragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorGroundFS.js";
 import coverage from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTileFlatFS.js";
+import globeCommon from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorGlobeCommon.js";
+import globeVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorGlobeVS.js";
 
 function table(resources, context, data, name) {
   const count = Math.max(1, data.length / 4);
@@ -51,8 +54,7 @@ function table(resources, context, data, name) {
   const size = new Cartesian2(width, height);
   resources.uniformMap[`u_sceneGISGround${name}`] = () => texture;
   const sizeName = {
-    Vertices: "Vertex",
-    Triangles: "Triangle",
+    Data: "Data",
     Picks: "Pick",
     Dash: "Dash",
   }[name];
@@ -61,7 +63,13 @@ function table(resources, context, data, name) {
 }
 
 /** Owns batched convex volumes and numeric geometry tables; no terrain mesh dependency. @private */
-function SceneGISVectorGroundResources(context, prepared, owner, allowPicking) {
+function SceneGISVectorGroundResources(
+  context,
+  prepared,
+  owner,
+  allowPicking,
+  geometryCache,
+) {
   this._vertexArrays = [];
   this._textures = [];
   this._pickIds = [];
@@ -69,6 +77,10 @@ function SceneGISVectorGroundResources(context, prepared, owner, allowPicking) {
   this._paintPrefix = prepared.kind;
   this._color = new Cartesian4();
   this._paint = new Cartesian4();
+  this._geometryCache = geometryCache;
+  this._geometry = undefined;
+  this._context = context;
+  this._terrainShaderProgram = undefined;
   this.uniformMap = {
     u_sceneGISGroundColor: () => this._color,
     u_sceneGISGroundPaint: () => this._paint,
@@ -84,8 +96,19 @@ function SceneGISVectorGroundResources(context, prepared, owner, allowPicking) {
         "Vector terrain rendering requires WebGL2, float textures and depth textures.",
       );
     }
-    table(this, context, prepared.ground.vertices, "Vertices");
-    table(this, context, prepared.ground.triangles, "Triangles");
+    const { vertices, triangles, frames } = prepared.ground;
+    const globe = frames !== undefined;
+    const triangleOffset = vertices.length;
+    const frameOffset = triangleOffset + triangles.length;
+    const data = new Float32Array(frameOffset + (frames?.length ?? 0));
+    data.set(vertices);
+    data.set(triangles, triangleOffset);
+    if (globe) {
+      data.set(frames, frameOffset);
+    }
+    table(this, context, data, "Data");
+    const offsets = new Cartesian2(triangleOffset / 4, frameOffset / 4);
+    this.uniformMap.u_sceneGISGroundOffsets = () => offsets;
     const colors = new Uint8Array(Math.max(1, prepared.identities.length) * 4);
     if (allowPicking) {
       for (let i = 0; i < prepared.identities.length; i++) {
@@ -99,16 +122,31 @@ function SceneGISVectorGroundResources(context, prepared, owner, allowPicking) {
       }
     }
     table(this, context, colors, "Picks");
-    // One 24-vertex outward-facing prism is instanced for every source triangle.
-    const buffer = Buffer.createVertexBuffer({
-      context,
-      typedArray: Float32Array.from({ length: 24 }, (_, i) => i),
-      usage: BufferUsage.STATIC_DRAW,
-    });
-    try {
-      this._vertexArrays.push(
-        new VertexArray({
+    this._geometryKey = globe;
+    let geometry = geometryCache.get(globe);
+    if (!geometry) {
+      // Instance one outward-facing volume per triangle: a planar prism or Globe box.
+      const buffer = Buffer.createVertexBuffer({
+        context,
+        typedArray: Float32Array.from({ length: globe ? 8 : 24 }, (_, i) => i),
+        usage: BufferUsage.STATIC_DRAW,
+      });
+      let indexBuffer;
+      try {
+        if (globe) {
+          indexBuffer = Buffer.createIndexBuffer({
+            context,
+            typedArray: new Uint16Array([
+              0, 2, 1, 1, 2, 3, 4, 5, 6, 5, 7, 6, 0, 1, 4, 1, 5, 4, 1, 3, 5, 3,
+              7, 5, 3, 2, 7, 2, 6, 7, 2, 0, 6, 0, 4, 6,
+            ]),
+            indexDatatype: IndexDatatype.UNSIGNED_SHORT,
+            usage: BufferUsage.STATIC_DRAW,
+          });
+        }
+        const vertexArray = new VertexArray({
           context,
+          indexBuffer,
           attributes: [
             {
               index: 0,
@@ -117,13 +155,22 @@ function SceneGISVectorGroundResources(context, prepared, owner, allowPicking) {
               componentsPerAttribute: 1,
             },
           ],
-        }),
-      );
-    } catch (error) {
-      buffer.destroy();
-      throw error;
+        });
+        geometry = { vertexArray, references: 0 };
+        geometryCache.set(globe, geometry);
+      } catch (error) {
+        indexBuffer?.destroy();
+        buffer.destroy();
+        throw error;
+      }
     }
+    geometry.references++;
+    this._geometry = geometry;
+    this._vertexArrays.push(geometry.vertexArray);
     const defines = ["SCENEGIS_VECTOR_GROUND"];
+    if (globe) {
+      defines.push("SCENEGIS_VECTOR_GLOBE");
+    }
     if (allowPicking) {
       defines.push("SCENEGIS_VECTOR_PICKING");
     }
@@ -147,11 +194,13 @@ function SceneGISVectorGroundResources(context, prepared, owner, allowPicking) {
       context,
       vertexShaderSource: new ShaderSource({
         defines,
-        sources: [common, vertex],
+        sources: globe ? [common, globeCommon, globeVertex] : [common, vertex],
       }),
       fragmentShaderSource: new ShaderSource({
         defines,
-        sources: [common, coverage, fragment],
+        sources: globe
+          ? [common, globeCommon, coverage, fragment]
+          : [common, coverage, fragment],
       }),
       attributeLocations: { prismVertex: 0 },
     });
@@ -161,6 +210,29 @@ function SceneGISVectorGroundResources(context, prepared, owner, allowPicking) {
     throw error;
   }
 }
+
+SceneGISVectorGroundResources.prototype.getShaderProgram = function (terrain) {
+  if (!terrain) {
+    return this._shaderProgram;
+  }
+  if (!this._terrainShaderProgram) {
+    const vs = this._shaderProgram.vertexShaderSource.clone();
+    const fs = this._shaderProgram.fragmentShaderSource.clone();
+    vs.defines.push(
+      "SCENEGIS_VECTOR_GLOBE_TERRAIN",
+      "SCENEGIS_VECTOR_GLOBE_VERTEX",
+    );
+    fs.defines.push("SCENEGIS_VECTOR_GLOBE_TERRAIN");
+    this._terrainShaderProgram = ShaderProgram.fromCache({
+      context: this._context,
+      vertexShaderSource: vs,
+      fragmentShaderSource: fs,
+      attributeLocations: { prismVertex: 0 },
+    });
+    this._terrainShaderProgram._bind();
+  }
+  return this._terrainShaderProgram;
+};
 
 SceneGISVectorGroundResources.prototype.updatePaint = function (paint) {
   const color = paint[`${this._paintPrefix}-color`];
@@ -182,9 +254,11 @@ SceneGISVectorGroundResources.prototype.isDestroyed = function () {
   return false;
 };
 SceneGISVectorGroundResources.prototype.destroy = function () {
-  for (const va of this._vertexArrays) {
-    va.destroy();
+  if (this._geometry && --this._geometry.references === 0) {
+    this._geometry.vertexArray.destroy();
+    this._geometryCache.delete(this._geometryKey);
   }
+  this._geometry = undefined;
   for (const texture of this._textures) {
     texture.destroy();
   }
@@ -192,10 +266,12 @@ SceneGISVectorGroundResources.prototype.destroy = function () {
     pick.destroy();
   }
   this._shaderProgram?.destroy();
+  this._terrainShaderProgram?.destroy();
   this._vertexArrays.length = 0;
   this._textures.length = 0;
   this._pickIds.length = 0;
   this._shaderProgram = undefined;
+  this._terrainShaderProgram = undefined;
   this._dashTexture = undefined;
   this.uniformMap = {};
   return destroyObject(this);

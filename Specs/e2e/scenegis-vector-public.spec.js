@@ -111,7 +111,9 @@ test("toggles real terrain while preserving the vector layer and Worker ownershi
       maximumHeight: 300,
       maximumLevel: 12,
       errorEvent: new C.Event(),
-      getLevelMaximumGeometricError: (level) => 20037508 / 2 ** level,
+      // This constant plane is exact even at the root; tile width is not its
+      // geometric error. Inflating that error requests an unnecessary deep cover.
+      getLevelMaximumGeometricError: () => 0,
       getTileDataAvailable: () => true,
       loadTileDataAvailability: () => undefined,
       requestTileGeometry: () =>

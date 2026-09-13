@@ -4,6 +4,7 @@ import Shaping from "./_SceneGISVectorSymbolShaping.js";
 import Assets from "./_SceneGISVectorSymbolAssets.js";
 import Projection from "./_SceneGISVectorSymbolProjection.js";
 import Batches from "./_SceneGISVectorSymbolBatches.js";
+import GlobeCoordinates from "../../Core/_private/_SceneGISVectorGlobeCoordinates.js";
 
 function inRegion(point, bounds, world) {
   return (
@@ -25,14 +26,19 @@ function shifted(box, screen, padding) {
   ];
 }
 function close(a, b) {
+  let dx = a.anchor.position.x - b.anchor.position.x;
+  if (a.terrain?.ellipsoid) {
+    const width = GlobeCoordinates.halfWidth * 2;
+    dx -= Math.round(dx / width) * width;
+  }
   return (
     a.key === b.key &&
-    Math.hypot(a.position.x - b.position.x, a.position.y - b.position.y) <=
+    Math.hypot(dx, a.anchor.position.y - b.anchor.position.y) <=
       Math.max(a.tolerance, b.tolerance)
   );
 }
 function metersPerPixel(runtime, zoom) {
-  const extent = runtime.owner._world.coordinateSystem.extent;
+  const extent = runtime.owner._extent;
   return (extent.maximumX - extent.minimumX) / (512 * 2 ** zoom);
 }
 function eligible(definition, zoom) {
@@ -111,7 +117,7 @@ function evaluation(runtime, base, zoom) {
 
 function* collect(runtime, job) {
   const result = [],
-    world = runtime.owner._world.coordinateSystem.extent;
+    world = runtime.owner._extent;
   for (let order = 0; order < runtime.owner._records.length; order++) {
     const definition = runtime.owner._records[order].definition;
     if (!eligible(definition, job.zoom)) {
@@ -121,7 +127,11 @@ function* collect(runtime, job) {
       for (const base of tileCandidates(runtime, entry, order)) {
         yield;
         Projection.attach(job.projection, base);
-        if (!regions.some((region) => inRegion(base.position, region, world))) {
+        if (
+          !regions.some((region) =>
+            inRegion(base.anchor.position, region, world),
+          )
+        ) {
           continue;
         }
         const screen = Projection.visible(job.projection, base.position);
@@ -151,8 +161,8 @@ function* collect(runtime, job) {
       b.order - a.order ||
       (a.evaluated.layout["symbol-sort-key"] ?? 0) -
         (b.evaluated.layout["symbol-sort-key"] ?? 0) ||
-      a.position.x - b.position.x ||
-      a.position.y - b.position.y ||
+      a.anchor.position.x - b.anchor.position.x ||
+      a.anchor.position.y - b.anchor.position.y ||
       a.key.localeCompare(b.key),
   );
   job.candidateCount = result.length;
@@ -434,11 +444,7 @@ function currentOwner(runtime, candidate) {
   return (
     candidate.entry.symbols === candidate.symbols &&
     regions?.some((r) =>
-      inRegion(
-        candidate.position,
-        r,
-        runtime.owner._world.coordinateSystem.extent,
-      ),
+      inRegion(candidate.anchor.position, r, runtime.owner._extent),
     )
   );
 }
@@ -654,7 +660,11 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
   const content = coverSignature(this);
   const resource = `${this.assets.revision}/${this._shaping.revision}`;
   const signature = `${view}|${content}|${resource}`;
-  this._projection = Projection.snapshot(this.owner.scene, this.owner._terrain);
+  this._projection = Projection.snapshot(
+    this.owner.scene,
+    this.owner._terrain,
+    this.owner._referenceDepth,
+  );
   this._metersPerPixel = metersPerPixel(this, zoom);
   let changed = view !== this._drawView || content !== this._drawContent;
   if (changed) {

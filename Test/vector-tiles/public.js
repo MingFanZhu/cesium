@@ -2,6 +2,14 @@
 import * as C from "/Build/CesiumUnminified/index.js";
 
 const element = (id) => document.getElementById(id);
+const globeMode = document.body.dataset.world === "globe";
+if (
+  globeMode &&
+  new window.URLSearchParams(window.location.search).get("provider") ===
+    "bright"
+) {
+  element("provider").value = "bright";
+}
 const half = 20037508.342789244;
 const locations = {
   berlin: [13.405, 52.52],
@@ -12,17 +20,21 @@ const locations = {
   alps: [11.4041, 47.2692, 580],
 };
 const viewer = new C.Viewer("map", {
-  planarWorld: {
-    extent: {
-      minimumX: -half,
-      minimumY: -half,
-      maximumX: half,
-      maximumY: half,
-    },
-    crs: "EPSG:3857",
-    maximumLevel: 18,
-    baseColor: C.Color.fromCssColorString("#f7f3ee"),
-  },
+  ...(globeMode
+    ? { baseLayer: false, scene3DOnly: true }
+    : {
+        planarWorld: {
+          extent: {
+            minimumX: -half,
+            minimumY: -half,
+            maximumX: half,
+            maximumY: half,
+          },
+          crs: "EPSG:3857",
+          maximumLevel: 18,
+          baseColor: C.Color.fromCssColorString("#f7f3ee"),
+        },
+      }),
   skyBox: false,
   skyAtmosphere: false,
   animation: false,
@@ -39,7 +51,27 @@ const viewer = new C.Viewer("map", {
   vrButton: false,
 });
 const scene = viewer.scene;
-viewer.planarWorld.maximumTiltedTileDistance = 100000;
+const world = scene.world;
+const vectorScheme = globeMode
+  ? new C.SceneGISPlanarTilingScheme({
+      coordinateSystem: new C.SceneGISPlanarCoordinateSystem({
+        crs: "EPSG:3857",
+        extent: new C.SceneGISPlanarExtent({
+          minimumX: -half,
+          minimumY: -half,
+          maximumX: half,
+          maximumY: half,
+        }),
+      }),
+    })
+  : world.tilingScheme;
+if (globeMode) {
+  world.baseColor = C.Color.fromCssColorString("#f7f3ee");
+  world.showGroundAtmosphere = false;
+  scene.fog.enabled = false;
+} else {
+  world.maximumTiltedTileDistance = 100000;
+}
 scene.debugShowFramesPerSecond = true;
 scene.msaaSamples = 1;
 scene.postProcessStages.fxaa.enabled = false;
@@ -57,8 +89,86 @@ let zoom = 14;
 let tilted = false;
 let removeTerrainError;
 let terrainError;
+let terrainGeneration = 0;
+let terrainLoading = false;
+
+async function setGlobeTerrain(enabled) {
+  const current = ++terrainGeneration;
+  removeTerrainError?.();
+  removeTerrainError = undefined;
+  terrainError = undefined;
+  terrainLoading = enabled;
+  cancelMeasurement?.();
+  element("terrain").checked = enabled;
+  try {
+    const provider = !enabled
+      ? new C.EllipsoidTerrainProvider()
+      : connection?.provider === "local"
+        ? new C.CustomHeightmapTerrainProvider({
+            width: 33,
+            height: 33,
+            callback: (x, y, level) => {
+              const rectangle =
+                new C.GeographicTilingScheme().tileXYToRectangle(x, y, level);
+              const buffer = new Float32Array(33 * 33);
+              for (let row = 0; row < 33; row++) {
+                for (let column = 0; column < 33; column++) {
+                  const longitude = C.Math.lerp(
+                    rectangle.west,
+                    rectangle.east,
+                    column / 32,
+                  );
+                  const latitude = C.Math.lerp(
+                    rectangle.north,
+                    rectangle.south,
+                    row / 32,
+                  );
+                  buffer[row * 33 + column] =
+                    600 +
+                    200 *
+                      Math.sin(longitude * 2000) *
+                      Math.cos(latitude * 2000);
+                }
+              }
+              return buffer;
+            },
+          })
+        : await C.ArcGISTiledElevationTerrainProvider.fromUrl(
+            "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer",
+          );
+    if (current !== terrainGeneration || viewer.isDestroyed()) {
+      return;
+    }
+    world.terrainProvider = provider;
+    terrainLoading = false;
+    world.enableLighting = enabled;
+    if (enabled) {
+      scene.light = new C.DirectionalLight({
+        direction: C.Cartesian3.negate(
+          C.Cartesian3.normalize(scene.camera.positionWC, new C.Cartesian3()),
+          new C.Cartesian3(),
+        ),
+      });
+      removeTerrainError = provider.errorEvent.addEventListener((error) => {
+        error.retry = false;
+        terrainError = `地形加载失败：${error.message}；可关闭地形恢复椭球。`;
+      });
+    }
+    scene.requestRender();
+  } catch (error) {
+    if (current !== terrainGeneration || viewer.isDestroyed()) {
+      return;
+    }
+    terrainLoading = false;
+    terrainError = `地形连接失败：${error.message}；可关闭地形恢复椭球。`;
+  }
+}
 
 function setTerrain(enabled) {
+  if (globeMode) {
+    setGlobeTerrain(enabled);
+    return;
+  }
   removeTerrainError?.();
   removeTerrainError = undefined;
   terrainError = undefined;
@@ -151,6 +261,28 @@ function view() {
     (metersPerPixel * scene.canvas.clientHeight) /
     (2 * Math.tan(verticalFov * 0.5));
   const pitch = tilted ? Math.PI / 4 : Math.PI / 2;
+  if (globeMode) {
+    const target = C.Cartesian3.fromDegrees(
+      longitude,
+      latitude,
+      element("terrain").checked
+        ? connection?.provider === "local"
+          ? 600
+          : referenceHeight
+        : 0,
+    );
+    scene.camera.lookAt(
+      target,
+      new C.HeadingPitchRange(
+        0,
+        -pitch,
+        range * Math.cos((latitude * Math.PI) / 180),
+      ),
+    );
+    scene.camera.lookAtTransform(C.Matrix4.IDENTITY);
+    scene.requestRender();
+    return;
+  }
   scene.camera.setView({
     destination: new C.Cartesian3(
       x,
@@ -188,7 +320,7 @@ function replaceLayer(next = connection) {
   const source = new MeasuredSource(
     {
       url: next.resource,
-      tilingScheme: viewer.planarWorld.tilingScheme,
+      tilingScheme: vectorScheme,
       minimumLevel: next.minimumLevel,
       maximumLevel: next.maximumLevel,
       credit: new C.Credit(next.attribution, true),
@@ -197,6 +329,7 @@ function replaceLayer(next = connection) {
   );
   const candidate = new C.SceneGISVectorTileLayer({
     scene,
+    tilingScheme: vectorScheme,
     style: next.style,
     sources: { [next.sourceId]: source },
     maximumVisibleTiles: 64,
@@ -237,15 +370,28 @@ async function connect() {
   element("error").textContent = "";
   element("status").textContent = "读取样式与数据目录…";
   try {
-    const profileUrl = `./reference/${provider}-profile.json`;
-    const styleUrl = `https://tiles.openfreemap.org/styles/${provider}`;
+    const local = provider === "local";
+    const selected = local ? "bright" : provider;
+    const profileUrl = `./reference/${selected}-profile.json`;
+    const styleUrl = local
+      ? "./reference/openfreemap-bright.json"
+      : `https://tiles.openfreemap.org/styles/${selected}`;
     const [reference, profile] = await Promise.all([
       json(styleUrl, controller.signal, "样式"),
       json(profileUrl, controller.signal, "样式支持清单"),
     ]);
     const sourceId = "openmaptiles";
     const metadataUrl = reference.sources.openmaptiles.url;
-    const metadata = await json(metadataUrl, controller.signal, "瓦片目录");
+    const metadata = local
+      ? {
+          tiles: [
+            `${new window.URL("./public-fixture.pbf", window.location.href).href}?z={z}&x={x}&y={y}`,
+          ],
+          minzoom: 0,
+          maxzoom: 14,
+          attribution: "SceneGIS 本地构造数据 · 非真实地理要素",
+        }
+      : await json(metadataUrl, controller.signal, "瓦片目录");
     const template = metadata.tiles[0];
     const sourceDefinition = {
       type: "vector",
@@ -259,8 +405,15 @@ async function connect() {
     );
     const style = new C.SceneGISVectorTileStyle({
       version: 8,
-      glyphs: reference.glyphs,
-      sprite: reference.sprite,
+      glyphs: local
+        ? `${
+            new window.URL("./symbol-assets/", window.location.href).href
+          }{range}.pbf?fontstack={fontstack}`
+        : reference.glyphs,
+      sprite: local
+        ? new window.URL("./line-symbol-assets/sprite", window.location.href)
+            .href
+        : reference.sprite,
       sources: { [sourceId]: sourceDefinition },
       layers,
     });
@@ -278,14 +431,21 @@ async function connect() {
       revision: template,
     };
     replaceLayer(next);
+    if (globeMode && element("terrain").checked) {
+      await setGlobeTerrain(true);
+    }
     supported = {
       total: reference.layers.length,
       rendered: layers.length,
       excluded: profile.excluded,
     };
-    const title = `OpenFreeMap · ${provider === "bright" ? "Bright" : "Liberty"}`;
+    const title = local
+      ? "本地构造地图 · Bright 样式"
+      : `OpenFreeMap · ${provider === "bright" ? "Bright" : "Liberty"}`;
     element("map-title").textContent = `${title} · 道路与地图标注`;
-    element("source").textContent = "OpenMapTiles schema · 免 token 公共 MVT";
+    element("source").textContent = local
+      ? "确定性构造数据 · 非真实地理要素 · 本地起伏地形"
+      : "OpenMapTiles schema · 免 token 公共 MVT";
     element("support-summary").textContent =
       `${layers.length} / ${reference.layers.length} 个样式层已接入`;
     element("excluded").replaceChildren();
@@ -310,14 +470,23 @@ async function connect() {
 }
 
 scene.postRender.addEventListener(() => {
-  const world = viewer.planarWorld;
   element("terrain-status").textContent =
     terrainError ??
-    (world.terrainProvider
-      ? world.tilesLoaded
-        ? "真实地形已就绪 · 道路与面直接贴地"
-        : "加载 Esri 高程…已就绪地表持续绘制"
-      : "零高程地表；可切换至 Esri 全球高程。网络不可用时可关闭地形。");
+    (terrainLoading
+      ? "正在准备高程数据…"
+      : (
+            globeMode
+              ? !(world.terrainProvider instanceof C.EllipsoidTerrainProvider)
+              : world.terrainProvider
+          )
+        ? world.tilesLoaded
+          ? "真实地形已就绪 · 道路与面直接贴地"
+          : "加载高程…已就绪地表持续绘制"
+        : globeMode
+          ? connection?.provider === "local"
+            ? "原生椭球地表 · 可切换本地构造地形"
+            : "原生椭球地表 · 可切换至 Esri 真实地形"
+          : "零高程地表；可切换至 Esri 全球高程。网络不可用时可关闭地形。");
   if (layer === undefined) {
     return;
   }
@@ -377,6 +546,14 @@ element("detail").onclick = () => {
   zoom = 16;
   view();
 };
+if (element("whole")) {
+  element("whole").onclick = () => {
+    scene.camera.setView({
+      destination: C.Cartesian3.fromDegrees(20, 30, 20000000),
+      orientation: { heading: 0, pitch: -Math.PI / 2, roll: 0 },
+    });
+  };
+}
 element("recreate").onclick = () => {
   if (connection !== undefined) {
     replaceLayer();
@@ -462,6 +639,7 @@ window.addEventListener("pagehide", (event) => {
     return;
   }
   generation++;
+  terrainGeneration++;
   pending?.abort();
   removeTerrainError?.();
   cancelMeasurement?.();

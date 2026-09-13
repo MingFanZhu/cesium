@@ -330,6 +330,144 @@ try {
       const groundTextures = groundResources._textures.slice();
       scene.destroy();
       canvas.remove();
+      const globeCanvas = document.createElement("canvas");
+      globeCanvas.width = globeCanvas.height = 64;
+      document.body.append(globeCanvas);
+      const globeScene = new C.Scene({
+        canvas: globeCanvas,
+        scene3DOnly: true,
+      });
+      globeScene.globe = new C.Globe();
+      globeScene.globe.showGroundAtmosphere = false;
+      globeScene.globe.terrainProvider = new C.CustomHeightmapTerrainProvider({
+        width: 17,
+        height: 17,
+        callback: () => new Float32Array(289).fill(600),
+      });
+      globeScene.fog.enabled = false;
+      globeScene.msaaSamples = 1;
+      globeScene.postProcessStages.fxaa.enabled = false;
+      const half = Math.PI * 6378137;
+      const globeScheme = new C.SceneGISPlanarTilingScheme({
+        coordinateSystem: new C.SceneGISPlanarCoordinateSystem({
+          crs: "EPSG:3857",
+          extent: new C.SceneGISPlanarExtent({
+            minimumX: -half,
+            minimumY: -half,
+            maximumX: half,
+            maximumY: half,
+          }),
+        }),
+      });
+      class GlobeSource extends C.SceneGISVectorTileSource {
+        requestTile() {
+          return Promise.resolve({
+            layers: [
+              {
+                name: "map",
+                version: 2,
+                extent: 4096,
+                features: [
+                  {
+                    id: "land",
+                    type: 3,
+                    properties: {},
+                    geometry: {
+                      parts: [
+                        new Float64Array([0, 0, 4096, 0, 4096, 4096, 0, 4096]),
+                      ],
+                      polygonStarts: new Uint32Array([0]),
+                    },
+                  },
+                  {
+                    id: "point",
+                    type: 1,
+                    properties: {},
+                    geometry: {
+                      parts: [new Float64Array([2048, 2048])],
+                      polygonStarts: new Uint32Array(),
+                    },
+                  },
+                ],
+              },
+            ],
+          });
+        }
+      }
+      const globeSource = new GlobeSource({
+        url: "/unused/{z}/{x}/{y}",
+        tilingScheme: globeScheme,
+        minimumLevel: 14,
+        maximumLevel: 14,
+      });
+      const bounds = globeScheme.tileXYToExtent(8192, 8192, 14);
+      const globeTarget = C.Cartesian3.fromRadians(
+        (bounds.minimumX + bounds.maximumX) / 2 / 6378137,
+        Math.atan(Math.sinh((bounds.minimumY + bounds.maximumY) / 2 / 6378137)),
+        600,
+      );
+      globeScene.camera.lookAt(
+        globeTarget,
+        new C.HeadingPitchRange(0, -Math.PI / 3, 300),
+      );
+      globeScene.camera.lookAtTransform(C.Matrix4.IDENTITY);
+      const globeLayer = globeScene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene: globeScene,
+          tilingScheme: globeScheme,
+          sources: { map: globeSource },
+          style: {
+            version: 8,
+            sources: {
+              map: {
+                type: "vector",
+                tiles: ["/unused/{z}/{x}/{y}"],
+                minzoom: 14,
+                maxzoom: 14,
+              },
+            },
+            layers: [
+              {
+                id: "land",
+                type: "fill",
+                source: "map",
+                "source-layer": "map",
+                paint: { "fill-color": "blue", "fill-antialias": false },
+              },
+              {
+                id: "points",
+                type: "circle",
+                source: "map",
+                "source-layer": "map",
+                paint: { "circle-color": "red", "circle-radius": 7 },
+              },
+            ],
+          },
+        }),
+      );
+      const globeStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        globeScene.initializeFrame();
+        globeScene.render();
+        if (performance.now() - globeStart > 15000) {
+          throw new Error("Globe package preparation did not finish.");
+        }
+      } while (
+        !globeLayer.tilesLoaded ||
+        !globeScene.globe.tilesLoaded ||
+        !globeLayer._terrain.entries.some((e) => e.result)
+      );
+      const globeColor = Array.from(
+        globeScene.context.readPixels({ x: 32, y: 31, width: 1, height: 1 }),
+      );
+      const globePick = globeScene.pick(new C.Cartesian2(32, 32))?.id.featureId;
+      const globeResources = globeLayer._drawOrder.find(
+        (b) => b._resources._textures,
+      )?._resources;
+      const globeTextures = globeResources._textures.slice();
+      globeScene.destroy();
+      globeCanvas.remove();
       return {
         mode,
         layers: decoded.layers.length,
@@ -357,6 +495,11 @@ try {
           picked: groundPick,
           released: groundTextures.every((t) => t.isDestroyed()),
         },
+        globe: {
+          color: globeColor,
+          picked: globePick,
+          released: globeTextures.every((t) => t.isDestroyed()),
+        },
       };
     }, mode);
     assert(result.layers > 0 && result.features > 0);
@@ -369,6 +512,9 @@ try {
     assert.deepEqual(result.ground.color, [0, 0, 255, 255]);
     assert.equal(result.ground.picked, "land");
     assert(result.ground.released);
+    assert.deepEqual(result.globe.color, [255, 0, 0, 255]);
+    assert.equal(result.globe.picked, "point");
+    assert(result.globe.released);
     assert(
       result.symbol.stable && result.symbol.separate && result.symbol.released,
     );

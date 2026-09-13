@@ -132,6 +132,9 @@ function createVertexArray(
           values: attribute.values,
         });
       }
+      if (name === "vectorAnchor") {
+        resources._anchorCoordinates.push(attribute.values);
+      }
     }
     indexBuffer = Buffer.createIndexBuffer({
       context,
@@ -172,9 +175,16 @@ function SceneGISVectorTileBatchResources(
   prepared,
   owner,
   allowPicking,
+  geometryCache,
 ) {
   if (prepared.ground) {
-    return new GroundResources(context, prepared, owner, allowPicking);
+    return new GroundResources(
+      context,
+      prepared,
+      owner,
+      allowPicking,
+      geometryCache,
+    );
   }
   this._vertexArrays = [];
   this._pickIds = [];
@@ -184,6 +194,7 @@ function SceneGISVectorTileBatchResources(
   this._paintAttributes = [];
   this._paintPrefix = prepared.kind;
   this._anchorBuffers = [];
+  this._anchorCoordinates = [];
   try {
     const geometries =
       prepared.geometries ??
@@ -235,6 +246,9 @@ function SceneGISVectorTileBatchResources(
       this.updatePaint(prepared.uniformPaint);
     }
     const defines = allowPicking ? ["SCENEGIS_VECTOR_PICKING"] : [];
+    if (owner._globe) {
+      defines.push("SCENEGIS_VECTOR_GLOBE");
+    }
     if (prepared.kind === "line") {
       defines.push("SCENEGIS_VECTOR_LINE");
     } else if (
@@ -339,6 +353,7 @@ SceneGISVectorTileBatchResources.prototype.destroy = function () {
   this._pickIds.length = 0;
   this._paintAttributes.length = 0;
   this._anchorBuffers.length = 0;
+  this._anchorCoordinates.length = 0;
   return destroyObject(this);
 };
 

@@ -8,8 +8,8 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V4A completed — 平面真实贴地`                         |
-| Active phase plan      | [V4A](plans/2026-09-13-v4a-planar-terrain.md)          |
+| Current phase          | `G1 completed — Globe 复用；下一阶段未激活`            |
+| Active phase plan      | None；最近完成 [G1](plans/2026-09-14-g1-globe.md)      |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
@@ -37,12 +37,15 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
 - Source：`packages/engine/Source/SceneGIS/Core/SceneGISVectorTile*.js` 和
   `packages/engine/Source/SceneGIS/Scene/SceneGISVectorTileLayer.js`，五个公共入口。
-- Specs：Core/Renderer/Scene 镜像测试，156 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
+- Specs：Core/Renderer/Scene 镜像测试，169 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面：[城市](../../Test/vector-tiles/index.html) 与 [样式图集](../../Test/vector-tiles/styles.html)，
   21 个城市 MVT fixtures 加 1 个样式 MVT。
 - 新页面：[公开地图](../../Test/vector-tiles/public.html)，默认 MapLibre 示例使用的 OpenFreeMap / Bright，
   保留 Liberty 对照，无需 token；来源和样式差距见 [参考](../../Test/vector-tiles/reference/README.md)。
+- Globe 页面：[球面地图](../../Test/vector-tiles/globe.html)，默认本地；公共数据、整球与真实地形切换。
+- 当前页面回归：13 项 E2E，包含 `Specs/e2e/scenegis-vector-globe.spec.js`；
+  使用 `Test/vector-tiles/playwright.config.mjs`，直接连接根开发服务器。
 - E2E：`Specs/e2e/scenegis-vector-tiles.spec.js`，3 项通过。
 - 公开页 E2E：`Specs/e2e/scenegis-vector-public.spec.js`，5 项通过；使用本地数据拦截外网。
 - Sandcastle：不新建；使用根服务器直接访问 `Test/**`。
@@ -75,7 +78,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[V4A review](reviews/2026-09-14-v4a-planar-terrain-review.md)；
+- Latest review：[G1 review](reviews/2026-09-14-g1-globe-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
 - Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
@@ -156,3 +159,18 @@ V3C1C gate 已关闭，本阶段实现与记录形成独立本地 checkpoint；�
 这是架构澄清，V4/G1 尚未激活，不表示公开图层已支持 terrainProvider 或 Globe。
 
 V4A 已实现并技术自审通过：平面 direct ground、terrain anchors、公开 Esri 地形开关与山地定位。156 项相关 Specs、9 项 E2E、build/types/release/installed-package 通过。本阶段无 upstream-owned 修改、无新 SGP。负责人于 2026-09-14 确认验收通过，技术与视觉 gate 已关闭，详见 [V4A review](reviews/2026-09-14-v4a-planar-terrain-review.md)；不把本阶段结果扩展为完整曲面文字或 Globe 资格。
+
+V4A checkpoint：`a961ff4ccb`。负责人确认验收并授权提前进入 [G1](plans/2026-09-14-g1-globe.md)，共享前端并独立验证 Globe 曲率、地形和标注。
+
+G1 已实现并技术自审，负责人于 2026-09-14 确认性能修正可接受，视觉与交互 gate 关闭。见 [最新 G1 review](reviews/2026-09-14-g1-globe-review.md)
+和 [ADR-0070](../../Documentation/SceneGIS/Decisions/ADR-0070-globe-vector-ground-rendering.md)。
+169 项 vector Specs / 13 项 Globe Specs、初始 13 项页面 E2E 通过证据与性能修正后 2 项相关 E2E、
+build/types/tsc/release/实际包已覆盖。新增 [Globe 本地/公开入口](../../Test/vector-tiles/globe.html)，保留 native Globe、独立
+EPSG:3857 matrix 与 Worker；native terrain 上直接画面/线、ECEF 标注与独立异步 BVH。
+无 upstream-owned 修改，无新 SGP；公共字体、完整曲面字形和性能边界见 G1-R09/R10/R16。
+负责人反馈浅倾角低帧后，修正椭球遮挡、GPU 数据与共享资源、派生命令失效、fractional zoom
+抖动和真实地形片元成本。同机原视角静态约 28→60 FPS、旋转/平移中位约 58 FPS，Alps 真实
+地形约 22→57–60 FPS；交互 P95 仍为 22–26 ms，完整条件与对照见最新 G1 review。
+本阶段实现、Specs、ADR 与记录形成独立 G1 本地 checkpoint，不激活下一阶段。
+负责人随后询问 hillshade 与高级环境的关系；当前能力边界已补入 [光照说明](../../Documentation/SceneGIS/VectorTiles.md#地形明暗hillshade-与高级环境)。
+高级环境光照与阴影 receiver 尚未接入 vector，不能从普通贴地验收推断兼容；由后续 V4/M1 资格工作承接。
