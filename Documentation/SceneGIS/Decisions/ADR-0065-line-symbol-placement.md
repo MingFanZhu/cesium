@@ -49,6 +49,17 @@ CPU 使用 eye-relative doubles 与当前 frustum projection，按 eye depth 做
 不得将 map pitch 简化成始终面向屏幕的文字，也不增加 Cesium Label/Billboard 依赖。
 glyph SDF 和普通 sprite atlas 是标注资源，不是地图颜色 RTT。
 
+2026-09-14 浅倾角尺寸修正：map-pitched text/icon 的地面像素长度在沿线排布前乘以
+`clamp(0.5 + 0.5 * anchorDepth / referenceDepth, 0, 4)`。两种 depth 均为 eye depth，
+referenceDepth 复用 style zoom 的视轴地面参考，Globe 使用已有椭球交点参考。
+依据 [MapLibre 5.24.0 symbol shader](https://github.com/maplibre/maplibre-gl-js/blob/v5.24.0/src/shaders/glsl/symbol_sdf.vertex.glsl)
+的 map-pitch 尺寸补偿，缓和近景过度放大和远景过度缩小；实际地图倾斜和透视压缩仍成立。
+地面 glyph corners、沿线 advance、碰撞包络及 native pick 必须使用同一补偿比例；缓存按补偿后的
+meters-per-pixel 失效，静止帧复用。正交投影不补偿，中心及 Z=0 俯视比例为 1，viewport 字形路径保持现状。
+这采用 MapLibre GPU 的 map-pitch 尺寸规律，不复制其 CPU 沿线 anchor 与 Shader glyph offset 的双路径，
+不宣称逐像素一致，也不扩展为 viewport perspective-size 支持。实际复现与验证见
+[V3C1D review](../../../AgentDocs/vector-tiles/reviews/2026-09-14-v3c1d-symbol-orbit-review.md)。
+
 anchor 只属于实际 render-cover 的半开区域；完整 glyph 可以越过瓦片边界。
 取样间距依 source canonical level 和 overzoom，整数 zoom 内保持世界 anchor 稳定；
 同内容的沿线候选还受屏幕重复距离约束，避免邻 tile 与 resident LOD 重复名称。

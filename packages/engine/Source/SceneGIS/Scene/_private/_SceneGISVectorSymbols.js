@@ -88,10 +88,70 @@ function tileCandidates(runtime, entry, order) {
         });
       }
     }
-    cached.layers.set(order, result);
     runtime.statistics.candidateBuilds += result.length;
+    result = { candidates: result };
+    cached.layers.set(order, result);
   }
   return result;
+}
+
+function* indexCandidates(candidates, projection, axis = "x") {
+  // Index construction shares the placement budget. Bounds contain actual attached
+  // anchor positions, so the same query works for flat, terrain and ECEF anchors.
+  yield;
+  const bounds = [
+    Infinity,
+    Infinity,
+    Infinity,
+    -Infinity,
+    -Infinity,
+    -Infinity,
+  ];
+  if (candidates.length <= 32) {
+    for (const candidate of candidates) {
+      Projection.attach(projection, candidate);
+      const point = candidate.position;
+      bounds[0] = Math.min(bounds[0], point.x);
+      bounds[1] = Math.min(bounds[1], point.y);
+      bounds[2] = Math.min(bounds[2], point.z);
+      bounds[3] = Math.max(bounds[3], point.x);
+      bounds[4] = Math.max(bounds[4], point.y);
+      bounds[5] = Math.max(bounds[5], point.z);
+    }
+    return { bounds, candidates };
+  }
+  const ordered = candidates
+    .slice()
+    .sort((a, b) => a.anchor.position[axis] - b.anchor.position[axis]);
+  const middle = Math.floor(ordered.length / 2);
+  const nextAxis = axis === "x" ? "y" : "x";
+  const left = yield* indexCandidates(
+    ordered.slice(0, middle),
+    projection,
+    nextAxis,
+  );
+  const right = yield* indexCandidates(
+    ordered.slice(middle),
+    projection,
+    nextAxis,
+  );
+  for (let i = 0; i < 3; i++) {
+    bounds[i] = Math.min(left.bounds[i], right.bounds[i]);
+    bounds[i + 3] = Math.max(left.bounds[i + 3], right.bounds[i + 3]);
+  }
+  return { bounds, left, right };
+}
+
+function* queryCandidates(index, projection) {
+  if (!Projection.intersectsBounds(projection, index.bounds)) {
+    return;
+  }
+  if (index.candidates) {
+    yield* index.candidates;
+  } else {
+    yield* queryCandidates(index.left, projection);
+    yield* queryCandidates(index.right, projection);
+  }
 }
 
 function evaluation(runtime, base, zoom) {
@@ -124,7 +184,18 @@ function* collect(runtime, job) {
       continue;
     }
     for (const [entry, regions] of job.cover.get(definition.source) ?? []) {
-      for (const base of tileCandidates(runtime, entry, order)) {
+      const cached = tileCandidates(runtime, entry, order);
+      if (cached.candidates.length === 0) {
+        continue;
+      }
+      if (!cached.index || cached.terrain !== job.projection.terrain) {
+        cached.index = yield* indexCandidates(
+          cached.candidates,
+          job.projection,
+        );
+        cached.terrain = job.projection.terrain;
+      }
+      for (const base of queryCandidates(cached.index, job.projection)) {
         yield;
         Projection.attach(job.projection, base);
         if (
@@ -593,7 +664,7 @@ function commit(runtime, job, candidates, frameState, zoom) {
   );
   const entries = new Set();
   for (const state of runtime.owner._sources.values()) {
-    for (const entry of state.render.keys()) {
+    for (const entry of state.entries.values()) {
       entries.add(entry);
     }
   }
@@ -766,7 +837,7 @@ SceneGISVectorSymbols.prototype.clear = function () {
   this._previous = [];
   this._placed = [];
   this._tileLayouts.clear();
-  this._shaping.records.clear();
+  this._shaping.clear();
   this._protected.clear();
   this._requirements.clear();
   this._spriteNeeded = false;

@@ -37,3 +37,21 @@ Batch 必要顺序、atlas ownership、relative-to-eye 精度、DPR、Cesium nat
 没有新 public API、Worker entry、pass、上游 seam 或依赖；平面资格不扩展到 terrain/Globe。
 验证布局收敛和预算、代理包络、current-view picking、buffer dirty 范围、资源生命周期、真实
 交互性能及 dev/release/installed-package Shader。用户视觉 gate 包含密度与布局更新延迟。
+
+## V3C1D amendment: resident candidates and conservative spatial queries
+
+2026-09-14 南京 Globe 水平绕转复现候选重复构造和 cohort 延迟；字形资源无重新请求，不能把
+标注短暂消失解释为主线程 MVT/字形解码。候选现在随 resident entry 的 symbol layout 保存，
+render cover 只决定当前归属；真实 eviction、layout 替换、clear/destroy 才释放或替换候选。
+
+每个已使用的 tile/style 候选集合建立私有空间索引，按 Mercator anchor X/Y 交替二分，叶片最多
+32 个 anchors。索引构造纳入既有 placement generator 的软预算，包围盒保存该 terrain snapshot
+下实际附着的世界位置；terrain snapshot 更换后重新构建，不使用近似高程剔除真实可见标注。
+查询按实际 projection 的六个裁剪平面和既有 maximumAnchorDepth，先保守跳过整组不可见 anchors，
+剩余 anchors 仍逐一执行原有 horizon、viewport、owner、样式、重复抑制和碰撞判断。包围盒与相机
+在双精度下作相对差，保留 Planar/Globe 和各 frustum 的坐标语义。索引不代表新的选择预算或画质档位。
+
+Shaping 待处理队列与已就绪的 LRU cache 分离；每帧只调度待处理记录，pending 不遍历完整 ready
+cache。淘汰、generation 失效、clear/destroy 同步移除相应队列记录，迟到完成仍按 record identity 隔离。
+字形 CPU 字节数在不可变 Worker 结果接收时计算，统计快照按页面聚合，不逐帧遍历 bitmap。
+以上均为自有 JS 缓存/调度调整；Worker 任务协议、碰撞优先级、当前帧 draw/pick、GPU buffers 和上游接缝不变。

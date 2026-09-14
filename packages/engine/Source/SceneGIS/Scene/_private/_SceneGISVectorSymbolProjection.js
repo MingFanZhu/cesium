@@ -13,18 +13,36 @@ function snapshot(scene, terrain, referenceDepth) {
   const position = camera.positionWC,
     direction = camera.directionWC,
     projection = frustum.projectionMatrix;
+  const up = camera.upWC,
+    right = camera.rightWC;
+  const planes = [];
+  for (let row = 0; row < 3; row++) {
+    for (const sign of [-1, 1]) {
+      const x = projection[3] + sign * projection[row];
+      const y = projection[7] + sign * projection[4 + row];
+      const z = projection[11] + sign * projection[8 + row];
+      planes.push([
+        right.x * x + up.x * y - direction.x * z,
+        right.y * x + up.y * y - direction.y * z,
+        right.z * x + up.z * y - direction.z * z,
+        projection[15] + sign * projection[12 + row],
+      ]);
+    }
+  }
   // Camera getters update their derived members. Read once for a placement pass,
   // instead of invoking that work for every anchor and glyph corner.
   return {
     terrain,
+    planes,
+    referenceDepth: referenceDepth ?? -position.z / direction.z,
     horizon: terrain?.ellipsoid
       ? new EllipsoidalOccluder(terrain.ellipsoid, position)
       : undefined,
     camera: {
       positionWC: Cartesian3.clone(position),
       directionWC: Cartesian3.clone(direction),
-      upWC: Cartesian3.clone(camera.upWC),
-      rightWC: Cartesian3.clone(camera.rightWC),
+      upWC: Cartesian3.clone(up),
+      rightWC: Cartesian3.clone(right),
       frustum: {
         near: frustum.near,
         far: frustum.far,
@@ -45,6 +63,30 @@ function snapshot(scene, terrain, referenceDepth) {
       clientHeight: scene.canvas.clientHeight,
     },
   };
+}
+
+function intersectsBounds(scene, bounds) {
+  const eye = scene.camera.positionWC;
+  const minimum = [bounds[0] - eye.x, bounds[1] - eye.y, bounds[2] - eye.z];
+  const maximum = [bounds[3] - eye.x, bounds[4] - eye.y, bounds[5] - eye.z];
+  if (bounds[0] > bounds[3]) {
+    return false;
+  }
+  for (const plane of scene.planes) {
+    let distance = plane[3];
+    for (let i = 0; i < 3; i++) {
+      distance += plane[i] * (plane[i] >= 0 ? maximum[i] : minimum[i]);
+    }
+    if (distance < 0) {
+      return false;
+    }
+  }
+  const direction = scene.camera.directionWC;
+  const depth =
+    direction.x * (direction.x >= 0 ? minimum[0] : maximum[0]) +
+    direction.y * (direction.y >= 0 ? minimum[1] : maximum[1]) +
+    direction.z * (direction.z >= 0 ? minimum[2] : maximum[2]);
+  return depth <= scene.maximumAnchorDepth;
 }
 
 function terrainPoint(scene, x, y) {
@@ -285,6 +327,9 @@ function geometry(scene, candidate, shaped, text, metersPerPixel) {
   }
   let { plane } = settings;
   const { mapPitch, along, rotation, angle, flip, maxAngle } = settings;
+  if (mapPitch) {
+    metersPerPixel *= perspectiveScale(scene, candidate.position);
+  }
   let cached = shaped._projectionGeometry;
   const reusable = mapPitch || !along;
   if (
@@ -427,6 +472,9 @@ function collision(scene, candidate, shaped, text, metersPerPixel) {
     return undefined;
   }
   const { mapPitch, along, angle, flip } = settings;
+  if (mapPitch) {
+    metersPerPixel *= perspectiveScale(scene, candidate.position);
+  }
   let plane = settings.plane;
   let proxies;
   if (!along) {
@@ -530,6 +578,18 @@ function collision(scene, candidate, shaped, text, metersPerPixel) {
   return { boxes };
 }
 
+function perspectiveScale(scene, point) {
+  if (scene.camera.frustum.projectionMatrix[15] !== 0) {
+    return 1;
+  }
+  // MapLibre's map-pitched symbol compensation blends viewport and ground
+  // scaling. Apply it before bending so glyph spacing and collision agree.
+  return Math.min(
+    4,
+    Math.max(0, 0.5 + (0.5 * depth(scene, point)) / scene.referenceDepth),
+  );
+}
+
 /** Separates current glyph drawing from placement collision envelopes. @private */
 const SceneGISVectorSymbolProjection = {
   visible,
@@ -538,5 +598,6 @@ const SceneGISVectorSymbolProjection = {
   collision,
   snapshot,
   attach,
+  intersectsBounds,
 };
 export default SceneGISVectorSymbolProjection;

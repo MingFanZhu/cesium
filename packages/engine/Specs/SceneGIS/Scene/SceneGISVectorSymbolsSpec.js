@@ -424,13 +424,29 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     const upload = spyOn(batch.resources, "update").and.callThrough();
     const shape = runtime._previous[0].shaped;
     const layouts = [...runtime._tileLayouts.values()][0];
+    const page = [...runtime.assets.pages.values()][0];
+    const expectedBytes =
+      page.image.arrayBufferView.byteLength +
+      [...page.glyphs.values()].reduce(
+        (sum, glyph) => sum + glyph.bitmap.byteLength,
+        0,
+      );
+    const glyphScan = spyOn(page.glyphs, "values").and.callThrough();
+    const shapingScan = spyOn(
+      runtime._shaping.records,
+      "values",
+    ).and.callThrough();
     const filter = spyOn(
       layer.style._compiled.get("labels").filter,
       "filter",
     ).and.callThrough();
     for (let i = 0; i < 3; i++) {
       scene.renderForSpecs();
+      expect(layer.statistics.glyphCpuBytes).toBe(expectedBytes);
     }
+    expect(glyphScan).not.toHaveBeenCalled();
+    expect(shapingScan).not.toHaveBeenCalled();
+    expect(runtime._shaping.pending).toBeFalse();
     expect(upload).not.toHaveBeenCalled();
     expect(request.calls.count()).toBe(1);
     scene.camera.position.x = 1;
@@ -451,6 +467,94 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(pickId.object).toBeUndefined();
     expect(world.isDestroyed()).toBeFalse();
   });
+  it("retains candidate indexes outside the render cover until their resident tile is evicted", async function () {
+    source = new SceneGISVectorTileSource({
+      url: "https://example.invalid/{z}/{x}/{y}",
+      tilingScheme: world.tilingScheme,
+      maximumLevel: 2,
+    });
+    spyOn(source, "requestTile").and.resolveTo(tile());
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    scene.camera.position.x = -128;
+    scene.camera.position.y = 128;
+    scene.camera.position.z = 10;
+    const layer = add(undefined, { maximumVisibleTiles: 4, tileCacheSize: 4 });
+    await loaded(layer);
+    const runtime = layer._symbols,
+      state = layer._sources.get("test");
+    const entry = [...state.render.keys()][0];
+    expect(entry.level).toBe(2);
+    const cache = runtime._tileLayouts.get(entry);
+    const index = cache.layers.get(0).index;
+    scene.camera.position.x = 128;
+    await loaded(layer);
+    expect(state.render.has(entry)).toBeFalse();
+    expect(state.entries.get(entry.key)).toBe(entry);
+    expect(runtime._tileLayouts.get(entry)).toBe(cache);
+    scene.camera.position.x = -128;
+    await loaded(layer);
+    expect(runtime._tileLayouts.get(entry).layers.get(0).index).toBe(index);
+    scene.camera.position.x = 128;
+    await loaded(layer);
+    scene.camera.position.x = 384;
+    await loaded(layer);
+    scene.camera.position.y = -128;
+    await loaded(layer);
+    scene.camera.position.x = 128;
+    await loaded(layer);
+    scene.camera.position.x = -128;
+    await loaded(layer);
+    expect(state.entries.has(entry.key)).toBeFalse();
+    expect(runtime._tileLayouts.has(entry)).toBeFalse();
+  });
+
+  it("prunes dense offscreen anchors conservatively and reuses the index during motion", async function () {
+    const features = Array.from({ length: 4096 }, (_, index) => {
+      const item = feature(`${index}`, (index % 64) * 64 + 32);
+      item.geometry.parts[0][1] = Math.floor(index / 64) * 64 + 32;
+      return item;
+    });
+    spyOn(source, "requestTile").and.resolveTo(tile(features));
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add();
+    await loaded(layer);
+    const runtime = layer._symbols;
+    const cache = [...runtime._tileLayouts.values()][0].layers.get(0);
+    const index = cache.index,
+      builds = runtime.statistics.candidateBuilds;
+    const tested = spyOn(Projection, "visible").and.callThrough();
+    scene.camera.position.x += 0.25;
+    runtime._nextPlacementTime = 0;
+    await loaded(layer);
+    expect(tested.calls.count()).toBeLessThan(features.length / 4);
+    expect(cache.index).toBe(index);
+    expect(runtime.statistics.candidateBuilds).toBe(builds);
+    const projection = runtime._projection;
+    const expected = cache.candidates.filter((candidate) =>
+      Projection.visible(projection, candidate.position),
+    );
+    expect(runtime.statistics.candidates).toBe(expected.length);
+    expect(expected.length).toBeGreaterThan(0);
+    // A whole node can only be discarded if none of its actual anchor points is visible.
+    function check(node) {
+      if (node.candidates) {
+        if (
+          node.candidates.some((candidate) =>
+            Projection.visible(projection, candidate.position),
+          )
+        ) {
+          expect(
+            Projection.intersectsBounds(projection, node.bounds),
+          ).toBeTrue();
+        }
+      } else {
+        check(node.left);
+        check(node.right);
+      }
+    }
+    check(index);
+  });
+
   it("renders real world glyph corners along a curve, stays upright after heading reversal, and releases the batch", async function () {
     spyOn(source, "requestTile").and.resolveTo(
       tile([
@@ -710,6 +814,104 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(scene.pick(glyphCenter(candidate), 1, 1).id.styleLayer).toBe(
       "viewport",
     );
+  });
+
+  it("compensates near and far road-label sizes at shallow pitch while preserving center and orthographic scale", async function () {
+    const pitch = (5 * Math.PI) / 180;
+    const locations = [
+      { y: -40 / Math.cos(pitch), text: "A", scale: 0.75 },
+      { y: 0, text: "AA", scale: 1 },
+      { y: 80 / Math.cos(pitch), text: "AAA", scale: 1.5 },
+    ];
+    spyOn(source, "requestTile").and.resolveTo(
+      tile(
+        locations.map(({ y, text }) =>
+          road(
+            [
+              [-450, y],
+              [450, y],
+            ],
+            text,
+          ),
+        ),
+      ),
+    );
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    scene.camera.frustum = new PerspectiveFrustum({
+      fov: Math.PI / 3,
+      aspectRatio: 1,
+      near: 1,
+      far: 1000,
+    });
+    scene.camera.position = new Cartesian3(
+      0,
+      -80 * Math.cos(pitch),
+      80 * Math.sin(pitch),
+    );
+    scene.camera.direction = new Cartesian3(
+      0,
+      Math.cos(pitch),
+      -Math.sin(pitch),
+    );
+    scene.camera.up = new Cartesian3(0, Math.sin(pitch), Math.cos(pitch));
+    const layer = add([
+      definition("map", {
+        "symbol-placement": "line-center",
+        "text-size": 8,
+        "text-allow-overlap": true,
+      }),
+    ]);
+    await loaded(layer);
+    const runtime = layer._symbols;
+    const atlas = [...runtime.assets.pages.values()][0].texture;
+    const check = (orthographic) => {
+      expect(runtime._placed.length).toBe(3);
+      for (const { text, scale } of locations) {
+        const c = runtime._placed.find((c) => c.text === text);
+        const quad = c._geometry.text.quads[0];
+        const box = c.shaped.text.quads[0].box;
+        const nominalWidth = (box[2] - box[0]) * runtime._metersPerPixel;
+        const groundWidth = Cartesian3.distance(
+          quad.positions[0],
+          quad.positions[1],
+        );
+        expect(groundWidth / nominalWidth).toBeCloseTo(
+          orthographic ? 1 : scale,
+          8,
+        );
+        const envelope = Projection.collision(
+          runtime._projection,
+          c,
+          c.shaped.text,
+          true,
+          runtime._metersPerPixel,
+        ).boxes[0];
+        for (const glyph of c.projected.text.quads) {
+          for (const [x, y] of glyph.corners) {
+            expect(x).toBeGreaterThanOrEqual(envelope[0]);
+            expect(x).toBeLessThanOrEqual(envelope[2]);
+            expect(y).toBeGreaterThanOrEqual(envelope[1]);
+            expect(y).toBeLessThanOrEqual(envelope[3]);
+          }
+        }
+      }
+    };
+    check(false);
+    const quads = runtime._placed.map((c) => c._geometry.text.quads);
+    scene.renderForSpecs();
+    runtime._placed.forEach((c, i) =>
+      expect(c._geometry.text.quads).toBe(quads[i]),
+    );
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 128,
+      aspectRatio: 1,
+      near: 1,
+      far: 1000,
+    });
+    await loaded(layer);
+    check(true);
+    expect([...runtime.assets.pages.values()][0].texture).toBe(atlas);
+    expect(layer.statistics.symbolFailures).toBe(0);
   });
 
   it("rejects short and sharp paths and suppresses repeated names without suppressing distinct names", async function () {

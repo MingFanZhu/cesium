@@ -24,14 +24,14 @@ function SceneGISVectorSymbolShaping(owner, assets, maximum) {
   this.assets = assets;
   this.maximum = maximum;
   this.records = new Map();
+  this._waiting = new Map();
+  this._pending = new Set();
   this.revision = 0;
   this.destroyed = false;
 }
 Object.defineProperty(SceneGISVectorSymbolShaping.prototype, "pending", {
   get() {
-    return [...this.records.values()].some(
-      (record) => record.state === "waiting" || record.state === "running",
-    );
+    return this._pending.size > 0;
   },
 });
 SceneGISVectorSymbolShaping.prototype.get = function (
@@ -55,11 +55,16 @@ SceneGISVectorSymbolShaping.prototype.get = function (
     )
   ) {
     this.records.delete(key);
+    this._waiting.delete(key);
+    this._pending.delete(record);
     record = undefined;
   }
   if (!record) {
     if (this.records.size >= this.maximum) {
-      this.records.delete(this.records.keys().next().value);
+      const oldest = this.records.values().next().value;
+      this.records.delete(oldest.key);
+      this._waiting.delete(oldest.key);
+      this._pending.delete(oldest);
     }
     const glyphs = new Map();
     const pages = new Map();
@@ -90,6 +95,8 @@ SceneGISVectorSymbolShaping.prototype.get = function (
       item: { key, text: candidate.text, layout: normalized, image, glyphs },
     };
     this.records.set(key, record);
+    this._waiting.set(key, record);
+    this._pending.add(record);
   } else {
     this.records.delete(key);
     this.records.set(key, record);
@@ -108,9 +115,13 @@ SceneGISVectorSymbolShaping.prototype.get = function (
 };
 SceneGISVectorSymbolShaping.prototype.flush = function () {
   while (this.owner._workers.available) {
-    const records = [...this.records.values()]
-      .filter((record) => record.state === "waiting")
-      .slice(0, 128);
+    const records = [];
+    for (const record of this._waiting.values()) {
+      records.push(record);
+      if (records.length === 128) {
+        break;
+      }
+    }
     if (!records.length) {
       return;
     }
@@ -124,6 +135,7 @@ SceneGISVectorSymbolShaping.prototype.flush = function () {
     for (const record of records) {
       record.state = "running";
       record.item = undefined;
+      this._waiting.delete(record.key);
     }
     const finish = (result, error) => {
       if (this.destroyed) {
@@ -131,6 +143,7 @@ SceneGISVectorSymbolShaping.prototype.flush = function () {
       }
       for (let i = 0; i < records.length; i++) {
         const record = records[i];
+        this._pending.delete(record);
         if (this.records.get(record.key) !== record) {
           continue;
         }
@@ -148,8 +161,13 @@ SceneGISVectorSymbolShaping.prototype.flush = function () {
     );
   }
 };
+SceneGISVectorSymbolShaping.prototype.clear = function () {
+  this.records.clear();
+  this._waiting.clear();
+  this._pending.clear();
+};
 SceneGISVectorSymbolShaping.prototype.destroy = function () {
   this.destroyed = true;
-  this.records.clear();
+  this.clear();
 };
 export default SceneGISVectorSymbolShaping;

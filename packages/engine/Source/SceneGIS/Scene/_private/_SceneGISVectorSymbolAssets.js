@@ -143,6 +143,10 @@ SceneGISVectorSymbolAssets.prototype.prepare = function (
       }
       entry.glyphs = result.glyphs;
       entry.image = result.image;
+      entry.cpuBytes = result.image.arrayBufferView.byteLength;
+      for (const glyph of result.glyphs.values()) {
+        entry.cpuBytes += glyph.bitmap.byteLength;
+      }
     };
     const settle = (error) => {
       if (this.destroyed) {

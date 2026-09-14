@@ -1065,13 +1065,7 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
               missingSymbolImages: [...this._symbols._missingImages],
               glyphRanges: this._symbols.assets.pages.size,
               glyphCpuBytes: [...this._symbols.assets.pages.values()].reduce(
-                (sum, page) =>
-                  sum +
-                  (page.image?.arrayBufferView.byteLength ?? 0) +
-                  [...(page.glyphs?.values() ?? [])].reduce(
-                    (bytes, glyph) => bytes + glyph.bitmap.byteLength,
-                    0,
-                  ),
+                (sum, page) => sum + (page.cpuBytes ?? 0),
                 0,
               ),
               symbolTextureBytes: [

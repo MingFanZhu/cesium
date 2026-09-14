@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                     |
-| ---------------------- | --------------------------------------------------------- |
-| Extension slug         | `vector-tiles`                                            |
-| Status                 | `active`                                                  |
-| Planning model         | `extension`                                               |
-| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md)    |
-| Current phase          | `V4B completed — 双世界高级环境接入`                      |
-| Active phase plan      | None；最近完成 [V4B](plans/2026-09-14-v4b-environment.md) |
-| Active standalone plan | None                                                      |
-| Architecture contact   | 当前 Agent                                                |
-| Execution contact      | 当前 Agent                                                |
-| Last updated           | `2026-09-14`                                              |
+| Field                  | Value                                                  |
+| ---------------------- | ------------------------------------------------------ |
+| Extension slug         | `vector-tiles`                                         |
+| Status                 | `active`                                               |
+| Planning model         | `extension`                                            |
+| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
+| Current phase          | `V3C1D completed — 待提交检查点`                       |
+| Active phase plan      | None                                                   |
+| Active standalone plan | None                                                   |
+| Architecture contact   | 当前 Agent                                             |
+| Execution contact      | 当前 Agent                                             |
+| Last updated           | `2026-09-14`                                           |
 
 ## Scope
 
@@ -78,7 +78,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[G1 review](reviews/2026-09-14-g1-globe-review.md)；
+- Latest review：[V3C1D review](reviews/2026-09-14-v3c1d-symbol-orbit-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
 - Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
@@ -185,3 +185,18 @@ MapLibre hillshade 不作为当前交付目标；按 [ADR-0071](../../Documentat
 2 项双世界页面回归通过，验证光向/云时间同步、参数与时间保留、恢复默认和资源释放。
 负责人于 2026-09-14 明确手动检查通过，视觉 gate 关闭，V4B completed，形成独立本地 checkpoint。
 当前没有 active phase；近地平线重负载问题仍为 V4B-R06 open，由后继 M1 定位，其他未资格范围见 R07。
+
+V4B checkpoint：`723a2feed9`。负责人继续反馈南京水平绕转时 POI 消失/出现与掉帧同步，
+已进入 [V3C1D](plans/2026-09-14-v3c1d-symbol-orbit.md)，限定标注缓存、调度与相关测量。
+
+V3C1D 实现与技术自审通过，负责人视觉/交互 gate pending。确认复现期间没有字体请求；修正 resident
+候选缓存、空间预筛选、排版待处理队列和字形统计扫描。28 项 symbol Specs、4 项相关页面 E2E 通过，
+同南京轨迹帧间隔 P95 60.4→36.9 ms，最长布局延迟 920.4→346.3 ms；原视角恢复后标注数一致。
+完整条件与剩余新瓦片/GPU 风险见最新 review。本阶段全部为 SceneGIS-owned，无 SGP；验收后独立提交。
+
+负责人追加浅倾角道路文字尺寸检查：已补齐 map-pitch 的部分透视尺寸补偿，保持沿线字距、碰撞和拾取一致，
+保留真实倾斜压缩。29 项 symbol Specs、2 项相关页面 E2E 通过，原“中山南路”投影宽 201→128 px；
+相机固定在新的 5.05° 反馈视角，视觉 gate 仍 pending。实现边界见 ADR-0065，证据见最新 review 的 R07。
+
+负责人认可当前功能并转向简单上手示例，V3C1D 按推进授权关闭视觉 gate，review R06 accepted。
+以上 pending 为历史记录；先形成独立 checkpoint，再开展示例整理，重负载性能风险继续保留。

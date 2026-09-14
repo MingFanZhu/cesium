@@ -75,6 +75,9 @@ GPU 使用 RTE 和 DPR，glyph 不按基础瓦片区域裁切。
 
 rotation auto 在 point 为 viewport、沿线为 map；pitch auto 跟随 rotation。
 map pitch 的四角是真实世界顶点，透视时随地面缩短和缩放；viewport pitch 的尺寸为 CSS pixels。
+map-pitched 文字和图标还按 anchor 与视轴参考点的距离做部分透视补偿，缓和近景过大和远景过小；
+字号、沿线间距、碰撞和拾取使用同一地面比例。它仍保留透视和倾斜压缩，不保证固定屏幕尺寸；
+正交及中心参考比例保持，具体公式与 MapLibre 兼容边界见 ADR-0065。
 文字按当前投影方向应用 keep-upright；箭头默认 icon-keep-upright=false，保留道路方向，
 icon-rotate 可表达反向交通。路牌使用 viewport rotation，编号和图标保持朝向屏幕。
 道路编号使用原始样式选择的预制普通 sprite，不需要 text-fit。
@@ -112,6 +115,11 @@ Placement 使用不可变相机快照，按约 2 ms 的步骤粒度软预算跨�
 最多复用 100 ms，再启动下一轮。持续移动不重启在途布局，避免饥饿；完成后处理最新视图。
 单个不可分割步骤可能超过预算，100 ms 也不是包含计算时间的硬完成期限。
 离开当前 owner/视口、near/far 或远景范围的已发布标注当前帧隐藏。
+
+候选和空间索引随驻留瓦片保存，短时离开 render cover 后再次进入可直接复用；真正淘汰、
+整数 layout 或 terrain snapshot 改变时失效。空间包围盒只用于保守跳过不可见候选，仍按实际
+anchor 位置完成原有可见性与碰撞判断。Shaping 只扫描待处理队列，字形内存统计复用加载时
+计算的字节数，减少相机移动时的主线程扫描；细节见 ADR-0068 的 V3C1D amendment。
 
 `tilesLoaded` 表示当前 base 与 symbol 请求、Worker 和最新视图 placement 均已终结，
 不保证没有失败；隐藏 Layer 没有当前需求。
