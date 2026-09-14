@@ -55,6 +55,31 @@
         step="0.05"
         value="1"
       />
+      <label for="surface-opacity"
+        >地表不透明度 <output id="surface-opacity-value">100%</output></label
+      >
+      <input
+        id="surface-opacity"
+        type="range"
+        min="0"
+        max="1"
+        step="0.05"
+        value="1"
+      />
+      <label for="imagery-opacity"
+        >测试影像不透明度 <output id="imagery-opacity-value">0%</output></label
+      >
+      <input
+        id="imagery-opacity"
+        type="range"
+        min="0"
+        max="1"
+        step="0.05"
+        value="0"
+      />
+      <p class="hint">
+        地表透明仍保留贴地深度；测试影像为本地蓝色网格。矢量透明后可观察下层颜色。
+      </p>
       <p class="hint">拖动平移 · 中键倾斜 · 滚轮缩放 · 点击查看要素</p>
       <div id="status" role="status">初始化…</div>
       <dl class="metrics">

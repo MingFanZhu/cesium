@@ -236,3 +236,5 @@ G1 checkpoint 为 `a2f71e1120`。负责人授权后推进 V4B，接入双世界�
 
 G2 已获授权并 active：[透明地表阶段](2026-09-14-g2-surface-transparency.md)，独立矢量 alpha 与球面当前可见面的透明适配；背面和地下后续扩展。
 G2 技术资格通过，负责人要求平面也支持透明，按推进授权 completed；独立 checkpoint 后开展 Planar 后继阶段。
+G2 checkpoint：`9e33cbd279`。当前 [G3](2026-09-14-g3-planar-transparency.md) active，限定平面当前可见地表的独立颜色透明。
+G3 技术资格通过，负责人确认并要求继续整理示例，按推进授权 completed，先独立 checkpoint。

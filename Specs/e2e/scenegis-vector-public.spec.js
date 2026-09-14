@@ -89,7 +89,8 @@ async function ready(page) {
 
 test("toggles real terrain while preserving the vector layer and Worker ownership", async ({
   page,
-}) => {
+}, testInfo) => {
+  test.setTimeout(90000);
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   const observed = await routes(page);
@@ -165,6 +166,55 @@ test("toggles real terrain while preserving the vector layer and Worker ownershi
   expect(ground.failures).toBe(0);
   expect(ground.anchors.length).toBeGreaterThan(0);
   expect(ground.anchors.every((z) => Math.abs(z - 300) < 0.1)).toBe(true);
+  const opacityInput = async (name, value) => {
+    await page.locator(`#${name}-opacity`).evaluate((input, value) => {
+      input.value = String(value);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }, value);
+    await expect(page.locator(`#${name}-opacity-value`)).toHaveText(
+      `${value * 100}%`,
+    );
+  };
+  await opacityInput("surface", 0);
+  await page.waitForFunction(
+    () => window.publicVectorPreview.viewer.planarWorld._surface._opacity === 0,
+  );
+  expect(
+    await page.evaluate(() => {
+      const p = window.publicVectorPreview;
+      return (
+        p.layer.tilesLoaded &&
+        p.layer.statistics.drawCommands > 0 &&
+        p.layer._symbols._placed.length > 0
+      );
+    }),
+  ).toBe(true);
+  await page.locator("#map").screenshot({
+    path: testInfo.outputPath("planar-transparent-terrain.png"),
+  });
+  await opacityInput("vector", 0.5);
+  await opacityInput("surface", 0.5);
+  await opacityInput("imagery", 1);
+  await page.waitForFunction(() => {
+    const p = window.publicVectorPreview;
+    return (
+      p.layer.opacity === 0.5 &&
+      p.viewer.planarWorld._surface._opacity === 0.5 &&
+      p.viewer.planarWorld.imageryLayers.get(0).alpha === 1
+    );
+  });
+  await page
+    .locator("#map")
+    .screenshot({ path: testInfo.outputPath("planar-transparent-mixed.png") });
+  await page.locator("#measure").click();
+  await expect(page.locator("#measure")).toBeEnabled({ timeout: 30000 });
+  await testInfo.attach("planar-transparency-cpu", {
+    body: await page.locator("#measurement").innerText(),
+    contentType: "text/plain",
+  });
+  await opacityInput("surface", 1);
+  await opacityInput("imagery", 0);
+  await opacityInput("vector", 1);
   await page.locator("#terrain").uncheck();
   await page.waitForFunction(
     () =>

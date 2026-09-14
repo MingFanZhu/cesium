@@ -7,7 +7,9 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     expect(vertexShader).toContain("position.xy + vec2(0.5)");
     expect(vertexShader).not.toContain("v_positionEC");
     const fragmentShader = SceneGISPlanarSurfaceShader.createFragmentShader(0);
-    expect(fragmentShader).not.toContain("sampler2D");
+    expect(fragmentShader).not.toContain(
+      "#define SCENEGIS_SURFACE_TRANSLUCENCY",
+    );
     expect(fragmentShader).not.toContain("#define SCENEGIS_LIGHTING");
     expect(fragmentShader).toContain(
       "sceneGISComposeLayers(u_color, v_textureCoordinates)",
@@ -127,9 +129,9 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
         "SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS",
       );
       expect(fragmentShader.match(/sceneGISComposeLayers/g).length).toBe(2);
-      expect(fragmentShader.match(/uniform sampler2D/g)?.length ?? 0).toBe(
-        layerCount,
-      );
+      expect(
+        fragmentShader.match(/uniform sampler2D u_texture/g)?.length ?? 0,
+      ).toBe(layerCount);
     }
   });
 

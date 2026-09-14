@@ -55,6 +55,7 @@ const installed = path.join(temporary, "node_modules/@cesium/engine");
 const types = await readFile(path.join(installed, "index.d.ts"), "utf8");
 assert(types.includes("maximumUploadTimePerFrame?: number"));
 assert(/class SceneGISVectorTileLayer[\s\S]*?opacity\?: number/.test(types));
+assert(/class SceneGISPlanarWorld[\s\S]*?opacity: number/.test(types));
 assert(!types.includes("SceneGISVectorWorkerPool"));
 assert(!types.includes("SceneGISVectorTileWorker"));
 const source = await readFile(path.join(installed, "index.js"), "utf8");
@@ -327,6 +328,18 @@ try {
         }),
       );
       const groundPick = scene.pick(location)?.id.featureId;
+      world.opacity = 0;
+      layer.opacity = 0.5;
+      render();
+      const planarTransparentColor = Array.from(
+        scene.context.readPixels({
+          x: Math.floor(location.x),
+          y: 63 - Math.floor(location.y),
+          width: 1,
+          height: 1,
+        }),
+      );
+      const planarTransparentPick = scene.pick(location)?.id.featureId;
       const groundResources = layer._drawOrder[0]._resources;
       const groundTextures = groundResources._textures.slice();
       scene.destroy();
@@ -558,6 +571,8 @@ try {
         ground: {
           color: groundColor,
           picked: groundPick,
+          transparentColor: planarTransparentColor,
+          transparentPick: planarTransparentPick,
           released: groundTextures.every((t) => t.isDestroyed()),
         },
         globe: {
@@ -584,6 +599,8 @@ try {
     assert.equal(result.symbol.picked, "symbol");
     assert.deepEqual(result.ground.color, [0, 0, 255, 255]);
     assert.equal(result.ground.picked, "land");
+    assert.deepEqual(result.ground.transparentColor, [0, 0, 128, 255]);
+    assert.equal(result.ground.transparentPick, "land");
     assert(result.ground.released);
     assert.deepEqual(result.globe.color, [255, 0, 0, 255]);
     assert.equal(result.globe.picked, "point");

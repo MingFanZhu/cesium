@@ -127,6 +127,34 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     return feature(3, [[1888, 1888, 2208, 1888, 2208, 2208, 1888, 2208]]);
   }
 
+  it("keeps flat vectors and picks independent of planar surface opacity", async function () {
+    world.baseColor = Color.BLUE;
+    spyOn(source, "requestTile").and.resolveTo(data([polygon()]));
+    const layer = add(
+      [definition("fill", { "fill-color": "red", "fill-antialias": false })],
+      { opacity: 0.5 },
+    );
+    await loaded(layer);
+    const workers = layer._workers;
+    for (const [opacity, blue] of [
+      [1, 128],
+      [0.5, 64],
+      [0, 0],
+      [1, 128],
+    ]) {
+      world.opacity = opacity;
+      const result = read();
+      expect(result.color).toEqualEpsilon([128, 0, blue, 255], 1);
+      expect(result.pick.id.featureId).toBe("7");
+      expect(layer._workers).toBe(workers);
+    }
+    layer.opacity = 0;
+    world.opacity = 0.5;
+    const result = read();
+    expect(result.color).toEqualEpsilon([0, 0, 128, 255], 1);
+    expect(result.pick).toBeUndefined();
+  });
+
   it("publishes a complete tile only after bounded batch uploads and leaves Worker completions CPU-only", async function () {
     const decoded = data([polygon()]);
     spyOn(source, "requestTile").and.resolveTo(decoded);

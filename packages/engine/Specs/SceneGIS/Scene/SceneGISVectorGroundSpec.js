@@ -162,6 +162,36 @@ describe("SceneGIS/Scene/SceneGISVectorGround", function () {
     };
   }
   [false, true].forEach(function (logarithmic) {
+    it(`keeps terrain-draped vectors independent of a transparent planar surface (log ${logarithmic})`, async function () {
+      scene.logarithmicDepthBuffer = logarithmic;
+      world.baseColor = Color.BLUE;
+      world.terrainProvider = terrain();
+      const layer = add(
+        [polygon()],
+        [
+          {
+            id: "red",
+            type: "fill",
+            paint: { "fill-color": "red", "fill-antialias": false },
+          },
+        ],
+      );
+      layer.opacity = 0.5;
+      await ready(layer);
+      const workers = layer._workers;
+      for (const [opacity, blue] of [
+        [1, 128],
+        [0.5, 64],
+        [0, 0],
+        [1, 128],
+      ]) {
+        world.opacity = opacity;
+        const result = sample(0, 0, 12);
+        expect(result.color).toEqualEpsilon([128, 0, blue, 255], 1);
+        expect(scene.pick(result.point)?.id.featureId).toBe("area");
+        expect(layer._workers).toBe(workers);
+      }
+    });
     it(`drapes ordered translucent fills without changing terrain depth (log ${logarithmic})`, async function () {
       scene.logarithmicDepthBuffer = logarithmic;
       if (!logarithmic) {

@@ -66,7 +66,11 @@ imageryLayer.alpha = 0.7;
 因此重叠要素的结果与整幅地图 group opacity 不同。修改无需重新解析或上传几何。
 
 [球面测试页](../../Test/vector-tiles/globe-map.html) 提供三个滑块和本地网格影像；
-平面页提供矢量滑块，既有 Planar imagery alpha 继续有效，整个 Planar World 仍保持 opaque contract。
+平面页同样提供三个滑块：`viewer.planarWorld.opacity` 控制地表整体颜色，
+`viewer.planarWorld.imageryLayers.get(0).alpha` 控制影像贡献，Layer.opacity 控制矢量。
+World.opacity 默认 1，接受有限 0..1，在下次正常 render 发布；requestRenderMode 下设置后调用 scene.requestRender()。
+透明模式要求 WebGL 2。地表为零仍保留深度和矢量贴地，不显示地下内容或后面的山坡。
+仅保存绘制地表前的背景快照，矢量始终直接绘制。详见 [ADR-0073](Decisions/ADR-0073-planar-surface-opacity.md)。
 本次透明资格限当前可见地表及其上方普通三维对象；地下/背面、穿越透明地表的对象排序，
 以及透明地表配合高级环境的深度合成留待后续验证。详见 [ADR-0072](Decisions/ADR-0072-vector-surface-transparency.md)。
 

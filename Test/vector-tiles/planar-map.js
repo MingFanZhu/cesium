@@ -1,3 +1,4 @@
+/* global document */
 import * as C from "/Build/CesiumUnminified/index.js";
 import installMapTest from "./map-test.js";
 
@@ -31,6 +32,39 @@ const viewer = new C.Viewer("map", {
 });
 const scene = viewer.scene;
 const world = viewer.planarWorld;
+// Local imagery uses the world's canonical tile matrix and needs no service.
+const grid = document.createElement("canvas");
+grid.width = grid.height = 128;
+const gridContext = grid.getContext("2d");
+gridContext.fillStyle = "#274c77";
+gridContext.fillRect(0, 0, 128, 128);
+gridContext.strokeStyle = "#ffffff";
+gridContext.strokeRect(0.5, 0.5, 127, 127);
+const imagery = world.imageryLayers.addImageryProvider({
+  tilingScheme: world.tilingScheme,
+  minimumLevel: 0,
+  maximumLevel: 18,
+  tileWidth: 128,
+  tileHeight: 128,
+  hasAlphaChannel: false,
+  errorEvent: new C.Event(),
+  requestImage: () => Promise.resolve(grid),
+});
+imagery.alpha = 0;
+for (const name of ["surface", "imagery"]) {
+  const input = document.getElementById(`${name}-opacity`);
+  input.addEventListener("input", () => {
+    const opacity = Number(input.value);
+    if (name === "surface") {
+      world.opacity = opacity;
+    } else {
+      imagery.alpha = opacity;
+    }
+    document.getElementById(`${name}-opacity-value`).value =
+      `${Math.round(opacity * 100)}%`;
+    scene.requestRender();
+  });
+}
 world.maximumTiltedTileDistance = 100000;
 let removeTerrainError;
 let terrainError;

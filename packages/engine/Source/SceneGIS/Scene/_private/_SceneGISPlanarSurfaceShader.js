@@ -28,6 +28,7 @@ function createFragmentShader(
   normalMode = "geometric",
   materialSource,
   advancedLighting = false,
+  translucent = false,
 ) {
   const declarations = [];
   const composition = [];
@@ -90,6 +91,9 @@ ${composition.join("\n")}
   }
   if (enableMaterial) {
     defines += "#define SCENEGIS_MATERIAL\n";
+  }
+  if (translucent) {
+    defines += "#define SCENEGIS_SURFACE_TRANSLUCENCY\n";
   }
   if (advancedLighting) {
     defines += `#define SCENEGIS_ADVANCED_LIGHTING\n${planarLighting.source}\n`;

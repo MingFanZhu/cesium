@@ -102,8 +102,8 @@ function validateMaterial(value) {
 }
 
 /**
- * A bounded, meter-based planar primary world with an opaque flat or heightmap
- * terrain surface, optional geometric lighting, and an ordered collection of
+ * A bounded, meter-based planar primary world with a flat or heightmap terrain
+ * surface, opaque by default, optional geometric lighting, and an ordered collection of
  * raster imagery layers.
  * The world supports programmatically positioned perspective and orthographic
  * cameras in {@link SceneMode.SCENE3D}.
@@ -183,6 +183,7 @@ function SceneGISPlanarWorld(options) {
   this._maximumTiltedTileDistance = Infinity;
   this._tileCacheSize = tileCacheSize;
   this._baseColor = Color.clone(baseColor);
+  this._opacity = 1.0;
   this._enableLighting = enableLighting;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   this._material = undefined;
@@ -427,6 +428,29 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
+   * Gets or sets the opacity of the composed surface color, including imagery
+   * and material. This does not multiply vector layer opacity. Geometry depth
+   * remains available for draping, picking, and occlusion even at zero opacity.
+   * Changes are published by the next normal render. The qualified view is
+   * above the surface in WebGL 2; underground transparency is not supported.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {number}
+   * @default 1.0
+   * @exception {DeveloperError} The value is not finite and between zero and one.
+   */
+  opacity: {
+    get: function () {
+      return this._opacity;
+    },
+    set: function (value) {
+      if (!Number.isFinite(value) || value < 0.0 || value > 1.0) {
+        throw new DeveloperError("opacity must be a finite number in [0, 1].");
+      }
+      this._opacity = value;
+    },
+  },
+  /**
    * Gets or sets whether fragment geometric Lambert lighting is enabled.
    * Lighting consumes the owning Scene's light and does not change surface
    * geometry, terrain selection, or resource ownership.
@@ -497,7 +521,7 @@ SceneGISPlanarWorld.prototype.beginFrame = function (frameState) {
 };
 
 /**
- * Selects visible planar tiles and submits opaque color commands.
+ * Selects visible planar tiles and submits surface color and depth commands.
  *
  * @param {object} frameState The state for the current frame.
  * @exception {DeveloperError} The world is rendered with a second WebGL Context.
@@ -516,6 +540,7 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
     this._lambertDiffuseMultiplier,
     this._material,
     this._maximumTiltedTileDistance,
+    this._opacity,
   );
 };
 
@@ -530,6 +555,13 @@ SceneGISPlanarWorld.prototype.renderEnvironment = function (
   frameState,
   passState,
 ) {
+  renderPlanarEnvironment.call(this, frameState, passState);
+  if (this._show && frameState.passes.render) {
+    this._surface.captureBackground(frameState, passState);
+  }
+};
+
+function renderPlanarEnvironment(frameState, passState) {
   const environment = this._environment;
   if (
     !this._show ||
@@ -590,7 +622,7 @@ SceneGISPlanarWorld.prototype.renderEnvironment = function (
       environmentState,
     );
   }
-};
+}
 
 /**
  * Trims unprotected tile records after command execution.

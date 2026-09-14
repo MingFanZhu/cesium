@@ -8,8 +8,8 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `G2 completed`                                         |
-| Active phase plan      | [G2](plans/2026-09-14-g2-surface-transparency.md)      |
+| Current phase          | `G3 completed`                                         |
+| Active phase plan      | [G3](plans/2026-09-14-g3-planar-transparency.md)       |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
@@ -78,7 +78,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[E1 review](reviews/2026-09-14-e1-quickstart-examples-review.md)；
+- Latest review：[G3 review](reviews/2026-09-14-g3-planar-transparency-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
 - Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
@@ -221,3 +221,12 @@ G2 实现与[技术自审](reviews/2026-09-14-g2-surface-transparency-review.md)
 背面/地下、跨透明表面排序、Planar 整体透明与高级环境透明深度合成仍为后继资格范围。
 
 负责人要求平面也支持透明，G2 按推进授权关闭 gate，先形成独立 checkpoint，再开展 Planar 后继阶段。
+
+G2 checkpoint：`9e33cbd279`。当前 [G3](plans/2026-09-14-g3-planar-transparency.md) 按负责人授权实施平面整体透明，见 ADR-0073。
+
+G3 技术自审通过：World.opacity 与平面地表/影像 UI 已接入，255 项相关 Specs、6 项平面 E2E、
+完整 build/types/release/实际包验证通过，详见最新 review。仅复制 surface 之前的背景，矢量继续直接绘制；
+linear/log 多视锥地形单次颜色贡献、MSAA/HDR、resize、pick 与资源释放已验证。
+本阶段全部 SceneGIS-owned，无新增 SGP；负责人视觉 gate pending，未形成 G3 checkpoint。
+
+负责人确认并要求在上手示例使用 lil-gui 控制矢量不透明度，G3 按推进授权关闭 gate，先独立 checkpoint。

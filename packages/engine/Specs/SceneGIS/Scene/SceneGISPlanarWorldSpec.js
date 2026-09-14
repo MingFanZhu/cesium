@@ -101,6 +101,7 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.maximumTiltedTileDistance).toBe(Infinity);
     expect(world.tileCacheSize).toBe(100);
     expect(world.baseColor).toEqual(Color.GRAY);
+    expect(world.opacity).toBe(1);
     expect(world.enableLighting).toBe(false);
     expect(world.lambertDiffuseMultiplier).toBe(0.9);
     expect(world.show).toBe(true);
@@ -126,6 +127,23 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world._frameState).toBeUndefined();
     world.maximumTiltedTileDistance = Infinity;
     expect(world.maximumTiltedTileDistance).toBe(Infinity);
+    world.destroy();
+  });
+
+  it("validates surface opacity independently of the opaque base color", function () {
+    const world = createWorld();
+    for (const opacity of [0, 0.5, 1]) {
+      world.opacity = opacity;
+      expect(world.opacity).toBe(opacity);
+    }
+    for (const value of [-0.1, 1.1, NaN, Infinity, undefined, null, "0.5"]) {
+      expect(() => {
+        world.opacity = value;
+      }).toThrowDeveloperError();
+      expect(world.opacity).toBe(1);
+    }
+    expect(world.baseColor).toEqual(Color.GRAY);
+    expect(world._surface._quadtree._tiles.size).toBe(0);
     world.destroy();
   });
 

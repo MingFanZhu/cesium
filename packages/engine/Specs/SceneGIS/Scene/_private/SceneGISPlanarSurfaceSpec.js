@@ -192,6 +192,169 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     }
   });
 
+  it("composes imagery before surface opacity and preserves the published depth snapshot", async function () {
+    const world = createWorld({ maximumLevel: 0 });
+    const image = document.createElement("canvas");
+    image.width = image.height = 1;
+    const context = image.getContext("2d");
+    context.fillStyle = "blue";
+    context.fillRect(0, 0, 1, 1);
+    const imagery = world.imageryLayers.addImageryProvider({
+      tilingScheme: world.tilingScheme,
+      minimumLevel: 0,
+      maximumLevel: 0,
+      tileWidth: 1,
+      tileHeight: 1,
+      hasAlphaChannel: false,
+      errorEvent: new Event(),
+      requestImage: () => Promise.resolve(image),
+    });
+    scene = createPlanarScene(world, 32, 32);
+    pointCameraAt(world);
+    await renderUntil(() => world.tilesLoaded);
+    const surface = world._surface;
+    const tile = surface._quadtree._renderTiles[0];
+    const command = tile.command;
+    const shader = command.shaderProgram;
+    const va = command.vertexArray;
+    const pixel = () =>
+      Array.from(
+        scene.context.readPixels({ x: 16, y: 16, width: 1, height: 1 }),
+      );
+    for (const [opacity, alpha, expected] of [
+      [1, 1, [0, 0, 255, 255]],
+      [0.5, 0.5, [64, 0, 64, 255]],
+      [0, 1, [0, 0, 0, 255]],
+      [1, 0, [255, 0, 0, 255]],
+    ]) {
+      world.opacity = opacity;
+      imagery.alpha = alpha;
+      scene.renderForSpecs();
+      expect(pixel()).toEqualEpsilon(expected, 1);
+      expect(tile.command).toBe(command);
+      if (opacity === 1) {
+        expect(command.shaderProgram).toBe(shader);
+      }
+      expect(command.vertexArray).toBe(va);
+      if (scene.pickPositionSupported) {
+        expect(scene.pickPosition(new Cartesian2(16, 16)).z).toBeCloseTo(0, 2);
+      }
+    }
+    world.opacity = 0.5;
+    scene.renderForSpecs();
+    const depth = tile.command;
+    const debug = { ...surface._debug };
+    world.opacity = 0;
+    const replay = {
+      ...scene.frameState,
+      passes: { render: false, pick: true, depth: true },
+      commandList: [],
+    };
+    world.render(replay);
+    expect(replay.commandList).toEqual([depth]);
+    expect(command.uniformMap.u_surfaceOpacity()).toBe(0.5);
+    scene.renderForSpecs();
+    expect(command.uniformMap.u_surfaceOpacity()).toBe(0);
+    expect(surface._debug.createdCommands).toBe(debug.createdCommands);
+    expect(surface._debug.createdShaders).toBe(debug.createdShaders);
+    expect(surface._debug.createdTextures).toBe(debug.createdTextures);
+    expect(surface._debug.submittedCommands).toBe(1);
+    const backgroundTexture = surface._background.getTexture();
+    scene.destroyForSpecs();
+    expect(va.isDestroyed()).toBeTrue();
+    expect(backgroundTexture.isDestroyed()).toBeTrue();
+  });
+
+  [false, true].forEach(function (logarithmicDepthBuffer) {
+    it(`blends the nearest terrain surface once across overlapping hills (${logarithmicDepthBuffer ? "log" : "linear"} depth)`, async function () {
+      const world = createWorld({ maximumLevel: 1, size: 1024, minimum: -512 });
+      const heights = new Float32Array(81);
+      for (let row = 0; row < 9; ++row) {
+        for (let col = 0; col < 9; ++col) {
+          heights[row * 9 + col] =
+            120 * Math.sin((row * Math.PI) / 8) * Math.sin((col * Math.PI) / 8);
+        }
+      }
+      const data = new SceneGISPlanarHeightmapTerrainData({
+        buffer: heights,
+        width: 9,
+        height: 9,
+      });
+      world.terrainProvider = {
+        tilingScheme: world.tilingScheme,
+        minimumHeight: 0,
+        maximumHeight: 120,
+        maximumLevel: 1,
+        errorEvent: new Event(),
+        getLevelMaximumGeometricError: (level) => 16 / 2 ** level,
+        requestTileGeometry: () => Promise.resolve(data),
+        getTileDataAvailable: () => true,
+        loadTileDataAvailability: () => undefined,
+      };
+      scene = createPlanarScene(world, 128, 128);
+      scene.msaaSamples = 1;
+      scene.logarithmicDepthBuffer = logarithmicDepthBuffer;
+      scene.farToNearRatio = 2;
+      aimCamera(
+        new Cartesian3(30, -500, 90),
+        new Cartesian3(30, 100, 0),
+        Cartesian3.UNIT_Z,
+      );
+      scene.camera.frustum.near = 1;
+      scene.camera.frustum.far = 2000;
+      await renderUntil(() => world.tilesLoaded);
+      const opaque = scene.context.readPixels();
+      const tiles = world._surface._quadtree._renderTiles;
+      expect(tiles.length).toBeGreaterThan(1);
+      const geometry = tiles.map((tile) => tile.command.vertexArray);
+      world.opacity = 0.5;
+      scene.renderForSpecs();
+      const translucent = scene.context.readPixels();
+      let samples = 0;
+      for (let i = 0; i < opaque.length; i += 4) {
+        if (opaque[i] === 255 && opaque[i + 1] === 0) {
+          expect(translucent[i])
+            .withContext(`pixel ${i / 4}`)
+            .toEqualEpsilon(128, 1);
+          ++samples;
+        }
+      }
+      expect(samples).toBeGreaterThan(1000);
+      expect(tiles.map((tile) => tile.command.vertexArray)).toEqual(geometry);
+      expect(world._surface._debug.submittedCommands).toBe(tiles.length);
+    });
+  });
+
+  it("refreshes and resizes the background capture through MSAA and HDR changes", function () {
+    const world = createWorld({ maximumLevel: 0 });
+    scene = createPlanarScene(world, 32, 32);
+    scene.msaaSamples = 4;
+    pointCameraAt(world);
+    world.opacity = 0;
+    const read = () =>
+      Array.from(
+        scene.context.readPixels({ x: 16, y: 16, width: 1, height: 1 }),
+      );
+    for (const hdr of [false, true, false]) {
+      scene.highDynamicRange = hdr;
+      scene.backgroundColor = hdr ? Color.BLUE : Color.GREEN;
+      world.show = false;
+      scene.renderForSpecs();
+      const background = read();
+      world.show = true;
+      scene.renderForSpecs();
+      expect(read()).toEqualEpsilon(background, 1);
+      const texture = world._surface._background.getTexture();
+      scene.renderForSpecs();
+      expect(world._surface._background.getTexture()).toBe(texture);
+    }
+    const oldTexture = world._surface._background.getTexture();
+    scene.canvas.width = scene.canvas.height = 64;
+    scene.renderForSpecs();
+    expect(oldTexture.isDestroyed()).toBeTrue();
+    expect(world._surface._background.getTexture().width).toBe(64);
+  });
+
   it("uses the globe pass without materializing C9 ground snapshots", function () {
     const world = createWorld({ maximumLevel: 0 });
     scene = createPlanarScene(world);
