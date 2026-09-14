@@ -52,7 +52,7 @@ V5B 远景 symbol filter 不减少地图选取；公开页已恢复原生持续�
 ## Execution and current gate
 
 World 属性、共享 angle / closed-bounds 判定与两条选取链均已实现。公开页采用 100000 米，
-完全本地的 `Test/vector-tiles/distance.html` 演示地形/影像 2000 米与俯视/浅角切换。
+完全本地的 `Test/vector-tiles/planar-distance.html` 演示地形/影像 2000 米与俯视/浅角切换。
 197 项相关 Specs、131 项既有 vector 回归及 5 项页面 E2E 已覆盖通过；完整 build / buildTs / tsc 通过。
 三项既有 lighting 断言按已有 advanced-lighting key 修正，产品 Shader 未变。
 证据与局限见 [review](../reviews/2026-09-13-v3c1a-tilted-distance-review.md)。

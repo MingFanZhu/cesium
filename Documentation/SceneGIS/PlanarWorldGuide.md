@@ -246,7 +246,7 @@ SunLight方向。双面surface允许从上下两侧观察，但lighting始终使
 相机角度和其他三维对象的可见距离不变。Terrain、imagery 和独立 MVT 共用判定，
 祖先与兄弟依赖仍可能越过细节距离；配置过小会让低角度画面大部分只显示粗层。
 属性在取得 World 后设置，不是 Viewer `planarWorld` 构造字段。确定性对照见
-[本地远景页面](../../Test/vector-tiles/distance.html)，详细契约见
+[本地远景页面](../../Test/vector-tiles/planar-distance.html)，详细契约见
 [ADR-0066](Decisions/ADR-0066-planar-tilted-tile-distance.md)。
 
 降低 `maximumScreenSpaceError` 会选择更多 tile；提高 `tileCacheSize` 会保留更多 unprotected tile record。每个 shown imagery layer 会增加 texture/request/cache 成本，但不会增加每个 ideal tile 的 draw command 数。Terrain LERC decode与Heightmap/Quantized mesh在唯一terrain Worker中执行，normal render每帧仍最多启动两个terrain task并promotion两个GPU content。每个non-flat final vertex增加2 bytes oct normal和一个terrain normal vertex buffer；`enableLighting`选择smooth或geometric Lambert variant但不增加command。调参时同时观察 selected/submitted tile、resident tile、request/texture/binding、mesh/promotion与warm-frame allocation；不要仅用单帧 FPS 推断泄漏或稳定性。

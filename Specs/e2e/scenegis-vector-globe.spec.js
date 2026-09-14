@@ -15,7 +15,7 @@ test("renders an offline Globe with native terrain, symbols, bounded cover and c
     external.push(url.origin);
     return route.abort();
   });
-  await page.goto("/Test/vector-tiles/globe.html");
+  await page.goto("/Test/vector-tiles/globe-map.html");
   const ready = () =>
     page.waitForFunction(() => {
       const p = window.publicVectorPreview;
@@ -23,6 +23,11 @@ test("renders an offline Globe with native terrain, symbols, bounded cover and c
     });
   await ready();
   await expect(page.locator("#error")).toBeEmpty();
+  await expect(
+    page.locator(
+      "#environment-panel, .cesium-viewer-timelineContainer, .cesium-viewer-animationContainer",
+    ),
+  ).toHaveCount(0);
   await page.evaluate(() => {
     window.globeIdentity = window.publicVectorPreview.viewer.scene.globe;
     window.globeWorkers = window.publicVectorPreview.layer._workers;
@@ -70,8 +75,23 @@ test("renders an offline Globe with native terrain, symbols, bounded cover and c
     const p = window.publicVectorPreview,
       l = p.layer,
       w = l._workers;
-    p.viewer.scene.primitives.remove(l);
-    return l.isDestroyed() && w.destroyed && w.slots.length === 0;
+    window.dispatchEvent(
+      new PageTransitionEvent("pagehide", { persisted: true }),
+    );
+    const cached = !p.viewer.isDestroyed() && !l.isDestroyed();
+    window.dispatchEvent(
+      new PageTransitionEvent("pagehide", { persisted: false }),
+    );
+    window.dispatchEvent(
+      new PageTransitionEvent("pagehide", { persisted: false }),
+    );
+    return (
+      cached &&
+      p.viewer.isDestroyed() &&
+      l.isDestroyed() &&
+      w.destroyed &&
+      w.slots.length === 0
+    );
   });
   expect(released).toBe(true);
   expect(external).toEqual([]);

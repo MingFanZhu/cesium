@@ -35,7 +35,7 @@ Bright / Liberty 剩余各 10 个 symbol layers：5 个道路/水系名称、3 �
 4. map pitch 的每个 quad corner 转真实世界坐标；viewport pitch 使用屏幕旋转 quad。
    沿用现有 RTE vertex protocol 与自动 pick，CPU 投影相同顶点用于逐 glyph collision。
    keep-upright 依据投影阅读方向翻转文字路径；箭头默认保留有向线，不跟随文字翻转。
-5. 新增 `Test/vector-tiles/line-symbols.html` 的确定性曲线/反向/短线/锐角/路牌/箭头场景；
+5. 新增 `Test/vector-tiles/planar-line-symbols.html` 的确定性曲线/反向/短线/锐角/路牌/箭头场景；
    公开 Bright/Liberty 接入这 10 层原始样式。更新 fixtures、兼容清单与审查记录。
 
 ## Validation and exit

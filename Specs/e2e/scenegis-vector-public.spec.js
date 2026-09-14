@@ -93,7 +93,7 @@ test("toggles real terrain while preserving the vector layer and Worker ownershi
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   const observed = await routes(page);
-  await page.goto("/Test/vector-tiles/public.html");
+  await page.goto("/Test/vector-tiles/planar-map.html");
   await ready(page);
   await page.evaluate(async () => {
     const C = await import("/Build/CesiumUnminified/index.js");
@@ -199,7 +199,7 @@ test("renders the public-map page with deterministic data, picking, tilt and res
     }
   });
   const observed = await routes(page);
-  await page.goto("/Test/vector-tiles/public.html");
+  await page.goto("/Test/vector-tiles/planar-map.html");
   await ready(page);
   expect(workers.length).toBe(2);
   expect(
@@ -280,7 +280,7 @@ test("switches between Bright and Liberty and preserves the map when the public 
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   const observed = await routes(page);
-  await page.goto("/Test/vector-tiles/public.html");
+  await page.goto("/Test/vector-tiles/planar-map.html");
   await ready(page);
   await expect(page.locator("#map-title")).toContainText("Bright");
   await page.evaluate(() => {
@@ -402,7 +402,7 @@ test("retains foreground coverage and map scale while culling distant labels at 
   page,
 }, testInfo) => {
   await routes(page);
-  await page.goto("/Test/vector-tiles/public.html");
+  await page.goto("/Test/vector-tiles/planar-map.html");
   await ready(page);
   const result = await page.evaluate(async () => {
     const C = await import("/Build/CesiumUnminified/index.js");
@@ -549,7 +549,7 @@ test("keeps top-down tile selection unchanged when zooming far away", async ({
   page,
 }) => {
   await routes(page);
-  await page.goto("/Test/vector-tiles/public.html");
+  await page.goto("/Test/vector-tiles/planar-map.html");
   await ready(page);
   const comparisons = await page.evaluate(async () => {
     const C = await import("/Build/CesiumUnminified/index.js");
@@ -599,7 +599,7 @@ test("renders the local terrain and imagery distance comparison through a near-h
 }, testInfo) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/Test/vector-tiles/distance.html");
+  await page.goto("/Test/vector-tiles/planar-distance.html");
   await page.waitForFunction(
     () => window.tiltedDistancePreview?.viewer.planarWorld.tilesLoaded,
   );

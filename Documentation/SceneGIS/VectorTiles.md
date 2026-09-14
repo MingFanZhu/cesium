@@ -1,24 +1,28 @@
 # Vector Tiles
 
+程序员上手入口：[简单示例目录](../../Test/vector-tiles/examples/示例目录.html)。
+平面和球面各有独立的本地最小示例、公开 Bright 示例及完整初始化 JavaScript；
+不含高级环境和调试面板，阅读顺序及数据替换方法见 [上手说明](../../Test/vector-tiles/examples/README.md)。
+
 ## 当前交付范围
 
 V1 提供独立的 MVT 数据、坐标、URL source 与 Style v8 子集计算前端。
 V2 在此基础上提供无 terrainProvider 的平面批量 renderer；不依赖 Cesium experimental MVT。
-`Test/vector-tiles/index.html` 的实际 flat 画面已于 2026-09-13 通过项目负责人验收。
+`Test/vector-tiles/planar-city.html` 的实际 flat 画面已于 2026-09-13 通过项目负责人验收。
 V3A 增加缓存瓦片的逐区域替换，自动化与项目负责人加载过渡画面验收均已通过。
 V3B0 将资源与命令迁入自有地图图元，保持已验收样式范围；
 不再依赖原生 Primitive/Appearance/BatchTable，通用 Renderer 与拾取派生继续复用。
 V3B1 增加自有 stroke、虚线数值表、fill fringe 与 circle blur；代码和自动验证已完成，
 新增样式图集已于 2026-09-13 通过项目负责人视觉验收。
-V3C0 新增 [公开地图 Test 页面](../../Test/vector-tiles/public.html)，以真实数据建立样式与性能基线；
+V3C0 新增 [公开地图 Test 页面](../../Test/vector-tiles/planar-map.html)，以真实数据建立样式与性能基线；
 现有 runtime/API 没有变化。按负责人选择，采用 MapLibre 示例使用的 OpenFreeMap / Bright，
 接入 93/119 层，另保留 Liberty 82/111 层对照；Streets v12 仅保留离线样式参考。
 未支持层及来源见 [参考说明](../../Test/vector-tiles/reference/README.md)。
 Bright 在线俯视/倾斜/16 级数据已 smoke，无需 token，公开页已于 2026-09-13 通过负责人验收。
-V5A 增加独立平面点标注与 [本地点标注图集](../../Test/vector-tiles/symbols.html)，
+V5A 增加独立平面点标注与 [本地点标注图集](../../Test/vector-tiles/planar-symbols.html)，
 当时 Bright 接入 108/119 层，Liberty 97/111 层，各新增 15 个 point symbol layers。
 V5B 继续接入各 10 个沿线名称、路牌与箭头层：当前 Bright 118/119、Liberty 107/111。
-新增 [沿线标注图集](../../Test/vector-tiles/line-symbols.html)；语义和限制见 [标注文档](VectorTileSymbols.md)。
+新增 [沿线标注图集](../../Test/vector-tiles/planar-line-symbols.html)；语义和限制见 [标注文档](VectorTileSymbols.md)。
 V4A 已实现平面直接贴地、terrain anchors 和公开页地形开关，技术资格见下文；
 负责人已于 2026-09-14 确认视觉验收。G1 增加 Globe 适配，技术验证与人工页见下文；
 G1 负责人于 2026-09-14 确认视觉与性能结果可接受，完整连续曲面字形仍未支持。
@@ -54,7 +58,7 @@ Style zoom 以视轴椭球交点和当地 Mercator 比例计算；越过地平�
 地形 LOD/provider 变化保留地图几何与 glyph atlas；待索引就绪前的锚点受真实地表遮挡。
 G1 不承诺完整环境材质融合；V4B 的环境资格见下文。陡坡大字形连续曲面贴合和稳定 60 FPS 仍未承诺。
 
-[Globe 离线入口](../../Test/vector-tiles/globe.html) 默认使用本地构造 MVT / Bright 样式，
+[Globe 离线入口](../../Test/vector-tiles/globe-map.html) 默认使用本地构造 MVT / Bright 样式，
 可切换公共 Bright/Liberty 与 Esri 高程。范围与数值协议见 [ADR-0070](Decisions/ADR-0070-globe-vector-ground-rendering.md)。
 
 ### 原始瓦片坐标
@@ -224,7 +228,7 @@ ground 要求 WebGL2、float textures 与 depth textures。Worker 把已有 fill
 terrain cover 收紧，含零高程等待地表及 skirts。只改高度 uniform，不重建 geometry。
 圆点与文字使用独立 terrain anchor，详见 [地形标注](VectorTileSymbols.md#地形标注)。
 
-`Test/vector-tiles/public.html` 提供“真实地形 · 矢量贴地”开关，以及紫金山、因斯布鲁克定位。
+`Test/vector-tiles/planar-map.html` 提供“真实地形 · 矢量贴地”开关，以及紫金山、因斯布鲁克定位。
 地形使用既有示例的 Esri WorldElevation3D LERC 服务；失败显示提示，关闭恢复零高程。
 不限定用户相机的 pitch；style 比例仍沿用视轴与 Z=0 参考面的契约，视轴完全不再朝向参考面
 时不显示地图，此既有比例限制尚需后续三维比例契约解决。Globe 的独立 G1 资格见前述 Globe 使用范围。
@@ -242,7 +246,7 @@ Style `type: "hillshade"` 是基于 `raster-dem` 高程源生成的制图晕渲�
 `0.4 + 0.6 * max(N·L, 0)` 基础光照，作用于地图面线颜色；Globe background 同样处理。
 它跟随 `world.enableLighting`，没有复用平面 terrain 的 Worker smooth normals、完整 light color/
 intensity、物理 irradiance 或云影数据。文字/图标保持其独立样式显示。公开地形示例用显式
-DirectionalLight 做基础观察光照；高级环境和 Globe 原生几何阴影可通过页面控件启用。
+DirectionalLight 做基础观察光照。矢量测试页已移除高级环境控件，相关产品接口仍可由应用自行接入。
 
 原生地表先渲染，矢量借用地表 depth 后在 TERRAIN_CLASSIFICATION 绘制，深度共享只保证贴附与遮挡。
 不透明矢量颜色会覆盖地表已经计算的照明和阴影，不能自动继承 native Globe/Planar material lighting。
@@ -263,9 +267,10 @@ controller 配置生效。Circle/symbol 保持制图颜色，不作为物理材�
 环境未 ready/停用时恢复基础路径；借用资源由环境 controller 独占释放。切换不重建地图图层。
 Globe 高级环境要求关闭原生 Globe lighting/ground atmosphere、sky/Sun/Fog/bloom 等冲突项；
 Planar 需要先注册 `SceneGISPlanarEnvironment`，使用显式光向或提供明确经纬度原点的 astronomical
-mode，完整前提沿用高级环境原契约。Test 页面负责启用时保存、停用时恢复这些原生状态，提供
-光照、云层、雾与泛光参数，以及 Cesium 原生 Timeline/Animation。Viewer clock 驱动双世界天文
-光向与云时间；环境开关保留所选时间与参数，定位操作同步 Planar 的天文原点。
+mode，完整前提沿用高级环境原契约。应用负责启用时保存、停用时恢复这些原生状态；
+可用 Viewer clock 驱动双世界天文光向与云时间，定位变化时同步 Planar 的天文原点。
+E1 按负责人要求从矢量测试页移除环境、参数面板和 Timeline/Animation，以及对应页面 E2E；
+engine Specs 和独立发布包的环境验证保留，V4B 产品能力与历史验收不变。
 
 本阶段接受不实现 MapLibre hillshade。技术验证、负责人视觉验收与剩余边界见
 [V4B review](../../AgentDocs/vector-tiles/reviews/2026-09-14-v4b-environment-review.md)。既有光照约束见

@@ -1,212 +1,74 @@
-# 矢量瓦片验收
+# 矢量地图示例与测试
 
-## Globe
+程序员先看 [中文上手目录](examples/示例目录.html)：
+[平面地图](examples/平面地图.html)、[球面地图](examples/球面地图.html)，各有独立同名 JS。
+两页只展示 Viewer、相机、样式和 Layer 接入，需要网络、无需 token。
+替换数据见 [上手说明](examples/README.md)。本地上手版已删除。
 
-`/Test/vector-tiles/globe.html` 默认使用本地构造数据与 Bright 样式，网络断开也能启动。
-数据仅用于验证，不表示真实地理要素；地形开关在本地模式使用连续的构造高度函数。
-`/Test/vector-tiles/globe.html?provider=bright` 直接打开 OpenFreeMap 公开地图，地形开关使用
-Esri 原生高程 provider；网络或公共字体缺字会明确报告，不自动改变数据源。
+复用仓库根服务器；未启动时运行 `npm run start -- --no-embeddings`，默认端口 8080。
+无需 Sandcastle。所有页面只导入 `/Build/CesiumUnminified/index.js`，使用 Cesium 原生 FPS。
 
-验收街区俯视/倾斜、阿尔卑斯真实地形、街道细节、整球缩放、拾取与重建。原生 Globe 始终
-保留；地形关闭后回到 EllipsoidTerrainProvider。使用 Viewer 默认持续渲染与原生 FPS。
-G1 已于 2026-09-14 通过负责人视觉与性能验收，不代表透明地球、非 WGS84 或完整曲面文字已支持。
+## 测试入口
 
-复用开发服务器运行页面回归：
+旧测试页保留有实际回归用途的能力，按世界命名；不再提供高级环境、环境参数和时间控件。
 
-```powershell
-npx playwright test -c Test/vector-tiles/playwright.config.mjs
-```
+| 世界 | 页面                                 | 验证内容                                                  |
+| ---- | ------------------------------------ | --------------------------------------------------------- |
+| 平面 | [综合地图](planar-map.html)          | Bright/Liberty、真实地形、倾斜、拾取、图层重建与 CPU 测量 |
+| 平面 | [城市](planar-city.html)             | 本地 MVT 金字塔、洞/透明层序、逐块替换、拾取              |
+| 平面 | [样式](planar-styles.html)           | cap/join、dash/gap、fill AA、circle blur                  |
+| 平面 | [点标注](planar-symbols.html)        | 中英文、图文 POI、避让、拾取与缩放                        |
+| 平面 | [沿线标注](planar-line-symbols.html) | 曲线文字、路牌、箭头、反向道路与锐角限制                  |
+| 平面 | [远景](planar-distance.html)         | 低角度地形/影像选层限制及俯视拉远对照                     |
+| 球面 | [综合地图](globe-map.html)           | 原生椭球与地形、地图/标注贴地、整球缩放和资源释放         |
 
-此配置只运行矢量页面，不启动 Sandcastle；Globe 测试明确阻断外网，以本地 MVT、字库、图标
-和起伏地形验证。`verify-worker-package.mjs` 同时验证独立 engine 安装包和两种 release 入口的
-Globe 贴地、圆点、拾取及资源释放。
+`planar-map.js` 和 `globe-map.js` 各自初始化 World、相机和地形；
+`map-test.js` 仅共用测试面板、数据接入、拾取与测量，没有根据 DOM 切换世界的分支。
+`map-test.css` 是测试面板样式，不被上手页加载。
 
-性能回归使用 1432×1150 的地图 canvas、pixelRatio 1。公开 Bright、地形关闭时可在页面控制台
-恢复南京浅倾角案例；必须先等待地图就绪，再使用原生 FPS 或 CPU 测量按钮：
+两个综合测试入口支持 `?provider=local`、`bright`、`liberty`。
+球面默认 local；平面默认 bright。local 使用合成 MVT 和已提交字体，不代表真实城市。
+其他平面图集全部本地运行。公开服务失败会明确报错并保留已有地图，可手动选择本地测试数据。
 
-```js
-publicVectorPreview.viewer.camera.setView(
-  await fetch("./globe-performance-camera.json").then((response) =>
-    response.json(),
-  ),
-);
-```
+地形开关：平面使用 Esri 3857 单根 LERC 高程；球面 local 使用确定性高度函数，在线使用 Esri 原生 provider。
+关闭恢复平面零高程或原生椭球。仅保留基础地形光照，矢量直接贴地。
+产品高级环境能力及 engine/release 验证仍在，本目录不再组装环境。
 
-真实地形对照选择阿尔卑斯并开启地形、倾斜。同机 GPU timer、CPU、旋转/平移与剩余帧时波动
-见 [G1 review](../../AgentDocs/vector-tiles/reviews/2026-09-14-g1-globe-review.md)；不得把 CPU 时间当作 FPS。
+## 数据和工具为何保留
 
-## 平面入口
+以下文件均有生成、自动化或性能复现用途，不是重复上手页面。
 
-根开发服务器入口：`/Test/vector-tiles/index.html`。当前页面直接使用
-`/Build/CesiumUnminified/index.js`，不需要打开 Sandcastle。
+- `tiles/`、`style.json`：城市 21 个 MVT 金字塔与样式；`generate-fixtures.mjs` 可重建。
+- `styles.pbf`、`style-cases.mjs`：样式图集；`generate-style-fixture.mjs` 可重建。
+- `public-fixture.pbf`：综合地图与 E2E 的五个合成要素；`generate-public-fixture.mjs` 可重建。
+- `symbol-assets/`、`line-symbol-assets/`、对应 cases 与 generate 脚本：点/沿线标注、字库和图标；
+  许可证见 [点标注资源](symbol-assets/README.md)、[沿线资源](line-symbol-assets/README.md)。
+- `reference/`：Bright/Liberty 固定样式、显式兼容清单与来源许可；Streets 保留为后续样式审计参考。
+- `profile-motion.mjs` 和三个 camera JSON：已反馈性能/道路尺寸问题的复现材料。
+- `verify-worker-package.mjs`：独立 engine 安装包、release ESM/IIFE 的 Worker、Globe、贴地和环境交付验证。
 
-从仓库根启动 `npm run start -- --no-embeddings`，然后访问
-`http://localhost:8080/Test/vector-tiles/index.html`。已有该仓库的根服务器时直接复用；
-上游 server 同时绑定固定的 8081 镜像端口，因此只改变 `--port` 不能启动第二个实例。
-
-## 数据与人工验收
-
-`generate-fixtures.mjs` 自行生成合成城市，不使用外部地图、token、glyph 或 sprite。
-`tiles/` 含 MVT 2.1 的 z=0..2 完整金字塔，共 21 个文件、83,969 字节。
-源数据共 320 个要素，分为 land/water/buildings/roads/places；
-相邻 tile 保留 buffer 和一致 feature ID，几何不预裁成地图颜色纹理。
-这些数据仅用于调试和验收，不表示真实地理对象。
-
-重新生成：`node Test/vector-tiles/generate-fixtures.mjs`。
-数据作者为 SceneGIS，随仓库许可证分发；protobufjs 仅用于离线 fixture 编码。
-页面通过公开的独立 source/decoder/style/layer 加载 PBF。
-
-- 全图俯视：公园、建筑、水域、道路底边/上层、圆形 POI 的顺序。
-- 中央街区：放大后线宽与圆半径保持 CSS 像素尺寸；source 在 z=2 后继续复用。
-- 倾斜视角：直接矢量保持在 Z=0 平面，道路和屏幕圆点连续显示。
-- 湖心岛是 polygon hole；河道跨 tile，观察透明水域在共享边是否变深或断裂。
-- 点击中央广场、道路、水域，确认返回业务属性、style layer、tile 和 feature ID。
-- 隐藏/显示、移除并重建：确认命令消失、恢复和无控制台错误。
-- 逐块加载演示：重新加载全图，再自动放大并让子瓦片分批完成。观察旧图保留、
-  每块独立替换且透明颜色不加深；最终“替代瓦片”归零，再点击中央广场确认源 tile 切换。
-
-演示通过页面的 source 子类延迟返回真实 PBF 的解析结果；延迟仅用于此 Test 页面，
-产品没有模拟延迟或特殊测试分支。不同 LOD 的 MVT 量化可造成小幅边缘跳动。
-V2 画面及 V3A 逐块加载过渡均已由项目负责人验收通过。
-V3B0 改用自有 GPU 图元，保留上述视觉基线；拾取复用 Cesium 的 DrawCommand 自动派生。
-
-V3B1 新增 `/Test/vector-tiles/styles.html` 样式图集，城市页面顶部可直接进入。
-`style-cases.mjs` 定义 12 个案例、17 个要素；`generate-style-fixture.mjs` 编码
-`styles.pbf`，重新生成命令为 `node Test/vector-tiles/generate-style-fixture.mjs`。
-使用独立的本地米制 World 验证同一 MVT 数值契约，城市页面继续验收 3857。
-全部案例关闭 MSAA/FXAA，以便直接检查自有 coverage：
-
-- 三种 cap 与三种 join，半透明拐角保持普通连接处颜色一致。
-- 同一 batch 内不同周期虚线、零长度圆点虚线、带 offset 的 gap 双轨。
-- 带孔洞的面边界 AA、不同 circle blur 和 line blur。
-- 俯视/倾斜、逐要素拾取、移除重建；页面标题采用 DOM 标签，不代表 symbol 已实现。
-
-当前没有 terrainProvider 或 symbol 渲染；拐角 dash 随网格变形，跨 tile 相位不保证连续，
-也不承诺 MapLibre 逐像素一致性。新增图集已于 2026-09-13 通过负责人视觉验收。颜色与样式契约见
-[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
+合成 MVT 由 SceneGIS 编写，随仓库许可分发。Noto 字库使用 SIL OFL；公开样式与数据署名见
+[来源和支持范围](reference/README.md)。不在仓库分发真实公开地图瓦片。
 
 ## 自动化与测量
 
-新增 `/Test/vector-tiles/public.html` 直接加载在线 MVT，支持柏林、纽约、上海与北京定位，
-俯视/倾斜、16 级街道细节、拾取、重建、样式排除清单和 CPU 测量。
-公开页采用透视相机，中键可倾斜；选层复用平面影像/地形 SSE，近处细、远处粗，
-显式预算为 64 desired / 128 cached。5° 浅俯角回归检查地面覆盖和比例，
-地平线以上保留未配置天空的场景背景。尺寸对照图集继续使用正交相机。
-默认使用免 token 的 OpenFreeMap / Bright，与用户参考项目的
-`test/examples/display-buildings-in-3d.html` 和 `add-a-vector-tile-source.html` 相同。
-可切换 Liberty 作样式对照；不需要 Mapbox 账户或 token。
-连接失败明确显示错误并保留原地图，不自动更换数据。
+`Specs/e2e/scenegis-vector-*.spec.js` 验证页面组装，使用本地 MVT、字体、sprite 和服务拦截。
+高级环境页面 E2E 随环境页面功能移除；产品 engine Specs 与发布脚本中的环境检查保留。
 
-V3C0 基线接入 Bright 93/119 层、Liberty 82/111 层；V5A 点标注扩展后的当前范围见下文，未渲染的层有逐项原因。
-参见 [参考、差距和授权](reference/README.md)。Streets 固定 JSON 仅作后续离线样式参考，
-官方 Mapbox 数据已移出本轮范围；当前真实公网 smoke 为 OpenFreeMap。
-按用户本轮要求启用公网示例；服务不可用时可手动返回本地城市，不自动切换数据。
+`npx playwright test -c Test/vector-tiles/playwright.config.mjs`
 
-`Specs/e2e/scenegis-vector-tiles.spec.js` 覆盖真实 PBF、颜色像素、requestRenderMode、
-拾取、倾斜、重建、父子替换中间状态和样式图集，共 3 项；143 项矢量单元和真实 Context 回归在
-`packages/engine/Specs/SceneGIS/`。
-修改源码或 Specs 后先执行 `npm run build -- --workspace @cesium/engine`，再执行
-`npm run test -- --workspace engine --includeName SceneGISVector --browsers ChromeHeadless --failTaskOnError`。
-当前 `gulp test --workspace engine` 只刷新 root bundle，却运行已有的 engine Specs bundle，
-省略前置构建会误测旧文件；直接跑 root 混合包也不能替代 engine 的模块 identity 验证。
-E2E 使用仓库默认配置时，需要释放 8080/8081 给其根服务器，不能同时运行第二个开发服务器。
+此命令连接已有服务器，不会启动 Sandcastle。产品源码/Specs 变更仍按
+[开发指南](../../Documentation/SceneGIS/DevelopmentGuide.md) 的 engine 构建与测试流程验证。
+发布验证仅在完成 build-release 与 build-ts 后运行 `node Test/vector-tiles/verify-worker-package.mjs`。
 
-新增 `Specs/e2e/scenegis-vector-public.spec.js` 的 5 项 E2E 拦截外网，使用本地
-`public-fixture.pbf` 与固定样式快照，覆盖两个入口、实际选层、pick、重建、
-Bright/Liberty 切换销毁旧图和 HTTP 503 连接失败保留旧图。生成命令为
-`node Test/vector-tiles/generate-public-fixture.mjs`。
+综合地图暴露 `window.publicVectorPreview`；“测量 60 帧”是 preRender 到 postRender 的 CPU 提交耗时，
+不含 GPU 完成或浏览器合成。首次就绪时间不含样式与 TileJSON 下载；请求数/字节数为当前 Layer 生命周期累计值。
+原生 FPS/MS 与 CPU 测量不是同一指标。
 
-“测量 60 帧”记录 preRender 到 postRender 的 CPU 提交时间，包含该页正常组装开销，
-不含 GPU 完成、浏览器合成或初次 bundle 下载。诊断暴露为 `window.vectorTilePreview`。
-该小数据集用于建立 V2 baseline，不代表密集真实地图的吞吐量。
+运行 `node Test/vector-tiles/profile-motion.mjs before` 记录固定南京轨迹；
+`node Test/vector-tiles/profile-motion.mjs after Build/Specs/vector-motion/before.har` 重放服务响应。
+输出只写忽略的 Build/Specs；Profiler 本身影响耗时，不能用 headless 帧时代表应用 FPS。
+球面相机可通过 `globe-performance-camera.json` 恢复；两个 nanjing camera 文件分别保留标注旋转与道路浅俯角视图。
 
-公开地图暴露 `window.publicVectorPreview`。其 60 帧测量记录
-preRender 到 postRender 的 CPU 提交、正常视图统计、请求数、接收字节和 Worker 内解码耗时。
-V3C1B 默认启用异步准备，无需开关；MVT/geometry/glyph/shaping 使用 Worker，页面不再包裹同步 decoder。
-Worker tasks/ms 可在 layer.statistics 查看；它们不是主线程耗时或 FPS。
-新增 Worker 文件后，运行中的开发服务器需要重启一次以刷新构建入口列表；本轮已处理。
-firstReadyMs 从创建图层到当前视图首次无失败就绪，排除页面 bundle 与样式/TileJSON 获取；
-要素数包含解码但尚未渲染的 POI/标注。指标是一次图层生命周期的累计值；
-如需独立地点/zoom 的冷启动对比，定位后使用“重建图层”，不要把累计数当作当前可见要素。
-
-公开页使用 Viewer 默认的持续渲染，通过 `scene.debugShowFramesPerSecond = true`
-开启 Cesium 原生 FPS / MS 面板；不再提供渲染模式开关或自定义帧率计时器。
-原生 MS 表示帧间隔，和“测量 60 帧”的 CPU 提交耗时不同。
-公开页本地 E2E 验证原生面板、持续渲染默认值及原有倾斜、拾取和重建。
-
-公开页启用 `world.maximumTiltedTileDistance = 100000`，只对低角度透视限制远景细分，
-俯视拉远保持原选层；10° 以下完全启用，10°–20° 逐渐放宽。
-[distance.html](distance.html) 是完全本地的地形/影像对照页，使用 2 千米细节距离、
-固定高度函数和带层级编号的影像；可以切换限制、5°、0.5° 和俯视拉远。
-累计请求数不会因相机切换清零，冷启动对比需分别刷新页面。
-
-交互 profiling 工具：复用开发服务器后执行 `node Test/vector-tiles/profile-motion.mjs before`。
-固定南京、1141×1150 CSS、DPR=1、60 帧 pan/zoom/rotate，先预热再采样，输出 HAR、CPU profile、
-JSON 与截图到忽略的 `Build/Specs/vector-motion/`。修复后执行
-`node Test/vector-tiles/profile-motion.mjs after Build/Specs/vector-motion/before.har` 重放相同外部响应。
-HAR 是本机临时测量数据，不提交。Profiler 会影响耗时，headless 帧间隔不代表应用浏览器 FPS；
-用户帧率另外在实际应用浏览器中，以相同视图和轨迹、不启动 Profiler 测量。
-
-## V5A 点标注
-
-`/Test/vector-tiles/symbols.html` 完全本地运行，中英文、描边、图文 POI 与排序避让均来自自有
-glyph/icon DrawCommand。7 个合成候选显示 6 条，左下低优先级文字被避让。
-点击文字或图标返回相同业务 identity；“连续缩放”“倾斜”“重建图层”用于检查尺寸与生命周期。
-资源与授权见 [symbol-assets](symbol-assets/README.md)，重新生成使用
-`node Test/vector-tiles/generate-symbol-fixture.mjs`（仅生成命令需要网络）。
-
-新增 2 项 `scenegis-vector-symbols.spec.js` E2E 检查实际文字 alpha 拾取、图标、倾斜、缩放、
-资源销毁与双倍渲染分辨率。公开页新增 15 个 point symbol layers：Bright 108/119、Liberty 97/111。
-“街道细节”显示 16 级 POI；字体/sprite 请求失败与 sprite 缺少名称分别显示错误和提示。
-公开页显式使用 `maximumGlyphRanges: 192`，供多字体中文街区；Layer 默认仍为 64。
-支持范围和限制见 [点标注文档](../../Documentation/SceneGIS/VectorTileSymbols.md)。
-
-## V5B 沿线与特殊标注
-
-`/Test/vector-tiles/line-symbols.html` 是完全本地的曲线文字、反向道路、方向箭头与绿色路牌。
-底部灰色锐角和短线不应显示名称；俯视/倾斜/旋转/连续缩放用于检查地图与屏幕两种对齐。
-新增 `scenegis-vector-line-symbols.spec.js` E2E 验证真实 glyph/icon alpha 拾取与资源释放。
-数据与普通 RGBA 图标由 `node Test/vector-tiles/generate-line-symbol-fixture.mjs` 本地生成，
-字体复用 V5A ASCII subset；没有网络前提。
-
-公开 Bright 当前接入 118/119、Liberty 107/111 层，各增加 10 个道路/水系名称、路牌与箭头层。
-原始 filter/layout/paint 保持完整；未支持的特殊 shaping、variable anchors、text-fit、
-terrain/Globe 和跨 tile 语义道路拼接限制见 [标注文档](../../Documentation/SceneGIS/VectorTileSymbols.md)。
-11 项页面 E2E 使用本地数据，公开服务仅用于人工检查。
-
-Worker 发布路径验证：完成 `npm run build-release` 与 `npm run build-ts` 后运行
-`node Test/vector-tiles/verify-worker-package.mjs`。脚本只使用本地 fixture，分别启动独立
-installed engine / release ESM / release IIFE consumer，不混用 runtime identity；临时 npm 安装保留在系统临时目录。
-
-## V4A 真实地形
-
-公开页的“真实地形 · 矢量贴地”开关使用 Esri WorldElevation3D / Terrain3D ImageServer，
-与既有 planar terrain 示例相同：3857 单根 XYZ，LERC 257×257 高程边界样本，最高 16 级。
-紫金山和因斯布鲁克便于观察起伏；俯视、倾斜、道路/面拾取、开关往返保留同一 vector layer。
-native FPS 持续显示。公开网络失败显示提示，可关闭地形；本地 terrain/imagery 对照仍可离线运行。
-
-自动化以确定性坡面、山脊和 300 米高程 fixture 验证；发布包脚本新增真实 ground 色彩、pick
-与数值纹理释放检查。平面 terrain 资格不代表 Globe 或完整地形文字质量。
-
-## V4B 高级环境
-
-`public.html` 和 `globe.html` 共用“高级环境”控件，可启用高级大气与物理地表光照，切换白天、
-低日照、夜间、体积云品质、云影和雾/体积光。Globe 另有原生地形与物体阴影开关；Planar 仅提供
-已支持的云影，不宣称原生几何阴影。公开页仍默认基础地图，勾选环境后异步加载仓库内环境资产。
-环境关闭恢复原生设置，反复切换保留同一地图、Worker 和 geometry；图层与环境各自显示错误。
-体积云与阴影有额外 GPU 成本，品质由用户显式选择，不自动降档。
-
-展开“光照与大气参数”“云层参数”“雾与泛光参数”可实时调整地表/天空亮度、空气散射、月光、
-云型、云量、云高、厚度、风速风向、雾与泛光。关闭重开环境保留参数；“恢复环境默认参数”
-只重置这些环境参数，不改变所选时间、地形或原生几何阴影开关。
-
-底部启用 Cesium 原生 Timeline 与 Animation，显示 UTC，支持拖动、播放、暂停和调速。
-初始为 2026-06-21 所选地点的近似太阳正午，暂停、600 倍速；时段预设保留当前当地太阳日，
-切换为近似正午、18 时或午夜。手动拖动/播放后显示“自定义 · 时间轴”。Globe 使用原生天文光向，
-Planar 使用 `SceneGISPlanarEnvironment` 的 astronomical mode，以所选定位点为经纬度原点；
-两者均由 Viewer clock 驱动，云时间与其同步。环境开关和定位操作不重置时钟。
-
-两页都支持 `?provider=local` 离线构造地图；`bright` / `liberty` 明确选择公开服务。
-高级环境实际资产、参数、原生时间控件和两页 Controller 生命周期由 `scenegis-vector-environment.spec.js` 验证；
-四条渲染路径的物理光照、云影、Globe 几何阴影、pick 与借用资源释放由 engine Specs 验证。
-发布包脚本另验证 installed engine / release ESM / IIFE 的环境 Shader、地形 receiver 与 native pick。
+既有资格与限制见 [矢量瓦片](../../Documentation/SceneGIS/VectorTiles.md)、
+[标注](../../Documentation/SceneGIS/VectorTileSymbols.md) 与 [阶段记录](../../AgentDocs/vector-tiles/README.md)。

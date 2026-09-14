@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SceneGIS · 点标注</title>
+    <title>平面 · SceneGIS · 点标注</title>
     <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
     <style>
       body {
@@ -59,7 +59,7 @@
   </head>
   <body>
     <header>
-      <h1>独立点标注</h1>
+      <h1>平面 · 独立点标注</h1>
       <p>
         中英文横排与描边、图文组合、排序避让。左下重叠的两条标注只显示优先项；点击文字或图标检查拾取。
       </p>
@@ -67,10 +67,10 @@
         <button id="top">俯视</button><button id="tilt">倾斜</button
         ><button id="zoom">连续缩放</button
         ><button id="recreate">重建图层</button>
-        <a href="./public.html">公开地图</a
-        ><a href="./line-symbols.html">沿线标注</a
-        ><a href="./styles.html">样式图集</a><span id="status">加载中…</span
-        ><span id="picked">尚未选择要素</span>
+        <a href="./planar-map.html">公开地图</a
+        ><a href="./planar-line-symbols.html">沿线标注</a
+        ><a href="./planar-styles.html">样式图集</a
+        ><span id="status">加载中…</span><span id="picked">尚未选择要素</span>
       </nav>
       <div id="error" role="alert"></div>
     </header>
@@ -78,6 +78,6 @@
     <script>
       window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
     </script>
-    <script type="module" src="./symbols.js"></script>
+    <script type="module" src="./planar-symbols.js"></script>
   </body>
 </html>

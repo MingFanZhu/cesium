@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SceneGIS · 矢量样式图集</title>
+    <title>平面 · SceneGIS · 矢量样式图集</title>
     <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
     <style>
       body {
@@ -84,7 +84,7 @@
   </head>
   <body>
     <header>
-      <h1>矢量样式图集</h1>
+      <h1>平面 · 矢量样式图集</h1>
       <p>
         独立图元 · 本地 MVT · 关闭 MSAA /
         FXAA。比较透明拐角、虚线间隙和孔洞边缘，点击图形检查拾取。
@@ -92,8 +92,8 @@
       <nav>
         <button id="top">俯视</button><button id="tilt">倾斜</button
         ><button id="recreate">重建图层</button>
-        <a href="./index.html">返回矢量城市</a
-        ><a href="./public.html">公开地图</a><span id="status">加载中…</span
+        <a href="./planar-city.html">返回矢量城市</a
+        ><a href="./planar-map.html">公开地图</a><span id="status">加载中…</span
         ><span id="picked">尚未选择要素</span>
       </nav>
       <div id="error" role="alert"></div>
@@ -105,6 +105,6 @@
     <script>
       window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
     </script>
-    <script type="module" src="./styles.js"></script>
+    <script type="module" src="./planar-styles.js"></script>
   </body>
 </html>

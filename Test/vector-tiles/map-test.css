@@ -213,30 +213,3 @@ main {
   width: auto;
   margin: 0;
 }
-
-#environment-panel .env-number {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 10px 0;
-}
-#environment-panel input[type="number"] {
-  width: 86px;
-  flex: none;
-  padding: 5px 6px;
-  border: 1px solid #c9d5cd;
-  border-radius: 4px;
-  color: inherit;
-  background: white;
-  font: inherit;
-  font-variant-numeric: tabular-nums;
-}
-#environment-panel input:invalid {
-  border-color: #a03d2e;
-}
-.env-reset {
-  width: 100%;
-  margin-top: 14px;
-  font-size: 12px;
-}

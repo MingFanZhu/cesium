@@ -66,7 +66,7 @@ Dash 相位按每个 decoded part 的累计长度；无全路里程时不承诺�
 
 实现位于自有 Core stroke/dashes/geometry、Renderer batch resources、
 Scene batch/cover/layer 与固定的四份 VectorTiles GLSL；没有新增公共入口或上游改动。
-`Test/vector-tiles/styles.html` 提供 12 类本地案例，行为回归留在 engine Specs 与页面 E2E。
+`Test/vector-tiles/planar-styles.html` 提供 12 类本地案例，行为回归留在 engine Specs 与页面 E2E。
 
 源码审查和真实测试补充了计划入口时未确认的两个根因：
 Cesium opaque frustum overlap 会使半透明地图重复合成；

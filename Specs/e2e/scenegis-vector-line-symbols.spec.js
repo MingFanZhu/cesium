@@ -20,7 +20,7 @@ test("renders curved names, directed arrows and viewport shields through heading
     external.push(url.href);
     return route.abort();
   });
-  await page.goto("/Test/vector-tiles/line-symbols.html");
+  await page.goto("/Test/vector-tiles/planar-line-symbols.html");
   await page.waitForFunction(
     () => window.lineSymbolPreview?.layer?.tilesLoaded,
   );

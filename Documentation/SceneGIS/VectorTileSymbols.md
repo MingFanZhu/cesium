@@ -152,7 +152,7 @@ Worker 待处理任务也计入 tilesLoaded；完成回调只存 CPU 状态。�
 
 ## 验收入口
 
-- [symbols.html](../../Test/vector-tiles/symbols.html)：完全本地的中英文、描边、POI、避让、拾取、缩放与倾斜。
-- [line-symbols.html](../../Test/vector-tiles/line-symbols.html)：曲线名称、正反道路、路牌、箭头、锐角和短线。
-- [public.html](../../Test/vector-tiles/public.html)：在线 Bright 118/119、Liberty 107/111 层；“街道细节”查看 POI、道路和箭头。
+- [symbols.html](../../Test/vector-tiles/planar-symbols.html)：完全本地的中英文、描边、POI、避让、拾取、缩放与倾斜。
+- [line-symbols.html](../../Test/vector-tiles/planar-line-symbols.html)：曲线名称、正反道路、路牌、箭头、锐角和短线。
+- [public.html](../../Test/vector-tiles/planar-map.html)：在线 Bright 118/119、Liberty 107/111 层；“街道细节”查看 POI、道路和箭头。
 - [V5B phase plan](../../AgentDocs/vector-tiles/plans/2026-09-13-v5b-line-symbols.md)：测试与负责人视觉 gate。

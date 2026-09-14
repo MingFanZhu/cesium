@@ -24,7 +24,7 @@ try {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("http://localhost:8080/Test/vector-tiles/public.html");
+  await page.goto("http://localhost:8080/Test/vector-tiles/planar-map.html");
   await page.waitForFunction(() => window.publicVectorPreview?.layer);
   await page.evaluate(async () => {
     const C = await import("/Build/CesiumUnminified/index.js");

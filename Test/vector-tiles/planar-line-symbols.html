@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SceneGIS · 沿线与特殊标注</title>
+    <title>平面 · SceneGIS · 沿线与特殊标注</title>
     <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
     <style>
       body {
@@ -59,7 +59,7 @@
   </head>
   <body>
     <header>
-      <h1>沿线文字 · 路牌 · 方向箭头</h1>
+      <h1>平面 · 沿线文字 · 路牌 · 方向箭头</h1>
       <p>
         道路名称逐字沿曲线排布，反向道路保持正向阅读；绿色路牌朝向屏幕。底部锐角与短线应不显示名称。点击字形或图标检查拾取。
       </p>
@@ -68,7 +68,8 @@
         ><button id="rotate">旋转 180°</button>
         <button id="zoom">连续缩放</button
         ><button id="recreate">重建图层</button>
-        <a href="./public.html">公开地图</a><a href="./symbols.html">点标注</a>
+        <a href="./planar-map.html">公开地图</a
+        ><a href="./planar-symbols.html">点标注</a>
         <span id="status">加载中…</span><span id="picked">尚未选择要素</span>
       </nav>
       <div id="error" role="alert"></div>
@@ -77,6 +78,6 @@
     <script>
       window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
     </script>
-    <script type="module" src="./line-symbols.js"></script>
+    <script type="module" src="./planar-line-symbols.js"></script>
   </body>
 </html>

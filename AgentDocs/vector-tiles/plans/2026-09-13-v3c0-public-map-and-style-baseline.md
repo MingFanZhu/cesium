@@ -39,7 +39,7 @@ OpenFreeMap 使用 OpenMapTiles schema，不套用 Mapbox Streets 字段。
 
 ## Implementation
 
-1. 新增 `Test/vector-tiles/public.html` 与配套页面组装：3857 World、城市定位、
+1. 新增 `Test/vector-tiles/planar-map.html` 与配套页面组装：3857 World、城市定位、
    在线 provider 选择、俯视/倾斜、pick、资源重建和 CPU 提交测量。
    Bright 与 Liberty 均使用免 token 的公开服务；解析公开 TileJSON 的
    tile template、min/maxzoom 和 attribution。请求有现有 tile/request/upload/cache 上限。

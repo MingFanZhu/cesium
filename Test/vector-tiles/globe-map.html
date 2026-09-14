@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Globe 矢量地图 · SceneGIS</title>
+    <title>球面 · 矢量地图 · SceneGIS</title>
     <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
-    <link rel="stylesheet" href="./public.css" />
+    <link rel="stylesheet" href="./map-test.css" />
   </head>
-  <body data-world="globe">
+  <body>
     <aside>
       <div class="eyebrow">SCENEGIS · VECTOR TILES</div>
-      <h1>Globe 矢量地图</h1>
+      <h1>球面 · 矢量地图</h1>
       <p class="intro">保留原生椭球与地形，直接绘制道路、面和地图标注。</p>
       <form id="connect">
         <label for="provider">数据与样式</label>
@@ -89,13 +89,13 @@
       <div id="error" role="alert"></div>
       <p id="symbol-warning" class="hint"></p>
       <footer>
-        <a href="./globe.html?provider=bright">公开球面地图</a>
-        <a href="./public.html">平面对照</a>
-        <a href="./index.html">本地城市</a>
-        <a href="./styles.html">样式图集</a>
-        <a href="./symbols.html">点标注图集</a>
-        <a href="./line-symbols.html">沿线与特殊标注</a>
-        <a href="./distance.html">地形与影像远景</a>
+        <a href="./globe-map.html?provider=bright">公开球面地图</a>
+        <a href="./planar-map.html">平面对照</a>
+        <a href="./planar-city.html">本地城市</a>
+        <a href="./planar-styles.html">样式图集</a>
+        <a href="./planar-symbols.html">点标注图集</a>
+        <a href="./planar-line-symbols.html">沿线与特殊标注</a>
+        <a href="./planar-distance.html">地形与影像远景</a>
         <a href="./reference/README.md">来源与授权</a>
       </footer>
     </aside>
@@ -109,6 +109,6 @@
     <script>
       window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
     </script>
-    <script type="module" src="./public.js"></script>
+    <script type="module" src="./globe-map.js"></script>
   </body>
 </html>

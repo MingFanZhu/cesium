@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 公开矢量地图</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="./示例样式.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <header>
+      <h1>平面 · 公开矢量地图</h1>
+      <p>OpenFreeMap · Bright，需要网络，无需 token。</p>
+      <nav>
+        <a href="./示例目录.html">示例目录</a>
+        <a href="./平面地图.js">查看 JavaScript</a>
+        <a href="../reference/openfreemap-bright.json">查看样式</a>
+        <a href="../planar-map.html?provider=local">离线测试</a>
+        <a href="../reference/README.md">数据与授权</a>
+      </nav>
+      <p id="error" role="alert"></p>
+    </header>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./平面地图.js"></script>
+  </body>
+</html>

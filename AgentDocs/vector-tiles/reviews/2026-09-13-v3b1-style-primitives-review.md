@@ -71,6 +71,6 @@ V3B0 为 median 0.7 ms、P95 1.3 ms；firstReady 本轮约 **569 ms**，此前�
 ## Gate and handoff
 
 当前修改全部位于 SceneGIS-owned 区域，无新增 upstream-owned file、SGP 或公共导出。
-[样式图集](../../../Test/vector-tiles/styles.html) 的负责人验收已通过；
+[样式图集](../../../Test/vector-tiles/planar-styles.html) 的负责人验收已通过；
 当前 Agent 完成本阶段独立 checkpoint，后续按 roadmap 细化 V3C。
 Symbol、sprite/pattern、extrusion、heatmap、生产 terrain 与 Globe 继续保留各自实现边界。

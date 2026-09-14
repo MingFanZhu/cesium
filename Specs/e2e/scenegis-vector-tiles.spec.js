@@ -20,7 +20,7 @@ test("renders local MVT with request-render mode, picking and layer recreation",
     external.push(url.origin);
     return route.abort();
   });
-  await page.goto("/Test/vector-tiles/index.html");
+  await page.goto("/Test/vector-tiles/planar-city.html");
   await page.waitForFunction(
     () =>
       window.vectorTilePreview?.layer.ready &&
@@ -141,7 +141,7 @@ test("keeps the city visible while delayed child tiles replace a resident ancest
 }, testInfo) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/Test/vector-tiles/index.html");
+  await page.goto("/Test/vector-tiles/planar-city.html");
   await page.waitForFunction(() => window.vectorTilePreview?.layer.tilesLoaded);
   await page.getByRole("button", { name: "逐块加载演示" }).click();
   await page.waitForFunction(() => {
@@ -198,7 +198,7 @@ test("renders the vector style gallery with analytic edges, picking and tilted m
 }, testInfo) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/Test/vector-tiles/styles.html");
+  await page.goto("/Test/vector-tiles/planar-styles.html");
   await page.waitForFunction(
     () => window.vectorStylePreview?.layer.tilesLoaded,
   );

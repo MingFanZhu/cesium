@@ -61,7 +61,7 @@ zoom 12.049935656442358，保持相机位置、heading、frustum 与 style zoom�
 
 ## Delivery
 
-- [公开地图](../../../Test/vector-tiles/public.html) 已启用 100000 米限制。
-- [本地地形/影像](../../../Test/vector-tiles/distance.html) 可切换限制、5°、0.5° 和俯视拉远。
+- [公开地图](../../../Test/vector-tiles/planar-map.html) 已启用 100000 米限制。
+- [本地地形/影像](../../../Test/vector-tiles/planar-distance.html) 可切换限制、5°、0.5° 和俯视拉远。
 - 本轮 upstream-owned files：无；SGP：无新增；生成文件不提交。
 - V5B checkpoint 为 `bb007b3518`；V3C1A 按推进授权关闭，checkpoint 后再激活 V3C1B。

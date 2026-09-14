@@ -8,7 +8,7 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `V3C1D completed — 待提交检查点`                       |
+| Current phase          | `E1 completed — 待提交检查点`                          |
 | Active phase plan      | None                                                   |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
@@ -39,12 +39,12 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   `packages/engine/Source/SceneGIS/Scene/SceneGISVectorTileLayer.js`，五个公共入口。
 - Specs：Core/Renderer/Scene 镜像测试，169 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
-- 人工页面：[城市](../../Test/vector-tiles/index.html) 与 [样式图集](../../Test/vector-tiles/styles.html)，
+- 人工页面：[城市](../../Test/vector-tiles/planar-city.html) 与 [样式图集](../../Test/vector-tiles/planar-styles.html)，
   21 个城市 MVT fixtures 加 1 个样式 MVT。
-- 新页面：[公开地图](../../Test/vector-tiles/public.html)，默认 MapLibre 示例使用的 OpenFreeMap / Bright，
+- 新页面：[公开地图](../../Test/vector-tiles/planar-map.html)，默认 MapLibre 示例使用的 OpenFreeMap / Bright，
   保留 Liberty 对照，无需 token；来源和样式差距见 [参考](../../Test/vector-tiles/reference/README.md)。
-- Globe 页面：[球面地图](../../Test/vector-tiles/globe.html)，默认本地；公共数据、整球与真实地形切换。
-- 当前页面回归：13 项 E2E，包含 `Specs/e2e/scenegis-vector-globe.spec.js`；
+- Globe 页面：[球面地图](../../Test/vector-tiles/globe-map.html)，默认本地；公共数据、整球与真实地形切换。
+- 当前页面回归：16 项 E2E，包含中文上手入口与 `Specs/e2e/scenegis-vector-globe.spec.js`；
   使用 `Test/vector-tiles/playwright.config.mjs`，直接连接根开发服务器。
 - E2E：`Specs/e2e/scenegis-vector-tiles.spec.js`，3 项通过。
 - 公开页 E2E：`Specs/e2e/scenegis-vector-public.spec.js`，5 项通过；使用本地数据拦截外网。
@@ -78,14 +78,14 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[V3C1D review](reviews/2026-09-14-v3c1d-symbol-orbit-review.md)；
+- Latest review：[E1 review](reviews/2026-09-14-e1-quickstart-examples-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
 - Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
   已审计 MapLibre 资源/排版/placement/跨 tile 与 Bright 的 25 个 symbol layers。
   建议将平面点标注、沿线标注提前，地形标注在 V4 后验收；负责人已批准，进入 [V5A](plans/2026-09-13-v5a-point-symbols.md)，契约见 [ADR-0063](../../Documentation/SceneGIS/Decisions/ADR-0063-point-symbol-renderer.md)。
 - V5A 已实现独立字体/图标资源、横排文字、统一 collision、跨 tile identity 和自有 GPU 图元；
-  [本地点标注图集](../../Test/vector-tiles/symbols.html) 与公开地图 Bright/Liberty 各 15 个 point layers 已交付。
+  [本地点标注图集](../../Test/vector-tiles/planar-symbols.html) 与公开地图 Bright/Liberty 各 15 个 point layers 已交付。
   108 项 Specs、7 项 E2E 已通过；北京 14 级 555 candidates / 278 placed，72 ranges，无资源失败。
   build/types/tsc/release/独立安装包、修改范围格式、全 AgentDocs Markdownlint 与上游审计通过。
   [正式点标注能力](../../Documentation/SceneGIS/VectorTileSymbols.md) 列出支持属性、缓存与失败语义。
@@ -100,7 +100,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - 负责人在修正交付后要求继续特殊标注，V5A 按推进授权关闭 gate；独立 checkpoint `50ab83b96f` 与 hook 通过。
 - [V5B](plans/2026-09-13-v5b-line-symbols.md) 已实现逐字曲线、map/viewport 对齐、路牌、箭头、
   keep-upright、max-angle、间距和邻 tile 重复抑制；不做跨 tile 语义道路拼接。
-  [沿线验收页](../../Test/vector-tiles/line-symbols.html) 完全本地；公开 Bright 118/119、Liberty 107/111 层。
+  [沿线验收页](../../Test/vector-tiles/planar-line-symbols.html) 完全本地；公开 Bright 118/119、Liberty 107/111 层。
   126 项 Specs、9 项页面 E2E、build/ESLint/tsc 通过；技术自审通过，负责人视觉 gate pending。
   正式决定见 [ADR-0065](../../Documentation/SceneGIS/Decisions/ADR-0065-line-symbol-placement.md)。
 - 公开页按负责人最新要求采用 Viewer 默认持续渲染和原生 `debugShowFramesPerSecond`；
@@ -125,7 +125,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - V3C1A 已实现并技术自审通过，World 距离默认 Infinity；公开页启用 100000 米。
   197 项相关 Specs、131 项既有 vector 回归及 5 项页面 E2E 已覆盖通过，build / buildTs / tsc 通过。
   柏林 5° 的 MVT 64→47，surface 219→105，load dependencies 473→241；俯视拉远 keys 一致。
-  新增 [本地地形/影像对照](../../Test/vector-tiles/distance.html)，详情与剩余近景性能风险见最新 review。
+  新增 [本地地形/影像对照](../../Test/vector-tiles/planar-distance.html)，详情与剩余近景性能风险见最新 review。
   负责人已明确要求推进异步 Worker，按推进授权关闭 V3C1A gate；先形成独立 checkpoint，再激活 V3C1B。
 
 V3C1A checkpoint：`413b7ffcc6`。负责人明确授权 Worker 实现，当前 [V3C1B](plans/2026-09-13-v3c1b-worker-preparation.md) active。
@@ -165,7 +165,7 @@ V4A checkpoint：`a961ff4ccb`。负责人确认验收并授权提前进入 [G1](
 G1 已实现并技术自审，负责人于 2026-09-14 确认性能修正可接受，视觉与交互 gate 关闭。见 [最新 G1 review](reviews/2026-09-14-g1-globe-review.md)
 和 [ADR-0070](../../Documentation/SceneGIS/Decisions/ADR-0070-globe-vector-ground-rendering.md)。
 169 项 vector Specs / 13 项 Globe Specs、初始 13 项页面 E2E 通过证据与性能修正后 2 项相关 E2E、
-build/types/tsc/release/实际包已覆盖。新增 [Globe 本地/公开入口](../../Test/vector-tiles/globe.html)，保留 native Globe、独立
+build/types/tsc/release/实际包已覆盖。新增 [Globe 本地/公开入口](../../Test/vector-tiles/globe-map.html)，保留 native Globe、独立
 EPSG:3857 matrix 与 Worker；native terrain 上直接画面/线、ECEF 标注与独立异步 BVH。
 无 upstream-owned 修改，无新 SGP；公共字体、完整曲面字形和性能边界见 G1-R09/R10/R16。
 负责人反馈浅倾角低帧后，修正椭球遮挡、GPU 数据与共享资源、派生命令失效、fractional zoom
@@ -200,3 +200,14 @@ V3C1D 实现与技术自审通过，负责人视觉/交互 gate pending。确认
 
 负责人认可当前功能并转向简单上手示例，V3C1D 按推进授权关闭视觉 gate，review R06 accepted。
 以上 pending 为历史记录；先形成独立 checkpoint，再开展示例整理，重负载性能风险继续保留。
+
+V3C1D checkpoint：`971a7b333b`，提交 hook 的 ESLint/Prettier/tsc/Markdownlint 通过。
+当前进入 [E1](plans/2026-09-14-e1-quickstart-examples.md)，只重写简单上手示例，独立展示平面和球面。
+
+E1 首版四页技术验证通过后，负责人要求进一步清理，阶段仍 active。
+当前 [中文上手目录](../../Test/vector-tiles/examples/示例目录.html) 仅保留“平面地图”和“球面地图”两个公开示例，
+本地上手版删除。旧测试页按 planar-/globe- 命名，独立世界初始化，移除高级环境与时间控件；
+生成数据和产品环境验证保留。当前验证与剩余 gate 见 [E1 review](reviews/2026-09-14-e1-quickstart-examples-review.md)，
+无产品 runtime 或上游修改。
+
+负责人确认矢量独立层和透明适配方向，E1 按推进授权完成，先建立独立 checkpoint，再进入透明渲染阶段。

@@ -23,7 +23,7 @@ test("renders local Chinese/Latin point labels, picks text/icons, and reuses pla
     external.push(url.href);
     return route.abort();
   });
-  await page.goto("/Test/vector-tiles/symbols.html");
+  await page.goto("/Test/vector-tiles/planar-symbols.html");
   await ready(page);
   expect(
     await page.evaluate(
@@ -116,7 +116,7 @@ test("renders local Chinese/Latin point labels, picks text/icons, and reuses pla
 test("keeps text layout in CSS pixels at double rendering resolution", async ({
   page,
 }, info) => {
-  await page.goto("/Test/vector-tiles/symbols.html");
+  await page.goto("/Test/vector-tiles/planar-symbols.html");
   await ready(page);
   const box = await page.evaluate(() => {
     const { viewer, layer } = window.symbolPreview;

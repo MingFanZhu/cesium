@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>低角度远景 · SceneGIS</title>
+    <title>平面 · 低角度远景 · SceneGIS</title>
     <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
-    <link rel="stylesheet" href="./public.css" />
+    <link rel="stylesheet" href="./map-test.css" />
   </head>
   <body>
     <aside>
       <div class="eyebrow">SCENEGIS · TILE SELECTION</div>
-      <h1>低角度远景</h1>
+      <h1>平面 · 低角度远景</h1>
       <p class="intro">
         本地地形与影像共用选层。保留远处粗覆盖，俯视拉远保持原行为。
       </p>
@@ -39,12 +39,12 @@
         请求数为页面生命周期累计值。瓦片颜色与编号表示层级；关闭限制可比较远景细节。
       </p>
       <pre id="error"></pre>
-      <a href="./public.html">返回公开矢量地图</a>
+      <a href="./planar-map.html">返回公开矢量地图</a>
     </aside>
     <main><div id="map"></div></main>
     <script>
       window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
     </script>
-    <script type="module" src="./distance.js"></script>
+    <script type="module" src="./planar-distance.js"></script>
   </body>
 </html>
