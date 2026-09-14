@@ -35,6 +35,7 @@ GlobeBackground.prototype.update = function (frameState) {
     owner: this._owner,
     uniformMap: {
       ...environment.createUniformMap(this._owner),
+      u_sceneGISVectorOpacity: () => this._owner.opacity,
       u_color: () => this._color,
       u_lighting: () => this._owner._world.enableLighting,
       u_depthRange: () => {

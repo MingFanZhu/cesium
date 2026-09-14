@@ -1,3 +1,4 @@
+uniform float u_sceneGISVectorOpacity;
 #ifdef SCENEGIS_VECTOR_GROUND
 #define SCENEGIS_VECTOR_INPUT
 vec2 groundCoordinates();
@@ -140,5 +141,6 @@ void main()
 #else
     out_FragColor = fill;
 #endif
+    out_FragColor *= u_sceneGISVectorOpacity;
     if (out_FragColor.a == 0.0) discard;
 }

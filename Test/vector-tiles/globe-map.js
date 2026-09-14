@@ -1,3 +1,4 @@
+/* global document */
 import * as C from "/Build/CesiumUnminified/index.js";
 import installMapTest from "./map-test.js";
 
@@ -25,6 +26,33 @@ const world = viewer.scene.globe;
 world.baseColor = C.Color.fromCssColorString("#f7f3ee");
 world.showGroundAtmosphere = false;
 scene.fog.enabled = false;
+// Imagery alpha affects its contribution to the surface; Globe alpha affects
+// the resulting terrain/imagery color. Neither changes vector opacity.
+const testImagery = viewer.imageryLayers.addImageryProvider(
+  new C.GridImageryProvider({
+    color: C.Color.WHITE,
+    backgroundColor: C.Color.fromCssColorString("#274c77"),
+    glowColor: C.Color.TRANSPARENT,
+  }),
+);
+testImagery.alpha = 0;
+for (const name of ["surface", "imagery"]) {
+  document
+    .getElementById(`${name}-opacity`)
+    .addEventListener("input", (event) => {
+      const opacity = Number(event.target.value);
+      document.getElementById(`${name}-opacity-value`).value =
+        `${Math.round(opacity * 100)}%`;
+      if (name === "surface") {
+        world.translucency.enabled = opacity < 1;
+        world.translucency.frontFaceAlpha = opacity;
+        world.translucency.backFaceAlpha = 0;
+      } else {
+        testImagery.alpha = opacity;
+      }
+      scene.requestRender();
+    });
+}
 // The vector source uses a single-root Mercator matrix, independently of Globe terrain.
 const tilingScheme = new C.SceneGISPlanarTilingScheme({
   coordinateSystem: new C.SceneGISPlanarCoordinateSystem({

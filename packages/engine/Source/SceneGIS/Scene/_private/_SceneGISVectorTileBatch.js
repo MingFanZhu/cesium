@@ -263,6 +263,7 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
   const depthRange = new Cartesian2();
   const uniformMap = {
     ...this._resources.uniformMap,
+    u_sceneGISVectorOpacity: () => this._owner.opacity,
     ...environment.createUniformMap(this._owner),
     u_sceneGISGroundHeights: () => groundHeights(this, frameState),
     u_sceneGISGroundLighting: () => this._owner._world.enableLighting,

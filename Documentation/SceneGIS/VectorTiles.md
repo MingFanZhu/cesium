@@ -1,7 +1,7 @@
 # Vector Tiles
 
 程序员上手入口：[简单示例目录](../../Test/vector-tiles/examples/示例目录.html)。
-平面和球面各有独立的本地最小示例、公开 Bright 示例及完整初始化 JavaScript；
+平面和球面各有独立的公开 Bright 示例及完整初始化 JavaScript；
 不含高级环境和调试面板，阅读顺序及数据替换方法见 [上手说明](../../Test/vector-tiles/examples/README.md)。
 
 ## 当前交付范围
@@ -38,14 +38,39 @@ Resident coverage 见 [ADR-0060](Decisions/ADR-0060-vector-tile-resident-render-
 ### Globe 使用范围
 
 `SceneGISVectorTileLayer` 可加入保留原生 `Globe` 的 WGS84 / SCENE3D 场景。零高程椭球和真实
-terrainProvider 使用同一直接贴地后端；Planar 无地形的 flat 快速路径保持独立。透明地球、
+terrainProvider 使用同一直接贴地后端；Planar 无地形的 flat 快速路径保持独立。
 morph/SCENE2D、非 WGS84 不在本阶段范围，构造或 update 会明确拒绝。
+透明 Globe 支持当前可见面的独立矢量显示，背面与地下观察尚未资格确认。
 
 ```js
 const layer = scene.primitives.add(
   new Cesium.SceneGISVectorTileLayer({ scene, style }),
 );
 ```
+
+### 独立透明度
+
+```js
+layer.opacity = 0.5;
+scene.globe.translucency.enabled = true;
+scene.globe.translucency.frontFaceAlpha = 0.3;
+scene.globe.translucency.backFaceAlpha = 0;
+// An existing imagery layer retains its native, independent alpha.
+imageryLayer.alpha = 0.7;
+```
+
+三者分别表示矢量要素的透明度、地形与影像合成后的地表颜色透明度、影像在地表颜色中的贡献。
+地表颜色完全透明仍保留贴地所需深度，矢量可以正常显示和拾取。
+矢量 `opacity` 可在构造时设置，默认 1，仅接受有限 `[0,1]`；0 跳过绘制/拾取但保留数据。
+它乘每个 background/fill/line/circle/text/icon 的 style alpha，不先合成地图纹理，
+因此重叠要素的结果与整幅地图 group opacity 不同。修改无需重新解析或上传几何。
+
+[球面测试页](../../Test/vector-tiles/globe-map.html) 提供三个滑块和本地网格影像；
+平面页提供矢量滑块，既有 Planar imagery alpha 继续有效，整个 Planar World 仍保持 opaque contract。
+本次透明资格限当前可见地表及其上方普通三维对象；地下/背面、穿越透明地表的对象排序，
+以及透明地表配合高级环境的深度合成留待后续验证。详见 [ADR-0072](Decisions/ADR-0072-vector-surface-transparency.md)。
+
+### Globe matrix
 
 省略 `tilingScheme` 时 Globe 自动创建 EPSG:3857 / ±π×6378137 米的单根 source matrix。
 显式 source override 必须与传入的 `tilingScheme` 共享 identity；不能传 Globe 的 geographic

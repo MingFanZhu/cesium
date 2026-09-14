@@ -115,6 +115,7 @@ function command(runtime, batch, frameState) {
     vertexArray: batch.resources.vertexArray,
     shaderProgram: batch.resources.shader,
     uniformMap: {
+      u_sceneGISVectorOpacity: () => runtime.owner.opacity,
       u_symbolAtlas: () =>
         runtime.assets.texture(batch.page, frameState.context),
       u_symbolDepthRange: () => {

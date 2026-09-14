@@ -624,6 +624,9 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
     expect(inside.pick?.id.featureId).toBe("18446744073709551615");
     expect(inside.pick?.id.styleLayer).toBe("fill");
     expect(layer.statistics.drawCommands).toBe(1);
+    layer.opacity = 0.5;
+    scene.renderForSpecs();
+    expect(read(-20, 0).color[0]).toEqualEpsilon(64, 1);
   });
 
   it("renders at full Mercator scale without losing the clipping ray to float translation", async function () {

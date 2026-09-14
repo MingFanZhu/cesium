@@ -47,6 +47,46 @@
         <button id="whole" type="button">地球全景</button>
         <button id="recreate" type="button">重建图层</button>
       </div>
+      <details open>
+        <summary>独立透明度</summary>
+        <label for="vector-opacity"
+          >矢量不透明度 <output id="vector-opacity-value">100%</output></label
+        >
+        <input
+          id="vector-opacity"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="1"
+        />
+        <label for="surface-opacity"
+          >地表不透明度 <output id="surface-opacity-value">100%</output></label
+        >
+        <input
+          id="surface-opacity"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="1"
+        />
+        <label for="imagery-opacity"
+          >测试影像不透明度
+          <output id="imagery-opacity-value">0%</output></label
+        >
+        <input
+          id="imagery-opacity"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="0"
+        />
+        <p class="hint">
+          影像为本地蓝色网格；降低矢量不透明度可看到下层。地表全透明仍保留贴地深度，仅支持当前可见面。
+        </p>
+      </details>
       <p class="hint">拖动平移 · 中键倾斜 · 滚轮缩放 · 点击查看要素</p>
       <div id="status" role="status">初始化…</div>
       <dl class="metrics">

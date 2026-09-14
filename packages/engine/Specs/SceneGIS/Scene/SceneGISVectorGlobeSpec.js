@@ -11,6 +11,7 @@ import {
   SceneTransforms,
   Cartesian3,
   GeographicTilingScheme,
+  GridImageryProvider,
   SceneMode,
   BoxGeometry,
   Primitive,
@@ -411,7 +412,7 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
     const far = Cover.select(layer, scene.frameState, flexible);
     expect(Math.max(...far.map((t) => t.level))).toBeLessThan(6);
   });
-  it("rejects a terrain matrix, translucent Globe, and non-3D scene before requesting", function () {
+  it("rejects a terrain matrix and non-3D scene before requesting", function () {
     const style = { version: 8, sources: {}, layers: [] };
     expect(
       () =>
@@ -421,16 +422,151 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
           tilingScheme: new GeographicTilingScheme(),
         }),
     ).toThrowDeveloperError();
-    globe.translucency.enabled = true;
-    expect(
-      () => new SceneGISVectorTileLayer({ scene, style }),
-    ).toThrowDeveloperError();
-    globe.translucency.enabled = false;
     scene._mode = SceneMode.SCENE2D;
     expect(
       () => new SceneGISVectorTileLayer({ scene, style }),
     ).toThrowDeveloperError();
     scene._mode = SceneMode.SCENE3D;
+  });
+  [false, true].forEach((logarithmic) => {
+    it(`keeps direct vector alpha independent of transparent terrain (log ${logarithmic})`, async function () {
+      scene.logarithmicDepthBuffer = logarithmic;
+      if (!logarithmic) {
+        scene.farToNearRatio = 2;
+      }
+      globe.baseColor = Color.BLUE;
+      globe.translucency.enabled = true;
+      globe.translucency.frontFaceAlpha = 0;
+      globe.translucency.backFaceAlpha = 0;
+      const layer = add(
+        [feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]])],
+        [
+          {
+            id: "red",
+            type: "fill",
+            paint: { "fill-color": "red", "fill-antialias": false },
+          },
+        ],
+      );
+      await ready(layer);
+      expect(sample().color.slice(0, 3)).toEqual([255, 0, 0]);
+      expect(scene.pick(sample().point)?.id.styleLayer).toBe("red");
+      const workers = layer._workers;
+      const commands = layer._drawOrder.flatMap(
+        (batch) => batch.renderCommands,
+      );
+      const arrays = commands.map((command) => command.vertexArray);
+      const shaders = commands.map((command) => command.shaderProgram);
+      layer.opacity = 0.5;
+      scene.renderForSpecs();
+      const current = layer._drawOrder.flatMap((batch) => batch.renderCommands);
+      expect(current).toEqual(commands);
+      expect(current.map((command) => command.vertexArray)).toEqual(arrays);
+      expect(current.map((command) => command.shaderProgram)).toEqual(shaders);
+      expect(sample().color[0]).toEqualEpsilon(128, 2);
+      expect(sample().color[2]).toEqualEpsilon(0, 2);
+      globe.translucency.frontFaceAlpha = 0.5;
+      scene.renderForSpecs();
+      expect(sample().color[0]).toEqualEpsilon(128, 2);
+      expect(sample().color[2]).toEqualEpsilon(64, 2);
+      globe.translucency.enabled = false;
+      scene.renderForSpecs();
+      expect(sample().color[0]).toEqualEpsilon(128, 2);
+      expect(sample().color[2]).toEqualEpsilon(128, 2);
+      expect(layer._workers).toBe(workers);
+      layer.opacity = 0;
+      scene.renderForSpecs();
+      expect(sample().color.slice(0, 3)).toEqual([0, 0, 255]);
+      expect(scene.pick(sample().point)).toBeUndefined();
+      layer.opacity = 1;
+      scene.renderForSpecs();
+      expect(sample().color.slice(0, 3)).toEqual([255, 0, 0]);
+      scene.primitives.remove(layer);
+      expect(
+        scene._globeTranslucencyState._sceneGISSurfaceOverlays,
+      ).toBeUndefined();
+      expect(arrays.every((array) => array.isDestroyed())).toBeTrue();
+    });
+  });
+  it("validates opacity without publishing invalid changes", function () {
+    const style = { version: 8, sources: {}, layers: [] };
+    [-1, 2, NaN, Infinity, "0.5"].forEach((opacity) => {
+      expect(
+        () => new SceneGISVectorTileLayer({ scene, style, opacity }),
+      ).toThrowDeveloperError();
+    });
+    const layer = scene.primitives.add(
+      new SceneGISVectorTileLayer({ scene, style, opacity: 0.25 }),
+    );
+    expect(layer.opacity).toBe(0.25);
+    expect(() => {
+      layer.opacity = NaN;
+    }).toThrowDeveloperError();
+    expect(layer.opacity).toBe(0.25);
+    scene._renderRequested = false;
+    layer.opacity = 0.5;
+    expect(scene._renderRequested).toBeTrue();
+  });
+  it("keeps imagery alpha and multiple vector owners independent", async function () {
+    globe.baseColor = Color.LIME;
+    const imagery = globe.imageryLayers.addImageryProvider(
+      new GridImageryProvider({
+        color: Color.BLUE,
+        backgroundColor: Color.BLUE,
+        glowColor: Color.BLUE,
+      }),
+    );
+    imagery.alpha = 0.5;
+    const layer = add(
+      [feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]])],
+      [
+        {
+          id: "red",
+          type: "fill",
+          paint: { "fill-color": "red", "fill-antialias": false },
+        },
+      ],
+    );
+    layer.opacity = 0.5;
+    await ready(layer);
+    const color = sample().color;
+    expect(color[0]).toEqualEpsilon(128, 2);
+    expect(color[1]).toEqualEpsilon(64, 2);
+    expect(color[2]).toEqualEpsilon(64, 2);
+    imagery.alpha = 0;
+    scene.renderForSpecs();
+    expect(sample().color.slice(0, 3)).toEqualEpsilon([128, 127, 0], 2);
+    globe.translucency.enabled = true;
+    globe.translucency.frontFaceAlpha = 0;
+    globe.translucency.backFaceAlpha = 0;
+    layer.opacity = 1;
+    const second = scene.primitives.add(
+      new SceneGISVectorTileLayer({
+        scene,
+        opacity: 0.5,
+        style: {
+          version: 8,
+          sources: {},
+          layers: [
+            {
+              id: "blue",
+              type: "background",
+              paint: { "background-color": "blue" },
+            },
+          ],
+        },
+      }),
+    );
+    await ready(second);
+    expect(sample().color.slice(0, 3)).toEqualEpsilon([127, 0, 128], 2);
+    const state = scene._globeTranslucencyState;
+    expect(state._sceneGISSurfaceOverlays.size).toBe(2);
+    scene.primitives.remove(second);
+    expect(state._sceneGISSurfaceOverlays.size).toBe(1);
+    scene.renderForSpecs();
+    expect(sample().color.slice(0, 3)).toEqual([255, 0, 0]);
+    scene.primitives.remove(layer);
+    expect(state._sceneGISSurfaceOverlays).toBeUndefined();
   });
   it("samples real native terrain for circles asynchronously and retains geometry across providers", async function () {
     globe.terrainProvider = new CustomHeightmapTerrainProvider({
@@ -468,43 +604,54 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
     expect(resources.isDestroyed()).toBeTrue();
     expect(layer._globeTerrainCache).toBeUndefined();
   });
-  it("keeps ordinary opaque 3D content above the vector ground", async function () {
-    const layer = add(
-      [feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]])],
-      [
-        {
-          id: "land",
-          type: "fill",
-          paint: { "fill-color": "red", "fill-antialias": false },
-        },
-      ],
-    );
-    scene.primitives.add(
-      new Primitive({
-        asynchronous: false,
-        geometryInstances: new GeometryInstance({
-          id: "box",
-          geometry: BoxGeometry.fromDimensions({
-            dimensions: new Cartesian3(150, 150, 200),
-            vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
-          }),
-          modelMatrix: Transforms.eastNorthUpToFixedFrame(
-            Coordinates.position(target.x, target.y, 100),
-          ),
-          attributes: {
-            color: ColorGeometryInstanceAttribute.fromColor(Color.BLUE),
+  [false, true].forEach((translucent) => {
+    it(`keeps ordinary 3D content above opaque and transparent vector ground (translucent ${translucent})`, async function () {
+      const layer = add(
+        [feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]])],
+        [
+          {
+            id: "land",
+            type: "fill",
+            paint: { "fill-color": "red", "fill-antialias": false },
           },
+        ],
+      );
+      scene.primitives.add(
+        new Primitive({
+          asynchronous: false,
+          geometryInstances: new GeometryInstance({
+            id: "box",
+            geometry: BoxGeometry.fromDimensions({
+              dimensions: new Cartesian3(150, 150, 200),
+              vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+            }),
+            modelMatrix: Transforms.eastNorthUpToFixedFrame(
+              Coordinates.position(target.x, target.y, 100),
+            ),
+            attributes: {
+              color: ColorGeometryInstanceAttribute.fromColor(
+                Color.BLUE.withAlpha(translucent ? 0.5 : 1),
+              ),
+            },
+          }),
+          appearance: new PerInstanceColorAppearance({
+            translucent,
+            flat: true,
+          }),
         }),
-        appearance: new PerInstanceColorAppearance({
-          translucent: false,
-          flat: true,
-        }),
-      }),
-    );
-    await ready(layer);
-    expect(sample(200).color[2]).toBe(255);
-    expect(scene.pick(sample(200).point)?.id).toBe("box");
-    expect(scene.globe).toBe(globe);
+      );
+      await ready(layer);
+      const original = sample(200).color;
+      expect(original[2]).toBeGreaterThan(120);
+      expect(scene.pick(sample(200).point)?.id).toBe("box");
+      globe.translucency.enabled = true;
+      globe.translucency.frontFaceAlpha = 0;
+      globe.translucency.backFaceAlpha = 0;
+      scene.renderForSpecs();
+      expect(sample(200).color).toEqualEpsilon(original, 2);
+      expect(scene.pick(sample(200).point)?.id).toBe("box");
+      expect(scene.globe).toBe(globe);
+    });
   });
   it("accepts native fill mesh encodings without optional height extrema", function () {
     const mesh = {

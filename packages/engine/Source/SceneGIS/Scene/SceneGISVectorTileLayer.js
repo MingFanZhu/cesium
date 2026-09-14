@@ -756,7 +756,7 @@ function publishOrder(layer) {
  * @constructor
  * @experimental This API is experimental and subject to change.
  * @param {object} options Layer configuration.
- * @param {Scene} options.scene The live SCENE3D Scene with a planar world or opaque WGS84 Globe.
+ * @param {Scene} options.scene The live SCENE3D Scene with a planar world or WGS84 Globe.
  * @param {SceneGISPlanarTilingScheme} [options.tilingScheme] Vector source matrix. Planar uses the World identity; Globe defaults to the EPSG:3857 single-root matrix.
  * @param {SceneGISVectorTileStyle|object} options.style A V1 style within the flat V3B1 rendered profile.
  * @param {Object.<string, SceneGISVectorTileSource>} [options.sources] Source overrides using the world's scheme.
@@ -769,6 +769,7 @@ function publishOrder(layer) {
  * @param {number} [options.maximumSymbolCandidates=2048] Maximum point-symbol candidates per view, selected by style priority.
  * @param {number} [options.maximumGlyphRanges=64] Maximum cached 256-code-point glyph pages; active pages cannot be evicted.
  * @param {number} [options.maximumSymbolRequests=4] Maximum concurrent glyph/sprite resource jobs.
+ * @param {number} [options.opacity=1] Per-feature opacity multiplier in [0, 1]; not composited group opacity.
  * @param {boolean} [options.show=true] Whether the layer is shown.
  * @param {boolean} [options.allowPicking=true] Whether feature pick resources are created.
  * @exception {DeveloperError} Scene, style, sources, or budget configuration is invalid.
@@ -791,11 +792,10 @@ function SceneGISVectorTileLayer(options) {
   if (
     globe &&
     (!scene.world.ellipsoid.equals(Ellipsoid.WGS84) ||
-      scene.mode !== SceneMode.SCENE3D ||
-      scene.world.translucency.enabled)
+      scene.mode !== SceneMode.SCENE3D)
   ) {
     throw new DeveloperError(
-      "Globe vector rendering requires opaque WGS84 in SCENE3D.",
+      "Globe vector rendering requires WGS84 in SCENE3D.",
     );
   }
   const tilingScheme = globe
@@ -850,6 +850,9 @@ function SceneGISVectorTileLayer(options) {
   ) {
     throw new DeveloperError("show and allowPicking must be booleans.");
   }
+  const opacity = options.opacity ?? 1;
+  validateOpacity(opacity);
+  this._opacity = opacity;
   this._records = style.layerIds.map((id) => layerRecord(style, id));
   if (
     options.sources !== undefined &&
@@ -927,7 +930,32 @@ function SceneGISVectorTileLayer(options) {
     : undefined;
 }
 
+function validateOpacity(value) {
+  if (!Number.isFinite(value) || value < 0 || value > 1) {
+    throw new DeveloperError("opacity must be a finite number in [0, 1].");
+  }
+}
+
 Object.defineProperties(SceneGISVectorTileLayer.prototype, {
+  /**
+   * Multiplies each feature's style opacity, including backgrounds and symbols.
+   * This is not composited group opacity. Zero skips drawing and picking while retaining data.
+   * @memberof SceneGISVectorTileLayer.prototype
+   * @type {number}
+   * @default 1
+   */
+  opacity: {
+    get: function () {
+      return this._opacity;
+    },
+    set: function (value) {
+      validateOpacity(value);
+      if (value !== this._opacity) {
+        this._opacity = value;
+        this._scene.requestRender();
+      }
+    },
+  },
   /**
    * Gets or sets visibility. Hidden layers retain data and cancel requests on normal update.
    * @memberof SceneGISVectorTileLayer.prototype
@@ -1088,12 +1116,16 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
     frameState !== this._scene.frameState ||
     this._scene.world !== this._world ||
     this._world.isDestroyed() ||
-    frameState.mode !== SceneMode.SCENE3D ||
-    (this._globe && this._world.translucency.enabled)
+    frameState.mode !== SceneMode.SCENE3D
   ) {
     throw new DeveloperError(
-      "The vector layer must update in its original opaque SCENE3D World.",
+      "The vector layer must update in its original SCENE3D World.",
     );
+  }
+  if (this._globe && !this._surfaceRegistered) {
+    const state = this._scene._globeTranslucencyState;
+    (state._sceneGISSurfaceOverlays ??= new Set()).add(this);
+    this._surfaceRegistered = true;
   }
   if (!this._show || !this._world.show) {
     if (frameState.passes.render) {
@@ -1182,6 +1214,9 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
       this._scene.requestRender();
     }
   }
+  if (this._opacity === 0) {
+    return;
+  }
   for (const batch of this._drawOrder) {
     batch.queue(frameState);
   }
@@ -1201,6 +1236,13 @@ SceneGISVectorTileLayer.prototype.isDestroyed = function () {
  * @returns {undefined}
  */
 SceneGISVectorTileLayer.prototype.destroy = function () {
+  if (this._surfaceRegistered) {
+    const state = this._scene._globeTranslucencyState;
+    state._sceneGISSurfaceOverlays.delete(this);
+    if (state._sceneGISSurfaceOverlays.size === 0) {
+      state._sceneGISSurfaceOverlays = undefined;
+    }
+  }
   this._workers.destroy();
   this._symbols?.destroy();
   for (const record of this._backgrounds) {

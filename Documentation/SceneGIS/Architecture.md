@@ -774,6 +774,11 @@ Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代�
 frame-local 物理光照/云影资源；direct 与 sky 分离，替换基础 Lambert。Globe 定向几何阴影在
 真实地表位置接收，覆盖凸体不投影。环境独占 LUT/atlas/history 与 HDR 合成，不新增地图颜色 RTT。
 Circle/symbol 保持制图颜色；Planar native geometry-shadow 资格不随此扩宽。
+按 [ADR-0072](Decisions/ADR-0072-vector-surface-transparency.md)，Layer opacity 只乘各要素样式 alpha，
+不引入地图颜色 RTT。Globe 透明地表通过 SGP-0012 显式 owner slot 借用 native first-surface depth，
+先直接合成 Globe 颜色再绘制矢量，普通地表上方对象保持后续 native 渲染；原生 imagery alpha 保持独立。
+首轮仅资格确认当前可见地表，背面、地下、穿越透明地表排序与高级环境透明深度合成另行验证。
+Planar 共享 vector opacity，整个 World 的 opaque contract 不在此决定中改变。
 矢量瓦片与平面影像/地形共享私有 SSE 数值判据，MVT 选取预算内互不包含的近细远粗 leaves，
 请求与内容缓存保持独立。Style zoom 以视轴在 Z=0 的前向交点为参考，不把倾斜造成的
 采样距离变化误认为用户缩放；具体边界见 [ADR-0064](Decisions/ADR-0064-vector-perspective-lod.md)。

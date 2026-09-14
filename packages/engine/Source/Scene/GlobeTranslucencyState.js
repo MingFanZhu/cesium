@@ -9,6 +9,9 @@ import ShaderSource from "../Renderer/ShaderSource.js";
 import BlendingState from "./BlendingState.js";
 import CullFace from "./CullFace.js";
 import SceneMode from "./SceneMode.js";
+// SCENEGIS_PATCH_BEGIN SGP-0012: Keep direct surface overlay color independent of Globe alpha.
+import surfaceOverlays from "../SceneGIS/Scene/_private/_SceneGISVectorSurfaceOverlays.js";
+// SCENEGIS_PATCH_END SGP-0012
 
 const DerivedCommandType = {
   OPAQUE_FRONT_FACE: 0,
@@ -46,6 +49,9 @@ const DerivedCommandNames = [
  * @private
  */
 function GlobeTranslucencyState() {
+  // SCENEGIS_PATCH_BEGIN SGP-0012: Layers explicitly register and release borrowed owner references.
+  this._sceneGISSurfaceOverlays = undefined;
+  // SCENEGIS_PATCH_END SGP-0012
   this._frontFaceAlphaByDistance = new NearFarScalar(0.0, 1.0, 0.0, 1.0);
   this._backFaceAlphaByDistance = new NearFarScalar(0.0, 1.0, 0.0, 1.0);
 
@@ -973,8 +979,16 @@ function executeCommands(
   executeCommandFunction,
   scene,
   passState,
+  // SCENEGIS_PATCH_BEGIN SGP-0012: Exclude direct overlays from native classification color.
+  excludedOwners,
+  // SCENEGIS_PATCH_END SGP-0012
 ) {
   for (let i = 0; i < commandsLength; ++i) {
+    // SCENEGIS_PATCH_BEGIN SGP-0012: Registered overlays use the packed depth without the color texture.
+    if (excludedOwners?.has(commands[i].owner)) {
+      continue;
+    }
+    // SCENEGIS_PATCH_END SGP-0012
     executeCommandFunction(commands[i], scene, passState);
   }
 }
@@ -988,6 +1002,27 @@ const depthOnlyTypes = [
   DerivedCommandType.DEPTH_ONLY_BACK_FACE,
   DerivedCommandType.DEPTH_ONLY_FRONT_AND_BACK_FACE,
 ];
+
+// SCENEGIS_PATCH_BEGIN SGP-0012: Keep native derived command identities inside their owning module.
+function surfaceCommandSide(command) {
+  const type = command.derivedCommands.type;
+  if (
+    type === DerivedCommandType.TRANSLUCENT_BACK_FACE ||
+    type === DerivedCommandType.TRANSLUCENT_BACK_FACE_MANUAL_DEPTH_TEST ||
+    type === DerivedCommandType.PICK_BACK_FACE
+  ) {
+    return 1;
+  }
+  if (
+    type === DerivedCommandType.TRANSLUCENT_FRONT_FACE ||
+    type === DerivedCommandType.TRANSLUCENT_FRONT_FACE_MANUAL_DEPTH_TEST ||
+    type === DerivedCommandType.PICK_FRONT_FACE
+  ) {
+    return 2;
+  }
+  return 0;
+}
+// SCENEGIS_PATCH_END SGP-0012
 
 GlobeTranslucencyState.prototype.executeGlobeCommands = function (
   frustumCommands,
@@ -1042,6 +1077,16 @@ GlobeTranslucencyState.prototype.executeGlobeClassificationCommands = function (
   const frontTranslucent = this._frontFaceTranslucent;
   const backTranslucent = this._backFaceTranslucent;
 
+  // SCENEGIS_PATCH_BEGIN SGP-0012: Only opt in frustums containing registered direct surface commands.
+  const overlayOwners = surfaceOverlays.hasCommands(
+    this._sceneGISSurfaceOverlays,
+    classificationCommands,
+    classificationCommandsLength,
+  )
+    ? this._sceneGISSurfaceOverlays
+    : undefined;
+  // SCENEGIS_PATCH_END SGP-0012
+
   if (!frontTranslucent || !backTranslucent) {
     // Render classification on opaque faces like normal
     executeCommands(
@@ -1050,6 +1095,9 @@ GlobeTranslucencyState.prototype.executeGlobeClassificationCommands = function (
       executeCommandFunction,
       scene,
       passState,
+      // SCENEGIS_PATCH_BEGIN SGP-0012: Direct overlays are not attached to the opaque back face.
+      overlayOwners,
+      // SCENEGIS_PATCH_END SGP-0012
     );
   }
 
@@ -1092,11 +1140,27 @@ GlobeTranslucencyState.prototype.executeGlobeClassificationCommands = function (
     executeCommandFunction,
     scene,
     passState,
+    // SCENEGIS_PATCH_BEGIN SGP-0012: Ordinary classification keeps its native color path.
+    overlayOwners,
+    // SCENEGIS_PATCH_END SGP-0012
   );
 
   // Unset temporary state
   uniformState.globeDepthTexture = originalGlobeDepthTexture;
   passState.framebuffer = originalFramebuffer;
+  // SCENEGIS_PATCH_BEGIN SGP-0012: Composite Globe color then direct vectors before ordinary scene objects.
+  if (defined(overlayOwners)) {
+    surfaceOverlays.execute(
+      scene,
+      passState,
+      frustumCommands,
+      executeCommandFunction,
+      overlayOwners,
+      surfaceCommandSide,
+      globeTranslucencyFramebuffer.packedDepthTexture,
+    );
+  }
+  // SCENEGIS_PATCH_END SGP-0012
 };
 
 export default GlobeTranslucencyState;

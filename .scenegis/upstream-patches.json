@@ -257,6 +257,24 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0058-vector-tile-frontend-contract.md",
       "removalCondition": "Retire if the independent style frontend dependency is removed or upstream declares the exact required dependency and delivery metadata."
+    },
+    {
+      "id": "SGP-0012",
+      "title": "Allow direct vector overlays on a translucent Globe surface",
+      "status": "active",
+      "reason": "Native translucent classification multiplies vector color by Globe alpha. An explicit owner slot keeps direct surface vectors independent using the native depth peel.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/GlobeTranslucencyState.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISVectorGlobeSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0072-vector-surface-transparency.md",
+      "removalCondition": "Retire when upstream exposes an equivalent optional direct surface overlay stage with independent color opacity and native depth/pick lifecycle."
     }
   ]
 }

@@ -6,6 +6,10 @@
 - Related: [ADR-0069](ADR-0069-planar-vector-ground-rendering.md)、[ADR-0067](ADR-0067-vector-worker-preparation.md)
 - SGP: None planned
 
+G2 补充：[ADR-0072](ADR-0072-vector-surface-transparency.md) 放开当前可见面的透明 Globe，
+通过 SGP-0012 保留直接矢量颜色与 native 地表深度。下文 opaque 限定记录 G1 的原始资格，
+当前透明范围与排序限制以 ADR-0072 为准，其他 G1 坐标/贴地协议保持。
+
 ## Context and decision
 
 Globe 的零高程表示椭球表面，不能使用 planar Z=0 或移除 Globe。Cesium 1.144 的 surface

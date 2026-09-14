@@ -9,7 +9,7 @@
 - Architecture reviewer: 当前 Agent；项目负责人确认产品边界
 - Created: `2026-09-12`
 - Updated: `2026-09-14`
-- Current phase: None；E1 completed，待独立 checkpoint
+- Current phase: G2；E1 checkpoint `3d9dcfe7a3`
 - Related discussions: [源码审计](../discussions/2026-09-12-cesium-mvt-and-planar-audit.md)、
   [实现边界](../discussions/2026-09-12-rendering-boundaries.md)、
   [MapLibre 与贴地](../discussions/2026-09-12-maplibre-reference-and-surface.md)、
@@ -233,3 +233,6 @@ G1 checkpoint 为 `a2f71e1120`。负责人授权后推进 V4B，接入双世界�
 发布包验证通过。负责人于 2026-09-14 明确手动检查通过，V4B completed，并形成独立本地 checkpoint。
 当前没有 active phase；近地平线性能、Planar native geometry-shadow 等剩余范围见
 [V4B review](../reviews/2026-09-14-v4b-environment-review.md)，不以本阶段验收标记 M1 完成。
+
+G2 已获授权并 active：[透明地表阶段](2026-09-14-g2-surface-transparency.md)，独立矢量 alpha 与球面当前可见面的透明适配；背面和地下后续扩展。
+G2 技术资格通过，负责人要求平面也支持透明，按推进授权 completed；独立 checkpoint 后开展 Planar 后继阶段。

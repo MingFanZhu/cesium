@@ -1,3 +1,4 @@
+uniform float u_sceneGISVectorOpacity;
 uniform sampler2D u_symbolAtlas;
 uniform vec2 u_symbolDepthRange;
 in vec2 v_uv;
@@ -31,5 +32,6 @@ void main()
         sampleColor.rgb *= sampleColor.a;
         out_FragColor = sampleColor * color;
     }
+    out_FragColor *= u_sceneGISVectorOpacity;
     if (out_FragColor.a < 0.01) discard;
 }

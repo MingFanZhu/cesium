@@ -55,6 +55,14 @@ button {
 select {
   width: 100%;
 }
+input[type="range"] {
+  width: 100%;
+  accent-color: #286c6d;
+}
+output {
+  float: right;
+  font-variant-numeric: tabular-nums;
+}
 button {
   cursor: pointer;
   transition: background 0.12s;

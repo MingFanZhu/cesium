@@ -1,3 +1,4 @@
+uniform float u_sceneGISVectorOpacity;
 uniform vec4 u_color;
 uniform vec2 u_depthRange;
 uniform bool u_lighting;
@@ -24,5 +25,5 @@ void main()
 #endif
     }
     color.rgb *= color.a;
-    out_FragColor = color;
+    out_FragColor = color * u_sceneGISVectorOpacity;
 }

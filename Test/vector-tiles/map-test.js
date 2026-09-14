@@ -26,6 +26,13 @@ export default function installMapTest(viewer, controls) {
   scene.postProcessStages.fxaa.enabled = false;
   scene.rethrowRenderErrors = true;
   let layer;
+  element("vector-opacity").addEventListener("input", (event) => {
+    const opacity = Number(event.target.value);
+    element("vector-opacity-value").value = `${Math.round(opacity * 100)}%`;
+    if (layer) {
+      layer.opacity = opacity;
+    }
+  });
   let connection;
   let pending;
   let generation = 0;
@@ -130,6 +137,7 @@ export default function installMapTest(viewer, controls) {
     );
     const candidate = new C.SceneGISVectorTileLayer({
       scene,
+      opacity: Number(element("vector-opacity").value),
       tilingScheme: vectorScheme,
       style: next.style,
       sources: { [next.sourceId]: source },

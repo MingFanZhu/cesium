@@ -54,6 +54,7 @@ runNpm(
 const installed = path.join(temporary, "node_modules/@cesium/engine");
 const types = await readFile(path.join(installed, "index.d.ts"), "utf8");
 assert(types.includes("maximumUploadTimePerFrame?: number"));
+assert(/class SceneGISVectorTileLayer[\s\S]*?opacity\?: number/.test(types));
 assert(!types.includes("SceneGISVectorWorkerPool"));
 assert(!types.includes("SceneGISVectorTileWorker"));
 const source = await readFile(path.join(installed, "index.js"), "utf8");
@@ -466,6 +467,19 @@ try {
         (b) => b._resources._textures,
       )?._resources;
       const globeTextures = globeResources._textures.slice();
+      globeScene.globe.translucency.enabled = true;
+      globeScene.globe.translucency.frontFaceAlpha = 0;
+      globeScene.globe.translucency.backFaceAlpha = 0;
+      globeLayer.opacity = 0.5;
+      globeScene.initializeFrame();
+      globeScene.render();
+      const transparentColor = Array.from(
+        globeScene.context.readPixels({ x: 32, y: 31, width: 1, height: 1 }),
+      );
+      const transparentPick = globeScene.pick(new C.Cartesian2(32, 32))?.id
+        .featureId;
+      globeScene.globe.translucency.enabled = false;
+      globeLayer.opacity = 1;
       const makeTexture = (rgba) =>
         new C.Texture({
           context: globeScene.context,
@@ -549,6 +563,8 @@ try {
         globe: {
           color: globeColor,
           picked: globePick,
+          transparentColor,
+          transparentPick,
           released: globeTextures.every((t) => t.isDestroyed()),
         },
         environment: {
@@ -571,6 +587,9 @@ try {
     assert(result.ground.released);
     assert.deepEqual(result.globe.color, [255, 0, 0, 255]);
     assert.equal(result.globe.picked, "point");
+    assert.equal(result.globe.transparentPick, "point");
+    assert(Math.abs(result.globe.transparentColor[0] - 128) <= 2);
+    assert(Math.abs(result.globe.transparentColor[2] - 64) <= 2);
     assert(result.globe.released);
     assert(result.environment.ready && result.environment.released);
     assert.equal(result.environment.picked, "point");

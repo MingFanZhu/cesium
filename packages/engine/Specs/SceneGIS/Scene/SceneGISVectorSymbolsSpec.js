@@ -449,6 +449,18 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(runtime._shaping.pending).toBeFalse();
     expect(upload).not.toHaveBeenCalled();
     expect(request.calls.count()).toBe(1);
+    layer.opacity = 0.5;
+    scene.renderForSpecs();
+    expect(pixel()[0]).toEqualEpsilon(128, 2);
+    expect(scene.pick(new Cartesian2(30, 32))?.primitive).toBe(layer);
+    layer.opacity = 0;
+    scene.renderForSpecs();
+    expect(pixel()[0]).toBe(0);
+    expect(scene.pick(new Cartesian2(30, 32))).toBeUndefined();
+    layer.opacity = 1;
+    scene.renderForSpecs();
+    expect(pixel()[0]).toBe(255);
+    expect(upload).not.toHaveBeenCalled();
     scene.camera.position.x = 1;
     scene.renderForSpecs();
     expect([...runtime._tileLayouts.values()][0]).toBe(layouts);

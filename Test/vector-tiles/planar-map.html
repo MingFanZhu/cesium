@@ -44,6 +44,17 @@
         <button id="detail" type="button">街道细节</button>
         <button id="recreate" type="button">重建图层</button>
       </div>
+      <label for="vector-opacity"
+        >矢量不透明度 <output id="vector-opacity-value">100%</output></label
+      >
+      <input
+        id="vector-opacity"
+        type="range"
+        min="0"
+        max="1"
+        step="0.05"
+        value="1"
+      />
       <p class="hint">拖动平移 · 中键倾斜 · 滚轮缩放 · 点击查看要素</p>
       <div id="status" role="status">初始化…</div>
       <dl class="metrics">

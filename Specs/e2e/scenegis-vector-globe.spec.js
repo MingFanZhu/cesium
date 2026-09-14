@@ -3,7 +3,8 @@ import { test, expect } from "@playwright/test";
 test("renders an offline Globe with native terrain, symbols, bounded cover and cleanup", async ({
   page,
 }) => {
-  test.setTimeout(90000);
+  // Includes six opacity changes, the 60-frame sample and the existing view/provider transitions.
+  test.setTimeout(150000);
   const errors = [],
     external = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -59,6 +60,70 @@ test("renders an offline Globe with native terrain, symbols, bounded cover and c
   expect(terrain.stats.visibleTiles).toBeLessThanOrEqual(64);
   expect(terrain.stats.failedTiles).toBe(0);
   await expect(page.locator("#error")).toBeEmpty();
+  // Exercise the controls on real terrain with the text/icon batches resident.
+  await page.evaluate(() => {
+    const p = window.publicVectorPreview;
+    window.transparencySymbols = p.layer.statistics.placedSymbols;
+  });
+  const opacity = async (name, value) => {
+    await page.locator(`#${name}-opacity`).evaluate((input, value) => {
+      input.value = String(value);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }, value);
+    await page.evaluate(
+      () =>
+        new Promise((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve)),
+        ),
+    );
+  };
+  await opacity("surface", 0);
+  await ready();
+  const independent = await page.evaluate(() => {
+    const p = window.publicVectorPreview,
+      scene = p.viewer.scene;
+    scene.render();
+    const pixels = scene.context.readPixels();
+    let colored = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i] + pixels[i + 1] + pixels[i + 2] > 60) {
+        colored++;
+      }
+    }
+    return {
+      colored,
+      symbols: p.layer.statistics.placedSymbols,
+      originalSymbols: window.transparencySymbols,
+      sameWorkers: p.layer._workers === window.globeWorkers,
+      opacity: p.layer.opacity,
+      alpha: scene.globe.translucency.frontFaceAlpha,
+    };
+  });
+  expect(independent.opacity).toBe(1);
+  expect(independent.alpha).toBe(0);
+  expect(independent.colored).toBeGreaterThan(10000);
+  expect(independent.symbols).toBe(independent.originalSymbols);
+  expect(independent.sameWorkers).toBe(true);
+  await page
+    .locator("#map")
+    .screenshot({ path: "Build/Specs/vector-transparent-terrain.png" });
+  await opacity("vector", 0.5);
+  await opacity("surface", 0.5);
+  await opacity("imagery", 1);
+  await ready();
+  await page
+    .locator("#map")
+    .screenshot({ path: "Build/Specs/vector-transparent-mixed.png" });
+  await expect(page.locator("#error")).toBeEmpty();
+  await page.locator("#measure").click();
+  await page.waitForFunction(() => !!window.publicVectorPreview.measurement);
+  console.log(
+    "Transparent surface warm CPU",
+    await page.evaluate(() => window.publicVectorPreview.measurement),
+  );
+  await opacity("vector", 1);
+  await opacity("surface", 1);
+  await opacity("imagery", 0);
   await page.locator("#terrain").uncheck();
   await page.locator("#whole").click();
   await ready();

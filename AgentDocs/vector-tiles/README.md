@@ -8,8 +8,8 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `E1 completed — 待提交检查点`                          |
-| Active phase plan      | None                                                   |
+| Current phase          | `G2 completed`                                         |
+| Active phase plan      | [G2](plans/2026-09-14-g2-surface-transparency.md)      |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
@@ -211,3 +211,13 @@ E1 首版四页技术验证通过后，负责人要求进一步清理，阶段�
 无产品 runtime 或上游修改。
 
 负责人确认矢量独立层和透明适配方向，E1 按推进授权完成，先建立独立 checkpoint，再进入透明渲染阶段。
+
+E1 checkpoint：`3d9dcfe7a3`。当前进入 [G2](plans/2026-09-14-g2-surface-transparency.md)，
+负责人明确首轮只显示当前可见地表；独立矢量 opacity 与 Globe 地表/影像透明按 ADR-0072 / SGP-0012 接入。
+
+G2 实现与[技术自审](reviews/2026-09-14-g2-surface-transparency-review.md)通过，负责人视觉 gate pending。
+181 vector + 20 native transparency Specs、7 项页面 E2E、build/types/release 与三种实际包入口通过。
+球面页提供矢量、地表和本地测试影像三项透明度；平面复用 vector opacity。上游只改 GlobeTranslucencyState.js。
+背面/地下、跨透明表面排序、Planar 整体透明与高级环境透明深度合成仍为后继资格范围。
+
+负责人要求平面也支持透明，G2 按推进授权关闭 gate，先形成独立 checkpoint，再开展 Planar 后继阶段。
