@@ -469,7 +469,12 @@ function getCommand(
     tile._materialCommandSource !== materialSource ||
     tile.command.shaderProgram !== shaderProgram
   ) {
-    tile.command.shaderProgram = shaderProgram;
+    if (tile.command.shaderProgram !== shaderProgram) {
+      // HDR can be disabled while the base shader changes. Drop dormant
+      // derived commands so re-enabling HDR cannot replay old uniforms.
+      tile.command.derivedCommands = {};
+      tile.command.shaderProgram = shaderProgram;
+    }
     tile.command.uniformMap = createUniformMap(
       surface,
       tile,

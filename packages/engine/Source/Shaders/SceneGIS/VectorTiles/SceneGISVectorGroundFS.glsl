@@ -18,7 +18,12 @@ vec2 groundCoordinates()
     vec4 eye = czm_windowToEyeCoordinates(gl_FragCoord.xy, depth);
     eye /= eye.w;
     groundLight = 1.0;
-    if (u_sceneGISGroundLighting) {
+    bool lighting = u_sceneGISGroundLighting;
+#ifdef SCENEGIS_VECTOR_ENVIRONMENT
+    lighting = true;
+    groundPositionEC = eye.xyz;
+#endif
+    if (lighting) {
         vec3 normal = normalize(cross(dFdx(eye.xyz), dFdy(eye.xyz)));
         vec3 worldNormal = mat3(czm_inverseView) * normal;
 #ifdef SCENEGIS_VECTOR_GLOBE
@@ -27,6 +32,9 @@ vec2 groundCoordinates()
         if (worldNormal.z < 0.0) normal = -normal;
 #endif
         groundLight = 0.4 + 0.6 * max(0.0, dot(normal, czm_lightDirectionEC));
+#ifdef SCENEGIS_VECTOR_ENVIRONMENT
+        groundNormalEC = normal;
+#endif
     }
     float viewDepth = -eye.z;
     if (viewDepth <= u_sceneGISVectorDepthRange.x || viewDepth > u_sceneGISVectorDepthRange.y) discard;

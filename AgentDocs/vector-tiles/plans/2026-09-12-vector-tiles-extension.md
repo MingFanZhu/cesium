@@ -9,7 +9,7 @@
 - Architecture reviewer: 当前 Agent；项目负责人确认产品边界
 - Created: `2026-09-12`
 - Updated: `2026-09-14`
-- Current phase: None；最近完成 [G1](2026-09-14-g1-globe.md)
+- Current phase: None；最近完成 [V4B](2026-09-14-v4b-environment.md)
 - Related discussions: [源码审计](../discussions/2026-09-12-cesium-mvt-and-planar-audit.md)、
   [实现边界](../discussions/2026-09-12-rendering-boundaries.md)、
   [MapLibre 与贴地](../discussions/2026-09-12-maplibre-reference-and-surface.md)、
@@ -111,6 +111,7 @@ Globe 从数据/样式/调度职责分离开始考虑，实际渲染资格另设
 | V5C   | 地形标注                            | V4 checkpoint                  | 生产地形已具备                             | 高程、遮挡、LOD 与标注稳定                                                   | planned   | 未激活                                                   |
 | V6    | M1 平面交付资格                     | V5C checkpoint                 | 冻结支持矩阵与数据集                       | Test 人工 gate、Specs/E2E、build/types/docs/package、升级检查                | planned   | 未激活                                                   |
 | G1    | Globe 复用和资格验证                | V4A checkpoint，负责人提前授权 | 重审 ECEF、曲率、terrain、horizon          | 共享前端复用与 Globe 自身画面/资源验收                                       | completed | [G1](2026-09-14-g1-globe.md)                             |
+| V4B   | 双世界高级环境接入                  | G1 checkpoint，负责人授权      | 审计物理光照与实际阴影 receiver            | 双世界光照/云影/HDR、生命周期、性能与视觉资格                                | completed | [V4B](2026-09-14-v4b-environment.md)                     |
 
 V2 从开始就采用 tile batch 和 lazy scheduling；V3 完善质量与性能，不以逐 Entity 实现作为长期过渡。
 V2 验收后将 V3 分为 V3A/B/C：覆盖、样式与密集性能分别有独立的改动面和 gate，
@@ -221,3 +222,9 @@ ADR 与 AgentDocs 作为独立本地 checkpoint 提交。当前未激活下一 p
 负责人于 2026-09-14 确认 G1 性能修正已可接受，技术 review 与视觉/交互 gate 关闭；G1 形成独立本地
 checkpoint，当前没有 active phase。未完成字体、曲面字形、帧时尾部与高级环境集成资格继续保留，
 不以本阶段验收代替 V4/V5C/M1。当前 hillshade/光照问题是能力边界说明，不激活新实现阶段。
+
+G1 checkpoint 为 `a2f71e1120`。负责人授权后推进 V4B，接入双世界实际物理光照、云影与 Globe
+定向几何阴影，补充环境参数面板及 native Timeline/Animation；实现、Specs、页面回归、构建/类型/
+发布包验证通过。负责人于 2026-09-14 明确手动检查通过，V4B completed，并形成独立本地 checkpoint。
+当前没有 active phase；近地平线性能、Planar native geometry-shadow 等剩余范围见
+[V4B review](../reviews/2026-09-14-v4b-environment-review.md)，不以本阶段验收标记 M1 完成。

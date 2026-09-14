@@ -1,14 +1,14 @@
 /* global document, window, fetch, performance, AbortController */
 import * as C from "/Build/CesiumUnminified/index.js";
+import installEnvironment from "./environment.js";
 
 const element = (id) => document.getElementById(id);
 const globeMode = document.body.dataset.world === "globe";
-if (
-  globeMode &&
-  new window.URLSearchParams(window.location.search).get("provider") ===
-    "bright"
-) {
-  element("provider").value = "bright";
+const initialProvider = new window.URLSearchParams(window.location.search).get(
+  "provider",
+);
+if (["local", "bright", "liberty"].includes(initialProvider)) {
+  element("provider").value = initialProvider;
 }
 const half = 20037508.342789244;
 const locations = {
@@ -37,8 +37,8 @@ const viewer = new C.Viewer("map", {
       }),
   skyBox: false,
   skyAtmosphere: false,
-  animation: false,
-  timeline: false,
+  animation: true,
+  timeline: true,
   fullscreenButton: false,
   homeButton: false,
   infoBox: false,
@@ -91,6 +91,11 @@ let removeTerrainError;
 let terrainError;
 let terrainGeneration = 0;
 let terrainLoading = false;
+const environment = installEnvironment(
+  viewer,
+  globeMode,
+  () => locations[element("location").value],
+);
 
 async function setGlobeTerrain(enabled) {
   const current = ++terrainGeneration;
@@ -141,14 +146,16 @@ async function setGlobeTerrain(enabled) {
     }
     world.terrainProvider = provider;
     terrainLoading = false;
-    world.enableLighting = enabled;
+    environment.setBaseLighting(enabled);
     if (enabled) {
-      scene.light = new C.DirectionalLight({
-        direction: C.Cartesian3.negate(
-          C.Cartesian3.normalize(scene.camera.positionWC, new C.Cartesian3()),
-          new C.Cartesian3(),
-        ),
-      });
+      environment.setBaseLight(
+        new C.DirectionalLight({
+          direction: C.Cartesian3.negate(
+            C.Cartesian3.normalize(scene.camera.positionWC, new C.Cartesian3()),
+            new C.Cartesian3(),
+          ),
+        }),
+      );
       removeTerrainError = provider.errorEvent.addEventListener((error) => {
         error.retry = false;
         terrainError = `地形加载失败：${error.message}；可关闭地形恢复椭球。`;
@@ -196,16 +203,18 @@ function setTerrain(enabled) {
       terrainError = `地形加载失败：${error.message}；可关闭地形恢复零高程。`;
     });
     world.terrainProvider = provider;
-    scene.light = new C.DirectionalLight({
-      direction: C.Cartesian3.normalize(
-        new C.Cartesian3(-1, -0.5, -1.5),
-        new C.Cartesian3(),
-      ),
-    });
+    environment.setBaseLight(
+      new C.DirectionalLight({
+        direction: C.Cartesian3.normalize(
+          new C.Cartesian3(-1, -0.5, -1.5),
+          new C.Cartesian3(),
+        ),
+      }),
+    );
   } else {
     world.terrainProvider = undefined;
   }
-  world.enableLighting = enabled;
+  environment.setBaseLighting(enabled);
   element("terrain").checked = enabled;
   scene.requestRender();
 }
@@ -531,6 +540,7 @@ element("connect").onsubmit = (event) => {
 };
 element("location").onchange = () => {
   zoom = element("location").value === "alps" ? 12 : 14;
+  environment.updateLocation();
   view();
 };
 element("terrain").onchange = () => setTerrain(element("terrain").checked);
@@ -619,6 +629,7 @@ handler.setInputAction(({ position }) => {
 }, C.ScreenSpaceEventType.LEFT_CLICK);
 window.publicVectorPreview = {
   viewer,
+  environment,
   get layer() {
     return layer;
   },
@@ -645,6 +656,7 @@ window.addEventListener("pagehide", (event) => {
   cancelMeasurement?.();
   connection = undefined;
   handler.destroy();
+  environment.destroy();
   viewer.destroy();
 });
 view();

@@ -770,6 +770,10 @@ Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代�
 局部 ENU 数值表由 Worker 准备，从实际地表 depth 逆投影恢复覆盖与拾取。Globe cover 使用
 地理包围体、horizon 和三维 SSE，不能套用 planar Z=0 的相机比例或地形 tile matrix。
 真实地形的标注索引由 vector Worker 异步构建；只借用已发布 native mesh，不请求或修改地形。
+按 [ADR-0071](Decisions/ADR-0071-vector-environment-lighting.md)，矢量地表只消费匹配 World 的既有
+frame-local 物理光照/云影资源；direct 与 sky 分离，替换基础 Lambert。Globe 定向几何阴影在
+真实地表位置接收，覆盖凸体不投影。环境独占 LUT/atlas/history 与 HDR 合成，不新增地图颜色 RTT。
+Circle/symbol 保持制图颜色；Planar native geometry-shadow 资格不随此扩宽。
 矢量瓦片与平面影像/地形共享私有 SSE 数值判据，MVT 选取预算内互不包含的近细远粗 leaves，
 请求与内容缓存保持独立。Style zoom 以视轴在 Z=0 的前向交点为参考，不把倾斜造成的
 采样距离变化误认为用户缩放；具体边界见 [ADR-0064](Decisions/ADR-0064-vector-perspective-lod.md)。

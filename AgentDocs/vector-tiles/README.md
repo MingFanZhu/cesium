@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                  |
-| ---------------------- | ------------------------------------------------------ |
-| Extension slug         | `vector-tiles`                                         |
-| Status                 | `active`                                               |
-| Planning model         | `extension`                                            |
-| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `G1 completed — Globe 复用；下一阶段未激活`            |
-| Active phase plan      | None；最近完成 [G1](plans/2026-09-14-g1-globe.md)      |
-| Active standalone plan | None                                                   |
-| Architecture contact   | 当前 Agent                                             |
-| Execution contact      | 当前 Agent                                             |
-| Last updated           | `2026-09-14`                                           |
+| Field                  | Value                                                     |
+| ---------------------- | --------------------------------------------------------- |
+| Extension slug         | `vector-tiles`                                            |
+| Status                 | `active`                                                  |
+| Planning model         | `extension`                                               |
+| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md)    |
+| Current phase          | `V4B completed — 双世界高级环境接入`                      |
+| Active phase plan      | None；最近完成 [V4B](plans/2026-09-14-v4b-environment.md) |
+| Active standalone plan | None                                                      |
+| Architecture contact   | 当前 Agent                                                |
+| Execution contact      | 当前 Agent                                                |
+| Last updated           | `2026-09-14`                                              |
 
 ## Scope
 
@@ -174,3 +174,14 @@ EPSG:3857 matrix 与 Worker；native terrain 上直接画面/线、ECEF 标注�
 本阶段实现、Specs、ADR 与记录形成独立 G1 本地 checkpoint，不激活下一阶段。
 负责人随后询问 hillshade 与高级环境的关系；当前能力边界已补入 [光照说明](../../Documentation/SceneGIS/VectorTiles.md#地形明暗hillshade-与高级环境)。
 高级环境光照与阴影 receiver 尚未接入 vector，不能从普通贴地验收推断兼容；由后续 V4/M1 资格工作承接。
+
+G1 checkpoint：`a2f71e1120`。负责人明确授权接入高级环境，当前进入 [V4B](plans/2026-09-14-v4b-environment.md)。
+MapLibre hillshade 不作为当前交付目标；按 [ADR-0071](../../Documentation/SceneGIS/Decisions/ADR-0071-vector-environment-lighting.md)
+复用现有物理光照、云影和 HDR 合成，独立验证双世界与 Globe 定向几何阴影 receiver。
+
+最新 [V4B review](reviews/2026-09-14-v4b-environment-review.md)：实现和技术自审通过，173 项 vector Specs、
+双世界实际环境及既有地形页面 E2E、build/types/release/实际安装包验证通过。全部改动为 SceneGIS-owned，
+无 SGP；新增环境 GPU 成本与限制已记录。补充环境参数分组和原生 Timeline/Animation 后，
+2 项双世界页面回归通过，验证光向/云时间同步、参数与时间保留、恢复默认和资源释放。
+负责人于 2026-09-14 明确手动检查通过，视觉 gate 关闭，V4B completed，形成独立本地 checkpoint。
+当前没有 active phase；近地平线重负载问题仍为 V4B-R06 open，由后继 M1 定位，其他未资格范围见 R07。

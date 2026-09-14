@@ -187,3 +187,26 @@ native FPS 持续显示。公开网络失败显示提示，可关闭地形；本
 
 自动化以确定性坡面、山脊和 300 米高程 fixture 验证；发布包脚本新增真实 ground 色彩、pick
 与数值纹理释放检查。平面 terrain 资格不代表 Globe 或完整地形文字质量。
+
+## V4B 高级环境
+
+`public.html` 和 `globe.html` 共用“高级环境”控件，可启用高级大气与物理地表光照，切换白天、
+低日照、夜间、体积云品质、云影和雾/体积光。Globe 另有原生地形与物体阴影开关；Planar 仅提供
+已支持的云影，不宣称原生几何阴影。公开页仍默认基础地图，勾选环境后异步加载仓库内环境资产。
+环境关闭恢复原生设置，反复切换保留同一地图、Worker 和 geometry；图层与环境各自显示错误。
+体积云与阴影有额外 GPU 成本，品质由用户显式选择，不自动降档。
+
+展开“光照与大气参数”“云层参数”“雾与泛光参数”可实时调整地表/天空亮度、空气散射、月光、
+云型、云量、云高、厚度、风速风向、雾与泛光。关闭重开环境保留参数；“恢复环境默认参数”
+只重置这些环境参数，不改变所选时间、地形或原生几何阴影开关。
+
+底部启用 Cesium 原生 Timeline 与 Animation，显示 UTC，支持拖动、播放、暂停和调速。
+初始为 2026-06-21 所选地点的近似太阳正午，暂停、600 倍速；时段预设保留当前当地太阳日，
+切换为近似正午、18 时或午夜。手动拖动/播放后显示“自定义 · 时间轴”。Globe 使用原生天文光向，
+Planar 使用 `SceneGISPlanarEnvironment` 的 astronomical mode，以所选定位点为经纬度原点；
+两者均由 Viewer clock 驱动，云时间与其同步。环境开关和定位操作不重置时钟。
+
+两页都支持 `?provider=local` 离线构造地图；`bright` / `liberty` 明确选择公开服务。
+高级环境实际资产、参数、原生时间控件和两页 Controller 生命周期由 `scenegis-vector-environment.spec.js` 验证；
+四条渲染路径的物理光照、云影、Globe 几何阴影、pick 与借用资源释放由 engine Specs 验证。
+发布包脚本另验证 installed engine / release ESM / IIFE 的环境 Shader、地形 receiver 与 native pick。

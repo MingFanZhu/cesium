@@ -52,7 +52,7 @@ Style zoom 以视轴椭球交点和当地 Mercator 比例计算；越过地平�
 面和线读取 native Globe depth，按独立 Worker 准备的数值几何做覆盖、透明混合和拾取，
 不合成地图颜色纹理。真实地形的圆点和文字使用 Worker 构建的已渲染 mesh BVH 查询高度，
 地形 LOD/provider 变化保留地图几何与 glyph atlas；待索引就绪前的锚点受真实地表遮挡。
-该阶段不承诺完整环境材质融合、陡坡大字形连续曲面贴合或稳定 60 FPS。
+G1 不承诺完整环境材质融合；V4B 的环境资格见下文。陡坡大字形连续曲面贴合和稳定 60 FPS 仍未承诺。
 
 [Globe 离线入口](../../Test/vector-tiles/globe.html) 默认使用本地构造 MVT / Bright 样式，
 可切换公共 Bright/Liberty 与 Esri 高程。范围与数值协议见 [ADR-0070](Decisions/ADR-0070-globe-vector-ground-rendering.md)。
@@ -218,7 +218,7 @@ ground 要求 WebGL2、float textures 与 depth textures。Worker 把已有 fill
 打包成数值表，GPU 使用批量垂直三角凸体，从地表深度重建真实位置并恢复 coverage。
 孔洞、线型、颜色、透明度与逐要素拾取沿用既有语义；不先渲染地图颜色纹理，不通过抬高 Z
 避免冲突。`pickPosition` 返回地形位置。开启 `world.enableLighting` 时，地图颜色采用
-地表深度法线的环境光加漫反射，关闭时保持原 style 颜色；不是高级材质/阴影集成资格。
+地表深度法线的环境光加漫反射，关闭时保持原 style 颜色；V4B 高级环境 active 时使用下述物理路径。
 
 可见性使用 provider 声明的全局高度包络；实际栅格化凸体在命令执行时根据当前已发布
 terrain cover 收紧，含零高程等待地表及 skirts。只改高度 uniform，不重建 geometry。
@@ -238,23 +238,40 @@ Style `type: "hillshade"` 是基于 `raster-dem` 高程源生成的制图晕渲�
 当前 vector source/style profile 未接入该类型。也存在预计算成矢量面的晕渲：本仓库固定 Streets v12
 参考的 `id: "hillshade"` 实际是 `type: "fill"`、`source-layer: "hillshade"`；名称不等于渲染类型。
 
-当前平面/Globe ground 的山体明暗来自实际地表深度的 geometric normal，与场景光方向做
+未启用高级环境时，平面/Globe ground 的山体明暗来自实际地表深度的 geometric normal，与场景光方向做
 `0.4 + 0.6 * max(N·L, 0)` 基础光照，作用于地图面线颜色；Globe background 同样处理。
 它跟随 `world.enableLighting`，没有复用平面 terrain 的 Worker smooth normals、完整 light color/
 intensity、物理 irradiance 或云影数据。文字/图标保持其独立样式显示。公开地形示例用显式
-DirectionalLight 做观察光照；没有启动高级环境 controller，也没有启用几何阴影。
+DirectionalLight 做基础观察光照；高级环境和 Globe 原生几何阴影可通过页面控件启用。
 
 原生地表先渲染，矢量借用地表 depth 后在 TERRAIN_CLASSIFICATION 绘制，深度共享只保证贴附与遮挡。
 不透明矢量颜色会覆盖地表已经计算的照明和阴影，不能自动继承 native Globe/Planar material lighting。
 Vector command 当前明确 `castShadows=false`、`receiveShadows=false`，覆盖凸体也不能作为真实 caster。
 
-高级环境现有 pre-tonemap HDR slot 位于场景颜色之后，具备为地图统一合成 aerial/fog/cloud 的顺序基础；
-这不代表本阶段完成集成验证。后续必须让地表矢量在自身着色时消费同一 World 的物理 Sun/sky、Beer
-transmittance 与真实 receiver 位置，替换基础 Lambert；几何阴影需要明确的 surface receiver 接入。
-云影/几何阴影应衰减 direct 项，不能把整个已渲染地图或 emissive/indirect 统一压暗。大气只合成一次，
-style hillshade 作为制图效果的启用策略须与三维光照明确区分。既有光照约束见
+V4B 在 caller 注册并启用 `SceneGISEnvironmentEffects` 后，background/fill/line 自动消费匹配
+World 的当前物理 Sun/Moon、diffuse sky 和 Beer cloud transmittance。颜色作为 albedo，替换基础
+Lambert；flat 使用真实平面位置与 +Z 法线，ground/Globe 使用实际地表 depth 和外向 geometric normal。
+复用 geometry、Worker、特征和 pick；不新增地图颜色 RTT、环境 LUT、云影 atlas 或后处理。
+
+Globe 另外借用 `scene.shadowMap`，在 `enabled` 且 `globe.shadows` 允许接收时，用真实地表位置
+采样原生定向阴影。使用原生 cascades、terrain bias 与可选 PCF；覆盖凸体始终不作为 caster，
+普通 3D 物体继续按自身 ShadowMode 投影。该路径不支持点光/聚光 ShadowMap，也不扩宽 Planar
+原生几何阴影资格。云影和几何阴影只衰减 direct，sky 不被重复压暗。
+
+既有 pre-tonemap HDR slot 为最终场景合成 atmosphere/aerial/fog/cloud/rays/bloom，各项按原环境
+controller 配置生效。Circle/symbol 保持制图颜色，不作为物理材质，但参与场景合成。
+环境未 ready/停用时恢复基础路径；借用资源由环境 controller 独占释放。切换不重建地图图层。
+Globe 高级环境要求关闭原生 Globe lighting/ground atmosphere、sky/Sun/Fog/bloom 等冲突项；
+Planar 需要先注册 `SceneGISPlanarEnvironment`，使用显式光向或提供明确经纬度原点的 astronomical
+mode，完整前提沿用高级环境原契约。Test 页面负责启用时保存、停用时恢复这些原生状态，提供
+光照、云层、雾与泛光参数，以及 Cesium 原生 Timeline/Animation。Viewer clock 驱动双世界天文
+光向与云时间；环境开关保留所选时间与参数，定位操作同步 Planar 的天文原点。
+
+本阶段接受不实现 MapLibre hillshade。技术验证、负责人视觉验收与剩余边界见
+[V4B review](../../AgentDocs/vector-tiles/reviews/2026-09-14-v4b-environment-review.md)。既有光照约束见
 [ADR-0054](Decisions/ADR-0054-model-physical-lighting-and-explicit-shadows.md) 与
-[ADR-0055](Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md)；此处记录未完成边界，不新增 API。
+[ADR-0055](Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md)，矢量接入见
+[ADR-0071](Decisions/ADR-0071-vector-environment-lighting.md)。
 
 ### 配置与样式
 

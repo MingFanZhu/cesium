@@ -16,6 +16,8 @@ import EllipsoidTerrainProvider from "../../../Core/EllipsoidTerrainProvider.js"
 import GlobeCoordinates from "../../Core/_private/_SceneGISVectorGlobeCoordinates.js";
 import GlobeCover from "./_SceneGISVectorGlobeCover.js";
 import GlobeTerrain from "./_SceneGISVectorGlobeTerrain.js";
+import EnvironmentResources from "../../Renderer/_private/_SceneGISVectorEnvironmentResources.js";
+import environment from "./_SceneGISVectorEnvironment.js";
 
 const colorState = {
   depthTest: { enabled: false },
@@ -28,7 +30,7 @@ const maximumCorner = new Cartesian3();
 
 function shaderProgram(batch) {
   const resources = batch._resources;
-  return resources.getShaderProgram
+  const base = resources.getShaderProgram
     ? resources.getShaderProgram(
         batch._owner._globe &&
           !(
@@ -37,6 +39,17 @@ function shaderProgram(batch) {
           ),
       )
     : resources._shaderProgram;
+  if (batch._kind === "circle" || !environment.active(batch._owner)) {
+    return base;
+  }
+  batch._environmentResources ??= new EnvironmentResources(
+    batch._owner._scene.context,
+  );
+  return batch._environmentResources.get(
+    base,
+    batch._owner._globe,
+    environment.shadowMap(batch._owner),
+  );
 }
 
 function groundHeights(batch, frameState) {
@@ -169,6 +182,8 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
     prepared = prepareBatch(prepared, allowPicking, true)[0];
   }
   this._ground = !!prepared.ground;
+  this._kind = prepared.kind;
+  this._environmentResources = undefined;
   this.commands = [];
   this.renderCommands = [];
   this._regionCommands = [];
@@ -228,7 +243,7 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
   if (this._resources !== undefined) {
     const program = shaderProgram(this);
     for (const command of this.commands) {
-      command.shaderProgram = program;
+      EnvironmentResources.setProgram(command, program);
     }
     updateAnchors(this);
     if (this._record?.uniformPaint && this._record.key === this._geometryKey) {
@@ -248,6 +263,7 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
   const depthRange = new Cartesian2();
   const uniformMap = {
     ...this._resources.uniformMap,
+    ...environment.createUniformMap(this._owner),
     u_sceneGISGroundHeights: () => groundHeights(this, frameState),
     u_sceneGISGroundLighting: () => this._owner._world.enableLighting,
     u_sceneGISVectorMetersPerPixel: () => this._owner._metersPerPixel,
@@ -328,7 +344,7 @@ SceneGISVectorTileBatch.prototype.setRegions = function (regions) {
         published.render = DrawCommand.shallowClone(source, published.render);
         published.render.uniformMap = published.uniformMap;
       }
-      published.render.shaderProgram = source.shaderProgram;
+      EnvironmentResources.setProgram(published.render, source.shaderProgram);
       this.renderCommands.push(published.render);
       index++;
     }
@@ -347,6 +363,7 @@ SceneGISVectorTileBatch.prototype.queue = function (frameState) {
 };
 
 SceneGISVectorTileBatch.prototype.destroy = function () {
+  this._environmentResources?.destroy();
   this._resources?.destroy();
   this._anchorTerrain = undefined;
   this._prepared = undefined;

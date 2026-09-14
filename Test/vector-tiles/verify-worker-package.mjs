@@ -466,6 +466,57 @@ try {
         (b) => b._resources._textures,
       )?._resources;
       const globeTextures = globeResources._textures.slice();
+      const makeTexture = (rgba) =>
+        new C.Texture({
+          context: globeScene.context,
+          source: {
+            width: 1,
+            height: 1,
+            arrayBufferView: new Uint8Array(rgba),
+          },
+        });
+      const environmentTextures = [
+        makeTexture([0, 255, 177, 0]),
+        makeTexture([128, 160, 192, 255]),
+        makeTexture([8, 12, 16, 255]),
+      ];
+      globeScene.highDynamicRange = true;
+      globeScene.frameState._sceneGISGlobeLighting = {
+        active: true,
+        atlasTexture: environmentTextures[0],
+        transmittanceTexture: environmentTextures[1],
+        irradianceTexture: environmentTextures[2],
+        matrices: Array.from({ length: 3 }, () =>
+          C.Matrix4.fromScale(C.Cartesian3.ZERO),
+        ),
+        intervals: Array.from({ length: 3 }, () => new C.Cartesian2(0, 100000)),
+        cascadeCount: 1,
+        showCloudShadows: true,
+        primaryLightDirection: C.Cartesian3.UNIT_X,
+        sunDirection: C.Cartesian3.UNIT_X,
+        primaryLightScale: new C.Cartesian3(1, 1, 1),
+        surfaceRadianceScale: 1,
+        cloudTop: 4000,
+      };
+      globeScene.initializeFrame();
+      globeScene.render();
+      const environmentPixel = Array.from(
+        globeScene.context.readPixels({ x: 12, y: 31, width: 1, height: 1 }),
+      );
+      const environmentResources = globeLayer._drawOrder.find(
+        (batch) => batch._kind === "fill",
+      )._environmentResources;
+      const environmentReady = environmentResources._programs.size > 0;
+      const environmentPick = globeScene.pick(new C.Cartesian2(32, 32))?.id
+        .featureId;
+      globeScene.frameState._sceneGISGlobeLighting = undefined;
+      globeScene.primitives.remove(globeLayer);
+      const environmentReleased =
+        environmentResources._programs.size === 0 &&
+        environmentTextures.every((texture) => !texture.isDestroyed());
+      for (const texture of environmentTextures) {
+        texture.destroy();
+      }
       globeScene.destroy();
       globeCanvas.remove();
       return {
@@ -500,6 +551,12 @@ try {
           picked: globePick,
           released: globeTextures.every((t) => t.isDestroyed()),
         },
+        environment: {
+          ready: environmentReady,
+          color: environmentPixel,
+          picked: environmentPick,
+          released: environmentReleased,
+        },
       };
     }, mode);
     assert(result.layers > 0 && result.features > 0);
@@ -515,6 +572,11 @@ try {
     assert.deepEqual(result.globe.color, [255, 0, 0, 255]);
     assert.equal(result.globe.picked, "point");
     assert(result.globe.released);
+    assert(result.environment.ready && result.environment.released);
+    assert.equal(result.environment.picked, "point");
+    assert(
+      result.environment.color[2] > 0 && result.environment.color[2] < 255,
+    );
     assert(
       result.symbol.stable && result.symbol.separate && result.symbol.released,
     );

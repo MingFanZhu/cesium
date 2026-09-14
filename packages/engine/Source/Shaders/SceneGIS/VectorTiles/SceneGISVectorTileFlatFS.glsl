@@ -3,6 +3,10 @@
 vec2 groundCoordinates();
 uniform bool u_sceneGISGroundLighting;
 float groundLight;
+#ifdef SCENEGIS_VECTOR_ENVIRONMENT
+vec3 groundPositionEC;
+vec3 groundNormalEC;
+#endif
 #else
 #define SCENEGIS_VECTOR_INPUT in
 #endif
@@ -108,7 +112,14 @@ void main()
         local.y > u_sceneGISVectorTileClip.w || local.y <= u_sceneGISVectorTileClip.y) discard;
 
     vec4 fill = czm_gammaCorrect(v_color);
+#ifdef SCENEGIS_VECTOR_ENVIRONMENT
 #ifdef SCENEGIS_VECTOR_GROUND
+    fill.rgb = vectorSurfaceRadiance(fill.rgb, groundPositionEC, groundNormalEC);
+#else
+    vec3 positionEC = eyeA.xyz + (eyeB.xyz - eyeA.xyz) * t;
+    fill.rgb = vectorSurfaceRadiance(fill.rgb, positionEC, czm_viewRotation * vec3(0.0, 0.0, 1.0));
+#endif
+#elif defined(SCENEGIS_VECTOR_GROUND)
     fill.rgb *= groundLight;
 #endif
     fill.rgb *= fill.a;

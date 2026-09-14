@@ -9,11 +9,19 @@ void main()
     eye /= eye.w;
     if (-eye.z <= u_depthRange.x || -eye.z > u_depthRange.y) discard;
     vec4 color = czm_gammaCorrect(u_color);
-    if (u_lighting) {
+    bool lighting = u_lighting;
+#ifdef SCENEGIS_VECTOR_ENVIRONMENT
+    lighting = true;
+#endif
+    if (lighting) {
         vec3 normal = normalize(cross(dFdx(eye.xyz), dFdy(eye.xyz)));
         vec3 world = (czm_inverseView * eye).xyz;
         if (dot(mat3(czm_inverseView) * normal, world) < 0.0) normal = -normal;
+#ifdef SCENEGIS_VECTOR_ENVIRONMENT
+        color.rgb = vectorSurfaceRadiance(color.rgb, eye.xyz, normal);
+#else
         color.rgb *= 0.4 + 0.6 * max(0.0, dot(normal, czm_lightDirectionEC));
+#endif
     }
     color.rgb *= color.a;
     out_FragColor = color;
