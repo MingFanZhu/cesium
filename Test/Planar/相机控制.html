@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 相机控制</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>相机控制</h1>
+      <p>
+        平面沿用 Camera 的 Cartesian
+        API。选择中心视图、飞行或全域视图；相机位置与范围都使用米。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="相机控制.js">查看源码</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./相机控制.js"></script>
+  </body>
+</html>

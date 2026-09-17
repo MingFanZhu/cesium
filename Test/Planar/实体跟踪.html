@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 实体跟踪</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>实体跟踪</h1>
+      <p>
+        用 FIXED 位置和 Cesium 原生 Clock
+        驱动移动实体。开启跟踪后，相机会随实体移动；关闭跟踪即可恢复自由浏览。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="实体跟踪.js">查看源码</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./实体跟踪.js"></script>
+  </body>
+</html>

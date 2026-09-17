@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 实体定位</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>实体定位</h1>
+      <p>
+        Entity 使用平面 Cartesian3 位置。Viewer.zoomTo 与 flyTo
+        可以定位单个实体，也可以定位整组 CustomDataSource。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="实体定位.js">查看源码</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./实体定位.js"></script>
+  </body>
+</html>

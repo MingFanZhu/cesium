@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 影像调色</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>影像调色</h1>
+      <p>
+        影像图层直接支持亮度、对比度、饱和度与色相调整。本地示意图用于观察颜色变化，替换
+        URL 即可接入瓦片服务。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="影像调色.js">查看源码</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./影像调色.js"></script>
+  </body>
+</html>

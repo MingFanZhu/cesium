@@ -17,12 +17,11 @@ http://localhost:8092/Test/index.html
 受管页面按大扩展拆分：
 
 - `vector-tiles/planar-city.html`：独立 MVT 平面渲染、本地城市数据与 feature pick；无公网依赖。
-- `平面Viewer.html`：声明式`Viewer({ planarWorld })`、EPSG:3857公开数据与基础导航。
-- `平面地表样式.html`：影像颜色滤镜与terrain `Material`样式。
-- `平面环境.html`：天文方向、原生Clock、可见天体、平面大气与SkyBox。
-- `平面API集成.html`：公共Camera视图/飞行和Entity/DataSource framing。
+- `Planar/示例目录.html`：八个独立功能入口，涵盖基础平面、公开影像地形、影像调色、地形材质、相机控制、实体定位、跟踪、日月天空。
+- `Planar/tests/`：原四个综合页面，仅保留为维护诊断；原根目录 URL 导向新功能页。
 
-四页都使用相同的best-effort公开OSM影像与Esri Terrain3D地形事实；服务不可用时仍以baseColor/flat fallback启动。
+平面功能页仅“影像与地形”访问公开 Esri 服务，其余使用本地确定性图案与高程图。
+每页直接展示所需公共 API，控件使用默认 lil-gui，说明独立于控件面板。旧综合测试页的公开服务与诊断配置保留。
 
 根开发服务器为 `/Build/CesiumUnminified/index.js` 维护增量构建上下文，并监听 engine、widgets 与
 Shader 源码。修改源码后刷新示例页面，即会请求最新开发 bundle；不需要单独构建或启动 Sandcastle。

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 基础平面</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>基础平面</h1>
+      <p>
+        用 Viewer({ planarWorld }) 创建本地米制平面。X 向东、Y 向北、Z
+        向上；左键平移，中键旋转，滚轮缩放。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="基础平面.js">查看源码</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./基础平面.js"></script>
+  </body>
+</html>

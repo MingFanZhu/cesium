@@ -11,6 +11,9 @@
 
 ## lil-gui provenance
 
+平面拆分示例 `Test/Planar/*.html` 及保留的 `Test/Planar/tests/*.html` 同样使用上述未修改的 lil-gui；
+新示例只定位外层 controls 容器，不覆盖 lil-gui 内部样式。
+
 - npm package：`https://registry.npmjs.org/lil-gui/-/lil-gui-0.21.0.tgz`
 - Distribution：`package/dist/lil-gui.esm.min.js`，原始字节未修改
 - Distribution SHA-256：`609142ae792244de064029d61f25ae8dcdeae76d4996d9eea95a4671d93a954d`

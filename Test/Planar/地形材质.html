@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 地形材质</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>地形材质</h1>
+      <p>
+        用已知高度范围的地形显示等高线、高程、坡度和坡向。这里的灰度图是一块本地合成山地；真实服务接入见“影像与地形”。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="地形材质.js">查看源码</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./地形材质.js"></script>
+  </body>
+</html>
