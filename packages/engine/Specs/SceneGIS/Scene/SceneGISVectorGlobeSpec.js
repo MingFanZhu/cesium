@@ -730,6 +730,37 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
       expect(scene.globe).toBe(globe);
     });
   });
+  it("keeps ellipsoid surface heights independent of native mesh skirts and LOD", function () {
+    const mesh = {
+      minimumHeight: 0,
+      maximumHeight: 0,
+      encoding: {
+        minimumHeight: -1000,
+        maximumHeight: 0,
+        exaggeration: 1,
+        exaggerationRelativeHeight: 0,
+      },
+    };
+    const tiles = [];
+    const layer = {
+      _world: {
+        terrainProvider: new EllipsoidTerrainProvider(),
+        _surface: { _tilesToRender: tiles },
+      },
+    };
+    const result = new Cartesian2();
+    expect(Terrain.heights(layer, undefined, result)).toEqual(
+      new Cartesian2(-1, 1),
+    );
+    tiles.push({ data: { renderedMesh: mesh } });
+    expect(Terrain.heights(layer, undefined, result)).toEqual(
+      new Cartesian2(-1, 1),
+    );
+    mesh.encoding.minimumHeight = -50;
+    expect(Terrain.heights(layer, undefined, result)).toEqual(
+      new Cartesian2(-1, 1),
+    );
+  });
   it("accepts native fill mesh encodings without optional height extrema", function () {
     const mesh = {
       minimumHeight: 12,

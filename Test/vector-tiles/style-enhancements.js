@@ -58,7 +58,8 @@ export default function start(globe) {
       fixture: {
         type: "vector",
         tiles: ["/Test/vector-tiles/enhancements.pbf?z={z}&x={x}&y={y}"],
-        minzoom: 15,
+        // The synthetic tile repeats at every level so zooming out can coarsen.
+        minzoom: 0,
         maxzoom: 15,
       },
     },

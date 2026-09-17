@@ -14,6 +14,7 @@
 已提供四种 pattern、点击选中/清除、全局水面透明度、POI 自动换位与可伸缩牌面。使用默认 lil-gui，不加载高级环境。
 `pattern-sprite.png/json` 是原创测试图案，运行 `node Test/vector-tiles/generate-pattern-fixture.mjs` 可重建。
 `enhancements.pbf` 在公共测试要素上增加三个重合 POI，运行 `node Test/vector-tiles/generate-enhancement-fixture.mjs` 可重建。
+增强页将这份合成数据重复用于 0–15 级，以便拉远时按预算降低层级；接入真实数据时应填写服务实际支持的范围。
 
 旧测试页保留有实际回归用途的能力，按世界命名；不再提供高级环境、环境参数和时间控件。
 

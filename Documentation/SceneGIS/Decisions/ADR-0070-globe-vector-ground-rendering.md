@@ -42,7 +42,8 @@ vector Worker 创建空间索引后做局部射线查询；索引与 mesh revisi
 局部 Newton 迭代；极小纬差用七阶 sine 多项式，避免 GPU intrinsic 的绝对误差放大为街道偏移。
 大于 0.1 rad 的动态 stroke 扩张采用普通 sine，不把小角度近似扩展至任意角度。
 
-选层使用当时已发布 surface 的高度范围；绘制包围体另保留真实 provider 的保守高度包络，
+默认 EllipsoidTerrainProvider 的高度范围固定为零高程加一米余量，不引入原生 mesh 裙边随 LOD 变化的地下高度。
+真实地形选层使用当时已发布 surface 的高度范围；绘制包围体另保留真实 provider 的保守高度包络，
 在执行 uniform 时收紧至本帧相交地形。不能把深达百千米的绘制包络直接作为近景 SSE 距离，
 否则会误选大量远处的高层级瓦片。Globe fill mesh 的 TerrainEncoding extrema 可为空，应使用
 mesh 自身高度；原生 mesh 的 skirt 只参与光栅化高度包络，不进入 anchor 的表面查询索引。

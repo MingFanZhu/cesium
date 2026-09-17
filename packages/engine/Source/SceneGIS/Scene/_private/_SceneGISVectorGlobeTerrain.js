@@ -56,6 +56,12 @@ function meshRange(mesh, result = new Cartesian2()) {
 }
 
 function heights(layer, bounds, result) {
+  if (layer._world.terrainProvider instanceof EllipsoidTerrainProvider) {
+    // Native mesh skirts are not part of the known geodetic-zero surface.
+    result.x = -1;
+    result.y = 1;
+    return result;
+  }
   result.x = 0;
   result.y = 0;
   const rectangle = bounds && Coordinates.rectangle(bounds);

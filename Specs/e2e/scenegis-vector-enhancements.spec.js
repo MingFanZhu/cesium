@@ -4,13 +4,20 @@ for (const world of ["平面", "球面"]) {
   test(`${world} material examples load local MVT, share sprites and retain batches while moving`, async ({
     page,
   }, info) => {
+    await page.setViewportSize({ width: 1061, height: 852 });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") {
+        errors.push(message.text());
+      }
+    });
     await page.goto(`/Test/vector-tiles/${world}样式增强.html`);
     await page.waitForFunction(
       () =>
         window.vectorEnhancements?.layer.ready &&
-        window.vectorEnhancements.layer.tilesLoaded,
+        window.vectorEnhancements.layer.tilesLoaded &&
+        (window.vectorEnhancements.viewer.scene.globe?.tilesLoaded ?? true),
     );
     await expect(page.locator("#status")).toContainText("点击地图");
     const initial = await page.evaluate(() => {
@@ -52,7 +59,8 @@ for (const world of ["平面", "球面"]) {
           window.vectorEnhancements.layer._patterns.texture,
       ),
     ).toBe(true);
-    await page.mouse.click(640, 400);
+    const viewport = page.viewportSize();
+    await page.mouse.click(viewport.width / 2, viewport.height / 2);
     await page.waitForFunction(
       () => window.vectorEnhancements.layer.tilesLoaded,
     );
@@ -76,6 +84,35 @@ for (const world of ["平面", "球面"]) {
         }),
       ),
     ).toEqual({});
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          const { viewer } = window.vectorEnhancements;
+          const remove = viewer.scene.postRender.addEventListener(() => {
+            remove();
+            resolve();
+          });
+          viewer.camera.moveBackward(100000);
+        }),
+    );
+    await page.waitForFunction(
+      () =>
+        window.vectorEnhancements.layer.tilesLoaded &&
+        (window.vectorEnhancements.viewer.scene.globe?.tilesLoaded ?? true),
+    );
+    const distant = await page.evaluate(() => {
+      const { viewer, layer } = window.vectorEnhancements;
+      return {
+        rendering: viewer.useDefaultRenderLoop,
+        visible: layer.statistics.visibleTiles,
+        rendered: layer.statistics.renderedTiles,
+        zoom: layer.statistics.zoom,
+      };
+    });
+    expect(distant.rendering).toBe(true);
+    expect(distant.visible).toBeLessThanOrEqual(32);
+    expect(distant.rendered).toBeGreaterThan(0);
+    expect(distant.zoom).toBeLessThan(15);
     expect(errors).toEqual([]);
   });
 }

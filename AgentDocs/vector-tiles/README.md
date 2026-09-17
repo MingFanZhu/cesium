@@ -10,8 +10,8 @@
 | Active extension plan    | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md) |
 | Completed extension plan | [总体计划](plans/2026-09-12-vector-tiles-extension.md)           |
 | Current phase            | None（四项技术完成，人工 gate pending）                          |
-| Active phase plan        | None；[最后阶段](plans/2026-09-17-v5e-icon-text-fit.md)          |
-| Last completed phase     | V5E（见本次提交）                                                |
+| Active phase plan        | None；[最后修复](plans/2026-09-17-enhancement-cover-fix.md)      |
+| Last completed phase     | 样式增强页选取范围修正（见本次提交）                             |
 | Active standalone plan   | None                                                             |
 | Architecture contact     | 当前 Agent                                                       |
 | Execution contact        | 当前 Agent                                                       |
@@ -61,9 +61,13 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 
 ## Current handoff
 
+负责人反馈球面增强页渲染报错，已复现默认椭球裙边扩大选取范围与示例固定高层级的问题。
+已按[修正计划](plans/2026-09-17-enhancement-cover-fix.md)完成修复，20 项 Globe Specs 和双世界 E2E 通过，
+用户当前页面已恢复。最新[修复评审](reviews/2026-09-17-enhancement-cover-fix-review.md) approved；四项人工视觉 gate 保持 pending。
+
 2026-09-17 负责人在 V3D1 checkpoint `2f14780d81` 后明确授权补充四类功能。
 当前执行[四类样式增强](plans/2026-09-17-style-enhancements-extension.md)，V3D2/V3D3 已独立提交；
-V5D 已独立提交，V5E 技术 completed。最新技术评审为 [V5E](reviews/2026-09-17-v5e-icon-fit-review.md)，
+V5D 已独立提交，V5E 技术 completed。四项汇总评审为 [V5E](reviews/2026-09-17-v5e-icon-fit-review.md)，
 本轮无 open discussion，四项最终人工视觉 gate pending。下列收口结论仅描述上一大阶段。
 
 - 2026-09-17 负责人明确验收通过，关闭 V3D1 贴地性能 gate 与当前矢量瓦片加载大阶段。
