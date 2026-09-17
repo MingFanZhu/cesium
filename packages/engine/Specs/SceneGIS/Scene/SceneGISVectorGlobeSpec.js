@@ -156,10 +156,27 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
       ),
     };
   }
-  it("places variable point anchors and picks their shifted glyphs on the Globe without new shaping during motion", async function () {
+  it("places variable anchors with fitted icons and picks their shifted glyphs on the Globe without new shaping during motion", async function () {
     const fonts = spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(
       encodeGlyphs(),
     );
+    const image = createCanvas(16, 16);
+    const context = image.getContext("2d");
+    context.fillStyle = "lime";
+    context.fillRect(0, 0, 16, 16);
+    spyOn(Resource.prototype, "fetchImage").and.resolveTo(image);
+    spyOn(Resource.prototype, "fetchJson").and.resolveTo({
+      shield: {
+        x: 0,
+        y: 0,
+        width: 16,
+        height: 16,
+        pixelRatio: 1,
+        content: [4, 4, 12, 12],
+        stretchX: [[4, 12]],
+        stretchY: [[4, 12]],
+      },
+    });
     const layer = add(
       [feature(1, [[2048, 2048]], "a"), feature(1, [[2048, 2048]], "b")],
       [
@@ -171,17 +188,27 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
             "text-font": ["Test"],
             "text-size": 24,
             "text-variable-anchor": ["left", "right"],
-            "text-radial-offset": 0.5,
+            "text-radial-offset": 0.7,
+            "icon-image": "shield",
+            "icon-text-fit": "both",
+            "icon-text-fit-padding": [2, 3, 2, 3],
           },
           paint: { "text-color": "red" },
         },
       ],
-      { glyphs: "https://example.invalid/{fontstack}/{range}.pbf" },
+      {
+        glyphs: "https://example.invalid/{fontstack}/{range}.pbf",
+        sprite: "https://example.invalid/sprite",
+      },
     );
     await ready(layer);
     const placed = layer._symbols._placed.filter((c) => c.placed?.text);
     expect(placed.map((c) => c.variableAnchor)).toEqual(["left", "right"]);
     for (const candidate of placed) {
+      expect(candidate.shaped.icon.quads.length).toBe(9);
+      expect(candidate.shaped.icon).toBe(
+        candidate.shaped.icons.get(candidate.variableAnchor),
+      );
       const corners = candidate.projected.text.quads[0].corners;
       const point = new Cartesian2(
         candidate.screen.x + corners.reduce((s, p) => s + p[0], 0) / 4,
@@ -201,6 +228,7 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
     ).toEqual(["left", "right"]);
     expect(layer.statistics.workerTasks).toBe(tasks);
     expect(fonts).toHaveBeenCalledTimes(1);
+    image.remove();
   });
   [false, true].forEach((logarithmic) => {
     it(`drapes and picks ordered translucent fills on the native ellipsoid (log ${logarithmic})`, async function () {

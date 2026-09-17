@@ -1,13 +1,13 @@
 # Extension Plan：四类样式增强
 
 - Type: extension plan
-- Status: active
+- Status: active（四项实现及技术 gate 完成；负责人视觉 gate pending）
 - Created / updated: 2026-09-17
 - Owner / architecture review: 当前 Agent，architecture/execution 自审，approved
 - Authorization: 负责人明确要求按建议补充纹理填充、动态要素状态、标注自动换位置、图标适配文字
 - Baseline: `feature/vector-tiles@2f14780d81`；前一大阶段保持 completed
 - Previous: [大阶段收口](../reviews/2026-09-17-milestone-closeout-review.md)
-- Current phase: V5D
+- Current phase: None；V5E 技术 completed，待四项人工验收
 - SGP: None planned
 
 ## 稳定目标与边界
@@ -20,12 +20,12 @@ Pattern 指 background/fill/line/fill-extrusion 的 sprite 重复纹理；它是
 
 ## 阶段路线
 
-| Phase | 目标           | 依赖与退出条件                                                           | 状态                                                        |
-| ----- | -------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
-| V3D2  | 纹理填充       | 共享 sprite、四类材质、双世界平面/贴地、pick/透明/生命周期及包验证       | completed `81340f7bef`；[计划](2026-09-17-v3d2-patterns.md) |
-| V3D3  | 动态要素状态   | V3D2 checkpoint；状态 API、依赖失效、Worker 代际、局部更新、拾取交互验证 | completed `d3a89475f3`；[计划](2026-09-17-v3d3-state.md)    |
-| V5D   | 标注自动换位置 | V3D3 checkpoint；候选锚点、稳定选择、碰撞与相机运动、双世界资格          | active；[计划](2026-09-17-v5d-variable-anchors.md)          |
-| V5E   | 图标适配文字   | V5D checkpoint；fit 模式/padding、sprite content/stretch、图文避让与拾取 | planned                                                     |
+| Phase | 目标           | 依赖与退出条件                                                           | 状态                                                               |
+| ----- | -------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| V3D2  | 纹理填充       | 共享 sprite、四类材质、双世界平面/贴地、pick/透明/生命周期及包验证       | completed `81340f7bef`；[计划](2026-09-17-v3d2-patterns.md)        |
+| V3D3  | 动态要素状态   | V3D2 checkpoint；状态 API、依赖失效、Worker 代际、局部更新、拾取交互验证 | completed `d3a89475f3`；[计划](2026-09-17-v3d3-state.md)           |
+| V5D   | 标注自动换位置 | V3D3 checkpoint；候选锚点、稳定选择、碰撞与相机运动、双世界资格          | completed `1bf28c4b1f`；[计划](2026-09-17-v5d-variable-anchors.md) |
+| V5E   | 图标适配文字   | V5D checkpoint；fit 模式/padding、sprite content/stretch、图文避让与拾取 | completed（本次提交）；[计划](2026-09-17-v5e-icon-text-fit.md)     |
 
 一次只激活一个 phase，进入时细化源码设计。技术验证与自审后各自形成独立本地 checkpoint，再实施下一项。
 四项由本次授权持续推进；最终提供 Test 人工入口，负责人对新画面的验收单独记录，不以技术提交冒充人工通过。
@@ -38,3 +38,10 @@ Pattern 指 background/fill/line/fill-extrusion 的 sprite 重复纹理；它是
 - Shader/Worker 经现有 build/release/installed package 验证；公共 API 增量运行完整类型生成与检查。
 - 不添加 upstream-owned 修改；确有需求再按 SGP/ADR 重新审计。
 - 四项全部实现并完成技术验证后汇总兼容矩阵与未完成边界，交付负责人最终视觉验收。
+
+## 当前交付
+
+四项已实现并通过技术自审，各阶段保持独立提交。最终 227 项 vector Specs、2 项双世界增强页 E2E、
+完整 engine/root/release 和三个实际 package 入口验证通过；公共状态 API 已在 V3D3 完成 build-ts/tsc。
+最新 [V5E review](../reviews/2026-09-17-v5e-icon-fit-review.md) 汇总剩余边界与人工 gate。
+负责人尚未验收本轮新画面，不自动合并或推送；不启动其他延期能力。

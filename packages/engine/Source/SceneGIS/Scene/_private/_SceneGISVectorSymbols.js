@@ -334,9 +334,13 @@ function paired(text, icon, layout) {
 
 function selectAnchor(candidate, anchor) {
   const text = candidate.shaped.variants?.get(anchor);
-  if (text && candidate.shaped.text !== text) {
+  const icon = candidate.shaped.icons?.get(anchor) ?? candidate.shaped.icon;
+  if (
+    text &&
+    (candidate.shaped.text !== text || candidate.shaped.icon !== icon)
+  ) {
     // Never mutate a shape container borrowed from the published placement.
-    candidate.shaped = { ...candidate.shaped, text };
+    candidate.shaped = { ...candidate.shaped, text, icon };
   }
 }
 

@@ -328,7 +328,65 @@ try {
         scene.context.readPixels({ x: 20, y: 32, width: 1, height: 1 }),
       );
       layer.removeFeatureState(stateTarget);
-      const patternLayer = scene.primitives.add(
+      const fitLayer = scene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene,
+          sources: { test: symbolSource },
+          style: {
+            version: 8,
+            glyphs: "/glyph.pbf?f={fontstack}&r={range}",
+            sprite: "/pattern",
+            sources: {
+              test: {
+                type: "vector",
+                tiles: ["/unused/{z}/{x}/{y}"],
+                maxzoom: 0,
+              },
+            },
+            layers: [
+              {
+                id: "fit",
+                type: "symbol",
+                source: "test",
+                "source-layer": "labels",
+                filter: ["==", ["geometry-type"], "Point"],
+                layout: {
+                  "text-field": "A",
+                  "text-font": ["Test"],
+                  "text-size": 24,
+                  "icon-image": "shield",
+                  "icon-text-fit": "both",
+                  "icon-text-fit-padding": [4, 4, 4, 4],
+                  "text-variable-anchor": ["center", "top"],
+                },
+                paint: { "text-color": "red" },
+              },
+            ],
+          },
+        }),
+      );
+      const fitStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - fitStart > 10000) {
+          throw new Error("Fitted icon package preparation did not finish.");
+        }
+      } while (!fitLayer.tilesLoaded);
+      const fitted = fitLayer._symbols._placed.find((c) => c.placed?.icon);
+      const fitTexture = fitLayer._symbols.assets.sprite.texture;
+      const fit = {
+        quads: fitted.shaped.icon.quads.length,
+        paired:
+          fitted.shaped.icon === fitted.shaped.icons.get(fitted.variableAnchor),
+        color: Array.from(
+          scene.context.readPixels({ x: 19, y: 31, width: 1, height: 1 }),
+        ),
+        picked: scene.pick(new C.Cartesian2(19, 32), 1, 1)?.id.styleLayer,
+      };
+      scene.primitives.remove(fitLayer);
+      fit.released = fitTexture.isDestroyed();
+      const materialLayer = scene.primitives.add(
         new C.SceneGISVectorTileLayer({
           scene,
           sources: { test: symbolSource },
@@ -357,13 +415,13 @@ try {
         if (performance.now() - patternStart > 10000) {
           throw new Error("Pattern package preparation did not finish.");
         }
-      } while (!patternLayer.tilesLoaded);
+      } while (!materialLayer.tilesLoaded);
       const patternColor = Array.from(
         scene.context.readPixels({ x: 20, y: 32, width: 1, height: 1 }),
       );
-      const patternAtlas = patternLayer._patterns.texture;
-      const patternBatch = patternLayer._drawOrder[0]._pattern;
-      scene.primitives.remove(patternLayer);
+      const patternAtlas = materialLayer._patterns.texture;
+      const patternBatch = materialLayer._drawOrder[0]._pattern;
+      scene.primitives.remove(materialLayer);
       const patternReleased = patternAtlas.isDestroyed();
       world.terrainProvider = {
         tilingScheme: world.tilingScheme,
@@ -706,6 +764,7 @@ try {
       return {
         mode,
         stateColor,
+        fit,
         pattern: {
           color: patternColor,
           batch: patternBatch,
@@ -761,6 +820,10 @@ try {
     }, mode);
     assert(result.layers > 0 && result.features > 0);
     assert.deepEqual(result.stateColor, [0, 255, 0, 255]);
+    assert.equal(result.fit.quads, 9);
+    assert(result.fit.paired && result.fit.released);
+    assert.equal(result.fit.picked, "fit");
+    assert(result.fit.color[0] > 0 && result.fit.color[1] > 0);
     assert(result.pattern.batch && result.pattern.released);
     assert(result.pattern.color[0] > 0 && result.pattern.color[1] > 0);
     assert(

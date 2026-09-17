@@ -6,6 +6,20 @@
 
 ## 当前交付范围
 
+2026-09-17 四类样式增强已实现，覆盖 Planar/Globe；本轮技术资格与人工 gate 见
+[增强计划](../../AgentDocs/vector-tiles/plans/2026-09-17-style-enhancements-extension.md)。
+
+| 类别     | 支持内容                                                 | 契约与限制                                                                           |
+| -------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 重复纹理 | background/fill/line/fill-extrusion pattern              | 共享 sprite；不含跨整数 zoom crossfade 或跨 tile 道路纹理相位拼接                    |
+| 动态状态 | paint feature-state/global-state、五个 Layer 状态 API    | 只重建受影响的几何批次；标注 paint 复用排版；不支持状态 layout/filter                |
+| 自动换位 | text-variable-anchor、text-radial-offset                 | 点标注，Worker 候选与稳定碰撞选择；沿线换位未接入                                    |
+| 适配牌面 | icon-text-fit、padding、sprite content/stretchX/stretchY | 普通 RGBA、多段伸缩、与可变 anchor 配对；不含 SDF icon、textFitWidth/Height 比例规则 |
+
+四项本地入口：[平面样式增强](../../Test/vector-tiles/平面样式增强.html)、
+[球面样式增强](../../Test/vector-tiles/球面样式增强.html)。图文设置见 [标注](VectorTileSymbols.md)。
+下列阶段条目保留历史交付范围，不代表当前支持数量。
+
 V1 提供独立的 MVT 数据、坐标、URL source 与 Style v8 子集计算前端。
 V2 在此基础上提供无 terrainProvider 的平面批量 renderer；不依赖 Cesium experimental MVT。
 `Test/vector-tiles/planar-city.html` 的实际 flat 画面已于 2026-09-13 通过项目负责人验收。

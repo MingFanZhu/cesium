@@ -9,9 +9,9 @@
 | Planning model           | `extension`                                                      |
 | Active extension plan    | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md) |
 | Completed extension plan | [总体计划](plans/2026-09-12-vector-tiles-extension.md)           |
-| Current phase            | V5D                                                              |
-| Active phase plan        | [标注自动换位置](plans/2026-09-17-v5d-variable-anchors.md)       |
-| Last completed phase     | V3D3 `d3a89475f3`                                                |
+| Current phase            | None（四项技术完成，人工 gate pending）                          |
+| Active phase plan        | None；[最后阶段](plans/2026-09-17-v5e-icon-text-fit.md)          |
+| Last completed phase     | V5E（见本次提交）                                                |
 | Active standalone plan   | None                                                             |
 | Architecture contact     | 当前 Agent                                                       |
 | Execution contact        | 当前 Agent                                                       |
@@ -63,7 +63,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 
 2026-09-17 负责人在 V3D1 checkpoint `2f14780d81` 后明确授权补充四类功能。
 当前执行[四类样式增强](plans/2026-09-17-style-enhancements-extension.md)，V3D2/V3D3 已独立提交；
-V5D active，V5E planned。最新技术评审为 [V3D3](reviews/2026-09-17-v3d3-state-review.md)，
+V5D 已独立提交，V5E 技术 completed。最新技术评审为 [V5E](reviews/2026-09-17-v5e-icon-fit-review.md)，
 本轮无 open discussion，四项最终人工视觉 gate pending。下列收口结论仅描述上一大阶段。
 
 - 2026-09-17 负责人明确验收通过，关闭 V3D1 贴地性能 gate 与当前矢量瓦片加载大阶段。

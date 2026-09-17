@@ -29,6 +29,17 @@ for (const world of ["平面", "球面"]) {
         .map((c) => c.variableAnchor),
     );
     expect(new Set(anchors).size).toBeGreaterThanOrEqual(3);
+    const fitted = await page.evaluate(() =>
+      window.vectorEnhancements.layer._symbols._placed
+        .filter((c) => c.placed?.text)
+        .map((c) => ({
+          quads: c.shaped.icon.quads.length,
+          paired: c.shaped.icon === c.shaped.icons.get(c.variableAnchor),
+          width: c.shaped.icon.box[2] - c.shaped.icon.box[0],
+        })),
+    );
+    expect(fitted.every((c) => c.quads === 9 && c.paired)).toBe(true);
+    expect(new Set(fitted.map((c) => c.width)).size).toBeGreaterThanOrEqual(3);
     await page.screenshot({ path: info.outputPath(`${world}-patterns.png`) });
     await page.getByRole("button", { name: "俯视", exact: true }).click();
     await page.waitForFunction(

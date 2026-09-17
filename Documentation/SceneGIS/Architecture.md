@@ -814,6 +814,8 @@ budgeted placement 与 current-camera drawing；静态 UV/paint/pick 和动态 g
 只上传改变的范围。短期避让延迟与保守碰撞造成的密度差异是显式资格边界。
 按 [ADR-0077](Decisions/ADR-0077-variable-symbol-anchors.md)，点标注可变 anchor 的候选在 Worker
 缓存，主线程按上次成功位置及声明顺序试放；只有最终选择写入碰撞网格，异步布局不得修改已发布 shape。
+按 [ADR-0078](Decisions/ADR-0078-icon-text-fit.md)，fit icon 的 content/stretch 切片与 UV 在 Worker
+准备，尺寸缩放复用既有 shaping cache。逻辑文字边界独立于 SDF border，变量 anchor 的图文选择必须一致。
 
 ## 验证架构
 

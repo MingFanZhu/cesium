@@ -26,5 +26,15 @@
     "width": 32,
     "height": 32,
     "pixelRatio": 1
+  },
+  "shield": {
+    "x": 128,
+    "y": 0,
+    "width": 32,
+    "height": 32,
+    "pixelRatio": 1,
+    "content": [6, 6, 26, 26],
+    "stretchX": [[10, 22]],
+    "stretchY": [[10, 22]]
   }
 }

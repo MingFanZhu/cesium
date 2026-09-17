@@ -4,7 +4,8 @@ import { URL } from "node:url";
 import { deflateSync } from "node:zlib";
 
 // Authored repeating materials, separate from the neighboring atlas regions.
-const pixels = Buffer.alloc((128 * 4 + 1) * 32);
+const width = 160;
+const pixels = Buffer.alloc((width * 4 + 1) * 32);
 const colors = [
   [220, 227, 218],
   [65, 150, 194],
@@ -12,7 +13,7 @@ const colors = [
   [169, 119, 91],
 ];
 for (let y = 0; y < 32; y++) {
-  for (let x = 0; x < 128; x++) {
+  for (let x = 0; x < width; x++) {
     const region = Math.floor(x / 32),
       u = x % 32;
     let color = colors[region];
@@ -27,7 +28,17 @@ for (let y = 0; y < 32; y++) {
     if (mark) {
       color = region === 3 ? [53, 76, 91] : [245, 249, 245];
     }
-    pixels.set([...color, 255], y * (128 * 4 + 1) + 1 + x * 4);
+    let alpha = 255;
+    if (region === 4) {
+      const rounded = (inset, radius) => {
+        const cx = Math.max(inset + radius, Math.min(31 - inset - radius, u));
+        const cy = Math.max(inset + radius, Math.min(31 - inset - radius, y));
+        return Math.hypot(u - cx, y - cy) <= radius;
+      };
+      color = rounded(4, 4) ? [252, 249, 237] : [37, 63, 91];
+      alpha = rounded(2, 6) ? 255 : 0;
+    }
+    pixels.set([...color, alpha], y * (width * 4 + 1) + 1 + x * 4);
   }
 }
 function chunk(type, data) {
@@ -46,7 +57,7 @@ function chunk(type, data) {
   return Buffer.concat([length, body, checksum]);
 }
 const header = Buffer.alloc(13);
-header.writeUInt32BE(128);
+header.writeUInt32BE(width);
 header.writeUInt32BE(32, 4);
 header[8] = 8;
 header[9] = 6;
@@ -62,12 +73,24 @@ await writeFile(
 await writeFile(
   new URL("pattern-sprite.json", import.meta.url),
   `${JSON.stringify(
-    Object.fromEntries(
-      ["grid", "water", "arrow", "windows"].map((name, i) => [
-        name,
-        { x: i * 32, y: 0, width: 32, height: 32, pixelRatio: 1 },
-      ]),
-    ),
+    {
+      ...Object.fromEntries(
+        ["grid", "water", "arrow", "windows"].map((name, i) => [
+          name,
+          { x: i * 32, y: 0, width: 32, height: 32, pixelRatio: 1 },
+        ]),
+      ),
+      shield: {
+        x: 128,
+        y: 0,
+        width: 32,
+        height: 32,
+        pixelRatio: 1,
+        content: [6, 6, 26, 26],
+        stretchX: [[10, 22]],
+        stretchY: [[10, 22]],
+      },
+    },
     null,
     2,
   )}\n`,

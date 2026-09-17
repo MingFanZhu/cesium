@@ -50,6 +50,8 @@ const profile = {
       "text-max-angle",
       "icon-image",
       "icon-size",
+      "icon-text-fit",
+      "icon-text-fit-padding",
       "icon-anchor",
       "icon-offset",
       "icon-padding",

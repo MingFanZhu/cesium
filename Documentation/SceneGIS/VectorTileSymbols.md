@@ -47,7 +47,7 @@ Style 的 `glyphs`、`sprite` 是只读配置，Style 不负责请求。
 
 文字排版以横排中文和普通 Latin 为首轮验收范围；保留完整词的英文换行、中文逐字断行和显式换行。
 不支持 Polygon point placement、vertical/RTL/复杂 shaping、rich text、text-variable-anchor-offset、
-icon-text-fit、SDF icon 或 fade transition。不支持的显式属性在构造时拒绝；
+SDF icon 或 fade transition。不支持的显式属性在构造时拒绝；
 Polygon geometry、缺字、已识别的复杂 shaping 文本在运行时提供诊断。
 该范围不承诺与 MapLibre 的自动均衡换行、复杂字体 shaping 或任意宽 halo 逐像素相同。
 
@@ -73,10 +73,39 @@ GPU 使用 RTE 和 DPR，glyph 不按基础瓦片区域裁切。
 point placement 支持 `text-variable-anchor`（九种标准位置）和 `text-radial-offset`（em）。
 每组候选由 Worker 一次排版，使用各自 anchor 的 auto justification。碰撞优先保留上次成功的位置，
 然后按数组顺序尝试；显式 allow-overlap 仍先寻找无碰撞位置。仅最终位置进入碰撞网格，
-渲染、terrain 和 pick 使用相同选择。普通 icon 保持自身位置，text/icon optional 继续生效。
+渲染、terrain 和 pick 使用相同选择。普通 icon 保持自身位置；启用 icon-text-fit 时牌面跟随文字位置，text/icon optional 继续生效。
 radial 优先于 text-offset；可变 anchor 的普通 offset 使用绝对分量沿 anchor 方向应用，
 固定 anchor 的普通 offset 保持原语义。对角 radial 按 sqrt(2) 分配，baseline correction 参见
 [ADR-0077](Decisions/ADR-0077-variable-symbol-anchors.md)。不支持沿线可变 anchor 或 anchor-offset collection。
+
+## 图标适配文字
+
+`icon-text-fit` 支持 none/width/height/both，`icon-text-fit-padding` 为 top/right/bottom/left 四边逻辑像素。
+以文字 advance 和 line-height 定义内容边界，排除 SDF border。fit 忽略 icon-anchor，
+在指定轴包住文字及 padding，其他轴使用原图尺寸并居中；icon-offset 保留。
+目标依照当前 text-size 计算后受 icon-size 缩放，stretch 中的固定像素区域按 pixelRatio 保留，避免压扁边框。
+
+sprite 可提供 `content: [left, top, right, bottom]` 与 `stretchX/stretchY: [[start, end], ...]`，
+坐标是原图像素。支持多个有序、不重叠的伸缩区间；content 必须非空、在图内且与各轴伸缩区域相交。
+未提供 metadata 时整图伸缩。过小目标保留固定内容的最小尺寸；不支持 `textFitWidth/textFitHeight` 比例规则，
+使用时给出错误，不静默忽略。普通 RGBA 的透明角落仍不渲染、不拾取。
+
+Worker 准备切片 UV 和系数，主线程复用现有 normalized shape 缓存按当前字号缩放。
+每个 variable anchor 有匹配的 fitted icon，碰撞、terrain、画面和 pick 共用。示例：
+
+```js
+const layout = {
+  "text-field": ["get", "name"],
+  "text-variable-anchor": ["top", "bottom", "left", "right"],
+  "text-radial-offset": 2.4,
+  "icon-image": "shield",
+  "icon-text-fit": "both",
+  "icon-text-fit-padding": [4, 6, 4, 6],
+};
+```
+
+沿线文字可以弯曲，牌面保持刚性。公共契约见 [ADR-0078](Decisions/ADR-0078-icon-text-fit.md)；
+字体、floor layout zoom 和地形曲面限制仍适用。
 
 ## 沿线、路牌与箭头
 

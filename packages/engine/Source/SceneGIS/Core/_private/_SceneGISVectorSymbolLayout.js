@@ -144,6 +144,12 @@ const SceneGISVectorSymbolLayout = {
         -maxWidth * anchor[0] + offset[0] * size,
         maxWidth * (1 - anchor[0]) + offset[0] * size,
       ],
+      logicalBox: [
+        -maxWidth * anchor[0] + offset[0] * size,
+        -lines.length * lineHeight * anchor[1] + offset[1] * size,
+        maxWidth * (1 - anchor[0]) + offset[0] * size,
+        lines.length * lineHeight * (1 - anchor[1]) + offset[1] * size,
+      ],
     };
   },
   icon(image, page, layout) {

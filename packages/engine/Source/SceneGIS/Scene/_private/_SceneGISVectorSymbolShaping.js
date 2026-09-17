@@ -1,4 +1,5 @@
 import RuntimeError from "../../../Core/RuntimeError.js";
+import IconFit from "../../Core/_private/_SceneGISVectorIconFit.js";
 
 function scaled(shape, scale, assets) {
   if (scale <= 0) {
@@ -7,6 +8,7 @@ function scaled(shape, scale, assets) {
   return {
     box: shape.box?.map((value) => value * scale),
     span: shape.span?.map((value) => value * scale),
+    logicalBox: shape.logicalBox?.map((value) => value * scale),
     quads: shape.quads.map((quad) => ({
       ...quad,
       page:
@@ -107,9 +109,25 @@ SceneGISVectorSymbolShaping.prototype.get = function (
   if (!record.result) {
     return undefined;
   }
+  const icon = (shape) =>
+    shape.fit
+      ? scaled(
+          IconFit.scale(shape, layout["text-size"] / 24, layout["icon-size"]),
+          1,
+          this.assets,
+        )
+      : scaled(shape, layout["icon-size"], this.assets);
   return {
     text: scaled(record.result.text, layout["text-size"] / 24, this.assets),
-    icon: scaled(record.result.icon, layout["icon-size"], this.assets),
+    icon: icon(record.result.icon),
+    icons:
+      record.result.icons &&
+      new Map(
+        [...record.result.icons].map(([anchor, shape]) => [
+          anchor,
+          icon(shape),
+        ]),
+      ),
     variants:
       record.result.variants &&
       new Map(

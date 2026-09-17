@@ -1200,6 +1200,89 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(scene.pick(new Cartesian2(24, 24), 1, 1)).toBeUndefined();
     expect(layer.statistics.glyphRanges).toBe(0);
   });
+  it("fits sliced icons to variable text, retains transparent corners and reuses Worker/GPU resources during zoom", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([feature("a", 2048, "AA"), feature("b", 2048, "AA", 2)]),
+    );
+    const fonts = spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(
+      bytes,
+    );
+    const metadata = spyOn(Resource.prototype, "fetchJson").and.resolveTo({
+      shield: {
+        x: 0,
+        y: 0,
+        width: 16,
+        height: 16,
+        pixelRatio: 1,
+        content: [2, 2, 14, 14],
+        stretchX: [[4, 12]],
+        stretchY: [[4, 12]],
+      },
+    });
+    image = createCanvas(16, 16);
+    const context = image.getContext("2d");
+    context.fillStyle = "lime";
+    context.fillRect(0, 0, 16, 16);
+    context.clearRect(0, 0, 3, 3);
+    spyOn(Resource.prototype, "fetchImage").and.resolveTo(image);
+    const layer = add([
+      definition("fit", {
+        "text-size": ["interpolate", ["linear"], ["zoom"], 0, 10, 5, 18],
+        "text-variable-anchor": ["left", "right"],
+        "text-radial-offset": 0.8,
+        "icon-image": "shield",
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": [2, 2, 2, 2],
+      }),
+    ]);
+    await loaded(layer);
+    const placed = layer._symbols._placed.filter((c) => c.placed?.text);
+    expect(placed.length).toBe(2);
+    expect(placed.map((c) => c.variableAnchor)).toEqual(["left", "right"]);
+    for (const c of placed) {
+      expect(c.shaped.icon).toBe(c.shaped.icons.get(c.variableAnchor));
+      expect(c.shaped.icon.quads.length).toBe(9);
+      expect(scene.pick(glyphCenter(c))?.id.featureId).toBe(
+        c.identity.featureId,
+      );
+      const box = c.shaped.icon.box;
+      const point = new Cartesian2(
+        c.screen.x + (box[0] + box[2]) / 2,
+        c.screen.y + box[3] - 1,
+      );
+      expect(scene.pick(point, 1, 1)?.id.featureId).toBe(c.identity.featureId);
+      expect(pixel(Math.floor(point.x), Math.floor(point.y))).toEqual([
+        0, 255, 0, 255,
+      ]);
+      const hole = new Cartesian2(
+        c.screen.x + box[0] + 0.5,
+        c.screen.y + box[1] + 0.5,
+      );
+      expect(scene.pick(hole, 1, 1)).toBeUndefined();
+    }
+    const groups = [...layer._symbols._groups.values()];
+    const buffers = groups.map((b) => b.resources._staticBuffer);
+    const atlas = layer._symbols.assets.sprite.texture;
+    const tasks = layer.statistics.workerTasks;
+    const width = placed[0].shaped.icon.box[2] - placed[0].shaped.icon.box[0];
+    scene.camera.position.z *= 0.95;
+    await loaded(layer);
+    const resized = layer._symbols._placed.find((c) => c.placed?.text);
+    expect(
+      resized.shaped.icon.box[2] - resized.shaped.icon.box[0],
+    ).toBeGreaterThan(width);
+    expect(
+      [...layer._symbols._groups.values()].map(
+        (b) => b.resources._staticBuffer,
+      ),
+    ).toEqual(buffers);
+    expect(layer.statistics.workerTasks).toBe(tasks);
+    expect(fonts).toHaveBeenCalledTimes(1);
+    expect(metadata).toHaveBeenCalledTimes(1);
+    scene.primitives.remove(layer);
+    expect(atlas.isDestroyed()).toBeTrue();
+    expect(buffers.every((b) => b.isDestroyed())).toBeTrue();
+  });
   it("publishes the base while glyphs are pending and does no loading during pick replay", async function () {
     spyOn(source, "requestTile").and.resolveTo(tile());
     let complete;

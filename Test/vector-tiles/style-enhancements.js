@@ -140,8 +140,11 @@ export default function start(globe) {
           "text-font": ["SceneGIS Test Noto Subset"],
           "text-size": 18,
           "text-variable-anchor": ["top", "bottom", "left", "right"],
-          "text-radial-offset": 1.4,
+          "text-radial-offset": 2.4,
           "text-justify": "auto",
+          "icon-image": "shield",
+          "icon-text-fit": "both",
+          "icon-text-fit-padding": [4, 6, 4, 6],
         },
         paint: {
           "text-color": "#132a39",

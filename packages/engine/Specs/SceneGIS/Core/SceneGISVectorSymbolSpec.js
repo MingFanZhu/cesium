@@ -88,11 +88,11 @@ describe("SceneGIS/Core/SceneGISVectorSymbol", function () {
     expect(l["icon-size"]).toBe(1.5);
     expect(l["text-offset"]).toEqual([0, 0]);
   });
-  it("rejects unimplemented rich text, text-fit and anchor-offset collections at construction", function () {
+  it("rejects unimplemented rich text and anchor-offset collections at construction", function () {
     for (const l of [
       { "text-variable-anchor-offset": ["top", [0, 1]] },
       { "text-field": ["format", "A", {}] },
-      { "icon-text-fit": "both" },
+      { "icon-text-fit": "invalid" },
     ]) {
       expect(
         () => new SceneGISVectorTileStyle(input(l)),

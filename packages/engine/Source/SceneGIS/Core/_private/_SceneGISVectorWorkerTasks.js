@@ -11,6 +11,7 @@ import prepareBatch from "./_SceneGISVectorBatchGeometry.js";
 import prepareSymbols from "./_SceneGISVectorSymbolPreparation.js";
 import Glyphs from "./_SceneGISVectorGlyphs.js";
 import Layout from "./_SceneGISVectorSymbolLayout.js";
+import IconFit from "./_SceneGISVectorIconFit.js";
 import prepareGlobeGeometry from "./_SceneGISVectorGlobeGeometry.js";
 import TerrainIndex from "./_SceneGISVectorGlobeTerrainIndex.js";
 import extrusionTerrain from "./_SceneGISVectorExtrusionTerrain.js";
@@ -92,11 +93,28 @@ function createVectorTaskHandler() {
                   ]),
                 )
               : undefined;
+            const shapedText = Layout.text(text, layout, lookup);
+            const icon = (shaped) =>
+              item.image &&
+              shaped.quads.length &&
+              (layout["icon-text-fit"] ?? "none") !== "none"
+                ? IconFit.prepare(item.image, "sprite", layout, shaped)
+                : Layout.icon(item.image, "sprite", layout);
+            const shapedIcon = icon(shapedText);
             return {
               key: item.key,
-              text: Layout.text(text, layout, lookup),
+              text: shapedText,
               variants,
-              icon: Layout.icon(item.image, "sprite", layout),
+              icon: shapedIcon,
+              icons:
+                shapedIcon.fit && variants
+                  ? new Map(
+                      [...variants].map(([anchor, shaped]) => [
+                        anchor,
+                        icon(shaped),
+                      ]),
+                    )
+                  : undefined,
             };
           } catch (error) {
             return { key: item.key, error: error.message };
