@@ -238,3 +238,7 @@ G2 已获授权并 active：[透明地表阶段](2026-09-14-g2-surface-transpare
 G2 技术资格通过，负责人要求平面也支持透明，按推进授权 completed；独立 checkpoint 后开展 Planar 后继阶段。
 G2 checkpoint：`9e33cbd279`。当前 [G3](2026-09-14-g3-planar-transparency.md) active，限定平面当前可见地表的独立颜色透明。
 G3 技术资格通过，负责人确认并要求继续整理示例，按推进授权 completed，先独立 checkpoint。
+G3 checkpoint：`1e84903262`。当前 [E2](2026-09-14-e2-example-opacity-gui.md) active，仅补充上手示例 lil-gui 矢量透明度控件。
+E2 实现及技术自审通过，3 项上手 E2E 和双世界实际页面检查通过；负责人视觉 gate pending，验收后独立 checkpoint。
+
+2026-09-17 负责人授权建筑拉伸，E2 按推进授权 completed；先独立 checkpoint，再进入样式扩展。

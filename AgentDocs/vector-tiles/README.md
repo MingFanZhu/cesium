@@ -8,8 +8,8 @@
 | Status                 | `active`                                               |
 | Planning model         | `extension`                                            |
 | Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `G3 completed`                                         |
-| Active phase plan      | [G3](plans/2026-09-14-g3-planar-transparency.md)       |
+| Current phase          | `E2 completed`                                         |
+| Active phase plan      | [E2](plans/2026-09-14-e2-example-opacity-gui.md)       |
 | Active standalone plan | None                                                   |
 | Architecture contact   | 当前 Agent                                             |
 | Execution contact      | 当前 Agent                                             |
@@ -78,7 +78,7 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
   负责人已明确采用 MapLibre 示例来源，Mapbox 官方数据访问不再是阶段前提。
 - 用户已明确：以 MapLibre 图形能力为目标，自有地图图元避免大量修改 Cesium native primitives。
   正式边界见 [ADR-0061](../../Documentation/SceneGIS/Decisions/ADR-0061-owned-vector-tile-primitives.md)。
-- Latest review：[G3 review](reviews/2026-09-14-g3-planar-transparency-review.md)；
+- Latest review：[E2 review](reviews/2026-09-14-e2-example-opacity-gui-review.md)；
   自有命令继续复用 Cesium pick 派生；V3B0-R04 的临时线数学桥接已移除。
 - V3C0 checkpoint：`0bec9cbe56`，公开地图阶段独立提交和 hook 通过。
 - Resolved discussion：[标注架构](discussions/2026-09-13-symbol-architecture.md)；
@@ -230,3 +230,11 @@ linear/log 多视锥地形单次颜色贡献、MSAA/HDR、resize、pick 与资�
 本阶段全部 SceneGIS-owned，无新增 SGP；负责人视觉 gate pending，未形成 G3 checkpoint。
 
 负责人确认并要求在上手示例使用 lil-gui 控制矢量不透明度，G3 按推进授权关闭 gate，先独立 checkpoint。
+
+G3 checkpoint：`1e84903262`。当前 [E2](plans/2026-09-14-e2-example-opacity-gui.md) 为两个中文上手示例加入 lil-gui 矢量透明度控件。
+
+E2 技术自审通过：两个示例直接绑定 Layer.opacity，3 项上手 E2E 通过，实际公开地图 GUI 与半透明效果已检查。
+按负责人修正保留 lil-gui 默认样式，说明与面板独立分块。
+无产品 runtime、上游文件或 SGP 变更；待负责人视觉验收后独立 checkpoint。
+
+2026-09-17 负责人授权推进建筑拉伸，E2 按推进授权完成，先建立独立 checkpoint。

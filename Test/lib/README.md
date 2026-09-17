@@ -5,9 +5,9 @@
 新增库时在下表登记固定版本、上游来源、许可证和使用页面，并将对应许可证文本与分发文件一同提交。
 禁止提交无法确认许可证的文件、远程动态 loader、access token 或经过本地修改却未说明来源的 minified bundle。
 
-| Library | Version | Upstream URL                            | License | Used by                                                               |
-| ------- | ------- | --------------------------------------- | ------- | --------------------------------------------------------------------- |
-| lil-gui | 0.21.0  | https://github.com/georgealways/lil-gui | MIT     | `Test/平面环境.html`, `Test/高级环境.html`, `Test/高级环境-平面.html` |
+| Library | Version | Upstream URL                            | License | Used by                                                                                                                                                       |
+| ------- | ------- | --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| lil-gui | 0.21.0  | https://github.com/georgealways/lil-gui | MIT     | `Test/平面环境.html`, `Test/高级环境.html`, `Test/高级环境-平面.html`, `Test/vector-tiles/examples/平面地图.html`, `Test/vector-tiles/examples/球面地图.html` |
 
 ## lil-gui provenance
 

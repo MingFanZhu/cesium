@@ -88,6 +88,28 @@ for (const world of ["planar", "globe"]) {
     expect(state.pick).toBe("openmaptiles");
     expect(state.fps).toBe(true);
     expect(state.stats.failedTiles + state.stats.symbolFailures).toBe(0);
+    await expect(page.locator("#controls .lil-gui")).toHaveCount(1);
+    const opacity = page.getByRole("textbox", { name: "矢量不透明度" });
+    await expect(opacity).toHaveValue("1");
+    for (const value of [0.5, 0, 1]) {
+      await opacity.fill(String(value));
+      await opacity.press("Enter");
+      await page.waitForFunction(
+        (value) => window.vectorExample.layer.opacity === value,
+        value,
+      );
+      const pickedSource = await page.evaluate(async () => {
+        const C = await import("/Build/CesiumUnminified/index.js");
+        const scene = window.vectorExample.viewer.scene;
+        return scene.pick(
+          new C.Cartesian2(
+            scene.canvas.clientWidth / 2,
+            scene.canvas.clientHeight / 2,
+          ),
+        )?.id?.source;
+      });
+      expect(pickedSource).toBe(value === 0 ? undefined : "openmaptiles");
+    }
     expect(requests.some((url) => url.endsWith("/environment.js"))).toBe(false);
     expect(unexpected).toEqual([]);
     await expect(
@@ -98,7 +120,10 @@ for (const world of ["planar", "globe"]) {
       window.dispatchEvent(
         new PageTransitionEvent("pagehide", { persisted: true }),
       );
-      const cached = !viewer.isDestroyed() && !layer.isDestroyed();
+      const cached =
+        !viewer.isDestroyed() &&
+        !layer.isDestroyed() &&
+        document.querySelectorAll("#controls .lil-gui").length === 1;
       window.dispatchEvent(
         new PageTransitionEvent("pagehide", { persisted: false }),
       );
@@ -109,9 +134,15 @@ for (const world of ["planar", "globe"]) {
         cached,
         destroyed: viewer.isDestroyed() && layer.isDestroyed(),
         canvases: document.querySelectorAll("canvas").length,
+        guis: document.querySelectorAll("#controls .lil-gui").length,
       };
     });
-    expect(lifetime).toEqual({ cached: true, destroyed: true, canvases: 0 });
+    expect(lifetime).toEqual({
+      cached: true,
+      destroyed: true,
+      canvases: 0,
+      guis: 0,
+    });
     expect(errors).toEqual([]);
   });
 }
@@ -125,6 +156,7 @@ test("shows a public catalog failure and keeps the offline test accessible", asy
   await page.goto("/Test/vector-tiles/examples/球面地图.html");
   await expect(page.locator("#error")).toContainText("503");
   expect(await page.evaluate(() => window.vectorExample.layer)).toBeUndefined();
+  await expect(page.locator("#controls .lil-gui")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "离线测试" })).toHaveAttribute(
     "href",
     "../globe-map.html?provider=local",

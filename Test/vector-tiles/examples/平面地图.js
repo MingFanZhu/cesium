@@ -1,5 +1,8 @@
 /* global document, window */
 import * as Cesium from "/Build/CesiumUnminified/index.js";
+import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
+
+let gui;
 
 // 1. Create the EPSG:3857 planar world.
 const halfWorld = Math.PI * 6378137;
@@ -47,8 +50,12 @@ viewer.camera.setView({
 
 // Viewer owns the added layer and releases its Workers and GPU resources.
 window.addEventListener("pagehide", (event) => {
-  if (!event.persisted && !viewer.isDestroyed()) {
-    viewer.destroy();
+  if (!event.persisted) {
+    gui?.destroy();
+    gui = undefined;
+    if (!viewer.isDestroyed()) {
+      viewer.destroy();
+    }
   }
 });
 
@@ -88,6 +95,13 @@ async function loadMap() {
       error.message ?? String(error);
   });
   window.vectorExample.layer = layer;
+
+  // 4. Bind the GUI directly to the layer's opacity (0: hidden, 1: opaque).
+  gui = new GUI({
+    title: "矢量图层",
+    container: document.getElementById("controls"),
+  });
+  gui.add(layer, "opacity", 0, 1, 0.01).name("矢量不透明度");
 }
 
 // Optional references for inspecting the running example in DevTools.

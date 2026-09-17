@@ -9,18 +9,21 @@
   </head>
   <body>
     <div id="map"></div>
-    <header>
-      <h1>球面 · 公开矢量地图</h1>
-      <p>OpenFreeMap · Bright，需要网络，无需 token。</p>
-      <nav>
-        <a href="./示例目录.html">示例目录</a>
-        <a href="./球面地图.js">查看 JavaScript</a>
-        <a href="../reference/openfreemap-bright.json">查看样式</a>
-        <a href="../globe-map.html?provider=local">离线测试</a>
-        <a href="../reference/README.md">数据与授权</a>
-      </nav>
-      <p id="error" role="alert"></p>
-    </header>
+    <div id="panels">
+      <header>
+        <h1>球面 · 公开矢量地图</h1>
+        <p>OpenFreeMap · Bright，需要网络，无需 token。</p>
+        <nav>
+          <a href="./示例目录.html">示例目录</a>
+          <a href="./球面地图.js">查看 JavaScript</a>
+          <a href="../reference/openfreemap-bright.json">查看样式</a>
+          <a href="../globe-map.html?provider=local">离线测试</a>
+          <a href="../reference/README.md">数据与授权</a>
+        </nav>
+        <p id="error" role="alert"></p>
+      </header>
+      <div id="controls"></div>
+    </div>
     <script>
       window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
     </script>
