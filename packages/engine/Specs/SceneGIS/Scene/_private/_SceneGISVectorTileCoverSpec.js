@@ -1,0 +1,217 @@
+import {
+  Cartesian3,
+  Intersect,
+  OrthographicFrustum,
+  PerspectiveFrustum,
+  SceneGISPlanarCoordinateSystem,
+  SceneGISPlanarExtent,
+  SceneGISPlanarTilingScheme,
+  SceneGISVectorTileSource,
+} from "../../../../index.js";
+import cover from "../../../../Source/SceneGIS/Scene/_private/_SceneGISVectorTileCover.js";
+import PlanarQuadtree from "../../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarQuadtree.js";
+
+describe("SceneGIS/Scene/_private/SceneGISVectorTileCover", function () {
+  function source(minimumLevel = 0, maximumLevel = 22) {
+    return new SceneGISVectorTileSource({
+      url: "/{z}/{x}/{y}",
+      minimumLevel,
+      maximumLevel,
+      tilingScheme: new SceneGISPlanarTilingScheme({
+        coordinateSystem: new SceneGISPlanarCoordinateSystem({
+          crs: "local-metres",
+          extent: new SceneGISPlanarExtent({
+            minimumX: 1000000000,
+            minimumY: 1000000000,
+            maximumX: 1000001024,
+            maximumY: 1000001024,
+          }),
+        }),
+      }),
+    });
+  }
+  it("uses the imagery/terrain leaf criterion without mutating its quadtree", function () {
+    const tiles = source(0, 4);
+    const frustum = new PerspectiveFrustum({
+      fov: Math.PI / 3,
+      aspectRatio: 1,
+      near: 1,
+      far: 4000,
+    });
+    const position = new Cartesian3(1000000512, 1000000400, 100);
+    const direction = Cartesian3.normalize(
+      new Cartesian3(0, 1, -0.2),
+      new Cartesian3(),
+    );
+    const up = Cartesian3.normalize(
+      new Cartesian3(0, 0.2, 1),
+      new Cartesian3(),
+    );
+    const frame = {
+      camera: { positionWC: position, frustum },
+      context: { drawingBufferWidth: 256, drawingBufferHeight: 256 },
+      pixelRatio: 1,
+      cullingVolume: frustum.computeCullingVolume(position, direction, up),
+    };
+    const quadtree = new PlanarQuadtree(tiles.tilingScheme);
+    try {
+      quadtree.beginFrame(1);
+      const keys = quadtree
+        .selectTiles(frame, 4, 2, [2, 1, 0.5, 0.25, 0.125])
+        .map((tile) => tile.key)
+        .sort();
+      const debug = { ...quadtree._debug };
+      expect(
+        cover
+          .select(frame, tiles, 128)
+          .map((tile) => tile.key)
+          .sort(),
+      ).toEqual(keys);
+      expect(quadtree._debug).toEqual(debug);
+      frame.pixelRatio = 2;
+      frame.context.drawingBufferHeight *= 2;
+      frame.context.drawingBufferWidth *= 2;
+      expect(
+        cover
+          .select(frame, tiles, 128)
+          .map((tile) => tile.key)
+          .sort(),
+      ).toEqual(keys);
+    } finally {
+      quadtree.destroy();
+    }
+  });
+  it("shares shallow-view distance selection with the surface while preserving top-down and source minimum levels", function () {
+    const tiles = source(0, 6);
+    const frustum = new PerspectiveFrustum({
+      fov: Math.PI / 3,
+      aspectRatio: 1,
+      near: 1,
+      far: 4000,
+    });
+    const position = new Cartesian3(1000000256, 1000000256, 10);
+    const direction = new Cartesian3(
+      0,
+      Math.cos(Math.PI / 36),
+      -Math.sin(Math.PI / 36),
+    );
+    const frame = {
+      camera: { positionWC: position, directionWC: direction, frustum },
+      context: { drawingBufferWidth: 1024, drawingBufferHeight: 1024 },
+      pixelRatio: 1,
+      cullingVolume: { computeVisibility: () => Intersect.INSIDE },
+    };
+    const quadtree = new PlanarQuadtree(tiles.tilingScheme);
+    const baseline = cover.select(frame, tiles, 1024);
+    const limited = cover.select(frame, tiles, 1024, 20);
+    expect(limited.length).toBeLessThan(baseline.length);
+    quadtree.beginFrame(1);
+    const errors = Array.from({ length: 7 }, (_, level) => 2 / 2 ** level);
+    const keys = (selected) => selected.map((t) => t.key).sort();
+    expect(keys(limited)).toEqual(
+      keys(quadtree.selectTiles(frame, 6, 2, errors, 20)),
+    );
+    frame.pixelRatio = 2;
+    frame.context.drawingBufferWidth *= 2;
+    frame.context.drawingBufferHeight *= 2;
+    expect(keys(cover.select(frame, tiles, 1024, 20))).toEqual(keys(limited));
+    for (const height of [10, 1000, 10000]) {
+      frame.camera.positionWC.z = height;
+      frame.camera.directionWC = new Cartesian3(0, 0, -1);
+      expect(keys(cover.select(frame, tiles, 1024, 100))).toEqual(
+        keys(cover.select(frame, tiles, 1024)),
+      );
+    }
+    frame.camera.directionWC = direction;
+    expect(
+      cover.select(frame, source(2, 6), 64, 1).every((t) => t.level >= 2),
+    ).toBe(true);
+    expect(() =>
+      cover.select(frame, source(2, 6), 4, 1),
+    ).toThrowDeveloperError();
+    quadtree.destroy();
+  });
+
+  it("bounds high-LOD traversal and coarsens to the source availability without building the full tree", function () {
+    const visibility = jasmine
+      .createSpy("visibility")
+      .and.returnValue(Intersect.INSIDE);
+    const frame = {
+      camera: {
+        frustum: new OrthographicFrustum({ width: 1, aspectRatio: 1 }),
+      },
+      context: { drawingBufferHeight: 512 },
+      pixelRatio: 1,
+      cullingVolume: { computeVisibility: visibility },
+    };
+    const selected = cover.select(frame, source(), 4);
+    expect(selected.map((tile) => tile.key)).toEqual([
+      "1/0/0",
+      "1/1/0",
+      "1/0/1",
+      "1/1/1",
+    ]);
+    expect(visibility.calls.count()).toBeLessThan(500);
+    expect(selected[0].bounds.minimumX).toBe(1000000000);
+    expect(() => cover.select(frame, source(2), 4)).toThrowDeveloperError();
+    visibility.and.returnValue(Intersect.OUTSIDE);
+    expect(cover.select(frame, source(), 4)).toEqual([]);
+  });
+  it("uses CSS pixels for zoom independently of drawing-buffer resolution", function () {
+    const frame = {
+      camera: {
+        positionWC: new Cartesian3(10, 20, 100),
+        directionWC: new Cartesian3(0, 0, -1),
+        frustum: new OrthographicFrustum({
+          width: 1600,
+          aspectRatio: 800 / 600,
+        }),
+      },
+      context: { drawingBufferWidth: 800, drawingBufferHeight: 600 },
+      pixelRatio: 1,
+    };
+    const zoom = cover.computeZoom(frame, 8192);
+    frame.context.drawingBufferWidth *= 2;
+    frame.context.drawingBufferHeight *= 2;
+    frame.pixelRatio = 2;
+    expect(cover.computeZoom(frame, 8192)).toBe(zoom);
+    frame.context.drawingBufferHeight = 0;
+    expect(cover.computeZoom(frame, 8192)).toBeUndefined();
+  });
+  it("preserves integer style gates under camera roundoff without quantizing continuous zoom", function () {
+    const width = 40075016.68557849;
+    const frame = {
+      camera: {
+        positionWC: new Cartesian3(1492168, 6894699, 1000),
+        directionWC: new Cartesian3(0, Math.SQRT1_2, -Math.SQRT1_2),
+        frustum: new OrthographicFrustum({
+          width: (1308 * width) / (512 * 2 ** 15.999999999999869),
+          aspectRatio: 1.308,
+        }),
+      },
+      context: { drawingBufferWidth: 1308, drawingBufferHeight: 1000 },
+      pixelRatio: 1,
+    };
+    expect(cover.computeZoom(frame, width)).toBe(16);
+    frame.camera.frustum.width = (1308 * width) / (512 * 2 ** 15.99);
+    expect(cover.computeZoom(frame, width)).toBeCloseTo(15.99, 12);
+    expect(Math.floor(cover.computeZoom(frame, width))).toBe(15);
+  });
+  it("keeps fractional scale identical across large-origin pan and heading changes", function () {
+    const frame = {
+      camera: {
+        positionWC: new Cartesian3(13222558, 3769268, 1136),
+        directionWC: new Cartesian3(0, 0.6, -0.8),
+        frustum: new PerspectiveFrustum({ fov: 0.65, aspectRatio: 1.3 }),
+      },
+      context: { drawingBufferWidth: 1300, drawingBufferHeight: 1000 },
+      pixelRatio: 1,
+    };
+    const zoom = cover.computeZoom(frame, 40075016.68557849);
+    frame.camera.positionWC.x += 400;
+    frame.camera.positionWC.y -= 320;
+    expect(cover.computeZoom(frame, 40075016.68557849)).toBe(zoom);
+    frame.camera.directionWC = new Cartesian3(0.6, 0, -0.8);
+    expect(cover.computeZoom(frame, 40075016.68557849)).toBe(zoom);
+  });
+});

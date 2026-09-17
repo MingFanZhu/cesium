@@ -1,0 +1,45 @@
+{
+  "destination": {
+    "x": -2605462.636682813,
+    "y": 4743378.601515114,
+    "z": 3364234.5465810597
+  },
+  "orientation": {
+    "direction": {
+      "x": 0.38494398896468046,
+      "y": -0.5714522253113056,
+      "z": 0.7247485629835474
+    },
+    "up": {
+      "x": -0.3388502362363983,
+      "y": 0.6429158622968265,
+      "z": 0.686905897055532
+    }
+  },
+  "frustum": {
+    "fov": 0.7868639544176411,
+    "aspectRatio": 1.2452173913043478,
+    "near": 1,
+    "far": 80150033.37115698
+  },
+  "viewport": {
+    "canvasCssWidth": 1432,
+    "canvasCssHeight": 1150,
+    "drawingBufferWidth": 1432,
+    "drawingBufferHeight": 1150
+  },
+  "orbit": {
+    "longitudeRadians": 2.0730815521566544,
+    "latitudeRadians": 0.5593074308309641,
+    "height": 0,
+    "amplitudeRadians": 1.5,
+    "movingFrames": 360,
+    "restingFrames": 120
+  },
+  "settings": {
+    "provider": "bright",
+    "terrain": false,
+    "advancedEnvironment": false,
+    "clockShouldAnimate": false
+  }
+}

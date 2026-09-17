@@ -62,6 +62,14 @@ function validateTileCacheSize(value) {
   }
 }
 
+function validateMaximumTiltedTileDistance(value) {
+  if (typeof value !== "number" || !(value > 0.0)) {
+    throw new DeveloperError(
+      "maximumTiltedTileDistance must be positive or Infinity.",
+    );
+  }
+}
+
 function validateBaseColor(value) {
   if (!(value instanceof Color) || value.alpha !== 1.0) {
     throw new DeveloperError("baseColor must be an opaque Color.");
@@ -94,8 +102,8 @@ function validateMaterial(value) {
 }
 
 /**
- * A bounded, meter-based planar primary world with an opaque flat or heightmap
- * terrain surface, optional geometric lighting, and an ordered collection of
+ * A bounded, meter-based planar primary world with a flat or heightmap terrain
+ * surface, opaque by default, optional geometric lighting, and an ordered collection of
  * raster imagery layers.
  * The world supports programmatically positioned perspective and orthographic
  * cameras in {@link SceneMode.SCENE3D}.
@@ -172,8 +180,10 @@ function SceneGISPlanarWorld(options) {
   this._tilingScheme = tilingScheme;
   this._maximumLevel = options.maximumLevel;
   this._maximumScreenSpaceError = maximumScreenSpaceError;
+  this._maximumTiltedTileDistance = Infinity;
   this._tileCacheSize = tileCacheSize;
   this._baseColor = Color.clone(baseColor);
+  this._opacity = 1.0;
   this._enableLighting = enableLighting;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   this._material = undefined;
@@ -364,6 +374,28 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     },
   },
   /**
+   * Gets or sets the tile detail distance in planar meters for shallow
+   * perspective views. Tiles beyond this distance retain coarse coverage.
+   * The limit applies fully within 10 degrees of the horizontal plane and
+   * relaxes smoothly until disabled at 20 degrees. Orthographic and top-down
+   * views are unchanged. This does not modify camera visibility or clipping.
+   * Set Infinity to retain unrestricted screen-space-error refinement.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {number}
+   * @default Infinity
+   * @exception {DeveloperError} The assigned value is not positive or Infinity.
+   */
+  maximumTiltedTileDistance: {
+    get: function () {
+      return this._maximumTiltedTileDistance;
+    },
+    set: function (value) {
+      validateMaximumTiltedTileDistance(value);
+      this._maximumTiltedTileDistance = value;
+    },
+  },
+  /**
    * Gets or sets the number of unprotected tile records retained after a frame.
    *
    * @memberof SceneGISPlanarWorld.prototype
@@ -393,6 +425,29 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
     set: function (value) {
       validateBaseColor(value);
       Color.clone(value, this._baseColor);
+    },
+  },
+  /**
+   * Gets or sets the opacity of the composed surface color, including imagery
+   * and material. This does not multiply vector layer opacity. Geometry depth
+   * remains available for draping, picking, and occlusion even at zero opacity.
+   * Changes are published by the next normal render. The qualified view is
+   * above the surface in WebGL 2; underground transparency is not supported.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {number}
+   * @default 1.0
+   * @exception {DeveloperError} The value is not finite and between zero and one.
+   */
+  opacity: {
+    get: function () {
+      return this._opacity;
+    },
+    set: function (value) {
+      if (!Number.isFinite(value) || value < 0.0 || value > 1.0) {
+        throw new DeveloperError("opacity must be a finite number in [0, 1].");
+      }
+      this._opacity = value;
     },
   },
   /**
@@ -466,7 +521,7 @@ SceneGISPlanarWorld.prototype.beginFrame = function (frameState) {
 };
 
 /**
- * Selects visible planar tiles and submits opaque color commands.
+ * Selects visible planar tiles and submits surface color and depth commands.
  *
  * @param {object} frameState The state for the current frame.
  * @exception {DeveloperError} The world is rendered with a second WebGL Context.
@@ -484,6 +539,8 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
     this._enableLighting,
     this._lambertDiffuseMultiplier,
     this._material,
+    this._maximumTiltedTileDistance,
+    this._opacity,
   );
 };
 
@@ -498,6 +555,13 @@ SceneGISPlanarWorld.prototype.renderEnvironment = function (
   frameState,
   passState,
 ) {
+  renderPlanarEnvironment.call(this, frameState, passState);
+  if (this._show && frameState.passes.render) {
+    this._surface.captureBackground(frameState, passState);
+  }
+};
+
+function renderPlanarEnvironment(frameState, passState) {
   const environment = this._environment;
   if (
     !this._show ||
@@ -558,7 +622,7 @@ SceneGISPlanarWorld.prototype.renderEnvironment = function (
       environmentState,
     );
   }
-};
+}
 
 /**
  * Trims unprotected tile records after command execution.

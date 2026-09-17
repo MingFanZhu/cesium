@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · SceneGIS · 矢量瓦片</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      body {
+        font:
+          14px/1.6 system-ui,
+          "Microsoft YaHei",
+          sans-serif;
+        color: #263d3e;
+      }
+      aside {
+        position: absolute;
+        top: 24px;
+        left: 24px;
+        width: 238px;
+        padding: 22px;
+        max-height: calc(100% - 94px);
+        overflow: auto;
+        background: #fffefaef;
+        border: 1px solid #d8dcd4;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px #1f303014;
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 2px;
+        color: #687c73;
+      }
+      h1 {
+        margin: 8px 0 4px;
+        font-size: 26px;
+        font-weight: 600;
+      }
+      p {
+        margin: 6px 0 14px;
+      }
+      .muted {
+        color: #79857d;
+        font-size: 12px;
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+        margin: 18px 0;
+      }
+      button {
+        font: inherit;
+        font-size: 12px;
+        padding: 8px;
+        border: 1px solid #cbd5ce;
+        border-radius: 4px;
+        background: #f7f8f2;
+        color: inherit;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #e7eee5;
+      }
+      button:focus-visible {
+        outline: 2px solid #397f89;
+      }
+      #status {
+        white-space: pre-line;
+        padding: 10px 0;
+        border-top: 1px solid #e3e7df;
+        font-variant-numeric: tabular-nums;
+      }
+      #picked {
+        max-height: 180px;
+        overflow: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        min-height: 72px;
+        font-size: 12px;
+        padding: 12px;
+        background: #edf1e9;
+        border-radius: 4px;
+      }
+      #error {
+        color: #a03f2a;
+        white-space: pre-wrap;
+      }
+      .legend {
+        display: flex;
+        gap: 14px;
+        font-size: 12px;
+      }
+      .legend span::before {
+        content: "";
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        margin-right: 5px;
+        background: var(--color);
+      }
+      a {
+        color: #397f89;
+      }
+      @media (max-width: 680px) {
+        aside {
+          top: 10px;
+          left: 10px;
+          width: 195px;
+          padding: 14px;
+        }
+        h1 {
+          font-size: 21px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <div class="eyebrow">SCENEGIS / VECTOR TILES</div>
+      <h1>平面 · 一座矢量城市</h1>
+      <p class="muted">平面场景 · 本地 MVT · V3B1 预览</p>
+      <div class="legend">
+        <span style="--color: #bdd4ad">公园</span
+        ><span style="--color: #8ebeca">水域</span
+        ><span style="--color: #c7c1b5">建筑</span>
+      </div>
+      <div class="controls">
+        <button id="overview">全图俯视</button
+        ><button id="detail">中央街区</button>
+        <button id="tilt">倾斜视角</button
+        ><button id="visibility">隐藏矢量</button>
+        <button id="recreate">移除并重建</button
+        ><button id="measure">测量 60 帧</button>
+        <button id="delayed" style="grid-column: 1 / -1">逐块加载演示</button>
+      </div>
+      <div id="status">正在初始化…</div>
+      <p class="muted">
+        左键平移 · 中键旋转 · 滚轮缩放<br />点击地图查看要素；湖心岛验证孔洞。
+      </p>
+      <div id="picked">尚未选择要素</div>
+      <p id="timing" class="muted"></p>
+      <p id="transition" class="muted"></p>
+      <p id="error" role="alert"></p>
+      <p class="muted">
+        当前验收 fill / line / circle；地形与文字标注在后续阶段。
+      </p>
+      <a href="./planar-styles.html">打开矢量样式图集</a> ·
+      <a href="./planar-map.html">公开矢量地图</a> ·
+      <a href="/Test/index.html">返回示例目录</a>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./planar-city.js"></script>
+  </body>
+</html>

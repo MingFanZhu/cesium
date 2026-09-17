@@ -224,7 +224,7 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     expect(
       tiles.every((tile) => tile._lightingCommandNormalMode === "smooth"),
     ).toBe(true);
-    expect(surface._shaderPrograms.has("1/1/smooth")).toBe(true);
+    expect(surface._shaderPrograms.has("1/1/smooth/0")).toBe(true);
     expect(tiles.map((tile) => tile.command)).toEqual(commandsBeforeLighting);
     expect(surface._debug.createdBuffers).toBe(
       surfaceAllocationsBeforeLighting.buffers,
@@ -477,7 +477,7 @@ describe("SceneGIS/Widget/SceneGISPlanarTerrainCesiumWidget", function () {
     expect(litPixels.every(Number.isFinite)).toBe(true);
     expect(litPixels).not.toEqual(unlitPixels);
     expect(tile._lightingCommandNormalMode).toBe("smooth");
-    expect(world._surface._shaderPrograms.has("1/1/smooth")).toBe(true);
+    expect(world._surface._shaderPrograms.has("1/1/smooth/0")).toBe(true);
     expect(world._surface._renderCommands).toEqual(commands);
     expect(commands.map((command) => command.vertexArray)).toEqual(
       vertexArrays,

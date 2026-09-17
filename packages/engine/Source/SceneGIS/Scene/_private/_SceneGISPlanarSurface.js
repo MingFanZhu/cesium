@@ -18,6 +18,7 @@ import SceneGISPlanarImagery from "./_SceneGISPlanarImagery.js";
 import SceneGISPlanarEnvironmentLighting from "./_SceneGISPlanarEnvironmentLighting.js";
 import SceneGISPlanarQuadtree from "./_SceneGISPlanarQuadtree.js";
 import SceneGISPlanarSurfaceShader from "./_SceneGISPlanarSurfaceShader.js";
+import SceneGISPlanarSurfaceBackground from "./_SceneGISPlanarSurfaceBackground.js";
 import SceneGISPlanarTerrain from "./_SceneGISPlanarTerrain.js";
 import SceneGISPlanarTerrainQuery from "./_SceneGISPlanarTerrainQuery.js";
 
@@ -61,6 +62,8 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
   this._transparentTexture = undefined;
   this._renderState = undefined;
   this._baseColor = undefined;
+  this._opacity = 1.0;
+  this._background = undefined;
   this._lambertDiffuseMultiplier = 0.9;
   this._environmentLighting = undefined;
   this._frameNumber = -1;
@@ -234,12 +237,14 @@ function getShaderProgram(
   materialSource,
   advancedLighting,
 ) {
+  const translucent = surface._opacity < 1.0;
   const key = getShaderKey(
     layerCount,
     enableLighting,
     normalMode,
     materialSource,
     advancedLighting,
+    translucent,
   );
   let shader = surface._shaderPrograms.get(key);
   if (!shader) {
@@ -250,6 +255,7 @@ function getShaderProgram(
       normalMode,
       materialSource,
       advancedLighting,
+      translucent,
     );
     surface._shaderPrograms.set(key, shader);
     if (defined(materialSource)) {
@@ -267,11 +273,12 @@ function getShaderKey(
   normalMode,
   materialSource,
   advancedLighting,
+  translucent = false,
 ) {
   const materialKey = defined(materialSource)
     ? `/material/${materialSource}`
     : "";
-  return `${layerCount}/${enableLighting ? 1 : 0}/${normalMode}/${advancedLighting ? 1 : 0}${materialKey}`;
+  return `${layerCount}/${enableLighting ? 1 : 0}/${normalMode}/${advancedLighting ? 1 : 0}${translucent ? "/translucent" : ""}${materialKey}`;
 }
 
 function createShaderProgram(
@@ -281,6 +288,7 @@ function createShaderProgram(
   normalMode,
   materialSource,
   advancedLighting,
+  translucent,
 ) {
   return ShaderProgram.fromCache({
     context,
@@ -296,6 +304,7 @@ function createShaderProgram(
       normalMode,
       materialSource,
       advancedLighting,
+      translucent,
     ),
     attributeLocations:
       normalMode === "smooth" ? { position: 0, normal: 1 } : { position: 0 },
@@ -309,6 +318,7 @@ function preflightMaterialShaders(
   enableLighting,
   materialSource,
   advancedLighting,
+  translucent,
 ) {
   if (!defined(materialSource)) {
     return;
@@ -322,6 +332,7 @@ function preflightMaterialShaders(
         normalMode,
         materialSource,
         advancedLighting,
+        translucent,
       );
       if (surface._shaderPrograms.has(key)) {
         continue;
@@ -333,6 +344,7 @@ function preflightMaterialShaders(
         normalMode,
         materialSource,
         advancedLighting,
+        translucent,
       );
       candidates.push({ key, shader });
       shader._bind();
@@ -359,6 +371,12 @@ function createUniformMap(
   advancedLighting,
 ) {
   const uniformMap = {
+    u_surfaceOpacity: function () {
+      return surface._opacity;
+    },
+    u_surfaceBackground: function () {
+      return surface._background.getTexture();
+    },
     u_color: function () {
       return surface._baseColor;
     },
@@ -469,7 +487,12 @@ function getCommand(
     tile._materialCommandSource !== materialSource ||
     tile.command.shaderProgram !== shaderProgram
   ) {
-    tile.command.shaderProgram = shaderProgram;
+    if (tile.command.shaderProgram !== shaderProgram) {
+      // HDR can be disabled while the base shader changes. Drop dormant
+      // derived commands so re-enabling HDR cannot replay old uniforms.
+      tile.command.derivedCommands = {};
+      tile.command.shaderProgram = shaderProgram;
+    }
     tile.command.uniformMap = createUniformMap(
       surface,
       tile,
@@ -605,6 +628,8 @@ SceneGISPlanarSurface.prototype.render = function (
   enableLighting = false,
   lambertDiffuseMultiplier = 0.9,
   material,
+  maximumTiltedTileDistance = Infinity,
+  opacity = 1.0,
 ) {
   validateContext(this, frameState.context);
   const passes = frameState.passes;
@@ -650,11 +675,14 @@ SceneGISPlanarSurface.prototype.render = function (
   const advancedLighting = environmentLighting?.active === true;
   const lightingSamplerCount = advancedLighting ? 3 : 0;
   if (
-    shownLayerCount + materialSamplerCount + lightingSamplerCount >
+    shownLayerCount +
+      materialSamplerCount +
+      lightingSamplerCount +
+      (opacity < 1.0 ? 1 : 0) >
     ContextLimits.maximumTextureImageUnits
   ) {
     throw new DeveloperError(
-      "The combined planar imagery, Material and environment sampler count exceeds maximumTextureImageUnits.",
+      "The combined planar imagery, Material, environment and surface background sampler count exceeds maximumTextureImageUnits.",
     );
   }
   if (defined(material)) {
@@ -666,6 +694,7 @@ SceneGISPlanarSurface.prototype.render = function (
       enableLighting,
       material.shaderSource,
       advancedLighting,
+      opacity < 1.0,
     );
   }
   const shownLayers = getShownLayers(this);
@@ -673,6 +702,7 @@ SceneGISPlanarSurface.prototype.render = function (
   this._renderedFrameNumber = frameState.frameNumber;
   this._renderCommands.length = 0;
   this._baseColor = baseColor;
+  this._opacity = opacity;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   this._environmentLighting = environmentLighting;
   const desiredTiles = this._quadtree.selectTiles(
@@ -680,6 +710,7 @@ SceneGISPlanarSurface.prototype.render = function (
     maximumLevel,
     maximumScreenSpaceError,
     this._terrain?.geometricErrors,
+    maximumTiltedTileDistance,
   );
   if (desiredTiles.length === 0) {
     this._tilesLoaded = true;
@@ -774,6 +805,17 @@ SceneGISPlanarSurface.prototype.endFrame = function (tileCacheSize) {
   this._quadtree.trim(tileCacheSize);
 };
 
+SceneGISPlanarSurface.prototype.captureBackground = function (
+  frameState,
+  passState,
+) {
+  if (this._opacity === 1.0 || this._renderCommands.length === 0) {
+    return;
+  }
+  this._background ??= new SceneGISPlanarSurfaceBackground();
+  this._background.capture(frameState, passState);
+};
+
 SceneGISPlanarSurface.prototype.isDestroyed = function () {
   return this._destroyed;
 };
@@ -783,6 +825,8 @@ SceneGISPlanarSurface.prototype.destroy = function () {
     return;
   }
   this._imageryLayers._changeListener = undefined;
+  this._background?.destroy();
+  this._background = undefined;
   this._terrain?.destroy();
   this._terrain = undefined;
   this._imagery.destroy();

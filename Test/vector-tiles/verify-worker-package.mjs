@@ -1,0 +1,865 @@
+/* global window, document, performance, requestAnimationFrame */
+import assert from "node:assert/strict";
+import process from "node:process";
+import console from "node:console";
+import { execFileSync } from "node:child_process";
+import { createServer } from "node:http";
+import { mkdtemp, readFile, writeFile, copyFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { fileURLToPath, URL } from "node:url";
+import { build } from "esbuild";
+import { chromium } from "playwright";
+import { encodeGlyphs } from "../../packages/engine/Specs/SceneGIS/Core/vectorSymbolFixture.js";
+
+// Run after build-release and build-ts. No external map service is used.
+const repo = fileURLToPath(new URL("../../", import.meta.url));
+const temporary = await mkdtemp(
+  path.join(tmpdir(), "scenegis-vector-package-"),
+);
+const npm =
+  process.env.npm_execpath ??
+  path.join(path.dirname(process.execPath), "node_modules/npm/bin/npm-cli.js");
+const runNpm = (args, cwd) =>
+  execFileSync(process.execPath, [npm, ...args], {
+    cwd,
+    encoding: "utf8",
+    maxBuffer: 8 * 1024 * 1024,
+  });
+const [archive] = JSON.parse(
+  runNpm(
+    ["pack", "--json", "--pack-destination", temporary],
+    path.join(repo, "packages/engine"),
+  ),
+);
+assert(
+  archive.files.some(
+    (file) => file.path === "Build/Workers/SceneGISVectorTileWorker.js",
+  ),
+);
+await writeFile(
+  path.join(temporary, "package.json"),
+  JSON.stringify({ private: true, type: "module" }),
+);
+runNpm(
+  [
+    "install",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund",
+    path.join(temporary, archive.filename),
+  ],
+  temporary,
+);
+const installed = path.join(temporary, "node_modules/@cesium/engine");
+const types = await readFile(path.join(installed, "index.d.ts"), "utf8");
+assert(types.includes("maximumUploadTimePerFrame?: number"));
+assert(/class SceneGISVectorTileLayer[\s\S]*?opacity\?: number/.test(types));
+assert(/class SceneGISPlanarWorld[\s\S]*?opacity: number/.test(types));
+assert(!types.includes("SceneGISVectorWorkerPool"));
+assert(!types.includes("SceneGISVectorTileWorker"));
+assert(
+  types.includes(
+    "setFeatureState(target: SceneGISVectorTileLayer.FeatureIdentifier",
+  ),
+);
+assert(types.includes("getGlobalState():"));
+const source = await readFile(path.join(installed, "index.js"), "utf8");
+assert(!source.includes("Source/Workers/SceneGISVectorTileWorker.js"));
+await writeFile(
+  path.join(temporary, "entry.js"),
+  'import * as C from "@cesium/engine"; window.C = C;',
+);
+await build({
+  entryPoints: [path.join(temporary, "entry.js")],
+  outfile: path.join(temporary, "consumer.js"),
+  bundle: true,
+  format: "esm",
+});
+await copyFile(
+  new URL("public-fixture.pbf", import.meta.url),
+  path.join(temporary, "tile.pbf"),
+);
+await writeFile(path.join(temporary, "glyph.pbf"), encodeGlyphs());
+for (const extension of ["png", "json"]) {
+  await copyFile(
+    new URL(`pattern-sprite.${extension}`, import.meta.url),
+    path.join(temporary, `pattern.${extension}`),
+  );
+}
+await writeFile(
+  path.join(temporary, "index.html"),
+  "<!doctype html><title>Vector Worker package qualification</title>",
+);
+const server = createServer(async (request, response) => {
+  const pathname = decodeURIComponent(
+    new URL(request.url, "http://localhost").pathname,
+  );
+  const release = pathname.startsWith("/release/");
+  const root = release ? path.join(repo, "Build/Cesium") : temporary;
+  const file = path.resolve(
+    root,
+    release ? pathname.slice(9) : pathname.slice(1) || "index.html",
+  );
+  if (!file.startsWith(root + path.sep)) {
+    response.writeHead(403).end();
+    return;
+  }
+  try {
+    const data = await readFile(file);
+    const mime = file.endsWith(".js")
+      ? "text/javascript"
+      : file.endsWith(".html")
+        ? "text/html"
+        : "application/octet-stream";
+    response.writeHead(200, { "Content-Type": mime }).end(data);
+  } catch {
+    response.writeHead(404).end();
+  }
+});
+await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+const origin = `http://127.0.0.1:${server.address().port}`;
+let browser;
+try {
+  browser = await chromium.launch({ headless: true });
+  const results = [];
+  for (const mode of ["installed-engine", "release-esm", "release-iife"]) {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(origin);
+    const result = await page.evaluate(async (mode) => {
+      window.CESIUM_BASE_URL =
+        mode === "installed-engine"
+          ? "/node_modules/@cesium/engine/Build/"
+          : "/release/";
+      if (mode === "installed-engine") {
+        await import("/consumer.js");
+      } else if (mode === "release-esm") {
+        window.C = await import("/release/index.js");
+      } else {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "/release/Cesium.js";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.append(script);
+        });
+        window.C = window.Cesium;
+      }
+      const C = window.C;
+      const scheme = new C.SceneGISPlanarTilingScheme({
+        coordinateSystem: new C.SceneGISPlanarCoordinateSystem({
+          extent: new C.SceneGISPlanarExtent({
+            minimumX: -512,
+            minimumY: -512,
+            maximumX: 512,
+            maximumY: 512,
+          }),
+        }),
+      });
+      const source = new C.SceneGISVectorTileSource({
+        url: "/tile.pbf?z={z}&x={x}&y={y}",
+        tilingScheme: scheme,
+      });
+      const decoded = await source.requestTile(0, 0, 0);
+      const raw = await source.requestTile(0, 0, 0, undefined, false);
+      const processor = new C.TaskProcessor("SceneGISVectorTileWorker");
+      const result = await processor.scheduleTask(
+        { kind: "decode", buffer: raw },
+        [raw],
+      );
+      processor.destroy();
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 64;
+      canvas.style.cssText = "width:64px;height:64px";
+      document.body.append(canvas);
+      const scene = new C.Scene({
+        canvas,
+        scene3DOnly: true,
+        contextOptions: { webgl: { antialias: false, stencil: true } },
+      });
+      const world = new C.SceneGISPlanarWorld({
+        coordinateSystem: scheme.coordinateSystem,
+        maximumLevel: 0,
+        baseColor: C.Color.BLACK,
+      });
+      scene._initializeWorld(world);
+      scene.msaaSamples = 1;
+      scene.postProcessStages.fxaa.enabled = false;
+      scene.rethrowRenderErrors = true;
+      scene.camera.setView({
+        destination: new C.Cartesian3(0, 0, 80),
+        orientation: {
+          direction: new C.Cartesian3(0, 0, -1),
+          up: new C.Cartesian3(0, 1, 0),
+        },
+      });
+      scene.camera.frustum.near = 1;
+      scene.camera.frustum.far = 1000;
+      const symbolSource = new C.SceneGISVectorTileSource({
+        url: "/unused/{z}/{x}/{y}",
+        tilingScheme: world.tilingScheme,
+        maximumLevel: 0,
+      });
+      symbolSource.requestTile = async () => ({
+        layers: [
+          {
+            name: "labels",
+            version: 2,
+            extent: 4096,
+            features: [
+              {
+                id: "land",
+                type: 3,
+                properties: {},
+                geometry: {
+                  parts: [
+                    new Float64Array([
+                      1536, 1536, 2560, 1536, 2560, 2560, 1536, 2560,
+                    ]),
+                  ],
+                  polygonStarts: new Uint32Array([0]),
+                },
+              },
+              {
+                id: "symbol",
+                type: 1,
+                properties: {},
+                geometry: {
+                  parts: [new Float64Array([2048, 2048])],
+                  polygonStarts: new Uint32Array(),
+                },
+              },
+            ],
+          },
+        ],
+      });
+      const layer = scene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene,
+          sources: { test: symbolSource },
+          style: {
+            version: 8,
+            glyphs: "/glyph.pbf?f={fontstack}&r={range}",
+            sources: {
+              test: {
+                type: "vector",
+                tiles: ["/unused/{z}/{x}/{y}"],
+                maxzoom: 0,
+              },
+            },
+            layers: [
+              {
+                id: "land",
+                type: "fill",
+                source: "test",
+                "source-layer": "labels",
+                filter: ["==", ["geometry-type"], "Polygon"],
+                paint: {
+                  "fill-color": [
+                    "case",
+                    ["boolean", ["feature-state", "active"], false],
+                    "lime",
+                    "blue",
+                  ],
+                  "fill-antialias": false,
+                },
+              },
+              {
+                id: "labels",
+                type: "symbol",
+                source: "test",
+                "source-layer": "labels",
+                filter: ["==", ["geometry-type"], "Point"],
+                layout: {
+                  "text-field": "A",
+                  "text-variable-anchor": ["center", "top"],
+                  "text-font": ["Test"],
+                  "text-size": 24,
+                },
+                paint: { "text-color": "red" },
+              },
+            ],
+          },
+        }),
+      );
+      const render = () => {
+        scene.initializeFrame();
+        scene.render();
+      };
+      const start = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - start > 10000) {
+          throw new Error("Symbol package preparation did not finish.");
+        }
+      } while (!layer.tilesLoaded);
+      const anchored = layer._symbols._placed.find((c) => c.placed?.text);
+      if (
+        anchored?.variableAnchor !== "center" ||
+        !anchored.shaped.variants.has("top")
+      ) {
+        throw new Error("Variable anchor Worker output was not used.");
+      }
+      const pixel = Array.from(
+        scene.context.readPixels({ x: 30, y: 31, width: 1, height: 1 }),
+      );
+      const picked = scene.pick(new C.Cartesian2(30, 32), 1, 1)?.id.featureId;
+      const batch = [...layer._symbols._groups.values()][0];
+      const fixed = batch.resources._staticBuffer,
+        dynamic = batch.resources._dynamicBuffer;
+      const uploads = batch.resources.uploadedBytes;
+      scene.camera.position.x += 1;
+      render();
+      const stable = batch.resources.uploadedBytes === uploads;
+      const stateTarget = { source: "test", sourceLayer: "labels", id: "land" };
+      layer.setFeatureState(stateTarget, { active: true });
+      const stateStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - stateStart > 10000) {
+          throw new Error("State package preparation did not finish.");
+        }
+      } while (!layer.tilesLoaded);
+      const stateColor = Array.from(
+        scene.context.readPixels({ x: 20, y: 32, width: 1, height: 1 }),
+      );
+      layer.removeFeatureState(stateTarget);
+      const fitLayer = scene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene,
+          sources: { test: symbolSource },
+          style: {
+            version: 8,
+            glyphs: "/glyph.pbf?f={fontstack}&r={range}",
+            sprite: "/pattern",
+            sources: {
+              test: {
+                type: "vector",
+                tiles: ["/unused/{z}/{x}/{y}"],
+                maxzoom: 0,
+              },
+            },
+            layers: [
+              {
+                id: "fit",
+                type: "symbol",
+                source: "test",
+                "source-layer": "labels",
+                filter: ["==", ["geometry-type"], "Point"],
+                layout: {
+                  "text-field": "A",
+                  "text-font": ["Test"],
+                  "text-size": 24,
+                  "icon-image": "shield",
+                  "icon-text-fit": "both",
+                  "icon-text-fit-padding": [4, 4, 4, 4],
+                  "text-variable-anchor": ["center", "top"],
+                },
+                paint: { "text-color": "red" },
+              },
+            ],
+          },
+        }),
+      );
+      const fitStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - fitStart > 10000) {
+          throw new Error("Fitted icon package preparation did not finish.");
+        }
+      } while (!fitLayer.tilesLoaded);
+      const fitted = fitLayer._symbols._placed.find((c) => c.placed?.icon);
+      const fitTexture = fitLayer._symbols.assets.sprite.texture;
+      const fit = {
+        quads: fitted.shaped.icon.quads.length,
+        paired:
+          fitted.shaped.icon === fitted.shaped.icons.get(fitted.variableAnchor),
+        color: Array.from(
+          scene.context.readPixels({ x: 19, y: 31, width: 1, height: 1 }),
+        ),
+        picked: scene.pick(new C.Cartesian2(19, 32), 1, 1)?.id.styleLayer,
+      };
+      scene.primitives.remove(fitLayer);
+      fit.released = fitTexture.isDestroyed();
+      const materialLayer = scene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene,
+          sources: { test: symbolSource },
+          style: {
+            version: 8,
+            sprite: "/pattern",
+            sources: {
+              test: { type: "vector", tiles: ["/unused/{z}/{x}/{y}"] },
+            },
+            layers: [
+              {
+                id: "pattern",
+                type: "fill",
+                source: "test",
+                "source-layer": "labels",
+                paint: { "fill-pattern": "windows" },
+              },
+            ],
+          },
+        }),
+      );
+      const patternStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - patternStart > 10000) {
+          throw new Error("Pattern package preparation did not finish.");
+        }
+      } while (!materialLayer.tilesLoaded);
+      const patternColor = Array.from(
+        scene.context.readPixels({ x: 20, y: 32, width: 1, height: 1 }),
+      );
+      const patternAtlas = materialLayer._patterns.texture;
+      const patternBatch = materialLayer._drawOrder[0]._pattern;
+      scene.primitives.remove(materialLayer);
+      const patternReleased = patternAtlas.isDestroyed();
+      world.terrainProvider = {
+        tilingScheme: world.tilingScheme,
+        minimumHeight: 12,
+        maximumHeight: 12,
+        maximumLevel: 0,
+        errorEvent: new C.Event(),
+        getLevelMaximumGeometricError: () => 1,
+        getTileDataAvailable: () => true,
+        loadTileDataAvailability: () => undefined,
+        requestTileGeometry: () =>
+          Promise.resolve(
+            new C.SceneGISPlanarHeightmapTerrainData({
+              width: 3,
+              height: 3,
+              buffer: new Float32Array(9).fill(12),
+            }),
+          ),
+      };
+      const groundStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - groundStart > 10000) {
+          throw new Error("Ground package preparation did not finish.");
+        }
+      } while (
+        !layer.tilesLoaded ||
+        layer._symbols._placed[0]?.position.z !== 12
+      );
+      const location = C.SceneTransforms.worldToWindowCoordinates(
+        scene,
+        new C.Cartesian3(-20, 0, 12),
+      );
+      const groundColor = Array.from(
+        scene.context.readPixels({
+          x: Math.floor(location.x),
+          y: 63 - Math.floor(location.y),
+          width: 1,
+          height: 1,
+        }),
+      );
+      const groundPick = scene.pick(location)?.id.featureId;
+      world.opacity = 0;
+      layer.opacity = 0.5;
+      render();
+      const planarTransparentColor = Array.from(
+        scene.context.readPixels({
+          x: Math.floor(location.x),
+          y: 63 - Math.floor(location.y),
+          width: 1,
+          height: 1,
+        }),
+      );
+      const planarTransparentPick = scene.pick(location)?.id.featureId;
+      const groundResources = layer._drawOrder[0]._resources;
+      const groundTextures = groundResources._textures.slice();
+      const extrusionLayer = scene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene,
+          sources: { test: symbolSource },
+          style: {
+            version: 8,
+            sources: {
+              test: { type: "vector", tiles: ["/unused/{z}/{x}/{y}"] },
+            },
+            layers: [
+              {
+                id: "building",
+                type: "fill-extrusion",
+                source: "test",
+                "source-layer": "labels",
+                paint: {
+                  "fill-extrusion-height": 40,
+                  "fill-extrusion-base": 5,
+                  "fill-extrusion-color": "lime",
+                },
+              },
+            ],
+          },
+        }),
+      );
+      const extrusionStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - extrusionStart > 10000) {
+          throw new Error("Extrusion package preparation did not finish.");
+        }
+      } while (!extrusionLayer.tilesLoaded);
+      const extrusionColor = Array.from(
+        scene.context.readPixels({ x: 30, y: 31, width: 1, height: 1 }),
+      );
+      const extrusionPick = scene.pick(new C.Cartesian2(30, 32), 1, 1)?.id
+        .featureId;
+      const extrusionVA =
+        extrusionLayer._drawOrder[0]._resources._vertexArrays[0];
+      scene.destroy();
+      canvas.remove();
+      const globeCanvas = document.createElement("canvas");
+      globeCanvas.width = globeCanvas.height = 64;
+      document.body.append(globeCanvas);
+      const globeScene = new C.Scene({
+        canvas: globeCanvas,
+        scene3DOnly: true,
+      });
+      globeScene.globe = new C.Globe();
+      globeScene.globe.showGroundAtmosphere = false;
+      globeScene.globe.terrainProvider = new C.CustomHeightmapTerrainProvider({
+        width: 17,
+        height: 17,
+        callback: () => new Float32Array(289).fill(600),
+      });
+      globeScene.fog.enabled = false;
+      globeScene.msaaSamples = 1;
+      globeScene.postProcessStages.fxaa.enabled = false;
+      const half = Math.PI * 6378137;
+      const globeScheme = new C.SceneGISPlanarTilingScheme({
+        coordinateSystem: new C.SceneGISPlanarCoordinateSystem({
+          crs: "EPSG:3857",
+          extent: new C.SceneGISPlanarExtent({
+            minimumX: -half,
+            minimumY: -half,
+            maximumX: half,
+            maximumY: half,
+          }),
+        }),
+      });
+      class GlobeSource extends C.SceneGISVectorTileSource {
+        requestTile() {
+          return Promise.resolve({
+            layers: [
+              {
+                name: "map",
+                version: 2,
+                extent: 4096,
+                features: [
+                  {
+                    id: "land",
+                    type: 3,
+                    properties: {},
+                    geometry: {
+                      parts: [
+                        new Float64Array([0, 0, 4096, 0, 4096, 4096, 0, 4096]),
+                      ],
+                      polygonStarts: new Uint32Array([0]),
+                    },
+                  },
+                  {
+                    id: "point",
+                    type: 1,
+                    properties: {},
+                    geometry: {
+                      parts: [new Float64Array([2048, 2048])],
+                      polygonStarts: new Uint32Array(),
+                    },
+                  },
+                ],
+              },
+            ],
+          });
+        }
+      }
+      const globeSource = new GlobeSource({
+        url: "/unused/{z}/{x}/{y}",
+        tilingScheme: globeScheme,
+        minimumLevel: 14,
+        maximumLevel: 14,
+      });
+      const bounds = globeScheme.tileXYToExtent(8192, 8192, 14);
+      const globeTarget = C.Cartesian3.fromRadians(
+        (bounds.minimumX + bounds.maximumX) / 2 / 6378137,
+        Math.atan(Math.sinh((bounds.minimumY + bounds.maximumY) / 2 / 6378137)),
+        600,
+      );
+      globeScene.camera.lookAt(
+        globeTarget,
+        new C.HeadingPitchRange(0, -Math.PI / 3, 300),
+      );
+      globeScene.camera.lookAtTransform(C.Matrix4.IDENTITY);
+      const globeLayer = globeScene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene: globeScene,
+          tilingScheme: globeScheme,
+          sources: { map: globeSource },
+          style: {
+            version: 8,
+            sources: {
+              map: {
+                type: "vector",
+                tiles: ["/unused/{z}/{x}/{y}"],
+                minzoom: 14,
+                maxzoom: 14,
+              },
+            },
+            layers: [
+              {
+                id: "land",
+                type: "fill",
+                source: "map",
+                "source-layer": "map",
+                paint: { "fill-color": "blue", "fill-antialias": false },
+              },
+              {
+                id: "points",
+                type: "circle",
+                source: "map",
+                "source-layer": "map",
+                paint: { "circle-color": "red", "circle-radius": 7 },
+              },
+            ],
+          },
+        }),
+      );
+      const globeStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        globeScene.initializeFrame();
+        globeScene.render();
+        if (performance.now() - globeStart > 15000) {
+          throw new Error("Globe package preparation did not finish.");
+        }
+      } while (
+        !globeLayer.tilesLoaded ||
+        !globeScene.globe.tilesLoaded ||
+        !globeLayer._terrain.entries.some((e) => e.result)
+      );
+      const globeColor = Array.from(
+        globeScene.context.readPixels({ x: 32, y: 31, width: 1, height: 1 }),
+      );
+      const terrainWorker = new C.TaskProcessor("SceneGISVectorTileWorker");
+      let globeExtrusionHeight;
+      try {
+        const result = await terrainWorker.scheduleTask({
+          kind: "extrusion-terrain",
+          bounds: { minimumX: bounds.minimumX, maximumY: bounds.maximumY },
+          origin: globeTarget,
+          streams: [
+            {
+              coordinates: new Float32Array([
+                bounds.width / 2,
+                -bounds.height / 2,
+              ]),
+              data: new Float32Array([
+                bounds.width / 2,
+                -bounds.height / 2,
+                40,
+                1,
+              ]),
+            },
+          ],
+          entries: globeLayer._terrain.entries.map((entry) => ({
+            rectangle: entry.rectangle,
+            height: entry.height,
+            result: entry.result,
+          })),
+        });
+        const stream = result.streams[0];
+        const position = new C.Cartesian3(
+          globeTarget.x + stream.high[0] + stream.low[0],
+          globeTarget.y + stream.high[1] + stream.low[1],
+          globeTarget.z + stream.high[2] + stream.low[2],
+        );
+        globeExtrusionHeight =
+          C.Ellipsoid.WGS84.cartesianToCartographic(position).height;
+      } finally {
+        terrainWorker.destroy();
+      }
+      const globePick = globeScene.pick(new C.Cartesian2(32, 32))?.id.featureId;
+      const globeResources = globeLayer._drawOrder.find(
+        (b) => b._resources._textures,
+      )?._resources;
+      const globeTextures = globeResources._textures.slice();
+      globeScene.globe.translucency.enabled = true;
+      globeScene.globe.translucency.frontFaceAlpha = 0;
+      globeScene.globe.translucency.backFaceAlpha = 0;
+      globeLayer.opacity = 0.5;
+      globeScene.initializeFrame();
+      globeScene.render();
+      const transparentColor = Array.from(
+        globeScene.context.readPixels({ x: 32, y: 31, width: 1, height: 1 }),
+      );
+      const transparentPick = globeScene.pick(new C.Cartesian2(32, 32))?.id
+        .featureId;
+      globeScene.globe.translucency.enabled = false;
+      globeLayer.opacity = 1;
+      const makeTexture = (rgba) =>
+        new C.Texture({
+          context: globeScene.context,
+          source: {
+            width: 1,
+            height: 1,
+            arrayBufferView: new Uint8Array(rgba),
+          },
+        });
+      const environmentTextures = [
+        makeTexture([0, 255, 177, 0]),
+        makeTexture([128, 160, 192, 255]),
+        makeTexture([8, 12, 16, 255]),
+      ];
+      globeScene.highDynamicRange = true;
+      globeScene.frameState._sceneGISGlobeLighting = {
+        active: true,
+        atlasTexture: environmentTextures[0],
+        transmittanceTexture: environmentTextures[1],
+        irradianceTexture: environmentTextures[2],
+        matrices: Array.from({ length: 3 }, () =>
+          C.Matrix4.fromScale(C.Cartesian3.ZERO),
+        ),
+        intervals: Array.from({ length: 3 }, () => new C.Cartesian2(0, 100000)),
+        cascadeCount: 1,
+        showCloudShadows: true,
+        primaryLightDirection: C.Cartesian3.UNIT_X,
+        sunDirection: C.Cartesian3.UNIT_X,
+        primaryLightScale: new C.Cartesian3(1, 1, 1),
+        surfaceRadianceScale: 1,
+        cloudTop: 4000,
+      };
+      globeScene.initializeFrame();
+      globeScene.render();
+      const environmentPixel = Array.from(
+        globeScene.context.readPixels({ x: 12, y: 31, width: 1, height: 1 }),
+      );
+      const environmentResources = globeLayer._drawOrder.find(
+        (batch) => batch._kind === "fill",
+      )._environmentResources;
+      const environmentReady = environmentResources._programs.size > 0;
+      const environmentPick = globeScene.pick(new C.Cartesian2(32, 32))?.id
+        .featureId;
+      globeScene.frameState._sceneGISGlobeLighting = undefined;
+      globeScene.primitives.remove(globeLayer);
+      const environmentReleased =
+        environmentResources._programs.size === 0 &&
+        environmentTextures.every((texture) => !texture.isDestroyed());
+      for (const texture of environmentTextures) {
+        texture.destroy();
+      }
+      globeScene.destroy();
+      globeCanvas.remove();
+      return {
+        mode,
+        stateColor,
+        fit,
+        pattern: {
+          color: patternColor,
+          batch: patternBatch,
+          released: patternReleased,
+        },
+        layers: decoded.layers.length,
+        features: decoded.layers.reduce(
+          (sum, layer) => sum + layer.features.length,
+          0,
+        ),
+        same: result.data.layers.length === decoded.layers.length,
+        transferred: raw.byteLength === 0,
+        typed: result.data.layers.some((layer) =>
+          layer.features.some(
+            (feature) => feature.geometry.parts[0] instanceof Float64Array,
+          ),
+        ),
+        destroyed: processor.isDestroyed(),
+        symbol: {
+          pixel,
+          picked,
+          stable,
+          separate: fixed !== dynamic,
+          released: fixed.isDestroyed() && dynamic.isDestroyed(),
+        },
+        extrusion: {
+          color: extrusionColor,
+          picked: extrusionPick,
+          released: extrusionVA.isDestroyed(),
+          globeHeight: globeExtrusionHeight,
+        },
+        ground: {
+          color: groundColor,
+          picked: groundPick,
+          transparentColor: planarTransparentColor,
+          transparentPick: planarTransparentPick,
+          released: groundTextures.every((t) => t.isDestroyed()),
+        },
+        globe: {
+          color: globeColor,
+          picked: globePick,
+          transparentColor,
+          transparentPick,
+          released: globeTextures.every((t) => t.isDestroyed()),
+        },
+        environment: {
+          ready: environmentReady,
+          color: environmentPixel,
+          picked: environmentPick,
+          released: environmentReleased,
+        },
+      };
+    }, mode);
+    assert(result.layers > 0 && result.features > 0);
+    assert.deepEqual(result.stateColor, [0, 255, 0, 255]);
+    assert.equal(result.fit.quads, 9);
+    assert(result.fit.paired && result.fit.released);
+    assert.equal(result.fit.picked, "fit");
+    assert(result.fit.color[0] > 0 && result.fit.color[1] > 0);
+    assert(result.pattern.batch && result.pattern.released);
+    assert(result.pattern.color[0] > 0 && result.pattern.color[1] > 0);
+    assert(
+      result.same && result.transferred && result.typed && result.destroyed,
+    );
+    assert.deepEqual(errors, []);
+    assert(result.extrusion.color[1] > 0 && result.extrusion.color[0] === 0);
+    assert.equal(result.extrusion.picked, "land");
+    assert(result.extrusion.released);
+    assert(Math.abs(result.extrusion.globeHeight - 640) < 2);
+    assert.deepEqual(result.symbol.pixel, [255, 0, 0, 255]);
+    assert.equal(result.symbol.picked, "symbol");
+    assert.deepEqual(result.ground.color, [0, 0, 255, 255]);
+    assert.equal(result.ground.picked, "land");
+    assert.deepEqual(result.ground.transparentColor, [0, 0, 128, 255]);
+    assert.equal(result.ground.transparentPick, "land");
+    assert(result.ground.released);
+    assert.deepEqual(result.globe.color, [255, 0, 0, 255]);
+    assert.equal(result.globe.picked, "point");
+    assert.equal(result.globe.transparentPick, "point");
+    assert(Math.abs(result.globe.transparentColor[0] - 128) <= 2);
+    assert(Math.abs(result.globe.transparentColor[2] - 64) <= 2);
+    assert(result.globe.released);
+    assert(result.environment.ready && result.environment.released);
+    assert.equal(result.environment.picked, "point");
+    assert(
+      result.environment.color[2] > 0 && result.environment.color[2] < 255,
+    );
+    assert(
+      result.symbol.stable && result.symbol.separate && result.symbol.released,
+    );
+    results.push(result);
+    await page.close();
+  }
+  console.log(JSON.stringify({ temporary, results }, null, 2));
+} finally {
+  await browser?.close();
+  await new Promise((resolve) => server.close(resolve));
+}

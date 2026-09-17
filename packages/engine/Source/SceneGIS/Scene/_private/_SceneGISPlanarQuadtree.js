@@ -72,16 +72,42 @@ function getPerspectiveSseDenominator(frustum) {
   );
 }
 
-function computeScreenSpaceError(quadtree, tile, frameState, geometricErrors) {
+function computeScreenSpaceError(
+  quadtree,
+  tile,
+  frameState,
+  geometricErrors,
+  maximumDistance,
+) {
   ++quadtree._debug.sseComputations;
-  const height = frameState.context.drawingBufferHeight;
-  if (height === 0) {
-    return 0.0;
-  }
   const geometricError = defined(geometricErrors)
     ? geometricErrors[tile.level]
     : quadtree._tilingScheme.coordinateSystem.extent.width /
       (256.0 * 2 ** tile.level);
+  return SceneGISPlanarQuadtree.computeScreenSpaceError(
+    frameState,
+    tile,
+    geometricError,
+    maximumDistance,
+  );
+}
+
+/**
+ * Shared imagery, terrain and vector-tile LOD metric. This reads closed tile
+ * bounds and the camera only; it does not create tiles or mutate a quadtree.
+ * An optional detail distance suppresses refinement beyond the closed bounds.
+ * @private
+ */
+SceneGISPlanarQuadtree.computeScreenSpaceError = function (
+  frameState,
+  tile,
+  geometricError,
+  maximumDistance = Infinity,
+) {
+  const height = frameState.context.drawingBufferHeight;
+  if (height === 0) {
+    return 0.0;
+  }
   const pixelRatio = frameState.pixelRatio;
   const frustum = frameState.camera.frustum;
   const orthographicHeight = getOrthographicHeight(frustum);
@@ -90,12 +116,41 @@ function computeScreenSpaceError(quadtree, tile, frameState, geometricErrors) {
   }
 
   const distance = distanceToTile(frameState.camera.positionWC, tile);
+  if (distance > maximumDistance) {
+    return 0.0;
+  }
   if (distance === 0.0) {
     return Number.POSITIVE_INFINITY;
   }
   const sseDenominator = getPerspectiveSseDenominator(frustum);
   return (geometricError * height) / (distance * sseDenominator) / pixelRatio;
-}
+};
+
+const fullDistanceSine = Math.sin(Math.PI / 18.0);
+const unrestrictedSine = Math.sin(Math.PI / 9.0);
+
+/** Computes the shared shallow-view detail range once per selection. @private */
+SceneGISPlanarQuadtree.computeMaximumTiltedTileDistance = function (
+  frameState,
+  maximumDistance = Infinity,
+) {
+  const camera = frameState.camera;
+  if (
+    maximumDistance === Infinity ||
+    defined(getOrthographicHeight(camera.frustum))
+  ) {
+    return Infinity;
+  }
+  const sine = Math.abs(camera.directionWC.z);
+  if (sine >= unrestrictedSine) {
+    return Infinity;
+  }
+  if (sine <= fullDistanceSine) {
+    return maximumDistance;
+  }
+  const t = (unrestrictedSine - sine) / (unrestrictedSine - fullDistanceSine);
+  return maximumDistance / (t * t * (3.0 - 2.0 * t));
+};
 
 function compareEvictionCandidates(left, right) {
   return (
@@ -171,7 +226,13 @@ SceneGISPlanarQuadtree.prototype.selectTiles = function (
   maximumLevel,
   maximumScreenSpaceError,
   geometricErrors,
+  maximumTiltedTileDistance = Infinity,
 ) {
+  const maximumDistance =
+    SceneGISPlanarQuadtree.computeMaximumTiltedTileDistance(
+      frameState,
+      maximumTiltedTileDistance,
+    );
   const stack = [{ x: 0, y: 0, level: 0 }];
   while (stack.length > 0) {
     const address = stack.pop();
@@ -192,6 +253,7 @@ SceneGISPlanarQuadtree.prototype.selectTiles = function (
       tile,
       frameState,
       geometricErrors,
+      maximumDistance,
     );
     if (tile.level < maximumLevel && sse > maximumScreenSpaceError) {
       this._refinedKeys.add(tile.key);

@@ -67,6 +67,7 @@ function fixture() {
   write(repo, "packages/engine/Source/Scene/Rename.js", "export default 1;\n");
   write(repo, "packages/engine/Source/Scene/Delete.js", "export default 1;\n");
   write(repo, "packages/engine/Source/Scene/Stale.js", "export default 1;\n");
+  write(repo, "packages/engine/package.json", '{"name":"fixture"}\n');
   write(repo, "Documentation/SceneGIS/Decisions/ADR.md", "# ADR\n");
   write(repo, "packages/engine/Specs/SceneGIS/TestSpec.js", "// spec\n");
   git(repo, ["add", "."]);
@@ -204,6 +205,36 @@ test("accepts registered manifest-only rename and retains the old path", () => {
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /2 registered upstream-owned entries/u);
   fs.rmSync(repo, { recursive: true, force: true });
+});
+
+test("accepts registered manifest-only JSON changes without adding illegal comments", () => {
+  const repo = fixture();
+  writeManifest(repo, [
+    { file: "packages/engine/Source/Scene/Scene.js", markerMode: "paired" },
+    { file: "packages/engine/package.json", markerMode: "manifest-only" },
+  ]);
+  write(
+    repo,
+    "packages/engine/package.json",
+    '{"name":"fixture","dependencies":{"style":"1.0.0"}}\n',
+  );
+  const result = audit(repo);
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(
+    path.dirname(fs.realpathSync(repo)),
+    fs.realpathSync(os.tmpdir()),
+  );
+  fs.rmSync(repo, { recursive: true, force: true });
+});
+
+expectFailure("manifest-only registration for modified JavaScript", (repo) => {
+  writeManifest(repo, [
+    {
+      file: "packages/engine/Source/Scene/Scene.js",
+      markerMode: "manifest-only",
+    },
+  ]);
+  write(repo, "packages/engine/Source/Scene/Scene.js", "export default 2;\n");
 });
 
 test("accepts registered manifest-only deletion", () => {

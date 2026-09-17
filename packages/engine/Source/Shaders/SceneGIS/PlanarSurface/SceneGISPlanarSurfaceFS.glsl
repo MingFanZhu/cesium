@@ -1,5 +1,9 @@
 in vec2 v_textureCoordinates;
 uniform vec4 u_color;
+#ifdef SCENEGIS_SURFACE_TRANSLUCENCY
+uniform float u_surfaceOpacity;
+uniform sampler2D u_surfaceBackground;
+#endif
 
 #ifdef SCENEGIS_MATERIAL
 in vec3 v_positionWC;
@@ -105,4 +109,10 @@ void main()
     color.rgb *= czm_lightColor * intensity;
 #endif
     out_FragColor = vec4(color.rgb, 1.0);
+    #ifdef SCENEGIS_SURFACE_TRANSLUCENCY
+        vec2 uv = gl_FragCoord.xy / vec2(textureSize(u_surfaceBackground, 0));
+        vec4 background = texture(u_surfaceBackground, uv);
+        // Depth remains opaque: reveal the scene background, not hidden slopes.
+        out_FragColor = mix(background, out_FragColor, u_surfaceOpacity);
+    #endif
 }

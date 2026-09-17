@@ -68,13 +68,15 @@ AgentDocs/**
 .scenegis/**
 scripts/scenegis/**
 packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js
+packages/engine/Source/Workers/SceneGISVectorTileWorker.js
 ```
 
 所有权按照“上游基线中是否已经存在该路径”判断，而不是按照当前分支中文件所在目录判断。修改 upstream-owned file 必须登记 SGP；新增 SceneGIS-owned file 不需要 SGP。
 
-`packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js`是ADR-0027批准的唯一特殊Worker entry：
-它不在上游基线中，只负责接入Cesium现有Worker构建链，实际算法继续位于`Source/SceneGIS/**`。该精确例外
-不自动授权其他`Source/Workers`文件；新增entry仍需重新审计、ADR与所有权说明。
+`packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js`（ADR-0027）与
+`packages/engine/Source/Workers/SceneGISVectorTileWorker.js`（ADR-0067）是批准的精确 owned Worker entries。
+它们不在上游基线中，只接入 Cesium 现有 Worker 构建链，算法继续位于 `Source/SceneGIS/**`。
+这些例外不授权其他 `Source/Workers` 文件；新增 entry 仍需重新审计、ADR 与所有权说明。
 
 `packages/engine/Source/Shaders/SceneGIS/**/*.glsl` 是 ADR-0030 批准的 SceneGIS shader source root。
 它复用 Cesium 现有 `Source/Shaders/**` GLSL-to-JS 构建链；相邻生成 `.js` 是忽略的 build artifact，
@@ -206,7 +208,7 @@ proposed ranges的并集覆盖changed lines，使任一retired登记可独立移
 | CSS 与 UI                      | engine 与 widgets 规则不同                            | UI 保持在 widgets 包边界内                                                      |
 | 模块副作用                     | 受 tree-shaking 和 `sideEffects` 影响                 | 优先显式安装或注册 API                                                          |
 
-Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前仍是延迟决策，不在没有真实功能和源码证据时预设答案。SceneGIS GLSL source/delivery 以 ADR-0030 为准；A4 已批准的唯一 terrain Worker 入口以 ADR-0027 为准。
+Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前仍是延迟决策，不在没有真实功能和源码证据时预设答案。SceneGIS GLSL source/delivery 以 ADR-0030 为准；已批准的 terrain 与 vector Worker 入口分别以 ADR-0027、ADR-0067 为准。
 
 ## 渲染扩展原则
 
@@ -389,6 +391,11 @@ refresh 即使已有 fallback 仍为 false；terminal direct 配合稳定 fallba
 actual render tiles，pick+depth 继续精确 replay 最近 normal-render command references。无 provider
 仍保持 zero terrain allocation，public World/camera picking 仍是 Z=0 reference plane。完整决定见
 [ADR-0009](Decisions/ADR-0009-planar-terrain-continuous-lod-and-cache.md)。
+
+`World.maximumTiltedTileDistance` 按 [ADR-0066](Decisions/ADR-0066-planar-tilted-tile-distance.md)
+可选约束低角度透视的细节距离；surface 与 MVT 在 desired selection 前共用判定。
+默认 Infinity；俯视、俯视拉远及正交保持原 SSE。超过距离保留粗 tile，仍遵守 terrain
+祖先/四兄弟依赖和各自 ready cover；不得把它变成 Camera far、相机俯角限制或全场景距离剔除。
 
 ### 平面地形查询、拾取与独立采样
 
@@ -739,6 +746,77 @@ Primitive、warm/mutation/provider convergence与lifecycle。Dev/release E2E和p
 Sandcastle只作为best-effort人工展示。Timing只记录同机diagnostic median/P95，不是跨机器hard gate。Architecture
 review不能代替项目负责人的真实浏览器/GPU人工验收。完整决定见ADR-0022。
 
+### 独立矢量瓦片
+
+状态按 [ADR-0076](Decisions/ADR-0076-vector-style-state.md) 由 Layer 持有，禁止将其写入可共享的 compiled Style。
+Feature/global state 只驱动 paint，按 source/sourceLayer/id 与表达式依赖失效；不重新请求 MVT，不由状态 API 操作 GPU。
+几何结果继续通过 Worker 和正常帧预算发布；标注复用不变的 shaping 与 buffers。
+
+Pattern 按 [ADR-0075](Decisions/ADR-0075-vector-pattern-materials.md) 借用 Layer 的单 sprite atlas，
+Worker 准备图案矩形与坐标，flat/ground/Globe/extrusion 只做材质采样；不得按 feature 拆 command 或生成地图颜色 RTT。
+无 symbol 的 Layer 显式拥有 sprite；有 symbol 时共享其 owner。未知图片报错，不能静默替换成纯色。
+
+建筑 `fill-extrusion` 按 [ADR-0074](Decisions/ADR-0074-vector-fill-extrusion.md) 使用独立实体网格，
+由 vector Worker 生成屋顶、侧墙和法线，按 tile/style 合批；使用普通 OPAQUE/TRANSLUCENT 和 native pick/depth。
+height/base 是相对 polygon terrain anchor 的米制高度，Planar 使用 +Z，Globe 使用 geodetic up；
+resident terrain revision 仅更新位置流，不重新三角化或主动请求地形。首次切换 Planar flat/ground 后端仍沿用既有批次重建。
+Globe 建筑地形求交与 ECEF 重编码在现有 vector Worker 完成，仅按批次相交地形依赖失效；
+主线程以既有上传预算发布完整位置流，并隔离旧地形代际和销毁后的结果。
+不把建筑送入地表 coverage，不新增逐 feature Primitive 或 Scene pass；跨瓦片的楼栋拼接尚未支持。
+
+`vector-tiles` 遵循 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
+不依赖 Cesium experimental MVT decoder/provider/vector GLB/Buffer vector/VectorProvider。
+MVT 保持 CRS 无关，source/World 显式匹配单根 tile matrix；首轮 EPSG:3857 平面验收。
+数据/样式/layout、tile batch、World adapter 与 symbol placement 分层；
+禁止以逐 feature Entity 或整棵预建 tile tree 作为地图 runtime。
+
+地形优先矢量直接绘制，不采用地图颜色 RTT 主路线。
+Depth/stencil ground 是需证明批量、层序、alpha 和 pick 的候选，
+既有 single-instance GroundPrimitive 契约不被自动扩宽。
+地图图元按 [ADR-0061](Decisions/ADR-0061-owned-vector-tile-primitives.md) 自行管理
+geometry、GPU buffers、Shader、DrawCommand 与 feature pick；复用 Cesium 通用 Renderer/Scene，
+不通过大量修改 native Primitive/Polyline 来扩展地图样式能力。
+Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代表 Globe 已支持。
+按 [ADR-0069](Decisions/ADR-0069-planar-vector-ground-rendering.md)，平面 ground 使用 Worker
+几何数值表与批量凸体，从实际 surface depth 恢复 coverage；default flat 保留独立快速路径。
+模式切换保留 source/Worker，ground 地形 LOD 只更新地表包络和 anchors，不重新三角化地图。
+圆点/文字的 terrain anchors 与连续曲面字形质量分开验收。
+按 [ADR-0070](Decisions/ADR-0070-globe-vector-ground-rendering.md)，Globe 使用独立 WGS84 / SCENE3D
+适配，保留原生椭球和 terrain；矢量 source 固定为独立 EPSG:3857 单根矩阵。曲面三角形细分和
+局部 ENU 数值表由 Worker 准备，从实际地表 depth 逆投影恢复覆盖与拾取。Globe cover 使用
+地理包围体、horizon 和三维 SSE，不能套用 planar Z=0 的相机比例或地形 tile matrix。
+真实地形的标注索引由 vector Worker 异步构建；只借用已发布 native mesh，不请求或修改地形。
+按 [ADR-0071](Decisions/ADR-0071-vector-environment-lighting.md)，矢量地表只消费匹配 World 的既有
+frame-local 物理光照/云影资源；direct 与 sky 分离，替换基础 Lambert。Globe 定向几何阴影在
+真实地表位置接收，覆盖凸体不投影。环境独占 LUT/atlas/history 与 HDR 合成，不新增地图颜色 RTT。
+Circle/symbol 保持制图颜色；Planar native geometry-shadow 资格不随此扩宽。
+按 [ADR-0072](Decisions/ADR-0072-vector-surface-transparency.md)，Layer opacity 只乘各要素样式 alpha，
+不引入地图颜色 RTT。Globe 透明地表通过 SGP-0012 显式 owner slot 借用 native first-surface depth，
+先直接合成 Globe 颜色再绘制矢量，普通地表上方对象保持后续 native 渲染；原生 imagery alpha 保持独立。
+首轮仅资格确认当前可见地表，背面、地下、穿越透明地表排序与高级环境透明深度合成另行验证。
+Planar 共享 vector opacity；按 [ADR-0073](Decisions/ADR-0073-planar-surface-opacity.md)，World.opacity 控制地表颜色。
+透明模式仅复制 surface 之前的背景，地形仍单次直接绘制并保留深度，避免多个视锥的隐藏山坡重复混色。
+背景快照不包含地图颜色；默认不透明模式保持原资源和 sampler 容量，透明额外占一个 sampler，要求 WebGL 2。
+矢量瓦片与平面影像/地形共享私有 SSE 数值判据，MVT 选取预算内互不包含的近细远粗 leaves，
+请求与内容缓存保持独立。Style zoom 以视轴在 Z=0 的前向交点为参考，不把倾斜造成的
+采样距离变化误认为用户缩放；具体边界见 [ADR-0064](Decisions/ADR-0064-vector-perspective-lod.md)。
+沿线标注按 glyph advance 逐字布置，map pitch 使用真实世界 quad corners，viewport pitch 使用 CSS offsets；
+有向箭头不随文字阅读方向翻转。按 ADR-0068，碰撞使用独立保守包络，
+布局按快照与软预算跨帧更新，实际字形绘制和拾取始终使用当前相机与真实顶点。
+具体语义、source LOD 间距与道路拼接边界见 [ADR-0065](Decisions/ADR-0065-line-symbol-placement.md)。
+
+矢量准备按 [ADR-0067](Decisions/ADR-0067-vector-worker-preparation.md) 使用独立 Worker：
+MVT、geometry buffers、整数 zoom anchors、glyph atlas 和 normalized shaping 异步准备。
+主线程保留请求、当前视图 placement/picking 和有预算的 GPU 提交；异步结果不得直接发布 draw commands。
+Layer 销毁终止 owned Workers，过时 tile 结果按 token 丢弃，不引入主线程 fallback 或自动 retry。
+标注按 [ADR-0068](Decisions/ADR-0068-symbol-placement-and-dynamic-buffers.md) 分离 persistent candidates、
+budgeted placement 与 current-camera drawing；静态 UV/paint/pick 和动态 geometry/visibility 分流，
+只上传改变的范围。短期避让延迟与保守碰撞造成的密度差异是显式资格边界。
+按 [ADR-0077](Decisions/ADR-0077-variable-symbol-anchors.md)，点标注可变 anchor 的候选在 Worker
+缓存，主线程按上次成功位置及声明顺序试放；只有最终选择写入碰撞网格，异步布局不得修改已发布 shape。
+按 [ADR-0078](Decisions/ADR-0078-icon-text-fit.md)，fit icon 的 content/stretch 切片与 UV 在 Worker
+准备，尺寸缩放复用既有 shaping cache。逻辑文字边界独立于 SDF border，变量 anchor 的图文选择必须一致。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：
@@ -800,7 +878,7 @@ ADR 放在 `Documentation/SceneGIS/Decisions/ADR-####-short-title.md`。首次�
 ## 当前延迟决策
 
 - SceneGIS `czm_*` builtin 的接入与生成方式；普通 SceneGIS GLSL source/delivery 已由 ADR-0030 决定。
-- 除 ADR-0027 唯一 terrain entry 外，其他 SceneGIS Worker 的入口、协议与发布行为。
+- 除 ADR-0027 terrain、ADR-0067 vector entries 外，其他 SceneGIS Worker 的入口、协议与发布行为。
 - 是否从根 JS barrel 严格排除 `_` 私有模块。
 - 持久视觉基线和性能基线的 CI 执行环境。
 

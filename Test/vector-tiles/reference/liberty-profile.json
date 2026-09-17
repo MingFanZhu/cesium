@@ -1,0 +1,9 @@
+{
+  "reference": "https://tiles.openfreemap.org/styles/liberty",
+  "audited": "2026-09-17",
+  "layerCount": 111,
+  "excluded": {
+    "natural_earth": "raster",
+    "landcover_wetland": "fill-translate-anchor"
+  }
+}

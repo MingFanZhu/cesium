@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>矢量瓦片 · 上手示例</title>
+    <style>
+      body {
+        max-width: 760px;
+        margin: 64px auto;
+        padding: 0 24px;
+        color: #243c40;
+        background: #faf9f5;
+        font:
+          16px/1.8 system-ui,
+          sans-serif;
+      }
+      h1 {
+        font-size: 28px;
+      }
+      h2 {
+        margin-top: 32px;
+        font-size: 20px;
+      }
+      a {
+        color: #006d80;
+      }
+      li {
+        margin: 12px 0;
+      }
+      code {
+        background: #eceee8;
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>矢量瓦片 · 上手示例</h1>
+    <p>
+      两个独立示例：创建 Viewer、设置相机、接入 OpenFreeMap Bright
+      矢量地图。需要网络，无需 token。
+    </p>
+    <h2>平面 · EPSG:3857</h2>
+    <ul>
+      <li>
+        <a href="./平面地图.html">平面地图</a> ·
+        <a href="./平面地图.js">JavaScript</a> — 米制投影坐标与透视相机。
+      </li>
+    </ul>
+    <h2>球面 · WGS84 Globe</h2>
+    <ul>
+      <li>
+        <a href="./球面地图.html">球面地图</a> ·
+        <a href="./球面地图.js">JavaScript</a> — 经纬度定位与原生椭球地表。
+      </li>
+    </ul>
+    <p>
+      每页包含完整初始化，使用一份 <code>CesiumUnminified/index.js</code>。 配有
+      lil-gui 矢量不透明度滑块，不包含高级环境或性能调试面板。
+    </p>
+    <p>
+      <a href="../reference/openfreemap-bright.json">Bright 样式 JSON</a> ·
+      <a href="./README.md">阅读与替换数据说明</a> ·
+      <a href="../README.md">测试目录说明</a>
+    </p>
+    <h2>测试页面 · 平面</h2>
+    <p>
+      <a href="../planar-map.html">综合地图与地形</a> ·
+      <a href="../planar-city.html">瓦片加载与拾取</a> ·
+      <a href="../planar-styles.html">样式图集</a> ·
+      <a href="../planar-symbols.html">点标注</a> ·
+      <a href="../planar-line-symbols.html">沿线标注</a> ·
+      <a href="../planar-distance.html">低角度远景</a>
+    </p>
+    <h2>测试页面 · 球面</h2>
+    <p><a href="../globe-map.html">综合地图与地形</a></p>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "reference": "https://tiles.openfreemap.org/styles/bright",
+  "audited": "2026-09-13",
+  "layerCount": 119,
+  "excluded": {
+    "building-top": "fill-translate / anchor"
+  }
+}

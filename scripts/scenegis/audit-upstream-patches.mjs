@@ -385,6 +385,7 @@ function audit(repo) {
     if (firstRegistration.file.markerMode === "manifest-only") {
       const unannotatable =
         ["D", "R", "C"].includes(entry.status) ||
+        (displayPath && /\.json$/iu.test(displayPath)) ||
         (displayPath && isBinaryDiff(repo, base.commit, displayPath));
       if (!unannotatable) {
         errors.push(
