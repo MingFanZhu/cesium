@@ -26,6 +26,8 @@ import circleVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTi
 import lineVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTileLineVS.js";
 import GroundResources from "./_SceneGISVectorGroundResources.js";
 import anchorVisibility from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorAnchorVisibility.js";
+import extrusionVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorExtrusionVS.js";
+import extrusionFragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorExtrusionFS.js";
 
 function repeatedColor(bytes, count) {
   const values = new Uint8Array(count * 4);
@@ -104,6 +106,10 @@ function createVertexArray(
     const attributes = [];
     const constantIndices = {};
     for (const [name, attribute] of Object.entries(geometry.attributes)) {
+      if (name === "extrusionData") {
+        resources._extrusionData.push(attribute.values);
+        continue;
+      }
       if (uniformPaint && (name === "color" || name === "linePaint")) {
         constantIndices[name] = attributes.length;
         attributes.push({ index: locations[name], value: [0, 0, 0, 0] });
@@ -195,6 +201,7 @@ function SceneGISVectorTileBatchResources(
   this._paintPrefix = prepared.kind;
   this._anchorBuffers = [];
   this._anchorCoordinates = [];
+  this._extrusionData = [];
   try {
     const geometries =
       prepared.geometries ??
@@ -238,7 +245,8 @@ function SceneGISVectorTileBatchResources(
           locations,
           this,
           prepared.uniformPaint,
-          owner._ground && prepared.kind === "circle",
+          (owner._ground && prepared.kind === "circle") ||
+            prepared.kind === "fill-extrusion",
         ),
       );
     }
@@ -293,9 +301,11 @@ function SceneGISVectorTileBatchResources(
       }
     }
     const sources =
-      prepared.kind === "line"
-        ? [lineVertex]
-        : [prepared.kind === "circle" ? circleVertex : flatVertex];
+      prepared.kind === "fill-extrusion"
+        ? [extrusionVertex]
+        : prepared.kind === "line"
+          ? [lineVertex]
+          : [prepared.kind === "circle" ? circleVertex : flatVertex];
     if (owner._ground && prepared.kind === "circle") {
       sources.unshift(anchorVisibility);
     }
@@ -304,7 +314,9 @@ function SceneGISVectorTileBatchResources(
       vertexShaderSource: new ShaderSource({ defines, sources }),
       fragmentShaderSource: new ShaderSource({
         defines,
-        sources: [flatFragment],
+        sources: [
+          prepared.kind === "fill-extrusion" ? extrusionFragment : flatFragment,
+        ],
       }),
       attributeLocations: locations,
     });
@@ -354,6 +366,7 @@ SceneGISVectorTileBatchResources.prototype.destroy = function () {
   this._paintAttributes.length = 0;
   this._anchorBuffers.length = 0;
   this._anchorCoordinates.length = 0;
+  this._extrusionData.length = 0;
   return destroyObject(this);
 };
 

@@ -124,6 +124,20 @@ test("renders an offline Globe with native terrain, symbols, bounded cover and c
   await opacity("vector", 1);
   await opacity("surface", 1);
   await opacity("imagery", 0);
+  // Building styles start at zoom 14; qualify them separately from the wide label view.
+  await page.locator("#detail").click();
+  await ready();
+  const buildings = await page.evaluate(() =>
+    window.publicVectorPreview.layer._drawOrder
+      .filter((b) => b._kind === "fill-extrusion")
+      .map((b) => ({
+        applied: b._extrusionState?.applied,
+        failed: !!b._extrusionState?.failed,
+      })),
+  );
+  expect(buildings.length).toBeGreaterThan(0);
+  expect(buildings.every((b) => b.applied && !b.failed)).toBe(true);
+  await expect(page.locator("#error")).toBeEmpty();
   await page.locator("#terrain").uncheck();
   await page.locator("#whole").click();
   await ready();

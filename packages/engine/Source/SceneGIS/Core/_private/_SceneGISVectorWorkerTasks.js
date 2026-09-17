@@ -13,6 +13,7 @@ import Glyphs from "./_SceneGISVectorGlyphs.js";
 import Layout from "./_SceneGISVectorSymbolLayout.js";
 import prepareGlobeGeometry from "./_SceneGISVectorGlobeGeometry.js";
 import TerrainIndex from "./_SceneGISVectorGlobeTerrainIndex.js";
+import extrusionTerrain from "./_SceneGISVectorExtrusionTerrain.js";
 
 function transfer(value, objects, seen = new Set()) {
   if (!value || typeof value !== "object" || seen.has(value)) {
@@ -51,6 +52,8 @@ function createVectorTaskHandler() {
     let result;
     if (parameters.kind === "terrain") {
       result = TerrainIndex.build(parameters);
+    } else if (parameters.kind === "extrusion-terrain") {
+      result = extrusionTerrain(parameters);
     } else if (parameters.kind === "decode") {
       result = { data: Tile.decode(parameters.buffer) };
     } else if (parameters.kind === "glyphs") {

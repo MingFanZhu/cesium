@@ -15,7 +15,7 @@ Bright 与 Liberty 均从 [公开 TileJSON](https://tiles.openfreemap.org/planet
 
 `openfreemap-bright.json` 是 2026-09-13 获取的完整 119 层快照，仅统一缩进，供离线 E2E 使用。
 `bright-profile.json` 当前只排除 `building-top` 的 fill-translate；
-其余 118 层保留原顺序、filter、layout 和 paint。
+其余 118 层保留原顺序；V3D1 示例把 building 改为 fill-extrusion，按 render_height/render_min_height 拉伸楼栋。
 V5A 新增 15 个 point layers，V5B 新增 10 个道路/水系名称、路牌与箭头层；数量不代表视觉完成比例。
 线上页面读取公开 style URL，遇到新的不支持配置会报错，不静默删属性。
 
@@ -25,7 +25,7 @@ Style code 按 BSD 3-Clause，设计按 CC BY 4.0；版权归 MapTiler.com、Ope
 Mapbox 及相应修改作者。全文见 [BRIGHT-LICENSE.txt](BRIGHT-LICENSE.txt)、
 [OPENFREEMAP-LICENSE.txt](OPENFREEMAP-LICENSE.txt) 和 [MAPBOX-LICENSE.txt](MAPBOX-LICENSE.txt)。
 页面提供此署名入口，地图角落保留 TileJSON 的 OpenFreeMap / OpenMapTiles / OpenStreetMap attribution。
-采用约定基础层和标注，不表示参考示例中的 3D extrusion 已实现。
+建筑拉伸当前支持实体屋顶、侧墙和孔洞；完整边界见矢量瓦片文档。
 
 ## Mapbox Streets v12：离线参考
 
@@ -59,8 +59,8 @@ Mapbox SDK 当前默认是 [Standard](https://docs.mapbox.com/mapbox-gl-js/guide
 [公开 TileJSON](https://tiles.openfreemap.org/planet)，采用 OpenMapTiles schema；
 不会把它们改名为 Mapbox Streets 数据或套用 Streets 的字段假设。
 `openfreemap-liberty.json` 是 2026-09-13 获取的同一 111 层样式快照，仅用于无需公网的 E2E。
-`liberty-profile.json` 当前显式排除 4 层：1 raster、1 fill-extrusion、2 pattern；
-其余 107 层接入，包括 V5B 新增的 10 个沿线/zoom-dependent placement symbol layers。
+`liberty-profile.json` 当前显式排除 3 层：1 raster、2 pattern；
+其余 108 层接入，包括 V5B 新增的 10 个沿线/zoom-dependent placement symbol layers 和 V3D1 的 building-3d。
 以后线上样式出现新的不支持配置会报错，不静默删属性。
 
 Liberty 由 [OpenFreeMap Styles](https://github.com/hyperknot/openfreemap-styles) 维护，

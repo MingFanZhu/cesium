@@ -1,8 +1,8 @@
 # Plans
 
-- [Extension plan](2026-09-12-vector-tiles-extension.md)：active；稳定边界已批准。
-- [V0 架构审计](2026-09-12-v0-architecture-audit.md)：completed；checkpoint `122cd2db2e`。
-- [V1 独立前端](2026-09-12-v1-vector-frontend.md)：completed；checkpoint `80089a0a91`。
-- [V2 平面批量与直接贴地](2026-09-13-v2-planar-batch-and-ground.md)：唯一 active phase；架构验证准备。
+- [Extension plan](2026-09-12-vector-tiles-extension.md)：completed；当前大阶段于 2026-09-17 经负责人验收关闭。
+- [V3D1 建筑拉伸](2026-09-17-v3d1-fill-extrusion.md)：completed；包含提交前贴地性能修正。
+- 当前无 active extension/phase/standalone plan。已完成阶段与 checkpoint 见[扩展索引](../README.md)。
+- 未进入的样式、地形标注和进一步性能范围为 deferred，见[收口评审](../reviews/2026-09-17-milestone-closeout-review.md)。
 
-后续 phase 仅在 roadmap 保留能力与 gate，激活时重新审计源码并创建详细计划。
+后续激活时重新审计源码与原评审 finding，再建立 phase plan；本次完成不代表兼容全部 MapLibre 能力。

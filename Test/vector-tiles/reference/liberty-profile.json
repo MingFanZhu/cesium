@@ -1,11 +1,10 @@
 {
   "reference": "https://tiles.openfreemap.org/styles/liberty",
-  "audited": "2026-09-13",
+  "audited": "2026-09-17",
   "layerCount": 111,
   "excluded": {
     "natural_earth": "raster",
     "landcover_wetland": "fill-pattern / sprite",
-    "road_area_pattern": "fill-pattern / sprite",
-    "building-3d": "fill-extrusion"
+    "road_area_pattern": "fill-pattern / sprite"
   }
 }

@@ -342,6 +342,46 @@ try {
       const planarTransparentPick = scene.pick(location)?.id.featureId;
       const groundResources = layer._drawOrder[0]._resources;
       const groundTextures = groundResources._textures.slice();
+      const extrusionLayer = scene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene,
+          sources: { test: symbolSource },
+          style: {
+            version: 8,
+            sources: {
+              test: { type: "vector", tiles: ["/unused/{z}/{x}/{y}"] },
+            },
+            layers: [
+              {
+                id: "building",
+                type: "fill-extrusion",
+                source: "test",
+                "source-layer": "labels",
+                paint: {
+                  "fill-extrusion-height": 40,
+                  "fill-extrusion-base": 5,
+                  "fill-extrusion-color": "lime",
+                },
+              },
+            ],
+          },
+        }),
+      );
+      const extrusionStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - extrusionStart > 10000) {
+          throw new Error("Extrusion package preparation did not finish.");
+        }
+      } while (!extrusionLayer.tilesLoaded);
+      const extrusionColor = Array.from(
+        scene.context.readPixels({ x: 30, y: 31, width: 1, height: 1 }),
+      );
+      const extrusionPick = scene.pick(new C.Cartesian2(30, 32), 1, 1)?.id
+        .featureId;
+      const extrusionVA =
+        extrusionLayer._drawOrder[0]._resources._vertexArrays[0];
       scene.destroy();
       canvas.remove();
       const globeCanvas = document.createElement("canvas");
@@ -475,6 +515,44 @@ try {
       const globeColor = Array.from(
         globeScene.context.readPixels({ x: 32, y: 31, width: 1, height: 1 }),
       );
+      const terrainWorker = new C.TaskProcessor("SceneGISVectorTileWorker");
+      let globeExtrusionHeight;
+      try {
+        const result = await terrainWorker.scheduleTask({
+          kind: "extrusion-terrain",
+          bounds: { minimumX: bounds.minimumX, maximumY: bounds.maximumY },
+          origin: globeTarget,
+          streams: [
+            {
+              coordinates: new Float32Array([
+                bounds.width / 2,
+                -bounds.height / 2,
+              ]),
+              data: new Float32Array([
+                bounds.width / 2,
+                -bounds.height / 2,
+                40,
+                1,
+              ]),
+            },
+          ],
+          entries: globeLayer._terrain.entries.map((entry) => ({
+            rectangle: entry.rectangle,
+            height: entry.height,
+            result: entry.result,
+          })),
+        });
+        const stream = result.streams[0];
+        const position = new C.Cartesian3(
+          globeTarget.x + stream.high[0] + stream.low[0],
+          globeTarget.y + stream.high[1] + stream.low[1],
+          globeTarget.z + stream.high[2] + stream.low[2],
+        );
+        globeExtrusionHeight =
+          C.Ellipsoid.WGS84.cartesianToCartographic(position).height;
+      } finally {
+        terrainWorker.destroy();
+      }
       const globePick = globeScene.pick(new C.Cartesian2(32, 32))?.id.featureId;
       const globeResources = globeLayer._drawOrder.find(
         (b) => b._resources._textures,
@@ -568,6 +646,12 @@ try {
           separate: fixed !== dynamic,
           released: fixed.isDestroyed() && dynamic.isDestroyed(),
         },
+        extrusion: {
+          color: extrusionColor,
+          picked: extrusionPick,
+          released: extrusionVA.isDestroyed(),
+          globeHeight: globeExtrusionHeight,
+        },
         ground: {
           color: groundColor,
           picked: groundPick,
@@ -595,6 +679,10 @@ try {
       result.same && result.transferred && result.typed && result.destroyed,
     );
     assert.deepEqual(errors, []);
+    assert(result.extrusion.color[1] > 0 && result.extrusion.color[0] === 0);
+    assert.equal(result.extrusion.picked, "land");
+    assert(result.extrusion.released);
+    assert(Math.abs(result.extrusion.globeHeight - 640) < 2);
     assert.deepEqual(result.symbol.pixel, [255, 0, 0, 255]);
     assert.equal(result.symbol.picked, "symbol");
     assert.deepEqual(result.ground.color, [0, 0, 255, 255]);

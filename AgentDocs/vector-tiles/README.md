@@ -2,18 +2,20 @@
 
 ## Metadata
 
-| Field                  | Value                                                  |
-| ---------------------- | ------------------------------------------------------ |
-| Extension slug         | `vector-tiles`                                         |
-| Status                 | `active`                                               |
-| Planning model         | `extension`                                            |
-| Active extension plan  | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase          | `E2 completed`                                         |
-| Active phase plan      | [E2](plans/2026-09-14-e2-example-opacity-gui.md)       |
-| Active standalone plan | None                                                   |
-| Architecture contact   | 当前 Agent                                             |
-| Execution contact      | 当前 Agent                                             |
-| Last updated           | `2026-09-14`                                           |
+| Field                    | Value                                                  |
+| ------------------------ | ------------------------------------------------------ |
+| Extension slug           | `vector-tiles`                                         |
+| Status                   | `completed`（当前大阶段）                              |
+| Planning model           | `extension`                                            |
+| Active extension plan    | None                                                   |
+| Completed extension plan | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
+| Current phase            | None                                                   |
+| Active phase plan        | None                                                   |
+| Last completed phase     | [V3D1](plans/2026-09-17-v3d1-fill-extrusion.md)        |
+| Active standalone plan   | None                                                   |
+| Architecture contact     | 当前 Agent                                             |
+| Execution contact        | 当前 Agent                                             |
+| Last updated             | `2026-09-17`                                           |
 
 ## Scope
 
@@ -37,26 +39,38 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - Upstream：`1.144 / 6d5d8b1f0725b6f831b336463f4b11c98023427b`。
 - Source：`packages/engine/Source/SceneGIS/Core/SceneGISVectorTile*.js` 和
   `packages/engine/Source/SceneGIS/Scene/SceneGISVectorTileLayer.js`，五个公共入口。
-- Specs：Core/Renderer/Scene 镜像测试，169 项覆盖通过；V5A 另有 14 项既有 planar quadtree 回归通过。
+- Specs：最终 198 项 vector Specs 通过；各先前阶段的专项资格保留在对应 review。
 - 当前能力：[VectorTiles](../../Documentation/SceneGIS/VectorTiles.md)。
 - 人工页面：[城市](../../Test/vector-tiles/planar-city.html) 与 [样式图集](../../Test/vector-tiles/planar-styles.html)，
   21 个城市 MVT fixtures 加 1 个样式 MVT。
 - 新页面：[公开地图](../../Test/vector-tiles/planar-map.html)，默认 MapLibre 示例使用的 OpenFreeMap / Bright，
   保留 Liberty 对照，无需 token；来源和样式差距见 [参考](../../Test/vector-tiles/reference/README.md)。
 - Globe 页面：[球面地图](../../Test/vector-tiles/globe-map.html)，默认本地；公共数据、整球与真实地形切换。
-- 当前页面回归：16 项 E2E，包含中文上手入口与 `Specs/e2e/scenegis-vector-globe.spec.js`；
-  使用 `Test/vector-tiles/playwright.config.mjs`，直接连接根开发服务器。
+- 页面回归使用 `Test/vector-tiles/playwright.config.mjs`，直接连接根开发服务器。
+  V3D1 的 6 项相关 E2E 通过；贴地性能修正后另通过 1 项 Globe E2E，非重新运行全部历史矩阵。
 - E2E：`Specs/e2e/scenegis-vector-tiles.spec.js`，3 项通过。
 - 公开页 E2E：`Specs/e2e/scenegis-vector-public.spec.js`，5 项通过；使用本地数据拦截外网。
 - Sandcastle：不新建；使用根服务器直接访问 `Test/**`。
 - ADR：[ADR-0057](../../Documentation/SceneGIS/Decisions/ADR-0057-independent-vector-tiles-runtime.md)。
-- SGP：`SGP-0011`；upstream-owned files 为 `packages/engine/package.json`、`ThirdParty.extra.json`。
+- SGP：历史阶段的 `SGP-0011` 涉及 `packages/engine/package.json`、`ThirdParty.extra.json`；
+  `SGP-0012` 涉及 `packages/engine/Source/Scene/GlobeTranslucencyState.js`。V3D1 与收口无上游改动。
 - V1 ADR：[ADR-0058](../../Documentation/SceneGIS/Decisions/ADR-0058-vector-tile-frontend-contract.md)。
 - V2 ADR：[ADR-0059](../../Documentation/SceneGIS/Decisions/ADR-0059-planar-vector-tile-batch-renderer.md)；无新增 SGP。
 - V3A ADR：[ADR-0060](../../Documentation/SceneGIS/Decisions/ADR-0060-vector-tile-resident-render-cover.md)；无新增 SGP。
 - V3B1 ADR：[ADR-0062](../../Documentation/SceneGIS/Decisions/ADR-0062-vector-stroke-and-coverage.md)；无新增 SGP。
 
 ## Current handoff
+
+- 2026-09-17 负责人明确验收通过，关闭 V3D1 贴地性能 gate 与当前矢量瓦片加载大阶段。
+- 当前无 active phase、open discussion 或待验收 gate。技术证据、冻结能力及后续事项见
+  [大阶段收口评审](reviews/2026-09-17-milestone-closeout-review.md)。后续工作需重新激活计划。
+- 最终 198 项 Specs 通过；Globe 建筑求交和编码已移入 Worker，同轨迹 CPU P95 从 76.4 ms 降至 15.6 ms。
+  不承诺所有设备、所有视角 60 FPS，保留原评审中的性能边界。
+- 本次 V3D1 实现、Specs、ADR 和收口记录形成同一本地 checkpoint，提交号见本文件 Git 历史；不自动合并或推送。
+
+## 阶段历史
+
+以下按阶段保留当时事实；历史中的 active/pending 描述不代表当前状态，以 Current handoff 和最新收口评审为准。
 
 - 源码事实：[Cesium 与平面能力审计](discussions/2026-09-12-cesium-mvt-and-planar-audit.md)。
 - 已解决 discussion：[实现边界与取舍](discussions/2026-09-12-rendering-boundaries.md)。
@@ -238,3 +252,10 @@ E2 技术自审通过：两个示例直接绑定 Layer.opacity，3 项上手 E2E
 无产品 runtime、上游文件或 SGP 变更；待负责人视觉验收后独立 checkpoint。
 
 2026-09-17 负责人授权推进建筑拉伸，E2 按推进授权完成，先建立独立 checkpoint。
+
+E2 checkpoint：`cae5a711bf`。当前 [V3D1](plans/2026-09-17-v3d1-fill-extrusion.md) 实现建筑拉伸，见 ADR-0074。
+
+V3D1 已实现 fill-extrusion 屋顶/侧墙/孔洞、米制高度与底高、透明和双世界 terrain anchors。
+193 项独立 vector Specs、6 项相关 E2E、build/types/tsc/release 与三种实际包入口通过。
+Bright 中文示例和原测试页已显示楼栋，Liberty 原生 building-3d 已启用。
+无 upstream-owned 改动与 SGP；完整边界、证据与待负责人视觉 gate 见 [V3D1 review](reviews/2026-09-17-v3d1-fill-extrusion-review.md)。

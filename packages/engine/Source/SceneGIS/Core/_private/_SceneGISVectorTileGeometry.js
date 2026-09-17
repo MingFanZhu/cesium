@@ -10,6 +10,7 @@ import IndexDatatype from "../../../Core/IndexDatatype.js";
 import PrimitiveType from "../../../Core/PrimitiveType.js";
 import strokeGeometry from "./_SceneGISVectorTileStroke.js";
 import Dashes from "./_SceneGISVectorTileDashes.js";
+import extrusionGeometry from "./_SceneGISVectorExtrusionGeometry.js";
 
 function attribute(values, size, double = false) {
   return new GeometryAttribute({
@@ -250,7 +251,8 @@ SceneGISVectorTileGeometry.build = function (
   for (let index = 0; index < sourceLayer.features.length; index++) {
     const feature = sourceLayer.features[index];
     if (
-      (definition.type === "fill" && feature.type !== 3) ||
+      ((definition.type === "fill" || definition.type === "fill-extrusion") &&
+        feature.type !== 3) ||
       (definition.type === "circle" && feature.type !== 1) ||
       (definition.type === "line" && feature.type === 1)
     ) {
@@ -275,6 +277,9 @@ SceneGISVectorTileGeometry.build = function (
       paint[`${definition.type}-color`],
       paint[`${definition.type}-opacity`],
     );
+    if (definition.type === "fill-extrusion") {
+      color.alpha = paint["fill-extrusion-opacity"];
+    }
     if (definition.type === "fill") {
       const geometry = fillGeometry(feature, coordinates);
       if (geometry !== undefined && color.alpha > 0) {
@@ -298,6 +303,13 @@ SceneGISVectorTileGeometry.build = function (
         const fringe = fringeGeometry(feature, coordinates);
         if (fringe !== undefined) {
           main.push(makeInstance(fringe, id, color));
+        }
+      }
+    } else if (definition.type === "fill-extrusion") {
+      if (color.alpha > 0) {
+        const geometry = extrusionGeometry(feature, coordinates, paint);
+        if (geometry) {
+          main.push(makeInstance(geometry, id, color));
         }
       }
     } else if (definition.type === "line") {

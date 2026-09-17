@@ -105,3 +105,10 @@ V4B-R06 与本 review R05 的其他 GPU/driver/新瓦片成本继续保留 open�
 负责人随后认可当前功能并要求转向独立、简单的球面/平面上手示例；按推进授权关闭 R06，
 status `accepted`，owner 项目负责人/当前 Agent。上述 pending 为历史交付状态，本结论优先。
 R05 与 V4B-R06 的重负载性能边界仍保留；本阶段先建立独立本地 checkpoint，再开展示例工作。
+
+## 2026-09-17 收口处置
+
+负责人验收当前大阶段后，V3C1D-R05 从 open 转为 deferred；GPU 创建/上传、高 draw-call 数与帧时尾部仍有成本，
+当前验收不扩大为全场景 60 FPS。V3C1D-R06 已由后续推进确认，阶段 checkpoint 保持有效。
+负责人角色为 architecture，后续有具体性能目标时重新激活；统一跟踪见
+[大阶段收口评审](2026-09-17-milestone-closeout-review.md)。原始证据保留。

@@ -12,8 +12,6 @@ import Coordinates from "../../Core/_private/_SceneGISVectorGlobeCoordinates.js"
 import Index from "../../Core/_private/_SceneGISVectorGlobeTerrainIndex.js";
 
 const ellipsoid = Ellipsoid.WGS84;
-const direction = new Cartesian3();
-const sample = new Cartesian3();
 
 function queryRectangle(tile, mesh) {
   const rectangle = Rectangle.clone(tile.rectangle);
@@ -128,30 +126,7 @@ function update(layer) {
     readyCount: revision,
     revision: (previous?.revision ?? 0) + 1,
     height(x, y) {
-      const ll = Coordinates.cartographic(x, y);
-      // Buffered coordinates may cross the antimeridian; normalize only this
-      // geographic query, preserving the source's original XYZ and geometry.
-      ll.longitude = Math.atan2(Math.sin(ll.longitude), Math.cos(ll.longitude));
-      for (const entry of entries) {
-        if (!Rectangle.contains(entry.rectangle, ll)) {
-          continue;
-        }
-        entry.needed = true;
-        if (!entry.result) {
-          continue;
-        }
-        ll.height = entry.height;
-        ellipsoid.cartographicToCartesian(ll, sample);
-        ellipsoid.geodeticSurfaceNormalCartographic(ll, direction);
-        Cartesian3.negate(direction, direction);
-        const distance = Index.intersect(entry.result, sample, direction);
-        if (distance !== undefined) {
-          return entry.height - distance;
-        }
-        // On shared tile edges the decoded, quantized surface can belong to
-        // either adjacent mesh. Test every geographic owner before declaring a miss.
-      }
-      return 0;
+      return Index.height(entries, x, y);
     },
   };
 }

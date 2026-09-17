@@ -108,3 +108,10 @@ Vector commands 明确不 cast/receive native geometry shadows，Globe backgroun
 
 该边界由后继 V4/M1 负责，进入实现前需审计现有物理光照 receiver 与 shadow 派生，不能直接给覆盖
 凸体开启 castShadows。当前正式能力说明见 [VectorTiles](../../../Documentation/SceneGIS/VectorTiles.md#地形明暗hillshade-与高级环境)。
+
+## 2026-09-17 收口处置
+
+负责人验收当前大阶段后，G1-R09 和 G1-R16 从 open 转为 deferred，G1-R10 保持 deferred。
+公共字体覆盖、连续曲面字形与所有动作的帧时尾部不属于当前已接受 profile，未标记为修复。
+负责人角色为 architecture；后续重新激活字体/地形标注或性能阶段时处理，统一跟踪见
+[大阶段收口评审](2026-09-17-milestone-closeout-review.md)。此前量测与资格证据保持不变。

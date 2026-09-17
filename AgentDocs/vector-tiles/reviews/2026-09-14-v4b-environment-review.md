@@ -71,3 +71,11 @@ Planar 使用既有 astronomical mode，云时间与 Viewer clock 同步。设�
 不新增产品 API、Shader 或资源。负责人于 2026-09-14 明确手动检查通过，R08 关闭。
 R06 性能工作仍由后继 M1 承接，R07 未资格范围不变；不把本次接受扩大为全场景 60 FPS。
 V4B 形成独立本地 checkpoint，不激活下一阶段。
+
+## 2026-09-17 收口处置
+
+负责人验收当前大阶段后，V4B-R06 从 open 转为 deferred：近地平线高命令量与 GPU/driver 成本仍未消除，
+当前交付不承诺全场景 60 FPS。V4B-R07 中当前可见地表透明已由 G2/G3 完成；
+Planar native geometry-shadow、地下/背面、完整曲面文字和更广字体范围继续 deferred，不能整项标记 fixed。
+负责人角色为 architecture，后续按需求重新激活资格阶段；统一跟踪见
+[大阶段收口评审](2026-09-17-milestone-closeout-review.md)。

@@ -22,6 +22,7 @@ import updateTerrain from "./_private/_SceneGISVectorTerrain.js";
 import GlobeCoordinates from "../Core/_private/_SceneGISVectorGlobeCoordinates.js";
 import GlobeCover from "./_private/_SceneGISVectorGlobeCover.js";
 import GlobeTerrain from "./_private/_SceneGISVectorGlobeTerrain.js";
+import extrusionAnchoring from "./_private/_SceneGISVectorExtrusionAnchoring.js";
 import GlobeBackground from "./_private/_SceneGISVectorGlobeBackground.js";
 
 function integerOption(options, name, fallback) {
@@ -241,7 +242,7 @@ function validatePreparedTile(result, records, allowPicking) {
     for (const item of group.batches) {
       if (
         (!item.geometries?.length && !item.ground) ||
-        !["fill", "line", "circle"].includes(item.kind) ||
+        !["fill", "line", "circle", "fill-extrusion"].includes(item.kind) ||
         !Array.isArray(item.identities)
       ) {
         throw new DeveloperError("Invalid vector Worker geometry.");
@@ -285,6 +286,24 @@ function validatePreparedTile(result, records, allowPicking) {
           );
         }
         const count = high.length / 3;
+        if (
+          item.kind === "fill-extrusion" &&
+          (!Number.isFinite(item.minimumHeight) ||
+            !Number.isFinite(item.maximumHeight) ||
+            item.minimumHeight > item.maximumHeight ||
+            !(
+              geometry.attributes.extrusionData?.values instanceof Float32Array
+            ) ||
+            geometry.attributes.extrusionData.componentsPerAttribute !== 4 ||
+            !(
+              geometry.attributes.vectorAnchor?.values instanceof Float32Array
+            ) ||
+            geometry.attributes.vectorAnchor.componentsPerAttribute !== 2 ||
+            !(geometry.attributes.normal?.values instanceof Float32Array) ||
+            geometry.attributes.normal.componentsPerAttribute !== 3)
+        ) {
+          throw new DeveloperError("Invalid vector Worker extrusion buffers.");
+        }
         for (const attribute of Object.values(geometry.attributes)) {
           if (
             !ArrayBuffer.isView(attribute.values) ||
@@ -666,10 +685,10 @@ function updateSources(layer, zoom, frameState) {
     }
   }
   let uploads = 0;
-  const budget = {
+  const budget = (layer._uploadBudget = {
     deadline: performance.now() + layer._maximumUploadTimePerFrame,
     bytes: 0,
-  };
+  });
   for (const [id, state] of layer._sources) {
     for (const entry of state.visible) {
       uploads = updateEntry(
@@ -1020,7 +1039,9 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
       return (
         this._tilesLoaded &&
         (this._symbols?.loaded ?? true) &&
-        (!this._globe || !GlobeTerrain.pending(this))
+        (!this._globe ||
+          (!GlobeTerrain.pending(this) &&
+            !this._drawOrder.some(extrusionAnchoring.pending)))
       );
     },
   },

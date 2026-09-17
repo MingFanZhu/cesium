@@ -246,7 +246,7 @@ describe("SceneGIS/Core/SceneGISVectorTileStyle", function () {
 
   it("returns path-bearing diagnostics for unsupported layers, properties, operators, and TileJSON", function () {
     const cases = [
-      [json({ type: "fill-extrusion" }), "layers[0].type"],
+      [json({ type: "raster" }), "layers[0].type"],
       [
         json({ paint: { "line-pattern": "road" } }),
         "layers[0].paint.line-pattern",

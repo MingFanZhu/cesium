@@ -36,6 +36,8 @@ gui.add(layer, "opacity", 0, 1, 0.01).name("矢量不透明度");
 不能靠修改 CRS 名称完成重投影。
 
 当前示例使用仓库固定 Bright 快照，显式排除尚不支持 fill-translate 的 building-top；
+building 改为 `fill-extrusion`，从 14 级起使用 `render_height` 和 `render_min_height`（米）生成楼栋。
+缺少属性时示例分别采用 10 米和 0 米；图层支持按要素属性或 zoom 表达式设置高度、底高和颜色。
 多字体使用 `maximumGlyphRanges: 192`。完整范围见
 [矢量瓦片](../../../Documentation/SceneGIS/VectorTiles.md) 与
 [标注说明](../../../Documentation/SceneGIS/VectorTileSymbols.md)。

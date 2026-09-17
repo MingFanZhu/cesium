@@ -31,6 +31,9 @@ const viewer = new C.Viewer("map", {
   vrButton: false,
 });
 const scene = viewer.scene;
+scene.light = new C.DirectionalLight({
+  direction: new C.Cartesian3(-0.3, -0.5, -1),
+});
 const world = viewer.planarWorld;
 // Local imagery uses the world's canonical tile matrix and needs no service.
 const grid = document.createElement("canvas");

@@ -18,6 +18,7 @@ import GlobeCover from "./_SceneGISVectorGlobeCover.js";
 import GlobeTerrain from "./_SceneGISVectorGlobeTerrain.js";
 import EnvironmentResources from "../../Renderer/_private/_SceneGISVectorEnvironmentResources.js";
 import environment from "./_SceneGISVectorEnvironment.js";
+import extrusionAnchoring from "./_SceneGISVectorExtrusionAnchoring.js";
 
 const colorState = {
   depthTest: { enabled: false },
@@ -96,7 +97,15 @@ function groundHeights(batch, frameState) {
   return range.heights;
 }
 
-function updateAnchors(batch) {
+function updateAnchors(batch, frameState) {
+  if (batch._kind === "fill-extrusion") {
+    if (batch._owner._globe) {
+      extrusionAnchoring.update(batch, frameState);
+    } else {
+      updateExtrusionAnchors(batch);
+    }
+    return;
+  }
   const terrain = batch._owner._terrain;
   const streams = batch._resources._anchorBuffers;
   if (!streams?.length || !terrain || batch._anchorTerrain === terrain) {
@@ -176,13 +185,98 @@ function updateAnchors(batch) {
   }
 }
 
+function updateExtrusionAnchors(batch) {
+  const terrain = batch._owner._terrain;
+  if (!terrain || batch._anchorTerrain === terrain) {
+    return;
+  }
+  batch._anchorTerrain = terrain;
+  const resources = batch._resources;
+  const streams = resources._anchorBuffers;
+  const point = new Cartesian3();
+  const encoded = new EncodedCartesian3();
+  for (let i = 0; i < streams.length; i += 2) {
+    const high = streams[i].values,
+      low = streams[i + 1].values;
+    const coordinates = resources._anchorCoordinates[i / 2];
+    const data = resources._extrusionData[i / 2];
+    let first = Infinity,
+      last = 0,
+      previousX,
+      previousY,
+      anchorHeight;
+    for (let j = 0; j < high.length / 3; j++) {
+      const cx = data[j * 4],
+        cy = data[j * 4 + 1];
+      if (cx !== previousX || cy !== previousY) {
+        anchorHeight = terrain.height(
+          cx + batch._tileBounds.minimumX,
+          cy + batch._tileBounds.maximumY,
+        );
+        previousX = cx;
+        previousY = cy;
+      }
+      const x = coordinates[j * 2],
+        y = coordinates[j * 2 + 1];
+      const z = data[j * 4 + 2];
+      let height = anchorHeight + z;
+      if (z === 0 && data[j * 4 + 3] === 0) {
+        height = Math.min(
+          height,
+          terrain.height(
+            x + batch._tileBounds.minimumX,
+            y + batch._tileBounds.maximumY,
+          ),
+        );
+      }
+      Cartesian3.fromElements(x, y, height, point);
+      EncodedCartesian3.fromCartesian(point, encoded);
+      for (let axis = 0; axis < 3; axis++) {
+        const key = axis === 0 ? "x" : axis === 1 ? "y" : "z";
+        const offset = j * 3 + axis;
+        const h = Math.fround(encoded.high[key]),
+          l = Math.fround(encoded.low[key]);
+        if (high[offset] !== h || low[offset] !== l) {
+          high[offset] = h;
+          low[offset] = l;
+          first = Math.min(first, offset);
+          last = offset + 1;
+        }
+      }
+    }
+    if (last > first) {
+      streams[i].buffer.copyFromArrayView(
+        high.subarray(first, last),
+        first * 4,
+      );
+      streams[i + 1].buffer.copyFromArrayView(
+        low.subarray(first, last),
+        first * 4,
+      );
+    }
+  }
+}
+
 /** Owns one tile/style geometry batch and its last published commands. @private */
 function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
-  if (owner._ground && prepared.instances && prepared.kind !== "circle") {
+  if (prepared.kind === "fill-extrusion" && prepared.instances) {
+    prepared = prepareBatch(prepared, allowPicking, false)[0];
+  } else if (
+    owner._ground &&
+    prepared.instances &&
+    prepared.kind !== "circle"
+  ) {
     prepared = prepareBatch(prepared, allowPicking, true)[0];
   }
   this._ground = !!prepared.ground;
   this._kind = prepared.kind;
+  this._minimumHeight = prepared.minimumHeight ?? 0;
+  this._maximumHeight = prepared.maximumHeight ?? 0;
+  this._heightRange = new Cartesian2();
+  this._styleOpacity =
+    prepared.kind === "fill-extrusion"
+      ? prepared.geometries[0].attributes.color.values[3] / 255
+      : 1;
   this._environmentResources = undefined;
   this.commands = [];
   this.renderCommands = [];
@@ -213,8 +307,15 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
 }
 
 SceneGISVectorTileBatch.prototype.update = function (frameState) {
+  const extrusion = this._kind === "fill-extrusion";
+  const heights = Cartesian2.fromElements(
+    (this._owner._ground ? this._owner._groundHeights.x : 0) +
+      this._minimumHeight,
+    (this._owner._ground ? this._owner._groundHeights.y : 0) +
+      this._maximumHeight,
+    this._heightRange,
+  );
   if (this._owner._globe) {
-    const heights = this._owner._groundHeights;
     if (
       !this._globeRegion ||
       this._globeRegion.minimumHeight !== heights.x ||
@@ -223,9 +324,8 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
       this._globeRegion = GlobeCover.region(this._tileBounds, heights);
       BoundingSphere.clone(this._globeRegion.boundingSphere, this._bounds);
     }
-  } else if (this._owner._ground) {
-    const bounds = this._tileBounds,
-      heights = this._owner._groundHeights;
+  } else if (this._owner._ground || extrusion) {
+    const bounds = this._tileBounds;
     Cartesian3.fromElements(
       bounds.minimumX,
       bounds.minimumY,
@@ -244,8 +344,11 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
     const program = shaderProgram(this);
     for (const command of this.commands) {
       EnvironmentResources.setProgram(command, program);
+      if (extrusion) {
+        updateExtrusionState(this, command);
+      }
     }
-    updateAnchors(this);
+    updateAnchors(this, frameState);
     if (this._record?.uniformPaint && this._record.key === this._geometryKey) {
       this._resources.updatePaint(this._record.uniformPaint);
     }
@@ -259,7 +362,7 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
     this._owner._groundGeometry,
   );
   this._prepared = undefined;
-  updateAnchors(this);
+  updateAnchors(this, frameState);
   const depthRange = new Cartesian2();
   const uniformMap = {
     ...this._resources.uniformMap,
@@ -307,8 +410,26 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
         receiveShadows: false,
       }),
     );
+    if (extrusion) {
+      updateExtrusionState(this, this.commands[this.commands.length - 1]);
+    }
   }
 };
+
+function updateExtrusionState(batch, command) {
+  const translucent = batch._styleOpacity * batch._owner.opacity < 1;
+  const pass = translucent ? Pass.TRANSLUCENT : Pass.OPAQUE;
+  if (command.pass === pass) {
+    return;
+  }
+  command.pass = pass;
+  command.renderState = RenderState.fromCache({
+    depthTest: { enabled: true },
+    depthMask: !translucent,
+    cull: { enabled: true, face: CullFace.BACK },
+    blending: translucent ? BlendingState.ALPHA_BLEND : undefined,
+  });
+}
 
 SceneGISVectorTileBatch.prototype.setRegions = function (regions) {
   this.renderCommands.length = 0;
@@ -346,6 +467,8 @@ SceneGISVectorTileBatch.prototype.setRegions = function (regions) {
         published.render.uniformMap = published.uniformMap;
       }
       EnvironmentResources.setProgram(published.render, source.shaderProgram);
+      published.render.pass = source.pass;
+      published.render.renderState = source.renderState;
       this.renderCommands.push(published.render);
       index++;
     }
@@ -355,7 +478,10 @@ SceneGISVectorTileBatch.prototype.setRegions = function (regions) {
 SceneGISVectorTileBatch.prototype.queue = function (frameState) {
   if (
     frameState.passes.render ||
-    (frameState.passes.pick && !frameState.passes.depth && this._allowPicking)
+    (frameState.passes.pick &&
+      !frameState.passes.depth &&
+      this._allowPicking) ||
+    (frameState.passes.depth && this._kind === "fill-extrusion")
   ) {
     for (const command of this.renderCommands) {
       frameState.commandList.push(command);
@@ -364,6 +490,7 @@ SceneGISVectorTileBatch.prototype.queue = function (frameState) {
 };
 
 SceneGISVectorTileBatch.prototype.destroy = function () {
+  extrusionAnchoring.clear(this);
   this._environmentResources?.destroy();
   this._resources?.destroy();
   this._anchorTerrain = undefined;

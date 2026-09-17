@@ -748,6 +748,14 @@ review不能代替项目负责人的真实浏览器/GPU人工验收。完整决�
 
 ### 独立矢量瓦片
 
+建筑 `fill-extrusion` 按 [ADR-0074](Decisions/ADR-0074-vector-fill-extrusion.md) 使用独立实体网格，
+由 vector Worker 生成屋顶、侧墙和法线，按 tile/style 合批；使用普通 OPAQUE/TRANSLUCENT 和 native pick/depth。
+height/base 是相对 polygon terrain anchor 的米制高度，Planar 使用 +Z，Globe 使用 geodetic up；
+resident terrain revision 仅更新位置流，不重新三角化或主动请求地形。首次切换 Planar flat/ground 后端仍沿用既有批次重建。
+Globe 建筑地形求交与 ECEF 重编码在现有 vector Worker 完成，仅按批次相交地形依赖失效；
+主线程以既有上传预算发布完整位置流，并隔离旧地形代际和销毁后的结果。
+不把建筑送入地表 coverage，不新增逐 feature Primitive 或 Scene pass；跨瓦片的楼栋拼接尚未支持。
+
 `vector-tiles` 遵循 [ADR-0057](Decisions/ADR-0057-independent-vector-tiles-runtime.md)，
 不依赖 Cesium experimental MVT decoder/provider/vector GLB/Buffer vector/VectorProvider。
 MVT 保持 CRS 无关，source/World 显式匹配单根 tile matrix；首轮 EPSG:3857 平面验收。

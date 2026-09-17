@@ -72,6 +72,16 @@ const profile = {
     ],
     layout: ["visibility"],
   },
+  "fill-extrusion": {
+    paint: [
+      "fill-extrusion-color",
+      "fill-extrusion-opacity",
+      "fill-extrusion-height",
+      "fill-extrusion-base",
+      "fill-extrusion-vertical-gradient",
+    ],
+    layout: ["visibility"],
+  },
   line: {
     paint: [
       "line-color",

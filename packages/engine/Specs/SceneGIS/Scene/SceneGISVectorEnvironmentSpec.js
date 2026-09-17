@@ -30,11 +30,20 @@ import createCanvas from "../../../../../Specs/createCanvas.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
 
 describe("SceneGIS/Scene/SceneGISVectorEnvironment", function () {
-  for (const profile of ["flat", "ground", "globe", "globe-terrain"]) {
+  for (const profile of [
+    "flat",
+    "ground",
+    "globe",
+    "globe-terrain",
+    "flat-extrusion",
+    "globe-extrusion",
+  ]) {
     it(`uses physical source/sky/cloud lighting on ${profile} and preserves pick, geometry and borrowed resources`, async function () {
       const scene = createScene({ canvas: createCanvas(128, 128) });
       const globe = profile.startsWith("globe");
       const terrain = profile.includes("terrain") || profile === "ground";
+      const extrusion = profile.endsWith("extrusion");
+      const kind = extrusion ? "fill-extrusion" : "fill";
       const textures = [];
       const key = globe ? "_sceneGISGlobeLighting" : "_sceneGISPlanarLighting";
       function texture(rgba) {
@@ -193,10 +202,16 @@ describe("SceneGIS/Scene/SceneGISVectorEnvironment", function () {
                 },
                 {
                   id: "area",
-                  type: "fill",
+                  type: kind,
                   source: "test",
                   "source-layer": "data",
-                  paint: { "fill-color": "#6688aa", "fill-opacity": 0.8 },
+                  paint: extrusion
+                    ? {
+                        "fill-extrusion-color": "#6688aa",
+                        "fill-extrusion-opacity": 0.8,
+                        "fill-extrusion-height": 10,
+                      }
+                    : { "fill-color": "#6688aa", "fill-opacity": 0.8 },
                 },
               ],
             },
@@ -222,7 +237,7 @@ describe("SceneGIS/Scene/SceneGISVectorEnvironment", function () {
         );
         expect(errors).toEqual([]);
         const baseline = pixel();
-        const draw = layer._drawOrder.find((batch) => batch._kind === "fill");
+        const draw = layer._drawOrder.find((batch) => batch._kind === kind);
         const base = draw.commands[0].shaderProgram;
         const vertexArray = draw.commands[0].vertexArray;
         const record = {

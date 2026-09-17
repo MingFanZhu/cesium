@@ -58,6 +58,17 @@ async function loadMap() {
   };
   // This snapshot's building-top layer uses unsupported fill-translate.
   style.layers = style.layers.filter((layer) => layer.id !== "building-top");
+  // Replace the 2D building footprint with real roofs and walls (heights in meters).
+  const building = style.layers.find((layer) => layer.id === "building");
+  building.type = "fill-extrusion";
+  building.minzoom = 14;
+  building.filter = ["!=", ["get", "hide_3d"], true];
+  building.paint = {
+    "fill-extrusion-color": "#ded6ca",
+    "fill-extrusion-height": ["coalesce", ["get", "render_height"], 10],
+    "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+    "fill-extrusion-opacity": 1,
+  };
   if (viewer.isDestroyed()) {
     return;
   }

@@ -2,6 +2,9 @@ import Cartesian3 from "../../../Core/Cartesian3.js";
 import IntersectionTests from "../../../Core/IntersectionTests.js";
 import TerrainEncoding from "../../../Core/TerrainEncoding.js";
 import Ray from "../../../Core/Ray.js";
+import Ellipsoid from "../../../Core/Ellipsoid.js";
+import Rectangle from "../../../Core/Rectangle.js";
+import Coordinates from "./_SceneGISVectorGlobeCoordinates.js";
 
 function build(parameters) {
   const encoding = TerrainEncoding.clone(parameters.encoding);
@@ -126,5 +129,32 @@ function intersect(data, origin, direction) {
   return closest === Infinity ? undefined : closest;
 }
 
+const sample = new Cartesian3();
+const downward = new Cartesian3();
+
+function height(entries, x, y) {
+  const ll = Coordinates.cartographic(x, y);
+  ll.longitude = Math.atan2(Math.sin(ll.longitude), Math.cos(ll.longitude));
+  for (const entry of entries) {
+    if (!Rectangle.contains(entry.rectangle, ll)) {
+      continue;
+    }
+    entry.needed = true;
+    if (!entry.result) {
+      continue;
+    }
+    ll.height = entry.height;
+    Ellipsoid.WGS84.cartographicToCartesian(ll, sample);
+    Ellipsoid.WGS84.geodeticSurfaceNormalCartographic(ll, downward);
+    Cartesian3.negate(downward, downward);
+    const distance = intersect(entry.result, sample, downward);
+    if (distance !== undefined) {
+      return entry.height - distance;
+    }
+    // Quantized shared edges may be owned by either adjacent mesh.
+  }
+  return 0;
+}
+
 /** Worker-built surface-only BVH with exact CPU ray/triangle queries. @private */
-export default { build, intersect };
+export default { build, intersect, height };

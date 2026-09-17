@@ -1,13 +1,56 @@
 import EncodedCartesian3 from "../../../Core/EncodedCartesian3.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import GlobeCoordinates from "./_SceneGISVectorGlobeCoordinates.js";
+import Cartesian3 from "../../../Core/Cartesian3.js";
 
 /** Subdivides long source triangles and packs stable local ellipsoid frames in the Worker. @private */
 function prepareGlobeGeometry(batch, bounds) {
   if (!batch.ground) {
+    const extrusion = batch.kind === "fill-extrusion";
+    const origin =
+      extrusion &&
+      GlobeCoordinates.position(
+        bounds.minimumX + bounds.width * 0.5,
+        bounds.minimumY + bounds.height * 0.5,
+      );
+    const point = new Cartesian3();
+    const encoded = new EncodedCartesian3();
     for (const geometry of batch.geometries) {
       const high = geometry.attributes.position3DHigh.values;
       const low = geometry.attributes.position3DLow.values;
+      if (extrusion) {
+        const anchors = geometry.attributes.vectorAnchor.values;
+        const normals = geometry.attributes.normal.values;
+        for (let i = 0; i < high.length / 3; i++) {
+          const x = bounds.minimumX + anchors[i * 2];
+          const y = bounds.maximumY + anchors[i * 2 + 1];
+          GlobeCoordinates.position(
+            x,
+            y,
+            high[i * 3 + 2] + low[i * 3 + 2],
+            point,
+          );
+          Cartesian3.subtract(point, origin, point);
+          EncodedCartesian3.fromCartesian(point, encoded);
+          Cartesian3.pack(encoded.high, high, i * 3);
+          Cartesian3.pack(encoded.low, low, i * 3);
+          const lon = x / GlobeCoordinates.radius;
+          const lat = GlobeCoordinates.latitude(y);
+          const nx = normals[i * 3],
+            ny = normals[i * 3 + 1],
+            nz = normals[i * 3 + 2];
+          normals[i * 3] =
+            -Math.sin(lon) * nx -
+            Math.sin(lat) * Math.cos(lon) * ny +
+            Math.cos(lat) * Math.cos(lon) * nz;
+          normals[i * 3 + 1] =
+            Math.cos(lon) * nx -
+            Math.sin(lat) * Math.sin(lon) * ny +
+            Math.cos(lat) * Math.sin(lon) * nz;
+          normals[i * 3 + 2] = Math.cos(lat) * ny + Math.sin(lat) * nz;
+        }
+        continue;
+      }
       const values = new Float32Array((high.length / 3) * 2);
       for (let i = 0; i < high.length / 3; i++) {
         values[i * 2] = high[i * 3] + low[i * 3];

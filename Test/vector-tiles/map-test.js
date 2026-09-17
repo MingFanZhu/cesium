@@ -212,6 +212,18 @@ export default function installMapTest(viewer, controls) {
       const layers = reference.layers.filter(
         (item) => !Object.hasOwn(profile.excluded, item.id),
       );
+      if (selected === "bright") {
+        const building = layers.find((item) => item.id === "building");
+        building.type = "fill-extrusion";
+        building.minzoom = 14;
+        building.filter = ["!=", ["get", "hide_3d"], true];
+        building.paint = {
+          "fill-extrusion-color": "#ded6ca",
+          "fill-extrusion-height": ["coalesce", ["get", "render_height"], 10],
+          "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+          "fill-extrusion-opacity": 1,
+        };
+      }
       const style = new C.SceneGISVectorTileStyle({
         version: 8,
         glyphs: local

@@ -79,6 +79,12 @@ for (const world of ["planar", "globe"]) {
         stats: layer.statistics,
         pick: pick?.id?.source,
         fps: scene.debugShowFramesPerSecond,
+        buildings: layer._drawOrder
+          .filter((batch) => batch._kind === "fill-extrusion")
+          .map((batch) => ({
+            height: batch._maximumHeight,
+            ground: batch._ground,
+          })),
       };
     });
     expect(state.planar).toBe(world === "planar");
@@ -87,6 +93,10 @@ for (const world of ["planar", "globe"]) {
     expect(state.stats.drawCommands).toBeGreaterThan(0);
     expect(state.pick).toBe("openmaptiles");
     expect(state.fps).toBe(true);
+    expect(state.buildings.length).toBeGreaterThan(0);
+    expect(state.buildings.every((b) => b.height === 10 && !b.ground)).toBe(
+      true,
+    );
     expect(state.stats.failedTiles + state.stats.symbolFailures).toBe(0);
     await expect(page.locator("#controls .lil-gui")).toHaveCount(1);
     const opacity = page.getByRole("textbox", { name: "矢量不透明度" });

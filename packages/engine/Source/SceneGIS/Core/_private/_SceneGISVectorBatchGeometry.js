@@ -79,7 +79,7 @@ function prepareVectorBatch(item, allowPicking, ground = false) {
         }
       }
       const packed =
-        ground && item.kind !== "circle"
+        ground && item.kind !== "circle" && item.kind !== "fill-extrusion"
           ? packGround(part, item.kind, allowPicking)
           : undefined;
       const bytes = packed
@@ -89,8 +89,17 @@ function prepareVectorBatch(item, allowPicking, ground = false) {
             (sum, attribute) => sum + attribute.values.byteLength,
             0,
           );
+      let minimumHeight = 0,
+        maximumHeight = 0;
+      const extrusion = part.attributes.extrusionData?.values;
+      for (let i = 2; i < (extrusion?.length ?? 0); i += 4) {
+        minimumHeight = Math.min(minimumHeight, extrusion[i]);
+        maximumHeight = Math.max(maximumHeight, extrusion[i]);
+      }
       result.push({
         kind: item.kind,
+        minimumHeight,
+        maximumHeight,
         geometries: packed ? undefined : [part],
         ground: packed,
         identities,

@@ -62,7 +62,7 @@ imageryLayer.alpha = 0.7;
 三者分别表示矢量要素的透明度、地形与影像合成后的地表颜色透明度、影像在地表颜色中的贡献。
 地表颜色完全透明仍保留贴地所需深度，矢量可以正常显示和拾取。
 矢量 `opacity` 可在构造时设置，默认 1，仅接受有限 `[0,1]`；0 跳过绘制/拾取但保留数据。
-它乘每个 background/fill/line/circle/text/icon 的 style alpha，不先合成地图纹理，
+它乘每个 background/fill/line/circle/text/icon 的 style alpha，以及 fill-extrusion-opacity，不先合成地图纹理，
 因此重叠要素的结果与整幅地图 group opacity 不同。修改无需重新解析或上传几何。
 
 [球面测试页](../../Test/vector-tiles/globe-map.html) 提供三个滑块和本地网格影像；
@@ -158,17 +158,56 @@ TMS 只改变 URL row，不改变 geometry。调用方拥有 Request、取消与
 
 ## 样式 profile
 
+### 建筑拉伸
+
+`fill-extrusion` 在平面和球面均生成真实屋顶和侧墙，支持孔洞、多 polygon 和逐要素拾取。
+下面的高度字段采用 OpenMapTiles schema；其他数据源应替换为自己的字段。
+
+```js
+{
+  id: "buildings",
+  type: "fill-extrusion",
+  source: "openmaptiles",
+  "source-layer": "building",
+  minzoom: 14,
+  filter: ["!=", ["get", "hide_3d"], true],
+  paint: {
+    "fill-extrusion-height": ["coalesce", ["get", "render_height"], 10],
+    "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+    "fill-extrusion-color": "#ded6ca",
+    "fill-extrusion-opacity": 1,
+    "fill-extrusion-vertical-gradient": true,
+  },
+}
+```
+
+height/base 表示相对地形的顶高/底高，单位米，并非顶高加底高；height<=base 时不绘制体积。
+无地形以 Z=0 或椭球为基准。有地形时每个 polygon 以外环顶点均值位置查询驻留地形，
+屋顶统一抬升；base=0 的底边向下延伸到各顶点较低的地形，正 base 则保留统一底高。
+地形更新只改变位置流，不额外请求地形或重新三角化；首次 Planar flat/ground 模式切换仍沿用既有批次重建。
+Globe 的建筑求高程与 ECEF 编码异步交给 vector Worker，只在相交地形变化时重算。
+等待期间保留上一份位置，完整结果在 normal render 按上传预算发布；待更新的可见建筑参与 `tilesLoaded`。
+
+color 的 alpha 按 Style 语义忽略；透明度使用 fill-extrusion-opacity × Layer.opacity。
+建筑使用普通三维深度和 Cesium OIT，不再按二维底图的层顺序覆盖其他物体。
+默认使用 Scene 光向与侧墙垂直渐变；已有高级环境可提供矢量材质光照。尚不提供建筑投射阴影、
+style light、pattern、translate、transition 或复杂屋顶，不承诺 MapLibre 像素一致。
+跨瓦片建筑当前不做语义拼接，因此起伏地形上的分片 anchor 可能产生接缝；大跨度结构与复杂透明交叠仍有边界。
+详见 [ADR-0074](Decisions/ADR-0074-vector-fill-extrusion.md)。
+
+### 支持矩阵
+
 `SceneGISVectorTileStyle` 使用固定的独立 `@maplibre/maplibre-gl-style-spec 24.8.1`，
 profile 为 `scenegis-vector-v1`，构造复制输入 JSON，预检失败带路径抛 DeveloperError。
 `validate(style)` 返回诊断字符串数组；编译成功后不会因调用者修改原 JSON 而变化。
 
-| 范围         | V1 计算能力                                                                                                                               |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Root/source  | version/name/metadata/sources/layers/glyphs/sprite；vector tiles/minzoom/maxzoom/scheme/attribution                                       |
-| Layers       | background、fill、line、circle、point/line symbol；source-layer、顺序、filter、min/maxzoom、visibility                                    |
-| Paint/layout | 颜色/opacity、基础 fill outline/antialias、line width/gap/offset/blur/dash/cap/join、circle radius/stroke/blur                            |
-| Expressions  | 经 profile 允许并测试的属性、分支、类型、算术与 zoom 表达式；完整清单见 ADR-0058                                                          |
-| 未支持       | 复杂 shaping/variable anchor、extrusion、pattern、feature-state/global-state、geometry-dependent filter、旧 style function、imports/slots |
+| 范围         | V1 计算能力                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| Root/source  | version/name/metadata/sources/layers/glyphs/sprite；vector tiles/minzoom/maxzoom/scheme/attribution                            |
+| Layers       | background、fill、fill-extrusion、line、circle、point/line symbol；source-layer、顺序、filter、min/maxzoom、visibility         |
+| Paint/layout | 颜色/opacity、基础 fill outline/antialias、line width/gap/offset/blur/dash/cap/join、circle radius/stroke/blur                 |
+| Expressions  | 经 profile 允许并测试的属性、分支、类型、算术与 zoom 表达式；完整清单见 ADR-0058                                               |
+| 未支持       | 复杂 shaping/variable anchor、pattern、feature-state/global-state、geometry-dependent filter、旧 style function、imports/slots |
 
 这些是前端求值能力；当前 V3B1 实际渲染语义与限制见下节。
 `version:8` 不代表支持任意 Mapbox/MapLibre 样式。
@@ -342,7 +381,8 @@ scene.primitives.remove(layer);
 | circle          | 屏幕圆形、CSS radius/stroke、color/opacity/blur；DPR 感知 AA                                                 |
 | style           | 属性/zoom 表达式、filter、visibility、min/maxzoom；全 tile 的 style layer 顺序优先                           |
 | pick            | primitive 为图层；id 含 source/sourceLayer/styleLayer/tile/featureIndex/featureId/properties                 |
-| 明确拒绝        | profile 之外的属性和类型，包括 pattern、gradient、extrusion、heatmap、raster；symbol 支持见专门文档          |
+| fill-extrusion  | 米制 height/base、color/opacity、vertical-gradient；实体屋顶、外墙、孔洞内墙，普通三维深度遮挡               |
+| 明确拒绝        | profile 之外的属性和类型，包括 pattern、line-gradient、heatmap、raster；symbol 支持见专门文档                |
 
 Line width/gap/offset 从参考平面的 CSS pixel 换算为米，再参与投影；
 俯视缩放保持参考宽度，倾斜时随地图透视变化。正 offset 向线方向右侧移动。
