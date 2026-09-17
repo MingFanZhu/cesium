@@ -13,6 +13,7 @@
 
 平面拆分示例 `Test/Planar/*.html` 及保留的 `Test/Planar/tests/*.html` 同样使用上述未修改的 lil-gui；
 新示例只定位外层 controls 容器，不覆盖 lil-gui 内部样式。
+高级环境拆分示例 `Test/AdvancedEnvironment/*.html` 与保留的 `tests/` 同样使用该版本。
 
 - npm package：`https://registry.npmjs.org/lil-gui/-/lil-gui-0.21.0.tgz`
 - Distribution：`package/dist/lil-gui.esm.min.js`，原始字节未修改

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>球面体积云</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>球面体积云</h1>
+      <p>
+        调整云型、覆盖率和质量，观察云影与体积光。播放后，风速与 Cesium Clock
+        共同决定云的移动。
+      </p>
+      <p>使用本地 Natural Earth 影像和默认椭球地表，无需在线服务。</p>
+      <p>
+        <a href="示例目录.html">全部环境示例</a> ·
+        <a href="球面体积云.js" target="_blank">查看源码</a>
+      </p>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./球面体积云.js"></script>
+  </body>
+</html>

@@ -9,7 +9,7 @@ import {
   controllerStatus,
   createErrorTracker,
   installPageCleanup,
-} from "/Test/AdvancedEnvironment/common.js";
+} from "/Test/AdvancedEnvironment/tests/common.js";
 
 const WEB_MERCATOR_LIMIT = 20037508.342789244;
 const NANJING = Object.freeze({ longitude: 118.8406, latitude: 32.0725 });

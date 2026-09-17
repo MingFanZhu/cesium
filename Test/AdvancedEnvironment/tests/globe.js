@@ -9,7 +9,7 @@ import {
   controllerStatus,
   createErrorTracker,
   installPageCleanup,
-} from "/Test/AdvancedEnvironment/common.js";
+} from "/Test/AdvancedEnvironment/tests/common.js";
 
 const runtimeStatus = document.querySelector("#runtimeStatus");
 const observationStatus = document.querySelector("#observationStatus");
