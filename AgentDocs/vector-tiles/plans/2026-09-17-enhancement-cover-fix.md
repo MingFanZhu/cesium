@@ -1,7 +1,7 @@
 # 样式增强页选取范围修正
 
 - Type: phase plan
-- Status: completed（技术修复；四项人工视觉 gate pending）
+- Status: completed（技术修复与 2026-09-18 负责人验收均通过）
 - Updated: 2026-09-17
 - Owner / architecture review: 当前 Agent，自审方案 approved
 - Parent: [四类样式增强](2026-09-17-style-enhancements-extension.md)

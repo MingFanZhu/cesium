@@ -1,7 +1,7 @@
 # 样式增强页选取范围修复评审
 
 - Type: review
-- Status: approved（技术自审；四项人工视觉 gate pending）
+- Status: approved（技术自审与负责人视觉 gate 均通过）
 - Date: 2026-09-17
 - Target: 相对 V5E checkpoint `e19c707543` 的修复工作树
 - Author / owner: 当前 Agent，architecture/execution 自审，非独立评审
@@ -25,4 +25,4 @@
 - 用户当前球面页已刷新并自查画面：8 块可见/绘制、0 失败，高度 [-1, 1]，地形与矢量就绪且渲染循环存活。
 - 修改路径与官方基线交集为空，没有 upstream-owned file 或 SGP；Shader、Worker、公共 API 不变，不重复发布矩阵。
 - 不增大预算、不限制相机、不吞异常；真实服务必须声明实际层级范围。仅有高 minzoom 的真实服务仍受最低可见覆盖预算契约约束。
-- 本次恢复页面可用性，不代表负责人已验收四项增强效果；继续由原四项计划承接人工视觉 gate。
+- 修复交付时仅确认页面可用性；2026-09-18 负责人明确验收通过，四项增强及本修复的人工 gate 已关闭，见[四项收口](2026-09-17-v5e-icon-fit-review.md)。

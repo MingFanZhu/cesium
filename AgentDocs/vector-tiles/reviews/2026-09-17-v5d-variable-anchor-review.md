@@ -1,7 +1,7 @@
 # V5D review：可变点标注锚点
 
 - Type: review
-- Status: approved（技术自审；人工视觉 gate pending）
+- Status: approved（技术自审与 2026-09-18 四项负责人验收均通过）
 - Date: 2026-09-17
 - Target: V5D 工作树，相对 V3D3 checkpoint `d3a89475f3`
 - Author / owner: 当前 Agent，architecture/execution 自审，非独立评审

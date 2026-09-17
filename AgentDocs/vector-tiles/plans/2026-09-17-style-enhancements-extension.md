@@ -1,13 +1,13 @@
 # Extension Plan：四类样式增强
 
 - Type: extension plan
-- Status: active（四项实现及技术 gate 完成；负责人视觉 gate pending）
-- Created / updated: 2026-09-17
+- Status: completed（技术与负责人视觉 gate 均通过）
+- Created / updated: 2026-09-17 / 2026-09-18
 - Owner / architecture review: 当前 Agent，architecture/execution 自审，approved
 - Authorization: 负责人明确要求按建议补充纹理填充、动态要素状态、标注自动换位置、图标适配文字
 - Baseline: `feature/vector-tiles@2f14780d81`；前一大阶段保持 completed
 - Previous: [大阶段收口](../reviews/2026-09-17-milestone-closeout-review.md)
-- Current phase: None；[选取范围修正](2026-09-17-enhancement-cover-fix.md) completed，待四项人工验收
+- Current phase: None；[选取范围修正](2026-09-17-enhancement-cover-fix.md) `77df6ac9e3` completed，人工验收通过
 - SGP: None planned
 
 ## 稳定目标与边界
@@ -47,4 +47,5 @@ Pattern 指 background/fill/line/fill-extrusion 的 sprite 重复纹理；它是
 四项已实现并通过技术自审，各阶段保持独立提交。最终 227 项 vector Specs、2 项双世界增强页 E2E、
 完整 engine/root/release 和三个实际 package 入口验证通过；公共状态 API 已在 V3D3 完成 build-ts/tsc。
 最新 [V5E review](../reviews/2026-09-17-v5e-icon-fit-review.md) 汇总剩余边界与人工 gate。
-负责人尚未验收本轮新画面，不自动合并或推送；不启动其他延期能力。
+2026-09-18 负责人明确验收通过，四项增强及选取范围修复的人工 gate 全部关闭，本 extension completed。
+仅回填验收文档，沿用已有自动化证据；已接受限制继续保留，不自动合并、推送或启动其他延期能力。

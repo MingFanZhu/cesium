@@ -2,7 +2,7 @@
 
 - Date: 2026-09-17
 - Reviewer: 当前 Agent，architecture/execution 自审，非独立评审
-- Decision: approved；技术 checkpoint，负责人视觉 gate 待四项汇总
+- Decision: approved；技术 checkpoint 与 2026-09-18 四项负责人验收均通过
 - Predecessor: V3D2 `81340f7bef`
 - Plan: [V3D3](../plans/2026-09-17-v3d3-state.md)
 - ADR: [0076](../../../Documentation/SceneGIS/Decisions/ADR-0076-vector-style-state.md)

@@ -2,7 +2,7 @@
 
 - Date: 2026-09-17
 - Reviewer: 当前 Agent，architecture/execution 自审，非独立评审
-- Decision: approved；技术 checkpoint，负责人视觉 gate 随四项增强最终汇总
+- Decision: approved；技术 checkpoint 与 2026-09-18 四项负责人验收均通过
 - Plan: [V3D2](../plans/2026-09-17-v3d2-patterns.md)
 - ADR: [0075](../../../Documentation/SceneGIS/Decisions/ADR-0075-vector-pattern-materials.md)
 - Upstream-owned files: None；与官方基线路径交集为空
@@ -35,5 +35,5 @@
 
 不含图像注册/available-images、pattern crossfade、跨瓦片道路全局里程和复杂建筑展开。
 首轮采用连续 zoom 比例和普通双线性采样；不提供各向异性 mipmap，远景细密纹理可走样。
-不宣称完整 MapLibre 像素一致；最终负责人手工视觉尚未完成，不能以本次自审替代。
+不宣称完整 MapLibre 像素一致；技术自审后，负责人于 2026-09-18 完成四项手工视觉验收。
 无阻塞发现；按已授权路线继续 V3D3，保持原大阶段 deferred finding，不删除历史记录。

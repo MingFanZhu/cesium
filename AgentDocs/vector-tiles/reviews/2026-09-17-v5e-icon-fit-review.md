@@ -1,7 +1,7 @@
 # V5E review：图标适配文字与四项交付
 
 - Type: review
-- Status: approved（技术自审；负责人最终视觉 gate pending）
+- Status: approved（技术自审与负责人最终视觉 gate 均通过）
 - Date: 2026-09-17
 - Target: V5E 工作树，相对 V5D checkpoint `1bf28c4b1f`
 - Author / owner: 当前 Agent，architecture/execution 自审，非独立评审
@@ -39,3 +39,14 @@ V3D2 `81340f7bef`、V3D3 `d3a89475f3`、V5D `1bf28c4b1f`、V5E 本次提交分�
 负责人下一步在 [平面](../../../Test/vector-tiles/平面样式增强.html) 和
 [球面](../../../Test/vector-tiles/球面样式增强.html) 检查纹理、点击选中、相机运动、POI 避让与牌面。
 两页保持默认 lil-gui，无高级环境。确认后只需回填本轮人工 gate；不自动合并、推送或开启其他样式阶段。
+
+## 负责人验收与收口：2026-09-18
+
+负责人在选取范围修复 `77df6ac9e3` 后明确“验收通过”。以上“下一步检查”记录为交付时状态，
+现关闭四项增强与页面修复的人工视觉 gate，extension completed，无 active phase 或阻塞 finding。
+V5E checkpoint 为 `e19c707543`；前三项独立 checkpoint 与全部技术证据保持原记录。
+
+本次只更新验收文档，不修改 runtime、Specs、上游文件或 SGP，不重复渲染/发布验证。
+本次修改的 Prettier、全 AgentDocs Markdownlint 与 diff 检查通过；全量 Prettier 仍有 233 个未修改历史文档的格式问题，沿用原修复评审的范围处理。
+已接受的纹理远景走样、跨 zoom/道路相位、状态批次重建成本、复杂 shaping 等边界继续保留，
+不因视觉验收而宣称已经实现。后续能力按原 extension 目录重新建立阶段计划；不自动合并或推送。

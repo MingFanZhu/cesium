@@ -1,7 +1,10 @@
 # Reviews
 
-- [V3D3 动态状态](2026-09-17-v3d3-state-review.md)：approved；API/Worker/双世界与交付包通过，四项最终视觉 gate 待负责人。
-- [V3D2 纹理材质](2026-09-17-v3d2-pattern-review.md)：approved；技术 checkpoint，四项增强最终视觉 gate 待负责人验收。
+- [V5E 与四项收口](2026-09-17-v5e-icon-fit-review.md)：approved；2026-09-18 负责人验收通过，四项人工 gate 全部关闭。
+- [选取范围修复](2026-09-17-enhancement-cover-fix-review.md)：approved；`77df6ac9e3` 已获负责人验收。
+- [V5D 可变锚点](2026-09-17-v5d-variable-anchor-review.md)：approved；包含在四项最终验收中。
+- [V3D3 动态状态](2026-09-17-v3d3-state-review.md)：approved；API/Worker/双世界与交付包通过，四项最终验收已通过。
+- [V3D2 纹理材质](2026-09-17-v3d2-pattern-review.md)：approved；技术与负责人视觉 gate 均通过。
 - [大阶段收口评审](2026-09-17-milestone-closeout-review.md)：approved；冻结本次交付范围、资格证据与延期事项。
 - [V3D1 建筑拉伸](2026-09-17-v3d1-fill-extrusion-review.md)：approved；198 项 vector Specs 与贴地性能修正通过，负责人验收通过。
 - 各历史阶段评审保留，入口见[扩展索引](../README.md)；已接受边界与延期 finding 不等于已经修复。
