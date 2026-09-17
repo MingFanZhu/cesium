@@ -146,6 +146,7 @@ function createVectorTaskHandler() {
               (512 * 2 ** Math.floor(parameters.zoom)),
             parameters.zoom,
             (key, error) => errors.push({ key, message: error.message }),
+            parameters,
           );
           symbols.push([
             record.order,
@@ -160,6 +161,7 @@ function createVectorTaskHandler() {
             parameters.zoom,
             tile,
             patterns,
+            parameters,
           ).flatMap((item) =>
             prepareBatch(item, parameters.allowPicking, parameters.ground),
           );
@@ -175,6 +177,16 @@ function createVectorTaskHandler() {
         layers,
         symbols,
         errors,
+        featureIds: data.layers.map((layer) => [
+          layer.name,
+          [
+            ...new Set(
+              layer.features
+                .filter((f) => f.id !== undefined)
+                .map((f) => String(f.id)),
+            ),
+          ],
+        ]),
         decodeMs,
         features: data.layers.reduce(
           (sum, layer) => sum + layer.features.length,

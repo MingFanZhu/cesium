@@ -748,6 +748,10 @@ review不能代替项目负责人的真实浏览器/GPU人工验收。完整决�
 
 ### 独立矢量瓦片
 
+状态按 [ADR-0076](Decisions/ADR-0076-vector-style-state.md) 由 Layer 持有，禁止将其写入可共享的 compiled Style。
+Feature/global state 只驱动 paint，按 source/sourceLayer/id 与表达式依赖失效；不重新请求 MVT，不由状态 API 操作 GPU。
+几何结果继续通过 Worker 和正常帧预算发布；标注复用不变的 shaping 与 buffers。
+
 Pattern 按 [ADR-0075](Decisions/ADR-0075-vector-pattern-materials.md) 借用 Layer 的单 sprite atlas，
 Worker 准备图案矩形与坐标，flat/ground/Globe/extrusion 只做材质采样；不得按 feature 拆 command 或生成地图颜色 RTT。
 无 symbol 的 Layer 显式拥有 sprite；有 symbol 时共享其 owner。未知图片报错，不能静默替换成纯色。

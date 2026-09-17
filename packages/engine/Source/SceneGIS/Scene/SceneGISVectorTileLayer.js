@@ -25,6 +25,8 @@ import GlobeTerrain from "./_private/_SceneGISVectorGlobeTerrain.js";
 import extrusionAnchoring from "./_private/_SceneGISVectorExtrusionAnchoring.js";
 import GlobeBackground from "./_private/_SceneGISVectorGlobeBackground.js";
 import Patterns from "./_private/_SceneGISVectorPatterns.js";
+import State from "../Core/_private/_SceneGISVectorState.js";
+import StateStore from "./_private/_SceneGISVectorStateStore.js";
 
 function integerOption(options, name, fallback) {
   const value = options[name] ?? fallback;
@@ -43,23 +45,34 @@ function hasZoom(expression) {
 
 function layerRecord(style, id) {
   const definition = style.getLayerDefinition(id);
+  const dependencies = { feature: new Set(), global: new Set() };
+  for (const value of Object.values(definition.paint ?? {})) {
+    State.dependencies(value, dependencies);
+  }
   return {
     definition,
     style,
+    stateDependencies: dependencies,
     filterZoom: hasZoom(definition.filter),
   };
 }
 
 function recordSignature(record, zoom) {
-  if (record.keyZoom !== zoom) {
+  if (record.keyZoom !== zoom || record.keyState !== record.stateRevision) {
     const definition = record.definition;
     record.key = [
       zoom >= (definition.minzoom ?? 0) && zoom < (definition.maxzoom ?? 24),
-      record.style._getGeometryKey(definition.id, zoom),
+      record.style._getGeometryKey(definition.id, zoom, record.context),
       record.filterZoom ? Math.floor(zoom) : "",
+      record.stateRevision ?? 0,
     ].join(":");
     record.keyZoom = zoom;
-    record.uniformPaint = record.style._getUniformPaint(definition.id, zoom);
+    record.keyState = record.stateRevision;
+    record.uniformPaint = record.style._getUniformPaint(
+      definition.id,
+      zoom,
+      record.context,
+    );
   }
   return record.key;
 }
@@ -69,6 +82,10 @@ function signature(records, zoom) {
     .filter(({ definition }) => definition.type !== "symbol")
     .map((record) => recordSignature(record, zoom))
     .join("|");
+}
+
+function entrySignature(state, entry) {
+  return `${state.signature}/${entry.stateRevision ?? 0}`;
 }
 
 function prepareSources(tilingScheme, style, overrides) {
@@ -364,7 +381,7 @@ function prepareEntry(layer, state, entry, zoom) {
       }
       continue;
     }
-    const key = signature([record], zoom);
+    const key = `${signature([record], zoom)}/${entry.stateVersions?.get(definition.id) ?? 0}`;
     signatures.set(definition.id, key);
     if (entry.layerSignatures?.get(definition.id) === key) {
       if (entry.batches.has(definition.id)) {
@@ -383,6 +400,10 @@ function prepareEntry(layer, state, entry, zoom) {
     maximumLevel: state.source.maximumLevel,
     allowPicking: layer._allowPicking,
     tile: { x: entry.x, y: entry.y, level: entry.level },
+    featureStates: layer._states.sources.get(
+      state.records[0]?.definition.source,
+    ),
+    globalState: layer._states.global,
   };
   const transfers = [];
   if (entry.data instanceof ArrayBuffer || ArrayBuffer.isView(entry.data)) {
@@ -400,7 +421,7 @@ function prepareEntry(layer, state, entry, zoom) {
     return;
   }
   const work = {
-    signature: state.signature,
+    signature: entrySignature(state, entry),
     symbolZoom,
     replaceSymbols: entry.symbolZoom !== symbolZoom,
     signatures,
@@ -428,6 +449,11 @@ function prepareEntry(layer, state, entry, zoom) {
       }
       {
         work.result = result;
+        if (result.featureIds) {
+          entry.featureIds = new Map(
+            result.featureIds.map(([name, ids]) => [name, new Set(ids)]),
+          );
+        }
         work.items = result.layers.flatMap((group) => {
           batches.set(group.id, []);
           return group.batches.map((item) => ({ id: group.id, item }));
@@ -518,6 +544,7 @@ function updateBackgrounds(layer, zoom, frameState) {
         record.definition.id,
         undefined,
         zoom,
+        { globalState: layer._states.global },
       );
       let candidate;
       if (evaluated.show && evaluated.paint["background-opacity"] > 0) {
@@ -579,12 +606,13 @@ function updateEntry(
   uploads,
   budget,
 ) {
-  if (entry.work && entry.work.signature !== state.signature) {
+  const desiredSignature = entrySignature(state, entry);
+  if (entry.work && entry.work.signature !== desiredSignature) {
     discardPreparation(entry);
   }
   const needsUpload =
     entry.state === "received" ||
-    (entry.state === "ready" && entry.signature !== state.signature);
+    (entry.state === "ready" && entry.signature !== desiredSignature);
   if (needsUpload) {
     try {
       prepareEntry(layer, state, entry, zoom);
@@ -759,13 +787,17 @@ function publishOrder(layer) {
     for (const entry of state.visible) {
       if (
         entry.state !== "failed" &&
-        (entry.state !== "ready" || entry.signature !== state.signature)
+        (entry.state !== "ready" ||
+          entry.signature !== entrySignature(state, entry))
       ) {
         layer._tilesLoaded = false;
       }
     }
     for (const entry of state.render.keys()) {
-      if (entry.state !== "failed" && entry.signature !== state.signature) {
+      if (
+        entry.state !== "failed" &&
+        entry.signature !== entrySignature(state, entry)
+      ) {
         layer._tilesLoaded = false;
       }
     }
@@ -909,6 +941,7 @@ function SceneGISVectorTileLayer(options) {
   this._groundHeights = new Cartesian2();
   this._groundGeometry = new Map();
   this._style = style;
+  this._states = new StateStore(this);
   this._show = options.show ?? true;
   this._allowPicking = options.allowPicking ?? true;
   this._errorEvent = new Event();
@@ -1270,6 +1303,66 @@ SceneGISVectorTileLayer.prototype.isDestroyed = function () {
 };
 
 /**
+ * Identifies an MVT feature across tile and level boundaries.
+ * @typedef {object} SceneGISVectorTileLayer.FeatureIdentifier
+ * @property {string} source Style source ID.
+ * @property {string} sourceLayer MVT source-layer name.
+ * @property {string|number} id Feature ID; numeric IDs must be safe integers.
+ */
+
+/**
+ * Merges JSON properties into a feature's paint state. Applies on subsequent normal renders without requesting MVT again.
+ * State persists across tile eviction until removed or the layer is destroyed. Features sharing source/sourceLayer/id share state.
+ * @param {SceneGISVectorTileLayer.FeatureIdentifier} target Feature identity.
+ * @param {object} state Finite JSON properties; input is copied.
+ * @exception {DeveloperError} The identity or JSON data is invalid.
+ */
+SceneGISVectorTileLayer.prototype.setFeatureState = function (target, state) {
+  this._states.set(target, state, false);
+};
+
+/**
+ * Returns a copy of a feature's state, or an empty object.
+ * @param {SceneGISVectorTileLayer.FeatureIdentifier} target Feature identity.
+ * @returns {object} Independent JSON snapshot.
+ * @exception {DeveloperError} The identity is invalid.
+ */
+SceneGISVectorTileLayer.prototype.getFeatureState = function (target) {
+  return State.copy(this._states.get(target));
+};
+
+/**
+ * Deletes one state property, or all state for the specified feature.
+ * @param {SceneGISVectorTileLayer.FeatureIdentifier} target Feature identity.
+ * @param {string} [key] Property to remove; omit to remove the feature state.
+ * @exception {DeveloperError} The identity or key is invalid.
+ */
+SceneGISVectorTileLayer.prototype.removeFeatureState = function (target, key) {
+  this._states.set(target, undefined, true, key);
+};
+
+/**
+ * Sets a layer-scoped global paint property. Null deletes the property; expressions should supply their own defaults.
+ * @param {string} key Property name.
+ * @param {*} value Finite JSON value, or null to remove the property.
+ * @exception {DeveloperError} The key or JSON value is invalid.
+ */
+SceneGISVectorTileLayer.prototype.setGlobalStateProperty = function (
+  key,
+  value,
+) {
+  this._states.setGlobal(key, value);
+};
+
+/**
+ * Returns a copy of all layer-scoped global paint state.
+ * @returns {object} Independent JSON snapshot.
+ */
+SceneGISVectorTileLayer.prototype.getGlobalState = function () {
+  return State.copy(this._states.global);
+};
+
+/**
  * Cancels requests and destroys all owned batches. Borrowed Scene, World, style, and sources remain live.
  * After destruction only isDestroyed may be called.
  * @returns {undefined}
@@ -1302,6 +1395,8 @@ SceneGISVectorTileLayer.prototype.destroy = function () {
   this._globeCoverCache = undefined;
   this._globeTerrainCache = undefined;
   this._globeTerrainEntries = undefined;
+  this._states.sources.clear();
+  this._states.global = State.empty;
   return destroyObject(this);
 };
 

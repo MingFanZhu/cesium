@@ -5,6 +5,7 @@ import Assets from "./_SceneGISVectorSymbolAssets.js";
 import Projection from "./_SceneGISVectorSymbolProjection.js";
 import Batches from "./_SceneGISVectorSymbolBatches.js";
 import GlobeCoordinates from "../../Core/_private/_SceneGISVectorGlobeCoordinates.js";
+import State from "../../Core/_private/_SceneGISVectorState.js";
 
 function inRegion(point, bounds, world) {
   return (
@@ -162,6 +163,12 @@ function evaluation(runtime, base, zoom) {
     label.feature,
     zoom,
     label.evaluation,
+    State.context(
+      runtime.owner._states.sources.get(base.identity.source),
+      base.identity.sourceLayer,
+      label.feature.id,
+      runtime.owner._states.global,
+    ),
   );
   const evaluated = label.evaluation.value;
   if (!label.shapeKey || evaluated.layout !== before) {
@@ -500,6 +507,7 @@ function viewSignature(runtime, zoom) {
     projection = camera.frustum.projectionMatrix;
   return [
     runtime.owner._terrain?.revision,
+    runtime.owner._states.revision,
     ...Array.from({ length: 16 }, (_, i) => view[i]),
     ...Array.from({ length: 16 }, (_, i) => projection[i]),
     zoom,

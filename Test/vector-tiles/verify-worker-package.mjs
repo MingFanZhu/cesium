@@ -58,6 +58,12 @@ assert(/class SceneGISVectorTileLayer[\s\S]*?opacity\?: number/.test(types));
 assert(/class SceneGISPlanarWorld[\s\S]*?opacity: number/.test(types));
 assert(!types.includes("SceneGISVectorWorkerPool"));
 assert(!types.includes("SceneGISVectorTileWorker"));
+assert(
+  types.includes(
+    "setFeatureState(target: SceneGISVectorTileLayer.FeatureIdentifier",
+  ),
+);
+assert(types.includes("getGlobalState():"));
 const source = await readFile(path.join(installed, "index.js"), "utf8");
 assert(!source.includes("Source/Workers/SceneGISVectorTileWorker.js"));
 await writeFile(
@@ -250,7 +256,15 @@ try {
                 source: "test",
                 "source-layer": "labels",
                 filter: ["==", ["geometry-type"], "Polygon"],
-                paint: { "fill-color": "blue", "fill-antialias": false },
+                paint: {
+                  "fill-color": [
+                    "case",
+                    ["boolean", ["feature-state", "active"], false],
+                    "lime",
+                    "blue",
+                  ],
+                  "fill-antialias": false,
+                },
               },
               {
                 id: "labels",
@@ -292,6 +306,20 @@ try {
       scene.camera.position.x += 1;
       render();
       const stable = batch.resources.uploadedBytes === uploads;
+      const stateTarget = { source: "test", sourceLayer: "labels", id: "land" };
+      layer.setFeatureState(stateTarget, { active: true });
+      const stateStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - stateStart > 10000) {
+          throw new Error("State package preparation did not finish.");
+        }
+      } while (!layer.tilesLoaded);
+      const stateColor = Array.from(
+        scene.context.readPixels({ x: 20, y: 32, width: 1, height: 1 }),
+      );
+      layer.removeFeatureState(stateTarget);
       const patternLayer = scene.primitives.add(
         new C.SceneGISVectorTileLayer({
           scene,
@@ -669,6 +697,7 @@ try {
       globeCanvas.remove();
       return {
         mode,
+        stateColor,
         pattern: {
           color: patternColor,
           batch: patternBatch,
@@ -723,6 +752,7 @@ try {
       };
     }, mode);
     assert(result.layers > 0 && result.features > 0);
+    assert.deepEqual(result.stateColor, [0, 255, 0, 255]);
     assert(result.pattern.batch && result.pattern.released);
     assert(result.pattern.color[0] > 0 && result.pattern.color[1] > 0);
     assert(

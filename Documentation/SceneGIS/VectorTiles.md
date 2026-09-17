@@ -209,6 +209,34 @@ style light、translate、transition 或复杂屋顶，不承诺 MapLibre 像素
 
 本地入口：[平面样式增强](../../Test/vector-tiles/平面样式增强.html)、[球面样式增强](../../Test/vector-tiles/球面样式增强.html)。
 
+### 动态要素状态
+
+```js
+const target = {
+  source: picked.id.source,
+  sourceLayer: picked.id.sourceLayer,
+  id: picked.id.featureId,
+};
+layer.setFeatureState(target, { selected: true });
+layer.getFeatureState(target);
+layer.removeFeatureState(target, "selected"); // Omit key to remove all state for this feature.
+layer.setGlobalStateProperty("themeColor", "#ffcc33");
+layer.getGlobalState();
+layer.setGlobalStateProperty("themeColor", null); // Delete the global property.
+```
+
+Paint 可使用 `feature-state` 和 `global-state`，例如
+`["case", ["boolean", ["feature-state", "selected"], false], "red", "blue"]`。
+状态按 Layer 隔离；同 source/sourceLayer/id 的要素共享状态并跨瓦片驻留保留。
+ID 接受 string 或安全整数，不为无 ID 要素自动生成身份。set 合并属性，get 返回副本；只接受有限 JSON 数据。
+状态默认空，由表达式提供默认值。本轮不支持 layout/filter 中的状态表达式或 style root state defaults。
+
+修改不重新请求 MVT，只重建含相关 ID、依赖相关 key 的几何批次，保留无关图层与旧可见结果直到预算发布。
+标注 paint 更新复用字形与 GPU buffers，不重新 shaping。首轮几何仍由 Worker 重建受影响批次，
+不是 MapLibre 的逐要素 paint buffer 局部更新；持续高频、大规模状态变化仍有成本。
+编译 Style 可被多个 Layer 共享；独立计算用 `style.evaluateLayer(id, feature, zoom, { featureState, globalState })`。
+详见 [ADR-0076](Decisions/ADR-0076-vector-style-state.md)。
+
 ### 支持矩阵
 
 `SceneGISVectorTileStyle` 使用固定的独立 `@maplibre/maplibre-gl-style-spec 24.8.1`，
@@ -221,7 +249,8 @@ profile 为 `scenegis-vector-v1`，构造复制输入 JSON，预检失败带路�
 | Layers       | background、fill、fill-extrusion、line、circle、point/line symbol；source-layer、顺序、filter、min/maxzoom、visibility |
 | Paint/layout | 颜色/opacity、基础 fill outline/antialias、line width/gap/offset/blur/dash/cap/join、circle radius/stroke/blur         |
 | Expressions  | 经 profile 允许并测试的属性、分支、类型、算术与 zoom 表达式；完整清单见 ADR-0058                                       |
-| 未支持       | 复杂 shaping/variable anchor、feature-state/global-state、geometry-dependent filter、旧 style function、imports/slots  |
+| 状态         | paint feature-state/global-state、Layer 局部失效、状态 API 和独立求值 context                                          |
+| 未支持       | 复杂 shaping/variable anchor、geometry-dependent filter、旧 style function、imports/slots                              |
 
 这些是前端求值能力；当前 V3B1 实际渲染语义与限制见下节。
 `version:8` 不代表支持任意 Mapbox/MapLibre 样式。

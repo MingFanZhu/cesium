@@ -9,9 +9,9 @@
 | Planning model           | `extension`                                                      |
 | Active extension plan    | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md) |
 | Completed extension plan | [总体计划](plans/2026-09-12-vector-tiles-extension.md)           |
-| Current phase            | V3D2                                                             |
-| Active phase plan        | [纹理填充](plans/2026-09-17-v3d2-patterns.md)                    |
-| Last completed phase     | [V3D1](plans/2026-09-17-v3d1-fill-extrusion.md)                  |
+| Current phase            | V3D3                                                             |
+| Active phase plan        | [动态要素状态](plans/2026-09-17-v3d3-state.md)                   |
+| Last completed phase     | V3D2 `81340f7bef`                                                |
 | Active standalone plan   | None                                                             |
 | Architecture contact     | 当前 Agent                                                       |
 | Execution contact        | 当前 Agent                                                       |

@@ -7,7 +7,7 @@
 - Authorization: 负责人明确要求按建议补充纹理填充、动态要素状态、标注自动换位置、图标适配文字
 - Baseline: `feature/vector-tiles@2f14780d81`；前一大阶段保持 completed
 - Previous: [大阶段收口](../reviews/2026-09-17-milestone-closeout-review.md)
-- Current phase: V3D2
+- Current phase: V3D3
 - SGP: None planned
 
 ## 稳定目标与边界
@@ -20,12 +20,12 @@ Pattern 指 background/fill/line/fill-extrusion 的 sprite 重复纹理；它是
 
 ## 阶段路线
 
-| Phase | 目标           | 依赖与退出条件                                                           | 状态                                        |
-| ----- | -------------- | ------------------------------------------------------------------------ | ------------------------------------------- |
-| V3D2  | 纹理填充       | 共享 sprite、四类材质、双世界平面/贴地、pick/透明/生命周期及包验证       | active；[计划](2026-09-17-v3d2-patterns.md) |
-| V3D3  | 动态要素状态   | V3D2 checkpoint；状态 API、依赖失效、Worker 代际、局部更新、拾取交互验证 | planned                                     |
-| V5D   | 标注自动换位置 | V3D3 checkpoint；候选锚点、稳定选择、碰撞与相机运动、双世界资格          | planned                                     |
-| V5E   | 图标适配文字   | V5D checkpoint；fit 模式/padding、sprite content/stretch、图文避让与拾取 | planned                                     |
+| Phase | 目标           | 依赖与退出条件                                                           | 状态                                                        |
+| ----- | -------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| V3D2  | 纹理填充       | 共享 sprite、四类材质、双世界平面/贴地、pick/透明/生命周期及包验证       | completed `81340f7bef`；[计划](2026-09-17-v3d2-patterns.md) |
+| V3D3  | 动态要素状态   | V3D2 checkpoint；状态 API、依赖失效、Worker 代际、局部更新、拾取交互验证 | active；[计划](2026-09-17-v3d3-state.md)                    |
+| V5D   | 标注自动换位置 | V3D3 checkpoint；候选锚点、稳定选择、碰撞与相机运动、双世界资格          | planned                                                     |
+| V5E   | 图标适配文字   | V5D checkpoint；fit 模式/padding、sprite content/stretch、图文避让与拾取 | planned                                                     |
 
 一次只激活一个 phase，进入时细化源码设计。技术验证与自审后各自形成独立本地 checkpoint，再实施下一项。
 四项由本次授权持续推进；最终提供 Test 人工入口，负责人对新画面的验收单独记录，不以技术提交冒充人工通过。

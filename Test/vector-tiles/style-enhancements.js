@@ -71,14 +71,40 @@ export default function start(globe) {
         type: "fill",
         source,
         "source-layer": "water",
-        paint: { "fill-pattern": "water", "fill-opacity": 0.6 },
+        paint: {
+          "fill-pattern": "water",
+          "fill-opacity": ["coalesce", ["global-state", "waterOpacity"], 0.6],
+        },
+      },
+      {
+        id: "selection",
+        type: "fill",
+        source,
+        "source-layer": "water",
+        paint: {
+          "fill-color": "#ffbd35",
+          "fill-opacity": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            0.55,
+            0,
+          ],
+        },
       },
       {
         id: "road",
         type: "line",
         source,
         "source-layer": "transportation",
-        paint: { "line-pattern": "arrow", "line-width": 24 },
+        paint: {
+          "line-pattern": "arrow",
+          "line-width": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            40,
+            24,
+          ],
+        },
       },
       {
         id: "building",
@@ -87,7 +113,12 @@ export default function start(globe) {
         "source-layer": "building",
         paint: {
           "fill-extrusion-pattern": "windows",
-          "fill-extrusion-height": 80,
+          "fill-extrusion-height": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            120,
+            80,
+          ],
         },
       },
     ],
@@ -122,8 +153,16 @@ export default function start(globe) {
       });
     }
   }
+  let selected;
   const options = {
     opacity: 1,
+    waterOpacity: 0.6,
+    clear: () => {
+      if (selected) {
+        layer.removeFeatureState(selected, "selected");
+      }
+      selected = undefined;
+    },
     top: () => view(false),
     tilt: () => view(true),
   };
@@ -135,10 +174,24 @@ export default function start(globe) {
       layer.opacity = value;
     });
   gui.add(options, "top").name("俯视");
+  gui
+    .add(options, "waterOpacity", 0, 1, 0.05)
+    .name("水面透明度 · 全局状态")
+    .onChange((value) => layer.setGlobalStateProperty("waterOpacity", value));
+  gui.add(options, "clear").name("清除选中");
   gui.add(options, "tilt").name("倾斜");
   const handler = new C.ScreenSpaceEventHandler(scene.canvas);
   handler.setInputAction(({ position }) => {
     const picked = scene.pick(position);
+    options.clear();
+    if (picked?.primitive === layer && picked.id.featureId !== undefined) {
+      selected = {
+        source: picked.id.source,
+        sourceLayer: picked.id.sourceLayer,
+        id: picked.id.featureId,
+      };
+      layer.setFeatureState(selected, { selected: true });
+    }
     status.textContent =
       picked?.primitive === layer
         ? `${picked.id.styleLayer} / ${picked.id.featureId}`

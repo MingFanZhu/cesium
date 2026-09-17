@@ -252,7 +252,7 @@ describe("SceneGIS/Core/SceneGISVectorTileStyle", function () {
         "layers[0].paint.line-gradient",
       ],
       [
-        json({ paint: { "line-width": ["feature-state", "width"] } }),
+        json({ paint: { "line-width": ["sin", 1] } }),
         "layers[0].paint.line-width[0]",
       ],
       [{ ...json(), imports: [] }, "style.imports"],

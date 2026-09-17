@@ -35,6 +35,30 @@ for (const world of ["平面", "球面"]) {
           window.vectorEnhancements.layer._patterns.texture,
       ),
     ).toBe(true);
+    await page.mouse.click(640, 400);
+    await page.waitForFunction(
+      () => window.vectorEnhancements.layer.tilesLoaded,
+    );
+    expect(
+      await page.evaluate(
+        () =>
+          window.vectorEnhancements.layer.getFeatureState({
+            source: "fixture",
+            sourceLayer: "transportation",
+            id: "203",
+          }).selected,
+      ),
+    ).toBe(true);
+    await page.getByRole("button", { name: "清除选中", exact: true }).click();
+    expect(
+      await page.evaluate(() =>
+        window.vectorEnhancements.layer.getFeatureState({
+          source: "fixture",
+          sourceLayer: "transportation",
+          id: "203",
+        }),
+      ),
+    ).toEqual({});
     expect(errors).toEqual([]);
   });
 }

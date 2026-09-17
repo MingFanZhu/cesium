@@ -12,6 +12,7 @@ import strokeGeometry from "./_SceneGISVectorTileStroke.js";
 import Dashes from "./_SceneGISVectorTileDashes.js";
 import extrusionGeometry from "./_SceneGISVectorExtrusionGeometry.js";
 import Pattern from "./_SceneGISVectorPattern.js";
+import State from "./_SceneGISVectorState.js";
 
 function attribute(values, size, double = false) {
   return new GeometryAttribute({
@@ -249,11 +250,16 @@ SceneGISVectorTileGeometry.build = function (
   zoom,
   tile,
   patterns,
+  stateContext,
 ) {
   const main = [];
   const outlines = [];
   const dashes = new Dashes();
-  const uniformPaint = style._getUniformPaint(definition.id, zoom);
+  const uniformPaint = style._getUniformPaint(
+    definition.id,
+    zoom,
+    stateContext,
+  );
   const radius =
     uniformPaint &&
     uniformPaint["line-gap-width"] * 0.5 +
@@ -274,7 +280,18 @@ SceneGISVectorTileGeometry.build = function (
     ) {
       continue;
     }
-    const cached = style._evaluateVisibleLayer(definition.id, feature, zoom);
+    const cached = style._evaluateVisibleLayer(
+      definition.id,
+      feature,
+      zoom,
+      undefined,
+      State.context(
+        stateContext?.featureStates,
+        sourceLayer.name,
+        feature.id,
+        stateContext?.globalState,
+      ),
+    );
     if (!cached) {
       continue;
     }

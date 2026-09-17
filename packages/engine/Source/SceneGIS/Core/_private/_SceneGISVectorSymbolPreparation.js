@@ -2,6 +2,7 @@ import Cartesian3 from "../../../Core/Cartesian3.js";
 import EncodedCartesian3 from "../../../Core/EncodedCartesian3.js";
 import RuntimeError from "../../../Core/RuntimeError.js";
 import Line from "./_SceneGISVectorSymbolLine.js";
+import State from "./_SceneGISVectorState.js";
 function content(layout) {
   let text = layout["text-field"] ?? "";
   if (layout["text-transform"] === "uppercase") {
@@ -89,6 +90,7 @@ function prepareVectorSymbols(
   metersPerPixel,
   zoom,
   report,
+  stateContext,
 ) {
   const labels = [];
   for (const feature of sourceLayer.features) {
@@ -96,6 +98,13 @@ function prepareVectorSymbols(
       definition.id,
       feature,
       zoom,
+      undefined,
+      State.context(
+        stateContext?.featureStates,
+        sourceLayer.name,
+        feature.id,
+        stateContext?.globalState,
+      ),
     );
     if (!evaluation) {
       continue;

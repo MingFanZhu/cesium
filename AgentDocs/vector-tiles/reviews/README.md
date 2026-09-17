@@ -1,5 +1,6 @@
 # Reviews
 
+- [V3D3 动态状态](2026-09-17-v3d3-state-review.md)：approved；API/Worker/双世界与交付包通过，四项最终视觉 gate 待负责人。
 - [V3D2 纹理材质](2026-09-17-v3d2-pattern-review.md)：approved；技术 checkpoint，四项增强最终视觉 gate 待负责人验收。
 - [大阶段收口评审](2026-09-17-milestone-closeout-review.md)：approved；冻结本次交付范围、资格证据与延期事项。
 - [V3D1 建筑拉伸](2026-09-17-v3d1-fill-extrusion-review.md)：approved；198 项 vector Specs 与贴地性能修正通过，负责人验收通过。

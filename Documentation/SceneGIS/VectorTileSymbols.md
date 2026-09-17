@@ -28,6 +28,9 @@ collision proxies 也不承诺包含起伏曲线的全部投影。精细地形�
 
 ## 样式与坐标
 
+Paint 现支持 `feature-state` / `global-state`；状态 API 见 [矢量瓦片](VectorTiles.md#动态要素状态)。
+文字颜色、halo 与图标透明度改变时保留已有 shaping/atlas，更新已有 buffers；layout/filter 不接受状态表达式。
+
 Style root 可指定 `glyphs: "/fonts/{fontstack}/{range}.pbf"` 和单个 `sprite: "/sprite"`。
 glyph PBF 的 24-pixel em、3-pixel SDF border、signed bearings 与 advance 保持原义；
 sprite 使用 `.json` 和 `.png`，图标尺寸除以 metadata.pixelRatio 后为 CSS pixels。

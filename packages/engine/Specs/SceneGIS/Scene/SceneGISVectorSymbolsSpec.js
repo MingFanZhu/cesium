@@ -148,6 +148,49 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     image = undefined;
   });
 
+  it("applies feature/global paint state without new Worker shapes, glyph requests or buffers", async function () {
+    const tiles = spyOn(source, "requestTile").and.resolveTo(tile());
+    const fonts = spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(
+      bytes,
+    );
+    const layer = add([
+      definition(
+        "labels",
+        {},
+        {
+          "text-color": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            "lime",
+            ["coalesce", ["global-state", "color"], "red"],
+          ],
+        },
+      ),
+    ]);
+    await loaded(layer);
+    const candidate = layer._symbols._placed[0],
+      shaped = candidate.shaped;
+    const resources = [...layer._symbols._groups.values()][0].resources;
+    const fixed = resources._staticBuffer,
+      dynamic = resources._dynamicBuffer;
+    const tasks = layer.statistics.workerTasks;
+    const target = { source: "test", sourceLayer: "data", id: "1" };
+    layer.setFeatureState(target, { selected: true });
+    await loaded(layer);
+    expect(pixel()).toEqual([0, 255, 0, 255]);
+    expect(layer._symbols._placed[0].shaped).toBe(shaped);
+    expect(resources._staticBuffer).toBe(fixed);
+    expect(resources._dynamicBuffer).toBe(dynamic);
+    layer.removeFeatureState(target);
+    layer.setGlobalStateProperty("color", "blue");
+    await loaded(layer);
+    expect(pixel()).toEqual([0, 0, 255, 255]);
+    expect(layer.statistics.workerTasks).toBe(tasks);
+    expect(tiles).toHaveBeenCalledTimes(1);
+    expect(fonts).toHaveBeenCalledTimes(1);
+    expect(scene.pick(new Cartesian2(30, 32))?.id.featureId).toBe("1");
+  });
+
   it("excludes offscreen anchors before glyph requests, shaping diagnostics and collision", async function () {
     spyOn(source, "requestTile").and.resolveTo(
       tile([

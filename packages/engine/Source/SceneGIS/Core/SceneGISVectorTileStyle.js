@@ -10,6 +10,7 @@ import {
 } from "@maplibre/maplibre-gl-style-spec";
 import Color from "../../Core/Color.js";
 import DeveloperError from "../../Core/DeveloperError.js";
+import State from "./_private/_SceneGISVectorState.js";
 
 const profile = {
   symbol: {
@@ -119,6 +120,8 @@ const profile = {
 const operators = new Set([
   "literal",
   "get",
+  "feature-state",
+  "global-state",
   "has",
   "!has",
   "id",
@@ -310,6 +313,15 @@ function validate(style) {
         checkKeys(values, selected[scope], `${path}.${scope}`, errors);
         for (const [name, value] of Object.entries(values)) {
           const propertyPath = `${path}.${scope}.${name}`;
+          const dependencies = State.dependencies(value);
+          if (
+            scope !== "paint" &&
+            (dependencies.feature.size || dependencies.global.size)
+          ) {
+            errors.push(
+              `${propertyPath}: state expressions are supported only in paint.`,
+            );
+          }
           if (
             value !== null &&
             typeof value === "object" &&
@@ -331,6 +343,12 @@ function validate(style) {
         }
       }
       checkExpression(layer.filter, `${path}.filter`, errors);
+      const dependencies = State.dependencies(layer.filter);
+      if (dependencies.feature.size || dependencies.global.size) {
+        errors.push(
+          `${path}.filter: state expressions are supported only in paint.`,
+        );
+      }
     });
   }
   try {
@@ -360,6 +378,9 @@ function compileLayer(layer) {
       const value = layer[scope]?.[name] ?? property.default;
       if (value !== undefined) {
         compiled[scope][name] = normalizePropertyExpression(value, property);
+        const dependencies = State.dependencies(value);
+        compiled[scope][name]._stateDependent =
+          dependencies.feature.size > 0 || dependencies.global.size > 0;
       }
     }
   }
@@ -396,14 +417,20 @@ function evaluateProperties(
   feature,
   previous,
   changed = true,
+  context,
+  stateChanged = false,
 ) {
-  if (previous && !changed) {
+  if (previous && !changed && !stateChanged) {
     return previous;
   }
   let result = previous ?? {};
+  const evaluationGlobals = context?.globalState
+    ? { ...globals, globalState: context.globalState }
+    : globals;
   for (const [name, expression] of Object.entries(properties)) {
     if (
       previous &&
+      !(stateChanged && expression._stateDependent) &&
       (!changed ||
         expression.kind === "constant" ||
         expression.kind === "source")
@@ -413,7 +440,11 @@ function evaluateProperties(
     if (result === previous) {
       result = { ...previous };
     }
-    const value = expression.evaluate(globals, feature);
+    const value = expression.evaluate(
+      evaluationGlobals,
+      feature,
+      context?.featureState,
+    );
     if (value instanceof StyleColor) {
       const [r, g, b, a] = value.rgb;
       result[name] = new Color(r, g, b, a);
@@ -569,11 +600,19 @@ SceneGISVectorTileStyle.prototype.getLayerDefinition = function (layerId) {
  */
 
 /**
+ * Per-evaluation paint state. The compiled style does not retain this context.
+ * @typedef {object} SceneGISVectorTileStyle.EvaluationContext
+ * @property {object} [featureState] State for this feature, default empty.
+ * @property {object} [globalState] Layer-scoped state, default empty.
+ */
+
+/**
  * Evaluates one layer without mutating the input feature or compiled configuration.
  * Unsafe integer properties enter the style engine as decimal strings; IDs retain their string identity.
  * @param {string} layerId Style layer ID.
  * @param {SceneGISVectorTile.Feature|undefined} feature A decoded feature, or undefined for background.
  * @param {number} zoom Continuous style zoom, independent of source LOD.
+ * @param {SceneGISVectorTileStyle.EvaluationContext} [context] Optional paint state for this evaluation.
  * @returns {SceneGISVectorTileStyle.EvaluatedLayer} Layer values; paint and symbol sizes use fractional zoom, other layout/filter values use integer zoom.
  * @exception {DeveloperError} The layer, feature, or zoom is invalid.
  */
@@ -581,6 +620,7 @@ SceneGISVectorTileStyle.prototype.evaluateLayer = function (
   layerId,
   feature,
   zoom,
+  context,
 ) {
   if (!Number.isFinite(zoom)) {
     throw new DeveloperError("zoom must be finite.");
@@ -615,15 +655,26 @@ SceneGISVectorTileStyle.prototype.evaluateLayer = function (
     sourceLayer: layer["source-layer"],
     show,
     layout,
-    paint: evaluateProperties(compiled.paint, { zoom }, input),
+    paint: evaluateProperties(
+      compiled.paint,
+      { zoom },
+      input,
+      undefined,
+      true,
+      context,
+    ),
   };
 };
 
 /** Camera-only values, rather than raw zoom, invalidate a geometry batch. @private */
-SceneGISVectorTileStyle.prototype._getGeometryKey = function (layerId, zoom) {
+SceneGISVectorTileStyle.prototype._getGeometryKey = function (
+  layerId,
+  zoom,
+  context,
+) {
   const compiled = getLayer(this, layerId);
   const values = [];
-  const uniform = this._getUniformPaint(layerId, zoom);
+  const uniform = this._getUniformPaint(layerId, zoom, context);
   if (uniform) {
     const type = compiled.definition.type;
     const width = uniform["line-width"],
@@ -650,7 +701,12 @@ SceneGISVectorTileStyle.prototype._getGeometryKey = function (layerId, zoom) {
         continue;
       }
       if (expression.kind === "camera") {
-        values.push(expression.evaluate(globals));
+        values.push(
+          expression.evaluate({
+            ...globals,
+            globalState: context?.globalState,
+          }),
+        );
       } else if (expression.kind === "composite") {
         values.push(globals.zoom);
       }
@@ -660,7 +716,11 @@ SceneGISVectorTileStyle.prototype._getGeometryKey = function (layerId, zoom) {
 };
 
 /** Feature-independent paint can use constant vertex attributes. @private */
-SceneGISVectorTileStyle.prototype._getUniformPaint = function (layerId, zoom) {
+SceneGISVectorTileStyle.prototype._getUniformPaint = function (
+  layerId,
+  zoom,
+  context,
+) {
   const compiled = getLayer(this, layerId);
   if (
     !["line", "fill"].includes(compiled.definition.type) ||
@@ -672,7 +732,14 @@ SceneGISVectorTileStyle.prototype._getUniformPaint = function (layerId, zoom) {
   ) {
     return undefined;
   }
-  const paint = evaluateProperties(compiled.paint, { zoom });
+  const paint = evaluateProperties(
+    compiled.paint,
+    { zoom },
+    undefined,
+    undefined,
+    true,
+    context,
+  );
   const type = compiled.definition.type;
   if (paint[`${type}-pattern`] !== undefined) {
     paint[`${type}-color`] = Color.clone(Color.WHITE);
@@ -690,6 +757,7 @@ SceneGISVectorTileStyle.prototype._evaluateVisibleLayer = function (
   feature,
   zoom,
   previous,
+  context,
 ) {
   const compiled = getLayer(this, layerId);
   const layer = compiled.definition;
@@ -706,7 +774,12 @@ SceneGISVectorTileStyle.prototype._evaluateVisibleLayer = function (
   ) {
     return undefined;
   }
-  if (previous?.zoom === zoom) {
+  const featureState = context?.featureState ?? State.empty;
+  const globalState = context?.globalState ?? State.empty;
+  const stateChanged =
+    previous?.featureState !== featureState ||
+    previous?.globalState !== globalState;
+  if (previous?.zoom === zoom && !stateChanged) {
     return previous;
   }
   let layout = evaluateProperties(
@@ -738,6 +811,8 @@ SceneGISVectorTileStyle.prototype._evaluateVisibleLayer = function (
   return {
     input,
     zoom,
+    featureState,
+    globalState,
     value: {
       id: layer.id,
       type: layer.type,
@@ -750,6 +825,9 @@ SceneGISVectorTileStyle.prototype._evaluateVisibleLayer = function (
         { zoom },
         input,
         previous?.value.paint,
+        true,
+        context,
+        stateChanged,
       ),
     },
   };
