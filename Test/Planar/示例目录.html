@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面功能示例</title>
+    <link rel="stylesheet" href="/Test/catalog.css" />
+  </head>
+  <body>
+    <h1>平面功能示例</h1>
+    <p>
+      每页只演示一项功能，控件采用默认 lil-gui。HTML 与同名 JS 就是完整入口。<a
+        href="/Test/index.html"
+        >返回全部示例</a
+      >
+    </p>
+    <main>
+      <a href="基础平面.html"
+        ><h2>基础平面</h2>
+        <p>
+          用 Viewer({ planarWorld }) 创建本地米制平面。X 向东、Y 向北、Z
+          向上；左键平移，中键旋转，滚轮缩放。
+        </p></a
+      >
+      <a href="影像与地形.html"
+        ><h2>影像与地形</h2>
+        <p>
+          接入 EPSG:3857 的公开影像和 LERC 地形，使用同一个
+          tilingScheme。默认查看南京紫金山；网络不可用时仍可浏览底色平面。
+        </p></a
+      >
+      <a href="影像调色.html"
+        ><h2>影像调色</h2>
+        <p>
+          影像图层直接支持亮度、对比度、饱和度与色相调整。本地示意图用于观察颜色变化，替换
+          URL 即可接入瓦片服务。
+        </p></a
+      >
+      <a href="地形材质.html"
+        ><h2>地形材质</h2>
+        <p>
+          用已知高度范围的地形显示等高线、高程、坡度和坡向。这里的灰度图是一块本地合成山地；真实服务接入见“影像与地形”。
+        </p></a
+      >
+      <a href="相机控制.html"
+        ><h2>相机控制</h2>
+        <p>
+          平面沿用 Camera 的 Cartesian
+          API。选择中心视图、飞行或全域视图；相机位置与范围都使用米。
+        </p></a
+      >
+      <a href="实体定位.html"
+        ><h2>实体定位</h2>
+        <p>
+          Entity 使用平面 Cartesian3 位置。Viewer.zoomTo 与 flyTo
+          可以定位单个实体，也可以定位整组 CustomDataSource。
+        </p></a
+      >
+      <a href="实体跟踪.html"
+        ><h2>实体跟踪</h2>
+        <p>
+          用 FIXED 位置和 Cesium 原生 Clock
+          驱动移动实体。开启跟踪后，相机会随实体移动；关闭跟踪即可恢复自由浏览。
+        </p></a
+      >
+      <a href="日月与天空.html"
+        ><h2>日月与天空</h2>
+        <p>
+          以南京经纬度作为天文参考，日月方向由 Clock
+          决定。平面坐标自身不隐含地理位置；这里展示基础天空，物理大气另见高级环境。
+        </p></a
+      >
+    </main>
+    <details>
+      <summary>维护用综合测试页</summary>
+      <p>保留原有诊断与 API 边界检查，用于维护，不作为上手代码。</p>
+      <p>
+        <a href="tests/平面Viewer.html">平面Viewer</a> ·
+        <a href="tests/平面地表样式.html">平面地表样式</a> ·
+        <a href="tests/平面API集成.html">平面API集成</a> ·
+        <a href="tests/平面环境.html">平面环境</a>
+      </p>
+    </details>
+  </body>
+</html>

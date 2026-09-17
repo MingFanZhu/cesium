@@ -15,7 +15,7 @@ test("links the Nanjing Planar sample to public data, astronomical Clock and Tim
       ? route.continue()
       : route.abort();
   });
-  await page.goto("/Test/高级环境-平面.html");
+  await page.goto("/Test/AdvancedEnvironment/tests/平面综合.html");
   await page.waitForFunction(
     () =>
       window.sceneGISPlanarSample?.getState().ready === true ||

@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1"
+    />
+    <title>综合测试 · SceneGIS 平面 API 集成</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #cesiumContainer {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      body > .lil-gui.lil-root {
+        position: absolute !important;
+        z-index: 10 !important;
+        top: 10px !important;
+        right: 10px !important;
+        max-width: calc(100% - 20px) !important;
+        max-height: calc(100% - 76px) !important;
+        overflow: auto !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module">
+      import * as Cesium from "/Build/CesiumUnminified/index.js";
+      import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
+
+      const LIMIT = 20037508.342789244;
+      const MOUNTAIN = new Cesium.Cartesian3(1113194.9, 5780349.2, 0.0);
+      const BOUNDS = new Cesium.BoundingSphere(MOUNTAIN, 120000.0);
+      const TRACKING_EPOCH = Cesium.JulianDate.fromIso8601(
+        "2026-08-14T00:00:00Z",
+      );
+      const providerState = { imageryFailed: false, terrainFailed: false };
+      const state = {
+        providerStatus: "公开影像与地形正在加载（best-effort）……",
+        cameraStatus: "公共Camera操作尚未执行。",
+        framingStatus: "Entity/DataSource定位尚未执行。",
+        trackingStatus: "Entity跟踪尚未启动。",
+        sceneApiStatus: "Scene Cartesian与安全边界尚未检查。",
+        simulationTime: Cesium.JulianDate.toIso8601(TRACKING_EPOCH),
+        clockAnimating: false,
+        clockMultiplier: 60.0,
+        setView: () => {
+          viewMountain();
+          state.cameraStatus = "setView已发布山地视角。";
+        },
+        lookAt: () => {
+          viewer.camera.lookAt(
+            MOUNTAIN,
+            new Cesium.HeadingPitchRange(0.0, -0.65, 500000.0),
+          );
+          viewer.scene.requestRender();
+          state.cameraStatus = "lookAt已发布山地中心视角。";
+        },
+        viewBoundingSphere: () => {
+          viewer.camera.viewBoundingSphere(BOUNDS);
+          viewer.scene.requestRender();
+          state.cameraStatus = "viewBoundingSphere已完成。";
+        },
+        flyTo: () => {
+          viewer.camera.flyTo({
+            destination: new Cesium.Cartesian3(
+              MOUNTAIN.x,
+              MOUNTAIN.y - 400000.0,
+              300000.0,
+            ),
+            orientation: {
+              direction: new Cesium.Cartesian3(0.0, 0.8, -0.6),
+              up: new Cesium.Cartesian3(0.0, 0.6, 0.8),
+            },
+            duration: 2.0,
+          });
+          state.cameraStatus = "flyTo执行中……";
+        },
+        flyToBoundingSphere: () => {
+          viewer.camera.flyToBoundingSphere(BOUNDS, { duration: 2.0 });
+          state.cameraStatus = "flyToBoundingSphere执行中……";
+        },
+        flyHome: () => {
+          viewer.camera.flyHome(2.0);
+          state.cameraStatus = "flyHome执行中……";
+        },
+        cancelFlight: () => {
+          viewer.camera.cancelFlight();
+          state.cameraStatus = "当前Camera飞行已取消。";
+        },
+        completeFlight: () => {
+          viewer.camera.completeFlight();
+          state.cameraStatus = "当前Camera飞行已立即完成。";
+        },
+        selectEntity: () => {
+          viewer.selectedEntity = framingEntity;
+          viewer.scene.requestRender();
+          state.framingStatus =
+            "已选择定位Entity；DONE bounds时InfoBox相机按钮可定位。";
+        },
+        zoomEntity: () =>
+          runFraming("Entity zoomTo", () =>
+            viewer.zoomTo(
+              framingEntity,
+              new Cesium.HeadingPitchRange(0.0, -0.75, 180000.0),
+            ),
+          ),
+        zoomCollection: () =>
+          runFraming("EntityCollection zoomTo", () =>
+            viewer.zoomTo(Promise.resolve(framingDataSource.entities)),
+          ),
+        flyDataSource: () =>
+          runFraming("DataSource flyTo", () =>
+            viewer.flyTo(framingDataSource, {
+              duration: 2.0,
+              offset: new Cesium.HeadingPitchRange(0.35, -0.7, 300000.0),
+            }),
+          ),
+        cancelFraming: () => {
+          viewer.camera.cancelFlight();
+          state.framingStatus = "DataSource/Entity飞行已取消。";
+        },
+        completeFraming: () => {
+          viewer.camera.completeFlight();
+          state.framingStatus = "DataSource/Entity飞行已立即完成。";
+        },
+        selectTrackingEntity: () => {
+          viewer.selectedEntity = trackingEntity;
+          viewer.scene.requestRender();
+          state.trackingStatus =
+            "已选择动态Entity；InfoBox相机按钮可跟踪/取消跟踪。";
+        },
+        trackEntity: () => {
+          viewer.trackedEntity = trackingEntity;
+          viewer.selectedEntity = trackingEntity;
+          state.trackingStatus = "正在按原生Clock跟踪FIXED动态Entity。";
+        },
+        stopTracking: () => {
+          viewer.trackedEntity = undefined;
+          state.trackingStatus = "已停止Entity跟踪，平面输入在下一帧恢复。";
+        },
+        stepTime: () => {
+          viewer.clock.currentTime = Cesium.JulianDate.addSeconds(
+            viewer.clock.currentTime,
+            60.0,
+            new Cesium.JulianDate(),
+          );
+          viewer.scene.requestRender();
+        },
+        resetTime: () => {
+          viewer.clock.shouldAnimate = false;
+          viewer.clock.currentTime = Cesium.JulianDate.clone(TRACKING_EPOCH);
+          state.clockAnimating = false;
+          viewer.scene.requestRender();
+        },
+        home: () => {
+          viewer.planarCameraController.viewHome(viewer.scene);
+          viewer.scene.requestRender();
+        },
+        inspectSceneApi: () => {
+          const scene = viewer.scene;
+          const center = new Cesium.Cartesian2(
+            scene.canvas.clientWidth * 0.5,
+            scene.canvas.clientHeight * 0.5,
+          );
+          const terrain = world.pickTerrainFromWindowPosition(center, scene);
+          const canvas = Cesium.defined(terrain)
+            ? scene.cartesianToCanvasCoordinates(terrain)
+            : undefined;
+          const depth = scene.pickPositionSupported
+            ? scene.pickPosition(center)
+            : undefined;
+          state.sceneApiStatus = `屏幕=${Cesium.defined(canvas) ? `${canvas.x.toFixed(1)},${canvas.y.toFixed(1)}` : "无"}；terrain Z=${Cesium.defined(terrain) ? terrain.z.toFixed(2) : "无"}；depth Z=${Cesium.defined(depth) ? depth.z.toFixed(2) : "无"}`;
+        },
+        verifySceneGuards: () => {
+          const errors = [];
+          try {
+            viewer.scene.sampleHeight(new Cesium.Cartographic());
+          } catch (error) {
+            errors.push("sampleHeight");
+          }
+          try {
+            viewer.camera.pickEllipsoid(new Cesium.Cartesian2(0.0, 0.0));
+          } catch (error) {
+            errors.push("pickEllipsoid");
+          }
+          state.sceneApiStatus = `已同步拒绝：${errors.join("、") || "未触发"}；supported=${viewer.scene.sampleHeightSupported}`;
+        },
+        cameraHelp:
+          "公共Camera使用平面东/北/上固定轴；左键平移、中键旋转、滚轮缩放。",
+        framingHelp:
+          "支持Entity、纯Entity数组、EntityCollection及其DataSource定位。",
+        trackingHelp:
+          "跟踪仅接受FIXED position与AUTODETECT/ENU固定轴；双击动态点也可开始跟踪。",
+        sceneApiHelp:
+          "支持Cartesian屏幕、pick/depth与World terrain；ellipsoid height/Rectangle API会同步拒绝。",
+      };
+
+      let viewer = new Cesium.Viewer("cesiumContainer", {
+        planarWorld: {
+          extent: {
+            minimumX: -LIMIT,
+            minimumY: -LIMIT,
+            maximumX: LIMIT,
+            maximumY: LIMIT,
+          },
+          crs: "EPSG:3857",
+          maximumLevel: 16,
+          baseColor: Cesium.Color.fromCssColorString("#263238"),
+          enableLighting: true,
+        },
+        skyBox: false,
+        skyAtmosphere: false,
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+        infoBox: true,
+        selectionIndicator: true,
+        baseLayerPicker: false,
+        geocoder: false,
+        sceneModePicker: false,
+        projectionPicker: false,
+        navigationHelpButton: false,
+        vrButton: false,
+      });
+      const world = viewer.planarWorld;
+      viewer.scene.rethrowRenderErrors = true;
+
+      function viewMountain() {
+        viewer.camera.setView({
+          destination: new Cesium.Cartesian3(
+            MOUNTAIN.x,
+            MOUNTAIN.y - 400000.0,
+            300000.0,
+          ),
+          orientation: {
+            direction: new Cesium.Cartesian3(0.0, 0.8, -0.6),
+            up: new Cesium.Cartesian3(0.0, 0.6, 0.8),
+          },
+        });
+        viewer.scene.requestRender();
+      }
+
+      const imageryProvider =
+        new Cesium.SceneGISPlanarUrlTemplateImageryProvider({
+          url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          tilingScheme: world.tilingScheme,
+          urlScheme: "xyz",
+          tileWidth: 256,
+          tileHeight: 256,
+          maximumLevel: 16,
+          credit: new Cesium.Credit(
+            '<a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>',
+            true,
+          ),
+        });
+      world.imageryLayers.addImageryProvider(imageryProvider);
+      const terrainProvider =
+        new Cesium.SceneGISPlanarUrlTemplateHeightmapTerrainProvider({
+          url: "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer/tile/{z}/{y}/{x}",
+          tilingScheme: world.tilingScheme,
+          urlScheme: "xyz",
+          heightmapWidth: 257,
+          heightmapHeight: 257,
+          format: "lerc",
+          minimumHeight: -450.0,
+          maximumHeight: 8700.0,
+          maximumLevel: 16,
+          credit: new Cesium.Credit(
+            '<a href="https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer" target="_blank">World Elevation services by Esri and listed contributors</a>',
+            true,
+          ),
+        });
+      world.terrainProvider = terrainProvider;
+
+      const framingEntity = viewer.entities.add({
+        id: "planar-framing-single",
+        name: "平面定位点",
+        description:
+          "此静态Entity用于viewer.zoomTo与DataSource framing人工验证。",
+        position: new Cesium.Cartesian3(1113194.9, 5780349.2, 18000.0),
+        point: {
+          pixelSize: 14.0,
+          color: Cesium.Color.YELLOW,
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 2.0,
+        },
+      });
+      const framingDataSource = new Cesium.CustomDataSource(
+        "planar-framing-data-source",
+      );
+      framingDataSource.entities.add({
+        id: "planar-framing-west",
+        position: new Cesium.Cartesian3(1013194.9, 5730349.2, 12000.0),
+        point: { pixelSize: 12.0, color: Cesium.Color.CYAN },
+      });
+      framingDataSource.entities.add({
+        id: "planar-framing-east",
+        position: new Cesium.Cartesian3(1213194.9, 5830349.2, 22000.0),
+        point: { pixelSize: 12.0, color: Cesium.Color.LIME },
+      });
+      await viewer.dataSources.add(framingDataSource);
+
+      const trackingPosition = new Cesium.CallbackPositionProperty(
+        (time, result) => {
+          const seconds = Cesium.JulianDate.secondsDifference(
+            time,
+            TRACKING_EPOCH,
+          );
+          const angle = seconds / 240.0;
+          return Cesium.Cartesian3.fromElements(
+            MOUNTAIN.x + Math.cos(angle) * 90000.0,
+            MOUNTAIN.y + Math.sin(angle) * 70000.0,
+            30000.0 + Math.sin(angle * 0.5) * 8000.0,
+            result,
+          );
+        },
+        false,
+        Cesium.ReferenceFrame.FIXED,
+      );
+      const trackingEntity = viewer.entities.add({
+        id: "planar-tracking-dynamic",
+        name: "FIXED动态跟踪点",
+        description:
+          "InfoBox相机按钮在跟踪与取消跟踪之间切换；画布左键双击也可开始跟踪。",
+        position: trackingPosition,
+        trackingReferenceFrame: Cesium.TrackingReferenceFrame.AUTODETECT,
+        viewFrom: new Cesium.Cartesian3(0.0, -180000.0, 140000.0),
+        point: {
+          pixelSize: 16.0,
+          color: Cesium.Color.ORANGE,
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 2.0,
+        },
+      });
+      viewer.clock.currentTime = Cesium.JulianDate.clone(TRACKING_EPOCH);
+      viewer.clock.shouldAnimate = false;
+      viewer.clock.multiplier = state.clockMultiplier;
+
+      async function runFraming(label, operation) {
+        state.framingStatus = `${label}执行中……`;
+        try {
+          const completed = await operation();
+          state.framingStatus = `${label}${completed ? "完成" : "未执行或已取消"}`;
+        } catch (error) {
+          state.framingStatus = `${label}失败：${error.message}`;
+        }
+      }
+      function updateProviderStatus() {
+        const failures = [];
+        if (providerState.imageryFailed) {
+          failures.push("影像不可用，使用baseColor");
+        }
+        if (providerState.terrainFailed) {
+          failures.push("地形不可用，使用flat fallback");
+        }
+        state.providerStatus =
+          failures.length > 0
+            ? failures.join("；")
+            : world.tilesLoaded
+              ? "当前视图公开数据已就绪"
+              : "公开影像与地形正在加载（best-effort）……";
+      }
+      function updateTrackingStatus() {
+        state.simulationTime = Cesium.JulianDate.toIso8601(
+          viewer.clock.currentTime,
+        );
+        state.clockAnimating = viewer.clock.shouldAnimate;
+        state.clockMultiplier = viewer.clock.multiplier;
+        if (viewer.trackedEntity === trackingEntity) {
+          state.trackingStatus = "正在按原生Clock跟踪FIXED动态Entity。";
+        }
+      }
+      imageryProvider.errorEvent.addEventListener((error) => {
+        providerState.imageryFailed = true;
+        error.retry = false;
+        updateProviderStatus();
+      });
+      terrainProvider.errorEvent.addEventListener((error) => {
+        providerState.terrainFailed = true;
+        error.retry = false;
+        updateProviderStatus();
+      });
+      const removePostRender = viewer.scene.postRender.addEventListener(() => {
+        updateProviderStatus();
+        updateTrackingStatus();
+      });
+
+      const gui = new GUI({
+        title: "平面 API 集成（I1 + I2 + I3 + I4）",
+        width: 370,
+      });
+      const cameraFolder = gui.addFolder("公共 Camera 视图与飞行");
+      cameraFolder.add(state, "setView").name("setView 山地视角");
+      cameraFolder.add(state, "lookAt").name("lookAt 山地中心");
+      cameraFolder.add(state, "viewBoundingSphere").name("viewBoundingSphere");
+      cameraFolder.add(state, "flyTo").name("flyTo 山地视角");
+      cameraFolder
+        .add(state, "flyToBoundingSphere")
+        .name("flyToBoundingSphere");
+      cameraFolder.add(state, "flyHome").name("Camera flyHome");
+      cameraFolder.add(state, "cancelFlight").name("取消Camera飞行");
+      cameraFolder.add(state, "completeFlight").name("立即完成Camera飞行");
+      cameraFolder
+        .add(state, "cameraStatus")
+        .name("Camera状态")
+        .listen()
+        .disable();
+      cameraFolder.add(state, "cameraHelp").name("固定轴说明").disable();
+
+      const framingFolder = gui.addFolder("Entity / DataSource 定位");
+      framingFolder.add(state, "selectEntity").name("选择示例Entity");
+      framingFolder.add(state, "zoomEntity").name("zoomTo单个Entity");
+      framingFolder.add(state, "zoomCollection").name("zoomTo集合Promise");
+      framingFolder.add(state, "flyDataSource").name("flyTo示例DataSource");
+      framingFolder.add(state, "cancelFraming").name("取消定位飞行");
+      framingFolder.add(state, "completeFraming").name("立即完成定位飞行");
+      framingFolder
+        .add(state, "framingStatus")
+        .name("定位状态")
+        .listen()
+        .disable();
+      framingFolder.add(state, "framingHelp").name("支持边界").disable();
+
+      const trackingFolder = gui.addFolder("Entity 跟踪与原生 Clock");
+      trackingFolder.add(state, "selectTrackingEntity").name("选择动态Entity");
+      trackingFolder.add(state, "trackEntity").name("开始trackedEntity");
+      trackingFolder.add(state, "stopTracking").name("停止trackedEntity");
+      trackingFolder
+        .add(state, "clockAnimating")
+        .name("Clock播放")
+        .onChange((value) => {
+          viewer.clock.shouldAnimate = value;
+          viewer.scene.requestRender();
+        });
+      trackingFolder
+        .add(state, "clockMultiplier", 1.0, 600.0, 1.0)
+        .name("Clock倍率")
+        .onChange((value) => {
+          viewer.clock.multiplier = value;
+        });
+      trackingFolder.add(state, "stepTime").name("时间前进60秒");
+      trackingFolder.add(state, "resetTime").name("重置UTC时间");
+      trackingFolder
+        .add(state, "simulationTime")
+        .name("当前UTC")
+        .listen()
+        .disable();
+      trackingFolder
+        .add(state, "trackingStatus")
+        .name("跟踪状态")
+        .listen()
+        .disable();
+      trackingFolder.add(state, "trackingHelp").name("固定轴说明").disable();
+      const sceneApiFolder = gui.addFolder("Scene API 安全边界");
+      sceneApiFolder.add(state, "inspectSceneApi").name("检查屏幕/深度/地形");
+      sceneApiFolder
+        .add(state, "verifySceneGuards")
+        .name("验证ellipsoid API拒绝");
+      sceneApiFolder
+        .add(state, "sceneApiStatus")
+        .name("检查状态")
+        .listen()
+        .disable();
+      sceneApiFolder.add(state, "sceneApiHelp").name("能力边界").disable();
+      gui.add(state, "home").name("平面全域 Home");
+      gui.add(state, "providerStatus").name("公开数据").listen().disable();
+
+      viewMountain();
+      updateProviderStatus();
+      window.viewer = viewer;
+      window.world = world;
+      window.framingEntity = framingEntity;
+      window.framingDataSource = framingDataSource;
+      window.trackingEntity = trackingEntity;
+      window.gui = gui;
+      window.exampleKind = "planar-api-integration";
+
+      let disposed = false;
+      function dispose() {
+        if (disposed) {
+          return;
+        }
+        disposed = true;
+        removePostRender();
+        gui.destroy();
+        if (!viewer.isDestroyed()) {
+          viewer = viewer.destroy();
+        }
+        window.viewer = undefined;
+        window.world = undefined;
+        window.framingEntity = undefined;
+        window.framingDataSource = undefined;
+        window.trackingEntity = undefined;
+        window.gui = undefined;
+        window.exampleKind = undefined;
+      }
+      window.addEventListener("pagehide", (event) => {
+        if (!event.persisted) {
+          dispose();
+        }
+      });
+    </script>
+  </body>
+</html>

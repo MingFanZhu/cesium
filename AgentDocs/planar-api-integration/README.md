@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                            |
-| ---------------------- | ---------------------------------------------------------------- |
-| Extension slug         | `planar-api-integration`                                         |
-| Status                 | `completed`                                                      |
-| Planning model         | `extension`                                                      |
-| Active extension plan  | [总体计划](plans/2026-08-14-planar-api-integration-extension.md) |
-| Current phase          | None                                                             |
-| Active phase plan      | None                                                             |
-| Active standalone plan | None                                                             |
-| Architecture contact   | Architecture Agent                                               |
-| Execution contact      | Execution Agent                                                  |
-| Last updated           | `2026-08-14`                                                     |
+| Field                  | Value                                                             |
+| ---------------------- | ----------------------------------------------------------------- |
+| Extension slug         | `planar-api-integration`                                          |
+| Status                 | `completed`                                                       |
+| Planning model         | `extension`                                                       |
+| Active extension plan  | [总体计划](plans/2026-08-14-planar-api-integration-extension.md)  |
+| Current phase          | None                                                              |
+| Active phase plan      | None                                                              |
+| Active standalone plan | None；[最近完成示例整理](plans/2026-09-18-functional-examples.md) |
+| Architecture contact   | Architecture Agent                                                |
+| Execution contact      | Execution Agent                                                   |
+| Last updated           | `2026-08-14`                                                      |
 
 ## Scope
 
@@ -49,6 +49,10 @@
 - SGP: I1 proposed new SGP for Camera integration；existing `SGP-0001`/`SGP-0002` remain independent
 
 ## Current handoff
+
+2026-09-18 负责人要求整理平面与高级环境两个已交付大阶段的示例。当前在 `feature/functional-examples`
+已完成[示例整理](plans/2026-09-18-functional-examples.md)，八项页面 E2E 与[技术自审](reviews/2026-09-18-functional-examples.md)通过。
+产品 I1–I5 保持 completed；当前 Agent 负责架构、执行和自审，本地 checkpoint 后继续高级环境示例。
 
 - Current state: I1 checkpoint=`ff7c1916d6604400465414305f3f647ef9347d5c`；I2最终checkpoint=`e755ad95a2`
   （not pushed）；阶段外Test示例拆分checkpoint=`74b41bb999`。I3 Architecture/code review与项目负责人manual gate已通过，

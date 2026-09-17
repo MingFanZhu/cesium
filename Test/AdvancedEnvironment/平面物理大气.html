@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面物理大气</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>平面物理大气</h1>
+      <p>
+        展示物理天空与空气透视。远处模型可观察空气透视的衰减；单独调整天空、空气和地表亮度。
+      </p>
+      <p>
+        平面使用本地米制坐标，Z 为高度；南京经纬度仅作为日月方向的天文参考。
+      </p>
+      <p>
+        <a href="示例目录.html">全部环境示例</a> ·
+        <a href="平面物理大气.js" target="_blank">查看源码</a>
+      </p>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./平面物理大气.js"></script>
+  </body>
+</html>

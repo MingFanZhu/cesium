@@ -2,6 +2,13 @@
 
 ## Status
 
+- Active standalone plan: none
+- Latest completed standalone plan:
+  [功能示例整理](plans/2026-09-18-functional-examples.md) — completed；十个功能示例、默认 lil-gui、
+  综合测试归档和导航迁移完成；不修改运行时能力。
+- Latest standalone review:
+  [功能示例评审](reviews/2026-09-18-functional-examples.md) — approved（技术自审）。
+
 - Extension: `active`
 - Current phase: `P14 completed — Planar Nanjing public data sample`
 - Current discussion:
@@ -65,6 +72,10 @@ HDR bloom/lens flare。两种世界共享光学参数、质量档、资源与合
 reference frame，不互相伪造坐标语义。
 
 ## Active work
+
+- 2026-09-18 功能示例整理完成：大气、雾、云、日月和光晕各含球面/平面页面，
+  11 项新页面/导航检查与两项原 Clock 回归通过。示例全部本地，默认 lil-gui 与说明分开，
+  原综合诊断保留于 `Test/AdvancedEnvironment/tests/`。本提交是独立本地检查点，未 push。
 
 - P14 is accepted after P13 `301916e4a5`: default Esri Mercator imagery/LERC
   terrain, Zijin Mountain camera and explicit Nanjing astronomical reference.
@@ -552,9 +563,20 @@ reference frame，不互相伪造坐标语义。
 - A2 assets/importer/generator：`packages/engine/Source/Assets/SceneGIS/Environment/BrunetonEarth/`、
   `packages/engine/Source/Assets/SceneGIS/Environment/PlanarEarth/`、`scripts/scenegis/`
 - A4 assets/generator：`packages/engine/Source/Assets/SceneGIS/Environment/CloudCore/`、`scripts/scenegis/`
-- Specs/manual page：`packages/engine/Specs/SceneGIS/Scene/`、`Test/高级环境.html`
+- Specs：`packages/engine/Specs/SceneGIS/Scene/`
+- 上手示例：`Test/AdvancedEnvironment/示例目录.html`；维护综合页：`Test/AdvancedEnvironment/tests/`
+- 页面 E2E：`Specs/e2e/scenegis-environment-examples.spec.js`
 
 ## Current handoff
+
+2026-09-18：功能示例整理完成，见
+[standalone plan](plans/2026-09-18-functional-examples.md) 与
+[review](reviews/2026-09-18-functional-examples.md)。已有产品阶段验收不变，无新增未解决 finding。
+本轮与平面示例 `2069e15ab6` 分开提交，后续按负责人反馈处理上手体验。
+
+### Historical handoff snapshots
+
+以下保留当时的阶段交接，当前状态以文件顶部 Status / Active work 为准。
 
 Candidates 1/2 are independently code-approved. Candidate 2's two focused
 fixtures pass 1/1 each; its same-state 35.86/36.24 FPS windows do not establish

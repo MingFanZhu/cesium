@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 影像与地形</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>影像与地形</h1>
+      <p>
+        接入 EPSG:3857 的公开影像和 LERC 地形，使用同一个
+        tilingScheme。默认查看南京紫金山；网络不可用时仍可浏览底色平面。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="影像与地形.js">查看源码</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./影像与地形.js"></script>
+  </body>
+</html>

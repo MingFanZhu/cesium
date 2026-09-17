@@ -14,7 +14,7 @@ test("links Globe cloud motion to the Cesium simulation clock", async ({
       errors.push(message.text());
     }
   });
-  await page.goto("/Test/%E9%AB%98%E7%BA%A7%E7%8E%AF%E5%A2%83.html");
+  await page.goto("/Test/AdvancedEnvironment/tests/球面综合.html");
   await page.waitForFunction(
     () => window.sceneGISGlobeSample?.getState().ready === true,
   );
@@ -120,7 +120,7 @@ test("links Globe cloud motion to the Cesium simulation clock", async ({
   expect(
     await page.evaluate(() => window.sceneGISGlobeSample.effects.cloudTime),
   ).toBe(41437);
-  await page.getByText("A11 月光 + 本地阴影", { exact: true }).click();
+  await page.getByText("A11 月光 + 本地模型", { exact: true }).click();
   const released = await page.evaluate(async () => {
     const Cesium = await import("/Build/CesiumUnminified/index.js");
     const sample = window.sceneGISGlobeSample;
@@ -182,14 +182,14 @@ test("qualifies the direct Globe environment sample and retained Planar navigati
     }
   });
 
-  await page.goto("/Test/%E9%AB%98%E7%BA%A7%E7%8E%AF%E5%A2%83.html");
+  await page.goto("/Test/AdvancedEnvironment/tests/球面综合.html");
   await expect(page.locator("body")).toHaveAttribute(
     "data-scenegis-page",
     "globe",
   );
   await expect(page.locator("#planarSampleLink")).toHaveAttribute(
     "href",
-    "/Test/高级环境-平面.html",
+    "/Test/AdvancedEnvironment/tests/平面综合.html",
   );
   await page.waitForFunction(
     () => window.sceneGISGlobeSample?.getState().ready === true,
@@ -255,16 +255,14 @@ test("qualifies the direct Globe environment sample and retained Planar navigati
     terrainDepth: false,
   });
 
-  await page.goto(
-    "/Test/%E9%AB%98%E7%BA%A7%E7%8E%AF%E5%A2%83-%E5%B9%B3%E9%9D%A2.html",
-  );
+  await page.goto("/Test/AdvancedEnvironment/tests/平面综合.html");
   await expect(page.locator("body")).toHaveAttribute(
     "data-scenegis-page",
     "planar",
   );
   await expect(page.locator("#globeSampleLink")).toHaveAttribute(
     "href",
-    "/Test/高级环境.html",
+    "/Test/AdvancedEnvironment/tests/球面综合.html",
   );
   await page.waitForFunction(
     () => window.sceneGISPlanarSample?.getState().ready === true,
