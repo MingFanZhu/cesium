@@ -344,7 +344,7 @@ test("switches between Bright and Liberty and preserves the map when the public 
     true,
   );
   await expect(page.locator("#support-summary")).toHaveText(
-    "108 / 111 个样式层已接入",
+    "109 / 111 个样式层已接入",
   );
   expect(
     await page.evaluate(() => window.publicVectorPreview.layer.style.layerIds),

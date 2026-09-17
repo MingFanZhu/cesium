@@ -9,6 +9,12 @@ in vec3 lineDash;
 in vec2 lineEnds;
 uniform float u_sceneGISVectorMetersPerPixel;
 out vec4 v_color;
+#ifdef SCENEGIS_VECTOR_PATTERN
+in vec4 patternRect;
+in vec2 patternSize;
+out vec4 v_patternRect;
+out vec2 v_patternSize;
+#endif
 out vec4 v_lineCoordinate;
 out vec4 v_lineStyle;
 out vec3 v_lineDash;
@@ -28,6 +34,10 @@ void main()
     gl_Position = czm_modelViewProjectionRelativeToEye * p;
     gl_Position.z = clamp(gl_Position.z, -gl_Position.w, gl_Position.w);
     v_color = color;
+#ifdef SCENEGIS_VECTOR_PATTERN
+    v_patternRect = patternRect;
+    v_patternSize = patternSize;
+#endif
     v_lineCoordinate = vec4(lineMetrics.xy * envelope,
         lineMetrics.z / u_sceneGISVectorMetersPerPixel + lineMetrics.w * envelope, outside);
     v_lineStyle = vec4(linePaint.x, linePaint.y * 0.5, linePaint.w, envelope);

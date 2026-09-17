@@ -11,6 +11,7 @@ import PrimitiveType from "../../../Core/PrimitiveType.js";
 import strokeGeometry from "./_SceneGISVectorTileStroke.js";
 import Dashes from "./_SceneGISVectorTileDashes.js";
 import extrusionGeometry from "./_SceneGISVectorExtrusionGeometry.js";
+import Pattern from "./_SceneGISVectorPattern.js";
 
 function attribute(values, size, double = false) {
   return new GeometryAttribute({
@@ -212,18 +213,32 @@ function circleGeometry(feature, coordinates, paint) {
  */
 const SceneGISVectorTileGeometry = {};
 
-SceneGISVectorTileGeometry.background = function (width, height, evaluated) {
-  return makeInstance(
+SceneGISVectorTileGeometry.background = function (
+  width,
+  height,
+  evaluated,
+  patterns,
+) {
+  const instance = makeInstance(
     rawGeometry(
       [0, 0, 0, width, 0, 0, width, -height, 0, 0, -height, 0],
       [0, 1, 2, 0, 2, 3],
     ),
     undefined,
     colorWithOpacity(
-      evaluated.paint["background-color"],
+      evaluated.paint["background-pattern"] !== undefined
+        ? Color.WHITE
+        : evaluated.paint["background-color"],
       evaluated.paint["background-opacity"],
     ),
   );
+  if (evaluated.paint["background-pattern"] !== undefined) {
+    Pattern.attach(
+      instance.geometry,
+      Pattern.image(patterns, evaluated.paint["background-pattern"]),
+    );
+  }
+  return instance;
 };
 
 SceneGISVectorTileGeometry.build = function (
@@ -233,6 +248,7 @@ SceneGISVectorTileGeometry.build = function (
   coordinates,
   zoom,
   tile,
+  patterns,
 ) {
   const main = [];
   const outlines = [];
@@ -264,6 +280,12 @@ SceneGISVectorTileGeometry.build = function (
     }
     const evaluated = cached.value;
     const paint = evaluated.paint;
+    const patternName = paint[`${definition.type}-pattern`];
+    const pattern =
+      patternName === undefined
+        ? undefined
+        : Pattern.image(patterns, patternName);
+    const firstInstance = main.length;
     const id = Object.freeze({
       source: definition.source,
       sourceLayer: sourceLayer.name,
@@ -274,7 +296,7 @@ SceneGISVectorTileGeometry.build = function (
       properties: Object.freeze({ ...feature.properties }),
     });
     const color = colorWithOpacity(
-      paint[`${definition.type}-color`],
+      pattern ? Color.WHITE : paint[`${definition.type}-color`],
       paint[`${definition.type}-opacity`],
     );
     if (definition.type === "fill-extrusion") {
@@ -286,7 +308,7 @@ SceneGISVectorTileGeometry.build = function (
         main.push(makeInstance(geometry, id, color));
       }
       const outline = paint["fill-outline-color"];
-      if (outline !== undefined && paint["fill-antialias"]) {
+      if (!pattern && outline !== undefined && paint["fill-antialias"]) {
         const outlineColor = colorWithOpacity(outline, paint["fill-opacity"]);
         if (outlineColor.alpha > 0) {
           for (const line of lineGeometries(
@@ -331,6 +353,11 @@ SceneGISVectorTileGeometry.build = function (
         main.push(makeInstance(geometry, id, color));
       }
     }
+    if (pattern) {
+      for (let i = firstInstance; i < main.length; i++) {
+        Pattern.attach(main[i].geometry, pattern);
+      }
+    }
   }
   const result = [];
   if (main.length > 0) {
@@ -339,6 +366,7 @@ SceneGISVectorTileGeometry.build = function (
       instances: main,
       dashIntervals: dashes.values,
       uniformPaint,
+      pattern: definition.paint?.[`${definition.type}-pattern`] !== undefined,
     });
   }
   if (outlines.length > 0) {

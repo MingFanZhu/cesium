@@ -28,6 +28,7 @@ import GroundResources from "./_SceneGISVectorGroundResources.js";
 import anchorVisibility from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorAnchorVisibility.js";
 import extrusionVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorExtrusionVS.js";
 import extrusionFragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorExtrusionFS.js";
+import patternFragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorPattern.js";
 
 function repeatedColor(bytes, count) {
   const values = new Uint8Array(count * 4);
@@ -254,6 +255,9 @@ function SceneGISVectorTileBatchResources(
       this.updatePaint(prepared.uniformPaint);
     }
     const defines = allowPicking ? ["SCENEGIS_VECTOR_PICKING"] : [];
+    if (prepared.pattern) {
+      defines.push("SCENEGIS_VECTOR_PATTERN");
+    }
     if (owner._globe) {
       defines.push("SCENEGIS_VECTOR_GLOBE");
     }
@@ -315,6 +319,7 @@ function SceneGISVectorTileBatchResources(
       fragmentShaderSource: new ShaderSource({
         defines,
         sources: [
+          patternFragment,
           prepared.kind === "fill-extrusion" ? extrusionFragment : flatFragment,
         ],
       }),

@@ -248,8 +248,8 @@ describe("SceneGIS/Core/SceneGISVectorTileStyle", function () {
     const cases = [
       [json({ type: "raster" }), "layers[0].type"],
       [
-        json({ paint: { "line-pattern": "road" } }),
-        "layers[0].paint.line-pattern",
+        json({ paint: { "line-gradient": "red" } }),
+        "layers[0].paint.line-gradient",
       ],
       [
         json({ paint: { "line-width": ["feature-state", "width"] } }),

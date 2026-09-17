@@ -23,6 +23,7 @@ import fragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorGround
 import coverage from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorTileFlatFS.js";
 import globeCommon from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorGlobeCommon.js";
 import globeVertex from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorGlobeVS.js";
+import patternFragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorPattern.js";
 
 function table(resources, context, data, name) {
   const count = Math.max(1, data.length / 4);
@@ -168,6 +169,9 @@ function SceneGISVectorGroundResources(
     this._geometry = geometry;
     this._vertexArrays.push(geometry.vertexArray);
     const defines = ["SCENEGIS_VECTOR_GROUND"];
+    if (prepared.pattern) {
+      defines.push("SCENEGIS_VECTOR_PATTERN");
+    }
     if (globe) {
       defines.push("SCENEGIS_VECTOR_GLOBE");
     }
@@ -199,8 +203,8 @@ function SceneGISVectorGroundResources(
       fragmentShaderSource: new ShaderSource({
         defines,
         sources: globe
-          ? [common, globeCommon, coverage, fragment]
-          : [common, coverage, fragment],
+          ? [common, globeCommon, patternFragment, coverage, fragment]
+          : [common, patternFragment, coverage, fragment],
       }),
       attributeLocations: { prismVertex: 0 },
     });

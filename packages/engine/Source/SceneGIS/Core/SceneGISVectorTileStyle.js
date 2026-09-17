@@ -60,7 +60,7 @@ const profile = {
     ],
   },
   background: {
-    paint: ["background-color", "background-opacity"],
+    paint: ["background-color", "background-opacity", "background-pattern"],
     layout: ["visibility"],
   },
   fill: {
@@ -69,6 +69,7 @@ const profile = {
       "fill-opacity",
       "fill-outline-color",
       "fill-antialias",
+      "fill-pattern",
     ],
     layout: ["visibility"],
   },
@@ -79,6 +80,7 @@ const profile = {
       "fill-extrusion-height",
       "fill-extrusion-base",
       "fill-extrusion-vertical-gradient",
+      "fill-extrusion-pattern",
     ],
     layout: ["visibility"],
   },
@@ -91,6 +93,7 @@ const profile = {
       "line-offset",
       "line-blur",
       "line-dasharray",
+      "line-pattern",
     ],
     layout: [
       "visibility",
@@ -641,7 +644,7 @@ SceneGISVectorTileStyle.prototype._getGeometryKey = function (layerId, zoom) {
         uniform &&
         scope === "paint" &&
         (compiled.definition.type === "line"
-          ? name !== "line-dasharray"
+          ? name !== "line-dasharray" && name !== "line-pattern"
           : name === "fill-color" || name === "fill-opacity")
       ) {
         continue;
@@ -669,7 +672,12 @@ SceneGISVectorTileStyle.prototype._getUniformPaint = function (layerId, zoom) {
   ) {
     return undefined;
   }
-  return evaluateProperties(compiled.paint, { zoom });
+  const paint = evaluateProperties(compiled.paint, { zoom });
+  const type = compiled.definition.type;
+  if (paint[`${type}-pattern`] !== undefined) {
+    paint[`${type}-color`] = Color.clone(Color.WHITE);
+  }
+  return paint;
 };
 
 /**

@@ -75,6 +75,12 @@ await copyFile(
   path.join(temporary, "tile.pbf"),
 );
 await writeFile(path.join(temporary, "glyph.pbf"), encodeGlyphs());
+for (const extension of ["png", "json"]) {
+  await copyFile(
+    new URL(`pattern-sprite.${extension}`, import.meta.url),
+    path.join(temporary, `pattern.${extension}`),
+  );
+}
 await writeFile(
   path.join(temporary, "index.html"),
   "<!doctype html><title>Vector Worker package qualification</title>",
@@ -286,6 +292,43 @@ try {
       scene.camera.position.x += 1;
       render();
       const stable = batch.resources.uploadedBytes === uploads;
+      const patternLayer = scene.primitives.add(
+        new C.SceneGISVectorTileLayer({
+          scene,
+          sources: { test: symbolSource },
+          style: {
+            version: 8,
+            sprite: "/pattern",
+            sources: {
+              test: { type: "vector", tiles: ["/unused/{z}/{x}/{y}"] },
+            },
+            layers: [
+              {
+                id: "pattern",
+                type: "fill",
+                source: "test",
+                "source-layer": "labels",
+                paint: { "fill-pattern": "windows" },
+              },
+            ],
+          },
+        }),
+      );
+      const patternStart = performance.now();
+      do {
+        await new Promise(requestAnimationFrame);
+        render();
+        if (performance.now() - patternStart > 10000) {
+          throw new Error("Pattern package preparation did not finish.");
+        }
+      } while (!patternLayer.tilesLoaded);
+      const patternColor = Array.from(
+        scene.context.readPixels({ x: 20, y: 32, width: 1, height: 1 }),
+      );
+      const patternAtlas = patternLayer._patterns.texture;
+      const patternBatch = patternLayer._drawOrder[0]._pattern;
+      scene.primitives.remove(patternLayer);
+      const patternReleased = patternAtlas.isDestroyed();
       world.terrainProvider = {
         tilingScheme: world.tilingScheme,
         minimumHeight: 12,
@@ -626,6 +669,11 @@ try {
       globeCanvas.remove();
       return {
         mode,
+        pattern: {
+          color: patternColor,
+          batch: patternBatch,
+          released: patternReleased,
+        },
         layers: decoded.layers.length,
         features: decoded.layers.reduce(
           (sum, layer) => sum + layer.features.length,
@@ -675,6 +723,8 @@ try {
       };
     }, mode);
     assert(result.layers > 0 && result.features > 0);
+    assert(result.pattern.batch && result.pattern.released);
+    assert(result.pattern.color[0] > 0 && result.pattern.color[1] > 0);
     assert(
       result.same && result.transferred && result.typed && result.destroyed,
     );

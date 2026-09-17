@@ -609,7 +609,7 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
       compiled.getLayerDefinition("missing"),
     ).toThrowDeveloperError();
     expect(() =>
-      add([definition("line", { "line-pattern": "unsupported-sprite" })]),
+      add([definition("line", { "line-gradient": "red" })]),
     ).toThrowDeveloperError();
     expect(() =>
       add([definition("fill")], { tileCacheSize: 1, maximumVisibleTiles: 2 }),

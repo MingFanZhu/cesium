@@ -41,6 +41,13 @@ SceneGISVectorWorkerPool.prototype.schedule = function (
   slot.busy = true;
   this.statistics.started++;
   const payload = { ...parameters };
+  if (
+    this.configuration?.patterns &&
+    slot.patterns !== this.configuration.patterns
+  ) {
+    payload.patterns = this.configuration.patterns;
+    slot.patterns = this.configuration.patterns;
+  }
   if (!slot.configured && this.configuration) {
     payload.configuration = this.configuration;
     slot.configured = true;
@@ -57,6 +64,9 @@ SceneGISVectorWorkerPool.prototype.schedule = function (
       if (error) {
         if (payload.configuration) {
           slot.configured = false;
+        }
+        if (payload.patterns) {
+          slot.patterns = undefined;
         }
         reject(error);
       } else {

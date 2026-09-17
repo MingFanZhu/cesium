@@ -191,9 +191,23 @@ Globe 的建筑求高程与 ECEF 编码异步交给 vector Worker，只在相交
 color 的 alpha 按 Style 语义忽略；透明度使用 fill-extrusion-opacity × Layer.opacity。
 建筑使用普通三维深度和 Cesium OIT，不再按二维底图的层顺序覆盖其他物体。
 默认使用 Scene 光向与侧墙垂直渐变；已有高级环境可提供矢量材质光照。尚不提供建筑投射阴影、
-style light、pattern、translate、transition 或复杂屋顶，不承诺 MapLibre 像素一致。
+style light、translate、transition 或复杂屋顶，不承诺 MapLibre 像素一致。Pattern 支持见下节。
 跨瓦片建筑当前不做语义拼接，因此起伏地形上的分片 anchor 可能产生接缝；大跨度结构与复杂透明交叠仍有边界。
 详见 [ADR-0074](Decisions/ADR-0074-vector-fill-extrusion.md)。
+
+### 重复纹理
+
+`background-pattern`、`fill-pattern`、`line-pattern` 和 `fill-extrusion-pattern` 从 style.sprite 的普通 RGBA 子图取材质。
+名称可为字符串或既有 get/match/step 等表达式；图片逻辑尺寸为元数据尺寸 / pixelRatio。
+纹理替代基础 color，alpha 乘样式 opacity 与 Layer.opacity；透明像素不可拾取。
+同一 Layer 的图案和 symbol 共用 sprite，请求一次，纹理由同一 owner 释放；图案不同的要素仍合批。
+
+面和背景按 source matrix 连续重复，线沿每个 decoded part 累计距离，建筑屋顶使用 XY、墙面使用沿墙距离/高度。
+图案使用连续 style zoom 下的参考平面米/像素，倾斜时随地图透视；不是把屏幕颜色先绘入地图纹理。
+本轮不含 image/available-images、动态图像注册、整数 zoom crossfade、跨瓦片道路全局里程、复杂建筑纹理展开和各向异性 mipmap。
+细密图案在远景可能产生走样，不承诺与 MapLibre 像素一致。详见 [ADR-0075](Decisions/ADR-0075-vector-pattern-materials.md)。
+
+本地入口：[平面样式增强](../../Test/vector-tiles/平面样式增强.html)、[球面样式增强](../../Test/vector-tiles/球面样式增强.html)。
 
 ### 支持矩阵
 
@@ -201,13 +215,13 @@ style light、pattern、translate、transition 或复杂屋顶，不承诺 MapLi
 profile 为 `scenegis-vector-v1`，构造复制输入 JSON，预检失败带路径抛 DeveloperError。
 `validate(style)` 返回诊断字符串数组；编译成功后不会因调用者修改原 JSON 而变化。
 
-| 范围         | V1 计算能力                                                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| Root/source  | version/name/metadata/sources/layers/glyphs/sprite；vector tiles/minzoom/maxzoom/scheme/attribution                            |
-| Layers       | background、fill、fill-extrusion、line、circle、point/line symbol；source-layer、顺序、filter、min/maxzoom、visibility         |
-| Paint/layout | 颜色/opacity、基础 fill outline/antialias、line width/gap/offset/blur/dash/cap/join、circle radius/stroke/blur                 |
-| Expressions  | 经 profile 允许并测试的属性、分支、类型、算术与 zoom 表达式；完整清单见 ADR-0058                                               |
-| 未支持       | 复杂 shaping/variable anchor、pattern、feature-state/global-state、geometry-dependent filter、旧 style function、imports/slots |
+| 范围         | V1 计算能力                                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Root/source  | version/name/metadata/sources/layers/glyphs/sprite；vector tiles/minzoom/maxzoom/scheme/attribution                    |
+| Layers       | background、fill、fill-extrusion、line、circle、point/line symbol；source-layer、顺序、filter、min/maxzoom、visibility |
+| Paint/layout | 颜色/opacity、基础 fill outline/antialias、line width/gap/offset/blur/dash/cap/join、circle radius/stroke/blur         |
+| Expressions  | 经 profile 允许并测试的属性、分支、类型、算术与 zoom 表达式；完整清单见 ADR-0058                                       |
+| 未支持       | 复杂 shaping/variable anchor、feature-state/global-state、geometry-dependent filter、旧 style function、imports/slots  |
 
 这些是前端求值能力；当前 V3B1 实际渲染语义与限制见下节。
 `version:8` 不代表支持任意 Mapbox/MapLibre 样式。
@@ -382,7 +396,8 @@ scene.primitives.remove(layer);
 | style           | 属性/zoom 表达式、filter、visibility、min/maxzoom；全 tile 的 style layer 顺序优先                           |
 | pick            | primitive 为图层；id 含 source/sourceLayer/styleLayer/tile/featureIndex/featureId/properties                 |
 | fill-extrusion  | 米制 height/base、color/opacity、vertical-gradient；实体屋顶、外墙、孔洞内墙，普通三维深度遮挡               |
-| 明确拒绝        | profile 之外的属性和类型，包括 pattern、line-gradient、heatmap、raster；symbol 支持见专门文档                |
+| pattern         | background/fill/line/fill-extrusion 的普通 sprite 重复材质，支持名称字符串及返回名称的既有表达式             |
+| 明确拒绝        | profile 之外的属性和类型，包括 line-gradient、heatmap、raster；symbol 支持见专门文档                         |
 
 Line width/gap/offset 从参考平面的 CSS pixel 换算为米，再参与投影；
 俯视缩放保持参考宽度，倾斜时随地图透视变化。正 offset 向线方向右侧移动。

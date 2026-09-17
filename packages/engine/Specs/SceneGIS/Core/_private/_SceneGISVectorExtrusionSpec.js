@@ -120,7 +120,7 @@ describe("SceneGIS/Core/SceneGISVectorExtrusion", function () {
     expect(build({ ...f, type: 2 })).toEqual([]);
     expect(
       SceneGISVectorTileStyle.validate(
-        style({ "fill-extrusion-pattern": "wall" }),
+        style({ "fill-extrusion-translate": [1, 0] }),
       ).length,
     ).toBeGreaterThan(0);
   });

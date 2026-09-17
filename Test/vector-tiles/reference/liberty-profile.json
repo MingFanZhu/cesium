@@ -4,7 +4,6 @@
   "layerCount": 111,
   "excluded": {
     "natural_earth": "raster",
-    "landcover_wetland": "fill-pattern / sprite",
-    "road_area_pattern": "fill-pattern / sprite"
+    "landcover_wetland": "fill-translate-anchor"
   }
 }

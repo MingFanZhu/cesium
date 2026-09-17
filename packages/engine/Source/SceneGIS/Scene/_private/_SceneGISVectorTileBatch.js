@@ -269,6 +269,7 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
     prepared = prepareBatch(prepared, allowPicking, true)[0];
   }
   this._ground = !!prepared.ground;
+  this._pattern = prepared.pattern ?? false;
   this._kind = prepared.kind;
   this._minimumHeight = prepared.minimumHeight ?? 0;
   this._maximumHeight = prepared.maximumHeight ?? 0;
@@ -366,6 +367,9 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
   const depthRange = new Cartesian2();
   const uniformMap = {
     ...this._resources.uniformMap,
+    ...(this._pattern
+      ? this._owner._patterns.uniformMap(this._tileBounds)
+      : {}),
     u_sceneGISVectorOpacity: () => this._owner.opacity,
     ...environment.createUniformMap(this._owner),
     u_sceneGISGroundHeights: () => groundHeights(this, frameState),
@@ -417,7 +421,8 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
 };
 
 function updateExtrusionState(batch, command) {
-  const translucent = batch._styleOpacity * batch._owner.opacity < 1;
+  const translucent =
+    batch._pattern || batch._styleOpacity * batch._owner.opacity < 1;
   const pass = translucent ? Pass.TRANSLUCENT : Pass.OPAQUE;
   if (command.pass === pass) {
     return;

@@ -98,6 +98,9 @@ function prepareVectorBatch(item, allowPicking, ground = false) {
       }
       result.push({
         kind: item.kind,
+        pattern:
+          item.pattern ??
+          item.instances[0].geometry.attributes.patternRect !== undefined,
         minimumHeight,
         maximumHeight,
         geometries: packed ? undefined : [part],

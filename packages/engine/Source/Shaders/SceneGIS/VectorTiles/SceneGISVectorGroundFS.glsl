@@ -60,6 +60,15 @@ vec2 groundCoordinates()
     float area = groundCross(b - a, c - a);
     if (area <= 0.0) discard;
     vec3 weights = edges / area;
+#ifdef SCENEGIS_VECTOR_PATTERN
+#ifdef SCENEGIS_VECTOR_LINE
+    const int patternOffset = 7;
+#else
+    const int patternOffset = 3;
+#endif
+    v_patternRect = groundVertex(v_groundIndices.x, patternOffset);
+    v_patternSize = groundVertex(v_groundIndices.x, patternOffset + 1).xy;
+#endif
 #ifdef SCENEGIS_VECTOR_UNIFORM_PAINT
     v_color = u_sceneGISGroundColor;
 #elif defined(SCENEGIS_VECTOR_GLOBE_TERRAIN)

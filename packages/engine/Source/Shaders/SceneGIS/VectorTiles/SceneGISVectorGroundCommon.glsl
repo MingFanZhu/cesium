@@ -44,9 +44,12 @@ vec4 groundFetch(sampler2D table, vec2 size, int index)
 vec4 groundVertex(int index, int field)
 {
 #ifdef SCENEGIS_VECTOR_LINE
-    const int stride = 7;
+    int stride = 7;
 #else
-    const int stride = 3;
+    int stride = 3;
+#endif
+#ifdef SCENEGIS_VECTOR_PATTERN
+    stride += 2;
 #endif
     return groundFetch(u_sceneGISGroundData, u_sceneGISGroundDataSize, index * stride + field);
 }

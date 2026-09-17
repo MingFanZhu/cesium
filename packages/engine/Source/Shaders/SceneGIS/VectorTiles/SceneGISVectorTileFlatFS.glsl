@@ -12,6 +12,10 @@ vec3 groundNormalEC;
 #define SCENEGIS_VECTOR_INPUT in
 #endif
 SCENEGIS_VECTOR_INPUT vec4 v_color;
+#ifdef SCENEGIS_VECTOR_PATTERN
+SCENEGIS_VECTOR_INPUT vec4 v_patternRect;
+SCENEGIS_VECTOR_INPUT vec2 v_patternSize;
+#endif
 #ifdef SCENEGIS_VECTOR_PICKING
 SCENEGIS_VECTOR_INPUT vec4 v_pickColor;
 #endif
@@ -112,7 +116,18 @@ void main()
     if (local.x < u_sceneGISVectorTileClip.x || local.x >= u_sceneGISVectorTileClip.z ||
         local.y > u_sceneGISVectorTileClip.w || local.y <= u_sceneGISVectorTileClip.y) discard;
 
-    vec4 fill = czm_gammaCorrect(v_color);
+    vec4 material = v_color;
+#ifdef SCENEGIS_VECTOR_PATTERN
+#ifdef SCENEGIS_VECTOR_LINE
+    vec2 patternPosition = vec2(v_lineProgress * v_patternSize.y / max(v_lineStyle.x, 0.000001),
+        (0.5 + v_lineCoordinate.y / max(2.0 * v_lineCoordinate.w, 0.000001)) * v_patternSize.y);
+#else
+    vec2 patternPosition = vectorPatternPosition(local, v_patternSize);
+#endif
+    material = vectorPatternSample(v_patternRect, v_patternSize, patternPosition);
+    material.a *= v_color.a;
+#endif
+    vec4 fill = czm_gammaCorrect(material);
 #ifdef SCENEGIS_VECTOR_ENVIRONMENT
 #ifdef SCENEGIS_VECTOR_GROUND
     fill.rgb = vectorSurfaceRadiance(fill.rgb, groundPositionEC, groundNormalEC);

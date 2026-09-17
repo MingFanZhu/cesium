@@ -4,7 +4,8 @@ function packVectorGroundGeometry(geometry, kind, allowPicking) {
   const high = attributes.position3DHigh.values;
   const low = attributes.position3DLow.values;
   const count = high.length / 3;
-  const stride = kind === "line" ? 7 : 3;
+  const baseStride = kind === "line" ? 7 : 3;
+  const stride = baseStride + (attributes.patternRect ? 2 : 0);
   const vertices = new Float32Array(count * stride * 4);
   const pick = attributes.pickColor?.values;
   const tokens = allowPicking
@@ -39,6 +40,10 @@ function packVectorGroundGeometry(geometry, kind, allowPicking) {
     } else if (attributes.fringe) {
       vertices[offset + 8] = attributes.fringe.values[i * 3];
       vertices[offset + 9] = attributes.fringe.values[i * 3 + 1];
+    }
+    if (attributes.patternRect) {
+      copy("patternRect", i, offset + baseStride * 4);
+      copy("patternSize", i, offset + baseStride * 4 + 4);
     }
   }
   const triangles = new Float32Array((geometry.indices.length / 3) * 4);

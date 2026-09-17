@@ -6,6 +6,9 @@ import BlendingState from "../../../Scene/BlendingState.js";
 import fragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorGlobeBackgroundFS.js";
 import EnvironmentResources from "../../Renderer/_private/_SceneGISVectorEnvironmentResources.js";
 import environment from "./_SceneGISVectorEnvironment.js";
+import ShaderSource from "../../../Renderer/ShaderSource.js";
+import patternFragment from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorPattern.js";
+import Pattern from "../../Core/_private/_SceneGISVectorPattern.js";
 
 /** One surface-depth background command, independent of source subdivision. @private */
 function GlobeBackground(owner, evaluated) {
@@ -19,6 +22,20 @@ function GlobeBackground(owner, evaluated) {
     color.alpha * paint["background-opacity"],
   );
   this.renderCommands = [];
+  if (paint["background-pattern"] !== undefined) {
+    const image = Pattern.image(
+      owner._patterns.metadata,
+      paint["background-pattern"],
+    );
+    this._pattern = image;
+    this._patternRect = Cartesian4.unpack(image.rect);
+    this._patternSize = Cartesian2.unpack(image.size);
+    this._patternRoot = new Cartesian2(
+      owner._extent.minimumX,
+      owner._extent.maximumY,
+    );
+    this._color.w = paint["background-opacity"];
+  }
 }
 GlobeBackground.prototype.update = function (frameState) {
   if (this._command) {
@@ -31,9 +48,21 @@ GlobeBackground.prototype.update = function (frameState) {
     return;
   }
   const range = new Cartesian2();
-  this._command = frameState.context.createViewportQuadCommand(fragment, {
+  const source = new ShaderSource({
+    defines: this._pattern ? ["SCENEGIS_VECTOR_PATTERN"] : [],
+    sources: [patternFragment, fragment],
+  });
+  this._command = frameState.context.createViewportQuadCommand(source, {
     owner: this._owner,
     uniformMap: {
+      ...(this._pattern
+        ? {
+            ...this._owner._patterns.uniformMap(this._owner._extent),
+            u_patternRect: () => this._patternRect,
+            u_patternSize: () => this._patternSize,
+            u_patternRoot: () => this._patternRoot,
+          }
+        : {}),
       ...environment.createUniformMap(this._owner),
       u_sceneGISVectorOpacity: () => this._owner.opacity,
       u_color: () => this._color,

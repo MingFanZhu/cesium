@@ -28,7 +28,9 @@ function extrusionGeometry(feature, coordinates, paint) {
     anchors = [],
     data = [],
     gradients = [],
+    patternCoordinates = [],
     indices = [];
+  const patterned = paint["fill-extrusion-pattern"] !== undefined;
   const parts = feature.geometry.parts;
   const starts = feature.geometry.polygonStarts;
   const extent = coordinates._extent;
@@ -62,7 +64,7 @@ function extrusionGeometry(feature, coordinates, paint) {
     const outer = rings[0];
     const cx = outer.reduce((sum, p) => sum + p.x, 0) / outer.length;
     const cy = outer.reduce((sum, p) => sum + p.y, 0) / outer.length;
-    function vertex(point, z, normal, top, wall) {
+    function vertex(point, z, normal, top, wall, distance = 0) {
       positions.push(point.x, point.y, z);
       normals.push(...normal);
       anchors.push(point.x, point.y);
@@ -70,6 +72,13 @@ function extrusionGeometry(feature, coordinates, paint) {
       gradients.push(
         wall && paint["fill-extrusion-vertical-gradient"] ? 0.7 + 0.3 * top : 1,
       );
+      if (patterned) {
+        patternCoordinates.push(
+          wall ? distance : point.x,
+          wall ? z : point.y,
+          wall ? 1 : 0,
+        );
+      }
     }
     const roofStart = positions.length / 3;
     const xy = [],
@@ -106,9 +115,13 @@ function extrusionGeometry(feature, coordinates, paint) {
         area += a.x * b.y - b.x * a.y;
       }
       const sign = (area > 0 ? 1 : -1) * (ring === 0 ? 1 : -1);
+      let distance = 0;
       for (let i = 0; i < points.length; i++) {
         const a = points[i],
           b = points[(i + 1) % points.length];
+        const length = Math.hypot(b.x - a.x, b.y - a.y);
+        const start = distance;
+        distance += length;
         // Tile clipping edges are not physical building walls, including MVT buffers.
         if (
           (a.u <= 0 && b.u <= 0) ||
@@ -118,17 +131,16 @@ function extrusionGeometry(feature, coordinates, paint) {
         ) {
           continue;
         }
-        const length = Math.hypot(b.x - a.x, b.y - a.y);
         const normal = [
           (sign * (b.y - a.y)) / length,
           (-sign * (b.x - a.x)) / length,
           0,
         ];
         const offset = positions.length / 3;
-        vertex(a, base, normal, 0, true);
-        vertex(b, base, normal, 0, true);
-        vertex(b, height, normal, 1, true);
-        vertex(a, height, normal, 1, true);
+        vertex(a, base, normal, 0, true, start);
+        vertex(b, base, normal, 0, true, distance);
+        vertex(b, height, normal, 1, true, distance);
+        vertex(a, height, normal, 1, true, start);
         for (const index of sign > 0
           ? [0, 1, 2, 0, 2, 3]
           : [0, 2, 1, 0, 3, 2]) {
@@ -147,6 +159,9 @@ function extrusionGeometry(feature, coordinates, paint) {
       vectorAnchor: attribute(anchors, 2),
       extrusionData: attribute(data, 4),
       extrusionGradient: attribute(gradients, 1),
+      ...(patterned
+        ? { patternCoordinate: attribute(patternCoordinates, 3) }
+        : {}),
     },
     indices: IndexDatatype.createTypedArray(positions.length / 3, indices),
     primitiveType: PrimitiveType.TRIANGLES,

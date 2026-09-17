@@ -37,9 +37,10 @@ function transfer(value, objects, seen = new Set()) {
 
 /** Creates state confined to one Worker: immutable style and matrix, no tile or GPU cache. @private */
 function createVectorTaskHandler() {
-  let style, scheme, configuration;
+  let style, scheme, configuration, patterns;
   return function processVectorTask(parameters, transferableObjects) {
     const begin = performance.now();
+    patterns = parameters.patterns ?? patterns;
     if (parameters.configuration) {
       configuration = parameters.configuration;
       style = new Style(configuration.style);
@@ -158,6 +159,7 @@ function createVectorTaskHandler() {
             coordinates,
             parameters.zoom,
             tile,
+            patterns,
           ).flatMap((item) =>
             prepareBatch(item, parameters.allowPicking, parameters.ground),
           );

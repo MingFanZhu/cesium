@@ -59,8 +59,9 @@ Mapbox SDK 当前默认是 [Standard](https://docs.mapbox.com/mapbox-gl-js/guide
 [公开 TileJSON](https://tiles.openfreemap.org/planet)，采用 OpenMapTiles schema；
 不会把它们改名为 Mapbox Streets 数据或套用 Streets 的字段假设。
 `openfreemap-liberty.json` 是 2026-09-13 获取的同一 111 层样式快照，仅用于无需公网的 E2E。
-`liberty-profile.json` 当前显式排除 3 层：1 raster、2 pattern；
-其余 108 层接入，包括 V5B 新增的 10 个沿线/zoom-dependent placement symbol layers 和 V3D1 的 building-3d。
+`liberty-profile.json` 当前显式排除 2 层：raster 与含 `fill-translate-anchor` 的湿地层；
+其余 109 层接入，包括 V5B 的沿线标注、V3D1 的 building-3d 与 V3D2 的 road_area_pattern。
+湿地图案本身已支持，但该层仍包含 profile 外的 translate-anchor，页面不会静默删除该属性。
 以后线上样式出现新的不支持配置会报错，不静默删属性。
 
 Liberty 由 [OpenFreeMap Styles](https://github.com/hyperknot/openfreemap-styles) 维护，

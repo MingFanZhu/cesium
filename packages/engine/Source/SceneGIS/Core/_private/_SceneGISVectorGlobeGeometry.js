@@ -36,6 +36,10 @@ function prepareGlobeGeometry(batch, bounds) {
           Cartesian3.pack(encoded.low, low, i * 3);
           const lon = x / GlobeCoordinates.radius;
           const lat = GlobeCoordinates.latitude(y);
+          const uv = geometry.attributes.patternCoordinate?.values;
+          if (uv && uv[i * 3 + 2] === 1) {
+            uv[i * 3 + 1] /= Math.cos(lat);
+          }
           const nx = normals[i * 3],
             ny = normals[i * 3 + 1],
             nz = normals[i * 3 + 2];

@@ -24,6 +24,7 @@ import GlobeCover from "./_private/_SceneGISVectorGlobeCover.js";
 import GlobeTerrain from "./_private/_SceneGISVectorGlobeTerrain.js";
 import extrusionAnchoring from "./_private/_SceneGISVectorExtrusionAnchoring.js";
 import GlobeBackground from "./_private/_SceneGISVectorGlobeBackground.js";
+import Patterns from "./_private/_SceneGISVectorPatterns.js";
 
 function integerOption(options, name, fallback) {
   const value = options[name] ?? fallback;
@@ -253,7 +254,7 @@ function validatePreparedTile(result, records, allowPicking) {
         if (
           !(vertices instanceof Float32Array) ||
           !(triangles instanceof Float32Array) ||
-          stride !== (item.kind === "line" ? 7 : 3) ||
+          stride !== (item.kind === "line" ? 7 : 3) + (item.pattern ? 2 : 0) ||
           vertices.length % (stride * 4) ||
           triangles.length % 4
         ) {
@@ -333,6 +334,9 @@ function validatePreparedTile(result, records, allowPicking) {
 }
 
 function prepareEntry(layer, state, entry, zoom) {
+  if (layer._patterns && !layer._patterns.loaded) {
+    return;
+  }
   if (entry.work || layer._preparing >= 2 || !layer._workers.available) {
     return;
   }
@@ -503,6 +507,11 @@ function createBatches(layer, state, entry, frameState, budget) {
 
 function updateBackgrounds(layer, zoom, frameState) {
   for (const record of layer._backgrounds) {
+    const pattern =
+      record.definition.paint?.["background-pattern"] !== undefined;
+    if (pattern && !layer._patterns.ready) {
+      continue;
+    }
     const desired = signature([record], zoom);
     if (record.signature !== desired) {
       const evaluated = layer._style.evaluateLayer(
@@ -517,13 +526,14 @@ function updateBackgrounds(layer, zoom, frameState) {
           bounds.width,
           bounds.height,
           evaluated,
+          layer._patterns?.metadata,
         );
         candidate = layer._globe
           ? new GlobeBackground(layer, evaluated)
           : new VectorBatch(
               layer,
               { bounds },
-              { kind: "fill", instances: [instance] },
+              { kind: "fill", instances: [instance], pattern },
               false,
             );
         try {
@@ -947,6 +957,12 @@ function SceneGISVectorTileLayer(options) {
         maximumSymbolRequests,
       )
     : undefined;
+  this._patterns = this._records.some(
+    ({ definition }) =>
+      definition.paint?.[`${definition.type}-pattern`] !== undefined,
+  )
+    ? new Patterns(this, maximumGlyphRanges, maximumSymbolRequests)
+    : undefined;
 }
 
 function validateOpacity(value) {
@@ -1038,6 +1054,7 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
     get: function () {
       return (
         this._tilesLoaded &&
+        (this._patterns?.loaded ?? true) &&
         (this._symbols?.loaded ?? true) &&
         (!this._globe ||
           (!GlobeTerrain.pending(this) &&
@@ -1216,6 +1233,7 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
       return;
     }
     this._metersPerPixel = this._extent.width / (512 * 2 ** zoom);
+    this._patterns?.update(frameState.context);
     updateBackgrounds(this, zoom, frameState);
     updateSources(this, zoom, frameState);
     if (this._symbols) {
@@ -1266,6 +1284,7 @@ SceneGISVectorTileLayer.prototype.destroy = function () {
   }
   this._workers.destroy();
   this._symbols?.destroy();
+  this._patterns?.destroy();
   for (const record of this._backgrounds) {
     record.batch?.destroy();
   }

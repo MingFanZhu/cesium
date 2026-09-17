@@ -2,20 +2,20 @@
 
 ## Metadata
 
-| Field                    | Value                                                  |
-| ------------------------ | ------------------------------------------------------ |
-| Extension slug           | `vector-tiles`                                         |
-| Status                   | `completed`（当前大阶段）                              |
-| Planning model           | `extension`                                            |
-| Active extension plan    | None                                                   |
-| Completed extension plan | [总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase            | None                                                   |
-| Active phase plan        | None                                                   |
-| Last completed phase     | [V3D1](plans/2026-09-17-v3d1-fill-extrusion.md)        |
-| Active standalone plan   | None                                                   |
-| Architecture contact     | 当前 Agent                                             |
-| Execution contact        | 当前 Agent                                             |
-| Last updated             | `2026-09-17`                                           |
+| Field                    | Value                                                            |
+| ------------------------ | ---------------------------------------------------------------- |
+| Extension slug           | `vector-tiles`                                                   |
+| Status                   | `active`（四类样式增强；前一大阶段已完成）                       |
+| Planning model           | `extension`                                                      |
+| Active extension plan    | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md) |
+| Completed extension plan | [总体计划](plans/2026-09-12-vector-tiles-extension.md)           |
+| Current phase            | V3D2                                                             |
+| Active phase plan        | [纹理填充](plans/2026-09-17-v3d2-patterns.md)                    |
+| Last completed phase     | [V3D1](plans/2026-09-17-v3d1-fill-extrusion.md)                  |
+| Active standalone plan   | None                                                             |
+| Architecture contact     | 当前 Agent                                                       |
+| Execution contact        | 当前 Agent                                                       |
+| Last updated             | `2026-09-17`                                                     |
 
 ## Scope
 
@@ -60,6 +60,10 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - V3B1 ADR：[ADR-0062](../../Documentation/SceneGIS/Decisions/ADR-0062-vector-stroke-and-coverage.md)；无新增 SGP。
 
 ## Current handoff
+
+2026-09-17 负责人在 V3D1 checkpoint `2f14780d81` 后明确授权补充四类功能。
+当前执行[四类样式增强](plans/2026-09-17-style-enhancements-extension.md)，V3D2 active；
+其余三个阶段 planned，按独立 checkpoint 顺序推进。下列收口结论仅描述上一大阶段。
 
 - 2026-09-17 负责人明确验收通过，关闭 V3D1 贴地性能 gate 与当前矢量瓦片加载大阶段。
 - 当前无 active phase、open discussion 或待验收 gate。技术证据、冻结能力及后续事项见

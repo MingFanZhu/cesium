@@ -748,6 +748,10 @@ review不能代替项目负责人的真实浏览器/GPU人工验收。完整决�
 
 ### 独立矢量瓦片
 
+Pattern 按 [ADR-0075](Decisions/ADR-0075-vector-pattern-materials.md) 借用 Layer 的单 sprite atlas，
+Worker 准备图案矩形与坐标，flat/ground/Globe/extrusion 只做材质采样；不得按 feature 拆 command 或生成地图颜色 RTT。
+无 symbol 的 Layer 显式拥有 sprite；有 symbol 时共享其 owner。未知图片报错，不能静默替换成纯色。
+
 建筑 `fill-extrusion` 按 [ADR-0074](Decisions/ADR-0074-vector-fill-extrusion.md) 使用独立实体网格，
 由 vector Worker 生成屋顶、侧墙和法线，按 tile/style 合批；使用普通 OPAQUE/TRANSLUCENT 和 native pick/depth。
 height/base 是相对 polygon terrain anchor 的米制高度，Planar 使用 +Z，Globe 使用 geodetic up；
