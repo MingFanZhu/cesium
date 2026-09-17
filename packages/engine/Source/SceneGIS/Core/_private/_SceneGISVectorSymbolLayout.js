@@ -22,6 +22,24 @@ function bounds(quads) {
   ];
 }
 
+function textOffset(layout, anchor) {
+  const radial = layout["text-radial-offset"];
+  const offset = layout["text-offset"];
+  if (radial === undefined && !layout["text-variable-anchor"]) {
+    return offset;
+  }
+  const x = 1 - 2 * anchor[0],
+    y = 1 - 2 * anchor[1];
+  const distance =
+    radial === undefined
+      ? undefined
+      : Math.max(0, radial) / (x && y ? Math.SQRT2 : 1);
+  return [
+    x * (distance ?? Math.abs(offset[0])),
+    y * ((distance ?? Math.abs(offset[1])) - 7 / 24),
+  ];
+}
+
 /** Pure symbol metrics and screen-space collision. Units are CSS pixels. @private */
 const SceneGISVectorSymbolLayout = {
   text(text, layout, lookup) {
@@ -79,7 +97,7 @@ const SceneGISVectorSymbolLayout = {
     const maxWidth = Math.max(...widths);
     const lineHeight = size * layout["text-line-height"];
     const anchor = anchors[layout["text-anchor"]];
-    const offset = layout["text-offset"];
+    const offset = textOffset(layout, anchor);
     const justification =
       layout["text-justify"] === "auto"
         ? anchor[0]

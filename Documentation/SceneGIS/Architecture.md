@@ -812,6 +812,8 @@ Layer 销毁终止 owned Workers，过时 tile 结果按 token 丢弃，不引�
 标注按 [ADR-0068](Decisions/ADR-0068-symbol-placement-and-dynamic-buffers.md) 分离 persistent candidates、
 budgeted placement 与 current-camera drawing；静态 UV/paint/pick 和动态 geometry/visibility 分流，
 只上传改变的范围。短期避让延迟与保守碰撞造成的密度差异是显式资格边界。
+按 [ADR-0077](Decisions/ADR-0077-variable-symbol-anchors.md)，点标注可变 anchor 的候选在 Worker
+缓存，主线程按上次成功位置及声明顺序试放；只有最终选择写入碰撞网格，异步布局不得修改已发布 shape。
 
 ## 验证架构
 

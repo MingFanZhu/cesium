@@ -191,6 +191,44 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(scene.pick(new Cartesian2(30, 32))?.id.featureId).toBe("1");
   });
 
+  it("prepares variable anchors in the Worker, tries free positions before overlap and retains placement on motion", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([feature("a", 2048, "A", 1), feature("b", 2048, "A", 2)]),
+    );
+    const fonts = spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(
+      bytes,
+    );
+    const layer = add([
+      definition("labels", {
+        "text-size": 16,
+        "text-variable-anchor": ["left", "right"],
+        "text-radial-offset": 0.25,
+        "text-allow-overlap": true,
+      }),
+    ]);
+    await loaded(layer);
+    const candidates = layer._symbols._placed.filter((c) => c.placed?.text);
+    expect(candidates.length).toBe(2);
+    expect(candidates.map((c) => c.variableAnchor)).toEqual(["left", "right"]);
+    expect(candidates.every((c) => c.shaped.variants.size === 2)).toBeTrue();
+    for (const c of candidates) {
+      expect(scene.pick(glyphCenter(c))?.id.featureId).toBe(
+        c.identity.featureId,
+      );
+    }
+    const tasks = layer.statistics.workerTasks;
+    const atlas = [...layer._symbols.assets.pages.values()][0].texture;
+    const snapshot = candidates.map((c) => c.shaped.text);
+    scene.camera.moveRight(1);
+    await loaded(layer);
+    const moved = layer._symbols._placed.filter((c) => c.placed?.text);
+    expect(moved.map((c) => c.variableAnchor)).toEqual(["left", "right"]);
+    expect(moved.map((c) => c.shaped.text)).toEqual(snapshot);
+    expect(layer.statistics.workerTasks).toBe(tasks);
+    expect(fonts).toHaveBeenCalledTimes(1);
+    expect([...layer._symbols.assets.pages.values()][0].texture).toBe(atlas);
+  });
+
   it("excludes offscreen anchors before glyph requests, shaping diagnostics and collision", async function () {
     spyOn(source, "requestTile").and.resolveTo(
       tile([

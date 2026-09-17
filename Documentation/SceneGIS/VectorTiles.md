@@ -250,7 +250,8 @@ profile 为 `scenegis-vector-v1`，构造复制输入 JSON，预检失败带路�
 | Paint/layout | 颜色/opacity、基础 fill outline/antialias、line width/gap/offset/blur/dash/cap/join、circle radius/stroke/blur         |
 | Expressions  | 经 profile 允许并测试的属性、分支、类型、算术与 zoom 表达式；完整清单见 ADR-0058                                       |
 | 状态         | paint feature-state/global-state、Layer 局部失效、状态 API 和独立求值 context                                          |
-| 未支持       | 复杂 shaping/variable anchor、geometry-dependent filter、旧 style function、imports/slots                              |
+| 点标注       | text-variable-anchor、text-radial-offset；Worker 候选排版与稳定碰撞选择                                                |
+| 未支持       | 复杂 shaping、geometry-dependent filter、旧 style function、imports/slots                                              |
 
 这些是前端求值能力；当前 V3B1 实际渲染语义与限制见下节。
 `version:8` 不代表支持任意 Mapbox/MapLibre 样式。

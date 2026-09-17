@@ -52,10 +52,12 @@ export default function start(globe) {
   const style = {
     version: 8,
     sprite: "/Test/vector-tiles/pattern-sprite",
+    glyphs:
+      "/Test/vector-tiles/symbol-assets/{range}.pbf?fontstack={fontstack}",
     sources: {
       fixture: {
         type: "vector",
-        tiles: ["/Test/vector-tiles/public-fixture.pbf?z={z}&x={x}&y={y}"],
+        tiles: ["/Test/vector-tiles/enhancements.pbf?z={z}&x={x}&y={y}"],
         minzoom: 15,
         maxzoom: 15,
       },
@@ -119,6 +121,32 @@ export default function start(globe) {
             120,
             80,
           ],
+        },
+      },
+      {
+        id: "poi-anchor",
+        type: "circle",
+        source,
+        "source-layer": "labels",
+        paint: { "circle-radius": 4, "circle-color": "#df5338" },
+      },
+      {
+        id: "poi",
+        type: "symbol",
+        source,
+        "source-layer": "labels",
+        layout: {
+          "text-field": ["get", "name"],
+          "text-font": ["SceneGIS Test Noto Subset"],
+          "text-size": 18,
+          "text-variable-anchor": ["top", "bottom", "left", "right"],
+          "text-radial-offset": 1.4,
+          "text-justify": "auto",
+        },
+        paint: {
+          "text-color": "#132a39",
+          "text-halo-color": "white",
+          "text-halo-width": 1.5,
         },
       },
     ],

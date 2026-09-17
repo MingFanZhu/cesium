@@ -11,8 +11,9 @@
 ## 测试入口
 
 四类新增能力集中在 [平面样式增强](平面样式增强.html) 与 [球面样式增强](球面样式增强.html)，
-已提供四种 pattern、点击选中/清除与全局水面透明度。使用默认 lil-gui，不加载高级环境；后续标注增强继续使用这两个入口。
+已提供四种 pattern、点击选中/清除、全局水面透明度和 POI 自动换位。使用默认 lil-gui，不加载高级环境。
 `pattern-sprite.png/json` 是原创测试图案，运行 `node Test/vector-tiles/generate-pattern-fixture.mjs` 可重建。
+`enhancements.pbf` 在公共测试要素上增加三个重合 POI，运行 `node Test/vector-tiles/generate-enhancement-fixture.mjs` 可重建。
 
 旧测试页保留有实际回归用途的能力，按世界命名；不再提供高级环境、环境参数和时间控件。
 

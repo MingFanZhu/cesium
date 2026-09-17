@@ -23,6 +23,12 @@ for (const world of ["平面", "球面"]) {
     });
     expect(initial.commands).toBeGreaterThan(0);
     expect(initial.pattern).toBeGreaterThan(0);
+    const anchors = await page.evaluate(() =>
+      window.vectorEnhancements.layer._symbols._placed
+        .filter((c) => c.placed?.text)
+        .map((c) => c.variableAnchor),
+    );
+    expect(new Set(anchors).size).toBeGreaterThanOrEqual(3);
     await page.screenshot({ path: info.outputPath(`${world}-patterns.png`) });
     await page.getByRole("button", { name: "俯视", exact: true }).click();
     await page.waitForFunction(

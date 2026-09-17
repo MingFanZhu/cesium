@@ -46,7 +46,7 @@ Style 的 `glyphs`、`sprite` 是只读配置，Style 不负责请求。
 | 沿线      | symbol-spacing、text-max-angle、text/icon-rotate、text/icon-keep-upright；逐字曲线排布、独立路牌和箭头 |
 
 文字排版以横排中文和普通 Latin 为首轮验收范围；保留完整词的英文换行、中文逐字断行和显式换行。
-不支持 Polygon point placement、vertical/RTL/复杂 shaping、rich text、variable anchors、
+不支持 Polygon point placement、vertical/RTL/复杂 shaping、rich text、text-variable-anchor-offset、
 icon-text-fit、SDF icon 或 fade transition。不支持的显式属性在构造时拒绝；
 Polygon geometry、缺字、已识别的复杂 shaping 文本在运行时提供诊断。
 该范围不承诺与 MapLibre 的自动均衡换行、复杂字体 shaping 或任意宽 halo 逐像素相同。
@@ -67,6 +67,16 @@ GPU 使用 RTE 和 DPR，glyph 不按基础瓦片区域裁切。
 不单独依赖不保证全局唯一的 MVT ID。同名不同位置不会仅按文字合并。
 允许 overlap/ignore-placement 的层保留 feature 绘制顺序，普通避让层共享 atlas batch。
 不同 Layer 实例各自管理 collision。
+
+## 点标注自动换位
+
+point placement 支持 `text-variable-anchor`（九种标准位置）和 `text-radial-offset`（em）。
+每组候选由 Worker 一次排版，使用各自 anchor 的 auto justification。碰撞优先保留上次成功的位置，
+然后按数组顺序尝试；显式 allow-overlap 仍先寻找无碰撞位置。仅最终位置进入碰撞网格，
+渲染、terrain 和 pick 使用相同选择。普通 icon 保持自身位置，text/icon optional 继续生效。
+radial 优先于 text-offset；可变 anchor 的普通 offset 使用绝对分量沿 anchor 方向应用，
+固定 anchor 的普通 offset 保持原语义。对角 radial 按 sqrt(2) 分配，baseline correction 参见
+[ADR-0077](Decisions/ADR-0077-variable-symbol-anchors.md)。不支持沿线可变 anchor 或 anchor-offset collection。
 
 ## 沿线、路牌与箭头
 

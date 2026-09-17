@@ -21,7 +21,9 @@ import {
   Transforms,
   IntersectionTests,
   Ray,
+  Resource,
 } from "../../../index.js";
+import { encodeGlyphs } from "../Core/vectorSymbolFixture.js";
 import DrawCommand from "../../../Source/Renderer/DrawCommand.js";
 import Coordinates from "../../../Source/SceneGIS/Core/_private/_SceneGISVectorGlobeCoordinates.js";
 import Cover from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorGlobeCover.js";
@@ -89,7 +91,7 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
   afterEach(function () {
     scene.destroyForSpecs();
   });
-  function add(features, layers) {
+  function add(features, layers, styleExtras = {}) {
     spyOn(source, "requestTile").and.resolveTo({
       layers: [{ name: "data", version: 2, extent: 4096, features }],
     });
@@ -100,6 +102,7 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
         sources: { test: source },
         style: {
           version: 8,
+          ...styleExtras,
           sources: {
             test: {
               type: "vector",
@@ -153,6 +156,52 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
       ),
     };
   }
+  it("places variable point anchors and picks their shifted glyphs on the Globe without new shaping during motion", async function () {
+    const fonts = spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(
+      encodeGlyphs(),
+    );
+    const layer = add(
+      [feature(1, [[2048, 2048]], "a"), feature(1, [[2048, 2048]], "b")],
+      [
+        {
+          id: "labels",
+          type: "symbol",
+          layout: {
+            "text-field": "A",
+            "text-font": ["Test"],
+            "text-size": 24,
+            "text-variable-anchor": ["left", "right"],
+            "text-radial-offset": 0.5,
+          },
+          paint: { "text-color": "red" },
+        },
+      ],
+      { glyphs: "https://example.invalid/{fontstack}/{range}.pbf" },
+    );
+    await ready(layer);
+    const placed = layer._symbols._placed.filter((c) => c.placed?.text);
+    expect(placed.map((c) => c.variableAnchor)).toEqual(["left", "right"]);
+    for (const candidate of placed) {
+      const corners = candidate.projected.text.quads[0].corners;
+      const point = new Cartesian2(
+        candidate.screen.x + corners.reduce((s, p) => s + p[0], 0) / 4,
+        candidate.screen.y + corners.reduce((s, p) => s + p[1], 0) / 4,
+      );
+      expect(scene.pick(point)?.id.featureId).toBe(
+        candidate.identity.featureId,
+      );
+    }
+    const tasks = layer.statistics.workerTasks;
+    scene.camera.moveRight(1);
+    await ready(layer);
+    expect(
+      layer._symbols._placed
+        .filter((c) => c.placed?.text)
+        .map((c) => c.variableAnchor),
+    ).toEqual(["left", "right"]);
+    expect(layer.statistics.workerTasks).toBe(tasks);
+    expect(fonts).toHaveBeenCalledTimes(1);
+  });
   [false, true].forEach((logarithmic) => {
     it(`drapes and picks ordered translucent fills on the native ellipsoid (log ${logarithmic})`, async function () {
       scene.logarithmicDepthBuffer = logarithmic;

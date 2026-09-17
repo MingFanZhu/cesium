@@ -88,9 +88,9 @@ describe("SceneGIS/Core/SceneGISVectorSymbol", function () {
     expect(l["icon-size"]).toBe(1.5);
     expect(l["text-offset"]).toEqual([0, 0]);
   });
-  it("rejects unimplemented rich text, text-fit and variable anchors at construction", function () {
+  it("rejects unimplemented rich text, text-fit and anchor-offset collections at construction", function () {
     for (const l of [
-      { "text-variable-anchor": ["top", "bottom"] },
+      { "text-variable-anchor-offset": ["top", [0, 1]] },
       { "text-field": ["format", "A", {}] },
       { "icon-text-fit": "both" },
     ]) {
@@ -98,6 +98,74 @@ describe("SceneGIS/Core/SceneGISVectorSymbol", function () {
         () => new SceneGISVectorTileStyle(input(l)),
       ).toThrowDeveloperError();
     }
+  });
+  it("directs radial and variable offsets using anchor edges and preserves ordinary offsets", function () {
+    const base = { "text-field": "A", "text-size": 24 };
+    for (const [anchor, x, y] of [
+      ["left", 24, 0],
+      ["top", 0, 17],
+      ["bottom-right", -24 / Math.SQRT2, -24 / Math.SQRT2 + 7],
+    ]) {
+      const normal = Layout.text(
+        "A",
+        evaluate({ ...base, "text-anchor": anchor }),
+        lookup,
+      );
+      const radial = Layout.text(
+        "A",
+        evaluate({ ...base, "text-anchor": anchor, "text-radial-offset": 1 }),
+        lookup,
+      );
+      expect(radial.box[0] - normal.box[0]).toBeCloseTo(x, 10);
+      expect(radial.box[1] - normal.box[1]).toBeCloseTo(y, 10);
+    }
+    const variable = evaluate({
+      ...base,
+      "text-variable-anchor": ["top-left", "bottom"],
+      "text-anchor": "top-left",
+      "text-offset": [-2, -1],
+    });
+    const normal = Layout.text(
+      "A",
+      evaluate({ ...base, "text-anchor": "top-left" }),
+      lookup,
+    );
+    const offset = Layout.text("A", variable, lookup);
+    expect(offset.box[0] - normal.box[0]).toBe(48);
+    expect(offset.box[1] - normal.box[1]).toBeCloseTo(17, 10);
+    const zero = Layout.text(
+      "A",
+      { ...variable, "text-radial-offset": 0 },
+      lookup,
+    );
+    expect(zero.box[0]).toBe(normal.box[0]);
+    expect(zero.box[1] - normal.box[1]).toBeCloseTo(-7, 10);
+  });
+  it("uses each variable anchor for multiline auto justification and validates point-only anchors", function () {
+    const l = evaluate({
+      "text-field": "AA\\nA",
+      "text-size": 24,
+      "text-variable-anchor": ["left", "right"],
+      "text-justify": "auto",
+    });
+    const left = Layout.text("AA\nA", { ...l, "text-anchor": "left" }, lookup);
+    const right = Layout.text(
+      "AA\nA",
+      { ...l, "text-anchor": "right" },
+      lookup,
+    );
+    expect(left.quads[2].box[0]).toBe(left.quads[0].box[0]);
+    expect(right.quads[2].box[2]).toBe(right.quads[1].box[2]);
+    expect(() =>
+      evaluate({ "text-field": "A", "text-variable-anchor": ["invalid"] }),
+    ).toThrowDeveloperError();
+    expect(() =>
+      evaluate({
+        "text-field": "A",
+        "symbol-placement": "line",
+        "text-variable-anchor": ["top"],
+      }),
+    ).toThrowDeveloperError();
   });
   it("positions 24-em metrics around the baseline and respects anchor/offset", function () {
     const centered = Layout.text("A", evaluate({ "text-size": 24 }), lookup);

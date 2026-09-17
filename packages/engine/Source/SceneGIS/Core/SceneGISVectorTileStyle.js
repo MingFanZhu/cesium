@@ -34,6 +34,8 @@ const profile = {
       "text-line-height",
       "text-letter-spacing",
       "text-anchor",
+      "text-variable-anchor",
+      "text-radial-offset",
       "text-justify",
       "text-offset",
       "text-padding",
@@ -308,6 +310,14 @@ function validate(style) {
         errors.push(`${path}.type: unsupported layer type.`);
         return;
       }
+      if (
+        layer.layout?.["text-variable-anchor"] !== undefined &&
+        (layer.layout["symbol-placement"] ?? "point") !== "point"
+      ) {
+        errors.push(
+          `${path}.layout.text-variable-anchor: requires constant point placement.`,
+        );
+      }
       for (const scope of ["paint", "layout"]) {
         const values = layer[scope] ?? {};
         checkKeys(values, selected[scope], `${path}.${scope}`, errors);
@@ -334,7 +344,7 @@ function validate(style) {
             );
           }
           if (!(
-            name === "text-font" &&
+            (name === "text-font" || name === "text-variable-anchor") &&
             Array.isArray(value) &&
             value.every((v) => typeof v === "string")
           )) {
@@ -374,6 +384,10 @@ function compileLayer(layer) {
   for (const scope of ["paint", "layout"]) {
     const specification = latest[`${scope}_${layer.type}`];
     for (const name of profile[layer.type][scope]) {
+      // Absence preserves text-offset; an explicit radial zero overrides it.
+      if (name === "text-radial-offset" && layer[scope]?.[name] === undefined) {
+        continue;
+      }
       const property = specification[name];
       const value = layer[scope]?.[name] ?? property.default;
       if (value !== undefined) {

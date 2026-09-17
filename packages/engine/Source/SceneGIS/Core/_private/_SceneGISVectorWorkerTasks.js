@@ -72,21 +72,30 @@ function createVectorTaskHandler() {
         shapes: parameters.items.map((item) => {
           try {
             const layout = { ...item.layout, "text-size": 24, "icon-size": 1 };
+            const lookup = (code) => {
+              const glyph = item.glyphs.get(code);
+              if (!glyph) {
+                throw new RuntimeError(`Missing glyph U+${code.toString(16)}`);
+              }
+              return glyph;
+            };
+            const text = item.text.replace(/\r/g, "");
+            const variants = layout["text-variable-anchor"]?.length
+              ? new Map(
+                  [...new Set(layout["text-variable-anchor"])].map((anchor) => [
+                    anchor,
+                    Layout.text(
+                      text,
+                      { ...layout, "text-anchor": anchor },
+                      lookup,
+                    ),
+                  ]),
+                )
+              : undefined;
             return {
               key: item.key,
-              text: Layout.text(
-                item.text.replace(/\r/g, ""),
-                layout,
-                (code) => {
-                  const glyph = item.glyphs.get(code);
-                  if (!glyph) {
-                    throw new RuntimeError(
-                      `Missing glyph U+${code.toString(16)}`,
-                    );
-                  }
-                  return glyph;
-                },
-              ),
+              text: Layout.text(text, layout, lookup),
+              variants,
               icon: Layout.icon(item.image, "sprite", layout),
             };
           } catch (error) {

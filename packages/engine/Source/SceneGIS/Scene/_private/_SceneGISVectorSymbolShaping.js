@@ -110,6 +110,14 @@ SceneGISVectorSymbolShaping.prototype.get = function (
   return {
     text: scaled(record.result.text, layout["text-size"] / 24, this.assets),
     icon: scaled(record.result.icon, layout["icon-size"], this.assets),
+    variants:
+      record.result.variants &&
+      new Map(
+        [...record.result.variants].map(([anchor, shape]) => [
+          anchor,
+          scaled(shape, layout["text-size"] / 24, this.assets),
+        ]),
+      ),
     pages: record.pages,
   };
 };

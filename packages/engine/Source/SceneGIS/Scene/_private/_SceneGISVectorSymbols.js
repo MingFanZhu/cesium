@@ -332,6 +332,72 @@ function paired(text, icon, layout) {
   };
 }
 
+function selectAnchor(candidate, anchor) {
+  const text = candidate.shaped.variants?.get(anchor);
+  if (text && candidate.shaped.text !== text) {
+    // Never mutate a shape container borrowed from the published placement.
+    candidate.shaped = { ...candidate.shaped, text };
+  }
+}
+
+function tryPlacement(job, candidate, layout, collision) {
+  const text = Projection.collision(
+    job.projection,
+    candidate,
+    candidate.shaped.text,
+    true,
+    job.metersPerPixel,
+  );
+  const icon = Projection.collision(
+    job.projection,
+    candidate,
+    candidate.shaped.icon,
+    false,
+    job.metersPerPixel,
+  );
+  const proxies = paired(text, icon, layout);
+  let textBoxes = boxes(proxies.text, candidate, true);
+  let iconBoxes = boxes(proxies.icon, candidate, false);
+  const preflight = Layout.place(
+    textBoxes,
+    iconBoxes,
+    layout,
+    collision,
+    false,
+  );
+  if (!preflight.text && !preflight.icon) {
+    return undefined;
+  }
+  const geometry = paired(
+    preflight.text
+      ? Projection.geometry(
+          job.projection,
+          candidate,
+          candidate.shaped.text,
+          true,
+          job.metersPerPixel,
+        )
+      : { quads: [] },
+    preflight.icon
+      ? Projection.geometry(
+          job.projection,
+          candidate,
+          candidate.shaped.icon,
+          false,
+          job.metersPerPixel,
+        )
+      : { quads: [] },
+    layout,
+  );
+  textBoxes = geometry.text?.quads?.length ? textBoxes : [];
+  iconBoxes = geometry.icon?.quads?.length ? iconBoxes : [];
+  const selected = Layout.place(textBoxes, iconBoxes, layout, collision, false);
+  if (!selected.text && !selected.icon) {
+    return undefined;
+  }
+  return { selected, geometry, textBoxes, iconBoxes };
+}
+
 function* placement(runtime, job) {
   const candidates = yield* collect(runtime, job);
   const requirements = new Map();
@@ -422,63 +488,61 @@ function* placement(runtime, job) {
         job.duplicates++;
         continue;
       }
-      const text = Projection.collision(
-        job.projection,
-        candidate,
-        candidate.shaped.text,
-        true,
-        job.metersPerPixel,
-      );
-      const icon = Projection.collision(
-        job.projection,
-        candidate,
-        candidate.shaped.icon,
-        false,
-        job.metersPerPixel,
-      );
-      const proxies = paired(text, icon, layout);
-      let textBoxes = boxes(proxies.text, candidate, true);
-      let iconBoxes = boxes(proxies.icon, candidate, false);
-      const preflight = Layout.place(
-        textBoxes,
-        iconBoxes,
+      const variants = candidate.shaped.variants;
+      const anchors = variants ? [...variants.keys()] : [undefined];
+      if (variants?.has(old?.variableAnchor)) {
+        anchors.splice(anchors.indexOf(old.variableAnchor), 1);
+        anchors.unshift(old.variableAnchor);
+      }
+      const passes =
+        variants &&
+        (layout["text-allow-overlap"] || layout["icon-allow-overlap"])
+          ? [
+              {
+                ...layout,
+                "text-allow-overlap": false,
+                "icon-allow-overlap": false,
+              },
+              layout,
+            ]
+          : [layout];
+      let choice, fallback;
+      for (const pass of passes) {
+        for (const anchor of anchors) {
+          if (variants) {
+            yield;
+          }
+          selectAnchor(candidate, anchor);
+          const trial = tryPlacement(job, candidate, pass, collision);
+          if (!trial) {
+            continue;
+          }
+          trial.shaped = candidate.shaped;
+          trial.anchor = anchor;
+          if (trial.selected.text || !candidate.text) {
+            choice = trial;
+            break;
+          }
+          fallback ??= trial;
+        }
+        if (choice) {
+          break;
+        }
+      }
+      choice ??= fallback;
+      if (!choice) {
+        continue;
+      }
+      candidate.shaped = choice.shaped;
+      candidate.variableAnchor = choice.anchor;
+      candidate.selection = Layout.place(
+        choice.textBoxes,
+        choice.iconBoxes,
         layout,
         collision,
-        false,
       );
-      if (!preflight.text && !preflight.icon) {
-        continue;
-      }
-      const geometry = paired(
-        preflight.text
-          ? Projection.geometry(
-              job.projection,
-              candidate,
-              candidate.shaped.text,
-              true,
-              job.metersPerPixel,
-            )
-          : { quads: [] },
-        preflight.icon
-          ? Projection.geometry(
-              job.projection,
-              candidate,
-              candidate.shaped.icon,
-              false,
-              job.metersPerPixel,
-            )
-          : { quads: [] },
-        layout,
-      );
-      textBoxes = geometry.text?.quads?.length ? textBoxes : [];
-      iconBoxes = geometry.icon?.quads?.length ? iconBoxes : [];
-      const selected = Layout.place(textBoxes, iconBoxes, layout, collision);
-      if (!selected.text && !selected.icon) {
-        continue;
-      }
-      candidate.selection = selected;
-      candidate._layoutGeometry = geometry;
-      candidate.placed = selected;
+      candidate._layoutGeometry = choice.geometry;
+      candidate.placed = candidate.selection;
       peers.push(candidate);
       repeats.set(candidate.key, peers);
     } catch (error) {
@@ -561,6 +625,7 @@ function drawCandidates(runtime, candidates, zoom) {
     } else {
       candidate.evaluated = current.evaluated;
     }
+    selectAnchor(candidate, candidate.variableAnchor);
     const layout = candidate.evaluated.layout;
     candidate._geometry = paired(
       candidate.selection.text

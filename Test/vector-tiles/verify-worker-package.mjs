@@ -274,6 +274,7 @@ try {
                 filter: ["==", ["geometry-type"], "Point"],
                 layout: {
                   "text-field": "A",
+                  "text-variable-anchor": ["center", "top"],
                   "text-font": ["Test"],
                   "text-size": 24,
                 },
@@ -295,6 +296,13 @@ try {
           throw new Error("Symbol package preparation did not finish.");
         }
       } while (!layer.tilesLoaded);
+      const anchored = layer._symbols._placed.find((c) => c.placed?.text);
+      if (
+        anchored?.variableAnchor !== "center" ||
+        !anchored.shaped.variants.has("top")
+      ) {
+        throw new Error("Variable anchor Worker output was not used.");
+      }
       const pixel = Array.from(
         scene.context.readPixels({ x: 30, y: 31, width: 1, height: 1 }),
       );
