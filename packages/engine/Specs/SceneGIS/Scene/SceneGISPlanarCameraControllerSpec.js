@@ -1710,6 +1710,103 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     expect(scene.camera.rightWC.z).toBeCloseTo(0.0, 12);
   });
 
+  it("keeps held surface rotation stable at the pitch and extent limits", function () {
+    const scene = createWidget();
+    controller = new SceneGISPlanarCameraController({ world });
+    widget.addController(controller);
+    spyOn(scene, "pickPosition").and.returnValue(undefined);
+    spyOn(world, "pickTerrain").and.returnValue(undefined);
+    spyOn(controller, "viewHome").and.callThrough();
+    const orthographic = createFrusta()[2];
+    orthographic.width = 256.0;
+    const initialPosition = new Cartesian3(0.0, -120.0, 90.0);
+    const initialPitch = -Math.atan2(0.6, 0.8);
+
+    for (const frustum of [perspective(), orthographic]) {
+      scene.camera.frustum = frustum;
+      SceneGISPlanarCamera.setWorldPose(
+        scene.camera,
+        initialPosition,
+        new Cartesian3(0.0, 0.8, -0.6),
+        new Cartesian3(0.0, 0.6, 0.8),
+      );
+      controller.firstUpdate(scene, JulianDate.now());
+      let pointer = new Cartesian2(
+        scene.canvas.clientWidth * 0.5,
+        scene.canvas.clientHeight * 0.7,
+      );
+      for (let i = 0; i < 30; i++) {
+        const end = new Cartesian2(
+          pointer.x,
+          pointer.y - scene.canvas.clientHeight * 0.01,
+        );
+        queueMovement(CameraEventType.MIDDLE_DRAG, pointer, end);
+        controller.update(scene, JulianDate.now());
+        pointer = end;
+      }
+      expect(controller._pitch).toBe(-CesiumMath.toRadians(5.0));
+      expect(controller._target.y).toBe(128.0);
+      const limitedPosition = Cartesian3.clone(scene.camera.positionWC);
+      const pivot = Cartesian3.clone(controller._rotatePivot);
+      const terrainCalls = world.pickTerrain.calls.count();
+      for (let i = 0; i < 10; i++) {
+        const end = new Cartesian2(
+          pointer.x,
+          pointer.y - scene.canvas.clientHeight * 0.01,
+        );
+        queueMovement(CameraEventType.MIDDLE_DRAG, pointer, end);
+        controller.update(scene, JulianDate.now());
+        pointer = end;
+      }
+      expect(scene.camera.positionWC).toEqualEpsilon(limitedPosition, 1e-9);
+      expect(controller._rotatePivot).toEqual(pivot);
+      expect(world.pickTerrain.calls.count()).toBe(terrainCalls);
+
+      const reverse = new Cartesian2(
+        pointer.x,
+        pointer.y +
+          ((controller._pitch - initialPitch) * scene.canvas.clientHeight) /
+            Math.PI,
+      );
+      queueMovement(CameraEventType.MIDDLE_DRAG, pointer, reverse);
+      controller.update(scene, JulianDate.now());
+      expect(scene.camera.positionWC).toEqualEpsilon(initialPosition, 1e-9);
+      releaseButton(CameraEventType.MIDDLE_DRAG);
+      controller.update(scene, JulianDate.now());
+      expect(controller._rotateActive).toBe(false);
+    }
+    expect(controller.viewHome).not.toHaveBeenCalled();
+  });
+
+  it("preserves wheel zoom when a held surface rotation continues", function () {
+    const scene = createWidget();
+    scene.camera.frustum = perspective();
+    controller = new SceneGISPlanarCameraController({ world });
+    widget.addController(controller);
+    controller.viewHome(scene);
+    controller.firstUpdate(scene, JulianDate.now());
+    const center = new Cartesian2(
+      scene.canvas.clientWidth * 0.5,
+      scene.canvas.clientHeight * 0.5,
+    );
+    const first = new Cartesian2(center.x + 1.0, center.y - 1.0);
+    queueMovement(CameraEventType.MIDDLE_DRAG, center, first);
+    controller.update(scene, JulianDate.now());
+    const initialRange = getZoomRange(scene);
+    queueMovement(CameraEventType.WHEEL, center, new Cartesian2(0.0, 10.0));
+    controller.update(scene, JulianDate.now());
+    const zoomedRange = getZoomRange(scene);
+    expect(zoomedRange).toBeLessThan(initialRange);
+
+    queueMovement(
+      CameraEventType.MIDDLE_DRAG,
+      first,
+      new Cartesian2(first.x + 2.0, first.y),
+    );
+    controller.update(scene, JulianDate.now());
+    expect(getZoomRange(scene)).toEqualEpsilon(zoomedRange, 1e-9);
+  });
+
   it("uses the viewport center as the fallback rotation anchor", function () {
     const scene = createWidget();
     controller = new SceneGISPlanarCameraController({ world });

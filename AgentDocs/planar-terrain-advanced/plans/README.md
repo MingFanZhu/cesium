@@ -1,5 +1,9 @@
 # Planar Terrain Advanced Plans
 
+## Maintenance
+
+- [低俯角旋转距离修复](2026-09-18-surface-orbit-distance-fix.md)（completed；技术自审与 54 项 Specs 通过）
+
 ## Completed extension plan
 
 - [总体计划：SceneGIS 平面高级地形](2026-08-10-planar-terrain-advanced-extension.md)

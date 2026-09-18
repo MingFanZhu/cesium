@@ -1,5 +1,8 @@
 # Planar Terrain Advanced Reviews
 
+- [低俯角旋转距离修复](2026-09-18-surface-orbit-distance-fix.md)
+  （approved；技术自审，54 项 Specs 与当前页复测通过，负责人已确认）
+
 - [A1 平面地形感知导航锚点](2026-08-10-a1-terrain-aware-navigation-anchors.md)
   （`approved`，项目负责人 Sandcastle 人工复测通过）
 - [A2 平面导航模式与相机—地表关系](2026-08-10-a2-navigation-mode-and-surface-relationship.md)

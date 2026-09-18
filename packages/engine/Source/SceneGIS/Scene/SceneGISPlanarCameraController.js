@@ -224,6 +224,21 @@ function applyTerrainClearance(controller, scene) {
   return surfaceHeight;
 }
 
+function getRotationDistance(scene, pivot, windowAnchor, position) {
+  const camera = scene.camera;
+  if (SceneGISPlanarCamera.getFrustumInfo(camera.frustum).perspective) {
+    Cartesian3.subtract(position, pivot, scratchPoint);
+    return Math.hypot(scratchPoint.x, scratchPoint.y, scratchPoint.z);
+  }
+  const ray = SceneGISPlanarCamera.getWindowRay(
+    camera,
+    scene.canvas,
+    windowAnchor,
+    scratchRay,
+  );
+  return (pivot.z - ray.origin.z) / ray.direction.z;
+}
+
 function positionForWindowAnchor(
   scene,
   point,
@@ -899,17 +914,12 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     scratchCameraPose,
   );
   if (starting) {
-    const oldRay = SceneGISPlanarCamera.getWindowRay(
-      camera,
-      scene.canvas,
+    const distance = getRotationDistance(
+      scene,
+      this._rotatePivot,
       this._rotateWindowAnchor,
-      scratchRay,
+      worldPose.position,
     );
-    Cartesian3.subtract(worldPose.position, this._rotatePivot, scratchPoint);
-    let distance = Math.hypot(scratchPoint.x, scratchPoint.y, scratchPoint.z);
-    if (!SceneGISPlanarCamera.getFrustumInfo(camera.frustum).perspective) {
-      distance = (this._rotatePivot.z - oldRay.origin.z) / oldRay.direction.z;
-    }
     if (!Number.isFinite(distance) || distance < 0.0) {
       return;
     }
@@ -945,20 +955,7 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     scratchUp,
     scratchRight,
   );
-  let distance = this._rotateDistance;
-  if (!allowsCrossing) {
-    const oldRay = SceneGISPlanarCamera.getWindowRay(
-      camera,
-      scene.canvas,
-      this._rotateWindowAnchor,
-      scratchRay,
-    );
-    Cartesian3.subtract(worldPose.position, this._rotatePivot, scratchPoint);
-    distance = Math.hypot(scratchPoint.x, scratchPoint.y, scratchPoint.z);
-    if (!SceneGISPlanarCamera.getFrustumInfo(camera.frustum).perspective) {
-      distance = (this._rotatePivot.z - oldRay.origin.z) / oldRay.direction.z;
-    }
-  }
+  // Boundary and clearance corrections must not grow the held orbit radius.
   positionForWindowAnchor(
     scene,
     this._rotatePivot,
@@ -966,7 +963,7 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     scratchDirection,
     scratchUp,
     scratchRight,
-    distance,
+    this._rotateDistance,
     scratchPosition,
   );
   const remainsOnPivotSide =
@@ -1094,6 +1091,18 @@ SceneGISPlanarCameraController.prototype._zoom = function (scene, movement) {
     }
   }
   this._applyTargetClamp(scene, undefined, this._target.z);
+  if (this._rotateActive && this._navigationMode === "surface") {
+    const worldPose = SceneGISPlanarCamera.getWorldPose(
+      camera,
+      scratchCameraPose,
+    );
+    this._rotateDistance = getRotationDistance(
+      scene,
+      this._rotatePivot,
+      this._rotateWindowAnchor,
+      worldPose.position,
+    );
+  }
 };
 
 /**

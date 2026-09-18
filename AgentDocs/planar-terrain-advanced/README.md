@@ -12,9 +12,10 @@
 - Latest completed phase:
   [A7 平面高级地形统一资格与交付](plans/2026-08-11-phase-a7-unified-qualification-and-delivery.md)
 - Active standalone plan: None
+- Latest completed standalone plan: [低俯角旋转距离修复](plans/2026-09-18-surface-orbit-distance-fix.md)
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
-- Last updated: `2026-08-12`
+- Last updated: `2026-09-18`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -61,6 +62,12 @@
   复用合法 SGP
 
 ## Current handoff
+
+2026-09-18：基础平面页中键低俯角旋转距离发散已修复，见
+[standalone plan](plans/2026-09-18-surface-orbit-distance-fix.md)与
+[技术自审](reviews/2026-09-18-surface-orbit-distance-fix.md)。54 项 focused Specs 与当前页同路径复测通过，
+无上游或 SGP 改动。负责人已确认；在 `scenegis/develop` 形成独立本地 checkpoint，未 push。
+原 A1–A7 完成状态保持，以下保留原阶段交接。
 
 - Current state: A1-A7均已完成；A7-R001/R002关闭，Architecture focused re-review与项目负责人公开
   EPSG:3857/LERC Sandcastle人工验收均已通过。
