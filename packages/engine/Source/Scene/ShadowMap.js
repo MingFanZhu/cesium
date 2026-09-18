@@ -44,6 +44,9 @@ import DebugCameraPrimitive from "./DebugCameraPrimitive.js";
 import PerInstanceColorAppearance from "./PerInstanceColorAppearance.js";
 import Primitive from "./Primitive.js";
 import ShadowMapShader from "./ShadowMapShader.js";
+// SCENEGIS_PATCH_BEGIN SGP-0013: Dispatch planar shadow geometry without replacing native resources.
+import SceneGISPlanarShadows from "../SceneGIS/Scene/_private/_SceneGISPlanarShadows.js";
+// SCENEGIS_PATCH_END SGP-0013
 
 /**
  * <div class="notice">
@@ -1427,11 +1430,14 @@ function checkVisibility(shadowMap, frameState) {
     }
 
     // If the light source is below the horizon then the shadow map is out of view
-    const surfaceNormal =
-      frameState.mapProjection.ellipsoid.geodeticSurfaceNormal(
-        sceneCamera.positionWC,
-        scratchCartesian1,
-      );
+    // SCENEGIS_PATCH_BEGIN SGP-0013: Planar daylight is measured against fixed world +Z.
+    const surfaceNormal = shadowMap._sceneGISPlanar
+      ? Cartesian3.UNIT_Z
+      : frameState.mapProjection.ellipsoid.geodeticSurfaceNormal(
+          sceneCamera.positionWC,
+          scratchCartesian1,
+        );
+    // SCENEGIS_PATCH_END SGP-0013
     const lightDirection = Cartesian3.negate(
       shadowMapCamera.directionWC,
       scratchCartesian2,
@@ -1530,7 +1536,9 @@ function updateCameras(shadowMap, frameState) {
   // Get the near and far of the scene camera
   let near;
   let far;
-  if (shadowMap._fitNearFar) {
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Keep planar cascade splits independent of visible tile bounds.
+  if (shadowMap._fitNearFar && !shadowMap._sceneGISPlanar) {
+    // SCENEGIS_PATCH_END SGP-0013
     // shadowFar can be very large, so limit to shadowMap.maximumDistance
     // Push the far plane slightly further than the near plane to avoid degenerate frustum
     near = Math.min(
@@ -1542,6 +1550,11 @@ function updateCameras(shadowMap, frameState) {
   } else {
     near = camera.frustum.near;
     far = shadowMap.maximumDistance;
+    // SCENEGIS_PATCH_BEGIN SGP-0013: Respect the planar camera far plane and avoid an inverted shadow frustum.
+    if (shadowMap._sceneGISPlanar) {
+      far = Math.max(near + 1.0, Math.min(far, camera.frustum.far));
+    }
+    // SCENEGIS_PATCH_END SGP-0013
   }
 
   shadowMap._sceneCamera = Camera.clone(camera, sceneCamera);
@@ -1562,6 +1575,13 @@ function updateCameras(shadowMap, frameState) {
  * @private
  */
 ShadowMap.prototype.update = function (frameState) {
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Select a world-specific shader and cascade profile per live frame.
+  const planar = SceneGISPlanarShadows.isActive(frameState);
+  if (planar !== (this._sceneGISPlanar === true)) {
+    this.dirty = true;
+  }
+  this._sceneGISPlanar = planar;
+  // SCENEGIS_PATCH_END SGP-0013
   updateCameras(this, frameState);
 
   if (this._needsUpdate) {
@@ -1571,7 +1591,12 @@ ShadowMap.prototype.update = function (frameState) {
       computeOmnidirectional(this, frameState);
     }
 
-    if (this._cascadesEnabled) {
+    // SCENEGIS_PATCH_BEGIN SGP-0013: Fit planar cascades on a stable world texel grid.
+    if (
+      this._cascadesEnabled &&
+      !SceneGISPlanarShadows.updateCascades(this, frameState)
+    ) {
+      // SCENEGIS_PATCH_END SGP-0013
       fitShadowMapToScene(this, frameState);
 
       if (this._numberOfCascades > 1) {
@@ -1632,6 +1657,11 @@ function combineUniforms(shadowMap, uniforms, isTerrain) {
       : shadowMap._primitiveBias;
 
   const mapUniforms = {
+    // SCENEGIS_PATCH_BEGIN SGP-0013: Scale planar receiver bias to each cascade's world texel footprint.
+    sceneGIS_planarCascadeBias: function () {
+      return shadowMap._sceneGISPlanarCascadeBias;
+    },
+    // SCENEGIS_PATCH_END SGP-0013
     shadowMap_texture: function () {
       return shadowMap._shadowMapTexture;
     },
@@ -1807,8 +1837,11 @@ ShadowMap.createReceiveDerivedCommand = function (
 
   let hasTerrainNormal = false;
   if (isTerrain) {
-    hasTerrainNormal =
-      command.owner.data.renderedMesh.encoding.hasVertexNormals;
+    // SCENEGIS_PATCH_BEGIN SGP-0013: Planar surfaces are explicit shader owners, not Globe tiles.
+    hasTerrainNormal = SceneGISPlanarShadows.isSurface(fragmentShaderSource)
+      ? true
+      : command.owner.data.renderedMesh.encoding.hasVertexNormals;
+    // SCENEGIS_PATCH_END SGP-0013
   }
 
   if (command.receiveShadows && lightShadowMapsEnabled) {

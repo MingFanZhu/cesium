@@ -154,7 +154,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarModelVisualizer", function () {
     expect(requests[0].options.scene).toBeUndefined();
     expect(requests[0].options.heightReference).toBe(HeightReference.NONE);
     expect(requests[0].options.enableVerticalExaggeration).toBe(false);
-    expect(requests[0].options.shadows).toBe(ShadowMode.DISABLED);
+    expect(requests[0].options.shadows).toBe(ShadowMode.ENABLED);
     expect(requests[0].options.environmentMapOptions).toEqual({
       enabled: false,
     });
@@ -205,7 +205,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarModelVisualizer", function () {
     expect(requests.length).toBe(0);
 
     collection.removeAll();
-    addModel({ model: { shadows: ShadowMode.ENABLED } });
+    addModel({ model: { shadows: 99 } });
     expect(function () {
       visualizer.update(time);
     }).toThrowDeveloperError();

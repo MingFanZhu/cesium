@@ -3,6 +3,20 @@ uniform vec4 u_color;
 #ifdef SCENEGIS_SURFACE_TRANSLUCENCY
 uniform float u_surfaceOpacity;
 uniform sampler2D u_surfaceBackground;
+#ifdef SHADOW_MAP
+vec3 sceneGISPlanarUnshadowedBackground;
+#endif
+#endif
+
+#ifdef SHADOW_MAP
+void sceneGISPlanarApplyShadow(float visibility)
+{
+    out_FragColor.rgb *= visibility;
+    #ifdef SCENEGIS_SURFACE_TRANSLUCENCY
+    // The captured background is not a receiver of this surface's shadows.
+    out_FragColor.rgb += sceneGISPlanarUnshadowedBackground * (1.0 - visibility);
+    #endif
+}
 #endif
 
 #ifdef SCENEGIS_MATERIAL
@@ -12,7 +26,7 @@ in vec3 v_normalWC;
     #endif
 #endif
 
-#if defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
+#if defined(SHADOW_MAP) || defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
 in vec3 v_positionEC;
 #endif
 
@@ -27,7 +41,7 @@ uniform float u_lambertDiffuseMultiplier;
 SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS
 SCENEGIS_PLANAR_SURFACE_MATERIAL_SOURCE
 
-#if defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_MATERIAL)
+#if defined(SHADOW_MAP) || defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_MATERIAL)
 vec3 sceneGISPlanarNormalEC()
 {
     #ifdef SCENEGIS_SMOOTH_NORMALS
@@ -122,5 +136,8 @@ void main()
         vec4 background = texture(u_surfaceBackground, uv);
         // Depth remains opaque: reveal the scene background, not hidden slopes.
         out_FragColor = mix(background, out_FragColor, u_surfaceOpacity);
+        #ifdef SHADOW_MAP
+        sceneGISPlanarUnshadowedBackground = background.rgb * (1.0 - u_surfaceOpacity);
+        #endif
     #endif
 }

@@ -1,5 +1,8 @@
 import defined from "../Core/defined.js";
 import ShaderSource from "../Renderer/ShaderSource.js";
+// SCENEGIS_PATCH_BEGIN SGP-0013: Share the native receiver with owned planar cascade filtering.
+import planarCascadeShadow from "../Shaders/SceneGIS/PlanarSurface/SceneGISPlanarCascadeShadow.js";
+// SCENEGIS_PATCH_END SGP-0013
 
 /**
  * @private
@@ -7,6 +10,9 @@ import ShaderSource from "../Renderer/ShaderSource.js";
 function ShadowMapShader() {}
 
 const clippingDefines = {
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Run planar clipping in shadow caster fragments.
+  SCENEGIS_PLANAR_CLIPPING: true,
+  // SCENEGIS_PATCH_END SGP-0013
   HAS_CLIPPING_PLANES: true,
   ENABLE_CLIPPING_POLYGONS: true,
 };
@@ -185,7 +191,9 @@ ShadowMapShader.getShadowReceiveShaderKeyword = function (
   const debugCascadeColors = shadowMap.debugCascadeColors;
   const softShadows = shadowMap.softShadows;
 
-  return `receiveShadow ${usesDepthTexture}${polygonOffsetSupported}${isPointLight}${isSpotLight}${hasCascades}${debugCascadeColors}${softShadows}${castShadows}${isTerrain}${hasTerrainNormal}`;
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Keep planar cascade variants distinct in the native cache.
+  return `receiveShadow ${usesDepthTexture}${polygonOffsetSupported}${isPointLight}${isSpotLight}${hasCascades}${debugCascadeColors}${softShadows}${castShadows}${isTerrain}${hasTerrainNormal}${shadowMap._sceneGISPlanar === true}`;
+  // SCENEGIS_PATCH_END SGP-0013
 };
 
 ShadowMapShader.createShadowReceiveVertexShader = function (
@@ -228,6 +236,11 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
   const hasPositionVarying = defined(positionVaryingName);
 
   const usesDepthTexture = shadowMap._usesDepthTexture;
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Planar surfaces provide geometric or interpolated fixed-axis normals.
+  const planarSurface = fs.defines.includes("SCENEGIS_PLANAR_SURFACE");
+  const planarCascades =
+    shadowMap._sceneGISPlanar === true && shadowMap._numberOfCascades > 1;
+  // SCENEGIS_PATCH_END SGP-0013
   const polygonOffsetSupported = shadowMap._polygonOffsetSupported;
   const isPointLight = shadowMap._isPointLight;
   const isSpotLight = shadowMap._isSpotLight;
@@ -250,6 +263,15 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
       "czm_shadow_receive_main",
     );
   }
+
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Enable position generation for all planar surface variants.
+  if (planarSurface) {
+    defines.push("SHADOW_MAP");
+  }
+  if (planarCascades) {
+    sources.push(planarCascadeShadow);
+  }
+  // SCENEGIS_PATCH_END SGP-0013
 
   if (isPointLight) {
     defines.push("USE_CUBE_MAP_SHADOW");
@@ -312,9 +334,13 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
     }${returnPositionEC}} \n` +
     `vec3 getNormalEC() \n` +
     `{ \n${
-      hasNormalVarying
-        ? `    return normalize(${normalVaryingName}); \n`
-        : "    return vec3(1.0); \n"
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Derivative terrain normals have no vertex varying.
+      planarSurface
+        ? "    return sceneGISPlanarNormalEC(); \n"
+        : hasNormalVarying
+          ? `    return normalize(${normalVaryingName}); \n`
+          : "    return vec3(1.0); \n"
+      // SCENEGIS_PATCH_END SGP-0013
     }} \n` +
     // Offset the shadow position in the direction of the normal for perpendicular and back faces
     `void applyNormalOffset(inout vec4 positionEC, vec3 normalEC, float nDotL) \n` +
@@ -387,14 +413,19 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
       "    float visibility = czm_shadowVisibility(shadowMap_texture, shadowParameters); \n";
   } else if (hasCascades) {
     fsSource += `${
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Preserve native shader assembly around the planar expressions.
+      // eslint-disable-next-line prefer-template
       "    float maxDepth = shadowMap_cascadeSplits[1].w; \n" +
+      // SCENEGIS_PATCH_END SGP-0013
       "    // Stop early if the eye depth exceeds the last cascade \n" +
       "    if (depth > maxDepth) \n" +
       "    { \n" +
       "        return; \n" +
       "    } \n" +
       "    // Get the cascade based on the eye-space depth \n" +
-      "    vec4 weights = czm_cascadeWeights(depth); \n" +
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Use exclusive planar split selection, including exact split boundaries.
+      `    vec4 weights = ${planarCascades ? "sceneGISPlanarCascadeWeights" : "czm_cascadeWeights"}(depth); \n` +
+      // SCENEGIS_PATCH_END SGP-0013
       "    // Apply normal offset \n" +
       "    float nDotL = clamp(dot(normalEC, shadowMap_lightDirectionEC), 0.0, 1.0); \n" +
       "    applyNormalOffset(positionEC, normalEC, nDotL); \n" +
@@ -404,7 +435,11 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
       "    shadowParameters.texCoords = shadowPosition.xy; \n" +
       "    shadowParameters.depth = shadowPosition.z; \n" +
       "    shadowParameters.nDotL = nDotL; \n" +
-      "    float visibility = czm_shadowVisibility(shadowMap_texture, shadowParameters); \n" +
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Blend overlap bands and contain the PCF footprint within each atlas tile.
+      (planarCascades
+        ? "    float visibility = sceneGISPlanarCascadeVisibility(shadowMap_texture, shadowParameters, positionEC, weights, depth); \n"
+        : "    float visibility = czm_shadowVisibility(shadowMap_texture, shadowParameters); \n") +
+      // SCENEGIS_PATCH_END SGP-0013
       "    // Fade out shadows that are far away \n" +
       "    float shadowMapMaximumDistance = shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness.z; \n" +
       "    float fade = max((depth - shadowMapMaximumDistance * 0.8) / (shadowMapMaximumDistance * 0.2), 0.0); \n" +
@@ -431,7 +466,13 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
       "    float visibility = czm_shadowVisibility(shadowMap_texture, shadowParameters); \n";
   }
 
-  fsSource += "    out_FragColor.rgb *= visibility; \n" + "} \n";
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Preserve the planar surface's unshadowed background contribution.
+  fsSource += `${
+    planarSurface
+      ? "    sceneGISPlanarApplyShadow(visibility); \n"
+      : "    out_FragColor.rgb *= visibility; \n"
+  }} \n`;
+  // SCENEGIS_PATCH_END SGP-0013
 
   sources.push(fsSource);
 

@@ -5615,6 +5615,10 @@ Scene.prototype._initializeWorld = function (world) {
  */
 Scene.prototype.destroy = function () {
   this._tweens.removeAll();
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Release the scene shadow atlas before destroying its WebGL context.
+  this.shadowMap =
+    this.shadowMap && !this.shadowMap.isDestroyed() && this.shadowMap.destroy();
+  // SCENEGIS_PATCH_END SGP-0013
   this._computeEngine = this._computeEngine && this._computeEngine.destroy();
   this._screenSpaceCameraController =
     this._screenSpaceCameraController &&

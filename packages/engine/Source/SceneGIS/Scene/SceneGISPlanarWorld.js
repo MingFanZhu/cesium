@@ -7,6 +7,8 @@ import Material from "../../Scene/Material.js";
 import ClippingPlaneCollection from "../../Scene/ClippingPlaneCollection.js";
 import ClippingPolygonCollection from "../../Scene/ClippingPolygonCollection.js";
 import SceneMode from "../../Scene/SceneMode.js";
+import ShadowMode from "../../Scene/ShadowMode.js";
+import validatePlanarShadowMode from "./_private/_SceneGISPlanarShadowMode.js";
 import SceneGISPlanarCoordinateSystem from "../Core/SceneGISPlanarCoordinateSystem.js";
 import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
 /* eslint-disable no-unused-vars -- Public JSDoc type requires a runtime-resolvable import. */
@@ -142,6 +144,7 @@ function setClippingCollection(world, key, value, Type) {
  * @param {number} [options.tileCacheSize=100] The number of unprotected tiles retained after a frame.
  * @param {Color} [options.baseColor=Color.GRAY] The opaque surface color.
  * @param {boolean} [options.enableLighting=false] Whether geometric Lambert lighting is enabled.
+ * @param {ShadowMode} [options.shadows=ShadowMode.RECEIVE_ONLY] Whether the surface casts or receives geometry shadows when scene shadows are enabled.
  * @param {number} [options.lambertDiffuseMultiplier=0.9] The non-negative multiplier applied to Lambert diffuse lighting.
  *
  * @exception {DeveloperError} <code>options.coordinateSystem</code> is not a SceneGISPlanarCoordinateSystem.
@@ -216,6 +219,9 @@ function SceneGISPlanarWorld(options) {
   validateTileCacheSize(tileCacheSize);
   validateBaseColor(baseColor);
   validateEnableLighting(enableLighting);
+  const shadows = validatePlanarShadowMode(
+    options.shadows ?? ShadowMode.RECEIVE_ONLY,
+  );
   validateLambertDiffuseMultiplier(lambertDiffuseMultiplier);
 
   this._coordinateSystem = coordinateSystem;
@@ -227,6 +233,7 @@ function SceneGISPlanarWorld(options) {
   this._baseColor = Color.clone(baseColor);
   this._opacity = 1.0;
   this._enableLighting = enableLighting;
+  this._shadows = shadows;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   this._material = undefined;
   this._clippingPlanes = undefined;
@@ -246,6 +253,21 @@ function SceneGISPlanarWorld(options) {
 }
 
 Object.defineProperties(SceneGISPlanarWorld.prototype, {
+  /**
+   * Gets or sets whether terrain casts or receives geometry shadows. Scene
+   * shadows must also be enabled. Only submitted terrain tiles cast shadows.
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {ShadowMode}
+   * @default ShadowMode.RECEIVE_ONLY
+   */
+  shadows: {
+    get: function () {
+      return this._shadows;
+    },
+    set: function (value) {
+      this._shadows = validatePlanarShadowMode(value);
+    },
+  },
   /**
    * Gets or sets world-owned terrain clipping planes. Plane coordinates use
    * planar world metres, transformed by the collection's modelMatrix.
@@ -638,6 +660,7 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
     this._opacity,
     this._clippingPlanes,
     this._clippingPolygons,
+    this._shadows,
   );
 };
 

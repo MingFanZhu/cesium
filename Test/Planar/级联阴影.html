@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 级联阴影</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>级联阴影</h1>
+      <p>
+        建筑、模型与地形投影。中键旋转，滚轮缩放；观察近远处阴影和移动时的边缘。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="级联阴影.js">查看源码</a>
+      </p>
+      <p id="status">正在加载本地场景…</p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./级联阴影.js"></script>
+  </body>
+</html>

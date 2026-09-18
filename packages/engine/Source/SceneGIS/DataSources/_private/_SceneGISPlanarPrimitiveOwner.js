@@ -86,6 +86,15 @@ SceneGISPlanarPrimitiveOwner.prototype.setShow = function (show) {
   }
 };
 
+SceneGISPlanarPrimitiveOwner.prototype.setShadows = function (shadows) {
+  for (const primitive of this.primitives) {
+    // Depth-draped classification primitives do not cast geometric shadows.
+    if ("shadows" in primitive) {
+      primitive.shadows = shadows;
+    }
+  }
+};
+
 SceneGISPlanarPrimitiveOwner.prototype.destroy = function () {
   if (this.destroyed) {
     return;

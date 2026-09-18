@@ -13,6 +13,8 @@ import PixelFormat from "../../../Core/PixelFormat.js";
 import PrimitiveType from "../../../Core/PrimitiveType.js";
 import RenderState from "../../../Renderer/RenderState.js";
 import ShaderProgram from "../../../Renderer/ShaderProgram.js";
+import ShaderSource from "../../../Renderer/ShaderSource.js";
+import ShadowMode from "../../../Scene/ShadowMode.js";
 import Texture from "../../../Renderer/Texture.js";
 import VertexArray from "../../../Renderer/VertexArray.js";
 import SceneGISPlanarImagery from "./_SceneGISPlanarImagery.js";
@@ -314,15 +316,23 @@ function createShaderProgram(
       advancedLighting,
       clipping,
     ),
-    fragmentShaderSource: SceneGISPlanarSurfaceShader.createFragmentShader(
-      layerCount,
-      enableLighting,
-      normalMode,
-      materialSource,
-      advancedLighting,
-      translucent,
-      clipping,
-    ),
+    fragmentShaderSource: new ShaderSource({
+      defines: [
+        "SCENEGIS_PLANAR_SURFACE",
+        ...(clipping ? ["SCENEGIS_PLANAR_CLIPPING"] : []),
+      ],
+      sources: [
+        SceneGISPlanarSurfaceShader.createFragmentShader(
+          layerCount,
+          enableLighting,
+          normalMode,
+          materialSource,
+          advancedLighting,
+          translucent,
+          clipping,
+        ),
+      ],
+    }),
     attributeLocations:
       normalMode === "smooth" ? { position: 0, normal: 1 } : { position: 0 },
   });
@@ -554,6 +564,8 @@ function getCommand(
     tile._materialCommandSource = materialSource;
   }
   tile.command.boundingVolume = tile.commandBoundingVolume;
+  tile.command.castShadows = ShadowMode.castShadows(surface._shadows);
+  tile.command.receiveShadows = ShadowMode.receiveShadows(surface._shadows);
   tile.command.modelMatrix = tile.modelMatrix;
   tile.command.primitiveType = terrainReady
     ? PrimitiveType.TRIANGLES
@@ -678,6 +690,7 @@ SceneGISPlanarSurface.prototype.render = function (
   opacity = 1.0,
   clippingPlanes,
   clippingPolygons,
+  shadows = ShadowMode.RECEIVE_ONLY,
 ) {
   validateContext(this, frameState.context);
   const passes = frameState.passes;
@@ -722,6 +735,11 @@ SceneGISPlanarSurface.prototype.render = function (
   const environmentLighting = frameState._sceneGISPlanarLighting;
   const advancedLighting = environmentLighting?.active === true;
   const lightingSamplerCount = advancedLighting ? 3 : 0;
+  const shadowSamplerCount =
+    frameState.shadowState?.lightShadowsEnabled &&
+    ShadowMode.receiveShadows(shadows)
+      ? 1
+      : 0;
   const clippingEnabled = SceneGISPlanarClipping.isEnabled(
     clippingPlanes,
     clippingPolygons,
@@ -730,12 +748,13 @@ SceneGISPlanarSurface.prototype.render = function (
     shownLayerCount +
       materialSamplerCount +
       lightingSamplerCount +
+      shadowSamplerCount +
       (clippingEnabled ? 1 : 0) +
       (opacity < 1.0 ? 1 : 0) >
     ContextLimits.maximumTextureImageUnits
   ) {
     throw new DeveloperError(
-      "The combined planar imagery, Material, environment, clipping and surface background sampler count exceeds maximumTextureImageUnits.",
+      "The combined planar imagery, Material, environment, shadows, clipping and surface background sampler count exceeds maximumTextureImageUnits.",
     );
   }
   if (defined(material)) {
@@ -766,6 +785,7 @@ SceneGISPlanarSurface.prototype.render = function (
   this._opacity = opacity;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   this._environmentLighting = environmentLighting;
+  this._shadows = shadows;
   const desiredTiles = this._quadtree.selectTiles(
     frameState,
     maximumLevel,

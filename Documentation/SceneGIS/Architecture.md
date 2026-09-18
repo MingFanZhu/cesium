@@ -946,3 +946,15 @@ height/clamp与Camera Rectangle/Ellipsoid方法必须fail-fast；`Camera.positio
 ellipsoid substrate，不代表planar CRS。non-Globe构造固定3D-only、关闭默认Fog并拒绝显式native Earth sky/Fog/Shadow；
 `Scene.updateFrameState`在发布frame state前再次验证caller late mutation。完整矩阵与SGP边界见
 [ADR-0039](Decisions/ADR-0039-planar-scene-api-qualification-and-safety.md)。
+
+## 平面级联阴影（R1）
+
+[ADR-0083](Decisions/ADR-0083-planar-cascaded-shadows.md) 通过 SGP-0013 扩宽此前 Planar
+几何阴影限制。复用原生 ShadowMap atlas、派生命令、PCF 和控制接口，SceneGIS-owned helper
+负责固定 +Z 可见性、稳定级联覆盖、纹素对齐、重叠混合和按纹素尺度的偏移。Scene 释放自有
+ShadowMap 后才销毁 Context。禁止第二套阴影引擎或伪装 Globe tile owner。
+
+`Viewer.shadows`、`Viewer.terrainShadows` 与 `world.shadows` 保留原生语义；普通 Entity
+Graphics / Primitive / Model 使用 `ShadowMode`。地形 clipping 同时作用于 caster，opacity
+的背景贡献不受地表阴影衰减。连续贴地分类覆盖、vector 和 label 的资格不随此扩大；不新增
+离屏地形预取。模型/表面的原生最终颜色阴影调制尚未改造成 direct-only 物理光照融合。

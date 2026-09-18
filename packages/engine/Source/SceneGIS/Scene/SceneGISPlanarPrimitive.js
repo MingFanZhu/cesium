@@ -8,6 +8,8 @@ import Material from "../../Scene/Material.js";
 import PerInstanceColorAppearance from "../../Scene/PerInstanceColorAppearance.js";
 import PolylineMaterialAppearance from "../../Scene/PolylineMaterialAppearance.js";
 import Primitive from "../../Scene/Primitive.js";
+import ShadowMode from "../../Scene/ShadowMode.js";
+import validatePlanarShadowMode from "./_private/_SceneGISPlanarShadowMode.js";
 import SceneGISPlanarBoxGeometry from "../Core/SceneGISPlanarBoxGeometry.js";
 import SceneGISPlanarCylinderGeometry from "../Core/SceneGISPlanarCylinderGeometry.js";
 import SceneGISPlanarEllipsoidGeometry from "../Core/SceneGISPlanarEllipsoidGeometry.js";
@@ -238,6 +240,7 @@ function createInternal(wrapper, attributes) {
       new Matrix4(),
     ),
     show: wrapper._show,
+    shadows: wrapper._shadows,
     allowPicking: wrapper._allowPicking,
     asynchronous: false,
     releaseGeometryInstances: false,
@@ -257,6 +260,7 @@ function createInternal(wrapper, attributes) {
  * @param {Object.<string, GeometryInstanceAttribute>} [options.attributes] Geometry instance attributes with valid component datatype, one to four components, boolean normalization, and one complete finite value.
  * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] A finite affine local transform.
  * @param {boolean} [options.show=true] Whether the primitive is shown.
+ * @param {ShadowMode} [options.shadows=ShadowMode.DISABLED] Whether the primitive casts or receives geometry shadows.
  * @param {boolean} [options.allowPicking=true] Whether picking resources are created.
  * @exception {DeveloperError} The id is missing or the geometry, appearance, attributes, matrix, or boolean options are invalid.
  */
@@ -282,6 +286,9 @@ function SceneGISPlanarPrimitive(options) {
   this._attributes = attributes;
   this._modelMatrix = modelMatrix;
   this._show = show;
+  this._shadows = validatePlanarShadowMode(
+    options.shadows ?? ShadowMode.DISABLED,
+  );
   this._allowPicking = allowPicking;
   this._id = options.id;
   this._current = undefined;
@@ -291,6 +298,24 @@ function SceneGISPlanarPrimitive(options) {
 }
 
 Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
+  /**
+   * Gets or sets the native geometry shadow mode without rebuilding geometry.
+   * @memberof SceneGISPlanarPrimitive.prototype
+   * @type {ShadowMode}
+   * @default ShadowMode.DISABLED
+   */
+  shadows: {
+    get: function () {
+      return this._shadows;
+    },
+    set: function (value) {
+      ensureAlive(this);
+      this._shadows = validatePlanarShadowMode(value);
+      if (this._current !== undefined) {
+        this._current.shadows = value;
+      }
+    },
+  },
   /**
    * Gets or sets a planar geometry of the kind fixed at construction. Replacement is promoted on a normal render pass.
    *

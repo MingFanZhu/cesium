@@ -584,7 +584,7 @@ lookAtWorldPosition 的固定 +Z up、四类 frustum 的 public getPickRay 和 f
   行为，C9 actual-cover drape也已被C11 GPU area backend取代；ordinary `NONE` geometry仍可以越过extent。
 - Planar callback完整顺序固定为gate、Anchor、Model、Polyline、Polygon、Solid、Area、Route、Path。六类C7
   Graphics只支持Color material、
-  disabled shadows与批准字段；partial Ellipsoid、Rectangle granularity、stRotation、classification和zIndex必须在
+  原生 ShadowMode 与批准字段；partial Ellipsoid、Rectangle granularity、stRotation、classification和zIndex必须在
   child低层mutation前拒绝。
 - C8 public Wall Geometry必须使用XY route与explicit top/bottom生成open non-flat mesh；PolylineVolume Geometry的
   shape +X映射route-left、+Y映射world-up，并以planar corner stations生成closed mesh。不得调用upstream
@@ -687,3 +687,15 @@ sky/shadow选项；自动化同时覆盖constructor preflight与`preRender`后�
 - [ ] 当前 phase/standalone plan、parent extension roadmap、discussion、review 和扩展
       索引已反映最终状态、验证结果与剩余事项。
 - [ ] 最终报告列出验证结果、上游文件、SGP 和剩余风险。
+
+## 平面几何阴影维护
+
+R1 按 [ADR-0083](Decisions/ADR-0083-planar-cascaded-shadows.md) 接入原生四级 ShadowMap，
+不再拒绝 Planar shadows / terrainShadows。CPU 覆盖、纹素稳定和 GLSL 过渡在 SceneGIS-owned
+helper 中实现，上游只保留 SGP-0013 dispatch；Widget / Viewer 沿用 SGP-0001/0002 集成边界。
+
+World 通过 DrawCommand castShadows/receiveShadows 与原生派生缓存接入；地表所有位置/法线
+变体、caster 裁剪、透明背景和 sampler 预算必须一同维护。Entity Graphics 与普通 Primitive
+沿用原生 shadows 字段；ground classification 并非真实投影几何，不扩大资格。
+阴影 atlas 由 Scene 的 ShadowMap 所有，销毁发生在 Context 之前。
+回归入口是 SceneGISPlanarShadowsSpec、相关 surface / visualizer Specs 和原生 ShadowMap Specs。

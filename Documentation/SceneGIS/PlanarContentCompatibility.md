@@ -88,7 +88,7 @@ failure/replacement/destroy 中维持 exactly-once ownership。
 - `Cesium3DTilesetGraphics`、3D Tiles/classification、ordered ground layers 与 Globe GroundPrimitive path。
 - 非 `CustomDataSource` automatic integration、enabled clustering、同时运行默认 Globe visualizer。
 - Runtime reprojection、Cartographic/Ellipsoid/ENU、geodesic/rhumb、IDL wrap 与格式自动转换。
-- Arbitrary Material、shadow、custom shader、terrain request from content、continuous ground for Model/solid/Wall/
+- Arbitrary Material、custom shader、terrain request from content、continuous ground for Model/solid/Wall/
   PolylineVolume/Path。
 - Globe-specific graphics fields。Unsupported combinations must fail fast; they are not silently ignored.
 
@@ -110,3 +110,11 @@ failure/replacement/destroy 中维持 exactly-once ownership。
 Any Cesium baseline, public inventory, Entity property profile, Geometry/Appearance pair, ground protocol or package export change
 requires this matrix, [PlanarContentGuide](PlanarContentGuide.md), and
 [PlanarWorldUpgradeChecklist](PlanarWorldUpgradeChecklist.md) to be reviewed together.
+
+## R1 阴影资格补充
+
+按 [ADR-0083](Decisions/ADR-0083-planar-cascaded-shadows.md)，普通 Model / Primitive 以及
+Solid、Area、Route、Polyline、Polygon Entity 路径支持原生 shadows / ShadowMode 字段。
+Model 默认 ENABLED，其他普通 Graphics 与 Primitive 默认 DISABLED。全局开关和地形投射/接收
+沿用 Viewer / World 原生式入口。动态更新复用几何，非法 enum 在发布前拒绝。
+连续 ground classification、vector tile、billboard / label 的阴影资格没有扩宽。

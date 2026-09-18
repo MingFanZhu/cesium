@@ -192,7 +192,7 @@ function configureCameraFrustum(widget) {
  *
  * @exception {DeveloperError} Element with id "container" does not exist in the document.
  * @exception {DeveloperError} <code>options.world</code> and <code>options.globe</code> are both specified.
- * @exception {DeveloperError} A non-Globe <code>options.world</code> is specified with the Globe-only <code>options.baseLayer</code>, <code>options.terrainProvider</code>, <code>options.terrain</code>, or <code>options.terrainShadows</code> option.
+ * @exception {DeveloperError} A non-Globe <code>options.world</code> is specified with the Globe-only <code>options.baseLayer</code>, <code>options.terrainProvider</code>, or <code>options.terrain</code> option.
  *
  * @demo {@link https://sandcastle.cesium.com/index.html?id=cesium-widget|Cesium Sandcastle Cesium Widget Demo}
  *
@@ -246,12 +246,7 @@ function CesiumWidget(container, options) {
 
   if (hasCustomWorld) {
     SceneGISPlanarSceneApi.validateConstructionOptions(options);
-    const globeOnlyOptions = [
-      "baseLayer",
-      "terrainProvider",
-      "terrain",
-      "terrainShadows",
-    ];
+    const globeOnlyOptions = ["baseLayer", "terrainProvider", "terrain"];
     for (let i = 0; i < globeOnlyOptions.length; ++i) {
       const optionName = globeOnlyOptions[i];
       if (defined(options[optionName])) {
@@ -391,6 +386,10 @@ function CesiumWidget(container, options) {
     if (hasWorldOption) {
       if (options.world !== false) {
         scene._initializeWorld(options.world);
+        // Apply explicit terrain shadow options to the planar primary world.
+        if (defined(options.terrainShadows)) {
+          options.world.shadows = options.terrainShadows;
+        }
       }
     } else {
       globe = options.globe;

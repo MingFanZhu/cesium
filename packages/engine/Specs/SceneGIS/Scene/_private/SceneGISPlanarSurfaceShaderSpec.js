@@ -5,7 +5,8 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     const vertexShader = SceneGISPlanarSurfaceShader.createVertexShader(false);
     expect(vertexShader).toBe(SceneGISPlanarSurfaceShader.vertexShader);
     expect(vertexShader).toContain("position.xy + vec2(0.5)");
-    expect(vertexShader).not.toContain("v_positionEC");
+    expect(vertexShader).toContain("#ifdef SHADOW_MAP\nout vec3 v_positionEC;");
+    expect(vertexShader).not.toContain("#define SHADOW_MAP");
     const fragmentShader = SceneGISPlanarSurfaceShader.createFragmentShader(0);
     expect(fragmentShader).not.toContain(
       "#define SCENEGIS_SURFACE_TRANSLUCENCY",

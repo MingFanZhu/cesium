@@ -190,9 +190,8 @@ describe("SceneGIS/Widget/SceneGISPlanarSceneApiCesiumWidget", function () {
     scene.fog.enabled = false;
     scene.shadowMap.enabled = true;
     scene.requestRender();
-    expect(function () {
-      renderFrame(scene);
-    }).toThrowDeveloperError();
+    renderFrame(scene);
+    expect(scene.shadowMap._sceneGISPlanar).toBe(true);
     scene.shadowMap.enabled = false;
     scene.requestRender();
     renderFrame(scene);

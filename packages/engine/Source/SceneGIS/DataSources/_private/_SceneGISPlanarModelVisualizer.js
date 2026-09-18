@@ -1,3 +1,4 @@
+import validatePlanarShadowMode from "../../Scene/_private/_SceneGISPlanarShadowMode.js";
 import AssociativeArray from "../../../Core/AssociativeArray.js";
 import BoundingSphere from "../../../Core/BoundingSphere.js";
 import BoundingSphereState from "../../../DataSources/BoundingSphereState.js";
@@ -182,10 +183,6 @@ function validateUnsupported(graphics, time) {
       "enableVerticalExaggeration must be false for planar models.",
     );
   }
-  const shadows = optional(graphics._shadows, time);
-  if (shadows !== undefined && shadows !== ShadowMode.DISABLED) {
-    throw new DeveloperError("shadows must be ShadowMode.DISABLED.");
-  }
   if (optional(graphics._environmentMapOptions, time) !== undefined) {
     throw new DeveloperError("environmentMapOptions is not supported.");
   }
@@ -323,6 +320,9 @@ function evaluateState(visualizer, item, time) {
   }
 
   return {
+    shadows: validatePlanarShadowMode(
+      value(graphics._shadows, time, ShadowMode.ENABLED),
+    ),
     show,
     position,
     resource,
@@ -361,7 +361,7 @@ function startLoad(visualizer, item, state) {
     incrementallyLoadTextures: state.incrementallyLoadTextures,
     heightReference: HeightReference.NONE,
     enableVerticalExaggeration: false,
-    shadows: ShadowMode.DISABLED,
+    shadows: state.shadows,
     environmentMapOptions: disabledEnvironmentMapOptions,
     allowPicking: true,
     enablePick: true,
@@ -449,7 +449,7 @@ function applyModel(item, model, state) {
   model.maximumScale = state.maximumScale;
   model.heightReference = HeightReference.NONE;
   model.enableVerticalExaggeration = false;
-  model.shadows = ShadowMode.DISABLED;
+  model.shadows = state.shadows;
   model.distanceDisplayCondition = state.distanceDisplayCondition;
   model.silhouetteColor = state.silhouetteColor;
   model.silhouetteSize = state.silhouetteSize;

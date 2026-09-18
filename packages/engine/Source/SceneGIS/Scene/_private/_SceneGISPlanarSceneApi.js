@@ -1,6 +1,7 @@
 import defined from "../../../Core/defined.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import SceneMode from "../../../Scene/SceneMode.js";
+import validatePlanarShadowMode from "./_SceneGISPlanarShadowMode.js";
 
 function isLiveNonGlobeScene(scene) {
   const world = scene?.world;
@@ -39,10 +40,11 @@ function validateConstructionOptions(options) {
     }
   }
 
-  if (defined(options.shadows) && options.shadows !== false) {
-    throw new DeveloperError(
-      "options.shadows must be false with a non-Globe world.",
-    );
+  if (defined(options.shadows) && typeof options.shadows !== "boolean") {
+    throw new DeveloperError("options.shadows must be a boolean.");
+  }
+  if (defined(options.terrainShadows)) {
+    validatePlanarShadowMode(options.terrainShadows);
   }
 
   const nativeEnvironmentOptions = ["skyBox", "skyAtmosphere"];
@@ -89,11 +91,6 @@ function validateFrameState(scene) {
   if (scene.fog.enabled) {
     throw new DeveloperError(
       "scene.fog.enabled must be false with a non-Globe world.",
-    );
-  }
-  if (scene.shadowMap.enabled) {
-    throw new DeveloperError(
-      "scene.shadowMap.enabled must be false with a non-Globe world.",
     );
   }
 }

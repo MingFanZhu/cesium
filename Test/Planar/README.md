@@ -29,3 +29,8 @@
 
 使用已有根服务器打开 /Test/Planar/示例目录.html。页面回归见 Specs/e2e/scenegis-feature-examples.spec.js，
 通过 Test/playwright.examples.config.mjs 连接 8080，不启动 Sandcastle。
+
+## 级联阴影
+
+`级联阴影.html` / `级联阴影.js`：本地地形、建筑和 glTF 的四级阴影。全景观察远处山体，
+近景观察建筑接触与级联交界；可切换投射/接收、低太阳高度、剖切与正交投影。复用原生阴影 API。

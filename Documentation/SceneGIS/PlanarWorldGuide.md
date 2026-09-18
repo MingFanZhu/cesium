@@ -423,7 +423,7 @@ SunLight方向。双面surface允许从上下两侧观察，但lighting始终使
 | navigation    | PC pan/rotate/wheel 惯性与 Home、public Camera Cartesian view/flight、FIXED Entity tracking、surface clearance与underground crossing；无sweep/touch/body/inertial tracking |
 | environment   | 默认无visual sky；可选caller-owned fixed-axis planar SkyBox、planar atmosphere与程序化Sun/Moon，不自动增加Earth sky语义                                                    |
 | UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                                                                     |
-| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow、full Globe Material、imagery picking                                                 |
+| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、full Globe Material、imagery picking                                                 |
 
 ## 性能与调参
 
@@ -522,8 +522,8 @@ ray pick具有回归证据；`*MostDetailed` ray仍是3D Tiles-specific，不属
 Cartesian `positionWC`/`position`；`positionCartographic`与`Scene.ellipsoid`只是Cesium内部ellipsoid projection/substrate，不是
 项目CRS。
 
-planar Widget/Viewer只接受SCENE3D/3D-only，并拒绝defined ellipsoid、map projection、2D mode、enabled shadows或native
-skyBox/skyAtmosphere。构造会关闭默认Fog；运行中visible native SkyBox/SkyAtmosphere/Sun/Moon、enabled Fog/Shadow在frame发布前
+planar Widget/Viewer只接受SCENE3D/3D-only，并拒绝defined ellipsoid、map projection、2D mode或native
+skyBox/skyAtmosphere。构造会关闭默认Fog；运行中visible native SkyBox/SkyAtmosphere/Sun/Moon、enabled Fog在frame发布前
 失败。hidden/disabled对象可以保留且仍由原caller/Scene ownership管理；修正后下一frame可恢复。使用
 `SceneGISPlanarEnvironment`提供平面sky、bodies和atmosphere。
 
@@ -543,3 +543,35 @@ Installed-package verifier除公共声明、API HTML、ESM/CJS与12个GLSL/12个
 
 这些underscore export只用于SceneGIS package间的soft-private组装与交付验证，不是稳定public API；相应无underscore拼写必须保持
 不可公开导入。升级或应用代码不得依赖其参数、状态或内部resource identity。
+
+## 平面级联阴影
+
+按 [ADR-0083](Decisions/ADR-0083-planar-cascaded-shadows.md)，平面复用 Cesium 四级 ShadowMap。
+公开入口保持原有命名：
+
+```js
+const viewer = new Cesium.Viewer("cesiumContainer", {
+  planarWorld: { coordinateSystem },
+  shadows: true,
+  terrainShadows: Cesium.ShadowMode.ENABLED,
+});
+viewer.scene.shadowMap.softShadows = true;
+viewer.scene.shadowMap.maximumDistance = 1000;
+viewer.scene.shadowMap.size = 2048;
+entity.box.shadows = Cesium.ShadowMode.ENABLED;
+```
+
+`viewer.shadows` 控制全局；`viewer.terrainShadows` 对应 `world.shadows`，支持原生四种
+`ShadowMode`，World 默认 `RECEIVE_ONLY`。普通 Planar Primitive / 非 Model Graphics 默认
+`DISABLED`，Model 默认 `ENABLED`，与相应 Cesium 类型一致。属性更新不重建几何。
+`scene.shadowMap` 继续控制距离、分辨率、软阴影、最低亮度及级联调试颜色。
+
+四级使用固定光照坐标基、包围球和世界纹素网格对齐；末端 10% 重叠混合，PCF 不跨 atlas
+分区采样。坡度偏移随级联纹素尺寸变化，减少自阴影条纹。透视、正交及大平面 XY 均保持
+固定 +Z 语义。地表剖切同步作用于投影；`world.opacity` 仅改变地表贡献，背景不接收该地表阴影。
+
+只对已提交的地形瓦片投影，不额外预取离屏山体。远距离、低太阳高度和小物体受有限纹素精度
+及偏移影响。`size` 是每级尺寸，四级 atlas 边长为两倍；不要只提高距离而不考虑分辨率。
+实体连续贴地分类覆盖、矢量瓦片和标注不在本阶段新增投射/接收资格。现有高级物理光照可与
+几何阴影组合，但原生模型/地表的几何阴影仍衰减最终表面颜色，间接光和自发光分离另行处理。
+开发示例：`Test/Planar/级联阴影.html`。

@@ -2,6 +2,39 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0013",
+      "title": "Integrate stable planar cascaded geometry shadows",
+      "status": "active",
+      "reason": "Native shadow visibility assumes an ellipsoid, cascades fit view-dependent bounds, and terrain receivers assume Globe tile owners. Planar shadows require explicit coordinate, stable cascade and surface shader dispatch while retaining native resources and APIs.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/ShadowMap.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/ShadowMapShader.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/widgets/Source/Viewer/Viewer.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarShadowsSpec.js",
+        "packages/engine/Specs/Scene/ShadowMapSpec.js",
+        "packages/engine/Specs/Scene/ShadowMapShaderSpec.js",
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0083-planar-cascaded-shadows.md",
+      "removalCondition": "Retire when native shadows and terrain controls support equivalent non-ellipsoid world semantics and stable cascades with explicit surface metadata."
+    },
+    {
       "id": "SGP-0010",
       "title": "Connect optional SceneGIS physical lighting to native model PBR",
       "status": "active",

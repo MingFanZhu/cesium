@@ -19,6 +19,7 @@ import {
   SceneGISPlanarImageryLayer,
   SceneGISPlanarWorld,
   SceneMode,
+  ShadowMode,
   ScreenSpaceEventType,
   TrackingReferenceFrame,
 } from "@cesium/engine";
@@ -303,7 +304,7 @@ describe(
         mapMode2D: false,
         depthPlaneEllipsoidOffset: 0,
         navigationInstructionsInitiallyVisible: false,
-        shadows: true,
+        shadows: "invalid",
         skyBox: {},
         skyAtmosphere: {},
         baseLayerPicker: true,
@@ -324,6 +325,22 @@ describe(
           });
         }
       }
+    });
+
+    it("preserves native scene and terrain shadow controls", function () {
+      const world = createWorld();
+      viewer = createPlanarViewer(world, {
+        shadows: true,
+        terrainShadows: ShadowMode.ENABLED,
+      });
+      expect(viewer.shadows).toBe(true);
+      expect(viewer.shadowMap).toBe(viewer.scene.shadowMap);
+      expect(viewer.terrainShadows).toBe(ShadowMode.ENABLED);
+      expect(world.shadows).toBe(ShadowMode.ENABLED);
+      viewer.terrainShadows = ShadowMode.CAST_ONLY;
+      expect(world.shadows).toBe(ShadowMode.CAST_ONLY);
+      viewer.shadows = false;
+      expect(viewer.scene.shadowMap.enabled).toBe(false);
     });
 
     it("accepts explicit false for suppressed widgets", function () {

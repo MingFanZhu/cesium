@@ -70,8 +70,8 @@ C2 的 private Model visualizer 直接使用 `Model.fromGltfAsync` 与 `scene.pr
 `update` 才加入 primitive collection。Stale/removal/destroy completion、candidate 与 active Model 均有
 exactly-once cleanup；同 generation failure 不自动重试。
 
-Model 固定 `heightReference=NONE`、`enableVerticalExaggeration=false`、`shadows=DISABLED`、dynamic
-environment map disabled，并启用 picking。C2 拒绝 vertical exaggeration、shadow、environment map、
+Model 固定 `heightReference=NONE`、`enableVerticalExaggeration=false`、dynamic
+environment map disabled，并启用 picking。C2 拒绝 vertical exaggeration、environment map、
 clipping planes 与 custom shader 配置；支持的普通 style/animation/property profile以 ADR-0014 为准。
 C2 private visualizer 不拥有 World、Scene、EntityCollection、EntityCluster 或输入 Resource。
 
@@ -123,7 +123,7 @@ construction时固定geometry kind。
 
 Automatic Solid profile支持Box、Cylinder与full Ellipsoid。Entity.position表示center；`NONE`保留center Z，
 clamp/relative先按C1 resolver解析anchor，再分别增加`dimensions.z / 2`、`length / 2`或`radii.z`。Entity
-orientation是fixed planar quaternion，倾斜后不重新求terrain接触。Partial/inner Ellipsoid、non-disabled shadows和
+orientation是fixed planar quaternion，倾斜后不重新求terrain接触。Partial/inner Ellipsoid和
 非Color material会fail-fast。
 
 Plane、Ellipse与Rectangle由private Area adapter降级到public Polygon/Polyline。Plane使用完整Entity position、
@@ -276,3 +276,12 @@ roles，不是 supported public API。C4 接入点由 `SGP-0001` 追踪；升级
   扩展，而不是继续扩大首版Entity compatibility adapter。
 - 不要使用 `Scene.getHeight/updateHeight`、`scene.pickPosition` 或 `world.pickTerrain` 替代 Entity
   HeightReference；它们的数据来源和生命周期不同。
+
+## 几何阴影
+
+R1 / [ADR-0083](Decisions/ADR-0083-planar-cascaded-shadows.md) 扩宽 C2–C8 的历史阴影限制。
+ModelGraphics.shadows 默认 ENABLED，其余具有原生 shadows 字段的普通 Graphics 默认 DISABLED。
+Solid、Area、Route、Polyline、Polygon 和 Model 的动态 ShadowMode 更新传递至现有 primitive，
+不改变 caller Property，不因阴影开关重建几何。SceneGISPlanarPrimitive.shadows 同样沿用该 enum。
+全局开启使用 Viewer.shadows，地形使用 Viewer.terrainShadows / world.shadows。
+连续 ground classification 覆盖并非 caster mesh，本次不赋予额外阴影能力。

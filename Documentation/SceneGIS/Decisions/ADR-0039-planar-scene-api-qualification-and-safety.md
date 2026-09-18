@@ -81,3 +81,9 @@ native-effect policy，可退役`SGP-0007`；其他SGP按各自独立removal con
 
 I5 unified dev/release E2E与installed engine/root package验证已闭合Scene capability/guard recovery、
 `_SceneGISPlanarSceneApi` archive与soft-private delivery、无underscore public hiding；paired `SGP-0007`已转为`active`。
+
+## 2026-09-18 amendment: planar geometry shadows
+
+[ADR-0083](ADR-0083-planar-cascaded-shadows.md) supersedes the planar geometry-shadow exclusion
+and disabled-shadow guard in this decision. It retains native switches and adds fixed-Z stable
+cascades through SGP-0013. Other qualification and physical-lighting boundaries are unchanged.

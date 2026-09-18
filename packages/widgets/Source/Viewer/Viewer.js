@@ -23,6 +23,7 @@ import {
   SceneGISPlanarCameraController,
   SceneGISPlanarWorld,
   SceneMode,
+  ShadowMode,
   // SCENEGIS_PATCH_END SGP-0002
   ScreenSpaceEventType,
   IonGeocoderService,
@@ -351,7 +352,6 @@ function validatePlanarViewerOptions(options, hasWorld, hasPlanarWorldOptions) {
     "imageryProviderViewModels",
     "terrainProvider",
     "terrain",
-    "terrainShadows",
     "selectedTerrainProviderViewModel",
     "terrainProviderViewModels",
     "ellipsoid",
@@ -369,7 +369,21 @@ function validatePlanarViewerOptions(options, hasWorld, hasPlanarWorldOptions) {
     }
   }
 
-  const disabledNativeOptions = ["shadows", "skyBox", "skyAtmosphere"];
+  const disabledNativeOptions = ["skyBox", "skyAtmosphere"];
+  // Validate shadow options before planar Viewer allocation.
+  if (defined(options.shadows) && typeof options.shadows !== "boolean") {
+    throw new DeveloperError("options.shadows must be a boolean.");
+  }
+  if (
+    defined(options.terrainShadows) &&
+    (!Number.isInteger(options.terrainShadows) ||
+      options.terrainShadows < ShadowMode.DISABLED ||
+      options.terrainShadows > ShadowMode.RECEIVE_ONLY)
+  ) {
+    throw new DeveloperError(
+      "options.terrainShadows must be a ShadowMode value.",
+    );
+  }
   for (let i = 0; i < disabledNativeOptions.length; i++) {
     const name = disabledNativeOptions[i];
     if (defined(options[name]) && options[name] !== false) {
@@ -1500,10 +1514,14 @@ Object.defineProperties(Viewer.prototype, {
    */
   terrainShadows: {
     get: function () {
-      return this.scene.globe.shadows;
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Route the native terrain shadow API to the actual primary world.
+      return (this.scene.globe ?? this.scene.world).shadows;
+      // SCENEGIS_PATCH_END SGP-0013
     },
     set: function (value) {
-      this.scene.globe.shadows = value;
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Preserve terrain shadow mutation for planar Viewer instances.
+      (this.scene.globe ?? this.scene.world).shadows = value;
+      // SCENEGIS_PATCH_END SGP-0013
     },
   },
 

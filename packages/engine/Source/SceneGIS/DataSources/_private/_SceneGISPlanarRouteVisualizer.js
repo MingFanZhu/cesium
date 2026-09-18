@@ -1,3 +1,4 @@
+import validatePlanarShadowMode from "../../Scene/_private/_SceneGISPlanarShadowMode.js";
 import AssociativeArray from "../../../Core/AssociativeArray.js";
 import BoundingSphere from "../../../Core/BoundingSphere.js";
 import Cartesian2 from "../../../Core/Cartesian2.js";
@@ -68,10 +69,6 @@ function materialColor(graphic, time) {
   );
 }
 function commonState(graphic, time) {
-  const shadows = optional(graphic._shadows, time);
-  if (shadows !== undefined && shadows !== ShadowMode.DISABLED) {
-    throw new DeveloperError("shadows must be ShadowMode.DISABLED.");
-  }
   for (const [name, property] of [
     ["classificationType", graphic._classificationType],
     ["zIndex", graphic._zIndex],
@@ -490,6 +487,9 @@ function createState(visualizer, item, name, time) {
   }
   return {
     shown: true,
+    shadows: validatePlanarShadowMode(
+      value(graphic._shadows, time, ShadowMode.DISABLED),
+    ),
     name,
     geometry,
     outlines: outline ? outlines : [],
@@ -600,6 +600,7 @@ function createOwner(visualizer, item, state) {
   owner.color = Color.clone(state.color);
   owner.outlineColor = Color.clone(state.outlineColor);
   owner.condition = state.condition;
+  owner.setShadows(state.shadows);
   owner.shown = true;
   owner.boundingSphere = new BoundingSphere();
   for (let i = 0; i < owner.primitives.length; i++) {
@@ -664,6 +665,7 @@ function applyState(owner, state) {
     owner.condition = state.condition;
   }
   owner.setShow(true);
+  owner.setShadows(state.shadows);
   owner.shown = true;
   return true;
 }

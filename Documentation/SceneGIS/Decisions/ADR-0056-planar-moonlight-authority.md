@@ -42,3 +42,9 @@ Moon disc and ground bounce remain separate work.
 
 Implementation and verification are tracked by
 [P11](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-12-phase-p11-planar-moonlight.md).
+
+## 2026-09-18 amendment: planar geometry shadows
+
+[ADR-0083](ADR-0083-planar-cascaded-shadows.md) supersedes the planar geometry-shadow exclusion
+and disabled-shadow guard in this decision. It retains native switches and adds fixed-Z stable
+cascades through SGP-0013. Other qualification and physical-lighting boundaries are unchanged.

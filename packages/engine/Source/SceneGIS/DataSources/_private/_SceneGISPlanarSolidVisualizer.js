@@ -1,3 +1,4 @@
+import validatePlanarShadowMode from "../../Scene/_private/_SceneGISPlanarShadowMode.js";
 import AssociativeArray from "../../../Core/AssociativeArray.js";
 import BoundingSphere from "../../../Core/BoundingSphere.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
@@ -83,10 +84,6 @@ function getFillColor(graphic, time) {
   );
 }
 function validateCommon(graphic, time) {
-  const shadows = optional(graphic._shadows, time);
-  if (shadows !== undefined && shadows !== ShadowMode.DISABLED) {
-    throw new DeveloperError("shadows must be ShadowMode.DISABLED.");
-  }
   const width = value(graphic._outlineWidth, time, 1.0);
   if (!Number.isFinite(width) || width < 0.0) {
     throw new DeveloperError("outlineWidth must be finite and nonnegative.");
@@ -354,6 +351,9 @@ function computeGraphicState(visualizer, item, name, time) {
     outline && common.width > 0 && outlineColor.alpha > 0;
   return {
     shown: true,
+    shadows: validatePlanarShadowMode(
+      value(graphic._shadows, time, ShadowMode.DISABLED),
+    ),
     geometry,
     outlines,
     fill: effectiveFill,
@@ -444,6 +444,7 @@ function createOwner(visualizer, item, state) {
   owner.fillColor = Color.clone(state.fillColor);
   owner.outlineColor = Color.clone(state.outlineColor);
   owner.condition = cloneCondition(state.condition);
+  owner.setShadows(state.shadows);
   owner.shown = true;
   owner.boundingSphere = new BoundingSphere();
   let hasSphere = false;
@@ -514,6 +515,7 @@ function applyState(owner, state) {
     owner.condition = cloneCondition(state.condition);
   }
   owner.setShow(true);
+  owner.setShadows(state.shadows);
   owner.shown = true;
   return true;
 }

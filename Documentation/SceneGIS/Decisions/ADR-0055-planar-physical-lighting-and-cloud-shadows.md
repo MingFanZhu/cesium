@@ -77,3 +77,9 @@ review; create an independent local checkpoint before continuing.
 On Cesium upgrades, recheck SGP-0010 PBR/IBL hooks, SceneGIS frame publication
 order, Planar surface normals/material source and sampler-budget preflight.
 Generated Shader JS/barrels/build outputs remain generated and uncommitted.
+
+## 2026-09-18 amendment: planar geometry shadows
+
+[ADR-0083](ADR-0083-planar-cascaded-shadows.md) supersedes the planar geometry-shadow exclusion
+and disabled-shadow guard in this decision. It retains native switches and adds fixed-Z stable
+cascades through SGP-0013. Other qualification and physical-lighting boundaries are unchanged.

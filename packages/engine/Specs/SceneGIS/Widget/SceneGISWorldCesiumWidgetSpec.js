@@ -139,7 +139,8 @@ describe("SceneGIS/Widget/SceneGISWorldCesiumWidget", function () {
     ["mapProjection", {}],
     ["mapMode2D", 0],
     ["depthPlaneEllipsoidOffset", 0.0],
-    ["shadows", true],
+    ["shadows", "invalid"],
+    ["terrainShadows", true],
     ["skyBox", {}],
     ["skyAtmosphere", {}],
   ].forEach(function ([optionName, value]) {
@@ -165,20 +166,18 @@ describe("SceneGIS/Widget/SceneGISWorldCesiumWidget", function () {
     );
   });
 
-  ["baseLayer", "terrainProvider", "terrain", "terrainShadows"].forEach(
-    function (optionName) {
-      it(`rejects custom world with ${optionName}`, function () {
-        const options = { world: createMockWorld() };
-        options[optionName] = {};
+  ["baseLayer", "terrainProvider", "terrain"].forEach(function (optionName) {
+    it(`rejects custom world with ${optionName}`, function () {
+      const options = { world: createMockWorld() };
+      options[optionName] = {};
 
-        expect(function () {
-          createWidget(options);
-        }).toThrowDeveloperError(
-          `options.${optionName} is not supported with a non-Globe options.world.`,
-        );
-      });
-    },
-  );
+      expect(function () {
+        createWidget(options);
+      }).toThrowDeveloperError(
+        `options.${optionName} is not supported with a non-Globe options.world.`,
+      );
+    });
+  });
 
   it("runs the custom world lifecycle in the existing order", function () {
     const world = createMockWorld();

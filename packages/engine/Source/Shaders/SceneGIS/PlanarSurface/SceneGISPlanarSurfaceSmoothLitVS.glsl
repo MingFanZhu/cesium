@@ -7,7 +7,7 @@ uniform vec3 u_clippingOffset;
 uniform vec3 u_clippingScale;
 #endif
 out vec3 v_normalEC;
-#if defined(SCENEGIS_MATERIAL) || defined(SCENEGIS_ADVANCED_LIGHTING)
+#if defined(SHADOW_MAP) || defined(SCENEGIS_MATERIAL) || defined(SCENEGIS_ADVANCED_LIGHTING)
 out vec3 v_positionEC;
 #endif
 #ifdef SCENEGIS_MATERIAL
@@ -30,7 +30,7 @@ void main()
 #else
     v_normalEC = czm_viewRotation * czm_octDecode(normal);
 #endif
-#if defined(SCENEGIS_MATERIAL) || defined(SCENEGIS_ADVANCED_LIGHTING)
+#if defined(SHADOW_MAP) || defined(SCENEGIS_MATERIAL) || defined(SCENEGIS_ADVANCED_LIGHTING)
     v_positionEC = (czm_modelView * vec4(position, 1.0)).xyz;
 #endif
     gl_Position = czm_modelViewProjection * vec4(position, 1.0);

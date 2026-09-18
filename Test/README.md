@@ -17,7 +17,7 @@ http://localhost:8080/Test/index.html
 受管页面按大扩展拆分：
 
 - `vector-tiles/examples/示例目录.html`：平面与球面矢量地图的上手示例。
-- `Planar/示例目录.html`：八个独立功能入口，涵盖基础平面、公开影像地形、影像调色、地形材质、相机控制、实体定位、跟踪、日月天空。
+- `Planar/示例目录.html`：独立功能入口，涵盖基础平面、公开影像地形、影像调色、地形材质、相机控制、实体定位、跟踪、日月天空。
 - `Planar/tests/`：原四个综合页面，仅保留为维护诊断；原根目录 URL 导向新功能页。
 - `AdvancedEnvironment/示例目录.html`：大气、雾、云、日月光照、泛光与光晕；球面和平面分别提供独立页面。
 - `AdvancedEnvironment/tests/`：原高级环境综合页面，保留历史诊断和相关回归入口。
@@ -36,3 +36,6 @@ Shader 源码。修改源码后刷新示例页面，即会请求最新开发 bun
 ```powershell
 npx prettier --check --ignore-path .gitignore "Test/**/*.html" "Test/**/*.md"
 ```
+
+`Planar/级联阴影.html` 使用本地 heightmap、建筑与 glTF，演示原生 shadows / terrainShadows /
+ShadowMode，提供软阴影、级联颜色、光方向、剖切和透视/正交控件。用于视觉验收，不能替代 Specs。

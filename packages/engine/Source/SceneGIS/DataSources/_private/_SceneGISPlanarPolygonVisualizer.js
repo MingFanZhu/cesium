@@ -1,3 +1,4 @@
+import validatePlanarShadowMode from "../../Scene/_private/_SceneGISPlanarShadowMode.js";
 import ArcType from "../../../Core/ArcType.js";
 import AssociativeArray from "../../../Core/AssociativeArray.js";
 import BoundingSphere from "../../../Core/BoundingSphere.js";
@@ -67,10 +68,6 @@ function validateUnsupported(graphic, time) {
   const arcType = optional(graphic._arcType, time);
   if (arcType !== undefined && arcType !== ArcType.NONE) {
     throw new DeveloperError("arcType must be ArcType.NONE when defined.");
-  }
-  const shadows = optional(graphic._shadows, time);
-  if (shadows !== undefined && shadows !== ShadowMode.DISABLED) {
-    throw new DeveloperError("shadows must be ShadowMode.DISABLED.");
   }
   const unsupportedProperties = [
     ["stRotation", graphic._stRotation],
@@ -446,6 +443,9 @@ function computeState(visualizer, item, time) {
     .join(";");
   return {
     shown: true,
+    shadows: validatePlanarShadowMode(
+      value(graphic._shadows, time, ShadowMode.DISABLED),
+    ),
     boundingSphere,
     fill: fill && fillColor.alpha > 0.0,
     fillColor,
@@ -566,6 +566,7 @@ function createOwner(visualizer, item, state) {
     state.distanceDisplayCondition,
   );
   owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
+  owner.setShadows(state.shadows);
   owner.shown = true;
   return owner;
 }
@@ -589,6 +590,7 @@ function applyState(owner, state) {
     BoundingSphere.clone(state.boundingSphere, owner.boundingSphere);
   }
   owner.setShow(true);
+  owner.setShadows(state.shadows);
   owner.shown = true;
   return true;
 }
