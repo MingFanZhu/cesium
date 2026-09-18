@@ -12,7 +12,7 @@
 - Latest completed phase:
   [A7 平面高级地形统一资格与交付](plans/2026-08-11-phase-a7-unified-qualification-and-delivery.md)
 - Active standalone plan: None
-- Latest completed standalone plan: [低俯角旋转距离修复](plans/2026-09-18-surface-orbit-distance-fix.md)
+- Latest completed standalone plan: [平面相机惯性](plans/2026-09-18-planar-camera-inertia.md)
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
 - Last updated: `2026-09-18`
@@ -62,6 +62,11 @@
   复用合法 SGP
 
 ## Current handoff
+
+2026-09-18：平面相机默认惯性已实现，见[惯性计划](plans/2026-09-18-planar-camera-inertia.md)、
+[技术自审](reviews/2026-09-18-planar-camera-inertia.md)与 ADR-0079。64 项 Specs、真实鼠标松手及
+requestRenderMode 验证、完整 build/build-ts/tsc 与上游审计通过。无上游或 SGP 改动，
+负责人已验收通过；本项形成独立本地 checkpoint，未 push。低俯角修复 checkpoint 为 `a7a6e8650a`。
 
 2026-09-18：基础平面页中键低俯角旋转距离发散已修复，见
 [standalone plan](plans/2026-09-18-surface-orbit-distance-fix.md)与

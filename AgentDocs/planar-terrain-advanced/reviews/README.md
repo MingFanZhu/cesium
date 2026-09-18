@@ -1,5 +1,8 @@
 # Planar Terrain Advanced Reviews
 
+- [平面相机惯性](2026-09-18-planar-camera-inertia.md)
+  （approved；技术自审，64 项 Specs 与实际鼠标余速验证通过，负责人验收通过）
+
 - [低俯角旋转距离修复](2026-09-18-surface-orbit-distance-fix.md)
   （approved；技术自审，54 项 Specs 与当前页复测通过，负责人已确认）
 

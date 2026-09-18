@@ -20,6 +20,8 @@ const MAXIMUM_WHEEL_RATIO = 0.1;
 const WHEEL_ZOOM_RATE = 5.0;
 const DEFAULT_MINIMUM_TERRAIN_CLEARANCE = 1.0;
 const TANGENT_RELEASE_PITCH_EPSILON = CesiumMath.EPSILON6;
+const INERTIA_MAXIMUM_CLICK_TIME = 0.4;
+const INERTIA_MINIMUM_MOVEMENT = 0.5;
 
 const scratchCenter = new Cartesian2();
 const scratchRay = { origin: new Cartesian3(), direction: new Cartesian3() };
@@ -44,6 +46,117 @@ const scratchHome = {
 function validateBoolean(name, value) {
   if (typeof value !== "boolean") {
     throw new DeveloperError(`${name} must be a boolean.`);
+  }
+}
+
+function validateInertia(name, value) {
+  if (!Number.isFinite(value) || value < 0.0 || value >= 1.0) {
+    throw new DeveloperError(`${name} must be a finite number in [0.0, 1.0).`);
+  }
+}
+
+function getInertiaCoefficient(controller, type) {
+  if (type === CameraEventType.MIDDLE_DRAG) {
+    return controller._inertiaSpin;
+  }
+  return type === CameraEventType.LEFT_DRAG
+    ? controller._inertiaTranslate
+    : controller._inertiaZoom;
+}
+
+function recordInertia(controller, type, movement) {
+  const inertia = controller._inertia;
+  inertia.type = type;
+  inertia.running = false;
+  inertia.pressTime = controller._aggregator.getButtonPressTime(type);
+  Cartesian2.subtract(
+    movement.endPosition,
+    movement.startPosition,
+    inertia.delta,
+  );
+  Cartesian2.clone(movement.endPosition, inertia.movement.endPosition);
+}
+
+function getInertiaMovement(controller) {
+  const inertia = controller._inertia;
+  const type = inertia.type;
+  const aggregator = controller._aggregator;
+  if (!defined(type) || aggregator.isButtonDown(type)) {
+    return undefined;
+  }
+  const pressTime = inertia.pressTime;
+  const releaseTime = aggregator.getButtonReleaseTime(type);
+  const coefficient = getInertiaCoefficient(controller, type);
+  const clickTime = (releaseTime - pressTime) / 1000.0;
+  const elapsed = (Date.now() - releaseTime) / 1000.0;
+  if (
+    coefficient === 0.0 ||
+    !(clickTime >= 0.0 && clickTime < INERTIA_MAXIMUM_CLICK_TIME) ||
+    !(elapsed >= 0.0)
+  ) {
+    inertia.type = undefined;
+    return undefined;
+  }
+  // Match ScreenSpaceCameraController's release-time exponential decay.
+  const scale = 0.5 * Math.exp(-(1.0 - coefficient) * 25.0 * elapsed);
+  if (Cartesian2.magnitude(inertia.delta) * scale < INERTIA_MINIMUM_MOVEMENT) {
+    inertia.type = undefined;
+    return undefined;
+  }
+  const movement = inertia.movement;
+  Cartesian2.clone(movement.endPosition, movement.startPosition);
+  Cartesian2.multiplyByScalar(inertia.delta, scale, movement.endPosition);
+  Cartesian2.add(
+    movement.startPosition,
+    movement.endPosition,
+    movement.endPosition,
+  );
+  inertia.running = true;
+  return movement;
+}
+
+function cancelInterruptedInertia(controller, scene) {
+  const inertia = controller._inertia;
+  if (!defined(inertia.type)) {
+    return;
+  }
+  const aggregator = controller._aggregator;
+  const pose = SceneGISPlanarCamera.getWorldPose(
+    scene.camera,
+    scratchCameraPose,
+  );
+  const previous = inertia.pose;
+  const changedPress =
+    aggregator.getButtonPressTime(inertia.type) !== inertia.pressTime;
+  const newPress =
+    changedPress ||
+    (aggregator.anyButtonDown && !aggregator.isButtonDown(inertia.type));
+  // Camera's world-coordinate getters can normalize its axes between updates.
+  const changedPose =
+    !Cartesian3.equals(pose.position, previous.position) ||
+    !Cartesian3.equalsEpsilon(
+      pose.direction,
+      previous.direction,
+      CesiumMath.EPSILON12,
+    ) ||
+    !Cartesian3.equalsEpsilon(pose.up, previous.up, CesiumMath.EPSILON12);
+  if (newPress || changedPose) {
+    const type = inertia.type;
+    inertia.type = undefined;
+    if (
+      changedPose ||
+      !aggregator.isButtonDown(CameraEventType.LEFT_DRAG) ||
+      (changedPress && type === CameraEventType.LEFT_DRAG)
+    ) {
+      controller._panActive = false;
+    }
+    if (
+      changedPose ||
+      !aggregator.isButtonDown(CameraEventType.MIDDLE_DRAG) ||
+      (changedPress && type === CameraEventType.MIDDLE_DRAG)
+    ) {
+      controller._rotateActive = false;
+    }
   }
 }
 
@@ -393,6 +506,27 @@ function SceneGISPlanarCameraController(options) {
   this._enablePan = true;
   this._enableRotate = true;
   this._enableZoom = true;
+  this._inertiaSpin = 0.9;
+  this._inertiaTranslate = 0.9;
+  this._inertiaZoom = 0.8;
+  this._inertia = {
+    type: undefined,
+    running: false,
+    pressTime: undefined,
+    delta: new Cartesian2(),
+    pointer: new Cartesian2(),
+    zoomAnchorValid: false,
+    movement: {
+      startPosition: new Cartesian2(),
+      endPosition: new Cartesian2(),
+    },
+    pose: {
+      position: new Cartesian3(),
+      direction: new Cartesian3(),
+      up: new Cartesian3(),
+      right: new Cartesian3(),
+    },
+  };
   this._homePadding = 1.05;
   this._element = undefined;
   this._aggregator = undefined;
@@ -578,9 +712,72 @@ Object.defineProperties(SceneGISPlanarCameraController.prototype, {
       this._homePadding = value;
     },
   },
+  /**
+   * Gets or sets the rotation inertia coefficient. Zero disables inertia.
+   *
+   * @memberof SceneGISPlanarCameraController.prototype
+   * @type {number}
+   * @default 0.9
+   * @exception {DeveloperError} The assigned value is not finite or is outside [0.0, 1.0).
+   */
+  inertiaSpin: {
+    get: function () {
+      return this._inertiaSpin;
+    },
+    set: function (value) {
+      validateInertia("inertiaSpin", value);
+      this._inertiaSpin = value;
+      if (value === 0.0 && this._inertia.type === CameraEventType.MIDDLE_DRAG) {
+        this._inertia.type = undefined;
+      }
+    },
+  },
+  /**
+   * Gets or sets the pan inertia coefficient. Zero disables inertia.
+   *
+   * @memberof SceneGISPlanarCameraController.prototype
+   * @type {number}
+   * @default 0.9
+   * @exception {DeveloperError} The assigned value is not finite or is outside [0.0, 1.0).
+   */
+  inertiaTranslate: {
+    get: function () {
+      return this._inertiaTranslate;
+    },
+    set: function (value) {
+      validateInertia("inertiaTranslate", value);
+      this._inertiaTranslate = value;
+      if (value === 0.0 && this._inertia.type === CameraEventType.LEFT_DRAG) {
+        this._inertia.type = undefined;
+      }
+    },
+  },
+  /**
+   * Gets or sets the wheel zoom inertia coefficient. Zero disables inertia.
+   *
+   * @memberof SceneGISPlanarCameraController.prototype
+   * @type {number}
+   * @default 0.8
+   * @exception {DeveloperError} The assigned value is not finite or is outside [0.0, 1.0).
+   */
+  inertiaZoom: {
+    get: function () {
+      return this._inertiaZoom;
+    },
+    set: function (value) {
+      validateInertia("inertiaZoom", value);
+      this._inertiaZoom = value;
+      if (value === 0.0 && this._inertia.type === CameraEventType.WHEEL) {
+        this._inertia.type = undefined;
+      }
+    },
+  },
 });
 
 SceneGISPlanarCameraController.prototype._cancelEvent = function (type) {
+  if (this._inertia.type === type) {
+    this._inertia.type = undefined;
+  }
   if (!defined(this._aggregator)) {
     return;
   }
@@ -610,6 +807,7 @@ SceneGISPlanarCameraController.prototype._cancelEvent = function (type) {
 };
 
 SceneGISPlanarCameraController.prototype._clearInputState = function () {
+  this._inertia.type = undefined;
   this._panActive = false;
   this._rotateActive = false;
   this._rotatePitchDirection = 0.0;
@@ -1019,16 +1217,25 @@ SceneGISPlanarCameraController.prototype._getRanges = function (scene) {
   return this._computeHomeState(scene).maximumRange;
 };
 
-SceneGISPlanarCameraController.prototype._zoom = function (scene, movement) {
+SceneGISPlanarCameraController.prototype._zoom = function (
+  scene,
+  movement,
+  inertial = false,
+) {
   const maximum = this._getRanges(scene);
   const camera = scene.camera;
-  const pointer = this._aggregator.getStartMousePosition(CameraEventType.WHEEL);
-  const anchor = resolveNavigationAnchor(
-    this,
-    scene,
-    pointer,
-    this._zoomAnchor,
-  );
+  const inertia = this._inertia;
+  if (!inertial) {
+    Cartesian2.clone(
+      this._aggregator.getStartMousePosition(CameraEventType.WHEEL),
+      inertia.pointer,
+    );
+    inertia.zoomAnchorValid = defined(
+      resolveNavigationAnchor(this, scene, inertia.pointer, this._zoomAnchor),
+    );
+  }
+  const pointer = inertia.pointer;
+  const anchor = inertia.zoomAnchorValid ? this._zoomAnchor : undefined;
   const difference = movement.endPosition.y - movement.startPosition.y;
   const ratio = CesiumMath.clamp(
     difference / scene.canvas.clientHeight,
@@ -1128,6 +1335,7 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
       "The planar controller must be connected before update.",
     );
   }
+  cancelInterruptedInertia(this, scene);
   const clearanceSurfaceHeight = applyTerrainClearance(this, scene);
   const aggregator = this._aggregator;
   if (scene.canvas.clientWidth === 0 || scene.canvas.clientHeight === 0) {
@@ -1138,6 +1346,13 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
   const middleMoving = aggregator.isMoving(CameraEventType.MIDDLE_DRAG);
   const leftMoving = aggregator.isMoving(CameraEventType.LEFT_DRAG);
   const wheelMoving = aggregator.isMoving(CameraEventType.WHEEL);
+  const inertia = this._inertia;
+  if (inertia.running && (middleMoving || leftMoving || wheelMoving)) {
+    inertia.type = undefined;
+    inertia.running = false;
+    this._panActive = false;
+    this._rotateActive = false;
+  }
   if (middleMoving && !this._enableRotate) {
     this._cancelEvent(CameraEventType.MIDDLE_DRAG);
   }
@@ -1156,10 +1371,24 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
       inputMayMoveCamera = true;
       this._panActive = false;
       this._rotate(scene, aggregator.getMovement(CameraEventType.MIDDLE_DRAG));
+      if (this._rotateActive) {
+        recordInertia(
+          this,
+          CameraEventType.MIDDLE_DRAG,
+          aggregator.getMovement(CameraEventType.MIDDLE_DRAG),
+        );
+      }
     } else if (dragRigReady && leftWillRun) {
       inputMayMoveCamera = true;
       this._rotateActive = false;
       this._pan(scene, aggregator.getMovement(CameraEventType.LEFT_DRAG));
+      if (this._panActive) {
+        recordInertia(
+          this,
+          CameraEventType.LEFT_DRAG,
+          aggregator.getMovement(CameraEventType.LEFT_DRAG),
+        );
+      }
     }
     if (wheelMoving && this._enableZoom) {
       const dragActive = this._panActive || this._rotateActive;
@@ -1169,21 +1398,48 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
       if (wheelRigReady) {
         inputMayMoveCamera = true;
         this._zoom(scene, aggregator.getMovement(CameraEventType.WHEEL));
+        recordInertia(
+          this,
+          CameraEventType.WHEEL,
+          aggregator.getMovement(CameraEventType.WHEEL),
+        );
       }
       if (dragActive) {
         Cartesian3.clone(this._dragTarget, this._target);
         this._surfaceHeight = this._dragSurfaceHeight;
       }
     }
-    if (!aggregator.isButtonDown(CameraEventType.LEFT_DRAG)) {
+    if (!middleMoving && !leftMoving && !wheelMoving) {
+      const movement = getInertiaMovement(this);
+      if (defined(movement)) {
+        inputMayMoveCamera = true;
+        if (inertia.type === CameraEventType.MIDDLE_DRAG) {
+          this._rotate(scene, movement);
+        } else if (inertia.type === CameraEventType.LEFT_DRAG) {
+          this._pan(scene, movement);
+        } else {
+          this._zoom(scene, movement, true);
+        }
+      }
+    }
+    if (
+      !aggregator.isButtonDown(CameraEventType.LEFT_DRAG) &&
+      inertia.type !== CameraEventType.LEFT_DRAG
+    ) {
       this._panActive = false;
     }
-    if (!aggregator.isButtonDown(CameraEventType.MIDDLE_DRAG)) {
+    if (
+      !aggregator.isButtonDown(CameraEventType.MIDDLE_DRAG) &&
+      inertia.type !== CameraEventType.MIDDLE_DRAG
+    ) {
       normalizeUndergroundTangent(this, scene);
       this._rotateActive = false;
     }
     if (inputMayMoveCamera) {
       applyTerrainClearance(this, scene);
+    }
+    if (defined(inertia.type)) {
+      SceneGISPlanarCamera.getWorldPose(scene.camera, inertia.pose);
     }
   } finally {
     aggregator.reset();
@@ -1292,6 +1548,7 @@ SceneGISPlanarCameraController.prototype.viewHome = function (scene) {
     homeDirection,
     homeUp,
   );
+  this._clearInputState();
   if (defined(home.orthographicScale)) {
     SceneGISPlanarCamera.scaleOrthographicFrustum(
       frustum,

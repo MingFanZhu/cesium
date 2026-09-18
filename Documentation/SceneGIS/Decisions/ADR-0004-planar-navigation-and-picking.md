@@ -14,6 +14,8 @@
   取代controller只使用Z=0 gesture anchor的阶段性限制；public Z=0 pick、Home与target clamp保持不变
 - A2 successor：`2026-08-10`，[ADR-0025](ADR-0025-planar-navigation-mode-and-surface-relationship.md)
   取代单一surface-side/Z=0 center rig；public World picking与Home语义保持不变
+- Inertia successor：`2026-09-18`，[ADR-0079](ADR-0079-planar-camera-inertia.md)
+  取代下文 P4 的无惯性阶段限制；平移、旋转与滚轮默认使用与 Globe 相同的惯性系数和衰减参数
 
 ## 上下文与源码事实
 

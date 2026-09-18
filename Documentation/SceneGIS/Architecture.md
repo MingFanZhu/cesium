@@ -421,6 +421,12 @@ reference plane解析。Pan与zoom的后续ray固定与anchor自身高度的水�
 期间anchor不随LOD变化。Public `world.pick`仍是Z=0；controller的center rig则按actual-cover terrain →
 resident camera-surface height/Z=0 fallback解析，并在extent clamp时保留target Z。
 
+Planar controller 默认使用 `inertiaSpin=0.9`、`inertiaTranslate=0.9`、`inertiaZoom=0.8`，
+finite `[0,1)` 且 0 关闭对应惯性。短手势释放后按真实时间指数衰减，继续使用该手势的锚点与约束；
+惯性状态由 controller 独占，不增加 timer 或重新拾取地形。新输入、外部 Camera pose 修改及
+Home/disable/mode change/flight/tracking/disconnect 取消余速，恢复后不得重放，见
+[ADR-0079](Decisions/ADR-0079-planar-camera-inertia.md)。
+
 `SceneGISPlanarCameraController.navigationMode`是精确的`"surface" | "underground"`同步状态，默认
 `"surface"`，由controller而非World/Scene/Viewer拥有。Viewer应用通过readonly
 `viewer.planarCameraController`设置，不增加Viewer option或mode event。Mode切换必须取消held input，但不移动

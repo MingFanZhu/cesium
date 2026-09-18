@@ -234,6 +234,23 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     expect(controller.enableRotate).toBe(true);
     expect(controller.enableZoom).toBe(true);
     expect(controller.homePadding).toBe(1.05);
+    expect(controller.inertiaSpin).toBe(0.9);
+    expect(controller.inertiaTranslate).toBe(0.9);
+    expect(controller.inertiaZoom).toBe(0.8);
+    function expectInvalidInertia(property, value) {
+      expect(() => {
+        controller[property] = value;
+      }).toThrowDeveloperError();
+    }
+    for (const property of ["inertiaSpin", "inertiaTranslate", "inertiaZoom"]) {
+      for (const value of [-1.0, 1.0, Infinity, Number.NaN, "0.9"]) {
+        expectInvalidInertia(property, value);
+      }
+      controller[property] = 0.0;
+      expect(controller[property]).toBe(0.0);
+      controller[property] = 0.95;
+      expect(controller[property]).toBe(0.95);
+    }
     expect(
       Object.getOwnPropertyDescriptor(
         SceneGISPlanarCameraController.prototype,
@@ -297,6 +314,311 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     expect(undergroundController.navigationMode).toBe("underground");
     expect(undergroundController.minimumTerrainClearance).toBe(3.0);
     localWorld.destroy();
+  });
+
+  describe("inertia", function () {
+    let scene;
+    let time;
+    let center;
+    const types = [
+      CameraEventType.LEFT_DRAG,
+      CameraEventType.MIDDLE_DRAG,
+      CameraEventType.WHEEL,
+    ];
+
+    beforeEach(function () {
+      scene = createWidget();
+      scene.camera.frustum = perspective();
+      controller = new SceneGISPlanarCameraController({ world });
+      widget.addController(controller);
+      time = JulianDate.now();
+      controller.viewHome(scene);
+      controller.firstUpdate(scene, time);
+      center = new Cartesian2(
+        scene.canvas.clientWidth * 0.5,
+        scene.canvas.clientHeight * 0.5,
+      );
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date("2026-09-18T00:00:00Z"));
+    });
+
+    afterEach(function () {
+      jasmine.clock().uninstall();
+    });
+
+    function move(type) {
+      const end =
+        type === CameraEventType.WHEEL
+          ? new Cartesian2(0.0, 20.0)
+          : new Cartesian2(center.x + 10.0, center.y - 10.0);
+      queueMovement(type, center, end);
+      const aggregator = controller._aggregator;
+      aggregator._pressTime[`${type}`] = new Date();
+      if (type === CameraEventType.WHEEL) {
+        aggregator._releaseTime[`${type}`] = new Date();
+        Cartesian2.clone(center, aggregator._currentMousePosition);
+      }
+      controller.update(scene, time);
+    }
+
+    function release(type, holdTime = 100) {
+      jasmine.clock().tick(holdTime);
+      if (type !== CameraEventType.WHEEL) {
+        releaseButton(type);
+        controller._aggregator._releaseTime[`${type}`] = new Date();
+      }
+    }
+
+    function advance(milliseconds = 16) {
+      jasmine.clock().tick(milliseconds);
+      // The simulation clock deliberately never advances.
+      controller.update(scene, time);
+    }
+
+    function value(type) {
+      if (type === CameraEventType.LEFT_DRAG) {
+        return scene.camera.positionWC.x;
+      }
+      return type === CameraEventType.MIDDLE_DRAG
+        ? controller._pitch
+        : Math.log(getZoomRange(scene));
+    }
+
+    function expectDecayToRest() {
+      for (const type of types) {
+        controller.viewHome(scene);
+        move(type);
+        release(type);
+        const released = value(type);
+        advance();
+        const first = value(type);
+        advance(100);
+        const second = value(type);
+        expect(Math.abs(first - released)).toBeGreaterThan(0.0);
+        expect(Math.abs(second - first)).toBeGreaterThan(0.0);
+        expect(Math.abs(second - first)).toBeLessThan(
+          Math.abs(first - released),
+        );
+        advance(3000);
+        const stopped = value(type);
+        advance();
+        expect(value(type)).toBe(stopped);
+        expect(controller._inertia.type).toBeUndefined();
+      }
+    }
+
+    it(
+      "decays pan rotate and zoom to rest with a paused clock (perspective)",
+      expectDecayToRest,
+    );
+
+    it("decays pan rotate and zoom to rest with a paused clock (orthographic)", function () {
+      scene.camera.frustum = createFrusta()[2];
+      expectDecayToRest();
+    });
+
+    it("does not coast after a long drag or when the matching coefficient is zero", function () {
+      for (const type of types.slice(0, 2)) {
+        controller.viewHome(scene);
+        move(type);
+        release(type, 500);
+        const released = value(type);
+        advance();
+        expect(value(type)).toBe(released);
+      }
+      const properties = ["inertiaTranslate", "inertiaSpin", "inertiaZoom"];
+      for (let i = 0; i < types.length; i++) {
+        const type = types[i];
+        controller.viewHome(scene);
+        controller[properties[i]] = 0.0;
+        move(type);
+        release(type);
+        const released = value(type);
+        advance();
+        expect(value(type)).toBe(released);
+      }
+    });
+
+    it("reuses the terrain anchor during each coasting gesture", function () {
+      spyOn(scene, "pickPosition").and.callFake((pointer, result) =>
+        intersectAtHeight(scene, pointer, 20.0, result),
+      );
+      spyOn(world, "pickTerrain").and.returnValue(undefined);
+      for (const type of types) {
+        controller.viewHome(scene);
+        move(type);
+        release(type);
+        const depthCalls = scene.pickPosition.calls.count();
+        const terrainCalls = world.pickTerrain.calls.count();
+        const anchor = Cartesian3.clone(
+          type === CameraEventType.LEFT_DRAG
+            ? controller._panAnchor
+            : type === CameraEventType.MIDDLE_DRAG
+              ? controller._rotatePivot
+              : controller._zoomAnchor,
+        );
+        advance();
+        advance();
+        const pointer =
+          type === CameraEventType.LEFT_DRAG
+            ? controller._inertia.movement.endPosition
+            : center;
+        expect(project(scene, anchor)).toEqualEpsilon(pointer, 1e-8);
+        expect(scene.pickPosition.calls.count()).toBe(depthCalls);
+        expect(world.pickTerrain.calls.count()).toBe(terrainCalls);
+      }
+    });
+
+    it("stops on a fresh press and lets the new gesture choose its own anchor", function () {
+      move(CameraEventType.MIDDLE_DRAG);
+      release(CameraEventType.MIDDLE_DRAG);
+      advance();
+      const position = Cartesian3.clone(scene.camera.positionWC);
+      const aggregator = controller._aggregator;
+      aggregator._isDown[`${CameraEventType.MIDDLE_DRAG}`] = true;
+      aggregator._buttonsDown++;
+      aggregator._pressTime[`${CameraEventType.MIDDLE_DRAG}`] = new Date();
+      advance();
+      expect(scene.camera.positionWC).toEqual(position);
+      expect(controller._rotateActive).toBe(false);
+      spyOn(scene, "pickPosition").and.callThrough();
+      move(CameraEventType.MIDDLE_DRAG);
+      expect(scene.pickPosition).toHaveBeenCalled();
+      expect(scene.camera.positionWC).not.toEqual(position);
+    });
+
+    it("gives a new wheel input sole ownership of the remaining motion", function () {
+      move(CameraEventType.MIDDLE_DRAG);
+      release(CameraEventType.MIDDLE_DRAG);
+      advance();
+      const direction = Cartesian3.clone(scene.camera.directionWC);
+      move(CameraEventType.WHEEL);
+      const range = getZoomRange(scene);
+      advance();
+      expect(scene.camera.directionWC).toEqualEpsilon(direction, 1e-12);
+      expect(getZoomRange(scene)).toBeLessThan(range);
+      expect(controller._inertia.type).toBe(CameraEventType.WHEEL);
+    });
+
+    it("cancels remaining motion across control ownership changes without replay", function () {
+      const interruptions = [
+        () => {
+          controller.enabled = false;
+          controller.enabled = true;
+        },
+        () => {
+          controller.enableRotate = false;
+          controller.enableRotate = true;
+        },
+        () => {
+          controller.inertiaSpin = 0.0;
+          controller.inertiaSpin = 0.9;
+        },
+        () => {
+          controller.navigationMode = "underground";
+          controller.navigationMode = "surface";
+        },
+        () => controller.viewHome(scene),
+        () => {
+          const token = controller._suspendForCameraFlight(scene);
+          controller._resumeFromCameraFlight(token);
+        },
+        () => {
+          const token = controller._suspendForEntityTracking(scene);
+          controller._resumeFromEntityTracking(token);
+        },
+        () => {
+          widget.removeController(controller);
+          widget.addController(controller);
+          controller.firstUpdate(scene, time);
+        },
+      ];
+      for (const interrupt of interruptions) {
+        controller.viewHome(scene);
+        move(CameraEventType.MIDDLE_DRAG);
+        release(CameraEventType.MIDDLE_DRAG);
+        advance();
+        interrupt();
+        const position = Cartesian3.clone(scene.camera.positionWC);
+        const direction = Cartesian3.clone(scene.camera.directionWC);
+        advance();
+        expect(scene.camera.positionWC).toEqual(position);
+        expect(scene.camera.directionWC).toEqual(direction);
+        expect(controller._inertia.type).toBeUndefined();
+      }
+    });
+
+    it("preserves an external camera pose instead of replaying old motion", function () {
+      move(CameraEventType.LEFT_DRAG);
+      release(CameraEventType.LEFT_DRAG);
+      advance();
+      scene.camera.position.x += 20.0;
+      const position = Cartesian3.clone(scene.camera.positionWC);
+      advance();
+      expect(scene.camera.positionWC).toEqual(position);
+      expect(controller._inertia.type).toBeUndefined();
+    });
+
+    it("keeps the orbit distance bounded when inertia reaches the surface pitch limit", function () {
+      SceneGISPlanarCamera.setWorldPose(
+        scene.camera,
+        new Cartesian3(0.0, -120.0, 90.0),
+        new Cartesian3(0.0, 0.8, -0.6),
+        new Cartesian3(0.0, 0.6, 0.8),
+      );
+      controller.firstUpdate(scene, time);
+      queueMovement(
+        CameraEventType.MIDDLE_DRAG,
+        center,
+        new Cartesian2(center.x, center.y - scene.canvas.clientHeight * 0.15),
+      );
+      controller._aggregator._pressTime[`${CameraEventType.MIDDLE_DRAG}`] =
+        new Date();
+      controller.update(scene, time);
+      const distance = controller._rotateDistance;
+      release(CameraEventType.MIDDLE_DRAG);
+      for (let i = 0; i < 20; i++) {
+        advance();
+      }
+      expect(controller._pitch).toBe(-CesiumMath.toRadians(5.0));
+      const limited = Cartesian3.clone(scene.camera.positionWC);
+      for (let i = 0; i < 20; i++) {
+        advance();
+      }
+      expect(scene.camera.positionWC).toEqualEpsilon(limited, 1e-9);
+      expect(controller._rotateDistance).toBe(distance);
+    });
+
+    it("applies surface clearance during coast and allows underground pivot crossing", function () {
+      move(CameraEventType.LEFT_DRAG);
+      release(CameraEventType.LEFT_DRAG);
+      const position = Cartesian3.clone(scene.camera.positionWC);
+      spyOn(world, "getTerrainHeight").and.callFake((point) =>
+        point.x < position.x - 0.01 ? position.z + 10.0 : 0.0,
+      );
+      advance();
+      expect(scene.camera.positionWC.z).toBeGreaterThanOrEqual(
+        position.z + 11.0,
+      );
+      world.getTerrainHeight.and.returnValue(0.0);
+      controller.navigationMode = "underground";
+      controller.viewHome(scene);
+      queueMovement(
+        CameraEventType.MIDDLE_DRAG,
+        center,
+        new Cartesian2(center.x, center.y - scene.canvas.clientHeight * 0.48),
+      );
+      controller._aggregator._pressTime[`${CameraEventType.MIDDLE_DRAG}`] =
+        new Date();
+      controller.update(scene, time);
+      const pivot = Cartesian3.clone(controller._rotatePivot);
+      expect(scene.camera.positionWC.z).toBeGreaterThan(pivot.z);
+      release(CameraEventType.MIDDLE_DRAG);
+      advance();
+      expect(scene.camera.positionWC.z).toBeLessThan(pivot.z);
+      expect(controller._rotatePivot).toEqual(pivot);
+      expect(project(scene, pivot)).toEqualEpsilon(center, 1e-8);
+    });
   });
 
   it("pushes surface poses upward without changing pose axes or pulling downward", function () {

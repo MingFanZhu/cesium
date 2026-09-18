@@ -481,13 +481,17 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
   `world.pickTerrain(ray)`、`world.pick(ray)`顺序解析；depth命中后不得重复线性terrain query。
 - Pan drag与rotate drag只在press时解析一次；pan movement与wheel correction使用anchor自身Z的水平面。
   Wheel每次event重新解析pointer anchor，但复用controller-owned scratch，不在hot path分配对象。
+- 惯性延续最后消费输入的 anchor/pivot/window pointer，按 wall-clock release elapsed time 衰减；
+  不在惯性帧重新做 depth/terrain picking，也不受 simulation Clock 暂停影响。`inertiaSpin`、
+  `inertiaTranslate`、`inertiaZoom` 接受 finite `[0,1)`，0 立即取消对应余速。新 press、外部 pose、
+  Home、feature/整体 disable、mode 切换、flight/tracking suspension 与 disconnect 必须取消且不重放。
 - Public `world.pick`/`pickFromWindowPosition`与Home仍是Z=0 contract；center rig按actual-cover terrain→
   resident camera-surface height/Z=0 fallback解析，target clamp只限制X/Y并保留target Z。
 - `navigationMode`只接受`"surface"`/`"underground"`且默认surface；setter切换必须隔离held input，但不移动
   Camera、调用Home或查询terrain。Viewer通过`planarCameraController`配置，不增加Viewer option或Event。
 - Observed relationship是private resident height→Z=0 fallback，不能自动切mode。Surface只接纳上侧/负pitch；
   underground接纳上侧/负pitch与下侧/正pitch，并只通过既有中键纵向orbit完成双向穿越。Crossing必须冻结
-  press-time完整3D pivot/window anchor，不重复terrain query、不调用Home或切mode；release后才重新同步新侧。
+  press-time完整3D pivot/window anchor，不重复terrain query、不调用Home或切mode；包括惯性在内的手势结束后才重新同步新侧。
 - `minimumTerrainClearance`默认1米且只接受finite positive number；setter本身不得移动Camera或查询terrain。
   Surface在first update与每次enabled update的input前检查Camera-local resident height→Z=0 fallback，并在input可能
   移动Camera后再检查endpoint；只沿world +Z纠正，不能用Home代替collision，也不能在terrain降低/detach时向下吸附。

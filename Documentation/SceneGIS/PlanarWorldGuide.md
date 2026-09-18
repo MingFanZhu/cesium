@@ -154,7 +154,11 @@ widget.clock.currentTime = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
 
 ## 导航、Home 与拾取
 
-- PC 输入为 left-drag pan、middle-drag rotate、wheel zoom；没有 touch、pinch 或 inertia。
+- PC 输入为 left-drag pan、middle-drag rotate、wheel zoom，默认带惯性；没有 touch 或 pinch。
+- 通过 `viewer.planarCameraController` 设置 `inertiaTranslate`、`inertiaSpin`、`inertiaZoom`，
+  默认分别为 `0.9`、`0.9`、`0.8`，与 Globe 默认值一致。范围为 `[0,1)`，越大衰减越慢，设为 `0` 关闭。
+  短拖动（按下到松开小于 0.4 秒）和滚轮输入在释放后逐渐停止；新的按下操作立即接管，Home、禁用输入、
+  模式切换、飞行或跟踪会清除余速。惯性使用真实时间，不受场景时钟暂停影响。
 - `SceneGISPlanarCameraController.viewHome(scene)` 和 planar Home button 按当前 viewport 与四类支持的 frustum 重新计算视图。
 - `viewer.camera`的`heading`/`pitch`/`roll`、`setView`、`lookAt`、`viewBoundingSphere`、`flyTo`、
   `flyToBoundingSphere`与`flyHome`在live planar World中使用固定`+X East/+Y North/+Z Up`与Cartesian位置。
@@ -225,18 +229,18 @@ SunLight方向。双面surface允许从上下两侧观察，但lighting始终使
 
 ## 支持矩阵与限制
 
-| 能力          | 当前契约                                                                                                                                                                    |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| extent        | 有限、严格正方形、米制、无 wrap                                                                                                                                             |
-| scene mode    | 仅 `SCENE3D`                                                                                                                                                                |
-| tiling        | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                                                                                                      |
-| surface       | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                                                                                                 |
-| imagery       | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                                                                            |
-| terrain style | caller-owned `Material`；四个稳定资格builtin与受限custom Fabric，仅组合diffuse/alpha                                                                                        |
-| navigation    | PC pan/rotate/wheel/Home、public Camera Cartesian view/flight、FIXED Entity tracking、surface clearance与underground crossing；无sweep/touch/inertia/body/inertial tracking |
-| environment   | 默认无visual sky；可选caller-owned fixed-axis planar SkyBox、planar atmosphere与程序化Sun/Moon，不自动增加Earth sky语义                                                     |
-| UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                                                                      |
-| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow、full Globe Material、imagery picking                                                  |
+| 能力          | 当前契约                                                                                                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| extent        | 有限、严格正方形、米制、无 wrap                                                                                                                                            |
+| scene mode    | 仅 `SCENE3D`                                                                                                                                                               |
+| tiling        | 单个 1×1 root，northwest-origin XYZ；可选 TMS URL 翻转                                                                                                                     |
+| surface       | opaque flat/Heightmap terrain、continuous LOD fallback、skirt与可选基础光照                                                                                                |
+| imagery       | 同 canonical tiling scheme、无 reprojection、单 pass composition                                                                                                           |
+| terrain style | caller-owned `Material`；四个稳定资格builtin与受限custom Fabric，仅组合diffuse/alpha                                                                                       |
+| navigation    | PC pan/rotate/wheel 惯性与 Home、public Camera Cartesian view/flight、FIXED Entity tracking、surface clearance与underground crossing；无sweep/touch/body/inertial tracking |
+| environment   | 默认无visual sky；可选caller-owned fixed-axis planar SkyBox、planar atmosphere与程序化Sun/Moon，不自动增加Earth sky语义                                                    |
+| UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                                                                     |
+| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、shadow、full Globe Material、imagery picking                                                 |
 
 ## 性能与调参
 
