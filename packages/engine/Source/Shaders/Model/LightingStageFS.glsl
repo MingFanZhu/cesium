@@ -46,6 +46,11 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
         // SCENEGIS_PATCH_BEGIN SGP-0015: Clearcoat samples the same world-fixed environment as the base layer.
         vec3 reflectMC = sceneGISSpecularDirection(reflect(-viewDirection, normal));
         // SCENEGIS_PATCH_END SGP-0015
+        // SCENEGIS_PATCH_BEGIN SGP-0016: Keep the clearcoat ray independent of base-layer roughness and normal.
+        #if defined(SCENEGIS_SSR_CAPTURE) || defined(SCENEGIS_SSR_RECEIVE)
+        sceneGISSSRCoatDirection = reflect(-viewDirection, normal);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0016
         vec3 iblColor = computeSpecularIBL(reflectMC, NdotV, f0, roughness);
         // SCENEGIS_PATCH_BEGIN SGP-0015: Physical clearcoat uses the same caller specular factor as the base layer.
         #ifdef SCENEGIS_MODEL_LIGHTING

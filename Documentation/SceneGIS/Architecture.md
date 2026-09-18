@@ -983,3 +983,16 @@ roughness mip 链，模型只借用；独立世界方向变换保证反射不随
 R3 仅捕获物理天空与中性地面近似；太阳盘由直接光 BRDF 计算，云、雾和局部几何反射不在资格内。
 当前为相机区域共享探针；太阳/局部坐标轴变化超过 0.1 度、高度变化超过 100 米或 LUT 替换时
 同步重建完整 mip 链。静态帧复用，环境 release/destroy 释放资源，不逐模型重复捕获。
+
+## 前向屏幕空间反射（R6）
+
+[ADR-0086](Decisions/ADR-0086-forward-screen-space-reflections.md) / SGP-0016 保留前向 PBR，
+由显式绑定 Scene 的 `SceneGISScreenSpaceReflections` 捕获本帧 opaque HDR 辐亮度，以及原生
+基础层/清漆层求值后的反射方向和粗糙度。原生日志深度与各视锥合并为统一 eye depth；
+追踪和保边过滤后的命中辐亮度在原生 IBL 材质权重之前融合，未命中保留已有 IBL。
+禁止把 SSR 加在最终颜色上，或在捕获中再次消费自身 SSR 结果。
+
+Scene 独占已绑定效果的生命周期，调用方可提前 destroy 解除绑定；默认 disabled，不分配 GPU，
+启用需要 SCENE3D / HDR / WebGL2 和浮点 MRT。关闭保留资源，resize 替换，Scene 在 Context
+销毁前释放。当前不透明 PBR 模型为接收者，opaque 地形/图元为反射来源；透明、分类覆盖、标注、
+屏幕外几何和递归反射不在资格内。额外完整 opaque replay 与全分辨率存储是明确的成本边界。

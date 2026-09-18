@@ -8,8 +8,8 @@
 | Status                 | `active`                                                   |
 | Planning model         | `extension`                                                |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | None; R3 completed                                         |
-| Active phase plan      | None                                                       |
+| Current phase          | R6 Screen-space reflections                                |
+| Active phase plan      | [R6](plans/2026-09-19-r6-screen-space-reflections.md)      |
 | Active standalone plan | None                                                       |
 | Architecture contact   | Current task                                               |
 | Execution contact      | Current task                                               |
@@ -35,12 +35,14 @@
 
 ## Current handoff
 
-- Current state: R3 implemented, technically reviewed and visually accepted by the owner on 2026-09-19.
-- Next action: Establish the isolated R3 checkpoint. The owner requests scene reflections next; assess SSR material inputs before activating its phase.
+- Current state: R3 accepted and checkpointed; R6 SSR implemented, technically reviewed and explicitly accepted by the owner on 2026-09-19.
+- Next action: Checkpoint R6, then investigate local water rendering as requested by the owner.
 - Priority assumption: Desktop WebGL2; Globe / Planar outdoor PBR models and 3D Tiles.
 - Open discussions: None.
-- Latest review: [R3 review](reviews/2026-09-19-r3-sky-reflections.md).
-- Known risks: One regional sky probe; neutral ground approximation; clouds, fog, local geometry and SSR excluded.
-- Validation: 50 focused strict GPU Specs; 43 native manager Specs pass with 4 confirmed pre-R3 baseline failures. Full builds/types and bounded GPU timing are in the review.
-- Checkpoints: R1 `4ea24b89ef`; R2 `c824cfec1e`, both accepted.
+- Latest review: [R6 review](reviews/2026-09-19-r6-screen-space-reflections.md).
+- Known risks: Screen-space misses, approximate glossy filtering, opaque-only receivers and full-resolution replay/storage costs.
+- Validation: 27 focused strict GPU Specs, build/release/types and patch audit pass. Bounded GPU timing and resource costs are in the R6 review.
+- Checkpoints: R1 `4ea24b89ef`; R2 `c824cfec1e`; R3 `2e2dc02ce6`, all accepted.
 - ADR: [ADR-0085](../../Documentation/SceneGIS/Decisions/ADR-0085-physical-sky-specular-ibl.md); SGP: `SGP-0015`.
+
+- Active R6 ADR: [ADR-0086](../../Documentation/SceneGIS/Decisions/ADR-0086-forward-screen-space-reflections.md); SGP: `SGP-0016`.

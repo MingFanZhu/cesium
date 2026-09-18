@@ -50,6 +50,11 @@ vec3 computeSpecularIBL(vec3 cubeDir, float NdotV, vec3 f0, float roughness)
 
     vec2 brdfLut = texture(czm_brdfLut, vec2(NdotV, roughness)).rg;
     vec3 specularSample = sampleSpecularEnvironment(cubeDir, roughness);
+    // SCENEGIS_PATCH_BEGIN SGP-0016: Substitute clearcoat radiance before its native BRDF weight.
+    #if defined(SCENEGIS_SSR_CAPTURE) || defined(SCENEGIS_SSR_RECEIVE)
+    specularSample = sceneGISSSR(specularSample, sceneGISSSRCoatDirection, roughness, true);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0016
 
     return specularSample * (F * brdfLut.x + brdfLut.y);
 }
@@ -125,6 +130,11 @@ vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material)
         vec3 reflectMC = sceneGISSpecularDirection(reflectEC);
         // SCENEGIS_PATCH_END SGP-0015
         vec3 radiance = sampleSpecularEnvironment(reflectMC, roughness);
+        // SCENEGIS_PATCH_BEGIN SGP-0016: Capture evaluated anisotropic direction or blend current-frame hit radiance.
+        #if defined(SCENEGIS_SSR_CAPTURE) || defined(SCENEGIS_SSR_RECEIVE)
+        radiance = sceneGISSSR(radiance, reflectEC, roughness, false);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0016
         vec3 specularContribution = radiance * FssEss * model_iblFactor.y;
     #else
         vec3 specularContribution = vec3(0.0);

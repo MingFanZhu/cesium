@@ -2,6 +2,9 @@ import BoundingRectangle from "../Core/BoundingRectangle.js";
 // SCENEGIS_PATCH_BEGIN SGP-0014: Evaluate current-frame AO before opaque lighting.
 import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbientOcclusion.js";
 // SCENEGIS_PATCH_END SGP-0014
+// SCENEGIS_PATCH_BEGIN SGP-0016: Schedule owned forward reflection capture and receivers.
+import SceneGISScreenSpaceReflections from "../SceneGIS/Scene/_private/_SceneGISScreenSpaceReflections.js";
+// SCENEGIS_PATCH_END SGP-0016
 import BoundingSphere from "../Core/BoundingSphere.js";
 import BoxGeometry from "../Core/BoxGeometry.js";
 import Cartesian3 from "../Core/Cartesian3.js";
@@ -2422,6 +2425,11 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
     return;
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0016: Reuse native log/HDR selection before capture or PBR radiance substitution.
+  if (SceneGISScreenSpaceReflections.draw(scene, command, passState)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0016
   if (
     frameState.shadowState.lightShadowsEnabled &&
     command.receiveShadows &&
@@ -2901,6 +2909,16 @@ function executeCommands(scene, passState) {
   // SCENEGIS_PATCH_END SGP-0014
 
   const globeTranslucencyState = scene._globeTranslucencyState;
+  // SCENEGIS_PATCH_BEGIN SGP-0016: Capture and trace opaque radiance after current-frame AO.
+  if (!picking) {
+    SceneGISScreenSpaceReflections.execute(
+      scene,
+      passState,
+      frustum,
+      executeCommand,
+    );
+  }
+  // SCENEGIS_PATCH_END SGP-0016
   const clearDepth = scene._depthClearCommand;
   const clearStencil = scene._stencilClearCommand;
   const clearClassificationStencil = scene._classificationStencilClearCommand;
@@ -4610,6 +4628,9 @@ function render(scene) {
   // SCENEGIS_PATCH_BEGIN SGP-0014: Validate AO and expose its sampler requirement before world rendering.
   SceneGISAmbientOcclusion.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0014
+  // SCENEGIS_PATCH_BEGIN SGP-0016: Validate the active reflection effect before rendering.
+  SceneGISScreenSpaceReflections.prepare(scene);
+  // SCENEGIS_PATCH_END SGP-0016
   frameState.passes.postProcess = scene.postProcessStages.hasSelected;
   frameState.tilesetPassState = renderTilesetPassState;
 
@@ -5681,6 +5702,9 @@ Scene.prototype.destroy = function () {
   this.postProcessStages =
     this.postProcessStages && this.postProcessStages.destroy();
 
+  // SCENEGIS_PATCH_BEGIN SGP-0016: Release attached reflection resources before Context destruction.
+  this._sceneGISScreenSpaceReflections?.destroy();
+  // SCENEGIS_PATCH_END SGP-0016
   this._context = this._context && this._context.destroy();
   this._frameState.creditDisplay =
     this._frameState.creditDisplay && this._frameState.creditDisplay.destroy();

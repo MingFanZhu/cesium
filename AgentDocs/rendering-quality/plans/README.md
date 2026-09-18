@@ -7,3 +7,5 @@
 - [R2 Ambient occlusion](2026-09-18-r2-ambient-occlusion.md): `completed`; technical self-review and owner acceptance complete.
 
 - [R3 Physical sky reflections](2026-09-19-r3-sky-reflections.md): `completed`; technical self-review and owner visual acceptance complete; previous R2 checkpoint `c824cfec1e`.
+
+- [R6 Screen-space reflections](2026-09-19-r6-screen-space-reflections.md): `completed`; owner visually accepted on 2026-09-19; R3 checkpoint `2e2dc02ce6`.

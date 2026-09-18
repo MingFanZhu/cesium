@@ -751,3 +751,21 @@ clearcoat 同样遵循 y；材质 metallic/roughness/normal/anisotropy 仍由原
 Scene/Model/ImageBasedLightingPipelineStage 和 Renderer/Framebuffer。Shader 修改先执行 gulp build
 再运行带 --webglValidation --failTaskOnError 的 GPU Specs。性能与已知原生基线失败见
 [R3 review](../../AgentDocs/rendering-quality/reviews/2026-09-19-r3-sky-reflections.md)。
+
+## 验证屏幕空间反射
+
+先显式设置 scene.highDynamicRange = true，再创建 SceneGISScreenSpaceReflections({ scene, enabled: true })。
+已有 glTF 材质、CustomShader 和 ImageBasedLighting 接口保持；效果按最终材质粗糙度及基础层/清漆层方向工作。
+同一 Scene 最多一个效果，Scene 拥有生命周期，也可提前调用 destroy；enabled=false 保留已分配资源以便恢复。
+maximumDistance / thickness 使用米，maximumRoughness 使用感知粗糙度，stepCount 控制每层追踪预算。
+
+实现入口为 Source/SceneGIS/Scene/SceneGISScreenSpaceReflections.js 及同名 private renderer，
+Shader 位于 Source/Shaders/SceneGIS/Reflections/。捕获使用原生 log/HDR/shadow/AO 命令，逐视锥合并
+R32F 深度；MRT 保存基础层和清漆层方向/粗糙度。结果回到材质 IBL，后处理色调映射和环境顺序保持。
+
+验收入口为 Test/Planar/屏幕空间反射.html?world=planar 或 world=globe。对比开关、粗糙度和相机移动；
+原生地表仅为反射来源，示例镜面地板是 PBR 模型。透明物体、屏幕外几何、递归和时域降噪尚未支持。
+本轮以全分辨率显式 replay 换取较小的原生集成范围，显存约 66.7 bytes/pixel；大型场景需评估几何重放成本。
+
+GPU 回归入口为 SceneGIS/Scene/SceneGISScreenSpaceReflections，关联 AO、sky reflections、physical model
+和原生 IBL pipeline Specs；Shader 修改须先 gulp build。验证记录见 R6 review，架构边界见 ADR-0086。
