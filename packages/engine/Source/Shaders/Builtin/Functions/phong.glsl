@@ -1,3 +1,8 @@
+// SCENEGIS_PATCH_BEGIN SGP-0014: Builtins precede the receiver shader's AO definition.
+#ifdef SCENEGIS_AMBIENT_OCCLUSION
+float sceneGISAmbientOcclusion();
+#endif
+// SCENEGIS_PATCH_END SGP-0014
 float czm_private_getLambertDiffuseOfMaterial(vec3 lightDirectionEC, czm_material material)
 {
     return czm_getLambertDiffuse(lightDirectionEC, material.normal);
@@ -41,7 +46,12 @@ vec4 czm_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
     // Temporary workaround for adding ambient.
     vec3 materialDiffuse = material.diffuse * 0.5;
 
+    // SCENEGIS_PATCH_BEGIN SGP-0014: Occlude ambient light without changing direct light or emission.
     vec3 ambient = materialDiffuse;
+    #ifdef SCENEGIS_AMBIENT_OCCLUSION
+    ambient *= sceneGISAmbientOcclusion();
+    #endif
+    // SCENEGIS_PATCH_END SGP-0014
     vec3 color = ambient + material.emission;
     color += materialDiffuse * diffuse * czm_lightColor;
     color += material.specular * specular * czm_lightColor;

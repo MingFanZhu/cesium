@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 高质量环境光遮蔽</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>环境光遮蔽</h1>
+      <p>观察墙角、台阶与物体接地处。切换 AO 对比，或查看“仅遮蔽”检查轮廓。</p>
+      <p>中键旋转，滚轮缩放。遮蔽半径以米为单位；仅环境光受遮蔽。</p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="环境光遮蔽.js">查看源码</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./环境光遮蔽.js"></script>
+  </body>
+</html>

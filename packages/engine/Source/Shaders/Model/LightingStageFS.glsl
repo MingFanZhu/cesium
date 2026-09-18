@@ -45,7 +45,12 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
         // Find the direction in which to sample the environment map
         vec3 reflectMC = normalize(model_iblReferenceFrameMatrix * reflect(-viewDirection, normal));
         vec3 iblColor = computeSpecularIBL(reflectMC, NdotV, f0, roughness);
+        // SCENEGIS_PATCH_BEGIN SGP-0014: Apply screen-space visibility only to clearcoat IBL.
+        #ifdef SCENEGIS_AMBIENT_OCCLUSION
+        iblColor *= sceneGISAmbientOcclusion();
+        #endif
         color += iblColor * material.occlusion;
+        // SCENEGIS_PATCH_END SGP-0014
     #endif
 
     float clearcoatFactor = material.clearcoatFactor;
@@ -81,7 +86,13 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
     // Accumulate colors from base layer
     vec3 color = directColor + material.emissive;
     #ifdef USE_IBL_LIGHTING
-        color += computeIBL(position, normal, lightDirection, lightColorHdr, material);
+        // SCENEGIS_PATCH_BEGIN SGP-0014: Preserve direct and emissive radiance while occluding IBL.
+        vec3 indirectColor = computeIBL(position, normal, lightDirection, lightColorHdr, material);
+        #ifdef SCENEGIS_AMBIENT_OCCLUSION
+        indirectColor *= sceneGISAmbientOcclusion();
+        #endif
+        color += indirectColor;
+        // SCENEGIS_PATCH_END SGP-0014
     #endif
 
     #ifdef USE_CLEARCOAT

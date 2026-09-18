@@ -8,12 +8,12 @@
 | Status                 | `active`                                                   |
 | Planning model         | `extension`                                                |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R1 Planar cascaded shadows; owner visually accepted        |
-| Active phase plan      | [R1](plans/2026-09-18-r1-planar-shadows.md)                |
+| Current phase          | R2 completed; R3 physical sky reflections next             |
+| Active phase plan      | [R2](plans/2026-09-18-r2-ambient-occlusion.md)             |
 | Active standalone plan | None                                                       |
 | Architecture contact   | Current task                                               |
 | Execution contact      | Current task                                               |
-| Last updated           | `2026-09-18`                                               |
+| Last updated           | `2026-09-19`                                               |
 
 ## Scope
 
@@ -35,10 +35,15 @@
 
 ## Current handoff
 
-- Current state: R1 implementation and technical self-review complete; owner visually accepted.
-- Next action: Create the accepted R1 checkpoint, then plan R2 high-quality ambient occlusion.
+- Current state: R2 accepted by owner continuation on 2026-09-19; implementation and technical self-review complete.
+- Next action: Create the isolated R2 checkpoint, then enter R3 physical sky reflections.
 - Priority assumption: Desktop WebGL2, outdoor city and terrain scenes, Globe / Planar both supported.
 - Open discussions: None.
-- Latest review: [R1 review](reviews/2026-09-18-r1-planar-shadows.md).
-- Known risks: Submitted terrain only, finite-distance/low-angle bias, native final-color shadow modulation, ground/vector exclusions.
-- Validation: 150 focused Specs with WebGL validation; 47 native shadow Specs without optional validation; build/release/types and CPU/GPU evidence in review.
+- Latest review: [R2 review](reviews/2026-09-18-r2-ambient-occlusion.md).
+- Known risks: Screen-space/offscreen limits, thin geometry, explicit WebGL2 float requirement, ground/vector/transparent exclusions.
+- Validation: 72 focused AO/shadow/native postprocess Specs with WebGL validation; build/release/types/lint/audit and GPU cost documented in R2 review.
+
+R1 checkpoint: `4ea24b89ef`. Current phase: [R2 ambient occlusion](plans/2026-09-18-r2-ambient-occlusion.md), completed; owner acceptance confirmed.
+
+- R2 ADR: [ADR-0084](../../Documentation/SceneGIS/Decisions/ADR-0084-forward-ambient-occlusion.md), `SGP-0014`.
+- R2 example: [环境光遮蔽](../../Test/Planar/环境光遮蔽.html).

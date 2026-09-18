@@ -123,6 +123,9 @@ void main()
         0.0,
         1.0
     );
+    #ifdef SCENEGIS_AMBIENT_OCCLUSION
+    intensity -= 0.3 * (1.0 - sceneGISAmbientOcclusion());
+    #endif
     color.rgb *= czm_lightColor * intensity;
 #endif
     out_FragColor = vec4(color.rgb, 1.0);

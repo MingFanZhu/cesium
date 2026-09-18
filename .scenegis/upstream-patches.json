@@ -2,6 +2,40 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0014",
+      "title": "Integrate current-frame ambient occlusion into indirect lighting",
+      "status": "active",
+      "reason": "Native final-color AO cannot preserve direct light, emissive and atmosphere. Explicit owned prepass and indirect-light receiver hooks are required.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/PostProcessStageCollection.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Builtin/Functions/phong.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/GlobeFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISAmbientOcclusionSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0084-forward-ambient-occlusion.md",
+      "removalCondition": "Native renderer provides current-frame AO and compatible per-material indirect-light integration."
+    },
+    {
       "id": "SGP-0013",
       "title": "Integrate stable planar cascaded geometry shadows",
       "status": "active",

@@ -69,7 +69,11 @@ vec3 sceneGISPlanarSurfaceRadiance(vec3 albedo, vec3 positionEC, vec3 normalEC)
 {
     float cosine = max(dot(normalize(czm_inverseViewRotation * normalEC),
         normalize(u_sceneGISShadowSunDirection)), 0.0);
+    vec3 indirect = sceneGISPlanarSkySource(positionEC, normalEC);
+    #ifdef SCENEGIS_AMBIENT_OCCLUSION
+    indirect *= sceneGISAmbientOcclusion();
+    #endif
     return albedo * (sceneGISPlanarDirectSource(positionEC) *
         (cosine / czm_pi) * sceneGISPlanarCloudTransmittance(positionEC) +
-        sceneGISPlanarSkySource(positionEC, normalEC));
+        indirect);
 }

@@ -699,3 +699,32 @@ World 通过 DrawCommand castShadows/receiveShadows 与原生派生缓存接入�
 沿用原生 shadows 字段；ground classification 并非真实投影几何，不扩大资格。
 阴影 atlas 由 Scene 的 ShadowMap 所有，销毁发生在 Context 之前。
 回归入口是 SceneGISPlanarShadowsSpec、相关 surface / visualizer Specs 和原生 ShadowMap Specs。
+
+## 高质量环境光遮蔽维护
+
+R2 使用 [ADR-0084](Decisions/ADR-0084-forward-ambient-occlusion.md) 的本帧 depth prepass，
+支持球面和平面的 SCENE3D 场景。沿用现有入口，默认关闭：
+
+```js
+const ao = viewer.scene.postProcessStages.ambientOcclusion;
+ao.enabled = true;
+ao.uniforms.lengthCap = 5.0; // Radius in world meters.
+ao.uniforms.intensity = 1.5;
+ao.uniforms.directionCount = 8;
+ao.uniforms.stepCount = 8;
+ao.uniforms.ambientOcclusionOnly = false;
+```
+
+默认半径为 1 米、强度 1.5、cosine bias 0.03、8 个方向及每方向 8 次采样；奇数方向向上补为
+成对射线。`randomTexture` 字段继续接受但不参与计算，采样相位由屏幕位置确定。
+仅 ambient / IBL 受影响；未开启地表光照的影像、unlit 材质保持原样。`ambientOcclusionOnly`
+用于查看遮蔽图；开启 HDR 时它仍经过后续 tone mapping。没有时域积累，不需要静止等待画面收敛。
+
+实现入口为 `_SceneGISAmbientOcclusion.js`，GLSL 位于 `Source/Shaders/SceneGIS/AmbientOcclusion/`。
+正交相机的原生 `czm_inverseProjection` 为零矩阵，必须使用原生 window-to-eye 重建；不得把
+线性深度当作当前视锥 device depth。多视锥合并、clip/discard、IBL 与自发光分离、资源寿命的
+回归入口为 `SceneGISAmbientOcclusionSpec.js`；人工入口为 `Test/Planar/环境光遮蔽.html`。
+
+成本包括额外 opaque 几何提交、4 个复用目标和一个 HDR pass-through/debug 目标，约 21 bytes/pixel
+（不计 driver padding 与 ShaderCache）。屏幕外/隐藏遮挡、亚像素细节、透明接收和 specular bent normal
+不在当前能力内。不要通过增大世界半径掩盖数据缝隙或把截图指标代替负责人视觉验收。

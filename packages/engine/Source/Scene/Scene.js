@@ -1,4 +1,7 @@
 import BoundingRectangle from "../Core/BoundingRectangle.js";
+// SCENEGIS_PATCH_BEGIN SGP-0014: Evaluate current-frame AO before opaque lighting.
+import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbientOcclusion.js";
+// SCENEGIS_PATCH_END SGP-0014
 import BoundingSphere from "../Core/BoundingSphere.js";
 import BoxGeometry from "../Core/BoxGeometry.js";
 import Cartesian3 from "../Core/Cartesian3.js";
@@ -2427,9 +2430,19 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
     // If the command receives shadows, execute the derived shadows command.
     // Some commands, such as OIT derived commands, do not have derived shadow commands themselves
     // and instead shadowing is built-in. In this case execute the command regularly below.
-    command.derivedCommands.shadows.receiveCommand.execute(context, passState);
+    // SCENEGIS_PATCH_BEGIN SGP-0014: Compose AO at indirect terms inside the shadow receiver.
+    SceneGISAmbientOcclusion.receiver(
+      scene,
+      command.derivedCommands.shadows.receiveCommand,
+    ).execute(context, passState);
+    // SCENEGIS_PATCH_END SGP-0014
   } else {
-    command.execute(context, passState);
+    // SCENEGIS_PATCH_BEGIN SGP-0014: Select an indirect-light AO receiver without changing geometry.
+    SceneGISAmbientOcclusion.receiver(scene, command).execute(
+      context,
+      passState,
+    );
+    // SCENEGIS_PATCH_END SGP-0014
   }
 }
 
@@ -2880,6 +2893,12 @@ function executeCommands(scene, passState) {
     frustumCommandsList,
   } = scene._view;
   const numFrustums = frustumCommandsList.length;
+
+  // SCENEGIS_PATCH_BEGIN SGP-0014: Resolve all opaque ranges into common eye depth before lighting.
+  if (!picking) {
+    SceneGISAmbientOcclusion.execute(scene, passState, frustum);
+  }
+  // SCENEGIS_PATCH_END SGP-0014
 
   const globeTranslucencyState = scene._globeTranslucencyState;
   const clearDepth = scene._depthClearCommand;
@@ -4588,6 +4607,9 @@ function render(scene) {
 
   scene.updateFrameState();
   frameState.passes.render = true;
+  // SCENEGIS_PATCH_BEGIN SGP-0014: Validate AO and expose its sampler requirement before world rendering.
+  SceneGISAmbientOcclusion.prepare(scene);
+  // SCENEGIS_PATCH_END SGP-0014
   frameState.passes.postProcess = scene.postProcessStages.hasSelected;
   frameState.tilesetPassState = renderTilesetPassState;
 

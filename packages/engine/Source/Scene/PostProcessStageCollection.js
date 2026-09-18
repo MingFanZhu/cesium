@@ -11,6 +11,9 @@ import TextureMinificationFilter from "../Renderer/TextureMinificationFilter.js"
 import TextureWrap from "../Renderer/TextureWrap.js";
 import PassThrough from "../Shaders/PostProcessStages/PassThrough.js";
 import PostProcessStageLibrary from "./PostProcessStageLibrary.js";
+// SCENEGIS_PATCH_BEGIN SGP-0014: Keep native AO controls with owned forward-lighting evaluation.
+import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbientOcclusion.js";
+// SCENEGIS_PATCH_END SGP-0014
 import PostProcessStageTextureCache from "./PostProcessStageTextureCache.js";
 import Tonemapper, { validateTonemapper } from "./Tonemapper.js";
 
@@ -34,7 +37,9 @@ const stackScratch = [];
  */
 function PostProcessStageCollection() {
   const fxaa = PostProcessStageLibrary.createFXAAStage();
-  const ao = PostProcessStageLibrary.createAmbientOcclusionStage();
+  // SCENEGIS_PATCH_BEGIN SGP-0014: Use the native composite contract for current-frame GTAO.
+  const ao = SceneGISAmbientOcclusion.createStage();
+  // SCENEGIS_PATCH_END SGP-0014
   const bloom = PostProcessStageLibrary.createBloomStage();
 
   // Auto-exposure is currently disabled because most shaders output a value in [0.0, 1.0].
@@ -148,34 +153,31 @@ Object.defineProperties(PostProcessStageCollection.prototype, {
       return this._fxaa;
     },
   },
+  // SCENEGIS_PATCH_BEGIN SGP-0014: Document shared AO controls and forward lighting.
   /**
-   * A post-process stage that applies Horizon-based Ambient Occlusion (HBAO) to the input texture.
-   * <p>
-   * Ambient occlusion simulates shadows from ambient light. These shadows would always be present when the
-   * surface receives light and regardless of the light's position.
-   * </p>
-   * <p>
-   * The uniforms have the following properties:
+   * Controls current-frame ground-truth ambient occlusion (GTAO). Occlusion affects
+   * ambient/IBL lighting of opaque terrain, lit primitives and models, before atmosphere.
+   * Direct light, emissive and unlit surfaces are preserved. Requires SCENE3D, WebGL2
+   * and floating-point render targets. Disabled by default.
+   * <p>The uniforms have the following properties:</p>
    * <ul>
-   * <li><code>intensity</code> is a scalar value used to lighten or darken the shadows exponentially. Higher values make the shadows darker. The default value is <code>3.0</code>.</li>
-   * <li><code>bias</code> is a scalar value representing an angle in radians. If the dot product between the normal of the sample and the vector to the camera is less than this value,
-   * sampling stops in the current direction. This is used to remove shadows from near planar edges. The default value is <code>0.1</code>.</li>
-   * <li><code>lengthCap</code> is a scalar value representing a length in meters. If the distance from the current sample to first sample is greater than this value,
-   * sampling stops in the current direction. The default value is <code>0.26</code>.</li>
-   * <li><code>directionCount</code> is the number of directions along which the ray marching will search for occluders. The default value is <code>8</code>.</li>
-   * <li><code>stepCount</code> is the number of steps the ray marching will take along each direction. The default value is <code>32</code>.</li>
-   * <li><code>randomTexture</code> is a texture where the red channel is a random value in [0.0, 1.0]. The default value is <code>undefined</code>. This texture needs to be set.</li>
-   * <li><code>ambientOcclusionOnly</code> is a boolean value. When <code>true</code>, only the shadows generated are written to the output. When <code>false</code>, the input texture is modulated
-   * with the ambient occlusion. This is a useful debug option for seeing the effects of changing the uniform values. The default value is <code>false</code>.</li>
+   * <li><code>intensity</code>: nonnegative visibility exponent, default <code>1.5</code>.</li>
+   * <li><code>bias</code>: horizon cosine bias in [0, 1), default <code>0.03</code>.</li>
+   * <li><code>lengthCap</code>: positive radius in meters, default <code>1.0</code>.</li>
+   * <li><code>directionCount</code>: integer ray count, at least 2, default <code>8</code>. Odd counts round up to paired rays.</li>
+   * <li><code>stepCount</code>: positive integer samples per ray, default <code>8</code>.</li>
+   * <li><code>randomTexture</code>: accepted but unused; sampling uses stable spatial noise.</li>
+   * <li><code>ambientOcclusionOnly</code>: show filtered visibility instead of scene color, default <code>false</code>.</li>
    * </ul>
-   * <p>
-   * When enabled, this stage will execute before all others.
-   * </p>
+   * <p>Resources are reused while disabled and released with this collection. Screen-space
+   * sampling cannot recover offscreen or hidden occluders. Transparent and classification
+   * receivers are outside the initial qualification.</p>
    *
    * @memberof PostProcessStageCollection.prototype
    * @type {PostProcessStageComposite}
    * @readonly
    */
+  // SCENEGIS_PATCH_END SGP-0014
   ambientOcclusion: {
     get: function () {
       return this._ao;
@@ -575,6 +577,9 @@ PostProcessStageCollection.prototype.update = function (
   useHdr,
 ) {
   removeStages(this);
+  // SCENEGIS_PATCH_BEGIN SGP-0014: Make default textures available during stage initialization.
+  this._ao._sceneGISAmbientOcclusion.context = context;
+  // SCENEGIS_PATCH_END SGP-0014
 
   const previousActiveStages = this._activeStages;
   const activeStages = (this._activeStages = this._previousActiveStages);
@@ -640,7 +645,12 @@ PostProcessStageCollection.prototype.update = function (
     this._randomTexture = undefined;
   }
 
-  if (!defined(this._randomTexture) && aoEnabled) {
+  // SCENEGIS_PATCH_BEGIN SGP-0014: Spatial GTAO noise needs no random texture allocation.
+  const needsRandomTexture = aoEnabled && !this._ao._sceneGISAmbientOcclusion;
+  // SCENEGIS_PATCH_END SGP-0014
+  // SCENEGIS_PATCH_BEGIN SGP-0014: Allocate only for a stage that consumes randomTexture.
+  if (!defined(this._randomTexture) && needsRandomTexture) {
+    // SCENEGIS_PATCH_END SGP-0014
     const length = 256 * 256 * 3;
     const random = new Uint8Array(length);
     for (let i = 0; i < length; i += 3) {
@@ -889,6 +899,9 @@ PostProcessStageCollection.prototype.isDestroyed = function () {
  */
 PostProcessStageCollection.prototype.destroy = function () {
   this._fxaa.destroy();
+  // SCENEGIS_PATCH_BEGIN SGP-0014: Release scene-local AO targets before the context is destroyed.
+  SceneGISAmbientOcclusion.destroy(this._ao);
+  // SCENEGIS_PATCH_END SGP-0014
   this._ao.destroy();
   this._bloom.destroy();
   this._autoExposure.destroy();

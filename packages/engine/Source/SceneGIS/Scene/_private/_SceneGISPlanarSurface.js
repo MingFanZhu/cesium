@@ -735,6 +735,10 @@ SceneGISPlanarSurface.prototype.render = function (
   const environmentLighting = frameState._sceneGISPlanarLighting;
   const advancedLighting = environmentLighting?.active === true;
   const lightingSamplerCount = advancedLighting ? 3 : 0;
+  const aoSamplerCount =
+    frameState._sceneGISAmbientOcclusion && (advancedLighting || enableLighting)
+      ? 1
+      : 0;
   const shadowSamplerCount =
     frameState.shadowState?.lightShadowsEnabled &&
     ShadowMode.receiveShadows(shadows)
@@ -748,13 +752,14 @@ SceneGISPlanarSurface.prototype.render = function (
     shownLayerCount +
       materialSamplerCount +
       lightingSamplerCount +
+      aoSamplerCount +
       shadowSamplerCount +
       (clippingEnabled ? 1 : 0) +
       (opacity < 1.0 ? 1 : 0) >
     ContextLimits.maximumTextureImageUnits
   ) {
     throw new DeveloperError(
-      "The combined planar imagery, Material, environment, shadows, clipping and surface background sampler count exceeds maximumTextureImageUnits.",
+      "The combined planar imagery, Material, environment, AO, shadows, clipping and surface background sampler count exceeds maximumTextureImageUnits.",
     );
   }
   if (defined(material)) {

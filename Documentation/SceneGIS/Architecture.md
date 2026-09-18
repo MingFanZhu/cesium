@@ -958,3 +958,15 @@ ShadowMap 后才销毁 Context。禁止第二套阴影引擎或伪装 Globe tile
 Graphics / Primitive / Model 使用 `ShadowMode`。地形 clipping 同时作用于 caster，opacity
 的背景贡献不受地表阴影衰减。连续贴地分类覆盖、vector 和 label 的资格不随此扩大；不新增
 离屏地形预取。模型/表面的原生最终颜色阴影调制尚未改造成 direct-only 物理光照融合。
+
+## 本帧环境光遮蔽（R2）
+
+[ADR-0084](Decisions/ADR-0084-forward-ambient-occlusion.md) / SGP-0014 复用
+`scene.postProcessStages.ambientOcclusion` 控制接口。SceneGIS-owned helper 重放原生 opaque
+depth-only 派生命令，将各视锥深度转换为统一 eye depth，再执行 GTAO hemisphere slice 积分和
+保边滤波。主绘制在 ambient / IBL 项采样遮蔽；不得把 AO 乘在最终场景、大气或自发光颜色上。
+
+仅资格确认 SCENE3D / WebGL2 floating-point targets，覆盖 Globe / Planar 地表、普通 lit
+primitive 与带法线的 PBR model。透明、classification、vector、label 不因本阶段自动扩大资格。
+不引入历史帧、相机 jitter 或第二套公开开关。帧缓冲由 native AO composite 的 owned state 所有，
+关闭时保留以便复用、resize 时替换、collection 销毁时释放；ShaderCache 管理派生程序。
