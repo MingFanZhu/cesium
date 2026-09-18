@@ -1,6 +1,11 @@
 in vec3 position;
 in vec2 normal;
 out vec2 v_textureCoordinates;
+#ifdef SCENEGIS_CLIPPING
+out vec3 v_clippingPosition;
+uniform vec3 u_clippingOffset;
+uniform vec3 u_clippingScale;
+#endif
 out vec3 v_normalEC;
 #if defined(SCENEGIS_MATERIAL) || defined(SCENEGIS_ADVANCED_LIGHTING)
 out vec3 v_positionEC;
@@ -13,6 +18,9 @@ out vec3 v_normalWC;
 void main()
 {
     v_textureCoordinates = position.xy + vec2(0.5);
+#ifdef SCENEGIS_CLIPPING
+    v_clippingPosition = position * u_clippingScale + u_clippingOffset;
+#endif
     // Worker oct normals are fixed planar world-axis vectors.
 #ifdef SCENEGIS_MATERIAL
     vec3 normalWC = czm_octDecode(normal);

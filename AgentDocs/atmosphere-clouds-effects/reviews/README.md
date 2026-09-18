@@ -1,5 +1,7 @@
 # Reviews
 
+- [2026-09-18-planar-aerial-horizon-band.md](2026-09-18-planar-aerial-horizon-band.md) — `accepted; closed; project-owner visual acceptance passed`。
+- [2026-09-18-globe-aerial-receiver-distance.md](2026-09-18-globe-aerial-receiver-distance.md) — `approved; technical self-review; project-owner visual acceptance pending`。
 - [2026-09-02-a11g-globe-moonlight-shadow-surface.md](2026-09-02-a11g-globe-moonlight-shadow-surface.md) — `implementation assigned; review pending`。
 - [2026-09-02-p1-planar-integrated-medium-restoration.md](2026-09-02-p1-planar-integrated-medium-restoration.md) — `deferred before review; candidate not accepted`。
 - [2026-09-02-a10g-globe-native-moon-composition.md](2026-09-02-a10g-globe-native-moon-composition.md) — `accepted; closed`。

@@ -54,7 +54,7 @@ describe("SceneGIS/Scene/SceneGISPlanarImageryProvider", function () {
       { minimumLevel: 1 },
       { maximumLevel: -1 },
       { tileWidth: 0 },
-      { tileHeight: 128 },
+      { tileHeight: 0 },
       { hasAlphaChannel: "true" },
       { errorEvent: {} },
       { requestImage: undefined },
@@ -64,5 +64,14 @@ describe("SceneGIS/Scene/SceneGISPlanarImageryProvider", function () {
         return new SceneGISPlanarImageryLayer(createProvider(overrides));
       }).toThrowDeveloperError();
     }
+  });
+
+  it("accepts rectangular pixel dimensions without changing physical tile coverage", function () {
+    const layer = new SceneGISPlanarImageryLayer(
+      createProvider({ tileHeight: 128 }),
+    );
+    expect(layer.imageryProvider.tileWidth).toBe(256);
+    expect(layer.imageryProvider.tileHeight).toBe(128);
+    layer.destroy();
   });
 });

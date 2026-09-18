@@ -12,6 +12,7 @@ import {
   createMultipleSourceGrid,
   generateAssetBuffers,
   generateTarget,
+  integrateSingleRadiance,
   integrateTotalRadiance,
   transmittance,
   verifyTarget,
@@ -45,6 +46,34 @@ function assertVectorClose(actual, expected, tolerance = 1e-12) {
       `${actual[i]} differs from ${expected[i]} at channel ${i}`,
     );
   }
+}
+
+function referenceSingleRadiance(height, mu, sunMu, cosine, samples = 16384) {
+  // Independent dense midpoint integral of the physical source, not LUT quadrature.
+  const distance = Math.min(boundaryDistance(height, mu), 20000000);
+  const step = distance / samples;
+  const radiance = [0, 0, 0];
+  const rayleigh = [5.802e-6, 1.3558e-5, 3.31e-5];
+  const solar = [1.474, 1.8504, 1.91198];
+  const rayleighPhase = (3 * (1 + cosine * cosine)) / (16 * Math.PI);
+  const miePhase =
+    (3 * (1 - 0.8 ** 2) * (1 + cosine * cosine)) /
+    (8 * Math.PI * (2 + 0.8 ** 2) * (1 + 0.8 ** 2 - 1.6 * cosine) ** 1.5);
+  for (let i = 0; i < samples; i++) {
+    const along = (i + 0.5) * step;
+    const z = height + mu * along;
+    const viewT = transmittance(height, mu, along);
+    const sunT = transmittance(z, sunMu);
+    for (let channel = 0; channel < 3; channel++) {
+      const source =
+        solar[channel] *
+        sunT[channel] *
+        (rayleigh[channel] * Math.exp(-z / 8000) * rayleighPhase +
+          3.996e-6 * Math.exp(-z / 1200) * miePhase);
+      radiance[channel] += viewT[channel] * source * step;
+    }
+  }
+  return radiance;
 }
 
 async function trackedBuffers() {
@@ -118,10 +147,7 @@ test("isolates the single seed and each multiple-scattering recurrence order", (
     const recurrence = order2 / seed[channel];
     assert.ok(Math.abs(order3 - order2 * recurrence) < 1e-24);
     assert.ok(Math.abs(order4 - order3 * recurrence) < 1e-30);
-    assert.equal(
-      result.grid.values[channel],
-      order2 + order3 + order4,
-    );
+    assert.equal(result.grid.values[channel], order2 + order3 + order4);
   }
 });
 
@@ -144,7 +170,8 @@ test("composes true-boundary horizontal and shallow segments through analytic tr
   for (const distance of distances) {
     const segmentT = transmittance(1000, 0, distance);
     const segment = horizontalBoundary.map(
-      (value, channel) => value - segmentT[channel] * horizontalBoundary[channel],
+      (value, channel) =>
+        value - segmentT[channel] * horizontalBoundary[channel],
     );
     const energy = segment.reduce((sum, value) => sum + value, 0);
     assert.ok(energy > previousEnergy);
@@ -180,6 +207,38 @@ test("composes true-boundary horizontal and shallow segments through analytic tr
   }
 });
 
+test("converges to the horizontal scattering limit from both sides", () => {
+  const horizontal = integrateSingleRadiance(600, 0, 0.89, 0.2);
+  for (const mu of [-1e-5, 1e-5]) {
+    assertVectorClose(
+      integrateSingleRadiance(600, mu, 0.89, 0.2),
+      horizontal,
+      0.00005,
+    );
+  }
+});
+
+test("matches independent dense single-scattering integrals across optical depths", () => {
+  for (const [height, mu] of [
+    [600, -0.001],
+    [600, 0.001],
+    [600, 0.1],
+    [30000, -0.05],
+    [59000, -0.005],
+  ]) {
+    const expected = referenceSingleRadiance(height, mu, 0.89, 0.2);
+    const refined = referenceSingleRadiance(height, mu, 0.89, 0.2, 32768);
+    assertVectorClose(expected, refined, 0.00001);
+    const actual = integrateSingleRadiance(height, mu, 0.89, 0.2);
+    for (let channel = 0; channel < 3; channel++) {
+      assert.ok(
+        Math.abs(actual[channel] / refined[channel] - 1) < 0.02,
+        `${height}/${mu} channel ${channel}: ${actual[channel]} vs ${refined[channel]}`,
+      );
+    }
+  }
+});
+
 test("computes direct plus cosine-weighted diffuse irradiance reference values", () => {
   const zeroMultiple = {
     width: 1,
@@ -191,10 +250,17 @@ test("computes direct plus cosine-weighted diffuse irradiance reference values",
     [1.474, 1.8504, 1.91198],
   );
   assertVectorClose(computeIrradiance(60000, -1, zeroMultiple), [0, 0, 0]);
-  assertVectorClose(
-    computeIrradiance(0, 1, zeroMultiple),
-    [1.418685152975808, 1.6855545473324087, 1.617489073158227],
+  const expected = transmittance(0, 1).map(
+    (value, channel) => value * [1.474, 1.8504, 1.91198][channel],
   );
+  for (let zenith = 0; zenith < 12; zenith++) {
+    const mu = (zenith + 0.5) / 12;
+    const incoming = referenceSingleRadiance(0, mu, 1, mu);
+    for (let channel = 0; channel < 3; channel++) {
+      expected[channel] += incoming[channel] * mu * ((2 * Math.PI) / 12);
+    }
+  }
+  assertVectorClose(computeIrradiance(0, 1, zeroMultiple), expected, 0.003);
 });
 
 test("verifies the exact tracked dimensions hashes provenance and license", async () => {

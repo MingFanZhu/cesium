@@ -1,5 +1,10 @@
 # Plans
 
+- Latest completed standalone plan:
+  [平面空气透视模型水平色带修复](2026-09-18-planar-aerial-horizon-band.md)
+- Previous standalone awaiting visual acceptance:
+  [球面空气透视模型条带修复](2026-09-18-globe-aerial-receiver-distance.md)
+
 - Active extension plan:
   [2026-08-14-atmosphere-clouds-effects-extension.md](2026-08-14-atmosphere-clouds-effects-extension.md)
 - Active phase plan:

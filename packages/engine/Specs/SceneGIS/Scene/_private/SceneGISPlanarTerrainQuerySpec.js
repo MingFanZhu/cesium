@@ -85,6 +85,22 @@ describe("SceneGIS/Scene/_SceneGISPlanarTerrainQuery", function () {
     ).toBe(-10.0);
   });
 
+  it("continues past a clipped near intersection to a visible far slope", function () {
+    const fixture = createTile({
+      width: 3,
+      buffer: new Float32Array([60, -60, 60, 60, -60, 60]),
+    });
+    const snapshot = [snapshotEntry(fixture)];
+    const ray = new Ray(new Cartesian3(-120, 0, 20), Cartesian3.UNIT_X);
+    const near = SceneGISPlanarTerrainQuery.pick(snapshot, 1, ray);
+    expect(near.x).toBeLessThan(0);
+    const far = SceneGISPlanarTerrainQuery.pick(snapshot, 1, ray, undefined, {
+      isClipped: (position) => position.x <= 0,
+    });
+    expect(far.x).toBeCloseTo(-near.x, 4);
+    expect(far.z).toBe(20);
+  });
+
   it("retains tile-local Float32 interpolation at an EPSG:3857 offset", function () {
     const half = 20037508.342789244;
     const fixture = createTile({

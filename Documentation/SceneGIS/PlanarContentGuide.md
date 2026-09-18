@@ -179,11 +179,11 @@ callback。Planar callback 只接受 `CustomDataSource`，因此 `widget.entitie
 
 第一次合法 update 先完整验证 World/Scene identity、`EntityCluster.enabled === false` 与所有 Entity 的
 top-level Property profile，再原子追加 Anchor、Model、Polyline、Polygon、Solid、Area、Route、Path children；
-children 从下一次 update开始执行。后续每帧 gate 仍先验证动态新增属性。Top-level 只允许 `point`、
+children 从下一次 update开始执行。后续每帧 gate 仍先验证动态新增的内建属性。内建 Property 支持 `point`、
 `billboard`、`label`、`model`、`polyline`、`polygon`、`box`、`cylinder`、`ellipsoid`、`plane`、`ellipse`、
 `rectangle`、`corridor`、`wall`、`polylineVolume`、`path`、`position`、`orientation`、`description`、
-`properties` 与 `viewFrom`；业务字段必须放入
-`Entity.properties`。其他已定义 standard/custom property 会在 child normal update 和低层资源 mutation 前抛
+`properties` 与 `viewFrom`；业务字段可使用
+`Entity.properties` 或原生 `Entity.addProperty`。其他已定义的标准 Property 会在 child normal update 和低层资源 mutation 前抛
 `DeveloperError`；同步 collection listener 可以先更新 CPU tracking。
 
 Model、Polyline 与 Polygon 自动路径加入各 DataSource 的 caller-owned `_primitives` container，使
@@ -197,22 +197,30 @@ EntityCluster、EntityCollection、Scene 或 World。Pick id 保持 original Ent
 完整、绑定Cesium `1.144`交付基线的逐类型与package inventory见
 [PlanarContentCompatibility](PlanarContentCompatibility.md)。下表只保留高层导航。
 
-| 数据或 graphics                                        | 当前决定                                     | 可用阶段/边界          |
-| ------------------------------------------------------ | -------------------------------------------- | ---------------------- |
-| `Entity`、Property/event、availability、show、metadata | 复用数据模型                                 | C4 automatic           |
-| `EntityCollection`、`CustomDataSource`                 | 复用数据模型                                 | C4 automatic           |
-| Point、Billboard、Label                                | private runtime                              | C4 automatic           |
-| 普通 glTF Model                                        | private runtime                              | C4 automatic           |
-| planar straight Polyline、Polygon                      | public Geometry/Primitive + private adapter  | C6 direct/C4 automatic |
-| Box、Cylinder、Ellipsoid、Plane、Ellipse、Rectangle    | public volume/lowered area + private adapter | C7 direct/C4 automatic |
-| Corridor、Wall、PolylineVolume、Path                   | public lowering/Geometry + private adapter   | C8 direct/C4 automatic |
-| `Cesium3DTilesetGraphics`                              | unsupported                                  | 独立扩展               |
-| GeoJSON、CZML、KML 自动 planar 转换                    | unsupported                                  | 独立扩展               |
-| Globe ground、geodesic/rhumb                           | 禁止隐式进入                                 | 不复用                 |
-| tracking、`flyTo`、`zoomTo`                            | unsupported                                  | 不改变                 |
+| 数据或 graphics                                        | 当前决定                                             | 可用阶段/边界          |
+| ------------------------------------------------------ | ---------------------------------------------------- | ---------------------- |
+| `Entity`、Property/event、availability、show、metadata | 复用数据模型                                         | C4 automatic           |
+| `EntityCollection`、`CustomDataSource`                 | 复用数据模型                                         | C4 automatic           |
+| Point、Billboard、Label                                | private runtime                                      | C4 automatic           |
+| 普通 glTF Model                                        | private runtime                                      | C4 automatic           |
+| planar straight Polyline、Polygon                      | public Geometry/Primitive + private adapter          | C6 direct/C4 automatic |
+| Box、Cylinder、Ellipsoid、Plane、Ellipse、Rectangle    | public volume/lowered area + private adapter         | C7 direct/C4 automatic |
+| Corridor、Wall、PolylineVolume、Path                   | public lowering/Geometry + private adapter           | C8 direct/C4 automatic |
+| `Cesium3DTilesetGraphics`                              | unsupported                                          | 独立扩展               |
+| GeoJSON、CZML、KML 自动 planar 转换                    | unsupported                                          | 独立扩展               |
+| Globe ground、geodesic/rhumb                           | 禁止隐式进入                                         | 不复用                 |
+| tracking、`flyTo`、`zoomTo`                            | 复用原入口；支持明确的平面 Entity/DataSource profile | API integration I2/I3  |
 
-C2/C3 固定 Anchor/Model/Polyline/Polygon graphic property allowlist，C4 的 gate 固定 Entity top-level
-allowlist。Planar path 替换而不是追加默认 Globe visualizers。
+C2/C3 使用 Anchor/Model/Polyline/Polygon graphic property allowlist，C4 的 gate 检查 Entity 内建 Property
+allowlist；自定义业务属性不参与渲染校验。Planar path 替换而不是追加默认 Globe visualizers。
+
+Polyline/Polygon 支持原生 `distanceDisplayCondition` 和动态 Property，在 ordinary/ground 下同时控制填充、
+边线和 picking。条件缺省表示无限制；ready 后修改 near/far 不重建 geometry，添加或清除条件会重建属性布局。
+距离依据 Cesium GeometryInstance 包围体近似判定，不是逐像素到相机的地形距离。
+
+上述 tracking/framing 的当前边界见 [PlanarWorldGuide](PlanarWorldGuide.md)。原生 Entity 辅助方法不能仅因
+Graphics 已能绘制而视为全部兼容：例如缺省 orientation 的 `Entity.computeModelMatrix` 仍构造球面 ENU，
+而平面 visualizer 使用固定 world axes；显式指定固定轴 Quaternion 可避免该缺省朝向差异。
 
 ## C5 资格、性能与交付边界
 
@@ -256,7 +264,10 @@ roles，不是 supported public API。C4 接入点由 `SGP-0001` 追踪；升级
 - 在 live planar World 的 `widget.entities`、`viewer.entities` 或 `CustomDataSource.entities` 中使用已批准的
   Point/Billboard/Label/Model/Polyline/Polygon/Box/Cylinder/Ellipsoid/Plane/Ellipse/Rectangle/Corridor/Wall/
   PolylineVolume/Path profile。
-- 将业务 metadata 放入 `Entity.properties`，不要注册新的 top-level Entity property。
+- 业务 metadata 可放入 `Entity.properties`，也可沿用 `Entity.addProperty` 注册顶层业务属性。
+- 平面 `RectangleGraphics.coordinates` 的四个 Rectangle 字段表示场景米制范围：使用
+  `new Rectangle(minimumX, minimumY, maximumX, maximumY)`，不要使用 `Rectangle.fromDegrees` 或球面矩形运算。
+  这是平面 adapter 的局部解释，不改原生 Rectangle 类，也不扩展 Camera 的 Rectangle 入口。
 - 在应用边界保留 finite meter-based Cartesian3，并显式记录所使用的 planar CRS。
 - 对需要确定 terrain 高度的离线或批处理流程，先使用显式 sampler，再写入 absolute position。
 - 大量静态内容优先按业务生命周期分组到少量`CustomDataSource`，通过collection add/remove控制批次；不要依赖

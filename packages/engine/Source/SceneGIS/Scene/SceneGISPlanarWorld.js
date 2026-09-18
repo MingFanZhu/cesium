@@ -4,6 +4,8 @@ import destroyObject from "../../Core/destroyObject.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import Frozen from "../../Core/Frozen.js";
 import Material from "../../Scene/Material.js";
+import ClippingPlaneCollection from "../../Scene/ClippingPlaneCollection.js";
+import ClippingPolygonCollection from "../../Scene/ClippingPolygonCollection.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import SceneGISPlanarCoordinateSystem from "../Core/SceneGISPlanarCoordinateSystem.js";
 import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
@@ -101,6 +103,27 @@ function validateMaterial(value) {
   }
 }
 
+function setClippingCollection(world, key, value, Type) {
+  if (value === world[key]) {
+    return;
+  }
+  if (
+    value !== undefined &&
+    (!(value instanceof Type) ||
+      value.isDestroyed() ||
+      value._owner !== undefined)
+  ) {
+    throw new DeveloperError(
+      "A clipping collection must be live and owned by at most one World or object.",
+    );
+  }
+  world[key]?.destroy();
+  world[key] = value;
+  if (value !== undefined) {
+    value._owner = world;
+  }
+}
+
 /**
  * A bounded, meter-based planar primary world with a flat or heightmap terrain
  * surface, opaque by default, optional geometric lighting, and an ordered collection of
@@ -112,7 +135,8 @@ function validateMaterial(value) {
  * @constructor
  *
  * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarCoordinateSystem} options.coordinateSystem The planar coordinate system.
+ * @param {SceneGISPlanarCoordinateSystem} [options.coordinateSystem] The planar coordinate system, required unless tilingScheme is supplied.
+ * @param {SceneGISPlanarTilingScheme} [options.tilingScheme] An existing canonical scheme, for example from a metadata terrain provider. If coordinateSystem is also supplied, both must reference the same object.
  * @param {number} options.maximumLevel The highest selectable surface level.
  * @param {number} [options.maximumScreenSpaceError=2.0] The refinement threshold in pixels.
  * @param {number} [options.tileCacheSize=100] The number of unprotected tiles retained after a frame.
@@ -131,15 +155,33 @@ function validateMaterial(value) {
  */
 function SceneGISPlanarWorld(options) {
   options = options ?? Frozen.EMPTY_OBJECT;
-  if (!(options.coordinateSystem instanceof SceneGISPlanarCoordinateSystem)) {
+  const suppliedScheme = options.tilingScheme;
+  if (
+    suppliedScheme !== undefined &&
+    !(suppliedScheme instanceof SceneGISPlanarTilingScheme)
+  ) {
+    throw new DeveloperError(
+      "options.tilingScheme must be a SceneGISPlanarTilingScheme.",
+    );
+  }
+  const coordinateSystem =
+    options.coordinateSystem ?? suppliedScheme?.coordinateSystem;
+  if (!(coordinateSystem instanceof SceneGISPlanarCoordinateSystem)) {
     throw new DeveloperError(
       "options.coordinateSystem must be a SceneGISPlanarCoordinateSystem.",
     );
   }
 
-  const tilingScheme = new SceneGISPlanarTilingScheme({
-    coordinateSystem: options.coordinateSystem,
-  });
+  if (
+    suppliedScheme !== undefined &&
+    suppliedScheme.coordinateSystem !== coordinateSystem
+  ) {
+    throw new DeveloperError(
+      "options.coordinateSystem must be the tiling scheme's coordinateSystem.",
+    );
+  }
+  const tilingScheme =
+    suppliedScheme ?? new SceneGISPlanarTilingScheme({ coordinateSystem });
   if (
     !Number.isInteger(options.maximumLevel) ||
     options.maximumLevel < 0 ||
@@ -176,7 +218,7 @@ function SceneGISPlanarWorld(options) {
   validateEnableLighting(enableLighting);
   validateLambertDiffuseMultiplier(lambertDiffuseMultiplier);
 
-  this._coordinateSystem = options.coordinateSystem;
+  this._coordinateSystem = coordinateSystem;
   this._tilingScheme = tilingScheme;
   this._maximumLevel = options.maximumLevel;
   this._maximumScreenSpaceError = maximumScreenSpaceError;
@@ -187,6 +229,8 @@ function SceneGISPlanarWorld(options) {
   this._enableLighting = enableLighting;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
   this._material = undefined;
+  this._clippingPlanes = undefined;
+  this._clippingPolygons = undefined;
   this._environment = undefined;
   this._show = true;
   this._terrainProvider = undefined;
@@ -198,9 +242,57 @@ function SceneGISPlanarWorld(options) {
   this._atmosphereRenderer = new SceneGISPlanarAtmosphereRenderer();
   this._celestialBodyRenderer = new SceneGISPlanarCelestialBodyRenderer();
   this._frameState = undefined;
+  this._requestRenderIfLoading = () => !this.isDestroyed() && !this.tilesLoaded;
 }
 
 Object.defineProperties(SceneGISPlanarWorld.prototype, {
+  /**
+   * Gets or sets world-owned terrain clipping planes. Plane coordinates use
+   * planar world metres, transformed by the collection's modelMatrix.
+   * Negative half-spaces are clipped, with Cesium union/intersection semantics.
+   * Changes publish on the next normal render. Requires WebGL 2 and float textures.
+   * Replacing the collection or destroying this World destroys the collection.
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {ClippingPlaneCollection|undefined}
+   * @default undefined
+   */
+  clippingPlanes: {
+    get: function () {
+      return this._clippingPlanes;
+    },
+    set: function (value) {
+      setClippingCollection(
+        this,
+        "_clippingPlanes",
+        value,
+        ClippingPlaneCollection,
+      );
+    },
+  },
+  /**
+   * Gets or sets world-owned terrain clipping polygons using the same collection
+   * and polygon API as Globe. Positions are straight-edged planar world XY
+   * metres; Z and ellipsoid are not used. Changes publish on
+   * the next normal render. Rendered terrain picking respects clipping;
+   * resident height queries and independent sampling retain source heights.
+   * Replacing the collection or destroying this World destroys the collection.
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {ClippingPolygonCollection|undefined}
+   * @default undefined
+   */
+  clippingPolygons: {
+    get: function () {
+      return this._clippingPolygons;
+    },
+    set: function (value) {
+      setClippingCollection(
+        this,
+        "_clippingPolygons",
+        value,
+        ClippingPolygonCollection,
+      );
+    },
+  },
   /**
    * Gets the planar coordinate system.
    *
@@ -508,6 +600,9 @@ SceneGISPlanarWorld.prototype.update = function (frameState) {
     );
   }
   this._frameState = frameState;
+  if (!this.tilesLoaded) {
+    frameState.afterRender.push(this._requestRenderIfLoading);
+  }
 };
 
 /**
@@ -541,6 +636,8 @@ SceneGISPlanarWorld.prototype.render = function (frameState) {
     this._material,
     this._maximumTiltedTileDistance,
     this._opacity,
+    this._clippingPlanes,
+    this._clippingPolygons,
   );
 };
 
@@ -861,6 +958,9 @@ SceneGISPlanarWorld.prototype.destroy = function () {
   this._atmosphereRenderer.destroy();
   this._celestialBodyRenderer.destroy();
   this._surface.destroy();
+  this._clippingPlanes?.destroy();
+  this._clippingPolygons?.destroy();
+  this._clippingPlanes = this._clippingPolygons = undefined;
   this._imageryLayers._owner = undefined;
   this._imageryLayers.destroy();
   return destroyObject(this);

@@ -8,6 +8,8 @@ import {
   HeadingPitchRange,
   Matrix4,
   OrthographicFrustum,
+  OrthographicOffCenterFrustum,
+  PerspectiveOffCenterFrustum,
   Rectangle,
   SceneGISPlanarCameraController,
   SceneGISPlanarCoordinateSystem,
@@ -251,6 +253,44 @@ describe("SceneGIS/Widget/SceneGISPlanarCameraCesiumWidget", function () {
     expect(camera.positionWC.z).toBe(-10.0);
     renderFrame();
     expect(camera.positionWC.z).toBe(controller.minimumTerrainClearance);
+  });
+
+  it("renders and picks through direct off-center planar frusta", function () {
+    const world = createWorld();
+    createWidget(world);
+    controller.enabled = false;
+    const camera = widget.scene.camera;
+    camera.setView({ destination: new Cartesian3(0, 0, 100) });
+    const frusta = [
+      new PerspectiveOffCenterFrustum({
+        left: -0.4,
+        right: 0.6,
+        bottom: -0.5,
+        top: 0.5,
+        near: 1,
+        far: 1000,
+      }),
+      new OrthographicOffCenterFrustum({
+        left: -40,
+        right: 60,
+        bottom: -50,
+        top: 50,
+        near: 1,
+        far: 1000,
+      }),
+    ];
+    for (const frustum of frusta) {
+      camera.frustum = frustum;
+      renderFrame();
+      const canvas = widget.canvas;
+      const ray = camera.getPickRay(
+        new Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2),
+      );
+      expect(world.pick(ray)).toEqualEpsilon(new Cartesian3(10, 0, 0), 1e-8);
+      expect(
+        widget.scene.context.readPixels({ x: 48, y: 48, width: 1, height: 1 }),
+      ).toEqual([255, 255, 255, 255]);
+    }
   });
 
   it("rejects ellipsoid-only Camera methods without mutating results or view", function () {

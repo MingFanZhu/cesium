@@ -36,9 +36,9 @@ Cesium 1.144 当前集成链路具有以下事实：
    containers；销毁 `CesiumWidget` 时又先销毁 `DataSourceDisplay`，后销毁 Scene 与 primary World。
 8. `Viewer` selection 已消费 `DataSourceDisplay.getBoundingSphere`，而 C2/C3 pick object 已返回 original
    `Entity`。因此选择、SelectionIndicator 和 InfoBox不需要新的 Viewer source seam。
-9. `Entity.propertyNames` 总是包含当前 Cesium 的标准 Property names，并追加 custom top-level names。
-   已定义的未支持标准 graphics或未知 top-level Property必须在 planar profile 中拒绝；普通业务元数据
-   应放入 `Entity.properties`。
+9. `Entity.propertyNames` 包含当前 Cesium 的标准 Property names，并追加 custom top-level names。
+   标准 Property 在 Entity.prototype 上定义，自定义 addProperty 字段在实例上定义。2026-09-18 修订：
+   只拒绝未支持的标准 Property；普通业务元数据同时支持 `Entity.properties` 与 `Entity.addProperty`。
 
 所以，C4 所需的最小集成缝隙位于 `CesiumWidget` 构造 `DataSourceDisplay` 的位置，而不是 Viewer、
 `DataSourceDisplay` 本体或全局 visualizer registry。
@@ -87,8 +87,8 @@ callback 初始只返回一个 private gate visualizer。第一次有效 `update
    `entityCluster.enabled === false`；
 2. 遍历当前 EntityCollection。以下已定义 Property允许存在：`point`、`billboard`、`label`、`model`、
    `polyline`、`polygon`、`position`、`orientation`、`description`、`properties` 和 `viewFrom`；
-3. 任何其他已定义的标准 graphics或 custom top-level Property在本帧 child normal update和低层资源
-   mutation前抛 `DeveloperError`。Custom metadata应使用 `Entity.properties`；同步
+3. 任何其他已定义的标准 Property 在本帧 child normal update和低层资源 mutation前抛 `DeveloperError`。
+   Custom metadata可使用 `Entity.properties` 或 `Entity.addProperty`；自定义字段不自动注册为 Graphics。同步
    `collectionChanged` listener允许只更新CPU tracking；
 4. 在局部 candidate数组中依次构造 Anchor、Model、Polyline、Polygon visualizer；任何构造失败时反向
    destroy已构造 candidate，保留原始异常，且不改变共享 visualizer数组；
@@ -163,10 +163,11 @@ Sandcastle或性能资格；批量、动态压力、交付页面和人工验收�
 拒绝。这样必须复制 `DataSourceDisplay.getBoundingSphere` 的 partial/PENDING联合逻辑，还会改变destroy
 和profiling粒度。Gate只负责验证与一次性激活，四个visualizer继续独立存在。
 
-### 接受所有 DataSource 或未知 Entity Property
+### 接受所有 DataSource 或未支持的标准 Entity Property
 
-拒绝。GeoJSON/CZML/KML默认坐标含义不是本扩展的planar米制Cartesian3；未知top-level Property也可能是
-未来新增的Cesium graphics。明确拒绝可防止版本升级后静默遗漏；业务元数据使用`Entity.properties`。
+拒绝。GeoJSON/CZML/KML默认坐标含义不是本扩展的planar米制Cartesian3；未来新增的 Cesium 标准 Property
+仍通过 Entity.prototype 检出并执行 allowlist。2026-09-18 取消对 addProperty 业务属性的额外限制，
+不改变 Cesium Entity 实现或加入平行元数据 API。
 
 ## 上游补丁与兼容性
 

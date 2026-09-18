@@ -43,6 +43,26 @@ Environment资源identity。
 
 ## 上游缝隙与升级
 
+### 2026-09-18 兼容性复核补充
+
+同一 SGP-0004 覆盖 [Camera 复核增量](../../../AgentDocs/planar-api-integration/plans/2026-09-18-camera-compatibility.md)：
+
+- `lookAtWorldPosition` 原地对准 Cartesian target，使用固定 +Z up，保留 position 与 transform；ellipsoid 参数在平面中忽略。
+  coincident target 保留方向并去除倾斜，垂直方向保留可用 right axis。
+- Public roll getter 与 Cesium 一样归一到非负一周范围；private controller roll 检测仍可使用 signed angle。
+- `getPickRay` 复用已有四类 frustum 的真实 bounds，包含 PerspectiveFrustum xOffset / yOffset，
+  直接 PerspectiveOffCenter 的透视射线及 OrthographicOffCenter 的 origin shift。Camera frame validation 接纳这四类。
+- 正交 move / rotate 保留显式宽度。`zoomIn/zoomOut(amount)` 改变水平 span，单位米，保持宽高比与偏心比例；
+  最小 span 为 near。lookAt / 带 offset 的 lookAtTransform 继续按 range 设置普通 OrthographicFrustum width。
+- 透视切正交使用非 identity reference frame 的 local range，或屏幕中心 ray 的 resident terrain / bounded Z=0 命中距离；
+  无命中时使用 abs(camera Z - resident height)，无 resident height 则 Z=0。尺度下限为 near，不能读 Cartographic.height。
+- `changed` 的平移比例在透视下使用 abs(Z - resident height)，无 terrain 时以 Z=0 为基准；
+  正交使用 vertical span，均以下限 near 防止零尺度。额外比较最近一次报告的 frustum span，支持纯正交缩放事件。
+  未注册 changed listener 时不增加 terrain query；无 timer、新 render resource 或每帧 snapshot allocation。
+
+不改变 positionCartographic 的 internal-only 边界，不把 geographic Rectangle 当作米制 extent。
+API 参数形式不变；新增 qualified Specs 直接调用真实 Camera，不仅测试 private 数学 helper。
+
 唯一upstream修改是`packages/engine/Source/Scene/Camera.js`中的paired `SGP-0004` import/dispatch/JSDoc hunk。
 `CameraFlightPath.js`不修改。升级Cesium时必须复核Camera method入口、`_currentFlight`、`TweenCollection` callback顺序、
 `preloadFlightCullingVolume`和四类frustum字段；若upstream提供Cartesian/fixed-frame pluggable flight，应移除SGP-0004并让

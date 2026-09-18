@@ -129,6 +129,26 @@ formula, new GPU resource, upstream hunk or SGP is needed. Planar is unchanged.
 The [A17 phase](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-11-phase-a17g-far-cloud-depth.md)
 owns far-depth/foreground regression and owner quality gates.
 
+## Opaque receiver endpoint correction — 2026-09-18
+
+The [model-band repair](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-18-globe-aerial-receiver-distance.md)
+reproduces a discontinuity on a box at about 20.5 km with a 600 m camera.
+A8-AR-006's atmosphere-only terrain stabilizer applies to all opaque depth,
+including elevated models. Moving its receiver radius toward the bottom sphere
+can remove the forward intersection; the resulting fallback jumps from a nearly
+zero optical path to the original receiver distance. Earth-scale sphere
+subtraction also quantizes the substituted endpoint.
+
+Globe finite aerial perspective and height fog must retain the ray distance
+reconstructed from the current resolved opaque depth. Distance and camera height
+do not identify terrain, and must not move geometry onto a different radial
+shell. This supersedes A8-AR-006's endpoint stabilization and its LOD-invariance
+test. Actual terrain depth changes remain observable; no artificial geometric
+invariance is promised. Preserve its separate current-frame depth-availability
+guard, native precise linear/log reconstruction, clear-depth identity, cloud
+occlusion and the existing Bruneton boundary clipping. No new public API,
+resource, upstream file or SGP is required.
+
 ## 参考
 
 - [Bruneton atmosphere demo shader](https://ebruneton.github.io/precomputed_atmospheric_scattering/atmosphere/demo/demo.glsl.html)

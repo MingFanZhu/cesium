@@ -84,7 +84,10 @@ describe("SceneGIS/Scene/SceneGISPlanarUrlTemplateImageryProvider", function () 
       { ...valid, urlScheme: "quadkey" },
       { ...valid, maximumLevel: -1 },
       { ...valid, tileWidth: 0 },
-      { ...valid, tileHeight: 128 },
+      { ...valid, tileHeight: 0 },
+      { ...valid, minimumLevel: 1 },
+      { ...valid, customTags: { id: 1 } },
+      { ...valid, urlSchemeZeroPadding: { "{x}": 4 } },
       { ...valid, subdomains: [] },
       { ...valid, hasAlphaChannel: 1 },
       { ...valid, credit: {} },
@@ -105,5 +108,45 @@ describe("SceneGIS/Scene/SceneGISPlanarUrlTemplateImageryProvider", function () 
         provider.requestImage(...address, new Request());
       }).toThrowDeveloperError();
     }
+  });
+
+  it("expands projected bounds, reverse tags, custom tags and padding without geographic conversion", function () {
+    const fetch = spyOn(Resource.prototype, "fetchImage").and.callFake(
+      function () {
+        const url = new URL(this.url);
+        expect(url.searchParams.get("bbox")).toBe("-64,0,0,64");
+        expect(url.searchParams.get("size")).toBe("256,128");
+        expect(url.pathname).toBe("/002/01/2/2/2/5/local-1-1-2.png");
+        return undefined;
+      },
+    );
+    const custom = jasmine
+      .createSpy("tag")
+      .and.callFake((provider, x, y, level) => `local-${x}-${y}-${level}`);
+    const provider = new SceneGISPlanarUrlTemplateImageryProvider({
+      url: "https://test/{z}/{x}/{y}/{reverseX}/{reverseY}/{reverseZ}/{id}.png?bbox={westProjected},{southProjected},{eastProjected},{northProjected}&size={width},{height}",
+      tilingScheme: createTilingScheme(),
+      maximumLevel: 8,
+      urlScheme: "tms",
+      tileHeight: 128,
+      customTags: { id: custom },
+      urlSchemeZeroPadding: { "{z}": "000", "{x}": "00" },
+    });
+    expect(provider.requestImage(1, 1, 2, new Request())).toBeUndefined();
+    expect(custom).toHaveBeenCalledOnceWith(provider, 1, 1, 2);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("matches Cesium reverseZ semantics at the maximum level", function () {
+    spyOn(Resource.prototype, "fetchImage").and.callFake(function () {
+      expect(this.url).toBe("https://test/4.png");
+      return undefined;
+    });
+    const provider = new SceneGISPlanarUrlTemplateImageryProvider({
+      url: "https://test/{reverseZ}.png",
+      tilingScheme: createTilingScheme(),
+      maximumLevel: 4,
+    });
+    provider.requestImage(0, 0, 4, new Request());
   });
 });

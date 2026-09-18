@@ -3,7 +3,7 @@
   "preset": "earth-flat-precomputed-v1",
   "generator": {
     "path": "scripts/scenegis/generate-planar-earth-luts.mjs",
-    "version": "scene-gis-flat-atmosphere-2",
+    "version": "scene-gis-flat-atmosphere-3",
     "runtimeDependencies": []
   },
   "source": {
@@ -48,9 +48,11 @@
   },
   "transport": {
     "geometry": "fixed +Z flat slab [0,60000] meters",
-    "segmentRule": "intersect untruncated geometric ray with slab, then cap only in-medium length",
+    "segmentRule": "intersect untruncated geometric ray with slab and retain the complete visible segment",
     "quadrature": {
-      "viewSamples": 12,
+      "viewSamples": 24,
+      "viewParameter": "per-channel absorbed transmittance",
+      "minimumViewTransmittance": 5.960464477539063e-8,
       "angularZenithSamples": 12,
       "angularAzimuthSamples": 8,
       "multipleScatteringOrders": [
@@ -59,8 +61,7 @@
         4
       ],
       "sourceHeightSamples": 32,
-      "sourceSunSamples": 32,
-      "mediumDistanceLimitMeters": 300000
+      "sourceSunSamples": 32
     },
     "multipleScatteringOrders": [
       2,
@@ -68,8 +69,8 @@
       4
     ],
     "runtimeEvaluation": "true-boundary entry/endpoint radiance differencing with analytic segment transmittance",
-    "boundaryEvaluation": "true slab boundary; exact horizontal uses semi-infinite optical limit",
-    "segmentTransmittance": "runtime analytic Rayleigh/Mie/ozone optical depth over the capped visible segment",
+    "boundaryEvaluation": "optical-depth quadrature to the true slab boundary or binary16 transmittance floor; exact horizontal uses semi-infinite optical limit",
+    "segmentTransmittance": "runtime analytic Rayleigh/Mie/ozone optical depth over the complete visible segment",
     "groundBoundary": "irradiance stores direct solar plus cosine-weighted atmospheric diffuse irradiance; fixed ground albedo is applied once at runtime and is excluded from orders 2-4"
   },
   "physicalPreset": {
@@ -118,11 +119,11 @@
     },
     "scattering.bin": {
       "bytes": 8388608,
-      "sha256": "873162E5730406EF0183E0B16E7F6E79537268AC1F6BC38B2F0AADED5C9D7FB9"
+      "sha256": "22C9240FDCF528521A74798816757D970647C6E3038322A587DABFF01A991135"
     },
     "irradiance.bin": {
       "bytes": 8192,
-      "sha256": "0265335BDFAB584639965B920A5F668C4906D77C290D6D6805D6F3F199CCE278"
+      "sha256": "B2B231213F25C9DE45F2DBBAAFFE1DCD4805398724CE6FE05D391D5E50613A6C"
     },
     "LICENSE.txt": {
       "bytes": 4239,

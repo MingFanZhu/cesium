@@ -137,3 +137,24 @@ LUT、generator、asset bytes、物理系数和边界均不变；不增加lookup
 resource或GPU bytes。Globe transport不变。Actual-GPU回归覆盖远处透射率单调性、超过
 300 km的ground/horizontal路径、vacuum entry与slab外不相交，并检查相同原始昼夜视角。
 本修订替代上述runtime `300 km medium budget`，只消费SGP-0008，没有upstream文件改动。
+
+## Planar horizon quadrature correction（2026-09-18）
+
+默认平面物理大气示例的 opaque 方块横跨水平视线时出现色带。CPU 极限与实际 GPU probe 确认，
+原因是 version 2 generator 对真实 boundary 的几何距离均分 12 段：低空向上近水平时第一采样点
+越过近处高密度介质，向上/向下 boundary radiance 的极限不一致。Runtime 深度与解析 transmittance 连续。
+
+Version 3 在每个颜色的 absorbed transmittance 上积分：
+`L_c = integral((source_c / extinction_c) d(1 - T_c))`。
+每颜色 24 个 midpoint samples，通过解析 optical depth 的单调反解求位置；几何与权重按 height/viewMu
+预计算并复用于 Sun/azimuth 和多次散射各阶。颜色必须分别采样，避免 ozone 等差异消光使共用位置漏掉某一颜色的主要贡献。
+各颜色到真实 boundary，或 `T_c = 2^-24` 后忽略小于 binary16 最小正值的透射 tail；exact horizontal 仍用解析半无限极限。
+这是离线精度预算，不是 runtime 的距离上限，也不通过插值最终颜色掩盖 horizon seam。
+
+同一 canonical generator 重建 `PlanarEarth/scattering.bin`、`irradiance.bin` 与 provenance，更新固定 hash/version；
+transmittance bytes、所有物理系数、LUT dimensions/format/packing 和公共 API 不变。Generator version 升级不改变
+`earth-flat-precomputed-v1` 的物理 preset 标识。Runtime shader、lookup、pass、resource ownership 与 GPU bytes 均不增加；
+Globe assets 和光学路径不变。Package verifier 同步新 manifest，并验证真实复制后的资产。
+
+[独立修复计划](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-18-planar-aerial-horizon-band.md)
+负责水平双侧极限、独立 dense integration、实际 GPU 和原示例画面验证；不宣称所有离线 quadrature 已达到无限精度。

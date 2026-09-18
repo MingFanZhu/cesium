@@ -147,15 +147,6 @@ void main()
         dot(worldDirection, u_east),
         dot(worldDirection, u_north),
         dot(worldDirection, u_vertical)));
-    float atmosphereDistanceToPoint = distanceToPoint;
-    #ifdef SCENEGIS_GLOBE
-    if (!isClearDepth) {
-        atmosphereDistanceToPoint = sceneGISGlobeStableTerrainDistance(
-            rayOrigin,
-            viewDirection,
-            distanceToPoint);
-    }
-    #endif
     vec3 sunDirection = normalize(vec3(
         dot(u_sunDirection, u_east),
         dot(u_sunDirection, u_north),
@@ -244,7 +235,7 @@ void main()
                 rayOrigin,
                 viewDirection,
                 sunDirection,
-                atmosphereDistanceToPoint,
+                distanceToPoint,
                 shadowLength,
                 transmittance);
         #else
@@ -281,7 +272,7 @@ void main()
             rayOrigin,
             viewDirection,
             sunDirection,
-            atmosphereDistanceToPoint,
+            distanceToPoint,
             shadowLength,
             u_heightFogDensity,
             u_heightFogHeightFalloff,

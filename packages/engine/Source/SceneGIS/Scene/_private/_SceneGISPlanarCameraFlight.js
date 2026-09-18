@@ -75,7 +75,7 @@ function axesToHeadingPitchRoll(direction, up, right, result) {
     const directionSign = direction.z > 0.0 ? -1.0 : 1.0;
     heading = Math.atan2(up.x * directionSign, up.y * directionSign);
   }
-  const pitch = Math.asin(CesiumMath.clamp(direction.z, -1.0, 1.0));
+  const pitch = Math.atan2(direction.z, horizontal);
   SceneGISPlanarCamera.getAxes(
     heading,
     pitch,

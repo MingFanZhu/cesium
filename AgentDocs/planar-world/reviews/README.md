@@ -4,6 +4,8 @@
 
 当前 review：
 
+- [通用影像来源](2026-09-18-imagery-protocols.md)（approved；技术自审与负责人视觉验收通过）
+
 - [P8 release qualification review](2026-08-06-p8-release-qualification.md)
   （`approved`）
 - [P7 manual acceptance review](2026-08-06-p7-manual-acceptance.md)

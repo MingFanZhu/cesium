@@ -11,10 +11,10 @@
 | Current phase          | None                                                                                    |
 | Active phase plan      | None                                                                                    |
 | Proposed phase plan    | None                                                                                    |
-| Active standalone plan | None                                                                                    |
+| Active standalone plan | None；[通用影像来源](plans/2026-09-18-imagery-protocols.md) 已验收完成                  |
 | Architecture contact   | Architecture Agent                                                                      |
 | Execution contact      | Execution Agent                                                                         |
-| Last updated           | `2026-08-07`                                                                            |
+| Last updated           | `2026-09-18`                                                                            |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -62,6 +62,15 @@
 - SGP: `SGP-0001`（`active`）；`SGP-0002`（`active`，仅跟踪 P6 `Viewer.js` 缝隙）
 
 ## Current handoff
+
+2026-09-18：[通用影像来源](plans/2026-09-18-imagery-protocols.md) 独立增量实现完成，
+对应 [ADR-0082](../../Documentation/SceneGIS/Decisions/ADR-0082-planar-imagery-protocols.md) 与
+[技术自审](reviews/2026-09-18-imagery-protocols.md)。新增 WMS、WMTS KVP / REST、TMS metadata、SingleTile，
+并扩展 URL tags。源码和 Specs 均在现有 SceneGIS Scene 目录；验收入口为
+[影像服务](../../Test/Planar/影像服务.html)。upstream-owned files=0，SGP=None。
+负责人已确认视觉验收通过，本项 completed；没有新 phase，没有提交、push 或发布。
+
+### 已完成的 P1–P8 交接基线
 
 - Current state: P1 through P8 are complete on `feature/planar-world`. P8 closes the approved first-version
   extension scope with local performance/lifecycle/package/upgrade qualification and adds no workflow,

@@ -3,6 +3,7 @@
 ## 状态
 
 - Status：`approved`
+- Amendment：`2026-09-18` Polyline/Polygon 支持原生 distanceDisplayCondition，取代下文 C3 初始拒绝该字段的限制。
 - Date：`2026-08-09`
 - Decision owners：Architecture Agent（依据项目负责人授予的后续阶段自主设计权限）
 - Related plan：
@@ -39,6 +40,21 @@ Cesium 1.144 当前线面实现具有以下约束：
 Globe updater，也不能直接把 experimental collection 暴露给调用方。
 
 ## 决策
+
+### 2026-09-18：原生距离显隐属性
+
+Polyline/Polygon adapter 接受原生 `distanceDisplayCondition` 及动态 Property，ordinary 与 C11 ground 后端均使用
+现有 GeometryInstance 距离属性，同时约束填充、所有边线和 picking。沿用 Cesium 的包围体近似距离判据，
+不建立逐帧 CPU camera show 分支，也不修改 Shader、Primitive 或 Graphics 上游源码。
+
+条件需 finite、非负 near、far > near，near 可由 Float32 表示；原生默认 far=Number.MAX_VALUE 在 GPU 属性中饱和到
+有限 Float32 上限，以满足已有 planar wrapper 的 finite attributes 契约。应用 Property 的值保持原样。
+未设置条件不增加 attribute/shader 工作；条件增删可重建布局。仅改变 near/far 时，ready current 原地更新 attributes，
+保留 geometry、VA 和 commands；尚未 ready 的 CPU candidate 可以替换。非法条件先于 current mutation 拒绝。
+
+实现只涉及 SceneGIS-owned private helper 与两种 visualizer，无新增 public type、SGP 或资源生命周期。
+资格验证见 `SceneGISPlanarEntityDistanceSpec`：ordinary/ground 的颜色、原 Entity pick、near/far、清除、默认 far、
+pending 更新、非法值原子性、warm identity 和 remove/destroy。
 
 ### 私有 Visualizer 与阶段边界
 

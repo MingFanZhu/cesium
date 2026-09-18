@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 地形剖切</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>地形剖切</h1>
+      <p>使用平面或多边形隐藏地形区域；可组合、反向裁剪和实时调整。</p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="地形剖切.js">查看源码</a>
+      </p>
+      <p id="status">正在加载地形…</p>
+      <p id="picked">单击地形查看可见表面坐标。</p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./地形剖切.js"></script>
+  </body>
+</html>

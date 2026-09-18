@@ -157,16 +157,19 @@ function Camera(scene) {
   this._right = new Cartesian3();
   this._rightWC = new Cartesian3();
 
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Expose the fourth frustum supported by planar cameras.
   /**
-   * The region of space in view.
+   * The region of space in view. Planar worlds also support OrthographicOffCenterFrustum in 3D.
    *
-   * @type {PerspectiveFrustum|PerspectiveOffCenterFrustum|OrthographicFrustum}
+   * @type {PerspectiveFrustum|PerspectiveOffCenterFrustum|OrthographicFrustum|OrthographicOffCenterFrustum}
    * @default PerspectiveFrustum()
    *
    * @see PerspectiveFrustum
    * @see PerspectiveOffCenterFrustum
    * @see OrthographicFrustum
+   * @see OrthographicOffCenterFrustum
    */
+  // SCENEGIS_PATCH_END SGP-0004
   this.frustum = new PerspectiveFrustum();
   this.frustum.aspectRatio =
     scene.drawingBufferWidth / scene.drawingBufferHeight;
@@ -492,6 +495,11 @@ Camera.prototype._updateCameraChanged = function () {
   }
 
   if (!defined(camera._changedDirection)) {
+    // SCENEGIS_PATCH_BEGIN SGP-0004: Track planar projection changes alongside Cartesian movement.
+    if (SceneGISPlanarCamera.isPlanarCamera(camera)) {
+      SceneGISPlanarCamera.captureChangedFrustum(camera);
+    }
+    // SCENEGIS_PATCH_END SGP-0004
     camera._changedPosition = Cartesian3.clone(
       camera.positionWC,
       camera._changedPosition,
@@ -518,13 +526,22 @@ Camera.prototype._updateCameraChanged = function () {
     camera.positionWC,
     camera._changedPosition,
   );
-  const heightPercentage = distance / camera.positionCartographic.height;
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Measure planar movement against the surface or orthographic span.
+  const heightPercentage = SceneGISPlanarCamera.isPlanarCamera(camera)
+    ? SceneGISPlanarCamera.getChangedPercentage(camera, distance)
+    : distance / camera.positionCartographic.height;
+  // SCENEGIS_PATCH_END SGP-0004
 
   if (
     dirPercentage > percentageChanged ||
     heightPercentage > percentageChanged
   ) {
     camera._changed.raiseEvent(Math.max(dirPercentage, heightPercentage));
+    // SCENEGIS_PATCH_BEGIN SGP-0004: Retain the last reported planar projection scale.
+    if (SceneGISPlanarCamera.isPlanarCamera(camera)) {
+      SceneGISPlanarCamera.captureChangedFrustum(camera);
+    }
+    // SCENEGIS_PATCH_END SGP-0004
     camera._changedPosition = Cartesian3.clone(
       camera.positionWC,
       camera._changedPosition,
@@ -1146,6 +1163,12 @@ Object.defineProperties(Camera.prototype, {
  * @private
  */
 Camera.prototype.update = function (mode) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: A planar 3D frame accepts all four explicitly supported frusta.
+  if (mode === SceneMode.SCENE3D && SceneGISPlanarCamera.isPlanarCamera(this)) {
+    SceneGISPlanarCamera.validatePlanarCamera(this);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   //>>includeStart('debug', pragmas.debug);
   if (!defined(mode)) {
     throw new DeveloperError("mode is required.");
@@ -1228,6 +1251,11 @@ const scratchRayIntersection = new Cartesian3();
 const scratchDepthIntersection = new Cartesian3();
 
 function calculateOrthographicFrustumWidth(camera) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Resolve planar range without ellipsoid height or stale depth.
+  if (SceneGISPlanarCamera.isPlanarCamera(camera)) {
+    return SceneGISPlanarCamera.getOrthographicWidth(camera);
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   // Camera is fixed to an object, so keep frustum width constant.
   if (!Matrix4.equals(Matrix4.IDENTITY, camera.transform)) {
     return Cartesian3.magnitude(camera.position);
@@ -1275,6 +1303,11 @@ function calculateOrthographicFrustumWidth(camera) {
 }
 
 Camera.prototype._adjustOrthographicFrustum = function (zooming) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Planar translation and rotation preserve the explicit projection scale.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   if (!(this.frustum instanceof OrthographicFrustum)) {
     return;
   }
@@ -2288,16 +2321,28 @@ function zoom2D(camera, amount) {
 }
 
 function zoom3D(camera, amount) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Orthographic planar zoom changes the visible span.
+  if (
+    SceneGISPlanarCamera.isPlanarCamera(camera) &&
+    SceneGISPlanarCamera.zoomOrthographic(camera, amount)
+  ) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   camera.move(camera.direction, amount);
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document explicit planar orthographic zoom.
 /**
  * Zooms <code>amount</code> along the camera's view vector.
+ * In a planar world with an orthographic frustum, reduces the horizontal span by
+ * <code>amount</code> meters, down to the near distance, without moving the camera.
  *
  * @param {number} [amount] The amount to move. Defaults to <code>defaultZoomAmount</code>.
  *
  * @see Camera#zoomOut
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.zoomIn = function (amount) {
   amount = amount ?? this.defaultZoomAmount;
   if (this._mode === SceneMode.SCENE2D) {
@@ -2307,14 +2352,18 @@ Camera.prototype.zoomIn = function (amount) {
   }
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document explicit planar orthographic zoom.
 /**
  * Zooms <code>amount</code> along the opposite direction of
  * the camera's view vector.
+ * In a planar world with an orthographic frustum, increases its horizontal span
+ * by <code>amount</code> meters without moving the camera.
  *
  * @param {number} [amount] The amount to move. Defaults to <code>defaultZoomAmount</code>.
  *
  * @see Camera#zoomIn
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.zoomOut = function (amount) {
   amount = amount ?? this.defaultZoomAmount;
   if (this._mode === SceneMode.SCENE2D) {
@@ -2543,6 +2592,14 @@ Camera.prototype.lookAtTransform = function (transform, offset) {
   Cartesian3.cross(this.right, this.direction, this.up);
   Cartesian3.normalize(this.up, this.up);
 
+  // SCENEGIS_PATCH_BEGIN SGP-0004: An explicit planar look-at offset defines the orthographic width.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    if (this.frustum instanceof OrthographicFrustum) {
+      this.frustum.width = Cartesian3.magnitude(this.position);
+    }
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   this._adjustOrthographicFrustum(true);
 };
 
@@ -2551,16 +2608,26 @@ const scratchLookAtWorldPositionDirection = new Cartesian3();
 const scratchLookAtWorldPositionWorldUp = new Cartesian3();
 const scratchLookAtWorldPositionRight = new Cartesian3();
 
+// SCENEGIS_PATCH_BEGIN SGP-0004: Document fixed-axis planar world-target orientation.
 /**
  * Sets the camera orientation to look at a target position in world coordinates. The camera's up vector will be oriented to the world up vector at the target position.
  * If the camera is at the target position, the camera will be oriented to the world up vector at the target position.
+ * In a planar world, world up is fixed +Z and the ellipsoid argument is ignored.
+ * The camera position and reference transform are preserved.
  * @param {Cartesian3} target The target position in world coordinates.
  * @param {Ellipsoid} [ellipsoid=Ellipsoid.default] The ellipsoid to use for determining the world up.
  */
+// SCENEGIS_PATCH_END SGP-0004
 Camera.prototype.lookAtWorldPosition = function (
   target,
   ellipsoid = Ellipsoid.default,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Orient toward a planar target using fixed world Z up.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    SceneGISPlanarCamera.lookAtWorldPosition(this, target);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   //>>includeStart('debug', pragmas.debug);
   Check.typeOf.object("target", target);
   Check.typeOf.object("ellipsoid", ellipsoid);
@@ -3160,6 +3227,16 @@ function getPickRayOrthographic(camera, windowPosition, result) {
  * @returns {Ray|undefined} Returns the {@link Cartesian3} position and direction of the ray, or undefined if the pick ray cannot be determined.
  */
 Camera.prototype.getPickRay = function (windowPosition, result) {
+  // SCENEGIS_PATCH_BEGIN SGP-0004: Use the actual bounds of all four planar frustum types.
+  if (SceneGISPlanarCamera.isPlanarCamera(this)) {
+    return SceneGISPlanarCamera.getWindowRay(
+      this,
+      this._scene.canvas,
+      windowPosition,
+      result,
+    );
+  }
+  // SCENEGIS_PATCH_END SGP-0004
   //>>includeStart('debug', pragmas.debug);
   if (!defined(windowPosition)) {
     throw new DeveloperError("windowPosition is required.");

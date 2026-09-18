@@ -52,6 +52,10 @@ shader generator 只扫描 `packages/engine/Source/Shaders/**/*.glsl` 和 ThirdP
 
 ### 公共平面影像类型
 
+> 2026-09-18 amendment：[ADR-0082](ADR-0082-planar-imagery-protocols.md) 增加通用 WMS / WMTS / TMS /
+> SingleTile 与 URL tags，异步 fromUrl 在 resolve 后同步 ready，像素宽高不再要求相等。
+> 以下 P5 范围作为历史设计保留；canonical 网格、所有权、图层合成与请求状态机保持。
+
 P5 新增以下 SceneGIS-owned 公共类型：
 
 - `SceneGISPlanarImageryProvider`：不可直接实例化的 structural interface；

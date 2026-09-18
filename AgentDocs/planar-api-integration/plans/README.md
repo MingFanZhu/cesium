@@ -1,5 +1,9 @@
 # Plans
 
+- [Entity 通用属性修复](2026-09-18-entity-api-fixes.md)（active standalone；EA-R001 与 EA-R003 距离显隐）
+
+- [Camera 兼容性复核](2026-09-18-camera-compatibility.md)（completed；负责人验收通过；原 I1–I5 已完成）
+
 - [Extension plan](2026-08-14-planar-api-integration-extension.md)（`completed`；I1-I5 completed；final checkpoint=`a81bbecebd`，not pushed）
 - [I1 Planar Camera View and Flight](2026-08-14-phase-i1-planar-camera-view-flight.md)（`completed`；Architecture approved；owner manual gate passed；独立checkpoint已创建）
 - [I2 Planar Entity/DataSource Framing](2026-08-14-phase-i2-planar-entity-datasource-framing.md)（`completed`；Architecture approved；owner manual gate passed；checkpoint=`e755ad95a2`）

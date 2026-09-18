@@ -18,7 +18,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { isDeepStrictEqual } from "node:util";
 
-export const generatorVersion = "scene-gis-flat-atmosphere-2";
+export const generatorVersion = "scene-gis-flat-atmosphere-3";
 export const dimensions = Object.freeze({
   transmittance: Object.freeze([256, 64]),
   scattering: Object.freeze([256, 128, 32]),
@@ -42,13 +42,14 @@ const physical = Object.freeze({
 });
 
 const quadrature = Object.freeze({
-  viewSamples: 12,
+  viewSamples: 24,
+  viewParameter: "per-channel absorbed transmittance",
+  minimumViewTransmittance: 2 ** -24,
   angularZenithSamples: 12,
   angularAzimuthSamples: 8,
   multipleScatteringOrders: Object.freeze([2, 3, 4]),
   sourceHeightSamples: 32,
   sourceSunSamples: 32,
-  mediumDistanceLimitMeters: 300000,
 });
 
 export const approvedFiles = Object.freeze({
@@ -58,11 +59,11 @@ export const approvedFiles = Object.freeze({
   }),
   "scattering.bin": Object.freeze({
     bytes: 8388608,
-    sha256: "873162E5730406EF0183E0B16E7F6E79537268AC1F6BC38B2F0AADED5C9D7FB9",
+    sha256: "22C9240FDCF528521A74798816757D970647C6E3038322A587DABFF01A991135",
   }),
   "irradiance.bin": Object.freeze({
     bytes: 8192,
-    sha256: "0265335BDFAB584639965B920A5F668C4906D77C290D6D6805D6F3F199CCE278",
+    sha256: "B2B231213F25C9DE45F2DBBAAFFE1DCD4805398724CE6FE05D391D5E50613A6C",
   }),
   "LICENSE.txt": Object.freeze({
     bytes: 4239,
@@ -256,7 +257,13 @@ function sampleGrid(grid, height, sunMu, channels = 3) {
   return result;
 }
 
-function scatteringSource(height, sunMu, cosineTheta, sourceGrid, includeSingle) {
+function scatteringSource(
+  height,
+  sunMu,
+  cosineTheta,
+  sourceGrid,
+  includeSingle,
+) {
   const sunT =
     sunMu > 0
       ? transmittance(height, sunMu)
@@ -273,12 +280,55 @@ function scatteringSource(height, sunMu, cosineTheta, sourceGrid, includeSingle)
         (physical.rayleighScatteringPerMeter[channel] *
           rayleigh *
           rayleighPhase(cosineTheta) +
-          physical.mieScatteringPerMeter[channel] *
-            mie *
-            miePhase(cosineTheta))
+          physical.mieScatteringPerMeter[channel] * mie * miePhase(cosineTheta))
       : 0;
     return single + multiple[channel];
   });
+}
+
+function createTransportSamples(height, viewMu) {
+  const boundary = boundaryDistance(height, viewMu);
+  if (!(boundary > 0) || !Number.isFinite(boundary)) {
+    return [];
+  }
+  const boundaryDepth = opticalDepth(height, viewMu, boundary);
+  function distanceAtDepth(depth, channel) {
+    let near = 0;
+    let far = boundary;
+    for (let iteration = 0; iteration < 48; iteration++) {
+      const middle = (near + far) * 0.5;
+      if (opticalDepth(height, viewMu, middle)[channel] < depth) {
+        near = middle;
+      } else {
+        far = middle;
+      }
+    }
+    return (near + far) * 0.5;
+  }
+  const samples = [];
+  for (let channel = 0; channel < 3; channel++) {
+    // L = integral(source / extinction d(1 - T)); resolve each color's path.
+    const depthLimit = Math.min(
+      boundaryDepth[channel],
+      -Math.log(quadrature.minimumViewTransmittance),
+    );
+    const absorbed = -Math.expm1(-depthLimit);
+    for (let index = 0; index < quadrature.viewSamples; index++) {
+      const along = distanceAtDepth(
+        -Math.log1p((-absorbed * (index + 0.5)) / quadrature.viewSamples),
+        channel,
+      );
+      const sampleHeight = height + viewMu * along;
+      samples.push({
+        height: sampleHeight,
+        channel,
+        weight:
+          absorbed /
+          (quadrature.viewSamples * extinctionAtHeight(sampleHeight)[channel]),
+      });
+    }
+  }
+  return samples;
 }
 
 function integrateTransport(
@@ -288,6 +338,7 @@ function integrateTransport(
   cosineTheta,
   sourceGrid,
   includeSingle,
+  samples,
 ) {
   const distance = boundaryDistance(height, viewMu);
   if (!(distance > 0)) {
@@ -306,30 +357,16 @@ function integrateTransport(
       (value, channel) => value / Math.max(extinction[channel], 1e-30),
     );
   }
-  const step = distance / quadrature.viewSamples;
   const radiance = [0, 0, 0];
-  for (let sample = 0; sample < quadrature.viewSamples; sample++) {
-    const alongStart = sample * step;
-    const along = alongStart + 0.5 * step;
-    const sampleHeight = Math.min(
-      Math.max(height + viewMu * along, 0),
-      physical.atmosphereTopMeters,
-    );
-    const viewT = transmittance(height, viewMu, alongStart);
+  for (const sample of samples ?? createTransportSamples(height, viewMu)) {
     const source = scatteringSource(
-      sampleHeight,
+      sample.height,
       sunMu,
       cosineTheta,
       sourceGrid,
       includeSingle,
     );
-    const extinction = extinctionAtHeight(sampleHeight);
-    for (let channel = 0; channel < 3; channel++) {
-      const intervalWeight =
-        -Math.expm1(-extinction[channel] * step) /
-        Math.max(extinction[channel], 1e-30);
-      radiance[channel] += viewT[channel] * source[channel] * intervalWeight;
-    }
+    radiance[sample.channel] += source[sample.channel] * sample.weight;
   }
   return radiance;
 }
@@ -339,6 +376,7 @@ export function integrateSingleRadiance(
   viewMu,
   sunMu,
   cosineTheta,
+  samples,
 ) {
   return integrateTransport(
     height,
@@ -347,6 +385,7 @@ export function integrateSingleRadiance(
     cosineTheta,
     undefined,
     true,
+    samples,
   );
 }
 
@@ -356,6 +395,7 @@ export function integrateSourceRadiance(
   sunMu,
   cosineTheta,
   sourceGrid,
+  samples,
 ) {
   return integrateTransport(
     height,
@@ -364,6 +404,7 @@ export function integrateSourceRadiance(
     cosineTheta,
     sourceGrid,
     false,
+    samples,
   );
 }
 
@@ -373,6 +414,7 @@ export function integrateTotalRadiance(
   sunMu,
   cosineTheta,
   sourceGrid,
+  samples,
 ) {
   return integrateTransport(
     height,
@@ -381,12 +423,21 @@ export function integrateTotalRadiance(
     cosineTheta,
     sourceGrid,
     true,
+    samples,
   );
 }
 
 export function createMultipleSourceGrid(width, height, hooks = {}) {
   const singleRadiance = hooks.singleRadiance ?? integrateSingleRadiance;
   const sourceRadiance = hooks.sourceRadiance ?? integrateSourceRadiance;
+  const paths = Array.from(Array(height).keys(), (y) =>
+    Array.from(Array(quadrature.angularZenithSamples).keys(), (zenith) =>
+      createTransportSamples(
+        texelHeight(y, height),
+        -1 + (2 * (zenith + 0.5)) / quadrature.angularZenithSamples,
+      ),
+    ),
+  );
   let previous = {
     width,
     height,
@@ -435,6 +486,7 @@ export function createMultipleSourceGrid(width, height, hooks = {}) {
                     incomingMu,
                     sunMu,
                     cosineTheta,
+                    paths[y][zenith],
                   )
                 : sourceRadiance(
                     sampleHeight,
@@ -442,6 +494,7 @@ export function createMultipleSourceGrid(width, height, hooks = {}) {
                     sunMu,
                     cosineTheta,
                     previous,
+                    paths[y][zenith],
                   );
             for (let channel = 0; channel < 3; channel++) {
               meanRadiance[channel] += incoming[channel];
@@ -476,7 +529,7 @@ export function createMultipleSourceGrid(width, height, hooks = {}) {
   };
 }
 
-export function computeIrradiance(height, sunMu, multipleGrid) {
+export function computeIrradiance(height, sunMu, multipleGrid, paths) {
   const directT = sunMu > 0 ? transmittance(height, sunMu) : [0, 0, 0];
   const irradiance = directT.map(
     (value, channel) =>
@@ -485,21 +538,17 @@ export function computeIrradiance(height, sunMu, multipleGrid) {
   const directionWeight =
     (2 * Math.PI) /
     (quadrature.angularZenithSamples * quadrature.angularAzimuthSamples);
-  for (
-    let zenith = 0;
-    zenith < quadrature.angularZenithSamples;
-    zenith++
-  ) {
-    const incomingMu =
-      (zenith + 0.5) / quadrature.angularZenithSamples;
+  for (let zenith = 0; zenith < quadrature.angularZenithSamples; zenith++) {
+    const incomingMu = (zenith + 0.5) / quadrature.angularZenithSamples;
+    const samples =
+      paths?.[zenith] ?? createTransportSamples(height, incomingMu);
     for (
       let azimuth = 0;
       azimuth < quadrature.angularAzimuthSamples;
       azimuth++
     ) {
       const phi =
-        (2 * Math.PI * (azimuth + 0.5)) /
-        quadrature.angularAzimuthSamples;
+        (2 * Math.PI * (azimuth + 0.5)) / quadrature.angularAzimuthSamples;
       const cosineTheta =
         incomingMu * sunMu +
         Math.sqrt(Math.max(1 - incomingMu * incomingMu, 0)) *
@@ -511,10 +560,10 @@ export function computeIrradiance(height, sunMu, multipleGrid) {
         sunMu,
         cosineTheta,
         multipleGrid,
+        samples,
       );
       for (let channel = 0; channel < 3; channel++) {
-        irradiance[channel] +=
-          incoming[channel] * incomingMu * directionWeight;
+        irradiance[channel] += incoming[channel] * incomingMu * directionWeight;
       }
     }
   }
@@ -591,6 +640,7 @@ export function generateAssetBuffers(options = {}) {
     const height = texelHeight(z, scatterDepth);
     for (let y = 0; y < scatterHeight; y++) {
       const viewMu = texelSignedSquare(y, scatterHeight);
+      const samples = createTransportSamples(height, viewMu);
       for (let x = 0; x < scatterWidth; x++) {
         const nuIndex = x % 8;
         const sunIndex = Math.floor(x / 8);
@@ -603,6 +653,7 @@ export function generateAssetBuffers(options = {}) {
           sunMu,
           nu,
           multiple.grid,
+          samples,
         );
         encodeRgba(radiance, Math.max(radiance[0], 0)).copy(
           scatteringBuffer,
@@ -616,9 +667,17 @@ export function generateAssetBuffers(options = {}) {
   const irradianceBuffer = Buffer.alloc(irrWidth * irrHeight * 8);
   for (let y = 0; y < irrHeight; y++) {
     const height = texelHeight(y, irrHeight);
+    const paths = Array.from(
+      Array(quadrature.angularZenithSamples).keys(),
+      (zenith) =>
+        createTransportSamples(
+          height,
+          (zenith + 0.5) / quadrature.angularZenithSamples,
+        ),
+    );
     for (let x = 0; x < irrWidth; x++) {
       const sunMu = texelSignedSquare(x, irrWidth);
-      const irradiance = computeIrradiance(height, sunMu, multiple.grid);
+      const irradiance = computeIrradiance(height, sunMu, multiple.grid, paths);
       encodeRgba(irradiance).copy(irradianceBuffer, (y * irrWidth + x) * 8);
     }
   }
@@ -699,15 +758,15 @@ function createProvenance(files) {
     transport: {
       geometry: "fixed +Z flat slab [0,60000] meters",
       segmentRule:
-        "intersect untruncated geometric ray with slab, then cap only in-medium length",
+        "intersect untruncated geometric ray with slab and retain the complete visible segment",
       quadrature,
       multipleScatteringOrders: quadrature.multipleScatteringOrders,
       runtimeEvaluation:
         "true-boundary entry/endpoint radiance differencing with analytic segment transmittance",
       boundaryEvaluation:
-        "true slab boundary; exact horizontal uses semi-infinite optical limit",
+        "optical-depth quadrature to the true slab boundary or binary16 transmittance floor; exact horizontal uses semi-infinite optical limit",
       segmentTransmittance:
-        "runtime analytic Rayleigh/Mie/ozone optical depth over the capped visible segment",
+        "runtime analytic Rayleigh/Mie/ozone optical depth over the complete visible segment",
       groundBoundary:
         "irradiance stores direct solar plus cosine-weighted atmospheric diffuse irradiance; fixed ground albedo is applied once at runtime and is excluded from orders 2-4",
     },

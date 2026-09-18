@@ -22,6 +22,7 @@ const publicEngine = [
   "SceneGISPlanarHeightmapTerrainData",
   "SceneGISPlanarQuantizedMeshTerrainData",
   "SceneGISPlanarTerrainProvider",
+  "SceneGISPlanarLayerTerrainProvider",
   "SceneGISPlanarTerrainSampler",
   "SceneGISPlanarUrlTemplateHeightmapTerrainProvider",
   "SceneGISPlanarUrlTemplateQuantizedMeshTerrainProvider",
@@ -31,6 +32,10 @@ const publicEngine = [
   "SceneGISPlanarSkyBox",
   "SceneGISPlanarImageryProvider",
   "SceneGISPlanarUrlTemplateImageryProvider",
+  "SceneGISPlanarWebMapServiceImageryProvider",
+  "SceneGISPlanarWebMapTileServiceImageryProvider",
+  "SceneGISPlanarTileMapServiceImageryProvider",
+  "SceneGISPlanarSingleTileImageryProvider",
   "SceneGISPlanarImageryLayer",
   "SceneGISPlanarImageryLayerCollection",
   "SceneGISPlanarPolylineGeometry",
@@ -52,6 +57,7 @@ const publicWidgets = [
   "SceneGISPlanarHomeButtonViewModel",
 ];
 const nonPublicSpellings = [
+  "SceneGISPlanarClipping",
   "SceneGISPlanarSurface",
   "SceneGISPlanarQuadtree",
   "SceneGISPlanarTile",
@@ -88,6 +94,7 @@ const nonPublicSpellings = [
   "SceneGISPlanarSceneApi",
 ];
 const softPrivateContentSymbols = [
+  "_SceneGISPlanarClipping",
   "_SceneGISPlanarCamera",
   "_SceneGISPlanarCameraFlight",
   "_SceneGISPlanarEntityFraming",
@@ -117,6 +124,7 @@ const softPrivateContentSymbols = [
 ];
 const softPrivateWidgetSymbols = ["_SceneGISPlanarViewerBootstrap"];
 const privateContentFiles = [
+  "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarClipping.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISEnvironmentEffectsRenderer.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarCamera.js",
   "package/Source/SceneGIS/Scene/_private/_SceneGISPlanarCameraFlight.js",
@@ -176,6 +184,7 @@ const sceneGISShaderSources = [
   "PlanarGround/SceneGISPlanarGroundAreaVS",
   "PlanarGround/SceneGISPlanarGroundLineFS",
   "PlanarGround/SceneGISPlanarGroundLineVS",
+  "PlanarSurface/SceneGISPlanarClippingFS",
   "PlanarSurface/SceneGISPlanarSurfaceFS",
   "PlanarSurface/SceneGISPlanarSurfaceGeometricLitVS",
   "PlanarSurface/SceneGISPlanarSurfaceSmoothLitVS",
@@ -215,11 +224,11 @@ const planarEarthFiles = {
   ],
   "scattering.bin": [
     8388608,
-    "873162E5730406EF0183E0B16E7F6E79537268AC1F6BC38B2F0AADED5C9D7FB9",
+    "22C9240FDCF528521A74798816757D970647C6E3038322A587DABFF01A991135",
   ],
   "irradiance.bin": [
     8192,
-    "0265335BDFAB584639965B920A5F668C4906D77C290D6D6805D6F3F199CCE278",
+    "B2B231213F25C9DE45F2DBBAAFFE1DCD4805398724CE6FE05D391D5E50613A6C",
   ],
   "LICENSE.txt": [
     4239,
@@ -259,8 +268,7 @@ const moonArchiveFiles = [
   "NASA_NOTICE.txt",
   "THIRD_PARTY_LICENSE.txt",
 ];
-const moonSourceArchiveRoot =
-  "package/Source/Assets/SceneGIS/Environment/Moon";
+const moonSourceArchiveRoot = "package/Source/Assets/SceneGIS/Environment/Moon";
 const moonReleaseArchiveRoot =
   "package/Build/Cesium/Assets/SceneGIS/Environment/Moon";
 
@@ -328,7 +336,7 @@ function verifyPlanarEarthDelivery(root) {
     fs.readFileSync(path.join(root, "provenance.json"), "utf8"),
   );
   assert.equal(provenance.preset, "earth-flat-precomputed-v1");
-  assert.equal(provenance.generator.version, "scene-gis-flat-atmosphere-2");
+  assert.equal(provenance.generator.version, "scene-gis-flat-atmosphere-3");
   assert.deepEqual(provenance.transport.multipleScatteringOrders, [2, 3, 4]);
   assert.match(provenance.transport.boundaryEvaluation, /true slab boundary/);
   assert.match(provenance.transport.segmentTransmittance, /runtime analytic/);
@@ -1311,6 +1319,14 @@ function verifyStylingDeclarations(declarations) {
   assert.match(world, /\n\s*material: Material \| undefined;/u);
   assert.match(
     world,
+    /\n\s*clippingPlanes: ClippingPlaneCollection \| undefined;/u,
+  );
+  assert.match(
+    world,
+    /\n\s*clippingPolygons: ClippingPolygonCollection \| undefined;/u,
+  );
+  assert.match(
+    world,
     /\n\s*readonly environment: SceneGISPlanarEnvironment \| undefined;/u,
   );
   const environment = classDeclaration(
@@ -1452,10 +1468,7 @@ async function verify() {
     ),
   );
   verifyMoonDelivery(
-    path.join(
-      rootDirectory,
-      "Build/Cesium/Assets/SceneGIS/Environment/Moon",
-    ),
+    path.join(rootDirectory, "Build/Cesium/Assets/SceneGIS/Environment/Moon"),
   );
   verifyTrackingSources(engineDirectory, widgetsDirectory);
 

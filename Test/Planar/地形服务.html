@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 地形服务</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>地形服务</h1>
+      <p>
+        先读取 layer.json，再按描述加载地形。这里使用 TileWorker
+        实际生成的本地高程图和三角网数据。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="地形服务.js">查看源码</a>
+      </p>
+      <p id="status">正在读取地形描述…</p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./地形服务.js"></script>
+  </body>
+</html>

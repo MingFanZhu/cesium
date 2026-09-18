@@ -3,6 +3,8 @@ import {
   SceneGISPlanarExtent,
   SceneGISPlanarImageryLayer,
   SceneGISPlanarTilingScheme,
+  SceneGISPlanarWebMapTileServiceImageryProvider,
+  Resource,
 } from "../../../../index.js";
 import Event from "../../../../Source/Core/Event.js";
 import TileProviderError from "../../../../Source/Core/TileProviderError.js";
@@ -69,6 +71,57 @@ describe("SceneGIS/Scene/SceneGISPlanarImagery", function () {
     expect(requestImage).toHaveBeenCalledTimes(2);
     imagery.destroy();
     layer.destroy();
+  });
+
+  it("reloads every layer sharing a provider on the next normal frame and closes stale images", async function () {
+    const resolves = [];
+    const provider = new SceneGISPlanarWebMapTileServiceImageryProvider({
+      url: "https://wmts.test/",
+      layer: "image",
+      style: "default",
+      tileMatrixSetID: "local",
+      tilingScheme: createProvider(() => undefined).tilingScheme,
+      maximumLevel: 0,
+      tileWidth: 1,
+      tileHeight: 1,
+      dimensions: { time: "first" },
+    });
+    spyOn(Resource.prototype, "fetchImage").and.callFake(
+      () => new Promise((resolve) => resolves.push(resolve)),
+    );
+    const layers = [
+      new SceneGISPlanarImageryLayer(provider),
+      new SceneGISPlanarImageryLayer(provider),
+    ];
+    const tile = { x: 0, y: 0, level: 0 };
+    const imagery = new SceneGISPlanarImagery({}, (callback) => callback(tile));
+    imagery.prepare({}, [tile], layers, 1);
+    const old = layers.map((layer) => tile.imageryBindings.get(layer));
+    expect(provider._reloadEvent.numberOfListeners).toBe(2);
+    provider.dimensions = { time: "second" };
+    expect(tile.imageryBindings.get(layers[0])).toBe(old[0]);
+    imagery.prepare({}, [tile], layers, 2);
+    expect(tile.imageryBindings.get(layers[0])).not.toBe(old[0]);
+    expect(imagery._debug.cancelledRequests).toBe(2);
+    expect(provider._reloadEvent.numberOfListeners).toBe(2);
+    const images = resolves.map(() => ({
+      width: 1,
+      height: 1,
+      close: jasmine.createSpy("close"),
+    }));
+    resolves[0](images[0]);
+    resolves[1](images[1]);
+    await Promise.resolve();
+    expect(images[0].close).toHaveBeenCalledTimes(1);
+    expect(images[1].close).toHaveBeenCalledTimes(1);
+    imagery.destroy();
+    expect(provider._reloadEvent.numberOfListeners).toBe(0);
+    resolves[2](images[2]);
+    resolves[3](images[3]);
+    await Promise.resolve();
+    expect(images[2].close).toHaveBeenCalledTimes(1);
+    expect(images[3].close).toHaveBeenCalledTimes(1);
+    layers.forEach((layer) => layer.destroy());
   });
 
   it("cancels released requests and isolates stale completion", async function () {

@@ -58,8 +58,15 @@ Package smoke 从 repo 外 consumer 使用 bare ESM `@cesium/engine`、`@cesium/
 | PolylineVolume | route + Cartesian2 shape                      | no implicit continuous terrain                      | fixed route-left/world-up frame                     | Route；Route focused + C10 cohort                     |
 | Path           | sampled FIXED position                        | source sample Z only                                | `PathMode.WHOLE`; no INERTIAL/VVLH/PORTIONS         | Path；Path focused + C10 cohort                       |
 
-`description`, `properties` 与 `viewFrom` 可作为 approved top-level metadata；unsupported standard Graphics 或 custom
-top-level properties fail-fast before child normal update and low-level resource mutation.
+`description`, `properties` 与 `viewFrom` 可作为 top-level metadata；也支持原生 `Entity.addProperty` 的业务属性，
+不自动将其解释为 Graphics。未支持的标准 Graphics 仍在 child normal update 和低层资源 mutation 前拒绝。
+
+Polyline/Polygon 支持原生 `distanceDisplayCondition`，包括 ordinary/ground、填充和边线，沿用 GeometryInstance
+包围体距离判据及 picking。动态 near/far 更新复用 ready GPU geometry；添加或清除条件时重建 attribute layout。
+
+RectangleGraphics 的米制 west/south/east/north 是明确的平面适配约定，保留原类型和字段以避免修改 Cesium；
+使用 `new Rectangle(minimumX, minimumY, maximumX, maximumY)` 传入场景米制范围，不能使用 `Rectangle.fromDegrees`
+或经纬度矩形工具计算平面范围。该约定仅属于平面 Entity adapter，不改变原生 Rectangle 方法或 Camera 的类型边界。
 
 ## Direct Primitive matrix
 
@@ -83,8 +90,13 @@ failure/replacement/destroy 中维持 exactly-once ownership。
 - Runtime reprojection、Cartographic/Ellipsoid/ENU、geodesic/rhumb、IDL wrap 与格式自动转换。
 - Arbitrary Material、shadow、custom shader、terrain request from content、continuous ground for Model/solid/Wall/
   PolylineVolume/Path。
-- Entity tracking、flight、`zoomTo`/`flyTo` 与 Globe-specific graphics fields。Unsupported combinations must fail fast;
-  they are not silently ignored.
+- Globe-specific graphics fields。Unsupported combinations must fail fast; they are not silently ignored.
+
+`planar-api-integration` I2/I3 已补齐受支持 Entity/DataSource profile 内的 `zoomTo`/`flyTo` 与
+`trackedEntity`，沿用 Viewer/CesiumWidget 原入口；具体坐标和目标边界见
+[PlanarWorldGuide](PlanarWorldGuide.md) 与 [ADR-0038](Decisions/ADR-0038-planar-entity-tracking.md)。
+上面的 Graphics 限制并不表示所有原生 Entity 辅助方法已完成平面适配；缺省 orientation 的
+`Entity.computeModelMatrix` 仍使用球面 ENU，与平面 visualizer 的固定轴矩阵不同。
 
 ## 交付证据与升级
 

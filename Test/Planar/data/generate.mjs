@@ -70,3 +70,23 @@ png("ramp.png", 256, 1, (x) => {
     Math.round(value + (stops[segment + 1][i] - value) * (progress - segment)),
   );
 });
+
+// A shared map for protocol comparisons, with unambiguous quadrant colors.
+function imageryPixel(x, y, width) {
+  x = Math.floor((x * 256) / width);
+  if (Math.abs(x - 128) < 2 || Math.abs(y - 128) < 2) {
+    return [255, 255, 255];
+  }
+  const quadrants = [
+    [131, 189, 176],
+    [232, 189, 120],
+    [132, 175, 206],
+    [206, 154, 145],
+  ];
+  const color = quadrants[(y >= 128 ? 2 : 0) + (x >= 128 ? 1 : 0)];
+  return x % 32 === 0 || y % 32 === 0
+    ? color.map((value) => Math.round((value + 255) / 2))
+    : color;
+}
+png("imagery-service/0/0/0.png", 256, 256, (x, y) => imageryPixel(x, y, 256));
+png("imagery-service/single.png", 512, 256, (x, y) => imageryPixel(x, y, 512));

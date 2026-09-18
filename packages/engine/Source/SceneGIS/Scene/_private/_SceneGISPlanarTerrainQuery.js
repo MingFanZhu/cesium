@@ -7,6 +7,14 @@ const scratchLocalRay = new Ray();
 const scratchVertex0 = new Cartesian3();
 const scratchVertex1 = new Cartesian3();
 const scratchVertex2 = new Cartesian3();
+const scratchClippingPosition = new Cartesian3();
+
+function isClipped(clipping, ray, t) {
+  if (!clipping) {
+    return false;
+  }
+  return clipping.isClipped(Ray.getPoint(ray, t, scratchClippingPosition));
+}
 
 function getVertex(mesh, index, result) {
   const offset = index * 3;
@@ -185,7 +193,7 @@ function intersectsMeshBounds(mesh, ray) {
   );
 }
 
-function intersectTerrain(tile, content, ray) {
+function intersectTerrain(tile, content, ray, clipping) {
   const mesh = content.mesh;
   const localRay = transformRay(tile, mesh, ray);
   if (!intersectsMeshBounds(mesh, localRay)) {
@@ -200,7 +208,12 @@ function intersectTerrain(tile, content, ray) {
       getVertex(mesh, mesh.indices[offset + 2], scratchVertex2),
       false,
     );
-    if (defined(t) && t >= 0.0 && (!defined(nearest) || t < nearest)) {
+    if (
+      defined(t) &&
+      t >= 0.0 &&
+      (!defined(nearest) || t < nearest) &&
+      !isClipped(clipping, ray, t)
+    ) {
       nearest = t;
     }
   }
@@ -237,7 +250,7 @@ function isCurrent(entry) {
   );
 }
 
-function pick(snapshot, count, ray, result) {
+function pick(snapshot, count, ray, result, clipping) {
   let nearest;
   let nearestKey;
   let nearestIsFlat = false;
@@ -249,9 +262,10 @@ function pick(snapshot, count, ray, result) {
     const isFlat = entry.source === "FLAT";
     const t = isFlat
       ? intersectFlat(entry.tile, ray)
-      : intersectTerrain(entry.tile, entry.content, ray);
+      : intersectTerrain(entry.tile, entry.content, ray, clipping);
     if (
       defined(t) &&
+      (!isFlat || !isClipped(clipping, ray, t)) &&
       (!defined(nearest) ||
         t < nearest ||
         (t === nearest && entry.key < nearestKey))

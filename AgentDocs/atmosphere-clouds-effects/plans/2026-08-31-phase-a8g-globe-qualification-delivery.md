@@ -328,6 +328,11 @@ owned` at the fixed high-Sun ground state, measured solar elevation
 
 ## A8-AR-006 execution correction — 2026-08-31
 
+The endpoint-stabilization portion below is superseded by the
+[2026-09-18 opaque receiver correction](2026-09-18-globe-aerial-receiver-distance.md)
+and ADR-0043 amendment after an elevated-model discontinuity was reproduced.
+The current-frame depth availability guard remains active.
+
 - Reproduction isolated a shared product defect rather than a Test camera
   transition: the first post-change frame had no current frustum commands while
   the resolved depth texture still contained prior-frame values, and far-field

@@ -351,6 +351,11 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
 
 实现或评审 `SceneGISPlanarWorld` imagery 时同时检查：
 
+- 通用协议入口见 ADR-0082：验证 WMS 版本 / 轴序与米制 BBOX、WMTS REST / KVP / matrix labels、
+  TMS XML 的网格及相对 href。Resource query / headers / proxy 与 Request identity 必须保留。
+  SingleTile 非正方形像素图像要在真实 GPU 上传验证；共享 provider 不得复用 closable ImageBitmap。
+  WMTS dimensions 标脏必须唤醒 request-render readiness，多个 layer 均重载，监听器随 runtime 释放。
+
 - provider 的 `tilingScheme` 必须与 world 的 canonical scheme 保持 object identity；collection
   owns layer，provider 始终由调用方拥有。
 - `tilesLoaded` 汇总当前视图 terrain coverage/readiness 与当前 shown imagery readiness；任何
@@ -365,6 +370,10 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
   provider picker、离线下载或预取；这些属于后续 UI 集成阶段。
 
 ### 平面 URL Heightmap Provider 检查
+
+`SceneGISPlanarLayerTerrainProvider` 是 ADR-0080 的独立服务入口，负责异步 layer.json、显式平面 profile、
+canonical scheme 校验与稀疏 availability。以下检查约束原 URL-template provider，不禁止服务层解析元数据。
+元数据接入必须验证目录/JSON 相对 URL、Request/Resource 保留、TMS/XYZ、缺失全局高度与实际 producer 产物。
 
 实现或评审 URL-template terrain provider 时同时检查：
 
@@ -382,6 +391,17 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
   per-tile attribution才进入TerrainData。
 - 自动化使用本地 Resource/LERC fixture。公开 terrain Sandcastle只作 best-effort人工检查，必须
   显示 Credit、说明 CORS/服务失败 fallback，并禁止预取、批量或离线下载。
+
+### 平面地形裁剪检查
+
+- World 属性复用原生 `ClippingPlaneCollection` / `ClippingPolygonCollection` / `ClippingPolygon`，
+  不新增同义公共类型；polygon 使用 XY 米制直线环，不调用原生球面 compute。
+- 修改仅在 normal render 发布；颜色、linear/log depth 与 terrain ray 使用同一快照，
+  被裁掉的最近 ray 交点不能阻止继续查找后方可见交点。resident height 和独立 sampler 保持源数据。
+- 覆盖 plane 交/并、modelMatrix、edge style、凹 polygon、多区域、inverse、增删与原地修改，
+  并验证大 CRS 偏移、非法环、独占集合所有权、sampler 预算和 GPU 资源销毁。
+- 默认无纹理；稳定帧无上传或 shader/command 重建，动态数量使用同一 shader。
+  新增 GLSL 走既有生成与 package 链，不手工维护生成模块。详见 ADR-0081。
 
 ### 平面地形光照检查
 
@@ -475,6 +495,11 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
 
 ### 平面地形感知导航锚点检查
 
+Camera public API 的回归应直接创建真实 Camera，覆盖非 identity transform 的 HPR / setView / flyTo、
+lookAtWorldPosition 的固定 +Z up、四类 frustum 的 public getPickRay 和 frame update。
+正交 move / rotate 保持宽度，zoom 改变 span；changed 不能使用 positionCartographic.height 计算平移比例，
+还须检测无位移的正交缩放。负 roll 读取与 Cesium 的非负一周范围一致；应用位置一律使用 Cartesian 状态。
+
 实现或评审planar controller gesture时同时检查：
 
 - Pan、rotate与wheel共享一份private anchor resolver，严格按合法in-extent rendered depth、
@@ -520,8 +545,9 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
   默认 Globe visualizer。Unsupported 输入必须在低层资源 mutation 前抛 `DeveloperError`，不得 warning、
   silent ignore或Globe fallback。
 - C4 automatic path 只接受 live planar World、`CustomDataSource` 与 disabled `EntityCluster`。业务 metadata
-  使用 `Entity.properties`；未知或 unsupported top-level Property 必须在所有 child normal update 和低层资源
-  mutation 前拒绝。同步 collection listener 可以先更新 CPU tracking。
+  可使用 `Entity.properties` 或原生 `Entity.addProperty`；gate 只对 Entity.prototype 上的内建 Property 执行
+  supported allowlist，未支持的标准 Graphics 在 child normal update 和低层资源 mutation 前拒绝。
+  自定义属性不自动成为可绘制 Graphics；同步 collection listener 可以先更新 CPU tracking。
 - 升级时复核 default visualizer、clamping、model matrix、`DataSourceDisplay` callback/update snapshot、
   per-DataSource primitive container、ordering 和 destroy lifecycle。
 - C2 Anchor只使用caller-owned disabled `EntityCluster` pool，低层对象接收absolute planar position；
@@ -547,6 +573,9 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
 - Polyline/Polygon automatic Entity adapter必须复用public SceneGISPlanarPrimitive，并保留original Entity id、
   per-DataSource target、world bounds和exactly-once lifecycle；不得继续引用private Buffer owner、experimental
   collection私有字段或建立dual runtime。
+- Polyline/Polygon 的原生 `distanceDisplayCondition` 同时作用于 fill/outline 和 ordinary/ground 路径。
+  未设置时不增加 instance attribute；增删条件允许重建 attribute layout，ready 后只改 near/far 必须复用 GPU geometry。
+  距离条件先验证，再写既有 GeometryInstance attributes，不用 CPU camera show 判据替代 native rendering/picking。
 - C7 public Box/Cylinder/Ellipsoid Geometry只描述以center为origin的local Cartesian volume，并与closed、non-flat
   `PerInstanceColorAppearance`配对。跨geometry kind replacement继续fail-fast；Plane/Ellipse/Rectangle必须降级到
   public Polygon/Polyline，不能调用upstream ellipsoid-oriented Geometry。

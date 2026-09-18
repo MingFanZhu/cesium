@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                             |
-| ---------------------- | ----------------------------------------------------------------- |
-| Extension slug         | `planar-api-integration`                                          |
-| Status                 | `completed`                                                       |
-| Planning model         | `extension`                                                       |
-| Active extension plan  | [总体计划](plans/2026-08-14-planar-api-integration-extension.md)  |
-| Current phase          | None                                                              |
-| Active phase plan      | None                                                              |
-| Active standalone plan | None；[最近完成示例整理](plans/2026-09-18-functional-examples.md) |
-| Architecture contact   | Architecture Agent                                                |
-| Execution contact      | Execution Agent                                                   |
-| Last updated           | `2026-08-14`                                                      |
+| Field                  | Value                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| Extension slug         | `planar-api-integration`                                                         |
+| Status                 | `active`                                                                         |
+| Planning model         | `extension`                                                                      |
+| Active extension plan  | None；[总体计划](plans/2026-08-14-planar-api-integration-extension.md) completed |
+| Current phase          | None                                                                             |
+| Active phase plan      | None                                                                             |
+| Active standalone plan | [Entity 通用属性修复](plans/2026-09-18-entity-api-fixes.md)                      |
+| Architecture contact   | Architecture Agent                                                               |
+| Execution contact      | Execution Agent                                                                  |
+| Last updated           | `2026-09-18`                                                                     |
 
 ## Scope
 
@@ -49,6 +49,21 @@
 - SGP: I1 proposed new SGP for Camera integration；existing `SGP-0001`/`SGP-0002` remain independent
 
 ## Current handoff
+
+2026-09-18：[Camera 兼容性复核](plans/2026-09-18-camera-compatibility.md)的实现、
+[技术自审](reviews/2026-09-18-camera-compatibility.md)与负责人验收通过；原 I1–I5 仍 completed。
+沿用 ADR-0037 / SGP-0004，唯一 upstream-owned file 为 Camera.js。
+329 项相关 Specs（含 Globe 回归与 real Context）通过；完整构建和类型检查已通过。负责人复测发现的 Home 末段
+CA-R007 已在 private Camera / flight helper 修复并通过浏览器自然飞行复测。源码位置为既有 private Camera helper，
+测试为 SceneGISPlanarCameraApiSpec / SceneGISPlanarCameraCesiumWidgetSpec，验收入口为 Test/Planar/相机控制.html。
+负责人随后要求审计 Entity 是否遵循非必要不修改 API 原则。
+[Entity API 审计](reviews/2026-09-18-entity-api-compatibility.md)已完成：原生数据模型未改，
+但存在额外 gate 限制、Graphics 覆盖差异、Entity matrix 与渲染朝向不一致及 Rectangle 单位冲突。
+负责人随后授权修复部分问题，并接受保留 Rectangle 米制字段解释。
+[Entity 通用属性修复](plans/2026-09-18-entity-api-fixes.md)已实现 EA-R001 与 EA-R003 距离显隐，
+[技术自审](reviews/2026-09-18-entity-api-fixes.md)通过；EA-R005 accepted。EA-R002 / EA-R004 与材质限制保留。
+扩展回归有 118 项通过、2 项已在修复前对照复现的既有失败，由当前 Agent 负责后续 fixture 修复，详见技术自审。
+本轮没有新增 upstream-owned 修改；保留旧阶段记录如下。
 
 2026-09-18 负责人要求整理平面与高级环境两个已交付大阶段的示例。当前在 `feature/functional-examples`
 已完成[示例整理](plans/2026-09-18-functional-examples.md)，八项页面 E2E 与[技术自审](reviews/2026-09-18-functional-examples.md)通过。

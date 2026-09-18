@@ -2,6 +2,10 @@
 
 ## Maintenance
 
+- [平面地形剖切与多边形裁剪](2026-09-18-terrain-clipping.md)（completed；共面裙边修复与负责人视觉验收通过）
+
+- [地形元数据接入与 TileWorker 核验](2026-09-18-terrain-layer-metadata.md)（active；技术验证完成，负责人视觉验收待定）
+
 - [平面相机惯性](2026-09-18-planar-camera-inertia.md)（completed；技术验收与 64 项 Specs 通过，负责人验收通过）
 
 - [低俯角旋转距离修复](2026-09-18-surface-orbit-distance-fix.md)（completed；技术自审与 54 项 Specs 通过）

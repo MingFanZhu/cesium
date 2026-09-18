@@ -1,4 +1,4 @@
 # Planar Terrain Advanced Discussions
 
-当前没有独立 open discussion。A1 源码审计若出现会改变公共 API、核心语义或总体范围的分歧，
-在本目录创建提炼后的 discussion；长期决定提升为 ADR。
+- [TileWorker 与 SceneGIS 地形描述契约对齐](2026-09-18-terrain-layer-contract.md)
+  （resolved；仅支持当前 v2 profile，双方已确认 TMS 公共语义与全局范围，交接由 active plan 跟踪）

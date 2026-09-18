@@ -1,0 +1,87 @@
+{
+  "available": [
+    [
+      {
+        "endX": 0,
+        "endY": 0,
+        "startX": 0,
+        "startY": 0
+      }
+    ],
+    [
+      {
+        "endX": 1,
+        "endY": 1,
+        "startX": 0,
+        "startY": 0
+      }
+    ]
+  ],
+  "extensions": [],
+  "format": "scenegis-planar-heightmap-rgb24-v2",
+  "maxzoom": 1,
+  "minzoom": 0,
+  "scenegis": {
+    "availability": "source-bounds",
+    "childMask": "available-children-else-0",
+    "coordinateSpace": {
+      "axes": [
+        "east",
+        "north",
+        "up"
+      ],
+      "id": "local",
+      "role": "private",
+      "rootRange": [
+        -100.0,
+        -100.0,
+        100.0,
+        100.0
+      ],
+      "unit": "metre"
+    },
+    "encodingRange": {
+      "maximum": 1677721.4,
+      "minimum": -1677721.6
+    },
+    "grid": {
+      "height": 65,
+      "placement": "posts",
+      "width": 65
+    },
+    "heightRange": {
+      "maximum": 0.10100000000023629,
+      "minimum": -16.726000000000237,
+      "source": "source-scan-conservative"
+    },
+    "heightReference": "source",
+    "logicalMaxLevel": 1,
+    "logicalMinLevel": 0,
+    "noDataPolicy": "zero",
+    "profile": "scenegis-planar-heightmap-rgb24-v2",
+    "quantization": {
+      "decodedEdgeDifferenceBudget": 0.0,
+      "maxError": 0.1,
+      "method": "signed-rgb24-fixed",
+      "sharedSourcePosts": true
+    },
+    "resampling": "bilinear",
+    "schemeId": "private-full@1",
+    "structure": {
+      "elementMultiplier": 256,
+      "elementsPerHeight": 3,
+      "heightOffset": -1677721.6,
+      "heightScale": 0.2,
+      "isBigEndian": true,
+      "stride": 4
+    },
+    "unit": "metre",
+    "verticalTransform": false
+  },
+  "scheme": "tms",
+  "tilejson": "2.1.0",
+  "tiles": [
+    "{z}/{y}/{x}.png"
+  ],
+  "version": "1.0.0"
+}

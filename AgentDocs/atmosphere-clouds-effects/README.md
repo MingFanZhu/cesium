@@ -2,12 +2,13 @@
 
 ## Status
 
-- Active standalone plan: none
+- Active standalone plan: None
+- Previous standalone awaiting visual acceptance:
+  [球面空气透视模型条带修复](plans/2026-09-18-globe-aerial-receiver-distance.md) — implementation verified；负责人视觉验收待定
 - Latest completed standalone plan:
-  [功能示例整理](plans/2026-09-18-functional-examples.md) — completed；十个功能示例、默认 lil-gui、
-  综合测试归档和导航迁移完成；不修改运行时能力。
+  [平面空气透视模型水平色带修复](plans/2026-09-18-planar-aerial-horizon-band.md) — completed；2026-09-18 负责人视觉验收通过。
 - Latest standalone review:
-  [功能示例评审](reviews/2026-09-18-functional-examples.md) — approved（技术自审）。
+  [平面空气透视模型水平色带评审](reviews/2026-09-18-planar-aerial-horizon-band.md) — accepted; closed。
 
 - Extension: `active`
 - Current phase: `P14 completed — Planar Nanjing public data sample`
@@ -72,6 +73,15 @@ HDR bloom/lens flare。两种世界共享光学参数、质量档、资源与合
 reference frame，不互相伪造坐标语义。
 
 ## Active work
+
+- 2026-09-18：平面模型水平色带已独立修复，纠正离线 Planar LUT 的近水平积分，按颜色透射率采样并重建固定资产。
+  新 CPU/GPU 回归先失败后通过，原视角与升高视角已复测。Runtime 成本与资源大小不增加，无 upstream/SGP 变化。
+  完整 package smoke 的既有 VectorTile 白名单缺漏单独记录；负责人视觉验收通过，本项尚未提交。
+
+- 2026-09-18：球面物理大气模型水平条带已修复，恢复真实 opaque receiver distance。
+  新 GPU 回归旧实现失败、修复通过，共 5 项针对性 GPU 检查通过；当前页面同视角条带与红线消失。
+  构建与技术自审完成，无 upstream/SGP 变化；负责人视觉验收待定，本项尚未提交。
+  后续平面对照检查发现另一根因，已由上述独立 Planar plan 接手修复；原排查证据仍保留在 Globe plan。
 
 - 2026-09-18 功能示例整理完成：大气、雾、云、日月和光晕各含球面/平面页面，
   11 项新页面/导航检查与两项原 Clock 回归通过。示例全部本地，默认 lil-gui 与说明分开，
@@ -568,6 +578,12 @@ reference frame，不互相伪造坐标语义。
 - 页面 E2E：`Specs/e2e/scenegis-environment-examples.spec.js`
 
 ## Current handoff
+
+2026-09-18：负责人确认平面空气透视模型水平色带修复验收通过，standalone plan 与 review 已关闭。
+实现仍在工作区，尚未提交；独立 Globe 修复的验收状态保留，既有 package export 白名单事项继续 deferred。
+下一项按负责人请求核对现有平面地形加载入口与元数据支持，尚未激活新的实现计划。
+
+### Previous handoff
 
 2026-09-18：功能示例整理完成，见
 [standalone plan](plans/2026-09-18-functional-examples.md) 与

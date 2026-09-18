@@ -28,9 +28,10 @@ function copySubdomains(value) {
 }
 
 /**
- * Provides planar raster tiles from a URL template containing any of
- * <code>{x}</code>, <code>{y}</code>, <code>{z}</code>, and
- * <code>{s}</code>.
+ * Provides planar raster tiles from a URL template. Supported tags are
+ * x, y, z, s, reverseX, reverseY, reverseZ, width, height, westProjected,
+ * southProjected, eastProjected, and northProjected. Projected bounds use
+ * the world's meter coordinates. Additional tags can be supplied with customTags.
  *
  * @alias SceneGISPlanarUrlTemplateImageryProvider
  * @constructor
@@ -45,6 +46,9 @@ function copySubdomains(value) {
  * @param {string|string[]} [options.subdomains="abc"] The URL subdomains.
  * @param {boolean} [options.hasAlphaChannel=true] Whether images have an alpha channel.
  * @param {Credit|string} [options.credit] The provider attribution.
+ * @param {number} [options.minimumLevel=0] The minimum level; must be zero.
+ * @param {object} [options.customTags] Functions keyed by tag name, called with (provider, x, y, level).
+ * @param {object} [options.urlSchemeZeroPadding] Minimum digit widths keyed by braced tag, such as {"{x}": "0000"}.
  *
  * @exception {DeveloperError} The URL, tiling scheme, levels, dimensions, subdomains, alpha flag, or credit are invalid.
  */
@@ -65,6 +69,9 @@ function SceneGISPlanarUrlTemplateImageryProvider(options) {
   }
   const maximumLevel =
     options.maximumLevel ?? options.tilingScheme.maximumSafeLevel;
+  if ((options.minimumLevel ?? 0) !== 0) {
+    throw new DeveloperError("minimumLevel must be zero.");
+  }
   if (
     !Number.isInteger(maximumLevel) ||
     maximumLevel < 0 ||
@@ -78,9 +85,6 @@ function SceneGISPlanarUrlTemplateImageryProvider(options) {
   const tileHeight = options.tileHeight ?? tileWidth;
   validatePositiveInteger("tileWidth", tileWidth);
   validatePositiveInteger("tileHeight", tileHeight);
-  if (tileWidth !== tileHeight) {
-    throw new DeveloperError("tileWidth and tileHeight must be equal.");
-  }
   const hasAlphaChannel = options.hasAlphaChannel ?? true;
   if (typeof hasAlphaChannel !== "boolean") {
     throw new DeveloperError("hasAlphaChannel must be a boolean.");
@@ -102,6 +106,20 @@ function SceneGISPlanarUrlTemplateImageryProvider(options) {
   this._hasAlphaChannel = hasAlphaChannel;
   this._credit = credit;
   this._errorEvent = new Event();
+  this._customTags = { ...options.customTags };
+  this._urlSchemeZeroPadding = { ...options.urlSchemeZeroPadding };
+  for (const tag of Object.values(this._customTags)) {
+    if (typeof tag !== "function") {
+      throw new DeveloperError("customTags values must be functions.");
+    }
+  }
+  for (const padding of Object.values(this._urlSchemeZeroPadding)) {
+    if (typeof padding !== "string" || !/^0+$/.test(padding)) {
+      throw new DeveloperError(
+        "urlSchemeZeroPadding values must be zero strings.",
+      );
+    }
+  }
 }
 
 Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
@@ -233,34 +251,82 @@ SceneGISPlanarUrlTemplateImageryProvider.prototype.requestImage = function (
   level,
   request,
 ) {
-  if (!Number.isInteger(level) || level < 0 || level > this._maximumLevel) {
-    throw new DeveloperError("level must be within the provider level range.");
-  }
-  const count = this._tilingScheme.getNumberOfXTilesAtLevel(level);
-  if (
-    !Number.isInteger(x) ||
-    !Number.isInteger(y) ||
-    x < 0 ||
-    y < 0 ||
-    x >= count ||
-    y >= count
-  ) {
-    throw new DeveloperError("x and y must identify a tile at level.");
-  }
-  const urlY = this._urlScheme === "tms" ? count - y - 1 : y;
-  const subdomainIndex =
-    ((x % this._subdomains.length) + (y % this._subdomains.length)) %
-    this._subdomains.length;
-  const resource = this._resource.getDerivedResource({
-    request,
-    templateValues: {
+  return this._buildImageResource(x, y, level, request).fetchImage({
+    preferImageBitmap: true,
+    flipY: true,
+  });
+};
+
+SceneGISPlanarUrlTemplateImageryProvider.prototype._validateTileAddress =
+  function (x, y, level) {
+    if (!Number.isInteger(level) || level < 0 || level > this._maximumLevel) {
+      throw new DeveloperError(
+        "level must be within the provider level range.",
+      );
+    }
+    const count = this._tilingScheme.getNumberOfXTilesAtLevel(level);
+    if (
+      !Number.isInteger(x) ||
+      !Number.isInteger(y) ||
+      x < 0 ||
+      y < 0 ||
+      x >= count ||
+      y >= count
+    ) {
+      throw new DeveloperError("x and y must identify a tile at level.");
+    }
+  };
+
+SceneGISPlanarUrlTemplateImageryProvider.prototype._buildImageResource =
+  function (x, y, level, request) {
+    this._validateTileAddress(x, y, level);
+    const count = this._tilingScheme.getNumberOfXTilesAtLevel(level);
+    const urlY = this._urlScheme === "tms" ? count - y - 1 : y;
+    const subdomainIndex =
+      ((x % this._subdomains.length) + (y % this._subdomains.length)) %
+      this._subdomains.length;
+    const templateValues = {
       x,
       y: urlY,
       z: level,
       s: this._subdomains[subdomainIndex],
-    },
-  });
-  return resource.fetchImage({ preferImageBitmap: true, flipY: true });
-};
+      reverseX: count - x - 1,
+      reverseY: count - y - 1,
+      reverseZ:
+        level < this._maximumLevel ? this._maximumLevel - level - 1 : level,
+      width: this._tileWidth,
+      height: this._tileHeight,
+    };
+    const tags =
+      this._resource.getUrlComponent(true).match(/\{([^}]+)\}/g) ?? [];
+    let extent;
+    for (const match of tags) {
+      const tag = match.slice(1, -1);
+      const custom = this._customTags[tag];
+      if (custom) {
+        templateValues[tag] = custom(this, x, y, level);
+      } else if (/^(west|south|east|north)Projected$/.test(tag)) {
+        extent ??= this._tilingScheme.tileXYToExtent(x, y, level);
+        const bounds = {
+          westProjected: extent.minimumX,
+          southProjected: extent.minimumY,
+          eastProjected: extent.maximumX,
+          northProjected: extent.maximumY,
+        };
+        templateValues[tag] = bounds[tag];
+      }
+      const padding = this._urlSchemeZeroPadding[match];
+      if (padding && templateValues[tag] !== undefined) {
+        templateValues[tag] = String(templateValues[tag]).padStart(
+          padding.length,
+          "0",
+        );
+      }
+    }
+    return this._resource.getDerivedResource({
+      request,
+      templateValues,
+    });
+  };
 
 export default SceneGISPlanarUrlTemplateImageryProvider;

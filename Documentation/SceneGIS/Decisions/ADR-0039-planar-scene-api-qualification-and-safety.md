@@ -25,8 +25,8 @@ ShadowMap、SkyAtmosphere、SkyBox、Sun 和 Moon 都包含 Ellipsoid、Cartogra
 ### 能力矩阵
 
 - **Supported**：`Camera.getPickRay`、`Scene.cartesianToCanvasCoordinates`、`SceneTransforms` 的 SCENE3D window/drawing-buffer
-  transforms、`Scene.pick`、`drillPick`、`pickPosition`、World terrain query，以及普通 private ray pick。它们继续使用上游实现，
-  不增加 parallel facade。
+  transforms、`Scene.pick`、`drillPick`、`pickPosition`、World terrain query，以及普通 private ray pick。
+  `Camera.getPickRay` 的四视锥与偏心修正见 ADR-0037 的 2026-09-18 补充；其他入口继续使用既有实现，不增加 parallel facade。
 - **Guarded globe-only**：`Scene.sampleHeight`、`sampleHeightMostDetailed`、`clampToHeight`、
   `clampToHeightMostDetailed`、`Camera.getRectangleCameraCoordinates`、`pickEllipsoid`、`computeViewRectangle`，以及 native Earth
   environment/Fog/Shadow。

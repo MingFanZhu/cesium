@@ -6,6 +6,7 @@ import Cartesian3 from "../../../Core/Cartesian3.js";
 import Color from "../../../Core/Color.js";
 import ColorMaterialProperty from "../../../DataSources/ColorMaterialProperty.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
+import DistanceDisplayCondition from "../../../Core/DistanceDisplayCondition.js";
 import EntityCollection from "../../../DataSources/EntityCollection.js";
 import HeightReference from "../../../Scene/HeightReference.js";
 import Material from "../../../Scene/Material.js";
@@ -17,6 +18,7 @@ import SceneGISPlanarPolylineGeometry from "../../Core/SceneGISPlanarPolylineGeo
 import SceneGISPlanarPrimitive from "../../Scene/SceneGISPlanarPrimitive.js";
 import SceneGISPlanarGroundPrimitive from "../../Scene/SceneGISPlanarGroundPrimitive.js";
 import getSceneGISPlanarGroundBounds from "./_SceneGISPlanarGroundBounds.js";
+import SceneGISPlanarDistanceDisplayCondition from "./_SceneGISPlanarDistanceDisplayCondition.js";
 import SceneGISPlanarPositionResolver from "./_SceneGISPlanarPositionResolver.js";
 import SceneGISPlanarPrimitiveOwner from "./_SceneGISPlanarPrimitiveOwner.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
@@ -48,7 +50,6 @@ function validateUnsupported(graphic, time) {
     throw new DeveloperError("shadows must be ShadowMode.DISABLED.");
   }
   const unsupportedProperties = [
-    ["distanceDisplayCondition", graphic._distanceDisplayCondition],
     ["classificationType", graphic._classificationType],
     ["zIndex", graphic._zIndex],
   ];
@@ -86,6 +87,11 @@ function computeState(visualizer, item, time) {
   const entity = item.entity;
   const graphic = entity._polyline;
   validateUnsupported(graphic, time);
+  const distanceDisplayCondition =
+    SceneGISPlanarDistanceDisplayCondition.getValue(
+      graphic._distanceDisplayCondition,
+      time,
+    );
   const width = value(graphic._width, time, 1.0);
   if (!Number.isFinite(width) || width < 0) {
     throw new DeveloperError("width must be a finite nonnegative number.");
@@ -148,9 +154,10 @@ function computeState(visualizer, item, time) {
     positions: resolved,
     width,
     color,
+    distanceDisplayCondition,
     ground: clampToGround,
     boundingSphere,
-    signature: `${clampToGround}|${resolved.length}|${resolved.map((p) => `${p.x},${p.y},${p.z}`).join(";")}|${width}`,
+    signature: `${distanceDisplayCondition !== undefined}|${clampToGround}|${resolved.length}|${resolved.map((p) => `${p.x},${p.y},${p.z}`).join(";")}|${width}`,
   };
 }
 
@@ -176,6 +183,15 @@ function createOwner(visualizer, item, state) {
       width: state.width,
     }),
     appearance,
+    attributes:
+      state.distanceDisplayCondition === undefined
+        ? undefined
+        : {
+            distanceDisplayCondition:
+              SceneGISPlanarDistanceDisplayCondition.createAttribute(
+                state.distanceDisplayCondition,
+              ),
+          },
     id: item.entity,
   });
   const owner = new SceneGISPlanarPrimitiveOwner(visualizer._primitives);
@@ -184,6 +200,9 @@ function createOwner(visualizer, item, state) {
   owner.collection = primitive;
   owner.appearance = appearance;
   owner.signature = state.signature;
+  owner.distanceDisplayCondition = DistanceDisplayCondition.clone(
+    state.distanceDisplayCondition,
+  );
   owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
   owner.shown = true;
   return owner;
@@ -196,6 +215,14 @@ function boundingSphereEquals(left, right) {
 }
 
 function applyState(owner, state) {
+  if (
+    !SceneGISPlanarDistanceDisplayCondition.update(
+      owner,
+      state.distanceDisplayCondition,
+    )
+  ) {
+    return false;
+  }
   Color.clone(state.color, owner.appearance.material.uniforms.color);
   if (!boundingSphereEquals(owner.boundingSphere, state.boundingSphere)) {
     BoundingSphere.clone(state.boundingSphere, owner.boundingSphere);
@@ -205,6 +232,7 @@ function applyState(owner, state) {
   }
   owner.setShow(true);
   owner.shown = true;
+  return true;
 }
 
 function releaseOwner(item) {
@@ -274,8 +302,11 @@ SceneGISPlanarPolylineVisualizer.prototype.update = function (time) {
       }
       continue;
     }
-    if (item.owner !== undefined && item.owner.signature === state.signature) {
-      applyState(item.owner, state);
+    if (
+      item.owner !== undefined &&
+      item.owner.signature === state.signature &&
+      applyState(item.owner, state)
+    ) {
       continue;
     }
     const candidate = createOwner(this, item, state);

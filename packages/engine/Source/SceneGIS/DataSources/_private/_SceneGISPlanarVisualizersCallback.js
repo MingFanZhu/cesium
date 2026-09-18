@@ -2,6 +2,7 @@ import defined from "../../../Core/defined.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import destroyObject from "../../../Core/destroyObject.js";
 import CustomDataSource from "../../../DataSources/CustomDataSource.js";
+import Entity from "../../../DataSources/Entity.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
 import SceneGISPlanarAnchorVisualizer from "./_SceneGISPlanarAnchorVisualizer.js";
 import SceneGISPlanarAreaVisualizer from "./_SceneGISPlanarAreaVisualizer.js";
@@ -49,6 +50,7 @@ function validateEntityProfile(dataSource) {
       const propertyName = propertyNames[j];
       if (
         !allowedPropertyNames.has(propertyName) &&
+        Object.prototype.hasOwnProperty.call(Entity.prototype, propertyName) &&
         defined(entity[propertyName])
       ) {
         throw new DeveloperError(

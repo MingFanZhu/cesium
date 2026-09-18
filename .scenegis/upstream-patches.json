@@ -102,7 +102,7 @@
       "id": "SGP-0004",
       "title": "Add planar Camera view and flight dispatch",
       "status": "active",
-      "reason": "Camera public view and flight APIs currently route SCENE3D positions and orientations through ellipsoid ENU and Cartographic interpolation, so a live planar primary world requires an explicit fixed-axis dispatch.",
+      "reason": "Camera view, flight, world-target orientation, orthographic scale, changed events and pick rays require explicit fixed-axis and four-frustum dispatch for a live planar primary world instead of ellipsoid ENU or Cartographic height.",
       "risk": "high",
       "files": [
         {
@@ -113,6 +113,7 @@
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISPlanarCameraSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISPlanarCameraFlightSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarCameraApiSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarCameraControllerSpec.js",
         "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarCameraCesiumWidgetSpec.js"
       ],

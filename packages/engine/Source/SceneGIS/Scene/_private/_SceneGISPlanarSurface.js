@@ -1,6 +1,7 @@
 import Buffer from "../../../Renderer/Buffer.js";
 import BufferUsage from "../../../Renderer/BufferUsage.js";
 import Cartesian2 from "../../../Core/Cartesian2.js";
+import Cartesian3 from "../../../Core/Cartesian3.js";
 import Cartesian4 from "../../../Core/Cartesian4.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import ContextLimits from "../../../Renderer/ContextLimits.js";
@@ -21,6 +22,7 @@ import SceneGISPlanarSurfaceShader from "./_SceneGISPlanarSurfaceShader.js";
 import SceneGISPlanarSurfaceBackground from "./_SceneGISPlanarSurfaceBackground.js";
 import SceneGISPlanarTerrain from "./_SceneGISPlanarTerrain.js";
 import SceneGISPlanarTerrainQuery from "./_SceneGISPlanarTerrainQuery.js";
+import SceneGISPlanarClipping from "./_SceneGISPlanarClipping.js";
 
 const unitQuad = new Float32Array([
   -0.5, -0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.5, 0.0, 0.5, 0.5, 0.0,
@@ -43,7 +45,15 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
     this._quadtree.forEachTile(callback),
   );
   this._terrain = undefined;
+  this._clipping = undefined;
+  this._clippingEnabled = false;
   imageryLayers._changeListener = (type, layer, property) => {
+    if (
+      layer.show &&
+      (type === "added" || (type === "changed" && property === "show"))
+    ) {
+      this._tilesLoaded = false;
+    }
     if (
       type === "removed" ||
       (type === "changed" && property === "show" && !layer.show)
@@ -94,7 +104,7 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
 Object.defineProperties(SceneGISPlanarSurface.prototype, {
   tilesLoaded: {
     get: function () {
-      return this._tilesLoaded;
+      return this._tilesLoaded && this._imagery.tilesLoaded;
     },
   },
 });
@@ -175,6 +185,7 @@ SceneGISPlanarSurface.prototype.pickTerrain = function (ray, result) {
     this._terrainQuerySnapshotCount,
     ray,
     result,
+    this._clipping,
   );
 };
 
@@ -245,6 +256,7 @@ function getShaderProgram(
     materialSource,
     advancedLighting,
     translucent,
+    surface._clippingEnabled,
   );
   let shader = surface._shaderPrograms.get(key);
   if (!shader) {
@@ -256,6 +268,7 @@ function getShaderProgram(
       materialSource,
       advancedLighting,
       translucent,
+      surface._clippingEnabled,
     );
     surface._shaderPrograms.set(key, shader);
     if (defined(materialSource)) {
@@ -274,11 +287,12 @@ function getShaderKey(
   materialSource,
   advancedLighting,
   translucent = false,
+  clipping = false,
 ) {
   const materialKey = defined(materialSource)
     ? `/material/${materialSource}`
     : "";
-  return `${layerCount}/${enableLighting ? 1 : 0}/${normalMode}/${advancedLighting ? 1 : 0}${translucent ? "/translucent" : ""}${materialKey}`;
+  return `${layerCount}/${enableLighting ? 1 : 0}/${normalMode}/${advancedLighting ? 1 : 0}${translucent ? "/translucent" : ""}${clipping ? "/clipping" : ""}${materialKey}`;
 }
 
 function createShaderProgram(
@@ -289,6 +303,7 @@ function createShaderProgram(
   materialSource,
   advancedLighting,
   translucent,
+  clipping = false,
 ) {
   return ShaderProgram.fromCache({
     context,
@@ -297,6 +312,7 @@ function createShaderProgram(
       normalMode,
       defined(materialSource),
       advancedLighting,
+      clipping,
     ),
     fragmentShaderSource: SceneGISPlanarSurfaceShader.createFragmentShader(
       layerCount,
@@ -305,6 +321,7 @@ function createShaderProgram(
       materialSource,
       advancedLighting,
       translucent,
+      clipping,
     ),
     attributeLocations:
       normalMode === "smooth" ? { position: 0, normal: 1 } : { position: 0 },
@@ -319,6 +336,7 @@ function preflightMaterialShaders(
   materialSource,
   advancedLighting,
   translucent,
+  clipping = false,
 ) {
   if (!defined(materialSource)) {
     return;
@@ -333,6 +351,7 @@ function preflightMaterialShaders(
         materialSource,
         advancedLighting,
         translucent,
+        clipping,
       );
       if (surface._shaderPrograms.has(key)) {
         continue;
@@ -345,6 +364,7 @@ function preflightMaterialShaders(
         materialSource,
         advancedLighting,
         translucent,
+        clipping,
       );
       candidates.push({ key, shader });
       shader._bind();
@@ -381,6 +401,32 @@ function createUniformMap(
       return surface._baseColor;
     },
   };
+  if (surface._clippingEnabled) {
+    const clipping = surface._clipping;
+    const offset = new Cartesian3();
+    const scale = new Cartesian3();
+    Object.assign(uniformMap, {
+      u_clippingData: () => clipping.texture,
+      u_clippingCounts: () => clipping.counts,
+      u_clippingUnion: () => clipping.union,
+      u_clippingInverse: () => clipping.inverse,
+      u_clippingEdgeStyle: () => clipping.edgeStyle,
+      u_clippingOffset: () =>
+        Cartesian3.fromElements(
+          tile.modelMatrix[12] - clipping.origin.x,
+          tile.modelMatrix[13] - clipping.origin.y,
+          tile.modelMatrix[14] - clipping.origin.z,
+          offset,
+        ),
+      u_clippingScale: () =>
+        Cartesian3.fromElements(
+          tile.modelMatrix[0],
+          tile.modelMatrix[5],
+          tile.modelMatrix[10],
+          scale,
+        ),
+    });
+  }
   if (advancedLighting) {
     Object.assign(
       uniformMap,
@@ -630,6 +676,8 @@ SceneGISPlanarSurface.prototype.render = function (
   material,
   maximumTiltedTileDistance = Infinity,
   opacity = 1.0,
+  clippingPlanes,
+  clippingPolygons,
 ) {
   validateContext(this, frameState.context);
   const passes = frameState.passes;
@@ -674,15 +722,20 @@ SceneGISPlanarSurface.prototype.render = function (
   const environmentLighting = frameState._sceneGISPlanarLighting;
   const advancedLighting = environmentLighting?.active === true;
   const lightingSamplerCount = advancedLighting ? 3 : 0;
+  const clippingEnabled = SceneGISPlanarClipping.isEnabled(
+    clippingPlanes,
+    clippingPolygons,
+  );
   if (
     shownLayerCount +
       materialSamplerCount +
       lightingSamplerCount +
+      (clippingEnabled ? 1 : 0) +
       (opacity < 1.0 ? 1 : 0) >
     ContextLimits.maximumTextureImageUnits
   ) {
     throw new DeveloperError(
-      "The combined planar imagery, Material, environment and surface background sampler count exceeds maximumTextureImageUnits.",
+      "The combined planar imagery, Material, environment, clipping and surface background sampler count exceeds maximumTextureImageUnits.",
     );
   }
   if (defined(material)) {
@@ -695,9 +748,17 @@ SceneGISPlanarSurface.prototype.render = function (
       material.shaderSource,
       advancedLighting,
       opacity < 1.0,
+      clippingEnabled,
     );
   }
   const shownLayers = getShownLayers(this);
+  if (clippingEnabled || this._clipping) {
+    this._clipping ??= new SceneGISPlanarClipping(
+      this._quadtree._tilingScheme.coordinateSystem.extent,
+    );
+    this._clipping.update(frameState.context, clippingPlanes, clippingPolygons);
+  }
+  this._clippingEnabled = clippingEnabled;
   this.invalidateTerrainQuerySnapshot();
   this._renderedFrameNumber = frameState.frameNumber;
   this._renderCommands.length = 0;
@@ -827,6 +888,8 @@ SceneGISPlanarSurface.prototype.destroy = function () {
   this._imageryLayers._changeListener = undefined;
   this._background?.destroy();
   this._background = undefined;
+  this._clipping?.destroy();
+  this._clipping = undefined;
   this._terrain?.destroy();
   this._terrain = undefined;
   this._imagery.destroy();

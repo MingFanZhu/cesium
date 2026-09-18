@@ -7,6 +7,7 @@ import Color from "../../../Core/Color.js";
 import ColorGeometryInstanceAttribute from "../../../Core/ColorGeometryInstanceAttribute.js";
 import ColorMaterialProperty from "../../../DataSources/ColorMaterialProperty.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
+import DistanceDisplayCondition from "../../../Core/DistanceDisplayCondition.js";
 import EntityCollection from "../../../DataSources/EntityCollection.js";
 import HeightReference from "../../../Scene/HeightReference.js";
 import Material from "../../../Scene/Material.js";
@@ -20,6 +21,7 @@ import SceneGISPlanarPolylineGeometry from "../../Core/SceneGISPlanarPolylineGeo
 import SceneGISPlanarPrimitive from "../../Scene/SceneGISPlanarPrimitive.js";
 import SceneGISPlanarGroundPrimitive from "../../Scene/SceneGISPlanarGroundPrimitive.js";
 import getSceneGISPlanarGroundBounds from "./_SceneGISPlanarGroundBounds.js";
+import SceneGISPlanarDistanceDisplayCondition from "./_SceneGISPlanarDistanceDisplayCondition.js";
 import SceneGISPlanarPositionResolver from "./_SceneGISPlanarPositionResolver.js";
 import SceneGISPlanarPrimitiveOwner from "./_SceneGISPlanarPrimitiveOwner.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
@@ -74,7 +76,6 @@ function validateUnsupported(graphic, time) {
     ["stRotation", graphic._stRotation],
     ["granularity", graphic._granularity],
     ["textureCoordinates", graphic._textureCoordinates],
-    ["distanceDisplayCondition", graphic._distanceDisplayCondition],
     ["classificationType", graphic._classificationType],
     ["zIndex", graphic._zIndex],
   ];
@@ -307,6 +308,11 @@ function computeState(visualizer, item, time) {
   const entity = item.entity;
   const graphic = entity._polygon;
   validateUnsupported(graphic, time);
+  const distanceDisplayCondition =
+    SceneGISPlanarDistanceDisplayCondition.getValue(
+      graphic._distanceDisplayCondition,
+      time,
+    );
   const hierarchy = optional(graphic._hierarchy, time);
   if (hierarchy === undefined) {
     return { missing: true };
@@ -443,6 +449,7 @@ function computeState(visualizer, item, time) {
     boundingSphere,
     fill: fill && fillColor.alpha > 0.0,
     fillColor,
+    distanceDisplayCondition,
     ground:
       heightReference !== HeightReference.NONE ||
       (extrudedHeight !== undefined &&
@@ -458,6 +465,7 @@ function computeState(visualizer, item, time) {
     outlineColor,
     outlineWidth,
     signature: [
+      distanceDisplayCondition !== undefined,
       geometryKey,
       fill,
       fillColor.toRgba(),
@@ -474,6 +482,15 @@ function computeState(visualizer, item, time) {
 
 function createOwner(visualizer, item, state) {
   const owner = new SceneGISPlanarPrimitiveOwner(visualizer._primitives);
+  const distanceAttributes =
+    state.distanceDisplayCondition === undefined
+      ? {}
+      : {
+          distanceDisplayCondition:
+            SceneGISPlanarDistanceDisplayCondition.createAttribute(
+              state.distanceDisplayCondition,
+            ),
+        };
   let fillPrimitive;
   if (state.fill) {
     const PrimitiveType = state.ground
@@ -498,6 +515,7 @@ function createOwner(visualizer, item, state) {
         closed: false,
       }),
       attributes: {
+        ...distanceAttributes,
         color: ColorGeometryInstanceAttribute.fromColor(state.fillColor),
       },
       id: item.entity,
@@ -535,6 +553,7 @@ function createOwner(visualizer, item, state) {
         material,
         translucent: state.outlineColor.alpha < 1.0,
       }),
+      attributes: distanceAttributes,
       id: item.entity,
     });
     owner.add(primitive);
@@ -543,6 +562,9 @@ function createOwner(visualizer, item, state) {
   owner.fillPrimitive = fillPrimitive;
   owner.outlinePrimitives = outlinePrimitives;
   owner.signature = state.signature;
+  owner.distanceDisplayCondition = DistanceDisplayCondition.clone(
+    state.distanceDisplayCondition,
+  );
   owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
   owner.shown = true;
   return owner;
@@ -555,11 +577,20 @@ function boundingSphereEquals(left, right) {
 }
 
 function applyState(owner, state) {
+  if (
+    !SceneGISPlanarDistanceDisplayCondition.update(
+      owner,
+      state.distanceDisplayCondition,
+    )
+  ) {
+    return false;
+  }
   if (!boundingSphereEquals(owner.boundingSphere, state.boundingSphere)) {
     BoundingSphere.clone(state.boundingSphere, owner.boundingSphere);
   }
   owner.setShow(true);
   owner.shown = true;
+  return true;
 }
 
 function releaseOwner(item) {
@@ -629,8 +660,11 @@ SceneGISPlanarPolygonVisualizer.prototype.update = function (time) {
       }
       continue;
     }
-    if (item.owner !== undefined && item.owner.signature === state.signature) {
-      applyState(item.owner, state);
+    if (
+      item.owner !== undefined &&
+      item.owner.signature === state.signature &&
+      applyState(item.owner, state)
+    ) {
       continue;
     }
     const candidate = createOwner(this, item, state);

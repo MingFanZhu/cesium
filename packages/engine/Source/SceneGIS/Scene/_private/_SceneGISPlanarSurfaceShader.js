@@ -3,6 +3,7 @@ import geometricLitVertexShader from "../../../Shaders/SceneGIS/PlanarSurface/Sc
 import smoothLitVertexShader from "../../../Shaders/SceneGIS/PlanarSurface/SceneGISPlanarSurfaceSmoothLitVS.js";
 import unlitVertexShader from "../../../Shaders/SceneGIS/PlanarSurface/SceneGISPlanarSurfaceUnlitVS.js";
 import planarLighting from "./_SceneGISPlanarEnvironmentLighting.js";
+import clippingSource from "../../../Shaders/SceneGIS/PlanarSurface/SceneGISPlanarClippingFS.js";
 
 const dynamicLayersToken = "SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS";
 const materialSourceToken = "SCENEGIS_PLANAR_SURFACE_MATERIAL_SOURCE";
@@ -12,14 +13,16 @@ function createVertexShader(
   normalMode = "geometric",
   enableMaterial = false,
   advancedLighting = false,
+  clipping = false,
 ) {
+  const clippingDefine = clipping ? "#define SCENEGIS_CLIPPING\n" : "";
   if (!enableLighting && !enableMaterial && !advancedLighting) {
-    return unlitVertexShader;
+    return `${clippingDefine}${unlitVertexShader}`;
   }
   const shader =
     normalMode === "smooth" ? smoothLitVertexShader : geometricLitVertexShader;
   const defines = `${enableMaterial ? "#define SCENEGIS_MATERIAL\n" : ""}${advancedLighting ? "#define SCENEGIS_ADVANCED_LIGHTING\n" : ""}`;
-  return `${defines}${shader}`;
+  return `${clippingDefine}${defines}${shader}`;
 }
 
 function createFragmentShader(
@@ -29,6 +32,7 @@ function createFragmentShader(
   materialSource,
   advancedLighting = false,
   translucent = false,
+  clipping = false,
 ) {
   const declarations = [];
   const composition = [];
@@ -94,6 +98,9 @@ ${composition.join("\n")}
   }
   if (translucent) {
     defines += "#define SCENEGIS_SURFACE_TRANSLUCENCY\n";
+  }
+  if (clipping) {
+    defines += `#define SCENEGIS_CLIPPING\n${clippingSource}\n`;
   }
   if (advancedLighting) {
     defines += `#define SCENEGIS_ADVANCED_LIGHTING\n${planarLighting.source}\n`;

@@ -1,0 +1,78 @@
+{
+  "available": [
+    [
+      {
+        "endX": 0,
+        "endY": 0,
+        "startX": 0,
+        "startY": 0
+      }
+    ],
+    [
+      {
+        "endX": 1,
+        "endY": 1,
+        "startX": 0,
+        "startY": 0
+      }
+    ]
+  ],
+  "extensions": [],
+  "format": "scenegis-planar-quantized-mesh-v2",
+  "maxzoom": 1,
+  "minzoom": 0,
+  "scenegis": {
+    "availability": "source-bounds",
+    "coordinateSpace": {
+      "axes": [
+        "east",
+        "north",
+        "up"
+      ],
+      "id": "local",
+      "role": "private",
+      "rootRange": [
+        -100.0,
+        -100.0,
+        100.0,
+        100.0
+      ],
+      "unit": "metre"
+    },
+    "grid": {
+      "height": 65,
+      "placement": "posts",
+      "width": 65
+    },
+    "heightRange": {
+      "maximum": 0.10100000351667404,
+      "minimum": -16.726001739501953,
+      "source": "source-scan-conservative"
+    },
+    "heightReference": "source",
+    "logicalMaxLevel": 1,
+    "logicalMinLevel": 0,
+    "noDataPolicy": "zero",
+    "profile": "scenegis-planar-quantized-mesh-v2",
+    "quantization": {
+      "decodedEdgeDifferenceBudget": 0.2,
+      "maxError": 0.1,
+      "method": "uint15-per-tile-outward-float32",
+      "sharedSourcePosts": true
+    },
+    "resampling": "bilinear",
+    "schemeId": "private-full@1",
+    "skirt": {
+      "minimumDepth": 0.2,
+      "source": "consumer-from-four-edge-indices"
+    },
+    "unit": "metre",
+    "verticalTransform": false
+  },
+  "scheme": "tms",
+  "tilejson": "2.1.0",
+  "tiles": [
+    "{z}/{y}/{x}.terrain"
+  ],
+  "version": "1.0.0"
+}

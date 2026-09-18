@@ -8344,6 +8344,115 @@ ${hardCascadeLibrary}`;
     ]);
   });
 
+  it("keeps Planar aerial scattering continuous across the horizon on the actual GPU", async function () {
+    connectPlanar();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    await publishPlanarResources();
+    const pixels = executeHalfFloatQuad(
+      [
+        atmosphereSource,
+        `uniform sampler2D u_transmittanceTexture;
+        uniform sampler3D u_scatteringTexture;
+        uniform sampler2D u_irradianceTexture;
+        void main() {
+          float mu = (floor(gl_FragCoord.x) - 1.0) * 0.001;
+          vec3 direction = vec3(0.0, sqrt(1.0 - mu * mu), mu);
+          vec3 sun = normalize(vec3(0.4, 0.2, 0.89));
+          bool intersects;
+          vec3 transmittance;
+          vec3 radiance = sceneGISPlanarRadianceToPoint(
+            u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
+            vec3(0.0, 0.0, 600.0), direction, sun, 20500.0, false,
+            intersects, transmittance);
+          out_FragColor = vec4(gl_FragCoord.y < 1.0 ? radiance : transmittance, 1.0);
+        }`,
+      ],
+      { width: 3, height: 2, uniformMap: effects._pipeline._uniformMap },
+    );
+    pixels.forEach(expectFiniteHdrStorage);
+    expect(rgbEnergy(pixels[1])).toBeGreaterThan(0.01);
+    for (const column of [0, 2]) {
+      for (let channel = 0; channel < 3; channel++) {
+        expect(
+          Math.abs(pixels[column][channel] / pixels[1][channel] - 1.0),
+        ).toBeLessThan(0.02);
+        expect(
+          Math.abs(pixels[3 + column][channel] - pixels[4][channel]),
+        ).toBeLessThan(0.001);
+      }
+    }
+  });
+
+  it("keeps a real Planar opaque face continuous across the horizon", async function () {
+    connectPlanar();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    await publishPlanarResources();
+    scene.canvas.width = 256;
+    scene.canvas.height = 256;
+    scene.camera.frustum.aspectRatio = 1;
+    scene.camera.frustum.near = 1;
+    scene.camera.frustum.far = 100000;
+    scene.camera.setView({
+      destination: new Cartesian3(0, 0, 600),
+      orientation: { direction: Cartesian3.UNIT_Y, up: Cartesian3.UNIT_Z },
+    });
+    scene.primitives.add(
+      new Primitive({
+        geometryInstances: new GeometryInstance({
+          geometry: BoxGeometry.fromDimensions({
+            dimensions: new Cartesian3(2400, 1200, 1200),
+            vertexFormat: PerInstanceColorAppearance.FLAT_VERTEX_FORMAT,
+          }),
+          modelMatrix: Matrix4.fromTranslation(new Cartesian3(0, 7000, 600)),
+          attributes: {
+            color: ColorGeometryInstanceAttribute.fromColor(
+              Color.fromBytes(80, 20, 20, 255),
+            ),
+          },
+        }),
+        appearance: new PerInstanceColorAppearance({
+          flat: true,
+          translucent: false,
+          closed: true,
+        }),
+        asynchronous: false,
+      }),
+    );
+    environment.sunDirection = Cartesian3.normalize(
+      new Cartesian3(0.4, 0.2, 0.89),
+      new Cartesian3(),
+    );
+    const time = JulianDate.fromIso8601("2026-06-21T02:30:00Z");
+    environment.update(scene, time);
+    effects.showAtmosphere = false;
+    effects.showAerialPerspective = false;
+    effects.backgroundRadianceScale = 10;
+    effects.update(scene, time);
+    scene.renderForSpecs(time);
+    const identity = readFramePixels();
+    effects.showAerialPerspective = true;
+    effects.update(scene, time);
+    scene.renderForSpecs(time);
+    const aerial = readFramePixels();
+    let maximumStep = 0;
+    for (let y = 124; y <= 132; y++) {
+      const pixel = (y * 256 + 128) * 4;
+      expect(identity[pixel]).toBeGreaterThan(20);
+      for (let channel = 0; channel < 3; channel++) {
+        maximumStep = Math.max(
+          maximumStep,
+          Math.abs(aerial[pixel + channel] - aerial[pixel - 256 * 4 + channel]),
+        );
+      }
+    }
+    expect(maximumStep).toBeLessThan(4);
+    expect(maximumRgbDelta(identity, aerial)).toBeGreaterThan(12);
+  });
+
   it("keeps Planar P5 far transport complete and aerial sources continuous on the actual GPU", async function () {
     connectPlanar();
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -8700,11 +8809,12 @@ ${hardCascadeLibrary}`;
     expect(resources.cloudLogDepthProgram).not.toBe(resources.cloudProgram);
     expect(resources.cloudResolveProgram).toBeDefined();
     expect(resources.cloudResolveLogDepthProgram).toBeDefined();
-    expect(resources.cloudShapeTexture.sizeInBytes).toBe(9586980);
+    // Planar uses the pinned reference cloud assets with mip chains.
+    expect(resources.cloudShapeTexture.sizeInBytes).toBe(2396745);
     expect(resources.cloudOccupancyTexture.sizeInBytes).toBe(2396745);
-    expect(resources.cloudDetailTexture.sizeInBytes).toBe(1198372);
-    expect(resources.cloudWeatherTexture.sizeInBytes).toBe(262144);
-    expect(resources.cloudTurbulenceTexture.sizeInBytes).toBe(1198372);
+    expect(resources.cloudDetailTexture.sizeInBytes).toBe(37449);
+    expect(resources.cloudWeatherTexture.sizeInBytes).toBe(1398101);
+    expect(resources.cloudTurbulenceTexture.sizeInBytes).toBe(87381);
     expect(resources.cloudStbnTexture.sizeInBytes).toBe(1048576);
     for (const texture of [
       resources.cloudShapeTexture,
@@ -17998,6 +18108,92 @@ ${hardCascadeLibrary}`;
     }
   }, 120000);
 
+  it("keeps Globe aerial color continuous across an elevated opaque receiver", async function () {
+    await connectControlledCloudMode("globe", function () {
+      effects.showClouds = false;
+    });
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    scene.globe.show = false;
+    scene.canvas.width = 256;
+    scene.canvas.height = 256;
+    scene.camera.frustum.aspectRatio = 1.0;
+    scene.camera.frustum.near = 1.0;
+    scene.camera.frustum.far = 1000000.0;
+    scene.camera.setView({
+      destination: Cartesian3.fromDegrees(118.8406, 32.01, 600.0),
+      orientation: {
+        heading: 0.0,
+        pitch: CesiumMath.toRadians(-5.0),
+        roll: 0.0,
+      },
+    });
+    const localFrame = Transforms.eastNorthUpToFixedFrame(
+      Cartesian3.fromDegrees(118.8406, 32.01, 0.0),
+    );
+    scene.primitives.add(
+      new Primitive({
+        geometryInstances: new GeometryInstance({
+          geometry: BoxGeometry.fromDimensions({
+            dimensions: new Cartesian3(3000.0, 1000.0, 3000.0),
+            vertexFormat: PerInstanceColorAppearance.FLAT_VERTEX_FORMAT,
+          }),
+          modelMatrix: Matrix4.multiply(
+            localFrame,
+            Matrix4.fromTranslation(
+              new Cartesian3(0.0, 20500.0, 1500.0),
+              new Matrix4(),
+            ),
+            new Matrix4(),
+          ),
+          attributes: {
+            color: ColorGeometryInstanceAttribute.fromColor(
+              Color.fromBytes(80, 20, 20, 255),
+            ),
+          },
+        }),
+        appearance: new PerInstanceColorAppearance({
+          flat: true,
+          translucent: false,
+          closed: true,
+        }),
+        asynchronous: false,
+      }),
+    );
+    effects.backgroundRadianceScale = 4.0;
+    const time = JulianDate.fromIso8601("2026-06-21T02:30:00Z");
+    effects.update(scene, time);
+    scene.renderForSpecs(time);
+    const identity = readFramePixels();
+    const rows = [];
+    for (let y = 1; y < 255; y++) {
+      const offset = (y * 256 + 128) * 4;
+      if (identity[offset] > 20) {
+        rows.push(y);
+      }
+    }
+    expect(rows.length).toBeGreaterThan(20);
+    effects.showAerialPerspective = true;
+    effects.update(scene, time);
+    scene.renderForSpecs(time);
+    const aerial = readFramePixels();
+    let maximumStep = 0;
+    for (let i = 2; i < rows.length - 2; i++) {
+      const previous = (rows[i - 1] * 256 + 128) * 4;
+      const current = (rows[i] * 256 + 128) * 4;
+      for (let channel = 0; channel < 3; channel++) {
+        maximumStep = Math.max(
+          maximumStep,
+          Math.abs(aerial[current + channel] - aerial[previous + channel]),
+        );
+      }
+    }
+    // A smooth face at nearly constant depth must not acquire a horizontal edge.
+    expect(maximumStep).toBeLessThan(12);
+    expect(maximumRgbDelta(aerial, identity)).toBeGreaterThan(12);
+  });
+
   it("renders every far opaque Globe pixel through linear and log aerial variants", async function () {
     await connectControlledCloudMode("globe");
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -18130,59 +18326,6 @@ ${hardCascadeLibrary}`;
         );
         effects.showHeightFog = false;
       }
-
-      const stableTerrainDistances = executeHalfFloatQuad(
-        [
-          brunetonDefinitionsSource,
-          brunetonCommonSource,
-          brunetonRuntimeSource,
-          atmosphereSource,
-          heightFogSource,
-          `precision highp float;
-          void main() {
-            vec3 down = vec3(0.0, 0.0, -1.0);
-            float nearDistance = sceneGISGlobeStableTerrainDistance(
-              vec3(0.0, 0.0, 1000.0), down, 500.0);
-            float farGroundDistance = sceneGISGlobeStableTerrainDistance(
-              vec3(0.0, 0.0, 100000.0), down, 100000.0);
-            float farLodDistance = sceneGISGlobeStableTerrainDistance(
-              vec3(0.0, 0.0, 100000.0), down, 98000.0);
-            float highCameraShortDepth = sceneGISGlobeStableTerrainDistance(
-              vec3(0.0, 0.0, 100000.0), down, 4000.0);
-            out_FragColor = vec4(
-              nearDistance / 10000.0,
-              farGroundDistance / 200000.0,
-              farLodDistance / 200000.0,
-              highCameraShortDepth / 200000.0);
-          }`,
-        ],
-        {
-          defines: [
-            "SCENEGIS_GLOBE",
-            "COMBINED_SCATTERING_TEXTURES",
-            "TRANSMITTANCE_TEXTURE_WIDTH 256",
-            "TRANSMITTANCE_TEXTURE_HEIGHT 64",
-            "SCATTERING_TEXTURE_R_SIZE 32",
-            "SCATTERING_TEXTURE_MU_SIZE 128",
-            "SCATTERING_TEXTURE_MU_S_SIZE 32",
-            "SCATTERING_TEXTURE_NU_SIZE 8",
-            "IRRADIANCE_TEXTURE_WIDTH 64",
-            "IRRADIANCE_TEXTURE_HEIGHT 16",
-          ],
-        },
-      )[0];
-      expect(stableTerrainDistances[0] * 10000.0).toEqualEpsilon(500.0, 8.0);
-      expect(stableTerrainDistances[1] * 200000.0).toEqualEpsilon(
-        100000.0,
-        64.0,
-      );
-      expect(
-        (stableTerrainDistances[1] - stableTerrainDistances[2]) * 200000.0,
-      ).toEqualEpsilon(0.0, 64.0);
-      expect(stableTerrainDistances[3] * 200000.0).toEqualEpsilon(
-        100000.0,
-        64.0,
-      );
 
       const clearDepthTexture = new Texture({
         context: scene.context,

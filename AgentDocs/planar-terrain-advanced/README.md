@@ -12,7 +12,8 @@
 - Latest completed phase:
   [A7 平面高级地形统一资格与交付](plans/2026-08-11-phase-a7-unified-qualification-and-delivery.md)
 - Active standalone plan: None
-- Latest completed standalone plan: [平面相机惯性](plans/2026-09-18-planar-camera-inertia.md)
+- Pending visual acceptance: [地形元数据接入](plans/2026-09-18-terrain-layer-metadata.md)
+- Latest completed standalone plan: [地形剖切与多边形裁剪](plans/2026-09-18-terrain-clipping.md)（技术与视觉验收通过）
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
 - Last updated: `2026-09-18`
@@ -62,6 +63,21 @@
   复用合法 SGP
 
 ## Current handoff
+
+2026-09-18：平面剖切和多边形裁剪已实现，直接复用原生 Cesium collection / polygon API。
+91 项相关 Specs、2 项真实地形 dev/release E2E、完整 build/release/types 与 engine tarball 定向 smoke 通过。
+见 [技术自审](reviews/2026-09-18-terrain-clipping.md)，负责人可在 Test/Planar“地形剖切”页验收。
+随后视觉复测发现的共面裙边碎点已修复；新增像素回归从 79 个残留降为 0，Clipping 当前 13 项通过，
+原相机与参数画面复测正常，负责人已确认验收通过，裁剪 standalone plan 关闭。
+工作分支为 `codex/planar-terrain-clipping`，继承 metadata 与独立大气变更；本项只变更裁剪范围，未提交或 push。
+
+2026-09-18：负责人进一步要求与 TileWorker 任务对齐地形公共字段，允许平面特需私有字段。
+[跨仓库讨论](discussions/2026-09-18-terrain-layer-contract.md) 已 resolved，双方确认完整协议，ADR-0080 已修订。
+消费端仅支持当前 v2 profile，未知格式统一拒绝；11 项 Specs 通过，两个真实 Chromium E2E 联合验收通过。
+TW-R001/R002/R003 已关闭；连同未改的 URL provider / World 为 54 项 Specs。完整 build/buildTs/tsc、lint 与画面检查通过，
+active standalone plan 仅待负责人视觉验收；本仓库未提交或 push。
+[技术自审](reviews/2026-09-18-terrain-layer-metadata.md) 与
+[兼容性清单](reviews/2026-09-18-tileworker-compatibility.md) 记录当前契约和验证证据。
 
 2026-09-18：平面相机默认惯性已实现，见[惯性计划](plans/2026-09-18-planar-camera-inertia.md)、
 [技术自审](reviews/2026-09-18-planar-camera-inertia.md)与 ADR-0079。64 项 Specs、真实鼠标松手及

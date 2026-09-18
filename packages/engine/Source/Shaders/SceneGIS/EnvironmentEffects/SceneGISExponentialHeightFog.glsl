@@ -1,12 +1,6 @@
 const float SCENEGIS_HEIGHT_FOG_SUPPORT_TOP = 60000.0;
 const float SCENEGIS_HEIGHT_FOG_MAX_DISTANCE = 300000.0;
 const int SCENEGIS_HEIGHT_FOG_GLOBE_SAMPLE_COUNT = 16;
-#ifdef SCENEGIS_GLOBE
-const float SCENEGIS_GLOBE_TERRAIN_STABILIZATION_START = 8000.0;
-const float SCENEGIS_GLOBE_TERRAIN_STABILIZATION_END = 50000.0;
-const float SCENEGIS_GLOBE_CAMERA_STABILIZATION_START = 2000.0;
-const float SCENEGIS_GLOBE_CAMERA_STABILIZATION_END = 27000.0;
-#endif
 
 float sceneGISHeightFogDensityAtHeight(
     float height,
@@ -64,50 +58,6 @@ bool sceneGISHeightFogSphereInterval(
     farDistance = -projected + root;
     return farDistance > 0.0;
 }
-
-#ifdef SCENEGIS_GLOBE
-float sceneGISGlobeStableTerrainDistance(
-    vec3 rayOrigin,
-    vec3 viewDirection,
-    float sceneDistance)
-{
-    float distance = max(sceneDistance, 0.0);
-    vec3 virtualOrigin = vec3(
-        rayOrigin.xy, SCENEGIS_BOTTOM_RADIUS + rayOrigin.z);
-    float distanceStabilization = smoothstep(
-        SCENEGIS_GLOBE_TERRAIN_STABILIZATION_START,
-        SCENEGIS_GLOBE_TERRAIN_STABILIZATION_END,
-        distance);
-    float cameraHeight = max(
-        length(virtualOrigin) - SCENEGIS_BOTTOM_RADIUS, 0.0);
-    float cameraStabilization = smoothstep(
-        SCENEGIS_GLOBE_CAMERA_STABILIZATION_START,
-        SCENEGIS_GLOBE_CAMERA_STABILIZATION_END,
-        cameraHeight);
-    float stabilization = max(
-        distanceStabilization, cameraStabilization);
-    if (stabilization <= 0.0) {
-        return distance;
-    }
-
-    vec3 scenePoint = virtualOrigin + viewDirection * distance;
-    float sceneHeight = length(scenePoint) - SCENEGIS_BOTTOM_RADIUS;
-    float stableHeight = mix(sceneHeight, 0.0, stabilization);
-    float stableRadius = SCENEGIS_BOTTOM_RADIUS + stableHeight;
-    float nearDistance;
-    float farDistance;
-    if (!sceneGISHeightFogSphereInterval(
-            virtualOrigin,
-            viewDirection,
-            stableRadius,
-            nearDistance,
-            farDistance)) {
-        return distance;
-    }
-    float stableDistance = nearDistance > 0.0 ? nearDistance : farDistance;
-    return stableDistance > 0.0 ? stableDistance : distance;
-}
-#endif
 
 bool sceneGISHeightFogGlobeSegment(
     vec3 rayOrigin,

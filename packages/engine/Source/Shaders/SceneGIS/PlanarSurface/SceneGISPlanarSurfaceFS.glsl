@@ -87,6 +87,9 @@ czm_materialInput sceneGISPlanarMaterialInput(vec3 normalEC)
 
 void main()
 {
+#ifdef SCENEGIS_CLIPPING
+    float clippingDistance = sceneGISClipTerrain();
+#endif
     vec4 color = sceneGISComposeLayers(u_color, v_textureCoordinates);
 #if defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_MATERIAL)
     vec3 normalEC = sceneGISPlanarNormalEC();
@@ -109,6 +112,11 @@ void main()
     color.rgb *= czm_lightColor * intensity;
 #endif
     out_FragColor = vec4(color.rgb, 1.0);
+#ifdef SCENEGIS_CLIPPING
+    if (clippingDistance < u_clippingEdgeStyle.w) {
+        out_FragColor.rgb = u_clippingEdgeStyle.rgb;
+    }
+#endif
     #ifdef SCENEGIS_SURFACE_TRANSLUCENCY
         vec2 uv = gl_FragCoord.xy / vec2(textureSize(u_surfaceBackground, 0));
         vec4 background = texture(u_surfaceBackground, uv);

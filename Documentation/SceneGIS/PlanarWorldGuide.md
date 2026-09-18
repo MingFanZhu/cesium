@@ -111,6 +111,58 @@ compile/link、sampler预算与像素结果。
 terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务条款、展示 attribution，并
 处理CORS、限流和服务失败。自动化测试应使用本地provider，不依赖公网。
 
+## 地形剖切与多边形裁剪
+
+与 Globe 一样，为 `world.clippingPlanes`、`world.clippingPolygons` 设置原生 Cesium 集合：
+
+```js
+import {
+  Cartesian3,
+  ClippingPlane,
+  ClippingPlaneCollection,
+  ClippingPolygon,
+  ClippingPolygonCollection,
+  Color,
+} from "cesium";
+
+world.clippingPlanes = new ClippingPlaneCollection({
+  planes: [new ClippingPlane(Cartesian3.UNIT_X, 0)],
+  unionClippingRegions: false,
+  edgeColor: Color.YELLOW,
+  edgeWidth: 2,
+});
+world.clippingPolygons = new ClippingPolygonCollection({
+  polygons: [
+    new ClippingPolygon({
+      positions: [
+        new Cartesian3(-50, -50, 0),
+        new Cartesian3(50, -50, 0),
+        new Cartesian3(50, 50, 0),
+        new Cartesian3(-50, 50, 0),
+      ],
+    }),
+  ],
+  inverse: false,
+});
+```
+
+坐标使用当前 World 的米制 XYZ。平面按 `modelMatrix` 变换，裁剪负半空间；多个平面默认裁剪交集，
+`unionClippingRegions=true` 裁剪并集。`edgeWidth` 单位为像素。
+多边形使用直线 XY 简单外环，支持凹多边形和任意绕序，Z 与 `ellipsoid` 不参与裁剪。
+多个多边形裁剪内部并集，`inverse=true` 保留并集内部。两类裁剪同时启用时，任一裁掉的部分均不可见。
+可以沿用 `add/get/remove/removeAll/contains`、`enabled` 与原生 `positions` 数组的原地修改。
+
+修改在下一次普通渲染生效；使用 `requestRenderMode` 时调用 `viewer.scene.requestRender()`。
+颜色、深度、`pickPosition` 和 `world.pickTerrain` 使用同一裁剪范围；
+`getTerrainHeight` 和独立 `SceneGISPlanarTerrainSampler` 仍返回源高程。
+剖切只隐藏地表，不生成侧壁或封底，不修改地形数据。集合由 World 独占，替换或销毁 World 会销毁集合。
+
+需要 WebGL 2 和浮点纹理，启用后占用一个 fragment sampler。平面实现直接测试边界，
+不使用球面的距离场，因此 `quality` 和 `debugShowDistanceTexture` 不影响平面画面。
+片元成本随平面数与多边形边数增长；当前验收覆盖交互式少量区域，不承诺大规模区域性能。
+本地操作入口为 [地形剖切](../../Test/Planar/地形剖切.html)，完整契约见
+[ADR-0081](Decisions/ADR-0081-planar-terrain-clipping.md)。
+
 ## CesiumWidget 入口
 
 低层应用可使用 `new CesiumWidget(container, { world })`。应用必须把 `scene.screenSpaceCameraController.enableInputs` 设为 `false`，再通过 `widget.addController` 注册唯一 `SceneGISPlanarCameraController`；销毁 Widget 前先移除 controller。`Viewer({ world })`与`Viewer({ planarWorld })`已自动完成这套顺序。live World入口适合高级调用方；常规应用优先使用raw config，并从readonly `viewer.planarWorld`取得resolved World后再安装provider。
@@ -202,13 +254,144 @@ widget.clock.currentTime = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
 - 独立批量采样使用`SceneGISPlanarTerrainSampler.sampleAtLevel`；它直接访问provider，不读取World
   cache，也不做ancestor/upsample fallback。
 
+## Camera 属性和方法兼容矩阵
+
+平面继续使用 `viewer.camera`，位置为当前 World 的米制 Cartesian3。
+HPR 单位为弧度：固定 +X 东、+Y 北、+Z 上；heading 从北顺时针向东，pitch 向下为负。
+heading / roll 使用非负一周范围，pitch 范围为 -π/2 到 π/2。
+垂直朝上或朝下时 heading 与 roll 不能唯一分离，读取结果以 roll=0 表达同一姿态。
+
+| 属性 / 方法                                                                                                        | 平面语义                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| position / direction / up / right                                                                                  | Camera 当前 reference frame 下的 Cartesian 状态                                                           |
+| positionWC / directionWC / upWC / rightWC                                                                          | 固定平面 world frame 下的状态；高程使用 positionWC.z                                                      |
+| heading / pitch / roll                                                                                             | 固定 world axes 下的 HPR，与 reference transform 无关                                                     |
+| setView                                                                                                            | Cartesian destination；支持 HPR 或 direction + up，以及 endTransform                                      |
+| flyTo / flyToBoundingSphere / flyHome                                                                              | Cartesian 飞行；保留 duration、easing、complete / cancel、cancelFlight / completeFlight                   |
+| lookAt                                                                                                             | 移动到 target + offset，并设置以 target 为原点的 translation-only reference frame                         |
+| lookAtWorldPosition                                                                                                | 原地看向 world target，固定 +Z up；保留位置与 transform；ellipsoid 参数忽略                               |
+| lookAtTransform                                                                                                    | 使用调用方指定 reference frame；offset 相对于该 frame。传 Matrix4.IDENTITY 且不传 offset 可解除目标参考系 |
+| viewBoundingSphere / distanceToBoundingSphere / getPixelSize                                                       | 米制 world-space sphere，无经纬度转换                                                                     |
+| move / moveForward 等、look / twist / rotate 系列                                                                  | 沿用 Cartesian reference-frame 操作；rotate 围绕当前 reference frame 原点，不自动选择地形 pivot           |
+| zoomIn / zoomOut                                                                                                   | 透视沿视线移动；正交按米改变水平 span，不移动位置，最小 span 为 near                                      |
+| switchToOrthographicFrustum / switchToPerspectiveFrustum                                                           | 可用；切正交从平面 target range / surface height 获取正尺度                                               |
+| getPickRay                                                                                                         | 透视、正交及两种直接 OffCenter 均按实际 bounds 生成 world ray，可传给 world.pickTerrain / world.pick      |
+| transform / inverseTransform / viewMatrix / inverseViewMatrix、worldToCameraCoordinates 系列及其反向               | 保留 Cartesian 矩阵和点 / 向量转换语义                                                                    |
+| changed / percentageChanged、moveStart / moveEnd                                                                   | 保留原事件接口；changed 使用平面尺度，能检测平移与纯正交缩放                                              |
+| getMagnitude                                                                                                       | 当前 reference frame 下 position 的向量长度，不是离地高度                                                 |
+| positionCartographic                                                                                               | 仅为 Cesium 内部椭球基底，不能作为平面坐标或高程读取                                                      |
+| pickEllipsoid / computeViewRectangle / getRectangleCameraCoordinates、Rectangle destination、flyOverLongitude 参数 | 球面专用，平面同步拒绝                                                                                    |
+
+`Camera.DEFAULT_VIEW_RECTANGLE` / `DEFAULT_VIEW_FACTOR` 不定义平面 Home；Home 按 World extent 拟合。
+`maximumZoomFactor` 是 Cesium 2D 参数，平面为 SCENE3D，不采用该参数。
+程序调用可指定范围外或地下 Cartesian pose；surface 导航控制器在下一次 update 按现有 clearance 规则纠正高度。
+示例 [相机控制](../../Test/Planar/相机控制.html) 可实时查看 HPR、坐标、正交宽度和 changed 计数。
+
 ## 影像与加载状态
+
+平面的通用影像来源如下。类名沿用 Cesium 对应名称，加 `SceneGISPlanar` 前缀；所有来源都把
+`world.tilingScheme` 原样传入，并通过 `world.imageryLayers.addImageryProvider(provider)` 加入图层。
+`alpha`、颜色滤镜、显示顺序和资源所有权不随协议改变。
+
+| 来源                        | 平面 Provider                                         | 主要配置                                                              |
+| --------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------- |
+| XYZ / 自定义 URL / TMS 模板 | `SceneGISPlanarUrlTemplateImageryProvider`            | `url`、`urlScheme`、`customTags`、`urlSchemeZeroPadding`              |
+| WMS 1.1.1 / 1.3.0           | `SceneGISPlanarWebMapServiceImageryProvider`          | `layers`、`parameters`、`srs` / `crs`、`axisOrder`                    |
+| WMTS KVP / REST             | `SceneGISPlanarWebMapTileServiceImageryProvider`      | `layer`、`style`、`tileMatrixSetID`、`tileMatrixLabels`、`dimensions` |
+| TMS 元数据                  | `SceneGISPlanarTileMapServiceImageryProvider.fromUrl` | 目录或 XML URL，读取 `tilemapresource.xml`                            |
+| 单幅影像                    | `SceneGISPlanarSingleTileImageryProvider.fromUrl`     | 自动读取图像尺寸；覆盖整个 world                                      |
+
+```js
+const imagery = new SceneGISPlanarWebMapServiceImageryProvider({
+  url: "/services/wms",
+  layers: "ortho",
+  tilingScheme: world.tilingScheme,
+  parameters: { version: "1.3.0", format: "image/png", transparent: true },
+  crs: "LOCAL:PROJECT",
+  axisOrder: "xy",
+});
+world.imageryLayers.addImageryProvider(imagery);
+
+const tms = await SceneGISPlanarTileMapServiceImageryProvider.fromUrl(
+  "/imagery/",
+  {
+    tilingScheme: world.tilingScheme,
+  },
+);
+world.imageryLayers.addImageryProvider(tms);
+```
+
+WMS 的坐标系默认取 `world.coordinateSystem.crs`，也可显式传 `crs`（1.3.0）或 `srs`（1.1.1）。
+这些标识必须代表 world 的实际米制坐标；不会做投影转换。WMS 1.3.0 的 `axisOrder: "xy" | "yx"`
+由服务 CRS 的轴定义决定；1.1.1 始终发送 XY。范围、width / height 由网格生成。
+
+WMTS 的 matrix set 必须对应 world 的单根、向下增加行号、逐级二分网格；`tileMatrixLabels[level]`
+可以是任意服务标识。KVP 地址和 REST 模板都使用相同选项，REST 支持 `{TileMatrixSet}`、`{TileMatrix}`、
+`{TileRow}`、`{TileCol}`、`{Style}`、`{Layer}` 及维度名。更换维度用
+`provider.dimensions = { Time: "2026-09-18" }`，不要原地修改 getter 返回的对象；下一 normal frame
+会刷新所有引用该 Provider 的图层，旧请求结果不会覆盖新图像。
+
+TMS `fromUrl` 会校验 SRS、BoundingBox、Origin、TileFormat 和 TileSet 分辨率，尊重 href 与 order，
+自动把内部 XYZ 行号转成 TMS 行号。不兼容的范围、多根矩阵、局部覆盖、缺失根层或不同分辨率会拒绝，
+不会猜测 3857 / 4326。无 XML、已知网格时，可直接构造 TMS provider 并显式配置尺寸与最大层级。
+单幅影像允许非正方形像素尺寸，子地形瓦片复用根图的对应部分；提供已知尺寸时也可同步构造。
+
+URL template 在 x/y/z/s 之外支持 `reverseX`、`reverseY`、`reverseZ`、`width`、`height` 和
+`westProjected` / `southProjected` / `eastProjected` / `northProjected`。Projected 值就是米制 XY，
+`customTags` 的回调签名为 `(provider, x, y, level) => value`，输入地址始终是 canonical XYZ。
+`urlSchemeZeroPadding` 与 Cesium 一样以带括号的 tag 为 key，例如 `{ "{x}": "0000" }`。
+
+本项覆盖外部通用影像加载；OpenStreetMap 等普通 XYZ 服务可以直接配置模板。原生 Grid / TileCoordinates
+属于程序化诊断图层，不是服务协议。没有增加 ArcGIS、Bing、Google、Ion、Mapbox 等厂商专用适配。
+当前未提供 GetCapabilities 自动发现、Clock / times 时序预取、feature picking 或跨 CRS 重投影。
+WMS 的静态 TIME 可放在 parameters 中，WMTS 可显式替换 dimensions。交互示例见
+[影像服务](../../Test/Planar/影像服务.html)，完整契约见 [ADR-0082](Decisions/ADR-0082-planar-imagery-protocols.md)。
 
 provider 的 `tilingScheme` 必须与 `world.tilingScheme` 是同一对象，不能只具有相同参数。每个 ideal geometry tile 始终提交一个 opaque command；shown layer 自底向顶在单 pass 中合成，因此 layer 数不能超过 WebGL texture image unit 上限。
 
 `world.tilesLoaded` 是当前视图 terrain coverage/readiness 与 shown imagery readiness 的合取。对 imagery contribution，运行时请求 desired tile 与 Level 0 bootstrap；可复用 cache 中最近的 ready ancestor，但不会主动请求中间 ancestor。Recoverable terrain 或 imagery direct content 仍 pending 时结果保持 `false`；terminal failure 配合稳定 fallback 时可 settled。移除 layer、替换 provider 或销毁 world 会取消/隔离请求并释放对应资源，late settlement 不得重新进入 cache。
 
 ## 地形、光照与数据边界
+
+### 通过 layer.json 加载地形服务
+
+`SceneGISPlanarLayerTerrainProvider.fromUrl` 接受服务目录、明确的 JSON 地址或 `Resource`。
+先等待描述加载完成，再让 World 复用 provider 的 canonical scheme：
+
+```js
+const terrain =
+  await Cesium.SceneGISPlanarLayerTerrainProvider.fromUrl("/terrain/");
+const world = new Cesium.SceneGISPlanarWorld({
+  tilingScheme: terrain.tilingScheme,
+  maximumLevel: terrain.maximumLevel,
+});
+world.terrainProvider = terrain;
+const viewer = new Cesium.Viewer("map", { world });
+```
+
+当前支持 TileWorker 的 `scenegis-planar-heightmap-rgb24-v2` 和
+`scenegis-planar-quantized-mesh-v2` 私有米制平面 profile。服务必须声明正方形 `rootRange`、
+boundary posts、0 起始层级、每层静态 `available`。`available` 与 Cesium 一致，始终使用 TMS 行号，
+不随 URL 的 `scheme=tms/slippyMap` 改变；provider 对外统一为 northwest XYZ。
+仅支持上述当前 profile，其余格式统一按不支持处理。
+相对瓦片模板、`{version}`、Resource 查询参数与请求头均保留。
+
+正式准备的 TileWorker v2 描述提供 `scenegis.heightRange.minimum/maximum`，由完整源扫描与编码误差推导
+保守范围；RGB24 的编码容量另放 `scenegis.encodingRange`。其他服务缺少全局范围时，应用必须在
+`fromUrl` options 中提供真实、保守的 `minimumHeight` 和 `maximumHeight`。不能用根瓦片极值代表所有后代。
+高度单位为米；NoData 填充值和量化误差也应包含在范围内。该范围描述地表，不包含消费端自行生成的裙边。
+
+向已有 World 挂载时，传入 `{ tilingScheme: world.tilingScheme }`，并按需合并高度范围等 options；
+元数据 rootRange 必须与其 extent 完全一致。此入口不执行 CRS 或垂直基准转换。
+Globe 的 `quantized-mesh-1.0` / `heightmap-1.0`、动态 availability 和 parent layer 尚不在支持范围内。
+低层 URL-template providers 继续用于已知参数的 image/LERC/mesh 接入。
+
+可运行 [地形服务示例](../../Test/Planar/地形服务.html)，切换两种真实 TileWorker 产物。
+示例默认直接读取服务公布的高度范围，也支持
+`?url=服务地址&minimumHeight=下界&maximumHeight=上界` 显式覆盖。契约见
+[ADR-0080](Decisions/ADR-0080-planar-terrain-layer-metadata.md)。
+
+### 运行时与光照
 
 `terrainProvider`由调用方拥有，并且必须引用World的canonical tiling scheme。Runtime维持direct、
 upsampled与flat fallback的连续单层coverage，以skirt遮蔽mixed-LOD边缘；terrain geometry与imagery

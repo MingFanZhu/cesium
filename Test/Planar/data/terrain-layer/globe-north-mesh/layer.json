@@ -1,0 +1,74 @@
+{
+  "available": [
+    [
+      {
+        "endX": 0,
+        "endY": 0,
+        "startX": 0,
+        "startY": 0
+      }
+    ],
+    [
+      {
+        "endX": 0,
+        "endY": 1,
+        "startX": 0,
+        "startY": 1
+      }
+    ]
+  ],
+  "bounds": [
+    -180.0,
+    -85.05112877980659,
+    180.0,
+    85.05112877980659
+  ],
+  "extensions": [],
+  "format": "quantized-mesh-1.0",
+  "maxzoom": 1,
+  "minzoom": 0,
+  "projection": "EPSG:3857",
+  "scenegis": {
+    "availability": "source-bounds",
+    "grid": {
+      "height": 65,
+      "placement": "posts",
+      "width": 65
+    },
+    "heightRange": {
+      "maximum": 0.10100000351667404,
+      "minimum": -16.726001739501953,
+      "source": "source-scan-conservative"
+    },
+    "heightReference": "source",
+    "horizonOcclusion": "finite-when-computable-otherwise-three-nan",
+    "logicalMaxLevel": 1,
+    "logicalMinLevel": 0,
+    "noDataPolicy": "zero",
+    "profile": "cesium-quantized-mesh-1.0",
+    "quantization": {
+      "additionalErrorBound": "half-reference-consumer-skirt-at-tile-level",
+      "decodedEdgeDifferenceBudget": 0.2,
+      "maxError": 0.1,
+      "method": "uint15-per-tile-outward-float32",
+      "sharedSourcePosts": true
+    },
+    "resampling": "bilinear",
+    "schemeId": "mercator-north@1",
+    "skirt": {
+      "depthAtLevelZero": 770673.3977995863,
+      "depthAtLogicalMax": 385336.69889979315,
+      "heightmapTerrainQuality": 0.25,
+      "levelScale": 0.5,
+      "source": "reference-cesium-default"
+    },
+    "unit": "metre",
+    "verticalTransform": false
+  },
+  "scheme": "tms",
+  "tilejson": "2.1.0",
+  "tiles": [
+    "{z}/{y}/{x}.terrain"
+  ],
+  "version": "1.0.0"
+}

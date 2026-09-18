@@ -78,6 +78,10 @@ function validatePlanarCamera(camera) {
 }
 
 const scratchFrustumInfo = {};
+const scratchPreviousFrustumInfo = {};
+const scratchCenterWindow = { x: 0, y: 0 };
+const scratchCenterRay = new Ray();
+const scratchSurfaceIntersection = new Cartesian3();
 
 function isPlanarCamera(camera) {
   return camera?._scene?.world instanceof SceneGISPlanarWorld;
@@ -321,7 +325,7 @@ function getWindowRay(camera, element, windowPosition, result) {
     );
   }
 
-  const info = getFrustumInfo(camera.frustum);
+  const info = getFrustumInfo(camera.frustum, scratchFrustumInfo);
   const pose = getWorldPose(camera, scratchWorldPose);
   validateCameraAxes(pose);
   result = result ?? new Ray();
@@ -638,10 +642,7 @@ function getAxes(heading, pitch, direction, up, right, roll) {
 function getHeadingPitch(camera, result) {
   const pose = getWorldPose(camera, scratchWorldPose);
   validateCameraAxes(pose);
-  const direction = Cartesian3.normalize(
-    pose.direction,
-    scratchExpectedDirection,
-  );
+  const direction = Cartesian3.normalize(pose.direction, scratchLocalDirection);
   const horizontalMagnitude = Math.hypot(direction.x, direction.y);
   let heading;
   if (horizontalMagnitude > CesiumMath.EPSILON12) {
@@ -651,7 +652,7 @@ function getHeadingPitch(camera, result) {
     const directionSign = direction.z > 0.0 ? -1.0 : 1.0;
     heading = Math.atan2(up.x * directionSign, up.y * directionSign);
   }
-  const pitch = Math.asin(CesiumMath.clamp(direction.z, -1.0, 1.0));
+  const pitch = Math.atan2(direction.z, horizontalMagnitude);
   getAxes(
     heading,
     pitch,
@@ -703,7 +704,110 @@ function getHeadingPitchRoll(camera, result) {
       "The planar camera axes must form an orthonormal basis.",
     );
   }
+  pose.roll = CesiumMath.zeroToTwoPi(pose.roll);
   return pose;
+}
+
+function lookAtWorldPosition(camera, target) {
+  validatePlanarCamera(camera);
+  if (!finiteCartesian3(target)) {
+    throw new DeveloperError(
+      "The planar Camera target must be a finite Cartesian3.",
+    );
+  }
+  const pose = getWorldPose(camera, scratchWorldPose);
+  Cartesian3.subtract(target, pose.position, scratchOffset);
+  if (Cartesian3.magnitudeSquared(scratchOffset) < CesiumMath.EPSILON8) {
+    Cartesian3.clone(pose.direction, scratchOffset);
+  }
+  robustNormalize(scratchOffset, scratchOffset);
+  Cartesian3.cross(scratchOffset, Cartesian3.UNIT_Z, scratchRight);
+  if (Cartesian3.magnitudeSquared(scratchRight) < CesiumMath.EPSILON8) {
+    Cartesian3.clone(pose.right, scratchRight);
+  }
+  Cartesian3.cross(scratchRight, scratchOffset, scratchUp);
+  setWorldPose(camera, pose.position, scratchOffset, scratchUp);
+}
+
+function getPlanarHeight(camera) {
+  const position = camera.positionWC;
+  const height = camera._scene.world.getTerrainHeight(position) ?? 0.0;
+  return Math.max(Math.abs(position.z - height), camera.frustum.near);
+}
+
+function getOrthographicWidth(camera) {
+  const world = validatePlanarCamera(camera);
+  if (!Matrix4.equals(camera.transform, Matrix4.IDENTITY)) {
+    return Math.max(Cartesian3.magnitude(camera.position), camera.frustum.near);
+  }
+  const canvas = camera._scene.canvas;
+  scratchCenterWindow.x = canvas.clientWidth * 0.5;
+  scratchCenterWindow.y = canvas.clientHeight * 0.5;
+  const ray = getWindowRay(
+    camera,
+    canvas,
+    scratchCenterWindow,
+    scratchCenterRay,
+  );
+  const intersection = defined(ray)
+    ? (world.pickTerrain(ray, scratchSurfaceIntersection) ??
+      world.pick(ray, scratchSurfaceIntersection))
+    : undefined;
+  return defined(intersection)
+    ? Math.max(
+        Cartesian3.distance(camera.positionWC, intersection),
+        camera.frustum.near,
+      )
+    : getPlanarHeight(camera);
+}
+
+function zoomOrthographic(camera, amount) {
+  const info = getFrustumInfo(camera.frustum, scratchFrustumInfo);
+  if (info.perspective) {
+    return false;
+  }
+  if (!Number.isFinite(amount)) {
+    throw new DeveloperError("The planar Camera zoom amount must be finite.");
+  }
+  const width = Math.max(info.near, info.horizontalSpan - amount);
+  scaleOrthographicFrustum(camera.frustum, width / info.horizontalSpan);
+  return true;
+}
+
+function captureChangedFrustum(camera) {
+  const previous = camera._changedFrustum;
+  camera._changedFrustum = camera.frustum.clone(
+    previous?.constructor === camera.frustum.constructor ? previous : undefined,
+  );
+}
+
+function getChangedPercentage(camera, distance) {
+  const info = getFrustumInfo(camera.frustum, scratchFrustumInfo);
+  const previous = getFrustumInfo(
+    camera._changedFrustum,
+    scratchPreviousFrustumInfo,
+  );
+  if (info.perspective !== previous.perspective) {
+    return 1.0;
+  }
+  const width = info.perspective
+    ? info.horizontalSlopeSpan
+    : info.horizontalSpan;
+  const height = info.perspective ? info.verticalSlopeSpan : info.verticalSpan;
+  const previousWidth = previous.perspective
+    ? previous.horizontalSlopeSpan
+    : previous.horizontalSpan;
+  const previousHeight = previous.perspective
+    ? previous.verticalSlopeSpan
+    : previous.verticalSpan;
+  return Math.max(
+    distance /
+      (info.perspective
+        ? getPlanarHeight(camera)
+        : Math.max(info.near, info.verticalSpan)),
+    Math.abs(width - previousWidth) / previousWidth,
+    Math.abs(height - previousHeight) / previousHeight,
+  );
 }
 
 function setView(camera, options) {
@@ -832,9 +936,7 @@ function lookAt(camera, target, offset) {
       horizontal > CesiumMath.EPSILON12
         ? Math.atan2(scratchCandidateDirection.x, scratchCandidateDirection.y)
         : 0.0;
-    const pitch = Math.asin(
-      CesiumMath.clamp(scratchCandidateDirection.z, -1.0, 1.0),
-    );
+    const pitch = Math.atan2(scratchCandidateDirection.z, horizontal);
     getAxes(
       heading,
       pitch,
@@ -1066,11 +1168,15 @@ const SceneGISPlanarCamera = {
   getFrustumInfo: getFrustumInfo,
   getHeadingPitch: getHeadingPitch,
   getHeadingPitchRoll: getHeadingPitchRoll,
+  getOrthographicWidth: getOrthographicWidth,
+  getChangedPercentage: getChangedPercentage,
+  captureChangedFrustum: captureChangedFrustum,
   getWorldPose: getWorldPose,
   getWindowRay: getWindowRay,
   intersectPlane: intersectPlane,
   isPlanarCamera: isPlanarCamera,
   lookAt: lookAt,
+  lookAtWorldPosition: lookAtWorldPosition,
   robustNormalize: robustNormalize,
   scaleOrthographicFrustum: scaleOrthographicFrustum,
   setView: setView,
@@ -1079,6 +1185,7 @@ const SceneGISPlanarCamera = {
   validatePlanarCamera: validatePlanarCamera,
   validateWorldPose: validateWorldPose,
   viewBoundingSphere: viewBoundingSphere,
+  zoomOrthographic: zoomOrthographic,
 };
 
 export default SceneGISPlanarCamera;

@@ -100,10 +100,11 @@ export function validateImageryProvider(provider) {
   if (
     !Number.isInteger(provider.tileWidth) ||
     provider.tileWidth <= 0 ||
-    provider.tileHeight !== provider.tileWidth
+    !Number.isInteger(provider.tileHeight) ||
+    provider.tileHeight <= 0
   ) {
     throw new DeveloperError(
-      "imageryProvider tile dimensions must be equal positive integers.",
+      "imageryProvider tile dimensions must be positive integers.",
     );
   }
   if (typeof provider.hasAlphaChannel !== "boolean") {
@@ -171,6 +172,11 @@ SceneGISPlanarImagery.prototype._getRuntime = function (layer) {
   let runtime = this._runtimes.get(layer);
   if (!runtime) {
     runtime = { layer, entries: new Map(), error: undefined };
+    runtime.removeReloadListener =
+      layer.imageryProvider._reloadEvent?.addEventListener(() => {
+        runtime.dirty = true;
+        this._tilesLoaded = false;
+      });
     this._runtimes.set(layer, runtime);
   }
   return runtime;
@@ -373,6 +379,11 @@ SceneGISPlanarImagery.prototype.prepare = function (
   frameNumber,
 ) {
   this._tilesLoaded = true;
+  for (const layer of layers) {
+    if (this._runtimes.get(layer)?.dirty) {
+      this.releaseLayer(layer);
+    }
+  }
   for (const tile of tiles) {
     for (const layer of layers) {
       if (!tile.imageryBindings) {
@@ -410,6 +421,7 @@ SceneGISPlanarImagery.prototype.releaseLayer = function (layer) {
   });
   const runtime = this._runtimes.get(layer);
   if (runtime) {
+    runtime.removeReloadListener?.();
     for (const entry of Array.from(runtime.entries.values())) {
       entry.references = 1;
       this.release(runtime, entry);

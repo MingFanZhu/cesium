@@ -1,5 +1,13 @@
 # Planar Terrain Advanced Reviews
 
+- [平面地形裁剪](2026-09-18-terrain-clipping.md)
+  （approved；累计 92 项相关 Specs、2 项真实地形 E2E 与 engine tarball 定向 smoke；共面裙边修复及负责人视觉验收通过）
+
+- [地形元数据接入](2026-09-18-terrain-layer-metadata.md)
+  （技术自审通过；当前 provider 11 项 Specs、真实产物两个 E2E 通过，负责人视觉验收待定）
+- [TileWorker 兼容性清单](2026-09-18-tileworker-compatibility.md)
+  （核验完成；双方统一 v2 契约已落地，TW-R001/R002/R003 新产物联合验收后 fixed）
+
 - [平面相机惯性](2026-09-18-planar-camera-inertia.md)
   （approved；技术自审，64 项 Specs 与实际鼠标余速验证通过，负责人验收通过）
 

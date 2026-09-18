@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TileMap version="1.0.0" tilemapservice="http://localhost:8080/Test/Planar/data/imagery-service/">
+  <Title>SceneGIS local imagery fixture</Title>
+  <Abstract>Original schematic imagery in a custom meter CRS.</Abstract>
+  <SRS>LOCAL:IMAGERY</SRS>
+  <BoundingBox minx="-10000" miny="-10000" maxx="10000" maxy="10000"/>
+  <Origin x="-10000" y="-10000"/>
+  <TileFormat width="256" height="256" mime-type="image/png" extension="png"/>
+  <TileSets profile="local">
+    <TileSet href="0" units-per-pixel="78.125" order="0"/>
+  </TileSets>
+</TileMap>

@@ -445,12 +445,20 @@ frustum bounds求view/flight endpoint，不借用ellipsoid ENU或Cartographic。
 callback/cancel/complete/requestRender/preload协议，并以soft-private token暂停已注册planar controller的input/clearance；
 结束或失败时exactly once恢复caller原有enabled状态。没有controller的低层planar Scene仍可flight。完整决定见
 [ADR-0037](Decisions/ADR-0037-planar-camera-view-and-flight.md)。
+同一契约同时覆盖原地 `lookAtWorldPosition` 的固定 +Z up、四类视锥的 public `getPickRay`、
+正交 width / zoom 与 `changed` 的平面尺度。平移和旋转不隐式重算正交宽度，公共 roll 读取遵循 Cesium 的非负一周范围。
+详见 ADR-0037 的 2026-09-18 补充以及 PlanarWorldGuide 的 Camera 兼容矩阵。
 完整决定见[ADR-0010](Decisions/ADR-0010-planar-terrain-query-picking-and-sampling.md)与
 [ADR-0024](Decisions/ADR-0024-planar-terrain-aware-navigation-anchors.md)、
 [ADR-0025](Decisions/ADR-0025-planar-navigation-mode-and-surface-relationship.md)与
 [ADR-0026](Decisions/ADR-0026-planar-terrain-clearance-and-penetration-prevention.md)。
 
 ### 平面 URL Heightmap Provider
+
+服务元数据接入使用 [ADR-0080](Decisions/ADR-0080-planar-terrain-layer-metadata.md) 的
+`SceneGISPlanarLayerTerrainProvider.fromUrl`，异步读取显式平面 profile、rootRange、available 与编码参数后
+返回同步 ready provider。World 可显式复用其 tilingScheme；也可向工厂传入既有 World 的 canonical scheme。
+私有坐标不转换，缺失的全局高度必须显式提供，不用根 tile 高度猜测后代范围。原 URL providers 继续保持下述低层职责。
 
 `SceneGISPlanarUrlTemplateHeightmapTerrainProvider` 是 coordinate-agnostic 的 concrete provider。
 应用必须传入 World 的 canonical `SceneGISPlanarTilingScheme`，并自行保证 URL 数据、world extent
@@ -467,6 +475,17 @@ pyramid；provider只拥有Resource/config/Event和global Credit reference，glo
 显示而不复制进每个TerrainData。公开Sandcastle的terrain服务只用于best-effort人工演示；自动化
 必须使用本地stub，不得依赖公网。完整决定见
 [ADR-0011](Decisions/ADR-0011-planar-url-template-heightmap-terrain-provider.md)。
+
+### 平面地形裁剪
+
+`SceneGISPlanarWorld.clippingPlanes` / `clippingPolygons` 复用 Cesium 原生集合和 polygon 类型，
+保持增删、启停、交并、inverse、modelMatrix 与平面 edge style API。坐标为米制平面坐标；polygon
+使用简单直线 XY 外环，不进入球面投影或 distance texture compute。集合为 World 独占。
+Surface 私有 RGBA Float32 纹理与 CPU 快照在 normal render 校验后发布，pick/depth replay 不消费未发布修改。
+裁剪只影响地表颜色、深度和可见 terrain ray query；源高程、provider、LOD 和原网格保持。
+默认无裁剪资源，启用后增加一个 sampler，数值和数量变化不增加 shader variants；销毁释放缓存纹理。
+不创建封底/侧壁，不承诺海量 polygon 性能。完整边界与验证见
+[ADR-0081](Decisions/ADR-0081-planar-terrain-clipping.md)。
 
 ### 平面地形基础光照
 
@@ -565,6 +584,12 @@ sparse metadata和service discovery不进入本阶段公共API。完整决定见
 [ADR-0028](Decisions/ADR-0028-planar-quantized-mesh-terrain.md)。
 
 ### 平面影像运行时
+
+通用外部影像由 SceneGIS 自有 URL template、WMS、WMTS、TMS 与 SingleTile provider 接入，
+协议参数与 Cesium 同名接口保持一致。TMS metadata 必须验证 canonical 网格，WMS 明确 CRS 与轴序；
+不得静默重投影或猜测地球坐标系。像素宽高分别为正整数，无须相等；米制网格仍严格正方形。
+WMTS dimensions 失效使用多订阅事件标脏，只在下一 normal frame 取消旧请求、替换纹理并隔离迟到结果。
+见 [ADR-0082](Decisions/ADR-0082-planar-imagery-protocols.md)。
 
 `SceneGISPlanarWorld` 的 imagery provider 必须与 world 共享同一个 canonical
 `SceneGISPlanarTilingScheme` object；等值但非同一 identity 的 scheme 不属于受支持配置。
@@ -678,7 +703,8 @@ GPU depth/stencil backend，且不自行发起terrain request。完整当前矩�
 
 C4 只为 live `SceneGISPlanarWorld` 安装 per-instance `DataSourceDisplay.visualizersCallback`；默认 Globe、
 `globe:false` 和其他 World 保持 Cesium 默认 callback。Planar gate 仅接受 `CustomDataSource`、disabled
-`EntityCluster` 和批准的 Entity top-level Property allowlist，第一次合法 update 原子追加 C2/C3 children，
+`EntityCluster` 和批准的 Entity 内建 Property allowlist；业务属性可复用 `Entity.addProperty` 或 `Entity.properties`。
+第一次合法 update 原子追加 C2/C3 children，
 后续每帧先于 child normal update 和低层资源 mutation 复验动态 profile；同步 collection listener 可以更新
 CPU tracking。Model/Polyline/Polygon 使用 per-DataSource primitive
 container，pick 继续返回 original Entity，bounds 由现有 `DataSourceDisplay` 联合。唯一上游缝隙位于

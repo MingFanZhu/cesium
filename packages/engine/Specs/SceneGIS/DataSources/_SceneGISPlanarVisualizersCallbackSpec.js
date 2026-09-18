@@ -125,7 +125,7 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     );
   });
 
-  it("rejects unsupported standard and custom properties before activation", function () {
+  it("rejects unsupported standard graphics but allows custom business properties", function () {
     const visualizers = createCallbackState();
     const entity = dataSource.entities.add({
       id: "unsupported",
@@ -137,12 +137,19 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     expect(visualizers.length).toBe(1);
 
     entity.tileset = undefined;
-    entity.addProperty("customGraphic");
-    entity.customGraphic = 1;
-    expect(function () {
-      visualizers[0].update(time);
-    }).toThrowDeveloperError();
-    expect(visualizers.length).toBe(1);
+    entity.addProperty("businessCode");
+    entity.businessCode = "A-1";
+    expect(visualizers[0].update(time)).toBe(false);
+    entity.businessCode = "A-2";
+    entity.addProperty("metadata");
+    entity.metadata = { category: "parcel" };
+    expect(visualizers[0].update(time)).toBe(true);
+    entity.removeProperty("businessCode");
+    expect(visualizers[0].update(time)).toBe(true);
+    expect(entity.metadata).toEqual({ category: "parcel" });
+    for (let i = visualizers.length - 1; i >= 0; i--) {
+      visualizers[i].destroy();
+    }
   });
 
   it("allows metadata and recovers after invalid profile and cluster correction", function () {
@@ -151,12 +158,11 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
       id: "metadata",
       properties: new PropertyBag({ category: "planar" }),
     });
-    entity.addProperty("temporaryGraphic");
-    entity.temporaryGraphic = true;
+    entity.tileset = new Cesium3DTilesetGraphics({ uri: "local.json" });
     expect(function () {
       visualizers[0].update(time);
     }).toThrowDeveloperError();
-    entity.temporaryGraphic = undefined;
+    entity.tileset = undefined;
 
     cluster.enabled = true;
     expect(function () {
@@ -336,8 +342,7 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
       }),
     });
     const invalid = dataSource.entities.add({ id: "dynamic-invalid" });
-    invalid.addProperty("unsupportedGraphic");
-    invalid.unsupportedGraphic = true;
+    invalid.tileset = new Cesium3DTilesetGraphics({ uri: "local.json" });
 
     expect(function () {
       for (let i = 0, length = visualizers.length; i < length; i++) {

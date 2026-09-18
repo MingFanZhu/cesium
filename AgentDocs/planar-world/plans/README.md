@@ -4,6 +4,8 @@
 
 ## 当前计划
 
+- 最近完成 standalone plan：[通用影像来源](2026-09-18-imagery-protocols.md)（completed；负责人验收通过）
+
 - 总体计划（extension plan）：
   [2026-08-05-planar-world-extension.md](2026-08-05-planar-world-extension.md)
   （`completed`）

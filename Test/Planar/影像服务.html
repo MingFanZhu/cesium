@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 影像服务</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>影像服务</h1>
+      <p>
+        切换 URL 模板、TMS、WMS、WMTS
+        和单幅影像，统一使用本地米制坐标与平面图层接口。
+      </p>
+      <p>
+        本页使用本地固定图像响应演示加载。接入真实服务时，在源码中填写服务地址、图层和坐标系。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="影像服务.js">查看源码</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./影像服务.js"></script>
+  </body>
+</html>
