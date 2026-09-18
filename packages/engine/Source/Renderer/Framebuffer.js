@@ -7,14 +7,18 @@ import PixelFormat from "../Core/PixelFormat.js";
 import ContextLimits from "./ContextLimits.js";
 import PixelDatatype from "./PixelDatatype.js";
 
-function attachTexture(framebuffer, attachment, texture) {
+// SCENEGIS_PATCH_BEGIN SGP-0015: Allow direct HDR rendering into a color mip.
+function attachTexture(framebuffer, attachment, texture, mipLevel = 0) {
+  // SCENEGIS_PATCH_END SGP-0015
   const gl = framebuffer._gl;
   gl.framebufferTexture2D(
     gl.FRAMEBUFFER,
     attachment,
     texture._target,
     texture._texture,
-    0,
+    // SCENEGIS_PATCH_BEGIN SGP-0015: Depth attachments keep their default level zero.
+    mipLevel,
+    // SCENEGIS_PATCH_END SGP-0015
   );
 }
 
@@ -36,6 +40,9 @@ function attachRenderbuffer(framebuffer, attachment, renderbuffer) {
  * @param {object} options Object with the following properties:
  * @param {Context} options.context
  * @param {Texture[]} [options.colorTextures]
+ * SCENEGIS_PATCH_BEGIN SGP-0015: Private color attachment mip selection.
+ * @param {number} [options.colorTextureMipLevel=0] Mipmap level of all color texture attachments.
+ * SCENEGIS_PATCH_END SGP-0015
  * @param {Renderbuffer[]} [options.colorRenderbuffers]
  * @param {Texture} [options.depthTexture]
  * @param {Renderbuffer} [options.depthRenderbuffer]
@@ -208,7 +215,14 @@ function Framebuffer(options) {
       //>>includeEnd('debug');
 
       const attachmentEnum = this._gl.COLOR_ATTACHMENT0 + i;
-      attachTexture(this, attachmentEnum, texture);
+      // SCENEGIS_PATCH_BEGIN SGP-0015: Attach the requested preallocated color mip.
+      attachTexture(
+        this,
+        attachmentEnum,
+        texture,
+        options.colorTextureMipLevel,
+      );
+      // SCENEGIS_PATCH_END SGP-0015
       this._activeColorAttachments[i] = attachmentEnum;
       this._colorTextures[i] = texture;
     }

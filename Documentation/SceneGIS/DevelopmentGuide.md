@@ -728,3 +728,26 @@ ao.uniforms.ambientOcclusionOnly = false;
 成本包括额外 opaque 几何提交、4 个复用目标和一个 HDR pass-through/debug 目标，约 21 bytes/pixel
 （不计 driver padding 与 ShaderCache）。屏幕外/隐藏遮挡、亚像素细节、透明接收和 specular bent normal
 不在当前能力内。不要通过增大世界半径掩盖数据缝隙或把截图指标代替负责人视觉验收。
+
+## 验证物理天空环境反射
+
+开启已有 SceneGISEnvironmentEffects 后，Globe / Planar 的原生 PBR Model 与 3D Tiles 默认镜面
+IBL 使用同一物理天空来源。无需额外开关；继续设置 model.imageBasedLighting.imageBasedLightingFactor
+或 Entity ModelGraphics.imageBasedLightingFactor。x 控制漫反射，y 控制镜面反射。物理变体的
+clearcoat 同样遵循 y；材质 metallic/roughness/normal/anisotropy 仍由原生 PBR 处理。
+
+显式 model.imageBasedLighting.specularEnvironmentMaps（KTX2）及 scene.specularEnvironmentMaps
+优先于自动天空。model 的显式 sphericalHarmonicCoefficients 保持原语义。
+自动天空模式下 environmentMapManager.enabled=false 可退出该模型的物理镜面来源；原生 manager
+的 groundColor/gamma 等程序化参数不改变物理 LUT。光照使用 surfaceRadianceScale，天空显示
+使用 backgroundRadianceScale。需一致亮度时同时调整二者，不能对已解码 HDR 贴图再作 sRGB 解码。
+
+打开 [环境反射示例](../../Test/Planar/环境反射.html)，用 world=globe 切换球面。前排金属、后排
+涂层陶瓷，粗糙度逐渐增大；对比镜面开关、白天/日落/夜间和转动视角。反射中不包含附近球体、
+云或地形纹理，这是 R3 的区域天空探针范围。地面仅中性受光近似。球面必须继续关闭与物理
+环境冲突的 native Globe lighting / ground atmosphere 等功能；示例已经按契约设置。
+
+验证入口为 SceneGIS/Scene/SceneGISSkyReflections；相关回归为 SceneGISModelEnvironmentLighting、
+Scene/Model/ImageBasedLightingPipelineStage 和 Renderer/Framebuffer。Shader 修改先执行 gulp build
+再运行带 --webglValidation --failTaskOnError 的 GPU Specs。性能与已知原生基线失败见
+[R3 review](../../AgentDocs/rendering-quality/reviews/2026-09-19-r3-sky-reflections.md)。

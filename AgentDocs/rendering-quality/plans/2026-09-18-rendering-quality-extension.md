@@ -8,7 +8,7 @@
 - Architecture review: `confirmed`
 - Architecture reviewer: Current task, source-based self-review
 - Created: `2026-09-18`
-- Updated: `2026-09-18`
+- Updated: `2026-09-19`
 - Related discussions: None
 - Related reviews: [R1 technical review](../reviews/2026-09-18-r1-planar-shadows.md)
 - ADR: Related `ADR-0039`, `ADR-0054`, `ADR-0055`; R1 adds `ADR-0083`; R2 adds `ADR-0084`
@@ -70,14 +70,15 @@
 
 ## Phase roadmap
 
-R1 至 R4 是当前优先序；后续候选在前序验收后按真实场景收益重新排序。
+R1 至 R4 是初始优先序；后续候选在前序验收后按真实场景收益重新排序。
+2026-09-19 负责人验收 R3 后，要求优先评估场景反射；R6 的进入评估先于 R4，具体 phase 尚未激活。
 对比基线作为每个 phase 的必要工作，不单独扩展为耗时的全引擎重构。
 
 | Phase | Objective                                                   | Dependencies                         | Entry gate                                                            | Exit gate                                                           | Status    | Phase plan                               |
 | ----- | ----------------------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------- | --------- | ---------------------------------------- |
 | R1    | 几何阴影：优先补齐 Planar 原生 API 兼容，再依据证据处理质量 | 现有物理光照、World 和原生 ShadowMap | 重新追踪阴影派生命令、深度、局部上方向及接收路径；建立有限 phase plan | 模型/地形投射接收正确，开关和销毁可靠，Globe 无回归，视觉与性能验收 | completed | [R1](2026-09-18-r1-planar-shadows.md)    |
 | R2    | 高质量环境遮蔽：接触处与凹槽的空间感                        | 深度与必要表面信息、正确光照合成位置 | 比较原生 SSAO 与 GTAO 类候选，明确可在 WebGL2 承担的方案              | 遮蔽改善可见，无明显轮廓黑边，不错误压暗天空/雾/自发光，开销有界    | completed | [R2](2026-09-18-r2-ambient-occlusion.md) |
-| R3    | 物理天空与镜面 IBL 一致                                     | 现有天空辐亮度和原生 PBR 环境接口    | 明确捕获/预过滤来源、更新频率、调用方环境覆盖和资源所有权             | 不同粗糙度材质反射一致，昼夜更新稳定，保留显式用户环境配置          | proposed  | None                                     |
+| R3    | 物理天空与镜面 IBL 一致                                     | 现有天空辐亮度和原生 PBR 环境接口    | 明确捕获/预过滤来源、更新频率、调用方环境覆盖和资源所有权             | 不同粗糙度材质反射一致，昼夜更新稳定，保留显式用户环境配置          | completed | [R3](2026-09-19-r3-sky-reflections.md)   |
 | R4    | 全场景抗锯齿与时间稳定性                                    | 经验证的深度/相机路径、静态画面基线  | 先验证 MSAA / FXAA；再用运动片段判定 TAA 的收益与集成成本             | 细线/高光闪烁下降，移动物体与标注清晰，拖影和 LOD 历史污染可控      | proposed  | None                                     |
 | R5    | 地表材质与近景细节                                          | 地形法线、素材和现有材质接口         | 用可控素材区分数据问题与渲染问题                                      | 近景尺度与粗糙度可信，远近过渡合理，纹理开销有界                    | candidate | None                                     |
 | R6    | 水面及局部反射                                              | IBL、深度、材质粗糙度                | 确认实际水面/玻璃需求与屏幕空间限制                                   | 反射缺失有明确环境来源，运动与岸线稳定                              | candidate | None                                     |
@@ -123,4 +124,4 @@ API 尽量沿用原生，所有 upstream-owned 修改及剩余限制可追踪。
 - R1 负责人验收通过并提交 `4ea24b89ef`；此前已验收集中修复独立保存为 `2d590726af`。R2 已于 2026-09-19 随负责人继续 R3 的指令确认验收。
 - 其余阶段保留粗粒度目标，进入时重新检查源码事实。
 
-R1 checkpoint: `4ea24b89ef`. Current phase: [R2 ambient occlusion](2026-09-18-r2-ambient-occlusion.md), completed; owner acceptance confirmed.
+R1 checkpoint: `4ea24b89ef`. R2 checkpoint: `c824cfec1e`. [R3 sky reflections](2026-09-19-r3-sky-reflections.md) completed technical review and explicit owner visual acceptance on 2026-09-19. No active phase; isolate R3 in a checkpoint before activating further work.

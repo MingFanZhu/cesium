@@ -2,6 +2,43 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0015",
+      "title": "Connect shared HDR physical sky reflections to native PBR",
+      "status": "active",
+      "reason": "Native procedural RGBA8 captures use a different atmosphere and model-oriented reflection frame; physical HDR sky needs direct mip rendering and a default IBL source seam.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Renderer/Framebuffer.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/DynamicEnvironmentMapManager.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Model/ImageBasedLightingPipelineStage.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ImageBasedLightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISSkyReflectionsSpec.js",
+        "packages/engine/Specs/Scene/Model/ImageBasedLightingPipelineStageSpec.js",
+        "packages/engine/Specs/Scene/DynamicEnvironmentMapManagerSpec.js",
+        "packages/engine/Specs/Renderer/FramebufferSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0085-physical-sky-specular-ibl.md",
+      "removalCondition": "Retire when native physical sky IBL offers equivalent HDR mip capture, explicit-source precedence and world-fixed reflection directions."
+    },
+    {
       "id": "SGP-0014",
       "title": "Integrate current-frame ambient occlusion into indirect lighting",
       "status": "active",

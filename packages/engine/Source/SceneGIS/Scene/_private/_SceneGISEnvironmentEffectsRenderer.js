@@ -50,6 +50,7 @@ import planarCloudTransportSource from "../../../Shaders/SceneGIS/EnvironmentEff
 import vertexSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsVS.js";
 import SceneGISAtmosphereReferenceFrame from "./_SceneGISAtmosphereReferenceFrame.js";
 import SceneGISEnvironmentEffectsPipeline from "./_SceneGISEnvironmentEffectsPipeline.js";
+import SceneGISSkyReflections from "./_SceneGISSkyReflections.js";
 
 const attributeLocations = { position: 0 };
 const fullscreenQuad = new Float32Array([
@@ -2145,8 +2146,10 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
       );
     }
   }
+  this._skyReflections ??= new SceneGISSkyReflections(this);
   const record = Object.freeze({
     active: true,
+    skyReflections: this._skyReflections,
     atlasTexture: shadow.outputFramebuffer.getColorTexture(0),
     transmittanceTexture: this._resources.transmittanceTexture,
     irradianceTexture: this._resources.irradianceTexture,
@@ -2219,6 +2222,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.releaseGlobeLighting =
       this._scene.frameState._sceneGISGlobeLighting = undefined;
     }
     this._globeLightingRecord = undefined;
+    this._skyReflections = this._skyReflections?.destroy();
     this._shadowCascadeCount = 0;
     this._shadowHistorySnapshot.valid = false;
     destroyGlobeShadowResources(this);

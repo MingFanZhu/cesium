@@ -4,6 +4,9 @@ import ImageBasedLightingStageFS from "../../Shaders/Model/ImageBasedLightingSta
 import ShaderDestination from "../../Renderer/ShaderDestination.js";
 import SpecularEnvironmentCubeMap from "../SpecularEnvironmentCubeMap.js";
 import Cartesian2 from "../../Core/Cartesian2.js";
+// SCENEGIS_PATCH_BEGIN SGP-0015: Borrow physical sky IBL without changing authored sources.
+import SceneGISModelEnvironmentLighting from "../../SceneGIS/Scene/_private/_SceneGISModelEnvironmentLighting.js";
+// SCENEGIS_PATCH_END SGP-0015
 
 const ImageBasedLightingPipelineStage = {
   name: "ImageBasedLightingPipelineStage", // Helps with debugging
@@ -30,7 +33,14 @@ ImageBasedLightingPipelineStage.process = function (
   // If environment maps or spherical harmonics are not specifically provided, use procedural lighting.
   let specularEnvironmentMapAtlas;
   if (!defined(imageBasedLighting.specularEnvironmentMaps)) {
-    specularEnvironmentMapAtlas = environmentMapManager.radianceCubeMap;
+    // SCENEGIS_PATCH_BEGIN SGP-0015: Explicit scene maps outrank procedural sources.
+    specularEnvironmentMapAtlas =
+      model._sceneGISEnvironmentLighting === true &&
+      defined(frameState.specularEnvironmentMaps)
+        ? undefined
+        : (model._sceneGISSkyReflections?.texture ??
+          environmentMapManager.radianceCubeMap);
+    // SCENEGIS_PATCH_END SGP-0015
   }
   const sphericalHarmonicCoefficients =
     imageBasedLighting.sphericalHarmonicCoefficients ??
@@ -120,7 +130,13 @@ ImageBasedLightingPipelineStage.process = function (
         "model_specularEnvironmentMapsMaximumLOD",
         ShaderDestination.FRAGMENT,
       );
-    } else if (model.useDefaultSpecularMaps) {
+      // SCENEGIS_PATCH_BEGIN SGP-0015: Physical lighting honors the native IBL object's scene-map selection.
+    } else if (
+      model.useDefaultSpecularMaps ||
+      (model._sceneGISEnvironmentLighting === true &&
+        imageBasedLighting.useDefaultSpecularMaps)
+    ) {
+      // SCENEGIS_PATCH_END SGP-0015
       shaderBuilder.addDefine(
         "SPECULAR_IBL",
         undefined,
@@ -163,6 +179,9 @@ ImageBasedLightingPipelineStage.process = function (
   }
 
   renderResources.uniformMap = combine(uniformMap, renderResources.uniformMap);
+  // SCENEGIS_PATCH_BEGIN SGP-0015: Retain native PBR factors with an independent world reflection frame.
+  SceneGISModelEnvironmentLighting.processSpecular(renderResources, frameState);
+  // SCENEGIS_PATCH_END SGP-0015
 };
 
 export default ImageBasedLightingPipelineStage;

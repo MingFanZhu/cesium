@@ -970,3 +970,16 @@ depth-only 派生命令，将各视锥深度转换为统一 eye depth，再执�
 primitive 与带法线的 PBR model。透明、classification、vector、label 不因本阶段自动扩大资格。
 不引入历史帧、相机 jitter 或第二套公开开关。帧缓冲由 native AO composite 的 owned state 所有，
 关闭时保留以便复用、resize 时替换、collection 销毁时释放；ShaderCache 管理派生程序。
+
+## 物理天空镜面 IBL（R3）
+
+[ADR-0085](Decisions/ADR-0085-physical-sky-specular-ibl.md) / SGP-0015 为 Globe / Planar
+物理环境补齐默认镜面 IBL。沿用 ImageBasedLighting、原生 PBR / clearcoat 和 GGX convolution；
+显式 model / scene specular maps 优先。环境 renderer 按需所有共享 RGBA16F cubemap 与完整
+roughness mip 链，模型只借用；独立世界方向变换保证反射不随 model/referenceMatrix 旋转。
+禁止把 per-model procedural manager 复制为第二套引擎。Framebuffer 的私有 color mip 参数
+仅用于直接 HDR attachment；深度和默认调用保持 level zero。保持已有材质、AO 与直接光分工。
+
+R3 仅捕获物理天空与中性地面近似；太阳盘由直接光 BRDF 计算，云、雾和局部几何反射不在资格内。
+当前为相机区域共享探针；太阳/局部坐标轴变化超过 0.1 度、高度变化超过 100 米或 LUT 替换时
+同步重建完整 mip 链。静态帧复用，环境 release/destroy 释放资源，不逐模型重复捕获。

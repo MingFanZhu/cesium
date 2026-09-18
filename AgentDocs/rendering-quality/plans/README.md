@@ -5,3 +5,5 @@
 - Future stages remain coarse until their entry gates are met.
 
 - [R2 Ambient occlusion](2026-09-18-r2-ambient-occlusion.md): `completed`; technical self-review and owner acceptance complete.
+
+- [R3 Physical sky reflections](2026-09-19-r3-sky-reflections.md): `completed`; technical self-review and owner visual acceptance complete; previous R2 checkpoint `c824cfec1e`.

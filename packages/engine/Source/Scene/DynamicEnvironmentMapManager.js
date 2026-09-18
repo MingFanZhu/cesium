@@ -28,6 +28,9 @@ import ComputeIrradianceFS from "../Shaders/ComputeIrradianceFS.js";
 import ComputeRadianceMapFS from "../Shaders/ComputeRadianceMapFS.js";
 import ConvolveSpecularMapFS from "../Shaders/ConvolveSpecularMapFS.js";
 import ConvolveSpecularMapVS from "../Shaders/ConvolveSpecularMapVS.js";
+// SCENEGIS_PATCH_BEGIN SGP-0015: Physical lighting already supplies the default environment sources.
+import SceneGISModelEnvironmentLighting from "../SceneGIS/Scene/_private/_SceneGISModelEnvironmentLighting.js";
+// SCENEGIS_PATCH_END SGP-0015
 
 /**
  * @typedef {object} DynamicEnvironmentMapManager.ConstructorOptions
@@ -852,6 +855,14 @@ function updateSphericalHarmonicCoefficients(manager, frameState) {
  * @private
  */
 DynamicEnvironmentMapManager.prototype.update = function (frameState) {
+  // SCENEGIS_PATCH_BEGIN SGP-0015: Cancel redundant native captures without changing caller controls.
+  if (
+    SceneGISModelEnvironmentLighting.skipProceduralEnvironment(this, frameState)
+  ) {
+    DynamicEnvironmentMapManager._updateCommandQueue(frameState);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0015
   const mode = frameState.mode;
   const isSupported =
     // @ts-expect-error A FrameState type works here because the function only references the context parameter.

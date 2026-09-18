@@ -43,8 +43,15 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
 
     #ifdef SPECULAR_IBL
         // Find the direction in which to sample the environment map
-        vec3 reflectMC = normalize(model_iblReferenceFrameMatrix * reflect(-viewDirection, normal));
+        // SCENEGIS_PATCH_BEGIN SGP-0015: Clearcoat samples the same world-fixed environment as the base layer.
+        vec3 reflectMC = sceneGISSpecularDirection(reflect(-viewDirection, normal));
+        // SCENEGIS_PATCH_END SGP-0015
         vec3 iblColor = computeSpecularIBL(reflectMC, NdotV, f0, roughness);
+        // SCENEGIS_PATCH_BEGIN SGP-0015: Physical clearcoat uses the same caller specular factor as the base layer.
+        #ifdef SCENEGIS_MODEL_LIGHTING
+        iblColor *= model_iblFactor.y;
+        #endif
+        // SCENEGIS_PATCH_END SGP-0015
         // SCENEGIS_PATCH_BEGIN SGP-0014: Apply screen-space visibility only to clearcoat IBL.
         #ifdef SCENEGIS_AMBIENT_OCCLUSION
         iblColor *= sceneGISAmbientOcclusion();

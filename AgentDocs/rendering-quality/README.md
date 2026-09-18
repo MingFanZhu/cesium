@@ -8,8 +8,8 @@
 | Status                 | `active`                                                   |
 | Planning model         | `extension`                                                |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R2 completed; R3 physical sky reflections next             |
-| Active phase plan      | [R2](plans/2026-09-18-r2-ambient-occlusion.md)             |
+| Current phase          | None; R3 completed                                         |
+| Active phase plan      | None                                                       |
 | Active standalone plan | None                                                       |
 | Architecture contact   | Current task                                               |
 | Execution contact      | Current task                                               |
@@ -35,15 +35,12 @@
 
 ## Current handoff
 
-- Current state: R2 accepted by owner continuation on 2026-09-19; implementation and technical self-review complete.
-- Next action: Create the isolated R2 checkpoint, then enter R3 physical sky reflections.
-- Priority assumption: Desktop WebGL2, outdoor city and terrain scenes, Globe / Planar both supported.
+- Current state: R3 implemented, technically reviewed and visually accepted by the owner on 2026-09-19.
+- Next action: Establish the isolated R3 checkpoint. The owner requests scene reflections next; assess SSR material inputs before activating its phase.
+- Priority assumption: Desktop WebGL2; Globe / Planar outdoor PBR models and 3D Tiles.
 - Open discussions: None.
-- Latest review: [R2 review](reviews/2026-09-18-r2-ambient-occlusion.md).
-- Known risks: Screen-space/offscreen limits, thin geometry, explicit WebGL2 float requirement, ground/vector/transparent exclusions.
-- Validation: 72 focused AO/shadow/native postprocess Specs with WebGL validation; build/release/types/lint/audit and GPU cost documented in R2 review.
-
-R1 checkpoint: `4ea24b89ef`. Current phase: [R2 ambient occlusion](plans/2026-09-18-r2-ambient-occlusion.md), completed; owner acceptance confirmed.
-
-- R2 ADR: [ADR-0084](../../Documentation/SceneGIS/Decisions/ADR-0084-forward-ambient-occlusion.md), `SGP-0014`.
-- R2 example: [环境光遮蔽](../../Test/Planar/环境光遮蔽.html).
+- Latest review: [R3 review](reviews/2026-09-19-r3-sky-reflections.md).
+- Known risks: One regional sky probe; neutral ground approximation; clouds, fog, local geometry and SSR excluded.
+- Validation: 50 focused strict GPU Specs; 43 native manager Specs pass with 4 confirmed pre-R3 baseline failures. Full builds/types and bounded GPU timing are in the review.
+- Checkpoints: R1 `4ea24b89ef`; R2 `c824cfec1e`, both accepted.
+- ADR: [ADR-0085](../../Documentation/SceneGIS/Decisions/ADR-0085-physical-sky-specular-ibl.md); SGP: `SGP-0015`.

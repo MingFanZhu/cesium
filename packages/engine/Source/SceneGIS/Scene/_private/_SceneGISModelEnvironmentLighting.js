@@ -1,4 +1,5 @@
 import defined from "../../../Core/defined.js";
+import Cartesian2 from "../../../Core/Cartesian2.js";
 import ShaderDestination from "../../../Renderer/ShaderDestination.js";
 import LightingModel from "../../../Scene/Model/LightingModel.js";
 import SceneMode from "../../../Scene/SceneMode.js";
@@ -31,12 +32,46 @@ const uniforms = {
  * @private
  */
 const SceneGISModelEnvironmentLighting = {
+  skipProceduralEnvironment(manager, frameState) {
+    const active =
+      frameState.mode === SceneMode.SCENE3D &&
+      (frameState._sceneGISPlanarLighting?.active === true ||
+        frameState._sceneGISGlobeLighting?.active === true);
+    if (active !== (manager._sceneGISPhysicalLighting === true)) {
+      manager.reset();
+      manager._sceneGISPhysicalLighting = active;
+    }
+    if (active) {
+      manager._shouldRegenerateShaders = false;
+    }
+    return active;
+  },
+
   update(model, frameState) {
     const planar = frameState._sceneGISPlanarLighting?.active === true;
     const active =
       frameState.mode === SceneMode.SCENE3D &&
       (frameState._sceneGISGlobeLighting?.active === true || planar) &&
       !defined(model.classificationType);
+    const record = planar
+      ? frameState._sceneGISPlanarLighting
+      : frameState._sceneGISGlobeLighting;
+    const sky =
+      active &&
+      model.environmentMapManager.enabled &&
+      model.imageBasedLighting.imageBasedLightingFactor.y > 0 &&
+      !defined(model.imageBasedLighting.specularEnvironmentMaps) &&
+      !defined(frameState.specularEnvironmentMaps)
+        ? record.skyReflections
+        : undefined;
+    if (sky && frameState.passes.render) {
+      sky.update(frameState);
+    }
+    const readySky = sky?.texture ? sky : undefined;
+    if (model._sceneGISSkyReflections !== readySky) {
+      model._sceneGISSkyReflections = readySky;
+      model.resetDrawCommands();
+    }
     if (
       active !== (model._sceneGISEnvironmentLighting === true) ||
       (active && planar !== (model._sceneGISPlanarEnvironmentLighting === true))
@@ -45,6 +80,31 @@ const SceneGISModelEnvironmentLighting = {
       model._sceneGISPlanarEnvironmentLighting = active && planar;
       model.resetDrawCommands();
     }
+  },
+
+  processSpecular(renderResources, frameState) {
+    const { model, shaderBuilder, uniformMap } = renderResources;
+    const sky = model._sceneGISSkyReflections;
+    if (!sky) {
+      return;
+    }
+    const fragment = ShaderDestination.FRAGMENT;
+    shaderBuilder.addDefine("SCENEGIS_SKY_REFLECTIONS", undefined, fragment);
+    shaderBuilder.addUniform("mat3", "u_sceneGISSkyWorldToLocal", fragment);
+    shaderBuilder.addUniform("float", "u_sceneGISSkyRadianceScale", fragment);
+    uniformMap.u_sceneGISSkyWorldToLocal = () => sky.worldToLocal;
+    uniformMap.u_sceneGISSkyRadianceScale = () =>
+      (frameState._sceneGISPlanarLighting ?? frameState._sceneGISGlobeLighting)
+        .surfaceRadianceScale;
+    uniformMap.model_specularEnvironmentMaps = () => sky.texture;
+    uniformMap.model_specularEnvironmentMapsMaximumLOD = () =>
+      sky.maximumMipmapLevel;
+    const factor = new Cartesian2();
+    uniformMap.model_iblFactor = () =>
+      Cartesian2.clone(
+        model.imageBasedLighting.imageBasedLightingFactor,
+        factor,
+      );
   },
 
   process(renderResources, frameState) {

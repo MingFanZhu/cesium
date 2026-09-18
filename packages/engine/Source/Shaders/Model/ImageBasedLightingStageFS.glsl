@@ -15,11 +15,27 @@ vec3 sampleDiffuseEnvironment(vec3 cubeDir)
 #endif
 
 #ifdef SPECULAR_IBL
+// SCENEGIS_PATCH_BEGIN SGP-0015: Keep default physical reflections fixed in the captured world frame.
+vec3 sceneGISSpecularDirection(vec3 directionEC)
+{
+    #ifdef SCENEGIS_SKY_REFLECTIONS
+    return normalize(u_sceneGISSkyWorldToLocal * czm_inverseViewRotation * directionEC);
+    #else
+    return normalize(model_iblReferenceFrameMatrix * directionEC);
+    #endif
+}
+// SCENEGIS_PATCH_END SGP-0015
 vec3 sampleSpecularEnvironment(vec3 cubeDir, float roughness)
 {
     #ifdef CUSTOM_SPECULAR_IBL
         float lod = roughness * model_specularEnvironmentMapsMaximumLOD;
-        return czm_textureCube(model_specularEnvironmentMaps, cubeDir, lod).rgb;
+        // SCENEGIS_PATCH_BEGIN SGP-0015: Calibrate physical HDR radiance without modifying authored maps.
+        vec3 radiance = czm_textureCube(model_specularEnvironmentMaps, cubeDir, lod).rgb;
+        #ifdef SCENEGIS_SKY_REFLECTIONS
+        radiance *= u_sceneGISSkyRadianceScale;
+        #endif
+        return radiance;
+        // SCENEGIS_PATCH_END SGP-0015
     #else
         float lod = roughness * czm_specularEnvironmentMapsMaximumLOD;
         return czm_textureCube(czm_specularEnvironmentMaps, cubeDir, lod).rgb;
@@ -105,7 +121,9 @@ vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material)
     #endif
 
     #ifdef SPECULAR_IBL
-        vec3 reflectMC = normalize(model_iblReferenceFrameMatrix * reflectEC);
+        // SCENEGIS_PATCH_BEGIN SGP-0015: Preserve anisotropic reflection directions in world space.
+        vec3 reflectMC = sceneGISSpecularDirection(reflectEC);
+        // SCENEGIS_PATCH_END SGP-0015
         vec3 radiance = sampleSpecularEnvironment(reflectMC, roughness);
         vec3 specularContribution = radiance * FssEss * model_iblFactor.y;
     #else
