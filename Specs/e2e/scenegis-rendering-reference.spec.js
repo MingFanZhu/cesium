@@ -30,6 +30,84 @@ function expectSameCamera(actual, expected) {
 }
 
 for (const world of ["planar", "globe"]) {
+  test(`${world}: geometric shadows preserve environment reflections and emission`, async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(`/Test/Rendering/阴影光照.html?world=${world}`);
+    await page.waitForFunction(() => window.example?.state.ready);
+    async function pixels() {
+      return page.evaluate(async (mode) => {
+        const C = await import("/Build/CesiumUnminified/index.js");
+        const scene = window.example.viewer.scene;
+        const frame =
+          mode === "planar"
+            ? C.Matrix4.IDENTITY
+            : C.Transforms.eastNorthUpToFixedFrame(
+                C.Cartesian3.fromDegrees(-75.596, 40.038),
+              );
+        return new Promise((resolve) => {
+          const remove = scene.postRender.addEventListener(() => {
+            remove();
+            resolve(
+              [-15, 0, 15].map((x) => {
+                const p = C.SceneTransforms.worldToWindowCoordinates(
+                  scene,
+                  C.Matrix4.multiplyByPoint(
+                    frame,
+                    new C.Cartesian3(x, 0, 0),
+                    new C.Cartesian3(),
+                  ),
+                );
+                return Array.from(
+                  scene.context.readPixels({
+                    x: Math.floor(p.x),
+                    y: scene.drawingBufferHeight - 1 - Math.floor(p.y),
+                    width: 1,
+                    height: 1,
+                  }),
+                );
+              }),
+            );
+          });
+        });
+      }, world);
+    }
+    await page.getByLabel("照明分量", { exact: true }).selectOption("仅环境光");
+    const shaded = await pixels();
+    await page.getByLabel("几何阴影", { exact: true }).uncheck();
+    expect(await pixels()).toEqual(shaded);
+    for (const pixel of shaded) {
+      expect(Math.max(...pixel.slice(0, 3))).toBeGreaterThan(20);
+    }
+    await page.getByLabel("照明分量", { exact: true }).selectOption("仅直接光");
+    const lit = await pixels();
+    await page.getByLabel("几何阴影", { exact: true }).check();
+    const shadow = await pixels();
+    expect(lit[0][0]).toBeGreaterThan(shadow[0][0] + 30);
+    expect(shadow[2]).toEqual(lit[2]);
+    await page.getByLabel("照明分量", { exact: true }).selectOption("完整光照");
+    await page.getByLabel("HDR", { exact: true }).uncheck();
+    await pixels();
+    await expect(page.locator("#error")).toBeEmpty();
+    expect(
+      await page.evaluate(() => {
+        const sample = window.example;
+        const atlas = sample.viewer.shadowMap._shadowMapTexture;
+        sample.destroy();
+        return (
+          atlas.isDestroyed() &&
+          sample.ibl.isDestroyed() &&
+          sample.models.every((model) => model.isDestroyed())
+        );
+      }),
+    ).toBe(true);
+    expect(errors).toEqual([]);
+  });
+}
+
+for (const world of ["planar", "globe"]) {
   test(`${world}: shadow detail controls and atlas lifecycle`, async ({
     page,
   }) => {

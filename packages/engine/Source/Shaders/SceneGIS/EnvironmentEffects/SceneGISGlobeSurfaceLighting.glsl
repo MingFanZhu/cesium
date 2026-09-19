@@ -71,6 +71,9 @@ vec3 sceneGISGlobeSurfaceLighting(
     #ifdef SCENEGIS_AMBIENT_OCCLUSION
     skyIrradiance *= sceneGISAmbientOcclusion();
     #endif
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+    primaryIrradiance *= sceneGISGeometryShadow();
+    #endif
     return max(albedo, vec3(0.0)) * (1.0 / czm_pi) *
         (primaryIrradiance * cloudTransmittance +
             max(skyIrradiance, vec3(0.0))) *

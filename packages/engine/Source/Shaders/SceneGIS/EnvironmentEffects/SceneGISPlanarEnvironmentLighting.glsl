@@ -73,7 +73,11 @@ vec3 sceneGISPlanarSurfaceRadiance(vec3 albedo, vec3 positionEC, vec3 normalEC)
     #ifdef SCENEGIS_AMBIENT_OCCLUSION
     indirect *= sceneGISAmbientOcclusion();
     #endif
+    float visibility = 1.0;
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+    visibility = sceneGISGeometryShadow();
+    #endif
     return albedo * (sceneGISPlanarDirectSource(positionEC) *
-        (cosine / czm_pi) * sceneGISPlanarCloudTransmittance(positionEC) +
+        (visibility * cosine / czm_pi) * sceneGISPlanarCloudTransmittance(positionEC) +
         indirect);
 }

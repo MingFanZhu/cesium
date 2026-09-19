@@ -1,4 +1,9 @@
 uniform vec4 u_initialColor;
+// SCENEGIS_PATCH_BEGIN SGP-0018: Lit terrain shades direct light before fog and edge composition.
+#if defined(SCENEGIS_GEOMETRY_SHADOW) && (defined(SCENEGIS_GLOBE_SURFACE_LIGHTING) || defined(ENABLE_VERTEX_LIGHTING) || defined(ENABLE_DAYNIGHT_SHADING))
+#define SCENEGIS_DIRECT_SHADOW_RECEIVER
+#endif
+// SCENEGIS_PATCH_END SGP-0018
 
 #if TEXTURE_UNITS > 0
 uniform sampler2D u_dayTextures[TEXTURE_UNITS];
@@ -449,16 +454,26 @@ void main()
         v_positionMC,
         sceneGISSurfaceNormalMC), color.a);
 #elif defined(ENABLE_VERTEX_LIGHTING)
+// SCENEGIS_PATCH_END SGP-0009
     float diffuseIntensity = clamp(czm_getLambertDiffuse(czm_lightDirectionEC, normalize(v_normalEC)) * u_lambertDiffuseMultiplier + u_vertexShadowDarkness, 0.0, 1.0);
+    // SCENEGIS_PATCH_BEGIN SGP-0018: Preserve the native terrain ambient floor.
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+    diffuseIntensity = mix(min(u_vertexShadowDarkness, diffuseIntensity), diffuseIntensity, sceneGISGeometryShadow());
+    #endif
+    // SCENEGIS_PATCH_END SGP-0018
     vec4 finalColor = vec4(color.rgb * czm_lightColor * diffuseIntensity, color.a);
 #elif defined(ENABLE_DAYNIGHT_SHADING)
     float diffuseIntensity = clamp(czm_getLambertDiffuse(czm_lightDirectionEC, normalEC) * 5.0 + 0.3, 0.0, 1.0);
     diffuseIntensity = mix(1.0, diffuseIntensity, fade);
+    // SCENEGIS_PATCH_BEGIN SGP-0018: Preserve the same ambient floor used by terrain AO.
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+    diffuseIntensity = mix(0.3 * fade, diffuseIntensity, sceneGISGeometryShadow());
+    #endif
+    // SCENEGIS_PATCH_END SGP-0018
     vec4 finalColor = vec4(color.rgb * czm_lightColor * diffuseIntensity, color.a);
 #else
     vec4 finalColor = color;
 #endif
-// SCENEGIS_PATCH_END SGP-0009
 
 // SCENEGIS_PATCH_BEGIN SGP-0014: Occlude only native ambient floors before clipping and atmosphere.
 #if defined(SCENEGIS_AMBIENT_OCCLUSION) && !defined(SCENEGIS_GLOBE_SURFACE_LIGHTING)

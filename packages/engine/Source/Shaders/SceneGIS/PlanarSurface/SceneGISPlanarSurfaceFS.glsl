@@ -1,4 +1,7 @@
 in vec2 v_textureCoordinates;
+#if defined(SCENEGIS_GEOMETRY_SHADOW) && (defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_LIGHTING))
+#define SCENEGIS_DIRECT_SHADOW_RECEIVER
+#endif
 uniform vec4 u_color;
 #ifdef SCENEGIS_SURFACE_TRANSLUCENCY
 uniform float u_surfaceOpacity;
@@ -123,6 +126,9 @@ void main()
         0.0,
         1.0
     );
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+    intensity = mix(min(0.3, intensity), intensity, sceneGISGeometryShadow());
+    #endif
     #ifdef SCENEGIS_AMBIENT_OCCLUSION
     intensity -= 0.3 * (1.0 - sceneGISAmbientOcclusion());
     #endif

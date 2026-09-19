@@ -1,3 +1,8 @@
+// SCENEGIS_PATCH_BEGIN SGP-0018: Model lighting owns shadow composition, including unlit materials.
+#ifdef SCENEGIS_GEOMETRY_SHADOW
+#define SCENEGIS_DIRECT_SHADOW_RECEIVER
+#endif
+// SCENEGIS_PATCH_END SGP-0018
 #ifdef USE_IBL_LIGHTING
 vec3 computeIBL(vec3 position, vec3 normal, vec3 lightDirection, vec3 lightColorHdr, czm_modelMaterial material)
 {
@@ -91,6 +96,12 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
         lightColorHdr = sceneGISModelDirectSource(position, lightColorHdr);
     #endif
     // SCENEGIS_PATCH_END SGP-0010
+
+    // SCENEGIS_PATCH_BEGIN SGP-0018: Attenuate direct base and clearcoat light before tone mapping.
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+        lightColorHdr *= sceneGISGeometryShadow();
+    #endif
+    // SCENEGIS_PATCH_END SGP-0018
 
     vec3 directLighting = czm_pbrLighting(viewDirection, normal, lightDirection, material);
     vec3 directColor = lightColorHdr * directLighting;

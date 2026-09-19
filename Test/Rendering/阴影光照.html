@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>阴影光照</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>阴影光照</h1>
+      <p>左：漫反射；中：金属环境反射；右：自发光。</p>
+      <p>几何阴影只遮挡直接光，阴影内仍保留环境光、反射和自发光。</p>
+      <p>
+        切换“仅环境光”并开关阴影，三块面板的亮度应保持不变。切换“仅直接光”可看到清晰遮挡，自发光板仍然发亮。
+      </p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="实景对比.html">实景对比</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./阴影光照.js"></script>
+  </body>
+</html>

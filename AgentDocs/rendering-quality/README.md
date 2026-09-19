@@ -8,8 +8,8 @@
 | Status                 | `active`                                                   |
 | Planning model         | `extension`                                                |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R10 Shadow refinement                                      |
-| Active phase plan      | [R10](plans/2026-09-19-r10-shadow-refinement.md)           |
+| Current phase          | R11 Direct shadow lighting                                 |
+| Active phase plan      | [R11](plans/2026-09-19-r11-direct-shadow-lighting.md)      |
 | Active standalone plan | None                                                       |
 | Architecture contact   | Current task                                               |
 | Execution contact      | Current task                                               |
@@ -35,15 +35,12 @@
 
 ## Current handoff
 
-- Current state: R10 technically complete; owner advanced to direct-only shadow lighting after the zoom fix.
-- Next action: Checkpoint R10, then activate direct-only shadow lighting.
-- Acceptance follow-up: Example wheel crash fixed by retaining the native camera far range;
-  real zoom-in/out regression passes in both Worlds. No additional engine or upstream change.
-- Priority: Photogrammetry first; future shadows, indirect light, reflection completeness and night lighting each keep focused examples.
-- Open discussions: None.
-- Latest review: [R10 review](reviews/2026-09-19-r10-shadow-refinement.md).
-- Known risks: Baked photogrammetry lighting, single-leaf sample scope, distance-band rescaling and native final-color shadow modulation. R9 Globe shadow bands are fixed.
-- Validation: 47 native shadow tests, 9 Planar GPU tests, 5 new GPU tests in dev/release, and 5 E2E pass. Builds/types, scoped ESLint and patch audit pass. Matched GPU median rises 1.719 to 2.597 ms; details in R10 review.
-- Checkpoints: R1 `4ea24b89ef`; R2 `c824cfec1e`; R3 `2e2dc02ce6`; R6 `f9301bf8cd`, all accepted.
-- Active phase ADR / SGP: [ADR-0088](../../Documentation/SceneGIS/Decisions/ADR-0088-directional-shadow-refinement.md), `SGP-0013`.
-- Example: [阴影精细度](../../Test/Rendering/阴影精细度.html)、[实景对比](../../Test/Rendering/实景对比.html)、[独立效果目录](../../Test/Rendering/示例目录.html).
+- Current state: R11 implementation and technical self-review complete; owner advanced to multi-light night rendering.
+- Next action: Checkpoint R11, then activate multi-light night rendering.
+- Latest review: [R11 review](reviews/2026-09-19-r11-direct-shadow-lighting.md).
+- Open discussions: None. Probes/GI remain deferred by the owner.
+- Known risks: Baked scan lighting, native Phong approximation, unlit/custom receiver semantics; no new resource allocation. Full limits and GPU timing are in the review.
+- Validation: 79 relevant development GPU/scene tests, 7 release lighting tests and 7 example E2E pass. Development/release builds, types, scoped lint and patch audit are recorded in the review.
+- Previous checkpoint: R10 `c2e8127dcc`; isolated from the active R11 changes.
+- Active ADR / SGP: [ADR-0089](../../Documentation/SceneGIS/Decisions/ADR-0089-direct-shadow-lighting.md), `SGP-0018`.
+- Examples: [阴影光照](../../Test/Rendering/阴影光照.html)、[实景对比](../../Test/Rendering/实景对比.html)、[独立效果目录](../../Test/Rendering/示例目录.html).

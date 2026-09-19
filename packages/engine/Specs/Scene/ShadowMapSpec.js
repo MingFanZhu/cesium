@@ -40,6 +40,9 @@ describe(
   function () {
     let scene;
     let sunShadowMap;
+    // SCENEGIS_PATCH_BEGIN SGP-0018: Isolate receiver-light fixtures between shadow tests.
+    let originalSceneLight;
+    // SCENEGIS_PATCH_END SGP-0018
     const backgroundColor = [0, 0, 0, 255];
 
     const longitude = -1.31968;
@@ -80,6 +83,9 @@ describe(
       Color.unpack(backgroundColor, 0, scene.backgroundColor);
 
       sunShadowMap = scene.shadowMap;
+      // SCENEGIS_PATCH_BEGIN SGP-0018: Retain the suite's native Sun light for unrelated cases.
+      originalSceneLight = scene.light;
+      // SCENEGIS_PATCH_END SGP-0018
 
       const boxOrigin = Cartesian3.fromRadians(longitude, latitude, boxHeight);
       const boxTransform = Transforms.headingPitchRollToFixedFrame(
@@ -320,6 +326,9 @@ describe(
       }
 
       scene.globe = undefined;
+      // SCENEGIS_PATCH_BEGIN SGP-0018: Restore receiver-light fixtures after each test.
+      scene.light = originalSceneLight;
+      // SCENEGIS_PATCH_END SGP-0018
       scene.shadowMap = scene.shadowMap && scene.shadowMap.destroy();
     });
 
@@ -909,6 +918,12 @@ describe(
         scene.camera.lookAt(origins[i], offsets[i]);
         scene.camera.moveForward(0.5);
 
+        // SCENEGIS_PATCH_BEGIN SGP-0018: Supply direct light to the tested wall; ambient is not a shadow receiver.
+        scene.light = new DirectionalLight({
+          direction: Cartesian3.clone(scene.camera.directionWC),
+        });
+        // SCENEGIS_PATCH_END SGP-0018
+
         // Render without shadows
         scene.shadowMap.enabled = false;
         let unshadowedColor;
@@ -976,6 +991,11 @@ describe(
       box.show = true;
       floor.show = true;
       createCascadedShadowMap();
+      // SCENEGIS_PATCH_BEGIN SGP-0018: Measure filter changes on a directly illuminated receiver.
+      scene.light = new DirectionalLight({
+        direction: Cartesian3.clone(scene.shadowMap._lightCamera.directionWC),
+      });
+      // SCENEGIS_PATCH_END SGP-0018
 
       // Render without shadows
       scene.shadowMap.enabled = false;
@@ -1001,6 +1021,11 @@ describe(
       box.show = true;
       floor.show = true;
       createCascadedShadowMap();
+      // SCENEGIS_PATCH_BEGIN SGP-0018: Darkness attenuates direct illumination, not the IBL baseline.
+      scene.light = new DirectionalLight({
+        direction: Cartesian3.clone(scene.shadowMap._lightCamera.directionWC),
+      });
+      // SCENEGIS_PATCH_END SGP-0018
 
       // Render without shadows
       scene.shadowMap.enabled = false;

@@ -425,6 +425,42 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0087-local-water-surfaces.md",
       "removalCondition": "Retire when upstream exposes equivalent opaque capture and per-frustum water composition hooks."
+    },
+    {
+      "id": "SGP-0018",
+      "title": "Apply geometric shadows to direct illumination",
+      "status": "active",
+      "reason": "Native final-color shadow modulation darkens indirect illumination and emission after material composition. Share the existing visibility before lighting with explicit material receivers.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/ShadowMapShader.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Builtin/Functions/phong.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/GlobeFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Specs/Scene/ShadowMapSpec.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISShadowLightingSpec.js",
+        "packages/engine/Specs/Scene/ShadowMapSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarShadowsSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0089-direct-shadow-lighting.md",
+      "removalCondition": "Retire when upstream shadow receivers provide equivalent direct-light visibility before material and atmospheric composition."
     }
   ]
 }

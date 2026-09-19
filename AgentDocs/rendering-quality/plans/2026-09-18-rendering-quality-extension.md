@@ -151,3 +151,10 @@ shared stable directional cascades, continuous PCF and geometric receiver-plane 
 with an independent example and both-world verification. Existing native APIs remain the controls.
 Implementation and technical review are complete. After the zoom fix, the owner advanced to direct-only
 shadow lighting; checkpoint R10 before activating that phase. See the [R10 review](../reviews/2026-09-19-r10-shadow-refinement.md).
+
+R10 checkpoint: `c2e8127dcc`. [R11 direct shadow lighting](2026-09-19-r11-direct-shadow-lighting.md)
+is active at the owner’s request, before probes/GI. Preserve indirect light and emission while
+keeping native shadow controls, resources and both-World behavior.
+
+R11 implementation and technical review are complete. The owner advanced to multi-light and
+emissive night rendering on 2026-09-19; checkpoint R11 before activating the next phase.

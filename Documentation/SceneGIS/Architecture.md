@@ -947,7 +947,7 @@ ellipsoid substrate，不代表planar CRS。non-Globe构造固定3D-only、关�
 `Scene.updateFrameState`在发布frame state前再次验证caller late mutation。完整矩阵与SGP边界见
 [ADR-0039](Decisions/ADR-0039-planar-scene-api-qualification-and-safety.md)。
 
-## 几何级联阴影（R1 / R10）
+## 几何级联阴影（R1 / R10 / R11）
 
 [ADR-0083](Decisions/ADR-0083-planar-cascaded-shadows.md) 通过 SGP-0013 扩宽此前 Planar
 几何阴影限制。[ADR-0088](Decisions/ADR-0088-directional-shadow-refinement.md) 将稳定四级覆盖
@@ -960,7 +960,13 @@ ShadowMap 后才销毁 Context。禁止第二套阴影引擎或伪装 Globe tile
 `Viewer.shadows`、`Viewer.terrainShadows` 与 `world.shadows` 保留原生语义；普通 Entity
 Graphics / Primitive / Model 使用 `ShadowMode`。地形 clipping 同时作用于 caster，opacity
 的背景贡献不受地表阴影衰减。连续贴地分类覆盖、vector 和 label 的资格不随此扩大；不新增
-离屏地形预取。模型/表面的原生最终颜色阴影调制尚未改造成 direct-only 物理光照融合。
+离屏地形预取。
+
+[ADR-0089](Decisions/ADR-0089-direct-shadow-lighting.md) / SGP-0018 将几何阴影可见度提前到
+材质光照阶段。PBR（含 clearcoat）、Phong 和启用光照的 Globe / Planar 地表仅衰减
+direct 光，保留环境光、IBL / SSR、自发光与后续雾、裁剪边缘合成。unlit glTF 不接收
+光照；没有光照分量约定的普通 unlit 地表和自定义最终颜色 shader 保留原有阴影行为。
+禁止为此新增 shadow atlas、渲染通道或公共开关。
 
 ## 本帧环境光遮蔽（R2）
 

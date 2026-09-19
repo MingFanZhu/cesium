@@ -3,6 +3,9 @@ import ShaderSource from "../Renderer/ShaderSource.js";
 // SCENEGIS_PATCH_BEGIN SGP-0013: Share the native receiver with owned directional cascade filtering.
 import cascadeShadow from "../Shaders/SceneGIS/Rendering/SceneGISCascadeShadow.js";
 // SCENEGIS_PATCH_END SGP-0013
+// SCENEGIS_PATCH_BEGIN SGP-0018: Share visibility with material lighting before color composition.
+import shadowLighting from "../Shaders/SceneGIS/Rendering/SceneGISShadowLighting.js";
+// SCENEGIS_PATCH_END SGP-0018
 
 /**
  * @private
@@ -272,6 +275,11 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
   }
   // SCENEGIS_PATCH_END SGP-0013
 
+  // SCENEGIS_PATCH_BEGIN SGP-0018: Define visibility before the receiver lighting functions.
+  defines.push("SCENEGIS_GEOMETRY_SHADOW");
+  sources.unshift(shadowLighting);
+  // SCENEGIS_PATCH_END SGP-0018
+
   if (isPointLight) {
     defines.push("USE_CUBE_MAP_SHADOW");
   } else if (usesDepthTexture) {
@@ -353,9 +361,10 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
     }} \n`;
 
   fsSource +=
-    "void main() \n" +
+    // SCENEGIS_PATCH_BEGIN SGP-0018: Sample visibility before material shading and tone mapping.
+    "void sceneGISComputeGeometryShadow() \n" +
     "{ \n" +
-    "    czm_shadow_receive_main(); \n" +
+    // SCENEGIS_PATCH_END SGP-0018
     "    vec4 positionEC = getPositionEC(); \n" +
     "    vec3 normalEC = getNormalEC(); \n" +
     "    float depth = -positionEC.z; \n";
@@ -451,10 +460,12 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
       "    float fade = max((depth - shadowMapMaximumDistance * 0.8) / (shadowMapMaximumDistance * 0.2), 0.0); \n" +
       "    visibility = mix(visibility, 1.0, fade); \n"
     }${
+      // SCENEGIS_PATCH_BEGIN SGP-0018: Delay debug tint until material color is available.
       debugCascadeColors
         ? "    // Draw cascade colors for debugging \n" +
-          "    out_FragColor *= czm_cascadeColor(weights); \n"
+          "    sceneGISGeometryShadowDebug = czm_cascadeColor(weights); \n"
         : ""
+      // SCENEGIS_PATCH_END SGP-0018
     }`;
   } else {
     fsSource +=
@@ -472,13 +483,24 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
       "    float visibility = czm_shadowVisibility(shadowMap_texture, shadowParameters); \n";
   }
 
-  // SCENEGIS_PATCH_BEGIN SGP-0013: Preserve the planar surface's unshadowed background contribution.
-  fsSource += `${
-    planarSurface
-      ? "    sceneGISPlanarApplyShadow(visibility); \n"
-      : "    out_FragColor.rgb *= visibility; \n"
-  }} \n`;
-  // SCENEGIS_PATCH_END SGP-0013
+  // SCENEGIS_PATCH_BEGIN SGP-0018: Qualified lighting consumes visibility; retain native color receivers.
+  fsSource += `    sceneGISGeometryShadowVisibility = visibility;
+}
+void main()
+{
+    sceneGISComputeGeometryShadow();
+    czm_shadow_receive_main();
+#ifndef SCENEGIS_DIRECT_SHADOW_RECEIVER
+${
+  planarSurface
+    ? "    sceneGISPlanarApplyShadow(sceneGISGeometryShadowVisibility);"
+    : "    out_FragColor.rgb *= sceneGISGeometryShadowVisibility;"
+}
+#endif
+    out_FragColor *= sceneGISGeometryShadowDebug;
+}
+`;
+  // SCENEGIS_PATCH_END SGP-0018
 
   sources.push(fsSource);
 

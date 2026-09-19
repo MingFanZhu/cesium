@@ -3,6 +3,12 @@
 float sceneGISAmbientOcclusion();
 #endif
 // SCENEGIS_PATCH_END SGP-0014
+// SCENEGIS_PATCH_BEGIN SGP-0018: Builtins precede the receiver's private shadow definition.
+#ifdef SCENEGIS_GEOMETRY_SHADOW
+#define SCENEGIS_DIRECT_SHADOW_RECEIVER
+float sceneGISGeometryShadow();
+#endif
+// SCENEGIS_PATCH_END SGP-0018
 float czm_private_getLambertDiffuseOfMaterial(vec3 lightDirectionEC, czm_material material)
 {
     return czm_getLambertDiffuse(lightDirectionEC, material.normal);
@@ -53,8 +59,14 @@ vec4 czm_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
     #endif
     // SCENEGIS_PATCH_END SGP-0014
     vec3 color = ambient + material.emission;
-    color += materialDiffuse * diffuse * czm_lightColor;
-    color += material.specular * specular * czm_lightColor;
+    // SCENEGIS_PATCH_BEGIN SGP-0018: Preserve ambient and emission under geometric shadows.
+    vec3 directLight = czm_lightColor;
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+    directLight *= sceneGISGeometryShadow();
+    #endif
+    color += materialDiffuse * diffuse * directLight;
+    color += material.specular * specular * directLight;
+    // SCENEGIS_PATCH_END SGP-0018
 
     return vec4(color, material.alpha);
 }
@@ -66,8 +78,14 @@ vec4 czm_private_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
 
     vec3 ambient = vec3(0.0);
     vec3 color = ambient + material.emission;
-    color += material.diffuse * diffuse * czm_lightColor;
-    color += material.specular * specular * czm_lightColor;
+    // SCENEGIS_PATCH_BEGIN SGP-0018: Preserve emission while shadowing direct diffuse and specular.
+    vec3 directLight = czm_lightColor;
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+    directLight *= sceneGISGeometryShadow();
+    #endif
+    color += material.diffuse * diffuse * directLight;
+    color += material.specular * specular * directLight;
+    // SCENEGIS_PATCH_END SGP-0018
 
     return vec4(color, material.alpha);
 }
