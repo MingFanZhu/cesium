@@ -125,3 +125,10 @@ API 尽量沿用原生，所有 upstream-owned 修改及剩余限制可追踪。
 - 其余阶段保留粗粒度目标，进入时重新检查源码事实。
 
 R1 checkpoint: `4ea24b89ef`. R2 checkpoint: `c824cfec1e`. [R3 sky reflections](2026-09-19-r3-sky-reflections.md) completed technical review and explicit owner visual acceptance on 2026-09-19. R3 checkpoint: `2e2dc02ce6`. [R6 SSR](2026-09-19-r6-screen-space-reflections.md) completed technical review and explicit owner visual acceptance on 2026-09-19. Next requested priority: local water rendering; activate its phase after the R6 checkpoint.
+
+## R8: Local water priority
+
+After explicit R6 acceptance and checkpoint `f9301bf8cd`, the owner selected lakes, rivers and pools.
+[R8 Local water](2026-09-19-r8-local-water.md) is completed and owner accepted, ahead of R4. Dependencies are accepted R3/R6.
+Entry: verified native Water and opaque capture boundaries. Exit: both-world transmission, reflection,
+shallow transitions, lifecycle, bounded GPU cost and visual acceptance. Ocean rendering remains a candidate.

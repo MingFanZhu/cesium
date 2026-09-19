@@ -7,3 +7,5 @@
 - [R3 Sky reflections](2026-09-19-r3-sky-reflections.md): technical self-review complete; owner visual gate passed on 2026-09-19.
 
 - [R6 Screen-space reflections](2026-09-19-r6-screen-space-reflections.md): technical self-review complete; owner visual gate passed on 2026-09-19.
+
+- [R8 Local water](2026-09-19-r8-local-water.md): technical self-review and owner acceptance complete.

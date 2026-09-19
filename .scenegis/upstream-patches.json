@@ -406,6 +406,24 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0072-vector-surface-transparency.md",
       "removalCondition": "Retire when upstream exposes an equivalent optional direct surface overlay stage with independent color opacity and native depth/pick lifecycle."
+    },
+    {
+      "id": "SGP-0017",
+      "title": "Compose local water after opaque geometry",
+      "status": "active",
+      "reason": "Local water requires a non-water opaque snapshot and per-frustum transmission composition before translucent geometry.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISWaterSurfaceSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0087-local-water-surfaces.md",
+      "removalCondition": "Retire when upstream exposes equivalent opaque capture and per-frustum water composition hooks."
     }
   ]
 }

@@ -9,3 +9,5 @@
 - [R3 Physical sky reflections](2026-09-19-r3-sky-reflections.md): `completed`; technical self-review and owner visual acceptance complete; previous R2 checkpoint `c824cfec1e`.
 
 - [R6 Screen-space reflections](2026-09-19-r6-screen-space-reflections.md): `completed`; owner visually accepted on 2026-09-19; R3 checkpoint `2e2dc02ce6`.
+
+- [R8 Local water](2026-09-19-r8-local-water.md): `completed`; owner accepted; R6 checkpoint `f9301bf8cd`.

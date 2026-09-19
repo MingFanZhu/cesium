@@ -769,3 +769,28 @@ R32F 深度；MRT 保存基础层和清漆层方向/粗糙度。结果回到材�
 
 GPU 回归入口为 SceneGIS/Scene/SceneGISScreenSpaceReflections，关联 AO、sky reflections、physical model
 和原生 IBL pipeline Specs；Shader 修改须先 gulp build。验证记录见 R6 review，架构边界见 ADR-0086。
+
+## 局部水面使用与验证
+
+先设置 `scene.highDynamicRange = true`，再把 `SceneGISWaterSurface` 加入 `scene.primitives`。
+`polygonHierarchy` 沿用 PolygonHierarchy，可含孔洞；坐标为局部 XY 米，Z 固定为零。
+使用 `modelMatrix` 放置水位：Planar 使用平移矩阵，Globe 使用对应水位的 ENU 刚体矩阵。
+不接受缩放、反射变换或经纬度数值直接充当局部坐标。构造时复制轮廓，改变轮廓需重建图元。
+
+`waveAmplitude` / `waveLength` 使用米，`flowDirection` 是局部二维方向，`flowSpeed` 使用米/秒。
+波纹跟随 Viewer Clock，仅扰动法线；暂停 Clock 即冻结波纹。`absorption` 是每米 RGB 吸收系数，
+`waterColor` 是线性散射色，启用物理环境后随光源变化。`roughness`、`refractionStrength`、
+`foamWidth` / `foamIntensity` 控制反射粗糙度、折射偏移和浅水接触泡沫。属性修改在下一帧验证；
+requestRenderMode 下由应用调用 scene.requestRender。`show`、`id`、集合生命周期沿用图元习惯。
+
+水面无需创建 SceneGISScreenSpaceReflections 即可显示场景倒影；若已有启用的 SSR，会自动共享
+opaque 快照。`water.reflections=false` 只关闭水面的屏幕追踪，天空反射仍保留。没有物理环境时，
+`reflectionColor` 提供明确的常量环境辐亮度。共享天空和 opaque targets 均不能由图元销毁。
+
+人工入口为 `Test/Planar/局部水面.html?world=planar` 或 `world=globe`。关闭显示水面检查水下结构，
+切换场景倒影，暂停时间、调整波纹和泡沫并旋转相机。首版只支持水上视角、局部单层和 opaque
+水下物体；屏幕外/隐藏反射、透明水下物体、焦散、海洋位移及水下介质不在范围内。
+
+实现和资源预算见 ADR-0087 与 R8 review。严格 GPU 入口为 SceneGIS/Scene/SceneGISWaterSurface，
+关联 SSR、AO 和 physical model lighting Specs。独立屏幕目标约 18.7 bytes/pixel，隐藏保留，
+Scene 销毁释放；启用 SSR 时借用已有捕获，避免重复 replay。Shader 修改先 gulp build。

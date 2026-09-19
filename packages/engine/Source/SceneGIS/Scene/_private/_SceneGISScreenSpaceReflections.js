@@ -15,6 +15,7 @@ import TextureMagnificationFilter from "../../../Renderer/TextureMagnificationFi
 import capture from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRCapture.js";
 import receive from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRReceive.js";
 import trace from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRTrace.js";
+import ray from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import filter from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRFilter.js";
 import depth from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import AmbientOcclusion from "./_SceneGISAmbientOcclusion.js";
@@ -33,6 +34,7 @@ const SceneGISScreenSpaceReflections = {};
 
 function eligible(command) {
   return (
+    command.owner?._sceneGISWater !== true &&
     opaquePasses.includes(command.pass) &&
     command.renderState?.depthTest.enabled &&
     command.renderState.depthMask &&
@@ -78,19 +80,23 @@ function allocate(effect, scene) {
       u_sceneGISSSRBase: () => s.result.getColorTexture(0),
       u_sceneGISSSRCoat: () => s.result.getColorTexture(1),
     };
-    s.trace = context.createViewportQuadCommand(trace, {
-      owner: effect,
-      uniformMap: {
-        u_depth: () => s.depth.getColorTexture(),
-        u_color: () => s.raw.getColorTexture(0),
-        u_baseRay: () => s.raw.getColorTexture(1),
-        u_coatRay: () => s.raw.getColorTexture(2),
-        u_maximumDistance: () => effect.maximumDistance,
-        u_thickness: () => effect.thickness,
-        u_maximumRoughness: () => effect.maximumRoughness,
-        u_stepCount: () => effect.stepCount,
+    s.trace = context.createViewportQuadCommand(
+      new ShaderSource({ sources: [ray, trace] }),
+      {
+        owner: effect,
+        uniformMap: {
+          u_depth: () => s.depth.getColorTexture(),
+          u_color: () => s.raw.getColorTexture(0),
+          u_baseRay: () => s.raw.getColorTexture(1),
+          u_coatRay: () => s.raw.getColorTexture(2),
+          u_maximumDistance: () => effect.maximumDistance,
+          u_thickness: () => effect.thickness,
+          u_maximumRoughness: () => effect.maximumRoughness,
+          u_stepCount: () => effect.stepCount,
+          u_rayNear: () => scene.camera.frustum.near,
+        },
       },
-    });
+    );
     s.filterInput = s.result;
     s.filterAxis = new Cartesian2(1, 0);
     s.filter = context.createViewportQuadCommand(filter, {

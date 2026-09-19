@@ -1,3 +1,6 @@
+// SCENEGIS_PATCH_BEGIN SGP-0017: Schedule local water with shared opaque inputs.
+import SceneGISWaterFrame from "../SceneGIS/Scene/_private/_SceneGISWaterFrame.js";
+// SCENEGIS_PATCH_END SGP-0017
 import BoundingRectangle from "../Core/BoundingRectangle.js";
 // SCENEGIS_PATCH_BEGIN SGP-0014: Evaluate current-frame AO before opaque lighting.
 import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbientOcclusion.js";
@@ -2425,6 +2428,12 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
     return;
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0017: Defer water color until opaque geometry is complete.
+  if (SceneGISWaterFrame.defer(scene, command)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0017
+
   // SCENEGIS_PATCH_BEGIN SGP-0016: Reuse native log/HDR selection before capture or PBR radiance substitution.
   if (SceneGISScreenSpaceReflections.draw(scene, command, passState)) {
     return;
@@ -2919,6 +2928,11 @@ function executeCommands(scene, passState) {
     );
   }
   // SCENEGIS_PATCH_END SGP-0016
+  // SCENEGIS_PATCH_BEGIN SGP-0017: Borrow SSR capture or capture opaque transmission inputs.
+  if (!picking) {
+    SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+  }
+  // SCENEGIS_PATCH_END SGP-0017
   const clearDepth = scene._depthClearCommand;
   const clearStencil = scene._stencilClearCommand;
   const clearClassificationStencil = scene._classificationStencilClearCommand;
@@ -3182,6 +3196,16 @@ function executeCommands(scene, passState) {
     performVoxelsPass(scene, passState, frustumCommands);
 
     performPass(frustumCommands, Pass.OPAQUE);
+    // SCENEGIS_PATCH_BEGIN SGP-0017: Compose water and write its depth before translucency.
+    if (!picking) {
+      SceneGISWaterFrame.draw(
+        scene,
+        passState,
+        frustumCommands,
+        executeCommand,
+      );
+    }
+    // SCENEGIS_PATCH_END SGP-0017
 
     // Draw direct edges (EDGES_ONLY mode) after opaque surfaces
     performCesium3DTileEdgesDirectPass(scene, passState, frustumCommands);
@@ -4631,6 +4655,9 @@ function render(scene) {
   // SCENEGIS_PATCH_BEGIN SGP-0016: Validate the active reflection effect before rendering.
   SceneGISScreenSpaceReflections.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0016
+  // SCENEGIS_PATCH_BEGIN SGP-0017: Reset water registration for the current render.
+  SceneGISWaterFrame.prepare(scene);
+  // SCENEGIS_PATCH_END SGP-0017
   frameState.passes.postProcess = scene.postProcessStages.hasSelected;
   frameState.tilesetPassState = renderTilesetPassState;
 
@@ -5705,6 +5732,9 @@ Scene.prototype.destroy = function () {
   // SCENEGIS_PATCH_BEGIN SGP-0016: Release attached reflection resources before Context destruction.
   this._sceneGISScreenSpaceReflections?.destroy();
   // SCENEGIS_PATCH_END SGP-0016
+  // SCENEGIS_PATCH_BEGIN SGP-0017: Release owned water targets before Context.
+  SceneGISWaterFrame.destroy(this);
+  // SCENEGIS_PATCH_END SGP-0017
   this._context = this._context && this._context.destroy();
   this._frameState.creditDisplay =
     this._frameState.creditDisplay && this._frameState.creditDisplay.destroy();

@@ -8,8 +8,8 @@
 | Status                 | `active`                                                   |
 | Planning model         | `extension`                                                |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R6 Screen-space reflections                                |
-| Active phase plan      | [R6](plans/2026-09-19-r6-screen-space-reflections.md)      |
+| Current phase          | R8 Local water                                             |
+| Active phase plan      | [R8](plans/2026-09-19-r8-local-water.md)                   |
 | Active standalone plan | None                                                       |
 | Architecture contact   | Current task                                               |
 | Execution contact      | Current task                                               |
@@ -35,14 +35,13 @@
 
 ## Current handoff
 
-- Current state: R3 accepted and checkpointed; R6 SSR implemented, technically reviewed and explicitly accepted by the owner on 2026-09-19.
-- Next action: Checkpoint R6, then investigate local water rendering as requested by the owner.
-- Priority assumption: Desktop WebGL2; Globe / Planar outdoor PBR models and 3D Tiles.
+- Current state: R8 local water and owner-requested foam refinement accepted.
+- Next action: Checkpoint R8 before the requested public-data comparison scene.
+- Priority: Local lakes, rivers and pools; consistent Globe / Planar API.
 - Open discussions: None.
-- Latest review: [R6 review](reviews/2026-09-19-r6-screen-space-reflections.md).
-- Known risks: Screen-space misses, approximate glossy filtering, opaque-only receivers and full-resolution replay/storage costs.
-- Validation: 27 focused strict GPU Specs, build/release/types and patch audit pass. Bounded GPU timing and resource costs are in the R6 review.
-- Checkpoints: R1 `4ea24b89ef`; R2 `c824cfec1e`; R3 `2e2dc02ce6`, all accepted.
-- ADR: [ADR-0085](../../Documentation/SceneGIS/Decisions/ADR-0085-physical-sky-specular-ibl.md); SGP: `SGP-0015`.
-
-- Active R6 ADR: [ADR-0086](../../Documentation/SceneGIS/Decisions/ADR-0086-forward-screen-space-reflections.md); SGP: `SGP-0016`.
+- Latest review: [R8 review](reviews/2026-09-19-r8-local-water.md).
+- Known risks: Above-water single-layer scope, screen-space reflection/refraction limits and opaque capture cost.
+- Validation: 30 distinct focused strict GPU Specs (12 final water), builds/types and patch audit pass; foam refinement adds about 0.10 ms in the measured example, with no new resources. Bounded GPU evidence is in review.
+- Checkpoints: R1 `4ea24b89ef`; R2 `c824cfec1e`; R3 `2e2dc02ce6`; R6 `f9301bf8cd`, all accepted.
+- Active ADR: [ADR-0087](../../Documentation/SceneGIS/Decisions/ADR-0087-local-water-surfaces.md); SGP: `SGP-0017`.
+- Example: [局部水面](../../Test/Planar/局部水面.html).

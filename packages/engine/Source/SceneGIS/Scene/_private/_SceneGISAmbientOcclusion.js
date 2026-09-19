@@ -195,6 +195,7 @@ function allocate(state, scene) {
 
 function eligible(command) {
   return (
+    command.owner?._sceneGISWater !== true &&
     opaquePasses.includes(command.pass) &&
     command.renderState?.depthTest.enabled &&
     command.renderState.depthMask

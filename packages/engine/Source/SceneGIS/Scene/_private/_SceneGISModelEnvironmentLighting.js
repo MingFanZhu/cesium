@@ -1,6 +1,7 @@
 import defined from "../../../Core/defined.js";
 import Cartesian2 from "../../../Core/Cartesian2.js";
 import ShaderDestination from "../../../Renderer/ShaderDestination.js";
+import ShaderSource from "../../../Renderer/ShaderSource.js";
 import LightingModel from "../../../Scene/Model/LightingModel.js";
 import SceneMode from "../../../Scene/SceneMode.js";
 import definitions from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonDefinitions.js";
@@ -27,11 +28,49 @@ const uniforms = {
   u_surfaceRadianceScale: "surfaceRadianceScale",
 };
 
+const globeDefines = {
+  SCENEGIS_GLOBE: undefined,
+  COMBINED_SCATTERING_TEXTURES: undefined,
+  TRANSMITTANCE_TEXTURE_WIDTH: 256,
+  TRANSMITTANCE_TEXTURE_HEIGHT: 64,
+  SCATTERING_TEXTURE_R_SIZE: 32,
+  SCATTERING_TEXTURE_MU_SIZE: 128,
+  SCATTERING_TEXTURE_MU_S_SIZE: 32,
+  SCATTERING_TEXTURE_NU_SIZE: 8,
+  IRRADIANCE_TEXTURE_WIDTH: 64,
+  IRRADIANCE_TEXTURE_HEIGHT: 16,
+};
+
 /**
  * Borrows the active world lighting record for native model PBR.
  * @private
  */
 const SceneGISModelEnvironmentLighting = {
+  // Owned non-model surfaces borrow the same physical light source libraries.
+  surfaceSource(planar) {
+    return new ShaderSource({
+      defines: planar
+        ? []
+        : Object.entries(globeDefines).map(([key, value]) =>
+            value === undefined ? key : `${key} ${value}`,
+          ),
+      sources: planar
+        ? [planarLighting.source, lighting]
+        : [definitions, common, runtime, atmosphere, shadows, lighting],
+    });
+  },
+  surfaceUniforms(frameState, planar) {
+    if (planar) {
+      return planarLighting.createUniformMap(
+        () => frameState._sceneGISPlanarLighting,
+      );
+    }
+    const result = {};
+    for (const [uniform, field] of Object.entries(uniforms)) {
+      result[uniform] = () => frameState._sceneGISGlobeLighting[field];
+    }
+    return result;
+  },
   skipProceduralEnvironment(manager, frameState) {
     const active =
       frameState.mode === SceneMode.SCENE3D &&
@@ -137,18 +176,7 @@ const SceneGISModelEnvironmentLighting = {
       );
       return;
     }
-    for (const [name, value] of Object.entries({
-      SCENEGIS_GLOBE: undefined,
-      COMBINED_SCATTERING_TEXTURES: undefined,
-      TRANSMITTANCE_TEXTURE_WIDTH: 256,
-      TRANSMITTANCE_TEXTURE_HEIGHT: 64,
-      SCATTERING_TEXTURE_R_SIZE: 32,
-      SCATTERING_TEXTURE_MU_SIZE: 128,
-      SCATTERING_TEXTURE_MU_S_SIZE: 32,
-      SCATTERING_TEXTURE_NU_SIZE: 8,
-      IRRADIANCE_TEXTURE_WIDTH: 64,
-      IRRADIANCE_TEXTURE_HEIGHT: 16,
-    })) {
+    for (const [name, value] of Object.entries(globeDefines)) {
       shaderBuilder.addDefine(name, value, fragment);
     }
     shaderBuilder.addFragmentLines([

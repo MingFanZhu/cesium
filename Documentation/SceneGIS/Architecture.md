@@ -996,3 +996,16 @@ Scene 独占已绑定效果的生命周期，调用方可提前 destroy 解除�
 启用需要 SCENE3D / HDR / WebGL2 和浮点 MRT。关闭保留资源，resize 替换，Scene 在 Context
 销毁前释放。当前不透明 PBR 模型为接收者，opaque 地形/图元为反射来源；透明、分类覆盖、标注、
 屏幕外几何和递归反射不在资格内。额外完整 opaque replay 与全分辨率存储是明确的成本边界。
+
+## 局部水面（R8）
+
+[ADR-0087](Decisions/ADR-0087-local-water-surfaces.md) / SGP-0017 增加显式
+`SceneGISWaterSurface` 图元，保留原生 Fabric Water 和 Entity API。PolygonHierarchy 使用
+local XY 米制平面，modelMatrix 使用刚体变换；Globe 采用 ENU，Planar 采用笛卡尔放置。
+同帧 opaque 快照不包含水面，已有 SSR 时借用其颜色/深度；否则 Scene 延迟创建共享捕获。
+水面逐视锥在 opaque 之后、translucent 之前合成透射、吸收、散射和 Fresnel 反射，并写水面深度。
+禁止用统一 alpha 替代 RGB Beer 吸收，或把水面重新送入自身反射/AO 输入。
+
+几何、程序和 pick ID 由图元所有，集合负责销毁；屏幕目标由 Scene 所有，天空由已有环境所有。
+波纹随 Scene time 演化，仅改变法线；散射、泡沫和直接高光借用现有物理光源，不对水下快照重新照明。
+首轮资格为水上观察、局部单层水面和 opaque 水下几何，不扩展为海洋、水下相机或多层透射。
