@@ -184,3 +184,12 @@ rate remains about 9–11 FPS with all effects. MRT memory cost and native compa
 explicit in the [R12 review](../reviews/2026-09-19-r12-main-pass-reflections.md). Owner visual
 acceptance is pending. Preserve this phase in its independent checkpoint before activating further
 performance work; AO prepass and shadow/draw submission costs remain candidates, not active scope.
+
+R12 checkpoint: `3df2db9e84`. The owner requests continued AO, cascade and submission optimization.
+Activate [R13](2026-09-19-r13-pass-submission.md) using the verified native uniform-cache precision,
+depth-lighting and tile cascade-culling facts. R12 explicit visual acceptance remains pending.
+
+R13 implementation and technical self-review are complete. [Review](../reviews/2026-09-19-r13-pass-submission.md)
+records unchanged quality settings, 1494 fewer cascade draws per frame and about 68% lower paired
+frame time (approximately 19 FPS). Owner visual review is pending. No new phase is active; preserve
+R13 in an independent local checkpoint before any further pass sharing or batching.

@@ -8,6 +8,9 @@ import SceneGISLocalLights from "../SceneGIS/Scene/_private/_SceneGISLocalLights
 // SCENEGIS_PATCH_BEGIN SGP-0014: Evaluate current-frame AO before opaque lighting.
 import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbientOcclusion.js";
 // SCENEGIS_PATCH_END SGP-0014
+// SCENEGIS_PATCH_BEGIN SGP-0013: Cull tile casters against light volumes independently of camera traversal.
+import SceneGISCascadedShadows from "../SceneGIS/Scene/_private/_SceneGISCascadedShadows.js";
+// SCENEGIS_PATCH_END SGP-0013
 // SCENEGIS_PATCH_BEGIN SGP-0016: Schedule owned forward reflection capture and receivers.
 import SceneGISScreenSpaceReflections from "../SceneGIS/Scene/_private/_SceneGISScreenSpaceReflections.js";
 // SCENEGIS_PATCH_END SGP-0016
@@ -3445,6 +3448,11 @@ function insertShadowCastCommands(scene, commandList, shadowMap) {
     } else if (numberOfPasses === 1) {
       passes[0].commandList.push(command);
     } else {
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Tile camera traversal does not cull individual light cascades.
+      if (SceneGISCascadedShadows.insertTileCaster(passes, command)) {
+        continue;
+      }
+      // SCENEGIS_PATCH_END SGP-0013
       let wasVisible = false;
       // Loop over cascades from largest to smallest
       for (let j = numberOfPasses - 1; j >= 0; --j) {

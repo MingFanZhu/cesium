@@ -1,5 +1,6 @@
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import Cartesian4 from "../../../Core/Cartesian4.js";
+import Intersect from "../../../Core/Intersect.js";
 import Matrix4 from "../../../Core/Matrix4.js";
 import OrthographicOffCenterFrustum from "../../../Core/OrthographicOffCenterFrustum.js";
 import SceneGISPlanarCamera from "./_SceneGISPlanarCamera.js";
@@ -30,6 +31,27 @@ function isActive(frameState) {
 
 function isSurface(shaderSource) {
   return shaderSource.defines.includes("SCENEGIS_PLANAR_SURFACE");
+}
+
+function insertTileCaster(passes, command) {
+  if (
+    command.cull ||
+    !command.owner?.content?.tile ||
+    !command.boundingVolume
+  ) {
+    return false;
+  }
+  // Tile traversal only proves camera visibility. Test each light volume independently;
+  // stable cascade spheres are not necessarily nested in world space.
+  for (const pass of passes) {
+    if (
+      pass.cullingVolume.computeVisibility(command.boundingVolume) !==
+      Intersect.OUTSIDE
+    ) {
+      pass.commandList.push(command);
+    }
+  }
+  return true;
 }
 
 function stabilizeFrustum(shadowMap, frameState) {
@@ -203,6 +225,7 @@ function updateCascades(shadowMap, frameState) {
 const SceneGISCascadedShadows = {
   isActive,
   isSurface,
+  insertTileCaster,
   stabilizeFrustum,
   updateCascades,
 };

@@ -705,6 +705,10 @@ Globe 保留可见范围裁剪并向上分档，测试应等待该范围发布�
 回归入口是 SceneGISShadowQualitySpec、SceneGISPlanarShadowsSpec 与原生 ShadowMap Specs。
 人工入口为 `Test/Rendering/阴影精细度.html?world=planar|globe` 和 `实景对比.html`。
 
+R13 按 [ADR-0092](Decisions/ADR-0092-depth-shadow-submission.md) 在级联插入处检查已委托 camera
+traversal 的 tile model bounds。各级联独立测试；普通 command、point/single-pass light 保留
+原生路径。没有修改 atlas、PCF、bias、级联划分或更新频率。
+
 ## 高质量环境光遮蔽维护
 
 R2 使用 [ADR-0084](Decisions/ADR-0084-forward-ambient-occlusion.md) 的本帧 depth prepass，
@@ -733,6 +737,13 @@ ao.uniforms.ambientOcclusionOnly = false;
 成本包括额外 opaque 几何提交、4 个复用目标和一个 HDR pass-through/debug 目标，约 21 bytes/pixel
 （不计 driver padding 与 ShaderCache）。屏幕外/隐藏遮挡、亚像素细节、透明接收和 specular bent normal
 不在当前能力内。不要通过增大世界半径掩盖数据缝隙或把截图指标代替负责人视觉验收。
+
+R13 的 `SCENEGIS_DEPTH_ONLY` 只跳过 ModelFS 中不影响 alpha/depth 的 lightingStage；原生
+material/custom shader、style、alpha mask、clipping 和 log depth 均保留。预通道并未删除，
+不能把减少着色/uniform 成本报告成减少 AO 几何绘制。原生 floating uniform arrays 在上传前
+由 owned helper 对打包后的位模式去重；native packing/validation/callbacks 不变，存储随
+uniform/ShaderProgram 生命周期释放。升级回归包括 `SceneGISUniformArraySpec` 与 native
+`UniformSpec`，不引入 GL sampler 绑定缓存。
 
 ## 验证物理天空环境反射
 

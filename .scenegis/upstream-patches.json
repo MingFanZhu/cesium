@@ -2,6 +2,25 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0021",
+      "title": "Avoid identical floating uniform array uploads",
+      "status": "active",
+      "reason": "Native array caches compare JS doubles with Float32 values, repeatedly uploading unchanged cloud, lighting and cascade arrays. Owned packed-bit comparison preserves exact GPU values.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Renderer/createUniformArray.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Renderer/SceneGISUniformArraySpec.js",
+        "packages/engine/Specs/Renderer/UniformSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0092-depth-shadow-submission.md",
+      "removalCondition": "Native floating uniform array comparison avoids duplicate uploads after Float32 packing."
+    },
+    {
       "id": "SGP-0016",
       "title": "Integrate current-frame screen-space reflection radiance into forward PBR",
       "status": "active",
@@ -80,6 +99,10 @@
       "risk": "high",
       "files": [
         {
+          "path": "packages/engine/Source/Shaders/Model/ModelFS.glsl",
+          "markerMode": "paired"
+        },
+        {
           "path": "packages/engine/Source/Scene/Scene.js",
           "markerMode": "paired"
         },
@@ -103,7 +126,7 @@
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISAmbientOcclusionSpec.js"
       ],
-      "decision": "Documentation/SceneGIS/Decisions/ADR-0084-forward-ambient-occlusion.md",
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0092-depth-shadow-submission.md",
       "removalCondition": "Native renderer provides current-frame AO and compatible per-material indirect-light integration."
     },
     {
@@ -137,7 +160,7 @@
         "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISShadowQualitySpec.js"
       ],
-      "decision": "Documentation/SceneGIS/Decisions/ADR-0088-directional-shadow-refinement.md",
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0092-depth-shadow-submission.md",
       "removalCondition": "Retire when native shadows and terrain controls support equivalent non-ellipsoid world semantics and stable cascades with explicit surface metadata."
     },
     {

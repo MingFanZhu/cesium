@@ -137,7 +137,11 @@ void main()
     customShaderStage(material, attributes, featureIds, metadata, metadataClass, metadataStatistics);
     #endif
 
+    // SCENEGIS_PATCH_BEGIN SGP-0014: Depth capture keeps material coverage without evaluating lighting.
+    #ifndef SCENEGIS_DEPTH_ONLY
     lightingStage(material, attributes);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0014
 
     #ifdef HAS_SELECTED_FEATURE_ID
     cpuStylingStage(material, selectedFeature);

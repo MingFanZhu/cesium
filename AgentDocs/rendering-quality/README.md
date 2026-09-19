@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                             |
-| ---------------------- | ----------------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                               |
-| Status                 | `active`                                                          |
-| Planning model         | `extension`                                                       |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)        |
-| Current phase          | R12 technically complete; owner visual review pending             |
-| Active phase plan      | None; latest [R12](plans/2026-09-19-r12-main-pass-reflections.md) |
-| Active standalone plan | None                                                              |
-| Architecture contact   | Current task                                                      |
-| Execution contact      | Current task                                                      |
-| Last updated           | `2026-09-19`                                                      |
+| Field                  | Value                                                       |
+| ---------------------- | ----------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                         |
+| Status                 | `active`                                                    |
+| Planning model         | `extension`                                                 |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)  |
+| Current phase          | R13 technically complete; owner visual review pending       |
+| Active phase plan      | None; latest [R13](plans/2026-09-19-r13-pass-submission.md) |
+| Active standalone plan | None                                                        |
+| Architecture contact   | Current task                                                |
+| Execution contact      | Current task                                                |
+| Last updated           | `2026-09-19`                                                |
 
 ## Scope
 
@@ -35,12 +35,12 @@
 
 ## Current handoff
 
-- Current state: R12 main-pass MRT implementation and technical self-review are complete, following performance maintenance checkpoint `cbd429e11b`.
-- Next action: Owner visually reviews the updated Viewer; then select the next bounded performance phase. Retain the saved startup-camera configuration follow-up and R7 night visual acceptance.
-- Latest review: [R12 review](reviews/2026-09-19-r12-main-pass-reflections.md); previous [Performance review](reviews/2026-09-19-real-scene-performance.md).
+- Current state: R13 depth/shadow/submission optimization and technical self-review are complete, after R12 checkpoint `3df2db9e84`.
+- Next action: Owner visually reviews the updated Viewer; then select further optimization if needed. AO geometry, remaining cascade draws and effect processing still have costs. Retain the startup-camera configuration and R7 night visual follow-ups.
+- Latest review: [R13 review](reviews/2026-09-19-r13-pass-submission.md); previous [R12 review](reviews/2026-09-19-r12-main-pass-reflections.md).
 - Open discussions: None. Probes/GI remain deferred by the owner.
-- Known risks: AO depth replay, native draw/uniform submission and shadow/effect work remain. Paired MRT samples are 9–11 FPS, with 25–27% lower frame time and 1574 fewer capture draws; MSAA MRT costs about 103 MiB extra in this view. Native compatibility cases retain replay.
-- Validation: 9 SSR, 11 AO and 12 water development GPU tests; final 9 SSR and 12 water release tests; complete build/declarations/types, patch audit and scoped checks pass. Saved settings and near-view workload are preserved.
-- Previous checkpoint: Performance maintenance `cbd429e11b`; R12 receives its own independent commit.
-- Related ADR / SGP: `ADR-0091`, amending `ADR-0086`; five upstream integration files use existing `SGP-0016`.
+- Known risks: Total rendering remains about 19 FPS; R12 MRT memory cost and compatibility paths remain. The native no-depth-texture test fails identically on the previous checkpoint; this phase does not change unsupported-context initialization.
+- Validation: 9 floating-array, 12 AO and 7 shadow-quality tests pass in development/release; 33 native uniform, 9 Planar shadow, 9 SSR and 46 native shadow tests pass. One native shadow failure is reproduced on the prior checkpoint. Full builds/types, patch audit, scoped checks and real-scene inspection are recorded in the review.
+- Previous checkpoint: R12 `3df2db9e84`; R13 receives its own independent commit.
+- Related ADR / SGP: `ADR-0092`; `SGP-0013/0014/0021`; three upstream files are changed.
 - Examples: [夜景光照](../../Test/Rendering/夜景光照.html)、[实景对比](../../Test/Rendering/实景对比.html)、[独立效果目录](../../Test/Rendering/示例目录.html).

@@ -1,12 +1,17 @@
 import {
   BoxGeometry,
+  BoundingSphere,
   Cartesian2,
   Cartesian3,
   Cartesian4,
   Color,
   ColorGeometryInstanceAttribute,
+  Cesium3DTileset,
+  CullingVolume,
   DirectionalLight,
   GeometryInstance,
+  HeadingPitchRange,
+  Intersect,
   Matrix4,
   PerInstanceColorAppearance,
   PixelDatatype,
@@ -23,6 +28,8 @@ import {
 import cascadeSource from "../../../Source/Shaders/SceneGIS/Rendering/SceneGISCascadeShadow.js";
 import createContext from "../../../../../Specs/createContext.js";
 import createScene from "../../../../../Specs/createScene.js";
+import createCanvas from "../../../../../Specs/createCanvas.js";
+import cascades from "../../../Source/SceneGIS/Scene/_private/_SceneGISCascadedShadows.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
 
 describe("SceneGIS/Scene/SceneGISShadowQuality", function () {
@@ -258,5 +265,89 @@ describe("SceneGIS/Scene/SceneGISShadowQuality", function () {
     scene.destroyForSpecs();
     scene = undefined;
     expect(atlas.isDestroyed()).toBe(true);
+  });
+  it("tests delegated tile bounds against non-nested cascades and retains ordinary culling", function () {
+    const makePass = (x) => ({
+      commandList: [],
+      cullingVolume: new CullingVolume([
+        new Cartesian4(1, 0, 0, 1 - x),
+        new Cartesian4(-1, 0, 0, 1 + x),
+      ]),
+    });
+    const passes = [makePass(0), makePass(10), makePass(0), makePass(10)];
+    const caster = {
+      cull: false,
+      owner: { content: { tile: {} } },
+      boundingVolume: new BoundingSphere(Cartesian3.ZERO, 0.1),
+    };
+    expect(cascades.insertTileCaster(passes, caster)).toBe(true);
+    expect(passes.map((p) => p.commandList.length)).toEqual([1, 0, 1, 0]);
+    caster.owner = {};
+    expect(cascades.insertTileCaster(passes, caster)).toBe(false);
+  });
+  it("culls real tile shadow commands per cascade without changing pixels", async function () {
+    scene = createScene({ canvas: createCanvas(64, 64) });
+    const tileset = scene.primitives.add(
+      await Cesium3DTileset.fromUrl(
+        "./Data/Cesium3DTiles/Batched/BatchedWithTransformBox/tileset.json",
+        {
+          shadows: ShadowMode.ENABLED,
+          maximumScreenSpaceError: 1,
+          cullRequestsWhileMoving: false,
+          environmentMapOptions: { enabled: false },
+        },
+      ),
+    );
+    const sphere = tileset.boundingSphere;
+    scene.camera.viewBoundingSphere(
+      sphere,
+      new HeadingPitchRange(0, -0.7, sphere.radius * 6),
+    );
+    scene.camera.frustum.near = 0.1;
+    scene.camera.frustum.far = sphere.radius * 100;
+    scene.light = new DirectionalLight({
+      direction: Cartesian3.normalize(
+        Cartesian3.negate(sphere.center, new Cartesian3()),
+        new Cartesian3(),
+      ),
+    });
+    const shadow = scene.shadowMap;
+    shadow.enabled = true;
+    shadow.maximumDistance = sphere.radius * 20;
+    shadow.size = 256;
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return (
+        tileset.tilesLoaded &&
+        scene.frameState.commandList.some((c) => c.owner?.content?.tile)
+      );
+    });
+    for (const movement of [0, sphere.radius]) {
+      scene.camera.moveRight(movement);
+      scene.renderForSpecs();
+      const casters = scene.frameState.commandList.filter(
+        (c) => c.castShadows && c.owner?.content?.tile,
+      );
+      expect(casters.length).toBeGreaterThan(0);
+      expect(casters.every((c) => c.cull === false)).toBe(true);
+      for (const pass of shadow.passes) {
+        const expected = casters.filter(
+          (c) =>
+            pass.cullingVolume.computeVisibility(c.boundingVolume) !==
+            Intersect.OUTSIDE,
+        );
+        expect(pass.commandList).toEqual(expected);
+      }
+      expect(
+        shadow.passes.reduce((sum, p) => sum + p.commandList.length, 0),
+      ).toBeLessThan(casters.length * 4);
+    }
+    const pixels = scene.context.readPixels();
+    const insertion = spyOn(cascades, "insertTileCaster").and.returnValue(
+      false,
+    );
+    scene.renderForSpecs();
+    expect(scene.context.readPixels()).toEqual(pixels);
+    insertion.and.callThrough();
   });
 });

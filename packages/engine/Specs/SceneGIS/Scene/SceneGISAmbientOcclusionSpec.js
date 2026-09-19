@@ -14,6 +14,7 @@ import {
   Model,
   OrthographicFrustum,
   PerInstanceColorAppearance,
+  Resource,
   SceneGISPlanarBoxGeometry,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
@@ -294,6 +295,19 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     ao.enabled = true;
     render();
     expect(openIBL).toBeGreaterThan(pixel(0, -3, 0.5)[0] + 5);
+    const modelCommand = scene.frameState.commandList.find(
+      (command) => command.owner === model,
+    );
+    const sourceCommand = scene.frameState.useLogDepth
+      ? modelCommand.derivedCommands.logDepth.command
+      : modelCommand;
+    const depthProgram =
+      ao._sceneGISAmbientOcclusion.depthCommands.get(sourceCommand)
+        .depthOnlyCommand.shaderProgram;
+    expect(
+      depthProgram.allUniforms.model_sphericalHarmonicCoefficients,
+    ).toBeUndefined();
+    expect(depthProgram.allUniforms.u_discard).toBeDefined();
     scene.highDynamicRange = false;
     ao.uniforms.ambientOcclusionOnly = true;
     render();
@@ -304,6 +318,63 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     scene.primitives.remove(model);
     customShader.destroy();
     ibl.destroy();
+  });
+  it("preserves native alpha-mask and model clipping coverage in the unlit depth variant", async function () {
+    setup();
+    box.show = false;
+    ao.uniforms.ambientOcclusionOnly = true;
+    const basePath = "./Data/Models/glTF-2.0/BoxCutout/glTF/";
+    const gltf = await Resource.fetchJson(`${basePath}BoxCutout.gltf`);
+    for (const material of gltf.materials) {
+      material.alphaMode = "MASK";
+    }
+    const model = scene.primitives.add(
+      await Model.fromGltfAsync({
+        gltf,
+        basePath,
+        modelMatrix: Matrix4.fromTranslation(new Cartesian3(0, 0, 3)),
+        scale: 6,
+        clippingPlanes: new ClippingPlaneCollection({
+          planes: [new ClippingPlane(Cartesian3.UNIT_X, 0)],
+        }),
+      }),
+    );
+    await pollToPromise(() => {
+      render();
+      return model.ready;
+    });
+    render();
+    const state = ao._sceneGISAmbientOcclusion;
+    const command = scene.frameState.commandList.find((c) => c.owner === model);
+    const source = scene.frameState.useLogDepth
+      ? command.derivedCommands.logDepth.command
+      : command;
+    const program = state.depthPrograms.get(source.shaderProgram);
+    expect(program.fragmentShaderSource.defines).toContain("ALPHA_MODE_MASK");
+    const fs = program.fragmentShaderSource.clone();
+    fs.defines = fs.defines.filter((name) => name !== "SCENEGIS_DEPTH_ONLY");
+    const reference = scene.context.shaderCache.createDerivedShaderProgram(
+      source.shaderProgram,
+      "spec_reference_depth",
+      {
+        vertexShaderSource: program.vertexShaderSource,
+        fragmentShaderSource: fs,
+        attributeLocations: source.shaderProgram._attributeLocations,
+      },
+    );
+    for (const distance of [0, 2]) {
+      model.clippingPlanes.get(0).distance = distance;
+      state.depthPrograms.set(source.shaderProgram, program);
+      render();
+      const optimized = scene.context.readPixels();
+      expect(
+        optimized.some((value, index) => index % 4 === 0 && value < 230),
+      ).toBe(true);
+      state.depthPrograms.set(source.shaderProgram, reference);
+      render();
+      expect(scene.context.readPixels()).toEqual(optimized);
+    }
+    state.depthPrograms.set(source.shaderProgram, program);
   });
   it("occludes local Globe contacts and conserves sky", async function () {
     scene = createScene({ canvas: createCanvas(128, 128), scene3DOnly: true });

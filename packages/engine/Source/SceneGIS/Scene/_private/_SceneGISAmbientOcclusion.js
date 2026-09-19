@@ -42,6 +42,7 @@ SceneGISAmbientOcclusion.createStage = function () {
     ready: false,
     context: undefined,
     depthCommands: new WeakMap(),
+    depthPrograms: new WeakMap(),
     receivers: new WeakMap(),
     receiverPrograms: new WeakMap(),
     receiverUniforms: undefined,
@@ -253,7 +254,26 @@ SceneGISAmbientOcclusion.execute = function (scene, passState, frustum) {
             state.depthCommands.get(command),
           );
           state.depthCommands.set(command, derived);
-          derived.depthOnlyCommand.execute(context, passState);
+          const depthCommand = derived.depthOnlyCommand;
+          const source = command.shaderProgram;
+          let program = state.depthPrograms.get(source);
+          if (!defined(program)) {
+            const fs = depthCommand.shaderProgram.fragmentShaderSource.clone();
+            fs.defines.push("SCENEGIS_DEPTH_ONLY");
+            program = context.shaderCache.createDerivedShaderProgram(
+              source,
+              "sceneGIS_AO_depth",
+              {
+                vertexShaderSource:
+                  depthCommand.shaderProgram.vertexShaderSource,
+                fragmentShaderSource: fs,
+                attributeLocations: source._attributeLocations,
+              },
+            );
+            state.depthPrograms.set(source, program);
+          }
+          depthCommand.shaderProgram = program;
+          depthCommand.execute(context, passState);
         }
       }
       passState.framebuffer = state.linearDepth.framebuffer;

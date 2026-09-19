@@ -33,6 +33,9 @@ SceneGIS-owned JS and GLSL roots, using existing generation, bundling and Specs 
 On upgrades recheck per-frustum command ordering, derived log/HDR/shadow commands, resource ownership,
 native lighting decomposition and postprocess HDR format. No monkey patch or copied shadow/render engine.
 
+R13 amendment: [ADR-0092](ADR-0092-depth-shadow-submission.md) skips only native Model lighting in
+AO's derived depth variants, preserving material/discard/depth semantics and the current-frame prepass.
+
 ## References
 
 - [GTAO research](https://www.activision.com/cdn/research/Practical_Real_Time_Strategies_for_Accurate_Indirect_Occlusion_NEW%20VERSION_COLOR.pdf)

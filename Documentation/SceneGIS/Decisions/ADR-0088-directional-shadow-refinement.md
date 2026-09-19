@@ -50,3 +50,7 @@ The small normal-shading/darkness expression in the owned GLSL follows
 `Source/Shaders/Builtin/Functions/shadowVisibility.glsl` from upstream commit
 `6d5d8b1f0725b6f831b336463f4b11c98023427b`. Synchronize this expression if its native semantics
 change; using the private function directly does not register a Cesium builtin dependency.
+
+R13 amendment: [ADR-0092](ADR-0092-depth-shadow-submission.md) independently culls tile-owned
+commands against each cascade when camera culling was delegated to 3D Tiles traversal. Stable
+volume fitting and filtering stay unchanged; no temporal shadow cache is introduced.

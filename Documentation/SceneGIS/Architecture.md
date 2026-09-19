@@ -1028,6 +1028,12 @@ Scene 独占已绑定效果的生命周期，调用方可提前 destroy 解除�
 4 个输出，clearcoat 需要 7 个；多视锥、分类等尚无等价主通道契约的原生路径仍按 ADR-0086 replay。
 附加资源为 SSR 所有，借用的原生附件不能由 SSR 销毁；AO 深度预通道仍独立。
 
+[ADR-0092](Decisions/ADR-0092-depth-shadow-submission.md) 限定精确的提交优化：浮点 uniform
+数组以实际上传的 Float32 位模式判断重复，不缓存调用方对象身份或跳过本帧 callback；AO 的
+模型深度变体保留材质、discard、裁剪与深度，仅跳过原生光照。3D Tiles 的 camera traversal
+不能代替 light-volume culling，委托相机剔除的瓦片命令需独立检查各级联，不能假设它们嵌套。
+这些优化不授权陈旧深度/阴影复用、自动质量降级或扩大普通 DrawCommand 的 cull 语义。
+
 ## 局部水面（R8）
 
 [ADR-0087](Decisions/ADR-0087-local-water-surfaces.md) / SGP-0017 增加显式

@@ -10,6 +10,9 @@ import Matrix2 from "../Core/Matrix2.js";
 import Matrix3 from "../Core/Matrix3.js";
 import Matrix4 from "../Core/Matrix4.js";
 import RuntimeError from "../Core/RuntimeError.js";
+// SCENEGIS_PATCH_BEGIN SGP-0021: Compare packed floating arrays before repeating a native upload.
+import SceneGISUniformArray from "../SceneGIS/Renderer/_private/_SceneGISUniformArray.js";
+// SCENEGIS_PATCH_END SGP-0021
 
 /**
  * @param {WebGL2RenderingContext} gl
@@ -113,9 +116,11 @@ class UniformArrayFloat {
       }
     }
 
-    if (changed) {
+    // SCENEGIS_PATCH_BEGIN SGP-0021: JS fractions can differ from unchanged Float32 cache values.
+    if (changed && SceneGISUniformArray.shouldUpload(this, arraybuffer)) {
       this._gl.uniform1fv(this._location, arraybuffer);
     }
+    // SCENEGIS_PATCH_END SGP-0021
   }
 }
 
@@ -166,9 +171,11 @@ class UniformArrayFloatVec2 {
       j += 2;
     }
 
-    if (changed) {
+    // SCENEGIS_PATCH_BEGIN SGP-0021: Upload only when packed floating components change.
+    if (changed && SceneGISUniformArray.shouldUpload(this, arraybuffer)) {
       this._gl.uniform2fv(this._location, arraybuffer);
     }
+    // SCENEGIS_PATCH_END SGP-0021
   }
 }
 
@@ -237,9 +244,11 @@ class UniformArrayFloatVec3 {
       j += 3;
     }
 
-    if (changed) {
+    // SCENEGIS_PATCH_BEGIN SGP-0021: Upload only when packed floating components change.
+    if (changed && SceneGISUniformArray.shouldUpload(this, arraybuffer)) {
       this._gl.uniform3fv(this._location, arraybuffer);
     }
+    // SCENEGIS_PATCH_END SGP-0021
   }
 }
 
@@ -314,9 +323,11 @@ class UniformArrayFloatVec4 {
       j += 4;
     }
 
-    if (changed) {
+    // SCENEGIS_PATCH_BEGIN SGP-0021: Upload only when packed floating components change.
+    if (changed && SceneGISUniformArray.shouldUpload(this, arraybuffer)) {
       this._gl.uniform4fv(this._location, arraybuffer);
     }
+    // SCENEGIS_PATCH_END SGP-0021
   }
 }
 
@@ -636,9 +647,11 @@ class UniformArrayMat2 {
       j += 4;
     }
 
-    if (changed) {
+    // SCENEGIS_PATCH_BEGIN SGP-0021: Upload only when packed floating components change.
+    if (changed && SceneGISUniformArray.shouldUpload(this, arraybuffer)) {
       this._gl.uniformMatrix2fv(this._location, false, arraybuffer);
     }
+    // SCENEGIS_PATCH_END SGP-0021
   }
 }
 
@@ -689,9 +702,11 @@ class UniformArrayMat3 {
       j += 9;
     }
 
-    if (changed) {
+    // SCENEGIS_PATCH_BEGIN SGP-0021: Upload only when packed floating components change.
+    if (changed && SceneGISUniformArray.shouldUpload(this, arraybuffer)) {
       this._gl.uniformMatrix3fv(this._location, false, arraybuffer);
     }
+    // SCENEGIS_PATCH_END SGP-0021
   }
 }
 
@@ -742,9 +757,11 @@ class UniformArrayMat4 {
       j += 16;
     }
 
-    if (changed) {
+    // SCENEGIS_PATCH_BEGIN SGP-0021: Upload only when packed floating components change.
+    if (changed && SceneGISUniformArray.shouldUpload(this, arraybuffer)) {
       this._gl.uniformMatrix4fv(this._location, false, arraybuffer);
     }
+    // SCENEGIS_PATCH_END SGP-0021
   }
 }
 
