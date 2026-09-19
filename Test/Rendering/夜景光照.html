@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>多光源与自发光</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>夜景光照</h1>
+      <p>暖色路灯、冷色庭院灯、建筑聚光灯与自发光灯带。</p>
+      <p>
+        关闭“局部照明”可单独观察灯具自发光；关闭“自发光”可观察灯具对地面和建筑的照明。
+      </p>
+      <p>金属展台可见局部光高光。泛光控制亮处光晕，局部灯光当前不投射阴影。</p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="实景对比.html">实景对比</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./夜景光照.js"></script>
+  </body>
+</html>

@@ -3,6 +3,15 @@
 #define SCENEGIS_DIRECT_SHADOW_RECEIVER
 #endif
 // SCENEGIS_PATCH_END SGP-0018
+// SCENEGIS_PATCH_BEGIN SGP-0019: Declare owned local-light BRDF accumulation.
+#define SCENEGIS_LOCAL_LIGHT_RECEIVER
+#if defined(SCENEGIS_LOCAL_LIGHTS) && defined(LIGHTING_PBR) && defined(HAS_NORMALS)
+vec3 sceneGISLocalPbr(czm_modelMaterial material, vec3 positionEC);
+#ifdef USE_CLEARCOAT
+vec3 sceneGISLocalClearcoat(czm_modelMaterial material, vec3 positionEC);
+#endif
+#endif
+// SCENEGIS_PATCH_END SGP-0019
 #ifdef USE_IBL_LIGHTING
 vec3 computeIBL(vec3 position, vec3 normal, vec3 lightDirection, vec3 lightColorHdr, czm_modelMaterial material)
 {
@@ -45,6 +54,11 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
     float directStrength = computeDirectSpecularStrength(normal, lightDirection, viewDirection, halfwayDirection, alphaRoughness);
     vec3 directReflection = F * directStrength * NdotL;
     vec3 color = lightColorHdr * directReflection;
+    // SCENEGIS_PATCH_BEGIN SGP-0019: Local sources illuminate clearcoat independently of Sun shadows.
+    #if defined(SCENEGIS_LOCAL_LIGHTS) && defined(LIGHTING_PBR) && defined(HAS_NORMALS)
+    color += sceneGISLocalClearcoat(material, position);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0019
 
     #ifdef SPECULAR_IBL
         // Find the direction in which to sample the environment map
@@ -105,6 +119,11 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
 
     vec3 directLighting = czm_pbrLighting(viewDirection, normal, lightDirection, material);
     vec3 directColor = lightColorHdr * directLighting;
+    // SCENEGIS_PATCH_BEGIN SGP-0019: Evaluate local sources through the same native PBR material.
+    #ifdef SCENEGIS_LOCAL_LIGHTS
+    directColor += sceneGISLocalPbr(material, position);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0019
 
     // Accumulate colors from base layer
     vec3 color = directColor + material.emissive;

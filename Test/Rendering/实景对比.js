@@ -104,6 +104,52 @@ const ssr = new C.SceneGISScreenSpaceReflections({
   maximumDistance: 500,
   thickness: 1,
 });
+const lights = new C.SceneGISLightCollection({ scene, show: false });
+const lampMarkers = [];
+for (const [x, y, z] of [
+  [-70, -55, 8],
+  [-20, -65, 8],
+  [40, -55, 8],
+  [85, 0, 10],
+  [350, -70, 9],
+]) {
+  const color = new C.Color(1, 0.6, 0.3);
+  const position = point(x, y, z);
+  lights.add(
+    new C.SceneGISPointLight({
+      position,
+      color,
+      intensity: 3000,
+      range: 65,
+      radius: 0.3,
+    }),
+  );
+  lampMarkers.push(
+    viewer.entities.add({
+      position,
+      show: false,
+      point: {
+        pixelSize: 7,
+        color,
+        outlineColor: C.Color.WHITE,
+        outlineWidth: 1,
+      },
+    }),
+  );
+}
+for (const x of [-45, 45]) {
+  lights.add(
+    new C.SceneGISSpotLight({
+      position: point(x, -50, 3),
+      direction: vector(new C.Cartesian3(0, 1, 0.8)),
+      color: new C.Color(0.3, 0.55, 1),
+      intensity: 12000,
+      range: 100,
+      innerConeAngle: 0.25,
+      outerConeAngle: 0.6,
+    }),
+  );
+}
 const baseline = Object.freeze({
   shadows: true,
   ao: true,
@@ -111,6 +157,8 @@ const baseline = Object.freeze({
   aoRadius: 2,
   ssr: false,
   originalTexture: false,
+  localLights: false,
+  localLightIntensity: 1,
 });
 const trial = { ...baseline };
 const models = [];
@@ -189,6 +237,14 @@ const state = {
     ao.uniforms.intensity = settings.aoIntensity;
     ao.uniforms.lengthCap = settings.aoRadius;
     ssr.enabled = settings.ssr;
+    lights.show = settings.localLights;
+    for (let i = 0; i < lights.length; i++) {
+      lights.get(i).intensity =
+        (i < 5 ? 3000 : 12000) * settings.localLightIntensity;
+    }
+    lampMarkers.forEach((marker) => {
+      marker.show = settings.localLights;
+    });
     if (tileset) {
       tileset.customShader = settings.originalTexture
         ? originalTextureShader
@@ -282,6 +338,14 @@ trialFolder
   .onChange(state.apply);
 trialFolder.add(trial, "ssr").name("屏幕空间反射").onChange(state.apply);
 trialFolder
+  .add(trial, "localLights")
+  .name("夜景局部灯光")
+  .onChange(state.apply);
+trialFolder
+  .add(trial, "localLightIntensity", 0, 3, 0.05)
+  .name("局部灯光强度")
+  .onChange(state.apply);
+trialFolder
   .add(trial, "originalTexture")
   .name("原始贴图（不重打光）")
   .onChange(state.apply);
@@ -294,7 +358,7 @@ const removeError = scene.renderError.addEventListener((...args) => {
 exposeExample(
   viewer,
   gui,
-  { state, trial, baseline, effects, environment, models, ssr, ao },
+  { state, trial, baseline, effects, environment, models, ssr, ao, lights },
   () => {
     disposed = true;
     removeError();

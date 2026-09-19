@@ -16,7 +16,25 @@
 - 原始贴图模式保留影像已有光照。动态重打光、阴影和 AO 会与原有明暗叠加，不能把
   原始贴图阴影当作当前光源产生的动态阴影。
 
-这是固定小场景，不提供多级倾斜瓦片 LOD、全城性能或新 GI/局部光能力的验证结论。
+这是固定小场景，不提供多级倾斜瓦片 LOD、全城性能或新 GI 能力的验证结论。
+
+## 夜景光照
+
+[独立示例](夜景光照.html?world=planar)提供点光源、聚光灯、自发光灯带和金属高光；
+`world=globe` 使用相同 API。局部照明、自发光、泛光与 SSR 可分别开关。
+综合页切到“夜间基线”“建筑近景”，选择“实验 B”并开启“夜景局部灯光”即可比较实景。
+
+`SceneGISLightCollection({scene})` 绑定到 Scene，`add` 接收 `SceneGISPointLight` /
+`SceneGISSpotLight`。`position` 使用世界坐标，`direction` 为光线发射方向；
+`intensity`、`color`、`range`、`radius` 可动态编辑。角度为弧度，距离为米。
+Globe 使用 ECEF，Planar 使用平面坐标；局部 ENU 变换仅在应用组装层完成。
+集合最多 16 个灯，包含隐藏灯；超限明确报错。Scene 销毁集合，描述对象可共享且无需销毁。
+request-render 模式编辑属性后调用 `scene.requestRender()`。
+
+自发光使用 glTF 原有 emissiveFactor/emissiveTexture 或 CustomShader 的 `material.emissive`；
+HDR 值大于 1 可配合泛光。示例使用原生 bloom，并修正提取阶段负 RGB 在 HDR 暗部
+产生彩色条带的问题。自发光自身不照亮邻近几何，需要配对显式局部灯。
+局部灯暂不投影、不参与体积散射或 GI；原始 unlit 贴图模式仍不接收动态照明。
 
 ## 阴影精细度
 

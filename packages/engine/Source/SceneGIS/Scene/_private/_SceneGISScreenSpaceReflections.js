@@ -19,6 +19,7 @@ import ray from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import filter from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRFilter.js";
 import depth from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import AmbientOcclusion from "./_SceneGISAmbientOcclusion.js";
+import LocalLights from "./_SceneGISLocalLights.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const mipSampler = new Sampler({
@@ -288,6 +289,7 @@ SceneGISScreenSpaceReflections.draw = function (scene, command, passState) {
   ) {
     command = command.derivedCommands.shadows.receiveCommand;
   }
+  command = LocalLights.receiver(scene, command);
   command = AmbientOcclusion.receiver(scene, command);
   // Non-PBR sources still occlude receivers and supply shaded color during capture.
   // Their normal draw does not need extra samplers or a receiver variant.

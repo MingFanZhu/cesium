@@ -1,4 +1,5 @@
 in vec2 v_textureCoordinates;
+#define SCENEGIS_LOCAL_LIGHT_RECEIVER
 #if defined(SCENEGIS_GEOMETRY_SHADOW) && (defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_LIGHTING))
 #define SCENEGIS_DIRECT_SHADOW_RECEIVER
 #endif
@@ -29,7 +30,7 @@ in vec3 v_normalWC;
     #endif
 #endif
 
-#if defined(SHADOW_MAP) || defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
+#if defined(SCENEGIS_LOCAL_LIGHTS) || defined(SHADOW_MAP) || defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
 in vec3 v_positionEC;
 #endif
 
@@ -117,6 +118,7 @@ void main()
     );
     color.rgb = mix(color.rgb, material.diffuse, material.alpha);
 #endif
+    vec3 localDiffuse = color.rgb;
 #ifdef SCENEGIS_ADVANCED_LIGHTING
     color.rgb = sceneGISPlanarSurfaceRadiance(color.rgb, v_positionEC, normalEC);
 #elif defined(SCENEGIS_LIGHTING)
@@ -133,6 +135,9 @@ void main()
     intensity -= 0.3 * (1.0 - sceneGISAmbientOcclusion());
     #endif
     color.rgb *= czm_lightColor * intensity;
+#endif
+#if defined(SCENEGIS_LOCAL_LIGHTS) && (defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_ADVANCED_LIGHTING))
+    color.rgb += sceneGISLocalLambert(v_positionEC, normalEC, localDiffuse);
 #endif
     out_FragColor = vec4(color.rgb, 1.0);
 #ifdef SCENEGIS_CLIPPING

@@ -4,6 +4,9 @@ import destroyObject from "../Core/destroyObject.js";
 import DeveloperError from "../Core/DeveloperError.js";
 import PixelFormat from "../Core/PixelFormat.js";
 import PixelDatatype from "../Renderer/PixelDatatype.js";
+// SCENEGIS_PATCH_BEGIN SGP-0020: Match native bloom intermediates to scene HDR precision.
+import SceneGISBloom from "../SceneGIS/Scene/_private/_SceneGISBloom.js";
+// SCENEGIS_PATCH_END SGP-0020
 import Sampler from "../Renderer/Sampler.js";
 import Texture from "../Renderer/Texture.js";
 import TextureMagnificationFilter from "../Renderer/TextureMagnificationFilter.js";
@@ -610,6 +613,11 @@ PostProcessStageCollection.prototype.update = function (
   const ao = this._ao;
   const bloom = this._bloom;
   const autoexposure = this._autoExposure;
+  // SCENEGIS_PATCH_BEGIN SGP-0020: Rebuild cached targets only when bloom precision changes.
+  if (SceneGISBloom.update(bloom, context, useHdr)) {
+    this._textureCacheDirty = true;
+  }
+  // SCENEGIS_PATCH_END SGP-0020
   const tonemapping = this._tonemapping;
   const fxaa = this._fxaa;
 

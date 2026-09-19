@@ -968,6 +968,21 @@ direct 光，保留环境光、IBL / SSR、自发光与后续雾、裁剪边缘�
 光照；没有光照分量约定的普通 unlit 地表和自定义最终颜色 shader 保留原有阴影行为。
 禁止为此新增 shadow atlas、渲染通道或公共开关。
 
+## 局部夜景光照（R7）
+
+[ADR-0090](Decisions/ADR-0090-local-night-lighting.md) / SGP-0019 增加显式绑定 Scene 的
+`SceneGISLightCollection`，借用最多 16 个 `SceneGISPointLight` / `SceneGISSpotLight`。
+保留 `scene.light` 和原生材质自发光；局部灯只在 PBR、Phong（含 OIT）和 lit terrain
+的直接光分量累加，位于雾与 tone mapping 之前，独立于方向光阴影和 AO。Globe 的 ECEF
+与 Planar 的 Cartesian 输入共用米制距离与弧度角；CPU 每帧变换到 eye space。
+SSR 捕获同样的局部照明，不增加几何 pass、texture 或 framebuffer。Scene 拥有集合生命周期，
+描述对象无 GPU 资源、可共享；超限报错，不静默选灯。局部阴影、体积散射、GI、自动 glTF
+灯节点导入和自定义光照 shader 不在首轮资格内。
+
+SGP-0020 修正原生 bloom 在 HDR tone mapping 前使用 8 位中间结果的暗部条带和自发光截断。
+已有 bloom stages 跟随 Scene framebuffer 精度，HDR/LDR 变化由 native texture cache 重建，
+提取的 RGB 不得为负。沿用原生控制和资源所有权；不创建第二套公开泛光效果。
+
 ## 本帧环境光遮蔽（R2）
 
 [ADR-0084](Decisions/ADR-0084-forward-ambient-occlusion.md) / SGP-0014 复用

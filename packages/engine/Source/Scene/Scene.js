@@ -2,6 +2,9 @@
 import SceneGISWaterFrame from "../SceneGIS/Scene/_private/_SceneGISWaterFrame.js";
 // SCENEGIS_PATCH_END SGP-0017
 import BoundingRectangle from "../Core/BoundingRectangle.js";
+// SCENEGIS_PATCH_BEGIN SGP-0019: Schedule bounded material-local lighting.
+import SceneGISLocalLights from "../SceneGIS/Scene/_private/_SceneGISLocalLights.js";
+// SCENEGIS_PATCH_END SGP-0019
 // SCENEGIS_PATCH_BEGIN SGP-0014: Evaluate current-frame AO before opaque lighting.
 import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbientOcclusion.js";
 // SCENEGIS_PATCH_END SGP-0014
@@ -2439,6 +2442,7 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
     return;
   }
   // SCENEGIS_PATCH_END SGP-0016
+  // SCENEGIS_PATCH_BEGIN SGP-0019: Retain native shadow selection before local material lighting.
   if (
     frameState.shadowState.lightShadowsEnabled &&
     command.receiveShadows &&
@@ -2447,20 +2451,15 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
     // If the command receives shadows, execute the derived shadows command.
     // Some commands, such as OIT derived commands, do not have derived shadow commands themselves
     // and instead shadowing is built-in. In this case execute the command regularly below.
-    // SCENEGIS_PATCH_BEGIN SGP-0014: Compose AO at indirect terms inside the shadow receiver.
-    SceneGISAmbientOcclusion.receiver(
-      scene,
-      command.derivedCommands.shadows.receiveCommand,
-    ).execute(context, passState);
-    // SCENEGIS_PATCH_END SGP-0014
-  } else {
-    // SCENEGIS_PATCH_BEGIN SGP-0014: Select an indirect-light AO receiver without changing geometry.
-    SceneGISAmbientOcclusion.receiver(scene, command).execute(
-      context,
-      passState,
-    );
-    // SCENEGIS_PATCH_END SGP-0014
+    command = command.derivedCommands.shadows.receiveCommand;
   }
+  // SCENEGIS_PATCH_END SGP-0019
+  // SCENEGIS_PATCH_BEGIN SGP-0019: Add independent local sources to the selected color command.
+  command = SceneGISLocalLights.receiver(scene, command);
+  // SCENEGIS_PATCH_END SGP-0019
+  // SCENEGIS_PATCH_BEGIN SGP-0014: Compose AO at indirect material terms.
+  SceneGISAmbientOcclusion.receiver(scene, command).execute(context, passState);
+  // SCENEGIS_PATCH_END SGP-0014
 }
 
 /**
@@ -4649,6 +4648,9 @@ function render(scene) {
 
   scene.updateFrameState();
   frameState.passes.render = true;
+  // SCENEGIS_PATCH_BEGIN SGP-0019: Transform local sources once per rendered frame.
+  SceneGISLocalLights.prepare(scene);
+  // SCENEGIS_PATCH_END SGP-0019
   // SCENEGIS_PATCH_BEGIN SGP-0014: Validate AO and expose its sampler requirement before world rendering.
   SceneGISAmbientOcclusion.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0014
@@ -5735,6 +5737,9 @@ Scene.prototype.destroy = function () {
   // SCENEGIS_PATCH_BEGIN SGP-0017: Release owned water targets before Context.
   SceneGISWaterFrame.destroy(this);
   // SCENEGIS_PATCH_END SGP-0017
+  // SCENEGIS_PATCH_BEGIN SGP-0019: Detach the Scene-owned local light collection.
+  this._sceneGISLights?.destroy();
+  // SCENEGIS_PATCH_END SGP-0019
   this._context = this._context && this._context.destroy();
   this._frameState.creditDisplay =
     this._frameState.creditDisplay && this._frameState.creditDisplay.destroy();

@@ -1,0 +1,43 @@
+#if defined(LIGHTING_PBR) && defined(HAS_NORMALS)
+vec3 sceneGISLocalPbr(czm_modelMaterial material, vec3 positionEC)
+{
+    vec3 color = vec3(0.0);
+    vec3 toEye = -normalize(positionEC);
+    for (int i = 0; i < 16; ++i) {
+        if (i >= u_sceneGISLightCount) { break; }
+        vec3 direction;
+        vec3 irradiance;
+        if (sceneGISLocalLight(i, positionEC, direction, irradiance) &&
+            dot(material.normalEC, direction) > 0.0) {
+            color += irradiance * czm_pbrLighting(toEye, material.normalEC, direction, material);
+        }
+    }
+    return color;
+}
+
+#ifdef USE_CLEARCOAT
+vec3 sceneGISLocalClearcoat(czm_modelMaterial material, vec3 positionEC)
+{
+    vec3 color = vec3(0.0);
+    vec3 toEye = -normalize(positionEC);
+    vec3 normal = material.clearcoatNormal;
+    float NdotV = clamp(dot(normal, toEye), 0.0, 1.0);
+    vec3 F = fresnelSchlick2(vec3(0.04), vec3(1.0), NdotV);
+    float alpha = material.clearcoatRoughness * material.clearcoatRoughness;
+    for (int i = 0; i < 16; ++i) {
+        if (i >= u_sceneGISLightCount) { break; }
+        vec3 direction;
+        vec3 irradiance;
+        if (sceneGISLocalLight(i, positionEC, direction, irradiance)) {
+            float NdotL = max(dot(normal, direction), 0.0);
+            if (NdotL > 0.0) {
+                float strength = computeDirectSpecularStrength(normal, direction, toEye,
+                    normalize(toEye + direction), alpha);
+                color += irradiance * F * strength * NdotL;
+            }
+        }
+    }
+    return color;
+}
+#endif
+#endif

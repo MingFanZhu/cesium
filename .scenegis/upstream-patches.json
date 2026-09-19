@@ -461,6 +461,62 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0089-direct-shadow-lighting.md",
       "removalCondition": "Retire when upstream shadow receivers provide equivalent direct-light visibility before material and atmospheric composition."
+    },
+    {
+      "id": "SGP-0019",
+      "title": "Add bounded local lighting before material composition",
+      "status": "active",
+      "reason": "Native Scene has one directional light; shared point and spot lighting requires explicit forward material seams and color-command scheduling.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Builtin/Functions/phong.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/GlobeFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Builtin/Functions/translucentPhong.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISLightCollectionSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0090-local-night-lighting.md",
+      "removalCondition": "Retire when upstream supports equivalent Scene-owned punctual lighting at native material stages with matching lifecycle and coordinate semantics."
+    },
+    {
+      "id": "SGP-0020",
+      "title": "Preserve HDR radiance through native bloom",
+      "status": "active",
+      "reason": "Native bloom uses unsigned-byte intermediate targets before HDR tone mapping, clipping emission and quantizing night gradients. Floating-point extraction also requires nonnegative RGB.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Shaders/PostProcessStages/ContrastBias.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/PostProcessStageCollection.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISLightCollectionSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0090-local-night-lighting.md",
+      "removalCondition": "Retire when native bloom preserves scene HDR precision and nonnegative extracted light through its intermediates."
     }
   ]
 }

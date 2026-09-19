@@ -139,6 +139,9 @@ uniform float u_vertexShadowDarkness;
 #endif
 
 in vec3 v_positionMC;
+// SCENEGIS_PATCH_BEGIN SGP-0019: Lit terrain participates in bounded local lighting.
+#define SCENEGIS_LOCAL_LIGHT_RECEIVER
+// SCENEGIS_PATCH_END SGP-0019
 in vec3 v_positionEC;
 in vec3 v_textureCoordinates;
 in vec3 v_normalMC;
@@ -484,6 +487,21 @@ void main()
     #endif
 #endif
 // SCENEGIS_PATCH_END SGP-0014
+
+// SCENEGIS_PATCH_BEGIN SGP-0019: Accumulate local diffuse light before clipping and atmosphere.
+#ifdef SCENEGIS_LOCAL_LIGHTS
+    #ifdef SCENEGIS_GLOBE_SURFACE_LIGHTING
+    vec3 sceneGISLocalNormal = normalize(czm_normal3D * sceneGISSurfaceNormalMC);
+    #elif defined(ENABLE_VERTEX_LIGHTING)
+    vec3 sceneGISLocalNormal = normalize(v_normalEC);
+    #elif defined(ENABLE_DAYNIGHT_SHADING)
+    vec3 sceneGISLocalNormal = normalEC;
+    #endif
+    #if defined(SCENEGIS_GLOBE_SURFACE_LIGHTING) || defined(ENABLE_VERTEX_LIGHTING) || defined(ENABLE_DAYNIGHT_SHADING)
+    finalColor.rgb += sceneGISLocalLambert(v_positionEC, sceneGISLocalNormal, color.rgb);
+    #endif
+#endif
+// SCENEGIS_PATCH_END SGP-0019
 
 #ifdef ENABLE_CLIPPING_PLANES
     vec4 clippingPlanesEdgeColor = vec4(1.0);

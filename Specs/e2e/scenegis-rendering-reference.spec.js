@@ -30,6 +30,105 @@ function expectSameCamera(actual, expected) {
 }
 
 for (const world of ["planar", "globe"]) {
+  test(`${world}: night lights, emission and HDR bloom remain independent`, async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(`/Test/Rendering/夜景光照.html?world=${world}`);
+    await page.waitForFunction(() => window.example?.state.ready);
+    async function sample() {
+      return page.evaluate(async (mode) => {
+        const C = await import("/Build/CesiumUnminified/index.js");
+        const scene = window.example.viewer.scene;
+        const frame =
+          mode === "planar"
+            ? C.Matrix4.IDENTITY
+            : C.Transforms.eastNorthUpToFixedFrame(
+                C.Cartesian3.fromDegrees(-75.596, 40.038),
+              );
+        return new Promise((resolve) => {
+          const remove = scene.postRender.addEventListener(() => {
+            remove();
+            resolve(
+              [
+                [9, -9, 0],
+                [0, 14.85, 7],
+              ].map((position) => {
+                const p = C.SceneTransforms.worldToWindowCoordinates(
+                  scene,
+                  C.Matrix4.multiplyByPoint(
+                    frame,
+                    C.Cartesian3.fromArray(position),
+                    new C.Cartesian3(),
+                  ),
+                );
+                return Array.from(
+                  scene.context.readPixels({
+                    x: Math.floor(p.x),
+                    y: scene.drawingBufferHeight - 1 - Math.floor(p.y),
+                    width: 1,
+                    height: 1,
+                  }),
+                );
+              }),
+            );
+          });
+        });
+      }, world);
+    }
+    await page.getByLabel("泛光", { exact: true }).uncheck();
+    const lit = await sample();
+    await page.getByLabel("局部照明", { exact: true }).uncheck();
+    const dark = await sample();
+    expect(lit[0][2]).toBeGreaterThan(dark[0][2] + 20);
+    expect(dark[1][0]).toBeGreaterThan(80);
+    await page.getByLabel("自发光", { exact: true }).uncheck();
+    const noEmission = await sample();
+    expect(dark[1][0]).toBeGreaterThan(noEmission[1][0] + 40);
+    await page.getByLabel("局部照明", { exact: true }).check();
+    await page.getByLabel("自发光", { exact: true }).check();
+    await page.getByLabel("泛光", { exact: true }).check();
+    await page.getByLabel("屏幕空间反射", { exact: true }).check();
+    await page.waitForFunction(() => window.example.ssr._ready);
+    await sample();
+    await expect(page.locator("#error")).toBeEmpty();
+    expect(
+      await page.evaluate(() => {
+        const example = window.example;
+        const lights = example.lights;
+        example.destroy();
+        return (
+          lights.isDestroyed() &&
+          example.ssr.isDestroyed() &&
+          example.models.every((m) => m.isDestroyed())
+        );
+      }),
+    ).toBe(true);
+    expect(errors).toEqual([]);
+  });
+
+  test(`${world}: reference night lights illuminate the scan and keep A/B reversible`, async ({
+    page,
+  }) => {
+    await page.goto(`/Test/Rendering/实景对比.html?world=${world}`);
+    await page.waitForFunction(() => window.example?.state.ready);
+    await page.getByLabel("固定时间", { exact: true }).selectOption("夜间基线");
+    await page.getByLabel("固定视角", { exact: true }).selectOption("建筑近景");
+    await page.getByLabel("对比状态", { exact: true }).selectOption("实验 B");
+    await page.getByLabel("夜景局部灯光", { exact: true }).check();
+    await page.waitForFunction(() => window.example.lights._state?.count === 7);
+    await expect(page.locator("#error")).toBeEmpty();
+    await page.getByLabel("对比状态", { exact: true }).selectOption("基线 A");
+    await page.waitForFunction(() => window.example.lights._state.count === 0);
+    expect(await page.evaluate(() => window.example.trial.localLights)).toBe(
+      true,
+    );
+    await page.evaluate(() => window.example.destroy());
+  });
+}
+
+for (const world of ["planar", "globe"]) {
   test(`${world}: geometric shadows preserve environment reflections and emission`, async ({
     page,
   }) => {

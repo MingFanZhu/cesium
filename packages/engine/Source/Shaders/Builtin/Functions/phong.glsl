@@ -9,6 +9,12 @@ float sceneGISAmbientOcclusion();
 float sceneGISGeometryShadow();
 #endif
 // SCENEGIS_PATCH_END SGP-0018
+// SCENEGIS_PATCH_BEGIN SGP-0019: Builtins precede owned local-light function definitions.
+#ifdef SCENEGIS_LOCAL_LIGHTS
+vec3 sceneGISLocalPositionEC();
+vec3 sceneGISLocalPhong(vec3 positionEC, vec3 normalEC, vec3 toEye, vec3 diffuse, float specular, float shininess);
+#endif
+// SCENEGIS_PATCH_END SGP-0019
 float czm_private_getLambertDiffuseOfMaterial(vec3 lightDirectionEC, czm_material material)
 {
     return czm_getLambertDiffuse(lightDirectionEC, material.normal);
@@ -68,6 +74,12 @@ vec4 czm_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
     color += material.specular * specular * directLight;
     // SCENEGIS_PATCH_END SGP-0018
 
+    // SCENEGIS_PATCH_BEGIN SGP-0019: Preserve emission and ambient while accumulating local sources.
+    #ifdef SCENEGIS_LOCAL_LIGHTS
+    color += sceneGISLocalPhong(sceneGISLocalPositionEC(), material.normal, toEye,
+        material.diffuse, material.specular, material.shininess);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0019
     return vec4(color, material.alpha);
 }
 
@@ -87,5 +99,11 @@ vec4 czm_private_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
     color += material.specular * specular * directLight;
     // SCENEGIS_PATCH_END SGP-0018
 
+    // SCENEGIS_PATCH_BEGIN SGP-0019: Apply the same local-light semantics to private Phong receivers.
+    #ifdef SCENEGIS_LOCAL_LIGHTS
+    color += sceneGISLocalPhong(sceneGISLocalPositionEC(), material.normal, toEye,
+        material.diffuse, material.specular, material.shininess);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0019
     return vec4(color, material.alpha);
 }
