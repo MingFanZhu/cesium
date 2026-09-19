@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>实景渲染对比</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>实景渲染对比</h1>
+      <p>AGI HQ 摄影测量园区 · 固定数据、视角与时间</p>
+      <p id="status">正在加载本地实景数据…</p>
+      <p id="comparison">基线 A</p>
+      <details>
+        <summary>对比说明与数据来源</summary>
+        <p>
+          倾斜贴图保留拍摄时的明暗。切换“原始贴图”可查看其固有光照；动态照明属于叠加近似。
+        </p>
+        <p>
+          A/B
+          使用同一相机和数据，只切换效果参数。跨版本对比请保留截图、导出配置与代码版本。
+        </p>
+        <p>
+          GLB
+          参照区包含公开车辆模型和中性反射面。阴影、间接光、反射、夜景的新效果仍各自提供独立页面。
+        </p>
+        <p>
+          <a href="https://cesium.com/learn/3d-tiling/ion-tile-photogrammetry/"
+            >AGI / Cesium 摄影测量样例</a
+          >
+          · <a href="data/README.md">数据说明</a>
+        </p>
+      </details>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./实景对比.js"></script>
+  </body>
+</html>

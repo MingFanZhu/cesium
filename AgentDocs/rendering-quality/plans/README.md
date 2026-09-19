@@ -11,3 +11,4 @@
 - [R6 Screen-space reflections](2026-09-19-r6-screen-space-reflections.md): `completed`; owner visually accepted on 2026-09-19; R3 checkpoint `2e2dc02ce6`.
 
 - [R8 Local water](2026-09-19-r8-local-water.md): `completed`; owner accepted; R6 checkpoint `f9301bf8cd`.
+- [R9 Public-data reference scene](2026-09-19-r9-reference-scene.md): `completed`, owner accepted; R8 checkpoint `b4a27c7358`.

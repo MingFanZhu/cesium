@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>渲染质量示例</title>
+    <style>
+      body {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 24px;
+        background: #11202b;
+        color: #e3e9ed;
+        font:
+          15px/1.7 system-ui,
+          sans-serif;
+      }
+      a {
+        color: #8fd3ff;
+      }
+      main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+      }
+      main a {
+        display: block;
+        padding: 18px;
+        background: #1b303e;
+        border: 1px solid #3b596b;
+        border-radius: 8px;
+        text-decoration: none;
+      }
+      h2 {
+        font-size: 19px;
+        margin-top: 0;
+      }
+      p {
+        color: #bacbd6;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>渲染质量示例</h1>
+    <p>
+      综合场景观察真实数据上的收益；独立页面观察每项效果。后续阴影、间接光、反射和夜景能力沿用这一组织方式。
+    </p>
+    <main>
+      <a href="实景对比.html?world=planar"
+        ><h2>实景渲染对比</h2>
+        <p>公开摄影测量园区、GLB 参照区、固定视角与时间、A/B 效果参数。</p></a
+      >
+      <a href="../Planar/级联阴影.html"
+        ><h2>级联阴影</h2>
+        <p>地形与建筑的投射、接收、级联与低角度光照。</p></a
+      >
+      <a href="../Planar/环境光遮蔽.html"
+        ><h2>环境光遮蔽</h2>
+        <p>建筑接触与凹槽，遮蔽半径、强度及独立遮蔽图。</p></a
+      >
+      <a href="../Planar/环境反射.html"
+        ><h2>天空环境反射</h2>
+        <p>物理天空、金属与非金属、粗糙度和昼夜变化。</p></a
+      >
+      <a href="../Planar/屏幕空间反射.html"
+        ><h2>屏幕空间反射</h2>
+        <p>可见几何的场景倒影及粗糙反射。</p></a
+      >
+      <a href="../Planar/局部水面.html"
+        ><h2>局部水面</h2>
+        <p>透底、吸收、反射、波纹和浅岸泡沫。</p></a
+      >
+    </main>
+    <p>间接照明、反射完整性与局部夜景灯光待后续实现，再加入各自示例。</p>
+    <a href="../index.html">返回全部示例</a>
+  </body>
+</html>

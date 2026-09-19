@@ -16,6 +16,8 @@ http://localhost:8080/Test/index.html
 
 受管页面按大扩展拆分：
 
+- `Rendering/示例目录.html`：公开摄影测量综合对比场景，以及每项渲染效果的独立入口。
+
 - `vector-tiles/examples/示例目录.html`：平面与球面矢量地图的上手示例。
 - `Planar/示例目录.html`：独立功能入口，涵盖基础平面、公开影像地形、影像调色、地形材质、相机控制、实体定位、跟踪、日月天空。
 - `Planar/tests/`：原四个综合页面，仅保留为维护诊断；原根目录 URL 导向新功能页。

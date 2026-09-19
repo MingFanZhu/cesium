@@ -132,3 +132,16 @@ After explicit R6 acceptance and checkpoint `f9301bf8cd`, the owner selected lak
 [R8 Local water](2026-09-19-r8-local-water.md) is completed and owner accepted, ahead of R4. Dependencies are accepted R3/R6.
 Entry: verified native Water and opaque capture boundaries. Exit: both-world transmission, reflection,
 shallow transitions, lifecycle, bounded GPU cost and visual acceptance. Ocean rendering remains a candidate.
+
+## R9: Photogrammetry comparison priority
+
+R8 checkpoint: `b4a27c7358`. The owner confirms that typical content is photogrammetry with baked
+textures; detailed PBR material work mainly concerns added GLBs. Activate the
+[R9 public-data reference scene](2026-09-19-r9-reference-scene.md) before further runtime effects.
+Subsequent priorities are shadow quality, indirect lighting, reflection completeness and local
+night lighting, with an independent example page for each effect as well as this common scene.
+R4 temporal work and R5 terrain material work are deferred in this ordering. Cloud reflections
+remain deferred by the owner because of their cost. Existing phase identifiers retain their meaning.
+
+R9 is owner accepted on 2026-09-19. The next requested phase is shadow refinement (item 4 in the
+visual priorities, distinct from the retained R4 temporal phase identifier).

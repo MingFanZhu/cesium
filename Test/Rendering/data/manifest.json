@@ -1,0 +1,19 @@
+{
+  "id": "agi-hq-reference-v1",
+  "source": "https://cesium.com/public/learn/AGI_HQ.zip",
+  "sourcePage": "https://cesium.com/learn/3d-tiling/ion-tile-photogrammetry/",
+  "sourceSha256": "254ac95ccef0db6288979a3f43c0861ee1f9abc62ae87f3ddf821572bfbc7e87",
+  "converter": "obj2gltf@3.2.0",
+  "normals": "Hemisphere-separated, area-weighted corner normals from original triangles",
+  "triangles": 139461,
+  "originalBounds": {
+    "minimum": [-248.039017, -263.71048, -52.570415],
+    "maximum": [280.904694, 299.755127, -11.972509]
+  },
+  "localBounds": {
+    "minimum": [-264.4718555, -281.73280350000005, 0],
+    "maximum": [264.4718555, 281.73280350000005, 40.597905999999995]
+  },
+  "glbBytes": 9375132,
+  "glbSha256": "e0617e7f437662a270861369e369afc9055975c5b264a836eac89f1440cec2ea"
+}

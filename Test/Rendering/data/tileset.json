@@ -1,0 +1,23 @@
+{
+  "asset": {
+    "version": "1.1",
+    "copyright": "AGI / Cesium public photogrammetry sample"
+  },
+  "geometricError": 773.9012402431689,
+  "root": {
+    "boundingVolume": {
+      "box": [
+        16.432838500000003, 18.0223235, -32.271462, 264.4718555, 0, 0, 0,
+        281.73280350000005, 0, 0, 0, 20.298952999999997
+      ]
+    },
+    "transform": [
+      1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -16.432838500000003, -18.0223235,
+      52.570415, 1
+    ],
+    "geometricError": 0,
+    "content": {
+      "uri": "agi-hq.glb"
+    }
+  }
+}
