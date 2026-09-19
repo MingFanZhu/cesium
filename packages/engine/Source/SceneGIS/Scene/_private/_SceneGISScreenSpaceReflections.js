@@ -50,6 +50,8 @@ function allocate(effect, scene) {
     s = effect._state = {
       captures: new WeakMap(),
       receivers: new WeakMap(),
+      capturePrograms: new WeakMap(),
+      receiverPrograms: new WeakMap(),
       capturing: false,
       raw: new FramebufferManager({
         colorAttachmentsLength: 3,
@@ -226,35 +228,41 @@ function derive(scene, command, s, capturing) {
   }
   const shader = command.shaderProgram;
   const name = capturing ? "sceneGIS_SSR_capture" : "sceneGIS_SSR_receive";
-  let program = scene.context.shaderCache.getDerivedShaderProgram(shader, name);
+  const programs = capturing ? s.capturePrograms : s.receiverPrograms;
+  let program = programs.get(shader);
+  // Native derived keys include the full source; resolve only when it changes.
   if (!defined(program)) {
-    const fs = shader.fragmentShaderSource.clone();
-    fs.defines.push(
-      capturing ? "SCENEGIS_SSR_CAPTURE" : "SCENEGIS_SSR_RECEIVE",
-    );
-    if (capturing) {
-      fs.sources = fs.sources.map((source) =>
-        ShaderSource.replaceMain(source, "sceneGISSSRMain"),
+    program = scene.context.shaderCache.getDerivedShaderProgram(shader, name);
+    if (!defined(program)) {
+      const fs = shader.fragmentShaderSource.clone();
+      fs.defines.push(
+        capturing ? "SCENEGIS_SSR_CAPTURE" : "SCENEGIS_SSR_RECEIVE",
       );
-      fs.sources.unshift(capture);
-      fs.sources.push(`void main() {
+      if (capturing) {
+        fs.sources = fs.sources.map((source) =>
+          ShaderSource.replaceMain(source, "sceneGISSSRMain"),
+        );
+        fs.sources.unshift(capture);
+        fs.sources.push(`void main() {
         sceneGISSSRMain();
         out_FragColor.a = 1.0;
         sceneGISSSRBaseOutput = sceneGISSSRBaseRay;
         sceneGISSSRCoatOutput = sceneGISSSRCoatRay;
       }`);
-    } else {
-      fs.sources.unshift(receive);
+      } else {
+        fs.sources.unshift(receive);
+      }
+      program = scene.context.shaderCache.createDerivedShaderProgram(
+        shader,
+        name,
+        {
+          vertexShaderSource: shader.vertexShaderSource,
+          fragmentShaderSource: fs,
+          attributeLocations: shader._attributeLocations,
+        },
+      );
     }
-    program = scene.context.shaderCache.createDerivedShaderProgram(
-      shader,
-      name,
-      {
-        vertexShaderSource: shader.vertexShaderSource,
-        fragmentShaderSource: fs,
-        attributeLocations: shader._attributeLocations,
-      },
-    );
+    programs.set(shader, program);
   }
   if (result.sourceUniforms !== command.uniformMap) {
     result.sourceUniforms = command.uniformMap;

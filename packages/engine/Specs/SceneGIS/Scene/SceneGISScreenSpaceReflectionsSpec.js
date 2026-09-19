@@ -236,6 +236,40 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
       expect(pixel(receiver)).toEqual(miss);
     });
   });
+  it("avoids source-key lookups on warm draws and refreshes changed SSR shaders", async function () {
+    setup();
+    await models();
+    const lookup = spyOn(
+      scene.context.shaderCache,
+      "getDerivedShaderProgram",
+    ).and.callThrough();
+    const ssrLookups = () =>
+      lookup.calls
+        .allArgs()
+        .filter((args) => args[1].startsWith("sceneGIS_SSR_"));
+    const receiver = point(0, -0.4, 0);
+    const reflected = pixel(receiver);
+    render();
+    expect(ssrLookups().length).toBe(0);
+    expect(pixel(receiver)).toEqual(reflected);
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    render();
+    expect(ssrLookups().length).toBeGreaterThan(0);
+    const resolvedSources = new Set(ssrLookups().map((args) => args[0]));
+    const capture = effect._state.raw.getColorTexture();
+    lookup.calls.reset();
+    shader.setUniform("u_roughness", 0.8);
+    render();
+    expect(ssrLookups().every((args) => !resolvedSources.has(args[0]))).toBe(
+      true,
+    );
+    expect(effect._state.raw.getColorTexture()).toBe(capture);
+    const rough = pixel(receiver);
+    expect(rough).not.toEqual(reflected);
+    effect.enabled = false;
+    render();
+    expect(pixel(receiver)).toEqual(rough);
+  });
   it("captures independent clearcoat and custom material directions after native evaluation", async function () {
     setup();
     await models(true);

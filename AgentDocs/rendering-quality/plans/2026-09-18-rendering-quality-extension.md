@@ -82,7 +82,7 @@ R1 至 R4 是初始优先序；后续候选在前序验收后按真实场景收�
 | R4    | 全场景抗锯齿与时间稳定性                                    | 经验证的深度/相机路径、静态画面基线  | 先验证 MSAA / FXAA；再用运动片段判定 TAA 的收益与集成成本             | 细线/高光闪烁下降，移动物体与标注清晰，拖影和 LOD 历史污染可控      | proposed  | None                                            |
 | R5    | 地表材质与近景细节                                          | 地形法线、素材和现有材质接口         | 用可控素材区分数据问题与渲染问题                                      | 近景尺度与粗糙度可信，远近过渡合理，纹理开销有界                    | candidate | None                                            |
 | R6    | 屏幕空间反射；水面和其他局部反射保留后续候选                | 已验收 IBL、深度、材质粗糙度         | 明确前向材质捕获与 IBL 融合边界                                       | 两个 World 的不透明 PBR 倒影、回退和生命周期正确，视觉及成本验收    | completed | [R6](2026-09-19-r6-screen-space-reflections.md) |
-| R7    | 夜景局部光与更完整间接照明                                  | 材质、曝光、光源需求与帧预算         | 基于夜景/室内实际场景决定局部灯或 GI 的优先级                         | 真实场景提升覆盖其带宽、阴影和资源成本                              | active    | [R7](2026-09-19-r7-local-lights.md)             |
+| R7    | 夜景局部光与更完整间接照明                                  | 材质、曝光、光源需求与帧预算         | 基于夜景/室内实际场景决定局部灯或 GI 的优先级                         | 真实场景提升覆盖其带宽、阴影和资源成本                              | completed | [R7](2026-09-19-r7-local-lights.md)             |
 
 R2 的 AO 原则上影响间接光，不应把最终合成颜色整体压暗当作物理融合完成。
 R4 不能只复用云的历史缓冲；整幅场景的动态物体、显露区域和标签需要独立论证。
@@ -167,3 +167,7 @@ bloom precision is corrected after a reproduced night-scene banding failure.
 R7 technical implementation and review are complete. On 2026-09-19 the owner redirected
 work to profiling a saved real-data Viewer scene. Preserve R7 in an isolated checkpoint
 before that work; explicit night-example visual acceptance remains a follow-up.
+
+R7 checkpoint: `f1a002ae46`. The [real-scene performance maintenance](2026-09-19-real-scene-performance.md)
+removes repeated full-source cache-key work from owned AO/SSR command derivation. Technical
+review and bounded verification are complete; no rendering feature or quality setting changes.

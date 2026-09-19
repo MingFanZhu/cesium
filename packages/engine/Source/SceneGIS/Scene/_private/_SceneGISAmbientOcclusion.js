@@ -43,6 +43,7 @@ SceneGISAmbientOcclusion.createStage = function () {
     context: undefined,
     depthCommands: new WeakMap(),
     receivers: new WeakMap(),
+    receiverPrograms: new WeakMap(),
     receiverUniforms: undefined,
     values: {},
   };
@@ -283,23 +284,28 @@ SceneGISAmbientOcclusion.receiver = function (scene, command) {
     state.receivers.set(command, result);
   }
   const shader = command.shaderProgram;
-  let program = scene.context.shaderCache.getDerivedShaderProgram(
-    shader,
-    "sceneGIS_AO",
-  );
+  let program = state.receiverPrograms.get(shader);
+  // Native derived keys include the full source; resolve only when it changes.
   if (!defined(program)) {
-    const fs = shader.fragmentShaderSource.clone();
-    fs.defines.push("SCENEGIS_AMBIENT_OCCLUSION");
-    fs.sources.unshift(receive);
-    program = scene.context.shaderCache.createDerivedShaderProgram(
+    program = scene.context.shaderCache.getDerivedShaderProgram(
       shader,
       "sceneGIS_AO",
-      {
-        vertexShaderSource: shader.vertexShaderSource,
-        fragmentShaderSource: fs,
-        attributeLocations: shader._attributeLocations,
-      },
     );
+    if (!defined(program)) {
+      const fs = shader.fragmentShaderSource.clone();
+      fs.defines.push("SCENEGIS_AMBIENT_OCCLUSION");
+      fs.sources.unshift(receive);
+      program = scene.context.shaderCache.createDerivedShaderProgram(
+        shader,
+        "sceneGIS_AO",
+        {
+          vertexShaderSource: shader.vertexShaderSource,
+          fragmentShaderSource: fs,
+          attributeLocations: shader._attributeLocations,
+        },
+      );
+    }
+    state.receiverPrograms.set(shader, program);
   }
   if (result.sourceUniforms !== command.uniformMap) {
     result.sourceUniforms = command.uniformMap;

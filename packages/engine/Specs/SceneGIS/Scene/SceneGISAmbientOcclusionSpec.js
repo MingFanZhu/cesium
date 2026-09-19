@@ -167,6 +167,26 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     scene.pick({ x: 64, y: 64 });
     expect(spy).not.toHaveBeenCalled();
   });
+  it("avoids source-key lookups on warm draws and refreshes changed AO shaders", function () {
+    setup();
+    render();
+    const lookup = spyOn(
+      scene.context.shaderCache,
+      "getDerivedShaderProgram",
+    ).and.callThrough();
+    const aoLookups = () =>
+      lookup.calls.allArgs().filter((args) => args[1] === "sceneGIS_AO");
+    render();
+    expect(aoLookups().length).toBe(0);
+    const shaded = pixel(0, -3.5);
+    world.enableLighting = false;
+    render();
+    expect(aoLookups().length).toBeGreaterThan(0);
+    expect(pixel(0, -3.5)).not.toEqual(shaded);
+    lookup.calls.reset();
+    render();
+    expect(aoLookups().length).toBe(0);
+  });
   it("validates the documented radius contract", function () {
     setup();
     ao.uniforms.lengthCap = 0;

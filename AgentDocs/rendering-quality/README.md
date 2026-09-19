@@ -8,9 +8,9 @@
 | Status                 | `active`                                                   |
 | Planning model         | `extension`                                                |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R7 Local night lighting                                    |
-| Active phase plan      | [R7](plans/2026-09-19-r7-local-lights.md)                  |
-| Active standalone plan | None                                                       |
+| Current phase          | Real-scene performance maintenance                         |
+| Active phase plan      | None                                                       |
+| Active standalone plan | [Performance](plans/2026-09-19-real-scene-performance.md)  |
 | Architecture contact   | Current task                                               |
 | Execution contact      | Current task                                               |
 | Last updated           | `2026-09-19`                                               |
@@ -35,12 +35,12 @@
 
 ## Current handoff
 
-- Current state: R7 implementation, bounded validation and technical self-review complete; owner visual acceptance remains an explicit follow-up.
-- Next action: Checkpoint R7 independently; the owner has redirected work to real-scene performance diagnosis.
-- Latest review: [R7 review](reviews/2026-09-19-r7-local-lights.md).
+- Current state: [Real-scene performance maintenance](plans/2026-09-19-real-scene-performance.md) implementation and technical review complete; final release package loaded in Viewer.
+- Next action: Owner visual confirmation at the restored near view; retain the saved startup-camera configuration follow-up and R7 night visual acceptance.
+- Latest review: [Performance review](reviews/2026-09-19-real-scene-performance.md); previous [R7 review](reviews/2026-09-19-r7-local-lights.md).
 - Open discussions: None. Probes/GI remain deferred by the owner.
-- Known risks: Maximum 16 local lights; no local shadows/GI; baked scan lighting and unlit/custom material boundaries. HDR bloom increases existing target precision.
-- Validation: 78 development tests, 15 release GPU/API tests and 4 night-example E2E pass. Build/type/lint/audit and bounded GPU results are recorded in the review.
-- Previous checkpoint: R11 `a94a3232fb`; isolated from R7.
-- Active ADR / SGP: [ADR-0090](../../Documentation/SceneGIS/Decisions/ADR-0090-local-night-lighting.md), `SGP-0019/0020`.
+- Known risks: Draw submission, AO depth replay, SSR shaded replay and shadow/effect GPU work remain; fixed-view frame rate is approximately 14–15 FPS versus 5 FPS before this fix.
+- Validation: 18 development GPU tests, 2 release regressions, development/release builds and scoped checks pass. Saved rendering settings and original near-view workload are preserved.
+- Previous checkpoint: R7 `f1a002ae46`; independent from performance maintenance.
+- Related ADR / SGP: `ADR-0084/0086`, existing `SGP-0014/0016`; this maintenance changes no upstream file or SGP entry.
 - Examples: [夜景光照](../../Test/Rendering/夜景光照.html)、[实景对比](../../Test/Rendering/实景对比.html)、[独立效果目录](../../Test/Rendering/示例目录.html).
