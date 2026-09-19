@@ -48,6 +48,11 @@ void cpuStylingStage(inout czm_modelMaterial material, SelectedFeature feature)
     sceneGISSSRScale(mix(featureColor.rgb, vec3(1.0), highlight));
     #endif
     // SCENEGIS_PATCH_END SGP-0016
+    // SCENEGIS_PATCH_BEGIN SGP-0014: Preserve feature styling in the indirect-only correction.
+    #ifdef SCENEGIS_AO_MAIN
+    sceneGISScaleIndirect(mix(featureColor.rgb, vec3(1.0), highlight));
+    #endif
+    // SCENEGIS_PATCH_END SGP-0014
     #endif
     
     material.alpha *= featureColor.a;

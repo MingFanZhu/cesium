@@ -479,6 +479,13 @@ void main()
 #endif
 
 // SCENEGIS_PATCH_BEGIN SGP-0014: Occlude only native ambient floors before clipping and atmosphere.
+#if defined(SCENEGIS_AO_MAIN) && !defined(SCENEGIS_GLOBE_SURFACE_LIGHTING)
+    #if defined(ENABLE_VERTEX_LIGHTING)
+    sceneGISRecordIndirect(color.rgb * czm_lightColor * min(u_vertexShadowDarkness, diffuseIntensity));
+    #elif defined(ENABLE_DAYNIGHT_SHADING)
+    sceneGISRecordIndirect(color.rgb * czm_lightColor * (0.3 * fade));
+    #endif
+#endif
 #if defined(SCENEGIS_AMBIENT_OCCLUSION) && !defined(SCENEGIS_GLOBE_SURFACE_LIGHTING)
     #if defined(ENABLE_VERTEX_LIGHTING)
     finalColor.rgb -= color.rgb * czm_lightColor * min(u_vertexShadowDarkness, diffuseIntensity) * (1.0 - sceneGISAmbientOcclusion());

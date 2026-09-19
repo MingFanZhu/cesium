@@ -8,5 +8,10 @@ void modelColorStage(inout czm_modelMaterial material)
     sceneGISSSRScale((1.0 - model_colorBlend) * mix(model_color.rgb, vec3(1.0), highlight));
     #endif
     // SCENEGIS_PATCH_END SGP-0016
+    // SCENEGIS_PATCH_BEGIN SGP-0014: Apply the same linear color response to captured indirect energy.
+    #ifdef SCENEGIS_AO_MAIN
+    sceneGISScaleIndirect((1.0 - model_colorBlend) * mix(model_color.rgb, vec3(1.0), highlight));
+    #endif
+    // SCENEGIS_PATCH_END SGP-0014
     material.alpha *= model_color.a;
 }

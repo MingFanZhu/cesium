@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                       |
-| ---------------------- | ----------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                         |
-| Status                 | `active`                                                    |
-| Planning model         | `extension`                                                 |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)  |
-| Current phase          | R13 technically complete; owner visual review pending       |
-| Active phase plan      | None; latest [R13](plans/2026-09-19-r13-pass-submission.md) |
-| Active standalone plan | None                                                        |
-| Architecture contact   | Current task                                                |
-| Execution contact      | Current task                                                |
-| Last updated           | `2026-09-19`                                                |
+| Field                  | Value                                                      |
+| ---------------------- | ---------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                        |
+| Status                 | `active`                                                   |
+| Planning model         | `extension`                                                |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
+| Current phase          | R14 technically complete; owner visual review pending      |
+| Active phase plan      | None; latest [R14](plans/2026-09-19-r14-main-pass-ao.md)   |
+| Active standalone plan | None                                                       |
+| Architecture contact   | Current task                                               |
+| Execution contact      | Current task                                               |
+| Last updated           | `2026-09-19`                                               |
 
 ## Scope
 
@@ -35,12 +35,12 @@
 
 ## Current handoff
 
-- Current state: R13 depth/shadow/submission optimization and technical self-review are complete, after R12 checkpoint `3df2db9e84`.
-- Next action: Owner visually reviews the updated Viewer; then select further optimization if needed. AO geometry, remaining cascade draws and effect processing still have costs. Retain the startup-camera configuration and R7 night visual follow-ups.
-- Latest review: [R13 review](reviews/2026-09-19-r13-pass-submission.md); previous [R12 review](reviews/2026-09-19-r12-main-pass-reflections.md).
+- Current state: R14 shared main-pass AO MRT and technical review are complete after R13 `6b472fa2e4`.
+- Next action: Owner visually reviews the updated Viewer; choose further performance work separately. Retain startup-camera configuration and R7 night follow-ups.
+- Latest review: [R14 review](reviews/2026-09-19-r14-main-pass-ao.md); previous [R13 review](reviews/2026-09-19-r13-pass-submission.md).
 - Open discussions: None. Probes/GI remain deferred by the owner.
-- Known risks: Total rendering remains about 19 FPS; R12 MRT memory cost and compatibility paths remain. The native no-depth-texture test fails identically on the previous checkpoint; this phase does not change unsupported-context initialization.
-- Validation: 9 floating-array, 12 AO and 7 shadow-quality tests pass in development/release; 33 native uniform, 9 Planar shadow, 9 SSR and 46 native shadow tests pass. One native shadow failure is reproduced on the prior checkpoint. Full builds/types, patch audit, scoped checks and real-scene inspection are recorded in the review.
-- Previous checkpoint: R12 `3df2db9e84`; R13 receives its own independent commit.
-- Related ADR / SGP: `ADR-0092`; `SGP-0013/0014/0021`; three upstream files are changed.
+- Known risks: Qualified AO has zero geometry draws and about 18% lower paired frame time, with extra MRT storage. LDR/multi-frustum/classification and unqualified post-lighting paths retain prepasses. R13's existing native no-depth-texture failure remains.
+- Validation: 14 AO, 9 SSR and 12 Water tests pass in development/release; full build/types, patch audit and real-scene inspection pass. Six upstream files and the exact performance/resource tradeoff are recorded in the review.
+- Previous checkpoint: R13 `6b472fa2e4`; R14 receives its own independent commit.
+- Related ADR / SGP: `ADR-0093`; `SGP-0014/0016`.
 - Examples: [夜景光照](../../Test/Rendering/夜景光照.html)、[实景对比](../../Test/Rendering/实景对比.html)、[独立效果目录](../../Test/Rendering/示例目录.html).

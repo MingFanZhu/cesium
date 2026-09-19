@@ -745,6 +745,14 @@ material/custom shader、style、alpha mask、clipping 和 log depth 均保留�
 uniform/ShaderProgram 生命周期释放。升级回归包括 `SceneGISUniformArraySpec` 与 native
 `UniformSpec`，不引入 GL sampler 绑定缓存。
 
+R14 按 [ADR-0093](Decisions/ADR-0093-main-pass-ambient-occlusion.md) 在合格 HDR 单视锥路径
+使用 `_SceneGISLightingMrt` 共享主通道深度与间接光输出。AO 单独开启需 2 个 color targets，
+与 base SSR 共用需 5 个，含 clearcoat 需 8 个；MSAA 样本数沿用主通道。全屏估计/过滤后
+仅合成间接光差值，SSR 与水面读取修正后的不透明颜色。特殊路径仍按上文运行预通道。
+检查 `mainPass` 与 `prepassDraws` 区分真实执行路径，不能只依据效果开关推断几何开销。
+回归覆盖 AO/SSR/Water Specs、资源生命周期和固定实景；更改 Model/terrain 的后光照颜色
+分支时必须同时更新间接光的线性响应或明确排除该分支。
+
 ## 验证物理天空环境反射
 
 开启已有 SceneGISEnvironmentEffects 后，Globe / Planar 的原生 PBR Model 与 3D Tiles 默认镜面

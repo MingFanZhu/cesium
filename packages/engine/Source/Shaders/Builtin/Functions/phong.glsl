@@ -2,6 +2,9 @@
 #ifdef SCENEGIS_AMBIENT_OCCLUSION
 float sceneGISAmbientOcclusion();
 #endif
+#ifdef SCENEGIS_AO_MAIN
+void sceneGISRecordIndirect(vec3 value);
+#endif
 // SCENEGIS_PATCH_END SGP-0014
 // SCENEGIS_PATCH_BEGIN SGP-0018: Builtins precede the receiver's private shadow definition.
 #ifdef SCENEGIS_GEOMETRY_SHADOW
@@ -62,6 +65,9 @@ vec4 czm_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
     vec3 ambient = materialDiffuse;
     #ifdef SCENEGIS_AMBIENT_OCCLUSION
     ambient *= sceneGISAmbientOcclusion();
+    #endif
+    #ifdef SCENEGIS_AO_MAIN
+    sceneGISRecordIndirect(ambient);
     #endif
     // SCENEGIS_PATCH_END SGP-0014
     vec3 color = ambient + material.emission;

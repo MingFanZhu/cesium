@@ -193,3 +193,11 @@ R13 implementation and technical self-review are complete. [Review](../reviews/2
 records unchanged quality settings, 1494 fewer cascade draws per frame and about 68% lower paired
 frame time (approximately 19 FPS). Owner visual review is pending. No new phase is active; preserve
 R13 in an independent local checkpoint before any further pass sharing or batching.
+
+R13 checkpoint: `6b472fa2e4`. The owner authorizes [R14 main-pass AO MRT](2026-09-19-r14-main-pass-ao.md),
+sharing current main depth and exporting indirect contributions so qualified AO needs no geometry
+prepass. Keep AO-only operation, material light separation, native MSAA and special-path contracts.
+
+R14 implementation and technical review are complete. Its [review](../reviews/2026-09-19-r14-main-pass-ao.md)
+records zero AO geometry on qualified main MRT, about 18% lower paired frame time and the attachment
+memory tradeoff. Owner visual review remains pending. No following phase is activated.

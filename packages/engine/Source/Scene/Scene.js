@@ -5,7 +5,7 @@ import BoundingRectangle from "../Core/BoundingRectangle.js";
 // SCENEGIS_PATCH_BEGIN SGP-0019: Schedule bounded material-local lighting.
 import SceneGISLocalLights from "../SceneGIS/Scene/_private/_SceneGISLocalLights.js";
 // SCENEGIS_PATCH_END SGP-0019
-// SCENEGIS_PATCH_BEGIN SGP-0014: Evaluate current-frame AO before opaque lighting.
+// SCENEGIS_PATCH_BEGIN SGP-0014: Integrate current-frame indirect ambient occlusion.
 import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbientOcclusion.js";
 // SCENEGIS_PATCH_END SGP-0014
 // SCENEGIS_PATCH_BEGIN SGP-0013: Cull tile casters against light volumes independently of camera traversal.
@@ -2913,14 +2913,14 @@ function executeCommands(scene, passState) {
   } = scene._view;
   const numFrustums = frustumCommandsList.length;
 
-  // SCENEGIS_PATCH_BEGIN SGP-0014: Resolve all opaque ranges into common eye depth before lighting.
-  if (!picking) {
+  // SCENEGIS_PATCH_BEGIN SGP-0014: AO uses main-pass MRT; SSR coordinates the shared layout when enabled.
+  if (!picking && !scene._sceneGISScreenSpaceReflections?.enabled) {
     SceneGISAmbientOcclusion.execute(scene, passState, frustum);
   }
   // SCENEGIS_PATCH_END SGP-0014
 
   const globeTranslucencyState = scene._globeTranslucencyState;
-  // SCENEGIS_PATCH_BEGIN SGP-0016: Capture and trace opaque radiance after current-frame AO.
+  // SCENEGIS_PATCH_BEGIN SGP-0016: Select shared MRT or the established AO-aware capture path.
   if (!picking) {
     SceneGISScreenSpaceReflections.execute(
       scene,
@@ -3198,10 +3198,15 @@ function executeCommands(scene, passState) {
     performVoxelsPass(scene, passState, frustumCommands);
 
     performPass(frustumCommands, Pass.OPAQUE);
+    // SCENEGIS_PATCH_BEGIN SGP-0014: Resolve AO-only MRT before water and translucency.
+    const aoResolved =
+      !picking && SceneGISAmbientOcclusion.resolve(scene, passState, frustum);
+    // SCENEGIS_PATCH_END SGP-0014
     // SCENEGIS_PATCH_BEGIN SGP-0016: Resolve main-pass material MRT before water and translucency.
     if (
       !picking &&
-      SceneGISScreenSpaceReflections.resolve(scene, passState, frustum)
+      (aoResolved ||
+        SceneGISScreenSpaceReflections.resolve(scene, passState, frustum))
     ) {
       SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
     }

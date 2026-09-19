@@ -117,6 +117,70 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     scene?.destroyForSpecs();
     scene = undefined;
   });
+  it("uses main HDR depth without extra indexed geometry and preserves MSAA lifecycle", function () {
+    setup();
+    scene.highDynamicRange = true;
+    scene.msaaSamples = 4;
+    render();
+    const state = ao._sceneGISAmbientOcclusion;
+    expect(state.mainPass).toBe(true);
+    expect(state.main.numSamples).toBe(4);
+    expect(state.main.framebuffer.numberOfColorAttachments).toBe(2);
+    expect(state.rawDepth).toBeUndefined();
+    const geometry = new Set(
+      scene.frameState.commandList.map((c) => c.vertexArray),
+    );
+    const draws = spyOn(scene.context, "draw").and.callThrough();
+    const geometryDrawCount = () =>
+      draws.calls.allArgs().filter(([c]) => geometry.has(c.vertexArray)).length;
+    render();
+    const count = geometryDrawCount();
+    expect(count).toBeGreaterThan(0);
+    expect(state.prepassDraws).toBe(0);
+    const shaded = pixel(0, -3.5)[0];
+    ao.enabled = false;
+    draws.calls.reset();
+    render();
+    expect(geometryDrawCount()).toBe(count);
+    expect(pixel(0, -3.5)[0]).toBeGreaterThan(shaded);
+    ao.enabled = true;
+    render();
+    expect(pixel(0, -3.5)[0]).toEqual(shaded);
+    ao.uniforms.ambientOcclusionOnly = true;
+    render();
+    expect(pixel(0, -3.5)[0]).toBeLessThan(230);
+    const exposed = pixel(10, -4)[0];
+    box.show = false;
+    render();
+    expect(pixel(0, -3.5)[0]).toEqualEpsilon(exposed, 1);
+    const oldTarget = state.main.indirect.getColorTexture();
+    scene.canvas.width = 160;
+    render();
+    expect(oldTarget.isDestroyed()).toBe(true);
+    const target = state.main.indirect.getColorTexture();
+    scene.destroyForSpecs();
+    scene = undefined;
+    expect(target.isDestroyed()).toBe(true);
+  });
+  it("matches indirect-only prepass composition in the same HDR scene", function () {
+    setup();
+    scene.highDynamicRange = true;
+    scene.msaaSamples = 1;
+    render();
+    const state = ao._sceneGISAmbientOcclusion;
+    expect(state.mainPass).toBe(true);
+    const main = scene.context.readPixels();
+    scene.invertClassification = true;
+    render();
+    expect(state.mainPass).toBe(false);
+    expect(state.prepassDraws).toBeGreaterThan(0);
+    const reference = scene.context.readPixels();
+    let difference = 0;
+    for (let i = 0; i < main.length; ++i) {
+      difference = Math.max(difference, Math.abs(main[i] - reference[i]));
+    }
+    expect(difference).toBeLessThanOrEqual(2);
+  });
   [false, true].forEach(function (orthographic) {
     it(`occludes contacts and conserves exposed planes (${orthographic ? "orthographic" : "perspective"})`, function () {
       setup(orthographic);
@@ -295,6 +359,18 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     ao.enabled = true;
     render();
     expect(openIBL).toBeGreaterThan(pixel(0, -3, 0.5)[0] + 5);
+    expect(ao._sceneGISAmbientOcclusion.mainPass).toBe(true);
+    expect(ao._sceneGISAmbientOcclusion.prepassDraws).toBe(0);
+    ao.uniforms.ambientOcclusionOnly = true;
+    render();
+    const contact = pixel(0, -3.5)[0];
+    customShader.setUniform("u_discard", true);
+    render();
+    expect(pixel(0, -3.5)[0]).toBeGreaterThan(contact + 5);
+    customShader.setUniform("u_discard", false);
+    scene.highDynamicRange = false;
+    ao.uniforms.ambientOcclusionOnly = true;
+    render();
     const modelCommand = scene.frameState.commandList.find(
       (command) => command.owner === model,
     );
@@ -308,9 +384,6 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
       depthProgram.allUniforms.model_sphericalHarmonicCoefficients,
     ).toBeUndefined();
     expect(depthProgram.allUniforms.u_discard).toBeDefined();
-    scene.highDynamicRange = false;
-    ao.uniforms.ambientOcclusionOnly = true;
-    render();
     expect(pixel(0, -3.5)[0]).toBeLessThan(230);
     customShader.setUniform("u_discard", true);
     render();
@@ -452,6 +525,12 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
       height: 1,
     });
     expect(contact[0]).toBeLessThan(235);
+    scene.highDynamicRange = true;
+    scene.globe.depthTestAgainstTerrain = true;
+    render();
+    expect(ao._sceneGISAmbientOcclusion.mainPass).toBe(true);
+    expect(ao._sceneGISAmbientOcclusion.prepassDraws).toBe(0);
+    scene.highDynamicRange = false;
     scene.camera.setView({
       destination: local(0, -25, 25),
       orientation: {

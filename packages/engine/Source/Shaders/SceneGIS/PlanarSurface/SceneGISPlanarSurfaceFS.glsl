@@ -134,6 +134,9 @@ void main()
     #ifdef SCENEGIS_AMBIENT_OCCLUSION
     intensity -= 0.3 * (1.0 - sceneGISAmbientOcclusion());
     #endif
+    #ifdef SCENEGIS_AO_MAIN
+    sceneGISRecordIndirect(color.rgb * czm_lightColor * 0.3);
+    #endif
     color.rgb *= czm_lightColor * intensity;
 #endif
 #if defined(SCENEGIS_LOCAL_LIGHTS) && (defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_ADVANCED_LIGHTING))
@@ -143,6 +146,9 @@ void main()
 #ifdef SCENEGIS_CLIPPING
     if (clippingDistance < u_clippingEdgeStyle.w) {
         out_FragColor.rgb = u_clippingEdgeStyle.rgb;
+        #ifdef SCENEGIS_AO_MAIN
+        sceneGISScaleIndirect(vec3(0.0));
+        #endif
     }
 #endif
     #ifdef SCENEGIS_SURFACE_TRANSLUCENCY
@@ -150,6 +156,9 @@ void main()
         vec4 background = texture(u_surfaceBackground, uv);
         // Depth remains opaque: reveal the scene background, not hidden slopes.
         out_FragColor = mix(background, out_FragColor, u_surfaceOpacity);
+        #ifdef SCENEGIS_AO_MAIN
+        sceneGISScaleIndirect(vec3(u_surfaceOpacity));
+        #endif
         #ifdef SHADOW_MAP
         sceneGISPlanarUnshadowedBackground = background.rgb * (1.0 - u_surfaceOpacity);
         #endif

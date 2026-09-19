@@ -259,7 +259,7 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     const ssrLookups = () =>
       lookup.calls
         .allArgs()
-        .filter((args) => args[1].startsWith("sceneGIS_SSR_"));
+        .filter((args) => /sceneGIS_(SSR|lighting)_/.test(args[1]));
     const receiver = point(0, -0.4, 0);
     const reflected = pixel(receiver);
     render();
@@ -361,16 +361,24 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     const receiver = point(0, -0.4, 0.4);
     const main = pixel(receiver);
     expect(effect._state.mainPass).toBe(true);
+    expect(effect._state.main.framebuffer.numberOfColorAttachments).toBe(8);
+    const ao =
+      scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
+    expect(ao.mainPass).toBe(true);
+    expect(ao.prepassDraws).toBe(0);
+    expect(ao.rawDepth).toBeUndefined();
     // Invert classification retains the native replay ordering. Ordinary models are unchanged.
     scene.invertClassification = true;
     render();
     expect(effect._state.mainPass).toBe(false);
     expect(effect._state.captureDraws).toBeGreaterThan(0);
+    expect(ao.prepassDraws).toBeGreaterThan(0);
     expect(pixel(receiver)).toEqualEpsilon(main, 3);
     scene.invertClassification = false;
     render();
     expect(effect._state.mainPass).toBe(true);
     expect(effect._state.captureDraws).toBe(0);
+    expect(ao.prepassDraws).toBe(0);
     expect(pixel(receiver)).toEqual(main);
   });
   it("preserves MSAA and model color response without replaying opaque shading", async function () {

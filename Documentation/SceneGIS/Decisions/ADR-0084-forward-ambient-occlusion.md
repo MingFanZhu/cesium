@@ -36,6 +36,10 @@ native lighting decomposition and postprocess HDR format. No monkey patch or cop
 R13 amendment: [ADR-0092](ADR-0092-depth-shadow-submission.md) skips only native Model lighting in
 AO's derived depth variants, preserving material/discard/depth semantics and the current-frame prepass.
 
+R14 amendment: [ADR-0093](ADR-0093-main-pass-ambient-occlusion.md) supersedes the mandatory prepass
+on qualified HDR single-frustum rendering. Main MRT exports indirect energy for an equivalent
+fullscreen correction; the established prepass remains only for unqualified pipeline contracts.
+
 ## References
 
 - [GTAO research](https://www.activision.com/cdn/research/Practical_Real_Time_Strategies_for_Accurate_Indirect_Occlusion_NEW%20VERSION_COLOR.pdf)

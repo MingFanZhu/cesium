@@ -20,7 +20,7 @@ import filter from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRFilter.js";
 import depth from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import AmbientOcclusion from "./_SceneGISAmbientOcclusion.js";
 import LocalLights from "./_SceneGISLocalLights.js";
-import ReflectionMrt from "./_SceneGISReflectionMrt.js";
+import ReflectionMrt from "./_SceneGISLightingMrt.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const mipSampler = new Sampler({
@@ -178,8 +178,13 @@ SceneGISScreenSpaceReflections.execute = function (
   s.mainActive = ReflectionMrt.begin(scene, s, passState, eligible);
   s.mainPass = s.mainActive;
   if (s.mainActive) {
+    const ao =
+      scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
+    ao.mainPass = s.main.ao;
+    ao.prepassDraws = 0;
     return;
   }
+  AmbientOcclusion.execute(scene, passState, frustum);
   try {
     s.capturing = true;
     passState.framebuffer = s.raw.framebuffer;
@@ -248,6 +253,8 @@ SceneGISScreenSpaceReflections.resolve = function (scene, passState, frustum) {
     passState.framebuffer = s.depth.framebuffer;
     s.copyDepth.execute(context, passState);
     context.uniformState.updateFrustum(scene.camera.frustum);
+    AmbientOcclusion.resolveShared(scene, passState, s.depth.getColorTexture());
+    ReflectionMrt.radiance(scene, s);
     traceReflections(scene, s, passState);
     passState.framebuffer = original;
     ReflectionMrt.composite(scene, s, passState);

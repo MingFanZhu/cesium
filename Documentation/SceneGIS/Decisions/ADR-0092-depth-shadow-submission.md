@@ -44,3 +44,7 @@ Paired natural-loop frame time falls by about 68%. This adds CPU-side packed-arr
 and derived programs, with no extra render target or automatic quality change. AO depth geometry,
 remaining visible shadow casters and full-resolution effect processing still cost time. See the
 [R13 review](../../../AgentDocs/rendering-quality/reviews/2026-09-19-r13-pass-submission.md) for limits.
+
+R14 amendment: [ADR-0093](ADR-0093-main-pass-ambient-occlusion.md) eliminates AO geometry on the
+qualified main-MRT path. This ADR's depth-only lighting optimization remains for compatibility
+prepasses; packed uniform caching and cascade culling are unchanged.

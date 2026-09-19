@@ -1034,6 +1034,12 @@ Scene 独占已绑定效果的生命周期，调用方可提前 destroy 解除�
 不能代替 light-volume culling，委托相机剔除的瓦片命令需独立检查各级联，不能假设它们嵌套。
 这些优化不授权陈旧深度/阴影复用、自动质量降级或扩大普通 DrawCommand 的 cull 语义。
 
+[ADR-0093](Decisions/ADR-0093-main-pass-ambient-occlusion.md) 将 AO 的常规 HDR 单视锥路径
+迁入共享主通道 MRT：额外输出已含材质、clearcoat 和样式响应的间接光，复用主深度进行
+全屏 AO，仅向原颜色合成 `(AO - 1) * indirect`。SSR 使用已修正的表面颜色和相同 AO 权重，
+水面可借用同一不透明快照。AO 单独开启同样不重绘几何；非 HDR、多视锥、分类及尚无
+精确响应契约的后光照分支保留既有预通道，不得把这一有限适用范围报告为全路径替换。
+
 ## 局部水面（R8）
 
 [ADR-0087](Decisions/ADR-0087-local-water-surfaces.md) / SGP-0017 增加显式

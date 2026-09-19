@@ -121,12 +121,20 @@
         {
           "path": "packages/engine/Source/Shaders/GlobeFS.glsl",
           "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/CPUStylingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ModelColorStageFS.glsl",
+          "markerMode": "paired"
         }
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISAmbientOcclusionSpec.js"
       ],
-      "decision": "Documentation/SceneGIS/Decisions/ADR-0092-depth-shadow-submission.md",
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0093-main-pass-ambient-occlusion.md",
       "removalCondition": "Native renderer provides current-frame AO and compatible per-material indirect-light integration."
     },
     {

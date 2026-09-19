@@ -58,3 +58,7 @@ submissions and full material evaluations. It does not establish acceptable tota
 
 Technical evidence and retained integration limits are recorded in the
 [R12 review](../../../AgentDocs/rendering-quality/reviews/2026-09-19-r12-main-pass-reflections.md).
+
+R14 amendment: [ADR-0093](ADR-0093-main-pass-ambient-occlusion.md) promotes the attachment manager
+to shared lighting MRT. AO may add one indirect output, consume main depth and correct the radiance
+source before SSR. It can also use MRT independently with SSR disabled; native MSAA is preserved.

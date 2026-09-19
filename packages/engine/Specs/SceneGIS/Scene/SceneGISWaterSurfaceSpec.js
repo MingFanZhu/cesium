@@ -282,6 +282,16 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     render();
     expect(state.borrowed).toBe(false);
     expect(pixel(p)).toEqualEpsilon(hit, 2);
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    render();
+    const ao =
+      scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
+    expect(ao.mainPass).toBe(true);
+    expect(ao.prepassDraws).toBe(0);
+    expect(state.borrowed).toBe(true);
+    expect(state.captureDraws).toBe(0);
+    expect(state.colorTexture).toBe(ao.radianceTexture);
+    expect(pixel(p)).toEqualEpsilon(hit, 2);
   });
   [true, false].forEach(function (planar) {
     it(`shares ${planar ? "Planar" : "Globe"} physical light for scattering and foam without relighting transmission`, async function () {
