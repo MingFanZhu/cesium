@@ -43,6 +43,11 @@ void cpuStylingStage(inout czm_modelMaterial material, SelectedFeature feature)
     #else
     float highlight = ceil(model_colorBlend);
     material.diffuse *= mix(featureColor.rgb, vec3(1.0), highlight);
+    // SCENEGIS_PATCH_BEGIN SGP-0016: Style reflection response with the same linear color multiplier.
+    #ifdef SCENEGIS_SSR_MAIN
+    sceneGISSSRScale(mix(featureColor.rgb, vec3(1.0), highlight));
+    #endif
+    // SCENEGIS_PATCH_END SGP-0016
     #endif
     
     material.alpha *= featureColor.a;

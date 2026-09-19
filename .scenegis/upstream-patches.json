@@ -19,12 +19,20 @@
         {
           "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
           "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/CPUStylingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ModelColorStageFS.glsl",
+          "markerMode": "paired"
         }
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISScreenSpaceReflectionsSpec.js"
       ],
-      "decision": "Documentation/SceneGIS/Decisions/ADR-0086-forward-screen-space-reflections.md",
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0091-main-pass-reflection-mrt.md",
       "removalCondition": "Native Scene supports equivalent forward material capture, current-frame SSR and per-lobe PBR radiance integration."
     },
     {

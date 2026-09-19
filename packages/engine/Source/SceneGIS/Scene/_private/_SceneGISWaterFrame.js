@@ -64,8 +64,12 @@ const SceneGISWaterFrame = {
       return;
     }
     const ssr = scene._sceneGISScreenSpaceReflections;
+    // Main-pass inputs are published after opaque drawing, before water composition.
+    if (ssr?.enabled && ssr._state?.mainActive) {
+      return;
+    }
     if (ssr?.ready) {
-      s.colorTexture = ssr._state.raw.getColorTexture();
+      s.colorTexture = ssr._state.radianceTexture;
       s.depthTexture = ssr._state.depth.getColorTexture();
       s.borrowed = true;
       s.ready = true;

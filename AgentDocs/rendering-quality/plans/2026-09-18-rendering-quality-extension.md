@@ -171,3 +171,16 @@ before that work; explicit night-example visual acceptance remains a follow-up.
 R7 checkpoint: `f1a002ae46`. The [real-scene performance maintenance](2026-09-19-real-scene-performance.md)
 removes repeated full-source cache-key work from owned AO/SSR command derivation. Technical
 review and bounded verification are complete; no rendering feature or quality setting changes.
+
+Performance maintenance checkpoint: `cbd429e11b`. Current-view follow-up reproduces 8–9 FPS with
+all effects and approximately 39 FPS without AO/SSR/shadows/environment. The owner authorizes
+[R12 main-pass MRT reflections](2026-09-19-r12-main-pass-reflections.md): remove redundant opaque
+shading with existing native material semantics and APIs. AO depth sharing and shadow scheduling
+remain subsequent candidates, entered only after this phase's verification and checkpoint.
+
+R12 implementation, verification and architecture/code self-review are complete. The qualified
+real scene eliminates 1574 SSR capture draws and paired frame time falls by 25–27%; total frame
+rate remains about 9–11 FPS with all effects. MRT memory cost and native compatibility routes are
+explicit in the [R12 review](../reviews/2026-09-19-r12-main-pass-reflections.md). Owner visual
+acceptance is pending. Preserve this phase in its independent checkpoint before activating further
+performance work; AO prepass and shadow/draw submission costs remain candidates, not active scope.

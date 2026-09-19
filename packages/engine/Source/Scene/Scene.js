@@ -3195,6 +3195,14 @@ function executeCommands(scene, passState) {
     performVoxelsPass(scene, passState, frustumCommands);
 
     performPass(frustumCommands, Pass.OPAQUE);
+    // SCENEGIS_PATCH_BEGIN SGP-0016: Resolve main-pass material MRT before water and translucency.
+    if (
+      !picking &&
+      SceneGISScreenSpaceReflections.resolve(scene, passState, frustum)
+    ) {
+      SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+    }
+    // SCENEGIS_PATCH_END SGP-0016
     // SCENEGIS_PATCH_BEGIN SGP-0017: Compose water and write its depth before translucency.
     if (!picking) {
       SceneGISWaterFrame.draw(

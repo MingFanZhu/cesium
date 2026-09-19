@@ -276,7 +276,7 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     const state = scene.frameState._sceneGISWater;
     expect(state.borrowed).toBe(true);
     expect(state.captureDraws).toBe(0);
-    expect(state.colorTexture).toBe(ssr._state.raw.getColorTexture());
+    expect(state.colorTexture).toBe(ssr._state.radianceTexture);
     expect(pixel(p)).toEqualEpsilon(hit, 2);
     ssr.destroy();
     render();

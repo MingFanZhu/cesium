@@ -2,6 +2,7 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  ColorBlendMode,
   CustomShader,
   DirectionalLight,
   ImageBasedLighting,
@@ -65,6 +66,7 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
       );
     } else {
       scene.globe = new Globe();
+      scene.globe.depthTestAgainstTerrain = true;
       scene.globe.showGroundAtmosphere = false;
       transform = Transforms.eastNorthUpToFixedFrame(
         Cartesian3.fromDegrees(0, 35, 100),
@@ -210,6 +212,17 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     it(`reflects ${planar ? "Planar" : "Globe"} opaque geometry using evaluated roughness and preserves IBL on misses`, async function () {
       setup(planar);
       const { box } = await models();
+      expect(effect._state.mainPass).toBe(true);
+      expect(effect._state.captureDraws).toBe(0);
+      expect(effect._state.mainDraws).toBeGreaterThan(0);
+      if (!planar) {
+        scene.globe.depthTestAgainstTerrain = false;
+        render();
+        expect(effect._state.mainPass).toBe(false);
+        scene.globe.depthTestAgainstTerrain = true;
+        render();
+        expect(effect._state.mainPass).toBe(true);
+      }
       const receiver = point(0, -0.4, 0);
       const hit = pixel(receiver);
       effect.enabled = false;
@@ -273,6 +286,9 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
   it("captures independent clearcoat and custom material directions after native evaluation", async function () {
     setup();
     await models(true);
+    expect(effect._state.mainPass).toBe(true);
+    expect(effect._state.main.framebuffer.numberOfColorAttachments).toBe(7);
+    expect(effect._state.captureDraws).toBe(0);
     const receiver = point(0, -0.4, 0.4);
     const base = sample(effect._state.raw.getColorTexture(1), receiver);
     const coat = sample(effect._state.raw.getColorTexture(2), receiver);
@@ -289,6 +305,8 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     render();
     expect(effect.ready).toBe(true);
     expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
+    expect(effect._state.mainPass).toBe(false);
+    expect(effect._state.captureDraws).toBeGreaterThan(0);
     const receiver = point(0, -1, 0);
     const depth = sample(effect._state.depth.getColorTexture(), receiver)[0];
     expect(depth).toBeGreaterThan(10);
@@ -330,6 +348,80 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     scene = undefined;
     expect(effect.isDestroyed()).toBe(true);
     expect(resized.isDestroyed()).toBe(true);
+  });
+  it("matches material-weighted replay across native compatibility transitions", async function () {
+    setup();
+    scene.msaaSamples = 1;
+    const { floor } = await models(true);
+    ibl.imageBasedLightingFactor = new Cartesian2(0, 0.35);
+    floor.color = new Color(0.6, 0.9, 0.8, 1.0);
+    floor.colorBlendMode = ColorBlendMode.HIGHLIGHT;
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    render();
+    const receiver = point(0, -0.4, 0.4);
+    const main = pixel(receiver);
+    expect(effect._state.mainPass).toBe(true);
+    // Invert classification retains the native replay ordering. Ordinary models are unchanged.
+    scene.invertClassification = true;
+    render();
+    expect(effect._state.mainPass).toBe(false);
+    expect(effect._state.captureDraws).toBeGreaterThan(0);
+    expect(pixel(receiver)).toEqualEpsilon(main, 3);
+    scene.invertClassification = false;
+    render();
+    expect(effect._state.mainPass).toBe(true);
+    expect(effect._state.captureDraws).toBe(0);
+    expect(pixel(receiver)).toEqual(main);
+  });
+  it("preserves MSAA and model color response without replaying opaque shading", async function () {
+    setup();
+    scene.msaaSamples = 4;
+    const { floor } = await models();
+    const receiver = point(0, -0.4, 0);
+    const state = effect._state;
+    expect(state.mainPass).toBe(true);
+    expect(state.main.numSamples).toBe(4);
+    expect(state.captureDraws).toBe(0);
+    scene.backgroundColor = Color.BLUE;
+    render();
+    expect(
+      Array.from(
+        scene.context.readPixels({
+          framebuffer: state.main.radiance.framebuffer,
+          x: 5,
+          y: 123,
+          width: 1,
+          height: 1,
+        }),
+      ),
+    ).toEqual([0, 0, 0, 0]);
+    expect(pixel(receiver)[0]).toBeGreaterThan(pixel(receiver)[1] + 60);
+    floor.color = Color.BLUE;
+    floor.colorBlendMode = ColorBlendMode.REPLACE;
+    render();
+    const replaced = pixel(receiver);
+    expect(replaced[2]).toBeGreaterThan(replaced[0] + 60);
+    expect(state.mainPass).toBe(true);
+    effect.enabled = false;
+    render();
+    expect(pixel(receiver)).toEqual(replaced);
+    effect.enabled = true;
+    floor.color = Color.WHITE;
+    floor.colorBlendMode = ColorBlendMode.HIGHLIGHT;
+    render();
+    expect(pixel(receiver)[0]).toBeGreaterThan(pixel(receiver)[1] + 60);
+
+    const nativeColor =
+      scene._view.globeDepth.colorFramebufferManager.getColorTexture();
+    const nativeDepth = state.main.source.depthStencilRenderbuffer;
+    const auxiliary = state.main.weights.getColorTexture();
+    const framebuffer = state.main.framebuffer;
+    effect.destroy();
+    expect(framebuffer.isDestroyed()).toBe(true);
+    expect(auxiliary.isDestroyed()).toBe(true);
+    expect(nativeColor.isDestroyed()).toBe(false);
+    expect(nativeDepth.isDestroyed()).toBe(false);
+    render();
   });
   it("allocates lazily, rejects non-HDR activation and detaches on explicit destroy", function () {
     scene = createScene({ canvas: createCanvas(32, 32) });

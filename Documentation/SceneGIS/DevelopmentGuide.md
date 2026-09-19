@@ -770,7 +770,11 @@ R32F 深度；MRT 保存基础层和清漆层方向/粗糙度。结果回到材�
 
 验收入口为 Test/Planar/屏幕空间反射.html?world=planar 或 world=globe。对比开关、粗糙度和相机移动；
 原生地表仅为反射来源，示例镜面地板是 PBR 模型。透明物体、屏幕外几何、递归和时域降噪尚未支持。
-本轮以全分辨率显式 replay 换取较小的原生集成范围，显存约 66.7 bytes/pixel；大型场景需评估几何重放成本。
+R12 按 ADR-0091 为合格的单视锥启用主通道 MRT，省去完整 shaded replay；多视锥、分类、
+清除 Globe 深度及未适配的材质后处理继续使用原路径。保留原生 MSAA，辅助浮点附件独立 resolve。
+普通材质在 4x MSAA 下 SSR 资源约 186.7 bytes/pixel，clearcoat 约 298.7 bytes/pixel；
+原 replay 约 66.7 bytes/pixel。上述只计 SSR 所有目标，不含借用的 native color/depth。
+MRT 用带宽/显存换取绘制和完整着色次数下降；必须在真实场景评估。
 
 GPU 回归入口为 SceneGIS/Scene/SceneGISScreenSpaceReflections，关联 AO、sky reflections、physical model
 和原生 IBL pipeline Specs；Shader 修改须先 gulp build。验证记录见 R6 review，架构边界见 ADR-0086。

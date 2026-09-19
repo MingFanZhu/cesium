@@ -87,6 +87,19 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
     float clearcoatFactor = material.clearcoatFactor;
     vec3 clearcoatColor = color * clearcoatFactor;
 
+    // SCENEGIS_PATCH_BEGIN SGP-0016: Preserve the full native layered response for MRT replacement.
+    #ifdef SCENEGIS_SSR_MAIN
+    sceneGISSSRBaseWeight *= 1.0 - clearcoatFactor * F;
+    sceneGISSSRCoatWeight *= clearcoatFactor * material.occlusion;
+    #ifdef SCENEGIS_MODEL_LIGHTING
+    sceneGISSSRCoatWeight *= model_iblFactor.y;
+    #endif
+    #ifdef SCENEGIS_AMBIENT_OCCLUSION
+    sceneGISSSRCoatWeight *= sceneGISAmbientOcclusion();
+    #endif
+    #endif
+    // SCENEGIS_PATCH_END SGP-0016
+
     // Dim base layer based on transmission loss through clearcoat
     return baseLayerColor * (1.0 - clearcoatFactor * F) + clearcoatColor;
 }
@@ -135,6 +148,11 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
         #endif
         color += indirectColor;
         // SCENEGIS_PATCH_END SGP-0014
+        // SCENEGIS_PATCH_BEGIN SGP-0016: Apply the same AO visibility to the captured specular response.
+        #if defined(SCENEGIS_SSR_MAIN) && defined(SCENEGIS_AMBIENT_OCCLUSION)
+        sceneGISSSRBaseWeight *= sceneGISAmbientOcclusion();
+        #endif
+        // SCENEGIS_PATCH_END SGP-0016
     #endif
 
     #ifdef USE_CLEARCOAT

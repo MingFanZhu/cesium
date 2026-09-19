@@ -20,6 +20,7 @@ import filter from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRFilter.js";
 import depth from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import AmbientOcclusion from "./_SceneGISAmbientOcclusion.js";
 import LocalLights from "./_SceneGISLocalLights.js";
+import ReflectionMrt from "./_SceneGISReflectionMrt.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const mipSampler = new Sampler({
@@ -89,7 +90,7 @@ function allocate(effect, scene) {
         owner: effect,
         uniformMap: {
           u_depth: () => s.depth.getColorTexture(),
-          u_color: () => s.raw.getColorTexture(0),
+          u_color: () => s.radianceTexture,
           u_baseRay: () => s.raw.getColorTexture(1),
           u_coatRay: () => s.raw.getColorTexture(2),
           u_maximumDistance: () => effect.maximumDistance,
@@ -141,6 +142,9 @@ SceneGISScreenSpaceReflections.prepare = function (scene) {
     return;
   }
   effect._ready = false;
+  if (defined(effect._state)) {
+    effect._state.mainActive = false;
+  }
   if (effect.enabled) {
     effect._validate();
   }
@@ -169,6 +173,13 @@ SceneGISScreenSpaceReflections.execute = function (
   const oldFramebuffer = passState.framebuffer;
   const oldPass = us.pass;
   s.captureDraws = 0;
+  s.mainDraws = 0;
+  s.radianceTexture = s.raw.getColorTexture();
+  s.mainActive = ReflectionMrt.begin(scene, s, passState, eligible);
+  s.mainPass = s.mainActive;
+  if (s.mainActive) {
+    return;
+  }
   try {
     s.capturing = true;
     passState.framebuffer = s.raw.framebuffer;
@@ -198,18 +209,7 @@ SceneGISScreenSpaceReflections.execute = function (
     }
     s.capturing = false;
     us.updateFrustum(scene.camera.frustum);
-    s.raw.getColorTexture().generateMipmap();
-    s.raw.getColorTexture().sampler = mipSampler;
-    passState.framebuffer = s.result.framebuffer;
-    s.trace.execute(context, passState);
-    s.filterInput = s.result;
-    Cartesian2.clone(Cartesian2.UNIT_X, s.filterAxis);
-    passState.framebuffer = s.filtered.framebuffer;
-    s.filter.execute(context, passState);
-    s.filterInput = s.filtered;
-    Cartesian2.clone(Cartesian2.UNIT_Y, s.filterAxis);
-    passState.framebuffer = s.result.framebuffer;
-    s.filter.execute(context, passState);
+    traceReflections(scene, s, passState);
     effect._ready = true;
   } finally {
     s.capturing = false;
@@ -217,6 +217,47 @@ SceneGISScreenSpaceReflections.execute = function (
     us.updateFrustum(scene.camera.frustum);
     us.updatePass(oldPass);
   }
+};
+
+function traceReflections(scene, s, passState) {
+  const context = scene.context;
+  s.radianceTexture.generateMipmap();
+  s.radianceTexture.sampler = mipSampler;
+  passState.framebuffer = s.result.framebuffer;
+  s.trace.execute(context, passState);
+  s.filterInput = s.result;
+  Cartesian2.clone(Cartesian2.UNIT_X, s.filterAxis);
+  passState.framebuffer = s.filtered.framebuffer;
+  s.filter.execute(context, passState);
+  s.filterInput = s.filtered;
+  Cartesian2.clone(Cartesian2.UNIT_Y, s.filterAxis);
+  passState.framebuffer = s.result.framebuffer;
+  s.filter.execute(context, passState);
+}
+
+SceneGISScreenSpaceReflections.resolve = function (scene, passState, frustum) {
+  const effect = scene._sceneGISScreenSpaceReflections;
+  const s = effect?._state;
+  if (!effect?.enabled || !s?.mainActive || !scene.frameState.passes.render) {
+    return false;
+  }
+  const context = scene.context;
+  const original = passState.framebuffer;
+  try {
+    ReflectionMrt.resolve(scene, s);
+    passState.framebuffer = s.depth.framebuffer;
+    s.copyDepth.execute(context, passState);
+    context.uniformState.updateFrustum(scene.camera.frustum);
+    traceReflections(scene, s, passState);
+    passState.framebuffer = original;
+    ReflectionMrt.composite(scene, s, passState);
+    effect._ready = true;
+  } finally {
+    s.mainActive = false;
+    passState.framebuffer = original;
+    context.uniformState.updateFrustum(frustum);
+  }
+  return true;
 };
 
 function derive(scene, command, s, capturing) {
@@ -287,7 +328,7 @@ SceneGISScreenSpaceReflections.draw = function (scene, command, passState) {
     return false;
   }
   const s = effect._state;
-  if (!defined(s) || (!s.capturing && !effect._ready)) {
+  if (!defined(s) || (!s.capturing && !s.mainActive && !effect._ready)) {
     return false;
   }
   if (
@@ -299,6 +340,10 @@ SceneGISScreenSpaceReflections.draw = function (scene, command, passState) {
   }
   command = LocalLights.receiver(scene, command);
   command = AmbientOcclusion.receiver(scene, command);
+  if (s.mainActive) {
+    ReflectionMrt.draw(scene, s, command, passState);
+    return true;
+  }
   // Non-PBR sources still occlude receivers and supply shaded color during capture.
   // Their normal draw does not need extra samplers or a receiver variant.
   if (
@@ -321,6 +366,7 @@ SceneGISScreenSpaceReflections.destroy = function (effect) {
   if (!defined(s)) {
     return;
   }
+  ReflectionMrt.destroy(s);
   s.raw.destroy();
   s.depth.destroy();
   s.result.destroy();

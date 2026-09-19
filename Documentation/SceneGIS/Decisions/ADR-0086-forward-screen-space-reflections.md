@@ -51,3 +51,10 @@ log/multifrustum reconstruction and ShaderCache lifetime during upgrades.
 GPU hit/miss and material tests, both coordinate worlds and projection types, native AO/shadow
 composition, picking exclusion and resource lifecycle are required. Full build/release/types and
 bounded actual-GPU timing accompany the owner-visible example. See the R6 plan for the phase gate.
+
+## R12 amendment
+
+[ADR-0091](ADR-0091-main-pass-reflection-mrt.md) replaces unconditional shaded replay with an
+eligible main-pass MRT path. Public behavior and per-lobe material weighting remain; the existing
+replay preserves native branches outside that path's qualification. See R12 for the exact MSAA,
+weighted replacement, background coverage and resource contracts.
