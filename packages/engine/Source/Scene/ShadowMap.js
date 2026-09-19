@@ -44,8 +44,8 @@ import DebugCameraPrimitive from "./DebugCameraPrimitive.js";
 import PerInstanceColorAppearance from "./PerInstanceColorAppearance.js";
 import Primitive from "./Primitive.js";
 import ShadowMapShader from "./ShadowMapShader.js";
-// SCENEGIS_PATCH_BEGIN SGP-0013: Dispatch planar shadow geometry without replacing native resources.
-import SceneGISPlanarShadows from "../SceneGIS/Scene/_private/_SceneGISPlanarShadows.js";
+// SCENEGIS_PATCH_BEGIN SGP-0013: Dispatch owned cascade geometry without replacing native resources.
+import SceneGISCascadedShadows from "../SceneGIS/Scene/_private/_SceneGISCascadedShadows.js";
 // SCENEGIS_PATCH_END SGP-0013
 
 /**
@@ -1536,7 +1536,7 @@ function updateCameras(shadowMap, frameState) {
   // Get the near and far of the scene camera
   let near;
   let far;
-  // SCENEGIS_PATCH_BEGIN SGP-0013: Keep planar cascade splits independent of visible tile bounds.
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Planar cascades use the configured range instead of globe receiver bounds.
   if (shadowMap._fitNearFar && !shadowMap._sceneGISPlanar) {
     // SCENEGIS_PATCH_END SGP-0013
     // shadowFar can be very large, so limit to shadowMap.maximumDistance
@@ -1550,8 +1550,8 @@ function updateCameras(shadowMap, frameState) {
   } else {
     near = camera.frustum.near;
     far = shadowMap.maximumDistance;
-    // SCENEGIS_PATCH_BEGIN SGP-0013: Respect the planar camera far plane and avoid an inverted shadow frustum.
-    if (shadowMap._sceneGISPlanar) {
+    // SCENEGIS_PATCH_BEGIN SGP-0013: Respect the camera far plane and avoid an inverted shadow frustum.
+    if (shadowMap._sceneGISPlanar || shadowMap._numberOfCascades > 1) {
       far = Math.max(near + 1.0, Math.min(far, camera.frustum.far));
     }
     // SCENEGIS_PATCH_END SGP-0013
@@ -1561,7 +1561,11 @@ function updateCameras(shadowMap, frameState) {
   camera.frustum.clone(shadowMap._sceneCamera.frustum);
   shadowMap._sceneCamera.frustum.near = near;
   shadowMap._sceneCamera.frustum.far = far;
-  shadowMap._distance = far - near;
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Stabilize Globe receiver ranges without sacrificing local-model resolution.
+  SceneGISCascadedShadows.stabilizeFrustum(shadowMap, frameState);
+  shadowMap._distance =
+    shadowMap._sceneCamera.frustum.far - shadowMap._sceneCamera.frustum.near;
+  // SCENEGIS_PATCH_END SGP-0013
 
   checkVisibility(shadowMap, frameState);
 
@@ -1576,7 +1580,7 @@ function updateCameras(shadowMap, frameState) {
  */
 ShadowMap.prototype.update = function (frameState) {
   // SCENEGIS_PATCH_BEGIN SGP-0013: Select a world-specific shader and cascade profile per live frame.
-  const planar = SceneGISPlanarShadows.isActive(frameState);
+  const planar = SceneGISCascadedShadows.isActive(frameState);
   if (planar !== (this._sceneGISPlanar === true)) {
     this.dirty = true;
   }
@@ -1591,10 +1595,10 @@ ShadowMap.prototype.update = function (frameState) {
       computeOmnidirectional(this, frameState);
     }
 
-    // SCENEGIS_PATCH_BEGIN SGP-0013: Fit planar cascades on a stable world texel grid.
+    // SCENEGIS_PATCH_BEGIN SGP-0013: Fit directional cascades on a stable world texel grid.
     if (
       this._cascadesEnabled &&
-      !SceneGISPlanarShadows.updateCascades(this, frameState)
+      !SceneGISCascadedShadows.updateCascades(this, frameState)
     ) {
       // SCENEGIS_PATCH_END SGP-0013
       fitShadowMapToScene(this, frameState);
@@ -1657,9 +1661,9 @@ function combineUniforms(shadowMap, uniforms, isTerrain) {
       : shadowMap._primitiveBias;
 
   const mapUniforms = {
-    // SCENEGIS_PATCH_BEGIN SGP-0013: Scale planar receiver bias to each cascade's world texel footprint.
-    sceneGIS_planarCascadeBias: function () {
-      return shadowMap._sceneGISPlanarCascadeBias;
+    // SCENEGIS_PATCH_BEGIN SGP-0013: Bound receiver precision bias by the cascade's world texel footprint.
+    sceneGIS_cascadeBias: function () {
+      return shadowMap._sceneGISCascadeBias;
     },
     // SCENEGIS_PATCH_END SGP-0013
     shadowMap_texture: function () {
@@ -1838,7 +1842,7 @@ ShadowMap.createReceiveDerivedCommand = function (
   let hasTerrainNormal = false;
   if (isTerrain) {
     // SCENEGIS_PATCH_BEGIN SGP-0013: Planar surfaces are explicit shader owners, not Globe tiles.
-    hasTerrainNormal = SceneGISPlanarShadows.isSurface(fragmentShaderSource)
+    hasTerrainNormal = SceneGISCascadedShadows.isSurface(fragmentShaderSource)
       ? true
       : command.owner.data.renderedMesh.encoding.hasVertexNormals;
     // SCENEGIS_PATCH_END SGP-0013

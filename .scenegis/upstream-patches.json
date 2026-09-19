@@ -100,9 +100,9 @@
     },
     {
       "id": "SGP-0013",
-      "title": "Integrate stable planar cascaded geometry shadows",
+      "title": "Integrate stable directional cascades and precise shadow filtering",
       "status": "active",
-      "reason": "Native shadow visibility assumes an ellipsoid, cascades fit view-dependent bounds, and terrain receivers assume Globe tile owners. Planar shadows require explicit coordinate, stable cascade and surface shader dispatch while retaining native resources and APIs.",
+      "reason": "Retain native shadow resources and APIs while dispatching non-ellipsoid visibility, stable Globe/Planar cascades, geometric receiver-plane correction and continuous atlas-safe PCF to owned code.",
       "risk": "high",
       "files": [
         {
@@ -126,9 +126,10 @@
         "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarShadowsSpec.js",
         "packages/engine/Specs/Scene/ShadowMapSpec.js",
         "packages/engine/Specs/Scene/ShadowMapShaderSpec.js",
-        "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js"
+        "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISShadowQualitySpec.js"
       ],
-      "decision": "Documentation/SceneGIS/Decisions/ADR-0083-planar-cascaded-shadows.md",
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0088-directional-shadow-refinement.md",
       "removalCondition": "Retire when native shadows and terrain controls support equivalent non-ellipsoid world semantics and stable cascades with explicit surface metadata."
     },
     {

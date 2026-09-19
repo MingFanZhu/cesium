@@ -1,7 +1,7 @@
 import defined from "../Core/defined.js";
 import ShaderSource from "../Renderer/ShaderSource.js";
-// SCENEGIS_PATCH_BEGIN SGP-0013: Share the native receiver with owned planar cascade filtering.
-import planarCascadeShadow from "../Shaders/SceneGIS/PlanarSurface/SceneGISPlanarCascadeShadow.js";
+// SCENEGIS_PATCH_BEGIN SGP-0013: Share the native receiver with owned directional cascade filtering.
+import cascadeShadow from "../Shaders/SceneGIS/Rendering/SceneGISCascadeShadow.js";
 // SCENEGIS_PATCH_END SGP-0013
 
 /**
@@ -238,8 +238,7 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
   const usesDepthTexture = shadowMap._usesDepthTexture;
   // SCENEGIS_PATCH_BEGIN SGP-0013: Planar surfaces provide geometric or interpolated fixed-axis normals.
   const planarSurface = fs.defines.includes("SCENEGIS_PLANAR_SURFACE");
-  const planarCascades =
-    shadowMap._sceneGISPlanar === true && shadowMap._numberOfCascades > 1;
+  const directionalCascades = shadowMap._numberOfCascades > 1;
   // SCENEGIS_PATCH_END SGP-0013
   const polygonOffsetSupported = shadowMap._polygonOffsetSupported;
   const isPointLight = shadowMap._isPointLight;
@@ -268,8 +267,8 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
   if (planarSurface) {
     defines.push("SHADOW_MAP");
   }
-  if (planarCascades) {
-    sources.push(planarCascadeShadow);
+  if (directionalCascades) {
+    sources.push(cascadeShadow);
   }
   // SCENEGIS_PATCH_END SGP-0013
 
@@ -361,6 +360,14 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
     "    vec3 normalEC = getNormalEC(); \n" +
     "    float depth = -positionEC.z; \n";
 
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Differentiate geometry before cascade-dependent control flow.
+  if (directionalCascades) {
+    fsSource +=
+      "    vec3 sceneGIS_positionDx = dFdx(positionEC.xyz); \n" +
+      "    vec3 sceneGIS_positionDy = dFdy(positionEC.xyz); \n";
+  }
+  // SCENEGIS_PATCH_END SGP-0013
+
   fsSource +=
     "    czm_shadowParameters shadowParameters; \n" +
     "    shadowParameters.texelStepSize = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.xy; \n" +
@@ -368,7 +375,9 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
     "    shadowParameters.normalShadingSmooth = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.w; \n" +
     "    shadowParameters.darkness = shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness.w; \n";
 
-  if (isTerrain) {
+  // SCENEGIS_PATCH_BEGIN SGP-0013: Precise cascades correct sample depth without distance-inflated bias.
+  if (isTerrain && !directionalCascades) {
+    // SCENEGIS_PATCH_END SGP-0013
     // Scale depth bias based on view distance to reduce z-fighting in distant terrain
     fsSource += "    shadowParameters.depthBias *= max(depth * 0.01, 1.0); \n";
   } else if (!polygonOffsetSupported) {
@@ -413,8 +422,7 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
       "    float visibility = czm_shadowVisibility(shadowMap_texture, shadowParameters); \n";
   } else if (hasCascades) {
     fsSource += `${
-      // SCENEGIS_PATCH_BEGIN SGP-0013: Preserve native shader assembly around the planar expressions.
-      // eslint-disable-next-line prefer-template
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Preserve native shader assembly around the owned cascade expressions.
       "    float maxDepth = shadowMap_cascadeSplits[1].w; \n" +
       // SCENEGIS_PATCH_END SGP-0013
       "    // Stop early if the eye depth exceeds the last cascade \n" +
@@ -423,8 +431,8 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
       "        return; \n" +
       "    } \n" +
       "    // Get the cascade based on the eye-space depth \n" +
-      // SCENEGIS_PATCH_BEGIN SGP-0013: Use exclusive planar split selection, including exact split boundaries.
-      `    vec4 weights = ${planarCascades ? "sceneGISPlanarCascadeWeights" : "czm_cascadeWeights"}(depth); \n` +
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Use exclusive split selection, including exact split boundaries.
+      `    vec4 weights = sceneGISCascadeWeights(depth); \n` +
       // SCENEGIS_PATCH_END SGP-0013
       "    // Apply normal offset \n" +
       "    float nDotL = clamp(dot(normalEC, shadowMap_lightDirectionEC), 0.0, 1.0); \n" +
@@ -436,9 +444,7 @@ ShadowMapShader.createShadowReceiveFragmentShader = function (
       "    shadowParameters.depth = shadowPosition.z; \n" +
       "    shadowParameters.nDotL = nDotL; \n" +
       // SCENEGIS_PATCH_BEGIN SGP-0013: Blend overlap bands and contain the PCF footprint within each atlas tile.
-      (planarCascades
-        ? "    float visibility = sceneGISPlanarCascadeVisibility(shadowMap_texture, shadowParameters, positionEC, weights, depth); \n"
-        : "    float visibility = czm_shadowVisibility(shadowMap_texture, shadowParameters); \n") +
+      "    float visibility = sceneGISCascadeVisibility(shadowMap_texture, shadowParameters, positionEC, weights, depth, sceneGIS_positionDx, sceneGIS_positionDy); \n" +
       // SCENEGIS_PATCH_END SGP-0013
       "    // Fade out shadows that are far away \n" +
       "    float shadowMapMaximumDistance = shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness.z; \n" +

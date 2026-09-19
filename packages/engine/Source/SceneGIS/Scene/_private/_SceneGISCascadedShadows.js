@@ -32,6 +32,30 @@ function isSurface(shaderSource) {
   return shaderSource.defines.includes("SCENEGIS_PLANAR_SURFACE");
 }
 
+function stabilizeFrustum(shadowMap, frameState) {
+  const frustum = shadowMap._sceneCamera.frustum;
+  if (
+    shadowMap._sceneGISPlanar ||
+    shadowMap._numberOfCascades <= 1 ||
+    !shadowMap._fitNearFar ||
+    frustum.near >= shadowMap.maximumDistance
+  ) {
+    return;
+  }
+  // Globe receivers can occupy only a few meters of a kilometer-scale range.
+  // Round their far extent up to a fixed distance band to retain local detail
+  // without continuously rescaling the atlas as visible bounds change.
+  frustum.near = frameState.camera.frustum.near;
+  frustum.far = Math.max(
+    frustum.near + 1,
+    Math.min(
+      2 ** Math.ceil(Math.log2(frustum.far)),
+      shadowMap.maximumDistance,
+      frameState.camera.frustum.far,
+    ),
+  );
+}
+
 function setCamera(camera, x, y, z, halfWidth, halfHeight, depth) {
   const position = camera.positionWC;
   position.x = right.x * x + up.x * y + direction.x * z;
@@ -40,8 +64,6 @@ function setCamera(camera, x, y, z, halfWidth, halfHeight, depth) {
   Cartesian3.clone(direction, camera.directionWC);
   Cartesian3.clone(up, camera.upWC);
   Cartesian3.clone(right, camera.rightWC);
-  // Shadow cameras retain Cesium's internal cartographic substrate only.
-  camera.positionCartographic.height = position.z;
   Matrix4.computeView(position, direction, up, right, camera.viewMatrix);
   Matrix4.inverseTransformation(camera.viewMatrix, camera.inverseViewMatrix);
   const frustum = (camera.frustum ??= new OrthographicOffCenterFrustum());
@@ -54,15 +76,14 @@ function setCamera(camera, x, y, z, halfWidth, halfHeight, depth) {
 }
 
 function updateCascades(shadowMap, frameState) {
-  if (!shadowMap._sceneGISPlanar) {
+  if (!shadowMap._sceneGISPlanar && shadowMap._numberOfCascades <= 1) {
     return false;
   }
   const camera = shadowMap._sceneCamera;
   const near = camera.frustum.near;
   const far = camera.frustum.far;
   const count = shadowMap._numberOfCascades;
-  const cascadeBias = (shadowMap._sceneGISPlanarCascadeBias ??=
-    new Cartesian4());
+  const cascadeBias = (shadowMap._sceneGISCascadeBias ??= new Cartesian4());
   Cartesian3.normalize(shadowMap._shadowMapCamera.directionWC, direction);
   const axis =
     Math.abs(direction.z) < 0.9 ? Cartesian3.UNIT_Z : Cartesian3.UNIT_Y;
@@ -179,5 +200,10 @@ function updateCascades(shadowMap, frameState) {
 }
 
 /** @private */
-const SceneGISPlanarShadows = { isActive, isSurface, updateCascades };
-export default SceneGISPlanarShadows;
+const SceneGISCascadedShadows = {
+  isActive,
+  isSurface,
+  stabilizeFrustum,
+  updateCascades,
+};
+export default SceneGISCascadedShadows;

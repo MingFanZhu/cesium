@@ -12,3 +12,4 @@
 
 - [R8 Local water](2026-09-19-r8-local-water.md): `completed`; owner accepted; R6 checkpoint `f9301bf8cd`.
 - [R9 Public-data reference scene](2026-09-19-r9-reference-scene.md): `completed`, owner accepted; R8 checkpoint `b4a27c7358`.
+- [R10 Shadow refinement](2026-09-19-r10-shadow-refinement.md): `active`; R9 checkpoint `f6028f6606`.

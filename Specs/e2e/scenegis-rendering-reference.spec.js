@@ -30,6 +30,90 @@ function expectSameCamera(actual, expected) {
 }
 
 for (const world of ["planar", "globe"]) {
+  test(`${world}: shadow detail controls and atlas lifecycle`, async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") {
+        errors.push(message.text());
+      }
+    });
+    await page.goto(`/Test/Rendering/阴影精细度.html?world=${world}`);
+    await page.waitForFunction(() => window.example?.state.ready);
+    expect(await page.evaluate(() => window.example.models.length)).toBe(14);
+    const canvas = await page.locator("canvas").boundingBox();
+    await page.mouse.move(
+      canvas.x + canvas.width * 0.5,
+      canvas.y + canvas.height * 0.65,
+    );
+    for (const delta of [120, -120]) {
+      const before = await page.evaluate(() =>
+        JSON.stringify(window.example.viewer.camera.positionWC),
+      );
+      await page.mouse.wheel(0, delta);
+      await page.waitForFunction((previous) => {
+        const viewer = window.example.viewer;
+        return (
+          !viewer.useDefaultRenderLoop ||
+          JSON.stringify(viewer.camera.positionWC) !== previous
+        );
+      }, before);
+      expect(
+        await page.evaluate(() => window.example.viewer.useDefaultRenderLoop),
+      ).toBe(true);
+      await expect(page.locator("#error")).toBeEmpty();
+    }
+    await page.getByLabel("软阴影", { exact: true }).uncheck();
+    await page.getByLabel("阴影分辨率", { exact: true }).selectOption("512");
+    await page.getByLabel("视角", { exact: true }).selectOption("远近级联");
+    await page.getByLabel("显示级联颜色", { exact: true }).check();
+    await page.waitForFunction(() => {
+      const shadow = window.example.viewer.shadowMap;
+      return shadow._shadowMapTexture.width === 1024;
+    });
+    await page.getByLabel("软阴影", { exact: true }).check();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          const remove =
+            window.example.viewer.scene.postRender.addEventListener(() => {
+              remove();
+              resolve();
+            });
+        }),
+    );
+    await expect(page.locator("#error")).toBeEmpty();
+    const released = await page.evaluate(() => {
+      const sample = window.example;
+      const atlas = sample.viewer.shadowMap._shadowMapTexture;
+      window.dispatchEvent(
+        new PageTransitionEvent("pagehide", { persisted: true }),
+      );
+      const retained = !sample.viewer.isDestroyed();
+      window.dispatchEvent(
+        new PageTransitionEvent("pagehide", { persisted: false }),
+      );
+      sample.destroy();
+      return {
+        retained,
+        viewer: sample.viewer.isDestroyed(),
+        atlas: atlas.isDestroyed(),
+        models: sample.models.every((model) => model.isDestroyed()),
+      };
+    });
+    expect(released).toEqual({
+      retained: true,
+      viewer: true,
+      atlas: true,
+      models: true,
+    });
+    expect(errors).toEqual([]);
+  });
+}
+
+for (const world of ["planar", "globe"]) {
   test(`${world}: public scan, repeatable comparison and lifecycle`, async ({
     page,
   }, info) => {

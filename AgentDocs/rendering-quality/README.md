@@ -8,8 +8,8 @@
 | Status                 | `active`                                                   |
 | Planning model         | `extension`                                                |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R9 Public-data reference scene                             |
-| Active phase plan      | [R9](plans/2026-09-19-r9-reference-scene.md)               |
+| Current phase          | R10 Shadow refinement                                      |
+| Active phase plan      | [R10](plans/2026-09-19-r10-shadow-refinement.md)           |
 | Active standalone plan | None                                                       |
 | Architecture contact   | Current task                                               |
 | Execution contact      | Current task                                               |
@@ -35,13 +35,15 @@
 
 ## Current handoff
 
-- Current state: R8 accepted and checkpointed as `b4a27c7358`; R9 technical review and owner acceptance complete.
-- Next action: Checkpoint R9, then qualify the requested shadow refinement phase.
+- Current state: R10 technically complete; owner advanced to direct-only shadow lighting after the zoom fix.
+- Next action: Checkpoint R10, then activate direct-only shadow lighting.
+- Acceptance follow-up: Example wheel crash fixed by retaining the native camera far range;
+  real zoom-in/out regression passes in both Worlds. No additional engine or upstream change.
 - Priority: Photogrammetry first; future shadows, indirect light, reflection completeness and night lighting each keep focused examples.
 - Open discussions: None.
-- Latest review: [R9 review](reviews/2026-09-19-r9-reference-scene.md).
-- Known risks: Baked photogrammetry lighting, single-leaf sample scope and existing Globe shadow bands captured by the reference scene.
-- Validation: Three checks pass: model normals and both-world loading/comparison/export/lifecycle. Scoped formatting, ESLint, Markdownlint and upstream audit pass; the full AgentDocs formatting check retains 316 pre-existing warnings. R8 GPU/build evidence remains in its review.
+- Latest review: [R10 review](reviews/2026-09-19-r10-shadow-refinement.md).
+- Known risks: Baked photogrammetry lighting, single-leaf sample scope, distance-band rescaling and native final-color shadow modulation. R9 Globe shadow bands are fixed.
+- Validation: 47 native shadow tests, 9 Planar GPU tests, 5 new GPU tests in dev/release, and 5 E2E pass. Builds/types, scoped ESLint and patch audit pass. Matched GPU median rises 1.719 to 2.597 ms; details in R10 review.
 - Checkpoints: R1 `4ea24b89ef`; R2 `c824cfec1e`; R3 `2e2dc02ce6`; R6 `f9301bf8cd`, all accepted.
-- Active phase ADR / SGP: None; R9 changes only owned examples, fixture preparation, E2E and handoff documents.
-- Example: [实景对比](../../Test/Rendering/实景对比.html)、[独立效果目录](../../Test/Rendering/示例目录.html).
+- Active phase ADR / SGP: [ADR-0088](../../Documentation/SceneGIS/Decisions/ADR-0088-directional-shadow-refinement.md), `SGP-0013`.
+- Example: [阴影精细度](../../Test/Rendering/阴影精细度.html)、[实景对比](../../Test/Rendering/实景对比.html)、[独立效果目录](../../Test/Rendering/示例目录.html).

@@ -947,11 +947,14 @@ ellipsoid substrate，不代表planar CRS。non-Globe构造固定3D-only、关�
 `Scene.updateFrameState`在发布frame state前再次验证caller late mutation。完整矩阵与SGP边界见
 [ADR-0039](Decisions/ADR-0039-planar-scene-api-qualification-and-safety.md)。
 
-## 平面级联阴影（R1）
+## 几何级联阴影（R1 / R10）
 
 [ADR-0083](Decisions/ADR-0083-planar-cascaded-shadows.md) 通过 SGP-0013 扩宽此前 Planar
-几何阴影限制。复用原生 ShadowMap atlas、派生命令、PCF 和控制接口，SceneGIS-owned helper
-负责固定 +Z 可见性、稳定级联覆盖、纹素对齐、重叠混合和按纹素尺度的偏移。Scene 释放自有
+几何阴影限制。[ADR-0088](Decisions/ADR-0088-directional-shadow-refinement.md) 将稳定四级覆盖
+与连续 PCF 扩展到 Globe；复用原生 ShadowMap atlas、派生命令和控制接口。SceneGIS-owned helper
+负责 World 可见性、级联包围球、纹素对齐、重叠混合与接收面逐采样深度校正。Planar 使用固定配置
+范围，Globe 对可见 far 范围按 2 的幂向上分档，兼顾小模型精度与档内稳定；跨档会重新分配。
+软阴影使用 4x4 tent，硬阴影单点；不增加资源或公共 API。Scene 释放自有
 ShadowMap 后才销毁 Context。禁止第二套阴影引擎或伪装 Globe tile owner。
 
 `Viewer.shadows`、`Viewer.terrainShadows` 与 `world.shadows` 保留原生语义；普通 Entity

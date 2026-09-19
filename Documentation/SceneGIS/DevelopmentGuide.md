@@ -688,7 +688,7 @@ sky/shadow选项；自动化同时覆盖constructor preflight与`preRender`后�
       索引已反映最终状态、验证结果与剩余事项。
 - [ ] 最终报告列出验证结果、上游文件、SGP 和剩余风险。
 
-## 平面几何阴影维护
+## 几何阴影维护
 
 R1 按 [ADR-0083](Decisions/ADR-0083-planar-cascaded-shadows.md) 接入原生四级 ShadowMap，
 不再拒绝 Planar shadows / terrainShadows。CPU 覆盖、纹素稳定和 GLSL 过渡在 SceneGIS-owned
@@ -698,7 +698,12 @@ World 通过 DrawCommand castShadows/receiveShadows 与原生派生缓存接入�
 变体、caster 裁剪、透明背景和 sampler 预算必须一同维护。Entity Graphics 与普通 Primitive
 沿用原生 shadows 字段；ground classification 并非真实投影几何，不扩大资格。
 阴影 atlas 由 Scene 的 ShadowMap 所有，销毁发生在 Context 之前。
-回归入口是 SceneGISPlanarShadowsSpec、相关 surface / visualizer Specs 和原生 ShadowMap Specs。
+R10 按 [ADR-0088](Decisions/ADR-0088-directional-shadow-refinement.md) 共享四级 fitter 与连续
+4x4 PCF；实现位于 `_SceneGISCascadedShadows.js` 与 `Rendering/SceneGISCascadeShadow.glsl`。
+接收面几何导数必须在级联分支前求值，深度校正在各采样中心计算；不要通过扩大 slope bias 掩盖条纹。
+Globe 保留可见范围裁剪并向上分档，测试应等待该范围发布后检查档内稳定性。
+回归入口是 SceneGISShadowQualitySpec、SceneGISPlanarShadowsSpec 与原生 ShadowMap Specs。
+人工入口为 `Test/Rendering/阴影精细度.html?world=planar|globe` 和 `实景对比.html`。
 
 ## 高质量环境光遮蔽维护
 

@@ -7,6 +7,9 @@
 - Related phase: [R1](../../../AgentDocs/rendering-quality/plans/2026-09-18-r1-planar-shadows.md)
 - Related SGP: `SGP-0013`, existing Widget / Viewer seams `SGP-0001/0002`
 - Amends the geometry-shadow exclusions in ADR-0039 and ADR-0055.
+- R10 amendment: [ADR-0088](ADR-0088-directional-shadow-refinement.md) shares the fitter with Globe
+  and replaces slope-expanded bias / nearest PCF with receiver-plane correction / continuous PCF.
+  The Globe-only path and original bias statements below describe R1, before this amendment.
 
 ## Decision
 

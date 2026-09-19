@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>阴影精细度</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>阴影精细度</h1>
+      <p>观察细杆、悬空横梁、斜面与远近级联的阴影。</p>
+      <p>
+        软阴影采用连续滤波；降低分辨率可放大边缘差别。阴影距离越大，同等分辨率下细节越少。
+      </p>
+      <p>移动视角观察稳定性；打开级联颜色可检查分级覆盖与过渡。</p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="实景对比.html">实景对比</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./阴影精细度.js"></script>
+  </body>
+</html>

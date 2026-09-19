@@ -145,3 +145,9 @@ remain deferred by the owner because of their cost. Existing phase identifiers r
 
 R9 is owner accepted on 2026-09-19. The next requested phase is shadow refinement (item 4 in the
 visual priorities, distinct from the retained R4 temporal phase identifier).
+
+R9 checkpoint: `f6028f6606`. [R10 shadow refinement](2026-09-19-r10-shadow-refinement.md) is active:
+shared stable directional cascades, continuous PCF and geometric receiver-plane correction,
+with an independent example and both-world verification. Existing native APIs remain the controls.
+Implementation and technical review are complete. After the zoom fix, the owner advanced to direct-only
+shadow lighting; checkpoint R10 before activating that phase. See the [R10 review](../reviews/2026-09-19-r10-shadow-refinement.md).

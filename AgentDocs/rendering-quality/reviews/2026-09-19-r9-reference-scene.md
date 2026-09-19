@@ -18,6 +18,9 @@
 
 ## Verification
 
+R10 follow-up: R9-F4 is now fixed by the shared cascade / receiver-plane filtering implementation;
+see [R10 review](2026-09-19-r10-shadow-refinement.md). The table retains the original R9 disposition.
+
 - One asset regression and two Chromium E2E cases cover both Worlds: fully local requests, actual scan content,
   A/B restoration, original-texture shader selection, SSR toggle, unchanged camera/time,
   exported configuration, model visibility, BFCache preservation and idempotent cleanup.
