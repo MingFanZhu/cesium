@@ -822,3 +822,24 @@ opaque 快照。`water.reflections=false` 只关闭水面的屏幕追踪，天�
 实现和资源预算见 ADR-0087 与 R8 review。严格 GPU 入口为 SceneGIS/Scene/SceneGISWaterSurface，
 关联 SSR、AO 和 physical model lighting Specs。独立屏幕目标约 18.7 bytes/pixel，隐藏保留，
 Scene 销毁释放；启用 SSR 时借用已有捕获，避免重复 replay。Shader 修改先 gulp build。
+
+## 可选 TAA
+
+```js
+scene.highDynamicRange = true;
+scene.msaaSamples = 1;
+scene.postProcessStages.fxaa.enabled = false;
+const taa = new Cesium.SceneGISTemporalAntialiasing({ scene, enabled: true });
+// Call after an application camera cut or scene replacement.
+taa.reset();
+```
+
+球面、平面、透视与正交相机使用同一接口。MSAA / FXAA 设置由应用显式选择；仅打开 TAA
+不会自动关闭它们。效果在 HDR bloom / tone mapping 前运行，逐视锥借用主深度，不重绘几何。
+相机和 CPU culling 不抖动，深度拾取抵消采样偏移。关闭会释放历史资源，Scene 销毁时自动销毁
+绑定效果；可提前调用 `taa.destroy()` 解除绑定。首帧、reset、resize 和投影变化使用当前颜色。
+
+`historyWeight` 默认 0.9、范围 [0, 0.95]，降低可加快响应但减弱稳定性。当前使用相机运动
+重投影，未提供物体 motion vectors；运动模型、透明对象和标注可能柔化或残影。request-render
+模式不请求额外收敛帧。独立页面 `Test/Rendering/时域抗锯齿.html` 提供四种 AA 模式、相机和
+物体运动对照。详见 ADR-0094 / SGP-0022；性能应在同样视角、分辨率、图层与效果下实测。

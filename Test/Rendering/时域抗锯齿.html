@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>时域抗锯齿 TAA</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>时域抗锯齿</h1>
+      <p>
+        比较细杆、斜边和远处格栅的锯齿与闪烁。切换模式后观察静止、相机移动和物体移动。
+      </p>
+      <p>
+        TAA
+        使用单样本主通道。移动物体尚无运动矢量，可能有柔化或残影；提高即时响应可降低历史权重。
+      </p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./时域抗锯齿.js"></script>
+  </body>
+</html>

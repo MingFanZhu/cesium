@@ -83,3 +83,6 @@ Owner visual review remains pending. Main shading, shadows, full-resolution effe
 still cost time; overall performance is not declared accepted. MSAA-resolved depth can differ at
 sample edges from the old single-sample prepass, so exact edge pixel identity is not promised.
 Retain R7 night and Viewer startup-camera follow-ups. No further phase is activated.
+
+Owner accepted R14 on 2026-09-20 and explicitly requested optional TAA. R14 checkpoint is
+`31ba432cc8`; the next entered phase is [R4](../plans/2026-09-20-r4-temporal-antialiasing.md).

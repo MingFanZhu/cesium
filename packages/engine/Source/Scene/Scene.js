@@ -1,3 +1,6 @@
+// SCENEGIS_PATCH_BEGIN SGP-0022: Schedule optional temporal antialiasing without geometry replay.
+import SceneGISTemporalAntialiasing from "../SceneGIS/Scene/_private/_SceneGISTemporalAntialiasing.js";
+// SCENEGIS_PATCH_END SGP-0022
 // SCENEGIS_PATCH_BEGIN SGP-0017: Schedule local water with shared opaque inputs.
 import SceneGISWaterFrame from "../SceneGIS/Scene/_private/_SceneGISWaterFrame.js";
 // SCENEGIS_PATCH_END SGP-0017
@@ -2888,6 +2891,11 @@ function executeCommands(scene, passState) {
 
   const passes = frameState.passes;
   const picking = passes.pick || passes.pickVoxel;
+  // SCENEGIS_PATCH_BEGIN SGP-0022: Begin camera-independent jitter after shadow submission.
+  if (!picking) {
+    SceneGISTemporalAntialiasing.begin(scene);
+  }
+  // SCENEGIS_PATCH_END SGP-0022
 
   // Ideally, we would render the sky box and atmosphere last for
   // early-z, but we would have to draw it in each frustum.
@@ -3222,6 +3230,12 @@ function executeCommands(scene, passState) {
     }
     // SCENEGIS_PATCH_END SGP-0017
 
+    // SCENEGIS_PATCH_BEGIN SGP-0022: Preserve opaque and water depth before per-frustum depth is cleared.
+    if (!picking) {
+      SceneGISTemporalAntialiasing.captureDepth(scene);
+    }
+    // SCENEGIS_PATCH_END SGP-0022
+
     // Draw direct edges (EDGES_ONLY mode) after opaque surfaces
     performCesium3DTileEdgesDirectPass(scene, passState, frustumCommands);
 
@@ -3246,6 +3260,9 @@ function executeCommands(scene, passState) {
       const pickDepth = scene._picking.getPickDepth(scene, index);
       pickDepth.update(context, globeDepth.depthStencilTexture);
       pickDepth.executeCopyDepth(context, passState);
+      // SCENEGIS_PATCH_BEGIN SGP-0022: Associate depth picking with the projection that produced it.
+      SceneGISTemporalAntialiasing.capturePickJitter(scene, pickDepth);
+      // SCENEGIS_PATCH_END SGP-0022
     }
 
     if (picking || !usePostProcessSelected) {
@@ -4310,6 +4327,10 @@ Scene.prototype.resolveFramebuffers = function (passState) {
     }
     // SCENEGIS_PATCH_END SGP-0008
 
+    // SCENEGIS_PATCH_BEGIN SGP-0022: Resolve temporal HDR before bloom and tone mapping.
+    colorTexture = SceneGISTemporalAntialiasing.resolve(this, colorTexture);
+    // SCENEGIS_PATCH_END SGP-0022
+
     postProcess.execute(context, colorTexture, depthTexture, idTexture);
     postProcess.copy(context, originalFramebuffer);
   }
@@ -4669,6 +4690,10 @@ function render(scene) {
 
   scene.updateFrameState();
   frameState.passes.render = true;
+  // SCENEGIS_PATCH_BEGIN SGP-0022: Validate temporal configuration before drawing.
+  SceneGISTemporalAntialiasing.prepare(scene);
+  // SCENEGIS_PATCH_END SGP-0022
+
   // SCENEGIS_PATCH_BEGIN SGP-0019: Transform local sources once per rendered frame.
   SceneGISLocalLights.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0019
@@ -4736,8 +4761,14 @@ function render(scene) {
   // SCENEGIS_PATCH_END SGP-0001
 
   scene.updateEnvironment();
-  scene.updateAndExecuteCommands(passState, backgroundColor);
-  scene.resolveFramebuffers(passState);
+  // SCENEGIS_PATCH_BEGIN SGP-0022: Restore render projection on success or failure before overlays and picking.
+  try {
+    scene.updateAndExecuteCommands(passState, backgroundColor);
+    scene.resolveFramebuffers(passState);
+  } finally {
+    SceneGISTemporalAntialiasing.end(scene);
+  }
+  // SCENEGIS_PATCH_END SGP-0022
 
   passState.framebuffer = undefined;
   executeOverlayCommands(scene, passState);
@@ -5761,6 +5792,9 @@ Scene.prototype.destroy = function () {
   // SCENEGIS_PATCH_BEGIN SGP-0019: Detach the Scene-owned local light collection.
   this._sceneGISLights?.destroy();
   // SCENEGIS_PATCH_END SGP-0019
+  // SCENEGIS_PATCH_BEGIN SGP-0022: Release temporal history before the Context.
+  this._sceneGISTemporalAntialiasing?.destroy();
+  // SCENEGIS_PATCH_END SGP-0022
   this._context = this._context && this._context.destroy();
   this._frameState.creditDisplay =
     this._frameState.creditDisplay && this._frameState.creditDisplay.destroy();

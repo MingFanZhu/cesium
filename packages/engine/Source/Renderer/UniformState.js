@@ -1,3 +1,6 @@
+// SCENEGIS_PATCH_BEGIN SGP-0022: Apply explicit render-only projection sampling.
+import applySceneGISProjectionJitter from "../SceneGIS/Renderer/_private/_SceneGISProjectionJitter.js";
+// SCENEGIS_PATCH_END SGP-0022
 import BoundingRectangle from "../Core/BoundingRectangle.js";
 import Cartesian2 from "../Core/Cartesian2.js";
 import Cartesian3 from "../Core/Cartesian3.js";
@@ -1421,6 +1424,10 @@ UniformState.prototype.updateFrustum = function (frustum) {
   this._frustumPlanes.y = frustum.bottom;
   this._frustumPlanes.z = frustum.left;
   this._frustumPlanes.w = frustum.right;
+  // SCENEGIS_PATCH_BEGIN SGP-0022: Keep projection and orthographic reconstruction in the same sample domain.
+  applySceneGISProjectionJitter(this);
+  // SCENEGIS_PATCH_END SGP-0022
+
 };
 
 UniformState.prototype.updatePass = function (pass) {

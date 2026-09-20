@@ -556,6 +556,32 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0090-local-night-lighting.md",
       "removalCondition": "Retire when native bloom preserves scene HDR precision and nonnegative extracted light through its intermediates."
+    },
+    {
+      "id": "SGP-0022",
+      "title": "Add optional render projection jitter and temporal resolve",
+      "status": "active",
+      "reason": "Temporal antialiasing needs render-only projection and per-frustum main depth before HDR postprocessing without changing Camera or replaying geometry.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Renderer/UniformState.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Picking.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISTemporalAntialiasingSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0094-temporal-antialiasing.md",
+      "removalCondition": "Native Scene provides equivalent temporal antialiasing and render-only projection/depth hooks."
     }
   ]
 }

@@ -46,6 +46,9 @@ const viewer = new C.Viewer("map", {
 });
 const scene = viewer.scene;
 scene.highDynamicRange = true;
+const taa = new C.SceneGISTemporalAntialiasing({ scene });
+const nativeSamples = scene.msaaSamples;
+const nativeFxaa = scene.postProcessStages.fxaa.enabled;
 scene.fog.enabled = false;
 scene.sunBloom = false;
 scene.shadowMap.size = 2048;
@@ -151,6 +154,7 @@ for (const x of [-45, 45]) {
   );
 }
 const baseline = Object.freeze({
+  antialiasing: "原生",
   shadows: true,
   ao: true,
   aoIntensity: 0.8,
@@ -223,6 +227,7 @@ const state = {
     });
     viewer.camera.frustum.near = 0.2;
     viewer.camera.frustum.far = 10000;
+    taa.reset();
     scene.requestRender();
   },
   setTime() {
@@ -232,6 +237,17 @@ const state = {
   },
   apply() {
     const settings = state.comparison === "基线 A" ? baseline : trial;
+    taa.enabled = settings.antialiasing === "TAA";
+    scene.msaaSamples =
+      settings.antialiasing === "原生"
+        ? nativeSamples
+        : settings.antialiasing === "4×MSAA"
+          ? 4
+          : 1;
+    scene.postProcessStages.fxaa.enabled =
+      settings.antialiasing === "原生"
+        ? nativeFxaa
+        : settings.antialiasing === "FXAA";
     viewer.shadows = settings.shadows;
     ao.enabled = settings.ao;
     ao.uniforms.intensity = settings.aoIntensity;
@@ -327,6 +343,10 @@ state.restoreTrial = function () {
   state.apply();
 };
 trialFolder.add(trial, "shadows").name("几何阴影").onChange(state.apply);
+trialFolder
+  .add(trial, "antialiasing", ["原生", "无 AA", "4×MSAA", "FXAA", "TAA"])
+  .name("抗锯齿模式")
+  .onChange(state.apply);
 trialFolder.add(trial, "ao").name("环境光遮蔽").onChange(state.apply);
 trialFolder
   .add(trial, "aoIntensity", 0, 2, 0.05)
@@ -358,7 +378,18 @@ const removeError = scene.renderError.addEventListener((...args) => {
 exposeExample(
   viewer,
   gui,
-  { state, trial, baseline, effects, environment, models, ssr, ao, lights },
+  {
+    state,
+    trial,
+    baseline,
+    effects,
+    environment,
+    models,
+    ssr,
+    ao,
+    lights,
+    taa,
+  },
   () => {
     disposed = true;
     removeError();

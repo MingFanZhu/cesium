@@ -201,3 +201,13 @@ prepass. Keep AO-only operation, material light separation, native MSAA and spec
 R14 implementation and technical review are complete. Its [review](../reviews/2026-09-19-r14-main-pass-ao.md)
 records zero AO geometry on qualified main MRT, about 18% lower paired frame time and the attachment
 memory tradeoff. Owner visual review remains pending. No following phase is activated.
+
+## R4 activation after R14
+
+R14 checkpoint `31ba432cc8` is owner accepted on 2026-09-20. Activate
+[R4](2026-09-20-r4-temporal-antialiasing.md) to compare optional TAA with MSAA under MRT.
+Preserve camera semantics, phase identifiers and a separate visual example.
+
+R4 implementation and [technical review](../reviews/2026-09-20-r4-temporal-antialiasing.md) are
+complete. Optional TAA has both-world examples and bounded storage savings; the fixed real-view
+frame time did not materially improve. Owner visual review is pending, and no later phase is active.

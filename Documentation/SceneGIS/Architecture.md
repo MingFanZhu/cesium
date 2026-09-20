@@ -1040,6 +1040,19 @@ Scene 独占已绑定效果的生命周期，调用方可提前 destroy 解除�
 水面可借用同一不透明快照。AO 单独开启同样不重绘几何；非 HDR、多视锥、分类及尚无
 精确响应契约的后光照分支保留既有预通道，不得把这一有限适用范围报告为全路径替换。
 
+## 时域抗锯齿（R4）
+
+[ADR-0094](Decisions/ADR-0094-temporal-antialiasing.md) / SGP-0022 增加可选的
+`SceneGISTemporalAntialiasing`，默认关闭。首轮限定 HDR / SCENE3D / WebGL2 单 viewport，
+球面和平面共用 API；原生 MSAA、FXAA 仍由调用方选择。渲染专用 projection jitter 只作用于
+UniformState，不修改 Camera、CPU culling 或阴影相机，异常时同样恢复；深度拾取记录并抵消
+对应采样偏移。逐视锥转换已有主深度，不重绘几何；独立 HDR/depth 历史在环境合成之后、
+bloom/tone mapping 之前重投影与裁剪，关闭、resize、destroy 释放对应 owned targets。
+
+不借用 Cloud history，不增加隐藏的 request-render 收敛帧。首轮仅有相机运动重投影，
+没有物体 motion vectors，动态、透明与标注内容可能柔化或残留拖影。远离几何的背景保持
+当前帧，轮廓仅扩展一像素深度支持以积累子像素覆盖；不得据此宣称全部场景实现无拖影 TAA。
+
 ## 局部水面（R8）
 
 [ADR-0087](Decisions/ADR-0087-local-water-surfaces.md) / SGP-0017 增加显式

@@ -1,3 +1,6 @@
+// SCENEGIS_PATCH_BEGIN SGP-0022: Unproject depth using its recorded temporal sample offset.
+import SceneGISTemporalAntialiasing from "../SceneGIS/Scene/_private/_SceneGISTemporalAntialiasing.js";
+// SCENEGIS_PATCH_END SGP-0022
 import ApproximateTerrainHeights from "../Core/ApproximateTerrainHeights.js";
 import BoundingRectangle from "../Core/BoundingRectangle.js";
 import Cartesian2 from "../Core/Cartesian2.js";
@@ -776,6 +779,9 @@ Picking.prototype.pickPositionWorldCoordinates = function (
         uniformState.updateFrustum(frustum);
       }
 
+      // SCENEGIS_PATCH_BEGIN SGP-0022: Keep world positions on the sampled surface under render-only jitter.
+      SceneGISTemporalAntialiasing.pickCoordinates(pickDepth, drawingBufferPosition);
+      // SCENEGIS_PATCH_END SGP-0022
       result = SceneTransforms.drawingBufferToWorldCoordinates(
         scene,
         drawingBufferPosition,

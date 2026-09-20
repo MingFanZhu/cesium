@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                      |
-| ---------------------- | ---------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                        |
-| Status                 | `active`                                                   |
-| Planning model         | `extension`                                                |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R14 technically complete; owner visual review pending      |
-| Active phase plan      | None; latest [R14](plans/2026-09-19-r14-main-pass-ao.md)   |
-| Active standalone plan | None                                                       |
-| Architecture contact   | Current task                                               |
-| Execution contact      | Current task                                               |
-| Last updated           | `2026-09-19`                                               |
+| Field                  | Value                                                           |
+| ---------------------- | --------------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                             |
+| Status                 | `active`                                                        |
+| Planning model         | `extension`                                                     |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)      |
+| Current phase          | R4 technically complete; owner review pending                   |
+| Active phase plan      | None; latest [R4](plans/2026-09-20-r4-temporal-antialiasing.md) |
+| Active standalone plan | None                                                            |
+| Architecture contact   | Current task                                                    |
+| Execution contact      | Current task                                                    |
+| Last updated           | `2026-09-20`                                                    |
 
 ## Scope
 
@@ -35,12 +35,12 @@
 
 ## Current handoff
 
-- Current state: R14 shared main-pass AO MRT and technical review are complete after R13 `6b472fa2e4`.
-- Next action: Owner visually reviews the updated Viewer; choose further performance work separately. Retain startup-camera configuration and R7 night follow-ups.
-- Latest review: [R14 review](reviews/2026-09-19-r14-main-pass-ao.md); previous [R13 review](reviews/2026-09-19-r13-pass-submission.md).
-- Open discussions: None. Probes/GI remain deferred by the owner.
-- Known risks: Qualified AO has zero geometry draws and about 18% lower paired frame time, with extra MRT storage. LDR/multi-frustum/classification and unqualified post-lighting paths retain prepasses. R13's existing native no-depth-texture failure remains.
-- Validation: 14 AO, 9 SSR and 12 Water tests pass in development/release; full build/types, patch audit and real-scene inspection pass. Six upstream files and the exact performance/resource tradeoff are recorded in the review.
-- Previous checkpoint: R13 `6b472fa2e4`; R14 receives its own independent commit.
-- Related ADR / SGP: `ADR-0093`; `SGP-0014/0016`.
-- Examples: [夜景光照](../../Test/Rendering/夜景光照.html)、[实景对比](../../Test/Rendering/实景对比.html)、[独立效果目录](../../Test/Rendering/示例目录.html).
+- R14 checkpoint `31ba432cc8` is owner accepted on 2026-09-20.
+- R4 optional TAA implementation and technical review are complete; owner visual review is pending.
+- Latest plan / review: [R4 plan](plans/2026-09-20-r4-temporal-antialiasing.md), [R4 review](reviews/2026-09-20-r4-temporal-antialiasing.md).
+- Verification: 45 strict feature/regression Specs, full release/types and patch audit pass. Native AutomaticUniforms has 87 passes and one pre-existing overlay constant mismatch.
+- Owner-reported static TAA jitter is corrected by current-pixel reconstruction and slope-aware depth rejection. The real reference ROI improves 87%; the new regression fails on the prior release and passes on the correction. Visual re-acceptance remains pending.
+- Real-view FPS is essentially unchanged at 37–38; estimated auxiliary storage saving is 59.2 MiB. TAA stays optional, with no native-default changes.
+- Both-world [standalone AA example](../../Test/Rendering/时域抗锯齿.html) and the [reference scene](../../Test/Rendering/实景对比.html) expose comparison controls.
+- Decision / seam: ADR-0094 / SGP-0022. Three upstream files; camera-only reprojection retains moving-content limitations.
+- Next action: owner reviews quality; no further phase active. Retain R7 night and Viewer startup-camera follow-ups.
