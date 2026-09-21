@@ -79,7 +79,7 @@ R1 至 R4 是初始优先序；后续候选在前序验收后按真实场景收�
 | R1    | 几何阴影：优先补齐 Planar 原生 API 兼容，再依据证据处理质量 | 现有物理光照、World 和原生 ShadowMap | 重新追踪阴影派生命令、深度、局部上方向及接收路径；建立有限 phase plan | 模型/地形投射接收正确，开关和销毁可靠，Globe 无回归，视觉与性能验收 | completed | [R1](2026-09-18-r1-planar-shadows.md)           |
 | R2    | 高质量环境遮蔽：接触处与凹槽的空间感                        | 深度与必要表面信息、正确光照合成位置 | 比较原生 SSAO 与 GTAO 类候选，明确可在 WebGL2 承担的方案              | 遮蔽改善可见，无明显轮廓黑边，不错误压暗天空/雾/自发光，开销有界    | completed | [R2](2026-09-18-r2-ambient-occlusion.md)        |
 | R3    | 物理天空与镜面 IBL 一致                                     | 现有天空辐亮度和原生 PBR 环境接口    | 明确捕获/预过滤来源、更新频率、调用方环境覆盖和资源所有权             | 不同粗糙度材质反射一致，昼夜更新稳定，保留显式用户环境配置          | completed | [R3](2026-09-19-r3-sky-reflections.md)          |
-| R4    | 全场景抗锯齿与时间稳定性                                    | 经验证的深度/相机路径、静态画面基线  | 先验证 MSAA / FXAA；再用运动片段判定 TAA 的收益与集成成本             | 细线/高光闪烁下降，移动物体与标注清晰，拖影和 LOD 历史污染可控      | proposed  | None                                            |
+| R4    | 全场景抗锯齿与时间稳定性                                    | 经验证的深度/相机路径、静态画面基线  | 先验证 MSAA / FXAA；再用运动片段判定 TAA 的收益与集成成本             | 已验收 camera-only TAA；独立物体运动限制保留在 phase plan           | completed | [R4](2026-09-20-r4-temporal-antialiasing.md)    |
 | R5    | 地表材质与近景细节                                          | 地形法线、素材和现有材质接口         | 用可控素材区分数据问题与渲染问题                                      | 近景尺度与粗糙度可信，远近过渡合理，纹理开销有界                    | candidate | None                                            |
 | R6    | 屏幕空间反射；水面和其他局部反射保留后续候选                | 已验收 IBL、深度、材质粗糙度         | 明确前向材质捕获与 IBL 融合边界                                       | 两个 World 的不透明 PBR 倒影、回退和生命周期正确，视觉及成本验收    | completed | [R6](2026-09-19-r6-screen-space-reflections.md) |
 | R7    | 夜景局部光与更完整间接照明                                  | 材质、曝光、光源需求与帧预算         | 基于夜景/室内实际场景决定局部灯或 GI 的优先级                         | 真实场景提升覆盖其带宽、阴影和资源成本                              | completed | [R7](2026-09-19-r7-local-lights.md)             |
@@ -217,3 +217,7 @@ resolve now retains actual surface depth and adapts a pinned Filament implementa
 [follow-up review](../reviews/2026-09-21-r4-temporal-reference-adaptation.md) records motion,
 static, lifetime and GPU-cost verification. Technical correction is complete; owner visual
 re-acceptance remains pending. No new phase or upstream seam is introduced.
+
+On 2026-09-21 the owner accepted correction checkpoint `c3add1660a` as usable. R4 is closed
+with its documented moving-content limits. Further GI/probe quality directions are under
+discussion only; no next implementation phase is authorized or active.

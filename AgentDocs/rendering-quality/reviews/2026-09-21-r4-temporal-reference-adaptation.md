@@ -6,6 +6,9 @@
 - Predecessor: [initial R4 review](2026-09-20-r4-temporal-antialiasing.md)
 - Decision / existing seam: ADR-0094 / SGP-0022
 
+Owner acceptance: checkpoint `c3add1660a` accepted as usable on 2026-09-21. This acceptance
+closes the visual handoff below without expanding camera-only reprojection's documented scope.
+
 ## Findings and disposition
 
 - P1, fixed: The previous resolve reprojects every covered pixel using the minimum depth of
@@ -32,8 +35,8 @@
   text assets total 12,839 bytes, below the declared 16 KiB budget, with no runtime fetch.
 - P2, accepted scope: Camera-only reprojection still cannot correctly track independently
   animated geometry or every translucent/shading change. This fix does not add object motion
-  vectors, temporal upscaling, sharpening or a new public option. Owner visual review remains
-  the final quality gate, particularly for wheel motion and fine photogrammetry textures.
+  vectors, temporal upscaling, sharpening or a new public option. Owner visual review is the
+  final quality gate; the current correction has been accepted as usable.
 
 ## Verification
 
@@ -72,5 +75,5 @@ commands/queries are destroyed and the normal render loop resumes.
 
 No upstream-owned file changes in this correction. The existing Scene, UniformState and Picking
 SGP-0022 seams are unchanged. Changes are owned shader, Specs, license assets, ADR and handoff
-documents. Keep this correction in its own local checkpoint; no new phase is active. Owner
-visual re-acceptance remains pending, with the same moving-content limitation as the initial R4.
+documents. Correction checkpoint `c3add1660a` is owner accepted as usable; no new phase is active.
+The same moving-content limitation as the initial R4 remains.

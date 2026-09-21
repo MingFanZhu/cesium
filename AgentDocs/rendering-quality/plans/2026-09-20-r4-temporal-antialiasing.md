@@ -48,12 +48,13 @@ Performance depends on resolution, attachment layout and driver; no universal FP
 
 ## Completion and handoff
 
-The zoom/reference correction is technically complete; owner visual re-acceptance is pending.
+The owner accepted the zoom/reference correction at `c3add1660a` as usable on 2026-09-21.
+Implementation and technical review are complete; documented moving-content limitations remain.
 [Follow-up review](../reviews/2026-09-21-r4-temporal-reference-adaptation.md) records the mature
 reference adaptation, both failing-old/passing-new regressions, 12 strict dev/release passes,
 full release build and isolated GPU cost of about 0.01 ms at the reference resolution. API,
 storage, pass counts and upstream seams are unchanged. Original camera/settings are restored.
-Create an independent local correction checkpoint; do not start another phase.
+The independent correction checkpoint is complete; no subsequent implementation phase is active.
 
 ### Reopened scope and prior checkpoint history
 

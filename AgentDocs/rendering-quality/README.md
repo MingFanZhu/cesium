@@ -8,7 +8,7 @@
 | Status                 | `active`                                                        |
 | Planning model         | `extension`                                                     |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)      |
-| Current phase          | R4 technically complete; owner review pending                   |
+| Current phase          | R4 completed; owner accepted as usable                          |
 | Active phase plan      | None; latest [R4](plans/2026-09-20-r4-temporal-antialiasing.md) |
 | Active standalone plan | None                                                            |
 | Architecture contact   | Current task                                                    |
@@ -36,12 +36,12 @@
 ## Current handoff
 
 - R14 checkpoint `31ba432cc8` is owner accepted on 2026-09-20.
-- R4 optional TAA implementation and technical review are complete; owner visual review is pending.
+- R4 correction checkpoint `c3add1660a` is owner accepted as usable on 2026-09-21. Existing moving-content limitations remain documented.
 - Latest plan / review: [R4 plan](plans/2026-09-20-r4-temporal-antialiasing.md), [zoom/reference review](reviews/2026-09-21-r4-temporal-reference-adaptation.md).
 - Verification: 45 strict feature/regression Specs, full release/types and patch audit pass. Native AutomaticUniforms has 87 passes and one pre-existing overlay constant mismatch.
-- Owner-reported static TAA jitter is corrected by current-pixel reconstruction and slope-aware depth rejection. The real reference ROI improves 87%; the new regression fails on the prior release and passes on the correction. Visual re-acceptance remains pending.
-- Follow-up to `9255216681`: retain actual covered-pixel depth and adapt the pinned Filament resolve after owner-reported zoom instability. Twelve dev/release TAA Specs pass; moving-camera spatial-reference error improves 22%. The isolated resolve costs about 0.01 ms more at 1198x852, with no new geometry, pass or target. This correction changes no upstream file; owner motion-quality review remains pending.
+- Owner-reported static TAA jitter is corrected by current-pixel reconstruction and slope-aware depth rejection. The real reference ROI improves 87%; the new regression fails on the prior release and passes on the correction.
+- Follow-up to `9255216681`: retain actual covered-pixel depth and adapt the pinned Filament resolve after owner-reported zoom instability. Twelve dev/release TAA Specs pass; moving-camera spatial-reference error improves 22%. The isolated resolve costs about 0.01 ms more at 1198x852, with no new geometry, pass or target. This correction changes no upstream file.
 - Real-view FPS is essentially unchanged at 37–38; estimated auxiliary storage saving is 59.2 MiB. TAA stays optional, with no native-default changes.
 - Both-world [standalone AA example](../../Test/Rendering/时域抗锯齿.html) and the [reference scene](../../Test/Rendering/实景对比.html) expose comparison controls.
 - Decision / seam: ADR-0094 / SGP-0022. Three upstream files; camera-only reprojection retains moving-content limitations.
-- Next action: owner reviews quality; no further phase active. Retain R7 night and Viewer startup-camera follow-ups.
+- Next action: discuss further quality priorities; no further implementation phase authorized or active. Retain R7 night and Viewer startup-camera follow-ups.
