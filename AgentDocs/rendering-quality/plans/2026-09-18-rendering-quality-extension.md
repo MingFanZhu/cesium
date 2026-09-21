@@ -233,3 +233,8 @@ are complete. Both-world main/composite pages use pinned local PBR assets, fixed
 lighting and reversible effects. Explicit 2K delivery controls the measured source texture
 budget; original 4K remains available. Five dedicated checks pass. Owner visual acceptance
 is pending, and no further rendering phase is active.
+
+The owner accepts R15 physical-atmosphere controls and subsequently requests standard GIS
+navigation restoration. Both-world example follow-up checks pass; no engine/SGP change is needed.
+Sponza remains a material fixture, while the owner prepares a more representative street model
+using UE/Blender. Asset replacement is not implemented or activated in this follow-up.

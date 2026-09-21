@@ -73,46 +73,12 @@ const viewer = new C.Viewer("map", {
   selectionIndicator: false,
 });
 const scene = viewer.scene;
-// Architectural views can look upward; surface navigation deliberately cannot.
-// These examples use the same public Camera operations in both Worlds.
-if (planar) {
-  viewer.removeController(viewer.planarCameraController);
-}
-scene.screenSpaceCameraController.enableInputs = false;
-const input = new C.ScreenSpaceEventHandler(scene.canvas);
-let looking = false;
-let panning = false;
-input.setInputAction(() => {
-  looking = true;
-}, C.ScreenSpaceEventType.LEFT_DOWN);
-input.setInputAction(() => {
-  looking = false;
-}, C.ScreenSpaceEventType.LEFT_UP);
-input.setInputAction(() => {
-  panning = true;
-}, C.ScreenSpaceEventType.MIDDLE_DOWN);
-input.setInputAction(() => {
-  panning = false;
-}, C.ScreenSpaceEventType.MIDDLE_UP);
-input.setInputAction((movement) => {
-  const dx = movement.endPosition.x - movement.startPosition.x;
-  const dy = movement.endPosition.y - movement.startPosition.y;
-  if (looking) {
-    viewer.camera.lookRight(dx * 0.003);
-    viewer.camera.lookUp(dy * 0.003);
-  }
-  if (panning) {
-    viewer.camera.moveRight(-dx * 0.005);
-    viewer.camera.moveUp(dy * 0.005);
-  }
-}, C.ScreenSpaceEventType.MOUSE_MOVE);
-input.setInputAction((delta) => {
-  viewer.camera.moveForward(C.Math.clamp(delta * 0.003, -0.8, 0.8));
-}, C.ScreenSpaceEventType.WHEEL);
 if (planar) {
   viewer.planarWorld.show = false;
 } else {
   scene.globe.show = false;
+  scene.globe.showGroundAtmosphere = false;
+  scene.globe.enableLighting = false;
 }
 if (scene.sun) {
   scene.sun.show = false;
@@ -147,18 +113,68 @@ const lightDirection = C.Cartesian3.normalize(
   new C.Cartesian3(-0.35, 0.55, -1),
   new C.Cartesian3(),
 );
-scene.light = new C.DirectionalLight({
+const fixedLight = new C.DirectionalLight({
   direction: vector(lightDirection),
   intensity: 2.5,
 });
-const ibl = new C.ImageBasedLighting({
-  sphericalHarmonicCoefficients: [
-    new C.Cartesian3(0.55, 0.7, 0.9),
-    ...Array.from({ length: 8 }, () => new C.Cartesian3()),
-  ],
-  specularEnvironmentMaps:
-    "/Specs/Data/EnvironmentMap/kiara_6_afternoon_2k_ibl.ktx2",
+scene.light = fixedLight;
+const fixedSH = [
+  new C.Cartesian3(0.55, 0.7, 0.9),
+  ...Array.from({ length: 8 }, () => new C.Cartesian3()),
+];
+const fixedMap = "/Specs/Data/EnvironmentMap/kiara_6_afternoon_2k_ibl.ktx2";
+const ibl = new C.ImageBasedLighting();
+const environmentDefaults = Object.freeze({
+  mode: "物理大气",
+  day: 172,
+  hour: 19,
+  showAtmosphere: true,
+  showAerialPerspective: true,
+  backgroundRadianceScale: 3,
+  aerialRadianceScale: 1,
+  surfaceRadianceScale: 3,
+  exposure: 1,
+  showHeightFog: false,
+  heightFogDensity: 0.0002,
+  heightFogHeightFalloff: 0.0002,
+  heightFogBaseHeight: 0,
+  heightFogStartDistance: 0,
+  heightFogMaximumOpacity: 0.7,
 });
+const atmosphere = { ...environmentDefaults };
+const solarLight = new C.SunLight({ intensity: 2 });
+const environment = planar
+  ? new C.SceneGISPlanarEnvironment({
+      world: viewer.planarWorld,
+      sunDirection: C.Cartesian3.UNIT_Z,
+      moonDirection: C.Cartesian3.UNIT_Y,
+      directionMode: "astronomical",
+      originLongitude: C.Math.toRadians(longitude),
+      originLatitude: C.Math.toRadians(latitude),
+      showAtmosphere: false,
+      showSun: false,
+      showMoon: false,
+    })
+  : undefined;
+if (environment) {
+  environment.enabled = false;
+  viewer.addController(environment);
+}
+const effects = new C.SceneGISEnvironmentEffects({
+  mode: planar ? "planar" : "globe",
+  world: planar ? viewer.planarWorld : undefined,
+  enabled: false,
+  showAtmosphere: true,
+  showAerialPerspective: true,
+  showHeightFog: false,
+  showClouds: false,
+  showCloudShadows: false,
+  showCrepuscularRays: false,
+  showBloom: false,
+  showLensFlare: false,
+  showMoonlight: false,
+});
+viewer.addController(effects);
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
 const ssr = new C.SceneGISScreenSpaceReflections({
   scene,
@@ -184,30 +200,37 @@ let removeReady;
 let manifest;
 
 // glTF Y-up becomes local Z-up using Model's explicit forwardAxis=X option.
-// The first pose is Intel's PhysCamera001, with the same axis conversion.
+// Downward inspection poses retain the standard surface-navigation controls.
 const views = {
-  "中庭（作者视角）": {
-    position: [-8.80743, 0.85825783, 1.59221947],
-    direction: [0.96391072, -0.1819838, 0.19431372],
-    up: [-0.19094054, 0.03604903, 0.98093933],
+  俯瞰全景: {
+    position: [-28, -28, 26],
+    target: [0, 0, 4],
+    yfov: 1.0,
+  },
+  中庭: {
+    position: [-8.8, 0.86, 6],
+    target: [2, 0, 2],
     yfov: 1.02122664,
   },
   上层与阴影: {
-    position: [10.5311031, -1.52825129, 7.352985],
-    direction: [-0.99188308, 0.12515381, 0.02246328],
-    up: [0.02228658, -0.00281202, 0.99974773],
+    position: [10.5, -1.53, 9],
+    target: [-3, 0, 5],
     yfov: 1.02323031,
   },
   拱廊接触: {
-    position: [2.70301843, -2.11138153, 1.35489559],
-    direction: [-0.93945209, 0.33160769, 0.08640775],
-    up: [0.08148066, -0.02876108, 0.99625995],
+    position: [2.7, -2.11, 2],
+    target: [-2, 0, 0.8],
     yfov: 0.6327615,
+  },
+  屋顶与天空: {
+    position: [-25, -18, 27],
+    target: [0, 0, 19],
+    yfov: 1.03,
   },
   ...(composite
     ? {
         材质矩阵: {
-          position: [4.5, -1.6, 1.65],
+          position: [4.5, -1.6, 2.05],
           target: [4.5, 0.6, 1.65],
           yfov: 1.35,
         },
@@ -227,7 +250,7 @@ const views = {
 const state = {
   ready: false,
   comparison: "实验 B",
-  view: "中庭（作者视角）",
+  view: "俯瞰全景",
   animate: false,
   resetView() {
     const view = views[state.view];
@@ -271,15 +294,69 @@ const state = {
     scene.msaaSamples = settings.antialiasing === "4×MSAA" ? 4 : 1;
     scene.postProcessStages.fxaa.enabled = settings.antialiasing === "FXAA";
     document.getElementById("comparison").textContent =
-      `${state.comparison} · 固定光照 / 曝光 1 · ${settings.antialiasing}`;
+      `${state.comparison} · ${atmosphere.mode} / 曝光 ${atmosphere.exposure} · ${settings.antialiasing}`;
     scene.requestRender();
+  },
+  setTime() {
+    viewer.clock.currentTime = C.JulianDate.addHours(
+      C.JulianDate.fromIso8601("2026-01-01T00:00:00Z"),
+      (atmosphere.day - 1) * 24 + atmosphere.hour,
+      new C.JulianDate(),
+    );
+    taa.reset();
+    scene.requestRender();
+  },
+  applyAtmosphere() {
+    const physical = atmosphere.mode === "物理大气";
+    if (physical !== effects.enabled) {
+      if (physical) {
+        scene.light = solarLight;
+        if (environment) {
+          environment.enabled = true;
+        }
+        effects.enabled = true;
+        ibl.sphericalHarmonicCoefficients = undefined;
+        ibl.specularEnvironmentMaps = undefined;
+      } else {
+        // Release the advanced owner before restoring the previous native light.
+        effects.enabled = false;
+        if (environment) {
+          environment.enabled = false;
+        }
+        scene.light = fixedLight;
+        ibl.sphericalHarmonicCoefficients = fixedSH;
+        ibl.specularEnvironmentMaps = fixedMap;
+      }
+    }
+    for (const key of [
+      "showAtmosphere",
+      "showAerialPerspective",
+      "backgroundRadianceScale",
+      "aerialRadianceScale",
+      "surfaceRadianceScale",
+      "showHeightFog",
+      "heightFogDensity",
+      "heightFogHeightFalloff",
+      "heightFogBaseHeight",
+      "heightFogStartDistance",
+      "heightFogMaximumOpacity",
+    ]) {
+      effects[key] = atmosphere[key];
+    }
+    scene.postProcessStages.exposure = atmosphere.exposure;
+    taa.reset();
+    state.apply();
+  },
+  resetAtmosphere() {
+    Object.assign(atmosphere, environmentDefaults);
+    state.animate = false;
+    state.setAnimation();
+    state.applyAtmosphere();
   },
   setAnimation() {
     viewer.clock.shouldAnimate = state.animate;
     if (!state.animate) {
-      viewer.clock.currentTime = C.JulianDate.fromIso8601(
-        "2026-06-21T19:00:00Z",
-      );
+      state.setTime();
     }
   },
   snapshot() {
@@ -293,14 +370,20 @@ const state = {
       comparison: state.comparison,
       settings: { ...(state.comparison === "基线 A" ? baseline : trial) },
       lighting: {
-        directionLocal: C.Cartesian3.pack(lightDirection, []),
-        intensity: scene.light.intensity,
+        source: atmosphere.mode,
+        directionLocal: effects.enabled
+          ? undefined
+          : C.Cartesian3.pack(lightDirection, []),
+        intensity: effects.enabled
+          ? solarLight.intensity
+          : fixedLight.intensity,
         exposure: scene.postProcessStages.exposure,
         specularEnvironment: ibl.specularEnvironmentMaps,
-        diffuseSH: ibl.sphericalHarmonicCoefficients.map((v) =>
+        diffuseSH: ibl.sphericalHarmonicCoefficients?.map((v) =>
           C.Cartesian3.pack(v, []),
         ),
       },
+      atmosphere: { ...atmosphere, year: 2026, longitude, latitude },
       time: C.JulianDate.toIso8601(viewer.clock.currentTime),
       animate: state.animate,
       view: state.view,
@@ -338,6 +421,84 @@ gui
   .name("固定视角")
   .onChange(state.resetView);
 gui.add(state, "resetView").name("恢复固定视角");
+const atmosphereFolder = gui.addFolder("物理大气与光照");
+atmosphereFolder
+  .add(atmosphere, "mode", ["物理大气", "固定 IBL"])
+  .name("照明模式")
+  .listen()
+  .onChange(state.applyAtmosphere);
+atmosphereFolder
+  .add(atmosphere, "day", 1, 365, 1)
+  .name("年内日序（2026）")
+  .listen()
+  .onChange(state.setTime);
+atmosphereFolder
+  .add(atmosphere, "hour", 0, 23.99, 0.05)
+  .name("时间（UTC 小时）")
+  .listen()
+  .onChange(state.setTime);
+atmosphereFolder
+  .add(atmosphere, "exposure", 0.1, 4, 0.05)
+  .name("曝光")
+  .listen()
+  .onChange(state.applyAtmosphere);
+atmosphereFolder
+  .add(atmosphere, "showAtmosphere")
+  .name("物理天空")
+  .listen()
+  .onChange(state.applyAtmosphere);
+atmosphereFolder
+  .add(atmosphere, "showAerialPerspective")
+  .name("空气透视")
+  .listen()
+  .onChange(state.applyAtmosphere);
+atmosphereFolder
+  .add(atmosphere, "backgroundRadianceScale", 0, 16, 0.1)
+  .name("天空亮度")
+  .listen()
+  .onChange(state.applyAtmosphere);
+atmosphereFolder
+  .add(atmosphere, "aerialRadianceScale", 0, 4, 0.05)
+  .name("空气散射亮度")
+  .listen()
+  .onChange(state.applyAtmosphere);
+atmosphereFolder
+  .add(atmosphere, "surfaceRadianceScale", 0, 8, 0.1)
+  .name("物体光照亮度")
+  .listen()
+  .onChange(state.applyAtmosphere);
+const fogFolder = atmosphereFolder.addFolder("高度雾").close();
+fogFolder
+  .add(atmosphere, "showHeightFog")
+  .name("启用高度雾")
+  .listen()
+  .onChange(state.applyAtmosphere);
+fogFolder
+  .add(atmosphere, "heightFogDensity", 0, 0.001, 0.00001)
+  .name("雾密度（每米）")
+  .listen()
+  .onChange(state.applyAtmosphere);
+fogFolder
+  .add(atmosphere, "heightFogHeightFalloff", 0, 0.001, 0.00001)
+  .name("高度衰减（每米）")
+  .listen()
+  .onChange(state.applyAtmosphere);
+fogFolder
+  .add(atmosphere, "heightFogBaseHeight", -10, 100, 1)
+  .name("雾基准高度（米）")
+  .listen()
+  .onChange(state.applyAtmosphere);
+fogFolder
+  .add(atmosphere, "heightFogStartDistance", 0, 100, 1)
+  .name("起雾距离（米）")
+  .listen()
+  .onChange(state.applyAtmosphere);
+fogFolder
+  .add(atmosphere, "heightFogMaximumOpacity", 0, 1, 0.05)
+  .name("最大不透明度")
+  .listen()
+  .onChange(state.applyAtmosphere);
+atmosphereFolder.add(state, "resetAtmosphere").name("恢复大气基准");
 const comparisonController = gui
   .add(state, "comparison", ["基线 A", "实验 B"])
   .name("对比状态");
@@ -364,29 +525,49 @@ trialFolder
 if (composite) {
   gui
     .add(state, "animate")
-    .name("播放水面（退出固定时刻）")
+    .name("播放时间（水面与太阳）")
+    .listen()
     .onChange(state.setAnimation);
 }
 gui.add(state, "exportConfig").name("导出验收配置");
 const removeError = scene.renderError.addEventListener((...args) => {
   document.getElementById("error").textContent = args[1].message;
 });
+const removeAtmosphereError = effects.errorEvent.addEventListener((error) => {
+  document.getElementById("error").textContent = error.message;
+});
 exposeExample(
   viewer,
   gui,
-  { state, baseline, trial, models, taa, ssr, ao, ibl },
+  {
+    state,
+    baseline,
+    trial,
+    models,
+    taa,
+    ssr,
+    ao,
+    ibl,
+    atmosphere,
+    effects,
+    environment,
+  },
   () => {
     disposed = true;
-    input.destroy();
     panelButton.removeEventListener("click", togglePanels);
     removeError();
+    removeAtmosphereError();
     removeReady?.();
+    viewer.removeController(effects);
+    if (environment) {
+      viewer.removeController(environment);
+    }
     shaders.forEach((shader) => shader.destroy());
     ibl.destroy();
   },
 );
 state.resetView();
-state.apply();
+state.applyAtmosphere();
 
 async function addModel(
   url,
@@ -539,7 +720,7 @@ async function loadScene() {
   removeReady = scene.postRender.addEventListener(() => {
     if (
       models.every((model) => model.ready) &&
-      ibl.useSpecularEnvironmentMaps
+      (effects.enabled ? effects.ready : ibl.useSpecularEnvironmentMaps)
     ) {
       state.ready = true;
       document.getElementById("status").textContent = composite

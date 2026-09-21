@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                           |
-| ---------------------- | --------------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                             |
-| Status                 | `active`                                                        |
-| Planning model         | `extension`                                                     |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)      |
-| Current phase          | R15 technically complete; owner visual review pending           |
-| Active phase plan      | None; latest [R15](plans/2026-09-21-r15-pbr-reference-scene.md) |
-| Active standalone plan | None                                                            |
-| Architecture contact   | Current task                                                    |
-| Execution contact      | Current task                                                    |
-| Last updated           | `2026-09-21`                                                    |
+| Field                  | Value                                                      |
+| ---------------------- | ---------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                        |
+| Status                 | `active`                                                   |
+| Planning model         | `extension`                                                |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
+| Current phase          | R15 follow-up completed                                    |
+| Active phase plan      | None                                                       |
+| Active standalone plan | None                                                       |
+| Architecture contact   | Current task                                               |
+| Execution contact      | Current task                                               |
+| Last updated           | `2026-09-21`                                               |
 
 ## Scope
 
@@ -45,3 +45,6 @@
 - Both-world [standalone AA example](../../Test/Rendering/时域抗锯齿.html) and the [reference scene](../../Test/Rendering/实景对比.html) expose comparison controls.
 - Decision / seam: ADR-0094 / SGP-0022. Three upstream files; camera-only reprojection retains moving-content limitations.
 - [R15 PBR reference scene](plans/2026-09-21-r15-pbr-reference-scene.md) and [technical review](reviews/2026-09-21-r15-pbr-reference-scene.md) are complete: local Intel Sponza main/composite pages, explicit 2K delivery and retained original 4K, Khronos material targets, pool and fixed comparisons. Five fixture/E2E checks pass; owner visual review is pending. No upstream or renderer change. Retain R7 night and Viewer startup-camera follow-ups; no new GI/glass phase is active.
+- Follow-up: physical atmosphere controls are owner accepted; standard navigation is restored
+  with downward inspection poses. The owner prefers a GIS street scene and plans to prepare
+  converted city assets; no replacement asset or new renderer phase is activated.

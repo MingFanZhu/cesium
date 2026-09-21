@@ -71,3 +71,41 @@ animation remains optional. No promise of native ray-traced reference equivalenc
   pending-load cleanup, missing-data instructions and main-only composition.
 - Technical gate and self-review complete; see [review](../reviews/2026-09-21-r15-pbr-reference-scene.md).
   Owner visual acceptance remains pending. No later phase is activated.
+
+## Physical atmosphere controls follow-up
+
+The owner requests physical-atmosphere parameters in the PBR page after checkpoint
+`ecfa89778e`. Reopen this example-assembly phase; no renderer/API expansion is needed.
+Use existing `SceneGISEnvironmentEffects` and astronomical `SceneGISPlanarEnvironment`.
+Globe requires a `SunLight` before activation; disable effects before releasing Planar
+light authority or restoring the original fixed directional light.
+
+Provide physical/fixed-IBL modes, 2026 day-of-year and UTC hour, sky/aerial visibility,
+independent sky/aerial/surface radiance, exposure and optional height-fog controls.
+In physical mode clear the explicit SH/map from the shared IBL so existing physical
+sky diffuse/specular lighting can be used. Restore their original values in fixed mode.
+Both pages share these controls. A/B effect changes keep the selected environment intact;
+reset and JSON export include the atmosphere settings. Clock playback moves both water
+and Sun; pausing restores the selected fixed time. Keep clouds and other effects disabled.
+
+Validate both Worlds with the existing dedicated E2E suite: environment readiness, live
+time/parameter updates, mode round trip, original-light restoration, camera invariance,
+export and controller teardown. Inspect the actual sky and lit architecture in IAB.
+Update the R15 review/docs and make a separate local follow-up checkpoint.
+
+## Restore standard navigation follow-up
+
+The owner visually accepted the atmosphere controls and stopped further validation of that
+change. The next request restores standard camera interaction. Remove the example-specific
+look/pan/dolly input handler; retain the Viewer-owned Planar controller and native Globe
+controller. Use explicit downward-looking inspection poses compatible with surface navigation,
+including a default architectural overview, instead of the former upward author-camera poses.
+Preserve the accepted atmosphere controls. Verify actual left-pan, middle-orbit and wheel inputs
+with the existing both-world E2E tests. Street-scene sourcing is research only in this request;
+do not download or replace the fixture without a selected scope.
+
+The follow-up is complete: both composite E2E regressions pass (83.4 seconds of test cases),
+including atmosphere round trips and real left/middle/wheel inputs. Owner atmosphere acceptance
+is recorded; IAB confirms the restored controls. Scoped lint/format and Markdown checks pass;
+AgentDocs-wide Prettier retains the same 316 pre-existing files. All changes are SceneGIS-owned.
+No engine build or extra fixture rerun is needed for this example-only correction.

@@ -87,6 +87,23 @@ function expectCamera(actual, expected) {
     expect(actual[property]).toBe(expected[property]);
   }
 }
+async function waitForConsumedInput(page) {
+  await page.waitForFunction(async () => {
+    const C = await import("/Build/CesiumUnminified/index.js");
+    const viewer = window.example.viewer;
+    const controller =
+      viewer.planarCameraController ?? viewer.scene.screenSpaceCameraController;
+    const input = controller._aggregator;
+    return (
+      !input.anyButtonDown &&
+      [
+        C.CameraEventType.LEFT_DRAG,
+        C.CameraEventType.MIDDLE_DRAG,
+        C.CameraEventType.WHEEL,
+      ].every((type) => !input.isMoving(type))
+    );
+  });
+}
 for (const world of ["planar", "globe"]) {
   test(`${world}: composite PBR, fixed poses, reversible effects, export and destruction`, async ({
     page,
@@ -97,7 +114,7 @@ for (const world of ["planar", "globe"]) {
     await page.waitForFunction(() => window.example?.state.ready);
     await expect(page.locator("#error")).toBeEmpty();
     const before = await page.evaluate(() => window.example.state.snapshot());
-    // An upward authored view must survive the first controller update.
+    // The initial overview must be compatible with the standard surface controller.
     const localPosition = await page.evaluate(async (mode) => {
       const C = await import("/Build/CesiumUnminified/index.js");
       const p = window.example.viewer.camera.positionWC;
@@ -116,13 +133,37 @@ for (const world of ["planar", "globe"]) {
         [],
       );
     }, world);
-    [-8.80743, 0.85825783, 1.59221947].forEach((value, i) =>
+    [-28, -28, 26].forEach((value, i) =>
       expect(localPosition[i]).toBeCloseTo(value, 6),
     );
+    expect(
+      await page.evaluate(
+        () =>
+          window.example.viewer.scene.screenSpaceCameraController.enableInputs,
+      ),
+    ).toBe(world === "globe");
+    // Isolate button mappings from release-time inertia in this interaction check.
+    const inertia = await page.evaluate(() => {
+      const viewer = window.example.viewer;
+      const controller =
+        viewer.planarCameraController ??
+        viewer.scene.screenSpaceCameraController;
+      const saved = {
+        inertiaSpin: controller.inertiaSpin,
+        inertiaTranslate: controller.inertiaTranslate,
+        inertiaZoom: controller.inertiaZoom,
+      };
+      controller.inertiaSpin =
+        controller.inertiaTranslate =
+        controller.inertiaZoom =
+          0;
+      return saved;
+    });
     await page.getByLabel("对比状态", { exact: true }).selectOption("基线 A");
     const baseline = await page.evaluate(() => window.example.state.snapshot());
     expectCamera(baseline.camera, before.camera);
     expect(baseline.lighting).toEqual(before.lighting);
+    expect(baseline.atmosphere).toEqual(before.atmosphere);
     expect(baseline.time).toBe(before.time);
     expect(baseline.settings.ao).toBe(false);
     expect(baseline.settings.ssr).toBe(false);
@@ -130,6 +171,72 @@ for (const world of ["planar", "globe"]) {
     expect(
       (await page.evaluate(() => window.example.state.snapshot())).settings,
     ).toEqual(before.settings);
+    expect(before.atmosphere.mode).toBe("物理大气");
+    expect(before.lighting.specularEnvironment).toBeUndefined();
+    expect(before.lighting.diffuseSH).toBeUndefined();
+    const sunBefore = await page.evaluate(() => ({
+      ...window.example.viewer.scene.light.direction,
+    }));
+    await page.getByLabel("时间（UTC 小时）", { exact: true }).fill("23");
+    await page.getByLabel("时间（UTC 小时）", { exact: true }).press("Tab");
+    await expect
+      .poll(() =>
+        page.evaluate(() => ({
+          ...window.example.viewer.scene.light.direction,
+        })),
+      )
+      .not.toEqual(sunBefore);
+    expect(
+      (await page.evaluate(() => window.example.state.snapshot())).time,
+    ).toBe("2026-06-21T23:00:00Z");
+    await page.getByLabel("曝光", { exact: true }).fill("1.5");
+    await page.getByLabel("曝光", { exact: true }).press("Tab");
+    await page.getByLabel("物体光照亮度", { exact: true }).fill("2");
+    await page.getByLabel("物体光照亮度", { exact: true }).press("Tab");
+    await page.getByRole("button", { name: /高度雾/ }).click();
+    await page.getByLabel("启用高度雾", { exact: true }).check();
+    await page.getByLabel("雾密度（每米）", { exact: true }).fill("0.0005");
+    await page.getByLabel("雾密度（每米）", { exact: true }).press("Tab");
+    expect(
+      await page.evaluate(() => ({
+        exposure: window.example.viewer.scene.postProcessStages.exposure,
+        surface: window.example.effects.surfaceRadianceScale,
+        fog: window.example.effects.showHeightFog,
+        density: window.example.effects.heightFogDensity,
+      })),
+    ).toEqual({ exposure: 1.5, surface: 2, fog: true, density: 0.0005 });
+    await page.getByRole("button", { name: /高度雾/ }).click();
+    await page.getByLabel("照明模式", { exact: true }).selectOption("固定 IBL");
+    await page.waitForFunction(
+      () =>
+        !window.example.effects.enabled &&
+        window.example.ibl.useSpecularEnvironmentMaps,
+    );
+    const fixed = await page.evaluate(() => window.example.state.snapshot());
+    expect(fixed.lighting.specularEnvironment).toContain(
+      "kiara_6_afternoon_2k_ibl.ktx2",
+    );
+    expect(fixed.lighting.diffuseSH).toHaveLength(9);
+    expectCamera(fixed.camera, before.camera);
+    await page.getByLabel("照明模式", { exact: true }).selectOption("物理大气");
+    await page.waitForFunction(() => window.example.effects.ready);
+    await page.getByLabel("播放时间（水面与太阳）", { exact: true }).check();
+    await page
+      .getByRole("button", { name: "恢复大气基准", exact: true })
+      .click();
+    const restored = await page.evaluate(() => window.example.state.snapshot());
+    expect(restored.atmosphere).toEqual(before.atmosphere);
+    expect(restored.lighting).toEqual(before.lighting);
+    expect(restored.time).toBe(before.time);
+    expect(restored.animate).toBe(false);
+    expectCamera(restored.camera, before.camera);
+    await expect(
+      page.getByLabel("播放时间（水面与太阳）", { exact: true }),
+    ).not.toBeChecked();
+    await page
+      .getByLabel("固定视角", { exact: true })
+      .selectOption("屋顶与天空");
+    await page.screenshot({ path: testInfo.outputPath("atmosphere.png") });
     await page.getByLabel("固定视角", { exact: true }).selectOption("材质矩阵");
     await page.screenshot({ path: testInfo.outputPath("materials.png") });
     await page
@@ -141,6 +248,7 @@ for (const world of ["planar", "globe"]) {
     const pool = await page.evaluate(() => window.example.state.snapshot());
     await page.mouse.move(650, 650);
     await page.mouse.wheel(0, -100);
+    await waitForConsumedInput(page);
     await expect
       .poll(
         async () =>
@@ -164,8 +272,44 @@ for (const world of ["planar", "globe"]) {
     );
     expect(config.asset).toBe("scenegis-pbr-reference-20260921");
     expect(config.textures).toBe("delivery-2k");
+    expect(config.atmosphere).toEqual(before.atmosphere);
     expectCamera(config.camera, pool.camera);
     await page.screenshot({ path: testInfo.outputPath("pool.png") });
+    await page.mouse.move(650, 450);
+    await page.mouse.down({ button: "left" });
+    await page.mouse.move(675, 460, { steps: 6 });
+    await page.mouse.up({ button: "left" });
+    await waitForConsumedInput(page);
+    await expect
+      .poll(
+        async () =>
+          (await page.evaluate(() => window.example.state.snapshot())).camera
+            .position,
+      )
+      .not.toEqual(pool.camera.position);
+    const panned = await page.evaluate(() => window.example.state.snapshot());
+    panned.camera.direction.forEach((value, i) =>
+      expect(value).toBeCloseTo(pool.camera.direction[i], 4),
+    );
+    await page.mouse.down({ button: "middle" });
+    await page.mouse.move(710, 485, { steps: 6 });
+    await page.mouse.up({ button: "middle" });
+    await waitForConsumedInput(page);
+    await expect
+      .poll(
+        async () =>
+          (await page.evaluate(() => window.example.state.snapshot())).camera
+            .direction,
+      )
+      .not.toEqual(panned.camera.direction);
+    await page.evaluate((saved) => {
+      const viewer = window.example.viewer;
+      Object.assign(
+        viewer.planarCameraController ??
+          viewer.scene.screenSpaceCameraController,
+        saved,
+      );
+    }, inertia);
     await expect(page.locator("#error")).toBeEmpty();
     expect(
       await page.evaluate(() => {
@@ -177,6 +321,7 @@ for (const world of ["planar", "globe"]) {
           e.models.every((m) => m.isDestroyed()) &&
           e.water.isDestroyed() &&
           e.ibl.isDestroyed() &&
+          !e.effects.ready &&
           e.taa.isDestroyed() &&
           e.ssr.isDestroyed()
         );

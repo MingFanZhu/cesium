@@ -62,10 +62,20 @@ node --use-env-proxy scripts/scenegis/prepare-pbr-reference.mjs
 
 源模型单位为米、Y-up。示例显式使用 `Model` 的 `upAxis: Axis.Y, forwardAxis: Axis.X`，
 对应局部 `[x, -z, y]`。Globe 只在同一局部场景外增加 ENU→ECEF 变换，Planar 使用局部米制。
-主体包围范围约 36.25 × 23.77 × 19.89 米。前三个相机来自作者的 PhysCamera001/002/003，
-保持其垂直 FOV；综合页另外提供三个样本近景。
+主体包围范围约 36.25 × 23.77 × 19.89 米。示例提供俯瞰全景、中庭、上层与拱廊视角，
+另有“屋顶与天空”用于观察大气，综合页还提供三个样本近景。
 
-固定方向光、环境 diffuse SH 与仓库既有 `kiara_6_afternoon_2k_ibl.ktx2`。
+默认启用 `SceneGISEnvironmentEffects` 物理大气，并由天文太阳位置驱动光照、天空漫反射和
+环境反射。两个 World 均采用参考经纬度 `-75.596, 40.038`；Planar 使用
+`SceneGISPlanarEnvironment` 的 astronomical 模式，Globe 使用原生太阳位置。
+默认冻结在 `2026-06-21T19:00:00Z`，可调 2026 年内日序和 UTC 小时。
+
+“物理大气与光照”面板支持物理天空、空气透视，分别调节天空、空气散射和物体光照亮度，
+以及总曝光。“高度雾”提供密度、高度衰减、基准高度、起雾距离和最大不透明度。
+这里复用现有大气模型；亮度控制不改变 Rayleigh/Mie 系数或重新生成散射 LUT。
+可切回“固定 IBL”：恢复初版固定方向光、diffuse SH 和仓库既有
+`kiara_6_afternoon_2k_ibl.ktx2`，作为稳定的光照对照；曝光在两个模式都生效，其余大气参数
+仅在物理模式生效。“恢复大气基准”会恢复参数并暂停时间，不改变相机。
 环境图复用既有 Cesium Specs 资产；本阶段未新增或修改该文件。
 主体 glTF 的 `KHR_lights_punctual` 不导入；本页光照是明确指定的 SceneGIS 验收配置。
 统一天空 IBL 尚无室内遮挡、空间探针或 GI；SSR 只反射屏幕内可用几何。
@@ -73,12 +83,14 @@ node --use-env-proxy scripts/scenegis/prepare-pbr-reference.mjs
 玻璃原始扩展保留。灯罩的 `KHR_materials_transmission` / `KHR_materials_volume`、头盔
 镜片的 transmission 当前不受 Model 支持，画面中这些部分只呈现核心材质的局限，不能作为
 正确玻璃结果。未用 alpha blending 替换它们。水池使用既有 `SceneGISWaterSurface`，冻结
-时刻便于比较；水面自己的反射与模型 SSR 开关相互独立。
+时刻便于比较；综合页可播放时间，同时推进水面和太阳，暂停后回到所选时刻。
+水面自己的反射与模型 SSR 开关相互独立。
 
 A 为几何阴影 + TAA，B 默认增加 AO / SSR。两者共用相机、灯光、曝光与资产，B 参数切回 A
-后仍保留。导出配置记录资产版本、纹理规格、相机、光照、时间、效果参数及绘制分辨率；
+后仍保留，切换 A/B 不修改大气参数。导出配置记录资产版本、纹理规格、相机、光照、
+大气参数、时间、效果参数及绘制分辨率；
 跨版本验收另保存 Git revision 与同尺寸截图。新渲染能力仍需要独立示例。
 
-作者视角包含仰视，不能用平面地表导航的俯角约束。因此这两个例子移除默认地表输入
-controller，使用公开 Camera API 组装室内查看：左键环视、中键平移、滚轮前后，两个 World
-行为一致；没有碰撞检测或地表高度约束。恢复固定视角可回到确定的验收姿态。
+两个页面使用 Viewer 原有相机控制：Planar 为默认地表 controller，Globe 为原生控制，
+左键平移、中键旋转、滚轮缩放。固定视角采用符合地表导航俯角范围的查看姿态，不再使用
+作者的仰视相机或示例自定义环视操作；恢复固定视角可回到确定的验收姿态。
