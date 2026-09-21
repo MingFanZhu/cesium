@@ -1,8 +1,11 @@
 # PBR 验收数据
 
-[主体基准](../PBR基准.html?world=planar)与[综合验收](../PBR综合验收.html?world=planar)
+[主体基准](../PBR基准.html?world=planar)与[Sponza 综合验收](../PBR综合验收.html?world=planar&asset=sponza)
 均支持 `world=globe`。综合页是 SceneGIS 组装场景，不是 Intel 原场景。
 默认 `textures=2k`，`textures=original` 使用解包后的原始 4K 纹理。
+
+综合验收入口当前默认使用 Bistro 街区，准备方式及 1K 交付说明见 [Bistro.md](Bistro.md)。
+本文以下说明仅适用于保留的 Sponza / Khronos 材质样本。
 
 ## 固定来源与署名
 

@@ -6,8 +6,13 @@ import exposeExample from "/Test/example-lifecycle.js";
 const params = new URLSearchParams(window.location.search);
 const planar = params.get("world") !== "globe";
 const composite = document.body.dataset.composite === "true";
+const street = composite && params.get("asset") !== "sponza";
 const original = params.get("textures") === "original";
-const variant = original ? "original-4k" : "delivery-2k";
+const variant = street
+  ? "bistro-delivery-1k"
+  : original
+    ? "original-4k"
+    : "delivery-2k";
 const panelButton = document.getElementById("toggle-panels");
 function togglePanels() {
   const hidden = document.body.classList.toggle("panels-hidden");
@@ -27,21 +32,39 @@ const frame = planar
 for (const link of document.querySelectorAll("a[data-world]")) {
   link.search = new URLSearchParams({
     world: link.dataset.world,
-    textures: original ? "original" : "2k",
+    textures: street ? "1k" : original ? "original" : "2k",
+    ...(composite ? { asset: street ? "bistro" : "sponza" } : {}),
   });
 }
 document.getElementById("other-page").search = params;
+const assetLink = document.getElementById("asset-link");
+if (assetLink) {
+  assetLink.search = new URLSearchParams({
+    world: planar ? "planar" : "globe",
+    asset: street ? "sponza" : "bistro",
+  });
+  assetLink.textContent = street ? "Sponza 材质与水池样本" : "Bistro 街区场景";
+  document.getElementById("bistro-notes").hidden = !street;
+  document.getElementById("sponza-notes").hidden = street;
+  document.getElementById("scene-description").textContent = street
+    ? "Bistro 街区 · 建筑、路面、植被与街道设施"
+    : "Sponza + 窗帘 + 标准材质样本 + 水池";
+}
 const textureLink = document.getElementById("texture-link");
+textureLink.hidden = street;
 textureLink.search = new URLSearchParams({
   world: planar ? "planar" : "globe",
   textures: original ? "2k" : "original",
+  ...(composite ? { asset: "sponza" } : {}),
 });
 if (original) {
   textureLink.textContent = "返回 2K 纹理交付版";
 }
-document.getElementById("variant").textContent = original
-  ? "原始 4K 纹理 · 高显存占用"
-  : "2K 纹理交付版 · 原始几何与材质 · 本地加载";
+document.getElementById("variant").textContent = street
+  ? "1K 纹理交付版 · 原始贴图通道恢复 · 用户几何保留"
+  : original
+    ? "原始 4K 纹理 · 高显存占用"
+    : "2K 纹理交付版 · 原始几何与材质 · 本地加载";
 
 const viewer = new C.Viewer("map", {
   ...(planar
@@ -49,10 +72,10 @@ const viewer = new C.Viewer("map", {
         planarWorld: {
           crs: "LOCAL",
           extent: {
-            minimumX: -100,
-            minimumY: -100,
-            maximumX: 100,
-            maximumY: 100,
+            minimumX: street ? -250 : -100,
+            minimumY: street ? -250 : -100,
+            maximumX: street ? 250 : 100,
+            maximumY: street ? 250 : 100,
           },
           maximumLevel: 0,
         },
@@ -94,7 +117,7 @@ scene.msaaSamples = 1;
 scene.postProcessStages.fxaa.enabled = false;
 scene.postProcessStages.exposure = 1;
 scene.shadowMap.size = 2048;
-scene.shadowMap.maximumDistance = 60;
+scene.shadowMap.maximumDistance = street ? 300 : 60;
 scene.shadowMap.softShadows = true;
 viewer.clock.currentTime = C.JulianDate.fromIso8601("2026-06-21T19:00:00Z");
 viewer.clock.shouldAnimate = false;
@@ -201,56 +224,71 @@ let manifest;
 
 // glTF Y-up becomes local Z-up using Model's explicit forwardAxis=X option.
 // Downward inspection poses retain the standard surface-navigation controls.
-const views = {
-  俯瞰全景: {
-    position: [-28, -28, 26],
-    target: [0, 0, 4],
-    yfov: 1.0,
-  },
-  中庭: {
-    position: [-8.8, 0.86, 6],
-    target: [2, 0, 2],
-    yfov: 1.02122664,
-  },
-  上层与阴影: {
-    position: [10.5, -1.53, 9],
-    target: [-3, 0, 5],
-    yfov: 1.02323031,
-  },
-  拱廊接触: {
-    position: [2.7, -2.11, 2],
-    target: [-2, 0, 0.8],
-    yfov: 0.6327615,
-  },
-  屋顶与天空: {
-    position: [-25, -18, 27],
-    target: [0, 0, 19],
-    yfov: 1.03,
-  },
-  ...(composite
-    ? {
-        材质矩阵: {
-          position: [4.5, -1.6, 2.05],
-          target: [4.5, 0.6, 1.65],
-          yfov: 1.35,
-        },
-        头盔与玻璃: {
-          position: [-3.25, -1.8, 1.42],
-          target: [-3.05, -0.45, 1.23],
-          yfov: 0.95,
-        },
-        水池反射: {
-          position: [-3.6, -1.9, 1.8],
-          target: [0, 0.45, 0.5],
-          yfov: 1.0,
-        },
-      }
-    : {}),
-};
+const views = street
+  ? {
+      街区全景: {
+        position: [170, -180, 145],
+        target: [24, -4, 12],
+        yfov: 0.95,
+      },
+      临街立面: { position: [70, -75, 35], target: [20, -5, 8], yfov: 1.0 },
+      街道近景: { position: [58, -48, 9], target: [32, -9, 2], yfov: 1.05 },
+      屋顶与天空: {
+        position: [-70, -110, 100],
+        target: [24, -4, 20],
+        yfov: 1.0,
+      },
+    }
+  : {
+      俯瞰全景: {
+        position: [-28, -28, 26],
+        target: [0, 0, 4],
+        yfov: 1.0,
+      },
+      中庭: {
+        position: [-8.8, 0.86, 6],
+        target: [2, 0, 2],
+        yfov: 1.02122664,
+      },
+      上层与阴影: {
+        position: [10.5, -1.53, 9],
+        target: [-3, 0, 5],
+        yfov: 1.02323031,
+      },
+      拱廊接触: {
+        position: [2.7, -2.11, 2],
+        target: [-2, 0, 0.8],
+        yfov: 0.6327615,
+      },
+      屋顶与天空: {
+        position: [-25, -18, 27],
+        target: [0, 0, 19],
+        yfov: 1.03,
+      },
+      ...(composite
+        ? {
+            材质矩阵: {
+              position: [4.5, -1.6, 2.05],
+              target: [4.5, 0.6, 1.65],
+              yfov: 1.35,
+            },
+            头盔与玻璃: {
+              position: [-3.25, -1.8, 1.42],
+              target: [-3.05, -0.45, 1.23],
+              yfov: 0.95,
+            },
+            水池反射: {
+              position: [-3.6, -1.9, 1.8],
+              target: [0, 0.45, 0.5],
+              yfov: 1.0,
+            },
+          }
+        : {}),
+    };
 const state = {
   ready: false,
   comparison: "实验 B",
-  view: "俯瞰全景",
+  view: street ? "街道近景" : "俯瞰全景",
   animate: false,
   resetView() {
     const view = views[state.view];
@@ -280,7 +318,7 @@ const state = {
     viewer.camera.frustum.fov =
       aspect > 1 ? 2 * Math.atan(Math.tan(view.yfov / 2) * aspect) : view.yfov;
     viewer.camera.frustum.near = 0.05;
-    viewer.camera.frustum.far = 250;
+    viewer.camera.frustum.far = street ? 1000 : 250;
     taa.reset();
   },
   apply() {
@@ -363,8 +401,15 @@ const state = {
     return {
       schema: "scenegis-pbr-reference-v1",
       asset: manifest?.id,
-      khronosRevision: manifest?.khronos.revision,
-      layout: composite ? "composite" : "sponza-main",
+      khronosRevision: manifest?.khronos?.revision,
+      sourceGlb: street ? manifest?.sourceGlb : undefined,
+      sourceFbx: street ? manifest?.sourceFbx : undefined,
+      materialNotes: street ? manifest?.assumptions : undefined,
+      layout: street
+        ? "bistro-street"
+        : composite
+          ? "composite"
+          : "sponza-main",
       textures: variant,
       world: planar ? "planar" : "globe",
       comparison: state.comparison,
@@ -407,7 +452,7 @@ const state = {
     );
     const link = document.createElement("a");
     link.href = url;
-    link.download = `pbr-reference-${composite ? "composite" : "main"}-${planar ? "planar" : "globe"}.json`;
+    link.download = `pbr-reference-${street ? "bistro" : composite ? "composite" : "main"}-${planar ? "planar" : "globe"}.json`;
     link.click();
     URL.revokeObjectURL(url);
   },
@@ -525,7 +570,7 @@ trialFolder
 if (composite) {
   gui
     .add(state, "animate")
-    .name("播放时间（水面与太阳）")
+    .name(street ? "播放时间（太阳）" : "播放时间（水面与太阳）")
     .listen()
     .onChange(state.setAnimation);
 }
@@ -610,7 +655,7 @@ async function box(position, scale, color) {
     shader,
   );
 }
-async function loadScene() {
+async function loadSponza() {
   const response = await fetch(`${local}prepared.json`);
   if (!response.ok) {
     throw new Error(
@@ -714,6 +759,35 @@ async function loadScene() {
     );
     window.example.water = water;
   }
+}
+async function loadScene() {
+  if (street) {
+    const response = await fetch(`${local}bistro/prepared.json`);
+    if (!response.ok) {
+      throw new Error(
+        "尚未准备 Bistro：请按 pbr-data/Bistro.md 运行 prepare-bistro.py，然后刷新。",
+      );
+    }
+    manifest = await response.json();
+    const expected = await (
+      await fetch("./pbr-data/bistro-manifest.json")
+    ).json();
+    if (
+      manifest.sourceGlb.sha256 !== expected.sourceGlbSha256 ||
+      manifest.sourceFbx.sha256 !== expected.sourceFbxSha256 ||
+      manifest.maximumTextureSize !== expected.maximumTextureSize
+    ) {
+      throw new Error(
+        "Bistro 数据与当前验收版本不一致，请检查 pbr-data/Bistro.md 并重新准备。",
+      );
+    }
+    if (disposed) {
+      return;
+    }
+    await addModel(`${local}bistro/Bistro.gltf`);
+  } else {
+    await loadSponza();
+  }
   if (disposed) {
     return;
   }
@@ -723,9 +797,11 @@ async function loadScene() {
       (effects.enabled ? effects.ready : ibl.useSpecularEnvironmentMaps)
     ) {
       state.ready = true;
-      document.getElementById("status").textContent = composite
-        ? "本地资源就绪 · 约 635 万三角面"
-        : "本地资源就绪 · 375 万三角面";
+      document.getElementById("status").textContent = street
+        ? "Bistro 就绪 · 约 283 万三角面"
+        : composite
+          ? "本地资源就绪 · 约 635 万三角面"
+          : "本地资源就绪 · 375 万三角面";
       removeReady();
       removeReady = undefined;
     }

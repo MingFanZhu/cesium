@@ -237,4 +237,14 @@ is pending, and no further rendering phase is active.
 The owner accepts R15 physical-atmosphere controls and subsequently requests standard GIS
 navigation restoration. Both-world example follow-up checks pass; no engine/SGP change is needed.
 Sponza remains a material fixture, while the owner prepares a more representative street model
-using UE/Blender. Asset replacement is not implemented or activated in this follow-up.
+using UE/Blender. Asset replacement was not implemented in that checkpoint.
+
+The owner now supplies Bistro geometry and its original FBX/texture archive. Activate
+the [R15 Bistro follow-up](2026-09-21-r15-bistro-scene.md): restore documented source
+material channels in a separate local derivative and replace the default composite
+architecture with a GIS street fixture. No new renderer phase or engine seam.
+
+The Bistro follow-up is technically complete: source geometry is retained, source ORM and
+normal conventions restored in an explicit 1K local derivative, and the default composite
+loads the street in both Worlds. Three Bistro checks and the previous Planar Sponza composite
+regression pass. Owner visual acceptance remains pending; no later renderer phase is active.

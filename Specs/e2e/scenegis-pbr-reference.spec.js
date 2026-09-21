@@ -1,4 +1,5 @@
-import { readFile, stat } from "node:fs/promises";
+import { open, readFile, stat } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test, expect } from "@playwright/test";
@@ -13,6 +14,191 @@ async function json(file) {
       ? data.subarray(20, 20 + data.readUInt32LE(12))
       : data,
   );
+}
+
+test("Bistro preserves supplied geometry and restores source material channels", async () => {
+  const local = join(dataRoot, "local/bistro");
+  const pinned = await json(join(dataRoot, "bistro-manifest.json"));
+  const report = await json(join(local, "prepared.json"));
+  const gltf = await json(join(local, "Bistro.gltf"));
+  expect(report.sourceGlb.sha256).toBe(pinned.sourceGlbSha256);
+  expect(report.sourceFbx.sha256).toBe(pinned.sourceFbxSha256);
+  expect(report.maximumTextureSize).toBe(pinned.maximumTextureSize);
+  expect(report.triangles).toBe(pinned.triangles);
+  const input = await open(join(dataRoot, "../../Data/Models/Bistro.glb"));
+  try {
+    const header = Buffer.alloc(20);
+    await input.read(header, 0, 20, 0);
+    const document = Buffer.alloc(header.readUInt32LE(12));
+    await input.read(document, 0, document.length, 20);
+    const source = JSON.parse(document);
+    expect(gltf.nodes).toEqual(source.nodes);
+    expect(gltf.meshes).toEqual(source.meshes);
+    expect(gltf.scenes).toEqual(source.scenes);
+    const geometry = await readFile(join(local, "Bistro.bin"));
+    for (let i = 0; i < gltf.accessors.length; i++) {
+      const original = source.accessors[i];
+      const delivered = gltf.accessors[i];
+      expect({ ...delivered, bufferView: original.bufferView }).toEqual(
+        original,
+      );
+    }
+    const imageViews = new Set(source.images.map((image) => image.bufferView));
+    let deliveryIndex = 0;
+    for (let i = 0; i < source.bufferViews.length; i++) {
+      if (imageViews.has(i)) {
+        continue;
+      }
+      const before = source.bufferViews[i];
+      const after = gltf.bufferViews[deliveryIndex++];
+      const bytes = Buffer.alloc(before.byteLength);
+      await input.read(
+        bytes,
+        0,
+        bytes.length,
+        28 + document.length + (before.byteOffset ?? 0),
+      );
+      expect(
+        geometry
+          .subarray(after.byteOffset, after.byteOffset + after.byteLength)
+          .equals(bytes),
+      ).toBe(true);
+    }
+  } finally {
+    await input.close();
+  }
+  expect(gltf.materials).toHaveLength(pinned.materials);
+  expect(gltf.extensionsUsed).toBeUndefined();
+  for (const material of gltf.materials) {
+    const pbr = material.pbrMetallicRoughness;
+    if (material.name === "Paris_LiquorBottle_01_Labels") {
+      expect(pbr.metallicFactor).toBe(0);
+    } else {
+      expect(pbr.metallicRoughnessTexture.index).toBe(
+        material.occlusionTexture.index,
+      );
+      expect(pbr.roughnessFactor).toBe(1);
+      const image =
+        gltf.images[gltf.textures[pbr.metallicRoughnessTexture.index].source];
+      expect(image.uri).toMatch(/_Specular\.png$/);
+    }
+    expect(material.normalTexture).toBeDefined();
+  }
+  expect(gltf.materials.filter((m) => m.alphaMode === "OPAQUE")).toHaveLength(
+    120,
+  );
+  expect(gltf.materials.filter((m) => m.alphaMode === "MASK")).toHaveLength(7);
+  // Small source maps are not resampled: compare decoded numeric ranges to the
+  // DDS measurements to catch gamma conversion and missing DirectX green inversion.
+  const requireTools = createRequire(
+    new URL("../../Build/pbr-reference/tools/package.json", import.meta.url),
+  );
+  const sharp = requireTools("sharp");
+  for (const texture of report.textures) {
+    const file = join(local, texture.uri);
+    const metadata = await sharp(file).metadata();
+    expect([metadata.width, metadata.height]).toEqual(texture.size);
+    expect(Math.max(...texture.size)).toBeLessThanOrEqual(1024);
+    if (texture.kind === "BaseColor" || Math.max(...texture.sourceSize) > 64) {
+      continue;
+    }
+    const stats = await sharp(file).stats();
+    for (let channel = 0; channel < 3; channel++) {
+      const flip = texture.kind === "Normal" && channel === 1;
+      const minimum = flip
+        ? 1 - texture.channelMax[channel]
+        : texture.channelMin[channel];
+      const maximum = flip
+        ? 1 - texture.channelMin[channel]
+        : texture.channelMax[channel];
+      expect(
+        Math.abs(stats.channels[channel].min / 255 - minimum),
+      ).toBeLessThan(0.005);
+      expect(
+        Math.abs(stats.channels[channel].max / 255 - maximum),
+      ).toBeLessThan(0.005);
+    }
+  }
+  expect(await readFile(join(local, "LICENSE.txt"), "utf8")).toContain(
+    "Attribution 4.0 International",
+  );
+});
+
+for (const world of ["planar", "globe"]) {
+  test(`Bistro ${world}: street fixture, atmosphere, comparison, navigation and cleanup`, async ({
+    page,
+  }, testInfo) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(`/Test/Rendering/PBR综合验收.html?world=${world}`);
+    await page.waitForFunction(() => window.example?.state.ready);
+    await expect(page.locator("#error")).toBeEmpty();
+    await expect(page.locator("#status")).toContainText("Bistro 就绪");
+    await expect(page.locator("#variant")).toContainText("1K");
+    await expect(page.locator("#texture-link")).toBeHidden();
+    const before = await page.evaluate(() => window.example.state.snapshot());
+    expect(before.layout).toBe("bistro-street");
+    expect(before.asset).toBe("scenegis-bistro-v5.2-20260921");
+    expect(before.textures).toBe("bistro-delivery-1k");
+    expect(before.view).toBe("街道近景");
+    expect(await page.evaluate(() => window.example.models.length)).toBe(1);
+    expect(
+      await page.evaluate(
+        () => window.example.models[0].statistics.trianglesLength,
+      ),
+    ).toBe(2829226);
+    expect(await page.evaluate(() => window.example.water)).toBeUndefined();
+    await page.getByLabel("对比状态", { exact: true }).selectOption("基线 A");
+    const baseline = await page.evaluate(() => window.example.state.snapshot());
+    expectCamera(baseline.camera, before.camera);
+    expect(baseline.atmosphere).toEqual(before.atmosphere);
+    expect(baseline.settings.ao).toBe(false);
+    await page.getByLabel("对比状态", { exact: true }).selectOption("实验 B");
+    await page.getByLabel("时间（UTC 小时）", { exact: true }).fill("14.8");
+    await page.getByLabel("时间（UTC 小时）", { exact: true }).press("Tab");
+    expect(
+      (await page.evaluate(() => window.example.state.snapshot())).time,
+    ).toBe("2026-06-21T14:48:00Z");
+    await page.screenshot({ path: testInfo.outputPath("bistro-street.png") });
+    await page.getByLabel("固定视角", { exact: true }).selectOption("街区全景");
+    await page.screenshot({ path: testInfo.outputPath("bistro-overview.png") });
+    const overview = await page.evaluate(() => window.example.state.snapshot());
+    const download = page.waitForEvent("download");
+    await page
+      .getByRole("button", { name: "导出验收配置", exact: true })
+      .click();
+    const saved = JSON.parse(
+      await readFile(await (await download).path(), "utf8"),
+    );
+    expect(saved.sourceGlb.sha256).toHaveLength(64);
+    expect(saved.materialNotes).toHaveLength(3);
+    expectCamera(saved.camera, overview.camera);
+    // Keep native controller input verification independent of the fixed comparison.
+    await page.mouse.move(650, 650);
+    await page.mouse.wheel(0, -100);
+    await expect
+      .poll(
+        async () =>
+          (await page.evaluate(() => window.example.state.snapshot())).camera
+            .position,
+      )
+      .not.toEqual(overview.camera.position);
+    await expect(page.locator("#error")).toBeEmpty();
+    expect(
+      await page.evaluate(() => {
+        const e = window.example;
+        e.destroy();
+        e.destroy();
+        return (
+          e.viewer.isDestroyed() &&
+          e.models[0].isDestroyed() &&
+          e.ibl.isDestroyed() &&
+          !e.effects.ready
+        );
+      }),
+    ).toBe(true);
+    expect(errors).toEqual([]);
+  });
 }
 
 test("pinned PBR fixtures retain geometry, materials, normals and explicit glass gaps", async () => {
@@ -110,7 +296,9 @@ for (const world of ["planar", "globe"]) {
   }, testInfo) => {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    await page.goto(`/Test/Rendering/PBR综合验收.html?world=${world}`);
+    await page.goto(
+      `/Test/Rendering/PBR综合验收.html?world=${world}&asset=sponza`,
+    );
     await page.waitForFunction(() => window.example?.state.ready);
     await expect(page.locator("#error")).toBeEmpty();
     const before = await page.evaluate(() => window.example.state.snapshot());
@@ -242,7 +430,9 @@ for (const world of ["planar", "globe"]) {
     await page
       .getByLabel("固定视角", { exact: true })
       .selectOption("头盔与玻璃");
-    await expect(page.locator(".gap")).toContainText("玻璃待支持");
+    await expect(page.locator("#sponza-notes .gap")).toContainText(
+      "玻璃待支持",
+    );
     await page.screenshot({ path: testInfo.outputPath("helmet-glass.png") });
     await page.getByLabel("固定视角", { exact: true }).selectOption("水池反射");
     const pool = await page.evaluate(() => window.example.state.snapshot());

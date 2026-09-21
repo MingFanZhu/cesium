@@ -12,37 +12,62 @@
     <div id="map"></div>
     <aside>
       <h1>PBR 综合验收</h1>
-      <p>Sponza + 窗帘 + 标准材质样本 + 水池</p>
+      <p id="scene-description">Bistro 街区 · 建筑、路面、植被与街道设施</p>
       <p id="status" role="status">正在加载本地资源…</p>
       <p id="variant"></p>
       <p id="comparison"></p>
       <p>左键平移 · 中键旋转 · 滚轮缩放</p>
-      <p class="gap">
-        玻璃待支持：灯罩与头盔镜片保留官方透射/体积材质；当前画面不能作为正确玻璃效果验收。
-      </p>
-      <details>
-        <summary>观察目标与来源</summary>
-        <p>
-          材质矩阵：金属度与粗糙度；头盔：皮革、木材、橡胶和金属；水池：反射、折射、波纹与接触；窗帘：双面材质和遮挡。
+      <section id="bistro-notes">
+        <p class="gap">
+          玻璃保留源材质的透明度，尚无物理透射；不能作为折射玻璃验收。当前街区不含水面。
         </p>
-        <p>
-          这是 SceneGIS 组装的验收场景，区别于官方 Sponza
-          主体基准。默认使用物理大气，可调日期、UTC
-          时间、天空与物体光照、曝光和高度雾。 切到固定 IBL
-          可恢复原光照对照；物理参数只在物理大气模式生效。 尚无室内探针或 GI。
+        <details>
+          <summary>街区来源与材质</summary>
+          <p>
+            Amazon Lumberyard Bistro / ORCA，CC BY
+            4.0。使用用户转换的街区几何，从原始 DDS 恢复
+            AO、粗糙度、金属度及法线方向。
+          </p>
+          <p>
+            默认 1K 纹理用于控制显存，原始 GLB 与 FBX 保留。瓶身纸标签缺少源
+            ORM，明确采用非金属哑光；植被按 0.5 阈值裁剪。
+          </p>
+          <p>
+            物理大气、固定 IBL 和 A/B 效果控制共用同一相机与资产。尚无局部探针或
+            GI。
+          </p>
+          <p><a href="pbr-data/Bistro.md">来源、转换记录与资源准备</a></p>
+        </details>
+      </section>
+      <section id="sponza-notes" hidden>
+        <p class="gap">
+          玻璃待支持：灯罩与头盔镜片保留官方透射/体积材质；当前画面不能作为正确玻璃效果验收。
         </p>
-        <p>
-          默认冻结时刻与水面。A/B
-          保持相机、光照及资产一致；后续新效果继续提供独立示例。
-        </p>
-        <p><a href="pbr-data/README.md">来源、授权与资源准备</a></p>
-      </details>
+        <details>
+          <summary>观察目标与来源</summary>
+          <p>
+            材质矩阵：金属度与粗糙度；头盔：皮革、木材、橡胶和金属；水池：反射、折射、波纹与接触；窗帘：双面材质和遮挡。
+          </p>
+          <p>
+            这是 SceneGIS 组装的验收场景，区别于官方 Sponza
+            主体基准。默认使用物理大气，可调日期、UTC
+            时间、天空与物体光照、曝光和高度雾。 切到固定 IBL
+            可恢复原光照对照；物理参数只在物理大气模式生效。 尚无室内探针或 GI。
+          </p>
+          <p>
+            默认冻结时刻与水面。A/B
+            保持相机、光照及资产一致；后续新效果继续提供独立示例。
+          </p>
+          <p><a href="pbr-data/README.md">来源、授权与资源准备</a></p>
+        </details>
+      </section>
       <p>
         <a data-world="planar" href="?world=planar">平面</a> ·
         <a data-world="globe" href="?world=globe">球面</a> ·
         <a id="other-page" href="PBR基准.html">主体基准</a> ·
         <a href="示例目录.html">效果目录</a>
       </p>
+      <p><a id="asset-link" href="?asset=sponza">Sponza 材质与水池样本</a></p>
       <p>
         <a id="texture-link" href="?textures=original"
           >原始 4K 纹理（主体约 6 GiB）</a

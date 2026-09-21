@@ -1,0 +1,19 @@
+{
+  "id": "scenegis-bistro-v5.2-20260921",
+  "source": "https://developer.nvidia.com/orca/amazon-lumberyard-bistro",
+  "author": "Amazon Lumberyard",
+  "year": 2017,
+  "license": "CC-BY-4.0",
+  "sourceGlbSha256": "4cbe7717362fd2254955ef66c7d531d63fdd62fd1b7743f4578938aa77521a96",
+  "sourceFbxSha256": "471991629c7e35a88338c48f3565390ad19cc5d1d7c7e067fc2a60b4f3b5f195",
+  "triangles": 2829226,
+  "primitives": 1591,
+  "materials": 132,
+  "maximumTextureSize": 1024,
+  "localBounds": {
+    "minimum": [-62.4583, -96.4816, -7.5619],
+    "maximum": [111.302, 87.9371, 43.5324]
+  },
+  "normalConversion": "DirectX green channel inverted for glTF",
+  "ormChannels": { "R": "occlusion", "G": "roughness", "B": "metallic" }
+}

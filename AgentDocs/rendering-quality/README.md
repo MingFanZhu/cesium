@@ -8,7 +8,7 @@
 | Status                 | `active`                                                   |
 | Planning model         | `extension`                                                |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R15 follow-up completed                                    |
+| Current phase          | R15 Bistro follow-up completed                             |
 | Active phase plan      | None                                                       |
 | Active standalone plan | None                                                       |
 | Architecture contact   | Current task                                               |
@@ -47,4 +47,10 @@
 - [R15 PBR reference scene](plans/2026-09-21-r15-pbr-reference-scene.md) and [technical review](reviews/2026-09-21-r15-pbr-reference-scene.md) are complete: local Intel Sponza main/composite pages, explicit 2K delivery and retained original 4K, Khronos material targets, pool and fixed comparisons. Five fixture/E2E checks pass; owner visual review is pending. No upstream or renderer change. Retain R7 night and Viewer startup-camera follow-ups; no new GI/glass phase is active.
 - Follow-up: physical atmosphere controls are owner accepted; standard navigation is restored
   with downward inspection poses. The owner prefers a GIS street scene and plans to prepare
-  converted city assets; no replacement asset or new renderer phase is activated.
+  converted city assets. The supplied Bistro GLB and original FBX/texture archive now
+  complete the [Bistro fixture follow-up](plans/2026-09-21-r15-bistro-scene.md).
+- [Bistro review](reviews/2026-09-21-r15-bistro-scene.md): default street fixture, restored
+  source material channels, explicit 1K delivery, both-world checks and retained Sponza
+  composite. Three Bistro tests and one existing Planar composite regression pass. Original
+  GLB/FBX/DDS remain intact; glass/source conversion limitations are documented. Owner visual
+  acceptance is pending. No upstream files, SGP or next renderer phase.
