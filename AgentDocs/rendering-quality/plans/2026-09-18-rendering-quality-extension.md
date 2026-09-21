@@ -221,3 +221,15 @@ re-acceptance remains pending. No new phase or upstream seam is introduced.
 On 2026-09-21 the owner accepted correction checkpoint `c3add1660a` as usable. R4 is closed
 with its documented moving-content limits. Further GI/probe quality directions are under
 discussion only; no next implementation phase is authorized or active.
+
+The owner subsequently approves [R15 PBR reference scene](2026-09-21-r15-pbr-reference-scene.md)
+on 2026-09-21: official Intel Sponza plus a separately identified material/water composite.
+Keep both-world APIs, fixed visual comparisons and independent future effect examples. This
+phase assembles existing capabilities and explicitly records unsupported glass extensions;
+GI and transmission renderer implementation remain future candidates.
+
+R15 implementation and [technical review](../reviews/2026-09-21-r15-pbr-reference-scene.md)
+are complete. Both-world main/composite pages use pinned local PBR assets, fixed cameras,
+lighting and reversible effects. Explicit 2K delivery controls the measured source texture
+budget; original 4K remains available. Five dedicated checks pass. Owner visual acceptance
+is pending, and no further rendering phase is active.

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PBR 综合验收</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+    <link rel="stylesheet" href="./PBR验收.css" />
+  </head>
+  <body data-composite="true">
+    <div id="map"></div>
+    <aside>
+      <h1>PBR 综合验收</h1>
+      <p>Sponza + 窗帘 + 标准材质样本 + 水池</p>
+      <p id="status" role="status">正在加载本地资源…</p>
+      <p id="variant"></p>
+      <p id="comparison"></p>
+      <p>左键环视 · 中键平移 · 滚轮前后</p>
+      <p class="gap">
+        玻璃待支持：灯罩与头盔镜片保留官方透射/体积材质；当前画面不能作为正确玻璃效果验收。
+      </p>
+      <details>
+        <summary>观察目标与来源</summary>
+        <p>
+          材质矩阵：金属度与粗糙度；头盔：皮革、木材、橡胶和金属；水池：反射、折射、波纹与接触；窗帘：双面材质和遮挡。
+        </p>
+        <p>
+          这是 SceneGIS 组装的验收场景，区别于官方 Sponza
+          主体基准。统一使用固定方向光、天空 IBL 与曝光，尚无室内探针或 GI。
+        </p>
+        <p>
+          默认冻结时刻与水面。A/B
+          保持相机、光照及资产一致；后续新效果继续提供独立示例。
+        </p>
+        <p><a href="pbr-data/README.md">来源、授权与资源准备</a></p>
+      </details>
+      <p>
+        <a data-world="planar" href="?world=planar">平面</a> ·
+        <a data-world="globe" href="?world=globe">球面</a> ·
+        <a id="other-page" href="PBR基准.html">主体基准</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <p>
+        <a id="texture-link" href="?textures=original"
+          >原始 4K 纹理（主体约 6 GiB）</a
+        >
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <button id="toggle-panels" type="button">隐藏面板</button>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./PBR验收.js"></script>
+  </body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sponza PBR 基准</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+    <link rel="stylesheet" href="./PBR验收.css" />
+  </head>
+  <body data-composite="false">
+    <div id="map"></div>
+    <aside>
+      <h1>Sponza PBR 基准</h1>
+      <p>Intel Sponza 2022 · 官方几何与材质</p>
+      <p id="status" role="status">正在加载本地资源…</p>
+      <p id="variant"></p>
+      <p id="comparison"></p>
+      <p>左键环视 · 中键平移 · 滚轮前后</p>
+      <details>
+        <summary>基准与数据说明</summary>
+        <p>
+          只加载 Sponza 主体，保留官方法线、材质与几何。默认 2K
+          纹理为明确的交付派生版；原始 4K 数据完整保留。
+        </p>
+        <p>
+          固定方向光与天空
+          IBL、曝光和时刻。未导入资产中的灯光，不等同于作者的离线参考渲染；尚无室内探针或
+          GI。
+        </p>
+        <p>
+          A/B 只切换效果参数，不改变相机、资产和光照。导出配置用于跨版本复查。
+        </p>
+        <p><a href="pbr-data/README.md">来源、授权与资源准备</a></p>
+      </details>
+      <p>
+        <a data-world="planar" href="?world=planar">平面</a> ·
+        <a data-world="globe" href="?world=globe">球面</a> ·
+        <a id="other-page" href="PBR综合验收.html">综合验收</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <p>
+        <a id="texture-link" href="?textures=original"
+          >原始 4K 纹理（主体约 6 GiB）</a
+        >
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <button id="toggle-panels" type="button">隐藏面板</button>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./PBR验收.js"></script>
+  </body>
+</html>
