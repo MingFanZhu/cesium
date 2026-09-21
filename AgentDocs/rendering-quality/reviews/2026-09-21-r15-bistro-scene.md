@@ -3,7 +3,8 @@
 - Type: `review`; status: `approved`; updated: `2026-09-21`
 - Target: [Bistro phase](../plans/2026-09-21-r15-bistro-scene.md)
 - Reviewer / implementation owner: current task, architecture and execution self-review
-- Upstream-owned files: none; SGP: none; no new runtime API or renderer seam
+- Initial fixture: no upstream files or runtime API; the railing correction below adds
+  one native shader change under `SGP-0023`
 
 ## Findings and disposition
 
@@ -39,3 +40,32 @@ passes; AgentDocs-wide Prettier retains the same 316 pre-existing files, without
 No full engine build is required for example/data-only changes. No upstream-owned file or
 generated output is committed. Owner visual acceptance remains pending. Correct physical
 glass, original authored lighting, GI and probes remain outside this completed fixture phase.
+
+## Railing correction after 388a4d8162
+
+- Target: reported white speckles on mesh 527 / `MASTER_Grain_Metal`, same R15 plan.
+- P1, fixed: 1,248 zero-area UV triangles without supplied tangents make native tangent
+  division undefined. Source constant textures contain no white pattern. Disabling
+  SSR/AO/shadows does not remove it, while the geometry-normal diagnostic does. Guard the
+  determinant before division and preserve geometry normals on the singular base/clearcoat
+  paths. Anisotropy keeps a finite orthogonal frame and unperturbed geometry normal.
+- P2, fixed: an absolute determinant cutoff would suppress valid small UV scales. The
+  guard uses relative floating-point cancellation; GPU checks retain regular, mirrored,
+  tiny-scale and explicitly supplied tangent mapping. No global material or texture change.
+- Evidence: nine strict real-GPU Specs pass in dev and release (Chrome Headless 153,
+  Windows); both builds and the upstream marker/manifest audit pass. Real IAB close-up
+  confirms white speckles disappear under the original camera, time, physical atmosphere,
+  AO, shadows, SSR and no AA. GUI controls and actual settings are restored together.
+  Existing Bistro E2E passes for Planar (28.6 s) and Globe (33.4 s), including navigation,
+  atmosphere/effect changes and cleanup.
+- Performance/lifetime: same 1198x852 IAB, 60 postRender intervals, 16.7 ms median and
+  17.7 ms P95 before/after; 1,591 commands, one primitive/model before/after. Vsync limits
+  this observation; it is not a GPU microbenchmark. No new resource, pass, texture, uniform
+  or per-frame allocation. GPU test textures/programs/context are destroyed by the tests.
+- Upstream inventory: only `packages/engine/Source/Shaders/Model/MaterialStageFS.glsl`,
+  paired `SGP-0023`, [ADR-0095](../../../Documentation/SceneGIS/Decisions/ADR-0095-degenerate-model-normal-mapping.md).
+  Generated shader JS and build bundles remain untracked outputs.
+- Remaining boundary: singular UVs cannot define tangent-space detail; those faces use
+  their geometry normals. This does not repair authored UV data. Owner visual re-acceptance
+  is pending; existing glass/GI/probe boundaries remain unchanged. Architecture/code
+  self-review approves this bounded correction; no new phase is activated.

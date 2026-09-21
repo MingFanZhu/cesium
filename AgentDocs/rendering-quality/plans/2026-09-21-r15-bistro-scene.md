@@ -4,7 +4,9 @@
 - Parent: [Rendering quality](2026-09-18-rendering-quality-extension.md)
 - Previous checkpoint: `f31fec25f6`
 - Owner / reviewer: current task, architecture and execution self-review
-- Architecture review: confirmed; example/data preparation only; no ADR or SGP
+- Architecture review: confirmed; initial fixture is example/data only; railing correction
+  uses [ADR-0095](../../../Documentation/SceneGIS/Decisions/ADR-0095-degenerate-model-normal-mapping.md)
+  and `SGP-0023`
 
 ## Source facts and scope
 
@@ -60,3 +62,31 @@ the street loads in both Worlds, its preparation is reproducible and limitations
   outside buildings. Keep the owner's selected atmosphere time during the final reload.
 - Technical review: [Bistro review](../reviews/2026-09-21-r15-bistro-scene.md).
   Owner visual acceptance is pending; no subsequent renderer phase is activated.
+
+## Reported railing white speckles
+
+After `388a4d8162`, the owner reports white pixels on the current railing close-up.
+Picking identifies `MASTER_Grain_Metal` on mesh 527. Its 19,060 triangles include
+1,248 zero-area UV triangles; all lack tangent attributes. The source color/ORM maps
+are constant. Native `MaterialStageFS.computeTangent` divides by the UV determinant
+without a singularity check. Disabling SSR/AO/shadows leaves the artifact; temporarily
+using geometry normals removes it. This is a reproduced native numerical defect, not
+an alpha conversion or material-color problem.
+
+Reopen the follow-up for a minimal native shader correction, tracked as SGP-0023:
+singular derivative UV frames use the existing geometry normal; regular/mirrored UVs
+and supplied tangents retain their behavior. Cover base, clearcoat and anisotropy callers
+without extra geometry passes, textures or public API. Use relative cancellation error,
+not an absolute UV-size cutoff. Add focused real-GPU normal tests and replay the owner's
+view with unchanged material/settings. Record frame timing/commands before and after,
+verify dev/release shader delivery, update review and create one correction checkpoint.
+
+Correction is implemented in the one native material shader. Nine strict GPU Specs pass
+in both dev and release, including preserved regular, mirrored and small-scale mapping.
+The original close-up now has clean metal rods under unchanged physical atmosphere,
+AO/SSR/shadows and no AA. Same 1198x852 IAB sampling (60 postRender intervals) records
+16.7 ms median / 17.7 ms P95 before and after, with 1,591 commands and one model unchanged.
+This is a display-capped frame-time check, not an isolated GPU timing claim. No GPU
+resource or pass is added. Dev/release builds and upstream patch audit pass.
+Existing Bistro Planar/Globe E2E both pass, including resource cleanup.
+The owner's camera and GUI settings are restored; final owner visual acceptance is pending.

@@ -248,3 +248,10 @@ The Bistro follow-up is technically complete: source geometry is retained, sourc
 normal conventions restored in an explicit 1K local derivative, and the default composite
 loads the street in both Worlds. Three Bistro checks and the previous Planar Sponza composite
 regression pass. Owner visual acceptance remains pending; no later renderer phase is active.
+
+Bistro checkpoint `388a4d8162` receives a focused R15 correction after the owner reports
+railing white speckles. The native derivative normal calculation divides by singular UVs.
+The one-shader correction preserves geometry normals on those faces and retains normal
+maps on valid UVs. `SGP-0023` / ADR-0095 and the existing Bistro plan/review track bounded
+GPU validation and unchanged-view evidence. Technical correction is complete; owner
+visual acceptance remains pending, and no subsequent renderer phase is activated.

@@ -28,6 +28,12 @@ vec3 computeTangent(in vec3 position, in vec2 normalTexCoords)
     vec2 tex_dx = dFdx(normalTexCoords);
     vec2 tex_dy = dFdy(normalTexCoords);
     float determinant = tex_dx.x * tex_dy.y - tex_dy.x * tex_dx.y;
+    // SCENEGIS_PATCH_BEGIN SGP-0023: Signal singular UV frames before division.
+    float determinantScale = abs(tex_dx.x * tex_dy.y) + abs(tex_dy.x * tex_dx.y);
+    if (abs(determinant) <= czm_epsilon7 * determinantScale) {
+        return vec3(0.0);
+    }
+    // SCENEGIS_PATCH_END SGP-0023
     vec3 tangent = tex_dy.t * dFdx(position) - tex_dx.t * dFdy(position);
     return tangent / determinant;
 }
@@ -44,6 +50,9 @@ struct NormalInfo {
 NormalInfo getNormalInfo(ProcessedAttributes attributes)
 {
     vec3 geometryNormal = attributes.normalEC;
+    // SCENEGIS_PATCH_BEGIN SGP-0023: Track undefined derivative normal mapping.
+    bool normalMappingDefined = true;
+    // SCENEGIS_PATCH_END SGP-0023
     #ifdef HAS_NORMAL_TEXTURE
         vec2 normalTexCoords = getNormalTexCoords();
     #endif
@@ -53,6 +62,13 @@ NormalInfo getNormalInfo(ProcessedAttributes attributes)
         vec3 bitangent = attributes.bitangentEC;
     #else // Assume HAS_NORMAL_TEXTURE
         vec3 tangent = computeTangent(attributes.positionEC, normalTexCoords);
+        // SCENEGIS_PATCH_BEGIN SGP-0023: Keep a finite anisotropy frame for collapsed UVs.
+        normalMappingDefined = any(notEqual(tangent, vec3(0.0)));
+        if (!normalMappingDefined) {
+            vec3 axis = abs(geometryNormal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
+            tangent = cross(axis, geometryNormal);
+        }
+        // SCENEGIS_PATCH_END SGP-0023
         tangent = normalize(tangent - geometryNormal * dot(geometryNormal, tangent));
         vec3 bitangent = normalize(cross(geometryNormal, tangent));
     #endif
@@ -76,6 +92,11 @@ NormalInfo getNormalInfo(ProcessedAttributes attributes)
             normalSample.xy *= u_normalTextureScale;
         #endif
         vec3 normal = normalize(tbn * normalSample);
+        // SCENEGIS_PATCH_BEGIN SGP-0023: Do not perturb a normal without a UV frame.
+        if (!normalMappingDefined) {
+            normal = geometryNormal;
+        }
+        // SCENEGIS_PATCH_END SGP-0023
     #else
         vec3 normal = geometryNormal;
     #endif
@@ -110,6 +131,11 @@ vec3 getNormalFromTexture(ProcessedAttributes attributes, vec3 geometryNormal)
         vec3 b = attributes.bitangentEC;
     #else
         vec3 t = computeTangent(attributes.positionEC, normalTexCoords);
+        // SCENEGIS_PATCH_BEGIN SGP-0023: Preserve base geometry normals on singular UVs.
+        if (all(equal(t, vec3(0.0)))) {
+            return geometryNormal;
+        }
+        // SCENEGIS_PATCH_END SGP-0023
         t = normalize(t - geometryNormal * dot(geometryNormal, t));
         vec3 b = normalize(cross(geometryNormal, t));
     #endif
@@ -149,6 +175,11 @@ vec3 getClearcoatNormalFromTexture(ProcessedAttributes attributes, vec3 geometry
         vec3 b = attributes.bitangentEC;
     #else
         vec3 t = computeTangent(attributes.positionEC, normalTexCoords);
+        // SCENEGIS_PATCH_BEGIN SGP-0023: Preserve clearcoat geometry normals on singular UVs.
+        if (all(equal(t, vec3(0.0)))) {
+            return geometryNormal;
+        }
+        // SCENEGIS_PATCH_END SGP-0023
         t = normalize(t - geometryNormal * dot(geometryNormal, t));
         vec3 b = normalize(cross(geometryNormal, t));
     #endif

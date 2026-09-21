@@ -8,7 +8,7 @@
 | Status                 | `active`                                                   |
 | Planning model         | `extension`                                                |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R15 Bistro follow-up completed                             |
+| Current phase          | R15 Bistro correction complete; owner review pending       |
 | Active phase plan      | None                                                       |
 | Active standalone plan | None                                                       |
 | Architecture contact   | Current task                                               |
@@ -54,3 +54,9 @@
   composite. Three Bistro tests and one existing Planar composite regression pass. Original
   GLB/FBX/DDS remain intact; glass/source conversion limitations are documented. Owner visual
   acceptance is pending. No upstream files, SGP or next renderer phase.
+- Railing follow-up to `388a4d8162`: singular UVs without tangents produced white
+  speckles in native material normals. The [Bistro plan](plans/2026-09-21-r15-bistro-scene.md)
+  and [review](reviews/2026-09-21-r15-bistro-scene.md) record the correction, GPU tests
+  and unchanged-view inspection. One upstream shader, `SGP-0023` /
+  [ADR-0095](../../Documentation/SceneGIS/Decisions/ADR-0095-degenerate-model-normal-mapping.md).
+  Camera/settings are restored. No subsequent renderer phase is active.

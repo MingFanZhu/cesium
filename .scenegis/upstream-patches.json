@@ -2,6 +2,25 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0023",
+      "title": "Keep model normals finite for singular texture coordinates",
+      "status": "active",
+      "reason": "Bistro railings contain zero-area UV triangles without tangents; native derivative tangent division produces NaNs and white speckles. Preserve geometry normals only where the UV frame is singular.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Shaders/Model/MaterialStageFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISModelNormalMappingSpec.js",
+        "Specs/e2e/scenegis-pbr-reference.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0095-degenerate-model-normal-mapping.md",
+      "removalCondition": "Native material normal mapping handles singular derivative UV frames without non-finite base, clearcoat or anisotropic normals."
+    },
+    {
       "id": "SGP-0021",
       "title": "Avoid identical floating uniform array uploads",
       "status": "active",
