@@ -5,6 +5,11 @@
 - Target: [R4](../plans/2026-09-20-r4-temporal-antialiasing.md), after R14 `31ba432cc8`
 - Decision / seam: ADR-0094 / SGP-0022
 
+Follow-up: owner-reported zoom instability reopened checkpoint `9255216681`. The
+[2026-09-21 review](2026-09-21-r4-temporal-reference-adaptation.md) supersedes the resolve
+algorithm and latest quality verification below; the original integration/lifecycle findings
+remain applicable.
+
 ## Findings and disposition
 
 - P1, fixed after owner review: Static textured slopes visibly jittered. The stationary reference

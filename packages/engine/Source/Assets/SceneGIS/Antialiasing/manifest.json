@@ -1,0 +1,11 @@
+{
+  "name": "SceneGIS temporal antialiasing attribution",
+  "source": "https://github.com/google/filament",
+  "revision": "062360c80946af6ec5ec1f479eb046f72a622b3b",
+  "sourcePath": "filament/src/materials/antiAliasing/taa/taa.mat",
+  "license": "Apache-2.0",
+  "format": "UTF-8 text",
+  "maximumTotalBytes": 16384,
+  "runtimeFetch": false,
+  "files": ["Filament-LICENSE.txt", "NOTICE.txt", "manifest.json"]
+}

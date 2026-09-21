@@ -1,0 +1,17 @@
+SceneGIS temporal antialiasing contains code adapted from Google Filament.
+Source: filament/src/materials/antiAliasing/taa/taa.mat
+Revision: 062360c80946af6ec5ec1f479eb046f72a622b3b
+https://github.com/google/filament/blob/062360c80946af6ec5ec1f479eb046f72a622b3b/filament/src/materials/antiAliasing/taa/taa.mat
+License: Apache License, Version 2.0 (see Filament-LICENSE.txt).
+
+SceneGIS modifications (2026): adapted Lanczos current-color reconstruction,
+five-tap Catmull-Rom history sampling with deringing, neighborhood/variance bounds,
+segment clipping and HDR blending for Cesium GLSL. Added linear-depth reprojection,
+CPU camera-relative transforms, silhouette support, depth rejection and current alpha.
+No Filament renderer, material compiler or runtime is included.
+
+Original history-filter source credits retained from Filament:
+M. J. P. (https://therealmjp.github.io/),
+http://vec3.ca/bicubic-filtering-in-fewer-taps/,
+Jorge Jimenez, SIGGRAPH 2016, Filmic SMAA (five-tap optimization).
+Variance clipping: Marco Salvi, An Excursion in Temporal Supersampling.

@@ -17,11 +17,15 @@ before overlays and on failures. Per-frustum fullscreen depth conversion copies 
 depth to a unified R32F surface; no geometry is redrawn. Separate RGBA16F color/R32F depth histories
 preserve HDR, alpha and world-scale depth. History composition is after advanced environment HDR
 and before native bloom/tone mapping. Current-to-previous eye transforms use CPU doubles to avoid
-ECEF cancellation in GLSL. A 3x3 Mitchell-Netravali reconstruction removes the current sample's
-projection offset before publication, including rejected/first-frame samples. Depth rejection
-includes the local depth footprint so grazing surfaces do not invalidate static history solely
-because of jitter. Neighborhood/variance clipping and radiance reactivity
-bound history reuse; background outside one-pixel silhouette support uses current color. Explicit `reset`, projection/log-depth
+ECEF cancellation in GLSL. A 3x3 Lanczos-2 reconstruction removes the current sample's
+projection offset before publication, including rejected/first-frame samples. Covered pixels
+retain their own depth; only uncovered silhouette support borrows a neighbor's depth and sample
+position to estimate displacement. Depth rejection includes the locally continuous depth footprint
+so grazing surfaces do not invalidate static history solely because of jitter. Five-tap Catmull-Rom
+history filtering with deringing avoids repeated bilinear blur. Cross/full neighborhood bounds,
+five-sample variance and history-to-current segment clipping bound history reuse. Reconstruct and
+clip in linear RGB, compress HDR only for blending and then expand. Background outside one-pixel
+silhouette support uses current color. Explicit `reset`, projection/log-depth
 changes, resize and re-enable discard history. Request-render scheduling is unchanged.
 
 Cloud history is never borrowed or modified. This is a separately requested full-scene AA feature;
@@ -43,4 +47,19 @@ Independent visual examples and the real Viewer compare quality and paired frame
 
 Algorithmic background: [Karis, High Quality Temporal Supersampling](https://www.advances.realtimerendering.com/s2014/index.html)
 and [Salvi, Temporal Supersampling](https://developer.download.nvidia.com/gameworks/events/GDC2016/msalvi_temporal_supersampling.pdf).
-No implementation source is copied.
+
+Amendment, 2026-09-21: resolve filtering and clipping are adapted from
+[Google Filament taa.mat](https://github.com/google/filament/blob/062360c80946af6ec5ec1f479eb046f72a622b3b/filament/src/materials/antiAliasing/taa/taa.mat),
+pinned to `062360c80946af6ec5ec1f479eb046f72a622b3b` (Apache-2.0). This replaces the original
+independent Mitchell/bilinear/component-clamp resolve after owner-reported zoom instability.
+Cesium-specific differences are linear merged depth, CPU double-precision eye transforms,
+depth rejection, silhouette support and preservation of current alpha. No upscaling or optional
+Filament sharpening, YCoCg or flicker heuristics are introduced. Relative to the previous resolve,
+history sampling adds four texture fetches; pass count, textures and geometry submission are unchanged.
+
+License, source pin, modifications and original algorithm credits ship in
+`packages/engine/Source/Assets/SceneGIS/Antialiasing/`, under the existing ADR-0041 asset-copy
+boundary. The JSON manifest declares text format and a 16 KiB total budget; these files have no
+runtime fetch or GPU allocation. When updating Filament, review the pinned filter, clipping,
+jitter conventions and HDR ordering together, retain provenance, and rerun motion/static GPU
+regressions. Do not import Filament's renderer or material compiler.

@@ -211,3 +211,9 @@ Preserve camera semantics, phase identifiers and a separate visual example.
 R4 implementation and [technical review](../reviews/2026-09-20-r4-temporal-antialiasing.md) are
 complete. Optional TAA has both-world examples and bounded storage savings; the fixed real-view
 frame time did not materially improve. Owner visual review is pending, and no later phase is active.
+
+R4 checkpoint `9255216681` was reopened on 2026-09-21 for wheel-zoom instability. The owned
+resolve now retains actual surface depth and adapts a pinned Filament implementation. The
+[follow-up review](../reviews/2026-09-21-r4-temporal-reference-adaptation.md) records motion,
+static, lifetime and GPU-cost verification. Technical correction is complete; owner visual
+re-acceptance remains pending. No new phase or upstream seam is introduced.

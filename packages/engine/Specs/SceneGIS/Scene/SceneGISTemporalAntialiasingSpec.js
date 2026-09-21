@@ -255,6 +255,115 @@ describe("SceneGIS/Scene/SceneGISTemporalAntialiasing", function () {
     expect(last.isDestroyed()).toBe(true);
     expect(taa.isDestroyed()).toBe(true);
   });
+  it("keeps surface detail attached during camera dolly", function () {
+    setup();
+    box.modelMatrix = Matrix4.fromScale(new Cartesian3(12, 12, 0.025));
+    box.appearance = new PerInstanceColorAppearance({
+      translucent: false,
+      closed: true,
+      fragmentShaderSource: `
+        in vec3 v_positionEC;
+        void main() {
+          vec3 p = (czm_inverseView * vec4(v_positionEC, 1.0)).xyz;
+          float detail = sin(p.x * 1.7) * sin(p.y * 1.7);
+          out_FragColor = vec4(vec3(0.5 + 0.45 * detail), 1.0);
+        }`,
+    });
+    const direction = Cartesian3.normalize(
+      new Cartesian3(0, 1, -0.25),
+      new Cartesian3(),
+    );
+    const start = new Cartesian3(0, -20, 5);
+    function setPose(frame) {
+      scene.camera.setView({
+        destination: Cartesian3.add(
+          start,
+          Cartesian3.multiplyByScalar(direction, frame * 0.6, new Cartesian3()),
+          new Cartesian3(),
+        ),
+        orientation: { direction, up: Cartesian3.UNIT_Z },
+      });
+    }
+    const frames = [];
+    const read = () =>
+      scene.context.readPixels({ x: 24, y: 20, width: 48, height: 32 });
+    setPose(0);
+    taa.enabled = true;
+    render(32);
+    for (let frame = 1; frame <= 12; ++frame) {
+      setPose(frame);
+      render();
+      frames.push(read());
+    }
+    // Spatial supersampling provides an independent reference at each camera pose.
+    // Comparing against zero history would penalize legitimate temporal antialiasing.
+    taa.enabled = false;
+    scene.canvas.width = 384;
+    scene.canvas.height = 384;
+    let error = 0;
+    for (let frame = 1; frame <= 12; ++frame) {
+      setPose(frame);
+      render();
+      const reference = scene.context.readPixels({
+        x: 96,
+        y: 80,
+        width: 192,
+        height: 128,
+      });
+      for (let y = 0; y < 32; ++y) {
+        for (let x = 0; x < 48; ++x) {
+          let sum = 0;
+          for (let sy = 0; sy < 4; ++sy) {
+            for (let sx = 0; sx < 4; ++sx) {
+              sum += reference[((y * 4 + sy) * 192 + x * 4 + sx) * 4];
+            }
+          }
+          error += Math.abs(sum / 16 - frames[frame - 1][(y * 48 + x) * 4]);
+        }
+      }
+    }
+    // Bound the mean error to four percent of the displayed luminance range on
+    // this deliberately fine texture. The previous resolve exceeds this budget.
+    expect(error / (12 * 48 * 32 * 255)).toBeLessThan(0.04);
+  });
+  it("retains the covered surface depth instead of its nearest neighbor", function () {
+    setup();
+    taa.enabled = true;
+    const inspect = scene.context.createViewportQuadCommand(
+      `uniform sampler2D u_depth;
+       uniform float u_expected;
+       in vec2 v_textureCoordinates;
+       void main() {
+         float difference = abs(texture(u_depth, v_textureCoordinates).r - u_expected);
+         out_FragColor = vec4(difference < 0.005 ? 1.0 : 0.0, 0.0, 0.0, 1.0);
+       }`,
+      {
+        uniformMap: {
+          u_depth: () =>
+            taa._state.history[1 - taa._state.index].getColorTexture(1),
+          u_expected: () => expected,
+        },
+      },
+    );
+    let expected;
+    try {
+      for (let frame = 0; frame < 8; ++frame) {
+        render();
+        const point = scene.pickPosition(new Cartesian2(48.5, 47.5));
+        expected = -Matrix4.multiplyByPoint(
+          scene.camera.viewMatrix,
+          point,
+          new Cartesian3(),
+        ).z;
+        inspect.execute(scene.context);
+        expect(
+          scene.context.readPixels({ x: 48, y: 48, width: 1, height: 1 })[0],
+        ).toBe(255);
+      }
+    } finally {
+      inspect.shaderProgram.destroy();
+    }
+  });
   it("keeps shared AO on the main MRT path with no depth geometry", function () {
     setup();
     scene.postProcessStages.ambientOcclusion.enabled = true;
