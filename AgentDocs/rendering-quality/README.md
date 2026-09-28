@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                   |
-| ---------------------- | ----------------------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                                     |
-| Status                 | `active`                                                                |
-| Planning model         | `extension`                                                             |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)              |
-| Current phase          | R18 technically complete; owner visual review pending                   |
-| Active phase plan      | None; completed [R18](plans/2026-09-28-r18-screen-space-reflections.md) |
-| Active standalone plan | None                                                                    |
-| Architecture contact   | Current task                                                            |
-| Execution contact      | Current task                                                            |
-| Last updated           | `2026-09-28`                                                            |
+| Field                  | Value                                                                |
+| ---------------------- | -------------------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                                  |
+| Status                 | `active`                                                             |
+| Planning model         | `extension`                                                          |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)           |
+| Current phase          | R19 technically complete; owner visual review pending                |
+| Active phase plan      | None; completed [R19](plans/2026-09-28-r19-specular-antialiasing.md) |
+| Active standalone plan | None                                                                 |
+| Architecture contact   | Current task                                                         |
+| Execution contact      | Current task                                                         |
+| Last updated           | `2026-09-28`                                                         |
 
 ## Scope
 
@@ -34,6 +34,11 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- R19 adapts Three.js geometry-normal filtering after R18 checkpoint `8d27a60feb`.
+  ADR-0098 / SGP-0025; retain TAA and native camera behavior. No open discussion.
+  Implementation and [review](reviews/2026-09-28-r19-specular-antialiasing.md) are complete;
+  owner visual acceptance remains pending. No next phase is active.
 
 - R18 is technically complete after R17 checkpoint `5972618214`: SSR efficiency and
   stability use pinned AMD references. See the [review](reviews/2026-09-28-r18-screen-space-reflections.md).

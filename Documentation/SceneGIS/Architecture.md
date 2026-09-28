@@ -1048,6 +1048,13 @@ Scene 独占已绑定效果的生命周期，调用方可提前 destroy 解除�
 水面可借用同一不透明快照。AO 单独开启同样不重绘几何；非 HDR、多视锥、分类及尚无
 精确响应契约的后光照分支保留既有预通道，不得把这一有限适用范围报告为全路径替换。
 
+## 几何高光抗锯齿（R19）
+
+独立的几何高光过滤按 [ADR-0098](Decisions/ADR-0098-geometric-specular-antialiasing.md)
+在 Model PBR 光照前调整有效粗糙度，基础层、清漆、IBL 与 SSR 共用结果。
+`SceneGISSpecularAntialiasing` 默认关闭、Scene-owned，无额外 GPU 资源或绘制通道。
+SGP-0025 仅发布设置、绑定 uniform 并调用自有 Shader；它不改变 TAA 或 MSAA 所有权。
+
 ## 时域抗锯齿（R4）
 
 [ADR-0094](Decisions/ADR-0094-temporal-antialiasing.md) / SGP-0022 增加可选的

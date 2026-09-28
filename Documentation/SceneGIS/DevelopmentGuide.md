@@ -868,6 +868,25 @@ opaque 快照。`water.reflections=false` 只关闭水面的屏幕追踪，天�
 关联 SSR、AO 和 physical model lighting Specs。独立屏幕目标约 18.7 bytes/pixel，隐藏保留，
 Scene 销毁释放；启用 SSR 时借用已有捕获，避免重复 replay。Shader 修改先 gulp build。
 
+## 几何高光抗锯齿
+
+PBR Model / 3D Tiles 可独立启用几何高光过滤，Globe / Planar 使用同一接口：
+
+```js
+const specularAA = new Cesium.SceneGISSpecularAntialiasing({
+  scene: viewer.scene,
+  enabled: true,
+});
+specularAA.enabled = false;
+```
+
+Scene 拥有该设置；也可提前调用 `destroy()` 解除绑定。默认关闭，不分配额外纹理、
+FBO 或绘制通道。它按几何法线的屏幕变化增加基础层和清漆的有效粗糙度，不修改源材质。
+平整镜面保持原粗糙度；这不能代替 TAA / MSAA，也不处理法线贴图频率或透明裁剪边缘。
+动态修改材质做即时对比时，可调用已有 TAA / SSR 的 `reset()` 清除历史。
+独立示例为 `Test/Rendering/高光抗锯齿.html?world=planar|globe`；Bistro 的实验 B
+提供“高光抗锯齿”开关。实现与升级边界见 ADR-0098 / SGP-0025。
+
 ## 可选 TAA
 
 ```js

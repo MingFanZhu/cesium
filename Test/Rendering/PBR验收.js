@@ -199,6 +199,7 @@ const effects = new C.SceneGISEnvironmentEffects({
 });
 viewer.addController(effects);
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
+const specularAA = new C.SceneGISSpecularAntialiasing({ scene });
 const ssr = new C.SceneGISScreenSpaceReflections({
   scene,
   enabled: false,
@@ -211,10 +212,11 @@ const baseline = Object.freeze({
   ao: false,
   ssr: false,
   antialiasing: "TAA",
+  specularAA: false,
   aoIntensity: 0.8,
   aoRadius: 0.7,
 });
-const trial = { ...baseline, ao: true, ssr: true };
+const trial = { ...baseline, ao: true, ssr: true, specularAA: true };
 const models = [];
 const shaders = [];
 let disposed = false;
@@ -342,6 +344,11 @@ const state = {
     ao.uniforms.lengthCap = settings.aoRadius;
     ssr.enabled = settings.ssr;
     taa.enabled = settings.antialiasing === "TAA";
+    if (specularAA.enabled !== settings.specularAA) {
+      specularAA.enabled = settings.specularAA;
+      taa.reset();
+      ssr.reset();
+    }
     probeOptions.apply();
     scene.msaaSamples = settings.antialiasing === "4×MSAA" ? 4 : 1;
     scene.postProcessStages.fxaa.enabled = settings.antialiasing === "FXAA";
@@ -566,6 +573,7 @@ const comparisonController = gui
   .add(state, "comparison", ["基线 A", "实验 B"])
   .name("对比状态");
 const trialFolder = gui.addFolder("实验 B 参数");
+trialFolder.add(trial, "specularAA").name("高光抗锯齿").onChange(state.apply);
 comparisonController.onChange(() => {
   trialFolder.show(state.comparison === "实验 B");
   state.apply();
@@ -711,6 +719,7 @@ exposeExample(
     models,
     probeOptions,
     taa,
+    specularAA,
     ssr,
     ao,
     ibl,

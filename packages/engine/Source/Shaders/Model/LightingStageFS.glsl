@@ -12,6 +12,11 @@ vec3 sceneGISLocalClearcoat(czm_modelMaterial material, vec3 positionEC);
 #endif
 #endif
 // SCENEGIS_PATCH_END SGP-0019
+// SCENEGIS_PATCH_BEGIN SGP-0025: Owned filtering runs before every PBR roughness consumer.
+#if defined(LIGHTING_PBR) && defined(HAS_NORMALS)
+void sceneGISFilterSpecular(inout czm_modelMaterial material, vec3 geometryNormal);
+#endif
+// SCENEGIS_PATCH_END SGP-0025
 #ifdef USE_IBL_LIGHTING
 vec3 computeIBL(vec3 position, vec3 normal, vec3 lightDirection, vec3 lightColorHdr, czm_modelMaterial material)
 {
@@ -193,6 +198,9 @@ void lightingStage(inout czm_modelMaterial material, ProcessedAttributes attribu
 {
     #ifdef LIGHTING_PBR
         #ifdef HAS_NORMALS
+            // SCENEGIS_PATCH_BEGIN SGP-0025: Use the unperturbed normalized geometry normal.
+            sceneGISFilterSpecular(material, attributes.normalEC);
+            // SCENEGIS_PATCH_END SGP-0025
             vec3 color = computePbrLighting(material, attributes.positionEC);
         #else
             vec3 color = material.diffuse * material.occlusion + material.emissive;

@@ -292,3 +292,17 @@ R18 implementation and [review](../reviews/2026-09-28-r18-screen-space-reflectio
 Both-world SSR history/reconstruction and independent controls pass bounded GPU/E2E and release/type
 checks. Measured isolated SSR time improves 37–62%, with additional history storage and explicit
 screen-space limits. Owner visual acceptance is pending; no next phase is active.
+
+## R19: Geometric specular antialiasing
+
+After R18 checkpoint `8d27a60feb`, the owner requests Three.js-inspired highlight
+filtering. Activate [R19](2026-09-28-r19-specular-antialiasing.md): optional shared
+PBR geometry roughness, independent both-world fixture and Bistro control.
+Retain accepted TAA and authored flat mirrors; no postprocess rewrite or GI.
+Exit: material/clearcoat integration, lifecycle, bounded performance and review.
+ADR-0098 / SGP-0025 track the native integration seams.
+
+R19 implementation and [review](../reviews/2026-09-28-r19-specular-antialiasing.md)
+are technically complete: direct/IBL/SSR roughness agreement, unchanged flat
+mirrors, 20 dev Specs, eight release Specs, two E2E checks and bounded GPU timing.
+Owner visual review remains pending; no following phase is active.

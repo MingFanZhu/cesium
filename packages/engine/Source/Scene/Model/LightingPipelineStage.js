@@ -2,6 +2,9 @@ import defined from "../../Core/defined.js";
 import ShaderDestination from "../../Renderer/ShaderDestination.js";
 import LightingStageFS from "../../Shaders/Model/LightingStageFS.js";
 import LightingModel from "./LightingModel.js";
+// SCENEGIS_PATCH_BEGIN SGP-0025: Bind owned geometric specular filtering.
+import SceneGISSpecularAntialiasing from "../../SceneGIS/Scene/SceneGISSpecularAntialiasing.js";
+// SCENEGIS_PATCH_END SGP-0025
 // SCENEGIS_PATCH_BEGIN SGP-0010: Bind the optional current-frame physical lighting source.
 import SceneGISModelEnvironmentLighting from "../../SceneGIS/Scene/_private/_SceneGISModelEnvironmentLighting.js";
 // SCENEGIS_PATCH_END SGP-0010
@@ -80,6 +83,9 @@ LightingPipelineStage.process = function (
   SceneGISModelEnvironmentLighting.process(renderResources, frameState);
   // SCENEGIS_PATCH_END SGP-0010
   shaderBuilder.addFragmentLines(LightingStageFS);
+  // SCENEGIS_PATCH_BEGIN SGP-0025: All PBR commands share a live filtering uniform.
+  SceneGISSpecularAntialiasing._process(renderResources, frameState);
+  // SCENEGIS_PATCH_END SGP-0025
 };
 
 export default LightingPipelineStage;

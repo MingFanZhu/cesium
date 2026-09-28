@@ -7,6 +7,9 @@ import {
   Cartesian3,
 } from "../../../index.js";
 import ShaderBuilderTester from "../../../../../Specs/ShaderBuilderTester.js";
+// SCENEGIS_PATCH_BEGIN SGP-0025: Expect the optional PBR filtering binding.
+import specularAntialiasing from "../../../Source/Shaders/SceneGIS/Antialiasing/SceneGISSpecularAntialiasing.js";
+// SCENEGIS_PATCH_END SGP-0025
 
 describe("Scene/Model/LightingPipelineStage", function () {
   const mockPrimitive = {};
@@ -77,8 +80,21 @@ describe("Scene/Model/LightingPipelineStage", function () {
       model: mockModel,
       shaderBuilder: shaderBuilder,
       lightingOptions: optionsPbr,
+      // SCENEGIS_PATCH_BEGIN SGP-0025: ModelSceneGraph supplies a uniform map and frame state.
+      uniformMap: {},
+      // SCENEGIS_PATCH_END SGP-0025
     };
-    LightingPipelineStage.process(renderResources, mockPrimitive);
+    // SCENEGIS_PATCH_BEGIN SGP-0025: Check default and live uniform publication.
+    const frameState = {};
+    LightingPipelineStage.process(renderResources, mockPrimitive, frameState);
+    expect(renderResources.uniformMap.u_sceneGISSpecularAntialiasing()).toBe(
+      false,
+    );
+    frameState._sceneGISSpecularAntialiasingEnabled = true;
+    expect(renderResources.uniformMap.u_sceneGISSpecularAntialiasing()).toBe(
+      true,
+    );
+    // SCENEGIS_PATCH_END SGP-0025
 
     ShaderBuilderTester.expectHasVertexDefines(shaderBuilder, []);
     ShaderBuilderTester.expectHasFragmentDefines(shaderBuilder, [
@@ -86,10 +102,14 @@ describe("Scene/Model/LightingPipelineStage", function () {
     ]);
 
     ShaderBuilderTester.expectHasVertexUniforms(shaderBuilder, []);
-    ShaderBuilderTester.expectHasFragmentUniforms(shaderBuilder, []);
-
+    // SCENEGIS_PATCH_BEGIN SGP-0025: Filtering does not replace native lighting.
+    ShaderBuilderTester.expectHasFragmentUniforms(shaderBuilder, [
+      "uniform bool u_sceneGISSpecularAntialiasing;",
+    ]);
     ShaderBuilderTester.expectFragmentLinesEqual(shaderBuilder, [
       _shadersLightingStageFS,
+      specularAntialiasing,
     ]);
+    // SCENEGIS_PATCH_END SGP-0025
   });
 });

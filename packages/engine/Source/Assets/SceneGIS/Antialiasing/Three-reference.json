@@ -1,0 +1,13 @@
+{
+  "name": "Three.js geometric specular antialiasing",
+  "repository": "https://github.com/mrdoob/three.js",
+  "tag": "r180",
+  "commit": "0af9729d0c143a86a1d725d6e2c3ad83301f3f34",
+  "license": "MIT",
+  "notice": "Three-LICENSE.txt",
+  "sources": [
+    "src/renderers/shaders/ShaderChunk/lights_physical_fragment.glsl.js",
+    "src/renderers/shaders/ShaderChunk/normal_fragment_begin.glsl.js"
+  ],
+  "adaptation": "Add unperturbed geometry-normal screen derivatives to base and clearcoat perceptual roughness. Omit the PMREM-specific minimum roughness."
+}

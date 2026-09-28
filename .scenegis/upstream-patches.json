@@ -2,6 +2,37 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0025",
+      "title": "Apply optional geometric specular antialiasing before model lighting",
+      "status": "active",
+      "reason": "PBR needs unperturbed geometry derivatives after custom material evaluation and before direct, IBL, clearcoat and SSR consumers; public postprocessing cannot filter material lobes.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Model/LightingPipelineStage.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Specs/Scene/Model/LightingPipelineStageSpec.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISSpecularAntialiasingSpec.js",
+        "packages/engine/Specs/Scene/Model/LightingPipelineStageSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0098-geometric-specular-antialiasing.md",
+      "removalCondition": "Native PBR exposes equivalent optional geometry-normal filtering shared by all specular consumers."
+    },
+    {
       "id": "SGP-0024",
       "title": "Integrate explicitly captured local environment probes",
       "status": "active",

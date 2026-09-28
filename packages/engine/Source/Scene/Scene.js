@@ -2129,6 +2129,10 @@ Scene.prototype.updateFrameState = function () {
   frameState.commandList.length = 0;
   frameState.shadowMaps.length = 0;
   frameState.brdfLutGenerator = this._brdfLutGenerator;
+  // SCENEGIS_PATCH_BEGIN SGP-0025: Publish the optional material filtering setting.
+  frameState._sceneGISSpecularAntialiasingEnabled =
+    this._sceneGISSpecularAntialiasing?.enabled === true;
+  // SCENEGIS_PATCH_END SGP-0025
   frameState.environmentMap = this.skyBox && this.skyBox._cubeMap;
   frameState.mode = this._mode;
   frameState.morphTime = this.morphTime;
@@ -5810,6 +5814,9 @@ Scene.prototype.destroy = function () {
   // SCENEGIS_PATCH_BEGIN SGP-0022: Release temporal history before the Context.
   this._sceneGISTemporalAntialiasing?.destroy();
   // SCENEGIS_PATCH_END SGP-0022
+  // SCENEGIS_PATCH_BEGIN SGP-0025: Detach the Scene-owned material filtering setting.
+  this._sceneGISSpecularAntialiasing?.destroy();
+  // SCENEGIS_PATCH_END SGP-0025
   this._context = this._context && this._context.destroy();
   this._frameState.creditDisplay =
     this._frameState.creditDisplay && this._frameState.creditDisplay.destroy();

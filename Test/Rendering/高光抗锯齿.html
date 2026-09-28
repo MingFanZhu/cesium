@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>高光抗锯齿</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>高光抗锯齿</h1>
+      <p>细圆杆与曲面上的亮点、清漆高光。缓慢旋转或缩放，观察闪烁。</p>
+      <p>
+        上排金属，下排清漆；从左到右粗糙度递增。默认关闭其他抗锯齿，便于单独比较高光过滤。
+      </p>
+      <p>
+        参考 Three.js 的几何法线过滤；轮廓锯齿仍需 TAA 或
+        MSAA，法线贴图的频率不由此方法过滤。
+      </p>
+      <p id="status" role="status">准备本地几何…</p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="PBR综合验收.html?world=planar">Bistro 街区</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./高光抗锯齿.js"></script>
+  </body>
+</html>
