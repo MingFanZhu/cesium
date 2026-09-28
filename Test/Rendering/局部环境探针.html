@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>局部环境遮挡与反射探针</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>局部环境探针</h1>
+      <p>
+        屋檐遮挡天空；金属球反射侧墙和相机背后的彩色物体。三颗球的粗糙度依次为
+        0.08、0.3、0.65。
+      </p>
+      <p>
+        先点击「捕获 / 更新探针」，再分别切换遮挡、反射与
+        GTAO。修改太阳时间或移动红墙后，需再次捕获。
+      </p>
+      <p>
+        探针只近似局部空间；没有漫反射反弹。初始关闭 SSR，便于检查屏幕外反射。
+      </p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="PBR综合验收.html">Bistro</a>
+      </p>
+      <p id="status">加载本地模型…</p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./局部环境探针.js"></script>
+  </body>
+</html>

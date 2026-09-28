@@ -778,6 +778,44 @@ Scene/Model/ImageBasedLightingPipelineStage 和 Renderer/Framebuffer。Shader �
 
 ## 验证屏幕空间反射
 
+### 局部环境遮挡与镜面探针
+
+先启用物理大气和 HDR，并等待独立 glTF/GLB Model 完整就绪。推荐加载时设置
+`incrementallyLoadTextures: false`。捕获来源须直接加入 `scene.primitives`。
+
+```js
+const probes = new Cesium.SceneGISReflectionProbeCollection({
+  scene,
+  resolution: 128,
+});
+const probe = probes.add(
+  new Cesium.SceneGISReflectionProbe({
+    modelMatrix, // Rigid local-to-world: Cartesian in Planar, ENU/ECEF in Globe.
+    halfSize: new Cesium.Cartesian3(10, 10, 6),
+    blendDistance: 2,
+    maximumDistance: 60,
+  }),
+);
+await probes.capture([model]);
+probes.occlusion = true;
+probes.reflections = true;
+```
+
+每 Scene 至多一个集合、两个探针。`resolution` 支持 32/64/128/256；放置参数只读，改变位置
+时移除原探针并添加新描述。中心应放在空处，盒范围匹配局部空间。`show=false` 保留缓存；
+移除探针或销毁集合释放贴图，Scene 销毁时自动释放集合，借用的 Model 不受影响。
+`capture()` 只更新一次，光照/模型变化后由调用方再次调用；失败保留原结果并拒绝 Promise。
+仅支持普通单视图 SCENE3D，捕获当帧可能卡顿，不适合逐帧调用。
+
+打开 [局部环境探针](../../Test/Rendering/局部环境探针.html)，比较屋檐遮挡、粗糙度、离屏红墙
+反射与 GTAO/SSR；`world=globe` 使用同一 API。Bistro 的“局部探针（手动捕获）”面板可调位置
+和范围，默认不会创建或捕获探针。光照变化后重新捕获；`基线 A` 排除局部探针。
+方向遮挡只描述捕获点，跨墙的大盒可能漏光或过暗；不包含漫反射反弹、透明/水面捕获、云、
+地形或流式 3D Tiles。GPU 入口为 `SceneGIS/Scene/SceneGISReflectionProbe`，页面组合测试为
+`Specs/e2e/scenegis-local-probes.spec.js`。决策及升级边界见 ADR-0096 / SGP-0024。
+
+### 屏幕空间反射使用
+
 先显式设置 scene.highDynamicRange = true，再创建 SceneGISScreenSpaceReflections({ scene, enabled: true })。
 已有 glTF 材质、CustomShader 和 ImageBasedLighting 接口保持；效果按最终材质粗糙度及基础层/清漆层方向工作。
 同一 Scene 最多一个效果，Scene 拥有生命周期，也可提前调用 destroy；enabled=false 保留已分配资源以便恢复。

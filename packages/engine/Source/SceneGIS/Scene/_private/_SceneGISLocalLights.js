@@ -40,7 +40,7 @@ function createState() {
 /** @private */
 const SceneGISLocalLights = {};
 
-SceneGISLocalLights.prepare = function (scene) {
+SceneGISLocalLights.prepare = function (scene, camera = scene.camera) {
   const collection = scene._sceneGISLights;
   if (!collection) {
     return;
@@ -56,7 +56,7 @@ SceneGISLocalLights.prepare = function (scene) {
   if (scene.mode !== SceneMode.SCENE3D) {
     throw new DeveloperError("Local lighting requires SCENE3D.");
   }
-  const view = scene.camera.viewMatrix;
+  const view = camera.viewMatrix;
   for (const light of collection._lights) {
     Validation.point(light);
     const spot = light instanceof SceneGISSpotLight;

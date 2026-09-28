@@ -217,8 +217,21 @@ const baseline = Object.freeze({
 const trial = { ...baseline, ao: true, ssr: true };
 const models = [];
 const shaders = [];
-let water;
 let disposed = false;
+let localProbes;
+let probePlacement;
+const probeOptions = {
+  show: true,
+  reflections: true,
+  occlusion: true,
+  x: street ? 38 : 0,
+  y: street ? -25 : 0,
+  z: street ? 3 : 2,
+  range: street ? 40 : 12,
+  apply: applyLocalProbes,
+  capture: captureLocalProbes,
+};
+let water;
 let removeReady;
 let manifest;
 
@@ -329,6 +342,7 @@ const state = {
     ao.uniforms.lengthCap = settings.aoRadius;
     ssr.enabled = settings.ssr;
     taa.enabled = settings.antialiasing === "TAA";
+    probeOptions.apply();
     scene.msaaSamples = settings.antialiasing === "4×MSAA" ? 4 : 1;
     scene.postProcessStages.fxaa.enabled = settings.antialiasing === "FXAA";
     document.getElementById("comparison").textContent =
@@ -563,6 +577,26 @@ trialFolder
   .name("遮蔽半径（米）")
   .onChange(state.apply);
 trialFolder.add(trial, "ssr").name("屏幕空间反射").onChange(state.apply);
+const probeFolder = gui.addFolder("局部探针（手动捕获）").close();
+const probeCaptureButton = probeFolder
+  .add(probeOptions, "capture")
+  .name("捕获 / 更新局部环境");
+probeFolder
+  .add(probeOptions, "show")
+  .name("实验 B 启用探针")
+  .onChange(probeOptions.apply);
+probeFolder
+  .add(probeOptions, "occlusion")
+  .name("环境遮挡")
+  .onChange(probeOptions.apply);
+probeFolder
+  .add(probeOptions, "reflections")
+  .name("局部镜面反射")
+  .onChange(probeOptions.apply);
+probeFolder.add(probeOptions, "x", -100, 150, 0.5).name("探针 X（米）");
+probeFolder.add(probeOptions, "y", -100, 100, 0.5).name("探针 Y（米）");
+probeFolder.add(probeOptions, "z", 0.5, 40, 0.5).name("探针 Z（米）");
+probeFolder.add(probeOptions, "range", 5, 60, 1).name("水平半宽（米）");
 trialFolder
   .add(trial, "antialiasing", ["无 AA", "FXAA", "TAA", "4×MSAA"])
   .name("抗锯齿")
@@ -593,6 +627,65 @@ if (street && planar) {
     .add(calibration, "exportCycles")
     .name("导出 Cycles 校准");
 }
+function applyLocalProbes() {
+  if (localProbes) {
+    localProbes.show = probeOptions.show && state.comparison === "实验 B";
+    localProbes.reflections = probeOptions.reflections;
+    localProbes.occlusion = probeOptions.occlusion;
+  }
+}
+async function captureLocalProbes() {
+  probeCaptureButton.disable();
+  document.getElementById("error").textContent = "";
+  try {
+    if (!state.ready || !effects.enabled || !effects.ready) {
+      throw new Error("请等待模型就绪，并启用物理大气照明后捕获。");
+    }
+    localProbes ??= new C.SceneGISReflectionProbeCollection({
+      scene,
+      resolution: 128,
+    });
+    window.example.probes = localProbes;
+    const placement = JSON.stringify([
+      probeOptions.x,
+      probeOptions.y,
+      probeOptions.z,
+      probeOptions.range,
+    ]);
+    if (placement !== probePlacement) {
+      const nextProbe = new C.SceneGISReflectionProbe({
+        modelMatrix: C.Matrix4.multiplyByTranslation(
+          frame,
+          new C.Cartesian3(probeOptions.x, probeOptions.y, probeOptions.z),
+          new C.Matrix4(),
+        ),
+        halfSize: new C.Cartesian3(
+          probeOptions.range,
+          probeOptions.range,
+          street ? 15 : 8,
+        ),
+        blendDistance: 3,
+        maximumDistance: Math.max(street ? 180 : 60, probeOptions.range * 2),
+      });
+      if (localProbes.length) {
+        localProbes.remove(localProbes.get(0));
+      }
+      localProbes.add(nextProbe);
+      probePlacement = placement;
+    }
+    probeOptions.apply();
+    await localProbes.capture(models);
+    const stats = localProbes._state;
+    document.getElementById("status").textContent =
+      `局部探针已更新 · ${stats.captureDraws} 次捕获绘制 · A/B 可比较 · 光照变化后请再次更新`;
+  } catch (error) {
+    document.getElementById("error").textContent = error.message;
+  } finally {
+    if (!disposed) {
+      probeCaptureButton.enable();
+    }
+  }
+}
 const removeError = scene.renderError.addEventListener((...args) => {
   document.getElementById("error").textContent = args[1].message;
 });
@@ -607,6 +700,7 @@ exposeExample(
     baseline,
     trial,
     models,
+    probeOptions,
     taa,
     ssr,
     ao,

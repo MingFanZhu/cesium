@@ -1,3 +1,9 @@
+// SCENEGIS_PATCH_BEGIN SGP-0024: Declare owned probe source functions before native IBL evaluation.
+#ifdef SCENEGIS_LOCAL_PROBES
+vec3 sceneGISProbeRadiance(vec3 sky, vec3 positionEC, vec3 rayEC, float roughness);
+float sceneGISProbeVisibility(vec3 positionEC, vec3 normalEC);
+#endif
+// SCENEGIS_PATCH_END SGP-0024
 // SCENEGIS_PATCH_BEGIN SGP-0010: The source library is supplied by the primitive lighting stage.
 #ifdef SCENEGIS_MODEL_DIFFUSE_SKY
 vec3 sceneGISModelSkyIrradiance(vec3 positionEC, vec3 normalEC);
@@ -41,7 +47,13 @@ vec3 sampleSpecularEnvironment(vec3 cubeDir, float roughness)
         return czm_textureCube(czm_specularEnvironmentMaps, cubeDir, lod).rgb;
     #endif
 }
+// SCENEGIS_PATCH_BEGIN SGP-0024: Clearcoat local radiance requires the receiver position and ray.
+#ifdef SCENEGIS_LOCAL_PROBES
+vec3 computeSpecularIBL(vec3 cubeDir, float NdotV, vec3 f0, float roughness, vec3 positionEC, vec3 rayEC)
+#else
 vec3 computeSpecularIBL(vec3 cubeDir, float NdotV, vec3 f0, float roughness)
+#endif
+// SCENEGIS_PATCH_END SGP-0024
 {
     // see https://bruop.github.io/ibl/ at Single Scattering Results
     // Roughness dependent fresnel, from Fdez-Aguera
@@ -50,6 +62,11 @@ vec3 computeSpecularIBL(vec3 cubeDir, float NdotV, vec3 f0, float roughness)
 
     vec2 brdfLut = texture(czm_brdfLut, vec2(NdotV, roughness)).rg;
     vec3 specularSample = sampleSpecularEnvironment(cubeDir, roughness);
+    // SCENEGIS_PATCH_BEGIN SGP-0024: Substitute cached local radiance before SSR and material weighting.
+    #ifdef SCENEGIS_LOCAL_PROBES
+    specularSample = sceneGISProbeRadiance(specularSample, positionEC, rayEC, roughness);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0024
     // SCENEGIS_PATCH_BEGIN SGP-0016: Substitute clearcoat radiance before its native BRDF weight.
     #if defined(SCENEGIS_SSR_CAPTURE) || defined(SCENEGIS_SSR_RECEIVE)
     specularSample = sceneGISSSR(specularSample, sceneGISSSRCoatDirection, roughness, true);
@@ -106,6 +123,11 @@ vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material)
         #endif
         // SCENEGIS_PATCH_END SGP-0010
 
+        // SCENEGIS_PATCH_BEGIN SGP-0024: Occlude only default sky diffuse, retaining authored SH.
+        #if defined(SCENEGIS_MODEL_DIFFUSE_SKY) && defined(SCENEGIS_LOCAL_PROBES)
+        irradiance *= sceneGISProbeVisibility(positionEC, normalEC);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0024
         vec3 averageFresnel = f0 + (1.0 - f0) / 21.0;
         float Ems = specularWeight * (1.0 - brdfLut.x - brdfLut.y);
         vec3 FmsEms = FssEss * averageFresnel * Ems / (1.0 - averageFresnel * Ems);
@@ -133,6 +155,11 @@ vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material)
         vec3 reflectMC = sceneGISSpecularDirection(reflectEC);
         // SCENEGIS_PATCH_END SGP-0015
         vec3 radiance = sampleSpecularEnvironment(reflectMC, roughness);
+        // SCENEGIS_PATCH_BEGIN SGP-0024: Local probes supply screen-external radiance before SSR.
+        #ifdef SCENEGIS_LOCAL_PROBES
+        radiance = sceneGISProbeRadiance(radiance, positionEC, reflectEC, roughness);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0024
         // SCENEGIS_PATCH_BEGIN SGP-0016: Capture evaluated anisotropic direction or blend current-frame hit radiance.
         #if defined(SCENEGIS_SSR_CAPTURE) || defined(SCENEGIS_SSR_RECEIVE)
         radiance = sceneGISSSR(radiance, reflectEC, roughness, false);

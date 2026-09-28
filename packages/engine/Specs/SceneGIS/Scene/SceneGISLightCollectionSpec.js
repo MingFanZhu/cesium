@@ -455,7 +455,10 @@ describe("SceneGIS/Scene/SceneGISLightCollection", function () {
     lamp();
     expect(sample()[0]).toBeGreaterThan(40);
     expect(effect._ready).toBe(true);
-    expect(effect._state.captureDraws).toBeGreaterThan(0);
+    // Lit sources can be captured in the main MRT pass or the compatible replay path.
+    expect(
+      effect._state.captureDraws + effect._state.mainDraws,
+    ).toBeGreaterThan(0);
     lights.destroy();
     expect(sample()[0]).toBeLessThan(3);
     effect.enabled = false;

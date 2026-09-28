@@ -1,6 +1,9 @@
 // SCENEGIS_PATCH_BEGIN SGP-0022: Schedule optional temporal antialiasing without geometry replay.
 import SceneGISTemporalAntialiasing from "../SceneGIS/Scene/_private/_SceneGISTemporalAntialiasing.js";
 // SCENEGIS_PATCH_END SGP-0022
+// SCENEGIS_PATCH_BEGIN SGP-0024: Schedule explicit local environment captures.
+import SceneGISReflectionProbes from "../SceneGIS/Scene/_private/_SceneGISReflectionProbes.js";
+// SCENEGIS_PATCH_END SGP-0024
 // SCENEGIS_PATCH_BEGIN SGP-0017: Schedule local water with shared opaque inputs.
 import SceneGISWaterFrame from "../SceneGIS/Scene/_private/_SceneGISWaterFrame.js";
 // SCENEGIS_PATCH_END SGP-0017
@@ -3836,6 +3839,12 @@ function executeCommandsInViewport(firstViewport, scene, passState) {
 
   updateAndRenderPrimitives(scene);
 
+  // SCENEGIS_PATCH_BEGIN SGP-0024: Capture complete ready sources before main-camera culling.
+  if (firstViewport) {
+    SceneGISReflectionProbes.execute(scene);
+  }
+  // SCENEGIS_PATCH_END SGP-0024
+
   view.createPotentiallyVisibleSet(scene);
 
   if (firstViewport) {
@@ -4690,6 +4699,9 @@ function render(scene) {
 
   scene.updateFrameState();
   frameState.passes.render = true;
+  // SCENEGIS_PATCH_BEGIN SGP-0024: Publish local probe bindings before model pipelines update.
+  SceneGISReflectionProbes.prepare(scene);
+  // SCENEGIS_PATCH_END SGP-0024
   // SCENEGIS_PATCH_BEGIN SGP-0022: Validate temporal configuration before drawing.
   SceneGISTemporalAntialiasing.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0022
@@ -5792,6 +5804,9 @@ Scene.prototype.destroy = function () {
   // SCENEGIS_PATCH_BEGIN SGP-0019: Detach the Scene-owned local light collection.
   this._sceneGISLights?.destroy();
   // SCENEGIS_PATCH_END SGP-0019
+  // SCENEGIS_PATCH_BEGIN SGP-0024: Release local probe resources before the Context.
+  this._sceneGISReflectionProbes?.destroy();
+  // SCENEGIS_PATCH_END SGP-0024
   // SCENEGIS_PATCH_BEGIN SGP-0022: Release temporal history before the Context.
   this._sceneGISTemporalAntialiasing?.destroy();
   // SCENEGIS_PATCH_END SGP-0022

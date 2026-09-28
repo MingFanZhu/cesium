@@ -266,3 +266,14 @@ matched Cycles full/direct reference, independent comparison and diagnostic expo
 focused checks, and a confirmed Bistro unused-AO binding correction. Source roughness and
 cross-renderer transport limits are explicit. Owner visual acceptance is pending; no next
 phase is active. Form the local R16 checkpoint before further implementation.
+
+## R17: Local environment probes
+
+After R16 checkpoint `f66ce0238c`, the owner selected environment occlusion and specular
+probes, with runtime capture requested explicitly after model loading or light edits.
+[R17](2026-09-28-r17-local-probes.md) is technically complete;
+[review](../reviews/2026-09-28-r17-local-probes.md) records validation and remaining limits.
+Owner visual acceptance is pending. Entry: complete standalone model commands
+and existing physical-sky PBR. Exit: both-world cached capture, source composition,
+state/lifecycle correctness, independent example, Bistro controls and bounded cost evidence.
+Diffuse bounce and streaming tile capture remain outside this phase. ADR-0096 / SGP-0024.

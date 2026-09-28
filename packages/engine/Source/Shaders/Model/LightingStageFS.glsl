@@ -70,7 +70,13 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
         sceneGISSSRCoatDirection = reflect(-viewDirection, normal);
         #endif
         // SCENEGIS_PATCH_END SGP-0016
+        // SCENEGIS_PATCH_BEGIN SGP-0024: Clearcoat shares the position-aware local reflection source.
+        #ifdef SCENEGIS_LOCAL_PROBES
+        vec3 iblColor = computeSpecularIBL(reflectMC, NdotV, f0, roughness, position, reflect(-viewDirection, normal));
+        #else
         vec3 iblColor = computeSpecularIBL(reflectMC, NdotV, f0, roughness);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0024
         // SCENEGIS_PATCH_BEGIN SGP-0015: Physical clearcoat uses the same caller specular factor as the base layer.
         #ifdef SCENEGIS_MODEL_LIGHTING
         iblColor *= model_iblFactor.y;

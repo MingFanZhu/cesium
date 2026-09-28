@@ -2,6 +2,32 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0024",
+      "title": "Integrate explicitly captured local environment probes",
+      "status": "active",
+      "reason": "Local probe capture needs a normal-frame scheduling seam and position-aware environment radiance/visibility before native material weighting.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ImageBasedLightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISReflectionProbeSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0096-local-environment-probes.md",
+      "removalCondition": "Native Scene and PBR expose equivalent bounded, explicitly updated geometry probes with environment-only occlusion."
+    },
+    {
       "id": "SGP-0023",
       "title": "Keep model normals finite for singular texture coordinates",
       "status": "active",

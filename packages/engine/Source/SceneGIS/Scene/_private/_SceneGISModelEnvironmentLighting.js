@@ -11,6 +11,7 @@ import atmosphere from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBru
 import shadows from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISCloudShadows.js";
 import lighting from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISModelEnvironmentLighting.js";
 import planarLighting from "./_SceneGISPlanarEnvironmentLighting.js";
+import localProbes from "./_SceneGISReflectionProbes.js";
 
 const uniforms = {
   u_sceneGISCloudShadowAtlas: "atlasTexture",
@@ -87,6 +88,11 @@ const SceneGISModelEnvironmentLighting = {
   },
 
   update(model, frameState) {
+    const probes = frameState._sceneGISReflectionProbes;
+    if (model._sceneGISReflectionProbes !== probes) {
+      model._sceneGISReflectionProbes = probes;
+      model.resetDrawCommands();
+    }
     const planar = frameState._sceneGISPlanarLighting?.active === true;
     const active =
       frameState.mode === SceneMode.SCENE3D &&
@@ -158,6 +164,13 @@ const SceneGISModelEnvironmentLighting = {
     const fragment = ShaderDestination.FRAGMENT;
     shaderBuilder.addDefine("SCENEGIS_MODEL_LIGHTING", undefined, fragment);
     const ibl = model.imageBasedLighting;
+    if (
+      model.environmentMapManager.enabled &&
+      !defined(ibl.specularEnvironmentMaps) &&
+      !defined(frameState.specularEnvironmentMaps)
+    ) {
+      localProbes.process(renderResources, frameState);
+    }
     if (ibl.enabled && !defined(ibl.sphericalHarmonicCoefficients)) {
       shaderBuilder.addDefine(
         "SCENEGIS_MODEL_DIFFUSE_SKY",

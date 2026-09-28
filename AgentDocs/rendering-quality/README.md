@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                             |
-| ---------------------- | ----------------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                               |
-| Status                 | `active`                                                          |
-| Planning model         | `extension`                                                       |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)        |
-| Current phase          | R16 technically complete; owner visual review pending             |
-| Active phase plan      | None; completed [R16](plans/2026-09-28-r16-cycles-calibration.md) |
-| Active standalone plan | None                                                              |
-| Architecture contact   | Current task                                                      |
-| Execution contact      | Current task                                                      |
-| Last updated           | `2026-09-28`                                                      |
+| Field                  | Value                                                       |
+| ---------------------- | ----------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                         |
+| Status                 | `active`                                                    |
+| Planning model         | `extension`                                                 |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)  |
+| Current phase          | R17 technically complete; owner visual review pending       |
+| Active phase plan      | None; completed [R17](plans/2026-09-28-r17-local-probes.md) |
+| Active standalone plan | None                                                        |
+| Architecture contact   | Current task                                                |
+| Execution contact      | Current task                                                |
+| Last updated           | `2026-09-28`                                                |
 
 ## Scope
 
@@ -35,13 +35,19 @@
 
 ## Current handoff
 
+- R17 is authorized: environment occlusion and local specular probes with explicit runtime
+  capture after loading/light edits. Diffuse bounce is excluded. See the active phase,
+  [ADR-0096](../../Documentation/SceneGIS/Decisions/ADR-0096-local-environment-probes.md)
+  and SGP-0024. Implementation and bounded verification are complete; see the
+  [R17 review](reviews/2026-09-28-r17-local-probes.md). Owner visual acceptance is pending.
+
 - [R16](plans/2026-09-28-r16-cycles-calibration.md) and its
   [review](reviews/2026-09-28-r16-cycles-calibration.md) are technically complete:
   same-asset Cycles reference, matched camera/physical sky/output, direct/full transport,
   independent comparison page and six bounded checks. Corrected unused source AO bindings;
   documented largely constant source roughness. No upstream/SGP or renderer changes.
   Open Blender document and browser configuration are preserved. Owner visual review
-  is pending; local probes and GI remain unactivated.
+  is pending; R17 now activates local probes only. GI remains deferred.
 
 - R14 checkpoint `31ba432cc8` is owner accepted on 2026-09-20.
 - R4 correction checkpoint `c3add1660a` is owner accepted as usable on 2026-09-21. Existing moving-content limitations remain documented.

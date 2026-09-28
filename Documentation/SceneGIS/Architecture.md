@@ -1010,6 +1010,14 @@ R3 仅捕获物理天空与中性地面近似；太阳盘由直接光 BRDF 计�
 
 ## 前向屏幕空间反射（R6）
 
+局部环境补全遵循 [ADR-0096](Decisions/ADR-0096-local-environment-probes.md) / SGP-0024：
+`SceneGISReflectionProbeCollection` 由 Scene 所有，显式捕获完整加载的独立 Model，最多两个
+刚体盒状探针。捕获使用独立 Camera 与 capture-only 原生 ShadowMap，完整结果原子发布；
+恢复主视图状态，不改主相机、主阴影图或 MRT 布局。静态帧只采样缓存。
+默认天空漫反射乘方向可见度；盒投影镜面辐亮度在原生 BRDF 和 SSR 之前替换环境来源。
+保留显式 IBL/SH，不能将遮挡乘到最终颜色或直射光上。探针位置可见度不等价于逐点遮挡，
+不承诺跨墙无漏光、漫反射反弹、透明捕获、递归或仅凭主相机瓦片完成离屏捕获。
+
 [ADR-0086](Decisions/ADR-0086-forward-screen-space-reflections.md) / SGP-0016 保留前向 PBR，
 由显式绑定 Scene 的 `SceneGISScreenSpaceReflections` 捕获本帧 opaque HDR 辐亮度，以及原生
 基础层/清漆层求值后的反射方向和粗糙度。原生日志深度与各视锥合并为统一 eye depth；
