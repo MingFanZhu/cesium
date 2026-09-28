@@ -1094,8 +1094,20 @@ local XY 米制平面，modelMatrix 使用刚体变换；Globe 采用 ENU，Plan
 禁止用统一 alpha 替代 RGB Beer 吸收，或把水面重新送入自身反射/AO 输入。
 
 几何、程序和 pick ID 由图元所有，集合负责销毁；屏幕目标由 Scene 所有，天空由已有环境所有。
-波纹随 Scene time 演化，仅改变法线；散射、泡沫和直接高光借用现有物理光源，不对水下快照重新照明。
+默认波纹随 Scene time 演化，仅改变法线；散射、泡沫和直接高光借用现有物理光源，不对水下快照重新照明。
 首轮资格为水上观察、局部单层水面和 opaque 水下几何，不扩展为海洋、水下相机或多层透射。
+
+## 风驱动湖面（R22）
+
+[ADR-0101](Decisions/ADR-0101-wind-water-spectrum.md) 在原有 WaterSurface 上增加可选的
+`windWaves: SceneGISWindWaves`，Globe / Planar 共用接口。模拟由调用方所有，可在同一 Context
+及对齐的局部坐标中共享；先移除借用的水面，再销毁模拟，最后销毁 Viewer/Context。
+
+初始 JONSWAP/TMA 频谱在参数变化时由 CPU 生成，双频段演化、IFFT、位移及法线由 GPU 完成，
+无运行时读回。Scene time 和配置均不变时复用输出；show=false 不推进模拟。128 米分块裁剪
+原始轮廓与孔洞，距离 LOD 保留一致的细分边界，位移按网格和像素足迹过滤，包围体涵盖位移。
+非当前网格缓存不超过 16 MiB。复用 R8 opaque/天空输入及延迟绘制缝隙，不新增上游补丁。
+这是均匀平均水深下的风浪外观，不承诺岸边绕射、地形驱动水流、洪水、破碎浪或水文预测。
 
 ## 全局自动曝光（R21）
 

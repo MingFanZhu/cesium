@@ -75,6 +75,11 @@ vec4 sceneGISSSRTrace(vec3 position, vec4 ray)
             float travel = length(p - position);
             if (surface > 0.0 && error >= 0.0 && error <= u_thickness && travel > 4.0 * bias)
             {
+                #ifdef SCENEGIS_WIND_WAVES
+                // A displaced water interface must not reflect the opaque lake bed.
+                vec3 hitPosition = sceneGISSSRPosition(uv * size, surface);
+                if ((czm_inverseModelView * vec4(hitPosition, 1.0)).z < 0.0) { return vec4(0.0); }
+                #endif
                 float edge = min(min(uv.x, uv.y), min(1.0 - uv.x, 1.0 - uv.y));
                 float confidence = smoothstep(0.0, 0.06, edge);
                 confidence *= 1.0 - smoothstep(0.8 * u_maximumDistance, u_maximumDistance, travel);

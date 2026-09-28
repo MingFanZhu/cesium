@@ -18,6 +18,13 @@ uniform float u_refractionStrength;
 uniform bool u_reflections;
 in vec3 v_positionEC;
 in vec2 v_waterPosition;
+#ifdef SCENEGIS_WIND_WAVES
+uniform sampler2D u_waveNormal0;
+uniform sampler2D u_waveNormal1;
+uniform float u_wavePeriod;
+uniform float u_waveResolution;
+in float v_shoreFade;
+#endif
 
 float sceneGISWaterNoise(vec2 p)
 {
@@ -100,12 +107,21 @@ void main()
     if (dot(up, view) <= 0.0) { discard; }
     float footprint = max(length(dFdx(v_waterPosition)), length(dFdy(v_waterPosition)));
     vec2 d = normalize(u_flowDirection);
+    float crestFoam = 0.0;
+    #ifdef SCENEGIS_WIND_WAVES
+    vec4 n0 = texture(u_waveNormal0, v_waterPosition / u_wavePeriod + 0.5 / u_waveResolution);
+    vec4 n1 = texture(u_waveNormal1, v_waterPosition / (u_wavePeriod * 4.0) + 0.5 / u_waveResolution);
+    vec2 gradient = n0.xy / max(n0.z, 0.1) + n1.xy / max(n1.z, 0.1);
+    vec3 normal = normalize(czm_normal * vec3(gradient * v_shoreFade, 1.0));
+    crestFoam = max(n0.a, n1.a) * v_shoreFade;
+    #else
     vec2 across = vec2(-d.y, d.x);
     vec2 slope = sceneGISWaterWave(d, 1.0, 1.0, 0.0, footprint);
     slope += sceneGISWaterWave(normalize(d + across * 0.6), 0.47, 1.7, 1.4, footprint) * 0.5;
     slope += sceneGISWaterWave(normalize(d - across * 0.8), 0.19, 2.6, 3.2, footprint) * 0.3;
     slope += sceneGISWaterWave(across, 0.08, 3.9, 0.7, footprint) * 0.15;
     vec3 normal = normalize(czm_normal * normalize(vec3(-slope, 1.0)));
+    #endif
     vec2 size = vec2(textureSize(u_depth, 0));
     vec2 uv = gl_FragCoord.xy / size;
     float bottomDepth = texture(u_depth, uv).r;
@@ -152,7 +168,7 @@ void main()
     float lightFresnel = 0.02037 + 0.97963 * pow(1.0 - max(dot(view, halfVector), 0.0), 5.0);
     color += beam * (distribution * visibility * lightFresnel * nDotL);
 
-    float foam = sceneGISWaterFoam(verticalDepth, footprint, d);
+    float foam = max(crestFoam, sceneGISWaterFoam(verticalDepth, footprint, d));
     color = mix(color, vec3(0.8) * diffuseLight, clamp(foam, 0.0, 1.0));
     out_FragColor = vec4(max(color, vec3(0.0)), 1.0);
 }

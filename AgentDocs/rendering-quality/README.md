@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                              |
-| ---------------------- | ------------------------------------------------------------------ |
-| Extension slug         | `rendering-quality`                                                |
-| Status                 | `active`                                                           |
-| Planning model         | `extension`                                                        |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)         |
-| Current phase          | R4 Bistro follow-up complete; owner visual review pending          |
-| Active phase plan      | None; completed [R4](plans/2026-09-20-r4-temporal-antialiasing.md) |
-| Active standalone plan | None                                                               |
-| Architecture contact   | Current task                                                       |
-| Execution contact      | Current task                                                       |
-| Last updated           | `2026-09-28`                                                       |
+| Field                  | Value                                                      |
+| ---------------------- | ---------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                        |
+| Status                 | `active`                                                   |
+| Planning model         | `extension`                                                |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
+| Current phase          | R22 technically complete; visual review pending            |
+| Active phase plan      | [R22](plans/2026-09-28-r22-wind-water.md)                  |
+| Active standalone plan | None                                                       |
+| Architecture contact   | Current task                                               |
+| Execution contact      | Current task                                               |
+| Last updated           | `2026-09-28`                                               |
 
 ## Scope
 
@@ -105,3 +105,7 @@
   Previous-jitter depth registration, 2x2 surface support and pinned Filament luminance
   weighting reduce static variation with unchanged scene exposure. Thirteen strict TAA
   Specs pass in dev/release; build/types pass. No upstream changes; owner visual review pending.
+
+- R22 authorized: optional spectral wind waves on existing water and a standalone Xuanwu Lake example. See [phase](plans/2026-09-28-r22-wind-water.md) and ADR-0101. No occlusion-culling implementation is active.
+
+- R22 technical gate passed: [review](reviews/2026-09-28-r22-wind-water.md), 21 strict GPU Specs in dev/release, two World example checks, release/types and bounded GPU timings. The Xuanwu Lake page awaits owner visual acceptance. No next phase is active.

@@ -336,3 +336,13 @@ records the corrected previous-jitter depth footprint and Filament luminance wei
 Implementation and [self-review](../reviews/2026-09-28-r4-bistro-flicker.md) are complete,
 with 13 dev/release Specs and bounded GPU evidence. No new phase or upstream seam; owner
 visual acceptance is pending.
+
+### R22: Wind-driven lake waves
+
+The owner prioritizes large lake/river surface geometry over occlusion culling. Activate
+[R22](2026-09-28-r22-wind-water.md) after checkpoint 5ee8b9b3af: reusable spectral wind
+waves, existing water optics, bounded mesh detail and a standalone Xuanwu Lake example.
+Entry: R8 ownership/render paths verified. Exit: physical controls, actual displaced
+geometry, both-world regressions, visual/performance evidence and independent checkpoint.
+
+R22 implementation and [technical review](../reviews/2026-09-28-r22-wind-water.md) are complete. Owner visual acceptance is pending; no subsequent phase is active.

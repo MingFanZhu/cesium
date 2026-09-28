@@ -23,6 +23,8 @@ import ray from "../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import vertex from "../../Shaders/SceneGIS/Water/SceneGISWaterVS.js";
 import fragment from "../../Shaders/SceneGIS/Water/SceneGISWaterFS.js";
 import WaterFrame from "./_private/_SceneGISWaterFrame.js";
+import WindWaves from "./SceneGISWindWaves.js";
+import WaterMesh from "./_private/_SceneGISWaterMesh.js";
 import EnvironmentLighting from "./_private/_SceneGISModelEnvironmentLighting.js";
 
 function cloneHierarchy(hierarchy) {
@@ -130,7 +132,6 @@ function validate(surface) {
  * Animation follows Scene time; no render loop is started. In requestRenderMode, request a frame
  * after editing these properties, just as for other application-managed primitives.
  * The collection owns the primitive; its Scene owns the shared capture targets.
- *
  * @alias SceneGISWaterSurface
  * @constructor
  * @param {object} options Initialization options.
@@ -142,7 +143,9 @@ function validate(surface) {
  * @param {Cartesian3} [options.absorption] RGB absorption per meter; defaults to (0.45, 0.12, 0.06).
  * @param {Color} [options.reflectionColor] Scene-linear environment radiance without physical sky; defaults to (0.2, 0.3, 0.4).
  * @param {number} [options.roughness=0.12] Perceptual roughness in [0.02, 1].
- * @param {number} [options.waveAmplitude=0.05] Normal-wave height scale in meters; geometry is not displaced.
+ * @param {SceneGISWindWaves} [options.windWaves] Optional caller-owned wind simulation. Fixed at construction; replaces normal-only waves.
+ * @param {number} [options.meshSpacing=1] Finest wind-wave grid spacing in meters, in [0.25, 4]. Fixed at construction; ignored without windWaves.
+ * @param {number} [options.waveAmplitude=0.05] Normal-only wave height in meters; ignored when windWaves is supplied.
  * @param {number} [options.waveLength=3.0] Largest normal-wave wavelength in meters.
  * @param {Cartesian2} [options.flowDirection=Cartesian2.UNIT_X] Local flow direction; need not be normalized.
  * @param {number} [options.flowSpeed=0.6] Wave phase speed in meters per second.
@@ -165,6 +168,15 @@ function validate(surface) {
  */
 function SceneGISWaterSurface(options = {}) {
   this._hierarchy = cloneHierarchy(options.polygonHierarchy);
+  this._windWaves = options.windWaves;
+  this._meshSpacing = options.meshSpacing ?? 1;
+  number(this._meshSpacing, "meshSpacing", 0.25, 4);
+  if (
+    this._windWaves !== undefined &&
+    !(this._windWaves instanceof WindWaves)
+  ) {
+    throw new DeveloperError("windWaves must be a SceneGISWindWaves instance.");
+  }
   /**
    * Rigid local-to-world transform.
    * @type {Matrix4}
@@ -272,6 +284,110 @@ function SceneGISWaterSurface(options = {}) {
   this._sky = undefined;
 }
 
+function waterVertex(surface) {
+  return new ShaderSource({
+    defines: surface._windWaves ? ["SCENEGIS_WIND_WAVES"] : [],
+    sources: [vertex],
+  });
+}
+const inverseScratch = new Matrix4();
+const cameraScratch = new Cartesian3();
+function updateTiles(surface, frameState) {
+  const mesh = surface._mesh;
+  const camera = Matrix4.multiplyByPoint(
+    Matrix4.inverseTransformation(surface.modelMatrix, inverseScratch),
+    frameState.camera.positionWC,
+    cameraScratch,
+  );
+  surface._commands ??= [];
+  surface._commands.length = 0;
+  for (const tile of mesh.tiles) {
+    tile.worldBounds = BoundingSphere.transform(
+      tile.bounds,
+      surface.modelMatrix,
+      tile.worldBounds,
+    );
+    tile.worldBounds.radius += surface._windWaves._maximumDisplacement;
+    if (frameState.cullingVolume.computeVisibility(tile.worldBounds) === -1) {
+      continue;
+    }
+    const distance = Math.hypot(
+      Math.max(tile.x - camera.x, 0, camera.x - tile.x - mesh.size),
+      Math.max(tile.y - camera.y, 0, camera.y - tile.y - mesh.size),
+      camera.z,
+    );
+    const level = Math.max(
+      0,
+      Math.min(
+        6,
+        Math.floor(Math.log2(Math.max(1, distance / (mesh.size * 0.5)))),
+      ),
+    );
+    let entry = tile.cache.find((e) => e.level === level);
+    if (!entry) {
+      const geometry = mesh.createGeometry(tile, level);
+      entry = {
+        level,
+        vertexArray: VertexArray.fromGeometry({
+          context: frameState.context,
+          geometry,
+          attributeLocations: { position: 0, waveData: 1 },
+          bufferUsage: BufferUsage.STATIC_DRAW,
+        }),
+        triangles: geometry.indices.length / 3,
+        bytes:
+          geometry.attributes.position.values.byteLength +
+          geometry.attributes.waveData.values.byteLength +
+          geometry.indices.byteLength,
+      };
+      if (tile.cache.length === 2) {
+        tile.cache.shift().vertexArray.destroy();
+      }
+      tile.cache.push(entry);
+    }
+    entry.lastUsed = frameState.frameNumber;
+    tile.command ??= new DrawCommand({
+      owner: surface,
+      pass: Pass.OPAQUE,
+      pickId: "u_pickColor",
+    });
+    const command = tile.command,
+      base = surface._command;
+    command.vertexArray = entry.vertexArray;
+    command.shaderProgram = base.shaderProgram;
+    command.uniformMap = base.uniformMap;
+    command.renderState = base.renderState;
+    command.modelMatrix = surface.modelMatrix;
+    command.boundingVolume = tile.worldBounds;
+    tile.level = level;
+    tile.triangles = entry.triangles;
+    surface._commands.push(command);
+    frameState.commandList.push(command);
+  }
+  // Keep active geometry plus at most 16 MiB of inactive LODs, even after touring the lake.
+  const inactive = [];
+  let inactiveBytes = 0;
+  for (const tile of mesh.tiles) {
+    for (const entry of tile.cache) {
+      if (entry.lastUsed !== frameState.frameNumber) {
+        inactive.push({ tile, entry });
+        inactiveBytes += entry.bytes;
+      }
+    }
+  }
+  if (inactiveBytes > 16 * 1024 * 1024) {
+    inactive.sort((a, b) => a.entry.lastUsed - b.entry.lastUsed);
+    for (const { tile, entry } of inactive) {
+      if (inactiveBytes <= 16 * 1024 * 1024) {
+        break;
+      }
+      tile.cache.splice(tile.cache.indexOf(entry), 1);
+      entry.vertexArray.destroy();
+      inactiveBytes -= entry.bytes;
+    }
+  }
+}
+
 function createResources(surface, frameState) {
   const context = frameState.context;
   const geometry = CoplanarPolygonGeometry.createGeometry(
@@ -284,6 +400,13 @@ function createResources(surface, frameState) {
     throw new DeveloperError("The water polygon must have a nonzero area.");
   }
   surface._localBounds = geometry.boundingSphere;
+  if (surface._windWaves) {
+    surface._mesh = new WaterMesh(
+      geometry,
+      surface._hierarchy,
+      surface._meshSpacing,
+    );
+  }
   surface._pickId = context.createPickId({
     primitive: surface,
     id: surface.id,
@@ -294,14 +417,17 @@ function createResources(surface, frameState) {
     vertexArray: VertexArray.fromGeometry({
       context,
       geometry,
-      attributeLocations: { position: 0 },
+      attributeLocations: { position: 0, waveData: 1 },
       bufferUsage: BufferUsage.STATIC_DRAW,
     }),
     shaderProgram: ShaderProgram.fromCache({
       context,
-      vertexShaderSource: vertex,
-      fragmentShaderSource: new ShaderSource({ sources: [ray, fragment] }),
-      attributeLocations: { position: 0 },
+      vertexShaderSource: waterVertex(surface),
+      fragmentShaderSource: new ShaderSource({
+        defines: surface._windWaves ? ["SCENEGIS_WIND_WAVES"] : [],
+        sources: [ray, fragment],
+      }),
+      attributeLocations: { position: 0, waveData: 1 },
     }),
     renderState: RenderState.fromCache({
       depthTest: { enabled: true },
@@ -324,7 +450,18 @@ function createResources(surface, frameState) {
       u_roughness: () => surface.roughness,
       u_waveAmplitude: () => surface.waveAmplitude,
       u_waveLength: () => surface.waveLength,
-      u_flowDirection: () => surface.flowDirection,
+      u_flowDirection: () =>
+        surface._windWaves?.windDirection ?? surface.flowDirection,
+      u_wavePeriod: () => surface._windWaves.patchLength,
+      u_waveResolution: () => surface._windWaves.resolution,
+      u_displacement0: () =>
+        surface._windWaves._state.bands[0].output.getColorTexture(0),
+      u_displacement1: () =>
+        surface._windWaves._state.bands[1].output.getColorTexture(0),
+      u_waveNormal0: () =>
+        surface._windWaves._state.bands[0].output.getColorTexture(1),
+      u_waveNormal1: () =>
+        surface._windWaves._state.bands[1].output.getColorTexture(1),
       u_time: () =>
         (surface._time * surface.flowSpeed * Math.PI * 2) / surface.waveLength,
       u_foamWidth: () => surface.foamWidth,
@@ -343,6 +480,28 @@ function createResources(surface, frameState) {
 }
 
 Object.defineProperties(SceneGISWaterSurface.prototype, {
+  /**
+   *  Borrowed wind simulation; destroy it only after removing its surfaces.
+   * @memberof SceneGISWaterSurface.prototype
+   * @type {SceneGISWindWaves|undefined}
+   * @readonly
+   */
+  windWaves: {
+    get() {
+      return this._windWaves;
+    },
+  },
+  /**
+   *  Finest grid spacing in meters.
+   * @memberof SceneGISWaterSurface.prototype
+   * @type {number}
+   * @readonly
+   */
+  meshSpacing: {
+    get() {
+      return this._meshSpacing;
+    },
+  },
   /**
    * Whether the geometry is ready to draw.
    * @memberof SceneGISWaterSurface.prototype
@@ -387,6 +546,9 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
   if (!this._command) {
     createResources(this, frameState);
   }
+  if (this._windWaves && frameState.passes.render) {
+    this._windWaves._update(frameState);
+  }
   const command = this._command;
   command.modelMatrix = this.modelMatrix;
   command.boundingVolume = BoundingSphere.transform(
@@ -424,23 +586,32 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
           ),
         );
       }
+      if (this._windWaves) {
+        source.defines.push("SCENEGIS_WIND_WAVES");
+      }
       source.sources.push(ray, fragment);
       const previous = command.shaderProgram;
       command.shaderProgram = ShaderProgram.fromCache({
         context: c,
-        vertexShaderSource: vertex,
+        vertexShaderSource: waterVertex(this),
         fragmentShaderSource: source,
-        attributeLocations: { position: 0 },
+        attributeLocations: { position: 0, waveData: 1 },
       });
       previous.destroy();
       this._lightingMode = lightingMode;
     }
     state.surfaces.push(this);
   }
-  frameState.commandList.push(command);
+  if (this._mesh) {
+    updateTiles(this, frameState);
+  } else {
+    frameState.commandList.push(command);
+  }
 };
 
-/** @returns {boolean} Whether this surface has been destroyed. */
+/**
+ *  @returns {boolean} Whether this surface has been destroyed.
+ */
 SceneGISWaterSurface.prototype.isDestroyed = function () {
   return false;
 };
@@ -450,6 +621,13 @@ SceneGISWaterSurface.prototype.isDestroyed = function () {
  * @returns {undefined}
  */
 SceneGISWaterSurface.prototype.destroy = function () {
+  if (this._mesh) {
+    for (const tile of this._mesh.tiles) {
+      for (const entry of tile.cache) {
+        entry.vertexArray.destroy();
+      }
+    }
+  }
   this._command?.vertexArray.destroy();
   this._command?.shaderProgram.destroy();
   this._pickId?.destroy();

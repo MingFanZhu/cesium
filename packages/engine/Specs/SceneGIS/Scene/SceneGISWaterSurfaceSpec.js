@@ -12,6 +12,7 @@ import {
   PolygonHierarchy,
   Primitive,
   SceneGISWaterSurface,
+  SceneGISWindWaves,
   SceneGISScreenSpaceReflections,
   SceneGISPlanarWorld,
   SceneGISPlanarCoordinateSystem,
@@ -32,7 +33,7 @@ import createScene from "../../../../../Specs/createScene.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
 
 describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
-  let scene, water, transform, sourceShader;
+  let scene, water, transform, sourceShader, borrowedWaves;
   const time = JulianDate.fromIso8601("2026-06-21T10:00:00Z");
   function point(x, y, z) {
     return Matrix4.multiplyByPoint(
@@ -89,7 +90,7 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
       }),
     );
   }
-  function setup(planar = true, orthographic = false, hole = false) {
+  function setup(planar = true, orthographic = false, hole = false, windWaves) {
     scene = createScene({ canvas: createCanvas(128, 128), scene3DOnly: true });
     scene.highDynamicRange = true;
     scene.fog.enabled = false;
@@ -148,6 +149,7 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     water = scene.primitives.add(
       new SceneGISWaterSurface({
         polygonHierarchy: hierarchy,
+        windWaves,
         modelMatrix: transform,
         id: "water",
         waveAmplitude: 0,
@@ -169,7 +171,82 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
       "bottom",
     );
   }
+  [true, false].forEach(function (planar) {
+    it(`renders displaced wind water and hole picking in ${planar ? "Planar" : "Globe"} without owning the simulation`, function () {
+      const waves = new SceneGISWindWaves({
+        resolution: 32,
+        patchLength: 16,
+        windSpeed: 10,
+      });
+      setup(planar, false, true, waves);
+      render();
+      expect(water._commands.length).toBeGreaterThan(0);
+      expect(waves.ready).toBeTrue();
+      const p = point(6, 0, 0),
+        screen = SceneTransforms.worldToWindowCoordinates(scene, p);
+      expect(scene.pick(screen).id).toBe("water");
+      expect(
+        scene.pick(
+          SceneTransforms.worldToWindowCoordinates(scene, point(0, 0, -1)),
+        ).id,
+      ).toBe("bottom");
+      render();
+      const before = pixel(p);
+      const depthBefore = scene.pickPosition(screen);
+      render(JulianDate.addSeconds(time, 0.8, new JulianDate()));
+      expect(waves._state.seconds).toEqualEpsilon(0.8, 1e-7);
+      expect(
+        Cartesian3.distance(scene.pickPosition(screen), depthBefore),
+      ).toBeGreaterThan(0.0001);
+      expect(pixel(p).some((v, i) => v !== before[i])).toBeTrue();
+      const arrays = water._mesh.tiles.flatMap((t) =>
+        t.cache.map((e) => e.vertexArray),
+      );
+      scene.primitives.remove(water);
+      water = undefined;
+      expect(arrays.every((a) => a.isDestroyed())).toBeTrue();
+      expect(waves.isDestroyed()).toBeFalse();
+      waves.destroy();
+    });
+  });
+  it("rejects submerged geometry from wind-wave reflection rays", function () {
+    borrowedWaves = new SceneGISWindWaves({
+      resolution: 32,
+      patchLength: 16,
+      windSpeed: 12,
+      amplitudeScale: 2,
+    });
+    setup(true, false, false, borrowedWaves);
+    water.reflections = true;
+    water.absorption = new Cartesian3(1000, 1000, 1000);
+    water.reflectionColor = Color.BLUE;
+    scene.camera.setView({
+      destination: point(0, -8, 2),
+      orientation: {
+        direction: Cartesian3.normalize(vector(0, 8, -2), new Cartesian3()),
+        up: vector(0, 0, 1),
+      },
+    });
+    flat(
+      new CoplanarPolygonGeometry({
+        polygonHierarchy: ring(20, -0.8),
+        vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+      }),
+      Color.RED,
+    );
+    render();
+    for (const x of [-2, 0, 2]) {
+      for (const y of [0, 2, 4]) {
+        expect(pixel(point(x, y, 0))[0]).toBeLessThan(2);
+      }
+    }
+  });
   afterEach(function () {
+    if (borrowedWaves && !borrowedWaves.isDestroyed()) {
+      scene.primitives.remove(water);
+      borrowedWaves.destroy();
+    }
+    borrowedWaves = undefined;
     scene?.destroyForSpecs();
     scene = undefined;
     sourceShader?.destroy();
@@ -294,68 +371,79 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     expect(pixel(p)).toEqualEpsilon(hit, 2);
   });
   [true, false].forEach(function (planar) {
-    it(`shares ${planar ? "Planar" : "Globe"} physical light for scattering and foam without relighting transmission`, async function () {
-      setup(planar);
-      water.absorption = new Cartesian3(10, 10, 10);
-      water.waterColor = new Color(0.15, 0.15, 0.15);
-      await pollToPromise(() => {
-        render();
-        return water.ready;
+    [false, true].forEach(function (windy) {
+      it(`shares ${planar ? "Planar" : "Globe"} ${windy ? "wind" : "normal-only"} physical light for scattering and foam without relighting transmission`, async function () {
+        borrowedWaves = windy
+          ? new SceneGISWindWaves({ resolution: 32 })
+          : undefined;
+        setup(planar, false, false, borrowedWaves);
+        water.absorption = new Cartesian3(10, 10, 10);
+        water.waterColor = new Color(0.15, 0.15, 0.15);
+        await pollToPromise(() => {
+          render();
+          return water.ready;
+        });
+        const c = scene.context;
+        const texture = new Texture({
+          context: c,
+          pixelFormat: PixelFormat.RGBA,
+          source: {
+            width: 2,
+            height: 2,
+            arrayBufferView: new Uint8Array(16).fill(128),
+          },
+        });
+        const key = planar
+          ? "_sceneGISPlanarLighting"
+          : "_sceneGISGlobeLighting";
+        const record = {
+          active: true,
+          atlasTexture: texture,
+          transmittanceTexture: texture,
+          irradianceTexture: texture,
+          matrices: Array.from({ length: 3 }, () =>
+            Matrix4.fromScale(Cartesian3.ZERO),
+          ),
+          intervals: Array.from({ length: 3 }, () => new Cartesian2(0, 100000)),
+          cascadeCount: 1,
+          showCloudShadows: false,
+          primaryLightDirection: vector(0, 0, 1),
+          sunDirection: vector(0, 0, 1),
+          primaryLightScale: new Cartesian3(1, 1, 1),
+          cameraRelativePosition: new Cartesian3(
+            0,
+            0,
+            scene.camera.positionWC.z,
+          ),
+          surfaceRadianceScale: 1,
+          cloudTop: 4000,
+        };
+        try {
+          scene.frameState[key] = record;
+          render();
+          const p = point(4, 0, 0);
+          const lit = pixel(p);
+          expect(water._lightingMode).toEqual(planar ? "planar" : "globe");
+          const program = water._command.shaderProgram;
+          record.surfaceRadianceScale = 0;
+          render();
+          expect(pixel(p)[0]).toBeLessThan(lit[0]);
+          expect(water._command.shaderProgram).toBe(program);
+          water.absorption = Cartesian3.clone(Cartesian3.ZERO);
+          render();
+          const unlitTransmission = pixel(p);
+          record.surfaceRadianceScale = 1;
+          render();
+          expect(pixel(p)).toEqual(unlitTransmission);
+          record.active = false;
+          render();
+          expect(water._lightingMode).toEqual("none");
+          expect(texture.isDestroyed()).toBe(false);
+        } finally {
+          scene.frameState[key] = undefined;
+          texture.destroy();
+        }
       });
-      const c = scene.context;
-      const texture = new Texture({
-        context: c,
-        pixelFormat: PixelFormat.RGBA,
-        source: {
-          width: 2,
-          height: 2,
-          arrayBufferView: new Uint8Array(16).fill(128),
-        },
-      });
-      const key = planar ? "_sceneGISPlanarLighting" : "_sceneGISGlobeLighting";
-      const record = {
-        active: true,
-        atlasTexture: texture,
-        transmittanceTexture: texture,
-        irradianceTexture: texture,
-        matrices: Array.from({ length: 3 }, () =>
-          Matrix4.fromScale(Cartesian3.ZERO),
-        ),
-        intervals: Array.from({ length: 3 }, () => new Cartesian2(0, 100000)),
-        cascadeCount: 1,
-        showCloudShadows: false,
-        primaryLightDirection: vector(0, 0, 1),
-        sunDirection: vector(0, 0, 1),
-        primaryLightScale: new Cartesian3(1, 1, 1),
-        cameraRelativePosition: new Cartesian3(0, 0, scene.camera.positionWC.z),
-        surfaceRadianceScale: 1,
-        cloudTop: 4000,
-      };
-      try {
-        scene.frameState[key] = record;
-        render();
-        const p = point(4, 0, 0);
-        const lit = pixel(p);
-        expect(water._lightingMode).toEqual(planar ? "planar" : "globe");
-        const program = water._command.shaderProgram;
-        record.surfaceRadianceScale = 0;
-        render();
-        expect(pixel(p)[0]).toBeLessThan(lit[0]);
-        expect(water._command.shaderProgram).toBe(program);
-        water.absorption = Cartesian3.clone(Cartesian3.ZERO);
-        render();
-        const unlitTransmission = pixel(p);
-        record.surfaceRadianceScale = 1;
-        render();
-        expect(pixel(p)).toEqual(unlitTransmission);
-        record.active = false;
-        render();
-        expect(water._lightingMode).toEqual("none");
-        expect(texture.isDestroyed()).toBe(false);
-      } finally {
-        scene.frameState[key] = undefined;
-        texture.destroy();
-      }
     });
   });
   it("rejects above-plane refraction samples instead of pulling foreground color into water", async function () {

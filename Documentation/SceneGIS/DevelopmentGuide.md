@@ -851,7 +851,7 @@ GPU 回归入口为 SceneGIS/Scene/SceneGISScreenSpaceReflections，关联 AO、
 不接受缩放、反射变换或经纬度数值直接充当局部坐标。构造时复制轮廓，改变轮廓需重建图元。
 
 `waveAmplitude` / `waveLength` 使用米，`flowDirection` 是局部二维方向，`flowSpeed` 使用米/秒。
-波纹跟随 Viewer Clock，仅扰动法线；暂停 Clock 即冻结波纹。`absorption` 是每米 RGB 吸收系数，
+默认波纹跟随 Viewer Clock，仅扰动法线；暂停 Clock 即冻结波纹。`absorption` 是每米 RGB 吸收系数，
 `waterColor` 是线性散射色，启用物理环境后随光源变化。`roughness`、`refractionStrength`、
 `foamWidth` / `foamIntensity` 控制反射粗糙度、折射偏移和浅水接触泡沫。属性修改在下一帧验证；
 requestRenderMode 下由应用调用 scene.requestRender。`show`、`id`、集合生命周期沿用图元习惯。
@@ -862,11 +862,57 @@ opaque 快照。`water.reflections=false` 只关闭水面的屏幕追踪，天�
 
 人工入口为 `Test/Planar/局部水面.html?world=planar` 或 `world=globe`。关闭显示水面检查水下结构，
 切换场景倒影，暂停时间、调整波纹和泡沫并旋转相机。首版只支持水上视角、局部单层和 opaque
-水下物体；屏幕外/隐藏反射、透明水下物体、焦散、海洋位移及水下介质不在范围内。
+水下物体；屏幕外/隐藏反射、透明水下物体、焦散及水下介质不在范围内。真实风浪位移见下文。
 
 实现和资源预算见 ADR-0087 与 R8 review。严格 GPU 入口为 SceneGIS/Scene/SceneGISWaterSurface，
 关联 SSR、AO 和 physical model lighting Specs。独立屏幕目标约 18.7 bytes/pixel，隐藏保留，
 Scene 销毁释放；启用 SSR 时借用已有捕获，避免重复 replay。Shader 修改先 gulp build。
+
+## 风浪水面使用与验证
+
+`SceneGISWindWaves` 是可选的可共享模拟，传入现有水面即可启用真实几何位移：
+
+```js
+const waves = new Cesium.SceneGISWindWaves({
+  windSpeed: 8,
+  windDirection: new Cesium.Cartesian2(-1, 1),
+  fetchLength: 1800,
+  waterDepth: 2,
+  resolution: 128,
+});
+const water = scene.primitives.add(
+  new Cesium.SceneGISWaterSurface({
+    polygonHierarchy,
+    modelMatrix,
+    windWaves: waves,
+    meshSpacing: 1,
+  }),
+);
+// Before destroying the Viewer/Context:
+scene.primitives.remove(water);
+waves.destroy();
+```
+
+`windSpeed` 为水面上方 10 米风速（m/s）；`windDirection` 为局部 XY 中波浪传播的去向，
+不是气象学的来向。`fetchLength` 为有效风区长度，`waterDepth` 为谱和色散使用的均匀平均水深，
+不会移动实际湖底。`amplitudeScale` 是艺术倍率；`choppiness` 控制水平位移；
+`whitecapIntensity` 控制波峰压缩产生的白沫。物理参数可动态修改，直接重建谱而不模拟气象渐变。
+
+`resolution`（32/64/128/256）、`patchLength`（默认 64 米，第二频段为四倍）、`seed`、
+水面的 `windWaves` 和 `meshSpacing` 在构造后只读。风浪替代原来的法线波，原有
+`waveAmplitude/waveLength/flowSpeed` 不控制 FFT；`flowSpeed/waveLength` 仍用于浅岸泡沫漂移。
+反射、折射、吸收、粗糙度和岸边泡沫沿用既有属性。轮廓边缘 4 米内衰减位移，保留岸线和孔洞。
+不同水面共享模拟时须使用对齐的局部坐标；独立方位或水位可使用独立实例。
+
+每个 128² 双频段实例增加 32 次小尺寸 GPU 绘制及约 2.17 MiB 纹理，暂停复用；风浪模拟不增加几何预通道。
+额外网格按距离生成，最多保留 16 MiB 非当前 LOD 缓存。波谱有周期、截断和均匀水深限制，
+没有沿岸绕射、浅水流动、破碎浪或水下相机；Globe 仍使用局部 ENU 平面，不是全球曲面海洋。
+
+人工入口 `Test/Rendering/玄武湖风浪.html?world=planar` / `world=globe`，
+可选 `quality=64|128|256`。数据目录记录 OSM 许可，地形和植被为示意。
+自动验证使用 `SceneGIS/Scene/SceneGISWindWaves`、`SceneGIS/Scene/SceneGISWaterSurface`
+和 `Test/Rendering/playwright.wind-water.config.mjs`；GPU 数值与独立 CPU DFT 对照。
+实现、边界和实测预算见 ADR-0101 与 R22 review。
 
 ## 几何高光抗锯齿
 
