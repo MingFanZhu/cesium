@@ -820,17 +820,24 @@ probes.reflections = true;
 已有 glTF 材质、CustomShader 和 ImageBasedLighting 接口保持；效果按最终材质粗糙度及基础层/清漆层方向工作。
 同一 Scene 最多一个效果，Scene 拥有生命周期，也可提前调用 destroy；enabled=false 保留已分配资源以便恢复。
 maximumDistance / thickness 使用米，maximumRoughness 使用感知粗糙度，stepCount 控制每层追踪预算。
+`resolutionScale` 支持 `0.5`（默认）或 `1`，后者保留更细的反射面细节。
+`temporalFiltering` 默认开启，独立于 TAA；相机运动使用反射距离修正视差，物体没有运动向量。
+材质、光照或场景发生跳变后调用 `reset()`；参数、分辨率和投影变化自动清除历史。
+没有额外收敛帧，按当前渲染节奏更新。历史与追踪均使用反射分辨率，随后按完整深度/材质重建。
 
 实现入口为 Source/SceneGIS/Scene/SceneGISScreenSpaceReflections.js 及同名 private renderer，
 Shader 位于 Source/Shaders/SceneGIS/Reflections/。捕获使用原生 log/HDR/shadow/AO 命令，逐视锥合并
 R32F 深度；MRT 保存基础层和清漆层方向/粗糙度。结果回到材质 IBL，后处理色调映射和环境顺序保持。
 
 验收入口为 Test/Planar/屏幕空间反射.html?world=planar 或 world=globe。对比开关、粗糙度和相机移动；
-原生地表仅为反射来源，示例镜面地板是 PBR 模型。透明物体、屏幕外几何、递归和时域降噪尚未支持。
+原生地表仅为反射来源，示例镜面地板是 PBR 模型。透明物体、屏幕外几何和递归反射尚未支持。
+R18 的独立入口为 [反射稳定性](../../Test/Rendering/反射稳定性.html)，Bistro 同时提供分辨率和时域开关。
+AMD FidelityFX SSSR/Reflection Denoiser 的固定版本来源、MIT 许可和 WebGL2 适配边界见 ADR-0097。
 R12 按 ADR-0091 为合格的单视锥启用主通道 MRT，省去完整 shaded replay；多视锥、分类、
 清除 Globe 深度及未适配的材质后处理继续使用原路径。保留原生 MSAA，辅助浮点附件独立 resolve。
-普通材质在 4x MSAA 下 SSR 资源约 186.7 bytes/pixel，clearcoat 约 298.7 bytes/pixel；
-原 replay 约 66.7 bytes/pixel。上述只计 SSR 所有目标，不含借用的 native color/depth。
+R18 半分辨率、时域开启时，普通材质在 4x MSAA 下 SSR 资源约 196 bytes/pixel，clearcoat 约 308 bytes/pixel；
+原 replay 约 76 bytes/pixel。全分辨率增加约 72 bytes/pixel；关闭时域前未分配历史可少用 16 bytes/pixel。
+上述只计 SSR 所有目标，不含借用的 native color/depth，忽略奇数尺寸向上取整。
 MRT 用带宽/显存换取绘制和完整着色次数下降；必须在真实场景评估。
 
 GPU 回归入口为 SceneGIS/Scene/SceneGISScreenSpaceReflections，关联 AO、sky reflections、physical model

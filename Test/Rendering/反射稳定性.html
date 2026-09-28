@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>屏幕空间反射稳定性</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside id="panel">
+      <h1>屏幕空间反射稳定性</h1>
+      <p>分层深度搜索 · 半分辨率重建 · 反射视差时域滤波</p>
+      <p>
+        平移、旋转和滚轮缩放，对比全分辨率与半分辨率，以及反射时域滤波开关。
+      </p>
+      <p>细小反射面可选择全分辨率。屏幕外物体仍由环境反射补充。</p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="PBR综合验收.html?world=planar">Bistro 街区</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="../Planar/屏幕空间反射.js"></script>
+  </body>
+</html>

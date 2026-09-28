@@ -9,6 +9,7 @@ import {
   Matrix4,
   Model,
   SceneGISScreenSpaceReflections,
+  SceneGISTemporalAntialiasing,
   SceneTransforms,
   UniformType,
   RuntimeError,
@@ -449,5 +450,103 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     expect(effect.isDestroyed()).toBe(true);
     effect = new SceneGISScreenSpaceReflections({ scene });
     expect(effect.enabled).toBe(false);
+  });
+  it("validates trace quality controls and owns reduced-resolution history across resize and disable", async function () {
+    setup();
+    expect(effect.resolutionScale).toBe(0.5);
+    expect(effect.temporalFiltering).toBe(true);
+    [0, 0.25, 0.75, 2, NaN].forEach(function (value) {
+      expect(() => {
+        effect.resolutionScale = value;
+      }).toThrowDeveloperError();
+    });
+    expect(() => {
+      effect.temporalFiltering = 1;
+    }).toThrowDeveloperError();
+    await models();
+    const t = effect._state.tracing;
+    expect(t.raw.getColorTexture(0).width).toBe(64);
+    const raw = t.raw;
+    const history = t.history.slice();
+    effect.enabled = false;
+    render();
+    expect(raw.isDestroyed()).toBe(false);
+    expect(t.valid).toBe(false);
+    effect.enabled = true;
+    effect.resolutionScale = 1;
+    render();
+    expect(raw.isDestroyed()).toBe(true);
+    expect(history.every((buffer) => buffer.isDestroyed())).toBe(true);
+    expect(t.raw.getColorTexture(0).width).toBe(128);
+    scene.canvas.width = 131;
+    scene.canvas.height = 129;
+    effect.resolutionScale = 0.5;
+    render();
+    expect(t.raw.getColorTexture(0).width).toBe(66);
+    expect(t.raw.getColorTexture(0).height).toBe(65);
+    expect(t.levels[5].getColorTexture().width).toBe(3);
+    const resources = [
+      t.raw,
+      ...t.history,
+      ...t.levels.map((level) => level.getColorTexture()),
+    ];
+    effect.destroy();
+    expect(resources.every((resource) => resource.isDestroyed())).toBe(true);
+  });
+  it("uses reflection history only across complete compatible renders and resets explicitly", async function () {
+    setup();
+    await models();
+    const t = effect._state.tracing;
+    const values = [];
+    const read = t.temporal.uniformMap.u_valid;
+    t.temporal.uniformMap.u_valid = () => {
+      const valid = read();
+      values.push(valid);
+      return valid;
+    };
+    render();
+    expect(values.pop()).toBe(true);
+    effect.reset();
+    render();
+    expect(values.pop()).toBe(false);
+    render();
+    expect(values.pop()).toBe(true);
+    scene.camera.frustum.fov *= 0.9;
+    render();
+    expect(values.pop()).toBe(false);
+    effect.temporalFiltering = false;
+    render();
+    expect(t.valid).toBe(false);
+    expect(t.filtered).toBe(t.raw);
+    effect.temporalFiltering = true;
+    render();
+    expect(values.pop()).toBe(false);
+    expect(t.filtered).not.toBe(t.raw);
+  });
+  [true, false].forEach(function (planar) {
+    it(`keeps moving ${planar ? "Planar" : "Globe"} reflections aligned with current geometry under TAA and clears disappearing sources`, async function () {
+      setup(planar);
+      const { box } = await models();
+      const taa = new SceneGISTemporalAntialiasing({ scene, enabled: true });
+      const receiver = point(0, -0.4, 0);
+      for (let i = 0; i < 8; ++i) {
+        scene.camera.moveRight(0.08);
+        scene.camera.moveForward(0.06);
+        render();
+        const reflection = sample(
+          effect._state.result.getColorTexture(),
+          receiver,
+        );
+        expect(reflection[0]).toBeGreaterThan(2.8);
+        expect(reflection[1]).toBeLessThan(0.01);
+        expect(reflection[3]).toBeGreaterThan(0.8);
+      }
+      box.show = false;
+      render();
+      expect(taa.ready).toBe(true);
+      expect(sample(effect._state.result.getColorTexture(), receiver)[3]).toBe(
+        0,
+      );
+    });
   });
 });

@@ -277,3 +277,18 @@ Owner visual acceptance is pending. Entry: complete standalone model commands
 and existing physical-sky PBR. Exit: both-world cached capture, source composition,
 state/lifecycle correctness, independent example, Bistro controls and bounded cost evidence.
 Diffuse bounce and streaming tile capture remain outside this phase. ADR-0096 / SGP-0024.
+
+## R18: Screen-space reflection efficiency and stability
+
+After R17 checkpoint `5972618214`, the owner prioritizes screen-space effects for GIS
+and approves [R18](2026-09-28-r18-screen-space-reflections.md). Retain optional manual
+probes, defer dynamic probes and diffuse GI. Adapt published AMD SSSR/denoiser designs
+to existing WebGL2 MRT; verify quality, history lifecycle and GPU cost before accepting.
+Future rendering stages should first consult GPU-vendor references and record revision,
+license and platform differences. AO improvements and effect-budget integration are later
+candidates and are not active implementation scope.
+
+R18 implementation and [review](../reviews/2026-09-28-r18-screen-space-reflections.md) are complete.
+Both-world SSR history/reconstruction and independent controls pass bounded GPU/E2E and release/type
+checks. Measured isolated SSR time improves 37–62%, with additional history storage and explicit
+screen-space limits. Owner visual acceptance is pending; no next phase is active.

@@ -9,6 +9,9 @@ import Renderer from "./_private/_SceneGISScreenSpaceReflections.js";
 
 function requestRender(effect) {
   effect._ready = false;
+  if (effect._state?.tracing) {
+    effect._state.tracing.valid = false;
+  }
   effect._scene?.requestRender();
 }
 
@@ -35,7 +38,7 @@ function numberProperty(name, minimum, maximum, integer = false) {
 }
 
 /**
- * Adds current-frame screen-space reflections to opaque native PBR models and 3D Tiles.
+ * Adds hierarchical screen-space reflections to opaque native PBR models and 3D Tiles.
  * Globe and Planar scenes use the same eye-space tracing. Existing specular IBL supplies
  * missing rays. Transparent objects, classification overlays and offscreen geometry are excluded.
  * HDR must be enabled explicitly. The Scene owns the attached effect and destroys it with the
@@ -50,6 +53,8 @@ function numberProperty(name, minimum, maximum, integer = false) {
  * @param {number} [options.thickness=0.5] Eye-depth intersection tolerance in meters, greater than zero.
  * @param {number} [options.maximumRoughness=0.6] Perceptual roughness cutoff in (0, 1].
  * @param {number} [options.stepCount=96] Maximum traversal steps per lobe, an integer in [16, 256].
+ * @param {number} [options.resolutionScale=0.5] Trace resolution, either 0.5 or 1. Full resolution preserves thin reflectors.
+ * @param {boolean} [options.temporalFiltering=true] Whether to reuse validated reflection history. Reprojection accounts for camera motion, not object motion.
  * @example
  * viewer.scene.highDynamicRange = true;
  * const reflections = new Cesium.SceneGISScreenSpaceReflections({
@@ -78,6 +83,8 @@ function SceneGISScreenSpaceReflections(options) {
   this.thickness = options.thickness ?? 0.5;
   this.maximumRoughness = options.maximumRoughness ?? 0.6;
   this.stepCount = options.stepCount ?? 96;
+  this.resolutionScale = options.resolutionScale ?? 0.5;
+  this.temporalFiltering = options.temporalFiltering ?? true;
   this.enabled = options.enabled ?? false;
   this._scene = scene;
   if (this.enabled) {
@@ -169,7 +176,52 @@ Object.defineProperties(SceneGISScreenSpaceReflections.prototype, {
    * @default 96
    */
   stepCount: numberProperty("stepCount", 16, 256, true),
+  /**
+   * Trace resolution, either 0.5 or 1. Lower resolution reduces tracing and history cost.
+   * @memberof SceneGISScreenSpaceReflections.prototype
+   * @type {number}
+   * @default 0.5
+   */
+  resolutionScale: {
+    get: function () {
+      return this._resolutionScale;
+    },
+    set: function (value) {
+      if (value !== 0.5 && value !== 1) {
+        throw new DeveloperError("resolutionScale must be 0.5 or 1.");
+      }
+      this._resolutionScale = value;
+      requestRender(this);
+    },
+  },
+  /**
+   * Whether to reuse validated reflection history. Call reset after discontinuous light
+   * or content edits. Camera-only reprojection cannot correctly track moving objects.
+   * @memberof SceneGISScreenSpaceReflections.prototype
+   * @type {boolean}
+   * @default true
+   */
+  temporalFiltering: {
+    get: function () {
+      return this._temporalFiltering;
+    },
+    set: function (value) {
+      if (typeof value !== "boolean") {
+        throw new DeveloperError("temporalFiltering must be boolean.");
+      }
+      this._temporalFiltering = value;
+      requestRender(this);
+    },
+  },
 });
+
+/**
+ * Discards reflection history after discontinuous scene, lighting or material edits.
+ * Requests one render; does not schedule convergence frames.
+ */
+SceneGISScreenSpaceReflections.prototype.reset = function () {
+  requestRender(this);
+};
 
 /** @private */
 SceneGISScreenSpaceReflections.prototype._validate = function () {

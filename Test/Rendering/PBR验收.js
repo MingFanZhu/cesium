@@ -428,6 +428,10 @@ const state = {
       world: planar ? "planar" : "globe",
       comparison: state.comparison,
       settings: { ...(state.comparison === "基线 A" ? baseline : trial) },
+      reflections: {
+        resolutionScale: ssr.resolutionScale,
+        temporalFiltering: ssr.temporalFiltering,
+      },
       lighting: {
         source: atmosphere.mode,
         directionLocal: effects.enabled
@@ -577,6 +581,11 @@ trialFolder
   .name("遮蔽半径（米）")
   .onChange(state.apply);
 trialFolder.add(trial, "ssr").name("屏幕空间反射").onChange(state.apply);
+trialFolder
+  .add(ssr, "resolutionScale", { 半分辨率: 0.5, 全分辨率: 1 })
+  .name("反射分辨率");
+trialFolder.add(ssr, "temporalFiltering").name("反射时域滤波");
+trialFolder.add(ssr, "reset").name("清除反射历史");
 const probeFolder = gui.addFolder("局部探针（手动捕获）").close();
 const probeCaptureButton = probeFolder
   .add(probeOptions, "capture")

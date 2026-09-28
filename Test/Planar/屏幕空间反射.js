@@ -142,9 +142,17 @@ const gui = new GUI({
 });
 gui.add(ssr, "enabled").name("屏幕空间反射");
 gui
+  .add(ssr, "resolutionScale", { 半分辨率: 0.5, 全分辨率: 1 })
+  .name("反射分辨率");
+gui.add(ssr, "temporalFiltering").name("反射时域滤波");
+gui.add(ssr, "reset").name("清除反射历史");
+gui
   .add(state, "roughness", 0.02, 0.8, 0.01)
   .name("地板粗糙度")
-  .onChange((value) => shaders[0]?.setUniform("u_roughness", value));
+  .onChange((value) => {
+    shaders[0]?.setUniform("u_roughness", value);
+    ssr.reset();
+  });
 gui.add(ssr, "maximumDistance", 5, 150, 1).name("反射距离（米）");
 gui.add(ssr, "thickness", 0.05, 2, 0.05).name("求交厚度（米）");
 gui.add(ssr, "stepCount", 16, 256, 16).name("追踪步数");

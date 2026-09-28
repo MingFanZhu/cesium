@@ -1,5 +1,4 @@
 import Color from "../../../Core/Color.js";
-import Cartesian2 from "../../../Core/Cartesian2.js";
 import combine from "../../../Core/combine.js";
 import defined from "../../../Core/defined.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
@@ -8,25 +7,16 @@ import DrawCommand from "../../../Renderer/DrawCommand.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
 import Pass from "../../../Renderer/Pass.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
-import Sampler from "../../../Renderer/Sampler.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
-import TextureMinificationFilter from "../../../Renderer/TextureMinificationFilter.js";
-import TextureMagnificationFilter from "../../../Renderer/TextureMagnificationFilter.js";
 import capture from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRCapture.js";
 import receive from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRReceive.js";
-import trace from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRTrace.js";
-import ray from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
-import filter from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRFilter.js";
 import depth from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import AmbientOcclusion from "./_SceneGISAmbientOcclusion.js";
 import LocalLights from "./_SceneGISLocalLights.js";
 import ReflectionMrt from "./_SceneGISLightingMrt.js";
+import ReflectionTracing from "./_SceneGISReflectionTracing.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
-const mipSampler = new Sampler({
-  minificationFilter: TextureMinificationFilter.LINEAR_MIPMAP_LINEAR,
-  magnificationFilter: TextureMagnificationFilter.LINEAR,
-});
 
 /**
  * Current-frame capture, traversal and native PBR radiance substitution.
@@ -68,10 +58,6 @@ function allocate(effect, scene) {
         colorAttachmentsLength: 2,
         pixelDatatype: PixelDatatype.HALF_FLOAT,
       }),
-      filtered: new FramebufferManager({
-        colorAttachmentsLength: 2,
-        pixelDatatype: PixelDatatype.HALF_FLOAT,
-      }),
       clear: new ClearCommand({
         color: Color.TRANSPARENT,
         depth: 1,
@@ -84,40 +70,11 @@ function allocate(effect, scene) {
       u_sceneGISSSRBase: () => s.result.getColorTexture(0),
       u_sceneGISSSRCoat: () => s.result.getColorTexture(1),
     };
-    s.trace = context.createViewportQuadCommand(
-      new ShaderSource({ sources: [ray, trace] }),
-      {
-        owner: effect,
-        uniformMap: {
-          u_depth: () => s.depth.getColorTexture(),
-          u_color: () => s.radianceTexture,
-          u_baseRay: () => s.raw.getColorTexture(1),
-          u_coatRay: () => s.raw.getColorTexture(2),
-          u_maximumDistance: () => effect.maximumDistance,
-          u_thickness: () => effect.thickness,
-          u_maximumRoughness: () => effect.maximumRoughness,
-          u_stepCount: () => effect.stepCount,
-          u_rayNear: () => scene.camera.frustum.near,
-        },
-      },
-    );
-    s.filterInput = s.result;
-    s.filterAxis = new Cartesian2(1, 0);
-    s.filter = context.createViewportQuadCommand(filter, {
-      owner: effect,
-      uniformMap: {
-        u_depth: () => s.depth.getColorTexture(),
-        u_baseRay: () => s.raw.getColorTexture(1),
-        u_coatRay: () => s.raw.getColorTexture(2),
-        u_base: () => s.filterInput.getColorTexture(0),
-        u_coat: () => s.filterInput.getColorTexture(1),
-        u_axis: () => s.filterAxis,
-      },
-    });
   }
-  for (const f of [s.raw, s.depth, s.result, s.filtered]) {
+  for (const f of [s.raw, s.depth, s.result]) {
     f.update(context, context.drawingBufferWidth, context.drawingBufferHeight);
   }
+  ReflectionTracing.allocate(effect, scene, s);
   const logDepth = scene.frameState.useLogDepth;
   if (!defined(s.copyDepth) || s.logDepth !== logDepth) {
     s.copyDepth?.shaderProgram.destroy();
@@ -140,6 +97,9 @@ SceneGISScreenSpaceReflections.prepare = function (scene) {
   const effect = scene._sceneGISScreenSpaceReflections;
   if (!defined(effect)) {
     return;
+  }
+  if (!effect._ready && effect._state?.tracing) {
+    effect._state.tracing.valid = false;
   }
   effect._ready = false;
   if (defined(effect._state)) {
@@ -214,7 +174,7 @@ SceneGISScreenSpaceReflections.execute = function (
     }
     s.capturing = false;
     us.updateFrustum(scene.camera.frustum);
-    traceReflections(scene, s, passState);
+    ReflectionTracing.execute(scene, s);
     effect._ready = true;
   } finally {
     s.capturing = false;
@@ -223,22 +183,6 @@ SceneGISScreenSpaceReflections.execute = function (
     us.updatePass(oldPass);
   }
 };
-
-function traceReflections(scene, s, passState) {
-  const context = scene.context;
-  s.radianceTexture.generateMipmap();
-  s.radianceTexture.sampler = mipSampler;
-  passState.framebuffer = s.result.framebuffer;
-  s.trace.execute(context, passState);
-  s.filterInput = s.result;
-  Cartesian2.clone(Cartesian2.UNIT_X, s.filterAxis);
-  passState.framebuffer = s.filtered.framebuffer;
-  s.filter.execute(context, passState);
-  s.filterInput = s.filtered;
-  Cartesian2.clone(Cartesian2.UNIT_Y, s.filterAxis);
-  passState.framebuffer = s.result.framebuffer;
-  s.filter.execute(context, passState);
-}
 
 SceneGISScreenSpaceReflections.resolve = function (scene, passState, frustum) {
   const effect = scene._sceneGISScreenSpaceReflections;
@@ -255,7 +199,7 @@ SceneGISScreenSpaceReflections.resolve = function (scene, passState, frustum) {
     context.uniformState.updateFrustum(scene.camera.frustum);
     AmbientOcclusion.resolveShared(scene, passState, s.depth.getColorTexture());
     ReflectionMrt.radiance(scene, s);
-    traceReflections(scene, s, passState);
+    ReflectionTracing.execute(scene, s);
     passState.framebuffer = original;
     ReflectionMrt.composite(scene, s, passState);
     effect._ready = true;
@@ -377,9 +321,7 @@ SceneGISScreenSpaceReflections.destroy = function (effect) {
   s.raw.destroy();
   s.depth.destroy();
   s.result.destroy();
-  s.filtered.destroy();
-  s.trace.shaderProgram.destroy();
-  s.filter.shaderProgram.destroy();
+  ReflectionTracing.destroy(s);
   s.copyDepth?.shaderProgram.destroy();
   effect._state = undefined;
 };

@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                       |
-| ---------------------- | ----------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                         |
-| Status                 | `active`                                                    |
-| Planning model         | `extension`                                                 |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)  |
-| Current phase          | R17 technically complete; owner visual review pending       |
-| Active phase plan      | None; completed [R17](plans/2026-09-28-r17-local-probes.md) |
-| Active standalone plan | None                                                        |
-| Architecture contact   | Current task                                                |
-| Execution contact      | Current task                                                |
-| Last updated           | `2026-09-28`                                                |
+| Field                  | Value                                                                   |
+| ---------------------- | ----------------------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                                     |
+| Status                 | `active`                                                                |
+| Planning model         | `extension`                                                             |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)              |
+| Current phase          | R18 technically complete; owner visual review pending                   |
+| Active phase plan      | None; completed [R18](plans/2026-09-28-r18-screen-space-reflections.md) |
+| Active standalone plan | None                                                                    |
+| Architecture contact   | Current task                                                            |
+| Execution contact      | Current task                                                            |
+| Last updated           | `2026-09-28`                                                            |
 
 ## Scope
 
@@ -34,6 +34,12 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- R18 is technically complete after R17 checkpoint `5972618214`: SSR efficiency and
+  stability use pinned AMD references. See the [review](reviews/2026-09-28-r18-screen-space-reflections.md).
+  Owner visual acceptance is pending. Retain manual probes; dynamic probes, diffuse
+  GI and subsequent AO work are deferred. Prefer GPU-vendor designs for future rendering
+  work, with source review, attribution and measured platform-specific tradeoffs.
 
 - R17 is authorized: environment occlusion and local specular probes with explicit runtime
   capture after loading/light edits. Diffuse bounce is excluded. See the active phase,
