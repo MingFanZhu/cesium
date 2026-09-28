@@ -19,6 +19,9 @@ import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbien
 // SCENEGIS_PATCH_END SGP-0014
 import PostProcessStageTextureCache from "./PostProcessStageTextureCache.js";
 import Tonemapper, { validateTonemapper } from "./Tonemapper.js";
+// SCENEGIS_PATCH_BEGIN SGP-0027: Reuse native tone mapping with owned histogram exposure.
+import SceneGISAutoExposure from "../SceneGIS/Scene/_private/_SceneGISAutoExposure.js";
+// SCENEGIS_PATCH_END SGP-0027
 
 const stackScratch = [];
 
@@ -335,7 +338,10 @@ Object.defineProperties(PostProcessStageCollection.prototype, {
         this._tonemapping.destroy();
       }
 
-      const useAutoExposure = this._autoExposureEnabled;
+      // SCENEGIS_PATCH_BEGIN SGP-0027: Select the exposure-texture variant only while explicitly active.
+      const useAutoExposure =
+        this._autoExposureEnabled || this._sceneGISAutoExposureActive === true;
+      // SCENEGIS_PATCH_END SGP-0027
       let tonemapping;
 
       switch (value) {
@@ -370,10 +376,16 @@ Object.defineProperties(PostProcessStageCollection.prototype, {
       }
 
       if (useAutoExposure) {
+        // SCENEGIS_PATCH_BEGIN SGP-0027: Resolve the current ping-pong result at draw time.
+        const collection = this;
         const autoexposure = this._autoExposure;
         tonemapping.uniforms.autoExposure = function () {
-          return autoexposure.outputTexture;
+          return (
+            SceneGISAutoExposure.texture(collection) ??
+            autoexposure.outputTexture
+          );
         };
+        // SCENEGIS_PATCH_END SGP-0027
       } else {
         tonemapping.uniforms.exposure = this._exposure;
       }
@@ -580,6 +592,13 @@ PostProcessStageCollection.prototype.update = function (
   useHdr,
 ) {
   removeStages(this);
+  // SCENEGIS_PATCH_BEGIN SGP-0027: Prepare the divisor before stage uniforms and framebuffer dependencies.
+  if (SceneGISAutoExposure.update(this, context, useHdr)) {
+    const tonemapper = this.tonemapper;
+    this._tonemapper = undefined;
+    this.tonemapper = tonemapper;
+  }
+  // SCENEGIS_PATCH_END SGP-0027
   // SCENEGIS_PATCH_BEGIN SGP-0014: Make default textures available during stage initialization.
   this._ao._sceneGISAmbientOcclusion.context = context;
   // SCENEGIS_PATCH_END SGP-0014
@@ -819,6 +838,9 @@ PostProcessStageCollection.prototype.execute = function (
     execute(ao, context, initialTexture, depthTexture, idTexture);
     initialTexture = getOutputTexture(ao);
   }
+  // SCENEGIS_PATCH_BEGIN SGP-0027: Meter unexposed HDR before native bloom and tone mapping.
+  SceneGISAutoExposure.execute(this, context, initialTexture);
+  // SCENEGIS_PATCH_END SGP-0027
   if (bloomEnabled && bloom.ready) {
     execute(bloom, context, initialTexture, depthTexture, idTexture);
     initialTexture = getOutputTexture(bloom);
@@ -906,6 +928,9 @@ PostProcessStageCollection.prototype.isDestroyed = function () {
  * @see PostProcessStageCollection#isDestroyed
  */
 PostProcessStageCollection.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0027: Release the Scene-owned controller before post-process targets.
+  this._sceneGISAutoExposure?.destroy();
+  // SCENEGIS_PATCH_END SGP-0027
   this._fxaa.destroy();
   // SCENEGIS_PATCH_BEGIN SGP-0014: Release scene-local AO targets before the context is destroyed.
   SceneGISAmbientOcclusion.destroy(this._ao);

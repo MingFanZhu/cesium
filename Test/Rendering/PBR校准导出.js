@@ -43,6 +43,9 @@ function readFloatTarget(scene, width, height, shader, uniforms) {
 export function captureCalibration(example) {
   const scene = example.viewer.scene;
   const snapshot = example.state.snapshot();
+  if (example.autoExposure?.enabled) {
+    throw new Error("Cycles 校准需要固定曝光，请先关闭自动曝光再导出。");
+  }
   if (!example.state.ready || snapshot.animate) {
     throw new Error("请等待 Bistro 加载完成并停止时间播放，再导出校准数据。");
   }

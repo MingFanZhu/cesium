@@ -942,3 +942,51 @@ taa.reset();
 重投影，未提供物体 motion vectors；运动模型、透明对象和标注可能柔化或残影。request-render
 模式不请求额外收敛帧。独立页面 `Test/Rendering/时域抗锯齿.html` 提供四种 AA 模式、相机和
 物体运动对照。详见 ADR-0094 / SGP-0022；性能应在同样视角、分辨率、图层与效果下实测。
+
+## 可选自动曝光
+
+`SceneGISAutoExposure` 为 Globe / Planar 提供同一套全局直方图测光与明暗适应接口。
+
+```js
+scene.highDynamicRange = true;
+const autoExposure = new Cesium.SceneGISAutoExposure({
+  scene,
+  enabled: true,
+  exposureCompensation: 0,
+  minimumExposure: 1 / 64,
+  maximumExposure: 64,
+  speedUp: 3,
+  speedDown: 1,
+});
+autoExposure.locked = true; // Freeze metered gain; compensation still applies.
+autoExposure.reset(); // Meter immediately after an application camera cut.
+```
+
+API 默认关闭，不改变原生固定曝光。`enabled=false` 释放自有 GPU 资源，下一帧恢复原生
+手动路径；Scene 销毁时自动销毁控制器，也可提前 `destroy()`。`ready` 表示已有测光结果。
+要求 HDR / WebGL2 / float color targets；不支持时明确报错，不静默降级。
+
+`exposureCompensation` 以档计，+1 使自动结果亮一倍。minimum/maximum 是自动增益的线性
+倍率范围，在补偿和原生 `scene.postProcessStages.exposure` 之前约束；原生 exposure 仍是
+额外倍率，启用自动曝光时必须为有限正数。这些是相对场景亮度的值，不是校准过的 EV100。
+`speedUp` 指进入亮处后降低曝光的速度，`speedDown` 指进入暗处后提高曝光的速度，
+单位为档/秒；距目标 1.5 档内转为指数收敛。默认亮处适应快、暗处适应慢。
+
+`lowPercent/highPercent` 是保留直方图区间的累计权重分位（默认 0.05/0.95），差值至少
+0.0001，避免 GPU 单精度下空测光区间。`centerWeight` 在均匀测光和中央高斯加权间插值。
+采用 64 档直方图，log2 亮度范围 [-16,16]；采样网格最长边不超过 128。罕见极亮/极暗值
+按分位排除，天空仍按画面占比参与测光，不做语义识别。
+
+测光使用未曝光 HDR，在原生 bloom / tone mapping 前运行；前序物理大气等已经包含在输入中。
+不读取历史曝光后的颜色，不增加几何或全尺寸颜色目标，也不逐帧读回 CPU。最多 4 个小目标
+绘制通道；锁定且已有结果时只更新 1x1 输出。五个 RGBA32F 目标上限约 385 KiB（方形网格），
+16:9 时约 217 KiB。保留原生 tone mapper，补偿仅在该原生阶段应用一次。
+
+真实时间而非模拟时钟控制适应速度。request-render 模式不主动追加收敛帧；应用需在希望
+观察适应的期间维持渲染。长时间无渲染后的下一帧按实际经过时间适应。加载完成或相机瞬移
+可调用 reset()，首帧立即测光。全局曝光无法同时解决深阴影和高亮天空的所有局部对比问题。
+
+独立示例 `Test/Rendering/自动曝光.html?world=planar|globe` 默认开启，提供日光/黄昏/夜间
+切换。PBR 综合验收新增“自动曝光 / 人眼适应”面板，默认关闭以保留固定曝光对比基准，且不
+改变 A/B 切换和相机；打开后对两组共用。Cycles 校准导出要求先关闭自动曝光。
+详见 ADR-0100 / SGP-0027 和 R21 review 的实测结果。

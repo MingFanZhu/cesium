@@ -1096,3 +1096,15 @@ local XY 米制平面，modelMatrix 使用刚体变换；Globe 采用 ENU，Plan
 几何、程序和 pick ID 由图元所有，集合负责销毁；屏幕目标由 Scene 所有，天空由已有环境所有。
 波纹随 Scene time 演化，仅改变法线；散射、泡沫和直接高光借用现有物理光源，不对水下快照重新照明。
 首轮资格为水上观察、局部单层水面和 opaque 水下几何，不扩展为海洋、水下相机或多层透射。
+
+## 全局自动曝光（R21）
+
+[ADR-0100](Decisions/ADR-0100-global-auto-exposure.md) / SGP-0027 增加默认关闭的
+`SceneGISAutoExposure`。它由 Scene 的 PostProcessStageCollection 拥有，Globe / Planar
+共用 HDR 屏幕空间测光，在 native bloom / tone mapping 前读取未曝光颜色；复用原生 tone
+mapper 的 1x1 divisor 接口。禁止曝光结果反馈测光、几何回放、全尺寸中间颜色和逐帧 CPU 读回。
+
+GPU 维护最长边 128 的 log luminance、64 档加权直方图和 1x1 双缓冲历史。全局增益在 stops
+空间以实际时间做 linear/exponential 适应，request-render 不额外请求收敛帧。默认不改变
+原生曝光/色调映射；关闭释放目标并恢复手动路径。原生 exposure 保持调用方所有权。
+GPU 不支持或 HDR 关闭时明确报错；不引入 pre-exposure、EV100 校准或局部曝光。

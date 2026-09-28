@@ -200,6 +200,7 @@ const effects = new C.SceneGISEnvironmentEffects({
 viewer.addController(effects);
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
 const ssil = new C.SceneGISScreenSpaceIndirectLighting({ scene });
+const autoExposure = new C.SceneGISAutoExposure({ scene });
 const specularAA = new C.SceneGISSpecularAntialiasing({ scene });
 const ssr = new C.SceneGISScreenSpaceReflections({
   scene,
@@ -451,6 +452,18 @@ const state = {
           ? solarLight.intensity
           : fixedLight.intensity,
         exposure: scene.postProcessStages.exposure,
+        autoExposure: {
+          enabled: autoExposure.enabled,
+          locked: autoExposure.locked,
+          compensation: autoExposure.exposureCompensation,
+          minimum: autoExposure.minimumExposure,
+          maximum: autoExposure.maximumExposure,
+          speedUp: autoExposure.speedUp,
+          speedDown: autoExposure.speedDown,
+          lowPercent: autoExposure.lowPercent,
+          highPercent: autoExposure.highPercent,
+          centerWeight: autoExposure.centerWeight,
+        },
         specularEnvironment: ibl.specularEnvironmentMaps,
         diffuseSH: ibl.sphericalHarmonicCoefficients?.map((v) =>
           C.Cartesian3.pack(v, []),
@@ -494,6 +507,34 @@ gui
   .name("固定视角")
   .onChange(state.resetView);
 gui.add(state, "resetView").name("恢复固定视角");
+const exposureFolder = gui.addFolder("自动曝光 / 人眼适应");
+exposureFolder.add(autoExposure, "enabled").name("自动曝光").listen();
+exposureFolder.add(autoExposure, "locked").name("锁定当前曝光").listen();
+exposureFolder
+  .add(autoExposure, "exposureCompensation", -3, 3, 0.1)
+  .name("曝光补偿（档）");
+exposureFolder
+  .add(autoExposure, "minimumExposure", 1 / 64, 1, 1 / 64)
+  .name("最低自动倍率");
+exposureFolder
+  .add(autoExposure, "maximumExposure", 1, 64, 0.5)
+  .name("最高自动倍率");
+exposureFolder
+  .add(autoExposure, "speedUp", 0.1, 10, 0.1)
+  .name("适应亮处（档/秒）");
+exposureFolder
+  .add(autoExposure, "speedDown", 0.1, 10, 0.1)
+  .name("适应暗处（档/秒）");
+exposureFolder
+  .add(autoExposure, "centerWeight", 0, 1, 0.05)
+  .name("中央测光权重");
+exposureFolder
+  .add(autoExposure, "lowPercent", 0, 0.4, 0.01)
+  .name("忽略暗部比例");
+exposureFolder
+  .add(autoExposure, "highPercent", 0.6, 1, 0.01)
+  .name("保留亮度上限分位");
+exposureFolder.add(autoExposure, "reset").name("立即重新测光");
 const atmosphereFolder = gui.addFolder("物理大气与光照");
 atmosphereFolder
   .add(atmosphere, "mode", ["物理大气", "固定 IBL"])
@@ -512,7 +553,7 @@ atmosphereFolder
   .onChange(state.setTime);
 atmosphereFolder
   .add(atmosphere, "exposure", 0.1, 4, 0.05)
-  .name("曝光")
+  .name("曝光倍率")
   .listen()
   .onChange(state.applyAtmosphere);
 atmosphereFolder
@@ -744,6 +785,7 @@ exposeExample(
     taa,
     specularAA,
     ssil,
+    autoExposure,
     ssr,
     ao,
     ibl,
@@ -951,6 +993,7 @@ async function loadScene() {
       (effects.enabled ? effects.ready : ibl.useSpecularEnvironmentMaps)
     ) {
       state.ready = true;
+      autoExposure.reset();
       document.getElementById("status").textContent = street
         ? "Bistro 就绪 · 约 283 万三角面"
         : composite

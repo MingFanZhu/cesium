@@ -2,6 +2,24 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0027",
+      "title": "Integrate optional histogram eye adaptation with native tone mapping",
+      "status": "active",
+      "reason": "Global metering needs pre-tone-map HDR and a GPU exposure divisor without an extra full-resolution color pass.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/PostProcessStageCollection.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISAutoExposureSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0100-global-auto-exposure.md",
+      "removalCondition": "Native post processing exposes equivalent histogram metering, time-based adaptation and explicit lifecycle."
+    },
+    {
       "id": "SGP-0026",
       "title": "Capture and compose bounded screen-space indirect diffuse lighting",
       "status": "active",

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>自动曝光</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>自动曝光</h1>
+      <p>
+        GPU
+        直方图测光与全局亮度适应。切换日光、黄昏、夜间，观察先暗后亮或先亮后暗的过渡。
+      </p>
+      <p>
+        先关闭自动曝光比较固定曝光，再开启或锁定；曝光补偿始终可调。只改变曝光，不增加照明。
+      </p>
+      <p>
+        暗处适应较慢，亮处较快。全局曝光无法同时提亮深暗处并保留所有天空细节。
+      </p>
+      <p id="status" role="status">准备本地几何…</p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="PBR综合验收.html?world=planar">Bistro 街区</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./自动曝光.js"></script>
+  </body>
+</html>

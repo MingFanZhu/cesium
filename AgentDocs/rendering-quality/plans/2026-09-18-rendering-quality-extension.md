@@ -320,3 +320,11 @@ are technically complete: bounded diffuse transport, shared main MRT, 13 feature
 cases, 39 regressions, two E2E cases and release/types. Measured GPU increment is
 approximately 1.1 ms at the documented Bistro configuration without more geometry
 submissions. Owner visual acceptance remains pending; no next phase is active.
+
+## R21 activation — 2026-09-28
+
+After R20 checkpoint `2bd5a2598f` and owner acceptance, activate
+[R21 global auto exposure](2026-09-28-r21-auto-exposure.md). Reuse native tone
+mapping with bounded GPU histogram metering; local exposure remains deferred.
+
+R21 implementation and technical review are complete; see its linked review for GPU/regression, release/type and performance evidence. Owner visual review is pending. No subsequent phase is active.
