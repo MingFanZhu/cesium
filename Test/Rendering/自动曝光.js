@@ -66,6 +66,10 @@ const autoExposure = new C.SceneGISAutoExposure({ scene, enabled: true });
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
 const ibl = new C.ImageBasedLighting({
   imageBasedLightingFactor: new C.Cartesian2(1, 0),
+  sphericalHarmonicCoefficients: Array.from(
+    { length: 9 },
+    () => new C.Cartesian3(),
+  ),
 });
 const models = [],
   shaders = [];
@@ -76,19 +80,18 @@ const state = {
   applyLighting() {
     const intensity = { 日光: 8, 黄昏: 0.4, 夜间: 0.025 }[state.lighting];
     scene.light.intensity = intensity;
-    ibl.sphericalHarmonicCoefficients = Array.from(
-      Array(9).keys(),
-      (i) =>
-        new C.Cartesian3(
-          i === 0 ? intensity * 0.08 : 0,
-          i === 0 ? intensity * 0.09 : 0,
-          i === 0 ? intensity * 0.12 : 0,
-        ),
+    // Native model uniforms retain this array; update the existing coefficients.
+    C.Cartesian3.fromElements(
+      intensity * 0.08,
+      intensity * 0.09,
+      intensity * 0.12,
+      ibl.sphericalHarmonicCoefficients[0],
     );
+    // Scene decodes backgroundColor with gamma before clearing the HDR target.
     scene.backgroundColor = new C.Color(
-      intensity * 0.015,
-      intensity * 0.025,
-      intensity * 0.04,
+      Math.pow(intensity * 0.015, 1 / scene.gamma),
+      Math.pow(intensity * 0.025, 1 / scene.gamma),
+      Math.pow(intensity * 0.04, 1 / scene.gamma),
       1,
     );
     taa.reset();

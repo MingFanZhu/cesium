@@ -92,3 +92,33 @@ owned targets/draws. Scope does not promise equal costs on mobile or other GPUs.
 Technical gate confirmed. Owner should enable the new Bistro folder and compare
 street/sky/shadow views, or use the independent bright/dark example. No further
 rendering phase is activated; global-exposure limitations remain as documented.
+
+## Dusk fixture correction after owner review
+
+- Status: fixed; architecture gate confirmed; date: 2026-09-28; checkpoint before
+  correction: `6d9f2bf2c1`. Owner visual review remains pending on this correction.
+- **High / actual lighting mismatch:** runtime inspection of the owner's dusk
+  frame showed configured first SH [0.032,0.036,0.048], but the native uniform still
+  held daylight [0.64,0.72,0.96]. Native pipeline captures the coefficient array.
+  The example now allocates it once and updates vectors in place; this does not
+  change native array-replacement semantics outside this fixture.
+- **Medium / gamma mismatch:** intended background radiance was assigned directly
+  to display-space backgroundColor, then raised to Scene.gamma in native HDR
+  clearing. The red background at dusk was 0.00001294 instead of 0.006. Encode
+  the linear preset values with inverse Scene gamma so background and model
+  illumination scale together. Do not change metering weights to hide this error.
+- **Evidence:** the original user frame metered gain about 11.98 with residual
+  daylight IBL and near-black background, producing washed-out faces. A separate
+  corrected page shows distinct lit/shaded faces and no rendering error. Original
+  user tab, camera and settings were preserved; temporary diagnostic tab closed.
+- **Regression:** two E2E cases pass in Globe/Planar, checking actual bound SH,
+  linear HDR background and target exposure shift by log2(20) for dusk. Existing
+  adaptation/lock/lifecycle/navigation checks remain in those cases. The new
+  background scaling assertion fails on the prior fixture. Scoped lint/format
+  passes; global AgentDocs retains its existing 318-file formatting debt.
+- **Scope:** only owned Test, E2E and handoff files change. No upstream-owned file
+  or additional SGP, no exposure-algorithm/API or build change. Public/native SH
+  array replacement can be examined separately if required; in-place coefficient
+  updates use the supported mutable data interface for this example. Global eye
+  adaptation still tends to normalize brightness; artistic dusk/night darkness
+  needs compensation or gain limits, now explained beside the controls.

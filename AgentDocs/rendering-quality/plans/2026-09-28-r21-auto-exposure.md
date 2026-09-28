@@ -60,3 +60,24 @@ Owner visual acceptance remains separate from technical tests.
 ## Completion and handoff
 
 Implementation and [technical review](../reviews/2026-09-28-r21-auto-exposure.md) are complete. Eleven feature GPU cases pass in development/release, with 52 existing regressions and two E2E cases. Release/types and patch audit pass. Bistro preserves manual default exposure; the independent example starts automatic. Isolated metering/adaptation cost is 0.0512 ms median on the measured desktop GPU; owner visual review is pending. No next phase is active.
+
+## Owner follow-up: dusk overexposure — 2026-09-28
+
+Status: completed correction after checkpoint `6d9f2bf2c1`. The owner observes washed-out
+dusk buildings. Runtime inspection confirms configured SH coefficients [0.032,
+0.036,0.048] while the native uniform closure still holds daylight coefficients
+[0.64,0.72,0.96]. The example replaces the array after shader construction; native
+ImageBasedLightingPipelineStage captures the original array. In addition, Scene
+converts backgroundColor from display gamma to linear HDR, while the fixture puts
+linear intensity values directly in that property. Consequently background dims
+faster than the intended radiance and biases global metering.
+
+Preserve one SH coefficient array and update its vectors in place; encode the
+intended linear background using Scene gamma. Change only the owned fixture, its
+explanatory text and E2E coverage. Verify actual bound lighting/background scale
+by 20x at dusk, plus unchanged existing eye-adaptation interactions in both worlds.
+Do not alter the exposure algorithm, native defaults or the owner's current view.
+Global adaptation intentionally compensates reduced illumination; preserving dusk
+mood remains an explicit compensation/gain-limit choice. No new ADR/SGP required.
+
+Correction verified: two updated E2E cases pass (Globe/Planar). The retained SH uniform, linear HDR background and metered target now follow a uniform 20x lighting reduction at dusk; the new regression fails on the previous fixture. Browser visual inspection confirms recovered face contrast. Only owned example/test/docs change, no engine or SGP change.

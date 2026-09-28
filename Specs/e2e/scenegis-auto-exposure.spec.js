@@ -45,6 +45,37 @@ for (const world of ["planar", "globe"]) {
         };
       });
     const before = await sample();
+    const lighting = () =>
+      page.evaluate(() => {
+        const scene = window.example.viewer.scene;
+        const command = scene.frameState.commandList.find(
+          (c) => c.uniformMap?.model_sphericalHarmonicCoefficients,
+        );
+        return {
+          indirect:
+            command.uniformMap.model_sphericalHarmonicCoefficients()[0].x,
+          background: scene.frameState.backgroundColor.red,
+        };
+      });
+    const daylight = await lighting();
+    await page
+      .getByRole("combobox", { name: "环境亮度", exact: true })
+      .selectOption({ label: "黄昏" });
+    await expect
+      .poll(async () => (await lighting()).indirect)
+      .toBeCloseTo(daylight.indirect / 20, 5);
+    await expect
+      .poll(async () => (await lighting()).background)
+      .toBeCloseTo(daylight.background / 20, 5);
+    await expect
+      .poll(async () => (await sample()).target)
+      .toBeCloseTo(before.target + Math.log2(20), 2);
+    await page
+      .getByRole("combobox", { name: "环境亮度", exact: true })
+      .selectOption({ label: "日光" });
+    await page
+      .getByRole("button", { name: "立即重新测光", exact: true })
+      .click();
     await page
       .getByRole("combobox", { name: "环境亮度", exact: true })
       .selectOption({ label: "夜间" });

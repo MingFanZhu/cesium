@@ -40,6 +40,8 @@
   ADR-0100 / SGP-0027; no local exposure. R20 example is owner accepted.
   R21 implementation and [technical review](reviews/2026-09-28-r21-auto-exposure.md)
   are complete; owner visual acceptance is pending, no next phase is active.
+  Owner dusk follow-up fixes stale example SH bindings and background gamma;
+  both-world exposure/lighting regressions pass. See the R21 plan/review amendment.
 
 - R20 is authorized after checkpoint `d68562fbc5`: finite-distance SSIL, shared MRT,
   independent example and optional Bistro control. ADR-0099 / SGP-0026.
