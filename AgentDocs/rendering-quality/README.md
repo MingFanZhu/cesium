@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                |
-| ---------------------- | -------------------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                                  |
-| Status                 | `active`                                                             |
-| Planning model         | `extension`                                                          |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)           |
-| Current phase          | R19 technically complete; owner visual review pending                |
-| Active phase plan      | None; completed [R19](plans/2026-09-28-r19-specular-antialiasing.md) |
-| Active standalone plan | None                                                                 |
-| Architecture contact   | Current task                                                         |
-| Execution contact      | Current task                                                         |
-| Last updated           | `2026-09-28`                                                         |
+| Field                  | Value                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                                           |
+| Status                 | `active`                                                                      |
+| Planning model         | `extension`                                                                   |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                    |
+| Current phase          | R20 technically complete; owner visual review pending                         |
+| Active phase plan      | None; completed [R20](plans/2026-09-28-r20-screen-space-indirect-lighting.md) |
+| Active standalone plan | None                                                                          |
+| Architecture contact   | Current task                                                                  |
+| Execution contact      | Current task                                                                  |
+| Last updated           | `2026-09-28`                                                                  |
 
 ## Scope
 
@@ -35,10 +35,16 @@
 
 ## Current handoff
 
+- R20 is authorized after checkpoint `d68562fbc5`: finite-distance SSIL, shared MRT,
+  independent example and optional Bistro control. ADR-0099 / SGP-0026.
+  Completed phase: [R20](plans/2026-09-28-r20-screen-space-indirect-lighting.md).
+  Latest [technical review](reviews/2026-09-28-r20-screen-space-indirect-lighting.md) confirms
+  implementation and bounded verification. Owner visual acceptance is pending; no next phase active.
+
 - R19 adapts Three.js geometry-normal filtering after R18 checkpoint `8d27a60feb`.
   ADR-0098 / SGP-0025; retain TAA and native camera behavior. No open discussion.
   Implementation and [review](reviews/2026-09-28-r19-specular-antialiasing.md) are complete;
-  owner visual acceptance remains pending. No next phase is active.
+  owner visual acceptance remains pending. R20 is tracked above.
 
 - R18 is technically complete after R17 checkpoint `5972618214`: SSR efficiency and
   stability use pinned AMD references. See the [review](reviews/2026-09-28-r18-screen-space-reflections.md).

@@ -64,10 +64,15 @@ const SceneGISWaterFrame = {
       return;
     }
     const ssr = scene._sceneGISScreenSpaceReflections;
+    const ssil = scene._sceneGISScreenSpaceIndirectLighting;
     const ao =
       scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
     // Main-pass inputs are published after opaque drawing, before water composition.
-    if ((ssr?.enabled && ssr._state?.mainActive) || ao.mainActive) {
+    if (
+      (ssr?.enabled && ssr._state?.mainActive) ||
+      ao.mainActive ||
+      (ssil?.enabled && ssil._state?.mainActive)
+    ) {
       return;
     }
     if (ssr?.ready) {
@@ -83,6 +88,19 @@ const SceneGISWaterFrame = {
       s.colorTexture.generateMipmap();
       s.colorTexture.sampler = sampler;
       s.depthTexture = ao.sourceDepth;
+      s.borrowed = true;
+      s.ready = true;
+      return;
+    }
+    if (
+      ssil?.ready &&
+      ssil._state.shared === ssil._state &&
+      ssil._state.main?.needsRadiance
+    ) {
+      s.colorTexture = ssil._state.radianceTexture;
+      s.colorTexture.generateMipmap();
+      s.colorTexture.sampler = sampler;
+      s.depthTexture = ssil._state.depth.getColorTexture();
       s.borrowed = true;
       s.ready = true;
       return;

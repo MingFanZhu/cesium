@@ -13,6 +13,7 @@ import BlendFunction from "../../../Scene/BlendFunction.js";
 import material from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRMain.js";
 import composite from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRComposite.js";
 import indirect from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOMain.js";
+import diffuse from "../../../Shaders/SceneGIS/IndirectLighting/SceneGISSILMain.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const classificationPasses = [
@@ -41,6 +42,7 @@ function layout(scene, passState, eligible, reflections) {
   const ranges = scene._view.frustumCommandsList;
   const environment = scene._environmentState;
   const ao = scene.postProcessStages.ambientOcclusion.enabled;
+  const ssil = scene._sceneGISScreenSpaceIndirectLighting?.enabled === true;
   if (
     (ao && !scene.highDynamicRange) ||
     ranges.length !== 1 ||
@@ -78,7 +80,7 @@ function layout(scene, passState, eligible, reflections) {
         return undefined;
       }
       if (
-        ao &&
+        (ao || ssil) &&
         indirectPostLightingBranches.some((name) => defines.includes(name))
       ) {
         return undefined;
@@ -87,7 +89,8 @@ function layout(scene, passState, eligible, reflections) {
     }
   }
   coat &&= reflections;
-  const count = (reflections ? (coat ? 7 : 4) : 1) + (ao ? 1 : 0);
+  const count =
+    (reflections ? (coat ? 7 : 4) : 1) + (ao ? 1 : 0) + (ssil ? 2 : 0);
   if (
     count > ContextLimits.maximumDrawBuffers ||
     count > ContextLimits.maximumColorAttachments
@@ -98,6 +101,7 @@ function layout(scene, passState, eligible, reflections) {
     manager,
     coat,
     ao,
+    ssil,
     reflections,
     count,
     radiance:
@@ -112,6 +116,7 @@ function releaseTargets(mrt) {
   mrt.renderbuffers?.forEach((buffer) => buffer.destroy());
   mrt.weights?.destroy();
   mrt.indirect?.destroy();
+  mrt.ssil?.destroy();
   mrt.radiance?.destroy();
   mrt.mask?.shaderProgram.destroy();
   mrt.composite?.shaderProgram.destroy();
@@ -119,7 +124,7 @@ function releaseTargets(mrt) {
 
 function allocate(scene, state, selected) {
   const context = scene.context;
-  const { manager, coat, ao, reflections, count, radiance } = selected;
+  const { manager, coat, ao, ssil, reflections, radiance } = selected;
   const source = manager.framebuffer;
   const color = state.raw.getColorTexture();
   let mrt = state.main;
@@ -129,6 +134,7 @@ function allocate(scene, state, selected) {
     mrt.color === color &&
     mrt.coat === coat &&
     mrt.ao === ao &&
+    !!mrt.ssil === ssil &&
     mrt.reflections === reflections &&
     mrt.needsRadiance === radiance
   ) {
@@ -160,6 +166,12 @@ function allocate(scene, state, selected) {
     indirect: ao
       ? new FramebufferManager({ pixelDatatype: PixelDatatype.HALF_FLOAT })
       : undefined,
+    ssil: ssil
+      ? new FramebufferManager({
+          colorAttachmentsLength: 2,
+          pixelDatatype: PixelDatatype.HALF_FLOAT,
+        })
+      : undefined,
     radiance: radiance
       ? new FramebufferManager({
           pixelDatatype: PixelDatatype.HALF_FLOAT,
@@ -168,6 +180,7 @@ function allocate(scene, state, selected) {
   };
   mrt.weights?.update(context, width, height);
   mrt.indirect?.update(context, width, height);
+  mrt.ssil?.update(context, width, height);
   mrt.radiance?.update(context, width, height);
   const textures = [color];
   if (reflections) {
@@ -187,7 +200,11 @@ function allocate(scene, state, selected) {
   if (ao) {
     textures.push(mrt.indirect.getColorTexture());
   }
-  mrt.aoLocation = count - 1;
+  mrt.aoLocation = textures.length - 1;
+  if (ssil) {
+    mrt.ssilLocation = textures.length;
+    textures.push(mrt.ssil.getColorTexture(0), mrt.ssil.getColorTexture(1));
+  }
   mrt.resolveFramebuffer = new Framebuffer({
     context,
     colorTextures: textures,
@@ -227,11 +244,14 @@ function allocate(scene, state, selected) {
       `uniform sampler2D u_color;
      uniform sampler2D u_coverage;
      ${ao ? "uniform sampler2D u_indirect; uniform sampler2D u_occlusion;" : ""}
+     ${ssil ? "uniform sampler2D u_ssil;" : ""}
+     ${!reflections && !ao ? "uniform sampler2D u_depth;" : ""}
      void main() {
        ivec2 pixel = ivec2(gl_FragCoord.xy);
-       float coverage = texelFetch(u_coverage, pixel, 0).a;
+       float coverage = ${!reflections && !ao ? "float(texelFetch(u_depth, pixel, 0).r > 0.0)" : "texelFetch(u_coverage, pixel, 0).a"};
        vec3 color = texelFetch(u_color, pixel, 0).rgb;
        ${ao ? "color += (texelFetch(u_occlusion, pixel, 0).r - 1.0) * texelFetch(u_indirect, pixel, 0).rgb;" : ""}
+       ${ssil ? "color += texelFetch(u_ssil, pixel, 0).rgb;" : ""}
        out_FragColor = vec4(color * coverage, coverage);
      }`,
       {
@@ -241,7 +261,12 @@ function allocate(scene, state, selected) {
           u_coverage: () =>
             reflections
               ? mrt.weights.getColorTexture(0)
-              : mrt.indirect.getColorTexture(),
+              : ao
+                ? mrt.indirect.getColorTexture()
+                : state.raw.getColorTexture(),
+          u_ssil: () =>
+            scene._sceneGISScreenSpaceIndirectLighting._state.result.getColorTexture(),
+          u_depth: () => state.depth.getColorTexture(),
           u_indirect: () => mrt.indirect.getColorTexture(),
           u_occlusion: () =>
             scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion.filtered.getColorTexture(),
@@ -258,6 +283,9 @@ function allocate(scene, state, selected) {
   }
   if (ao) {
     defines.push("SCENEGIS_AO_MAIN");
+  }
+  if (ssil) {
+    defines.push("SCENEGIS_SSIL_MAIN");
   }
   mrt.composite = context.createViewportQuadCommand(
     new ShaderSource({
@@ -282,6 +310,8 @@ function allocate(scene, state, selected) {
         u_coatWeight: () => mrt.weights.getColorTexture(2),
         u_coatEnvironment: () => mrt.weights.getColorTexture(3),
         u_indirect: () => mrt.indirect.getColorTexture(),
+        u_ssil: () =>
+          scene._sceneGISScreenSpaceIndirectLighting._state.result.getColorTexture(),
         u_occlusion: () =>
           scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion.filtered.getColorTexture(),
       },
@@ -313,7 +343,7 @@ const SceneGISLightingMrt = {
       // Clear owned outputs only. Native color/depth already contain the background.
       passState.framebuffer = state.raw.framebuffer;
       state.clear.execute(scene.context, passState);
-      for (const buffer of [mrt.weights, mrt.indirect]) {
+      for (const buffer of [mrt.weights, mrt.indirect, mrt.ssil]) {
         if (defined(buffer)) {
           passState.framebuffer = buffer.framebuffer;
           state.clearColor.execute(scene.context, passState);
@@ -337,7 +367,7 @@ const SceneGISLightingMrt = {
     const shader = command.shaderProgram;
     let program = mrt.programs.get(shader);
     if (!defined(program)) {
-      const name = `sceneGIS_lighting_${mrt.reflections}_${mrt.coat}_${mrt.ao}`;
+      const name = `sceneGIS_lighting_${mrt.reflections}_${mrt.coat}_${mrt.ao}_${!!mrt.ssil}`;
       program = scene.context.shaderCache.getDerivedShaderProgram(shader, name);
       if (!defined(program)) {
         const fs = shader.fragmentShaderSource.clone();
@@ -360,8 +390,16 @@ const SceneGISLightingMrt = {
           );
           fs.sources.unshift(indirect);
         }
+        if (mrt.ssil) {
+          fs.defines.push(
+            "SCENEGIS_SSIL_MAIN",
+            `SCENEGIS_SSIL_SOURCE_LOCATION ${mrt.ssilLocation}`,
+            `SCENEGIS_SSIL_RESPONSE_LOCATION ${mrt.ssilLocation + 1}`,
+          );
+          fs.sources.unshift(diffuse);
+        }
         fs.sources.push(
-          `void main() { sceneGISSSRMain(); ${mrt.reflections ? "sceneGISSSRWriteMaterial();" : ""} ${mrt.ao ? "sceneGISWriteIndirect();" : ""} }`,
+          `void main() { sceneGISSSRMain(); ${mrt.reflections ? "sceneGISSSRWriteMaterial();" : ""} ${mrt.ao ? "sceneGISWriteIndirect();" : ""} ${mrt.ssil ? "sceneGISSILWrite();" : ""} }`,
         );
         program = scene.context.shaderCache.createDerivedShaderProgram(
           shader,

@@ -21,6 +21,7 @@ import estimate from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOEstim
 import filter from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOFilter.js";
 import receive from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOReceive.js";
 import LightingMrt from "./_SceneGISLightingMrt.js";
+import IndirectLighting from "./_SceneGISScreenSpaceIndirectLighting.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const parameterNames = [
@@ -391,6 +392,7 @@ SceneGISAmbientOcclusion.resolve = function (scene, passState, frustum) {
     state.copyCommand.execute(context, passState);
     context.uniformState.updateFrustum(scene.camera.frustum);
     estimateOcclusion(state, context, passState);
+    IndirectLighting.render(scene, state, state.linearDepth.getColorTexture());
     passState.framebuffer = original;
     LightingMrt.composite(scene, state, passState);
     if (state.main.needsRadiance) {

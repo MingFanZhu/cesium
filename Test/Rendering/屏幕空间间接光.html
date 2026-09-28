@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>屏幕空间间接光</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>屏幕空间间接光</h1>
+      <p>有限距离的一跳漫反射：彩色墙面向地面和灰色方块反弹光线。</p>
+      <p>
+        SSIL 属于屏幕空间 GI
+        的近似方法，只利用当前画面可见的表面；屏幕外和被遮住的内容不会产生间接光。
+      </p>
+      <p>
+        默认半分辨率，复用主通道
+        MRT，不增加几何绘制。可关闭彩墙自发光，单独观察太阳光的颜色反弹。
+      </p>
+      <p id="status" role="status">准备本地几何…</p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="PBR综合验收.html?world=planar">Bistro 街区</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./屏幕空间间接光.js"></script>
+  </body>
+</html>

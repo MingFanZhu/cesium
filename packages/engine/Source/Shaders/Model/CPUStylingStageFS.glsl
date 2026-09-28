@@ -42,6 +42,11 @@ void cpuStylingStage(inout czm_modelMaterial material, SelectedFeature feature)
     material.diffuse = featureColor.rgb * featureColor.a;
     #else
     float highlight = ceil(model_colorBlend);
+    // SCENEGIS_PATCH_BEGIN SGP-0026: Preserve feature styling in diffuse transport.
+    #ifdef SCENEGIS_SSIL_MAIN
+    sceneGISSILScale(mix(featureColor.rgb, vec3(1.0), highlight));
+    #endif
+    // SCENEGIS_PATCH_END SGP-0026
     material.diffuse *= mix(featureColor.rgb, vec3(1.0), highlight);
     // SCENEGIS_PATCH_BEGIN SGP-0016: Style reflection response with the same linear color multiplier.
     #ifdef SCENEGIS_SSR_MAIN

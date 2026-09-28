@@ -8,6 +8,9 @@ import SceneGISReflectionProbes from "../SceneGIS/Scene/_private/_SceneGISReflec
 import SceneGISWaterFrame from "../SceneGIS/Scene/_private/_SceneGISWaterFrame.js";
 // SCENEGIS_PATCH_END SGP-0017
 import BoundingRectangle from "../Core/BoundingRectangle.js";
+// SCENEGIS_PATCH_BEGIN SGP-0026: Share main-pass diffuse inputs with optional screen-space indirect lighting.
+import SceneGISScreenSpaceIndirectLighting from "../SceneGIS/Scene/_private/_SceneGISScreenSpaceIndirectLighting.js";
+// SCENEGIS_PATCH_END SGP-0026
 // SCENEGIS_PATCH_BEGIN SGP-0019: Schedule bounded material-local lighting.
 import SceneGISLocalLights from "../SceneGIS/Scene/_private/_SceneGISLocalLights.js";
 // SCENEGIS_PATCH_END SGP-0019
@@ -2470,6 +2473,9 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
   // SCENEGIS_PATCH_BEGIN SGP-0019: Add independent local sources to the selected color command.
   command = SceneGISLocalLights.receiver(scene, command);
   // SCENEGIS_PATCH_END SGP-0019
+  // SCENEGIS_PATCH_BEGIN SGP-0026: Capture diffuse transport during the original opaque draw.
+  command = SceneGISScreenSpaceIndirectLighting.receiver(scene, command);
+  // SCENEGIS_PATCH_END SGP-0026
   // SCENEGIS_PATCH_BEGIN SGP-0014: Compose AO at indirect material terms.
   SceneGISAmbientOcclusion.receiver(scene, command).execute(context, passState);
   // SCENEGIS_PATCH_END SGP-0014
@@ -2928,6 +2934,12 @@ function executeCommands(scene, passState) {
   } = scene._view;
   const numFrustums = frustumCommandsList.length;
 
+  // SCENEGIS_PATCH_BEGIN SGP-0026: Preflight shared layout and start standalone SSIL without geometry replay.
+  if (!picking) {
+    SceneGISScreenSpaceIndirectLighting.begin(scene, passState);
+  }
+  // SCENEGIS_PATCH_END SGP-0026
+
   // SCENEGIS_PATCH_BEGIN SGP-0014: AO uses main-pass MRT; SSR coordinates the shared layout when enabled.
   if (!picking && !scene._sceneGISScreenSpaceReflections?.enabled) {
     SceneGISAmbientOcclusion.execute(scene, passState, frustum);
@@ -3213,6 +3225,14 @@ function executeCommands(scene, passState) {
     performVoxelsPass(scene, passState, frustumCommands);
 
     performPass(frustumCommands, Pass.OPAQUE);
+    // SCENEGIS_PATCH_BEGIN SGP-0026: Resolve standalone diffuse transport before water and transparency.
+    if (
+      !picking &&
+      SceneGISScreenSpaceIndirectLighting.resolve(scene, passState, frustum)
+    ) {
+      SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+    }
+    // SCENEGIS_PATCH_END SGP-0026
     // SCENEGIS_PATCH_BEGIN SGP-0014: Resolve AO-only MRT before water and translucency.
     const aoResolved =
       !picking && SceneGISAmbientOcclusion.resolve(scene, passState, frustum);
@@ -4719,6 +4739,9 @@ function render(scene) {
   // SCENEGIS_PATCH_BEGIN SGP-0016: Validate the active reflection effect before rendering.
   SceneGISScreenSpaceReflections.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0016
+  // SCENEGIS_PATCH_BEGIN SGP-0026: Validate and reset optional diffuse transport before rendering.
+  SceneGISScreenSpaceIndirectLighting.prepare(scene);
+  // SCENEGIS_PATCH_END SGP-0026
   // SCENEGIS_PATCH_BEGIN SGP-0017: Reset water registration for the current render.
   SceneGISWaterFrame.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0017
@@ -5802,6 +5825,9 @@ Scene.prototype.destroy = function () {
   // SCENEGIS_PATCH_BEGIN SGP-0016: Release attached reflection resources before Context destruction.
   this._sceneGISScreenSpaceReflections?.destroy();
   // SCENEGIS_PATCH_END SGP-0016
+  // SCENEGIS_PATCH_BEGIN SGP-0026: Release Scene-owned indirect lighting before Context destruction.
+  this._sceneGISScreenSpaceIndirectLighting?.destroy();
+  // SCENEGIS_PATCH_END SGP-0026
   // SCENEGIS_PATCH_BEGIN SGP-0017: Release owned water targets before Context.
   SceneGISWaterFrame.destroy(this);
   // SCENEGIS_PATCH_END SGP-0017

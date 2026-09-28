@@ -15,6 +15,7 @@ import AmbientOcclusion from "./_SceneGISAmbientOcclusion.js";
 import LocalLights from "./_SceneGISLocalLights.js";
 import ReflectionMrt from "./_SceneGISLightingMrt.js";
 import ReflectionTracing from "./_SceneGISReflectionTracing.js";
+import IndirectLighting from "./_SceneGISScreenSpaceIndirectLighting.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 
@@ -198,6 +199,7 @@ SceneGISScreenSpaceReflections.resolve = function (scene, passState, frustum) {
     s.copyDepth.execute(context, passState);
     context.uniformState.updateFrustum(scene.camera.frustum);
     AmbientOcclusion.resolveShared(scene, passState, s.depth.getColorTexture());
+    IndirectLighting.render(scene, s, s.depth.getColorTexture());
     ReflectionMrt.radiance(scene, s);
     ReflectionTracing.execute(scene, s);
     passState.framebuffer = original;

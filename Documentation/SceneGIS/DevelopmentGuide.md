@@ -887,6 +887,41 @@ FBO 或绘制通道。它按几何法线的屏幕变化增加基础层和清漆�
 独立示例为 `Test/Rendering/高光抗锯齿.html?world=planar|globe`；Bistro 的实验 B
 提供“高光抗锯齿”开关。实现与升级边界见 ADR-0098 / SGP-0025。
 
+## 可选屏幕空间间接光（SSIL）
+
+```js
+viewer.scene.highDynamicRange = true;
+const indirectLighting = new Cesium.SceneGISScreenSpaceIndirectLighting({
+  scene: viewer.scene,
+  enabled: true,
+  radius: 5,
+  thickness: 0.5,
+  intensity: 1,
+  resolutionScale: 0.5,
+});
+```
+
+SSIL / SSGI 名称有重叠；这里实现的是局部、可见表面之间的一次漫反射。使用同帧主 MRT 的
+直接漫反射和自发光，避免模糊最终画面和重复反弹 IBL。非 PBR / unlit / 地形只参与遮挡；
+屏幕外和被挡住的几何、玻璃、水和多次反弹不作为源或接收者。Bistro 的实验 B 新增
+“屏幕空间间接光（实验）”开关，默认关闭；独立示例是 `Test/Rendering/屏幕空间间接光.html`，
+支持 `world=planar|globe`，可关闭彩墙自发光单独检查直接漫反射的颜色传递。
+
+默认每像素 4 个切片方向、每侧 8 个采样，半分辨率估计后保边重建。`radius` 是米制最大距离，
+`thickness` 是单层深度假定厚度，过大或过小均可能漏光；它无法恢复真实的隐藏几何。
+`directionCount` / `stepCount` 调节开销，`resolutionScale` 为 0.5 或 1。无独立时域历史，
+可与已有 TAA 配合；应用即时对比时可调用 TAA / SSR 的 `reset()`。不自动改变抗锯齿或相机。
+
+Scene 拥有效果；`ready` 表示当前帧已产生结果。构造为关闭不分配 GPU，关闭已启用效果会保留
+目标，`destroy()` 提前释放并解绑。要求 HDR / SCENE3D / WebGL2 / 浮点附件以及单视锥，
+不合格 MRT 布局显式报错；不回放几何。SSIL / SSIL+AO 分别需 3/4 个输出，叠加基础 SSR
+需 6/7 个，清漆 SSR 同开需 9/10 个，不在当前原型支持范围。MSAA 辅助数据 resolve 有边缘近似。
+
+已有 AO/SSR 时，半分辨率 SSIL 的新增持久目标约为 26 bytes/pixel（1 sample），
+4x MSAA 为 90 bytes/pixel，忽略奇数尺寸向上取整。独立启用另需 opaque color/depth 快照及
+线性深度；水面可借用包含反弹项的快照，无需再次绘制。具体 GPU 时间必须在固定场景实测，
+参考 ADR-0099 / SGP-0026 和 R20 review；不以样例帧率代表所有 GIS 场景。
+
 ## 可选 TAA
 
 ```js

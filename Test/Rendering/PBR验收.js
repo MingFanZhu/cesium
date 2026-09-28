@@ -199,6 +199,7 @@ const effects = new C.SceneGISEnvironmentEffects({
 });
 viewer.addController(effects);
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
+const ssil = new C.SceneGISScreenSpaceIndirectLighting({ scene });
 const specularAA = new C.SceneGISSpecularAntialiasing({ scene });
 const ssr = new C.SceneGISScreenSpaceReflections({
   scene,
@@ -213,6 +214,7 @@ const baseline = Object.freeze({
   ssr: false,
   antialiasing: "TAA",
   specularAA: false,
+  ssil: false,
   aoIntensity: 0.8,
   aoRadius: 0.7,
 });
@@ -343,6 +345,7 @@ const state = {
     ao.uniforms.intensity = settings.aoIntensity;
     ao.uniforms.lengthCap = settings.aoRadius;
     ssr.enabled = settings.ssr;
+    ssil.enabled = settings.ssil;
     taa.enabled = settings.antialiasing === "TAA";
     if (specularAA.enabled !== settings.specularAA) {
       specularAA.enabled = settings.specularAA;
@@ -588,6 +591,26 @@ trialFolder
   .add(trial, "aoRadius", 0.1, 2, 0.1)
   .name("遮蔽半径（米）")
   .onChange(state.apply);
+trialFolder
+  .add(trial, "ssil")
+  .name("屏幕空间间接光（实验）")
+  .onChange(() => {
+    state.apply();
+    taa.reset();
+    ssr.reset();
+  });
+trialFolder
+  .add(ssil, "intensity", 0, 4, 0.05)
+  .name("间接光强度")
+  .onChange(() => taa.reset());
+trialFolder
+  .add(ssil, "radius", 0.5, 20, 0.5)
+  .name("间接光距离（米）")
+  .onChange(() => taa.reset());
+trialFolder
+  .add(ssil, "thickness", 0.05, 2, 0.05)
+  .name("间接光厚度（米）")
+  .onChange(() => taa.reset());
 trialFolder.add(trial, "ssr").name("屏幕空间反射").onChange(state.apply);
 trialFolder
   .add(ssr, "resolutionScale", { 半分辨率: 0.5, 全分辨率: 1 })
@@ -720,6 +743,7 @@ exposeExample(
     probeOptions,
     taa,
     specularAA,
+    ssil,
     ssr,
     ao,
     ibl,

@@ -306,3 +306,17 @@ R19 implementation and [review](../reviews/2026-09-28-r19-specular-antialiasing.
 are technically complete: direct/IBL/SSR roughness agreement, unchanged flat
 mirrors, 20 dev Specs, eight release Specs, two E2E checks and bounded GPU timing.
 Owner visual review remains pending; no following phase is active.
+
+## R20: Bounded screen-space indirect diffuse
+
+After R19 checkpoint `d68562fbc5`, the owner authorizes an optional SSIL prototype.
+Activate [R20](2026-09-28-r20-screen-space-indirect-lighting.md): main-pass diffuse
+inputs, finite visibility sectors, bilateral reconstruction and independent fixture.
+This expands the earlier deferred diffuse scope only to one local screen-space
+bounce. Full GI, dynamic probes and renderer replacement remain outside scope.
+
+R20 implementation and [review](../reviews/2026-09-28-r20-screen-space-indirect-lighting.md)
+are technically complete: bounded diffuse transport, shared main MRT, 13 feature
+cases, 39 regressions, two E2E cases and release/types. Measured GPU increment is
+approximately 1.1 ms at the documented Bistro configuration without more geometry
+submissions. Owner visual acceptance remains pending; no next phase is active.

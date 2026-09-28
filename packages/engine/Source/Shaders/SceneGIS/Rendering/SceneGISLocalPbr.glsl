@@ -10,6 +10,9 @@ vec3 sceneGISLocalPbr(czm_modelMaterial material, vec3 positionEC)
         if (sceneGISLocalLight(i, positionEC, direction, irradiance) &&
             dot(material.normalEC, direction) > 0.0) {
             color += irradiance * czm_pbrLighting(toEye, material.normalEC, direction, material);
+            #ifdef SCENEGIS_SSIL_MAIN
+            sceneGISSILLocal(material, direction, irradiance);
+            #endif
         }
     }
     return color;

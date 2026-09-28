@@ -97,6 +97,11 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
 
     float clearcoatFactor = material.clearcoatFactor;
     vec3 clearcoatColor = color * clearcoatFactor;
+    // SCENEGIS_PATCH_BEGIN SGP-0026: Preserve clearcoat attenuation in diffuse transport.
+    #ifdef SCENEGIS_SSIL_MAIN
+    sceneGISSILScale(1.0 - clearcoatFactor * F);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0026
 
     // SCENEGIS_PATCH_BEGIN SGP-0014: Capture layered indirect energy for main-pass AO.
     #ifdef SCENEGIS_AO_MAIN
@@ -152,6 +157,11 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
 
     vec3 directLighting = czm_pbrLighting(viewDirection, normal, lightDirection, material);
     vec3 directColor = lightColorHdr * directLighting;
+    // SCENEGIS_PATCH_BEGIN SGP-0026: Record diffuse-only source and response before local lights and IBL.
+    #ifdef SCENEGIS_SSIL_MAIN
+    sceneGISSILRecord(material, lightDirection, lightColorHdr);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0026
     // SCENEGIS_PATCH_BEGIN SGP-0019: Evaluate local sources through the same native PBR material.
     #ifdef SCENEGIS_LOCAL_LIGHTS
     directColor += sceneGISLocalPbr(material, position);

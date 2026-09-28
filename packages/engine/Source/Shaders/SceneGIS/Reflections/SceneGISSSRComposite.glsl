@@ -12,6 +12,9 @@ uniform sampler2D u_coatEnvironment;
 uniform sampler2D u_indirect;
 uniform sampler2D u_occlusion;
 #endif
+#ifdef SCENEGIS_SSIL_MAIN
+uniform sampler2D u_ssil;
+#endif
 
 vec3 replaceEnvironment(vec4 hit, vec3 weight, vec3 environment)
 {
@@ -36,5 +39,8 @@ void main()
     correction = visibility * correction + (visibility - 1.0) * texelFetch(u_indirect, pixel, 0).rgb;
     #endif
     // Apply the signed replacement delta without flattening native MSAA color samples.
+    #ifdef SCENEGIS_SSIL_MAIN
+    correction += texelFetch(u_ssil, pixel, 0).rgb;
+    #endif
     out_FragColor = vec4(correction, 0.0);
 }

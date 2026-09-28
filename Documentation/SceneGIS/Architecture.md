@@ -1048,6 +1048,22 @@ Scene 独占已绑定效果的生命周期，调用方可提前 destroy 解除�
 水面可借用同一不透明快照。AO 单独开启同样不重绘几何；非 HDR、多视锥、分类及尚无
 精确响应契约的后光照分支保留既有预通道，不得把这一有限适用范围报告为全路径替换。
 
+## 屏幕空间间接漫反射（R20）
+
+[ADR-0099](Decisions/ADR-0099-screen-space-indirect-lighting.md) / SGP-0026 增加实验性、
+默认关闭的 `SceneGISScreenSpaceIndirectLighting`。Globe / Planar 共用有限距离的一跳
+漫反射估计；沿用前向光照，在原始 opaque MRT 中增加两个 RGBA16F 附件，记录直射漫反射
+加自发光、接收材质响应和法线。禁止将最终画面、天空 IBL、高光或已有 SSIL 再次作为反弹源。
+保留材质遮挡、清漆衰减和已支持的线性样式；GTAO 不再次乘到已经追踪可见性的反弹项。
+
+SSIL 使用稳定空间采样、32 位可见性扇区和保边重建，无独立历史；TAA 仍由应用控制。
+只接收支持的 opaque PBR Model / 3D Tiles，其他 opaque 几何仅遮挡。限定 HDR / WebGL2 /
+单视锥和已确认的后光照分支，布局不支持时明确报错，不能静默重绘几何或降级。
+单独启用需 3 个输出，加 AO 为 4，加基础 SSR 为 6/7；清漆 SSR 同开超出当前附件预算。
+Scene 管理生命周期；借用主颜色/深度不可销毁，禁用保留已分配目标，resize/destroy 释放自有资源。
+MSAA 保留原生颜色样本，辅助材质独立 resolve；边缘混合后的法线是近似，不能声称逐样本 GI。
+屏幕外、隐藏表面、透明和多次反弹不属于本阶段能力。
+
 ## 几何高光抗锯齿（R19）
 
 独立的几何高光过滤按 [ADR-0098](Decisions/ADR-0098-geometric-specular-antialiasing.md)

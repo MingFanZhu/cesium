@@ -2,6 +2,36 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0026",
+      "title": "Capture and compose bounded screen-space indirect diffuse lighting",
+      "status": "active",
+      "reason": "SSIL needs diffuse source and material response from the main draw, with explicit Scene scheduling and lifecycle; final-color postprocessing cannot separate these terms.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ModelColorStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/CPUStylingStageFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISScreenSpaceIndirectLightingSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0099-screen-space-indirect-lighting.md",
+      "removalCondition": "Native Scene exposes equivalent single-pass diffuse transport data and bounded screen-space indirect lighting."
+    },
+    {
       "id": "SGP-0025",
       "title": "Apply optional geometric specular antialiasing before model lighting",
       "status": "active",
