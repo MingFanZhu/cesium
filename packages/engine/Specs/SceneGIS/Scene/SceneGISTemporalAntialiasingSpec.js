@@ -231,6 +231,61 @@ describe("SceneGIS/Scene/SceneGISTemporalAntialiasing", function () {
     // actual presented-pixel variation, not merely intermediate edge-color counts.
     expect(difference / (16 * 96 * 96)).toBeLessThan(0.5);
   });
+  it("stabilizes subpixel railings against a covered background", function () {
+    setup();
+    box.show = false;
+    const instances = [];
+    function addBar(x, y, width, color) {
+      instances.push(
+        new GeometryInstance({
+          geometry: BoxGeometry.fromDimensions({
+            dimensions: new Cartesian3(width, 0.1, 8),
+            vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+          }),
+          modelMatrix: Matrix4.fromTranslation(new Cartesian3(x, y, 0)),
+          attributes: {
+            color: ColorGeometryInstanceAttribute.fromColor(color),
+          },
+        }),
+      );
+    }
+    addBar(0, 2, 20, Color.WHITE);
+    for (let i = -12; i <= 12; ++i) {
+      addBar(i * 0.3, 0, 0.035, Color.BLACK);
+    }
+    scene.primitives.add(
+      new Primitive({
+        geometryInstances: instances,
+        appearance: new PerInstanceColorAppearance({
+          flat: true,
+          translucent: false,
+          closed: true,
+        }),
+        asynchronous: false,
+      }),
+    );
+    scene.camera.setView({
+      destination: new Cartesian3(0, -14, 1),
+      orientation: { direction: Cartesian3.UNIT_Y, up: Cartesian3.UNIT_Z },
+    });
+    taa.enabled = true;
+    render(32);
+    const read = () =>
+      scene.context.readPixels({ x: 24, y: 24, width: 48, height: 48 });
+    let previous = read();
+    let difference = 0;
+    for (let frame = 0; frame < 16; ++frame) {
+      render();
+      const pixels = read();
+      for (let i = 0; i < pixels.length; i += 4) {
+        difference += Math.abs(pixels[i] - previous[i]);
+      }
+      previous = pixels;
+    }
+    // Both sides of an edge contain geometry. Jitter changing the selected surface
+    // must not repeatedly discard the integrated subpixel coverage.
+    expect(difference / (16 * 48 * 48)).toBeLessThan(2);
+  });
   it("supports orthographic motion, resize and deterministic history lifetime", function () {
     setup(false, true);
     taa.enabled = true;

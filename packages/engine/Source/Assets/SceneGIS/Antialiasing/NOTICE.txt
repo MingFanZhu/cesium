@@ -6,8 +6,10 @@ License: Apache License, Version 2.0 (see Filament-LICENSE.txt).
 
 SceneGIS modifications (2026): adapted Lanczos current-color reconstruction,
 five-tap Catmull-Rom history sampling with deringing, neighborhood/variance bounds,
-segment clipping and HDR blending for Cesium GLSL. Added linear-depth reprojection,
-CPU camera-relative transforms, silhouette support, depth rejection and current alpha.
+segment clipping, luminance-based flicker suppression and HDR blending for Cesium GLSL.
+Added linear-depth reprojection,
+CPU camera-relative transforms, silhouette support, jitter-aligned depth-footprint
+rejection and current alpha.
 No Filament renderer, material compiler or runtime is included.
 
 Original history-filter source credits retained from Filament:

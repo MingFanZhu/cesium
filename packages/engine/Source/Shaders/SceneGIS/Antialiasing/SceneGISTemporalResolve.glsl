@@ -11,6 +11,7 @@ uniform mat4 u_previousProjection;
 uniform mat4 u_previousFromCurrent;
 uniform float u_historyWeight;
 uniform vec2 u_jitter;
+uniform vec2 u_previousJitter;
 uniform bool u_valid;
 in vec2 v_textureCoordinates;
 layout(location = 0) out vec4 out_FragColor;
@@ -152,17 +153,45 @@ void main()
     vec2 previousUv = uv + (clip.xy / clip.w * 0.5 + 0.5 - sampleUv);
     vec2 border = 0.5 / size;
     if (any(lessThan(previousUv, border)) || any(greaterThan(previousUv, 1.0 - border))) { return; }
-    float oldDepth = texture(u_historyDepth, previousUv).r;
+    // Color history is reconstructed at pixel centers, but depth history retains
+    // the jittered surface samples. Project the actual depth sample into the old
+    // jittered grid, rather than reading depth at the unjittered color coordinate.
+    vec2 previousDepthUv = clip.xy / clip.w * 0.5 + 0.5 + u_previousJitter * 0.5;
+    ivec2 depthBase = ivec2(floor(previousDepthUv * size - 0.5));
+    float depthError = 1.0e30;
+    // At a subpixel edge, either side may supply the nearest sample in each frame.
+    // Accept a matching surface in the reconstruction footprint, without blending
+    // foreground/background depths into a fictitious surface or widening tolerance.
+    for (int y = 0; y < 2; ++y) {
+        for (int x = 0; x < 2; ++x) {
+            ivec2 location = clamp(depthBase + ivec2(x, y), ivec2(0), ivec2(size) - 1);
+            float oldDepth = texelFetch(u_historyDepth, location, 0).r;
+            if (oldDepth > 0.0) {
+                depthError = min(depthError, abs(oldDepth + previousEye.z));
+            }
+        }
+    }
     float tolerance = max(max(0.01, -previousEye.z * 0.002), depthFootprint);
-    if (oldDepth <= 0.0 || abs(oldDepth + previousEye.z) > tolerance) { return; }
+    if (depthError > tolerance) { return; }
 
     mean *= 0.2;
     vec3 sigma = sqrt(abs(square * 0.2 - mean * mean));
     vec3 low = max(mix(low5, low9, 0.5), mean - sigma);
     vec3 high = min(mix(high5, high9, 0.5), mean + sigma);
     vec3 history = clipHistory(low, high, reconstructed, sampleHistory(previousUv, size));
+    // Filament/Lottes: attenuate an inconsistent current sample after clipping has
+    // rejected stale colors. Thin highlights should not dominate the accumulated
+    // coverage merely because this frame's jitter happens to hit them.
+    float currentWeight = 1.0 - u_historyWeight;
+    if (u_historyWeight > 0.0) {
+        float currentLuma = dot(reconstructed, vec3(0.2126, 0.7152, 0.0722));
+        float historyLuma = dot(history, vec3(0.2126, 0.7152, 0.0722));
+        float confidence = 1.0 - abs(currentLuma - historyLuma)
+            / (0.001 + max(currentLuma, historyLuma));
+        currentWeight *= confidence * confidence;
+    }
     // Keep Filament's ordering: spatial reconstruction and clipping in linear RGB,
     // HDR compression only for temporal blending, then restore linear HDR radiance.
-    vec3 result = mix(compressColor(reconstructed), compressColor(history), u_historyWeight);
+    vec3 result = mix(compressColor(history), compressColor(reconstructed), currentWeight);
     out_FragColor = vec4(expandColor(result), current.a);
 }

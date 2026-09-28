@@ -328,3 +328,11 @@ After R20 checkpoint `2bd5a2598f` and owner acceptance, activate
 mapping with bounded GPU histogram metering; local exposure remains deferred.
 
 R21 implementation and technical review are complete; see its linked review for GPU/regression, release/type and performance evidence. Owner visual review is pending. No subsequent phase is active.
+
+### R4 Bistro stability follow-up, 2026-09-28
+
+The owner reopens accepted R4 for stationary subpixel flicker. The existing phase now
+records the corrected previous-jitter depth footprint and Filament luminance weighting.
+Implementation and [self-review](../reviews/2026-09-28-r4-bistro-flicker.md) are complete,
+with 13 dev/release Specs and bounded GPU evidence. No new phase or upstream seam; owner
+visual acceptance is pending.

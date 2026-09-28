@@ -58,6 +58,7 @@ function allocate(effect) {
       sample: 0,
       index: 0,
       jitter: new Cartesian2(),
+      previousJitter: new Cartesian2(),
       projection: new Matrix4(),
       inverseProjection: new Matrix4(),
       previousProjection: new Matrix4(),
@@ -82,6 +83,7 @@ function allocate(effect) {
         u_previousFromCurrent: () => state.previousFromCurrent,
         u_historyWeight: () => effect.historyWeight,
         u_jitter: () => state.jitter,
+        u_previousJitter: () => state.previousJitter,
         u_valid: () => state.valid,
       },
     });
@@ -206,6 +208,7 @@ SceneGISTemporalAntialiasing.resolve = function (scene, color) {
   const result = state.history[state.index].getColorTexture(0);
   Matrix4.clone(state.projection, state.previousProjection);
   Matrix4.clone(scene.camera.viewMatrix, state.previousView);
+  Cartesian2.clone(state.jitter, state.previousJitter);
   state.index = 1 - state.index;
   state.sample = (state.sample + 1) % 8;
   state.valid = true;

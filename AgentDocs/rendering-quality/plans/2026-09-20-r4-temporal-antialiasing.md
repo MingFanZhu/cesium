@@ -1,6 +1,6 @@
 # Phase R4: Temporal Antialiasing
 
-- Type: `phase`; status: `completed`; updated: `2026-09-21`
+- Type: `phase`; status: `completed`; updated: `2026-09-28`
 - Parent: [Rendering quality](2026-09-18-rendering-quality-extension.md)
 - Owner / reviewer: Current task, architecture and execution self-review
 - Architecture: confirmed; previous checkpoint: R14 `31ba432cc8`, owner accepted
@@ -89,3 +89,31 @@ inspection and paired measurements. Native AutomaticUniforms has 87 passes and o
 overlay constant mismatch (14 versus 13), verified directly at R14 HEAD. No material FPS gain
 was measured; TAA remains optional. Owner visual acceptance is pending. Create this phase checkpoint
 before starting another phase.
+
+## 2026-09-28 Bistro flicker follow-up
+
+Owner reopens R4 for severe flicker on static Bistro railings/foliage. At a fixed camera,
+disabling AO, SSR and shadows does not remove the fault. The depth history stores jittered
+samples but rejection reads at the unjittered color-history coordinate. A single nearest
+depth also rejects valid subpixel coverage when consecutive samples hit opposite sides
+of an edge. A temporary diagnostic aligns previous depth sampling with both frame jitters
+and checks the four samples surrounding the projected surface; static mean RGB variation
+falls from 0.982 to 0.504 byte levels/frame at 1185x667.
+
+Scope: retain covered-pixel depth for camera motion; explicitly retain the previous jitter,
+validate depth against the corresponding 2x2 footprint, and adapt Filament's existing
+luminance-based current-sample weighting (diagnostic variation 0.256). Preserve explicit
+zero history weight, color clipping, real disocclusion, camera/API contracts, pass count and
+resource ownership. No object motion vectors, new targets, upstream hooks or blanket
+history-weight change. Changes are confined to owned renderer/resolve/Specs and records.
+
+Before implementation, add a thin foreground/background GPU regression and show it fails
+on HEAD. Validate all TAA Specs, release build and release Specs, compare the same Bistro
+view and moving-camera behavior, and record bounded GPU cost. Update ADR-0094 and shipped
+attribution for the additional Filament adaptation. Complete self-review and one local
+checkpoint; final quality remains subject to owner visual acceptance.
+
+Follow-up implementation and self-review are complete. The [Bistro review](../reviews/2026-09-28-r4-bistro-flicker.md)
+records 13 dev/release passes, release/types, 68.9% lower static frame variation with the
+owner's automatic exposure enabled, and approximately 0.005 ms extra isolated resolve cost.
+No upstream or resource-layout changes. Owner visual acceptance remains pending.

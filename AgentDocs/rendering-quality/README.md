@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                        |
-| ---------------------- | ------------------------------------------------------------ |
-| Extension slug         | `rendering-quality`                                          |
-| Status                 | `active`                                                     |
-| Planning model         | `extension`                                                  |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)   |
-| Current phase          | R21 technically complete; owner visual review pending        |
-| Active phase plan      | None; completed [R21](plans/2026-09-28-r21-auto-exposure.md) |
-| Active standalone plan | None                                                         |
-| Architecture contact   | Current task                                                 |
-| Execution contact      | Current task                                                 |
-| Last updated           | `2026-09-28`                                                 |
+| Field                  | Value                                                              |
+| ---------------------- | ------------------------------------------------------------------ |
+| Extension slug         | `rendering-quality`                                                |
+| Status                 | `active`                                                           |
+| Planning model         | `extension`                                                        |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)         |
+| Current phase          | R4 Bistro follow-up complete; owner visual review pending          |
+| Active phase plan      | None; completed [R4](plans/2026-09-20-r4-temporal-antialiasing.md) |
+| Active standalone plan | None                                                               |
+| Architecture contact   | Current task                                                       |
+| Execution contact      | Current task                                                       |
+| Last updated           | `2026-09-28`                                                       |
 
 ## Scope
 
@@ -99,3 +99,9 @@
   and unchanged-view inspection. One upstream shader, `SGP-0023` /
   [ADR-0095](../../Documentation/SceneGIS/Decisions/ADR-0095-degenerate-model-normal-mapping.md).
   Camera/settings are restored. No subsequent renderer phase is active.
+
+- R4 Bistro flicker follow-up: [review](reviews/2026-09-28-r4-bistro-flicker.md) and
+  [phase](plans/2026-09-20-r4-temporal-antialiasing.md) technically complete on 2026-09-28.
+  Previous-jitter depth registration, 2x2 surface support and pinned Filament luminance
+  weighting reduce static variation with unchanged scene exposure. Thirteen strict TAA
+  Specs pass in dev/release; build/types pass. No upstream changes; owner visual review pending.

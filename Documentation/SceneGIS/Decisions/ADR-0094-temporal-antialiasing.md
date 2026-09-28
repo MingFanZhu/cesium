@@ -63,3 +63,24 @@ boundary. The JSON manifest declares text format and a 16 KiB total budget; thes
 runtime fetch or GPU allocation. When updating Filament, review the pinned filter, clipping,
 jitter conventions and HDR ordering together, retain provenance, and rerun motion/static GPU
 regressions. Do not import Filament's renderer or material compiler.
+
+## 2026-09-28: Depth registration and subpixel flicker
+
+Color history is unjittered; depth history deliberately preserves the original jittered
+surface samples. Retain the previous clip-space jitter with the previous view/projection.
+Depth validation projects the actual current sample into the previous jittered grid,
+and accepts a matching positive depth in its 2x2 reconstruction footprint. It never
+interpolates foreground/background depths or substitutes a neighbor for a covered pixel's
+current depth. Existing continuous-slope tolerance and color clipping remain in force.
+This corrects repeated false disocclusion of stationary subpixel railings.
+
+Also adapt the pinned Filament/Lottes luminance-difference weighting after history clipping,
+before HDR blending. The public historyWeight name, default, range and zero-history behavior
+remain unchanged; its documented meaning becomes the base contribution, since inconsistent
+current luminance may increase retention of already validated/clipped history. This supersedes
+the earlier exclusion of Filament's optional flicker suppression. No new public control,
+target, pass or geometry submission is added. Three extra depth fetches replace the single
+nearest-depth test. Independently animated/translucent content remains a documented limitation.
+
+See the [Bistro follow-up review](../../../AgentDocs/rendering-quality/reviews/2026-09-28-r4-bistro-flicker.md)
+for the failing-old/passing-new regression, visual qualification and GPU measurement.

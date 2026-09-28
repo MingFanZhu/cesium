@@ -19,7 +19,7 @@ import Renderer from "./_private/_SceneGISTemporalAntialiasing.js";
  * @param {object} options Initialization options.
  * @param {Scene} options.scene The live Scene; only one effect may be attached.
  * @param {boolean} [options.enabled=false] Whether temporal antialiasing is enabled.
- * @param {number} [options.historyWeight=0.9] Maximum history contribution in [0, 0.95].
+ * @param {number} [options.historyWeight=0.9] Base history contribution in [0, 0.95]; zero disables history blending.
  * @exception {RuntimeError} Enabled TAA requires HDR, SCENE3D and supported WebGL2 targets; stereo is excluded.
  * @example
  * scene.highDynamicRange = true;
@@ -96,7 +96,9 @@ Object.defineProperties(SceneGISTemporalAntialiasing.prototype, {
     },
   },
   /**
-   * Maximum history contribution; lower values respond faster to changing content.
+   * Base history contribution; lower values respond faster to changing content.
+   * After depth rejection and color clipping, luminance differences can increase
+   * history retention to suppress subpixel flicker. Zero disables history blending.
    * @memberof SceneGISTemporalAntialiasing.prototype
    * @type {number}
    * @default 0.9
