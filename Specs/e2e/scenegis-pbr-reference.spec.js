@@ -74,9 +74,7 @@ test("Bistro preserves supplied geometry and restores source material channels",
     if (material.name === "Paris_LiquorBottle_01_Labels") {
       expect(pbr.metallicFactor).toBe(0);
     } else {
-      expect(pbr.metallicRoughnessTexture.index).toBe(
-        material.occlusionTexture.index,
-      );
+      expect(material.occlusionTexture).toBeUndefined();
       expect(pbr.roughnessFactor).toBe(1);
       const image =
         gltf.images[gltf.textures[pbr.metallicRoughnessTexture.index].source];
@@ -171,7 +169,7 @@ for (const world of ["planar", "globe"]) {
       await readFile(await (await download).path(), "utf8"),
     );
     expect(saved.sourceGlb.sha256).toHaveLength(64);
-    expect(saved.materialNotes).toHaveLength(3);
+    expect(saved.materialNotes).toHaveLength(4);
     expectCamera(saved.camera, overview.camera);
     // Keep native controller input verification independent of the fixed comparison.
     await page.mouse.move(650, 650);

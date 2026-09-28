@@ -255,3 +255,14 @@ The one-shader correction preserves geometry normals on those faces and retains 
 maps on valid UVs. `SGP-0023` / ADR-0095 and the existing Bistro plan/review track bounded
 GPU validation and unchanged-view evidence. Technical correction is complete; owner
 visual acceptance remains pending, and no subsequent renderer phase is activated.
+
+On 2026-09-28 the owner approves [R16 Cycles calibration](2026-09-28-r16-cycles-calibration.md).
+Establish a same-asset, matched-camera/light/output reference and inspect material and
+AA/SSR contributions before changing lighting algorithms. Local probes, indirect lighting,
+glass and foliage remain subsequent candidates, with no implementation activated yet.
+
+R16 implementation and [review](../reviews/2026-09-28-r16-cycles-calibration.md) complete:
+matched Cycles full/direct reference, independent comparison and diagnostic exports, six
+focused checks, and a confirmed Bistro unused-AO binding correction. Source roughness and
+cross-renderer transport limits are explicit. Owner visual acceptance is pending; no next
+phase is active. Form the local R16 checkpoint before further implementation.

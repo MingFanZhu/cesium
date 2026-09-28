@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bistro · 画质校准</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font:
+          15px/1.6 system-ui,
+          sans-serif;
+        background: #101519;
+        color: #dce3e7;
+      }
+      body {
+        margin: 0;
+      }
+      header,
+      main,
+      footer {
+        max-width: 1600px;
+        margin: auto;
+        padding: 16px 28px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 26px;
+        font-weight: 600;
+      }
+      p {
+        margin: 8px 0;
+      }
+      a {
+        color: #97d8e8;
+      }
+      .eyebrow {
+        color: #90a4ae;
+        font-size: 12px;
+        letter-spacing: 0.15em;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      select,
+      button {
+        padding: 8px;
+        border: 1px solid #4b5c65;
+        border-radius: 5px;
+        background: #202b32;
+        color: inherit;
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      input[type="range"] {
+        flex: 1;
+        min-width: 140px;
+        accent-color: #97d8e8;
+      }
+      #scroll {
+        overflow: auto;
+      }
+      #comparison {
+        position: relative;
+        width: 100%;
+        background: #202b32;
+        --split: 50%;
+      }
+      #comparison.native {
+        width: var(--width);
+      }
+      #comparison img {
+        width: 100%;
+        display: block;
+      }
+      #left {
+        position: absolute;
+        inset: 0;
+        clip-path: inset(0 calc(100% - var(--split)) 0 0);
+      }
+      #divider {
+        position: absolute;
+        inset: 0 auto 0 var(--split);
+        width: 2px;
+        background: #d4e7ed;
+        pointer-events: none;
+      }
+      .caption {
+        position: absolute;
+        top: 12px;
+        padding: 5px 10px;
+        background: #101519df;
+        border-radius: 4px;
+      }
+      #left-caption {
+        left: 12px;
+      }
+      #right-caption {
+        right: 12px;
+      }
+      #status {
+        color: #a3b6c2;
+      }
+      #error {
+        color: #ffb7ad;
+      }
+      details {
+        margin-top: 12px;
+        max-width: 1050px;
+      }
+      footer {
+        color: #a3b6c2;
+        border-top: 1px solid #30404a;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (max-width: 650px) {
+        header,
+        main,
+        footer {
+          padding: 12px;
+        }
+        .caption {
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="eyebrow">SCENEGIS / RENDERING LAB</div>
+      <h1>Bistro · 画质校准</h1>
+      <p>
+        同一资产、相机、太阳与 HDR
+        天空。拖动分界线，观察光照、材质和抗锯齿各自的影响。
+      </p>
+      <p id="status" role="status">正在读取本机参考图…</p>
+      <p id="error" role="alert"></p>
+    </header>
+    <main>
+      <div class="toolbar">
+        <button type="button" data-pair="reference">引擎 / Cycles</button>
+        <button type="button" data-pair="transport">Cycles 间接光</button>
+        <button type="button" data-pair="effects">AO + SSR</button>
+        <button type="button" data-pair="aa">抗锯齿</button>
+        <label><input id="native" type="checkbox" /> 原始像素 1:1</label>
+      </div>
+      <div class="toolbar">
+        <label
+          >左图
+          <select id="select-left" aria-label="左图"></select
+        ></label>
+        <label for="split">分界线</label>
+        <input id="split" type="range" min="0" max="100" value="50" />
+        <label
+          >右图
+          <select id="select-right" aria-label="右图"></select
+        ></label>
+      </div>
+      <div id="scroll">
+        <div id="comparison" hidden>
+          <img id="right" alt="右侧对照图" />
+          <img id="left" alt="左侧对照图" />
+          <div id="divider"></div>
+          <span id="left-caption" class="caption"></span>
+          <span id="right-caption" class="caption"></span>
+        </div>
+      </div>
+      <p id="description"></p>
+      <details>
+        <summary>如何解释这些对照</summary>
+        <p>
+          引擎受控图关闭 AO、SSR、雾和空气透视，使用 4×MSAA。Cycles 保留相同的
+          1K 纹理和透明材质，没有补建模或新增玻璃透射。两侧均使用 PBR
+          Neutral、相同曝光与 gamma。
+        </p>
+        <p>
+          Cycles
+          的“零反弹”仍计算光源、环境的直接照明及几何遮挡；“多次反弹”增加漫反射和光泽反射各
+          4 次反弹。该组可观察反弹光贡献；引擎 / Cycles 的全部差异不能都归于
+          GI。
+        </p>
+        <p>
+          引擎天空漫反射是半球近似，反射天空不包含周围建筑；Cycles
+          对天空逐方向积分并计算遮挡。BRDF、法线切线、纹理过滤、透明排序与阴影采样也可能有差异。
+        </p>
+        <p>
+          材质分项图不参与光照和 HDR 色调映射；以 sRGB
+          显示，灰度不等于纹理原始数值。法线为映射到 0–1 的世界空间法线。
+        </p>
+      </details>
+    </main>
+    <footer>
+      <p>
+        <a href="PBR综合验收.html?world=planar">实时场景</a> ·
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="pbr-data/Calibration.md">复现步骤与校准记录</a>
+      </p>
+      <p>
+        <a href="pbr-data/local/calibration/Bistro-reference.blend"
+          >Blender 工程</a
+        >
+        · <a href="pbr-data/local/calibration/cycles-full.exr">线性 EXR</a> ·
+        <a href="pbr-data/local/calibration/reference-report.json">渲染参数</a>
+      </p>
+      <p>
+        Amazon Lumberyard Bistro / ORCA · CC BY
+        4.0。图像与工程保存在本机，未随源码提交。
+      </p>
+    </footer>
+    <script type="module" src="./PBR画质校准.js"></script>
+  </body>
+</html>

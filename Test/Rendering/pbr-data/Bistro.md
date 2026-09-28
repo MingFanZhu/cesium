@@ -20,9 +20,14 @@
 
 原 GLB 的所有材质均为 BLEND、金属度 1、粗糙度约 0.553，没有 ORM 纹理。
 原始 README 明确规定 `Specular.dds` 的 R/G/B 分别是 AO、粗糙度和金属度，
-不是普通高光颜色。准备脚本用原始纹理重建 glTF metallic-roughness / occlusion，
+不是普通高光颜色。准备脚本用原始纹理重建 glTF metallic-roughness，
 移除误接的 `KHR_materials_specular`；DirectX 法线翻转绿色通道后用于 glTF。
 转换在原始数值通道上进行，不应用显示色调映射。
+
+2026-09-28 校准发现 131 张源 ORM 的 R 通道全零，源 Falcor 对此槽位标为
+unsupported；它不能作为 glTF 的有效 AO 绑定，现已移除这些 `occlusionTexture`。
+保留原始 ORM 字节及 G/B 数值，125 张粗糙度近似常数 0.741 的源特征也保留。
+复现及独立 Cycles 对照见 [画质校准记录](Calibration.md)。
 
 120 个完全不透明材质使用 OPAQUE，7 个植被或源命名 MASKED 材质使用 MASK
 （阈值 0.5），5 个其余带透明度材质保留 BLEND。保留原有双面属性与自发光。

@@ -17,6 +17,44 @@ import bpy
 import numpy as np
 
 
+OCCLUSION_NOTE = "Source ORM red is entirely zero and is not authored AO: omit occlusionTexture."
+
+
+def repair_occlusion_bindings(gltf, records):
+    """Bistro's unused zero red channel must not become glTF zero visibility.
+
+    Falcor scene-formats.md documents this source slot as unsupported. Restrict
+    the correction to the measured all-zero source channel; retain real AO maps.
+    """
+    by_uri = {record["uri"]: record for record in records}
+    removed = 0
+    for material in gltf["materials"]:
+        binding = material.get("occlusionTexture")
+        if binding is None:
+            continue
+        image = gltf["images"][gltf["textures"][binding["index"]]["source"]]
+        record = by_uri[image["uri"]]
+        if record["kind"] == "Specular" and record["channelMax"][0] == 0:
+            del material["occlusionTexture"]
+            removed += 1
+    return removed
+
+
+def update_occlusion(output):
+    """Repair an already prepared fixture without re-encoding any texture."""
+    model = output / "Bistro.gltf"
+    report_file = output / "prepared.json"
+    gltf = json.loads(model.read_text(encoding="utf8"))
+    report = json.loads(report_file.read_text(encoding="utf8"))
+    assert report["id"] == "scenegis-bistro-v5.2-20260921"
+    removed = repair_occlusion_bindings(gltf, report["textures"])
+    if OCCLUSION_NOTE not in report["assumptions"]:
+        report["assumptions"].append(OCCLUSION_NOTE)
+    model.write_text(json.dumps(gltf, separators=(",", ":")), encoding="utf8")
+    report_file.write_text(json.dumps(report, indent=2), encoding="utf8")
+    print("BISTRO_OCCLUSION_CORRECTED", removed, flush=True)
+
+
 def prepare(source, archive, output, maximum_size):
     output.mkdir(parents=True, exist_ok=True)
     textures = output / "textures"
@@ -151,6 +189,7 @@ def prepare(source, archive, output, maximum_size):
             "alphaRange": [alpha_min, alpha_max],
             "orm": orm is not None,
         })
+    repair_occlusion_bindings(gltf, records)
     gltf["asset"]["generator"] += " / SceneGIS Bistro source material restoration"
     (output / "Bistro.gltf").write_text(
         json.dumps(gltf, separators=(",", ":")), encoding="utf8"
@@ -180,6 +219,7 @@ def prepare(source, archive, output, maximum_size):
             "Paris_LiquorBottle_01_Labels has no source ORM: use metallic=0, roughness=1.",
             "Foliage/authored MASKED alpha cutoff=0.5.",
             "Source alpha does not implement physical glass transmission.",
+            OCCLUSION_NOTE,
         ],
         "textureMipBytesRGBA8": sum(
             r["size"][0] * r["size"][1] * 4 * 4 / 3 for r in records
@@ -199,7 +239,10 @@ def prepare(source, archive, output, maximum_size):
 
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:]
-    prepare(
-        Path(args[0]).resolve(), Path(args[1]).resolve(), Path(args[2]).resolve(),
-        int(args[3]) if len(args) > 3 else 1024,
-    )
+    if args[0] == "--update-occlusion":
+        update_occlusion(Path(args[1]).resolve())
+    else:
+        prepare(
+            Path(args[0]).resolve(), Path(args[1]).resolve(), Path(args[2]).resolve(),
+            int(args[3]) if len(args) > 3 else 1024,
+        )

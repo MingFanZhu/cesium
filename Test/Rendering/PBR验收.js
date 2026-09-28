@@ -575,6 +575,24 @@ if (composite) {
     .onChange(state.setAnimation);
 }
 gui.add(state, "exportConfig").name("导出验收配置");
+if (street && planar) {
+  const calibration = {
+    async exportCycles() {
+      calibration.button.disable();
+      try {
+        const { downloadCalibration } = await import("./PBR校准导出.js");
+        await downloadCalibration(window.example);
+      } catch (error) {
+        document.getElementById("error").textContent = error.message;
+      } finally {
+        calibration.button.enable();
+      }
+    },
+  };
+  calibration.button = gui
+    .add(calibration, "exportCycles")
+    .name("导出 Cycles 校准");
+}
 const removeError = scene.renderError.addEventListener((...args) => {
   document.getElementById("error").textContent = args[1].message;
 });
