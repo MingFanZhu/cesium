@@ -1110,6 +1110,19 @@ local XY 米制平面，modelMatrix 使用刚体变换；Globe 采用 ENU，Plan
 非当前网格缓存不超过 16 MiB。复用 R8 opaque/天空输入及延迟绘制缝隙，不新增上游补丁。
 这是均匀平均水深下的风浪外观，不承诺岸边绕射、地形驱动水流、洪水、破碎浪或水文预测。
 
+## 可编程 GPU 粒子
+
+[ADR-0102](Decisions/ADR-0102-gpu-particle-foundation.md) 增加独立的
+`SceneGISGpuParticleSystem` 图元。用户提供 GLSL 初始化与更新函数，以及自定义
+`uniformMap`；底层不内置力、速度积分、发射形状或天气行为。状态使用局部米制坐标，
+调用方提供刚体 `modelMatrix` 与保守的局部 `boundingSphere`；Globe / Planar 共用 API。
+
+固定容量状态存储于四张 RGBA32F 纹理的双缓冲集合；正常帧时间变化时执行一次 MRT 更新，
+无逐粒子 CPU 更新或读回。CPU 只调度循环槽位的发射；容量饱和覆盖旧槽位。
+一个实例化 quad 命令接入原生透明/OIT、深度与系统级拾取，pick pass 不推进模拟。
+资源由图元所有，集合负责销毁；Shader uniform 引用与输入图像借用，上传的图像纹理由图元所有。
+不承诺逐粒子排序、光照、阴影、碰撞或运动矢量；雨雪作为后续独立封装。
+
 ## 全局自动曝光（R21）
 
 [ADR-0100](Decisions/ADR-0100-global-auto-exposure.md) / SGP-0027 增加默认关闭的

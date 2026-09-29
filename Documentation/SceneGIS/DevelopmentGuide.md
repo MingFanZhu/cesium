@@ -915,6 +915,63 @@ waves.destroy();
 和 `Test/Rendering/playwright.wind-water.config.mjs`；GPU 数值与独立 CPU DFT 对照。
 实现、边界和实测预算见 ADR-0101 与 R22 review。
 
+## 可编程 GPU 粒子使用与验证
+
+把 `SceneGISGpuParticleSystem` 加入 `scene.primitives`，由用户 GLSL 定义运动规律：
+
+```js
+const acceleration = new Cesium.Cartesian3(0, 0, -2);
+const particles = scene.primitives.add(
+  new Cesium.SceneGISGpuParticleSystem({
+    maximumParticles: 65536,
+    emissionRate: 10000,
+    modelMatrix,
+    boundingSphere: new Cesium.BoundingSphere(Cesium.Cartesian3.ZERO, 100),
+    simulationShader: `
+      uniform vec3 u_acceleration;
+      void initializeParticle(inout SceneGISParticle p) {
+        float a = sceneGISParticleRandom(p.seed, 0.0) * 6.2831853;
+        p.velocity = vec3(cos(a), sin(a), 4.0);
+        p.life = 4.0;
+        p.size = vec2(0.2);
+        p.color = vec4(0.2, 0.7, 1.0, 0.8);
+      }
+      void updateParticle(inout SceneGISParticle p, float dt) {
+        p.position += p.velocity * dt + 0.5 * u_acceleration * dt * dt;
+        p.velocity += u_acceleration * dt;
+      }`,
+    uniformMap: { u_acceleration: () => acceleration },
+  }),
+);
+```
+
+`SceneGISParticle` 包含 `position/velocity`（vec3）、`color`（vec4）、`size`（vec2）、
+`rotation/life/age/seed`（float）。位置与尺寸使用局部米制，rotation 为屏幕逆时针弧度，
+life/age 单位秒。age/seed 由底层维护，其余字段由 Shader 保存和修改；更新函数读取推进后的 age。
+引擎本身不会积分 velocity。`sceneGISParticleRandom(seed, stream)` 提供确定性 [0,1) 随机值。
+出生粒子按其帧内年龄执行首次更新；life=0 可主动终止粒子。
+
+构造后 capacity（`maximumParticles`）、Shader、uniformMap 的键、seed 和输入 image 不变。
+回调可返回变化的 uniform；资源由调用方负责，避免回调中每帧分配新对象。
+`u_sg` 与 `czm_` 开头的 uniform 名保留。decoded image/canvas/bitmap 可作为可选 image；
+底层拥有上传副本，没有 image 时使用柔边圆形。
+
+`paused=true` 保留画面并冻结模拟，`show=false` 隐藏并停止模拟，`emissionRate=0` 只停止发射。
+`reset()` 在下一正常帧清空并重启序列，复用已有资源；Scene 时间倒退同样重置。
+向前跳时直接把实际 dt 传给 Shader，调用方须选择适合的积分方案，没有隐式限步或补帧。
+`modelMatrix` 必须是刚体变换，修改后已有粒子一起移动；Globe 使用 ENU，Planar 使用笛卡尔放置。
+调用方确保位置及 sprite 最大范围处于局部 boundingSphere 内；不做逐粒子 CPU 回读计算包围体。
+
+要求 WebGL2、float color buffer 与四个 MRT 输出；每个分配槽位双缓冲共 128 字节，
+64K 状态占 8 MiB、256K 占 32 MiB，非方形容量有纹理 padding。固定容量决定更新成本，
+大 sprite 和大量透明叠加仍受 fill rate 限制。OIT 不可用时不做逐粒子排序；不含碰撞、光照、
+阴影和粒子运动矢量。默认集合拥有图元：`scene.primitives.remove(particles)` 会销毁资源。
+
+自动验证入口 `SceneGIS/Scene/SceneGISGpuParticleSystem`，独立人工入口
+`Test/Rendering/GPU粒子.html?world=planar` / `world=globe`。
+示例的喷泉重力、轨道与体积漂浮均为调用方 Shader；天气不是底层参数。
+性能证据与首版边界见 `AgentDocs/gpu-particles/reviews/`。
+
 ## 几何高光抗锯齿
 
 PBR Model / 3D Tiles 可独立启用几何高光过滤，Globe / Planar 使用同一接口：

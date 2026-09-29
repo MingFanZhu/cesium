@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>可编程 GPU 粒子</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+    <style>
+      aside {
+        max-height: calc(100% - 65px);
+        overflow: auto;
+      }
+      pre {
+        overflow: auto;
+        max-height: 280px;
+        font-size: 11px;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>可编程 GPU 粒子</h1>
+      <p>
+        喷泉、轨道与体积漂浮共用同一套粒子接口，运动规律由示例中的 Shader 定义。
+      </p>
+      <p>
+        浅色方块用于观察深度遮挡。可以暂停、停止发射或重置粒子；切换示例和容量会重新开始。
+      </p>
+      <p id="status">正在初始化…</p>
+      <details>
+        <summary>查看当前粒子 Shader</summary>
+        <pre id="shader"></pre>
+      </details>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="示例目录.html">目录</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./GPU粒子.js"></script>
+  </body>
+</html>
