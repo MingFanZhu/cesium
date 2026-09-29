@@ -18,4 +18,4 @@ P1 checkpoint is complete. P2 implements aerial rain/snow using the generic foun
 
 Post-checkpoint owner feedback removes cloud composition from the weather example. Rain/snow, atmosphere and height fog remain; the standalone environment subsystem is unaffected. See the P2 plan follow-up.
 
-The Globe example now uses a pinned OSM Nanjing building extract in Test/Rendering/data/NanjingBuildings, with native batched extrusion and explicit height estimates. Planar retains its schematic district. Data preparation is scripts/scenegis/prepare-weather-city.mjs; example-level validation is Specs/e2e/scenegis-weather.spec.js with Test/Rendering/playwright.weather.config.mjs. No engine or weather API change.
+The owner superseded the local snapshot with native Cesium ion OSM Buildings, World Terrain and default world imagery streaming. Globe uses existing SDK authorization and the Nanjing camera; Planar retains its schematic district. The local city fixture and converter are removed. Example validation is Specs/e2e/scenegis-weather.spec.js with Test/Rendering/playwright.weather.config.mjs; Globe requires network/ion access. No engine or weather API change.

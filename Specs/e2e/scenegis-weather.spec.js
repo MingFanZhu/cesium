@@ -8,29 +8,26 @@ for (const world of ["globe", "planar"]) {
     page.on("pageerror", (error) => errors.push(error.message));
     const dataResponses = [];
     page.on("response", (response) => {
-      if (response.url().endsWith("NanjingBuildings/buildings.geojson")) {
+      if (new URL(response.url()).pathname === "/v1/assets/96188/endpoint") {
         dataResponses.push(response.status());
       }
     });
     await page.goto(`/Test/Rendering/鸟瞰天气.html?world=${world}`);
     await page.waitForFunction(
       () =>
-        window.example?.cityPrimitive.ready &&
+        (window.example?.reference.visible ||
+          window.example?.reference.primitive?.ready) &&
         window.example.weather.textureMemoryInBytes > 0,
     );
     await expect(page.locator("#error")).toHaveText("");
     await expect(page.getByLabel("阴天云层", { exact: true })).toHaveCount(0);
     if (world === "globe") {
       expect(dataResponses).toEqual([200]);
-      await expect(page.locator("#data-status")).toContainText("5607");
+      await expect(page.locator("#data-status")).toContainText("Cesium ion");
       await expect(page.locator("#city-credit")).toBeVisible();
-      const reference = await page.evaluate(() => window.example.reference);
-      expect(reference.heightCounts).toMatchObject({
-        height: 501,
-        levels: 315,
-        estimated: 4791,
-        holes: 37,
-      });
+      await page.waitForFunction(
+        () => window.example.viewer.imageryLayers.get(0).ready,
+      );
     } else {
       expect(dataResponses).toEqual([]);
       await expect(page.locator("#data-status")).toHaveText("本地示意街区");
@@ -47,15 +44,37 @@ for (const world of ["globe", "planar"]) {
     ).toHaveValue("雪");
     await expect(page.locator("#error")).toHaveText("");
     const released = await page.evaluate(() => {
-      const { viewer, weather, cityPrimitive, destroy } = window.example;
+      const { viewer, weather, reference, destroy } = window.example;
       destroy();
       return [
         viewer.isDestroyed(),
         weather.isDestroyed(),
-        cityPrimitive.isDestroyed(),
+        reference.primitive.isDestroyed(),
       ];
     });
     expect(released).toEqual([true, true, true]);
     expect(errors).toEqual([]);
   });
 }
+
+test("Weather reports an ion authorization failure without local buildings", async ({
+  page,
+}) => {
+  await page.route("**/v1/assets/96188/endpoint?*", (route) =>
+    route.fulfill({
+      status: 401,
+      contentType: "application/json",
+      body: JSON.stringify({
+        code: "INVALID_TOKEN",
+        message: "Test authorization failure",
+      }),
+    }),
+  );
+  await page.goto("/Test/Rendering/鸟瞰天气.html?world=globe");
+  await expect(page.locator("#error")).toContainText("OSM Buildings 加载失败");
+  await expect(page.locator("#data-status")).toContainText("加载失败");
+  expect(
+    await page.evaluate(() => window.example.reference.primitive === undefined),
+  ).toBe(true);
+  await page.evaluate(() => window.example.destroy());
+});

@@ -5,21 +5,23 @@ import exposeExample from "/Test/example-lifecycle.js";
 
 const planar =
   new URLSearchParams(window.location.search).get("world") !== "globe";
-let cityData;
-if (!planar) {
-  document.getElementById("data-status").textContent =
-    "正在加载南京城区建筑白模…";
-  try {
-    cityData = await C.Resource.fetchJson(
-      "./data/NanjingBuildings/buildings.geojson",
-    );
-  } catch (error) {
-    document.getElementById("error").textContent =
-      `建筑数据加载失败：${error.message}`;
-    throw error;
-  }
-}
 document.getElementById("city-credit").hidden = planar;
+const reference = {
+  name: planar ? "本地示意街区" : "Cesium ion · OSM Buildings · 南京",
+  primitive: undefined,
+  visible: false,
+  failed: false,
+};
+const terrain = planar ? undefined : C.Terrain.fromWorldTerrain();
+const imagery = planar ? undefined : C.ImageryLayer.fromWorldImagery();
+const removeImageryError = imagery?.errorEvent.addEventListener(() => {
+  document.getElementById("error").textContent =
+    "世界影像加载失败，请检查网络和 Cesium ion 授权。";
+});
+const removeTerrainError = terrain?.errorEvent.addEventListener(() => {
+  document.getElementById("error").textContent =
+    "世界地形加载失败，请检查网络和 Cesium ion 授权。";
+});
 const viewer = new C.Viewer("map", {
   ...(planar
     ? {
@@ -36,7 +38,7 @@ const viewer = new C.Viewer("map", {
           baseColor: C.Color.fromCssColorString("#535f56"),
         },
       }
-    : { baseLayer: false }),
+    : { baseLayer: imagery, terrain }),
   skyBox: false,
   skyAtmosphere: false,
   baseLayerPicker: false,
@@ -104,15 +106,15 @@ viewer.clock.currentTime = C.JulianDate.fromIso8601("2026-06-21T02:00:00Z");
 const matrix = planar
   ? C.Matrix4.IDENTITY
   : C.Transforms.eastNorthUpToFixedFrame(
-      C.Cartesian3.fromDegrees(...cityData.metadata.center),
+      C.Cartesian3.fromDegrees(118.785, 32.045, 0),
     );
 const point = (p) => C.Matrix4.multiplyByPoint(matrix, p, new C.Cartesian3());
 const vector = (p) =>
   C.Matrix4.multiplyByPointAsVector(matrix, p, new C.Cartesian3());
 
-const instances = [];
 if (planar) {
   // Keep the existing local schematic district for Planar.
+  const instances = [];
   function box(position, dimensions, color) {
     instances.push(
       new C.GeometryInstance({
@@ -160,50 +162,14 @@ if (planar) {
       }
     }
   }
-} else {
-  // Native polygon workers preserve the geographic footprint and courtyard holes.
-  for (const feature of cityData.features) {
-    const polygons =
-      feature.geometry.type === "Polygon"
-        ? [feature.geometry.coordinates]
-        : feature.geometry.coordinates;
-    for (const [outer, ...holes] of polygons) {
-      const ringPositions = (ring) =>
-        C.Cartesian3.fromDegreesArray(ring.slice(0, -1).flat());
-      instances.push(
-        new C.GeometryInstance({
-          id: feature.id,
-          geometry: new C.PolygonGeometry({
-            polygonHierarchy: new C.PolygonHierarchy(
-              ringPositions(outer),
-              holes.map((ring) => new C.PolygonHierarchy(ringPositions(ring))),
-            ),
-            height: feature.properties.height,
-            extrudedHeight: 0,
-            vertexFormat: C.PerInstanceColorAppearance.VERTEX_FORMAT,
-          }),
-          attributes: {
-            color: C.ColorGeometryInstanceAttribute.fromColor(
-              C.Color.fromCssColorString("#cbd0d4"),
-            ),
-          },
-        }),
-      );
-    }
-  }
+  reference.primitive = scene.primitives.add(
+    new C.Primitive({
+      geometryInstances: instances,
+      asynchronous: false,
+      appearance: new C.PerInstanceColorAppearance({ translucent: false }),
+    }),
+  );
 }
-const cityPrimitive = scene.primitives.add(
-  new C.Primitive({
-    geometryInstances: instances,
-    asynchronous: !planar,
-    appearance: new C.PerInstanceColorAppearance({ translucent: false }),
-  }),
-);
-const reference = {
-  name: planar ? "本地示意街区" : "南京中心城区 · OSM 建筑白模",
-  buildingCount: cityData?.features.length,
-  heightCounts: cityData?.metadata.counts,
-};
 
 const weather = scene.primitives.add(
   new C.SceneGISWeather({
@@ -334,22 +300,54 @@ const removeUpdate = scene.preUpdate.addEventListener(() => {
       `当前强度 ${weather.actualIntensity.toFixed(2)} · 降水状态 ${(weather.textureMemoryInBytes / 1048576).toFixed(1)} MiB · 风向以东／北为水平轴`;
     document.getElementById("data-status").textContent = planar
       ? reference.name
-      : `${reference.name} · ${reference.buildingCount} 栋 · ${cityPrimitive.ready ? "已加载" : "正在生成几何…"}`;
+      : `${reference.name} · ${reference.failed ? "加载失败" : reference.primitive ? (reference.primitive.tilesLoaded && reference.visible ? "当前视角已加载" : "正在流式加载…") : "正在连接 ion…"}`;
   }
 });
 const removeError = scene.renderError.addEventListener((...args) => {
   document.getElementById("error").textContent = args[1].message;
 });
-exposeExample(
-  viewer,
-  gui,
-  { weather, effects, settings, cityPrimitive, reference },
-  () => {
-    removeUpdate();
-    removeError();
-    viewer.removeController(effects);
-    if (environment) {
-      viewer.removeController(environment);
-    }
-  },
-);
+const removeTilesetEvents = [];
+exposeExample(viewer, gui, { weather, effects, settings, reference }, () => {
+  removeUpdate();
+  removeError();
+  removeTerrainError?.();
+  removeImageryError?.();
+  for (const remove of removeTilesetEvents) {
+    remove();
+  }
+  viewer.removeController(effects);
+  if (environment) {
+    viewer.removeController(environment);
+  }
+});
+
+if (!planar) {
+  // Collection ownership begins only after the async ion factory has completed.
+  C.createOsmBuildingsAsync({
+    style: new C.Cesium3DTileStyle({ color: "color('#cbd0d4')" }),
+  })
+    .then((tileset) => {
+      if (viewer.isDestroyed()) {
+        tileset.destroy();
+        return;
+      }
+      reference.primitive = scene.primitives.add(tileset);
+      removeTilesetEvents.push(
+        tileset.tileVisible.addEventListener(() => {
+          reference.visible = true;
+        }),
+        tileset.tileFailed.addEventListener(() => {
+          reference.failed = true;
+          document.getElementById("error").textContent =
+            "建筑瓦片加载失败，请检查网络和 Cesium ion 授权。";
+        }),
+      );
+    })
+    .catch(() => {
+      if (!viewer.isDestroyed()) {
+        reference.failed = true;
+        document.getElementById("error").textContent =
+          "OSM Buildings 加载失败，请检查网络和 Cesium ion 授权。";
+      }
+    });
+}

@@ -1010,10 +1010,12 @@ low/medium/high 总槽位为 16K/32K/64K，双池模拟纹理约 2.02/4/8.04 MiB
 人工入口 `Test/Rendering/鸟瞰天气.html?world=planar` / `world=globe`，
 自动验证 `SceneGIS/Scene/SceneGISWeather` 与 `SceneGIS/Scene/SceneGISGpuParticleSystem`。
 
-球面鸟瞰天气使用本地固定快照 `Test/Rendering/data/NanjingBuildings/buildings.geojson`：
-5,607 个南京城区 OSM 建筑面，原始轮廓和内环由 native PolygonGeometry 批量挤出。
-有 height 标签时使用其值，否则按楼层 × 3 米、最后按 12 米估高；平面继续使用示意街区。
-数据许可、快照和统计见同目录 README。页面运行不依赖公网或 ion token。
+球面鸟瞰天气通过 `createOsmBuildingsAsync` 在线加载 Cesium ion OSM Buildings，
+并使用 `Terrain.fromWorldTerrain()` 与 `ImageryLayer.fromWorldImagery()`；观察位置为南京。
+沿用 SDK 的 `Ion.defaultAccessToken`
+配置，不在示例中保存凭据。ion 建筑和地形按视角流式加载；请求失败会明确提示。
+平面继续使用示意街区。
+不保存本地建筑快照或自行挤出建筑；Globe 验证依赖公网与 ion 授权。
 示例加载、控件和销毁验证：`npx playwright test --config Test/Rendering/playwright.weather.config.mjs`。
 
 ## 几何高光抗锯齿
