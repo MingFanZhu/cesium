@@ -1,6 +1,58 @@
 import { test, expect } from "@playwright/test";
 
 for (const world of ["globe", "planar"]) {
+  test(`Snow details ${world} exposes melting controls and native disposal`, async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(`/Test/Rendering/降雪细节.html?world=${world}`);
+    await expect(page.locator("#status")).toHaveText("本地场景已加载");
+    await page.waitForFunction(
+      () => window.example.snowLens.ready && window.example.reflections.ready,
+    );
+    const lens = page.getByRole("checkbox", { name: "镜头雪点", exact: true });
+    await lens.uncheck();
+    expect(
+      await page.evaluate(() => [
+        window.example.snowLens.enabled,
+        window.example.surfaceWeather.enabled,
+      ]),
+    ).toEqual([false, true]);
+    await lens.check();
+    for (const [name, value] of [
+      ["雪点尺度（像素）", "36"],
+      ["融化周期（秒）", "10"],
+    ]) {
+      const input = page.getByRole("textbox", { name, exact: true });
+      await input.fill(value);
+      await input.press("Tab");
+    }
+    await page
+      .getByRole("checkbox", { name: "场景时间推进", exact: true })
+      .uncheck();
+    expect(
+      await page.evaluate(() => {
+        const { snowLens, viewer, surfaceWeather } = window.example;
+        return [
+          snowLens.enabled,
+          snowLens.flakeSize,
+          snowLens.meltDuration,
+          viewer.clock.shouldAnimate,
+          surfaceWeather.rippleIntensity,
+        ];
+      }),
+    ).toEqual([true, 36, 10, false, 0]);
+    await expect(page.locator("#error")).toHaveText("");
+    expect(
+      await page.evaluate(() => {
+        const { snowLens, destroy } = window.example;
+        destroy();
+        return snowLens.isDestroyed();
+      }),
+    ).toBe(true);
+    expect(errors).toEqual([]);
+  });
   test(`Rain details ${world} exposes independent controls and native disposal`, async ({
     page,
   }) => {
@@ -138,6 +190,7 @@ for (const world of ["globe", "planar"]) {
     await page.waitForFunction(
       () =>
         window.example.rainLens.enabled &&
+        !window.example.snowLens.enabled &&
         window.example.surfaceWeather.rippleIntensity > 0,
     );
     const wetnessInput = page.getByRole("textbox", {
@@ -188,9 +241,10 @@ for (const world of ["globe", "planar"]) {
     expect(
       await page.evaluate(() => [
         window.example.rainLens.enabled,
+        window.example.snowLens.enabled,
         window.example.surfaceWeather.rippleIntensity,
       ]),
-    ).toEqual([false, 0]);
+    ).toEqual([false, false, 0]);
     expect(
       await page.evaluate(() => window.example.surfaceWeather.enabled),
     ).toBe(false);
@@ -214,12 +268,34 @@ for (const world of ["globe", "planar"]) {
       await page.evaluate(() => window.example.surfaceWeather.wetness),
     ).toBe(baseline.wetness);
     await page.waitForFunction(() => window.example.effects.showHeightFog);
+    await page.waitForFunction(
+      () => window.example.snowLens.ready && window.example.snowLens.enabled,
+    );
     expect(
       await page.evaluate(() => [
         window.example.rainLens.enabled,
+        window.example.snowLens.enabled,
         window.example.surfaceWeather.rippleIntensity,
       ]),
-    ).toEqual([false, 0]);
+    ).toEqual([false, true, 0]);
+    const snowLensToggle = page.getByRole("checkbox", {
+      name: "镜头雪点",
+      exact: true,
+    });
+    await snowLensToggle.uncheck();
+    await page.waitForFunction(() => !window.example.snowLens.enabled);
+    await snowLensToggle.check();
+    const precipitationToggle = page.getByRole("checkbox", {
+      name: "显示降水",
+      exact: true,
+    });
+    await precipitationToggle.uncheck();
+    await page.waitForFunction(
+      () =>
+        !window.example.snowLens.enabled && !window.example.rainLens.enabled,
+    );
+    await precipitationToggle.check();
+    await page.waitForFunction(() => window.example.snowLens.enabled);
     await page
       .getByRole("checkbox", { name: "能见度随天气变化", exact: true })
       .uncheck();
@@ -244,6 +320,8 @@ for (const world of ["globe", "planar"]) {
         weather,
         surfaceWeather,
         reflections,
+        snowLens,
+        rainLens,
         reference,
         destroy,
       } = window.example;
@@ -254,9 +332,11 @@ for (const world of ["globe", "planar"]) {
         reference.primitive.isDestroyed(),
         surfaceWeather.isDestroyed(),
         reflections.isDestroyed(),
+        snowLens.isDestroyed(),
+        rainLens.isDestroyed(),
       ];
     });
-    expect(released).toEqual([true, true, true, true, true]);
+    expect(released).toEqual([true, true, true, true, true, true, true]);
     expect(errors).toEqual([]);
   });
 }

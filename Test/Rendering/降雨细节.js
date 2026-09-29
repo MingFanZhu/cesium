@@ -3,6 +3,8 @@ import * as C from "/Build/CesiumUnminified/index.js";
 import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
 import exposeExample from "/Test/example-lifecycle.js";
 
+// Both detail pages share this local fixture; only their lens controls differ.
+const snowExample = document.documentElement.dataset.weather === "snow";
 const planar =
   new URLSearchParams(window.location.search).get("world") !== "globe";
 const viewer = new C.Viewer("map", {
@@ -65,12 +67,21 @@ scene.light = new C.DirectionalLight({
 const surfaceWeather = new C.SceneGISSurfaceWeather({
   scene,
   enabled: true,
-  wetness: 1,
-  rippleIntensity: 0.85,
+  wetness: snowExample ? 0.35 : 1,
+  snowCoverage: snowExample ? 0.5 : 0,
+  rippleIntensity: snowExample ? 0 : 0.85,
 });
-const rainLens = scene.postProcessStages.add(
-  new C.SceneGISRainLensStage({ scene, enabled: true, intensity: 0.6 }),
-);
+const rainLens = snowExample
+  ? undefined
+  : scene.postProcessStages.add(
+      new C.SceneGISRainLensStage({ scene, enabled: true, intensity: 0.6 }),
+    );
+const snowLens = snowExample
+  ? scene.postProcessStages.add(
+      new C.SceneGISSnowLensStage({ scene, enabled: true, intensity: 0.6 }),
+    )
+  : undefined;
+const lens = snowLens ?? rainLens;
 const reflections = new C.SceneGISScreenSpaceReflections({
   scene,
   enabled: true,
@@ -83,7 +94,7 @@ const ibl = new C.ImageBasedLighting({
 const shaders = [];
 const settings = {
   intensity: 0.85,
-  ripples: true,
+  ripples: !snowExample,
   lens: true,
   lensStrength: 0.7,
   animate: true,
@@ -104,27 +115,40 @@ const settings = {
 };
 settings.home();
 const gui = new GUI({
-  title: `降雨细节 · ${planar ? "平面" : "球面"}`,
+  title: `${snowExample ? "降雪" : "降雨"}细节 · ${planar ? "平面" : "球面"}`,
   container: document.getElementById("controls"),
 });
-function syncRain() {
+function syncPrecipitation() {
   surfaceWeather.rippleIntensity = settings.ripples ? settings.intensity : 0;
-  rainLens.intensity = settings.intensity * settings.lensStrength;
-  rainLens.enabled = settings.lens && rainLens.intensity > 0;
+  lens.intensity = settings.intensity * settings.lensStrength;
+  lens.enabled = settings.lens && lens.intensity > 0;
 }
-gui.add(settings, "intensity", 0, 1, 0.01).name("降雨强度").onChange(syncRain);
-gui.add(settings, "ripples").name("湿地涟漪").onChange(syncRain);
-gui.add(surfaceWeather, "rippleScale", 0.2, 2, 0.05).name("涟漪尺度（米）");
+gui
+  .add(settings, "intensity", 0, 1, 0.01)
+  .name(snowExample ? "降雪强度" : "降雨强度")
+  .onChange(syncPrecipitation);
+if (!snowExample) {
+  gui.add(settings, "ripples").name("湿地涟漪").onChange(syncPrecipitation);
+  gui.add(surfaceWeather, "rippleScale", 0.2, 2, 0.05).name("涟漪尺度（米）");
+}
 gui.add(surfaceWeather, "wetness", 0, 1, 0.01).name("湿润程度");
 gui.add(surfaceWeather, "snowCoverage", 0, 1, 0.01).name("积雪覆盖");
 gui.add(reflections, "enabled").name("模型 SSR");
-gui.add(settings, "lens").name("镜头雨滴").onChange(syncRain);
+gui
+  .add(settings, "lens")
+  .name(snowExample ? "镜头雪点" : "镜头雨滴")
+  .onChange(syncPrecipitation);
 gui
   .add(settings, "lensStrength", 0, 1, 0.01)
-  .name("镜头雨滴强度")
-  .onChange(syncRain);
-gui.add(rainLens, "dropletSize", 8, 80, 1).name("雨滴尺度（像素）");
-gui.add(rainLens, "distortion", 0, 30, 0.5).name("镜头折射（像素）");
+  .name(snowExample ? "镜头雪点强度" : "镜头雨滴强度")
+  .onChange(syncPrecipitation);
+if (snowExample) {
+  gui.add(snowLens, "flakeSize", 8, 80, 1).name("雪点尺度（像素）");
+  gui.add(snowLens, "meltDuration", 1, 30, 0.5).name("融化周期（秒）");
+} else {
+  gui.add(rainLens, "dropletSize", 8, 80, 1).name("雨滴尺度（像素）");
+  gui.add(rainLens, "distortion", 0, 30, 0.5).name("镜头折射（像素）");
+}
 gui
   .add(settings, "animate")
   .name("场景时间推进")
@@ -136,14 +160,14 @@ gui
   .name("观察视角")
   .onChange(settings.home);
 gui.add(settings, "home").name("还原视角");
-syncRain();
+syncPrecipitation();
 const removeError = scene.renderError.addEventListener((...args) => {
   document.getElementById("error").textContent = args[1].message;
 });
 exposeExample(
   viewer,
   gui,
-  { surfaceWeather, rainLens, reflections, settings },
+  { surfaceWeather, rainLens, snowLens, reflections, settings },
   () => {
     removeError();
     scene.primitives.removeAll();

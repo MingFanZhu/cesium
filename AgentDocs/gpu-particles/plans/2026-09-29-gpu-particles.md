@@ -19,6 +19,8 @@ Provide a reusable GPU simulation/render primitive on the existing WebGL2 render
 
 ## Risks and overall acceptance
 
+The P4 snow-lens counterpart is a small owned follow-up after bac1ae8b10: [snow lens plan](2026-09-29-snow-lens.md). It adds an independent native color stage and example weather selection, without extending surface materials or particle simulation. Implementation/review evidence is recorded separately; owner visual acceptance remains pending.
+
 P4 is implemented after 87debf6371: [rain details](2026-09-29-p4-rain-details.md). Optional wet-surface material ripples and a native lens post-process stage exclude water-surface ripples. ADR-0105 defines the public/lifecycle boundary; no upstream seam changed. P4 tests, release/types, visuals and self-review pass; owner visual acceptance is pending. No subsequent phase is active.
 
 P3 is authorized after checkpoint 781e2a9d90: [surface-weather plan](2026-09-29-p3-surface-weather.md), implementation completed. It extends weather composition with independent approximate wetness/thin snow using existing materials, no asset attributes or simulation. Explicit forward integration seams are tracked under ADR-0104/SGP-0028; the generic particle foundation and completed P1/P2 contracts remain unchanged. Material/coordinate/lifecycle GPU tests, visual and bounded performance evidence, release/types and self-review satisfy the implementation gate. Owner visual acceptance is pending; no next phase is activated.

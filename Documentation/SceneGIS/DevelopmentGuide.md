@@ -1084,6 +1084,22 @@ scene.postProcessStages.remove(rainLens);
 独立本地示例 `Test/Rendering/降雨细节.html` 支持两种世界；鸟瞰天气页面已提供开关与强度调节。
 专项 Specs 加入 `SceneGIS/Scene/SceneGISRainLensStage`；设计与限制见 ADR-0105。
 
+### 降雪镜头
+
+`SceneGISSnowLensStage` 沿用雨滴镜头的 native collection ownership，默认 disabled；参数为
+`intensity`（0–1）、`flakeSize`（8–128 drawing-buffer pixels，默认 24）、`meltDuration`
+（1–30 秒，默认 6）。例如：
+
+```js
+const snowLens = scene.postProcessStages.add(
+  new Cesium.SceneGISSnowLensStage({ scene, enabled: true, intensity: 0.6 }),
+);
+```
+
+雪点附着后融化、淡出，仅有一次颜色后处理，无贴图、深度、历史或固定亮点高光。暂停 Scene time
+即冻结；不改变相机、光照、空中粒子或地表积雪。调用方按雨雪类型显式选择镜头 stage，晴天或隐藏
+降水时关闭它们。`Test/Rendering/降雪细节.html` 提供本地球面/平面示例，`鸟瞰天气.html` 提供联动开关。
+
 ## 几何高光抗锯齿
 
 PBR Model / 3D Tiles 可独立启用几何高光过滤，Globe / Planar 使用同一接口：

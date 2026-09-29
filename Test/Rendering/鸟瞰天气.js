@@ -68,6 +68,9 @@ const surfaceWeather = new C.SceneGISSurfaceWeather({
 const rainLens = scene.postProcessStages.add(
   new C.SceneGISRainLensStage({ scene }),
 );
+const snowLens = scene.postProcessStages.add(
+  new C.SceneGISSnowLensStage({ scene }),
+);
 scene.highDynamicRange = true;
 const reflections = new C.SceneGISScreenSpaceReflections({
   scene,
@@ -212,6 +215,8 @@ const settings = {
   rippleStrength: 1,
   lens: true,
   lensStrength: 0.7,
+  snowLens: true,
+  snowLensStrength: 0.7,
   home() {
     const views = {
       街区鸟瞰: [
@@ -342,6 +347,11 @@ details.add(settings, "lens").name("镜头雨滴");
 details.add(settings, "lensStrength", 0, 1, 0.01).name("镜头雨滴强度");
 details.add(rainLens, "dropletSize", 8, 80, 1).name("雨滴尺度（像素）");
 details.add(rainLens, "distortion", 0, 30, 0.5).name("镜头折射（像素）");
+const snowDetails = gui.addFolder("降雪镜头");
+snowDetails.add(settings, "snowLens").name("镜头雪点");
+snowDetails.add(settings, "snowLensStrength", 0, 1, 0.01).name("镜头雪点强度");
+snowDetails.add(snowLens, "flakeSize", 8, 80, 1).name("雪点尺度（像素）");
+snowDetails.add(snowLens, "meltDuration", 1, 30, 0.5).name("融化周期（秒）");
 let lastStatus = 0;
 const removeUpdate = scene.preUpdate.addEventListener(() => {
   const rain =
@@ -355,6 +365,13 @@ const removeUpdate = scene.preUpdate.addEventListener(() => {
     rainLens.intensity = lens;
   }
   rainLens.enabled = settings.lens && lens > 0;
+  const snow =
+    weather.show && weather.type === "snow" ? weather.actualIntensity : 0;
+  const snowAmount = snow * settings.snowLensStrength;
+  if (snowLens.intensity !== snowAmount) {
+    snowLens.intensity = snowAmount;
+  }
+  snowLens.enabled = settings.snowLens && snowAmount > 0;
   const fogDensity = settings.fog ? weather.actualIntensity * 0.0003 : 0;
   effects.heightFogDensity = fogDensity;
   effects.showHeightFog = fogDensity > 0;
@@ -379,6 +396,7 @@ exposeExample(
     weather,
     surfaceWeather,
     rainLens,
+    snowLens,
     reflections,
     effects,
     settings,

@@ -3,17 +3,19 @@
 - Updated: 2026-09-29; status: implemented, owner visual acceptance pending; planning model: extension
 - Architecture/execution/reviewer: current task, self-review
 - Active extension: [roadmap](plans/2026-09-29-gpu-particles.md)
-- Current phase: P4 implementation completed at 279103d298; [lens texture follow-up](plans/2026-09-29-lens-texture.md) implemented; owner visual acceptance pending
-- Open discussions / unresolved code reviews: none; [latest lens review](reviews/2026-09-29-lens-texture.md), [approved P4 review](reviews/2026-09-29-p4-rain-details.md)
+- Current phase: P4 completed at 279103d298, rain-lens follow-up at bac1ae8b10; [snow lens follow-up](plans/2026-09-29-snow-lens.md) implemented, owner visual acceptance pending
+- Open discussions / unresolved code reviews: none; [snow lens review](reviews/2026-09-29-snow-lens.md), [rain lens review](reviews/2026-09-29-lens-texture.md), [approved P4 review](reviews/2026-09-29-p4-rain-details.md)
 - ADR: [0102](../../Documentation/SceneGIS/Decisions/ADR-0102-gpu-particle-foundation.md), [0103](../../Documentation/SceneGIS/Decisions/ADR-0103-aerial-weather.md), [0104](../../Documentation/SceneGIS/Decisions/ADR-0104-approximate-surface-weather.md); SGP: SGP-0028
-- Source: packages/engine/Source/SceneGIS/Scene/SceneGISGpuParticleSystem.js, SceneGISWeather.js, SceneGISSurfaceWeather.js, SceneGISRainLensStage.js
+- Source: packages/engine/Source/SceneGIS/Scene/SceneGISGpuParticleSystem.js, SceneGISWeather.js, SceneGISSurfaceWeather.js, SceneGISRainLensStage.js, SceneGISSnowLensStage.js
 - Shaders: packages/engine/Source/Shaders/SceneGIS/Particles/, Weather/
-- Specs: packages/engine/Specs/SceneGIS/Scene/SceneGISGpuParticleSystemSpec.js, SceneGISWeatherSpec.js, SceneGISSurfaceWeatherSpec.js, SceneGISRainLensStageSpec.js
-- Examples: Test/Rendering/GPU粒子.html, Test/Rendering/鸟瞰天气.html, Test/Rendering/地表雨雪.html, Test/Rendering/降雨细节.html; no new Sandcastle
+- Specs: packages/engine/Specs/SceneGIS/Scene/SceneGISGpuParticleSystemSpec.js, SceneGISWeatherSpec.js, SceneGISSurfaceWeatherSpec.js, SceneGISRainLensStageSpec.js, SceneGISSnowLensStageSpec.js
+- Examples: Test/Rendering/GPU粒子.html, Test/Rendering/鸟瞰天气.html, Test/Rendering/地表雨雪.html, Test/Rendering/降雨细节.html, Test/Rendering/降雪细节.html; no new Sandcastle
 - Branch: codex/gpu-particles; P1 checkpoint: 1a2de73dc3
 - P4 decision: [ADR-0105](../../Documentation/SceneGIS/Decisions/ADR-0105-rain-surface-and-lens-details.md); no new upstream patch
 
 ## Handoff
+
+Snow follow-up adds a separate, disabled-by-default SceneGISSnowLensStage with intensity, flakeSize and meltDuration. Sparse matte flecks soften into wet traces in one native color pass, without fixed glints or external assets. The aerial example selects the rain/snow stage by precipitation type; clear and hidden precipitation disable both, with independent manual toggles. Both-world local pages and six scoped E2E cases pass; three GPU Specs pass in development/release. Fixed-camera RTX 3060 Ti timing at 1185×667 measures approximately 0.515 ms incremental median. See the plan/review for build, lifecycle and approximation limits. Owner visual acceptance is pending; no later phase is active.
 
 Lens follow-up packages an MIT refraction/height sprite and adds static/rolling beads with visible-color reflection and a subtle lower edge. The owner selected the RaindropsOnGlass appearance but rejected the fixed bright glint; that lobe is removed from the final shader. Keep one post-process pass and no simulation/capture. Three GPU Specs pass in development/release and both-world E2E passes. Final RTX 3060 Ti fixture cost is approximately 0.301 ms at 1001×826. Code self-review approves a follow-up checkpoint; visual acceptance remains pending. See the follow-up plan/review for lifecycle, packaging and approximation limits. No subsequent phase is active.
 
