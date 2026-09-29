@@ -53,3 +53,9 @@ All four upstream-owned files use paired SGP-0028 markers:
 - packages/engine/Source/Shaders/Builtin/Functions/phong.glsl: material-input hook for opaque Phong receivers.
 
 Owned implementations, examples, Specs, ADR and patch registration form one P3 checkpoint. No subsequent phase is activated. Owner should compare dry/wet/snow in the independent example and real GIS scene, subject to online data availability.
+
+## Follow-up review: Session authorization
+
+Target: example-only changes after b81e7b8b61. Current-task self-review approves reading the optional sceneGIS.ionAccessToken sessionStorage entry before all ion provider factories. A mocked E2E test passes for all three initial requests with a synthetic token; source contains no credential. Live owner authorization removes the default-token notice and loads terrain/buildings. The imagery endpoint accepts authentication in a direct HTTP check, while the desktop browser still reports a network failure for that request. Keep P3-03 accepted as an online-example limitation; do not attribute it to invalid credentials or introduce an unrequested provider substitute.
+
+Reflection diagnosis confirms no SSR instance in the aerial example, and existing terrain lacks an SSR receiver regardless of the toggle. No SSR/terrain renderer changes are included in this follow-up. No new upstream-owned files, SGP or phase are introduced. Focused source/Markdown checks and the new E2E test pass; engine build/tests are unchanged and need no rerun.

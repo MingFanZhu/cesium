@@ -1018,6 +1018,10 @@ low/medium/high 总槽位为 16K/32K/64K，双池模拟纹理约 2.02/4/8.04 MiB
 不保存本地建筑快照或自行挤出建筑；Globe 验证依赖公网与 ion 授权。
 示例加载、控件和销毁验证：`npx playwright test --config Test/Rendering/playwright.weather.config.mjs`。
 
+本地调试可在当前页面的 `sessionStorage` 设置 `sceneGIS.ionAccessToken` 后刷新。
+鸟瞰天气示例在创建任何 ion provider 前读取此值；未配置时保留 SDK 默认行为。
+凭据仅存于该标签页会话，不写入示例源码、页面 URL、日志或版本控制。
+
 ## 地表湿润与薄雪
 
 ```js

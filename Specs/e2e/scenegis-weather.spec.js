@@ -106,6 +106,31 @@ for (const world of ["globe", "planar"]) {
   });
 }
 
+test("Weather uses session authorization for every initial ion provider", async ({
+  page,
+}) => {
+  const token = "scenegis-weather-test-token";
+  await page.addInitScript((value) => {
+    window.sessionStorage.setItem("sceneGIS.ionAccessToken", value);
+  }, token);
+  const requests = new Map();
+  await page.route("https://api.cesium.com/v1/assets/*/endpoint?*", (route) => {
+    const url = new URL(route.request().url());
+    requests.set(url.pathname, url.searchParams.get("access_token"));
+    return route.fulfill({
+      status: 401,
+      contentType: "application/json",
+      body: JSON.stringify({ code: "INVALID_TOKEN" }),
+    });
+  });
+  await page.goto("/Test/Rendering/鸟瞰天气.html?world=globe");
+  await expect.poll(() => requests.size).toBe(3);
+  expect([...requests.values()]).toEqual([token, token, token]);
+  expect(new URL(page.url()).searchParams.has("access_token")).toBe(false);
+  await page.waitForFunction(() => window.example !== undefined);
+  await page.evaluate(() => window.example.destroy());
+});
+
 test("Weather reports an ion authorization failure without local buildings", async ({
   page,
 }) => {

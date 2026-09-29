@@ -5,6 +5,13 @@ import exposeExample from "/Test/example-lifecycle.js";
 
 const planar =
   new URLSearchParams(window.location.search).get("world") !== "globe";
+if (!planar) {
+  // Keep local credentials in this browser session, never in source or page URLs.
+  const ionToken = window.sessionStorage.getItem("sceneGIS.ionAccessToken");
+  if (ionToken) {
+    C.Ion.defaultAccessToken = ionToken;
+  }
+}
 document.getElementById("city-credit").hidden = planar;
 const reference = {
   name: planar ? "本地示意街区" : "Cesium ion · OSM Buildings · 南京",
