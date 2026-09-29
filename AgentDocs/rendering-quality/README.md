@@ -13,7 +13,7 @@
 | Active standalone plan | None                                                       |
 | Architecture contact   | Current task                                               |
 | Execution contact      | Current task                                               |
-| Last updated           | `2026-09-28`                                               |
+| Last updated           | `2026-09-29`                                               |
 
 ## Scope
 
@@ -109,3 +109,5 @@
 - R22 authorized: optional spectral wind waves on existing water and a standalone Xuanwu Lake example. See [phase](plans/2026-09-28-r22-wind-water.md) and ADR-0101. No occlusion-culling implementation is active.
 
 - R22 technical gate passed: [review](reviews/2026-09-28-r22-wind-water.md), 21 strict GPU Specs in dev/release, two World example checks, release/types and bounded GPU timings. The Xuanwu Lake page awaits owner visual acceptance. No next phase is active.
+
+- R22 grid follow-up: continuous camera-distance displacement filtering removes the owner-reported tile highlight bands while retaining watertight boundaries. 22 focused strict GPU Specs pass; same-view GPU timing and ownership review are recorded in the R22 review. No upstream files or new render passes. Owner visual acceptance remains pending.

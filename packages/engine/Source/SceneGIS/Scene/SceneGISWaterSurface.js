@@ -318,10 +318,7 @@ function updateTiles(surface, frameState) {
     );
     const level = Math.max(
       0,
-      Math.min(
-        6,
-        Math.floor(Math.log2(Math.max(1, distance / (mesh.size * 0.5)))),
-      ),
+      Math.min(6, Math.floor(Math.log2(Math.max(1, distance * mesh.lodScale)))),
     );
     let entry = tile.cache.find((e) => e.level === level);
     if (!entry) {
@@ -454,6 +451,7 @@ function createResources(surface, frameState) {
         surface._windWaves?.windDirection ?? surface.flowDirection,
       u_wavePeriod: () => surface._windWaves.patchLength,
       u_waveResolution: () => surface._windWaves.resolution,
+      u_waveLodScale: () => surface._mesh.lodScale,
       u_displacement0: () =>
         surface._windWaves._state.bands[0].output.getColorTexture(0),
       u_displacement1: () =>

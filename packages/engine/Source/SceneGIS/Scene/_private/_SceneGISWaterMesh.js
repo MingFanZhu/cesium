@@ -67,6 +67,7 @@ function distanceSquared(x, y, a, b) {
 function SceneGISWaterMesh(geometry, hierarchy, spacing) {
   this.spacing = spacing;
   this.size = 128;
+  this.lodScale = 2 / this.size;
   this.tiles = [];
   const tiles = new Map(),
     positions = geometry.attributes.position.values,
@@ -144,16 +145,8 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
       distance = Math.min(distance, distanceSquared(p[0], p[1], a, b));
     }
     const fade = Math.min(1, Math.sqrt(distance) / 4);
-    const edge = Math.min(
-      p[0] - tile.x,
-      tile.x + size - p[0],
-      p[1] - tile.y,
-      tile.y + size - p[1],
-    );
-    waveData.push(
-      fade * fade * (3 - 2 * fade),
-      fine + (step - fine) * Math.min(1, Math.max(0, edge) / step),
-    );
+    // A vertex's wave filter must not depend on its tile or selected mesh LOD.
+    waveData.push(fade * fade * (3 - 2 * fade), fine);
     return index;
   }
   for (const polygon of tile.polygons) {

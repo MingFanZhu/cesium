@@ -2,11 +2,25 @@ import {
   Cartesian2,
   Cartesian3,
   CoplanarPolygonGeometry,
+  ClearCommand,
+  DrawCommand,
+  Matrix4,
+  OrthographicFrustum,
+  PrimitiveType,
+  Sampler,
+  ShaderProgram,
+  ShaderSource,
+  Texture,
+  TextureMinificationFilter,
+  TextureWrap,
+  VertexArray,
   JulianDate,
   PolygonHierarchy,
   SceneGISWindWaves,
   VertexFormat,
 } from "../../../index.js";
+import waterVertex from "../../../Source/Shaders/SceneGIS/Water/SceneGISWaterVS.js";
+import createFrameState from "../../../../../Specs/createFrameState.js";
 import createContext from "../../../../../Specs/createContext.js";
 import spectrum from "../../../Source/SceneGIS/Scene/_private/_SceneGISWindSpectrum.js";
 import WaterMesh from "../../../Source/SceneGIS/Scene/_private/_SceneGISWaterMesh.js";
@@ -139,6 +153,128 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
     expect(textures.every((t) => t.isDestroyed())).toBeTrue();
     waves = undefined;
   });
+  it("filters edge and interior displacement with the same continuous camera footprint", function () {
+    context = createContext();
+    const hierarchy = new PolygonHierarchy([
+      new Cartesian3(-128, -128),
+      new Cartesian3(128, -128),
+      new Cartesian3(128, 128),
+      new Cartesian3(-128, 128),
+    ]);
+    const source = CoplanarPolygonGeometry.createGeometry(
+      new CoplanarPolygonGeometry({
+        polygonHierarchy: hierarchy,
+        vertexFormat: VertexFormat.POSITION_ONLY,
+      }),
+    );
+    const mesh = new WaterMesh(source, hierarchy, 0.25);
+    const geometry = mesh.createGeometry(
+      mesh.tiles.find((t) => t.x === 0 && t.y === 0),
+      4,
+    );
+    const positions = geometry.attributes.position.values;
+    const data = geometry.attributes.waveData.values;
+    const frame = createFrameState(context);
+    frame.camera.position = new Cartesian3(2, 64, 256);
+    frame.camera.direction = new Cartesian3(0, 0, -1);
+    frame.camera.up = Cartesian3.clone(Cartesian3.UNIT_Y);
+    frame.camera.right = Cartesian3.clone(Cartesian3.UNIT_X);
+    frame.camera.frustum = new OrthographicFrustum({
+      width: 0.25,
+      aspectRatio: 1,
+      near: 0.1,
+      far: 1000,
+    });
+    context.uniformState.update(frame);
+    // Base texels alternate zero/one height. All coarser levels have exactly mean height 0.5.
+    const pixels = new Uint8Array(32 * 32 * 4);
+    for (let y = 0; y < 32; ++y) {
+      for (let x = 0; x < 32; ++x) {
+        pixels[(y * 32 + x) * 4 + 2] = ((x + y) % 2) * 255;
+        pixels[(y * 32 + x) * 4 + 3] = 255;
+      }
+    }
+    const displacement = new Texture({
+      context,
+      flipY: false,
+      source: { width: 32, height: 32, arrayBufferView: pixels },
+    });
+    displacement.generateMipmap();
+    displacement.sampler = new Sampler({
+      wrapS: TextureWrap.REPEAT,
+      wrapT: TextureWrap.REPEAT,
+      minificationFilter: TextureMinificationFilter.LINEAR_MIPMAP_LINEAR,
+    });
+    const zero = new Texture({
+      context,
+      source: { width: 1, height: 1, arrayBufferView: new Uint8Array(4) },
+    });
+    const program = ShaderProgram.fromCache({
+      context,
+      vertexShaderSource: new ShaderSource({
+        defines: ["SCENEGIS_WIND_WAVES"],
+        sources: [
+          ShaderSource.replaceMain(waterVertex, "waterMain"),
+          "void main() { waterMain(); gl_Position = vec4(0.0, 0.0, 0.0, 1.0); gl_PointSize = 1.0; }",
+        ],
+      }),
+      fragmentShaderSource:
+        "in vec3 v_positionEC; void main() { out_FragColor = vec4(v_positionEC.z + 256.0, 0.0, 0.0, 1.0); }",
+      attributeLocations: { position: 0, waveData: 1 },
+    });
+    try {
+      // These points have equal camera distance; one is on the shared tile edge and one inside.
+      for (const x of [0, 4]) {
+        let index = -1;
+        for (let i = 0; i < positions.length; i += 3) {
+          if (positions[i] === x && positions[i + 1] === 64) {
+            index = i / 3;
+            break;
+          }
+        }
+        expect(index).toBeGreaterThanOrEqual(0);
+        const vertexArray = new VertexArray({
+          context,
+          attributes: [
+            {
+              index: 0,
+              value: Array.from(positions.subarray(index * 3, index * 3 + 3)),
+            },
+            {
+              index: 1,
+              value: Array.from(data.subarray(index * 2, index * 2 + 2)),
+            },
+          ],
+        });
+        try {
+          ClearCommand.ALL.execute(context);
+          new DrawCommand({
+            vertexArray,
+            shaderProgram: program,
+            count: 1,
+            primitiveType: PrimitiveType.POINTS,
+            modelMatrix: Matrix4.IDENTITY,
+            uniformMap: {
+              u_displacement0: () => displacement,
+              u_displacement1: () => zero,
+              u_wavePeriod: () => 16,
+              u_waveResolution: () => 32,
+              u_waveLodScale: () => mesh.lodScale,
+            },
+          }).execute(context);
+          const result = context.readPixels();
+          expect(result[0]).toEqualEpsilon(128, 2);
+          expect(Array.from(result.subarray(1))).toEqual([0, 0, 255]);
+        } finally {
+          vertexArray.destroy();
+        }
+      }
+    } finally {
+      program.destroy();
+      displacement.destroy();
+      zero.destroy();
+    }
+  });
   it("preserves hole area and identical tile boundary vertices across mesh LODs", function () {
     const ring = (s) =>
       new PolygonHierarchy([
@@ -160,6 +296,11 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
     for (const tile of mesh.tiles) {
       const g = mesh.createGeometry(tile, 3),
         p = g.attributes.position.values;
+      expect(
+        g.attributes.waveData.values.every(
+          (v, i) => i % 2 === 0 || v === mesh.spacing,
+        ),
+      ).toBeTrue();
       for (let i = 0; i < g.indices.length; i += 3) {
         const a = g.indices[i] * 3,
           b = g.indices[i + 1] * 3,

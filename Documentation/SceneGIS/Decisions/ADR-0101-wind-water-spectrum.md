@@ -18,8 +18,10 @@ through native renderer resources; no compute extension, worker or synchronous r
 Initial random phases are seeded. Evolved displacement and normals share the same wave
 field. Geometry uses polygon-clipped tiles with distance-based density and matching edges,
 while short waves remain normal detail. Every LOD retains the same finest tile-boundary
-vertices; geometry mips vary toward coarse interiors, and pixel-footprint filtering limits
-distant vertex shimmer. Each tile keeps at most two LODs; inactive entries have a shared
+vertices. Displacement mips use a continuous per-vertex camera-distance footprint, sharing
+the mesh LOD selection scale and conservatively covering its cell spacing; the footprint
+does not reset at tile edges or change with the selected LOD. Pixel-footprint filtering also
+limits distant vertex shimmer. Each tile keeps at most two LODs; inactive entries have a shared
 16 MiB budget per surface. Reuse R8 physical lighting, opaque inputs,
 transmission, Fresnel reflections, depth writes, picking and collection ownership.
 
