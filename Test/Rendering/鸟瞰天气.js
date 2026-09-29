@@ -65,6 +65,9 @@ const surfaceWeather = new C.SceneGISSurfaceWeather({
   enabled: true,
   wetness: 0.65,
 });
+const rainLens = scene.postProcessStages.add(
+  new C.SceneGISRainLensStage({ scene }),
+);
 scene.highDynamicRange = true;
 const reflections = new C.SceneGISScreenSpaceReflections({
   scene,
@@ -205,6 +208,10 @@ const settings = {
   windAngle: 10,
   fog: true,
   animate: true,
+  ripples: true,
+  rippleStrength: 1,
+  lens: true,
+  lensStrength: 0.7,
   home() {
     const views = {
       街区鸟瞰: [
@@ -327,8 +334,27 @@ surfaces
   .name("积雪覆盖")
   .listen();
 surfaces.add(surfaceWeather, "patchScale", 5, 150, 1).name("斑块尺度（米）");
+const details = gui.addFolder("降雨细节");
+details.add(settings, "ripples").name("湿地涟漪");
+details.add(settings, "rippleStrength", 0, 1, 0.01).name("涟漪强度");
+details.add(surfaceWeather, "rippleScale", 0.2, 2, 0.05).name("涟漪尺度（米）");
+details.add(settings, "lens").name("镜头雨滴");
+details.add(settings, "lensStrength", 0, 1, 0.01).name("镜头雨滴强度");
+details.add(rainLens, "dropletSize", 8, 80, 1).name("雨滴尺度（像素）");
+details.add(rainLens, "distortion", 0, 30, 0.5).name("镜头折射（像素）");
 let lastStatus = 0;
 const removeUpdate = scene.preUpdate.addEventListener(() => {
+  const rain =
+    weather.show && weather.type === "rain" ? weather.actualIntensity : 0;
+  const ripples = settings.ripples ? rain * settings.rippleStrength : 0;
+  if (surfaceWeather.rippleIntensity !== ripples) {
+    surfaceWeather.rippleIntensity = ripples;
+  }
+  const lens = rain * settings.lensStrength;
+  if (rainLens.intensity !== lens) {
+    rainLens.intensity = lens;
+  }
+  rainLens.enabled = settings.lens && lens > 0;
   const fogDensity = settings.fog ? weather.actualIntensity * 0.0003 : 0;
   effects.heightFogDensity = fogDensity;
   effects.showHeightFog = fogDensity > 0;
@@ -349,7 +375,15 @@ const removeTilesetEvents = [];
 exposeExample(
   viewer,
   gui,
-  { weather, surfaceWeather, reflections, effects, settings, reference },
+  {
+    weather,
+    surfaceWeather,
+    rainLens,
+    reflections,
+    effects,
+    settings,
+    reference,
+  },
   () => {
     removeUpdate();
     removeError();

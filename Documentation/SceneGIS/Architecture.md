@@ -1147,6 +1147,12 @@ SSR MRT/replay 与探针捕获共享同一材质；地形保留 diffuse lighting
 不因此成为 PBR/SSR 接收者。默认关闭，零覆盖恢复原命令，无额外纹理、几何 pass、history 或读回。
 透明、unlit 模型、分类和水面不参与；不模拟屋檐遮挡、水洼深度、排水或雪厚。
 
+[ADR-0105](Decisions/ADR-0105-rain-surface-and-lens-details.md) 的 `rippleIntensity` 默认零，
+以 Scene time 在湿润朝上表面求解析环状法线，光照和模型 SSR 共享结果。远处按像素足迹淡出，
+不增加纹理、几何回放或水面接入。独立 `SceneGISRainLensStage` 显式加入同一 Scene 的原生
+`postProcessStages`，由 collection 管理生命周期；默认关闭，只增加 tone mapping 后、FXAA 前的
+颜色通道，保留 alpha，不修改相机、曝光、天气或时钟。
+
 ## 全局自动曝光（R21）
 
 [ADR-0100](Decisions/ADR-0100-global-auto-exposure.md) / SGP-0027 增加默认关闭的

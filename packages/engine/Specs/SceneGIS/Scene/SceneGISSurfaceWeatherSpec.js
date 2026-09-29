@@ -9,6 +9,7 @@ import {
   GeometryInstance,
   Globe,
   ImageBasedLighting,
+  JulianDate,
   LightingModel,
   Matrix4,
   Model,
@@ -148,6 +149,7 @@ describe("SceneGIS/Scene/SceneGISSurfaceWeather", function () {
     setup();
     pixel();
     expect(effect.enabled).toBe(false);
+    expect(effect.rippleIntensity).toBe(0);
     expect(effect._state).toBeUndefined();
     expect(() => new SceneGISSurfaceWeather({ scene })).toThrowDeveloperError();
     expect(() => {
@@ -158,6 +160,12 @@ describe("SceneGIS/Scene/SceneGISSurfaceWeather", function () {
     }).toThrowDeveloperError();
     expect(() => {
       effect.patchScale = 0;
+    }).toThrowDeveloperError();
+    expect(() => {
+      effect.rippleIntensity = 2;
+    }).toThrowDeveloperError();
+    expect(() => {
+      effect.rippleScale = 0;
     }).toThrowDeveloperError();
     expect(() => {
       effect.enabled = 1;
@@ -173,6 +181,80 @@ describe("SceneGIS/Scene/SceneGISSurfaceWeather", function () {
     scene = undefined;
   });
   [true, false].forEach(function (planar) {
+    it(`animates only resolved wet upward ripples in ${planar ? "Planar" : "Globe"}`, function () {
+      setup(planar);
+      effect.enabled = true;
+      effect.wetness = 1;
+      const epoch = JulianDate.fromIso8601("2026-09-29T00:00:00Z");
+      let offset = 0,
+        wall = false,
+        span = 4;
+      function sample(seconds) {
+        scene.renderForSpecs(
+          JulianDate.addSeconds(epoch, seconds, new JulianDate()),
+        );
+        SurfaceWeather.prepare(scene);
+        if (!quad) {
+          quad = scene.context.createViewportQuadCommand(
+            new ShaderSource({
+              sources: [
+                coverage,
+                `
+              in vec2 v_textureCoordinates;
+              uniform float u_offset;
+              uniform float u_span;
+              uniform bool u_wall;
+              uniform float u_wet;
+              void main() {
+                vec3 p = vec3((v_textureCoordinates - 0.5) * u_span, -40.0);
+                p.x -= u_offset;
+                vec3 n = sceneGISWeatherUp(p);
+                if (u_wall) { n = normalize(cross(n, vec3(0.0, 1.0, 0.0))); }
+                vec2 cover = sceneGISWeatherCoverage(p, n);
+                vec3 result = sceneGISWeatherRippleNormal(p, n, n, u_wet * (1.0 - cover.y));
+                out_FragColor = vec4((result - n) * 0.5 + 0.5, 1.0);
+              }`,
+              ],
+            }),
+            {
+              uniformMap: {
+                ...effect._state.uniforms,
+                u_offset: () => offset,
+                u_span: () => span,
+                u_wall: () => wall,
+                u_wet: () => effect.wetness,
+              },
+            },
+          );
+        }
+        quad.execute(scene.context);
+        return Array.from(scene.context.readPixels());
+      }
+      const flat = sample(0);
+      effect.rippleIntensity = 1;
+      const first = sample(0);
+      expect(first).not.toEqual(flat);
+      expect(sample(0)).toEqual(first);
+      expect(sample(0.6)).not.toEqual(first);
+      if (planar) {
+        view(41);
+        offset = 41;
+        expect(sample(0)).toEqualEpsilon(first, 1);
+        view();
+        offset = 0;
+      }
+      effect.wetness = 0;
+      expect(sample(0)).toEqual(flat);
+      effect.wetness = 1;
+      effect.snowCoverage = 1;
+      expect(sample(0)).toEqual(flat);
+      effect.snowCoverage = 0;
+      wall = true;
+      expect(sample(0)).toEqual(flat);
+      wall = false;
+      span = 100;
+      expect(sample(0)).toEqual(flat);
+    });
     it(`shades ${planar ? "Planar" : "Globe"} model wetness/snow before lighting and restores authored material`, async function () {
       setup(planar);
       await floor();
@@ -204,6 +286,8 @@ describe("SceneGIS/Scene/SceneGISSurfaceWeather", function () {
       const count = scene.frameState.commandList.length;
       effect.enabled = true;
       effect.wetness = 1;
+      effect.rippleIntensity = 1;
+      effect.rippleScale = 8;
       expect(pixel()[0]).toBeLessThan(dry[0] - 5);
       effect.snowCoverage = 1;
       expect(pixel()[0]).toBeGreaterThan(dry[0] + 15);
@@ -247,6 +331,8 @@ describe("SceneGIS/Scene/SceneGISSurfaceWeather", function () {
     const dry = pixel();
     effect.enabled = true;
     effect.wetness = 1;
+    effect.rippleIntensity = 1;
+    effect.rippleScale = 8;
     expect(pixel()[0]).toBeLessThan(dry[0] - 5);
     effect.snowCoverage = 1;
     expect(pixel()[0]).toBeGreaterThan(dry[0] + 15);
@@ -334,5 +420,21 @@ describe("SceneGIS/Scene/SceneGISSurfaceWeather", function () {
         scene.context.readPixels({ x: 32, y: 32, width: 1, height: 1 }),
       ).slice(0, 3),
     ).toEqualEpsilon([56, 56, 56], 1);
+    quad.shaderProgram.destroy();
+    quad = scene.context.createViewportQuadCommand(
+      "uniform sampler2D u_data; in vec2 v_textureCoordinates; void main() { out_FragColor = vec4(texture(u_data, v_textureCoordinates).xyz * 0.5 + 0.5, 1.0); }",
+      { uniformMap: { u_data: () => target } },
+    );
+    quad.execute(scene.context);
+    const smooth = Array.from(scene.context.readPixels());
+    const draws = scene.frameState.commandList.length;
+    effect.rippleIntensity = 1;
+    effect.rippleScale = 8;
+    pixel();
+    quad.execute(scene.context);
+    expect(Array.from(scene.context.readPixels())).not.toEqual(smooth);
+    expect(ssr._state.raw.getColorTexture(1)).toBe(target);
+    expect(ssr._state.captureDraws).toBe(0);
+    expect(scene.frameState.commandList.length).toBe(draws);
   });
 });

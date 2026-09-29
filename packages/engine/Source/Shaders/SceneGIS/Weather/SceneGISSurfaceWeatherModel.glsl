@@ -9,8 +9,13 @@ void sceneGISWeatherModel(inout czm_modelMaterial material, vec3 positionEC, vec
     material.roughness = mix(material.roughness, min(material.roughness, 0.22), cover.x);
     material.roughness = mix(material.roughness, 0.85, cover.y);
     material.normalEC = normalize(mix(material.normalEC, normalize(geometryNormalEC), 0.65 * cover.y));
+    vec3 wetNormal = material.normalEC;
+    material.normalEC = sceneGISWeatherRippleNormal(positionEC, wetNormal, geometryNormalEC, cover.x);
     #ifdef USE_CLEARCOAT
     material.clearcoatFactor *= 1.0 - cover.y;
+    if (u_sceneGISSurfaceRipples.x > 0.0) {
+        material.clearcoatNormal = normalize(material.clearcoatNormal + material.normalEC - wetNormal);
+    }
     #endif
     #ifdef USE_ANISOTROPY
     material.anisotropyStrength *= 1.0 - cover.y;

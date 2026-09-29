@@ -23,3 +23,5 @@ References: [UE decals](https://dev.epicgames.com/documentation/en-us/unreal-eng
 ## Validation and upgrade boundary
 
 GPU Specs must verify disabled equivalence, slope/material response, both-world coordinates, terrain/Phong, capture agreement and lifecycle. Review native material layout, lighting order, Globe normals and command selection when upgrading Cesium. Full release/type checks qualify the new export; bounded timings and draw counts qualify the added fragment cost. Visual acceptance uses both the local material fixture and online aerial example.
+
+Follow-up: [ADR-0105](ADR-0105-rain-surface-and-lens-details.md) adds opt-in Scene-time wet-surface ripple normals through these existing seams, plus an independent native lens stage. Wetness/snow amounts remain caller-controlled; explicit water remains excluded. No SGP-0028 seam change is required.

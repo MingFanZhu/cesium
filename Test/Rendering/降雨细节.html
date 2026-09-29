@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>降雨细节 · 湿地涟漪与镜头雨滴</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>雨落地面与镜头</h1>
+      <p>
+        近看湿润地面的环状高光与反射扰动。关闭镜头雨滴可更清楚地观察地表，两个效果可以独立使用。
+      </p>
+      <p>
+        涟漪仅改变湿润表面的法线，不增加地面几何。积雪、干燥和陡坡会抑制涟漪，远处自动淡出。没有水面或额外水洼贴图。
+      </p>
+      <p>
+        镜头水珠与滑落水痕会局部折射画面；暂停时间可固定两种效果。降雨强度为视觉参数。
+      </p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="鸟瞰天气.html?world=globe">真实城市天气</a> ·
+        <a href="示例目录.html">目录</a>
+      </p>
+      <p id="status">正在加载本地模型…</p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./降雨细节.js"></script>
+  </body>
+</html>

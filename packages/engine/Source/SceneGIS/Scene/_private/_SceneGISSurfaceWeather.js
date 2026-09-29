@@ -1,5 +1,7 @@
 import Cartesian2 from "../../../Core/Cartesian2.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
+import Cartesian4 from "../../../Core/Cartesian4.js";
+import JulianDate from "../../../Core/JulianDate.js";
 import combine from "../../../Core/combine.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
@@ -18,6 +20,9 @@ function createState(effect) {
     active: false,
     origin: new Cartesian3(),
     amounts: new Cartesian2(),
+    rippleOrigin: new Cartesian3(),
+    ripples: new Cartesian4(),
+    epoch: undefined,
     shaders: new WeakMap(),
     receivers: new WeakMap(),
   };
@@ -25,6 +30,8 @@ function createState(effect) {
     u_sceneGISSurfaceOrigin: () => state.origin,
     u_sceneGISSurfaceAmounts: () => state.amounts,
     u_sceneGISSurfaceScale: () => effect.patchScale,
+    u_sceneGISRippleOrigin: () => state.rippleOrigin,
+    u_sceneGISSurfaceRipples: () => state.ripples,
     u_sceneGISSurfaceSnowColor: () => effect.snowColor,
     u_sceneGISSurfacePlanar: () =>
       !!effect._scene.world && effect._scene.world !== effect._scene.globe,
@@ -59,6 +66,24 @@ SurfaceWeather.prepare = function (scene, camera = scene.camera) {
     (((p.y / scale) % 256) + 256) % 256,
     (((p.z / scale) % 256) + 256) % 256,
     state.origin,
+  );
+  const rippleScale = effect.rippleScale;
+  Cartesian3.fromElements(
+    (((p.x / rippleScale) % 256) + 256) % 256,
+    (((p.y / rippleScale) % 256) + 256) % 256,
+    (((p.z / rippleScale) % 256) + 256) % 256,
+    state.rippleOrigin,
+  );
+  const time = scene.frameState.time;
+  state.epoch ??= JulianDate.clone(time);
+  const seconds = JulianDate.secondsDifference(time, state.epoch);
+  // The procedural impact hash repeats every 256 two-second cycles.
+  Cartesian4.fromElements(
+    effect.rippleIntensity,
+    rippleScale,
+    ((seconds % 512) + 512) % 512,
+    0.22,
+    state.ripples,
   );
 };
 

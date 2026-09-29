@@ -1,6 +1,61 @@
 import { test, expect } from "@playwright/test";
 
 for (const world of ["globe", "planar"]) {
+  test(`Rain details ${world} exposes independent controls and native disposal`, async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(`/Test/Rendering/降雨细节.html?world=${world}`);
+    await expect(page.locator("#status")).toHaveText("本地场景已加载");
+    await page.waitForFunction(
+      () => window.example.reflections.ready && window.example.rainLens.ready,
+    );
+    const ripple = page.getByRole("checkbox", {
+      name: "湿地涟漪",
+      exact: true,
+    });
+    const lens = page.getByRole("checkbox", { name: "镜头雨滴", exact: true });
+    await lens.uncheck();
+    expect(
+      await page.evaluate(() => [
+        window.example.rainLens.enabled,
+        window.example.surfaceWeather.rippleIntensity > 0,
+      ]),
+    ).toEqual([false, true]);
+    await ripple.uncheck();
+    await lens.check();
+    expect(
+      await page.evaluate(() => [
+        window.example.rainLens.enabled,
+        window.example.surfaceWeather.rippleIntensity,
+      ]),
+    ).toEqual([true, 0]);
+    await ripple.check();
+    await page
+      .getByRole("checkbox", { name: "场景时间推进", exact: true })
+      .uncheck();
+    await page
+      .getByRole("combobox", { name: "观察视角", exact: true })
+      .selectOption({ label: "鸟瞰淡出" });
+    await page
+      .getByRole("combobox", { name: "观察视角", exact: true })
+      .selectOption({ label: "近看地面" });
+    await expect(page.locator("#error")).toHaveText("");
+    expect(
+      await page.evaluate(() => {
+        const { rainLens, surfaceWeather, reflections, destroy } =
+          window.example;
+        destroy();
+        return [
+          rainLens.isDestroyed(),
+          surfaceWeather.isDestroyed(),
+          reflections.isDestroyed(),
+        ];
+      }),
+    ).toEqual([true, true, true]);
+    expect(errors).toEqual([]);
+  });
   test(`Surface weather ${world} loads local materials and releases its setting`, async ({
     page,
   }) => {
@@ -80,6 +135,11 @@ for (const world of ["globe", "planar"]) {
       false,
     );
     await page.waitForFunction(() => window.example.effects.showHeightFog);
+    await page.waitForFunction(
+      () =>
+        window.example.rainLens.enabled &&
+        window.example.surfaceWeather.rippleIntensity > 0,
+    );
     const wetnessInput = page.getByRole("textbox", {
       name: "湿润程度",
       exact: true,
@@ -126,6 +186,12 @@ for (const world of ["globe", "planar"]) {
     });
     await expect(surfaceToggle).not.toBeChecked();
     expect(
+      await page.evaluate(() => [
+        window.example.rainLens.enabled,
+        window.example.surfaceWeather.rippleIntensity,
+      ]),
+    ).toEqual([false, 0]);
+    expect(
       await page.evaluate(() => window.example.surfaceWeather.enabled),
     ).toBe(false);
     // Explicit user overrides remain available even under the clear preset.
@@ -148,6 +214,12 @@ for (const world of ["globe", "planar"]) {
       await page.evaluate(() => window.example.surfaceWeather.wetness),
     ).toBe(baseline.wetness);
     await page.waitForFunction(() => window.example.effects.showHeightFog);
+    expect(
+      await page.evaluate(() => [
+        window.example.rainLens.enabled,
+        window.example.surfaceWeather.rippleIntensity,
+      ]),
+    ).toEqual([false, 0]);
     await page
       .getByRole("checkbox", { name: "能见度随天气变化", exact: true })
       .uncheck();

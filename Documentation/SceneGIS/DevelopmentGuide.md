@@ -1056,6 +1056,34 @@ surfaceWeather.snowCoverage = 0.8;
 真实数据入口 `Test/Rendering/鸟瞰天气.html?world=globe`。前者不依赖公网；后者沿用 ion。
 专项 Specs：`SceneGIS/Scene/SceneGISSurfaceWeather`；示例 E2E 沿用 weather 配置。
 
+### 湿地涟漪与镜头雨滴
+
+```js
+surfaceWeather.rippleIntensity = 0.8; // [0, 1], default zero
+surfaceWeather.rippleScale = 0.8; // positive meters
+const rainLens = scene.postProcessStages.add(
+  new Cesium.SceneGISRainLensStage({
+    scene,
+    enabled: true, // default false
+    intensity: 0.6, // [0, 1]
+    dropletSize: 36, // drawing-buffer pixels, [8, 128]
+    distortion: 12, // pixels, [0, 40]
+  }),
+);
+// Collection removal destroys the stage and releases native resources.
+scene.postProcessStages.remove(rainLens);
+```
+
+涟漪只影响湿润、接近水平的表面法线；积雪和远处亚像素图案抑制涟漪，水面不参与。
+不会生成地面位移或雨滴碰撞，屋檐下也可能有涟漪。`rippleScale` 同时决定落点间距与波纹半径。
+模型 SSR 使用扰动法线，地形仅影响已有的湿润方向高光。默认零强度保持既有材质行为。
+
+镜头雨滴与地表覆盖互相独立，提供水珠、滑落水痕和局部折射，只有一个颜色后处理，无深度重绘。
+两者随 Scene time 动画，暂停时间即冻结；不会主动启动时钟或请求连续帧。
+调用方决定与降水的联动，雨雪切换时可将两者强度归零，并关闭镜头 stage 避免执行通道。
+独立本地示例 `Test/Rendering/降雨细节.html` 支持两种世界；鸟瞰天气页面已提供开关与强度调节。
+专项 Specs 加入 `SceneGIS/Scene/SceneGISRainLensStage`；设计与限制见 ADR-0105。
+
 ## 几何高光抗锯齿
 
 PBR Model / 3D Tiles 可独立启用几何高光过滤，Globe / Planar 使用同一接口：

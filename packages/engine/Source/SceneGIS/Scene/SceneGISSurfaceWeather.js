@@ -17,7 +17,8 @@ function unit(value, name) {
  * Terrain retains diffuse lighting with an approximate wet directional highlight.
  * Unlit models, translucent content, classification and water are unchanged.
  *
- * Amounts are independent of particle weather and scene time. This does not
+ * Wetness/snow amounts are independent of particle weather and scene time.
+ * Optional rain ripples animate the wet normal using Scene time. This does not
  * simulate shelter, drainage, puddle depth, snow thickness or melting. Imagery
  * has no land-cover semantics, so photographed vegetation/water may be covered.
  * The Scene owns this setting; explicit destroy detaches it early. ShaderCache
@@ -31,6 +32,8 @@ function unit(value, name) {
  * @param {number} [options.wetness=0] Visual wetness in [0, 1].
  * @param {number} [options.snowCoverage=0] Visual snow coverage in [0, 1].
  * @param {number} [options.patchScale=40] Positive world-space patch size in meters.
+ * @param {number} [options.rippleIntensity=0] Visual rain-ring density/strength in [0, 1]. Independent of precipitation particles.
+ * @param {number} [options.rippleScale=0.8] Positive rain-ring cell size in meters. Subpixel rings fade out.
  * @param {Color} [options.snowColor] Snow reflectance, default (0.85, 0.9, 0.95).
  * @exception {DeveloperError} Scene and option values must meet their documented contracts.
  * @example
@@ -59,11 +62,46 @@ function SceneGISSurfaceWeather(options) {
   this.wetness = options.wetness ?? 0;
   this.snowCoverage = options.snowCoverage ?? 0;
   this.patchScale = options.patchScale ?? 40;
+  this.rippleIntensity = options.rippleIntensity ?? 0;
+  this.rippleScale = options.rippleScale ?? 0.8;
   this.snowColor = options.snowColor ?? new Color(0.85, 0.9, 0.95);
   scene._sceneGISSurfaceWeather = this;
 }
 
 Object.defineProperties(SceneGISSurfaceWeather.prototype, {
+  /** Rain-ring density/strength on wet upward surfaces, [0, 1]. Zero disables rings.
+   * Uses Scene time without requesting animation frames. Snow suppresses ripples.
+   * @memberof SceneGISSurfaceWeather.prototype
+   * @type {number}
+   * @default 0
+   */
+  rippleIntensity: {
+    get() {
+      return this._rippleIntensity;
+    },
+    set(value) {
+      unit(value, "rippleIntensity");
+      this._rippleIntensity = value;
+      this._scene.requestRender();
+    },
+  },
+  /** Positive procedural ripple cell size in world meters. No geometry displacement.
+   * @memberof SceneGISSurfaceWeather.prototype
+   * @type {number}
+   * @default 0.8
+   */
+  rippleScale: {
+    get() {
+      return this._rippleScale;
+    },
+    set(value) {
+      if (!Number.isFinite(value) || value <= 0) {
+        throw new DeveloperError("rippleScale must be positive and finite.");
+      }
+      this._rippleScale = value;
+      this._scene.requestRender();
+    },
+  },
   /** Whether to apply coverage. Changing settings requests a frame.
    * @memberof SceneGISSurfaceWeather.prototype
    * @type {boolean}
