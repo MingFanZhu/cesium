@@ -47,3 +47,9 @@ Adjacent GPU median differences are approximately 0.09 ms for rain and 0.05 ms f
 ## Remaining limits
 
 Regional tangent approximation in Globe, artistic density/sizes, camera-local periodic coverage, native transparency limits and no particle motion vectors. Large sprite footprints can increase transparent fill cost; integrated scene/cloud cost must be measured by applications. Street-level roof shelter, wetness and snow accumulation are outside the authorized phase. Owner should judge the final visible rain/snow atmosphere in the independent example; this gate does not replace visual acceptance.
+
+## Post-checkpoint example review
+
+After c9fb09b5b0, owner feedback removes example clouds and replaces Globe's schematic blocks with public white-building data. Current-task architecture/code self-review approves the example-only change: native PolygonGeometry workers batch the local OSM snapshot, including holes; PrimitiveCollection owns release. Planar remains schematic. The phase-plan follow-ups record the changes and two passing example E2E tests. No engine, shader, public API or upstream file changes occur.
+
+Height completeness is an accepted limitation, owned by the example: 501 source heights, 315 level-derived heights and 4,791 12-meter estimates. The source record with building=no is excluded. Original geographic footprints, license, snapshot and derivation are preserved/documented. Flat ellipsoid ground and estimated heights are explicitly disclosed, so this is a visual weather reference, not a surveyed city model. No unresolved code finding or further phase is opened.

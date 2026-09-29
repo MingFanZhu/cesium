@@ -17,3 +17,5 @@
 P1 checkpoint is complete. P2 implements aerial rain/snow using the generic foundation, preserving shader-owned physics and adding reusable initial fill and render-only styling. Automated and browser validation and architecture self-review are complete; P2 is included in its own local checkpoint after P1. Owner visual acceptance of the weather example is pending. Roof shelter and surface state remain outside this delivery, with no further phase activated. See the P2 plan, review and resolved scope discussion.
 
 Post-checkpoint owner feedback removes cloud composition from the weather example. Rain/snow, atmosphere and height fog remain; the standalone environment subsystem is unaffected. See the P2 plan follow-up.
+
+The Globe example now uses a pinned OSM Nanjing building extract in Test/Rendering/data/NanjingBuildings, with native batched extrusion and explicit height estimates. Planar retains its schematic district. Data preparation is scripts/scenegis/prepare-weather-city.mjs; example-level validation is Specs/e2e/scenegis-weather.spec.js with Test/Rendering/playwright.weather.config.mjs. No engine or weather API change.
