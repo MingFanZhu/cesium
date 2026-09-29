@@ -43,17 +43,17 @@ describe("SceneGIS/Scene/SceneGISSnowLensStage", function () {
     expect(lens._command).toBeUndefined();
     expect(fetch).not.toHaveBeenCalled();
     expect(() => {
-      lens.flakeSize = 0;
+      lens.coverage = -0.1;
     }).toThrowDeveloperError();
     expect(() => {
-      lens.meltDuration = NaN;
+      lens.coverage = NaN;
     }).toThrowDeveloperError();
     expect(() => lens.update({}, false)).toThrowDeveloperError();
     expect(scene.postProcessStages.remove(lens)).toBe(true);
     expect(lens.isDestroyed()).toBe(true);
   });
 
-  it("preserves identity/alpha, follows reversible Scene time and reuses/releases native resources", async function () {
+  it("preserves identity/alpha, stays static and reuses/releases its texture and native resources", async function () {
     const pattern = scene.postProcessStages.add(
       new PostProcessStage({
         fragmentShader: `in vec2 v_textureCoordinates;
@@ -69,7 +69,6 @@ describe("SceneGIS/Scene/SceneGISSnowLensStage", function () {
         scene,
         enabled: true,
         intensity: 0,
-        flakeSize: 12,
       }),
     );
     await pollToPromise(() => {
@@ -84,32 +83,37 @@ describe("SceneGIS/Scene/SceneGISSnowLensStage", function () {
       original.filter((_, i) => i % 4 === 3),
     );
     expect(render(2)).toEqual(snow);
-    expect(render(3.5)).not.toEqual(snow);
+    expect(render(300)).toEqual(snow);
     expect(render(2)).toEqual(snow);
-    expect(render(2 + lens.meltDuration * 256)).toEqual(snow);
     const target = lens._command.framebuffer;
     const program = lens._command.shaderProgram;
-    lens.flakeSize = 16;
-    lens.meltDuration = 4;
+    const texture = lens._actualUniforms.u_frostTexture;
+    expect(texture.width).toBe(1254);
+    expect(texture.height).toBe(1254);
+    lens.coverage = 0.6;
     render(2);
     expect(lens._command.framebuffer).toBe(target);
     expect(lens._command.shaderProgram).toBe(program);
+    expect(lens._actualUniforms.u_frostTexture).toBe(texture);
     lens.enabled = false;
     expect(render(2)).toEqual(original);
     expect(lens._command).toBeUndefined();
+    expect(texture.isDestroyed()).toBe(true);
     lens.enabled = true;
     await pollToPromise(() => {
       render();
       return lens.ready;
     });
     const resumedProgram = lens._command.shaderProgram;
+    const resumedTexture = lens._actualUniforms.u_frostTexture;
     scene.destroyForSpecs();
     scene = undefined;
     expect(lens.isDestroyed()).toBe(true);
     expect(resumedProgram.isDestroyed()).toBe(true);
+    expect(resumedTexture.isDestroyed()).toBe(true);
   });
 
-  it("increases sparse matte coverage with intensity without emitting in a black scene", async function () {
+  it("extends frost inward while preserving the default center and black-scene darkness", async function () {
     let brightness = 0.25;
     const background = scene.postProcessStages.add(
       new PostProcessStage({
@@ -123,7 +127,6 @@ describe("SceneGIS/Scene/SceneGISSnowLensStage", function () {
         scene,
         enabled: true,
         intensity: 0,
-        flakeSize: 12,
       }),
     );
     await pollToPromise(() => {
@@ -133,13 +136,18 @@ describe("SceneGIS/Scene/SceneGISSnowLensStage", function () {
     const dry = render(2);
     const changedPixels = (pixels) =>
       pixels.filter((v, i) => i % 4 === 0 && v !== dry[i]).length;
-    lens.intensity = 0.25;
-    const lightSnow = render(2);
     lens.intensity = 1;
-    const heavySnow = render(2);
-    expect(changedPixels(heavySnow)).toBeGreaterThan(changedPixels(lightSnow));
-    expect(changedPixels(heavySnow)).toBeLessThan((128 * 128) / 2);
-    expect(heavySnow.some((v, i) => i % 4 === 0 && v > dry[i] + 5)).toBe(true);
+    const frost = render(2);
+    const center = (64 * 128 + 64) * 4;
+    expect(frost.slice(center, center + 4)).toEqual(
+      dry.slice(center, center + 4),
+    );
+    expect(frost.some((v, i) => i % 4 === 0 && v > dry[i] + 5)).toBe(true);
+    lens.coverage = 0.8;
+    expect(changedPixels(render(2))).toBeGreaterThan(changedPixels(frost));
+    lens.coverage = 0;
+    expect(render(2)).toEqual(dry);
+    lens.coverage = 1;
     brightness = 0;
     expect(
       render(2)

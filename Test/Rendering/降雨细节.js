@@ -136,15 +136,14 @@ gui.add(surfaceWeather, "snowCoverage", 0, 1, 0.01).name("积雪覆盖");
 gui.add(reflections, "enabled").name("模型 SSR");
 gui
   .add(settings, "lens")
-  .name(snowExample ? "镜头雪点" : "镜头雨滴")
+  .name(snowExample ? "镜头结霜" : "镜头雨滴")
   .onChange(syncPrecipitation);
 gui
   .add(settings, "lensStrength", 0, 1, 0.01)
-  .name(snowExample ? "镜头雪点强度" : "镜头雨滴强度")
+  .name(snowExample ? "结霜强度" : "镜头雨滴强度")
   .onChange(syncPrecipitation);
 if (snowExample) {
-  gui.add(snowLens, "flakeSize", 8, 80, 1).name("雪点尺度（像素）");
-  gui.add(snowLens, "meltDuration", 1, 30, 0.5).name("融化周期（秒）");
+  gui.add(snowLens, "coverage", 0, 1, 0.01).name("结霜范围");
 } else {
   gui.add(rainLens, "dropletSize", 8, 80, 1).name("雨滴尺度（像素）");
   gui.add(rainLens, "distortion", 0, 30, 0.5).name("镜头折射（像素）");

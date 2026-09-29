@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 for (const world of ["globe", "planar"]) {
-  test(`Snow details ${world} exposes melting controls and native disposal`, async ({
+  test(`Snow details ${world} exposes frost controls and native disposal`, async ({
     page,
   }) => {
     const errors = [];
@@ -11,7 +11,7 @@ for (const world of ["globe", "planar"]) {
     await page.waitForFunction(
       () => window.example.snowLens.ready && window.example.reflections.ready,
     );
-    const lens = page.getByRole("checkbox", { name: "镜头雪点", exact: true });
+    const lens = page.getByRole("checkbox", { name: "镜头结霜", exact: true });
     await lens.uncheck();
     expect(
       await page.evaluate(() => [
@@ -20,14 +20,12 @@ for (const world of ["globe", "planar"]) {
       ]),
     ).toEqual([false, true]);
     await lens.check();
-    for (const [name, value] of [
-      ["雪点尺度（像素）", "36"],
-      ["融化周期（秒）", "10"],
-    ]) {
-      const input = page.getByRole("textbox", { name, exact: true });
-      await input.fill(value);
-      await input.press("Tab");
-    }
+    const coverage = page.getByRole("textbox", {
+      name: "结霜范围",
+      exact: true,
+    });
+    await coverage.fill("0.65");
+    await coverage.press("Tab");
     await page
       .getByRole("checkbox", { name: "场景时间推进", exact: true })
       .uncheck();
@@ -36,13 +34,12 @@ for (const world of ["globe", "planar"]) {
         const { snowLens, viewer, surfaceWeather } = window.example;
         return [
           snowLens.enabled,
-          snowLens.flakeSize,
-          snowLens.meltDuration,
+          snowLens.coverage,
           viewer.clock.shouldAnimate,
           surfaceWeather.rippleIntensity,
         ];
       }),
-    ).toEqual([true, 36, 10, false, 0]);
+    ).toEqual([true, 0.65, false, 0]);
     await expect(page.locator("#error")).toHaveText("");
     expect(
       await page.evaluate(() => {
@@ -279,7 +276,7 @@ for (const world of ["globe", "planar"]) {
       ]),
     ).toEqual([false, true, 0]);
     const snowLensToggle = page.getByRole("checkbox", {
-      name: "镜头雪点",
+      name: "镜头结霜",
       exact: true,
     });
     await snowLensToggle.uncheck();

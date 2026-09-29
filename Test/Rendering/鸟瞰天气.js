@@ -348,10 +348,9 @@ details.add(settings, "lensStrength", 0, 1, 0.01).name("镜头雨滴强度");
 details.add(rainLens, "dropletSize", 8, 80, 1).name("雨滴尺度（像素）");
 details.add(rainLens, "distortion", 0, 30, 0.5).name("镜头折射（像素）");
 const snowDetails = gui.addFolder("降雪镜头");
-snowDetails.add(settings, "snowLens").name("镜头雪点");
-snowDetails.add(settings, "snowLensStrength", 0, 1, 0.01).name("镜头雪点强度");
-snowDetails.add(snowLens, "flakeSize", 8, 80, 1).name("雪点尺度（像素）");
-snowDetails.add(snowLens, "meltDuration", 1, 30, 0.5).name("融化周期（秒）");
+snowDetails.add(settings, "snowLens").name("镜头结霜");
+snowDetails.add(settings, "snowLensStrength", 0, 1, 0.01).name("结霜强度");
+snowDetails.add(snowLens, "coverage", 0, 1, 0.01).name("结霜范围");
 let lastStatus = 0;
 const removeUpdate = scene.preUpdate.addEventListener(() => {
   const rain =

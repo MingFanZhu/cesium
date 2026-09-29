@@ -1,0 +1,15 @@
+{
+  "name": "SceneGIS static lens frost texture",
+  "source": "Generated for SceneGIS using the built-in image_gen tool, 2026-09-30",
+  "file": "frost.png",
+  "modifications": "None; generated PNG copied byte-for-byte.",
+  "sha256": "091275ce6480f3b519287e65cb37260c309cd55f3eee4bd269205456fde9c3af",
+  "bytes": 4053408,
+  "format": "PNG RGB8; grayscale density sampled from R as linear data",
+  "width": 1254,
+  "height": 1254,
+  "maximumGpuBytes": 6290064,
+  "runtimeUrl": "Assets/SceneGIS/Weather/SnowLens/frost.png",
+  "files": ["frost.png", "manifest.json"],
+  "prompt": "Use case: photorealistic-natural. Asset type: static grayscale frost density texture for a real-time camera lens post-process shader, square 1024x1024 PNG. Create a macro, perfectly front-facing detailed frost-on-glass texture, covering the entire square with interlocking natural fern-like dendritic ice crystals, feathery frozen branches and fine crystalline veins. Monochrome grayscale only: ice veins silver-white and pale gray, gaps deep black. The medium-sized crystals should occupy roughly 30-100 pixels each, varied orientation, organically clustered with some soft frosted haze. Flat texture data, even illumination, no directional lighting, no glints, no shadows, no perspective, no background scene, no border/frame, no text or watermark. No falling snow, snowballs, separate six-point decorative snowflakes, raindrops or snow splashes. This is a reusable material texture, not a finished scenic picture; distribute the frost across the full image, including the center. The consuming shader supplies its own edge coverage mask."
+}

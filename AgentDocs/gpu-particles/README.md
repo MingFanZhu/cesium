@@ -1,9 +1,9 @@
 # GPU Particles
 
-- Updated: 2026-09-29; status: implemented, owner visual acceptance pending; planning model: extension
+- Updated: 2026-09-30; status: static frost implemented, owner visual acceptance pending; planning model: extension
 - Architecture/execution/reviewer: current task, self-review
 - Active extension: [roadmap](plans/2026-09-29-gpu-particles.md)
-- Current phase: P4 completed at 279103d298, rain-lens follow-up at bac1ae8b10; [snow lens follow-up](plans/2026-09-29-snow-lens.md) implemented, owner visual acceptance pending
+- Current phase: P4 completed at 279103d298, rain-lens follow-up at bac1ae8b10; [snow lens follow-up](plans/2026-09-29-snow-lens.md) static frost correction after af3e25ee15 implemented
 - Open discussions / unresolved code reviews: none; [snow lens review](reviews/2026-09-29-snow-lens.md), [rain lens review](reviews/2026-09-29-lens-texture.md), [approved P4 review](reviews/2026-09-29-p4-rain-details.md)
 - ADR: [0102](../../Documentation/SceneGIS/Decisions/ADR-0102-gpu-particle-foundation.md), [0103](../../Documentation/SceneGIS/Decisions/ADR-0103-aerial-weather.md), [0104](../../Documentation/SceneGIS/Decisions/ADR-0104-approximate-surface-weather.md); SGP: SGP-0028
 - Source: packages/engine/Source/SceneGIS/Scene/SceneGISGpuParticleSystem.js, SceneGISWeather.js, SceneGISSurfaceWeather.js, SceneGISRainLensStage.js, SceneGISSnowLensStage.js
@@ -14,6 +14,8 @@
 - P4 decision: [ADR-0105](../../Documentation/SceneGIS/Decisions/ADR-0105-rain-surface-and-lens-details.md); no new upstream patch
 
 ## Handoff
+
+The owner clarified that snow lens should be static frost on glass, not attached flakes. The completed correction replaces the flake/melt controls and shader with intensity/coverage and a packaged static crystal texture, retaining the stage name and weather selection. Three GPU Specs pass in development/release, five scoped E2E cases pass, and full release/types plus engine asset delivery are verified. Both-world desktop visuals show edge frost with a clear center. A bounded batch timing at 1001×826 measures about 0.342 ms incremental median, with a 6 MiB sampled texture and one native output target. No upstream/SGP change or later phase; owner visual acceptance is pending. See the current plan/review and ADR-0105 amendment. The following initial snow checkpoint is superseded visually/API-wise by this correction.
 
 Snow follow-up adds a separate, disabled-by-default SceneGISSnowLensStage with intensity, flakeSize and meltDuration. Sparse matte flecks soften into wet traces in one native color pass, without fixed glints or external assets. The aerial example selects the rain/snow stage by precipitation type; clear and hidden precipitation disable both, with independent manual toggles. Both-world local pages and six scoped E2E cases pass; three GPU Specs pass in development/release. Fixed-camera RTX 3060 Ti timing at 1185×667 measures approximately 0.515 ms incremental median. See the plan/review for build, lifecycle and approximation limits. Owner visual acceptance is pending; no later phase is active.
 
