@@ -101,19 +101,20 @@ const effects = new C.SceneGISEnvironmentEffects({
   enabled: true,
   showAtmosphere: true,
   showAerialPerspective: true,
-  showHeightFog: true,
+  showHeightFog: false,
   showClouds: false,
   showCloudShadows: false,
   showCrepuscularRays: false,
   showBloom: false,
   showLensFlare: false,
   showMoonlight: false,
-  heightFogDensity: 0.00025,
+  heightFogDensity: 0,
   heightFogHeightFalloff: 0.00035,
   heightFogStartDistance: 80,
   heightFogMaximumOpacity: 0.8,
   heightFogInscatteringScale: 0.55,
-  surfaceRadianceScale: 1,
+  // Fixed daylight calibration; weather presets never change surface lighting.
+  surfaceRadianceScale: 3,
   backgroundRadianceScale: 1,
 });
 viewer.addController(effects);
@@ -324,9 +325,9 @@ surfaces
 surfaces.add(surfaceWeather, "patchScale", 5, 150, 1).name("斑块尺度（米）");
 let lastStatus = 0;
 const removeUpdate = scene.preUpdate.addEventListener(() => {
-  effects.showHeightFog = settings.fog;
-  effects.heightFogDensity =
-    0.000015 + (settings.fog ? weather.actualIntensity * 0.0003 : 0);
+  const fogDensity = settings.fog ? weather.actualIntensity * 0.0003 : 0;
+  effects.heightFogDensity = fogDensity;
+  effects.showHeightFog = fogDensity > 0;
   const now = performance.now();
   if (now - lastStatus > 500) {
     lastStatus = now;

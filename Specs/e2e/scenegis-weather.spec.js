@@ -79,6 +79,38 @@ for (const world of ["globe", "planar"]) {
     expect(await page.evaluate(() => window.example.reflections.enabled)).toBe(
       false,
     );
+    await page.waitForFunction(() => window.example.effects.showHeightFog);
+    const baseline = await page.evaluate(() => {
+      const { viewer, effects, surfaceWeather } = window.example;
+      return {
+        surfaceScale: effects.surfaceRadianceScale,
+        backgroundScale: effects.backgroundRadianceScale,
+        exposure: viewer.scene.postProcessStages.exposure,
+        wetness: surfaceWeather.wetness,
+        snowCoverage: surfaceWeather.snowCoverage,
+      };
+    });
+    await page
+      .getByRole("combobox", { name: "天气预设", exact: true })
+      .selectOption({ label: "晴" });
+    await page.waitForFunction(
+      () =>
+        window.example.weather.actualIntensity === 0 &&
+        !window.example.effects.showHeightFog,
+    );
+    expect(
+      await page.evaluate(() => {
+        const { viewer, effects, surfaceWeather } = window.example;
+        return {
+          surfaceScale: effects.surfaceRadianceScale,
+          backgroundScale: effects.backgroundRadianceScale,
+          exposure: viewer.scene.postProcessStages.exposure,
+          wetness: surfaceWeather.wetness,
+          snowCoverage: surfaceWeather.snowCoverage,
+          fogDensity: effects.heightFogDensity,
+        };
+      }),
+    ).toEqual({ ...baseline, fogDensity: 0 });
     await page
       .getByRole("combobox", { name: "观察高度", exact: true })
       .selectOption({ label: "街区鸟瞰" });
@@ -88,6 +120,15 @@ for (const world of ["globe", "planar"]) {
     await expect(
       page.getByRole("combobox", { name: "降水类型", exact: true }),
     ).toHaveValue("雪");
+    await page.waitForFunction(() => window.example.effects.showHeightFog);
+    await page
+      .getByRole("checkbox", { name: "能见度随天气变化", exact: true })
+      .uncheck();
+    await page.waitForFunction(
+      () =>
+        !window.example.effects.showHeightFog &&
+        window.example.effects.heightFogDensity === 0,
+    );
     await page
       .getByRole("combobox", { name: "地表预设", exact: true })
       .selectOption({ label: "积雪" });
