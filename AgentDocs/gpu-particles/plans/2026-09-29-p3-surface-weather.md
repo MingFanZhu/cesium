@@ -52,3 +52,19 @@ Owner reports that clear weather remains dark and asks for weather to stay withi
 Use a fixed surface scale of 3 for this imagery/white-building scene, qualified by same-view inspection; the engine's general scale of 10 clips bright imagery here. Keep the base atmosphere, solar setup and exposure independent of weather presets. Remove the weather fog floor and disable its pass when transitioned intensity reaches zero or the fog checkbox is off. Preserve independently chosen wetness/snow, SSR and camera. Extend the current E2E to verify rain-to-clear removes fog without changing base calibration or surface state, plus manual fog disable. No engine/shader/upstream changes.
 
 Implementation and focused Planar E2E pass (21 seconds), including base calibration/exposure/surface invariance through weather changes, full fog removal and explicit fog disable. Same-view live Globe comparison identifies the low fixed light scale as the dominant cause of darkness; 3 preserves imagery contrast better than the general physical default of 10. Online ion responses remain intermittent and are unrelated to this correction. No weather-core or render-pipeline behavior changes.
+
+## Follow-up: Horizon sky calibration
+
+Owner observes remaining darkness after reload at a horizon-facing view. Live state confirms weather fog is off/zero, surface scale is 3, and independently enabled wetness is 0.65. The prior ground-focused inspection missed the example's backgroundRadianceScale override of 1; the environment's existing default is 4 in Globe and 10 in Planar. Same-view comparison changing only the background scale confirms the abnormally dark sky comes from that override.
+
+Remove the example override and inherit the environment defaults. Keep fixed surface calibration, time, exposure, weather and wetness unchanged. Reuse the existing example E2E for weather/calibration separation and inspect the Globe horizon after reload, restoring the owner's camera/settings. No engine, shader, upstream or public API changes; do not automatically dry surfaces when selecting clear weather.
+
+Completed: the existing focused Planar E2E passes (21 seconds). Reloaded Globe uses background scale 4, weather fog returns to zero and the horizon sky is visibly brighter without raising surface scale or exposure. Current wetness remains 0.65 by design. Scoped checks pass; self-review approves the one-line example correction. Owner visual judgment remains final.
+
+## Follow-up: Preset-linked surface visibility
+
+Owner now explicitly supersedes the example's independent visibility behavior: precipitation enables coverage (wet by default), clear disables it, and values remain adjustable. Implement this only in the example's weather-preset callback: set surfaceWeather.enabled from the preset's precipitation intensity while preserving wetness and snowCoverage. Manual snow/coverage choices remain possible; the next weather preset reapplies the visibility rule. Rename the surface folder and make its visibility checkbox listen to automatic changes. Core APIs stay independent.
+
+Extend existing E2E with a nondefault wetness value, clear disabling without value loss, explicit manual override, and precipitation re-enabling with the same value. Update the live page and retain the owner's horizon camera. No engine, shader, upstream or SGP change.
+
+Completed: the focused Planar E2E passes (21 seconds), covering wetness 0.42 retained across clear/manual override/precipitation and existing fog, SSR and lifecycle checks. The initial test exposed a lil-gui listen-cache issue during rapid manual/preset changes; using the checkbox controller's setValue updates the setting and display synchronously. Live Globe inspection confirms clear disables coverage while retaining wetness 0.65 and the owner's horizon view. Self-review approves the example-only follow-up; no later phase is activated.

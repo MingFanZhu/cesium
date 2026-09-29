@@ -1008,8 +1008,10 @@ low/medium/high 总槽位为 16K/32K/64K，双池模拟纹理约 2.02/4/8.04 MiB
 天气不自动改变场景环境；调用方可组合已有环境效果。鸟瞰天气示例仅组合大气和高度雾，
 不提供云层配置或开关。集合移除会销毁两个粒子池。
 基础物理光照和曝光不随天气预设修改；该示例的固定 surfaceRadianceScale 为 3。
+天空亮度沿用环境默认值（Globe 4、Planar 10），不额外压暗天空。
 天气雾密度随 actualIntensity 归零，不保留晴天雾底值；关闭“能见度随天气变化”也清除天气雾。
-地表湿润和积雪保持独立，不在切晴时自动清空。
+天气 API 与地表覆盖仍独立；示例的天气预设在晴天关闭覆盖、降水时启用覆盖（初始为湿润）。
+切换预设保留湿润/积雪参数，所有地表控件仍可手动覆盖，切晴不会清空调好的数值。
 人工入口 `Test/Rendering/鸟瞰天气.html?world=planar` / `world=globe`，
 自动验证 `SceneGIS/Scene/SceneGISWeather` 与 `SceneGIS/Scene/SceneGISGpuParticleSystem`。
 

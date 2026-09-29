@@ -115,7 +115,6 @@ const effects = new C.SceneGISEnvironmentEffects({
   heightFogInscatteringScale: 0.55,
   // Fixed daylight calibration; weather presets never change surface lighting.
   surfaceRadianceScale: 3,
-  backgroundRadianceScale: 1,
 });
 viewer.addController(effects);
 viewer.clock.shouldAnimate = true;
@@ -260,20 +259,9 @@ const gui = new GUI({
   title: planar ? "鸟瞰天气 · 平面" : "鸟瞰天气 · 球面",
   container: document.getElementById("controls"),
 });
-gui
+const weatherPreset = gui
   .add(settings, "preset", ["晴", "小雨", "中雨", "大雨", "小雪", "大雪"])
-  .name("天气预设")
-  .onChange((v) => {
-    weather.type = v.includes("雪") ? "snow" : "rain";
-    weather.intensity = {
-      晴: 0,
-      小雨: 0.25,
-      中雨: 0.7,
-      大雨: 1,
-      小雪: 0.3,
-      大雪: 1,
-    }[v];
-  });
+  .name("天气预设");
 gui.add(weather, "type", { 雨: "rain", 雪: "snow" }).name("降水类型").listen();
 gui.add(weather, "intensity", 0, 1, 0.01).name("降水强度").listen();
 function wind() {
@@ -306,9 +294,25 @@ gui
   .name("观察高度")
   .onChange(settings.home);
 gui.add(settings, "home").name("还原视角");
-const surfaces = gui.addFolder("地表覆盖（独立于降水）");
+const surfaces = gui.addFolder("地表覆盖（可手动调整）");
 surfaces.add(reflections, "enabled").name("模型 SSR");
-surfaces.add(surfaceWeather, "enabled").name("显示地表覆盖");
+const surfaceEnabled = surfaces
+  .add(surfaceWeather, "enabled")
+  .name("显示地表覆盖")
+  .listen();
+weatherPreset.onChange((v) => {
+  weather.type = v.includes("雪") ? "snow" : "rain";
+  weather.intensity = {
+    晴: 0,
+    小雨: 0.25,
+    中雨: 0.7,
+    大雨: 1,
+    小雪: 0.3,
+    大雪: 1,
+  }[v];
+  // Presets toggle coverage while preserving the user's wetness/snow values.
+  surfaceEnabled.setValue(weather.intensity > 0);
+});
 surfaces
   .add(settings, "surface", ["干燥", "湿润", "薄雪", "积雪"])
   .name("地表预设")

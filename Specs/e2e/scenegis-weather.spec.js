@@ -80,6 +80,15 @@ for (const world of ["globe", "planar"]) {
       false,
     );
     await page.waitForFunction(() => window.example.effects.showHeightFog);
+    const wetnessInput = page.getByRole("textbox", {
+      name: "湿润程度",
+      exact: true,
+    });
+    await wetnessInput.fill("0.42");
+    await wetnessInput.press("Tab");
+    expect(
+      await page.evaluate(() => window.example.surfaceWeather.wetness),
+    ).toBe(0.42);
     const baseline = await page.evaluate(() => {
       const { viewer, effects, surfaceWeather } = window.example;
       return {
@@ -111,6 +120,20 @@ for (const world of ["globe", "planar"]) {
         };
       }),
     ).toEqual({ ...baseline, fogDensity: 0 });
+    const surfaceToggle = page.getByRole("checkbox", {
+      name: "显示地表覆盖",
+      exact: true,
+    });
+    await expect(surfaceToggle).not.toBeChecked();
+    expect(
+      await page.evaluate(() => window.example.surfaceWeather.enabled),
+    ).toBe(false);
+    // Explicit user overrides remain available even under the clear preset.
+    await surfaceToggle.check();
+    expect(
+      await page.evaluate(() => window.example.surfaceWeather.enabled),
+    ).toBe(true);
+    await surfaceToggle.uncheck();
     await page
       .getByRole("combobox", { name: "观察高度", exact: true })
       .selectOption({ label: "街区鸟瞰" });
@@ -120,6 +143,10 @@ for (const world of ["globe", "planar"]) {
     await expect(
       page.getByRole("combobox", { name: "降水类型", exact: true }),
     ).toHaveValue("雪");
+    await expect(surfaceToggle).toBeChecked();
+    expect(
+      await page.evaluate(() => window.example.surfaceWeather.wetness),
+    ).toBe(baseline.wetness);
     await page.waitForFunction(() => window.example.effects.showHeightFog);
     await page
       .getByRole("checkbox", { name: "能见度随天气变化", exact: true })
