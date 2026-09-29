@@ -71,6 +71,14 @@ for (const world of ["globe", "planar"]) {
       await expect(page.locator("#data-status")).toHaveText("本地示意街区");
       await expect(page.locator("#city-credit")).toBeHidden();
     }
+    const ssr = page.getByRole("checkbox", { name: "模型 SSR", exact: true });
+    await expect(ssr).not.toBeChecked();
+    await ssr.check();
+    await page.waitForFunction(() => window.example.reflections.ready);
+    await ssr.uncheck();
+    expect(await page.evaluate(() => window.example.reflections.enabled)).toBe(
+      false,
+    );
     await page
       .getByRole("combobox", { name: "观察高度", exact: true })
       .selectOption({ label: "街区鸟瞰" });
@@ -91,17 +99,24 @@ for (const world of ["globe", "planar"]) {
     ).toBe(0.95);
     await expect(page.locator("#error")).toHaveText("");
     const released = await page.evaluate(() => {
-      const { viewer, weather, surfaceWeather, reference, destroy } =
-        window.example;
+      const {
+        viewer,
+        weather,
+        surfaceWeather,
+        reflections,
+        reference,
+        destroy,
+      } = window.example;
       destroy();
       return [
         viewer.isDestroyed(),
         weather.isDestroyed(),
         reference.primitive.isDestroyed(),
         surfaceWeather.isDestroyed(),
+        reflections.isDestroyed(),
       ];
     });
-    expect(released).toEqual([true, true, true, true]);
+    expect(released).toEqual([true, true, true, true, true]);
     expect(errors).toEqual([]);
   });
 }

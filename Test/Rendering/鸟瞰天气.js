@@ -66,6 +66,10 @@ const surfaceWeather = new C.SceneGISSurfaceWeather({
   wetness: 0.65,
 });
 scene.highDynamicRange = true;
+const reflections = new C.SceneGISScreenSpaceReflections({
+  scene,
+  enabled: false,
+});
 scene.msaaSamples = 1;
 scene.postProcessStages.fxaa.enabled = true;
 scene.fog.enabled = false;
@@ -302,6 +306,7 @@ gui
   .onChange(settings.home);
 gui.add(settings, "home").name("还原视角");
 const surfaces = gui.addFolder("地表覆盖（独立于降水）");
+surfaces.add(reflections, "enabled").name("模型 SSR");
 surfaces.add(surfaceWeather, "enabled").name("显示地表覆盖");
 surfaces
   .add(settings, "surface", ["干燥", "湿润", "薄雪", "积雪"])
@@ -339,7 +344,7 @@ const removeTilesetEvents = [];
 exposeExample(
   viewer,
   gui,
-  { weather, surfaceWeather, effects, settings, reference },
+  { weather, surfaceWeather, reflections, effects, settings, reference },
   () => {
     removeUpdate();
     removeError();
