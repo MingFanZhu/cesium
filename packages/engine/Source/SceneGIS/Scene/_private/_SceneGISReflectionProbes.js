@@ -33,6 +33,7 @@ import cubeVertex from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISSky
 import filter from "../../../Shaders/SceneGIS/Reflections/SceneGISProbeFilterFS.js";
 import lighting from "../../../Shaders/SceneGIS/Reflections/SceneGISProbeLighting.js";
 import LocalLights from "./_SceneGISLocalLights.js";
+import SurfaceWeather from "./_SceneGISSurfaceWeather.js";
 
 const directions = [
   new Cartesian3(1, 0, 0),
@@ -338,6 +339,7 @@ function captureProbe(collection, probe, frameState) {
         shadow.update(frameState);
       }
       LocalLights.prepare(scene, state.camera);
+      SurfaceWeather.prepare(scene, state.camera);
       state.passState.framebuffer = state.frames[state.face];
       state.clear.execute(context, state.passState);
       const skyCommand = state.quadCommands[0];
@@ -364,6 +366,7 @@ function captureProbe(collection, probe, frameState) {
           command = result.receiveCommand;
         }
         command = LocalLights.receiver(scene, command);
+        command = SurfaceWeather.receiver(scene, command);
         context.uniformState.updatePass(command.pass);
         deriveCapture(context, command, state).execute(
           context,
@@ -544,6 +547,7 @@ const SceneGISReflectionProbes = {
       uniformState.update(frameState);
       uniformState.updatePass(oldPass);
       LocalLights.prepare(scene);
+      SurfaceWeather.prepare(scene);
       this.prepare(scene);
       state.commands.length = 0;
       state.captureMilliseconds = performance.now() - start;

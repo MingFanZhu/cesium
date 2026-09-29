@@ -17,6 +17,12 @@ vec3 sceneGISLocalClearcoat(czm_modelMaterial material, vec3 positionEC);
 void sceneGISFilterSpecular(inout czm_modelMaterial material, vec3 geometryNormal);
 #endif
 // SCENEGIS_PATCH_END SGP-0025
+// SCENEGIS_PATCH_BEGIN SGP-0028: Declare the pre-lighting weather material seam.
+#define SCENEGIS_SURFACE_WEATHER_MODEL
+#ifdef SCENEGIS_SURFACE_WEATHER
+void sceneGISWeatherModel(inout czm_modelMaterial material, vec3 positionEC, vec3 geometryNormalEC);
+#endif
+// SCENEGIS_PATCH_END SGP-0028
 #ifdef USE_IBL_LIGHTING
 vec3 computeIBL(vec3 position, vec3 normal, vec3 lightDirection, vec3 lightColorHdr, czm_modelMaterial material)
 {
@@ -208,6 +214,11 @@ void lightingStage(inout czm_modelMaterial material, ProcessedAttributes attribu
 {
     #ifdef LIGHTING_PBR
         #ifdef HAS_NORMALS
+            // SCENEGIS_PATCH_BEGIN SGP-0028: Evaluate coverage before BRDF filtering, direct light and IBL/MRT.
+            #ifdef SCENEGIS_SURFACE_WEATHER
+            sceneGISWeatherModel(material, attributes.positionEC, attributes.normalEC);
+            #endif
+            // SCENEGIS_PATCH_END SGP-0028
             // SCENEGIS_PATCH_BEGIN SGP-0025: Use the unperturbed normalized geometry normal.
             sceneGISFilterSpecular(material, attributes.normalEC);
             // SCENEGIS_PATCH_END SGP-0025

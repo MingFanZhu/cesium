@@ -80,7 +80,15 @@ vec3 sceneGISPlanarSurfaceRadiance(vec3 albedo, vec3 positionEC, vec3 normalEC)
     #ifdef SCENEGIS_GEOMETRY_SHADOW
     visibility = sceneGISGeometryShadow();
     #endif
-    return albedo * (sceneGISPlanarDirectSource(positionEC) *
+    vec3 wetHighlight = vec3(0.0);
+    #ifdef SCENEGIS_SURFACE_WEATHER
+    vec2 cover = sceneGISWeatherCoverage(positionEC, normalEC);
+    wetHighlight = sceneGISPlanarDirectSource(positionEC) *
+        (visibility * cosine) * sceneGISPlanarCloudTransmittance(positionEC) *
+        sceneGISWeatherFilm(positionEC, normalEC,
+            normalize(czm_viewRotation * u_sceneGISShadowSunDirection), cover.x);
+    #endif
+    return wetHighlight + albedo * (sceneGISPlanarDirectSource(positionEC) *
         (visibility * cosine / czm_pi) * sceneGISPlanarCloudTransmittance(positionEC) +
         indirect);
 }

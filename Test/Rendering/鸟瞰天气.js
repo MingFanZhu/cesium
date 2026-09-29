@@ -53,6 +53,11 @@ const viewer = new C.Viewer("map", {
   selectionIndicator: false,
 });
 const scene = viewer.scene;
+const surfaceWeather = new C.SceneGISSurfaceWeather({
+  scene,
+  enabled: true,
+  wetness: 0.65,
+});
 scene.highDynamicRange = true;
 scene.msaaSamples = 1;
 scene.postProcessStages.fxaa.enabled = true;
@@ -183,6 +188,7 @@ const weather = scene.primitives.add(
 );
 const settings = {
   preset: "中雨",
+  surface: "湿润",
   view: planar ? "街区鸟瞰" : "城市鸟瞰",
   windSpeed: 5,
   windAngle: 10,
@@ -288,6 +294,22 @@ gui
   .name("观察高度")
   .onChange(settings.home);
 gui.add(settings, "home").name("还原视角");
+const surfaces = gui.addFolder("地表覆盖（独立于降水）");
+surfaces.add(surfaceWeather, "enabled").name("显示地表覆盖");
+surfaces
+  .add(settings, "surface", ["干燥", "湿润", "薄雪", "积雪"])
+  .name("地表预设")
+  .onChange((value) => {
+    surfaceWeather.wetness = value === "湿润" ? 0.8 : 0;
+    surfaceWeather.snowCoverage =
+      value === "薄雪" ? 0.45 : value === "积雪" ? 0.95 : 0;
+  });
+surfaces.add(surfaceWeather, "wetness", 0, 1, 0.01).name("湿润程度").listen();
+surfaces
+  .add(surfaceWeather, "snowCoverage", 0, 1, 0.01)
+  .name("积雪覆盖")
+  .listen();
+surfaces.add(surfaceWeather, "patchScale", 5, 150, 1).name("斑块尺度（米）");
 let lastStatus = 0;
 const removeUpdate = scene.preUpdate.addEventListener(() => {
   effects.showHeightFog = settings.fog;
@@ -307,19 +329,24 @@ const removeError = scene.renderError.addEventListener((...args) => {
   document.getElementById("error").textContent = args[1].message;
 });
 const removeTilesetEvents = [];
-exposeExample(viewer, gui, { weather, effects, settings, reference }, () => {
-  removeUpdate();
-  removeError();
-  removeTerrainError?.();
-  removeImageryError?.();
-  for (const remove of removeTilesetEvents) {
-    remove();
-  }
-  viewer.removeController(effects);
-  if (environment) {
-    viewer.removeController(environment);
-  }
-});
+exposeExample(
+  viewer,
+  gui,
+  { weather, surfaceWeather, effects, settings, reference },
+  () => {
+    removeUpdate();
+    removeError();
+    removeTerrainError?.();
+    removeImageryError?.();
+    for (const remove of removeTilesetEvents) {
+      remove();
+    }
+    viewer.removeController(effects);
+    if (environment) {
+      viewer.removeController(environment);
+    }
+  },
+);
 
 if (!planar) {
   // Collection ownership begins only after the async ion factory has completed.

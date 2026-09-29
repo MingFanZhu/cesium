@@ -1,5 +1,6 @@
 in vec2 v_textureCoordinates;
 #define SCENEGIS_LOCAL_LIGHT_RECEIVER
+#define SCENEGIS_SURFACE_WEATHER_TERRAIN
 #if defined(SCENEGIS_GEOMETRY_SHADOW) && (defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_LIGHTING))
 #define SCENEGIS_DIRECT_SHADOW_RECEIVER
 #endif
@@ -30,7 +31,7 @@ in vec3 v_normalWC;
     #endif
 #endif
 
-#if defined(SCENEGIS_LOCAL_LIGHTS) || defined(SHADOW_MAP) || defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
+#if defined(SCENEGIS_SURFACE_WEATHER) || defined(SCENEGIS_LOCAL_LIGHTS) || defined(SHADOW_MAP) || defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
 in vec3 v_positionEC;
 #endif
 
@@ -118,6 +119,11 @@ void main()
     );
     color.rgb = mix(color.rgb, material.diffuse, material.alpha);
 #endif
+    #ifdef SCENEGIS_SURFACE_WEATHER
+    vec3 weatherNormalEC = sceneGISWeatherTerrainNormal(v_positionEC);
+    vec2 weatherCoverage = sceneGISWeatherCoverage(v_positionEC, weatherNormalEC);
+    color.rgb = sceneGISWeatherAlbedo(color.rgb, weatherCoverage);
+    #endif
     vec3 localDiffuse = color.rgb;
 #ifdef SCENEGIS_ADVANCED_LIGHTING
     color.rgb = sceneGISPlanarSurfaceRadiance(color.rgb, v_positionEC, normalEC);
@@ -142,6 +148,14 @@ void main()
 #if defined(SCENEGIS_LOCAL_LIGHTS) && (defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_ADVANCED_LIGHTING))
     color.rgb += sceneGISLocalLambert(v_positionEC, normalEC, localDiffuse);
 #endif
+    #if defined(SCENEGIS_SURFACE_WEATHER) && defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_ADVANCED_LIGHTING)
+    vec3 weatherLight = czm_lightColorHdr;
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+    weatherLight *= sceneGISGeometryShadow();
+    #endif
+    color.rgb += weatherLight * max(dot(weatherNormalEC, czm_lightDirectionEC), 0.0) *
+        sceneGISWeatherFilm(v_positionEC, weatherNormalEC, czm_lightDirectionEC, weatherCoverage.x);
+    #endif
     out_FragColor = vec4(color.rgb, 1.0);
 #ifdef SCENEGIS_CLIPPING
     if (clippingDistance < u_clippingEdgeStyle.w) {

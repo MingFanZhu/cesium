@@ -335,6 +335,9 @@ vec3 computeEllipsoidPosition()
     return (czm_inverseView * vec4(ellipsoidPosition, 1.0)).xyz;
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0028: Expose opaque Globe terrain as a weather receiver.
+#define SCENEGIS_SURFACE_WEATHER_TERRAIN
+// SCENEGIS_PATCH_END SGP-0028
 void main()
 {
 #ifdef TILE_LIMIT_RECTANGLE
@@ -444,6 +447,16 @@ void main()
     color = alphaBlend(materialColor, color);
 #endif
 
+// SCENEGIS_PATCH_BEGIN SGP-0028: Cover composed imagery before surface lighting.
+#ifdef SCENEGIS_SURFACE_WEATHER
+    vec3 weatherNormalEC = sceneGISWeatherTerrainNormal(v_positionEC);
+    vec2 weatherCoverage = sceneGISWeatherCoverage(v_positionEC, weatherNormalEC);
+    #if defined(HAS_WATER_MASK) && (defined(SHOW_REFLECTIVE_OCEAN) || defined(APPLY_MATERIAL))
+    weatherCoverage *= 1.0 - mask;
+    #endif
+    color.rgb = sceneGISWeatherAlbedo(color.rgb, weatherCoverage);
+#endif
+// SCENEGIS_PATCH_END SGP-0028
 // SCENEGIS_PATCH_BEGIN SGP-0009: Select the mutually exclusive SceneGIS physical Globe surface branch.
 #ifdef SCENEGIS_GLOBE_SURFACE_LIGHTING
     #ifdef SCENEGIS_GLOBE_SURFACE_TERRAIN_NORMAL
@@ -478,6 +491,16 @@ void main()
     vec4 finalColor = color;
 #endif
 
+// SCENEGIS_PATCH_BEGIN SGP-0028: Add only a direct wet highlight to native lit terrain.
+#if defined(SCENEGIS_SURFACE_WEATHER) && !defined(SCENEGIS_GLOBE_SURFACE_LIGHTING) && (defined(ENABLE_VERTEX_LIGHTING) || defined(ENABLE_DAYNIGHT_SHADING))
+    vec3 weatherLight = czm_lightColorHdr;
+    #ifdef SCENEGIS_GEOMETRY_SHADOW
+    weatherLight *= sceneGISGeometryShadow();
+    #endif
+    finalColor.rgb += weatherLight * max(dot(weatherNormalEC, czm_lightDirectionEC), 0.0) *
+        sceneGISWeatherFilm(v_positionEC, weatherNormalEC, czm_lightDirectionEC, weatherCoverage.x);
+#endif
+// SCENEGIS_PATCH_END SGP-0028
 // SCENEGIS_PATCH_BEGIN SGP-0014: Occlude only native ambient floors before clipping and atmosphere.
 #if defined(SCENEGIS_AO_MAIN) && !defined(SCENEGIS_GLOBE_SURFACE_LIGHTING)
     #if defined(ENABLE_VERTEX_LIGHTING)

@@ -14,6 +14,9 @@ import SceneGISScreenSpaceIndirectLighting from "../SceneGIS/Scene/_private/_Sce
 // SCENEGIS_PATCH_BEGIN SGP-0019: Schedule bounded material-local lighting.
 import SceneGISLocalLights from "../SceneGIS/Scene/_private/_SceneGISLocalLights.js";
 // SCENEGIS_PATCH_END SGP-0019
+// SCENEGIS_PATCH_BEGIN SGP-0028: Apply optional weather coverage before forward lighting.
+import SceneGISSurfaceWeather from "../SceneGIS/Scene/_private/_SceneGISSurfaceWeather.js";
+// SCENEGIS_PATCH_END SGP-0028
 // SCENEGIS_PATCH_BEGIN SGP-0014: Integrate current-frame indirect ambient occlusion.
 import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbientOcclusion.js";
 // SCENEGIS_PATCH_END SGP-0014
@@ -2473,6 +2476,9 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
   // SCENEGIS_PATCH_BEGIN SGP-0019: Add independent local sources to the selected color command.
   command = SceneGISLocalLights.receiver(scene, command);
   // SCENEGIS_PATCH_END SGP-0019
+  // SCENEGIS_PATCH_BEGIN SGP-0028: Share weather material inputs with color and indirect-light receivers.
+  command = SceneGISSurfaceWeather.receiver(scene, command);
+  // SCENEGIS_PATCH_END SGP-0028
   // SCENEGIS_PATCH_BEGIN SGP-0026: Capture diffuse transport during the original opaque draw.
   command = SceneGISScreenSpaceIndirectLighting.receiver(scene, command);
   // SCENEGIS_PATCH_END SGP-0026
@@ -4733,6 +4739,9 @@ function render(scene) {
   // SCENEGIS_PATCH_BEGIN SGP-0019: Transform local sources once per rendered frame.
   SceneGISLocalLights.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0019
+  // SCENEGIS_PATCH_BEGIN SGP-0028: Prepare stable surface coverage coordinates once per frame.
+  SceneGISSurfaceWeather.prepare(scene);
+  // SCENEGIS_PATCH_END SGP-0028
   // SCENEGIS_PATCH_BEGIN SGP-0014: Validate AO and expose its sampler requirement before world rendering.
   SceneGISAmbientOcclusion.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0014
@@ -5834,6 +5843,9 @@ Scene.prototype.destroy = function () {
   // SCENEGIS_PATCH_BEGIN SGP-0019: Detach the Scene-owned local light collection.
   this._sceneGISLights?.destroy();
   // SCENEGIS_PATCH_END SGP-0019
+  // SCENEGIS_PATCH_BEGIN SGP-0028: Detach Scene-owned surface weather before Context destruction.
+  this._sceneGISSurfaceWeather?.destroy();
+  // SCENEGIS_PATCH_END SGP-0028
   // SCENEGIS_PATCH_BEGIN SGP-0024: Release local probe resources before the Context.
   this._sceneGISReflectionProbes?.destroy();
   // SCENEGIS_PATCH_END SGP-0024

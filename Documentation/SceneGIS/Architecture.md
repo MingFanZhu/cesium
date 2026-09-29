@@ -1137,6 +1137,16 @@ GPU 粒子池，模拟规则全部在天气 GLSL 内。显式 Globe / Planar 模
 这些由调用方组合现有 `SceneGISEnvironmentEffects`。不新增全屏处理或几何遮挡重绘。
 普通深度测试只处理可见遮挡，不提供屋檐遮雨、碰撞、积水或积雪；强度是视觉密度。
 
+## 地表湿润与薄雪
+
+[ADR-0104](Decisions/ADR-0104-approximate-surface-weather.md) / SGP-0028 的
+`SceneGISSurfaceWeather` 独立于降水粒子，由 Scene 所有。基于既有几何法线、材质和世界位置，
+在 opaque PBR / Phong / Globe 与 Planar 地表光照前应用覆盖；不要求额外资产属性。
+Globe 用 geodetic up，Planar 用固定 Z；CPU 降低相机原点数值后进行世界固定周期噪声求值。
+SSR MRT/replay 与探针捕获共享同一材质；地形保留 diffuse lighting，只近似增加湿润方向高光，
+不因此成为 PBR/SSR 接收者。默认关闭，零覆盖恢复原命令，无额外纹理、几何 pass、history 或读回。
+透明、unlit 模型、分类和水面不参与；不模拟屋檐遮挡、水洼深度、排水或雪厚。
+
 ## 全局自动曝光（R21）
 
 [ADR-0100](Decisions/ADR-0100-global-auto-exposure.md) / SGP-0027 增加默认关闭的

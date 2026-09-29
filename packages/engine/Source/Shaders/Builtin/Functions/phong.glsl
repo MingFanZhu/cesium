@@ -18,6 +18,12 @@ vec3 sceneGISLocalPositionEC();
 vec3 sceneGISLocalPhong(vec3 positionEC, vec3 normalEC, vec3 toEye, vec3 diffuse, float specular, float shininess);
 #endif
 // SCENEGIS_PATCH_END SGP-0019
+// SCENEGIS_PATCH_BEGIN SGP-0028: Builtins precede the owned weather definitions.
+#ifdef SCENEGIS_SURFACE_WEATHER
+vec3 sceneGISWeatherPositionEC();
+void sceneGISWeatherPhong(inout czm_material material, vec3 positionEC);
+#endif
+// SCENEGIS_PATCH_END SGP-0028
 float czm_private_getLambertDiffuseOfMaterial(vec3 lightDirectionEC, czm_material material)
 {
     return czm_getLambertDiffuse(lightDirectionEC, material.normal);
@@ -49,6 +55,11 @@ float czm_private_getSpecularOfMaterial(vec3 lightDirectionEC, vec3 toEyeEC, czm
  */
 vec4 czm_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
 {
+    // SCENEGIS_PATCH_BEGIN SGP-0028: Preserve native lighting with weather-adjusted material inputs.
+    #ifdef SCENEGIS_SURFACE_WEATHER
+    sceneGISWeatherPhong(material, sceneGISWeatherPositionEC());
+    #endif
+    // SCENEGIS_PATCH_END SGP-0028
     // Diffuse from directional light sources at eye (for top-down)
     float diffuse = czm_private_getLambertDiffuseOfMaterial(vec3(0.0, 0.0, 1.0), material);
     if (czm_sceneMode == czm_sceneMode3D) {
@@ -91,6 +102,11 @@ vec4 czm_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
 
 vec4 czm_private_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
 {
+    // SCENEGIS_PATCH_BEGIN SGP-0028: Apply the same coverage to private Phong receivers.
+    #ifdef SCENEGIS_SURFACE_WEATHER
+    sceneGISWeatherPhong(material, sceneGISWeatherPositionEC());
+    #endif
+    // SCENEGIS_PATCH_END SGP-0028
     float diffuse = czm_private_getLambertDiffuseOfMaterial(lightDirectionEC, material);
     float specular = czm_private_getSpecularOfMaterial(lightDirectionEC, toEye, material);
 

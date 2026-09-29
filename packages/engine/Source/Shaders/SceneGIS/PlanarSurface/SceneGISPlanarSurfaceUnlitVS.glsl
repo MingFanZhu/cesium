@@ -1,6 +1,6 @@
 in vec3 position;
 out vec2 v_textureCoordinates;
-#ifdef SHADOW_MAP
+#if defined(SHADOW_MAP) || defined(SCENEGIS_SURFACE_WEATHER)
 out vec3 v_positionEC;
 #endif
 #ifdef SCENEGIS_CLIPPING
@@ -12,7 +12,7 @@ uniform vec3 u_clippingScale;
 void main()
 {
     v_textureCoordinates = position.xy + vec2(0.5);
-#ifdef SHADOW_MAP
+#if defined(SHADOW_MAP) || defined(SCENEGIS_SURFACE_WEATHER)
     v_positionEC = (czm_modelView * vec4(position, 1.0)).xyz;
 #endif
 #ifdef SCENEGIS_CLIPPING

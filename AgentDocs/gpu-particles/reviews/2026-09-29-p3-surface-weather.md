@@ -1,0 +1,55 @@
+# P3 review: Approximate surface weather
+
+## Metadata
+
+- Status: approved; created/updated: 2026-09-29
+- Reviewer: current task, architecture/code self-review; no independent reviewer
+- Target: codex/gpu-particles changes after 781e2a9d90
+- Parent: [P3](../plans/2026-09-29-p3-surface-weather.md); [ADR-0104](../../../Documentation/SceneGIS/Decisions/ADR-0104-approximate-surface-weather.md)
+- SGP-0028; four upstream-owned files listed below
+
+## Scope and conclusion
+
+SceneGISSurfaceWeather applies caller-controlled wetness and thin snow before forward lighting using existing normals, material values and world positions. One Scene owns one optional setting; default/disabled behavior is unchanged. Particle precipitation remains independent. PBR, Phong and Globe/Planar terrain are supported; SSR material capture and explicit probe capture share the evaluation. No texture, framebuffer, extra geometry pass, runtime readback or simulation is introduced. Architecture/code gate approves the separate P3 local checkpoint. This does not replace owner visual acceptance.
+
+## Findings and disposition
+
+| ID    | Severity | Status   | Owner        | Evidence and disposition                                                                                                                                                                                                                                                                                                    |
+| ----- | -------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P3-01 | note     | accepted | architecture | Existing imagery/materials do not identify shelter, drainage or land cover. Slope and world-fixed coverage meet the owner's approximate GIS scope; document no puddle depth, thickness or semantic protection. No follow-up is required by this phase.                                                                      |
+| P3-02 | note     | accepted | architecture | Terrain retains native diffuse lighting and gains only an approximate direct wet highlight. It is not a new PBR or SSR receiver. This preserves the bounded integration surface; model SSR roughness is tested separately.                                                                                                  |
+| P3-03 | low      | accepted | example      | The final desktop ion scene reports a world-imagery network failure, while buildings/terrain load and the online E2E readiness test passes. Keep the explicit loading error and local independent fixture; do not introduce a silent substitute or retry policy. Online visual inspection depends on available ion imagery. |
+
+No unresolved code finding remains. Unlit/no-normal models, translucent content, classification and explicit water are intentionally excluded; this is documented rather than silently claiming universal material support. Explicit reflection probes must be recaptured by callers after changing weather.
+
+## Validation reviewed
+
+- Ten SceneGISSurfaceWeather GPU Specs pass in development and release with WebGL validation, Chrome Headless 154 / Windows. Coverage includes public validation/default/lifecycle, both-world PBR and terrain, Phong, unlit exclusion, snow slope and coat replacement, emission/alpha retention, large-coordinate camera stability, disabled restoration and SSR MRT roughness with zero capture replay draws.
+- Five weather E2E cases pass: local material fixture in both worlds, online Globe controls/readiness/destruction, Planar aerial regression and explicit mocked ion authorization failure. Independent browser inspection shows snowy upward surfaces while walls retain colors. The final desktop imagery failure is recorded above.
+- Full buildRelease, buildTs and tsc pass. Existing unrelated native JSDoc warnings remain; none name the new public API. Generated barrel/type output exports SceneGISSurfaceWeather. Generated files are not committed.
+- Focused ESLint, formatting, Markdown and whitespace checks pass. Upstream patch audit passes with exactly four upstream-owned files in this delivery and no generated-file status changes.
+- The required repository-wide AgentDocs Prettier check reports 318 existing formatting failures outside this delivery. Changed files pass the explicit scoped check; unrelated documents are not reformatted.
+- Source/lifecycle inspection confirms lazy CPU-only setting state, weak caches, ShaderCache-owned derived programs and Scene teardown before Context destruction. Disabling restores base command selection. Shadows/picking remain on their original paths.
+
+## Bounded performance evidence
+
+Local Windows / Codex Chromium / ANGLE D3D11 / RTX 3060 Ti, 1219×826, MSAA 1, HDR and FXAA. The local Planar fixture has six material boxes and ground, no precipitation. Scene time and camera are fixed. CPU scope surrounds Scene.initializeFrame/render; EXT_disjoint_timer_query_webgl2 surrounds frame submission. Fifteen warmup frames precede ninety interleaved off/wet/thin-snow frames, thirty valid non-disjoint samples per case. Other app tabs remain active, so timings include scheduling noise and are not isolated shader benchmarks.
+
+| Case            | CPU median / p95 (ms) | GPU median / p95 (ms) | Frame command count |
+| --------------- | --------------------- | --------------------- | ------------------- |
+| Off             | 1.80 / 3.00           | 0.392 / 3.505         | 5                   |
+| Wet             | 2.30 / 3.40           | 0.387 / 2.503         | 5                   |
+| Thin snow, 0.65 | 1.80 / 3.30           | 0.457 / 2.377         | 5                   |
+
+An initial sequential run had baseline drift and is excluded from incremental claims. Interleaved wetness is within timing noise; thin snow adds roughly 0.065 ms to the GPU median in this small fixture. CPU medians/tails are noisy, so no precise CPU cost or city-scale performance promise is claimed. Counts are frameState.commandList entries, not raw GL draw-call counts. Source inspection confirms no added render targets or geometry replay. Partial snow adds fragment noise evaluation; zero/full snow skips it and distant footprints filter the pattern.
+
+## Upstream boundary
+
+All four upstream-owned files use paired SGP-0028 markers:
+
+- packages/engine/Source/Scene/Scene.js: prepare, command integration and Scene-owned lifecycle.
+- packages/engine/Source/Shaders/Model/LightingStageFS.glsl: material evaluation before lighting/specular filtering.
+- packages/engine/Source/Shaders/GlobeFS.glsl: surface qualification, albedo coverage and native direct highlight.
+- packages/engine/Source/Shaders/Builtin/Functions/phong.glsl: material-input hook for opaque Phong receivers.
+
+Owned implementations, examples, Specs, ADR and patch registration form one P3 checkpoint. No subsequent phase is activated. Owner should compare dry/wet/snow in the independent example and real GIS scene, subject to online data availability.

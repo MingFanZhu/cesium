@@ -13,6 +13,7 @@ import receive from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRReceive.js
 import depth from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import AmbientOcclusion from "./_SceneGISAmbientOcclusion.js";
 import LocalLights from "./_SceneGISLocalLights.js";
+import SurfaceWeather from "./_SceneGISSurfaceWeather.js";
 import ReflectionMrt from "./_SceneGISLightingMrt.js";
 import ReflectionTracing from "./_SceneGISReflectionTracing.js";
 import IndirectLighting from "./_SceneGISScreenSpaceIndirectLighting.js";
@@ -292,6 +293,7 @@ SceneGISScreenSpaceReflections.draw = function (scene, command, passState) {
     command = command.derivedCommands.shadows.receiveCommand;
   }
   command = LocalLights.receiver(scene, command);
+  command = SurfaceWeather.receiver(scene, command);
   command = AmbientOcclusion.receiver(scene, command);
   if (s.mainActive) {
     ReflectionMrt.draw(scene, s, command, passState);

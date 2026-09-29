@@ -1018,6 +1018,33 @@ low/medium/high 总槽位为 16K/32K/64K，双池模拟纹理约 2.02/4/8.04 MiB
 不保存本地建筑快照或自行挤出建筑；Globe 验证依赖公网与 ion 授权。
 示例加载、控件和销毁验证：`npx playwright test --config Test/Rendering/playwright.weather.config.mjs`。
 
+## 地表湿润与薄雪
+
+```js
+const surfaceWeather = new Cesium.SceneGISSurfaceWeather({
+  scene: viewer.scene,
+  enabled: true,
+  wetness: 0.7,
+  snowCoverage: 0.0,
+  patchScale: 40,
+});
+surfaceWeather.snowCoverage = 0.8;
+```
+
+`wetness` / `snowCoverage` 是独立的 0..1 视觉参数，不跟随降水类型或时间自动累积/消退。
+`patchScale` 是正数、单位米；`snowColor` 是线性反射率 Color。属性赋值请求一帧，直接修改
+返回的 Color 分量后由调用方 `scene.requestRender()`。Scene 拥有实例，提前 `destroy()` 会解除绑定。
+
+自动使用现有坡度与材质：朝上面优先积雪，湿润降低粗糙表面的高光宽度并使非金属底色变暗。
+支持 opaque PBR Model/3D Tiles、lit Phong 图元及两种地表；地形保留原 diffuse 光照和近似湿润方向高光。
+不改变透明、unlit 模型、分类、水面、alpha 与自发光；不要求新的 GIS 资产材质字段。
+薄雪不改变轮廓，无屋檐遮挡或真实积水深度；底图无地物语义，可能覆盖照片里的树木/水域。
+探针仍按其原有手动更新契约捕获，修改表面后如需更新离屏反射，应重新捕获。
+
+人工入口 `Test/Rendering/地表雨雪.html?world=planar` / `world=globe`，
+真实数据入口 `Test/Rendering/鸟瞰天气.html?world=globe`。前者不依赖公网；后者沿用 ion。
+专项 Specs：`SceneGIS/Scene/SceneGISSurfaceWeather`；示例 E2E 沿用 weather 配置。
+
 ## 几何高光抗锯齿
 
 PBR Model / 3D Tiles 可独立启用几何高光过滤，Globe / Planar 使用同一接口：

@@ -1,6 +1,44 @@
 import { test, expect } from "@playwright/test";
 
 for (const world of ["globe", "planar"]) {
+  test(`Surface weather ${world} loads local materials and releases its setting`, async ({
+    page,
+  }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(`/Test/Rendering/地表雨雪.html?world=${world}`);
+    await expect(page.locator("#status")).toHaveText("本地场景已加载");
+    for (const label of ["干燥", "湿润", "积雪"]) {
+      await page
+        .getByRole("combobox", { name: "地表预设", exact: true })
+        .selectOption({ label });
+      await page.evaluate(
+        () =>
+          new Promise((resolve) =>
+            window.example.viewer.scene.postRender.addEventListener(
+              function once() {
+                window.example.viewer.scene.postRender.removeEventListener(
+                  once,
+                );
+                resolve();
+              },
+            ),
+          ),
+      );
+      await expect(page.locator("#error")).toHaveText("");
+    }
+    expect(
+      await page.evaluate(() => {
+        const { surfaceWeather, destroy } = window.example;
+        destroy();
+        return surfaceWeather.isDestroyed();
+      }),
+    ).toBe(true);
+    expect(errors).toEqual([]);
+  });
+}
+
+for (const world of ["globe", "planar"]) {
   test(`Weather ${world} loads the reference, changes view and releases resources`, async ({
     page,
   }) => {
@@ -42,17 +80,28 @@ for (const world of ["globe", "planar"]) {
     await expect(
       page.getByRole("combobox", { name: "降水类型", exact: true }),
     ).toHaveValue("雪");
+    await page
+      .getByRole("combobox", { name: "地表预设", exact: true })
+      .selectOption({ label: "积雪" });
+    await page.waitForFunction(
+      () => window.example.surfaceWeather._state?.active,
+    );
+    expect(
+      await page.evaluate(() => window.example.surfaceWeather.snowCoverage),
+    ).toBe(0.95);
     await expect(page.locator("#error")).toHaveText("");
     const released = await page.evaluate(() => {
-      const { viewer, weather, reference, destroy } = window.example;
+      const { viewer, weather, surfaceWeather, reference, destroy } =
+        window.example;
       destroy();
       return [
         viewer.isDestroyed(),
         weather.isDestroyed(),
         reference.primitive.isDestroyed(),
+        surfaceWeather.isDestroyed(),
       ];
     });
-    expect(released).toEqual([true, true, true]);
+    expect(released).toEqual([true, true, true, true]);
     expect(errors).toEqual([]);
   });
 }

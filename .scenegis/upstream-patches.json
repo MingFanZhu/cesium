@@ -2,6 +2,36 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0028",
+      "title": "Apply optional weather coverage before forward surface lighting",
+      "status": "active",
+      "reason": "Wetness and snow must modify native material inputs before lighting and MRT capture, with explicit Scene scheduling and lifetime.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/GlobeFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Builtin/Functions/phong.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISSurfaceWeatherSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0104-approximate-surface-weather.md",
+      "removalCondition": "Native Scene exposes equivalent material coverage integration before all supported lighting consumers."
+    },
+    {
       "id": "SGP-0027",
       "title": "Integrate optional histogram eye adaptation with native tone mapping",
       "status": "active",

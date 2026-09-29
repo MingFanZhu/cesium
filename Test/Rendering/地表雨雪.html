@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>地表湿润与积雪</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>地表湿润与积雪</h1>
+      <p>
+        同一组材质，对比干燥、湿润和积雪。屋顶与地面优先积雪，立面保留原色；湿润表面变暗，高光收窄。
+      </p>
+      <p>
+        左侧为普通图元，右侧为 PBR
+        模型，背景为地表。旋转视角观察高光，切换覆盖开关对比。
+      </p>
+      <p>
+        覆盖固定在世界坐标中，无需额外材质贴图。不模拟屋檐遮挡、真实水洼或雪层厚度。
+      </p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="鸟瞰天气.html?world=globe">真实城市天气</a> ·
+        <a href="示例目录.html">目录</a>
+      </p>
+      <p id="status">正在加载本地模型…</p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./地表雨雪.js"></script>
+  </body>
+</html>
