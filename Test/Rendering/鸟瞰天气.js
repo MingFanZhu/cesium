@@ -75,12 +75,6 @@ const effects = new C.SceneGISEnvironmentEffects({
   showBloom: false,
   showLensFlare: false,
   showMoonlight: false,
-  cloudPreset: "stratus",
-  cloudQuality: "low",
-  cloudCoverage: 0.95,
-  cloudDensity: 3,
-  cloudBaseHeight: 2500,
-  cloudThickness: 1000,
   heightFogDensity: 0.00025,
   heightFogHeightFalloff: 0.00035,
   heightFogStartDistance: 80,
@@ -174,7 +168,6 @@ const settings = {
   windSpeed: 5,
   windAngle: 10,
   fog: true,
-  clouds: false,
   animate: true,
   home() {
     const views = {
@@ -249,12 +242,6 @@ gui
 gui.add(weather, "particleSize", 0.25, 3, 0.05).name("雨雪尺寸");
 gui.add(weather, "transitionDuration", 0, 6, 0.1).name("过渡时间（秒）");
 gui.add(settings, "fog").name("能见度随天气变化");
-gui
-  .add(settings, "clouds")
-  .name("阴天云层")
-  .onChange((v) => {
-    effects.showClouds = v;
-  });
 gui.add(weather, "show").name("显示降水");
 gui.add(weather, "paused").name("暂停降水模拟");
 gui

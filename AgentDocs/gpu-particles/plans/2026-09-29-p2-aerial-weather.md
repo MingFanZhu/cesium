@@ -34,3 +34,9 @@ Fixed-budget sprite rendering is visual precipitation, not rainfall measurement.
 Implementation follows the plan without new renderer hooks. Bird's-eye inspection required larger particle pixel footprints than the initial draft; near/far rain and snow remain bounded in world extent and retain distance fades. The example aligns precipitation ceiling with optional cloud base and exposes weather-linked height fog separately. No source data download is required.
 
 Eight weather plus eleven foundation Specs pass in development/release with WebGL validation. Full release, generated types and tsc pass. Browser inspection covers both worlds, rain/snow, aerial heights, frozen-time view changes and cloud composition without errors. Lifecycle and world-space motion have direct GPU/CPU numerical tests. Scoped checks and upstream ownership audit pass. See [P2 review](../reviews/2026-09-29-p2-aerial-weather.md) for timing, evidence and accepted limits. Architecture gate approves the separate P2 checkpoint; owner visual acceptance remains pending, with no later phase activated.
+
+## Follow-up: remove example cloud composition
+
+Owner visual feedback requests removing cloud support from this weather example. Remove the cloud preset parameters, settings field, GUI callback and explanatory text; keep showClouds/showCloudShadows explicitly false. Rain/snow and existing atmosphere/height fog remain. This is a small example-only revision after c9fb09b5b0, with no engine, shader or public API change. Validate scoped lint/formatting and the Globe page's controls/render errors; no full build or repeated engine Specs are needed.
+
+Completed: Globe browser renders rain and height fog without console errors; the cloud control is absent. Scoped ESLint/Prettier and Markdown validation pass. Architecture/code self-review confirms the removal is limited to example composition and current usage documentation; no upstream files, SGP or new unresolved risk.
