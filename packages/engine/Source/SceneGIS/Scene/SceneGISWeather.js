@@ -59,7 +59,8 @@ function releasePools(weather) {
 }
 function createPools(weather) {
   const count = budgets[weather.quality] / 2;
-  const nearRadius = Math.min(180, weather.radius * 0.18);
+  // Keep enough precipitation in front of nearby opaque city geometry.
+  const nearRadius = Math.min(60, weather.radius * 0.18);
   const layers = [];
   try {
     for (let i = 0; i < 2; ++i) {

@@ -14,8 +14,11 @@ void styleParticle(inout SceneGISParticle p) {
     float mpp = czm_metersPerPixel(eye, 1.0);
     float variation = 0.7 + 0.6 * sceneGISParticleRandom(p.seed, 6.0);
     float distant = step(1.0, u_innerRadius);
-    float width = mix(mix(1.3, 0.9, distant), mix(4.5, 2.0, distant), u_snow);
-    float height = mix(mix(18.0, 8.0, distant), width, u_snow);
+    // Dense rain needs a resolvable streak footprint as well as more live ranks.
+    float rainWidth = mix(mix(1.15, 2.2, u_intensity), mix(0.65, 1.25, u_intensity), distant);
+    float rainHeight = mix(mix(12.0, 26.0, u_intensity), mix(5.0, 12.0, u_intensity), distant);
+    float width = mix(rainWidth, mix(4.5, 2.0, distant), u_snow);
+    float height = mix(rainHeight, width, u_snow);
     p.size = min(vec2(width, height) * mpp * u_particleSize * variation, vec2(40.0));
     vec3 velocityEC = (czm_modelView * vec4(weatherVelocity(p.seed), 0.0)).xyz;
     vec2 screenVelocity = velocityEC.xy;

@@ -206,6 +206,38 @@ describe("SceneGIS/Scene/SceneGISWeather", function () {
     expect(texture.isDestroyed()).toBeTrue();
   });
   [true, false].forEach(function (planar) {
+    it(`increases visible rain with intensity without reallocating in ${planar ? "Planar" : "Globe"}`, function () {
+      create(planar, { color: Color.RED, intensity: 0.25 });
+      // Isolate rain in front of nearby city geometry rather than distant haze.
+      scene.camera.frustum.far = 40;
+      scene.primitives.add(weather);
+      scene.renderForSpecs(time);
+      const layers = weather._layers;
+      const snapshot = read();
+      const bytes = weather.textureMemoryInBytes;
+      function coverage(intensity) {
+        weather.intensity = intensity;
+        scene.renderForSpecs(time);
+        const pixels = scene.context.readPixels();
+        let count = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (pixels[i] > Math.max(pixels[i + 1], pixels[i + 2]) + 20) {
+            ++count;
+          }
+        }
+        return count;
+      }
+      const light = coverage(0.25);
+      const medium = coverage(0.7);
+      const heavy = coverage(1);
+      expect(light).toBeGreaterThan(0);
+      expect(medium).toBeGreaterThan(light * 1.5);
+      expect(heavy).toBeGreaterThan(medium * 1.1);
+      expect(coverage(0)).toBe(0);
+      expect(weather._layers).toBe(layers);
+      expect(weather.textureMemoryInBytes).toBe(bytes);
+      expect(read()).toEqual(snapshot);
+    });
     it(`rebases GPU coordinates without camera dragging in ${planar ? "Planar" : "Globe"}`, function () {
       create(planar);
       tick(0);
@@ -242,7 +274,7 @@ describe("SceneGIS/Scene/SceneGISWeather", function () {
         rebased.y + (Math.cos(0.57 + phase) - Math.cos(phase)) * 0.12,
         rebased.z + velocity[2],
       ];
-      const radius = 180;
+      const radius = 60;
       for (let i = 0; i < 3; i++) {
         expected[i] =
           ((((expected[i] + radius) % (2 * radius)) + 2 * radius) %

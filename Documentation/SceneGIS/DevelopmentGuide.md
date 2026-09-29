@@ -997,6 +997,8 @@ weather.intensity = 0; // Fade to clear over transitionDuration.
 `mode` 必须匹配场景且构造后不变。风速为 m/s，Planar XY 或 Globe 东/北；半径单位米，
 降水顶高为 Planar Z 或 Globe 椭球高。强度是 0..1 视觉密度，不是降雨量。
 `transitionDuration` 默认为 3 秒，作用于强度、雨雪形态和风速；`particleSize` 与 `color` 控制外观。
+强度通过稳定随机阈值改变可见粒子子集，降雨还随强度增强雨丝宽度和长度；近景覆盖半径上限为 60 米，
+避免大量粒子位于附近建筑之后。固定槽位/显存不代表所有粒子始终可见，雾并非雨量变化的唯一表现。
 `actualIntensity` 为当前过渡值。`show=false` 立即隐藏并暂停时间，`paused=true` 冻结模拟和过渡，
 相机移动仍保持覆盖；零强度完成淡出后停止 GPU 模拟/绘制。按需渲染由应用请求帧。
 
