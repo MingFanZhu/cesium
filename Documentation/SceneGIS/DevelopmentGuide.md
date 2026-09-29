@@ -957,10 +957,14 @@ life/age 单位秒。age/seed 由底层维护，其余字段由 Shader 保存和
 底层拥有上传副本，没有 image 时使用柔边圆形。
 
 `paused=true` 保留画面并冻结模拟，`show=false` 隐藏并停止模拟，`emissionRate=0` 只停止发射。
-`reset()` 在下一正常帧清空并重启序列，复用已有资源；Scene 时间倒退同样重置。
+`initialParticles` 默认 0；可在构造时指定初始填充数量。
+`reset()` 在下一可见且未暂停的正常帧重新填充并重启序列，复用已有资源；Scene 时间倒退同样重置。
 向前跳时直接把实际 dt 传给 Shader，调用方须选择适合的积分方案，没有隐式限步或补帧。
 `modelMatrix` 必须是刚体变换，修改后已有粒子一起移动；Globe 使用 ENU，Planar 使用笛卡尔放置。
-调用方确保位置及 sprite 最大范围处于局部 boundingSphere 内；不做逐粒子 CPU 回读计算包围体。
+可选 `renderShader` 定义 `void styleParticle(inout SceneGISParticle p)`，在顶点副本上修改
+显示属性，支持冻结模拟后随相机变化的呈现；不回写 GPU 状态。uniformMap 同时供模拟和绘制使用。
+调用方确保位置及 sprite 最大范围（包括 styleParticle 修改）处于局部 boundingSphere 内；
+不做逐粒子 CPU 回读计算包围体。
 
 要求 WebGL2、float color buffer 与四个 MRT 输出；每个分配槽位双缓冲共 128 字节，
 64K 状态占 8 MiB、256K 占 32 MiB，非方形容量有纹理 padding。固定容量决定更新成本，
@@ -971,6 +975,40 @@ life/age 单位秒。age/seed 由底层维护，其余字段由 Shader 保存和
 `Test/Rendering/GPU粒子.html?world=planar` / `world=globe`。
 示例的喷泉重力、轨道与体积漂浮均为调用方 Shader；天气不是底层参数。
 性能证据与首版边界见 `AgentDocs/gpu-particles/reviews/`。
+
+## 鸟瞰雨雪天气
+
+```js
+const weather = scene.primitives.add(
+  new Cesium.SceneGISWeather({
+    mode: "planar", // Globe scenes use "globe".
+    type: "rain",
+    intensity: 0.7,
+    windVelocity: new Cesium.Cartesian2(5, 1),
+    quality: "medium",
+    radius: 1800,
+    ceilingHeight: 2500,
+  }),
+);
+weather.type = "snow";
+weather.intensity = 0; // Fade to clear over transitionDuration.
+```
+
+`mode` 必须匹配场景且构造后不变。风速为 m/s，Planar XY 或 Globe 东/北；半径单位米，
+降水顶高为 Planar Z 或 Globe 椭球高。强度是 0..1 视觉密度，不是降雨量。
+`transitionDuration` 默认为 3 秒，作用于强度、雨雪形态和风速；`particleSize` 与 `color` 控制外观。
+`actualIntensity` 为当前过渡值。`show=false` 立即隐藏并暂停时间，`paused=true` 冻结模拟和过渡，
+相机移动仍保持覆盖；零强度完成淡出后停止 GPU 模拟/绘制。按需渲染由应用请求帧。
+
+low/medium/high 总槽位为 16K/32K/64K，双池模拟纹理约 2.02/4/8.04 MiB；
+`textureMemoryInBytes` 返回含 padding 的精确值。更改 quality/radius 重建池，暂停期间延迟至恢复时创建。
+雨雪类型和强度变化复用资源。相机局部体积不是全城逐点天气场；Globe 五公里以内使用切平面近似。
+粒子无光照、遮雨碰撞、地面状态或运动矢量，TAA 下运动粒子仍可能有拖影。
+
+天气不自动改变场景环境；调用方可组合已有大气、体积云及高度雾。示例默认使用高度雾，
+可独立开启阴天云层；云层开销不包含在降水预算内。集合移除会销毁两个粒子池。
+人工入口 `Test/Rendering/鸟瞰天气.html?world=planar` / `world=globe`，
+自动验证 `SceneGIS/Scene/SceneGISWeather` 与 `SceneGIS/Scene/SceneGISGpuParticleSystem`。
 
 ## 几何高光抗锯齿
 

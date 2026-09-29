@@ -204,12 +204,13 @@ function createResources(system, context) {
       shaderProgram: ShaderProgram.fromCache({
         context,
         vertexShaderSource: new ShaderSource({
-          sources: [particleState, particleVertex],
+          sources: [particleState, system.renderShader, particleVertex],
         }),
         fragmentShaderSource: particleFragment,
         attributeLocations: { a_corner: 0 },
       }),
       uniformMap: {
+        ...system.uniformMap,
         ...inputs,
         u_sgHasImage: () => !!state.image,
         u_sgImage: () => state.image ?? context.defaultTexture,
@@ -248,6 +249,10 @@ function createResources(system, context) {
  * The update sees the advanced age; setting life to zero kills the particle.
  * <code>sceneGISParticleRandom(seed, stream)</code> returns a deterministic value in [0, 1).
  * Use distinct nonnegative integer streams for independent samples.
+ * Optional renderShader defines <code>void styleParticle(inout SceneGISParticle p)</code>.
+ * It modifies a draw-local copy without changing stored simulation state, including
+ * during frozen time and picking. It shares uniformMap and native vertex builtins.
+ * Supplied bounds must include its maximum position/size changes.
  *
  * Local state moves with modelMatrix. The caller must keep all positions and sprite
  * extents inside boundingSphere and write finite attributes, nonnegative sizes/colors
@@ -264,9 +269,11 @@ function createResources(system, context) {
  * @constructor
  * @param {object} options Configuration.
  * @param {string} options.simulationShader Initialization/update function definitions and custom uniform declarations.
+ * @param {string} [options.renderShader] Draw-only styleParticle definition and custom uniform declarations. Defaults to an unchanged particle.
  * @param {BoundingSphere} options.boundingSphere Conservative local bounds including maximum sprite extent.
- * @param {object} [options.uniformMap] Callbacks for shader uniforms; evaluated per update draw, never per particle. Names beginning with u_sg or czm_ are reserved. Borrowed uniform resources remain caller-owned.
+ * @param {object} [options.uniformMap] Callbacks for simulation/render uniforms; evaluated per draw, never per particle. Names beginning with u_sg or czm_ are reserved. Borrowed uniform resources remain caller-owned.
  * @param {number} [options.maximumParticles=65536] Immutable slot capacity, integer in [1, 1048576].
+ * @param {number} [options.initialParticles=0] Immutable initial/reset fill, integer from zero through maximumParticles. These particles initialize at age zero before regular emission.
  * @param {number} [options.seed=0] Immutable seed offset, integer in [0, 16777215].
  * @param {number} [options.emissionRate=1000] Births per second; finite and nonnegative.
  * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world transform; use ENU for Globe.
@@ -303,18 +310,29 @@ function SceneGISGpuParticleSystem(options = {}) {
     throw new DeveloperError("simulationShader is required.");
   }
   this._maximumParticles = options.maximumParticles ?? 65536;
+  this._initialParticles = options.initialParticles ?? 0;
   this._seed = options.seed ?? 0;
   if (
     !Number.isInteger(this._maximumParticles) ||
     this._maximumParticles < 1 ||
     this._maximumParticles > 1048576 ||
+    !Number.isInteger(this._initialParticles) ||
+    this._initialParticles < 0 ||
+    this._initialParticles > this._maximumParticles ||
     !Number.isInteger(this._seed) ||
     this._seed < 0 ||
     this._seed >= seedPeriod
   ) {
-    throw new DeveloperError("Invalid maximumParticles or seed.");
+    throw new DeveloperError(
+      "Invalid maximumParticles, initialParticles or seed.",
+    );
   }
   this._simulationShader = options.simulationShader;
+  this._renderShader =
+    options.renderShader ?? "void styleParticle(inout SceneGISParticle p) {}";
+  if (typeof this._renderShader !== "string" || !this._renderShader.trim()) {
+    throw new DeveloperError("renderShader must be a nonempty string.");
+  }
   this._uniformMap = Object.freeze({ ...options.uniformMap });
   for (const [name, callback] of Object.entries(this._uniformMap)) {
     if (
@@ -368,6 +386,28 @@ function SceneGISGpuParticleSystem(options = {}) {
 }
 
 Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
+  /**
+   * Immutable initial/reset fill count.
+   * @memberof SceneGISGpuParticleSystem.prototype
+   * @type {number}
+   * @readonly
+   */
+  initialParticles: {
+    get() {
+      return this._initialParticles;
+    },
+  },
+  /**
+   * Immutable draw-only style function source.
+   * @memberof SceneGISGpuParticleSystem.prototype
+   * @type {string}
+   * @readonly
+   */
+  renderShader: {
+    get() {
+      return this._renderShader;
+    },
+  },
   /**
    * Immutable slot capacity.
    * @memberof SceneGISGpuParticleSystem.prototype
@@ -437,7 +477,7 @@ Object.defineProperties(SceneGISGpuParticleSystem.prototype, {
 });
 
 /**
- * Clear all particles and restart the deterministic emission sequence on the next
+ * Refill initialParticles and restart the deterministic emission sequence on the next
  * visible, unpaused normal frame. Reuses allocated resources; pick does not consume reset.
  */
 SceneGISGpuParticleSystem.prototype.reset = function () {
@@ -477,17 +517,20 @@ SceneGISGpuParticleSystem.prototype.update = function (frameState) {
         dt = 0;
         this._nextSlot = this._serial = this._remainder = 0;
       }
-      const births = this._remainder + dt * this.emissionRate;
+      const births = state.reset
+        ? this.initialParticles
+        : this._remainder + dt * this.emissionRate;
       const emitted = Math.floor(births);
       const count = Math.min(emitted, this.maximumParticles);
       this._remainder = births - emitted;
       state.spawn.x =
         (this._nextSlot + emitted - count) % this.maximumParticles;
       state.spawn.y = count;
-      state.spawn.z = count
-        ? (this._remainder + count - 1) / this.emissionRate
-        : 0;
-      state.spawn.w = count ? 1 / this.emissionRate : 0;
+      state.spawn.z =
+        count && !state.reset
+          ? (this._remainder + count - 1) / this.emissionRate
+          : 0;
+      state.spawn.w = count && !state.reset ? 1 / this.emissionRate : 0;
       state.serial = (this._serial + emitted - count) % seedPeriod;
       state.deltaTime = dt;
       state.updateCommand.framebuffer = state.buffers[1 - state.index];

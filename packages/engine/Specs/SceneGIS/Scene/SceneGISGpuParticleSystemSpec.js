@@ -97,6 +97,8 @@ describe("SceneGIS/Scene/SceneGISGpuParticleSystem", function () {
   it("validates the abstract shader contract without allocating GPU resources", function () {
     expect(() => new SceneGISGpuParticleSystem()).toThrowDeveloperError();
     expect(() => create({ maximumParticles: 0 })).toThrowDeveloperError();
+    expect(() => create({ initialParticles: 5 })).toThrowDeveloperError();
+    expect(() => create({ renderShader: "" })).toThrowDeveloperError();
     expect(() =>
       create({ uniformMap: { u_sgCapacity: () => 1 } }),
     ).toThrowDeveloperError();
@@ -127,6 +129,21 @@ describe("SceneGIS/Scene/SceneGISGpuParticleSystem", function () {
     tick(1.5);
     expect(read()[3]).toBe(-1);
     expect(read(0, 1)[3]).toBe(-1);
+  });
+  it("fills initial slots on first/reset frames and continues the emission sequence", function () {
+    context = createContext();
+    create({ initialParticles: 2 });
+    tick(0);
+    expect(read()[3]).toBe(0);
+    expect(read(3, 1)[3]).toBe(1);
+    expect(read(0, 2)[3]).toBe(-1);
+    tick(0.25);
+    expect(read(3, 2)[3]).toBe(2);
+    expect(read(0, 2)[3]).toBe(0);
+    particles.reset();
+    tick(0.25);
+    expect(read(3, 1)[3]).toBe(1);
+    expect(read(0, 2)[3]).toBe(-1);
   });
   it("does not inject velocity integration or forces into an empty user update", function () {
     context = createContext();
@@ -272,13 +289,16 @@ describe("SceneGIS/Scene/SceneGISGpuParticleSystem", function () {
         ctx = canvas.getContext("2d");
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, 2, 2);
+      let drawColor = Color.RED;
       create({
         maximumParticles: 1,
         emissionRate: 1,
         modelMatrix: matrix,
         image: canvas,
         id: "particles",
-        uniformMap: {},
+        uniformMap: { u_drawColor: () => drawColor },
+        renderShader: `uniform vec4 u_drawColor;
+          void styleParticle(inout SceneGISParticle p) { p.color = u_drawColor; }`,
         simulationShader: `
         void initializeParticle(inout SceneGISParticle p) { p.size=vec2(8.0); p.color=vec4(1.0,0.0,0.0,0.8); }
         void updateParticle(inout SceneGISParticle p,float dt) {}`,
@@ -292,6 +312,11 @@ describe("SceneGIS/Scene/SceneGISGpuParticleSystem", function () {
       const snapshot = read();
       expect(scene.pick(new Cartesian2(32, 32)).id).toBe("particles");
       expect(read()).toEqual(snapshot);
+      const stateColor = read(2);
+      drawColor = Color.LIME;
+      scene.renderForSpecs(JulianDate.addSeconds(time, 1, new JulianDate()));
+      expect(pixel()[1]).toBeGreaterThan(100);
+      expect(read(2)).toEqual(stateColor);
       const boxMatrix = Matrix4.multiplyByTranslation(
         matrix,
         new Cartesian3(0, 0, 5),

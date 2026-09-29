@@ -29,3 +29,7 @@ Use existing ADR-0030 GLSL conversion and generated exports/types. Only owned so
 - [NVIDIA GPU Gems 3, Chapter 23](https://developer.nvidia.com/gpugems/gpugems3/part-iv-image-effects/chapter-23-high-speed-screen-particles): particle overdraw/fill-rate tradeoffs. Low-resolution rendering is not introduced for sharp sprites without measurement.
 
 Implementation is independently written using existing Cesium renderer interfaces; no vendor source/asset is imported.
+
+## P2 amendment: initial fill and draw-local styling
+
+[ADR-0103](ADR-0103-aerial-weather.md) adds optional immutable initialParticles and renderShader. Reset/rewind fills initialParticles instead of always clearing; zero retains P1 behavior. Initial slots start at age zero, and the emission cursor/seed continue after them. The render function styleParticle operates on a vertex-local copy with the same uniformMap; it never changes persistent state. Bounds must include styling. This generic hook supports view-dependent presentation under frozen simulation and contains no weather behavior.

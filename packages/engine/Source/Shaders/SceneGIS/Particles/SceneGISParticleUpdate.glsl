@@ -22,8 +22,8 @@ void main() {
     int width = textureSize(u_sgPosition, 0).x;
     float index = float(texel.y * width + texel.x);
     SceneGISParticle p = sceneGISNewParticle();
-    if (!u_sgReset && index < u_sgCapacity) {
-        p = sceneGISReadParticle(texel);
+    if (index < u_sgCapacity) {
+        if (!u_sgReset) { p = sceneGISReadParticle(texel); }
         float offset = mod(index - u_sgSpawn.x + u_sgCapacity, u_sgCapacity);
         float dt = u_sgDeltaTime;
         if (offset < u_sgSpawn.y) {

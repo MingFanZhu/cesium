@@ -2,7 +2,7 @@
 
 - Type: extension; status: active; created/updated: 2026-09-29
 - Owner/reviewer: current architecture/execution task; architecture review confirmed
-- ADR-0102; SGP none; discussions none
+- ADR-0102/0103; SGP none; [resolved weather scope](../discussions/2026-09-29-weather-scope.md)
 
 ## Objective and boundaries
 
@@ -10,10 +10,10 @@ Provide a reusable GPU simulation/render primitive on the existing WebGL2 render
 
 ## Roadmap
 
-| Phase | Scope                                                                    | Entry                                    | Exit                                                                                                          | Status                                                                          |
-| ----- | ------------------------------------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| P1    | GPU state/lifecycle, custom GLSL, instanced sprites, independent example | Native renderer and build facts verified | Numeric/render/lifecycle tests, both worlds, performance evidence, release/types, review and local checkpoint | completed; [plan](2026-09-29-p1-foundation.md), owner visual acceptance pending |
-| P2    | Rain/snow wrappers and weather presentation                              | P1 checkpoint and owner direction        | Separate weather example and quality/performance acceptance                                                   | candidate; no detailed design yet                                               |
+| Phase | Scope                                                                    | Entry                                    | Exit                                                                                                          | Status                                                                                             |
+| ----- | ------------------------------------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| P1    | GPU state/lifecycle, custom GLSL, instanced sprites, independent example | Native renderer and build facts verified | Numeric/render/lifecycle tests, both worlds, performance evidence, release/types, review and local checkpoint | completed; [plan](2026-09-29-p1-foundation.md), checkpoint 1a2de73dc3                              |
+| P2    | Rain/snow wrappers and weather presentation                              | P1 checkpoint and owner direction        | Separate weather example and quality/performance acceptance                                                   | implementation completed; [plan](2026-09-29-p2-aerial-weather.md), owner visual acceptance pending |
 
 ## Risks and overall acceptance
 

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>鸟瞰雨雪天气</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>街区上空 · 雨与雪</h1>
+      <p>
+        近远两层降水，随风飘落；可组合阴天云层和距离雾，观察街区与城市鸟瞰的天气氛围。
+      </p>
+      <p>
+        移动相机或暂停时间后旋转视角，观察雨雪的空间连续性。强度为视觉参数，街区为本地构造示意。
+      </p>
+      <p id="status">正在准备天气…</p>
+      <p>本例侧重鸟瞰；不模拟屋檐遮雨、碰撞、地面积水或积雪。</p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="GPU粒子.html">GPU 粒子</a> · <a href="示例目录.html">目录</a>
+      </p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./鸟瞰天气.js"></script>
+  </body>
+</html>

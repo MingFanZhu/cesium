@@ -5,6 +5,7 @@ void main() {
     int width = textureSize(u_sgPosition, 0).x;
     int index = gl_InstanceID;
     SceneGISParticle p = sceneGISReadParticle(ivec2(index % width, index / width));
+    styleParticle(p);
     v_uv = a_corner + 0.5;
     v_color = p.color;
     if (p.age < 0.0 || p.age >= p.life) {
