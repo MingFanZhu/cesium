@@ -1,0 +1,23 @@
+{
+  "name": "SceneGIS rain lens sprite",
+  "source": "https://github.com/SardineFish/raindrop-fx",
+  "revision": "bae4081bc15815bb094ea040a976dca083bbc3a5",
+  "sourcePath": "assets/img/raindrop.png",
+  "license": "MIT",
+  "copyright": "Copyright (c) 2021 SardineFish",
+  "modifications": "None; original PNG copied byte-for-byte. SceneGIS independently samples and animates the sprite.",
+  "file": "raindrop.png",
+  "sha256": "a6123c516de0c93c6d6d7fde3a70294e9bc67a669c8d8a4b6fc72b98feb029bd",
+  "bytes": 33913,
+  "format": "PNG RGBA8, linear data, no mipmaps",
+  "width": 256,
+  "height": 256,
+  "channels": {
+    "RG": "Refraction direction encoded in [0, 1]",
+    "B": "Unused zero",
+    "A": "Droplet height profile"
+  },
+  "maximumGpuBytes": 262144,
+  "runtimeUrl": "Assets/SceneGIS/Weather/RainLens/raindrop.png",
+  "files": ["raindrop.png", "LICENSE.txt", "manifest.json"]
+}

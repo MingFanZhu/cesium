@@ -1,7 +1,9 @@
 import DeveloperError from "../../Core/DeveloperError.js";
+import buildModuleUrl from "../../Core/buildModuleUrl.js";
 import JulianDate from "../../Core/JulianDate.js";
 import PostProcessStage from "../../Scene/PostProcessStage.js";
 import PostProcessStageSampleMode from "../../Scene/PostProcessStageSampleMode.js";
+import Texture from "../../Renderer/Texture.js";
 import fragmentShader from "../../Shaders/SceneGIS/Weather/SceneGISRainLens.js";
 
 function range(value, name, minimum, maximum) {
@@ -17,8 +19,12 @@ function range(value, name, minimum, maximum) {
  * It does not change the camera, exposure, weather, depth or source alpha.
  *
  * Animation follows Scene time; frozen time freezes drops and rewinding is
- * deterministic. No extra frames, history, textures or collision passes are
- * requested. The native post-process cache owns the output framebuffer.
+ * deterministic. A packaged 256x256 raindrop refraction/height sprite supplies
+ * the droplet profile. Native image uniforms load it on first enable and own its
+ * texture lifetime; the post-process cache owns the output framebuffer.
+ * Visible scene color approximates wide-field reflection without a scene
+ * capture. The meniscus has subtle attenuation, without a fixed white glint.
+ * No extra frames, history or collision passes are requested.
  * This is an artistic lens effect, not a lens-fluid simulation.
  *
  * @alias SceneGISRainLensStage
@@ -57,6 +63,9 @@ class SceneGISRainLensStage extends PostProcessStage {
       fragmentShader,
       sampleMode: PostProcessStageSampleMode.LINEAR,
       uniforms: {
+        u_rainSprite: buildModuleUrl(
+          "Assets/SceneGIS/Weather/RainLens/raindrop.png",
+        ),
         u_rainIntensity: () => state.intensity,
         u_dropletSize: () => state.size,
         u_distortion: () => state.distortion,
@@ -123,6 +132,20 @@ class SceneGISRainLensStage extends PostProcessStage {
       this._rainState.time = ((seconds % 2048) + 2048) % 2048;
     }
     super.update(context, useLogDepth);
+  }
+
+  /** Releases the packaged sprite and native stage resources.
+   * @returns {undefined}
+   */
+  destroy() {
+    // Native collection removal clears _textureCache before calling destroy,
+    // which makes its image-uniform cleanup skip this stage's owned sprite.
+    const sprite = this._actualUniforms.u_rainSprite;
+    if (sprite instanceof Texture && !sprite.isDestroyed()) {
+      sprite.destroy();
+    }
+    delete this._actualUniforms.u_rainSprite;
+    return super.destroy();
   }
 }
 

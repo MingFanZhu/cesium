@@ -3,8 +3,8 @@
 - Updated: 2026-09-29; status: implemented, owner visual acceptance pending; planning model: extension
 - Architecture/execution/reviewer: current task, self-review
 - Active extension: [roadmap](plans/2026-09-29-gpu-particles.md)
-- Current phase: P4 implementation completed; [rain details plan](plans/2026-09-29-p4-rain-details.md); owner visual acceptance pending
-- Open discussions / unresolved code reviews: none; [approved P4 review](reviews/2026-09-29-p4-rain-details.md)
+- Current phase: P4 implementation completed at 279103d298; [lens texture follow-up](plans/2026-09-29-lens-texture.md) implemented; owner visual acceptance pending
+- Open discussions / unresolved code reviews: none; [latest lens review](reviews/2026-09-29-lens-texture.md), [approved P4 review](reviews/2026-09-29-p4-rain-details.md)
 - ADR: [0102](../../Documentation/SceneGIS/Decisions/ADR-0102-gpu-particle-foundation.md), [0103](../../Documentation/SceneGIS/Decisions/ADR-0103-aerial-weather.md), [0104](../../Documentation/SceneGIS/Decisions/ADR-0104-approximate-surface-weather.md); SGP: SGP-0028
 - Source: packages/engine/Source/SceneGIS/Scene/SceneGISGpuParticleSystem.js, SceneGISWeather.js, SceneGISSurfaceWeather.js, SceneGISRainLensStage.js
 - Shaders: packages/engine/Source/Shaders/SceneGIS/Particles/, Weather/
@@ -14,6 +14,8 @@
 - P4 decision: [ADR-0105](../../Documentation/SceneGIS/Decisions/ADR-0105-rain-surface-and-lens-details.md); no new upstream patch
 
 ## Handoff
+
+Lens follow-up packages an MIT refraction/height sprite and adds static/rolling beads with visible-color reflection and a subtle lower edge. The owner selected the RaindropsOnGlass appearance but rejected the fixed bright glint; that lobe is removed from the final shader. Keep one post-process pass and no simulation/capture. Three GPU Specs pass in development/release and both-world E2E passes. Final RTX 3060 Ti fixture cost is approximately 0.301 ms at 1001×826. Code self-review approves a follow-up checkpoint; visual acceptance remains pending. See the follow-up plan/review for lifecycle, packaging and approximation limits. No subsequent phase is active.
 
 P4 adds opt-in wet-ground ripple normals and independent lens beads/trails, without water-surface work. Default public behavior remains unchanged. Fourteen GPU Specs pass in development/release, four scoped E2E cases pass, full release/types and self-review pass. See the P4 plan/review for resource/timing evidence and limitations. Independent local Globe/Planar examples are visually qualified; the online aerial page retains the owner's camera/weather with new controls, but reports a world-terrain network/ion error. P4 is ready for its own local checkpoint; no subsequent phase is active. Owner visual acceptance is the remaining gate.
 
