@@ -14,6 +14,10 @@ Rebase persistent particle positions from their last simulation frame to current
 
 ## Environment and performance
 
+The later [ADR-0106](ADR-0106-unified-weather-composition.md) supersedes example-only
+composition with opt-in scene-bound weather orchestration. The particle-only and
+generic GPU contracts below remain valid when no Scene is supplied.
+
 Reuse existing atmosphere/height fog as caller composition in examples. Do not add fullscreen haze, geometry replay, shadow/occlusion capture, automatic quality changes or per-particle CPU queries. Low/medium/high total budgets are 16K/32K/64K, with two MRT updates and two translucent submissions while active; native OIT may derive additional draws. State is 128 bytes per allocated slot including padding. Normal depth testing handles visible opaque occlusion; it does not establish roof shelter.
 
 Intensity is visual 0..1, not mm/hour. Rain/snow are unlit sprites tinted by caller color; surface wetness, puddles, splashes, accumulation, shelter and motion vectors are outside this phase. Images/assets are not required. Shader generation, exports and public types reuse ADR-0030 and native build entries. Validation includes exact GPU coordinates, frozen-camera behavior, both-world rendering, lifecycle, budget evidence and release/types.

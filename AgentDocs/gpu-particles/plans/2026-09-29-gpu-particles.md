@@ -10,12 +10,17 @@ Provide a reusable GPU simulation/render primitive on the existing WebGL2 render
 
 ## Roadmap
 
+P5 is implemented after 51be32aa8d: [unified weather composition](2026-09-30-p5-weather-composition.md).
+The owner requests engine-level orchestration previously confined to the example.
+ADR-0106 defines manual authority, borrowed components and lifecycle; no upstream seam.
+
 | Phase | Scope                                                                    | Entry                                        | Exit                                                                                                                | Status                                                                                              |
 | ----- | ------------------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | P1    | GPU state/lifecycle, custom GLSL, instanced sprites, independent example | Native renderer and build facts verified     | Numeric/render/lifecycle tests, both worlds, performance evidence, release/types, review and local checkpoint       | completed; [plan](2026-09-29-p1-foundation.md), checkpoint 1a2de73dc3                               |
 | P2    | Rain/snow wrappers and weather presentation                              | P1 checkpoint and owner direction            | Separate weather example and quality/performance acceptance                                                         | implementation completed; [plan](2026-09-29-p2-aerial-weather.md), owner visual acceptance pending  |
 | P3    | Approximate surface wetness/thin snow using existing GIS data            | P2 checkpoint 781e2a9d90 and owner direction | Both-world material/lifecycle tests, examples, bounded timings, release/types, review and local checkpoint          | implementation completed; [plan](2026-09-29-p3-surface-weather.md), owner visual acceptance pending |
 | P4    | Wet-ground ripples and independent lens rain                             | Checkpoint 87debf6371 and owner direction    | Both-world visuals, surface/lens GPU tests, native lifecycle, bounded timings, release/types, review and checkpoint | implementation completed; [plan](2026-09-29-p4-rain-details.md), owner visual acceptance pending    |
+| P5    | Unified weather composition and explicit manual authority                | Checkpoint 51be32aa8d and owner direction    | Engine contracts, same-frame/example integration, lifecycle, release/types and review                               | implementation completed; [plan](2026-09-30-p5-weather-composition.md), Viewer acceptance pending   |
 
 ## Risks and overall acceptance
 

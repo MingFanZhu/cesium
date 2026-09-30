@@ -191,22 +191,22 @@ for (const world of ["globe", "planar"]) {
         window.example.surfaceWeather.rippleIntensity > 0,
     );
     const wetnessInput = page.getByRole("textbox", {
-      name: "湿润程度",
+      name: "降雨湿润程度",
       exact: true,
     });
     await wetnessInput.fill("0.42");
     await wetnessInput.press("Tab");
     expect(
-      await page.evaluate(() => window.example.surfaceWeather.wetness),
+      await page.evaluate(() => window.example.weather.surface.wetness),
     ).toBe(0.42);
     const baseline = await page.evaluate(() => {
-      const { viewer, effects, surfaceWeather } = window.example;
+      const { viewer, effects, weather } = window.example;
       return {
         surfaceScale: effects.surfaceRadianceScale,
         backgroundScale: effects.backgroundRadianceScale,
         exposure: viewer.scene.postProcessStages.exposure,
-        wetness: surfaceWeather.wetness,
-        snowCoverage: surfaceWeather.snowCoverage,
+        wetness: weather.surface.wetness,
+        snowCoverage: weather.surface.snowCoverage,
       };
     });
     await page
@@ -219,13 +219,13 @@ for (const world of ["globe", "planar"]) {
     );
     expect(
       await page.evaluate(() => {
-        const { viewer, effects, surfaceWeather } = window.example;
+        const { viewer, effects, weather } = window.example;
         return {
           surfaceScale: effects.surfaceRadianceScale,
           backgroundScale: effects.backgroundRadianceScale,
           exposure: viewer.scene.postProcessStages.exposure,
-          wetness: surfaceWeather.wetness,
-          snowCoverage: surfaceWeather.snowCoverage,
+          wetness: weather.surface.wetness,
+          snowCoverage: weather.surface.snowCoverage,
           fogDensity: effects.heightFogDensity,
         };
       }),
@@ -251,6 +251,13 @@ for (const world of ["globe", "planar"]) {
       await page.evaluate(() => window.example.surfaceWeather.enabled),
     ).toBe(true);
     await surfaceToggle.uncheck();
+    // Manual control is explicit and persists until the user restores automation.
+    expect(
+      await page.evaluate(() => window.example.weather.surface.automatic),
+    ).toBe(false);
+    await page
+      .getByRole("checkbox", { name: "地表随天气联动", exact: true })
+      .check();
     await page
       .getByRole("combobox", { name: "观察高度", exact: true })
       .selectOption({ label: "街区鸟瞰" });
@@ -260,9 +267,15 @@ for (const world of ["globe", "planar"]) {
     await expect(
       page.getByRole("combobox", { name: "降水类型", exact: true }),
     ).toHaveValue("雪");
+    await page.waitForFunction(
+      () =>
+        window.example.weather.actualIntensity === 1 &&
+        window.example.surfaceWeather.snowCoverage ===
+          window.example.weather.surface.snowCoverage,
+    );
     await expect(surfaceToggle).toBeChecked();
     expect(
-      await page.evaluate(() => window.example.surfaceWeather.wetness),
+      await page.evaluate(() => window.example.weather.surface.wetness),
     ).toBe(baseline.wetness);
     await page.waitForFunction(() => window.example.effects.showHeightFog);
     await page.waitForFunction(
@@ -283,7 +296,7 @@ for (const world of ["globe", "planar"]) {
     await page.waitForFunction(() => !window.example.snowLens.enabled);
     await snowLensToggle.check();
     const precipitationToggle = page.getByRole("checkbox", {
-      name: "显示降水",
+      name: "显示天气",
       exact: true,
     });
     await precipitationToggle.uncheck();
@@ -301,6 +314,31 @@ for (const world of ["globe", "planar"]) {
         !window.example.effects.showHeightFog &&
         window.example.effects.heightFogDensity === 0,
     );
+    // Editing the external/shared fog controls releases weather authority.
+    const fogDensityInput = page.getByRole("textbox", {
+      name: "当前雾密度（手动）",
+      exact: true,
+    });
+    await fogDensityInput.fill("0.00012");
+    await fogDensityInput.press("Tab");
+    await expect(
+      page.getByRole("checkbox", { name: "雾随天气联动", exact: true }),
+    ).not.toBeChecked();
+    await page
+      .getByRole("checkbox", { name: "显示雾（手动）", exact: true })
+      .check();
+    await page
+      .getByRole("combobox", { name: "天气预设", exact: true })
+      .selectOption({ label: "晴" });
+    await page.waitForFunction(
+      () => window.example.weather.actualIntensity === 0,
+    );
+    expect(
+      await page.evaluate(() => [
+        window.example.effects.showHeightFog,
+        window.example.effects.heightFogDensity,
+      ]),
+    ).toEqual([true, 0.00012]);
     await page
       .getByRole("combobox", { name: "地表预设", exact: true })
       .selectOption({ label: "积雪" });

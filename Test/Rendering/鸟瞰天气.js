@@ -60,17 +60,6 @@ const viewer = new C.Viewer("map", {
   selectionIndicator: false,
 });
 const scene = viewer.scene;
-const surfaceWeather = new C.SceneGISSurfaceWeather({
-  scene,
-  enabled: true,
-  wetness: 0.65,
-});
-const rainLens = scene.postProcessStages.add(
-  new C.SceneGISRainLensStage({ scene }),
-);
-const snowLens = scene.postProcessStages.add(
-  new C.SceneGISSnowLensStage({ scene }),
-);
 scene.highDynamicRange = true;
 const reflections = new C.SceneGISScreenSpaceReflections({
   scene,
@@ -195,6 +184,8 @@ if (planar) {
 
 const weather = scene.primitives.add(
   new C.SceneGISWeather({
+    scene,
+    environmentEffects: effects,
     mode: planar ? "planar" : "globe",
     intensity: 0.7,
     quality: "medium",
@@ -203,20 +194,14 @@ const weather = scene.primitives.add(
     ceilingHeight: 2500,
   }),
 );
+const { surfaceWeather, rainLens, snowLens } = weather;
 const settings = {
   preset: "中雨",
   surface: "湿润",
   view: planar ? "街区鸟瞰" : "城市鸟瞰",
   windSpeed: 5,
   windAngle: 10,
-  fog: true,
   animate: true,
-  ripples: true,
-  rippleStrength: 1,
-  lens: true,
-  lensStrength: 0.7,
-  snowLens: true,
-  snowLensStrength: 0.7,
   home() {
     const views = {
       街区鸟瞰: [
@@ -292,8 +277,25 @@ gui
   .name("降水质量");
 gui.add(weather, "particleSize", 0.25, 3, 0.05).name("雨雪尺寸");
 gui.add(weather, "transitionDuration", 0, 6, 0.1).name("过渡时间（秒）");
-gui.add(settings, "fog").name("能见度随天气变化");
-gui.add(weather, "show").name("显示降水");
+const fogControls = gui.addFolder("天气雾（复用环境设置）");
+fogControls.add(weather.fog, "automatic").name("雾随天气联动").listen();
+fogControls.add(weather.fog, "enabled").name("能见度随天气变化");
+fogControls.add(weather.fog, "density", 0, 0.001, 0.00001).name("满强度雾密度");
+fogControls
+  .add(effects, "heightFogDensity", 0, 0.001, 0.00001)
+  .name("当前雾密度（手动）")
+  .listen()
+  .onChange(() => {
+    weather.fog.automatic = false;
+  });
+fogControls
+  .add(effects, "showHeightFog")
+  .name("显示雾（手动）")
+  .listen()
+  .onChange(() => {
+    weather.fog.automatic = false;
+  });
+gui.add(weather, "show").name("显示天气");
 gui.add(weather, "paused").name("暂停降水模拟");
 gui
   .add(settings, "animate")
@@ -308,10 +310,17 @@ gui
 gui.add(settings, "home").name("还原视角");
 const surfaces = gui.addFolder("地表覆盖（可手动调整）");
 surfaces.add(reflections, "enabled").name("模型 SSR");
-const surfaceEnabled = surfaces
+surfaces.add(weather.surface, "automatic").name("地表随天气联动").listen();
+surfaces.add(weather.surface, "enabled").name("启用天气地表");
+surfaces.add(weather.surface, "wetness", 0, 1, 0.01).name("降雨湿润程度");
+surfaces.add(weather.surface, "snowCoverage", 0, 1, 0.01).name("降雪覆盖程度");
+surfaces
   .add(surfaceWeather, "enabled")
   .name("显示地表覆盖")
-  .listen();
+  .listen()
+  .onChange(() => {
+    weather.surface.automatic = false;
+  });
 weatherPreset.onChange((v) => {
   weather.type = v.includes("雪") ? "snow" : "rain";
   weather.intensity = {
@@ -322,58 +331,46 @@ weatherPreset.onChange((v) => {
     小雪: 0.3,
     大雪: 1,
   }[v];
-  // Presets toggle coverage while preserving the user's wetness/snow values.
-  surfaceEnabled.setValue(weather.intensity > 0);
 });
 surfaces
   .add(settings, "surface", ["干燥", "湿润", "薄雪", "积雪"])
   .name("地表预设")
   .onChange((value) => {
+    weather.surface.automatic = false;
+    surfaceWeather.enabled = value !== "干燥";
     surfaceWeather.wetness = value === "湿润" ? 0.8 : 0;
     surfaceWeather.snowCoverage =
       value === "薄雪" ? 0.45 : value === "积雪" ? 0.95 : 0;
   });
-surfaces.add(surfaceWeather, "wetness", 0, 1, 0.01).name("湿润程度").listen();
+surfaces
+  .add(surfaceWeather, "wetness", 0, 1, 0.01)
+  .name("湿润程度")
+  .listen()
+  .onChange(() => {
+    weather.surface.automatic = false;
+  });
 surfaces
   .add(surfaceWeather, "snowCoverage", 0, 1, 0.01)
   .name("积雪覆盖")
-  .listen();
+  .listen()
+  .onChange(() => {
+    weather.surface.automatic = false;
+  });
 surfaces.add(surfaceWeather, "patchScale", 5, 150, 1).name("斑块尺度（米）");
 const details = gui.addFolder("降雨细节");
-details.add(settings, "ripples").name("湿地涟漪");
-details.add(settings, "rippleStrength", 0, 1, 0.01).name("涟漪强度");
+details.add(weather.surface, "rippleIntensity", 0, 1, 0.01).name("涟漪强度");
 details.add(surfaceWeather, "rippleScale", 0.2, 2, 0.05).name("涟漪尺度（米）");
-details.add(settings, "lens").name("镜头雨滴");
-details.add(settings, "lensStrength", 0, 1, 0.01).name("镜头雨滴强度");
+details.add(weather.lens, "automatic").name("镜头随天气联动");
+details.add(weather.lens, "rainEnabled").name("镜头雨滴");
+details.add(weather.lens, "rainIntensity", 0, 1, 0.01).name("镜头雨滴强度");
 details.add(rainLens, "dropletSize", 8, 80, 1).name("雨滴尺度（像素）");
 details.add(rainLens, "distortion", 0, 30, 0.5).name("镜头折射（像素）");
 const snowDetails = gui.addFolder("降雪镜头");
-snowDetails.add(settings, "snowLens").name("镜头结霜");
-snowDetails.add(settings, "snowLensStrength", 0, 1, 0.01).name("结霜强度");
+snowDetails.add(weather.lens, "snowEnabled").name("镜头结霜");
+snowDetails.add(weather.lens, "snowIntensity", 0, 1, 0.01).name("结霜强度");
 snowDetails.add(snowLens, "coverage", 0, 1, 0.01).name("结霜范围");
 let lastStatus = 0;
 const removeUpdate = scene.preUpdate.addEventListener(() => {
-  const rain =
-    weather.show && weather.type === "rain" ? weather.actualIntensity : 0;
-  const ripples = settings.ripples ? rain * settings.rippleStrength : 0;
-  if (surfaceWeather.rippleIntensity !== ripples) {
-    surfaceWeather.rippleIntensity = ripples;
-  }
-  const lens = rain * settings.lensStrength;
-  if (rainLens.intensity !== lens) {
-    rainLens.intensity = lens;
-  }
-  rainLens.enabled = settings.lens && lens > 0;
-  const snow =
-    weather.show && weather.type === "snow" ? weather.actualIntensity : 0;
-  const snowAmount = snow * settings.snowLensStrength;
-  if (snowLens.intensity !== snowAmount) {
-    snowLens.intensity = snowAmount;
-  }
-  snowLens.enabled = settings.snowLens && snowAmount > 0;
-  const fogDensity = settings.fog ? weather.actualIntensity * 0.0003 : 0;
-  effects.heightFogDensity = fogDensity;
-  effects.showHeightFog = fogDensity > 0;
   const now = performance.now();
   if (now - lastStatus > 500) {
     lastStatus = now;

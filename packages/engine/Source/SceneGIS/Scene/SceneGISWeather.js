@@ -9,6 +9,7 @@ import JulianDate from "../../Core/JulianDate.js";
 import Matrix4 from "../../Core/Matrix4.js";
 import Transforms from "../../Core/Transforms.js";
 import SceneGISGpuParticleSystem from "./SceneGISGpuParticleSystem.js";
+import SceneGISWeatherEffects from "./_private/_SceneGISWeatherEffects.js";
 import weatherCommon from "../../Shaders/SceneGIS/Particles/SceneGISWeatherCommon.js";
 import weatherSimulation from "../../Shaders/SceneGIS/Particles/SceneGISWeatherSimulation.js";
 import weatherStyle from "../../Shaders/SceneGIS/Particles/SceneGISWeatherStyle.js";
@@ -106,17 +107,62 @@ function approach(value, target, step) {
   );
 }
 
+function advanceWeather(weather, time) {
+  validate(weather);
+  const dt = weather._lastTime
+    ? JulianDate.secondsDifference(time, weather._lastTime)
+    : 0;
+  weather._lastTime = JulianDate.clone(time, weather._lastTime);
+  weather._deltaTime = Math.max(0, dt);
+  if (!weather.show || weather.paused) {
+    return;
+  }
+  const step =
+    weather.transitionDuration === 0
+      ? 1
+      : weather._deltaTime / weather.transitionDuration;
+  weather._currentIntensity = approach(
+    weather._currentIntensity,
+    weather.intensity,
+    step,
+  );
+  weather._snow = approach(
+    weather._snow,
+    weather.type === "snow" ? 1 : 0,
+    step,
+  );
+  const fraction =
+    weather.transitionDuration === 0
+      ? 1
+      : 1 - Math.exp((-3 * weather._deltaTime) / weather.transitionDuration);
+  Cartesian2.lerp(
+    weather._currentWind,
+    weather.windVelocity,
+    fraction,
+    weather._currentWind,
+  );
+}
+
 /**
  * Camera-local rain and snow for aerial GIS views, in WebGL2 SCENE3D.
  * Add to {@link Scene#primitives}; the collection normally owns destruction.
  * Two bounded GPU particle pools wrap and fade around the observer. Overlapping
  * particles retain world-space motion as the camera moves, including frozen time.
- * Weather is excluded from picking and does not modify lighting, fog, clouds or clocks.
- * Compose those separately with SceneGISEnvironmentEffects when desired.
+ * Supplying scene also coordinates fog, surface wetness/snow and lens rain/frost.
+ * Fog borrows the caller's registered environmentEffects; it never enables that
+ * controller or changes lighting, exposure, clouds or clocks. Without scene,
+ * this primitive provides independent precipitation only.
+ *
+ * Each fog/surface/lens group defaults to automatic control (fog requires a binding).
+ * Set a group's automatic=false before adjusting its shared effect externally.
+ * Manual groups receive no weather writes, including on clear or hide. Strengths
+ * are retained while automatic effects fade out. Bound composition runs before
+ * Scene consumers; add this primitive to the supplied Scene and destroy/remove it
+ * when no longer needed. Only one scene-bound weather system is allowed per Scene.
  *
  * Intensity is an artistic density, not a rainfall measurement. Opaque depth testing
  * hides particles behind geometry but does not provide roof shelter or collisions.
- * Sprites are unlit, with no surface wetness, accumulation or motion vectors.
+ * Sprites are unlit, with no physical accumulation or motion vectors.
  * Globe uses a regional camera-local tangent approximation for altitude and vertical.
  * Quality/radius changes reset both pools; type/intensity/wind transitions reuse them.
  * show=false hides immediately and pauses observed time; intensity=0 fades to clear.
@@ -127,6 +173,14 @@ function approach(value, target, step) {
  * @constructor
  * @param {object} options Configuration.
  * @param {string} options.mode "globe" for ENU or "planar" for fixed world XYZ meters. Must match the Scene world.
+ * @param {Scene} [options.scene] Bind complete weather composition to this live SCENE3D Scene.
+ * @param {SceneGISEnvironmentEffects} [options.environmentEffects] Borrow the existing fog controller. The caller registers/enables it; omitted means no fog binding.
+ * @param {SceneGISSurfaceWeather} [options.surfaceWeather] Borrow a surface setting; otherwise reuse the Scene setting or create one.
+ * @param {SceneGISRainLensStage} [options.rainLens] Borrow a stage already in this Scene's collection; otherwise create and own it.
+ * @param {SceneGISSnowLensStage} [options.snowLens] Borrow a stage already in this Scene's collection; otherwise create and own it.
+ * @param {SceneGISWeather.FogOptions} [options.fog] Fog control; requires scene.
+ * @param {SceneGISWeather.SurfaceOptions} [options.surface] Surface control; requires scene.
+ * @param {SceneGISWeather.LensOptions} [options.lens] Lens control; requires scene.
  * @param {string} [options.type="rain"] "rain" or "snow".
  * @param {number} [options.intensity=0.6] Target visual density in [0,1].
  * @param {Cartesian2} [options.windVelocity] Horizontal velocity in m/s; Planar XY or Globe east/north. Defaults to (3,0).
@@ -141,10 +195,13 @@ function approach(value, target, step) {
  * @throws {DeveloperError} Mode or public values violate their documented contracts.
  * @example
  * const weather = scene.primitives.add(new Cesium.SceneGISWeather({
+ *   scene, environmentEffects: effects,
  *   mode: "planar", type: "rain", intensity: 0.7,
  *   windVelocity: new Cesium.Cartesian2(4, 1), quality: "medium"
  * }));
  * weather.intensity = 0; // Smoothly clear the precipitation.
+ * weather.fog.automatic = false; // Let the external environment panel own fog.
+ * effects.heightFogDensity = 0.0001;
  */
 function SceneGISWeather(options = {}) {
   if (options.mode !== "globe" && options.mode !== "planar") {
@@ -223,9 +280,103 @@ function SceneGISWeather(options = {}) {
   this._renderTransform = Matrix4.clone(Matrix4.IDENTITY);
   this._cartographic = new Cartographic();
   this._cameraHeight = 0;
+  this._deltaTime = 0;
+  this._lastParticleTime = undefined;
+  this._effects = undefined;
+  this._removePreUpdate = undefined;
+  if (options.scene !== undefined) {
+    this._effects = new SceneGISWeatherEffects(this, options);
+    const now = new JulianDate();
+    this._removePreUpdate = options.scene.preUpdate.addEventListener(
+      (scene, time) => {
+        advanceWeather(this, time ?? JulianDate.now(now));
+        this._effects.update(this);
+      },
+    );
+  } else if (
+    options.environmentEffects ||
+    options.surfaceWeather ||
+    options.rainLens ||
+    options.snowLens ||
+    options.fog ||
+    options.surface ||
+    options.lens
+  ) {
+    throw new DeveloperError("Weather composition options require scene.");
+  }
 }
 
 Object.defineProperties(SceneGISWeather.prototype, {
+  /** Shared fog controller; caller-owned, never implicitly enabled.
+   * @memberof SceneGISWeather.prototype
+   * @type {SceneGISEnvironmentEffects|undefined}
+   * @readonly
+   */
+  environmentEffects: {
+    get() {
+      return this._effects?.environmentEffects;
+    },
+  },
+  /** Shared surface setting. Automatically created when scene has none.
+   * @memberof SceneGISWeather.prototype
+   * @type {SceneGISSurfaceWeather|undefined}
+   * @readonly
+   */
+  surfaceWeather: {
+    get() {
+      return this._effects?.surfaceWeather;
+    },
+  },
+  /** Shared native rain stage. Set lens.automatic=false for direct manual control.
+   * @memberof SceneGISWeather.prototype
+   * @type {SceneGISRainLensStage|undefined}
+   * @readonly
+   */
+  rainLens: {
+    get() {
+      return this._effects?.rainLens;
+    },
+  },
+  /** Shared native frost stage. Geometry/appearance controls remain on this stage.
+   * @memberof SceneGISWeather.prototype
+   * @type {SceneGISSnowLensStage|undefined}
+   * @readonly
+   */
+  snowLens: {
+    get() {
+      return this._effects?.snowLens;
+    },
+  },
+  /** Mutable fog automation and full-intensity density. Undefined without scene.
+   * @memberof SceneGISWeather.prototype
+   * @type {SceneGISWeather.FogOptions|undefined}
+   * @readonly
+   */
+  fog: {
+    get() {
+      return this._effects?.fog;
+    },
+  },
+  /** Mutable full-intensity surface amounts, retained through clear/hide.
+   * @memberof SceneGISWeather.prototype
+   * @type {SceneGISWeather.SurfaceOptions|undefined}
+   * @readonly
+   */
+  surface: {
+    get() {
+      return this._effects?.surface;
+    },
+  },
+  /** Mutable rain/frost automation and full-intensity strengths.
+   * @memberof SceneGISWeather.prototype
+   * @type {SceneGISWeather.LensOptions|undefined}
+   * @readonly
+   */
+  lens: {
+    get() {
+      return this._effects?.lens;
+    },
+  },
   /**
    * Immutable world mode.
    * @memberof SceneGISWeather.prototype
@@ -269,11 +420,23 @@ SceneGISWeather.prototype.update = function (frameState) {
   if (!frameState.passes.render || frameState.passes.pick) {
     return;
   }
-  validate(this);
-  let dt = this._lastTime
-    ? JulianDate.secondsDifference(frameState.time, this._lastTime)
+  if (this._effects) {
+    if (frameState !== this._effects.scene.frameState) {
+      throw new DeveloperError("Weather must be added to its supplied Scene.");
+    }
+  } else {
+    advanceWeather(this, frameState.time);
+  }
+  // Scene preUpdate can run without a rendered frame in requestRenderMode.
+  // Particle rebasing follows actual primitive updates, not composition ticks.
+  const dt = this._lastParticleTime
+    ? JulianDate.secondsDifference(frameState.time, this._lastParticleTime)
     : 0;
-  this._lastTime = JulianDate.clone(frameState.time, this._lastTime);
+  this._lastParticleTime = JulianDate.clone(
+    frameState.time,
+    this._lastParticleTime,
+  );
+  const rewind = dt < 0;
   if (!this.show) {
     if (this._layers) {
       for (const layer of this._layers) {
@@ -282,30 +445,6 @@ SceneGISWeather.prototype.update = function (frameState) {
       }
     }
     return;
-  }
-  const rewind = dt < 0;
-  if (rewind) {
-    dt = 0;
-  }
-  if (!this.paused) {
-    const step =
-      this.transitionDuration === 0 ? 1 : dt / this.transitionDuration;
-    this._currentIntensity = approach(
-      this._currentIntensity,
-      this.intensity,
-      step,
-    );
-    this._snow = approach(this._snow, this.type === "snow" ? 1 : 0, step);
-    const fraction =
-      this.transitionDuration === 0
-        ? 1
-        : 1 - Math.exp((-3 * dt) / this.transitionDuration);
-    Cartesian2.lerp(
-      this._currentWind,
-      this.windVelocity,
-      fraction,
-      this._currentWind,
-    );
   }
   const camera = frameState.camera;
   if (this.mode === "globe") {
@@ -375,12 +514,49 @@ SceneGISWeather.prototype.isDestroyed = function () {
 };
 
 /**
- * Release both owned particle pools. Scene environment resources are untouched.
+ * Release owned pools, surface/lens components and the Scene listener. Borrowed
+ * resources survive; weather-written fields are restored only if not edited later.
  * @returns {undefined}
  */
 SceneGISWeather.prototype.destroy = function () {
+  this._removePreUpdate?.();
+  this._removePreUpdate = undefined;
+  this._effects?.destroy();
+  this._effects = undefined;
   releasePools(this);
   return destroyObject(this);
 };
+
+/**
+ * Automatic fog writes density/showHeightFog only; other fog parameters stay shared.
+ * Direct environment controls remain available when automatic=false.
+ * @typedef {object} SceneGISWeather.FogOptions
+ * @property {boolean} [automatic=true] Follow weather. Defaults to false without environmentEffects.
+ * @property {boolean} [enabled=true] Apply fog while automatic; false clears weather fog.
+ * @property {number} [density=0.0003] Extinction per meter at full intensity, [0,0.001].
+ */
+
+/**
+ * Automatic rain drives wetness/ripples; snow drives coverage. Current values are
+ * available on surfaceWeather. Set automatic=false to edit it independently.
+ * @typedef {object} SceneGISWeather.SurfaceOptions
+ * @property {boolean} [automatic=true] Follow weather; false stops all surface writes.
+ * @property {boolean} [enabled=true] Apply automatic coverage; false disables it.
+ * @property {number} [wetness=0.8] Full-rain wetness, [0,1].
+ * @property {number} [snowCoverage=0.95] Full-snow coverage, [0,1].
+ * @property {number} [rippleIntensity=1] Full-rain ripple strength, [0,1].
+ */
+
+/**
+ * Automatic lens strengths follow the rain/snow mixture. Shape controls remain
+ * directly available on rainLens and snowLens; manual mode stops all lens writes.
+ * @typedef {object} SceneGISWeather.LensOptions
+ * @property {boolean} [automatic=true] Follow weather; false stops all lens writes.
+ * @property {boolean} [enabled=true] Apply automatic lens effects.
+ * @property {boolean} [rainEnabled=true] Enable automatic rain beads.
+ * @property {boolean} [snowEnabled=true] Enable automatic frost.
+ * @property {number} [rainIntensity=0.7] Full-rain strength, [0,1].
+ * @property {number} [snowIntensity=0.7] Full-snow strength, [0,1].
+ */
 
 export default SceneGISWeather;

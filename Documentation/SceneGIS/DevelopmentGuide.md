@@ -981,6 +981,8 @@ life/age 单位秒。age/seed 由底层维护，其余字段由 Shader 保存和
 ```js
 const weather = scene.primitives.add(
   new Cesium.SceneGISWeather({
+    scene,
+    environmentEffects: effects, // Existing registered/enabled environment controller.
     mode: "planar", // Globe scenes use "globe".
     type: "rain",
     intensity: 0.7,
@@ -992,6 +994,15 @@ const weather = scene.primitives.add(
 );
 weather.type = "snow";
 weather.intensity = 0; // Fade to clear over transitionDuration.
+weather.surface.wetness = 0.8; // Retained full-rain strength.
+weather.lens.rainIntensity = 0.5;
+weather.snowLens.coverage = 0.4; // Shape controls use the shared native stage.
+
+// External fog controls use the very same controller, without competing writers.
+weather.fog.automatic = false;
+effects.showHeightFog = true;
+effects.heightFogDensity = 0.0001;
+weather.fog.automatic = true; // Explicitly return authority to weather.
 ```
 
 `mode` 必须匹配场景且构造后不变。风速为 m/s，Planar XY 或 Globe 东/北；半径单位米，
@@ -1007,13 +1018,32 @@ low/medium/high 总槽位为 16K/32K/64K，双池模拟纹理约 2.02/4/8.04 MiB
 雨雪类型和强度变化复用资源。相机局部体积不是全城逐点天气场；Globe 五公里以内使用切平面近似。
 粒子无光照、遮雨碰撞、地面状态或运动矢量，TAA 下运动粒子仍可能有拖影。
 
-天气不自动改变场景环境；调用方可组合已有环境效果。鸟瞰天气示例仅组合大气和高度雾，
-不提供云层配置或开关。集合移除会销毁两个粒子池。
+传入 `scene` 后，天气统一联动高度雾、湿润/积雪、地表涟漪、雨滴镜头和结霜。
+雨雪交叉过渡使用同一当前强度/类型比例，不在示例中额外逐帧拼接。`show=false` 隐藏全部自动联动效果，
+`paused` 冻结粒子及联动强度过渡；已有镜头雨滴/地表涟漪的细节动画仍随 Scene time，完全静止需暂停场景时间。
+不传 `scene` 保持独立粒子用法，不能同时传联动配置。`mode` 必须与绑定 Scene 匹配，
+每个 Scene 只允许一个绑定天气实例。
+
+`fog`、`surface`、`lens` 三组配置各有 `automatic` 和 `enabled`。自动模式下，`enabled=false`
+关闭该项；`automatic=false` 完全停止天气对该项的写入，允许外部直接调节共享实例，即使天气切晴/隐藏也不覆盖。
+手动状态不会因切天气预设而悄悄重置，重新开启 automatic 才恢复联动。
+`fog.density`、`surface.wetness/snowCoverage/rippleIntensity`、`lens.rainIntensity/snowIntensity`
+是满强度数值，晴天保留；运行时当前值可从共享实例读取。修改配置与旧粒子参数一样由下次 Scene update 消费，
+按需渲染应用应请求一帧。自动联动只在值变化时调用效果 setter，不增加持续请求帧。
+
+雾必须显式传入已注册的 `environmentEffects`，天气不会创建第二个环境控制器、启用它或接管物理大气。
+未绑定时 fog.automatic 默认 false；强行打开会报配置错误。其他雾参数可通过同一 `weather.environmentEffects`
+调节。天气借用既有 Scene surface 或显式 `surfaceWeather`；显式借用的 `rainLens/snowLens` 必须已在本 Scene collection。
+缺少时自动创建 surface 和两种 native stage，首次启用才加载镜头纹理。
+集合移除销毁天气自建的效果及粒子池，移除 preUpdate listener；借用资源不销毁，仅条件恢复仍等于最后一次天气写入的字段，
+保留后续外部修改。Fog controller 仍由调用方注册/移除。见 ADR-0106。
+
+鸟瞰天气示例不提供云层配置或开关。
 基础物理光照和曝光不随天气预设修改；该示例的固定 surfaceRadianceScale 为 3。
 天空亮度沿用环境默认值（Globe 4、Planar 10），不额外压暗天空。
-天气雾密度随 actualIntensity 归零，不保留晴天雾底值；关闭“能见度随天气变化”也清除天气雾。
-天气 API 与地表覆盖仍独立；示例的天气预设在晴天关闭覆盖、降水时启用覆盖（初始为湿润）。
-切换预设保留湿润/积雪参数，所有地表控件仍可手动覆盖，切晴不会清空调好的数值。
+自动模式下天气雾密度随 actualIntensity 归零；关闭“能见度随天气变化”也清除天气雾。
+下雨自动湿润、下雪自动积雪，晴天关闭覆盖；独立地表 API 仍可使用。
+示例同时提供联动强度和当前值的手动控件，编辑当前值会显式转为对应的手动模式。
 人工入口 `Test/Rendering/鸟瞰天气.html?world=planar` / `world=globe`，
 自动验证 `SceneGIS/Scene/SceneGISWeather` 与 `SceneGIS/Scene/SceneGISGpuParticleSystem`。
 
@@ -1080,7 +1110,7 @@ scene.postProcessStages.remove(rainLens);
 
 镜头雨滴与地表覆盖互相独立，提供水珠、滑落水痕和局部折射，只有一个颜色后处理，无深度重绘。
 两者随 Scene time 动画，暂停时间即冻结；不会主动启动时钟或请求连续帧。
-调用方决定与降水的联动，雨雪切换时可将两者强度归零，并关闭镜头 stage 避免执行通道。
+可独立手动控制，也可由绑定 Scene 的 SceneGISWeather 联动强度并关闭零强度的镜头 stage。
 独立本地示例 `Test/Rendering/降雨细节.html` 支持两种世界；鸟瞰天气页面已提供开关与强度调节。
 专项 Specs 加入 `SceneGIS/Scene/SceneGISRainLensStage`；设计与限制见 ADR-0105。
 
@@ -1103,8 +1133,9 @@ const snowLens = scene.postProcessStages.add(
 
 使用包内静态冰晶贴图在镜头边缘形成霜层，默认保留清晰中央视野；范围为 1 时延伸至中心。
 不随时间动画，不模拟雪点撞击或融化。一次颜色后处理，轻微模糊和透光，无深度、历史或固定亮点高光。
-纹理首次启用时加载，跟随 stage 释放；不改变相机、光照、空中粒子或地表积雪。调用方按雨雪类型显式选择镜头 stage，晴天或隐藏
-降水时关闭它们。`Test/Rendering/降雪细节.html` 提供本地球面/平面示例，`鸟瞰天气.html` 提供联动开关。
+纹理首次启用时加载，跟随 stage 释放；不改变相机、光照、空中粒子或地表积雪。独立调用方可显式选择镜头 stage；
+绑定 Scene 的 SceneGISWeather 默认负责自动选择，晴天或隐藏天气时关闭自动控制的镜头。
+`Test/Rendering/降雪细节.html` 提供本地球面/平面示例，`鸟瞰天气.html` 提供统一联动及手动控制。
 
 ## 几何高光抗锯齿
 

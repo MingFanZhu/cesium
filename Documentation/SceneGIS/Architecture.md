@@ -1133,9 +1133,16 @@ GPU 粒子池，模拟规则全部在天气 GLSL 内。显式 Globe / Planar 模
 相机移动时将已有状态转换至当前局部坐标，冻结时间时只在绘制副本上转换。
 周期循环和距离渐隐补充视域，球面采用区域 ENU 近似，不是全球降水模拟。
 
-天气归 `scene.primitives` 所有并排除拾取；它不修改大气、雾、云、光照与时钟，
-这些由调用方组合现有 `SceneGISEnvironmentEffects`。不新增全屏处理或几何遮挡重绘。
-普通深度测试只处理可见遮挡，不提供屋檐遮雨、碰撞、积水或积雪；强度是视觉密度。
+天气归 `scene.primitives` 所有并排除拾取；不提供屋檐遮雨、碰撞或物理积累，强度是视觉密度。
+[ADR-0106](Decisions/ADR-0106-unified-weather-composition.md) 将雾、地表及镜头联动纳入可选的
+scene-bound composition；不传 Scene 时保持独立粒子。Fog 显式借用已注册的 EnvironmentEffects，
+不创建/启用第二个环境控制器，不改变大气、云、光照、曝光或时钟。Surface/Lens 复用现有实现，
+没有额外 Shader、几何回放或独立渲染管线。
+
+`fog/surface/lens.automatic=false` 时完全交还共享实例控制权；自动模式才由天气写入当前强度，
+clear/hide 撤除自动效果并保留目标强度。Scene preUpdate 在环境与材质 consumer 前同步状态，
+primitive update 不重复推进过渡；粒子相机重定位按实际绘制帧计时，不能用未绘制的 preUpdate 代替。
+一个 Scene 只绑定一个完整天气实例。销毁释放自建组件与监听；借用实例不销毁，条件恢复仍未被外部改动的天气字段。
 
 ## 地表湿润与薄雪
 
