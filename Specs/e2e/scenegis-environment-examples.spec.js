@@ -2,6 +2,64 @@ import { test, expect } from "@playwright/test";
 
 const features = ["物理大气", "高度雾", "体积云", "日月光照", "泛光与光晕"];
 
+for (const world of ["globe", "planar"]) {
+  test(`Night stars ${world}: local assets, controls and camera`, async ({
+    page,
+  }) => {
+    test.setTimeout(120000);
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.route("**/*", (route) => {
+      const url = new URL(route.request().url());
+      return url.hostname === "localhost" || url.protocol === "data:"
+        ? route.continue()
+        : route.abort();
+    });
+    await page.goto(`/Test/AdvancedEnvironment/夜晚星空.html?world=${world}`);
+    await page.waitForFunction(() => window.example?.effects.ready);
+    const camera = await page.evaluate(() => {
+      const { viewer, effects } = window.example;
+      return {
+        z: viewer.camera.positionWC.z,
+        stars: effects.showStars,
+        mode: effects.mode,
+      };
+    });
+    expect(camera.stars).toBe(true);
+    expect(camera.mode).toBe(world);
+    if (world === "planar") {
+      expect(camera.z).toBeCloseTo(200, 3);
+    }
+    await page.getByLabel("星空", { exact: true }).uncheck();
+    expect(await page.evaluate(() => window.example.effects.showStars)).toBe(
+      false,
+    );
+    await page.getByLabel("星空", { exact: true }).check();
+    await page.getByLabel("体积云", { exact: true }).check();
+    await page.getByRole("button", { name: "白昼", exact: true }).click();
+    await page.getByRole("button", { name: "深夜", exact: true }).click();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          const remove =
+            window.example.viewer.scene.postRender.addEventListener(() => {
+              remove();
+              resolve();
+            });
+        }),
+    );
+    expect(await page.locator(".cesium-widget-errorPanel").count()).toBe(0);
+    expect(errors).toEqual([]);
+    const disposed = await page.evaluate(() => {
+      const { effects } = window.example;
+      const stars = effects._pipeline._resources.starTexture;
+      window.example.destroy();
+      return stars.isDestroyed();
+    });
+    expect(disposed).toBe(true);
+  });
+}
+
 for (const world of ["球面", "平面"]) {
   for (const feature of features) {
     test(`Environment ${world}${feature}: offline API example`, async ({

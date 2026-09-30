@@ -508,6 +508,13 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     hideNativeEnvironment(scene);
     scene.highDynamicRange = true;
     const requests = Array.from({ length: 8 }, createDeferred);
+    spyOn(Resource, "fetchImage").and.returnValue(
+      Promise.resolve({
+        width: 1,
+        height: 1,
+        arrayBufferView: new Uint8Array([0, 0, 0, 255]),
+      }),
+    );
     let requestIndex = 0;
     spyOn(Resource, "fetchArrayBuffer").and.callFake(function () {
       const request = requests[requestIndex++];
@@ -567,7 +574,25 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
   }
 
   function createLutBuffers() {
+    const stars = Object.fromEntries(
+      [
+        "positiveX",
+        "negativeX",
+        "positiveY",
+        "negativeY",
+        "positiveZ",
+        "negativeZ",
+      ].map((face) => [
+        face,
+        {
+          width: 1,
+          height: 1,
+          arrayBufferView: new Uint8Array([0, 0, 0, 255]),
+        },
+      ]),
+    );
     return {
+      stars,
       transmittance: new ArrayBuffer(256 * 64 * 4 * 2),
       scattering: new ArrayBuffer(256 * 128 * 32 * 4 * 2),
       irradiance: new ArrayBuffer(64 * 16 * 4 * 2),

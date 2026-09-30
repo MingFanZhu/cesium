@@ -2,7 +2,10 @@
 
 ## Status
 
-- Active standalone plan: None
+- Active standalone plan: [物理大气夜晚星空](plans/2026-09-30-night-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
+- Latest technical review: [夜晚星空](reviews/2026-09-30-night-stars.md).
+- Night stars example: [双世界星空](../../Test/AdvancedEnvironment/夜晚星空.html);
+  Specs: `packages/engine/Specs/SceneGIS/Scene/SceneGISAtmosphereStarsSpec.js`.
 - Previous standalone awaiting visual acceptance:
   [球面空气透视模型条带修复](plans/2026-09-18-globe-aerial-receiver-distance.md) — implementation verified；负责人视觉验收待定
 - Latest completed standalone plan:

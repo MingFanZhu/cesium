@@ -13,6 +13,7 @@ import Matrix4 from "../../../Core/Matrix4.js";
 import Simon1994PlanetaryPositions from "../../../Core/Simon1994PlanetaryPositions.js";
 import Transforms from "../../../Core/Transforms.js";
 import ClearCommand from "../../../Renderer/ClearCommand.js";
+import CubeMap from "../../../Renderer/CubeMap.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
@@ -205,6 +206,7 @@ function destroyResources(resources) {
   destroyResource(resources.transmittanceTexture);
   destroyResource(resources.scatteringTexture);
   destroyResource(resources.irradianceTexture);
+  destroyResource(resources.starTexture);
   destroyResource(resources.cloudShapeTexture);
   destroyResource(resources.cloudOccupancyTexture);
   destroyResource(resources.cloudDetailTexture);
@@ -242,11 +244,18 @@ function createTexture3D(context, width, height, depth, buffer) {
 
 function createCloudMipLevelStorage(width, height, depth, channels) {
   const levels = [];
+  // Texture3D retains the base-level unpack alignment for explicit mip uploads.
+  const alignment = PixelFormat.alignmentInBytes(
+    channels === 1 ? PixelFormat.RED : PixelFormat.RGBA,
+    PixelDatatype.UNSIGNED_BYTE,
+    width,
+  );
   while (width > 1 || height > 1 || depth > 1) {
     width = Math.max(Math.floor(width / 2), 1);
     height = Math.max(Math.floor(height / 2), 1);
     depth = Math.max(Math.floor(depth / 2), 1);
-    levels.push(new Uint8Array(width * height * depth * channels));
+    const rowBytes = Math.ceil((width * channels) / alignment) * alignment;
+    levels.push(new Uint8Array(rowBytes * height * depth));
   }
   return levels;
 }
@@ -1417,6 +1426,7 @@ function createResources(renderer, context, buffers) {
       context,
       buffers.cloudStbn,
     );
+    candidate.starTexture = new CubeMap({ context, source: buffers.stars });
     const renderState = RenderState.fromCache({
       cull: { enabled: false },
       depthTest: { enabled: false },
@@ -1739,6 +1749,33 @@ function isUnderground(renderer) {
   return renderer._frame.cameraPosition.z < terrainHeight;
 }
 
+function updateStarRotation(renderer, time) {
+  const rotation = renderer._worldToStars;
+  const environment = renderer._world?.environment;
+  if (defined(environment) && environment.directionMode === "manual") {
+    Matrix3.clone(Matrix3.IDENTITY, rotation);
+    return;
+  }
+  Transforms.computeTemeToPseudoFixedMatrix(time, rotation);
+  Matrix3.transpose(rotation, rotation);
+  if (defined(environment)) {
+    Cartesian3.fromRadians(
+      environment.originLongitude,
+      environment.originLatitude,
+      0.0,
+      undefined,
+      renderer._starObserver,
+    );
+    Transforms.eastNorthUpToFixedFrame(
+      renderer._starObserver,
+      undefined,
+      renderer._starEnuTransform,
+    );
+    Matrix4.getMatrix3(renderer._starEnuTransform, renderer._starEnuRotation);
+    Matrix3.multiply(rotation, renderer._starEnuRotation, rotation);
+  }
+}
+
 /**
  * A2 renderer and resource owner for the A1 advanced-environment slots.
  *
@@ -1751,6 +1788,10 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._owner = options.owner;
   this._resources = undefined;
   this._bloomResources = undefined;
+  this._worldToStars = Matrix3.clone(Matrix3.IDENTITY);
+  this._starObserver = new Cartesian3();
+  this._starEnuTransform = new Matrix4();
+  this._starEnuRotation = new Matrix3();
   this._showAtmosphere = true;
   this._showAerialPerspective = true;
   this._showHeightFog = true;
@@ -1891,6 +1932,10 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_ellipsoidCenter: () => that._frame.ellipsoidCenter,
     u_ellipsoidRadii: () => that._frame.ellipsoidRadii,
     u_backgroundRadianceScale: () => that._owner._backgroundRadianceScale,
+    u_showStars: () => that._owner._showStars,
+    u_starIntensity: () => that._owner._starIntensity,
+    u_starTexture: () => that._resources.starTexture,
+    u_worldToStars: () => that._worldToStars,
     u_aerialRadianceScale: () => that._owner._aerialRadianceScale,
     u_surfaceRadianceScale: () => that._owner._surfaceRadianceScale,
     u_showAerialPerspective: () => that._showAerialPerspective,
@@ -2318,6 +2363,9 @@ SceneGISEnvironmentEffectsRenderer.prototype.renderBackground = function (
     publishShadowHistorySnapshot(this);
   }
   if (this._showAtmosphere) {
+    if (this._owner._showStars) {
+      updateStarRotation(this, frameState.time);
+    }
     this._resources.backgroundCommand.execute(frameState.context, passState);
   }
 };

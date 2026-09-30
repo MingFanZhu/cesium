@@ -14,6 +14,10 @@ uniform vec3 u_vertical;
 uniform vec3 u_sunDirection;
 uniform float u_altitude;
 uniform float u_backgroundRadianceScale;
+uniform bool u_showStars;
+uniform float u_starIntensity;
+uniform samplerCube u_starTexture;
+uniform mat3 u_worldToStars;
 uniform bool u_showHeightFog;
 uniform float u_heightFogDensity;
 uniform float u_heightFogHeightFalloff;
@@ -71,13 +75,32 @@ void main()
             true,
             intersectsAtmosphere,
             transmittance);
-    if (!intersectsAtmosphere) {
+    if (!intersectsAtmosphere && !u_showStars) {
         discard;
     }
     #endif
     vec3 physicalRadiance = sceneGISApplySunDisk(
         radiance, viewDirection, sunDirection, transmittance);
     vec3 sceneLinearRadiance = physicalRadiance * u_backgroundRadianceScale;
+    if (u_showStars && u_starIntensity > 0.0) {
+        float visibility = 1.0 - smoothstep(-0.2079116908, -0.1045284633, sunDirection.z);
+        // Above the optical atmosphere the sky is space even on the day side.
+        visibility = mix(visibility, 1.0, smoothstep(30000.0, 60000.0, rayOrigin.z));
+        #ifdef SCENEGIS_GLOBE
+        // Sky scattering clamps below-horizon rays for continuity. Stars must
+        // instead respect the actual optical ground intersection.
+        AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
+        vec3 starOrigin = vec3(rayOrigin.xy * 0.001, atmosphere.bottom_radius + rayOrigin.z * 0.001);
+        float starRadius = length(starOrigin);
+        visibility *= RayIntersectsGround(atmosphere, starRadius, dot(starOrigin, viewDirection) / starRadius) ? 0.0 : 1.0;
+        #else
+        visibility *= viewDirection.z > 0.0 ? 1.0 : 0.0;
+        #endif
+        if (visibility > 0.0) {
+            vec3 stars = czm_srgbToLinear(texture(u_starTexture, u_worldToStars * worldDirection).rgb);
+            sceneLinearRadiance += stars * transmittance * (visibility * u_starIntensity);
+        }
+    }
     if (u_showHeightFog) {
         sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
             u_transmittanceTexture,

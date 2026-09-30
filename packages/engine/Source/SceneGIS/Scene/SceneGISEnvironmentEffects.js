@@ -36,6 +36,14 @@ const cloudAssetFiles = Object.freeze([
 const cloudQualities = Object.freeze(["low", "medium", "high"]);
 const cloudPresets = Object.freeze(["cumulus", "stratus", "cirrus", "mixed"]);
 const moonTextureAsset = "Assets/SceneGIS/Environment/Moon/color_large.webp";
+const starFaces = Object.freeze({
+  positiveX: "px",
+  negativeX: "mx",
+  positiveY: "py",
+  negativeY: "my",
+  positiveZ: "pz",
+  negativeZ: "mz",
+});
 
 function validateLiveScene(scene) {
   //>>includeStart('debug', pragmas.debug);
@@ -435,20 +443,32 @@ async function fetchEnvironmentAssets(controller, generation) {
   const assetRoot = assetRoots[controller._mode];
   const assetFiles = [...worldAssetFiles, ...cloudAssetFiles];
   try {
-    const buffers = await Promise.all(
-      assetFiles.map((file) =>
+    const buffers = await Promise.all([
+      ...assetFiles.map((file) =>
         Resource.fetchArrayBuffer(
           buildModuleUrl(
             `${file.root === "world" ? assetRoot : cloudAssetRoot}${file.name}`,
           ),
         ),
       ),
-    );
+      ...Object.values(starFaces).map((face) =>
+        Resource.fetchImage({
+          url: buildModuleUrl(`Assets/Textures/SkyBox/tycho2t3_80_${face}.jpg`),
+          preferImageBitmap: false,
+        }),
+      ),
+    ]);
     if (!isCurrentGeneration(controller, generation)) {
       return;
     }
     controller._pendingBuffers = Object.fromEntries(
       assetFiles.map((file, index) => [file.key, buffers[index]]),
+    );
+    controller._pendingBuffers.stars = Object.fromEntries(
+      Object.keys(starFaces).map((face, index) => [
+        face,
+        buffers[assetFiles.length + index],
+      ]),
     );
     requestRender(controller);
   } catch (error) {
@@ -584,6 +604,8 @@ function SceneGISEnvironmentEffects(options) {
   const showBloom = options.showBloom ?? true;
   const showLensFlare = options.showLensFlare ?? true;
   const showMoonlight = options.showMoonlight ?? true;
+  const showStars = options.showStars ?? true;
+  const starIntensity = options.starIntensity ?? 1.0;
   const cloudQuality =
     options.cloudQuality ?? (mode === globeMode ? "high" : "medium");
   const cloudPreset = options.cloudPreset ?? "cumulus";
@@ -628,6 +650,7 @@ function SceneGISEnvironmentEffects(options) {
   validateCalibrationScale("options.bloomIntensity", bloomIntensity);
   validateCalibrationScale("options.lensFlareIntensity", lensFlareIntensity);
   validateCalibrationScale("options.moonlightIntensity", moonlightIntensity);
+  validateCalibrationScale("options.starIntensity", starIntensity);
   validateRange("options.heightFogDensity", heightFogDensity, 0.0, 0.001);
   validateRange(
     "options.heightFogHeightFalloff",
@@ -701,6 +724,7 @@ function SceneGISEnvironmentEffects(options) {
   Check.typeOf.bool("options.showBloom", showBloom);
   Check.typeOf.bool("options.showLensFlare", showLensFlare);
   Check.typeOf.bool("options.showMoonlight", showMoonlight);
+  Check.typeOf.bool("options.showStars", showStars);
   //>>includeEnd('debug');
 
   this._mode = mode;
@@ -715,6 +739,8 @@ function SceneGISEnvironmentEffects(options) {
   this._showBloom = showBloom;
   this._showLensFlare = showLensFlare;
   this._showMoonlight = showMoonlight;
+  this._showStars = showStars;
+  this._starIntensity = starIntensity;
   this._cloudQuality = cloudQuality;
   this._cloudPreset = cloudPreset;
   this._cloudCoverage = cloudCoverage;
@@ -833,7 +859,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets whether the physical atmosphere and Sun background are shown.
+   * Gets or sets whether the physical atmosphere, Sun and stars background are shown.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}
@@ -1388,6 +1414,40 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
+   * Whether stars are composed into the physical atmosphere background before fog
+   * and clouds. Stars fade in during twilight. Globe and astronomical Planar worlds
+   * use simulation time; manual Planar lighting uses a fixed world-space star map.
+   * Requires showAtmosphere. Toggling this property reuses the loaded star texture.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   * @default true
+   */
+  showStars: {
+    get: function () {
+      return this._showStars;
+    },
+    set: function (value) {
+      setRenderBoolean(this, "_showStars", value);
+    },
+  },
+  /**
+   * Scene-linear star brightness in the inclusive range 0–64, independent of
+   * backgroundRadianceScale. This affects the visible background, not lighting.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   * @default 1.0
+   */
+  starIntensity: {
+    get: function () {
+      return this._starIntensity;
+    },
+    set: function (value) {
+      setWarmNumber(this, "_starIntensity", value, 0.0, 64.0);
+    },
+  },
+  /**
    * Gets or sets the readable full-phase Globe or Planar Moonlight scale.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
@@ -1507,6 +1567,8 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {boolean} [showBloom=true] Whether scene-wide HDR bloom is shown.
  * @property {boolean} [showLensFlare=true] Whether Sun-gated lens artifacts are shown.
  * @property {boolean} [showMoonlight=true] Whether readable Globe or Planar Moonlight participates in the primary directional light.
+ * @property {boolean} [showStars=true] Whether the physical atmosphere background includes stars, attenuated by atmosphere, fog and clouds.
+ * @property {number} [starIntensity=1.0] Scene-linear star brightness in the inclusive range 0–64, independent of backgroundRadianceScale.
  * @property {string} [cloudQuality] Exact "low", "medium", or "high" cloud budget. Defaults to "high" on Globe and "medium" on Planar.
  * @property {string} [cloudPreset="cumulus"] Exact "cumulus", "stratus", "cirrus", or "mixed" immutable morphology preset.
  * @property {number} [cloudCoverage] Global cloud coverage bias in the inclusive range 0–1. Defaults to 0.3 on Globe and 0.45 on Planar.
