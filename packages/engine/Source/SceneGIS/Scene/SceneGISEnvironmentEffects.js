@@ -36,14 +36,6 @@ const cloudAssetFiles = Object.freeze([
 const cloudQualities = Object.freeze(["low", "medium", "high"]);
 const cloudPresets = Object.freeze(["cumulus", "stratus", "cirrus", "mixed"]);
 const moonTextureAsset = "Assets/SceneGIS/Environment/Moon/color_large.webp";
-const starFaces = Object.freeze({
-  positiveX: "px",
-  negativeX: "mx",
-  positiveY: "py",
-  negativeY: "my",
-  positiveZ: "pz",
-  negativeZ: "mz",
-});
 
 function validateLiveScene(scene) {
   //>>includeStart('debug', pragmas.debug);
@@ -443,32 +435,20 @@ async function fetchEnvironmentAssets(controller, generation) {
   const assetRoot = assetRoots[controller._mode];
   const assetFiles = [...worldAssetFiles, ...cloudAssetFiles];
   try {
-    const buffers = await Promise.all([
-      ...assetFiles.map((file) =>
+    const buffers = await Promise.all(
+      assetFiles.map((file) =>
         Resource.fetchArrayBuffer(
           buildModuleUrl(
             `${file.root === "world" ? assetRoot : cloudAssetRoot}${file.name}`,
           ),
         ),
       ),
-      ...Object.values(starFaces).map((face) =>
-        Resource.fetchImage({
-          url: buildModuleUrl(`Assets/Textures/SkyBox/tycho2t3_80_${face}.jpg`),
-          preferImageBitmap: false,
-        }),
-      ),
-    ]);
+    );
     if (!isCurrentGeneration(controller, generation)) {
       return;
     }
     controller._pendingBuffers = Object.fromEntries(
       assetFiles.map((file, index) => [file.key, buffers[index]]),
-    );
-    controller._pendingBuffers.stars = Object.fromEntries(
-      Object.keys(starFaces).map((face, index) => [
-        face,
-        buffers[assetFiles.length + index],
-      ]),
     );
     requestRender(controller);
   } catch (error) {
@@ -1414,10 +1394,12 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Whether stars are composed into the physical atmosphere background before fog
-   * and clouds. Stars fade in during twilight. Globe and astronomical Planar worlds
-   * use simulation time; manual Planar lighting uses a fixed world-space star map.
-   * Requires showAtmosphere. Toggling this property reuses the loaded star texture.
+   * Whether procedural stars appear in the perspective atmosphere background,
+   * attenuated by atmosphere, fog and clouds. Stars fade in during twilight.
+   * Globe and astronomical Planar worlds use simulation time; manual Planar
+   * lighting uses fixed world axes. Positions are synthetic, not a star catalog.
+   * Requires showAtmosphere. No star images are downloaded. Warm toggles reuse
+   * the deterministic star buffer. Orthographic views have no angular star field.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {boolean}

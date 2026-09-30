@@ -1,6 +1,6 @@
 # 物理大气夜晚星空
 
-- Type: standalone plan; status: implemented, technical review passed; owner visual acceptance pending
+- Type: standalone plan; status: image approach superseded by [程序星空](2026-09-30-procedural-stars.md); original implementation and verification retained below
 - Owner: 当前 Agent（实现与架构自审）；date: 2026-09-30
 - Parent: [extension](2026-08-14-atmosphere-clouds-effects-extension.md)
 - ADR: [ADR-0107](../../../Documentation/SceneGIS/Decisions/ADR-0107-atmosphere-stars.md)

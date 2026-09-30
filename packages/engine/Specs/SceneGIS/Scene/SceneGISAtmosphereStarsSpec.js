@@ -7,6 +7,7 @@ import {
   JulianDate,
   Matrix3,
   Matrix4,
+  OrthographicFrustum,
   Resource,
   SceneGISEnvironmentEffects,
   SceneGISPlanarCoordinateSystem,
@@ -18,6 +19,7 @@ import {
 import ClearCommand from "../../../Source/Renderer/ClearCommand.js";
 import createScene from "../../../../../Specs/createScene.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
+import createCanvas from "../../../../../Specs/createCanvas.js";
 
 describe("SceneGIS/Scene/SceneGISAtmosphereStars", function () {
   let scene;
@@ -25,14 +27,11 @@ describe("SceneGIS/Scene/SceneGISAtmosphereStars", function () {
   let environment;
   const host = {};
   const time = JulianDate.fromIso8601("2026-06-21T15:00:00Z");
-  const face = {
-    width: 1,
-    height: 1,
-    arrayBufferView: new Uint8Array([128, 128, 128, 255]),
-  };
-
-  function setup(mode = "planar", imagePromise = Promise.resolve(face)) {
-    scene = createScene({ scene3DOnly: true });
+  function setup(mode = "planar", size = 1) {
+    scene = createScene({
+      scene3DOnly: true,
+      canvas: createCanvas(size, size),
+    });
     const sizes = {
       "transmittance.bin": 256 * 64 * 4 * 2,
       "scattering.bin": 256 * 128 * 32 * 4 * 2,
@@ -51,7 +50,7 @@ describe("SceneGIS/Scene/SceneGISAtmosphereStars", function () {
       }
       return Promise.resolve(buffer);
     });
-    spyOn(Resource, "fetchImage").and.returnValue(imagePromise);
+    spyOn(Resource, "fetchImage").and.throwError("Stars must not fetch images");
     let world;
     if (mode === "planar") {
       world = new SceneGISPlanarWorld({
@@ -134,12 +133,31 @@ describe("SceneGIS/Scene/SceneGISAtmosphereStars", function () {
 
   function pixel() {
     new ClearCommand({ color: Color.BLACK }).execute(scene.context);
-    effects._pipeline._resources.backgroundCommand.execute(scene.context);
+    effects._pipeline._resources.starsCommand.execute(scene.context);
     return Array.from(scene.context.readPixels({ width: 1, height: 1 }));
+  }
+
+  function placeTestStar(direction = Cartesian3.UNIT_Z) {
+    const resources = effects._pipeline._resources;
+    resources.starsCommand.instanceCount = 1;
+    resources.starsVertexArray
+      .getAttribute(1)
+      .vertexBuffer.copyFromArrayView(
+        new Float32Array([
+          direction.x,
+          direction.y,
+          direction.z,
+          0.5,
+          0.5,
+          0.5,
+        ]),
+      );
   }
 
   function isolateBackground() {
     const renderer = effects._pipeline;
+    Matrix3.clone(Matrix3.IDENTITY, renderer._worldToStars);
+    placeTestStar();
     const frame = renderer._frame;
     frame.altitude = 200;
     Cartesian3.clone(Cartesian3.UNIT_X, frame.east);
@@ -192,13 +210,13 @@ describe("SceneGIS/Scene/SceneGISAtmosphereStars", function () {
     effects.update(scene, time);
     expect(requestRender).toHaveBeenCalled();
     expect(effects._pipeline._resources).toBe(resources);
-    expect(Resource.fetchImage).toHaveBeenCalledTimes(6);
-    expect(Resource.fetchImage.calls.first().args[0].preferImageBitmap).toBe(
-      false,
-    );
+    expect(Resource.fetchImage).not.toHaveBeenCalled();
     expect(Resource.fetchArrayBuffer).toHaveBeenCalledTimes(8);
+    const stars = resources.starsVertexArray.getAttribute(1).vertexBuffer;
+    expect(stars.sizeInBytes).toBe(4096 * 24);
     effects.disconnectedCallback(host);
-    expect(resources.starTexture.isDestroyed()).toBe(true);
+    expect(resources.starsVertexArray.isDestroyed()).toBe(true);
+    expect(stars.isDestroyed()).toBe(true);
   });
 
   ["globe", "planar"].forEach((mode) => {
@@ -208,10 +226,7 @@ describe("SceneGIS/Scene/SceneGISAtmosphereStars", function () {
       const renderer = isolateBackground();
       const night = pixel()[0];
       expect(night).toBeGreaterThan(20);
-      expect(night).toBeLessThan(58); // Linearized 128/255 star texel, then extinction.
-      effects.showStars = false;
-      expect(pixel()[0]).toBe(0);
-      effects.showStars = true;
+      expect(night).toBeLessThan(58); // Filtered linear star radiance, then extinction.
       effects.starIntensity = 0.5;
       expect(pixel()[0]).toEqualEpsilon(night / 2, 1);
       effects.starIntensity = 1;
@@ -232,8 +247,10 @@ describe("SceneGIS/Scene/SceneGISAtmosphereStars", function () {
         Cartesian3.UNIT_Z,
         new Cartesian3(),
       );
+      placeTestStar(renderer._frame.cameraDirection);
       expect(pixel()[0]).toBe(0);
       Cartesian3.clone(Cartesian3.UNIT_Z, renderer._frame.cameraDirection);
+      placeTestStar();
       effects.heightFogDensity = 0.001;
       effects.heightFogHeightFalloff = 0;
       effects.heightFogMaximumOpacity = 1;
@@ -293,36 +310,77 @@ describe("SceneGIS/Scene/SceneGISAtmosphereStars", function () {
     expect(effects._pipeline._worldToStars).toEqual(Matrix3.IDENTITY);
   });
 
-  it("publishes no GPU resources after a star load completes on a disconnected generation", async function () {
-    let resolve;
-    setup(
-      "globe",
-      new Promise((r) => {
-        resolve = r;
-      }),
-    );
-    effects.firstUpdate(scene, time);
-    const pipeline = effects._pipeline;
-    const publish = spyOn(pipeline, "publishResources");
-    effects.disconnectedCallback(host);
-    resolve(face);
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(publish).not.toHaveBeenCalled();
-    expect(pipeline.isDestroyed()).toBe(true);
-    expect(effects._pendingBuffers).toBeUndefined();
+  it("recreates the same catalog without network assets or directional bias", async function () {
+    setup();
+    await ready();
+    const first = new Float32Array(4096 * 6);
+    effects._pipeline._resources.starsVertexArray
+      .getAttribute(1)
+      .vertexBuffer.getBufferData(first);
+    const mean = new Cartesian3();
+    for (let i = 0; i < first.length; i += 6) {
+      const direction = new Cartesian3(first[i], first[i + 1], first[i + 2]);
+      expect(Cartesian3.magnitude(direction)).toEqualEpsilon(1, 1e-7);
+      Cartesian3.add(mean, direction, mean);
+    }
+    expect(Cartesian3.magnitude(mean) / 4096).toBeLessThan(0.04);
+    effects.enabled = false;
+    effects.update(scene, time);
+    effects.enabled = true;
+    await ready();
+    const second = new Float32Array(first.length);
+    effects._pipeline._resources.starsVertexArray
+      .getAttribute(1)
+      .vertexBuffer.getBufferData(second);
+    expect(second).toEqual(first);
+    expect(Resource.fetchImage).not.toHaveBeenCalled();
   });
 
-  it("reports a star asset failure once through the existing error event", async function () {
-    const error = new Error("star image unavailable");
-    setup("globe", Promise.reject(error));
-    const errors = [];
-    effects.errorEvent.addEventListener((_owner, value) => errors.push(value));
-    effects.firstUpdate(scene, time);
-    await pollToPromise(() => errors.length > 0);
-    effects.update(scene, time);
-    expect(errors).toEqual([error]);
-    expect(effects.ready).toBe(false);
-    expect(effects._pipeline._resources).toBeUndefined();
+  it("preserves star energy during subpixel motion without changing background alpha", async function () {
+    setup("planar", 16);
+    await ready();
+    const renderer = isolateBackground();
+    renderer._frame.altitude = 100000;
+    for (const phase of [0, 0.25, 0.5, 0.75]) {
+      placeTestStar(
+        Cartesian3.normalize(
+          new Cartesian3(phase / 8, phase / 8, 1),
+          new Cartesian3(),
+        ),
+      );
+      pixel();
+      const pixels = scene.context.readPixels({ width: 16, height: 16 });
+      let energy = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        energy += pixels[i];
+        expect(pixels[i + 3]).toBe(255);
+      }
+      // RGBA8 quantization accounts for the small integral error.
+      expect(energy).toEqualEpsilon(0.5 * 255, 4);
+    }
+  });
+
+  it("submits no star draw when hidden, zero intensity or orthographic", async function () {
+    setup();
+    await ready();
+    const draw = spyOn(
+      effects._pipeline._resources.starsCommand,
+      "execute",
+    ).and.callThrough();
+    scene.renderForSpecs(time);
+    expect(draw).toHaveBeenCalledTimes(1);
+    draw.calls.reset();
+    effects.showStars = false;
+    scene.renderForSpecs(time);
+    effects.showStars = true;
+    effects.starIntensity = 0;
+    scene.renderForSpecs(time);
+    effects.starIntensity = 1;
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 1000,
+      aspectRatio: 1,
+    });
+    scene.renderForSpecs(time);
+    expect(draw).not.toHaveBeenCalled();
   });
 });

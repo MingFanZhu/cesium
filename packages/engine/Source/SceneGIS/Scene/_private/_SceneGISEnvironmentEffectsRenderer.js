@@ -13,7 +13,7 @@ import Matrix4 from "../../../Core/Matrix4.js";
 import Simon1994PlanetaryPositions from "../../../Core/Simon1994PlanetaryPositions.js";
 import Transforms from "../../../Core/Transforms.js";
 import ClearCommand from "../../../Renderer/ClearCommand.js";
-import CubeMap from "../../../Renderer/CubeMap.js";
+import BlendingState from "../../../Scene/BlendingState.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
@@ -39,6 +39,8 @@ import cloudShadowSource from "../../../Shaders/SceneGIS/EnvironmentEffects/Scen
 import aerialFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS.js";
 import atmosphereSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
 import backgroundFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS.js";
+import starsFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsStarsFS.js";
+import starsVertexSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsStarsVS.js";
 import bloomBlurFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBloomBlurFS.js";
 import bloomCompositeFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBloomCompositeFS.js";
 import bloomThresholdFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBloomThresholdFS.js";
@@ -54,6 +56,12 @@ import SceneGISEnvironmentEffectsPipeline from "./_SceneGISEnvironmentEffectsPip
 import SceneGISSkyReflections from "./_SceneGISSkyReflections.js";
 
 const attributeLocations = { position: 0 };
+const starAttributeLocations = {
+  position: 0,
+  starDirection: 1,
+  starRadiance: 2,
+};
+const starCount = 4096;
 const fullscreenQuad = new Float32Array([
   -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0,
 ]);
@@ -195,6 +203,10 @@ function destroyResources(resources) {
   destroyResource(resources.cloudHistoryFramebuffer0);
   destroyResource(resources.cloudHistoryFramebuffer1);
   destroyResource(resources.backgroundProgram);
+  destroyResource(resources.starsProgram);
+  destroyResource(resources.starsVertexArray);
+  destroyResource(resources.starsVertexBuffer);
+  destroyResource(resources.starsQuadBuffer);
   destroyResource(resources.aerialProgram);
   destroyResource(resources.aerialLogDepthProgram);
   destroyResource(resources.cloudProgram);
@@ -206,7 +218,6 @@ function destroyResources(resources) {
   destroyResource(resources.transmittanceTexture);
   destroyResource(resources.scatteringTexture);
   destroyResource(resources.irradianceTexture);
-  destroyResource(resources.starTexture);
   destroyResource(resources.cloudShapeTexture);
   destroyResource(resources.cloudOccupancyTexture);
   destroyResource(resources.cloudDetailTexture);
@@ -499,6 +510,8 @@ function createProgram(
   additionalDefines,
   cloudLibrarySource = cloudSource,
   globeCloudLibrarySource = globeCloudSource,
+  vertexShaderSource = vertexSource,
+  locations = attributeLocations,
 ) {
   const defines = globe
     ? [
@@ -544,9 +557,9 @@ function createProgram(
   });
   const program = ShaderProgram.fromCache({
     context,
-    vertexShaderSource: vertexSource,
+    vertexShaderSource,
     fragmentShaderSource,
-    attributeLocations,
+    attributeLocations: locations,
   });
   try {
     program._bind();
@@ -1306,6 +1319,91 @@ function publishShadowHistorySnapshot(renderer) {
   snapshot.detail = cloudQualityProfiles[owner._cloudQuality].detail;
 }
 
+function createStars(renderer, context, candidate, globe) {
+  // Fixed seed and uniform solid-angle sampling: no poles, cube seams or
+  // frame-dependent noise. These directions do not represent real constellations.
+  let seed = 0x6d2b79f5;
+  const random = function () {
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    return (seed >>> 0) / 4294967296;
+  };
+  const stars = new Float32Array(starCount * 6);
+  for (let i = 0; i < starCount; i++) {
+    const z = 2 * random() - 1;
+    const angle = 2 * Math.PI * random();
+    const radius = Math.sqrt(1 - z * z);
+    const brightness = 0.08 + 3 * Math.pow(random(), 8);
+    const temperature = 2 * random() - 1;
+    const offset = i * 6;
+    stars[offset] = radius * Math.cos(angle);
+    stars[offset + 1] = radius * Math.sin(angle);
+    stars[offset + 2] = z;
+    stars[offset + 3] = brightness * (1 - 0.2 * Math.max(temperature, 0));
+    stars[offset + 4] = brightness * (1 - 0.08 * Math.abs(temperature));
+    stars[offset + 5] = brightness * (1 + 0.28 * Math.min(temperature, 0));
+  }
+  candidate.starsVertexBuffer = Buffer.createVertexBuffer({
+    context,
+    typedArray: stars,
+    usage: BufferUsage.STATIC_DRAW,
+  });
+  candidate.starsQuadBuffer = Buffer.createVertexBuffer({
+    context,
+    typedArray: fullscreenQuad,
+    usage: BufferUsage.STATIC_DRAW,
+  });
+  candidate.starsVertexArray = new VertexArray({
+    context,
+    attributes: [
+      {
+        index: 0,
+        vertexBuffer: candidate.starsQuadBuffer,
+        componentsPerAttribute: 2,
+        componentDatatype: ComponentDatatype.FLOAT,
+      },
+      ...[1, 2].map((index) => ({
+        index,
+        vertexBuffer: candidate.starsVertexBuffer,
+        componentsPerAttribute: 3,
+        componentDatatype: ComponentDatatype.FLOAT,
+        offsetInBytes: (index - 1) * 12,
+        strideInBytes: 24,
+        instanceDivisor: 1,
+      })),
+    ],
+  });
+  // The VAO owns both buffers, including the shared instance attributes.
+  candidate.starsVertexBuffer = candidate.starsQuadBuffer = undefined;
+  candidate.starsProgram = createProgram(
+    context,
+    starsFragmentSource,
+    globe,
+    undefined,
+    undefined,
+    undefined,
+    starsVertexSource,
+    starAttributeLocations,
+  );
+  candidate.starsCommand = new DrawCommand({
+    vertexArray: candidate.starsVertexArray,
+    shaderProgram: candidate.starsProgram,
+    uniformMap: renderer._uniformMap,
+    renderState: RenderState.fromCache({
+      cull: { enabled: false },
+      depthTest: { enabled: false },
+      depthMask: false,
+      // Zero output alpha adds star radiance without changing background alpha.
+      blending: BlendingState.PRE_MULTIPLIED_ALPHA_BLEND,
+    }),
+    primitiveType: PrimitiveType.TRIANGLE_STRIP,
+    count: 4,
+    instanceCount: starCount,
+    owner: renderer,
+  });
+}
+
 function createResources(renderer, context, buffers) {
   const candidate = {};
   try {
@@ -1426,7 +1524,7 @@ function createResources(renderer, context, buffers) {
       context,
       buffers.cloudStbn,
     );
-    candidate.starTexture = new CubeMap({ context, source: buffers.stars });
+    createStars(renderer, context, candidate, globe);
     const renderState = RenderState.fromCache({
       cull: { enabled: false },
       depthTest: { enabled: false },
@@ -1932,9 +2030,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_ellipsoidCenter: () => that._frame.ellipsoidCenter,
     u_ellipsoidRadii: () => that._frame.ellipsoidRadii,
     u_backgroundRadianceScale: () => that._owner._backgroundRadianceScale,
-    u_showStars: () => that._owner._showStars,
     u_starIntensity: () => that._owner._starIntensity,
-    u_starTexture: () => that._resources.starTexture,
     u_worldToStars: () => that._worldToStars,
     u_aerialRadianceScale: () => that._owner._aerialRadianceScale,
     u_surfaceRadianceScale: () => that._owner._surfaceRadianceScale,
@@ -2363,10 +2459,15 @@ SceneGISEnvironmentEffectsRenderer.prototype.renderBackground = function (
     publishShadowHistorySnapshot(this);
   }
   if (this._showAtmosphere) {
-    if (this._owner._showStars) {
-      updateStarRotation(this, frameState.time);
-    }
     this._resources.backgroundCommand.execute(frameState.context, passState);
+    if (
+      this._owner._showStars &&
+      this._owner._starIntensity > 0.0 &&
+      this._perspective
+    ) {
+      updateStarRotation(this, frameState.time);
+      this._resources.starsCommand.execute(frameState.context, passState);
+    }
   }
 };
 

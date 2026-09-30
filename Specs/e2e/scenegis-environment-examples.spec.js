@@ -8,7 +8,13 @@ for (const world of ["globe", "planar"]) {
   }) => {
     test.setTimeout(120000);
     const errors = [];
+    const starRequests = [];
     page.on("pageerror", (error) => errors.push(error.message));
+    page.on("request", (request) => {
+      if (request.url().includes("tycho2t3_80")) {
+        starRequests.push(request.url());
+      }
+    });
     await page.route("**/*", (route) => {
       const url = new URL(route.request().url());
       return url.hostname === "localhost" || url.protocol === "data:"
@@ -50,9 +56,10 @@ for (const world of ["globe", "planar"]) {
     );
     expect(await page.locator(".cesium-widget-errorPanel").count()).toBe(0);
     expect(errors).toEqual([]);
+    expect(starRequests).toEqual([]);
     const disposed = await page.evaluate(() => {
       const { effects } = window.example;
-      const stars = effects._pipeline._resources.starTexture;
+      const stars = effects._pipeline._resources.starsVertexArray;
       window.example.destroy();
       return stars.isDestroyed();
     });

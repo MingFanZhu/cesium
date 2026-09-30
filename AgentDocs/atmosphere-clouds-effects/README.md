@@ -2,8 +2,8 @@
 
 ## Status
 
-- Active standalone plan: [物理大气夜晚星空](plans/2026-09-30-night-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
-- Latest technical review: [夜晚星空](reviews/2026-09-30-night-stars.md).
+- Active standalone plan: [程序星空](plans/2026-09-30-procedural-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
+- Latest technical review: [程序星空](reviews/2026-09-30-procedural-stars.md).
 - Night stars example: [双世界星空](../../Test/AdvancedEnvironment/夜晚星空.html);
   Specs: `packages/engine/Specs/SceneGIS/Scene/SceneGISAtmosphereStarsSpec.js`.
 - Previous standalone awaiting visual acceptance:
