@@ -211,5 +211,7 @@ major stage in a separate conversation. Close this standalone maintenance at
 the present quality level; do not claim noise-free rendering or a complete
 strict-validation pass. The review retains the unresolved background-draw
 fixture errors and finite-sampling limits. No next feature or phase is activated
-by this checkpoint. The containing commit on `codex/gpu-particles` is the new
-work's source baseline; local `scenegis/develop` is still an older ancestor.
+by this checkpoint. Code checkpoint `1d894f6f5f` and the preceding 49 commits were
+subsequently fast-forwarded from `codex/gpu-particles` into local
+`scenegis/develop` at the owner's request. The next conversation will create its
+new stage branch from this updated develop; no new branch is created here.

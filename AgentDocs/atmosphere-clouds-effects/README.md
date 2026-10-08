@@ -3,12 +3,14 @@
 ## Status
 
 - Latest standalone checkpoint: [云与 TAA 配准](plans/2026-10-02-cloud-taa-registration.md) — 2026-10-08 owner approved committing the current result and moving to a new major stage; dual-world regressions and 60x playback verified; remaining strict-WebGL fixture errors retained in review; ADR-0048 / ADR-0094; no upstream delta.
-- Current handoff: cloud maintenance is closed for this checkpoint. Start new work
-  from the commit containing this handoff on `codex/gpu-particles`, which includes
-  the later rendering, GPU particle, weather and procedural-star work. At this
-  checkpoint, local `scenegis/develop` is an ancestor and has not been advanced.
-  Create the next major feature branch from this checkpoint after defining its
-  scope and plan. Do not infer the available features from the old branch name.
+- Current handoff: cloud maintenance is closed at code checkpoint `1d894f6f5f`.
+  On 2026-10-08, the owner requested merging the accumulated work into
+  `scenegis/develop`; all 50 commits from `codex/gpu-particles` were fast-forwarded
+  without conflicts. Local develop now includes the later rendering, GPU particle,
+  weather, procedural-star and cloud stability work. Start the next major stage
+  from the updated local `scenegis/develop`; the next conversation will define its
+  scope and create its branch. No new branch or phase is created during this
+  handoff. The merge and handoff are local and have not been pushed.
 - Open maintenance issue: the strict-WebGL background-draw fixture errors in the
   [review](reviews/2026-10-02-cloud-taa-registration.md) remain unresolved. The next
   atmosphere maintenance owner should isolate their resource/attachment lifecycle
@@ -62,7 +64,8 @@
   [ADR-0055](../../Documentation/SceneGIS/Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md),
   [ADR-0056](../../Documentation/SceneGIS/Decisions/ADR-0056-planar-moonlight-authority.md)
 - Upstream patches: active `SGP-0008` / `SGP-0009`（consume only in A16）、active `SGP-0010`（model source seam）
-- Current maintenance branch: `codex/gpu-particles`
+- Current maintenance branch: `scenegis/develop`
+- Merged source branch: `codex/gpu-particles` (retained)
 - Historical extension branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
 - A2 checkpoint: `da2eb55743a46423e65b2047965907c05ea260b7`（未push）
