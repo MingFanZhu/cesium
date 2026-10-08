@@ -37,8 +37,9 @@ uniform sampler3D u_scatteringTexture;
 uniform sampler2D u_irradianceTexture;
 uniform sampler2D u_cloudColorTexture;
 uniform sampler2D u_cloudDistanceTexture;
+uniform vec2 u_cloudDepthOffset;
 
-bool sceneGISSelectCloudSample(
+bool sceneGISSelectCloudTexel(
     vec2 textureCoordinates,
     float sceneDistance,
     bool clearDepth,
@@ -57,8 +58,11 @@ bool sceneGISSelectCloudSample(
         shadowLength);
 
     float frontDelta = encodedSceneDistance - distances.y;
+    // Filter uncertainty in the reconstructed cloud front, not discontinuities
+    // in opaque depth. A sky/terrain boundary behind an opaque cloud must not
+    // make that cloud transparent along the horizon.
     float reconstructionFootprint =
-        fwidth(frontDelta) + 1.0 / SCENEGIS_CLOUD_DISTANCE_ENCODING;
+        fwidth(distances.y) + 1.0 / SCENEGIS_CLOUD_DISTANCE_ENCODING;
     if (!cloudValid) {
         cloudColor = vec4(0.0, 0.0, 0.0, 1.0);
         meanDistance = 0.0;
@@ -76,6 +80,63 @@ bool sceneGISSelectCloudSample(
     }
     meanDistance = distances.x * SCENEGIS_CLOUD_DISTANCE_ENCODING;
     frontDistance = distances.y * SCENEGIS_CLOUD_DISTANCE_ENCODING;
+    return cloudColor.a < 1.0 - 1.0e-6;
+}
+
+bool sceneGISSelectCloudSample(
+    vec2 textureCoordinates,
+    float sceneDistance,
+    bool clearDepth,
+    out vec4 cloudColor,
+    out float meanDistance,
+    out float frontDistance,
+    out float shadowLength)
+{
+    // Cloud history uses a stable grid. Translate its resolved radiance into
+    // the scene's jittered grid before the final TAA reconstruction.
+    vec2 cloudCoordinates = textureCoordinates - u_cloudDepthOffset;
+    if (all(equal(u_cloudDepthOffset, vec2(0.0)))) {
+        return sceneGISSelectCloudTexel(cloudCoordinates, sceneDistance,
+            clearDepth, cloudColor, meanDistance, frontDistance, shadowLength);
+    }
+    vec2 dimensions = vec2(textureSize(u_cloudColorTexture, 0));
+    vec2 position = cloudCoordinates * dimensions - 0.5;
+    vec2 base = floor(position);
+    vec2 fraction = fract(position);
+    cloudColor = vec4(0.0);
+    meanDistance = 0.0;
+    frontDistance = 0.0;
+    shadowLength = 0.0;
+    float distanceWeight = 0.0;
+    for (int y = 0; y < 2; ++y) {
+        for (int x = 0; x < 2; ++x) {
+            vec2 corner = vec2(float(x), float(y));
+            vec2 weights = mix(vec2(1.0) - fraction, fraction, corner);
+            float weight = weights.x * weights.y;
+            vec2 sampleCoordinates = (clamp(base + corner,
+                vec2(0.0), dimensions - 1.0) + 0.5) / dimensions;
+            vec4 sampleColor;
+            float sampleMean;
+            float sampleFront;
+            float sampleShadow;
+            bool visible = sceneGISSelectCloudTexel(sampleCoordinates,
+                sceneDistance, clearDepth, sampleColor, sampleMean,
+                sampleFront, sampleShadow);
+            // Apply each tap's foreground visibility before filtering optical
+            // values. Decode distance validity; never interpolate packed alpha.
+            cloudColor += sampleColor * weight;
+            float opticalWeight = visible ? weight * (1.0 - sampleColor.a) : 0.0;
+            meanDistance += sampleMean * opticalWeight;
+            frontDistance += sampleFront * opticalWeight;
+            shadowLength += sampleShadow * opticalWeight;
+            distanceWeight += opticalWeight;
+        }
+    }
+    if (distanceWeight > 0.0) {
+        meanDistance /= distanceWeight;
+        frontDistance /= distanceWeight;
+        shadowLength /= distanceWeight;
+    }
     return cloudColor.a < 1.0 - 1.0e-6;
 }
 
@@ -139,7 +200,8 @@ void main()
     if (u_showClouds && u_sceneGISShowCrepuscularRays) {
         bool unusedShadowSampleValid;
         sceneGISDecodeCloudShadowLength(
-            texture(u_cloudDistanceTexture, v_textureCoordinates).a,
+            texture(u_cloudDistanceTexture,
+                v_textureCoordinates - u_cloudDepthOffset).a,
             unusedShadowSampleValid,
             shadowLength);
     }

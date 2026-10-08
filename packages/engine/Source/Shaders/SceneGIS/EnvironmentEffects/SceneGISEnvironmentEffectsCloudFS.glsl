@@ -12,6 +12,7 @@ uniform bool u_perspective;
 uniform bool u_hasCurrentGlobeDepth;
 #endif
 uniform vec4 u_frustum;
+uniform vec2 u_cloudDepthOffset;
 uniform vec3 u_cameraPosition;
 uniform vec3 u_surfacePosition;
 uniform vec3 u_cameraDirection;
@@ -61,14 +62,15 @@ void main()
     }
     vec2 fullPixel =
         cloudCoordinates * vec2(textureSize(u_depthTexture, 0));
-    float rawDepth = texture(u_depthTexture, cloudCoordinates).r;
-    float resolvedDepth = czm_readDepth(u_depthTexture, cloudCoordinates);
+    vec2 depthCoordinates = cloudCoordinates + u_cloudDepthOffset;
+    float rawDepth = texture(u_depthTexture, depthCoordinates).r;
+    float resolvedDepth = czm_readDepth(u_depthTexture, depthCoordinates);
     bool isClearDepth = sceneGISIsClearResolvedDepth(rawDepth);
     #ifdef SCENEGIS_GLOBE
     isClearDepth = isClearDepth || !u_hasCurrentGlobeDepth;
     #endif
-    // Ray, depth and blue noise share one sample coordinate. Phased medium
-    // uses an explicit full-resolution pixel rather than the low-grid center.
+    // Rays and blue noise use the stable cloud grid. Read opaque depth at the
+    // corresponding jittered scene coordinate, preserving the same world ray.
     vec2 plane = mix(u_frustum.xz, u_frustum.yw, cloudCoordinates);
     vec3 eyeOffset = u_cameraRight * plane.x + u_cameraUp * plane.y;
     vec3 worldOriginOffset = u_perspective ? vec3(0.0) : eyeOffset;
@@ -97,12 +99,13 @@ void main()
         // potentially undefined eye-space reconstruction.
         #ifdef SCENEGIS_GLOBE
         // Preserve log-depth precision for every Globe quality tier.
-        vec4 eye = czm_screenToEyeCoordinates(cloudCoordinates, rawDepth);
+        vec4 eye = czm_screenToEyeCoordinates(depthCoordinates, rawDepth);
         #else
         // Phased rays belong to the selected full-resolution depth pixel.
         vec4 eye = u_cloudTracePhased
-            ? czm_screenToEyeCoordinates(cloudCoordinates, rawDepth)
-            : czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth);
+            ? czm_screenToEyeCoordinates(depthCoordinates, rawDepth)
+            : czm_windowToEyeCoordinates(
+                gl_FragCoord.xy + u_cloudDepthOffset * u_cloudBufferDimensions, rawDepth);
         #endif
         eye /= eye.w;
         distanceToGeometry = u_perspective

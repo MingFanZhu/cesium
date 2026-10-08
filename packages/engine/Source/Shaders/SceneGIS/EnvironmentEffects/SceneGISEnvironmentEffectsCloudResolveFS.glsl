@@ -16,6 +16,8 @@ uniform bool u_hasCurrentGlobeDepth;
 #endif
 uniform float u_cloudStbnSlice;
 uniform vec4 u_frustum;
+uniform vec2 u_cloudDepthOffset;
+uniform vec2 u_cloudPreviousDepthOffset;
 uniform vec3 u_cameraPosition;
 uniform vec3 u_cameraDirection;
 uniform vec3 u_cameraRight;
@@ -241,6 +243,62 @@ float sceneGISCloudHistoryPositionToleranceMeters(float previous, float current)
     return tolerance;
 }
 
+float sceneGISCloudReceiverDistanceDelta(
+    vec2 pixel, vec2 axis, vec2 dimensions, float centerDistance)
+{
+    vec2 samplePixel = clamp(pixel + axis, vec2(0.5), dimensions - 0.5);
+    float rawDepth = texture(u_depthTexture, samplePixel / dimensions).r;
+    if (sceneGISIsClearResolvedDepth(rawDepth) || all(equal(samplePixel, pixel))) {
+        return 1.0e30;
+    }
+    vec4 eye = czm_windowToEyeCoordinates(samplePixel, rawDepth);
+    eye /= eye.w;
+    float distanceMeters = u_perspective ? length(eye.xyz) : max(-eye.z, 0.0);
+    return abs(distanceMeters - centerDistance);
+}
+
+float sceneGISCloudReceiverJitterFootprint(
+    vec2 pixel, vec2 dimensions, float centerDistance)
+{
+    vec2 displacement = abs(u_cloudDepthOffset - u_cloudPreviousDepthOffset) * dimensions;
+    if (u_cloudHistoryReprojection || all(equal(displacement, vec2(0.0)))) {
+        return 0.0;
+    }
+    // The same cloud ray can read different opaque samples under scene jitter.
+    // Bound that receiver displacement using the continuous side of each axis,
+    // so a silhouette's depth jump cannot widen the history acceptance range.
+    vec2 slope = vec2(
+        min(sceneGISCloudReceiverDistanceDelta(pixel, vec2(-1.0, 0.0), dimensions, centerDistance),
+            sceneGISCloudReceiverDistanceDelta(pixel, vec2(1.0, 0.0), dimensions, centerDistance)),
+        min(sceneGISCloudReceiverDistanceDelta(pixel, vec2(0.0, -1.0), dimensions, centerDistance),
+            sceneGISCloudReceiverDistanceDelta(pixel, vec2(0.0, 1.0), dimensions, centerDistance)));
+    slope = mix(slope, vec2(0.0), greaterThan(slope, vec2(1.0e29)));
+    return dot(slope, displacement);
+}
+
+bool sceneGISCloudSceneHistoryCompatible(
+    bool clearDepth, float previousDistance, float currentDistance,
+    vec3 previousAnchor, vec3 currentAnchor,
+    vec2 pixel, vec2 dimensions, float sceneDistanceMeters, vec3 receiverNormal)
+{
+    if (clearDepth) {
+        return previousDistance == 1.0;
+    }
+    float tolerance = sceneGISCloudHistoryPositionToleranceMeters(
+        previousDistance, currentDistance);
+    if (u_cloudTracePhased && u_cloudHistoryReprojection) {
+        // Cloud and receiver have different parallax. Reprojection at cloud
+        // depth need not observe the same point on a continuous receiver.
+        float normalMagnitude = length(receiverNormal);
+        return previousDistance != 1.0 && normalMagnitude > 0.0 &&
+            abs(dot(receiverNormal, previousAnchor - currentAnchor)) <=
+                tolerance * normalMagnitude;
+    }
+    tolerance += sceneGISCloudReceiverJitterFootprint(
+        pixel, dimensions, sceneDistanceMeters);
+    return distance(previousAnchor, currentAnchor) <= tolerance;
+}
+
 // Mean/sigma AABB clipping adapted from three-geospatial
 // b012ad06d858fc035d88aacfd73f092f93c994e4,
 // packages/clouds/src/shaders/varianceClipping.glsl (MIT).
@@ -291,14 +349,13 @@ vec4 sceneGISCloudVarianceClip(
         clamp(historyColor.a, lower.a, upper.a));
 }
 
-#ifndef SCENEGIS_GLOBE
-vec3 sceneGISPlanarCloudReceiverEye(vec2 pixel, float rawDepth)
+vec3 sceneGISCloudReceiverEye(vec2 pixel, float rawDepth)
 {
     vec4 eye = czm_windowToEyeCoordinates(pixel, rawDepth);
     return eye.xyz / eye.w;
 }
 
-vec3 sceneGISPlanarCloudReceiverDerivative(
+vec3 sceneGISCloudReceiverDerivative(
     vec2 pixel, vec2 axis, vec2 dimensions, vec3 centerEye)
 {
     vec2 lowerPixel = clamp(pixel - axis, vec2(0.5), dimensions - 0.5);
@@ -312,10 +369,10 @@ vec3 sceneGISPlanarCloudReceiverDerivative(
     vec3 lowerDelta = vec3(0.0);
     vec3 upperDelta = vec3(0.0);
     if (lowerValid) {
-        lowerDelta = centerEye - sceneGISPlanarCloudReceiverEye(lowerPixel, lowerDepth);
+        lowerDelta = centerEye - sceneGISCloudReceiverEye(lowerPixel, lowerDepth);
     }
     if (upperValid) {
-        upperDelta = sceneGISPlanarCloudReceiverEye(upperPixel, upperDepth) - centerEye;
+        upperDelta = sceneGISCloudReceiverEye(upperPixel, upperDepth) - centerEye;
     }
     if (!lowerValid) {
         return upperDelta;
@@ -326,7 +383,62 @@ vec3 sceneGISPlanarCloudReceiverDerivative(
     // A silhouette spans different surfaces. Use the side closest in eye depth.
     return abs(lowerDelta.z) < abs(upperDelta.z) ? lowerDelta : upperDelta;
 }
-#endif
+
+bool sceneGISCloudHistoryTapCompatible(
+    vec2 coordinates, vec4 distances, bool clearDepth,
+    vec3 meanAnchor, vec3 frontAnchor, vec3 sceneAnchor,
+    vec3 targetDirection, vec3 currentDistances,
+    vec2 supportMinimum, vec2 supportMaximum, vec3 receiverNormal,
+    float sceneDistanceMeters)
+{
+    vec3 rayOrigin;
+    vec3 rayDirection;
+    sceneGISCloudResolveRay(coordinates, u_cloudPreviousPerspective,
+        u_cloudPreviousFrustum, vec3(0.0), u_cloudPreviousCameraDirection,
+        u_cloudPreviousCameraRight, u_cloudPreviousCameraUp, rayOrigin, rayDirection);
+    vec3 previousScene = rayOrigin + rayDirection *
+        (distances.z * SCENEGIS_CLOUD_DISTANCE_ENCODING);
+    vec2 dimensions = vec2(textureSize(u_depthTexture, 0));
+    if (!sceneGISCloudSceneHistoryCompatible(clearDepth,
+        distances.z, currentDistances.z, previousScene, sceneAnchor,
+        gl_FragCoord.xy + u_cloudDepthOffset * dimensions, dimensions,
+        sceneDistanceMeters, receiverNormal)) {
+        return false;
+    }
+    vec2 precisionRadius = vec2(
+        sceneGISCloudHistoryPositionToleranceMeters(distances.x, currentDistances.x),
+        sceneGISCloudHistoryPositionToleranceMeters(distances.y, currentDistances.y));
+    vec3 meanFromOrigin = meanAnchor - rayOrigin;
+    // The bilinear footprint reaches one texel away from its center instead
+    // of the nearest sample's half texel. Its rays still need to cover the anchor.
+    vec2 span = u_cloudPreviousFrustum.yw - u_cloudPreviousFrustum.xz;
+    float texelRadius = 0.5 * length(span /
+        vec2(textureSize(u_cloudHistoryDistanceTexture, 0)));
+    texelRadius *= u_cloudPreviousPerspective
+        ? max(distances.x, currentDistances.x) * SCENEGIS_CLOUD_DISTANCE_ENCODING : 1.0;
+    if (length(meanFromOrigin - rayDirection * dot(meanFromOrigin, rayDirection)) >
+        precisionRadius.x + texelRadius) {
+        return false;
+    }
+    bool cloudValid;
+    float shadowLength;
+    sceneGISDecodeCloudShadowLength(distances.a, cloudValid, shadowLength);
+    if (!cloudValid) {
+        return true;
+    }
+    vec3 previousMean = rayOrigin + rayDirection *
+        (distances.x * SCENEGIS_CLOUD_DISTANCE_ENCODING);
+    vec3 previousFront = rayOrigin + rayDirection *
+        (distances.y * SCENEGIS_CLOUD_DISTANCE_ENCODING);
+    vec2 projected = currentDistances.xy * SCENEGIS_CLOUD_DISTANCE_ENCODING + vec2(
+        dot(previousMean - meanAnchor, targetDirection),
+        dot(previousFront - frontAnchor, targetDirection));
+    return all(greaterThanEqual(projected, vec2(0.0))) &&
+        all(greaterThanEqual(projected, supportMinimum - precisionRadius)) &&
+        all(lessThanEqual(projected, supportMaximum + precisionRadius)) &&
+        (clearDepth || all(lessThanEqual(projected,
+            vec2(sceneDistanceMeters) + precisionRadius)));
+}
 
 void main()
 {
@@ -342,8 +454,10 @@ void main()
     }
     ivec2 center = ivec2(floor(lowPosition + vec2(0.5)));
     vec2 fraction = fract(lowPosition);
-    float rawDepth = texture(u_depthTexture, v_textureCoordinates).r;
-    float resolvedDepth = czm_readDepth(u_depthTexture, v_textureCoordinates);
+    vec2 depthCoordinates = v_textureCoordinates + u_cloudDepthOffset;
+    vec2 depthPixel = gl_FragCoord.xy + u_cloudDepthOffset * fullDimensions;
+    float rawDepth = texture(u_depthTexture, depthCoordinates).r;
+    float resolvedDepth = czm_readDepth(u_depthTexture, depthCoordinates);
     bool isClearDepth = sceneGISIsClearResolvedDepth(rawDepth);
     #ifdef SCENEGIS_GLOBE
     isClearDepth = isClearDepth || !u_hasCurrentGlobeDepth;
@@ -352,10 +466,10 @@ void main()
     float sceneDistance = 1.0;
     if (!isClearDepth) {
         #ifdef SCENEGIS_GLOBE
-        vec4 eye = czm_windowToEyeCoordinates(gl_FragCoord.xy, rawDepth);
+        vec4 eye = czm_windowToEyeCoordinates(depthPixel, rawDepth);
         #else
         vec4 eye = czm_windowToEyeCoordinates(
-            gl_FragCoord.xy, rawDepth);
+            depthPixel, rawDepth);
         #endif
         eye /= eye.w;
         sceneDistanceMeters = u_perspective
@@ -389,22 +503,19 @@ void main()
         vec3(0.0), u_cameraDirection, u_cameraRight, u_cameraUp,
         targetOrigin, targetDirection);
     vec3 targetScene = targetOrigin + targetDirection * sceneDistanceMeters;
-    #ifdef SCENEGIS_GLOBE
-    // Evaluate receiver derivatives uniformly, before any neighbor rejection.
-    vec3 receiverNormal = cross(dFdx(targetScene), dFdy(targetScene));
-    #else
     vec3 receiverNormal = vec3(0.0);
     if (!isClearDepth) {
-        vec3 centerEye = sceneGISPlanarCloudReceiverEye(gl_FragCoord.xy, rawDepth);
+        // Sky/terrain discontinuities must not become a fictitious receiver
+        // plane that rejects every finite-depth cloud sample at the horizon.
+        vec3 centerEye = sceneGISCloudReceiverEye(depthPixel, rawDepth);
         vec3 normalEC = cross(
-            sceneGISPlanarCloudReceiverDerivative(gl_FragCoord.xy,
+            sceneGISCloudReceiverDerivative(depthPixel,
                 vec2(1.0, 0.0), fullDimensions, centerEye),
-            sceneGISPlanarCloudReceiverDerivative(gl_FragCoord.xy,
+            sceneGISCloudReceiverDerivative(depthPixel,
                 vec2(0.0, 1.0), fullDimensions, centerEye));
         receiverNormal = u_cameraRight * normalEC.x +
             u_cameraUp * normalEC.y - u_cameraDirection * normalEC.z;
     }
-    #endif
     float receiverNormalMagnitude = length(receiverNormal);
     for (int y = -1; y <= 1; ++y) {
         for (int x = -1; x <= 1; ++x) {
@@ -420,7 +531,8 @@ void main()
                 vec2 tent = max(1.0 - abs(floor(gl_FragCoord.xy) -
                     vec2(sourcePixel)) * 0.5, vec2(0.0));
                 float weight = tent.x * tent.y;
-                float sourceRawDepth = texelFetch(u_depthTexture, sourcePixel, 0).r;
+                float sourceRawDepth = texture(u_depthTexture,
+                    sourceUv + u_cloudDepthOffset).r;
                 bool sourceClear = sceneGISIsClearResolvedDepth(sourceRawDepth);
                 #ifdef SCENEGIS_GLOBE
                 sourceClear = sourceClear || !u_hasCurrentGlobeDepth;
@@ -442,8 +554,9 @@ void main()
                         (distanceSample.z * SCENEGIS_CLOUD_DISTANCE_ENCODING);
                     #else
                     // Current raw depth remains valid beyond the packed 1,000 km range.
-                    vec3 sourceEye = sceneGISPlanarCloudReceiverEye(
-                        vec2(sourcePixel) + 0.5, sourceRawDepth);
+                    vec3 sourceEye = sceneGISCloudReceiverEye(
+                        vec2(sourcePixel) + 0.5 + u_cloudDepthOffset * fullDimensions,
+                        sourceRawDepth);
                     vec3 sourceScene = sourceOrigin + sourceDirection *
                         (u_perspective ? length(sourceEye) : max(-sourceEye.z, 0.0));
                     #endif
@@ -521,7 +634,7 @@ void main()
             #else
             // Qualify the source receiver before it contributes color or history bounds.
             vec2 sourceUv = (vec2(texel) + 0.5) / lowDimensions;
-            float sourceRawDepth = texture(u_depthTexture, sourceUv).r;
+            float sourceRawDepth = texture(u_depthTexture, sourceUv + u_cloudDepthOffset).r;
             if (sceneGISIsClearResolvedDepth(sourceRawDepth) != isClearDepth) {
                 continue;
             }
@@ -531,8 +644,8 @@ void main()
                 vec3(0.0), u_cameraDirection, u_cameraRight, u_cameraUp,
                 sourceOrigin, sourceDirection);
             if (!isClearDepth) {
-                vec3 sourceEye = sceneGISPlanarCloudReceiverEye(
-                    sourceUv * fullDimensions, sourceRawDepth);
+                vec3 sourceEye = sceneGISCloudReceiverEye(
+                    (sourceUv + u_cloudDepthOffset) * fullDimensions, sourceRawDepth);
                 vec3 sourceScene = sourceOrigin + sourceDirection *
                     (u_perspective ? length(sourceEye) : max(-sourceEye.z, 0.0));
                 if (!(receiverNormalMagnitude > 0.0) ||
@@ -663,6 +776,7 @@ void main()
         currentMeanAnchor,
         currentFrontAnchor,
         currentSceneAnchor);
+    vec2 continuousHistoryCoordinates = historyCoordinates;
     if (u_cloudTracePhased) {
         if (!reprojectedPositionValid) {
             out_FragData_0 = spatialColor;
@@ -713,12 +827,11 @@ void main()
         (historyDistance.y * SCENEGIS_CLOUD_DISTANCE_ENCODING);
     vec3 previousSceneAnchor = previousRayOrigin + previousRayDirection *
         (historyDistance.z * SCENEGIS_CLOUD_DISTANCE_ENCODING);
+    bool sceneDistanceCompatible = sceneGISCloudSceneHistoryCompatible(
+        isClearDepth, historyDistance.z, spatialDistance.z,
+        previousSceneAnchor, currentSceneAnchor,
+        depthPixel, fullDimensions, sceneDistanceMeters, receiverNormal);
     #ifdef SCENEGIS_GLOBE
-    bool sceneDistanceCompatible = isClearDepth
-        ? historyDistance.z == 1.0
-        : distance(previousSceneAnchor, currentSceneAnchor) <=
-            sceneGISCloudHistoryPositionToleranceMeters(
-                historyDistance.z, spatialDistance.z);
     bool distanceCompatible =
         distance(previousMeanAnchor, currentMeanAnchor) <=
             sceneGISCloudHistoryPositionToleranceMeters(
@@ -728,11 +841,6 @@ void main()
                 historyDistance.y, spatialDistance.y) &&
         sceneDistanceCompatible;
     #else
-    bool sceneDistanceCompatible = isClearDepth
-        ? historyDistance.z == 1.0
-        : distance(previousSceneAnchor, currentSceneAnchor) <=
-            sceneGISCloudHistoryPositionToleranceMeters(
-                historyDistance.z, spatialDistance.z);
     vec2 precisionRadius = vec2(
         sceneGISCloudHistoryPositionToleranceMeters(historyDistance.x, spatialDistance.x),
         sceneGISCloudHistoryPositionToleranceMeters(historyDistance.y, spatialDistance.y));
@@ -785,6 +893,48 @@ void main()
             distanceCompatible && transmittanceCompatible && radianceCompatible
         ? 1.0
         : 0.0;
+    if (u_cloudTracePhased && u_cloudHistoryReprojection && currentValid) {
+        // Reconstruct optical history at the subpixel position. Metadata stays
+        // nearest per tap; a foreground or different receiver cannot bleed into
+        // the cloud merely because it is inside the bilinear footprint.
+        ivec2 size = textureSize(u_cloudHistoryDistanceTexture, 0);
+        vec2 position = continuousHistoryCoordinates * vec2(size) - 0.5;
+        ivec2 base = ivec2(floor(position));
+        vec2 fraction = fract(position);
+        vec4 filteredHistory = vec4(0.0);
+        float supportedWeight = 0.0;
+        for (int y = 0; y <= 1; ++y) {
+            for (int x = 0; x <= 1; ++x) {
+                ivec2 pixel = base + ivec2(x, y);
+                if (any(lessThan(pixel, ivec2(0))) || any(greaterThanEqual(pixel, size))) {
+                    continue;
+                }
+                vec2 tent = mix(1.0 - fraction, fraction, vec2(x, y));
+                float weight = tent.x * tent.y;
+                if (weight <= 0.0) {
+                    continue;
+                }
+                vec4 distances = texelFetch(u_cloudHistoryDistanceTexture, pixel, 0);
+                if (!sceneGISCloudHistoryTapCompatible(
+                    (vec2(pixel) + 0.5) / vec2(size), distances, isClearDepth,
+                    currentMeanAnchor, currentFrontAnchor, currentSceneAnchor,
+                    targetDirection, spatialDistance.xyz,
+                    cloudSupportMinimum, cloudSupportMaximum, receiverNormal,
+                    sceneDistanceMeters)) {
+                    continue;
+                }
+                filteredHistory += texelFetch(u_cloudHistoryColorTexture, pixel, 0) * weight;
+                supportedWeight += weight;
+            }
+        }
+        historyCompatible = supportedWeight;
+        if (supportedWeight > 0.0 && spatialColorRangeValid) {
+            clippedHistoryColor = sceneGISCloudVarianceClip(
+                filteredHistory / supportedWeight,
+                spatialColorMoment1, spatialColorMoment2, spatialColorSampleCount,
+                spatialColorMinimum, spatialColorMaximum);
+        }
+    }
     historyWeight *= historyCompatible;
     float shadowHistoryCompatible =
         abs(previousShadowLength - currentShadowLength) <=

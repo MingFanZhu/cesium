@@ -1260,18 +1260,32 @@ function shadowFrustumContinuous(previous, current) {
   );
 }
 
+function cloudHistoryAdvectionContinuous(renderer, snapshot) {
+  // Reprojection follows wind displacement, not the caller's clock rate.
+  // Check unwrapped travel as well as the published offset: a full-period seek
+  // can repeat an offset, while a small step can cross its modulo boundary.
+  const travel = Math.abs(
+    (renderer._owner._cloudTime - snapshot.cloudTime) *
+      renderer._owner._cloudWindSpeed,
+  );
+  return (
+    travel <= cloudHistoryMaximumTranslation &&
+    Cartesian2.distance(renderer._cloudOffset, snapshot.cloudOffset) <=
+      cloudHistoryMaximumTranslation
+  );
+}
+
 function shadowHistoryContinuous(renderer) {
   const snapshot = renderer._shadowHistorySnapshot;
   const frame = renderer._frame;
   const owner = renderer._owner;
-  const cloudTime = owner._cloudTime;
   return (
     snapshot.valid &&
     snapshot.projection === frame.projection &&
     Cartesian3.distance(snapshot.cameraPosition, frame.cameraPosition) <=
       cloudHistoryMaximumTranslation &&
     shadowFrustumContinuous(snapshot.frustum, renderer._frustum) &&
-    Math.abs(cloudTime - snapshot.cloudTime) < 1.0 &&
+    cloudHistoryAdvectionContinuous(renderer, snapshot) &&
     Cartesian3.dot(snapshot.sunDirection, renderer._primaryLightDirection) >=
       cloudHistoryMinimumSunDot &&
     Cartesian3.equals(snapshot.ellipsoidCenter, frame.ellipsoidCenter) &&
@@ -1548,10 +1562,14 @@ function createResources(renderer, context, buffers) {
       count: 4,
       owner: renderer,
     });
+    const cloudUniformMap = {
+      ...renderer._uniformMap,
+      u_frustum: () => renderer._cloudFrustum,
+    };
     candidate.cloudCommand = new DrawCommand({
       vertexArray: candidate.vertexArray,
       shaderProgram: candidate.cloudProgram,
-      uniformMap: renderer._uniformMap,
+      uniformMap: cloudUniformMap,
       renderState,
       primitiveType: PrimitiveType.TRIANGLE_STRIP,
       count: 4,
@@ -1560,7 +1578,7 @@ function createResources(renderer, context, buffers) {
     candidate.cloudResolveCommand = new DrawCommand({
       vertexArray: candidate.vertexArray,
       shaderProgram: candidate.cloudResolveProgram,
-      uniformMap: renderer._uniformMap,
+      uniformMap: cloudUniformMap,
       renderState,
       primitiveType: PrimitiveType.TRIANGLE_STRIP,
       count: 4,
@@ -1573,7 +1591,7 @@ function createResources(renderer, context, buffers) {
   return candidate;
 }
 
-function updateFrustum(renderer, camera) {
+function updateFrustum(renderer, camera, jitter) {
   void camera.frustum.projectionMatrix;
   const frustum = camera.frustum.offCenterFrustum ?? camera.frustum;
   const perspective = renderer._frame.projection === "perspective";
@@ -1586,6 +1604,20 @@ function updateFrustum(renderer, camera) {
     frustum.top / divisor,
     renderer._frustum,
   );
+  Cartesian4.clone(renderer._frustum, renderer._cloudFrustum);
+  Cartesian2.clone(Cartesian2.ZERO, renderer._cloudDepthOffset);
+  if (defined(jitter)) {
+    // Background/aerial rays follow geometry. Clouds retain their own stable
+    // grid and address jittered scene depth through the explicit UV offset.
+    Cartesian2.multiplyByScalar(jitter, 0.5, renderer._cloudDepthOffset);
+    const planes = renderer._frustum;
+    const x = jitter.x * (planes.y - planes.x) * 0.5;
+    const y = jitter.y * (planes.w - planes.z) * 0.5;
+    planes.x -= x;
+    planes.y -= x;
+    planes.z -= y;
+    planes.w -= y;
+  }
 }
 
 const sunFixedTransform = new Matrix3();
@@ -1815,7 +1847,11 @@ function updateFrame(renderer, scene, frameState, time) {
     renderer._frame,
     renderer._scratchFrame,
   );
-  updateFrustum(renderer, frameState.camera);
+  updateFrustum(
+    renderer,
+    frameState.camera,
+    scene.context.uniformState._sceneGISProjectionJitter,
+  );
   if (renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE) {
     const celestialTime = defined(time)
       ? time
@@ -1898,6 +1934,8 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._frame = SceneGISAtmosphereReferenceFrame.createSnapshot();
   this._scratchFrame = SceneGISAtmosphereReferenceFrame.createSnapshot();
   this._frustum = new Cartesian4();
+  this._cloudFrustum = new Cartesian4();
+  this._cloudDepthOffset = new Cartesian2();
   this._sunDirection = new Cartesian3();
   this._moonPosition = new Cartesian3();
   this._moonDirection = new Cartesian3();
@@ -2014,6 +2052,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_perspective: () => that._perspective,
     u_hasCurrentGlobeDepth: () => that._hasCurrentGlobeDepth,
     u_frustum: () => that._frustum,
+    u_cloudDepthOffset: () => that._cloudDepthOffset,
     u_cameraDirection: () => that._frame.cameraDirection,
     u_cameraPosition: () => that._frame.cameraPosition,
     u_surfacePosition: () => that._frame.surfacePosition,
@@ -2123,6 +2162,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_cloudPreviousPerspective: () =>
       that._cloudHistorySnapshot.projection === "perspective",
     u_cloudPreviousFrustum: () => that._cloudHistorySnapshot.frustum,
+    u_cloudPreviousDepthOffset: () => that._cloudHistorySnapshot.depthOffset,
     u_cloudPreviousCameraPosition: () =>
       that._cloudHistorySnapshot.frame.cameraPosition,
     u_cloudCameraDelta: () => that._cloudCameraDelta,
@@ -2641,6 +2681,7 @@ function createCloudHistorySnapshot() {
     useLogDepth: false,
     cloudTime: 0.0,
     frustum: new Cartesian4(),
+    depthOffset: new Cartesian2(),
     cloudOffset: new Cartesian2(),
     sunDirection: new Cartesian3(),
     primaryLightScale: new Cartesian3(),
@@ -2686,10 +2727,10 @@ function cloudHistoryInputsFinite(renderer) {
     Number.isFinite(owner._cloudTime) &&
     Number.isFinite(frame.altitude) &&
     Number.isFinite(frame.baseHeight) &&
-    Number.isFinite(renderer._frustum.x) &&
-    Number.isFinite(renderer._frustum.y) &&
-    Number.isFinite(renderer._frustum.z) &&
-    Number.isFinite(renderer._frustum.w) &&
+    Number.isFinite(renderer._cloudFrustum.x) &&
+    Number.isFinite(renderer._cloudFrustum.y) &&
+    Number.isFinite(renderer._cloudFrustum.z) &&
+    Number.isFinite(renderer._cloudFrustum.w) &&
     cloudHistoryVectorFinite(frame.cameraPosition) &&
     cloudHistoryVectorFinite(frame.cameraDirection) &&
     cloudHistoryVectorFinite(frame.cameraUp) &&
@@ -2748,7 +2789,7 @@ function cloudHistoryMaterialCompatible(renderer, width, height) {
 
 function cloudHistoryFrustumContinuous(renderer) {
   const previous = renderer._cloudHistorySnapshot.frustum;
-  const current = renderer._frustum;
+  const current = renderer._cloudFrustum;
   const horizontalSpan = previous.y - previous.x;
   const verticalSpan = previous.w - previous.z;
   return (
@@ -2768,7 +2809,6 @@ function cloudHistoryFrustumContinuous(renderer) {
 function cloudHistoryContinuityFailure(renderer, width, height) {
   const previous = renderer._cloudHistorySnapshot;
   const frame = renderer._frame;
-  const time = renderer._owner._cloudTime;
   if (!cloudHistoryInputsFinite(renderer)) {
     return "nonfinite-input";
   }
@@ -2778,8 +2818,8 @@ function cloudHistoryContinuityFailure(renderer, width, height) {
   if (!cloudHistoryMaterialCompatible(renderer, width, height)) {
     return "structured-compatibility";
   }
-  if (!Number.isFinite(time) || Math.abs(time - previous.cloudTime) > 1.0) {
-    return "cloud-time";
+  if (!cloudHistoryAdvectionContinuous(renderer, previous)) {
+    return "cloud-advection";
   }
   if (
     Cartesian3.dot(
@@ -2824,10 +2864,10 @@ function cloudHistoryStationary(renderer) {
     renderer._owner._cloudTime === previous.cloudTime &&
     renderer._cloudOffset.x === previous.cloudOffset.x &&
     renderer._cloudOffset.y === previous.cloudOffset.y &&
-    renderer._frustum.x === previous.frustum.x &&
-    renderer._frustum.y === previous.frustum.y &&
-    renderer._frustum.z === previous.frustum.z &&
-    renderer._frustum.w === previous.frustum.w &&
+    renderer._cloudFrustum.x === previous.frustum.x &&
+    renderer._cloudFrustum.y === previous.frustum.y &&
+    renderer._cloudFrustum.z === previous.frustum.z &&
+    renderer._cloudFrustum.w === previous.frustum.w &&
     cloudHistoryVectorEqual(
       frame.cameraPosition,
       previous.frame.cameraPosition,
@@ -2869,7 +2909,8 @@ function commitCloudHistorySnapshot(renderer, width, height) {
   snapshot.cloudRadianceScale = owner._cloudRadianceScale;
   snapshot.useLogDepth = renderer._scene.frameState.useLogDepth;
   snapshot.cloudTime = owner._cloudTime;
-  Cartesian4.clone(renderer._frustum, snapshot.frustum);
+  Cartesian4.clone(renderer._cloudFrustum, snapshot.frustum);
+  Cartesian2.clone(renderer._cloudDepthOffset, snapshot.depthOffset);
   Cartesian2.clone(renderer._cloudOffset, snapshot.cloudOffset);
   Cartesian3.clone(cloudHistoryLightDirection(renderer), snapshot.sunDirection);
   Cartesian3.clone(renderer._primaryLightScale, snapshot.primaryLightScale);
@@ -2892,7 +2933,7 @@ function commitCloudHistorySnapshot(renderer, width, height) {
 function cloudHistoryFailureIsCameraCut(reason) {
   return (
     reason === "nonfinite-input" ||
-    reason === "cloud-time" ||
+    reason === "cloud-advection" ||
     reason === "sun-direction" ||
     reason === "camera-projection" ||
     reason === "camera-translation" ||

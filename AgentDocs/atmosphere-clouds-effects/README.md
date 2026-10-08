@@ -2,8 +2,21 @@
 
 ## Status
 
-- Active standalone plan: [程序星空](plans/2026-09-30-procedural-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
-- Latest technical review: [程序星空](reviews/2026-09-30-procedural-stars.md).
+- Latest standalone checkpoint: [云与 TAA 配准](plans/2026-10-02-cloud-taa-registration.md) — 2026-10-08 owner approved committing the current result and moving to a new major stage; dual-world regressions and 60x playback verified; remaining strict-WebGL fixture errors retained in review; ADR-0048 / ADR-0094; no upstream delta.
+- Current handoff: cloud maintenance is closed for this checkpoint. Start new work
+  from the commit containing this handoff on `codex/gpu-particles`, which includes
+  the later rendering, GPU particle, weather and procedural-star work. At this
+  checkpoint, local `scenegis/develop` is an ancestor and has not been advanced.
+  Create the next major feature branch from this checkpoint after defining its
+  scope and plan. Do not infer the available features from the old branch name.
+- Open maintenance issue: the strict-WebGL background-draw fixture errors in the
+  [review](reviews/2026-10-02-cloud-taa-registration.md) remain unresolved. The next
+  atmosphere maintenance owner should isolate their resource/attachment lifecycle
+  before claiming a complete strict-validation suite pass; they do not reopen the
+  accepted cloud quality work automatically.
+- Previous standalone plan: [程序星空](plans/2026-09-30-procedural-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
+- Latest technical review: [云与 TAA 配准](reviews/2026-10-02-cloud-taa-registration.md).
+- Previous technical review: [程序星空](reviews/2026-09-30-procedural-stars.md).
 - Night stars example: [双世界星空](../../Test/AdvancedEnvironment/夜晚星空.html);
   Specs: `packages/engine/Specs/SceneGIS/Scene/SceneGISAtmosphereStarsSpec.js`.
 - Previous standalone awaiting visual acceptance:
@@ -49,7 +62,8 @@
   [ADR-0055](../../Documentation/SceneGIS/Decisions/ADR-0055-planar-physical-lighting-and-cloud-shadows.md),
   [ADR-0056](../../Documentation/SceneGIS/Decisions/ADR-0056-planar-moonlight-authority.md)
 - Upstream patches: active `SGP-0008` / `SGP-0009`（consume only in A16）、active `SGP-0010`（model source seam）
-- Branch: `feature/atmosphere-clouds-effects`
+- Current maintenance branch: `codex/gpu-particles`
+- Historical extension branch: `feature/atmosphere-clouds-effects`
 - A1 checkpoint: `a62aaf16ae3a22ae0a27d6bd21358d65b50b55e1`（未push）
 - A2 checkpoint: `da2eb55743a46423e65b2047965907c05ea260b7`（未push）
 - A3 checkpoint: `43ed40117104e0450bf23dc094b2ab2e602bbfa2`（未push）

@@ -36,6 +36,9 @@ scene.debugShowFramesPerSecond = true;
 scene.sunBloom = false;
 scene.fog.enabled = false;
 scene.highDynamicRange = true;
+scene.msaaSamples = 1;
+scene.postProcessStages.fxaa.enabled = false;
+const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
 scene.postProcessStages.bloom.enabled = false;
 const world = viewer.planarWorld;
 const environment = new C.SceneGISPlanarEnvironment({
@@ -102,6 +105,7 @@ const gui = new GUI({
   container: document.getElementById("controls"),
 });
 gui.add(effects, "showClouds").name("体积云");
+gui.add(taa, "enabled").name("TAA 抗锯齿");
 gui
   .add(effects, "cloudQuality", { 低: "low", 中: "medium", 高: "high" })
   .name("质量");
@@ -120,7 +124,7 @@ gui.add(effects, "showCloudShadows").name("云影");
 gui.add(effects, "showCrepuscularRays").name("体积光");
 gui.add(viewer.clock, "shouldAnimate").name("播放");
 gui.add(viewer.clock, "multiplier", -60, 60, 1).name("时间倍速");
-exposeExample(viewer, gui, { effects, world, environment }, () => {
+exposeExample(viewer, gui, { effects, world, environment, taa }, () => {
   removeTick();
   viewer.removeController(effects);
   viewer.removeController(environment);

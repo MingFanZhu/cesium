@@ -1008,3 +1008,121 @@ support. Moving/advection frames continue to require the existing intervals.
 This supersedes A13's uniform stationary/moving interval rule; it does not
 freeze STBN, change weights, publish historical distances or retain unsupported
 clouds. High/low, Planar, resources and public API remain unchanged.
+
+## 2026-10-03: Independent cloud grid with scene TAA
+
+The initial render-jittered cloud frustum corrected registration but the owner
+reported increased flicker: jitter alone triggered moving-ray history rejection.
+Cloud trace, resolve and history therefore retain the unjittered Camera frustum.
+Read scene depth at stable cloud UV plus half the render NDC jitter, and use that
+same shifted coordinate for inverse-projection reconstruction and receiver
+derivatives. Background and aerial rays still follow the jittered scene frustum.
+
+Composite cloud radiance at scene UV minus that offset. With active jitter,
+reconstruct the four nearest premultiplied radiance/transmittance taps, applying
+each tap's existing foreground visibility first. Decode semantic distances and
+packed validity/shadow data before combining them; never filter packed alpha.
+Weight composition distances by visible optical contribution. With zero jitter,
+retain the original direct sample. Scene TAA then removes render jitter once.
+
+Exact stationary history uses the existing 0.9 path because cloud rays truly
+remain identical. Physical camera/cloud movement still uses 0.82 reprojection
+and all existing semantic gates. Camera/culling/picking, cloud history ownership,
+STBN/phase budgets, resources and public API remain unchanged. The composite
+adds up to six texture reads with jitter, with no additional pass or attachment.
+See the [standalone plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-02-cloud-taa-registration.md).
+No upstream patch is changed; this consumes the existing SGP-0022 jitter seam.
+
+### 2026-10-04: Opaque receiver footprint under TAA jitter
+
+Stable cloud rays still sample jittered opaque depth. On a sloped finite receiver,
+successive nearest samples need not have identical radial distance. The owner's
+near-cloud view confirmed about 15.4% false scene-distance rejection with TAA,
+while clear-sky clouds did not exhibit that rejection.
+
+Retain the previous depth UV offset with the cloud snapshot. Only for identical
+integration rays, extend scene-distance precision tolerance by the measured
+continuous receiver slope times the actual inter-frame pixel-jitter displacement.
+Use the smaller finite one-sided depth difference on each axis, ignoring sky and
+image-boundary neighbors; an isolated silhouette jump must not define the slope.
+Zero jitter difference and actual ray/cloud motion preserve the original gate.
+Clear/finite classification, cloud front/mean checks and temporal weights remain
+unchanged. This is receiver sampling footprint compensation, not a history
+bypass or an unrestricted tolerance multiplier. It requires four depth reads
+only for stationary finite-depth pixels whose jitter changed, with no new pass,
+texture, public option or upstream modification.
+
+### 2026-10-07: Horizon receiver plane and cloud-front visibility
+
+The owner's thin terrain line through clouds reproduces with TAA disabled.
+At the sky/terrain boundary, Globe's quad derivatives create a false receiver
+plane and reject all finite-depth support in two medium phases. Both worlds
+now use the existing discontinuity-aware eye-space receiver reconstruction:
+choose the continuous finite neighbor on each axis and transform the normal
+into the cloud world frame. Do not derive a receiver plane across clear depth.
+Keep exact depth classes, plane tolerance and foreground rejection unchanged.
+This adds four neighbor depth reads for finite Globe receivers; Planar already
+uses these reads. No texture, pass, history or trace-budget change is required.
+
+Separately, cloud visibility softening must measure reconstructed cloud-front
+variation, not `fwidth(sceneDistance - cloudFront)`. An opaque-depth jump behind
+a cloud is not uncertainty in that cloud's front. Use `fwidth(cloudFront)` plus
+the existing encoding precision; retain the actual foreground distance test.
+GPU witnesses cover every phase, both world modes, finite/clear boundaries and
+near blockers, and fail under the former expressions. The owner's restored
+view verifies the diagnosed line removal; general grain and moving visual
+acceptance remain separate. No upstream SGP changes.
+
+### 2026-10-07: Moving cloud history and receiver parallax
+
+During camera translation, reprojection at cloud depth observes a different
+point on the opaque surface behind it. Requiring equality of those two receiver
+positions falsely rejected about 64% of finite-depth history in the diagnosed
+20 m/frame forward motion. For moving phased clouds in both worlds, compare the
+previous receiver point against the current continuous receiver plane instead,
+using the existing scene-distance precision tolerance. Keep finite/clear
+classification and reject an invalid plane. Stationary and nonphased behavior
+remain unchanged; this is a geometric correction, not a global tolerance scale.
+
+Moving phased color history is reconstructed at its fractional previous UV.
+Each of the four bilinear taps independently qualifies receiver continuity,
+nonnegative cloud depths, the existing current cloud-depth support interval,
+current opaque foreground and cloud-anchor ray coverage. The ray coverage
+radius includes one history texel rather than the nearest sample's half texel;
+this footprint adjustment does not widen longitudinal or receiver tolerances.
+Only eligible premultiplied radiance/transmittance is interpolated; packed
+validity/shadow metadata is decoded separately per tap. Normalize eligible
+color, apply existing variance clipping and multiply the unchanged 0.82 motion
+weight by supported bilinear weight. No eligible tap means current spatial
+color. Shadow history retains its existing separate nearest-sample policy.
+
+Exact-stationary 0.9 history, camera cuts, current-domain published depths,
+trace phases, step budgets, resources and public API do not change. Up to eight
+additional history texture reads occur only on the moving phased path; bounded
+motion GPU cost and foreground/disocclusion regressions accompany this change.
+This applies the general reconstruction principle described in Epic's
+[Volumetric Cloud documentation](https://dev.epicgames.com/documentation/unreal-engine/volumetric-cloud-component-in-unreal-engine),
+without copying UE code or claiming equivalent quality. Fast disocclusion,
+thin volume detail and residual grain remain finite-sampling limits.
+
+### 2026-10-08: Accelerated clock continuity follows cloud advection
+
+The fixed one-second simulation-time cutoff incorrectly discards history during
+ordinary accelerated playback. At 60x, the owner's frame-time variation crosses
+that cutoff on 55 of 96 frames, although wind moves the density field only about
+20 m between frames. Cloud density animation currently uses the wind offset;
+simulation time does not independently deform its shape.
+
+Cloud body and cloud-shadow history in both worlds now qualify continuity using
+physical displacement, with the existing 25 km translation budget. Require both
+`abs(deltaCloudTime * cloudWindSpeed)` and published cloud-offset displacement to
+stay within that budget. The first check rejects large seeks that alias a whole
+200 km period; the second rejects the offset's modulo discontinuity. Reverse
+playback uses the same rule. At zero wind, time alone does not change the cloud
+field; independent lighting/camera/material gates still apply.
+
+This supersedes the earlier one-second gate, without clamping caller time or
+adding an internal animation clock. Existing wind reprojection, per-pixel depth
+and support qualification, 0.9/0.82 weights, STBN phases, trace budgets and resource
+lifecycle are unchanged. No Shader, public API, pass, texture or upstream patch
+is added. Large disocclusions and actual light changes still lose history.

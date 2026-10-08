@@ -84,3 +84,30 @@ nearest-depth test. Independently animated/translucent content remains a documen
 
 See the [Bistro follow-up review](../../../AgentDocs/rendering-quality/reviews/2026-09-28-r4-bistro-flicker.md)
 for the failing-old/passing-new regression, visual qualification and GPU measurement.
+
+## 2026-10-03: Environment ray registration and cloud history isolation
+
+The shared environment ray frustum consumes the existing render-only clip jitter.
+Shift its left/right and bottom/top by minus half the respective span times the
+NDC jitter, in both perspective and orthographic projections. This agrees with
+geometry/depth while leaving the public Camera unmodified. Background, aerial
+composition and procedural stars use this render sampling domain.
+
+Cloud history belongs exclusively to the cloud renderer and uses stable Camera
+rays. The earlier jittered-cloud implementation was rejected for increased
+flicker. Explicit UV translation now maps cloud samples to scene depth and cloud
+radiance back to the render grid. Cloud composition filters optical values only
+after per-tap visibility qualification; final TAA removes the scene jitter once.
+Scene jitter alone no longer switches cloud history into the moving-ray path.
+Actual motion retains the existing reprojection/gates. No velocity/depth
+attachment, additional pass or cloud trace budget is introduced. The conditional
+four-tap composite costs six extra reads. See ADR-0048 and the
+[registration plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-02-cloud-taa-registration.md).
+This consumes the existing SGP-0022 seam without changing any upstream file.
+
+The 2026-10-04 ADR-0048 correction also retains the previous cloud depth-sampling
+offset. Stable cloud history validates finite receiver distance against the
+continuous surface footprint of the actual scene-jitter displacement. This
+prevents terrain-backed clouds from repeatedly losing history while sky-backed
+clouds remain stable. Scene TAA itself, its weights and its depth history are
+unchanged; the correction belongs to cloud history qualification.
