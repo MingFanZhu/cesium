@@ -210,6 +210,57 @@ for (const world of ["planar", "globe"]) {
     expect(automatic.time).toBe(before.time);
     expect(automatic.lighting.autoExposure.enabled).toBe(true);
     expect(automatic.lighting.autoExposure.locked).toBe(true);
+    const lookSelect = page.getByLabel("画面预设", { exact: true });
+    for (const name of ["清晰通透", "柔和电影", "中性自然"]) {
+      await lookSelect.selectOption({ label: name });
+      const look = await page.evaluate(() => window.example.state.snapshot());
+      expect(look.picture.preset).toBe(name);
+      expect(look.picture.enabled).toBe(true);
+      expectCamera(look.camera, automatic.camera);
+      expect(look.time).toBe(automatic.time);
+      expect(look.atmosphere).toEqual(automatic.atmosphere);
+      expect(look.lighting.autoExposure).toEqual(
+        automatic.lighting.autoExposure,
+      );
+      expect(look.lighting.exposure).toBe(automatic.lighting.exposure);
+      expect(look.lighting.imageBasedLightingFactor).toEqual(
+        automatic.lighting.imageBasedLightingFactor,
+      );
+      expect(look.lighting.shadows).toEqual(automatic.lighting.shadows);
+      expect(look.lighting.toneMapper).toBe(
+        name === "柔和电影" ? "ACES" : "PBR_NEUTRAL",
+      );
+    }
+    const temperature = page.getByLabel("白平衡色温（K，升高偏暖）", {
+      exact: true,
+    });
+    await temperature.fill("9200");
+    await temperature.press("Tab");
+    expect(
+      await page.evaluate(() => window.example.colorGrading.temperature),
+    ).toBe(9200);
+    const custom = await page.evaluate(
+      () => window.example.state.snapshot().picture,
+    );
+    expect(custom.preset).toBe("自定义");
+    expect(custom.temperature).toBe(9200);
+    await page.getByLabel("启用颜色调整", { exact: true }).uncheck();
+    expect(await page.evaluate(() => window.example.colorGrading.enabled)).toBe(
+      false,
+    );
+    await page
+      .getByRole("button", { name: "重置画面风格", exact: true })
+      .click();
+    expect(
+      await page.evaluate(() => window.example.state.snapshot().picture),
+    ).toEqual({
+      preset: "中性自然",
+      enabled: true,
+      temperature: 6500,
+      tint: 0,
+      contrast: 1,
+      saturation: 1,
+    });
     await page.getByLabel("自动曝光", { exact: true }).uncheck();
     await page.getByLabel("锁定当前曝光", { exact: true }).uncheck();
     expect(automatic.lighting.exposure).toBe(1);
@@ -316,6 +367,7 @@ for (const world of ["planar", "globe"]) {
           e.viewer.isDestroyed() &&
           e.models[0].isDestroyed() &&
           e.ibl.isDestroyed() &&
+          e.colorGrading.isDestroyed() &&
           !e.effects.ready
         );
       }),

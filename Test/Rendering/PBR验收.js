@@ -215,6 +215,10 @@ viewer.addController(effects);
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
 const ssil = new C.SceneGISScreenSpaceIndirectLighting({ scene });
 const autoExposure = new C.SceneGISAutoExposure({ scene });
+const colorGrading = street
+  ? new C.SceneGISColorGrading({ scene, enabled: true })
+  : undefined;
+const picture = street ? { preset: "中性自然" } : undefined;
 const specularAA = new C.SceneGISSpecularAntialiasing({ scene });
 const ssr = new C.SceneGISScreenSpaceReflections({
   scene,
@@ -542,6 +546,16 @@ const state = {
         ),
       },
       atmosphere: { ...atmosphere, year: 2026, longitude, latitude },
+      picture: colorGrading
+        ? {
+            preset: picture.preset,
+            enabled: colorGrading.enabled,
+            temperature: colorGrading.temperature,
+            tint: colorGrading.tint,
+            contrast: colorGrading.contrast,
+            saturation: colorGrading.saturation,
+          }
+        : undefined,
       time: C.JulianDate.toIso8601(viewer.clock.currentTime),
       animate: state.animate,
       view: state.view,
@@ -586,6 +600,8 @@ if (street) {
     rendering,
     effects,
     autoExposure,
+    colorGrading,
+    picture,
     ssr,
     ssil,
     taa,
@@ -894,7 +910,9 @@ exposeExample(
   gui,
   {
     state,
-    ...(street ? { rendering } : { baseline, trial, probeOptions }),
+    ...(street
+      ? { rendering, colorGrading, picture }
+      : { baseline, trial, probeOptions }),
     models,
     taa,
     specularAA,

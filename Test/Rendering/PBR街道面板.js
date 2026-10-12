@@ -9,6 +9,8 @@ export default function createStreetControls(options) {
     rendering,
     effects,
     autoExposure,
+    colorGrading,
+    picture,
     ssr,
     ssil,
     taa,
@@ -142,6 +144,120 @@ export default function createStreetControls(options) {
   bind(hdr, effects, "bloomIntensity", "泛光强度", [0, 4, 0.01]);
   bind(hdr, effects, "showLensFlare", "镜头光晕");
   bind(hdr, effects, "lensFlareIntensity", "光晕强度", [0, 4, 0.1]);
+
+  const looks = {
+    中性自然: {
+      temperature: 6500,
+      tint: 0,
+      contrast: 1,
+      saturation: 1,
+      tonemapper: "PBR_NEUTRAL",
+    },
+    清晰通透: {
+      temperature: 8000,
+      tint: 0,
+      contrast: 1.12,
+      saturation: 1.05,
+      tonemapper: "PBR_NEUTRAL",
+    },
+    柔和电影: {
+      temperature: 7500,
+      tint: 0.03,
+      contrast: 1.04,
+      saturation: 0.95,
+      tonemapper: "ACES",
+    },
+  };
+  const pictureFolder = gui.addFolder("画面风格与白平衡");
+  const pictureChanged = () => {
+    picture.preset = "自定义";
+    viewer.scene.requestRender();
+  };
+  const applyLook = () => {
+    const look = looks[picture.preset];
+    if (!look) {
+      return;
+    }
+    const { tonemapper, ...grading } = look;
+    Object.assign(colorGrading, grading, { enabled: true });
+    viewer.scene.postProcessStages.tonemapper = tonemapper;
+    viewer.scene.requestRender();
+  };
+  bind(
+    pictureFolder,
+    picture,
+    "preset",
+    "画面预设",
+    [[...Object.keys(looks), "自定义"]],
+    applyLook,
+  );
+  bind(
+    pictureFolder,
+    colorGrading,
+    "enabled",
+    "启用颜色调整",
+    [],
+    pictureChanged,
+  );
+  bind(
+    pictureFolder,
+    viewer.scene.postProcessStages,
+    "tonemapper",
+    "色调映射",
+    [
+      {
+        "PBR 中性": "PBR_NEUTRAL",
+        ACES: "ACES",
+        "Filmic 胶片": "FILMIC",
+        Reinhard: "REINHARD",
+        "Reinhard 修正": "MODIFIED_REINHARD",
+      },
+    ],
+    pictureChanged,
+  );
+  bind(
+    pictureFolder,
+    colorGrading,
+    "temperature",
+    "白平衡色温（K，升高偏暖）",
+    [4000, 25000, 100],
+    pictureChanged,
+  );
+  bind(
+    pictureFolder,
+    colorGrading,
+    "tint",
+    "色偏（绿 ↔ 品红）",
+    [-1, 1, 0.01],
+    pictureChanged,
+  );
+  bind(
+    pictureFolder,
+    colorGrading,
+    "contrast",
+    "明暗对比度",
+    [0.5, 2, 0.01],
+    pictureChanged,
+  );
+  bind(
+    pictureFolder,
+    colorGrading,
+    "saturation",
+    "色彩饱和度",
+    [0, 2, 0.01],
+    pictureChanged,
+  );
+  pictureFolder
+    .add(
+      {
+        reset() {
+          picture.preset = "中性自然";
+          applyLook();
+        },
+      },
+      "reset",
+    )
+    .name("重置画面风格");
 
   const shadows = gui.addFolder("几何阴影").close();
   render(shadows, "shadows", "启用几何阴影");

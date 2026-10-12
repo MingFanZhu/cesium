@@ -8,8 +8,8 @@
 | Status                 | `active`                                                             |
 | Planning model         | `extension`                                                          |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)           |
-| Current phase          | R23 completed and visually accepted                                  |
-| Active phase plan      | [R23](plans/2026-10-12-r23-webgl-street-lighting.md)                 |
+| Current phase          | R24 completed and visually accepted                                  |
+| Active phase plan      | [R24](plans/2026-10-12-r24-color-grading.md)                         |
 | Active standalone plan | None; [completed scope](plans/2026-10-12-street-reflection-scope.md) |
 | Architecture contact   | Current task                                                         |
 | Execution contact      | Current task                                                         |
@@ -34,6 +34,15 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-12: owner authorizes white balance, picture controls and three street presets.
+  [R24](plans/2026-10-12-r24-color-grading.md) uses exposed linear HDR inside existing native
+  tone stages, with no new full-screen pass. ADR-0154 / SGP-0044; grading preserves
+  light, Clock, atmosphere and automatic metering. [Technical review](reviews/2026-10-12-r24-color-grading.md)
+  confirms nine dev/release feature Specs, 51 regressions, two-world Bistro E2E and
+  release/types/tsc/audit. The current page offers three looks and individual controls;
+  the owner accepts the result and authorizes its independent local phase checkpoint.
+  No next implementation phase is active.
 
 - 2026-10-12: local reflection probes leave the changing-WebGIS street workflow.
   [Standalone scope](plans/2026-10-12-street-reflection-scope.md) removes Bistro controls

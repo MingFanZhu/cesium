@@ -380,3 +380,16 @@ capture from the Bistro workflow while preserving optional engine infrastructure
 and reference examples. Dynamic placement/refresh is deferred; current WebGL quality work
 prioritizes material response, sky/environment reflection and SSR. No diffuse GI phase is
 activated, and the earlier R17 technical results and outstanding visual limits remain valid.
+
+### R24: HDR picture controls, 2026-10-12
+
+After checkpoint `69c3f4f098`, the owner authorizes white balance, contrast, saturation
+and neutral/clear/soft-film presets. [R24](2026-10-12-r24-color-grading.md) adds optional
+grading inside native tone mapping, preserving existing exposure and lighting APIs.
+No new color pass, LUT, automatic white balance or GI work. Earlier independent visual
+gates remain recorded.
+
+R24 is complete and owner accepted: [review](../reviews/2026-10-12-r24-color-grading.md)
+records GPU/E2E/build/type/ownership verification and bounded cost. On 2026-10-12 the owner
+accepts the street picture controls and presets and authorizes their independent local
+phase checkpoint. No next implementation phase is active.

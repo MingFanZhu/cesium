@@ -22,6 +22,9 @@ import Tonemapper, { validateTonemapper } from "./Tonemapper.js";
 // SCENEGIS_PATCH_BEGIN SGP-0027: Reuse native tone mapping with owned histogram exposure.
 import SceneGISAutoExposure from "../SceneGIS/Scene/_private/_SceneGISAutoExposure.js";
 // SCENEGIS_PATCH_END SGP-0027
+// SCENEGIS_PATCH_BEGIN SGP-0044: Assemble optional HDR grading in native tone stages.
+import SceneGISColorGrading from "../SceneGIS/Scene/SceneGISColorGrading.js";
+// SCENEGIS_PATCH_END SGP-0044
 
 const stackScratch = [];
 
@@ -375,6 +378,9 @@ Object.defineProperties(PostProcessStageCollection.prototype, {
           break;
       }
 
+      // SCENEGIS_PATCH_BEGIN SGP-0044: Configure the fresh stage before uniforms and commands exist.
+      SceneGISColorGrading._configureStage(this, tonemapping);
+      // SCENEGIS_PATCH_END SGP-0044
       if (useAutoExposure) {
         // SCENEGIS_PATCH_BEGIN SGP-0027: Resolve the current ping-pong result at draw time.
         const collection = this;
@@ -592,13 +598,14 @@ PostProcessStageCollection.prototype.update = function (
   useHdr,
 ) {
   removeStages(this);
-  // SCENEGIS_PATCH_BEGIN SGP-0027: Prepare the divisor before stage uniforms and framebuffer dependencies.
-  if (SceneGISAutoExposure.update(this, context, useHdr)) {
+  // SCENEGIS_PATCH_BEGIN SGP-0044: Share variant rebuilding with SGP-0027 exposure preparation.
+  const gradingChanged = SceneGISColorGrading._update(this, useHdr);
+  if (SceneGISAutoExposure.update(this, context, useHdr) || gradingChanged) {
     const tonemapper = this.tonemapper;
     this._tonemapper = undefined;
     this.tonemapper = tonemapper;
   }
-  // SCENEGIS_PATCH_END SGP-0027
+  // SCENEGIS_PATCH_END SGP-0044
   // SCENEGIS_PATCH_BEGIN SGP-0014: Make default textures available during stage initialization.
   this._ao._sceneGISAmbientOcclusion.context = context;
   // SCENEGIS_PATCH_END SGP-0014
@@ -928,6 +935,9 @@ PostProcessStageCollection.prototype.isDestroyed = function () {
  * @see PostProcessStageCollection#isDestroyed
  */
 PostProcessStageCollection.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0044: Detach the Scene-owned settings before destroying tone stages.
+  this._sceneGISColorGrading?.destroy();
+  // SCENEGIS_PATCH_END SGP-0044
   // SCENEGIS_PATCH_BEGIN SGP-0027: Release the Scene-owned controller before post-process targets.
   this._sceneGISAutoExposure?.destroy();
   // SCENEGIS_PATCH_END SGP-0027

@@ -21,6 +21,11 @@ void main()
 #else
     color *= vec3(exposure);
 #endif
+    // SCENEGIS_PATCH_BEGIN SGP-0044: Grade exposed HDR before the native tone curve.
+#ifdef SCENEGIS_COLOR_GRADING
+    color = sceneGIS_gradeColor(color);
+#endif
+    // SCENEGIS_PATCH_END SGP-0044
     color = color / (1.0 + color);
     color = czm_inverseGamma(color);
     out_FragColor = vec4(color, fragmentColor.a);

@@ -2,6 +2,45 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0044",
+      "title": "Integrate optional HDR color grading with native tone curves",
+      "status": "active",
+      "reason": "White balance and grading must consume exposed linear HDR before native compression without an additional color pass.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/PostProcessStageCollection.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/PostProcessStages/PbrNeutralTonemapping.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/PostProcessStages/AcesTonemappingStage.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/PostProcessStages/FilmicTonemapping.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/PostProcessStages/ModifiedReinhardTonemapping.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/PostProcessStages/ReinhardTonemapping.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISColorGradingSpec.js",
+        "Specs/e2e/scenegis-pbr-reference.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0154-hdr-color-grading.md",
+      "removalCondition": "Native tone mapping offers equivalent linear HDR grading and explicit controller lifecycle."
+    },
+    {
       "id": "SGP-0028",
       "title": "Apply optional weather coverage before forward surface lighting",
       "status": "active",

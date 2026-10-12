@@ -1171,3 +1171,12 @@ GPU 维护最长边 128 的 log luminance、64 档加权直方图和 1x1 双缓�
 空间以实际时间做 linear/exponential 适应，request-render 不额外请求收敛帧。默认不改变
 原生曝光/色调映射；关闭释放目标并恢复手动路径。原生 exposure 保持调用方所有权。
 GPU 不支持或 HDR 关闭时明确报错；不引入 pre-exposure、EV100 校准或局部曝光。
+
+## HDR 颜色调整（R24）
+
+[ADR-0154](Decisions/ADR-0154-hdr-color-grading.md) / SGP-0044 增加可选的
+`SceneGISColorGrading`，由 Scene 的 PostProcessStageCollection 所有。白平衡、亮度对比和
+饱和度在原生曝光之后、五种原生 tone curve 之前作用于线性 HDR，不改变 alpha 或输出 gamma。
+原生 stage 在首次 update 前显式组装自有函数与 uniforms；不做源码替换或复制 tone mapper。
+无额外纹理、FBO 或 pass；普通参数只更新 uniform，启停和原生 variant 变化可重建 stage。
+测光、TAA、光照和天空遮蔽保持独立；预设属于应用配置，不成为引擎隐式默认值。

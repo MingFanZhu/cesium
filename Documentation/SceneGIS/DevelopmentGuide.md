@@ -1259,3 +1259,28 @@ API 默认关闭，不改变原生固定曝光。`enabled=false` 释放自有 GP
 切换。PBR 综合验收的 Bistro 使用“HDR 与曝光”分组直接控制当前配置，默认关闭以保留固定
 曝光基准；Sponza 仍使用“自动曝光 / 人眼适应”分组并共用于 A/B。Cycles 校准导出要求先关闭自动曝光。
 详见 ADR-0100 / SGP-0027 和 R21 review 的实测结果。
+
+## HDR 白平衡与画面风格
+
+```js
+scene.highDynamicRange = true;
+const grading = new Cesium.SceneGISColorGrading({
+  scene,
+  enabled: true,
+  temperature: 8000,
+  contrast: 1.12,
+  saturation: 1.05,
+});
+grading.tint = 0.03;
+```
+
+`temperature` 是日光型相机白平衡色温，范围 4000–25000 K，6500 为中性，升高使画面偏暖；
+不是灯光色温，不自动估计光源。`tint` 范围 [-1,1]，正值偏品红、负值偏绿。
+`contrast` 范围 [0.5,2]，围绕曝光后线性 0.18 调整明暗；`saturation` 范围 [0,2]，0 为灰度。
+中性参数精确跳过颜色运算。允许预设之外独立控制原生 tone mapper 和曝光。
+
+默认 disabled，启用必须打开 HDR。Scene 拥有控制器，也可提前 `destroy()` 解绑。
+调色复用原生 tone mapping 通道，无新增纹理/FBO/绘制，不反馈到自动测光或 TAA，参数调整无需
+重置 TAA/SSR。全局白平衡不能同时消除阳光与蓝天等混合光源，也不能补充建筑对天空的遮挡。
+`Test/Rendering/PBR综合验收.html` 的“画面风格与白平衡”提供三种起点及自定义参数；预设
+只调整颜色与 tone mapper，保持时间、光照、大气和曝光配置。完整边界见 ADR-0154。
