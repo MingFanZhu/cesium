@@ -208,6 +208,8 @@ const effects = new C.SceneGISEnvironmentEffects({
   showCloudShadows: false,
   showCrepuscularRays: false,
   showBloom: false,
+  // Bistro's supplied emissive textures/factors peak at 1 in linear HDR.
+  ...(street ? { bloomThreshold: 0.1, bloomIntensity: 0.15 } : {}),
   showLensFlare: false,
   showMoonlight: false,
 });

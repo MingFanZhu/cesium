@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                |
-| ---------------------- | -------------------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                                  |
-| Status                 | `active`                                                             |
-| Planning model         | `extension`                                                          |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)           |
-| Current phase          | R24 completed and visually accepted                                  |
-| Active phase plan      | [R24](plans/2026-10-12-r24-color-grading.md)                         |
-| Active standalone plan | None; [completed scope](plans/2026-10-12-street-reflection-scope.md) |
-| Architecture contact   | Current task                                                         |
-| Execution contact      | Current task                                                         |
-| Last updated           | `2026-10-12`                                                         |
+| Field                  | Value                                                                       |
+| ---------------------- | --------------------------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                                         |
+| Status                 | `active`                                                                    |
+| Planning model         | `extension`                                                                 |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                  |
+| Current phase          | R24 completed and visually accepted                                         |
+| Active phase plan      | [R24](plans/2026-10-12-r24-color-grading.md)                                |
+| Active standalone plan | None; [completed night emission](plans/2026-10-12-street-night-emission.md) |
+| Architecture contact   | Current task                                                                |
+| Execution contact      | Current task                                                                |
+| Last updated           | `2026-10-13`                                                                |
 
 ## Scope
 
@@ -34,6 +34,15 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- After R24 checkpoint `2e09227156`, the owner reports weak nighttime emission.
+  [Focused maintenance](plans/2026-10-12-street-night-emission.md) diagnoses a disabled
+  bloom and an inherited threshold above the fixture's emissive range. Tune only
+  optional street bloom parameters; preserve native emission, exposure and daytime
+  defaults. No new renderer phase or GI scope is active.
+  [Technical review](reviews/2026-10-12-street-night-emission.md) confirms both-world
+  real bloom-buffer E2E and same-view night inspection. The owner accepts this adjustment
+  on 2026-10-13, completing the independent local checkpoint gate.
 
 - 2026-10-12: owner authorizes white balance, picture controls and three street presets.
   [R24](plans/2026-10-12-r24-color-grading.md) uses exposed linear HDR inside existing native

@@ -264,11 +264,32 @@ for (const world of ["planar", "globe"]) {
     await page.getByLabel("自动曝光", { exact: true }).uncheck();
     await page.getByLabel("锁定当前曝光", { exact: true }).uncheck();
     expect(automatic.lighting.exposure).toBe(1);
+    const hour = page.getByLabel("时间（UTC 小时）", { exact: true });
+    await hour.fill("22");
+    await hour.press("Tab");
     await page.getByLabel("泛光", { exact: true }).check();
-    expect(await page.evaluate(() => window.example.effects.showBloom)).toBe(
-      true,
+    // Verify actual emissive energy reaches the bloom buffer, not only the toggle.
+    expect(await readBloomPeak(page)).toBeGreaterThan(0);
+    const night = await page.evaluate(() => window.example.state.snapshot());
+    expect(night.time).toBe("2026-03-20T22:00:00Z");
+    expect(night.environmentEffects.showBloom).toBe(true);
+    expect(night.environmentEffects.bloomThreshold).toBe(
+      before.environmentEffects.bloomThreshold,
     );
+    expect(night.environmentEffects.bloomIntensity).toBe(
+      before.environmentEffects.bloomIntensity,
+    );
+    const threshold = page.getByLabel("泛光阈值（曝光前）", { exact: true });
+    await threshold.fill("10");
+    await threshold.press("Tab");
+    expect(await readBloomPeak(page)).toBe(0);
+    await threshold.fill(String(before.environmentEffects.bloomThreshold));
+    await threshold.press("Tab");
+    expect(await readBloomPeak(page)).toBeGreaterThan(0);
+    await page.screenshot({ path: testInfo.outputPath("night-emission.png") });
     await page.getByLabel("泛光", { exact: true }).uncheck();
+    await hour.fill(String(before.atmosphere.hour));
+    await hour.press("Tab");
     expect(await page.evaluate(() => window.example.models.length)).toBe(1);
     expect(
       await page.evaluate(
@@ -437,6 +458,39 @@ test("pinned PBR fixtures retain geometry, materials, normals and explicit glass
     expect(gltf.extensionsUsed).toEqual(manifest.unsupported[name]);
   }
 });
+
+async function readBloomPeak(page) {
+  return page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const e = window.example;
+        const scene = e.viewer.scene;
+        const remove = scene.postRender.addEventListener(() => {
+          remove();
+          const target =
+            e.effects._pipeline._bloomResources.thresholdFramebuffer;
+          const texture = target.getColorTexture(0);
+          const pixels = scene.context.readPixels({
+            framebuffer: target.framebuffer,
+            width: texture.width,
+            height: texture.height,
+          });
+          // Nonzero RGB has nonzero bits for both float32 and float16 readbacks.
+          let maximum = 0;
+          for (let i = 0; i < pixels.length; i += 4) {
+            maximum = Math.max(
+              maximum,
+              pixels[i],
+              pixels[i + 1],
+              pixels[i + 2],
+            );
+          }
+          resolve(maximum);
+        });
+        scene.requestRender();
+      }),
+  );
+}
 
 function expectCamera(actual, expected) {
   for (const axis of ["position", "direction", "up"]) {

@@ -140,7 +140,7 @@ export default function createStreetControls(options) {
   }
   metering.add(autoExposure, "reset").name("立即重新测光");
   bind(hdr, effects, "showBloom", "泛光");
-  bind(hdr, effects, "bloomThreshold", "泛光阈值", [0, 64, 0.1]);
+  bind(hdr, effects, "bloomThreshold", "泛光阈值（曝光前）", [0, 64, 0.01]);
   bind(hdr, effects, "bloomIntensity", "泛光强度", [0, 4, 0.01]);
   bind(hdr, effects, "showLensFlare", "镜头光晕");
   bind(hdr, effects, "lensFlareIntensity", "光晕强度", [0, 4, 0.1]);

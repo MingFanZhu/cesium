@@ -393,3 +393,10 @@ R24 is complete and owner accepted: [review](../reviews/2026-10-12-r24-color-gra
 records GPU/E2E/build/type/ownership verification and bounded cost. On 2026-10-12 the owner
 accepts the street picture controls and presets and authorizes their independent local
 phase checkpoint. No next implementation phase is active.
+
+After R24 checkpoint `2e09227156`, [night emission maintenance](2026-10-12-street-night-emission.md)
+addresses the owner's weak-glow report. Source emission is intact; optional bloom uses
+a threshold above its range. Qualify example parameters in both Worlds without changing
+the renderer, authored materials, accepted daytime picture or deferred GI scope.
+Both-world verification and review are complete. The owner visually accepts the street
+bloom adjustment on 2026-10-13; form its independent checkpoint with no next phase active.
