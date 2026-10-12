@@ -44,6 +44,12 @@
   Bistro and shared Sponza E2E pass. Matched restaurant images and bounded GPU timings
   are complete; the default preset retains the 64 MiB shadow target. The owner accepts
   the baseline on 2026-10-12 and authorizes its checkpoint and continued work.
+  Checkpoint: `f94d0d1766`. Follow-up exposure isolation supports the owner's observation:
+  original lighting with auto exposure (native multiplier 1, gain about 3.57) provides
+  similar overall brightening. R23 is exposure/parameter calibration; its separate
+  lighting contribution is stronger shadow separation. See the review amendment.
+  Normalize and lock exposure for subsequent lighting comparisons; retain automatic
+  adaptation as a separate navigation check. No next implementation phase is active.
 
 - 2026-10-12: owner selects WebGL quality first and confirms `scenegis/develop` as base.
   `feature/webgl-rendering-quality` starts at `2f6d4ce30b`; the completed

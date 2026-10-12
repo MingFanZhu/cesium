@@ -66,3 +66,30 @@ public API change; WebGPU/P4n remains deferred on its original branch.
 The owner accepts the same-camera original/daylight baseline on 2026-10-12 and
 authorizes the phase checkpoint and continued work. This review does not close older
 visual gates or claim parity with the supplied third-party renderer screenshot.
+
+## Exposure attribution after owner feedback
+
+After checkpoint `f94d0d1766`, the owner observes that automatic exposure can produce
+a similar improvement. A separate diagnostic browser compares four settings at the
+same restaurant camera, time, viewport and effects: original/manual 1, original/manual
+2.5, daylight/manual 2.5, and original/automatic with native multiplier 1 and zero
+compensation. Geometry, materials and the user's live page are untouched.
+
+The automatic result has effective gain about 3.57 (1.84 stops); changing only manual
+exposure to 2.5 already produces much of the visible brightening. The daylight preset
+additionally strengthens shadow separation, visible under the awning and in foliage
+shadows, through diffuse weight 0.5 and darkness 0. These images support attributing
+the overall brightness improvement chiefly to exposure, without claiming a new
+direct-lighting algorithm or quantitatively apportioning perceptual quality.
+
+Native exposure multiplies automatic gain under ADR-0100. Enabling auto exposure on
+the daylight preset retains its extra 2.5 factor; comparisons must explicitly report
+and normalize this factor. Use automatic metering to establish a useful viewing
+exposure, then hold exposure constant across lighting/effect comparisons. Automatic
+adaptation remains a separate navigation check. No default or public API is changed.
+
+A bounded 0.45-radian look-right/return sample with three seconds per direction shows
+smooth gain near 3.59 to 3.61 and then 3.61 to 3.52. This only checks that local street
+turn, not an indoor/outdoor transition or all motion stability. No page errors occurred.
+Ignored evidence: `Build/Specs/street-exposure-review/` contains four images and the
+configuration/gain report. Only handoff documents change; upstream files and SGP: none.
