@@ -346,3 +346,13 @@ Entry: R8 ownership/render paths verified. Exit: physical controls, actual displ
 geometry, both-world regressions, visual/performance evidence and independent checkpoint.
 
 R22 implementation and [technical review](../reviews/2026-09-28-r22-wind-water.md) are complete. Owner visual acceptance is pending; no subsequent phase is active.
+
+## WebGL quality priority — 2026-10-12
+
+The owner selects WebGL as the near-term quality backend and explicitly confirms
+`scenegis/develop` (`2f6d4ce30b`) as the branch base. The independent
+[shared-fix backport](2026-10-12-webgl-fix-backport.md) precedes new picture-quality work.
+Preserve prior visual gates and the deferred WebGPU/P4n branch. Next, establish a fixed
+Bistro direct-light, sky/environment, shadow, material and HDR/exposure baseline; evaluate
+AO, reflections and SSIL by visible benefit afterward. No new implementation phase is
+activated by the backport.

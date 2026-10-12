@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                      |
-| ---------------------- | ---------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                        |
-| Status                 | `active`                                                   |
-| Planning model         | `extension`                                                |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md) |
-| Current phase          | R22 technically complete; visual review pending            |
-| Active phase plan      | [R22](plans/2026-09-28-r22-wind-water.md)                  |
-| Active standalone plan | None                                                       |
-| Architecture contact   | Current task                                               |
-| Execution contact      | Current task                                               |
-| Last updated           | `2026-09-29`                                               |
+| Field                  | Value                                                              |
+| ---------------------- | ------------------------------------------------------------------ |
+| Extension slug         | `rendering-quality`                                                |
+| Status                 | `active`                                                           |
+| Planning model         | `extension`                                                        |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)         |
+| Current phase          | R22 technically complete; visual review pending                    |
+| Active phase plan      | [R22](plans/2026-09-28-r22-wind-water.md)                          |
+| Active standalone plan | None; [completed backport](plans/2026-10-12-webgl-fix-backport.md) |
+| Architecture contact   | Current task                                                       |
+| Execution contact      | Current task                                                       |
+| Last updated           | `2026-10-12`                                                       |
 
 ## Scope
 
@@ -34,6 +34,14 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-12: owner selects WebGL quality first and confirms `scenegis/develop` as base.
+  `feature/webgl-rendering-quality` starts at `2f6d4ce30b`; the completed
+  [standalone backport](plans/2026-10-12-webgl-fix-backport.md) transfers only shared bug fixes.
+  WebGPU/P4n work and open visual findings remain on the original branch, deferred.
+  [Migration review](reviews/2026-10-12-webgl-fix-backport.md): 181 native cases, six GPU/browser
+  cases, release/types/tsc and patch audit pass; existing tooling/visual limitations are recorded.
+  Existing R22 and older visual gates remain unchanged; no new quality phase is active.
 
 - R21 is authorized after SSIL checkpoint `2bd5a2598f`: global histogram exposure,
   eye adaptation, lock/manual controls, independent example and Bistro controls.

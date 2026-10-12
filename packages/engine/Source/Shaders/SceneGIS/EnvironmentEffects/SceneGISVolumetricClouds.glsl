@@ -107,6 +107,37 @@ bool sceneGISCloudSphereInterval(
     return farDistance > 0.0;
 }
 
+bool sceneGISCloudLocalSphereInterval(
+    vec3 localOrigin,
+    vec3 direction,
+    float height,
+    out float nearDistance,
+    out float farDistance)
+{
+    // Keep metric altitude separate from the planet radius. Subtracting
+    // squared planet-scale values moved the first sample by metres near grazing.
+    float projected = dot(localOrigin, direction) +
+        SCENEGIS_BOTTOM_RADIUS * direction.z;
+    float constant = dot(localOrigin.xy, localOrigin.xy) +
+        (localOrigin.z - height) *
+            (2.0 * SCENEGIS_BOTTOM_RADIUS + localOrigin.z + height);
+    float discriminant = projected * projected - constant;
+    if (discriminant < 0.0) {
+        return false;
+    }
+    float root = sqrt(max(discriminant, 0.0));
+    float farRoot = -projected - (projected >= 0.0 ? root : -root);
+    if (farRoot == 0.0) {
+        nearDistance = 0.0;
+        farDistance = 0.0;
+        return false;
+    }
+    float otherRoot = constant / farRoot;
+    nearDistance = min(farRoot, otherRoot);
+    farDistance = max(farRoot, otherRoot);
+    return farDistance > 0.0;
+}
+
 bool sceneGISCloudSegment(
     vec3 rayOrigin,
     vec3 rayDirection,
@@ -123,19 +154,19 @@ bool sceneGISCloudSegment(
     vec3 virtualOrigin = vec3(
         rayOrigin.xy, SCENEGIS_BOTTOM_RADIUS + rayOrigin.z);
     float innerRadius = SCENEGIS_BOTTOM_RADIUS + cloudBaseHeight;
-    float outerRadius = innerRadius + cloudThickness;
     float outerNear;
     float outerFar;
-    if (!sceneGISCloudSphereInterval(
-            virtualOrigin, rayDirection, outerRadius, outerNear, outerFar)) {
+    if (!sceneGISCloudLocalSphereInterval(
+            rayOrigin, rayDirection, cloudBaseHeight + cloudThickness,
+            outerNear, outerFar)) {
         return false;
     }
     segmentStart = max(outerNear, 0.0);
     segmentEnd = min(outerFar, maximumDistance);
     float innerNear;
     float innerFar;
-    if (sceneGISCloudSphereInterval(
-            virtualOrigin, rayDirection, innerRadius, innerNear, innerFar)) {
+    if (sceneGISCloudLocalSphereInterval(
+            rayOrigin, rayDirection, cloudBaseHeight, innerNear, innerFar)) {
         if (length(virtualOrigin) < innerRadius) {
             segmentStart = max(segmentStart, innerFar);
         } else if (innerNear > segmentStart) {

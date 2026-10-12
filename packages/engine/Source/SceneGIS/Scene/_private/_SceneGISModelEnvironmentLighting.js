@@ -171,7 +171,11 @@ const SceneGISModelEnvironmentLighting = {
     ) {
       localProbes.process(renderResources, frameState);
     }
-    if (ibl.enabled && !defined(ibl.sphericalHarmonicCoefficients)) {
+    if (
+      ibl.enabled &&
+      !defined(ibl.sphericalHarmonicCoefficients) &&
+      !defined(frameState.sphericalHarmonicCoefficients)
+    ) {
       shaderBuilder.addDefine(
         "SCENEGIS_MODEL_DIFFUSE_SKY",
         undefined,

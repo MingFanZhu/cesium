@@ -257,7 +257,12 @@ describe("SceneGIS/Scene/SceneGISAtmosphereStars", function () {
       effects.heightFogInscatteringScale = 0;
       effects.heightFogDirectionalInscatteringScale = 0;
       renderer._showHeightFog = true;
-      expect(pixel()[0]).toBeLessThan(night / 10);
+      if (mode === "globe") {
+        // Globe applies fog once in the final Aerial pass, after this star draw.
+        expect(pixel()[0]).toEqualEpsilon(night, 1);
+      } else {
+        expect(pixel()[0]).toBeLessThan(night / 10);
+      }
       renderer._showHeightFog = false;
       renderer._frame.altitude = 100000;
       renderer._sunDirection = new Cartesian3(1, 0, 0);

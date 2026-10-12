@@ -12110,6 +12110,9 @@ ${hardCascadeLibrary}`;
     await publishPlanarResources();
     // Isolate invalidation from the independently tested rendered sampling phase.
     effects._pipeline._uniformMap.u_cloudStbnSlice = () => 0.5 / 64;
+    // The trace command owns a separate uniform map from the composition pass.
+    effects._pipeline._resources.cloudCommand.uniformMap.u_cloudStbnSlice =
+      () => 0.5 / 64;
     const validity = [];
     const resolveCommand = effects._pipeline._resources.cloudResolveCommand;
     const execute = resolveCommand.execute;
@@ -12713,7 +12716,8 @@ ${hardCascadeLibrary}`;
       }
       disconnectControlledCloudMode();
     }
-  });
+    // Both physical-sky variants can compile beyond Jasmine's default timeout.
+  }, 120000);
 
   it("calibrates only intrinsic raw cloud MRT radiance across both worlds", async function () {
     function alphaBits(color) {

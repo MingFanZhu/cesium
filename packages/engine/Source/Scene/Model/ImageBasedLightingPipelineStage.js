@@ -34,17 +34,18 @@ ImageBasedLightingPipelineStage.process = function (
   let specularEnvironmentMapAtlas;
   if (!defined(imageBasedLighting.specularEnvironmentMaps)) {
     // SCENEGIS_PATCH_BEGIN SGP-0015: Explicit scene maps outrank procedural sources.
-    specularEnvironmentMapAtlas =
-      model._sceneGISEnvironmentLighting === true &&
-      defined(frameState.specularEnvironmentMaps)
-        ? undefined
-        : (model._sceneGISSkyReflections?.texture ??
-          environmentMapManager.radianceCubeMap);
+    specularEnvironmentMapAtlas = defined(frameState.specularEnvironmentMaps)
+      ? undefined
+      : (model._sceneGISSkyReflections?.texture ??
+        environmentMapManager.radianceCubeMap);
     // SCENEGIS_PATCH_END SGP-0015
   }
+  // SCENEGIS_PATCH_BEGIN SGP-0015: Explicit Model and Scene SH precede default environment coefficients.
   const sphericalHarmonicCoefficients =
     imageBasedLighting.sphericalHarmonicCoefficients ??
+    frameState.sphericalHarmonicCoefficients ??
     environmentMapManager.sphericalHarmonicCoefficients;
+  // SCENEGIS_PATCH_END SGP-0015
 
   shaderBuilder.addDefine(
     "USE_IBL_LIGHTING",
@@ -130,12 +131,8 @@ ImageBasedLightingPipelineStage.process = function (
         "model_specularEnvironmentMapsMaximumLOD",
         ShaderDestination.FRAGMENT,
       );
-      // SCENEGIS_PATCH_BEGIN SGP-0015: Physical lighting honors the native IBL object's scene-map selection.
-    } else if (
-      model.useDefaultSpecularMaps ||
-      (model._sceneGISEnvironmentLighting === true &&
-        imageBasedLighting.useDefaultSpecularMaps)
-    ) {
+      // SCENEGIS_PATCH_BEGIN SGP-0015: Honor the native IBL object's Scene-map selection in both lighting modes.
+    } else if (imageBasedLighting.useDefaultSpecularMaps) {
       // SCENEGIS_PATCH_END SGP-0015
       shaderBuilder.addDefine(
         "SPECULAR_IBL",
@@ -159,7 +156,13 @@ ImageBasedLightingPipelineStage.process = function (
       return model._iblReferenceFrameMatrix;
     },
     model_sphericalHarmonicCoefficients: function () {
-      return sphericalHarmonicCoefficients;
+      // SCENEGIS_PATCH_BEGIN SGP-0015: Read the current source when callers replace authored coefficient arrays.
+      return (
+        imageBasedLighting.sphericalHarmonicCoefficients ??
+        frameState.sphericalHarmonicCoefficients ??
+        environmentMapManager.sphericalHarmonicCoefficients
+      );
+      // SCENEGIS_PATCH_END SGP-0015
     },
     model_specularEnvironmentMaps: function () {
       return imageBasedLighting.specularEnvironmentCubeMap.texture;

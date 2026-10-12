@@ -2179,6 +2179,9 @@ Scene.prototype.updateFrameState = function () {
 
   if (
     defined(this._specularEnvironmentCubeMap) &&
+    // SCENEGIS_PATCH_BEGIN SGP-0015: Withdraw the previous Scene source as soon as its URL changes.
+    this._specularEnvironmentCubeMap.url === this.specularEnvironmentMaps &&
+    // SCENEGIS_PATCH_END SGP-0015
     this._specularEnvironmentCubeMap.ready
   ) {
     frameState.specularEnvironmentMaps =

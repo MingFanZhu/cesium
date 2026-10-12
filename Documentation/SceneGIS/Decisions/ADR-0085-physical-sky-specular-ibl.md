@@ -36,3 +36,7 @@ their default physical sources are supplied, preserving standalone behavior and 
 SGP-0015 covers private framebuffer mip attachment, dynamic manager gating, model IBL selection,
 and independent specular direction transformation. Recheck these seams and native GGX parameterization
 on upstream upgrades. Source/glsl generation and tests use the existing build entry points.
+
+## 2026-10-12 WebGL maintenance backport
+
+Authored Model SH/cubes precede Scene SH/cubes, which precede default physical/procedural sources in both lighting modes. Uniform callbacks read the current SH array. A changed or cleared Scene URL immediately withdraws the previous map. Backported from `122ba3dd1d`; SGP-0015 now also covers the narrow Scene frame-state seam.

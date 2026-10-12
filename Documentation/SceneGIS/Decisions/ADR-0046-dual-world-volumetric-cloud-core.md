@@ -817,3 +817,7 @@ independent cloudRadianceScale (default 1 in both worlds), as Globe does.
 This is an explicit unit conversion, not a hidden scalar tuned to a fixture.
 The sample migrates its old cloudRadianceScale 48 to 1. Night ambient follows
 the same physical units. Ground bounce and directional Moon remain successors.
+
+## 2026-10-12 WebGL maintenance backport
+
+Backport `5bede894ca` numerical corrections: local metric shell intersections avoid subtracting squared planet radii; history variance clipping ignores only FP32 roundoff on constant RGB axes; native-resolution spatial resolve uses exact fragment centers. No ray/sample budget, resource, history-weight or public-API change.

@@ -74,6 +74,7 @@ void main()
         false, intersectsAtmosphere, transmittance);
     #endif
     vec3 radiance = v_starRadiance * transmittance * (weight * visibility * u_starIntensity);
+    #ifndef SCENEGIS_GLOBE
     if (u_showHeightFog) {
         // The background already includes fog inscattering. Attenuate stars only.
         radiance = sceneGISApplyExponentialHeightFog(
@@ -82,5 +83,6 @@ void main()
             u_heightFogDensity, u_heightFogHeightFalloff, u_heightFogBaseHeight,
             u_heightFogStartDistance, u_heightFogMaximumOpacity, 0.0, 0.0, 0.0, 1.0);
     }
+    #endif
     out_FragColor = vec4(sceneGISGuardHdrStorage(radiance), 0.0);
 }

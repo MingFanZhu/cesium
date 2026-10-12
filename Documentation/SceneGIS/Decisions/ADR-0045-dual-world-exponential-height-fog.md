@@ -163,3 +163,7 @@ multiplier或把visual failure包装成quality preset。
 - [ADR-0042](ADR-0042-planar-precomputed-atmosphere.md)
 - [ADR-0043](ADR-0043-atmosphere-log-depth-and-radiance-mapping.md)
 - [ADR-0044](ADR-0044-separate-background-aerial-radiance-calibration.md)
+
+## 2026-10-12 WebGL maintenance backport
+
+Globe background and stars omit their early height-fog application. The existing Aerial pass applies fog once after transparent composition; a 50% fog retains 50%, not 25%, of a clear-sky input. Planar ordering remains unchanged. Backported from `4ee99433ab` (source decision ADR-0131); no new pass, resource or public API.

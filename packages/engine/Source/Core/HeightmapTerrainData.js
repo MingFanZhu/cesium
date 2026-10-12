@@ -167,6 +167,13 @@ Object.defineProperties(HeightmapTerrainData.prototype, {
       return this._childTileMask;
     },
   },
+  // SCENEGIS_PATCH_BEGIN SGP-0043: Advance received parents before upsampling missing descendants.
+  canUpsample: {
+    get: function () {
+      return defined(this._mesh);
+    },
+  },
+  // SCENEGIS_PATCH_END SGP-0043
 });
 
 const createMeshTaskName = "createVerticesFromHeightmap";

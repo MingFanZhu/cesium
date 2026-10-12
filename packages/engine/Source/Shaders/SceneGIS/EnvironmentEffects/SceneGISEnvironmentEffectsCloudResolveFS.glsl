@@ -341,7 +341,16 @@ vec4 sceneGISCloudVarianceClip(
     // discrepancy must not discard otherwise compatible color history.
     for (int channel = 0; channel < 3; ++channel) {
         if (abs(delta[channel]) > extent[channel]) {
-            fraction = min(fraction, extent[channel] / abs(delta[channel]));
+            // Four-tap normalization can move an exactly constant channel by
+            // an FP32 rounding unit. Do not collapse the common RGB trajectory
+            // for that residue on a zero-width axis; real outliers still clip.
+            float roundoff = 8.0 * 1.1920928955078125e-7 *
+                max(abs(historyColor[channel]), abs(center[channel]));
+            if (extent[channel] == 0.0 && abs(delta[channel]) <= roundoff) {
+                delta[channel] = 0.0;
+            } else {
+                fraction = min(fraction, extent[channel] / abs(delta[channel]));
+            }
         }
     }
     return vec4(
@@ -448,6 +457,12 @@ void main()
         ? 1.75
         : 0.08;
     vec2 lowPosition = v_textureCoordinates * lowDimensions - vec2(0.5);
+    if (all(equal(lowDimensions, fullDimensions))) {
+        // A one-to-one raster has an exact integer source position. UV rounding
+        // around that integer must not flip fract() between zero and one and
+        // move the existing reconstruction kernel to the opposite side.
+        lowPosition = gl_FragCoord.xy - vec2(0.5);
+    }
     if (u_cloudTracePhased) {
         lowPosition = (floor(gl_FragCoord.xy) -
             vec2(sceneGISCloudTracePhase(u_cloudStbnSlice))) * 0.5;

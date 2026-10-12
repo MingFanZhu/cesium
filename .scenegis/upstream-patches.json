@@ -212,7 +212,7 @@
       "id": "SGP-0015",
       "title": "Connect shared HDR physical sky reflections to native PBR",
       "status": "active",
-      "reason": "Native procedural RGBA8 captures use a different atmosphere and model-oriented reflection frame; physical HDR sky needs direct mip rendering and a default IBL source seam.",
+      "reason": "Native procedural RGBA8 captures use a different atmosphere and model-oriented reflection frame; physical HDR sky needs direct mip rendering and a default IBL source seam. Preserve Model > Scene > procedural source precedence and live source replacement (backported from 122ba3dd1d).",
       "risk": "high",
       "files": [
         {
@@ -234,13 +234,18 @@
         {
           "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
           "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
         }
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISSkyReflectionsSpec.js",
         "packages/engine/Specs/Scene/Model/ImageBasedLightingPipelineStageSpec.js",
         "packages/engine/Specs/Scene/DynamicEnvironmentMapManagerSpec.js",
-        "packages/engine/Specs/Renderer/FramebufferSpec.js"
+        "packages/engine/Specs/Renderer/FramebufferSpec.js",
+        "Specs/e2e/scenegis-webgl-environment-source-priority.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0085-physical-sky-specular-ibl.md",
       "removalCondition": "Retire when native physical sky IBL offers equivalent HDR mip capture, explicit-source precedence and world-fixed reflection directions."
@@ -736,6 +741,26 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0094-temporal-antialiasing.md",
       "removalCondition": "Native Scene provides equivalent temporal antialiasing and render-only projection/depth hooks."
+    },
+    {
+      "id": "SGP-0043",
+      "title": "Report native heightmap upsampling readiness",
+      "status": "active",
+      "reason": "Native Globe traversal can visit missing descendants before a received heightmap parent has a mesh. Expose the existing canUpsample contract so the terrain state machine advances that parent instead of indefinitely deferring its children.",
+      "risk": "low",
+      "files": [
+        {
+          "path": "packages/engine/Source/Core/HeightmapTerrainData.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISHeightmapUpsamplingSpec.js",
+        "packages/engine/Specs/Core/HeightmapTerrainDataSpec.js",
+        "packages/engine/Specs/Scene/GlobeSurfaceTileSpec.js"
+      ],
+      "removalCondition": "Native HeightmapTerrainData reports mesh readiness to GlobeSurfaceTile before upsampling, as QuantizedMeshTerrainData already does.",
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0153-heightmap-upsampling-readiness.md"
     }
   ]
 }

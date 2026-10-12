@@ -599,6 +599,11 @@ reference frame，不互相伪造坐标语义。
 
 ## Current handoff
 
+- 2026-10-12: the rendering-quality [WebGL backport](../rendering-quality/plans/2026-10-12-webgl-fix-backport.md)
+  transfers shared cloud numerical corrections and the accepted single Globe fog
+  composition to a branch from develop. No new cloud phase or sample budget.
+  The historical strict-validation fixture finding remains open.
+
 2026-09-18：负责人确认平面空气透视模型水平色带修复验收通过，standalone plan 与 review 已关闭。
 实现仍在工作区，尚未提交；独立 Globe 修复的验收状态保留，既有 package export 白名单事项继续 deferred。
 下一项按负责人请求核对现有平面地形加载入口与元数据支持，尚未激活新的实现计划。

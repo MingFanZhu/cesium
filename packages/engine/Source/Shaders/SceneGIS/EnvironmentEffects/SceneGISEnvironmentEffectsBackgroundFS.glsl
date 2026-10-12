@@ -78,6 +78,8 @@ void main()
     vec3 physicalRadiance = sceneGISApplySunDisk(
         radiance, viewDirection, sunDirection, transmittance);
     vec3 sceneLinearRadiance = physicalRadiance * u_backgroundRadianceScale;
+    #ifndef SCENEGIS_GLOBE
+    // Globe fog is applied once after translucent composition in AerialFS.
     if (u_showHeightFog) {
         sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
             u_transmittanceTexture,
@@ -101,5 +103,6 @@ void main()
             u_heightFogDirectionalInscatteringScale,
             u_heightFogDirectionalInscatteringExponent);
     }
+    #endif
     out_FragColor = vec4(sceneGISGuardHdrStorage(sceneLinearRadiance), 1.0);
 }
