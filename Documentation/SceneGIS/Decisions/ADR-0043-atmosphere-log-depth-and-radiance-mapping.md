@@ -149,6 +149,24 @@ guard, native precise linear/log reconstruction, clear-depth identity, cloud
 occlusion and the existing Bruneton boundary clipping. No new public API,
 resource, upstream file or SGP is required.
 
+## Finite-ray numerical precision clarification — 2026-10-12
+
+The Bistro street fixture exposes a separate near-horizon artifact at a camera
+height of about 5 m and receiver distances of tens of meters. Keep local ray
+direction, length and radial height separate from the planet-sized position.
+Use factored shell distances and rationalized radius differences for finite
+transport and boundary clipping; do not reconstruct a short ray by subtracting
+two planet-sized endpoints. Finite transport no longer applies the empirical
+horizon-angle clamp to that ray.
+
+Finite transport subtracts two nearby LUT samples. Interpolate the existing
+RGBA16F texels explicitly in FP32 for those queries, using the same LUT mapping,
+combined-scattering model and clamp-to-edge semantics. Infinite sky retains its
+existing sampling path. This corrects runtime numerical precision without a new
+LUT, pass, API or radiance calibration; the original table resolution and stored
+half-float values still bound accuracy. Qualification and measured cost are in
+[the maintenance review](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-10-12-globe-near-aerial-precision.md).
+
 ## 参考
 
 - [Bruneton atmosphere demo shader](https://ebruneton.github.io/precomputed_atmospheric_scattering/atmosphere/demo/demo.glsl.html)

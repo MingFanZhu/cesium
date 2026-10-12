@@ -176,14 +176,20 @@ vec3 sceneGISGlobeSkyRadianceToPoint(
     vec3 camera = vec3(
         rayOrigin.xy * 0.001,
         atmosphere.bottom_radius + rayOrigin.z * 0.001);
-    vec3 point = camera + viewDirection * max(distanceToPoint, 0.0) * 0.001;
-    return max(GetSkyRadianceToPoint(
+    // Keep meter-scale height and ray length separate from the planet radius.
+    float localHeight = rayOrigin.z * 0.001;
+    float height = (dot(camera.xy, camera.xy) + localHeight *
+        (2.0 * atmosphere.bottom_radius + localHeight)) /
+        (length(camera) + atmosphere.bottom_radius);
+    return max(GetSkyRadianceAlongRay(
         atmosphere,
         transmittanceTexture,
         scatteringTexture,
         scatteringTexture,
         camera,
-        point,
+        height,
+        viewDirection,
+        max(distanceToPoint, 0.0) * 0.001,
         max(shadowLength, 0.0) * 0.001,
         sunDirection,
         transmittance), vec3(0.0));

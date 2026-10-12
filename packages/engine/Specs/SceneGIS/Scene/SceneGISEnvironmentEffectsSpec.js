@@ -18859,6 +18859,146 @@ ${hardCascadeLibrary}`;
     }
   }, 120000);
 
+  it("keeps short Globe aerial rays continuous across the horizon", async function () {
+    await connectControlledCloudMode("globe", function () {
+      effects.showClouds = false;
+    });
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const resources = effects._pipeline._resources;
+    const pixels = executeHalfFloatQuad(
+      [
+        brunetonDefinitionsSource,
+        brunetonCommonSource,
+        brunetonRuntimeSource,
+        atmosphereSource,
+        `precision highp float;
+        precision highp sampler3D;
+        uniform sampler2D u_transmittance;
+        uniform sampler3D u_scattering;
+        void main() {
+          float mu = (gl_FragCoord.x - 128.0) * 0.00025;
+          vec3 direction = vec3(-sqrt(1.0 - mu * mu), 0.0, mu);
+          vec3 sun = normalize(vec3(-0.98876, -0.11645, 0.09376));
+          vec3 transmittance;
+          vec3 radiance = sceneGISGlobeSkyRadianceToPoint(
+              u_transmittance, u_scattering, vec3(0.0, 0.0, 4.938666),
+              direction, sun, 20.0, 0.0, transmittance);
+          out_FragColor = vec4(radiance, transmittance.r);
+        }`,
+      ],
+      {
+        width: 256,
+        defines: resources.aerialProgram.fragmentShaderSource.defines,
+        uniformMap: {
+          u_transmittance: () => resources.transmittanceTexture,
+          u_scattering: () => resources.scatteringTexture,
+        },
+      },
+    );
+    // A 20 m ray at street height has a nonzero, smoothly varying optical source
+    // on both sides of the horizon. Exposure must not reveal a boundary on a wall.
+    let maximumStep = 0;
+    let maximumHorizonStep = 0;
+    for (let i = 0; i < pixels.length; i++) {
+      expect(pixels[i][0]).toBeGreaterThan(0.00005);
+      expect(pixels[i][0]).toBeLessThan(0.0005);
+      expect(pixels[i][3]).toBeGreaterThan(0.999);
+      expect(pixels[i][3]).toBeLessThanOrEqual(1.0);
+      if (i > 0) {
+        for (let channel = 0; channel < 3; channel++) {
+          maximumStep = Math.max(
+            maximumStep,
+            Math.abs(pixels[i][channel] - pixels[i - 1][channel]),
+          );
+          if (i >= 112 && i <= 144) {
+            maximumHorizonStep = Math.max(
+              maximumHorizonStep,
+              Math.abs(pixels[i][channel] - pixels[i - 1][channel]),
+            );
+          }
+        }
+      }
+    }
+    // Isolate the reproduced horizon edge from the wider half-float LUT error.
+    expect(maximumHorizonStep).toBeLessThan(0.00003);
+    expect(maximumStep).toBeLessThan(0.0001);
+  }, 120000);
+
+  it("clips finite Globe aerial rays at the atmosphere boundaries", async function () {
+    await connectControlledCloudMode("globe", function () {
+      effects.showClouds = false;
+    });
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const resources = effects._pipeline._resources;
+    const pixels = executeHalfFloatQuad(
+      [
+        brunetonDefinitionsSource,
+        brunetonCommonSource,
+        brunetonRuntimeSource,
+        atmosphereSource,
+        `precision highp float;
+        precision highp sampler3D;
+        uniform sampler2D u_transmittance;
+        uniform sampler3D u_scattering;
+        void main() {
+          int i = int(gl_FragCoord.x);
+          float height = 5.0;
+          float distance = 0.0;
+          vec3 direction = vec3(0.0, 0.0, 1.0);
+          if (i == 1) { height = -10.0; distance = 5.0; }
+          if (i == 2) { height = -10.0; distance = 20.0; }
+          if (i == 3) { height = 0.0; distance = 10.0; }
+          if (i == 4 || i == 5) {
+            distance = i == 4 ? 20.0 : 5.0;
+            direction.z = -1.0;
+          }
+          if (i >= 6 && i <= 8) {
+            height = 70000.0;
+            distance = i == 8 ? 20000.0 : 5000.0;
+            direction.z = i == 6 ? 1.0 : -1.0;
+          }
+          if (i == 9) {
+            height = 60000.0; distance = 10000.0; direction.z = -1.0;
+          }
+          if (i == 10) { distance = 20.0; direction = vec3(1.0, 0.0, 0.0); }
+          vec3 transmittance;
+          vec3 radiance = sceneGISGlobeSkyRadianceToPoint(
+              u_transmittance, u_scattering, vec3(0.0, 0.0, height),
+              direction, normalize(vec3(0.2, 0.0, 1.0)), distance,
+              i == 10 ? distance : 0.0, transmittance);
+          out_FragColor = vec4(radiance, transmittance.r);
+        }`,
+      ],
+      {
+        width: 11,
+        defines: resources.aerialProgram.fragmentShaderSource.defines,
+        uniformMap: {
+          u_transmittance: () => resources.transmittanceTexture,
+          u_scattering: () => resources.scatteringTexture,
+        },
+      },
+    );
+    for (const pixel of pixels) {
+      expect(pixel.every(Number.isFinite)).toBe(true);
+    }
+    for (const i of [0, 1, 6, 7]) {
+      expect(pixels[i]).toEqual([0.0, 0.0, 0.0, 1.0]);
+    }
+    for (const [clipped, boundary] of [
+      [2, 3],
+      [4, 5],
+      [8, 9],
+    ]) {
+      expect(pixels[clipped]).toEqualEpsilon(pixels[boundary], 0.00001);
+      expect(Math.max(...pixels[boundary].slice(0, 3))).toBeGreaterThan(0.0);
+    }
+    expect(pixels[10].slice(0, 3)).toEqual([0.0, 0.0, 0.0]);
+  }, 120000);
+
   it("keeps Globe aerial color continuous across an elevated opaque receiver", async function () {
     await connectControlledCloudMode("globe", function () {
       effects.showClouds = false;

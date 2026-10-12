@@ -200,9 +200,10 @@ InverseSolidAngle MiePhaseFunction(const Number g, const Number nu) {
   return k * (1.0 + nu * nu) / pow(1.0 + g * g - 2.0 * g * nu, 1.5);
 }
 
-vec4 GetScatteringTextureUvwzFromRMuMuSNu(const AtmosphereParameters atmosphere,
+vec4 GetScatteringTextureUvwzFromGeometry(const AtmosphereParameters atmosphere,
     const Length r, const Number mu, const Number mu_s, const Number nu,
-    const bool ray_r_mu_intersects_ground) {
+    const bool ray_r_mu_intersects_ground, const Length rho,
+    const Area discriminant, const Length height) {
   assert(r >= atmosphere.bottom_radius && r <= atmosphere.top_radius);
   assert(mu >= -1.0 && mu <= 1.0);
   assert(mu_s >= -1.0 && mu_s <= 1.0);
@@ -211,22 +212,17 @@ vec4 GetScatteringTextureUvwzFromRMuMuSNu(const AtmosphereParameters atmosphere,
   // Distance to top atmosphere boundary for a horizontal ray at ground level.
   Length H = sqrt(atmosphere.top_radius * atmosphere.top_radius -
       atmosphere.bottom_radius * atmosphere.bottom_radius);
-  // Distance to the horizon.
-  Length rho =
-      SafeSqrt(r * r - atmosphere.bottom_radius * atmosphere.bottom_radius);
   Number u_r = GetTextureCoordFromUnitRange(rho / H, SCATTERING_TEXTURE_R_SIZE);
 
   // Discriminant of the quadratic equation for the intersections of the ray
   // (r,mu) with the ground (see RayIntersectsGround).
   Length r_mu = r * mu;
-  Area discriminant =
-      r_mu * r_mu - r * r + atmosphere.bottom_radius * atmosphere.bottom_radius;
   Number u_mu;
   if (ray_r_mu_intersects_ground) {
     // Distance to the ground for the ray (r,mu), and its minimum and maximum
     // values over all mu - obtained for (r,-1) and (r,mu_horizon).
     Length d = -r_mu - SafeSqrt(discriminant);
-    Length d_min = r - atmosphere.bottom_radius;
+    Length d_min = height;
     Length d_max = rho;
     u_mu = 0.5 - 0.5 * GetTextureCoordFromUnitRange(d_max == d_min ? 0.0 :
         (d - d_min) / (d_max - d_min), SCATTERING_TEXTURE_MU_SIZE / 2);
@@ -235,7 +231,7 @@ vec4 GetScatteringTextureUvwzFromRMuMuSNu(const AtmosphereParameters atmosphere,
     // minimum and maximum values over all mu - obtained for (r,1) and
     // (r,mu_horizon).
     Length d = -r_mu + SafeSqrt(discriminant + H * H);
-    Length d_min = atmosphere.top_radius - r;
+    Length d_min = atmosphere.top_radius - atmosphere.bottom_radius - height;
     Length d_max = rho + H;
     u_mu = 0.5 + 0.5 * GetTextureCoordFromUnitRange(
         (d - d_min) / (d_max - d_min), SCATTERING_TEXTURE_MU_SIZE / 2);
@@ -258,6 +254,19 @@ vec4 GetScatteringTextureUvwzFromRMuMuSNu(const AtmosphereParameters atmosphere,
 
   Number u_nu = (nu + 1.0) / 2.0;
   return vec4(u_nu, u_mu_s, u_mu, u_r);
+}
+
+vec4 GetScatteringTextureUvwzFromRMuMuSNu(const AtmosphereParameters atmosphere,
+    const Length r, const Number mu, const Number mu_s, const Number nu,
+    const bool ray_r_mu_intersects_ground) {
+  Length rho =
+      SafeSqrt(r * r - atmosphere.bottom_radius * atmosphere.bottom_radius);
+  Length r_mu = r * mu;
+  Area discriminant =
+      r_mu * r_mu - r * r + atmosphere.bottom_radius * atmosphere.bottom_radius;
+  return GetScatteringTextureUvwzFromGeometry(atmosphere,
+      r, mu, mu_s, nu, ray_r_mu_intersects_ground,
+      rho, discriminant, r - atmosphere.bottom_radius);
 }
 
 vec2 GetIrradianceTextureUvFromRMuS(const AtmosphereParameters atmosphere,
