@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                               |
-| ---------------------- | ----------------------------------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                                                 |
-| Status                 | `active`                                                                            |
-| Planning model         | `extension`                                                                         |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                          |
-| Current phase          | R23 completed and visually accepted                                                 |
-| Active phase plan      | [R23](plans/2026-10-12-r23-webgl-street-lighting.md)                                |
-| Active standalone plan | None; [completed street controls](plans/2026-10-12-street-controls-and-location.md) |
-| Architecture contact   | Current task                                                                        |
-| Execution contact      | Current task                                                                        |
-| Last updated           | `2026-10-12`                                                                        |
+| Field                  | Value                                                                |
+| ---------------------- | -------------------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                                  |
+| Status                 | `active`                                                             |
+| Planning model         | `extension`                                                          |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)           |
+| Current phase          | R23 completed and visually accepted                                  |
+| Active phase plan      | [R23](plans/2026-10-12-r23-webgl-street-lighting.md)                 |
+| Active standalone plan | None; [completed scope](plans/2026-10-12-street-reflection-scope.md) |
+| Architecture contact   | Current task                                                         |
+| Execution contact      | Current task                                                         |
+| Last updated           | `2026-10-12`                                                         |
 
 ## Scope
 
@@ -34,6 +34,15 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-12: local reflection probes leave the changing-WebGIS street workflow.
+  [Standalone scope](plans/2026-10-12-street-reflection-scope.md) removes Bistro controls
+  while retaining engine APIs, Specs, the independent example and the Sponza fixture.
+  WebGL quality continues with materials, sky/environment and screen-space reflections;
+  automatic probe placement/refresh and GI expansion are deferred. Older R17 visual
+  findings remain recorded; retaining capture infrastructure does not establish GI support.
+  Maintenance is complete: three E2E cases pass; [review](reviews/2026-10-12-street-reflection-scope.md)
+  records scope, verification and retained tooling limitations. No new rendering phase is active.
 
 - The owner's direct advanced-environment controls and UTC-local equinox placement
   are complete. [Standalone maintenance](plans/2026-10-12-street-controls-and-location.md)

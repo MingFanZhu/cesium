@@ -371,3 +371,12 @@ shadow-storage cost. On 2026-10-12 the owner authorizes its checkpoint and conti
 After R23, [standalone UI/location maintenance](2026-10-12-street-controls-and-location.md)
 fulfills the owner's request for direct advanced-environment controls and a Greenwich
 spring-equinox placement. Three related E2E cases pass; no new quality phase is activated.
+
+### WebGIS reflection scope, 2026-10-12
+
+The owner prioritizes frequently changing WebGIS scenes without an editor/runtime split.
+The [street scope maintenance](2026-10-12-street-reflection-scope.md) removes local probe
+capture from the Bistro workflow while preserving optional engine infrastructure, tests
+and reference examples. Dynamic placement/refresh is deferred; current WebGL quality work
+prioritizes material response, sky/environment reflection and SSR. No diffuse GI phase is
+activated, and the earlier R17 technical results and outstanding visual limits remain valid.

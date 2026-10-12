@@ -12,7 +12,6 @@ export default function createStreetControls(options) {
     ssr,
     ssil,
     taa,
-    probeOptions,
     views,
   } = options;
   const refresh = () => {
@@ -194,24 +193,5 @@ export default function createStreetControls(options) {
   ]);
   render(aa, "specularAA", "高光抗锯齿");
 
-  const probes = gui.addFolder("局部探针（手动捕获）").close();
-  const captureButton = probes
-    .add(probeOptions, "capture")
-    .name("捕获 / 更新局部环境");
-  for (const [property, label] of [
-    ["show", "启用局部探针"],
-    ["occlusion", "环境遮挡"],
-    ["reflections", "局部镜面反射"],
-  ]) {
-    bind(probes, probeOptions, property, label, [], () => {
-      probeOptions.apply();
-      refresh();
-    });
-  }
-  probes.add(probeOptions, "x", -100, 150, 0.5).name("探针 X（米）");
-  probes.add(probeOptions, "y", -100, 100, 0.5).name("探针 Y（米）");
-  probes.add(probeOptions, "z", 0.5, 40, 0.5).name("探针 Z（米）");
-  probes.add(probeOptions, "range", 5, 60, 1).name("水平半宽（米）");
   gui.add(state, "exportConfig").name("导出验收配置");
-  return captureButton;
 }

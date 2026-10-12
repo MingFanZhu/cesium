@@ -575,23 +575,25 @@ const gui = new GUI({
   width: street ? 330 : 245,
   container: document.getElementById("controls"),
 });
-const probeCaptureButton = street
-  ? createStreetControls({
-      gui,
-      viewer,
-      state,
-      atmosphere,
-      lighting,
-      rendering,
-      effects,
-      autoExposure,
-      ssr,
-      ssil,
-      taa,
-      probeOptions,
-      views,
-    })
-  : createReferenceControls();
+let probeCaptureButton;
+if (street) {
+  createStreetControls({
+    gui,
+    viewer,
+    state,
+    atmosphere,
+    lighting,
+    rendering,
+    effects,
+    autoExposure,
+    ssr,
+    ssil,
+    taa,
+    views,
+  });
+} else {
+  probeCaptureButton = createReferenceControls();
+}
 
 function createReferenceControls() {
   gui
@@ -892,9 +894,8 @@ exposeExample(
   gui,
   {
     state,
-    ...(street ? { rendering } : { baseline, trial }),
+    ...(street ? { rendering } : { baseline, trial, probeOptions }),
     models,
-    probeOptions,
     taa,
     specularAA,
     ssil,

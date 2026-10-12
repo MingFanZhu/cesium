@@ -149,6 +149,13 @@ for (const world of ["planar", "globe"]) {
       0,
     );
     await expect(page.locator("#controls")).not.toContainText(/基线 A|实验 B/);
+    await expect(page.locator("#controls")).not.toContainText("局部探针");
+    expect(
+      await page.evaluate(() => ({
+        controls: window.example.probeOptions,
+        collection: window.example.viewer.scene._sceneGISReflectionProbes,
+      })),
+    ).toEqual({ controls: undefined, collection: undefined });
     const location = await page.evaluate(async () => {
       const C = await import("/Build/CesiumUnminified/index.js");
       const e = window.example;
@@ -417,6 +424,9 @@ for (const world of ["planar", "globe"]) {
     );
     await page.waitForFunction(() => window.example?.state.ready);
     await expect(page.locator("#error")).toBeEmpty();
+    expect(
+      await page.evaluate(() => typeof window.example.probeOptions.capture),
+    ).toBe("function");
     const before = await page.evaluate(() => window.example.state.snapshot());
     // The initial overview must be compatible with the standard surface controller.
     const localPosition = await page.evaluate(async (mode) => {
