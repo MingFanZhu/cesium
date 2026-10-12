@@ -116,6 +116,7 @@ scene.backgroundColor = C.Color.fromCssColorString("#8295a7");
 scene.msaaSamples = 1;
 scene.postProcessStages.fxaa.enabled = false;
 scene.postProcessStages.exposure = 1;
+scene.postProcessStages.tonemapper = C.Tonemapper.PBR_NEUTRAL;
 scene.shadowMap.size = 2048;
 scene.shadowMap.maximumDistance = street ? 300 : 60;
 scene.shadowMap.softShadows = true;
@@ -147,6 +148,31 @@ const fixedSH = [
 ];
 const fixedMap = "/Specs/Data/EnvironmentMap/kiara_6_afternoon_2k_ibl.ktx2";
 const ibl = new C.ImageBasedLighting();
+// These are authored example balances, not geometric sky visibility or GI.
+const lightingPresets = {
+  原始参数: {
+    exposure: 1,
+    diffuse: 1,
+    specular: 1,
+    shadowDarkness: 0.3,
+    shadowSize: 2048,
+    shadowDistance: street ? 300 : 60,
+    softShadows: true,
+  },
+  街道日光: {
+    exposure: 2.5,
+    diffuse: 0.5,
+    specular: 1,
+    shadowDarkness: 0,
+    shadowSize: 2048,
+    shadowDistance: 300,
+    softShadows: true,
+  },
+};
+const lighting = {
+  preset: street ? "街道日光" : "原始参数",
+  ...lightingPresets[street ? "街道日光" : "原始参数"],
+};
 const environmentDefaults = Object.freeze({
   mode: "物理大气",
   day: 172,
@@ -156,7 +182,7 @@ const environmentDefaults = Object.freeze({
   backgroundRadianceScale: 3,
   aerialRadianceScale: 1,
   surfaceRadianceScale: 3,
-  exposure: 1,
+  exposure: lighting.exposure,
   showHeightFog: false,
   heightFogDensity: 0.0002,
   heightFogHeightFalloff: 0.0002,
@@ -244,6 +270,11 @@ let manifest;
 // Downward inspection poses retain the standard surface-navigation controls.
 const views = street
   ? {
+      餐馆街景: {
+        position: [-10, -6.8, 4],
+        target: [4, -3.8, 2.5],
+        yfov: 1.05,
+      },
       街区全景: {
         position: [170, -180, 145],
         target: [24, -4, 12],
@@ -306,7 +337,7 @@ const views = street
 const state = {
   ready: false,
   comparison: "实验 B",
-  view: street ? "街道近景" : "俯瞰全景",
+  view: street ? "餐馆街景" : "俯瞰全景",
   animate: false,
   resetView() {
     const view = views[state.view];
@@ -360,6 +391,27 @@ const state = {
       `${state.comparison} · ${atmosphere.mode} / 曝光 ${atmosphere.exposure} · ${settings.antialiasing}`;
     scene.requestRender();
   },
+  applyLighting() {
+    ibl.imageBasedLightingFactor.x = lighting.diffuse;
+    ibl.imageBasedLightingFactor.y = lighting.specular;
+    scene.shadowMap.darkness = lighting.shadowDarkness;
+    scene.shadowMap.size = lighting.shadowSize;
+    scene.shadowMap.maximumDistance = lighting.shadowDistance;
+    scene.shadowMap.softShadows = lighting.softShadows;
+    taa.reset();
+    ssr.reset();
+    scene.requestRender();
+  },
+  applyLightingPreset() {
+    const preset = lightingPresets[lighting.preset];
+    if (!preset) {
+      return;
+    }
+    Object.assign(lighting, preset);
+    atmosphere.exposure = preset.exposure;
+    state.applyLighting();
+    state.applyAtmosphere();
+  },
   setTime() {
     viewer.clock.currentTime = C.JulianDate.addHours(
       C.JulianDate.fromIso8601("2026-01-01T00:00:00Z"),
@@ -412,15 +464,14 @@ const state = {
   },
   resetAtmosphere() {
     Object.assign(atmosphere, environmentDefaults);
+    lighting.preset = "自定义";
     state.animate = false;
     state.setAnimation();
+    state.setTime();
     state.applyAtmosphere();
   },
   setAnimation() {
     viewer.clock.shouldAnimate = state.animate;
-    if (!state.animate) {
-      state.setTime();
-    }
   },
   snapshot() {
     return {
@@ -444,6 +495,19 @@ const state = {
         temporalFiltering: ssr.temporalFiltering,
       },
       lighting: {
+        preset: street ? lighting.preset : undefined,
+        imageBasedLightingFactor: C.Cartesian2.pack(
+          ibl.imageBasedLightingFactor,
+          [],
+        ),
+        toneMapper: scene.postProcessStages.tonemapper,
+        shadows: {
+          enabled: viewer.shadows,
+          darkness: scene.shadowMap.darkness,
+          size: scene.shadowMap.size,
+          maximumDistance: scene.shadowMap.maximumDistance,
+          softShadows: scene.shadowMap.softShadows,
+        },
         source: atmosphere.mode,
         directionLocal: effects.enabled
           ? undefined
@@ -507,7 +571,49 @@ gui
   .name("固定视角")
   .onChange(state.resetView);
 gui.add(state, "resetView").name("恢复固定视角");
-const exposureFolder = gui.addFolder("自动曝光 / 人眼适应");
+if (street) {
+  const lightingFolder = gui.addFolder("街道光照与阴影");
+  lightingFolder
+    .add(lighting, "preset", [...Object.keys(lightingPresets), "自定义"])
+    .name("光照参数对照")
+    .listen()
+    .onChange(state.applyLightingPreset);
+  const lightingChanged = () => {
+    lighting.preset = "自定义";
+    state.applyLighting();
+  };
+  lightingFolder
+    .add(lighting, "diffuse", 0, 1, 0.05)
+    .name("天空漫反射权重")
+    .listen()
+    .onChange(lightingChanged);
+  lightingFolder
+    .add(lighting, "specular", 0, 1, 0.05)
+    .name("环境镜面权重")
+    .listen()
+    .onChange(lightingChanged);
+  lightingFolder
+    .add(lighting, "shadowDarkness", 0, 1, 0.05)
+    .name("阴影内直射保留")
+    .listen()
+    .onChange(lightingChanged);
+  lightingFolder
+    .add(lighting, "shadowSize", { 2048: 2048, 4096: 4096 })
+    .name("每级阴影分辨率")
+    .listen()
+    .onChange(lightingChanged);
+  lightingFolder
+    .add(lighting, "shadowDistance", 60, 500, 10)
+    .name("阴影距离（米）")
+    .listen()
+    .onChange(lightingChanged);
+  lightingFolder
+    .add(lighting, "softShadows")
+    .name("阴影柔化")
+    .listen()
+    .onChange(lightingChanged);
+}
+const exposureFolder = gui.addFolder("自动曝光 / 人眼适应").close();
 exposureFolder.add(autoExposure, "enabled").name("自动曝光").listen();
 exposureFolder.add(autoExposure, "locked").name("锁定当前曝光").listen();
 exposureFolder
@@ -555,7 +661,10 @@ atmosphereFolder
   .add(atmosphere, "exposure", 0.1, 4, 0.05)
   .name("曝光倍率")
   .listen()
-  .onChange(state.applyAtmosphere);
+  .onChange(() => {
+    lighting.preset = "自定义";
+    state.applyAtmosphere();
+  });
 atmosphereFolder
   .add(atmosphere, "showAtmosphere")
   .name("物理天空")
@@ -578,7 +687,7 @@ atmosphereFolder
   .onChange(state.applyAtmosphere);
 atmosphereFolder
   .add(atmosphere, "surfaceRadianceScale", 0, 8, 0.1)
-  .name("物体光照亮度")
+  .name(street ? "太阳与天空总倍率" : "物体光照亮度")
   .listen()
   .onChange(state.applyAtmosphere);
 const fogFolder = atmosphereFolder.addFolder("高度雾").close();
@@ -773,6 +882,17 @@ const removeError = scene.renderError.addEventListener((...args) => {
 const removeAtmosphereError = effects.errorEvent.addEventListener((error) => {
   document.getElementById("error").textContent = error.message;
 });
+const clockYearStart = C.JulianDate.fromIso8601("2026-01-01T00:00:00Z");
+const removeClockSync = viewer.clock.onTick.addEventListener((clock) => {
+  const seconds = C.JulianDate.secondsDifference(
+    clock.currentTime,
+    clockYearStart,
+  );
+  const day = Math.floor(seconds / 86400);
+  atmosphere.day = day + 1;
+  atmosphere.hour = (seconds - day * 86400) / 3600;
+  state.animate = clock.shouldAnimate;
+});
 exposeExample(
   viewer,
   gui,
@@ -790,6 +910,7 @@ exposeExample(
     ao,
     ibl,
     atmosphere,
+    lighting,
     effects,
     environment,
   },
@@ -798,6 +919,7 @@ exposeExample(
     panelButton.removeEventListener("click", togglePanels);
     removeError();
     removeAtmosphereError();
+    removeClockSync();
     removeReady?.();
     viewer.removeController(effects);
     if (environment) {
@@ -808,6 +930,7 @@ exposeExample(
   },
 );
 state.resetView();
+state.applyLighting();
 state.applyAtmosphere();
 
 async function addModel(

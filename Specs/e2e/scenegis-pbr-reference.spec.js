@@ -138,7 +138,63 @@ for (const world of ["planar", "globe"]) {
     expect(before.layout).toBe("bistro-street");
     expect(before.asset).toBe("scenegis-bistro-v5.2-20260921");
     expect(before.textures).toBe("bistro-delivery-1k");
-    expect(before.view).toBe("街道近景");
+    expect(before.view).toBe("餐馆街景");
+    expect(before.lighting.exposure).toBe(2.5);
+    expect(before.lighting.imageBasedLightingFactor).toEqual([0.5, 1]);
+    expect(before.lighting.toneMapper).toBe("PBR_NEUTRAL");
+    expect(before.lighting.shadows).toEqual({
+      enabled: true,
+      darkness: 0,
+      size: 2048,
+      maximumDistance: 300,
+      softShadows: true,
+    });
+    await page
+      .getByLabel("光照参数对照", { exact: true })
+      .selectOption("原始参数");
+    const originalLighting = await page.evaluate(() =>
+      window.example.state.snapshot(),
+    );
+    expectCamera(originalLighting.camera, before.camera);
+    expect(originalLighting.time).toBe(before.time);
+    expect(originalLighting.settings).toEqual(before.settings);
+    expect(originalLighting.lighting.autoExposure).toEqual(
+      before.lighting.autoExposure,
+    );
+    expect(originalLighting.lighting.exposure).toBe(1);
+    expect(originalLighting.lighting.imageBasedLightingFactor).toEqual([1, 1]);
+    expect(originalLighting.lighting.shadows.darkness).toBe(0.3);
+    expect(originalLighting.lighting.shadows.size).toBe(2048);
+    await page
+      .getByLabel("光照参数对照", { exact: true })
+      .selectOption("街道日光");
+    const restoredLighting = await page.evaluate(() =>
+      window.example.state.snapshot(),
+    );
+    expectCamera(restoredLighting.camera, before.camera);
+    expect(restoredLighting.time).toBe(before.time);
+    expect(restoredLighting.lighting).toEqual(before.lighting);
+    await page
+      .getByRole("button", { name: "自动曝光 / 人眼适应", exact: false })
+      .click();
+    await page.getByLabel("自动曝光", { exact: true }).check();
+    await page.waitForFunction(() => window.example.autoExposure.ready);
+    await page.getByLabel("锁定当前曝光", { exact: true }).check();
+    await page
+      .getByLabel("光照参数对照", { exact: true })
+      .selectOption("原始参数");
+    const automatic = await page.evaluate(() =>
+      window.example.state.snapshot(),
+    );
+    expectCamera(automatic.camera, before.camera);
+    expect(automatic.time).toBe(before.time);
+    expect(automatic.lighting.autoExposure.enabled).toBe(true);
+    expect(automatic.lighting.autoExposure.locked).toBe(true);
+    await page.getByLabel("自动曝光", { exact: true }).uncheck();
+    await page.getByLabel("锁定当前曝光", { exact: true }).uncheck();
+    await page
+      .getByLabel("光照参数对照", { exact: true })
+      .selectOption("街道日光");
     expect(await page.evaluate(() => window.example.models.length)).toBe(1);
     expect(
       await page.evaluate(
@@ -157,6 +213,32 @@ for (const world of ["planar", "globe"]) {
     expect(
       (await page.evaluate(() => window.example.state.snapshot())).time,
     ).toBe("2026-06-21T14:48:00Z");
+    // Advance the actual Clock; pausing must retain the visible time, not restore
+    // the last edited hour. This also verifies the Clock -> GUI synchronization.
+    await page.evaluate(async () => {
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const clock = window.example.viewer.clock;
+      clock.currentTime = C.JulianDate.fromIso8601("2026-06-21T15:03:12Z");
+      clock.onTick.raiseEvent(clock);
+    });
+    await page.getByLabel("播放时间（太阳）", { exact: true }).check();
+    await expect
+      .poll(
+        async () =>
+          (await page.evaluate(() => window.example.state.snapshot())).time,
+      )
+      .not.toBe("2026-06-21T15:03:12Z");
+    await page.getByLabel("播放时间（太阳）", { exact: true }).uncheck();
+    const paused = await page.evaluate(() => window.example.state.snapshot());
+    expect(paused.time).toMatch(/^2026-06-21T15:03:/);
+    expect(paused.atmosphere.hour).toBeGreaterThan(15.05);
+    expect(paused.atmosphere.hour).toBeLessThan(15.1);
+    expect(paused.animate).toBe(false);
+    // Use the native tick with animation disabled to prove pause is stable.
+    await page.evaluate(() => window.example.viewer.clock.tick());
+    expect(
+      (await page.evaluate(() => window.example.state.snapshot())).time,
+    ).toBe(paused.time);
     await page.screenshot({ path: testInfo.outputPath("bistro-street.png") });
     await page.getByLabel("固定视角", { exact: true }).selectOption("街区全景");
     await page.screenshot({ path: testInfo.outputPath("bistro-overview.png") });
@@ -375,8 +457,8 @@ for (const world of ["planar", "globe"]) {
     expect(
       (await page.evaluate(() => window.example.state.snapshot())).time,
     ).toBe("2026-06-21T23:00:00Z");
-    await page.getByLabel("曝光", { exact: true }).fill("1.5");
-    await page.getByLabel("曝光", { exact: true }).press("Tab");
+    await page.getByLabel("曝光倍率", { exact: true }).fill("1.5");
+    await page.getByLabel("曝光倍率", { exact: true }).press("Tab");
     await page.getByLabel("物体光照亮度", { exact: true }).fill("2");
     await page.getByLabel("物体光照亮度", { exact: true }).press("Tab");
     await page.getByRole("button", { name: /高度雾/ }).click();

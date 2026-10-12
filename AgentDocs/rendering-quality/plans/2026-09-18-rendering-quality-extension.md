@@ -356,3 +356,14 @@ Preserve prior visual gates and the deferred WebGPU/P4n branch. Next, establish 
 Bistro direct-light, sky/environment, shadow, material and HDR/exposure baseline; evaluate
 AO, reflections and SSIL by visible benefit afterward. No new implementation phase is
 activated by the backport.
+
+After backport checkpoint `16422ff2f4`, the owner authorizes
+[R23 street lighting](2026-10-12-r23-webgl-street-lighting.md). First qualify native
+direct/environment balance, shadow visibility/precision and HDR exposure on the same
+Bistro asset and fixed views. Existing controls are preferred; new algorithms and
+physical/API semantic changes require a separate decision. Older visual gates remain
+recorded independently. R23 is the sole active implementation phase.
+
+R23 is complete and owner accepted; [review](../reviews/2026-10-12-r23-webgl-street-lighting.md)
+records three passing E2E cases, matched restaurant images and unchanged default GPU/
+shadow-storage cost. On 2026-10-12 the owner authorizes its checkpoint and continued work.
