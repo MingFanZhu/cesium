@@ -2,6 +2,7 @@
 import * as C from "/Build/CesiumUnminified/index.js";
 import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
 import exposeExample from "/Test/example-lifecycle.js";
+import createStreetControls from "./PBR街道面板.js";
 
 const params = new URLSearchParams(window.location.search);
 const planar = params.get("world") !== "globe";
@@ -22,8 +23,8 @@ panelButton.addEventListener("click", togglePanels);
 const local = "./pbr-data/local/";
 const intel = `${local}${original ? "" : "2k/"}`;
 const khronos = `${local}khronos/Models/`;
-const longitude = -75.596;
-const latitude = 40.038;
+const longitude = street ? 0 : -75.596;
+const latitude = street ? 51.4779 : 40.038;
 const frame = planar
   ? C.Matrix4.IDENTITY
   : C.Transforms.eastNorthUpToFixedFrame(
@@ -120,7 +121,10 @@ scene.postProcessStages.tonemapper = C.Tonemapper.PBR_NEUTRAL;
 scene.shadowMap.size = 2048;
 scene.shadowMap.maximumDistance = street ? 300 : 60;
 scene.shadowMap.softShadows = true;
-viewer.clock.currentTime = C.JulianDate.fromIso8601("2026-06-21T19:00:00Z");
+const initialTime = C.JulianDate.fromIso8601(
+  street ? "2026-03-20T14:00:00Z" : "2026-06-21T19:00:00Z",
+);
+viewer.clock.currentTime = C.JulianDate.clone(initialTime);
 viewer.clock.shouldAnimate = false;
 
 function point(position) {
@@ -149,40 +153,24 @@ const fixedSH = [
 const fixedMap = "/Specs/Data/EnvironmentMap/kiara_6_afternoon_2k_ibl.ktx2";
 const ibl = new C.ImageBasedLighting();
 // These are authored example balances, not geometric sky visibility or GI.
-const lightingPresets = {
-  原始参数: {
-    exposure: 1,
-    diffuse: 1,
-    specular: 1,
-    shadowDarkness: 0.3,
-    shadowSize: 2048,
-    shadowDistance: street ? 300 : 60,
-    softShadows: true,
-  },
-  街道日光: {
-    exposure: 2.5,
-    diffuse: 0.5,
-    specular: 1,
-    shadowDarkness: 0,
-    shadowSize: 2048,
-    shadowDistance: 300,
-    softShadows: true,
-  },
-};
 const lighting = {
-  preset: street ? "街道日光" : "原始参数",
-  ...lightingPresets[street ? "街道日光" : "原始参数"],
+  diffuse: street ? 0.5 : 1,
+  specular: 1,
+  shadowDarkness: street ? 0 : 0.3,
+  shadowSize: 2048,
+  shadowDistance: street ? 300 : 60,
+  softShadows: true,
 };
 const environmentDefaults = Object.freeze({
   mode: "物理大气",
-  day: 172,
-  hour: 19,
+  day: street ? 79 : 172,
+  hour: street ? 14 : 19,
   showAtmosphere: true,
   showAerialPerspective: true,
   backgroundRadianceScale: 3,
   aerialRadianceScale: 1,
   surfaceRadianceScale: 3,
-  exposure: lighting.exposure,
+  exposure: street ? 2.5 : 1,
   showHeightFog: false,
   heightFogDensity: 0.0002,
   heightFogHeightFalloff: 0.0002,
@@ -246,6 +234,7 @@ const baseline = Object.freeze({
   aoRadius: 0.7,
 });
 const trial = { ...baseline, ao: true, ssr: true, specularAA: true };
+const rendering = street ? { ...trial } : undefined;
 const models = [];
 const shaders = [];
 let disposed = false;
@@ -336,7 +325,7 @@ const views = street
     };
 const state = {
   ready: false,
-  comparison: "实验 B",
+  ...(street ? {} : { comparison: "实验 B" }),
   view: street ? "餐馆街景" : "俯瞰全景",
   animate: false,
   resetView() {
@@ -371,7 +360,11 @@ const state = {
     taa.reset();
   },
   apply() {
-    const settings = state.comparison === "基线 A" ? baseline : trial;
+    const settings = street
+      ? rendering
+      : state.comparison === "基线 A"
+        ? baseline
+        : trial;
     viewer.shadows = settings.shadows;
     ao.enabled = settings.ao;
     ao.uniforms.intensity = settings.aoIntensity;
@@ -388,7 +381,7 @@ const state = {
     scene.msaaSamples = settings.antialiasing === "4×MSAA" ? 4 : 1;
     scene.postProcessStages.fxaa.enabled = settings.antialiasing === "FXAA";
     document.getElementById("comparison").textContent =
-      `${state.comparison} · ${atmosphere.mode} / 曝光 ${atmosphere.exposure} · ${settings.antialiasing}`;
+      `${street ? "" : `${state.comparison} · `}${atmosphere.mode} / 曝光 ${atmosphere.exposure} · ${settings.antialiasing}`;
     scene.requestRender();
   },
   applyLighting() {
@@ -401,16 +394,6 @@ const state = {
     taa.reset();
     ssr.reset();
     scene.requestRender();
-  },
-  applyLightingPreset() {
-    const preset = lightingPresets[lighting.preset];
-    if (!preset) {
-      return;
-    }
-    Object.assign(lighting, preset);
-    atmosphere.exposure = preset.exposure;
-    state.applyLighting();
-    state.applyAtmosphere();
   },
   setTime() {
     viewer.clock.currentTime = C.JulianDate.addHours(
@@ -464,7 +447,6 @@ const state = {
   },
   resetAtmosphere() {
     Object.assign(atmosphere, environmentDefaults);
-    lighting.preset = "自定义";
     state.animate = false;
     state.setAnimation();
     state.setTime();
@@ -488,14 +470,40 @@ const state = {
           : "sponza-main",
       textures: variant,
       world: planar ? "planar" : "globe",
-      comparison: state.comparison,
-      settings: { ...(state.comparison === "基线 A" ? baseline : trial) },
+      ...(street ? {} : { comparison: state.comparison }),
+      settings: {
+        ...(street
+          ? rendering
+          : state.comparison === "基线 A"
+            ? baseline
+            : trial),
+      },
+      environmentEffects: street
+        ? Object.fromEntries(
+            [
+              "showClouds",
+              "showCloudShadows",
+              "showCrepuscularRays",
+              "cloudQuality",
+              "cloudPreset",
+              "cloudCoverage",
+              "cloudDensity",
+              "cloudRadianceScale",
+              "showMoonlight",
+              "moonlightIntensity",
+              "showBloom",
+              "bloomThreshold",
+              "bloomIntensity",
+              "showLensFlare",
+              "lensFlareIntensity",
+            ].map((key) => [key, effects[key]]),
+          )
+        : undefined,
       reflections: {
         resolutionScale: ssr.resolutionScale,
         temporalFiltering: ssr.temporalFiltering,
       },
       lighting: {
-        preset: street ? lighting.preset : undefined,
         imageBasedLightingFactor: C.Cartesian2.pack(
           ibl.imageBasedLightingFactor,
           [],
@@ -564,241 +572,218 @@ const state = {
 };
 const gui = new GUI({
   title: composite ? "PBR 综合验收" : "Sponza 主体基准",
+  width: street ? 330 : 245,
   container: document.getElementById("controls"),
 });
-gui
-  .add(state, "view", Object.keys(views))
-  .name("固定视角")
-  .onChange(state.resetView);
-gui.add(state, "resetView").name("恢复固定视角");
-if (street) {
-  const lightingFolder = gui.addFolder("街道光照与阴影");
-  lightingFolder
-    .add(lighting, "preset", [...Object.keys(lightingPresets), "自定义"])
-    .name("光照参数对照")
-    .listen()
-    .onChange(state.applyLightingPreset);
-  const lightingChanged = () => {
-    lighting.preset = "自定义";
-    state.applyLighting();
-  };
-  lightingFolder
-    .add(lighting, "diffuse", 0, 1, 0.05)
-    .name("天空漫反射权重")
-    .listen()
-    .onChange(lightingChanged);
-  lightingFolder
-    .add(lighting, "specular", 0, 1, 0.05)
-    .name("环境镜面权重")
-    .listen()
-    .onChange(lightingChanged);
-  lightingFolder
-    .add(lighting, "shadowDarkness", 0, 1, 0.05)
-    .name("阴影内直射保留")
-    .listen()
-    .onChange(lightingChanged);
-  lightingFolder
-    .add(lighting, "shadowSize", { 2048: 2048, 4096: 4096 })
-    .name("每级阴影分辨率")
-    .listen()
-    .onChange(lightingChanged);
-  lightingFolder
-    .add(lighting, "shadowDistance", 60, 500, 10)
-    .name("阴影距离（米）")
-    .listen()
-    .onChange(lightingChanged);
-  lightingFolder
-    .add(lighting, "softShadows")
-    .name("阴影柔化")
-    .listen()
-    .onChange(lightingChanged);
-}
-const exposureFolder = gui.addFolder("自动曝光 / 人眼适应").close();
-exposureFolder.add(autoExposure, "enabled").name("自动曝光").listen();
-exposureFolder.add(autoExposure, "locked").name("锁定当前曝光").listen();
-exposureFolder
-  .add(autoExposure, "exposureCompensation", -3, 3, 0.1)
-  .name("曝光补偿（档）");
-exposureFolder
-  .add(autoExposure, "minimumExposure", 1 / 64, 1, 1 / 64)
-  .name("最低自动倍率");
-exposureFolder
-  .add(autoExposure, "maximumExposure", 1, 64, 0.5)
-  .name("最高自动倍率");
-exposureFolder
-  .add(autoExposure, "speedUp", 0.1, 10, 0.1)
-  .name("适应亮处（档/秒）");
-exposureFolder
-  .add(autoExposure, "speedDown", 0.1, 10, 0.1)
-  .name("适应暗处（档/秒）");
-exposureFolder
-  .add(autoExposure, "centerWeight", 0, 1, 0.05)
-  .name("中央测光权重");
-exposureFolder
-  .add(autoExposure, "lowPercent", 0, 0.4, 0.01)
-  .name("忽略暗部比例");
-exposureFolder
-  .add(autoExposure, "highPercent", 0.6, 1, 0.01)
-  .name("保留亮度上限分位");
-exposureFolder.add(autoExposure, "reset").name("立即重新测光");
-const atmosphereFolder = gui.addFolder("物理大气与光照");
-atmosphereFolder
-  .add(atmosphere, "mode", ["物理大气", "固定 IBL"])
-  .name("照明模式")
-  .listen()
-  .onChange(state.applyAtmosphere);
-atmosphereFolder
-  .add(atmosphere, "day", 1, 365, 1)
-  .name("年内日序（2026）")
-  .listen()
-  .onChange(state.setTime);
-atmosphereFolder
-  .add(atmosphere, "hour", 0, 23.99, 0.05)
-  .name("时间（UTC 小时）")
-  .listen()
-  .onChange(state.setTime);
-atmosphereFolder
-  .add(atmosphere, "exposure", 0.1, 4, 0.05)
-  .name("曝光倍率")
-  .listen()
-  .onChange(() => {
-    lighting.preset = "自定义";
-    state.applyAtmosphere();
-  });
-atmosphereFolder
-  .add(atmosphere, "showAtmosphere")
-  .name("物理天空")
-  .listen()
-  .onChange(state.applyAtmosphere);
-atmosphereFolder
-  .add(atmosphere, "showAerialPerspective")
-  .name("空气透视")
-  .listen()
-  .onChange(state.applyAtmosphere);
-atmosphereFolder
-  .add(atmosphere, "backgroundRadianceScale", 0, 16, 0.1)
-  .name("天空亮度")
-  .listen()
-  .onChange(state.applyAtmosphere);
-atmosphereFolder
-  .add(atmosphere, "aerialRadianceScale", 0, 4, 0.05)
-  .name("空气散射亮度")
-  .listen()
-  .onChange(state.applyAtmosphere);
-atmosphereFolder
-  .add(atmosphere, "surfaceRadianceScale", 0, 8, 0.1)
-  .name(street ? "太阳与天空总倍率" : "物体光照亮度")
-  .listen()
-  .onChange(state.applyAtmosphere);
-const fogFolder = atmosphereFolder.addFolder("高度雾").close();
-fogFolder
-  .add(atmosphere, "showHeightFog")
-  .name("启用高度雾")
-  .listen()
-  .onChange(state.applyAtmosphere);
-fogFolder
-  .add(atmosphere, "heightFogDensity", 0, 0.001, 0.00001)
-  .name("雾密度（每米）")
-  .listen()
-  .onChange(state.applyAtmosphere);
-fogFolder
-  .add(atmosphere, "heightFogHeightFalloff", 0, 0.001, 0.00001)
-  .name("高度衰减（每米）")
-  .listen()
-  .onChange(state.applyAtmosphere);
-fogFolder
-  .add(atmosphere, "heightFogBaseHeight", -10, 100, 1)
-  .name("雾基准高度（米）")
-  .listen()
-  .onChange(state.applyAtmosphere);
-fogFolder
-  .add(atmosphere, "heightFogStartDistance", 0, 100, 1)
-  .name("起雾距离（米）")
-  .listen()
-  .onChange(state.applyAtmosphere);
-fogFolder
-  .add(atmosphere, "heightFogMaximumOpacity", 0, 1, 0.05)
-  .name("最大不透明度")
-  .listen()
-  .onChange(state.applyAtmosphere);
-atmosphereFolder.add(state, "resetAtmosphere").name("恢复大气基准");
-const comparisonController = gui
-  .add(state, "comparison", ["基线 A", "实验 B"])
-  .name("对比状态");
-const trialFolder = gui.addFolder("实验 B 参数");
-trialFolder.add(trial, "specularAA").name("高光抗锯齿").onChange(state.apply);
-comparisonController.onChange(() => {
-  trialFolder.show(state.comparison === "实验 B");
-  state.apply();
-});
-trialFolder.add(trial, "shadows").name("几何阴影").onChange(state.apply);
-trialFolder.add(trial, "ao").name("环境光遮蔽").onChange(state.apply);
-trialFolder
-  .add(trial, "aoIntensity", 0, 2, 0.05)
-  .name("遮蔽强度")
-  .onChange(state.apply);
-trialFolder
-  .add(trial, "aoRadius", 0.1, 2, 0.1)
-  .name("遮蔽半径（米）")
-  .onChange(state.apply);
-trialFolder
-  .add(trial, "ssil")
-  .name("屏幕空间间接光（实验）")
-  .onChange(() => {
-    state.apply();
-    taa.reset();
-    ssr.reset();
-  });
-trialFolder
-  .add(ssil, "intensity", 0, 4, 0.05)
-  .name("间接光强度")
-  .onChange(() => taa.reset());
-trialFolder
-  .add(ssil, "radius", 0.5, 20, 0.5)
-  .name("间接光距离（米）")
-  .onChange(() => taa.reset());
-trialFolder
-  .add(ssil, "thickness", 0.05, 2, 0.05)
-  .name("间接光厚度（米）")
-  .onChange(() => taa.reset());
-trialFolder.add(trial, "ssr").name("屏幕空间反射").onChange(state.apply);
-trialFolder
-  .add(ssr, "resolutionScale", { 半分辨率: 0.5, 全分辨率: 1 })
-  .name("反射分辨率");
-trialFolder.add(ssr, "temporalFiltering").name("反射时域滤波");
-trialFolder.add(ssr, "reset").name("清除反射历史");
-const probeFolder = gui.addFolder("局部探针（手动捕获）").close();
-const probeCaptureButton = probeFolder
-  .add(probeOptions, "capture")
-  .name("捕获 / 更新局部环境");
-probeFolder
-  .add(probeOptions, "show")
-  .name("实验 B 启用探针")
-  .onChange(probeOptions.apply);
-probeFolder
-  .add(probeOptions, "occlusion")
-  .name("环境遮挡")
-  .onChange(probeOptions.apply);
-probeFolder
-  .add(probeOptions, "reflections")
-  .name("局部镜面反射")
-  .onChange(probeOptions.apply);
-probeFolder.add(probeOptions, "x", -100, 150, 0.5).name("探针 X（米）");
-probeFolder.add(probeOptions, "y", -100, 100, 0.5).name("探针 Y（米）");
-probeFolder.add(probeOptions, "z", 0.5, 40, 0.5).name("探针 Z（米）");
-probeFolder.add(probeOptions, "range", 5, 60, 1).name("水平半宽（米）");
-trialFolder
-  .add(trial, "antialiasing", ["无 AA", "FXAA", "TAA", "4×MSAA"])
-  .name("抗锯齿")
-  .onChange(state.apply);
-if (composite) {
+const probeCaptureButton = street
+  ? createStreetControls({
+      gui,
+      viewer,
+      state,
+      atmosphere,
+      lighting,
+      rendering,
+      effects,
+      autoExposure,
+      ssr,
+      ssil,
+      taa,
+      probeOptions,
+      views,
+    })
+  : createReferenceControls();
+
+function createReferenceControls() {
   gui
-    .add(state, "animate")
-    .name(street ? "播放时间（太阳）" : "播放时间（水面与太阳）")
+    .add(state, "view", Object.keys(views))
+    .name("固定视角")
+    .onChange(state.resetView);
+  gui.add(state, "resetView").name("恢复固定视角");
+  const exposureFolder = gui.addFolder("自动曝光 / 人眼适应").close();
+  exposureFolder.add(autoExposure, "enabled").name("自动曝光").listen();
+  exposureFolder.add(autoExposure, "locked").name("锁定当前曝光").listen();
+  exposureFolder
+    .add(autoExposure, "exposureCompensation", -3, 3, 0.1)
+    .name("曝光补偿（档）");
+  exposureFolder
+    .add(autoExposure, "minimumExposure", 1 / 64, 1, 1 / 64)
+    .name("最低自动倍率");
+  exposureFolder
+    .add(autoExposure, "maximumExposure", 1, 64, 0.5)
+    .name("最高自动倍率");
+  exposureFolder
+    .add(autoExposure, "speedUp", 0.1, 10, 0.1)
+    .name("适应亮处（档/秒）");
+  exposureFolder
+    .add(autoExposure, "speedDown", 0.1, 10, 0.1)
+    .name("适应暗处（档/秒）");
+  exposureFolder
+    .add(autoExposure, "centerWeight", 0, 1, 0.05)
+    .name("中央测光权重");
+  exposureFolder
+    .add(autoExposure, "lowPercent", 0, 0.4, 0.01)
+    .name("忽略暗部比例");
+  exposureFolder
+    .add(autoExposure, "highPercent", 0.6, 1, 0.01)
+    .name("保留亮度上限分位");
+  exposureFolder.add(autoExposure, "reset").name("立即重新测光");
+  const atmosphereFolder = gui.addFolder("物理大气与光照");
+  atmosphereFolder
+    .add(atmosphere, "mode", ["物理大气", "固定 IBL"])
+    .name("照明模式")
     .listen()
-    .onChange(state.setAnimation);
+    .onChange(state.applyAtmosphere);
+  atmosphereFolder
+    .add(atmosphere, "day", 1, 365, 1)
+    .name("年内日序（2026）")
+    .listen()
+    .onChange(state.setTime);
+  atmosphereFolder
+    .add(atmosphere, "hour", 0, 23.99, 0.05)
+    .name("时间（UTC 小时）")
+    .listen()
+    .onChange(state.setTime);
+  atmosphereFolder
+    .add(atmosphere, "exposure", 0.1, 4, 0.05)
+    .name("曝光倍率")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  atmosphereFolder
+    .add(atmosphere, "showAtmosphere")
+    .name("物理天空")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  atmosphereFolder
+    .add(atmosphere, "showAerialPerspective")
+    .name("空气透视")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  atmosphereFolder
+    .add(atmosphere, "backgroundRadianceScale", 0, 16, 0.1)
+    .name("天空亮度")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  atmosphereFolder
+    .add(atmosphere, "aerialRadianceScale", 0, 4, 0.05)
+    .name("空气散射亮度")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  atmosphereFolder
+    .add(atmosphere, "surfaceRadianceScale", 0, 8, 0.1)
+    .name(street ? "太阳与天空总倍率" : "物体光照亮度")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  const fogFolder = atmosphereFolder.addFolder("高度雾").close();
+  fogFolder
+    .add(atmosphere, "showHeightFog")
+    .name("启用高度雾")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  fogFolder
+    .add(atmosphere, "heightFogDensity", 0, 0.001, 0.00001)
+    .name("雾密度（每米）")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  fogFolder
+    .add(atmosphere, "heightFogHeightFalloff", 0, 0.001, 0.00001)
+    .name("高度衰减（每米）")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  fogFolder
+    .add(atmosphere, "heightFogBaseHeight", -10, 100, 1)
+    .name("雾基准高度（米）")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  fogFolder
+    .add(atmosphere, "heightFogStartDistance", 0, 100, 1)
+    .name("起雾距离（米）")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  fogFolder
+    .add(atmosphere, "heightFogMaximumOpacity", 0, 1, 0.05)
+    .name("最大不透明度")
+    .listen()
+    .onChange(state.applyAtmosphere);
+  atmosphereFolder.add(state, "resetAtmosphere").name("恢复大气基准");
+  const comparisonController = gui
+    .add(state, "comparison", ["基线 A", "实验 B"])
+    .name("对比状态");
+  const trialFolder = gui.addFolder("实验 B 参数");
+  trialFolder.add(trial, "specularAA").name("高光抗锯齿").onChange(state.apply);
+  comparisonController.onChange(() => {
+    trialFolder.show(state.comparison === "实验 B");
+    state.apply();
+  });
+  trialFolder.add(trial, "shadows").name("几何阴影").onChange(state.apply);
+  trialFolder.add(trial, "ao").name("环境光遮蔽").onChange(state.apply);
+  trialFolder
+    .add(trial, "aoIntensity", 0, 2, 0.05)
+    .name("遮蔽强度")
+    .onChange(state.apply);
+  trialFolder
+    .add(trial, "aoRadius", 0.1, 2, 0.1)
+    .name("遮蔽半径（米）")
+    .onChange(state.apply);
+  trialFolder
+    .add(trial, "ssil")
+    .name("屏幕空间间接光（实验）")
+    .onChange(() => {
+      state.apply();
+      taa.reset();
+      ssr.reset();
+    });
+  trialFolder
+    .add(ssil, "intensity", 0, 4, 0.05)
+    .name("间接光强度")
+    .onChange(() => taa.reset());
+  trialFolder
+    .add(ssil, "radius", 0.5, 20, 0.5)
+    .name("间接光距离（米）")
+    .onChange(() => taa.reset());
+  trialFolder
+    .add(ssil, "thickness", 0.05, 2, 0.05)
+    .name("间接光厚度（米）")
+    .onChange(() => taa.reset());
+  trialFolder.add(trial, "ssr").name("屏幕空间反射").onChange(state.apply);
+  trialFolder
+    .add(ssr, "resolutionScale", { 半分辨率: 0.5, 全分辨率: 1 })
+    .name("反射分辨率");
+  trialFolder.add(ssr, "temporalFiltering").name("反射时域滤波");
+  trialFolder.add(ssr, "reset").name("清除反射历史");
+  const probeFolder = gui.addFolder("局部探针（手动捕获）").close();
+  const probeCaptureButton = probeFolder
+    .add(probeOptions, "capture")
+    .name("捕获 / 更新局部环境");
+  probeFolder
+    .add(probeOptions, "show")
+    .name("实验 B 启用探针")
+    .onChange(probeOptions.apply);
+  probeFolder
+    .add(probeOptions, "occlusion")
+    .name("环境遮挡")
+    .onChange(probeOptions.apply);
+  probeFolder
+    .add(probeOptions, "reflections")
+    .name("局部镜面反射")
+    .onChange(probeOptions.apply);
+  probeFolder.add(probeOptions, "x", -100, 150, 0.5).name("探针 X（米）");
+  probeFolder.add(probeOptions, "y", -100, 100, 0.5).name("探针 Y（米）");
+  probeFolder.add(probeOptions, "z", 0.5, 40, 0.5).name("探针 Z（米）");
+  probeFolder.add(probeOptions, "range", 5, 60, 1).name("水平半宽（米）");
+  trialFolder
+    .add(trial, "antialiasing", ["无 AA", "FXAA", "TAA", "4×MSAA"])
+    .name("抗锯齿")
+    .onChange(state.apply);
+  if (composite) {
+    gui
+      .add(state, "animate")
+      .name(street ? "播放时间（太阳）" : "播放时间（水面与太阳）")
+      .listen()
+      .onChange(state.setAnimation);
+  }
+  gui.add(state, "exportConfig").name("导出验收配置");
+  return probeCaptureButton;
 }
-gui.add(state, "exportConfig").name("导出验收配置");
 if (street && planar) {
   const calibration = {
     async exportCycles() {
@@ -819,7 +804,8 @@ if (street && planar) {
 }
 function applyLocalProbes() {
   if (localProbes) {
-    localProbes.show = probeOptions.show && state.comparison === "实验 B";
+    localProbes.show =
+      probeOptions.show && (street || state.comparison === "实验 B");
     localProbes.reflections = probeOptions.reflections;
     localProbes.occlusion = probeOptions.occlusion;
   }
@@ -867,7 +853,7 @@ async function captureLocalProbes() {
     await localProbes.capture(models);
     const stats = localProbes._state;
     document.getElementById("status").textContent =
-      `局部探针已更新 · ${stats.captureDraws} 次捕获绘制 · A/B 可比较 · 光照变化后请再次更新`;
+      `局部探针已更新 · ${stats.captureDraws} 次捕获绘制 · 光照变化后请再次更新`;
   } catch (error) {
     document.getElementById("error").textContent = error.message;
   } finally {
@@ -892,14 +878,21 @@ const removeClockSync = viewer.clock.onTick.addEventListener((clock) => {
   atmosphere.day = day + 1;
   atmosphere.hour = (seconds - day * 86400) / 3600;
   state.animate = clock.shouldAnimate;
+  if (street) {
+    effects.cloudTime = C.JulianDate.secondsDifference(
+      clock.currentTime,
+      initialTime,
+    );
+    document.getElementById("street-time").textContent =
+      `格林尼治 · ${C.JulianDate.toIso8601(clock.currentTime, 0).replace("T", " ").replace("Z", " UTC / GMT")}`;
+  }
 });
 exposeExample(
   viewer,
   gui,
   {
     state,
-    baseline,
-    trial,
+    ...(street ? { rendering } : { baseline, trial }),
     models,
     probeOptions,
     taa,

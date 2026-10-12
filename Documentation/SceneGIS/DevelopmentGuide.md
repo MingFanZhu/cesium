@@ -1172,8 +1172,8 @@ const indirectLighting = new Cesium.SceneGISScreenSpaceIndirectLighting({
 
 SSIL / SSGI 名称有重叠；这里实现的是局部、可见表面之间的一次漫反射。使用同帧主 MRT 的
 直接漫反射和自发光，避免模糊最终画面和重复反弹 IBL。非 PBR / unlit / 地形只参与遮挡；
-屏幕外和被挡住的几何、玻璃、水和多次反弹不作为源或接收者。Bistro 的实验 B 新增
-“屏幕空间间接光（实验）”开关，默认关闭；独立示例是 `Test/Rendering/屏幕空间间接光.html`，
+屏幕外和被挡住的几何、玻璃、水和多次反弹不作为源或接收者。Bistro 的
+“屏幕空间间接光”分组直接控制当前配置，默认关闭；独立示例是 `Test/Rendering/屏幕空间间接光.html`，
 支持 `world=planar|globe`，可关闭彩墙自发光单独检查直接漫反射的颜色传递。
 
 默认每像素 4 个切片方向、每侧 8 个采样，半分辨率估计后保边重建。`radius` 是米制最大距离，
@@ -1256,6 +1256,6 @@ API 默认关闭，不改变原生固定曝光。`enabled=false` 释放自有 GP
 可调用 reset()，首帧立即测光。全局曝光无法同时解决深阴影和高亮天空的所有局部对比问题。
 
 独立示例 `Test/Rendering/自动曝光.html?world=planar|globe` 默认开启，提供日光/黄昏/夜间
-切换。PBR 综合验收新增“自动曝光 / 人眼适应”面板，默认关闭以保留固定曝光对比基准，且不
-改变 A/B 切换和相机；打开后对两组共用。Cycles 校准导出要求先关闭自动曝光。
+切换。PBR 综合验收的 Bistro 使用“HDR 与曝光”分组直接控制当前配置，默认关闭以保留固定
+曝光基准；Sponza 仍使用“自动曝光 / 人眼适应”分组并共用于 A/B。Cycles 校准导出要求先关闭自动曝光。
 详见 ADR-0100 / SGP-0027 和 R21 review 的实测结果。

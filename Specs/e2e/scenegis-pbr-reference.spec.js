@@ -123,7 +123,7 @@ test("Bistro preserves supplied geometry and restores source material channels",
 });
 
 for (const world of ["planar", "globe"]) {
-  test(`Bistro ${world}: street fixture, atmosphere, comparison, navigation and cleanup`, async ({
+  test(`Bistro ${world}: direct controls, UTC location, clock, navigation and cleanup`, async ({
     page,
   }, testInfo) => {
     const errors = [];
@@ -139,6 +139,37 @@ for (const world of ["planar", "globe"]) {
     expect(before.asset).toBe("scenegis-bistro-v5.2-20260921");
     expect(before.textures).toBe("bistro-delivery-1k");
     expect(before.view).toBe("餐馆街景");
+    expect(before.time).toBe("2026-03-20T14:00:00Z");
+    expect(before.atmosphere.longitude).toBe(0);
+    expect(before.atmosphere.latitude).toBe(51.4779);
+    expect(before.atmosphere.day).toBe(79);
+    expect(before.comparison).toBeUndefined();
+    await expect(page.getByLabel("对比状态", { exact: true })).toHaveCount(0);
+    await expect(page.getByLabel("光照参数对照", { exact: true })).toHaveCount(
+      0,
+    );
+    await expect(page.locator("#controls")).not.toContainText(/基线 A|实验 B/);
+    const location = await page.evaluate(async () => {
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const e = window.example;
+      if (e.environment) {
+        return [
+          C.Math.toDegrees(e.environment.originLongitude),
+          C.Math.toDegrees(e.environment.originLatitude),
+        ];
+      }
+      const origin = C.Matrix4.getTranslation(
+        e.models[0].modelMatrix,
+        new C.Cartesian3(),
+      );
+      const cartographic = C.Cartographic.fromCartesian(origin);
+      return [
+        C.Math.toDegrees(cartographic.longitude),
+        C.Math.toDegrees(cartographic.latitude),
+      ];
+    });
+    expect(location[0]).toBeCloseTo(0, 7);
+    expect(location[1]).toBeCloseTo(51.4779, 7);
     expect(before.lighting.exposure).toBe(2.5);
     expect(before.lighting.imageBasedLightingFactor).toEqual([0.5, 1]);
     expect(before.lighting.toneMapper).toBe("PBR_NEUTRAL");
@@ -150,39 +181,21 @@ for (const world of ["planar", "globe"]) {
       softShadows: true,
     });
     await page
-      .getByLabel("光照参数对照", { exact: true })
-      .selectOption("原始参数");
-    const originalLighting = await page.evaluate(() =>
-      window.example.state.snapshot(),
-    );
-    expectCamera(originalLighting.camera, before.camera);
-    expect(originalLighting.time).toBe(before.time);
-    expect(originalLighting.settings).toEqual(before.settings);
-    expect(originalLighting.lighting.autoExposure).toEqual(
-      before.lighting.autoExposure,
-    );
-    expect(originalLighting.lighting.exposure).toBe(1);
-    expect(originalLighting.lighting.imageBasedLightingFactor).toEqual([1, 1]);
-    expect(originalLighting.lighting.shadows.darkness).toBe(0.3);
-    expect(originalLighting.lighting.shadows.size).toBe(2048);
-    await page
-      .getByLabel("光照参数对照", { exact: true })
-      .selectOption("街道日光");
-    const restoredLighting = await page.evaluate(() =>
-      window.example.state.snapshot(),
-    );
-    expectCamera(restoredLighting.camera, before.camera);
-    expect(restoredLighting.time).toBe(before.time);
-    expect(restoredLighting.lighting).toEqual(before.lighting);
-    await page
-      .getByRole("button", { name: "自动曝光 / 人眼适应", exact: false })
+      .getByRole("button", { name: "物理大气与光照", exact: false })
       .click();
+    await page.getByLabel("天空漫反射权重", { exact: true }).fill("0.65");
+    await page.getByLabel("天空漫反射权重", { exact: true }).press("Tab");
+    expect(
+      await page.evaluate(() => window.example.ibl.imageBasedLightingFactor.x),
+    ).toBe(0.65);
+    await page
+      .getByRole("button", { name: "HDR 与曝光", exact: false })
+      .click();
+    await page.getByLabel("曝光倍率", { exact: true }).fill("1");
+    await page.getByLabel("曝光倍率", { exact: true }).press("Tab");
     await page.getByLabel("自动曝光", { exact: true }).check();
     await page.waitForFunction(() => window.example.autoExposure.ready);
     await page.getByLabel("锁定当前曝光", { exact: true }).check();
-    await page
-      .getByLabel("光照参数对照", { exact: true })
-      .selectOption("原始参数");
     const automatic = await page.evaluate(() =>
       window.example.state.snapshot(),
     );
@@ -192,9 +205,12 @@ for (const world of ["planar", "globe"]) {
     expect(automatic.lighting.autoExposure.locked).toBe(true);
     await page.getByLabel("自动曝光", { exact: true }).uncheck();
     await page.getByLabel("锁定当前曝光", { exact: true }).uncheck();
-    await page
-      .getByLabel("光照参数对照", { exact: true })
-      .selectOption("街道日光");
+    expect(automatic.lighting.exposure).toBe(1);
+    await page.getByLabel("泛光", { exact: true }).check();
+    expect(await page.evaluate(() => window.example.effects.showBloom)).toBe(
+      true,
+    );
+    await page.getByLabel("泛光", { exact: true }).uncheck();
     expect(await page.evaluate(() => window.example.models.length)).toBe(1);
     expect(
       await page.evaluate(
@@ -202,23 +218,29 @@ for (const world of ["planar", "globe"]) {
       ),
     ).toBe(2829226);
     expect(await page.evaluate(() => window.example.water)).toBeUndefined();
-    await page.getByLabel("对比状态", { exact: true }).selectOption("基线 A");
-    const baseline = await page.evaluate(() => window.example.state.snapshot());
-    expectCamera(baseline.camera, before.camera);
-    expect(baseline.atmosphere).toEqual(before.atmosphere);
-    expect(baseline.settings.ao).toBe(false);
-    await page.getByLabel("对比状态", { exact: true }).selectOption("实验 B");
+    await page
+      .getByRole("button", { name: "环境光遮蔽", exact: false })
+      .click();
+    await page.getByLabel("启用环境光遮蔽", { exact: true }).uncheck();
+    expect(await page.evaluate(() => window.example.ao.enabled)).toBe(false);
+    await page.getByLabel("启用环境光遮蔽", { exact: true }).check();
+    await page.getByRole("button", { name: "几何阴影", exact: false }).click();
+    await page.getByLabel("阴影内直射保留", { exact: true }).fill("0.1");
+    await page.getByLabel("阴影内直射保留", { exact: true }).press("Tab");
+    expect(
+      await page.evaluate(() => window.example.viewer.scene.shadowMap.darkness),
+    ).toBe(0.1);
     await page.getByLabel("时间（UTC 小时）", { exact: true }).fill("14.8");
     await page.getByLabel("时间（UTC 小时）", { exact: true }).press("Tab");
     expect(
       (await page.evaluate(() => window.example.state.snapshot())).time,
-    ).toBe("2026-06-21T14:48:00Z");
+    ).toBe("2026-03-20T14:48:00Z");
     // Advance the actual Clock; pausing must retain the visible time, not restore
     // the last edited hour. This also verifies the Clock -> GUI synchronization.
     await page.evaluate(async () => {
       const C = await import("/Build/CesiumUnminified/index.js");
       const clock = window.example.viewer.clock;
-      clock.currentTime = C.JulianDate.fromIso8601("2026-06-21T15:03:12Z");
+      clock.currentTime = C.JulianDate.fromIso8601("2026-03-20T15:03:12Z");
       clock.onTick.raiseEvent(clock);
     });
     await page.getByLabel("播放时间（太阳）", { exact: true }).check();
@@ -227,10 +249,10 @@ for (const world of ["planar", "globe"]) {
         async () =>
           (await page.evaluate(() => window.example.state.snapshot())).time,
       )
-      .not.toBe("2026-06-21T15:03:12Z");
+      .not.toBe("2026-03-20T15:03:12Z");
     await page.getByLabel("播放时间（太阳）", { exact: true }).uncheck();
     const paused = await page.evaluate(() => window.example.state.snapshot());
-    expect(paused.time).toMatch(/^2026-06-21T15:03:/);
+    expect(paused.time).toMatch(/^2026-03-20T15:03:/);
     expect(paused.atmosphere.hour).toBeGreaterThan(15.05);
     expect(paused.atmosphere.hour).toBeLessThan(15.1);
     expect(paused.animate).toBe(false);
@@ -239,6 +261,20 @@ for (const world of ["planar", "globe"]) {
     expect(
       (await page.evaluate(() => window.example.state.snapshot())).time,
     ).toBe(paused.time);
+    await page.getByLabel("年内日序（2026）", { exact: true }).fill("80");
+    await page.getByLabel("年内日序（2026）", { exact: true }).press("Tab");
+    expect(
+      (await page.evaluate(() => window.example.state.snapshot())).time,
+    ).toMatch(/^2026-03-21T15:03:/);
+    await page
+      .getByRole("button", { name: "恢复默认时间与大气", exact: true })
+      .click();
+    expect(
+      (await page.evaluate(() => window.example.state.snapshot())).time,
+    ).toBe(before.time);
+    await expect(page.locator("#street-time")).toContainText(
+      "2026-03-20 14:00:00 UTC / GMT",
+    );
     await page.screenshot({ path: testInfo.outputPath("bistro-street.png") });
     await page.getByLabel("固定视角", { exact: true }).selectOption("街区全景");
     await page.screenshot({ path: testInfo.outputPath("bistro-overview.png") });

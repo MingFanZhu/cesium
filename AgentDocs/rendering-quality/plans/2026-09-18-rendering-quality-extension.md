@@ -367,3 +367,7 @@ recorded independently. R23 is the sole active implementation phase.
 R23 is complete and owner accepted; [review](../reviews/2026-10-12-r23-webgl-street-lighting.md)
 records three passing E2E cases, matched restaurant images and unchanged default GPU/
 shadow-storage cost. On 2026-10-12 the owner authorizes its checkpoint and continued work.
+
+After R23, [standalone UI/location maintenance](2026-10-12-street-controls-and-location.md)
+fulfills the owner's request for direct advanced-environment controls and a Greenwich
+spring-equinox placement. Three related E2E cases pass; no new quality phase is activated.

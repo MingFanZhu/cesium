@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                              |
-| ---------------------- | ------------------------------------------------------------------ |
-| Extension slug         | `rendering-quality`                                                |
-| Status                 | `active`                                                           |
-| Planning model         | `extension`                                                        |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)         |
-| Current phase          | R23 completed and visually accepted                                |
-| Active phase plan      | [R23](plans/2026-10-12-r23-webgl-street-lighting.md)               |
-| Active standalone plan | None; [completed backport](plans/2026-10-12-webgl-fix-backport.md) |
-| Architecture contact   | Current task                                                       |
-| Execution contact      | Current task                                                       |
-| Last updated           | `2026-10-12`                                                       |
+| Field                  | Value                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                                                 |
+| Status                 | `active`                                                                            |
+| Planning model         | `extension`                                                                         |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                          |
+| Current phase          | R23 completed and visually accepted                                                 |
+| Active phase plan      | [R23](plans/2026-10-12-r23-webgl-street-lighting.md)                                |
+| Active standalone plan | None; [completed street controls](plans/2026-10-12-street-controls-and-location.md) |
+| Architecture contact   | Current task                                                                        |
+| Execution contact      | Current task                                                                        |
+| Last updated           | `2026-10-12`                                                                        |
 
 ## Scope
 
@@ -34,6 +34,13 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- The owner's direct advanced-environment controls and UTC-local equinox placement
+  are complete. [Standalone maintenance](plans/2026-10-12-street-controls-and-location.md)
+  removes Bistro A/B gates and places it at Greenwich on March 20, preserving shared
+  Sponza fixtures and the completed R23 record. Three E2E cases pass; the updated panel
+  is shown in-app. [Review](reviews/2026-10-12-street-controls-and-location.md) records
+  verification and time semantics. No new rendering algorithm or phase is activated.
 
 - R23 is authorized after checkpoint `16422ff2f4`: tune the original WebGL Bistro
   direct/environment lighting, shadows and exposure using existing APIs first.
