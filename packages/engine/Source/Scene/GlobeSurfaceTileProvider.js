@@ -51,6 +51,9 @@ import TerrainFillMesh from "./TerrainFillMesh.js";
 import TerrainState from "./TerrainState.js";
 import TileBoundingRegion from "./TileBoundingRegion.js";
 import TileSelectionResult from "./TileSelectionResult.js";
+// SCENEGIS_PATCH_BEGIN SGP-0051: Reserve surface textures before native imagery batching.
+import sceneGISGlobeMaterial from "../SceneGIS/Scene/_private/_SceneGISGlobeMaterial.js";
+// SCENEGIS_PATCH_END SGP-0051
 
 /** @import Context from "../Renderer/Context.js"; */
 /** @import EllipsoidalOccluder from "../Core/EllipsoidalOccluder.js"; */
@@ -2509,6 +2512,17 @@ function addDrawCommandsForTile(tileProvider, tile, frameState) {
   }
 
   maxTextures -= globeTranslucencyState.numberOfTextureUniforms;
+  // SCENEGIS_PATCH_BEGIN SGP-0051: Reserve surface and companion-transparency samplers before imagery batching.
+  maxTextures = sceneGISGlobeMaterial(
+    maxTextures,
+    defined(tileProvider.materialUniformMap)
+      ? tileProvider._surfaceShaderSet.material
+      : undefined,
+    surfaceTile.imagery.length > 0,
+    surfaceTile.vectorData?.show === true,
+    frameState,
+  );
+  // SCENEGIS_PATCH_END SGP-0051
 
   const mesh = surfaceTile.renderedMesh;
   let rtc = mesh.center;

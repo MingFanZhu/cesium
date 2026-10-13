@@ -17,7 +17,9 @@ vec3 sceneGISGlobeGeodeticSurfaceNormal(vec3 positionMC)
 vec3 sceneGISGlobeSurfaceLighting(
     vec3 albedo,
     vec3 positionWC,
-    vec3 surfaceNormalWC)
+    vec3 surfaceNormalWC,
+    vec3 geometryNormalEC,
+    float wetness)
 {
     vec3 radiiSquared = czm_ellipsoidRadii * czm_ellipsoidRadii;
     vec3 geodeticNormal = normalize(positionWC / radiiSquared);
@@ -81,11 +83,10 @@ vec3 sceneGISGlobeSurfaceLighting(
     vec3 wetHighlight = vec3(0.0);
     #ifdef SCENEGIS_SURFACE_WEATHER
     vec3 weatherPositionEC = (czm_view * vec4(positionWC, 1.0)).xyz;
-    vec3 weatherNormalEC = sceneGISWeatherTerrainNormal(weatherPositionEC);
-    vec2 cover = sceneGISWeatherCoverage(weatherPositionEC, weatherNormalEC);
+    vec3 weatherNormalEC = geometryNormalEC;
     wetHighlight = primaryIrradiance * cloudTransmittance * u_surfaceRadianceScale *
         sceneGISWeatherFilm(weatherPositionEC, weatherNormalEC,
-            normalize(czm_viewRotation * u_sceneGISPrimaryLightDirection), cover.x);
+            normalize(czm_viewRotation * u_sceneGISPrimaryLightDirection), wetness);
     #endif
     return wetHighlight + max(albedo, vec3(0.0)) * (1.0 / czm_pi) *
         (primaryIrradiance * cloudTransmittance +

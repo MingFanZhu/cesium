@@ -206,13 +206,20 @@ void main()
       sources[i] = ShaderSource.replaceMain(sources[i], "czm_log_depth_main");
     }
 
+    // SCENEGIS_PATCH_BEGIN SGP-0053: Keep depth-clamped classification volumes closed across logarithmic frustums.
+    const depthArgument = sources.some((source) =>
+      /\s+czm_writeDepthClamp\(/.test(source),
+    )
+      ? "clamp(v_depthFromNearPlusOne, 1.0, czm_farDepthFromNearPlusOne)"
+      : "";
     logSource = `
 void main()
 {
     czm_log_depth_main();
-    czm_writeLogDepth();
+    czm_writeLogDepth(${depthArgument});
 }
 `;
+    // SCENEGIS_PATCH_END SGP-0053
   }
 
   sources.push(logSource);

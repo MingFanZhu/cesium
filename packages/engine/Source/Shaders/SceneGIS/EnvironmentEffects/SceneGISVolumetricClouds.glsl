@@ -67,9 +67,32 @@ vec3 sceneGISGlobeCloudOffset(
 }
 #endif
 
+uniform bool u_linearSceneDepth;
+uniform bool u_sceneDepthPerspective;
+uniform vec4 u_sceneDepthFrustum;
+
 bool sceneGISIsClearResolvedDepth(float rawDepth)
 {
-    return rawDepth == 0.0 || rawDepth == 1.0;
+    return rawDepth == 0.0 || (!u_linearSceneDepth && rawDepth == 1.0);
+}
+
+vec4 sceneGISScreenToEyeCoordinates(vec2 coordinates, float depth)
+{
+    if (!u_linearSceneDepth) {
+        return czm_screenToEyeCoordinates(coordinates, depth);
+    }
+    // Full-camera planes include scene jitter, independently of the stable cloud grid.
+    vec2 plane = mix(u_sceneDepthFrustum.xz, u_sceneDepthFrustum.yw, coordinates);
+    return vec4(plane * (u_sceneDepthPerspective ? depth : 1.0), -depth, 1.0);
+}
+
+vec4 sceneGISWindowToEyeCoordinates(vec2 coordinates, float depth)
+{
+    if (!u_linearSceneDepth) {
+        return czm_windowToEyeCoordinates(coordinates, depth);
+    }
+    return sceneGISScreenToEyeCoordinates(
+        (coordinates - czm_viewport.xy) / czm_viewport.zw, depth);
 }
 const int SCENEGIS_CLOUD_PRIMARY_MAX_STEPS = 64;
 const int SCENEGIS_CLOUD_FINE_MAX_STEPS = 4;

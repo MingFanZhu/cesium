@@ -1059,6 +1059,9 @@ GlobeTranslucencyState.prototype.executeGlobeClassificationCommands = function (
   globeTranslucencyFramebuffer,
   scene,
   passState,
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Split opaque classification from per-segment translucent depth peeling.
+  classificationStage,
+  // SCENEGIS_PATCH_END SGP-0046
 ) {
   const { context } = scene;
   const { uniformState } = context;
@@ -1069,6 +1072,13 @@ GlobeTranslucencyState.prototype.executeGlobeClassificationCommands = function (
     frustumCommands.commands[Pass.TERRAIN_CLASSIFICATION];
   const classificationCommandsLength =
     frustumCommands.indices[Pass.TERRAIN_CLASSIFICATION];
+
+  // SCENEGIS_PATCH_BEGIN SGP-0046: The delayed transparent stage owns the current segment's classification contents.
+  if (classificationStage === "translucent") {
+    this._globeTranslucencyFramebuffer = globeTranslucencyFramebuffer;
+    globeTranslucencyFramebuffer.clearClassification(context, passState);
+  }
+  // SCENEGIS_PATCH_END SGP-0046
 
   if (globeCommandsLength === 0 || classificationCommandsLength === 0) {
     return;
@@ -1087,7 +1097,12 @@ GlobeTranslucencyState.prototype.executeGlobeClassificationCommands = function (
     : undefined;
   // SCENEGIS_PATCH_END SGP-0012
 
-  if (!frontTranslucent || !backTranslucent) {
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Only the material stage classifies opaque Globe faces.
+  if (
+    classificationStage !== "translucent" &&
+    (!frontTranslucent || !backTranslucent)
+  ) {
+    // SCENEGIS_PATCH_END SGP-0046
     // Render classification on opaque faces like normal
     executeCommands(
       classificationCommands,
@@ -1101,6 +1116,11 @@ GlobeTranslucencyState.prototype.executeGlobeClassificationCommands = function (
     );
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Delay depth peeling until this segment's transparency executes.
+  if (classificationStage === "opaque") {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0046
   if (!frontTranslucent && !backTranslucent) {
     // No translucent commands to render. Skip translucent classification.
     return;

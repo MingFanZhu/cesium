@@ -7,7 +7,8 @@
 - Owner role: `architecture`
 - Architecture review: `confirmed`，仅探索范围与阶段边界
 - Architecture reviewer: Current task
-- Created / Updated: `2026-10-13`
+- Created: `2026-10-13`
+- Updated: `2026-10-14`
 - Related discussion: [接入审计](../discussions/2026-10-13-command-integration-and-reuse.md)
 - Related review: [P2](../reviews/2026-10-13-p2-deferred-lighting-qualification.md)
 - ADR / SGP: [ADR-0156](../../../Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md) / SGP-0046；依赖 ADR-0155 / SGP-0045
@@ -17,6 +18,11 @@
 在当前 WebGL 街道画质成果之上，验证统一 G-buffer 与延迟光照能否改善多光源和
 屏幕空间效果的复用、画质及成本，并依据证据决定是否替换现有不透明前向主通道。
 “用了延迟”不是验收标准；必须有材质正确性、兼容性和同条件成本证据。
+
+负责人于 2026-10-13 明确后续顺序：先完成 Globe 接入并验收，再回查 Entity、Primitive、
+glTF Model 与 3D Tiles，清理仅用于完整不透明前向兼容的分支、重复提交、资源和 Shader。
+不保留两套不透明主通道；透明、阴影、拾取等仍按实际用途保留。此工作已设为持续目标，
+Globe 后继清理阶段仅记录稳定目标，进入时再依据当时源码建立 phase plan。
 
 ## Non-goals
 
@@ -30,8 +36,8 @@
 1. 使用独立分支和工作目录；原已验收 WebGL 分支作为稳定对照。
 2. 默认复用现有 API、资源、几何准备、LOD、材质解析和 GPU 资源所有权；先按材质家族
    适配，再决定统一调度缝隙，禁止在底层 draw 入口猜测任意 Shader 的材质语义。
-3. 可以采用不透明/MASK 延迟、透明和特殊内容配套前向的单一混合管线。
-   探索中的调试选择不自动形成永久公开选项。
+3. 以单一不透明/MASK 延迟主通道为目标，透明和特殊内容保留专用通道；不维护完整旧前向
+   兼容模式或为了过渡 Globe 前向另建调度层。探索中的调试选择不形成永久公开选项。
 4. 新实现进入 SceneGIS-owned 区域。长期管线决定形成 ADR；上游最小接点逐项登记 SGP。
 5. 任何旧能力删除、设备门槛提高、AA 语义改变或 API 改变均属重大选择；获得证据后确认。
    已有 ADR 中要求前向材质求值的范围，在具体替换前正式修订，不能只靠本计划覆盖。
@@ -97,3 +103,21 @@ P4a checkpoint `b6a1f17178` 已形成，提交钩子通过。
 Globe、多视锥、影像多 pass 和贴地分类作为后继独立阶段，不自动更改现有用户开关。
 
 P4b 技术验证、review 与负责人视觉 gate 于 2026-10-13 全部通过，批准独立提交后继续 Globe 接入。
+
+P4b checkpoint `5bde0722ba` 已形成，提交钩子通过。后继
+[P4c](2026-10-13-p4c-globe-integration.md) 已完成真实 Globe 入口审计。
+负责人选择 A 后进一步取消完整前向兼容目标，以后续指示为准：不实现过渡 Globe 前向调度，
+P4c 已按 ADR-0161 激活统一延迟的材质与调度设计。新的 API/资源/可见性语义变化仍须依据
+具体证据确认，不以保留旧绘制顺序或逐像素前向等价为目标。
+
+负责人随后将独立 `SceneGISVectorTileLayer` 的延迟适配加入持续目标。完成当前 Globe
+阶段后，在内容覆盖/前向冗余回查中单独资格确认 flat、Globe/Planar ground、fill-extrusion
+与 circle/symbol；已有普通 Primitive 验收不代表这些自有 Shader/DrawCommand 已接入。
+保留 ADR-0071 的地表受光及 circle/symbol 制图颜色语义，复用 source/Worker、瓦片调度、
+样式/状态与 feature identity，验证贴地深度、alpha/层序、遮挡和 pick。它独立于原生
+experimental `HAS_VECTOR_LAYER`；不得混作一条路径。具体阶段激活时再细化设计和测试。
+运行时 goal 当前保持 active；现有工具只支持修改状态，不能改写其文案，本计划保存新增范围。
+
+P4c 于 2026-10-14 完成技术检查、自审与负责人视觉验收；密集分段贴地分类缺口已修复
+并经负责人确认消失，批准形成独立阶段提交。该 checkpoint 完成后，再依据当时源码
+激活不透明前向冗余审计阶段；独立矢量适配继续属于后继范围。

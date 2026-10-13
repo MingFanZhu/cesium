@@ -38,6 +38,7 @@ function createState(collection) {
 const SceneGISLocalLights = {};
 
 SceneGISLocalLights.prepare = function (scene, camera = scene.camera) {
+  scene.frameState._sceneGISLocalLightTextureCount = 0;
   const collection = scene._sceneGISLights;
   if (!collection) {
     return;
@@ -92,6 +93,7 @@ SceneGISLocalLights.prepare = function (scene, camera = scene.camera) {
     }
   }
   if (state.count) {
+    scene.frameState._sceneGISLocalLightTextureCount = 1;
     state.tiles.update(
       state.count,
       camera,

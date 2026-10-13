@@ -8,6 +8,7 @@ export default defineConfig({
     "scenegis-tiled-lighting.spec.js",
     "scenegis-deferred-styling.spec.js",
     "scenegis-deferred-primitives.spec.js",
+    "scenegis-deferred-globe.spec.js",
   ],
   outputDir: "../../Build/Specs/e2e/deferred",
   workers: 1,

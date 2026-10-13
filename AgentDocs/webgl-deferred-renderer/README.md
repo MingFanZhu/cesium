@@ -8,10 +8,10 @@
 | Status                           | `active`                                                          |
 | Planning model                   | `extension`                                                       |
 | Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
-| Current phase                    | P4b completed：普通面图元与 Entity 材质                           |
-| Active phase plan                | [P4b](plans/2026-10-13-p4b-primitive-materials.md)                |
+| Current phase                    | P4c completed：技术、review 与负责人视觉验收通过，形成独立提交    |
+| Active phase plan                | 无；[P4c](plans/2026-10-13-p4c-globe-integration.md) 已完成       |
 | Architecture / execution contact | 当前任务                                                          |
-| Last updated                     | `2026-10-13`                                                      |
+| Last updated                     | `2026-10-14`                                                      |
 
 ## Scope
 
@@ -45,6 +45,26 @@
 - [P3 多光源讨论](discussions/2026-10-13-many-light-scheduling.md)，负责人已选择 A。
 
 ## Current handoff
+
+2026-10-14 负责人反馈密集分段蓝色贴地面不完整；SGP-0053 已修复自动日志深度错误
+discard 分类体的问题。新增覆盖/拾取回归修复前失败、修复后通过；72 项延迟、119 项
+原生分类/贴地图元与一项 GPU 深度契约通过，Globe E2E、单段/20 段截图、release/types
+及静态/补丁审计通过。负责人确认“缺口已消失，通过并提交 P4c”；WDR-P4C-08
+技术与视觉验证完成，P4c gate 通过。本轮形成独立提交后，再进入不透明前向冗余审计。
+
+最新增量：跨段半透明 inverse 已按批准的 12 bytes/pixel 每额外 Tiles 段缓存实现，
+71 项延迟 Specs 通过；远近透明层、分类深度/归属、近物体遮挡、拾取和动态释放有 GPU 证据。
+独立 [Globe 验收页](../../Test/Rendering/延迟地球验收.html) 的八附件、多视锥、高级环境、
+海洋/Fabric、分类/反色、共享屏幕效果组合 E2E 通过。真实 Bistro 单段到三段的 GPU 中位数
+13.45→16.93 ms；原生分段导致材质提交 1537→1818，不能当作单纯缓存或光照成本。
+
+高级空气透视/高度雾和 medium 云接收使用统一深度；无 TAA 的多段可见水面按批准预算
+增加条件 R32F，原水面 MRT 写入最终深度，折射仍读 opaque。TAA 活跃时复用原目标，
+单段/隐藏/关闭效果/resize 的释放已验证。原生 GlobeTranslucencyState 16 项与 TAA 13 项回归通过。
+不扩大已有高级替代效果的重复原生视觉适配，未删除公共参数。完整 release/types 已通过；
+最终 Globe/要素样式/图元三个浏览器场景和定向静态检查已通过，自审确认技术 gate 完成。
+2026-10-14 负责人视觉验收通过，批准独立 P4c 提交；后继阶段须在该提交之后激活。
+以下为按增量保留的历史证据；当前状态以本节和 [P4c review](reviews/2026-10-13-p4c-globe-entry-audit.md) 的最新结论为准。
 
 独立工作目录已构建；本地 Bistro 资产只读复用。原 WebGL 验收目录与 WebGPU 未提交工作
 均保留。P1 诊断页面仍走现有光照；P2 独立页面开始材质 / 光照分离。范围为单视锥 HDR 3D、
@@ -104,3 +124,62 @@ P4b 技术验证完成：101 项相关 Specs 与三项浏览器场景通过；SG
 Entity 不透明状态残留 blending。详见 [P4b review](reviews/2026-10-13-p4b-primitive-qualification.md)。
 [独立图元页面](../../Test/Rendering/延迟图元验收.html) 于 2026-10-13 获负责人确认通过，
 技术、review 与视觉 gate 均通过；形成 P4b 独立 checkpoint 后继续 Globe 接入审计。
+
+P4b checkpoint 为 `5bde0722ba`，提交钩子通过。
+[P4c draft](plans/2026-10-13-p4c-globe-integration.md) 与
+[入口审计](reviews/2026-10-13-p4c-globe-entry-audit.md) 记录真实 Globe 的深度清除、分类、
+影像混合、多视锥、AO/大气和局部灯 sampler 问题。当前
+[讨论](discussions/2026-10-13-globe-scheduling-boundary.md) 已解决：负责人选择 A 后进一步明确
+不必兼容前向，取消临时 Globe 前向调度方案，转为统一不透明延迟的材质与调度设计。
+[ADR-0161](../../Documentation/SceneGIS/Decisions/ADR-0161-unified-opaque-deferred-direction.md)
+记录长期方向；保留现有 API 与场景语义，不要求旧前向绘制顺序和逐像素等价。
+首个增量已实现真实 Globe G-buffer、多层影像独立底色合成、原生/物理/局部光照及天气，
+新增 [Globe GPU Specs](../../packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGlobeSpec.js)。
+后续默认地表深度清除、TAA/water、原生地表大气/雾、基础 terrain/Tiles 分类和裁剪已接入；
+当前 64 项延迟 GPU Specs、12 项天气 Specs 与此前 13 项 TAA 通过。分类按负责人选择 A 按需增加 RGBA16F；
+海洋/Fabric 按后续批准的 A 保存独立水掩码/波纹法线及覆盖色，与分类和要素样式共存时
+最多七附件；裁剪不增加附件。两项既有夜间/云影大测试在 P4b 原源码
+隔离构建上复现相同失败，保留为遗留测试问题。多视锥与整阶段 gate 待完成，
+详见入口审计的增量证据。
+
+后续 fill highlight / opaque underground 增量的 20 项 Globe Specs 通过（含新增两项）；
+保留原生显示顺序和距离渐变，不新增附件或绘制。跨视锥、inverse classification 与其余
+未资格确认分支仍待完成，不能将这些内部增量视为 P4c 整阶段验收。
+
+不透明 inverse classification 已复用同一分类附件与原生 IGNORE_SHOW stencil；保留
+feature/Model 着色、拾取及 AO/SSR/SSIL 乘色，不新增材质绘制或纹理。半透明 inverse
+已按负责人选择 A 接通按需 Tiles 材质缓存，保留主背景并复用延迟光照及原生透明/OIT。
+64 项延迟 Specs 通过，另补强七附件与原生深度拾取比较，缓存上限 60 bytes/pixel，
+关闭/resize/卸载会解除原生深度复制目标的借用引用。Bistro 的材质提交保持 1537 次，
+屏幕光照 2→3 次；1280×800 无要素样式缓存约 50.78 MiB，GPU 中位数 12.57→13.02 ms，
+区间交叠，不外推普遍性能。多视锥仍保留显式限制；按需 RG32F/最多八附件与额外透明层
+缓存的具体预算已获负责人选择 A 批准，布局与跨段时序尚待实施验证，见 ADR-0161。
+
+资源审计同时修复原生 PixelFormat.isColorFormat 遗漏已存在的 RG 格式（SGP-0052）；
+混合 RG32F/RGBA16F 的真实 GPU Spec 通过。原生 Framebuffer 回归 69 项通过、1 项非法
+RGBA/UNSIGNED_INT 夹具失败，已在 P4b 原源码隔离构建复现，不是本轮回归。此修复
+不分配新场景纹理，也不批准多视锥额外附件。当前阶段 upstream 文件增至五项，见 review。
+
+原生 Globe 矢量面/线已接入同一覆盖附件，保留光照后语义和原生分类顺序；八个矢量
+sampler 与 Fabric 共同计入影像分批。两项新增 GPU Specs 与街道多影像/TAA 检查通过，
+最多七附件的已批准边界不变，具体证据见 P4c review。独立 SceneGISVectorTileLayer
+仍为后续阶段；原生透明 Globe 已通过后续独立验证，多视锥仍未完成资格确认。
+
+原生透明 Globe 保留其透明面、分类深度 peel 和拾取通道，不透明面进入同一 G-buffer。
+新增三项 Specs 覆盖前后面、真正的地下透明相机、分类、AO/TAA，以及实测 sampler 溢出的
+修复：透明配套通道在影像分批前计入当前灯表与物理天空纹理，未改变 API 或增加附件。
+街道材质附件仍为 39.0625 MiB、两次延迟光照，整帧 GPU 中位数 13.27 → 14.58 ms，
+波动区间交叠；代价来自原生透明绘制与资源，不能据此声称总显存不变或普遍性能结论。
+独立矢量 direct surface overlay 与透明地球的提前合成组合仍待矢量阶段适配。
+
+负责人已要求作为持续目标推进：先完成 Globe，阶段验收/提交后再清理已接入 Entity、
+Primitive、glTF 与 3D Tiles 的不透明前向兼容冗余。清理覆盖调度、Shader、资源与测试，
+不把必要的透明/阴影/拾取专用路径误当冗余；重大选择仍先确认。
+
+负责人已将独立矢量切片 `SceneGISVectorTileLayer` 的适配纳入持续目标，见总体计划末尾。
+Globe 阶段之后单独验证自有 flat/ground/extrusion/symbol 绘制，不以普通 Primitive 的
+资格或原生 experimental `HAS_VECTOR_LAYER` 支持替代。Fabric 的纹理槽预算与一次材质合成
+已有 GPU 证据：递归计入子材质贴图、影像按剩余容量分批，普通无水 Fabric 不新增附件或
+材质绘制。海洋与 Fabric 的顺序、水掩码排除天气、五/六/七附件组合及释放已有 GPU 证据；
+真实街道 1280×800 开启海洋与双纹理 Fabric 增加 15.625 MiB，不增加材质/光照绘制，
+整帧 GPU 中位数约 14.90 → 15.40 ms。其余 Globe 分支与整阶段 gate 尚未完成。

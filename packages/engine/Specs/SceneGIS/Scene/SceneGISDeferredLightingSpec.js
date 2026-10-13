@@ -18,6 +18,7 @@ import {
   PerspectiveFrustum,
   PerInstanceColorAppearance,
   PixelDatatype,
+  PixelFormat,
   PolygonHierarchy,
   Primitive,
   SceneGISLightCollection,
@@ -29,6 +30,7 @@ import {
   ShadowMode,
   SceneGISScreenSpaceReflections,
   SceneGISScreenSpaceIndirectLighting,
+  SceneGISTemporalAntialiasing,
 } from "../../../index.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -185,6 +187,108 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     scene?.destroyForSpecs();
     borrowed.splice(0).forEach((resource) => resource.destroy());
     scene = renderer = undefined;
+  });
+  [false, true].forEach((logDepth) => {
+    it(`collects multi-frustum materials before lighting and transparency with log depth ${logDepth}`, async function () {
+      setup();
+      const near = await addModel(true);
+      const far = await addModel(true);
+      near.modelMatrix = Matrix4.multiplyByUniformScale(
+        Matrix4.fromTranslation(new Cartesian3(6999998, 0, 980)),
+        3,
+        new Matrix4(),
+      );
+      far.modelMatrix = Matrix4.multiplyByUniformScale(
+        Matrix4.fromTranslation(new Cartesian3(7000000, 0, 0)),
+        300,
+        new Matrix4(),
+      );
+      scene.primitives.add(
+        new Primitive({
+          asynchronous: false,
+          geometryInstances: new GeometryInstance({
+            geometry: BoxGeometry.fromDimensions({
+              dimensions: new Cartesian3(350, 350, 1),
+              vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+            }),
+            modelMatrix: Matrix4.fromTranslation(
+              new Cartesian3(7000000, 0, 500),
+            ),
+            attributes: {
+              color: ColorGeometryInstanceAttribute.fromColor(
+                new Color(1, 0, 0, 0.4),
+              ),
+            },
+          }),
+          appearance: new PerInstanceColorAppearance({
+            translucent: true,
+            flat: true,
+          }),
+        }),
+      );
+      scene.camera.setView({
+        destination: new Cartesian3(7000000, 0, 1000),
+        orientation: {
+          direction: new Cartesian3(0, 0, -1),
+          up: new Cartesian3(0, 1, 0),
+        },
+      });
+      scene.camera.frustum = new PerspectiveFrustum({
+        near: 1,
+        far: 2000,
+        fov: Math.PI / 3,
+        aspectRatio: 1,
+      });
+      scene.farToNearRatio = scene.logarithmicDepthFarToNearRatio = 10;
+      scene.logarithmicDepthBuffer = logDepth;
+      render();
+      expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
+      const before = [color(27), color(36)];
+      renderer.enabled = true;
+      render();
+      expect(color(27)).toEqualEpsilon(before[0], 0.002);
+      expect(color(36)).toEqualEpsilon(before[1], 0.002);
+      expect(renderer._linearDepth.pixelFormat).toBe(PixelFormat.RG);
+      const nearDepth = sample(renderer._linearDepth, 27);
+      const farDepth = sample(renderer._linearDepth, 36);
+      expect(nearDepth[0]).toBeLessThan(30);
+      expect(nearDepth[0]).toBeGreaterThan(10);
+      expect(farDepth[0]).toEqualEpsilon(850, 0.02);
+      expect(nearDepth[1]).toBeLessThan(farDepth[1]);
+      expect(renderer.lightDrawCount).toBe(2);
+      expect(renderer.drawCount).toBe(2);
+      expect(renderer._framebuffer.numberOfColorAttachments).toBe(5);
+      expect(renderer.byteLength).toBe(64 * 64 * 40);
+      expect(scene.pick(new Cartesian2(27, 32)).primitive).toBe(near);
+      render();
+      expect(scene.pickPosition(new Cartesian2(27, 32)).z).toEqualEpsilon(
+        981.5,
+        0.02,
+      );
+      const ssr = new SceneGISScreenSpaceReflections({ scene, enabled: true });
+      const ssil = new SceneGISScreenSpaceIndirectLighting({
+        scene,
+        enabled: true,
+      });
+      const taa = new SceneGISTemporalAntialiasing({ scene, enabled: true });
+      scene.postProcessStages.ambientOcclusion.enabled = true;
+      render();
+      expect(ssr.ready && ssil.ready && taa.ready).toBe(true);
+      expect(renderer._linearDepth).toBe(ssr._state.depth.getColorTexture());
+      expect(renderer._depth).toBeUndefined();
+      expect(renderer.byteLength).toBe(64 * 64 * 32);
+      const shared = renderer._linearDepth;
+      renderer.enabled = false;
+      expect(shared.isDestroyed()).toBe(false);
+      renderer.enabled = true;
+      scene.farToNearRatio = scene.logarithmicDepthFarToNearRatio = 1000000;
+      render();
+      expect(scene._view.frustumCommandsList.length).toBe(1);
+      expect(renderer._linearDepth.pixelFormat).toBe(PixelFormat.RED);
+      expect(renderer._framebuffer.numberOfColorAttachments).toBe(4);
+      expect(shared.isDestroyed()).toBe(true);
+      expect(scene.context._gl.getError()).toBe(0);
+    });
   });
   [false, true].forEach((unlit) => {
     it(`matches native ${unlit ? "unlit" : "PBR"} lighting and retains picking`, async function () {

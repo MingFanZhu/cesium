@@ -382,6 +382,24 @@ GlobeDepth.prototype.executeUpdateDepth = function (
   this._updateDepthCommand.execute(context, passState);
 };
 
+// SCENEGIS_PATCH_BEGIN SGP-0046: Detach an external depth source before its owner releases it.
+GlobeDepth.prototype.releaseDepthSource = function (depthTexture) {
+  const framebuffer = this._updateDepthFramebuffer;
+  if (
+    defined(depthTexture) &&
+    framebuffer.getDepthStencilTexture() === depthTexture
+  ) {
+    framebuffer.destroyFramebuffer();
+    framebuffer.setDepthStencilTexture(undefined);
+    framebuffer.setColorTexture(undefined, 0);
+    this._tempCopyDepthFramebuffer.destroy();
+    this._tempCopyDepthTexture = undefined;
+    this._updateDepthCommand.framebuffer = undefined;
+    this._tempCopyDepthCommand.framebuffer = undefined;
+  }
+};
+// SCENEGIS_PATCH_END SGP-0046
+
 GlobeDepth.prototype.executeCopyColor = function (context, passState) {
   if (defined(this._copyColorCommand)) {
     this._copyColorCommand.execute(context, passState);

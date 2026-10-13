@@ -168,7 +168,7 @@ void main()
     float distanceToPoint = SCENEGIS_PLANAR_BACKGROUND_DISTANCE;
     if (!isClearDepth) {
         // Avoid a lossy log-to-perspective-depth round trip at distant receivers.
-        vec4 eye = czm_windowToEyeCoordinates(
+        vec4 eye = sceneGISWindowToEyeCoordinates(
             gl_FragCoord.xy, rawDepth);
         eye /= eye.w;
         distanceToPoint = u_perspective
@@ -180,7 +180,7 @@ void main()
         : normalize(u_cameraDirection);
     #else
     // Preserve native log-depth precision across large Planar extents.
-    vec4 eye = czm_windowToEyeCoordinates(
+    vec4 eye = sceneGISWindowToEyeCoordinates(
         gl_FragCoord.xy, rawDepth);
     eye /= eye.w;
     vec3 eyeOffset = u_cameraRight * eye.x + u_cameraUp * eye.y;

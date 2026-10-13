@@ -1,4 +1,16 @@
 uniform vec4 u_initialColor;
+// SCENEGIS_PATCH_BEGIN SGP-0051: Expose evaluated Globe material before lighting.
+#define SCENEGIS_DEFERRED_GLOBE_MATERIAL
+#ifdef SCENEGIS_DEFERRED_GLOBE_CAPTURE
+void sceneGISRecordGlobe(vec4 color, vec3 normalEC, vec3 positionEC, float fade, vec3 lightingParameters);
+void sceneGISRecordGlobeEdge(vec3 color);
+void sceneGISRecordGlobeWater(float mask);
+void sceneGISRecordGlobeWaves(vec3 normalEC);
+void sceneGISRecordGlobeFabric(vec4 color);
+vec4 sceneGISComposeGlobeMaterial(vec4 surfaceColor, vec4 materialColor);
+uniform bool u_sceneGISFinalImageryBatch;
+#endif
+// SCENEGIS_PATCH_END SGP-0051
 // SCENEGIS_PATCH_BEGIN SGP-0018: Lit terrain shades direct light before fog and edge composition.
 #if defined(SCENEGIS_GEOMETRY_SHADOW) && (defined(SCENEGIS_GLOBE_SURFACE_LIGHTING) || defined(ENABLE_VERTEX_LIGHTING) || defined(ENABLE_DAYNIGHT_SHADING))
 #define SCENEGIS_DIRECT_SHADOW_RECEIVER
@@ -414,7 +426,12 @@ void main()
 
     float mask = texture(u_waterMask, waterMaskTextureCoordinates).r;
 
-    #ifdef SHOW_REFLECTIVE_OCEAN
+    // SCENEGIS_PATCH_BEGIN SGP-0051: Capture water coverage and prepare waves only in the first material batch.
+    #ifdef SCENEGIS_DEFERRED_GLOBE_CAPTURE
+    sceneGISRecordGlobeWater(mask);
+    #endif
+    #if defined(SHOW_REFLECTIVE_OCEAN) && !defined(SCENEGIS_DEFERRED_GLOBE_BLEND)
+    // SCENEGIS_PATCH_END SGP-0051
     if (mask > 0.0)
     {
         mat3 enuToEye = czm_eastNorthUpToEyeCoordinates(v_positionMC, normalEC);
@@ -429,7 +446,14 @@ void main()
     #endif
 #endif
 
-#ifdef APPLY_MATERIAL
+// SCENEGIS_PATCH_BEGIN SGP-0051: Ocean keeps Fabric coverage separate until screen composition.
+#if defined(APPLY_MATERIAL) && !(defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) && defined(SHOW_REFLECTIVE_OCEAN) && defined(SCENEGIS_DEFERRED_GLOBE_BLEND))
+// SCENEGIS_PATCH_END SGP-0051
+    // SCENEGIS_PATCH_BEGIN SGP-0051: Evaluate Fabric only once after the final imagery batch.
+    #if defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) && !defined(SHOW_REFLECTIVE_OCEAN)
+    if (u_sceneGISFinalImageryBatch) {
+    #endif
+    // SCENEGIS_PATCH_END SGP-0051
     czm_materialInput materialInput;
     materialInput.st = v_textureCoordinates.st;
     materialInput.normalEC = normalize(v_normalEC);
@@ -444,8 +468,52 @@ void main()
 
     czm_material material = czm_getMaterial(materialInput);
     vec4 materialColor = vec4(material.diffuse, material.alpha);
+    // SCENEGIS_PATCH_BEGIN SGP-0051: Keep intermediate imagery alpha valid for source-over composition.
+    #ifdef SCENEGIS_DEFERRED_GLOBE_CAPTURE
+    #ifdef SHOW_REFLECTIVE_OCEAN
+    sceneGISRecordGlobeFabric(materialColor);
+    #else
+    color = sceneGISComposeGlobeMaterial(color, materialColor);
+    }
+    #endif
+    #else
+    // SCENEGIS_PATCH_END SGP-0051
     color = alphaBlend(materialColor, color);
+    // SCENEGIS_PATCH_BEGIN SGP-0051: End the material composition selection.
+    #endif
+    // SCENEGIS_PATCH_END SGP-0051
 #endif
+
+// SCENEGIS_PATCH_BEGIN SGP-0051: Submit surface data without evaluating any light.
+#ifdef SCENEGIS_DEFERRED_GLOBE_CAPTURE
+    #ifdef ENABLE_CLIPPING_POLYGONS
+    clipPolygons(u_clippingDistance, CLIPPING_POLYGON_REGIONS_LENGTH, v_clippingPosition, v_regionIndex);
+    #endif
+    #ifdef SCENEGIS_GLOBE_SURFACE_LIGHTING
+        #ifdef SCENEGIS_GLOBE_SURFACE_TERRAIN_NORMAL
+        vec3 sceneGISDeferredGlobeNormal = normalize(czm_normal3D * v_normalMC);
+        #else
+        vec3 sceneGISDeferredGlobeNormal = normalize(czm_normal3D *
+            sceneGISGlobeGeodeticSurfaceNormal(v_positionMC));
+        #endif
+    sceneGISRecordGlobe(color, sceneGISDeferredGlobeNormal, v_positionEC, fade, vec3(3.0, 0.0, 0.0));
+    #elif defined(ENABLE_VERTEX_LIGHTING)
+    sceneGISRecordGlobe(color, normalize(v_normalEC), v_positionEC, fade,
+        vec3(1.0, u_lambertDiffuseMultiplier, u_vertexShadowDarkness));
+    #elif defined(ENABLE_DAYNIGHT_SHADING)
+    sceneGISRecordGlobe(color, normalEC, v_positionEC, fade, vec3(2.0, 5.0, 0.3));
+    #else
+    sceneGISRecordGlobe(color, normalEC, v_positionEC, fade, vec3(0.0));
+    #endif
+    #ifdef ENABLE_CLIPPING_PLANES
+    if (clipDistance < u_clippingPlanesEdgeStyle.a) {
+        sceneGISRecordGlobeEdge(u_clippingPlanesEdgeStyle.rgb);
+    }
+    #endif
+    out_FragColor = color;
+    return;
+#endif
+// SCENEGIS_PATCH_END SGP-0051
 
 // SCENEGIS_PATCH_BEGIN SGP-0028: Cover composed imagery before surface lighting.
 #ifdef SCENEGIS_SURFACE_WEATHER
@@ -468,7 +536,13 @@ void main()
     vec4 finalColor = vec4(sceneGISGlobeSurfaceLighting(
         color.rgb,
         v_positionMC,
-        sceneGISSurfaceNormalMC), color.a);
+        sceneGISSurfaceNormalMC,
+        #ifdef SCENEGIS_SURFACE_WEATHER
+        weatherNormalEC, weatherCoverage.x
+        #else
+        vec3(0.0), 0.0
+        #endif
+        ), color.a);
 #elif defined(ENABLE_VERTEX_LIGHTING)
 // SCENEGIS_PATCH_END SGP-0009
     float diffuseIntensity = clamp(czm_getLambertDiffuse(czm_lightDirectionEC, normalize(v_normalEC)) * u_lambertDiffuseMultiplier + u_vertexShadowDarkness, 0.0, 1.0);
@@ -746,6 +820,13 @@ vec4 computeWaterColor(vec3 positionEyeCoordinates, vec2 textureCoordinates, mat
 #endif
 
     vec3 normalEC = enuToEye * normalTangentSpace;
+
+    // SCENEGIS_PATCH_BEGIN SGP-0051: Submit the wave normal without evaluating ocean illumination.
+    #ifdef SCENEGIS_DEFERRED_GLOBE_CAPTURE
+    sceneGISRecordGlobeWaves(normalEC);
+    return imageryColor;
+    #endif
+    // SCENEGIS_PATCH_END SGP-0051
 
     const vec3 waveHighlightColor = vec3(0.3, 0.45, 0.6);
 

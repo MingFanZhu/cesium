@@ -2467,7 +2467,7 @@ function executeCommand(
   }
   // SCENEGIS_PATCH_END SGP-0045
 
-  // SCENEGIS_PATCH_BEGIN SGP-0046: Route qualified opaque color draws into the private material pass.
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Route qualified opaque and classification draws into owned surface targets.
   if (scene._sceneGISDeferred?.draw(command, passState)) {
     return;
   }
@@ -2507,6 +2507,9 @@ function executeCommand(
   // SCENEGIS_PATCH_BEGIN SGP-0026: Capture diffuse transport during the original opaque draw.
   command = SceneGISScreenSpaceIndirectLighting.receiver(scene, command);
   // SCENEGIS_PATCH_END SGP-0026
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Water publishes final depth during its original color draw.
+  command = SceneGISWaterFrame.waterCommand(scene, command, passState);
+  // SCENEGIS_PATCH_END SGP-0046
   // SCENEGIS_PATCH_BEGIN SGP-0014: Compose AO at indirect material terms.
   SceneGISAmbientOcclusion.receiver(scene, command).execute(context, passState);
   // SCENEGIS_PATCH_END SGP-0014
@@ -2740,7 +2743,11 @@ function performTranslucentPass(scene, passState, frustumCommands) {
   ) {
     // Fullscreen pass to copy unclassified fragments when alpha < 1.0.
     // Not executed when undefined.
-    invertClassification = scene._invertClassification;
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Compose deferred Tiles through the native transparency schedule.
+    invertClassification = scene._sceneGISDeferred?.enabled
+      ? scene._sceneGISDeferred.inverseClassification
+      : scene._invertClassification;
+    // SCENEGIS_PATCH_END SGP-0046
   }
 
   const executeTranslucentCommands =
@@ -3025,9 +3032,19 @@ function executeCommands(scene, passState) {
     }
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Finish all material segments before their transparency passes.
+  const deferredFrusta =
+    !picking &&
+    scene._sceneGISDeferred?._active &&
+    scene._sceneGISDeferred._multiFrustum;
+  const iterations = deferredFrusta ? numFrustums * 2 : numFrustums;
+  // SCENEGIS_PATCH_END SGP-0046
   // Execute commands in each frustum in back to front order
-  for (let i = 0; i < numFrustums; ++i) {
-    const index = numFrustums - i - 1;
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Repeat only the dedicated transparency schedule for deferred frusta.
+  for (let i = 0; i < iterations; ++i) {
+    const index = numFrustums - (i % numFrustums) - 1;
+    const deferredTransparency = deferredFrusta && i >= numFrustums;
+    // SCENEGIS_PATCH_END SGP-0046
     const frustumCommands = frustumCommandsList[index];
 
     if (scene.mode === SceneMode.SCENE2D) {
@@ -3054,25 +3071,307 @@ function executeCommands(scene, passState) {
       clearStencil.execute(context, passState);
     }
 
-    if (globeTranslucencyState.translucent) {
-      uniformState.updatePass(Pass.GLOBE);
-      globeTranslucencyState.executeGlobeCommands(
-        frustumCommands,
-        executeCommand,
-        globeTranslucencyFramebuffer,
-        scene,
-        passState,
-      );
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Material and lighting precede the separate multi-frustum transparent stage.
+    if (!deferredTransparency) {
+      if (deferredFrusta) {
+        scene._sceneGISDeferred.beginFrustum(index, passState);
+      }
+      if (globeTranslucencyState.translucent) {
+        uniformState.updatePass(Pass.GLOBE);
+        globeTranslucencyState.executeGlobeCommands(
+          frustumCommands,
+          executeCommand,
+          globeTranslucencyFramebuffer,
+          scene,
+          passState,
+        );
+      } else {
+        performPass(frustumCommands, Pass.GLOBE);
+      }
+
+      if (useGlobeDepthFramebuffer) {
+        globeDepth.executeCopyDepth(context, passState);
+      }
+
+      // Retain visible terrain depth before native terrain-test clearing.
+      if (!picking) {
+        scene._sceneGISDeferred?.preserveGlobeDepth(passState);
+      }
+
+      // Draw terrain classification
+      if (!renderTranslucentDepthForPick) {
+        if (globeTranslucencyState.translucent) {
+          uniformState.updatePass(Pass.TERRAIN_CLASSIFICATION);
+          globeTranslucencyState.executeGlobeClassificationCommands(
+            frustumCommands,
+            executeCommand,
+            globeTranslucencyFramebuffer,
+            scene,
+            passState,
+            deferredFrusta ? "opaque" : undefined,
+          );
+        } else {
+          performPass(frustumCommands, Pass.TERRAIN_CLASSIFICATION);
+        }
+      }
+
+      if (clearGlobeDepth) {
+        clearDepth.execute(context, passState);
+        if (useDepthPlane) {
+          depthPlane.execute(context, passState);
+        }
+      }
+
+      let commandCount;
+
+      // Draw edges FIRST - before binding textures to avoid feedback loop
+      performCesium3DTileEdgesPass(scene, passState, frustumCommands);
+
+      if (
+        scene._enableEdgeVisibility &&
+        defined(scene._view) &&
+        defined(scene._view.edgeFramebuffer)
+      ) {
+        // Get edge color texture (attachment 0)
+        const colorTexture = scene._view.edgeFramebuffer.colorTexture;
+        if (defined(colorTexture)) {
+          scene.context.uniformState.edgeColorTexture = colorTexture;
+        } else {
+          scene.context.uniformState.edgeColorTexture =
+            scene.context.defaultTexture;
+        }
+
+        // Get edge ID texture (attachment 1)
+        const idTexture = scene._view.edgeFramebuffer.idTexture;
+        if (defined(idTexture)) {
+          scene.context.uniformState.edgeIdTexture = idTexture;
+        } else {
+          scene.context.uniformState.edgeIdTexture =
+            scene.context.defaultTexture;
+        }
+
+        // Get edge depth texture (attachment 2)
+        const edgeDepthTexture = scene._view.edgeFramebuffer.depthTexture;
+        if (defined(edgeDepthTexture)) {
+          scene.context.uniformState.edgeDepthTexture = edgeDepthTexture;
+        } else {
+          scene.context.uniformState.edgeDepthTexture =
+            scene.context.defaultTexture;
+        }
+      } else {
+        scene.context.uniformState.edgeColorTexture =
+          scene.context.defaultTexture;
+        scene.context.uniformState.edgeIdTexture = scene.context.defaultTexture;
+        scene.context.uniformState.edgeDepthTexture =
+          scene.context.defaultTexture;
+      }
+
+      // Planar fill feature-ID pre-pass: write feature IDs from non-behind
+      // planar fill geometry so that behind fills can test same-object.
+      performPlanarFillIdPass(scene, passState, frustumCommands);
+
+      if (
+        scene._enablePlanarFillId &&
+        defined(scene._view) &&
+        defined(scene._view.planarFillIdFramebuffer)
+      ) {
+        const pfIdTexture = scene._view.planarFillIdFramebuffer.idTexture;
+        uniformState.planarFillIdTexture = defined(pfIdTexture)
+          ? pfIdTexture
+          : context.defaultTexture;
+      } else {
+        uniformState.planarFillIdTexture = context.defaultTexture;
+      }
+
+      // Keep inverse classification in deferred material and native stencil stages.
+      if (
+        !useInvertClassification ||
+        picking ||
+        renderTranslucentDepthForPick ||
+        scene._sceneGISDeferred?.handlesInvertClassification
+      ) {
+        // Common/fastest path. Draw 3D Tiles and classification normally.
+
+        // Draw 3D Tiles
+        commandCount = performPass(frustumCommands, Pass.CESIUM_3D_TILE);
+
+        if (commandCount > 0) {
+          if (useGlobeDepthFramebuffer) {
+            globeDepth.prepareColorTextures(context, clearGlobeDepth);
+            globeDepth.executeUpdateDepth(
+              context,
+              passState,
+              // Preserve native picking of independently captured Tiles.
+              scene._sceneGISDeferred?.tilesDepthTexture ??
+                globeDepth.depthStencilTexture,
+            );
+          }
+
+          // Draw classifications. Modifies 3D Tiles color.
+          if (!renderTranslucentDepthForPick) {
+            // Resolve the native ignore-show stencil before classification color.
+            scene._sceneGISDeferred?.applyInvertClassification(
+              passState,
+              frustumCommands,
+              executeCommand,
+            );
+            commandCount = performPass(
+              frustumCommands,
+              Pass.CESIUM_3D_TILE_CLASSIFICATION,
+            );
+          }
+        }
+      } else {
+        // When the invert classification color is opaque:
+        //    Main FBO (FBO1):                   Main_Color   + Main_DepthStencil
+        //    Invert classification FBO (FBO2) : Invert_Color + Main_DepthStencil
+        //
+        //    1. Clear FBO2 color to vec4(0.0) for each frustum
+        //    2. Draw 3D Tiles to FBO2
+        //    3. Draw classification to FBO2
+        //    4. Fullscreen pass to FBO1, draw Invert_Color when:
+        //           * Main_DepthStencil has the stencil bit set > 0 (classified)
+        //    5. Fullscreen pass to FBO1, draw Invert_Color * czm_invertClassificationColor when:
+        //           * Main_DepthStencil has stencil bit set to 0 (unclassified) and
+        //           * Invert_Color !== vec4(0.0)
+        //
+        // When the invert classification color is translucent:
+        //    Main FBO (FBO1):                  Main_Color         + Main_DepthStencil
+        //    Invert classification FBO (FBO2): Invert_Color       + Invert_DepthStencil
+        //    IsClassified FBO (FBO3):          IsClassified_Color + Invert_DepthStencil
+        //
+        //    1. Clear FBO2 and FBO3 color to vec4(0.0), stencil to 0, and depth to 1.0
+        //    2. Draw 3D Tiles to FBO2
+        //    3. Draw classification to FBO2
+        //    4. Fullscreen pass to FBO3, draw any color when
+        //           * Invert_DepthStencil has the stencil bit set > 0 (classified)
+        //    5. Fullscreen pass to FBO1, draw Invert_Color when:
+        //           * Invert_Color !== vec4(0.0) and
+        //           * IsClassified_Color !== vec4(0.0)
+        //    6. Fullscreen pass to FBO1, draw Invert_Color * czm_invertClassificationColor when:
+        //           * Invert_Color !== vec4(0.0) and
+        //           * IsClassified_Color === vec4(0.0)
+        //
+        // NOTE: Step six when translucent invert color occurs after the TRANSLUCENT pass
+        //
+        scene._invertClassification.clear(context, passState);
+
+        const opaqueClassificationFramebuffer = passState.framebuffer;
+        passState.framebuffer = scene._invertClassification._fbo.framebuffer;
+
+        // Draw normally
+        performPass(frustumCommands, Pass.CESIUM_3D_TILE);
+
+        if (useGlobeDepthFramebuffer) {
+          scene._invertClassification.prepareTextures(context);
+          globeDepth.executeUpdateDepth(
+            context,
+            passState,
+            scene._invertClassification._fbo.getDepthStencilTexture(),
+          );
+        }
+
+        // Set stencil
+        commandCount = performPass(
+          frustumCommands,
+          Pass.CESIUM_3D_TILE_CLASSIFICATION_IGNORE_SHOW,
+        );
+
+        passState.framebuffer = opaqueClassificationFramebuffer;
+
+        // Fullscreen pass to copy classified fragments
+        scene._invertClassification.executeClassified(context, passState);
+        if (frameState.invertClassificationColor.alpha === 1.0) {
+          // Fullscreen pass to copy unclassified fragments when alpha == 1.0
+          scene._invertClassification.executeUnclassified(context, passState);
+        }
+
+        // Clear stencil set by the classification for the next classification pass
+        if (commandCount > 0 && context.stencilBuffer) {
+          clearClassificationStencil.execute(context, passState);
+        }
+
+        // Draw style over classification.
+        commandCount = performPass(
+          frustumCommands,
+          Pass.CESIUM_3D_TILE_CLASSIFICATION,
+        );
+      }
+
+      if (commandCount > 0 && context.stencilBuffer) {
+        clearStencil.execute(context, passState);
+      }
+
+      performVoxelsPass(scene, passState, frustumCommands);
+
+      performPass(frustumCommands, Pass.OPAQUE);
+      // Shade once after the nearest material segment has completed.
+      if (deferredFrusta && index !== 0) {
+        continue;
+      }
+      // Produce native lighting responses before their existing screen resolves.
+      if (!picking && scene._sceneGISDeferred?.light(passState)) {
+        SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+      }
+      // SCENEGIS_PATCH_END SGP-0046
+      // SCENEGIS_PATCH_BEGIN SGP-0026: Resolve standalone diffuse transport before water and transparency.
+      if (
+        !picking &&
+        SceneGISScreenSpaceIndirectLighting.resolve(scene, passState, frustum)
+      ) {
+        SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+      }
+      // SCENEGIS_PATCH_END SGP-0026
+      // SCENEGIS_PATCH_BEGIN SGP-0046: Continue the unified material and light stage.
+      // SCENEGIS_PATCH_END SGP-0046
+      // SCENEGIS_PATCH_BEGIN SGP-0014: Resolve AO-only MRT before water and translucency.
+      const aoResolved =
+        !picking && SceneGISAmbientOcclusion.resolve(scene, passState, frustum);
+      // SCENEGIS_PATCH_END SGP-0014
+      // SCENEGIS_PATCH_BEGIN SGP-0046: Continue the unified material and light stage.
+      // SCENEGIS_PATCH_END SGP-0046
+      // SCENEGIS_PATCH_BEGIN SGP-0016: Resolve main-pass material MRT before water and translucency.
+      if (
+        !picking &&
+        (aoResolved ||
+          SceneGISScreenSpaceReflections.resolve(scene, passState, frustum))
+      ) {
+        SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+      }
+      // SCENEGIS_PATCH_END SGP-0016
+      // SCENEGIS_PATCH_BEGIN SGP-0046: Continue the unified material and light stage.
+      // SCENEGIS_PATCH_END SGP-0046
+      // SCENEGIS_PATCH_BEGIN SGP-0045: Capture the current opaque surface before water and transparency.
+      if (!picking) {
+        scene._sceneGISGBuffer?.capture(
+          passState,
+          frustumCommands,
+          executeCommand,
+        );
+      }
+      // SCENEGIS_PATCH_END SGP-0045
+      // SCENEGIS_PATCH_BEGIN SGP-0046: Continue the unified material and light stage.
+      // Start temporal depth from the unified opaque surface.
+      if (!picking) {
+        SceneGISTemporalAntialiasing.captureDeferredDepth(scene);
+        SceneGISWaterFrame.captureFinalDepth(scene);
+      }
+      if (deferredFrusta) {
+        continue;
+      }
     } else {
-      performPass(frustumCommands, Pass.GLOBE);
-    }
-
-    if (useGlobeDepthFramebuffer) {
-      globeDepth.executeCopyDepth(context, passState);
-    }
-
-    // Draw terrain classification
-    if (!renderTranslucentDepthForPick) {
+      if (clearGlobeDepth && useDepthPlane) {
+        depthPlane.execute(context, passState);
+      }
+      scene._sceneGISDeferred.restoreFrustumDepth(index, passState);
+      const deferredInverse = scene._sceneGISDeferred.inverseClassification;
+      if (
+        useGlobeDepthFramebuffer &&
+        (globeTranslucencyState.translucent || deferredInverse)
+      ) {
+        globeDepth.executeCopyDepth(context, passState);
+        deferredInverse?.restoreGlobeDepth(passState);
+      }
       if (globeTranslucencyState.translucent) {
         uniformState.updatePass(Pass.TERRAIN_CLASSIFICATION);
         globeTranslucencyState.executeGlobeClassificationCommands(
@@ -3081,222 +3380,11 @@ function executeCommands(scene, passState) {
           globeTranslucencyFramebuffer,
           scene,
           passState,
-        );
-      } else {
-        performPass(frustumCommands, Pass.TERRAIN_CLASSIFICATION);
-      }
-    }
-
-    if (clearGlobeDepth) {
-      clearDepth.execute(context, passState);
-      if (useDepthPlane) {
-        depthPlane.execute(context, passState);
-      }
-    }
-
-    let commandCount;
-
-    // Draw edges FIRST - before binding textures to avoid feedback loop
-    performCesium3DTileEdgesPass(scene, passState, frustumCommands);
-
-    if (
-      scene._enableEdgeVisibility &&
-      defined(scene._view) &&
-      defined(scene._view.edgeFramebuffer)
-    ) {
-      // Get edge color texture (attachment 0)
-      const colorTexture = scene._view.edgeFramebuffer.colorTexture;
-      if (defined(colorTexture)) {
-        scene.context.uniformState.edgeColorTexture = colorTexture;
-      } else {
-        scene.context.uniformState.edgeColorTexture =
-          scene.context.defaultTexture;
-      }
-
-      // Get edge ID texture (attachment 1)
-      const idTexture = scene._view.edgeFramebuffer.idTexture;
-      if (defined(idTexture)) {
-        scene.context.uniformState.edgeIdTexture = idTexture;
-      } else {
-        scene.context.uniformState.edgeIdTexture = scene.context.defaultTexture;
-      }
-
-      // Get edge depth texture (attachment 2)
-      const edgeDepthTexture = scene._view.edgeFramebuffer.depthTexture;
-      if (defined(edgeDepthTexture)) {
-        scene.context.uniformState.edgeDepthTexture = edgeDepthTexture;
-      } else {
-        scene.context.uniformState.edgeDepthTexture =
-          scene.context.defaultTexture;
-      }
-    } else {
-      scene.context.uniformState.edgeColorTexture =
-        scene.context.defaultTexture;
-      scene.context.uniformState.edgeIdTexture = scene.context.defaultTexture;
-      scene.context.uniformState.edgeDepthTexture =
-        scene.context.defaultTexture;
-    }
-
-    // Planar fill feature-ID pre-pass: write feature IDs from non-behind
-    // planar fill geometry so that behind fills can test same-object.
-    performPlanarFillIdPass(scene, passState, frustumCommands);
-
-    if (
-      scene._enablePlanarFillId &&
-      defined(scene._view) &&
-      defined(scene._view.planarFillIdFramebuffer)
-    ) {
-      const pfIdTexture = scene._view.planarFillIdFramebuffer.idTexture;
-      uniformState.planarFillIdTexture = defined(pfIdTexture)
-        ? pfIdTexture
-        : context.defaultTexture;
-    } else {
-      uniformState.planarFillIdTexture = context.defaultTexture;
-    }
-
-    if (!useInvertClassification || picking || renderTranslucentDepthForPick) {
-      // Common/fastest path. Draw 3D Tiles and classification normally.
-
-      // Draw 3D Tiles
-      commandCount = performPass(frustumCommands, Pass.CESIUM_3D_TILE);
-
-      if (commandCount > 0) {
-        if (useGlobeDepthFramebuffer) {
-          globeDepth.prepareColorTextures(context, clearGlobeDepth);
-          globeDepth.executeUpdateDepth(
-            context,
-            passState,
-            globeDepth.depthStencilTexture,
-          );
-        }
-
-        // Draw classifications. Modifies 3D Tiles color.
-        if (!renderTranslucentDepthForPick) {
-          commandCount = performPass(
-            frustumCommands,
-            Pass.CESIUM_3D_TILE_CLASSIFICATION,
-          );
-        }
-      }
-    } else {
-      // When the invert classification color is opaque:
-      //    Main FBO (FBO1):                   Main_Color   + Main_DepthStencil
-      //    Invert classification FBO (FBO2) : Invert_Color + Main_DepthStencil
-      //
-      //    1. Clear FBO2 color to vec4(0.0) for each frustum
-      //    2. Draw 3D Tiles to FBO2
-      //    3. Draw classification to FBO2
-      //    4. Fullscreen pass to FBO1, draw Invert_Color when:
-      //           * Main_DepthStencil has the stencil bit set > 0 (classified)
-      //    5. Fullscreen pass to FBO1, draw Invert_Color * czm_invertClassificationColor when:
-      //           * Main_DepthStencil has stencil bit set to 0 (unclassified) and
-      //           * Invert_Color !== vec4(0.0)
-      //
-      // When the invert classification color is translucent:
-      //    Main FBO (FBO1):                  Main_Color         + Main_DepthStencil
-      //    Invert classification FBO (FBO2): Invert_Color       + Invert_DepthStencil
-      //    IsClassified FBO (FBO3):          IsClassified_Color + Invert_DepthStencil
-      //
-      //    1. Clear FBO2 and FBO3 color to vec4(0.0), stencil to 0, and depth to 1.0
-      //    2. Draw 3D Tiles to FBO2
-      //    3. Draw classification to FBO2
-      //    4. Fullscreen pass to FBO3, draw any color when
-      //           * Invert_DepthStencil has the stencil bit set > 0 (classified)
-      //    5. Fullscreen pass to FBO1, draw Invert_Color when:
-      //           * Invert_Color !== vec4(0.0) and
-      //           * IsClassified_Color !== vec4(0.0)
-      //    6. Fullscreen pass to FBO1, draw Invert_Color * czm_invertClassificationColor when:
-      //           * Invert_Color !== vec4(0.0) and
-      //           * IsClassified_Color === vec4(0.0)
-      //
-      // NOTE: Step six when translucent invert color occurs after the TRANSLUCENT pass
-      //
-      scene._invertClassification.clear(context, passState);
-
-      const opaqueClassificationFramebuffer = passState.framebuffer;
-      passState.framebuffer = scene._invertClassification._fbo.framebuffer;
-
-      // Draw normally
-      performPass(frustumCommands, Pass.CESIUM_3D_TILE);
-
-      if (useGlobeDepthFramebuffer) {
-        scene._invertClassification.prepareTextures(context);
-        globeDepth.executeUpdateDepth(
-          context,
-          passState,
-          scene._invertClassification._fbo.getDepthStencilTexture(),
+          "translucent",
         );
       }
-
-      // Set stencil
-      commandCount = performPass(
-        frustumCommands,
-        Pass.CESIUM_3D_TILE_CLASSIFICATION_IGNORE_SHOW,
-      );
-
-      passState.framebuffer = opaqueClassificationFramebuffer;
-
-      // Fullscreen pass to copy classified fragments
-      scene._invertClassification.executeClassified(context, passState);
-      if (frameState.invertClassificationColor.alpha === 1.0) {
-        // Fullscreen pass to copy unclassified fragments when alpha == 1.0
-        scene._invertClassification.executeUnclassified(context, passState);
-      }
-
-      // Clear stencil set by the classification for the next classification pass
-      if (commandCount > 0 && context.stencilBuffer) {
-        clearClassificationStencil.execute(context, passState);
-      }
-
-      // Draw style over classification.
-      commandCount = performPass(
-        frustumCommands,
-        Pass.CESIUM_3D_TILE_CLASSIFICATION,
-      );
-    }
-
-    if (commandCount > 0 && context.stencilBuffer) {
-      clearStencil.execute(context, passState);
-    }
-
-    performVoxelsPass(scene, passState, frustumCommands);
-
-    performPass(frustumCommands, Pass.OPAQUE);
-    // SCENEGIS_PATCH_BEGIN SGP-0046: Produce native lighting responses before their existing screen resolves.
-    if (!picking && scene._sceneGISDeferred?.light(passState)) {
-      SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
     }
     // SCENEGIS_PATCH_END SGP-0046
-    // SCENEGIS_PATCH_BEGIN SGP-0026: Resolve standalone diffuse transport before water and transparency.
-    if (
-      !picking &&
-      SceneGISScreenSpaceIndirectLighting.resolve(scene, passState, frustum)
-    ) {
-      SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
-    }
-    // SCENEGIS_PATCH_END SGP-0026
-    // SCENEGIS_PATCH_BEGIN SGP-0014: Resolve AO-only MRT before water and translucency.
-    const aoResolved =
-      !picking && SceneGISAmbientOcclusion.resolve(scene, passState, frustum);
-    // SCENEGIS_PATCH_END SGP-0014
-    // SCENEGIS_PATCH_BEGIN SGP-0016: Resolve main-pass material MRT before water and translucency.
-    if (
-      !picking &&
-      (aoResolved ||
-        SceneGISScreenSpaceReflections.resolve(scene, passState, frustum))
-    ) {
-      SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
-    }
-    // SCENEGIS_PATCH_END SGP-0016
-    // SCENEGIS_PATCH_BEGIN SGP-0045: Capture the current opaque surface before water and transparency.
-    if (!picking) {
-      scene._sceneGISGBuffer?.capture(
-        passState,
-        frustumCommands,
-        executeCommand,
-      );
-    }
-    // SCENEGIS_PATCH_END SGP-0045
     // SCENEGIS_PATCH_BEGIN SGP-0017: Compose water and write its depth before translucency.
     if (!picking) {
       SceneGISWaterFrame.draw(
@@ -4302,7 +4390,9 @@ function updateAndClearFramebuffers(scene, passState, clearColor) {
     view.planarFillIdFramebuffer.releaseResources();
   }
 
-  if (useInvertClassification) {
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Deferred classification owns its material overlay and needs no native color copy.
+  if (useInvertClassification && !scene._sceneGISDeferred?.enabled) {
+    // SCENEGIS_PATCH_END SGP-0046
     let depthFramebuffer;
     if (frameState.invertClassificationColor.alpha === 1.0) {
       if (useGlobeDepthFramebuffer) {

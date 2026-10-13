@@ -970,6 +970,12 @@ direct 光，保留环境光、IBL / SSR、自发光与后续雾、裁剪边缘�
 
 ## WebGL 延迟实验的共享深度
 
+按 [ADR-0161](Decisions/ADR-0161-unified-opaque-deferred-direction.md)，实验分支以后以
+单一不透明/MASK 延迟主通道为目标，不维护完整前向兼容模式，也不为过渡 Globe 前向另建
+调度层。复用现有 API、内容准备和资源设施；透明、阴影、拾取、天空保留各自专用通道。
+Globe 影像先合成材质，再参与光照；旧前向逐像素等价不再作为新增接入的强制验收目标。
+原生可见性、分类、深度精度和公共能力仍需独立契约，未完成资格不得通过删除校验来表示支持。
+
 按 [ADR-0160](Decisions/ADR-0160-deferred-primitive-materials.md) / SGP-0049，实验的普通
 Primitive 材质通过原生 appearance 组装时的显式标记接入。Phong 复用四附件和共享屏幕光照组，
 保留其原生材质、天气、直接阴影和 AO 语义；Entity 仍由原生 visualizer / batch 生成图元。

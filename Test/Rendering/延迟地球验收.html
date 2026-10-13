@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WebGL 延迟光照 · 地球验收</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      aside {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 290px;
+        max-height: calc(100% - 68px);
+        overflow: auto;
+        padding: 16px;
+        background: #18202bef;
+        color: #eef2f6;
+        font: 13px/1.5 sans-serif;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 8px;
+      }
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+      details {
+        border-top: 1px solid #526172;
+        padding: 10px 0;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button,
+      select,
+      input {
+        font: inherit;
+      }
+      input[type="range"] {
+        width: 150px;
+        vertical-align: middle;
+      }
+      a {
+        color: #a0d3ff;
+      }
+      #error {
+        color: #ff9797;
+        white-space: pre-wrap;
+      }
+      #stats {
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>地球与混合表面</h1>
+      <p>
+        格林尼治 · 本地合成海岸与测试瓦片。用于检查渲染语义，不代表真实地理。
+      </p>
+      <button id="home">海岸总览</button>
+      <button id="tiles-view">靠近瓦片</button>
+      <button id="earth-view">地球视角</button>
+      <p id="status" role="status">正在加载本地场景…</p>
+      <details open>
+        <summary>时间与光照</summary>
+        <label
+          >春分日 UTC
+          <input
+            id="hour"
+            type="range"
+            min="0"
+            max="23.9"
+            step="0.1"
+            value="14" /><output id="time"></output
+        ></label>
+        <label
+          ><input id="animate" type="checkbox" />播放时间（每秒十分钟）</label
+        >
+        <label
+          ><input id="environment" type="checkbox" checked />高级物理环境</label
+        >
+        <label><input id="atmosphere" type="checkbox" checked />物理天空</label>
+        <label><input id="aerial" type="checkbox" checked />空气透视</label>
+        <label><input id="height-fog" type="checkbox" />高度雾</label>
+        <label><input id="shadows" type="checkbox" checked />几何阴影</label>
+      </details>
+      <details open>
+        <summary>地形、影像与海洋</summary>
+        <label
+          ><input
+            id="terrain-depth"
+            type="checkbox"
+            checked
+            disabled
+          />地形遮挡地物</label
+        >
+        <p>高级环境使用地形深度；关闭高级环境后可测试遮挡开关。</p>
+        <label
+          >影像层数
+          <select id="imagery">
+            <option value="1">1 层</option>
+            <option value="17">17 层（检查分批）</option>
+          </select></label
+        >
+        <label><input id="fabric" type="checkbox" />Fabric 双纹理覆盖</label>
+        <label><input id="ocean" type="checkbox" checked />原生海洋波纹</label>
+        <label
+          >地表状态
+          <select id="weather">
+            <option value="dry">干燥</option>
+            <option value="wet">湿润</option>
+            <option value="snow">积雪</option>
+          </select></label
+        >
+      </details>
+      <details open>
+        <summary>分类与透明</summary>
+        <label
+          ><input
+            id="classification"
+            type="checkbox"
+            checked
+          />地面与瓦片分类</label
+        >
+        <label
+          >反向分类
+          <select id="inverse">
+            <option value="off">关闭</option>
+            <option value="opaque">不透明乘色</option>
+            <option value="translucent">半透明（保留背景）</option>
+          </select></label
+        >
+        <label
+          >地球透明
+          <select id="translucency">
+            <option value="opaque">不透明</option>
+            <option value="front">正面 50%</option>
+            <option value="both">正反面 50%</option>
+          </select></label
+        >
+        <label
+          ><input id="tiles" type="checkbox" checked />显示测试 Tiles</label
+        >
+      </details>
+      <details>
+        <summary>屏幕空间效果</summary>
+        <label
+          >视锥分段
+          <select id="frustums">
+            <option value="default">原生范围</option>
+            <option value="2">密集分段（检查跨段遮挡）</option>
+          </select></label
+        >
+        <label><input id="ao" type="checkbox" checked />环境光遮蔽</label>
+        <label><input id="ssr" type="checkbox" />屏幕空间反射</label>
+        <label><input id="ssil" type="checkbox" />屏幕空间间接光</label>
+        <label><input id="taa" type="checkbox" checked />时域抗锯齿</label>
+      </details>
+      <p id="picked">点击地物检查拾取及表面高度。</p>
+      <p id="stats"></p>
+      <p>
+        本页固定使用延迟光照。密集分段用于检查跨段遮挡，会增加绘制与透明层缓存成本。
+      </p>
+      <a href="延迟光照原型.html?world=globe">街道综合场景</a> ·
+      <a href="延迟图元验收.html">图元与 Entity</a>
+      <p id="error" role="alert"></p>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./延迟地球验收.js"></script>
+  </body>
+</html>

@@ -78,3 +78,8 @@ P4b amendment: [ADR-0160](ADR-0160-deferred-primitive-materials.md) qualifies or
 native Phong appearances and their Entity geometry batches using the existing four
 targets and one shared lighting group (SGP-0049); SGP-0050 corrects dynamic Entity
 opaque base-state initialization without changing alpha behavior.
+
+Direction amendment: [ADR-0161](ADR-0161-unified-opaque-deferred-direction.md) targets
+one opaque deferred pipeline and removes full forward-renderer compatibility as
+a future acceptance goal. Existing bounded qualifications remain unchanged until
+their replacements are implemented and verified.

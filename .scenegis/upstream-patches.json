@@ -828,7 +828,7 @@
       "id": "SGP-0046",
       "title": "Explore native-material deferred WebGL lighting",
       "status": "active",
-      "reason": "The private deferred experiment needs material-only native Model variants and explicit Scene scheduling before existing opaque lighting-response resolves.",
+      "reason": "The private deferred experiment needs material-only native variants and explicit Scene scheduling for surface depth across Globe clears, native and inverse classification, cached Tiles depth ownership, cross-frustum material collection, one lighting resolve, depth restoration for dedicated transparency, staged translucent Globe classification, and shared final water depth for temporal and environment effects.",
       "risk": "high",
       "files": [
         {
@@ -838,10 +838,20 @@
         {
           "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
           "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/GlobeDepth.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/GlobeTranslucencyState.js",
+          "markerMode": "paired"
         }
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredLightingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGlobeSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredClassificationSpec.js",
         "Specs/e2e/scenegis-deferred-lighting.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md",
@@ -924,6 +934,66 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
       "removalCondition": "Native dynamic Entity color appearance initializes blending consistently with its actual translucency."
+    },
+    {
+      "id": "SGP-0051",
+      "title": "Submit native Globe imagery as deferred surface material",
+      "status": "active",
+      "reason": "Capture imagery, Fabric, terrain and ocean material before lighting, preserving clipping and unlit overlays; reserve surface and companion-transparency lighting samplers, and submit native wave normals and water masks without evaluating illumination in the material pass.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/GlobeSurfaceTileProvider.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/GlobeFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGlobeSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0161-unified-opaque-deferred-direction.md",
+      "removalCondition": "Native rendering exposes equivalent Globe material submission, or the deferred pipeline is retired."
+    },
+    {
+      "id": "SGP-0052",
+      "title": "Accept native two-channel color framebuffer attachments",
+      "status": "active",
+      "reason": "PixelFormat already validates and allocates RG textures, but isColorFormat omits RG and rejects their use as framebuffer color attachments.",
+      "risk": "low",
+      "files": [
+        {
+          "path": "packages/engine/Source/Core/PixelFormat.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Renderer/SceneGISFramebufferFormatsSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0161-unified-opaque-deferred-direction.md",
+      "removalCondition": "Native PixelFormat.isColorFormat accepts the existing RG color format."
+    },
+    {
+      "id": "SGP-0053",
+      "title": "Preserve depth-clamped classification volumes in logarithmic frustums",
+      "status": "active",
+      "reason": "Automatic logarithmic depth derivation discards out-of-frustum fragments even when the source shader requests depth clamp, opening classification volumes and removing ground coverage and picks. Clamp the automatic log-depth argument only for depth-clamped shaders; retain ordinary discard and explicit depth-writer ownership.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/DerivedCommand.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGlobeSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISLogDepthClampSpec.js",
+        "Specs/e2e/scenegis-deferred-globe.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0161-unified-opaque-deferred-direction.md",
+      "removalCondition": "Native log-depth command derivation preserves source depth-clamp semantics."
     }
   ]
 }

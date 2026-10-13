@@ -70,6 +70,7 @@ function allocate(effect) {
       }),
       clear: new ClearCommand({ color: Color.TRANSPARENT }),
       history: [],
+      waterCommands: new WeakMap(),
     };
     state.resolve = context.createViewportQuadCommand(resolveShader, {
       owner: effect,
@@ -91,6 +92,8 @@ function allocate(effect) {
   const width = context.drawingBufferWidth;
   const height = context.drawingBufferHeight;
   if (width !== state.width || height !== state.height) {
+    state.waterFramebuffer?.destroy();
+    state.waterFramebuffer = undefined;
     for (const buffer of state.history) {
       buffer.destroy();
     }
@@ -160,6 +163,7 @@ SceneGISTemporalAntialiasing.begin = function (scene) {
     return;
   }
   const state = allocate(effect);
+  state.deferredCaptured = false;
   const projection = scene.camera.frustum.projectionMatrix;
   if (!Matrix4.equals(projection, state.projection)) {
     state.valid = false;
@@ -183,7 +187,7 @@ SceneGISTemporalAntialiasing.begin = function (scene) {
 
 SceneGISTemporalAntialiasing.captureDepth = function (scene) {
   const state = scene._sceneGISTemporalAntialiasing?._state;
-  if (!state?.active) {
+  if (!state?.active || state.deferredCaptured) {
     return;
   }
   const view = scene._view;
@@ -194,6 +198,21 @@ SceneGISTemporalAntialiasing.captureDepth = function (scene) {
   state.sourceDepth = manager.getDepthStencilTexture();
   state.copyDepth.framebuffer = state.depth.framebuffer;
   state.copyDepth.execute(scene.context);
+};
+
+SceneGISTemporalAntialiasing.captureDeferredDepth = function (scene) {
+  const state = scene._sceneGISTemporalAntialiasing?._state;
+  if (!state?.active || !scene._sceneGISDeferred?.ready) {
+    return;
+  }
+  state.deferredDepth = scene._sceneGISDeferred._linearDepth;
+  state.copyDeferredDepth ??= scene.context.createViewportQuadCommand(
+    "uniform sampler2D u_depth; void main() { out_FragColor = texelFetch(u_depth, ivec2(gl_FragCoord.xy), 0); }",
+    { uniformMap: { u_depth: () => state.deferredDepth } },
+  );
+  state.copyDeferredDepth.framebuffer = state.depth.framebuffer;
+  state.copyDeferredDepth.execute(scene.context);
+  state.deferredCaptured = true;
 };
 
 SceneGISTemporalAntialiasing.resolve = function (scene, color) {
@@ -235,12 +254,14 @@ SceneGISTemporalAntialiasing.destroy = function (effect) {
     return;
   }
   SceneGISTemporalAntialiasing.end(effect._scene);
+  state.waterFramebuffer?.destroy();
   state.depth.destroy();
   for (const buffer of state.history) {
     buffer.destroy();
   }
   state.resolve.shaderProgram.destroy();
   state.copyDepth?.shaderProgram.destroy();
+  state.copyDeferredDepth?.shaderProgram.destroy();
   effect._state = undefined;
   effect._ready = false;
 };

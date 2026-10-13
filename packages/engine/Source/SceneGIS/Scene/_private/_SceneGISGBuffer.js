@@ -19,6 +19,7 @@ import debugShader from "../../../Shaders/SceneGIS/Rendering/SceneGISGBufferDebu
 import depthShader from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import resolveMrt from "../../Renderer/_SceneGISResolveMrt.js";
 import SurfaceWeather from "./_SceneGISSurfaceWeather.js";
+import surfaceOverlays from "./_SceneGISVectorSurfaceOverlays.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const excluded = [
@@ -36,10 +37,22 @@ const excluded = [
 ];
 
 function eligible(command) {
-  return command.owner?._sceneGISWater !== true;
+  return command.owner?._sceneGISWater !== true && !isGlobeDepth(command);
 }
 
-function validate(scene, range, passState, isDeferredModel) {
+function isGlobeDepth(command) {
+  const mask = command.renderState?.colorMask;
+  return (
+    command.pass === Pass.GLOBE &&
+    mask &&
+    !mask.red &&
+    !mask.green &&
+    !mask.blue &&
+    !mask.alpha
+  );
+}
+
+function validate(scene, range, passState, isDeferredModel, isDeferredGlobe) {
   const context = scene.context;
   if (
     !context.webgl2 ||
@@ -56,11 +69,11 @@ function validate(scene, range, passState, isDeferredModel) {
   if (
     scene.mode !== SceneMode.SCENE3D ||
     !scene.highDynamicRange ||
-    scene._view.frustumCommandsList.length !== 1 ||
+    (scene._view.frustumCommandsList.length !== 1 && !isDeferredGlobe) ||
     scene._environmentState.useWebVR ||
-    scene._environmentState.useInvertClassification ||
-    scene._environmentState.clearGlobeDepth ||
-    scene._globeTranslucencyState.translucent ||
+    (scene._environmentState.useInvertClassification && !isDeferredGlobe) ||
+    (scene._environmentState.clearGlobeDepth && !isDeferredGlobe) ||
+    (scene._globeTranslucencyState.translucent && !isDeferredGlobe) ||
     scene.debugCommandFilter ||
     scene.debugShowCommands ||
     scene.debugShowFrustums ||
@@ -71,18 +84,49 @@ function validate(scene, range, passState, isDeferredModel) {
       "G-buffer prototype requires one HDR 3D frustum, an opaque world and a full viewport.",
     );
   }
+  if (
+    isDeferredGlobe &&
+    scene._globeTranslucencyState.translucent &&
+    surfaceOverlays.hasCommands(
+      scene._globeTranslucencyState._sceneGISSurfaceOverlays,
+      range.commands[Pass.TERRAIN_CLASSIFICATION],
+      range.indices[Pass.TERRAIN_CLASSIFICATION],
+    )
+  ) {
+    throw new DeveloperError(
+      "Deferred translucent Globe direct vector overlays require their separate adaptation.",
+    );
+  }
+  let hasClassification =
+    (scene._environmentState.useInvertClassification &&
+      range.indices[Pass.CESIUM_3D_TILE] > 0) ||
+    [Pass.TERRAIN_CLASSIFICATION, Pass.CESIUM_3D_TILE_CLASSIFICATION].some(
+      (pass) => range.indices[pass] > 0,
+    );
+  if (hasClassification && !isDeferredGlobe) {
+    throw new DeveloperError(
+      "G-buffer diagnostic replay does not support classification.",
+    );
+  }
   for (const pass of [
-    Pass.TERRAIN_CLASSIFICATION,
-    Pass.CESIUM_3D_TILE_CLASSIFICATION,
     Pass.CESIUM_3D_TILE_CLASSIFICATION_IGNORE_SHOW,
     Pass.VOXELS,
   ]) {
-    if (range.indices[pass] > 0) {
+    if (
+      range.indices[pass] > 0 &&
+      !(
+        isDeferredGlobe &&
+        pass === Pass.CESIUM_3D_TILE_CLASSIFICATION_IGNORE_SHOW
+      )
+    ) {
       throw new DeveloperError(
         "G-buffer prototype does not support classification or voxel passes.",
       );
     }
   }
+  let hasFeatureStyle = false;
+  let hasOcean = false;
+  let hasOceanFabric = false;
   for (const pass of opaquePasses) {
     for (let i = 0; i < range.indices[pass]; ++i) {
       const command = range.commands[pass][i];
@@ -92,7 +136,7 @@ function validate(scene, range, passState, isDeferredModel) {
       if (
         !command.renderState?.depthTest.enabled ||
         !command.renderState.depthMask ||
-        command.renderState.blending.enabled ||
+        (command.renderState.blending.enabled && !isDeferredGlobe?.(command)) ||
         defined(command.framebuffer)
       ) {
         throw new DeveloperError(
@@ -100,6 +144,17 @@ function validate(scene, range, passState, isDeferredModel) {
         );
       }
       const fs = command.shaderProgram.fragmentShaderSource;
+      if (isDeferredGlobe?.(command)) {
+        hasClassification ||= fs.defines.includes("HAS_VECTOR_LAYER");
+        hasOcean ||=
+          fs.defines.includes("HAS_WATER_MASK") &&
+          (fs.defines.includes("SHOW_REFLECTIVE_OCEAN") ||
+            fs.defines.includes("APPLY_MATERIAL"));
+        hasOceanFabric ||=
+          fs.defines.includes("SHOW_REFLECTIVE_OCEAN") &&
+          fs.defines.includes("APPLY_MATERIAL");
+      }
+      hasFeatureStyle ||= fs.defines.includes("HAS_SELECTED_FEATURE_ID");
       const nativeStyling =
         isDeferredModel &&
         (fs.defines.includes("HAS_MODEL_COLOR") ||
@@ -129,6 +184,20 @@ function validate(scene, range, passState, isDeferredModel) {
         );
       }
     }
+  }
+  const count =
+    4 +
+    (hasClassification ? 1 : 0) +
+    (hasFeatureStyle || hasOceanFabric ? 1 : 0) +
+    (hasOcean ? 1 : 0);
+  if (
+    (hasClassification || hasOcean) &&
+    (ContextLimits.maximumDrawBuffers < count ||
+      ContextLimits.maximumColorAttachments < count)
+  ) {
+    throw new RuntimeError(
+      `Deferred ${hasOcean ? "Globe water material" : "classification"} requires ${count} floating-point color attachments.`,
+    );
   }
 }
 
@@ -192,8 +261,12 @@ function allocate(probe) {
 
 /** Native material-buffer experiment; not a public renderer selection API. @private */
 class _SceneGISGBuffer {
-  static _validate(scene, range, passState, isDeferredModel) {
-    validate(scene, range, passState, isDeferredModel);
+  static _isGlobeDepth(command) {
+    return isGlobeDepth(command);
+  }
+
+  static _validate(scene, range, passState, isDeferredModel, isDeferredGlobe) {
+    validate(scene, range, passState, isDeferredModel, isDeferredGlobe);
   }
 
   constructor(scene) {

@@ -1,5 +1,6 @@
 import resolveMrt from "../../Renderer/_SceneGISResolveMrt.js";
 import defined from "../../../Core/defined.js";
+import PixelFormat from "../../../Core/PixelFormat.js";
 import ContextLimits from "../../../Renderer/ContextLimits.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
 import Framebuffer from "../../../Renderer/Framebuffer.js";
@@ -15,6 +16,7 @@ import material from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRMain.js";
 import composite from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRComposite.js";
 import indirect from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOMain.js";
 import diffuse from "../../../Shaders/SceneGIS/IndirectLighting/SceneGISSILMain.js";
+import GBuffer from "./_SceneGISGBuffer.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const classificationPasses = [
@@ -46,11 +48,13 @@ function layout(scene, passState, eligible, reflections) {
   const ssil = scene._sceneGISScreenSpaceIndirectLighting?.enabled === true;
   if (
     (ao && !scene.highDynamicRange) ||
-    ranges.length !== 1 ||
+    (ranges.length !== 1 && !scene._sceneGISDeferred?.enabled) ||
     environment.useWebVR ||
-    environment.useInvertClassification ||
-    environment.clearGlobeDepth ||
-    scene._globeTranslucencyState.translucent ||
+    (environment.useInvertClassification &&
+      !scene._sceneGISDeferred?.enabled) ||
+    (environment.clearGlobeDepth && !scene._sceneGISDeferred?.enabled) ||
+    (scene._globeTranslucencyState.translucent &&
+      !scene._sceneGISDeferred?.enabled) ||
     scene.debugShowCommands ||
     scene.debugShowFrustums
   ) {
@@ -62,31 +66,48 @@ function layout(scene, passState, eligible, reflections) {
   if (manager.framebuffer !== passState.framebuffer) {
     return undefined;
   }
-  const range = ranges[0];
-  if (classificationPasses.some((pass) => range.indices[pass] > 0)) {
-    return undefined;
-  }
   let coat = false;
-  for (const pass of opaquePasses) {
-    for (let i = 0; i < range.indices[pass]; ++i) {
-      const command = range.commands[pass][i];
-      if (command.owner?._sceneGISWater === true) {
-        continue;
+  for (const range of ranges) {
+    if (
+      classificationPasses.some((pass) => range.indices[pass] > 0) &&
+      !scene._sceneGISDeferred?.enabled
+    ) {
+      return undefined;
+    }
+    for (const pass of opaquePasses) {
+      for (let i = 0; i < range.indices[pass]; ++i) {
+        const command = range.commands[pass][i];
+        if (command.owner?._sceneGISWater === true) {
+          continue;
+        }
+        if (
+          scene._sceneGISDeferred?.enabled &&
+          GBuffer._isGlobeDepth(command)
+        ) {
+          continue;
+        }
+        const deferredGlobe =
+          scene._sceneGISDeferred?.enabled &&
+          scene._sceneGISDeferred._isGlobeCommand(command);
+        if (
+          !eligible(command) ||
+          (command.renderState.blending.enabled && !deferredGlobe)
+        ) {
+          return undefined;
+        }
+        const defines = command.shaderProgram.fragmentShaderSource.defines;
+        if (postLightingBranches.some((name) => defines.includes(name))) {
+          return undefined;
+        }
+        if (
+          (ao || ssil) &&
+          !deferredGlobe &&
+          indirectPostLightingBranches.some((name) => defines.includes(name))
+        ) {
+          return undefined;
+        }
+        coat ||= defines.includes("USE_CLEARCOAT");
       }
-      if (!eligible(command) || command.renderState.blending.enabled) {
-        return undefined;
-      }
-      const defines = command.shaderProgram.fragmentShaderSource.defines;
-      if (postLightingBranches.some((name) => defines.includes(name))) {
-        return undefined;
-      }
-      if (
-        (ao || ssil) &&
-        indirectPostLightingBranches.some((name) => defines.includes(name))
-      ) {
-        return undefined;
-      }
-      coat ||= defines.includes("USE_CLEARCOAT");
     }
   }
   coat &&= reflections;
@@ -337,6 +358,17 @@ const SceneGISLightingMrt = {
   ) {
     if (!defined(selected)) {
       return false;
+    }
+    state.depth.update(
+      scene.context,
+      scene.drawingBufferWidth,
+      scene.drawingBufferHeight,
+      1,
+      PixelDatatype.FLOAT,
+      scene._sceneGISDeferred?._multiFrustum ? PixelFormat.RG : PixelFormat.RED,
+    );
+    if (state.depth === state.linearDepth) {
+      state.sourceDepth = state.depth.getColorTexture();
     }
     const mrt = allocate(scene, state, selected);
     const original = passState.framebuffer;

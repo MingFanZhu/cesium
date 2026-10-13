@@ -4955,7 +4955,7 @@ ${hardCascadeLibrary}`;
           out_FragColor = vec4(sceneGISGlobeSurfaceLighting(
             vec3(0.5),
             u_testReceiverEcef,
-            u_testReceiverNormal), 1.0);
+            u_testReceiverNormal, vec3(0.0), 0.0), 1.0);
         }`;
     const surfaceReceiverDefines = [
       "SCENEGIS_GLOBE",
@@ -8051,6 +8051,7 @@ ${hardCascadeLibrary}`;
     const dimmed = makeTexture([8.0, 8.0, 8.0, 0.25]);
     const clearDepth = makeTexture([1.0, 1.0, 1.0, 1.0]);
     const finiteDepth = makeTexture([0.5, 0.5, 0.5, 1.0]);
+    const linearClearDepth = makeTexture([0.0, 0.0, 0.0, 1.0]);
     const pipeline = effects._pipeline;
     pipeline.executeHdr(scene.context, dimmed, clearDepth, clearDepth);
     const sunDirection = Cartesian3.clone(pipeline._sunDirection);
@@ -8148,6 +8149,18 @@ ${hardCascadeLibrary}`;
       expect(clearLens.every((pixel) => pixel[3] === 0.25)).toBe(true);
       expect(finiteLens.every((pixel) => pixel[3] === 0.25)).toBe(true);
       clearLens.forEach(expectFiniteHdrStorage);
+
+      // Linear eye depth clears at zero; a surface one meter away still occludes the Sun.
+      const compositeUniforms =
+        pipeline._bloomResources.compositeCommand.uniformMap;
+      const originalLinearDepth = compositeUniforms.u_linearSceneDepth;
+      compositeUniforms.u_linearSceneDepth = () => true;
+      try {
+        expect(executeAndRead(bright, linearClearDepth)).toEqual(clearLens);
+        expect(executeAndRead(bright, clearDepth)).toEqual(finiteLens);
+      } finally {
+        compositeUniforms.u_linearSceneDepth = originalLinearDepth;
+      }
 
       effects.showLensFlare = false;
       effects.showBloom = true;
@@ -8260,6 +8273,7 @@ ${hardCascadeLibrary}`;
       dimmed.destroy();
       clearDepth.destroy();
       finiteDepth.destroy();
+      linearClearDepth.destroy();
     }
   }
 
@@ -8366,7 +8380,7 @@ ${hardCascadeLibrary}`;
             vec3 radiance = sceneGISGlobeSurfaceLighting(
               vec3(0.5),
               u_sceneGISShadowSurfacePosition,
-              u_sceneGISShadowVertical);
+              u_sceneGISShadowVertical, vec3(0.0), 0.0);
             out_FragColor = vec4(radiance, 1.0);
           }`,
         ],
@@ -8596,7 +8610,7 @@ ${hardCascadeLibrary}`;
             out_FragColor = vec4(sceneGISGlobeSurfaceLighting(
               vec3(u_testAlbedo),
               u_sceneGISShadowSurfacePosition,
-              u_sceneGISShadowVertical), 1.0);
+              u_sceneGISShadowVertical, vec3(0.0), 0.0), 1.0);
           }`,
         ],
         {

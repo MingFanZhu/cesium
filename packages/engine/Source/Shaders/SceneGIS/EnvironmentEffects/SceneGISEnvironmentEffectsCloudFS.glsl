@@ -64,7 +64,6 @@ void main()
         cloudCoordinates * vec2(textureSize(u_depthTexture, 0));
     vec2 depthCoordinates = cloudCoordinates + u_cloudDepthOffset;
     float rawDepth = texture(u_depthTexture, depthCoordinates).r;
-    float resolvedDepth = czm_readDepth(u_depthTexture, depthCoordinates);
     bool isClearDepth = sceneGISIsClearResolvedDepth(rawDepth);
     #ifdef SCENEGIS_GLOBE
     isClearDepth = isClearDepth || !u_hasCurrentGlobeDepth;
@@ -99,12 +98,12 @@ void main()
         // potentially undefined eye-space reconstruction.
         #ifdef SCENEGIS_GLOBE
         // Preserve log-depth precision for every Globe quality tier.
-        vec4 eye = czm_screenToEyeCoordinates(depthCoordinates, rawDepth);
+        vec4 eye = sceneGISScreenToEyeCoordinates(depthCoordinates, rawDepth);
         #else
         // Phased rays belong to the selected full-resolution depth pixel.
         vec4 eye = u_cloudTracePhased
-            ? czm_screenToEyeCoordinates(depthCoordinates, rawDepth)
-            : czm_windowToEyeCoordinates(
+            ? sceneGISScreenToEyeCoordinates(depthCoordinates, rawDepth)
+            : sceneGISWindowToEyeCoordinates(
                 gl_FragCoord.xy + u_cloudDepthOffset * u_cloudBufferDimensions, rawDepth);
         #endif
         eye /= eye.w;

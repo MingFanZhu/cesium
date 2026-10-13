@@ -277,6 +277,9 @@ PixelFormat.validate = function (pixelFormat) {
 PixelFormat.isColorFormat = function (pixelFormat) {
   return (
     pixelFormat === PixelFormat.RED ||
+    // SCENEGIS_PATCH_BEGIN SGP-0052: Accept the existing two-channel color texture format.
+    pixelFormat === PixelFormat.RG ||
+    // SCENEGIS_PATCH_END SGP-0052
     pixelFormat === PixelFormat.ALPHA ||
     pixelFormat === PixelFormat.RGB ||
     pixelFormat === PixelFormat.RGBA ||

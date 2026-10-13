@@ -1,6 +1,8 @@
 import Color from "../../../Core/Color.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
 import ClearCommand from "../../../Renderer/ClearCommand.js";
+import DrawCommand from "../../../Renderer/DrawCommand.js";
+import Framebuffer from "../../../Renderer/Framebuffer.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
 import Pass from "../../../Renderer/Pass.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
@@ -15,6 +17,17 @@ const sampler = new Sampler({
   minificationFilter: TextureMinificationFilter.LINEAR_MIPMAP_LINEAR,
   magnificationFilter: TextureMagnificationFilter.LINEAR,
 });
+
+function hasVisibleWater(ranges) {
+  for (const range of ranges) {
+    for (let i = 0; i < range.indices[Pass.OPAQUE]; ++i) {
+      if (SceneGISWaterFrame.isWater(range.commands[Pass.OPAQUE][i])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 /**
  * Scene-owned opaque inputs and per-frustum water scheduling.
@@ -41,6 +54,127 @@ const SceneGISWaterFrame = {
     state.ready = false;
     state.captureDraws = 0;
     state.borrowed = false;
+    if (state.finalDepth) {
+      state.finalDepth.captured = false;
+    }
+  },
+  releaseFinalDepth(scene) {
+    const water = scene.frameState._sceneGISWater;
+    const state = water?.finalDepth;
+    if (state) {
+      state.waterFramebuffer?.destroy();
+      state.depth.destroy();
+      state.copyDepth?.shaderProgram.destroy();
+      water.finalDepth = undefined;
+    }
+  },
+  updateFinalDepth(scene) {
+    const deferred = scene._sceneGISDeferred;
+    const ranges = scene._view.frustumCommandsList;
+    const needed =
+      deferred?.enabled &&
+      ranges.length > 1 &&
+      scene._sceneGISEnvironmentEffectsPipeline?.needsSceneDepth &&
+      !scene._sceneGISTemporalAntialiasing?._state?.active &&
+      hasVisibleWater(ranges);
+    if (!needed) {
+      SceneGISWaterFrame.releaseFinalDepth(scene);
+      return;
+    }
+    const water = SceneGISWaterFrame.get(scene.frameState);
+    const state = (water.finalDepth ??= {
+      depth: new FramebufferManager({
+        pixelFormat: PixelFormat.RED,
+        pixelDatatype: PixelDatatype.FLOAT,
+      }),
+      waterCommands: new WeakMap(),
+    });
+    const {
+      context,
+      drawingBufferWidth: width,
+      drawingBufferHeight: height,
+    } = scene;
+    if (state.depth.isDirty(width, height, 1)) {
+      state.waterFramebuffer?.destroy();
+      state.waterFramebuffer = undefined;
+      state.depth.update(context, width, height);
+    }
+    state.byteLength = width * height * 4;
+  },
+  captureFinalDepth(scene) {
+    const state = scene.frameState._sceneGISWater?.finalDepth;
+    if (!state || !scene._sceneGISDeferred?.ready) {
+      return;
+    }
+    state.sourceDepth = scene._sceneGISDeferred._linearDepth;
+    state.copyDepth ??= scene.context.createViewportQuadCommand(
+      "uniform sampler2D u_depth; void main() { out_FragColor = texelFetch(u_depth, ivec2(gl_FragCoord.xy), 0); }",
+      { uniformMap: { u_depth: () => state.sourceDepth } },
+    );
+    state.copyDepth.framebuffer = state.depth.framebuffer;
+    state.copyDepth.execute(scene.context);
+    state.captured = true;
+  },
+  waterCommand(scene, command, passState) {
+    const water = scene.frameState._sceneGISWater;
+    if (!water?.drawing || !SceneGISWaterFrame.isWater(command)) {
+      return command;
+    }
+    const temporal = scene._sceneGISTemporalAntialiasing?._state;
+    const state =
+      temporal?.active && temporal.deferredCaptured
+        ? temporal
+        : water.finalDepth?.captured
+          ? water.finalDepth
+          : undefined;
+    if (!state) {
+      return command;
+    }
+    const source = passState.framebuffer;
+    if (!state.waterFramebuffer || state.waterSource !== source) {
+      state.waterFramebuffer?.destroy();
+      state.waterFramebuffer = new Framebuffer({
+        context: scene.context,
+        colorTextures: [
+          source.getColorTexture(0),
+          state.depth.getColorTexture(),
+        ],
+        depthStencilTexture: source.depthStencilTexture,
+        destroyAttachments: false,
+      });
+      state.waterSource = source;
+    }
+    const shader = command.shaderProgram;
+    let program = scene.context.shaderCache.getDerivedShaderProgram(
+      shader,
+      "sceneGIS_water_final_depth",
+    );
+    if (!program) {
+      const fs = shader.fragmentShaderSource.clone();
+      fs.sources = fs.sources.map((s) =>
+        ShaderSource.replaceMain(s, "sceneGISFinalWaterMain"),
+      );
+      fs.sources.push(
+        "layout(location = 1) out float sceneGISFinalWaterDepth; void main() { sceneGISFinalWaterMain(); sceneGISFinalWaterDepth = -v_positionEC.z; }",
+      );
+      program = scene.context.shaderCache.createDerivedShaderProgram(
+        shader,
+        "sceneGIS_water_final_depth",
+        {
+          vertexShaderSource: shader.vertexShaderSource,
+          fragmentShaderSource: fs,
+          attributeLocations: shader._attributeLocations,
+        },
+      );
+    }
+    const derived = DrawCommand.shallowClone(
+      command,
+      state.waterCommands.get(command),
+    );
+    state.waterCommands.set(command, derived);
+    derived.shaderProgram = program;
+    derived.framebuffer = state.waterFramebuffer;
+    return derived;
   },
   defer(scene, command) {
     return (
@@ -54,13 +188,7 @@ const SceneGISWaterFrame = {
       return;
     }
     const ranges = scene._view.frustumCommandsList;
-    let visible = false;
-    for (const range of ranges) {
-      for (let i = 0; i < range.indices[Pass.OPAQUE]; ++i) {
-        visible ||= SceneGISWaterFrame.isWater(range.commands[Pass.OPAQUE][i]);
-      }
-    }
-    if (!visible) {
+    if (!hasVisibleWater(ranges)) {
       return;
     }
     const deferred = scene._sceneGISDeferred;
@@ -225,6 +353,7 @@ const SceneGISWaterFrame = {
     }
   },
   destroy(scene) {
+    SceneGISWaterFrame.releaseFinalDepth(scene);
     const s = scene.frameState._sceneGISWater;
     s?.raw?.destroy();
     s?.depth?.destroy();

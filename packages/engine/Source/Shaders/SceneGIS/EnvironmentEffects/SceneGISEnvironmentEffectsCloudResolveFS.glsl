@@ -251,7 +251,7 @@ float sceneGISCloudReceiverDistanceDelta(
     if (sceneGISIsClearResolvedDepth(rawDepth) || all(equal(samplePixel, pixel))) {
         return 1.0e30;
     }
-    vec4 eye = czm_windowToEyeCoordinates(samplePixel, rawDepth);
+    vec4 eye = sceneGISWindowToEyeCoordinates(samplePixel, rawDepth);
     eye /= eye.w;
     float distanceMeters = u_perspective ? length(eye.xyz) : max(-eye.z, 0.0);
     return abs(distanceMeters - centerDistance);
@@ -360,7 +360,7 @@ vec4 sceneGISCloudVarianceClip(
 
 vec3 sceneGISCloudReceiverEye(vec2 pixel, float rawDepth)
 {
-    vec4 eye = czm_windowToEyeCoordinates(pixel, rawDepth);
+    vec4 eye = sceneGISWindowToEyeCoordinates(pixel, rawDepth);
     return eye.xyz / eye.w;
 }
 
@@ -472,7 +472,6 @@ void main()
     vec2 depthCoordinates = v_textureCoordinates + u_cloudDepthOffset;
     vec2 depthPixel = gl_FragCoord.xy + u_cloudDepthOffset * fullDimensions;
     float rawDepth = texture(u_depthTexture, depthCoordinates).r;
-    float resolvedDepth = czm_readDepth(u_depthTexture, depthCoordinates);
     bool isClearDepth = sceneGISIsClearResolvedDepth(rawDepth);
     #ifdef SCENEGIS_GLOBE
     isClearDepth = isClearDepth || !u_hasCurrentGlobeDepth;
@@ -481,9 +480,9 @@ void main()
     float sceneDistance = 1.0;
     if (!isClearDepth) {
         #ifdef SCENEGIS_GLOBE
-        vec4 eye = czm_windowToEyeCoordinates(depthPixel, rawDepth);
+        vec4 eye = sceneGISWindowToEyeCoordinates(depthPixel, rawDepth);
         #else
-        vec4 eye = czm_windowToEyeCoordinates(
+        vec4 eye = sceneGISWindowToEyeCoordinates(
             depthPixel, rawDepth);
         #endif
         eye /= eye.w;

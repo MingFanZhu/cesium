@@ -2130,6 +2130,9 @@ function SceneGISEnvironmentEffectsRenderer(options) {
       that._owner._heightFogDirectionalInscatteringExponent,
     u_colorTexture: () => that._inputColorTexture,
     u_depthTexture: () => that._depthTexture,
+    u_linearSceneDepth: () => that._linearSceneDepth === true,
+    u_sceneDepthPerspective: () => that._perspective,
+    u_sceneDepthFrustum: () => that._frustum,
     u_bloomTexture: () => that._bloomTexture,
     u_bloomDirection: () => that._bloomDirection,
     u_sunViewportCoordinates: () => that._sunViewportCoordinates,
@@ -2261,6 +2264,23 @@ SceneGISEnvironmentEffectsRenderer.prototype = Object.create(
 );
 SceneGISEnvironmentEffectsRenderer.prototype.constructor =
   SceneGISEnvironmentEffectsRenderer;
+
+Object.defineProperty(
+  SceneGISEnvironmentEffectsRenderer.prototype,
+  "needsSceneDepth",
+  {
+    get: function () {
+      return (
+        this.enabled &&
+        defined(this._resources) &&
+        (this._showAerialPerspective ||
+          this._showHeightFog ||
+          this._showClouds ||
+          this._owner._showLensFlare)
+      );
+    },
+  },
+);
 
 SceneGISEnvironmentEffectsRenderer.prototype.publishResources = function (
   context,
@@ -3209,6 +3229,25 @@ SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
     return colorTexture;
   }
   void idTexture;
+  const deferred = this._scene._sceneGISDeferred;
+  this._linearSceneDepth = deferred?.ready === true;
+  if (this._linearSceneDepth) {
+    const temporal = this._scene._sceneGISTemporalAntialiasing?._state;
+    if (temporal?.active && temporal.deferredCaptured) {
+      depthTexture = temporal.depth.getColorTexture();
+    } else if (this._scene.frameState._sceneGISWater?.finalDepth?.captured) {
+      depthTexture =
+        this._scene.frameState._sceneGISWater.finalDepth.depth.getColorTexture();
+    } else if (
+      this._scene.frameState._sceneGISWater?.ready &&
+      !deferred._multiFrustum
+    ) {
+      // A single native depth buffer already contains the complete water surface.
+      this._linearSceneDepth = false;
+    } else {
+      depthTexture = deferred._linearDepth;
+    }
+  }
   let cloudPassExecuted;
   let hdrTexture;
   try {
