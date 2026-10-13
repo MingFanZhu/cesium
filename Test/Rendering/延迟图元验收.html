@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WebGL 延迟光照 · 图元与 Entity</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      aside {
+        position: absolute;
+        left: 14px;
+        top: 14px;
+        width: 280px;
+        padding: 16px;
+        background: #18202bed;
+        color: #eef2f6;
+        font: 14px/1.55 sans-serif;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 10px;
+      }
+      label {
+        display: block;
+        margin: 9px 0;
+      }
+      button,
+      select {
+        font: inherit;
+      }
+      a {
+        color: #8dcaff;
+      }
+      #error {
+        color: #ff9797;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>普通图元与 Entity</h1>
+      <p>
+        左侧为 Primitive 材质；右侧为 Entity
+        方块、圆柱和挤出面。中央模型用于混合场景对照。
+      </p>
+      <label><input id="deferred" type="checkbox" checked />使用延迟光照</label>
+      <label
+        >Entity 颜色
+        <select id="color">
+          <option value="CYAN">青色</option>
+          <option value="ORANGE">橙色</option>
+          <option value="WHITE">白色</option>
+        </select></label
+      >
+      <label><input id="translucent" type="checkbox" />Entity 半透明</label>
+      <label><input id="animate" type="checkbox" />动态改变 Entity 尺寸</label>
+      <label
+        ><input id="show" type="checkbox" checked />显示 Entity 面几何</label
+      >
+      <label><input id="lights" type="checkbox" checked />局部点光源</label>
+      <label><input id="shadows" type="checkbox" checked />几何阴影</label>
+      <label><input id="ao" type="checkbox" checked />环境光遮蔽</label>
+      <label><input id="taa" type="checkbox" checked />时域抗锯齿</label>
+      <label
+        >地表状态
+        <select id="weather">
+          <option value="dry">干燥</option>
+          <option value="wet">湿润</option>
+          <option value="snow">积雪</option>
+        </select></label
+      >
+      <button id="home">复位视角</button>
+      <p id="picked">点击物体检查原生拾取</p>
+      <p id="stats">加载本地场景…</p>
+      <p>本页验证离地几何。Globe 与贴地分类将单独接入。</p>
+      <a href="延迟光照原型.html?world=globe">街道场景</a> ·
+      <a href="延迟要素样式.html">要素样式</a>
+      <p id="error" role="alert"></p>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./延迟图元验收.js"></script>
+  </body>
+</html>

@@ -8,8 +8,8 @@
 | Status                           | `active`                                                          |
 | Planning model                   | `extension`                                                       |
 | Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
-| Current phase                    | P4a completed：原生 Model / Tiles 样式，待阶段 checkpoint         |
-| Active phase plan                | 无；[P4a](plans/2026-10-13-p4a-model-and-tile-styling.md) 已完成  |
+| Current phase                    | P4b completed：普通面图元与 Entity 材质                           |
+| Active phase plan                | [P4b](plans/2026-10-13-p4b-primitive-materials.md)                |
 | Architecture / execution contact | 当前任务                                                          |
 | Last updated                     | `2026-10-13`                                                      |
 
@@ -94,4 +94,13 @@ P4a 已实现，69 项 GPU Specs 与最终街道/要素 E2E（2 项） 通过。
 [P4a review](reviews/2026-10-13-p4a-native-styling-qualification.md) 记录正确性、资源和成本证据。
 [街道模型颜色](../../Test/Rendering/延迟光照原型.html) 与
 [原生要素样例](../../Test/Rendering/延迟要素样式.html) 已于 2026-10-13 获负责人视觉验收。
-技术、review 和视觉 gate 均通过，批准形成 P4a 独立 checkpoint；提交后继续审计 Globe、Entity 与普通图元。
+技术、review 和视觉 gate 均通过，P4a checkpoint 为 `b6a1f17178`，提交钩子通过。
+
+当前 [P4b](plans/2026-10-13-p4b-primitive-materials.md) 已激活：普通原生 Phong 面图元与对应
+Entity 批处理进入延迟光照；Globe、多视锥和贴地分类保持后继独立范围。
+决定见 [ADR-0160](../../Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md) / SGP-0049。
+
+P4b 技术验证完成：101 项相关 Specs 与三项浏览器场景通过；SGP-0050 同时修复实测动态
+Entity 不透明状态残留 blending。详见 [P4b review](reviews/2026-10-13-p4b-primitive-qualification.md)。
+[独立图元页面](../../Test/Rendering/延迟图元验收.html) 于 2026-10-13 获负责人确认通过，
+技术、review 与视觉 gate 均通过；形成 P4b 独立 checkpoint 后继续 Globe 接入审计。

@@ -102,6 +102,9 @@ DynamicGeometryUpdater.prototype.update = function (time) {
     if (isColorAppearance) {
       appearance = new PerInstanceColorAppearance({
         closed: closed,
+        // SCENEGIS_PATCH_BEGIN SGP-0050: Preserve ground defaults; off-ground instance alpha below selects blending.
+        translucent: !!onTerrain,
+        // SCENEGIS_PATCH_END SGP-0050
         flat:
           onTerrain && !geometryUpdater._supportsMaterialsforEntitiesOnTerrain,
       });

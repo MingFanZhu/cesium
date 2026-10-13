@@ -1,0 +1,392 @@
+import {
+  _SceneGISDeferredLighting as DeferredLighting,
+  BoxGeometry,
+  CallbackProperty,
+  Cartesian2,
+  Cartesian3,
+  Color,
+  ColorGeometryInstanceAttribute,
+  DataSourceCollection,
+  DataSourceDisplay,
+  DirectionalLight,
+  EllipsoidSurfaceAppearance,
+  FramebufferManager,
+  GeometryInstance,
+  Material,
+  MaterialAppearance,
+  Matrix4,
+  OrthographicFrustum,
+  PerInstanceColorAppearance,
+  PixelDatatype,
+  Primitive,
+  SceneGISLightCollection,
+  SceneGISPointLight,
+  SceneGISPlanarCoordinateSystem,
+  SceneGISPlanarExtent,
+  SceneGISPlanarWorld,
+  SceneGISSurfaceWeather,
+  SceneGISScreenSpaceReflections,
+  SceneGISScreenSpaceIndirectLighting,
+  ShadowMode,
+  ShowGeometryInstanceAttribute,
+} from "../../../index.js";
+import createCanvas from "../../../../../Specs/createCanvas.js";
+import createScene from "../../../../../Specs/createScene.js";
+import pollToPromise from "../../../../../Specs/pollToPromise.js";
+
+describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
+  let scene, renderer, display, dataSources;
+  function render() {
+    scene.renderForSpecs();
+  }
+  beforeEach(function () {
+    scene = createScene({ canvas: createCanvas(64, 64), scene3DOnly: true });
+    scene.highDynamicRange = true;
+    scene.msaaSamples = 1;
+    scene.fog.enabled = false;
+    scene.skyAtmosphere = scene.skyBox = scene.sun = scene.moon = undefined;
+    scene.light = new DirectionalLight({
+      direction: new Cartesian3(0, 0, -1),
+      intensity: 2,
+    });
+    scene.camera.setView({
+      destination: new Cartesian3(7000000, 0, 10),
+      orientation: {
+        direction: new Cartesian3(0, 0, -1),
+        up: new Cartesian3(0, 1, 0),
+      },
+    });
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 8,
+      aspectRatio: 1,
+      near: 0.1,
+      far: 30,
+    });
+    scene.farToNearRatio = 10000;
+    scene.logarithmicDepthBuffer = false;
+    renderer = new DeferredLighting(scene);
+  });
+  afterEach(function () {
+    display?.destroy();
+    dataSources?.destroy();
+    scene?.destroyForSpecs();
+    scene = renderer = display = dataSources = undefined;
+  });
+  function sample(texture, x = 32) {
+    const target = new FramebufferManager({
+      pixelDatatype: PixelDatatype.FLOAT,
+    });
+    target.update(scene.context, 1, 1);
+    const copy = scene.context.createViewportQuadCommand(
+      "uniform sampler2D u_texture; uniform vec2 u_pixel; void main(){out_FragColor=texelFetch(u_texture,ivec2(u_pixel),0);}",
+      {
+        framebuffer: target.framebuffer,
+        uniformMap: {
+          u_texture: () => texture,
+          u_pixel: () => new Cartesian2(x, 32),
+        },
+      },
+    );
+    try {
+      copy.execute(scene.context);
+      return Array.from(
+        scene.context.readPixels({
+          framebuffer: target.framebuffer,
+          width: 1,
+          height: 1,
+        }),
+      );
+    } finally {
+      copy.shaderProgram.destroy();
+      target.destroy();
+    }
+  }
+  function color(x = 32) {
+    return sample(
+      scene._view.sceneFramebuffer._colorFramebuffer.getColorTexture(),
+      x,
+    );
+  }
+  function compare() {
+    renderer.enabled = false;
+    render();
+    const before = color();
+    renderer.enabled = true;
+    render();
+    expect(color()).toEqualEpsilon(before, 0.004);
+    expect(before[0] + before[1] + before[2]).toBeGreaterThan(0.01);
+    return before;
+  }
+  function box(
+    appearance = new PerInstanceColorAppearance({ translucent: false }),
+    x = 0,
+    dimensions = new Cartesian3(2, 2, 1),
+    z = 0,
+  ) {
+    return scene.primitives.add(
+      new Primitive({
+        asynchronous: false,
+        shadows: ShadowMode.ENABLED,
+        geometryInstances: new GeometryInstance({
+          id: "box",
+          geometry: BoxGeometry.fromDimensions({
+            dimensions,
+            vertexFormat: appearance.vertexFormat,
+          }),
+          modelMatrix: Matrix4.fromTranslation(
+            new Cartesian3(7000000 + x, 0, z),
+          ),
+          attributes: {
+            color: ColorGeometryInstanceAttribute.fromColor(
+              new Color(0.3, 0.5, 0.7, 1),
+            ),
+            show: new ShowGeometryInstanceAttribute(true),
+          },
+        }),
+        appearance,
+      }),
+    );
+  }
+  function material() {
+    return new Material({
+      fabric: {
+        type: "SceneGISDeferredSpecPhong",
+        uniforms: { color: new Color(0.3, 0.4, 0.5, 1) },
+        source: `czm_material czm_getMaterial(czm_materialInput i) {
+          czm_material m=czm_getDefaultMaterial(i);
+          m.diffuse=color.rgb; m.alpha=color.a;
+          m.emission=vec3(0.05,0.1,0.15); m.specular=0.7; m.shininess=31.25;
+          m.normal=normalize(i.normalEC+vec3(0.1,0.0,0.0)); return m;
+        }`,
+      },
+      translucent: (m) => m.uniforms.color.alpha < 1,
+    });
+  }
+
+  it("captures instance color and keeps native edits, show, picking and flat/transparent routing", function () {
+    const primitive = box();
+    compare();
+    expect(renderer.groupCount).toBe(1);
+    expect(renderer.drawCount).toBe(1);
+    expect(renderer.lightDrawCount).toBe(1);
+    expect(renderer._style).toBeUndefined();
+    expect(sample(renderer._raw.getColorTexture(2))[3]).toBe(-2);
+    expect(scene.pick(new Cartesian2(32, 32)).id).toBe("box");
+    const attributes = primitive.getGeometryInstanceAttributes("box");
+    attributes.color = ColorGeometryInstanceAttribute.toValue(Color.RED);
+    compare();
+    expect(color()[1]).toBeLessThan(0.001);
+    attributes.show = ShowGeometryInstanceAttribute.toValue(false);
+    render();
+    expect(scene.pick(new Cartesian2(32, 32))).toBeUndefined();
+    attributes.show = ShowGeometryInstanceAttribute.toValue(true);
+    primitive.appearance = new PerInstanceColorAppearance({
+      flat: true,
+      translucent: false,
+    });
+    compare();
+    expect(renderer._phong).toBeUndefined();
+    primitive.appearance = new PerInstanceColorAppearance({
+      translucent: true,
+    });
+    attributes.color = ColorGeometryInstanceAttribute.toValue(
+      new Color(0.4, 0.6, 0.8, 0.5),
+    );
+    compare();
+    expect(renderer._phong).toBeUndefined();
+  });
+  ["BASIC", "TEXTURED", "ALL"].forEach((support) => {
+    it(`preserves ${support} Fabric material values and live uniforms`, function () {
+      const appearance = new MaterialAppearance({
+        material: material(),
+        materialSupport: MaterialAppearance.MaterialSupport[support],
+        translucent: false,
+      });
+      box(appearance);
+      compare();
+      expect(sample(renderer._raw.getColorTexture(1))[3]).toBe(31.25);
+      expect(
+        sample(renderer._raw.getColorTexture(3)).slice(0, 3),
+      ).toEqualEpsilon([0.05, 0.1, 0.15], 0.001);
+      appearance.material.uniforms.color = new Color(0.1, 0.8, 0.2, 1);
+      compare();
+      expect(renderer.groupCount).toBe(1);
+      appearance.material.uniforms.color.alpha = 0.5;
+      compare();
+      expect(renderer._phong).toBeUndefined();
+    });
+  });
+  it("qualifies native ellipsoid surface appearance without qualifying custom outer shaders", function () {
+    const primitive = box(
+      new EllipsoidSurfaceAppearance({
+        material: material(),
+        translucent: false,
+      }),
+    );
+    compare();
+    expect(renderer.groupCount).toBe(1);
+    primitive.appearance = new PerInstanceColorAppearance({
+      translucent: false,
+      fragmentShaderSource: "void main(){out_FragColor=vec4(0.2,0.4,0.6,1.0);}",
+    });
+    compare();
+    expect(renderer._phong).toBeUndefined();
+    expect(renderer._hasPassthrough).toBe(true);
+  });
+  it("shares one Phong lighting group and the punctual-light table with current-frame AO", function () {
+    box();
+    box(undefined, 2.5);
+    const lights = new SceneGISLightCollection({ scene });
+    lights.add(
+      new SceneGISPointLight({
+        position: new Cartesian3(7000000, 0, 3),
+        color: Color.ORANGE,
+        intensity: 3,
+        range: 10,
+      }),
+    );
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    const effects = [
+      new SceneGISScreenSpaceReflections({ scene, enabled: true }),
+      new SceneGISScreenSpaceIndirectLighting({ scene, enabled: true }),
+    ];
+    compare();
+    expect(renderer.drawCount).toBe(2);
+    expect(renderer.groupCount).toBe(1);
+    expect(renderer.lightDrawCount).toBe(1);
+    const lit = color();
+    lights.get(0).show = false;
+    render();
+    expect(lit[0]).toBeGreaterThan(color()[0] + 0.01);
+    effects.forEach((effect) => effect.destroy());
+  });
+  it("preserves direct-only shadows and evaluates weather once before capture", function () {
+    const world = new SceneGISPlanarWorld({
+      coordinateSystem: new SceneGISPlanarCoordinateSystem({
+        extent: new SceneGISPlanarExtent({
+          minimumX: 6999968,
+          maximumX: 7000032,
+          minimumY: -32,
+          maximumY: 32,
+        }),
+      }),
+      maximumLevel: 0,
+    });
+    scene._initializeWorld(world);
+    world.show = false;
+    box(
+      new MaterialAppearance({ material: material(), translucent: false }),
+      0,
+      new Cartesian3(8, 8, 0.1),
+    );
+    box(undefined, -1.5, new Cartesian3(1, 1, 1), 3);
+    scene.light.direction = new Cartesian3(1, 0, -1);
+    scene.shadowMap.maximumDistance = 30;
+    scene.shadowMap.size = 1024;
+    scene.shadowMap.darkness = 0;
+    render();
+    const lit = color(43);
+    scene.shadowMap.enabled = true;
+    render();
+    const shadowed = color(43);
+    expect(lit[0]).toBeGreaterThan(shadowed[0] + 0.01);
+    renderer.enabled = true;
+    render();
+    expect(color(43)).toEqualEpsilon(shadowed, 0.004);
+    expect(sample(renderer._raw.getColorTexture(3), 43)[3]).toBeLessThan(0.2);
+    expect(color(43)[0]).toBeGreaterThan(0.19);
+    const weather = new SceneGISSurfaceWeather({ scene, enabled: true });
+    weather.wetness = 1;
+    compare();
+    const wet = sample(renderer._raw.getColorTexture(0));
+    weather.snowCoverage = 1;
+    compare();
+    const snow = sample(renderer._raw.getColorTexture(0));
+    expect(snow[0]).toBeGreaterThan(wet[0]);
+    expect(sample(renderer._raw.getColorTexture(3)).slice(0, 3)).toEqualEpsilon(
+      [0.05, 0.1, 0.15],
+      0.001,
+    );
+  });
+  it("keeps actual Entity static and dynamic geometry batches and picking", async function () {
+    dataSources = new DataSourceCollection();
+    display = new DataSourceDisplay({
+      scene,
+      dataSourceCollection: dataSources,
+    });
+    let size = 2;
+    const entity = display.defaultDataSource.entities.add({
+      position: new Cartesian3(7000000, 0, 0),
+      box: { dimensions: new Cartesian3(2, 2, 2), material: Color.CYAN },
+    });
+    const update = async () =>
+      pollToPromise(
+        () => {
+          const ready = display.update(scene.lastRenderTime);
+          render();
+          return ready;
+        },
+        { timeout: 30000 },
+      );
+    render();
+    await update();
+    compare();
+    expect(renderer._phong).toBeDefined();
+    expect(scene.pick(new Cartesian2(32, 32)).id).toBe(entity);
+    entity.box.material = Color.RED;
+    await update();
+    compare();
+    expect(color()[1]).toBeLessThan(0.001);
+    entity.box.dimensions = new CallbackProperty(
+      () => new Cartesian3(size, size, size),
+      false,
+    );
+    size = 3;
+    await update();
+    compare();
+    expect(renderer._phong).toBeDefined();
+    const opaque = scene.frameState.commandList.find(
+      (command) =>
+        command.owner?.appearance instanceof PerInstanceColorAppearance,
+    );
+    expect(opaque.renderState.blending.enabled).toBe(false);
+    expect(opaque.renderState.depthMask).toBe(true);
+    entity.box.material = new Color(1, 0, 0, 0.4);
+    await update();
+    compare();
+    expect(renderer._phong).toBeUndefined();
+    entity.box.material = Color.CYAN;
+    await update();
+    compare();
+    expect(renderer._phong).toBeDefined();
+    entity.show = false;
+    await update();
+    expect(scene.pick(new Cartesian2(32, 32))).toBeUndefined();
+  });
+  it("releases the shared lighting program after removal and on scene destruction", function () {
+    const primitive = box();
+    renderer.enabled = true;
+    render();
+    const group = renderer._phong;
+    const destroy = spyOn(
+      group.command.shaderProgram,
+      "destroy",
+    ).and.callThrough();
+    scene.primitives.remove(primitive);
+    render();
+    expect(destroy).toHaveBeenCalled();
+    expect(renderer._phong).toBeUndefined();
+    box();
+    render();
+    const raw = renderer._raw.getColorTexture();
+    const phong = renderer._phong.command.shaderProgram;
+    const release = jasmine.isSpy(phong.destroy)
+      ? phong.destroy
+      : spyOn(phong, "destroy").and.callThrough();
+    release.calls.reset();
+    scene.destroyForSpecs();
+    scene = undefined;
+    expect(release).toHaveBeenCalled();
+    expect(raw.isDestroyed()).toBe(true);
+  });
+});

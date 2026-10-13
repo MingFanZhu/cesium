@@ -884,6 +884,46 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0159-deferred-feature-styling.md",
       "removalCondition": "Native rendering exposes equivalent post-lighting style capture, or the private deferred experiment is retired."
+    },
+    {
+      "id": "SGP-0049",
+      "title": "Capture native Primitive Phong materials for deferred lighting",
+      "status": "active",
+      "reason": "Explicitly identify native lit appearances and capture weather-adjusted Phong material before lighting while preserving geometry, batching and picking APIs.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Primitive.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Builtin/Functions/phong.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredPrimitivesSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
+      "removalCondition": "Native rendering exposes equivalent Primitive material capture, or the private deferred experiment is retired."
+    },
+    {
+      "id": "SGP-0050",
+      "title": "Initialize dynamic Entity color geometry with an opaque base state",
+      "status": "active",
+      "reason": "DynamicGeometryUpdater changes off-ground translucency after constructing PerInstanceColorAppearance; a translucent base state incorrectly keeps blending enabled on opaque commands. Start off-ground geometry opaque and let native getRenderState enable blending for actual translucent alpha; preserve ground defaults.",
+      "risk": "low",
+      "files": [
+        {
+          "path": "packages/engine/Source/DataSources/DynamicGeometryUpdater.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredPrimitivesSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
+      "removalCondition": "Native dynamic Entity color appearance initializes blending consistently with its actual translucency."
     }
   ]
 }

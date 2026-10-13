@@ -24,6 +24,11 @@ vec3 sceneGISWeatherPositionEC();
 void sceneGISWeatherPhong(inout czm_material material, vec3 positionEC);
 #endif
 // SCENEGIS_PATCH_END SGP-0028
+// SCENEGIS_PATCH_BEGIN SGP-0049: Builtins precede the owned deferred material capture definition.
+#ifdef SCENEGIS_DEFERRED_PHONG_CAPTURE
+void sceneGISRecordPhong(czm_material material);
+#endif
+// SCENEGIS_PATCH_END SGP-0049
 float czm_private_getLambertDiffuseOfMaterial(vec3 lightDirectionEC, czm_material material)
 {
     return czm_getLambertDiffuse(lightDirectionEC, material.normal);
@@ -60,6 +65,12 @@ vec4 czm_phong(vec3 toEye, czm_material material, vec3 lightDirectionEC)
     sceneGISWeatherPhong(material, sceneGISWeatherPositionEC());
     #endif
     // SCENEGIS_PATCH_END SGP-0028
+    // SCENEGIS_PATCH_BEGIN SGP-0049: Capture the evaluated material before native lighting.
+    #ifdef SCENEGIS_DEFERRED_PHONG_CAPTURE
+    sceneGISRecordPhong(material);
+    return vec4(material.diffuse, material.alpha);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0049
     // Diffuse from directional light sources at eye (for top-down)
     float diffuse = czm_private_getLambertDiffuseOfMaterial(vec3(0.0, 0.0, 1.0), material);
     if (czm_sceneMode == czm_sceneMode3D) {

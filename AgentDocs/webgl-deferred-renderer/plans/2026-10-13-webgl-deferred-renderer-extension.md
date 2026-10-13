@@ -92,4 +92,8 @@ P3b checkpoint `84aafea838` 已形成。P4 首个 draft 针对已复现的 Model
 负责人已确认按需第五附件，保留原生光照前/后着色；P4a 已激活，见 ADR-0159 / SGP-0048。
 
 P4a 技术检查、review 与负责人视觉 gate 于 2026-10-13 全部通过；批准形成独立 checkpoint。
-下一步依据源码审计 Globe、Entity 与普通图元，待 P4a 提交后细化阶段。
+P4a checkpoint `b6a1f17178` 已形成，提交钩子通过。
+依据源码激活 [P4b](2026-10-13-p4b-primitive-materials.md)：原生 Phong 面图元与 Entity 批处理；
+Globe、多视锥、影像多 pass 和贴地分类作为后继独立阶段，不自动更改现有用户开关。
+
+P4b 技术验证、review 与负责人视觉 gate 于 2026-10-13 全部通过，批准独立提交后继续 Globe 接入。

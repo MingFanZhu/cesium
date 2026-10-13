@@ -970,6 +970,11 @@ direct 光，保留环境光、IBL / SSR、自发光与后续雾、裁剪边缘�
 
 ## WebGL 延迟实验的共享深度
 
+按 [ADR-0160](Decisions/ADR-0160-deferred-primitive-materials.md) / SGP-0049，实验的普通
+Primitive 材质通过原生 appearance 组装时的显式标记接入。Phong 复用四附件和共享屏幕光照组，
+保留其原生材质、天气、直接阴影和 AO 语义；Entity 仍由原生 visualizer / batch 生成图元。
+不将任意 Entity、自定义外层 Shader、Globe 或贴地分类自动视为已完成延迟接入。
+
 [ADR-0159](Decisions/ADR-0159-deferred-feature-styling.md) / SGP-0048 保留原生 Model 与网格
 3D Tiles 的光照前/后样式分工。模型级颜色复用原生函数与 uniforms；逐要素的光照后
 乘数写入按需第五张 RGBA16F，再在既有屏幕光照中应用于颜色和 AO/SSR/SSIL 响应。

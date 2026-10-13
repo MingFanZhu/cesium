@@ -1,4 +1,7 @@
 import BoundingSphere from "../Core/BoundingSphere.js";
+// SCENEGIS_PATCH_BEGIN SGP-0049: Identify native material families during explicit shader assembly.
+import preparePrimitiveMaterial from "../SceneGIS/Scene/_private/_SceneGISDeferredPrimitiveMaterial.js";
+// SCENEGIS_PATCH_END SGP-0049
 import Cartesian2 from "../Core/Cartesian2.js";
 import Cartesian3 from "../Core/Cartesian3.js";
 import Cartesian4 from "../Core/Cartesian4.js";
@@ -1741,6 +1744,9 @@ function createShaderProgram(primitive, frameState, appearance) {
   vs = modifyForEncodedNormals(primitive, vs);
   vs = Primitive._modifyShaderPosition(primitive, vs, frameState.scene3DOnly);
   let fs = appearance.getFragmentShaderSource();
+  // SCENEGIS_PATCH_BEGIN SGP-0049: Preserve authored outer shaders outside the deferred material contract.
+  fs = preparePrimitiveMaterial(appearance, fs);
+  // SCENEGIS_PATCH_END SGP-0049
   fs = appendPickToFragmentShader(fs);
 
   primitive._sp = ShaderProgram.replaceCache({

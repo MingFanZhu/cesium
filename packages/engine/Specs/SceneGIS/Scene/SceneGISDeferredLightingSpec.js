@@ -437,7 +437,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     renderer.enabled = true;
     render();
     expect(color()).toEqualEpsilon(before, 0.004);
-    expect(sample(renderer._raw.getColorTexture(2))[3]).toBe(-1);
+    expect(sample(renderer._raw.getColorTexture(2))[3]).toBe(-2);
     expect(renderer.drawCount).toBe(2);
     scene.primitives.remove(opaque);
     box(4, true);

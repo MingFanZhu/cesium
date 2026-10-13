@@ -73,3 +73,8 @@ linear-depth target and eliminates its duplicate conversion in the deferred expe
 P4a amendment: [ADR-0159](ADR-0159-deferred-feature-styling.md) qualifies native Model.color
 and mesh feature styling. Ordinary material targets remain four; selected-feature opaque
 Models use an optional fifth RGBA16F for the native post-lighting multiplier (SGP-0048).
+
+P4b amendment: [ADR-0160](ADR-0160-deferred-primitive-materials.md) qualifies ordinary
+native Phong appearances and their Entity geometry batches using the existing four
+targets and one shared lighting group (SGP-0049); SGP-0050 corrects dynamic Entity
+opaque base-state initialization without changing alpha behavior.

@@ -21,6 +21,7 @@ import LightingModel from "../../../Scene/Model/LightingModel.js";
 import capture from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredCapture.js";
 import inputs from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredInputs.js";
 import lighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredLighting.js";
+import phongLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPhongLighting.js";
 import indirect from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOMain.js";
 import depth from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import common from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOCommon.js";
@@ -45,6 +46,9 @@ function shaderInfo(renderer, command) {
     info = {
       model: fs.sources.some((source) =>
         source.includes("SCENEGIS_GBUFFER_MODEL"),
+      ),
+      phong: fs.sources.some((source) =>
+        source.includes("#define SCENEGIS_DEFERRED_PHONG_MATERIAL"),
       ),
       key: fs.defines.filter((define) => lightingDefine.test(define)).join(";"),
     };
@@ -88,6 +92,8 @@ function release(renderer) {
   renderer._commands = new WeakMap();
   renderer._passthrough?.command.shaderProgram.destroy();
   renderer._passthrough = undefined;
+  renderer._phong?.command.shaderProgram.destroy();
+  renderer._phong = undefined;
   renderer._active = renderer._ready = false;
   renderer.byteLength = 0;
 }
@@ -143,7 +149,7 @@ function allocate(renderer, manager) {
   }
 }
 
-function createGroup(renderer, model, key) {
+function createGroup(renderer, model, key, phong = false) {
   const scene = renderer._scene;
   const builder = new ShaderBuilder();
   const fragment = ShaderDestination.FRAGMENT;
@@ -183,10 +189,12 @@ function createGroup(renderer, model, key) {
     if (key.includes("HAS_SELECTED_FEATURE_ID")) {
       builder.addDefine("SCENEGIS_DEFERRED_FEATURE_STYLE", undefined, fragment);
     }
+  } else if (phong) {
+    builder.addDefine("SCENEGIS_DEFERRED_PHONG_LIGHTING", undefined, fragment);
   } else {
     builder.addDefine("SCENEGIS_DEFERRED_PASSTHROUGH", undefined, fragment);
   }
-  builder.addFragmentLines(lighting);
+  builder.addFragmentLines(phong ? phongLighting : lighting);
   const group = { id: -1, seen: false, sourceUniforms: undefined };
   group.uniforms = {
     u_sceneGISDeferredDiffuse: () => renderer._raw.getColorTexture(0),
@@ -218,6 +226,7 @@ function prepareGroups(renderer, range) {
   renderer._groups.length = 0;
   renderer._hasPassthrough = false;
   renderer._hasFeatureStyle = false;
+  let hasPhong = false;
   for (const pass of opaquePasses) {
     for (let i = 0; i < range.indices[pass]; ++i) {
       const command = range.commands[pass][i];
@@ -225,6 +234,10 @@ function prepareGroups(renderer, range) {
         continue;
       }
       const info = shaderInfo(renderer, command);
+      if (info.phong) {
+        hasPhong = true;
+        continue;
+      }
       if (!info.model) {
         renderer._hasPassthrough = true;
         continue;
@@ -272,6 +285,14 @@ function prepareGroups(renderer, range) {
   }
   if (renderer._hasPassthrough) {
     renderer._passthrough ??= createGroup(renderer);
+  }
+  if (hasPhong) {
+    renderer._phong ??= createGroup(renderer, undefined, undefined, true);
+    renderer._phong.id = -2;
+    renderer._groups.push(renderer._phong);
+  } else {
+    renderer._phong?.command.shaderProgram.destroy();
+    renderer._phong = undefined;
   }
   renderer.groupCount = renderer._groups.length;
 }
@@ -387,7 +408,9 @@ class _SceneGISDeferredLighting {
     const model = info.model;
     const group = model
       ? this._models.get(command.owner).get(info.key)
-      : undefined;
+      : info.phong
+        ? this._phong
+        : undefined;
     if (
       scene.frameState.shadowState.lightShadowsEnabled &&
       command.receiveShadows &&
@@ -395,7 +418,7 @@ class _SceneGISDeferredLighting {
     ) {
       command = command.derivedCommands.shadows.receiveCommand;
     }
-    if (!model) {
+    if (!model && !info.phong) {
       command = LocalLights.receiver(scene, command);
     }
     command = SurfaceWeather.receiver(scene, command);
@@ -422,6 +445,8 @@ class _SceneGISDeferredLighting {
             "SCENEGIS_GBUFFER_MODEL_CAPTURE",
             "SCENEGIS_DEFERRED_CAPTURE",
           );
+        } else if (info.phong) {
+          fs.defines.push("SCENEGIS_DEFERRED_PHONG_CAPTURE");
         } else {
           fs.defines.push("SCENEGIS_AO_MAIN", "SCENEGIS_AO_LOCATION 2");
           fs.sources.unshift(indirect);

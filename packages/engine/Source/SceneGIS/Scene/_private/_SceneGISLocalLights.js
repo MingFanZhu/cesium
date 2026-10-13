@@ -151,7 +151,7 @@ SceneGISLocalLights.receiver = function (scene, command) {
     if (model) {
       fs.sources.push(localPbr);
     }
-    if (phong) {
+    if (phong && !fs.defines.includes("SCENEGIS_DEFERRED_PHONG_LIGHTING")) {
       const varying = ShaderSource.findPositionVarying(fs);
       fs.sources.push(`vec3 sceneGISLocalPositionEC() { return ${varying}; }`);
     }

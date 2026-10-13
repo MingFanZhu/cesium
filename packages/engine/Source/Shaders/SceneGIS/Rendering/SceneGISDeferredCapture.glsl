@@ -5,7 +5,7 @@ layout(location = 4) out vec4 sceneGISDeferredStyle;
 layout(location = 1) out vec4 sceneGISDeferredNormal;
 layout(location = 3) out vec4 sceneGISDeferredEmission;
 
-#ifdef SCENEGIS_GBUFFER_MODEL_CAPTURE
+#if defined(SCENEGIS_GBUFFER_MODEL_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE)
 layout(location = 2) out vec4 sceneGISDeferredSpecular;
 vec4 sceneGISDeferredDiffuseValue;
 vec4 sceneGISDeferredNormalValue;
@@ -18,6 +18,15 @@ void sceneGISRecordFeatureStyle(vec3 multiplier)
     sceneGISDeferredStyleValue = multiplier;
 }
 
+#ifdef SCENEGIS_DEFERRED_PHONG_CAPTURE
+void sceneGISRecordPhong(czm_material material)
+{
+    sceneGISDeferredDiffuseValue = vec4(material.diffuse, material.alpha);
+    sceneGISDeferredNormalValue = vec4(material.normal, material.shininess);
+    sceneGISDeferredSpecularValue = vec3(material.specular);
+    sceneGISDeferredEmissionValue = material.emission;
+}
+#else
 void sceneGISRecordGBuffer(czm_modelMaterial material)
 {
     sceneGISDeferredDiffuseValue = vec4(material.diffuse, material.occlusion);
@@ -25,6 +34,7 @@ void sceneGISRecordGBuffer(czm_modelMaterial material)
     sceneGISDeferredSpecularValue = material.specular;
     sceneGISDeferredEmissionValue = material.emissive;
 }
+#endif
 #endif
 
 void sceneGISWriteDeferredMaterial()
@@ -36,7 +46,7 @@ void sceneGISWriteDeferredMaterial()
     sceneGISDeferredStyle = vec4(1.0);
     #endif
 #endif
-#ifdef SCENEGIS_GBUFFER_MODEL_CAPTURE
+#if defined(SCENEGIS_GBUFFER_MODEL_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE)
     out_FragColor = sceneGISDeferredDiffuseValue;
     sceneGISDeferredNormal = sceneGISDeferredNormalValue;
     sceneGISDeferredSpecular = vec4(sceneGISDeferredSpecularValue, u_sceneGISDeferredGroup);
