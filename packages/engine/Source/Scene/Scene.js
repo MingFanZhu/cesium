@@ -2453,6 +2453,12 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
     return;
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0045: Reuse native command selection for private material capture.
+  if (scene._sceneGISGBuffer?.draw(command, passState)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0045
+
   // SCENEGIS_PATCH_BEGIN SGP-0017: Defer water color until opaque geometry is complete.
   if (SceneGISWaterFrame.defer(scene, command)) {
     return;
@@ -3255,6 +3261,15 @@ function executeCommands(scene, passState) {
       SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
     }
     // SCENEGIS_PATCH_END SGP-0016
+    // SCENEGIS_PATCH_BEGIN SGP-0045: Capture the current opaque surface before water and transparency.
+    if (!picking) {
+      scene._sceneGISGBuffer?.capture(
+        passState,
+        frustumCommands,
+        executeCommand,
+      );
+    }
+    // SCENEGIS_PATCH_END SGP-0045
     // SCENEGIS_PATCH_BEGIN SGP-0017: Compose water and write its depth before translucency.
     if (!picking) {
       SceneGISWaterFrame.draw(
@@ -5831,6 +5846,9 @@ Scene.prototype.destroy = function () {
     this._canvas.parentNode.removeChild(this._creditContainer);
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0045: Release private material targets before the native Context.
+  this._sceneGISGBuffer?.destroy();
+  // SCENEGIS_PATCH_END SGP-0045
   this.postProcessStages =
     this.postProcessStages && this.postProcessStages.destroy();
 

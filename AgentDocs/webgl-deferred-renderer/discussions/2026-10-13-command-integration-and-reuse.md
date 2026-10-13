@@ -2,11 +2,11 @@
 
 ## Metadata
 
-- Status: `open`；P0 审计结论已确认，P1 具体契约待调查
+- Status: `resolved` for P1；生产管线覆盖与 MSAA 决策留待 P2
 - Owner role: `architecture`
 - Created / Updated: `2026-10-13`
 - Parent: [总体计划](../plans/2026-10-13-webgl-deferred-renderer-extension.md)
-- Resulting ADR / Related SGP: 无新增
+- Resulting ADR / Related SGP: [ADR-0155](../../../Documentation/SceneGIS/Decisions/ADR-0155-webgl-gbuffer-prototype.md) / SGP-0045
 
 ## Question and source facts
 
@@ -77,3 +77,10 @@ P1 进入前确认：
 4. 派生命令、日志深度、相机相对坐标及后光照覆盖的最小接点。
 
 开放项由当前架构任务在 P1 设计中解决；目前不需要负责人再次批准创建分支。
+
+## P1 resolution
+
+[P1](../plans/2026-10-13-p1-gbuffer-prototype.md) 选择私有诊断重放，四组 RGBA16F 直接保存原生
+材质值；继续原生 log/HDR 命令选择，不替换 DrawCommand 构造或 loader。普通 opaque
+Model 与 MASK 先验证；特殊材质/样式明确拒绝。1×/4× 已验证附件解析，混合边缘只用于诊断，
+不作为正式延迟照明契约。数据、成本和残留风险见 [P1 review](../reviews/2026-10-13-p1-gbuffer-qualification.md)。

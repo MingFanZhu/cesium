@@ -1,3 +1,9 @@
+// SCENEGIS_PATCH_BEGIN SGP-0045: Expose evaluated native material to the private buffer prototype.
+#define SCENEGIS_GBUFFER_MODEL
+#ifdef SCENEGIS_GBUFFER_MODEL_CAPTURE
+void sceneGISRecordGBuffer(czm_modelMaterial material);
+#endif
+// SCENEGIS_PATCH_END SGP-0045
 // SCENEGIS_PATCH_BEGIN SGP-0018: Model lighting owns shadow composition, including unlit materials.
 #ifdef SCENEGIS_GEOMETRY_SHADOW
 #define SCENEGIS_DIRECT_SHADOW_RECEIVER
@@ -246,5 +252,10 @@ void lightingStage(inout czm_modelMaterial material, ProcessedAttributes attribu
         color = czm_linearToSrgb(color);
     #endif
 
+    // SCENEGIS_PATCH_BEGIN SGP-0045: Record surface properties before diffuse becomes lit color.
+    #ifdef SCENEGIS_GBUFFER_MODEL_CAPTURE
+    sceneGISRecordGBuffer(material);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0045
     material.diffuse = color;
 }

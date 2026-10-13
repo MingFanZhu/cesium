@@ -800,6 +800,29 @@
       ],
       "removalCondition": "Native HeightmapTerrainData reports mesh readiness to GlobeSurfaceTile before upsampling, as QuantizedMeshTerrainData already does.",
       "decision": "Documentation/SceneGIS/Decisions/ADR-0153-heightmap-upsampling-readiness.md"
+    },
+    {
+      "id": "SGP-0045",
+      "title": "Qualify native WebGL material buffers",
+      "status": "active",
+      "reason": "A private G-buffer prototype needs native material values before diffuse is overwritten, and an explicit Scene replay/lifecycle seam.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISGBufferSpec.js",
+        "Specs/e2e/scenegis-gbuffer.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0155-webgl-gbuffer-prototype.md",
+      "removalCondition": "Native rendering exposes equivalent material outputs and owned capture scheduling, or the diagnostic prototype is retired."
     }
   ]
 }

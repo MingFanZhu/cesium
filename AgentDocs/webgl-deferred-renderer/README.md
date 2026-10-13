@@ -2,54 +2,54 @@
 
 ## Metadata
 
-| Field                 | Value                                                             |
-| --------------------- | ----------------------------------------------------------------- |
-| Extension slug        | `webgl-deferred-renderer`                                         |
-| Status                | `active`                                                          |
-| Planning model        | `extension`                                                       |
-| Active extension plan | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
-| Current phase         | P0 隔离与接入审计完成；P1 尚未激活                                |
-| Active phase plan     | None；[P0 记录](plans/2026-10-13-p0-isolation-and-audit.md)       |
-| Architecture contact  | Current task                                                      |
-| Execution contact     | Current task                                                      |
-| Last updated          | `2026-10-13`                                                      |
+| Field                            | Value                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| Extension slug                   | `webgl-deferred-renderer`                                                 |
+| Status                           | `active`                                                                  |
+| Planning model                   | `extension`                                                               |
+| Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md)         |
+| Current phase                    | P1 completed，技术与负责人视觉验收通过                                    |
+| Active phase plan                | 无；最近完成 [P1 G-buffer 原型](plans/2026-10-13-p1-gbuffer-prototype.md) |
+| Architecture / execution contact | 当前任务                                                                  |
+| Last updated                     | `2026-10-13`                                                              |
 
 ## Scope
 
 探索 WebGL2 统一表面数据、不透明延迟光照，以及共享数据支撑的多光源、AO、SSR、SSIL
-画质和性能改进。它是渲染管线扩展；既有效果和街道调校仍属于 `rendering-quality`。
-不因新分支自动宣布产品改为延迟，也不在本阶段修改运行时代码。
-
-负责人明确解除“必须长期保留完整前向模式”的约束。可以评估不透明延迟为主、透明等
-内容使用配套前向通道的统一管线；无需预设公开的 forward/deferred 切换 API。
-旧版本的回退依靠独立分支与提交，不能据此增加永久双管线维护负担。
+画质和性能改进。既有效果和街道调校仍属于 `rendering-quality`。
+负责人允许不再长期维护完整前向模式；可以采用不透明延迟与透明等配套前向的统一管线。
+不预设公开 forward/deferred 切换 API。P1 只交付可观察的材质数据，不接管主光照。
 
 ## Engineering links
 
-- Branch: `feature/webgl-deferred-rendering`。
-- Base: `feature/webgl-rendering-quality` 的 `5688deaeeb`；不是 WebGPU 分支或旧官方主线。
-- 复用源码入口：[Scene](../../packages/engine/Source/Scene/Scene.js)、
-  [Model](../../packages/engine/Source/Scene/Model/Model.js)、
-  [ModelFS](../../packages/engine/Source/Shaders/Model/ModelFS.glsl)、
-  [共享 MRT](../../packages/engine/Source/SceneGIS/Scene/_private/_SceneGISLightingMrt.js)。
-- 测试入口：[SceneGIS Specs](../../packages/engine/Specs/SceneGIS/)、
-  [E2E](../../Specs/e2e/)；新测试尚未创建。
-- 验收资产：[PBR 综合街道](../../Test/Rendering/PBR综合验收.html)；尚无新演示页面。
-- 相关设计：[ADR-0091](../../Documentation/SceneGIS/Decisions/ADR-0091-main-pass-reflection-mrt.md)、
-  [ADR-0093](../../Documentation/SceneGIS/Decisions/ADR-0093-main-pass-ambient-occlusion.md)、
-  [ADR-0097](../../Documentation/SceneGIS/Decisions/ADR-0097-hierarchical-screen-space-reflections.md)、
-  [ADR-0099](../../Documentation/SceneGIS/Decisions/ADR-0099-screen-space-indirect-lighting.md)。
-- 本扩展 ADR / SGP：尚无。具体管线决策和上游集成在实现前登记。
+- Branch: `feature/webgl-deferred-rendering`；基线 `5688deaeeb`；P0 checkpoint `bb9b16eba0`。
+- [诊断器](../../packages/engine/Source/SceneGIS/Scene/_private/_SceneGISGBuffer.js)、
+  [共享 MRT resolve helper](../../packages/engine/Source/SceneGIS/Renderer/_SceneGISResolveMrt.js)。
+- [GPU Specs](../../packages/engine/Specs/SceneGIS/Scene/SceneGISGBufferSpec.js)、
+  [Bistro E2E](../../Specs/e2e/scenegis-gbuffer.spec.js)、
+  [独立 E2E 配置](../../Test/Rendering/playwright.gbuffer.config.mjs)。
+- [独立街道原型](../../Test/Rendering/GBuffer原型.html)，复用
+  [原 PBR 示例组装](../../Test/Rendering/PBR验收.js)、Clock、资产、环境与右侧面板。
+- [ADR-0155](../../Documentation/SceneGIS/Decisions/ADR-0155-webgl-gbuffer-prototype.md)、
+  [SGP-0045](../../.scenegis/upstream-patches.json)。
+- [接入与复用讨论](discussions/2026-10-13-command-integration-and-reuse.md)、
+  [P0 评审](reviews/2026-10-13-p0-isolation-and-audit.md)、
+  [P1 评审](reviews/2026-10-13-p1-gbuffer-qualification.md)。
 
 ## Current handoff
 
-- 已从上述干净提交建立独立 managed worktree 和分支，原 WebGL 验收目录与 WebGPU
-  未提交工作均保留。独立目录尚未安装构建依赖或启动新的演示服务。
-- [P0 评审](reviews/2026-10-13-p0-isolation-and-audit.md) 只确认分支与源码审计，
-  不代表渲染、性能或视觉 gate 通过。
-- [接入与复用讨论](discussions/2026-10-13-command-integration-and-reuse.md) 记录
-  DrawCommand 分类、WebGPU 完成边界和 P1 必须解决的问题。
-- 下一步：P0 独立提交后，依据当前源码细化 P1 的 G-buffer 材质/深度契约和有限 GPU 原型。
-  优先复用已有 GLSL 材质和 Renderer，不复制 WebGPU loader / WGSL / 异步拾取体系。
-- 重大选择：MSAA 语义、支持设备/场景范围、公共 API 或旧能力削减，先提供证据再询问负责人。
-  目前没有需要负责人回答的阻塞问题。
+独立工作目录已构建；本地 Bistro 资产只读复用。原 WebGL 验收目录与 WebGPU 未提交工作
+均保留。原型主画面仍走现有光照；单视锥 HDR 3D，普通 opaque/MASK Model 为采集范围，
+其他 ordinary opaque 只遮挡，透明与水面不采集，未表示的分层材质/样式显式拒绝。
+
+P1 GPU Specs 7 项、既有 AO/SSR/SSIL 回归 40 项及 Bistro E2E 1 项通过。
+原生 MASK、普通几何遮挡、同步拾取、日志/正交深度、resize/释放、空场景清理均有证据。
+全量 dev/release、类型生成、补丁审计及静态检查结果见 P1 review。
+
+1280×800、RTX 3060 Ti、固定 14:00 视角：单采样额外 627 draws / 39.1 MiB；
+整帧 GPU 中位数 17.4 → 21.0 ms。4× MSAA 原型目标约 179.7 MiB，解析边缘存在材质混合。
+这是诊断重放成本，不构成延迟性能收益或正式附件布局决定。
+
+负责人于 2026-10-13 接受独立街道原型，批准形成 P1 阶段提交；技术与视觉 gate 均通过。
+本次提交只包含 P1，P2 保持 planned。下一阶段开始时依据当前源码建立独立 phase plan，
+正式 MSAA、支持范围、公共 API 和能力削减等重大取舍仍须提供证据后询问。

@@ -1,3 +1,4 @@
+import resolveMrt from "../../Renderer/_SceneGISResolveMrt.js";
 import defined from "../../../Core/defined.js";
 import ContextLimits from "../../../Renderer/ContextLimits.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
@@ -433,40 +434,15 @@ const SceneGISLightingMrt = {
 
   resolve(scene, state) {
     const context = scene.context;
-    const gl = context._gl;
     const mrt = state.main;
-    const source = mrt.framebuffer;
-    const target = mrt.resolveFramebuffer;
-    const count = source.numberOfColorAttachments;
-    const drawBuffers = new Array(count).fill(gl.NONE);
-    source.bindRead();
-    target.bindDraw();
-    try {
-      // Native multisample resolve only selects attachment zero. Resolve each MRT explicitly.
-      for (let i = 0; i < (mrt.numSamples > 1 ? count : 1); ++i) {
-        gl.readBuffer(gl.COLOR_ATTACHMENT0 + i);
-        drawBuffers[i] = gl.COLOR_ATTACHMENT0 + i;
-        gl.drawBuffers(drawBuffers);
-        gl.blitFramebuffer(
-          0,
-          0,
-          mrt.width,
-          mrt.height,
-          0,
-          0,
-          mrt.width,
-          mrt.height,
-          gl.COLOR_BUFFER_BIT | (i === 0 ? gl.DEPTH_BUFFER_BIT : 0),
-          gl.NEAREST,
-        );
-        drawBuffers[i] = gl.NONE;
-      }
-    } finally {
-      gl.readBuffer(gl.COLOR_ATTACHMENT0);
-      gl.drawBuffers(target._getActiveColorAttachments());
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      context._currentFramebuffer = undefined;
-    }
+    resolveMrt(
+      context,
+      mrt.framebuffer,
+      mrt.resolveFramebuffer,
+      mrt.width,
+      mrt.height,
+      mrt.numSamples > 1 ? mrt.framebuffer.numberOfColorAttachments : 1,
+    );
   },
 
   radiance(scene, state) {

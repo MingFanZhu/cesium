@@ -9,8 +9,8 @@
 - Architecture reviewer: Current task
 - Created / Updated: `2026-10-13`
 - Related discussion: [接入审计](../discussions/2026-10-13-command-integration-and-reuse.md)
-- Related review: [P0](../reviews/2026-10-13-p0-isolation-and-audit.md)
-- ADR / SGP: 尚无新增
+- Related review: [P1](../reviews/2026-10-13-p1-gbuffer-qualification.md)
+- ADR / SGP: [ADR-0155](../../../Documentation/SceneGIS/Decisions/ADR-0155-webgl-gbuffer-prototype.md) / SGP-0045
 
 ## Objective
 
@@ -51,7 +51,7 @@
 | Phase | Objective                   | Dependencies / entry gate                      | Exit gate                                                      | Status    | Phase plan                                 |
 | ----- | --------------------------- | ---------------------------------------------- | -------------------------------------------------------------- | --------- | ------------------------------------------ |
 | P0    | 隔离与接入范围审计          | 已提交 WebGL 基线                              | 分支、源码事实、复用/风险清单、文档检查与独立提交              | completed | [P0](2026-10-13-p0-isolation-and-audit.md) |
-| P1    | 统一表面数据的有限 GPU 原型 | P0 checkpoint；依据源码细化材质/深度与附件预算 | 已限定材质正确性、覆盖率、精度、资源生命周期和 MSAA 取舍证据   | planned   | 未创建                                     |
+| P1    | 统一表面数据的有限 GPU 原型 | P0 checkpoint；依据源码细化材质/深度与附件预算 | 已限定材质正确性、覆盖率、精度、资源生命周期和 MSAA 取舍证据   | completed | [P1](2026-10-13-p1-gbuffer-prototype.md)   |
 | P2    | 不透明延迟光照与混合合成    | P1 契约通过；必要重大选择已确认                | 同条件直接光/环境光/阴影/透明/曝光正确性和街道对照             | planned   | 未创建                                     |
 | P3    | 多光源与共享屏幕空间效果    | P2 已验收                                      | 分项验证光源剔除、AO/SSR/SSIL 数据复用收益及稳定性             | planned   | 未创建                                     |
 | P4    | GIS 内容覆盖与替换决策      | P3 有明确收益；按缺口安排子阶段                | 兼容矩阵、回归、实际设备成本、视觉验收，明确迁入主线或保留实验 | planned   | 未创建                                     |
@@ -79,4 +79,5 @@
 
 ## Progress and handoff
 
-P0 完成；P1 尚未激活。当前交付为隔离分支与探索记录，没有运行时代码变化。
+P0 checkpoint `bb9b16eba0`；[P1 G-buffer 原型](2026-10-13-p1-gbuffer-prototype.md) completed。
+技术验证通过，负责人于 2026-10-13 接受视觉结果并授权本阶段独立提交。P2 保持 planned。
