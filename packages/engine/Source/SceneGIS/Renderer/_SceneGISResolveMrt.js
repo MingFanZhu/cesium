@@ -6,6 +6,7 @@ function _SceneGISResolveMrt(
   width,
   height,
   colorCount,
+  copyDepth = true,
 ) {
   const gl = context._gl;
   const drawBuffers = new Array(target.numberOfColorAttachments).fill(gl.NONE);
@@ -25,7 +26,7 @@ function _SceneGISResolveMrt(
         0,
         width,
         height,
-        gl.COLOR_BUFFER_BIT | (i === 0 ? gl.DEPTH_BUFFER_BIT : 0),
+        gl.COLOR_BUFFER_BIT | (i === 0 && copyDepth ? gl.DEPTH_BUFFER_BIT : 0),
         gl.NEAREST,
       );
       drawBuffers[i] = gl.NONE;

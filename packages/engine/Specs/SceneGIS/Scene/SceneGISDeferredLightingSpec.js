@@ -225,6 +225,82 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     expect(renderer.drawCount).toBe(1);
     expect(ssr._state.captureDraws).toBe(0);
   });
+  it("clears vacated opaque pixels from current-frame linear depth", async function () {
+    setup();
+    const model = await addModel();
+    renderer.enabled = true;
+    render();
+    const depth = renderer._depth.getColorTexture();
+    expect(sample(depth)[0]).toBeGreaterThan(0);
+    model.modelMatrix = Matrix4.fromTranslation(
+      new Cartesian3(7000002.5, 0, 0),
+    );
+    render();
+    expect(renderer.ready).toBe(true);
+    expect(sample(depth)[0]).toBe(0);
+  });
+  ["ao", "ssr", "ssil"].forEach((name) => {
+    it(`shares current depth with ${name} across owner and resource changes`, async function () {
+      setup();
+      await addModel(false, true);
+      const ao = scene.postProcessStages.ambientOcclusion;
+      const ssr = new SceneGISScreenSpaceReflections({ scene });
+      const ssil = new SceneGISScreenSpaceIndirectLighting({ scene });
+      const effect = { ao, ssr, ssil }[name];
+      effect.enabled = true;
+      render();
+      const state =
+        name === "ao" ? ao._sceneGISAmbientOcclusion : effect._state;
+      const before = color(36);
+      const conversion = spyOn(
+        state.copyDepth ?? state.copyCommand,
+        "execute",
+      ).and.callThrough();
+      renderer.enabled = true;
+      render();
+      expect(renderer._depth).toBeUndefined();
+      expect(renderer._linearDepth).toBe(state.depth.getColorTexture());
+      expect(conversion).not.toHaveBeenCalled();
+      expect(color(36)).toEqualEpsilon(before, 0.006);
+      expect(sample(renderer._linearDepth, 36)[0]).toEqualEpsilon(8.5, 0.01);
+      expect(sample(renderer._linearDepth, 28)[0]).toBe(0);
+      expect(renderer.byteLength).toBe(64 * 64 * 32);
+      const first = renderer._linearDepth;
+      renderer.enabled = false;
+      expect(first.isDestroyed()).toBe(false);
+      render();
+      expect(conversion).toHaveBeenCalledTimes(1);
+      expect(color(36)).toEqualEpsilon(before, 0.006);
+      renderer.enabled = true;
+      scene.camera.frustum = new PerspectiveFrustum({
+        fov: Math.PI / 3,
+        aspectRatio: 1,
+        near: 0.1,
+        far: 30,
+      });
+      scene.logarithmicDepthBuffer = true;
+      scene.canvas.width = 96;
+      render();
+      expect(first.isDestroyed()).toBe(true);
+      expect(renderer._linearDepth.width).toBe(96);
+      expect(sample(renderer._linearDepth, 48)[0]).toEqualEpsilon(8.5, 0.003);
+      effect.enabled = false;
+      render();
+      const owned = renderer._depth.getColorTexture();
+      expect(renderer._linearDepth).toBe(owned);
+      expect(renderer.byteLength).toBe(96 * 64 * 36);
+      effect.enabled = true;
+      render();
+      expect(owned.isDestroyed()).toBe(true);
+      expect(renderer._depth).toBeUndefined();
+      const last = renderer._linearDepth;
+      renderer.destroy();
+      expect(last.isDestroyed()).toBe(false);
+      scene.destroyForSpecs();
+      scene = undefined;
+      expect(last.isDestroyed()).toBe(true);
+    });
+  });
   it("rejects MSAA without changing it and releases only owned resources", async function () {
     setup();
     await addModel();

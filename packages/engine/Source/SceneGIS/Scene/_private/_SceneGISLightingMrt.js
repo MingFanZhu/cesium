@@ -354,8 +354,10 @@ const SceneGISLightingMrt = {
         passState.framebuffer = mrt.clearFramebuffer;
         state.clearColor.execute(scene.context, passState);
       }
-      passState.framebuffer = state.depth.framebuffer;
-      state.clearColor.execute(scene.context, passState);
+      if (!scene._sceneGISDeferred?._active) {
+        passState.framebuffer = state.depth.framebuffer;
+        state.clearColor.execute(scene.context, passState);
+      }
     } finally {
       passState.framebuffer = original;
     }
@@ -432,9 +434,10 @@ const SceneGISLightingMrt = {
     );
   },
 
-  resolve(scene, state) {
+  resolve(scene, state, passState, copyDepth = state.copyDepth) {
     const context = scene.context;
     const mrt = state.main;
+    const sharedDepth = scene._sceneGISDeferred?.ready === true;
     resolveMrt(
       context,
       mrt.framebuffer,
@@ -442,7 +445,12 @@ const SceneGISLightingMrt = {
       mrt.width,
       mrt.height,
       mrt.numSamples > 1 ? mrt.framebuffer.numberOfColorAttachments : 1,
+      !sharedDepth,
     );
+    if (!sharedDepth) {
+      passState.framebuffer = state.depth.framebuffer;
+      copyDepth.execute(context, passState);
+    }
   },
 
   radiance(scene, state) {

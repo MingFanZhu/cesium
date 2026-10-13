@@ -968,6 +968,16 @@ direct 光，保留环境光、IBL / SSR、自发光与后续雾、裁剪边缘�
 光照；没有光照分量约定的普通 unlit 地表和自定义最终颜色 shader 保留原有阴影行为。
 禁止为此新增 shadow atlas、渲染通道或公共开关。
 
+## WebGL 延迟实验的共享深度
+
+[ADR-0156](Decisions/ADR-0156-webgl-deferred-lighting-experiment.md) 的私有单采样实验按
+[ADR-0158](Decisions/ADR-0158-shared-deferred-depth.md) 复用当前 lighting MRT owner 的
+R32F 线性深度。Deferred 在 opaque 完成后、屏幕光照之前清零并转换一次；AO/SSR/SSIL
+直接消费，不再重复 depth blit/转换。没有 consumer 时 Deferred 才自有该目标。
+借用 Texture 与自有 FramebufferManager 分离，每帧刷新；销毁借用者不得销毁 owner 资源。
+材质法线、AO 几何法线、SSR/SSIL 光照响应的语义保持独立，不能直接以数据名称相似替换。
+现有非实验、多视锥/多采样接点保持原有调度与所有权，不新增公共渲染选择 API。
+
 ## 局部夜景光照（R7）
 
 [ADR-0090](Decisions/ADR-0090-local-night-lighting.md) / SGP-0019 增加显式绑定 Scene 的

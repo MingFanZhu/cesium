@@ -71,7 +71,7 @@ const SceneGISWaterFrame = {
       s.colorTexture = deferred._waterColor.getColorTexture();
       s.colorTexture.generateMipmap();
       s.colorTexture.sampler = sampler;
-      s.depthTexture = deferred._depth.getColorTexture();
+      s.depthTexture = deferred._linearDepth;
       s.borrowed = true;
       s.ready = true;
       return;

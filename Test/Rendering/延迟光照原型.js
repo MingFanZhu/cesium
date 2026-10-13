@@ -125,7 +125,7 @@ const remove = scene.postRender.addEventListener(() => {
   }
   if (started) {
     stats.textContent = renderer.ready
-      ? `${scene.drawingBufferWidth} × ${scene.drawingBufferHeight} · ${renderer.drawCount} 次材质绘制 · ${renderer.lightDrawCount} 次屏幕光照 · 材质/深度约 ${(renderer.byteLength / 1048576).toFixed(1)} MiB`
+      ? `${scene.drawingBufferWidth} × ${scene.drawingBufferHeight} · ${renderer.drawCount} 次材质绘制 · ${renderer.lightDrawCount} 次屏幕光照 · 自有材质/深度约 ${(renderer.byteLength / 1048576).toFixed(1)} MiB`
       : "当前使用原有光照或等待当前帧";
     const tiles = lamps._state?.tiles;
     lightStats.textContent = tiles

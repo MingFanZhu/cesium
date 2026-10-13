@@ -54,7 +54,7 @@
 | P1    | 统一表面数据的有限 GPU 原型 | P0 checkpoint；依据源码细化材质/深度与附件预算 | 已限定材质正确性、覆盖率、精度、资源生命周期和 MSAA 取舍证据   | completed | [P1](2026-10-13-p1-gbuffer-prototype.md)           |
 | P2    | 不透明延迟光照与混合合成    | P1 契约通过；必要重大选择已确认                | 同条件直接光/环境光/阴影/透明/曝光正确性和街道对照             | completed | [P2](2026-10-13-p2-deferred-lighting.md)           |
 | P3a   | 256 灯分块调度              | P2 已验收                                      | 256 灯同语义、共享接收、资源/成本、视觉验收与独立提交          | completed | [P3a](2026-10-13-p3-many-light-and-shared-data.md) |
-| P3b   | 共享屏幕空间效果            | P3a 独立 checkpoint                            | AO/SSR/SSIL 数据复用收益及稳定性                               | planned   | 未创建                                             |
+| P3b   | 共享屏幕空间效果            | P3a 独立 checkpoint                            | AO/SSR/SSIL 数据复用收益及稳定性                               | completed | [P3b](2026-10-13-p3b-shared-screen-depth.md)       |
 | P4    | GIS 内容覆盖与替换决策      | P3a / P3b 有明确收益；按缺口安排子阶段         | 兼容矩阵、回归、实际设备成本、视觉验收，明确迁入主线或保留实验 | planned   | 未创建                                             |
 
 后继阶段仅记录目标，不提前冻结 G-buffer 编码、灯光分块方式、Shader 文件或接口。
@@ -84,4 +84,6 @@ P0 checkpoint `bb9b16eba0`；[P1 G-buffer 原型](2026-10-13-p1-gbuffer-prototyp
 技术验证通过，负责人于 2026-10-13 接受视觉结果；P1 checkpoint 为 `0a48afdd65`。
 负责人确认 P2 单采样 + TAA / FXAA 路线，并于 2026-10-13 接受延迟光照视觉结果；
 [P2 plan](2026-10-13-p2-deferred-lighting.md) completed，批准阶段提交后继续。
-P2 checkpoint `b1c3a8a494` 已形成；P3 draft 与源码/成本调查已记录，负责人已选择 A，P3a 技术与负责人视觉 gate 已通过，批准独立提交后继续；P3b 保持 planned。
+P2 checkpoint `b1c3a8a494` 已形成；P3 draft 与源码/成本调查已记录，负责人已选择 A，P3a 技术与负责人视觉 gate 已通过，批准独立提交后继续；P3a checkpoint `085f47e8f7` 已形成；P3b 已细化为共享屏幕深度并激活。
+
+负责人于 2026-10-13 接受 P3b 共享深度结果，技术与视觉 gate 均通过；批准形成独立 checkpoint 后继续 P4。

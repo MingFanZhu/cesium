@@ -387,9 +387,7 @@ SceneGISAmbientOcclusion.resolve = function (scene, passState, frustum) {
   const context = scene.context;
   const original = passState.framebuffer;
   try {
-    LightingMrt.resolve(scene, state);
-    passState.framebuffer = state.linearDepth.framebuffer;
-    state.copyCommand.execute(context, passState);
+    LightingMrt.resolve(scene, state, passState, state.copyCommand);
     context.uniformState.updateFrustum(scene.camera.frustum);
     estimateOcclusion(state, context, passState);
     IndirectLighting.render(scene, state, state.linearDepth.getColorTexture());

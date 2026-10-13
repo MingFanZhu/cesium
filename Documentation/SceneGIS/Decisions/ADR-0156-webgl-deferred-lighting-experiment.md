@@ -66,3 +66,6 @@ the same camera, UTC, resolution and effect quality, reporting actual group coun
 storage. Full dev/release/types, relevant regressions, patch audit and owner visual acceptance
 precede a phase checkpoint. Review native stage ordering, shadow wrappers, shared MRT layout,
 framebuffer ownership and group invalidation on upstream upgrades.
+
+P3b amendment: [ADR-0158](ADR-0158-shared-deferred-depth.md) shares the existing lighting-MRT
+linear-depth target and eliminates its duplicate conversion in the deferred experiment.

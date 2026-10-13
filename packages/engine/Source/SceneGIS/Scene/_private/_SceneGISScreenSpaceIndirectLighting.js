@@ -211,9 +211,7 @@ const SceneGISScreenSpaceIndirectLighting = {
     }
     const original = passState.framebuffer;
     try {
-      LightingMrt.resolve(scene, s);
-      passState.framebuffer = s.depth.framebuffer;
-      s.copyDepth.execute(scene.context, passState);
+      LightingMrt.resolve(scene, s, passState);
       scene.context.uniformState.updateFrustum(scene.camera.frustum);
       SceneGISScreenSpaceIndirectLighting.render(
         scene,

@@ -195,9 +195,7 @@ SceneGISScreenSpaceReflections.resolve = function (scene, passState, frustum) {
   const context = scene.context;
   const original = passState.framebuffer;
   try {
-    ReflectionMrt.resolve(scene, s);
-    passState.framebuffer = s.depth.framebuffer;
-    s.copyDepth.execute(context, passState);
+    ReflectionMrt.resolve(scene, s, passState);
     context.uniformState.updateFrustum(scene.camera.frustum);
     AmbientOcclusion.resolveShared(scene, passState, s.depth.getColorTexture());
     IndirectLighting.render(scene, s, s.depth.getColorTexture());

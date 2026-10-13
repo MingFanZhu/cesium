@@ -2,16 +2,16 @@
 
 ## Metadata
 
-| Field                            | Value                                                                 |
-| -------------------------------- | --------------------------------------------------------------------- |
-| Extension slug                   | `webgl-deferred-renderer`                                             |
-| Status                           | `active`                                                              |
-| Planning model                   | `extension`                                                           |
-| Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md)     |
-| Current phase                    | P3a completed；准备独立 checkpoint                                    |
-| Active phase plan                | 暂无；已完成 [P3a](plans/2026-10-13-p3-many-light-and-shared-data.md) |
-| Architecture / execution contact | 当前任务                                                              |
-| Last updated                     | `2026-10-13`                                                          |
+| Field                            | Value                                                             |
+| -------------------------------- | ----------------------------------------------------------------- |
+| Extension slug                   | `webgl-deferred-renderer`                                         |
+| Status                           | `active`                                                          |
+| Planning model                   | `extension`                                                       |
+| Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
+| Current phase                    | P3b completed：准备独立 checkpoint                                |
+| Active phase plan                | 暂无；已完成 [P3b](plans/2026-10-13-p3b-shared-screen-depth.md)   |
+| Architecture / execution contact | 当前任务                                                          |
+| Last updated                     | `2026-10-13`                                                      |
 
 ## Scope
 
@@ -77,4 +77,9 @@ P3a 已按负责人选择 A 实现：保留灯光 API，容量扩至 256，延�
 [P3a review](reviews/2026-10-13-p3a-tiled-lighting-qualification.md)。
 256 灯 / 3 米屏幕光照约 2.746 → 1.771 ms，整帧约 18.33 → 17.42 ms；
 6 米密集重叠退化已明确记录。完整交付检查通过，负责人于 2026-10-13 接受视觉结果，批准阶段提交并继续。
-P3b 未激活，不混入本阶段。
+P3a checkpoint 为 `085f47e8f7`，提交钩子通过。
+[P3b](plans/2026-10-13-p3b-shared-screen-depth.md) 已依据当前源码激活，同语义共享线性深度。
+
+P3b 已完成同语义深度共享并修复移动后旧深度残留，70 项 GPU Specs 与 1 项街道 E2E 通过。
+1280×800 少一个 R32F（约 3.9 MiB），固定 HDR 对 P3a 逐像素一致；不声明普遍整帧提速。
+[P3b review](reviews/2026-10-13-p3b-shared-depth-qualification.md) 记录证据，负责人已于 2026-10-13 接受视觉结果，批准独立提交并继续。

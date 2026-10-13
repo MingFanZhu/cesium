@@ -68,7 +68,12 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
     // Isolate current-frame lighting from temporal histories; the performance/motion case below retains TAA.
     e.taa.enabled = false;
     try {
-      for (const hour of [14, 22]) {
+      for (const [hour, ssil] of [
+        [14, false],
+        [22, false],
+        [14, true],
+      ]) {
+        e.ssil.enabled = ssil;
         e.atmosphere.hour = hour;
         e.state.setTime();
         e.deferred.enabled = false;
@@ -96,6 +101,7 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
         }
         report.comparisons.push({
           hour,
+          ssil,
           mean: sum / (width * height * 3),
           maximum,
           nonfinite,
@@ -107,6 +113,7 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
     }
     e.atmosphere.hour = 14;
     e.state.setTime();
+    e.ssil.enabled = false;
     e.taa.enabled = true;
     for (const enabled of [false, true]) {
       e.deferred.enabled = enabled;
@@ -137,6 +144,8 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
         lightingDraws: e.deferred.lightDrawCount,
         groups: e.deferred.groupCount,
         materialDepthBytes: e.deferred.byteLength,
+        sharedDepth:
+          e.deferred._linearDepth === e.ssr._state.depth.getColorTexture(),
         ssrCaptureDraws: e.ssr._state.captureDraws,
       });
     }
@@ -156,10 +165,14 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
   expect(report.timing[1].groups).toBe(1);
   expect(report.timing[1].lightingDraws).toBe(1);
   expect(report.timing[1].ssrCaptureDraws).toBe(0);
+  expect(report.timing[1].sharedDepth).toBe(true);
+  expect(report.timing[1].materialDepthBytes).toBe(1280 * 800 * 32);
   await page.screenshot({ path: testInfo.outputPath("day.png") });
   const motion = await page.evaluate(() => {
     const e = window.example;
     const texture = e.deferred._raw.getColorTexture();
+    const depth = e.deferred._linearDepth;
+    e.ssil.enabled = true;
     for (let i = 0; i < 24; ++i) {
       e.viewer.camera.moveRight(0.08);
       e.viewer.render();
@@ -168,9 +181,17 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
       taa: e.taa.ready,
       deferred: e.deferred.ready,
       sameTexture: texture === e.deferred._raw.getColorTexture(),
+      sharedDepth:
+        depth === e.deferred._linearDepth &&
+        depth === e.ssil._state.sourceDepth,
     };
   });
-  expect(motion).toEqual({ taa: true, deferred: true, sameTexture: true });
+  expect(motion).toEqual({
+    taa: true,
+    deferred: true,
+    sameTexture: true,
+    sharedDepth: true,
+  });
   await page.screenshot({ path: testInfo.outputPath("motion.png") });
   await page.evaluate(() => {
     const e = window.example;

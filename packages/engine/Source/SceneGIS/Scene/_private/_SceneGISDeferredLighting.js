@@ -67,6 +67,7 @@ function release(renderer) {
   renderer._raw = undefined;
   renderer._depth?.destroy();
   renderer._depth = undefined;
+  renderer._linearDepth = undefined;
   renderer._copyDepth?.shaderProgram.destroy();
   renderer._copyDepth = undefined;
   renderer._waterColor?.destroy();
@@ -96,10 +97,6 @@ function allocate(renderer, manager) {
     colorAttachmentsLength: 4,
     pixelDatatype: PixelDatatype.HALF_FLOAT,
   });
-  renderer._depth ??= new FramebufferManager({
-    pixelFormat: PixelFormat.RED,
-    pixelDatatype: PixelDatatype.FLOAT,
-  });
   const source = manager.framebuffer;
   if (renderer._raw.isDirty(width, height, 1) || renderer._source !== source) {
     renderer._framebuffer?.destroy();
@@ -112,8 +109,7 @@ function allocate(renderer, manager) {
     });
     renderer._source = source;
   }
-  renderer._depth.update(context, width, height);
-  renderer.byteLength = width * height * 36;
+  renderer.byteLength = width * height * 32;
   const logDepth = frameState.useLogDepth;
   if (!renderer._copyDepth || renderer._logDepth !== logDepth) {
     renderer._copyDepth?.shaderProgram.destroy();
@@ -170,7 +166,7 @@ function createGroup(renderer, model, key) {
     u_sceneGISDeferredNormal: () => renderer._raw.getColorTexture(1),
     u_sceneGISDeferredSpecular: () => renderer._raw.getColorTexture(2),
     u_sceneGISDeferredEmission: () => renderer._raw.getColorTexture(3),
-    u_linearDepth: () => renderer._depth.getColorTexture(),
+    u_linearDepth: () => renderer._linearDepth,
     u_sceneGISDeferredGroup: () => group.id,
   };
   group.command = new DrawCommand({
@@ -292,6 +288,7 @@ class _SceneGISDeferredLighting {
 
   begin(passState) {
     this._active = this._ready = this._waterReady = false;
+    this._linearDepth = undefined;
     this.drawCount = this.lightDrawCount = this.groupCount = 0;
     if (!this.enabled || !this._scene.frameState.passes.render) {
       return;
@@ -437,10 +434,33 @@ class _SceneGISDeferredLighting {
     const original = passState.framebuffer;
     const pass = scene.context.uniformState.pass;
     try {
-      passState.framebuffer = this._depth.framebuffer;
+      const shared = sharedState(scene);
+      let target;
+      if (shared) {
+        // The lighting-MRT owner retains lifetime responsibility for this target.
+        this._depth?.destroy();
+        this._depth = undefined;
+        target = shared.depth;
+      } else {
+        this._depth ??= new FramebufferManager({
+          pixelFormat: PixelFormat.RED,
+          pixelDatatype: PixelDatatype.FLOAT,
+        });
+        this._depth.update(
+          scene.context,
+          scene.drawingBufferWidth,
+          scene.drawingBufferHeight,
+        );
+        target = this._depth;
+        this.byteLength +=
+          scene.drawingBufferWidth * scene.drawingBufferHeight * 4;
+      }
+      this._linearDepth = target.getColorTexture();
+      passState.framebuffer = target.framebuffer;
+      // Conversion discards background, so disoccluded pixels must start empty.
+      this._clear.execute(scene.context, passState);
       this._copyDepth.execute(scene.context, passState);
       passState.framebuffer = original;
-      const shared = sharedState(scene);
       scene.context.uniformState.updatePass(Pass.OPAQUE);
       const draw = (group) => {
         let command = LocalLights.receiver(scene, group.command);
@@ -470,7 +490,7 @@ class _SceneGISDeferredLighting {
           {
             uniformMap: {
               u_color: () => this._source.getColorTexture(0),
-              u_depth: () => this._depth.getColorTexture(),
+              u_depth: () => this._linearDepth,
             },
           },
         );
