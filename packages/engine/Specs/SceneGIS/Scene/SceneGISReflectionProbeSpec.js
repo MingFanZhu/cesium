@@ -13,6 +13,8 @@ import {
   PixelFormat,
   SceneGISReflectionProbe,
   SceneGISReflectionProbeCollection,
+  SceneGISLightCollection,
+  SceneGISPointLight,
   ShaderSource,
   ShadowMode,
   Texture,
@@ -320,6 +322,61 @@ describe("SceneGIS/Scene/SceneGISReflectionProbe", function () {
       expect(maps.visibility.isDestroyed()).toBe(true);
       expect(pixel()).toEqualEpsilon(original, 2);
     });
+  });
+
+  it("shares 256 tiled lights with cube cameras and restores the main-camera table", async function () {
+    setup();
+    scene.canvas.width = 128;
+    scene.canvas.height = 96;
+    const receiver = await model(
+      new Cartesian3(0, 3, 0),
+      [0, 0, 0],
+      new Cartesian3(8, 1, 8),
+    );
+    const material = new CustomShader({
+      fragmentShaderText:
+        "void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial m) { m.diffuse=vec3(0.4); m.specular=vec3(0.0); m.emissive=vec3(0.0); m.clearcoatFactor=0.0; }",
+    });
+    shaders.push(material);
+    receiver.customShader = material;
+    const lights = new SceneGISLightCollection({ scene });
+    for (let i = 0; i < 256; ++i) {
+      lights.add(
+        new SceneGISPointLight({
+          position: Matrix4.multiplyByPoint(
+            frame,
+            new Cartesian3(
+              ((i % 16) - 8) * 0.75,
+              1.5,
+              (Math.floor(i / 16) - 8) * 0.5,
+            ),
+            new Cartesian3(),
+          ),
+          intensity: 2,
+          range: 2,
+          color: Color.RED,
+        }),
+      );
+    }
+    const probe = addProbe();
+    render();
+    const before = pixel();
+    const parameters = Array.from(lights._state.tiles.parameters);
+    lights._tiled = false;
+    let pending = collection.capture([receiver]);
+    render();
+    await pending;
+    const reference = sample(probe._maps.radiance, Cartesian3.UNIT_Y);
+    lights._tiled = true;
+    pending = collection.capture([receiver]);
+    render();
+    await pending;
+    const actual = sample(probe._maps.radiance, Cartesian3.UNIT_Y);
+    expect(actual[0]).toBeGreaterThan(actual[1] + 0.1);
+    expect(actual).toEqualEpsilon(reference, 0.002);
+    expect(Array.from(lights._state.tiles.parameters)).toEqual(parameters);
+    collection.show = false;
+    expect(pixel()).toEqualEpsilon(before, 2);
   });
 
   it("occludes default diffuse sky with zero specular factor, preserves emission and direct light, and respects masked openings", async function () {

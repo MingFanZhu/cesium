@@ -223,7 +223,7 @@ describe("SceneGIS/Scene/SceneGISLightCollection", function () {
       lamp();
     }
     scene.renderForSpecs();
-    expect(lights._state.count).toBe(16);
+    expect(lights._state.count).toBe(256);
     expect(() => lamp()).toThrowDeveloperError();
     expect(lights.remove(light)).toBe(true);
     expect(lights.remove(light)).toBe(false);
@@ -338,8 +338,17 @@ describe("SceneGIS/Scene/SceneGISLightCollection", function () {
       light.show = true;
       sample();
       const count = scene.context.shaderCache.numberOfShaders;
+      const cacheLookup = spyOn(
+        scene.context.shaderCache,
+        "getDerivedShaderProgram",
+      ).and.callThrough();
       light.position = point(1, 0, 8);
       sample();
+      expect(
+        cacheLookup.calls
+          .allArgs()
+          .filter((args) => args[1] === "sceneGIS_localLights").length,
+      ).toBe(0);
       expect(scene.context.shaderCache.numberOfShaders).toBe(count);
       expect(lights._state.count).toBe(1);
       light.show = false;

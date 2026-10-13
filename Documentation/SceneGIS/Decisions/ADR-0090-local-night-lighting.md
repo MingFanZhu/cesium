@@ -13,6 +13,13 @@ provide simpler material lighting. Scene selects log/HDR/shadow commands before 
 owned AO/SSR receiver stages. Native glTF emissive factors/textures and CustomShader
 already support emission; no parallel material API is needed.
 
+## 2026-10-13 storage and capacity amendment
+
+The WebGL2 deferred experiment now follows [ADR-0157](ADR-0157-tiled-local-lighting.md)
+and SGP-0047: 256 descriptors, shared GPU tables and conservative tile lists. This
+supersedes the 16-light uniform storage and texture-free collection described below.
+Coordinate, attenuation, material and independent-energy semantics remain in force.
+
 ## Decision
 
 Expose `SceneGISLightCollection({scene})`, `SceneGISPointLight` and `SceneGISSpotLight`.

@@ -2,16 +2,16 @@
 
 ## Metadata
 
-| Field                            | Value                                                             |
-| -------------------------------- | ----------------------------------------------------------------- |
-| Extension slug                   | `webgl-deferred-renderer`                                         |
-| Status                           | `active`                                                          |
-| Planning model                   | `extension`                                                       |
-| Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
-| Current phase                    | P2 completed，技术与视觉 gate 已通过                              |
-| Active phase plan                | 暂无；[最近完成 P2](plans/2026-10-13-p2-deferred-lighting.md)     |
-| Architecture / execution contact | 当前任务                                                          |
-| Last updated                     | `2026-10-13`                                                      |
+| Field                            | Value                                                                 |
+| -------------------------------- | --------------------------------------------------------------------- |
+| Extension slug                   | `webgl-deferred-renderer`                                             |
+| Status                           | `active`                                                              |
+| Planning model                   | `extension`                                                           |
+| Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md)     |
+| Current phase                    | P3a completed；准备独立 checkpoint                                    |
+| Active phase plan                | 暂无；已完成 [P3a](plans/2026-10-13-p3-many-light-and-shared-data.md) |
+| Architecture / execution contact | 当前任务                                                              |
+| Last updated                     | `2026-10-13`                                                          |
 
 ## Scope
 
@@ -42,6 +42,7 @@
   [P1 评审](reviews/2026-10-13-p1-gbuffer-qualification.md)。
 - [ADR-0156](../../Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md) / SGP-0046、
   [P2 评审](reviews/2026-10-13-p2-deferred-lighting-qualification.md)。
+- [P3 多光源讨论](discussions/2026-10-13-many-light-scheduling.md)，负责人已选择 A。
 
 ## Current handoff
 
@@ -67,4 +68,13 @@ native 阴影可见度与现有 AO/SSR/SSIL 合成，详见
 P2 GPU Specs 9 项、既有回归 47 项、独立 Bistro E2E 1 项及完整 build / release / types 已通过。
 同条件 1280×800、TAA / AO / SSR 下，627 次材质 + 1 次屏幕光照，材质/线性深度约 35.2 MiB，
 整帧计时中位数约 16.0 → 15.3 ms；不作普遍提速声明。负责人于 2026-10-13 接受视觉结果，
-批准形成 P2 阶段提交后继续。当前架构任务确认 P2 completed，详见 P2 review；P3 尚未激活。
+批准形成 P2 阶段提交后继续。P2 checkpoint 为 `b1c3a8a494`，提交钩子通过。
+
+P3a 已按负责人选择 A 实现：保留灯光 API，容量扩至 256，延迟与配套接收者共享 tile 列表。
+一张 RGBA32UI 保存参数 float bits、headers 与索引；解决真实探针组合的 sampler 超限。
+局部 Shader 派生缓存与 caster 资格修复，局部灯不投影的既有语义不变。
+34 项相关 GPU Specs 与 1 项多灯街道 E2E 通过，详见
+[P3a review](reviews/2026-10-13-p3a-tiled-lighting-qualification.md)。
+256 灯 / 3 米屏幕光照约 2.746 → 1.771 ms，整帧约 18.33 → 17.42 ms；
+6 米密集重叠退化已明确记录。完整交付检查通过，负责人于 2026-10-13 接受视觉结果，批准阶段提交并继续。
+P3b 未激活，不混入本阶段。

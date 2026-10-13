@@ -295,16 +295,20 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     setup();
     await addModel();
     const lights = new SceneGISLightCollection({ scene });
-    lights.add(
-      new SceneGISPointLight({
-        position: new Cartesian3(7000000, 0, 6),
-        intensity: 20,
-        range: 10,
-      }),
-    );
+    for (let i = 0; i < 256; ++i) {
+      lights.add(
+        new SceneGISPointLight({
+          position: new Cartesian3(7000000 + (i % 16) * 0.01, 0, 6),
+          intensity: 20 / 256,
+          range: 10,
+        }),
+      );
+    }
+    lights._tiled = false;
     const opaque = box(4);
     render();
     const before = color();
+    lights._tiled = true;
     renderer.enabled = true;
     render();
     expect(color()).toEqualEpsilon(before, 0.004);
@@ -314,6 +318,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     box(4, true);
     render();
     const translucent = color();
+    lights._tiled = false;
     renderer.enabled = false;
     render();
     expect(color()).toEqualEpsilon(translucent, 0.004);

@@ -117,6 +117,43 @@
         />使用延迟光照</label
       >
       <p id="deferred-stats">等待原街区加载…</p>
+      <label
+        >局部灯数量
+        <select id="light-count">
+          <option value="0">关闭</option>
+          <option value="16">16 盏</option>
+          <option value="64">64 盏</option>
+          <option value="256">256 盏</option>
+        </select>
+      </label>
+      <label
+        >范围
+        <select id="light-range">
+          <option value="3">小范围（3 米）</option>
+          <option value="6">中范围（6 米）</option>
+          <option value="80">大范围重叠（80 米）</option>
+        </select> </label
+      ><br />
+      <label><input id="light-tiled" type="checkbox" checked />分块筛选</label>
+      <label
+        >单灯强度
+        <input
+          id="light-intensity"
+          type="number"
+          min="0"
+          max="100"
+          step="0.5"
+          value="1"
+          style="width: 48px"
+        />
+      </label>
+      <button id="light-place" type="button">布置到当前画面</button>
+      <p id="light-stats">未启用局部灯</p>
+      <p id="light-error" role="alert"></p>
+      <p>
+        测试灯固定在世界坐标。取消分块可对照同一灯表逐灯计算；两者画面应一致。
+        可调到 22:00 观察彩色受光。局部灯暂不投影，重叠会累加能量。
+      </p>
       <small
         >单采样材质缓冲，支持 TAA / FXAA；MSAA
         配置会明确报错。取消勾选可在相同参数下查看原有光照。</small

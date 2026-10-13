@@ -971,11 +971,18 @@ direct 光，保留环境光、IBL / SSR、自发光与后续雾、裁剪边缘�
 ## 局部夜景光照（R7）
 
 [ADR-0090](Decisions/ADR-0090-local-night-lighting.md) / SGP-0019 增加显式绑定 Scene 的
-`SceneGISLightCollection`，借用最多 16 个 `SceneGISPointLight` / `SceneGISSpotLight`。
+`SceneGISLightCollection`。当前 WebGL2 延迟实验按
+[ADR-0157](Decisions/ADR-0157-tiled-local-lighting.md) / SGP-0047 扩至最多 256 个
+`SceneGISPointLight` / `SceneGISSpotLight`，调用形式与能量语义不变。
 保留 `scene.light` 和原生材质自发光；局部灯只在 PBR、Phong（含 OIT）和 lit terrain
 的直接光分量累加，位于雾与 tone mapping 之前，独立于方向光阴影和 AO。Globe 的 ECEF
 与 Planar 的 Cartesian 输入共用米制距离与弧度角；CPU 每帧变换到 eye space。
-SSR 捕获同样的局部照明，不增加几何 pass、texture 或 framebuffer。Scene 拥有集合生命周期，
+延迟 Model、配套透明/普通接收者、SSR 与探针捕获共享保守 tile 灯列表和 GPU 参数表；
+复用原生 Texture，参数 float bits、tile headers 与索引共享一张 RGBA32UI 数据纹理，
+只占一个 sampler。集合拥有纹理，空/隐藏时释放，resize 更新，销毁先于 Context。
+不读取深度，不截断 tile 候选；局部 range/cone 精确判断保留。多灯高度重叠时不保证提速。
+SGP-0047 显式排除 shadow caster 的局部颜色派生；ShaderCache 仍拥有程序。
+不增加几何 pass 或 framebuffer。Scene 拥有集合生命周期，
 描述对象无 GPU 资源、可共享；超限报错，不静默选灯。局部阴影、体积散射、GI、自动 glTF
 灯节点导入和自定义光照 shader 不在首轮资格内。
 

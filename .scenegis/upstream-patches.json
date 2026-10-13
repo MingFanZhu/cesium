@@ -846,6 +846,25 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md",
       "removalCondition": "Native rendering provides equivalent deferred material lighting, or the private experiment is retired."
+    },
+    {
+      "id": "SGP-0047",
+      "title": "Keep tiled local lighting out of shadow casters",
+      "status": "active",
+      "reason": "Pass explicit shadow-cast execution context so color receivers do not derive local-light shaders for shadow geometry.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISLightCollectionSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISLightTilesSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0157-tiled-local-lighting.md",
+      "removalCondition": "Native command scheduling exposes equivalent explicit color-receiver eligibility."
     }
   ]
 }

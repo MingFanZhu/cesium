@@ -2371,7 +2371,15 @@ function debugShowBoundingVolume(command, scene, passState, debugFramebuffer) {
  *
  * @private
  */
-function executeCommand(command, scene, passState, debugFramebuffer) {
+// SCENEGIS_PATCH_BEGIN SGP-0047: Identify caster execution separately from color reception.
+function executeCommand(
+  command,
+  scene,
+  passState,
+  debugFramebuffer,
+  shadowCast = false,
+) {
+  // SCENEGIS_PATCH_END SGP-0047
   const frameState = scene._frameState;
   const context = scene._context;
 
@@ -2488,9 +2496,11 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
     command = command.derivedCommands.shadows.receiveCommand;
   }
   // SCENEGIS_PATCH_END SGP-0019
-  // SCENEGIS_PATCH_BEGIN SGP-0019: Add independent local sources to the selected color command.
-  command = SceneGISLocalLights.receiver(scene, command);
-  // SCENEGIS_PATCH_END SGP-0019
+  // SCENEGIS_PATCH_BEGIN SGP-0047: Local sources only affect color receivers.
+  if (!shadowCast) {
+    command = SceneGISLocalLights.receiver(scene, command);
+  }
+  // SCENEGIS_PATCH_END SGP-0047
   // SCENEGIS_PATCH_BEGIN SGP-0028: Share weather material inputs with color and indirect-light receivers.
   command = SceneGISSurfaceWeather.receiver(scene, command);
   // SCENEGIS_PATCH_END SGP-0028
@@ -3604,7 +3614,9 @@ function executeShadowMapCastCommands(scene) {
         // conditionally render based on whether the pass is translucent or opaque.
         uniformState.updatePass(command.pass);
         const castCommand = command.derivedCommands.shadows.castCommands[i];
-        executeCommand(castCommand, scene, pass.passState);
+        // SCENEGIS_PATCH_BEGIN SGP-0047: Skip local-color derivation while casting shadows.
+        executeCommand(castCommand, scene, pass.passState, undefined, true);
+        // SCENEGIS_PATCH_END SGP-0047
       }
     }
   }

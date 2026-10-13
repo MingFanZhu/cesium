@@ -2,10 +2,11 @@ import destroyObject from "../../Core/destroyObject.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import Frozen from "../../Core/Frozen.js";
 import SceneMode from "../../Scene/SceneMode.js";
+import LightTiles from "./_private/_SceneGISLightTiles.js";
 import SceneGISPointLight from "./SceneGISPointLight.js";
 
 /**
- * A bounded forward-light collection attached to one Scene. Adds up to 16 local
+ * A tiled-light collection attached to one WebGL2 Scene. Adds up to 256 local
  * lights alongside Scene.light, without replacing the Sun/Moon or its shadows.
  * Receivers are lit PBR models/3D Tiles, Phong primitives and lit Globe/Planar
  * terrain in SCENE3D. Unlit materials and custom lighting shaders are unchanged.
@@ -14,7 +15,7 @@ import SceneGISPointLight from "./SceneGISPointLight.js";
  *
  * The Scene owns this collection and destroys it before its Context. Explicit
  * destroy detaches it early. Light descriptors are borrowed, never destroyed.
- * No textures, framebuffers or extra geometry passes are allocated.
+ * The collection owns shared GPU light tables. No extra geometry passes are allocated.
  *
  * @alias SceneGISLightCollection
  * @constructor
@@ -45,6 +46,8 @@ function SceneGISLightCollection(options = Frozen.EMPTY_OBJECT) {
   this._scene = scene;
   this._lights = [];
   this._state = undefined;
+  // Private street diagnostic: compare candidates with the complete GPU light table.
+  this._tiled = true;
   /**
    * Whether local lighting contributes. Request a frame after editing in request-render mode.
    * @type {boolean}
@@ -62,7 +65,7 @@ function SceneGISLightCollection(options = Frozen.EMPTY_OBJECT) {
  * @type {number}
  * @readonly
  */
-SceneGISLightCollection.MAXIMUM_LIGHTS = 16;
+SceneGISLightCollection.MAXIMUM_LIGHTS = LightTiles.maximumLights;
 
 Object.defineProperties(SceneGISLightCollection.prototype, {
   /**
@@ -93,8 +96,8 @@ SceneGISLightCollection.prototype.add = function (light) {
   if (this.contains(light)) {
     return light;
   }
-  if (this.length === 16) {
-    throw new DeveloperError("A collection supports at most 16 local lights.");
+  if (this.length === SceneGISLightCollection.MAXIMUM_LIGHTS) {
+    throw new DeveloperError("A collection supports at most 256 local lights.");
   }
   this._lights.push(light);
   this._scene.requestRender();
@@ -134,9 +137,10 @@ SceneGISLightCollection.prototype.get = function (index) {
 SceneGISLightCollection.prototype.isDestroyed = function () {
   return false;
 };
-/** Detaches the collection and releases its CPU references. Light descriptors remain usable.
+/** Detaches the collection and releases its CPU references and GPU tables. Light descriptors remain usable.
  * @returns {undefined} */
 SceneGISLightCollection.prototype.destroy = function () {
+  this._state?.tiles?.destroy();
   this.removeAll();
   this._scene._sceneGISLights = undefined;
   this._scene = this._state = undefined;

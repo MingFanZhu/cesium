@@ -1,5 +1,4 @@
 import Cartesian3 from "../../../Core/Cartesian3.js";
-import Cartesian4 from "../../../Core/Cartesian4.js";
 import combine from "../../../Core/combine.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import Matrix4 from "../../../Core/Matrix4.js";
@@ -10,18 +9,16 @@ import SceneMode from "../../../Scene/SceneMode.js";
 import localLights from "../../../Shaders/SceneGIS/Rendering/SceneGISLocalLights.js";
 import localPbr from "../../../Shaders/SceneGIS/Rendering/SceneGISLocalPbr.js";
 import SceneGISSpotLight from "../SceneGISSpotLight.js";
+import LightTiles from "./_SceneGISLightTiles.js";
 import Validation from "./_SceneGISLightValidation.js";
 
 const passes = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE, Pass.TRANSLUCENT];
 const phongPattern = /czm_(?:private_phong|phong|translucentPhong)\s*\(/;
 
-function createState() {
+function createState(collection) {
   const state = {
     count: 0,
-    positions: Array.from({ length: 16 }, () => new Cartesian4()),
-    colors: Array.from({ length: 16 }, () => new Cartesian4()),
-    directions: Array.from({ length: 16 }, () => new Cartesian4()),
-    cones: new Float32Array(16),
+    tiles: undefined,
     receivers: new WeakMap(),
     shaders: new WeakMap(),
     position: new Cartesian3(),
@@ -29,10 +26,10 @@ function createState() {
   };
   state.uniforms = {
     u_sceneGISLightCount: () => state.count,
-    u_sceneGISLightPositions: () => state.positions,
-    u_sceneGISLightColors: () => state.colors,
-    u_sceneGISLightDirections: () => state.directions,
-    u_sceneGISLightCones: () => state.cones,
+    u_sceneGISLightTable: () => state.tiles.texture,
+    u_sceneGISLightIndexRow: () => state.tiles.indexRow,
+    u_sceneGISLightGrid: () => state.tiles.grid,
+    u_sceneGISLightTiled: () => collection._tiled,
   };
   return state;
 }
@@ -45,12 +42,14 @@ SceneGISLocalLights.prepare = function (scene, camera = scene.camera) {
   if (!collection) {
     return;
   }
-  const state = collection._state ?? (collection._state = createState());
+  const state =
+    collection._state ?? (collection._state = createState(collection));
   state.count = 0;
   if (typeof collection.show !== "boolean") {
     throw new DeveloperError("Light collection show must be a boolean.");
   }
   if (!collection.show || collection.length === 0) {
+    state.tiles = state.tiles?.destroy();
     return;
   }
   if (scene.mode !== SceneMode.SCENE3D) {
@@ -66,38 +65,41 @@ SceneGISLocalLights.prepare = function (scene, camera = scene.camera) {
     if (!light.show || light.intensity === 0) {
       continue;
     }
-    const index = state.count++;
+    state.tiles ??= new LightTiles(scene.context);
+    const data = state.tiles.parameters;
+    const offset = state.count++ * 16;
     Matrix4.multiplyByPoint(view, light.position, state.position);
-    Cartesian4.fromElements(
-      state.position.x,
-      state.position.y,
-      state.position.z,
-      light.range * light.range,
-      state.positions[index],
-    );
+    data[offset] = state.position.x;
+    data[offset + 1] = state.position.y;
+    data[offset + 2] = state.position.z;
+    data[offset + 3] = light.range * light.range;
     const color = light.color;
-    Cartesian4.fromElements(
-      color.red * light.intensity,
-      color.green * light.intensity,
-      color.blue * light.intensity,
-      light.radius * light.radius,
-      state.colors[index],
-    );
+    data[offset + 4] = color.red * light.intensity;
+    data[offset + 5] = color.green * light.intensity;
+    data[offset + 6] = color.blue * light.intensity;
+    data[offset + 7] = light.radius * light.radius;
     if (spot) {
       Cartesian3.normalize(light.direction, state.direction);
       Matrix4.multiplyByPointAsVector(view, state.direction, state.direction);
       const outer = Math.cos(light.outerConeAngle);
-      Cartesian4.fromElements(
-        state.direction.x,
-        state.direction.y,
-        state.direction.z,
-        outer,
-        state.directions[index],
-      );
-      state.cones[index] = 1 / (Math.cos(light.innerConeAngle) - outer);
+      data[offset + 8] = state.direction.x;
+      data[offset + 9] = state.direction.y;
+      data[offset + 10] = state.direction.z;
+      data[offset + 11] = outer;
+      data[offset + 12] = 1 / (Math.cos(light.innerConeAngle) - outer);
     } else {
-      state.cones[index] = -1;
+      data[offset + 12] = -1;
     }
+  }
+  if (state.count) {
+    state.tiles.update(
+      state.count,
+      camera,
+      scene.context.drawingBufferWidth,
+      scene.context.drawingBufferHeight,
+    );
+  } else {
+    state.tiles = state.tiles?.destroy();
   }
 };
 
@@ -113,16 +115,17 @@ SceneGISLocalLights.receiver = function (scene, command) {
     return command;
   }
   const shader = command.shaderProgram;
-  let qualifies = state.shaders.get(shader);
-  if (qualifies === undefined) {
+  let info = state.shaders.get(shader);
+  if (!info) {
     const fs = shader.fragmentShaderSource;
-    qualifies =
+    const qualifies =
       fs.sources.some((s) => s.includes("SCENEGIS_LOCAL_LIGHT_RECEIVER")) ||
       (ShaderSource.findPositionVarying(fs) !== undefined &&
         fs.sources.some((s) => phongPattern.test(s)));
-    state.shaders.set(shader, qualifies);
+    info = { qualifies, program: undefined };
+    state.shaders.set(shader, info);
   }
-  if (!qualifies) {
+  if (!info.qualifies) {
     return command;
   }
   let result = state.receivers.get(command);
@@ -130,10 +133,13 @@ SceneGISLocalLights.receiver = function (scene, command) {
     result = {};
     state.receivers.set(command, result);
   }
-  let program = scene.context.shaderCache.getDerivedShaderProgram(
-    shader,
-    "sceneGIS_localLights",
-  );
+  let program = info.program;
+  if (!program) {
+    program = scene.context.shaderCache.getDerivedShaderProgram(
+      shader,
+      "sceneGIS_localLights",
+    );
+  }
   if (!program) {
     const fs = shader.fragmentShaderSource.clone();
     const vs = shader.vertexShaderSource.clone();
@@ -159,6 +165,7 @@ SceneGISLocalLights.receiver = function (scene, command) {
       },
     );
   }
+  info.program = program;
   if (!result.uniformMap || result.sourceUniforms !== command.uniformMap) {
     result.sourceUniforms = command.uniformMap;
     result.uniformMap = combine(state.uniforms, command.uniformMap);

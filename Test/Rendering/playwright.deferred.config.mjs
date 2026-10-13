@@ -3,7 +3,10 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "../../Specs/e2e",
-  testMatch: "scenegis-deferred-lighting.spec.js",
+  testMatch: [
+    "scenegis-deferred-lighting.spec.js",
+    "scenegis-tiled-lighting.spec.js",
+  ],
   outputDir: "../../Build/Specs/e2e/deferred",
   workers: 1,
   retries: 0,
