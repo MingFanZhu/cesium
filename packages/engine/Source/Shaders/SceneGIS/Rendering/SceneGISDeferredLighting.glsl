@@ -32,6 +32,23 @@ void main()
     #else
     vec3 color = material.diffuse;
     #endif
-    out_FragColor = vec4(color, 1.0);
+    #ifdef SCENEGIS_DEFERRED_FEATURE_STYLE
+    vec3 multiplier = texelFetch(u_sceneGISDeferredStyle, pixel, 0).rgb;
+    color *= multiplier;
+        #ifdef SCENEGIS_AO_MAIN
+        sceneGISScaleIndirect(multiplier);
+        #endif
+        #ifdef SCENEGIS_SSR_MAIN
+        sceneGISSSRScale(multiplier);
+        #endif
+        #ifdef SCENEGIS_SSIL_MAIN
+        sceneGISSILScale(multiplier);
+        #endif
+    #endif
+    material.diffuse = color;
+    #ifdef HAS_MODEL_COLOR
+    modelColorStage(material);
+    #endif
+    out_FragColor = vec4(material.diffuse, material.alpha);
 #endif
 }

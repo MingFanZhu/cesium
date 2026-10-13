@@ -1,4 +1,7 @@
 uniform float u_sceneGISDeferredGroup;
+#ifdef SCENEGIS_DEFERRED_STYLE_TARGET
+layout(location = 4) out vec4 sceneGISDeferredStyle;
+#endif
 layout(location = 1) out vec4 sceneGISDeferredNormal;
 layout(location = 3) out vec4 sceneGISDeferredEmission;
 
@@ -8,6 +11,12 @@ vec4 sceneGISDeferredDiffuseValue;
 vec4 sceneGISDeferredNormalValue;
 vec3 sceneGISDeferredSpecularValue;
 vec3 sceneGISDeferredEmissionValue;
+vec3 sceneGISDeferredStyleValue = vec3(1.0);
+
+void sceneGISRecordFeatureStyle(vec3 multiplier)
+{
+    sceneGISDeferredStyleValue = multiplier;
+}
 
 void sceneGISRecordGBuffer(czm_modelMaterial material)
 {
@@ -20,6 +29,13 @@ void sceneGISRecordGBuffer(czm_modelMaterial material)
 
 void sceneGISWriteDeferredMaterial()
 {
+#ifdef SCENEGIS_DEFERRED_STYLE_TARGET
+    #ifdef SCENEGIS_GBUFFER_MODEL_CAPTURE
+    sceneGISDeferredStyle = vec4(sceneGISDeferredStyleValue, 1.0);
+    #else
+    sceneGISDeferredStyle = vec4(1.0);
+    #endif
+#endif
 #ifdef SCENEGIS_GBUFFER_MODEL_CAPTURE
     out_FragColor = sceneGISDeferredDiffuseValue;
     sceneGISDeferredNormal = sceneGISDeferredNormalValue;

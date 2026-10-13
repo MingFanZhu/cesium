@@ -865,6 +865,25 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0157-tiled-local-lighting.md",
       "removalCondition": "Native command scheduling exposes equivalent explicit color-receiver eligibility."
+    },
+    {
+      "id": "SGP-0048",
+      "title": "Capture native feature styling for deferred lighting",
+      "status": "active",
+      "reason": "Preserve the native per-feature post-lighting color multiplier across material capture and fullscreen lighting without storing pick IDs or changing feature APIs.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Shaders/Model/CPUStylingStageFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredLightingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredStylingSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0159-deferred-feature-styling.md",
+      "removalCondition": "Native rendering exposes equivalent post-lighting style capture, or the private deferred experiment is retired."
     }
   ]
 }

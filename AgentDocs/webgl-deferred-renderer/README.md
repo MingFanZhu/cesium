@@ -8,8 +8,8 @@
 | Status                           | `active`                                                          |
 | Planning model                   | `extension`                                                       |
 | Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
-| Current phase                    | P3b completed：准备独立 checkpoint                                |
-| Active phase plan                | 暂无；已完成 [P3b](plans/2026-10-13-p3b-shared-screen-depth.md)   |
+| Current phase                    | P4a completed：原生 Model / Tiles 样式，待阶段 checkpoint         |
+| Active phase plan                | 无；[P4a](plans/2026-10-13-p4a-model-and-tile-styling.md) 已完成  |
 | Architecture / execution contact | 当前任务                                                          |
 | Last updated                     | `2026-10-13`                                                      |
 
@@ -83,3 +83,15 @@ P3a checkpoint 为 `085f47e8f7`，提交钩子通过。
 P3b 已完成同语义深度共享并修复移动后旧深度残留，70 项 GPU Specs 与 1 项街道 E2E 通过。
 1280×800 少一个 R32F（约 3.9 MiB），固定 HDR 对 P3a 逐像素一致；不声明普遍整帧提速。
 [P3b review](reviews/2026-10-13-p3b-shared-depth-qualification.md) 记录证据，负责人已于 2026-10-13 接受视觉结果，批准独立提交并继续。
+
+P3b checkpoint 为 `84aafea838`，工作区与提交钩子检查通过。
+当前 [P4a](plans/2026-10-13-p4a-model-and-tile-styling.md) 聚焦原生 Model/网格 Tiles 样式。
+已实测默认 10 要素 b3dm 与 Model.color 被原型拒绝；
+[附件预算讨论](discussions/2026-10-13-gis-style-buffer-budget.md) 已确认 A，保留原生语义；P4a 已激活，实施按需第五附件。
+
+P4a 已实现，69 项 GPU Specs 与最终街道/要素 E2E（2 项） 通过。原生样式语义、透明分流和拾取保留。
+[ADR-0159](../../Documentation/SceneGIS/Decisions/ADR-0159-deferred-feature-styling.md) / SGP-0048；
+[P4a review](reviews/2026-10-13-p4a-native-styling-qualification.md) 记录正确性、资源和成本证据。
+[街道模型颜色](../../Test/Rendering/延迟光照原型.html) 与
+[原生要素样例](../../Test/Rendering/延迟要素样式.html) 已于 2026-10-13 获负责人视觉验收。
+技术、review 和视觉 gate 均通过，批准形成 P4a 独立 checkpoint；提交后继续审计 Globe、Entity 与普通图元。

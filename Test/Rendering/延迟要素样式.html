@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WebGL 延迟光照 · 要素样式</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      aside {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        width: 310px;
+        padding: 16px;
+        background: #18202bee;
+        color: #eef2f6;
+        font: 14px/1.6 sans-serif;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 10px;
+      }
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+      button,
+      select {
+        font: inherit;
+      }
+      a {
+        color: #8dcaff;
+      }
+      #error {
+        color: #ff9797;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>原生要素样式 · 延迟验收</h1>
+      <p><a href="延迟光照原型.html?world=globe">返回 Bistro 街道</a></p>
+      <label><input id="deferred" type="checkbox" checked />使用延迟光照</label>
+      <label
+        >颜色方式
+        <select id="mode">
+          <option value="HIGHLIGHT">相乘高亮</option>
+          <option value="REPLACE">替换材质基础色</option>
+          <option value="MIX">混合材质基础色（50%）</option>
+        </select></label
+      >
+      <label
+        >样式
+        <select id="style">
+          <option value="height">按高度分色</option>
+          <option value="white">原始颜色</option>
+          <option value="cyan">统一青色</option>
+          <option value="alpha">部分透明</option>
+        </select></label
+      >
+      <label><input id="show" type="checkbox" checked />显示瓦片</label>
+      <label><input id="ao" type="checkbox" checked />环境光遮蔽</label>
+      <label><input id="ssr" type="checkbox" checked />屏幕空间反射</label>
+      <label><input id="ssil" type="checkbox" />屏幕空间间接光</label>
+      <label><input id="taa" type="checkbox" checked />时域抗锯齿</label>
+      <p>点击建筑后，可直接编辑该要素；重新选择样式会恢复样式计算结果。</p>
+      <button id="paint" disabled>选中要素染红</button>
+      <button id="hide" disabled>隐藏选中要素</button>
+      <button id="restore">恢复全部</button>
+      <p id="picked">尚未选择要素</p>
+      <p id="stats">加载本地 10 要素 b3dm…</p>
+      <p>
+        灰色底板保留普通图元路径。四／五附件随可见内容变化；拾取沿用原生通道。
+      </p>
+      <p id="error" role="alert"></p>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./延迟要素样式.js"></script>
+  </body>
+</html>

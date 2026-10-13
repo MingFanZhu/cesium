@@ -39,7 +39,7 @@ function eligible(command) {
   return command.owner?._sceneGISWater !== true;
 }
 
-function validate(scene, range, passState) {
+function validate(scene, range, passState, isDeferredModel) {
   const context = scene.context;
   if (
     !context.webgl2 ||
@@ -100,7 +100,29 @@ function validate(scene, range, passState) {
         );
       }
       const fs = command.shaderProgram.fragmentShaderSource;
-      const unsupported = excluded.find((name) => fs.defines.includes(name));
+      const nativeStyling =
+        isDeferredModel &&
+        (fs.defines.includes("HAS_MODEL_COLOR") ||
+          fs.defines.includes("HAS_SELECTED_FEATURE_ID")) &&
+        isDeferredModel(command);
+      const unsupported = excluded.find(
+        (name) =>
+          fs.defines.includes(name) &&
+          !(
+            nativeStyling &&
+            (name === "HAS_MODEL_COLOR" || name === "HAS_SELECTED_FEATURE_ID")
+          ),
+      );
+      if (
+        nativeStyling &&
+        fs.defines.includes("HAS_SELECTED_FEATURE_ID") &&
+        (ContextLimits.maximumDrawBuffers < 5 ||
+          ContextLimits.maximumColorAttachments < 5)
+      ) {
+        throw new RuntimeError(
+          "Deferred feature styling requires five floating-point color attachments.",
+        );
+      }
       if (unsupported) {
         throw new DeveloperError(
           `G-buffer prototype does not encode ${unsupported}.`,
@@ -170,8 +192,8 @@ function allocate(probe) {
 
 /** Native material-buffer experiment; not a public renderer selection API. @private */
 class _SceneGISGBuffer {
-  static _validate(scene, range, passState) {
-    validate(scene, range, passState);
+  static _validate(scene, range, passState, isDeferredModel) {
+    validate(scene, range, passState, isDeferredModel);
   }
 
   constructor(scene) {

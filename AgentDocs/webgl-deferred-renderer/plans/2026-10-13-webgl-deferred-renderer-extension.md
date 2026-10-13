@@ -55,7 +55,7 @@
 | P2    | 不透明延迟光照与混合合成    | P1 契约通过；必要重大选择已确认                | 同条件直接光/环境光/阴影/透明/曝光正确性和街道对照             | completed | [P2](2026-10-13-p2-deferred-lighting.md)           |
 | P3a   | 256 灯分块调度              | P2 已验收                                      | 256 灯同语义、共享接收、资源/成本、视觉验收与独立提交          | completed | [P3a](2026-10-13-p3-many-light-and-shared-data.md) |
 | P3b   | 共享屏幕空间效果            | P3a 独立 checkpoint                            | AO/SSR/SSIL 数据复用收益及稳定性                               | completed | [P3b](2026-10-13-p3b-shared-screen-depth.md)       |
-| P4    | GIS 内容覆盖与替换决策      | P3a / P3b 有明确收益；按缺口安排子阶段         | 兼容矩阵、回归、实际设备成本、视觉验收，明确迁入主线或保留实验 | planned   | 未创建                                             |
+| P4    | GIS 内容覆盖与替换决策      | P3a / P3b 有明确收益；按缺口安排子阶段         | 兼容矩阵、回归、实际设备成本、视觉验收，明确迁入主线或保留实验 | active    | [P4a](2026-10-13-p4a-model-and-tile-styling.md)    |
 
 后继阶段仅记录目标，不提前冻结 G-buffer 编码、灯光分块方式、Shader 文件或接口。
 默认顺序推进，每阶段独立提交后才能激活下一阶段。
@@ -87,3 +87,9 @@ P0 checkpoint `bb9b16eba0`；[P1 G-buffer 原型](2026-10-13-p1-gbuffer-prototyp
 P2 checkpoint `b1c3a8a494` 已形成；P3 draft 与源码/成本调查已记录，负责人已选择 A，P3a 技术与负责人视觉 gate 已通过，批准独立提交后继续；P3a checkpoint `085f47e8f7` 已形成；P3b 已细化为共享屏幕深度并激活。
 
 负责人于 2026-10-13 接受 P3b 共享深度结果，技术与视觉 gate 均通过；批准形成独立 checkpoint 后继续 P4。
+
+P3b checkpoint `84aafea838` 已形成。P4 首个 draft 针对已复现的 Model / Tiles 样式阻碍；
+负责人已确认按需第五附件，保留原生光照前/后着色；P4a 已激活，见 ADR-0159 / SGP-0048。
+
+P4a 技术检查、review 与负责人视觉 gate 于 2026-10-13 全部通过；批准形成独立 checkpoint。
+下一步依据源码审计 Globe、Entity 与普通图元，待 P4a 提交后细化阶段。

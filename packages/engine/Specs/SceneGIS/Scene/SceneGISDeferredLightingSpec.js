@@ -3,6 +3,7 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  ColorBlendMode,
   BoxGeometry,
   ColorGeometryInstanceAttribute,
   CustomShader,
@@ -203,6 +204,54 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
         8.5,
         0.01,
       );
+    });
+  });
+  [false, true].forEach((unlit) => {
+    it(`preserves model color modes in ${unlit ? "unlit" : "PBR"} without extra targets`, async function () {
+      setup();
+      const model = await addModel(unlit);
+      model.color = new Color(0.25, 0.6, 0.8, 1);
+      model.colorBlendAmount = 0.4;
+      if (!unlit) {
+        scene.postProcessStages.ambientOcclusion.enabled = true;
+        const ssr = new SceneGISScreenSpaceReflections({
+          scene,
+          enabled: true,
+        });
+        const ssil = new SceneGISScreenSpaceIndirectLighting({
+          scene,
+          enabled: true,
+        });
+        expect(ssr.enabled && ssil.enabled).toBe(true);
+      }
+      for (const mode of [
+        ColorBlendMode.HIGHLIGHT,
+        ColorBlendMode.REPLACE,
+        ColorBlendMode.MIX,
+      ]) {
+        renderer.enabled = false;
+        model.colorBlendMode = mode;
+        render();
+        const before = color();
+        renderer.enabled = true;
+        render();
+        expect(color()).withContext(String(mode)).toEqualEpsilon(before, 0.006);
+        expect(renderer._style).toBeUndefined();
+        expect(scene.pick(new Cartesian2(32, 32)).primitive).toBe(model);
+      }
+      model.color = undefined;
+      render();
+      const unstyled = color();
+      renderer.enabled = false;
+      render();
+      expect(color()).toEqualEpsilon(unstyled, 0.006);
+      model.color = new Color(0.5, 0.8, 1, 0.4);
+      render();
+      const transparent = color();
+      renderer.enabled = true;
+      render();
+      expect(color()).toEqualEpsilon(transparent, 0.006);
+      expect(renderer.groupCount).toBe(0);
     });
   });
   it("preserves MASK and the existing AO, SSR and SSIL response resolves", async function () {

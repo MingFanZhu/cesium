@@ -5,6 +5,7 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  ColorBlendMode,
   SceneGISLightCollection,
   SceneGISPointLight,
 } from "/Build/CesiumUnminified/index.js";
@@ -13,6 +14,21 @@ const example = window.example;
 const scene = example.viewer.scene;
 const renderer = new _SceneGISDeferredLighting(scene);
 example.deferred = renderer;
+const modelColor = document.getElementById("style-model-color");
+const modelMode = document.getElementById("style-model-mode");
+function applyModelStyle() {
+  for (const model of example.models) {
+    model.color =
+      modelColor.value === "original"
+        ? undefined
+        : Color.fromCssColorString(modelColor.value);
+    model.colorBlendMode = ColorBlendMode[modelMode.value];
+    model.colorBlendAmount = 0.5;
+  }
+  example.taa.reset();
+  example.ssr.reset();
+}
+modelColor.onchange = modelMode.onchange = applyModelStyle;
 const enabled = document.getElementById("deferred-enabled");
 const stats = document.getElementById("deferred-stats");
 const lightCount = document.getElementById("light-count");
@@ -117,6 +133,7 @@ const remove = scene.postRender.addEventListener(() => {
   if (!started && example.state.ready) {
     renderer.enabled = enabled.checked;
     started = true;
+    applyModelStyle();
     const requested = new URLSearchParams(window.location.search).get("lights");
     if (["16", "64", "256"].includes(requested)) {
       lightCount.value = requested;

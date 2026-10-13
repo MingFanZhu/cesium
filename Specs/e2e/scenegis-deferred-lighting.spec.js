@@ -68,11 +68,15 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
     // Isolate current-frame lighting from temporal histories; the performance/motion case below retains TAA.
     e.taa.enabled = false;
     try {
-      for (const [hour, ssil] of [
+      for (const [hour, ssil, tint] of [
         [14, false],
         [22, false],
         [14, true],
+        [14, true, true],
       ]) {
+        for (const model of e.models) {
+          model.color = tint ? new C.Color(0.25, 0.6, 0.8, 1) : undefined;
+        }
         e.ssil.enabled = ssil;
         e.atmosphere.hour = hour;
         e.state.setTime();
@@ -102,6 +106,7 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
         report.comparisons.push({
           hour,
           ssil,
+          tint: !!tint,
           mean: sum / (width * height * 3),
           maximum,
           nonfinite,
@@ -112,6 +117,9 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
       target.destroy();
     }
     e.atmosphere.hour = 14;
+    e.models.forEach((model) => {
+      model.color = undefined;
+    });
     e.state.setTime();
     e.ssil.enabled = false;
     e.taa.enabled = true;

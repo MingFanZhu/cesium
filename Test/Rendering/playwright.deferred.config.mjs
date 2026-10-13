@@ -6,6 +6,7 @@ export default defineConfig({
   testMatch: [
     "scenegis-deferred-lighting.spec.js",
     "scenegis-tiled-lighting.spec.js",
+    "scenegis-deferred-styling.spec.js",
   ],
   outputDir: "../../Build/Specs/e2e/deferred",
   workers: 1,

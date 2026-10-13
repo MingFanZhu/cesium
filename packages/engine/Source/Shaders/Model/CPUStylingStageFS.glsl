@@ -1,3 +1,8 @@
+// SCENEGIS_PATCH_BEGIN SGP-0048: Capture the native post-lighting feature multiplier.
+#ifdef SCENEGIS_DEFERRED_CAPTURE
+void sceneGISRecordFeatureStyle(vec3 multiplier);
+#endif
+// SCENEGIS_PATCH_END SGP-0048
 void filterByPassType(vec4 featureColor)
 {
     bool styleTranslucent = (featureColor.a != 1.0);
@@ -42,6 +47,11 @@ void cpuStylingStage(inout czm_modelMaterial material, SelectedFeature feature)
     material.diffuse = featureColor.rgb * featureColor.a;
     #else
     float highlight = ceil(model_colorBlend);
+    // SCENEGIS_PATCH_BEGIN SGP-0048: Preserve feature color across deferred material and lighting passes.
+    #ifdef SCENEGIS_DEFERRED_CAPTURE
+    sceneGISRecordFeatureStyle(mix(featureColor.rgb, vec3(1.0), highlight));
+    #endif
+    // SCENEGIS_PATCH_END SGP-0048
     // SCENEGIS_PATCH_BEGIN SGP-0026: Preserve feature styling in diffuse transport.
     #ifdef SCENEGIS_SSIL_MAIN
     sceneGISSILScale(mix(featureColor.rgb, vec3(1.0), highlight));

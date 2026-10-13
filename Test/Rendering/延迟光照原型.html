@@ -117,6 +117,27 @@
         />使用延迟光照</label
       >
       <p id="deferred-stats">等待原街区加载…</p>
+      <details>
+        <summary>模型颜色与要素样式</summary>
+        <label
+          >街区颜色
+          <select id="style-model-color">
+            <option value="original">原材质</option>
+            <option value="#60b8ff">蓝色</option>
+            <option value="#ffc060">暖色</option>
+          </select>
+        </label>
+        <label
+          >混合方式
+          <select id="style-model-mode">
+            <option value="HIGHLIGHT">相乘高亮</option>
+            <option value="MIX">混合（50%）</option>
+            <option value="REPLACE">替换</option>
+          </select>
+        </label>
+        <p>切换延迟光照，对照相同颜色、时间和效果。模型级颜色仍使用四附件。</p>
+        <a href="延迟要素样式.html">打开原生 3D Tiles 要素样式验收</a>
+      </details>
       <label
         >局部灯数量
         <select id="light-count">

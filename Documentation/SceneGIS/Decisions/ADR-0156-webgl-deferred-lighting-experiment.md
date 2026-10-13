@@ -69,3 +69,7 @@ framebuffer ownership and group invalidation on upstream upgrades.
 
 P3b amendment: [ADR-0158](ADR-0158-shared-deferred-depth.md) shares the existing lighting-MRT
 linear-depth target and eliminates its duplicate conversion in the deferred experiment.
+
+P4a amendment: [ADR-0159](ADR-0159-deferred-feature-styling.md) qualifies native Model.color
+and mesh feature styling. Ordinary material targets remain four; selected-feature opaque
+Models use an optional fifth RGBA16F for the native post-lighting multiplier (SGP-0048).

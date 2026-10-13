@@ -970,6 +970,13 @@ direct 光，保留环境光、IBL / SSR、自发光与后续雾、裁剪边缘�
 
 ## WebGL 延迟实验的共享深度
 
+[ADR-0159](Decisions/ADR-0159-deferred-feature-styling.md) / SGP-0048 保留原生 Model 与网格
+3D Tiles 的光照前/后样式分工。模型级颜色复用原生函数与 uniforms；逐要素的光照后
+乘数写入按需第五张 RGBA16F，再在既有屏幕光照中应用于颜色和 AO/SSR/SSIL 响应。
+不存 feature/pick ID，不新增全屏绘制，不改变透明分流或拾取。此类不透明内容要求至少
+五附件，普通内容仍为四附件；第五附件独立所有，布局切换保留四张基础纹理。
+诊断 G-buffer 与延迟实验的资格边界保持独立，不据此扩大分类、点云或特殊边缘效果范围。
+
 [ADR-0156](Decisions/ADR-0156-webgl-deferred-lighting-experiment.md) 的私有单采样实验按
 [ADR-0158](Decisions/ADR-0158-shared-deferred-depth.md) 复用当前 lighting MRT owner 的
 R32F 线性深度。Deferred 在 opaque 完成后、屏幕光照之前清零并转换一次；AO/SSR/SSIL

@@ -16,6 +16,7 @@ import ShaderDestination from "../../../Renderer/ShaderDestination.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
 import ImageBasedLightingPipelineStage from "../../../Scene/Model/ImageBasedLightingPipelineStage.js";
 import LightingPipelineStage from "../../../Scene/Model/LightingPipelineStage.js";
+import ModelColorPipelineStage from "../../../Scene/Model/ModelColorPipelineStage.js";
 import LightingModel from "../../../Scene/Model/LightingModel.js";
 import capture from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredCapture.js";
 import inputs from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredInputs.js";
@@ -30,7 +31,7 @@ import SurfaceWeather from "./_SceneGISSurfaceWeather.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const lightingDefine =
-  /^(LIGHTING_|HAS_NORMALS$|USE_IBL_LIGHTING$|USE_CUSTOM_LIGHT_COLOR$|DIFFUSE_IBL$|SPECULAR_IBL$|CUSTOM_SPHERICAL_HARMONICS$|CUSTOM_SPECULAR_IBL$|SCENEGIS_MODEL_|SCENEGIS_SKY_REFLECTIONS$|SCENEGIS_GLOBE$)/;
+  /^(LIGHTING_|HAS_MODEL_COLOR$|HAS_SELECTED_FEATURE_ID$|HAS_NORMALS$|USE_IBL_LIGHTING$|USE_CUSTOM_LIGHT_COLOR$|DIFFUSE_IBL$|SPECULAR_IBL$|CUSTOM_SPHERICAL_HARMONICS$|CUSTOM_SPECULAR_IBL$|SCENEGIS_MODEL_|SCENEGIS_SKY_REFLECTIONS$|SCENEGIS_GLOBE$)/;
 
 function eligible(command) {
   return command.owner?._sceneGISWater !== true;
@@ -65,6 +66,8 @@ function release(renderer) {
   renderer._framebuffer = undefined;
   renderer._raw?.destroy();
   renderer._raw = undefined;
+  renderer._style?.destroy();
+  renderer._style = undefined;
   renderer._depth?.destroy();
   renderer._depth = undefined;
   renderer._linearDepth = undefined;
@@ -98,18 +101,34 @@ function allocate(renderer, manager) {
     pixelDatatype: PixelDatatype.HALF_FLOAT,
   });
   const source = manager.framebuffer;
-  if (renderer._raw.isDirty(width, height, 1) || renderer._source !== source) {
+  const styleChanged = renderer._hasFeatureStyle !== !!renderer._style;
+  if (
+    renderer._raw.isDirty(width, height, 1) ||
+    renderer._source !== source ||
+    styleChanged
+  ) {
     renderer._framebuffer?.destroy();
     renderer._raw.update(context, width, height);
+    const colors = [0, 1, 2, 3].map((i) => renderer._raw.getColorTexture(i));
+    if (renderer._hasFeatureStyle) {
+      renderer._style ??= new FramebufferManager({
+        pixelDatatype: PixelDatatype.HALF_FLOAT,
+      });
+      renderer._style.update(context, width, height);
+      colors.push(renderer._style.getColorTexture());
+    } else {
+      renderer._style?.destroy();
+      renderer._style = undefined;
+    }
     renderer._framebuffer = new Framebuffer({
       context,
-      colorTextures: [0, 1, 2, 3].map((i) => renderer._raw.getColorTexture(i)),
+      colorTextures: colors,
       depthStencilTexture: source.depthStencilTexture,
       destroyAttachments: false,
     });
     renderer._source = source;
   }
-  renderer.byteLength = width * height * 32;
+  renderer.byteLength = width * height * (renderer._hasFeatureStyle ? 40 : 32);
   const logDepth = frameState.useLogDepth;
   if (!renderer._copyDepth || renderer._logDepth !== logDepth) {
     renderer._copyDepth?.shaderProgram.destroy();
@@ -139,6 +158,8 @@ function createGroup(renderer, model, key) {
       model,
       shaderBuilder: builder,
       uniformMap: {},
+      renderStateOptions: {},
+      alphaOptions: {},
       lightingOptions: {
         lightingModel: key.includes("LIGHTING_PBR")
           ? LightingModel.PBR
@@ -156,6 +177,12 @@ function createGroup(renderer, model, key) {
       );
     }
     LightingPipelineStage.process(resources, undefined, scene.frameState);
+    if (key.includes("HAS_MODEL_COLOR")) {
+      ModelColorPipelineStage.process(resources, model, scene.frameState);
+    }
+    if (key.includes("HAS_SELECTED_FEATURE_ID")) {
+      builder.addDefine("SCENEGIS_DEFERRED_FEATURE_STYLE", undefined, fragment);
+    }
   } else {
     builder.addDefine("SCENEGIS_DEFERRED_PASSTHROUGH", undefined, fragment);
   }
@@ -166,6 +193,7 @@ function createGroup(renderer, model, key) {
     u_sceneGISDeferredNormal: () => renderer._raw.getColorTexture(1),
     u_sceneGISDeferredSpecular: () => renderer._raw.getColorTexture(2),
     u_sceneGISDeferredEmission: () => renderer._raw.getColorTexture(3),
+    u_sceneGISDeferredStyle: () => renderer._style.getColorTexture(),
     u_linearDepth: () => renderer._linearDepth,
     u_sceneGISDeferredGroup: () => group.id,
   };
@@ -189,6 +217,7 @@ function prepareGroups(renderer, range) {
   }
   renderer._groups.length = 0;
   renderer._hasPassthrough = false;
+  renderer._hasFeatureStyle = false;
   for (const pass of opaquePasses) {
     for (let i = 0; i < range.indices[pass]; ++i) {
       const command = range.commands[pass][i];
@@ -207,6 +236,7 @@ function prepareGroups(renderer, range) {
         renderer._models.set(model, groups);
       }
       const key = info.key;
+      renderer._hasFeatureStyle ||= key.includes("HAS_SELECTED_FEATURE_ID");
       let group = groups.get(key);
       if (!group) {
         group = createGroup(renderer, model, key);
@@ -260,6 +290,7 @@ class _SceneGISDeferredLighting {
     this._groups = [];
     this._commands = new WeakMap();
     this._shaders = new WeakMap();
+    this._isModelCommand = (command) => shaderInfo(this, command).model;
     this._clear = new ClearCommand({ color: Color.TRANSPARENT });
     this.drawCount =
       this.groupCount =
@@ -309,7 +340,7 @@ class _SceneGISDeferredLighting {
       release(this);
       return;
     }
-    GBuffer._validate(scene, range, passState);
+    GBuffer._validate(scene, range, passState, this._isModelCommand);
     const layout = LightingMrt.layout(
       scene,
       passState,
@@ -321,13 +352,17 @@ class _SceneGISDeferredLighting {
         "Deferred lighting requires a supported opaque lighting layout without cascade debug tint.",
       );
     }
-    allocate(this, layout.manager);
     prepareGroups(this, range);
+    allocate(this, layout.manager);
     const original = passState.framebuffer;
     try {
       // Clear owned colors only; native Scene owns the shared depth clear.
       passState.framebuffer = this._raw.framebuffer;
       this._clear.execute(scene.context, passState);
+      if (this._style) {
+        passState.framebuffer = this._style.framebuffer;
+        this._clear.execute(scene.context, passState);
+      }
     } finally {
       passState.framebuffer = original;
     }
@@ -369,15 +404,19 @@ class _SceneGISDeferredLighting {
     if (
       !cached ||
       cached.shader !== shader ||
+      cached.featureStyle !== this._hasFeatureStyle ||
       cached.sourceUniforms !== command.uniformMap
     ) {
-      const name = "sceneGIS_deferred_material";
+      const name = `sceneGIS_deferred_material_${this._hasFeatureStyle ? 5 : 4}`;
       let program = scene.context.shaderCache.getDerivedShaderProgram(
         shader,
         name,
       );
       if (!program) {
         const fs = shader.fragmentShaderSource.clone();
+        if (this._hasFeatureStyle) {
+          fs.defines.push("SCENEGIS_DEFERRED_STYLE_TARGET");
+        }
         if (model) {
           fs.defines.push(
             "SCENEGIS_GBUFFER_MODEL_CAPTURE",
@@ -406,6 +445,7 @@ class _SceneGISDeferredLighting {
       }
       cached = {
         shader,
+        featureStyle: this._hasFeatureStyle,
         sourceUniforms: command.uniformMap,
         uniformMap: combine(
           { u_sceneGISDeferredGroup: () => cached.group.id },
