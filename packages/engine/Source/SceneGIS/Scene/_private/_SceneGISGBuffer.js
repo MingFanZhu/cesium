@@ -39,8 +39,7 @@ function eligible(command) {
   return command.owner?._sceneGISWater !== true;
 }
 
-function validate(probe, range, passState) {
-  const scene = probe._scene;
+function validate(scene, range, passState) {
   const context = scene.context;
   if (
     !context.webgl2 ||
@@ -171,6 +170,10 @@ function allocate(probe) {
 
 /** Native material-buffer experiment; not a public renderer selection API. @private */
 class _SceneGISGBuffer {
+  static _validate(scene, range, passState) {
+    validate(scene, range, passState);
+  }
+
   constructor(scene) {
     if (!scene || scene.isDestroyed() || scene._sceneGISGBuffer) {
       throw new DeveloperError(
@@ -254,7 +257,7 @@ class _SceneGISGBuffer {
     if (!this.enabled) {
       return;
     }
-    validate(this, range, passState);
+    validate(this._scene, range, passState);
     allocate(this);
     const scene = this._scene;
     const context = scene.context;

@@ -823,6 +823,29 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0155-webgl-gbuffer-prototype.md",
       "removalCondition": "Native rendering exposes equivalent material outputs and owned capture scheduling, or the diagnostic prototype is retired."
+    },
+    {
+      "id": "SGP-0046",
+      "title": "Explore native-material deferred WebGL lighting",
+      "status": "active",
+      "reason": "The private deferred experiment needs material-only native Model variants and explicit Scene scheduling before existing opaque lighting-response resolves.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredLightingSpec.js",
+        "Specs/e2e/scenegis-deferred-lighting.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md",
+      "removalCondition": "Native rendering provides equivalent deferred material lighting, or the private experiment is retired."
     }
   ]
 }

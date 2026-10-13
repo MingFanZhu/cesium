@@ -216,6 +216,9 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
  * @param {czm_modelMaterial} material The material properties from {@MaterialStageFS}
  * @param {ProcessedAttributes} attributes
  */
+// SCENEGIS_PATCH_BEGIN SGP-0046: Screen lighting borrows the library without geometry-stage inputs.
+#ifndef SCENEGIS_DEFERRED_LIGHTING
+// SCENEGIS_PATCH_END SGP-0046
 void lightingStage(inout czm_modelMaterial material, ProcessedAttributes attributes)
 {
     #ifdef LIGHTING_PBR
@@ -228,7 +231,13 @@ void lightingStage(inout czm_modelMaterial material, ProcessedAttributes attribu
             // SCENEGIS_PATCH_BEGIN SGP-0025: Use the unperturbed normalized geometry normal.
             sceneGISFilterSpecular(material, attributes.normalEC);
             // SCENEGIS_PATCH_END SGP-0025
+            // SCENEGIS_PATCH_BEGIN SGP-0046: Material submission defers BRDF evaluation while retaining filtering.
+            #ifdef SCENEGIS_DEFERRED_CAPTURE
+            vec3 color = material.diffuse;
+            #else
             vec3 color = computePbrLighting(material, attributes.positionEC);
+            #endif
+            // SCENEGIS_PATCH_END SGP-0046
         #else
             vec3 color = material.diffuse * material.occlusion + material.emissive;
         #endif
@@ -259,3 +268,6 @@ void lightingStage(inout czm_modelMaterial material, ProcessedAttributes attribu
     // SCENEGIS_PATCH_END SGP-0045
     material.diffuse = color;
 }
+// SCENEGIS_PATCH_BEGIN SGP-0046: End the native geometry lighting entry point.
+#endif
+// SCENEGIS_PATCH_END SGP-0046

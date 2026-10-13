@@ -2459,6 +2459,12 @@ function executeCommand(command, scene, passState, debugFramebuffer) {
   }
   // SCENEGIS_PATCH_END SGP-0045
 
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Route qualified opaque color draws into the private material pass.
+  if (scene._sceneGISDeferred?.draw(command, passState)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0046
+
   // SCENEGIS_PATCH_BEGIN SGP-0017: Defer water color until opaque geometry is complete.
   if (SceneGISWaterFrame.defer(scene, command)) {
     return;
@@ -2949,6 +2955,12 @@ function executeCommands(scene, passState) {
   } = scene._view;
   const numFrustums = frustumCommandsList.length;
 
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Preflight deferred material ownership before effect or opaque submission.
+  if (!picking) {
+    scene._sceneGISDeferred?.begin(passState);
+  }
+  // SCENEGIS_PATCH_END SGP-0046
+
   // SCENEGIS_PATCH_BEGIN SGP-0026: Preflight shared layout and start standalone SSIL without geometry replay.
   if (!picking) {
     SceneGISScreenSpaceIndirectLighting.begin(scene, passState);
@@ -3240,6 +3252,11 @@ function executeCommands(scene, passState) {
     performVoxelsPass(scene, passState, frustumCommands);
 
     performPass(frustumCommands, Pass.OPAQUE);
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Produce native lighting responses before their existing screen resolves.
+    if (!picking && scene._sceneGISDeferred?.light(passState)) {
+      SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+    }
+    // SCENEGIS_PATCH_END SGP-0046
     // SCENEGIS_PATCH_BEGIN SGP-0026: Resolve standalone diffuse transport before water and transparency.
     if (
       !picking &&
@@ -5849,6 +5866,9 @@ Scene.prototype.destroy = function () {
   // SCENEGIS_PATCH_BEGIN SGP-0045: Release private material targets before the native Context.
   this._sceneGISGBuffer?.destroy();
   // SCENEGIS_PATCH_END SGP-0045
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Release owned material targets before postprocessing and Context.
+  this._sceneGISDeferred?.destroy();
+  // SCENEGIS_PATCH_END SGP-0046
   this.postProcessStages =
     this.postProcessStages && this.postProcessStages.destroy();
 

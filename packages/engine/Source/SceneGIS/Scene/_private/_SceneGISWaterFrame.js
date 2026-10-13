@@ -63,6 +63,19 @@ const SceneGISWaterFrame = {
     if (!visible) {
       return;
     }
+    const deferred = scene._sceneGISDeferred;
+    if (deferred?._active) {
+      return;
+    }
+    if (deferred?.ready && deferred._waterReady) {
+      s.colorTexture = deferred._waterColor.getColorTexture();
+      s.colorTexture.generateMipmap();
+      s.colorTexture.sampler = sampler;
+      s.depthTexture = deferred._depth.getColorTexture();
+      s.borrowed = true;
+      s.ready = true;
+      return;
+    }
     const ssr = scene._sceneGISScreenSpaceReflections;
     const ssil = scene._sceneGISScreenSpaceIndirectLighting;
     const ao =
