@@ -5,6 +5,31 @@
 - Plan: [P1](../../../AgentDocs/webgl-deferred-renderer/plans/2026-10-13-p1-gbuffer-prototype.md)
 - Upstream integration: SGP-0045
 
+## P4d amendment — retire diagnostic replay
+
+After P4c qualification, the inspector reads the actual deferred material targets and
+linear depth. Remove its extra geometry replay, independent four-target/depth allocation,
+MSAA resolve and dedicated capture Shader. Scene retains only the inspector lifecycle
+hook under SGP-0045; native material recording remains required by deferred submission.
+Qualification moves into an owned layout helper so the main renderer and screen-space
+consumers do not depend on the diagnostic inspector.
+
+The private inspector requires an existing deferred controller. Its display toggle does
+not enable/disable the renderer or own the borrowed textures. Resize, empty frames and
+renderer disable are observed through the current renderer's readiness and live inputs.
+Only the display PostProcessStage belongs to the inspector. Coverage uses the main group
+field, not emission alpha, which now carries shadow visibility. The former MSAA diagnostic
+control is removed from the example; the accepted single-sample deferred contract applies.
+This supersedes the replay/ownership portions below, retained as the P1 decision history.
+Default Scene adoption and unsupported families remain separate P4d decisions; this
+increment does not qualify a complete replacement by itself.
+
+The former independent Model diagnostic-capture define is removed. The existing deferred
+capture define now drives native material recording, BRDF deferral and feature-style
+recording together; there is no longer a capture-with-forward-lighting combination.
+The native material hook remains tracked under SGP-0045. Transparent, shadow and pick
+programs retain their existing selection and ownership.
+
 ## Context and decision
 
 Qualify native material data before replacing lighting. Preserve the glTF loader, geometry,

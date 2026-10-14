@@ -24,6 +24,12 @@ const float FEATURE_ID_TOLERANCE = 0.5;
 // Offset added to feature IDs so 0 means "no planar fill" in the texture.
 const float FEATURE_ID_OFFSET = 1.0;
 
+// SCENEGIS_PATCH_BEGIN SGP-0045: Resolve coplanar raster precision before native fill depth ordering.
+#if defined(SCENEGIS_DEFERRED_CAPTURE) && defined(HAS_PLANAR_FILL_DEPTH)
+float sceneGISResolvePlanarFillDepth(float depth);
+#endif
+// SCENEGIS_PATCH_END SGP-0045
+
 czm_modelMaterial defaultModelMaterial()
 {
     czm_modelMaterial material;
@@ -69,6 +75,12 @@ bool isEdge = false;
 
 void main()
 {
+    // SCENEGIS_PATCH_BEGIN SGP-0045: Initialize planar fill depth for non-logarithmic color and feature-ID draws.
+    #if defined(HAS_PLANAR_FILL_DEPTH) && !defined(LOG_DEPTH)
+    gl_FragDepth = gl_FragCoord.z;
+    #endif
+    // SCENEGIS_PATCH_END SGP-0045
+
     #if defined(PRIMITIVE_TYPE_POINTS) && defined(HAS_POINT_DIAMETER)
     // Render points as circles
     float distanceToCenter = length(gl_PointCoord - vec2(0.5));
@@ -232,6 +244,11 @@ void main()
     //
     // ──────────────────────────────────────────────────────────────────────
     #ifdef HAS_PLANAR_FILL_DEPTH
+    // SCENEGIS_PATCH_BEGIN SGP-0045: Share the pre-pass depth only within raster and depth-buffer precision.
+    #ifdef SCENEGIS_DEFERRED_CAPTURE
+    gl_FragDepth = sceneGISResolvePlanarFillDepth(gl_FragDepth);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0045
     gl_FragDepth *= PLANAR_DEPTH_PULL;
     #endif
 

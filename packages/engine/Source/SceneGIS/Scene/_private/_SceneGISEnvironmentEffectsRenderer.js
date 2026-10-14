@@ -5,6 +5,7 @@ import Cartesian2 from "../../../Core/Cartesian2.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import Cartesian4 from "../../../Core/Cartesian4.js";
 import Color from "../../../Core/Color.js";
+import DirectionalLight from "../../../Scene/DirectionalLight.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import defined from "../../../Core/defined.js";
 import JulianDate from "../../../Core/JulianDate.js";
@@ -1418,44 +1419,15 @@ function createStars(renderer, context, candidate, globe) {
   });
 }
 
-function createResources(renderer, context, buffers) {
+function createCloudResources(renderer, context, buffers, vertexArray) {
   const candidate = {};
+  const globe = renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
+  const renderState = RenderState.fromCache({
+    cull: { enabled: false },
+    depthTest: { enabled: false },
+    depthMask: false,
+  });
   try {
-    candidate.vertexBuffer = Buffer.createVertexBuffer({
-      context,
-      typedArray: fullscreenQuad,
-      usage: BufferUsage.STATIC_DRAW,
-    });
-    candidate.vertexArray = new VertexArray({
-      context,
-      attributes: [
-        {
-          index: attributeLocations.position,
-          vertexBuffer: candidate.vertexBuffer,
-          componentsPerAttribute: 2,
-          componentDatatype: ComponentDatatype.FLOAT,
-        },
-      ],
-    });
-    // VertexArray owns its vertex buffers after successful construction.
-    candidate.vertexBuffer = undefined;
-    const globe = renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
-    candidate.backgroundProgram = createProgram(
-      context,
-      backgroundFragmentSource,
-      globe,
-    );
-    candidate.aerialProgram = createProgram(
-      context,
-      aerialFragmentSource,
-      globe,
-    );
-    candidate.aerialLogDepthProgram = createProgram(
-      context,
-      aerialFragmentSource,
-      globe,
-      ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
-    );
     candidate.cloudProgram = createProgram(context, cloudFragmentSource, globe);
     candidate.cloudLogDepthProgram = createProgram(
       context,
@@ -1473,25 +1445,6 @@ function createResources(renderer, context, buffers) {
       cloudResolveFragmentSource,
       globe,
       ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
-    );
-    candidate.transmittanceTexture = createTexture2D(
-      context,
-      256,
-      64,
-      buffers.transmittance,
-    );
-    candidate.scatteringTexture = createTexture3D(
-      context,
-      256,
-      128,
-      32,
-      buffers.scattering,
-    );
-    candidate.irradianceTexture = createTexture2D(
-      context,
-      64,
-      16,
-      buffers.irradiance,
     );
     const createVolume = globe
       ? createCloudBaseLevelTexture3D
@@ -1538,7 +1491,96 @@ function createResources(renderer, context, buffers) {
       context,
       buffers.cloudStbn,
     );
-    createStars(renderer, context, candidate, globe);
+    const cloudUniformMap = {
+      ...renderer._uniformMap,
+      u_frustum: () => renderer._cloudFrustum,
+    };
+    candidate.cloudCommand = new DrawCommand({
+      vertexArray: vertexArray,
+      shaderProgram: candidate.cloudProgram,
+      uniformMap: cloudUniformMap,
+      renderState,
+      primitiveType: PrimitiveType.TRIANGLE_STRIP,
+      count: 4,
+      owner: renderer,
+    });
+    candidate.cloudResolveCommand = new DrawCommand({
+      vertexArray: vertexArray,
+      shaderProgram: candidate.cloudResolveProgram,
+      uniformMap: cloudUniformMap,
+      renderState,
+      primitiveType: PrimitiveType.TRIANGLE_STRIP,
+      count: 4,
+      owner: renderer,
+    });
+  } catch (error) {
+    destroyResources(candidate);
+    throw error;
+  }
+  return candidate;
+}
+
+function createResources(renderer, context, buffers) {
+  const candidate = {};
+  try {
+    candidate.vertexBuffer = Buffer.createVertexBuffer({
+      context,
+      typedArray: fullscreenQuad,
+      usage: BufferUsage.STATIC_DRAW,
+    });
+    candidate.vertexArray = new VertexArray({
+      context,
+      attributes: [
+        {
+          index: attributeLocations.position,
+          vertexBuffer: candidate.vertexBuffer,
+          componentsPerAttribute: 2,
+          componentDatatype: ComponentDatatype.FLOAT,
+        },
+      ],
+    });
+    // VertexArray owns its vertex buffers after successful construction.
+    candidate.vertexBuffer = undefined;
+    const globe = renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
+    candidate.backgroundProgram = createProgram(
+      context,
+      backgroundFragmentSource,
+      globe,
+    );
+    const aerialDefines = defined(buffers.cloudShape)
+      ? []
+      : ["SCENEGIS_NO_CLOUDS"];
+    candidate.aerialProgram = createProgram(
+      context,
+      aerialFragmentSource,
+      globe,
+      aerialDefines,
+    );
+    candidate.aerialLogDepthProgram = createProgram(
+      context,
+      aerialFragmentSource,
+      globe,
+      [...aerialDefines, "LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
+    );
+    candidate.transmittanceTexture = createTexture2D(
+      context,
+      256,
+      64,
+      buffers.transmittance,
+    );
+    candidate.scatteringTexture = createTexture3D(
+      context,
+      256,
+      128,
+      32,
+      buffers.scattering,
+    );
+    candidate.irradianceTexture = createTexture2D(
+      context,
+      64,
+      16,
+      buffers.irradiance,
+    );
     const renderState = RenderState.fromCache({
       cull: { enabled: false },
       depthTest: { enabled: false },
@@ -1562,28 +1604,13 @@ function createResources(renderer, context, buffers) {
       count: 4,
       owner: renderer,
     });
-    const cloudUniformMap = {
-      ...renderer._uniformMap,
-      u_frustum: () => renderer._cloudFrustum,
-    };
-    candidate.cloudCommand = new DrawCommand({
-      vertexArray: candidate.vertexArray,
-      shaderProgram: candidate.cloudProgram,
-      uniformMap: cloudUniformMap,
-      renderState,
-      primitiveType: PrimitiveType.TRIANGLE_STRIP,
-      count: 4,
-      owner: renderer,
-    });
-    candidate.cloudResolveCommand = new DrawCommand({
-      vertexArray: candidate.vertexArray,
-      shaderProgram: candidate.cloudResolveProgram,
-      uniformMap: cloudUniformMap,
-      renderState,
-      primitiveType: PrimitiveType.TRIANGLE_STRIP,
-      count: 4,
-      owner: renderer,
-    });
+    if (defined(buffers.cloudShape)) {
+      Object.assign(
+        candidate,
+        createCloudResources(renderer, context, buffers, candidate.vertexArray),
+      );
+    }
+    createStars(renderer, context, candidate, globe);
   } catch (error) {
     destroyResources(candidate);
     throw error;
@@ -1660,12 +1687,14 @@ function updateGlobeCelestialAuthority(renderer, frameState, time) {
   if (
     defined(frameState.frameNumber) &&
     renderer._celestialFrameNumber === frameState.frameNumber &&
+    renderer._celestialLight === renderer._scene.light &&
     renderer._celestialTimeValid &&
     JulianDate.equals(renderer._celestialTime, time)
   ) {
     return;
   }
   renderer._celestialFrameNumber = frameState.frameNumber;
+  renderer._celestialLight = renderer._scene.light;
   JulianDate.clone(time, renderer._celestialTime);
   renderer._celestialTimeValid = true;
   computeGlobeSunDirection(time, renderer._sunDirection);
@@ -1862,6 +1891,29 @@ function updateFrame(renderer, scene, frameState, time) {
   }
   if (renderer._mode !== SceneGISAtmosphereReferenceFrame.GLOBE) {
     updatePlanarCelestialAuthority(renderer);
+  }
+  const light = scene.light;
+  const automatic =
+    renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE
+      ? renderer._owner._directionalLight
+      : renderer._world.environment._light;
+  if (light instanceof DirectionalLight && light !== automatic) {
+    Cartesian3.normalize(light.direction, renderer._primaryLightDirection);
+    Cartesian3.negate(
+      renderer._primaryLightDirection,
+      renderer._primaryLightDirection,
+    );
+    // The physical shader multiplies this scale by its solar spectrum.
+    // Preserve the caller's linear RGB irradiance before atmospheric attenuation.
+    renderer._primaryLightScale.x =
+      (light.color.red * light.intensity) / solarIrradiance.x;
+    renderer._primaryLightScale.y =
+      (light.color.green * light.intensity) / solarIrradiance.y;
+    renderer._primaryLightScale.z =
+      (light.color.blue * light.intensity) / solarIrradiance.z;
+    Color.clone(light.color, renderer._nativeLightColor);
+    renderer._nativeLightIntensity = light.intensity;
+    renderer._primaryLightState.nativeIntensity = light.intensity;
   }
   const owner = renderer._owner;
   const wrappedDistance =
@@ -2218,10 +2270,12 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_sceneGISCloudShadowCascadeCount: () => that._shadowCascadeCount,
     u_sceneGISShowCloudShadows: () =>
       that._showClouds &&
+      that.hasCloudResources() &&
       that._owner._showCloudShadows &&
       that._shadowCloudCasterActive,
     u_sceneGISShowCrepuscularRays: () =>
       that._showClouds &&
+      that.hasCloudResources() &&
       that._owner._showCrepuscularRays &&
       that._shadowCloudCasterActive,
     u_sceneGISShadowSurfacePosition: () => that._frame.surfacePosition,
@@ -2293,6 +2347,45 @@ SceneGISEnvironmentEffectsRenderer.prototype.publishResources = function (
   destroyResources(previous);
 };
 
+SceneGISEnvironmentEffectsRenderer.prototype.hasCloudResources = function () {
+  return defined(this._resources?.cloudShapeTexture);
+};
+
+SceneGISEnvironmentEffectsRenderer.prototype.publishCloudResources = function (
+  context,
+  buffers,
+) {
+  const resources = this._resources;
+  const candidate = createCloudResources(
+    this,
+    context,
+    buffers,
+    resources.vertexArray,
+  );
+  const globe = this._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
+  try {
+    candidate.aerialProgram = createProgram(
+      context,
+      aerialFragmentSource,
+      globe,
+    );
+    candidate.aerialLogDepthProgram = createProgram(
+      context,
+      aerialFragmentSource,
+      globe,
+      ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
+    );
+  } catch (error) {
+    destroyResources(candidate);
+    throw error;
+  }
+  destroyResource(resources.aerialProgram);
+  destroyResource(resources.aerialLogDepthProgram);
+  Object.assign(resources, candidate);
+  resources.aerialCommand.shaderProgram = resources.aerialProgram;
+  this.invalidateCloudHistory("cloud-resources");
+};
+
 SceneGISEnvironmentEffectsRenderer.prototype.hasResources = function () {
   return defined(this._resources);
 };
@@ -2320,38 +2413,50 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
     this._shadowOrigin,
     this._shadowCameraRelative,
   );
-  const profile = cloudQualityProfiles[this._owner._cloudQuality];
-  const shadow = ensureGlobeShadowResources(
-    this,
-    frameState.context,
-    profile.shadowResolution,
-  );
-  updateGlobeShadowCascades(this, frameState, profile);
-  shadow.historyValid = shadowHistoryContinuous(this);
-  Cartesian3.subtract(
-    this._shadowOrigin,
-    this._shadowHistorySnapshot.shadowOrigin,
-    this._shadowOriginDelta,
-  );
-  shadow.historyWriteIndex = 1 - shadow.historyReadIndex;
-  shadow.outputFramebuffer =
-    shadow.historyWriteIndex === 0
-      ? shadow.historyFramebuffer0
-      : shadow.historyFramebuffer1;
-  if (!shadow.historyValid) {
-    Cartesian3.clone(Cartesian3.ZERO, this._shadowOriginDelta);
-    for (let cascade = 0; cascade < 3; cascade++) {
-      Matrix4.clone(
-        this._shadowMatrices[cascade],
-        this._shadowPreviousMatrices[cascade],
-      );
+  let shadow;
+  if (
+    this._showClouds &&
+    this.hasCloudResources() &&
+    (this._owner._showCloudShadows || this._owner._showCrepuscularRays)
+  ) {
+    const profile = cloudQualityProfiles[this._owner._cloudQuality];
+    shadow = ensureGlobeShadowResources(
+      this,
+      frameState.context,
+      profile.shadowResolution,
+    );
+    updateGlobeShadowCascades(this, frameState, profile);
+    shadow.historyValid = shadowHistoryContinuous(this);
+    Cartesian3.subtract(
+      this._shadowOrigin,
+      this._shadowHistorySnapshot.shadowOrigin,
+      this._shadowOriginDelta,
+    );
+    shadow.historyWriteIndex = 1 - shadow.historyReadIndex;
+    shadow.outputFramebuffer =
+      shadow.historyWriteIndex === 0
+        ? shadow.historyFramebuffer0
+        : shadow.historyFramebuffer1;
+    if (!shadow.historyValid) {
+      Cartesian3.clone(Cartesian3.ZERO, this._shadowOriginDelta);
+      for (let cascade = 0; cascade < 3; cascade++) {
+        Matrix4.clone(
+          this._shadowMatrices[cascade],
+          this._shadowPreviousMatrices[cascade],
+        );
+      }
     }
+  } else {
+    this._shadowCascadeCount = 0;
+    this._shadowHistorySnapshot.valid = false;
   }
   this._skyReflections ??= new SceneGISSkyReflections(this);
   const record = Object.freeze({
     active: true,
     skyReflections: this._skyReflections,
-    atlasTexture: shadow.outputFramebuffer.getColorTexture(0),
+    atlasTexture:
+      shadow?.outputFramebuffer.getColorTexture(0) ??
+      frameState.context.defaultTexture,
     transmittanceTexture: this._resources.transmittanceTexture,
     irradianceTexture: this._resources.irradianceTexture,
     matrices: this._shadowMatrices,
@@ -2362,10 +2467,12 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
     far: this._shadowFar,
     showCloudShadows:
       this._showClouds &&
+      this.hasCloudResources() &&
       this._owner._showCloudShadows &&
       this._shadowCloudCasterActive,
     showCrepuscularRays:
       this._showClouds &&
+      this.hasCloudResources() &&
       this._owner._showCrepuscularRays &&
       this._shadowCloudCasterActive,
     surfaceRadianceScale: this._owner._surfaceRadianceScale,
@@ -3042,6 +3149,7 @@ function executeCloudPass(renderer, context, depthTexture) {
   const owner = renderer._owner;
   if (
     !renderer._showClouds ||
+    !renderer.hasCloudResources() ||
     owner._cloudDensity <= 0.0 ||
     owner._cloudThickness <= 0.0
   ) {
@@ -3245,7 +3353,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
       // A single native depth buffer already contains the complete water surface.
       this._linearSceneDepth = false;
     } else {
-      depthTexture = deferred._linearDepth;
+      depthTexture = deferred.opaqueDepthTexture;
     }
   }
   let cloudPassExecuted;

@@ -68,11 +68,9 @@ vec3 computeSpecularIBL(vec3 cubeDir, float NdotV, vec3 f0, float roughness)
     #endif
     // SCENEGIS_PATCH_END SGP-0024
     // SCENEGIS_PATCH_BEGIN SGP-0016: Substitute clearcoat radiance before its native BRDF weight.
-    #if defined(SCENEGIS_SSR_CAPTURE) || defined(SCENEGIS_SSR_RECEIVE)
-    specularSample = sceneGISSSR(specularSample, sceneGISSSRCoatDirection, roughness, true);
     #ifdef SCENEGIS_SSR_MAIN
+    specularSample = sceneGISSSR(specularSample, sceneGISSSRCoatDirection, roughness, true);
     sceneGISSSRCoatWeight = F * brdfLut.x + brdfLut.y;
-    #endif
     #endif
     // SCENEGIS_PATCH_END SGP-0016
 
@@ -160,12 +158,10 @@ vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material)
         radiance = sceneGISProbeRadiance(radiance, positionEC, reflectEC, roughness);
         #endif
         // SCENEGIS_PATCH_END SGP-0024
-        // SCENEGIS_PATCH_BEGIN SGP-0016: Capture evaluated anisotropic direction or blend current-frame hit radiance.
-        #if defined(SCENEGIS_SSR_CAPTURE) || defined(SCENEGIS_SSR_RECEIVE)
-        radiance = sceneGISSSR(radiance, reflectEC, roughness, false);
+        // SCENEGIS_PATCH_BEGIN SGP-0016: Record the native anisotropic response for screen-space reflections.
         #ifdef SCENEGIS_SSR_MAIN
+        radiance = sceneGISSSR(radiance, reflectEC, roughness, false);
         sceneGISSSRBaseWeight = FssEss * model_iblFactor.y;
-        #endif
         #endif
         // SCENEGIS_PATCH_END SGP-0016
         vec3 specularContribution = radiance * FssEss * model_iblFactor.y;

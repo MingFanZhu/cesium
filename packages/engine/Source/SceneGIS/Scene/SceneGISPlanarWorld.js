@@ -543,10 +543,12 @@ Object.defineProperties(SceneGISPlanarWorld.prototype, {
   },
   /**
    * Gets or sets the opacity of the composed surface color, including imagery
-   * and material. This does not multiply vector layer opacity. Geometry depth
-   * remains available for draping, picking, and occlusion even at zero opacity.
-   * Changes are published by the next normal render. The qualified view is
-   * above the surface in WebGL 2; underground transparency is not supported.
+   * and material. This does not multiply vector layer opacity. Values below one
+   * use the translucent pass without writing opaque scene depth, revealing
+   * objects behind the surface. Terrain height and ray queries remain available
+   * at every opacity. Scene depth picking follows the translucent-picking setting.
+   * Changes are published by the next normal render. Translucent sorting follows
+   * the scene's order-independent translucency configuration.
    *
    * @memberof SceneGISPlanarWorld.prototype
    * @type {number}
@@ -676,13 +678,13 @@ SceneGISPlanarWorld.prototype.renderEnvironment = function (
   passState,
 ) {
   renderPlanarEnvironment.call(this, frameState, passState);
-  if (this._show && frameState.passes.render) {
-    this._surface.captureBackground(frameState, passState);
-  }
 };
 
 function renderPlanarEnvironment(frameState, passState) {
   const environment = this._environment;
+  if (environment?._scene?._sceneGISEnvironmentEffectsPipeline?.enabled) {
+    return;
+  }
   if (
     !this._show ||
     environment === undefined ||
@@ -717,10 +719,7 @@ function renderPlanarEnvironment(frameState, passState) {
   }
 
   if (environment._skyBox !== undefined) {
-    const skyBoxCommand = environment._skyBox._update(
-      frameState,
-      scene.highDynamicRange,
-    );
+    const skyBoxCommand = environment._skyBox._update(frameState, scene._hdr);
     if (skyBoxCommand !== undefined) {
       skyBoxCommand.execute(frameState.context, passState);
     }

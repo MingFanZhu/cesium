@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WebGL 延迟渲染 · Planar 地表</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      aside {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        width: 260px;
+        padding: 18px;
+        background: #142131ed;
+        color: #edf3fa;
+        font: 14px/1.6 sans-serif;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 19px;
+      }
+      label {
+        display: block;
+        margin: 12px 0;
+      }
+      select,
+      button,
+      input {
+        font: inherit;
+      }
+      input[type="range"] {
+        width: 140px;
+        vertical-align: middle;
+      }
+      #error {
+        color: #ffaaa4;
+      }
+      small {
+        color: #bacbdc;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>Planar 地表受光</h1>
+      <p>降低地表不透明度，可看见地下的黄色横梁及椭球被埋住的部分。</p>
+      <label
+        >地表光照
+        <select id="lighting">
+          <option value="basic">基础受光</option>
+          <option value="physical">物理 Sun / sky</option>
+          <option value="unlit">不受光</option>
+        </select></label
+      >
+      <label
+        >光源方位
+        <input id="azimuth" type="range" min="0" max="360" value="225"
+      /></label>
+      <label
+        >地表不透明度
+        <input id="opacity" type="range" min="0" max="1" step="0.05" value="1"
+      /></label>
+      <label
+        >地表状态
+        <select id="weather">
+          <option value="dry">干燥</option>
+          <option value="wet">湿润</option>
+          <option value="snow">积雪</option>
+        </select></label
+      >
+      <label><input id="clipping" type="checkbox" />裁剪地表并显示边缘</label>
+      <label><input id="hdr" type="checkbox" checked />HDR 显示</label>
+      <label><input id="ao" type="checkbox" checked />环境光遮蔽</label>
+      <button id="home" type="button">复位视角</button>
+      <p id="status">正在准备地形…</p>
+      <small id="stats"></small>
+      <p>
+        <small
+          >物理环境使用 HDR。不透明地表延迟受光；半透明地表使用
+          OIT，与后方物体合成。</small
+        >
+      </p>
+      <p id="error" role="alert"></p>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./延迟平面验收.js"></script>
+  </body>
+</html>

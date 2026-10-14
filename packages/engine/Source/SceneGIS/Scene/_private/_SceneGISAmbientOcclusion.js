@@ -5,21 +5,17 @@ import DeveloperError from "../../../Core/DeveloperError.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
 import RuntimeError from "../../../Core/RuntimeError.js";
 import ClearCommand from "../../../Renderer/ClearCommand.js";
-import DrawCommand from "../../../Renderer/DrawCommand.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
 import Pass from "../../../Renderer/Pass.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
-import DerivedCommand from "../../../Scene/DerivedCommand.js";
 import PostProcessStage from "../../../Scene/PostProcessStage.js";
 import PostProcessStageComposite from "../../../Scene/PostProcessStageComposite.js";
 import SceneMode from "../../../Scene/SceneMode.js";
 import common from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOCommon.js";
 import debug from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODebug.js";
-import depth from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import estimate from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOEstimate.js";
 import filter from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOFilter.js";
-import receive from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOReceive.js";
 import LightingMrt from "./_SceneGISLightingMrt.js";
 import IndirectLighting from "./_SceneGISScreenSpaceIndirectLighting.js";
 
@@ -43,11 +39,6 @@ SceneGISAmbientOcclusion.createStage = function () {
   const state = {
     ready: false,
     context: undefined,
-    depthCommands: new WeakMap(),
-    depthPrograms: new WeakMap(),
-    receivers: new WeakMap(),
-    receiverPrograms: new WeakMap(),
-    receiverUniforms: undefined,
     values: {},
   };
   const uniforms = {
@@ -75,9 +66,6 @@ SceneGISAmbientOcclusion.createStage = function () {
     uniforms,
   });
   state.uniforms = uniforms;
-  state.receiverUniforms = {
-    u_sceneGISAmbientOcclusion: () => state.filtered.getColorTexture(),
-  };
   composite._sceneGISAmbientOcclusion = state;
   return composite;
 };
@@ -132,15 +120,9 @@ SceneGISAmbientOcclusion.prepare = function (scene) {
   state.context = context;
 };
 
-function allocate(state, scene, prepass = true, sourceDepth) {
+function allocate(state, scene, sourceDepth) {
   const context = scene.context;
-  if (prepass && !defined(state.rawDepth)) {
-    state.rawDepth = new FramebufferManager({
-      color: false,
-      depthStencil: true,
-      supportsDepthTexture: true,
-    });
-  }
+
   if (!defined(sourceDepth) && !defined(state.linearDepth)) {
     state.linearDepth = new FramebufferManager({
       pixelFormat: PixelFormat.RED,
@@ -150,7 +132,6 @@ function allocate(state, scene, prepass = true, sourceDepth) {
   if (!defined(state.estimate)) {
     state.estimate = new FramebufferManager();
     state.filtered = new FramebufferManager({ pixelFormat: PixelFormat.RED });
-    state.clearDepth = new ClearCommand({ depth: 1.0, stencil: 0 });
     state.clearLinear = new ClearCommand({ color: Color.TRANSPARENT });
     const uniforms = {
       u_linearDepth: () => state.sourceDepth,
@@ -178,12 +159,7 @@ function allocate(state, scene, prepass = true, sourceDepth) {
       },
     );
   }
-  for (const buffer of [
-    state.rawDepth,
-    state.linearDepth,
-    state.estimate,
-    state.filtered,
-  ]) {
+  for (const buffer of [state.linearDepth, state.estimate, state.filtered]) {
     buffer?.update(
       context,
       context.drawingBufferWidth,
@@ -191,30 +167,6 @@ function allocate(state, scene, prepass = true, sourceDepth) {
     );
   }
   state.sourceDepth = sourceDepth ?? state.linearDepth.getColorTexture();
-  if (defined(sourceDepth)) {
-    return;
-  }
-  const useLogDepth = scene.frameState.useLogDepth;
-  if (!defined(state.copyCommand) || state.useLogDepth !== useLogDepth) {
-    state.copyCommand?.shaderProgram.destroy();
-    state.copyCommand = context.createViewportQuadCommand(
-      new ShaderSource({
-        defines: useLogDepth ? ["LOG_DEPTH_READ_ONLY"] : [],
-        sources: [depth],
-      }),
-      {
-        owner: state,
-        uniformMap: {
-          u_depth: () =>
-            (state.mainPass
-              ? state.raw
-              : state.rawDepth
-            ).getDepthStencilTexture(),
-        },
-      },
-    );
-    state.useLogDepth = useLogDepth;
-  }
 }
 
 function eligible(command) {
@@ -227,7 +179,7 @@ function eligible(command) {
   );
 }
 
-SceneGISAmbientOcclusion.execute = function (scene, passState, frustum) {
+SceneGISAmbientOcclusion.execute = function (scene, passState) {
   const state =
     scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
   if (
@@ -236,117 +188,24 @@ SceneGISAmbientOcclusion.execute = function (scene, passState, frustum) {
   ) {
     return;
   }
-  state.prepassDraws = 0;
-  if (!scene._sceneGISScreenSpaceReflections?.enabled) {
-    const selected = LightingMrt.layout(scene, passState, eligible, false);
-    if (defined(selected)) {
-      allocate(state, scene, false);
-      if (!defined(state.raw)) {
-        state.raw = new FramebufferManager({
-          pixelDatatype: PixelDatatype.HALF_FLOAT,
-          depthStencil: true,
-          supportsDepthTexture: true,
-        });
-        state.clear = new ClearCommand({
-          color: Color.TRANSPARENT,
-          depth: 1,
-          stencil: 0,
-        });
-        state.clearColor = state.clearLinear;
-      }
-      state.raw.update(
-        scene.context,
-        scene.context.drawingBufferWidth,
-        scene.context.drawingBufferHeight,
-      );
-      state.depth = state.linearDepth;
-      state.mainPass = state.mainActive = LightingMrt.begin(
-        scene,
-        state,
-        passState,
-        eligible,
-        false,
-        selected,
-      );
-      state.rawDepth?.destroy();
-      state.rawDepth = undefined;
-      return;
-    }
-  }
   allocate(state, scene);
-  const context = scene.context;
-  const us = context.uniformState;
-  const oldFramebuffer = passState.framebuffer;
-  const oldPass = us.pass;
-  try {
-    passState.framebuffer = state.linearDepth.framebuffer;
-    state.clearLinear.execute(context, passState);
-    const list = scene._view.frustumCommandsList;
-    for (let i = list.length - 1; i >= 0; --i) {
-      const range = list[i];
-      frustum.near =
-        i === 0 ? range.near : range.near * scene.opaqueFrustumNearOffset;
-      frustum.far = range.far;
-      us.updateFrustum(frustum);
-      passState.framebuffer = state.rawDepth.framebuffer;
-      state.clearDepth.execute(context, passState);
-      for (const pass of opaquePasses) {
-        us.updatePass(pass);
-        const commands = range.commands[pass];
-        for (let j = 0; j < range.indices[pass]; ++j) {
-          let command = commands[j];
-          if (
-            !eligible(command) ||
-            (scene.debugCommandFilter && !scene.debugCommandFilter(command))
-          ) {
-            continue;
-          }
-          if (
-            scene.frameState.useLogDepth &&
-            defined(command.derivedCommands.logDepth)
-          ) {
-            command = command.derivedCommands.logDepth.command;
-          }
-          const derived = DerivedCommand.createDepthOnlyDerivedCommand(
-            scene,
-            command,
-            context,
-            state.depthCommands.get(command),
-          );
-          state.depthCommands.set(command, derived);
-          const depthCommand = derived.depthOnlyCommand;
-          const source = command.shaderProgram;
-          let program = state.depthPrograms.get(source);
-          if (!defined(program)) {
-            const fs = depthCommand.shaderProgram.fragmentShaderSource.clone();
-            fs.defines.push("SCENEGIS_DEPTH_ONLY");
-            program = context.shaderCache.createDerivedShaderProgram(
-              source,
-              "sceneGIS_AO_depth",
-              {
-                vertexShaderSource:
-                  depthCommand.shaderProgram.vertexShaderSource,
-                fragmentShaderSource: fs,
-                attributeLocations: source._attributeLocations,
-              },
-            );
-            state.depthPrograms.set(source, program);
-          }
-          depthCommand.shaderProgram = program;
-          depthCommand.execute(context, passState);
-          ++state.prepassDraws;
-        }
-      }
-      passState.framebuffer = state.linearDepth.framebuffer;
-      state.copyCommand.execute(context, passState);
-    }
-    us.updateFrustum(scene.camera.frustum);
-    estimateOcclusion(state, context, passState);
-  } finally {
-    passState.framebuffer = oldFramebuffer;
-    us.updateFrustum(scene.camera.frustum);
-    us.updatePass(oldPass);
-  }
+  state.raw ??= new FramebufferManager({
+    pixelDatatype: PixelDatatype.HALF_FLOAT,
+  });
+  state.clear = state.clearColor = state.clearLinear;
+  state.raw.update(
+    scene.context,
+    scene.context.drawingBufferWidth,
+    scene.context.drawingBufferHeight,
+  );
+  state.depth = state.linearDepth;
+  state.mainPass = state.mainActive = LightingMrt.begin(
+    scene,
+    state,
+    passState,
+    eligible,
+    false,
+  );
 };
 
 function estimateOcclusion(state, context, passState) {
@@ -369,12 +228,12 @@ SceneGISAmbientOcclusion.resolveShared = function (
   }
   // Shared SSR owns the depth snapshot; release now-unused standalone capture targets.
   LightingMrt.destroy(state);
-  for (const name of ["raw", "rawDepth", "linearDepth"]) {
+  for (const name of ["raw", "linearDepth"]) {
     state[name]?.destroy();
     state[name] = undefined;
   }
   state.depth = undefined;
-  allocate(state, scene, false, sourceDepth);
+  allocate(state, scene, sourceDepth);
   estimateOcclusion(state, scene.context, passState);
 };
 
@@ -387,7 +246,7 @@ SceneGISAmbientOcclusion.resolve = function (scene, passState, frustum) {
   const context = scene.context;
   const original = passState.framebuffer;
   try {
-    LightingMrt.resolve(scene, state, passState, state.copyCommand);
+    LightingMrt.resolve(scene, state);
     context.uniformState.updateFrustum(scene.camera.frustum);
     estimateOcclusion(state, context, passState);
     IndirectLighting.render(scene, state, state.linearDepth.getColorTexture());
@@ -404,69 +263,15 @@ SceneGISAmbientOcclusion.resolve = function (scene, passState, frustum) {
   return true;
 };
 
-SceneGISAmbientOcclusion.receiver = function (scene, command) {
-  const state =
-    scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
-  if (scene.frameState.passes.render && state.mainActive && eligible(command)) {
-    return LightingMrt.command(scene, state, command);
-  }
-  if (!scene.frameState.passes.render || !state.ready || !eligible(command)) {
-    return command;
-  }
-  let result = state.receivers.get(command);
-  if (!defined(result)) {
-    result = {};
-    state.receivers.set(command, result);
-  }
-  const shader = command.shaderProgram;
-  let program = state.receiverPrograms.get(shader);
-  // Native derived keys include the full source; resolve only when it changes.
-  if (!defined(program)) {
-    program = scene.context.shaderCache.getDerivedShaderProgram(
-      shader,
-      "sceneGIS_AO",
-    );
-    if (!defined(program)) {
-      const fs = shader.fragmentShaderSource.clone();
-      fs.defines.push("SCENEGIS_AMBIENT_OCCLUSION");
-      fs.sources.unshift(receive);
-      program = scene.context.shaderCache.createDerivedShaderProgram(
-        shader,
-        "sceneGIS_AO",
-        {
-          vertexShaderSource: shader.vertexShaderSource,
-          fragmentShaderSource: fs,
-          attributeLocations: shader._attributeLocations,
-        },
-      );
-    }
-    state.receiverPrograms.set(shader, program);
-  }
-  if (result.sourceUniforms !== command.uniformMap) {
-    result.sourceUniforms = command.uniformMap;
-    result.uniformMap = combine(state.receiverUniforms, command.uniformMap);
-  }
-  result.command = DrawCommand.shallowClone(command, result.command);
-  result.command.shaderProgram = program;
-  result.command.uniformMap = result.uniformMap;
-  return result.command;
-};
-
 SceneGISAmbientOcclusion.destroy = function (stage) {
   const state = stage._sceneGISAmbientOcclusion;
   state.ready = false;
   LightingMrt.destroy(state);
-  for (const name of [
-    "raw",
-    "rawDepth",
-    "linearDepth",
-    "estimate",
-    "filtered",
-  ]) {
+  for (const name of ["raw", "linearDepth", "estimate", "filtered"]) {
     state[name]?.destroy();
     state[name] = undefined;
   }
-  for (const name of ["copyCommand", "estimateCommand", "filterCommand"]) {
+  for (const name of ["estimateCommand", "filterCommand"]) {
     state[name]?.shaderProgram.destroy();
     state[name] = undefined;
   }

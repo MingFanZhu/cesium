@@ -1,12 +1,122 @@
 # ADR-0161: One opaque deferred pipeline
 
-- Status: accepted direction; Globe implementation is not yet qualified
+- Status: accepted direction; P4c Globe qualified, P4d opaque consolidation in progress
 - Date: 2026-10-13
 - Parent: [ADR-0156](ADR-0156-webgl-deferred-lighting-experiment.md)
 - Plan: [P4c](../../../AgentDocs/webgl-deferred-renderer/plans/2026-10-13-p4c-globe-integration.md)
 - Integration: SGP-0046; SGP-0051 adds the explicit GlobeFS material hook and reserves Fabric samplers in GlobeSurfaceTileProvider
 
 ## Decision
+
+### P4d approved entry scope and display color
+
+On 2026-10-14 the owner selects option A: this branch targets WebGL2 / SCENE3D
+with single-sample opaque materials. WebGL1, 2D, Columbus View and WebVR are
+outside the supported entry profile; do not add a complete forward fallback for
+them. The intended Scene default is one sample. WebGPU is outside this work.
+The automatic Scene entry and removal of the private experiment switch remain
+P4d work until their integration and consumer audit are qualified.
+
+`Scene.highDynamicRange = false` must not disable deferred rendering. Keep material
+storage, surface lighting, atmosphere and transparent composition in the same
+linear floating-point domain. At the native display-conversion slot, clamp RGB
+to [0, 1] and apply `1 / scene.gamma`, retaining alpha. Do not apply exposure,
+white balance or a tone curve in this LDR mode. HDR display retains the existing
+tone mapper and controls. This deliberately defines one display contract rather
+than recreating the old family-dependent forward LDR transforms. HDR-only optional
+effects keep their explicit public capability checks; disabling display HDR does
+not silently disable them or reduce G-buffer precision.
+
+SGP-0046 separates the public display choice from Scene's internal linear-storage
+flag and passes it to PostProcessStageCollection. An owned helper configures the
+existing tone-mapping slot as a gamma-only display stage in LDR mode. No additional
+geometry or display pass is added relative to the existing deferred HDR pipeline.
+Changing the public flag requests a frame, rebuilds only the display variant and
+retains material targets, lighting programs and native linear color storage.
+Shader modules continue through the native GLSL generator. Recheck Scene's HDR
+derivation, post-processing order and display-stage lifecycle on upstream updates.
+
+### P4d Planar material boundary
+
+The owner confirms that Planar keeps receiving light; only geometry-stage lighting
+moves to the deferred pass. Preserve `enableLighting`, Lambert controls, physical
+Sun/sky and cloud shadows, imagery/Fabric composition, clipping edges and surface
+opacity. This supersedes treating Planar's already-lit color as a passthrough.
+
+Use group -5 in the existing four RGBA16F material attachments: composed RGB and
+surface opacity, lighting normal, lighting mode/Lambert parameters/group, and
+geometric normal/shadow visibility. Modes distinguish unlit, basic Lambert,
+physical lighting and unlit clipping edges. The full-screen group borrows the
+surface's frame-local environment uniforms;
+weather and local lights run there once. Smooth and geometric terrain both publish
+eye position during material capture. Keep shared source for dedicated passes,
+with an explicit capture return before lighting and background composition.
+
+Following visual feedback, the owner explicitly approves true Planar transparency:
+opacity below one uses the existing translucent/OIT pass, including its dedicated
+lighting, and does not write opaque scene depth. This reveals objects and other
+terrain layers behind it. Opacity one retains deferred material capture and
+lighting. The old pre-surface background snapshot and blending are removed.
+Zero opacity discards; terrain queries remain available, while scene depth picking
+follows its translucent-depth option. See the ADR-0073 amendment. No additional
+material attachment is allocated. Internal Planar sky and water inputs still follow
+the linear-storage flag even when public HDR display is disabled.
+
+Unlit Planar retains its native generic shadow reception, including clipping edges;
+lit modes attenuate direct illumination only. Mode 4 marks lit clipping edges and
+mode 5 marks unlit clipping edges. This preserves existing shadow behavior without
+evaluating illumination during opaque material capture. Relates to ADR-0012 and
+ADR-0055; implementation remains in owned source paths.
+
+### P4d approved extended material storage
+
+On 2026-10-14 the owner approves preserving native specular, clearcoat, anisotropy,
+Model clipping, silhouettes, primitive outlines and point-cloud styling before the
+P4d checkpoint. Allocate optional RGBA16F fields from the visible material union:
+specularWeight (1 scalar), clearcoat factor/roughness/normal (5), anisotropic T/B
+and strength (7). Preserve both tangent vectors and CustomShader values without
+extra directional quantization. Primitive outline coverage uses existing style
+alpha when available, otherwise one field. Lit point sprites retain the fragment-to-center pixel offset x/y (2 fields),
+because per-fragment reconstruction changes their native view direction. The
+offset is bounded by sprite size and avoids half-float overflow at distant eye
+coordinates. Reconstruct the center using this offset and the existing eye-depth
+target. Unlit points require no
+position fields. The full union fits 16 scalars / four additional RGBA16F targets:
+32 bytes/pixel, or 31.25 MiB at 1280 by 800. Release unused targets and detach
+borrowed scene depth before resize or destruction.
+
+The inverse-classification material working set owns an independent optional set
+with the same maximum; it is reused across frusta, not duplicated per frustum. Its
+existing saved color/depth layers remain unchanged. Classified material merging
+copies the matching fields; unclassified transparency shades its own working set.
+When all attachments fit, the original material submission writes them together.
+Otherwise, only commands needing extension fields add one material-only draw at
+EQUAL depth with depth writes disabled. It repeats native coverage and material
+evaluation, never BRDF or a second complete opaque color pipeline.
+
+Clearcoat SSR can require seven screen outputs; AO and SSIL add three more. If the
+combined output exceeds attachment capacity, split reflection and indirect outputs
+into two screen-lighting draws, sharing all existing effect textures and material
+inputs. This increases screen BRDF work but adds neither effect textures nor geometry.
+Report material-extension and screen-lighting draws separately from base material
+draws; do not claim universal savings from removing the old fallback.
+
+Clipping edges and opaque silhouettes record native unlit color into the existing
+passthrough group through SGP-0045. Transparent silhouettes keep the dedicated
+transparent path. Primitive outline coverage composes after deferred lighting and
+scales indirect responses. Point style gamma correction remains after native PBR
+and before feature/model/outline/classification color. Shared linear screen deltas
+are transformed through that same gamma and affine color response in an additional
+screen correction for each visible lit styled-point group, using the existing MRT
+color snapshot. Fixed-color channels have zero response. No correction texture or
+geometry replay is added. SGP-0045 captures point-center coordinates and native
+post-lighting coverage; owned modules implement storage, lighting and composition.
+
+This implements the approved budget, not the final P4d visual gate. Validation and
+remaining qualification are tracked in the
+[P4d review](../../../AgentDocs/webgl-deferred-renderer/reviews/2026-10-14-p4d-entry-audit.md).
+
+### Unified opaque direction
 
 The owner explicitly removes ongoing compatibility with the complete opaque
 forward renderer as a goal of this experimental branch. Build one opaque/MASK
@@ -259,3 +369,113 @@ Keep experimental checks for material families and combinations that have not be
 qualified. P4c removes only the restrictions covered by its code, tests and review;
 the independent vector-tile direct overlay and redundant opaque forward cleanup
 remain subsequent work. The stable worktree is outside this change.
+
+## Independent native annotations
+
+2026-10-14 负责人批准按需标注深度、实心 / 半透明覆盖拆分，以及标注不参与水面
+折射。原先保留混色写深度的方案在视觉验收中造成背景矩形遮挡透明物，已被本决定
+取代；完整讨论与成本选择见 P4d 标注讨论。2026-10-14 修正后的负责人视觉验收通过。
+
+BillboardCollection 的实心覆盖（包括普通 Label）从物理 G-buffer 排除，在每段水面 /
+透明之前的独立无光照 pass 绘制。SGP-0046 在 native culling / derived commands 前
+通过 owned helper，将旧 Pass.OPAQUE 混色批次按原生 alpha cutoff 0.995 拆成互斥
+实心与透明命令；默认已拆分的 OPAQUE_AND_TRANSLUCENT 直接复用。半透明背景与
+字体边缘不写深度，使用现有 OIT 或调用方已选择的排序透明。pick / depth picking
+保留原生路径；不新增公共开关或完整不透明前向管线。
+
+旧单次混色批次最多 1→2 次提交，当前验收页 glyph/background 共 2→4 次；普通物理
+几何不增加提交。按需深度单段 R32F（4 bytes/pixel），多段 RG32F（8 bytes/pixel），
+1280×800 分别 3.90625 / 7.8125 MiB；无实心标注命令时释放，包含普通无背景 Label
+在内的该家族可激活分配。每帧仅初始化复制物理深度一次，实心标注提交同时通过
+无混色 MRT 写入标注深度和已有 TAA / water final-depth；删除旧每段全屏深度复制。
+因此无需 EXT_float_blend，不新增颜色目标或硬件 depth-stencil。负 frustum tag
+标识不应随底层 Globe 清除的标注覆盖，多段派生拒绝更近表面占据的像素。
+
+AO/SSR/SSIL 与水面折射继续使用物理表面 color/depth；不将标注颜色刷新到水面
+折射输入。前方水面完整遮挡标注，后方水面可透过半透明背景显示。原物理物体
+折射保持不变；标注深度仅供后续遮挡恢复、环境和最终 TAA 深度使用。资源由
+deferred 控制器管理，借用主颜色、硬件深度和最终深度附件，不转移其所有权。
+
+## Native fill, edges and transparent volumes
+
+Bentley planar fill retains its feature-ID pre-pass and proportional depth bias.
+SGP-0045 initializes explicit fragment depth for the non-logarithmic fill variant
+in ModelFS before either pass, and owned capture preserves its final biased depth.
+Native edge metadata and EDGES_ONLY passes remain dedicated. Surface edge color
+is recorded as the existing unlit overlay; redirected color outputs avoid native
+edge MRT conflicts with material attachments. EdgeDetectionStageFS reconstructs
+packed raster depth using the active projection, including orthographic views.
+These changes add no geometry replay or attachment.
+
+The owner approved the voxel/water contract and conditional budget on 2026-10-14.
+Voxel color remains native premultiplied-alpha ray marching without hardware depth
+writes, after water and temporal depth capture. SGP-0046 keeps native picking and
+provides a narrow IntersectDepth hook: color truncates its original eye-space ray
+against final opaque, annotation and water linear depth. The volume in front of
+water remains visible; the portion behind water is occluded and does not enter
+physical underwater refraction. The native depthTest=false override is retained.
+
+Reuse active TAA final depth or the existing water final-depth target. When both
+visible water and voxels require a target and neither is available, activate the
+same R32F water final-depth resource, including single-frustum scenes: 4 bytes per
+pixel (3.90625 MiB at 1280×800), with one initialization copy per frame. Existing
+water draws publish depth through their MRT; no added geometry submission, volume
+color copy or separate volume framebuffer is needed. Release the conditional target
+when either family disappears, on resize or when TAA supplies the borrowed target.
+The native closest-frustum volume submission and shader-cache ownership remain.
+
+Pixel, lifecycle and browser evidence is recorded in the P4d review. Native-channel
+visual acceptance and the final P4d matrix remain separate gates; this decision does
+not claim the phase is complete. Related patches: SGP-0045 and SGP-0046.
+
+## Coplanar fill precision under temporal sampling
+
+The planar-fill capture reuses the native feature-ID pre-pass depth attachment to
+resolve depth ties caused by separate triangles snapping to the raster subpixel
+grid. When a valid feature occupies the pixel and the natural depth difference is
+within two subpixel slope-error bounds plus two depth24 quantization steps, use
+the same reference depth before native planar pull and same-feature behind push.
+The subpixel spacing comes from WebGL SUBPIXEL_BITS, queried once on first use;
+the slope is computed in the current depth encoding. Actual separation outside
+that precision range keeps its depth. TAA projection and history are unchanged.
+
+The SGP-0045 ModelFS hook is active only for deferred planar-fill material capture.
+Owned capture adds one sampler of an existing pre-pass attachment, no texture or
+geometry draw. The pre-pass itself never samples its attached depth. This preserves
+the extension's coplanar ordering contract under all eight TAA samples, including
+logarithmic and orthographic projection; evidence and visual status stay in P4d.
+The [extension specification](https://github.com/CesiumGS/glTF/tree/vendor-extensions/extensions/2.0/Vendor/BENTLEY_materials_planar_fill)
+leaves coplanarity detection to implementations and scopes behind to the same
+logical object. This correction does not introduce a new cross-object priority API.
+
+## Voxel picking against visible surfaces
+
+Voxel picking retains native nonzero-alpha hit and metadata behavior, but its pass
+must follow opaque pick IDs because it does not write hardware depth. SGP-0046
+refreshes the existing packed depth after opaque commands only for pick frusta
+containing voxels, then submits the original voxel pick command. The ray is clipped
+against this pick's surface depth, including water, before returning a volume ID.
+Do not borrow the preceding color frame's temporal depth. This adds no texture or
+color-frame draw; one scissored depth copy is added per affected pick frustum.
+
+## Advanced environment is the default visual authority
+
+Owner-approved on 2026-10-14. In the WebGL deferred profile, SGP-0046 gates native SkyAtmosphere, SkyBox, Sun / Sun bloom, visual Fog, Globe ground atmosphere and legacy Globe daylight preparation. Public objects remain available; Fog tile culling and the advanced Globe Moon / ephemeris and shadow-light infrastructure remain. Disabling advanced effects never restores those legacy visuals.
+
+Owned deferred Globe shaders do not duplicate native atmosphere or legacy daylight evaluation. Their former atmosphere helper, capture flags and screen-light branches are removed; material ocean response, clipping and display overlays retain their separate contracts. Shared Cesium native shader implementations remain behind the effective gates.
+
+The read-only scene.environmentEffects returns an explicitly registered SceneGISEnvironmentEffects (even disabled), or a lazy Scene-owned default for a Globe / Planar world. No world means no inferred environment. The default enables physical atmosphere, aerial perspective and height fog; clouds, cloud shadows, crepuscular rays, bloom and lens flare default off. Getter access starts no network / GPU work. The first enabled normal frame activates resources. Explicit controllers take over before their update; the default disconnects and releases its GPU resources without losing its settings or enabled state. Removing the explicit controller restores the same default within that world. Scene releases only its defaults before world destruction or replacement; caller-owned controllers retain their existing removal obligation.
+
+Planar reuses registered light authority, or a Scene-owned fixed-Z Sun / Moon direction when none exists. Explicit planar light authority replaces the automatic authority without duplicate ownership. No geographic origin is guessed. Internal linear floating-point computation is independent of the public display HDR flag; default activation does not change that flag.
+
+The automatic instance uses surfaceRadianceScale=1 for its default LDR display; explicit constructor defaults remain unchanged. While the advanced pipeline is active, Planar skips its older lightweight sky preparation and drawing without changing caller settings.
+
+Owner-approved custom primary lighting supersedes the scene.light conflict in ADR-0053 for Globe and the unconditional automatic-light assignment on Planar. A caller-installed DirectionalLight retains its identity, direction, color, intensity and ownership. Both worlds yield automatic scene.light assignment while that light is present. Installing a SunLight resumes the automatic Sun/Moon light and captures that new object for conditional restoration. Disable, disconnect and controller takeover restore only a light still held by the releasing owner; they never overwrite a replacement caller light.
+
+The shared physical primary record uses the normalized opposite of DirectionalLight.direction and linear color times intensity. Its scale is that RGB irradiance divided component-wise by the existing solar spectrum, so terrain, physical models and clouds apply the same source before their existing atmospheric transmission and BRDF. Native geometry shadows use the same scene.light; cloud shadows use the shared direction. Sky, aerial solar scattering, celestial bodies and night sky remain tied to the original Sun/Moon state. No new resource, light pass or public option is added. Existing direction/energy history checks remain responsible for cloud and cloud-shadow invalidation.
+
+The cloud-free generation downloads only the three atmosphere LUTs. Cloud textures, ray-march / reconstruction shaders and shadow atlases require explicit cloud activation; upgrading does not replace the atmosphere LUTs. Turning clouds off retains warm cloud resources until environment disconnection or destruction, preserving existing warm-toggle semantics. Fetch / allocation failures retain the existing generation error latch without retries or a native fallback. This overrides the caller-created-only and native-flag-conflict restrictions in ADR-0040 / ADR-0041 for this deferred profile. Evidence, full cost accounting and owner visual gate are tracked in P4d.
+
+## Shared Gaussian renderer lifetime
+
+GaussianSplat3DTileContent creates a shared GaussianSplatPrimitive on its tileset; single-tile unload must not destroy that shared renderer. SGP-0054 makes tileset destruction invoke the existing primitive destroy before clearing its ownership reference, including collection removal and Scene teardown. Already destroyed private primitives remain removable without a second destroy. This repairs the existing deterministic resource-release contract; it adds no rendering pass, resource budget, API or alternate opaque pipeline.

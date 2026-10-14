@@ -219,7 +219,7 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
       if (!planar) {
         scene.globe.depthTestAgainstTerrain = false;
         render();
-        expect(effect._state.mainPass).toBe(false);
+        expect(effect._state.mainPass).toBe(true);
         scene.globe.depthTestAgainstTerrain = true;
         render();
         expect(effect._state.mainPass).toBe(true);
@@ -306,8 +306,8 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     render();
     expect(effect.ready).toBe(true);
     expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
-    expect(effect._state.mainPass).toBe(false);
-    expect(effect._state.captureDraws).toBeGreaterThan(0);
+    expect(effect._state.mainPass).toBe(true);
+    expect(effect._state.captureDraws).toBe(0);
     const receiver = point(0, -1, 0);
     const depth = sample(effect._state.depth.getColorTexture(), receiver)[0];
     expect(depth).toBeGreaterThan(10);
@@ -350,7 +350,7 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     expect(effect.isDestroyed()).toBe(true);
     expect(resized.isDestroyed()).toBe(true);
   });
-  it("matches material-weighted replay across native compatibility transitions", async function () {
+  it("keeps material-weighted responses when inverse classification is enabled", async function () {
     setup();
     scene.msaaSamples = 1;
     const { floor } = await models(true);
@@ -368,12 +368,12 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     expect(ao.mainPass).toBe(true);
     expect(ao.prepassDraws).toBe(0);
     expect(ao.rawDepth).toBeUndefined();
-    // Invert classification retains the native replay ordering. Ordinary models are unchanged.
+    // Ordinary models retain the same shared outputs when inverse classification is enabled.
     scene.invertClassification = true;
     render();
-    expect(effect._state.mainPass).toBe(false);
-    expect(effect._state.captureDraws).toBeGreaterThan(0);
-    expect(ao.prepassDraws).toBeGreaterThan(0);
+    expect(effect._state.mainPass).toBe(true);
+    expect(effect._state.captureDraws).toBe(0);
+    expect(ao.prepassDraws).toBe(0);
     expect(pixel(receiver)).toEqualEpsilon(main, 3);
     scene.invertClassification = false;
     render();
@@ -382,14 +382,19 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     expect(ao.prepassDraws).toBe(0);
     expect(pixel(receiver)).toEqual(main);
   });
-  it("preserves MSAA and model color response without replaying opaque shading", async function () {
+  it("preserves model color response and rejects MSAA without allocating replacement targets", async function () {
     setup();
-    scene.msaaSamples = 4;
     const { floor } = await models();
+    const raw = effect._state.raw.getColorTexture();
+    scene.msaaSamples = 4;
+    expect(render).toThrowDeveloperError();
+    expect(effect._state.raw.getColorTexture()).toBe(raw);
+    scene.msaaSamples = 1;
+    render();
     const receiver = point(0, -0.4, 0);
     const state = effect._state;
     expect(state.mainPass).toBe(true);
-    expect(state.main.numSamples).toBe(4);
+    expect(state.raw.getDepthStencilTexture()).toBeUndefined();
     expect(state.captureDraws).toBe(0);
     scene.backgroundColor = Color.BLUE;
     render();
@@ -422,7 +427,7 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
 
     const nativeColor =
       scene._view.globeDepth.colorFramebufferManager.getColorTexture();
-    const nativeDepth = state.main.source.depthStencilRenderbuffer;
+    const nativeDepth = state.main.source.depthStencilTexture;
     const auxiliary = state.main.weights.getColorTexture();
     const framebuffer = state.main.framebuffer;
     effect.destroy();

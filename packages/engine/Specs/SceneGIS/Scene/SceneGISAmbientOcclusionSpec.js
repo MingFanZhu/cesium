@@ -117,14 +117,14 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     scene?.destroyForSpecs();
     scene = undefined;
   });
-  it("uses main HDR depth without extra indexed geometry and preserves MSAA lifecycle", function () {
+  it("uses main HDR depth without extra indexed geometry and preserves shared-target lifecycle", function () {
     setup();
     scene.highDynamicRange = true;
-    scene.msaaSamples = 4;
+    scene.msaaSamples = 1;
     render();
     const state = ao._sceneGISAmbientOcclusion;
     expect(state.mainPass).toBe(true);
-    expect(state.main.numSamples).toBe(4);
+    expect(state.raw.getDepthStencilTexture()).toBeUndefined();
     expect(state.main.framebuffer.numberOfColorAttachments).toBe(2);
     expect(state.rawDepth).toBeUndefined();
     const geometry = new Set(
@@ -162,7 +162,7 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     scene = undefined;
     expect(target.isDestroyed()).toBe(true);
   });
-  it("matches indirect-only prepass composition in the same HDR scene", function () {
+  it("keeps ordinary material occlusion unchanged when classification is enabled", function () {
     setup();
     scene.highDynamicRange = true;
     scene.msaaSamples = 1;
@@ -172,8 +172,8 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     const main = scene.context.readPixels();
     scene.invertClassification = true;
     render();
-    expect(state.mainPass).toBe(false);
-    expect(state.prepassDraws).toBeGreaterThan(0);
+    expect(state.mainPass).toBe(true);
+    expect(state.prepassDraws).toBe(0);
     const reference = scene.context.readPixels();
     let difference = 0;
     for (let i = 0; i < main.length; ++i) {
@@ -232,7 +232,7 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     scene.pick({ x: 64, y: 64 });
     expect(spy).not.toHaveBeenCalled();
   });
-  it("avoids source-key lookups on warm draws and refreshes changed AO shaders", function () {
+  it("reuses deferred AO shaders when only Planar lighting values change", function () {
     setup();
     render();
     const lookup = spyOn(
@@ -240,13 +240,15 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
       "getDerivedShaderProgram",
     ).and.callThrough();
     const aoLookups = () =>
-      lookup.calls.allArgs().filter((args) => args[1] === "sceneGIS_AO");
+      lookup.calls
+        .allArgs()
+        .filter((args) => args[1].startsWith("sceneGIS_lighting_"));
     render();
     expect(aoLookups().length).toBe(0);
     const shaded = pixel(0, -3.5);
     world.enableLighting = false;
     render();
-    expect(aoLookups().length).toBeGreaterThan(0);
+    expect(aoLookups().length).toBe(0);
     expect(pixel(0, -3.5)).not.toEqual(shaded);
     lookup.calls.reset();
     render();
@@ -371,19 +373,7 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     scene.highDynamicRange = false;
     ao.uniforms.ambientOcclusionOnly = true;
     render();
-    const modelCommand = scene.frameState.commandList.find(
-      (command) => command.owner === model,
-    );
-    const sourceCommand = scene.frameState.useLogDepth
-      ? modelCommand.derivedCommands.logDepth.command
-      : modelCommand;
-    const depthProgram =
-      ao._sceneGISAmbientOcclusion.depthCommands.get(sourceCommand)
-        .depthOnlyCommand.shaderProgram;
-    expect(
-      depthProgram.allUniforms.model_sphericalHarmonicCoefficients,
-    ).toBeUndefined();
-    expect(depthProgram.allUniforms.u_discard).toBeDefined();
+    expect(ao._sceneGISAmbientOcclusion.prepassDraws).toBe(0);
     expect(pixel(0, -3.5)[0]).toBeLessThan(230);
     customShader.setUniform("u_discard", true);
     render();
@@ -392,7 +382,7 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     customShader.destroy();
     ibl.destroy();
   });
-  it("preserves native alpha-mask and model clipping coverage in the unlit depth variant", async function () {
+  it("preserves native alpha-mask and moving model clipping coverage in shared deferred depth", async function () {
     setup();
     box.show = false;
     ao.uniforms.ambientOcclusionOnly = true;
@@ -419,35 +409,19 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     render();
     const state = ao._sceneGISAmbientOcclusion;
     const command = scene.frameState.commandList.find((c) => c.owner === model);
-    const source = scene.frameState.useLogDepth
-      ? command.derivedCommands.logDepth.command
-      : command;
-    const program = state.depthPrograms.get(source.shaderProgram);
-    expect(program.fragmentShaderSource.defines).toContain("ALPHA_MODE_MASK");
-    const fs = program.fragmentShaderSource.clone();
-    fs.defines = fs.defines.filter((name) => name !== "SCENEGIS_DEPTH_ONLY");
-    const reference = scene.context.shaderCache.createDerivedShaderProgram(
-      source.shaderProgram,
-      "spec_reference_depth",
-      {
-        vertexShaderSource: program.vertexShaderSource,
-        fragmentShaderSource: fs,
-        attributeLocations: source.shaderProgram._attributeLocations,
-      },
+    expect(command.shaderProgram.fragmentShaderSource.defines).toContain(
+      "ALPHA_MODE_MASK",
     );
-    for (const distance of [0, 2]) {
-      model.clippingPlanes.get(0).distance = distance;
-      state.depthPrograms.set(source.shaderProgram, program);
-      render();
-      const optimized = scene.context.readPixels();
-      expect(
-        optimized.some((value, index) => index % 4 === 0 && value < 230),
-      ).toBe(true);
-      state.depthPrograms.set(source.shaderProgram, reference);
-      render();
-      expect(scene.context.readPixels()).toEqual(optimized);
-    }
-    state.depthPrograms.set(source.shaderProgram, program);
+    const clipped = scene.context.readPixels();
+    model.clippingPlanes.get(0).distance = 2;
+    render();
+    const moved = scene.context.readPixels();
+    expect(moved).not.toEqual(clipped);
+    expect(moved.some((value, index) => index % 4 === 0 && value < 230)).toBe(
+      true,
+    );
+    expect(state.prepassDraws).toBe(0);
+    expect(state.sourceDepth).toBe(scene._sceneGISDeferred._linearDepth);
   });
   it("occludes local Globe contacts and conserves sky", async function () {
     scene = createScene({ canvas: createCanvas(128, 128), scene3DOnly: true });

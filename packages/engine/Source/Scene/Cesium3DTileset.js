@@ -3650,6 +3650,14 @@ Cesium3DTileset.prototype.isDestroyed = function () {
  * @see Cesium3DTileset#isDestroyed
  */
 Cesium3DTileset.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0054: Release the shared tileset-owned splat renderer.
+  if (defined(this.gaussianSplatPrimitive)) {
+    if (!this.gaussianSplatPrimitive.isDestroyed()) {
+      this.gaussianSplatPrimitive.destroy();
+    }
+    this.gaussianSplatPrimitive = undefined;
+  }
+  // SCENEGIS_PATCH_END SGP-0054
   this._tileDebugLabels =
     this._tileDebugLabels && this._tileDebugLabels.destroy();
   this._clippingPlanes = this._clippingPlanes && this._clippingPlanes.destroy();

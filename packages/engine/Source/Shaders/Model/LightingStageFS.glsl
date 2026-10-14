@@ -1,7 +1,7 @@
-// SCENEGIS_PATCH_BEGIN SGP-0045: Expose evaluated native material to the private buffer prototype.
+// SCENEGIS_PATCH_BEGIN SGP-0045: Expose evaluated native material during deferred submission.
 #define SCENEGIS_GBUFFER_MODEL
-#ifdef SCENEGIS_GBUFFER_MODEL_CAPTURE
-void sceneGISRecordGBuffer(czm_modelMaterial material);
+#ifdef SCENEGIS_DEFERRED_CAPTURE
+void sceneGISRecordGBuffer(czm_modelMaterial material, vec3 positionEC);
 #endif
 // SCENEGIS_PATCH_END SGP-0045
 // SCENEGIS_PATCH_BEGIN SGP-0018: Model lighting owns shadow composition, including unlit materials.
@@ -83,7 +83,7 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
         vec3 reflectMC = sceneGISSpecularDirection(reflect(-viewDirection, normal));
         // SCENEGIS_PATCH_END SGP-0015
         // SCENEGIS_PATCH_BEGIN SGP-0016: Keep the clearcoat ray independent of base-layer roughness and normal.
-        #if defined(SCENEGIS_SSR_CAPTURE) || defined(SCENEGIS_SSR_RECEIVE)
+        #ifdef SCENEGIS_SSR_MAIN
         sceneGISSSRCoatDirection = reflect(-viewDirection, normal);
         #endif
         // SCENEGIS_PATCH_END SGP-0016
@@ -99,12 +99,7 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
         iblColor *= model_iblFactor.y;
         #endif
         // SCENEGIS_PATCH_END SGP-0015
-        // SCENEGIS_PATCH_BEGIN SGP-0014: Apply screen-space visibility only to clearcoat IBL.
-        #ifdef SCENEGIS_AMBIENT_OCCLUSION
-        iblColor *= sceneGISAmbientOcclusion();
-        #endif
         color += iblColor * material.occlusion;
-        // SCENEGIS_PATCH_END SGP-0014
     #endif
 
     float clearcoatFactor = material.clearcoatFactor;
@@ -130,9 +125,6 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
     sceneGISSSRCoatWeight *= clearcoatFactor * material.occlusion;
     #ifdef SCENEGIS_MODEL_LIGHTING
     sceneGISSSRCoatWeight *= model_iblFactor.y;
-    #endif
-    #ifdef SCENEGIS_AMBIENT_OCCLUSION
-    sceneGISSSRCoatWeight *= sceneGISAmbientOcclusion();
     #endif
     #endif
     // SCENEGIS_PATCH_END SGP-0016
@@ -183,21 +175,13 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
     // Accumulate colors from base layer
     vec3 color = directColor + material.emissive;
     #ifdef USE_IBL_LIGHTING
-        // SCENEGIS_PATCH_BEGIN SGP-0014: Preserve direct and emissive radiance while occluding IBL.
+        // SCENEGIS_PATCH_BEGIN SGP-0014: Record indirect energy for shared screen-space visibility.
         vec3 indirectColor = computeIBL(position, normal, lightDirection, lightColorHdr, material);
-        #ifdef SCENEGIS_AMBIENT_OCCLUSION
-        indirectColor *= sceneGISAmbientOcclusion();
-        #endif
         color += indirectColor;
         #ifdef SCENEGIS_AO_MAIN
         sceneGISRecordIndirect(indirectColor);
         #endif
         // SCENEGIS_PATCH_END SGP-0014
-        // SCENEGIS_PATCH_BEGIN SGP-0016: Apply the same AO visibility to the captured specular response.
-        #if defined(SCENEGIS_SSR_MAIN) && defined(SCENEGIS_AMBIENT_OCCLUSION)
-        sceneGISSSRBaseWeight *= sceneGISAmbientOcclusion();
-        #endif
-        // SCENEGIS_PATCH_END SGP-0016
     #endif
 
     #ifdef USE_CLEARCOAT
@@ -262,8 +246,8 @@ void lightingStage(inout czm_modelMaterial material, ProcessedAttributes attribu
     #endif
 
     // SCENEGIS_PATCH_BEGIN SGP-0045: Record surface properties before diffuse becomes lit color.
-    #ifdef SCENEGIS_GBUFFER_MODEL_CAPTURE
-    sceneGISRecordGBuffer(material);
+    #ifdef SCENEGIS_DEFERRED_CAPTURE
+    sceneGISRecordGBuffer(material, attributes.positionEC);
     #endif
     // SCENEGIS_PATCH_END SGP-0045
     material.diffuse = color;

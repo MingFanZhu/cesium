@@ -18,9 +18,13 @@ void main()
     czm_material material;
     material.diffuse = diffuse.rgb;
     material.alpha = diffuse.a;
-    material.normal = normal.xyz;
+    material.normal = normalize(normal.xyz);
     material.shininess = normal.w;
     material.specular = specular.r;
     material.emission = texelFetch(u_sceneGISDeferredEmission, pixel, 0).rgb;
+    #ifdef ONLY_SUN_LIGHTING
+    out_FragColor = czm_private_phong(normalize(-sceneGISLocalPositionEC()), material, czm_sunDirectionEC);
+    #else
     out_FragColor = czm_phong(normalize(-sceneGISLocalPositionEC()), material, czm_lightDirectionEC);
+    #endif
 }

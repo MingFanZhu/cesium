@@ -70,9 +70,6 @@ vec3 sceneGISGlobeSurfaceLighting(
             globePosition,
             viewDistance));
     }
-    #ifdef SCENEGIS_AMBIENT_OCCLUSION
-    skyIrradiance *= sceneGISAmbientOcclusion();
-    #endif
     #ifdef SCENEGIS_AO_MAIN
     sceneGISRecordIndirect(max(albedo, vec3(0.0)) * (1.0 / czm_pi) *
         max(skyIrradiance, vec3(0.0)) * u_surfaceRadianceScale);

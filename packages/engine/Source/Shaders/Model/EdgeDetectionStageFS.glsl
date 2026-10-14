@@ -1,3 +1,8 @@
+// SCENEGIS_PATCH_BEGIN SGP-0045: Preserve final native edge color in deferred material capture.
+#ifdef SCENEGIS_DEFERRED_CAPTURE
+void sceneGISRecordUnlitModelColor(vec3 color);
+#endif
+// SCENEGIS_PATCH_END SGP-0045
 void edgeDetectionStage(inout vec4 color, inout FeatureIds featureIds) {
     if (u_isEdgePass) {
         return;
@@ -19,9 +24,10 @@ void edgeDetectionStage(inout vec4 color, inout FeatureIds featureIds) {
     vec4 geomEC = czm_windowToEyeCoordinates(gl_FragCoord);
     float geomDepthLinear = -geomEC.z;
 
-    // Convert edge depth to linear depth
-    float z_ndc_edge = edgeDepthWin * 2.0 - 1.0;
-    float edgeDepthLinear = (2.0 * n * f) / (f + n - z_ndc_edge * (f - n));
+    // SCENEGIS_PATCH_BEGIN SGP-0045: Decode packed raster depth with the active orthographic or perspective projection.
+    vec4 edgeEC = czm_windowToEyeCoordinates(vec4(gl_FragCoord.xy, edgeDepthWin, 1.0));
+    float edgeDepthLinear = -edgeEC.z / edgeEC.w;
+    // SCENEGIS_PATCH_END SGP-0045
 
     float d = abs(edgeDepthLinear - geomDepthLinear);
 
@@ -53,6 +59,11 @@ void edgeDetectionStage(inout vec4 color, inout FeatureIds featureIds) {
 
         if (drawEdge) {
             color = edgeColor;
+            // SCENEGIS_PATCH_BEGIN SGP-0045: Record the edge overlay without relighting or replaying the surface.
+            #ifdef SCENEGIS_DEFERRED_CAPTURE
+            sceneGISRecordUnlitModelColor(color.rgb);
+            #endif
+            // SCENEGIS_PATCH_END SGP-0045
         }
     }
 }

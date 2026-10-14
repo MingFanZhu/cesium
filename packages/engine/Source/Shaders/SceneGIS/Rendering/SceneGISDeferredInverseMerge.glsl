@@ -4,6 +4,7 @@ uniform sampler2D u_specular;
 uniform sampler2D u_emission;
 uniform sampler2D u_mask;
 uniform sampler2D u_depth;
+#ifndef SCENEGIS_DEFERRED_EXTENSION_ONLY
 layout(location = 1) out vec4 normal;
 layout(location = 2) out vec4 specular;
 layout(location = 3) out vec4 emission;
@@ -21,6 +22,8 @@ layout(location = SCENEGIS_DEFERRED_CLASSIFICATION_LOCATION) out vec4 classifica
 uniform float u_frustumTag;
 layout(location = SCENEGIS_DEFERRED_DEPTH_LOCATION) out vec2 surfaceDepth;
 #endif
+
+#endif
 void main()
 {
     ivec2 p = ivec2(gl_FragCoord.xy);
@@ -28,6 +31,10 @@ void main()
     if (material.a == 0.0 || texelFetch(u_mask, p, 0).r == 0.0) {
         discard;
     }
+    #ifdef SCENEGIS_DEFERRED_EXTENSIONS
+    sceneGISCopyExtensions(p);
+    #endif
+    #ifndef SCENEGIS_DEFERRED_EXTENSION_ONLY
     out_FragColor = texelFetch(u_diffuse, p, 0);
     normal = texelFetch(u_normal, p, 0);
     specular = material;
@@ -40,6 +47,7 @@ void main()
     #endif
     #ifdef SCENEGIS_DEFERRED_CLASSIFICATION_LOCATION
     classification = vec4(0.0);
+    #endif
     #endif
     gl_FragDepth = texelFetch(u_depth, p, 0).r;
     #ifdef SCENEGIS_DEFERRED_DEPTH_LOCATION

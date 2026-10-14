@@ -2,18 +2,20 @@
 
 ## Metadata
 
-| Field                            | Value                                                             |
-| -------------------------------- | ----------------------------------------------------------------- |
-| Extension slug                   | `webgl-deferred-renderer`                                         |
-| Status                           | `active`                                                          |
-| Planning model                   | `extension`                                                       |
-| Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
-| Current phase                    | P4c completed：技术、review 与负责人视觉验收通过，形成独立提交    |
-| Active phase plan                | 无；[P4c](plans/2026-10-13-p4c-globe-integration.md) 已完成       |
-| Architecture / execution contact | 当前任务                                                          |
-| Last updated                     | `2026-10-14`                                                      |
+| Field                            | Value                                                                   |
+| -------------------------------- | ----------------------------------------------------------------------- |
+| Extension slug                   | `webgl-deferred-renderer`                                               |
+| Status                           | `active`                                                                |
+| Planning model                   | `extension`                                                             |
+| Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md)       |
+| Current phase                    | P4d completed；独立提交后进入矢量切片适配                               |
+| Active phase plan                | 无；已完成 [P4d](plans/2026-10-14-p4d-opaque-pipeline-consolidation.md) |
+| Architecture / execution contact | 当前任务                                                                |
+| Last updated                     | `2026-10-14`                                                            |
 
 ## Scope
+
+当前无待决的范围 / 预算讨论。2026-10-14 负责人确认自定义主光画面通过，并批准提交 P4d 后继续独立矢量切片适配。P4d 的技术验证、自审、负责人视觉与提交钩子预检全部完成；本 checkpoint 包含阶段代码、Specs、ADR / SGP 及 AgentDocs。独立矢量阶段在提交成功后依据当时源码激活。
 
 探索 WebGL2 统一表面数据、不透明延迟光照，以及共享数据支撑的多光源、AO、SSR、SSIL
 画质和性能改进。既有效果和街道调校仍属于 `rendering-quality`。
@@ -21,6 +23,13 @@
 不预设公开 forward/deferred 切换 API。P1 只交付可观察的材质数据，不接管主光照。
 
 ## Engineering links
+
+- P4d 当前增量：默认高级环境及云资源按需加载已实现；Planar 大气 / 高度雾及开云黑天空修正已有技术证据，开云画面已获负责人确认。
+  自定义 DirectionalLight 保留方向、颜色、强度和所有权，SunLight 恢复自动主光。
+  [默认环境验收页](../../Test/Rendering/延迟默认环境验收.html) 的主光 / 阴影增量已获负责人视觉确认，P4d gate 全部通过。
+  既有 Planar、扩展材质、标注与原生通道增量已验收；当前范围以
+  [能力矩阵与剩余项](reviews/2026-10-14-p4d-entry-audit.md#current-adaptation-matrix-and-remaining-work) 为准。
+  Gaussian tileset 移除释放已修复，十一项相关 Specs 通过；消费者审计和最终视觉确认后 WDR-P4D-01 至 08 均 fixed。以下 handoff 保留历史增量状态，当前状态以本节和 review 最后结论为准。
 
 - Branch: `feature/webgl-deferred-rendering`；基线 `5688deaeeb`；P0 checkpoint `bb9b16eba0`。
 - [诊断器](../../packages/engine/Source/SceneGIS/Scene/_private/_SceneGISGBuffer.js)、
@@ -45,6 +54,34 @@
 - [P3 多光源讨论](discussions/2026-10-13-many-light-scheduling.md)，负责人已选择 A。
 
 ## Current handoff
+
+2026-10-14 负责人选择 A：只推进 WebGL2 / SCENE3D 的延迟渲染，目标默认单采样，
+其他模式明确不支持。HDR 关闭的实现已加入本轮：内部保留线性浮点光照与透明合成，
+最终使用原显示槽位做裁剪/gamma，不应用曝光/tone mapping；详见 ADR-0161。
+Scene 默认单采样、自动绑定与 Planar/Ellipsoid 不透明材质接入已完成。
+负责人随后要求真正透明，并接受半透明 Planar 使用 OIT 专用受光；已移除旧背景
+快照，地下物体、透明分层、拾取及阴影回归通过，见
+[决定](discussions/2026-10-14-planar-transparency.md) 与末尾 review。
+私有前向开关、旧效果几何重放和接收派生已移除。Planar 负责人视觉已通过。
+负责人要求 P4d 保持未提交，补齐现有扩展材质、裁剪、轮廓与点云样式后关闭阶段。
+[扩展预算](discussions/2026-10-14-extended-material-budget.md) 已获批；最多四张按需
+RGBA16F 与容量溢出的材质附加提交已实现。原生材质/点云、MASK、分类与释放的
+167 项相关 GPU 用例有通过证据，扩展材质与图元浏览器、成本和交付检查通过。
+负责人确认本增量画面符合预期；P4d 保持未提交，继续处理带背景标注及最终兼容矩阵。
+全 AgentDocs Prettier 另有九个既存 Planar 文档格式提示，当前扩展文档检查通过。
+[标注预算](discussions/2026-10-14-depth-writing-annotations.md) 已获批准，原生标注尾部
+和条件深度已接入。负责人指出背景矩形遮挡透明物后，已批准实心 / 透明拆分及标注不参与水面折射；修正后的 12 项定向 GPU 用例与独立 E2E 通过，负责人在页面视觉确认通过。Bentley planar fill 三项 GPU 资格已通过，edge visibility 的 10 项回归与 voxel 基础 17 项回归也已通过；[voxel 与水面语义 / 深度预算](discussions/2026-10-14-voxel-water-depth.md) 已获负责人批准并完成实现。44 项相关 GPU 回归与原生通道 E2E 通过，填充 / 边线 / 体素增量待负责人视觉；Gaussian 的九项原生回归通过，最终兼容矩阵仍 open；独立矢量适配仍为后继范围。
+诊断页面为 `Test/Rendering/GBuffer原型.html`，只读主 G-buffer，不再重放几何。
+验证与本轮尚未提交状态见 [P4d review](reviews/2026-10-14-p4d-entry-audit.md)。
+
+P4c checkpoint `fbde52dcd5` 已形成，提交钩子的 ESLint、Prettier、Markdown 和类型检查通过。
+随后激活 [P4d](plans/2026-10-14-p4d-opaque-pipeline-consolidation.md)：已移除旧 G-buffer
+诊断重放，直接借用主延迟数据；6 项诊断 GPU Specs、样式与共享布局回归及街道 E2E
+通过。默认配置尚未修改；统一入口场景范围已由上述 A 决定替代原待答复事项。
+默认配置、passthrough 家族与专用通道依赖见
+[入口 review](reviews/2026-10-14-p4d-entry-audit.md)。
+旧独立 Model 诊断 capture 标记也已移除，17 项光照与 7 项样式回归通过；
+该句对应早期诊断增量；当前完整 upstream-owned 清单见 P4d review，整个 P4d 尚未提交。
 
 2026-10-14 负责人反馈密集分段蓝色贴地面不完整；SGP-0053 已修复自动日志深度错误
 discard 分类体的问题。新增覆盖/拾取回归修复前失败、修复后通过；72 项延迟、119 项
@@ -183,3 +220,11 @@ Globe 阶段之后单独验证自有 flat/ground/extrusion/symbol 绘制，不�
 材质绘制。海洋与 Fabric 的顺序、水掩码排除天气、五/六/七附件组合及释放已有 GPU 证据；
 真实街道 1280×800 开启海洋与双纹理 Fabric 增加 15.625 MiB，不增加材质/光照绘制，
 整帧 GPU 中位数约 14.90 → 15.40 ms。其余 Globe 分支与整阶段 gate 尚未完成。
+
+## Latest visual gate
+
+标注修正已获负责人视觉确认。左侧 TAA 共面填充修正也已确认正确；右侧体积与后方红面重叠时返回红面的问题已复现并修正，负责人已确认该拾取修正符合预期。20 项相关 GPU 与原生通道点击 E2E 通过；Gaussian 混合场景 GPU 已通过，原生生命周期边界记录在 review。最终兼容矩阵与 P4d 提交 gate 仍 open。
+
+最新默认高级环境已实现：scene.environmentEffects 与接管规则遵循负责人批准。原生视觉雾 / 大气 / Globe daylight 不做兼容补齐；默认物理大气 / 空气透视 / 高度雾，云资源真正按需创建。技术验证及成本记录已完成，新默认画面的负责人视觉待确认；详见默认环境 discussion、P4d plan 与 review 末尾当前矩阵。
+
+负责人随后指出开云时 Planar 天空变黑：已修正 clear-depth=0 被用于表面视线重建的问题，新增修复前失败的 GPU 回归与 Globe / Planar 开云 LDR / HDR 浏览器检查通过，无新增纹理 / 绘制或上游路径。七项默认环境 GPU Specs 现有通过证据；本次画面仍待负责人重新确认，不沿用先前无云结果关闭 gate。

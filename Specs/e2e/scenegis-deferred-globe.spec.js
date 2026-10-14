@@ -1,5 +1,51 @@
 import { test, expect } from "@playwright/test";
 
+test("deferred Globe supports LDR display without switching its opaque renderer", async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(90000);
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/Test/Rendering/延迟地球验收.html");
+  await page.waitForFunction(() => window.example?.ready, undefined, {
+    timeout: 45000,
+  });
+  const result = await page.evaluate(() => {
+    const e = window.example;
+    const scene = e.viewer.scene;
+    e.viewer.useDefaultRenderLoop = false;
+    scene.rethrowRenderErrors = true;
+    e.effects.enabled = false;
+    e.taa.enabled = e.ssr.enabled = e.ssil.enabled = false;
+    scene.highDynamicRange = false;
+    e.viewer.render();
+    const material = e.deferred._raw.getColorTexture();
+    scene.highDynamicRange = true;
+    e.viewer.render();
+    const reused = e.deferred._raw.getColorTexture() === material;
+    scene.highDynamicRange = false;
+    e.viewer.render();
+    return {
+      ready: e.deferred.ready,
+      hdr: scene.highDynamicRange,
+      reused,
+      errors: e.errors,
+      glError: scene.context._gl.getError(),
+    };
+  });
+  expect(result).toEqual({
+    ready: true,
+    hdr: false,
+    reused: true,
+    errors: [],
+    glError: 0,
+  });
+  await page.screenshot({ path: testInfo.outputPath("globe-ldr.png") });
+  await page.evaluate(() => window.example.destroy());
+  expect(errors).toEqual([]);
+});
+
 test("deferred Globe composes advanced environment, mixed surfaces and live controls", async ({
   page,
 }, testInfo) => {

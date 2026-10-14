@@ -8,6 +8,9 @@ import SceneGISReflectionProbes from "../SceneGIS/Scene/_private/_SceneGISReflec
 import SceneGISWaterFrame from "../SceneGIS/Scene/_private/_SceneGISWaterFrame.js";
 // SCENEGIS_PATCH_END SGP-0017
 import BoundingRectangle from "../Core/BoundingRectangle.js";
+// SCENEGIS_PATCH_BEGIN SGP-0046: Own the lightweight default advanced environment.
+import SceneGISDefaultEnvironment from "../SceneGIS/Scene/_private/_SceneGISDefaultEnvironment.js";
+// SCENEGIS_PATCH_END SGP-0046
 // SCENEGIS_PATCH_BEGIN SGP-0026: Share main-pass diffuse inputs with optional screen-space indirect lighting.
 import SceneGISScreenSpaceIndirectLighting from "../SceneGIS/Scene/_private/_SceneGISScreenSpaceIndirectLighting.js";
 // SCENEGIS_PATCH_END SGP-0026
@@ -110,6 +113,9 @@ import VoxelPrimitive from "./VoxelPrimitive.js";
 import getMetadataClassProperty from "./getMetadataClassProperty.js";
 import PickedMetadataInfo from "./PickedMetadataInfo.js";
 import getMetadataProperty from "./getMetadataProperty.js";
+// SCENEGIS_PATCH_BEGIN SGP-0046: Scene owns its opaque deferred renderer.
+import SceneGISDeferredLighting from "../SceneGIS/Scene/_private/_SceneGISDeferredLighting.js";
+// SCENEGIS_PATCH_END SGP-0046
 
 // SCENEGIS_PATCH_BEGIN SGP-0007: Guard non-Globe Scene APIs and native effects.
 import SceneGISPlanarSceneApi from "../SceneGIS/Scene/_private/_SceneGISPlanarSceneApi.js";
@@ -148,7 +154,9 @@ const requestRenderAfterFrame = function (scene) {
  * @param {boolean} [options.requestRenderMode=false] If true, rendering a frame will only occur when needed as determined by changes within the scene. Enabling improves performance of the application, but requires using {@link Scene#requestRender} to render a new frame explicitly in this mode. This will be necessary in many cases after making changes to the scene in other parts of the API. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
  * @param {number} [options.maximumRenderTimeChange=0.0] If requestRenderMode is true, this value defines the maximum change in simulation time allowed before a render is requested. See {@link https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/|Improving Performance with Explicit Rendering}.
  * @param {number} [options.depthPlaneEllipsoidOffset=0.0] Adjust the DepthPlane to address rendering artefacts below ellipsoid zero elevation.
- * @param {number} [options.msaaSamples=4] If provided, this value controls the rate of multisample antialiasing. Typical multisampling rates are 2, 4, and sometimes 8 samples per pixel. Higher sampling rates of MSAA may impact performance in exchange for improved visual quality. This value only applies to WebGL2 contexts that support multisample render targets. Set to 1 to disable MSAA.
+ * SCENEGIS_PATCH_BEGIN SGP-0046: Document the single-sample deferred entry.
+ * @param {number} [options.msaaSamples=1] The render target sample count. SceneGIS deferred rendering requires 1; select FXAA or SceneGIS temporal antialiasing for edge smoothing.
+ * SCENEGIS_PATCH_END SGP-0046
  *
  * @see CesiumWidget
  * @see {@link http://www.khronos.org/registry/webgl/specs/latest/#5.2|WebGLContextAttributes}
@@ -286,7 +294,9 @@ function Scene(options) {
   this._minimumDisableDepthTestDistance = 0.0;
   this._debugInspector = new DebugInspector();
 
-  this._msaaSamples = options.msaaSamples ?? 4;
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Deferred materials require single-sample targets.
+  this._msaaSamples = options.msaaSamples ?? 1;
+  // SCENEGIS_PATCH_END SGP-0046
 
   /**
    * Exceptions occurring in <code>render</code> are always caught in order to raise the
@@ -781,6 +791,10 @@ function Scene(options) {
 
   this._hdr = undefined;
   this._hdrDirty = undefined;
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Bind the Scene-owned renderer before selecting linear storage.
+  this._sceneGISDeferred = new SceneGISDeferredLighting(this);
+  this._frameState._sceneGISDeferredRendering = true;
+  // SCENEGIS_PATCH_END SGP-0046
   this.highDynamicRange = false;
   this.gamma = 2.2;
 
@@ -861,6 +875,11 @@ function setPrimaryWorld(scene, world, globe) {
     return;
   }
 
+  // SCENEGIS_PATCH_END SGP-0001
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Release defaults while the previous world is still live.
+  SceneGISDefaultEnvironment.release(scene);
+  // SCENEGIS_PATCH_END SGP-0046
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Complete the primary world ownership transition.
   updateGlobeListeners(scene, undefined);
 
   const previousWorld = scene._world;
@@ -876,6 +895,24 @@ function setPrimaryWorld(scene, world, globe) {
 // SCENEGIS_PATCH_END SGP-0001
 
 Object.defineProperties(Scene.prototype, {
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Expose the effective advanced environment without allocating GPU resources.
+  /**
+   * Gets the effective advanced environment. An explicitly registered controller
+   * takes precedence, including when disabled. Otherwise a Scene-owned default
+   * enables physical atmosphere, aerial perspective and height fog for the
+   * primary Globe or planar world. Clouds, cloud shadows, crepuscular rays,
+   * bloom and lens flare are disabled on this default.
+   *
+   * @memberof Scene.prototype
+   * @type {SceneGISEnvironmentEffects|undefined}
+   * @readonly
+   */
+  environmentEffects: {
+    get: function () {
+      return SceneGISDefaultEnvironment.get(this);
+    },
+  },
+  // SCENEGIS_PATCH_END SGP-0046
   /**
    * Gets the canvas element to which this scene is bound.
    * @memberof Scene.prototype
@@ -1718,12 +1755,14 @@ Object.defineProperties(Scene.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Document the shared deferred display conversion.
   /**
-   * The value used for gamma correction. This is only used when rendering with high dynamic range.
+   * The value used for gamma correction. Deferred rendering uses this for both HDR and LDR display.
    * @memberof Scene.prototype
    * @type {number}
    * @default 2.2
    */
+  // SCENEGIS_PATCH_END SGP-0046
   gamma: {
     get: function () {
       return this._context.uniformState.gamma;
@@ -1733,22 +1772,35 @@ Object.defineProperties(Scene.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Distinguish display HDR from deferred intermediate storage.
   /**
-   * Whether or not to use high dynamic range rendering.
+   * Whether or not to use high dynamic range rendering. In the deferred pipeline,
+   * disabling this skips exposure and tone mapping at display output while retaining
+   * linear floating-point lighting and transparency. LDR output clamps RGB and applies gamma.
    * @memberof Scene.prototype
    * @type {boolean}
    * @default false
    */
+  // SCENEGIS_PATCH_END SGP-0046
   highDynamicRange: {
     get: function () {
-      return this._hdr;
+      // SCENEGIS_PATCH_BEGIN SGP-0046: Keep display HDR independent of linear deferred storage.
+      return this._sceneGISDisplayHdr ?? this._hdr;
+      // SCENEGIS_PATCH_END SGP-0046
     },
     set: function (value) {
       const context = this._context;
-      const hdr =
+      // SCENEGIS_PATCH_BEGIN SGP-0046: Deferred materials and transparent composition share linear color.
+      const displayHdr =
         value &&
         context.depthTexture &&
         (context.colorBufferFloat || context.colorBufferHalfFloat);
+      if (displayHdr !== this._sceneGISDisplayHdr) {
+        this.requestRender();
+      }
+      this._sceneGISDisplayHdr = displayHdr;
+      const hdr = displayHdr || defined(this._sceneGISDeferred);
+      // SCENEGIS_PATCH_END SGP-0046
       this._hdrDirty = hdr !== this._hdr;
       this._hdr = hdr;
     },
@@ -1788,7 +1840,10 @@ Object.defineProperties(Scene.prototype, {
    * The sample rate of multisample antialiasing (values greater than 1 enable MSAA).
    * @memberof Scene.prototype
    * @type {number}
-   * @default 4
+   * SCENEGIS_PATCH_BEGIN SGP-0046: Expose the single-sample deferred default.
+   * @default 1
+   * SceneGIS deferred rendering rejects multisampling; use FXAA or temporal antialiasing.
+   * SCENEGIS_PATCH_END SGP-0046
    */
   msaaSamples: {
     get: function () {
@@ -2461,12 +2516,6 @@ function executeCommand(
     return;
   }
 
-  // SCENEGIS_PATCH_BEGIN SGP-0045: Reuse native command selection for private material capture.
-  if (scene._sceneGISGBuffer?.draw(command, passState)) {
-    return;
-  }
-  // SCENEGIS_PATCH_END SGP-0045
-
   // SCENEGIS_PATCH_BEGIN SGP-0046: Route qualified opaque and classification draws into owned surface targets.
   if (scene._sceneGISDeferred?.draw(command, passState)) {
     return;
@@ -2479,11 +2528,6 @@ function executeCommand(
   }
   // SCENEGIS_PATCH_END SGP-0017
 
-  // SCENEGIS_PATCH_BEGIN SGP-0016: Reuse native log/HDR selection before capture or PBR radiance substitution.
-  if (SceneGISScreenSpaceReflections.draw(scene, command, passState)) {
-    return;
-  }
-  // SCENEGIS_PATCH_END SGP-0016
   // SCENEGIS_PATCH_BEGIN SGP-0019: Retain native shadow selection before local material lighting.
   if (
     frameState.shadowState.lightShadowsEnabled &&
@@ -2504,15 +2548,10 @@ function executeCommand(
   // SCENEGIS_PATCH_BEGIN SGP-0028: Share weather material inputs with color and indirect-light receivers.
   command = SceneGISSurfaceWeather.receiver(scene, command);
   // SCENEGIS_PATCH_END SGP-0028
-  // SCENEGIS_PATCH_BEGIN SGP-0026: Capture diffuse transport during the original opaque draw.
-  command = SceneGISScreenSpaceIndirectLighting.receiver(scene, command);
-  // SCENEGIS_PATCH_END SGP-0026
   // SCENEGIS_PATCH_BEGIN SGP-0046: Water publishes final depth during its original color draw.
   command = SceneGISWaterFrame.waterCommand(scene, command, passState);
+  command.execute(context, passState);
   // SCENEGIS_PATCH_END SGP-0046
-  // SCENEGIS_PATCH_BEGIN SGP-0014: Compose AO at indirect material terms.
-  SceneGISAmbientOcclusion.receiver(scene, command).execute(context, passState);
-  // SCENEGIS_PATCH_END SGP-0014
 }
 
 /**
@@ -2744,9 +2783,7 @@ function performTranslucentPass(scene, passState, frustumCommands) {
     // Fullscreen pass to copy unclassified fragments when alpha < 1.0.
     // Not executed when undefined.
     // SCENEGIS_PATCH_BEGIN SGP-0046: Compose deferred Tiles through the native transparency schedule.
-    invertClassification = scene._sceneGISDeferred?.enabled
-      ? scene._sceneGISDeferred.inverseClassification
-      : scene._invertClassification;
+    invertClassification = scene._sceneGISDeferred.inverseClassification;
     // SCENEGIS_PATCH_END SGP-0046
   }
 
@@ -2986,24 +3023,19 @@ function executeCommands(scene, passState) {
 
   // SCENEGIS_PATCH_BEGIN SGP-0014: AO uses main-pass MRT; SSR coordinates the shared layout when enabled.
   if (!picking && !scene._sceneGISScreenSpaceReflections?.enabled) {
-    SceneGISAmbientOcclusion.execute(scene, passState, frustum);
+    SceneGISAmbientOcclusion.execute(scene, passState);
   }
   // SCENEGIS_PATCH_END SGP-0014
 
   const globeTranslucencyState = scene._globeTranslucencyState;
-  // SCENEGIS_PATCH_BEGIN SGP-0016: Select shared MRT or the established AO-aware capture path.
+  // SCENEGIS_PATCH_BEGIN SGP-0016: Prepare reflection outputs for deferred screen lighting.
   if (!picking) {
-    SceneGISScreenSpaceReflections.execute(
-      scene,
-      passState,
-      frustum,
-      executeCommand,
-    );
+    SceneGISScreenSpaceReflections.execute(scene, passState);
   }
   // SCENEGIS_PATCH_END SGP-0016
-  // SCENEGIS_PATCH_BEGIN SGP-0017: Borrow SSR capture or capture opaque transmission inputs.
+  // SCENEGIS_PATCH_BEGIN SGP-0017: Borrow deferred opaque transmission inputs for water.
   if (!picking) {
-    SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+    SceneGISWaterFrame.capture(scene);
   }
   // SCENEGIS_PATCH_END SGP-0017
   const clearDepth = scene._depthClearCommand;
@@ -3302,16 +3334,22 @@ function executeCommands(scene, passState) {
         clearStencil.execute(context, passState);
       }
 
-      performVoxelsPass(scene, passState, frustumCommands);
-
       performPass(frustumCommands, Pass.OPAQUE);
+      if (picking && frustumCommands.indices[Pass.VOXELS] > 0) {
+        // Clip native voxel picking against this pick's completed surface depth.
+        // Volumes do not write depth, so opaque IDs must be submitted first.
+        if (useGlobeDepthFramebuffer) {
+          globeDepth.executeCopyDepth(context, passState);
+        }
+        performVoxelsPass(scene, passState, frustumCommands);
+      }
       // Shade once after the nearest material segment has completed.
       if (deferredFrusta && index !== 0) {
         continue;
       }
       // Produce native lighting responses before their existing screen resolves.
       if (!picking && scene._sceneGISDeferred?.light(passState)) {
-        SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+        SceneGISWaterFrame.capture(scene);
       }
       // SCENEGIS_PATCH_END SGP-0046
       // SCENEGIS_PATCH_BEGIN SGP-0026: Resolve standalone diffuse transport before water and transparency.
@@ -3319,38 +3357,24 @@ function executeCommands(scene, passState) {
         !picking &&
         SceneGISScreenSpaceIndirectLighting.resolve(scene, passState, frustum)
       ) {
-        SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+        SceneGISWaterFrame.capture(scene);
       }
       // SCENEGIS_PATCH_END SGP-0026
-      // SCENEGIS_PATCH_BEGIN SGP-0046: Continue the unified material and light stage.
-      // SCENEGIS_PATCH_END SGP-0046
       // SCENEGIS_PATCH_BEGIN SGP-0014: Resolve AO-only MRT before water and translucency.
       const aoResolved =
         !picking && SceneGISAmbientOcclusion.resolve(scene, passState, frustum);
       // SCENEGIS_PATCH_END SGP-0014
-      // SCENEGIS_PATCH_BEGIN SGP-0046: Continue the unified material and light stage.
-      // SCENEGIS_PATCH_END SGP-0046
       // SCENEGIS_PATCH_BEGIN SGP-0016: Resolve main-pass material MRT before water and translucency.
       if (
         !picking &&
         (aoResolved ||
           SceneGISScreenSpaceReflections.resolve(scene, passState, frustum))
       ) {
-        SceneGISWaterFrame.capture(scene, passState, frustum, executeCommand);
+        SceneGISWaterFrame.capture(scene);
       }
       // SCENEGIS_PATCH_END SGP-0016
       // SCENEGIS_PATCH_BEGIN SGP-0046: Continue the unified material and light stage.
-      // SCENEGIS_PATCH_END SGP-0046
-      // SCENEGIS_PATCH_BEGIN SGP-0045: Capture the current opaque surface before water and transparency.
-      if (!picking) {
-        scene._sceneGISGBuffer?.capture(
-          passState,
-          frustumCommands,
-          executeCommand,
-        );
-      }
-      // SCENEGIS_PATCH_END SGP-0045
-      // SCENEGIS_PATCH_BEGIN SGP-0046: Continue the unified material and light stage.
+      scene._sceneGISDeferred?.prepareAnnotations(passState);
       // Start temporal depth from the unified opaque surface.
       if (!picking) {
         SceneGISTemporalAntialiasing.captureDeferredDepth(scene);
@@ -3384,6 +3408,14 @@ function executeCommands(scene, passState) {
         );
       }
     }
+    if (!picking) {
+      scene._sceneGISDeferred?.drawAnnotations(
+        frustumCommands,
+        index,
+        passState,
+        executeCommand,
+      );
+    }
     // SCENEGIS_PATCH_END SGP-0046
     // SCENEGIS_PATCH_BEGIN SGP-0017: Compose water and write its depth before translucency.
     if (!picking) {
@@ -3401,6 +3433,12 @@ function executeCommands(scene, passState) {
       SceneGISTemporalAntialiasing.captureDepth(scene);
     }
     // SCENEGIS_PATCH_END SGP-0022
+
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Compose volumes against the completed opaque and water surface depth.
+    if (!picking) {
+      performVoxelsPass(scene, passState, frustumCommands);
+    }
+    // SCENEGIS_PATCH_END SGP-0046
 
     // Draw direct edges (EDGES_ONLY mode) after opaque surfaces
     performCesium3DTileEdgesDirectPass(scene, passState, frustumCommands);
@@ -4010,6 +4048,10 @@ function executeCommandsInViewport(firstViewport, scene, passState) {
   }
   // SCENEGIS_PATCH_END SGP-0024
 
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Separate native annotation coverage before culling and transparency derivation.
+  scene._sceneGISDeferred.prepareAnnotationCommands();
+  // SCENEGIS_PATCH_END SGP-0046
+
   view.createPotentiallyVisibleSet(scene);
 
   if (firstViewport) {
@@ -4036,7 +4078,10 @@ Scene.prototype.updateEnvironment = function () {
   const renderPass = frameState.passes.render;
   const offscreenPass = frameState.passes.offscreen;
   const atmosphere = this.atmosphere;
-  const skyAtmosphere = this.skyAtmosphere;
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Advanced rendering owns visual sky and atmosphere in the deferred profile.
+  const nativeEnvironment = !defined(this._sceneGISDeferred);
+  const skyAtmosphere = nativeEnvironment ? this.skyAtmosphere : undefined;
+  // SCENEGIS_PATCH_END SGP-0046
   const globe = this.globe;
   const globeTranslucencyState = this._globeTranslucencyState;
 
@@ -4078,12 +4123,16 @@ Scene.prototype.updateEnvironment = function () {
       environmentState.skyAtmosphereCommand = undefined;
     }
 
-    environmentState.skyBoxCommand = defined(this.skyBox)
-      ? this.skyBox.update(frameState, this._hdr)
-      : undefined;
-    const sunCommands = defined(this.sun)
-      ? this.sun.update(frameState, view.passState, this._hdr)
-      : undefined;
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Skip native sky and Sun resource preparation without mutating caller objects.
+    environmentState.skyBoxCommand =
+      nativeEnvironment && defined(this.skyBox)
+        ? this.skyBox.update(frameState, this._hdr)
+        : undefined;
+    const sunCommands =
+      nativeEnvironment && defined(this.sun)
+        ? this.sun.update(frameState, view.passState, this._hdr)
+        : undefined;
+    // SCENEGIS_PATCH_END SGP-0046
     environmentState.sunDrawCommand = defined(sunCommands)
       ? sunCommands.drawCommand
       : undefined;
@@ -4283,7 +4332,13 @@ function updateAndClearFramebuffers(scene, passState, clearColor) {
   environmentState.originalFramebuffer = passState.framebuffer;
 
   // Manage sun bloom post-processing effect.
-  if (defined(scene.sun) && scene.sunBloom !== scene._sunBloom) {
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Native Sun bloom is not an alternate deferred environment.
+  if (
+    !defined(scene._sceneGISDeferred) &&
+    defined(scene.sun) &&
+    scene.sunBloom !== scene._sunBloom
+  ) {
+    // SCENEGIS_PATCH_END SGP-0046
     if (scene.sunBloom && !useWebVR) {
       scene._sunPostProcess = new SunPostProcess();
     } else if (defined(scene._sunPostProcess)) {
@@ -4351,7 +4406,14 @@ function updateAndClearFramebuffers(scene, passState, clearColor) {
     );
     view.sceneFramebuffer.clear(context, passState, clearColor);
 
-    postProcess.update(context, frameState.useLogDepth, scene._hdr);
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Select display conversion independently of linear framebuffer precision.
+    postProcess.update(
+      context,
+      frameState.useLogDepth,
+      scene._hdr,
+      scene.highDynamicRange,
+    );
+    // SCENEGIS_PATCH_END SGP-0046
     postProcess.clear(context);
 
     usePostProcess = environmentState.usePostProcess = postProcess.ready;
@@ -4391,7 +4453,7 @@ function updateAndClearFramebuffers(scene, passState, clearColor) {
   }
 
   // SCENEGIS_PATCH_BEGIN SGP-0046: Deferred classification owns its material overlay and needs no native color copy.
-  if (useInvertClassification && !scene._sceneGISDeferred?.enabled) {
+  if (useInvertClassification && !defined(scene._sceneGISDeferred)) {
     // SCENEGIS_PATCH_END SGP-0046
     let depthFramebuffer;
     if (frameState.invertClassificationColor.alpha === 1.0) {
@@ -4866,6 +4928,9 @@ function render(scene) {
 
   scene.updateFrameState();
   frameState.passes.render = true;
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Reject unsupported profiles before any main-frame GPU work.
+  scene._sceneGISDeferred.prepare();
+  // SCENEGIS_PATCH_END SGP-0046
   // SCENEGIS_PATCH_BEGIN SGP-0024: Publish local probe bindings before model pipelines update.
   SceneGISReflectionProbes.prepare(scene);
   // SCENEGIS_PATCH_END SGP-0024
@@ -4905,6 +4970,11 @@ function render(scene) {
 
   frameState.atmosphere = scene.atmosphere;
   scene.fog.update(frameState);
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Retain fog culling while advanced rendering owns visible participating media.
+  if (defined(scene._sceneGISDeferred)) {
+    frameState.fog.renderable = false;
+  }
+  // SCENEGIS_PATCH_END SGP-0046
 
   uniformState.update(frameState);
 
@@ -5007,7 +5077,13 @@ Scene.prototype.render = function (time) {
     time = JulianDate.now();
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Yield default ownership before explicit controllers acquire it.
+  SceneGISDefaultEnvironment.prepare(this, time);
+  // SCENEGIS_PATCH_END SGP-0046
   this._controllerHost.update(this, time);
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Activate the default after caller-owned planar light authority updates.
+  SceneGISDefaultEnvironment.update(this, time);
+  // SCENEGIS_PATCH_END SGP-0046
 
   const cameraChanged = this._view.checkForCameraUpdates(this);
   if (cameraChanged) {
@@ -5965,7 +6041,7 @@ Scene.prototype.destroy = function () {
     this._canvas.parentNode.removeChild(this._creditContainer);
   }
 
-  // SCENEGIS_PATCH_BEGIN SGP-0045: Release private material targets before the native Context.
+  // SCENEGIS_PATCH_BEGIN SGP-0045: Release the borrowed-material inspector before postprocessing.
   this._sceneGISGBuffer?.destroy();
   // SCENEGIS_PATCH_END SGP-0045
   // SCENEGIS_PATCH_BEGIN SGP-0046: Release owned material targets before postprocessing and Context.

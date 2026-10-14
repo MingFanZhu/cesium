@@ -109,13 +109,7 @@
       "
     >
       <strong>WebGL 延迟光照原型</strong><br />
-      <label
-        ><input
-          id="deferred-enabled"
-          type="checkbox"
-          checked
-        />使用延迟光照</label
-      >
+      <p>不透明与 MASK 材质统一使用延迟光照。</p>
       <p id="deferred-stats">等待原街区加载…</p>
       <details>
         <summary>模型颜色与要素样式</summary>
@@ -175,10 +169,7 @@
         测试灯固定在世界坐标。取消分块可对照同一灯表逐灯计算；两者画面应一致。
         可调到 22:00 观察彩色受光。局部灯暂不投影，重叠会累加能量。
       </p>
-      <small
-        >单采样材质缓冲，支持 TAA / FXAA；MSAA
-        配置会明确报错。取消勾选可在相同参数下查看原有光照。</small
-      >
+      <small>单采样材质缓冲，支持 TAA / FXAA；MSAA 配置会明确报错。</small>
     </section>
     <button id="toggle-panels" type="button">隐藏面板</button>
     <script>

@@ -30,6 +30,15 @@ variants; the deferred instance owns and releases its shared lighting program.
 
 ## Boundaries and verification
 
+P4d extends the same material protocol to the independent ray-cast
+`EllipsoidPrimitive`. SGP-0049 marks EllipsoidFS explicitly and captures
+`czm_private_phong` as well as `czm_phong`. Its sun-only mode uses a separate
+screen-lighting group with the original lighting function. Material depth reads
+the shader-written intersection depth, including non-logarithmic multi-frustum
+rendering; bounding-box fragment depth is not the visible surface. No extra
+attachment or geometry submission is introduced. Opaque material and native
+transparent composition continue to follow Material.isTranslucent().
+
 Globe imagery, depth clearing, terrain classification, multiple frustums, dynamic
 ellipsoid impostors and arbitrary post-lighting shaders remain separately scoped.
 Do not change native Globe settings to bypass qualification. Native HDR comparison,

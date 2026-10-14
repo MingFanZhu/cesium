@@ -1,4 +1,8 @@
 in vec2 v_textureCoordinates;
+#define SCENEGIS_DEFERRED_PLANAR_MATERIAL
+#ifdef SCENEGIS_DEFERRED_PLANAR_CAPTURE
+void sceneGISRecordPlanar(vec4 color, vec3 normalEC, vec3 geometryNormalEC, vec3 parameters);
+#endif
 #define SCENEGIS_LOCAL_LIGHT_RECEIVER
 #define SCENEGIS_SURFACE_WEATHER_TERRAIN
 #if defined(SCENEGIS_GEOMETRY_SHADOW) && (defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_LIGHTING))
@@ -7,20 +11,12 @@ in vec2 v_textureCoordinates;
 uniform vec4 u_color;
 #ifdef SCENEGIS_SURFACE_TRANSLUCENCY
 uniform float u_surfaceOpacity;
-uniform sampler2D u_surfaceBackground;
-#ifdef SHADOW_MAP
-vec3 sceneGISPlanarUnshadowedBackground;
-#endif
 #endif
 
 #ifdef SHADOW_MAP
 void sceneGISPlanarApplyShadow(float visibility)
 {
     out_FragColor.rgb *= visibility;
-    #ifdef SCENEGIS_SURFACE_TRANSLUCENCY
-    // The captured background is not a receiver of this surface's shadows.
-    out_FragColor.rgb += sceneGISPlanarUnshadowedBackground * (1.0 - visibility);
-    #endif
 }
 #endif
 
@@ -31,7 +27,7 @@ in vec3 v_normalWC;
     #endif
 #endif
 
-#if defined(SCENEGIS_SURFACE_WEATHER) || defined(SCENEGIS_LOCAL_LIGHTS) || defined(SHADOW_MAP) || defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
+#if defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE) || defined(SCENEGIS_SURFACE_WEATHER) || defined(SCENEGIS_LOCAL_LIGHTS) || defined(SHADOW_MAP) || defined(SCENEGIS_ADVANCED_LIGHTING) || defined(SCENEGIS_MATERIAL) || (defined(SCENEGIS_LIGHTING) && !defined(SCENEGIS_SMOOTH_NORMALS))
 in vec3 v_positionEC;
 #endif
 
@@ -46,7 +42,7 @@ uniform float u_lambertDiffuseMultiplier;
 SCENEGIS_PLANAR_SURFACE_DYNAMIC_LAYERS
 SCENEGIS_PLANAR_SURFACE_MATERIAL_SOURCE
 
-#if defined(SHADOW_MAP) || defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_MATERIAL)
+#if defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE) || defined(SHADOW_MAP) || defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_MATERIAL)
 vec3 sceneGISPlanarNormalEC()
 {
     #ifdef SCENEGIS_SMOOTH_NORMALS
@@ -106,11 +102,17 @@ czm_materialInput sceneGISPlanarMaterialInput(vec3 normalEC)
 
 void main()
 {
+#ifdef SCENEGIS_SURFACE_TRANSLUCENCY
+    // Invisible terrain must not occlude pick/depth or cast an opaque shadow.
+    if (u_surfaceOpacity == 0.0) {
+        discard;
+    }
+#endif
 #ifdef SCENEGIS_CLIPPING
     float clippingDistance = sceneGISClipTerrain();
 #endif
     vec4 color = sceneGISComposeLayers(u_color, v_textureCoordinates);
-#if defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_MATERIAL)
+#if defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE) || defined(SCENEGIS_LIGHTING) || defined(SCENEGIS_MATERIAL)
     vec3 normalEC = sceneGISPlanarNormalEC();
 #endif
 #ifdef SCENEGIS_MATERIAL
@@ -119,6 +121,28 @@ void main()
     );
     color.rgb = mix(color.rgb, material.diffuse, material.alpha);
 #endif
+    #ifdef SCENEGIS_DEFERRED_PLANAR_CAPTURE
+    vec3 parameters = vec3(0.0);
+        #ifdef SCENEGIS_ADVANCED_LIGHTING
+        parameters.x = 2.0;
+        #elif defined(SCENEGIS_LIGHTING)
+        parameters = vec3(1.0, u_lambertDiffuseMultiplier, 0.3);
+        #endif
+        #ifdef SCENEGIS_CLIPPING
+        if (clippingDistance < u_clippingEdgeStyle.w) {
+            color.rgb = u_clippingEdgeStyle.rgb;
+            parameters.x = 4.0;
+            #ifndef SCENEGIS_LIGHTING
+            parameters.x = 5.0;
+            #endif
+        }
+        #endif
+    color.a = 1.0;
+    sceneGISRecordPlanar(color, normalEC,
+        normalize(cross(dFdx(v_positionEC), dFdy(v_positionEC))), parameters);
+    out_FragColor = vec4(color.rgb, 1.0);
+    return;
+    #endif
     #ifdef SCENEGIS_SURFACE_WEATHER
     vec3 weatherNormalEC = sceneGISWeatherTerrainNormal(v_positionEC);
     vec2 weatherCoverage = sceneGISWeatherCoverage(v_positionEC, weatherNormalEC);
@@ -136,9 +160,6 @@ void main()
     );
     #ifdef SCENEGIS_GEOMETRY_SHADOW
     intensity = mix(min(0.3, intensity), intensity, sceneGISGeometryShadow());
-    #endif
-    #ifdef SCENEGIS_AMBIENT_OCCLUSION
-    intensity -= 0.3 * (1.0 - sceneGISAmbientOcclusion());
     #endif
     #ifdef SCENEGIS_AO_MAIN
     sceneGISRecordIndirect(color.rgb * czm_lightColor * 0.3);
@@ -166,15 +187,6 @@ void main()
     }
 #endif
     #ifdef SCENEGIS_SURFACE_TRANSLUCENCY
-        vec2 uv = gl_FragCoord.xy / vec2(textureSize(u_surfaceBackground, 0));
-        vec4 background = texture(u_surfaceBackground, uv);
-        // Depth remains opaque: reveal the scene background, not hidden slopes.
-        out_FragColor = mix(background, out_FragColor, u_surfaceOpacity);
-        #ifdef SCENEGIS_AO_MAIN
-        sceneGISScaleIndirect(vec3(u_surfaceOpacity));
-        #endif
-        #ifdef SHADOW_MAP
-        sceneGISPlanarUnshadowedBackground = background.rgb * (1.0 - u_surfaceOpacity);
-        #endif
+        out_FragColor.a = u_surfaceOpacity;
     #endif
 }

@@ -79,7 +79,6 @@ const viewer = new C.Viewer("map", {
   selectionIndicator: false,
   infoBox: false,
   scene3DOnly: true,
-  msaaSamples: 1,
   skyBox: false,
   skyAtmosphere: false,
 });
@@ -125,8 +124,7 @@ const effects = new C.SceneGISEnvironmentEffects({
 });
 viewer.addController(effects);
 scene.postProcessStages.tonemapper = C.Tonemapper.PBR_NEUTRAL;
-const deferred = new C._SceneGISDeferredLighting(scene);
-deferred.enabled = true;
+const deferred = scene._sceneGISDeferred;
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
 const ssr = new C.SceneGISScreenSpaceReflections({ scene });
 const ssil = new C.SceneGISScreenSpaceIndirectLighting({ scene });

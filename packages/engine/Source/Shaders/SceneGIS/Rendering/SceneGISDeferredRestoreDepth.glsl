@@ -6,6 +6,9 @@ void main()
 {
     ivec2 pixel = ivec2(gl_FragCoord.xy);
     vec2 surface = texelFetch(u_linearDepth, pixel, 0).rg;
+    // Negative tags identify depth-writing annotations over the material below.
+    bool annotation = surface.y < 0.0;
+    surface.y = abs(surface.y);
     if (surface.x <= 0.0 || surface.y > u_frustumTag) {
         discard;
     }
@@ -13,7 +16,7 @@ void main()
         // A nearer opaque segment occludes transparency in every farther segment.
         gl_FragDepth = 0.0;
     } else {
-        if (u_clearGlobeDepth && texelFetch(u_material, pixel, 0).a == -3.0) {
+        if (!annotation && u_clearGlobeDepth && texelFetch(u_material, pixel, 0).a == -3.0) {
             discard;
         }
         #ifdef LOG_DEPTH_READ_ONLY

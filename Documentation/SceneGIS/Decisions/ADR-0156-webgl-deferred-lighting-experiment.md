@@ -83,3 +83,8 @@ Direction amendment: [ADR-0161](ADR-0161-unified-opaque-deferred-direction.md) t
 one opaque deferred pipeline and removes full forward-renderer compatibility as
 a future acceptance goal. Existing bounded qualifications remain unchanged until
 their replacements are implemented and verified.
+
+P4d display amendment: ADR-0161 separates display HDR from the shared linear
+deferred pipeline. The original HDR-display prerequisite is superseded; turning
+it off selects gamma-only LDR output in the native display slot. Floating-point
+material and scene-color storage remain required.

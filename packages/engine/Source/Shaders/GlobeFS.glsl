@@ -583,13 +583,6 @@ void main()
     sceneGISRecordIndirect(color.rgb * czm_lightColor * (0.3 * fade));
     #endif
 #endif
-#if defined(SCENEGIS_AMBIENT_OCCLUSION) && !defined(SCENEGIS_GLOBE_SURFACE_LIGHTING)
-    #if defined(ENABLE_VERTEX_LIGHTING)
-    finalColor.rgb -= color.rgb * czm_lightColor * min(u_vertexShadowDarkness, diffuseIntensity) * (1.0 - sceneGISAmbientOcclusion());
-    #elif defined(ENABLE_DAYNIGHT_SHADING)
-    finalColor.rgb -= color.rgb * czm_lightColor * (0.3 * fade) * (1.0 - sceneGISAmbientOcclusion());
-    #endif
-#endif
 // SCENEGIS_PATCH_END SGP-0014
 
 // SCENEGIS_PATCH_BEGIN SGP-0019: Accumulate local diffuse light before clipping and atmosphere.

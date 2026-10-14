@@ -1,11 +1,12 @@
 import {
-  _SceneGISDeferredLighting as DeferredLighting,
   BoxGeometry,
   Cartesian2,
   Cartesian3,
   Cesium3DTileset,
   ClassificationPrimitive,
   ClassificationType,
+  ClippingPlane,
+  ClippingPlaneCollection,
   Color,
   ColorGeometryInstanceAttribute,
   ContextLimits,
@@ -74,7 +75,7 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
       destination: Cartesian3.fromDegrees(1, 1, 10000),
       orientation: { heading: 0, pitch: -Math.PI / 2, roll: 0 },
     });
-    renderer = new DeferredLighting(scene);
+    renderer = scene._sceneGISDeferred;
     await ready(
       () =>
         scene.globe.tilesLoaded &&
@@ -147,13 +148,19 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
   }
 
   it("preserves native premultiplied classification order and picking without changing albedo", async function () {
+    const groundColor = color();
     await ground(new Color(0, 1, 0, 0.5), "green");
     await ground(new Color(1, 0, 0, 0.25), "red");
     render();
-    const before = color();
-    renderer.enabled = true;
-    render();
-    expect(color()).toEqualEpsilon(before, 0.002);
+    expect(color()).toEqualEpsilon(
+      [
+        ...groundColor
+          .slice(0, 3)
+          .map((v, i) => v * 0.375 + [0.25, 0.375, 0][i]),
+        1,
+      ],
+      0.005,
+    );
     expect(read(renderer._raw.getColorTexture(0))).toEqualEpsilon(
       [0.2, 0.3, 0.4, 1],
       0.001,
@@ -188,7 +195,6 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
         classificationType: ClassificationType.TERRAIN,
       },
     });
-    renderer.enabled = true;
     await ready(() => renderer.classificationDrawCount > 0);
     expect(read(renderer._classification.getColorTexture())[3]).toBeGreaterThan(
       0.4,
@@ -286,10 +292,7 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
     const { tileset, volume } = await tiles();
     tileset.root.content.getFeature(0).color = Color.YELLOW;
     render();
-    const native = color(true);
-    renderer.enabled = true;
-    render();
-    expect(color(true)).toEqualEpsilon(native, 0.008);
+
     expect(renderer._framebuffer.numberOfColorAttachments).toBe(6);
     const indices = read(renderer._raw.getColorTexture(2), true);
     const overlays = read(renderer._classification.getColorTexture(), true);
@@ -298,6 +301,17 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
         (value, i) => i % 4 === 3 && value > 0.4 && indices[i] > 0,
       ) - 3;
     expect(index).toBeGreaterThanOrEqual(0);
+    const classifiedColor = color(true).slice(index, index + 3);
+    volume.show = false;
+    render();
+    const baseColor = color(true).slice(index, index + 3);
+    expect(classifiedColor).toEqualEpsilon(
+      baseColor.map(
+        (value, channel) =>
+          value * (1 - overlays[index + 3]) + overlays[index + channel],
+      ),
+      0.002,
+    );
     const ssr = new SceneGISScreenSpaceReflections({ scene, enabled: true });
     const ssil = new SceneGISScreenSpaceIndirectLighting({
       scene,
@@ -352,10 +366,7 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
     scene.invertClassification = true;
     scene.invertClassificationColor = new Color(0.5, 0.25, 0.75, 1);
     render();
-    const native = color(true);
-    renderer.enabled = true;
-    render();
-    expect(color(true)).toEqualEpsilon(native, 0.01);
+
     expect(renderer._framebuffer.numberOfColorAttachments).toBe(6);
     const identities = read(renderer._raw.getColorTexture(2), true);
     const overlay = read(renderer._classification.getColorTexture(), true);
@@ -406,12 +417,27 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
     );
     expect(scene.pick(pixel)).toBeDefined();
     expect(scene.pickPosition(pixel)).toBeDefined();
-    renderer.enabled = false;
+  });
+
+  it("lights unlit model clipping edges in translucent inverse material storage", async function () {
+    const { tileset, volume } = await tiles();
+    volume.show = false;
+    tileset.clippingPlanes = new ClippingPlaneCollection({
+      planes: [new ClippingPlane(Cartesian3.UNIT_X, 0)],
+      edgeWidth: 1000000,
+      edgeColor: Color.YELLOW,
+    });
+    scene.invertClassification = true;
+    scene.invertClassificationColor = new Color(0.5, 0.25, 0.75, 0.5);
     render();
-    const hiddenNative = color(true);
-    renderer.enabled = true;
-    render();
-    expect(color(true)).toEqualEpsilon(hiddenNative, 0.01);
+    const inverse = renderer._inverse;
+    const groups = read(inverse._raw.getColorTexture(2), true);
+    const edge =
+      groups.findIndex((value, i) => i % 4 === 3 && value === -1) - 3;
+    expect(edge).toBeGreaterThanOrEqual(0);
+    expect(
+      read(inverse._color.getColorTexture(), true).slice(edge, edge + 4),
+    ).toEqualEpsilon([1, 1, 0, 1], 0.001);
   });
 
   it("preserves translucent inverse backgrounds and classified surfaces with one Tiles material submission", async function () {
@@ -423,10 +449,7 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
     scene.invertClassification = true;
     scene.invertClassificationColor = new Color(0.5, 0.25, 0.75, 0.5);
     render();
-    const native = color(true);
-    renderer.enabled = true;
-    render();
-    expect(color(true)).toEqualEpsilon(native, 0.01);
+
     const inverse = renderer._inverse;
     expect(scene._environmentState.useOIT).toBe(true);
     expect(inverse.unclassifiedCommand.derivedCommands.oit).toBeDefined();
@@ -459,15 +482,7 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
     expect(scene.pick(pixel)).toBeDefined();
     const deferredPosition = scene.pickPosition(pixel);
     expect(deferredPosition).toBeDefined();
-    renderer.enabled = false;
-    render();
-    const hidden = color(true);
-    expect(
-      Cartesian3.distance(deferredPosition, scene.pickPosition(pixel)),
-    ).toBeLessThan(0.01);
-    renderer.enabled = true;
-    render();
-    expect(color(true)).toEqualEpsilon(hidden, 0.01);
+
     scene.invertClassificationColor.alpha = 1;
     const texture = renderer._inverse._raw.getColorTexture();
     const mainDepth = renderer._source.depthStencilTexture;
@@ -513,11 +528,7 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
     scene.invertClassification = true;
     scene.invertClassificationColor = new Color(0.5, 0.25, 0.75, 0.5);
     render();
-    const native = color(true);
-    renderer.enabled = true;
-    render();
     expect(scene._environmentState.useOIT).toBe(false);
-    expect(color(true)).toEqualEpsilon(native, 0.01);
     const inverse = renderer._inverse;
     const ids = read(inverse._raw.getColorTexture(2), true);
     const mask = read(inverse._mask.getColorTexture(), true);
@@ -562,12 +573,11 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
     scene.postProcessStages.ambientOcclusion.enabled = false;
     box(75, new Color(1, 0, 0, 0.25));
     render();
-    const deferred = color(true);
-    renderer.enabled = false;
-    render();
-    expect(color(true)).toEqualEpsilon(deferred, 0.01);
-    renderer.enabled = true;
-    render();
+    const coverage = 1 - Math.pow(1 - Color.floatToByte(0.25) / 255, 2);
+    expect(color().slice(0, 3)).toEqualEpsilon(
+      [coverage, 1 - coverage, 0],
+      0.002,
+    );
     const beforeResize = renderer._inverse._raw.getColorTexture();
     scene.canvas.width = 96;
     render();
@@ -652,12 +662,9 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
       await ready(
         () => far.tilesLoaded && far.root.content?.featuresLength > 0,
       );
-      const native = color(true);
-      renderer.enabled = true;
-      render();
+      const multiColor = color(true);
       expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
       expect(scene._environmentState.useOIT).toBe(oit);
-      expect(color(true)).toEqualEpsilon(native, 0.01);
       const inverse = renderer._inverse;
       const layers = inverse._rangeLayers.filter(Boolean);
       expect(layers.length).toBeGreaterThan(1);
@@ -683,6 +690,30 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
           );
         }) - 3;
       expect(overlap).toBeGreaterThanOrEqual(0);
+      if (!oit) {
+        // Sorted inverse layers composite far to near over the linear background.
+        const tint = [0.5, 0.25, 0.75];
+        let expected = [0.1, 0.2, 0.3].map((value) =>
+          Math.pow(value, scene.gamma),
+        );
+        const ordered = layerColors
+          .map((values, index) => ({
+            color: values.slice(overlap, overlap + 4),
+            depth: layerDepths[index][overlap],
+          }))
+          .filter((layer) => layer.color[3] > 0)
+          .sort((a, b) => b.depth - a.depth);
+        for (const layer of ordered) {
+          expected = expected.map(
+            (value, channel) =>
+              value * 0.5 + layer.color[channel] * tint[channel] * 0.5,
+          );
+        }
+        expect(multiColor.slice(overlap, overlap + 3)).toEqualEpsilon(
+          expected,
+          0.003,
+        );
+      }
       expect(renderer.drawCount).toBe(
         scene._view.frustumCommandsList.reduce(
           (sum, range) => sum + range.indices[Pass.CESIUM_3D_TILE],
@@ -713,8 +744,12 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
       );
       expect(scene.pick(pixel)).toBeDefined();
       const position = scene.pickPosition(pixel);
-      renderer.enabled = false;
+      scene.logarithmicDepthFarToNearRatio = scene.farToNearRatio = 1e9;
       render();
+      expect(scene._view.frustumCommandsList.length).toBe(1);
+      if (oit) {
+        expect(color(true)).toEqualEpsilon(multiColor, 0.01);
+      }
       const referencePosition = scene.pickPosition(pixel);
       expect(!!position).toBe(!!referencePosition);
       if (position && referencePosition) {
@@ -722,7 +757,7 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
           0.03,
         );
       }
-      renderer.enabled = true;
+      scene.logarithmicDepthFarToNearRatio = scene.farToNearRatio = 4;
       scene.primitives.add(
         new Primitive({
           asynchronous: false,
@@ -784,7 +819,6 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
   it("scales shared responses for inverse color and releases the optional target without native color copies", async function () {
     const { volume } = await tiles();
     scene.primitives.remove(volume);
-    renderer.enabled = true;
     const ssr = new SceneGISScreenSpaceReflections({ scene, enabled: true });
     const ssil = new SceneGISScreenSpaceIndirectLighting({
       scene,
@@ -875,12 +909,13 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
 
   it("requires six attachments only while classification and feature styling coexist", async function () {
     const { volume } = await tiles();
+    const existing = renderer._classification.getColorTexture();
     const previous = ContextLimits._maximumDrawBuffers;
     try {
       ContextLimits._maximumDrawBuffers = 5;
-      renderer.enabled = true;
       expect(render).toThrowError(/classification requires 6/);
-      expect(renderer._classification).toBeUndefined();
+      expect(renderer._classification.getColorTexture()).toBe(existing);
+      expect(existing.isDestroyed()).toBe(false);
       volume.show = false;
       render();
       expect(renderer.ready).toBe(true);

@@ -82,15 +82,15 @@ function validateGlobeConflict(controller, scene) {
     );
   }
   if (
-    !isHidden(scene.skyAtmosphere) ||
-    !isHidden(scene.skyBox) ||
-    !isHidden(scene.sun) ||
-    scene.sunBloom !== false ||
-    (controller._showBloom &&
-      scene.postProcessStages.bloom.enabled !== false) ||
-    scene.fog.enabled !== false ||
-    scene.globe.showGroundAtmosphere !== false ||
-    scene.globe.enableLighting !== false
+    (!defined(scene._sceneGISDeferred) &&
+      (!isHidden(scene.skyAtmosphere) ||
+        !isHidden(scene.skyBox) ||
+        !isHidden(scene.sun) ||
+        scene.sunBloom !== false ||
+        scene.fog.enabled !== false ||
+        scene.globe.showGroundAtmosphere !== false ||
+        scene.globe.enableLighting !== false)) ||
+    (controller._showBloom && scene.postProcessStages.bloom.enabled !== false)
   ) {
     throw new DeveloperError(
       "Advanced Globe environment requires native sky, Sun, Sun bloom, enabled post-process bloom, Fog, ground atmosphere, and Globe lighting to be disabled.",
@@ -100,23 +100,18 @@ function validateGlobeConflict(controller, scene) {
     throw new DeveloperError('mode "globe" must not use a planar world.');
   }
   if (
-    !controller._ownsGlobeCelestialLifecycle &&
     defined(scene.light) &&
-    !(scene.light instanceof SunLight)
+    !(scene.light instanceof SunLight) &&
+    !(scene.light instanceof DirectionalLight)
   ) {
     throw new DeveloperError(
-      "Advanced Globe Moonlight requires the initial scene.light to be undefined or a SunLight.",
+      "Advanced Globe lighting requires a SunLight or DirectionalLight.",
     );
   }
   if (controller._ownsGlobeCelestialLifecycle) {
     if (scene.moon !== controller._celestialMoon) {
       throw new DeveloperError(
         "scene.moon must remain the captured Moon while advanced Globe Moonlight is active.",
-      );
-    }
-    if (scene.light !== controller._directionalLight) {
-      throw new DeveloperError(
-        "scene.light must remain the controller-owned DirectionalLight while advanced Globe Moonlight is active.",
       );
     }
     if (
@@ -137,6 +132,19 @@ function validateGlobeConflict(controller, scene) {
       "scene.globe.depthTestAgainstTerrain must remain true while advanced Globe environment effects are active.",
     );
   }
+}
+
+function selectGlobeLight(controller, scene) {
+  if (
+    scene.light === controller._directionalLight ||
+    scene.light instanceof DirectionalLight
+  ) {
+    return;
+  }
+  controller._celestialPreviousLight = scene.light;
+  Color.clone(scene.light?.color ?? Color.WHITE, controller._celestialSunColor);
+  controller._celestialSunIntensity = scene.light?.intensity ?? 2.0;
+  scene.light = controller._directionalLight;
 }
 
 function acquireGlobeCelestialLifecycle(controller, scene) {
@@ -161,14 +169,17 @@ function acquireGlobeCelestialLifecycle(controller, scene) {
     defined(scene.moon) &&
     scene.moon.textureUrl !== controller._celestialMoonTextureUrl;
   controller._ownsGlobeCelestialLifecycle = true;
-  scene.light = controller._directionalLight;
+  selectGlobeLight(controller, scene);
   if (controller._changedMoonTextureUrl) {
     scene.moon.textureUrl = controller._celestialMoonTextureUrl;
   }
 }
 
 function updateGlobeCelestialLifecycle(controller) {
-  if (!controller._ownsGlobeCelestialLifecycle) {
+  if (
+    !controller._ownsGlobeCelestialLifecycle ||
+    controller._scene.light !== controller._directionalLight
+  ) {
     return;
   }
   const state = controller._pipeline.getPrimaryLightState();
@@ -273,21 +284,23 @@ function validatePlanarConflict(controller, scene) {
     );
   }
   if (
-    environment._showAtmosphere ||
-    defined(environment._skyBox) ||
-    environment._showSun ||
-    environment._showMoon
+    !defined(scene._sceneGISDeferred) &&
+    (environment._showAtmosphere ||
+      defined(environment._skyBox) ||
+      environment._showSun ||
+      environment._showMoon)
   ) {
     throw new DeveloperError(
       "Advanced planar environment conflicts with lightweight planar sky, atmosphere, Sun, or Moon output.",
     );
   }
   if (
-    !isHidden(scene.skyAtmosphere) ||
-    !isHidden(scene.skyBox) ||
-    !isHidden(scene.sun) ||
     !isHidden(scene.moon) ||
-    scene.fog.enabled !== false
+    (!defined(scene._sceneGISDeferred) &&
+      (!isHidden(scene.skyAtmosphere) ||
+        !isHidden(scene.skyBox) ||
+        !isHidden(scene.sun) ||
+        scene.fog.enabled !== false))
   ) {
     throw new DeveloperError(
       "Advanced planar environment requires native Scene sky, Sun, Moon, and Fog output to be disabled.",
@@ -302,7 +315,7 @@ function validateActive(controller, scene) {
       "The Scene does not support the required WebGL2 RGBA16F advanced-environment profile.",
     );
   }
-  if (scene.highDynamicRange !== true) {
+  if (scene.highDynamicRange !== true && !defined(scene._sceneGISDeferred)) {
     throw new DeveloperError(
       "scene.highDynamicRange must be true before enabling advanced environment effects.",
     );
@@ -331,6 +344,8 @@ function invalidateGeneration(controller) {
   controller._generation++;
   controller._pendingBuffers = undefined;
   controller._generationStarted = false;
+  controller._cloudGenerationStarted = false;
+  controller._pendingCloudBuffers = undefined;
 }
 
 function requestRender(controller) {
@@ -431,9 +446,17 @@ function isCurrentGeneration(controller, generation) {
   );
 }
 
-async function fetchEnvironmentAssets(controller, generation) {
+async function fetchEnvironmentAssets(
+  controller,
+  generation,
+  cloudsOnly = false,
+) {
   const assetRoot = assetRoots[controller._mode];
-  const assetFiles = [...worldAssetFiles, ...cloudAssetFiles];
+  const includeClouds = cloudsOnly || controller._showClouds;
+  const assetFiles = cloudsOnly
+    ? cloudAssetFiles
+    : [...worldAssetFiles, ...(includeClouds ? cloudAssetFiles : [])];
+  controller._cloudGenerationStarted ||= includeClouds;
   try {
     const buffers = await Promise.all(
       assetFiles.map((file) =>
@@ -447,9 +470,14 @@ async function fetchEnvironmentAssets(controller, generation) {
     if (!isCurrentGeneration(controller, generation)) {
       return;
     }
-    controller._pendingBuffers = Object.fromEntries(
+    const pending = Object.fromEntries(
       assetFiles.map((file, index) => [file.key, buffers[index]]),
     );
+    if (cloudsOnly) {
+      controller._pendingCloudBuffers = pending;
+    } else {
+      controller._pendingBuffers = pending;
+    }
     requestRender(controller);
   } catch (error) {
     if (
@@ -494,14 +522,26 @@ function beginGeneration(controller, scene) {
 }
 
 function publishPendingResources(controller, scene) {
-  if (!defined(controller._pendingBuffers)) {
-    return;
-  }
-  const buffers = controller._pendingBuffers;
-  controller._pendingBuffers = undefined;
   try {
-    controller._pipeline.publishResources(scene.context, buffers);
-    controller._ready = true;
+    if (defined(controller._pendingBuffers)) {
+      const buffers = controller._pendingBuffers;
+      controller._pendingBuffers = undefined;
+      controller._pipeline.publishResources(scene.context, buffers);
+      controller._ready = true;
+    }
+    if (defined(controller._pendingCloudBuffers)) {
+      const buffers = controller._pendingCloudBuffers;
+      controller._pendingCloudBuffers = undefined;
+      controller._pipeline.publishCloudResources(scene.context, buffers);
+    }
+    if (
+      controller._ready &&
+      controller._showClouds &&
+      !controller._pipeline.hasCloudResources() &&
+      !controller._cloudGenerationStarted
+    ) {
+      void fetchEnvironmentAssets(controller, controller._generation, true);
+    }
   } catch (error) {
     raiseGenerationError(controller, controller._generation, error);
   }
@@ -520,6 +560,7 @@ function activate(controller, scene, time) {
   ensurePipeline(controller, scene);
   if (controller._pipeline.hasResources()) {
     controller._ready = true;
+    publishPendingResources(controller, scene);
     controller._pipeline.prepareGlobeLighting(scene.frameState, time);
     updateGlobeCelestialLifecycle(controller);
     return;
@@ -539,10 +580,17 @@ function activate(controller, scene, time) {
 /**
  * Controls the SceneGIS advanced physical atmosphere and aerial-perspective
  * pipeline for either a native Globe or a SceneGIS planar world.
+ * A caller-installed scene.light DirectionalLight controls surface, model and
+ * cloud illumination without changing celestial sky directions. Installing a
+ * SunLight restores automatic Sun/Moon lighting. Caller lights are never owned
+ * or overwritten by this controller.
  *
- * The controller is caller-owned. Register it with a Scene controller host and
- * remove it before destroying the host. It is disabled by default and performs
- * no resource request or Scene mutation until its first enabled update.
+ * Explicitly constructed controllers are caller-owned. Register them with a
+ * Scene controller host and remove them before destroying the host. They are
+ * disabled by default and perform no resource request or Scene mutation until
+ * their first enabled update. Scene.environmentEffects can instead return a
+ * Scene-owned lightweight default; control its properties without registering
+ * or removing it. Explicitly registered controllers take precedence.
  *
  * @alias SceneGISEnvironmentEffects
  * @constructor
@@ -770,6 +818,8 @@ function SceneGISEnvironmentEffects(options) {
   this._changedMoonTextureUrl = false;
   this._generation = 0;
   this._generationStarted = false;
+  this._cloudGenerationStarted = false;
+  this._pendingCloudBuffers = undefined;
   this._pendingBuffers = undefined;
   this._errorGeneration = -1;
 }
@@ -1509,6 +1559,9 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
     return;
   }
   ensurePipeline(this, scene);
+  if (this._mode === globeMode) {
+    selectGlobeLight(this, scene);
+  }
   if (this._mode === globeMode && !this._ready) {
     this._pipeline.prepareGlobeLighting(scene.frameState, time);
     updateGlobeCelestialLifecycle(this);

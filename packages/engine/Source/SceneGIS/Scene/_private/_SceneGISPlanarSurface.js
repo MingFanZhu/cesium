@@ -15,13 +15,13 @@ import RenderState from "../../../Renderer/RenderState.js";
 import ShaderProgram from "../../../Renderer/ShaderProgram.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
 import ShadowMode from "../../../Scene/ShadowMode.js";
+import BlendingState from "../../../Scene/BlendingState.js";
 import Texture from "../../../Renderer/Texture.js";
 import VertexArray from "../../../Renderer/VertexArray.js";
 import SceneGISPlanarImagery from "./_SceneGISPlanarImagery.js";
 import SceneGISPlanarEnvironmentLighting from "./_SceneGISPlanarEnvironmentLighting.js";
 import SceneGISPlanarQuadtree from "./_SceneGISPlanarQuadtree.js";
 import SceneGISPlanarSurfaceShader from "./_SceneGISPlanarSurfaceShader.js";
-import SceneGISPlanarSurfaceBackground from "./_SceneGISPlanarSurfaceBackground.js";
 import SceneGISPlanarTerrain from "./_SceneGISPlanarTerrain.js";
 import SceneGISPlanarTerrainQuery from "./_SceneGISPlanarTerrainQuery.js";
 import SceneGISPlanarClipping from "./_SceneGISPlanarClipping.js";
@@ -73,9 +73,9 @@ function SceneGISPlanarSurface(tilingScheme, imageryLayers) {
   this._publishedMaterialSource = undefined;
   this._transparentTexture = undefined;
   this._renderState = undefined;
+  this._translucentRenderState = undefined;
   this._baseColor = undefined;
   this._opacity = 1.0;
-  this._background = undefined;
   this._lambertDiffuseMultiplier = 0.9;
   this._environmentLighting = undefined;
   this._frameNumber = -1;
@@ -228,6 +228,12 @@ function createResources(surface, context, layerCount) {
     cull: { enabled: false },
     depthTest: { enabled: true },
     depthMask: true,
+  });
+  surface._translucentRenderState = RenderState.fromCache({
+    cull: { enabled: false },
+    depthTest: { enabled: true },
+    depthMask: false,
+    blending: BlendingState.ALPHA_BLEND,
   });
   if (layerCount > 0) {
     surface._transparentTexture = new Texture({
@@ -404,9 +410,6 @@ function createUniformMap(
     u_surfaceOpacity: function () {
       return surface._opacity;
     },
-    u_surfaceBackground: function () {
-      return surface._background.getTexture();
-    },
     u_color: function () {
       return surface._baseColor;
     },
@@ -564,6 +567,11 @@ function getCommand(
     tile._materialCommandSource = materialSource;
   }
   tile.command.boundingVolume = tile.commandBoundingVolume;
+  const translucent = surface._opacity < 1.0;
+  tile.command.pass = translucent ? Pass.TRANSLUCENT : Pass.GLOBE;
+  tile.command.renderState = translucent
+    ? surface._translucentRenderState
+    : surface._renderState;
   tile.command.castShadows = ShadowMode.castShadows(surface._shadows);
   tile.command.receiveShadows = ShadowMode.receiveShadows(surface._shadows);
   tile.command.modelMatrix = tile.modelMatrix;
@@ -703,6 +711,11 @@ SceneGISPlanarSurface.prototype.render = function (
       return;
     }
     for (const command of this._renderCommands) {
+      // Terrain has no feature ID. A translucent color must not overwrite the
+      // ID of an object visible through it; explicit depth picking still replays it.
+      if (command.pass === Pass.TRANSLUCENT && !passes.depth) {
+        continue;
+      }
       frameState.commandList.push(command);
       if (passes.depth) {
         ++this._debug.depthSubmittedCommands;
@@ -754,12 +767,11 @@ SceneGISPlanarSurface.prototype.render = function (
       lightingSamplerCount +
       aoSamplerCount +
       shadowSamplerCount +
-      (clippingEnabled ? 1 : 0) +
-      (opacity < 1.0 ? 1 : 0) >
+      (clippingEnabled ? 1 : 0) >
     ContextLimits.maximumTextureImageUnits
   ) {
     throw new DeveloperError(
-      "The combined planar imagery, Material, environment, AO, shadows, clipping and surface background sampler count exceeds maximumTextureImageUnits.",
+      "The combined planar imagery, Material, environment, AO, shadows and clipping sampler count exceeds maximumTextureImageUnits.",
     );
   }
   if (defined(material)) {
@@ -891,17 +903,6 @@ SceneGISPlanarSurface.prototype.endFrame = function (tileCacheSize) {
   this._quadtree.trim(tileCacheSize);
 };
 
-SceneGISPlanarSurface.prototype.captureBackground = function (
-  frameState,
-  passState,
-) {
-  if (this._opacity === 1.0 || this._renderCommands.length === 0) {
-    return;
-  }
-  this._background ??= new SceneGISPlanarSurfaceBackground();
-  this._background.capture(frameState, passState);
-};
-
 SceneGISPlanarSurface.prototype.isDestroyed = function () {
   return this._destroyed;
 };
@@ -911,8 +912,6 @@ SceneGISPlanarSurface.prototype.destroy = function () {
     return;
   }
   this._imageryLayers._changeListener = undefined;
-  this._background?.destroy();
-  this._background = undefined;
   this._clipping?.destroy();
   this._clipping = undefined;
   this._terrain?.destroy();
@@ -945,6 +944,7 @@ SceneGISPlanarSurface.prototype.destroy = function () {
   this._publishedMaterialSource = undefined;
   this._transparentTexture = undefined;
   this._renderState = undefined;
+  this._translucentRenderState = undefined;
   this._renderCommands.length = 0;
   this._terrainQuerySnapshot.length = 0;
   this._terrainQuerySnapshotCount = 0;

@@ -1,4 +1,7 @@
 import resolveMrt from "../../Renderer/_SceneGISResolveMrt.js";
+import combine from "../../../Core/combine.js";
+import pointColor from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPointColor.js";
+import MaterialExtensions from "./_SceneGISDeferredMaterialExtensions.js";
 import defined from "../../../Core/defined.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
 import ContextLimits from "../../../Renderer/ContextLimits.js";
@@ -7,8 +10,6 @@ import Framebuffer from "../../../Renderer/Framebuffer.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
 import Pass from "../../../Renderer/Pass.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
-import Renderbuffer from "../../../Renderer/Renderbuffer.js";
-import RenderbufferFormat from "../../../Renderer/RenderbufferFormat.js";
 import RenderState from "../../../Renderer/RenderState.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
 import BlendFunction from "../../../Scene/BlendFunction.js";
@@ -16,24 +17,11 @@ import material from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRMain.js";
 import composite from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRComposite.js";
 import indirect from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOMain.js";
 import diffuse from "../../../Shaders/SceneGIS/IndirectLighting/SceneGISSILMain.js";
-import GBuffer from "./_SceneGISGBuffer.js";
+import DeferredLayout from "./_SceneGISDeferredLayout.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
-const classificationPasses = [
-  Pass.TERRAIN_CLASSIFICATION,
-  Pass.CESIUM_3D_TILE_CLASSIFICATION,
-  Pass.CESIUM_3D_TILE_CLASSIFICATION_IGNORE_SHOW,
-];
 // These native stages modify lit color without an MRT response contract yet.
-const postLightingBranches = [
-  "HAS_ATMOSPHERE",
-  "HAS_PRIMITIVE_OUTLINE",
-  "HAS_CLIPPING_PLANES",
-  "HAS_SILHOUETTE",
-  "HAS_EDGE_VISIBILITY",
-  "HAS_POINT_CLOUD_COLOR_STYLE",
-  "HAS_PLANAR_FILL_DEPTH",
-];
+const postLightingBranches = ["HAS_ATMOSPHERE"];
 const indirectPostLightingBranches = [
   "FOG",
   "GROUND_ATMOSPHERE",
@@ -47,14 +35,8 @@ function layout(scene, passState, eligible, reflections) {
   const ao = scene.postProcessStages.ambientOcclusion.enabled;
   const ssil = scene._sceneGISScreenSpaceIndirectLighting?.enabled === true;
   if (
-    (ao && !scene.highDynamicRange) ||
-    (ranges.length !== 1 && !scene._sceneGISDeferred?.enabled) ||
+    (ao && !scene._hdr) ||
     environment.useWebVR ||
-    (environment.useInvertClassification &&
-      !scene._sceneGISDeferred?.enabled) ||
-    (environment.clearGlobeDepth && !scene._sceneGISDeferred?.enabled) ||
-    (scene._globeTranslucencyState.translucent &&
-      !scene._sceneGISDeferred?.enabled) ||
     scene.debugShowCommands ||
     scene.debugShowFrustums
   ) {
@@ -68,12 +50,6 @@ function layout(scene, passState, eligible, reflections) {
   }
   let coat = false;
   for (const range of ranges) {
-    if (
-      classificationPasses.some((pass) => range.indices[pass] > 0) &&
-      !scene._sceneGISDeferred?.enabled
-    ) {
-      return undefined;
-    }
     for (const pass of opaquePasses) {
       for (let i = 0; i < range.indices[pass]; ++i) {
         const command = range.commands[pass][i];
@@ -81,14 +57,12 @@ function layout(scene, passState, eligible, reflections) {
           continue;
         }
         if (
-          scene._sceneGISDeferred?.enabled &&
-          GBuffer._isGlobeDepth(command)
+          DeferredLayout.isGlobeDepth(command) ||
+          DeferredLayout.isAnnotation(command)
         ) {
           continue;
         }
-        const deferredGlobe =
-          scene._sceneGISDeferred?.enabled &&
-          scene._sceneGISDeferred._isGlobeCommand(command);
+        const deferredGlobe = scene._sceneGISDeferred._isGlobeCommand(command);
         if (
           !eligible(command) ||
           (command.renderState.blending.enabled && !deferredGlobe)
@@ -113,9 +87,15 @@ function layout(scene, passState, eligible, reflections) {
   coat &&= reflections;
   const count =
     (reflections ? (coat ? 7 : 4) : 1) + (ao ? 1 : 0) + (ssil ? 2 : 0);
+  const capacity = Math.min(
+    ContextLimits.maximumDrawBuffers,
+    ContextLimits.maximumColorAttachments,
+  );
+  const reflectionCount = reflections ? (coat ? 7 : 4) : 1;
+  const split = count > capacity;
   if (
-    count > ContextLimits.maximumDrawBuffers ||
-    count > ContextLimits.maximumColorAttachments
+    split &&
+    (reflectionCount > capacity || 1 + Number(ao) + (ssil ? 2 : 0) > capacity)
   ) {
     return undefined;
   }
@@ -126,6 +106,8 @@ function layout(scene, passState, eligible, reflections) {
     ssil,
     reflections,
     count,
+    split,
+    reflectionCount,
     radiance:
       reflections || scene.frameState._sceneGISWater?.surfaces.length > 0,
   };
@@ -133,20 +115,32 @@ function layout(scene, passState, eligible, reflections) {
 
 function releaseTargets(mrt) {
   mrt.framebuffer?.destroy();
+  mrt.auxiliaryFramebuffer?.destroy();
   mrt.resolveFramebuffer?.destroy();
-  mrt.clearFramebuffer?.destroy();
-  mrt.renderbuffers?.forEach((buffer) => buffer.destroy());
   mrt.weights?.destroy();
   mrt.indirect?.destroy();
   mrt.ssil?.destroy();
   mrt.radiance?.destroy();
   mrt.mask?.shaderProgram.destroy();
   mrt.composite?.shaderProgram.destroy();
+  for (const command of mrt.pointCommands.values()) {
+    command.shaderProgram.destroy();
+  }
+  mrt.pointCommands.clear();
 }
 
 function allocate(scene, state, selected) {
   const context = scene.context;
-  const { manager, coat, ao, ssil, reflections, radiance } = selected;
+  const {
+    manager,
+    coat,
+    ao,
+    ssil,
+    reflections,
+    radiance,
+    split,
+    reflectionCount,
+  } = selected;
   const source = manager.framebuffer;
   const color = state.raw.getColorTexture();
   let mrt = state.main;
@@ -158,7 +152,8 @@ function allocate(scene, state, selected) {
     mrt.ao === ao &&
     !!mrt.ssil === ssil &&
     mrt.reflections === reflections &&
-    mrt.needsRadiance === radiance
+    mrt.needsRadiance === radiance &&
+    mrt.split === split
   ) {
     return mrt;
   }
@@ -170,14 +165,17 @@ function allocate(scene, state, selected) {
   mrt = state.main = {
     source,
     color,
+    split,
     coat,
     ao,
     reflections,
     needsRadiance: radiance,
     width,
     height,
-    numSamples: manager.numSamples,
+    pointCommands: new Map(),
     commands: new WeakMap(),
+    auxiliaryCommands: new WeakMap(),
+    auxiliaryPrograms: new WeakMap(),
     programs: new WeakMap(),
     weights: reflections
       ? new FramebufferManager({
@@ -222,44 +220,30 @@ function allocate(scene, state, selected) {
   if (ao) {
     textures.push(mrt.indirect.getColorTexture());
   }
-  mrt.aoLocation = textures.length - 1;
+  mrt.aoLocation = split ? 1 : textures.length - 1;
   if (ssil) {
-    mrt.ssilLocation = textures.length;
+    mrt.ssilLocation = split ? 1 + Number(ao) : textures.length;
     textures.push(mrt.ssil.getColorTexture(0), mrt.ssil.getColorTexture(1));
+  }
+  if (split) {
+    mrt.auxiliaryFramebuffer = new Framebuffer({
+      context,
+      colorTextures: [color, ...textures.slice(reflectionCount)],
+      destroyAttachments: false,
+    });
+    textures.length = reflectionCount;
   }
   mrt.resolveFramebuffer = new Framebuffer({
     context,
     colorTextures: textures,
-    depthStencilTexture: state.raw.getDepthStencilTexture(),
     destroyAttachments: false,
   });
-  const options = { context, destroyAttachments: false };
-  if (mrt.numSamples > 1) {
-    mrt.renderbuffers = textures.slice(1).map(
-      () =>
-        new Renderbuffer({
-          context,
-          width,
-          height,
-          numSamples: mrt.numSamples,
-          format: RenderbufferFormat.RGBA16F,
-        }),
-    );
-    options.colorRenderbuffers = [
-      manager.getColorRenderbuffer(),
-      ...mrt.renderbuffers,
-    ];
-    options.depthStencilRenderbuffer = source.depthStencilRenderbuffer;
-    mrt.clearFramebuffer = new Framebuffer({
-      context,
-      colorRenderbuffers: mrt.renderbuffers,
-      destroyAttachments: false,
-    });
-  } else {
-    options.colorTextures = [manager.getColorTexture(), ...textures.slice(1)];
-    options.depthStencilTexture = source.depthStencilTexture;
-  }
-  mrt.framebuffer = new Framebuffer(options);
+  mrt.framebuffer = new Framebuffer({
+    context,
+    colorTextures: [manager.getColorTexture(), ...textures.slice(1)],
+    depthStencilTexture: source.depthStencilTexture,
+    destroyAttachments: false,
+  });
   // Exclude the native background from the opaque radiance mip chain.
   if (radiance) {
     mrt.mask = context.createViewportQuadCommand(
@@ -342,6 +326,69 @@ function allocate(scene, state, selected) {
   return mrt;
 }
 
+function compositePointColors(scene, mrt, passState) {
+  const renderer = scene._sceneGISDeferred;
+  for (const group of renderer._groups) {
+    const source = group.command;
+    const flags = source.shaderProgram.fragmentShaderSource.defines;
+    if (
+      !flags.includes("HAS_POINT_CLOUD_COLOR_STYLE") ||
+      !flags.includes("LIGHTING_PBR") ||
+      !flags.includes("HAS_NORMALS")
+    ) {
+      continue;
+    }
+    let command = mrt.pointCommands.get(source);
+    if (!command) {
+      const defines =
+        mrt.composite.shaderProgram.fragmentShaderSource.defines.concat(
+          "HDR",
+          "SCENEGIS_POINT_COLOR_CORRECTION",
+          flags.filter((name) =>
+            [
+              "HAS_MODEL_COLOR",
+              "HAS_PRIMITIVE_OUTLINE",
+              "SCENEGIS_DEFERRED_FEATURE_STYLE",
+              "SCENEGIS_DEFERRED_OUTLINE_STYLE",
+            ].includes(name),
+          ),
+        );
+      command = scene.context.createViewportQuadCommand(
+        new ShaderSource({
+          defines,
+          sources: [
+            MaterialExtensions.lightingSource(renderer._extensionLayout),
+            pointColor,
+            composite,
+          ],
+        }),
+        {
+          renderState: mrt.composite.renderState,
+          uniformMap: combine(
+            source.uniformMap,
+            combine(mrt.composite.uniformMap, {
+              u_sceneGISPointLitColor: () => mrt.color,
+              u_sceneGISPointClassified: () => renderer._hasClassification,
+              u_sceneGISClassification: () =>
+                renderer._classification?.getColorTexture() ??
+                renderer._raw.getColorTexture(0),
+            }),
+          ),
+        },
+      );
+      mrt.pointCommands.set(source, command);
+    }
+    command.execute(scene.context, passState);
+    ++renderer.colorCorrectionDrawCount;
+  }
+  for (const [source, command] of mrt.pointCommands) {
+    if (!renderer._groups.some((group) => group.command === source)) {
+      command.shaderProgram.destroy();
+      mrt.pointCommands.delete(source);
+    }
+  }
+}
+
 /**
  * Shares AO/reflection outputs while borrowing native main-pass color/depth.
  * @private
@@ -382,10 +429,6 @@ const SceneGISLightingMrt = {
           state.clearColor.execute(scene.context, passState);
         }
       }
-      if (defined(mrt.clearFramebuffer)) {
-        passState.framebuffer = mrt.clearFramebuffer;
-        state.clearColor.execute(scene.context, passState);
-      }
       if (!scene._sceneGISDeferred?._active) {
         passState.framebuffer = state.depth.framebuffer;
         state.clearColor.execute(scene.context, passState);
@@ -397,35 +440,41 @@ const SceneGISLightingMrt = {
     return true;
   },
 
-  command(scene, state, command) {
+  command(scene, state, command, auxiliary = false) {
     const mrt = state.main;
+    const reflections = mrt.reflections && !auxiliary;
+    const coat = mrt.coat && !auxiliary;
+    const ao = mrt.ao && (!mrt.split || auxiliary);
+    const ssil = !!mrt.ssil && (!mrt.split || auxiliary);
+    const programs = auxiliary ? mrt.auxiliaryPrograms : mrt.programs;
+    const commands = auxiliary ? mrt.auxiliaryCommands : mrt.commands;
     const shader = command.shaderProgram;
-    let program = mrt.programs.get(shader);
+    let program = programs.get(shader);
     if (!defined(program)) {
-      const name = `sceneGIS_lighting_${mrt.reflections}_${mrt.coat}_${mrt.ao}_${!!mrt.ssil}`;
+      const name = `sceneGIS_lighting_${reflections}_${coat}_${ao}_${ssil}_${auxiliary}`;
       program = scene.context.shaderCache.getDerivedShaderProgram(shader, name);
       if (!defined(program)) {
         const fs = shader.fragmentShaderSource.clone();
-        if (mrt.reflections) {
-          fs.defines.push("SCENEGIS_SSR_CAPTURE", "SCENEGIS_SSR_MAIN");
+        if (reflections) {
+          fs.defines.push("SCENEGIS_SSR_MAIN");
         }
-        if (mrt.coat) {
+        if (coat) {
           fs.defines.push("SCENEGIS_SSR_COAT_TARGETS");
         }
         fs.sources = fs.sources.map((source) =>
           ShaderSource.replaceMain(source, "sceneGISSSRMain"),
         );
-        if (mrt.reflections) {
+        if (reflections) {
           fs.sources.unshift(material);
         }
-        if (mrt.ao) {
+        if (ao) {
           fs.defines.push(
             "SCENEGIS_AO_MAIN",
             `SCENEGIS_AO_LOCATION ${mrt.aoLocation}`,
           );
           fs.sources.unshift(indirect);
         }
-        if (mrt.ssil) {
+        if (ssil) {
           fs.defines.push(
             "SCENEGIS_SSIL_MAIN",
             `SCENEGIS_SSIL_SOURCE_LOCATION ${mrt.ssilLocation}`,
@@ -434,7 +483,7 @@ const SceneGISLightingMrt = {
           fs.sources.unshift(diffuse);
         }
         fs.sources.push(
-          `void main() { sceneGISSSRMain(); ${mrt.reflections ? "sceneGISSSRWriteMaterial();" : ""} ${mrt.ao ? "sceneGISWriteIndirect();" : ""} ${mrt.ssil ? "sceneGISSILWrite();" : ""} }`,
+          `void main() { sceneGISSSRMain(); ${reflections ? "sceneGISSSRWriteMaterial();" : ""} ${ao ? "sceneGISWriteIndirect();" : ""} ${ssil ? "sceneGISSILWrite();" : ""} }`,
         );
         program = scene.context.shaderCache.createDerivedShaderProgram(
           shader,
@@ -446,43 +495,30 @@ const SceneGISLightingMrt = {
           },
         );
       }
-      mrt.programs.set(shader, program);
+      programs.set(shader, program);
     }
-    const derived = DrawCommand.shallowClone(
-      command,
-      mrt.commands.get(command),
-    );
-    mrt.commands.set(command, derived);
+    const derived = DrawCommand.shallowClone(command, commands.get(command));
+    commands.set(command, derived);
     derived.shaderProgram = program;
-    derived.framebuffer = mrt.framebuffer;
+    derived.framebuffer = auxiliary
+      ? mrt.auxiliaryFramebuffer
+      : mrt.framebuffer;
     ++state.mainDraws;
     return derived;
   },
 
-  draw(scene, state, command, passState) {
-    SceneGISLightingMrt.command(scene, state, command).execute(
-      scene.context,
-      passState,
-    );
-  },
-
-  resolve(scene, state, passState, copyDepth = state.copyDepth) {
-    const context = scene.context;
+  resolve(scene, state) {
     const mrt = state.main;
-    const sharedDepth = scene._sceneGISDeferred?.ready === true;
+    // Deferred material collection already populated the shared linear depth.
     resolveMrt(
-      context,
+      scene.context,
       mrt.framebuffer,
       mrt.resolveFramebuffer,
       mrt.width,
       mrt.height,
-      mrt.numSamples > 1 ? mrt.framebuffer.numberOfColorAttachments : 1,
-      !sharedDepth,
+      1,
+      false,
     );
-    if (!sharedDepth) {
-      passState.framebuffer = state.depth.framebuffer;
-      copyDepth.execute(context, passState);
-    }
   },
 
   radiance(scene, state) {
@@ -492,6 +528,7 @@ const SceneGISLightingMrt = {
 
   composite(scene, state, passState) {
     state.main.composite.execute(scene.context, passState);
+    compositePointColors(scene, state.main, passState);
   },
 
   destroy(state) {

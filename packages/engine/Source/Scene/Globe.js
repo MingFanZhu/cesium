@@ -1028,7 +1028,11 @@ Globe.prototype.beginFrame = function (frameState) {
   const mode = frameState.mode;
 
   if (pass.render) {
-    if (this.showGroundAtmosphere) {
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Advanced rendering owns atmosphere and daylight in the deferred profile.
+    const nativeEnvironment = !frameState._sceneGISDeferredRendering;
+    const showGroundAtmosphere = nativeEnvironment && this.showGroundAtmosphere;
+    if (showGroundAtmosphere) {
+      // SCENEGIS_PATCH_END SGP-0046
       this._zoomedOutOceanSpecularIntensity = 0.4;
     } else {
       this._zoomedOutOceanSpecularIntensity = 0.5;
@@ -1050,11 +1054,15 @@ Globe.prototype.beginFrame = function (frameState) {
     tileProvider.hasWaterMask = hasWaterMask;
     tileProvider.showWaterEffect = this.showWaterEffect;
     tileProvider.oceanNormalMap = this._oceanNormalMap;
-    tileProvider.enableLighting = this.enableLighting;
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Keep legacy settings caller-owned while omitting their native visual variants.
+    tileProvider.enableLighting = nativeEnvironment && this.enableLighting;
+    // SCENEGIS_PATCH_END SGP-0046
     tileProvider.dynamicAtmosphereLighting = this.dynamicAtmosphereLighting;
     tileProvider.dynamicAtmosphereLightingFromSun =
       this.dynamicAtmosphereLightingFromSun;
-    tileProvider.showGroundAtmosphere = this.showGroundAtmosphere;
+    // SCENEGIS_PATCH_BEGIN SGP-0046: The advanced atmosphere is the sole deferred atmosphere authority.
+    tileProvider.showGroundAtmosphere = showGroundAtmosphere;
+    // SCENEGIS_PATCH_END SGP-0046
     tileProvider.atmosphereLightIntensity = this.atmosphereLightIntensity;
     tileProvider.atmosphereRayleighCoefficient =
       this.atmosphereRayleighCoefficient;

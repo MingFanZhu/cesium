@@ -22,7 +22,11 @@ uniform float u_aerialRadianceScale;
 uniform float u_backgroundRadianceScale;
 uniform bool u_showAerialPerspective;
 uniform bool u_showHeightFog;
+#ifdef SCENEGIS_NO_CLOUDS
+const bool u_showClouds = false;
+#else
 uniform bool u_showClouds;
+#endif
 uniform float u_cloudCoverage;
 uniform float u_heightFogDensity;
 uniform float u_heightFogHeightFalloff;
@@ -179,10 +183,15 @@ void main()
         ? normalize(u_cameraDirection + eyeOffset)
         : normalize(u_cameraDirection);
     #else
-    // Preserve native log-depth precision across large Planar extents.
-    vec4 eye = sceneGISWindowToEyeCoordinates(
-        gl_FragCoord.xy, rawDepth);
-    eye /= eye.w;
+    // A clear deferred depth is zero, not a surface at the camera origin.
+    // Build sky rays from the frustum; only reconstruct actual receivers.
+    vec2 plane = mix(u_frustum.xz, u_frustum.yw, v_textureCoordinates);
+    vec4 eye = vec4(plane, -1.0, 1.0);
+    if (!isClearDepth) {
+        // Preserve native log-depth precision across large Planar extents.
+        eye = sceneGISWindowToEyeCoordinates(gl_FragCoord.xy, rawDepth);
+        eye /= eye.w;
+    }
     vec3 eyeOffset = u_cameraRight * eye.x + u_cameraUp * eye.y;
     vec3 worldOriginOffset = u_perspective ? vec3(0.0) : eyeOffset;
     float distanceToPoint = isClearDepth
@@ -288,67 +297,71 @@ void main()
         sceneLinearRadiance += delta;
     }
     #endif
-    if (!isClearDepth && u_showAerialPerspective) {
-        vec3 transmittance;
-        #ifdef SCENEGIS_GLOBE
-        vec3 radiance = sceneGISGlobeSkyRadianceToPoint(
+    // Keep the receiver guard shared by both medium contributions. Repeating
+    // it in chained conditions can lose the combined result on ANGLE/D3D11.
+    if (!isClearDepth) {
+        if (u_showAerialPerspective) {
+            vec3 transmittance;
+            #ifdef SCENEGIS_GLOBE
+            vec3 radiance = sceneGISGlobeSkyRadianceToPoint(
+                    u_transmittanceTexture,
+                    u_scatteringTexture,
+                    rayOrigin,
+                    viewDirection,
+                    sunDirection,
+                    distanceToPoint,
+                    shadowLength,
+                    transmittance);
+            #else
+            bool intersectsAtmosphere;
+            vec3 radiance = sceneGISPlanarRadianceToPoint(
+                    u_transmittanceTexture,
+                    u_scatteringTexture,
+                    u_irradianceTexture,
+                    rayOrigin,
+                    viewDirection,
+                    sunDirection,
+                    distanceToPoint,
+                    false,
+                    intersectsAtmosphere,
+                    transmittance);
+            radiance = max(radiance - sceneGISPlanarCloudShadowRadiance(
+                u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
+                rayOrigin, viewDirection, sunDirection, distanceToPoint, shadowLength), vec3(0.0));
+            #endif
+            #ifdef SCENEGIS_GLOBE
+            sceneLinearRadiance =
+                inputColor.rgb * transmittance +
+                radiance * globeAtmosphereRadianceScale;
+            #else
+            sceneLinearRadiance =
+                inputColor.rgb * transmittance +
+                radiance * (u_backgroundRadianceScale * u_aerialRadianceScale);
+            #endif
+        }
+        if (u_showHeightFog) {
+            sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
                 u_transmittanceTexture,
-                u_scatteringTexture,
+                sceneLinearRadiance,
                 rayOrigin,
                 viewDirection,
                 sunDirection,
                 distanceToPoint,
                 shadowLength,
-                transmittance);
-        #else
-        bool intersectsAtmosphere;
-        vec3 radiance = sceneGISPlanarRadianceToPoint(
-                u_transmittanceTexture,
-                u_scatteringTexture,
-                u_irradianceTexture,
-                rayOrigin,
-                viewDirection,
-                sunDirection,
-                distanceToPoint,
-                false,
-                intersectsAtmosphere,
-                transmittance);
-        radiance = max(radiance - sceneGISPlanarCloudShadowRadiance(
-            u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
-            rayOrigin, viewDirection, sunDirection, distanceToPoint, shadowLength), vec3(0.0));
-        #endif
-        #ifdef SCENEGIS_GLOBE
-        sceneLinearRadiance =
-            inputColor.rgb * transmittance +
-            radiance * globeAtmosphereRadianceScale;
-        #else
-        sceneLinearRadiance =
-            inputColor.rgb * transmittance +
-            radiance * (u_backgroundRadianceScale * u_aerialRadianceScale);
-        #endif
-    }
-    if (!isClearDepth && u_showHeightFog) {
-        sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
-            u_transmittanceTexture,
-            sceneLinearRadiance,
-            rayOrigin,
-            viewDirection,
-            sunDirection,
-            distanceToPoint,
-            shadowLength,
-            u_heightFogDensity,
-            u_heightFogHeightFalloff,
-            u_heightFogBaseHeight,
-            u_heightFogStartDistance,
-            u_heightFogMaximumOpacity,
-            #ifdef SCENEGIS_GLOBE
-            u_backgroundRadianceScale,
-            #else
-            1.0,
-            #endif
-            u_heightFogInscatteringScale,
-            u_heightFogDirectionalInscatteringScale,
-            u_heightFogDirectionalInscatteringExponent);
+                u_heightFogDensity,
+                u_heightFogHeightFalloff,
+                u_heightFogBaseHeight,
+                u_heightFogStartDistance,
+                u_heightFogMaximumOpacity,
+                #ifdef SCENEGIS_GLOBE
+                u_backgroundRadianceScale,
+                #else
+                1.0,
+                #endif
+                u_heightFogInscatteringScale,
+                u_heightFogDirectionalInscatteringScale,
+                u_heightFogDirectionalInscatteringExponent);
+        }
     }
     float hazeCloudFrontDistance = 0.0;
     float hazeCloudOpacity = 0.0;

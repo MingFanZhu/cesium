@@ -50,6 +50,8 @@ describe("SceneGIS/Scene/SceneGISPlanarShadows", function () {
     });
     scene = createScene({ canvas: createCanvas(128, 128), scene3DOnly: true });
     scene._initializeWorld(world);
+    // Assert shadow transmission in linear color; display gamma has its own Specs.
+    scene.gamma = 1;
     scene.camera.setView({
       destination: new Cartesian3(offset + 5, offset, 40),
       orientation: {

@@ -413,7 +413,7 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceIndirectLighting", function () {
     expect(ssr._state.mainDraws).toBe(2);
     expect(ssr._state.main.framebuffer.numberOfColorAttachments).toBe(7);
   });
-  it("preserves MSAA, finite range and linear model styling", async function () {
+  it("preserves finite range and linear model styling and rejects MSAA", async function () {
     setup();
     scene.world.show = false;
     const { floor } = await models();
@@ -427,9 +427,12 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceIndirectLighting", function () {
     render();
     expect(output()[0]).toBeLessThan(original * 0.6);
     expect(output()[0]).toBeGreaterThan(original * 0.4);
+    const material = effect._state.main;
     scene.msaaSamples = 4;
+    expect(render).toThrowDeveloperError();
+    expect(effect._state.main).toBe(material);
+    scene.msaaSamples = 1;
     render();
-    expect(effect._state.main.numSamples).toBe(4);
     expect(output()[0]).toBeGreaterThan(0.001);
   });
   it("does not change pixels when disabled or intensity is zero and releases resources", async function () {
@@ -456,14 +459,30 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceIndirectLighting", function () {
     render();
     expect(pixel(point(0, 0, 0.01))).toEqual(off);
   });
-  it("rejects clearcoat SSR attachment overflow before replaying geometry", async function () {
+  it("splits clearcoat SSR and indirect screen outputs without replaying geometry", async function () {
     setup();
     scene.world.show = false;
     await models(true);
     const ssr = new SceneGISScreenSpaceReflections({ scene, enabled: true });
-    expect(() => render()).toThrowError(RuntimeError);
-    expect(ssr._state).toBeUndefined();
-    expect(effect.ready).toBe(false);
+    render();
+    expect(ssr._state.main.split).toBe(true);
+    expect(ssr._state.captureDraws).toBe(0);
+    expect(ssr._state.main.framebuffer.numberOfColorAttachments).toBe(7);
+    expect(ssr._state.main.auxiliaryFramebuffer.numberOfColorAttachments).toBe(
+      3,
+    );
+    expect(effect.ready).toBe(true);
+    expect(output().every(Number.isFinite)).toBe(true);
+    expect(output()[0]).toBeGreaterThan(0);
+    expect(scene._sceneGISDeferred.drawCount).toBe(2);
+    expect(scene._sceneGISDeferred.materialExtensionDrawCount).toBe(0);
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    render();
+    expect(ssr._state.main.auxiliaryFramebuffer.numberOfColorAttachments).toBe(
+      4,
+    );
+    expect(effect.ready).toBe(true);
+    expect(scene.context._gl.getError()).toBe(0);
   });
   it("publishes standalone opaque radiance to water without replay", async function () {
     setup();

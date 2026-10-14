@@ -561,11 +561,16 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
   }
 
   async function publishPlanarResources() {
+    // These existing medium fixtures exercise warm cloud resources. Cold loading
+    // is covered by SceneGISDefaultEnvironmentSpec.
+    const showClouds = effects.showClouds;
+    effects.showClouds = true;
     effects.firstUpdate(scene, scene.frameState.time);
     await pollToPromise(function () {
       effects.update(scene, scene.frameState.time);
       return effects.ready;
     });
+    effects.showClouds = showClouds;
   }
 
   function createLutBuffers() {
@@ -6976,7 +6981,7 @@ ${hardCascadeLibrary}`;
     }).toThrowDeveloperError();
   });
 
-  it("accepts caller-owned Globe Moon while other conflicts fail before attachment or fetch", function () {
+  it("accepts caller-owned Globe Moon and gated native environment flags", function () {
     connectGlobeWithDeferredAssets();
     const moon = {
       show: true,
@@ -7020,20 +7025,16 @@ ${hardCascadeLibrary}`;
 
     for (const conflict of conflictCases) {
       conflict.enable();
-      expect(firstUpdate).toThrowDeveloperError();
-      expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
-      expect(effects._pipeline).toBeUndefined();
-      expect(Resource.fetchArrayBuffer).not.toHaveBeenCalled();
+      expect(firstUpdate).not.toThrow();
+      expect(scene._sceneGISEnvironmentEffectsPipeline).toBe(effects._pipeline);
       conflict.disable();
     }
-
-    expect(firstUpdate).not.toThrow();
-    expect(Resource.fetchArrayBuffer).toHaveBeenCalledTimes(8);
+    expect(Resource.fetchArrayBuffer).toHaveBeenCalledTimes(3);
     expect(scene.moon).toBe(moon);
     expect(scene.moon.show).toBe(true);
   });
 
-  it("rejects native Globe lighting before any A5 resource mutation", function () {
+  it("rejects duplicate bloom while allowing custom primary and gated Globe lighting", function () {
     scene = createScene();
     scene.globe = new Globe(Ellipsoid.WGS84);
     hideNativeEnvironment(scene);
@@ -7046,14 +7047,6 @@ ${hardCascadeLibrary}`;
     effects.connectedCallback({});
     const fetch = spyOn(Resource, "fetchArrayBuffer").and.callThrough();
 
-    expect(function () {
-      effects.firstUpdate(scene, scene.frameState.time);
-    }).toThrowDeveloperError();
-    expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
-    expect(scene.frameState._sceneGISGlobeLighting).toBeUndefined();
-    expect(fetch).not.toHaveBeenCalled();
-
-    scene.globe.enableLighting = false;
     scene.postProcessStages.bloom.enabled = true;
     expect(function () {
       effects.firstUpdate(scene, scene.frameState.time);
@@ -7063,16 +7056,15 @@ ${hardCascadeLibrary}`;
     expect(fetch).not.toHaveBeenCalled();
     scene.postProcessStages.bloom.enabled = false;
 
-    const sunLight = scene.light;
-    scene.light = new DirectionalLight({
+    const customLight = new DirectionalLight({
       direction: Cartesian3.UNIT_X,
     });
-    expect(function () {
-      effects.firstUpdate(scene, scene.frameState.time);
-    }).toThrowDeveloperError();
-    expect(effects._pipeline).toBeUndefined();
-    expect(fetch).not.toHaveBeenCalled();
-    scene.light = sunLight;
+    scene.light = customLight;
+    expect(() =>
+      effects.firstUpdate(scene, scene.frameState.time),
+    ).not.toThrow();
+    expect(scene.light).toBe(customLight);
+    expect(scene.globe.enableLighting).toBe(true);
   });
 
   it("keeps Globe shadow toggles warm and releases the exact atlas lifecycle", async function () {
@@ -7845,8 +7837,10 @@ ${hardCascadeLibrary}`;
     });
     scene.light = replacementLight;
     effects.update(scene, nightTime);
-    expect(lifecycleErrors.length).toBe(2);
-    expect(lifecycleErrors[1].error.message).toContain("scene.light");
+    expect(lifecycleErrors.length).toBe(1);
+    expect(pipeline.getPrimaryLightState().direction).toEqual(
+      Cartesian3.negate(replacementLight.direction, new Cartesian3()),
+    );
     effects.enabled = false;
     expect(scene.light).toBe(replacementLight);
     expect(capturedMoon.textureUrl).toBe(callerMoonTextureUrl);
@@ -7858,8 +7852,8 @@ ${hardCascadeLibrary}`;
     replacementMoon.textureUrl = ownedMoonTextureUrl;
     scene.moon = replacementMoon;
     effects.update(scene, nightTime);
-    expect(lifecycleErrors.length).toBe(3);
-    expect(lifecycleErrors[2].error.message).toContain("scene.moon");
+    expect(lifecycleErrors.length).toBe(2);
+    expect(lifecycleErrors[1].error.message).toContain("scene.moon");
     effects.enabled = false;
     expect(scene.moon).toBe(replacementMoon);
     expect(replacementMoon.textureUrl).toBe(ownedMoonTextureUrl);
@@ -7870,7 +7864,7 @@ ${hardCascadeLibrary}`;
     effects.update(scene, nightTime);
     scene.shadowMap.enabled = false;
     effects.update(scene, nightTime);
-    expect(lifecycleErrors.length).toBe(3);
+    expect(lifecycleErrors.length).toBe(2);
     effects.enabled = false;
     expect(scene.shadowMap.enabled).toBe(false);
 
@@ -7879,7 +7873,7 @@ ${hardCascadeLibrary}`;
     effects.update(scene, nightTime);
     scene.globe.shadows = ShadowMode.RECEIVE_ONLY;
     effects.update(scene, nightTime);
-    expect(lifecycleErrors.length).toBe(3);
+    expect(lifecycleErrors.length).toBe(2);
     effects.enabled = false;
     expect(scene.globe.shadows).toBe(ShadowMode.RECEIVE_ONLY);
 
@@ -7893,7 +7887,7 @@ ${hardCascadeLibrary}`;
     effects.showMoonlight = false;
     effects.update(scene, nightTime);
     expect(scene.shadowMap.enabled).toBe(true);
-    expect(lifecycleErrors.length).toBe(3);
+    expect(lifecycleErrors.length).toBe(2);
     effects.enabled = false;
     expect(scene.shadowMap.enabled).toBe(true);
     expect(scene.globe.shadows).toBe(ShadowMode.ENABLED);
@@ -19339,7 +19333,7 @@ ${hardCascadeLibrary}`;
     }
   });
 
-  it("fails closed once on a late planar native conflict and retries explicitly", async function () {
+  it("fails closed once on a late planar authority conflict and retries explicitly", async function () {
     connectPlanar();
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
@@ -19349,7 +19343,7 @@ ${hardCascadeLibrary}`;
       errors.push({ controller, error });
     });
     await publishPlanarResources();
-    scene.fog.enabled = true;
+    environment.enabled = false;
 
     effects.update(scene, scene.frameState.time);
     effects.update(scene, scene.frameState.time);
@@ -19357,7 +19351,8 @@ ${hardCascadeLibrary}`;
     expect(errors[0].controller).toBe(effects);
     expect(scene._sceneGISEnvironmentEffectsPipeline).toBeUndefined();
 
-    scene.fog.enabled = false;
+    environment.enabled = true;
+    environment.update(scene, scene.frameState.time);
     effects.enabled = false;
     effects.enabled = true;
     effects.update(scene, scene.frameState.time);
@@ -19467,7 +19462,7 @@ ${hardCascadeLibrary}`;
       errors.push({ controller, error });
     });
     effects.firstUpdate(scene, scene.frameState.time);
-    scene.sun = { show: true };
+    scene.postProcessStages.bloom.enabled = true;
     effects.update(scene, scene.frameState.time);
     expect(errors.length).toBe(1);
     requestRender.calls.reset();
@@ -19481,7 +19476,7 @@ ${hardCascadeLibrary}`;
     expect(effects._pendingBuffers).toBeUndefined();
     expect(requestRender).not.toHaveBeenCalled();
     expect(effects.ready).toBe(false);
-    scene.sun = undefined;
+    scene.postProcessStages.bloom.enabled = false;
   });
 
   it("preserves foreign A1 authority during disconnect", async function () {

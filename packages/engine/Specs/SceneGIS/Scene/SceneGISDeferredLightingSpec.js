@@ -1,9 +1,10 @@
 import {
-  _SceneGISDeferredLighting as DeferredLighting,
   Cartesian2,
   Cartesian3,
   Color,
   ColorBlendMode,
+  ClippingPlane,
+  ClippingPlaneCollection,
   BoxGeometry,
   ColorGeometryInstanceAttribute,
   CustomShader,
@@ -64,7 +65,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     });
     scene.farToNearRatio = 10000;
     scene.logarithmicDepthBuffer = false;
-    renderer = new DeferredLighting(scene);
+    renderer = scene._sceneGISDeferred;
   }
   function render() {
     scene.renderForSpecs();
@@ -188,6 +189,164 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     borrowed.splice(0).forEach((resource) => resource.destroy());
     scene = renderer = undefined;
   });
+  it("preserves opaque and translucent native silhouettes with deferred model lighting", async function () {
+    setup();
+    const model = await addModel();
+    scene.light.intensity = 0;
+    scene.camera.setView({
+      destination: new Cartesian3(7000008, 6, 10),
+      orientation: {
+        direction: Cartesian3.normalize(
+          new Cartesian3(-8, -6, -10),
+          new Cartesian3(),
+        ),
+        up: Cartesian3.UNIT_Z,
+      },
+    });
+    model.silhouetteSize = 16;
+    model.silhouetteColor = Color.RED;
+    render();
+    const groups = Array.from(
+      { length: 64 },
+      (_, x) => sample(renderer._raw.getColorTexture(2), x)[3],
+    );
+    const edge = groups.indexOf(-1);
+    expect(edge).toBeGreaterThan(-1);
+    expect(color(edge)).toEqualEpsilon([1, 0, 0, 1], 0.001);
+    expect(color()).toEqualEpsilon([0.1, 0.2, 0.3, 1], 0.002);
+    expect(renderer._framebuffer.numberOfColorAttachments).toBe(4);
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    render();
+    expect(color(edge)).toEqualEpsilon([1, 0, 0, 1], 0.001);
+    expect(
+      scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion
+        .prepassDraws,
+    ).toBe(0);
+    model.silhouetteColor = Color.RED.withAlpha(0.5);
+    render();
+    expect(sample(renderer._raw.getColorTexture(2), edge)[3]).toBe(0);
+    const blended = sample(
+      scene.postProcessStages._tonemapping._colorTexture,
+      edge,
+    );
+    expect(blended[0]).toBeGreaterThan(0.4);
+    expect(blended[0]).toBeLessThan(0.8);
+    expect(blended[1]).toBeLessThan(0.001);
+    model.silhouetteSize = 0;
+    render();
+    expect(
+      sample(scene.postProcessStages._tonemapping._colorTexture, edge)[0],
+    ).toBeLessThan(0.001);
+    expect(scene.context._gl.getError()).toBe(0);
+  });
+  it("preserves model clipping edges, live planes and picking without extra material targets", async function () {
+    setup();
+    const model = await addModel();
+    model.clippingPlanes = new ClippingPlaneCollection({
+      planes: [new ClippingPlane(Cartesian3.UNIT_X, 0)],
+      edgeWidth: 3,
+      edgeColor: Color.YELLOW,
+    });
+    render();
+    expect(renderer._framebuffer.numberOfColorAttachments).toBe(4);
+    const raw = renderer._raw.getColorTexture();
+    const groups = Array.from(
+      { length: 64 },
+      (_, x) => sample(renderer._raw.getColorTexture(2), x)[3],
+    );
+    const edge = groups.indexOf(-1);
+    expect(edge).toBeGreaterThan(-1);
+    expect(color(edge)).toEqualEpsilon([1, 1, 0, 1], 0.001);
+    scene.light.intensity = 0;
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    const ssr = new SceneGISScreenSpaceReflections({ scene, enabled: true });
+    render();
+    expect(color(edge)).toEqualEpsilon([1, 1, 0, 1], 0.001);
+    expect(
+      scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion
+        .mainPass,
+    ).toBe(true);
+    expect(ssr._state.captureDraws).toBe(0);
+    expect(scene.pick(new Cartesian2(edge, 32)).primitive).toBe(model);
+    model.clippingPlanes.get(0).distance = -10;
+    render();
+    expect(sample(renderer._raw.getColorTexture(2))[3]).toBe(0);
+    expect(scene.pick(new Cartesian2(32, 32))).toBeUndefined();
+    model.clippingPlanes.get(0).distance = 10;
+    render();
+    expect(sample(renderer._raw.getColorTexture(2))[3]).toBeGreaterThan(0);
+    scene.canvas.width = 80;
+    render();
+    expect(raw.isDestroyed()).toBe(true);
+    const current = renderer._raw.getColorTexture();
+    scene.primitives.remove(model);
+    render();
+    expect(current.isDestroyed()).toBe(true);
+    ssr.destroy();
+  });
+  it("keeps LDR lighting and transparency linear until one display conversion", async function () {
+    setup();
+    scene.highDynamicRange = false;
+    scene.postProcessStages.fxaa.enabled = false;
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    await addModel();
+    box(3, true);
+    render();
+    const linear = sample(scene.postProcessStages._tonemapping._colorTexture);
+    const output = sample(scene.postProcessStages.outputTexture);
+    const expected = linear.map((value, index) =>
+      index === 3
+        ? value
+        : Math.pow(Math.min(Math.max(value, 0), 1), 1 / scene.gamma),
+    );
+    expect(output).toEqualEpsilon(expected, 2 / 255);
+    expect(scene.highDynamicRange).toBe(false);
+    expect(scene._hdr).toBe(true);
+    expect(renderer.ready).toBe(true);
+    const material = renderer._raw.getColorTexture();
+    const source = renderer._source;
+    scene.postProcessStages.exposure = 0.01;
+    render();
+    expect(sample(scene.postProcessStages.outputTexture)).toEqualEpsilon(
+      output,
+      1 / 255,
+    );
+    scene.requestRenderMode = true;
+    scene._renderRequested = false;
+    scene.highDynamicRange = true;
+    expect(scene._renderRequested).toBe(true);
+    render();
+    const hdrOutput = sample(scene.postProcessStages.outputTexture);
+    expect(hdrOutput[0]).toBeLessThan(output[0] - 0.1);
+    expect(
+      sample(scene.postProcessStages._tonemapping._colorTexture),
+    ).toEqualEpsilon(linear, 0.002);
+    expect(renderer._raw.getColorTexture()).toBe(material);
+    expect(renderer._source).toBe(source);
+    scene.highDynamicRange = false;
+    render();
+    expect(sample(scene.postProcessStages.outputTexture)).toEqualEpsilon(
+      output,
+      1 / 255,
+    );
+    expect(renderer._raw.getColorTexture()).toBe(material);
+  });
+  it("clamps LDR highlights at output while preserving material radiance and picking", async function () {
+    setup();
+    scene.highDynamicRange = false;
+    scene.postProcessStages.fxaa.enabled = false;
+    scene.light.intensity = 50;
+    const model = await addModel();
+    render();
+    expect(color()[0]).toBeGreaterThan(1);
+    expect(sample(scene.postProcessStages.outputTexture)[0]).toBe(1);
+    expect(scene.pick(new Cartesian2(32, 32)).primitive).toBe(model);
+    const material = renderer._raw.getColorTexture();
+    renderer.destroy();
+    expect(material.isDestroyed()).toBe(true);
+    expect(scene.highDynamicRange).toBe(false);
+    expect(scene._hdr).toBe(false);
+  });
   [false, true].forEach((logDepth) => {
     it(`collects multi-frustum materials before lighting and transparency with log depth ${logDepth}`, async function () {
       setup();
@@ -243,11 +402,14 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
       scene.logarithmicDepthBuffer = logDepth;
       render();
       expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
-      const before = [color(27), color(36)];
-      renderer.enabled = true;
-      render();
-      expect(color(27)).toEqualEpsilon(before[0], 0.002);
-      expect(color(36)).toEqualEpsilon(before[1], 0.002);
+      expect(color(27)).toEqualEpsilon([0.2, 0.3, 0.4, 1], 0.002);
+      const composite = scene.postProcessStages._tonemapping._colorTexture;
+      expect(sample(composite, 27)).toEqualEpsilon([0.2, 0.3, 0.4, 1], 0.002);
+      // The transparent box contributes its front and back faces to native OIT.
+      expect(sample(composite, 36)).toEqualEpsilon(
+        [0.712, 0.108, 0.144, 1],
+        0.004,
+      );
       expect(renderer._linearDepth.pixelFormat).toBe(PixelFormat.RG);
       const nearDepth = sample(renderer._linearDepth, 27);
       const farDepth = sample(renderer._linearDepth, 36);
@@ -278,9 +440,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
       expect(renderer._depth).toBeUndefined();
       expect(renderer.byteLength).toBe(64 * 64 * 32);
       const shared = renderer._linearDepth;
-      renderer.enabled = false;
       expect(shared.isDestroyed()).toBe(false);
-      renderer.enabled = true;
       scene.farToNearRatio = scene.logarithmicDepthFarToNearRatio = 1000000;
       render();
       expect(scene._view.frustumCommandsList.length).toBe(1);
@@ -291,15 +451,22 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     });
   });
   [false, true].forEach((unlit) => {
-    it(`matches native ${unlit ? "unlit" : "PBR"} lighting and retains picking`, async function () {
+    it(`evaluates ${unlit ? "unlit" : "PBR"} lighting and retains picking`, async function () {
       setup();
       const model = await addModel(unlit);
-      const before = color();
-      expect(before[0]).toBeGreaterThan(0.01);
-      renderer.enabled = true;
+      const lit = color();
+      scene.light.intensity = 0;
       render();
       expect(renderer.ready).toBe(true);
-      expect(color()).toEqualEpsilon(before, 0.003);
+      expect(color()).toEqualEpsilon(
+        unlit ? [0.2, 0.3, 0.4, 1] : [0.1, 0.2, 0.3, 1],
+        0.003,
+      );
+      if (unlit) {
+        expect(lit).toEqualEpsilon(color(), 0.001);
+      } else {
+        expect(lit[0]).toBeGreaterThan(color()[0] + 0.01);
+      }
       expect(renderer.drawCount).toBe(1);
       expect(renderer.groupCount).toBe(1);
       expect(renderer.lightDrawCount).toBe(1);
@@ -314,6 +481,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     it(`preserves model color modes in ${unlit ? "unlit" : "PBR"} without extra targets`, async function () {
       setup();
       const model = await addModel(unlit);
+      const unstyled = color();
       model.color = new Color(0.25, 0.6, 0.8, 1);
       model.colorBlendAmount = 0.4;
       if (!unlit) {
@@ -333,28 +501,32 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
         ColorBlendMode.REPLACE,
         ColorBlendMode.MIX,
       ]) {
-        renderer.enabled = false;
         model.colorBlendMode = mode;
         render();
-        const before = color();
-        renderer.enabled = true;
-        render();
-        expect(color()).withContext(String(mode)).toEqualEpsilon(before, 0.006);
+        const tint = [0.25, 0.6, 0.8];
+        const expected = unstyled.map((value, channel) =>
+          channel === 3
+            ? 1
+            : mode === ColorBlendMode.HIGHLIGHT
+              ? value * tint[channel]
+              : mode === ColorBlendMode.REPLACE
+                ? tint[channel]
+                : value * 0.6 + tint[channel] * 0.4,
+        );
+        expect(color())
+          .withContext(String(mode))
+          .toEqualEpsilon(expected, 0.006);
         expect(renderer._style).toBeUndefined();
         expect(scene.pick(new Cartesian2(32, 32)).primitive).toBe(model);
       }
       model.color = undefined;
       render();
-      const unstyled = color();
-      renderer.enabled = false;
-      render();
       expect(color()).toEqualEpsilon(unstyled, 0.006);
       model.color = new Color(0.5, 0.8, 1, 0.4);
       render();
-      const transparent = color();
-      renderer.enabled = true;
-      render();
-      expect(color()).toEqualEpsilon(transparent, 0.006);
+      expect(
+        sample(scene.postProcessStages._tonemapping._colorTexture)[0],
+      ).toBeGreaterThan(0.01);
       expect(renderer.groupCount).toBe(0);
     });
   });
@@ -368,10 +540,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
       enabled: true,
     });
     render();
-    const before = color(36);
-    renderer.enabled = true;
-    render();
-    expect(color(36)).toEqualEpsilon(before, 0.006);
+    expect(color(36)[0]).toBeGreaterThan(0.1);
     expect(color(28)[0]).toBeLessThan(0.001);
     expect(ssr.ready).toBe(true);
     expect(ssil.ready).toBe(true);
@@ -381,7 +550,6 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
   it("clears vacated opaque pixels from current-frame linear depth", async function () {
     setup();
     const model = await addModel();
-    renderer.enabled = true;
     render();
     const depth = renderer._depth.getColorTexture();
     expect(sample(depth)[0]).toBeGreaterThan(0);
@@ -405,26 +573,17 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
       const state =
         name === "ao" ? ao._sceneGISAmbientOcclusion : effect._state;
       const before = color(36);
-      const conversion = spyOn(
-        state.copyDepth ?? state.copyCommand,
-        "execute",
-      ).and.callThrough();
-      renderer.enabled = true;
+      expect(state.raw.getDepthStencilTexture()).toBeUndefined();
       render();
       expect(renderer._depth).toBeUndefined();
       expect(renderer._linearDepth).toBe(state.depth.getColorTexture());
-      expect(conversion).not.toHaveBeenCalled();
+      expect(state.copyDepth ?? state.copyCommand).toBeUndefined();
       expect(color(36)).toEqualEpsilon(before, 0.006);
       expect(sample(renderer._linearDepth, 36)[0]).toEqualEpsilon(8.5, 0.01);
       expect(sample(renderer._linearDepth, 28)[0]).toBe(0);
       expect(renderer.byteLength).toBe(64 * 64 * 32);
       const first = renderer._linearDepth;
-      renderer.enabled = false;
       expect(first.isDestroyed()).toBe(false);
-      render();
-      expect(conversion).toHaveBeenCalledTimes(1);
-      expect(color(36)).toEqualEpsilon(before, 0.006);
-      renderer.enabled = true;
       scene.camera.frustum = new PerspectiveFrustum({
         fov: Math.PI / 3,
         aspectRatio: 1,
@@ -457,24 +616,21 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
   it("rejects MSAA without changing it and releases only owned resources", async function () {
     setup();
     await addModel();
-    expect(renderer._raw).toBeUndefined();
-    renderer.enabled = true;
+    const material = renderer._raw.getColorTexture();
     scene.msaaSamples = 4;
     expect(render).toThrowDeveloperError();
     expect(scene.msaaSamples).toBe(4);
+    expect(renderer._raw.getColorTexture()).toBe(material);
     scene.msaaSamples = 1;
     render();
     const raw = renderer._raw.getColorTexture(),
       depth = renderer._depth.getColorTexture(),
       borrowedDepth = renderer._source.depthStencilTexture;
-    renderer.enabled = false;
+    scene.primitives.removeAll();
+    render();
     expect(raw.isDestroyed()).toBe(true);
     expect(depth.isDestroyed()).toBe(true);
     expect(borrowedDepth.isDestroyed()).toBe(false);
-    renderer.enabled = true;
-    render();
-    scene.primitives.removeAll();
-    render();
     expect(renderer.ready).toBe(false);
     expect(renderer._models.size).toBe(0);
   });
@@ -504,11 +660,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
       beforeRight = color(46);
     expect(beforeLeft[0]).toBeGreaterThan(beforeRight[0]);
     expect(beforeRight[1]).toBeGreaterThan(beforeLeft[1]);
-    renderer.enabled = true;
-    render();
     expect(renderer.groupCount).toBe(2);
-    expect(color(18)).toEqualEpsilon(beforeLeft, 0.004);
-    expect(color(46)).toEqualEpsilon(beforeRight, 0.004);
     left.lightColor = new Cartesian3(0, 0, 2);
     left.imageBasedLighting.sphericalHarmonicCoefficients = Array.from(
       { length: 9 },
@@ -516,9 +668,9 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     );
     render();
     const changed = color(18);
-    renderer.enabled = false;
-    render();
-    expect(changed).toEqualEpsilon(color(18), 0.004);
+    expect(changed[2]).toBeGreaterThan(beforeLeft[2] + 0.01);
+    expect(changed[1]).toBeLessThan(beforeLeft[1]);
+    expect(color(46)).toEqualEpsilon(beforeRight, 0.001);
   });
   it("retains ordinary opaque occlusion, transparent composition and local lights", async function () {
     setup();
@@ -538,7 +690,6 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     render();
     const before = color();
     lights._tiled = true;
-    renderer.enabled = true;
     render();
     expect(color()).toEqualEpsilon(before, 0.004);
     expect(sample(renderer._raw.getColorTexture(2))[3]).toBe(-2);
@@ -548,7 +699,6 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     render();
     const translucent = color();
     lights._tiled = false;
-    renderer.enabled = false;
     render();
     expect(color()).toEqualEpsilon(translucent, 0.004);
   });
@@ -563,10 +713,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     });
     scene.logarithmicDepthBuffer = true;
     render();
-    const before = color();
-    renderer.enabled = true;
-    render();
-    expect(color()).toEqualEpsilon(before, 0.003);
+    expect(color()).toEqualEpsilon([0.24, 0.41, 0.58, 1], 0.003);
     expect(sample(renderer._depth.getColorTexture())[0]).toEqualEpsilon(
       8.5,
       0.003,
@@ -602,13 +749,10 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
       }),
     );
     render();
-    const before = color();
-    renderer.enabled = true;
-    render();
     expect(renderer.drawCount).toBe(1);
     expect(scene.frameState._sceneGISWater.captureDraws).toBe(0);
     expect(scene.frameState._sceneGISWater.borrowed).toBe(true);
-    expect(color()).toEqualEpsilon(before, 0.008);
+    expect(scene.frameState._sceneGISWater.depthTexture).toBeDefined();
   });
   it("reuses native shadow visibility without darkening model emission", async function () {
     setup();
@@ -624,6 +768,8 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
       maximumLevel: 0,
     });
     scene._initializeWorld(world);
+    // This shadow fixture controls its primary light explicitly.
+    scene.environmentEffects.enabled = false;
     world.show = false;
     const floor = await addModel();
     floor.modelMatrix = Matrix4.multiplyByScale(
@@ -642,9 +788,7 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     render();
     const shadowed = color(43);
     expect(lit[0]).toBeGreaterThan(shadowed[0] + 0.01);
-    renderer.enabled = true;
-    render();
-    expect(color(43)).toEqualEpsilon(shadowed, 0.003);
+
     expect(sample(renderer._raw.getColorTexture(3), 43)[3]).toBeLessThan(0.2);
     expect(color(43)[0]).toBeGreaterThanOrEqual(0.099);
   });

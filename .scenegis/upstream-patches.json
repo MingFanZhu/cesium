@@ -215,9 +215,9 @@
     },
     {
       "id": "SGP-0016",
-      "title": "Integrate current-frame screen-space reflection radiance into forward PBR",
+      "title": "Record native PBR IBL responses for screen-space reflections",
       "status": "active",
-      "reason": "SSR needs a current-frame material/radiance capture and native IBL substitution before material weighting, which public postprocessing cannot provide.",
+      "reason": "SSR needs native IBL direction and BRDF weighting in shared screen lighting. The deferred pipeline keeps the SCENEGIS_SSR_MAIN recorders and removes the obsolete standalone capture and forward receiver branches.",
       "risk": "high",
       "files": [
         {
@@ -293,7 +293,7 @@
       "id": "SGP-0014",
       "title": "Integrate current-frame ambient occlusion into indirect lighting",
       "status": "active",
-      "reason": "Native final-color AO cannot preserve direct light, emissive and atmosphere. Explicit owned prepass and indirect-light receiver hooks are required.",
+      "reason": "Native final-color AO cannot preserve direct light, emissive and atmosphere. Shared screen lighting records indirect energy separately; the deferred pipeline removes the old geometry prepass and standalone opaque AO receiver while retaining the indirect recorders.",
       "risk": "high",
       "files": [
         {
@@ -805,7 +805,7 @@
       "id": "SGP-0045",
       "title": "Qualify native WebGL material buffers",
       "status": "active",
-      "reason": "A private G-buffer prototype needs native material values before diffuse is overwritten, and an explicit Scene replay/lifecycle seam.",
+      "reason": "Deferred capture records native material values and point-center eye coordinates before lighting overwrites diffuse. The inspector borrows the main material targets instead of replaying geometry. Narrow native hooks retain clipping-edge and silhouette unlit colors, primitive outline coverage, discard, transparency and picking while owned code stores and restores optional material extensions. Initialize native planar-fill fragment depth before both the feature-ID pre-pass and color pass when LOG_DEPTH is absent; preserve post-material model stages and capture their final biased depth. Preserve final native edge-visibility color as an unlit deferred overlay without replaying the surface. Decode native packed edge depth with the active orthographic or perspective projection. The unified native-channel contract is recorded in ADR-0161. Resolve native planar-fill depth ties against the existing feature-ID pre-pass depth within measured raster subpixel and depth24 precision before native ordering, preventing TAA jitter from changing coplanar visibility without new textures or geometry draws.",
       "risk": "high",
       "files": [
         {
@@ -815,20 +815,48 @@
         {
           "path": "packages/engine/Source/Shaders/Model/LightingStageFS.glsl",
           "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ModelClippingPlanesStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ModelSilhouetteStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/PrimitiveOutlineStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ModelFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/EdgeDetectionStageFS.glsl",
+          "markerMode": "paired"
         }
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISGBufferSpec.js",
-        "Specs/e2e/scenegis-gbuffer.spec.js"
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredLightingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredStylingSpec.js",
+        "Specs/e2e/scenegis-gbuffer.spec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISAmbientOcclusionSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredMaterialExtensionsSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredPointCloudSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredClassificationSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredNativeModelStagesSpec.js",
+        "Specs/e2e/scenegis-deferred-native-channels.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0155-webgl-gbuffer-prototype.md",
-      "removalCondition": "Native rendering exposes equivalent material outputs and owned capture scheduling, or the diagnostic prototype is retired."
+      "removalCondition": "Native rendering exposes equivalent material outputs and inspector lifecycle, or deferred material inspection is retired."
     },
     {
       "id": "SGP-0046",
-      "title": "Explore native-material deferred WebGL lighting",
+      "title": "Integrate Scene-owned native-material deferred WebGL lighting",
       "status": "active",
-      "reason": "The private deferred experiment needs material-only native variants and explicit Scene scheduling for surface depth across Globe clears, native and inverse classification, cached Tiles depth ownership, cross-frustum material collection, one lighting resolve, depth restoration for dedicated transparency, staged translucent Globe classification, and shared final water depth for temporal and environment effects.",
+      "reason": "Scene owns a default single-sample deferred renderer with explicit WebGL2/3D profile validation. Material-only native variants and Scene scheduling preserve surface depth across Globe clears, native and inverse classification, cached Tiles depth ownership, cross-frustum material collection, one lighting resolve, depth restoration for dedicated transparency, staged translucent Globe classification, and shared final water depth for temporal and environment effects. Display HDR is independent of linear deferred storage; the native tone-mapping slot supplies gamma-only LDR output without exposure. Scene, CesiumWidget and Viewer document the same single-sample default. Obsolete opaque AO/SSR receiver and geometry-capture scheduling is removed; their existing outputs consume deferred material and screen-lighting data. Native billboard and label coverage is separated before culling: solid colors run in a dedicated per-frustum tail with unblended depth MRT, while fractional backgrounds and glyph edges reuse native transparency. Conditional annotation depth serves occlusion and final temporal depth; physical water refraction inputs exclude annotations. Native voxel color runs after water and truncates its view ray against final opaque, annotation and water linear depth without material capture or geometry replay. Reuse TAA or water final depth; otherwise activate the owner-approved conditional R32F and one initialization copy for visible water plus voxel, including a single frustum. The scene contract and budget are recorded in ADR-0161. Native voxel picking runs after opaque pick IDs and refreshes the existing packed depth only for frusta with voxel pick commands, preserving front-surface occlusion without borrowing temporal color depth or adding color-frame resources. The owner excludes native visual fog, atmosphere and Globe daylight from deferred compatibility: gate their Scene/Globe preparation while retaining caller objects and fog culling; scene.environmentEffects exposes a Scene-owned lightweight advanced default with caller-owned controller precedence, world-bound teardown, and deferred cloud resources.",
       "risk": "high",
       "files": [
         {
@@ -846,13 +874,40 @@
         {
           "path": "packages/engine/Source/Scene/GlobeTranslucencyState.js",
           "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/PostProcessStageCollection.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Widget/CesiumWidget.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/widgets/Source/Viewer/Viewer.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Voxels/IntersectDepth.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Globe.js",
+          "markerMode": "paired"
         }
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredLightingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredEntrySpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGlobeSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredClassificationSpec.js",
-        "Specs/e2e/scenegis-deferred-lighting.spec.js"
+        "Specs/e2e/scenegis-deferred-lighting.spec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredAnnotationsSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredVoxelsSpec.js",
+        "Specs/e2e/scenegis-deferred-native-channels.spec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGaussianSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDefaultEnvironmentSpec.js",
+        "Specs/e2e/scenegis-deferred-default-environment.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md",
       "removalCondition": "Native rendering provides equivalent deferred material lighting, or the private experiment is retired."
@@ -899,7 +954,7 @@
       "id": "SGP-0049",
       "title": "Capture native Primitive Phong materials for deferred lighting",
       "status": "active",
-      "reason": "Explicitly identify native lit appearances and capture weather-adjusted Phong material before lighting while preserving geometry, batching and picking APIs.",
+      "reason": "Explicitly identify native lit appearances and ray-cast EllipsoidPrimitive, capture weather-adjusted Phong material before lighting, and preserve explicit intersection depth and sun-only lighting while retaining geometry, batching and picking APIs.",
       "risk": "medium",
       "files": [
         {
@@ -908,6 +963,14 @@
         },
         {
           "path": "packages/engine/Source/Shaders/Builtin/Functions/phong.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/EllipsoidFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/OIT.js",
           "markerMode": "paired"
         }
       ],
@@ -994,6 +1057,25 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0161-unified-opaque-deferred-direction.md",
       "removalCondition": "Native log-depth command derivation preserves source depth-clamp semantics."
+    },
+    {
+      "id": "SGP-0054",
+      "title": "Release tileset-owned Gaussian resources on tileset destruction",
+      "status": "active",
+      "reason": "GaussianSplat3DTileContent creates one shared GaussianSplatPrimitive on its tileset, but tileset destruction does not release that primitive. Invoke its existing destroy during tileset teardown, including collection removal and Scene destruction, and clear the ownership reference. Preserve single-tile unloading and callers that already released the private primitive.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Cesium3DTileset.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredGaussianSpec.js",
+        "packages/engine/Specs/Scene/GaussianSplatPrimitiveSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0161-unified-opaque-deferred-direction.md",
+      "removalCondition": "Native Cesium3DTileset destruction releases its shared GaussianSplatPrimitive."
     }
   ]
 }

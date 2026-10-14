@@ -16,7 +16,6 @@ const viewer = new C.Viewer("map", {
   selectionIndicator: false,
   infoBox: false,
   scene3DOnly: true,
-  msaaSamples: 1,
 });
 const scene = viewer.scene;
 scene.highDynamicRange = true;
@@ -61,8 +60,7 @@ scene.primitives.add(
     appearance: new C.PerInstanceColorAppearance({ translucent: false }),
   }),
 );
-const renderer = new C._SceneGISDeferredLighting(scene);
-renderer.enabled = true;
+const renderer = scene._sceneGISDeferred;
 const ssr = new C.SceneGISScreenSpaceReflections({ scene, enabled: true });
 const ssil = new C.SceneGISScreenSpaceIndirectLighting({ scene });
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
@@ -153,7 +151,7 @@ byId("hide").onclick = () => {
 scene.postRender.addEventListener(() => {
   byId("stats").textContent = renderer.ready
     ? `${renderer._style ? 5 : 4} 张材质附件 · ${renderer.drawCount} 次材质绘制 · ${renderer.lightDrawCount} 次光照 · ${(renderer.byteLength / 1048576).toFixed(1)} MiB`
-    : "原生光照";
+    : "等待场景材质…";
 });
 window.example = {
   viewer,

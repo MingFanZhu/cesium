@@ -71,6 +71,9 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     const result = new Scene({ canvas, contextOptions });
     result._initializeWorld(world);
     result.highDynamicRange = false;
+    // These fixtures assert linear imagery/terrain composition. Display gamma
+    // is covered separately by the deferred display Specs.
+    result.gamma = 1;
     result.destroyForSpecs = function () {
       const sceneCanvas = this.canvas;
       this.destroy();
@@ -192,7 +195,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     }
   });
 
-  it("composes imagery before surface opacity and preserves the published depth snapshot", async function () {
+  it("composes imagery before surface opacity and preserves the published command snapshot", async function () {
     const world = createWorld({ maximumLevel: 0 });
     const image = document.createElement("canvas");
     image.width = image.height = 1;
@@ -237,7 +240,12 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       }
       expect(command.vertexArray).toBe(va);
       if (scene.pickPositionSupported) {
-        expect(scene.pickPosition(new Cartesian2(16, 16)).z).toBeCloseTo(0, 2);
+        const position = scene.pickPosition(new Cartesian2(16, 16));
+        if (opacity === 1) {
+          expect(position.z).toBeCloseTo(0, 2);
+        } else {
+          expect(position).toBeUndefined();
+        }
       }
     }
     world.opacity = 0.5;
@@ -259,14 +267,12 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(surface._debug.createdShaders).toBe(debug.createdShaders);
     expect(surface._debug.createdTextures).toBe(debug.createdTextures);
     expect(surface._debug.submittedCommands).toBe(1);
-    const backgroundTexture = surface._background.getTexture();
     scene.destroyForSpecs();
     expect(va.isDestroyed()).toBeTrue();
-    expect(backgroundTexture.isDestroyed()).toBeTrue();
   });
 
   [false, true].forEach(function (logarithmicDepthBuffer) {
-    it(`blends the nearest terrain surface once across overlapping hills (${logarithmicDepthBuffer ? "log" : "linear"} depth)`, async function () {
+    it(`reveals overlapping terrain layers across frusta (${logarithmicDepthBuffer ? "log" : "linear"} depth)`, async function () {
       const world = createWorld({ maximumLevel: 1, size: 1024, minimum: -512 });
       const heights = new Float32Array(81);
       for (let row = 0; row < 9; ++row) {
@@ -295,6 +301,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       scene.msaaSamples = 1;
       scene.logarithmicDepthBuffer = logarithmicDepthBuffer;
       scene.farToNearRatio = 2;
+      scene.logarithmicDepthFarToNearRatio = 2;
       aimCamera(
         new Cartesian3(30, -500, 90),
         new Cartesian3(30, 100, 0),
@@ -311,24 +318,29 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       scene.renderForSpecs();
       const translucent = scene.context.readPixels();
       let samples = 0;
+      let overlapping = 0;
       for (let i = 0; i < opaque.length; i += 4) {
         if (opaque[i] === 255 && opaque[i + 1] === 0) {
           expect(translucent[i])
             .withContext(`pixel ${i / 4}`)
-            .toEqualEpsilon(128, 1);
+            .toBeGreaterThanOrEqual(127);
+          expect(translucent[i + 1]).toBe(0);
+          expect(translucent[i + 2]).toBe(0);
+          overlapping += Number(translucent[i] > 190);
           ++samples;
         }
       }
       expect(samples).toBeGreaterThan(1000);
+      expect(overlapping).toBeGreaterThan(0);
+      expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
       expect(tiles.map((tile) => tile.command.vertexArray)).toEqual(geometry);
       expect(world._surface._debug.submittedCommands).toBe(tiles.length);
     });
   });
 
-  it("refreshes and resizes the background capture through MSAA and HDR changes", function () {
+  it("reuses native OIT resources across opacity and HDR changes and resizes them", function () {
     const world = createWorld({ maximumLevel: 0 });
     scene = createPlanarScene(world, 32, 32);
-    scene.msaaSamples = 4;
     pointCameraAt(world);
     world.opacity = 0;
     const read = () =>
@@ -344,15 +356,15 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       world.show = true;
       scene.renderForSpecs();
       expect(read()).toEqualEpsilon(background, 1);
-      const texture = world._surface._background.getTexture();
+      const texture = scene._view.oit._accumulationTexture;
       scene.renderForSpecs();
-      expect(world._surface._background.getTexture()).toBe(texture);
+      expect(scene._view.oit._accumulationTexture).toBe(texture);
     }
-    const oldTexture = world._surface._background.getTexture();
+    const oldTexture = scene._view.oit._accumulationTexture;
     scene.canvas.width = scene.canvas.height = 64;
     scene.renderForSpecs();
     expect(oldTexture.isDestroyed()).toBeTrue();
-    expect(world._surface._background.getTexture().width).toBe(64);
+    expect(scene._view.oit._accumulationTexture.width).toBe(64);
   });
 
   it("uses the globe pass without materializing C9 ground snapshots", function () {

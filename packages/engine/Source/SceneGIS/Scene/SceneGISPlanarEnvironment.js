@@ -126,7 +126,13 @@ function nativeVisible(value) {
 
 function validateNativeEnvironmentConflict(environment, scene) {
   validateSkyBox(environment._skyBox);
-  if (environment._showSun && defined(scene.sun) && scene.sun.show !== false) {
+  const nativeEnvironment = !defined(scene._sceneGISDeferred);
+  if (
+    nativeEnvironment &&
+    environment._showSun &&
+    defined(scene.sun) &&
+    scene.sun.show !== false
+  ) {
     throw new DeveloperError(
       "SceneGIS planar Sun cannot be shown while the native Scene Sun is visible.",
     );
@@ -142,9 +148,10 @@ function validateNativeEnvironmentConflict(environment, scene) {
   }
   if (defined(environment._skyBox)) {
     if (
-      nativeVisible(scene.skyBox) ||
-      nativeVisible(scene.skyAtmosphere) ||
-      nativeVisible(scene.sun) ||
+      (nativeEnvironment &&
+        (nativeVisible(scene.skyBox) ||
+          nativeVisible(scene.skyAtmosphere) ||
+          nativeVisible(scene.sun))) ||
       nativeVisible(scene.moon)
     ) {
       throw new DeveloperError(
@@ -153,8 +160,8 @@ function validateNativeEnvironmentConflict(environment, scene) {
     }
   } else if (
     environment._showAtmosphere &&
-    (nativeVisible(scene.skyAtmosphere) ||
-      nativeVisible(scene.sun) ||
+    ((nativeEnvironment &&
+      (nativeVisible(scene.skyAtmosphere) || nativeVisible(scene.sun))) ||
       nativeVisible(scene.moon))
   ) {
     throw new DeveloperError(
@@ -370,11 +377,21 @@ function syncLight(environment) {
     : environment._sunIntensity;
 }
 
-function acquireAuthority(environment) {
+function selectLight(environment) {
   const scene = environment._scene;
+  if (
+    scene.light === environment._light ||
+    scene.light instanceof DirectionalLight
+  ) {
+    return;
+  }
   environment._capturedLight = scene.light;
-  syncLight(environment);
   scene.light = environment._light;
+}
+
+function acquireAuthority(environment) {
+  syncLight(environment);
+  selectLight(environment);
   environment._hasAuthority = true;
 }
 
@@ -395,6 +412,9 @@ function releaseAuthority(environment) {
 /**
  * Controls manual or project-origin astronomical celestial directions and
  * planar scene lighting for one caller-owned {@link SceneGISPlanarWorld}.
+ * An explicit scene.light DirectionalLight takes precedence over the automatic
+ * light. Installing a SunLight restores automatic lighting. Celestial directions
+ * remain available to the sky and advanced environment while a custom light is active.
  * Register the instance with a CesiumWidget or Viewer controller host and
  * remove it before destroying the widget. The world does not own this
  * instance or its stable light.
@@ -1148,6 +1168,7 @@ SceneGISPlanarEnvironment.prototype.connectedCallback = function (element) {
       "A SceneGISPlanarEnvironment instance must not be registered twice.",
     );
   }
+  this._world.environment?._defaultEnvironmentOwner?.releaseLight();
   if (defined(this._world.environment)) {
     throw new DeveloperError(
       "A SceneGISPlanarWorld may register only one Environment.",
@@ -1221,7 +1242,7 @@ SceneGISPlanarEnvironment.prototype.firstUpdate = function (scene, time) {
 };
 
 /**
- * Reasserts the stable light during an active controller-host update.
+ * Updates the automatic light while preserving an explicit caller light.
  *
  * @param {Scene} scene The host Scene.
  * @param {JulianDate} time The current simulation time.
@@ -1250,7 +1271,7 @@ SceneGISPlanarEnvironment.prototype.update = function (scene, time) {
     this._astronomyRenderRequested = false;
   }
   syncLight(this);
-  scene.light = this._light;
+  selectLight(this);
   this._hasAuthority = true;
 };
 

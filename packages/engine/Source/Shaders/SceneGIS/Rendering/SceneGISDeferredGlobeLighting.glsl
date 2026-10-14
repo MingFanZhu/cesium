@@ -9,7 +9,7 @@ uniform vec4 u_undergroundColor;
 uniform vec4 u_undergroundColorAlphaByDistance;
 #endif
 
-void sceneGISDeferredGlobeDisplay(inout vec4 color, vec3 positionEC, float flags, float fade)
+void sceneGISDeferredGlobeDisplay(inout vec4 color, vec3 positionEC, float flags)
 {
     #ifdef HIGHLIGHT_FILL_TILE
     if (mod(floor(flags / 512.0), 2.0) > 0.5) {
@@ -18,9 +18,6 @@ void sceneGISDeferredGlobeDisplay(inout vec4 color, vec3 positionEC, float flags
         sceneGISScaleIndirect(vec3(1.0 - u_fillHighlightColor.a));
         #endif
     }
-    #endif
-    #if defined(FOG) || defined(GROUND_ATMOSPHERE)
-    sceneGISDeferredGlobeAtmosphere(color.rgb, positionEC, mod(flags, 16.0), fade);
     #endif
     #ifdef UNDERGROUND_COLOR
     if (flags >= 1024.0) {
@@ -50,9 +47,9 @@ void main()
     vec3 normalEC = normalize(surface.xyz);
     float depth = texelFetch(u_linearDepth, pixel, 0).r;
     vec3 positionEC = sceneGISAOPosition(gl_FragCoord.xy, depth);
-    // Clipping edges replace surface radiance before native atmosphere.
+    // Clipping edges replace surface radiance before display overlays.
     if (mod(floor(parameters.x / 16.0), 2.0) > 0.5) {
-        sceneGISDeferredGlobeDisplay(albedo, positionEC, parameters.x, surface.w);
+        sceneGISDeferredGlobeDisplay(albedo, positionEC, parameters.x);
         out_FragColor = albedo;
         return;
     }
@@ -90,24 +87,6 @@ void main()
     vec3 positionWC = czm_viewerPositionWC + czm_inverseViewRotation * positionEC;
     color = sceneGISGlobeSurfaceLighting(albedo.rgb, positionWC,
         normalize(czm_inverseViewRotation * normalEC), geometryNormalEC, wetness);
-    #else
-    if (lightingMode > 0.5) {
-        float diffuse = clamp(czm_getLambertDiffuse(czm_lightDirectionEC, normalEC) * parameters.y + parameters.z, 0.0, 1.0);
-        float ambient = min(parameters.z, diffuse);
-        if (lightingMode > 1.5) {
-            diffuse = mix(1.0, diffuse, surface.w);
-            ambient = parameters.z * surface.w;
-        }
-        color *= czm_lightColor * mix(ambient, diffuse, sceneGISGeometryShadow());
-        #ifdef SCENEGIS_AO_MAIN
-        sceneGISRecordIndirect(albedo.rgb * czm_lightColor * ambient);
-        #endif
-        #ifdef SCENEGIS_SURFACE_WEATHER
-        color += czm_lightColorHdr * sceneGISGeometryShadow() *
-            max(dot(geometryNormalEC, czm_lightDirectionEC), 0.0) *
-            sceneGISWeatherFilm(positionEC, geometryNormalEC, czm_lightDirectionEC, coverage.x);
-        #endif
-    }
     #endif
     #ifdef SCENEGIS_LOCAL_LIGHTS
     if (lightingMode > 0.5) {
@@ -115,6 +94,6 @@ void main()
     }
     #endif
     vec4 finalColor = vec4(color, albedo.a);
-    sceneGISDeferredGlobeDisplay(finalColor, positionEC, parameters.x, surface.w);
+    sceneGISDeferredGlobeDisplay(finalColor, positionEC, parameters.x);
     out_FragColor = finalColor;
 }

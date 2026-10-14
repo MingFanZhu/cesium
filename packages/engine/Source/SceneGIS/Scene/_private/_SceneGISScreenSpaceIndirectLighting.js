@@ -9,7 +9,6 @@ import Pass from "../../../Renderer/Pass.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
 import RenderState from "../../../Renderer/RenderState.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
-import depthShader from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import common from "../../../Shaders/SceneGIS/IndirectLighting/SceneGISSILCommon.js";
 import estimate from "../../../Shaders/SceneGIS/IndirectLighting/SceneGISSILEstimate.js";
 import reconstruct from "../../../Shaders/SceneGIS/IndirectLighting/SceneGISSILReconstruct.js";
@@ -97,7 +96,7 @@ const SceneGISScreenSpaceIndirectLighting = {
     );
     if (!selected) {
       throw new RuntimeError(
-        "SSIL requires a supported single-frustum opaque MRT layout. Disable clearcoat SSR, classification or unsupported post-lighting effects; SSIL does not replay geometry.",
+        "SSIL requires a supported deferred lighting MRT layout; SSIL does not replay geometry.",
       );
     }
     if (
@@ -111,8 +110,6 @@ const SceneGISScreenSpaceIndirectLighting = {
     if (!s.raw) {
       s.raw = new FramebufferManager({
         pixelDatatype: PixelDatatype.HALF_FLOAT,
-        depthStencil: true,
-        supportsDepthTexture: true,
       });
       s.depth = new FramebufferManager({
         pixelFormat: PixelFormat.RED,
@@ -120,8 +117,6 @@ const SceneGISScreenSpaceIndirectLighting = {
       });
       s.clear = new ClearCommand({
         color: Color.TRANSPARENT,
-        depth: 1,
-        stencil: 0,
       });
       s.clearColor = new ClearCommand({ color: Color.TRANSPARENT });
     }
@@ -132,20 +127,6 @@ const SceneGISScreenSpaceIndirectLighting = {
         context.drawingBufferHeight,
       );
     }
-    if (!s.copyDepth || s.logDepth !== scene.frameState.useLogDepth) {
-      s.copyDepth?.shaderProgram.destroy();
-      s.logDepth = scene.frameState.useLogDepth;
-      s.copyDepth = context.createViewportQuadCommand(
-        new ShaderSource({
-          defines: s.logDepth ? ["LOG_DEPTH_READ_ONLY"] : [],
-          sources: [depthShader],
-        }),
-        {
-          owner: effect,
-          uniformMap: { u_depth: () => s.raw.getDepthStencilTexture() },
-        },
-      );
-    }
     s.mainActive = LightingMrt.begin(
       scene,
       s,
@@ -154,14 +135,6 @@ const SceneGISScreenSpaceIndirectLighting = {
       false,
       selected,
     );
-  },
-
-  receiver(scene, command) {
-    const s = scene._sceneGISScreenSpaceIndirectLighting?._state;
-    if (scene.frameState.passes.render && s?.mainActive && eligible(command)) {
-      return LightingMrt.command(scene, s, command);
-    }
-    return command;
   },
 
   render(scene, shared, sourceDepth) {
@@ -243,7 +216,7 @@ const SceneGISScreenSpaceIndirectLighting = {
     for (const name of ["raw", "depth", "estimate", "result"]) {
       s[name]?.destroy();
     }
-    for (const name of ["copyDepth", "estimateCommand", "reconstructCommand"]) {
+    for (const name of ["estimateCommand", "reconstructCommand"]) {
       s[name]?.shaderProgram.destroy();
     }
     effect._state = undefined;

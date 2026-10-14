@@ -121,3 +121,14 @@ experimental `HAS_VECTOR_LAYER`；不得混作一条路径。具体阶段激活�
 P4c 于 2026-10-14 完成技术检查、自审与负责人视觉验收；密集分段贴地分类缺口已修复
 并经负责人确认消失，批准形成独立阶段提交。该 checkpoint 完成后，再依据当时源码
 激活不透明前向冗余审计阶段；独立矢量适配继续属于后继范围。
+
+P4c checkpoint `fbde52dcd5` 已形成，提交钩子通过。依据当前源码激活
+[P4d](2026-10-14-p4d-opaque-pipeline-consolidation.md) 的入口审计；默认配置与未适配
+能力尚待逐项决定，不把启用开关直接改为常量作为统一管线交付。
+
+2026-10-14 负责人已选择默认入口方案 A：WebGL2 / SCENE3D、目标默认单采样，
+WebGL1、2D、Columbus View、WebVR 不进入当前资格。P4d 先补同一线性延迟路径的
+HDR 关闭显示契约，再完成默认绑定与旧不透明前向冗余清理；WebGPU 不在本分支范围。
+具体实现与未完事项继续由 P4d plan / review 跟踪，不新增阶段或提前关闭 gate。
+
+2026-10-14 P4d 的技术、自审及全部负责人视觉 gate 已完成，最后的自定义主光画面获负责人确认；批准形成本阶段独立本地 checkpoint。阶段完成既定唯一不透明 / MASK 入口、能力补齐和前向冗余清理，保留透明 / 阴影 / 拾取 / 标注 / 体积的必要专用路径。该提交成功后，再依据独立 SceneGISVectorTileLayer 的实际源码激活矢量切片 phase；其 flat、Globe / Planar ground、fill-extrusion、circle / symbol 与透明 Globe 组合仍属未完成范围。

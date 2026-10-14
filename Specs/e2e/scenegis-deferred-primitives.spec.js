@@ -94,8 +94,9 @@ test("deferred native primitives preserve Entity updates, mixed HDR and frame co
       }
       input.dispatchEvent(new Event("change"));
     };
-    const result = { comparisons: [], timing: [], counts: undefined };
+    const result = { states: [], timing: [], counts: undefined };
     try {
+      let previous;
       for (const [id, value] of [
         ["weather", "dry"],
         ["weather", "wet"],
@@ -105,35 +106,34 @@ test("deferred native primitives preserve Entity updates, mixed HDR and frame co
         ["translucent", false],
       ]) {
         change(id, value);
-        e.deferred.enabled = false;
         await ready();
-        const before = read();
-        e.deferred.enabled = true;
         render();
         const after = read();
         let sum = 0,
           max = 0,
           nonfinite = 0;
-        for (let i = 0; i < before.length; ++i) {
+        for (let i = 0; i < after.length; ++i) {
           if (i % 4 === 3) {
             continue;
           }
           const delta =
-            Math.abs(before[i] - after[i]) / (1 + Math.abs(before[i]));
+            Math.abs((previous?.[i] ?? after[i]) - after[i]) /
+            (1 + Math.abs(previous?.[i] ?? after[i]));
           sum += delta;
           max = Math.max(max, delta);
           if (!Number.isFinite(after[i])) {
             ++nonfinite;
           }
         }
-        result.comparisons.push({
+        result.states.push({
           id,
           value,
           materialDraws: e.deferred.drawCount,
-          mean: sum / (1280 * 800 * 3),
+          change: sum / (1280 * 800 * 3),
           max,
           nonfinite,
         });
+        previous = after;
       }
       change("weather", "dry");
       change("animate", true);
@@ -154,8 +154,7 @@ test("deferred native primitives preserve Entity updates, mixed HDR and frame co
       await ready();
       e.taa.enabled = true;
       const timer = gl.getExtension("EXT_disjoint_timer_query_webgl2");
-      for (const enabled of [false, true]) {
-        e.deferred.enabled = enabled;
+      {
         e.taa.reset();
         const gpu = [],
           cpu = [];
@@ -190,7 +189,6 @@ test("deferred native primitives preserve Entity updates, mixed HDR and frame co
             : null;
         };
         result.timing.push({
-          enabled,
           gpuMs: median(gpu),
           cpuMs: median(cpu),
           samples: gpu.length,
@@ -214,14 +212,14 @@ test("deferred native primitives preserve Entity updates, mixed HDR and frame co
     JSON.stringify(report, null, 2),
   );
   console.log(JSON.stringify(report));
-  for (const comparison of report.comparisons) {
-    expect(comparison.mean).toBeLessThan(0.002);
-    expect(comparison.nonfinite).toBe(0);
+  for (const state of report.states) {
+    expect(state.nonfinite).toBe(0);
   }
+  expect(report.states[3].change).toBeGreaterThan(0.0001);
   expect(report.entityPick).toBe(true);
   expect(report.counts.style).toBe(false);
   expect(report.counts.groups).toBe(2);
-  const alphaModes = report.comparisons.filter(
+  const alphaModes = report.states.filter(
     (entry) => entry.id === "translucent",
   );
   expect(alphaModes[0].materialDraws).toBeLessThan(alphaModes[1].materialDraws);

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>延迟原生通道验收</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #14253b;
+        color: #eef5ff;
+        font: 14px/1.7 sans-serif;
+      }
+      aside {
+        box-sizing: border-box;
+        width: 290px;
+        height: 100%;
+        padding: 24px;
+        overflow: auto;
+      }
+      #map {
+        position: absolute;
+        left: 290px;
+        right: 0;
+        top: 0;
+        bottom: 0;
+      }
+      h1 {
+        font-size: 21px;
+        margin: 0 0 16px;
+      }
+      label {
+        display: block;
+        margin: 16px 0;
+      }
+      select,
+      button {
+        font: inherit;
+      }
+      #error {
+        color: #ffb9a5;
+        white-space: pre-wrap;
+      }
+      small {
+        color: #b8cbe4;
+      }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <h1>延迟原生通道验收</h1>
+      <p>
+        左：同要素背后填充与异要素覆盖。中：原生制图边线。右：透明体积与不透明遮挡。
+      </p>
+      <label
+        >边线显示
+        <select id="edges">
+          <option value="1">表面与边线</option>
+          <option value="0">仅表面</option>
+          <option value="2">仅边线</option>
+        </select></label
+      >
+      <label><input id="volume" type="checkbox" checked />显示体积</label>
+      <label
+        >遮挡面
+        <select id="surface">
+          <option value="5">体积后方</option>
+          <option value="0">穿过体积</option>
+          <option value="-5">体积前方</option>
+        </select></label
+      >
+      <label><input id="depth" type="checkbox" checked />体积深度测试</label>
+      <label><input id="water" type="checkbox" />显示水面</label>
+      <label
+        >水面位置
+        <select id="waterPosition">
+          <option value="4">体积后方</option>
+          <option value="0">穿过体积</option>
+          <option value="-4">体积前方</option>
+        </select></label
+      >
+      <label
+        >投影
+        <select id="projection">
+          <option value="perspective">透视</option>
+          <option value="orthographic">正交</option>
+        </select></label
+      >
+      <label><input id="multi" type="checkbox" />多个视锥</label>
+      <label><input id="taa" type="checkbox" checked />TAA</label>
+      <label><input id="ao" type="checkbox" />环境遮蔽</label>
+      <button id="home">恢复视角</button>
+      <p id="pick">点击内容查看拾取</p>
+      <small
+        >填充的同要素背后面不应盖过红面；异要素紫面仍可覆盖。绿色边线保持制图色。前方红面或水面遮挡体积，穿过时只保留前半部；体积不参与水下折射。</small
+      >
+      <p id="error"></p>
+    </aside>
+    <div id="map"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./延迟原生通道验收.js"></script>
+  </body>
+</html>

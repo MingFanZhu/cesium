@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 
-test("Bistro deferred lighting preserves day/night responses and measures equal-quality cost", async ({
+test("Bistro deferred lighting preserves day/night responses and records frame cost", async ({
   page,
 }, testInfo) => {
   test.setTimeout(240000);
@@ -32,7 +32,7 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
     const timer = gl.getExtension("EXT_disjoint_timer_query_webgl2");
     const report = {
       renderer: info && gl.getParameter(info.UNMASKED_RENDERER_WEBGL),
-      comparisons: [],
+      states: [],
       timing: [],
       ao: e.ao.enabled,
       ssr: e.ssr.enabled,
@@ -68,6 +68,7 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
     // Isolate current-frame lighting from temporal histories; the performance/motion case below retains TAA.
     e.taa.enabled = false;
     try {
+      let previous;
       for (const [hour, ssil, tint] of [
         [14, false],
         [22, false],
@@ -80,18 +81,13 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
         e.ssil.enabled = ssil;
         e.atmosphere.hour = hour;
         e.state.setTime();
-        e.deferred.enabled = false;
-        e.ssr.reset();
-        viewer.render();
-        const reference = read();
-        e.deferred.enabled = true;
         e.ssr.reset();
         viewer.render();
         const actual = read();
         let sum = 0,
           maximum = 0,
           nonfinite = 0;
-        for (let i = 0; i < reference.length; ++i) {
+        for (let i = 0; i < actual.length; ++i) {
           if (i % 4 === 3) {
             continue;
           }
@@ -99,18 +95,20 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
             ++nonfinite;
           }
           const error =
-            Math.abs(actual[i] - reference[i]) / (1 + Math.abs(reference[i]));
+            Math.abs(actual[i] - (previous?.[i] ?? actual[i])) /
+            (1 + Math.abs(previous?.[i] ?? actual[i]));
           sum += error;
           maximum = Math.max(maximum, error);
         }
-        report.comparisons.push({
+        report.states.push({
           hour,
           ssil,
           tint: !!tint,
-          mean: sum / (width * height * 3),
+          change: sum / (width * height * 3),
           maximum,
           nonfinite,
         });
+        previous = actual;
       }
     } finally {
       copy.shaderProgram.destroy();
@@ -123,8 +121,7 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
     e.state.setTime();
     e.ssil.enabled = false;
     e.taa.enabled = true;
-    for (const enabled of [false, true]) {
-      e.deferred.enabled = enabled;
+    {
       e.taa.reset();
       e.ssr.reset();
       viewer.render();
@@ -146,7 +143,6 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
         }
       }
       report.timing.push({
-        enabled,
         durations,
         materialDraws: e.deferred.drawCount,
         lightingDraws: e.deferred.lightDrawCount,
@@ -166,15 +162,16 @@ test("Bistro deferred lighting preserves day/night responses and measures equal-
   );
   expect(report.ao && report.ssr).toBe(true);
   expect(report.samples).toBe(1);
-  for (const comparison of report.comparisons) {
-    expect(comparison.nonfinite).toBe(0);
-    expect(comparison.mean).toBeLessThan(0.01);
+  for (const state of report.states) {
+    expect(state.nonfinite).toBe(0);
   }
-  expect(report.timing[1].groups).toBe(1);
-  expect(report.timing[1].lightingDraws).toBe(1);
-  expect(report.timing[1].ssrCaptureDraws).toBe(0);
-  expect(report.timing[1].sharedDepth).toBe(true);
-  expect(report.timing[1].materialDepthBytes).toBe(1280 * 800 * 32);
+  expect(report.states[1].change).toBeGreaterThan(0.001);
+  expect(report.states[3].change).toBeGreaterThan(0.001);
+  expect(report.timing[0].groups).toBe(1);
+  expect(report.timing[0].lightingDraws).toBe(1);
+  expect(report.timing[0].ssrCaptureDraws).toBe(0);
+  expect(report.timing[0].sharedDepth).toBe(true);
+  expect(report.timing[0].materialDepthBytes).toBe(1280 * 800 * 32);
   await page.screenshot({ path: testInfo.outputPath("day.png") });
   const motion = await page.evaluate(() => {
     const e = window.example;

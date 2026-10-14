@@ -136,10 +136,10 @@ describe("SceneGIS/Scene/SceneGISTemporalAntialiasing", function () {
       taa.enabled = true;
     }).toThrowError(/Temporal antialiasing requires/);
     scene.highDynamicRange = true;
-    scene.msaaSamples = 4;
+    scene.msaaSamples = 1;
     taa.enabled = true;
     render();
-    expect(scene.msaaSamples).toBe(4);
+    expect(scene.msaaSamples).toBe(1);
     expect(scene.postProcessStages.fxaa.enabled).toBe(false);
     expect(taa.ready).toBe(true);
   });

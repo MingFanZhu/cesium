@@ -16,7 +16,6 @@ const viewer = new C.Viewer("map", {
   selectionIndicator: false,
   infoBox: false,
   scene3DOnly: true,
-  msaaSamples: 1,
 });
 const scene = viewer.scene;
 scene.highDynamicRange = true;
@@ -52,8 +51,7 @@ scene.shadowMap.enabled = true;
 scene.shadowMap.maximumDistance = 100;
 scene.shadowMap.size = 2048;
 scene.shadowMap.darkness = 0;
-const deferred = new C._SceneGISDeferredLighting(scene);
-deferred.enabled = true;
+const deferred = scene._sceneGISDeferred;
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
 scene.postProcessStages.ambientOcclusion.enabled = true;
 const lights = new C.SceneGISLightCollection({ scene });
@@ -236,7 +234,6 @@ byId("animate").onchange = () => {
   reset();
 };
 for (const [id, effect] of Object.entries({
-  deferred,
   taa,
   ao: scene.postProcessStages.ambientOcclusion,
   shadows: scene.shadowMap,
@@ -275,7 +272,7 @@ scene.renderError.addEventListener((...args) => {
 scene.postRender.addEventListener(() => {
   byId("stats").textContent = deferred.ready
     ? `${deferred.drawCount} 次材质 · ${deferred.lightDrawCount} 次光照 · ${(deferred.byteLength / 1048576).toFixed(1)} MiB`
-    : "原生前向光照";
+    : "等待场景材质…";
 });
 window.example = {
   viewer,

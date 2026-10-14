@@ -2,6 +2,12 @@
 
 ## 状态
 
+- Deferred amendment: [ADR-0161](ADR-0161-unified-opaque-deferred-direction.md)
+  supersedes the exclusive scene.light ownership below. Caller-installed
+  DirectionalLight instances override automatic Sun/Moon lighting for surfaces,
+  models, clouds and shadows. SunLight restores automatic lighting; sky and
+  lunar texture authority remain unchanged.
+
 - A16 amendment: [ADR-0054](ADR-0054-model-physical-lighting-and-explicit-shadows.md)
   supersedes the Moon-only geometry-shadow API/ownership below. Geometry-shadow
   switches remain wholly caller-owned; light and lunar texture authority remain.

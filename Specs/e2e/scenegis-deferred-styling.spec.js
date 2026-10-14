@@ -50,8 +50,9 @@ test("native feature styling preserves HDR, live edits and mixed target layouts"
         height: 800,
       });
     };
-    const result = { comparisons: [], timing: [] };
+    const result = { states: [], timing: [] };
     try {
+      let previous;
       for (const [mode, style] of [
         ["HIGHLIGHT", "height"],
         ["REPLACE", "cyan"],
@@ -60,43 +61,39 @@ test("native feature styling preserves HDR, live edits and mixed target layouts"
         document.getElementById("mode").value = mode;
         document.getElementById("style").value = style;
         e.applyStyle();
-        e.deferred.enabled = false;
-        e.ssr.reset();
-        e.viewer.render();
-        const before = read();
-        e.deferred.enabled = true;
         e.ssr.reset();
         e.viewer.render();
         const after = read();
         let sum = 0,
           maximum = 0,
           nonfinite = 0;
-        for (let i = 0; i < before.length; i++) {
+        for (let i = 0; i < after.length; i++) {
           if (i % 4 === 3) {
             continue;
           }
           const delta =
-            Math.abs(before[i] - after[i]) / (1 + Math.abs(before[i]));
+            Math.abs((previous?.[i] ?? after[i]) - after[i]) /
+            (1 + Math.abs(previous?.[i] ?? after[i]));
           sum += delta;
           maximum = Math.max(maximum, delta);
           if (!Number.isFinite(after[i])) {
             nonfinite++;
           }
         }
-        result.comparisons.push({
+        result.states.push({
           mode,
           style,
-          mean: sum / (1280 * 800 * 3),
+          change: sum / (1280 * 800 * 3),
           maximum,
           nonfinite,
         });
+        previous = after;
       }
       document.getElementById("mode").value = "HIGHLIGHT";
       document.getElementById("style").value = "height";
       e.applyStyle();
       e.taa.enabled = true;
-      for (const enabled of [false, true]) {
-        e.deferred.enabled = enabled;
+      {
         e.taa.reset();
         e.ssr.reset();
         e.viewer.render();
@@ -121,7 +118,6 @@ test("native feature styling preserves HDR, live edits and mixed target layouts"
           }
         }
         result.timing.push({
-          enabled,
           durations,
           cpu,
           materialDraws: e.deferred.drawCount,
@@ -150,17 +146,17 @@ test("native feature styling preserves HDR, live edits and mixed target layouts"
     };
     return result;
   });
-  for (const item of report.comparisons) {
+  for (const item of report.states) {
     expect(item.nonfinite).toBe(0);
-    expect(item.mean).toBeLessThan(0.001);
   }
+  expect(report.states[1].change).toBeGreaterThan(0.0001);
   expect(report.hidden).toEqual({
     released: true,
     retained: true,
     style: false,
   });
   expect(report.restored).toEqual({ retained: true, style: true });
-  expect(report.timing[1].bytes).toBe(1280 * 800 * 40);
+  expect(report.timing[0].bytes).toBe(1280 * 800 * 40);
   await page.mouse.click(640, 400);
   await expect(page.locator("#paint")).toBeEnabled();
   await page.getByRole("button", { name: "选中要素染红" }).click();

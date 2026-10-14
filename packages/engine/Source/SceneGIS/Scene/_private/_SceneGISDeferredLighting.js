@@ -28,11 +28,9 @@ import classification from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferred
 import inputs from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredInputs.js";
 import lighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredLighting.js";
 import phongLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPhongLighting.js";
+import planarLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPlanarLighting.js";
 import globeLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredGlobeLighting.js";
 import globeOcean from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredGlobeOcean.js";
-import atmosphereCommon from "../../../Shaders/AtmosphereCommon.js";
-import groundAtmosphere from "../../../Shaders/GroundAtmosphere.js";
-import globeAtmosphere from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredGlobeAtmosphere.js";
 import restoreDepth from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredRestoreDepth.js";
 import globeSurfaceLighting from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISGlobeSurfaceLighting.js";
 import brunetonDefinitions from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonDefinitions.js";
@@ -43,11 +41,15 @@ import cloudShadows from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISC
 import indirect from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOMain.js";
 import depth from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODepth.js";
 import common from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOCommon.js";
-import GBuffer from "./_SceneGISGBuffer.js";
+import DeferredLayout from "./_SceneGISDeferredLayout.js";
+import Annotations from "./_SceneGISDeferredAnnotations.js";
+import MaterialExtensions from "./_SceneGISDeferredMaterialExtensions.js";
+import DepthFunction from "../../../Scene/DepthFunction.js";
 import DeferredInverse from "./_SceneGISDeferredInverse.js";
 import LightingMrt from "./_SceneGISLightingMrt.js";
 import LocalLights from "./_SceneGISLocalLights.js";
 import SurfaceWeather from "./_SceneGISSurfaceWeather.js";
+import PlanarEnvironmentLighting from "./_SceneGISPlanarEnvironmentLighting.js";
 import WaterFrame from "./_SceneGISWaterFrame.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
@@ -56,12 +58,56 @@ const classificationPasses = [
   Pass.CESIUM_3D_TILE_CLASSIFICATION,
 ];
 const lightingDefine =
-  /^(LIGHTING_|HAS_MODEL_COLOR$|HAS_SELECTED_FEATURE_ID$|HAS_NORMALS$|USE_IBL_LIGHTING$|USE_CUSTOM_LIGHT_COLOR$|DIFFUSE_IBL$|SPECULAR_IBL$|CUSTOM_SPHERICAL_HARMONICS$|CUSTOM_SPECULAR_IBL$|SCENEGIS_MODEL_|SCENEGIS_SKY_REFLECTIONS$|SCENEGIS_GLOBE$)/;
+  /^(PRIMITIVE_TYPE_POINTS$|HAS_POINT_CLOUD_COLOR_STYLE$|HAS_PRIMITIVE_OUTLINE$|USE_CLEARCOAT$|USE_ANISOTROPY$|USE_SPECULAR$|LIGHTING_|HAS_MODEL_COLOR$|HAS_SELECTED_FEATURE_ID$|HAS_NORMALS$|USE_IBL_LIGHTING$|USE_CUSTOM_LIGHT_COLOR$|DIFFUSE_IBL$|SPECULAR_IBL$|CUSTOM_SPHERICAL_HARMONICS$|CUSTOM_SPECULAR_IBL$|SCENEGIS_MODEL_|SCENEGIS_SKY_REFLECTIONS$|SCENEGIS_GLOBE$)/;
 const pendingGlobeBranches = ["TRANSLUCENT"];
+
+function executeVoxel(renderer, command, passState) {
+  const context = renderer._scene.context;
+  const cache = (renderer._voxelCommands ??= new WeakMap());
+  let cached = cache.get(command);
+  if (!cached) {
+    cached = { command: new DrawCommand() };
+    cache.set(command, cached);
+  }
+  const source = command.shaderProgram;
+  const key = "sceneGIS_voxel_linear_depth";
+  let shader = context.shaderCache.getDerivedShaderProgram(source, key);
+  if (!shader) {
+    const fs = source.fragmentShaderSource.clone();
+    fs.defines.push("SCENEGIS_DEFERRED_VOXEL_DEPTH");
+    shader = context.shaderCache.createDerivedShaderProgram(source, key, {
+      vertexShaderSource: source.vertexShaderSource,
+      fragmentShaderSource: fs,
+      attributeLocations: source._attributeLocations,
+    });
+  }
+  const derived = DrawCommand.shallowClone(command, cached.command);
+  if (cached.sourceUniforms !== command.uniformMap) {
+    cached.uniformMap = combine(command.uniformMap, {
+      u_sceneGISVoxelDepth: () => {
+        const scene = renderer._scene;
+        const temporal = scene._sceneGISTemporalAntialiasing?._state;
+        if (temporal?.active && temporal.deferredCaptured) {
+          return temporal.depth.getColorTexture();
+        }
+        const water = scene.frameState._sceneGISWater?.finalDepth;
+        return water?.captured
+          ? water.depth.getColorTexture()
+          : renderer.opaqueDepthTexture;
+      },
+    });
+    cached.sourceUniforms = command.uniformMap;
+  }
+  derived.shaderProgram = shader;
+  derived.uniformMap = cached.uniformMap;
+  derived.execute(context, passState);
+}
 
 function eligible(command) {
   return (
-    command.owner?._sceneGISWater !== true && !GBuffer._isGlobeDepth(command)
+    command.owner?._sceneGISWater !== true &&
+    !DeferredLayout.isGlobeDepth(command) &&
+    !DeferredLayout.isAnnotation(command)
   );
 }
 
@@ -70,6 +116,20 @@ function shaderInfo(renderer, command) {
   let info = renderer._shaders.get(shader);
   if (!info) {
     const fs = shader.fragmentShaderSource;
+    const pointPosition =
+      fs.defines.includes("PRIMITIVE_TYPE_POINTS") &&
+      fs.defines.includes("LIGHTING_PBR") &&
+      fs.defines.includes("HAS_NORMALS");
+    const extensionDefines = fs.defines.filter(
+      (name) =>
+        [
+          "USE_SPECULAR",
+          "USE_CLEARCOAT",
+          "USE_ANISOTROPY",
+          "HAS_PRIMITIVE_OUTLINE",
+        ].includes(name) ||
+        (pointPosition && name === "PRIMITIVE_TYPE_POINTS"),
+    );
     info = {
       model: fs.sources.some((source) =>
         source.includes("SCENEGIS_GBUFFER_MODEL"),
@@ -77,11 +137,27 @@ function shaderInfo(renderer, command) {
       phong: fs.sources.some((source) =>
         source.includes("#define SCENEGIS_DEFERRED_PHONG_MATERIAL"),
       ),
+      sunPhong: fs.defines.includes("ONLY_SUN_LIGHTING"),
+      featureStyle: fs.defines.includes("HAS_SELECTED_FEATURE_ID"),
+      extensionDefines,
+      extensions: extensionDefines.length > 0,
+      unlitOverlay: fs.defines.some(
+        (name) =>
+          name === "HAS_CLIPPING_PLANES" ||
+          name === "HAS_SILHOUETTE" ||
+          name === "HAS_EDGE_VISIBILITY",
+      ),
+      planar: fs.sources.some((source) =>
+        source.includes("#define SCENEGIS_DEFERRED_PLANAR_MATERIAL"),
+      ),
+      planarDefines: ["SCENEGIS_ADVANCED_LIGHTING"].filter((name) =>
+        fs.sources.some((source) => source.includes(`#define ${name}`)),
+      ),
       globe: fs.sources.some((source) =>
         source.includes("#define SCENEGIS_DEFERRED_GLOBE_MATERIAL"),
       ),
       globeDefines: fs.defines.filter((define) =>
-        /^(FOG$|GROUND_ATMOSPHERE$|DYNAMIC_ATMOSPHERE_LIGHTING$|DYNAMIC_ATMOSPHERE_LIGHTING_FROM_SUN$|COLOR_CORRECT$|HIGHLIGHT_FILL_TILE$|UNDERGROUND_COLOR$|SCENEGIS_GLOBE$|SCENEGIS_GLOBE_SURFACE_LIGHTING$|COMBINED_SCATTERING_TEXTURES$|TRANSMITTANCE_TEXTURE_|SCATTERING_TEXTURE_|IRRADIANCE_TEXTURE_)/.test(
+        /^(HIGHLIGHT_FILL_TILE$|UNDERGROUND_COLOR$|SCENEGIS_GLOBE$|SCENEGIS_GLOBE_SURFACE_LIGHTING$|COMBINED_SCATTERING_TEXTURES$|TRANSMITTANCE_TEXTURE_|SCATTERING_TEXTURE_|IRRADIANCE_TEXTURE_)/.test(
           define,
         ),
       ),
@@ -112,6 +188,7 @@ function sharedState(scene) {
 }
 
 function release(renderer) {
+  Annotations.release(renderer);
   WaterFrame.releaseFinalDepth(renderer._scene);
   renderer._inverse?.destroy();
   renderer._inverse = undefined;
@@ -125,6 +202,11 @@ function release(renderer) {
   renderer._classification = undefined;
   renderer._markUnclassified?.shaderProgram.destroy();
   renderer._markUnclassified = undefined;
+  renderer._extensionView?.destroy();
+  renderer._extensionView = undefined;
+  renderer._extensions?.destroy();
+  renderer._extensions = undefined;
+  renderer._allocatedExtensionKey = undefined;
   renderer._raw?.destroy();
   renderer._raw = undefined;
   renderer._style?.destroy();
@@ -159,6 +241,10 @@ function release(renderer) {
   renderer._passthrough = undefined;
   renderer._phong?.command.shaderProgram.destroy();
   renderer._phong = undefined;
+  renderer._sunPhong?.command.shaderProgram.destroy();
+  renderer._sunPhong = undefined;
+  renderer._planar?.command.shaderProgram.destroy();
+  renderer._planar = undefined;
   renderer._globe?.command.shaderProgram.destroy();
   renderer._globe = undefined;
   renderer._active = renderer._ready = false;
@@ -174,6 +260,9 @@ function allocate(renderer, manager) {
     pixelDatatype: PixelDatatype.HALF_FLOAT,
   });
   const source = manager.framebuffer;
+  const extensionChanged =
+    renderer._allocatedExtensionKey !== renderer._extensionLayout.key ||
+    renderer._allocatedExtensionCombined !== renderer._extensionCombined;
   const styleChanged = renderer._hasStyleTarget !== !!renderer._style;
   const oceanChanged = renderer._hasOcean !== !!renderer._ocean;
   const classificationChanged =
@@ -182,6 +271,7 @@ function allocate(renderer, manager) {
     renderer._raw.isDirty(width, height, 1) ||
     renderer._source !== source ||
     renderer._allocatedMultiFrustum !== renderer._multiFrustum ||
+    extensionChanged ||
     styleChanged ||
     classificationChanged ||
     oceanChanged
@@ -193,6 +283,30 @@ function allocate(renderer, manager) {
     renderer._classificationView?.destroy();
     renderer._classificationView = undefined;
     renderer._raw.update(context, width, height);
+    renderer._extensionView?.destroy();
+    renderer._extensionView = undefined;
+    const extensionCount = renderer._extensionLayout.count;
+    if (renderer._extensions?._colorAttachmentsLength !== extensionCount) {
+      renderer._extensions?.destroy();
+      renderer._extensions = undefined;
+    }
+    if (extensionCount) {
+      renderer._extensions ??= new FramebufferManager({
+        colorAttachmentsLength: extensionCount,
+        pixelDatatype: PixelDatatype.HALF_FLOAT,
+      });
+      renderer._extensions.update(context, width, height);
+      renderer._extensionView = new Framebuffer({
+        context,
+        colorTextures: Array.from({ length: extensionCount }, (_, i) =>
+          renderer._extensions.getColorTexture(i),
+        ),
+        depthStencilTexture: source.depthStencilTexture,
+        destroyAttachments: false,
+      });
+    }
+    renderer._allocatedExtensionKey = renderer._extensionLayout.key;
+    renderer._allocatedExtensionCombined = renderer._extensionCombined;
     const colors = [0, 1, 2, 3].map((i) => renderer._raw.getColorTexture(i));
     if (renderer._hasStyleTarget) {
       renderer._style ??= new FramebufferManager({
@@ -231,6 +345,11 @@ function allocate(renderer, manager) {
       renderer._classification?.destroy();
       renderer._classification = undefined;
     }
+    if (renderer._extensionCombined) {
+      for (let i = 0; i < renderer._extensionLayout.count; ++i) {
+        colors.push(renderer._extensions.getColorTexture(i));
+      }
+    }
     renderer._framebuffer = new Framebuffer({
       context,
       colorTextures: colors,
@@ -255,6 +374,7 @@ function allocate(renderer, manager) {
     width *
     height *
     (32 +
+      renderer._extensionLayout.count * 8 +
       (renderer._hasStyleTarget ? 8 : 0) +
       (renderer._hasOcean ? 8 : 0) +
       (renderer._hasClassification ? 8 : 0));
@@ -292,6 +412,34 @@ function createGroup(renderer, model, key, family) {
   builder.addDefine("SCENEGIS_GEOMETRY_SHADOW", undefined, fragment);
   builder.addFragmentLines([inputs, common]);
   if (model) {
+    for (const define of [
+      "HAS_POINT_CLOUD_COLOR_STYLE",
+      "PRIMITIVE_TYPE_POINTS",
+      "USE_SPECULAR",
+      "USE_CLEARCOAT",
+      "USE_ANISOTROPY",
+      "HAS_PRIMITIVE_OUTLINE",
+    ]) {
+      if (key.includes(define)) {
+        builder.addDefine(define, undefined, fragment);
+      }
+    }
+    if (key.includes("HAS_PRIMITIVE_OUTLINE")) {
+      builder.addUniform("vec4", "model_outlineColor", fragment);
+      if (renderer._extensionLayout.outlineInStyle) {
+        builder.addDefine(
+          "SCENEGIS_DEFERRED_OUTLINE_STYLE",
+          undefined,
+          fragment,
+        );
+      }
+    }
+    if (renderer._extensionLayout.count) {
+      builder.addDefine("SCENEGIS_DEFERRED_EXTENSIONS", undefined, fragment);
+      builder.addFragmentLines(
+        MaterialExtensions.lightingSource(renderer._extensionLayout),
+      );
+    }
     const resources = {
       model,
       shaderBuilder: builder,
@@ -323,6 +471,16 @@ function createGroup(renderer, model, key, family) {
     }
   } else if (family === "phong") {
     builder.addDefine("SCENEGIS_DEFERRED_PHONG_LIGHTING", undefined, fragment);
+    if (key === "sun") {
+      builder.addDefine("ONLY_SUN_LIGHTING", undefined, fragment);
+    }
+  } else if (family === "planar") {
+    for (const define of key) {
+      builder.addDefine(define, undefined, fragment);
+    }
+    if (key.includes("SCENEGIS_ADVANCED_LIGHTING")) {
+      builder.addFragmentLines(PlanarEnvironmentLighting.source);
+    }
   } else if (family === "globe") {
     builder.addDefine("SCENEGIS_DEFERRED_GLOBE_LIGHTING", undefined, fragment);
     for (const define of key) {
@@ -330,13 +488,6 @@ function createGroup(renderer, model, key, family) {
     }
     if (key.includes("SCENEGIS_DEFERRED_GLOBE_WATER")) {
       builder.addFragmentLines(globeOcean);
-    }
-    if (key.includes("GROUND_ATMOSPHERE") || key.includes("FOG")) {
-      builder.addFragmentLines([
-        atmosphereCommon,
-        groundAtmosphere,
-        globeAtmosphere,
-      ]);
     }
     if (key.includes("SCENEGIS_GLOBE_SURFACE_LIGHTING")) {
       builder.addFragmentLines([
@@ -356,9 +507,16 @@ function createGroup(renderer, model, key, family) {
       ? globeLighting
       : family === "phong"
         ? phongLighting
-        : lighting,
+        : family === "planar"
+          ? planarLighting
+          : lighting,
   );
-  const group = { id: -1, seen: false, sourceUniforms: undefined };
+  const group = {
+    id: -1,
+    seen: false,
+    sourceUniforms: undefined,
+    extensionKey: renderer._extensionLayout.key,
+  };
   const source = () => renderer._lightingInputs ?? renderer;
   group.uniforms = {
     u_sceneGISDeferredDiffuse: () => source()._raw.getColorTexture(0),
@@ -370,6 +528,10 @@ function createGroup(renderer, model, key, family) {
     u_linearDepth: () => source()._linearDepth,
     u_sceneGISDeferredGroup: () => group.id,
   };
+  for (let i = 0; i < renderer._extensionLayout.count; ++i) {
+    group.uniforms[`u_sceneGISExtension${i}`] = () =>
+      source()._extensions.getColorTexture(i);
+  }
   if (family === "globe") {
     // The first tile in a group may be a loaded tile without a fill-color uniform.
     group.uniforms.u_fillHighlightColor = () => scene.globe.fillHighlightColor;
@@ -387,6 +549,31 @@ function createGroup(renderer, model, key, family) {
 }
 
 function prepareGroups(renderer, ranges) {
+  const extensionDefines = new Set();
+  let extensionStyleTarget = false;
+  for (const range of ranges) {
+    for (const pass of opaquePasses) {
+      for (let i = 0; i < range.indices[pass]; ++i) {
+        const command = range.commands[pass][i];
+        if (eligible(command)) {
+          const info = shaderInfo(renderer, command);
+          extensionStyleTarget ||= info.globeOceanFabric;
+          if (info.model) {
+            extensionStyleTarget ||= info.featureStyle;
+            info.extensionDefines.forEach((name) => extensionDefines.add(name));
+          }
+        }
+      }
+    }
+  }
+  const extensionKey = `${[...extensionDefines].sort().join(";")}_${extensionStyleTarget}`;
+  if (!renderer._extensionLayouts.has(extensionKey)) {
+    renderer._extensionLayouts.set(
+      extensionKey,
+      MaterialExtensions.layout(extensionDefines, extensionStyleTarget),
+    );
+  }
+  renderer._extensionLayout = renderer._extensionLayouts.get(extensionKey);
   renderer._hasInverseClassification =
     renderer._scene._environmentState.useInvertClassification &&
     ranges.some((range) => range.indices[Pass.CESIUM_3D_TILE] > 0);
@@ -407,6 +594,8 @@ function prepareGroups(renderer, ranges) {
   renderer._hasOcean = false;
   let hasOceanFabric = false;
   let hasPhong = false;
+  let hasSunPhong = false;
+  let planarCommand;
   let globeCommand;
   const globeDefines = new Set();
   for (const range of ranges) {
@@ -417,6 +606,10 @@ function prepareGroups(renderer, ranges) {
           continue;
         }
         const info = shaderInfo(renderer, command);
+        if (info.planar) {
+          planarCommand ??= command;
+          continue;
+        }
         if (info.globe) {
           if (info.pendingGlobeBranch) {
             throw new DeveloperError(
@@ -435,13 +628,18 @@ function prepareGroups(renderer, ranges) {
           continue;
         }
         if (info.phong) {
-          hasPhong = true;
+          if (info.sunPhong) {
+            hasSunPhong = true;
+          } else {
+            hasPhong = true;
+          }
           continue;
         }
         if (!info.model) {
           renderer._hasPassthrough = true;
           continue;
         }
+        renderer._hasPassthrough ||= info.unlitOverlay;
         const model = command.owner;
         let groups = renderer._models.get(model);
         if (!groups) {
@@ -451,6 +649,10 @@ function prepareGroups(renderer, ranges) {
         const key = info.key;
         renderer._hasFeatureStyle ||= key.includes("HAS_SELECTED_FEATURE_ID");
         let group = groups.get(key);
+        if (group && group.extensionKey !== renderer._extensionLayout.key) {
+          group.command.shaderProgram.destroy();
+          group = undefined;
+        }
         if (!group) {
           group = createGroup(renderer, model, key);
           groups.set(key, group);
@@ -497,6 +699,36 @@ function prepareGroups(renderer, ranges) {
   } else {
     renderer._phong?.command.shaderProgram.destroy();
     renderer._phong = undefined;
+  }
+  if (hasSunPhong) {
+    renderer._sunPhong ??= createGroup(renderer, undefined, "sun", "phong");
+    renderer._sunPhong.id = -4;
+    renderer._groups.push(renderer._sunPhong);
+  } else {
+    renderer._sunPhong?.command.shaderProgram.destroy();
+    renderer._sunPhong = undefined;
+  }
+  if (planarCommand) {
+    const defines = shaderInfo(renderer, planarCommand).planarDefines;
+    const key = defines.join(";");
+    if (renderer._planar?.key !== key) {
+      renderer._planar?.command.shaderProgram.destroy();
+      renderer._planar = createGroup(renderer, undefined, defines, "planar");
+      renderer._planar.key = key;
+      renderer._planar.id = -5;
+    }
+    const group = renderer._planar;
+    if (group.sourceUniforms !== planarCommand.uniformMap) {
+      group.sourceUniforms = planarCommand.uniformMap;
+      group.command.uniformMap = combine(
+        group.uniforms,
+        planarCommand.uniformMap,
+      );
+    }
+    renderer._groups.push(group);
+  } else {
+    renderer._planar?.command.shaderProgram.destroy();
+    renderer._planar = undefined;
   }
   if (globeCommand) {
     if (renderer._hasOcean) {
@@ -577,7 +809,7 @@ function classificationLighting(renderer, command) {
   return derived;
 }
 
-/** Private native-material lighting experiment, with no public selection API. @private */
+/** Scene-owned native-material deferred lighting. @private */
 class _SceneGISDeferredLighting {
   constructor(scene) {
     if (!scene || scene.isDestroyed() || scene._sceneGISDeferred) {
@@ -586,8 +818,9 @@ class _SceneGISDeferredLighting {
       );
     }
     this._scene = scene;
-    this._enabled = this._active = this._ready = false;
+    this._active = this._ready = false;
     this._models = new Map();
+    this._extensionLayouts = new Map();
     this._globeBatches = new Map();
     this._groups = [];
     this._commands = new WeakMap();
@@ -598,7 +831,10 @@ class _SceneGISDeferredLighting {
     this._isGlobeCommand = (command) =>
       command.pass === Pass.GLOBE && shaderInfo(this, command).globe;
     this._clear = new ClearCommand({ color: Color.TRANSPARENT });
+    this.annotationDrawCount = this.annotationDepthCopyCount = 0;
     this.drawCount =
+      this.materialExtensionDrawCount =
+      this.colorCorrectionDrawCount =
       this.classificationDrawCount =
       this.groupCount =
       this.lightDrawCount =
@@ -607,21 +843,26 @@ class _SceneGISDeferredLighting {
     scene._sceneGISDeferred = this;
   }
 
-  get enabled() {
-    return this._enabled;
-  }
-  set enabled(value) {
-    if (typeof value !== "boolean") {
-      throw new DeveloperError("enabled must be boolean.");
-    }
-    this._enabled = value;
-    if (!value) {
-      release(this);
-    }
-    this._scene.requestRender();
-  }
   get ready() {
-    return this._enabled && this._ready;
+    return this._ready;
+  }
+
+  get opaqueDepthTexture() {
+    return this._annotations?.ready
+      ? this._annotations.depth.getColorTexture()
+      : this._linearDepth;
+  }
+
+  prepareAnnotationCommands() {
+    Annotations.prepareCommands(this);
+  }
+
+  prepareAnnotations(passState) {
+    Annotations.captureDepth(this, passState);
+  }
+
+  drawAnnotations(range, index, passState, executeCommand) {
+    Annotations.draw(this, range, index, passState, executeCommand);
   }
 
   get handlesInvertClassification() {
@@ -704,29 +945,26 @@ class _SceneGISDeferredLighting {
     }
   }
 
+  prepare() {
+    DeferredLayout.validateScene(this._scene);
+  }
+
   begin(passState) {
     this._active = this._ready = this._waterReady = false;
     this._linearDepth = undefined;
     this._preservedGlobeDepth = false;
+    this.annotationDrawCount = this.annotationDepthCopyCount = 0;
     this.drawCount =
+      this.materialExtensionDrawCount =
+      this.colorCorrectionDrawCount =
       this.classificationDrawCount =
       this.lightDrawCount =
       this.groupCount =
         0;
-    if (!this.enabled || !this._scene.frameState.passes.render) {
+    if (!this._scene.frameState.passes.render) {
       return;
     }
     const scene = this._scene;
-    if (scene.msaaSamples > 1) {
-      throw new DeveloperError(
-        "Deferred lighting requires msaaSamples = 1. Select TAA or FXAA explicitly.",
-      );
-    }
-    if (scene._sceneGISGBuffer?.enabled) {
-      throw new DeveloperError(
-        "Disable diagnostic G-buffer replay before enabling deferred lighting.",
-      );
-    }
     const ranges = scene._view.frustumCommandsList;
     this._multiFrustum = ranges.length > 1;
     if (ranges.length === 0) {
@@ -734,7 +972,7 @@ class _SceneGISDeferredLighting {
       return;
     }
     for (const range of ranges) {
-      GBuffer._validate(
+      DeferredLayout.validate(
         scene,
         range,
         passState,
@@ -768,7 +1006,15 @@ class _SceneGISDeferredLighting {
         `Deferred material layout requires ${targetCount} floating-point color attachments.`,
       );
     }
+    this._extensionLocation = targetCount;
+    this._extensionCombined =
+      targetCount + this._extensionLayout.count <=
+      Math.min(
+        ContextLimits.maximumDrawBuffers,
+        ContextLimits.maximumColorAttachments,
+      );
     allocate(this, layout.manager);
+    Annotations.update(this, ranges);
     WaterFrame.updateFinalDepth(scene);
     if (
       this._hasInverseClassification &&
@@ -786,6 +1032,10 @@ class _SceneGISDeferredLighting {
       // Clear owned colors only; native Scene owns the shared depth clear.
       passState.framebuffer = this._raw.framebuffer;
       this._clear.execute(scene.context, passState);
+      if (this._extensions) {
+        passState.framebuffer = this._extensions.framebuffer;
+        this._clear.execute(scene.context, passState);
+      }
       if (this._style) {
         passState.framebuffer = this._style.framebuffer;
         this._clear.execute(scene.context, passState);
@@ -844,6 +1094,11 @@ class _SceneGISDeferredLighting {
         }
       }
       colors.push(this._linearDepth);
+      if (this._extensionCombined) {
+        for (let i = 0; i < this._extensionLayout.count; ++i) {
+          colors.push(this._extensions.getColorTexture(i));
+        }
+      }
       this._framebuffer = new Framebuffer({
         context: scene.context,
         colorTextures: colors,
@@ -871,7 +1126,7 @@ class _SceneGISDeferredLighting {
         }),
         {
           uniformMap: {
-            u_linearDepth: () => this._linearDepth,
+            u_linearDepth: () => this.opaqueDepthTexture,
             u_material: () => this._raw.getColorTexture(2),
             u_frustumTag: () => this._frustumTag,
             u_clearGlobeDepth: () => scene._environmentState.clearGlobeDepth,
@@ -891,6 +1146,29 @@ class _SceneGISDeferredLighting {
   draw(command, passState) {
     const scene = this._scene;
     const passes = scene.frameState.passes;
+    if (
+      this._ready &&
+      passes.render &&
+      !passes.pick &&
+      !passes.depth &&
+      !passes.pickVoxel &&
+      command.pass === Pass.VOXELS
+    ) {
+      executeVoxel(this, command, passState);
+      return true;
+    }
+    if (
+      passes.render &&
+      !passes.pick &&
+      !passes.depth &&
+      !passes.pickVoxel &&
+      DeferredLayout.isAnnotation(command)
+    ) {
+      if (this._annotations?.drawing) {
+        Annotations.execute(this, command, passState);
+      }
+      return true;
+    }
     if (
       !this._active ||
       !passes.render ||
@@ -932,10 +1210,14 @@ class _SceneGISDeferredLighting {
     const group = model
       ? this._models.get(command.owner).get(info.key)
       : info.phong
-        ? this._phong
+        ? info.sunPhong
+          ? this._sunPhong
+          : this._phong
         : info.globe
           ? this._globe
-          : undefined;
+          : info.planar
+            ? this._planar
+            : undefined;
     if (
       scene.frameState.shadowState.lightShadowsEnabled &&
       command.receiveShadows &&
@@ -943,17 +1225,22 @@ class _SceneGISDeferredLighting {
     ) {
       command = command.derivedCommands.shadows.receiveCommand;
     }
-    if (!model && !info.phong && !info.globe) {
+    if (!model && !info.phong && !info.globe && !info.planar) {
       command = LocalLights.receiver(scene, command);
     }
-    if (!info.globe) {
+    if (!info.globe && !info.planar) {
       command = SurfaceWeather.receiver(scene, command);
     }
     const shader = command.shaderProgram;
+    const inverseMaterial =
+      !!this._inverse && command.pass === Pass.CESIUM_3D_TILE;
     let cached = this._commands.get(command);
     if (
       !cached ||
       cached.shader !== shader ||
+      cached.inverseMaterial !== inverseMaterial ||
+      cached.extensionKey !== this._extensionLayout.key ||
+      cached.extensionCombined !== this._extensionCombined ||
       cached.styleTarget !== this._hasStyleTarget ||
       cached.ocean !== this._hasOcean ||
       cached.classification !== this._hasClassification ||
@@ -961,14 +1248,15 @@ class _SceneGISDeferredLighting {
       cached.globeBlend !== globeBlend ||
       cached.sourceUniforms !== command.uniformMap
     ) {
-      const name = `sceneGIS_deferred_material_${this._hasStyleTarget ? 5 : 4}${this._hasOcean ? "_ocean" : ""}${this._hasClassification ? "_classification" : ""}${this._multiFrustum ? "_frusta" : ""}${globeBlend ? "_imagery" : ""}`;
+      const name = `sceneGIS_deferred_material_${inverseMaterial}_${this._extensionLayout.key}_${this._extensionCombined}_${this._hasStyleTarget ? 5 : 4}${this._hasOcean ? "_ocean" : ""}${this._hasClassification ? "_classification" : ""}${this._multiFrustum ? "_frusta" : ""}${globeBlend ? "_imagery" : ""}`;
       let program = scene.context.shaderCache.getDerivedShaderProgram(
         shader,
         name,
       );
       if (!program) {
         const fs = shader.fragmentShaderSource.clone();
-        if (this._multiFrustum) {
+        let vs = shader.vertexShaderSource;
+        if (this._multiFrustum && !inverseMaterial) {
           fs.defines.push(
             `SCENEGIS_DEFERRED_DEPTH_LOCATION ${4 + Number(this._hasStyleTarget) + Number(this._hasOcean) + Number(this._hasClassification)}`,
           );
@@ -976,23 +1264,27 @@ class _SceneGISDeferredLighting {
         if (this._hasStyleTarget) {
           fs.defines.push("SCENEGIS_DEFERRED_STYLE_TARGET");
         }
-        if (this._hasOcean) {
+        if (this._hasOcean && !inverseMaterial) {
           fs.defines.push(
             `SCENEGIS_DEFERRED_OCEAN_LOCATION ${4 + (this._hasStyleTarget ? 1 : 0)}`,
           );
         }
-        if (this._hasClassification) {
+        if (this._hasClassification && !inverseMaterial) {
           fs.defines.push(
             `SCENEGIS_DEFERRED_CLASSIFICATION_LOCATION ${4 + (this._hasStyleTarget ? 1 : 0) + (this._hasOcean ? 1 : 0)}`,
           );
         }
         if (model) {
           fs.defines.push(
-            "SCENEGIS_GBUFFER_MODEL_CAPTURE",
             "SCENEGIS_DEFERRED_CAPTURE",
+            "CESIUM_REDIRECTED_COLOR_OUTPUT",
           );
         } else if (info.phong) {
           fs.defines.push("SCENEGIS_DEFERRED_PHONG_CAPTURE");
+        } else if (info.planar) {
+          fs.defines.push("SCENEGIS_DEFERRED_PLANAR_CAPTURE");
+          vs = vs.clone();
+          vs.defines.push("SCENEGIS_DEFERRED_PLANAR_CAPTURE");
         } else if (info.globe) {
           fs.defines.push("SCENEGIS_DEFERRED_GLOBE_CAPTURE");
           if (globeBlend) {
@@ -1006,20 +1298,66 @@ class _SceneGISDeferredLighting {
           ShaderSource.replaceMain(source, "sceneGISDeferredMaterialMain"),
         );
         fs.sources.push(capture);
+        if (this._extensionLayout.count) {
+          fs.defines.push("SCENEGIS_DEFERRED_EXTENSIONS");
+          fs.sources.push(
+            MaterialExtensions.captureSource(
+              this._extensionLayout,
+              this._extensionCombined
+                ? inverseMaterial
+                  ? 4 + Number(this._hasStyleTarget)
+                  : this._extensionLocation
+                : undefined,
+            ),
+          );
+        }
         fs.sources.push(
-          "void main() { sceneGISDeferredMaterialMain(); sceneGISWriteDeferredMaterial(); }",
+          `void main() { sceneGISDeferredMaterialMain(); sceneGISWriteDeferredMaterial(); ${this._extensionCombined && this._extensionLayout.count ? "sceneGISWriteExtensions();" : ""} }`,
         );
         program = scene.context.shaderCache.createDerivedShaderProgram(
           shader,
           name,
           {
-            vertexShaderSource: shader.vertexShaderSource,
+            vertexShaderSource: vs,
             fragmentShaderSource: fs,
             attributeLocations: shader._attributeLocations,
           },
         );
       }
+      let extensionProgram;
+      if (info.extensions && !this._extensionCombined) {
+        const extensionName = `${name}_extensions`;
+        extensionProgram = scene.context.shaderCache.getDerivedShaderProgram(
+          shader,
+          extensionName,
+        );
+        if (!extensionProgram) {
+          const fs = program.fragmentShaderSource.clone();
+          fs.defines.push("SCENEGIS_DEFERRED_EXTENSION_ONLY");
+          fs.sources[fs.sources.length - 2] = MaterialExtensions.captureSource(
+            this._extensionLayout,
+            0,
+          );
+          fs.sources[fs.sources.length - 1] =
+            "uniform sampler2D u_sceneGISVisibleMaterial; void main() { if (texelFetch(u_sceneGISVisibleMaterial, ivec2(gl_FragCoord.xy), 0).a != u_sceneGISDeferredGroup) { discard; } sceneGISDeferredMaterialMain(); sceneGISWriteExtensions(); }";
+          extensionProgram =
+            scene.context.shaderCache.createDerivedShaderProgram(
+              shader,
+              extensionName,
+              {
+                vertexShaderSource: program.vertexShaderSource,
+                fragmentShaderSource: fs,
+                attributeLocations: shader._attributeLocations,
+              },
+            );
+        }
+      }
       cached = {
+        inverseMaterial,
+        extensionProgram,
+        extensionCommand: new DrawCommand(),
+        extensionKey: this._extensionLayout.key,
+        extensionCombined: this._extensionCombined,
         shader,
         styleTarget: this._hasStyleTarget,
         ocean: this._hasOcean,
@@ -1030,8 +1368,21 @@ class _SceneGISDeferredLighting {
         uniformMap: combine(
           {
             u_sceneGISDeferredGroup: () => cached.group.id,
+            u_sceneGISVisibleMaterial: () =>
+              (this._inverse && command.pass === Pass.CESIUM_3D_TILE
+                ? this._inverse
+                : this
+              )._raw.getColorTexture(2),
             u_sceneGISFinalImageryBatch: () => cached.finalGlobeBatch,
             u_sceneGISDeferredFrustumTag: () => this._frustumTag,
+            u_sceneGISPlanarFillDepth: () =>
+              scene._view.planarFillIdFramebuffer.depthStencilTexture,
+            u_sceneGISRasterSubpixelSize: () =>
+              (this._rasterSubpixelSize ??=
+                2 **
+                -scene.context._gl.getParameter(
+                  scene.context._gl.SUBPIXEL_BITS,
+                )),
           },
           command.uniformMap,
         ),
@@ -1053,9 +1404,35 @@ class _SceneGISDeferredLighting {
         : this._framebuffer;
     if (inverse) {
       this._inverse.groups.add(cached.group);
+      if (info.unlitOverlay) {
+        this._inverse.groups.add(this._passthrough);
+      }
     }
     derived.execute(scene.context, passState);
     ++this.drawCount;
+    if (
+      cached.extensionProgram &&
+      !command.uniformMap.model_silhouettePass?.()
+    ) {
+      const extra = DrawCommand.shallowClone(derived, cached.extensionCommand);
+      extra.shaderProgram = cached.extensionProgram;
+      if (cached.sourceRenderState !== derived.renderState) {
+        const state = RenderState.getState(derived.renderState);
+        state.depthTest = { enabled: true, func: DepthFunction.EQUAL };
+        state.depthMask = false;
+        state.stencilTest.enabled = false;
+        state.stencilMask = 0;
+        state.blending.enabled = false;
+        cached.extensionRenderState = RenderState.fromCache(state);
+        cached.sourceRenderState = derived.renderState;
+      }
+      extra.renderState = cached.extensionRenderState;
+      extra.framebuffer = inverse
+        ? this._inverse._extensionView
+        : this._extensionView;
+      extra.execute(scene.context, passState);
+      ++this.materialExtensionDrawCount;
+    }
     return true;
   }
 
@@ -1118,8 +1495,9 @@ class _SceneGISDeferredLighting {
 
   _drawLight(group, passState, shared, inverse = false) {
     const scene = this._scene;
+    let sharedCommand;
     let command =
-      group === this._globe
+      group === this._globe || group === this._planar
         ? SurfaceWeather.receiver(scene, group.command)
         : group.command;
     command = LocalLights.receiver(scene, command);
@@ -1128,11 +1506,19 @@ class _SceneGISDeferredLighting {
     } else {
       command = classificationLighting(this, command);
       if (shared) {
+        sharedCommand = command;
         command = LightingMrt.command(scene, shared, command);
       }
     }
     command.execute(scene.context, passState);
     ++this.lightDrawCount;
+    if (shared?.main.split) {
+      LightingMrt.command(scene, shared, sharedCommand, true).execute(
+        scene.context,
+        passState,
+      );
+      ++this.lightDrawCount;
+    }
   }
 
   _lightInverse(passState) {
@@ -1209,7 +1595,9 @@ class _SceneGISDeferredLighting {
   }
   destroy() {
     release(this);
+    const displayHdr = this._scene.highDynamicRange;
     this._scene._sceneGISDeferred = undefined;
+    this._scene.highDynamicRange = displayHdr;
     this._scene.requestRender();
     this._scene = undefined;
     return destroyObject(this);

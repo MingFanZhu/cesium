@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>延迟标注验收</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #152237;
+        color: #edf4ff;
+        font: 14px/1.6 sans-serif;
+      }
+      body {
+        display: grid;
+        grid-template-columns: 290px 1fr;
+        grid-template-rows: minmax(0, 1fr);
+      }
+      aside {
+        padding: 24px;
+      }
+      #map {
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 16px;
+      }
+      label {
+        display: block;
+        margin: 15px 0;
+      }
+      select,
+      button,
+      input {
+        font: inherit;
+      }
+      input[type="range"] {
+        width: 145px;
+      }
+      small {
+        color: #a7bed8;
+      }
+      #error {
+        color: #ff9c9c;
+      }
+      button {
+        padding: 6px 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <h1>延迟标注验收</h1>
+      <p>左：文字背景混色。中：透明蓝板前后遮挡。右：水面与标注前后关系。</p>
+      <label
+        ><input id="background" type="checkbox" checked />显示文字背景</label
+      >
+      <label
+        >背景不透明度
+        <input
+          id="alpha"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="0.5"
+        /><span id="alphaValue">0.50</span></label
+      >
+      <label
+        >蓝板位置
+        <select id="panel">
+          <option value="1">标注后方</option>
+          <option value="5">标注前方</option>
+        </select></label
+      >
+      <label
+        >水面位置
+        <select id="water">
+          <option value="1">标注后方</option>
+          <option value="5">标注前方</option>
+        </select></label
+      >
+      <label><input id="multi" type="checkbox" />多个视锥</label>
+      <label><input id="taa" type="checkbox" checked />TAA</label>
+      <label><input id="ao" type="checkbox" />环境遮蔽</label>
+      <button id="home">恢复视角</button>
+      <p id="pick">点击文字查看拾取</p>
+      <small
+        >实心文字独立绘制；半透明背景与透明物合成。后方蓝板和水面可透过背景显示；标注不参与水面折射，前方水面完整遮挡标注。</small
+      >
+      <p id="error"></p>
+    </aside>
+    <div id="map"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./延迟标注验收.js"></script>
+  </body>
+</html>

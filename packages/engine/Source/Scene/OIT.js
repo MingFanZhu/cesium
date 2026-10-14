@@ -518,6 +518,10 @@ function getTranslucentShaderProgram(context, shaderProgram, keyword, source) {
   const attributeLocations = shaderProgram._attributeLocations;
   const fs = shaderProgram.fragmentShaderSource.clone();
 
+  // SCENEGIS_PATCH_BEGIN SGP-0049: Keep the builtin that also declares sun-only Phong for ellipsoid transparency.
+  const phong = fs.defines.includes("ONLY_SUN_LIGHTING")
+    ? "czm_phong"
+    : "czm_translucentPhong";
   fs.sources = fs.sources.map(function (fsSource) {
     return ShaderSource.replaceMain(fsSource, "czm_translucent_main")
       .replace(/out_FragColor/g, "czm_out_FragColor")
@@ -526,8 +530,9 @@ function getTranslucentShaderProgram(context, shaderProgram, keyword, source) {
         "",
       )
       .replace(/\bdiscard\b/g, "czm_discard = true")
-      .replace(/czm_phong/g, "czm_translucentPhong");
+      .replace(/czm_phong/g, phong);
   });
+  // SCENEGIS_PATCH_END SGP-0049
 
   // Discarding the fragment in main is a workaround for ANGLE D3D9
   // shader compilation errors.

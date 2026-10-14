@@ -1,3 +1,5 @@
+import MaterialExtensions from "./_SceneGISDeferredMaterialExtensions.js";
+import DepthFunction from "../../../Scene/DepthFunction.js";
 import Color from "../../../Core/Color.js";
 import combine from "../../../Core/combine.js";
 import destroyObject from "../../../Core/destroyObject.js";
@@ -109,12 +111,38 @@ class _SceneGISDeferredInverse {
     const width = context.drawingBufferWidth;
     const height = context.drawingBufferHeight;
     const style = renderer._hasStyleTarget;
-    const layout = `${style}_${renderer._hasOcean}_${renderer._hasClassification}_${renderer._multiFrustum}_${frameState.useLogDepth}`;
+    const layout = `${renderer._extensionLayout.key}_${renderer._extensionCombined}_${style}_${renderer._hasOcean}_${renderer._hasClassification}_${renderer._multiFrustum}_${frameState.useLogDepth}`;
     if (this._raw.isDirty(width, height, 1) || this._layout !== layout) {
       this._releaseDepthSource();
       this.framebuffer?.destroy();
       this._maskView?.destroy();
       this._raw.update(context, width, height);
+      this._extensionView?.destroy();
+      this._extensionView = undefined;
+      const extensionCount = renderer._extensionLayout.count;
+      if (this._extensions?._colorAttachmentsLength !== extensionCount) {
+        this._extensions?.destroy();
+        this._extensions = undefined;
+      }
+      if (extensionCount) {
+        this._extensions ??= new FramebufferManager({
+          colorAttachmentsLength: extensionCount,
+          pixelDatatype: PixelDatatype.HALF_FLOAT,
+        });
+        this._extensions.update(context, width, height);
+        this._extensionView = new Framebuffer({
+          context,
+          colorTextures: Array.from({ length: extensionCount }, (_, i) =>
+            this._extensions.getColorTexture(i),
+          ),
+          depthStencilTexture: this._raw.getDepthStencilTexture(),
+          destroyAttachments: false,
+        });
+        for (let i = 0; i < extensionCount; ++i) {
+          this._uniforms[`u_sceneGISExtension${i}`] = () =>
+            this._extensions.getColorTexture(i);
+        }
+      }
       if (style) {
         this._style ??= new FramebufferManager({
           pixelDatatype: PixelDatatype.HALF_FLOAT,
@@ -131,6 +159,11 @@ class _SceneGISDeferredInverse {
       if (style) {
         colors.push(this._style.getColorTexture());
       }
+      if (renderer._extensionCombined) {
+        for (let i = 0; i < extensionCount; ++i) {
+          colors.push(this._extensions.getColorTexture(i));
+        }
+      }
       this.framebuffer = new Framebuffer({
         context,
         colorTextures: colors,
@@ -144,6 +177,8 @@ class _SceneGISDeferredInverse {
         destroyAttachments: false,
       });
       this._merge?.shaderProgram.destroy();
+      this._mergeExtensions?.shaderProgram.destroy();
+      this._mergeExtensions = undefined;
       const defines = [];
       if (style) {
         defines.push("SCENEGIS_DEFERRED_STYLE_TARGET");
@@ -164,8 +199,18 @@ class _SceneGISDeferredInverse {
           defines.push("LOG_DEPTH_READ_ONLY");
         }
       }
+      const sources = [merge];
+      if (extensionCount && renderer._extensionCombined) {
+        defines.push("SCENEGIS_DEFERRED_EXTENSIONS");
+        sources.unshift(
+          MaterialExtensions.copySource(
+            renderer._extensionLayout,
+            renderer._extensionLocation,
+          ),
+        );
+      }
       this._merge = context.createViewportQuadCommand(
-        new ShaderSource({ defines, sources: [merge] }),
+        new ShaderSource({ defines, sources }),
         {
           uniformMap: this._uniforms,
           renderState: RenderState.fromCache({
@@ -176,6 +221,27 @@ class _SceneGISDeferredInverse {
           }),
         },
       );
+      if (extensionCount && !renderer._extensionCombined) {
+        this._mergeExtensions = context.createViewportQuadCommand(
+          new ShaderSource({
+            defines: [
+              "SCENEGIS_DEFERRED_EXTENSION_ONLY",
+              "SCENEGIS_DEFERRED_EXTENSIONS",
+            ],
+            sources: [
+              MaterialExtensions.copySource(renderer._extensionLayout, 0),
+              merge,
+            ],
+          }),
+          {
+            uniformMap: this._uniforms,
+            renderState: RenderState.fromCache({
+              depthTest: { enabled: true, func: DepthFunction.EQUAL },
+              depthMask: false,
+            }),
+          },
+        );
+      }
       this._layout = layout;
     }
     if (!this._copyDepth || this._logDepth !== frameState.useLogDepth) {
@@ -215,7 +281,12 @@ class _SceneGISDeferredInverse {
       layer.depth.destroy();
     }
     this.byteLength =
-      width * height * (52 + (style ? 8 : 0) + (layerCount - 1) * 12);
+      width *
+      height *
+      (52 +
+        renderer._extensionLayout.count * 8 +
+        (style ? 8 : 0) +
+        (layerCount - 1) * 12);
     if (!renderer._multiFrustum) {
       this.beginFrustum(0, passState);
       this.selectFrustum(0);
@@ -241,6 +312,7 @@ class _SceneGISDeferredInverse {
     this._raw.clear(context, this._clear, passState);
     for (const target of [
       this._style,
+      this._extensions,
       this._mask,
       this._activeLayer.depth,
       this._activeLayer.color,
@@ -264,6 +336,10 @@ class _SceneGISDeferredInverse {
     this._mark.execute(this._scene.context, passState);
     this._merge.framebuffer = renderer._framebuffer;
     this._merge.execute(this._scene.context, passState);
+    if (this._mergeExtensions) {
+      this._mergeExtensions.framebuffer = renderer._extensionView;
+      this._mergeExtensions.execute(this._scene.context, passState);
+    }
   }
 
   prepareLight(passState) {
@@ -325,8 +401,14 @@ class _SceneGISDeferredInverse {
   destroy() {
     this._releaseDepthSource();
     this.framebuffer?.destroy();
+    this._extensionView?.destroy();
     this._maskView?.destroy();
-    for (const target of [this._raw, this._style, this._mask]) {
+    for (const target of [
+      this._raw,
+      this._style,
+      this._extensions,
+      this._mask,
+    ]) {
       target?.destroy();
     }
     for (const layer of this._layers) {
@@ -336,6 +418,7 @@ class _SceneGISDeferredInverse {
     for (const command of [
       this._mark,
       this._merge,
+      this._mergeExtensions,
       this._copyDepth,
       this._packDepth,
       this.unclassifiedCommand,

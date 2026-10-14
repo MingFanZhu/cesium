@@ -1,5 +1,4 @@
 import {
-  _SceneGISDeferredLighting as DeferredLighting,
   BoxGeometry,
   CallbackProperty,
   Cartesian2,
@@ -9,6 +8,7 @@ import {
   DataSourceCollection,
   DataSourceDisplay,
   DirectionalLight,
+  EllipsoidPrimitive,
   EllipsoidSurfaceAppearance,
   FramebufferManager,
   GeometryInstance,
@@ -17,6 +17,7 @@ import {
   Matrix4,
   OrthographicFrustum,
   PerInstanceColorAppearance,
+  PerspectiveFrustum,
   PixelDatatype,
   Primitive,
   SceneGISLightCollection,
@@ -64,7 +65,7 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
     });
     scene.farToNearRatio = 10000;
     scene.logarithmicDepthBuffer = false;
-    renderer = new DeferredLighting(scene);
+    renderer = scene._sceneGISDeferred;
   });
   afterEach(function () {
     display?.destroy();
@@ -106,16 +107,6 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
       scene._view.sceneFramebuffer._colorFramebuffer.getColorTexture(),
       x,
     );
-  }
-  function compare() {
-    renderer.enabled = false;
-    render();
-    const before = color();
-    renderer.enabled = true;
-    render();
-    expect(color()).toEqualEpsilon(before, 0.004);
-    expect(before[0] + before[1] + before[2]).toBeGreaterThan(0.01);
-    return before;
   }
   function box(
     appearance = new PerInstanceColorAppearance({ translucent: false }),
@@ -163,9 +154,80 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
     });
   }
 
+  [false, true].forEach((logDepth) => {
+    it(`captures ray-cast ellipsoid material and intersection depth with log depth ${logDepth}`, function () {
+      scene.camera.frustum = new PerspectiveFrustum({
+        fov: Math.PI / 3,
+        aspectRatio: 1,
+        near: 0.1,
+        far: 30,
+      });
+      scene.logarithmicDepthBuffer = logDepth;
+      // A second native frustum exercises the material pass's explicit depth output.
+      scene.farToNearRatio = scene.logarithmicDepthFarToNearRatio = 2;
+      const surface = material();
+      const ellipsoid = scene.primitives.add(
+        new EllipsoidPrimitive({
+          center: new Cartesian3(7000000, 0, 0),
+          radii: new Cartesian3(2, 2, 2),
+          material: surface,
+        }),
+      );
+      render();
+      expect(sample(renderer._raw.getColorTexture(0))).toEqualEpsilon(
+        [0.3, 0.4, 0.5, 1],
+        0.001,
+      );
+      expect(sample(renderer._raw.getColorTexture(2))).toEqualEpsilon(
+        [0.7, 0.7, 0.7, -2],
+        0.001,
+      );
+      expect(sample(renderer._linearDepth)[0]).toEqualEpsilon(8, 0.03);
+      expect(scene.pick(new Cartesian2(32, 32)).primitive).toBe(ellipsoid);
+      expect(renderer.drawCount).toBeGreaterThan(0);
+      expect(renderer.lightDrawCount).toBe(1);
+      // With no direct light, ordinary Phong retains ambient and emission.
+      scene.light.intensity = 0;
+      render();
+      expect(color()).toEqualEpsilon([0.2, 0.3, 0.4, 1], 0.002);
+      ellipsoid.onlySunLighting = true;
+      render();
+      expect(color()).toEqualEpsilon([0.05, 0.1, 0.15, 1], 0.001);
+      expect(sample(renderer._raw.getColorTexture(2))[3]).toBe(-4);
+      expect(renderer._phong).toBeUndefined();
+      expect(renderer._sunPhong).toBeDefined();
+      // Native transparency remains a dedicated draw and must not write this material group.
+      surface.uniforms.color.alpha = 0.4;
+      render();
+      expect(renderer._sunPhong).toBeUndefined();
+      expect(renderer.drawCount).toBe(0);
+      expect(scene.pick(new Cartesian2(32, 32)).primitive).toBe(ellipsoid);
+      scene.primitives.remove(ellipsoid);
+      surface.destroy();
+    });
+  });
+
   it("captures instance color and keeps native edits, show, picking and flat/transparent routing", function () {
     const primitive = box();
-    compare();
+    render();
+    const albedo = sample(renderer._raw.getColorTexture(0));
+    const bytes = ColorGeometryInstanceAttribute.toValue(
+      new Color(0.3, 0.5, 0.7, 1),
+    );
+    expect(albedo).toEqualEpsilon(
+      Array.from(bytes, (value, channel) =>
+        channel === 3 ? 1 : Math.pow(value / 255, scene.gamma),
+      ),
+      0.001,
+    );
+    expect(color()).toEqualEpsilon(albedo, 0.002);
+    scene.light.intensity = 0;
+    render();
+    expect(color()).toEqualEpsilon(
+      [albedo[0] * 0.5, albedo[1] * 0.5, albedo[2] * 0.5, 1],
+      0.002,
+    );
+    scene.light.intensity = 2;
     expect(renderer.groupCount).toBe(1);
     expect(renderer.drawCount).toBe(1);
     expect(renderer.lightDrawCount).toBe(1);
@@ -174,7 +236,7 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
     expect(scene.pick(new Cartesian2(32, 32)).id).toBe("box");
     const attributes = primitive.getGeometryInstanceAttributes("box");
     attributes.color = ColorGeometryInstanceAttribute.toValue(Color.RED);
-    compare();
+    render();
     expect(color()[1]).toBeLessThan(0.001);
     attributes.show = ShowGeometryInstanceAttribute.toValue(false);
     render();
@@ -184,15 +246,16 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
       flat: true,
       translucent: false,
     });
-    compare();
+    render();
     expect(renderer._phong).toBeUndefined();
+    expect(color()).toEqualEpsilon([1, 0, 0, 1], 0.001);
     primitive.appearance = new PerInstanceColorAppearance({
       translucent: true,
     });
     attributes.color = ColorGeometryInstanceAttribute.toValue(
       new Color(0.4, 0.6, 0.8, 0.5),
     );
-    compare();
+    render();
     expect(renderer._phong).toBeUndefined();
   });
   ["BASIC", "TEXTURED", "ALL"].forEach((support) => {
@@ -203,16 +266,24 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
         translucent: false,
       });
       box(appearance);
-      compare();
+      render();
       expect(sample(renderer._raw.getColorTexture(1))[3]).toBe(31.25);
       expect(
         sample(renderer._raw.getColorTexture(3)).slice(0, 3),
       ).toEqualEpsilon([0.05, 0.1, 0.15], 0.001);
+      scene.light.intensity = 0;
+      render();
+      expect(color()).toEqualEpsilon([0.2, 0.3, 0.4, 1], 0.002);
       appearance.material.uniforms.color = new Color(0.1, 0.8, 0.2, 1);
-      compare();
+      render();
+      expect(color()).toEqualEpsilon([0.1, 0.5, 0.25, 1], 0.002);
+      expect(sample(renderer._raw.getColorTexture(0))).toEqualEpsilon(
+        [0.1, 0.8, 0.2, 1],
+        0.001,
+      );
       expect(renderer.groupCount).toBe(1);
       appearance.material.uniforms.color.alpha = 0.5;
-      compare();
+      render();
       expect(renderer._phong).toBeUndefined();
     });
   });
@@ -223,15 +294,16 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
         translucent: false,
       }),
     );
-    compare();
+    render();
     expect(renderer.groupCount).toBe(1);
     primitive.appearance = new PerInstanceColorAppearance({
       translucent: false,
       fragmentShaderSource: "void main(){out_FragColor=vec4(0.2,0.4,0.6,1.0);}",
     });
-    compare();
+    render();
     expect(renderer._phong).toBeUndefined();
     expect(renderer._hasPassthrough).toBe(true);
+    expect(color()).toEqualEpsilon([0.2, 0.4, 0.6, 1], 0.001);
   });
   it("shares one Phong lighting group and the punctual-light table with current-frame AO", function () {
     box();
@@ -250,7 +322,7 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
       new SceneGISScreenSpaceReflections({ scene, enabled: true }),
       new SceneGISScreenSpaceIndirectLighting({ scene, enabled: true }),
     ];
-    compare();
+    render();
     expect(renderer.drawCount).toBe(2);
     expect(renderer.groupCount).toBe(1);
     expect(renderer.lightDrawCount).toBe(1);
@@ -273,6 +345,8 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
       maximumLevel: 0,
     });
     scene._initializeWorld(world);
+    // This shadow fixture controls its primary light explicitly.
+    scene.environmentEffects.enabled = false;
     world.show = false;
     box(
       new MaterialAppearance({ material: material(), translucent: false }),
@@ -290,17 +364,14 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
     render();
     const shadowed = color(43);
     expect(lit[0]).toBeGreaterThan(shadowed[0] + 0.01);
-    renderer.enabled = true;
-    render();
-    expect(color(43)).toEqualEpsilon(shadowed, 0.004);
     expect(sample(renderer._raw.getColorTexture(3), 43)[3]).toBeLessThan(0.2);
     expect(color(43)[0]).toBeGreaterThan(0.19);
     const weather = new SceneGISSurfaceWeather({ scene, enabled: true });
     weather.wetness = 1;
-    compare();
+    render();
     const wet = sample(renderer._raw.getColorTexture(0));
     weather.snowCoverage = 1;
-    compare();
+    render();
     const snow = sample(renderer._raw.getColorTexture(0));
     expect(snow[0]).toBeGreaterThan(wet[0]);
     expect(sample(renderer._raw.getColorTexture(3)).slice(0, 3)).toEqualEpsilon(
@@ -330,12 +401,13 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
       );
     render();
     await update();
-    compare();
+    render();
     expect(renderer._phong).toBeDefined();
+    expect(color()).toEqualEpsilon([0, 1, 1, 1], 0.002);
     expect(scene.pick(new Cartesian2(32, 32)).id).toBe(entity);
     entity.box.material = Color.RED;
     await update();
-    compare();
+    render();
     expect(color()[1]).toBeLessThan(0.001);
     entity.box.dimensions = new CallbackProperty(
       () => new Cartesian3(size, size, size),
@@ -343,7 +415,7 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
     );
     size = 3;
     await update();
-    compare();
+    render();
     expect(renderer._phong).toBeDefined();
     const opaque = scene.frameState.commandList.find(
       (command) =>
@@ -353,11 +425,11 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
     expect(opaque.renderState.depthMask).toBe(true);
     entity.box.material = new Color(1, 0, 0, 0.4);
     await update();
-    compare();
+    render();
     expect(renderer._phong).toBeUndefined();
     entity.box.material = Color.CYAN;
     await update();
-    compare();
+    render();
     expect(renderer._phong).toBeDefined();
     entity.show = false;
     await update();
@@ -365,7 +437,6 @@ describe("SceneGIS/Scene/SceneGISDeferredPrimitives", function () {
   });
   it("releases the shared lighting program after removal and on scene destruction", function () {
     const primitive = box();
-    renderer.enabled = true;
     render();
     const group = renderer._phong;
     const destroy = spyOn(

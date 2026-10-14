@@ -19,6 +19,9 @@ import SceneGISAmbientOcclusion from "../SceneGIS/Scene/_private/_SceneGISAmbien
 // SCENEGIS_PATCH_END SGP-0014
 import PostProcessStageTextureCache from "./PostProcessStageTextureCache.js";
 import Tonemapper, { validateTonemapper } from "./Tonemapper.js";
+// SCENEGIS_PATCH_BEGIN SGP-0046: Reuse the native display slot for deferred LDR output.
+import SceneGISDeferredOutput from "../SceneGIS/Scene/_private/_SceneGISDeferredOutput.js";
+// SCENEGIS_PATCH_END SGP-0046
 // SCENEGIS_PATCH_BEGIN SGP-0027: Reuse native tone mapping with owned histogram exposure.
 import SceneGISAutoExposure from "../SceneGIS/Scene/_private/_SceneGISAutoExposure.js";
 // SCENEGIS_PATCH_END SGP-0027
@@ -381,6 +384,9 @@ Object.defineProperties(PostProcessStageCollection.prototype, {
       // SCENEGIS_PATCH_BEGIN SGP-0044: Configure the fresh stage before uniforms and commands exist.
       SceneGISColorGrading._configureStage(this, tonemapping);
       // SCENEGIS_PATCH_END SGP-0044
+      // SCENEGIS_PATCH_BEGIN SGP-0046: Configure before the fresh display stage creates GPU resources.
+      SceneGISDeferredOutput.configure(this, tonemapping);
+      // SCENEGIS_PATCH_END SGP-0046
       if (useAutoExposure) {
         // SCENEGIS_PATCH_BEGIN SGP-0027: Resolve the current ping-pong result at draw time.
         const collection = this;
@@ -596,11 +602,21 @@ PostProcessStageCollection.prototype.update = function (
   context,
   useLogDepth,
   useHdr,
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Preserve display intent when deferred rendering uses linear storage.
+  displayHdr = useHdr,
+  // SCENEGIS_PATCH_END SGP-0046
 ) {
   removeStages(this);
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Rebuild the display variant only when its color contract changes.
+  const outputChanged = SceneGISDeferredOutput.update(this, useHdr, displayHdr);
+  // SCENEGIS_PATCH_END SGP-0046
   // SCENEGIS_PATCH_BEGIN SGP-0044: Share variant rebuilding with SGP-0027 exposure preparation.
-  const gradingChanged = SceneGISColorGrading._update(this, useHdr);
-  if (SceneGISAutoExposure.update(this, context, useHdr) || gradingChanged) {
+  const gradingChanged = SceneGISColorGrading._update(this, displayHdr);
+  if (
+    SceneGISAutoExposure.update(this, context, displayHdr) ||
+    gradingChanged ||
+    outputChanged
+  ) {
     const tonemapper = this.tonemapper;
     this._tonemapper = undefined;
     this.tonemapper = tonemapper;

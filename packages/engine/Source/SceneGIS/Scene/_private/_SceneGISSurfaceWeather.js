@@ -92,10 +92,19 @@ SurfaceWeather.receiver = function (scene, command) {
   if (
     !state?.active ||
     !scene.frameState.passes.render ||
-    !passes.includes(command.pass) ||
     command.owner?._sceneGISWater ||
-    !command.shaderProgram ||
-    command.renderState.blending.enabled
+    !command.shaderProgram
+  ) {
+    return command;
+  }
+  const translucentPlanar =
+    command.pass === Pass.TRANSLUCENT &&
+    command.shaderProgram.fragmentShaderSource.sources.some((source) =>
+      source.includes("#define SCENEGIS_DEFERRED_PLANAR_MATERIAL"),
+    );
+  if (
+    (!passes.includes(command.pass) && !translucentPlanar) ||
+    (command.renderState.blending.enabled && !translucentPlanar)
   ) {
     return command;
   }

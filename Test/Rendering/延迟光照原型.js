@@ -1,7 +1,6 @@
 /* global window, document, URLSearchParams */
 import "./PBR验收.js";
 import {
-  _SceneGISDeferredLighting,
   Cartesian2,
   Cartesian3,
   Color,
@@ -12,7 +11,7 @@ import {
 
 const example = window.example;
 const scene = example.viewer.scene;
-const renderer = new _SceneGISDeferredLighting(scene);
+const renderer = scene._sceneGISDeferred;
 example.deferred = renderer;
 const modelColor = document.getElementById("style-model-color");
 const modelMode = document.getElementById("style-model-mode");
@@ -29,7 +28,6 @@ function applyModelStyle() {
   example.ssr.reset();
 }
 modelColor.onchange = modelMode.onchange = applyModelStyle;
-const enabled = document.getElementById("deferred-enabled");
 const stats = document.getElementById("deferred-stats");
 const lightCount = document.getElementById("light-count");
 const lightRange = document.getElementById("light-range");
@@ -123,15 +121,9 @@ lightIntensity.onchange = () => {
   example.ssr.reset();
 };
 example.localLighting = { collection: lamps, configure: configureLights };
-enabled.onchange = () => {
-  renderer.enabled = enabled.checked;
-  example.taa.reset();
-  example.ssr.reset();
-};
 let started = false;
 const remove = scene.postRender.addEventListener(() => {
   if (!started && example.state.ready) {
-    renderer.enabled = enabled.checked;
     started = true;
     applyModelStyle();
     const requested = new URLSearchParams(window.location.search).get("lights");
@@ -143,7 +135,7 @@ const remove = scene.postRender.addEventListener(() => {
   if (started) {
     stats.textContent = renderer.ready
       ? `${scene.drawingBufferWidth} × ${scene.drawingBufferHeight} · ${renderer.drawCount} 次材质绘制 · ${renderer.lightDrawCount} 次屏幕光照 · 自有材质/深度约 ${(renderer.byteLength / 1048576).toFixed(1)} MiB`
-      : "当前使用原有光照或等待当前帧";
+      : "等待当前帧材质数据";
     const tiles = lamps._state?.tiles;
     lightStats.textContent = tiles
       ? `${lamps.length} 盏 · 每块平均 ${(tiles.referenceCount / (tiles.grid.x * tiles.grid.y)).toFixed(1)} / 最多 ${tiles.maximumTileCount} 盏 · 灯表 ${(tiles.byteLength / 1024).toFixed(0)} KiB`

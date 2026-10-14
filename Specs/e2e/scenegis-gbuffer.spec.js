@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 
-test("Bistro native material buffers, navigation, clock and measured replay cost", async ({
+test("Bistro shared deferred material inspection, navigation, clock and display cost", async ({
   page,
 }, testInfo) => {
   test.setTimeout(240000);
@@ -27,6 +27,7 @@ test("Bistro native material buffers, navigation, clock and measured replay cost
     const viewer = example.viewer;
     const scene = viewer.scene;
     const probe = example.gbuffer;
+    const deferred = example.deferred;
     const context = scene.context;
     const gl = context._gl;
     const renderer = gl.getExtension("WEBGL_debug_renderer_info");
@@ -37,12 +38,12 @@ test("Bistro native material buffers, navigation, clock and measured replay cost
     };
     // Time complete frames after compiling each configuration once. Report, do not gate on GPU speed.
     for (const config of [
-      { enabled: false, samples: 1 },
-      { enabled: true, samples: 1 },
-      { enabled: true, samples: 4 },
+      { enabled: false, view: 0 },
+      { enabled: true, view: 0 },
+      { enabled: true, view: 2 },
     ]) {
       probe.enabled = config.enabled;
-      scene.msaaSamples = config.samples;
+      probe.debugView = config.view;
       viewer.render();
       const durations = [];
       if (timer) {
@@ -64,8 +65,12 @@ test("Bistro native material buffers, navigation, clock and measured replay cost
       result.timing.push({
         ...config,
         durations,
-        draws: probe.drawCount,
-        byteLength: probe.byteLength,
+        draws: deferred.drawCount,
+        byteLength: deferred.byteLength,
+        borrowed:
+          !config.enabled ||
+          (probe._debug._uniformMap ?? probe._debug.uniforms).u_diffuse() ===
+            deferred._raw.getColorTexture(),
       });
     }
     // Read an actual 32x20 grid from each attachment, independent of the display shader.
@@ -87,7 +92,7 @@ test("Bistro native material buffers, navigation, clock and measured replay cost
     result.channels = [];
     try {
       for (let i = 0; i < 4; ++i) {
-        texture = probe._raw.getColorTexture(i);
+        texture = deferred._raw.getColorTexture(i);
         copy.execute(context);
         const values = context.readPixels({
           framebuffer: target.framebuffer,
@@ -106,14 +111,17 @@ test("Bistro native material buffers, navigation, clock and measured replay cost
       target.destroy();
     }
     result.glError = gl.getError();
-    scene.msaaSamples = 1;
+    probe.debugView = 0;
     viewer.render();
     return result;
   });
   expect(report.glError).toBe(0);
-  expect(report.timing[0].byteLength).toBe(0);
-  expect(report.timing[1].draws).toBeGreaterThan(100);
-  expect(report.timing[2].byteLength).toBe(1280 * 800 * 184);
+  expect(report.timing[0].draws).toBeGreaterThan(100);
+  for (const entry of report.timing) {
+    expect(entry.borrowed).toBe(true);
+    expect(entry.draws).toBe(report.timing[0].draws);
+    expect(entry.byteLength).toBe(report.timing[0].byteLength);
+  }
   for (const channel of report.channels) {
     expect(channel.finite).toBe(true);
     expect(channel.nonzero).toBeGreaterThan(0);
@@ -136,7 +144,7 @@ test("Bistro native material buffers, navigation, clock and measured replay cost
     const example = window.example;
     example.viewer.camera.moveRight(2);
     example.viewer.render();
-    const moved = example.gbuffer.ready && example.gbuffer.drawCount > 0;
+    const moved = example.gbuffer.ready && example.deferred.drawCount > 0;
     example.atmosphere.hour = 22;
     example.state.setTime();
     example.viewer.render();
@@ -153,7 +161,8 @@ test("Bistro native material buffers, navigation, clock and measured replay cost
   expect(errors).toEqual([]);
   const released = await page.evaluate(() => {
     const probe = window.example.gbuffer;
-    const texture = probe._raw.getColorTexture();
+    const deferred = window.example.deferred;
+    const texture = deferred._raw.getColorTexture();
     window.example.destroy();
     return probe.isDestroyed() && texture.isDestroyed();
   });

@@ -3,7 +3,7 @@ uniform sampler2D u_sceneGISDeferredNormal;
 uniform sampler2D u_sceneGISDeferredSpecular;
 uniform sampler2D u_sceneGISDeferredEmission;
 uniform float u_sceneGISDeferredGroup;
-#if defined(SCENEGIS_DEFERRED_FEATURE_STYLE) || defined(SCENEGIS_DEFERRED_GLOBE_FABRIC)
+#if defined(SCENEGIS_DEFERRED_FEATURE_STYLE) || defined(SCENEGIS_DEFERRED_GLOBE_FABRIC) || defined(SCENEGIS_DEFERRED_OUTLINE_STYLE)
 uniform sampler2D u_sceneGISDeferredStyle;
 #endif
 

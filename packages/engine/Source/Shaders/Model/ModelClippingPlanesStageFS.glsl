@@ -75,6 +75,11 @@ float clip(vec4 fragCoord, sampler2D clippingPlanes, mat4 clippingPlanesMatrix) 
     return clipAmount;
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0045: Preserve unlit clipping edges in deferred material capture.
+#ifdef SCENEGIS_DEFERRED_CAPTURE
+void sceneGISRecordUnlitModelColor(vec3 color);
+#endif
+// SCENEGIS_PATCH_END SGP-0045
 void modelClippingPlanesStage(inout vec4 color)
 {
     float clipDistance = clip(gl_FragCoord, model_clippingPlanes, model_clippingPlanesMatrix);
@@ -84,5 +89,10 @@ void modelClippingPlanesStage(inout vec4 color)
     
     if (clipDistance > 0.0 && clipDistance < clippingPlanesEdgeWidth) {
         color = clippingPlanesEdgeColor;
+        // SCENEGIS_PATCH_BEGIN SGP-0045: Record the final edge color without a second geometry pass.
+        #ifdef SCENEGIS_DEFERRED_CAPTURE
+        sceneGISRecordUnlitModelColor(color.rgb);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0045
     }
 }

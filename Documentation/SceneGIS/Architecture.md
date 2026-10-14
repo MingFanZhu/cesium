@@ -827,8 +827,9 @@ Circle/symbol 保持制图颜色；Planar native geometry-shadow 资格不随此
 先直接合成 Globe 颜色再绘制矢量，普通地表上方对象保持后续 native 渲染；原生 imagery alpha 保持独立。
 首轮仅资格确认当前可见地表，背面、地下、穿越透明地表排序与高级环境透明深度合成另行验证。
 Planar 共享 vector opacity；按 [ADR-0073](Decisions/ADR-0073-planar-surface-opacity.md)，World.opacity 控制地表颜色。
-透明模式仅复制 surface 之前的背景，地形仍单次直接绘制并保留深度，避免多个视锥的隐藏山坡重复混色。
-背景快照不包含地图颜色；默认不透明模式保持原资源和 sampler 容量，透明额外占一个 sampler，要求 WebGL 2。
+WebGL deferred 分支按 ADR-0073 的 2026-10-14 修订采用真正透明：opacity<1 使用原生透明/OIT
+专用受光，关闭颜色绘制的深度写入，显示后方物体与重叠地表；opacity=1 保持不透明延迟。
+移除旧背景快照及 sampler；地形查询保持可用，场景深度拾取遵循 pickTranslucentDepth。
 矢量瓦片与平面影像/地形共享私有 SSE 数值判据，MVT 选取预算内互不包含的近细远粗 leaves，
 请求与内容缓存保持独立。Style zoom 以视轴在 Z=0 的前向交点为参考，不把倾斜造成的
 采样距离变化误认为用户缩放；具体边界见 [ADR-0064](Decisions/ADR-0064-vector-perspective-lod.md)。
@@ -975,6 +976,12 @@ direct 光，保留环境光、IBL / SSR、自发光与后续雾、裁剪边缘�
 调度层。复用现有 API、内容准备和资源设施；透明、阴影、拾取、天空保留各自专用通道。
 Globe 影像先合成材质，再参与光照；旧前向逐像素等价不再作为新增接入的强制验收目标。
 原生可见性、分类、深度精度和公共能力仍需独立契约，未完成资格不得通过删除校验来表示支持。
+
+P4d 已获准将唯一入口限定为 WebGL2 / SCENE3D、默认单采样，其他原生场景模式不以完整
+前向 fallback 兼容；入口迁移仍按该阶段计划跟踪。`highDynamicRange=false` 的延迟路径
+保留内部线性浮点材质、光照和透明合成，在现有显示槽位只做裁剪与 gamma，不应用曝光和
+tone curve。开启 HDR 恢复既有显示控制；浮点设备要求及 HDR 专用效果的显式前提不变。
+完整颜色、资源和升级边界见 ADR-0161 的 P4d amendment / SGP-0046。
 
 按 [ADR-0160](Decisions/ADR-0160-deferred-primitive-materials.md) / SGP-0049，实验的普通
 Primitive 材质通过原生 appearance 组装时的显式标记接入。Phong 复用四附件和共享屏幕光照组，
@@ -1215,3 +1222,9 @@ GPU 不支持或 HDR 关闭时明确报错；不引入 pre-exposure、EV100 校�
 原生 stage 在首次 update 前显式组装自有函数与 uniforms；不做源码替换或复制 tone mapper。
 无额外纹理、FBO 或 pass；普通参数只更新 uniform，启停和原生 variant 变化可重建 stage。
 测光、TAA、光照和天空遮蔽保持独立；预设属于应用配置，不成为引擎隐式默认值。
+
+## WebGL 默认高级环境
+
+ADR-0161 / SGP-0046：WebGL 延迟入口统一使用高级物理环境；原生 sky / Sun bloom / 可见 Fog / Globe ground atmosphere 与 daylight 不再执行。保留调用方对象、Fog 瓦片剔除以及高级环境使用的 Moon / 星历。scene.environmentEffects 只读访问显式控制器或 Scene 自有默认实例，默认开启大气、空气透视和高度雾；云及其阴影 / 光束、bloom、lens flare 默认关闭且云资源按需冷加载。显式环境（包括 disabled）优先，默认让位释放 GPU，移除后恢复原设置；World 变更前释放自有实例，不销毁调用方控制器。显示 HDR 开关不限制内部物理计算，也不由默认创建改写。Planar 复用显式 light authority；没有时提供固定 Z 默认方向，不猜地理坐标。
+
+Globe / Planar 均允许调用方安装 scene.light DirectionalLight；自动主光让位，统一驱动地表、模型、云和现有阴影。恢复 SunLight 后恢复自动太阳 / 月亮主光。自定义光对象不被改写或销毁，天空与天体仍按既有星历或 Planar 天体方向；环境释放只恢复仍归其持有的光源。

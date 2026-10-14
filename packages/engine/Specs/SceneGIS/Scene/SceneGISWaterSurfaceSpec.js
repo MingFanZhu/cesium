@@ -20,7 +20,6 @@ import {
   SceneTransforms,
   Transforms,
   DirectionalLight,
-  RuntimeError,
   OrthographicFrustum,
   BoxGeometry,
   CustomShader,
@@ -357,7 +356,10 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     expect(pixel(p)).toEqualEpsilon(hit, 2);
     ssr.destroy();
     render();
-    expect(state.borrowed).toBe(false);
+    expect(state.borrowed).toBe(true);
+    expect(state.colorTexture).toBe(
+      scene._sceneGISDeferred._waterColor.getColorTexture(),
+    );
     expect(pixel(p)).toEqualEpsilon(hit, 2);
     scene.postProcessStages.ambientOcclusion.enabled = true;
     render();
@@ -579,7 +581,7 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     });
     render();
     const state = scene.frameState._sceneGISWater;
-    const first = state.raw.getColorTexture();
+    const first = state.colorTexture;
     render(JulianDate.addSeconds(time, 2, new JulianDate()));
     expect(water._time).toEqual(2);
     render(JulianDate.addSeconds(time, 2, new JulianDate()));
@@ -588,7 +590,7 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     scene.canvas.width = 96;
     render();
     expect(first.isDestroyed()).toBe(true);
-    expect(state.raw.getColorTexture().width).toEqual(96);
+    expect(state.colorTexture.width).toEqual(96);
     expect(water._command).toBe(command);
     const va = command.vertexArray;
     scene.primitives.remove(water);
@@ -596,12 +598,12 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     expect(va.isDestroyed()).toBe(true);
     render();
     expect(state.ready).toBe(false);
-    const finalTexture = state.raw.getColorTexture();
+    const finalTexture = state.colorTexture;
     scene.destroyForSpecs();
     scene = undefined;
     expect(finalTexture.isDestroyed()).toBe(true);
   });
-  it("rejects invalid geometry, material values and unsupported active rendering before allocation", function () {
+  it("rejects invalid geometry and material values and supports HDR-disabled display", function () {
     expect(
       () => new SceneGISWaterSurface({ polygonHierarchy: ring(1, 2) }),
     ).toThrowDeveloperError();
@@ -633,8 +635,9 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     expect(scene.frameState._sceneGISWater.raw).toBeUndefined();
     water.show = true;
     scene.highDynamicRange = false;
-    expect(() => render()).toThrowError(RuntimeError);
-    expect(water.ready).toBe(false);
-    expect(scene.frameState._sceneGISWater.raw).toBeUndefined();
+    render();
+    expect(water.ready).toBe(true);
+    expect(scene._hdr).toBe(true);
+    expect(scene.frameState._sceneGISWater.borrowed).toBe(true);
   });
 });

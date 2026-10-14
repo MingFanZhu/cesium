@@ -1,5 +1,4 @@
 import {
-  _SceneGISDeferredLighting as DeferredLighting,
   _SceneGISGBuffer as GBuffer,
   Cartesian2,
   Cartesian3,
@@ -44,7 +43,7 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     ibl = new ImageBasedLighting({
       imageBasedLightingFactor: new Cartesian2(0, 0),
     });
-    renderer = new DeferredLighting(scene);
+    renderer = scene._sceneGISDeferred;
   });
   afterEach(function () {
     scene?.destroyForSpecs();
@@ -99,29 +98,19 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
       : view.sceneFramebuffer._colorFramebuffer;
     return pixels(target.getColorTexture());
   }
-  function compare() {
-    renderer.enabled = false;
-    render();
-    const before = hdr();
-    renderer.enabled = true;
-    render();
-    const after = hdr();
-    let error = 0,
-      maximum = 0,
-      lit = 0;
-    for (let i = 0; i < before.length; ++i) {
-      if (i % 4 === 3) {
-        continue;
+  function expectHighlight(base, multiplier) {
+    const actual = hdr();
+    let covered = 0;
+    for (let i = 0; i < actual.length; i += 4) {
+      if (base[i] + base[i + 1] + base[i + 2] > 0.01) {
+        ++covered;
+        expect(Array.from(actual.slice(i, i + 3))).toEqualEpsilon(
+          multiplier.map((value, channel) => value * base[i + channel]),
+          0.003,
+        );
       }
-      const delta = Math.abs(before[i] - after[i]);
-      error += delta;
-      maximum = Math.max(maximum, delta);
-      lit += before[i] > 0.01 ? 1 : 0;
     }
-    expect(lit).toBeGreaterThan(10);
-    expect(error / before.length).toBeLessThan(0.001);
-    expect(maximum).toBeLessThan(0.02);
-    expect(renderer.ready).toBe(true);
+    expect(covered).toBeGreaterThan(10);
   }
   [
     "Batched/BatchedWithBatchTable",
@@ -130,6 +119,9 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     it(`preserves native feature modes, show, translucency and picking for ${kind}`, async function () {
       const tileset = await tiles(kind);
       const content = tileset.root.content;
+      tileset.style = new Cesium3DTileStyle({ color: "color('white')" });
+      render();
+      const unstyled = hdr();
       tileset.style = new Cesium3DTileStyle({ color: "color('cyan')" });
       tileset.colorBlendAmount = 0.4;
       for (const mode of [
@@ -138,8 +130,16 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
         Cesium3DTileColorBlendMode.MIX,
       ]) {
         tileset.colorBlendMode = mode;
-        compare();
+        render();
         expect(renderer._style).toBeDefined();
+        if (mode === Cesium3DTileColorBlendMode.HIGHLIGHT) {
+          expectHighlight(unstyled, [0, 1, 1]);
+        } else {
+          const output = hdr();
+          expect(
+            output.some((value, i) => Math.abs(value - unstyled[i]) > 0.02),
+          ).toBe(true);
+        }
       }
       const point = new Cartesian2(32, 32);
       const feature = scene.pick(point);
@@ -148,17 +148,17 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
       tileset.style = undefined;
       render();
       feature.color = new Color(0.6, 0.2, 0.8, 1);
-      compare();
+      render();
       expect(scene.pick(point)).toBe(feature);
       feature.show = false;
-      compare();
+      render();
       expect(scene.pick(point)).not.toBe(feature);
       feature.show = true;
       feature.color = new Color(0.6, 0.2, 0.8, 0.4);
-      compare();
+      render();
       expect(scene.pick(point)).toBe(feature);
       feature.color = Color.YELLOW;
-      compare();
+      render();
       expect(scene.pick(point)).toBe(feature);
     });
   });
@@ -170,13 +170,32 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
       scene,
       enabled: true,
     });
+    tileset.style = new Cesium3DTileStyle({ color: "color('white')" });
+    render();
+    const main = ssr._state.main;
+    const indirect = pixels(main.indirect.getColorTexture());
+    const response = pixels(main.ssil.getColorTexture(1));
     tileset.style = new Cesium3DTileStyle({ color: "color('orange')" });
     tileset.root.content._model.color = new Color(0.3, 0.7, 0.9, 1);
-    compare();
+    render();
     expect(ssr.ready).toBe(true);
     expect(ssil.ready).toBe(true);
     expect(ssr._state.captureDraws).toBe(0);
     expect(renderer._linearDepth).toBe(ssr._state.depth.getColorTexture());
+    // Highlight applies to indirect energy and diffuse response, as well as main color.
+    const orange = Math.pow(Color.ORANGE.green, scene.gamma);
+    for (const [before, after] of [
+      [indirect, pixels(main.indirect.getColorTexture())],
+      [response, pixels(main.ssil.getColorTexture(1))],
+    ]) {
+      const multiplier = [0.3, orange * 0.7, 0];
+      for (let i = 0; i < before.length; i += 4) {
+        expect(Array.from(after.slice(i, i + 3))).toEqualEpsilon(
+          multiplier.map((value, channel) => value * before[i + channel]),
+          0.003,
+        );
+      }
+    }
   });
   it("retains base targets across feature visibility, resize and unload", async function () {
     const tileset = await tiles();
@@ -192,7 +211,6 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
       render();
       return ordinary.ready;
     });
-    renderer.enabled = true;
     render();
     const base = renderer._raw.getColorTexture();
     const style = renderer._style.getColorTexture();
@@ -226,27 +244,32 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     scene = undefined;
     expect(last.isDestroyed()).toBe(true);
   });
-  it("checks the fifth target limit while retaining diagnostic qualification", async function () {
+  it("checks the fifth target limit and inspects qualified styling without replay", async function () {
     await tiles();
+    const styleBefore = renderer._style.getColorTexture();
     const original = ContextLimits._maximumDrawBuffers;
     try {
       ContextLimits._maximumDrawBuffers = 4;
-      renderer.enabled = true;
       expect(render).toThrowError(/five floating-point color attachments/);
-      expect(renderer._style).toBeUndefined();
+      expect(renderer._style.getColorTexture()).toBe(styleBefore);
+      expect(styleBefore.isDestroyed()).toBe(false);
     } finally {
       ContextLimits._maximumDrawBuffers = original;
-      renderer.enabled = false;
     }
     const probe = new GBuffer(scene);
     probe.enabled = true;
-    expect(render).toThrowDeveloperError();
+    expect(render).not.toThrow();
+    expect(probe.ready).toBe(true);
+    expect(probe._debug.uniforms.u_diffuse()).toBe(
+      renderer._raw.getColorTexture(),
+    );
+    const style = renderer._style.getColorTexture();
     probe.destroy();
+    expect(style.isDestroyed()).toBe(false);
   });
   it("refreshes lighting groups when native tile LOD unloads and reloads content", async function () {
     const tileset = await tiles("Tilesets/Tileset");
     tileset.maximumScreenSpaceError = 1;
-    renderer.enabled = true;
     await pollToPromise(
       () => {
         render();
@@ -279,7 +302,7 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     expect(
       [...renderer._models.keys()].every((model) => !model.isDestroyed()),
     ).toBe(true);
-    compare();
+    render();
   });
   it("preserves texture feature IDs and fragment-level transparent filtering", async function () {
     const model = scene.primitives.add(
@@ -329,7 +352,7 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     for (let i = 0; i < table.featuresLength; ++i) {
       table.getFeature(i).color = new Color(0.4, 0.8, 0.3, i % 2 ? 0.4 : 1);
     }
-    compare();
+    render();
     const commands = scene._view.frustumCommandsList[0].commands[Pass.OPAQUE];
     expect(
       commands.some((c) =>
@@ -342,7 +365,7 @@ describe("SceneGIS/Scene/SceneGISDeferredStyling", function () {
     const feature = scene.pick(point);
     expect(feature).toBeDefined();
     feature.show = false;
-    compare();
+    render();
     expect(scene.pick(point)).not.toBe(feature);
   });
 });

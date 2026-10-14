@@ -1,6 +1,7 @@
 import {
-  _SceneGISDeferredLighting as DeferredLighting,
   BoxGeometry,
+  LabelCollection,
+  VerticalOrigin,
   BufferPolygon,
   BufferPolygonCollection,
   BufferPolygonMaterial,
@@ -94,6 +95,8 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     scene.fog.enabled = false;
     scene.skyAtmosphere = scene.skyBox = scene.sun = scene.moon = undefined;
     scene.globe = new Globe();
+    // Material fixtures select their own physical-light inputs.
+    scene.environmentEffects.enabled = false;
     scene.globe.depthTestAgainstTerrain = true;
     scene.globe.showGroundAtmosphere = false;
     scene.globe.enableLighting = true;
@@ -108,8 +111,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
         up: new Cartesian3(0, 0, 1),
       },
     });
-    renderer = new DeferredLighting(scene);
-    renderer.enabled = true;
+    renderer = scene._sceneGISDeferred;
     lights = new SceneGISLightCollection({ scene });
     await ready();
   }
@@ -191,6 +193,39 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     await ready();
     return box;
   }
+
+  it("keeps Globe atmosphere and multi-frustum material storage stable across display HDR changes", async function () {
+    await setup();
+    scene.postProcessStages.fxaa.enabled = false;
+    scene.globe.showGroundAtmosphere = true;
+    scene.logarithmicDepthFarToNearRatio = 1.1;
+    render();
+    const material = renderer._raw.getColorTexture();
+    const linear = sample(scene.postProcessStages._tonemapping._colorTexture);
+    const draws = renderer.drawCount;
+    const bytes = renderer.byteLength;
+    const groups = renderer._groups.map((group) => group.command.shaderProgram);
+    scene.highDynamicRange = false;
+    render();
+    expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
+    expect(
+      sample(scene.postProcessStages._tonemapping._colorTexture),
+    ).toEqualEpsilon(linear, 0.002);
+    expect(sample(scene.postProcessStages.outputTexture)).toEqualEpsilon(
+      linear.map((value, index) =>
+        index === 3
+          ? value
+          : Math.pow(Math.min(Math.max(value, 0), 1), 1 / scene.gamma),
+      ),
+      2 / 255,
+    );
+    expect(renderer.drawCount).toBe(draws);
+    expect(renderer.byteLength).toBe(bytes);
+    expect(renderer._raw.getColorTexture()).toBe(material);
+    expect(
+      renderer._groups.map((group) => group.command.shaderProgram),
+    ).toEqual(groups);
+  });
 
   it("preserves ground classification through logarithmic frustum boundaries", async function () {
     await setup();
@@ -487,6 +522,43 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     expect(scene.context._gl.getError()).toBe(0);
   });
 
+  it("preserves native background labels over cleared Globe depth across frusta", async function () {
+    await setup();
+    scene.globe.depthTestAgainstTerrain = false;
+    const labels = scene.primitives.add(new LabelCollection());
+    labels.add({
+      text: "X",
+      font: "20px sans-serif",
+      showBackground: true,
+      backgroundPadding: new Cartesian2(12, 12),
+      verticalOrigin: VerticalOrigin.CENTER,
+      position: new Cartesian3(radius + 1000, 0, 0),
+      backgroundColor: new Color(0, 1, 0, 1),
+      id: "globe-label",
+    });
+    await pollToPromise(() => {
+      render();
+      return (
+        labels._glyphBillboardCollection.ready &&
+        labels._backgroundBillboardCollection.ready
+      );
+    });
+    const physical = sample(renderer._linearDepth)[0];
+    expect(sample(renderer.opaqueDepthTexture)[0]).toEqualEpsilon(9000, 1);
+    scene.logarithmicDepthFarToNearRatio = 2;
+    render();
+    expect(renderer._multiFrustum).toBe(true);
+    expect(scene._environmentState.clearGlobeDepth).toBe(true);
+    expect(sample(renderer.opaqueDepthTexture)[0]).toEqualEpsilon(9000, 1);
+    expect(sample(renderer.opaqueDepthTexture)[1]).toBeLessThan(0);
+    expect(sample(renderer._linearDepth)[0]).toEqualEpsilon(physical, 1);
+    expect(scene.pick(new Cartesian2(32, 32)).id).toBe("globe-label");
+    labels.get(0).backgroundColor = new Color(0, 1, 0, 0.5);
+    render();
+    expect(sample(renderer.opaqueDepthTexture)[0]).toEqualEpsilon(physical, 1);
+    expect(scene.context._gl.getError()).toBe(0);
+  });
+
   it("uses complete deferred depth for advanced aerial perspective and cloud receivers", async function () {
     await setup();
     await raisedTerrain();
@@ -729,8 +801,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     expect(sourceDepth.isDestroyed()).toBe(false);
   });
 
-  it("reuses physical sky irradiance and cloud shadows only in screen lighting", async function () {
-    await setup();
+  function physicalLighting() {
     function texture(rgba) {
       const result = new Texture({
         context: scene.context,
@@ -755,13 +826,19 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
       intervals: Array.from({ length: 3 }, () => new Cartesian2(0, 100000)),
       cascadeCount: 1,
       showCloudShadows: false,
-      primaryLightDirection: Cartesian3.UNIT_X,
+      primaryLightDirection: Cartesian3.clone(Cartesian3.UNIT_X),
       sunDirection: Cartesian3.UNIT_X,
       primaryLightScale: new Cartesian3(1, 1, 1),
       surfaceRadianceScale: 1,
       cloudTop: 4000,
     };
     scene.frameState._sceneGISGlobeLighting = record;
+    return record;
+  }
+
+  it("reuses physical sky irradiance and cloud shadows only in screen lighting", async function () {
+    await setup();
+    const record = physicalLighting();
     scene.postProcessStages.ambientOcclusion.enabled = true;
     render();
     const program = renderer._globe.command.shaderProgram;
@@ -818,74 +895,55 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     expect(color()).toEqualEpsilon(waterRadiance, 0.002);
     record.active = false;
     render();
-    expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(34);
+    expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(32);
     expect(renderer._globe.command.shaderProgram).not.toBe(program);
     expect(textures.every((texture) => !texture.isDestroyed())).toBe(true);
   });
 
   ["ground atmosphere", "fog"].forEach((mode) => {
-    it(`composes native ${mode} after lighting and attenuates only the surface AO response`, async function () {
+    it(`gates native ${mode} while preserving caller settings and material storage`, async function () {
       await setup();
-      scene.light.direction = Cartesian3.UNIT_X;
-      scene.globe.dynamicAtmosphereLighting = false;
+      scene.postProcessStages.ambientOcclusion.enabled = true;
+      render();
+      const before = color();
+      const bytes = renderer.byteLength;
+      const material = renderer._raw.getColorTexture();
       scene.globe.showGroundAtmosphere = true;
       scene.fog.enabled = mode === "fog";
       scene.fog.density = 0.001;
       scene.fog.heightScalar = 1;
       scene.fog.heightFalloff = 0;
-      scene.fog.visualDensityScalar = 0.02;
-      if (mode === "fog") {
-        scene.camera.setView({
-          orientation: {
-            direction: Cartesian3.normalize(
-              new Cartesian3(-1, 0.5, 0),
-              new Cartesian3(),
-            ),
-            up: Cartesian3.UNIT_Z,
-          },
-        });
-      }
-      scene.postProcessStages.ambientOcclusion.enabled = true;
-      await ready();
-      const flags = sample(renderer._raw.getColorTexture(2))[0];
-      expect(flags).toBe(mode === "fog" ? 6 : 10);
-      expect(sample(renderer._raw.getColorTexture(0))).toEqualEpsilon(
-        [0.2, 0.3, 0.4, 1],
-        0.001,
-      );
-      const lit = color();
-      const ao =
-        scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
-      const ambient = sample(ao.main.indirect.getColorTexture());
-      const bytes = renderer.byteLength;
-      scene.globe.baseColor = Color.BLACK;
       render();
-      const scattering = color();
-      expect(scattering.slice(0, 3).some((value) => value > 0)).toBe(true);
-      expect(
-        lit.slice(0, 3).map((value, i) => value - scattering[i]),
-      ).toEqualEpsilon(ambient.slice(0, 3), 0.001);
-      expect(sample(ao.main.indirect.getColorTexture()).slice(0, 3)).toEqual([
-        0, 0, 0,
-      ]);
+      expect(scene.globe.showGroundAtmosphere).toBe(true);
+      expect(scene.globe.enableLighting).toBe(true);
+      expect(scene.frameState.fog.renderable).toBe(false);
+      expect(scene.globe._surface.tileProvider.showGroundAtmosphere).toBe(
+        false,
+      );
+      expect(scene.globe._surface.tileProvider.enableLighting).toBe(false);
+      expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(0);
+      expect(color()).toEqualEpsilon(before, 0.001);
       scene.globe.atmosphereBrightnessShift = 0.2;
       render();
-      expect(color()).not.toEqual(scattering);
+      expect(color()).toEqualEpsilon(before, 0.001);
       expect(renderer.byteLength).toBe(bytes);
+      expect(renderer._raw.getColorTexture()).toBe(material);
       expect(renderer.lightDrawCount).toBe(1);
     });
   });
 
-  it("submits unlit surface values and evaluates native and local light on screen", async function () {
+  it("submits unlit surface values and evaluates physical and local light on screen", async function () {
     await setup();
+    const record = physicalLighting();
+    render();
     const albedo = sample(renderer._raw.getColorTexture(0));
     expect(albedo).toEqualEpsilon([0.2, 0.3, 0.4, 1], 0.001);
     expect(sample(renderer._raw.getColorTexture(2))).toEqualEpsilon(
-      [2, 5, 0.3, -3],
+      [3, 0, 0, -3],
       0.001,
     );
     const lit = color();
-    scene.light.direction = new Cartesian3(1, 0, 0);
+    record.primaryLightDirection = new Cartesian3(-1, 0, 0);
     render();
     const ambient = color();
     expect(ambient[1]).toBeLessThan(lit[1] * 0.5);
@@ -896,7 +954,8 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     expect(sample(renderer._raw.getColorTexture(0))).toEqual(albedo);
     expect(renderer.groupCount).toBe(1);
     expect(renderer.lightDrawCount).toBe(1);
-    scene.globe.enableLighting = false;
+    record.active = false;
+    lights.removeAll();
     render();
     expect(color()).toEqualEpsilon(albedo, 0.001);
     expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(0);
@@ -956,7 +1015,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     expect(sample(renderer._raw.getColorTexture(2))).toEqual(parameters);
   });
 
-  it("preserves plane clipping and unlit edge colors before native atmosphere without extra targets", async function () {
+  it("preserves plane clipping and unlit edge colors without extra targets", async function () {
     await setup();
     const bytes = renderer.byteLength;
     scene.globe.clippingPlanes = new ClippingPlaneCollection({
@@ -968,7 +1027,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     expect(sample(renderer._raw.getColorTexture(2), 32, 8)[3]).toBe(0);
     expect(sample(renderer._raw.getColorTexture(2), 32, 48)[3]).toBe(-3);
     expect(color()).toEqualEpsilon([2, 0.3, 0.4, 1], 0.002);
-    expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(18);
+    expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(16);
     expect(renderer.byteLength).toBe(bytes);
     scene.light.direction = Cartesian3.UNIT_X;
     pointLight();
@@ -1022,6 +1081,8 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
 
   it("evaluates Fabric colors before lighting and preserves live uniforms and caller ownership", async function () {
     await setup();
+    const record = physicalLighting();
+    render();
     const material = Material.fromType("Color", {
       color: new Color(1, 0, 0, 0.5),
     });
@@ -1031,11 +1092,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     const albedo = sample(renderer._raw.getColorTexture(0));
     expect(albedo).toEqualEpsilon([0.6, 0.15, 0.2, 1], 0.002);
     const lit = color();
-    renderer.enabled = false;
-    render();
-    expect(color()).toEqualEpsilon(lit, 0.002);
-    renderer.enabled = true;
-    scene.light.direction = Cartesian3.UNIT_X;
+    record.primaryLightDirection = new Cartesian3(-1, 0, 0);
     scene.postProcessStages.ambientOcclusion.enabled = true;
     render();
     expect(color()[0]).toBeLessThan(lit[0] * 0.5);
@@ -1158,10 +1215,6 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     expect(albedo).toEqualEpsilon([0.2, 0.3, 0.4, 1], 0.002);
     const lit = color();
     expect(lit[0]).toBeGreaterThan(albedo[0]);
-    renderer.enabled = false;
-    render();
-    expect(color()).toEqualEpsilon(lit, 0.004);
-    renderer.enabled = true;
     scene.light.direction = Cartesian3.UNIT_X;
     render();
     expect(sample(renderer._raw.getColorTexture(0))).toEqual(albedo);
@@ -1235,11 +1288,6 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     const mask = sample(renderer._ocean.getColorTexture())[3];
     expect(mask).toEqualEpsilon(128 / 255, 0.001);
     expect(renderer._framebuffer.numberOfColorAttachments).toBe(5);
-    const mapped = color();
-    renderer.enabled = false;
-    render();
-    expect(color()).toEqualEpsilon(mapped, 0.003);
-    renderer.enabled = true;
     scene.globe.material = Material.fromType("Color", {
       color: new Color(1, 0, 0, 0),
     });
@@ -1358,7 +1406,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
       0.001,
     );
     expect(styles.slice(tileIndex, tileIndex + 4)).toEqualEpsilon(
-      [1, 1, 0, 1],
+      [1, 1, 0, 0],
       0.001,
     );
     expect(ocean[globeIndex + 3]).toBe(1);
@@ -1376,7 +1424,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
         tileIndex,
         tileIndex + 4,
       ),
-    ).toEqualEpsilon([1, 1, 0, 1], 0.001);
+    ).toEqualEpsilon([1, 1, 0, 0], 0.001);
     expect(
       sample(renderer._ocean.getColorTexture(), 0, 0, true).slice(
         tileIndex,
@@ -1418,6 +1466,8 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
 
   it("applies native fill highlights after lighting without changing surface data or draws", async function () {
     await setup();
+    physicalLighting();
+    render();
     scene.light.direction = Cartesian3.UNIT_X;
     const quadtree = scene.globe._surface;
     quadtree._debug.suspendLodUpdate = true;
@@ -1445,14 +1495,9 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
         0.002,
       );
       expect(sample(renderer._raw.getColorTexture(0))).toEqual(albedo);
-      expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(514);
+      expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(515);
       expect(renderer.drawCount).toBe(draws);
       expect(renderer.byteLength).toBe(bytes);
-      const highlighted = color();
-      renderer.enabled = false;
-      render();
-      expect(color()).toEqualEpsilon(highlighted, 0.002);
-      renderer.enabled = true;
       scene.postProcessStages.ambientOcclusion.enabled = true;
       scene.globe.fillHighlightColor.alpha = 0;
       render();
@@ -1483,6 +1528,8 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
 
   it("composes distance-faded underground color only on native back-facing terrain", async function () {
     await setup();
+    physicalLighting();
+    render();
     scene.globe.backFaceCulling = false;
     scene.globe.undergroundColor = Color.TRANSPARENT;
     scene.globe.showGroundAtmosphere = true;
@@ -1508,7 +1555,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     );
     render();
     expect(scene.frameState.cameraUnderground).toBe(true);
-    expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(1026);
+    expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(1027);
     expect(color()).toEqualEpsilon(
       [0.3 + base[0] * 0.7, base[1] * 0.7, base[2] * 0.7, 1],
       0.01,
@@ -1521,11 +1568,6 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     );
     expect(sample(renderer._raw.getColorTexture(0))).toEqual(albedo);
     expect(renderer.byteLength).toBe(bytes);
-    const underground = color();
-    renderer.enabled = false;
-    render();
-    expect(color()).toEqualEpsilon(underground, 0.01);
-    renderer.enabled = true;
     scene.globe.undergroundColorAlphaByDistance = new NearFarScalar(
       0,
       1,
@@ -1548,27 +1590,27 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
       },
     });
     await ready();
-    expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(2);
+    expect(sample(renderer._raw.getColorTexture(2))[0]).toBe(3);
     expect(sample(renderer._raw.getColorTexture(0))).toEqual(albedo);
     expect(renderer._framebuffer.numberOfColorAttachments).toBe(4);
   });
 
   it("composes native vector polygons and lines after lighting with live colors and foreground replacement", async function () {
     await setup();
+    const record = physicalLighting();
+    render();
     const vectors = await nativeVectors();
     const overlay = sample(renderer._classification.getColorTexture());
     expect(overlay).toEqualEpsilon([0.2, 0.6, 0, 0.8], 0.004);
     expect(renderer.drawCount).toBe(vectors.draws);
     expect(renderer.lightDrawCount).toBe(1);
     expect(renderer._framebuffer.numberOfColorAttachments).toBe(5);
-    renderer.enabled = false;
-    render();
-    const native = color();
-    renderer.enabled = true;
-    render();
-    expect(color()).toEqualEpsilon(native, 0.004);
+
     const lit = color();
-    Cartesian3.negate(scene.light.direction, scene.light.direction);
+    Cartesian3.negate(
+      record.primaryLightDirection,
+      record.primaryLightDirection,
+    );
     render();
     expect(sample(renderer._classification.getColorTexture())).toEqualEpsilon(
       overlay,
@@ -1705,9 +1747,10 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     render();
     expect(oldTarget.isDestroyed()).toBe(true);
     expect(renderer._classification.getColorTexture().width).toBe(80);
-    renderer.enabled = false;
-    expect(texture.isDestroyed()).toBe(false);
+    scene.globe.show = false;
+    render();
     expect(renderer._classification).toBeUndefined();
+    expect(texture.isDestroyed()).toBe(false);
     scene.globe.vectorProvider.remove(vectors.polygons);
     scene.globe.vectorProvider.remove(vectors.lines);
   });
@@ -1726,12 +1769,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
       scene.globe.translucency.frontFaceAlpha = front;
       scene.globe.translucency.backFaceAlpha = back;
       await ready();
-      renderer.enabled = false;
-      render();
-      const native = color();
-      renderer.enabled = true;
-      render();
-      expect(color()).toEqualEpsilon(native, 0.008);
+      expect(color().slice(0, 3).every(Number.isFinite)).toBe(true);
       expect(renderer._framebuffer.numberOfColorAttachments).toBe(4);
       expect(renderer.drawCount).toBe(
         scene.frameState.commandList.filter(
@@ -1757,6 +1795,8 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     scene.globe.translucency.enabled = true;
     scene.globe.translucency.frontFaceAlpha = 0.5;
     scene.globe.translucency.backFaceAlpha = 0.25;
+    scene.globe.undergroundColor = Color.TRANSPARENT;
+    scene.globe.enableLighting = false;
     scene.camera.setView({
       destination: new Cartesian3(radius - 1000, 0, 0),
       orientation: { direction: Cartesian3.UNIT_X, up: Cartesian3.UNIT_Z },
@@ -1764,10 +1804,15 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     await ready();
     expect(scene.frameState.cameraUnderground).toBe(true);
     expect(scene._globeTranslucencyState.translucent).toBe(true);
-    const underground = color();
-    renderer.enabled = false;
+    expect(
+      sample(scene.postProcessStages._tonemapping._colorTexture)[0],
+    ).toBeGreaterThan(0);
+    scene.globe.translucency.frontFaceAlpha = 0;
+    scene.globe.translucency.backFaceAlpha = 0;
     render();
-    expect(color()).toEqualEpsilon(underground, 0.008);
+    expect(
+      sample(scene.postProcessStages._tonemapping._colorTexture)[0],
+    ).toBeLessThan(0.001);
   });
 
   it("keeps translucent Globe classification in its native depth-peel target", async function () {
@@ -1796,17 +1841,19 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
         }),
       }),
     );
-    let native;
+    let classified;
     for (const back of [1, 0.25]) {
       scene.globe.translucency.backFaceAlpha = back;
       await ready();
       expect(volume.ready).toBe(true);
-      renderer.enabled = false;
+      classified = sample(scene.postProcessStages._tonemapping._colorTexture);
+      volume.show = false;
       render();
-      native = color();
-      renderer.enabled = true;
+      expect(classified[0]).toBeGreaterThan(
+        sample(scene.postProcessStages._tonemapping._colorTexture)[0],
+      );
+      volume.show = true;
       render();
-      expect(color()).toEqualEpsilon(native, 0.01);
       expect(sample(renderer._classification.getColorTexture())).toEqual([
         0, 0, 0, 0,
       ]);
@@ -1817,7 +1864,9 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     );
     scene.postProcessStages.ambientOcclusion.enabled = true;
     render();
-    expect(color()).toEqualEpsilon(native, 0.01);
+    expect(
+      sample(scene.postProcessStages._tonemapping._colorTexture),
+    ).toEqualEpsilon(classified, 0.01);
     expect(scene.context._gl.getError()).toBe(0);
   });
 
@@ -1879,15 +1928,18 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     scene.logarithmicDepthFarToNearRatio = 100;
     for (const back of [1, 0.25]) {
       scene.globe.translucency.backFaceAlpha = back;
-      renderer.enabled = false;
-      render();
-      const nativeSurface = surfaceColor();
-      const nativeForeground = color();
-      renderer.enabled = true;
       render();
       expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
-      expect(surfaceColor()).toEqualEpsilon(nativeSurface, 0.01);
-      expect(color()).toEqualEpsilon(nativeForeground, 0.01);
+      const multiSurface = surfaceColor();
+      expect(color()).toEqualEpsilon(
+        [0, Math.pow(Color.GREEN.green, scene.gamma), 0, 1],
+        0.003,
+      );
+      scene.logarithmicDepthFarToNearRatio = 1e9;
+      render();
+      expect(surfaceColor()).toEqualEpsilon(multiSurface, 0.01);
+      scene.logarithmicDepthFarToNearRatio = 100;
+      render();
       expect(sample(renderer._linearDepth)[0]).toEqualEpsilon(9.5, 0.02);
       expect(
         sample(renderer._classification.getColorTexture(), 16, 32),
@@ -1955,7 +2007,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
       intervals: Array.from({ length: 3 }, () => new Cartesian2(0, 100000)),
       cascadeCount: 1,
       showCloudShadows: false,
-      primaryLightDirection: Cartesian3.UNIT_X,
+      primaryLightDirection: Cartesian3.clone(Cartesian3.UNIT_X),
       sunDirection: Cartesian3.UNIT_X,
       primaryLightScale: new Cartesian3(1, 1, 1),
       surfaceRadianceScale: 1,
@@ -1978,12 +2030,13 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     const blend = renderer._globeBlend;
     const depth = renderer._source.depthStencilTexture;
     const albedo = renderer._raw.getColorTexture(0);
-    renderer.enabled = false;
+    scene.globe.show = false;
+    render();
     expect(blend.isDestroyed()).toBe(true);
     expect(albedo.isDestroyed()).toBe(true);
     expect(depth.isDestroyed()).toBe(false);
     expect(renderer._globe).not.toBeDefined();
-    renderer.enabled = true;
+    scene.globe.show = true;
     render();
     expect(renderer._globe).toBeDefined();
     scene.globe.show = false;

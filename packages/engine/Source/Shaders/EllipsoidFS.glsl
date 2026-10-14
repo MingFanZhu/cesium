@@ -1,6 +1,11 @@
 uniform vec3 u_radii;
 uniform vec3 u_oneOverEllipsoidRadiiSquared;
 
+// SCENEGIS_PATCH_BEGIN SGP-0049: Capture ray-intersection Phong material and its explicit fragment depth.
+#define SCENEGIS_DEFERRED_PHONG_MATERIAL
+#define SCENEGIS_DEFERRED_EXPLICIT_DEPTH
+// SCENEGIS_PATCH_END SGP-0049
+
 in vec3 v_positionEC;
 
 vec4 computeEllipsoidColor(czm_ray ray, float intersection, float side)
@@ -91,7 +96,9 @@ void main()
     vec3 positionEC = czm_pointAlongRay(ray, t);
     vec4 positionCC = czm_projection * vec4(positionEC, 1.0);
 #ifdef LOG_DEPTH
-    czm_writeLogDepth(1.0 + positionCC.w);
+    // SCENEGIS_PATCH_BEGIN SGP-0049: Encode intersection depth relative to the active frustum near plane.
+    czm_writeLogDepth(1.0 + positionCC.w - czm_currentFrustum.x);
+    // SCENEGIS_PATCH_END SGP-0049
 #else
     float z = positionCC.z / positionCC.w;
 

@@ -2,6 +2,7 @@ import {
   Cartesian3,
   Color,
   DirectionalLight,
+  SunLight,
   JulianDate,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarEnvironment,
@@ -63,10 +64,7 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
     });
   }
 
-  function createScene(
-    world,
-    light = new DirectionalLight({ direction: Cartesian3.UNIT_Z }),
-  ) {
+  function createScene(world, light = new SunLight()) {
     return {
       world,
       mode: SceneMode.SCENE3D,
@@ -270,7 +268,7 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
     const world = createWorld();
     const environment = createEnvironment(world);
     const element = {};
-    const displaced = new DirectionalLight({ direction: Cartesian3.UNIT_X });
+    const displaced = new SunLight();
     const scene = createScene(world, displaced);
     environment.connectedCallback(element);
 
@@ -287,7 +285,7 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
     const override = new DirectionalLight({ direction: Cartesian3.UNIT_Y });
     scene.light = override;
     environment.update(scene);
-    expect(scene.light).toBe(environment.light);
+    expect(scene.light).toBe(override);
     expect(environment.light.direction).toEqual(
       Cartesian3.negate(environment.sunDirection, new Cartesian3()),
     );
@@ -296,7 +294,7 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
     expect(scene.requestRender).toHaveBeenCalledTimes(1);
 
     environment.disconnectedCallback(element);
-    expect(scene.light).toBe(displaced);
+    expect(scene.light).toBe(override);
     world.destroy();
   });
 
@@ -348,7 +346,7 @@ describe("SceneGIS/Scene/SceneGISPlanarEnvironment", function () {
     const replacement = new DirectionalLight({ direction: Cartesian3.UNIT_Y });
     scene.light = replacement;
     environment.enabled = true;
-    expect(scene.light).toBe(environment.light);
+    expect(scene.light).toBe(replacement);
     expect(environment.light.intensity).toBe(5.0);
     environment.update(scene);
     scene.light = displaced;

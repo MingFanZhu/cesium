@@ -42,5 +42,8 @@ void main()
     #ifdef SCENEGIS_SSIL_MAIN
     correction += texelFetch(u_ssil, pixel, 0).rgb;
     #endif
+    #ifdef SCENEGIS_POINT_COLOR_CORRECTION
+    correction = sceneGISPointColorCorrection(correction, pixel);
+    #endif
     out_FragColor = vec4(correction, 0.0);
 }

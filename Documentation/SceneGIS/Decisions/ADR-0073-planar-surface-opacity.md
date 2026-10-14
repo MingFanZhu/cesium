@@ -1,11 +1,39 @@
 # ADR-0073：平面地表颜色透明与独立深度
 
-- Status: accepted，G3 qualification pending
+- Status: accepted；2026-10-14 WebGL deferred amendment supersedes the color-only decision below
 - Date: 2026-09-14
 - SGP: None；SceneGIS-owned 实现
 - Related: [ADR-0072](ADR-0072-vector-surface-transparency.md)
 
 ## Decision
+
+### 2026-10-14 WebGL deferred amendment
+
+负责人在 P4d 视觉验收后明确要求真正透明，并确认不透明地表使用延迟受光，半透明
+地表使用现有 OIT 专用受光通道。见 [ADR-0161](ADR-0161-unified-opaque-deferred-direction.md)
+及 [决策记录](../../../AgentDocs/webgl-deferred-renderer/discussions/2026-10-14-planar-transparency.md)。
+
+`opacity=1` 保持 Pass.GLOBE 与不透明深度；`opacity<1` 的原 tile command 转为
+Pass.TRANSLUCENT，保留 depth test、关闭颜色绘制的 depth write、输出真实 alpha。
+地表后方对象和重叠山坡参与原生 weighted OIT；前方不透明对象继续遮挡地表。
+OIT 关闭或不可用时沿用原生排序透明能力，不保证相交透明面的精确顺序。
+基础/物理/局部受光、阴影与天气在透明专用 Shader 中求值；不透明材质捕获仍提前
+返回并在屏幕阶段受光。这属于透明配套通道，不是完整不透明前向模式。
+
+零 opacity 在 Shader 中 discard，不产生颜色、深度或阴影遮挡；terrain LOD、
+影像准备、height/ray 查询仍正常。无 feature ID 的透明地表不重放到普通 ID pick，
+避免覆盖可见后方对象的 ID。`Scene.pickPosition` 默认返回不透明场景深度，开启
+`pickTranslucentDepth` 后可重放非零透明地表深度。显式 World 地形查询独立于 opacity。
+公共值仍在 normal render 发布，辅助 depth replay 不提前发布修改。
+
+删除旧背景快照 helper、颜色复制、sampler 和资源，不增加独立透明材质附件。
+复用原生 OIT 已有目标；移除旧快照可少驻留 8 bytes/pixel 的 RGBA16F（当前线性
+存储 profile）。不透明/透明切换复用 tile command、VA 与内容纹理，更新 Shader、
+pass、render state 及失效的派生命令。
+
+以下保留原实现决定作为历史，仅“背景混色并保留遮挡深度”的部分由本修订取代。
+
+### Original color-only decision
 
 SceneGISPlanarWorld 增加 opacity，默认 1，有限 0..1。该值控制 baseColor、影像、Material 和基础光照合成后的
 地表颜色；不改变各 imagery alpha，也不乘独立 VectorTileLayer.opacity。baseColor 继续要求 opaque Color。
