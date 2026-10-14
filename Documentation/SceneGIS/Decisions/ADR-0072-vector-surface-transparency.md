@@ -41,6 +41,8 @@ Planar 使用同一矢量 opacity，但整个 Planar World 的透明不在此 AD
 
 ## Ownership, delivery and upgrade
 
+P4e 接缝修正（2026-10-14）：原生透明 Globe 颜色路径关闭裙边，窄小瓦片缝会使 first peel 读到远侧地球，造成独立地图漏点及邻近法线异常。仅在当前视锥存在 direct overlay、相机在地表上方且 `Globe.showSkirts=true` 时，SGP-0012 让同一次 depth-only draw 使用已有 index buffer 的完整裙边索引。owned helper 缓存独立的命令及原生 log / HDR 派生；原 Globe 颜色命令、VA / buffer 所有权不变。不增加纹理或提交；增加该深度绘制的索引数量。关闭 `showSkirts`、没有 direct overlay 或地下观察仍走原生命令。此修正补齐当前可见表面的连续深度，不扩展地下或背面地图承诺。
+
 注册集合只保存 owner references，无 context/GPU ownership；最后 Layer 释放后清空 slot。
 借用 Scene-owned GlobeTranslucencyFramebuffer，不创建或销毁 native depth/color textures。
 新 helper 位于 SceneGIS/Scene/_private，Shader 仍按现有 GLSL glob 生成；公共 opacity 由原 buildTs 生成类型。

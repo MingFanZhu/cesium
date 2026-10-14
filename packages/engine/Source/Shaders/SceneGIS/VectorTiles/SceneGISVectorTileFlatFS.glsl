@@ -1,3 +1,4 @@
+#define SCENEGIS_DEFERRED_VECTOR_OVERLAY
 uniform float u_sceneGISVectorOpacity;
 #ifdef SCENEGIS_VECTOR_GROUND
 #define SCENEGIS_VECTOR_INPUT
@@ -128,6 +129,7 @@ void main()
     material.a *= v_color.a;
 #endif
     vec4 fill = czm_gammaCorrect(material);
+#ifndef SCENEGIS_DEFERRED_VECTOR_OVERLAY_CAPTURE
 #ifdef SCENEGIS_VECTOR_ENVIRONMENT
 #ifdef SCENEGIS_VECTOR_GROUND
     fill.rgb = vectorSurfaceRadiance(fill.rgb, groundPositionEC, groundNormalEC);
@@ -137,6 +139,7 @@ void main()
 #endif
 #elif defined(SCENEGIS_VECTOR_GROUND)
     fill.rgb *= groundLight;
+#endif
 #endif
     fill.rgb *= fill.a;
 #ifdef SCENEGIS_VECTOR_CIRCLE

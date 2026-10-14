@@ -9,6 +9,11 @@ import {
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
+  SceneGISPlanarTilingScheme,
+  FramebufferManager,
+  PixelDatatype,
+  SceneGISScreenSpaceReflections,
+  SceneGISScreenSpaceIndirectLighting,
   SceneGISVectorTileLayer,
   SceneGISVectorTileSource,
   SceneTransforms,
@@ -40,7 +45,18 @@ describe("SceneGIS/Scene/SceneGISVectorExtrusion", function () {
           scene.globe = world = new Globe();
           world.showGroundAtmosphere = false;
           world.maximumScreenSpaceError = 8;
-          scheme = Coordinates.scheme();
+          // Use the same bundled constructors as the public source API.
+          scheme = new SceneGISPlanarTilingScheme({
+            coordinateSystem: new SceneGISPlanarCoordinateSystem({
+              crs: "EPSG:3857",
+              extent: new SceneGISPlanarExtent({
+                minimumX: -Coordinates.halfWidth,
+                minimumY: -Coordinates.halfWidth,
+                maximumX: Coordinates.halfWidth,
+                maximumY: Coordinates.halfWidth,
+              }),
+            }),
+          });
           const level = 14;
           const x = Math.floor(((13.4 + 180) / 360) * 2 ** level);
           const y = Math.floor(
@@ -76,6 +92,8 @@ describe("SceneGIS/Scene/SceneGISVectorExtrusion", function () {
             maximumLevel: 0,
           });
         }
+        // These fixtures isolate material and directional-light behavior.
+        scene.environmentEffects.enabled = false;
         world.baseColor = Color.BLUE;
         target = {
           x: bounds.minimumX + bounds.width / 2,
@@ -201,6 +219,66 @@ describe("SceneGIS/Scene/SceneGISVectorExtrusion", function () {
         const picked = scene.pick(new Cartesian2(p.x, p.y), 1, 1);
         return { color, picked, point: p };
       }
+      function materialAt(texture, point) {
+        const target = new FramebufferManager({
+          pixelDatatype: PixelDatatype.FLOAT,
+        });
+        target.update(scene.context, 1, 1);
+        const copy = scene.context.createViewportQuadCommand(
+          "uniform sampler2D u_texture; uniform vec2 u_pixel; void main() { out_FragColor = texelFetch(u_texture, ivec2(u_pixel), 0); }",
+          {
+            framebuffer: target.framebuffer,
+            uniformMap: {
+              u_texture: () => texture,
+              u_pixel: () =>
+                new Cartesian2(Math.floor(point.x), 255 - Math.floor(point.y)),
+            },
+          },
+        );
+        try {
+          copy.execute(scene.context);
+          return Array.from(
+            scene.context.readPixels({
+              framebuffer: target.framebuffer,
+              width: 1,
+              height: 1,
+            }),
+          );
+        } finally {
+          copy.shaderProgram.destroy();
+          target.destroy();
+        }
+      }
+      it("stores opaque albedo and normals independently of the directional light", async function () {
+        add();
+        await ready();
+        const up = globeMode
+          ? Cartesian3.normalize(position(height), new Cartesian3())
+          : Cartesian3.UNIT_Z;
+        scene.light.direction = Cartesian3.negate(up, new Cartesian3());
+        const lit = sample(height);
+        scene.renderForSpecs();
+        const renderer = scene._sceneGISDeferred;
+        const raw = (index) =>
+          materialAt(renderer._raw.getColorTexture(index), lit.point);
+        const albedo = raw(0);
+        const normal = raw(1);
+        expect(albedo).toEqualEpsilon([1, 0, 0, 1], 0.001);
+        expect(
+          Cartesian3.magnitude(Cartesian3.fromArray(normal)),
+        ).toEqualEpsilon(1, 0.002);
+        expect(raw(2)[3]).toBe(-6);
+        const texture = renderer._raw.getColorTexture();
+        const count = renderer.drawCount;
+        scene.light.direction = Cartesian3.clone(up);
+        const dark = sample(height);
+        scene.renderForSpecs();
+        expect(dark.color[0]).toBeLessThan(lit.color[0]);
+        expect(raw(0)).toEqual(albedo);
+        expect(raw(1)).toEqual(normal);
+        expect(renderer._raw.getColorTexture()).toBe(texture);
+        expect(renderer.drawCount).toBe(count);
+      });
       it("draws and picks an elevated roof, preserves warm resources and changes opacity without rebuilding", async function () {
         add();
         await ready();
@@ -235,6 +313,39 @@ describe("SceneGIS/Scene/SceneGISVectorExtrusion", function () {
         expect(sample(height).picked?.id?.featureId).toBe("tower");
         scene.primitives.remove(layer);
         expect(va.isDestroyed()).toBeTrue();
+      });
+      it("shares opaque material with screen effects without replaying vector geometry", async function () {
+        add();
+        await ready();
+        const point = sample(height).point;
+        scene.renderForSpecs();
+        const renderer = scene._sceneGISDeferred;
+        const count = renderer.drawCount;
+        scene.highDynamicRange = true;
+        scene.postProcessStages.ambientOcclusion.enabled = true;
+        const ssr = new SceneGISScreenSpaceReflections({
+          scene,
+          enabled: true,
+        });
+        const ssil = new SceneGISScreenSpaceIndirectLighting({
+          scene,
+          enabled: true,
+        });
+        scene.renderForSpecs();
+        expect(ssr.ready && ssil.ready).toBeTrue();
+        expect(renderer.drawCount).toBe(count);
+        expect(ssr._state.captureDraws).toBe(0);
+        const indirect = materialAt(
+          ssr._state.main.indirect.getColorTexture(),
+          point,
+        );
+        expect(indirect[0]).toEqualEpsilon(0.35, 0.002);
+        expect(indirect.slice(1, 3)).toEqual([0, 0]);
+        const group = renderer._vector;
+        scene.primitives.remove(layer);
+        scene.renderForSpecs();
+        expect(renderer._vector).toBeUndefined();
+        expect(renderer._groups).not.toContain(group);
       });
       it("raises the roof on resident terrain without rebuilding the geometry", async function () {
         add(10);

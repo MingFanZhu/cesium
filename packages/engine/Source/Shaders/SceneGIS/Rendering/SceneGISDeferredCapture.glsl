@@ -26,6 +26,9 @@ layout(location = SCENEGIS_DEFERRED_OCEAN_LOCATION) out vec4 sceneGISDeferredOce
 #ifdef SCENEGIS_DEFERRED_CLASSIFICATION_LOCATION
 layout(location = SCENEGIS_DEFERRED_CLASSIFICATION_LOCATION) out vec4 sceneGISClassificationOverlay;
 #endif
+#ifdef SCENEGIS_DEFERRED_VECTOR_OVERLAY_LOCATION
+layout(location = SCENEGIS_DEFERRED_VECTOR_OVERLAY_LOCATION) out vec4 sceneGISVectorAlbedo;
+#endif
 #ifdef SCENEGIS_DEFERRED_STYLE_TARGET
 layout(location = 4) out vec4 sceneGISDeferredStyle;
 #endif
@@ -33,7 +36,7 @@ layout(location = 1) out vec4 sceneGISDeferredNormal;
 layout(location = 3) out vec4 sceneGISDeferredEmission;
 #endif
 
-#if defined(SCENEGIS_DEFERRED_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE) || defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) || defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE)
+#if defined(SCENEGIS_DEFERRED_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE) || defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) || defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE) || defined(SCENEGIS_DEFERRED_VECTOR_CAPTURE)
 #if !defined(SCENEGIS_DEFERRED_GLOBE_BLEND) && !defined(SCENEGIS_DEFERRED_EXTENSION_ONLY)
 layout(location = 2) out vec4 sceneGISDeferredSpecular;
 #endif
@@ -131,6 +134,14 @@ void sceneGISRecordPlanar(vec4 color, vec3 normalEC, vec3 geometryNormalEC, vec3
     sceneGISDeferredSpecularValue = parameters;
     sceneGISDeferredEmissionValue = geometryNormalEC;
 }
+#elif defined(SCENEGIS_DEFERRED_VECTOR_CAPTURE)
+void sceneGISRecordVector(vec4 color, vec3 normalEC)
+{
+    sceneGISDeferredDiffuseValue = color;
+    sceneGISDeferredNormalValue = vec4(normalEC, 0.0);
+    sceneGISDeferredSpecularValue = vec3(0.0);
+    sceneGISDeferredEmissionValue = vec3(0.0);
+}
 #elif defined(SCENEGIS_DEFERRED_PHONG_CAPTURE)
 void sceneGISRecordPhong(czm_material material)
 {
@@ -164,6 +175,9 @@ void sceneGISWriteDeferredMaterial()
     // Only imagery color is composited; other surface fields remain unchanged.
     out_FragColor = sceneGISDeferredDiffuseValue;
 #else
+#ifdef SCENEGIS_DEFERRED_VECTOR_OVERLAY_LOCATION
+    sceneGISVectorAlbedo = vec4(0.0);
+#endif
 #ifdef SCENEGIS_DEFERRED_DEPTH_LOCATION
     #if defined(LOG_DEPTH) || defined(SCENEGIS_DEFERRED_EXPLICIT_DEPTH) || defined(HAS_PLANAR_FILL_DEPTH)
     vec4 sceneGISEye = czm_windowToEyeCoordinates(gl_FragCoord.xy, gl_FragDepth);
@@ -197,7 +211,7 @@ void sceneGISWriteDeferredMaterial()
     sceneGISDeferredOcean = vec4(0.0);
     #endif
 #endif
-#if defined(SCENEGIS_DEFERRED_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE) || defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) || defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE)
+#if defined(SCENEGIS_DEFERRED_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE) || defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) || defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE) || defined(SCENEGIS_DEFERRED_VECTOR_CAPTURE)
     out_FragColor = sceneGISDeferredDiffuseValue;
     sceneGISDeferredNormal = sceneGISDeferredNormalValue;
     sceneGISDeferredSpecular = vec4(sceneGISDeferredSpecularValue, u_sceneGISDeferredGroup);

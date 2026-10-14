@@ -1,16 +1,18 @@
 in float prismVertex;
 flat out ivec3 v_groundIndices;
-flat out int v_groundFrame;
 flat out float v_globeLinearError;
 
 void main()
 {
     vec4 triangle = groundTriangle(gl_InstanceID);
     ivec3 indices = ivec3(triangle.xyz);
-    int frame = int(triangle.w);
+    int frame = gl_InstanceID;
+    vec4 metadata = groundFetch(u_sceneGISGroundData, u_sceneGISGroundDataSize, int(u_sceneGISGroundOffsets.y) + frame * 4 + 3);
+    v_groundEdgeFrames = ivec3(metadata.zw, triangle.w);
     vec2 a = groundPosition(indices.x), b = groundPosition(indices.y), c = groundPosition(indices.z);
     if (groundCross(b - a, c - a) < 0.0) {
         indices.yz = indices.zy;
+        v_groundEdgeFrames.yz = v_groundEdgeFrames.zy;
         vec2 swap = b; b = c; c = swap;
     }
     v_groundIndices = indices;
@@ -20,7 +22,6 @@ void main()
 #ifdef SCENEGIS_VECTOR_GLOBE_TERRAIN
     v_terrainReference = reference;
     v_terrainFrame = vec4(globeFrame(frame, 3).xy, globeFrame(frame, 1).w, globeFrame(frame, 2).w);
-    v_terrainOriginEye = (czm_modelViewRelativeToEye * globeOrigin(frame)).xyz;
     v_terrainAB = vec4(a, b);
     v_terrainC = vec4(c, groundVertex(indices.x, 0).z, 0.0);
 #ifndef SCENEGIS_VECTOR_UNIFORM_PAINT

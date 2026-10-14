@@ -6,6 +6,9 @@ import {
   HeadingPitchRange,
   SceneGISVectorTileLayer,
   SceneGISVectorTileSource,
+  SceneGISPlanarTilingScheme,
+  SceneGISPlanarCoordinateSystem,
+  SceneGISPlanarExtent,
   CustomHeightmapTerrainProvider,
   EllipsoidTerrainProvider,
   SceneTransforms,
@@ -22,12 +25,17 @@ import {
   IntersectionTests,
   Ray,
   Resource,
+  Pass,
+  DirectionalLight,
+  FramebufferManager,
+  PixelDatatype,
 } from "../../../index.js";
 import { encodeGlyphs } from "../Core/vectorSymbolFixture.js";
 import DrawCommand from "../../../Source/Renderer/DrawCommand.js";
 import Coordinates from "../../../Source/SceneGIS/Core/_private/_SceneGISVectorGlobeCoordinates.js";
 import Cover from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorGlobeCover.js";
 import Terrain from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorGlobeTerrain.js";
+import SourceEllipsoidTerrainProvider from "../../../Source/Core/EllipsoidTerrainProvider.js";
 import createScene from "../../../../../Specs/createScene.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
@@ -79,7 +87,20 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
     scene.fog.enabled = false;
     scene.msaaSamples = 1;
     scene.postProcessStages.fxaa.enabled = false;
-    scheme = Coordinates.scheme();
+    // Isolate coverage and alpha in a linear, environment-free fixture.
+    scene.environmentEffects.enabled = false;
+    scene.gamma = 1;
+    scheme = new SceneGISPlanarTilingScheme({
+      coordinateSystem: new SceneGISPlanarCoordinateSystem({
+        crs: "EPSG:3857",
+        extent: new SceneGISPlanarExtent({
+          minimumX: -Coordinates.halfWidth,
+          minimumY: -Coordinates.halfWidth,
+          maximumX: Coordinates.halfWidth,
+          maximumY: Coordinates.halfWidth,
+        }),
+      }),
+    });
     source = new SceneGISVectorTileSource({
       url: "https://example.invalid/{z}/{x}/{y}",
       tilingScheme: scheme,
@@ -489,6 +510,229 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
     const far = Cover.select(layer, scene.frameState, flexible);
     expect(Math.max(...far.map((t) => t.level))).toBeLessThan(6);
   });
+  [false, true].forEach((logarithmic) => {
+    it(`preserves uniform translucent fill coverage on native terrain (log ${logarithmic})`, async function () {
+      scene.logarithmicDepthBuffer = logarithmic;
+      scene.farToNearRatio = 2;
+      globe.terrainProvider = new CustomHeightmapTerrainProvider({
+        width: 16,
+        height: 16,
+        callback: () => new Float32Array(256).fill(35),
+      });
+      globe.translucency.enabled = true;
+      globe.translucency.frontFaceAlpha = 0;
+      globe.translucency.backFaceAlpha = 0;
+      const layer = add(
+        [feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]])],
+        [
+          {
+            id: "red",
+            type: "fill",
+            paint: {
+              "fill-color": "red",
+              "fill-opacity": 0.5,
+              "fill-antialias": false,
+            },
+          },
+        ],
+      );
+      await ready(layer);
+      scene.renderForSpecs();
+      const pixels = scene.context.readPixels({
+        x: 96,
+        y: 96,
+        width: 64,
+        height: 64,
+      });
+      const incorrect = [];
+      for (let i = 0; i < pixels.length; i += 4) {
+        if (Math.abs(pixels[i] - 128) > 1) {
+          incorrect.push({
+            x: 96 + ((i / 4) % 64),
+            y: 96 + Math.floor(i / 256),
+            red: pixels[i],
+          });
+        }
+      }
+      expect(incorrect).toEqual([]);
+    });
+  });
+  it("closes transparent native tile seams only in the borrowed surface depth", async function () {
+    scene.canvas.width = 1280;
+    scene.canvas.height = 800;
+    scene.camera.frustum.aspectRatio = 1.6;
+    scene.camera.frustum.near = 1;
+    globe.maximumScreenSpaceError = 8;
+    const bounds = scheme.tileXYToExtent(8801, 5373, 14);
+    target = {
+      x: bounds.minimumX + bounds.width * 0.5,
+      y: bounds.minimumY + bounds.height * 0.5,
+    };
+    const latitude = Coordinates.cartographic(target.x, target.y).latitude;
+    const scale = Math.cos(latitude);
+    scene.camera.lookAt(
+      Coordinates.position(target.x, target.y),
+      new HeadingPitchRange(0, -0.85, 1050 * scale),
+    );
+    scene.camera.lookAtTransform(Matrix4.IDENTITY);
+    globe.terrainProvider = new CustomHeightmapTerrainProvider({
+      width: 16,
+      height: 16,
+      callback: () => new Float32Array(256).fill(35 * scale),
+    });
+    globe.translucency.enabled = true;
+    globe.translucency.frontFaceAlpha = 0;
+    globe.translucency.backFaceAlpha = 0;
+    const layer = add(
+      [feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]])],
+      [
+        {
+          id: "red",
+          type: "fill",
+          paint: {
+            "fill-color": "red",
+            "fill-opacity": 0.5,
+            "fill-antialias": false,
+          },
+        },
+      ],
+    );
+    source.requestTile.and.callFake((x, y) =>
+      Promise.resolve({
+        layers: [
+          {
+            name: "data",
+            version: 2,
+            extent: 4096,
+            features:
+              x === 8801 && y === 5373
+                ? [feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]])]
+                : [],
+          },
+        ],
+      }),
+    );
+    await ready(layer);
+    const draw = spyOn(scene.context, "draw").and.callThrough();
+    function capture() {
+      draw.calls.reset();
+      scene.renderForSpecs();
+      const pixels = scene.context.readPixels({
+        x: 415,
+        y: 315,
+        width: 135,
+        height: 200,
+      });
+      let missing = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        if (Math.abs(pixels[i] - 128) > 1) {
+          missing++;
+        }
+      }
+      const depths = draw.calls
+        .allArgs()
+        .map((args) => args[0])
+        .filter(
+          (command) =>
+            command.pass === Pass.GLOBE &&
+            command.renderState.colorMask.red === false,
+        );
+      return {
+        missing,
+        draws: depths.length,
+        indices: depths.reduce((sum, command) => sum + command.count, 0),
+      };
+    }
+    const closed = capture();
+    expect(closed.missing).toBe(0);
+    globe.showSkirts = false;
+    const open = capture();
+    // The public opt-out retains native holes; closure adds indices, not draws.
+    expect(open.missing).toBeGreaterThan(0);
+    expect(open.draws).toBe(closed.draws);
+    expect(open.indices).toBeLessThan(closed.indices);
+    globe.showSkirts = true;
+    expect(capture().missing).toBe(0);
+    layer.show = false;
+    expect(capture().draws).toBe(0);
+  });
+  it("defers lit background styles and preserves their transparent surface path", async function () {
+    globe.enableLighting = true;
+    const normal = Cartesian3.normalize(
+      Coordinates.position(target.x, target.y),
+      new Cartesian3(),
+    );
+    scene.light = new DirectionalLight({
+      direction: Cartesian3.negate(normal, new Cartesian3()),
+    });
+    const layer = scene.primitives.add(
+      new SceneGISVectorTileLayer({
+        scene,
+        style: {
+          version: 8,
+          sources: {},
+          layers: [
+            {
+              id: "background",
+              type: "background",
+              paint: {
+                "background-color": "red",
+                "background-opacity": 0.5,
+              },
+            },
+          ],
+        },
+      }),
+    );
+    await ready(layer);
+    const renderer = scene._sceneGISDeferred;
+    expect(renderer._vectorOverlays).toBeDefined();
+    if (!renderer._vectorOverlays) {
+      return;
+    }
+    const targetBuffer = new FramebufferManager({
+      pixelDatatype: PixelDatatype.FLOAT,
+    });
+    targetBuffer.update(scene.context, 1, 1);
+    const materialTexture = renderer._vectorOverlays.raw.getColorTexture();
+    const copy = scene.context.createViewportQuadCommand(
+      "uniform sampler2D u_texture; void main() { out_FragColor = texelFetch(u_texture, ivec2(128), 0); }",
+      {
+        framebuffer: targetBuffer.framebuffer,
+        uniformMap: { u_texture: () => materialTexture },
+      },
+    );
+    function material() {
+      copy.execute(scene.context);
+      return Array.from(
+        scene.context.readPixels({
+          framebuffer: targetBuffer.framebuffer,
+          width: 1,
+          height: 1,
+        }),
+      );
+    }
+    try {
+      expect(material()).toEqualEpsilon([0.5, 0, 0, 0.5], 0.002);
+      const bright = sample().color;
+      scene.light.direction = normal;
+      scene.renderForSpecs();
+      const dark = sample().color;
+      expect(dark[0]).toBeLessThan(bright[0]);
+      expect(material()).toEqualEpsilon([0.5, 0, 0, 0.5], 0.002);
+      globe.translucency.enabled = true;
+      globe.translucency.frontFaceAlpha = 0;
+      globe.translucency.backFaceAlpha = 0;
+      scene.renderForSpecs();
+      const transparent = sample().color;
+      expect(renderer._vectorOverlays).toBeUndefined();
+      expect(materialTexture.isDestroyed()).toBe(true);
+      expect(transparent[0]).toEqualEpsilon(dark[0], 2);
+    } finally {
+      copy.shaderProgram.destroy();
+      targetBuffer.destroy();
+    }
+  });
   it("rejects a terrain matrix and non-3D scene before requesting", function () {
     const style = { version: 8, sources: {}, layers: [] };
     expect(
@@ -744,7 +988,7 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
     const tiles = [];
     const layer = {
       _world: {
-        terrainProvider: new EllipsoidTerrainProvider(),
+        terrainProvider: new SourceEllipsoidTerrainProvider(),
         _surface: { _tilesToRender: tiles },
       },
     };

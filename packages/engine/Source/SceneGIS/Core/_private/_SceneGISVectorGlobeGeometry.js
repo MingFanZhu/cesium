@@ -153,6 +153,48 @@ function prepareGlobeGeometry(batch, bounds) {
       packed.triangles[i + 2],
     );
   }
+  // Shared edges must invert the same surface point in one common frame.
+  // Reuse redundant metric fields and the instance/frame identity slot.
+  const vertexKeys = new Map();
+  function vertexKey(index) {
+    let key = vertexKeys.get(index);
+    if (key === undefined) {
+      const offset = index * stride;
+      const fields = [vertices[offset], vertices[offset + 1]];
+      if (batch.kind === "line" || batch.fringe) {
+        fields.push(...vertices.slice(offset + 8, offset + 12));
+      }
+      if (batch.kind === "line") {
+        fields.push(...vertices.slice(offset + 16, offset + 19));
+      }
+      key = fields.map(Math.fround).join(",");
+      vertexKeys.set(index, key);
+    }
+    return key;
+  }
+  const edgeFrames = new Map();
+  for (let i = 0; i < triangles.length; i += 4) {
+    const frame = i / 4;
+    const owners = [];
+    for (const [a, b] of [
+      [1, 2],
+      [2, 0],
+      [0, 1],
+    ]) {
+      const first = vertexKey(triangles[i + a]);
+      const second = vertexKey(triangles[i + b]);
+      const key = first < second ? `${first};${second}` : `${second};${first}`;
+      let owner = edgeFrames.get(key);
+      if (owner === undefined) {
+        owner = frame;
+        edgeFrames.set(key, owner);
+      }
+      owners.push(owner);
+    }
+    frames[frame * 16 + 14] = owners[0];
+    frames[frame * 16 + 15] = owners[1];
+    triangles[i + 3] = owners[2];
+  }
   batch.byteLength -= packed.vertices.byteLength + packed.triangles.byteLength;
   packed.vertices = new Float32Array(vertices);
   packed.triangles = new Float32Array(triangles);

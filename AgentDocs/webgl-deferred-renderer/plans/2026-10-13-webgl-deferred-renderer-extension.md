@@ -3,14 +3,14 @@
 ## Metadata
 
 - Plan type: `extension`
-- Status: `active`
+- Status: `completed`
 - Owner role: `architecture`
-- Architecture review: `confirmed`，仅探索范围与阶段边界
+- Architecture review: `confirmed`，既定范围的实现、验证与阶段 gate 已关闭
 - Architecture reviewer: Current task
 - Created: `2026-10-13`
-- Updated: `2026-10-14`
+- Updated: `2026-10-15`
 - Related discussion: [接入审计](../discussions/2026-10-13-command-integration-and-reuse.md)
-- Related review: [P2](../reviews/2026-10-13-p2-deferred-lighting-qualification.md)
+- Related review: [最终 P4e](../reviews/2026-10-14-p4e-vector-entry-audit.md)、[P4d](../reviews/2026-10-14-p4d-entry-audit.md)
 - ADR / SGP: [ADR-0156](../../../Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md) / SGP-0046；依赖 ADR-0155 / SGP-0045
 
 ## Objective
@@ -54,14 +54,14 @@ Globe 后继清理阶段仅记录稳定目标，进入时再依据当时源码�
 
 ## Phase roadmap
 
-| Phase | Objective                   | Dependencies / entry gate                      | Exit gate                                                      | Status    | Phase plan                                         |
-| ----- | --------------------------- | ---------------------------------------------- | -------------------------------------------------------------- | --------- | -------------------------------------------------- |
-| P0    | 隔离与接入范围审计          | 已提交 WebGL 基线                              | 分支、源码事实、复用/风险清单、文档检查与独立提交              | completed | [P0](2026-10-13-p0-isolation-and-audit.md)         |
-| P1    | 统一表面数据的有限 GPU 原型 | P0 checkpoint；依据源码细化材质/深度与附件预算 | 已限定材质正确性、覆盖率、精度、资源生命周期和 MSAA 取舍证据   | completed | [P1](2026-10-13-p1-gbuffer-prototype.md)           |
-| P2    | 不透明延迟光照与混合合成    | P1 契约通过；必要重大选择已确认                | 同条件直接光/环境光/阴影/透明/曝光正确性和街道对照             | completed | [P2](2026-10-13-p2-deferred-lighting.md)           |
-| P3a   | 256 灯分块调度              | P2 已验收                                      | 256 灯同语义、共享接收、资源/成本、视觉验收与独立提交          | completed | [P3a](2026-10-13-p3-many-light-and-shared-data.md) |
-| P3b   | 共享屏幕空间效果            | P3a 独立 checkpoint                            | AO/SSR/SSIL 数据复用收益及稳定性                               | completed | [P3b](2026-10-13-p3b-shared-screen-depth.md)       |
-| P4    | GIS 内容覆盖与替换决策      | P3a / P3b 有明确收益；按缺口安排子阶段         | 兼容矩阵、回归、实际设备成本、视觉验收，明确迁入主线或保留实验 | active    | [P4a](2026-10-13-p4a-model-and-tile-styling.md)    |
+| Phase | Objective                   | Dependencies / entry gate                      | Exit gate                                                      | Status    | Phase plan                                                                               |
+| ----- | --------------------------- | ---------------------------------------------- | -------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------- |
+| P0    | 隔离与接入范围审计          | 已提交 WebGL 基线                              | 分支、源码事实、复用/风险清单、文档检查与独立提交              | completed | [P0](2026-10-13-p0-isolation-and-audit.md)                                               |
+| P1    | 统一表面数据的有限 GPU 原型 | P0 checkpoint；依据源码细化材质/深度与附件预算 | 已限定材质正确性、覆盖率、精度、资源生命周期和 MSAA 取舍证据   | completed | [P1](2026-10-13-p1-gbuffer-prototype.md)                                                 |
+| P2    | 不透明延迟光照与混合合成    | P1 契约通过；必要重大选择已确认                | 同条件直接光/环境光/阴影/透明/曝光正确性和街道对照             | completed | [P2](2026-10-13-p2-deferred-lighting.md)                                                 |
+| P3a   | 256 灯分块调度              | P2 已验收                                      | 256 灯同语义、共享接收、资源/成本、视觉验收与独立提交          | completed | [P3a](2026-10-13-p3-many-light-and-shared-data.md)                                       |
+| P3b   | 共享屏幕空间效果            | P3a 独立 checkpoint                            | AO/SSR/SSIL 数据复用收益及稳定性                               | completed | [P3b](2026-10-13-p3b-shared-screen-depth.md)                                             |
+| P4    | GIS 内容覆盖与替换决策      | P3a / P3b 有明确收益；按缺口安排子阶段         | 兼容矩阵、回归、实际设备成本、视觉验收，明确迁入主线或保留实验 | completed | [P4a](2026-10-13-p4a-model-and-tile-styling.md) 至 [P4e](2026-10-14-p4e-vector-tiles.md) |
 
 后继阶段仅记录目标，不提前冻结 G-buffer 编码、灯光分块方式、Shader 文件或接口。
 默认顺序推进，每阶段独立提交后才能激活下一阶段。
@@ -85,6 +85,8 @@ Globe 后继清理阶段仅记录稳定目标，进入时再依据当时源码�
 无收益的候选优化不因已实现就强行保留。
 
 ## Progress and handoff
+
+当前结论：P4e 新增透明 Planar 画面于 2026-10-15 获负责人验收并授权提交，全部既定阶段 gate 关闭。WebGL2 / SCENE3D 单采样的 Entity、Primitive、glTF Model、3D Tiles、Globe、Planar 与独立矢量切片已完成本计划范围内的单一不透明 / MASK 延迟接入和冗余清理；透明、阴影、拾取、标注、体积继续使用必要专用通道。最终覆盖与限制见 P4e review 末尾。成果作为 `feature/webgl-deferred-rendering` 的本地阶段检查点交付，主线合并和发布不属于本次授权范围；没有激活后继阶段。以下保留历史推进证据。
 
 P0 checkpoint `bb9b16eba0`；[P1 G-buffer 原型](2026-10-13-p1-gbuffer-prototype.md) completed。
 技术验证通过，负责人于 2026-10-13 接受视觉结果；P1 checkpoint 为 `0a48afdd65`。
@@ -132,3 +134,7 @@ HDR 关闭显示契约，再完成默认绑定与旧不透明前向冗余清理�
 具体实现与未完事项继续由 P4d plan / review 跟踪，不新增阶段或提前关闭 gate。
 
 2026-10-14 P4d 的技术、自审及全部负责人视觉 gate 已完成，最后的自定义主光画面获负责人确认；批准形成本阶段独立本地 checkpoint。阶段完成既定唯一不透明 / MASK 入口、能力补齐和前向冗余清理，保留透明 / 阴影 / 拾取 / 标注 / 体积的必要专用路径。该提交成功后，再依据独立 SceneGISVectorTileLayer 的实际源码激活矢量切片 phase；其 flat、Globe / Planar ground、fill-extrusion、circle / symbol 与透明 Globe 组合仍属未完成范围。
+
+P4d checkpoint `4ba2e217c7` 已提交且钩子通过；现在依据源码与 vector Specs 激活 [P4e](2026-10-14-p4e-vector-tiles.md)。新地图材质预算由独立 discussion 跟踪，不覆盖原 vector extension 的历史完成记录。
+
+2026-10-15 负责人确认现有 P4e 页面视觉通过，并批准透明 Planar 的深度与地形提交预算。该增量实现、技术验证与自审通过后，负责人另行确认新增本地地形、多视锥、opacity=0.5 / 0 / 1 的地图、圆点、完整 VECTOR 文字、道路与点击拾取画面通过，指示提交 P4e。最后视觉 gate 与七项 review findings 全部关闭，形成本阶段独立 checkpoint；未激活下一阶段。

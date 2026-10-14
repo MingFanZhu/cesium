@@ -1,3 +1,7 @@
+#define SCENEGIS_DEFERRED_VECTOR_MATERIAL
+#ifdef SCENEGIS_DEFERRED_VECTOR_CAPTURE
+void sceneGISRecordVector(vec4 color, vec3 normalEC);
+#endif
 uniform float u_sceneGISVectorOpacity;
 uniform vec4 u_sceneGISVectorTileClip;
 in vec4 v_color;
@@ -28,13 +32,18 @@ void main()
 #endif
     vec4 fill = czm_gammaCorrect(material);
     vec3 normalEC = normalize(v_normalEC);
+#ifndef SCENEGIS_DEFERRED_VECTOR_CAPTURE
 #ifdef SCENEGIS_VECTOR_ENVIRONMENT
     fill.rgb = vectorSurfaceRadiance(fill.rgb, v_positionEC, normalEC);
 #else
     fill.rgb *= 0.35 + 0.65 * max(dot(normalEC, czm_lightDirectionEC), 0.0) * czm_lightColor;
 #endif
+#endif
     fill.rgb *= v_gradient;
     fill.a *= u_sceneGISVectorOpacity;
     if (fill.a == 0.0) discard;
+#ifdef SCENEGIS_DEFERRED_VECTOR_CAPTURE
+    sceneGISRecordVector(fill, normalEC);
+#endif
     out_FragColor = fill;
 }

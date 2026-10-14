@@ -49,7 +49,10 @@ GlobeBackground.prototype.update = function (frameState) {
   }
   const range = new Cartesian2();
   const source = new ShaderSource({
-    defines: this._pattern ? ["SCENEGIS_VECTOR_PATTERN"] : [],
+    defines: [
+      "SCENEGIS_VECTOR_BACKGROUND",
+      ...(this._pattern ? ["SCENEGIS_VECTOR_PATTERN"] : []),
+    ],
     sources: [patternFragment, fragment],
   });
   this._command = frameState.context.createViewportQuadCommand(source, {

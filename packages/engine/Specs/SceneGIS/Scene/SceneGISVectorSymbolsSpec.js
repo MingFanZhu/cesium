@@ -7,7 +7,6 @@ import {
   OrthographicFrustum,
   PerspectiveFrustum,
   Resource,
-  RuntimeError,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
@@ -16,6 +15,8 @@ import {
 } from "../../../index.js";
 import WorkerPool from "../../../Source/SceneGIS/Core/_private/_SceneGISVectorWorkerPool.js";
 import Assets from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorSymbolAssets.js";
+import SourceResource from "../../../Source/Core/Resource.js";
+import SourceRuntimeError from "../../../Source/Core/RuntimeError.js";
 import Projection from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorSymbolProjection.js";
 import { encodeGlyphs, glyph } from "../Core/vectorSymbolFixture.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
@@ -128,6 +129,9 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
       baseColor: Color.BLACK,
     });
     scene._initializeWorld(world);
+    // Test native symbol colors and alpha without the default environment.
+    scene.environmentEffects.enabled = false;
+    scene.gamma = 1;
     scene.msaaSamples = 1;
     scene.postProcessStages.fxaa.enabled = false;
     scene.camera.position = new Cartesian3(0, 0, 80);
@@ -501,7 +505,10 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     const va = batch.resources.vertexArray,
       atlas = batch.page.texture,
       pickId = [...runtime._pickIds.values()][0];
-    expect(command.derivedCommands.picking.pickCommand.vertexArray).toBe(va);
+    const pickSource = scene.frameState.useLogDepth
+      ? command.derivedCommands.logDepth.command
+      : command;
+    expect(pickSource.derivedCommands.picking.pickCommand.vertexArray).toBe(va);
     const upload = spyOn(batch.resources, "update").and.callThrough();
     const shape = runtime._previous[0].shaped;
     const layouts = [...runtime._tileLayouts.values()][0];
@@ -1474,14 +1481,16 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
 
   it("evicts only unused glyph ranges and terminates stale requests within a bounded cache", async function () {
     let complete;
-    spyOn(Resource.prototype, "fetchArrayBuffer").and.callFake(function () {
-      if (this.url.includes("0-255")) {
-        return new Promise((resolve) => {
-          complete = resolve;
-        });
-      }
-      return Promise.resolve(encodeGlyphs([glyph(256)]));
-    });
+    spyOn(SourceResource.prototype, "fetchArrayBuffer").and.callFake(
+      function () {
+        if (this.url.includes("0-255")) {
+          return new Promise((resolve) => {
+            complete = resolve;
+          });
+        }
+        return Promise.resolve(encodeGlyphs([glyph(256)]));
+      },
+    );
     const owner = {
       scene,
       style: { glyphs: "https://example.invalid/{fontstack}/{range}.pbf" },
@@ -1506,7 +1515,7 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(assets.glyph("Test", 256).glyph.id).toBe(256);
     expect(() =>
       assets.prepare(first, false, new Set(["Test/1"])),
-    ).toThrowError(RuntimeError);
+    ).toThrowError(SourceRuntimeError);
     assets.destroy();
     owner._workers.destroy();
   });

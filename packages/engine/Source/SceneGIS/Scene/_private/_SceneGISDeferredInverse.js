@@ -111,7 +111,7 @@ class _SceneGISDeferredInverse {
     const width = context.drawingBufferWidth;
     const height = context.drawingBufferHeight;
     const style = renderer._hasStyleTarget;
-    const layout = `${renderer._extensionLayout.key}_${renderer._extensionCombined}_${style}_${renderer._hasOcean}_${renderer._hasClassification}_${renderer._multiFrustum}_${frameState.useLogDepth}`;
+    const layout = `${renderer._extensionLayout.key}_${renderer._extensionCombined}_${style}_${renderer._hasOcean}_${renderer._hasClassification}_${renderer._multiFrustum}_${frameState.useLogDepth}_${renderer._vectorOverlayLocation}`;
     if (this._raw.isDirty(width, height, 1) || this._layout !== layout) {
       this._releaseDepthSource();
       this.framebuffer?.destroy();
@@ -200,6 +200,11 @@ class _SceneGISDeferredInverse {
         }
       }
       const sources = [merge];
+      if (renderer._vectorOverlayLocation !== undefined) {
+        defines.push(
+          `SCENEGIS_DEFERRED_VECTOR_OVERLAY_LOCATION ${renderer._vectorOverlayLocation}`,
+        );
+      }
       if (extensionCount && renderer._extensionCombined) {
         defines.push("SCENEGIS_DEFERRED_EXTENSIONS");
         sources.unshift(

@@ -1,9 +1,13 @@
 import {
+  BoxGeometry,
   Cartesian2,
   Cartesian3,
   Cartesian4,
   CullingVolume,
   Color,
+  ColorGeometryInstanceAttribute,
+  ClippingPlane,
+  ClippingPlaneCollection,
   Event,
   SceneTransforms,
   SceneGISPlanarWorld,
@@ -12,6 +16,20 @@ import {
   SceneGISPlanarHeightmapTerrainData,
   SceneGISVectorTileLayer,
   SceneGISVectorTileSource,
+  DirectionalLight,
+  FramebufferManager,
+  PixelDatatype,
+  ContextLimits,
+  SceneGISScreenSpaceReflections,
+  SceneGISWaterSurface,
+  PolygonHierarchy,
+  Matrix4,
+  GeometryInstance,
+  PerInstanceColorAppearance,
+  Primitive,
+  OrthographicFrustum,
+  Pass,
+  SceneGISTemporalAntialiasing,
 } from "../../../index.js";
 import createScene from "../../../../../Specs/createScene.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
@@ -37,6 +55,9 @@ describe("SceneGIS/Scene/SceneGISVectorGround", function () {
       baseColor: Color.BLACK,
     });
     scene._initializeWorld(world);
+    // Isolate surface coverage and independent alpha from the default environment.
+    scene.environmentEffects.enabled = false;
+    scene.gamma = 1;
     scene.msaaSamples = 1;
     scene.postProcessStages.fxaa.enabled = false;
     scene.camera.position = new Cartesian3(0, -80, 80);
@@ -234,6 +255,521 @@ describe("SceneGIS/Scene/SceneGISVectorGround", function () {
         1,
       );
     });
+  });
+
+  it("applies a transparent map once to the nearest overlapping terrain across frusta", async function () {
+    scene.logarithmicDepthBuffer = false;
+    scene.farToNearRatio = 2;
+    scene.camera.frustum.fov = 0.12;
+    scene.camera.setView({
+      destination: new Cartesian3(0, -125, 30),
+      orientation: {
+        direction: Cartesian3.normalize(
+          new Cartesian3(0, 1, -0.08),
+          new Cartesian3(),
+        ),
+        up: Cartesian3.UNIT_Z,
+      },
+    });
+    const provider = terrain();
+    provider.maximumHeight = 60;
+    provider.requestTileGeometry = () =>
+      Promise.resolve(
+        new SceneGISPlanarHeightmapTerrainData({
+          width: 9,
+          height: 9,
+          buffer: Float32Array.from(
+            { length: 81 },
+            (_, i) => 60 * Math.sin((Math.floor(i / 9) * Math.PI) / 2) ** 2,
+          ),
+        }),
+      );
+    world.terrainProvider = provider;
+    const layer = add(
+      [feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]], "hills")],
+      [
+        {
+          id: "map",
+          type: "fill",
+          paint: { "fill-color": "red", "fill-antialias": false },
+        },
+      ],
+    );
+    layer.opacity = 0.5;
+    await ready(layer, 0);
+    const opaque = scene.context.readPixels();
+    world.opacity = 0;
+    scene.renderForSpecs();
+    const pixels = scene.context.readPixels();
+    let count = 0;
+    let maximumError = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (opaque[i] === 128) {
+        ++count;
+        maximumError = Math.max(maximumError, Math.abs(pixels[i] - 128));
+      }
+    }
+    expect(count).toBeGreaterThan(1000);
+    expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
+    expect(maximumError).toBeLessThanOrEqual(1);
+  });
+
+  it("keeps map coverage continuous across narrow perspective frusta", async function () {
+    scene.logarithmicDepthBuffer = false;
+    scene.farToNearRatio = 2;
+    scene.camera.frustum.fov = 0.2;
+    scene.camera.setView({
+      destination: new Cartesian3(0, -197, 223),
+      orientation: {
+        direction: Cartesian3.normalize(
+          new Cartesian3(0, 197, -223),
+          new Cartesian3(),
+        ),
+        up: Cartesian3.UNIT_Z,
+      },
+    });
+    world.terrainProvider = terrain();
+    world.opacity = 0;
+    const layer = add(
+      [feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]], "plane")],
+      [
+        {
+          id: "map",
+          type: "fill",
+          paint: { "fill-color": "red", "fill-antialias": false },
+        },
+      ],
+    );
+    layer.opacity = 0.5;
+    await ready(layer);
+    const pixels = scene.context.readPixels({
+      x: 70,
+      y: 100,
+      width: 116,
+      height: 100,
+    });
+    let maximumError = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      maximumError = Math.max(maximumError, Math.abs(pixels[i] - 128));
+    }
+    expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
+    expect(maximumError).toBeLessThanOrEqual(1);
+  });
+
+  it("keeps transparent map occlusion and pick depth in front of buried objects", async function () {
+    scene.camera.setView({
+      destination: new Cartesian3(0, 0, 100),
+      orientation: {
+        direction: new Cartesian3(0, 0, -1),
+        up: Cartesian3.UNIT_Y,
+      },
+    });
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 80,
+      aspectRatio: 1,
+      near: 1,
+      far: 300,
+    });
+    scene.logarithmicDepthBuffer = false;
+    const box = scene.primitives.add(
+      new Primitive({
+        asynchronous: false,
+        geometryInstances: new GeometryInstance({
+          id: "box",
+          geometry: BoxGeometry.fromDimensions({
+            dimensions: new Cartesian3(70, 70, 1),
+            vertexFormat: PerInstanceColorAppearance.FLAT_VERTEX_FORMAT,
+          }),
+          attributes: {
+            color: ColorGeometryInstanceAttribute.fromColor(Color.LIME),
+          },
+        }),
+        appearance: new PerInstanceColorAppearance({
+          flat: true,
+          translucent: false,
+          closed: true,
+        }),
+      }),
+    );
+    world.baseColor = Color.BLUE;
+    world.terrainProvider = terrain();
+    world.opacity = 0.5;
+    const layer = add(
+      [polygon()],
+      [
+        {
+          id: "red",
+          type: "fill",
+          paint: { "fill-color": "red", "fill-antialias": false },
+        },
+      ],
+    );
+    layer.opacity = 0.5;
+    await ready(layer);
+    let pixel = sample(0, 0, 12);
+    expect(pixel.color).toEqualEpsilon([128, 64, 64, 255], 1);
+    expect(scene.pick(pixel.point)?.id.featureId).toBe("area");
+    scene.camera.setView({
+      orientation: {
+        direction: new Cartesian3(0, 0, -1),
+        up: Cartesian3.UNIT_X,
+      },
+    });
+    pixel = sample(0, 0, 12);
+    expect(pixel.color).toEqualEpsilon([128, 64, 64, 255], 1);
+    expect(scene.pick(pixel.point)?.id.featureId).toBe("area");
+    scene._view.oit = scene._view.oit.destroy();
+    pixel = sample(0, 0, 12);
+    expect(scene._environmentState.useOIT).toBeFalse();
+    expect(pixel.color).toEqualEpsilon([128, 64, 64, 255], 1);
+    box.modelMatrix = Matrix4.fromTranslation(new Cartesian3(0, 0, 35));
+    pixel = sample(0, 0, 12);
+    expect(pixel.color).toEqualEpsilon([0, 255, 0, 255], 1);
+    expect(scene.pick(pixel.point)?.id).toBe("box");
+    box.modelMatrix = Matrix4.IDENTITY;
+    world.clippingPlanes = new ClippingPlaneCollection({
+      planes: [new ClippingPlane(Cartesian3.UNIT_X, 0)],
+    });
+    const clipped = sample(-10, 0, 12 - (10 * 24) / 256);
+    expect(clipped.color).toEqualEpsilon([0, 255, 0, 255], 1);
+    expect(scene.pick(clipped.point)?.id).toBe("box");
+    const retained = sample(10, 0, 12 + (10 * 24) / 256);
+    expect(retained.color).toEqualEpsilon([128, 64, 64, 255], 1);
+    expect(scene.pick(retained.point)?.id.featureId).toBe("area");
+  });
+
+  it("keeps transparent terrain and overflowing markers aligned with temporal samples", async function () {
+    scene.camera.setView({
+      destination: new Cartesian3(128, 0, 100),
+      orientation: {
+        direction: new Cartesian3(0, 0, -1),
+        up: Cartesian3.UNIT_Y,
+      },
+    });
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 80,
+      aspectRatio: 1,
+      near: 1,
+      far: 300,
+    });
+    scene.highDynamicRange = true;
+    world.terrainProvider = terrain();
+    world.opacity = 0;
+    const layer = add(
+      [feature(1, [[4000, 2048]], "edge")],
+      [
+        {
+          id: "dot",
+          type: "circle",
+          paint: {
+            "circle-color": "blue",
+            "circle-opacity": 0.5,
+            "circle-radius": 48,
+          },
+        },
+      ],
+    );
+    await ready(layer);
+    const inside = sample(120, 0, 24).color;
+    const outside = sample(132, 0, 24).color;
+    expect(inside[2]).toBeGreaterThan(80);
+    expect(outside).toEqualEpsilon(inside, 1);
+    expect(scene.pick(sample(132, 0, 24).point)?.id.featureId).toBe("edge");
+    const taa = new SceneGISTemporalAntialiasing({
+      scene,
+      enabled: true,
+      historyWeight: 0,
+    });
+    for (let i = 0; i < 2; ++i) {
+      expect(sample(120, 0, 24).color).toEqualEpsilon(inside, 2);
+      expect(sample(132, 0, 24).color).toEqualEpsilon(outside, 2);
+    }
+    expect(taa.ready).toBeTrue();
+    expect(scene.context._gl.getError()).toBe(0);
+  });
+
+  it("bounds transparent map resources and submissions and releases mutually exclusive targets", async function () {
+    world.terrainProvider = terrain();
+    world.opacity = 0;
+    scene.farToNearRatio = 2;
+    scene.logarithmicDepthBuffer = false;
+    const layer = add(
+      [polygon()],
+      [
+        {
+          id: "red",
+          type: "fill",
+          paint: { "fill-color": "red", "fill-antialias": false },
+        },
+      ],
+    );
+    await ready(layer);
+    const pixel = sample(0, 0, 12);
+    const renderer = scene._sceneGISDeferred;
+    const state = renderer._planarVectors;
+    const depth = state.depth.getDepthStencilTexture();
+    const color = state.raw.getColorTexture();
+    expect(depth.sizeInBytes).toBe(256 * 256 * 4);
+    expect(color.sizeInBytes).toBe(256 * 256 * 8);
+    expect(state.depthDrawCount).toBe(world._surface._renderCommands.length);
+    expect(state.mapDrawCount).toBe(
+      scene._view.frustumCommandsList.reduce(
+        (sum, range) => sum + range.indices[Pass.TERRAIN_CLASSIFICATION],
+        0,
+      ),
+    );
+    expect(renderer._vectorOverlays).toBeUndefined();
+    scene.pick(pixel.point);
+    expect(state.depth.getDepthStencilTexture()).toBe(depth);
+    expect(state.pickDepthDrawCount).toBe(
+      world._surface._renderCommands.length,
+    );
+    world.opacity = 0.5;
+    scene.renderForSpecs();
+    expect(state.raw.getColorTexture()).toBe(color);
+    world.opacity = 1;
+    world.enableLighting = true;
+    scene.renderForSpecs();
+    expect(renderer._planarVectors).toBeUndefined();
+    expect(depth.isDestroyed() && color.isDestroyed()).toBeTrue();
+    expect(renderer._vectorOverlays).toBeDefined();
+    world.opacity = 0;
+    scene.renderForSpecs();
+    expect(renderer._vectorOverlays).toBeUndefined();
+    const resized = renderer._planarVectors;
+    scene.canvas.width = 192;
+    scene.canvas.height = 144;
+    scene.renderForSpecs();
+    expect(resized.byteLength).toBe(192 * 144 * 12);
+    const last = resized.depth.getDepthStencilTexture();
+    layer.show = false;
+    scene.renderForSpecs();
+    expect(renderer._planarVectors).toBeUndefined();
+    expect(last.isDestroyed()).toBeTrue();
+    expect(scene.context._gl.getError()).toBe(0);
+  });
+  [0, 5, 6].forEach(function (capacity) {
+    it(`defers ordered lit fills while keeping an intervening circle unlit (MRT limit ${capacity})`, async function () {
+      const limited = capacity > 0;
+      const maximum = ContextLimits._maximumDrawBuffers;
+      try {
+        if (limited) {
+          ContextLimits._maximumDrawBuffers = capacity;
+        }
+        if (capacity === 6) {
+          scene.logarithmicDepthBuffer = false;
+          scene.farToNearRatio = 2;
+        }
+        world.terrainProvider = terrain();
+        world.enableLighting = true;
+        scene.light = new DirectionalLight({
+          direction: new Cartesian3(0, 0, -1),
+        });
+        const layer = add(
+          [polygon(), feature(1, [[2048, 2048]], "dot")],
+          [
+            {
+              id: "red",
+              type: "fill",
+              paint: {
+                "fill-color": "red",
+                "fill-opacity": 0.5,
+                "fill-antialias": false,
+              },
+            },
+            {
+              id: "dot",
+              type: "circle",
+              paint: {
+                "circle-color": "blue",
+                "circle-opacity": 0.5,
+                "circle-radius": 18,
+              },
+            },
+            {
+              id: "green",
+              type: "fill",
+              paint: {
+                "fill-color": "#00ff00",
+                "fill-opacity": 0.5,
+                "fill-antialias": false,
+              },
+            },
+          ],
+        );
+        await ready(layer);
+        const lit = sample(0, 0, 12);
+        const renderer = scene._sceneGISDeferred;
+        const overlay = renderer._vectorOverlays;
+        expect(overlay).toBeDefined();
+        if (!overlay) {
+          return;
+        }
+        expect(overlay.combined).toBe(!limited);
+        if (limited) {
+          expect(overlay.clearDrawCount).toBeGreaterThan(0);
+          expect(overlay.clearDrawCount).toBeLessThanOrEqual(
+            scene._view.frustumCommandsList.length * 2,
+          );
+        } else {
+          expect(overlay.clearDrawCount).toBe(0);
+        }
+        const target = new FramebufferManager({
+          pixelDatatype: PixelDatatype.FLOAT,
+        });
+        target.update(scene.context, 1, 1);
+        const copy = scene.context.createViewportQuadCommand(
+          "uniform sampler2D u_texture; uniform vec2 u_pixel; void main() { out_FragColor = texelFetch(u_texture, ivec2(u_pixel), 0); }",
+          {
+            framebuffer: target.framebuffer,
+            uniformMap: {
+              u_texture: () => overlay.raw.getColorTexture(),
+              u_pixel: () =>
+                new Cartesian2(
+                  Math.floor(lit.point.x),
+                  255 - Math.floor(lit.point.y),
+                ),
+            },
+          },
+        );
+        function material() {
+          copy.execute(scene.context);
+          return Array.from(
+            scene.context.readPixels({
+              framebuffer: target.framebuffer,
+              width: 1,
+              height: 1,
+            }),
+          );
+        }
+        try {
+          const first = material();
+          expect(first).toEqualEpsilon([0.125, 0.5, 0, 0.875], 0.003);
+          const texture = overlay.raw.getColorTexture();
+          const draws = renderer.classificationDrawCount;
+          scene.light.direction = new Cartesian3(0, 0, 1);
+          const dark = sample(0, 0, 12);
+          expect(material()).toEqual(first);
+          expect(dark.color[0]).toBeLessThan(lit.color[0]);
+          expect(dark.color[1]).toBeLessThan(lit.color[1]);
+          expect(dark.color[2]).toEqualEpsilon(lit.color[2], 1);
+          expect(dark.color[2]).toEqualEpsilon(64, 2);
+          expect(renderer.classificationDrawCount).toBe(draws);
+          expect(scene.pick(dark.point)?.id.styleLayer).toBe("green");
+          scene.primitives.remove(layer);
+          scene.renderForSpecs();
+          expect(renderer._vectorOverlays).toBeUndefined();
+          expect(texture.isDestroyed()).toBeTrue();
+        } finally {
+          copy.shaderProgram.destroy();
+          target.destroy();
+        }
+      } finally {
+        ContextLimits._maximumDrawBuffers = maximum;
+      }
+    });
+  });
+  it("keeps one shared coverage value when adding deferred map lighting", async function () {
+    scene.highDynamicRange = true;
+    world.terrainProvider = terrain();
+    world.enableLighting = true;
+    scene.light = new DirectionalLight({ direction: new Cartesian3(0, 0, -1) });
+    const layer = add(
+      [polygon()],
+      [
+        {
+          id: "red",
+          type: "fill",
+          paint: {
+            "fill-color": "red",
+            "fill-opacity": 0.5,
+            "fill-antialias": false,
+          },
+        },
+      ],
+    );
+    const ssr = new SceneGISScreenSpaceReflections({ scene, enabled: true });
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    const target = new FramebufferManager({
+      pixelDatatype: PixelDatatype.FLOAT,
+    });
+    target.update(scene.context, 1, 1);
+    let texture;
+    const copy = scene.context.createViewportQuadCommand(
+      "uniform sampler2D u_texture; void main() { out_FragColor = texelFetch(u_texture, ivec2(128, 127), 0); }",
+      {
+        framebuffer: target.framebuffer,
+        uniformMap: { u_texture: () => texture },
+      },
+    );
+    function read(input) {
+      texture = input;
+      copy.execute(scene.context);
+      return Array.from(
+        scene.context.readPixels({
+          framebuffer: target.framebuffer,
+          width: 1,
+          height: 1,
+        }),
+      );
+    }
+    try {
+      await ready(layer);
+      const state = ssr._state;
+      expect(ssr.ready).toBe(true);
+      expect(read(state.main.weights.getColorTexture(0))[3]).toEqualEpsilon(
+        1,
+        0.001,
+      );
+      expect(read(state.main.indirect.getColorTexture())[3]).toEqualEpsilon(
+        1,
+        0.001,
+      );
+      const radiance = read(state.radianceTexture);
+      const color = read(state.main.source.getColorTexture(0));
+      expect(radiance[0]).toEqualEpsilon(color[0], 0.002);
+      expect(radiance[3]).toEqualEpsilon(1, 0.001);
+      const draws = scene._sceneGISDeferred.classificationDrawCount;
+      const water = scene.primitives.add(
+        new SceneGISWaterSurface({
+          polygonHierarchy: new PolygonHierarchy([
+            new Cartesian3(-20, -20, 0),
+            new Cartesian3(20, -20, 0),
+            new Cartesian3(20, 20, 0),
+            new Cartesian3(-20, 20, 0),
+          ]),
+          modelMatrix: Matrix4.fromTranslation(new Cartesian3(0, 0, 20)),
+          waveAmplitude: 0,
+          flowSpeed: 0,
+          foamIntensity: 0,
+          reflections: false,
+        }),
+      );
+      scene.renderForSpecs();
+      expect(water.ready).toBe(true);
+      const inputs = scene.frameState._sceneGISWater;
+      expect(inputs.colorTexture).toBe(state.radianceTexture);
+      expect(inputs.depthTexture).toBe(scene._sceneGISDeferred._linearDepth);
+      expect(inputs.captureDraws).toBe(0);
+      expect(read(inputs.colorTexture)).toEqualEpsilon(radiance, 0.005);
+      expect(scene._sceneGISDeferred.classificationDrawCount).toBe(draws);
+      ssr.enabled = false;
+      scene.renderForSpecs();
+      const ao =
+        scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
+      expect(inputs.colorTexture).toBe(ao.radianceTexture);
+      expect(read(ao.main.indirect.getColorTexture())[3]).toEqualEpsilon(
+        1,
+        0.001,
+      );
+      expect(read(inputs.colorTexture)[3]).toEqualEpsilon(1, 0.001);
+      expect(inputs.captureDraws).toBe(0);
+      expect(scene._sceneGISDeferred.classificationDrawCount).toBe(draws);
+    } finally {
+      copy.shaderProgram.destroy();
+      target.destroy();
+      ssr.destroy();
+    }
   });
   it("retains elevated tile coverage when the zero plane lies outside the frustum", function () {
     scene.renderForSpecs();

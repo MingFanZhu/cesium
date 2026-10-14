@@ -2,10 +2,23 @@
 
 - Status: accepted；2026-10-14 WebGL deferred amendment supersedes the color-only decision below
 - Date: 2026-09-14
-- SGP: None；SceneGIS-owned 实现
+- SGP: SGP-0046（2026-10-15 透明地图阶段 hook）；其余为 SceneGIS-owned 实现
 - Related: [ADR-0072](ADR-0072-vector-surface-transparency.md)
 
 ## Decision
+
+### 2026-10-15 transparent vector amendment
+
+负责人另行批准透明 Planar 与可见地图共存时的深度资源与提交预算，见
+[讨论](../../../AgentDocs/webgl-deferred-renderer/discussions/2026-10-14-planar-vector-transparent-depth.md)。
+按需增加一张 DEPTH24_STENCIL8，整个视图捕获最近地形表面；每个可见瓦片只增加
+一次无材质、无光照深度提交，低于批准的每瓦片每视锥一次上限。拾取复用同一目标。
+地图颜色使用与不透明地图互斥的已批准 RGBA16F，1280 × 800 合计 11.71875 MiB。
+在既有透明地形提交中合成最近地表上的有序地图颜色，其他山坡不重复叠加地图；
+World opacity=0 只移除地形自身颜色，不移除独立的地图颜色。地图、普通几何和
+屏幕光照不增加提交。裁剪、越过地形边界的标记、拾取与 TAA 仍遵循原有契约。
+Scene 通过 SGP-0046 显式调度 owned helper；无新公共 API。本文下方 P4d 的
+“零 opacity discard”只适用于地形自身颜色，不再排除本增量的地图合成。
 
 ### 2026-10-14 WebGL deferred amendment
 

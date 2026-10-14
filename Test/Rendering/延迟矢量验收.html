@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>延迟矢量验收</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      #controls {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        padding: 16px;
+        width: 260px;
+        color: #edf5ff;
+        background: #142438ed;
+        border-radius: 10px;
+        font: 14px/1.7 sans-serif;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 8px;
+      }
+      label {
+        display: block;
+      }
+      input[type="range"] {
+        width: 125px;
+        vertical-align: middle;
+      }
+      p {
+        color: #b4c6dc;
+        margin: 8px 0;
+      }
+      #error {
+        color: #ff9f8f;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="controls">
+      <h1>矢量切片 · 延迟适配</h1>
+      <label
+        >场景
+        <select id="world">
+          <option value="planar">平面</option>
+          <option value="globe">地球</option>
+        </select></label
+      >
+      <label><input id="physical" type="checkbox" /> 物理环境受光</label>
+      <label
+        >光照方位
+        <input id="azimuth" type="range" min="-180" max="180" value="-45"
+      /></label>
+      <label
+        >地表不透明度
+        <input
+          id="surface"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="1"
+        /><output id="surface-value">1</output></label
+      >
+      <label
+        >地图不透明度
+        <input
+          id="opacity"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="1"
+        /><output id="opacity-value">1</output></label
+      >
+      <label
+        ><input id="selected" type="checkbox" /> 切换绿色面的要素状态</label
+      >
+      <label><input id="terrain" type="checkbox" /> 本地地形</label>
+      <label><input id="background" type="checkbox" /> 地图背景样式</label>
+      <label><input id="water" type="checkbox" /> 地图上方水面</label>
+      <label><input id="screens" type="checkbox" /> AO／SSR／SSIL</label>
+      <label><input id="frusta" type="checkbox" /> 多视锥</label>
+      <label><input id="hdr" type="checkbox" checked /> HDR 显示</label>
+      <p>
+        物理环境下，面／线和右侧建筑随光照变化；文字与蓝色圆点保持制图颜色。点击图形检查要素拾取。
+      </p>
+      <p id="picked">尚未拾取</p>
+      <p id="status">加载本地数据…</p>
+      <p id="error"></p>
+    </div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./延迟矢量验收.js"></script>
+  </body>
+</html>

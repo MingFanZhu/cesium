@@ -4,6 +4,15 @@ uniform vec2 u_sceneGISGroundDataSize;
 uniform vec2 u_sceneGISGroundOffsets;
 uniform vec2 u_sceneGISGroundPickSize;
 uniform vec2 u_sceneGISGroundHeights;
+#ifdef SCENEGIS_VECTOR_GLOBE
+#ifdef SCENEGIS_VECTOR_GLOBE_VERTEX
+flat out int v_groundFrame;
+flat out ivec3 v_groundEdgeFrames;
+#else
+flat in int v_groundFrame;
+flat in ivec3 v_groundEdgeFrames;
+#endif
+#endif
 #ifdef SCENEGIS_VECTOR_GLOBE_TERRAIN
 #ifdef SCENEGIS_VECTOR_GLOBE_VERTEX
 #define SCENEGIS_TERRAIN_VARYING out
@@ -12,7 +21,6 @@ uniform vec2 u_sceneGISGroundHeights;
 #endif
 flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainReference;
 flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainFrame;
-flat SCENEGIS_TERRAIN_VARYING vec3 v_terrainOriginEye;
 flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainAB;
 flat SCENEGIS_TERRAIN_VARYING vec4 v_terrainC;
 #ifndef SCENEGIS_VECTOR_UNIFORM_PAINT

@@ -8,6 +8,9 @@ uniform sampler2D u_depth;
 layout(location = 1) out vec4 normal;
 layout(location = 2) out vec4 specular;
 layout(location = 3) out vec4 emission;
+#ifdef SCENEGIS_DEFERRED_VECTOR_OVERLAY_LOCATION
+layout(location = SCENEGIS_DEFERRED_VECTOR_OVERLAY_LOCATION) out vec4 vectorAlbedo;
+#endif
 #ifdef SCENEGIS_DEFERRED_STYLE_TARGET
 uniform sampler2D u_style;
 layout(location = 4) out vec4 style;
@@ -39,6 +42,9 @@ void main()
     normal = texelFetch(u_normal, p, 0);
     specular = material;
     emission = texelFetch(u_emission, p, 0);
+    #ifdef SCENEGIS_DEFERRED_VECTOR_OVERLAY_LOCATION
+    vectorAlbedo = vec4(0.0);
+    #endif
     #ifdef SCENEGIS_DEFERRED_STYLE_TARGET
     style = texelFetch(u_style, p, 0);
     #endif

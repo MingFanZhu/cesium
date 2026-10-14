@@ -1,23 +1,63 @@
 flat in ivec3 v_groundIndices;
 #ifdef SCENEGIS_VECTOR_GLOBE
-flat in int v_groundFrame;
 flat in float v_globeLinearError;
 #endif
 
 bool groundEdge(float edge, vec2 direction)
 {
     // Opposite directions own opposite sides of the exact shared boundary.
+#ifndef SCENEGIS_VECTOR_GLOBE
+    return edge > 0.0 || (edge == 0.0 && (direction.y < 0.0 ||
+        (direction.y == 0.0 && direction.x > 0.0)));
+#else
     return edge > 0.0 || (edge == 0.0 && (direction.y > 0.0 ||
         (direction.y == 0.0 && direction.x < 0.0)));
+#endif
 }
+
+#ifdef SCENEGIS_VECTOR_GLOBE
+float globeGroundEdge(vec2 a, vec2 b, vec3 eye, int frame, vec2 local)
+{
+    if (frame != v_groundFrame) {
+        local = globeCoordinates(globeLocalPosition(eye, frame), frame);
+    }
+    // Canonical endpoints also keep the arithmetic identical on both sides.
+    bool reversed = a.x > b.x || (a.x == b.x && a.y > b.y);
+    vec2 start = reversed ? b : a;
+    vec2 end = reversed ? a : b;
+    float value = groundCross(end - start, local - start);
+    return reversed ? -value : value;
+}
+#endif
+
+#ifndef SCENEGIS_VECTOR_GLOBE
+float planarGroundEdge(vec2 a, vec2 b, vec2 local)
+{
+    // Both triangles must evaluate the same arithmetic on their shared edge.
+    bool reversed = a.x > b.x || (a.x == b.x && a.y > b.y);
+    vec2 start = reversed ? b : a;
+    vec2 end = reversed ? a : b;
+    float value = groundCross(end - start, local - start);
+    return reversed ? -value : value;
+}
+#endif
 
 vec2 groundCoordinates()
 {
+#ifdef SCENEGIS_VECTOR_PLANAR_TRANSPARENT
+    float depth = texture(u_sceneGISPlanarVectorDepth, gl_FragCoord.xy / czm_viewport.zw).r;
+#else
     float depth = czm_unpackDepth(texture(czm_globeDepthTexture, gl_FragCoord.xy / czm_viewport.zw));
+#endif
     if (depth == 0.0 || depth == 1.0) discard;
+#ifdef SCENEGIS_VECTOR_PLANAR_TRANSPARENT
+    vec4 eye = sceneGISPlanarVectorEye(gl_FragCoord.xy, depth);
+#else
     vec4 eye = czm_windowToEyeCoordinates(gl_FragCoord.xy, depth);
+#endif
     eye /= eye.w;
     groundLight = 1.0;
+#ifndef SCENEGIS_DEFERRED_VECTOR_OVERLAY_CAPTURE
     bool lighting = u_sceneGISGroundLighting;
 #ifdef SCENEGIS_VECTOR_ENVIRONMENT
     lighting = true;
@@ -36,6 +76,7 @@ vec2 groundCoordinates()
         groundNormalEC = normal;
 #endif
     }
+#endif
     float viewDepth = -eye.z;
     if (viewDepth <= u_sceneGISVectorDepthRange.x || viewDepth > u_sceneGISVectorDepthRange.y) discard;
 #ifdef SCENEGIS_VECTOR_GLOBE_TERRAIN
@@ -55,8 +96,23 @@ vec2 groundCoordinates()
 #else
     vec2 local = (czm_inverseModelView * eye).xy;
 #endif
-    vec3 edges = vec3(groundCross(c - b, local - b), groundCross(a - c, local - c), groundCross(b - a, local - a));
+#ifdef SCENEGIS_VECTOR_GLOBE
+    vec3 edges = vec3(
+        globeGroundEdge(b, c, eye.xyz, v_groundEdgeFrames.x, local),
+        globeGroundEdge(c, a, eye.xyz, v_groundEdgeFrames.y, local),
+        globeGroundEdge(a, b, eye.xyz, v_groundEdgeFrames.z, local));
+#else
+    vec3 edges = vec3(planarGroundEdge(b, c, local), planarGroundEdge(c, a, local), planarGroundEdge(a, b, local));
+#endif
+#ifdef SCENEGIS_VECTOR_GLOBE
     if (!groundEdge(edges.x, c - b) || !groundEdge(edges.y, a - c) || !groundEdge(edges.z, b - a)) discard;
+#else
+    // Match the rasterized prism's edge ownership in window coordinates, including camera roll.
+    mat2 localToWindow = inverse(mat2(dFdx(local), dFdy(local)));
+    if (!groundEdge(edges.x, localToWindow * (c - b)) ||
+        !groundEdge(edges.y, localToWindow * (a - c)) ||
+        !groundEdge(edges.z, localToWindow * (b - a))) discard;
+#endif
     float area = groundCross(b - a, c - a);
     if (area <= 0.0) discard;
     vec3 weights = edges / area;

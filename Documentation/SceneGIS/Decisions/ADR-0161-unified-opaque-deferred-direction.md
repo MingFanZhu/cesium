@@ -476,6 +476,62 @@ The shared physical primary record uses the normalized opposite of DirectionalLi
 
 The cloud-free generation downloads only the three atmosphere LUTs. Cloud textures, ray-march / reconstruction shaders and shadow atlases require explicit cloud activation; upgrading does not replace the atmosphere LUTs. Turning clouds off retains warm cloud resources until environment disconnection or destruction, preserving existing warm-toggle semantics. Fetch / allocation failures retain the existing generation error latch without retries or a native fallback. This overrides the caller-created-only and native-flag-conflict restrictions in ADR-0040 / ADR-0041 for this deferred profile. Evidence, full cost accounting and owner visual gate are tracked in P4d.
 
+## Ordered vector material lighting
+
+P4e retains the vector extension's existing surface, style and alpha contracts.
+Opaque extrusion uses group -6 in the existing material attachments. Geometry
+publishes pattern-composed albedo and its lighting normal; the screen family
+evaluates the existing basic or physical vector lighting and shared indirect
+response. Transparent extrusion retains its dedicated forward lighting.
+
+The owner-approved opaque map budget adds one conditional RGBA16F target
+(7.8125 MiB at 1280 by 800), reused across frusta. The existing classification
+target accumulates unlit colors; the new target accumulates lit albedo with the
+same per-layer blending. Both contributions retain attenuation from intervening
+layers, including circles and symbols. One additive screen lighting draw resolves
+the lit contribution, or at most two when the existing shared-effect sampler
+split is required. When MRT capacity is full, at most two screen clears per
+frustum replace simultaneous material-target clearing. No map or ordinary
+geometry is resubmitted. Release the target when no opaque lit map is visible.
+See the [approved budget](../../../AgentDocs/webgl-deferred-renderer/discussions/2026-10-14-vector-overlay-budget.md).
+
+Transparent Globe overlays continue to borrow native first-surface peel depth.
+Their direct composition stage bypasses opaque classification capture even in
+the single-frustum schedule, where it precedes opaque lighting.
+
+On 2026-10-15 the owner separately approved transparent Planar's conditional
+DEPTH24_STENCIL8 target (3.90625 MiB at 1280 by 800) and at most one depth-only
+submission per visible terrain tile per frustum, including picking. The implementation
+captures the nearest terrain once for the whole view, reducing that ceiling to one
+submission per visible tile per view. It reuses the original geometry and clipping,
+with no imagery, material or lighting evaluation. A tight logarithmic interval over
+visible terrain keeps one independent depth encoding across native log/linear frusta.
+SGP-0046 supplies explicit Scene preparation, classification and transparency hooks;
+the implementation and derived shaders remain in an owned helper.
+
+The approved RGBA16F map target is mutually exclusive with the opaque map target.
+Ordered transparent map colors are composed with the nearest terrain in its existing
+OIT or sorted-transparent draw, retaining independent World and layer alpha even at
+World opacity zero. The first-surface comparison includes eight DEPTH24 steps for
+the reproduced float interpolation difference between full-view and clipped-frustum
+rasterization; it does not change the stored depth format or ordinary object depth.
+Map geometry is submitted once per original frustum occurrence. The same MRT draw
+sends marker pixels outside the terrain directly to scene color, testing existing
+opaque depth. Pick variants write actual terrain depth with enabled ALWAYS testing
+to retain map layer order and occlusion by later ordinary objects. The helper releases
+both targets when this combination is absent; no additional screen lighting is added.
+This preserves the existing current-surface contract, not arbitrary subsurface
+transparent sorting. See the [approved Planar budget](../../../AgentDocs/webgl-deferred-renderer/discussions/2026-10-14-planar-vector-transparent-depth.md)
+and [ADR-0073](ADR-0073-planar-surface-opacity.md).
+
+The vector audit also exposed a multi-frustum position-picking regression.
+SGP-0046 replaces the existing pick-depth copy through one explicit Scene hook:
+combine the current tagged opaque linear depth with final hardware depth into the
+native PickDepth framebuffer. Do not sample a packed Globe texture left by a
+different frustum. Preserve picking's opaque near offset, render-only jitter,
+annotation depth and nearer final surface depths. This adds no texture or draw;
+the owned shader is released with the deferred renderer.
+
 ## Shared Gaussian renderer lifetime
 
 GaussianSplat3DTileContent creates a shared GaussianSplatPrimitive on its tileset; single-tile unload must not destroy that shared renderer. SGP-0054 makes tileset destruction invoke the existing primitive destroy before clearing its ownership reference, including collection removal and Scene teardown. Already destroyed private primitives remain removable without a second destroy. This repairs the existing deterministic resource-release contract; it adds no rendering pass, resource budget, API or alternate opaque pipeline.

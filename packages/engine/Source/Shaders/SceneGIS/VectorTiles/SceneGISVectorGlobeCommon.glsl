@@ -14,13 +14,21 @@ float globeSinDelta(float x)
 vec4 globeFrame(int index, int field)
 {
 #if defined(SCENEGIS_VECTOR_GLOBE_TERRAIN) && !defined(SCENEGIS_VECTOR_GLOBE_VERTEX)
-    if (field == 0) return v_terrainReference;
-    if (field == 1) return vec4(0.0, 0.0, 0.0, v_terrainFrame.z);
-    if (field == 2) return vec4(0.0, 0.0, 0.0, v_terrainFrame.w);
-    return vec4(v_terrainFrame.xy, v_terrainFrame.zw * (v_terrainReference.w / globeRadius));
-#else
-    return groundFetch(u_sceneGISGroundData, u_sceneGISGroundDataSize, int(u_sceneGISGroundOffsets.y) + index * 4 + field);
+    if (index == v_groundFrame) {
+        if (field == 0) return v_terrainReference;
+        if (field == 3) return vec4(v_terrainFrame.xy, v_terrainFrame.zw * (v_terrainReference.w / globeRadius));
+    }
 #endif
+    int base = int(u_sceneGISGroundOffsets.y) + index * 4;
+    vec4 value = groundFetch(u_sceneGISGroundData, u_sceneGISGroundDataSize, base + field);
+    if (field == 3) {
+        float cosine = groundFetch(u_sceneGISGroundData, u_sceneGISGroundDataSize, base).w;
+        vec2 radii = vec2(
+            groundFetch(u_sceneGISGroundData, u_sceneGISGroundDataSize, base + 1).w,
+            groundFetch(u_sceneGISGroundData, u_sceneGISGroundDataSize, base + 2).w);
+        value.zw = radii * (cosine / globeRadius);
+    }
+    return value;
 }
 
 mat3 globeAxes(int index)
@@ -41,11 +49,8 @@ vec4 globeOrigin(int index)
 // float longitude/latitude subtraction would lose sub-metre street detail.
 vec3 globeLocalPosition(vec3 eye, int index)
 {
-#if defined(SCENEGIS_VECTOR_GLOBE_TERRAIN) && !defined(SCENEGIS_VECTOR_GLOBE_VERTEX)
-    vec3 originEye = v_terrainOriginEye;
-#else
+    // Both sides of a shared edge evaluate this transform in the fragment stage.
     vec3 originEye = (czm_modelViewRelativeToEye * globeOrigin(index)).xyz;
-#endif
     return transpose(globeAxes(index)) * (mat3(czm_inverseView) * (eye - originEye));
 }
 

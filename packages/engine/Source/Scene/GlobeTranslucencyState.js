@@ -963,12 +963,23 @@ function executeCommandsMatchingType(
   scene,
   passState,
   types,
+  // SCENEGIS_PATCH_BEGIN SGP-0012: Close native tile seams only in direct vector surface depth.
+  surfaceDepthSkirts = false,
+  // SCENEGIS_PATCH_END SGP-0012
 ) {
   for (let i = 0; i < commandsLength; ++i) {
     const command = commands[i];
     const type = command.derivedCommands.type;
     if (!defined(types) || types.indexOf(type) > -1) {
-      executeCommandFunction(command, scene, passState);
+      // SCENEGIS_PATCH_BEGIN SGP-0012: Reuse the same depth draw and native derivation with skirt indices.
+      executeCommandFunction(
+        surfaceDepthSkirts
+          ? surfaceOverlays.depthCommand(command, scene)
+          : command,
+        scene,
+        passState,
+      );
+      // SCENEGIS_PATCH_END SGP-0012
     }
   }
 }
@@ -1142,6 +1153,11 @@ GlobeTranslucencyState.prototype.executeGlobeClassificationCommands = function (
     scene,
     passState,
     depthOnlyTypes,
+    // SCENEGIS_PATCH_BEGIN SGP-0012: Respect the public skirt switch and above-surface vector scope.
+    defined(overlayOwners) &&
+      scene.globe.showSkirts &&
+      !scene.cameraUnderground,
+    // SCENEGIS_PATCH_END SGP-0012
   );
 
   if (context.depthTexture) {

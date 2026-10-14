@@ -102,7 +102,7 @@ czm_materialInput sceneGISPlanarMaterialInput(vec3 normalEC)
 
 void main()
 {
-#ifdef SCENEGIS_SURFACE_TRANSLUCENCY
+#if defined(SCENEGIS_SURFACE_TRANSLUCENCY) && !defined(SCENEGIS_PLANAR_VECTOR_OVERLAY)
     // Invisible terrain must not occlude pick/depth or cast an opaque shadow.
     if (u_surfaceOpacity == 0.0) {
         discard;

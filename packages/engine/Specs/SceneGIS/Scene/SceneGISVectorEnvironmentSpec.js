@@ -12,6 +12,7 @@ import {
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
   SceneGISPlanarWorld,
+  SceneGISPlanarTilingScheme,
   SceneGISVectorTileLayer,
   SceneGISVectorTileSource,
   Texture,
@@ -37,6 +38,8 @@ describe("SceneGIS/Scene/SceneGISVectorEnvironment", function () {
     "globe-terrain",
     "flat-extrusion",
     "globe-extrusion",
+    "flat-opaque-extrusion",
+    "globe-opaque-extrusion",
   ]) {
     it(`uses physical source/sky/cloud lighting on ${profile} and preserves pick, geometry and borrowed resources`, async function () {
       const scene = createScene({ canvas: createCanvas(128, 128) });
@@ -80,7 +83,17 @@ describe("SceneGIS/Scene/SceneGISVectorEnvironment", function () {
           scene.globe = world = new Globe();
           world.baseColor = Color.BLACK;
           world.showGroundAtmosphere = false;
-          scheme = Coordinates.scheme();
+          scheme = new SceneGISPlanarTilingScheme({
+            coordinateSystem: new SceneGISPlanarCoordinateSystem({
+              crs: "EPSG:3857",
+              extent: new SceneGISPlanarExtent({
+                minimumX: -Coordinates.halfWidth,
+                minimumY: -Coordinates.halfWidth,
+                maximumX: Coordinates.halfWidth,
+                maximumY: Coordinates.halfWidth,
+              }),
+            }),
+          });
           const bounds = scheme.tileXYToExtent(8192, 8192, 14);
           target = Coordinates.position(
             bounds.minimumX + bounds.width / 2,
@@ -149,6 +162,8 @@ describe("SceneGIS/Scene/SceneGISVectorEnvironment", function () {
             },
           });
         }
+        // The fixture supplies explicit frame-local environment textures.
+        scene.environmentEffects.enabled = false;
         scene.camera.frustum.near = 0.1;
         const level = globe ? 14 : 0;
         const source = new SceneGISVectorTileSource({
@@ -208,7 +223,9 @@ describe("SceneGIS/Scene/SceneGISVectorEnvironment", function () {
                   paint: extrusion
                     ? {
                         "fill-extrusion-color": "#6688aa",
-                        "fill-extrusion-opacity": 0.8,
+                        "fill-extrusion-opacity": profile.includes("opaque")
+                          ? 1
+                          : 0.8,
                         "fill-extrusion-height": 10,
                       }
                     : { "fill-color": "#6688aa", "fill-opacity": 0.8 },

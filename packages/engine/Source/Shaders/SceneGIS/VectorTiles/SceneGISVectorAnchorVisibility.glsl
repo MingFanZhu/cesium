@@ -10,9 +10,17 @@ float sceneGISAnchorVisibility(vec4 clip, float eyeDepth)
         for (int x = 0; x < 2; x++) {
             vec2 pixel = base + vec2(float(x), float(y));
             if (any(lessThan(pixel, czm_viewport.xy)) || any(greaterThanEqual(pixel, czm_viewport.xy + czm_viewport.zw))) continue;
+#ifdef SCENEGIS_VECTOR_PLANAR_TRANSPARENT
+            float depth = texture(u_sceneGISPlanarVectorDepth, pixel / czm_viewport.zw).r;
+#else
             float depth = czm_unpackDepth(texture(czm_globeDepthTexture, pixel / czm_viewport.zw));
+#endif
             if (depth == 0.0 || depth == 1.0) continue;
+#ifdef SCENEGIS_VECTOR_PLANAR_TRANSPARENT
+            vec4 eye = sceneGISPlanarVectorEye(pixel, depth);
+#else
             vec4 eye = czm_windowToEyeCoordinates(pixel, depth);
+#endif
             farthest = max(farthest, -eye.z / eye.w);
         }
     }

@@ -2,20 +2,22 @@
 
 ## Metadata
 
-| Field                            | Value                                                                   |
-| -------------------------------- | ----------------------------------------------------------------------- |
-| Extension slug                   | `webgl-deferred-renderer`                                               |
-| Status                           | `active`                                                                |
-| Planning model                   | `extension`                                                             |
-| Active extension plan            | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md)       |
-| Current phase                    | P4d completed；独立提交后进入矢量切片适配                               |
-| Active phase plan                | 无；已完成 [P4d](plans/2026-10-14-p4d-opaque-pipeline-consolidation.md) |
-| Architecture / execution contact | 当前任务                                                                |
-| Last updated                     | `2026-10-14`                                                            |
+| Field                            | Value                                                             |
+| -------------------------------- | ----------------------------------------------------------------- |
+| Extension slug                   | `webgl-deferred-renderer`                                         |
+| Status                           | `completed`                                                       |
+| Planning model                   | `extension`                                                       |
+| Active extension plan            | None                                                              |
+| Completed extension plan         | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
+| Current phase                    | None                                                              |
+| Active phase plan                | None                                                              |
+| Last completed phase             | [P4e：独立矢量切片适配](plans/2026-10-14-p4e-vector-tiles.md)     |
+| Architecture / execution contact | 当前任务                                                          |
+| Last updated                     | `2026-10-15`                                                      |
 
 ## Scope
 
-当前无待决的范围 / 预算讨论。2026-10-14 负责人确认自定义主光画面通过，并批准提交 P4d 后继续独立矢量切片适配。P4d 的技术验证、自审、负责人视觉与提交钩子预检全部完成；本 checkpoint 包含阶段代码、Specs、ADR / SGP 及 AgentDocs。独立矢量阶段在提交成功后依据当时源码激活。
+P4d checkpoint 为 `4ba2e217c7`。2026-10-15 负责人在此前矢量画面通过的基础上，明确确认新增透明 Planar 画面通过并指示提交 P4e；本阶段技术、自审与视觉 gate 全部关闭，代码、Specs、ADR / SGP 和记录形成独立本地 checkpoint。WebGL2 / SCENE3D、单采样的既定单一不透明 / MASK 延迟目标完成，当前没有 active phase。最终内容矩阵、资源成本与保留边界见 [P4e review](reviews/2026-10-14-p4e-vector-entry-audit.md#final-owner-acceptance-and-architecture-gate)；成果保留在 `feature/webgl-deferred-rendering`，本轮不包含主线合并或发布。
 
 探索 WebGL2 统一表面数据、不透明延迟光照，以及共享数据支撑的多光源、AO、SSR、SSIL
 画质和性能改进。既有效果和街道调校仍属于 `rendering-quality`。
@@ -23,6 +25,14 @@
 不预设公开 forward/deferred 切换 API。P1 只交付可观察的材质数据，不接管主光照。
 
 ## Engineering links
+
+- 2026-10-15 透明 Planar 增量技术与负责人视觉 gate 均通过：Ground / DeferredPlanar 25 项、实际页面截图及资源/提交预算、完整 release/types/tsc、定向静态检查与 SGP 审计。新增本地地形、多视锥、opacity=0.5 / 0 / 1 下的地图、圆点、完整 VECTOR 文字、道路及点击拾取已获负责人确认；P4e review 全部七项 findings 关闭。
+
+- P4e [地图覆盖预算](discussions/2026-10-14-vector-overlay-budget.md) 已批准并接入：extrusion 材质 / 共享效果 16 项、矢量环境 8 项、地图层序与附件容量 3 项、Globe 矢量最终 23 项通过。多视锥位置拾取修正另有 3 项通过。图案 / 状态 / 符号 46 项已有通过证据。双世界验收页和基础浏览器检查已建立；透明 Globe 共享边重复混合与原生瓦片缝漏点已修复，新增 GPU 及浏览器连续覆盖回归通过，成本见 WDR-P4E-05。[透明 Planar 深度讨论](discussions/2026-10-14-planar-vector-transparent-depth.md) 已获批准；条件深度、互斥地图颜色、OIT 合成和拾取已接入，新增验收与 P4e 最终 gate 均已关闭。
+
+- P4e 水面 / 共享效果回查修正地图重复 coverage alpha，新增 GPU 与双世界浏览器回归通过；独立 Globe background 已补齐材质标记与几何光照门禁，19 项背景 / 环境 / pattern GPU 用例和 Globe 浏览器回归通过。两项均复用已有预算，详见入口审计 WDR-P4E-06 / 07，负责人已于 2026-10-15 确认现有增量视觉通过。
+
+以下 P4d 及更早记录保留各增量当时的验证状态；P4d 最终状态以本页 Scope 的已提交 checkpoint 为准。
 
 - P4d 当前增量：默认高级环境及云资源按需加载已实现；Planar 大气 / 高度雾及开云黑天空修正已有技术证据，开云画面已获负责人确认。
   自定义 DirectionalLight 保留方向、颜色、强度和所有权，SunLight 恢复自动主光。
@@ -53,7 +63,9 @@
   [P2 评审](reviews/2026-10-13-p2-deferred-lighting-qualification.md)。
 - [P3 多光源讨论](discussions/2026-10-13-many-light-scheduling.md)，负责人已选择 A。
 
-## Current handoff
+## Historical incremental handoffs
+
+以下保留各阶段当时的状态与证据，不表示当前仍有相应待办。最终状态以上方 Scope 和 P4e 最终 review 为准。
 
 2026-10-14 负责人选择 A：只推进 WebGL2 / SCENE3D 的延迟渲染，目标默认单采样，
 其他模式明确不支持。HDR 关闭的实现已加入本轮：内部保留线性浮点光照与透明合成，
@@ -221,7 +233,7 @@ Globe 阶段之后单独验证自有 flat/ground/extrusion/symbol 绘制，不�
 真实街道 1280×800 开启海洋与双纹理 Fabric 增加 15.625 MiB，不增加材质/光照绘制，
 整帧 GPU 中位数约 14.90 → 15.40 ms。其余 Globe 分支与整阶段 gate 尚未完成。
 
-## Latest visual gate
+## Historical P4d visual gate
 
 标注修正已获负责人视觉确认。左侧 TAA 共面填充修正也已确认正确；右侧体积与后方红面重叠时返回红面的问题已复现并修正，负责人已确认该拾取修正符合预期。20 项相关 GPU 与原生通道点击 E2E 通过；Gaussian 混合场景 GPU 已通过，原生生命周期边界记录在 review。最终兼容矩阵与 P4d 提交 gate 仍 open。
 

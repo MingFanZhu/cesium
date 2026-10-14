@@ -5,7 +5,6 @@ import ContextLimits from "../../../Renderer/ContextLimits.js";
 import Pass from "../../../Renderer/Pass.js";
 import BillboardCollection from "../../../Scene/BillboardCollection.js";
 import SceneMode from "../../../Scene/SceneMode.js";
-import surfaceOverlays from "./_SceneGISVectorSurfaceOverlays.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const excluded = ["HAS_MODEL_COLOR", "HAS_SELECTED_FEATURE_ID"];
@@ -74,18 +73,6 @@ function validate(scene, range, passState, isDeferredModel, isDeferredGlobe) {
   if (passState.viewport.x !== 0 || passState.viewport.y !== 0) {
     throw new DeveloperError(
       "Deferred material layout requires a full viewport.",
-    );
-  }
-  if (
-    scene._globeTranslucencyState.translucent &&
-    surfaceOverlays.hasCommands(
-      scene._globeTranslucencyState._sceneGISSurfaceOverlays,
-      range.commands[Pass.TERRAIN_CLASSIFICATION],
-      range.indices[Pass.TERRAIN_CLASSIFICATION],
-    )
-  ) {
-    throw new DeveloperError(
-      "Deferred translucent Globe direct vector overlays require their separate adaptation.",
     );
   }
   let hasClassification =

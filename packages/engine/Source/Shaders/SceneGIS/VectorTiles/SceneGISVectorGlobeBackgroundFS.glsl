@@ -1,3 +1,4 @@
+#define SCENEGIS_DEFERRED_VECTOR_OVERLAY
 uniform float u_sceneGISVectorOpacity;
 uniform vec4 u_color;
 uniform vec2 u_depthRange;
@@ -31,6 +32,7 @@ void main()
     material.a *= u_color.a;
 #endif
     vec4 color = czm_gammaCorrect(material);
+#ifndef SCENEGIS_DEFERRED_VECTOR_OVERLAY_CAPTURE
     bool lighting = u_lighting;
 #ifdef SCENEGIS_VECTOR_ENVIRONMENT
     lighting = true;
@@ -45,6 +47,7 @@ void main()
         color.rgb *= 0.4 + 0.6 * max(0.0, dot(normal, czm_lightDirectionEC));
 #endif
     }
+#endif
     color.rgb *= color.a;
     out_FragColor = color * u_sceneGISVectorOpacity;
 }

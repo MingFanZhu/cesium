@@ -506,6 +506,11 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
     expect(sample(renderer._linearDepth)[0]).toEqualEpsilon(9400, 1);
     expect(sample(renderer._linearDepth, 8)[0]).toEqualEpsilon(8000, 10);
     expect(sample(renderer._linearDepth, 44)[0]).toEqualEpsilon(9.5, 0.01);
+    const terrainPosition = scene.pickPosition(new Cartesian2(8, 32));
+    expect(terrainPosition).toBeDefined();
+    expect(
+      scene.globe.ellipsoid.cartesianToCartographic(terrainPosition).height,
+    ).toEqualEpsilon(2000, 5);
     expect(renderer.lightDrawCount).toBe(renderer.groupCount + 1);
     scene.postProcessStages.ambientOcclusion.enabled = true;
     render();

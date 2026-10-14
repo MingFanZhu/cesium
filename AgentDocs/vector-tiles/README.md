@@ -15,9 +15,11 @@
 | Active standalone plan   | None                                                                                                                     |
 | Architecture contact     | 当前 Agent                                                                                                               |
 | Execution contact        | 当前 Agent                                                                                                               |
-| Last updated             | `2026-09-18`                                                                                                             |
+| Last updated             | `2026-10-15`                                                                                                             |
 
 ## Scope
+
+2026-10-15 WebGL 唯一延迟入口的后继适配已由 [webgl-deferred-renderer P4e](../webgl-deferred-renderer/plans/2026-10-14-p4e-vector-tiles.md) 完成技术、自审与负责人视觉验收，并获准独立提交；包括 opaque extrusion、flat / ground 有序受光与不受光覆盖，以及透明 Globe / Planar 的当前表面合成与拾取。新增条件预算、最终证据和保留边界见 [P4e review](../webgl-deferred-renderer/reviews/2026-10-14-p4e-vector-entry-audit.md#final-owner-acceptance-and-architecture-gate)。下文保留原 vector 扩展的历史记录，不扩展其样式或任意地下 / 背面排序能力。
 
 实现类似 Mapbox 的矢量瓦片能力：MVT、声明式样式、按需调度、批量渲染、贴地和标注。
 首个产品里程碑在 `SceneGISPlanarWorld` 验收，共享数据与样式前端考虑 Globe 复用。

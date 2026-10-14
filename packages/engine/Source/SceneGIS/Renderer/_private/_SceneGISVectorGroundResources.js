@@ -197,7 +197,7 @@ function SceneGISVectorGroundResources(
     this._shaderProgram = ShaderProgram.fromCache({
       context,
       vertexShaderSource: new ShaderSource({
-        defines,
+        defines: globe ? [...defines, "SCENEGIS_VECTOR_GLOBE_VERTEX"] : defines,
         sources: globe ? [common, globeCommon, globeVertex] : [common, vertex],
       }),
       fragmentShaderSource: new ShaderSource({
@@ -222,10 +222,7 @@ SceneGISVectorGroundResources.prototype.getShaderProgram = function (terrain) {
   if (!this._terrainShaderProgram) {
     const vs = this._shaderProgram.vertexShaderSource.clone();
     const fs = this._shaderProgram.fragmentShaderSource.clone();
-    vs.defines.push(
-      "SCENEGIS_VECTOR_GLOBE_TERRAIN",
-      "SCENEGIS_VECTOR_GLOBE_VERTEX",
-    );
+    vs.defines.push("SCENEGIS_VECTOR_GLOBE_TERRAIN");
     fs.defines.push("SCENEGIS_VECTOR_GLOBE_TERRAIN");
     this._terrainShaderProgram = ShaderProgram.fromCache({
       context: this._context,

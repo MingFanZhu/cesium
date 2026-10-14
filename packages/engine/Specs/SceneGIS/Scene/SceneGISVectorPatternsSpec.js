@@ -10,6 +10,7 @@ import {
   Event,
   CustomHeightmapTerrainProvider,
   SceneGISPlanarCoordinateSystem,
+  SceneGISPlanarTilingScheme,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
   SceneGISVectorTileLayer,
@@ -34,7 +35,17 @@ describe("SceneGIS/Scene/SceneGISVectorPatterns", function () {
         if (globeMode) {
           scene.globe = world = new Globe();
           world.showGroundAtmosphere = false;
-          scheme = Coordinates.scheme();
+          scheme = new SceneGISPlanarTilingScheme({
+            coordinateSystem: new SceneGISPlanarCoordinateSystem({
+              crs: "EPSG:3857",
+              extent: new SceneGISPlanarExtent({
+                minimumX: -Coordinates.halfWidth,
+                minimumY: -Coordinates.halfWidth,
+                maximumX: Coordinates.halfWidth,
+                maximumY: Coordinates.halfWidth,
+              }),
+            }),
+          });
           level = 14;
           bounds = scheme.tileXYToExtent(8801, 5373, level);
         } else {
@@ -54,6 +65,9 @@ describe("SceneGIS/Scene/SceneGISVectorPatterns", function () {
           scheme = world.tilingScheme;
           bounds = scheme.tileXYToExtent(0, 0, 0);
         }
+        // Keep the style fixture independent of the default physical environment.
+        scene.environmentEffects.enabled = false;
+        scene.gamma = 1;
         world.baseColor = Color.BLUE;
         scene.camera.frustum = new PerspectiveFrustum({
           fov: Math.PI / 3,

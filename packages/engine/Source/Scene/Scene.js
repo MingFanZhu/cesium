@@ -3010,6 +3010,7 @@ function executeCommands(scene, passState) {
   const numFrustums = frustumCommandsList.length;
 
   // SCENEGIS_PATCH_BEGIN SGP-0046: Preflight deferred material ownership before effect or opaque submission.
+  scene._sceneGISDeferred?.preparePlanarVectors(passState);
   if (!picking) {
     scene._sceneGISDeferred?.begin(passState);
   }
@@ -3142,7 +3143,13 @@ function executeCommands(scene, passState) {
             passState,
             deferredFrusta ? "opaque" : undefined,
           );
-        } else {
+        } else if (
+          !scene._sceneGISDeferred?.classifyPlanarVectors(
+            frustumCommands,
+            passState,
+            executeCommand,
+          )
+        ) {
           performPass(frustumCommands, Pass.TERRAIN_CLASSIFICATION);
         }
       }
@@ -3451,7 +3458,17 @@ function executeCommands(scene, passState) {
       uniformState.updateFrustum(frustum);
     }
 
-    performTranslucentPass(scene, passState, frustumCommands);
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Compose ordered maps with the nearest transparent Planar surface.
+    if (
+      !scene._sceneGISDeferred?.drawPlanarVectors(
+        frustumCommands,
+        passState,
+        performTranslucentPass,
+      )
+    ) {
+      performTranslucentPass(scene, passState, frustumCommands);
+    }
+    // SCENEGIS_PATCH_END SGP-0046
 
     performTranslucent3DTilesClassification(scene, passState, frustumCommands);
 
@@ -3463,7 +3480,18 @@ function executeCommands(scene, passState) {
       // PERFORMANCE_IDEA: Use MRT to avoid the extra copy.
       const pickDepth = scene._picking.getPickDepth(scene, index);
       pickDepth.update(context, globeDepth.depthStencilTexture);
-      pickDepth.executeCopyDepth(context, passState);
+      // SCENEGIS_PATCH_BEGIN SGP-0046: Copy this frustum's retained opaque depth instead of a stale Globe segment.
+      if (
+        !scene._sceneGISDeferred?.copyPickDepth(
+          pickDepth,
+          globeDepth.depthStencilTexture,
+          index,
+          passState,
+        )
+      ) {
+        pickDepth.executeCopyDepth(context, passState);
+      }
+      // SCENEGIS_PATCH_END SGP-0046
       // SCENEGIS_PATCH_BEGIN SGP-0022: Associate depth picking with the projection that produced it.
       SceneGISTemporalAntialiasing.capturePickJitter(scene, pickDepth);
       // SCENEGIS_PATCH_END SGP-0022
