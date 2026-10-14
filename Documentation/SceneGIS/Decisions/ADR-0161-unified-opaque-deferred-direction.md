@@ -1,6 +1,6 @@
 # ADR-0161: One opaque deferred pipeline
 
-- Status: accepted direction; P4c Globe qualified, P4d opaque consolidation in progress
+- Status: accepted; P4e committed, P4f native CustomShader technically and visually qualified
 - Date: 2026-10-13
 - Parent: [ADR-0156](ADR-0156-webgl-deferred-lighting-experiment.md)
 - Plan: [P4c](../../../AgentDocs/webgl-deferred-renderer/plans/2026-10-13-p4c-globe-integration.md)
@@ -535,3 +535,26 @@ the owned shader is released with the deferred renderer.
 ## Shared Gaussian renderer lifetime
 
 GaussianSplat3DTileContent creates a shared GaussianSplatPrimitive on its tileset; single-tile unload must not destroy that shared renderer. SGP-0054 makes tileset destruction invoke the existing primitive destroy before clearing its ownership reference, including collection removal and Scene teardown. Already destroyed private primitives remain removable without a second destroy. This repairs the existing deterministic resource-release contract; it adds no rendering pass, resource budget, API or alternate opaque pipeline.
+
+## Native CustomShader material contract
+
+P4f qualifies the existing Model / Cesium3DTileset CustomShader API. Both
+MODIFY_MATERIAL and REPLACE_MATERIAL run before the existing SGP-0045 material
+capture. Native vertex callbacks, varyings, uniforms, texture updates, discard
+and feature inputs remain in the native model pipeline. Opaque / MASK lighting
+stays deferred; TRANSLUCENT uses forward shading and existing OIT or native
+sorted-transparency dispatch. Alpha alone does not reclassify an OPAQUE command.
+Replacing a CustomShader preserves caller ownership and native shader rebuilds.
+
+This qualification adds no runtime branch, attachment or geometry submission.
+Seven new GPU cases verify the bounded contract, including OIT composition,
+opaque occlusion, picking and resource lifetime; native sorted transparency is
+not a new algorithm introduced by this phase. Weighted blended OIT approximates
+transparent composition; it neither guarantees exact layered refraction nor
+creates additional subsurface vector-map coverage. The vector current-surface
+contract remains separate from ordinary transparent model rendering.
+
+See the [usage guide](../CustomShaderGuide.md) and
+[P4f review](../../../AgentDocs/webgl-deferred-renderer/reviews/2026-10-15-p4f-custom-shader.md).
+Existing SGP-0045 / 0046 provide the material and Scene integration seams;
+this amendment modifies no upstream-owned source.

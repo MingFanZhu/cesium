@@ -2,20 +2,21 @@
 
 ## Metadata
 
-| Field                            | Value                                                             |
-| -------------------------------- | ----------------------------------------------------------------- |
-| Extension slug                   | `webgl-deferred-renderer`                                         |
-| Status                           | `completed`                                                       |
-| Planning model                   | `extension`                                                       |
-| Active extension plan            | None                                                              |
-| Completed extension plan         | [总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
-| Current phase                    | None                                                              |
-| Active phase plan                | None                                                              |
-| Last completed phase             | [P4e：独立矢量切片适配](plans/2026-10-14-p4e-vector-tiles.md)     |
-| Architecture / execution contact | 当前任务                                                          |
-| Last updated                     | `2026-10-15`                                                      |
+| Field                            | Value                                                                       |
+| -------------------------------- | --------------------------------------------------------------------------- |
+| Extension slug                   | `webgl-deferred-renderer`                                                   |
+| Status                           | `completed`                                                                 |
+| Planning model                   | `extension`                                                                 |
+| Active extension plan            | 无；[已完成总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
+| Current phase                    | 无                                                                          |
+| Active phase plan                | 无                                                                          |
+| Last completed phase             | [P4f：原生 CustomShader 资格](plans/2026-10-15-p4f-custom-shader.md)        |
+| Architecture / execution contact | 当前任务                                                                    |
+| Last updated                     | `2026-10-15`                                                                |
 
 ## Scope
+
+2026-10-15 P4e 独立 checkpoint 为 `60cedcbb7b`，提交钩子通过。负责人随后要求继续支持 CustomShader，明确透明内容继续走前向专用通道。[P4f](plans/2026-10-15-p4f-custom-shader.md) 已补齐原生 API 的测试与支持说明，技术、自审与负责人视觉 gate 全部通过；负责人明确确认“画面和拾取通过，提交 P4f”。本增量形成独立本地 checkpoint，当前没有 active phase。最终证据与保留边界见 [P4f review](reviews/2026-10-15-p4f-custom-shader.md)。
 
 P4d checkpoint 为 `4ba2e217c7`。2026-10-15 负责人在此前矢量画面通过的基础上，明确确认新增透明 Planar 画面通过并指示提交 P4e；本阶段技术、自审与视觉 gate 全部关闭，代码、Specs、ADR / SGP 和记录形成独立本地 checkpoint。WebGL2 / SCENE3D、单采样的既定单一不透明 / MASK 延迟目标完成，当前没有 active phase。最终内容矩阵、资源成本与保留边界见 [P4e review](reviews/2026-10-14-p4e-vector-entry-audit.md#final-owner-acceptance-and-architecture-gate)；成果保留在 `feature/webgl-deferred-rendering`，本轮不包含主线合并或发布。
 
@@ -25,6 +26,8 @@ P4d checkpoint 为 `4ba2e217c7`。2026-10-15 负责人在此前矢量画面通�
 不预设公开 forward/deferred 切换 API。P1 只交付可观察的材质数据，不接管主光照。
 
 ## Engineering links
+
+- P4f 原生 CustomShader：七项新增 GPU Specs 与独立浏览器检查通过；材质模式、动态纹理 / uniform、顶点 / varying / discard、透明前向 OIT、Model / Tileset 替换和拾取已取得有界证据。未发现需要修改运行时的缺口，无新增附件或提交预算。见 [接入说明](../../Documentation/SceneGIS/CustomShaderGuide.md)、[验收页](../../Test/Rendering/延迟CustomShader验收.html) 与 [P4f review](reviews/2026-10-15-p4f-custom-shader.md)；负责人画面与拾取验收通过，阶段 gate 全部关闭。
 
 - 2026-10-15 透明 Planar 增量技术与负责人视觉 gate 均通过：Ground / DeferredPlanar 25 项、实际页面截图及资源/提交预算、完整 release/types/tsc、定向静态检查与 SGP 审计。新增本地地形、多视锥、opacity=0.5 / 0 / 1 下的地图、圆点、完整 VECTOR 文字、道路及点击拾取已获负责人确认；P4e review 全部七项 findings 关闭。
 

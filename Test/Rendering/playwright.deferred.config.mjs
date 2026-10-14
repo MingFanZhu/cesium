@@ -15,6 +15,7 @@ export default defineConfig({
     "scenegis-deferred-native-channels.spec.js",
     "scenegis-deferred-default-environment.spec.js",
     "scenegis-deferred-vectors.spec.js",
+    "scenegis-deferred-custom-shader.spec.js",
   ],
   outputDir: "../../Build/Specs/e2e/deferred",
   workers: 1,

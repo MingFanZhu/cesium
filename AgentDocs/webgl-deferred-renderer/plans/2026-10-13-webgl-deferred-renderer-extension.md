@@ -5,15 +5,17 @@
 - Plan type: `extension`
 - Status: `completed`
 - Owner role: `architecture`
-- Architecture review: `confirmed`，既定范围的实现、验证与阶段 gate 已关闭
+- Architecture review: `confirmed`，P4e 既定范围与 P4f 原生 CustomShader 增量的技术、review 和视觉 gate 全部关闭
 - Architecture reviewer: Current task
 - Created: `2026-10-13`
 - Updated: `2026-10-15`
 - Related discussion: [接入审计](../discussions/2026-10-13-command-integration-and-reuse.md)
-- Related review: [最终 P4e](../reviews/2026-10-14-p4e-vector-entry-audit.md)、[P4d](../reviews/2026-10-14-p4d-entry-audit.md)
+- Related review: [最终 P4f](../reviews/2026-10-15-p4f-custom-shader.md)、[P4e](../reviews/2026-10-14-p4e-vector-entry-audit.md)、[P4d](../reviews/2026-10-14-p4d-entry-audit.md)
 - ADR / SGP: [ADR-0156](../../../Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md) / SGP-0046；依赖 ADR-0155 / SGP-0045
 
 ## Objective
+
+2026-10-15 P4e checkpoint `60cedcbb7b` 后，负责人要求继续支持原生 CustomShader。新增 [P4f](2026-10-15-p4f-custom-shader.md) 按当前源码验证其既有 API 与透明前向 / OIT 路径，修复实际缺口；不自动扩大为任意外层 Shader / DrawCommand 协议或多表面矢量贴附。此前阶段完成状态保持。
 
 在当前 WebGL 街道画质成果之上，验证统一 G-buffer 与延迟光照能否改善多光源和
 屏幕空间效果的复用、画质及成本，并依据证据决定是否替换现有不透明前向主通道。
@@ -62,6 +64,7 @@ Globe 后继清理阶段仅记录稳定目标，进入时再依据当时源码�
 | P3a   | 256 灯分块调度              | P2 已验收                                      | 256 灯同语义、共享接收、资源/成本、视觉验收与独立提交          | completed | [P3a](2026-10-13-p3-many-light-and-shared-data.md)                                       |
 | P3b   | 共享屏幕空间效果            | P3a 独立 checkpoint                            | AO/SSR/SSIL 数据复用收益及稳定性                               | completed | [P3b](2026-10-13-p3b-shared-screen-depth.md)                                             |
 | P4    | GIS 内容覆盖与替换决策      | P3a / P3b 有明确收益；按缺口安排子阶段         | 兼容矩阵、回归、实际设备成本、视觉验收，明确迁入主线或保留实验 | completed | [P4a](2026-10-13-p4a-model-and-tile-styling.md) 至 [P4e](2026-10-14-p4e-vector-tiles.md) |
+| P4f   | 原生 CustomShader 资格      | P4e checkpoint；负责人新增请求                 | API / 透明专用通道证据、成本、自审、视觉验收与独立提交         | completed | [P4f](2026-10-15-p4f-custom-shader.md)                                                   |
 
 后继阶段仅记录目标，不提前冻结 G-buffer 编码、灯光分块方式、Shader 文件或接口。
 默认顺序推进，每阶段独立提交后才能激活下一阶段。
@@ -85,6 +88,8 @@ Globe 后继清理阶段仅记录稳定目标，进入时再依据当时源码�
 无收益的候选优化不因已实现就强行保留。
 
 ## Progress and handoff
+
+最新状态：P4e `60cedcbb7b` 已提交；P4f 技术、自审与负责人视觉 gate 全部通过，负责人于 2026-10-15 确认画面与拾取通过并授权提交。原生 API 无需新增产品分支，七项 GPU Specs 与浏览器验收检查通过，支持边界已写入接入说明及 ADR-0161。本阶段形成独立本地 checkpoint，当前没有 active phase。以下完成结论对应 P4e 关闭时的原目标范围。
 
 当前结论：P4e 新增透明 Planar 画面于 2026-10-15 获负责人验收并授权提交，全部既定阶段 gate 关闭。WebGL2 / SCENE3D 单采样的 Entity、Primitive、glTF Model、3D Tiles、Globe、Planar 与独立矢量切片已完成本计划范围内的单一不透明 / MASK 延迟接入和冗余清理；透明、阴影、拾取、标注、体积继续使用必要专用通道。最终覆盖与限制见 P4e review 末尾。成果作为 `feature/webgl-deferred-rendering` 的本地阶段检查点交付，主线合并和发布不属于本次授权范围；没有激活后继阶段。以下保留历史推进证据。
 
