@@ -158,3 +158,13 @@ Globe assets 和光学路径不变。Package verifier 同步新 manifest，并�
 
 [独立修复计划](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-09-18-planar-aerial-horizon-band.md)
 负责水平双侧极限、独立 dense integration、实际 GPU 和原示例画面验证；不宣称所有离线 quadrature 已达到无限精度。
+
+## High-altitude boundary precision（2026-10-15）
+
+相机位于远处真空时，slab 裁剪得到的边界高度必须保留为准确的 0 / 60000 m，
+不得再以巨大相机高度与射线位移相消来恢复。非水平且到达 slab 出口的介质长度由端点高度差
+除以方向 Z 计算，避免两个巨大入射距离相减；有限接收点和原有近水平路径保留原长度，
+避免微小高度差再次丢失短光程。
+这修正 250000 km 俯视背景的地面反射分支跳变，不扩大地面容差或修改 LUT、物理系数、
+background distance limit、公共 API、pass 和资源预算。无 upstream / SGP 增量。
+验证与剩余边界见 [独立修复计划](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-15-planar-high-altitude-precision.md)。

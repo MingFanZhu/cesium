@@ -397,9 +397,21 @@ vec3 sceneGISPlanarRadianceToPoint(
     intersectsAtmosphere = true;
     float segmentStartHeight = rayOrigin.z + viewDirection.z * segmentStart;
     float segmentEndHeight = rayOrigin.z + viewDirection.z * segmentEnd;
+    float segmentDistance = segmentEnd - segmentStart;
+    if (abs(viewDirection.z) >= 1.0e-6) {
+        // Keep clipped boundaries exact instead of subtracting the vacuum path.
+        // At orbital distances that cancellation can move the ground by meters.
+        segmentStartHeight = clamp(rayOrigin.z, 0.0, SCENEGIS_PLANAR_TOP);
+        float exitHeight = viewDirection.z < 0.0 ? 0.0 : SCENEGIS_PLANAR_TOP;
+        float exitDistance = (exitHeight - rayOrigin.z) / viewDirection.z;
+        if (maximumDistance >= exitDistance) {
+            segmentEndHeight = exitHeight;
+            segmentDistance = (segmentEndHeight - segmentStartHeight) / viewDirection.z;
+        }
+    }
     float cosineTheta = dot(viewDirection, sunDirection);
     transmittance = sceneGISPlanarSegmentTransmittance(
-        segmentStartHeight, viewDirection.z, segmentEnd - segmentStart);
+        segmentStartHeight, viewDirection.z, segmentDistance);
     vec3 startRadiance = sceneGISPlanarScatteringToBoundary(
         scatteringTexture,
         segmentStartHeight,

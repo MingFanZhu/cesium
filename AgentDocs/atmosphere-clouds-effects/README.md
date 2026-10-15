@@ -2,11 +2,16 @@
 
 ## Status
 
-- Latest standalone checkpoint: [Globe 近距离空气透视精度](plans/2026-10-12-globe-near-aerial-precision.md)
+- Latest standalone checkpoint: [Planar 超高空大气边界精度](plans/2026-10-15-planar-high-altitude-precision.md)
+  — 2026-10-15 实现与技术验证完成，2026-10-16 负责人视觉验收通过；
+  [技术评审](reviews/2026-10-15-planar-high-altitude-precision.md)保留两项已复现的基线 fixture 失败。
+  只修正 Planar slab 数值精度，默认环境保持开启。
+- Previous standalone checkpoint: [Globe 近距离空气透视精度](plans/2026-10-12-globe-near-aerial-precision.md)
   — WebGL 街区近景水平亮线已修复；技术验证完成，2026-10-12 负责人确认消失，视觉验收通过。
   [技术评审](reviews/2026-10-12-globe-near-aerial-precision.md)记录 GPU 回归、性能与既有 strict-WebGL fixture 限制。
-- Current handoff: 近距离空气透视 standalone 已关闭，代码与记录形成独立本地提交；无 upstream / SGP 增量。
-  WebGL 街区画质主线继续保留，未因本次修复扩展到历史背景 fixture 或新的光线追踪路线。
+- Current handoff: Planar 超高空大气精度 standalone 已关闭，代码、Specs、ADR 与验收记录
+  收口到 `scenegis/develop` 的独立本地提交；无 upstream / SGP 增量，未推送。
+  历史背景 fixture 问题仍由环境维护负责人后续处理，未激活新的阶段。
 - Previous standalone checkpoint: [云与 TAA 配准](plans/2026-10-02-cloud-taa-registration.md) — 2026-10-08 owner approved committing the current result and moving to a new major stage; dual-world regressions and 60x playback verified; remaining strict-WebGL fixture errors retained in review; ADR-0048 / ADR-0094; no upstream delta.
 - Previous handoff: cloud maintenance is closed at code checkpoint `1d894f6f5f`.
   On 2026-10-08, the owner requested merging the accumulated work into
@@ -22,7 +27,8 @@
   before claiming a complete strict-validation suite pass; they do not reopen the
   accepted cloud quality work automatically.
 - Previous standalone plan: [程序星空](plans/2026-09-30-procedural-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
-- Latest technical review: [Globe 近距离空气透视精度](reviews/2026-10-12-globe-near-aerial-precision.md).
+- Latest technical review: [Planar 超高空大气边界精度](reviews/2026-10-15-planar-high-altitude-precision.md).
+- Previous technical review: [Globe 近距离空气透视精度](reviews/2026-10-12-globe-near-aerial-precision.md).
 - Previous technical review: [云与 TAA 配准](reviews/2026-10-02-cloud-taa-registration.md).
 - Previous technical review: [程序星空](reviews/2026-09-30-procedural-stars.md).
 - Night stars example: [双世界星空](../../Test/AdvancedEnvironment/夜晚星空.html);

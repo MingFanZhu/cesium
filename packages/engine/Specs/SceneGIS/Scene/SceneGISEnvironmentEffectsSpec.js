@@ -9053,6 +9053,127 @@ ${hardCascadeLibrary}`;
     }
   });
 
+  it("keeps Planar atmosphere invariant across a long vacuum entry", async function () {
+    connectPlanar();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    await publishPlanarResources();
+    const width = 256;
+    const pixels = executeHalfFloatQuad(
+      [
+        atmosphereSource,
+        `precision highp float;
+        precision highp sampler3D;
+        uniform sampler2D u_transmittanceTexture;
+        uniform sampler3D u_scatteringTexture;
+        uniform sampler2D u_irradianceTexture;
+        void main() {
+          vec3 direction = normalize(vec3(
+              (gl_FragCoord.x - 128.0) / 128.0, 0.37, -1.0));
+          float height = mod(floor(gl_FragCoord.y), 2.0) < 0.5
+              ? 60000.0 : 250000000.0;
+          bool intersects;
+          vec3 transmittance;
+          vec3 radiance = sceneGISPlanarRadianceToPoint(
+              u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
+              vec3(0.0, 0.0, height), direction,
+              normalize(vec3(0.4, 0.2, 0.89)), 1000000000.0,
+              gl_FragCoord.y < 2.0, intersects, transmittance);
+          out_FragColor = vec4(radiance, transmittance.r);
+        }`,
+      ],
+      { width, height: 4, uniformMap: effects._pipeline._uniformMap },
+    );
+    let maximumDelta = 0;
+    let minimumGroundContribution = Infinity;
+    for (let x = 0; x < width; x++) {
+      for (const row of [0, 2]) {
+        const reference = pixels[row * width + x];
+        const distant = pixels[(row + 1) * width + x];
+        expectFiniteHdrStorage(reference);
+        expectFiniteHdrStorage(distant);
+        expect(rgbEnergy(reference)).toBeGreaterThan(0.01);
+        expect(reference[3]).toBeGreaterThan(0.1);
+        expect(reference[3]).toBeLessThan(1.0);
+        for (let channel = 0; channel < 4; channel++) {
+          maximumDelta = Math.max(
+            maximumDelta,
+            Math.abs(reference[channel] - distant[channel]),
+          );
+        }
+      }
+      minimumGroundContribution = Math.min(
+        minimumGroundContribution,
+        rgbEnergy(pixels[x]) - rgbEnergy(pixels[2 * width + x]),
+      );
+    }
+    expect(minimumGroundContribution).toBeGreaterThan(0.01);
+    // The optical segment is identical; allow only the half-float output ULP.
+    expect(maximumDelta).toBeLessThan(0.001);
+  });
+
+  it("preserves finite Planar atmosphere endpoints and slab exits", async function () {
+    connectPlanar();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    await publishPlanarResources();
+    const pixels = executeHalfFloatQuad(
+      [
+        atmosphereSource,
+        `precision highp float;
+        precision highp sampler3D;
+        uniform sampler2D u_transmittanceTexture;
+        uniform sampler3D u_scatteringTexture;
+        uniform sampler2D u_irradianceTexture;
+        void main() {
+          float index = floor(gl_FragCoord.x);
+          bool alternate = gl_FragCoord.y > 1.0;
+          float height = alternate ? 250000000.0 : 60000.0;
+          float distance = height - (index < 1.0 ? 10000.0 : 0.0);
+          vec3 direction = vec3(0.0, 0.0, -1.0);
+          if (index > 1.0 && index < 3.0) {
+            height = 10000.0;
+            direction.z = 1.0;
+            distance = alternate ? 1000000000.0 : 50000.0;
+          }
+          if (index > 2.0) {
+            height = 250000000.0;
+            direction.z = alternate ? -1.0 : 1.0;
+            distance = 1000.0;
+          }
+          if (index > 3.0) {
+            height = 1000.0;
+            direction = normalize(vec3(1.0, 0.0, alternate ? 0.001 : 0.0));
+            distance = 20.0;
+          }
+          bool intersects;
+          vec3 transmittance;
+          vec3 radiance = sceneGISPlanarRadianceToPoint(
+              u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
+              vec3(0.0, 0.0, height), direction,
+              normalize(vec3(0.4, 0.2, 0.89)), distance, true,
+              intersects, transmittance);
+          out_FragColor = vec4(radiance, transmittance.b);
+        }`,
+      ],
+      { width: 5, height: 2, uniformMap: effects._pipeline._uniformMap },
+    );
+    for (const x of [0, 1, 2, 4]) {
+      expectFiniteHdrStorage(pixels[x]);
+      expectFiniteHdrStorage(pixels[x + 5]);
+      expect(rgbEnergy(pixels[x])).toBeGreaterThan(0.0);
+      expect(pixels[x + 5]).toEqualEpsilon(pixels[x], 0.001);
+    }
+    // A receiver inside the slab must not acquire the ground contribution.
+    expect(pixels[0][3]).toBeGreaterThan(pixels[1][3]);
+    expect(pixels[3]).toEqual([0, 0, 0, 1]);
+    expect(pixels[8]).toEqual([0, 0, 0, 1]);
+    // A short shallow ray must not become an empty optical path.
+    expect(pixels[9][3]).toBeLessThan(1.0);
+  });
+
   it("keeps a real Planar opaque face continuous across the horizon", async function () {
     connectPlanar();
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
