@@ -13,6 +13,12 @@ void main()
     #endif
 #else
     vec4 normal = texelFetch(u_sceneGISDeferredNormal, pixel, 0);
+    #ifdef SCENEGIS_DEFERRED_POINT_EDL
+    if (normal.w < 0.0) {
+        out_FragColor = diffuse;
+        return;
+    }
+    #endif
     czm_modelMaterial material;
     material.diffuse = diffuse.rgb;
     material.occlusion = diffuse.a;

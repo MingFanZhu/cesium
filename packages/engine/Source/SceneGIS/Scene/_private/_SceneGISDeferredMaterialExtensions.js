@@ -102,8 +102,8 @@ function captureSource(layout, location) {
 
 function lightingSource(layout) {
   const lines = [];
-  for (let i = 0; i < layout.count; ++i) {
-    lines.push(`uniform sampler2D u_sceneGISExtension${i};`);
+  if (layout.count) {
+    lines.push("uniform highp sampler2DArray u_sceneGISExtensions;");
   }
   lines.push("float sceneGISDeferredOutline = 0.0; vec2 sceneGISPointOffset;");
   lines.push(
@@ -111,7 +111,7 @@ function lightingSource(layout) {
   );
   for (let i = 0; i < layout.count; ++i) {
     lines.push(
-      `vec4 sceneGISExtension${i} = texelFetch(u_sceneGISExtension${i}, pixel, 0);`,
+      `vec4 sceneGISExtension${i} = texelFetch(u_sceneGISExtensions, ivec3(pixel, ${i}), 0);`,
     );
   }
   layout.fields.forEach(({ name, field }, i) => {
@@ -128,9 +128,8 @@ function lightingSource(layout) {
 }
 
 function copySource(layout, location) {
-  const lines = [];
+  const lines = ["uniform highp sampler2DArray u_sceneGISExtensions;"];
   for (let i = 0; i < layout.count; ++i) {
-    lines.push(`uniform sampler2D u_sceneGISExtension${i};`);
     if (location + i !== 0) {
       lines.push(
         `layout(location = ${location + i}) out vec4 sceneGISExtensionOutput${i};`,
@@ -141,7 +140,9 @@ function copySource(layout, location) {
   for (let i = 0; i < layout.count; ++i) {
     const output =
       location + i === 0 ? "out_FragColor" : `sceneGISExtensionOutput${i}`;
-    lines.push(`${output} = texelFetch(u_sceneGISExtension${i}, pixel, 0);`);
+    lines.push(
+      `${output} = texelFetch(u_sceneGISExtensions, ivec3(pixel, ${i}), 0);`,
+    );
   }
   lines.push("}");
   return lines.join("\n");

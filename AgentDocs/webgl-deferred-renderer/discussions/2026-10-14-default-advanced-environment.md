@@ -40,3 +40,5 @@
 默认环境的新画面待负责人视觉确认。高级 Globe 原有自定义 scene.light 冲突仍在，需随 P4d 最终 API 边界审计记录；本讨论未批准改变显式光源所有权。P4d 未提交。
 
 负责人在视觉检查时发现首次开云的 Planar 天空变黑。已修正 clear-depth 视线重建，新增修复前失败的 GPU 用例和两项浏览器开云 / HDR 检查通过，资源与调度预算不变。当前七项专用 GPU 用例有通过证据，重新视觉验收待完成；详见 review 的 cloud-enabled sky 节。
+
+2026-10-15 状态核对：上述 pending 是历史增量状态。负责人后续确认开云和自定义主光画面通过，已接受显式 DirectionalLight 所有权方案；P4d 已提交 `4ba2e217c7`。最终结论见 [P4d review](../reviews/2026-10-14-p4d-entry-audit.md) 和 [ADR-0161](../../../Documentation/SceneGIS/Decisions/ADR-0161-unified-opaque-deferred-direction.md)。此讨论不再有未解决决定。

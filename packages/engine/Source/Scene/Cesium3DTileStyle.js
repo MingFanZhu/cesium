@@ -1370,6 +1370,13 @@ Cesium3DTileStyle.prototype.getColorShaderFunction = function (
   variableSubstitutionMap,
   shaderState,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0058: Distinguish native point producers and variable bindings.
+  const key = JSON.stringify([functionSignature, variableSubstitutionMap]);
+  if (this._colorShaderFunctionKey !== key) {
+    this._colorShaderFunctionReady = false;
+    this._colorShaderFunctionKey = key;
+  }
+  // SCENEGIS_PATCH_END SGP-0058
   if (this._colorShaderFunctionReady) {
     shaderState.translucent = this._colorShaderTranslucent;
     // Return the cached result, may be undefined
@@ -1408,6 +1415,13 @@ Cesium3DTileStyle.prototype.getShowShaderFunction = function (
   variableSubstitutionMap,
   shaderState,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0058: Distinguish native point producers and variable bindings.
+  const key = JSON.stringify([functionSignature, variableSubstitutionMap]);
+  if (this._showShaderFunctionKey !== key) {
+    this._showShaderFunctionReady = false;
+    this._showShaderFunctionKey = key;
+  }
+  // SCENEGIS_PATCH_END SGP-0058
   if (this._showShaderFunctionReady) {
     // Return the cached result, may be undefined
     return this._showShaderFunction;
@@ -1444,6 +1458,13 @@ Cesium3DTileStyle.prototype.getPointSizeShaderFunction = function (
   variableSubstitutionMap,
   shaderState,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0058: Distinguish native point producers and variable bindings.
+  const key = JSON.stringify([functionSignature, variableSubstitutionMap]);
+  if (this._pointSizeShaderFunctionKey !== key) {
+    this._pointSizeShaderFunctionReady = false;
+    this._pointSizeShaderFunctionKey = key;
+  }
+  // SCENEGIS_PATCH_END SGP-0058
   if (this._pointSizeShaderFunctionReady) {
     // Return the cached result, may be undefined
     return this._pointSizeShaderFunction;

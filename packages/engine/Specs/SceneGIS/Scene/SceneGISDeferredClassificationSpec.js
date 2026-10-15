@@ -493,6 +493,61 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
     expect(renderer.drawCount).toBe(draws);
   });
 
+  it("retains diagnostic tint through classified and translucent inverse layers", async function () {
+    await tiles(new Cartesian3(15, 1000, 100));
+    scene.invertClassification = true;
+    scene.invertClassificationColor = new Color(0.5, 0.25, 0.75, 0.5);
+    scene.backgroundColor = Color.BLACK;
+    spyOn(Color, "fromRandom").and.returnValue(new Color(0.5, 0.25, 0.125));
+    render();
+    const baseline = read(
+      renderer._inverse._activeLayer.color.getColorTexture(),
+      true,
+    );
+    const classifiedBaseline = color(true);
+    const ids = read(renderer._inverse._raw.getColorTexture(2), true);
+    const mask = read(renderer._inverse._mask.getColorTexture(), true);
+    const outside =
+      ids.findIndex((v, i) => i % 4 === 3 && v > 0 && mask[i - 3] === 0) - 3;
+    const inside =
+      ids.findIndex((v, i) => i % 4 === 3 && v > 0 && mask[i - 3] > 0) - 3;
+    expect(outside).toBeGreaterThanOrEqual(0);
+    expect(inside).toBeGreaterThanOrEqual(0);
+    scene.debugShowCommands = true;
+    render();
+    const tinted = read(
+      renderer._inverse._activeLayer.color.getColorTexture(),
+      true,
+    );
+    const classifiedTinted = color(true);
+    for (let channel = 0; channel < 3; ++channel) {
+      expect(tinted[outside + channel]).toEqualEpsilon(
+        baseline[outside + channel] * [0.5, 0.25, 0.125][channel],
+        0.003,
+      );
+      expect(classifiedTinted[inside + channel]).toEqualEpsilon(
+        classifiedBaseline[inside + channel] * [0.5, 0.25, 0.125][channel],
+        0.003,
+      );
+    }
+    expect(renderer.debugTintByteLength).toBe(64 * 64 * 12);
+    expect(renderer.debugTintScreenCount).toBe(1);
+    expect(renderer.debugTintDrawCount).toBeGreaterThan(0);
+    expect(scene.context._gl.getError()).toBe(0);
+    scene.debugShowCommands = false;
+    render();
+    expect(
+      read(renderer._inverse._activeLayer.color.getColorTexture(), true).slice(
+        outside,
+        outside + 3,
+      ),
+    ).toEqualEpsilon(baseline.slice(outside, outside + 3), 0.003);
+    expect(renderer.debugTintByteLength).toBe(0);
+    expect(renderer._inverse._mask.getColorTexture().pixelDatatype).toBe(
+      PixelDatatype.UNSIGNED_BYTE,
+    );
+  });
+
   it("keeps the opaque background, screen effects and foreground depth for sorted inverse transparency", async function () {
     scene.destroyForSpecs();
     await setup({ orderIndependentTranslucency: false });
@@ -626,6 +681,8 @@ describe("SceneGIS/Scene/SceneGISDeferredClassification", function () {
         scene.destroyForSpecs();
         await setup({ orderIndependentTranslucency: false });
       }
+      // The analytic blend oracle uses backgroundColor without atmospheric haze.
+      scene.environmentEffects.enabled = false;
       const { tileset, volume } = await tiles(new Cartesian3(15, 1000, 100));
       const origin = Cartesian3.fromRadians(-1.31968, 0.698874);
       const frame = Transforms.eastNorthUpToFixedFrame(origin);

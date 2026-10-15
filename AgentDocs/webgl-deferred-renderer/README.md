@@ -2,19 +2,25 @@
 
 ## Metadata
 
-| Field                            | Value                                                                       |
-| -------------------------------- | --------------------------------------------------------------------------- |
-| Extension slug                   | `webgl-deferred-renderer`                                                   |
-| Status                           | `completed`                                                                 |
-| Planning model                   | `extension`                                                                 |
-| Active extension plan            | 无；[已完成总体计划](plans/2026-10-13-webgl-deferred-renderer-extension.md) |
-| Current phase                    | 无                                                                          |
-| Active phase plan                | 无                                                                          |
-| Last completed phase             | [P4f：原生 CustomShader 资格](plans/2026-10-15-p4f-custom-shader.md)        |
-| Architecture / execution contact | 当前任务                                                                    |
-| Last updated                     | `2026-10-15`                                                                |
+| Field                            | Value                                                                                  |
+| -------------------------------- | -------------------------------------------------------------------------------------- |
+| Extension slug                   | `webgl-deferred-renderer`                                                              |
+| Status                           | `completed`                                                                            |
+| Planning model                   | `extension`                                                                            |
+| Extension plan                   | [总体计划（completed）](plans/2026-10-13-webgl-deferred-renderer-extension.md)         |
+| Current phase                    | 无；全部阶段已完成                                                                     |
+| Active phase plan                | 无                                                                                     |
+| Last completed phase             | [P4g：全部 DrawCommand 生产者接入](plans/2026-10-15-p4g-all-draw-command-producers.md) |
+| Architecture / execution contact | 当前任务                                                                               |
+| Last updated                     | `2026-10-15`                                                                           |
 
 ## Scope
+
+2026-10-15 负责人在最终验收页确认“画面通过，提交 P4g”。调试着色、Globe 空地伪阴影、Planar 斜向投影与水面不透明反射的最终视觉 gate 已关闭，点云此前验收继续有效。77 个生产者模块 / 217 个创建和派生点的技术审查、Specs、浏览器 / 成本检查、完整 release / types、静态与补丁审计均已完成。本提交为 P4g 独立本地 checkpoint；全分支当前 WebGL2 / SCENE3D 单采样、不透明 / MASK 延迟与透明专用前向目标完成，没有 active phase。反射探针和透明物体水面 SSR 仍按负责人决定暂缓，不宣称这两项已适配。
+
+以下保留范围演进及历史阶段记录，最新完成结论以本段和 P4g 最终 review 为准。
+
+2026-10-15 负责人纠正完成边界：全部创建 / 派生 DrawCommand 的模块都须适配，不能只核对先前内容矩阵；仅有同类型替代且明确提前拒绝 / 门禁的模块允许排除。P4f 已独立提交 `8f3baba438`，据新要求激活 [P4g](plans/2026-10-15-p4g-all-draw-command-producers.md) 和 [全命令审计](reviews/2026-10-15-p4g-all-draw-command-producers.md)。已关闭本轮发现的点云、诊断和辅助路由技术缺口，最终视觉 gate 已由负责人确认通过，详见下节。以下完成结论为此前阶段的历史范围。
 
 2026-10-15 P4e 独立 checkpoint 为 `60cedcbb7b`，提交钩子通过。负责人随后要求继续支持 CustomShader，明确透明内容继续走前向专用通道。[P4f](plans/2026-10-15-p4f-custom-shader.md) 已补齐原生 API 的测试与支持说明，技术、自审与负责人视觉 gate 全部通过；负责人明确确认“画面和拾取通过，提交 P4f”。本增量形成独立本地 checkpoint，当前没有 active phase。最终证据与保留边界见 [P4f review](reviews/2026-10-15-p4f-custom-shader.md)。
 
@@ -24,6 +30,20 @@ P4d checkpoint 为 `4ba2e217c7`。2026-10-15 负责人在此前矢量画面通�
 画质和性能改进。既有效果和街道调校仍属于 `rendering-quality`。
 负责人允许不再长期维护完整前向模式；可以采用不透明延迟与透明等配套前向的统一管线。
 不预设公开 forward/deferred 切换 API。P1 只交付可观察的材质数据，不接管主光照。
+
+## Final P4g handoff
+
+### 最终状态（负责人验收通过）
+
+2026-10-15 负责人在最终验收页确认“画面通过，提交 P4g”。调试着色、Globe 空地伪阴影、Planar 斜向投影与水面不透明反射的最终视觉 gate 已关闭，点云此前验收继续有效。77 个生产者模块 / 217 个创建和派生点的技术审查、Specs、浏览器 / 成本检查、完整 release / types、静态与补丁审计均已完成。本提交为 P4g 独立本地 checkpoint；全分支当前 WebGL2 / SCENE3D 单采样、不透明 / MASK 延迟与透明专用前向目标完成，没有 active phase。反射探针和透明物体水面 SSR 仍按负责人决定暂缓，不宣称这两项已适配。
+
+以下保留此前增量记录；当前未完成项以上述状态和 review 末尾为准。
+
+全量 [全部生产者矩阵](reviews/2026-10-15-p4g-command-producer-matrix.md)已建立。点集合分流、独立点云材质分离、EDL 和命令过滤修正已通过技术增量。六项 EDL GPU、八项生产者 GPU、192 项原生样式测试及浏览器检查通过，负责人已确认点云画面与拾取通过。动态点云多帧裁剪、十一项 GPU 粒子和四十七项 CloudCollection 也有通过证据；旧 Planar 环境门禁遗漏已修正。探针、调试着色及剩余矩阵尚未关闭，P4g 未提交，不把点云验收扩大为全阶段 gate。
+
+已完成的预算讨论：[EDL 点深度与提交预算](discussions/2026-10-15-point-edl-depth-budget.md)，批准范围内的接入、技术与负责人视觉验收均完成；SGP-0055 / SGP-0056 / SGP-0057 / SGP-0058 已登记。最终阶段事实以 [P4g review](reviews/2026-10-15-p4g-all-draw-command-producers.md) 为准，下面旧阶段记录不构成新范围下的完成声明。
+
+2026-10-15 负责人随后明确反射探针不启用、仅作技术积累，现阶段暂缓；其六面捕获与启用后的 sampler 容量问题保留记录，不再阻塞 P4g。此决定不涉及正常使用的物理天空反射、SSR 或局部灯。其余模块审计与调试着色接入继续。
 
 ## Engineering links
 
@@ -68,7 +88,7 @@ P4d checkpoint 为 `4ba2e217c7`。2026-10-15 负责人在此前矢量画面通�
 
 ## Historical incremental handoffs
 
-以下保留各阶段当时的状态与证据，不表示当前仍有相应待办。最终状态以上方 Scope 和 P4e 最终 review 为准。
+以下保留各阶段当时的状态与证据，不表示当前仍有相应待办。最终状态以上方 Scope 和 P4g 最终 review 为准。
 
 2026-10-14 负责人选择 A：只推进 WebGL2 / SCENE3D 的延迟渲染，目标默认单采样，
 其他模式明确不支持。HDR 关闭的实现已加入本轮：内部保留线性浮点光照与透明合成，

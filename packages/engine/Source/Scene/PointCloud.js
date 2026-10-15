@@ -1076,10 +1076,18 @@ function createShaders(pointCloud, frameState, style) {
   vs += "    color = color * u_highlightColor; \n";
 
   if (usesNormals && normalShading) {
+    // SCENEGIS_PATCH_BEGIN SGP-0056: Defer opaque point lighting without changing translucent shading.
+    vs = `#ifdef SCENEGIS_DEFERRED_POINT_CAPTURE\nout vec3 v_sceneGISPointNormalEC;\n#endif\n${vs}`;
+    vs +=
+      "#ifdef SCENEGIS_DEFERRED_POINT_CAPTURE\n    v_sceneGISPointNormalEC = normalEC;\n#else\n";
+    // SCENEGIS_PATCH_END SGP-0056
     vs +=
       "    float diffuseStrength = czm_getLambertDiffuse(czm_lightDirectionEC, normalEC); \n" +
       "    diffuseStrength = max(diffuseStrength, 0.4); \n" + // Apply some ambient lighting
       "    color.xyz *= diffuseStrength * czm_lightColor; \n";
+    // SCENEGIS_PATCH_BEGIN SGP-0056: Close the native forward-only lighting branch.
+    vs += "#endif\n";
+    // SCENEGIS_PATCH_END SGP-0056
   }
 
   vs +=
@@ -1102,6 +1110,12 @@ function createShaders(pointCloud, frameState, style) {
   vs += "} \n";
 
   let fs = "in vec4 v_color; \n";
+  // SCENEGIS_PATCH_BEGIN SGP-0056: Declare the independent point material interface.
+  if (usesNormals && normalShading) {
+    fs +=
+      "#define SCENEGIS_DEFERRED_POINT_MATERIAL\n#ifdef SCENEGIS_DEFERRED_POINT_CAPTURE\nin vec3 v_sceneGISPointNormalEC;\nvoid sceneGISRecordPoint(vec4 color, vec3 normalEC, vec4 styledColor, bool edge);\n#endif\n";
+  }
+  // SCENEGIS_PATCH_END SGP-0056
 
   if (hasClippedContent) {
     fs +=
@@ -1126,6 +1140,14 @@ function createShaders(pointCloud, frameState, style) {
     );
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0056: Preserve clipping-edge color as an unlit material.
+  if (usesNormals && normalShading) {
+    const edge = hasClippedContent
+      ? "clipDistance > 0.0 && clipDistance < clippingPlanesEdgeWidth"
+      : "false";
+    fs += `#ifdef SCENEGIS_DEFERRED_POINT_CAPTURE\n    sceneGISRecordPoint(v_color, v_sceneGISPointNormalEC, out_FragColor, ${edge});\n#endif\n`;
+  }
+  // SCENEGIS_PATCH_END SGP-0056
   fs += "} \n";
 
   if (pointCloud.splitDirection !== SplitDirection.NONE) {

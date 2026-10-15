@@ -3650,6 +3650,9 @@ Cesium3DTileset.prototype.isDestroyed = function () {
  * @see Cesium3DTileset#isDestroyed
  */
 Cesium3DTileset.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0057: Destroy the tileset-owned point EDL processor.
+  this._pointCloudEyeDomeLighting = this._pointCloudEyeDomeLighting.destroy();
+  // SCENEGIS_PATCH_END SGP-0057
   // SCENEGIS_PATCH_BEGIN SGP-0054: Release the shared tileset-owned splat renderer.
   if (defined(this.gaussianSplatPrimitive)) {
     if (!this.gaussianSplatPrimitive.isDestroyed()) {

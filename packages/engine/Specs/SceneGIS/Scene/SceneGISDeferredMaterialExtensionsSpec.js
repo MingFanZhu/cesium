@@ -23,6 +23,10 @@ import {
   Pass,
   PixelDatatype,
   Resource,
+  SceneGISLightCollection,
+  SceneGISPointLight,
+  SceneGISScreenSpaceReflections,
+  SceneGISScreenSpaceIndirectLighting,
 } from "../../../index.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -68,12 +72,13 @@ describe("SceneGIS/Scene/SceneGISDeferredMaterialExtensions", function () {
     scene = custom = undefined;
   });
   function sample(texture, x = 36) {
+    const layer = texture._sceneGISArrayLayer;
     const target = new FramebufferManager({
       pixelDatatype: PixelDatatype.FLOAT,
     });
     target.update(scene.context, 1, 1);
     const copy = scene.context.createViewportQuadCommand(
-      `uniform sampler2D u_texture; void main() { out_FragColor = texelFetch(u_texture, ivec2(${x}, 32), 0); }`,
+      `uniform highp ${layer === undefined ? "sampler2D" : "sampler2DArray"} u_texture; void main() { out_FragColor = texelFetch(u_texture, ${layer === undefined ? `ivec2(${x}, 32)` : `ivec3(${x}, 32, ${layer})`}, 0); }`,
       {
         framebuffer: target.framebuffer,
         uniformMap: { u_texture: () => texture },
@@ -237,6 +242,52 @@ describe("SceneGIS/Scene/SceneGISDeferredMaterialExtensions", function () {
     expect(depth.isDestroyed()).toBe(true);
     expect(scene.context._gl.getError()).toBe(0);
   });
+  it("tints extended materials and shared responses without additional geometry lighting", async function () {
+    const subject = await model("Anisotropy", true);
+    const lights = new SceneGISLightCollection({ scene });
+    lights.add(
+      new SceneGISPointLight({
+        position: new Cartesian3(7000001, 0, 5),
+        range: 20,
+        intensity: 20,
+      }),
+    );
+    const ssr = new SceneGISScreenSpaceReflections({ scene, enabled: true });
+    const ssil = new SceneGISScreenSpaceIndirectLighting({
+      scene,
+      enabled: true,
+    });
+    scene.postProcessStages.ambientOcclusion.enabled = true;
+    render();
+    const baseline = color();
+    const renderer = scene._sceneGISDeferred;
+    const draws = renderer.drawCount;
+    const lightsDrawn = renderer.lightDrawCount;
+    spyOn(Color, "fromRandom").and.returnValue(new Color(0.5, 0.25, 0.125));
+    scene.debugShowCommands = true;
+    render();
+    const tinted = color();
+    for (let i = 0; i < 3; ++i) {
+      expect(tinted[i]).toEqualEpsilon(
+        baseline[i] * [0.5, 0.25, 0.125][i],
+        0.004,
+      );
+    }
+    expect(renderer.drawCount).toBe(draws);
+    expect(renderer.lightDrawCount).toBe(lightsDrawn);
+    expect(renderer.debugTintDrawCount).toBe(draws);
+    expect(renderer.debugTintByteLength).toBe(64 * 64 * 8);
+    expect(ssr.ready).toBe(true);
+    expect(ssil.ready).toBe(true);
+    expect(scene.context._gl.getError()).toBe(0);
+    subject.show = false;
+    render();
+    expect(renderer.debugTintByteLength).toBe(0);
+    ssil.destroy();
+    ssr.destroy();
+    lights.destroy();
+  });
+
   it("composes native primitive outline coverage after deferred lighting and releases its field", async function () {
     scene.primitives.add(
       new Primitive({

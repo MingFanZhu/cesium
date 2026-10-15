@@ -749,7 +749,9 @@ PostProcessStageCollection.prototype.update = function (
   }
   activeStagesChanged = count !== activeStages.length;
   if (activeStagesChanged) {
-    this.update(context, useLogDepth, useHdr);
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Retain display intent when newly ready stages rebuild the active chain.
+    this.update(context, useLogDepth, useHdr, displayHdr);
+    // SCENEGIS_PATCH_END SGP-0046
   }
 };
 

@@ -85,12 +85,13 @@ describe("SceneGIS/Scene/SceneGISDeferredPointCloud", function () {
     return tileset;
   }
   function pixels(texture) {
+    const layer = texture._sceneGISArrayLayer;
     const target = new FramebufferManager({
       pixelDatatype: PixelDatatype.FLOAT,
     });
     target.update(scene.context, 64, 64);
     const copy = scene.context.createViewportQuadCommand(
-      "uniform sampler2D u_texture; void main() {out_FragColor=texelFetch(u_texture,ivec2(gl_FragCoord.xy),0);}",
+      `uniform highp ${layer === undefined ? "sampler2D" : "sampler2DArray"} u_texture; void main() {out_FragColor=texelFetch(u_texture,${layer === undefined ? "ivec2(gl_FragCoord.xy)" : `ivec3(gl_FragCoord.xy, ${layer})`},0);}`,
       {
         framebuffer: target.framebuffer,
         uniformMap: { u_texture: () => texture },

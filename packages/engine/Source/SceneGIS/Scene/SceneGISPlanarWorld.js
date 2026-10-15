@@ -682,7 +682,10 @@ SceneGISPlanarWorld.prototype.renderEnvironment = function (
 
 function renderPlanarEnvironment(frameState, passState) {
   const environment = this._environment;
-  if (environment?._scene?._sceneGISEnvironmentEffectsPipeline?.enabled) {
+  if (
+    frameState._sceneGISDeferredRendering ||
+    environment?._scene?._sceneGISEnvironmentEffectsPipeline?.enabled
+  ) {
     return;
   }
   if (

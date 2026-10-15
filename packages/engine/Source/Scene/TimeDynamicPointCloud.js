@@ -794,6 +794,9 @@ TimeDynamicPointCloud.prototype.isDestroyed = function () {
  * @see TimeDynamicPointCloud#isDestroyed
  */
 TimeDynamicPointCloud.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0057: Destroy the dynamic cloud-owned point EDL processor.
+  this._pointCloudEyeDomeLighting = this._pointCloudEyeDomeLighting.destroy();
+  // SCENEGIS_PATCH_END SGP-0057
   unloadFrames(this);
   this._clippingPlanes = this._clippingPlanes && this._clippingPlanes.destroy();
   this._pickId = this._pickId && this._pickId.destroy();

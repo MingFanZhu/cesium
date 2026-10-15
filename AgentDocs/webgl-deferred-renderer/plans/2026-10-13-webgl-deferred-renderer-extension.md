@@ -5,7 +5,7 @@
 - Plan type: `extension`
 - Status: `completed`
 - Owner role: `architecture`
-- Architecture review: `confirmed`，P4e 既定范围与 P4f 原生 CustomShader 增量的技术、review 和视觉 gate 全部关闭
+- Architecture review: `confirmed`，P4g 全生产者技术审查与负责人最终视觉通过，所有阶段完成
 - Architecture reviewer: Current task
 - Created: `2026-10-13`
 - Updated: `2026-10-15`
@@ -14,6 +14,10 @@
 - ADR / SGP: [ADR-0156](../../../Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md) / SGP-0046；依赖 ADR-0155 / SGP-0045
 
 ## Objective
+
+2026-10-15 负责人明确扩大完成边界：所有直接创建、派生或通过工厂创建 DrawCommand 的模块及其公共委托入口，均须接入当前延迟与透明前向管线。只有被现有同类型模块替代且明确提前拒绝 / 门禁的路径可以排除；不能将历史未列举、一般不支持条件或缺少测试等同于合法排除。P4f checkpoint `8f3baba438` 后激活 [P4g](2026-10-15-p4g-all-draw-command-producers.md)，最终完成以全生产者矩阵为准。
+
+同日负责人另行明确反射探针不启用、仅作技术积累，现阶段可以暂缓。显式局部探针的六面捕获和启用后的采样器容量问题保留在 P4g review，暂不阻塞阶段或分支目标完成；此项为负责人的范围例外，不代表已完成适配，不扩大到物理天空反射、SSR 或其他生产者。
 
 2026-10-15 P4e checkpoint `60cedcbb7b` 后，负责人要求继续支持原生 CustomShader。新增 [P4f](2026-10-15-p4f-custom-shader.md) 按当前源码验证其既有 API 与透明前向 / OIT 路径，修复实际缺口；不自动扩大为任意外层 Shader / DrawCommand 协议或多表面矢量贴附。此前阶段完成状态保持。
 
@@ -65,6 +69,7 @@ Globe 后继清理阶段仅记录稳定目标，进入时再依据当时源码�
 | P3b   | 共享屏幕空间效果            | P3a 独立 checkpoint                            | AO/SSR/SSIL 数据复用收益及稳定性                               | completed | [P3b](2026-10-13-p3b-shared-screen-depth.md)                                             |
 | P4    | GIS 内容覆盖与替换决策      | P3a / P3b 有明确收益；按缺口安排子阶段         | 兼容矩阵、回归、实际设备成本、视觉验收，明确迁入主线或保留实验 | completed | [P4a](2026-10-13-p4a-model-and-tile-styling.md) 至 [P4e](2026-10-14-p4e-vector-tiles.md) |
 | P4f   | 原生 CustomShader 资格      | P4e checkpoint；负责人新增请求                 | API / 透明专用通道证据、成本、自审、视觉验收与独立提交         | completed | [P4f](2026-10-15-p4f-custom-shader.md)                                                   |
+| P4g   | 全部 DrawCommand 生产者接入 | P4f checkpoint；负责人全模块要求               | 全量矩阵无遗漏、真实缺口修正、合法替代门禁、技术与视觉 gate    | completed | [P4g](2026-10-15-p4g-all-draw-command-producers.md)                                      |
 
 后继阶段仅记录目标，不提前冻结 G-buffer 编码、灯光分块方式、Shader 文件或接口。
 默认顺序推进，每阶段独立提交后才能激活下一阶段。
@@ -88,6 +93,8 @@ Globe 后继清理阶段仅记录稳定目标，进入时再依据当时源码�
 无收益的候选优化不因已实现就强行保留。
 
 ## Progress and handoff
+
+最新全局状态：2026-10-15 负责人在最终验收页确认“画面通过，提交 P4g”。调试着色、Globe 空地伪阴影、Planar 斜向投影与水面不透明反射的最终视觉 gate 已关闭，点云此前验收继续有效。77 个生产者模块 / 217 个创建和派生点的技术审查、Specs、浏览器 / 成本检查、完整 release / types、静态与补丁审计均已完成。本提交为 P4g 独立本地 checkpoint；全分支当前 WebGL2 / SCENE3D 单采样、不透明 / MASK 延迟与透明专用前向目标完成，没有 active phase。反射探针和透明物体水面 SSR 仍按负责人决定暂缓，不宣称这两项已适配。
 
 最新状态：P4e `60cedcbb7b` 已提交；P4f 技术、自审与负责人视觉 gate 全部通过，负责人于 2026-10-15 确认画面与拾取通过并授权提交。原生 API 无需新增产品分支，七项 GPU Specs 与浏览器验收检查通过，支持边界已写入接入说明及 ADR-0161。本阶段形成独立本地 checkpoint，当前没有 active phase。以下完成结论对应 P4e 关闭时的原目标范围。
 

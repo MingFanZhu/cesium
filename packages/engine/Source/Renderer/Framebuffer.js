@@ -11,6 +11,18 @@ import PixelDatatype from "./PixelDatatype.js";
 function attachTexture(framebuffer, attachment, texture, mipLevel = 0) {
   // SCENEGIS_PATCH_END SGP-0015
   const gl = framebuffer._gl;
+  // SCENEGIS_PATCH_BEGIN SGP-0059: Attach a borrowed layer of owned material storage.
+  if (defined(texture._sceneGISArrayLayer)) {
+    gl.framebufferTextureLayer(
+      gl.FRAMEBUFFER,
+      attachment,
+      texture._texture,
+      mipLevel,
+      texture._sceneGISArrayLayer,
+    );
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0059
   gl.framebufferTexture2D(
     gl.FRAMEBUFFER,
     attachment,

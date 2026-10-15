@@ -1,10 +1,12 @@
 import resolveMrt from "../../Renderer/_SceneGISResolveMrt.js";
 import combine from "../../../Core/combine.js";
 import pointColor from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPointColor.js";
+import pointEDL from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPointEDL.js";
 import MaterialExtensions from "./_SceneGISDeferredMaterialExtensions.js";
 import defined from "../../../Core/defined.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
 import ContextLimits from "../../../Renderer/ContextLimits.js";
+import ClearCommand from "../../../Renderer/ClearCommand.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
 import Framebuffer from "../../../Renderer/Framebuffer.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
@@ -34,12 +36,7 @@ function layout(scene, passState, eligible, reflections) {
   const environment = scene._environmentState;
   const ao = scene.postProcessStages.ambientOcclusion.enabled;
   const ssil = scene._sceneGISScreenSpaceIndirectLighting?.enabled === true;
-  if (
-    (ao && !scene._hdr) ||
-    environment.useWebVR ||
-    scene.debugShowCommands ||
-    scene.debugShowFrustums
-  ) {
+  if ((ao && !scene._hdr) || environment.useWebVR) {
     return undefined;
   }
   const manager = environment.useGlobeDepthFramebuffer
@@ -57,6 +54,8 @@ function layout(scene, passState, eligible, reflections) {
           continue;
         }
         if (
+          command instanceof ClearCommand ||
+          DeferredLayout.isDebugOverlay(command) ||
           DeferredLayout.isGlobeDepth(command) ||
           DeferredLayout.isAnnotation(command)
         ) {
@@ -339,6 +338,11 @@ function compositePointColors(scene, mrt, passState) {
       continue;
     }
     let command = mrt.pointCommands.get(source);
+    const debug = !!renderer._debugTint;
+    if (command && command._sceneGISDebugTint !== debug) {
+      command.shaderProgram.destroy();
+      command = undefined;
+    }
     if (!command) {
       const defines =
         mrt.composite.shaderProgram.fragmentShaderSource.defines.concat(
@@ -350,14 +354,20 @@ function compositePointColors(scene, mrt, passState) {
               "HAS_PRIMITIVE_OUTLINE",
               "SCENEGIS_DEFERRED_FEATURE_STYLE",
               "SCENEGIS_DEFERRED_OUTLINE_STYLE",
+              "SCENEGIS_DEFERRED_POINT_EDL",
             ].includes(name),
           ),
         );
+      defines.push("SCENEGIS_POINT_EDL_FUNCTION_ONLY");
+      if (debug) {
+        defines.push("SCENEGIS_DEFERRED_DEBUG_TINT");
+      }
       command = scene.context.createViewportQuadCommand(
         new ShaderSource({
           defines,
           sources: [
             MaterialExtensions.lightingSource(renderer._extensionLayout),
+            flags.includes("SCENEGIS_DEFERRED_POINT_EDL") ? pointEDL : "",
             pointColor,
             composite,
           ],
@@ -372,10 +382,13 @@ function compositePointColors(scene, mrt, passState) {
               u_sceneGISClassification: () =>
                 renderer._classification?.getColorTexture() ??
                 renderer._raw.getColorTexture(0),
+              u_sceneGISDebugTint: () =>
+                renderer._debugTint.target.getColorTexture(),
             }),
           ),
         },
       );
+      command._sceneGISDebugTint = debug;
       mrt.pointCommands.set(source, command);
     }
     command.execute(scene.context, passState);

@@ -1,4 +1,5 @@
 import combine from "../../../Core/combine.js";
+import DeferredDebug from "./_SceneGISDeferredDebug.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
 import Framebuffer from "../../../Renderer/Framebuffer.js";
@@ -257,7 +258,7 @@ function execute(renderer, command, passState) {
   derived.shaderProgram = program;
   // Only opaque coverage reaches this framebuffer, so FLOAT outputs never require float blending.
   derived.framebuffer = state.framebuffer;
-  derived.execute(context, passState);
+  DeferredDebug.receiver(renderer._scene, derived).execute(context, passState);
   ++renderer.annotationDrawCount;
 }
 

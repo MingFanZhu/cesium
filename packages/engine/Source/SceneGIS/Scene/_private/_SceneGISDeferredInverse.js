@@ -1,4 +1,6 @@
 import MaterialExtensions from "./_SceneGISDeferredMaterialExtensions.js";
+import MaterialArray from "../../Renderer/_SceneGISMaterialArray.js";
+import DeferredDebug from "./_SceneGISDeferredDebug.js";
 import DepthFunction from "../../../Scene/DepthFunction.js";
 import Color from "../../../Core/Color.js";
 import combine from "../../../Core/combine.js";
@@ -65,6 +67,7 @@ class _SceneGISDeferredInverse {
       "void main() { out_FragColor = vec4(1.0); }",
       {
         renderState: RenderState.fromCache({
+          colorMask: { red: true, green: false, blue: false, alpha: false },
           depthMask: false,
           stencilMask: 0,
           stencilTest: {
@@ -111,7 +114,8 @@ class _SceneGISDeferredInverse {
     const width = context.drawingBufferWidth;
     const height = context.drawingBufferHeight;
     const style = renderer._hasStyleTarget;
-    const layout = `${renderer._extensionLayout.key}_${renderer._extensionCombined}_${style}_${renderer._hasOcean}_${renderer._hasClassification}_${renderer._multiFrustum}_${frameState.useLogDepth}_${renderer._vectorOverlayLocation}`;
+    const debug = !!renderer._debugTint;
+    const layout = `${renderer._extensionLayout.key}_${renderer._extensionCombined}_${style}_${renderer._hasOcean}_${renderer._hasClassification}_${renderer._multiFrustum}_${frameState.useLogDepth}_${renderer._vectorOverlayLocation}_${debug}`;
     if (this._raw.isDirty(width, height, 1) || this._layout !== layout) {
       this._releaseDepthSource();
       this.framebuffer?.destroy();
@@ -125,10 +129,7 @@ class _SceneGISDeferredInverse {
         this._extensions = undefined;
       }
       if (extensionCount) {
-        this._extensions ??= new FramebufferManager({
-          colorAttachmentsLength: extensionCount,
-          pixelDatatype: PixelDatatype.HALF_FLOAT,
-        });
+        this._extensions ??= new MaterialArray(extensionCount);
         this._extensions.update(context, width, height);
         this._extensionView = new Framebuffer({
           context,
@@ -138,10 +139,7 @@ class _SceneGISDeferredInverse {
           depthStencilTexture: this._raw.getDepthStencilTexture(),
           destroyAttachments: false,
         });
-        for (let i = 0; i < extensionCount; ++i) {
-          this._uniforms[`u_sceneGISExtension${i}`] = () =>
-            this._extensions.getColorTexture(i);
-        }
+        this._uniforms.u_sceneGISExtensions = () => this._extensions.texture;
       }
       if (style) {
         this._style ??= new FramebufferManager({
@@ -152,7 +150,14 @@ class _SceneGISDeferredInverse {
         this._style?.destroy();
         this._style = undefined;
       }
-      for (const target of [this._mask, this._depth, this._color]) {
+      this._mask.update(
+        context,
+        width,
+        height,
+        1,
+        debug ? PixelDatatype.HALF_FLOAT : PixelDatatype.UNSIGNED_BYTE,
+      );
+      for (const target of [this._depth, this._color]) {
         target.update(context, width, height);
       }
       const colors = [0, 1, 2, 3].map((i) => this._raw.getColorTexture(i));
@@ -289,6 +294,7 @@ class _SceneGISDeferredInverse {
       width *
       height *
       (52 +
+        (debug ? 4 : 0) +
         renderer._extensionLayout.count * 8 +
         (style ? 8 : 0) +
         (layerCount - 1) * 12);
@@ -341,6 +347,7 @@ class _SceneGISDeferredInverse {
     this._mark.execute(this._scene.context, passState);
     this._merge.framebuffer = renderer._framebuffer;
     this._merge.execute(this._scene.context, passState);
+    DeferredDebug.merge(renderer, this, passState);
     if (this._mergeExtensions) {
       this._mergeExtensions.framebuffer = renderer._extensionView;
       this._mergeExtensions.execute(this._scene.context, passState);
@@ -367,7 +374,7 @@ class _SceneGISDeferredInverse {
         ShaderSource.replaceMain(source, "sceneGISInverseLightMain"),
       );
       fs.sources.push(
-        "uniform sampler2D u_sceneGISInverseMask; void main() { if (texelFetch(u_sceneGISInverseMask, ivec2(gl_FragCoord.xy), 0).r != 0.0) { discard; } sceneGISInverseLightMain(); }",
+        "uniform sampler2D u_sceneGISInverseMask; uniform bool u_sceneGISInverseDebug; void main() { vec4 mask = texelFetch(u_sceneGISInverseMask, ivec2(gl_FragCoord.xy), 0); if (mask.r != 0.0) { discard; } sceneGISInverseLightMain(); if (u_sceneGISInverseDebug) out_FragColor.rgb *= mask.gba; }",
       );
       program = context.shaderCache.createDerivedShaderProgram(
         shader,
@@ -385,7 +392,11 @@ class _SceneGISDeferredInverse {
         command: new DrawCommand(),
         sourceUniforms: command.uniformMap,
         uniforms: combine(
-          { u_sceneGISInverseMask: this._uniforms.u_mask },
+          {
+            u_sceneGISInverseMask: this._uniforms.u_mask,
+            u_sceneGISInverseDebug: () =>
+              !!this._scene._sceneGISDeferred._debugTint,
+          },
           command.uniformMap,
         ),
       };

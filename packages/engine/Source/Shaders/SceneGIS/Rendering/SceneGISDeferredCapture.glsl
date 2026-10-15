@@ -36,7 +36,7 @@ layout(location = 1) out vec4 sceneGISDeferredNormal;
 layout(location = 3) out vec4 sceneGISDeferredEmission;
 #endif
 
-#if defined(SCENEGIS_DEFERRED_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE) || defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) || defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE) || defined(SCENEGIS_DEFERRED_VECTOR_CAPTURE)
+#if defined(SCENEGIS_DEFERRED_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE) || defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) || defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE) || defined(SCENEGIS_DEFERRED_VECTOR_CAPTURE) || defined(SCENEGIS_DEFERRED_POINT_CAPTURE)
 #if !defined(SCENEGIS_DEFERRED_GLOBE_BLEND) && !defined(SCENEGIS_DEFERRED_EXTENSION_ONLY)
 layout(location = 2) out vec4 sceneGISDeferredSpecular;
 #endif
@@ -142,6 +142,14 @@ void sceneGISRecordVector(vec4 color, vec3 normalEC)
     sceneGISDeferredSpecularValue = vec3(0.0);
     sceneGISDeferredEmissionValue = vec3(0.0);
 }
+#elif defined(SCENEGIS_DEFERRED_POINT_CAPTURE)
+void sceneGISRecordPoint(vec4 color, vec3 normalEC, vec4 styledColor, bool edge)
+{
+    sceneGISDeferredDiffuseValue = edge ? styledColor : color;
+    sceneGISDeferredNormalValue = vec4(normalEC, float(edge));
+    sceneGISDeferredSpecularValue = vec3(0.0);
+    sceneGISDeferredEmissionValue = vec3(0.0);
+}
 #elif defined(SCENEGIS_DEFERRED_PHONG_CAPTURE)
 void sceneGISRecordPhong(czm_material material)
 {
@@ -211,7 +219,7 @@ void sceneGISWriteDeferredMaterial()
     sceneGISDeferredOcean = vec4(0.0);
     #endif
 #endif
-#if defined(SCENEGIS_DEFERRED_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE) || defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) || defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE) || defined(SCENEGIS_DEFERRED_VECTOR_CAPTURE)
+#if defined(SCENEGIS_DEFERRED_CAPTURE) || defined(SCENEGIS_DEFERRED_PHONG_CAPTURE) || defined(SCENEGIS_DEFERRED_GLOBE_CAPTURE) || defined(SCENEGIS_DEFERRED_PLANAR_CAPTURE) || defined(SCENEGIS_DEFERRED_VECTOR_CAPTURE) || defined(SCENEGIS_DEFERRED_POINT_CAPTURE)
     out_FragColor = sceneGISDeferredDiffuseValue;
     sceneGISDeferredNormal = sceneGISDeferredNormalValue;
     sceneGISDeferredSpecular = vec4(sceneGISDeferredSpecularValue, u_sceneGISDeferredGroup);
@@ -222,15 +230,21 @@ void sceneGISWriteDeferredMaterial()
     sceneGISDeferredEmission = vec4(sceneGISDeferredEmissionValue, visibility);
     #ifdef SCENEGIS_DEFERRED_CAPTURE
     if (sceneGISDeferredUnlitModel) {
+        #ifdef SCENEGIS_DEFERRED_POINT_EDL
+        // Preserve the processor group for clipping-edge colors under EDL.
+        sceneGISDeferredNormal = vec4(0.0, 0.0, 0.0, -1.0);
+        sceneGISDeferredSpecular = vec4(0.0, 0.0, 0.0, u_sceneGISDeferredGroup);
+        #else
         sceneGISDeferredNormal = vec4(0.0);
         sceneGISDeferredSpecular = vec4(0.0, 0.0, 0.0, -1.0);
+        #endif
         sceneGISDeferredEmission = vec4(0.0);
     }
     #endif
 #else
     // Ordinary opaque content retains native color and its indirect-only response.
     sceneGISDeferredNormal = vec4(0.0);
-    sceneGISIndirectOutput = vec4(sceneGISIndirect, -1.0);
+    sceneGISIndirectOutput = vec4(sceneGISIndirect, u_sceneGISDeferredGroup);
     sceneGISDeferredEmission = vec4(0.0);
 #endif
 #endif

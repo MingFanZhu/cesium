@@ -1152,8 +1152,9 @@ PointPrimitiveCollection.prototype.update = function (frameState) {
       }
 
       command.primitiveType = PrimitiveType.POINTS;
-      command.pass =
-        opaqueCommand || !opaqueAndTranslucent ? Pass.OPAQUE : Pass.TRANSLUCENT;
+      // SCENEGIS_PATCH_BEGIN SGP-0055: Match point pass routing to the selected blend state.
+      command.pass = opaqueCommand ? Pass.OPAQUE : Pass.TRANSLUCENT;
+      // SCENEGIS_PATCH_END SGP-0055
       command.owner = this;
 
       const index = opaqueAndTranslucent ? Math.floor(j / 2.0) : j;

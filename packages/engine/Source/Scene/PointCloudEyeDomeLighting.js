@@ -12,6 +12,9 @@ import ShaderSource from "../Renderer/ShaderSource.js";
 import BlendingState from "../Scene/BlendingState.js";
 import StencilConstants from "../Scene/StencilConstants.js";
 import PointCloudEyeDomeLightingShader from "../Shaders/PostProcessStages/PointCloudEyeDomeLighting.js";
+// SCENEGIS_PATCH_BEGIN SGP-0057: Register point depth with the deferred lighting owner.
+import DeferredPointEDL from "../SceneGIS/Scene/_private/_SceneGISDeferredPointEDL.js";
+// SCENEGIS_PATCH_END SGP-0057
 
 /**
  * Eye dome lighting. Does not support points with per-point translucency, but does allow translucent styling against the globe.
@@ -182,6 +185,13 @@ PointCloudEyeDomeLighting.prototype.update = function (
   this._radius =
     pointCloudShading.eyeDomeLightingRadius * frameState.pixelRatio;
 
+  // SCENEGIS_PATCH_BEGIN SGP-0057: Keep opaque materials in the unified pipeline.
+  if (frameState._sceneGISDeferredRendering) {
+    DeferredPointEDL.register(this, frameState, commandStart);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0057
+
   createResources(this, frameState.context);
 
   // Hijack existing point commands to render into an offscreen FBO.
@@ -278,6 +288,9 @@ PointCloudEyeDomeLighting.prototype.isDestroyed = function () {
  * @see PointCloudEyeDomeLighting#isDestroyed
  */
 PointCloudEyeDomeLighting.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0057: Release the processor-owned deferred point depth.
+  DeferredPointEDL.releaseProcessor(this);
+  // SCENEGIS_PATCH_END SGP-0057
   destroyFramebuffer(this);
   return destroyObject(this);
 };

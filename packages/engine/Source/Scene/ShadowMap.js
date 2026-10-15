@@ -1875,7 +1875,10 @@ ShadowMap.createReceiveDerivedCommand = function (
       !defined(receiveShader) ||
       shaderDirty ||
       shadowsDirty ||
-      castShadowsDirty
+      // SCENEGIS_PATCH_BEGIN SGP-0013: Reused Globe commands can change terrain normal layout without changing their base shader.
+      castShadowsDirty ||
+      result.receiveShaderHasTerrainNormal !== hasTerrainNormal
+      // SCENEGIS_PATCH_END SGP-0013
     ) {
       const keyword = ShadowMapShader.getShadowReceiveShaderKeyword(
         lightShadowMaps[0],
@@ -1923,6 +1926,9 @@ ShadowMap.createReceiveDerivedCommand = function (
     result.receiveCommand.uniformMap = receiveUniformMap;
     result.receiveShaderProgramId = command.shaderProgram.id;
     result.receiveShaderCastShadows = command.castShadows;
+    // SCENEGIS_PATCH_BEGIN SGP-0013: Retain the normal layout used by the receiver variant.
+    result.receiveShaderHasTerrainNormal = hasTerrainNormal;
+    // SCENEGIS_PATCH_END SGP-0013
   }
 
   return result;

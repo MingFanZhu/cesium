@@ -446,6 +446,40 @@ describe("SceneGIS/Scene/SceneGISDefaultEnvironment", function () {
     expect(light._hasAuthority).toBe(false);
   });
 
+  it("does not restore legacy Planar sky when advanced effects are disabled", function () {
+    const fetch = pendingAssets();
+    scene = createScene({ canvas: createCanvas(32, 32) });
+    const world = planarWorld();
+    scene._initializeWorld(world);
+    scene.camera.setView({
+      destination: new Cartesian3(0, 0, 10),
+      orientation: {
+        direction: new Cartesian3(0, 0, 1),
+        up: new Cartesian3(0, 1, 0),
+      },
+    });
+    scene.environmentEffects.enabled = false;
+    const explicit = register(
+      new SceneGISPlanarEnvironment({
+        world,
+        showAtmosphere: true,
+        showSun: true,
+        showMoon: true,
+        sunDirection: new Cartesian3(1, 0, 1),
+        moonDirection: new Cartesian3(-1, 0, -1),
+      }),
+    );
+    scene.renderForSpecs();
+    expect(explicit._hasAuthority).toBe(true);
+    expect(world._atmosphereRenderer._shaderProgram).toBeUndefined();
+    expect(world._celestialBodyRenderer._shaderProgram).toBeUndefined();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(
+      scene.context.readPixels({ x: 16, y: 16, width: 1, height: 1 }),
+    ).toEqual([0, 0, 0, 255]);
+    expect(scene.context._gl.getError()).toBe(0);
+  });
+
   it("preserves clear Planar sky when clouds are enabled with deferred depth", async function () {
     scene = createScene({ canvas: createCanvas(32, 32) });
     const world = planarWorld(100000);

@@ -2443,7 +2443,11 @@ function executeCommand(
   }
 
   if (command instanceof ClearCommand) {
-    command.execute(context, passState);
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Clear Tiles stencil in the target owning its material depth.
+    if (!scene._sceneGISDeferred?.clear(command, passState)) {
+      command.execute(context, passState);
+    }
+    // SCENEGIS_PATCH_END SGP-0046
     return;
   }
 
@@ -2507,7 +2511,12 @@ function executeCommand(
     }
   }
 
-  if (scene.debugShowCommands || scene.debugShowFrustums) {
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Deferred diagnostics retain material routing and shade before tinting.
+  if (
+    !scene._sceneGISDeferred &&
+    (scene.debugShowCommands || scene.debugShowFrustums)
+  ) {
+    // SCENEGIS_PATCH_END SGP-0046
     scene._debugInspector.executeDebugShowFrustumsCommand(
       scene,
       command,
@@ -2550,6 +2559,9 @@ function executeCommand(
   // SCENEGIS_PATCH_END SGP-0028
   // SCENEGIS_PATCH_BEGIN SGP-0046: Water publishes final depth during its original color draw.
   command = SceneGISWaterFrame.waterCommand(scene, command, passState);
+  if (!shadowCast && !passes.pick && !passes.depth && !passes.pickVoxel) {
+    command = scene._sceneGISDeferred?.debugCommand(command) ?? command;
+  }
   command.execute(context, passState);
   // SCENEGIS_PATCH_END SGP-0046
 }
@@ -3416,6 +3428,11 @@ function executeCommands(scene, passState) {
       }
     }
     if (!picking) {
+      scene._sceneGISDeferred?.drawDebugOverlays(
+        frustumCommands,
+        passState,
+        executeCommand,
+      );
       scene._sceneGISDeferred?.drawAnnotations(
         frustumCommands,
         index,

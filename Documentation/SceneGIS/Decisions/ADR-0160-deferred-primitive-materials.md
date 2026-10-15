@@ -4,7 +4,7 @@
 - Date: 2026-10-13
 - Parent: [ADR-0156](ADR-0156-webgl-deferred-lighting-experiment.md)
 - Plan: [P4b](../../../AgentDocs/webgl-deferred-renderer/plans/2026-10-13-p4b-primitive-materials.md)
-- Upstream integration: SGP-0049, SGP-0050
+- Upstream integration: SGP-0049, SGP-0050, SGP-0055, SGP-0056, SGP-0057, SGP-0058, SGP-0059
 
 ## Decision
 
@@ -56,3 +56,56 @@ translucent default for ground classification. Native getRenderState enables ble
 when the subsequently selected alpha is translucent. This preserves native alpha
 behavior and makes ordinary opaque state consistent without weakening deferred
 validation. Test opaque/translucent transitions through actual dynamic Entity batches.
+
+P4g's complete command-producer audit reproduced another pass/state mismatch:
+PointPrimitiveCollection with BlendOption.TRANSLUCENT assigns its alpha-blended,
+non-depth-writing command to OPAQUE. SGP-0055 selects the pass from the existing
+opaque-command flag. Translucent-only and mixed collections therefore use native
+forward OIT or sorted transparency; their opaque portions retain deferred capture.
+No attachment, extra submission or public option is added. Verify actual blending,
+front/back opaque occlusion, picking and collection destruction, rather than only
+checking the number of commands produced by update.
+
+P4g also covers the independent PointCloud used by TimeDynamicPointCloud.
+SGP-0056 exposes its styled source color and decoded eye-space normal before
+vertex lighting. Opaque points with normalShading capture these fields; one
+screen group evaluates the native Lambert response, 0.4 ambient floor and gamma
+conversion in the original order. Clipping-edge colors remain unlit, and shadow
+visibility is retained. Normal-free or normalShading=false points remain unlit;
+translucent points keep native forward lighting. ShaderCache owns capture
+variants and the deferred instance releases its point lighting group when unused.
+No attachment or geometry submission is added for this material separation.
+The owner approved the separate [EDL point-depth budget](../../../AgentDocs/webgl-deferred-renderer/discussions/2026-10-15-point-edl-depth-budget.md).
+SGP-0057 registers each visible opaque point with its native EDL processor and
+returns before native lit offscreen rendering. A private full-view depth pass
+preserves styled point size, clipping, discard and TAA, deduplicating commands
+across frustums. Each active processor owns R32F linear depth and a depth-stencil
+attachment, eight bytes per pixel. Disabled, hidden or destroyed processors
+release these targets. Both native processor owners explicitly destroy EDL.
+The four-neighbor response runs in the corresponding deferred lighting group;
+no EDL screen composite is added. Native transparent points remain forward.
+Point color correction and shared lighting data receive the same EDL factor.
+
+SGP-0058 keys the native style-function cache by function signature and variable
+substitution map. Model pnts and independent PointCloud can share one style while
+requiring different GLSL function definitions. This prevents incompatible cached
+color, show or point-size functions without changing the public styling API.
+Real GPU coverage, native style regression and the owner-approved point-cloud
+page qualify this increment; P4g's other producers remain separately reviewed.
+
+## P4g extended-material sampler capacity
+
+Feature styling, all three glTF material extensions, physical environment,
+cloud shadows and local lights consume sixteen fragment samplers before debug
+tint. Store the existing extension attachments as separate RGBA16F layers of an
+owned WebGL2 2D-array texture. Material MRT writes keep the same attachment
+locations; screen lighting and inverse-classification copies use one array
+sampler instead of up to four samplers. Preserve format, per-layer precision,
+allocated bytes, draw counts and the existing WebGL2 device requirement.
+
+`_SceneGISMaterialArray` owns allocation, resize and destruction. Its layer
+views are borrowed attachments and never delete their parent storage.
+SGP-0059 adds only explicit layer attachment in Framebuffer and native sampler
+binding in createUniform; no public API or additional resource budget is added.
+On upstream upgrades, verify layered MRT completeness, array sampler binding,
+borrowed view lifetime and ordinary 2D / cube-map attachment behavior.

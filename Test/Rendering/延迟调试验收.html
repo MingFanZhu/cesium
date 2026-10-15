@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>延迟调试验收</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      #controls {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        padding: 16px 20px;
+        color: #edf5ff;
+        background: #142438ed;
+        border-radius: 10px;
+        font: 14px/1.8 sans-serif;
+        max-width: 300px;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 8px;
+      }
+      label {
+        display: block;
+      }
+      select {
+        margin-left: 8px;
+      }
+      p {
+        margin: 8px 0 0;
+        color: #b4c6dc;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="controls">
+      <h1>延迟调试着色</h1>
+      <label
+        >场景<select id="world">
+          <option value="globe">地球</option>
+          <option value="planar">平面</option>
+        </select></label
+      >
+      <label
+        >着色方式<select id="debug">
+          <option value="none">正常</option>
+          <option value="commands">按命令</option>
+          <option value="frustums">按视锥</option>
+          <option value="cascades">阴影级联</option>
+        </select></label
+      >
+      <label><input id="multi" type="checkbox" />多视锥</label>
+      <label><input id="taa" type="checkbox" />TAA</label>
+      <label><input id="screen" type="checkbox" />AO／SSR／SSIL 与局部灯</label>
+      <label><input id="water" type="checkbox" checked />水面</label>
+      <p id="pick">点击物体或标注检查拾取</p>
+      <p id="cost"></p>
+      <p id="error"></p>
+      <details>
+        <summary>环境设置</summary>
+        <label><input id="enabled" type="checkbox" checked /> 高级环境</label>
+        <label
+          ><input id="atmosphere" type="checkbox" checked /> 物理大气</label
+        >
+        <label><input id="fog" type="checkbox" checked /> 指数高度雾</label>
+        <label><input id="aerial" type="checkbox" checked /> 空气透视</label>
+        <label><input id="clouds" type="checkbox" /> 体积云</label>
+        <label><input id="hdr" type="checkbox" /> HDR 显示</label>
+        <label
+          >主光<select id="primary">
+            <option value="auto">自动太阳／月亮</option>
+            <option value="custom">自定义方向光</option>
+          </select></label
+        >
+        <label
+          >主光颜色 <input id="lightColor" type="color" value="#ffffff"
+        /></label>
+        <label
+          >主光强度
+          <input
+            id="lightIntensity"
+            type="range"
+            min="0"
+            max="5"
+            step="0.1"
+            value="2"
+        /></label>
+        <label
+          >主光方位
+          <input
+            id="lightAzimuth"
+            type="range"
+            min="-180"
+            max="180"
+            step="5"
+            value="-45"
+        /></label>
+        <label><input id="shadows" type="checkbox" /> 几何及云阴影</label>
+      </details>
+      <p>
+        切换调试着色，观察地表、模型、透明蓝板、文字与水面；关闭调试应恢复正常画面。
+      </p>
+      <p>
+        默认使用斜向主光展示几何投影；平面自动太阳垂直向下，投影在物体正下方。
+      </p>
+      <p id="status">正在加载环境</p>
+    </div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./延迟调试验收.js"></script>
+  </body>
+</html>

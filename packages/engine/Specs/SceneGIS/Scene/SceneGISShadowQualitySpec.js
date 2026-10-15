@@ -13,12 +13,14 @@ import {
   HeadingPitchRange,
   Intersect,
   Matrix4,
+  Pass,
   PerInstanceColorAppearance,
   PixelDatatype,
   PixelFormat,
   Primitive,
   Sampler,
   ShaderSource,
+  ShadowMap,
   ShadowMode,
   Texture,
   TextureMagnificationFilter,
@@ -52,6 +54,45 @@ describe("SceneGIS/Scene/SceneGISShadowQuality", function () {
     Matrix4.IDENTITY,
     Matrix4.IDENTITY,
   ];
+
+  it("invalidates a reused Globe receiver when terrain normal availability changes", function () {
+    scene = createScene();
+    command = scene.context.createViewportQuadCommand(
+      "void main() { out_FragColor = vec4(1.0); }",
+    );
+    command.pass = Pass.GLOBE;
+    command.castShadows = command.receiveShadows = true;
+    const encoding = { hasVertexNormals: true };
+    command.owner = { data: { renderedMesh: { encoding } } };
+    const shadow = scene.shadowMap;
+    let result;
+    const update = () => {
+      result = ShadowMap.createReceiveDerivedCommand(
+        [shadow],
+        command,
+        false,
+        scene.context,
+        result,
+      );
+      return result.receiveCommand.shaderProgram;
+    };
+    const withNormals = update();
+    expect(withNormals.vertexShaderSource.defines).toContain(
+      "GENERATE_POSITION_AND_NORMAL",
+    );
+    encoding.hasVertexNormals = false;
+    const withoutNormals = update();
+    expect(withoutNormals).not.toBe(withNormals);
+    expect(withoutNormals.vertexShaderSource.defines).not.toContain(
+      "GENERATE_POSITION_AND_NORMAL",
+    );
+    expect(withoutNormals.vertexShaderSource.defines).toContain(
+      "GENERATE_POSITION",
+    );
+    expect(update()).toBe(withoutNormals);
+    encoding.hasVertexNormals = true;
+    expect(update()).toBe(withNormals);
+  });
 
   function setup(sample, slope = new Cartesian2(), blend = false) {
     context = createContext({}, 1, 1);

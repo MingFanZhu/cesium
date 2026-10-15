@@ -2,12 +2,22 @@ import defined from "../../../Core/defined.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import RuntimeError from "../../../Core/RuntimeError.js";
 import ContextLimits from "../../../Renderer/ContextLimits.js";
+import ClearCommand from "../../../Renderer/ClearCommand.js";
 import Pass from "../../../Renderer/Pass.js";
 import BillboardCollection from "../../../Scene/BillboardCollection.js";
+import Vector3DTilePrimitive from "../../../Scene/Vector3DTilePrimitive.js";
 import SceneMode from "../../../Scene/SceneMode.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const excluded = ["HAS_MODEL_COLOR", "HAS_SELECTED_FEATURE_ID"];
+
+function isDebugOverlay(command) {
+  return (
+    command.pass === Pass.OPAQUE &&
+    command.owner instanceof Vector3DTilePrimitive &&
+    command.owner.debugWireframe
+  );
+}
 
 function isAnnotation(command) {
   return (
@@ -19,6 +29,8 @@ function isAnnotation(command) {
 
 function eligible(command) {
   return (
+    !(command instanceof ClearCommand) &&
+    !isDebugOverlay(command) &&
     command.owner?._sceneGISWater !== true &&
     !isGlobeDepth(command) &&
     !isAnnotation(command)
@@ -51,15 +63,9 @@ function validateScene(scene) {
       "Deferred material layout requires WebGL2, four floating-point targets and depth textures.",
     );
   }
-  if (
-    scene.mode !== SceneMode.SCENE3D ||
-    scene.useWebVR ||
-    scene.debugCommandFilter ||
-    scene.debugShowCommands ||
-    scene.debugShowFrustums
-  ) {
+  if (scene.mode !== SceneMode.SCENE3D || scene.useWebVR) {
     throw new DeveloperError(
-      "Deferred rendering requires SCENE3D without WebVR or debug overrides.",
+      "Deferred rendering requires SCENE3D without WebVR.",
     );
   }
   if (scene.msaaSamples !== 1) {
@@ -163,5 +169,6 @@ const _SceneGISDeferredLayout = {
   validate,
   isGlobeDepth,
   isAnnotation,
+  isDebugOverlay,
 };
 export default _SceneGISDeferredLayout;

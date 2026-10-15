@@ -460,7 +460,7 @@ color-frame draw; one scissored depth copy is added per affected pick frustum.
 
 ## Advanced environment is the default visual authority
 
-Owner-approved on 2026-10-14. In the WebGL deferred profile, SGP-0046 gates native SkyAtmosphere, SkyBox, Sun / Sun bloom, visual Fog, Globe ground atmosphere and legacy Globe daylight preparation. Public objects remain available; Fog tile culling and the advanced Globe Moon / ephemeris and shadow-light infrastructure remain. Disabling advanced effects never restores those legacy visuals.
+Owner-approved on 2026-10-14. In the WebGL deferred profile, SGP-0046 gates native SkyAtmosphere, SkyBox, Sun / Sun bloom, visual Fog, Globe ground atmosphere and legacy Globe daylight preparation. Public objects remain available; Fog tile culling and the advanced Globe Moon / ephemeris and shadow-light infrastructure remain. Disabling advanced effects never restores those legacy visuals. P4g verifies the same rule for explicitly registered PlanarEnvironment: PlanarWorld gates its legacy atmosphere and celestial draws on the deferred profile, independent of the advanced controller's enabled state. Its explicit light authority remains available; this owned gate adds no upstream patch or rendering resources.
 
 Owned deferred Globe shaders do not duplicate native atmosphere or legacy daylight evaluation. Their former atmosphere helper, capture flags and screen-light branches are removed; material ocean response, clipping and display overlays retain their separate contracts. Shared Cesium native shader implementations remain behind the effective gates.
 
@@ -558,3 +558,37 @@ See the [usage guide](../CustomShaderGuide.md) and
 [P4f review](../../../AgentDocs/webgl-deferred-renderer/reviews/2026-10-15-p4f-custom-shader.md).
 Existing SGP-0045 / 0046 provide the material and Scene integration seams;
 this amendment modifies no upstream-owned source.
+
+## Diagnostic and auxiliary commands in the unified schedule
+
+P4g qualifies every direct DrawCommand producer and its delegated entry points.
+ClearCommand carries stencil ownership and must not enter ordinary material
+validation. In translucent inverse classification, skip-LOD stencil clears execute
+on the independent Tiles material framebuffer. SGP-0046 supplies this narrow
+Scene hook. Native vector-tile classification wireframe is a dedicated unlit
+per-frustum tail, preserving its original single draw and depth policy; Model
+classification wireframe remains a depth-writing material command.
+
+Command, frustum and shadow-cascade diagnostics tint completed lighting and shared
+indirect responses before classification blending. The owner-approved debug budget
+permits one unlit tint draw per visible opaque command. Actual storage is eight
+bytes per pixel, plus four bytes for the inverse-classification mask when active;
+normal rendering allocates neither. Ordinary lighting consumes the tint directly,
+with no additional screen draw; inverse classification adds one screen merge.
+Transparent and dedicated color commands apply tint within their original draw,
+before OIT weighting. Preserve alpha, clipping, discard, shadow and pick behavior.
+See the [approved budget](../../../AgentDocs/webgl-deferred-renderer/discussions/2026-10-15-debug-tint-budget.md)
+and ADR-0160 / SGP-0059 for the unchanged-budget array storage that frees sampler
+capacity. SGP-0046 retains routing instead of invoking the old lit opaque debug draw.
+
+Recursive post-process preparation must carry displayHdr independently of the
+linear storage flag, including its first update after readiness. SGP-0046 preserves
+this input so LDR starts with gamma-only output rather than accidental tone mapping.
+Disabling the advanced environment does not restore native Planar sky or celestial
+geometry; the existing explicit primary-light authority remains available.
+
+Reused terrain commands can change vertex-normal availability without changing
+the material shader. SGP-0013 invalidates the native shadow-receive variant on this
+layout change. Preserve terrain self-shadowing, filter settings and resource budget.
+The current owner defers explicit local reflection probes and transparent-object
+water SSR reflections; neither is claimed as qualified by P4g.

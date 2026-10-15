@@ -32,6 +32,10 @@ function createUniform(gl, activeUniform, uniformName, location) {
     case gl.SAMPLER_3D:
     case gl.SAMPLER_CUBE:
       return new UniformSampler(gl, activeUniform, uniformName, location);
+    // SCENEGIS_PATCH_BEGIN SGP-0059: Reuse native texture binding for material arrays.
+    case gl.SAMPLER_2D_ARRAY:
+      return new UniformSampler(gl, activeUniform, uniformName, location);
+    // SCENEGIS_PATCH_END SGP-0059
     case gl.UNSIGNED_INT_SAMPLER_2D:
       return new UniformSampler(gl, activeUniform, uniformName, location);
     case gl.INT:

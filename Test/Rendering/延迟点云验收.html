@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>点云 EDL · 延迟与透明验收</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      aside {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        width: 265px;
+        padding: 16px;
+        background: #172333ed;
+        color: #edf4ff;
+        font: 14px/1.6 sans-serif;
+      }
+      h1 {
+        font-size: 19px;
+        margin: 0 0 10px;
+      }
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+      input[type="range"] {
+        width: 140px;
+        vertical-align: middle;
+      }
+      button {
+        font: inherit;
+      }
+      #error {
+        color: #ffaaaa;
+      }
+      #legend {
+        position: absolute;
+        right: 20px;
+        bottom: 35px;
+        color: #edf4ff;
+        background: #172333ed;
+        padding: 12px;
+        font: 16px sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>点云 EDL 验收</h1>
+      <p>左：3D Tiles 点云。右：动态点云。点选内容检查拾取。</p>
+      <label><input id="edl" type="checkbox" checked />EDL 轮廓增强</label>
+      <label
+        >半径
+        <input id="radius" type="range" min="0.5" max="6" step="0.5" value="2"
+      /></label>
+      <label
+        >强度
+        <input id="strength" type="range" min="0" max="3" step="0.1" value="1"
+      /></label>
+      <label
+        >不透明度
+        <input id="alpha" type="range" min="0" max="1" step="0.1" value="1"
+      /></label>
+      <label><input id="normals" type="checkbox" checked />按法线受光</label>
+      <label><input id="occluder" type="checkbox" />前方蓝色遮挡板</label>
+      <label><input id="taa" type="checkbox" />TAA</label>
+      <label><input id="frustums" type="checkbox" />多视锥</label>
+      <button id="frame">切换动态帧</button>
+      <button id="home">复位视角</button>
+      <p id="picked">尚未拾取</p>
+      <p id="stats">加载本地点云…</p>
+      <p id="error"></p>
+    </aside>
+    <div id="legend">3D Tiles 点云　｜　TimeDynamicPointCloud</div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./延迟点云验收.js"></script>
+  </body>
+</html>

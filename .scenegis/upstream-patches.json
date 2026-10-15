@@ -339,7 +339,7 @@
       "id": "SGP-0013",
       "title": "Integrate stable directional cascades and precise shadow filtering",
       "status": "active",
-      "reason": "Retain native shadow resources and APIs while dispatching non-ellipsoid visibility, stable Globe/Planar cascades, geometric receiver-plane correction and continuous atlas-safe PCF to owned code.",
+      "reason": "Retain native shadow resources and APIs while dispatching non-ellipsoid visibility, stable Globe/Planar cascades, geometric receiver-plane correction and continuous atlas-safe PCF to owned code. Reused Globe commands invalidate their receive variant when terrain vertex-normal availability changes, even when the base material shader is unchanged.",
       "risk": "high",
       "files": [
         {
@@ -856,7 +856,7 @@
       "id": "SGP-0046",
       "title": "Integrate Scene-owned native-material deferred WebGL lighting",
       "status": "active",
-      "reason": "Scene owns a default single-sample deferred renderer with explicit WebGL2/3D profile validation. Material-only native variants and Scene scheduling preserve surface depth across Globe clears, native and inverse classification, cached Tiles depth ownership, cross-frustum material collection, one lighting resolve, depth restoration for dedicated transparency, staged translucent Globe classification, and shared final water depth for temporal and environment effects. Display HDR is independent of linear deferred storage; the native tone-mapping slot supplies gamma-only LDR output without exposure. Scene, CesiumWidget and Viewer document the same single-sample default. Obsolete opaque AO/SSR receiver and geometry-capture scheduling is removed; their existing outputs consume deferred material and screen-lighting data. Native billboard and label coverage is separated before culling: solid colors run in a dedicated per-frustum tail with unblended depth MRT, while fractional backgrounds and glyph edges reuse native transparency. Conditional annotation depth serves occlusion and final temporal depth; physical water refraction inputs exclude annotations. Native voxel color runs after water and truncates its view ray against final opaque, annotation and water linear depth without material capture or geometry replay. Reuse TAA or water final depth; otherwise activate the owner-approved conditional R32F and one initialization copy for visible water plus voxel, including a single frustum. The scene contract and budget are recorded in ADR-0161. Native voxel picking runs after opaque pick IDs and refreshes the existing packed depth only for frusta with voxel pick commands, preserving front-surface occlusion without borrowing temporal color depth or adding color-frame resources. The owner excludes native visual fog, atmosphere and Globe daylight from deferred compatibility: gate their Scene/Globe preparation while retaining caller objects and fog culling; scene.environmentEffects exposes a Scene-owned lightweight advanced default with caller-owned controller precedence, world-bound teardown, and deferred cloud resources. Multi-frustum position picking replaces the native depth copy with an owned copy combining the current segment of retained opaque linear depth and final hardware depth, avoiding stale packed Globe depth after the split lighting schedule; it reuses native pick targets and adds no copy or geometry submission. Owner-approved transparent Planar maps use explicit preparation, classification and transparency hooks: one whole-view nearest-terrain depth capture, ordered maps in a mutually exclusive color target, and composition in existing transparent terrain draws; native picking writes actual surface depth. The owned helper stays within ADR-0073 and ADR-0161 budgets.",
+      "reason": "Scene owns a default single-sample deferred renderer with explicit WebGL2/3D profile validation. Material-only native variants and Scene scheduling preserve surface depth across Globe clears, native and inverse classification, cached Tiles depth ownership, cross-frustum material collection, one lighting resolve, depth restoration for dedicated transparency, staged translucent Globe classification, and shared final water depth for temporal and environment effects. Display HDR is independent of linear deferred storage; the native tone-mapping slot supplies gamma-only LDR output without exposure. Scene, CesiumWidget and Viewer document the same single-sample default. Obsolete opaque AO/SSR receiver and geometry-capture scheduling is removed; their existing outputs consume deferred material and screen-lighting data. Native billboard and label coverage is separated before culling: solid colors run in a dedicated per-frustum tail with unblended depth MRT, while fractional backgrounds and glyph edges reuse native transparency. Conditional annotation depth serves occlusion and final temporal depth; physical water refraction inputs exclude annotations. Native voxel color runs after water and truncates its view ray against final opaque, annotation and water linear depth without material capture or geometry replay. Reuse TAA or water final depth; otherwise activate the owner-approved conditional R32F and one initialization copy for visible water plus voxel, including a single frustum. The scene contract and budget are recorded in ADR-0161. Native voxel picking runs after opaque pick IDs and refreshes the existing packed depth only for frusta with voxel pick commands, preserving front-surface occlusion without borrowing temporal color depth or adding color-frame resources. The owner excludes native visual fog, atmosphere and Globe daylight from deferred compatibility: gate their Scene/Globe preparation while retaining caller objects and fog culling; scene.environmentEffects exposes a Scene-owned lightweight advanced default with caller-owned controller precedence, world-bound teardown, and deferred cloud resources. Multi-frustum position picking replaces the native depth copy with an owned copy combining the current segment of retained opaque linear depth and final hardware depth, avoiding stale packed Globe depth after the split lighting schedule; it reuses native pick targets and adds no copy or geometry submission. Owner-approved transparent Planar maps use explicit preparation, classification and transparency hooks: one whole-view nearest-terrain depth capture, ordered maps in a mutually exclusive color target, and composition in existing transparent terrain draws; native picking writes actual surface depth. The owned helper stays within ADR-0073 and ADR-0161 budgets. P4g retains diagnostic tint after deferred lighting, routes skip-LOD stencil clears to their actual material target, and places native vector classification wireframe in a dedicated unlit tail. Recursive post-process updates preserve displayHdr on the first LDR frame.",
       "risk": "high",
       "files": [
         {
@@ -910,7 +910,10 @@
         "Specs/e2e/scenegis-deferred-default-environment.spec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISVectorGlobeSpec.js",
         "packages/engine/Specs/SceneGIS/Scene/SceneGISVectorGroundSpec.js",
-        "Specs/e2e/scenegis-deferred-vectors.spec.js"
+        "Specs/e2e/scenegis-deferred-vectors.spec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredCommandProducersSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredDebugSpec.js",
+        "Specs/e2e/scenegis-deferred-debug.spec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0156-webgl-deferred-lighting-experiment.md",
       "removalCondition": "Native rendering provides equivalent deferred material lighting, or the private experiment is retired."
@@ -1079,6 +1082,112 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0161-unified-opaque-deferred-direction.md",
       "removalCondition": "Native Cesium3DTileset destruction releases its shared GaussianSplatPrimitive."
+    },
+    {
+      "id": "SGP-0055",
+      "title": "Route translucent-only point collections through the translucent pass",
+      "status": "active",
+      "reason": "PointPrimitiveCollection labels BlendOption.TRANSLUCENT commands as OPAQUE despite disabled depth writes and enabled blending. Select the pass from the actual opaque-command flag so translucent points use native forward OIT or sorted transparency and opaque points retain deferred material capture.",
+      "risk": "low",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/PointPrimitiveCollection.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredCommandProducersSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
+      "removalCondition": "Native PointPrimitiveCollection assigns BlendOption.TRANSLUCENT commands to Pass.TRANSLUCENT."
+    },
+    {
+      "id": "SGP-0056",
+      "title": "Capture independent point cloud material before vertex lighting",
+      "status": "active",
+      "reason": "TimeDynamicPointCloud uses the independent PointCloud producer. Expose its styled color and decoded eye-space normal to deferred capture while retaining native forward lighting for translucent points, clipping edge color, style and picking.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/PointCloud.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredCommandProducersSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
+      "removalCondition": "Native independent PointCloud provides an equivalent deferred material interface."
+    },
+    {
+      "id": "SGP-0057",
+      "title": "Register point EDL depth with the deferred renderer",
+      "status": "active",
+      "reason": "Keep original opaque point material commands and register their EDL processor instead of redirecting lit color into the native framebuffer. The scene-owned deferred renderer captures one private point depth per visible command and applies EDL within lighting. Release the dedicated depth when the native processor is destroyed. Destroy the EDL processor when its owning tileset or dynamic point cloud is destroyed; both native owners omit this release.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/PointCloudEyeDomeLighting.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Cesium3DTileset.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/TimeDynamicPointCloud.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredPointEDLSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
+      "removalCondition": "Native point EDL supports deferred lighting with equivalent private point-depth ownership."
+    },
+    {
+      "id": "SGP-0058",
+      "title": "Key point style shader caches by their generation arguments",
+      "status": "active",
+      "reason": "Sharing one Cesium3DTileStyle between Model pnts and independent PointCloud reuses incompatible cached GLSL signatures. Invalidate each shader-function cache when its function signature or variable substitution map changes, preserving existing style-change invalidation and translucent metadata.",
+      "risk": "low",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Cesium3DTileStyle.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredPointEDLSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
+      "removalCondition": "Native style shader caching distinguishes function signatures and variable substitutions."
+    },
+    {
+      "id": "SGP-0059",
+      "title": "Bind owned deferred material array layers and samplers",
+      "status": "active",
+      "reason": "Four separate extended-material samplers exhaust the WebGL2 fragment limit with native feature styling, physical environment and diagnostic tint. Owned RGBA16F array storage preserves attachment count, precision, bytes and draw submissions; only layer attachment and sampler binding require upstream seams.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Renderer/Framebuffer.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Renderer/createUniform.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Renderer/SceneGISMaterialArraySpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredMaterialExtensionsSpec.js",
+        "packages/engine/Specs/Renderer/FramebufferSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDeferredPointCloudSpec.js",
+        "Specs/e2e/scenegis-deferred-debug.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
+      "removalCondition": "Native framebuffer and uniform APIs support equivalent borrowed texture-array layers."
     }
   ]
 }

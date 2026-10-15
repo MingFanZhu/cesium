@@ -28,6 +28,7 @@ import classification from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferred
 import inputs from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredInputs.js";
 import lighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredLighting.js";
 import phongLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPhongLighting.js";
+import pointLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPointLighting.js";
 import planarLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPlanarLighting.js";
 import vectorLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredVectorLighting.js";
 import VectorEnvironmentResources from "../../Renderer/_private/_SceneGISVectorEnvironmentResources.js";
@@ -56,6 +57,9 @@ import LocalLights from "./_SceneGISLocalLights.js";
 import SurfaceWeather from "./_SceneGISSurfaceWeather.js";
 import PlanarEnvironmentLighting from "./_SceneGISPlanarEnvironmentLighting.js";
 import WaterFrame from "./_SceneGISWaterFrame.js";
+import PointEDL from "./_SceneGISDeferredPointEDL.js";
+import MaterialArray from "../../Renderer/_SceneGISMaterialArray.js";
+import DeferredDebug from "./_SceneGISDeferredDebug.js";
 
 const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
 const classificationPasses = [
@@ -105,11 +109,13 @@ function executeVoxel(renderer, command, passState) {
   }
   derived.shaderProgram = shader;
   derived.uniformMap = cached.uniformMap;
-  derived.execute(context, passState);
+  DeferredDebug.receiver(renderer._scene, derived).execute(context, passState);
 }
 
 function eligible(command) {
   return (
+    !(command instanceof ClearCommand) &&
+    !DeferredLayout.isDebugOverlay(command) &&
     command.owner?._sceneGISWater !== true &&
     !DeferredLayout.isGlobeDepth(command) &&
     !DeferredLayout.isAnnotation(command)
@@ -143,6 +149,9 @@ function shaderInfo(renderer, command) {
         source.includes("#define SCENEGIS_DEFERRED_PHONG_MATERIAL"),
       ),
       sunPhong: fs.defines.includes("ONLY_SUN_LIGHTING"),
+      point: fs.sources.some((source) =>
+        source.includes("#define SCENEGIS_DEFERRED_POINT_MATERIAL"),
+      ),
       featureStyle: fs.defines.includes("HAS_SELECTED_FEATURE_ID"),
       extensionDefines,
       extensions: extensionDefines.length > 0,
@@ -200,7 +209,13 @@ function sharedState(scene) {
   ].find((state) => state?.mainActive);
 }
 
+function groupKey(info, edl) {
+  return `${info.point ? "point;" : ""}${info.key}${edl ? ";EDL" : ""}`;
+}
+
 function release(renderer) {
+  DeferredDebug.release(renderer);
+  PointEDL.release(renderer);
   renderer._planarVectors?.destroy();
   renderer._planarVectors = undefined;
   renderer._vectorOverlays?.destroy();
@@ -262,6 +277,8 @@ function release(renderer) {
   renderer._phong = undefined;
   renderer._sunPhong?.command.shaderProgram.destroy();
   renderer._sunPhong = undefined;
+  renderer._point?.command.shaderProgram.destroy();
+  renderer._point = undefined;
   renderer._planar?.command.shaderProgram.destroy();
   renderer._planar = undefined;
   renderer._vector?.command.shaderProgram.destroy();
@@ -319,10 +336,7 @@ function allocate(renderer, manager) {
       renderer._extensions = undefined;
     }
     if (extensionCount) {
-      renderer._extensions ??= new FramebufferManager({
-        colorAttachmentsLength: extensionCount,
-        pixelDatatype: PixelDatatype.HALF_FLOAT,
-      });
+      renderer._extensions ??= new MaterialArray(extensionCount);
       renderer._extensions.update(context, width, height);
       renderer._extensionView = new Framebuffer({
         context,
@@ -436,7 +450,7 @@ function allocate(renderer, manager) {
   }
 }
 
-function createGroup(renderer, model, key, family) {
+function createGroup(renderer, model, key, family, edl) {
   const scene = renderer._scene;
   const builder = new ShaderBuilder();
   const fragment = ShaderDestination.FRAGMENT;
@@ -509,6 +523,8 @@ function createGroup(renderer, model, key, family) {
     if (key === "sun") {
       builder.addDefine("ONLY_SUN_LIGHTING", undefined, fragment);
     }
+  } else if (family === "point") {
+    builder.addDefine("SCENEGIS_DEFERRED_POINT_LIGHTING", undefined, fragment);
   } else if (family === "planar") {
     for (const define of key) {
       builder.addDefine(define, undefined, fragment);
@@ -548,22 +564,35 @@ function createGroup(renderer, model, key, family) {
   } else {
     builder.addDefine("SCENEGIS_DEFERRED_PASSTHROUGH", undefined, fragment);
   }
-  builder.addFragmentLines(
+  let lightingSource =
     family === "globe"
       ? globeLighting
       : family === "phong"
         ? phongLighting
-        : family === "planar"
-          ? planarLighting
-          : family === "vector"
-            ? vectorLighting
-            : lighting,
-  );
+        : family === "point"
+          ? pointLighting
+          : family === "planar"
+            ? planarLighting
+            : family === "vector"
+              ? vectorLighting
+              : lighting;
+  if (edl) {
+    builder.addDefine("SCENEGIS_DEFERRED_POINT_EDL", undefined, fragment);
+    lightingSource = ShaderSource.replaceMain(
+      lightingSource,
+      "sceneGISPointLitMain",
+    );
+  }
+  builder.addFragmentLines(lightingSource);
+  if (edl) {
+    builder.addFragmentLines(PointEDL.lighting);
+  }
   const group = {
     id: -1,
     seen: false,
     sourceUniforms: undefined,
     extensionKey: renderer._extensionLayout.key,
+    edl,
   };
   const source = () => renderer._lightingInputs ?? renderer;
   group.uniforms = {
@@ -576,9 +605,9 @@ function createGroup(renderer, model, key, family) {
     u_linearDepth: () => source()._linearDepth,
     u_sceneGISDeferredGroup: () => group.id,
   };
-  for (let i = 0; i < renderer._extensionLayout.count; ++i) {
-    group.uniforms[`u_sceneGISExtension${i}`] = () =>
-      source()._extensions.getColorTexture(i);
+  group.uniforms.u_sceneGISExtensions = () => source()._extensions.texture;
+  if (edl) {
+    group.uniforms = PointEDL.uniforms(edl, group.uniforms);
   }
   if (family === "globe") {
     // The first tile in a group may be a loaded tile without a fill-color uniform.
@@ -643,6 +672,7 @@ function prepareGroups(renderer, ranges) {
   let hasOceanFabric = false;
   let hasPhong = false;
   let hasSunPhong = false;
+  let hasPoint = false;
   let planarCommand;
   let vectorCommand;
   let globeCommand;
@@ -655,6 +685,11 @@ function prepareGroups(renderer, ranges) {
           continue;
         }
         const info = shaderInfo(renderer, command);
+        const edl = renderer._pointEDLOwners.get(command.owner);
+        if (info.point && !edl) {
+          hasPoint = true;
+          continue;
+        }
         if (info.vector) {
           vectorCommand ??= command;
           continue;
@@ -688,26 +723,36 @@ function prepareGroups(renderer, ranges) {
           }
           continue;
         }
-        if (!info.model) {
+        if (!info.model && !edl) {
           renderer._hasPassthrough = true;
           continue;
         }
-        renderer._hasPassthrough ||= info.unlitOverlay;
+        renderer._hasPassthrough ||= info.unlitOverlay && !edl;
         const model = command.owner;
         let groups = renderer._models.get(model);
         if (!groups) {
           groups = new Map();
           renderer._models.set(model, groups);
         }
-        const key = info.key;
+        const key = groupKey(info, edl);
         renderer._hasFeatureStyle ||= key.includes("HAS_SELECTED_FEATURE_ID");
         let group = groups.get(key);
-        if (group && group.extensionKey !== renderer._extensionLayout.key) {
+        if (
+          group &&
+          (group.extensionKey !== renderer._extensionLayout.key ||
+            group.edl !== edl)
+        ) {
           group.command.shaderProgram.destroy();
           group = undefined;
         }
         if (!group) {
-          group = createGroup(renderer, model, key);
+          group = createGroup(
+            renderer,
+            info.model ? model : undefined,
+            key,
+            info.point ? "point" : undefined,
+            edl,
+          );
           groups.set(key, group);
         }
         if (group.seen) {
@@ -752,6 +797,14 @@ function prepareGroups(renderer, ranges) {
   } else {
     renderer._phong?.command.shaderProgram.destroy();
     renderer._phong = undefined;
+  }
+  if (hasPoint) {
+    renderer._point ??= createGroup(renderer, undefined, undefined, "point");
+    renderer._point.id = -7;
+    renderer._groups.push(renderer._point);
+  } else {
+    renderer._point?.command.shaderProgram.destroy();
+    renderer._point = undefined;
   }
   if (hasSunPhong) {
     renderer._sunPhong ??= createGroup(renderer, undefined, "sun", "phong");
@@ -956,6 +1009,48 @@ class _SceneGISDeferredLighting {
     Annotations.captureDepth(this, passState);
   }
 
+  debugCommand(command) {
+    return DeferredDebug.receiver(this._scene, command);
+  }
+
+  clear(command, passState) {
+    const passes = this._scene.frameState.passes;
+    if (
+      !this._active ||
+      !this._inverse ||
+      !passes.render ||
+      passes.pick ||
+      passes.depth ||
+      command.pass !== Pass.CESIUM_3D_TILE ||
+      command.framebuffer !== undefined
+    ) {
+      return false;
+    }
+    const original = passState.framebuffer;
+    try {
+      passState.framebuffer = this._inverse.framebuffer;
+      command.execute(this._scene.context, passState);
+    } finally {
+      passState.framebuffer = original;
+    }
+    return true;
+  }
+
+  drawDebugOverlays(range, passState, executeCommand) {
+    this._drawingDebugOverlays = true;
+    try {
+      const pass = Pass.OPAQUE;
+      for (let i = 0; i < range.indices[pass]; ++i) {
+        const command = range.commands[pass][i];
+        if (DeferredLayout.isDebugOverlay(command)) {
+          executeCommand(command, this._scene, passState);
+        }
+      }
+    } finally {
+      this._drawingDebugOverlays = false;
+    }
+  }
+
   drawAnnotations(range, index, passState, executeCommand) {
     Annotations.draw(this, range, index, passState, executeCommand);
   }
@@ -1081,11 +1176,12 @@ class _SceneGISDeferredLighting {
       eligible,
       scene._sceneGISScreenSpaceReflections?.enabled === true,
     );
-    if (!layout || scene.shadowMap.debugCascadeColors) {
+    if (!layout) {
       throw new DeveloperError(
-        "Deferred lighting requires a supported opaque lighting layout without cascade debug tint.",
+        "Deferred lighting requires a supported opaque lighting layout.",
       );
     }
+    PointEDL.prepare(this, ranges);
     prepareGroups(this, ranges);
     VectorOverlays.prepare(this, ranges);
     const targetCount =
@@ -1126,6 +1222,9 @@ class _SceneGISDeferredLighting {
       this._vectorOverlayLocation = undefined;
     }
     allocate(this, layout.manager);
+    DeferredDebug.update(this, ranges, passState);
+    PointEDL.draw(this, passState);
+    this.byteLength += this.pointEDLByteLength;
     Annotations.update(this, ranges);
     WaterFrame.updateFinalDepth(scene);
     if (
@@ -1135,6 +1234,10 @@ class _SceneGISDeferredLighting {
       this._inverse ??= new DeferredInverse(scene);
       this._inverse.update(this, passState);
       this.byteLength += this._inverse.byteLength;
+      if (this._debugTint) {
+        this.debugTintByteLength +=
+          scene.drawingBufferWidth * scene.drawingBufferHeight * 4;
+      }
     } else {
       this._inverse?.destroy();
       this._inverse = undefined;
@@ -1319,6 +1422,21 @@ class _SceneGISDeferredLighting {
       !passes.pick &&
       !passes.depth &&
       !passes.pickVoxel &&
+      DeferredLayout.isDebugOverlay(command)
+    ) {
+      if (this._drawingDebugOverlays) {
+        DeferredDebug.receiver(scene, command).execute(
+          scene.context,
+          passState,
+        );
+      }
+      return true;
+    }
+    if (
+      passes.render &&
+      !passes.pick &&
+      !passes.depth &&
+      !passes.pickVoxel &&
       DeferredLayout.isAnnotation(command)
     ) {
       if (this._annotations?.drawing) {
@@ -1343,10 +1461,11 @@ class _SceneGISDeferredLighting {
         this._directSurfaceOverlays?.has(command.owner))
     ) {
       // Native translucent classification owns its depth peel and color target.
-      command.execute(scene.context, passState);
+      DeferredDebug.receiver(scene, command).execute(scene.context, passState);
       return true;
     }
     if (classificationPasses.includes(command.pass)) {
+      command = DeferredDebug.receiver(scene, command);
       if (this._vectorOverlays) {
         this._vectorOverlays.draw(command, passState);
         ++this.classificationDrawCount;
@@ -1371,19 +1490,23 @@ class _SceneGISDeferredLighting {
     const finalGlobeBatch =
       info.globe &&
       this._globeBatches.get(command.owner) === command.uniformMap.properties;
-    const group = model
-      ? this._models.get(command.owner).get(info.key)
-      : info.phong
-        ? info.sunPhong
-          ? this._sunPhong
-          : this._phong
-        : info.globe
-          ? this._globe
-          : info.planar
-            ? this._planar
-            : info.vector
-              ? this._vector
-              : undefined;
+    const edl = this._pointEDLOwners.get(command.owner);
+    const group =
+      model || edl
+        ? this._models.get(command.owner).get(groupKey(info, edl))
+        : info.phong
+          ? info.sunPhong
+            ? this._sunPhong
+            : this._phong
+          : info.point
+            ? this._point
+            : info.globe
+              ? this._globe
+              : info.planar
+                ? this._planar
+                : info.vector
+                  ? this._vector
+                  : undefined;
     if (
       scene.frameState.shadowState.lightShadowsEnabled &&
       command.receiveShadows &&
@@ -1391,7 +1514,14 @@ class _SceneGISDeferredLighting {
     ) {
       command = command.derivedCommands.shadows.receiveCommand;
     }
-    if (!model && !info.phong && !info.globe && !info.planar && !info.vector) {
+    if (
+      !model &&
+      !info.phong &&
+      !info.point &&
+      !info.globe &&
+      !info.planar &&
+      !info.vector
+    ) {
       command = LocalLights.receiver(scene, command);
     }
     if (!info.globe && !info.planar && !info.vector) {
@@ -1407,6 +1537,7 @@ class _SceneGISDeferredLighting {
     if (
       !cached ||
       cached.shader !== shader ||
+      cached.edl !== !!edl ||
       cached.inverseMaterial !== inverseMaterial ||
       cached.extensionKey !== this._extensionLayout.key ||
       cached.extensionCombined !== this._extensionCombined ||
@@ -1418,7 +1549,7 @@ class _SceneGISDeferredLighting {
       cached.globeBlend !== globeBlend ||
       cached.sourceUniforms !== command.uniformMap
     ) {
-      const name = `sceneGIS_deferred_material_${inverseMaterial}_${this._extensionLayout.key}_${this._extensionCombined}_${this._hasStyleTarget ? 5 : 4}${this._hasOcean ? "_ocean" : ""}${this._hasClassification ? "_classification" : ""}${this._multiFrustum ? "_frusta" : ""}${globeBlend ? "_imagery" : ""}_vector_${vectorLocation}`;
+      const name = `sceneGIS_deferred_material_${inverseMaterial}_${this._extensionLayout.key}_${this._extensionCombined}_${this._hasStyleTarget ? 5 : 4}${this._hasOcean ? "_ocean" : ""}${this._hasClassification ? "_classification" : ""}${this._multiFrustum ? "_frusta" : ""}${globeBlend ? "_imagery" : ""}_vector_${vectorLocation}_edl_${!!edl}`;
       let program = scene.context.shaderCache.getDerivedShaderProgram(
         shader,
         name,
@@ -1426,6 +1557,9 @@ class _SceneGISDeferredLighting {
       if (!program) {
         const fs = shader.fragmentShaderSource.clone();
         let vs = shader.vertexShaderSource;
+        if (edl) {
+          fs.defines.push("SCENEGIS_DEFERRED_POINT_EDL");
+        }
         if (vectorLocation !== undefined && !globeBlend) {
           fs.defines.push(
             `SCENEGIS_DEFERRED_VECTOR_OVERLAY_LOCATION ${vectorLocation}`,
@@ -1456,6 +1590,13 @@ class _SceneGISDeferredLighting {
           );
         } else if (info.phong) {
           fs.defines.push("SCENEGIS_DEFERRED_PHONG_CAPTURE");
+        } else if (info.point) {
+          fs.defines.push(
+            "SCENEGIS_DEFERRED_POINT_CAPTURE",
+            "SCENEGIS_DIRECT_SHADOW_RECEIVER",
+          );
+          vs = vs.clone();
+          vs.defines.push("SCENEGIS_DEFERRED_POINT_CAPTURE");
         } else if (info.vector) {
           fs.defines.push("SCENEGIS_DEFERRED_VECTOR_CAPTURE");
         } else if (info.planar) {
@@ -1530,6 +1671,7 @@ class _SceneGISDeferredLighting {
         }
       }
       cached = {
+        edl: !!edl,
         vectorLocation,
         inverseMaterial,
         extensionProgram,
@@ -1582,11 +1724,14 @@ class _SceneGISDeferredLighting {
         : this._framebuffer;
     if (inverse) {
       this._inverse.groups.add(cached.group);
-      if (info.unlitOverlay) {
+      if (info.unlitOverlay && !edl) {
         this._inverse.groups.add(this._passthrough);
       }
     }
     derived.execute(scene.context, passState);
+    if (!globeBlend || finalGlobeBatch) {
+      DeferredDebug.capture(this, derived, command, !!inverse, passState);
+    }
     if (this._vectorOverlays && !globeBlend) {
       this._vectorOverlays.dirty = true;
     }
@@ -1686,6 +1831,7 @@ class _SceneGISDeferredLighting {
       command = this._inverse.lightCommand(command);
     } else {
       if (!group.vectorOverlay) {
+        command = DeferredDebug.lighting(this, command);
         command = classificationLighting(this, command);
       }
       if (shared) {

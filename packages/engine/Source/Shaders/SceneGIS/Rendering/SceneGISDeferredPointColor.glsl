@@ -3,6 +3,9 @@ uniform float u_sceneGISDeferredGroup;
 uniform sampler2D u_sceneGISPointLitColor;
 uniform bool u_sceneGISPointClassified;
 uniform sampler2D u_sceneGISClassification;
+#ifdef SCENEGIS_DEFERRED_DEBUG_TINT
+uniform sampler2D u_sceneGISDebugTint;
+#endif
 #if defined(SCENEGIS_DEFERRED_FEATURE_STYLE) || defined(SCENEGIS_DEFERRED_OUTLINE_STYLE)
 uniform sampler2D u_sceneGISDeferredStyle;
 #endif
@@ -42,6 +45,16 @@ vec3 sceneGISPointColorCorrection(vec3 correction, ivec2 pixel)
     response *= 1.0 - alpha;
     constantColor = mix(constantColor, model_outlineColor.rgb, alpha);
 #endif
+    #ifdef SCENEGIS_DEFERRED_POINT_EDL
+    float pointShade = sceneGISPointShade();
+    response *= pointShade;
+    constantColor *= pointShade;
+    #endif
+    #ifdef SCENEGIS_DEFERRED_DEBUG_TINT
+    vec3 debugTint = texelFetch(u_sceneGISDebugTint, pixel, 0).rgb;
+    response *= debugTint;
+    constantColor *= debugTint;
+    #endif
     if (u_sceneGISPointClassified) {
         vec4 overlay = texelFetch(u_sceneGISClassification, pixel, 0);
         vec3 factor = overlay.a < 0.0 ? overlay.rgb : vec3(1.0 - overlay.a);
