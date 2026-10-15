@@ -46,7 +46,8 @@ function copyDimensions(value) {
  * @param {string[]} [options.tileMatrixLabels] Matrix identifiers indexed by canonical level.
  * @param {string} [options.format="image/jpeg"] The image MIME type.
  * @param {object} [options.dimensions] Static dimension names and values. Assign a new object to reload tiles.
- * @param {number} [options.minimumLevel=0] The minimum level; must be zero.
+ * @param {SceneGISPlanarExtent} [options.coverageExtent] Coverage in world meter coordinates; does not change tile addresses.
+ * @param {number} [options.minimumLevel=0] The minimum available canonical level.
  * @param {number} [options.maximumLevel] The highest level, defaulting to the last label or maximumSafeLevel.
  * @param {number} [options.tileWidth=256] The image width in pixels.
  * @param {number} [options.tileHeight=options.tileWidth] The image height in pixels.
@@ -80,11 +81,7 @@ class SceneGISPlanarWebMapTileServiceImageryProvider extends SceneGISPlanarUrlTe
     const labels = options.tileMatrixLabels;
     if (
       labels !== undefined &&
-      (!Array.isArray(labels) ||
-        labels.length === 0 ||
-        Array.from(labels).some(
-          (label) => typeof label !== "string" || label.length === 0,
-        ))
+      (!Array.isArray(labels) || labels.length === 0)
     ) {
       throw new DeveloperError(
         "tileMatrixLabels must be a non-empty array of strings.",
@@ -95,10 +92,14 @@ class SceneGISPlanarWebMapTileServiceImageryProvider extends SceneGISPlanarUrlTe
       maximumLevel:
         options.maximumLevel ?? (labels ? labels.length - 1 : undefined),
     });
-    if (labels && labels.length <= this.maximumLevel) {
-      throw new DeveloperError(
-        "tileMatrixLabels must cover every requested level.",
-      );
+    if (labels) {
+      for (let level = this.minimumLevel; level <= this.maximumLevel; ++level) {
+        if (typeof labels[level] !== "string" || labels[level].length === 0) {
+          throw new DeveloperError(
+            "tileMatrixLabels must cover every requested canonical level.",
+          );
+        }
+      }
     }
     this._tileMatrixLabels = labels ? Object.freeze(labels.slice()) : undefined;
     this._layer = options.layer;

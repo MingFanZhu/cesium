@@ -51,7 +51,7 @@ describe("SceneGIS/Scene/SceneGISPlanarImageryProvider", function () {
 
   it("rejects incomplete or inconsistent structural providers", function () {
     for (const overrides of [
-      { minimumLevel: 1 },
+      { minimumLevel: 3 },
       { maximumLevel: -1 },
       { tileWidth: 0 },
       { tileHeight: 0 },
@@ -73,5 +73,20 @@ describe("SceneGIS/Scene/SceneGISPlanarImageryProvider", function () {
     expect(layer.imageryProvider.tileWidth).toBe(256);
     expect(layer.imageryProvider.tileHeight).toBe(128);
     layer.destroy();
+  });
+  it("accepts nonzero minimum and rejects invalid intervals or coverage", function () {
+    const layer = new SceneGISPlanarImageryLayer(
+      createProvider({ minimumLevel: 2 }),
+    );
+    layer.destroy();
+    for (const overrides of [
+      { minimumLevel: -1 },
+      { minimumLevel: 0.5 },
+      { coverageExtent: {} },
+    ]) {
+      expect(
+        () => new SceneGISPlanarImageryLayer(createProvider(overrides)),
+      ).toThrowDeveloperError();
+    }
   });
 });

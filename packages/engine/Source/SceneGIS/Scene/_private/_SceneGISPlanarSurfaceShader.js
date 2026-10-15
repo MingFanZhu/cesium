@@ -39,6 +39,7 @@ function createFragmentShader(
   for (let i = 0; i < layerCount; ++i) {
     declarations.push(`uniform sampler2D u_texture${i};`);
     declarations.push(`uniform vec4 u_translationScale${i};`);
+    declarations.push(`uniform vec4 u_coverage${i};`);
     declarations.push(`uniform float u_alpha${i};`);
     declarations.push(`uniform float u_brightness${i};`);
     declarations.push(`uniform float u_contrast${i};`);
@@ -53,6 +54,9 @@ function createFragmentShader(
         vec2(0.0),
         vec2(1.0));
     vec4 sample${i} = texture(u_texture${i}, coordinates${i});
+    vec2 inside${i} = step(u_coverage${i}.xy, textureCoordinates) *
+        step(textureCoordinates, u_coverage${i}.zw);
+    sample${i}.a *= inside${i}.x * inside${i}.y;
     if (u_colorToAlpha${i}.a > 0.5 &&
         max(max(abs(sample${i}.r - u_colorToAlpha${i}.r),
                 abs(sample${i}.g - u_colorToAlpha${i}.g)),

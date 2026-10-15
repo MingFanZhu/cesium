@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 局部影像</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>局部影像</h1>
+      <p>
+        彩色影像从第 2 层开始；灰色地表表示覆盖范围外、缺图或当前地表层级过低。
+      </p>
+      <p>
+        近景可观察矩形覆盖边缘和右上方缺图。远景不请求不存在的粗层。拖动滚轮可连续缩放。
+      </p>
+      <p><button id="near">近景</button> <button id="far">远景</button></p>
+      <p>
+        <button id="missing">全部缺图</button>
+        <button id="restore">恢复影像</button>
+      </p>
+      <p><button id="toggle">显示 / 隐藏</button></p>
+      <p id="status"></p>
+      <div id="error"></div>
+      <a href="示例目录.html">示例目录</a>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module">
+      import * as C from "/Build/CesiumUnminified/index.js";
+      import exposeExample from "/Test/example-lifecycle.js";
+
+      const viewer = new C.Viewer("map", {
+        planarWorld: {
+          crs: "LOCAL:SPARSE",
+          extent: {
+            minimumX: -10000,
+            minimumY: -10000,
+            maximumX: 10000,
+            maximumY: 10000,
+          },
+          maximumLevel: 4,
+          baseColor: C.Color.fromCssColorString("#87939b"),
+        },
+        skyBox: false,
+        skyAtmosphere: false,
+        baseLayerPicker: false,
+        geocoder: false,
+        homeButton: false,
+        sceneModePicker: false,
+        navigationHelpButton: false,
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+        requestRenderMode: true,
+        maximumRenderTimeChange: Infinity,
+      });
+      viewer.scene.environmentEffects.enabled = false;
+      const world = viewer.planarWorld;
+      const requests = [];
+      let layer;
+      function setView(height) {
+        viewer.camera.setView({
+          destination: new C.Cartesian3(0, 0, height),
+          orientation: { heading: 0, pitch: -Math.PI / 2, roll: 0 },
+        });
+        viewer.scene.requestRender();
+      }
+      function setMissing(allMissing) {
+        world.imageryLayers.removeAll();
+        requests.length = 0;
+        const provider = new C.SceneGISPlanarUrlTemplateImageryProvider({
+          tilingScheme: world.tilingScheme,
+          minimumLevel: 2,
+          maximumLevel: 2,
+          coverageExtent: new C.SceneGISPlanarExtent({
+            minimumX: -2500,
+            minimumY: -1800,
+            maximumX: 2700,
+            maximumY: 2200,
+          }),
+          url: "/Test/Planar/data/imagery-service/{fixture}?z={z}&x={x}&y={y}",
+          customTags: {
+            fixture: (_provider, x, y, level) => {
+              requests.push(`${level}/${x}/${y}`);
+              return allMissing || (x === 2 && y === 1)
+                ? "missing-tile.png"
+                : "0/0/0.png";
+            },
+          },
+        });
+        provider.errorEvent.addEventListener((failure) => {
+          document.getElementById("error").textContent = failure.message;
+        });
+        layer = world.imageryLayers.addImageryProvider(provider);
+        viewer.scene.requestRender();
+      }
+      document.getElementById("near").onclick = () => setView(6000);
+      document.getElementById("far").onclick = () => setView(3000000);
+      document.getElementById("missing").onclick = () => setMissing(true);
+      document.getElementById("restore").onclick = () => setMissing(false);
+      document.getElementById("toggle").onclick = () => {
+        layer.show = !layer.show;
+        viewer.scene.requestRender();
+      };
+      viewer.scene.postRender.addEventListener(() => {
+        document.getElementById("status").textContent =
+          `已请求 ${requests.length} 张；${world.tilesLoaded ? "当前视图已结算" : "加载中"}`;
+      });
+      exposeExample(
+        viewer,
+        { destroy() {} },
+        { world, requests, setView, setMissing },
+      );
+      setMissing(false);
+      setView(6000);
+    </script>
+  </body>
+</html>

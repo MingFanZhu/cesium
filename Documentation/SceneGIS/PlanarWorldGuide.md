@@ -349,7 +349,7 @@ WMS 的静态 TIME 可放在 parameters 中，WMTS 可显式替换 dimensions。
 
 provider 的 `tilingScheme` 必须与 `world.tilingScheme` 是同一对象，不能只具有相同参数。每个 ideal geometry tile 始终提交一个 opaque command；shown layer 自底向顶在单 pass 中合成，因此 layer 数不能超过 WebGL texture image unit 上限。
 
-`world.tilesLoaded` 是当前视图 terrain coverage/readiness 与 shown imagery readiness 的合取。对 imagery contribution，运行时请求 desired tile 与 Level 0 bootstrap；可复用 cache 中最近的 ready ancestor，但不会主动请求中间 ancestor。Recoverable terrain 或 imagery direct content 仍 pending 时结果保持 `false`；terminal failure 配合稳定 fallback 时可 settled。移除 layer、替换 provider 或销毁 world 会取消/隔离请求并释放对应资源，late settlement 不得重新进入 cache。
+`world.tilesLoaded` 是当前视图 terrain coverage/readiness 与 shown imagery readiness 的合取。对 imagery contribution，运行时请求 desired tile 与 minimumLevel ancestor bootstrap；可复用 cache 中最近的 ready ancestor，但不会主动请求中间 ancestor。Recoverable terrain 或 imagery direct content 仍 pending 时结果保持 `false`；terminal failure 配合稳定 fallback 时可 settled。移除 layer、替换 provider 或销毁 world 会取消/隔离请求并释放对应资源，late settlement 不得重新进入 cache。
 
 ## 地形、光照与数据边界
 
@@ -423,7 +423,7 @@ SunLight方向。双面surface允许从上下两侧观察，但lighting始终使
 | navigation    | PC pan/rotate/wheel 惯性与 Home、public Camera Cartesian view/flight、FIXED Entity tracking、surface clearance与underground crossing；无sweep/touch/body/inertial tracking |
 | environment   | 默认无visual sky；可选caller-owned fixed-axis planar SkyBox、planar atmosphere与程序化Sun/Moon，不自动增加Earth sky语义                                                    |
 | UI            | planar Viewer 无通用 provider picker、geocoder、mode/projection picker                                                                                                     |
-| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、full Globe Material、imagery picking                                                 |
+| unsupported   | continuous/swept collision、free-look、universal cross-tile normal stitching、full Globe Material、imagery picking                                                         |
 
 ## 性能与调参
 
@@ -575,3 +575,40 @@ entity.box.shadows = Cesium.ShadowMode.ENABLED;
 实体连续贴地分类覆盖、矢量瓦片和标注不在本阶段新增投射/接收资格。现有高级物理光照可与
 几何阴影组合，但原生模型/地表的几何阴影仍衰减最终表面颜色，间接光和自发光分离另行处理。
 开发示例：`Test/Planar/级联阴影.html`。
+
+## 局部影像与最低数据层级
+
+URL、WMS、WMTS 和 TMS Provider 支持连续 `minimumLevel..maximumLevel`。
+`minimumLevel` 默认 0；`coverageExtent` 是可选的 `SceneGISPlanarExtent` 世界米制矩形。
+它只约束影像请求和合成，不改变世界范围、网格原点、全球 XYZ 或完整 WMS BBOX。
+
+```javascript
+const provider = new Cesium.SceneGISPlanarUrlTemplateImageryProvider({
+  tilingScheme: world.tilingScheme,
+  url: "/imagery/{z}/{x}/{y}.png",
+  minimumLevel: 12,
+  maximumLevel: 18,
+  coverageExtent: new Cesium.SceneGISPlanarExtent({
+    minimumX: 1000,
+    minimumY: 2000,
+    maximumX: 1200,
+    maximumY: 2300,
+  }),
+});
+world.imageryLayers.addImageryProvider(provider);
+```
+
+实际地表瓦片低于 minimumLevel 时该层透明，不请求不存在的父层，也不强制细化地表。
+达到最低层级后请求同层图；高于 maximumLevel 时采样合法祖先。缺图或等待时可复用最近
+READY 祖先，必要 bootstrap 仅为对应 minimumLevel 祖先。父图缺失不会推断子图缺失。
+
+可确认的 image HTTP 404 作为缺图结算，不触发普通 errorEvent 或重试。其他 HTTP、网络和
+解码错误仍报告。自定义 Provider 应在 rejection 上保留明确的 `statusCode`；没有状态码的
+错误不会被猜测为 404。`tilesLoaded` 表示当前视图已结算，不保证所有图像都存在。
+
+WMTS labels 使用全球 level 索引，minimumLevel 以下可以留空。TMS `fromUrl` 根据 XML
+分辨率推导 canonical 最低层级，BoundingBox 可为局部覆盖，Origin 必须仍是全球西南角。
+SDK 显式范围和层级必须位于 metadata 声明内。SingleTile 保持整世界 Level 0 用法。
+
+本地复现入口：[局部影像](../../Test/Planar/局部影像.html)。正式契约见
+[ADR-0162](Decisions/ADR-0162-planar-sparse-imagery.md)。

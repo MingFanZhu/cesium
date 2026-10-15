@@ -596,11 +596,19 @@ WMTS dimensions 失效使用多订阅事件标脏，只在下一 normal frame �
 `SceneGISPlanarImageryLayerCollection` 拥有加入其中的 layer，并负责其 exactly-once destroy，
 但 layer、collection 和 world 都不拥有 provider。
 
-影像 readiness 只描述当前 normal-render ideal tile set 上所有 shown layer 的 desired imagery；
+影像 readiness 描述当前 normal-render 实际 render tile set 上所有 shown layer 的有效影像依赖；
 因此 `world.tilesLoaded` 是 current-view 动态值，而不是 provider 全金字塔完成标志。每个 binding
-请求 desired address，并在需要时 bootstrap Level 0；它可以复用 cache 中最近的 READY ancestor，
+请求 desired address，并在需要时 bootstrap 对应 minimumLevel ancestor；它可以复用合法区间内最近的 READY ancestor，
 但 P5 不主动请求 intermediate ancestor。request、decoded image、texture、generation 和 cache
 reference 必须分别有明确的取消、迟到隔离与 exactly-once 释放语义。
+
+按 [ADR-0162](Decisions/ADR-0162-planar-sparse-imagery.md)，SDK 声明连续 minimumLevel..maximumLevel
+及可选世界米制 coverageExtent。实际地表层级低于最低层或覆盖外不创建影像依赖，只允许子层
+采样父层，不能反向拼接或强制细化。请求完整 canonical tile；coverage mask 只影响该层贡献，
+不改变全球网格、XYZ、WMS BBOX、geometry 或 sampler/draw 数。明确 image HTTP 404 进入
+UNAVAILABLE；其他失败维持 error/retry 通道。必要 fallback pending 仍阻塞 readiness，
+缺图记录沿用已有缓存和 generation 生命周期，不建立全局负缓存。TMS metadata 可从真实
+非零 canonical level 开始，Origin 仍为全球原点；SingleTile 保持全世界 Level 0。
 
 图层按 collection 的 bottom-to-top 顺序在每个 ideal tile 的单个 opaque command 中合成。
 shown layer 数超过 `ContextLimits.maximumTextureImageUnits` 时必须在 request、selection 或 GPU

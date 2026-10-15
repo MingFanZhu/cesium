@@ -5,6 +5,7 @@ import Credit from "../../Core/Credit.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import Event from "../../Core/Event.js";
 import Request from "../../Core/Request.js";
+import SceneGISPlanarExtent from "../Core/SceneGISPlanarExtent.js";
 import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
 /* eslint-enable no-unused-vars */
 
@@ -19,8 +20,8 @@ function throwPropertyInstantiationError() {
 
 /**
  * Defines the structural contract for imagery providers used by a
- * {@link SceneGISPlanarWorld}. Implementations must provide a complete
- * northwest-origin Level-0 pyramid and return images in the provider's
+ * {@link SceneGISPlanarWorld}. Implementations declare a continuous canonical
+ * level interval in the northwest-origin grid and return images in the provider's
  * declared tile dimensions. This type is not intended to be instantiated
  * directly.
  *
@@ -42,12 +43,22 @@ class SceneGISPlanarImageryProvider {
   }
 
   /**
-   * Gets the minimum level, which must be zero.
+   * Gets the minimum available canonical level.
    * @type {number}
    * @constant
    */
   get minimumLevel() {
     return throwPropertyInstantiationError();
+  }
+
+  /**
+   * Gets optional coverage in world meter coordinates. Undefined covers the world.
+   * This rectangle does not change canonical tile addresses or image bounds.
+   * @type {SceneGISPlanarExtent=}
+   * @constant
+   */
+  get coverageExtent() {
+    return undefined;
   }
 
   /**
@@ -111,6 +122,8 @@ class SceneGISPlanarImageryProvider {
   /**
    * Requests an image for a canonical northwest-origin XYZ tile address.
    * The request may be throttled by returning <code>undefined</code>.
+   * Rejection with statusCode 404 denotes missing imagery without a runtime
+   * errorEvent. Other failures retain the ordinary error/retry behavior.
    *
    * @param {number} x The tile X coordinate.
    * @param {number} y The tile Y coordinate.

@@ -6,15 +6,15 @@
 | ---------------------- | --------------------------------------------------------------------------------------- |
 | Extension slug         | `planar-world`                                                                          |
 | Status                 | `completed`                                                                             |
-| Planning model         | `extension`                                                                             |
+| Planning model         | `standalone`                                                                            |
 | Extension plan         | [Planar World extension plan](plans/2026-08-05-planar-world-extension.md) (`completed`) |
 | Current phase          | None                                                                                    |
 | Active phase plan      | None                                                                                    |
 | Proposed phase plan    | None                                                                                    |
-| Active standalone plan | None；[通用影像来源](plans/2026-09-18-imagery-protocols.md) 已验收完成                  |
+| Active standalone plan | None；[局部影像](plans/2026-10-15-sparse-imagery.md) (`completed`)                      |
 | Architecture contact   | Architecture Agent                                                                      |
 | Execution contact      | Execution Agent                                                                         |
-| Last updated           | `2026-09-18`                                                                            |
+| Last updated           | `2026-10-15`                                                                            |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -62,6 +62,19 @@
 - SGP: `SGP-0001`（`active`）；`SGP-0002`（`active`，仅跟踪 P6 `Viewer.js` 缝隙）
 
 ## Current handoff
+
+2026-10-15：负责人已确认 [局部影像与最低层级契约](discussions/2026-10-15-sparse-imagery-confirmed-contract.md)
+（`resolved`）：覆盖范围由 SDK 配置，数据层级连续，tile HTTP 404 表示缺图；
+实际地表层级低于 minimumLevel 时不请求、不显示该影像层，只允许子层采样合法父层，不反向拼接子图。
+全球原始 XYZ 与 canonical scheme 保持，沿用单图 binding / 单地表 command。
+原 [设计初评](discussions/2026-10-15-sparse-imagery-minimum-level.md) 标记 superseded；
+其中绘制分区、overview/mosaic、跨层缺口和新增远景预算策略不进入本次实现范围。
+负责人已确认视觉验收通过，[standalone plan](plans/2026-10-15-sparse-imagery.md) 已完成，
+[ADR-0162](../../Documentation/SceneGIS/Decisions/ADR-0162-planar-sparse-imagery.md) 固化本次契约；
+实现与自动化验证已完成，见 [技术自审](reviews/2026-10-15-sparse-imagery.md)。
+新增 dev/release E2E 通过，既有 3 项 Specs 与旧协议案例颜色失败已用基线复现；
+2026-10-15 负责人确认 [局部影像](../../Test/Planar/局部影像.html) 视觉验收通过，SI-R02 已关闭，review approved。
+负责人授权本增量在 scenegis/develop 形成独立本地提交；既有 completed 阶段不重开。
 
 2026-09-18：[通用影像来源](plans/2026-09-18-imagery-protocols.md) 独立增量实现完成，
 对应 [ADR-0082](../../Documentation/SceneGIS/Decisions/ADR-0082-planar-imagery-protocols.md) 与

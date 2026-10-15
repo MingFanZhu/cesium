@@ -7,6 +7,7 @@ import Request from "../../../Core/Request.js";
 import RequestType from "../../../Core/RequestType.js";
 import TileProviderError from "../../../Core/TileProviderError.js";
 import Texture from "../../../Renderer/Texture.js";
+import SceneGISPlanarExtent from "../../Core/SceneGISPlanarExtent.js";
 import SceneGISPlanarTilingScheme from "../../Core/SceneGISPlanarTilingScheme.js";
 import SceneGISPlanarTileImagery from "./_SceneGISPlanarTileImagery.js";
 
@@ -16,6 +17,7 @@ const State = Object.freeze({
   RECEIVED: 2,
   READY: 3,
   FAILED: 4,
+  UNAVAILABLE: 5,
 });
 
 function key(address) {
@@ -87,8 +89,20 @@ export function validateImageryProvider(provider) {
       "imageryProvider.tilingScheme must be a SceneGISPlanarTilingScheme.",
     );
   }
-  if (provider.minimumLevel !== 0) {
-    throw new DeveloperError("imageryProvider.minimumLevel must be zero.");
+  if (
+    !Number.isInteger(provider.minimumLevel) ||
+    provider.minimumLevel < 0 ||
+    provider.minimumLevel > provider.maximumLevel
+  ) {
+    throw new DeveloperError("imageryProvider.minimumLevel is invalid.");
+  }
+  if (
+    provider.coverageExtent !== undefined &&
+    !(provider.coverageExtent instanceof SceneGISPlanarExtent)
+  ) {
+    throw new DeveloperError(
+      "imageryProvider.coverageExtent must be a SceneGISPlanarExtent.",
+    );
   }
   if (
     !Number.isInteger(provider.maximumLevel) ||
@@ -296,6 +310,10 @@ SceneGISPlanarImagery.prototype._fail = function (
     return;
   }
   entry.request = undefined;
+  if (error?.statusCode === 404) {
+    entry.state = State.UNAVAILABLE;
+    return;
+  }
   entry.state = State.FAILED;
   const provider = runtime.layer.imageryProvider;
   runtime.error = reportProviderError(
@@ -397,7 +415,9 @@ SceneGISPlanarImagery.prototype.prepare = function (
         tile.imageryBindings.set(layer, binding);
         ++this._debug.createdBindings;
       }
-      this._advance(context, runtime, binding.desired, frameNumber);
+      if (binding.desired) {
+        this._advance(context, runtime, binding.desired, frameNumber);
+      }
       if (binding.fallback) {
         this._advance(context, runtime, binding.fallback, frameNumber);
       }

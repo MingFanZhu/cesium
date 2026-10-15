@@ -2298,4 +2298,77 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       secondScene.destroyForSpecs();
     }
   });
+  it("masks partial coverage without changing draws and excludes coarse surfaces", async function () {
+    const world = createWorld({
+      maximumLevel: 1,
+      maximumScreenSpaceError: 1e10,
+    });
+    const image = document.createElement("canvas");
+    image.width = image.height = 1;
+    const context = image.getContext("2d");
+    context.fillStyle = "#00ff00";
+    context.fillRect(0, 0, 1, 1);
+    const request = jasmine
+      .createSpy("request")
+      .and.callFake(() => Promise.resolve(image));
+    const layer = world.imageryLayers.addImageryProvider({
+      tilingScheme: world.tilingScheme,
+      minimumLevel: 1,
+      maximumLevel: 1,
+      coverageExtent: new SceneGISPlanarExtent({
+        minimumX: -10,
+        minimumY: -5,
+        maximumX: 5,
+        maximumY: 12,
+      }),
+      tileWidth: 1,
+      tileHeight: 1,
+      hasAlphaChannel: true,
+      errorEvent: new Event(),
+      requestImage: request,
+    });
+    scene = createPlanarScene(world, 128, 128);
+    pointCameraAt(world, 64);
+    scene.renderForSpecs();
+    expect(request).not.toHaveBeenCalled();
+    world.maximumScreenSpaceError = 0.01;
+    await renderUntil(() => world.tilesLoaded);
+    const sample = (x, y) =>
+      readWindowPixel(
+        SceneTransforms.worldToWindowCoordinates(
+          scene,
+          new Cartesian3(x, y, 0),
+        ),
+      );
+    expect(sample(0, 0)).toEqual([0, 255, 0, 255]);
+    expect(sample(20, 0)).toEqual([255, 0, 0, 255]);
+    expect(sample(0, -20)).toEqual([255, 0, 0, 255]);
+    const surface = world._surface;
+    expect(surface._renderCommands.length).toBe(
+      surface._quadtree._renderTiles.length,
+    );
+    const commands = surface._renderCommands.slice();
+    const before = { ...surface._imagery._debug };
+    scene.renderForSpecs();
+    expect(surface._imagery._debug).toEqual(before);
+    expect(surface._renderCommands).toEqual(commands);
+    const replay = {
+      ...scene.frameState,
+      passes: { render: false, pick: true, depth: true },
+      commandList: [],
+    };
+    world.render(replay);
+    expect(replay.commandList).toEqual(commands);
+    for (const tile of surface._quadtree._renderTiles) {
+      expect(tile.command.uniformMap.u_coverage0()).toBe(
+        tile.imageryBindings.get(layer).coverage,
+      );
+    }
+    const count = request.calls.count();
+    world.maximumScreenSpaceError = 1e10;
+    scene.renderForSpecs();
+    expect(sample(0, 0)).toEqual([255, 0, 0, 255]);
+    expect(request.calls.count()).toBe(count);
+    expect(world.tilesLoaded).toBe(true);
+  });
 });

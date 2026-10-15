@@ -1,6 +1,7 @@
 import {
   Request,
   Resource,
+  SceneGISPlanarExtent,
   SceneGISPlanarWebMapServiceImageryProvider,
 } from "../../../index.js";
 import createScheme from "./_private/createPlanarImageryScheme.js";
@@ -77,11 +78,33 @@ describe("SceneGIS/Scene/SceneGISPlanarWebMapServiceImageryProvider", function (
       { ...options, parameters: { version: "2.0.0" } },
       { ...options, axisOrder: "guess" },
       { ...options, times: {} },
-      { ...options, minimumLevel: 1 },
+      { ...options, minimumLevel: -1 },
     ]) {
       expect(
         () => new SceneGISPlanarWebMapServiceImageryProvider(invalid),
       ).toThrowDeveloperError();
     }
+  });
+  it("retains the complete canonical BBOX for nonaligned coverage at nonzero levels", function () {
+    const provider = new SceneGISPlanarWebMapServiceImageryProvider({
+      url: "https://wms.test/",
+      layers: "image",
+      tilingScheme: createScheme(),
+      minimumLevel: 3,
+      maximumLevel: 3,
+      coverageExtent: new SceneGISPlanarExtent({
+        minimumX: 1163,
+        minimumY: 2162,
+        maximumX: 1180,
+        maximumY: 2180,
+      }),
+    });
+    spyOn(Resource.prototype, "fetchImage").and.callFake(function () {
+      expect(new URL(this.url).searchParams.get("bbox")).toBe(
+        "1160,2160,1192,2192",
+      );
+      return undefined;
+    });
+    provider.requestImage(5, 2, 3, new Request());
   });
 });

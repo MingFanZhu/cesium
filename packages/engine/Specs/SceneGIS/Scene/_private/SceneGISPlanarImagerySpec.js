@@ -450,4 +450,152 @@ describe("SceneGIS/Scene/SceneGISPlanarImagery", function () {
     imagery.destroy();
     layer.destroy();
   });
+  it("settles explicit image 404 without error events or repeated requests", async function () {
+    const request = jasmine
+      .createSpy("request")
+      .and.callFake(() => Promise.reject({ statusCode: 404 }));
+    const provider = createProvider(request);
+    provider.minimumLevel = 1;
+    const errors = jasmine.createSpy("errors");
+    provider.errorEvent.addEventListener(errors);
+    const layer = new SceneGISPlanarImageryLayer(provider);
+    const tiles = [
+      { x: 0, y: 0, level: 1 },
+      { x: 0, y: 0, level: 0 },
+    ];
+    const imagery = new SceneGISPlanarImagery({}, (callback) =>
+      tiles.forEach(callback),
+    );
+    imagery.prepare({}, tiles, [layer], 1);
+    await Promise.resolve();
+    imagery.prepare({}, tiles, [layer], 2);
+    imagery.prepare({}, tiles, [layer], 3);
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(errors).not.toHaveBeenCalled();
+    expect(imagery.tilesLoaded).toBe(true);
+    expect(tiles[0].imageryBindings.get(layer).desired.state).toBe(
+      imagery.State.UNAVAILABLE,
+    );
+    expect(tiles[1].imageryBindings.get(layer).desired).toBeUndefined();
+    imagery.releaseLayer(layer);
+    imagery.prepare({}, tiles, [layer], 4);
+    await Promise.resolve();
+    expect(request).toHaveBeenCalledTimes(2);
+    imagery.destroy();
+    layer.destroy();
+  });
+
+  it("keeps ordinary HTTP and unclassified failures observable", async function () {
+    for (const failure of [
+      { statusCode: 401 },
+      { statusCode: 403 },
+      { statusCode: 500 },
+      new Error("decode"),
+    ]) {
+      const provider = createProvider(() => Promise.reject(failure));
+      const errors = jasmine.createSpy("errors");
+      provider.errorEvent.addEventListener(errors);
+      const layer = new SceneGISPlanarImageryLayer(provider);
+      const tile = { x: 0, y: 0, level: 0 };
+      const imagery = new SceneGISPlanarImagery({}, (callback) =>
+        callback(tile),
+      );
+      imagery.prepare({}, [tile], [layer], 1);
+      await Promise.resolve();
+      expect(errors).toHaveBeenCalledTimes(1);
+      expect(tile.imageryBindings.get(layer).desired.state).toBe(
+        imagery.State.FAILED,
+      );
+      imagery.destroy();
+      layer.destroy();
+    }
+  });
+
+  it("excludes coverage-only edge contacts and keeps intersecting global addresses", function () {
+    const request = jasmine.createSpy("request").and.returnValue(undefined);
+    const provider = createProvider(request);
+    provider.minimumLevel = 1;
+    provider.coverageExtent = new SceneGISPlanarExtent({
+      minimumX: 0.5,
+      minimumY: 0.6,
+      maximumX: 0.8,
+      maximumY: 0.9,
+    });
+    const layer = new SceneGISPlanarImageryLayer(provider);
+    const tiles = [0, 1].map((x) => ({
+      x,
+      y: 0,
+      level: 1,
+      extent: provider.tilingScheme.tileXYToExtent(x, 0, 1),
+    }));
+    const imagery = new SceneGISPlanarImagery({}, (callback) =>
+      tiles.forEach(callback),
+    );
+    imagery.prepare({}, tiles, [layer], 1);
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(request.calls.first().args.slice(0, 3)).toEqual([1, 0, 1]);
+    const excluded = tiles[0].imageryBindings.get(layer);
+    expect(excluded.desired).toBeUndefined();
+    expect(excluded.isSettled()).toBe(true);
+    const mask = tiles[1].imageryBindings.get(layer).coverage;
+    expect(mask.x).toBe(0);
+    expect(mask.y).toEqualEpsilon(0.2, 1e-14);
+    expect(mask.z).toEqualEpsilon(0.6, 1e-14);
+    expect(mask.w).toEqualEpsilon(0.8, 1e-14);
+    imagery.destroy();
+    layer.destroy();
+  });
+  it("waits for a useful bootstrap after desired 404 and never retries missing entries", async function () {
+    let rejectParent;
+    const request = jasmine
+      .createSpy("request")
+      .and.callFake((_x, _y, level) =>
+        level === 2
+          ? Promise.reject({ statusCode: 404 })
+          : new Promise((_resolve, reject) => {
+              rejectParent = reject;
+            }),
+      );
+    const provider = createProvider(request);
+    provider.minimumLevel = 1;
+    provider.maximumLevel = 2;
+    const layer = new SceneGISPlanarImageryLayer(provider);
+    const tile = { x: 3, y: 1, level: 2 };
+    const imagery = new SceneGISPlanarImagery({}, (callback) => callback(tile));
+    imagery.prepare({}, [tile], [layer], 1);
+    await Promise.resolve();
+    imagery.prepare({}, [tile], [layer], 2);
+    expect(imagery.tilesLoaded).toBe(false);
+    rejectParent({ statusCode: 404 });
+    await Promise.resolve();
+    imagery.prepare({}, [tile], [layer], 3);
+    imagery.prepare({}, [tile], [layer], 4);
+    expect(imagery.tilesLoaded).toBe(true);
+    expect(request.calls.allArgs().map((args) => args.slice(0, 3))).toEqual([
+      [3, 1, 2],
+      [1, 0, 1],
+    ]);
+    imagery.destroy();
+    layer.destroy();
+  });
+
+  it("does not infer missing children from a missing parent and closes decoded children on release", async function () {
+    const image = { width: 1, height: 1, close: jasmine.createSpy("close") };
+    const provider = createProvider((_x, _y, level) =>
+      level === 0
+        ? Promise.reject({ statusCode: 404 })
+        : Promise.resolve(image),
+    );
+    const layer = new SceneGISPlanarImageryLayer(provider);
+    const tile = { x: 1, y: 1, level: 1 };
+    const imagery = new SceneGISPlanarImagery({}, (callback) => callback(tile));
+    imagery.prepare({}, [tile], [layer], 1);
+    await Promise.resolve();
+    const binding = tile.imageryBindings.get(layer);
+    expect(binding.desired.state).toBe(imagery.State.RECEIVED);
+    expect(binding.fallback.state).toBe(imagery.State.UNAVAILABLE);
+    imagery.destroy();
+    layer.destroy();
+    expect(image.close).toHaveBeenCalledTimes(1);
+  });
 });

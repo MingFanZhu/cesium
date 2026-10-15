@@ -360,7 +360,7 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
   owns layer，provider 始终由调用方拥有。
 - `tilesLoaded` 汇总当前视图 terrain coverage/readiness 与当前 shown imagery readiness；任何
   recoverable direct content pending 都不能提前标为 loaded，terminal failure 配合稳定 fallback 才可 settled。
-- 对 imagery contribution，每个 binding 只请求 desired 与必要的 Level 0 bootstrap，不主动推进 intermediate ancestor；
+- 对 imagery contribution，每个 binding 只请求 desired 与必要的 minimumLevel ancestor bootstrap，不主动推进 intermediate ancestor；
   cache 中已有的最近 READY ancestor 可以复用，reference 切换和 eviction 必须 exactly once。
 - 每个 ideal tile 保持一个 opaque command；shown layer 数必须在任何 request 或 GPU mutation
   前按 texture-unit limit fail-fast，不能用 multipass 绕过。
@@ -368,6 +368,11 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
   Context 拒绝都需要自动化 Specs；开发示例的外网结果不能替代这些证据。
 - `scenegis-planar-imagery` 只展示 engine-level 显式组装。不要在 P5 示例中加入 Viewer、widgets、
   provider picker、离线下载或预取；这些属于后续 UI 集成阶段。
+
+局部影像按 ADR-0162 验证：实际 render surface 层级低于 minimumLevel 或 coverageExtent
+外不建立请求；仅子层采样父层，不能反向拼接。coverage 使用世界米制矩形，XYZ 与完整
+BBOX 不变，边界外只让该层透明。明确 image HTTP 404 进入 UNAVAILABLE；其他错误仍报告。
+WMTS labels 按 canonical level 索引；TMS metadata 分辨率识别最低层级，Origin 保持全球原点。
 
 ### 平面 URL Heightmap Provider 检查
 

@@ -459,6 +459,9 @@ function createUniformMap(
     uniformMap[`u_translationScale${i}`] = function () {
       return tile._imagerySlots[i].translationScale;
     };
+    uniformMap[`u_coverage${i}`] = function () {
+      return tile._imagerySlots[i].coverage;
+    };
     uniformMap[`u_alpha${i}`] = function () {
       return tile._imagerySlots[i].alpha;
     };
@@ -660,6 +663,7 @@ function updateTileSlots(surface, tile, layers) {
     }
     slot.texture = selected?.texture ?? surface._transparentTexture;
     slot.translationScale = binding.translationScale;
+    slot.coverage = binding.coverage;
     slot.alpha = layer.alpha;
     slot.brightness = layer.brightness;
     slot.contrast = layer.contrast;

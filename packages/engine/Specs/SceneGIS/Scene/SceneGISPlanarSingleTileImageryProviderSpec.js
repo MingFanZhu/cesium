@@ -74,4 +74,16 @@ describe("SceneGIS/Scene/SceneGISPlanarSingleTileImageryProvider", function () {
       }),
     ).toBeRejectedWithError("image unavailable");
   });
+  it("retains its whole-world contract instead of accepting local coverage", function () {
+    expect(
+      () =>
+        new SceneGISPlanarSingleTileImageryProvider({
+          url: "image.png",
+          tilingScheme: createScheme(),
+          tileWidth: 1,
+          tileHeight: 1,
+          coverageExtent: createScheme().coordinateSystem.extent,
+        }),
+    ).toThrowDeveloperError();
+  });
 });

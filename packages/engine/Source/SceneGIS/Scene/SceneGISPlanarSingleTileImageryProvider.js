@@ -22,6 +22,11 @@ import SceneGISPlanarUrlTemplateImageryProvider from "./SceneGISPlanarUrlTemplat
  */
 class SceneGISPlanarSingleTileImageryProvider extends SceneGISPlanarUrlTemplateImageryProvider {
   constructor(options = {}) {
+    if (options.coverageExtent !== undefined) {
+      throw new DeveloperError(
+        "SingleTile imagery covers the whole world; coverageExtent is not supported.",
+      );
+    }
     if (options.tileWidth === undefined || options.tileHeight === undefined) {
       throw new DeveloperError(
         "tileWidth and tileHeight are required; use fromUrl to detect them.",

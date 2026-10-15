@@ -18,7 +18,8 @@ import SceneGISPlanarUrlTemplateImageryProvider from "./SceneGISPlanarUrlTemplat
  * @param {string} [options.crs] The WMS 1.3.0 CRS, defaulting to coordinateSystem.crs.
  * @param {string} [options.srs] The WMS 1.1.1 SRS, defaulting to coordinateSystem.crs.
  * @param {"xy"|"yx"} [options.axisOrder="xy"] WMS 1.3.0 BBOX axis order. WMS 1.1.1 always uses XY.
- * @param {number} [options.minimumLevel=0] The minimum level; must be zero.
+ * @param {SceneGISPlanarExtent} [options.coverageExtent] Coverage in world meter coordinates; does not change tile addresses.
+ * @param {number} [options.minimumLevel=0] The minimum available canonical level.
  * @param {number} [options.maximumLevel] The maximum available level.
  * @param {number} [options.tileWidth=256] The image width in pixels.
  * @param {number} [options.tileHeight=options.tileWidth] The image height in pixels.

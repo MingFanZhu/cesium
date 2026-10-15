@@ -90,11 +90,37 @@ describe("SceneGIS/Scene/SceneGISPlanarWebMapTileServiceImageryProvider", functi
       { ...options(), dimensions: { Time: {} } },
       { ...options(), dimensions: "first" },
       { ...options(), format: 1 },
-      { ...options(), minimumLevel: 1 },
+      { ...options(), minimumLevel: -1 },
     ]) {
       expect(
         () => new SceneGISPlanarWebMapTileServiceImageryProvider(invalid),
       ).toThrowDeveloperError();
     }
+  });
+  it("uses canonical matrix labels while permitting absent labels below minimum", function () {
+    const labels = [];
+    labels[2] = "service-two";
+    labels[3] = "service-three";
+    const provider = new SceneGISPlanarWebMapTileServiceImageryProvider({
+      ...options(),
+      minimumLevel: 2,
+      tileMatrixLabels: labels,
+    });
+    spyOn(Resource.prototype, "fetchImage").and.callFake(function () {
+      const query = new URL(this.url).searchParams;
+      expect(query.get("tilematrix")).toBe("service-three");
+      expect(query.get("tilecol")).toBe("5");
+      expect(query.get("tilerow")).toBe("2");
+      return undefined;
+    });
+    provider.requestImage(5, 2, 3, new Request());
+    expect(
+      () =>
+        new SceneGISPlanarWebMapTileServiceImageryProvider({
+          ...options(),
+          minimumLevel: 1,
+          tileMatrixLabels: labels,
+        }),
+    ).toThrowDeveloperError();
   });
 });

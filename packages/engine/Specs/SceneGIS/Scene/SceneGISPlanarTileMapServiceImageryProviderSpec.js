@@ -2,6 +2,7 @@ import {
   Request,
   Resource,
   RuntimeError,
+  SceneGISPlanarExtent,
   SceneGISPlanarTileMapServiceImageryProvider,
 } from "../../../index.js";
 import createScheme from "./_private/createPlanarImageryScheme.js";
@@ -71,6 +72,7 @@ describe("SceneGIS/Scene/SceneGISPlanarTileMapServiceImageryProvider", function 
     const options = { tilingScheme: createScheme() };
     for (const document of [
       metadata.replace("LOCAL:TEST", "EPSG:3857"),
+      metadata.replace('maxx="1256"', 'maxx="900"'),
       metadata.replace('maxx="1256"', 'maxx="1512"'),
       metadata.replace(
         '<Origin x="1000" y="2000"',
@@ -121,5 +123,58 @@ describe("SceneGIS/Scene/SceneGISPlanarTileMapServiceImageryProvider", function 
     });
     provider.requestImage(2, 0, 2, new Request());
     expect(fetchXML).not.toHaveBeenCalled();
+  });
+  it("maps a partial pyramid by resolution without rebasing global tile addresses", async function () {
+    const partial = metadata
+      .replace('units-per-pixel="1"', 'units-per-pixel="0.25"')
+      .replace('units-per-pixel="0.5"', 'units-per-pixel="0.125"')
+      .replace(
+        'minx="1000" miny="2000" maxx="1256" maxy="2256"',
+        'minx="1100" miny="2100" maxx="1200" maxy="2200"',
+      );
+    spyOn(Resource.prototype, "fetchXML").and.returnValue(
+      Promise.resolve(xml(partial)),
+    );
+    spyOn(Resource.prototype, "fetchImage").and.callFake(function () {
+      expect(new URL(this.url).pathname).toBe("/tiles/detail/5/5.png");
+      return undefined;
+    });
+    const provider = await SceneGISPlanarTileMapServiceImageryProvider.fromUrl(
+      "https://tms.test/",
+      { tilingScheme: createScheme() },
+    );
+    expect(provider.minimumLevel).toBe(2);
+    expect(provider.maximumLevel).toBe(3);
+    expect(provider.coverageExtent.minimumX).toBe(1100);
+    provider.requestImage(5, 2, 3, new Request());
+    await expectAsync(
+      SceneGISPlanarTileMapServiceImageryProvider.fromUrl("https://tms.test/", {
+        tilingScheme: createScheme(),
+        minimumLevel: 1,
+      }),
+    ).toBeRejectedWithError(RuntimeError);
+  });
+  it("rejects SDK coverage outside metadata and propagates metadata 404", async function () {
+    const fetch = spyOn(Resource.prototype, "fetchXML").and.returnValue(
+      Promise.resolve(xml()),
+    );
+    await expectAsync(
+      SceneGISPlanarTileMapServiceImageryProvider.fromUrl("https://tms.test/", {
+        tilingScheme: createScheme(),
+        coverageExtent: new SceneGISPlanarExtent({
+          minimumX: 900,
+          minimumY: 2000,
+          maximumX: 1200,
+          maximumY: 2200,
+        }),
+      }),
+    ).toBeRejectedWithError(RuntimeError);
+    const missing = { statusCode: 404 };
+    fetch.and.returnValue(Promise.reject(missing));
+    await expectAsync(
+      SceneGISPlanarTileMapServiceImageryProvider.fromUrl("https://tms.test/", {
+        tilingScheme: createScheme(),
+      }),
+    ).toBeRejectedWith(missing);
   });
 });

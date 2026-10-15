@@ -3,6 +3,7 @@ import DeveloperError from "../../Core/DeveloperError.js";
 import Event from "../../Core/Event.js";
 import Frozen from "../../Core/Frozen.js";
 import Resource from "../../Core/Resource.js";
+import SceneGISPlanarExtent from "../Core/SceneGISPlanarExtent.js";
 import SceneGISPlanarTilingScheme from "../Core/SceneGISPlanarTilingScheme.js";
 
 function validatePositiveInteger(name, value) {
@@ -46,7 +47,8 @@ function copySubdomains(value) {
  * @param {string|string[]} [options.subdomains="abc"] The URL subdomains.
  * @param {boolean} [options.hasAlphaChannel=true] Whether images have an alpha channel.
  * @param {Credit|string} [options.credit] The provider attribution.
- * @param {number} [options.minimumLevel=0] The minimum level; must be zero.
+ * @param {SceneGISPlanarExtent} [options.coverageExtent] Coverage in world meter coordinates; does not change tile addresses.
+ * @param {number} [options.minimumLevel=0] The minimum available canonical level.
  * @param {object} [options.customTags] Functions keyed by tag name, called with (provider, x, y, level).
  * @param {object} [options.urlSchemeZeroPadding] Minimum digit widths keyed by braced tag, such as {"{x}": "0000"}.
  *
@@ -69,8 +71,21 @@ function SceneGISPlanarUrlTemplateImageryProvider(options) {
   }
   const maximumLevel =
     options.maximumLevel ?? options.tilingScheme.maximumSafeLevel;
-  if ((options.minimumLevel ?? 0) !== 0) {
-    throw new DeveloperError("minimumLevel must be zero.");
+  const minimumLevel = options.minimumLevel ?? 0;
+  if (
+    !Number.isInteger(minimumLevel) ||
+    minimumLevel < 0 ||
+    minimumLevel > maximumLevel
+  ) {
+    throw new DeveloperError(
+      "minimumLevel must be an integer from zero through maximumLevel.",
+    );
+  }
+  if (
+    options.coverageExtent !== undefined &&
+    !(options.coverageExtent instanceof SceneGISPlanarExtent)
+  ) {
+    throw new DeveloperError("coverageExtent must be a SceneGISPlanarExtent.");
   }
   if (
     !Number.isInteger(maximumLevel) ||
@@ -100,6 +115,8 @@ function SceneGISPlanarUrlTemplateImageryProvider(options) {
   this._tilingScheme = options.tilingScheme;
   this._urlScheme = urlScheme;
   this._maximumLevel = maximumLevel;
+  this._minimumLevel = minimumLevel;
+  this._coverageExtent = options.coverageExtent;
   this._tileWidth = tileWidth;
   this._tileHeight = tileHeight;
   this._subdomains = copySubdomains(options.subdomains ?? "abc");
@@ -135,14 +152,26 @@ Object.defineProperties(SceneGISPlanarUrlTemplateImageryProvider.prototype, {
     },
   },
   /**
-   * Gets the minimum available level, which is always zero.
+   * Gets optional coverage in world meter coordinates. Outside this rectangle the
+   * layer is transparent; canonical tile bounds and addresses are unchanged.
+   * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
+   * @type {SceneGISPlanarExtent|undefined}
+   * @readonly
+   */
+  coverageExtent: {
+    get: function () {
+      return this._coverageExtent;
+    },
+  },
+  /**
+   * Gets the minimum available canonical level.
    * @memberof SceneGISPlanarUrlTemplateImageryProvider.prototype
    * @type {number}
    * @readonly
    */
   minimumLevel: {
     get: function () {
-      return 0;
+      return this._minimumLevel;
     },
   },
   /**
@@ -252,6 +281,7 @@ SceneGISPlanarUrlTemplateImageryProvider.prototype.requestImage = function (
   request,
 ) {
   return this._buildImageResource(x, y, level, request).fetchImage({
+    preferBlob: true,
     preferImageBitmap: true,
     flipY: true,
   });
@@ -259,7 +289,11 @@ SceneGISPlanarUrlTemplateImageryProvider.prototype.requestImage = function (
 
 SceneGISPlanarUrlTemplateImageryProvider.prototype._validateTileAddress =
   function (x, y, level) {
-    if (!Number.isInteger(level) || level < 0 || level > this._maximumLevel) {
+    if (
+      !Number.isInteger(level) ||
+      level < this._minimumLevel ||
+      level > this._maximumLevel
+    ) {
       throw new DeveloperError(
         "level must be within the provider level range.",
       );

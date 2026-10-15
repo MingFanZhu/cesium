@@ -34,8 +34,36 @@ function SceneGISPlanarTileImagery(manager, tile, runtime) {
   this.manager = manager;
   this.tile = tile;
   this.runtime = runtime;
-  this.desiredAddress = getAddress(tile, runtime.layer.imageryProvider);
-  this.desired = manager.acquire(runtime, this.desiredAddress);
+  const provider = runtime.layer.imageryProvider;
+  this.coverage = new Cartesian4(0.0, 0.0, 1.0, 1.0);
+  const coverage = provider.coverageExtent;
+  if (coverage) {
+    const extent = tile.extent;
+    this.coverage.x = Math.max(
+      0.0,
+      (coverage.minimumX - extent.minimumX) / extent.width,
+    );
+    this.coverage.y = Math.max(
+      0.0,
+      (coverage.minimumY - extent.minimumY) / extent.height,
+    );
+    this.coverage.z = Math.min(
+      1.0,
+      (coverage.maximumX - extent.minimumX) / extent.width,
+    );
+    this.coverage.w = Math.min(
+      1.0,
+      (coverage.maximumY - extent.minimumY) / extent.height,
+    );
+  }
+  const covered =
+    tile.level >= provider.minimumLevel &&
+    this.coverage.x < this.coverage.z &&
+    this.coverage.y < this.coverage.w;
+  this.desiredAddress = covered ? getAddress(tile, provider) : undefined;
+  this.desired = covered
+    ? manager.acquire(runtime, this.desiredAddress)
+    : undefined;
   this.fallback = undefined;
   this.selected = undefined;
   this.translationScale = new Cartesian4(0.0, 0.0, 1.0, 1.0);
@@ -45,6 +73,10 @@ function SceneGISPlanarTileImagery(manager, tile, runtime) {
 SceneGISPlanarTileImagery.prototype.select = function () {
   const manager = this.manager;
   const desired = this.desired;
+  if (!desired) {
+    return undefined;
+  }
+  const minimumLevel = this.runtime.layer.imageryProvider.minimumLevel;
   let selected = desired.state === manager.State.READY ? desired : undefined;
   if (
     desired.state === manager.State.FAILED &&
@@ -55,7 +87,7 @@ SceneGISPlanarTileImagery.prototype.select = function () {
 
   if (!selected && desired.state !== manager.State.FAILED) {
     let level = desired.level - 1;
-    while (level >= 0) {
+    while (level >= minimumLevel) {
       const factor = 2 ** (desired.level - level);
       const address = {
         level,
@@ -73,11 +105,16 @@ SceneGISPlanarTileImagery.prototype.select = function () {
 
   if (
     !selected &&
-    desired.level > 0 &&
+    desired.level > minimumLevel &&
     desired.state !== manager.State.FAILED
   ) {
-    const rootAddress = { level: 0, x: 0, y: 0 };
-    if (!this.fallback || this.fallback.level !== 0) {
+    const factor = 2 ** (desired.level - minimumLevel);
+    const rootAddress = {
+      level: minimumLevel,
+      x: Math.floor(desired.x / factor),
+      y: Math.floor(desired.y / factor),
+    };
+    if (!this.fallback || this.fallback.level !== minimumLevel) {
       if (this.fallback) {
         manager.release(this.runtime, this.fallback);
       }
@@ -110,6 +147,18 @@ SceneGISPlanarTileImagery.prototype.select = function () {
 };
 
 SceneGISPlanarTileImagery.prototype.isSettled = function () {
+  if (!this.desired) {
+    return true;
+  }
+  const State = this.manager.State;
+  if (this.desired.state === State.UNAVAILABLE) {
+    return (
+      !this.fallback ||
+      this.fallback.state === State.READY ||
+      this.fallback.state === State.FAILED ||
+      this.fallback.state === State.UNAVAILABLE
+    );
+  }
   return (
     this.desired.state === this.manager.State.READY ||
     this.desired.state === this.manager.State.FAILED
@@ -120,7 +169,9 @@ SceneGISPlanarTileImagery.prototype.destroy = function () {
   if (this._destroyed) {
     return;
   }
-  this.manager.release(this.runtime, this.desired);
+  if (this.desired) {
+    this.manager.release(this.runtime, this.desired);
+  }
   if (this.fallback) {
     this.manager.release(this.runtime, this.fallback);
   }

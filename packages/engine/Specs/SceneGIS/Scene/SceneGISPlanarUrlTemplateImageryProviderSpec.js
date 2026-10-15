@@ -61,6 +61,7 @@ describe("SceneGIS/Scene/SceneGISPlanarUrlTemplateImageryProvider", function () 
     expect(requests[0].url).toBe("https://c.test/2/2/3.png");
     expect(requests[0].request).toBe(request);
     expect(requests[0].options).toEqual({
+      preferBlob: true,
       preferImageBitmap: true,
       flipY: true,
     });
@@ -85,7 +86,7 @@ describe("SceneGIS/Scene/SceneGISPlanarUrlTemplateImageryProvider", function () 
       { ...valid, maximumLevel: -1 },
       { ...valid, tileWidth: 0 },
       { ...valid, tileHeight: 0 },
-      { ...valid, minimumLevel: 1 },
+      { ...valid, minimumLevel: 3 },
       { ...valid, customTags: { id: 1 } },
       { ...valid, urlSchemeZeroPadding: { "{x}": 4 } },
       { ...valid, subdomains: [] },
@@ -148,5 +149,34 @@ describe("SceneGIS/Scene/SceneGISPlanarUrlTemplateImageryProvider", function () 
       maximumLevel: 4,
     });
     provider.requestImage(0, 0, 4, new Request());
+  });
+  it("preserves global XYZ with a nonzero minimum and rectangular coverage", function () {
+    const coverageExtent = new SceneGISPlanarExtent({
+      minimumX: 10,
+      minimumY: 15,
+      maximumX: 40,
+      maximumY: 35,
+    });
+    const provider = new SceneGISPlanarUrlTemplateImageryProvider({
+      url: "https://test/{z}/{x}/{y}.png",
+      tilingScheme: createTilingScheme(),
+      minimumLevel: 2,
+      maximumLevel: 4,
+      coverageExtent,
+    });
+    expect(provider.minimumLevel).toBe(2);
+    expect(provider.coverageExtent).toBe(coverageExtent);
+    const fetch = spyOn(Resource.prototype, "fetchImage").and.callFake(
+      function (options) {
+        expect(this.url).toBe("https://test/3/5/2.png");
+        expect(options.preferBlob).toBe(true);
+        return undefined;
+      },
+    );
+    provider.requestImage(5, 2, 3, new Request());
+    expect(() =>
+      provider.requestImage(0, 0, 1, new Request()),
+    ).toThrowDeveloperError();
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
