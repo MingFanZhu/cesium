@@ -44,6 +44,10 @@ Offset 与 dash / pattern 的纵向累计 station 保持地图空间语义，防
 这是一种制图宽度，不声称从像素规则推导出了道路的真实米宽。计划与证据见
 [低俯角修复](../../../AgentDocs/vector-tiles/plans/2026-10-16-low-angle-rendering.md)。
 
+Globe 中心视线未命中椭球时，参考距离及 style 比例按
+[ADR-0070](ADR-0070-globe-vector-ground-rendering.md#2026-10-16地平线样式参考距离)
+使用真实地表距离并连续衔接地平线，不以 camera near 代替参考距离；coverage 公式保持不变。
+
 连续拓扑表达连接处，避免把普通拐角当独立 segment 重叠绘制。
 Miter 超限转 bevel；round join 按角度生成扇形，极锐/反向转折保留有限网格。
 Geometry 保存逐 feature paint 与 pick 属性，不按颜色或 dash 值生成独立 command。

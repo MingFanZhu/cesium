@@ -27,8 +27,20 @@ Worker 细分长三角形并建立局部 ENU reference；实例化定向盒覆�
 近处采用 high/low ECEF origin 与局部逆投影，避免绝对 float ECEF/经纬度相减损失精度。
 
 MVT 选取使用地理包围体、三维距离 SSE、horizon 与既有硬 tile budget，独立于 terrain readiness。
-Style 比例在视轴椭球交点测量并换算 Mercator metric；未命中时使用前向最近点，朝离地球时由
-实际 cover 决定是否有地图，不通过 camera pitch 限制或清空整个图层掩盖部分可见地表。
+Style 比例在视轴椭球交点测量并换算 Mercator metric；未命中时使用前向射线对应的地表参考点，
+朝离地球时由实际 cover 决定是否有地图，不通过 camera pitch 限制或清空整个图层掩盖部分可见地表。
+
+### 2026-10-16：地平线样式参考距离
+
+中心朝天且下方仍有地表时，旧 ECEF 最近点距离会退到 camera near，产生过大 style zoom，
+使已加载的地图全部退出样式显示范围。改为在 Cesium ellipsoid scaled space 中求前向射线
+最近点，再用 `Ellipsoid.scaleToGeodeticSurface` 投到地表；相机到地表点的实际距离与该点纬度
+共同决定 CSS pixel 比例。相切时该点与原射线交点收敛到同一位置，朝外时回到相机下方地表。
+Style zoom 与 line `_referenceDepth` 消费同一距离；不依赖 near、历史帧或加载到的整数瓦片等级。
+现有命中交点路径、SSE 选级、样式隐藏和深度遮挡保持。这里借鉴 Cesium 的地表距离/投影尺度
+原则，未把 per-tile SSE 等同于全局 style zoom，也不借用异步 terrain mesh 的 LOD 作为样式比例。
+使用固定 scratch 对象，无逐帧瓦片遍历、额外请求或 GPU 资源。见
+[修复计划](../../../AgentDocs/vector-tiles/plans/2026-10-16-horizon-style-scale.md)。
 
 Globe 默认椭球 anchors 直接映射 geodetic zero。真实地形 anchors 消费已渲染 mesh，由现有
 vector Worker 创建空间索引后做局部射线查询；索引与 mesh revision/provider 绑定，过时结果

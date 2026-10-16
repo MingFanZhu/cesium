@@ -63,6 +63,14 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 
 ## Current handoff
 
+2026-10-16 负责人确认按 [Globe 地平线样式比例计划](plans/2026-10-16-horizon-style-scale.md)
+修复中心朝天、下方有地表时整层隐藏；当前 standalone completed，负责人视觉 gate 已通过。既有 SSE cover 不变，
+统一修正 style zoom 与线宽参考距离。前一低俯角/PASS/注记交接已验收，checkpoint `d255b6b74e`。
+90 项相关 Specs 与构建、静态检查通过；原视角 style zoom 从 29.10 恢复至 21.22，
+仍为 23 块可见瓦片；跨地平线及恢复原视角的 241 帧无整层绘制归零，详见
+[self-review](reviews/2026-10-16-horizon-style-scale.md)。本轮无 upstream-owned 修改或 SGP 增量。
+形成独立本地 checkpoint，不推送；高级环境灰蒙感作为随后独立诊断。
+
 2026-10-16 负责人确认修复公开球面地图的近处线宽放大及地平线注记截断，
 按[独立修复计划](plans/2026-10-16-low-angle-rendering.md)推进；不改变 D2 的待人工验收状态。
 近处线宽在解析覆盖中补偿，独立注记保留地形锚点可见性、模型深度遮挡和原有 source-over 顺序。

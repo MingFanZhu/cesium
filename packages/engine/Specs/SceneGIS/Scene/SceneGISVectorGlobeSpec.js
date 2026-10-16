@@ -461,6 +461,128 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
     scene.renderForSpecs();
     expect(Cover.computeZoom({}, scene.frameState)).toBeGreaterThan(zooms[0]);
   });
+  it("uses surface distance instead of the near plane when looking above the horizon", function () {
+    const layer = {};
+    scene.camera.setView({
+      destination: Cartesian3.fromDegrees(118.74, 32.02, 23.5),
+      orientation: { heading: 0, pitch: 0.00858, roll: 0 },
+    });
+    const zooms = [];
+    for (const near of [0.1, 1, 10]) {
+      scene.camera.frustum.near = near;
+      scene.renderForSpecs();
+      zooms.push(Cover.computeZoom(layer, scene.frameState));
+      expect(layer._referenceDepth).toEqualEpsilon(23.5, 1e-7);
+      expect(zooms.at(-1)).toBeGreaterThan(0);
+      expect(zooms.at(-1)).toBeLessThan(24);
+    }
+    expect(new Set(zooms).size).toBe(1);
+  });
+  [0, 32.1, 75].forEach((latitude) => {
+    it(`keeps style scale continuous across the ellipsoid horizon at latitude ${latitude}`, function () {
+      const layer = {};
+      const camera = scene.camera;
+      const position = Cartesian3.fromDegrees(118.8, latitude, 23.5);
+      function view(pitch) {
+        camera.setView({
+          destination: position,
+          orientation: { heading: 0.7, pitch, roll: 0 },
+        });
+      }
+      function intersects(pitch) {
+        view(pitch);
+        return IntersectionTests.rayEllipsoid(
+          new Ray(camera.positionWC, camera.directionWC),
+          globe.ellipsoid,
+        );
+      }
+      let low = -0.1;
+      let high = 0;
+      for (let i = 0; i < 40; i++) {
+        const middle = (low + high) * 0.5;
+        if (intersects(middle)) {
+          low = middle;
+        } else {
+          high = middle;
+        }
+      }
+      expect(intersects(low - 1e-9)).toBeDefined();
+      expect(intersects(high + 1e-9)).toBeUndefined();
+      for (const boundary of [(low + high) * 0.5, 0]) {
+        const samples = [];
+        for (const offset of [-1e-9, 1e-9]) {
+          view(boundary + offset);
+          scene.renderForSpecs();
+          const zoom = Cover.computeZoom(layer, scene.frameState);
+          samples.push({ zoom, depth: layer._referenceDepth });
+          expect(Number.isFinite(zoom)).toBeTrue();
+          expect(zoom).toBeLessThan(24);
+          expect(layer._referenceDepth).toBeGreaterThan(23);
+        }
+        expect(Math.abs(samples[0].zoom - samples[1].zoom)).toBeLessThan(0.01);
+        expect(Math.abs(samples[0].depth / samples[1].depth - 1)).toBeLessThan(
+          0.01,
+        );
+      }
+    });
+  });
+  it("renders and picks visible ground below a sky-facing axis while honoring style zoom ranges", async function () {
+    source = new SceneGISVectorTileSource({
+      url: "https://example.invalid/{z}/{x}/{y}",
+      tilingScheme: scheme,
+      maximumLevel: 14,
+    });
+    scene.camera.lookAt(
+      Coordinates.position(target.x, target.y),
+      new HeadingPitchRange(0, -0.23, 100),
+    );
+    scene.camera.lookAtTransform(Matrix4.IDENTITY);
+    scene.camera.setView({
+      destination: Cartesian3.clone(scene.camera.positionWC),
+      orientation: { heading: scene.camera.heading, pitch: 0.00858, roll: 0 },
+    });
+    scene.camera.frustum.near = 0.1;
+    const layer = add(
+      [
+        feature(3, [[0, 0, 4096, 0, 4096, 4096, 0, 4096]]),
+        feature(2, [[2048, 1300, 2048, 2800]], "road"),
+      ],
+      [
+        {
+          id: "land",
+          type: "fill",
+          paint: { "fill-color": "red", "fill-antialias": false },
+        },
+        {
+          id: "hidden-minzoom",
+          type: "fill",
+          minzoom: 24,
+          paint: { "fill-color": "green" },
+        },
+        {
+          id: "hidden-maxzoom",
+          type: "fill",
+          maxzoom: 1,
+          paint: { "fill-color": "green" },
+        },
+        {
+          id: "road",
+          type: "line",
+          filter: ["==", ["geometry-type"], "LineString"],
+          paint: { "line-color": "blue", "line-width": 16 },
+        },
+      ],
+    );
+    await ready(layer);
+    const pixel = sample();
+    expect(pixel.point.y).toBeGreaterThan(128);
+    expect(pixel.point.y).toBeLessThan(256);
+    expect(pixel.color[2]).toBeGreaterThan(230);
+    expect(scene.pick(pixel.point)?.id.styleLayer).toBe("road");
+    const beside = new Cartesian2(pixel.point.x + 15, pixel.point.y);
+    expect(scene.pick(beside)?.id.styleLayer).toBe("land");
+    expect(layer.statistics.drawCommands).toBeGreaterThan(0);
+  });
   [
     [179.999, 75],
     [-179.999, -60],

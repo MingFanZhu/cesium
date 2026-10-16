@@ -14,6 +14,8 @@ const pixelSize = new Cartesian2();
 const point = new Cartesian3();
 const ray = new Ray();
 const ellipsoid = Ellipsoid.WGS84;
+const scaledOrigin = new Cartesian3();
+const scaledDirection = new Cartesian3();
 
 function region(bounds, heights) {
   return new TileBoundingRegion({
@@ -34,13 +36,26 @@ function computeZoom(layer, frameState) {
   Cartesian3.clone(camera.directionWC, ray.direction);
   const intersection = IntersectionTests.rayEllipsoid(ray, ellipsoid);
   let distance = intersection?.start;
-  if (!(distance > 0)) {
-    distance = Math.max(
-      camera.frustum.near,
-      -Cartesian3.dot(ray.origin, ray.direction),
+  if (distance > 0) {
+    Ray.getPoint(ray, distance, point);
+  } else {
+    // Continue the surface reference across the ellipsoid tangent. The nearest
+    // point of the forward scaled ray converges to the same tangent point;
+    // projecting it to the surface also preserves a real distance when facing
+    // away from the globe. The camera's near plane is not a surface reference.
+    ellipsoid.transformPositionToScaledSpace(ray.origin, scaledOrigin);
+    ellipsoid.transformPositionToScaledSpace(ray.direction, scaledDirection);
+    const closest = Math.max(
+      0,
+      -Cartesian3.dot(scaledOrigin, scaledDirection) /
+        Cartesian3.magnitudeSquared(scaledDirection),
     );
+    Ray.getPoint(ray, closest, point);
+    if (!ellipsoid.scaleToGeodeticSurface(point, point)) {
+      return undefined;
+    }
+    distance = Cartesian3.distance(ray.origin, point);
   }
-  Ray.getPoint(ray, distance, point);
   const cartographic = ellipsoid.cartesianToCartographic(point);
   if (!cartographic) {
     return undefined;
