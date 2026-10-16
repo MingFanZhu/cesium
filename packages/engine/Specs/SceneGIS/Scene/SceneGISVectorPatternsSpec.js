@@ -117,7 +117,7 @@ describe("SceneGIS/Scene/SceneGISVectorPatterns", function () {
         scene.destroyForSpecs();
       });
 
-      function add(type, symbols = false) {
+      function add(type, symbols = false, pattern = true) {
         spyOn(source, "requestTile").and.resolveTo({
           layers: [
             {
@@ -151,7 +151,7 @@ describe("SceneGIS/Scene/SceneGISVectorPatterns", function () {
             ? {}
             : { source: "s", "source-layer": "data" }),
           paint: {
-            [`${type}-pattern`]: "stripes",
+            ...(pattern ? { [`${type}-pattern`]: "stripes" } : {}),
             [`${type}-color`]: "blue",
             ...(type === "line" ? { "line-width": 32 } : {}),
             ...(type === "fill-extrusion"
@@ -247,6 +247,33 @@ describe("SceneGIS/Scene/SceneGISVectorPatterns", function () {
           ).toBeUndefined();
         }
       }
+      it("dynamic rules lazily enable patterns and retain the atlas across removal", async function () {
+        add("fill", false, false);
+        await ready();
+        expect(layer._patterns).toBeUndefined();
+        expect(fetchImage).not.toHaveBeenCalled();
+        const count = source.requestTile.calls.count();
+        layer.setPaintProperty("pattern", "fill-pattern", "stripes");
+        await ready();
+        scan();
+        const atlas = layer._patterns.texture;
+        layer.setPaintProperty("pattern", "fill-pattern", null);
+        await ready();
+        expect(
+          Array.from(
+            scene.context.readPixels({ x: 64, y: 64, width: 1, height: 1 }),
+          ),
+        ).toEqual([0, 0, 255, 255]);
+        layer.setPaintProperty("pattern", "fill-pattern", "stripes");
+        await ready();
+        scan();
+        expect(layer._patterns.texture).toBe(atlas);
+        expect(fetchImage).toHaveBeenCalledTimes(1);
+        expect(source.requestTile.calls.count()).toBe(count);
+        scene.primitives.remove(layer);
+        expect(atlas.isDestroyed()).toBe(true);
+      });
+
       ["background", "fill", "line", "fill-extrusion"].forEach((type) => {
         it(`renders ${type} repeating sprite pixels, excludes neighbor colors and preserves shared resources`, async function () {
           add(type, type === "fill");

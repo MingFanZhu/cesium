@@ -427,10 +427,57 @@ layer.errorEvent.addEventListener(({ source, tile, error }) => {
 scene.primitives.remove(layer);
 ```
 
-构造时配置固定；替换 style/source 时销毁旧图层并创建新图层。
+构造时 source、样式层结构与根资源配置固定；整体替换时销毁旧图层并创建新图层。
+已有样式层的 paint、layout、filter 可用下述动态 API 修改，无需重建 Layer。
 可传 `sources: { sourceId: source }` 借用 caller-owned source；否则从 style 的单 URL 创建。
 `show` 控制显隐；`ready` 表示已完成一次正常更新，`tilesLoaded` 表示当前 cover 无待处理工作，
 失败会通过 errorEvent 报告，也计入 `statistics.failedTiles`。
+
+### 动态绘制规则
+
+`styleLayerId` 是 Style JSON 中的内部层 ID，不是 SDK 资源树节点 ID。Globe 和 Planar 使用相同 API：
+
+```js
+layer.setPaintProperty("road", "line-width", 8);
+layer.setLayoutProperty("poi", "text-size", [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  10,
+  12,
+  16,
+  24,
+]);
+layer.setFilter("water", ["==", ["get", "class"], "lake"]);
+const widthRule = layer.getPaintProperty("road", "line-width");
+const sizeRule = layer.getLayoutProperty("poi", "text-size");
+const filterRule = layer.getFilter("water");
+const currentStyle = layer.getStyle();
+// Remove an explicit rule and restore its default; null filter means no filter.
+layer.setPaintProperty("road", "line-width", null);
+layer.setFilter("water", null);
+```
+
+- setter 同步复制、校验并编译候选。无效层、属性、值、表达式抛出 `DeveloperError`，原样式与刷新状态不变。
+  沿用当前支持的 profile 和表达式，不扩展为任意 Style v8 属性。`undefined` 不是删除指令；相同规则不调度工作。
+- `null` 删除显式属性，paint/layout 恢复默认值；filter 恢复不过滤。未显式设置的 getter 返回 `undefined`，
+  其他情况返回独立的原始 JSON 规则，不求值、不补齐默认值。background 没有 filter。
+- setter 返回后 getter 立即可见新规则。`getStyle()` 返回完整独立快照，保留 name、metadata、sources、glyphs、sprite；
+  包含尚未绘制的成功修改，不包含 show、opacity、feature/global state 或 caller-owned source override 对象。
+  修改返回对象不影响 Layer；共享旧 compiled Style 的其他 Layer 不受影响。`layer.style` 指向新 compiled Style。
+- 正常帧异步重新准备相关内部层的批次或标注候选，按既有预算上传，保留其他批次、Source、原始 MVT cache、
+  Worker pool、feature/global state、glyph/sprite atlas 和可复用 shaping。标注保留其已发布样式版本直到替换。
+  setter 不操作 GPU；首次开启 pattern 的资源请求和上传也发生在后续正常帧。
+- 隐藏时保留修改，显示后使用最新规则；连续编辑、待请求与在途 Worker 结果受版本隔离，销毁后迟到结果不再发布。
+  旧画面保留到替代内容就绪，不承诺所有瓦片同帧切换。异步失败继续用 `errorEvent` 报告；
+  `tilesLoaded` 表示当前视图没有待处理工作，不能当作所有请求成功的证明。
+
+首版修改粒度是内部样式层，不是 paint-only GPU subrange 更新；每次非空修改同步复制和编译完整 Style。
+SDK 保存修改后的 URL 样式时可使用 `getStyle()` 导出 inline Style；引擎不写远端 JSON。
+升级时应同时更新主 bundle、Worker 与类型产物。决定见 [ADR-0163](Decisions/ADR-0163-vector-dynamic-style-rules.md)。
+两世界的[样式增强示例](../../Test/vector-tiles/README.md)提供道路宽度、建筑高度、标注字号、可见性、过滤、恢复与导出控件。
+
+### 绘制范围与缓存
 
 | 渲染范围        | V3B1 行为                                                                                                    |
 | --------------- | ------------------------------------------------------------------------------------------------------------ |

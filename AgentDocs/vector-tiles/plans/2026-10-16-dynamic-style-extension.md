@@ -7,7 +7,7 @@
 - Baseline: `scenegis/develop@5d847ca8c6`
 - Branch: 按负责人本对话要求继续使用当前 `scenegis/develop`，保留 WebGPU stash。
 - Related: ADR-0058、ADR-0067、ADR-0076；SGP 增量预期为无
-- Current phase: D1 completed；[phase plan](2026-10-16-d1-style-snapshots.md)，D2 待本地 checkpoint 后激活
+- Current phase: [D2 runtime](2026-10-16-d2-layer-style-runtime.md) technical completed；负责人视觉 gate pending；D1 checkpoint `7414056515`
 
 ## 目标与边界
 
@@ -19,10 +19,10 @@ null 删除并恢复缺省语义，undefined 不是删除指令。getter 同步�
 
 ## 路线
 
-| Phase | 目标                                         | 退出条件                                                           | 状态      |
-| ----- | -------------------------------------------- | ------------------------------------------------------------------ | --------- |
-| D1    | 不可变完整快照、原子候选校验与查询基础       | Core 契约测试、自审、独立本地提交                                  | completed |
-| D2    | Layer API、按依赖失效、Worker/标注代际与交付 | 双世界、缓存、隐藏/连续修改/迟到结果、构建类型及文档验证，独立提交 | pending   |
+| Phase | 目标                                         | 退出条件                                                           | 状态                  |
+| ----- | -------------------------------------------- | ------------------------------------------------------------------ | --------------------- |
+| D1    | 不可变完整快照、原子候选校验与查询基础       | Core 契约测试、自审、独立本地提交                                  | completed             |
+| D2    | Layer API、按依赖失效、Worker/标注代际与交付 | 双世界、缓存、隐藏/连续修改/迟到结果、构建类型及文档验证，独立提交 | completed (technical) |
 
 D1 提交后再依据当前代码细化 D2，不以 D1 私有 helper 宣称 API 已交付。
 不新增样式层/source/type/root 资源替换、动画 transition 或 paint-only GPU subrange 优化承诺。
@@ -40,4 +40,6 @@ D1 提交后再依据当前代码细化 D2，不以 D1 私有 helper 宣称 API 
 ## 交接
 
 SDK 仍固定旧引擎；最终交付明确 API、提交与升级条件。不得由此工作修改 SDK lock 或产物。
+七个公开方法、完整文档与双世界示例已完成，验证和剩余事项见 [D2 review](../reviews/2026-10-16-d2-layer-style-runtime.md)。
+本 extension 保持 active，仅等待新增动态规则的负责人视觉验收；先前大气修复的“通过”不挪用为本项验收。
 此前扩展及 P4e 的验收状态不变；本工作不扩展地下/背面排序、复杂 shaping 等历史延期能力。

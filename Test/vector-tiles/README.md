@@ -12,6 +12,8 @@
 
 四类新增能力集中在 [平面样式增强](平面样式增强.html) 与 [球面样式增强](球面样式增强.html)，
 已提供四种 pattern、点击选中/清除、全局水面透明度、POI 自动换位与可伸缩牌面。使用默认 lil-gui，不加载高级环境。
+“动态绘制规则”面板通过 Layer API 调整道路宽度、建筑高度、标注字号、水面可见性与标注过滤，
+可以恢复初始规则或导出当前 Style JSON；这些操作保留已有选中状态和资源。
 `pattern-sprite.png/json` 是原创测试图案，运行 `node Test/vector-tiles/generate-pattern-fixture.mjs` 可重建。
 `enhancements.pbf` 在公共测试要素上增加三个重合 POI，运行 `node Test/vector-tiles/generate-enhancement-fixture.mjs` 可重建。
 增强页将这份合成数据重复用于 0–15 级，以便拉远时按预算降低层级；接入真实数据时应填写服务实际支持的范围。
@@ -67,6 +69,9 @@
 高级环境页面 E2E 随环境页面功能移除；产品 engine Specs 与发布脚本中的环境检查保留。
 
 `npx playwright test -c Test/vector-tiles/playwright.config.mjs`
+
+`scenegis-vector-dynamic-style.spec.js` 检查两世界控件、恢复、JSON 下载及资源保留，
+同时验证 development/release，运行前需 `npm run build-release`。
 
 此命令连接已有服务器，不会启动 Sandcastle。产品源码/Specs 变更仍按
 [开发指南](../../Documentation/SceneGIS/DevelopmentGuide.md) 的 engine 构建与测试流程验证。

@@ -38,6 +38,9 @@ describe("SceneGIS/Scene/SceneGISVectorTileStyles", function () {
       baseColor: Color.BLACK,
     });
     scene._initializeWorld(world);
+    // Verify exact style colors without the default physical environment.
+    scene.environmentEffects.enabled = false;
+    scene.gamma = 1;
     scene.msaaSamples = 1;
     scene.postProcessStages.fxaa.enabled = false;
     scene.camera.position = new Cartesian3(0, 0, 1000);

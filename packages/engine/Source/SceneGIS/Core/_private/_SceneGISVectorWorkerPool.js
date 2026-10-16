@@ -51,6 +51,10 @@ SceneGISVectorWorkerPool.prototype.schedule = function (
   if (!slot.configured && this.configuration) {
     payload.configuration = this.configuration;
     slot.configured = true;
+    slot.style = this.configuration.style;
+  } else if (this.configuration && slot.style !== this.configuration.style) {
+    payload.style = this.configuration.style;
+    slot.style = this.configuration.style;
   }
   return new Promise((resolve, reject) => {
     slot.reject = reject;
@@ -67,6 +71,9 @@ SceneGISVectorWorkerPool.prototype.schedule = function (
         }
         if (payload.patterns) {
           slot.patterns = undefined;
+        }
+        if (payload.style) {
+          slot.style = undefined;
         }
         reject(error);
       } else {

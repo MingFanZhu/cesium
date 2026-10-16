@@ -36,6 +36,9 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
       baseColor: Color.BLACK,
     });
     scene._initializeWorld(world);
+    // Isolate vector style/pick semantics from the default physical environment.
+    scene.environmentEffects.enabled = false;
+    scene.gamma = 1;
     scene.msaaSamples = 1;
     scene.postProcessStages.fxaa.enabled = false;
     scene.camera.position = new Cartesian3(0, 0, 80);
@@ -126,6 +129,223 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
   function polygon() {
     return feature(3, [[1888, 1888, 2208, 1888, 2208, 2208, 1888, 2208]]);
   }
+
+  it("dynamic rules replace background paint and restore its default visibility", async function () {
+    const layer = add([
+      {
+        id: "background",
+        type: "background",
+        paint: { "background-color": "red" },
+      },
+    ]);
+    await loaded(layer);
+    const original = layer._backgrounds[0].batch;
+    const resources = original._resources;
+    expect(read().color).toEqual([255, 0, 0, 255]);
+    layer.setPaintProperty("background", "background-color", "lime");
+    expect(layer._backgrounds[0].batch).toBe(original);
+    await loaded(layer);
+    expect(resources.isDestroyed()).toBeTrue();
+    expect(read().color).toEqual([0, 255, 0, 255]);
+    layer.setLayoutProperty("background", "visibility", "none");
+    await loaded(layer);
+    expect(read().color).toEqual([0, 0, 0, 255]);
+    layer.setLayoutProperty("background", "visibility", null);
+    await loaded(layer);
+    expect(read().color).toEqual([0, 255, 0, 255]);
+  });
+
+  it("dynamic rules expose isolated synchronous snapshots and reject invalid edits atomically", function () {
+    const input = style([definition("fill")]);
+    input.name = "SDK map";
+    input.metadata = { application: { id: "demo" } };
+    const shared = new SceneGISVectorTileStyle(input);
+    const layer = add([], { style: shared, show: false, opacity: 0.4 });
+    const other = add([], { style: shared, show: false });
+    const identity = { source: "test", sourceLayer: "data", id: "7" };
+    layer.setFeatureState(identity, { selected: true });
+    layer.setGlobalStateProperty("color", "green");
+    const rule = ["coalesce", ["global-state", "color"], "red"];
+    layer.setPaintProperty("fill", "fill-color", rule);
+    rule[2] = "blue";
+    expect(layer.getPaintProperty("fill", "fill-color")[2]).toBe("red");
+    expect(layer.style).not.toBe(shared);
+    expect(other.style).toBe(shared);
+    expect(shared.getLayerDefinition("fill").paint).toEqual({});
+    const snapshot = layer.getStyle();
+    expect(snapshot.name).toBe(input.name);
+    expect(snapshot.metadata).toEqual(input.metadata);
+    snapshot.metadata.application.id = "changed";
+    snapshot.layers[0].paint["fill-color"][2] = "blue";
+    expect(layer.getStyle().metadata.application.id).toBe("demo");
+    expect(layer.getFeatureState(identity)).toEqual({ selected: true });
+    expect(layer.getGlobalState()).toEqual({ color: "green" });
+    expect(layer.show).toBe(false);
+    expect(layer.opacity).toBe(0.4);
+    expect(layer._sources.get("test").source).toBe(source);
+    expect(layer._workers.slots.length).toBe(0);
+    const before = layer.getStyle(),
+      compiled = layer.style;
+    const render = spyOn(scene, "requestRender");
+    expect(() =>
+      layer.setPaintProperty("missing", "fill-color", "blue"),
+    ).toThrowDeveloperError();
+    expect(() =>
+      layer.setLayoutProperty("fill", "unknown", null),
+    ).toThrowDeveloperError();
+    expect(() => layer.setFilter("fill", ["bad", 1])).toThrowDeveloperError();
+    expect(() =>
+      layer.setPaintProperty("fill", "fill-opacity", -1),
+    ).toThrowDeveloperError();
+    expect(() => layer.setFilter("fill", undefined)).toThrowDeveloperError();
+    expect(layer.getStyle()).toEqual(before);
+    expect(layer.style).toBe(compiled);
+    expect(render).not.toHaveBeenCalled();
+    layer.setPaintProperty(
+      "fill",
+      "fill-color",
+      layer.getPaintProperty("fill", "fill-color"),
+    );
+    expect(render).not.toHaveBeenCalled();
+    layer.setPaintProperty("fill", "fill-color", null);
+    expect(layer.getPaintProperty("fill", "fill-color")).toBeUndefined();
+    scene.primitives.remove(layer);
+    expect(() => layer.getStyle()).toThrowDeveloperError();
+    expect(() => layer.setFilter("fill", null)).toThrowDeveloperError();
+  });
+
+  it("dynamic rules refresh only the affected batches and preserve source data and state", async function () {
+    scene.environmentEffects.enabled = false;
+    scene.gamma = 1;
+    spyOn(source, "requestTile").and.resolveTo(data([polygon()]));
+    const layer = add([
+      definition(
+        "fill",
+        { "fill-color": "blue", "fill-antialias": false },
+        "base",
+      ),
+      definition("fill", { "fill-color": "red", "fill-antialias": false }),
+    ]);
+    await loaded(layer);
+    expect(read().color).toEqual([255, 0, 0, 255]);
+    const state = layer._sources.get("test"),
+      entry = [...state.entries.values()][0];
+    const payload = entry.data,
+      base = entry.batches.get("base"),
+      workers = layer._workers;
+    const identity = { source: "test", sourceLayer: "data", id: "7" };
+    layer.setFeatureState(identity, { color: "lime" });
+    layer.setGlobalStateProperty("fallback", "red");
+    const before = layer.statistics;
+    layer.setPaintProperty("fill", "fill-color", [
+      "coalesce",
+      ["feature-state", "color"],
+      ["global-state", "fallback"],
+    ]);
+    expect(layer.tilesLoaded).toBe(false);
+    await loaded(layer);
+    expect(read().color).toEqual([0, 255, 0, 255]);
+    expect(read().pick.primitive).toBe(layer);
+    expect(entry.batches.get("base")).toBe(base);
+    expect(entry.data).toBe(payload);
+    expect(layer._workers).toBe(workers);
+    expect(source.requestTile.calls.count()).toBe(1);
+    expect(layer.statistics.uploads - before.uploads).toBe(1);
+    layer.setFilter("fill", ["==", ["id"], "missing"]);
+    await loaded(layer);
+    expect(read().color).toEqual([0, 0, 255, 255]);
+    layer.setFilter("fill", null);
+    layer.setLayoutProperty("fill", "visibility", "none");
+    await loaded(layer);
+    expect(read().color).toEqual([0, 0, 255, 255]);
+    layer.setLayoutProperty("fill", "visibility", null);
+    await loaded(layer);
+    expect(read().color).toEqual([0, 255, 0, 255]);
+    expect(entry.batches.get("base")).toBe(base);
+    expect(source.requestTile.calls.count()).toBe(1);
+    expect(layer.getFeatureState(identity)).toEqual({ color: "lime" });
+  });
+
+  it("dynamic rules survive hidden edits and pending tile requests", async function () {
+    scene.environmentEffects.enabled = false;
+    scene.gamma = 1;
+    let complete;
+    spyOn(source, "requestTile").and.returnValue(
+      new Promise((resolve) => {
+        complete = resolve;
+      }),
+    );
+    const layer = add([
+      definition("fill", { "fill-color": "red", "fill-antialias": false }),
+    ]);
+    scene.renderForSpecs();
+    expect(layer.statistics.pendingRequests).toBe(1);
+    layer.setPaintProperty("fill", "fill-color", "blue");
+    complete(data([polygon()]));
+    await loaded(layer);
+    expect(read().color).toEqual([0, 0, 255, 255]);
+    layer.show = false;
+    scene.renderForSpecs();
+    const count = layer.statistics.workerTasks;
+    layer.setPaintProperty("fill", "fill-color", "lime");
+    layer.setLayoutProperty("fill", "visibility", "none");
+    scene.renderForSpecs();
+    expect(layer.statistics.workerTasks).toBe(count);
+    expect(layer.getPaintProperty("fill", "fill-color")).toBe("lime");
+    layer.setLayoutProperty("fill", "visibility", null);
+    layer.show = true;
+    await loaded(layer);
+    expect(read().color).toEqual([0, 255, 0, 255]);
+    expect(source.requestTile.calls.count()).toBe(1);
+  });
+
+  it("dynamic rules discard in-flight results after consecutive edits and destruction", async function () {
+    scene.environmentEffects.enabled = false;
+    scene.gamma = 1;
+    spyOn(source, "requestTile").and.resolveTo(data([polygon()]));
+    const layer = add([
+      definition("fill", { "fill-color": "red", "fill-antialias": false }),
+    ]);
+    await loaded(layer);
+    const pool = layer._workers,
+      schedule = pool.schedule.bind(pool),
+      completions = [];
+    spyOn(pool, "schedule").and.callFake((parameters, transfers) => {
+      const promise = schedule(parameters, transfers);
+      return parameters.kind !== "tile" || !promise
+        ? promise
+        : promise.then(
+            (result) =>
+              new Promise((resolve) => completions.push(() => resolve(result))),
+          );
+    });
+    layer.setPaintProperty("fill", "fill-color", "blue");
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return completions.length > 0;
+    });
+    layer.setPaintProperty("fill", "fill-color", "lime");
+    completions.shift()();
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return completions.length > 0;
+    });
+    expect(read().color).toEqual([255, 0, 0, 255]);
+    completions.shift()();
+    await loaded(layer);
+    expect(read().color).toEqual([0, 255, 0, 255]);
+    expect(source.requestTile.calls.count()).toBe(1);
+    layer.setPaintProperty("fill", "fill-color", "blue");
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return completions.length > 0;
+    });
+    scene.primitives.remove(layer);
+    completions.shift()();
+    await Promise.resolve();
+    expect(layer.isDestroyed()).toBe(true);
+    expect(pool.destroyed).toBe(true);
+  });
 
   it("keeps flat vectors and picks independent of planar surface opacity", async function () {
     world.baseColor = Color.BLUE;

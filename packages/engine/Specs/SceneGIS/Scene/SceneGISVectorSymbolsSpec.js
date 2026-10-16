@@ -152,6 +152,61 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     image = undefined;
   });
 
+  it("dynamic rules refresh symbol layout and filters while retaining unrelated candidates and assets", async function () {
+    const tiles = spyOn(source, "requestTile").and.resolveTo(tile());
+    const fonts = spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(
+      bytes,
+    );
+    const layer = add([
+      definition("labels"),
+      definition("other", {
+        "text-offset": [2, 0],
+        "text-allow-overlap": true,
+      }),
+    ]);
+    await loaded(layer);
+    const runtime = layer._symbols,
+      assets = runtime.assets;
+    const entry = [...layer._sources.get("test").entries.values()][0];
+    const other = entry.symbols.get(1);
+    const shapes = [...runtime._shaping.records.values()].map((r) => r.result);
+    const page = assets.pages.values().next().value;
+    layer.setPaintProperty("labels", "text-color", "lime");
+    await loaded(layer);
+    expect(pixel()).toEqual([0, 255, 0, 255]);
+    expect(entry.symbols.get(1)).toBe(other);
+    expect(runtime.assets).toBe(assets);
+    expect(assets.pages.values().next().value).toBe(page);
+    expect([...runtime._shaping.records.values()].map((r) => r.result)).toEqual(
+      shapes,
+    );
+    layer.setLayoutProperty("labels", "text-field", "AA");
+    layer.setLayoutProperty("labels", "text-size", 18);
+    await loaded(layer);
+    const candidate = runtime._placed.find(
+      (c) => c.identity.styleLayer === "labels",
+    );
+    expect(candidate.text).toBe("AA");
+    expect(candidate.evaluated.layout["text-size"]).toBe(18);
+    expect(entry.symbols.get(1)).toBe(other);
+    layer.setFilter("labels", ["==", ["id"], "missing"]);
+    await loaded(layer);
+    expect(
+      runtime._placed.some(
+        (c) => c.identity.styleLayer === "labels" && c._visible,
+      ),
+    ).toBe(false);
+    layer.setFilter("labels", null);
+    await loaded(layer);
+    expect(
+      runtime._placed.some(
+        (c) => c.identity.styleLayer === "labels" && c._visible,
+      ),
+    ).toBe(true);
+    expect(tiles).toHaveBeenCalledTimes(1);
+    expect(fonts).toHaveBeenCalledTimes(1);
+  });
+
   it("applies feature/global paint state without new Worker shapes, glyph requests or buffers", async function () {
     const tiles = spyOn(source, "requestTile").and.resolveTo(tile());
     const fonts = spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(
@@ -511,7 +566,7 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(pickSource.derivedCommands.picking.pickCommand.vertexArray).toBe(va);
     const upload = spyOn(batch.resources, "update").and.callThrough();
     const shape = runtime._previous[0].shaped;
-    const layouts = [...runtime._tileLayouts.values()][0];
+    const layouts = [...runtime._tileLayouts.values()][0].layers.get(0);
     const page = [...runtime.assets.pages.values()][0];
     const expectedBytes =
       page.image.arrayBufferView.byteLength +
@@ -551,14 +606,16 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(upload).not.toHaveBeenCalled();
     scene.camera.position.x = 1;
     scene.renderForSpecs();
-    expect([...runtime._tileLayouts.values()][0]).toBe(layouts);
+    expect([...runtime._tileLayouts.values()][0].layers.get(0)).toBe(layouts);
     expect(filter).not.toHaveBeenCalled();
     expect(runtime._previous[0].shaped).toBe(shape);
     expect([...runtime._groups.values()][0].command).toBe(command);
     expect([...runtime._pickIds.values()][0]).toBe(pickId);
     scene.camera.position.z *= 0.5;
     await loaded(layer);
-    expect([...runtime._tileLayouts.values()][0]).not.toBe(layouts);
+    expect([...runtime._tileLayouts.values()][0].layers.get(0)).not.toBe(
+      layouts,
+    );
     expect(filter).toHaveBeenCalled();
     scene.primitives.remove(layer);
     expect(runtime._tileLayouts.size).toBe(0);

@@ -55,6 +55,44 @@ describe("SceneGIS/Core/SceneGISVectorWorker", function () {
     ).toBeTrue();
   });
 
+  it("dynamic rules reconfigure both existing Worker slots without recreating the pool", async function () {
+    pool = new Pool({
+      extent: { minimumX: -512, minimumY: -512, maximumX: 512, maximumY: 512 },
+      style,
+    });
+    const data = Tile.decode(
+      fixture([{ features: [{ id: "1", type: 1, geometry: [9, 20, 40] }] }]),
+    );
+    const task = () =>
+      pool.schedule({
+        kind: "tile",
+        data,
+        tile: { x: 0, y: 0, level: 0 },
+        maximumLevel: 0,
+        zoom: 0,
+        allowPicking: false,
+        records: [{ id: "labels", order: 1 }],
+      });
+    const before = await Promise.all([task(), task()]);
+    expect(before.map((r) => r.symbols[0][1].labels[0].names.text)).toEqual([
+      "A",
+      "A",
+    ]);
+    const processors = pool.slots.map((slot) => slot.processor);
+    pool.configuration = {
+      ...pool.configuration,
+      style: new Style(style)
+        ._withRule("labels", "layout", "text-field", "AA")
+        ._getSnapshot(),
+    };
+    const after = await Promise.all([task(), task()]);
+    expect(after.map((r) => r.symbols[0][1].labels[0].names.text)).toEqual([
+      "AA",
+      "AA",
+    ]);
+    expect(pool.slots.map((slot) => slot.processor)).toEqual(processors);
+  });
+
   it("prepares GPU buffers, stable feature identity and world anchors in a real Worker", async function () {
     const bytes = fixture([
       {

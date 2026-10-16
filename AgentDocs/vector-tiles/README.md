@@ -9,9 +9,9 @@
 | Planning model           | `extension`                                                                                                              |
 | Active extension plan    | [动态绘制规则](plans/2026-10-16-dynamic-style-extension.md)                                                              |
 | Completed extension plan | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md)、[总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase            | D1：样式快照与候选校验                                                                                                   |
-| Active phase plan        | [D1](plans/2026-10-16-d1-style-snapshots.md)                                                                             |
-| Last completed phase     | 样式增强页选取范围修正 `77df6ac9e3`                                                                                      |
+| Current phase            | D2 技术完成，等待动态规则人工视觉 gate                                                                                   |
+| Active phase plan        | None；[D2](plans/2026-10-16-d2-layer-style-runtime.md) technical completed                                               |
+| Last completed phase     | D2：Layer 动态样式运行时；D1 checkpoint `7414056515`                                                                     |
 | Active standalone plan   | None                                                                                                                     |
 | Architecture contact     | 当前 Agent                                                                                                               |
 | Execution contact        | 当前 Agent                                                                                                               |
@@ -65,9 +65,15 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 
 2026-10-16 SDK JSON 接入完成后启动[动态绘制规则扩展](plans/2026-10-16-dynamic-style-extension.md)。
 当前 D1 [样式快照与原子校验](plans/2026-10-16-d1-style-snapshots.md) completed，17 项 Core Specs 通过，
-[自审](reviews/2026-10-16-d1-style-snapshots.md)通过；独立提交后进入 D2。当前 Agent 负责
-Architecture / implementation self-review。沿用本对话指定的 `scenegis/develop`；SDK 不在修改范围。
-下列 completed 状态仅描述此前已验收阶段，新 API 尚未交付。
+[自审](reviews/2026-10-16-d1-style-snapshots.md)通过；checkpoint `7414056515`。
+[D2](plans/2026-10-16-d2-layer-style-runtime.md) technical completed，Layer 七个公开方法、Worker 同步、
+缓存与标注版本隔离、两世界控件/导出已交付。[D2 self-review](reviews/2026-10-16-d2-layer-style-runtime.md)
+记录 10 项新增动态规则、112 项专项通过及 1 项已有失败、4 项 E2E、完整构建/类型资格与边界。
+当前仅保留负责人视觉 gate，尚无对本项新增规则的人工验收；无 open discussion。
+Architecture / implementation self-review 仍由当前 Agent 承担。沿用本对话指定的 `scenegis/develop`，
+D2 独立本地 checkpoint 由本文件 Git 历史定位；SDK lock、临时 state、生成产物不在提交范围。
+SDK 升级必须同步主 bundle、Worker 与类型；ID 是 Style 内部层 ID，null 删除，getter 即时、绘制异步。
+下列 completed 状态保留此前已验收阶段；不能代替本次动态规则视觉 gate。
 
 2026-09-18 负责人明确“验收通过”，关闭纹理填充、动态要素状态、标注自动换位置、图标适配文字
 及球面增强页修复的人工 gate。[四类样式增强](plans/2026-09-17-style-enhancements-extension.md) completed，

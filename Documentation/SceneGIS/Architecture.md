@@ -792,6 +792,10 @@ review不能代替项目负责人的真实浏览器/GPU人工验收。完整决�
 Feature/global state 只驱动 paint，按 source/sourceLayer/id 与表达式依赖失效；不重新请求 MVT，不由状态 API 操作 GPU。
 几何结果继续通过 Worker 和正常帧预算发布；标注复用不变的 shaping 与 buffers。
 
+绘制规则按 [ADR-0163](Decisions/ADR-0163-vector-dynamic-style-rules.md) 在 Layer 上同步校验、发布独立不可变 Style，
+禁止修改调用方或共享 compiled Style。主线程与各 Worker 使用同一规则版本，旧异步结果不得覆盖新规则；
+正常帧只替换受影响内部层，保留 Source、原始 MVT cache、state 和资源所有权。getStyle 是当前配置快照，不是 GPU 完成信号。
+
 Pattern 按 [ADR-0075](Decisions/ADR-0075-vector-pattern-materials.md) 借用 Layer 的单 sprite atlas，
 Worker 准备图案矩形与坐标，flat/ground/Globe/extrusion 只做材质采样；不得按 feature 拆 command 或生成地图颜色 RTT。
 无 symbol 的 Layer 显式拥有 sprite；有 symbol 时共享其 owner。未知图片报错，不能静默替换成纯色。

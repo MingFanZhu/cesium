@@ -29,6 +29,9 @@ export default function start(globe) {
     projectionPicker: false,
   });
   const scene = viewer.scene;
+  // Keep this local style fixture independent of clock-driven physical lighting.
+  scene.environmentEffects.enabled = false;
+  scene.gamma = 1;
   scene.debugShowFramesPerSecond = true;
   scene.fog.enabled = false;
   if (globe) {
@@ -212,6 +215,87 @@ export default function start(globe) {
     .onChange((value) => layer.setGlobalStateProperty("waterOpacity", value));
   gui.add(options, "clear").name("清除选中");
   gui.add(options, "tilt").name("倾斜");
+  const ruleFolder = gui.addFolder("动态绘制规则");
+  const rules = {
+    lineWidth: 24,
+    buildingHeight: 80,
+    textSize: 18,
+    waterVisible: true,
+    labelsVisible: true,
+    reset: () => {
+      layer.setPaintProperty(
+        "road",
+        "line-width",
+        style.layers[3].paint["line-width"],
+      );
+      layer.setPaintProperty(
+        "building",
+        "fill-extrusion-height",
+        style.layers[4].paint["fill-extrusion-height"],
+      );
+      layer.setLayoutProperty(
+        "poi",
+        "text-size",
+        style.layers[6].layout["text-size"],
+      );
+      layer.setLayoutProperty("water", "visibility", null);
+      layer.setFilter("poi", null);
+      Object.assign(rules, {
+        lineWidth: 24,
+        buildingHeight: 80,
+        textSize: 18,
+        waterVisible: true,
+        labelsVisible: true,
+      });
+      for (const controller of ruleFolder.controllers) {
+        controller.updateDisplay();
+      }
+      status.textContent = "已恢复初始绘制规则，选中状态保留";
+    },
+    export: () => {
+      const blob = new window.Blob(
+        [JSON.stringify(layer.getStyle(), null, 2)],
+        {
+          type: "application/json",
+        },
+      );
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "vector-style.json";
+      link.click();
+      window.URL.revokeObjectURL(url);
+      status.textContent = "已导出当前样式；临时选中状态不在样式内";
+    },
+  };
+  ruleFolder
+    .add(rules, "lineWidth", 1, 60, 1)
+    .name("道路宽度")
+    .onChange((value) => layer.setPaintProperty("road", "line-width", value));
+  ruleFolder
+    .add(rules, "buildingHeight", 0, 200, 5)
+    .name("建筑高度")
+    .onChange((value) =>
+      layer.setPaintProperty("building", "fill-extrusion-height", value),
+    );
+  ruleFolder
+    .add(rules, "textSize", 10, 36, 1)
+    .name("标注字号")
+    .onChange((value) => layer.setLayoutProperty("poi", "text-size", value));
+  ruleFolder
+    .add(rules, "waterVisible")
+    .name("显示水面")
+    .onChange((value) =>
+      layer.setLayoutProperty("water", "visibility", value ? null : "none"),
+    );
+  ruleFolder
+    .add(rules, "labelsVisible")
+    .name("显示标注")
+    .onChange((value) =>
+      layer.setFilter("poi", value ? null : ["==", ["id"], ""]),
+    );
+  ruleFolder.add(rules, "reset").name("恢复初始规则");
+  ruleFolder.add(rules, "export").name("导出当前样式");
   const handler = new C.ScreenSpaceEventHandler(scene.canvas);
   handler.setInputAction(({ position }) => {
     const picked = scene.pick(position);

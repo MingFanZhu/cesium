@@ -51,6 +51,9 @@ function createVectorTaskHandler() {
         }),
       });
     }
+    if (parameters.style) {
+      style = new Style(parameters.style);
+    }
     let result;
     if (parameters.kind === "terrain") {
       result = TerrainIndex.build(parameters);

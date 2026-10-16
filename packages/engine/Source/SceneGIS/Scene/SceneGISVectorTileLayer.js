@@ -85,7 +85,7 @@ function signature(records, zoom) {
 }
 
 function entrySignature(state, entry) {
-  return `${state.signature}/${entry.stateRevision ?? 0}`;
+  return `${state.signature}/${state.styleRevision ?? 0}/${entry.stateRevision ?? 0}`;
 }
 
 function prepareSources(tilingScheme, style, overrides) {
@@ -368,15 +368,21 @@ function prepareEntry(layer, state, entry, zoom) {
   }
   const records = [],
     signatures = new Map(),
-    batches = new Map();
+    batches = new Map(),
+    symbolSignatures = new Map(),
+    symbolOrders = [];
   const symbolZoom = Math.floor(zoom);
   for (const record of state.records) {
     const definition = record.definition;
     if (definition.type === "symbol") {
-      if (entry.symbolZoom !== symbolZoom) {
+      const key = `${symbolZoom}/${record.styleRevision ?? 0}`;
+      symbolSignatures.set(definition.id, key);
+      if (entry.symbolSignatures?.get(definition.id) !== key) {
+        const order = layer._records.indexOf(record);
+        symbolOrders.push(order);
         records.push({
           id: definition.id,
-          order: layer._records.indexOf(record),
+          order,
         });
       }
       continue;
@@ -422,8 +428,11 @@ function prepareEntry(layer, state, entry, zoom) {
   }
   const work = {
     signature: entrySignature(state, entry),
+    styleRevision: state.styleRevision ?? 0,
+    style: layer._style,
     symbolZoom,
-    replaceSymbols: entry.symbolZoom !== symbolZoom,
+    symbolSignatures,
+    symbolOrders,
     signatures,
     batches,
     cursor: 0,
@@ -437,6 +446,10 @@ function prepareEntry(layer, state, entry, zoom) {
       }
       layer._preparing--;
       if (entry.work !== work) {
+        return;
+      }
+      if (work.styleRevision !== (state.styleRevision ?? 0)) {
+        layer._scene.requestRender();
         return;
       }
       try {
@@ -472,6 +485,10 @@ function prepareEntry(layer, state, entry, zoom) {
       }
       layer._preparing--;
       if (entry.work !== work) {
+        return;
+      }
+      if (work.styleRevision !== (state.styleRevision ?? 0)) {
+        layer._scene.requestRender();
         return;
       }
       discardPreparation(entry);
@@ -517,13 +534,21 @@ function createBatches(layer, state, entry, frameState, budget) {
   }
   entry.batches = work.batches;
   entry.layerSignatures = work.signatures;
-  if (work.replaceSymbols) {
-    entry.symbols = new Map(work.result.symbols);
+  if (work.symbolOrders.length > 0) {
+    const symbols = new Map(entry.symbols);
+    for (const order of work.symbolOrders) {
+      symbols.delete(order);
+    }
+    for (const [order, group] of work.result.symbols) {
+      symbols.set(order, { ...group, style: work.style });
+    }
+    entry.symbols = symbols;
     entry.symbolZoom = work.symbolZoom;
     for (const error of work.result.errors) {
       layer._symbols?.report(error.key, new DeveloperError(error.message));
     }
   }
+  entry.symbolSignatures = work.symbolSignatures;
   entry.state = "ready";
   entry.signature = work.signature;
   entry.work = undefined;
@@ -808,7 +833,8 @@ function publishOrder(layer) {
  * Renders independently decoded vector tiles on a SceneGIS planar world or WGS84 Globe.
  * Add this object to scene.primitives. The collection then owns its lifetime.
  * Construction does not request data or allocate GPU resources. Scene, World,
- * style, and source overrides are borrowed. Style/source configuration is fixed.
+ * style, and source overrides are borrowed. Rule setters derive a layer-owned immutable style;
+ * source configuration remains fixed. GPU refresh is asynchronous and preserves source caches.
  * Uses a flat fast path without a terrainProvider, and direct ground rendering
  * with a provider. Ground rendering requires WebGL2, float and depth textures.
  * Published resident ancestors or descendants cover pending desired tiles
@@ -970,16 +996,10 @@ function SceneGISVectorTileLayer(options) {
       maximumX: extent.maximumX,
       maximumY: extent.maximumY,
     },
-    style: {
-      version: 8,
-      ...(this._style.glyphs ? { glyphs: this._style.glyphs } : {}),
-      ...(this._style.sprite ? { sprite: this._style.sprite } : {}),
-      sources: this._style.sources,
-      layers: this._style.layerIds.map((id) =>
-        this._style.getLayerDefinition(id),
-      ),
-    },
+    style: style._snapshot,
   });
+  this._maximumGlyphRanges = maximumGlyphRanges;
+  this._maximumSymbolRequests = maximumSymbolRequests;
   this._symbols = this._records.some(
     (record) => record.definition.type === "symbol",
   )
@@ -1056,7 +1076,8 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
     },
   },
   /**
-   * The immutable style frontend.
+   * The current immutable style frontend. Successful rule setters replace this reference;
+   * previously returned or caller-supplied styles remain unchanged.
    * @memberof SceneGISVectorTileLayer.prototype
    * @type {SceneGISVectorTileStyle}
    * @readonly
@@ -1300,6 +1321,152 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
  */
 SceneGISVectorTileLayer.prototype.isDestroyed = function () {
   return false;
+};
+
+function setRule(layer, layerId, scope, name, value) {
+  const style = layer._style._withRule(layerId, scope, name, value);
+  if (style === layer._style) {
+    return;
+  }
+  const index = layer._records.findIndex(
+    (record) => record.definition.id === layerId,
+  );
+  const previous = layer._records[index];
+  const record = layerRecord(style, layerId);
+  record.stateRevision = (previous.stateRevision ?? 0) + 1;
+  record.styleRevision = (previous.styleRevision ?? 0) + 1;
+  record.context = { globalState: layer._states.global };
+  if (
+    !layer._patterns &&
+    record.definition.paint?.[`${record.definition.type}-pattern`] !== undefined
+  ) {
+    layer._patterns = new Patterns(
+      layer,
+      layer._maximumGlyphRanges,
+      layer._maximumSymbolRequests,
+    );
+  }
+  layer._style = style;
+  layer._records[index] = record;
+  layer._workers.configuration = {
+    ...layer._workers.configuration,
+    style: style._snapshot,
+  };
+  if (record.definition.type === "background") {
+    record.batch = previous.batch;
+    layer._backgrounds[layer._backgrounds.indexOf(previous)] = record;
+  } else {
+    const source = layer._sources.get(record.definition.source);
+    source.records[source.records.indexOf(previous)] = record;
+    source.styleRevision = (source.styleRevision ?? 0) + 1;
+    // A new valid rule can repair a failed preparation without re-fetching MVT.
+    for (const entry of source.entries.values()) {
+      if (entry.state === "failed" && entry.data !== undefined) {
+        entry.state = entry.signature === undefined ? "received" : "ready";
+      }
+    }
+  }
+  layer._tilesLoaded = false;
+  layer._scene.requestRender();
+}
+
+/**
+ * Changes one existing style layer's paint rule. Input is copied and validated synchronously.
+ * Null removes the explicit rule and restores the profile default; undefined is invalid.
+ * Getters reflect a successful change immediately. Normal renders asynchronously prepare affected
+ * batches or symbol candidates using cached MVT; old content remains until replacement is ready.
+ * Hidden layers retain edits until shown. Sources, opacity and feature/global state are preserved.
+ * No GPU work occurs in this method. Asynchronous failures use errorEvent; tilesLoaded describes
+ * current-view pending work, not success. Unchanged rules do not schedule work.
+ * @param {string} styleLayerId ID inside the Style document, not a resource-tree ID.
+ * @param {string} name Supported paint property for this style layer's type.
+ * @param {*} value A finite JSON literal/expression, or null to remove the rule.
+ * @exception {DeveloperError} The layer, property or value is invalid, or this object was destroyed.
+ */
+SceneGISVectorTileLayer.prototype.setPaintProperty = function (
+  styleLayerId,
+  name,
+  value,
+) {
+  setRule(this, styleLayerId, "paint", name, value);
+};
+
+/**
+ * Gets an independent copy of the explicit, unevaluated paint rule.
+ * @param {string} styleLayerId ID inside the Style document.
+ * @param {string} name Supported paint property.
+ * @returns {*} JSON rule, or undefined when not explicitly set (including after removal).
+ * @exception {DeveloperError} The layer/property is invalid or this object was destroyed.
+ */
+SceneGISVectorTileLayer.prototype.getPaintProperty = function (
+  styleLayerId,
+  name,
+) {
+  return this._style._getRule(styleLayerId, "paint", name);
+};
+
+/**
+ * Changes an existing style layer's layout rule, including visibility.
+ * Uses the validation, null-removal, immediate getter and asynchronous refresh semantics of setPaintProperty.
+ * Symbol edits re-prepare affected candidates and placement, retaining reusable glyph/sprite/shaping resources.
+ * @param {string} styleLayerId ID inside the Style document.
+ * @param {string} name Supported layout property for this style layer's type.
+ * @param {*} value A finite JSON literal/expression, or null to restore the default.
+ * @exception {DeveloperError} The layer, property or value is invalid, or this object was destroyed.
+ */
+SceneGISVectorTileLayer.prototype.setLayoutProperty = function (
+  styleLayerId,
+  name,
+  value,
+) {
+  setRule(this, styleLayerId, "layout", name, value);
+};
+
+/**
+ * Gets an independent copy of the explicit, unevaluated layout rule.
+ * @param {string} styleLayerId ID inside the Style document.
+ * @param {string} name Supported layout property.
+ * @returns {*} JSON rule, or undefined when not explicitly set.
+ * @exception {DeveloperError} The layer/property is invalid or this object was destroyed.
+ */
+SceneGISVectorTileLayer.prototype.getLayoutProperty = function (
+  styleLayerId,
+  name,
+) {
+  return this._style._getRule(styleLayerId, "layout", name);
+};
+
+/**
+ * Changes a non-background style layer's filter. Null removes filtering; undefined is invalid.
+ * Validates synchronously, then refreshes affected batches/candidates asynchronously from cached MVT.
+ * Getters reflect the accepted filter immediately; in-flight older results cannot overwrite it.
+ * @param {string} styleLayerId ID inside the Style document.
+ * @param {Array|null} filter A supported expression/legacy filter, or null to remove it.
+ * @exception {DeveloperError} The layer/filter is invalid or this object was destroyed.
+ */
+SceneGISVectorTileLayer.prototype.setFilter = function (styleLayerId, filter) {
+  setRule(this, styleLayerId, "filter", undefined, filter);
+};
+
+/**
+ * Gets an independent copy of the explicit filter.
+ * @param {string} styleLayerId Non-background ID inside the Style document.
+ * @returns {Array|undefined} The filter, or undefined when not set.
+ * @exception {DeveloperError} The layer is invalid or this object was destroyed.
+ */
+SceneGISVectorTileLayer.prototype.getFilter = function (styleLayerId) {
+  return this._style._getRule(styleLayerId, "filter");
+};
+
+/**
+ * Returns an independent complete Style v8 JSON snapshot of all accepted rules, including pending edits.
+ * Does not wait for GPU refresh. Includes original name/metadata/source/resource definitions and omits
+ * temporary feature/global state, Layer show/opacity, and source override objects.
+ * @returns {object} A mutable JSON snapshot; modifying it does not change this Layer.
+ * @exception {DeveloperError} This object was destroyed.
+ */
+SceneGISVectorTileLayer.prototype.getStyle = function () {
+  return this._style._getSnapshot();
 };
 
 /**

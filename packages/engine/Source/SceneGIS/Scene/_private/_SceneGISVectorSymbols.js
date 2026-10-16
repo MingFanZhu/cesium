@@ -52,14 +52,14 @@ function eligible(definition, zoom) {
 
 function tileCandidates(runtime, entry, order) {
   let cached = runtime._tileLayouts.get(entry);
-  if (!cached || cached.symbols !== entry.symbols) {
-    cached = { symbols: entry.symbols, layers: new Map() };
+  if (!cached) {
+    cached = { layers: new Map() };
     runtime._tileLayouts.set(entry, cached);
   }
+  const layer = entry.symbols?.get(order);
   let result = cached.layers.get(order);
-  if (!result) {
+  if (!result || result.symbols !== layer) {
     result = [];
-    const layer = entry.symbols?.get(order);
     const definition = runtime.owner._records[order].definition;
     for (const label of layer?.labels ?? []) {
       const identity = Object.freeze({
@@ -77,7 +77,7 @@ function tileCandidates(runtime, entry, order) {
           anchor,
           label,
           entry,
-          symbols: entry.symbols,
+          symbols: layer,
           order,
           identity,
           tileKey: entry.key,
@@ -90,7 +90,7 @@ function tileCandidates(runtime, entry, order) {
       }
     }
     runtime.statistics.candidateBuilds += result.length;
-    result = { candidates: result };
+    result = { candidates: result, symbols: layer };
     cached.layers.set(order, result);
   }
   return result;
@@ -158,7 +158,7 @@ function* queryCandidates(index, projection) {
 function evaluation(runtime, base, zoom) {
   const label = base.label;
   const before = label.evaluation.value.layout;
-  label.evaluation = runtime.owner.style._evaluateVisibleLayer(
+  label.evaluation = base.symbols.style._evaluateVisibleLayer(
     base.identity.styleLayer,
     label.feature,
     zoom,
@@ -589,7 +589,7 @@ function currentOwner(runtime, candidate) {
     .get(candidate.identity.source)
     ?.render.get(candidate.entry);
   return (
-    candidate.entry.symbols === candidate.symbols &&
+    candidate.entry.symbols?.get(candidate.order) === candidate.symbols &&
     regions?.some((r) =>
       inRegion(candidate.anchor.position, r, runtime.owner._extent),
     )
@@ -808,6 +808,10 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
   const content = coverSignature(this);
   const resource = `${this.assets.revision}/${this._shaping.revision}`;
   const signature = `${view}|${content}|${resource}`;
+  if (this._placement && this._placement.content !== content) {
+    this._placement.iterator.return();
+    this._placement = undefined;
+  }
   this._projection = Projection.snapshot(
     this.owner.scene,
     this.owner._terrain,

@@ -177,6 +177,40 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
       ),
     };
   }
+  it("dynamic rules update Globe drawing and picking without replacing the layer or sources", async function () {
+    const layer = add(
+      [feature(3, [[1400, 1400, 2700, 1400, 2700, 2700, 1400, 2700]])],
+      [
+        {
+          id: "area",
+          type: "fill",
+          paint: { "fill-color": "red", "fill-antialias": false },
+        },
+      ],
+    );
+    await ready(layer);
+    const count = source.requestTile.calls.count(),
+      pool = layer._workers;
+    expect(sample().color).toEqual([255, 0, 0, 255]);
+    layer.setPaintProperty("area", "fill-color", "lime");
+    await ready(layer);
+    expect(sample().color).toEqual([0, 255, 0, 255]);
+    expect(scene.pick(sample().point)?.primitive).toBe(layer);
+    layer.setLayoutProperty("area", "visibility", "none");
+    await ready(layer);
+    expect(scene.pick(sample().point)).toBeUndefined();
+    layer.setLayoutProperty("area", "visibility", null);
+    layer.setFilter("area", ["==", ["id"], "missing"]);
+    await ready(layer);
+    expect(scene.pick(sample().point)).toBeUndefined();
+    layer.setFilter("area", null);
+    await ready(layer);
+    expect(scene.pick(sample().point)?.primitive).toBe(layer);
+    expect(layer._sources.get("test").source).toBe(source);
+    expect(layer._workers).toBe(pool);
+    expect(source.requestTile.calls.count()).toBe(count);
+  });
+
   it("places variable anchors with fitted icons and picks their shifted glyphs on the Globe without new shaping during motion", async function () {
     const fonts = spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(
       encodeGlyphs(),
