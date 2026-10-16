@@ -499,8 +499,73 @@ function SceneGISVectorTileStyle(style) {
   this._glyphs = snapshot.glyphs;
   this._sprite = snapshot.sprite;
   this._layerIds = Object.freeze(snapshot.layers.map((layer) => layer.id));
-  freezeJson(snapshot.layers);
+  this._snapshot = freezeJson(snapshot);
 }
+
+/** Returns an independent, complete Style JSON document. @private */
+SceneGISVectorTileStyle.prototype._getSnapshot = function () {
+  return cloneJson(this._snapshot);
+};
+
+function ruleDefinition(style, layerId, scope, name) {
+  if (typeof layerId !== "string" || layerId.length === 0) {
+    throw new DeveloperError("A non-empty style layer ID is required.");
+  }
+  if (scope !== "filter" && typeof name !== "string") {
+    throw new DeveloperError("A style property name is required.");
+  }
+  const definition = getLayer(style, layerId).definition;
+  if (scope === "filter") {
+    if (definition.type === "background") {
+      throw new DeveloperError("Background layers do not support filters.");
+    }
+  } else if (
+    !["paint", "layout"].includes(scope) ||
+    !profile[definition.type][scope].includes(name)
+  ) {
+    throw new DeveloperError(
+      `Unsupported style property: ${layerId}.${scope}.${name}`,
+    );
+  }
+  return definition;
+}
+
+/** Gets a copied, unevaluated rule; absence is undefined. @private */
+SceneGISVectorTileStyle.prototype._getRule = function (layerId, scope, name) {
+  const definition = ruleDefinition(this, layerId, scope, name);
+  const value =
+    scope === "filter" ? definition.filter : definition[scope]?.[name];
+  return value === undefined ? undefined : cloneJson(value);
+};
+
+/** Validates and compiles an immutable candidate before any owner mutation. @private */
+SceneGISVectorTileStyle.prototype._withRule = function (
+  layerId,
+  scope,
+  name,
+  value,
+) {
+  const previous = this._getRule(layerId, scope, name);
+  if (value === undefined) {
+    throw new DeveloperError(
+      "A style rule value is required; use null to remove it.",
+    );
+  }
+  const next = value === null ? undefined : cloneJson(value);
+  if (JSON.stringify(previous) === JSON.stringify(next)) {
+    return this;
+  }
+  const snapshot = this._getSnapshot();
+  const definition = snapshot.layers.find((layer) => layer.id === layerId);
+  const target = scope === "filter" ? definition : (definition[scope] ??= {});
+  const key = scope === "filter" ? "filter" : name;
+  if (next === undefined) {
+    delete target[key];
+  } else {
+    target[key] = next;
+  }
+  return new SceneGISVectorTileStyle(snapshot);
+};
 
 Object.defineProperties(SceneGISVectorTileStyle.prototype, {
   /**

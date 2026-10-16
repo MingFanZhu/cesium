@@ -20,6 +20,136 @@ describe("SceneGIS/Core/SceneGISVectorTileStyle", function () {
     return { id: "42", type: 2, properties };
   }
 
+  it("preserves complete independent snapshots when deriving a rule", function () {
+    const input = json({
+      paint: { "line-width": 3 },
+      metadata: { label: "roads" },
+    });
+    input.name = "Map";
+    input.metadata = { owner: { name: "caller" } };
+    const original = new SceneGISVectorTileStyle(input);
+    const expression = ["+", ["get", "width"], 2];
+    const candidate = original._withRule(
+      "roads",
+      "paint",
+      "line-width",
+      expression,
+    );
+    expression[2] = 100;
+    input.metadata.owner.name = "changed";
+    const snapshot = candidate._getSnapshot();
+    expect(snapshot.name).toBe("Map");
+    expect(snapshot.metadata.owner.name).toBe("caller");
+    expect(snapshot.sources).toEqual(original.sources);
+    expect(snapshot.layers[0].metadata).toEqual({ label: "roads" });
+    snapshot.layers[0].paint["line-width"][2] = 99;
+    const rule = candidate._getRule("roads", "paint", "line-width");
+    rule[2] = 77;
+    expect(
+      candidate.evaluateLayer("roads", feature({ width: 4 }), 1).paint[
+        "line-width"
+      ],
+    ).toBe(6);
+    expect(
+      original.evaluateLayer("roads", feature(), 1).paint["line-width"],
+    ).toBe(3);
+  });
+
+  it("removes rules with null and restores defaults without changing the original", function () {
+    const original = new SceneGISVectorTileStyle(
+      json({
+        paint: { "line-width": 8 },
+        layout: { "line-cap": "round" },
+        filter: ["==", ["get", "kind"], "road"],
+      }),
+    );
+    const candidate = original
+      ._withRule("roads", "paint", "line-width", null)
+      ._withRule("roads", "layout", "line-cap", null)
+      ._withRule("roads", "filter", undefined, null);
+    const defaults = new SceneGISVectorTileStyle(json());
+    expect(candidate.evaluateLayer("roads", feature(), 1)).toEqual(
+      defaults.evaluateLayer("roads", feature(), 1),
+    );
+    expect(candidate._getRule("roads", "paint", "line-width")).toBeUndefined();
+    expect(candidate._getRule("roads", "filter")).toBeUndefined();
+    expect(original._getRule("roads", "paint", "line-width")).toBe(8);
+    expect(candidate._withRule("roads", "filter", undefined, null)).toBe(
+      candidate,
+    );
+    expect(original._withRule("roads", "paint", "line-width", 8)).toBe(
+      original,
+    );
+  });
+
+  it("rejects invalid rule candidates atomically using the existing profile", function () {
+    const original = new SceneGISVectorTileStyle(
+      json({ paint: { "line-width": 3 } }),
+    );
+    const snapshot = original._getSnapshot();
+    for (const args of [
+      ["missing", "paint", "line-width", 1],
+      [undefined, "paint", "line-width", 1],
+      ["roads", "paint", Symbol("invalid"), 1],
+      ["roads", "paint", "unknown", null],
+      ["roads", "paint", "line-cap", "round"],
+      ["roads", "layout", "line-cap", "invalid"],
+      ["roads", "paint", "line-width", -1],
+      ["roads", "paint", "line-width", undefined],
+      ["roads", "paint", "line-width", Infinity],
+      ["roads", "paint", "line-width", ["unknown", 1]],
+      ["roads", "paint", "line-width", ["+", "text", 1]],
+      [
+        "roads",
+        "filter",
+        undefined,
+        ["==", ["feature-state", "selected"], true],
+      ],
+      ["roads", "layout", "line-cap", ["global-state", "cap"]],
+    ]) {
+      expect(function () {
+        original._withRule(...args);
+      }).toThrowDeveloperError();
+      expect(original._getSnapshot()).toEqual(snapshot);
+    }
+    expect(function () {
+      original._getRule("roads", "layout", "missing");
+    }).toThrowDeveloperError();
+  });
+
+  it("derives layout, filter and state paint expressions without losing supported semantics", function () {
+    const original = new SceneGISVectorTileStyle(json());
+    const candidate = original
+      ._withRule("roads", "paint", "line-width", [
+        "coalesce",
+        ["feature-state", "width"],
+        2,
+      ])
+      ._withRule("roads", "layout", "line-cap", [
+        "step",
+        ["zoom"],
+        "butt",
+        3,
+        "round",
+      ])
+      ._withRule("roads", "filter", undefined, ["==", "kind", "road"]);
+    const evaluated = candidate.evaluateLayer(
+      "roads",
+      feature({ kind: "road" }),
+      3.5,
+      { featureState: { width: 7 } },
+    );
+    expect(evaluated.paint["line-width"]).toBe(7);
+    expect(evaluated.layout["line-cap"]).toBe("round");
+    expect(evaluated.show).toBe(true);
+    expect(candidate.evaluateLayer("roads", feature(), 3).show).toBe(false);
+    expect(candidate._getSnapshot().layers[0].filter).toEqual([
+      "==",
+      "kind",
+      "road",
+    ]);
+  });
+
   it("preserves layer order and isolates compiled configuration from caller mutation", function () {
     const input = json({ paint: { "line-width": 3 } });
     input.layers.unshift({

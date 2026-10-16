@@ -5,17 +5,17 @@
 | Field                    | Value                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
 | Extension slug           | `vector-tiles`                                                                                                           |
-| Status                   | `completed`（四类样式增强与前一大阶段均已验收）                                                                          |
+| Status                   | `active`（动态绘制规则；此前扩展已验收）                                                                                 |
 | Planning model           | `extension`                                                                                                              |
-| Active extension plan    | None                                                                                                                     |
+| Active extension plan    | [动态绘制规则](plans/2026-10-16-dynamic-style-extension.md)                                                              |
 | Completed extension plan | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md)、[总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase            | None（人工 gate 已关闭）                                                                                                 |
-| Active phase plan        | None；[最后修复](plans/2026-09-17-enhancement-cover-fix.md)                                                              |
+| Current phase            | D1：样式快照与候选校验                                                                                                   |
+| Active phase plan        | [D1](plans/2026-10-16-d1-style-snapshots.md)                                                                             |
 | Last completed phase     | 样式增强页选取范围修正 `77df6ac9e3`                                                                                      |
 | Active standalone plan   | None                                                                                                                     |
 | Architecture contact     | 当前 Agent                                                                                                               |
 | Execution contact        | 当前 Agent                                                                                                               |
-| Last updated             | `2026-10-15`                                                                                                             |
+| Last updated             | `2026-10-16`                                                                                                             |
 
 ## Scope
 
@@ -62,6 +62,12 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - V3B1 ADR：[ADR-0062](../../Documentation/SceneGIS/Decisions/ADR-0062-vector-stroke-and-coverage.md)；无新增 SGP。
 
 ## Current handoff
+
+2026-10-16 SDK JSON 接入完成后启动[动态绘制规则扩展](plans/2026-10-16-dynamic-style-extension.md)。
+当前 D1 [样式快照与原子校验](plans/2026-10-16-d1-style-snapshots.md) completed，17 项 Core Specs 通过，
+[自审](reviews/2026-10-16-d1-style-snapshots.md)通过；独立提交后进入 D2。当前 Agent 负责
+Architecture / implementation self-review。沿用本对话指定的 `scenegis/develop`；SDK 不在修改范围。
+下列 completed 状态仅描述此前已验收阶段，新 API 尚未交付。
 
 2026-09-18 负责人明确“验收通过”，关闭纹理填充、动态要素状态、标注自动换位置、图标适配文字
 及球面增强页修复的人工 gate。[四类样式增强](plans/2026-09-17-style-enhancements-extension.md) completed，
