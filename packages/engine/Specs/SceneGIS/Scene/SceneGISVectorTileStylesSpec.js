@@ -5,6 +5,7 @@ import {
   ColorGeometryInstanceAttribute,
   PerInstanceColorAppearance,
   OrthographicFrustum,
+  PerspectiveFrustum,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
@@ -343,6 +344,61 @@ describe("SceneGIS/Scene/SceneGISVectorTileStyles", function () {
     expect(sample(0, 6).id).toBe("road");
     expect(sample(0, 10).id).toBeUndefined();
     scene.camera.frustum.width = 256;
+    scene.renderForSpecs();
+    expect(layer._drawOrder[0]._resources).toBe(resources);
+    expect(layer.statistics.uploads).toBe(uploads);
+  });
+
+  it("bounds near stroke magnification while preserving distant foreshortening and warm resources", async function () {
+    scene.camera.frustum = new PerspectiveFrustum({
+      fov: Math.PI / 3,
+      aspectRatio: 1,
+      near: 1,
+      far: 5000,
+    });
+    scene.camera.position = new Cartesian3(0, -200, 100);
+    scene.camera.direction = Cartesian3.normalize(
+      new Cartesian3(0, 200, -100),
+      new Cartesian3(),
+    );
+    scene.camera.up = Cartesian3.cross(
+      scene.camera.right,
+      scene.camera.direction,
+      new Cartesian3(),
+    );
+    await draw(
+      [
+        feature("road", [
+          [
+            [0, -190],
+            [0, 1500],
+          ],
+        ]),
+      ],
+      definition("line", { "line-color": "red", "line-width": 8 }),
+    );
+    const resources = layer._drawOrder[0]._resources;
+    const uploads = layer.statistics.uploads;
+    const pixels = scene.context.readPixels({ width: 128, height: 128 });
+    const widths = [24, 64, 104].map((y) => {
+      let width = 0;
+      for (let x = 0; x < 128; ++x) {
+        if (pixels[(y * 128 + x) * 4] > 127) {
+          ++width;
+        }
+      }
+      return width;
+    });
+    expect(widths[0]).toBeGreaterThanOrEqual(7);
+    expect(widths[0]).toBeLessThanOrEqual(9);
+    expect(widths[1]).toBeGreaterThanOrEqual(7);
+    expect(widths[1]).toBeLessThanOrEqual(9);
+    expect(widths[2]).toBeGreaterThan(0);
+    expect(widths[2]).toBeLessThan(widths[1]);
+    expect(scene.pick(new Cartesian2(64, 104), 1, 1)?.id.featureId).toBe(
+      "road",
+    );
+    expect(scene.pick(new Cartesian2(70, 104), 1, 1)).toBeUndefined();
     scene.renderForSpecs();
     expect(layer._drawOrder[0]._resources).toBe(resources);
     expect(layer.statistics.uploads).toBe(uploads);

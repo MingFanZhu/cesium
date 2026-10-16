@@ -78,6 +78,7 @@ vec2 groundCoordinates()
     }
 #endif
     float viewDepth = -eye.z;
+    groundViewDepth = viewDepth;
     if (viewDepth <= u_sceneGISVectorDepthRange.x || viewDepth > u_sceneGISVectorDepthRange.y) discard;
 #ifdef SCENEGIS_VECTOR_GLOBE_TERRAIN
     vec2 a = v_terrainAB.xy, b = v_terrainAB.zw, c = v_terrainC.xy;

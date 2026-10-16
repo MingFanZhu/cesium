@@ -26,6 +26,7 @@ void main()
     p.xy += vec2(offset.x, -offset.y) * czm_pixelRatio * 2.0 / czm_viewport.zw * p.w;
     gl_Position = p;
     gl_Position.z = clamp(p.z, -p.w, p.w);
+    czm_vertexLogDepth();
     if (parameters.w < 0.5) {
         gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     }

@@ -1,6 +1,14 @@
 uniform float u_sceneGISVectorOpacity;
 uniform sampler2D u_symbolAtlas;
 uniform vec2 u_symbolDepthRange;
+#if defined(OPAQUE) || defined(SCENEGIS_VECTOR_ANNOTATION)
+uniform sampler2D u_symbolMaterialDepth;
+uniform sampler2D u_symbolMaterial;
+uniform sampler2D u_symbolExternalDepth;
+uniform bool u_symbolHasExternalDepth;
+uniform vec2 u_sceneGISVectorMapRange;
+uniform float u_sceneGISVectorStyleOrder;
+#endif
 in vec2 v_uv;
 in vec4 v_color;
 in vec4 v_haloColor;
@@ -15,6 +23,22 @@ void main()
     if (v_eyeDepth <= u_symbolDepthRange.x || v_eyeDepth > u_symbolDepthRange.y) discard;
 #ifdef SCENEGIS_VECTOR_TERRAIN_ANCHOR
     if (v_groundVisibility < 0.5) discard;
+#endif
+#if defined(OPAQUE) || defined(SCENEGIS_VECTOR_ANNOTATION)
+    ivec2 pixel = ivec2(gl_FragCoord.xy);
+    float surfaceDepth = texelFetch(u_symbolMaterialDepth, pixel, 0).r;
+    vec4 material = texelFetch(u_symbolMaterial, pixel, 0);
+    float group = material.a;
+    float tag = dot(material.rgb, vec3(1.0, 256.0, 65536.0));
+    bool ownBuilding = group == -6.0 && tag > u_sceneGISVectorMapRange.x && tag <= u_sceneGISVectorMapRange.y;
+    if (ownBuilding && tag > u_sceneGISVectorMapRange.x + u_sceneGISVectorStyleOrder) discard;
+    // Terrain tests the anchor; this map's buildings use style order.
+    if (!ownBuilding && surfaceDepth > 0.0 && group != -3.0 && group != -5.0 &&
+        surfaceDepth < v_eyeDepth) discard;
+    if (u_symbolHasExternalDepth) {
+        float externalDepth = texelFetch(u_symbolExternalDepth, pixel, 0).r;
+        if (externalDepth > 0.0 && externalDepth < v_eyeDepth) discard;
+    }
 #endif
     vec4 sampleColor = texture(u_symbolAtlas, v_uv);
     vec4 color = czm_gammaCorrect(v_color);
@@ -34,4 +58,8 @@ void main()
     }
     out_FragColor *= u_sceneGISVectorOpacity;
     if (out_FragColor.a < 0.01) discard;
+#ifdef OPAQUE
+    if (out_FragColor.a < 0.995) discard;
+#endif
+    czm_writeLogDepth();
 }

@@ -854,7 +854,7 @@ function publishOrder(layer) {
  * @param {number} [options.maximumUploadTimePerFrame=4] Soft CPU milliseconds for tile GPU publication per normal frame.
  * @param {number} [options.maximumUploadBytesPerFrame=4194304] Soft tile buffer upload byte budget per normal frame. One indivisible batch may exceed it.
  * @param {number} [options.maximumSymbolCandidates=2048] Maximum point-symbol candidates per view, selected by style priority.
- * @param {number} [options.maximumGlyphRanges=64] Maximum cached 256-code-point glyph pages; active pages cannot be evicted.
+ * @param {number} [options.maximumGlyphRanges=64] Maximum cached 256-code-point glyph pages per symbol cohort. An atomic replacement may additionally retain the published cohort's pages until commit, at most twice this limit.
  * @param {number} [options.maximumSymbolRequests=4] Maximum concurrent glyph/sprite resource jobs.
  * @param {number} [options.opacity=1] Per-feature opacity multiplier in [0, 1]; not composited group opacity.
  * @param {boolean} [options.show=true] Whether the layer is shown.
@@ -1287,6 +1287,10 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
       return;
     }
     this._metersPerPixel = this._extent.width / (512 * 2 ** zoom);
+    if (!this._globe) {
+      this._referenceDepth =
+        -frameState.camera.positionWC.z / frameState.camera.directionWC.z;
+    }
     this._patterns?.update(frameState.context);
     updateBackgrounds(this, zoom, frameState);
     updateSources(this, zoom, frameState);

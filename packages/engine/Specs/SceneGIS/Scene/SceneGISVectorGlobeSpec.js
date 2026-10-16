@@ -177,6 +177,54 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
       ),
     };
   }
+  [0, 100].forEach(function (height) {
+    it(`bounds near ground stroke width and preserves far foreshortening at height ${height}`, async function () {
+      if (height) {
+        globe.terrainProvider = new CustomHeightmapTerrainProvider({
+          width: 16,
+          height: 16,
+          callback: () => new Float32Array(256).fill(height),
+        });
+      }
+      scene.camera.lookAt(
+        Coordinates.position(target.x, target.y, height),
+        new HeadingPitchRange(0, height ? -Math.PI / 3 : -Math.PI / 6, 1000),
+      );
+      scene.camera.lookAtTransform(Matrix4.IDENTITY);
+      scene.camera.frustum.fov = Math.PI / 4;
+      const layer = add(
+        [feature(2, [[2048, -4096, 2048, 8192]], "road")],
+        [
+          {
+            id: "road",
+            type: "line",
+            paint: { "line-color": "red", "line-width": 16 },
+          },
+        ],
+      );
+      await ready(layer);
+      const pixels = scene.context.readPixels({ width: 256, height: 256 });
+      const widths = [56, 128, 232].map((y) => {
+        let width = 0;
+        for (let x = 112; x < 144; ++x) {
+          if (pixels[(y * 256 + x) * 4] > 127) {
+            ++width;
+          }
+        }
+        return width;
+      });
+      expect(widths[0]).toBeGreaterThanOrEqual(15);
+      expect(widths[0]).toBeLessThanOrEqual(17);
+      expect(widths[1]).toBeGreaterThanOrEqual(15);
+      expect(widths[1]).toBeLessThanOrEqual(17);
+      expect(widths[2]).toBeGreaterThan(0);
+      expect(widths[2]).toBeLessThan(widths[1]);
+      expect(scene.pick(new Cartesian2(128, 200), 1, 1)?.id.featureId).toBe(
+        "road",
+      );
+      expect(scene.pick(new Cartesian2(138, 200), 1, 1)).toBeUndefined();
+    });
+  });
   it("dynamic rules update Globe drawing and picking without replacing the layer or sources", async function () {
     const layer = add(
       [feature(3, [[1400, 1400, 2700, 1400, 2700, 2700, 1400, 2700]])],

@@ -12,6 +12,7 @@ import {
   SceneGISPlanarTilingScheme,
   FramebufferManager,
   PixelDatatype,
+  PostProcessStage,
   SceneGISScreenSpaceReflections,
   SceneGISScreenSpaceIndirectLighting,
   SceneGISVectorTileLayer,
@@ -295,7 +296,7 @@ describe("SceneGIS/Scene/SceneGISVectorExtrusion", function () {
         const resources = batch._resources,
           va = resources._vertexArrays[0],
           program = resources._shaderProgram;
-        expect(batch.commands[0].pass).toBe(Pass.OPAQUE);
+        expect(batch.commands[0].pass).toBe(Pass.SCENEGIS_VECTOR);
         for (let i = 0; i < 5; i++) {
           scene.renderForSpecs();
         }
@@ -304,7 +305,7 @@ describe("SceneGIS/Scene/SceneGISVectorExtrusion", function () {
         const transparent = sample(height);
         expect(transparent.color[2]).toBeGreaterThan(20);
         expect(transparent.picked?.id?.featureId).toBe("tower");
-        expect(batch.commands[0].pass).toBe(Pass.TRANSLUCENT);
+        expect(batch.commands[0].pass).toBe(Pass.SCENEGIS_VECTOR);
         expect(resources._vertexArrays[0]).toBe(va);
         expect(resources._shaderProgram).toBe(program);
         layer.opacity = 0;
@@ -313,6 +314,34 @@ describe("SceneGIS/Scene/SceneGISVectorExtrusion", function () {
         expect(sample(height).picked?.id?.featureId).toBe("tower");
         scene.primitives.remove(layer);
         expect(va.isDestroyed()).toBeTrue();
+      });
+      it("retains building IDs for post-process selection in the vector pass", async function () {
+        add();
+        await ready();
+        const stage = scene.postProcessStages.add(
+          new PostProcessStage({
+            fragmentShader:
+              "uniform sampler2D colorTexture; in vec2 v_textureCoordinates; void main() { out_FragColor = texture(colorTexture, v_textureCoordinates); }",
+          }),
+        );
+        stage.selected = [];
+        await pollToPromise(() => {
+          scene.renderForSpecs();
+          return stage.ready;
+        });
+        const point = sample(height).point;
+        scene.renderForSpecs();
+        const rgba = scene.context.readPixels({
+          framebuffer: scene._view.sceneFramebuffer.getIdFramebuffer(),
+          x: Math.floor(point.x),
+          y: 255 - Math.floor(point.y),
+          width: 1,
+          height: 1,
+        });
+        const id = scene.context.getObjectByPickColor(
+          Color.bytesToRgba(...rgba),
+        );
+        expect(id?.id.featureId).toBe("tower");
       });
       it("shares opaque material with screen effects without replaying vector geometry", async function () {
         add();

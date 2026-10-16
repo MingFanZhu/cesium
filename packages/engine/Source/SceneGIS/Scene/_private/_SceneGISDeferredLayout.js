@@ -8,7 +8,12 @@ import BillboardCollection from "../../../Scene/BillboardCollection.js";
 import Vector3DTilePrimitive from "../../../Scene/Vector3DTilePrimitive.js";
 import SceneMode from "../../../Scene/SceneMode.js";
 
-const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
+const opaquePasses = [
+  Pass.GLOBE,
+  Pass.CESIUM_3D_TILE,
+  Pass.OPAQUE,
+  Pass.SCENEGIS_VECTOR,
+];
 const excluded = ["HAS_MODEL_COLOR", "HAS_SELECTED_FEATURE_ID"];
 
 function isDebugOverlay(command) {
@@ -21,9 +26,16 @@ function isDebugOverlay(command) {
 
 function isAnnotation(command) {
   return (
-    command.pass === Pass.OPAQUE &&
-    command.owner instanceof BillboardCollection &&
-    command.renderState.depthMask
+    ((command.pass === Pass.OPAQUE || command.pass === Pass.SCENEGIS_VECTOR) &&
+      (command.owner instanceof BillboardCollection ||
+        command.shaderProgram?.fragmentShaderSource.defines.includes(
+          "SCENEGIS_VECTOR_SYMBOL",
+        )) &&
+      command.renderState.depthMask) ||
+    (command.pass === Pass.SCENEGIS_VECTOR &&
+      command.shaderProgram?.fragmentShaderSource.defines.includes(
+        "SCENEGIS_VECTOR_ORDERED_EXTRUSION",
+      ))
   );
 }
 

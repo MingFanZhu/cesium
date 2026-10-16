@@ -37,6 +37,12 @@ Opaque 写真实几何深度；透明使用 Cesium TRANSLUCENT/OIT，与底图�
 Native derived pick/depth 使用同一几何/clip，Layer opacity=0 保留资源且不提交绘制。
 不增加自定义 pass、第二套 WebGL Context 或上游渲染 hook。
 
+2026-10-16 后继决定由 [ADR-0161](ADR-0161-unified-opaque-deferred-direction.md#2026-10-16-vector-annotations-on-opaque-worlds)
+细化不透明世界的调度：建筑与注记进入 `SCENEGIS_VECTOR`，透明建筑使用有序 forward 合成，
+与同一地图注记遵循样式层序；opaque 建筑仍共享物理 G-buffer 与一次延迟光照。
+外部 Model / 3D Tiles 深度与地图层序分离。SGP-0046 提供 Scene / Pass 最小接缝，
+透明世界原协议不随此扩展；上述“不增加 pass”和透明建筑统一 OIT 的初期约束由该决定替代。
+
 ## Delivery and validation
 
 沿用 SceneGIS GLSL root 与既有 vector Worker entry；新增私有模块按现有 barrel/build 生成，不改上游。

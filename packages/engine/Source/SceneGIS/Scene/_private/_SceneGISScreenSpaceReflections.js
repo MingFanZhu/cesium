@@ -10,7 +10,12 @@ import ReflectionMrt from "./_SceneGISLightingMrt.js";
 import ReflectionTracing from "./_SceneGISReflectionTracing.js";
 import IndirectLighting from "./_SceneGISScreenSpaceIndirectLighting.js";
 
-const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
+const opaquePasses = [
+  Pass.GLOBE,
+  Pass.CESIUM_3D_TILE,
+  Pass.OPAQUE,
+  Pass.SCENEGIS_VECTOR,
+];
 
 /**
  * Current-frame capture, traversal and native PBR radiance substitution.

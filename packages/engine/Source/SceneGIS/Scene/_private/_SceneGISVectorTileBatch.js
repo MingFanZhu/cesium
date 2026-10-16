@@ -291,6 +291,7 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
   this._owner = owner;
   this._prepared = prepared;
   this._record = record;
+  this._styleOrder = owner._records.indexOf(record) + 1;
   this._geometryKey = record?.key;
   this._resources = undefined;
   this._modelMatrix = Matrix4.fromTranslation(
@@ -371,10 +372,20 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
       ? this._owner._patterns.uniformMap(this._tileBounds)
       : {}),
     u_sceneGISVectorOpacity: () => this._owner.opacity,
+    ...(extrusion
+      ? {
+          u_sceneGISVectorStyleOrder: () => this._styleOrder,
+          u_sceneGISVectorMapRange: () =>
+            this._owner._scene._sceneGISDeferred._vectorSymbolOcclusion?.maps.get(
+              this._owner,
+            )?.range ?? Cartesian2.ZERO,
+        }
+      : {}),
     ...environment.createUniformMap(this._owner),
     u_sceneGISGroundHeights: () => groundHeights(this, frameState),
     u_sceneGISGroundLighting: () => this._owner._world.enableLighting,
     u_sceneGISVectorMetersPerPixel: () => this._owner._metersPerPixel,
+    u_sceneGISVectorReferenceDepth: () => this._owner._referenceDepth,
     u_sceneGISVectorDepthRange: () => {
       const splits = frameState.frustumSplits;
       const far = frameState.context.uniformState.currentFrustum.y;
@@ -423,8 +434,18 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
 function updateExtrusionState(batch, command) {
   const translucent =
     batch._pattern || batch._styleOpacity * batch._owner.opacity < 1;
-  const pass = translucent ? Pass.TRANSLUCENT : Pass.OPAQUE;
-  if (command.pass === pass) {
+  const opaqueWorld = batch._owner._globe
+    ? !batch._owner._scene.globe.translucency.enabled
+    : batch._owner._world.opacity === 1;
+  const pass = opaqueWorld
+    ? Pass.SCENEGIS_VECTOR
+    : translucent
+      ? Pass.TRANSLUCENT
+      : Pass.OPAQUE;
+  if (
+    command.pass === pass &&
+    command.renderState.blending.enabled === !!translucent
+  ) {
     return;
   }
   command.pass = pass;

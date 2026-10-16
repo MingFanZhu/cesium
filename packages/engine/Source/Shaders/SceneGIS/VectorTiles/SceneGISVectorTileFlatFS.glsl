@@ -5,6 +5,7 @@ uniform float u_sceneGISVectorOpacity;
 vec2 groundCoordinates();
 uniform bool u_sceneGISGroundLighting;
 float groundLight;
+float groundViewDepth;
 #ifdef SCENEGIS_VECTOR_ENVIRONMENT
 vec3 groundPositionEC;
 vec3 groundNormalEC;
@@ -37,6 +38,7 @@ SCENEGIS_VECTOR_INPUT vec4 v_strokeColor;
 SCENEGIS_VECTOR_INPUT float v_fringe;
 #endif
 #ifdef SCENEGIS_VECTOR_LINE
+uniform float u_sceneGISVectorReferenceDepth;
 SCENEGIS_VECTOR_INPUT vec4 v_lineCoordinate;
 SCENEGIS_VECTOR_INPUT vec4 v_lineStyle;
 SCENEGIS_VECTOR_INPUT vec3 v_lineDash;
@@ -47,21 +49,22 @@ uniform sampler2D u_sceneGISVectorDashTable;
 uniform vec2 u_sceneGISVectorDashSize;
 #endif
 
-float lineCoverage()
+float lineCoverage(float scale)
 {
     float distanceToLine = length(v_lineCoordinate.xy);
-    float outer = v_lineCoordinate.w;
+    float outer = v_lineCoordinate.w * scale;
     float aa = max(0.000001, length(vec2(dFdx(distanceToLine), dFdy(distanceToLine))));
-    float fade = aa + v_lineStyle.z;
+    float blur = v_lineStyle.z * scale;
+    float fade = aa + blur;
     float coverage = clamp((outer + aa * 0.5 - distanceToLine) / fade, 0.0, 1.0);
     if (v_lineStyle.y > 0.0) {
-        coverage = min(coverage, clamp((distanceToLine - v_lineStyle.y + aa * 0.5) / fade, 0.0, 1.0));
+        coverage = min(coverage, clamp((distanceToLine - v_lineStyle.y * scale + aa * 0.5) / fade, 0.0, 1.0));
     }
     if (v_lineEnds.x >= 0.0 && v_lineEnds.y < 1.5) {
         float endDistance = max(-v_lineCoordinate.z, v_lineCoordinate.z - v_lineEnds.x);
         if (v_lineEnds.y > 0.5) endDistance -= outer;
         float endAA = max(0.000001, length(vec2(dFdx(v_lineCoordinate.z), dFdy(v_lineCoordinate.z))));
-        coverage = min(coverage, clamp((endAA * 0.5 - endDistance) / (endAA + v_lineStyle.z), 0.0, 1.0));
+        coverage = min(coverage, clamp((endAA * 0.5 - endDistance) / (endAA + blur), 0.0, 1.0));
     }
 #ifdef SCENEGIS_VECTOR_DASH
     if (v_lineDash.y > 0.0) {
@@ -83,7 +86,7 @@ float lineCoverage()
             dashDistance = min(dashDistance, shape);
         }
         float dashAA = max(0.000001, length(vec2(dFdx(v_lineProgress), dFdy(v_lineProgress))));
-        coverage = min(coverage, clamp((dashAA * 0.5 - dashDistance) / (dashAA + v_lineStyle.z), 0.0, 1.0));
+        coverage = min(coverage, clamp((dashAA * 0.5 - dashDistance) / (dashAA + blur), 0.0, 1.0));
     }
 #endif
     return coverage;
@@ -117,11 +120,23 @@ void main()
     if (local.x < u_sceneGISVectorTileClip.x || local.x >= u_sceneGISVectorTileClip.z ||
         local.y > u_sceneGISVectorTileClip.w || local.y <= u_sceneGISVectorTileClip.y) discard;
 
+#ifdef SCENEGIS_VECTOR_LINE
+    // Keep the map-space centerline and longitudinal stations stable. Only
+    // cancel magnification in front of the style reference; distant strokes
+    // retain perspective foreshortening. The original mesh bounds this subset.
+#ifdef SCENEGIS_VECTOR_GROUND
+    float lineDepth = groundViewDepth;
+#else
+    float lineDepth = viewDepth;
+#endif
+    float lineScale = czm_projection[3][3] == 0.0 ?
+        min(1.0, lineDepth / u_sceneGISVectorReferenceDepth) : 1.0;
+#endif
     vec4 material = v_color;
 #ifdef SCENEGIS_VECTOR_PATTERN
 #ifdef SCENEGIS_VECTOR_LINE
     vec2 patternPosition = vec2(v_lineProgress * v_patternSize.y / max(v_lineStyle.x, 0.000001),
-        (0.5 + v_lineCoordinate.y / max(2.0 * v_lineCoordinate.w, 0.000001)) * v_patternSize.y);
+        (0.5 + v_lineCoordinate.y / max(2.0 * v_lineCoordinate.w * lineScale, 0.000001)) * v_patternSize.y);
 #else
     vec2 patternPosition = vectorPatternPosition(local, v_patternSize);
 #endif
@@ -153,7 +168,7 @@ void main()
     stroke.rgb *= stroke.a;
     out_FragColor = fill * fillCoverage + stroke * max(0.0, outerCoverage - fillCoverage);
 #elif defined(SCENEGIS_VECTOR_LINE)
-    out_FragColor = fill * lineCoverage();
+    out_FragColor = fill * lineCoverage(lineScale);
 #elif defined(SCENEGIS_VECTOR_FRINGE)
     out_FragColor = fill * v_fringe;
 #else

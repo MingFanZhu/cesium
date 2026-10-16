@@ -29,7 +29,10 @@ const Pass = {
   GAUSSIAN_SPLATS: 12,
   CESIUM_3D_TILE_EDGES_DIRECT: 13,
   OVERLAY: 14,
-  NUMBER_OF_PASSES: 15,
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Schedule map geometry independently of external object depth.
+  SCENEGIS_VECTOR: 15,
+  NUMBER_OF_PASSES: 16,
+  // SCENEGIS_PATCH_END SGP-0046
 };
 
 Object.freeze(Pass);

@@ -63,6 +63,22 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 
 ## Current handoff
 
+2026-10-16 负责人确认修复公开球面地图的近处线宽放大及地平线注记截断，
+按[独立修复计划](plans/2026-10-16-low-angle-rendering.md)推进；不改变 D2 的待人工验收状态。
+近处线宽在解析覆盖中补偿，独立注记保留地形锚点可见性、模型深度遮挡和原有 source-over 顺序。
+负责人进一步确认同一地图建筑/注记按样式层序，并允许独立 PASS。
+已接入 SCENEGIS_VECTOR，保留外部模型/3D Tiles 和地形遮挡；累计 136 项相关 Specs 通过。
+构建和静态检查通过；Scene.js / Pass.js 的最小上游接缝登记 SGP-0046。
+[self-review](reviews/2026-10-16-low-angle-rendering.md)记录资源成本和透明地表边界。
+2026-10-16 负责人已确认本轮视觉 gate 通过，创建独立本地 checkpoint，不推送。
+负责人随后报告视角变化时注记短暂消失；已复现旧 render cover 失效后提前隐藏，
+而新 placement 尚未提交的空档。负责人确认方案后，已完成显示/拾取批次原子交接，
+等待字体和 Worker 时保留旧批次，继续按当前样式和既有深度协议隐藏；
+[self-review](reviews/2026-10-16-low-angle-rendering.md) 的 P1 已 fixed。
+85 项相关回归、构建及静态检查通过；公开页 300 帧缩放往返未重现此前空档，
+记录了旧注记保留、有限过渡 cache 和提交后释放证据。负责人最终视觉 gate 已通过。
+随后报告另一当前视角下整层不显示，作为独立问题继续诊断；不改动 D2 的待验收状态。
+
 2026-10-16 SDK JSON 接入完成后启动[动态绘制规则扩展](plans/2026-10-16-dynamic-style-extension.md)。
 当前 D1 [样式快照与原子校验](plans/2026-10-16-d1-style-snapshots.md) completed，17 项 Core Specs 通过，
 [自审](reviews/2026-10-16-d1-style-snapshots.md)通过；checkpoint `7414056515`。

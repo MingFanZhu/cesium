@@ -1,3 +1,7 @@
+#ifdef SCENEGIS_VECTOR_SYMBOL
+uniform sampler2D u_sceneGISVectorTerrainDepth;
+uniform bool u_sceneGISVectorHasTerrainDepth;
+#endif
 float sceneGISAnchorVisibility(vec4 clip, float eyeDepth)
 {
     if (clip.w <= 0.0 || eyeDepth <= czm_currentFrustum.x || eyeDepth > czm_currentFrustum.y) return 0.0;
@@ -10,6 +14,12 @@ float sceneGISAnchorVisibility(vec4 clip, float eyeDepth)
         for (int x = 0; x < 2; x++) {
             vec2 pixel = base + vec2(float(x), float(y));
             if (any(lessThan(pixel, czm_viewport.xy)) || any(greaterThanEqual(pixel, czm_viewport.xy + czm_viewport.zw))) continue;
+#ifdef SCENEGIS_VECTOR_SYMBOL
+            if (u_sceneGISVectorHasTerrainDepth) {
+                farthest = max(farthest, texelFetch(u_sceneGISVectorTerrainDepth, ivec2(pixel), 0).r);
+                continue;
+            }
+#endif
 #ifdef SCENEGIS_VECTOR_PLANAR_TRANSPARENT
             float depth = texture(u_sceneGISPlanarVectorDepth, pixel / czm_viewport.zw).r;
 #else

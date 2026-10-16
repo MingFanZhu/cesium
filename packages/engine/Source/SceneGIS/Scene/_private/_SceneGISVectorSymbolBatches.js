@@ -3,6 +3,7 @@ import DrawCommand from "../../../Renderer/DrawCommand.js";
 import RenderState from "../../../Renderer/RenderState.js";
 import Pass from "../../../Renderer/Pass.js";
 import BlendingState from "../../../Scene/BlendingState.js";
+import DepthFunction from "../../../Scene/DepthFunction.js";
 import Resources from "../../Renderer/_private/_SceneGISVectorSymbolResources.js";
 
 const corners = [0, 1, 2, 0, 2, 3];
@@ -116,8 +117,28 @@ function command(runtime, batch, frameState) {
     shaderProgram: batch.resources.shader,
     uniformMap: {
       u_sceneGISVectorOpacity: () => runtime.owner.opacity,
+      u_sceneGISVectorStyleOrder: () => batch.record + 1,
+      u_sceneGISVectorMapRange: () =>
+        runtime.owner._scene._sceneGISDeferred._vectorSymbolOcclusion?.maps.get(
+          runtime.owner,
+        )?.range ?? Cartesian2.ZERO,
+      u_symbolHasExternalDepth: () =>
+        !!runtime.owner._scene._sceneGISDeferred._vectorSymbolOcclusion?.depth,
+      u_symbolExternalDepth: () =>
+        runtime.owner._scene._sceneGISDeferred._vectorSymbolOcclusion?.depth?.getColorTexture() ??
+        frameState.context.defaultTexture,
       u_symbolAtlas: () =>
         runtime.assets.texture(batch.page, frameState.context),
+      u_sceneGISVectorHasTerrainDepth: () =>
+        !!runtime.owner._scene._sceneGISDeferred._vectorSymbolOcclusion
+          ?.terrain,
+      u_sceneGISVectorTerrainDepth: () =>
+        runtime.owner._scene._sceneGISDeferred._vectorSymbolOcclusion?.terrain?.getColorTexture() ??
+        frameState.context.defaultTexture,
+      u_symbolMaterialDepth: () =>
+        runtime.owner._scene._sceneGISDeferred._linearDepth,
+      u_symbolMaterial: () =>
+        runtime.owner._scene._sceneGISDeferred._raw.getColorTexture(2),
       u_symbolDepthRange: () => {
         const far = frameState.context.uniformState.currentFrustum.y;
         const index = frameState.frustumSplits.indexOf(far);
@@ -127,19 +148,27 @@ function command(runtime, batch, frameState) {
       },
     },
     renderState: RenderState.fromCache({
-      depthTest: { enabled: false },
-      depthMask: false,
+      // Terrain visibility is tested at the anchor. Per-pixel material depth
+      // rejects objects without cutting a billboard against its own ground.
+      depthTest: { enabled: true, func: DepthFunction.ALWAYS },
+      depthMask: true,
       cull: { enabled: false },
       blending: BlendingState.PRE_MULTIPLIED_ALPHA_BLEND,
     }),
     pickId: runtime.owner._allowPicking ? "v_pickColor" : undefined,
-    pass: Pass.TERRAIN_CLASSIFICATION,
+    pass: Pass.SCENEGIS_VECTOR,
     cull: false,
   });
 }
 
 function order(runtime) {
   runtime.batches.clear();
+  const surfaceState = RenderState.fromCache({
+    depthTest: { enabled: false },
+    depthMask: false,
+    cull: { enabled: false },
+    blending: BlendingState.PRE_MULTIPLIED_ALPHA_BLEND,
+  });
   for (const batch of [...runtime._groups.values()].sort(
     (a, b) => a.record - b.record || Number(a.text) - Number(b.text),
   )) {
@@ -156,7 +185,22 @@ function order(runtime) {
             !frame.passes.depth &&
             runtime.owner._allowPicking)
         ) {
-          frame.commandList.push(batch.command);
+          const owner = runtime.owner;
+          const translucentSurface = owner._globe
+            ? owner._scene.globe.translucency.enabled
+            : owner._world.opacity < 1;
+          if (translucentSurface) {
+            // Transparent worlds retain their dedicated ordered map composite.
+            const pick = (batch.surfaceCommand = DrawCommand.shallowClone(
+              batch.command,
+              batch.surfaceCommand,
+            ));
+            pick.pass = Pass.TERRAIN_CLASSIFICATION;
+            pick.renderState = surfaceState;
+            frame.commandList.push(pick);
+          } else {
+            frame.commandList.push(batch.command);
+          }
         }
       },
     });

@@ -12,7 +12,12 @@ import DepthFunction from "../../../Scene/DepthFunction.js";
 import indirect from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOMain.js";
 import DeferredLayout from "./_SceneGISDeferredLayout.js";
 
-const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
+const opaquePasses = [
+  Pass.GLOBE,
+  Pass.CESIUM_3D_TILE,
+  Pass.OPAQUE,
+  Pass.SCENEGIS_VECTOR,
+];
 
 function enabled(scene) {
   return (

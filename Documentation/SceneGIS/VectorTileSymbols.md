@@ -149,6 +149,8 @@ anchor 的世界间距为 symbol-spacing 乘以整数 style zoom 与 source cano
 该设置不会自动修改产品预算，也不代表任意中文视图都能在任意预算下完整显示。
 
 字形按 font/range 共用页面；当前需求/发布命令使用的页面不可 LRU 淘汰。
+原子交接期间额外保留旧显示批次的页面，总数最多为 2 × maximumGlyphRanges，共用页面不重复分配；
+取消的新需求可以淘汰，提交后回收超额缓存。稳态 cache 和单批需求仍受该选项上限约束。
 过期请求可取消；迟到结果不能恢复已销毁资源。异步完成只准备 CPU 数据并 requestRender，
 GPU 与布局只在 normal update 发布，pick/depth 复用快照。
 基础地图不等待字体；同内容标注在延迟 LOD 替换时保留身份。
@@ -156,7 +158,10 @@ GPU 与布局只在 normal update 发布，pick/depth 复用快照。
 Placement 使用不可变相机快照，按约 2 ms 的步骤粒度软预算跨帧推进；普通交互在提交后
 最多复用 100 ms，再启动下一轮。持续移动不重启在途布局，避免饥饿；完成后处理最新视图。
 单个不可分割步骤可能超过预算，100 ms 也不是包含计算时间的硬完成期限。
-离开当前 owner/视口、near/far 或远景范围的已发布标注当前帧隐藏。
+render cover/LOD 切换不提前隐藏已发布标注；新批次的字形、Worker shaping 和 collision 全部就绪后，
+统一替换显示与拾取并释放旧分组。等待期间继续按当前相机绘制；离开视口、near/far 或远景范围，
+以及被当前 visibility/filter/min/max zoom 隐藏的标注，仍在当前帧隐藏。
+地形、外部模型遮挡和同地图建筑层序保持；详见 ADR-0068 的原子交接修订。
 
 候选和空间索引随驻留瓦片保存，短时离开 render cover 后再次进入可直接复用；真正淘汰、
 整数 layout 或 terrain snapshot 改变时失效。空间包围盒只用于保守跳过不可见候选，仍按实际
@@ -193,6 +198,15 @@ Worker 待处理任务也计入 tilesLoaded；完成回调只存 CPU 状态。�
 密集视图瓶颈，整体内存硬上限与 terrain/Globe 另行验证。见 [ADR-0067](Decisions/ADR-0067-vector-worker-preparation.md)。
 
 ## 验收入口
+
+2026-10-16 不透明 Globe / Planar 的建筑与注记进入独立 `SCENEGIS_VECTOR` PASS。
+同一 Layer 中，位于建筑层之后的注记完整显示在建筑上；位于建筑层之前的注记接受建筑覆盖。
+半透明建筑与注记仍按 style.layers 顺序 source-over 混色；拾取遵循相同层序。
+地形继续按锚点遮挡，另外加载的 Model / 3D Tiles 保留物理深度遮挡，包括藏在地图建筑后的模型。
+跨出地表轮廓的 glyph 不再被 classification 丢弃；环境使用实心注记深度。
+每批 symbol 保留一次颜色、一次实心深度提交，atlas 与顶点缓存不重建；外部 / 地形深度按需保留。
+透明地表继续使用既有独立地图路径；未扩展透明世界或水面排序契约。
+详见 [ADR-0161](Decisions/ADR-0161-unified-opaque-deferred-direction.md#2026-10-16-vector-annotations-on-opaque-worlds)。
 
 - [symbols.html](../../Test/vector-tiles/planar-symbols.html)：完全本地的中英文、描边、POI、避让、拾取、缩放与倾斜。
 - [line-symbols.html](../../Test/vector-tiles/planar-line-symbols.html)：曲线名称、正反道路、路牌、箭头、锐角和短线。

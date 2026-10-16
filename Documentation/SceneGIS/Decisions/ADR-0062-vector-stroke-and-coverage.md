@@ -32,6 +32,18 @@ Line width/gap/offset 按参考平面 CSS pixel 换算为米，挤出后参与�
 large-origin positions 仍为 double→high/low 与 double modelMatrix。
 Circle 保持屏幕尺寸，不把其 screen alignment 暗改为 map alignment。
 
+### 2026-10-16：近处线宽上限
+
+负责人确认低俯角下抑制近处的额外放大，保留贴地及远处透视收缩。
+在解析 coverage 中，width / gap / blur 乘以 `min(1, eyeDepth / referenceDepth)`；
+正交投影为 1。Ground 使用实际地表深度，flat 使用参考平面交点深度。
+这修订上述无限制近大远小的行为，不改变 style zoom、source LOD 或线的真实中心位置。
+原网格仍保守包围收缩后的覆盖；无需重建网格、增加顶点属性或纹理。
+Offset 与 dash / pattern 的纵向累计 station 保持地图空间语义，防止随视点移动时相位游动；
+图案的横向坐标随新宽度归一化，cap 和 gap 共享同一解析边界。
+这是一种制图宽度，不声称从像素规则推导出了道路的真实米宽。计划与证据见
+[低俯角修复](../../../AgentDocs/vector-tiles/plans/2026-10-16-low-angle-rendering.md)。
+
 连续拓扑表达连接处，避免把普通拐角当独立 segment 重叠绘制。
 Miter 超限转 bevel；round join 按角度生成扇形，极锐/反向转折保留有限网格。
 Geometry 保存逐 feature paint 与 pick 属性，不按颜色或 dash 值生成独立 command。

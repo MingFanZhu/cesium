@@ -3,6 +3,9 @@ import {
   Cartesian3,
   Color,
   Event,
+  Matrix4,
+  Model,
+  Cesium3DTileset,
   SceneGISPlanarHeightmapTerrainData,
   OrthographicFrustum,
   PerspectiveFrustum,
@@ -106,6 +109,36 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     });
     expect(layer.statistics.failedTiles).toBe(0);
   }
+  function building() {
+    return {
+      id: "building",
+      type: 3,
+      properties: {},
+      geometry: {
+        parts: [
+          new Float64Array([1968, 1968, 2128, 1968, 2128, 2128, 1968, 2128]),
+        ],
+        polygonStarts: new Uint32Array([0]),
+      },
+    };
+  }
+  function buildingDefinition(opacity = 1) {
+    return {
+      id: "buildings",
+      type: "fill-extrusion",
+      source: "test",
+      "source-layer": "data",
+      filter: ["==", ["geometry-type"], "Polygon"],
+      paint: {
+        "fill-extrusion-color": "lime",
+        "fill-extrusion-height": 60,
+        "fill-extrusion-opacity": opacity,
+      },
+    };
+  }
+  function pointDefinition() {
+    return { ...definition(), filter: ["==", ["geometry-type"], "Point"] };
+  }
   function pixel(x = 30, y = 32) {
     scene.renderForSpecs();
     return Array.from(
@@ -150,6 +183,283 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     scene.destroyForSpecs();
     image?.remove();
     image = undefined;
+  });
+
+  [false, true].forEach(function (logarithmic) {
+    it(`retains symbol coverage above the terrain silhouette (log ${logarithmic})`, async function () {
+      scene.logarithmicDepthBuffer = logarithmic;
+      scene.farToNearRatio = 10;
+      scene.logarithmicDepthFarToNearRatio = 10;
+      const label = feature();
+      label.geometry.parts[0][1] = 48;
+      spyOn(source, "requestTile").and.resolveTo(tile([label]));
+      spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+      scene.camera.position = new Cartesian3(0, 440, 5);
+      scene.camera.direction = Cartesian3.normalize(
+        new Cartesian3(0, 60, -5),
+        new Cartesian3(),
+      );
+      scene.camera.up = Cartesian3.cross(
+        scene.camera.right,
+        scene.camera.direction,
+        new Cartesian3(),
+      );
+      scene.camera.frustum.far = 5000;
+      const layer = add([
+        definition("labels", { "text-size": 16, "text-offset": [0, -0.5] }),
+      ]);
+      await loaded(layer);
+      const candidate = layer._symbols._placed[0];
+      const point = glyphCenter(candidate);
+      const ray = scene.camera.getPickRay(point);
+      const distance = -ray.origin.z / ray.direction.z;
+      expect(
+        distance < 0 || ray.origin.y + distance * ray.direction.y > 512,
+      ).toBeTrue();
+      expect(pixel(Math.floor(point.x), Math.floor(point.y))).toEqual([
+        255, 0, 0, 255,
+      ]);
+      expect(scene.pick(point, 1, 1)?.id.featureId).toBe("1");
+      const renderer = scene._sceneGISDeferred;
+      expect(scene.frameState.frustumSplits.length).toBeGreaterThan(2);
+      const depth = renderer._annotations.depth.getColorTexture();
+      const buffers = [...layer._symbols._groups.values()].map(
+        (b) => b.resources,
+      );
+      scene.renderForSpecs();
+      expect(renderer._annotations.depth.getColorTexture()).toBe(depth);
+      expect(
+        [...layer._symbols._groups.values()].map((b) => b.resources),
+      ).toEqual(buffers);
+      expect(renderer.annotationDrawCount).toBeGreaterThan(0);
+      layer.opacity = 0.5;
+      expect(pixel(Math.floor(point.x), Math.floor(point.y))[0]).toEqualEpsilon(
+        128,
+        2,
+      );
+      layer.opacity = 1;
+      scene.primitives.remove(layer);
+      scene.renderForSpecs();
+      expect(depth.isDestroyed()).toBeTrue();
+      expect(renderer._annotations).toBeUndefined();
+    });
+  });
+
+  [false, true].forEach(function (labelsAbove) {
+    it(`orders opaque buildings and symbols by style (labels above ${labelsAbove})`, async function () {
+      spyOn(source, "requestTile").and.resolveTo(tile([feature(), building()]));
+      spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+      const layers = [buildingDefinition(), pointDefinition()];
+      const layer = add(labelsAbove ? layers : layers.reverse());
+      await loaded(layer);
+      const point = glyphCenter(layer._symbols._placed[0]);
+      const color = pixel(Math.floor(point.x), Math.floor(point.y));
+      if (labelsAbove) {
+        expect(color).toEqual([255, 0, 0, 255]);
+      } else {
+        expect(color[0]).toBe(0);
+        expect(color[1]).toBeGreaterThan(0);
+      }
+      expect(scene._sceneGISDeferred.vectorSymbolOcclusionByteLength).toBe(0);
+      expect(scene.pick(point, 1, 1)?.id.featureId).toBe(
+        labelsAbove ? "1" : "building",
+      );
+    });
+  });
+
+  [false, true].forEach(function (labelsAbove) {
+    it(`orders translucent buildings and fractional symbols (labels above ${labelsAbove})`, async function () {
+      spyOn(source, "requestTile").and.resolveTo(tile([feature(), building()]));
+      spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+      const label = pointDefinition();
+      label.paint["text-opacity"] = 0.5;
+      const layers = [buildingDefinition(0.5), label];
+      const layer = add(labelsAbove ? layers : layers.reverse());
+      await loaded(layer);
+      const point = glyphCenter(layer._symbols._placed[0]);
+      const color = pixel(Math.floor(point.x), Math.floor(point.y));
+      expect(color[0]).toEqualEpsilon(labelsAbove ? 128 : 64, 2);
+      expect(color[1]).toBeGreaterThan(0);
+      expect(scene.pick(point, 1, 1)?.id.featureId).toBe(
+        labelsAbove ? "1" : "building",
+      );
+    });
+  });
+
+  it("keeps building style order across linear frusta", async function () {
+    scene.logarithmicDepthBuffer = false;
+    scene.farToNearRatio = 2;
+    spyOn(source, "requestTile").and.resolveTo(tile([feature(), building()]));
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([buildingDefinition(), pointDefinition()]);
+    await loaded(layer);
+    const point = glyphCenter(layer._symbols._placed[0]);
+    expect(scene.frameState.frustumSplits.length).toBeGreaterThan(2);
+    expect(pixel(Math.floor(point.x), Math.floor(point.y))).toEqual([
+      255, 0, 0, 255,
+    ]);
+    expect(scene.pick(point, 1, 1)?.id.featureId).toBe("1");
+  });
+
+  [false, true].forEach(function (labelsAbove) {
+    it(`keeps translucent style composition across linear frusta (labels above ${labelsAbove})`, async function () {
+      scene.logarithmicDepthBuffer = false;
+      scene.farToNearRatio = 2;
+      spyOn(source, "requestTile").and.resolveTo(tile([feature(), building()]));
+      spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+      const label = pointDefinition();
+      label.paint["text-opacity"] = 0.5;
+      const layers = [buildingDefinition(0.5), label];
+      const layer = add(labelsAbove ? layers : layers.reverse());
+      await loaded(layer);
+      const point = glyphCenter(layer._symbols._placed[0]);
+      expect(scene.frameState.frustumSplits.length).toBeGreaterThan(2);
+      const color = pixel(Math.floor(point.x), Math.floor(point.y));
+      expect(color[0]).toEqualEpsilon(labelsAbove ? 128 : 64, 2);
+      expect(color[1]).toBeGreaterThan(0);
+      expect(scene.pick(point, 1, 1)?.id.featureId).toBe(
+        labelsAbove ? "1" : "building",
+      );
+    });
+  });
+
+  it("does not apply one map's style order to another map's building", async function () {
+    spyOn(source, "requestTile").and.resolveTo(tile([feature(), building()]));
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const buildings = add([buildingDefinition()]);
+    const labels = add([pointDefinition()]);
+    await loaded(buildings);
+    await loaded(labels);
+    const point = glyphCenter(labels._symbols._placed[0]);
+    expect(scene.pick(point, 1, 1)?.id.featureId).toBe("building");
+    expect(pixel(Math.floor(point.x), Math.floor(point.y))[0]).toBe(0);
+    scene.primitives.remove(buildings);
+    expect(pixel(Math.floor(point.x), Math.floor(point.y))).toEqual([
+      255, 0, 0, 255,
+    ]);
+  });
+
+  it("retains 3D Tiles occlusion behind an earlier map building", async function () {
+    const tileset = scene.primitives.add(
+      await Cesium3DTileset.fromUrl(
+        `data:application/json,${encodeURIComponent(
+          JSON.stringify({
+            asset: { version: "1.1" },
+            geometricError: 1000,
+            root: {
+              boundingVolume: { box: [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1] },
+              geometricError: 0,
+              content: {
+                uri: new URL(
+                  "./Data/Models/glTF-2.0/Box/glTF/Box.gltf",
+                  window.location.href,
+                ).href,
+              },
+            },
+          }),
+        )}`,
+        {
+          modelMatrix: Matrix4.multiplyByUniformScale(
+            Matrix4.fromTranslation(new Cartesian3(0, 0, 20)),
+            30,
+            new Matrix4(),
+          ),
+        },
+      ),
+    );
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return (
+        tileset.root.contentReady && tileset._statistics.numberOfCommands > 0
+      );
+    });
+    spyOn(source, "requestTile").and.resolveTo(tile([feature(), building()]));
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add([buildingDefinition(), pointDefinition()]);
+    await loaded(layer);
+    const point = glyphCenter(layer._symbols._placed[0]);
+    expect(pixel(Math.floor(point.x), Math.floor(point.y))[0]).toBe(0);
+    scene.primitives.remove(tileset);
+    expect(pixel(Math.floor(point.x), Math.floor(point.y))).toEqual([
+      255, 0, 0, 255,
+    ]);
+  });
+
+  [false, true].forEach(function (logarithmic) {
+    it(`retains an external model hidden behind an earlier map building (log ${logarithmic})`, async function () {
+      scene.logarithmicDepthBuffer = logarithmic;
+      scene.farToNearRatio = 2;
+      const model = scene.primitives.add(
+        await Model.fromGltfAsync({
+          url: "./Data/Models/glTF-2.0/Box/glTF/Box.gltf",
+          modelMatrix: Matrix4.multiplyByUniformScale(
+            Matrix4.fromTranslation(new Cartesian3(0, 0, 20)),
+            30,
+            new Matrix4(),
+          ),
+        }),
+      );
+      await pollToPromise(() => {
+        scene.renderForSpecs();
+        return model.ready;
+      });
+      spyOn(source, "requestTile").and.resolveTo(tile([feature(), building()]));
+      spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+      const layer = add([buildingDefinition(), pointDefinition()]);
+      await loaded(layer);
+      const point = glyphCenter(layer._symbols._placed[0]);
+      expect(pixel(Math.floor(point.x), Math.floor(point.y))[0]).toBe(0);
+      const renderer = scene._sceneGISDeferred;
+      const target = renderer._vectorSymbolOcclusion.depth.getColorTexture();
+      scene.renderForSpecs();
+      expect(renderer._vectorSymbolOcclusion.depth.getColorTexture()).toBe(
+        target,
+      );
+      expect(renderer.vectorSymbolOcclusionDrawCount).toBeGreaterThan(0);
+      expect(renderer.vectorSymbolOcclusionDrawCount).toBe(
+        scene.frameState.frustumSplits.length - 1,
+      );
+      expect(scene.pick(point, 1, 1)?.id.featureId).toBe("building");
+      scene.primitives.remove(model);
+      expect(pixel(Math.floor(point.x), Math.floor(point.y))).toEqual([
+        255, 0, 0, 255,
+      ]);
+      expect(target.isDestroyed()).toBeTrue();
+    });
+  });
+
+  it("keeps opaque models in front of symbols and restores coverage after removal", async function () {
+    scene.logarithmicDepthBuffer = false;
+    scene.farToNearRatio = 2;
+    const model = scene.primitives.add(
+      await Model.fromGltfAsync({
+        url: "./Data/Models/glTF-2.0/Box/glTF/Box.gltf",
+        modelMatrix: Matrix4.multiplyByUniformScale(
+          Matrix4.fromTranslation(new Cartesian3(0, 0, 20)),
+          30,
+          new Matrix4(),
+        ),
+      }),
+    );
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return model.ready;
+    });
+    spyOn(source, "requestTile").and.resolveTo(tile());
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const layer = add();
+    await loaded(layer);
+    expect(scene.frameState.frustumSplits.length).toBeGreaterThan(2);
+    const point = glyphCenter(layer._symbols._placed[0]);
+    expect(pixel(Math.floor(point.x), Math.floor(point.y))).not.toEqual([
+      255, 0, 0, 255,
+    ]);
+    expect(scene.pick(point, 1, 1)?.primitive).toBe(model);
+    scene.primitives.remove(model);
+    expect(pixel(Math.floor(point.x), Math.floor(point.y))).toEqual([
+      255, 0, 0, 255,
+    ]);
+    expect(scene.pick(point, 1, 1)?.id.featureId).toBe("1");
   });
 
   it("dynamic rules refresh symbol layout and filters while retaining unrelated candidates and assets", async function () {
@@ -561,8 +871,8 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
       atlas = batch.page.texture,
       pickId = [...runtime._pickIds.values()][0];
     const pickSource = scene.frameState.useLogDepth
-      ? command.derivedCommands.logDepth.command
-      : command;
+      ? batch.command.derivedCommands.logDepth.command
+      : batch.command;
     expect(pickSource.derivedCommands.picking.pickCommand.vertexArray).toBe(va);
     const upload = spyOn(batch.resources, "update").and.callThrough();
     const shape = runtime._previous[0].shaped;
@@ -1417,6 +1727,10 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(layer.statistics.placedSymbols).toBe(2);
     expect(pixel(37, 32)).toEqual([0, 0, 255, 255]);
     expect(scene.pick(new Cartesian2(37, 32), 1, 1).id.featureId).toBe("upper");
+    layer.opacity = 0.5;
+    const mixed = pixel(37, 32);
+    expect(mixed[0]).toEqualEpsilon(64, 2);
+    expect(mixed[2]).toEqualEpsilon(128, 2);
   });
 
   it("reports a terminal font failure once without retry or blocking the base", async function () {
@@ -1515,6 +1829,8 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     const layer = add();
     await loaded(layer);
     const previousPick = [...layer._symbols._pickIds.values()][0];
+    const runtime = layer._symbols;
+    runtime._placementBudget = 0;
     scene.camera.position.z = 20;
     scene.renderForSpecs();
     expect(layer.tilesLoaded).toBeFalse();
@@ -1523,6 +1839,31 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     for (const complete of pending) {
       complete();
     }
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      const entries = [...layer._sources.get("test").render.keys()];
+      return entries.length > 0 && entries.every((entry) => entry.level === 1);
+    });
+    const commits = runtime.statistics.placementCommits;
+    expect(runtime._placement).toBeDefined();
+    for (
+      let i = 0;
+      i < 80 && runtime.statistics.placementCommits === commits;
+      i++
+    ) {
+      scene.camera.position.x += 0.001;
+      scene.renderForSpecs();
+      expect(layer.statistics.placedSymbols).toBe(1);
+      const shown = runtime._placed.find((candidate) => candidate.placed);
+      expect(shown).toBeDefined();
+      if (shown) {
+        const picked = scene.pick(glyphCenter(shown), 1, 1);
+        expect(picked?.id.featureId).toBe(shown.identity.featureId);
+      }
+      expect([...runtime._pickIds.values()][0]).toBe(previousPick);
+    }
+    expect(runtime.statistics.placementCommits).toBeGreaterThan(commits);
+    runtime._placementBudget = 2;
     await loaded(layer);
     expect(layer.statistics.duplicateSymbols).toBe(1);
     expect(layer.statistics.placedSymbols).toBe(1);
@@ -1534,6 +1875,115 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(
       scene.pick(new Cartesian2(anchor.x + 2, anchor.y), 1, 1).id.featureId,
     ).toContain("child");
+  });
+
+  it("atomically replaces symbols after delayed glyphs and Worker shaping", async function () {
+    spyOn(source, "requestTile").and.resolveTo(tile());
+    let completeGlyph, completeShape;
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.callFake(function () {
+      return this.url.includes("0-255")
+        ? Promise.resolve(bytes)
+        : new Promise((resolve) => {
+            completeGlyph = () => resolve(encodeGlyphs([glyph(256)]));
+          });
+    });
+    const layer = add(undefined, { maximumGlyphRanges: 1 });
+    await loaded(layer);
+    const runtime = layer._symbols;
+    const old = runtime._placed[0];
+    const oldPick = runtime._pickIds.get(old.id);
+    const oldBatch = [...runtime._groups.values()][0];
+    const oldVertexArray = oldBatch.resources.vertexArray;
+    const oldTexture = oldBatch.page.texture;
+    const schedule = layer._workers.schedule.bind(layer._workers);
+    spyOn(layer._workers, "schedule").and.callFake((task, ...args) => {
+      const promise = schedule(task, ...args);
+      if (
+        promise &&
+        task.kind === "shapes" &&
+        task.items.some((item) => item.text === "Ā")
+      ) {
+        return promise.then(
+          (result) =>
+            new Promise((resolve) => {
+              completeShape = () => resolve(result);
+            }),
+        );
+      }
+      return promise;
+    });
+    layer.setLayoutProperty("labels", "text-field", "Ā");
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return !!completeGlyph;
+    });
+    const commits = runtime.statistics.placementCommits;
+    function checkPublished() {
+      scene.renderForSpecs();
+      expect(runtime.statistics.placementCommits).toBe(commits);
+      expect(layer.tilesLoaded).toBeFalse();
+      expect(runtime._placed[0]).toBe(old);
+      expect(old._visible).toBeTrue();
+      expect(runtime._pickIds.get(old.id)).toBe(oldPick);
+      expect(scene.pick(glyphCenter(old), 1, 1)).toBe(oldPick.object);
+      expect(pixel()).toEqual([255, 0, 0, 255]);
+      expect(oldTexture.isDestroyed()).toBeFalse();
+      expect(oldVertexArray.isDestroyed()).toBeFalse();
+    }
+    checkPublished();
+    expect(runtime.assets.pages.size).toBe(2);
+    completeGlyph();
+    await pollToPromise(() => {
+      scene.renderForSpecs();
+      return !!completeShape;
+    });
+    checkPublished();
+    completeShape();
+    runtime._placementBudget = 2;
+    await loaded(layer);
+    expect(runtime._placed[0].text).toBe("Ā");
+    expect(runtime._placed[0]).not.toBe(old);
+    expect(pixel()).toEqual([255, 0, 0, 255]);
+    expect(scene.pick(glyphCenter(runtime._placed[0]), 1, 1).id).toBe(
+      runtime._placed[0].identity,
+    );
+    expect(oldTexture.isDestroyed()).toBeTrue();
+    expect(oldVertexArray.isDestroyed()).toBeTrue();
+    expect(oldPick.object).toBeUndefined();
+    expect(runtime.assets.pages.size).toBe(1);
+    expect(layer.statistics.symbolFailures).toBe(0);
+  });
+
+  ["visibility", "filter"].forEach(function (rule) {
+    it(`immediately applies ${rule} to published symbols during a pending placement`, async function () {
+      spyOn(source, "requestTile").and.resolveTo(tile());
+      spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+      const layer = add();
+      await loaded(layer);
+      const runtime = layer._symbols;
+      const old = runtime._placed[0];
+      runtime._placementBudget = 0;
+      runtime._nextPlacementTime = 0;
+      scene.camera.position.x += 0.01;
+      scene.renderForSpecs();
+      expect(runtime._placement).toBeDefined();
+      expect(old._visible).toBeTrue();
+      if (rule === "visibility") {
+        layer.setLayoutProperty("labels", "visibility", "none");
+      } else {
+        layer.setFilter("labels", ["==", ["id"], "missing"]);
+      }
+      scene.renderForSpecs();
+      expect(old._visible).toBeFalse();
+      expect(pixel()).toEqual([0, 0, 0, 255]);
+      expect(scene.pick(new Cartesian2(30, 32), 1, 1)).toBeUndefined();
+      runtime._placementBudget = 2;
+      await loaded(layer);
+      expect(layer.statistics.placedSymbols).toBe(0);
+      expect(runtime._groups.size).toBe(0);
+      expect(runtime._pickIds.size).toBe(0);
+      expect(layer.statistics.symbolFailures).toBe(0);
+    });
   });
 
   it("evicts only unused glyph ranges and terminates stale requests within a bounded cache", async function () {
@@ -1570,8 +2020,22 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     });
     expect(old.glyphs).toBeUndefined();
     expect(assets.glyph("Test", 256).glyph.id).toBe(256);
+    const published = assets.pages.get("Test/1");
+    assets.prepare(first, false, new Set(["Test/1"]));
+    expect(assets.pages.size).toBe(2);
+    expect(published.released).not.toBeTrue();
+    // A cancelled replacement cannot accumulate a third cohort.
+    const third = new Map([["Test/2", { font: "Test", range: 2 }]]);
+    const abandoned = assets.pages.get("Test/0");
+    assets.prepare(third, false, new Set(["Test/1"]));
+    expect(assets.pages.size).toBe(2);
+    expect(abandoned.released).toBeTrue();
+    expect(assets.pages.get("Test/1")).toBe(published);
+    assets.prepare(third, false, new Set(["Test/2"]));
+    expect(assets.pages.size).toBe(1);
+    expect(published.released).toBeTrue();
     expect(() =>
-      assets.prepare(first, false, new Set(["Test/1"])),
+      assets.prepare(new Map([...first, ...third]), false, new Set()),
     ).toThrowError(SourceRuntimeError);
     assets.destroy();
     owner._workers.destroy();

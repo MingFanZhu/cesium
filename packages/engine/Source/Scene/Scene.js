@@ -2472,6 +2472,11 @@ function executeCommand(
   }
 
   if (passes.pick || passes.depth) {
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Record external pick depth during its original draw for the vector pass.
+    if (scene._sceneGISDeferred?.drawVectorPickObject(command, passState)) {
+      return;
+    }
+    // SCENEGIS_PATCH_END SGP-0046
     if (passes.pick && !passes.depth) {
       if (frameState.passes.snap) {
         // Snapping pass: only commands with a snap variant write the float
@@ -3023,6 +3028,7 @@ function executeCommands(scene, passState) {
 
   // SCENEGIS_PATCH_BEGIN SGP-0046: Preflight deferred material ownership before effect or opaque submission.
   scene._sceneGISDeferred?.preparePlanarVectors(passState);
+  scene._sceneGISDeferred?.prepareVectorPicks(passState);
   if (!picking) {
     scene._sceneGISDeferred?.begin(passState);
   }
@@ -3354,6 +3360,12 @@ function executeCommands(scene, passState) {
       }
 
       performPass(frustumCommands, Pass.OPAQUE);
+      // Collect vector materials after retaining external object occlusion.
+      scene._sceneGISDeferred?.drawVectorMaterials(
+        frustumCommands,
+        passState,
+        executeCommand,
+      );
       if (picking && frustumCommands.indices[Pass.VOXELS] > 0) {
         // Clip native voxel picking against this pick's completed surface depth.
         // Volumes do not write depth, so opaque IDs must be submitted first.
@@ -3398,6 +3410,11 @@ function executeCommands(scene, passState) {
       if (!picking) {
         SceneGISTemporalAntialiasing.captureDeferredDepth(scene);
         SceneGISWaterFrame.captureFinalDepth(scene);
+        scene._sceneGISDeferred?.drawVectorAnnotations(
+          passState,
+          frustum,
+          executeCommand,
+        );
       }
       if (deferredFrusta) {
         continue;
@@ -3554,10 +3571,16 @@ function executeCommands(scene, passState) {
 
     performIdPass(frustumCommands, Pass.CESIUM_3D_TILE);
     performIdPass(frustumCommands, Pass.OPAQUE);
+    // SCENEGIS_PATCH_BEGIN SGP-0046: Retain vector IDs in post-process selection after pass separation.
+    performIdPass(frustumCommands, Pass.SCENEGIS_VECTOR);
+    // SCENEGIS_PATCH_END SGP-0046
     performIdPass(frustumCommands, Pass.TRANSLUCENT);
 
     passState.framebuffer = originalFramebuffer;
   }
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Compose vector pick IDs in style order after all external frusta.
+  scene._sceneGISDeferred?.drawVectorSymbolPicks(passState, frustum);
+  // SCENEGIS_PATCH_END SGP-0046
 }
 
 /**

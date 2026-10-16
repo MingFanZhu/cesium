@@ -19,7 +19,12 @@ import filter from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOFilter.
 import LightingMrt from "./_SceneGISLightingMrt.js";
 import IndirectLighting from "./_SceneGISScreenSpaceIndirectLighting.js";
 
-const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
+const opaquePasses = [
+  Pass.GLOBE,
+  Pass.CESIUM_3D_TILE,
+  Pass.OPAQUE,
+  Pass.SCENEGIS_VECTOR,
+];
 const parameterNames = [
   "intensity",
   "bias",

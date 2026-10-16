@@ -55,3 +55,29 @@ Shaping 待处理队列与已就绪的 LRU cache 分离；每帧只调度待处�
 cache。淘汰、generation 失效、clear/destroy 同步移除相应队列记录，迟到完成仍按 record identity 隔离。
 字形 CPU 字节数在不可变 Worker 结果接收时计算，统计快照按页面聚合，不逐帧遍历 bitmap。
 以上均为自有 JS 缓存/调度调整；Worker 任务协议、碰撞优先级、当前帧 draw/pick、GPU buffers 和上游接缝不变。
+
+## 2026-10-16 amendment: atomic symbol cohort handoff
+
+公开地图跨 LOD 移动复现：render cover 已切换，已发布注记立即被 currentOwner 隐藏，
+新 placement 仍在分帧计算，期间可见注记从百余降到个位数。负责人确认新批次准备完成后
+原子替换；本节修订上述 owner 消失即隐藏的历史规则。
+
+render cover 的半开 ownership 仍用于收集新候选和去重，不再决定已发布批次的存活期。
+待发布批次完成候选收集、glyph/sprite 请求、Worker shaping 与 collision 后，才统一发布
+GPU streams / pick identity 并释放旧分组。资源未完成时 generator 让出当前帧，资源版本
+变化后继续；终结的加载/排版错误继续报告并排除相应候选，不无限等待或自动 retry。
+
+等待期间旧注记继续使用当前相机、地形 attachment、near/far、远景距离与视域裁剪；
+当前 style 的 visibility、filter、min/max zoom 与 paint 仍生效。隐藏 Layer / World 和销毁
+继续清空。既有 Shader 深度协议不变：地形、外部 Model / 3D Tiles 遮挡，以及同地图
+建筑/注记样式层序保持；pick 复用当前发布批次。
+
+maximumGlyphRanges 约束单批需求和稳态 cache。为了在满 cache 时仍能原子交接，
+新批次加载期间额外保护已发布批次使用的页面，合计最多 2 × maximumGlyphRanges；
+共用页面不重复分配。取消的待发布需求仍可 LRU 淘汰，不能累积第三批保护集；提交后
+回收超额缓存。显示/待发布候选各受 maximumSymbolCandidates 约束，单个 sprite 保持原生命周期。
+这是显式、有界的过渡内存成本，不保证加载完全不同字集时保持原稳态峰值。
+
+仅 SceneGIS-owned runtime / assets 和 Specs 修改，无新增上游接缝或 SGP。
+验证包含分帧跨 LOD 的逐帧显示/拾取、延迟 glyph/shaping 时旧资源存活、提交后释放、
+连续取消时 cache 有界、等待期间样式隐藏，以及既有地形/外部模型遮挡回归。

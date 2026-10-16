@@ -396,6 +396,46 @@ AO/SSR/SSIL 与水面折射继续使用物理表面 color/depth；不将标注�
 折射保持不变；标注深度仅供后续遮挡恢复、环境和最终 TAA 深度使用。资源由
 deferred 控制器管理，借用主颜色、硬件深度和最终深度附件，不转移其所有权。
 
+### 2026-10-16: Vector annotations on opaque worlds
+
+Opaque Globe / Planar buildings and symbols use the dedicated `Pass.SCENEGIS_VECTOR`.
+Ground fills and strokes retain their surface-classification integration. The vector
+material stage follows external opaque objects in each frustum and shares their G-buffer
+and single lighting resolve. Symbols remain cartographic colors outside material capture,
+preserving glyphs extending beyond the terrain silhouette. Terrain tests the anchor;
+external Models / 3D Tiles retain physical occlusion. Within one vector map, buildings
+and symbols follow style order. Buildings retain their own physical depth relationships.
+The otherwise unused vector material specular RGB stores a frame-local 24-bit map/style
+identity as three exact bytes; this identity is not a public layer ID or lighting input.
+
+Vector map ordering includes fractional alpha. Reusing native OIT split commands changes
+ordered source-over colors, so each vector batch draws its original premultiplied color
+once, then writes only alpha >= 0.995 coverage into the existing annotation depth target
+and hardware / final depth. This is two submissions per batch per occupied frustum,
+with one borrowed framebuffer view and the existing conditional R32F / RG32F annotation
+target. Translucent buildings use their original forward shader in the same ordered tail.
+Style is outside the frustum loop, so fractional composition is independent of segment
+order. Native transparency and water follow this stage. No ordinary material replay is added.
+Native Billboard / Label splitting stays unchanged. Atlas, geometry and derived programs
+remain cached; removing the last annotation releases its conditional depth and views.
+
+When symbols, opaque map buildings and external objects coexist, retain one R32F external
+depth snapshot (4 bytes/pixel, one screen copy per frustum) before vector material capture.
+This preserves an external occluder hidden behind a map building without redrawing it.
+Multi-frustum terrain-anchored symbols also retain terrain in one conditional R32F target
+at the terrain boundary (4 bytes/pixel, one screen copy per frustum). Both targets are
+reused while needed and released when absent; no per-map color target is added.
+
+Color picking submits buildings once in their vector material stage and symbols after
+all external frusta. During the original pick draws, conditional external R32F and
+building RG32F outputs retain current-pick depth and style identity (4 + 8 bytes/pixel
+when both are needed). Borrow native pick color/depth attachments, preserve native
+terrain-anchor visibility, alpha/discard, and log depth; do not borrow color-frame model
+depth. No geometry replay is used. Native depth/snapping/metadata paths remain separate.
+Transparent Globe / Planar retain their existing map composition contract.
+SGP-0046 covers the minimal Scene schedule and Pass enum changes. See the
+[repair plan](../../../AgentDocs/vector-tiles/plans/2026-10-16-low-angle-rendering.md).
+
 ## Native fill, edges and transparent volumes
 
 Bentley planar fill retains its feature-ID pre-pass and proportional depth bias.

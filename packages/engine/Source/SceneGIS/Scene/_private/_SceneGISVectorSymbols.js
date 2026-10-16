@@ -157,12 +157,18 @@ function* queryCandidates(index, projection) {
 
 function evaluation(runtime, base, zoom) {
   const label = base.label;
-  const before = label.evaluation.value.layout;
-  label.evaluation = base.symbols.style._evaluateVisibleLayer(
+  const style = runtime.owner._records[base.order].style;
+  const previous =
+    (label.evaluationStyle ?? base.symbols.style) === style
+      ? label.evaluation
+      : undefined;
+  const before = previous?.value.layout;
+  label.evaluationStyle = style;
+  label.evaluation = style._evaluateVisibleLayer(
     base.identity.styleLayer,
     label.feature,
     zoom,
-    label.evaluation,
+    previous,
     State.context(
       runtime.owner._states.sources.get(base.identity.source),
       base.identity.sourceLayer,
@@ -170,6 +176,9 @@ function evaluation(runtime, base, zoom) {
       runtime.owner._states.global,
     ),
   );
+  if (!label.evaluation) {
+    return undefined;
+  }
   const evaluated = label.evaluation.value;
   if (!label.shapeKey || evaluated.layout !== before) {
     label.shapeKey = JSON.stringify([
@@ -225,11 +234,15 @@ function* collect(runtime, job) {
           );
           continue;
         }
+        const current = evaluation(runtime, base, job.zoom);
+        if (!current) {
+          continue;
+        }
         result.push({
           ...base,
           base,
           screen,
-          ...evaluation(runtime, base, job.zoom),
+          ...current,
         });
       }
     }
@@ -259,21 +272,27 @@ function shape(runtime, candidate, old) {
   ) {
     old = undefined;
   }
-  let pending = candidate.requirements.some(
-    (r) => runtime.assets.pages.get(r.key)?.state !== "ready",
-  );
-  pending ||= !!candidate.icon && runtime.assets.sprite?.state !== "ready";
-  if (pending) {
-    if (old?.shaped) {
-      candidate.shaped = old.shaped;
-      candidate.evaluated = old.evaluated;
-      candidate.shapeKey = old.shapeKey;
+  let pending = false;
+  for (const requirement of candidate.requirements) {
+    const state = runtime.assets.pages.get(requirement.key)?.state;
+    if (state === "failed") {
+      return true;
     }
-    return;
+    pending ||= state !== "ready";
+  }
+  if (candidate.icon) {
+    const state = runtime.assets.sprite?.state;
+    if (state === "failed") {
+      return true;
+    }
+    pending ||= state !== "ready";
+  }
+  if (pending) {
+    return false;
   }
   if (old?.shapeKey === candidate.shapeKey) {
     candidate.shaped = old.shaped;
-    return;
+    return true;
   }
   let image;
   if (candidate.icon) {
@@ -305,14 +324,7 @@ function shape(runtime, candidate, old) {
     candidate.evaluated.layout,
     image,
   );
-  if (!candidate.shaped) {
-    runtime._waitingShapes = true;
-    if (old?.shaped) {
-      candidate.shaped = old.shaped;
-      candidate.evaluated = old.evaluated;
-      candidate.shapeKey = old.shapeKey;
-    }
-  }
+  return !!candidate.shaped;
 }
 
 function boxes(part, candidate, text) {
@@ -417,20 +429,10 @@ function* placement(runtime, job) {
       "Active symbol glyph ranges exceed maximumGlyphRanges.",
     );
   }
-  for (const [key, batch] of runtime._groups) {
-    if (batch.text ? !requirements.has(batch.page.key) : !spriteNeeded) {
-      batch.resources.destroy();
-      runtime._groups.delete(key);
-    }
-  }
-  Batches.order(runtime);
-  runtime._protected = new Set(
-    [...runtime._groups.values()].map((batch) => batch.page.key),
-  );
+  // Published streams and their atlas pages remain owned until commit succeeds.
   runtime._requirements = requirements;
   runtime._spriteNeeded = spriteNeeded;
   runtime.assets.prepare(requirements, spriteNeeded, runtime._protected);
-  runtime._waitingShapes = false;
   const previous = new Map(),
     anchors = new Map(),
     byKey = new Map(),
@@ -446,6 +448,7 @@ function* placement(runtime, job) {
     previous.get(old.key).push(old);
   }
   job.duplicates = 0;
+  const prepared = [];
   for (const candidate of candidates) {
     yield;
     const peers = byKey.get(candidate.key) ?? [];
@@ -469,8 +472,36 @@ function* placement(runtime, job) {
     candidate.id = old?.id ?? candidate.id;
     candidate.base.id = candidate.id;
     matched.add(candidate.id);
+    prepared.push({ candidate, old });
+  }
+  // Prepare the complete cohort before collision/publication. Resource waits yield
+  // the frame instead of spending the placement budget polling asynchronous work.
+  let waiting = prepared;
+  while (waiting.length) {
+    const resource = `${runtime.assets.revision}/${runtime._shaping.revision}`;
+    const remaining = [];
+    for (const item of waiting) {
+      yield;
+      try {
+        if (!shape(runtime, item.candidate, item.old)) {
+          remaining.push(item);
+        }
+      } catch (error) {
+        runtime.report(item.candidate.key, error);
+      }
+    }
+    waiting = remaining;
+    if (waiting.length) {
+      while (
+        resource === `${runtime.assets.revision}/${runtime._shaping.revision}`
+      ) {
+        yield false;
+      }
+    }
+  }
+  for (const { candidate, old } of prepared) {
+    yield;
     try {
-      shape(runtime, candidate, old);
       if (!candidate.shaped) {
         continue;
       }
@@ -574,6 +605,7 @@ function viewSignature(runtime, zoom) {
   const view = camera.viewMatrix,
     projection = camera.frustum.projectionMatrix;
   return [
+    runtime._styleRevision,
     runtime.owner._terrain?.revision,
     runtime.owner._states.revision,
     ...Array.from({ length: 16 }, (_, i) => view[i]),
@@ -584,18 +616,6 @@ function viewSignature(runtime, zoom) {
     scene.pixelRatio,
   ].join("|");
 }
-function currentOwner(runtime, candidate) {
-  const regions = runtime.owner._sources
-    .get(candidate.identity.source)
-    ?.render.get(candidate.entry);
-  return (
-    candidate.entry.symbols?.get(candidate.order) === candidate.symbols &&
-    regions?.some((r) =>
-      inRegion(candidate.anchor.position, r, runtime.owner._extent),
-    )
-  );
-}
-
 function drawCandidates(runtime, candidates, zoom) {
   const projection = runtime._projection;
   const mpp = runtime._metersPerPixel;
@@ -606,10 +626,7 @@ function drawCandidates(runtime, candidates, zoom) {
     Projection.attach(projection, candidate);
     candidate._visible = false;
     candidate.placed = undefined;
-    if (
-      !currentOwner(runtime, candidate) ||
-      !eligible(runtime.owner._records[candidate.order].definition, zoom)
-    ) {
+    if (!eligible(runtime.owner._records[candidate.order].definition, zoom)) {
       continue;
     }
     const screen = Projection.visible(projection, candidate.position);
@@ -618,6 +635,9 @@ function drawCandidates(runtime, candidates, zoom) {
     }
     candidate.screen = screen;
     const current = evaluation(runtime, candidate.base, zoom);
+    if (!current) {
+      continue;
+    }
     if (current.shapeKey !== candidate.shapeKey) {
       const old = {
         shaped: candidate.shaped,
@@ -625,7 +645,9 @@ function drawCandidates(runtime, candidates, zoom) {
         shapeKey: candidate.shapeKey,
       };
       Object.assign(candidate, current);
-      shape(runtime, candidate, old);
+      if (!shape(runtime, candidate, old)) {
+        Object.assign(candidate, old);
+      }
     } else {
       candidate.evaluated = current.evaluated;
     }
@@ -732,9 +754,10 @@ function commit(runtime, job, candidates, frameState, zoom) {
   }
   runtime._previous = candidates;
   runtime._placed = candidates.filter((candidate) => candidate.selection);
-  runtime._signature = job.signature;
+  const resource = `${runtime.assets.revision}/${runtime._shaping.revision}`;
+  runtime._signature = `${job.view}|${job.content}|${resource}`;
   runtime._content = job.content;
-  runtime._resource = job.resource;
+  runtime._resource = resource;
   runtime._nextPlacementTime = performance.now() + 100;
   runtime._protected = new Set(
     [...runtime._groups.values()].map((batch) => batch.page.key),
@@ -782,6 +805,8 @@ function SceneGISVectorSymbols(
   this._requirements = new Map();
   this._nextPlacementTime = 0;
   this._placementBudget = 2;
+  this._style = owner.style;
+  this._styleRevision = 0;
   this.statistics = {
     candidates: 0,
     placed: 0,
@@ -804,11 +829,19 @@ SceneGISVectorSymbols.prototype.report = function (key, error) {
   }
 };
 SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
+  if (this._style !== this.owner.style) {
+    this._style = this.owner.style;
+    this._styleRevision++;
+  }
   const view = viewSignature(this, zoom);
   const content = coverSignature(this);
   const resource = `${this.assets.revision}/${this._shaping.revision}`;
   const signature = `${view}|${content}|${resource}`;
-  if (this._placement && this._placement.content !== content) {
+  if (
+    this._placement &&
+    (this._placement.content !== content ||
+      this._placement.styleRevision !== this._styleRevision)
+  ) {
     this._placement.iterator.return();
     this._placement = undefined;
   }
@@ -846,9 +879,9 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
       );
     }
     const job = {
-      signature,
+      view,
       content,
-      resource,
+      styleRevision: this._styleRevision,
       cover,
       zoom,
       projection: this._projection,
@@ -865,7 +898,11 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
       do {
         step = job.iterator.next();
         this.statistics.placementSteps++;
-      } while (!step.done && performance.now() - start < this._placementBudget);
+      } while (
+        !step.done &&
+        step.value !== false &&
+        performance.now() - start < this._placementBudget
+      );
       if (step.done) {
         commit(this, job, step.value, frameState, zoom);
         this._placement = undefined;
@@ -893,11 +930,7 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
     ).length;
   }
   const pending = !!this._placement || signature !== this._signature;
-  this.loaded =
-    !pending &&
-    this.assets.loaded &&
-    !this._shaping.pending &&
-    !this._waitingShapes;
+  this.loaded = !pending && this.assets.loaded && !this._shaping.pending;
   if (pending) {
     this.owner.scene.requestRender();
   }
@@ -922,7 +955,6 @@ SceneGISVectorSymbols.prototype.clear = function () {
   this._protected.clear();
   this._requirements.clear();
   this._spriteNeeded = false;
-  this._waitingShapes = false;
   this._signature = this._content = this._resource = undefined;
   this._drawView = this._drawContent = undefined;
   this._nextPlacementTime = 0;

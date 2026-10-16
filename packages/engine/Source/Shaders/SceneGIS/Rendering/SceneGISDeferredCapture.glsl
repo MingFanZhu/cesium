@@ -135,11 +135,15 @@ void sceneGISRecordPlanar(vec4 color, vec3 normalEC, vec3 geometryNormalEC, vec3
     sceneGISDeferredEmissionValue = geometryNormalEC;
 }
 #elif defined(SCENEGIS_DEFERRED_VECTOR_CAPTURE)
+uniform vec2 u_sceneGISVectorMapRange;
+uniform float u_sceneGISVectorStyleOrder;
 void sceneGISRecordVector(vec4 color, vec3 normalEC)
 {
     sceneGISDeferredDiffuseValue = color;
     sceneGISDeferredNormalValue = vec4(normalEC, 0.0);
-    sceneGISDeferredSpecularValue = vec3(0.0);
+    // Byte components preserve frame-local style IDs exactly in RGBA16F.
+    float tag = u_sceneGISVectorMapRange.x + u_sceneGISVectorStyleOrder;
+    sceneGISDeferredSpecularValue = mod(floor(tag / vec3(1.0, 256.0, 65536.0)), 256.0);
     sceneGISDeferredEmissionValue = vec3(0.0);
 }
 #elif defined(SCENEGIS_DEFERRED_POINT_CAPTURE)

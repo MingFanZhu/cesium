@@ -834,6 +834,12 @@ Flat、生产贴地、标注与 Globe 各有阶段资格；Planar 测试不代�
 frame-local 物理光照/云影资源；direct 与 sky 分离，替换基础 Lambert。Globe 定向几何阴影在
 真实地表位置接收，覆盖凸体不投影。环境独占 LUT/atlas/history 与 HDR 合成，不新增地图颜色 RTT。
 Circle/symbol 保持制图颜色；Planar native geometry-shadow 资格不随此扩宽。
+不透明 Globe / Planar 的建筑与 symbol 按 ADR-0161 使用 `SCENEGIS_VECTOR` PASS，
+外部材质先于地图建筑收集，共用一次延迟光照。同一地图建筑与注记遵循样式层序，
+地形判断锚点可见性，外部 Model / 3D Tiles 保持物理遮挡。保留 source-over 颜色和实心注记深度；
+不得将注记颜色写入物理材质。条件外部 / 地形深度快照及拾取 MRT 的预算由 ADR-0161 管理。
+Line 按 ADR-0062 在实际地表 / 平面交点的解析覆盖中限制近处放大，保留远处透视收缩；
+style zoom、source LOD 和纵向花纹 station 不随宽度补偿改变。
 按 [ADR-0072](Decisions/ADR-0072-vector-surface-transparency.md)，Layer opacity 只乘各要素样式 alpha，
 不引入地图颜色 RTT。Globe 透明地表通过 SGP-0012 显式 owner slot 借用 native first-surface depth，
 先直接合成 Globe 颜色再绘制矢量，普通地表上方对象保持后续 native 渲染；原生 imagery alpha 保持独立。

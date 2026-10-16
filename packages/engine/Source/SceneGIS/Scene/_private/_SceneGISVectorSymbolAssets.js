@@ -59,13 +59,12 @@ SceneGISVectorSymbolAssets.prototype.prepare = function (
         );
         candidates.sort((a, b) => a.used - b.used);
         const victim = candidates[0];
-        if (!victim) {
-          throw new RuntimeError(
-            "Active symbol glyph ranges exceed maximumGlyphRanges.",
-          );
+        if (victim) {
+          release(victim);
+          this.pages.delete(victim.key);
         }
-        release(victim);
-        this.pages.delete(victim.key);
+        // Only the currently published cohort may exceed the cache budget while
+        // its replacement loads. Both cohorts individually obey maximumRanges.
       }
       entry = {
         ...requirement,
@@ -78,6 +77,18 @@ SceneGISVectorSymbolAssets.prototype.prepare = function (
       this.pages.set(key, entry);
     }
     entry.used = now;
+  }
+  if (this.pages.size > this.maximumRanges) {
+    const unused = [...this.pages.values()]
+      .filter((page) => !needed.has(page.key) && !protectedKeys.has(page.key))
+      .sort((a, b) => a.used - b.used);
+    for (const page of unused) {
+      if (this.pages.size <= this.maximumRanges) {
+        break;
+      }
+      release(page);
+      this.pages.delete(page.key);
+    }
   }
   if (spriteNeeded && !this.sprite) {
     this.sprite = {

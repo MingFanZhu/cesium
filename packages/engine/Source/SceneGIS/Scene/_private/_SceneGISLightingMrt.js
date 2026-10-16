@@ -21,7 +21,12 @@ import indirect from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOMain.
 import diffuse from "../../../Shaders/SceneGIS/IndirectLighting/SceneGISSILMain.js";
 import DeferredLayout from "./_SceneGISDeferredLayout.js";
 
-const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
+const opaquePasses = [
+  Pass.GLOBE,
+  Pass.CESIUM_3D_TILE,
+  Pass.OPAQUE,
+  Pass.SCENEGIS_VECTOR,
+];
 // These native stages modify lit color without an MRT response contract yet.
 const postLightingBranches = ["HAS_ATMOSPHERE"];
 const indirectPostLightingBranches = [

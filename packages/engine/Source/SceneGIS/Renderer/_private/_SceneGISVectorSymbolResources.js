@@ -57,11 +57,15 @@ function SceneGISVectorSymbolResources(
     this.shader = ShaderProgram.fromCache({
       context,
       vertexShaderSource: new ShaderSource({
-        defines: ground ? ["SCENEGIS_VECTOR_TERRAIN_ANCHOR"] : [],
+        defines: ground
+          ? ["SCENEGIS_VECTOR_SYMBOL", "SCENEGIS_VECTOR_TERRAIN_ANCHOR"]
+          : ["SCENEGIS_VECTOR_SYMBOL"],
         sources: ground ? [anchorVisibility, vertex] : [vertex],
       }),
       fragmentShaderSource: new ShaderSource({
-        defines: ground ? ["SCENEGIS_VECTOR_TERRAIN_ANCHOR"] : [],
+        defines: ground
+          ? ["SCENEGIS_VECTOR_SYMBOL", "SCENEGIS_VECTOR_TERRAIN_ANCHOR"]
+          : ["SCENEGIS_VECTOR_SYMBOL"],
         sources: [fragment],
       }),
       attributeLocations: Object.fromEntries(

@@ -491,7 +491,8 @@ SDK 保存修改后的 URL 样式时可使用 `getStyle()` 导出 inline Style�
 | 明确拒绝        | profile 之外的属性和类型，包括 line-gradient、heatmap、raster；symbol 支持见专门文档                         |
 
 Line width/gap/offset 从参考平面的 CSS pixel 换算为米，再参与投影；
-俯视缩放保持参考宽度，倾斜时随地图透视变化。正 offset 向线方向右侧移动。
+俯视缩放保持参考宽度；近处 width/gap/blur 的解析覆盖抑制额外透视放大，远处仍透视收缩。
+Offset 和 dash/pattern 的纵向 station 不随此补偿变化，正 offset 向线方向右侧移动。
 Circle 保持屏幕对齐与 CSS 尺寸。Fill AA 关闭时仅绘制 interior，显式 outline 也遵循该开关。
 内建 coverage 在关闭 MSAA/FXAA 的 Context 下验证，Map color 始终直接矢量绘制。
 

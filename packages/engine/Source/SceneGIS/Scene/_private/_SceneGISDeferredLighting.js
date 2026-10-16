@@ -49,6 +49,8 @@ import DeferredLayout from "./_SceneGISDeferredLayout.js";
 import VectorOverlays from "./_SceneGISDeferredVectorOverlays.js";
 import PlanarVectorOverlays from "./_SceneGISPlanarVectorOverlays.js";
 import Annotations from "./_SceneGISDeferredAnnotations.js";
+import VectorSymbolOcclusion from "./_SceneGISVectorSymbolOcclusion.js";
+import VectorSymbolPicking from "./_SceneGISVectorSymbolPicking.js";
 import MaterialExtensions from "./_SceneGISDeferredMaterialExtensions.js";
 import DepthFunction from "../../../Scene/DepthFunction.js";
 import DeferredInverse from "./_SceneGISDeferredInverse.js";
@@ -61,7 +63,12 @@ import PointEDL from "./_SceneGISDeferredPointEDL.js";
 import MaterialArray from "../../Renderer/_SceneGISMaterialArray.js";
 import DeferredDebug from "./_SceneGISDeferredDebug.js";
 
-const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
+const opaquePasses = [
+  Pass.GLOBE,
+  Pass.CESIUM_3D_TILE,
+  Pass.OPAQUE,
+  Pass.SCENEGIS_VECTOR,
+];
 const classificationPasses = [
   Pass.TERRAIN_CLASSIFICATION,
   Pass.CESIUM_3D_TILE_CLASSIFICATION,
@@ -221,6 +228,8 @@ function release(renderer) {
   renderer._vectorOverlays?.destroy();
   renderer._vectorOverlays = undefined;
   Annotations.release(renderer);
+  VectorSymbolOcclusion.release(renderer);
+  VectorSymbolPicking.release(renderer);
   WaterFrame.releaseFinalDepth(renderer._scene);
   renderer._inverse?.destroy();
   renderer._inverse = undefined;
@@ -1055,6 +1064,45 @@ class _SceneGISDeferredLighting {
     Annotations.draw(this, range, index, passState, executeCommand);
   }
 
+  drawVectorAnnotations(passState, frustum, executeCommand) {
+    Annotations.drawVectors(this, passState, frustum, executeCommand);
+  }
+
+  drawVectorMaterials(range, passState, executeCommand) {
+    const scene = this._scene;
+    if (!scene.frameState.passes.pick && !scene.frameState.passes.depth) {
+      if (!this._active) {
+        return;
+      }
+      VectorSymbolOcclusion.capture(this, passState);
+    }
+    scene.context.uniformState.updatePass(Pass.SCENEGIS_VECTOR);
+    for (let i = 0; i < range.indices[Pass.SCENEGIS_VECTOR]; ++i) {
+      const command = range.commands[Pass.SCENEGIS_VECTOR][i];
+      if (
+        this._vectorSymbolPicking?.active &&
+        command.shaderProgram.fragmentShaderSource.defines.includes(
+          "SCENEGIS_VECTOR_SYMBOL",
+        )
+      ) {
+        continue;
+      }
+      executeCommand(command, scene, passState);
+    }
+  }
+
+  drawVectorSymbolPicks(passState, frustum) {
+    VectorSymbolPicking.draw(this, passState, frustum);
+  }
+
+  prepareVectorPicks(passState) {
+    VectorSymbolPicking.begin(this, passState);
+  }
+
+  drawVectorPickObject(command, passState) {
+    return VectorSymbolPicking.object(this, command, passState, shaderInfo);
+  }
+
   get handlesInvertClassification() {
     return (
       this._active && this._scene._environmentState.useInvertClassification
@@ -1226,6 +1274,7 @@ class _SceneGISDeferredLighting {
     PointEDL.draw(this, passState);
     this.byteLength += this.pointEDLByteLength;
     Annotations.update(this, ranges);
+    VectorSymbolOcclusion.update(this, ranges, passState, eligible, shaderInfo);
     WaterFrame.updateFinalDepth(scene);
     if (
       this._hasInverseClassification &&
@@ -1763,6 +1812,9 @@ class _SceneGISDeferredLighting {
   }
 
   preserveGlobeDepth(passState) {
+    if (this._active) {
+      VectorSymbolOcclusion.capture(this, passState, true);
+    }
     if (
       this._active &&
       !this._multiFrustum &&

@@ -14,7 +14,12 @@ import estimate from "../../../Shaders/SceneGIS/IndirectLighting/SceneGISSILEsti
 import reconstruct from "../../../Shaders/SceneGIS/IndirectLighting/SceneGISSILReconstruct.js";
 import LightingMrt from "./_SceneGISLightingMrt.js";
 
-const opaquePasses = [Pass.GLOBE, Pass.CESIUM_3D_TILE, Pass.OPAQUE];
+const opaquePasses = [
+  Pass.GLOBE,
+  Pass.CESIUM_3D_TILE,
+  Pass.OPAQUE,
+  Pass.SCENEGIS_VECTOR,
+];
 function eligible(command) {
   return (
     command.owner?._sceneGISWater !== true &&
