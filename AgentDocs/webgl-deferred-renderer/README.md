@@ -12,9 +12,98 @@
 | Active phase plan                | 无                                                                                     |
 | Last completed phase             | [P4g：全部 DrawCommand 生产者接入](plans/2026-10-15-p4g-all-draw-command-producers.md) |
 | Architecture / execution contact | 当前任务                                                                               |
-| Last updated                     | `2026-10-15`                                                                           |
+| Last updated                     | `2026-10-17`                                                                           |
 
 ## Scope
+
+2026-10-17 提交收口：负责人已授权将本轮环境维护整体提交到 `scenegis/develop`。
+[环境辐亮度 standalone plan](plans/2026-10-16-environment-radiance.md) 标记 completed，
+本地检查点包含光谱 / 补光 / 昼夜衔接、Planar 地面反馈、AgX 和已验收默认参数。
+当前无 active maintenance plan；验收限于已记录的 Globe / Planar LDR 配置，历史 HDR
+观察和既有测试失败保留在 [review](reviews/2026-10-16-environment-radiance.md)，不扩大通过范围。
+以下各段保留实施过程中的历史状态；“未提交 / active / pending”以本段及 review 收口节为准。
+
+最新默认值更新（2026-10-17）：负责人授权把已验收外观提升为引擎默认。默认与显式环境
+均使用天空 2.5 / 地表 1.2；Globe 空气距离 0.5、Planar 1。HDR / 自动曝光默认关闭，
+显式调用方参数优先。两个物理示例已移除重复预设；18 项相关 Specs、完整 dev build、
+类型生成 / tsc 和现场刷新检查通过。无新上游文件 / SGP，未提交；见 active plan / review 最新节。
+
+最新维护增量（2026-10-17）：负责人授权保留 flat-slab，补齐地面反射参与 orders 2–4。
+generator v4 / PlanarEarth 资产已更新；地面反照率、太阳时间、HDR / 自动曝光关闭均保持。
+当前执行、验证与清晨/正午/黄昏对照见下述 active plan / review 最新节；没有新增运行时
+绘制、资源或上游补丁。负责人已确认本轮清晨、正午、黄昏及日落后对照通过，
+RAD-14 visual accepted；保留平板暮光、四阶截断及方向平均近似，维护增量未提交。
+
+2026-10-16 维护增量：按负责人要求统一默认地表 / 大气辐亮度，保持自动曝光默认关闭。
+当前 active standalone plan 为 [环境辐亮度](plans/2026-10-16-environment-radiance.md)；
+中午 HDR 诊断后，按负责人要求恢复原实现 Sun / Sky 光谱转换与共同场景 RGB 单位。
+41 项相关 Specs、build / types、当前视角 GPU 读回通过；见
+[review / technical-pass, visual-pending](reviews/2026-10-16-environment-radiance.md)。
+后续已按负责人批准同步日间示例中性倍率，并通过 ADR-0164 / SGP-0060 接入 AgX；
+示例显式使用 AgX / exposure=10，引擎默认保持 PBR Neutral / 1、自动曝光关闭。
+AgX / 调色 / 自动曝光 26 项专项通过；原生 collection 14 项通过、26 项既有失败，
+去掉 AgX 接入后同样复现，详见 review。完整 dev / release / types 通过。
+双世界已检查，参考曝光 10 下部分材质及矢量注记仍偏浅，RAD-03 视觉 gate 待确认。
+已对照 UE 官方物理光照、曝光和公开大气实现，后续应区分天空补光 / 地面反弹与显示契约，
+不能再用统一放大太阳或散射掩盖问题；未把 UE 算法移植纳入本增量。
+负责人随后批准 ADR-0165：补齐共享漫反射的下半球地面返回；矢量文字 / 图标抵消曝光，
+仍保留 AgX、alpha、样式顺序及外部遮挡。已完成实现，Model / 模型类 3D Tiles 双世界、
+矢量光照与注记专项 64 项通过；当前视角背光偏蓝减轻，图标恢复颜色，最终视觉仍待确认。
+不新增 pass / 资源，保留地面反照率 0.1 和自动曝光关闭；区域反弹与自动增益一帧历史边界
+详见上述 review 的 ADR-0165 增量。当前维护计划继续 active，技术证据不替代负责人视觉 gate。
+最新 LDR 反馈继续指出整体暗淡；已确认并修复 Planar 总照度 / 透射 LUT 网格不对齐造成
+天空误扣（ADR-0044 补充 / RAD-09）。新增真实资产 GPU 回归通过；相关定向证据共 81 项。
+随后按负责人要求移除 Planar 示例的自定义主光覆盖，恢复默认物理太阳，保留 LDR；
+大气此前一直启用，当前太阳 / 主光均为固定 +Z、primaryScale=1、自动曝光关闭。
+整体观感没有宣称通过；LDR 参考白仍需核对，见 review 的“当前 LDR 反馈”及末节。
+自动太阳后仍偏暗；最新 UE 对照确认 Planar 多次散射省略地面返回、LDR 缺少显示参考标定。
+参考点太阳约 116156 lux、天空约 6884 lux；参数不同，不能以 UE 的 20% 天空比例直接判错。
+该轮只诊断，未启动整体算法替换。负责人随后指定先在球面物理大气页固定南京正午、
+关闭 HDR，球面验收后再处理平面 transport。Globe 冻结 LUT 白 / 灰面证实原单位是存储
+归一化而非显示白；按 ADR-0044 将共同单位标定为 40000 cd/m²，保留物理能量比例、
+LDR clamp/gamma、默认倍率 1 和自动曝光关闭。当前执行与视觉状态见 review 末节。
+2026-10-17 负责人认为球面有所改善但仍暗 / 灰。再次 GPU 复核确认水平天空输出与照度
+相差约 0.73%，朝南竖直面的半球近似低估天空项约 36%（RAD-11 open）。UE / Unity
+分别控制天空外观、环境补光与空气透视，不能照搬三个倍率；后续优先改进方向性 diffuse
+sky，再讨论可复现艺术预设。该轮仅诊断，未修改代码 / 参数，详见最新 review。
+历史 extension / phases 的完成状态保持，不重开已验收的渲染调度阶段。当前增量未提交。
+
+负责人随后批准优先改善算法。Globe 已用方向天空积分照度表替换非水平面的半球比例，
+正午参考侧墙由约 4013 lux 恢复到 6071 lux，独立高采样参考为 6264 lux。12 个方向 /
+高度 / 昼暮 / 坐标旋转样本与生命周期 GPU 检查通过，相关回归共 32 项通过。
+atlas 约 1.35 MiB，冷创建 GPU 积分本机约 2 ms，首次程序编译测量约 0.6 s；无每帧
+预计算或新增 sampler。RAD-11 技术修复完成，RAD-03 球面视觉仍 pending；当前增量仍
+未提交。完整误差、成本及近似边界见上述 review 的方向性天空照度增量。
+
+后续 LDR 观感预览在当前球面正午页面采用天空 2.5 / 地表 1.2 / 空气 1.0，未固化源码
+或改变引擎默认。降低空气倍率可见地平线明暗接缝；远景去灰需另评估光学厚度而非只乘
+散射输出。RAD-03 仍 open，相关比较及下一步见同一 plan / review 末节。
+
+负责人随后批准空气透视调整。按 [ADR-0166](../../Documentation/SceneGIS/Decisions/ADR-0166-globe-aerial-perspective-distance-scale.md)
+接入 Globe `aerialPerspectiveDistanceScale`：缩放有限路径查询，同时计算散射与透射率，
+保留真实深度、云可见性、光照和高度雾；默认 1，Planar 暂只接受 1。当前球面正午 LDR
+示例固化天空 2.5 / 地表 1.2 / 空气亮度 1 / 距离 0.5 的预览，并提供实时控件。
+专项及相关回归 22 项通过；无新增 pass / GPU 资源。视觉 gate 仍 open，未提交；
+构建、现场检查及边界详见同一 review 的空气透视增量。
+
+最新负责人已接受球面正午预设，蓝色区域确认是水面，撤销此前接缝判断。随后完成
+14 个时段与晨昏 212 个逐分钟样本检查：无渲染报错或硬切换，但旧夜间可读性补光在
+-6°/-12° 才接入，使清晨 / 黄昏出现比深夜更暗的地表低谷（RAD-12 open）。月光开关
+有响应，但同样不能填补此前低谷。本轮只记录检查，页面恢复正午；夜景策略与 Planar
+仍待后续，见同一 plan / review 最新节。没有更改引擎实现或提交。
+
+2026-10-17 负责人批准夜间补光独立配置与照度过渡。按
+[ADR-0167](../../Documentation/SceneGIS/Decisions/ADR-0167-globe-night-ambient-irradiance.md)
+实现 Globe `nightAmbientIntensity`（默认 1、0 关闭），替换固定太阳角过渡。42 项相关 Specs 与当前视角
+15 个时段 / 212 个分钟样本通过，RAD-12 technical fixed / visual pending。球面 / LDR / 自动曝光关闭保持，Planar 与月光方向光规则不变；
+SGP-0009 仅增加一个 uniform，最新结果仍记录在同一 plan / review。
+
+2026-10-17 最新负责人已验收 Globe 全时段，RAD-12 visual accepted。当前按同一维护
+plan 完成 Planar 夜间环境光和示例 LDR 预设同步；27 项相关 Specs、完整构建 / 类型和
+上游审计通过。15 时段 / 212 分钟样本不再有地表和模型的晨昏低谷，正午 / 深夜保持。
+保留 +Z 平面 transport、Moon、遮挡与样式；平板天空较快变黑和半球 diffuse 近似仍在。
+具体结果 / 性能见 plan / review 最新节；RAD-13 technical fixed，Planar visual gate
+仍由负责人确认，当前维护增量未提交。
 
 2026-10-15 负责人在最终验收页确认“画面通过，提交 P4g”。调试着色、Globe 空地伪阴影、Planar 斜向投影与水面不透明反射的最终视觉 gate 已关闭，点云此前验收继续有效。77 个生产者模块 / 217 个创建和派生点的技术审查、Specs、浏览器 / 成本检查、完整 release / types、静态与补丁审计均已完成。本提交为 P4g 独立本地 checkpoint；全分支当前 WebGL2 / SCENE3D 单采样、不透明 / MASK 延迟与透明专用前向目标完成，没有 active phase。反射探针和透明物体水面 SSR 仍按负责人决定暂缓，不宣称这两项已适配。
 

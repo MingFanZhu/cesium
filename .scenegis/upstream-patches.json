@@ -580,7 +580,7 @@
       "id": "SGP-0009",
       "title": "Add optional SceneGIS Globe surface lighting seam",
       "status": "active",
-      "reason": "Cesium Globe surface shaders have no explicit frame-local extension seam for a caller-owned physical Sun/sky irradiance source and volumetric Beer cloud transmittance, while post-process relighting would incorrectly light already shaded scene primitives.",
+      "reason": "Cesium Globe surface shaders have no explicit frame-local extension seam for a caller-owned physical Sun/sky irradiance source and volumetric Beer cloud transmittance, while post-process relighting would incorrectly light already shaded scene primitives. ADR-0167 adds one warm nightAmbientIntensity uniform to the existing GlobeSurfaceTileProvider map; the irradiance-driven ambient floor remains SceneGIS-owned.",
       "risk": "high",
       "files": [
         {
@@ -1194,6 +1194,31 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0160-deferred-primitive-materials.md",
       "removalCondition": "Native framebuffer and uniform APIs support equivalent borrowed texture-array layers."
+    },
+    {
+      "id": "SGP-0060",
+      "title": "Select owned AgX in the native HDR display slot",
+      "status": "active",
+      "reason": "Expose AgX through the existing Tonemapper API and reuse native exposure, grading and display-stage lifecycle without a second post-process pass.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Tonemapper.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/PostProcessStageCollection.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISAgXTonemappingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISColorGradingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISAutoExposureSpec.js",
+        "packages/engine/Specs/Scene/PostProcessStageCollectionSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0164-agx-hdr-display.md",
+      "removalCondition": "Native Tonemapper supplies equivalent linear-sRGB AgX with compatible exposure, grading and LDR behavior."
     }
   ]
 }

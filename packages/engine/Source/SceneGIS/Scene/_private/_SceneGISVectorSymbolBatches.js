@@ -111,11 +111,32 @@ function writeSlot(batch, slot, initialize) {
 
 function command(runtime, batch, frameState) {
   const depthRange = new Cartesian2();
+  const scene = runtime.owner._scene;
+  const stages = scene.postProcessStages;
   return new DrawCommand({
     owner: runtime.owner,
     vertexArray: batch.resources.vertexArray,
     shaderProgram: batch.resources.shader,
     uniformMap: {
+      u_symbolInverseExposure: () => {
+        if (!scene.highDynamicRange) {
+          return 1;
+        }
+        const effect = stages._sceneGISAutoExposure;
+        const compensation = effect?.enabled ? effect.exposureCompensation : 0;
+        return stages.exposure > 0
+          ? Math.pow(2, -compensation) / stages.exposure
+          : 0;
+      },
+      u_symbolAutomaticExposure: () =>
+        scene.highDynamicRange &&
+        !!(
+          stages._sceneGISAutoExposure?.enabled &&
+          stages._sceneGISAutoExposure.ready
+        ),
+      u_symbolExposureHistory: () =>
+        stages._sceneGISAutoExposure?._state?.result.getColorTexture() ??
+        frameState.context.defaultTexture,
       u_sceneGISVectorOpacity: () => runtime.owner.opacity,
       u_sceneGISVectorStyleOrder: () => batch.record + 1,
       u_sceneGISVectorMapRange: () =>

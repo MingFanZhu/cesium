@@ -224,11 +224,11 @@ const planarEarthFiles = {
   ],
   "scattering.bin": [
     8388608,
-    "22C9240FDCF528521A74798816757D970647C6E3038322A587DABFF01A991135",
+    "802B9CFB4E796BAA59D33017D8EF3725A99C8421F6CB4941446F68B3BEBD65E2",
   ],
   "irradiance.bin": [
     8192,
-    "B2B231213F25C9DE45F2DBBAAFFE1DCD4805398724CE6FE05D391D5E50613A6C",
+    "647A70C8B00B4045230C385FEC6C2A7F62D24BCE038AA05FE16467DFABCFC2A3",
   ],
   "LICENSE.txt": [
     4239,
@@ -336,7 +336,7 @@ function verifyPlanarEarthDelivery(root) {
     fs.readFileSync(path.join(root, "provenance.json"), "utf8"),
   );
   assert.equal(provenance.preset, "earth-flat-precomputed-v1");
-  assert.equal(provenance.generator.version, "scene-gis-flat-atmosphere-3");
+  assert.equal(provenance.generator.version, "scene-gis-flat-atmosphere-4");
   assert.deepEqual(provenance.transport.multipleScatteringOrders, [2, 3, 4]);
   assert.match(provenance.transport.boundaryEvaluation, /true slab boundary/);
   assert.match(provenance.transport.segmentTransmittance, /runtime analytic/);

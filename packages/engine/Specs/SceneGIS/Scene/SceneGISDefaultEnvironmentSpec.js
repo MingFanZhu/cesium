@@ -4,12 +4,14 @@ import {
   Color,
   ColorGeometryInstanceAttribute,
   DirectionalLight,
+  FramebufferManager,
   GeometryInstance,
   Globe,
   JulianDate,
   Matrix4,
   Model,
   PerInstanceColorAppearance,
+  PixelDatatype,
   Primitive,
   Resource,
   SceneGISEnvironmentEffects,
@@ -70,7 +72,146 @@ describe("SceneGIS/Scene/SceneGISDefaultEnvironment", function () {
     });
   }
 
+  function linearPixel(y) {
+    const target = new FramebufferManager({
+      pixelDatatype: PixelDatatype.FLOAT,
+    });
+    target.update(scene.context, 1, 1);
+    const command = scene.context.createViewportQuadCommand(
+      `uniform sampler2D u_color;
+       void main() { out_FragColor = texelFetch(u_color, ivec2(16, ${y}), 0); }`,
+      {
+        framebuffer: target.framebuffer,
+        uniformMap: {
+          u_color: () => scene.postProcessStages._tonemapping._colorTexture,
+        },
+      },
+    );
+    try {
+      command.execute(scene.context);
+      return Array.from(
+        scene.context.readPixels({
+          framebuffer: target.framebuffer,
+          width: 1,
+          height: 1,
+        }),
+      );
+    } finally {
+      command.shaderProgram.destroy();
+      target.destroy();
+    }
+  }
+
   ["globe", "planar"].forEach((mode) => {
+    it(`keeps accepted appearance defaults across display and ownership changes in ${mode}`, async function () {
+      scene = createScene({ canvas: createCanvas(32, 32) });
+      const planar = mode === "planar";
+      const world = planar ? planarWorld(100000) : new Globe();
+      if (planar) {
+        world.enableLighting = true;
+        scene._initializeWorld(world);
+      } else {
+        scene.globe = world;
+      }
+      world.baseColor = new Color(0.4, 0.4, 0.4, 1);
+      const origin = planar
+        ? Matrix4.IDENTITY
+        : Transforms.eastNorthUpToFixedFrame(new Cartesian3(6378137, 0, 0));
+      scene.camera.setView({
+        destination: Matrix4.multiplyByPoint(
+          origin,
+          new Cartesian3(0, -2000, 1000),
+          new Cartesian3(),
+        ),
+        orientation: {
+          direction: Matrix4.multiplyByPointAsVector(
+            origin,
+            Cartesian3.normalize(new Cartesian3(0, 1, -0.1), new Cartesian3()),
+            new Cartesian3(),
+          ),
+          up: Matrix4.multiplyByPointAsVector(
+            origin,
+            Cartesian3.UNIT_Z,
+            new Cartesian3(),
+          ),
+        },
+      });
+      scene.postProcessStages.fxaa.enabled = false;
+      const time = JulianDate.fromIso8601("2026-03-20T12:00:00Z");
+      const render = () => scene.renderForSpecs(time);
+      const defaults = scene.environmentEffects;
+      expect(scene.highDynamicRange).toBe(false);
+      await pollToPromise(() => {
+        render();
+        return defaults.ready && world.tilesLoaded;
+      });
+      const resources = defaults._pipeline._resources;
+      const material = scene._sceneGISDeferred._raw.getColorTexture();
+      const baseline = [linearPixel(4), linearPixel(28)];
+      baseline.forEach((pixel) => expect(pixel[2]).toBeGreaterThan(0));
+      const verifyRadiance = (effects) => {
+        expect(effects.surfaceRadianceScale).toBe(1.2);
+        expect(effects.backgroundRadianceScale).toBe(2.5);
+        expect(effects.aerialRadianceScale).toBe(1);
+        expect(effects.aerialPerspectiveDistanceScale).toBe(planar ? 1 : 0.5);
+        expect(effects.nightAmbientIntensity).toBe(1);
+        const lighting = planar
+          ? scene.frameState._sceneGISPlanarLighting
+          : scene.frameState._sceneGISGlobeLighting;
+        expect(lighting.surfaceRadianceScale).toBe(1.2);
+        expect(effects._pipeline._uniformMap.u_backgroundRadianceScale()).toBe(
+          2.5,
+        );
+        expect(
+          effects._pipeline._uniformMap.u_aerialPerspectiveDistanceScale(),
+        ).toBe(planar ? 1 : 0.5);
+        expect(linearPixel(4)).toEqualEpsilon(baseline[0], 0.002);
+        expect(linearPixel(28)).toEqualEpsilon(baseline[1], 0.002);
+        expect(scene.postProcessStages._sceneGISAutoExposure).toBeUndefined();
+        expect(scene.postProcessStages._autoExposureEnabled).toBe(false);
+      };
+      verifyRadiance(defaults);
+      scene.highDynamicRange = true;
+      scene.postProcessStages.exposure = 0.7;
+      render();
+      verifyRadiance(defaults);
+      expect(defaults._pipeline._resources).toBe(resources);
+      expect(scene._sceneGISDeferred._raw.getColorTexture()).toBe(material);
+      const explicit = register(
+        new SceneGISEnvironmentEffects({
+          mode,
+          world: planar ? world : undefined,
+          enabled: true,
+          showClouds: false,
+          showCloudShadows: false,
+          showCrepuscularRays: false,
+          showBloom: false,
+          showLensFlare: false,
+        }),
+      );
+      await pollToPromise(() => {
+        render();
+        return explicit.ready;
+      });
+      verifyRadiance(explicit);
+      scene.highDynamicRange = false;
+      render();
+      verifyRadiance(explicit);
+      // Explicit art direction remains caller-owned when the display changes.
+      explicit.backgroundRadianceScale = 3;
+      explicit.surfaceRadianceScale = 2;
+      explicit.aerialRadianceScale = 0.5;
+      explicit.aerialPerspectiveDistanceScale = 1;
+      scene.highDynamicRange = true;
+      render();
+      expect(explicit.backgroundRadianceScale).toBe(3);
+      expect(explicit.surfaceRadianceScale).toBe(2);
+      expect(explicit.aerialRadianceScale).toBe(0.5);
+      expect(explicit.aerialPerspectiveDistanceScale).toBe(1);
+      expect(scene.postProcessStages.exposure).toBe(0.7);
+      expect(scene.context._gl.getError()).toBe(0);
+    });
+
     it(`lights real terrain and glTF from the same custom source in ${mode}`, async function () {
       scene = createScene({ canvas: createCanvas(64, 64) });
       const planar = mode === "planar";
@@ -212,15 +353,24 @@ describe("SceneGIS/Scene/SceneGISDefaultEnvironment", function () {
       });
       const renderer = effects._pipeline;
       const lut = renderer._resources.transmittanceTexture;
+      const unit = 40000.0;
+      const solarRgb = new Cartesian3(
+        (1.474 * 98242.786222) / unit,
+        (1.8504 * 69954.398112) / unit,
+        (1.91198 * 66475.012354) / unit,
+      );
       expect(scene.light).toBe(custom);
       expect(renderer._primaryLightDirection).toEqualEpsilon(
         Cartesian3.negate(custom.direction, new Cartesian3()),
         1e-12,
       );
-      expect(renderer._primaryLightScale).toEqualEpsilon(
-        new Cartesian3(0.6 / 1.474, 1.2 / 1.8504, 1.8 / 1.91198),
-        1e-12,
-      );
+      expect(
+        Cartesian3.multiplyComponents(
+          renderer._primaryLightScale,
+          solarRgb,
+          new Cartesian3(),
+        ),
+      ).toEqualEpsilon(new Cartesian3(0.6, 1.2, 1.8), 1e-12);
       custom.color = Color.clone(Color.GREEN);
       custom.intensity = 0;
       scene.renderForSpecs();
@@ -229,10 +379,13 @@ describe("SceneGIS/Scene/SceneGISDefaultEnvironment", function () {
       custom.intensity = 2;
       scene.renderForSpecs();
       expect(renderer._primaryLightDirection).toEqual(Cartesian3.UNIT_Z);
-      expect(renderer._primaryLightScale).toEqualEpsilon(
-        new Cartesian3(0, (2 * Color.GREEN.green) / 1.8504, 0),
-        1e-12,
-      );
+      expect(
+        Cartesian3.multiplyComponents(
+          renderer._primaryLightScale,
+          solarRgb,
+          new Cartesian3(),
+        ),
+      ).toEqualEpsilon(new Cartesian3(0, 2 * Color.GREEN.green, 0), 1e-12);
       expect(renderer._resources.transmittanceTexture).toBe(lut);
       const sun = new SunLight();
       scene.light = sun;

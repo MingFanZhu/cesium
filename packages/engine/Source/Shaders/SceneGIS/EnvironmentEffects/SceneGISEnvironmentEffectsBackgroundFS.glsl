@@ -82,7 +82,7 @@ void main()
     // Globe fog is applied once after translucent composition in AerialFS.
     if (u_showHeightFog) {
         sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
-            u_transmittanceTexture,
+            u_transmittanceTexture, u_irradianceTexture,
             sceneLinearRadiance,
             rayOrigin,
             viewDirection,

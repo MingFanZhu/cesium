@@ -1802,6 +1802,9 @@ function createTileUniformMap(frameState, globeSurfaceTileProvider) {
     u_surfaceRadianceScale: function () {
       return frameState._sceneGISGlobeLighting.surfaceRadianceScale;
     },
+    u_nightAmbientIntensity: function () {
+      return frameState._sceneGISGlobeLighting.nightAmbientIntensity;
+    },
     // SCENEGIS_PATCH_END SGP-0009
     u_initialColor: function () {
       return this.properties.initialColor;

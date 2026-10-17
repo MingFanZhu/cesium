@@ -1,6 +1,7 @@
 import {
   Cartesian2,
   Cartesian3,
+  Cesium3DTileset,
   CustomShader,
   DirectionalLight,
   HeadingPitchRange,
@@ -17,8 +18,13 @@ import createScene from "../../../../../Specs/createScene.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
 
 describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
-  for (const planar of [false, true]) {
-    it(`lights a native ${planar ? "Planar" : "Globe"} PBR model with physical sources and cloud transmittance while preserving material and resource ownership`, async function () {
+  for (const [planar, tiled] of [
+    [false, false],
+    [true, false],
+    [false, true],
+    [true, true],
+  ]) {
+    it(`lights a native ${planar ? "Planar" : "Globe"} PBR ${tiled ? "tileset" : "model"} with physical sources and cloud transmittance while preserving material and resource ownership`, async function () {
       const scene = createScene();
       const context = scene.context;
       const textures = [];
@@ -83,25 +89,48 @@ describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
           uniforms: {
             u_testDiffuse: { type: UniformType.FLOAT, value: 0.3 },
             u_testEmissive: { type: UniformType.FLOAT, value: 0.0 },
+            u_testNormal: {
+              type: UniformType.VEC3,
+              value: new Cartesian3(0, 0, 1),
+            },
           },
           fragmentShaderText: `void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
           material.diffuse = vec3(u_testDiffuse);
           material.specular = vec3(0.0);
           material.roughness = 1.0;
           material.emissive = vec3(u_testEmissive);
+          material.normalEC = u_testNormal;
         }`,
         });
-        const model = scene.primitives.add(
-          await Model.fromGltfAsync({
-            url: "./Data/Models/glTF-2.0/Box/glTF/Box.gltf",
-            modelMatrix: planar
-              ? Matrix4.fromTranslation(origin)
-              : Transforms.eastNorthUpToFixedFrame(origin),
-            customShader: shader,
-            imageBasedLighting: new ImageBasedLighting({
-              imageBasedLightingFactor: new Cartesian2(1, 0),
-            }),
+        const url = "./Data/Models/glTF-2.0/Box/glTF/Box.gltf";
+        const options = {
+          modelMatrix: planar
+            ? Matrix4.fromTranslation(origin)
+            : Transforms.eastNorthUpToFixedFrame(origin),
+          customShader: shader,
+          imageBasedLighting: new ImageBasedLighting({
+            imageBasedLightingFactor: new Cartesian2(1, 0),
           }),
+        };
+        const model = scene.primitives.add(
+          tiled
+            ? await Cesium3DTileset.fromUrl(
+                `data:application/json,${encodeURIComponent(
+                  JSON.stringify({
+                    asset: { version: "1.1" },
+                    geometricError: 1000,
+                    root: {
+                      boundingVolume: {
+                        box: [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+                      },
+                      geometricError: 0,
+                      content: { uri: new URL(url, window.location.href).href },
+                    },
+                  }),
+                )}`,
+                options,
+              )
+            : await Model.fromGltfAsync({ ...options, url }),
         );
         // Keep the native comparison's diffuse source fixed while its async cube map would otherwise evolve.
         model.environmentMapManager.enabled = false;
@@ -126,7 +155,10 @@ describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
         await pollToPromise(
           () => {
             scene.renderForSpecs(time);
-            return model.ready;
+            return tiled
+              ? model.root.contentReady &&
+                  model._statistics.numberOfCommands > 0
+              : model.ready;
           },
           { timeout: 30000 },
         );
@@ -159,6 +191,7 @@ describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
           ),
           primaryLightScale: new Cartesian3(1, 1, 1),
           surfaceRadianceScale: 1,
+          nightAmbientIntensity: 1,
           cloudTop: 4000,
         };
         scene.frameState[recordKey] = record;
@@ -172,6 +205,26 @@ describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
           "SCENEGIS_MODEL_DIFFUSE_SKY",
         );
         expect(lit).not.toEqual(nativePixel);
+        // An orthogonal material normal receives no direct Sun. Changing only
+        // primary gain must still light it through the diffuse ground return.
+        shader.setUniform("u_testNormal", Cartesian3.UNIT_X);
+        const wall = pixel();
+        record.primaryLightScale = Cartesian3.ZERO;
+        const wallWithoutGroundSun = pixel();
+        expect(wall.slice(0, 3).reduce((sum, value) => sum + value, 0))
+          .withContext(JSON.stringify({ wall, wallWithoutGroundSun }))
+          .toBeGreaterThan(
+            wallWithoutGroundSun
+              .slice(0, 3)
+              .reduce((sum, value) => sum + value, 0),
+          );
+        shader.setUniform("u_testNormal", new Cartesian3(0, 0, -1));
+        const undersideSkyReturn = pixel();
+        expect(undersideSkyReturn[0]).toBeGreaterThan(0);
+        record.primaryLightScale = new Cartesian3(1, 1, 1);
+        expect(pixel()[0]).toBeGreaterThan(undersideSkyReturn[0]);
+        shader.setUniform("u_testNormal", Cartesian3.UNIT_Z);
+        expect(pixel()).toEqual(lit);
         record.showCloudShadows = true;
         const shadowed = pixel();
         expect(shadowed[0]).toBeLessThan(lit[0]);
@@ -186,6 +239,19 @@ describe("SceneGIS/Scene/SceneGISModelEnvironmentLighting", function () {
         expect(pixel()[0]).toBeGreaterThan(sky[0]);
         expect(modelProgram()).toBe(physicalProgram);
 
+        {
+          const physicalIrradiance = record.irradianceTexture;
+          record.irradianceTexture = texture([0, 0, 0, 255]);
+          const ambient = pixel();
+          expect(ambient[0]).toBeGreaterThan(0);
+          record.nightAmbientIntensity = 0;
+          expect(pixel().slice(0, 3)).toEqual([0, 0, 0]);
+          record.nightAmbientIntensity = 2;
+          expect(pixel()[0]).toBeGreaterThan(ambient[0]);
+          expect(modelProgram()).toBe(physicalProgram);
+          record.nightAmbientIntensity = 1;
+          record.irradianceTexture = physicalIrradiance;
+        }
         if (planar) {
           const physicalIrradiance = record.irradianceTexture;
           record.irradianceTexture = texture([0, 0, 0, 255]);

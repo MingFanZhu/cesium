@@ -16,6 +16,7 @@ const fields = {
   u_sceneGISPrimaryLightScale: "primaryLightScale",
   u_sceneGISCameraRelativePosition: "cameraRelativePosition",
   u_surfaceRadianceScale: "surfaceRadianceScale",
+  u_nightAmbientIntensity: "nightAmbientIntensity",
 };
 
 /** Borrows frame-local Planar lighting for material source consumers. @private */

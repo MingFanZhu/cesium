@@ -93,7 +93,7 @@ describe("SceneGIS/Scene/SceneGISColorGrading", function () {
     expect(scene.postProcessStages._sceneGISColorGrading).toBeUndefined();
   });
 
-  it("preserves native pixels and alpha at neutral for all five tone mappers", function () {
+  it("preserves pixels and alpha at neutral for every tone mapper", function () {
     for (const mapper of Object.values(Tonemapper)) {
       scene.postProcessStages.tonemapper = mapper;
       effect.enabled = false;

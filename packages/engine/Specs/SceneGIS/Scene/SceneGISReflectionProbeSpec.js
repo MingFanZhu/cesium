@@ -79,6 +79,7 @@ describe("SceneGIS/Scene/SceneGISReflectionProbe", function () {
       active: true,
       skyReflections: sky,
       surfaceRadianceScale: 0.2,
+      nightAmbientIntensity: 1,
       ...renderer._resources,
       atlasTexture: renderer._resources.transmittanceTexture,
       matrices: [Matrix4.IDENTITY, Matrix4.IDENTITY, Matrix4.IDENTITY],

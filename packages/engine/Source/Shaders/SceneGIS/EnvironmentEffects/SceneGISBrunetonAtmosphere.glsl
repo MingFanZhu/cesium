@@ -65,6 +65,29 @@ const vec3 SCENEGIS_MIE_EXTINCTION = vec3(4.44e-6);
 const vec3 SCENEGIS_MIE_SCATTERING = vec3(3.996e-6);
 const vec3 SCENEGIS_OZONE_EXTINCTION = vec3(6.5e-7, 1.881e-6, 8.5e-8);
 const vec3 SCENEGIS_SOLAR_IRRADIANCE = vec3(1.474, 1.8504, 1.91198);
+// Three-wavelength spectral-to-linear-sRGB factors from AtmosphereParameters.ts
+// (c) 2024 Shota Matsuda, MIT; see Assets/SceneGIS/Environment/BrunetonEarth/LICENSE.txt.
+// at the source commit above. Both sources use the SAME relative-luminance unit.
+// Keep the CPU primary-light denominator in _SceneGISEnvironmentEffectsRenderer
+// synchronized; LUT values and dimensionless transmittance remain spectral.
+const vec3 SCENEGIS_SUN_RADIANCE_TO_LUMINANCE =
+    vec3(98242.786222, 69954.398112, 66475.012354);
+const vec3 SCENEGIS_SKY_RADIANCE_TO_LUMINANCE =
+    vec3(114974.916437, 71305.954816, 65310.548555);
+// Fixed daylight diffuse-white reference in cd/m^2 (ADR-0044).
+// This is a shared unit conversion, independent of exposure and display mode.
+const float SCENEGIS_LUMINANCE_UNIT = 40000.0;
+
+vec3 sceneGISSunRadianceToScene(vec3 spectrum)
+{
+    return spectrum * (SCENEGIS_SUN_RADIANCE_TO_LUMINANCE / SCENEGIS_LUMINANCE_UNIT);
+}
+
+vec3 sceneGISSkyRadianceToScene(vec3 spectrum)
+{
+    return spectrum * (SCENEGIS_SKY_RADIANCE_TO_LUMINANCE / SCENEGIS_LUMINANCE_UNIT);
+}
+
 const vec3 SCENEGIS_GROUND_ALBEDO = vec3(0.1);
 // Maximum finite binary16 value used by Cesium's RGBA16F HDR targets.
 const float SCENEGIS_HDR_MAX = 65504.0;
@@ -110,7 +133,109 @@ float sceneGISMiePhase(float cosineTheta)
            ((2.0 + g * g) * pow(denominator, 1.5));
 }
 
+uniform float u_nightAmbientIntensity;
+
+// Artistic irradiance floor, independent of Sun/Moon and display exposure.
+// A component-wise C1 smooth maximum prevents colored materials from dipping
+// below their deep-night level as the physical twilight spectrum changes.
+vec3 sceneGISNightAmbientIrradiance(vec3 physicalSky, float hemisphere)
+{
+    if (u_nightAmbientIntensity == 0.0 || hemisphere <= 0.0) {
+        return vec3(0.0);
+    }
+    vec3 floorIrradiance = SCENEGIS_READABLE_NIGHT_SKY_IRRADIANCE *
+        (u_nightAmbientIntensity * hemisphere);
+    vec3 ratio = max(physicalSky, vec3(0.0)) / floorIrradiance;
+    vec3 shoulder = max(vec3(0.25) - abs(ratio - vec3(1.0)), vec3(0.0));
+    return floorIrradiance * (max(vec3(1.0) - ratio, vec3(0.0)) +
+        shoulder * shoulder);
+}
+
 #ifdef SCENEGIS_GLOBE
+// Match the cold-build atlas in SceneGISGlobeDiffuseIrradianceFS and the renderer.
+const float SCENEGIS_DIFFUSE_HEIGHTS = 16.0;
+const float SCENEGIS_DIFFUSE_SUNS = 65.0;
+const float SCENEGIS_DIFFUSE_NORMALS = 17.0;
+const float SCENEGIS_DIFFUSE_AZIMUTHS = 9.0;
+
+vec3 sceneGISGlobeDirectionalSkyIrradiance(
+    sampler2D irradianceTexture,
+    vec3 point,
+    vec3 normal,
+    vec3 sunDirection)
+{
+    float radius = length(point);
+    vec3 up = point / radius;
+    float sunCosine = clamp(dot(up, sunDirection), -1.0, 1.0);
+    float normalCosine = clamp(dot(up, normal), -1.0, 1.0);
+    float projectedLength = sqrt(max(
+        (1.0 - sunCosine * sunCosine) * (1.0 - normalCosine * normalCosine),
+        1.0e-12));
+    float azimuthCosine = clamp(
+        (dot(normal, sunDirection) - normalCosine * sunCosine) / projectedLength,
+        -1.0, 1.0);
+    float heightIndex = sqrt(clamp((radius - 6360.0) / 60.0, 0.0, 1.0)) *
+        (SCENEGIS_DIFFUSE_HEIGHTS - 1.0);
+    float azimuthIndex = acos(azimuthCosine) / czm_pi *
+        (SCENEGIS_DIFFUSE_AZIMUTHS - 1.0);
+    // The source LUT stops at mu_s = -0.5. Spend half the samples on twilight.
+    float sunUnit = sign(sunCosine) *
+        sqrt(abs(sunCosine) / (sunCosine < 0.0 ? 0.5 : 1.0));
+    float sunIndex = clamp(0.5 + 0.5 * sunUnit, 0.0, 1.0) *
+        (SCENEGIS_DIFFUSE_SUNS - 1.0);
+    float normalIndex = acos(normalCosine) / czm_pi *
+        (SCENEGIS_DIFFUSE_NORMALS - 1.0);
+    vec2 base = floor(vec2(azimuthIndex, heightIndex));
+    vec2 fraction = fract(vec2(azimuthIndex, heightIndex));
+    vec2 dimensions = vec2(textureSize(irradianceTexture, 0));
+    vec3 irradiance = vec3(0.0);
+    for (int y = 0; y < 2; ++y) {
+        for (int x = 0; x < 2; ++x) {
+            vec2 corner = vec2(float(x), float(y));
+            vec2 tile = min(base + corner, vec2(
+                SCENEGIS_DIFFUSE_AZIMUTHS - 1.0, SCENEGIS_DIFFUSE_HEIGHTS - 1.0));
+            vec2 weights = mix(vec2(1.0) - fraction, fraction, corner);
+            vec2 pixel = vec2(
+                64.0 + tile.x * SCENEGIS_DIFFUSE_SUNS + sunIndex,
+                tile.y * SCENEGIS_DIFFUSE_NORMALS + normalIndex);
+            irradiance += texture(irradianceTexture, (pixel + 0.5) / dimensions).rgb *
+                weights.x * weights.y;
+        }
+    }
+    return irradiance;
+}
+
+// Convert once, before mixing direct/diffuse light with RGB materials or lights.
+vec3 sceneGISGlobeSunAndSkyIrradiance(
+    AtmosphereParameters atmosphere,
+    sampler2D transmittanceTexture,
+    sampler2D irradianceTexture,
+    vec3 point,
+    vec3 normal,
+    vec3 sunDirection,
+    out vec3 sky)
+{
+    vec3 sun = GetSunAndSkyIrradiance(atmosphere, transmittanceTexture,
+        irradianceTexture, point, normal, sunDirection, sky);
+    sky = sceneGISSkyRadianceToScene(sceneGISGlobeDirectionalSkyIrradiance(
+        irradianceTexture, point, normal, sunDirection));
+    return sceneGISSunRadianceToScene(sun);
+}
+
+vec3 sceneGISGlobeSunAndSkyScalarIrradiance(
+    AtmosphereParameters atmosphere,
+    sampler2D transmittanceTexture,
+    sampler2D irradianceTexture,
+    vec3 point,
+    vec3 sunDirection,
+    out vec3 sky)
+{
+    vec3 sun = GetSunAndSkyScalarIrradiance(atmosphere, transmittanceTexture,
+        irradianceTexture, point, sunDirection, sky);
+    sky = sceneGISSkyRadianceToScene(sky);
+    return sceneGISSunRadianceToScene(sun);
+}
+
 AtmosphereParameters sceneGISAtmosphereParameters()
 {
     AtmosphereParameters atmosphere;
@@ -136,6 +261,38 @@ AtmosphereParameters sceneGISAtmosphereParameters()
     return atmosphere;
 }
 
+vec3 sceneGISGlobeGroundIrradiance(
+    sampler2D transmittanceTexture,
+    sampler2D irradianceTexture,
+    vec3 up,
+    vec3 sunDirection,
+    vec3 primaryDirection,
+    vec3 primaryScale,
+    float cloudTransmittance)
+{
+    AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
+    vec3 ground = up * atmosphere.bottom_radius;
+    vec3 sky;
+    vec3 unusedSun = sceneGISGlobeSunAndSkyIrradiance(atmosphere,
+        transmittanceTexture, irradianceTexture, ground, up, sunDirection, sky);
+    vec3 unusedSky;
+    vec3 direct = sceneGISGlobeSunAndSkyIrradiance(atmosphere,
+        transmittanceTexture, irradianceTexture, ground, up, primaryDirection, unusedSky);
+    sky += sceneGISNightAmbientIrradiance(sky, 1.0);
+    // A Lambertian lower hemisphere: radiance = albedo * irradiance / pi.
+    // The receiver's cosine integral supplies pi; its hemisphere weight is separate.
+    return SCENEGIS_GROUND_ALBEDO * (sky + direct *
+        max(primaryScale, vec3(0.0)) * cloudTransmittance);
+}
+
+float sceneGISGlobeGroundWeight(vec3 position, vec3 normal)
+{
+    float radius = max(length(position), SCENEGIS_BOTTOM_RADIUS);
+    float ratio = SCENEGIS_BOTTOM_RADIUS / radius;
+    return clamp(0.5 * (1.0 - dot(normal, normalize(position))), 0.0, 1.0) *
+        ratio * ratio;
+}
+
 vec3 sceneGISGlobeSkyRadiance(
     sampler2D transmittanceTexture,
     sampler3D scatteringTexture,
@@ -149,7 +306,7 @@ vec3 sceneGISGlobeSkyRadiance(
     vec3 camera = vec3(
         rayOrigin.xy * 0.001,
         atmosphere.bottom_radius + rayOrigin.z * 0.001);
-    return max(GetSkyRadiance(
+    return sceneGISSkyRadianceToScene(max(GetSkyRadiance(
         atmosphere,
         transmittanceTexture,
         scatteringTexture,
@@ -159,7 +316,7 @@ vec3 sceneGISGlobeSkyRadiance(
         max(shadowLength, 0.0) * 0.001,
         sunDirection,
         true,
-        transmittance), vec3(0.0));
+        transmittance), vec3(0.0)));
 }
 
 vec3 sceneGISGlobeSkyRadianceToPoint(
@@ -181,7 +338,7 @@ vec3 sceneGISGlobeSkyRadianceToPoint(
     float height = (dot(camera.xy, camera.xy) + localHeight *
         (2.0 * atmosphere.bottom_radius + localHeight)) /
         (length(camera) + atmosphere.bottom_radius);
-    return max(GetSkyRadianceAlongRay(
+    return sceneGISSkyRadianceToScene(max(GetSkyRadianceAlongRay(
         atmosphere,
         transmittanceTexture,
         scatteringTexture,
@@ -192,7 +349,53 @@ vec3 sceneGISGlobeSkyRadianceToPoint(
         max(distanceToPoint, 0.0) * 0.001,
         max(shadowLength, 0.0) * 0.001,
         sunDirection,
-        transmittance), vec3(0.0));
+        transmittance), vec3(0.0)));
+}
+#endif
+
+#ifdef SCENEGIS_GLOBE
+vec3 sceneGISGlobeAerialRadianceToPoint(
+    sampler2D transmittanceTexture,
+    sampler3D scatteringTexture,
+    vec3 rayOrigin,
+    vec3 viewDirection,
+    vec3 sunDirection,
+    float distanceToPoint,
+    float shadowLength,
+    float distanceScale,
+    out vec3 transmittance)
+{
+    if (distanceScale == 1.0) {
+        return sceneGISGlobeSkyRadianceToPoint(transmittanceTexture,
+            scatteringTexture, rayOrigin, viewDirection, sunDirection,
+            distanceToPoint, shadowLength, transmittance);
+    }
+    transmittance = vec3(1.0);
+    if (distanceScale == 0.0 || distanceToPoint <= 0.0) {
+        return vec3(0.0);
+    }
+    // Exclude the initial vacuum before shortening the atmospheric segment.
+    vec3 camera = vec3(rayOrigin.xy, SCENEGIS_BOTTOM_RADIUS + rayOrigin.z);
+    float radius = length(camera);
+    float top = sceneGISAtmosphereParameters().top_radius * 1000.0;
+    if (radius > top) {
+        float rmu = dot(camera, viewDirection);
+        float discriminant = rmu * rmu + (top - radius) * (top + radius);
+        if (rmu >= 0.0 || discriminant < 0.0) {
+            return vec3(0.0);
+        }
+        float entry = -rmu - sqrt(discriminant);
+        if (entry >= distanceToPoint) {
+            return vec3(0.0);
+        }
+        rayOrigin += viewDirection * entry;
+        distanceToPoint -= entry;
+    }
+    return sceneGISGlobeSkyRadianceToPoint(transmittanceTexture,
+        scatteringTexture, rayOrigin, viewDirection, sunDirection,
+        distanceToPoint * distanceScale,
+        min(max(shadowLength, 0.0), distanceToPoint) * distanceScale,
+        transmittance);
 }
 #endif
 
@@ -350,6 +553,55 @@ vec3 sceneGISPlanarIrradiance(
         sceneGISPlanarHeightCoordinate(height))).rgb;
 }
 
+// The flat LUT stores total horizontal spectral irradiance, including the Sun.
+vec3 sceneGISPlanarSkyIrradianceTexel(sampler2D irradianceTexture, ivec2 texel)
+{
+    vec2 coordinate = (vec2(texel) + 0.5) / vec2(textureSize(irradianceTexture, 0));
+    float height = SCENEGIS_PLANAR_TOP * coordinate.y * coordinate.y;
+    float signedSun = 2.0 * coordinate.x - 1.0;
+    float sunMu = sign(signedSun) * signedSun * signedSun;
+    vec3 direct = vec3(0.0);
+    if (sunMu > 0.0) {
+        // Match the generator at this texel, not the finer transmittance grid.
+        direct = SCENEGIS_SOLAR_IRRADIANCE * sunMu *
+            sceneGISPlanarSegmentTransmittance(height, sunMu,
+                (SCENEGIS_PLANAR_TOP - height) / sunMu);
+    }
+    return max(texelFetch(irradianceTexture, texel, 0).rgb - direct, vec3(0.0));
+}
+
+vec3 sceneGISPlanarSkyIrradiance(sampler2D irradianceTexture, float height, float sunMu)
+{
+    vec2 size = vec2(textureSize(irradianceTexture, 0));
+    vec2 coordinate = vec2(sceneGISPlanarSignedSquareCoordinate(sunMu),
+        sceneGISPlanarHeightCoordinate(height));
+    vec2 samplePosition = clamp(coordinate * size - 0.5, vec2(0.0), size - 1.0);
+    ivec2 lower = ivec2(floor(samplePosition));
+    ivec2 upper = min(lower + 1, ivec2(size) - 1);
+    vec2 blend = fract(samplePosition);
+    return mix(
+        mix(sceneGISPlanarSkyIrradianceTexel(irradianceTexture, lower),
+            sceneGISPlanarSkyIrradianceTexel(irradianceTexture, ivec2(upper.x, lower.y)), blend.x),
+        mix(sceneGISPlanarSkyIrradianceTexel(irradianceTexture, ivec2(lower.x, upper.y)),
+            sceneGISPlanarSkyIrradianceTexel(irradianceTexture, upper), blend.x), blend.y);
+}
+
+// Split at the stored sample positions before interpolation and RGB conversion.
+vec3 sceneGISPlanarSunAndSkyIrradiance(
+    sampler2D transmittanceTexture,
+    sampler2D irradianceTexture,
+    float height,
+    float sunZenithCosine,
+    out vec3 sky)
+{
+    vec3 beam = sunZenithCosine > 0.0 ? SCENEGIS_SOLAR_IRRADIANCE *
+        sceneGISPlanarTransmittanceToBoundary(
+            transmittanceTexture, height, sunZenithCosine) : vec3(0.0);
+    sky = sceneGISSkyRadianceToScene(sceneGISPlanarSkyIrradiance(
+        irradianceTexture, height, sunZenithCosine));
+    return sceneGISSunRadianceToScene(beam);
+}
+
 bool sceneGISPlanarSlabSegment(
     vec3 rayOrigin,
     vec3 viewDirection,
@@ -424,11 +676,14 @@ vec3 sceneGISPlanarRadianceToPoint(
         viewDirection.z,
         sunDirection.z,
         cosineTheta);
-    vec3 radiance = max(startRadiance - transmittance * endRadiance, vec3(0.0));
+    vec3 radiance = sceneGISSkyRadianceToScene(
+        max(startRadiance - transmittance * endRadiance, vec3(0.0)));
     if (includeGround && viewDirection.z < 0.0 && segmentEndHeight <= 1.0) {
+        vec3 sky;
+        vec3 beam = sceneGISPlanarSunAndSkyIrradiance(
+            transmittanceTexture, irradianceTexture, 0.0, sunDirection.z, sky);
         radiance += transmittance * SCENEGIS_GROUND_ALBEDO *
-            sceneGISPlanarIrradiance(
-                irradianceTexture, 0.0, sunDirection.z) / czm_pi;
+            (beam * max(sunDirection.z, 0.0) + sky) / czm_pi;
     }
     return max(radiance, vec3(0.0));
 }
@@ -443,7 +698,7 @@ vec3 sceneGISApplySunDisk(vec3 radiance, vec3 viewDirection, vec3 sunDirection, 
     #ifdef SCENEGIS_GLOBE
     horizonVisibility = 1.0;
     #endif
-    vec3 solarRadiance = SCENEGIS_SOLAR_IRRADIANCE /
+    vec3 solarRadiance = sceneGISSunRadianceToScene(SCENEGIS_SOLAR_IRRADIANCE) /
         (czm_pi * SCENEGIS_SUN_ANGULAR_RADIUS * SCENEGIS_SUN_ANGULAR_RADIUS);
     return radiance + horizonVisibility * disk * solarRadiance * transmittance;
 }

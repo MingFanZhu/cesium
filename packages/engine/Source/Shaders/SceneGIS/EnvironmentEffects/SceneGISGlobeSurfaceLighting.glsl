@@ -38,7 +38,7 @@ vec3 sceneGISGlobeSurfaceLighting(
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
     vec3 virtualPoint = globePosition * 0.001;
     vec3 skyIrradiance;
-    vec3 unusedSunIrradiance = GetSunAndSkyIrradiance(
+    vec3 unusedSunIrradiance = sceneGISGlobeSunAndSkyIrradiance(
         atmosphere,
         u_sceneGISTransmittanceTexture,
         u_sceneGISIrradianceTexture,
@@ -47,7 +47,7 @@ vec3 sceneGISGlobeSurfaceLighting(
         globeSun,
         skyIrradiance);
     vec3 unusedPrimarySkyIrradiance;
-    vec3 primaryIrradiance = GetSunAndSkyIrradiance(
+    vec3 primaryIrradiance = sceneGISGlobeSunAndSkyIrradiance(
         atmosphere,
         u_sceneGISTransmittanceTexture,
         u_sceneGISIrradianceTexture,
@@ -58,9 +58,20 @@ vec3 sceneGISGlobeSurfaceLighting(
         max(u_sceneGISPrimaryLightScale, vec3(0.0));
     float skyHemisphere = 0.5 *
         (1.0 + dot(globeNormal, geodeticNormal));
-    skyIrradiance += sceneGISReadableNightSkyIrradiance(
-        geodeticNormal,
-        globeSun) * skyHemisphere;
+    skyIrradiance += sceneGISNightAmbientIrradiance(
+        skyIrradiance, skyHemisphere);
+    float groundWeight = sceneGISGlobeGroundWeight(globePosition, globeNormal);
+    if (groundWeight > 0.0) {
+        float groundCloudTransmittance = u_sceneGISShowCloudShadows
+            ? exp(-sceneGISCloudShadowOpticalDepth(
+                geodeticNormal * SCENEGIS_BOTTOM_RADIUS,
+                max(-(czm_view * vec4(positionWC, 1.0)).z, 0.0)))
+            : 1.0;
+        skyIrradiance += groundWeight * sceneGISGlobeGroundIrradiance(
+            u_sceneGISTransmittanceTexture, u_sceneGISIrradianceTexture,
+            geodeticNormal, globeSun, normalize(u_sceneGISPrimaryLightDirection),
+            u_sceneGISPrimaryLightScale, groundCloudTransmittance);
+    }
     float cloudTransmittance = 1.0;
     if (u_sceneGISShowCloudShadows) {
         float viewDistance = max(

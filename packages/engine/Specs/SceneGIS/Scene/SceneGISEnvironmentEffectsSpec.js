@@ -70,6 +70,15 @@ import globeCloudSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffect
 import cloudSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISVolumetricClouds.js";
 import planarCloudTransportSource from "../../../Source/Shaders/SceneGIS/EnvironmentEffects/SceneGISPlanarCloudTransport.js";
 
+// Independent reference from the pinned AtmosphereParameters.ts preset.
+const spectralLuminanceUnit = 40000.0;
+const sunToScene = [98242.786222, 69954.398112, 66475.012354].map(
+  (value) => value / spectralLuminanceUnit,
+);
+const skyToScene = [114974.916437, 71305.954816, 65310.548555].map(
+  (value) => value / spectralLuminanceUnit,
+);
+
 const globeShapeDetailLodMutationSource = globeCloudSource
   .replace(
     /float shape = texture\([\s\S]*?SCENEGIS_GLOBE_CLOUD_SHAPE_SCALE\)\.r;/,
@@ -124,10 +133,8 @@ void main()
     #ifdef SCENEGIS_PRIMARY_MOON_PROBE
     actualSunDirection = vec3(0.0, 0.0, -1.0);
     primaryLightDirection = vec3(0.0, 0.0, 1.0);
-    primaryLightScale = vec3(
-        0.12 / 1.474,
-        0.16 / 1.8504,
-        0.22 / 1.91198);
+    primaryLightScale = vec3(0.12, 0.16, 0.22) /
+        sceneGISSunRadianceToScene(SCENEGIS_SOLAR_IRRADIANCE);
     #endif
     vec3 globePrimaryLightDirection = primaryLightDirection;
     #if defined(SCENEGIS_PRIMARY_MOON_PROBE) && defined(SCENEGIS_GLOBE)
@@ -795,7 +802,10 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
         sources,
       }),
       {
-        uniformMap: options.uniformMap ?? {},
+        uniformMap: {
+          u_nightAmbientIntensity: () => effects?.nightAmbientIntensity ?? 1,
+          ...options.uniformMap,
+        },
         framebuffer,
       },
     );
@@ -2789,9 +2799,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.cloudWindSpeed).toBe(20.0);
     expect(effects.cloudTime).toBe(0.0);
     expect(effects.cloudRadianceScale).toBe(1.0);
-    expect(effects.backgroundRadianceScale).toBe(4.0);
+    expect(effects.backgroundRadianceScale).toBe(2.5);
     expect(effects.aerialRadianceScale).toBe(1.0);
-    expect(effects.surfaceRadianceScale).toBe(10.0);
+    expect(effects.surfaceRadianceScale).toBe(1.2);
     expect(effects.bloomThreshold).toBe(10.0);
     expect(effects.bloomIntensity).toBe(0.05);
     expect(effects.lensFlareIntensity).toBe(5.0);
@@ -3299,7 +3309,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
           out_FragColor = sceneGISPlanarCloudHaze(u_transmittanceTexture, u_irradianceTexture,
             origin, direction, vec3(0,0,1), 10000.0, u_testLength, 0.4);
         } else if (u_testComponent == 1) {
-          out_FragColor = vec4(sceneGISApplyExponentialHeightFog(u_transmittanceTexture,
+          out_FragColor = vec4(sceneGISApplyExponentialHeightFog(u_transmittanceTexture, u_irradianceTexture,
             vec3(0), origin, direction, direction, 10000.0, u_testLength,
             0.00004, 0.0002, 0.0, 250.0, 1.0, 1.0, u_testAmbient, u_testDirectional, 8.0), 1);
         } else {
@@ -3372,7 +3382,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       const densityM = Math.exp(-1000 / 1200);
       const extinction = 5.802e-6 * densityR + 4.44e-6 * densityM;
       expect(atmosphereShadow[0]).toEqualEpsilon(
-        0.5 * (Math.exp(-extinction * 2500) - Math.exp(-extinction * 10000)),
+        skyToScene[0] *
+          0.5 *
+          (Math.exp(-extinction * 2500) - Math.exp(-extinction * 10000)),
         0.0002,
       );
       shadowLength = 10000;
@@ -3404,6 +3416,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
         ...uniforms,
         u_colorTexture: () => input,
         u_depthTexture: () => clearDepth,
+        u_linearSceneDepth: () => false,
+        u_cloudDepthOffset: () => Cartesian2.ZERO,
         u_cloudColorTexture: () => noCloud,
         u_cloudDistanceTexture: () => packedDistance,
         u_showClouds: () => true,
@@ -3521,7 +3535,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       .replace(
         `    if (isClearDepth && u_showHeightFog) {
         sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
-            u_transmittanceTexture,
+            u_transmittanceTexture, u_irradianceTexture,
             sceneLinearRadiance,
             rayOrigin,
             viewDirection,
@@ -3541,7 +3555,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
         `    if (isClearDepth && u_showHeightFog && shadowLength > 0.0) {
         vec3 clearFogBase = sceneLinearRadiance;
         vec3 shadowedFog = sceneGISApplyExponentialHeightFog(
-            u_transmittanceTexture,
+            u_transmittanceTexture, u_irradianceTexture,
             clearFogBase,
             rayOrigin,
             viewDirection,
@@ -3558,7 +3572,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
             u_heightFogDirectionalInscatteringScale,
             u_heightFogDirectionalInscatteringExponent);
         vec3 unshadowedFog = sceneGISApplyExponentialHeightFog(
-            u_transmittanceTexture,
+            u_transmittanceTexture, u_irradianceTexture,
             clearFogBase,
             rayOrigin,
             viewDirection,
@@ -3689,6 +3703,10 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
           uniformMap: {
             u_colorTexture: () => colorTexture,
             u_depthTexture: () => sampledDepthTexture,
+            u_linearSceneDepth: () => false,
+            u_sceneDepthPerspective: () => false,
+            u_sceneDepthFrustum: () => new Cartesian4(-1, 1, -1, 1),
+            u_cloudDepthOffset: () => Cartesian2.ZERO,
             u_perspective: () => false,
             u_frustum: () => ({ x: -1.0, y: 1.0, z: -1.0, w: 1.0 }),
             u_hasCurrentGlobeDepth: () => true,
@@ -3702,6 +3720,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
             u_altitude: () => 1000.0,
             u_aerialRadianceScale: () => 1.0,
             u_backgroundRadianceScale: () => backgroundScale,
+            u_aerialPerspectiveDistanceScale: () => 1.0,
             u_showAerialPerspective: () => showAerialPerspective,
             u_showHeightFog: () => showHeightFog,
             u_showClouds: () => showClouds,
@@ -3772,7 +3791,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       void main() {
         AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
         vec3 skyIrradiance;
-        vec3 sunIrradiance = GetSunAndSkyScalarIrradiance(
+        vec3 sunIrradiance = sceneGISGlobeSunAndSkyScalarIrradiance(
           atmosphere,
           u_transmittanceTexture,
           u_irradianceTexture,
@@ -7455,6 +7474,14 @@ ${hardCascadeLibrary}`;
     expect(pipeline._moonPhase).toBe(1);
     expect(pipeline._moonContribution).toBe(1);
     expect(pipeline._moonIrradiance).toEqual(new Cartesian3(0.12, 0.16, 0.22));
+    expect(pipeline._primaryLightScale).toEqualEpsilon(
+      new Cartesian3(
+        0.12 / (1.474 * sunToScene[0]),
+        0.16 / (1.8504 * sunToScene[1]),
+        0.22 / (1.91198 * sunToScene[2]),
+      ),
+      1e-12,
+    );
     expect(scene.light).toBe(light);
     expect(light.direction).toEqual(new Cartesian3(0, 0, -1));
     expect(light.color).toEqual(new Color(0.12, 0.16, 0.22, 1));
@@ -7576,7 +7603,7 @@ ${hardCascadeLibrary}`;
           u_sceneGISPrimaryLightScale, beam, sky);
         result = gl_FragCoord.x < 3.0 ? beam : sky;
       } else if (gl_FragCoord.x < 5.0) {
-        result = sceneGISApplyExponentialHeightFog(u_sceneGISTransmittanceTexture,
+        result = sceneGISApplyExponentialHeightFog(u_sceneGISTransmittanceTexture, u_sceneGISIrradianceTexture,
           vec3(0), position, primary, sun, 1000.0, u_testLength,
           0.0001, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 8.0);
       } else {
@@ -8345,6 +8372,324 @@ ${hardCascadeLibrary}`;
     expect(scene.frameState._sceneGISGlobeLighting).toBeUndefined();
   });
 
+  ["globe", "planar"].forEach((mode) => {
+    it(`converts ${mode} spectral sources into one linear RGB unit without recoloring RGB lights`, async function () {
+      await connectControlledCloudMode(mode);
+      if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+        return;
+      }
+      const pipeline = effects._pipeline;
+      const resources = pipeline._resources;
+      scene.light = new DirectionalLight({
+        direction: new Cartesian3(0, 0, -1),
+        color: new Color(0.25, 0.5, 0.75),
+        intensity: 1.7,
+      });
+      effects.update(scene, scene.frameState.time);
+      const program = createEnvironmentEffectsProgramForSpecs(
+        scene.context,
+        `precision highp float;
+        precision highp sampler3D;
+        uniform sampler2D u_transmittance;
+        uniform sampler2D u_irradiance;
+        uniform sampler3D u_scattering;
+        uniform vec3 u_rgbLightScale;
+        void main() {
+          int i = int(gl_FragCoord.x);
+          vec3 sun = normalize(vec3(0.6, 0.0, 0.8));
+          vec3 point = vec3(0.0, 0.0, 6360.1);
+          vec3 rawSky;
+          vec3 rawBeam;
+          vec3 sky;
+          vec3 beam;
+          #ifdef SCENEGIS_GLOBE
+          rawBeam = GetSunAndSkyIrradiance(sceneGISAtmosphereParameters(),
+              u_transmittance, u_irradiance, point, vec3(0,0,1), sun, rawSky);
+          rawSky = sceneGISGlobeDirectionalSkyIrradiance(
+              u_irradiance, point, vec3(0,0,1), sun);
+          beam = sceneGISGlobeSunAndSkyIrradiance(sceneGISAtmosphereParameters(),
+              u_transmittance, u_irradiance, point, vec3(0,0,1), sun, sky);
+          #else
+          rawBeam = SCENEGIS_SOLAR_IRRADIANCE * sceneGISPlanarTransmittanceToBoundary(
+              u_transmittance, 100.0, sun.z);
+          rawSky = sceneGISPlanarSkyIrradiance(u_irradiance, 100.0, sun.z);
+          beam = sceneGISPlanarSunAndSkyIrradiance(
+              u_transmittance, u_irradiance, 100.0, sun.z, sky);
+          #endif
+          vec3 result = i == 0 ? sceneGISSunRadianceToScene(vec3(1)) :
+              i == 1 ? sceneGISSkyRadianceToScene(vec3(1)) :
+              i == 2 ? beam / rawBeam : sky / rawSky;
+          if (i == 4) {
+            // Cloud incidence uses scalar irradiance rather than surface cosine.
+            vec3 cloudBeam;
+            vec3 cloudSky;
+            sceneGISCloudIncidentIrradiance(u_transmittance, u_irradiance,
+                vec3(0,0,100), point * 1000.0, sun, sun, vec3(1), cloudBeam, cloudSky);
+            result = cloudBeam / (beam / sun.z);
+            #ifndef SCENEGIS_GLOBE
+            result = cloudBeam / beam;
+            #endif
+          }
+          if (i == 5) {
+            #ifdef SCENEGIS_GLOBE
+            vec3 transmission;
+            vec3 raw = GetSkyRadiance(sceneGISAtmosphereParameters(),
+                u_transmittance, u_scattering, u_scattering, point,
+                vec3(0,0,1), 0.0, sun, true, transmission);
+            result = sceneGISGlobeSkyRadiance(u_transmittance, u_scattering,
+                vec3(0,0,100), vec3(0,0,1), sun, 0.0, transmission) / raw;
+            #else
+            vec3 transmission;
+            bool intersects;
+            vec3 withGround = sceneGISPlanarRadianceToPoint(u_transmittance,
+                u_scattering, u_irradiance, vec3(0,0,100), vec3(0,0,-1),
+                sun, 100.0, true, intersects, transmission);
+            vec3 withoutGround = sceneGISPlanarRadianceToPoint(u_transmittance,
+                u_scattering, u_irradiance, vec3(0,0,100), vec3(0,0,-1),
+                sun, 100.0, false, intersects, transmission);
+            vec3 groundSky;
+            vec3 groundBeam = sceneGISPlanarSunAndSkyIrradiance(
+                u_transmittance, u_irradiance, 0.0, sun.z, groundSky);
+            result = (withGround - withoutGround) /
+                (transmission * SCENEGIS_GROUND_ALBEDO *
+                 (groundBeam * sun.z + groundSky) / czm_pi);
+            #endif
+          }
+          if (i == 6) {
+            result = sceneGISSunRadianceToScene(SCENEGIS_SOLAR_IRRADIANCE) * u_rgbLightScale;
+          }
+          if (i == 7) {
+            result = sceneGISApplySunDisk(vec3(0), sun, sun, vec3(1)) *
+                (czm_pi * SCENEGIS_SUN_ANGULAR_RADIUS * SCENEGIS_SUN_ANGULAR_RADIUS) /
+                SCENEGIS_SOLAR_IRRADIANCE;
+          }
+          out_FragColor = vec4(result, 1);
+        }`,
+        mode === "globe",
+      );
+      let pixels;
+      try {
+        pixels = executeHalfFloatQuad(program.fragmentShaderSource.sources, {
+          width: 8,
+          defines: program.fragmentShaderSource.defines,
+          uniformMap: {
+            u_transmittance: () => resources.transmittanceTexture,
+            u_irradiance: () => resources.irradianceTexture,
+            u_scattering: () => resources.scatteringTexture,
+            u_rgbLightScale: () => pipeline._primaryLightScale,
+          },
+        });
+      } finally {
+        program.destroy();
+      }
+      // Pinned spectral conversion with the fixed daylight scene reference.
+      for (let channel = 0; channel < 3; channel++) {
+        for (const i of [0, 2, 7]) {
+          expect(pixels[i][channel]).toEqualEpsilon(sunToScene[channel], 0.002);
+        }
+        for (const i of [1, 3]) {
+          expect(pixels[i][channel]).toEqualEpsilon(skyToScene[channel], 0.002);
+        }
+        expect(pixels[4][channel]).toEqualEpsilon(1, 0.002);
+        expect(pixels[5][channel]).toEqualEpsilon(
+          mode === "globe" ? skyToScene[channel] : 1,
+          0.002,
+        );
+        expect(pixels[6][channel]).toEqualEpsilon(
+          [0.425, 0.85, 1.275][channel],
+          0.002,
+        );
+      }
+    });
+  });
+
+  it("integrates directional Globe sky diffuse across surface orientations and twilight", async function () {
+    await connectControlledCloudMode("globe", () => {
+      effects.showClouds = false;
+    });
+    const resources = effects._pipeline._resources;
+    const atlas = resources.irradianceTexture;
+    expect(atlas.width).toBe(649);
+    expect(atlas.height).toBe(272);
+    const program = createEnvironmentEffectsProgramForSpecs(
+      scene.context,
+      `precision highp float;
+       precision highp sampler3D;
+       uniform sampler2D u_transmittance;
+       uniform sampler2D u_irradiance;
+       uniform sampler3D u_scattering;
+       void main() {
+         int i = int(gl_FragCoord.x) / 2;
+         float elevation = i < 3 || i > 8 ? 81.31 : i < 5 ? 30.0 :
+             i == 5 ? 5.0 : i == 6 ? -3.0 : i == 7 ? -6.0 : -9.0;
+         float height = i == 4 ? 5.0 : i == 10 ? 60.0 : 0.001;
+         float tilt = i == 0 ? 0.0 : i == 2 ? 135.0 : i == 9 ? 180.0 : 90.0;
+         float azimuth = i == 3 ? 180.0 : 0.0;
+         vec3 sun = vec3(cos(radians(elevation)), 0.0, sin(radians(elevation)));
+         vec3 normal = vec3(sin(radians(tilt)) * cos(radians(azimuth)),
+             sin(radians(tilt)) * sin(radians(azimuth)), cos(radians(tilt)));
+         vec3 point = vec3(0.0, 0.0, 6360.0 + height);
+         vec3 sky = vec3(0.0);
+         if (int(gl_FragCoord.x) % 2 == 0) {
+           // Cyclic coordinate permutation is a rigid world rotation.
+           sky = i == 11 ? sceneGISGlobeDirectionalSkyIrradiance(
+               u_irradiance, point.zxy, normal.zxy, sun.zxy) :
+               sceneGISGlobeDirectionalSkyIrradiance(u_irradiance, point, normal, sun);
+         } else {
+           // Independent dense angular quadrature, without the product atlas.
+           for (int m = 0; m < 64; ++m) {
+             float mu = (float(m) + 0.5) / 64.0;
+             float sine = sqrt(1.0 - mu * mu);
+             for (int a = 0; a < 128; ++a) {
+               float phi = (float(a) + 0.5) * czm_twoPi / 128.0;
+               vec3 ray = vec3(sine * cos(phi), sine * sin(phi), mu);
+               vec3 transmittance;
+               vec3 radiance = GetSkyRadiance(sceneGISAtmosphereParameters(),
+                   u_transmittance, u_scattering, u_scattering,
+                   point, ray, 0.0, sun, true, transmittance);
+               sky += max(radiance, vec3(0.0)) * max(dot(normal, ray), 0.0);
+             }
+           }
+           sky *= czm_twoPi / (64.0 * 128.0);
+         }
+         out_FragColor = vec4(sceneGISSkyRadianceToScene(sky), 1.0);
+       }`,
+      true,
+    );
+    try {
+      const pixels = executeHalfFloatQuad(
+        program.fragmentShaderSource.sources,
+        {
+          width: 24,
+          defines: program.fragmentShaderSource.defines,
+          uniformMap: {
+            u_transmittance: () => resources.transmittanceTexture,
+            u_irradiance: () => atlas,
+            u_scattering: () => resources.scatteringTexture,
+          },
+        },
+      );
+      const luminance = (p) =>
+        (p[0] * 0.2126 + p[1] * 0.7152 + p[2] * 0.0722) * 40000.0;
+      for (let i = 0; i < 12; ++i) {
+        const actual = luminance(pixels[i * 2]);
+        const expected = luminance(pixels[i * 2 + 1]);
+        expect(Math.abs(actual - expected))
+          .withContext(`case ${i}: ${actual} lux vs ${expected} lux`)
+          .toBeLessThan(Math.max(1.0, expected * 0.08));
+      }
+      expect(pixels[22]).toEqual(pixels[2]);
+      // The former hemisphere factor yields only about 4013 lux on this wall.
+      expect(luminance(pixels[2])).toBeGreaterThan(5900.0);
+      expect(luminance(pixels[2])).toBeLessThan(6600.0);
+      effects.update(scene, scene.frameState.time);
+      expect(effects._pipeline._resources.irradianceTexture).toBe(atlas);
+    } finally {
+      program.destroy();
+    }
+    effects.disconnectedCallback(effects._element);
+    expect(atlas.isDestroyed()).toBe(true);
+  });
+
+  it("calibrates frozen Globe daylight to diffuse white and 18 percent gray", async function () {
+    await connectControlledCloudMode("globe", () => {
+      effects.showClouds = false;
+    });
+    const resources = effects._pipeline._resources;
+    const program = createEnvironmentEffectsProgramForSpecs(
+      scene.context,
+      `uniform sampler2D u_transmittance;
+       uniform sampler2D u_irradiance;
+       void main() {
+         vec3 sky;
+         vec3 sun = sceneGISGlobeSunAndSkyIrradiance(
+             sceneGISAtmosphereParameters(), u_transmittance, u_irradiance,
+             vec3(0.0, 0.0, 6360.001), vec3(0.0, 0.0, 1.0),
+             vec3(0.0, 0.0, 1.0), sky);
+         float reflectance = gl_FragCoord.x < 1.0 ? 1.0 : 0.18;
+         out_FragColor = vec4(reflectance * (sun + sky) / czm_pi, 1.0);
+       }`,
+      true,
+    );
+    try {
+      const pixels = executeHalfFloatQuad(
+        program.fragmentShaderSource.sources,
+        {
+          width: 2,
+          defines: program.fragmentShaderSource.defines,
+          uniformMap: {
+            u_transmittance: () => resources.transmittanceTexture,
+            u_irradiance: () => resources.irradianceTexture,
+          },
+        },
+      );
+      const luminance = (pixel) =>
+        pixel[0] * 0.2126 + pixel[1] * 0.7152 + pixel[2] * 0.0722;
+      // Acceptance is reflectance placement, independent of conversion factors.
+      // The former storage divisor produces white 0.523 and gray 0.094 here.
+      expect(luminance(pixels[0])).toEqualEpsilon(1.0, 0.025);
+      expect(luminance(pixels[1])).toEqualEpsilon(0.18, 0.005);
+      expect(luminance(pixels[1]) / luminance(pixels[0])).toEqualEpsilon(
+        0.18,
+        0.001,
+      );
+      expect(scene.postProcessStages._sceneGISAutoExposure).toBeUndefined();
+    } finally {
+      program.destroy();
+    }
+  });
+
+  it("recovers Planar diffuse irradiance on the frozen LUT grid without subtracting sky energy", async function () {
+    connectPlanar();
+    effects.firstUpdate(scene, scene.frameState.time);
+    await pollToPromise(() => {
+      effects.update(scene, scene.frameState.time);
+      return effects.ready;
+    });
+    const resources = effects._pipeline._resources;
+    const pixels = executeHalfFloatQuad(
+      [
+        atmosphereSource,
+        `uniform sampler2D u_transmittance;
+       uniform sampler2D u_irradiance;
+       void main() {
+         int i = int(gl_FragCoord.x);
+         vec2 samplePoint = i == 0 ? vec2(0.0, 1.0) :
+             i == 1 ? vec2(100.0, 0.8) :
+             i == 2 ? vec2(5000.0, 0.25) : vec2(0.0, -0.1);
+         vec3 sky;
+         vec3 beam = sceneGISPlanarSunAndSkyIrradiance(u_transmittance,
+             u_irradiance, samplePoint.x, samplePoint.y, sky);
+         out_FragColor = vec4(sky, 1.0);
+       }`,
+      ],
+      {
+        width: 4,
+        uniformMap: {
+          u_transmittance: () => resources.transmittanceTexture,
+          u_irradiance: () => resources.irradianceTexture,
+        },
+      },
+    );
+    // Independent CPU reference: decode the frozen binary16 total-irradiance
+    // asset, subtract the generator's analytic direct term at each stored sample,
+    // then bilinearly interpolate. The old endpoint subtraction erased red sky.
+    const expected = [
+      [0.0444151131, 0.1107607233, 0.2488528041],
+      [0.0416698528, 0.104393376, 0.2342744566],
+      [0.0178550497, 0.046087535, 0.1127015994],
+      [0, 0, 0],
+    ];
+    for (let i = 0; i < expected.length; i++) {
+      for (let channel = 0; channel < 3; channel++) {
+        expect(pixels[i][channel]).toEqualEpsilon(
+          expected[i][channel] * skyToScene[channel],
+          0.0003,
+        );
+      }
+    }
+  });
+
   it("scales Globe surface radiance and matches aerial extinction endpoints on the actual GPU", async function () {
     await connectControlledCloudMode("globe");
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -8486,7 +8831,7 @@ ${hardCascadeLibrary}`;
     expect(aerialFragmentSource).not.toContain("u_surfaceRadianceScale");
   });
 
-  it("adds fixed Globe readable-night irradiance only to ambient domains on the actual GPU", async function () {
+  it("adds configurable Globe night ambient irradiance only to ambient domains on the actual GPU", async function () {
     await connectControlledCloudMode("globe");
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
@@ -8544,9 +8889,9 @@ ${hardCascadeLibrary}`;
     );
     const nightSun = Cartesian3.negate(radialUp, new Cartesian3());
     const lunarPrimaryScale = new Cartesian3(
-      0.12 / 1.474,
-      0.16 / 1.8504,
-      0.22 / 1.91198,
+      0.12 / (1.474 * sunToScene[0]),
+      0.16 / (1.8504 * sunToScene[1]),
+      0.22 / (1.91198 * sunToScene[2]),
     );
     const zeroMatrix = Matrix4.fromScale(Cartesian3.ZERO, new Matrix4());
     const atlasValues = new Uint16Array(4 * 4 * 4);
@@ -8573,9 +8918,8 @@ ${hardCascadeLibrary}`;
     const surfaceWithoutNight = globeSurfaceLightingSource.replace(
       `    float skyHemisphere = 0.5 *
         (1.0 + dot(globeNormal, geodeticNormal));
-    skyIrradiance += sceneGISReadableNightSkyIrradiance(
-        geodeticNormal,
-        globeSun) * skyHemisphere;
+    skyIrradiance += sceneGISNightAmbientIrradiance(
+        skyIrradiance, skyHemisphere);
 `,
       "",
     );
@@ -8750,9 +9094,7 @@ ${hardCascadeLibrary}`;
     };
     const cloudWithoutNight = cloudSource.replace(
       `    skyIrradiance = max(skyIrradiance, vec3(0.0)) +
-        sceneGISReadableNightSkyIrradiance(
-            normalize(globePosition),
-            sunDirection);`,
+        sceneGISNightAmbientIrradiance(skyIrradiance, 1.0);`,
       "    skyIrradiance = max(skyIrradiance, vec3(0.0));",
     );
     expect(cloudWithoutNight).not.toBe(cloudSource);
@@ -8786,11 +9128,12 @@ ${hardCascadeLibrary}`;
 
     const fogFragment = `precision highp float;
       uniform sampler2D u_transmittanceTexture;
+      uniform sampler2D u_irradianceTexture;
       uniform float u_testAmbientScale;
       uniform float u_testDirectionalScale;
       void main() {
         out_FragColor = vec4(sceneGISApplyExponentialHeightFog(
-          u_transmittanceTexture,
+          u_transmittanceTexture, u_irradianceTexture,
           vec3(0.0),
           vec3(0.0),
           vec3(0.0, 1.0, 0.0),
@@ -8833,8 +9176,12 @@ ${hardCascadeLibrary}`;
           defines: globe ? shaderDefines : [],
           uniformMap: {
             u_transmittanceTexture: () => resources.transmittanceTexture,
+            u_irradianceTexture: () => resources.irradianceTexture,
             u_testAmbientScale: () => ambientScale,
             u_testDirectionalScale: () => directionalScale,
+            u_sceneGISShadowSunDirection: () => new Cartesian3(0, 0, -1),
+            u_sceneGISPrimaryLightScale: () => Cartesian3.ZERO,
+            u_sceneGISShadowCloudTop: () => 6000,
           },
         },
       )[0];
@@ -9010,7 +9357,7 @@ ${hardCascadeLibrary}`;
     expect(renderFog(atmosphereSource, false, 0.0, 1.0).slice(0, 3)).toEqual([
       0.0, 0.0, 0.0,
     ]);
-  });
+  }, 90000);
 
   it("keeps Planar aerial scattering continuous across the horizon on the actual GPU", async function () {
     connectPlanar();
@@ -9370,7 +9717,7 @@ ${hardCascadeLibrary}`;
     }
   });
 
-  it("adds Planar P4 readable night to fixed-Z ambient consumers on the actual GPU", async function () {
+  it("adds irradiance-driven Planar night ambient to fixed-Z ambient consumers on the actual GPU", async function () {
     await connectControlledCloudMode("planar");
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
@@ -9409,22 +9756,23 @@ ${hardCascadeLibrary}`;
     expect(renderSurface(-200000, -1)).toEqual(night);
     effects.showCloudShadows = false;
     expect(renderSurface(200000, -1)).toEqual(night);
-    expect(renderSurface(200000, 1).slice(0, 3)).toEqual([0, 0, 0]);
+    // A black physical sky requires fill even with a positive Sun elevation.
+    expect(renderSurface(200000, 1)).toEqual(night);
+    effects.nightAmbientIntensity = 0;
+    expect(renderSurface(200000, -1).slice(0, 3)).toEqual([0, 0, 0]);
+    effects.nightAmbientIntensity = 1;
+    renderSurface(200000, -1);
     expect(effects._pipeline._resources).toBe(resources);
     expect(scene.shadowMap.enabled).toBe(false);
 
     const record = { ...scene.frameState._sceneGISPlanarLighting };
     let position = new Cartesian3(0, 0, 2500);
-    const withoutNight = planarLighting.source.replace(
-      "vec3(0.020, 0.036, 0.060)",
-      "vec3(0.0)",
-    );
-    expect(withoutNight).not.toBe(planarLighting.source);
-    function probe(sunZ, source = planarLighting.source) {
+    function probe(sunZ, intensity = 1) {
+      record.nightAmbientIntensity = intensity;
       record.sunDirection = new Cartesian3(Math.sqrt(1 - sunZ * sunZ), 0, sunZ);
       return executeHalfFloatQuad(
         [
-          source,
+          planarLighting.source,
           heightFogSource,
           cloudSource,
           `precision highp float;
@@ -9446,7 +9794,7 @@ ${hardCascadeLibrary}`;
           } else {
             bool ambient = gl_FragCoord.x < 5.0;
             result = sceneGISApplyExponentialHeightFog(
-              u_sceneGISTransmittanceTexture, vec3(0.0), u_testPosition,
+              u_sceneGISTransmittanceTexture, u_sceneGISIrradianceTexture, vec3(0.0), u_testPosition,
               vec3(0.0, 1.0, 0.0), sun, 10000.0, 0.0,
               3.0e-5, 1.0e-3, 0.0, 0.0, 1.0, 1.0,
               ambient ? 1.0 : 0.0, ambient ? 0.0 : 1.0, 4.0);
@@ -9474,23 +9822,21 @@ ${hardCascadeLibrary}`;
     }
     expect(probe(-0.2079116908)).toEqual(fullNight);
     const twilight = probe(-0.15);
-    const dark = probe(-1, withoutNight);
+    const dark = probe(-1, 0);
     for (const index of [1, 3, 4]) {
       expect(rgbEnergy(twilight[index])).toBeGreaterThan(0);
-      expect(rgbEnergy(twilight[index])).toBeLessThan(
-        rgbEnergy(fullNight[index]),
-      );
+      expect(twilight[index]).toEqual(fullNight[index]);
       expect(dark[index].slice(0, 3)).toEqual([0, 0, 0]);
     }
     position = new Cartesian3(20000000, -30000000, 2500);
     expect(probe(-1)).toEqual(fullNight);
     // Nonzero physical sources prove day identity beyond a black-LUT fixture.
     copyConstantHalfTexture(resources.transmittanceTexture, [0.2, 0.2, 0.2, 1]);
-    copyConstantHalfTexture(resources.irradianceTexture, [0.5, 0.5, 0.5, 1]);
+    copyConstantHalfTexture(resources.irradianceTexture, [2, 2, 2, 1]);
     for (const sunZ of [1, -0.1045284633]) {
-      expect(probe(sunZ)).toEqual(probe(sunZ, withoutNight));
+      expect(probe(sunZ)).toEqual(probe(sunZ, 0));
     }
-  });
+  }, 90000);
 
   it("uses the WGS84 geodetic fallback normal at mid latitude on the actual GPU", function () {
     scene = createScene();
@@ -9915,6 +10261,378 @@ ${hardCascadeLibrary}`;
         inputTexture.destroy();
         disconnectControlledCloudMode();
       }
+    }
+  });
+
+  ["globe", "planar"].forEach((mode) => {
+    it(`keeps ${mode} twilight ambient above the night floor without adding daylight energy`, async function () {
+      await connectControlledCloudMode(mode, () => {
+        effects.showClouds = false;
+      });
+      const program = createEnvironmentEffectsProgramForSpecs(
+        scene.context,
+        `precision highp float;
+       uniform sampler2D u_irradianceTexture;
+       void main() {
+         float x = floor(gl_FragCoord.x);
+         float hemisphere = floor(gl_FragCoord.y) * 0.5;
+         vec3 floorValue = SCENEGIS_READABLE_NIGHT_SKY_IRRADIANCE * hemisphere;
+         // Synthetic input isolates the transition, including both C1 joins.
+         vec3 sky = floorValue * (x / 40.0);
+         if (x >= 81.0) {
+           float elevation = radians(x - 111.0);
+           vec3 sun = vec3(cos(elevation), 0.0, sin(elevation));
+           vec3 normal = vec3(sqrt(max(1.0-pow(2.0*hemisphere-1.0,2.0),0.0)),
+               0.0, 2.0*hemisphere-1.0);
+           #ifdef SCENEGIS_GLOBE
+           sky = sceneGISSkyRadianceToScene(sceneGISGlobeDirectionalSkyIrradiance(
+               u_irradianceTexture, vec3(0,0,6360), normal, sun));
+           #else
+           sky = sceneGISSkyRadianceToScene(sceneGISPlanarSkyIrradiance(
+               u_irradianceTexture, 0.0, sun.z)) * hemisphere;
+           #endif
+         }
+         out_FragColor = vec4(sky + sceneGISNightAmbientIrradiance(sky, hemisphere), 1);
+       }`,
+        mode === "globe",
+      );
+      try {
+        const options = {
+          defines: program.fragmentShaderSource.defines,
+          width: 142,
+          height: 3,
+          uniformMap: effects._pipeline._uniformMap,
+        };
+        effects.nightAmbientIntensity = 0;
+        const physical = executeHalfFloatQuad(
+          program.fragmentShaderSource.sources,
+          options,
+        );
+        effects.nightAmbientIntensity = 1;
+        const filled = executeHalfFloatQuad(
+          program.fragmentShaderSource.sources,
+          options,
+        );
+        const reference = [0.02, 0.036, 0.06];
+        for (let row = 0; row < 3; row++) {
+          for (let x = 0; x < 142; x++) {
+            const i = row * 142 + x;
+            for (let c = 0; c < 3; c++) {
+              const floor = reference[c] * row * 0.5;
+              expect(filled[i][c]).toBeGreaterThanOrEqual(floor - 0.00005);
+              expect(filled[i][c]).toBeGreaterThanOrEqual(
+                physical[i][c] - 0.00005,
+              );
+              if (physical[i][c] >= 1.25 * floor || row === 0) {
+                expect(filled[i][c]).toBe(physical[i][c]);
+              }
+              if (x <= 30) {
+                expect(filled[i][c]).toEqualEpsilon(floor, 0.00005);
+              }
+              if (x > 0 && x <= 80) {
+                expect(filled[i][c]).toBeGreaterThanOrEqual(filled[i - 1][c]);
+                expect(filled[i][c] - filled[i - 1][c]).toBeLessThan(0.002);
+              }
+            }
+          }
+        }
+      } finally {
+        program.destroy();
+      }
+    });
+
+    it(`validates ${mode} night ambient intensity and keeps it a warm uniform`, async function () {
+      await connectControlledCloudMode(mode, () => {
+        effects.showClouds = false;
+      });
+      expect(effects.nightAmbientIntensity).toBe(1.0);
+      const options = {
+        mode,
+        world: mode === "planar" ? scene.world : undefined,
+      };
+      expect(
+        new SceneGISEnvironmentEffects({
+          ...options,
+          nightAmbientIntensity: 0.5,
+        }).nightAmbientIntensity,
+      ).toBe(0.5);
+      [-0.1, 8.1, NaN, Infinity, "0.5"].forEach((value) => {
+        expect(
+          () =>
+            new SceneGISEnvironmentEffects({
+              ...options,
+              nightAmbientIntensity: value,
+            }),
+        ).toThrowDeveloperError();
+        expect(() => {
+          effects.nightAmbientIntensity = value;
+        }).toThrowDeveloperError();
+      });
+      const resources = effects._pipeline._resources;
+      const request = spyOn(scene, "requestRender");
+      const fetch = spyOn(Resource, "fetchArrayBuffer");
+      const compile = spyOn(ShaderProgram, "fromCache");
+      for (const value of [0, 0.5, 8, 1]) {
+        effects.nightAmbientIntensity = value;
+        expect(effects._pipeline._uniformMap.u_nightAmbientIntensity()).toBe(
+          value,
+        );
+        effects.update(scene, scene.frameState.time);
+        expect(
+          scene.frameState[
+            mode === "globe"
+              ? "_sceneGISGlobeLighting"
+              : "_sceneGISPlanarLighting"
+          ].nightAmbientIntensity,
+        ).toBe(value);
+      }
+      effects.nightAmbientIntensity = 1;
+      expect(request).toHaveBeenCalledTimes(4);
+      expect(fetch).not.toHaveBeenCalled();
+      expect(compile).not.toHaveBeenCalled();
+      expect(effects._pipeline._resources).toBe(resources);
+    });
+  });
+
+  it("validates Globe aerial distance scaling and keeps it a warm uniform", async function () {
+    const defaults = new SceneGISEnvironmentEffects({ mode: "globe" });
+    expect(defaults.aerialPerspectiveDistanceScale).toBe(0.5);
+    for (const value of [0, 1]) {
+      const explicit = new SceneGISEnvironmentEffects({
+        mode: "globe",
+        backgroundRadianceScale: value,
+        surfaceRadianceScale: value,
+        aerialPerspectiveDistanceScale: value,
+      });
+      expect(explicit.backgroundRadianceScale).toBe(value);
+      expect(explicit.surfaceRadianceScale).toBe(value);
+      expect(explicit.aerialPerspectiveDistanceScale).toBe(value);
+    }
+    for (const value of [-0.1, 8.1, NaN, Infinity, "0.5"]) {
+      expect(
+        () =>
+          new SceneGISEnvironmentEffects({
+            mode: "globe",
+            aerialPerspectiveDistanceScale: value,
+          }),
+      ).toThrowDeveloperError();
+      expect(() => {
+        defaults.aerialPerspectiveDistanceScale = value;
+      }).toThrowDeveloperError();
+    }
+    const world = connectPlanar();
+    expect(effects.aerialPerspectiveDistanceScale).toBe(1.0);
+    expect(() => {
+      effects.aerialPerspectiveDistanceScale = 0.5;
+    }).toThrowDeveloperError();
+    expect(
+      () =>
+        new SceneGISEnvironmentEffects({
+          mode: "planar",
+          world,
+          aerialPerspectiveDistanceScale: 0.5,
+        }),
+    ).toThrowDeveloperError();
+    disconnectControlledCloudMode();
+    await connectControlledCloudMode("globe", () => {
+      effects.showClouds = false;
+    });
+    const resources = effects._pipeline._resources;
+    const request = spyOn(scene, "requestRender");
+    const fetch = spyOn(Resource, "fetchArrayBuffer");
+    const compile = spyOn(ShaderProgram, "fromCache");
+    for (const value of [0, 0.5, 8, 1]) {
+      effects.aerialPerspectiveDistanceScale = value;
+      expect(
+        effects._pipeline._uniformMap.u_aerialPerspectiveDistanceScale(),
+      ).toBe(value);
+    }
+    effects.aerialPerspectiveDistanceScale = 1;
+    expect(request).toHaveBeenCalledTimes(4);
+    expect(fetch).not.toHaveBeenCalled();
+    expect(compile).not.toHaveBeenCalled();
+    expect(effects._pipeline._resources).toBe(resources);
+  });
+
+  it("scales Globe aerial distance with paired transport and excludes initial vacuum", async function () {
+    await connectControlledCloudMode("globe", () => {
+      effects.showClouds = false;
+    });
+    const program = createEnvironmentEffectsProgramForSpecs(
+      scene.context,
+      `precision highp float;
+       precision highp sampler3D;
+       uniform sampler2D u_transmittanceTexture;
+       uniform sampler3D u_scatteringTexture;
+       void main() {
+         int i = int(gl_FragCoord.x) / 4;
+         int kind = int(gl_FragCoord.x) % 4;
+         float scale = i == 0 ? 0.0 : i == 1 ? 1.0 : i == 2 ? 2.0 : 0.5;
+         bool space = i >= 4 && i <= 6;
+         vec3 origin = vec3(0, 0, space ? 100000.0 : 1000.0);
+         vec3 direction = space ? vec3(0,0,-1) : vec3(0,1,0);
+         float distance = i == 4 ? 90000.0 : i == 5 ? 20000.0 : 20000.0;
+         if (i == 6) { direction = vec3(0,0,1); }
+         float shadowLength = i == 7 ? 4000.0 : 0.0;
+         vec3 sun = normalize(vec3(0.0, 0.3, 1.0));
+         vec3 t;
+         vec3 s;
+         if (kind < 2) {
+           s = sceneGISGlobeAerialRadianceToPoint(u_transmittanceTexture,
+               u_scatteringTexture, origin, direction, sun, distance,
+               shadowLength, scale, t);
+         } else if (i == 0 || i == 5 || i == 6) {
+           t = vec3(1); s = vec3(0);
+         } else {
+           // Independent reference endpoints: 40 km vacuum precedes the
+           // 50 km atmosphere segment in case 4; its half path is 25 km.
+           vec3 referenceOrigin = i == 4 ? vec3(0,0,60000) : origin;
+           float referenceDistance = i == 4 ? 25000.0 :
+               i == 1 ? 20000.0 : i == 2 ? 40000.0 : 10000.0;
+           s = sceneGISGlobeSkyRadianceToPoint(u_transmittanceTexture,
+               u_scatteringTexture, referenceOrigin, direction, sun,
+               referenceDistance, i == 7 ? 2000.0 : 0.0, t);
+         }
+         out_FragColor = vec4(kind % 2 == 0 ? s : t, 1);
+       }`,
+      true,
+    );
+    try {
+      const pixels = executeHalfFloatQuad(
+        program.fragmentShaderSource.sources,
+        {
+          width: 32,
+          defines: program.fragmentShaderSource.defines,
+          uniformMap: effects._pipeline._uniformMap,
+        },
+      );
+      for (let i = 0; i < 8; i++) {
+        expect(pixels[i * 4])
+          .withContext(`scattering ${i}`)
+          .toEqualEpsilon(pixels[i * 4 + 2], 0.001);
+        expect(pixels[i * 4 + 1])
+          .withContext(`transmittance ${i}`)
+          .toEqualEpsilon(pixels[i * 4 + 3], 0.001);
+      }
+      for (let channel = 0; channel < 3; channel++) {
+        expect(pixels[12][channel]).toBeLessThan(pixels[4][channel]);
+        expect(pixels[13][channel]).toBeGreaterThan(pixels[5][channel]);
+      }
+      expect(pixels[0]).toEqual([0, 0, 0, 1]);
+      expect(pixels[1]).toEqual([1, 1, 1, 1]);
+    } finally {
+      program.destroy();
+    }
+  });
+
+  it("applies Globe aerial distance to geometry and clouds without changing visibility", async function () {
+    await connectControlledCloudMode("globe", () => {
+      effects.showClouds = false;
+    });
+    const textures = [];
+    function constant(value) {
+      const texture = new Texture({
+        context: scene.context,
+        width: 1,
+        height: 1,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: PixelDatatype.HALF_FLOAT,
+      });
+      copyConstantHalfTexture(texture, value);
+      textures.push(texture);
+      return texture;
+    }
+    const input = constant([0.25, 0.5, 0.75, 1]);
+    const depth = constant([20000, 0, 0, 1]);
+    const cloud = constant([0.125, 0.25, 0.375, 0.5]);
+    const cloudDepth = constant([0.015625, 0.0078125, 1, 1]);
+    let distance = 20000;
+    let clouds = false;
+    const uniforms = {
+      ...effects._pipeline._uniformMap,
+      u_colorTexture: () => input,
+      u_depthTexture: () => depth,
+      u_cloudColorTexture: () => cloud,
+      u_cloudDistanceTexture: () => cloudDepth,
+      u_perspective: () => false,
+      u_frustum: () => new Cartesian4(-1, 1, -1, 1),
+      u_cameraDirection: () => Cartesian3.UNIT_Y,
+      u_cameraRight: () => Cartesian3.UNIT_X,
+      u_cameraUp: () => Cartesian3.UNIT_Z,
+      u_east: () => Cartesian3.UNIT_X,
+      u_north: () => Cartesian3.UNIT_Y,
+      u_vertical: () => Cartesian3.UNIT_Z,
+      u_sunDirection: () => Cartesian3.UNIT_Z,
+      u_altitude: () => 1000,
+      u_hasCurrentGlobeDepth: () => true,
+      u_linearSceneDepth: () => true,
+      u_sceneDepthPerspective: () => false,
+      u_sceneDepthFrustum: () => new Cartesian4(-1, 1, -1, 1),
+      u_showAerialPerspective: () => true,
+      u_showHeightFog: () => false,
+      u_showClouds: () => clouds,
+      u_cloudCoverage: () => 0,
+      u_sceneGISShowCrepuscularRays: () => false,
+      u_cloudDepthOffset: () => Cartesian2.ZERO,
+      u_backgroundRadianceScale: () => 1,
+      u_aerialRadianceScale: () => 1,
+      u_distance: () => distance,
+    };
+    const actual = createEnvironmentEffectsProgramForSpecs(
+      scene.context,
+      aerialFragmentSource,
+      true,
+    );
+    const expected = createEnvironmentEffectsProgramForSpecs(
+      scene.context,
+      `uniform sampler2D u_transmittanceTexture;
+       uniform sampler3D u_scatteringTexture;
+       uniform float u_aerialPerspectiveDistanceScale;
+       uniform float u_distance;
+       uniform bool u_showClouds;
+       void main() {
+         vec3 t;
+         vec3 s = sceneGISGlobeSkyRadianceToPoint(u_transmittanceTexture,
+             u_scatteringTexture, vec3(0,0,1000), vec3(0,1,0), vec3(0,0,1),
+             u_distance * u_aerialPerspectiveDistanceScale, 0.0, t);
+         vec3 color = u_distance == 0.0 ? vec3(0.25,0.5,0.75) :
+             vec3(0.25,0.5,0.75) * t + s;
+         if (u_showClouds && u_distance > 7812.5) {
+           s = sceneGISGlobeSkyRadianceToPoint(u_transmittanceTexture,
+               u_scatteringTexture, vec3(0,0,1000), vec3(0,1,0), vec3(0,0,1),
+               15625.0 * u_aerialPerspectiveDistanceScale, 0.0, t);
+           color = color * 0.5 + vec3(0.125,0.25,0.375) * t + s * 0.5;
+         }
+         out_FragColor = vec4(color,1);
+       }`,
+      true,
+    );
+    function render(program) {
+      return executeHalfFloatQuad(program.fragmentShaderSource.sources, {
+        defines: program.fragmentShaderSource.defines,
+        uniformMap: uniforms,
+      })[0];
+    }
+    try {
+      for (const scale of [0, 0.5, 1, 2]) {
+        effects.aerialPerspectiveDistanceScale = scale;
+        for (const entry of [
+          [20000, false],
+          [20000, true],
+          [5000, true],
+          [0, false],
+        ]) {
+          [distance, clouds] = entry;
+          copyConstantHalfTexture(depth, [distance, 0, 0, 1]);
+          expect(render(actual))
+            .withContext(`${scale}/${distance}/${clouds}`)
+            .toEqualEpsilon(render(expected), 0.003);
+        }
+      }
+    } finally {
+      actual.destroy();
+      expected.destroy();
+      textures.forEach((texture) => texture.destroy());
     }
   });
 
@@ -13700,7 +14418,7 @@ ${hardCascadeLibrary}`;
             actualSky);
           AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
           vec3 expectedSky;
-          vec3 expectedSun = GetSunAndSkyScalarIrradiance(
+          vec3 expectedSun = sceneGISGlobeSunAndSkyScalarIrradiance(
             atmosphere,
             u_transmittanceTexture,
             u_irradianceTexture,
@@ -13728,7 +14446,7 @@ ${hardCascadeLibrary}`;
           vec3 groundPoint =
             (globePosition - surfaceNormal * height) * 0.001;
           vec3 expectedGroundSky;
-          vec3 expectedGroundSun = GetSunAndSkyIrradiance(
+          vec3 expectedGroundSun = sceneGISGlobeSunAndSkyIrradiance(
             atmosphere,
             u_transmittanceTexture,
             u_irradianceTexture,
@@ -18086,13 +18804,17 @@ ${hardCascadeLibrary}`;
           cloudShadowSource,
           heightFogSource,
           cloudSource,
+          planarCloudTransportSource,
           aerialFragmentSource,
         ],
         {
           width,
           uniformMap: {
+            ...effects._pipeline._uniformMap,
             u_colorTexture: () => colorTexture,
             u_depthTexture: () => depthTexture,
+            u_linearSceneDepth: () => false,
+            u_cloudDepthOffset: () => Cartesian2.ZERO,
             u_perspective: () => true,
             u_cameraDirection: () => scene.camera.directionWC,
             u_cameraRight: () => scene.camera.rightWC,
@@ -18111,6 +18833,8 @@ ${hardCascadeLibrary}`;
             u_showAerialPerspective: () => state[0],
             u_showHeightFog: () => state[1],
             u_showClouds: () => state[2],
+            // This fixture supplies resolved cloud pixels, without local haze.
+            u_cloudCoverage: () => 0.0,
             u_heightFogDensity: () => 0.00003,
             u_heightFogHeightFalloff: () => 0.0001,
             u_heightFogBaseHeight: () => 0.0,
@@ -18216,8 +18940,8 @@ ${hardCascadeLibrary}`;
         .slice(0, cloudResolveFragmentSource.indexOf("    vec4 colorSum ="))
         .replace(/layout \(location = [01]\) out vec4 out_FragData_[01];/g, "");
       const lossyPrefix = distancePrefix.replaceAll(
-        "gl_FragCoord.xy, rawDepth",
-        "vec4(gl_FragCoord.xy, czm_readDepth(u_depthTexture, v_textureCoordinates), 1.0)",
+        "sceneGISWindowToEyeCoordinates(gl_FragCoord.xy, rawDepth)",
+        "czm_windowToEyeCoordinates(vec4(gl_FragCoord.xy, czm_readDepth(u_depthTexture, v_textureCoordinates), 1.0))",
       );
       expect(lossyPrefix).not.toBe(distancePrefix);
       const projectionX = scene.camera.frustum.projectionMatrix[0];
@@ -18236,6 +18960,10 @@ ${hardCascadeLibrary}`;
             width: targetWidth,
             defines: ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
             uniformMap: {
+              ...effects._pipeline._uniformMap,
+              u_linearSceneDepth: () => false,
+              u_cloudTracePhased: () => false,
+              u_cloudDepthOffset: () => Cartesian2.ZERO,
               u_colorTexture: () => inputTexture,
               u_depthTexture: () => farDepthTexture,
               u_cloudLowDistanceTexture: () => cloudDistanceTexture,
@@ -19031,26 +19759,29 @@ ${hardCascadeLibrary}`;
     let maximumStep = 0;
     let maximumHorizonStep = 0;
     for (let i = 0; i < pixels.length; i++) {
-      expect(pixels[i][0]).toBeGreaterThan(0.00005);
-      expect(pixels[i][0]).toBeLessThan(0.0005);
+      expect(pixels[i][0] / skyToScene[0]).toBeGreaterThan(0.00005);
+      expect(pixels[i][0] / skyToScene[0]).toBeLessThan(0.0005);
       expect(pixels[i][3]).toBeGreaterThan(0.999);
       expect(pixels[i][3]).toBeLessThanOrEqual(1.0);
       if (i > 0) {
         for (let channel = 0; channel < 3; channel++) {
           maximumStep = Math.max(
             maximumStep,
-            Math.abs(pixels[i][channel] - pixels[i - 1][channel]),
+            Math.abs(pixels[i][channel] - pixels[i - 1][channel]) /
+              skyToScene[channel],
           );
           if (i >= 112 && i <= 144) {
             maximumHorizonStep = Math.max(
               maximumHorizonStep,
-              Math.abs(pixels[i][channel] - pixels[i - 1][channel]),
+              Math.abs(pixels[i][channel] - pixels[i - 1][channel]) /
+                skyToScene[channel],
             );
           }
         }
       }
     }
-    // Isolate the reproduced horizon edge from the wider half-float LUT error.
+    // Compare in the original spectral unit so the color conversion does not
+    // relax the reproduced horizon edge's half-float LUT error budget.
     expect(maximumHorizonStep).toBeLessThan(0.00003);
     expect(maximumStep).toBeLessThan(0.0001);
   }, 120000);
@@ -19122,7 +19853,14 @@ ${hardCascadeLibrary}`;
       [4, 5],
       [8, 9],
     ]) {
-      expect(pixels[clipped]).toEqualEpsilon(pixels[boundary], 0.00001);
+      // Preserve the original spectral error budget across display-unit changes.
+      for (let channel = 0; channel < 3; channel++) {
+        expect(pixels[clipped][channel] / skyToScene[channel]).toEqualEpsilon(
+          pixels[boundary][channel] / skyToScene[channel],
+          0.00001,
+        );
+      }
+      expect(pixels[clipped][3]).toEqualEpsilon(pixels[boundary][3], 0.00001);
       expect(Math.max(...pixels[boundary].slice(0, 3))).toBeGreaterThan(0.0);
     }
     expect(pixels[10].slice(0, 3)).toEqual([0.0, 0.0, 0.0]);

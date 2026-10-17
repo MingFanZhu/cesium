@@ -577,6 +577,15 @@ function activate(controller, scene, time) {
   }
 }
 
+function validateAerialPerspectiveDistanceScale(mode, name, value) {
+  validateRange(name, value, 0.0, 8.0);
+  if (mode === planarMode && value !== 1.0) {
+    throw new DeveloperError(
+      `${name} must be 1.0 in Planar mode; distance scaling currently supports Globe only.`,
+    );
+  }
+}
+
 /**
  * Controls the SceneGIS advanced physical atmosphere and aerial-perspective
  * pipeline for either a native Globe or a SceneGIS planar world.
@@ -647,10 +656,14 @@ function SceneGISEnvironmentEffects(options) {
   const cloudWindSpeed = options.cloudWindSpeed ?? 20.0;
   const cloudTime = options.cloudTime ?? 0.0;
   const cloudRadianceScale = options.cloudRadianceScale ?? 1.0;
-  const backgroundRadianceScale =
-    options.backgroundRadianceScale ?? (mode === globeMode ? 4.0 : 10.0);
+  // Apply the accepted appearance defaults independently of display exposure
+  // and the shared physical radiance units. Explicit caller values take priority.
+  const backgroundRadianceScale = options.backgroundRadianceScale ?? 2.5;
   const aerialRadianceScale = options.aerialRadianceScale ?? 1.0;
-  const surfaceRadianceScale = options.surfaceRadianceScale ?? 10.0;
+  const aerialPerspectiveDistanceScale =
+    options.aerialPerspectiveDistanceScale ?? (mode === globeMode ? 0.5 : 1.0);
+  const surfaceRadianceScale = options.surfaceRadianceScale ?? 1.2;
+  const nightAmbientIntensity = options.nightAmbientIntensity ?? 1.0;
   const bloomThreshold = options.bloomThreshold ?? 10.0;
   const bloomIntensity = options.bloomIntensity ?? 0.05;
   const lensFlareIntensity = options.lensFlareIntensity ?? 5.0;
@@ -670,6 +683,17 @@ function SceneGISEnvironmentEffects(options) {
     backgroundRadianceScale,
   );
   validateCalibrationScale("options.aerialRadianceScale", aerialRadianceScale);
+  validateAerialPerspectiveDistanceScale(
+    mode,
+    "options.aerialPerspectiveDistanceScale",
+    aerialPerspectiveDistanceScale,
+  );
+  validateRange(
+    "options.nightAmbientIntensity",
+    nightAmbientIntensity,
+    0.0,
+    8.0,
+  );
   validateCalibrationScale(
     "options.surfaceRadianceScale",
     surfaceRadianceScale,
@@ -781,7 +805,9 @@ function SceneGISEnvironmentEffects(options) {
   this._cloudRadianceScale = cloudRadianceScale;
   this._backgroundRadianceScale = backgroundRadianceScale;
   this._aerialRadianceScale = aerialRadianceScale;
+  this._aerialPerspectiveDistanceScale = aerialPerspectiveDistanceScale;
   this._surfaceRadianceScale = surfaceRadianceScale;
+  this._nightAmbientIntensity = nightAmbientIntensity;
   this._bloomThreshold = bloomThreshold;
   this._bloomIntensity = bloomIntensity;
   this._lensFlareIntensity = lensFlareIntensity;
@@ -952,9 +978,12 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
   },
   /**
    * Gets or sets the scene-linear scale applied to physical background radiance.
+   * Also calibrates aerial and cloud radiance. The default appearance scale is
+   * 2.5 in both worlds, independently of display HDR or exposure.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
+   * @default 2.5
    */
   backgroundRadianceScale: {
     get: function () {
@@ -990,10 +1019,37 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
   },
   /**
-   * Gets or sets the Globe, Planar surface and physical model direct and diffuse sky radiance scale.
+   * Gets or sets the finite-receiver atmospheric lookup distance scale.
+   * Values below one reduce both aerial scattering and attenuation. Zero
+   * removes them; one preserves the physical lookup distance. Initial vacuum
+   * is excluded. Sky background, lighting, cloud density, height fog and actual
+   * geometry/depth are unchanged. This is an artistic endpoint remapping.
+   * Globe supports finite values in [0, 8] and defaults to 0.5.
+   * Planar requires 1.0 and defaults to 1.0.
+   * Updates reuse existing GPU resources and request a render.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
    * @type {number}
+   * @default 0.5 (Globe), 1.0 (Planar)
+   * @exception {DeveloperError} The value is outside the supported range or non-unit in Planar mode.
+   */
+  aerialPerspectiveDistanceScale: {
+    get: function () {
+      return this._aerialPerspectiveDistanceScale;
+    },
+    set: function (value) {
+      validateAerialPerspectiveDistanceScale(this._mode, "value", value);
+      setWarmNumber(this, "_aerialPerspectiveDistanceScale", value, 0.0, 8.0);
+    },
+  },
+  /**
+   * Gets or sets the Globe, Planar surface and physical model direct and diffuse sky radiance scale.
+   * The default appearance scale is 1.2 in both worlds. This artistic adjustment
+   * is independent of display HDR and exposure.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   * @default 1.2
    */
   surfaceRadianceScale: {
     get: function () {
@@ -1001,6 +1057,29 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
     },
     set: function (value) {
       setWarmNumber(this, "_surfaceRadianceScale", value, 0.0, 64.0);
+    },
+  },
+  /**
+   * Gets or sets the artistic night ambient irradiance floor multiplier.
+   * Physical sky irradiance smoothly replaces this blue-gray hemisphere as
+   * daylight increases. Zero disables the fill; one preserves the reference
+   * deep-night level. Materials, normals and ambient occlusion still apply.
+   * This does not change the sky background, Moon light, or exposure.
+   * Globe and Planar support finite values in [0, 8].
+   * Updates reuse existing GPU resources and request a render.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   * @default 1.0
+   * @exception {DeveloperError} The value is outside the supported range.
+   */
+  nightAmbientIntensity: {
+    get: function () {
+      return this._nightAmbientIntensity;
+    },
+    set: function (value) {
+      validateRange("value", value, 0.0, 8.0);
+      setWarmNumber(this, "_nightAmbientIntensity", value, 0.0, 8.0);
     },
   },
   /**
@@ -1614,9 +1693,11 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [cloudWindSpeed=20.0] Cloud advection speed in meters per second in the inclusive range 0–200.
  * @property {number} [cloudTime=0.0] Caller-owned simulation seconds in the inclusive range -1000000000–1000000000.
  * @property {number} [cloudRadianceScale] Cloud radiance calibration relative to backgroundRadianceScale in the inclusive range 0–64. Defaults to 1.0 in both worlds.
- * @property {number} [backgroundRadianceScale] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64. Defaults to 4.0 on Globe and 10.0 on Planar.
+ * @property {number} [backgroundRadianceScale=2.5] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64. The default appearance scale is the same in both worlds.
  * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64, relative to backgroundRadianceScale on both worlds.
- * @property {number} [surfaceRadianceScale=10.0] Globe, Planar surface and physical model direct/diffuse sky radiance scale, in the inclusive range 0–64.
+ * @property {number} [aerialPerspectiveDistanceScale] Finite-receiver atmospheric lookup distance scale in [0, 8]. Defaults to 0.5 on Globe and 1.0 on Planar; Planar requires one. Scales scattering and attenuation together, excluding initial vacuum. Does not change background sky, lighting or geometry.
+ * @property {number} [surfaceRadianceScale=1.2] Globe, Planar surface and physical model direct/diffuse sky radiance scale, in the inclusive range 0–64. Independent of display HDR and exposure.
+ * @property {number} [nightAmbientIntensity=1.0] Artistic blue-gray night ambient floor multiplier in [0, 8]; zero disables it. Blends according to physical sky irradiance, before material/ambient occlusion. Globe and Planar. Independent of Moon light and exposure.
  * @property {number} [bloomThreshold=10.0] HDR bloom threshold in the inclusive RGBA16F range 0–65504.
  * @property {number} [bloomIntensity=0.05] Scene-wide bloom intensity in the inclusive range 0–64.
  * @property {number} [lensFlareIntensity=5.0] Sun-gated lens artifact intensity in the inclusive range 0–64.

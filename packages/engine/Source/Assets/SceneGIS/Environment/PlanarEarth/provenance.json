@@ -3,7 +3,7 @@
   "preset": "earth-flat-precomputed-v1",
   "generator": {
     "path": "scripts/scenegis/generate-planar-earth-luts.mjs",
-    "version": "scene-gis-flat-atmosphere-3",
+    "version": "scene-gis-flat-atmosphere-4",
     "runtimeDependencies": []
   },
   "source": {
@@ -71,7 +71,7 @@
     "runtimeEvaluation": "true-boundary entry/endpoint radiance differencing with analytic segment transmittance",
     "boundaryEvaluation": "optical-depth quadrature to the true slab boundary or binary16 transmittance floor; exact horizontal uses semi-infinite optical limit",
     "segmentTransmittance": "runtime analytic Rayleigh/Mie/ozone optical depth over the complete visible segment",
-    "groundBoundary": "irradiance stores direct solar plus cosine-weighted atmospheric diffuse irradiance; fixed ground albedo is applied once at runtime and is excluded from orders 2-4"
+    "groundBoundary": "order n includes transmittance-to-ground times Lambert albedo/pi times ground irradiance of order n-2 (direct for n=2, cosine-weighted single-order atmospheric diffuse thereafter); scattering stores atmospheric paths only, and the final visible ground reflection is applied once at runtime"
   },
   "physicalPreset": {
     "atmosphereTopMeters": 60000,
@@ -119,11 +119,11 @@
     },
     "scattering.bin": {
       "bytes": 8388608,
-      "sha256": "22C9240FDCF528521A74798816757D970647C6E3038322A587DABFF01A991135"
+      "sha256": "802B9CFB4E796BAA59D33017D8EF3725A99C8421F6CB4941446F68B3BEBD65E2"
     },
     "irradiance.bin": {
       "bytes": 8192,
-      "sha256": "B2B231213F25C9DE45F2DBBAAFFE1DCD4805398724CE6FE05D391D5E50613A6C"
+      "sha256": "647A70C8B00B4045230C385FEC6C2A7F62D24BCE038AA05FE16467DFABCFC2A3"
     },
     "LICENSE.txt": {
       "bytes": 4239,

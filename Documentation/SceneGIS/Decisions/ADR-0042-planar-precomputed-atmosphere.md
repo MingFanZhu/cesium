@@ -168,3 +168,28 @@ Globe assets 和光学路径不变。Package verifier 同步新 manifest，并�
 这修正 250000 km 俯视背景的地面反射分支跳变，不扩大地面容差或修改 LUT、物理系数、
 background distance limit、公共 API、pass 和资源预算。无 upstream / SGP 增量。
 验证与剩余边界见 [独立修复计划](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-15-planar-high-altitude-precision.md)。
+
+## Ground feedback in multiple scattering（2026-10-17）
+
+负责人授权补齐地面反射进入大气的缺失能量，保留无限 flat slab、fixed +Z、Earth
+albedo=0.1、orders 2–4 和现有方向平均近似。禁止以加白、加黄、太阳角偏移或暮光延时
+对齐 Globe。HDR / 自动曝光的默认及当前 LDR 验收配置不变。
+
+Version 4 在第 n 阶散射密度积分中，对朝向地面的入射方向加入
+`T_to_ground * albedo / pi * E_ground[n-2]`。E0 为 ground direct solar irradiance；
+E1、E2 分别来自 L1、L2 的上半球余弦积分，不是累计总照度。地面反射本身计为一次
+相互作用；每条路径只进入所属阶一次。此递推遵循
+[Bruneton ground boundary formulation](https://ebruneton.github.io/precomputed_atmospheric_scattering/atmosphere/functions.glsl.html#multiple_scattering)，
+使用本仓库 flat-slab 积分，没有复制 spherical implementation。
+
+Scattering LUT 仍只包含最后一次相互作用发生在大气中的路径，最后一次可见地面反射
+继续由 runtime 单独加入。Irradiance 保持 direct 加全部已计算大气阶次的 diffuse，
+不把夜间艺术环境光写入物理 LUT。太阳位于平面以下时仍无新的太阳能量源。
+
+通过 canonical generator 重建并跟踪 scattering / irradiance / provenance，更新
+deterministic manifest 和 package verifier；transmittance bytes、物理参数、格式、
+纹理尺寸、请求数量、运行时 Shader / pass / GPU 资源均不变，无 upstream / SGP 增量。
+高阶方向平均、有限四阶与既有 12×8 angular quadrature 仍是近似，不宣称与完整
+directional transport 或 Globe 逐像素一致。当前实施与技术 / 视觉 gate 记录于
+[维护 plan](../../../AgentDocs/webgl-deferred-renderer/plans/2026-10-16-environment-radiance.md)
+及其 review。

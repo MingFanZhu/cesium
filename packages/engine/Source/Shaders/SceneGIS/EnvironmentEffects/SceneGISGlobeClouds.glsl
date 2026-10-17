@@ -163,16 +163,14 @@ vec4 sceneGISGlobeCloudHaze(
 
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
     vec3 skyIrradiance;
-    vec3 sunIrradiance = GetSunAndSkyScalarIrradiance(
+    vec3 sunIrradiance = sceneGISGlobeSunAndSkyScalarIrradiance(
         atmosphere,
         transmittanceTexture,
         irradianceTexture,
         virtualCameraPosition * 0.001,
         sunDirection,
         skyIrradiance);
-    skyIrradiance += sceneGISReadableNightSkyIrradiance(
-        normalAtOrigin,
-        sunDirection);
+    skyIrradiance += sceneGISNightAmbientIrradiance(skyIrradiance, 1.0);
     float cosineTheta = dot(sunDirection, rayDirection);
     vec3 inscatter = sunIrradiance *
         sceneGISCloudDualPhase(cosineTheta, 1.0) * directionalOpacity;

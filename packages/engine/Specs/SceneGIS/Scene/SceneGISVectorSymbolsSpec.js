@@ -15,6 +15,8 @@ import {
   SceneGISPlanarWorld,
   SceneGISVectorTileLayer,
   SceneGISVectorTileSource,
+  SceneGISAutoExposure,
+  Tonemapper,
 } from "../../../index.js";
 import WorkerPool from "../../../Source/SceneGIS/Core/_private/_SceneGISVectorWorkerPool.js";
 import Assets from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorSymbolAssets.js";
@@ -183,6 +185,74 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     scene.destroyForSpecs();
     image?.remove();
     image = undefined;
+  });
+
+  [false, true].forEach(function (icon) {
+    it(`compensates HDR exposure for ${icon ? "icons" : "text"} while preserving tone mapping, alpha and picking`, async function () {
+      spyOn(source, "requestTile").and.resolveTo(tile());
+      spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+      spyOn(Resource.prototype, "fetchJson").and.resolveTo({
+        pin: { x: 0, y: 0, width: 16, height: 16, pixelRatio: 1 },
+      });
+      image = createCanvas(16, 16);
+      const context = image.getContext("2d");
+      context.fillStyle = "#3388cc";
+      context.fillRect(0, 0, 16, 16);
+      spyOn(Resource.prototype, "fetchImage").and.resolveTo(image);
+      const layer = add([
+        definition(
+          "symbols",
+          icon
+            ? {
+                "text-field": "",
+                "icon-image": "pin",
+              }
+            : {},
+          { "text-color": "#3388cc" },
+        ),
+      ]);
+      await loaded(layer);
+      const ldr = pixel();
+      const stages = scene.postProcessStages;
+      stages.exposure = 10;
+      expect(pixel()).toEqual(ldr);
+      scene.highDynamicRange = true;
+      stages.tonemapper = Tonemapper.AGX;
+      stages.exposure = 1;
+      const hdr = pixel();
+      expect(hdr).not.toEqual(ldr);
+      for (const exposure of [0.5, 10]) {
+        stages.exposure = exposure;
+        expect(pixel()).toEqualEpsilon(hdr, 1);
+        expect(scene.pick(new Cartesian2(30, 32), 1, 1)?.id.styleLayer).toBe(
+          "symbols",
+        );
+      }
+      layer.opacity = 0.5;
+      const half = pixel();
+      expect(half[2]).toBeLessThan(hdr[2]);
+      stages.exposure = 1;
+      expect(pixel()).toEqualEpsilon(half, 1);
+      layer.opacity = 1;
+      const effect = new SceneGISAutoExposure({
+        scene,
+        enabled: true,
+        locked: true,
+        minimumExposure: 2,
+        maximumExposure: 2,
+      });
+      pixel(); // Produce the first automatic exposure history.
+      expect(pixel()).toEqualEpsilon(hdr, 1);
+      stages.exposure = 10;
+      effect.exposureCompensation = 1;
+      expect(pixel()).toEqualEpsilon(hdr, 1);
+      effect.destroy();
+      expect(pixel()).toEqualEpsilon(hdr, 1);
+      stages.exposure = 0;
+      expect(pixel().slice(0, 3)).toEqual([0, 0, 0]);
+      scene.highDynamicRange = false;
+      expect(pixel()).toEqual(ldr);
+    });
   });
 
   [false, true].forEach(function (logarithmic) {

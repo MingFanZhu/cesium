@@ -285,5 +285,11 @@ IrradianceSpectrum GetIrradiance(
     const IrradianceTexture irradiance_texture,
     const Length r, const Number mu_s) {
   vec2 uv = GetIrradianceTextureUvFromRMuS(atmosphere, r, mu_s);
+  // The original irradiance grid occupies the lower-left region of the
+  // SceneGIS directional atlas. Standalone reference grids keep their size.
+  vec2 halfTexel = 0.5 / vec2(IRRADIANCE_TEXTURE_WIDTH, IRRADIANCE_TEXTURE_HEIGHT);
+  uv = clamp(uv, halfTexel, vec2(1.0) - halfTexel);
+  uv *= vec2(IRRADIANCE_TEXTURE_WIDTH, IRRADIANCE_TEXTURE_HEIGHT) /
+      vec2(textureSize(irradiance_texture, 0));
   return IrradianceSpectrum(texture(irradiance_texture, uv));
 }

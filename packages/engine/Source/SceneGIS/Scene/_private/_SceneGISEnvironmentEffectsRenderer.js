@@ -16,6 +16,7 @@ import Transforms from "../../../Core/Transforms.js";
 import ClearCommand from "../../../Renderer/ClearCommand.js";
 import BlendingState from "../../../Scene/BlendingState.js";
 import DrawCommand from "../../../Renderer/DrawCommand.js";
+import Framebuffer from "../../../Renderer/Framebuffer.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
@@ -40,6 +41,7 @@ import cloudShadowSource from "../../../Shaders/SceneGIS/EnvironmentEffects/Scen
 import aerialFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsAerialFS.js";
 import atmosphereSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
 import backgroundFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBackgroundFS.js";
+import diffuseIrradianceFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISGlobeDiffuseIrradianceFS.js";
 import starsFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsStarsFS.js";
 import starsVertexSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsStarsVS.js";
 import bloomBlurFragmentSource from "../../../Shaders/SceneGIS/EnvironmentEffects/SceneGISEnvironmentEffectsBloomBlurFS.js";
@@ -1520,6 +1522,55 @@ function createCloudResources(renderer, context, buffers, vertexArray) {
   return candidate;
 }
 
+function createGlobeDirectionalIrradiance(context, resources) {
+  // Match SceneGISGlobeDiffuseIrradianceFS: original grid plus a 4D atlas.
+  const width = 64 + 65 * 9;
+  const height = 17 * 16;
+  const atlas = new Texture({
+    context,
+    width,
+    height,
+    pixelFormat: PixelFormat.RGBA,
+    pixelDatatype: PixelDatatype.HALF_FLOAT,
+    sampler: linearSampler,
+  });
+  let framebuffer;
+  let program;
+  try {
+    framebuffer = new Framebuffer({
+      context,
+      colorTextures: [atlas],
+      destroyAttachments: false,
+    });
+    program = createProgram(context, diffuseIrradianceFragmentSource, true);
+    const command = new DrawCommand({
+      vertexArray: resources.vertexArray,
+      shaderProgram: program,
+      uniformMap: {
+        u_transmittanceTexture: () => resources.transmittanceTexture,
+        u_scatteringTexture: () => resources.scatteringTexture,
+        u_irradianceTexture: () => resources.irradianceTexture,
+      },
+      framebuffer,
+      renderState: RenderState.fromCache({
+        viewport: new BoundingRectangle(0, 0, width, height),
+        depthTest: { enabled: false },
+        depthMask: false,
+      }),
+      primitiveType: PrimitiveType.TRIANGLE_STRIP,
+      count: 4,
+    });
+    command.execute(context);
+    return atlas;
+  } catch (error) {
+    atlas.destroy();
+    throw error;
+  } finally {
+    destroyResource(program);
+    destroyResource(framebuffer);
+  }
+}
+
 function createResources(renderer, context, buffers) {
   const candidate = {};
   try {
@@ -1581,6 +1632,14 @@ function createResources(renderer, context, buffers) {
       16,
       buffers.irradiance,
     );
+    if (globe) {
+      const original = candidate.irradianceTexture;
+      candidate.irradianceTexture = createGlobeDirectionalIrradiance(
+        context,
+        candidate,
+      );
+      original.destroy();
+    }
     const renderState = RenderState.fromCache({
       cull: { enabled: false },
       depthTest: { enabled: false },
@@ -1654,7 +1713,16 @@ const moonInertialPosition = new Cartesian3();
 const moonToObserver = new Cartesian3();
 const moonToSun = new Cartesian3();
 const primaryWeightedDirection = new Cartesian3();
-const solarIrradiance = new Cartesian3(1.474, 1.8504, 1.91198);
+// Match SceneGISBrunetonAtmosphere.glsl: the source preset's spectral-to-sRGB
+// factors share one photometric reference, not one normalization per channel.
+// RGB Moonlight and caller-owned lights must divide by the converted solar RGB.
+// Fixed daylight diffuse-white reference, shared with the atmosphere shader.
+const luminanceUnit = 40000.0;
+const solarIrradiance = new Cartesian3(
+  (1.474 * 98242.786222) / luminanceUnit,
+  (1.8504 * 69954.398112) / luminanceUnit,
+  (1.91198 * 66475.012354) / luminanceUnit,
+);
 const moonFullPhaseIrradiance = new Cartesian3(0.12, 0.16, 0.22);
 const sinNightStart = Math.sin((-6.0 * Math.PI) / 180.0);
 const sinNightEnd = Math.sin((-12.0 * Math.PI) / 180.0);
@@ -1903,7 +1971,7 @@ function updateFrame(renderer, scene, frameState, time) {
       renderer._primaryLightDirection,
       renderer._primaryLightDirection,
     );
-    // The physical shader multiplies this scale by its solar spectrum.
+    // The physical shader multiplies this scale by its converted solar RGB.
     // Preserve the caller's linear RGB irradiance before atmospheric attenuation.
     renderer._primaryLightScale.x =
       (light.color.red * light.intensity) / solarIrradiance.x;
@@ -2124,7 +2192,10 @@ function SceneGISEnvironmentEffectsRenderer(options) {
     u_starIntensity: () => that._owner._starIntensity,
     u_worldToStars: () => that._worldToStars,
     u_aerialRadianceScale: () => that._owner._aerialRadianceScale,
+    u_aerialPerspectiveDistanceScale: () =>
+      that._owner._aerialPerspectiveDistanceScale,
     u_surfaceRadianceScale: () => that._owner._surfaceRadianceScale,
+    u_nightAmbientIntensity: () => that._owner._nightAmbientIntensity,
     u_showAerialPerspective: () => that._showAerialPerspective,
     u_showHeightFog: () => that._showHeightFog,
     u_showClouds: () => that._cloudPassActive,
@@ -2476,6 +2547,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
       this._owner._showCrepuscularRays &&
       this._shadowCloudCasterActive,
     surfaceRadianceScale: this._owner._surfaceRadianceScale,
+    nightAmbientIntensity: this._owner._nightAmbientIntensity,
     surfacePosition: this._frame.surfacePosition,
     east: this._frame.east,
     north: this._frame.north,

@@ -27,10 +27,11 @@ const viewer = new Cesium.Viewer("map", {
   fullscreenButton: false,
 });
 viewer.scene.debugShowFramesPerSecond = true;
-// Planar lighting uses the same fixed +Z-up coordinates as the buildings.
-viewer.scene.light = new Cesium.DirectionalLight({
-  direction: new Cesium.Cartesian3(-0.3, -0.5, -1),
-});
+// Use the atmosphere reference display; lighting and style colors stay linear.
+viewer.scene.highDynamicRange = true;
+viewer.scene.postProcessStages.tonemapper = Cesium.Tonemapper.AGX;
+viewer.scene.postProcessStages.exposure = 10;
+// Keep the default physical sun and atmosphere supplied by the planar world.
 
 // 2. Planar positions are projected meters, not longitude/latitude.
 viewer.planarWorld.maximumTiltedTileDistance = 100000;
@@ -117,6 +118,13 @@ async function loadMap() {
     container: document.getElementById("controls"),
   });
   gui.add(layer, "opacity", 0, 1, 0.01).name("矢量不透明度");
+  gui.add(viewer.scene, "highDynamicRange").name("HDR 显示");
+  gui
+    .add(viewer.scene.postProcessStages, "tonemapper", Cesium.Tonemapper)
+    .name("色调映射");
+  gui
+    .add(viewer.scene.postProcessStages, "exposure", 0.1, 20, 0.1)
+    .name("手动曝光");
 }
 
 // Optional references for inspecting the running example in DevTools.

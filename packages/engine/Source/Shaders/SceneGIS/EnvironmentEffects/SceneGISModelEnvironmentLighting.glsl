@@ -26,7 +26,7 @@ vec3 sceneGISModelDirectSource(vec3 positionEC, vec3 nativeSource)
         vec3 lightDirection = normalize(u_sceneGISPrimaryLightDirection);
         vec3 unusedSky;
         // The native PBR BRDF already includes NdotL. Sample beam irradiance.
-        vec3 source = GetSunAndSkyIrradiance(
+        vec3 source = sceneGISGlobeSunAndSkyIrradiance(
             sceneGISAtmosphereParameters(),
             u_sceneGISTransmittanceTexture,
             u_sceneGISIrradianceTexture,
@@ -50,7 +50,7 @@ vec3 sceneGISModelSkyIrradiance(vec3 positionEC, vec3 normalEC)
     vec3 normalWC = normalize(czm_inverseViewRotation * normalEC);
     vec3 sun = normalize(u_sceneGISActualSunDirection);
     vec3 sky;
-    vec3 unusedDirect = GetSunAndSkyIrradiance(
+    vec3 unusedDirect = sceneGISGlobeSunAndSkyIrradiance(
         sceneGISAtmosphereParameters(),
         u_sceneGISTransmittanceTexture,
         u_sceneGISIrradianceTexture,
@@ -58,8 +58,19 @@ vec3 sceneGISModelSkyIrradiance(vec3 positionEC, vec3 normalEC)
         normalWC,
         sun,
         sky);
-    sky += sceneGISReadableNightSkyIrradiance(up, sun) *
-        (0.5 * (1.0 + dot(normalWC, up)));
+    sky += sceneGISNightAmbientIrradiance(
+        sky, 0.5 * (1.0 + dot(normalWC, up)));
+    float groundWeight = sceneGISGlobeGroundWeight(globePosition, normalWC);
+    if (groundWeight > 0.0) {
+        float cloudTransmittance = u_sceneGISShowCloudShadows
+            ? exp(-sceneGISCloudShadowOpticalDepth(
+                up * SCENEGIS_BOTTOM_RADIUS, max(-positionEC.z, 0.0)))
+            : 1.0;
+        sky += groundWeight * sceneGISGlobeGroundIrradiance(
+            u_sceneGISTransmittanceTexture, u_sceneGISIrradianceTexture,
+            up, sun, normalize(u_sceneGISPrimaryLightDirection),
+            u_sceneGISPrimaryLightScale, cloudTransmittance);
+    }
     // Native diffuse IBL expects irradiance/pi before its material weighting.
     return max(sky, vec3(0.0)) * (u_surfaceRadianceScale / czm_pi);
 }

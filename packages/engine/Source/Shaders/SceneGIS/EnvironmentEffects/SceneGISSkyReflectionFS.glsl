@@ -23,7 +23,7 @@ void main()
             u_scatteringTexture, origin, direction, u_sunDirection, distance, 0.0, transmission);
         vec3 point = vec3(0.0, 0.0, radius) + direction * distance;
         vec3 sky;
-        vec3 beam = GetSunAndSkyIrradiance(sceneGISAtmosphereParameters(),
+        vec3 beam = sceneGISGlobeSunAndSkyIrradiance(sceneGISAtmosphereParameters(),
             u_transmittanceTexture, u_irradianceTexture, point * 0.001,
             normalize(point), u_sunDirection, sky);
         radiance += transmission * SCENEGIS_GROUND_ALBEDO * (beam + sky + night) / czm_pi;

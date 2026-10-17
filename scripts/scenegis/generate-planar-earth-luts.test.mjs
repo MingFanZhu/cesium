@@ -13,6 +13,7 @@ import {
   generateAssetBuffers,
   generateTarget,
   integrateSingleRadiance,
+  integrateSourceRadiance,
   integrateTotalRadiance,
   transmittance,
   verifyTarget,
@@ -126,6 +127,7 @@ test("isolates the single seed and each multiple-scattering recurrence order", (
   let sourceCalls = 0;
   const seed = [1, 2, 3];
   const result = createMultipleSourceGrid(1, 1, {
+    groundAlbedo: [0, 0, 0],
     singleRadiance: () => {
       singleCalls++;
       return seed;
@@ -148,6 +150,120 @@ test("isolates the single seed and each multiple-scattering recurrence order", (
     assert.ok(Math.abs(order3 - order2 * recurrence) < 1e-24);
     assert.ok(Math.abs(order4 - order3 * recurrence) < 1e-30);
     assert.equal(result.grid.values[channel], order2 + order3 + order4);
+  }
+});
+
+test("includes ground-reflected sunlight in the second scattering order", () => {
+  const black = createMultipleSourceGrid(2, 1, { groundAlbedo: [0, 0, 0] });
+  const reflecting = createMultipleSourceGrid(2, 1);
+  const height = 15000;
+  const sunMu = 0.25;
+  const solar = [1.474, 1.8504, 1.91198];
+  const groundT = transmittance(0, sunMu);
+  const meanGroundT = [0, 0, 0];
+  for (let i = 0; i < 6; i++) {
+    const t = transmittance(height, -1 + (2 * (i + 0.5)) / 12);
+    for (let c = 0; c < 3; c++) {
+      meanGroundT[c] += t[c] / 12;
+    }
+  }
+  for (let c = 0; c < 3; c++) {
+    const scattering =
+      [5.802e-6, 1.3558e-5, 3.31e-5][c] * Math.exp(-height / 8000) +
+      3.996e-6 * Math.exp(-height / 1200);
+    const expected =
+      (0.1 / Math.PI) *
+      solar[c] *
+      sunMu *
+      groundT[c] *
+      meanGroundT[c] *
+      scattering;
+    const added =
+      reflecting.orderGrids[0].values[3 + c] -
+      black.orderGrids[0].values[3 + c];
+    assert.ok(expected > 0);
+    assert.ok(
+      Math.abs(added / expected - 1) < 1e-10,
+      `${added} vs ${expected}`,
+    );
+  }
+});
+
+test("feeds single-order ground irradiance back without repeating direct sunlight", () => {
+  const result = createMultipleSourceGrid(2, 8);
+  const sunMu = 0.25;
+  const expected = [
+    [0, 0, 0],
+    [0, 0, 0],
+  ];
+  // Independently integrate L1 and L2 at the ground on a finer angular grid.
+  // E1 must feed order 3; E2 (including the earlier ground bounce) feeds order 4.
+  for (let j = 0; j < 48; j++) {
+    const mu = (j + 0.5) / 48;
+    const second = integrateSourceRadiance(
+      0,
+      mu,
+      sunMu,
+      0,
+      result.orderGrids[0],
+    );
+    for (let c = 0; c < 3; c++) {
+      expected[1][c] += (second[c] * mu * 2 * Math.PI) / 48;
+    }
+    for (let k = 0; k < 32; k++) {
+      const cosine =
+        mu * sunMu +
+        Math.sqrt((1 - mu * mu) * (1 - sunMu * sunMu)) *
+          Math.cos((2 * Math.PI * (k + 0.5)) / 32);
+      const first = integrateSingleRadiance(0, mu, sunMu, cosine);
+      for (let c = 0; c < 3; c++) {
+        expected[0][c] += (first[c] * mu * 2 * Math.PI) / (48 * 32);
+      }
+    }
+  }
+  for (let order = 0; order < 2; order++) {
+    for (let c = 0; c < 3; c++) {
+      const actual = result.groundIrradianceOrders[order + 1][1][c];
+      assert.ok(expected[order][c] > 0);
+      // The retained 12x8 angular rule under-resolves the single-Mie peak;
+      // allow its measured 5% error, while checking the isotropic E2 at 2%.
+      assert.ok(
+        Math.abs(actual / expected[order][c] - 1) < (order === 0 ? 0.06 : 0.02),
+        `E${order + 1}/${c}: ${actual} vs ${expected[order][c]}`,
+      );
+    }
+  }
+});
+
+test("keeps flat-slab nights dark and excludes the final ground reflection from scattering", () => {
+  const result = createMultipleSourceGrid(4, 4);
+  for (const order of result.orderGrids) {
+    for (let y = 0; y < order.height; y++) {
+      for (let x = 0; x < order.width / 2; x++) {
+        assertVectorClose(
+          Array.from(order.values.slice((y * 4 + x) * 3, (y * 4 + x + 1) * 3)),
+          [0, 0, 0],
+        );
+      }
+    }
+  }
+  for (const sunMu of [-0.1, -1]) {
+    assertVectorClose(
+      integrateTotalRadiance(600, 0.2, sunMu, 0.5, result.grid),
+      [0, 0, 0],
+    );
+    assertVectorClose(computeIrradiance(0, sunMu, result.grid), [0, 0, 0]);
+  }
+  // A zero-length atmospheric path has no radiance even with a lit ground.
+  assertVectorClose(
+    integrateTotalRadiance(0, -1, 0.5, 0.5, result.grid),
+    [0, 0, 0],
+  );
+  const black = createMultipleSourceGrid(4, 4, { groundAlbedo: [0, 0, 0] });
+  const lit = computeIrradiance(0, 0.5, result.grid);
+  const unlit = computeIrradiance(0, 0.5, black.grid);
+  for (let c = 0; c < 3; c++) {
+    assert.ok(lit[c] > unlit[c]);
   }
 });
 

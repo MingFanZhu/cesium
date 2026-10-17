@@ -40,8 +40,6 @@ class SceneGISDefaultEnvironment {
       showCrepuscularRays: false,
       showBloom: false,
       showLensFlare: false,
-      // The default also serves LDR displays without a separate exposure setup.
-      surfaceRadianceScale: 1.0,
     });
     this.light = undefined;
     this.element = scene.canvas;

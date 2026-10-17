@@ -281,6 +281,7 @@ describe("SceneGIS/Scene/SceneGISVectorEnvironment", function () {
           ),
           primaryLightScale: new Cartesian3(1, 1, 1),
           surfaceRadianceScale: 1,
+          nightAmbientIntensity: 1,
           cloudTop: 4000,
         };
         scene.frameState[key] = record;

@@ -418,6 +418,7 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
             scene.camera.positionWC.z,
           ),
           surfaceRadianceScale: 1,
+          nightAmbientIntensity: 1,
           cloudTop: 4000,
         };
         try {

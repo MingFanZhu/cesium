@@ -835,6 +835,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
       sunDirection: Cartesian3.UNIT_X,
       primaryLightScale: new Cartesian3(1, 1, 1),
       surfaceRadianceScale: 1,
+      nightAmbientIntensity: 1,
       cloudTop: 4000,
     };
     scene.frameState._sceneGISGlobeLighting = record;
@@ -2016,6 +2017,7 @@ describe("SceneGIS/Scene/SceneGISDeferredGlobe", function () {
       sunDirection: Cartesian3.UNIT_X,
       primaryLightScale: new Cartesian3(1, 1, 1),
       surfaceRadianceScale: 1,
+      nightAmbientIntensity: 1,
       cloudTop: 4000,
     };
     scene.frameState._sceneGISGlobeLighting = record;

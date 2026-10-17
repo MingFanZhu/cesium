@@ -771,6 +771,57 @@ clearcoat 同样遵循 y；材质 metallic/roughness/normal/anisotropy 仍由原
 的 groundColor/gamma 等程序化参数不改变物理 LUT。光照使用 surfaceRadianceScale，天空显示
 使用 backgroundRadianceScale。需一致亮度时同时调整二者，不能对已解码 HDR 贴图再作 sRGB 解码。
 
+2026-10-17 起，Globe / Planar 的默认及显式环境均使用已验收的外观默认：
+backgroundRadianceScale=2.5、surfaceRadianceScale=1.2，空气透视 / 云的相对倍率仍为 1。
+HDR/LDR 切换不改变这些值。它们是艺术控制，不改变共同物理单位；需要中性倍率时显式
+设置为 1。HDR 和自动曝光默认关闭；显式 HDR 可设置手动 exposure，LDR 只裁剪并应用
+gamma，不进行曝光。调用方显式参数优先，不由默认环境覆盖。
+已有应用若需要旧外观，可显式指定原背景倍率（Globe 4 / Planar 10）及原地表倍率
+（自动环境 1 / 显式环境 10）；这仅恢复旧倍率，补齐光谱转换后不保证旧色彩逐像素相同。
+Earth LUT 的三波段结果按原实现 Sun / Sky 系数转换到线性 sRGB，并除以固定的
+40000 cd/m² 日光参考单位；它使天顶太阳下的海平面 18% 灰面接近显示线性 0.18，
+不是动态曝光或太阳强度倍率，HDR/LDR 使用同一换算。
+该相对光度单位贯穿表面、大气、云和物理天空反射；不是直接向 HDR 缓冲写 lux。
+自定义 DirectionalLight、model lightColor、发光与注记仍接受原来的场景 RGB，不要自行
+再乘光谱转换系数。系数、单位和三波段近似边界见 ADR-0044。
+
+AgX 可通过既有显示接口显式选择（ADR-0164 / SGP-0060）：
+
+```js
+scene.highDynamicRange = true;
+scene.postProcessStages.tonemapper = Cesium.Tonemapper.AGX;
+scene.postProcessStages.exposure = 10;
+```
+
+这是日间物理大气来源示例的对照配置，不会改引擎 PBR Neutral / exposure=1 默认，
+也不会自动启用自动曝光。曝光 10 不是太阳强度换算或所有材质的通用校准；独立大气与矢量
+示例提供曲线 / 手动曝光控件。AgX 复用调色和输出 gamma，保持 alpha；LDR 忽略曝光与曲线。
+本地保留 Cesium 的可配置 gamma，和 Three.js 的 sRGB 输出传递函数并非逐像素相同。
+
+按 ADR-0165，矢量文字 / 图标抵消曝光增益，继续接受 AgX 等曲线和调色；提高 exposure
+不会再同时冲白注记。alpha、样式顺序、地形 / 外部模型遮挡与拾取规则不变。自动曝光仍
+默认关闭；显式启用时补偿使用上一完成帧的自动增益，适应期间可能有一帧亮度比值变化。
+共享环境漫反射包含原反照率 0.1 的下半球地面反弹，改善背光侧墙；显式 IBL / SH 保持
+调用方所有权。该区域近似没有计算建筑之间的多次反弹或局部地面纹理，不作为完整 GI。
+
+Globe 表面天空补光使用方向性照度表，按表面位置、太阳与法线查询实际天空的余弦积分，
+不再对侧墙固定采用水平天空的一半。表在环境冷创建时生成，不随相机或太阳移动重建；
+占用约 1.35 MiB，替代原 8 KiB 照度纹理，材质 sampler 和每帧 pass 数量不增加。
+首次使用包含 shader 编译与一次 GPU 积分；具体测量和有限网格误差见 ADR-0165 及环境
+radiance review。此改进不改变 Planar transport、天空外观倍率或自动曝光默认。
+
+Globe 默认使用 `scene.environmentEffects.aerialPerspectiveDistanceScale = 0.5` 减轻
+远景空气透视（ADR-0166）。它在原大气模型中缩短有限接收点的查询距离，同时计算散射
+和透射率；不同于只乘散射颜色的 `aerialRadianceScale`。显式 1 保持原物理查询距离，0 移除
+有限距离空气透视，支持有限值 [0, 8]；Planar 当前仅接受 1。天空背景、真实几何深度、
+云遮挡、表面光照和高度雾不受影响。修改不重建 LUT，也不编译 shader。非 1 倍率是
+艺术控制，仍需检查地平线及远景边界；不代表修改了整个星球的物理气溶胶密度。
+
+球面物理大气示例当前用于正午 LDR 验收，继承默认天空 2.5、地表 1.2、空气亮度 1、
+空气透视距离 0.5；界面可实时调节。平面物理大气示例继承相同天空 / 地表 / 空气亮度默认，
+保留 Planar 中性空气距离 1；两页均提供北京时间和夜间环境光控件。
+两页已移除重复的外观倍率配置，直接使用引擎默认；HDR 与自动曝光仍关闭。
+
 打开 [环境反射示例](../../Test/Planar/环境反射.html)，用 world=globe 切换球面。前排金属、后排
 涂层陶瓷，粗糙度逐渐增大；对比镜面开关、白天/日落/夜间和转动视角。反射中不包含附近球体、
 云或地形纹理，这是 R3 的区域天空探针范围。地面仅中性受光近似。球面必须继续关闭与物理
@@ -1264,6 +1315,13 @@ API 默认关闭，不改变原生固定曝光。`enabled=false` 释放自有 GP
 切换。PBR 综合验收的 Bistro 使用“HDR 与曝光”分组直接控制当前配置，默认关闭以保留固定
 曝光基准；Sponza 仍使用“自动曝光 / 人眼适应”分组并共用于 A/B。Cycles 校准导出要求先关闭自动曝光。
 详见 ADR-0100 / SGP-0027 和 R21 review 的实测结果。
+
+## Globe / Planar 夜间环境光
+
+Globe / Planar 夜间可用 `scene.environmentEffects.nightAmbientIntensity = 1` 配置环境补光；
+有限范围 [0,8]，0 完全关闭。它以实际天空 RGB 照度平滑衔接夜间下限，默认保持
+原深夜亮度，不修改背景天空、太阳/月亮方向光、HDR 或曝光。平面以固定 +Z 的物理天空照度判断。
+这是艺术可读性设置，不是物理月光照度；详见 ADR-0167。
 
 ## HDR 白平衡与画面风格
 

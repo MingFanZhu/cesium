@@ -59,7 +59,7 @@ const state = {
   cloudDensity: 1.0,
   cloudTimeOffset: 0.0,
   cloudRadianceScale: 1.0,
-  backgroundRadianceScale: 10.0,
+  backgroundRadianceScale: 1.0,
   aerialRadianceScale: 1.0,
   surfaceRadianceScale: 1.0,
   day: () => applyLighting("day"),

@@ -36,6 +36,9 @@ scene.debugShowFramesPerSecond = true;
 scene.sunBloom = false;
 scene.fog.enabled = false;
 scene.highDynamicRange = true;
+// Reference display pairing from the original atmosphere examples.
+scene.postProcessStages.tonemapper = C.Tonemapper.AGX;
+scene.postProcessStages.exposure = 10;
 scene.msaaSamples = 1;
 scene.postProcessStages.fxaa.enabled = false;
 const taa = new C.SceneGISTemporalAntialiasing({ scene, enabled: true });
@@ -69,7 +72,7 @@ const effects = new C.SceneGISEnvironmentEffects({
   cloudQuality: "medium",
   cloudCoverage: 0.35,
   heightFogDensity: 0.000025,
-  backgroundRadianceScale: 10,
+  backgroundRadianceScale: 1,
   surfaceRadianceScale: 1,
 });
 viewer.addController(effects);

@@ -78,7 +78,7 @@ void main()
     if (u_showHeightFog) {
         // The background already includes fog inscattering. Attenuate stars only.
         radiance = sceneGISApplyExponentialHeightFog(
-            u_transmittanceTexture, radiance, rayOrigin, viewDirection, sunDirection,
+            u_transmittanceTexture, u_irradianceTexture, radiance, rayOrigin, viewDirection, sunDirection,
             SCENEGIS_PLANAR_BACKGROUND_DISTANCE, 0.0,
             u_heightFogDensity, u_heightFogHeightFalloff, u_heightFogBaseHeight,
             u_heightFogStartDistance, u_heightFogMaximumOpacity, 0.0, 0.0, 0.0, 1.0);

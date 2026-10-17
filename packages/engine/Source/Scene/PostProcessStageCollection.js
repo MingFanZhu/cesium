@@ -28,6 +28,9 @@ import SceneGISAutoExposure from "../SceneGIS/Scene/_private/_SceneGISAutoExposu
 // SCENEGIS_PATCH_BEGIN SGP-0044: Assemble optional HDR grading in native tone stages.
 import SceneGISColorGrading from "../SceneGIS/Scene/SceneGISColorGrading.js";
 // SCENEGIS_PATCH_END SGP-0044
+// SCENEGIS_PATCH_BEGIN SGP-0060: Reuse the native display slot for owned AgX.
+import createSceneGISAgXTonemapping from "../SceneGIS/Scene/_private/_SceneGISAgXTonemapping.js";
+// SCENEGIS_PATCH_END SGP-0060
 
 const stackScratch = [];
 
@@ -351,6 +354,11 @@ Object.defineProperties(PostProcessStageCollection.prototype, {
       let tonemapping;
 
       switch (value) {
+        // SCENEGIS_PATCH_BEGIN SGP-0060: Share exposure, grading and stage lifecycle.
+        case Tonemapper.AGX:
+          tonemapping = createSceneGISAgXTonemapping(useAutoExposure);
+          break;
+        // SCENEGIS_PATCH_END SGP-0060
         case Tonemapper.REINHARD:
           tonemapping =
             PostProcessStageLibrary.createReinhardTonemappingStage(

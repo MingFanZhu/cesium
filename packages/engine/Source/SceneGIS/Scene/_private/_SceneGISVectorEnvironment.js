@@ -17,6 +17,7 @@ const fields = {
   u_sceneGISPrimaryLightDirection: "primaryLightDirection",
   u_sceneGISPrimaryLightScale: "primaryLightScale",
   u_surfaceRadianceScale: "surfaceRadianceScale",
+  u_nightAmbientIntensity: "nightAmbientIntensity",
 };
 
 function record(owner) {

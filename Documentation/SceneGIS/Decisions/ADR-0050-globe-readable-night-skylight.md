@@ -184,3 +184,11 @@ pass或GPU bytes。Moon显示与directional moonlight后续独立适配。复用
 
 以actual-GPU Planar source/consumer、day identity、native PBR与Globe回归，加上代理验收
 day/twilight/night可复现画面为本阶段gate。用户已授权代理视觉验收及阶段间持续推进。
+
+## Globe irradiance-driven successor (2026-10-17)
+
+[ADR-0167](ADR-0167-globe-night-ambient-irradiance.md) replaces the Globe fixed
+solar-angle transition with a configurable irradiance floor. Its default preserves
+the accepted deep-night RGB source. The approved Planar amendment extends this
+replacement to P4 ambient consumers; Moon directional lighting retains ADR-0053. The old fixed-source/no-property rules above
+remain historical rather than constraints on the approved Globe successor.

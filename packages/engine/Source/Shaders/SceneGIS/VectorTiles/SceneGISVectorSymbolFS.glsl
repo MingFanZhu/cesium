@@ -1,6 +1,9 @@
 uniform float u_sceneGISVectorOpacity;
 uniform sampler2D u_symbolAtlas;
 uniform vec2 u_symbolDepthRange;
+uniform float u_symbolInverseExposure;
+uniform bool u_symbolAutomaticExposure;
+uniform sampler2D u_symbolExposureHistory;
 #if defined(OPAQUE) || defined(SCENEGIS_VECTOR_ANNOTATION)
 uniform sampler2D u_symbolMaterialDepth;
 uniform sampler2D u_symbolMaterial;
@@ -57,6 +60,13 @@ void main()
         out_FragColor = sampleColor * color;
     }
     out_FragColor *= u_sceneGISVectorOpacity;
+    // Preserve alpha, coverage and depth. Tone mapping still owns display color.
+    float inverseExposure = u_symbolInverseExposure;
+    if (u_symbolAutomaticExposure) {
+        // G is the last completed automatic log gain; R also includes old manual gain.
+        inverseExposure *= exp2(-texelFetch(u_symbolExposureHistory, ivec2(0), 0).g);
+    }
+    out_FragColor.rgb *= inverseExposure;
     if (out_FragColor.a < 0.01) discard;
 #ifdef OPAQUE
     if (out_FragColor.a < 0.995) discard;

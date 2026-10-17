@@ -216,6 +216,8 @@ describe("SceneGIS/Scene/SceneGISSkyReflections", function () {
         model = scene.primitives.add(
           await Model.fromGltfAsync({
             url: "./Data/Models/glTF-2.0/BoxClearcoat/glTF/BoxClearcoat.gltf",
+            // Freeze authored material inputs before comparing reflection sources.
+            incrementallyLoadTextures: false,
             modelMatrix: matrix,
             customShader: shader,
             imageBasedLighting: ibl,
@@ -244,6 +246,7 @@ describe("SceneGIS/Scene/SceneGISSkyReflections", function () {
           active: true,
           skyReflections: probe,
           surfaceRadianceScale: 0.2,
+          nightAmbientIntensity: 1,
           ...renderer._resources,
           atlasTexture: renderer._resources.transmittanceTexture,
           matrices: [Matrix4.IDENTITY, Matrix4.IDENTITY, Matrix4.IDENTITY],

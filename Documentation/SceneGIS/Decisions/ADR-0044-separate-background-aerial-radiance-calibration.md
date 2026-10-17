@@ -157,3 +157,162 @@ zero; do not add distance-dependent artistic blending. This supersedes the
 Planar absolute semantics above. Document the public property meaning and run
 full build/types plus actual background/finite/cloud GPU endpoint tests and
 near/far visual review. No new upstream path, SGP, uniform or resource.
+
+## 2026-10-16 amendment: Neutral surface and atmosphere defaults
+
+Subsequent owner review at local noon with HDR still found a dark image. Equal
+default scales establish only relative consistency. The owner then approved
+restoring the missing spectral-to-linear-RGB conversion described below. Visual
+qualification remains pending; equal-scale tests alone do not establish it. See RAD-04 in the
+[diagnostic review](../../../AgentDocs/webgl-deferred-renderer/reviews/2026-10-16-environment-radiance.md).
+
+The owner requests engine-level radiance consistency while leaving automatic
+exposure disabled by default. Both worlds already consume physical surface
+irradiance and atmospheric radiance in linear space. However, automatic scenes
+used surface scale 1 with atmospheric scale 4 (Globe) or 10 (Planar); explicit
+controllers used surface scale 10. The default therefore amplified in-scattering
+relative to surface lighting, independently of display HDR.
+
+Set surfaceRadianceScale and backgroundRadianceScale to 1 for both worlds and
+both creation paths. Aerial and cloud relative scales remain 1. Remove the
+automatic instance's LDR-specific surface override. This supersedes earlier
+default values in this ADR, ADR-0046, ADR-0047 and ADR-0161, while preserving the
+existing explicit property meanings, ranges and warm-update behavior.
+
+At neutral settings the composition is `surfaceRadiance * transmittance +
+atmosphericRadiance`, with no unequal calibration hidden in the creation path.
+The common photometric scene unit is defined below; this is not an EV100 camera
+calibration. Independent explicit scales remain artistic
+controls and can deliberately depart from that baseline. Unlit annotations and
+emissive content retain their separate material semantics.
+
+Overall brightness belongs to the display transform. Keep HDR exposure and tone
+mapping, LDR clamp/gamma, and automatic exposure's disabled default unchanged.
+A common gain of 4 was inspected but clipped sunlit map surfaces in noon LDR;
+do not compensate for missing display tone mapping by scaling only surfaces or
+only atmosphere. Existing applications that intentionally depend on the old
+appearance can specify their former scale values explicitly.
+
+The default-only step did not change Shaders. The spectral amendment below adds
+constant arithmetic at source boundaries; it does not change LUTs, optical
+coefficients, render passes, attachments, samplers or upstream-owned files.
+Validation covers real Globe / Planar linear
+pixels across HDR/LDR and default/explicit ownership, resource reuse, existing
+physical material consumers and visual comparison. See the
+[maintenance plan](../../../AgentDocs/webgl-deferred-renderer/plans/2026-10-16-environment-radiance.md).
+
+## 2026-10-16 amendment: Spectral transport to scene RGB
+
+The Earth LUTs store spectral samples at 680 / 550 / 440 nm. They are not RGB
+color values. Restore the pinned source's three-wavelength approximation from
+[AtmosphereParameters.ts](https://github.com/takram-design-engineering/three-geospatial/blob/9c6dfd0054f077f3ad4695b802e74d4c6a814440/packages/atmosphere/src/AtmosphereParameters.ts):
+
+- Sun conversion: `(98242.786222, 69954.398112, 66475.012354)`.
+- Sky conversion: `(114974.916437, 71305.954816, 65310.548555)`.
+- Initial shared reference: `U = dot(SunConversion, (0.2126, 0.7152, 0.0722))`;
+  superseded by the fixed daylight reference below.
+- Scene RGB radiance / irradiance = spectral value × its conversion / `U`.
+
+The initial divisor follows the original implementation's storage convention. Multiplying
+converted scene radiance by `U` recovers the approximation's linear-sRGB luminance
+channels in cd/m²; irradiance similarly recovers illuminance channels in lux.
+Do not normalize each source or color channel separately. Half-float scene
+buffers store relative RGB, not the large unnormalized photometric values.
+This approximation is tied to the fixed Earth solar spectrum and is not a
+general conversion for arbitrary spectra. Retain the source license with the
+existing BrunetonEarth asset attribution; recheck factors when the source
+commit, spectral preset or LUT wavelength convention changes.
+
+`SceneGISBrunetonAtmosphere.glsl` owns the boundary. Low-level Bruneton functions,
+LUT contents, density, optical depth and transmittance stay in the spectral
+transport domain. Globe Sun/Sky surface and scalar wrappers, sky / finite-ray
+radiance, and the Sun disk return converted values. Planar splits its LUT's
+total horizontal irradiance into direct and diffuse spectral terms before
+applying distinct factors; ground-boundary radiance uses their converted sum.
+That ground-boundary branch needs one additional existing transmittance-LUT
+lookup to recover the direct component, with no new texture or render target.
+
+Globe / Planar terrain, models / Tiles, vector material lighting, cloud incident
+and ground light, cloud haze and physical sky reflections consume those RGB
+sources exactly once. Height fog remains an empirical artistic source, with
+its scattering tint expressed in the same RGB basis. RGB albedo, unlit symbols,
+emissive materials, readable-night ambient, Moonlight and explicit RGB lights
+must not receive the spectral conversion. The CPU primary-light scale divides
+Moonlight / custom DirectionalLight RGB by the **converted** solar irradiance,
+preserving those existing RGB contracts. Native model lightColor overrides
+retain their bypass. The automatic physical Sun still comes from the Earth LUT;
+native compatibility intensity is not an extra physical multiplier.
+
+Exposure remains a display operation and defaults to its existing value; no
+automatic exposure, display mode, tone curve or hidden global gain is introduced.
+Correcting the color basis is not a promise that every material appears bright
+at exposure 1. Numerical qualification and the owner's visual gate are separate.
+
+### Fixed daylight scene reference
+
+The owner approves qualifying Globe first at local noon with HDR disabled.
+The previous divisor of approximately 75717.3 cd/m² was chosen by the source for
+half-float storage, not as a diffuse-white reference. With the frozen Globe LUT,
+a sea-level white Lambert surface under a zenith Sun has scene luminance 0.52315,
+and an 18% gray surface has 0.09417. Direct clamp/gamma therefore displays the
+reference gray below the intended linear 0.18 baseline.
+
+Use a fixed shared scene luminance unit of **40000 cd/m²** for both Sun and Sky
+conversion, and the matching CPU primary-light denominator. This corresponds to
+a white Lambert surface under 40000*pi (approximately 125664) lux. The frozen
+Earth preset produces reference gray near 0.18 at sea level with a zenith Sun.
+This is an explicit rendering calibration, not a claim that all real daylight
+conditions have this illuminance or that the previous spectral transport was wrong.
+
+The unit does not depend on the frame, camera, display mode, world, or sampled
+scene content. Spectra, optical transport, LUTs, relative Sun/Sky energy, and
+Lambert normalization stay unchanged. HDR exposure is still a gain on these
+relative scene values; LDR still performs only clamp/gamma. Explicit RGB lights,
+unlit materials, emissive colors, readable night RGB and annotations retain
+their authored scene-value semantics. Automatic exposure remains disabled.
+
+This supersedes only the divisor in the preceding spectral amendment. Default
+surface/background/aerial scales remain 1. No new API, uniform, resource, pass,
+or upstream patch is required. Globe white/gray GPU tests and source/ownership
+regressions qualify the calibration; Planar transport and visual review remain
+separate follow-ups after Globe acceptance.
+
+### Planar finite-grid correction
+
+The subsequent LDR review exposed a real subtraction error: the total irradiance
+LUT is 64x16, while transmittance is 256x64. Their edge texels represent different
+Sun cosines and heights. Subtracting direct irradiance at the requested coordinates
+from interpolated total irradiance can remove valid sky energy. At ground/zenith
+the spectral red sky component becomes -0.00559 and is clamped to zero, although
+the stored irradiance texel contains approximately 0.03856 of red sky energy.
+
+Recover diffuse irradiance at each contributing irradiance texel by subtracting
+the analytic direct term at that texel's actual height and Sun cosine; then
+interpolate the diffuse values. Use the existing analytic slab transmittance,
+which matches the generator. Keep the direct beam sampled independently at the
+requested coordinates, retain the asset format/data, and add no textures/passes.
+This adds bounded four-texel lookup/analytic work to Planar diffuse queries;
+record cost and test real frozen LUT edges/interiors against an independent CPU
+reference. Globe irradiance already stores diffuse energy and is unchanged.
+
+## 2026-10-17 amendment: Accepted appearance defaults
+
+After accepting the Globe and Planar visual reviews, the owner explicitly requests
+promoting the reviewed appearance to engine defaults. Both automatic Scene-owned
+instances and explicitly constructed controllers now default to
+`backgroundRadianceScale=2.5` and `surfaceRadianceScale=1.2`. Aerial and cloud
+relative radiance scales and night ambient intensity remain 1. The Globe aerial
+distance default becomes 0.5; Planar remains 1, as amended in ADR-0166.
+
+These are explicit appearance defaults, superseding the neutral default values
+above. They do not change the common 40000 cd/m² unit, spectral RGB conversion,
+physical Sun/sky sources, LUTs or scattering recurrence. Callers can still request
+neutral scales of 1 or any other supported explicit values, including zero.
+Default HDR and automatic exposure remain disabled; explicit display settings and
+warm parameter overrides remain caller-owned. No display-mode-dependent defaults,
+new Shader, pass, resource or upstream patch are introduced.
+
+Validation reuses actual linear-pixel tests across Globe/Planar, automatic/explicit
+ownership and LDR/HDR, public constructor/range/warm tests, and build/type checks.
+The physical atmosphere examples inherit these defaults instead of duplicating
+the accepted values. See the existing maintenance plan and review for results.

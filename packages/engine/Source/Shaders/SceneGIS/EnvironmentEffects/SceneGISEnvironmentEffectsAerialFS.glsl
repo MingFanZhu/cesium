@@ -19,6 +19,7 @@ uniform vec3 u_vertical;
 uniform vec3 u_sunDirection;
 uniform float u_altitude;
 uniform float u_aerialRadianceScale;
+uniform float u_aerialPerspectiveDistanceScale;
 uniform float u_backgroundRadianceScale;
 uniform bool u_showAerialPerspective;
 uniform bool u_showHeightFog;
@@ -251,7 +252,7 @@ void main()
     }
     if (isClearDepth && u_showHeightFog) {
         sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
-            u_transmittanceTexture,
+            u_transmittanceTexture, u_irradianceTexture,
             sceneLinearRadiance,
             rayOrigin,
             viewDirection,
@@ -282,13 +283,13 @@ void main()
             // Background already contains the lit fog. Its affine difference
             // attenuates the atmosphere correction and changes directional fog once.
             delta = sceneGISApplyExponentialHeightFog(
-                u_transmittanceTexture, delta, rayOrigin, viewDirection, sunDirection,
+                u_transmittanceTexture, u_irradianceTexture, delta, rayOrigin, viewDirection, sunDirection,
                 distanceToPoint, shadowLength, u_heightFogDensity,
                 u_heightFogHeightFalloff, u_heightFogBaseHeight, u_heightFogStartDistance,
                 u_heightFogMaximumOpacity, 1.0, u_heightFogInscatteringScale,
                 u_heightFogDirectionalInscatteringScale, u_heightFogDirectionalInscatteringExponent) -
                 sceneGISApplyExponentialHeightFog(
-                u_transmittanceTexture, vec3(0.0), rayOrigin, viewDirection, sunDirection,
+                u_transmittanceTexture, u_irradianceTexture, vec3(0.0), rayOrigin, viewDirection, sunDirection,
                 distanceToPoint, 0.0, u_heightFogDensity,
                 u_heightFogHeightFalloff, u_heightFogBaseHeight, u_heightFogStartDistance,
                 u_heightFogMaximumOpacity, 1.0, u_heightFogInscatteringScale,
@@ -303,7 +304,7 @@ void main()
         if (u_showAerialPerspective) {
             vec3 transmittance;
             #ifdef SCENEGIS_GLOBE
-            vec3 radiance = sceneGISGlobeSkyRadianceToPoint(
+            vec3 radiance = sceneGISGlobeAerialRadianceToPoint(
                     u_transmittanceTexture,
                     u_scatteringTexture,
                     rayOrigin,
@@ -311,6 +312,7 @@ void main()
                     sunDirection,
                     distanceToPoint,
                     shadowLength,
+                    u_aerialPerspectiveDistanceScale,
                     transmittance);
             #else
             bool intersectsAtmosphere;
@@ -341,7 +343,7 @@ void main()
         }
         if (u_showHeightFog) {
             sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
-                u_transmittanceTexture,
+                u_transmittanceTexture, u_irradianceTexture,
                 sceneLinearRadiance,
                 rayOrigin,
                 viewDirection,
@@ -387,7 +389,7 @@ void main()
             if (u_showAerialPerspective) {
                 vec3 cloudTransmittance;
                 #ifdef SCENEGIS_GLOBE
-                vec3 cloudAtmosphere = sceneGISGlobeSkyRadianceToPoint(
+                vec3 cloudAtmosphere = sceneGISGlobeAerialRadianceToPoint(
                     u_transmittanceTexture,
                     u_scatteringTexture,
                     rayOrigin,
@@ -395,6 +397,7 @@ void main()
                     sunDirection,
                     cloudMeanDistance,
                     cloudShadowLength,
+                    u_aerialPerspectiveDistanceScale,
                     cloudTransmittance);
                 #else
                 bool cloudIntersectsAtmosphere;
@@ -425,7 +428,7 @@ void main()
             }
             if (u_showHeightFog && cloudOpacity > 1.0e-6) {
                 cloudOptical = sceneGISApplyExponentialHeightFog(
-                    u_transmittanceTexture,
+                    u_transmittanceTexture, u_irradianceTexture,
                     cloudOptical / cloudOpacity,
                     rayOrigin,
                     viewDirection,

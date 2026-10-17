@@ -1236,12 +1236,58 @@ GPU 不支持或 HDR 关闭时明确报错；不引入 pre-exposure、EV100 校�
 
 [ADR-0154](Decisions/ADR-0154-hdr-color-grading.md) / SGP-0044 增加可选的
 `SceneGISColorGrading`，由 Scene 的 PostProcessStageCollection 所有。白平衡、亮度对比和
-饱和度在原生曝光之后、五种原生 tone curve 之前作用于线性 HDR，不改变 alpha 或输出 gamma。
+饱和度在原生曝光之后、所选 tone curve 之前作用于线性 HDR，不改变 alpha 或输出 gamma。
 原生 stage 在首次 update 前显式组装自有函数与 uniforms；不做源码替换或复制 tone mapper。
 无额外纹理、FBO 或 pass；普通参数只更新 uniform，启停和原生 variant 变化可重建 stage。
 测光、TAA、光照和天空遮蔽保持独立；预设属于应用配置，不成为引擎隐式默认值。
 
+## AgX HDR 显示曲线
+
+[ADR-0164](Decisions/ADR-0164-agx-hdr-display.md) / SGP-0060 在既有 Tonemapper 中增加
+`AGX`，由原生 collection 显示槽位选择自有 stage。沿用一次曝光、可选调色、一次输出 gamma
+及原生生命周期；AgX 内部 2.2 次幂属于返回线性 RGB，不能当作重复显示 gamma 删除。
+保持引擎 PBR Neutral / exposure=1、自动曝光默认关闭；LDR 仍只裁剪 / gamma。
+示例中的 AgX / exposure=10 是来源对照配置，不是太阳倍率或 EV100 标定。没有新增 pass / 目标。
+
+[ADR-0165](Decisions/ADR-0165-diffuse-ground-return-and-symbol-exposure.md)：矢量文字 / 图标
+在原有有序混合位置只对线性 premultiplied RGB 抵消曝光，保持 alpha、拾取、深度及样式顺序。
+色调映射 / 调色仍作用于注记；LDR 不补偿。显式自动曝光使用上一完成帧的自动增益与当前
+手动增益 / compensation，适应期间允许一帧比值变化，不增加测光 pass，默认仍关闭。
+
 ## WebGL 默认高级环境
+
+ADR-0044 的 2026-10-17 修订将验收外观提升为引擎默认：两个世界及默认 / 显式环境均以
+backgroundRadianceScale=2.5、surfaceRadianceScale=1.2、aerial / cloud 相对倍率 1 起步。
+这些是显式艺术默认，不改变共同物理单位；调用方可指定中性倍率 1 或其他受支持值。
+默认不随 HDR/LDR 或创建入口变化。HDR 和自动曝光默认关闭；显式 HDR 曝光 / tone
+mapping 与调用方设置保持独立，LDR 保留 clamp / gamma。
+物理 LUT 保留三波段光谱传输，在 SceneGIS 包装边界按原实现 Sun / Sky 各自系数转为
+线性 sRGB，并共同除以固定日光参考单位 40000 cd/m²，见 ADR-0044。地表、大气、云和
+天空反射共用这一相对光度单位；透射率不转换，已有 RGB 灯光 / 材质不二次转换。
+三波段近似不是任意光谱积分或 EV100 标定；数值验证不替代负责人视觉验收。
+该单位将地球预设海平面、天顶太阳下的参考 18% 灰面置于约 0.18；不依相机、时刻或
+HDR/LDR 动态测光，太阳 / 天空的物理照度比例保持原值。
+
+ADR-0165 为共享漫反射环境来源补齐下半球 Lambert 地面反弹，使用原地面反照率 0.1、
+地面水平直射 / 天空照度及接收面半球权重。Globe 按半径平方比约束高空贡献；云影影响
+反弹的直射来源，AO 继续影响间接光。矢量建筑、Model / 模型类 Tiles 与地形共用，显式
+SH 所有权保留。此区域环境近似不等价于局部纹理、建筑之间或逐反弹可见性的完整 GI。
+
+Globe 的上半球 diffuse sky 按已有 scattering LUT 做方向余弦积分，代替斜面的半球比例
+近似（ADR-0165）。资源创建时生成高度 / 太阳 / 法线倾角 / 相对方位的全局照度表，与原
+64×16 scalar irradiance 共用一个 649×272 RGBA16F atlas；运行时四次双线性查询。
+保持光谱转换边界、独立直射和地面返回，不增加材质 sampler 或每帧更新；不使用相机区域
+缓存。原照度纹理及临时 FBO / program 在生成后释放，atlas 由环境生命周期持有。
+
+ADR-0167 用 `nightAmbientIntensity` 替代 Globe / Planar 固定太阳角夜间补光：默认 1、有限 [0,8]，
+0 关闭。按接收面的物理天空 RGB 照度做连续环境光下限，保留法线、材质、AO 与
+原 ambient 消费边界；背景天空、直射日月光和曝光独立。只扩展 SGP-0009 一个 warm
+uniform，不新增资源；Planar 复用既有 lighting record 和固定 +Z 天空照度。
+
+ADR-0166 的 `aerialPerspectiveDistanceScale` 是 Globe 有限接收点的艺术距离控制，
+Globe 默认 0.5、有限范围 [0, 8]；1 保留原物理查询距离，0 同时移除沿程散射与衰减。初始真空段不参与缩放，几何和
+云前方大气使用同一距离倍率，实际深度、云前后判断、高度雾、光照和背景天空保持原值。
+通过 warm uniform 更新，不新增资源或 pass；Planar 暂仅接受 1，不暗中套用球面实现。
 
 ADR-0161 / SGP-0046：WebGL 延迟入口统一使用高级物理环境；原生 sky / Sun bloom / 可见 Fog / Globe ground atmosphere 与 daylight 不再执行。保留调用方对象、Fog 瓦片剔除以及高级环境使用的 Moon / 星历。scene.environmentEffects 只读访问显式控制器或 Scene 自有默认实例，默认开启大气、空气透视和高度雾；云及其阴影 / 光束、bloom、lens flare 默认关闭且云资源按需冷加载。显式环境（包括 disabled）优先，默认让位释放 GPU，移除后恢复原设置；World 变更前释放自有实例，不销毁调用方控制器。显示 HDR 开关不限制内部物理计算，也不由默认创建改写。Planar 复用显式 light authority；没有时提供固定 Z 默认方向，不猜地理坐标。
 

@@ -18,7 +18,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { isDeepStrictEqual } from "node:util";
 
-export const generatorVersion = "scene-gis-flat-atmosphere-3";
+export const generatorVersion = "scene-gis-flat-atmosphere-4";
 export const dimensions = Object.freeze({
   transmittance: Object.freeze([256, 64]),
   scattering: Object.freeze([256, 128, 32]),
@@ -59,11 +59,11 @@ export const approvedFiles = Object.freeze({
   }),
   "scattering.bin": Object.freeze({
     bytes: 8388608,
-    sha256: "22C9240FDCF528521A74798816757D970647C6E3038322A587DABFF01A991135",
+    sha256: "802B9CFB4E796BAA59D33017D8EF3725A99C8421F6CB4941446F68B3BEBD65E2",
   }),
   "irradiance.bin": Object.freeze({
     bytes: 8192,
-    sha256: "B2B231213F25C9DE45F2DBBAAFFE1DCD4805398724CE6FE05D391D5E50613A6C",
+    sha256: "647A70C8B00B4045230C385FEC6C2A7F62D24BCE038AA05FE16467DFABCFC2A3",
   }),
   "LICENSE.txt": Object.freeze({
     bytes: 4239,
@@ -427,9 +427,10 @@ export function integrateTotalRadiance(
   );
 }
 
-export function createMultipleSourceGrid(width, height, hooks = {}) {
-  const singleRadiance = hooks.singleRadiance ?? integrateSingleRadiance;
-  const sourceRadiance = hooks.sourceRadiance ?? integrateSourceRadiance;
+export function createMultipleSourceGrid(width, height, options = {}) {
+  const singleRadiance = options.singleRadiance ?? integrateSingleRadiance;
+  const sourceRadiance = options.sourceRadiance ?? integrateSourceRadiance;
+  const groundAlbedo = options.groundAlbedo ?? physical.groundAlbedo;
   const paths = Array.from(Array(height).keys(), (y) =>
     Array.from(Array(quadrature.angularZenithSamples).keys(), (zenith) =>
       createTransportSamples(
@@ -446,7 +447,22 @@ export function createMultipleSourceGrid(width, height, hooks = {}) {
   const accumulated = new Float64Array(width * height * 3);
   const orderEnergy = [];
   const orderGrids = [];
+  const groundIrradianceOrders = [];
+  const groundPaths = Array.from(
+    Array(quadrature.angularZenithSamples).keys(),
+    (zenith) =>
+      createTransportSamples(
+        0,
+        (zenith + 0.5) / quadrature.angularZenithSamples,
+      ),
+  );
+  let groundIrradiance = Array.from(Array(width).keys(), (x) =>
+    directIrradiance(0, texelSignedSquare(x, width)),
+  );
   for (const order of quadrature.multipleScatteringOrders) {
+    // Order n receives paths with n-1 events. A ground reflection is one event,
+    // so its incident irradiance must contain exactly n-2 events, not their sum.
+    groundIrradianceOrders.push(groundIrradiance);
     const current = new Float64Array(width * height * 3);
     let energy = 0;
     for (let y = 0; y < height; y++) {
@@ -466,6 +482,10 @@ export function createMultipleSourceGrid(width, height, hooks = {}) {
         ) {
           const incomingMu =
             -1 + (2 * (zenith + 0.5)) / quadrature.angularZenithSamples;
+          const groundT =
+            incomingMu < 0
+              ? transmittance(sampleHeight, incomingMu)
+              : [0, 0, 0];
           for (
             let azimuth = 0;
             azimuth < quadrature.angularAzimuthSamples;
@@ -497,7 +517,12 @@ export function createMultipleSourceGrid(width, height, hooks = {}) {
                     paths[y][zenith],
                   );
             for (let channel = 0; channel < 3; channel++) {
-              meanRadiance[channel] += incoming[channel];
+              meanRadiance[channel] +=
+                incoming[channel] +
+                (groundT[channel] *
+                  groundAlbedo[channel] *
+                  groundIrradiance[x][channel]) /
+                  Math.PI;
             }
           }
         }
@@ -519,6 +544,20 @@ export function createMultipleSourceGrid(width, height, hooks = {}) {
       }
     }
     orderEnergy.push(energy);
+    if (order < quadrature.multipleScatteringOrders.at(-1)) {
+      groundIrradiance = [];
+      for (let x = 0; x < width; x++) {
+        groundIrradiance.push(
+          diffuseIrradiance(
+            0,
+            texelSignedSquare(x, width),
+            order === 2 ? undefined : previous,
+            groundPaths,
+            order === 2,
+          ),
+        );
+      }
+    }
     previous = { width, height, values: current };
     orderGrids.push(previous);
   }
@@ -526,15 +565,20 @@ export function createMultipleSourceGrid(width, height, hooks = {}) {
     grid: { width, height, values: accumulated },
     orderEnergy,
     orderGrids,
+    groundIrradianceOrders,
   };
 }
 
-export function computeIrradiance(height, sunMu, multipleGrid, paths) {
+function directIrradiance(height, sunMu) {
   const directT = sunMu > 0 ? transmittance(height, sunMu) : [0, 0, 0];
-  const irradiance = directT.map(
+  return directT.map(
     (value, channel) =>
       physical.solarIrradiance[channel] * Math.max(sunMu, 0) * value,
   );
+}
+
+function diffuseIrradiance(height, sunMu, multipleGrid, paths, includeSingle) {
+  const irradiance = [0, 0, 0];
   const directionWeight =
     (2 * Math.PI) /
     (quadrature.angularZenithSamples * quadrature.angularAzimuthSamples);
@@ -554,12 +598,13 @@ export function computeIrradiance(height, sunMu, multipleGrid, paths) {
         Math.sqrt(Math.max(1 - incomingMu * incomingMu, 0)) *
           Math.sqrt(Math.max(1 - sunMu * sunMu, 0)) *
           Math.cos(phi);
-      const incoming = integrateTotalRadiance(
+      const incoming = integrateTransport(
         height,
         incomingMu,
         sunMu,
         cosineTheta,
         multipleGrid,
+        includeSingle,
         samples,
       );
       for (let channel = 0; channel < 3; channel++) {
@@ -568,6 +613,12 @@ export function computeIrradiance(height, sunMu, multipleGrid, paths) {
     }
   }
   return irradiance;
+}
+
+export function computeIrradiance(height, sunMu, multipleGrid, paths) {
+  const direct = directIrradiance(height, sunMu);
+  const diffuse = diffuseIrradiance(height, sunMu, multipleGrid, paths, true);
+  return direct.map((value, channel) => value + diffuse[channel]);
 }
 
 export function numberToFloat16(value) {
@@ -617,7 +668,9 @@ export function generateAssetBuffers(options = {}) {
   const sourceWidth = options.sourceSunSamples ?? quadrature.sourceSunSamples;
   const sourceHeight =
     options.sourceHeightSamples ?? quadrature.sourceHeightSamples;
-  const multiple = createMultipleSourceGrid(sourceWidth, sourceHeight);
+  const multiple = createMultipleSourceGrid(sourceWidth, sourceHeight, {
+    groundAlbedo: options.groundAlbedo,
+  });
 
   const [transWidth, transHeight] = sizes.transmittance;
   const transmittanceBuffer = Buffer.alloc(transWidth * transHeight * 8);
@@ -768,7 +821,7 @@ function createProvenance(files) {
       segmentTransmittance:
         "runtime analytic Rayleigh/Mie/ozone optical depth over the complete visible segment",
       groundBoundary:
-        "irradiance stores direct solar plus cosine-weighted atmospheric diffuse irradiance; fixed ground albedo is applied once at runtime and is excluded from orders 2-4",
+        "order n includes transmittance-to-ground times Lambert albedo/pi times ground irradiance of order n-2 (direct for n=2, cosine-weighted single-order atmospheric diffuse thereafter); scattering stores atmospheric paths only, and the final visible ground reflection is applied once at runtime",
     },
     physicalPreset: physical,
     files,

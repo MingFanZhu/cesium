@@ -707,7 +707,7 @@ void sceneGISCloudIncidentIrradiance(
     #ifdef SCENEGIS_GLOBE
     AtmosphereParameters atmosphere = sceneGISAtmosphereParameters();
     vec3 point = globePosition * 0.001;
-    vec3 unusedSunIrradiance = GetSunAndSkyScalarIrradiance(
+    vec3 unusedSunIrradiance = sceneGISGlobeSunAndSkyScalarIrradiance(
         atmosphere,
         transmittanceTexture,
         irradianceTexture,
@@ -715,7 +715,7 @@ void sceneGISCloudIncidentIrradiance(
         sunDirection,
         skyIrradiance);
     vec3 unusedPrimarySkyIrradiance;
-    sunIrradiance = max(GetSunAndSkyScalarIrradiance(
+    sunIrradiance = max(sceneGISGlobeSunAndSkyScalarIrradiance(
         atmosphere,
         transmittanceTexture,
         irradianceTexture,
@@ -723,28 +723,18 @@ void sceneGISCloudIncidentIrradiance(
         primaryLightDirection,
         unusedPrimarySkyIrradiance) * primaryLightScale, vec3(0.0));
     skyIrradiance = max(skyIrradiance, vec3(0.0)) +
-        sceneGISReadableNightSkyIrradiance(
-            normalize(globePosition),
-            sunDirection);
+        sceneGISNightAmbientIrradiance(skyIrradiance, 1.0);
     #else
-    vec3 totalIrradiance = max(sceneGISPlanarIrradiance(
-        irradianceTexture, localPosition.z, sunDirection.z), vec3(0.0));
-    sunIrradiance = vec3(0.0);
-    if (sunDirection.z > 0.0 && localPosition.z >= 0.0 &&
-        localPosition.z <= SCENEGIS_PLANAR_TOP) {
-        sunIrradiance = max(sceneGISPlanarTransmittanceToBoundary(
-            transmittanceTexture, localPosition.z, sunDirection.z), vec3(0.0));
-    }
-    vec3 directIrradiance = SCENEGIS_SOLAR_IRRADIANCE *
-        max(sunDirection.z, 0.0) * sunIrradiance;
-    skyIrradiance = max(totalIrradiance - directIrradiance, vec3(0.0)) +
-        sceneGISReadableNightSkyIrradiance(vec3(0.0, 0.0, 1.0), sunDirection);
+    vec3 unusedSolarBeam = sceneGISPlanarSunAndSkyIrradiance(
+        transmittanceTexture, irradianceTexture, localPosition.z,
+        sunDirection.z, skyIrradiance);
+    skyIrradiance += sceneGISNightAmbientIrradiance(skyIrradiance, 1.0);
     sunIrradiance = vec3(0.0);
     if (primaryLightDirection.z > 0.0 && localPosition.z >= 0.0 &&
         localPosition.z <= SCENEGIS_PLANAR_TOP) {
         sunIrradiance = max(sceneGISPlanarTransmittanceToBoundary(
             transmittanceTexture, localPosition.z, primaryLightDirection.z), vec3(0.0)) *
-            SCENEGIS_SOLAR_IRRADIANCE * primaryLightScale;
+            sceneGISSunRadianceToScene(SCENEGIS_SOLAR_IRRADIANCE) * primaryLightScale;
     }
     #endif
 }
@@ -765,7 +755,7 @@ vec3 sceneGISGlobeCloudGroundSource(
     float height = length(globePosition) - SCENEGIS_BOTTOM_RADIUS;
     vec3 groundPoint = (globePosition - surfaceNormal * height) * 0.001;
     vec3 groundSkyIrradiance;
-    vec3 unusedGroundSunIrradiance = GetSunAndSkyIrradiance(
+    vec3 unusedGroundSunIrradiance = sceneGISGlobeSunAndSkyIrradiance(
         atmosphere,
         transmittanceTexture,
         irradianceTexture,
@@ -774,7 +764,7 @@ vec3 sceneGISGlobeCloudGroundSource(
         sunDirection,
         groundSkyIrradiance);
     vec3 unusedPrimaryGroundSkyIrradiance;
-    vec3 groundSunIrradiance = GetSunAndSkyIrradiance(
+    vec3 groundSunIrradiance = sceneGISGlobeSunAndSkyIrradiance(
         atmosphere,
         transmittanceTexture,
         irradianceTexture,
@@ -784,9 +774,8 @@ vec3 sceneGISGlobeCloudGroundSource(
         unusedPrimaryGroundSkyIrradiance) * primaryLightScale;
     float groundSkyHemisphere = 0.5 *
         (1.0 + dot(surfaceNormal, normalize(groundPoint)));
-    groundSkyIrradiance += sceneGISReadableNightSkyIrradiance(
-        normalize(groundPoint),
-        sunDirection) * groundSkyHemisphere;
+    groundSkyIrradiance += sceneGISNightAmbientIrradiance(
+        groundSkyIrradiance, groundSkyHemisphere);
     const float groundAlbedo = 0.3;
     vec3 groundIrradiance = max(groundSkyIrradiance, vec3(0.0)) +
         (1.0 - clamp(cloudCoverage, 0.0, 1.0)) *

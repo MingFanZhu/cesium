@@ -22,20 +22,15 @@ void sceneGISPlanarSurfaceIrradiance(
     // Sample the lower boundary continuously, including receiver reconstruction
     // roundoff at Z = 0. The LUT already clamps below-ground heights to zero.
     if (height >= SCENEGIS_PLANAR_TOP) {
-        beam = primary.z > 0.0 ? SCENEGIS_SOLAR_IRRADIANCE : vec3(0.0);
+        beam = primary.z > 0.0 ?
+            sceneGISSunRadianceToScene(SCENEGIS_SOLAR_IRRADIANCE) : vec3(0.0);
         return;
     }
-    if (sun.z > 0.0) {
-        beam = SCENEGIS_SOLAR_IRRADIANCE * sceneGISPlanarTransmittanceToBoundary(
-            u_sceneGISTransmittanceTexture, height, sun.z);
-    }
-    // The flat LUT stores total horizontal irradiance. Remove its direct
-    // cosine term before using it as a diffuse hemispherical source.
-    sky = max(sceneGISPlanarIrradiance(
-        u_sceneGISIrradianceTexture, height, sun.z) - beam * max(sun.z, 0.0), vec3(0.0));
-    sky += sceneGISReadableNightSkyIrradiance(vec3(0.0, 0.0, 1.0), sun);
+    beam = sceneGISPlanarSunAndSkyIrradiance(
+        u_sceneGISTransmittanceTexture, u_sceneGISIrradianceTexture, height, sun.z, sky);
+    sky += sceneGISNightAmbientIrradiance(sky, 1.0);
     // Directional Moonlight uses its own optical path; the sky remains solar.
-    beam = primary.z > 0.0 ? SCENEGIS_SOLAR_IRRADIANCE *
+    beam = primary.z > 0.0 ? sceneGISSunRadianceToScene(SCENEGIS_SOLAR_IRRADIANCE) *
         sceneGISPlanarTransmittanceToBoundary(
             u_sceneGISTransmittanceTexture, height, primary.z) : vec3(0.0);
 }
@@ -54,7 +49,19 @@ vec3 sceneGISPlanarSkySource(vec3 positionEC, vec3 normalEC)
     vec3 sky;
     sceneGISPlanarSurfaceIrradiance(sceneGISPlanarLightPosition(positionEC).z, beam, sky);
     vec3 normalWC = normalize(czm_inverseViewRotation * normalEC);
-    return sky * (0.5 * (1.0 + normalWC.z)) * (u_surfaceRadianceScale / czm_pi);
+    float groundWeight = clamp(0.5 * (1.0 - normalWC.z), 0.0, 1.0);
+    vec3 indirect = sky * (1.0 - groundWeight);
+    if (groundWeight > 0.0) {
+        sceneGISPlanarSurfaceIrradiance(0.0, beam, sky);
+        vec3 groundPosition = vec3(sceneGISPlanarLightPosition(positionEC).xy, 0.0);
+        float cloudTransmittance = u_sceneGISShowCloudShadows
+            ? exp(-sceneGISCloudShadowOpticalDepth(groundPosition, max(-positionEC.z, 0.0)))
+            : 1.0;
+        vec3 direct = beam * max(normalize(u_sceneGISShadowSunDirection).z, 0.0) *
+            max(u_sceneGISPrimaryLightScale, vec3(0.0)) * cloudTransmittance;
+        indirect += SCENEGIS_GROUND_ALBEDO * (direct + sky) * groundWeight;
+    }
+    return indirect * (u_surfaceRadianceScale / czm_pi);
 }
 
 float sceneGISPlanarCloudTransmittance(vec3 positionEC)

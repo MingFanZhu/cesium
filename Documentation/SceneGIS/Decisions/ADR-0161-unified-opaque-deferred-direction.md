@@ -508,7 +508,13 @@ The read-only scene.environmentEffects returns an explicitly registered SceneGIS
 
 Planar reuses registered light authority, or a Scene-owned fixed-Z Sun / Moon direction when none exists. Explicit planar light authority replaces the automatic authority without duplicate ownership. No geographic origin is guessed. Internal linear floating-point computation is independent of the public display HDR flag; default activation does not change that flag.
 
-The automatic instance uses surfaceRadianceScale=1 for its default LDR display; explicit constructor defaults remain unchanged. While the advanced pipeline is active, Planar skips its older lightweight sky preparation and drawing without changing caller settings.
+The initial automatic instance used surfaceRadianceScale=1 for LDR while explicit
+construction retained 10. This asymmetric calibration is superseded by the
+2026-10-16 neutral-radiance amendment in ADR-0044: both creation paths and worlds
+default surfaceRadianceScale and backgroundRadianceScale to 1, with aerial and
+cloud relative scales also 1. Display HDR does not change these values. While the
+advanced pipeline is active, Planar skips its older lightweight sky preparation
+and drawing without changing caller settings.
 
 Owner-approved custom primary lighting supersedes the scene.light conflict in ADR-0053 for Globe and the unconditional automatic-light assignment on Planar. A caller-installed DirectionalLight retains its identity, direction, color, intensity and ownership. Both worlds yield automatic scene.light assignment while that light is present. Installing a SunLight resumes the automatic Sun/Moon light and captures that new object for conditional restoration. Disable, disconnect and controller takeover restore only a light still held by the releasing owner; they never overwrite a replacement caller light.
 

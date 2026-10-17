@@ -45,6 +45,16 @@ const Tonemapper = {
    * @constant
    */
   PBR_NEUTRAL: "PBR_NEUTRAL",
+  // SCENEGIS_PATCH_BEGIN SGP-0060: Expose the owned AgX HDR display curve.
+  /**
+   * Use neutral-look AgX tonemapping in linear sRGB, followed by Scene gamma.
+   * Exposure remains controlled by PostProcessStageCollection.
+   *
+   * @type {string}
+   * @constant
+   */
+  AGX: "AGX",
+  // SCENEGIS_PATCH_END SGP-0060
 };
 
 /**
@@ -59,6 +69,9 @@ export function validateTonemapper(tonemapper) {
     tonemapper === Tonemapper.MODIFIED_REINHARD ||
     tonemapper === Tonemapper.FILMIC ||
     tonemapper === Tonemapper.ACES ||
+    // SCENEGIS_PATCH_BEGIN SGP-0060: Accept AgX through the existing selection API.
+    tonemapper === Tonemapper.AGX ||
+    // SCENEGIS_PATCH_END SGP-0060
     tonemapper === Tonemapper.PBR_NEUTRAL
   );
 }

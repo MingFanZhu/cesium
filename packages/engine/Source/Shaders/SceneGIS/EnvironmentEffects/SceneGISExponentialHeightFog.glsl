@@ -226,7 +226,10 @@ float sceneGISHeightFogMaxComponent(vec3 value)
 vec3 sceneGISHeightFogAmbientSource(vec3 sunColor)
 {
     vec3 scattering = SCENEGIS_RAYLEIGH + SCENEGIS_MIE_SCATTERING;
-    vec3 numerator = max(sunColor * scattering, vec3(0.0));
+    // This empirical tint approximates scattered sunlight. Its source now
+    // arrives in scene RGB, so account for the distinct sky/solar conversions.
+    vec3 numerator = max(sunColor * scattering *
+        (SCENEGIS_SKY_RADIANCE_TO_LUMINANCE / SCENEGIS_SUN_RADIANCE_TO_LUMINANCE), vec3(0.0));
     float denominator = sceneGISHeightFogMaxComponent(
         SCENEGIS_SOLAR_IRRADIANCE * scattering);
     return numerator / max(denominator, 1.0e-8);
@@ -246,6 +249,7 @@ vec3 sceneGISHeightFogDirectionalSource(vec3 sunColor)
 
 vec3 sceneGISApplyExponentialHeightFog(
     sampler2D transmittanceTexture,
+    sampler2D irradianceTexture,
     vec3 sceneColor,
     vec3 rayOrigin,
     vec3 viewDirection,
@@ -308,7 +312,7 @@ vec3 sceneGISApplyExponentialHeightFog(
         1.0 - exp(-clamp(opticalDepth, 0.0, 80.0)),
         maximumOpacity);
     float representativeDistance = 0.5 * (segmentStart + segmentEnd);
-    vec3 sunColor = SCENEGIS_SOLAR_IRRADIANCE *
+    vec3 sunColor = sceneGISSunRadianceToScene(SCENEGIS_SOLAR_IRRADIANCE) *
         sceneGISHeightFogSunTransmittance(
             transmittanceTexture,
             rayOrigin,
@@ -322,18 +326,23 @@ vec3 sceneGISApplyExponentialHeightFog(
     vec3 representativeRadialUp = normalize(vec3(
         representativePoint.xy,
         SCENEGIS_BOTTOM_RADIUS + representativePoint.z));
-    ambientIrradiance += sceneGISReadableNightSkyIrradiance(
-        representativeRadialUp,
-        sunDirection);
+    vec3 atmospherePoint = vec3(representativePoint.xy,
+        SCENEGIS_BOTTOM_RADIUS + representativePoint.z) * 0.001;
+    vec3 physicalSky = sceneGISSkyRadianceToScene(
+        GetIrradiance(sceneGISAtmosphereParameters(), irradianceTexture,
+            length(atmospherePoint), dot(representativeRadialUp, sunDirection)));
+    ambientIrradiance += sceneGISNightAmbientIrradiance(physicalSky, 1.0);
     #else
-    ambientIrradiance += sceneGISReadableNightSkyIrradiance(
-        vec3(0.0, 0.0, 1.0), sunDirection);
+    vec3 physicalSky = sceneGISSkyRadianceToScene(sceneGISPlanarSkyIrradiance(
+        irradianceTexture, rayOrigin.z + viewDirection.z * representativeDistance,
+        sunDirection.z));
+    ambientIrradiance += sceneGISNightAmbientIrradiance(physicalSky, 1.0);
     #endif
     vec3 ambientSource = sceneGISHeightFogAmbientSource(ambientIrradiance);
     vec3 directionalLight = sunDirection;
     #ifndef SCENEGIS_GLOBE
     directionalLight = normalize(u_sceneGISShadowSunDirection);
-    sunColor = SCENEGIS_SOLAR_IRRADIANCE * u_sceneGISPrimaryLightScale *
+    sunColor = sceneGISSunRadianceToScene(SCENEGIS_SOLAR_IRRADIANCE) * u_sceneGISPrimaryLightScale *
         sceneGISHeightFogSunTransmittance(transmittanceTexture, rayOrigin,
             viewDirection, directionalLight, representativeDistance);
     #endif
