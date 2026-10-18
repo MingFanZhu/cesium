@@ -490,9 +490,9 @@
     },
     {
       "id": "SGP-0005",
-      "title": "Add planar Entity and DataSource framing dispatch",
+      "title": "Add planar Entity, DataSource and tileset framing dispatch",
       "status": "active",
-      "reason": "CesiumWidget and Viewer currently normalize zoom targets through Globe-specific overloads and share mutable completion state, while planar Entity framing requires an exact target profile, isolated operation lifecycle, and zoom-only InfoBox behavior.",
+      "reason": "CesiumWidget and Viewer currently normalize zoom targets through Globe-specific overloads and share mutable completion state, while planar Entity and native planar-coordinate tileset framing require an exact target profile, current bounds, isolated operation lifecycle, and zoom-only InfoBox behavior.",
       "risk": "high",
       "files": [
         {
@@ -506,10 +506,11 @@
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarEntityZoomCesiumWidgetSpec.js",
+        "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarTilesetZoomCesiumWidgetSpec.js",
         "packages/widgets/Specs/SceneGIS/SceneGISPlanarViewerSpec.js"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0006-planar-viewer-and-widget-integration.md",
-      "removalCondition": "Retire when upstream CesiumWidget and Viewer expose equivalent custom-world Entity/DataSource target validation, operation-isolated zoom lifecycle, and configurable zoom-only InfoBox camera behavior."
+      "removalCondition": "Retire when upstream CesiumWidget and Viewer expose equivalent custom-world Entity/DataSource/planar-tileset target validation, operation-isolated zoom lifecycle, and configurable zoom-only InfoBox camera behavior."
     },
     {
       "id": "SGP-0006",

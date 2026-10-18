@@ -4,6 +4,7 @@ import {
   CallbackPositionProperty,
   Cartesian2,
   Cartesian3,
+  Cesium3DTileset,
   CesiumWidget,
   Color,
   ControllerHost,
@@ -12,6 +13,7 @@ import {
   Ellipsoid,
   Entity,
   Event,
+  HeadingPitchRange,
   ReferenceFrame,
   SceneGISPlanarCameraController,
   SceneGISPlanarCoordinateSystem,
@@ -526,6 +528,63 @@ describe(
       );
       expect(zoomTo).toHaveBeenCalledOnceWith(entity);
       expect(viewer.trackedEntity).toBeUndefined();
+    });
+
+    it("frames native tilesets through live and declarative planar Viewers", async function () {
+      async function qualifyTileset() {
+        viewer.resize();
+        const tileset = await Cesium3DTileset.fromUrl(
+          `data:application/json,${encodeURIComponent(
+            JSON.stringify({
+              asset: { version: "1.1" },
+              geometricError: 0,
+              root: {
+                boundingVolume: { sphere: [10, 20, 30, 5] },
+                geometricError: 0,
+              },
+            }),
+          )}`,
+        );
+        viewer.scene.primitives.add(tileset);
+        const zoom = viewer.zoomTo(
+          tileset,
+          new HeadingPitchRange(0, -Math.PI / 2, 100),
+        );
+        viewer.cesiumWidget._postRender();
+        expect(await zoom).toBe(true);
+        expect(viewer.camera.positionWC).toEqualEpsilon(
+          new Cartesian3(10, 20, 130),
+          1e-9,
+        );
+        const flight = viewer.flyTo(Promise.resolve(tileset), {
+          duration: 1,
+          offset: new HeadingPitchRange(0, -Math.PI / 2, 150),
+        });
+        await Promise.resolve();
+        viewer.cesiumWidget._postRender();
+        expect(viewer.planarCameraController._flightSuspensionCount).toBe(1);
+        viewer.camera.completeFlight();
+        expect(await flight).toBe(true);
+        expect(viewer.camera.positionWC).toEqualEpsilon(
+          new Cartesian3(10, 20, 180),
+          1e-9,
+        );
+        expect(viewer.planarCameraController._flightSuspensionCount).toBe(0);
+      }
+
+      viewer = createPlanarViewer(createWorld());
+      await qualifyTileset();
+      viewer.destroy();
+      viewer = createDeclarativePlanarViewer({
+        extent: {
+          minimumX: -128,
+          minimumY: -128,
+          maximumX: 128,
+          maximumY: 128,
+        },
+        maximumLevel: 0,
+      });
+      await qualifyTileset();
     });
 
     it("delegates live and declarative planar Entity zoom to the resolved World", async function () {

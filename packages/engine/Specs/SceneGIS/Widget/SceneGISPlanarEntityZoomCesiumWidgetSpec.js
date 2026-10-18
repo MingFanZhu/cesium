@@ -363,7 +363,7 @@ describe("SceneGIS/Widget/SceneGISPlanarEntityZoomCesiumWidget", function () {
     await expectRejectedExactlyOnce(widget.zoomTo(Promise.reject(null)), null);
     expect(widget._sceneGISPlanarFramingOperation).toBeUndefined();
     await expectAsync(widget.zoomTo(Promise.resolve({}))).toBeRejectedWithError(
-      "A planar zoom target must be an Entity, an Entity array, an EntityCollection, or a DataSource with an EntityCollection.",
+      "A planar zoom target must be an Entity, an Entity array, an EntityCollection, a DataSource with an EntityCollection, or a Cesium3DTileset in planar world coordinates.",
     );
     expect(widget._sceneGISPlanarFramingOperation).toBeUndefined();
 

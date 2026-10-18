@@ -218,8 +218,12 @@ widget.clock.currentTime = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
 - Camera flight继续使用Cesium tween与complete/cancel callback；飞行期间已注册planar controller暂停input，结束后恢复
   caller原有`enabled`状态，并从下一controller frame继续surface clearance。低层Scene没有controller时仍可flight。
 - `Viewer`和低层`CesiumWidget`的`zoomTo`/`flyTo`支持`Entity`、纯`Entity[]`、`EntityCollection`、
-  `entities`为真实`EntityCollection`的DataSource及resolve为这些类型的Promise。Entity属性必须已经使用当前World的
+  `entities`为真实`EntityCollection`的DataSource、已正确放置的原生 `Cesium3DTileset` 及 resolve 为这些类型的 Promise。Entity属性必须已经使用当前World的
   planar Cartesian米制语义；不会转换GeoJSON/CZML/KML坐标或推断CRS。
+- tileset 的内容和包围体必须已经处于当前 World Cartesian 坐标；须加入 Scene 的 primitive collection tree。
+  使用 `Cesium3DTileset.fromUrl` 的 Promise 等待根元数据就绪，执行时读取包含最新 root/model 变换的公开
+  `boundingSphere`；不等待全部内容加载，也不转换 ECEF、region 或推断 CRS。目标移除/销毁返回 `false`。
+  飞行使用开始时的 bounds，不持续追踪之后的矩阵变化。
 - framing等待完整`DataSourceDisplay` bounds；empty或无`DONE` bounds返回`false`，PENDING不移动Camera。
 - `trackedEntity`只接受真实Entity、defined `ReferenceFrame.FIXED` position与`AUTODETECT/ENU`
   `trackingReferenceFrame`。两种tracking frame都使用固定`+X East/+Y North/+Z Up`，不读取Entity orientation；
@@ -228,7 +232,7 @@ widget.clock.currentTime = JulianDate.fromIso8601("2026-06-21T12:00:00Z");
   bounds使用当前Camera fixed offset。Tracking暂停planar input但不改变controller `enabled`；direct Camera flight结束后恢复，
   successful zoom/fly、Home、Entity removal或clear停止tracking。
 - InfoBox camera对当前可track Entity执行track/untrack，对不可track但DONE bounds执行zoom fallback；left-double-click使用同一规则。
-- `ImageryLayer`、3D Tiles、point cloud、Voxel、Buffer与plain-object target在planar World中不受支持；直接使用
+- `ImageryLayer`、point cloud、Voxel、Buffer与plain-object target在planar World中不受支持；直接使用
   `viewer.camera` fixed-axis方法处理应用自有Cartesian bounds。
 - `world.pick(ray)` 与 `world.pickFromWindowPosition(position, scene)` 是有界的 Z=0 数学拾取，不依赖当前 LOD 或 depth buffer；extent 外返回 `undefined`。
 - `scene.pickPosition(position)` 是 rendered-depth 拾取，要求浏览器支持 depth texture，并依赖最近一次 normal render。它不等同于通用 object picking。
@@ -530,7 +534,7 @@ skyBox/skyAtmosphere。构造会关闭默认Fog；运行中visible native SkyBox
 ## Planar API 统一交付
 
 V1与I1-I4的公开路径作为同一交付单元验证：`Viewer({ planarWorld })`先解析唯一planar World与controller，public
-`Camera`完成fixed-axis view/bounds/flight，`Viewer.zoomTo/flyTo`消费受支持的Entity/DataSource profile，
+`Camera`完成fixed-axis view/bounds/flight，`Viewer.zoomTo/flyTo`消费受支持的Entity/DataSource/planar tileset profile，
 `trackedEntity`按native Clock跟随FIXED position，最后由Scene API safety阻止ellipsoid height/clamp、globe-only Camera入口和
 native Fog/Shadow/Earth environment产生伪平面语义。Dev与release使用同一个blocked-network Viewer case；应用不得把3D Tiles
 MostDetailed、GeoJSON/CZML/KML转换、clustering或planar Fog/Shadow误认为已包含在该矩阵中。

@@ -332,3 +332,31 @@ invariant使用，但不是planar CRS或application position contract。
 Direct Widget preflight和construction Fog normalization继续属于SGP-0001，Viewer preflight继续属于SGP-0002；Scene height/native
 frame safety由SGP-0007与[ADR-0039](ADR-0039-planar-scene-api-qualification-and-safety.md)定义。`world:false`、`globe:false`和默认
 Globe Viewer不进入该profile。
+
+## 2026-10-18 amendment：原生 planar tileset 取景
+
+在既有 Entity/DataSource profile 之外，live/declarative planar Viewer 和低层 CesiumWidget
+接纳原生 `Cesium3DTileset` 及 resolve 为该类型的 Promise。前提是内容和全部包围体已经
+使用当前 World Cartesian 坐标，目标已属于 Scene 的 primitive collection tree。
+这取代 I2 对全部 3D Tiles target 的拒绝，不开放其他未支持的 target 类型或地理重投影。
+
+执行时读取公开 `tileset.boundingSphere`，让原生 getter 刷新当前 `modelMatrix × root.transform`
+对应的根包围球，然后复用 ADR-0037 的 fixed-axis Camera API。`fromUrl` Promise 提供根元数据
+readiness；不等待所有内容加载，不直接调用私有 root 方法，不缓存请求时的旧 bounds。
+飞行开始后的矩阵变化不自动重定向航程，调用方应发起新请求。
+
+operation 继续独立结算，保留 stale callback、replacement、cancel、trackedEntity 和 controller
+suspension 契约。实际执行时目标仍未加入 Scene、已经销毁或根尚未初始化时 resolve false；允许
+Promise resolve 后、执行取景前加入 Scene，避免 Promise continuation 顺序导致提前失败。所在 collection
+路径的 primitiveRemoved 取消已失去场景归属的目标；多重归属时重新绑定有效路径。preUpdate
+发现直接销毁后取消；完成回调也检查目标存活。所有 terminal path 必须解除监听。
+Widget destroy 先取消 operation；Scene teardown 通过原生 tween/primitive 生命周期取消。
+调用方仍负责不把已销毁对象留在原生 collection 中。
+
+公开 `tileset.root.transform` 已满足 SDK 显式根矩阵替换需求；modelMatrix 是额外外层矩阵，
+不能替代该语义。此能力不转换 region、RTC、子矩阵或烘焙 ECEF 顶点。地理投影、完整 tileset
+渲染/LOD/picking 资格须另行设计，详见
+[源码审计](../../../AgentDocs/planar-api-integration/discussions/2026-10-18-geographic-tileset-scope.md)。
+
+复用 SGP-0005，仅更新 CesiumWidget.js / Viewer.js 既有配对标记内的公共目标说明。
+运行时与资源管理在自有 helper 中完成；不新增 Camera、Scene 或 Cesium3DTileset 上游修改。

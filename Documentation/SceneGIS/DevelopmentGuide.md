@@ -478,12 +478,14 @@ canonical scheme 校验与稀疏 availability。以下检查约束原 URL-templa
 - Viewer 必须关闭 legacy camera inputs，通过 `ControllerHost` 注册唯一
   `SceneGISPlanarCameraController`，并在 CesiumWidget/Scene/world destroy 前 exactly-once remove。
   registration failure 也必须释放已经连接的 aggregator 和 child state。
-- planar Home只调用`controller.viewHome(scene)`。`zoomTo`/`flyTo`仅接纳精确Entity/DataSource profile；
+- planar Home只调用`controller.viewHome(scene)`。`zoomTo`/`flyTo`接纳精确Entity/DataSource profile，以及已正确放置在平面 World 的原生 tileset；
   `trackedEntity`仅接纳真实Entity、FIXED position与AUTODETECT/ENU fixed-axis tracking。InfoBox camera按当前sample在
   track/untrack与DONE-bounds zoom之间选择，left-double-click使用同一track-or-zoom规则，left-click selection保留。
 - tracking controller必须晚于planar input controller注册，使用独立计数token暂停input；不得复用Earth `EntityView`、读取
   orientation或接受INERTIAL/VELOCITY。Direct Camera flight暂时优先，successful framing/Home/remove/destroy必须
   exactly-once释放definition listener、Camera transform与token。
+- tileset 取景读取执行时的公开 `boundingSphere`，不访问私有 root、不重投影 CRS。覆盖根/模型矩阵更新、
+  Promise readiness、目标移除/销毁、取消/替换及 Widget/Scene teardown；所有 operation listener 和 flight token 必须释放。
 - planar imagery仍由应用通过canonical `world.tilingScheme`和`world.imageryLayers`显式组装；
   `scenegis-planar-viewer` 只演示该高层 ownership，不引入通用 provider picker、预取或离线下载。
 

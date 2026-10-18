@@ -10,10 +10,10 @@
 | Active extension plan  | None；[总体计划](plans/2026-08-14-planar-api-integration-extension.md) completed |
 | Current phase          | None                                                                             |
 | Active phase plan      | None                                                                             |
-| Active standalone plan | [Entity 通用属性修复](plans/2026-09-18-entity-api-fixes.md)                      |
+| Active standalone plan | None；[Tileset 取景](plans/2026-10-18-tileset-framing.md) completed              |
 | Architecture contact   | Architecture Agent                                                               |
 | Execution contact      | Execution Agent                                                                  |
-| Last updated           | `2026-09-18`                                                                     |
+| Last updated           | `2026-10-18`                                                                     |
 
 ## Scope
 
@@ -22,7 +22,7 @@
 - 让 Cesium `Camera` 的 Cartesian view、flight、look-at 与 bounding-sphere framing 在
   `SceneGISPlanarWorld` 中使用固定 `+X East / +Y North / +Z Up` 语义。
 - 让 `Viewer.zoomTo/flyTo`、InfoBox camera 和 `trackedEntity` 在明确的平面 Entity/DataSource profile
-  内复用 Cesium 公共 API。
+  内复用 Cesium 公共 API；取景额外接纳已正确放置的原生 planar tileset。
 - 资格确认通用 Cartesian picking/screen transforms，并对仍依赖 `Cartographic`、`Rectangle`、`Ellipsoid`
   的球面 API 提供清晰边界，避免静默错误。
 - 保持 Globe、`globe:false`、live World 与声明式 `planarWorld` 行为兼容，并让上游改动保持窄 SGP hook。
@@ -49,6 +49,13 @@
 - SGP: I1 proposed new SGP for Camera integration；existing `SGP-0001`/`SGP-0002` remain independent
 
 ## Current handoff
+
+2026-10-18：负责人授权实现已正确放置的原生 planar tileset 取景。
+[Standalone plan](plans/2026-10-18-tileset-framing.md)、
+[源码审计与地理转换边界](discussions/2026-10-18-geographic-tileset-scope.md)、
+[本轮评审](reviews/2026-10-18-tileset-framing.md)记录实现与验证。沿用 ADR-0006 / SGP-0005，
+实现与技术自审完成，50 项相关 Specs、完整构建/类型检查和补丁审计通过，建立 scenegis/develop 本地检查点。
+不改变物理环境默认值，不实现自动地理重投影。当前 Entity 通用属性修复的独立验收和旧 finding 保持原状态。
 
 2026-09-18：[Camera 兼容性复核](plans/2026-09-18-camera-compatibility.md)的实现、
 [技术自审](reviews/2026-09-18-camera-compatibility.md)与负责人验收通过；原 I1–I5 仍 completed。

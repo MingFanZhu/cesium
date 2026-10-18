@@ -1396,7 +1396,7 @@ CesiumWidget.prototype._canTrackSceneGISPlanarEntity = function (entity, time) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar world, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar world, the resolved target must be an Entity, an Entity array, an EntityCollection, a DataSource whose entities property is an EntityCollection, or a Cesium3DTileset already using planar world coordinates. A tileset must belong to the scene primitive collection tree; its current root/model transforms are applied at dispatch. Removing or destroying it cancels framing. Geographic coordinates are not reprojected.
  * @param {HeadingPitchRange} [offset] The offset from the center of the entity in the local east-north-up reference frame.
  * @returns {Promise<boolean>} A Promise that resolves to true if the zoom was successful or false if the target is not currently visualized in the scene or the zoom was cancelled.
  * @exception {DeveloperError} In a planar world, the resolved target or offset does not belong to the supported planar profile.
@@ -1425,7 +1425,7 @@ CesiumWidget.prototype.zoomTo = function (target, offset) {
  * target will be the range. The heading will be determined from the offset. If the heading cannot be
  * determined from the offset, the heading will be north.</p>
  *
- * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar world, the resolved target must be an Entity, an Entity array, an EntityCollection, or a DataSource whose entities property is an EntityCollection.
+ * @param {Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Cesium3DTileset|TimeDynamicPointCloud|VoxelPrimitive|BufferPrimitiveCollection<BufferPrimitive>>} target The target to view. For a planar world, the resolved target must be an Entity, an Entity array, an EntityCollection, a DataSource whose entities property is an EntityCollection, or a Cesium3DTileset already using planar world coordinates. A tileset must belong to the scene primitive collection tree; its current root/model transforms are applied at dispatch. Removing or destroying it cancels framing. Geographic coordinates are not reprojected.
  * @param {object} [options] Object with the following properties:
  * @param {number} [options.duration=3.0] The duration of the flight in seconds.
  * @param {number} [options.maximumHeight] The maximum height at the peak of the flight.

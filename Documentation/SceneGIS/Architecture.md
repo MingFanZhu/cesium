@@ -681,8 +681,13 @@ anchor X/Y 必须位于 World inclusive extent。
 
 Entity/DataSource framing必须复用`DataSourceDisplay.getBoundingSphere(entity, false, scratch)`：任一`PENDING`等待且不发布
 部分Camera状态，mixed `DONE`/`FAILED`只合并`DONE`，empty或全部`FAILED`返回`false`。接纳时snapshot array/collection；
-plain object、mixed array及ImageryLayer/3D Tiles/point cloud/Voxel/Buffer目标同步或异步明确拒绝。最终bounds只交给
+plain object、mixed array及ImageryLayer/point cloud/Voxel/Buffer目标同步或异步明确拒绝。最终bounds只交给
 ADR-0037的`Camera.viewBoundingSphere`/`flyToBoundingSphere`，不得复制visualizer bounds或推断CRS。
+
+已使用当前 World Cartesian 坐标的原生 `Cesium3DTileset` 也可取景；执行时读取公开
+`boundingSphere`，目标必须属于 Scene primitive collection tree。移除、销毁、替换和
+Widget/Scene teardown 必须结算并释放监听/flight suspension；不重投影地理内容或 region。
+完整 target contract 与 SGP-0005 见 ADR-0006 的 2026-10-18 amendment。
 
 首版 HeightReference profile 只接受 `NONE`、`CLAMP_TO_GROUND` 与 `RELATIVE_TO_GROUND`。逻辑地表
 读取同步、无请求的 `world.getTerrainHeight`；无 resident terrain 时回退 Z=0，已有 resident ancestor

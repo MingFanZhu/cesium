@@ -7,6 +7,8 @@ import Matrix4 from "../../../Core/Matrix4.js";
 import BoundingSphereState from "../../../DataSources/BoundingSphereState.js";
 import Entity from "../../../DataSources/Entity.js";
 import EntityCollection from "../../../DataSources/EntityCollection.js";
+import Cesium3DTileset from "../../../Scene/Cesium3DTileset.js";
+import PrimitiveCollection from "../../../Scene/PrimitiveCollection.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
 import SceneGISPlanarEntityTracker from "./_SceneGISPlanarEntityTracker.js";
 
@@ -65,11 +67,14 @@ function snapshotOptions(options, isFlight) {
 
 function invalidTarget() {
   return new DeveloperError(
-    "A planar zoom target must be an Entity, an Entity array, an EntityCollection, or a DataSource with an EntityCollection.",
+    "A planar zoom target must be an Entity, an Entity array, an EntityCollection, a DataSource with an EntityCollection, or a Cesium3DTileset in planar world coordinates.",
   );
 }
 
 function snapshotResolvedTarget(target) {
+  if (target instanceof Cesium3DTileset) {
+    return { tileset: target };
+  }
   if (target instanceof Entity) {
     return { entities: [target] };
   }
@@ -123,6 +128,81 @@ function clearCurrent(widget, operation) {
     widget._sceneGISPlanarFramingOperation = undefined;
   }
   removeLoadingListener(operation);
+  removeTargetListeners(operation);
+}
+
+function removeTargetListeners(operation) {
+  const removers = operation.removeTargetListeners;
+  operation.removeTargetListeners = undefined;
+  if (defined(removers)) {
+    for (let i = 0; i < removers.length; i++) {
+      removers[i]();
+    }
+  }
+}
+
+function findTilesetPath(collection, tileset, path) {
+  if (collection.isDestroyed()) {
+    return false;
+  }
+  path.push(collection);
+  if (collection.contains(tileset)) {
+    return true;
+  }
+  for (let i = 0; i < collection.length; i++) {
+    const child = collection.get(i);
+    // removeAll raises events before truncating its backing array.
+    if (
+      child instanceof PrimitiveCollection &&
+      collection.contains(child) &&
+      findTilesetPath(child, tileset, path)
+    ) {
+      return true;
+    }
+  }
+  path.pop();
+  return false;
+}
+
+function observeTileset(widget, operation, requireAttachment = true) {
+  removeTargetListeners(operation);
+  const scene = widget.scene;
+  const tileset = operation.tileset;
+  const path = [];
+  if (scene.isDestroyed() || tileset.isDestroyed() || !defined(tileset.root)) {
+    cancel(widget);
+    return;
+  }
+  if (!findTilesetPath(scene.primitives, tileset, path)) {
+    if (requireAttachment) {
+      cancel(widget);
+    }
+    return;
+  }
+
+  const removers = [];
+  operation.removeTargetListeners = removers;
+  for (let i = 0; i < path.length; i++) {
+    const child = i + 1 < path.length ? path[i + 1] : tileset;
+    removers.push(
+      path[i].primitiveRemoved.addEventListener(function (removed) {
+        if (
+          removed === child &&
+          widget._sceneGISPlanarFramingOperation === operation
+        ) {
+          // A primitive can belong to more than one collection.
+          observeTileset(widget, operation);
+        }
+      }),
+    );
+  }
+  removers.push(
+    scene.preUpdate.addEventListener(function () {
+      if (tileset.isDestroyed()) {
+        cancel(widget);
+      }
+    }),
+  );
 }
 
 function settle(widget, operation, reject, value) {
@@ -153,6 +233,12 @@ function cancel(widget) {
 
 function publishSnapshot(widget, operation, snapshot) {
   if (widget._sceneGISPlanarFramingOperation !== operation) {
+    return;
+  }
+  if (defined(snapshot.tileset)) {
+    operation.tileset = snapshot.tileset;
+    // The caller may attach the resolved target before the next postRender.
+    observeTileset(widget, operation, false);
     return;
   }
   if (defined(snapshot.dataSource)) {
@@ -197,7 +283,10 @@ function start(widget, target, options, isFlight) {
     isFlight,
     options: optionSnapshot,
     entities: undefined,
+    tileset: undefined,
+    framingStarted: false,
     removeLoadingListener: undefined,
+    removeTargetListeners: undefined,
     boundingSpheres: [],
     boundingSphere: new BoundingSphere(),
     flight: undefined,
@@ -244,44 +333,63 @@ const boundingSphereScratch = new BoundingSphere();
 
 function update(widget) {
   const operation = widget._sceneGISPlanarFramingOperation;
-  if (!defined(operation) || !defined(operation.entities)) {
-    return;
-  }
-  if (operation.entities.length === 0) {
-    settle(widget, operation, false, false);
+  if (
+    !defined(operation) ||
+    operation.framingStarted ||
+    (!defined(operation.entities) && !defined(operation.tileset))
+  ) {
     return;
   }
 
   try {
-    const spheres = operation.boundingSpheres;
-    let count = 0;
-    for (let i = 0; i < operation.entities.length; ++i) {
-      const state = widget._dataSourceDisplay.getBoundingSphere(
-        operation.entities[i],
-        false,
-        boundingSphereScratch,
-      );
-      if (state === BoundingSphereState.PENDING) {
+    if (defined(operation.tileset)) {
+      if (!defined(operation.removeTargetListeners)) {
+        observeTileset(widget, operation);
+        if (widget._sceneGISPlanarFramingOperation !== operation) {
+          return;
+        }
+      }
+      if (operation.tileset.isDestroyed()) {
+        cancel(widget);
         return;
       }
-      if (state === BoundingSphereState.DONE) {
-        spheres[count] = BoundingSphere.clone(
+      // The public getter refreshes bounds using current root/model transforms.
+      BoundingSphere.clone(
+        operation.tileset.boundingSphere,
+        operation.boundingSphere,
+      );
+    } else {
+      const spheres = operation.boundingSpheres;
+      let count = 0;
+      for (let i = 0; i < operation.entities.length; ++i) {
+        const state = widget._dataSourceDisplay.getBoundingSphere(
+          operation.entities[i],
+          false,
           boundingSphereScratch,
-          spheres[count],
         );
-        count++;
+        if (state === BoundingSphereState.PENDING) {
+          return;
+        }
+        if (state === BoundingSphereState.DONE) {
+          spheres[count] = BoundingSphere.clone(
+            boundingSphereScratch,
+            spheres[count],
+          );
+          count++;
+        }
       }
+      if (count === 0) {
+        settle(widget, operation, false, false);
+        return;
+      }
+      spheres.length = count;
+      BoundingSphere.fromBoundingSpheres(spheres, operation.boundingSphere);
     }
-    if (count === 0) {
-      settle(widget, operation, false, false);
-      return;
-    }
-    spheres.length = count;
-    BoundingSphere.fromBoundingSpheres(spheres, operation.boundingSphere);
 
     const camera = widget.scene.camera;
     const framingOptions = operation.options;
     if (operation.isFlight) {
+      operation.framingStarted = true;
       operation.entities = undefined;
       camera.flyToBoundingSphere(operation.boundingSphere, {
         duration: framingOptions.duration,
@@ -289,7 +397,12 @@ function update(widget) {
         offset: framingOptions.offset,
         complete() {
           if (widget._sceneGISPlanarFramingOperation === operation) {
-            settle(widget, operation, false, true);
+            settle(
+              widget,
+              operation,
+              false,
+              !defined(operation.tileset) || !operation.tileset.isDestroyed(),
+            );
           }
         },
         cancel() {
@@ -317,7 +430,7 @@ function update(widget) {
 }
 
 /**
- * Isolated planar Entity/DataSource framing lifecycle.
+ * Isolated planar Entity/DataSource and native tileset framing lifecycle.
  *
  * @private
  */
