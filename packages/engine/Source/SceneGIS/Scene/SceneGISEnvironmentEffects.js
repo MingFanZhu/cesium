@@ -666,7 +666,7 @@ function SceneGISEnvironmentEffects(options) {
   const surfaceRadianceScale = options.surfaceRadianceScale ?? 1.2;
   const nightAmbientIntensity = options.nightAmbientIntensity ?? 1.0;
   const bloomThreshold = options.bloomThreshold ?? 10.0;
-  const bloomIntensity = options.bloomIntensity ?? 0.05;
+  const bloomIntensity = options.bloomIntensity ?? 0.005;
   const lensFlareIntensity = options.lensFlareIntensity ?? 5.0;
   const moonlightIntensity = options.moonlightIntensity ?? 1.0;
   const heightFogDensity = options.heightFogDensity ?? 0.000008;
@@ -1720,7 +1720,7 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [surfaceRadianceScale=1.2] Globe, Planar surface and physical model direct/diffuse sky radiance scale, in the inclusive range 0–64. Independent of display HDR and exposure.
  * @property {number} [nightAmbientIntensity=1.0] Artistic blue-gray night ambient floor multiplier in [0, 8]; zero disables it. Blends according to physical sky irradiance, before material/ambient occlusion. Globe and Planar. Independent of Moon light and exposure.
  * @property {number} [bloomThreshold=10.0] HDR bloom threshold in the inclusive RGBA16F range 0–65504.
- * @property {number} [bloomIntensity=0.05] Scene-wide bloom intensity in the inclusive range 0–64.
+ * @property {number} [bloomIntensity=0.005] Scene-wide bloom intensity in the inclusive range 0–64.
  * @property {number} [lensFlareIntensity=5.0] Sun-gated lens artifact intensity in the inclusive range 0–64.
  * @property {number} [moonlightIntensity=1.0] Readable full-phase Globe or Planar Moonlight scale in the inclusive range 0–64.
  * @property {number} [heightFogDensity=0.000008] Base-height extinction coefficient per meter, in the inclusive range 0–0.001.

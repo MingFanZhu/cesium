@@ -3342,11 +3342,10 @@ function executeBloom(renderer, context, colorTexture, depthTexture) {
     resources.thresholdCommand.execute(context, renderer._bloomHalfPassState);
 
     for (let octave = 0; octave < 3; ++octave) {
-      // Equal covariance to the Globe 1/2/4 schedule, with six evenly spaced
-      // axes to avoid a square finite-support footprint around the Planar Sun.
-      const planar = renderer._mode === SceneGISAtmosphereReferenceFrame.PLANAR;
-      const radius = planar ? Math.sqrt(7.0) : 2 ** octave;
-      const angle = planar ? (octave * Math.PI) / 6.0 : 0.0;
+      // Six evenly spaced axes avoid a square finite-support footprint in either
+      // world, with the same covariance and pass count as the 1/2/4 H/V schedule.
+      const radius = Math.sqrt(7.0);
+      const angle = (octave * Math.PI) / 6.0;
       const offsetX = radius * Math.cos(angle);
       const offsetY = radius * Math.sin(angle);
       renderer._bloomTexture =

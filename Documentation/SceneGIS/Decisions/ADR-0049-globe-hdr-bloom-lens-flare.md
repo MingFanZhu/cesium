@@ -1,5 +1,22 @@
 # ADR-0049：Globe HDR Bloom and Lens Flare
 
+## 双世界太阳泛光修订 — 2026-10-19
+
+当前 Globe 太阳视角再次复现圆角方形泛光；关闭 bloom 后太阳本体仍为圆形。
+旧 1/2/4 H/V 有限支撑的可见等亮轮廓存在轴向偏差，之前扩大支撑并未消除该根因。
+将 P3 已验证的六方向调度统一用于两世界：0/90、30/120、60/150 度，半径 sqrt(7)。
+保留归一化核、同一二阶矩、六次 blur 与既有 GPU 存储；不改变太阳辐射、阈值、遮挡或 alpha。
+本修订取代以下历史段落中“Globe 保留旧调度”的规定。
+
+负责人同时要求降低引擎默认强度，`bloomIntensity` 从 0.05 调为 0.005。
+这是显式的全场景艺术默认，调用方仍可指定原值或其他受支持值；没有太阳专用倍率或亮度截断。
+镜头光晕仍由独立 `lensFlareIntensity` 控制，曝光、tone mapping、白平衡不变。
+综合环境控件步进改为 0.001，能准确显示与恢复新默认值。
+
+新增 256×256 真实 GPU 圆盘回归测量可见等亮轮廓，避免旧 32×16 fixture 被纹理边界截断。
+相关计划见[太阳泛光修复](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-19-solar-bloom-footprint.md)。
+无新增公共 API、pass、Shader、资源、upstream-owned file 或 SGP。
+
 ## Planar amendment — 2026-09-11
 
 P3 starts after P2 `b09a3d5ce2` and extends this same HDR contract to Planar.

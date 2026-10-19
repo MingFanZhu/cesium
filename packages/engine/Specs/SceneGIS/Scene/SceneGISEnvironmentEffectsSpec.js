@@ -2803,7 +2803,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     expect(effects.aerialRadianceScale).toBe(1.0);
     expect(effects.surfaceRadianceScale).toBe(1.2);
     expect(effects.bloomThreshold).toBe(10.0);
-    expect(effects.bloomIntensity).toBe(0.05);
+    expect(effects.bloomIntensity).toBe(0.005);
     expect(effects.lensFlareIntensity).toBe(5.0);
     expect(effects.heightFogDensity).toBe(0.000008);
     expect(effects.heightFogHeightFalloff).toBe(0.0002);
@@ -8301,6 +8301,117 @@ ${hardCascadeLibrary}`;
   for (const mode of ["globe", "planar"]) {
     it(`applies ${mode} HDR bloom and Sun-gated lens artifacts on the actual GPU`, () =>
       verifyHdrArtifacts(mode));
+  }
+
+  async function verifyRoundBloom(mode) {
+    await connectControlledCloudMode(mode);
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    effects.showAerialPerspective = false;
+    effects.showHeightFog = false;
+    effects.showClouds = false;
+    effects.showLensFlare = false;
+    effects.showBloom = true;
+    effects.bloomThreshold = 10;
+    effects.bloomIntensity = 0.05;
+    const size = 256;
+    const center = (size - 1) * 0.5;
+    const values = new Uint16Array(size * size * 4);
+    for (let y = 0; y < size; ++y) {
+      for (let x = 0; x < size; ++x) {
+        const bright = Math.hypot(x - center, y - center) <= 4.5;
+        values.set(
+          [
+            bright ? 32768 : 0,
+            bright ? 32768 : 0,
+            bright ? 32768 : 0,
+            0.25,
+          ].map(encodeFloat16),
+          (y * size + x) * 4,
+        );
+      }
+    }
+    const input = new Texture({
+      context: scene.context,
+      width: size,
+      height: size,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.HALF_FLOAT,
+      source: { arrayBufferView: values },
+    });
+    try {
+      const pipeline = effects._pipeline;
+      const result = pipeline.executeHdr(scene.context, input, input, input);
+      const pixels = readHalfTexturePixels(result);
+      function sample(x, y) {
+        const ix = Math.floor(x);
+        const iy = Math.floor(y);
+        const fx = x - ix;
+        const fy = y - iy;
+        return CesiumMath.lerp(
+          CesiumMath.lerp(
+            pixels[iy * size + ix][0],
+            pixels[iy * size + ix + 1][0],
+            fx,
+          ),
+          CesiumMath.lerp(
+            pixels[(iy + 1) * size + ix][0],
+            pixels[(iy + 1) * size + ix + 1][0],
+            fx,
+          ),
+          fy,
+        );
+      }
+      // Measure visible isophotes, not just the blur's nonzero support.
+      // The field is wide enough that none of these rays reaches a texture edge.
+      for (const level of [0.1, 1.0]) {
+        const radii = [];
+        for (let direction = 0; direction < 24; ++direction) {
+          const angle = (direction * Math.PI) / 12;
+          let previous = sample(
+            center + 8 * Math.cos(angle),
+            center + 8 * Math.sin(angle),
+          );
+          for (let radius = 8.5; radius < 100; radius += 0.5) {
+            const current = sample(
+              center + radius * Math.cos(angle),
+              center + radius * Math.sin(angle),
+            );
+            if (current < level) {
+              radii.push(
+                radius -
+                  0.5 +
+                  (0.5 * (previous - level)) / (previous - current),
+              );
+              break;
+            }
+            previous = current;
+          }
+        }
+        expect(radii.length).toBe(24);
+        const mean =
+          radii.reduce((sum, radius) => sum + radius, 0) / radii.length;
+        expect((Math.max(...radii) - Math.min(...radii)) / mean)
+          .withContext(`${mode} isophote ${level}: ${JSON.stringify(radii)}`)
+          .toBeLessThan(0.06);
+      }
+      expect(pixels.every((pixel) => pixel[3] === 0.25)).toBe(true);
+
+      // Normalized optical spread must not change a constant bright field's gain.
+      copyConstantHalfTexture(input, [32, 32, 32, 0.25]);
+      const uniform = pipeline.executeHdr(scene.context, input, input, input);
+      const pixel = readHalfTexturePixel(uniform, 128, 128);
+      expect(pixel[0]).toBeCloseTo(32 * 1.05, 1);
+      expect(pixel[3]).toBe(0.25);
+    } finally {
+      input.destroy();
+    }
+  }
+
+  for (const mode of ["globe", "planar"]) {
+    it(`keeps a round high-radiance bloom footprint in ${mode}`, () =>
+      verifyRoundBloom(mode));
   }
 
   it("compiles the frame-local Globe surface variant and restores the native variant", async function () {

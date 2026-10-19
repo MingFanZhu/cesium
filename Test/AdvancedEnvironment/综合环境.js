@@ -156,7 +156,7 @@ const groups = [
     "泛光与光晕",
     ["showBloom", "泛光"],
     ["bloomThreshold", "泛光阈值", 0, 65504, 0.01],
-    ["bloomIntensity", "泛光强度", 0, 64, 0.01],
+    ["bloomIntensity", "泛光强度", 0, 64, 0.001],
     ["showLensFlare", "镜头光晕"],
     ["lensFlareIntensity", "光晕强度", 0, 64, 0.01],
   ],

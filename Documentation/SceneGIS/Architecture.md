@@ -278,6 +278,9 @@ A7固定使用two half-resolution加one full-resolution color-only RGBA16F targe
 tone mapping或Planar执行；完整public、resource与lifecycle contract见
 [ADR-0049](Decisions/ADR-0049-globe-hdr-bloom-lens-flare.md)。
 
+ADR-0049 的 2026-10-19 修订统一两世界的六方向有限模糊：保留归一化核、二阶矩与六次 blur 预算，
+避免太阳高亮暴露轴向方形支撑。`bloomIntensity` 默认 0.005，仍为显式全场景艺术参数；不添加太阳专用倍率。
+
 A9-G在同一physical irradiance/source domain为Globe natural environment增加一种固定`readable` night skylight。它按每个
 receiver/sample的actual radial up与ECEF Sun direction在local solar elevation `-6°`到`-12°`之间平滑接管，只进入terrain、cloud body/
 ground bounce/haze与height-fog ambient；direct Sun、Beer shadow、directional fog/rays、background atmosphere、Models/3D Tiles、Planar及
