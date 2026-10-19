@@ -15,6 +15,8 @@ import vertexShaderSource from "../../../Shaders/SceneGIS/PlanarGround/SceneGISP
  * surface position, keeping color and picking in a shared VA draw.
  * This shader contains no ellipsoid, map projection, or terrain-tile
  * dependency.
+ * Area extent planes and fragment culling follow ShadowVolumeAppearanceVS/FS
+ * at the same baseline; stencil retains the exact polygon footprint.
  *
  * @private
  */

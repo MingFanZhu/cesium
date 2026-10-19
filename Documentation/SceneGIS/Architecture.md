@@ -786,10 +786,12 @@ detach只更新uniform/model transform/bounds，不替换footprint VA、index、
 ADR-0168 为 Ground wrapper 增加同 kind 的静态 `geometryInstances`，共享一个原生 Primitive/VA/BatchTable。
 保留每项 original id、attributes、bounds，single Context、same-kind candidate/current 与 exactly-once lifecycle。
 线用 DOUBLE 点差生成 origin-independent 方向与逐顶点 width；批次共用 XY origin 与 normalized Z envelope。
-不同颜色、半透明面以原生 pick offsets 隔离 stencil/color；连续同色不透明面在 classification mask
-容量内合并，面的 picking 逐实例隔离。B3 贴地线按原生 GroundPolylinePrimitive 分工，读取当前
+贴地面以闭体 stencil 保持精确轮廓，color/pick 读取地表深度并裁剪实例 XY extent。
+范围内部不相交的异色/透明面共用一对 stencil/fill 命令及独立 pick ID；相交面保持输入顺序，
+同色不透明的 render 仍可在 classification mask 容量内合并，不按颜色重排透明面。
+B3 贴地线按原生 GroundPolylinePrimitive 分工，读取当前
 `czm_globeDepthTexture`，按 segment width/start/end plane 做片元裁剪；每 VA 共用一个颜色/拾取命令，
-无需 stencil 计数与逐实例 offsets。Line 必须支持 depth texture，不能静默回退旧 stencil 路径。
+无需 stencil 计数与逐实例 offsets。两种 ground geometry 都要求 depth texture，不提供静默降级。
 拓扑变化重建批次，属性变化复用几何；超过 65535 顶点的贴地面要求 uint element indices，线复用原生拆分。
 Pick/depth使用已建立current的命令路径；不读取actual terrain triangles、不发
 terrain request、不改变SSE/cache/readiness，也不存在C9 fallback。Polyline clamp与non-extruded Polygon、Ellipse、Rectangle、

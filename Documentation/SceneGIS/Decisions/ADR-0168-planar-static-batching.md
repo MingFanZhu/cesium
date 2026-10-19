@@ -72,6 +72,23 @@ Line 一条命令覆盖一个 VA，不再需要 per-instance offset；area 继�
 Ground 支持检测加入 depth texture 能力；升级须复核当前 frustum 的 globe-depth copy、log depth reconstruction、
 back-face volume rasterization 和 pick derived Shader。
 
+### B4 贴地面实例范围裁剪与空间合批
+
+B4 替代 B2 对异色/透明面和 picking 一律逐实例绘制的限制。原生 GroundPrimitive 提供实例 extents，
+ClassificationPrimitive 的 extent 路径按 VA 提交 stencil/fill 两条命令；ShadowVolumeAppearanceFS 用地表深度
+重建位置并裁剪实例范围。Planar 增加 XY extent 属性及同类片元判定，stencil pass 保持完整闭体，color/pick pass
+才做 extent 裁剪。复用已有深度复制，不增加 GPU target、Scene pass 或 terrain CPU clipping。
+
+为了保留已有的透明叠加、后绘制覆盖和孔洞契约，按输入顺序与 VA 建立连续空间分组，不任意合并相交实例。
+使用已有 rbush 依赖检测 XY bounding extents 的内部相交；边界接触允许同组，保守 bbox 相交可能减少合批率。
+互不相交的异色/透明对象共用一个 stencil/fill pair，pick 同样共享；同色不透明的相交对象仍可在最多 15 个
+闭体的计数容量内合并 render，pick 保持空间分组。组内重叠层数不会溢出 classification bits。
+静态空间信息保存在 candidate 内；颜色变更按需重算 render 分组，pick 分组和 warm 资源复用。
+两种 ground geometry 均要求 depth texture；polygon 大批次继续使用 native pick offsets 和 uint-index 能力契约。
+
+升级须同时复核 stencil 精确轮廓、extent FS discard 与 stencil 清零的执行关系、原生 pick varying 和
+linear/log globe-depth 重建；用凹面/孔洞/相邻边、宽 envelope 低视角、透明重叠和独立 ID/显隐验证。
+
 复核 GeometryPipeline 的 position/prevPosition/nextPosition、normal 变换，PrimitivePipeline 的
 scene3DOnly/combine/high-low 路径，BatchTable 的实例 attributes、ID 和 Primitive 生命周期。
 用不同 origin 的大坐标像素/pick 测试及对象数与命令/VA 数对照证明其仍在真实合批。

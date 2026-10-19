@@ -16,12 +16,16 @@ Primitive、VA 和 DrawCommand，同时保持独立 ID、颜色、显隐、实�
 
 ## 阶段
 
-| Phase | 状态      | 目标与 gate                                                                                                                   |
-| ----- | --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| B1    | completed | 普通 SceneGISPlanarPrimitive 实例数组、精度、像素/pick、attributes、warm resources、构建/types 与 review 已完成；形成独立提交 |
-| B2    | completed | [贴地线面合批](2026-10-19-b2-ground-instances.md) 实现、生命周期、像素/pick、资源对照、SDK 交付与 review 已完成               |
+| Phase | 状态      | 目标与 gate                                                                                                                          |
+| ----- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| B1    | completed | 普通 SceneGISPlanarPrimitive 实例数组、精度、像素/pick、attributes、warm resources、构建/types 与 review 已完成；形成独立提交        |
+| B2    | completed | [贴地线面合批](2026-10-19-b2-ground-instances.md) 实现、生命周期、像素/pick、资源对照、SDK 交付与 review 已完成                      |
+| B3    | completed | [贴地线 draw call 合批](2026-10-19-b3-ground-line-draws.md)；每 VA 一条命令，独立属性/拾取、坡面/低视角、交付与 review 完成          |
+| B4    | completed | [贴地面 draw call 合批](2026-10-19-b4-ground-area-draws.md)；空间分组共享 stencil/fill，独立属性/拾取、透明/孔洞、交付与 review 完成 |
 
 ## 整体验收与风险
+
+B4 已完成：[贴地面 draw call 合批](2026-10-19-b4-ground-area-draws.md)，在保留独立颜色、显隐、拾取及重叠顺序的前提下减少 area 命令。
 
 B3 已完成：[贴地线 draw call 合批](2026-10-19-b3-ground-line-draws.md)。对照原生
 GroundPolylinePrimitive 补齐 fragment footprint 判定，使 ground line 命令按 VA 而非实例数增长；B1/B2 checkpoint 保留。

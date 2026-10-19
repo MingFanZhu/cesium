@@ -107,8 +107,10 @@ context交付；engine/widgets/Shader source watcher能清理相关cache，刷�
 
 ADR-0168 静态合批还需复核原生 GeometryPipeline 的 DOUBLE 变换与 high/low encoding、Primitive
 `_createPickOffsets` / `_pickOffsets` 的实例顺序及 index/offset/count、BatchTable `_batchValuesDirty` 的重置时机。
-Ground 同色不透明 polygon 命令合并受 `CLASSIFICATION_MASK` 容量限制；不同色/透明面和面的 picking 必须保持
-范围隔离。Line 按 VA 绘制，复核 GLOBE 后的 depth copy、`czm_globeDepthTexture`、linear/log 重建与 pick Shader
+Ground 同色不透明 polygon 的重叠合并受 `CLASSIFICATION_MASK` 容量限制；不相交的异色/透明面与 picking
+共用 stencil/fill pair，重叠实例保持输入顺序。复核 GroundPrimitive / ShadowVolumeAppearance 的 extent 裁剪、
+hole wall 绕序、FS discard 与 stencil 清零关系，防止低视角串色或串 ID。
+Line 按 VA 绘制；两者均复核 GLOBE 后的 depth copy、`czm_globeDepthTexture`、linear/log 重建与 pick Shader
 片元裁剪，禁止退回逐实例 stencil。重新验证超过 65535 顶点的 uint-index batch、line direction/width/plane 属性、独立颜色/显隐/拾取，
 以及 provider attach/replace/detach 不重建共享 VA/Shader/commands。
 

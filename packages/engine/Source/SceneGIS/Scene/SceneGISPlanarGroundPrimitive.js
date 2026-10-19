@@ -283,6 +283,7 @@ function createCandidate(primitive, frameState) {
   let volume;
   let bounds;
   let vertexCount = 0;
+  const extents = [];
   const instances = entries.map(function (entry) {
     const created = SceneGISPlanarGroundVolume.create(
       primitive._world,
@@ -290,6 +291,7 @@ function createCandidate(primitive, frameState) {
       origin,
     );
     volume ??= created;
+    extents.push(created.extent);
     bounds =
       bounds === undefined
         ? BoundingSphere.clone(created.geometry.boundingSphere)
@@ -337,7 +339,7 @@ function createCandidate(primitive, frameState) {
           closed: true,
           translucent: false,
         });
-  const commands = createSceneGISPlanarGroundCommands(primitive);
+  const commands = createSceneGISPlanarGroundCommands(primitive, extents);
   const candidate = new Primitive({
     geometryInstances:
       primitive._batch === undefined ? instances[0] : instances,
@@ -440,9 +442,9 @@ function preserveCurrentAttributes(primitive) {
 /**
  * Renders planar polylines or non-extruded polygons clamped to the current planar surface.
  * A static batch shares one native Primitive and its vertex buffers. Lines use one command per
- * vertex array with fragment clipping against surface depth. Area stencil/color ranges remain
- * isolated for picking, different colors, and translucent objects. Compatible opaque area ranges
- * are coalesced within the stencil counter capacity.
+ * vertex array with fragment clipping against surface depth. Areas with disjoint XY extents share
+ * a stencil/color pair, including for picking. Overlapping areas retain input order; compatible
+ * opaque area ranges can also coalesce within the stencil counter capacity.
  *
  * @alias SceneGISPlanarGroundPrimitive
  * @constructor
@@ -623,8 +625,10 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
       "SceneGISPlanarGroundPrimitive requires a stencil buffer.",
     );
   }
-  if (this._geometryKind === "polyline" && !frameState.context.depthTexture) {
-    throw new DeveloperError("Planar ground polylines require depth textures.");
+  if (!frameState.context.depthTexture) {
+    throw new DeveloperError(
+      "Planar ground primitives require depth textures.",
+    );
   }
   if (!frameState.passes.render && this._current === undefined) {
     return;

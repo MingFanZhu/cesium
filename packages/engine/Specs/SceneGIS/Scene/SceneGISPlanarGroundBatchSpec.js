@@ -226,6 +226,197 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundBatch", function () {
     expect(primitive._current._va.length).toBe(1);
   });
 
+  it("renders and picks 1024 disjoint colored areas in one stencil/fill pair", function () {
+    const instances = Array.from({ length: 1024 }, (_, id) => ({
+      id,
+      geometry: new SceneGISPlanarPolygonGeometry({
+        positions: ring(
+          ((id % 32) - 16) * 5,
+          (Math.floor(id / 32) - 16) * 5,
+          1.5,
+        ),
+      }),
+      attributes: attributes(
+        (id % 2 === 0 ? Color.RED : Color.BLUE).withAlpha(0.5),
+      ),
+    }));
+    const expected = baseline([instances[528]]);
+    const primitive = add(instances);
+    expect(render()).toEqual(expected);
+    expect(pick()).toEqual({ primitive, id: 528 });
+    const commands = primitive._currentCommands;
+    expect(commands.colorCommands.length).toBe(1);
+    expect(commands.stencilCommands.length).toBe(1);
+    expect(commands.pickColorCommands.length).toBe(1);
+    expect(commands.pickStencilCommands.length).toBe(1);
+    const current = primitive._current;
+    const va = current._va[0];
+    const command = commands.colorCommands[0];
+    expect(current._va.length).toBe(1);
+    primitive.getGeometryInstanceAttributes(528).color =
+      ColorGeometryInstanceAttribute.toValue(Color.CYAN);
+    expect(render()[1]).toBeGreaterThan(100);
+    primitive.getGeometryInstanceAttributes(528).show = new Uint8Array([0]);
+    expect(render().slice(0, 3)).toEqual([0, 0, 0]);
+    expect(pick()?.primitive).not.toBe(primitive);
+    view(5, 0, true);
+    expect(render()[2]).toBeGreaterThan(100);
+    expect(pick()).toEqual({ primitive, id: 529 });
+    expect(primitive._current).toBe(current);
+    expect(current._va[0]).toBe(va);
+    expect(commands.colorCommands[0]).toBe(command);
+    expect(commands.colorCommands.length).toBe(1);
+    scene.primitives.remove(primitive);
+    expect(va.isDestroyed()).toBeTrue();
+  });
+
+  it("keeps projected volumes isolated through low views and linear/log depth on sloped terrain", async function () {
+    const instances = [
+      polygon(1),
+      {
+        ...polygon(2, 0, Color.BLUE),
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: ring(0, 6, 2),
+        }),
+      },
+    ];
+    const primitive = add(instances);
+    render();
+    const va = primitive._current._va[0];
+    const data = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array([-20, 20, -20, 20]),
+      width: 2,
+      height: 2,
+    });
+    world.terrainProvider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: -80,
+      maximumHeight: 80,
+      maximumLevel: 0,
+      errorEvent: new Event(),
+      getLevelMaximumGeometricError: () => 1,
+      requestTileGeometry: () => Promise.resolve(data),
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+    };
+    await pollToPromise(() => {
+      render();
+      return (
+        world.getTerrainHeight(new Cartesian3(center, center, 0)) !== undefined
+      );
+    });
+    for (const logarithmic of [false, true]) {
+      scene.logarithmicDepthBuffer = logarithmic;
+      for (const degrees of [85, 45, 10]) {
+        const angle = (degrees * Math.PI) / 180;
+        const s = Math.sin(angle);
+        const c = Math.cos(angle);
+        for (const [y, id, channel] of [
+          [0, 1, 0],
+          [6, 2, 2],
+        ]) {
+          scene.camera.setView({
+            destination: new Cartesian3(center, center + y - 10 * c, 10 * s),
+            orientation: {
+              direction: new Cartesian3(0, c, -s),
+              up: new Cartesian3(0, s, c),
+            },
+          });
+          const pixel = render();
+          expect(pixel[channel]).toBeGreaterThan(200);
+          expect(pixel[2 - channel]).toBeLessThan(10);
+          expect(pick()).toEqual({ primitive, id });
+        }
+      }
+    }
+    expect(primitive._currentCommands.colorCommands.length).toBe(1);
+    expect(primitive._currentCommands.pickColorCommands.length).toBe(1);
+    expect(primitive._current._va[0]).toBe(va);
+  });
+
+  it("keeps concavities, holes, adjacent edges and transparent layers with independent picking", function () {
+    const concave = {
+      id: 1,
+      geometry: new SceneGISPlanarPolygonGeometry({
+        positions: [
+          [-3, -3],
+          [3, -3],
+          [3, -1],
+          [-1, -1],
+          [-1, 3],
+          [-3, 3],
+        ].map(([x, y]) => new Cartesian3(center + x, center + y, 0)),
+      }),
+      attributes: attributes(Color.RED.withAlpha(0.5)),
+    };
+    const adjacent = {
+      ...polygon(2, 5, Color.BLUE.withAlpha(0.5)),
+      geometry: new SceneGISPlanarPolygonGeometry({ positions: ring(5, 0, 2) }),
+    };
+    const holed = polygon(3, -8, Color.GREEN, [ring(-8, 0, 0.75).reverse()]);
+    const primitive = add([concave, adjacent, holed]);
+    for (const [x, y, id] of [
+      [0, 0, undefined],
+      [-2, 0, 1],
+      [4, 0, 2],
+      [-8, 0, undefined],
+      [-9.5, 0, 3],
+    ]) {
+      view(x, y, true);
+      render();
+      if (id === undefined) {
+        expect(pick()?.id)
+          .withContext(`Outside footprint at ${x}, ${y}`)
+          .toBeUndefined();
+      } else {
+        expect(pick()).toEqual({ primitive, id });
+      }
+    }
+    expect(primitive._currentCommands.colorCommands.length).toBe(1);
+    expect(primitive._currentCommands.pickColorCommands.length).toBe(1);
+    scene.primitives.remove(primitive);
+    view(0, 0, true);
+    const instances = [
+      polygon(1, 0, Color.RED.withAlpha(0.5)),
+      polygon(2, 4, Color.GREEN.withAlpha(0.5)),
+      polygon(3, 1, Color.BLUE.withAlpha(0.5)),
+    ];
+    const expected = baseline(instances);
+    const layered = add(instances);
+    expect(render()).toEqual(expected);
+    expect(layered._currentCommands.colorCommands.length).toBe(2);
+    expect(pick()).toEqual({ primitive: layered, id: 3 });
+  });
+
+  it("keeps a single area's hole empty from an oblique view for either ring winding", function () {
+    view(0, 0, true);
+    for (const reverseOuter of [false, true]) {
+      for (const reverseHole of [false, true]) {
+        const outer = ring(0, 0, 2);
+        const hole = ring(0, 0, 0.75);
+        const primitive = scene.primitives.add(
+          new SceneGISPlanarGroundPrimitive({
+            world,
+            geometry: new SceneGISPlanarPolygonGeometry({
+              positions: reverseOuter ? outer.reverse() : outer,
+              holes: [reverseHole ? hole.reverse() : hole],
+            }),
+            id: "hole",
+            appearance: new PerInstanceColorAppearance({ flat: true }),
+            attributes: attributes(Color.GREEN),
+          }),
+        );
+        expect(render().slice(0, 3))
+          .withContext(`${reverseOuter},${reverseHole}`)
+          .toEqual([0, 0, 0]);
+        expect(pick()?.id)
+          .withContext(`${reverseOuter},${reverseHole}`)
+          .toBeUndefined();
+        scene.primitives.remove(primitive);
+      }
+    }
+  });
+
   it("batches crossing lines with different origins, widths, and colors", function () {
     const lines = [
       {

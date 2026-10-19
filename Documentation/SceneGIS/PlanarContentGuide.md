@@ -188,9 +188,11 @@ const groundBatch = scene.primitives.add(
 - 坐标只消费 XY，Z 自动贴合当前平面地形；不接受实例或批次 modelMatrix。Provider/LOD 变化不重建几何。
 - 一批共享 Primitive、VA 和 BatchTable。贴地线读取地表深度并按线段范围逐片元裁剪；不同颜色、宽度和
   透明度可共用每 VA 一条颜色命令，拾取使用相同裁剪与独立 ID，无逐实例 stencil 命令。
-  线的 width 在实际地表位置计算，provider 改变只更新 envelope；要求 Context 支持 depth texture。
-- 不同颜色与半透明贴地面仍保留逐实例 stencil/color 范围；连续相同不透明颜色的面每组最多 15 个，
-  以免重叠闭体使 stencil 计数回绕。面的拾取仍逐实例隔离，不按颜色重排透明面。
+  线的 width 在实际地表位置计算，provider 改变只更新 envelope；线和面均要求 Context 支持 depth texture。
+- 贴地面按输入顺序、VA 与 XY 包围范围分组。范围内部不相交的面，无论颜色和透明度，都共用一对
+  stencil/fill 命令；拾取也共用这对命令，每个对象保留独立 ID。颜色/显隐仍通过实例属性更新。
+  相交区域保留覆盖与透明叠加顺序；同色不透明的相交面仍可在最多 15 个闭体的容量内合并 render。
+  包围范围相交的凹面即使实际轮廓不交也可能分组；完全重叠的异色/透明面仍需逐对象命令。
 - 超过 65535 顶点的贴地面批次要求 uint element indices；不支持该能力的 Context 会在 GPU 分配前拒绝，
   SDK 可按空间区域构建较小批次。线沿用原生索引拆分。每 VA 命令可在多个 frustum 中执行，
   command 数不包含场景共用的深度复制、合成等开销。

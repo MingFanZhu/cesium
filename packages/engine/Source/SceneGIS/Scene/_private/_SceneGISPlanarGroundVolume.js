@@ -43,11 +43,33 @@ function createPolygonVolume(geometry, batchOrigin) {
   const values = [];
   const indices = [];
   const flattened = source.rings.flat();
+  const extent = {
+    minX: Infinity,
+    minY: Infinity,
+    maxX: -Infinity,
+    maxY: -Infinity,
+  };
+  for (const point of flattened) {
+    extent.minX = Math.min(extent.minX, point.x);
+    extent.minY = Math.min(extent.minY, point.y);
+    extent.maxX = Math.max(extent.maxX, point.x);
+    extent.maxY = Math.max(extent.maxY, point.y);
+  }
+  const extentValues = [];
   const bottom = new Array(flattened.length);
   const top = new Array(flattened.length);
   for (let i = 0; i < flattened.length; ++i) {
     bottom[i] = addVertex(values, flattened[i], -0.5, origin);
     top[i] = addVertex(values, flattened[i], 0.5, origin);
+    for (let j = 0; j < 2; j++) {
+      // Subtract world coordinates in DOUBLE before storing relative FLOAT data.
+      extentValues.push(
+        extent.minX - flattened[i].x,
+        extent.minY - flattened[i].y,
+        extent.maxX - extent.minX,
+        extent.maxY - extent.minY,
+      );
+    }
   }
   for (let i = 0; i < source.topTriangles.length; i += 3) {
     const a = source.topTriangles[i];
@@ -64,16 +86,20 @@ function createPolygonVolume(geometry, batchOrigin) {
     indices.push(top[a], top[b], top[c], bottom[a], bottom[c], bottom[b]);
   }
   let offset = 0;
-  for (const ring of source.rings) {
+  for (let r = 0; r < source.rings.length; r++) {
+    const ring = source.rings[r];
     let area = 0.0;
     for (let i = 0; i < ring.length; ++i) {
       const next = ring[(i + 1) % ring.length];
-      area += ring[i].x * next.y - next.x * ring[i].y;
+      area +=
+        (ring[i].x - ring[0].x) * (next.y - ring[0].y) -
+        (next.x - ring[0].x) * (ring[i].y - ring[0].y);
     }
     for (let i = 0; i < ring.length; ++i) {
       const a = offset + i;
       const b = offset + ((i + 1) % ring.length);
-      if (area > 0.0) {
+      // Inner walls must face the hole, opposite to the outer boundary walls.
+      if (area > 0.0 === (r === 0)) {
         indices.push(bottom[a], bottom[b], top[b], bottom[a], top[b], top[a]);
       } else {
         indices.push(bottom[a], top[b], bottom[b], bottom[a], top[a], top[b]);
@@ -81,7 +107,14 @@ function createPolygonVolume(geometry, batchOrigin) {
     }
     offset += ring.length;
   }
-  return { values, indices, origin, footprintPoints: flattened };
+  return {
+    values,
+    indices,
+    origin,
+    extent,
+    extentValues,
+    footprintPoints: flattened,
+  };
 }
 
 function joinNormal(ax, ay, bx, by) {
@@ -241,6 +274,13 @@ SceneGISPlanarGroundVolume.create = function (world, geometry, batchOrigin) {
       values: typedValues,
     }),
   });
+  if (data.extentValues !== undefined) {
+    attributes.groundExtents = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 4,
+      values: new Float32Array(data.extentValues),
+    });
+  }
   if (data.nextValues !== undefined) {
     attributes.incomingDirection = new GeometryAttribute({
       componentDatatype: ComponentDatatype.FLOAT,
@@ -287,6 +327,7 @@ SceneGISPlanarGroundVolume.create = function (world, geometry, batchOrigin) {
     envelope,
     origin: data.origin,
     width: data.width,
+    extent: data.extent,
     presentationBounds: createPresentationBounds(data.footprintPoints),
   };
 };

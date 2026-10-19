@@ -337,21 +337,43 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
     }).toThrowDeveloperError();
   });
 
-  it("rejects missing depth textures before creating a ground line candidate", function () {
-    const primitive = line();
-    world.update(scene.frameState);
+  it("rejects missing depth textures before creating ground line or area candidates", function () {
+    const primitives = [
+      line(),
+      new SceneGISPlanarGroundPrimitive({
+        world,
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: [
+            new Cartesian3(-1, -1),
+            new Cartesian3(1, -1),
+            new Cartesian3(0, 1),
+          ],
+        }),
+        appearance: new PerInstanceColorAppearance({ flat: true }),
+        attributes: {
+          color: ColorGeometryInstanceAttribute.fromColor(Color.RED),
+        },
+        id: "area",
+      }),
+    ];
+    const frameState = scene.frameState;
+    world.update(frameState);
     const context = scene.context;
     const depthTexture = context._depthTexture;
     const webgl2 = context._webgl2;
     try {
       context._depthTexture = context._webgl2 = false;
       expect(SceneGISPlanarGroundPrimitive.isSupported(scene)).toBeFalse();
-      expect(() => primitive.update(scene.frameState)).toThrowDeveloperError();
-      expect(primitive._current).toBeUndefined();
+      for (const primitive of primitives) {
+        expect(() => primitive.update(frameState)).toThrowDeveloperError();
+        expect(primitive._current).toBeUndefined();
+      }
     } finally {
       context._depthTexture = depthTexture;
       context._webgl2 = webgl2;
-      primitive.destroy();
+      for (const primitive of primitives) {
+        primitive.destroy();
+      }
     }
   });
 });

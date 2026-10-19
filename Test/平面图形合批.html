@@ -63,7 +63,7 @@
       </p>
       <select id="kind" aria-label="图形类型">
         <option value="ordinary">普通面 · 独立颜色</option>
-        <option value="ground-area">贴地面 · 相同颜色</option>
+        <option value="ground-area">贴地面 · 独立颜色</option>
         <option value="ground-line">贴地线 · 独立颜色与宽度</option>
       </select>
       <button id="batch">使用合批</button>
@@ -127,9 +127,7 @@
                   }),
             attributes: {
               color: C.ColorGeometryInstanceAttribute.fromColor(
-                kind === "ground-area"
-                  ? C.Color.fromCssColorString("#43bec5")
-                  : C.Color.fromHsl((index % 32) / 40 + 0.05, 0.65, 0.55),
+                C.Color.fromHsl((index % 32) / 40 + 0.05, 0.65, 0.55),
               ),
               show: new C.ShowGeometryInstanceAttribute(true),
             },
@@ -239,7 +237,7 @@
           kind === "ordinary"
             ? "普通面共享几何与绘制命令。"
             : kind === "ground-area"
-              ? "相同不透明颜色的贴地面在模板计数容量内合并命令；改变颜色后自动重新分组，拾取仍逐对象隔离。"
+              ? "范围不相交的贴地面共享一条模板命令与一条颜色命令；每个对象可独立改色、显隐和拾取。重叠区域保留绘制顺序。"
               : "贴地线从地表深度判断每个片元的线段范围，独立颜色、宽度和拾取共用一个绘制命令，无逐对象模板命令。";
         document.querySelector("#picked").textContent = "点击图形查看业务 ID";
         document.querySelector("#toggle").textContent = "隐藏隔列";

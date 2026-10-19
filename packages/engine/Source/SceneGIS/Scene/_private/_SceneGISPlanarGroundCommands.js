@@ -1,3 +1,4 @@
+import RBush from "rbush";
 import BlendingState from "../../../Scene/BlendingState.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import DepthFunction from "../../../Scene/DepthFunction.js";
@@ -100,17 +101,19 @@ function syncBaseCommand(command, modelMatrix, boundingVolume) {
 /**
  * Creates the standard Primitive queue hook used by planar ground volumes.
  *
- * Area z-fail commands follow ClassificationPrimitive. Lines follow the
+ * Area z-fail commands and depth-reconstructed extent clipping follow
+ * ClassificationPrimitive and ShadowVolumeAppearance. Lines follow the
  * one-command-per-VA, depth-clipped volume role of GroundPolylinePrimitive at
  * upstream baseline
  * 6d5d8b1f0725b6f831b336463f4b11c98023427b. Recheck that source when its
  * stencil mask, depth function, or terrain-classification pass changes.
  *
  * @param {object} owner The public planar ground primitive.
+ * @param {object[]} extents The stable world XY extents in instance order.
  * @returns {object} The hook and stable derived command arrays.
  * @private
  */
-function createSceneGISPlanarGroundCommands(owner) {
+function createSceneGISPlanarGroundCommands(owner, extents) {
   const stencilCommands = [];
   const colorCommands = [];
   const pickStencilCommands = [];
@@ -120,50 +123,74 @@ function createSceneGISPlanarGroundCommands(owner) {
   let pickRenderState;
   let lineRenderState;
   let ranges;
+  let pickRanges;
   let rangesDirty = true;
+  let sourceUniformMap;
+  let stencilUniformMap;
+  let colorUniformMap;
 
-  function updateRanges(primitive) {
+  function buildRanges(primitive, mergeOpaque) {
     const instances = owner._batch.instances;
     const offsets = primitive._pickOffsets;
     const schema = instances[0].attributes.color;
     const mergeAreas =
-      owner._geometryKind === "polygon" &&
+      mergeOpaque &&
       schema.componentDatatype === ComponentDatatype.UNSIGNED_BYTE &&
       schema.normalize;
     const result = [];
+    const tree = new RBush();
     let run;
     let previousColor;
+    let sameColor = true;
     let count = 0;
     for (let i = 0; i < offsets.length; i++) {
       const offset = offsets[i];
       const color = mergeAreas
         ? primitive.getGeometryInstanceAttributes(instances[i].id).color
         : undefined;
-      // The classification bits count closed-volume crossings. A full wrap would
-      // erase coverage when all footprints overlap, even when their colors match.
-      const merge =
+      const extent = extents[i];
+      const matchesColor =
         mergeAreas &&
         color[3] === 255 &&
         previousColor !== undefined &&
-        count < StencilConstants.CLASSIFICATION_MASK &&
-        run.index === offset.index &&
-        run.offset + run.count === offset.offset &&
         color[0] === previousColor[0] &&
         color[1] === previousColor[1] &&
         color[2] === previousColor[2] &&
         color[3] === previousColor[3];
+      // Disjoint footprints never accumulate stencil counts at a surface point.
+      // Touching edges are allowed; only overlapping interiors require isolation.
+      const overlaps = tree
+        .search(extent)
+        .some(
+          (other) =>
+            extent.minX < other.maxX &&
+            extent.maxX > other.minX &&
+            extent.minY < other.maxY &&
+            extent.maxY > other.minY,
+        );
+      const merge =
+        run !== undefined &&
+        run.index === offset.index &&
+        run.offset + run.count === offset.offset &&
+        (!overlaps ||
+          (sameColor &&
+            matchesColor &&
+            count < StencilConstants.CLASSIFICATION_MASK));
       if (merge) {
         run.count += offset.count;
         count++;
+        sameColor &&= matchesColor;
       } else {
         run = { ...offset };
         result.push(run);
         count = 1;
+        sameColor = true;
+        tree.clear();
       }
+      tree.insert(extent);
       previousColor = color;
     }
-    ranges = result;
-    rangesDirty = false;
+    return result;
   }
 
   function updateAndQueue(
@@ -209,14 +236,29 @@ function createSceneGISPlanarGroundCommands(owner) {
     );
     colorRenderState ??= RenderState.fromCache(colorRenderStateOptions);
     pickRenderState ??= RenderState.fromCache(pickRenderStateOptions);
+    if (sourceUniformMap !== sourceColorCommands[0].uniformMap) {
+      sourceUniformMap = sourceColorCommands[0].uniformMap;
+      stencilUniformMap = {
+        ...sourceUniformMap,
+        u_sceneGISGroundAreaColor: () => false,
+      };
+      colorUniformMap = {
+        ...sourceUniformMap,
+        u_sceneGISGroundAreaColor: () => true,
+      };
+    }
     const batch = owner._batch !== undefined;
     if (batch && frameState.passes.render && rangesDirty) {
-      updateRanges(primitive);
+      ranges = buildRanges(primitive, true);
+      rangesDirty = false;
+    }
+    if (batch && pickRanges === undefined) {
+      pickRanges = buildRanges(primitive, false);
     }
     const activeRanges = batch
       ? frameState.passes.render
         ? ranges
-        : primitive._pickOffsets
+        : pickRanges
       : undefined;
     const length = activeRanges?.length ?? sourceColorCommands.length;
     if (frameState.passes.render) {
@@ -236,6 +278,7 @@ function createSceneGISPlanarGroundCommands(owner) {
         stencil.owner = owner;
         stencil.pass = Pass.TERRAIN_CLASSIFICATION;
         stencil.renderState = stencilDepthRenderState;
+        stencil.uniformMap = stencilUniformMap;
         stencil.cull = false;
         stencil.pickId = undefined;
         stencilCommands[i] = stencil;
@@ -244,6 +287,7 @@ function createSceneGISPlanarGroundCommands(owner) {
         color.owner = owner;
         color.pass = Pass.TERRAIN_CLASSIFICATION;
         color.renderState = colorRenderState;
+        color.uniformMap = colorUniformMap;
         color.cull = false;
         color.pickId = undefined;
         colorCommands[i] = color;
@@ -261,6 +305,7 @@ function createSceneGISPlanarGroundCommands(owner) {
         stencil.owner = owner;
         stencil.pass = Pass.TERRAIN_CLASSIFICATION;
         stencil.renderState = stencilDepthRenderState;
+        stencil.uniformMap = stencilUniformMap;
         stencil.cull = false;
         stencil.pickOnly = true;
         stencil.pickId = undefined;
@@ -270,6 +315,7 @@ function createSceneGISPlanarGroundCommands(owner) {
         color.owner = owner;
         color.pass = Pass.TERRAIN_CLASSIFICATION;
         color.renderState = pickRenderState;
+        color.uniformMap = colorUniformMap;
         color.cull = false;
         color.pickOnly = false;
         color.pickId = primitive.allowPicking ? "v_pickColor" : undefined;
