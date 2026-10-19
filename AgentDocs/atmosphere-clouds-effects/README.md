@@ -2,19 +2,24 @@
 
 ## Status
 
-- Latest standalone: [固定太阳白点显示校正](plans/2026-10-19-solar-white-balance.md) — implementation verified，负责人视觉判断保留。
+- Latest standalone: [综合环境矢量验收图层](plans/2026-10-19-integrated-vector-layer.md) — completed；2026-10-19 负责人视觉验收通过。
+  双世界按需加载 Bright 矢量，道路、水域、注记和立体建筑可验收；显隐、不透明度与底色可调。
+  [技术评审](reviews/2026-10-19-integrated-vector-layer.md)记录异步生命周期与原生地形选择器衔接。
+- Previous standalone: [固定太阳白点显示校正](plans/2026-10-19-solar-white-balance.md) — implementation verified，负责人视觉判断保留。
   默认开启的 `whiteBalance` 在双世界 HDR / LDR 共用 Bruneton 固定太阳白点；复用显示 pass。
   [技术评审](reviews/2026-10-19-solar-white-balance.md)；ADR-0169；唯一 upstream 增量为
   `Scene/PostProcessStageCollection.js`，复用 SGP-0044 / SGP-0046。
-  2026-10-19 负责人要求将已验证修复形成独立本地提交，不推送。
 - Previous standalone: [高度雾完整可见段积分](plans/2026-10-19-height-fog-visible-segment.md) — implementation verified，负责人视觉判断保留。
   移除双世界 300 km 介质截断，Globe 按误差上界裁剪稀薄尾部，每次最多 16 次密度采样；
   当前视角、连续高度 / 倾角、精度与资源验证见[技术评审](reviews/2026-10-19-height-fog-visible-segment.md)。
-  2026-10-19 负责人要求将已验证修复形成独立本地提交，不推送。
+- Current handoff: 2026-10-19 按负责人要求移除 MVT 专用水面，并将有效改动分项形成独立本地提交；不推送。
+  高度雾 checkpoint `8131844823`，白平衡 checkpoint `1ba75c7ce5`；矢量示例与撤销记录随本次收口提交。
+  综合环境水域保持普通 fill，保留原 WaterSurface；MVT 撤销记录见[矢量扩展索引](../vector-tiles/README.md)。
+  ion token 经负责人明确授权保留于示例，不在文档或测试复制凭据。高度雾默认开启已在此前 checkpoint 中交付。
 - Previous standalone checkpoint: [南京综合环境调试示例](plans/2026-10-19-integrated-environment-example.md) — completed。
   双世界 39 个环境参数、引擎默认值、原生 Clock/Timeline 和球面图层选择器；两项综合 E2E、目录检查、布局及生命周期验证通过。
   [示例评审](reviews/2026-10-19-integrated-environment-example.md)已完成；无产品或 upstream/SGP 改动。
-- Current handoff: 新入口 `Test/AdvancedEnvironment/综合环境.html?world=globe|planar` 已加入目录，可用于后续环境调试；未激活产品实现阶段。
+- Example handoff: 新入口 `Test/AdvancedEnvironment/综合环境.html?world=globe|planar` 已加入目录，可用于后续环境调试。
 - Previous standalone checkpoint: [Planar 超高空大气边界精度](plans/2026-10-15-planar-high-altitude-precision.md)
   — 2026-10-15 实现与技术验证完成，2026-10-16 负责人视觉验收通过；
   [技术评审](reviews/2026-10-15-planar-high-altitude-precision.md)保留两项已复现的基线 fixture 失败。
@@ -40,7 +45,8 @@
   before claiming a complete strict-validation suite pass; they do not reopen the
   accepted cloud quality work automatically.
 - Previous standalone plan: [程序星空](plans/2026-09-30-procedural-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
-- Latest technical review: [固定太阳白点显示校正](reviews/2026-10-19-solar-white-balance.md).
+- Latest technical review: [综合环境矢量验收图层](reviews/2026-10-19-integrated-vector-layer.md).
+- Previous technical review: [固定太阳白点显示校正](reviews/2026-10-19-solar-white-balance.md).
 - Previous technical review: [高度雾完整可见段积分](reviews/2026-10-19-height-fog-visible-segment.md).
 - Previous technical review: [Planar 超高空大气边界精度](reviews/2026-10-15-planar-high-altitude-precision.md).
 - Previous technical review: [Globe 近距离空气透视精度](reviews/2026-10-12-globe-near-aerial-precision.md).

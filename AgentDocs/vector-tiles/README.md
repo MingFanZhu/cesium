@@ -63,6 +63,10 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 
 ## Current handoff
 
+2026-10-19 负责人撤销 MVT 专用水面及自动水域材质方案。未提交的实现、专属示例、测试和过程文档已清除，
+保留原 `SceneGISWaterSurface`，综合环境中的矢量水域继续使用普通 `fill`。本项无待继续的实现或视觉 gate，
+不改变 D2 原有 gate，也未改变现有 SSE 选级与瓦片调度。
+
 2026-10-19 负责人确认按诊断方向修复文字放大与 fill 边缘模糊，保留 SSE、不增加俯角阈值。
 [有界修复计划](plans/2026-10-19-near-view-style-scale.md) completed，技术实现与
 [方法复审](reviews/2026-10-19-near-view-style-scale.md)已完成。负责人要求质疑方法后，

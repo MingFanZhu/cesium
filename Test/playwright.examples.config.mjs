@@ -6,6 +6,7 @@ export default defineConfig({
   testMatch: [
     "scenegis-feature-examples.spec.js",
     "scenegis-environment-examples.spec.js",
+    "scenegis-environment-vector.spec.js",
     "scenegis-rendering-reference.spec.js",
   ],
   outputDir: "../Build/Specs/e2e/feature-examples",

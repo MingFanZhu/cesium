@@ -2,6 +2,11 @@
 import * as C from "/Build/CesiumUnminified/index.js";
 import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
 import exposeExample from "/Test/example-lifecycle.js";
+import installVectorInspection from "./综合环境矢量.js";
+
+// Example ion credential retained at the project owner's request.
+C.Ion.defaultAccessToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxNzY3MjZlMi0xNTgyLTQ0NmMtOGUxOC1kY2RlMTlhOGNiOGYiLCJpZCI6Mzc3MzAsImlhdCI6MTY2MTQxMjg5M30.1QRdCE8ul5AzeUgD_WhkdTqcUJHZqiXVhkGeL80Vqfw";
 
 const planar =
   new URLSearchParams(window.location.search).get("world") === "planar";
@@ -12,15 +17,17 @@ const origin = new C.WebMercatorProjection().project(
 );
 const modeOptions = {};
 if (planar) {
+  // Online MVT uses the standard single-root Web Mercator tile matrix.
+  const halfWorld = Math.PI * 6378137;
   modeOptions.planarWorld = {
     crs: "EPSG:3857",
     extent: {
-      minimumX: origin.x - 200000,
-      minimumY: origin.y - 200000,
-      maximumX: origin.x + 200000,
-      maximumY: origin.y + 200000,
+      minimumX: -halfWorld,
+      minimumY: -halfWorld,
+      maximumX: halfWorld,
+      maximumY: halfWorld,
     },
-    maximumLevel: 0,
+    maximumLevel: 18,
   };
   modeOptions.baseLayerPicker = false;
 } else {
@@ -54,6 +61,13 @@ const viewer = new C.Viewer("map", {
 });
 const scene = viewer.scene;
 const effects = scene.environmentEffects;
+// The native picker disables terrain depth for Ellipsoid; active effects need it.
+const removeTerrainChanged =
+  scene.globe?.terrainProviderChanged.addEventListener(() => {
+    if (effects.enabled) {
+      scene.globe.depthTestAgainstTerrain = true;
+    }
+  });
 let environment;
 if (planar) {
   // Celestial reference is explicit, independent of the planar CRS.
@@ -191,6 +205,7 @@ const actions = {
 gui.add(actions, "home").name("回到南京视角");
 gui.add(actions, "reset").name("恢复环境默认值");
 gui.add(effects, "enabled").name("高级环境总开关").listen();
+const vectors = installVectorInspection(viewer, gui);
 for (const [title, ...fields] of groups) {
   const folder = gui.addFolder(title);
   for (const [property, label, ...range] of fields) {
@@ -239,12 +254,14 @@ const removeStatus = scene.postRender.addEventListener(() => {
 exposeExample(
   viewer,
   gui,
-  { effects, environment, defaults, displayDefaults, actions },
+  { effects, environment, defaults, displayDefaults, actions, vectors },
   () => {
     removeTick();
     removeStatus();
     removeError();
     removeRenderError();
+    removeTerrainChanged?.();
+    vectors.destroy();
     if (environment) {
       viewer.removeController(environment);
     }

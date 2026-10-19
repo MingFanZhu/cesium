@@ -30,6 +30,15 @@
       #error:empty {
         display: none;
       }
+      #vectorStatus {
+        font-size: 12px;
+      }
+      #vectorError {
+        color: #a00000;
+      }
+      #vectorError:empty {
+        display: none;
+      }
       @media (max-width: 700px) {
         aside {
           width: 270px;
@@ -57,9 +66,17 @@
           手动修改云时间后，从该值继续随时钟变化。
         </p>
         <p id="worldHelp"></p>
+        <p>
+          “矢量验收”可按需加载 OpenFreeMap Bright
+          的道路、水域、注记和立体建筑，需联网。
+          默认隐藏矢量底色，便于与原影像和地形对照；恢复环境默认值保留矢量设置。
+          <a href="../vector-tiles/reference/README.md">矢量数据与样式授权</a>
+        </p>
       </details>
       <p id="status" role="status">正在加载环境…</p>
       <p id="error" role="alert"></p>
+      <p id="vectorStatus" role="status"></p>
+      <p id="vectorError" role="alert"></p>
       <div id="controls"></div>
     </aside>
     <script>
