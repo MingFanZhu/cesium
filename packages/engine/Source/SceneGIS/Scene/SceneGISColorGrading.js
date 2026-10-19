@@ -202,13 +202,23 @@ SceneGISColorGrading.prototype.destroy = function () {
 };
 
 /** @private */
-SceneGISColorGrading._update = function (collection, useHdr) {
+SceneGISColorGrading._update = function (collection, useHdr, context) {
   const active = collection._sceneGISColorGrading?.enabled === true;
   if (active && !useHdr) {
     throw new RuntimeError("Color grading requires HDR.");
   }
   const bound = active ? collection._sceneGISColorGrading : undefined;
-  const changed = bound !== collection._sceneGISColorGradingBound;
+  const frameState = context.uniformState.frameState;
+  const environment =
+    frameState?._sceneGISGlobeLighting ?? frameState?._sceneGISPlanarLighting;
+  const solarAvailable = environment?.active === true;
+  const changed =
+    bound !== collection._sceneGISColorGradingBound ||
+    solarAvailable !==
+      (collection._sceneGISSolarWhiteBalanceAvailable === true);
+  collection._sceneGISSolarWhiteBalanceAvailable = solarAvailable;
+  collection._sceneGISSolarWhiteBalanceEnabled =
+    solarAvailable && environment.whiteBalance === true;
   collection._sceneGISColorGradingBound = bound;
   collection._sceneGISColorGradingActive = active;
   return changed;
@@ -216,17 +226,25 @@ SceneGISColorGrading._update = function (collection, useHdr) {
 
 /** @private */
 SceneGISColorGrading._configureStage = function (collection, stage) {
-  if (!collection._sceneGISColorGradingActive) {
+  if (
+    !collection._sceneGISColorGradingActive &&
+    !collection._sceneGISSolarWhiteBalanceAvailable
+  ) {
     return;
   }
-  const effect = collection._sceneGISColorGrading;
+  const effect = collection._sceneGISColorGradingActive
+    ? collection._sceneGISColorGrading
+    : undefined;
   // The collection calls this exactly once, before the fresh native stage's update.
   stage._fragmentShader = `#define SCENEGIS_COLOR_GRADING\n${shader}\n${stage.fragmentShader}`;
-  stage.uniforms.u_sceneGISWhiteBalance = () => whiteBalance(effect);
+  stage.uniforms.u_sceneGISSolarWhiteBalanceEnabled = () =>
+    collection._sceneGISSolarWhiteBalanceEnabled === true;
+  stage.uniforms.u_sceneGISWhiteBalance = () =>
+    effect ? whiteBalance(effect) : Matrix3.IDENTITY;
   stage.uniforms.u_sceneGISWhiteBalanceEnabled = () =>
-    effect.temperature !== 6500 || effect.tint !== 0;
-  stage.uniforms.u_sceneGISContrast = () => effect.contrast;
-  stage.uniforms.u_sceneGISSaturation = () => effect.saturation;
+    !!effect && (effect.temperature !== 6500 || effect.tint !== 0);
+  stage.uniforms.u_sceneGISContrast = () => effect?.contrast ?? 1;
+  stage.uniforms.u_sceneGISSaturation = () => effect?.saturation ?? 1;
 };
 
 export default SceneGISColorGrading;

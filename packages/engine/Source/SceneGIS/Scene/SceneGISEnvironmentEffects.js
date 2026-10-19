@@ -633,6 +633,7 @@ function SceneGISEnvironmentEffects(options) {
   }
   const enabled = options.enabled ?? false;
   const showAtmosphere = options.showAtmosphere ?? true;
+  const whiteBalance = options.whiteBalance ?? true;
   const showAerialPerspective = options.showAerialPerspective ?? true;
   const showHeightFog = options.showHeightFog ?? true;
   const showClouds = options.showClouds ?? true;
@@ -768,6 +769,7 @@ function SceneGISEnvironmentEffects(options) {
   //>>includeStart('debug', pragmas.debug);
   Check.typeOf.bool("options.enabled", enabled);
   Check.typeOf.bool("options.showAtmosphere", showAtmosphere);
+  Check.typeOf.bool("options.whiteBalance", whiteBalance);
   Check.typeOf.bool("options.showAerialPerspective", showAerialPerspective);
   Check.typeOf.bool("options.showHeightFog", showHeightFog);
   Check.typeOf.bool("options.showClouds", showClouds);
@@ -783,6 +785,7 @@ function SceneGISEnvironmentEffects(options) {
   this._world = world;
   this._enabled = enabled;
   this._showAtmosphere = showAtmosphere;
+  this._whiteBalance = whiteBalance;
   this._showAerialPerspective = showAerialPerspective;
   this._showHeightFog = showHeightFog;
   this._showClouds = showClouds;
@@ -862,6 +865,23 @@ function SceneGISEnvironmentEffects(options) {
 SceneGISEnvironmentEffects.isSupported = isSupported;
 
 Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
+  /**
+   * Whether final HDR/LDR display uses the fixed Earth solar-spectrum white point.
+   * Applies globally after scene composition, preserving atmospheric color changes.
+   * Does not estimate the current illuminant or alter lighting, exposure or imagery.
+   *
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   * @default true
+   */
+  whiteBalance: {
+    get: function () {
+      return this._whiteBalance;
+    },
+    set: function (value) {
+      setRenderBoolean(this, "_whiteBalance", value);
+    },
+  },
   /** @memberof SceneGISEnvironmentEffects.prototype @type {string} @readonly */
   mode: {
     get: function () {
@@ -1673,6 +1693,7 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {SceneGISPlanarWorld} [world] Required only for planar mode.
  * @property {boolean} [enabled=false] Whether advanced effects are active.
  * @property {boolean} [showAtmosphere=true] Whether to render atmosphere and Sun background.
+ * @property {boolean} [whiteBalance=true] Whether final HDR/LDR display uses the fixed Earth solar-spectrum white point.
  * @property {boolean} [showAerialPerspective=true] Whether to composite opaque geometry aerial perspective.
  * @property {boolean} [showHeightFog=true] Whether to apply single-layer exponential height fog.
  * @property {boolean} [showClouds=true] Whether to render the single-deck volumetric cloud core.

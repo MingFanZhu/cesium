@@ -95,6 +95,7 @@ const groups = [
     "天空与光照",
     ["showAtmosphere", "物理天空与太阳"],
     ["showAerialPerspective", "空气透视"],
+    ["whiteBalance", "太阳白平衡（HDR / LDR）"],
     ["backgroundRadianceScale", "天空亮度", 0, 64, 0.01],
     ["aerialRadianceScale", "空气透视亮度", 0, 64, 0.01],
     ["aerialPerspectiveDistanceScale", "空气透视距离倍率", 0, 8, 0.01],

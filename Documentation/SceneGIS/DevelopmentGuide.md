@@ -776,8 +776,8 @@ clearcoat 同样遵循 y；材质 metallic/roughness/normal/anisotropy 仍由原
 2026-10-17 起，Globe / Planar 的默认及显式环境均使用已验收的外观默认：
 backgroundRadianceScale=2.5、surfaceRadianceScale=1.2，空气透视 / 云的相对倍率仍为 1。
 HDR/LDR 切换不改变这些值。它们是艺术控制，不改变共同物理单位；需要中性倍率时显式
-设置为 1。HDR 和自动曝光默认关闭；显式 HDR 可设置手动 exposure，LDR 只裁剪并应用
-gamma，不进行曝光。调用方显式参数优先，不由默认环境覆盖。
+设置为 1。HDR 和自动曝光默认关闭；显式 HDR 可设置手动 exposure，LDR 在固定太阳白点
+校正后裁剪并应用 gamma，不进行曝光。调用方显式参数优先，不由默认环境覆盖。
 已有应用若需要旧外观，可显式指定原背景倍率（Globe 4 / Planar 10）及原地表倍率
 （自动环境 1 / 显式环境 10）；这仅恢复旧倍率，补齐光谱转换后不保证旧色彩逐像素相同。
 Earth LUT 的三波段结果按原实现 Sun / Sky 系数转换到线性 sRGB，并除以固定的
@@ -786,6 +786,14 @@ Earth LUT 的三波段结果按原实现 Sun / Sky 系数转换到线性 sRGB，
 该相对光度单位贯穿表面、大气、云和物理天空反射；不是直接向 HDR 缓冲写 lux。
 自定义 DirectionalLight、model lightColor、发光与注记仍接受原来的场景 RGB，不要自行
 再乘光谱转换系数。系数、单位和三波段近似边界见 ADR-0044。
+
+`scene.environmentEffects.whiteBalance` 默认 true，球面 / 平面及 HDR / LDR 共用
+Bruneton demo 的固定太阳光谱白点（ADR-0169）。它在显示曲线之前校正整幅画面，
+不增加绘制 pass；切换布尔值只更新 uniform，不重建环境或重置 history。
+综合环境示例的“天空与光照 → 太阳白平衡（HDR / LDR）”可直接开关比较。
+设为 false 可查看原始色彩；高级环境停用时也不再执行这项校正。
+它保留大气造成的日落暖色，不根据当前白屋顶或太阳高度强制归一，也不能消除影像中
+已经拍摄进去的光照。显式 HDR `SceneGISColorGrading` 的色温 / 色偏在此之后作用。
 
 AgX 可通过既有显示接口显式选择（ADR-0164 / SGP-0060）：
 

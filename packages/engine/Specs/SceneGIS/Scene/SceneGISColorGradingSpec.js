@@ -43,7 +43,7 @@ describe("SceneGIS/Scene/SceneGISColorGrading", function () {
       source: { width: 8, height: 8, arrayBufferView: data },
     });
     const stages = scene.postProcessStages;
-    stages.update(scene.context, false, true);
+    stages.update(scene.context, false, true, scene.highDynamicRange);
     stages.execute(
       scene.context,
       input,
@@ -225,5 +225,85 @@ describe("SceneGIS/Scene/SceneGISColorGrading", function () {
     render();
     scene.destroyForSpecs();
     expect(effect.isDestroyed()).toBe(true);
+  });
+
+  // Earth solar spectrum integrated to linear sRGB, normalized by its RGB mean.
+  const solarWhite = [
+    1.0824144146221106, 0.9675558806892958, 0.9500297046885936,
+  ];
+
+  it("applies the solar white point once before every HDR curve and LDR output in both worlds", function () {
+    const rgb = [0.12, 0.48, 1.8];
+    const balanced = rgb.map((v, i) => v / solarWhite[i]);
+    for (const key of ["_sceneGISGlobeLighting", "_sceneGISPlanarLighting"]) {
+      for (const hdr of [false, true]) {
+        scene.highDynamicRange = hdr;
+        for (const mapper of Object.values(Tonemapper)) {
+          scene.postProcessStages.tonemapper = mapper;
+          scene.frameState[key] = undefined;
+          const reference = render(balanced, 0.4);
+          scene.frameState[key] = { active: true, whiteBalance: true };
+          expect(render(rgb, 0.4)).toEqualEpsilon(reference, 1);
+          expect(reference[3]).toEqualEpsilon(102, 1);
+        }
+      }
+      scene.frameState[key] = undefined;
+    }
+  });
+
+  it("neutralizes solar white while retaining atmospheric sunset color and LDR exposure independence", function () {
+    scene.highDynamicRange = false;
+    scene.frameState._sceneGISGlobeLighting = {
+      active: true,
+      whiteBalance: true,
+    };
+    scene.postProcessStages.exposure = 20;
+    const pixel = render(solarWhite.map((v) => v * 0.18));
+    const expected = 255 * Math.pow(0.18, 1 / scene.gamma);
+    expect(pixel.slice(0, 3)).toEqualEpsilon([expected, expected, expected], 1);
+    expect(render([0, 0, 0], 0.6)).toEqualEpsilon([0, 0, 0, 153], 1);
+    const sunset = render([0.8, 0.12, 0.02]);
+    expect(sunset[0]).toBeGreaterThan(sunset[1]);
+    expect(sunset[1]).toBeGreaterThan(sunset[2]);
+  });
+
+  it("composes solar white balance before explicit camera grading", function () {
+    effect.enabled = true;
+    effect.temperature = 8000;
+    effect.tint = 0.2;
+    effect.contrast = 1.2;
+    effect.saturation = 0.8;
+    const rgb = [0.32, 0.15, 0.08];
+    const reference = render(rgb.map((v, i) => v / solarWhite[i]));
+    scene.frameState._sceneGISGlobeLighting = {
+      active: true,
+      whiteBalance: true,
+    };
+    expect(render(rgb)).toEqualEpsilon(reference, 1);
+  });
+
+  it("toggles solar white balance without rebuilding and restores output when its environment detaches", function () {
+    scene.highDynamicRange = false;
+    const rgb = [0.5, 0.3, 0.1];
+    const original = render(rgb);
+    const record = { active: true, whiteBalance: true };
+    scene.frameState._sceneGISGlobeLighting = record;
+    const balanced = render(rgb);
+    const stages = scene.postProcessStages;
+    const stage = stages._tonemapping;
+    const program = stage._command.shaderProgram;
+    const output = stages.outputTexture;
+    record.whiteBalance = false;
+    expect(render(rgb)).toEqual(original);
+    record.whiteBalance = true;
+    expect(render(rgb)).toEqual(balanced);
+    expect(stages._tonemapping).toBe(stage);
+    expect(stage._command.shaderProgram).toBe(program);
+    expect(stages.outputTexture).toBe(output);
+    expect(stages.length).toBe(0);
+    scene.frameState._sceneGISGlobeLighting = undefined;
+    expect(render(rgb)).toEqual(original);
+    expect(stage.isDestroyed()).toBe(true);
+    expect(stages._sceneGISSolarWhiteBalanceEnabled).toBe(false);
   });
 });

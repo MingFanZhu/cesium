@@ -5,7 +5,7 @@
       "id": "SGP-0044",
       "title": "Integrate optional HDR color grading with native tone curves",
       "status": "active",
-      "reason": "White balance and grading must consume exposed linear HDR before native compression without an additional color pass.",
+      "reason": "White balance and grading must consume exposed linear HDR before native compression without an additional color pass. ADR-0169 also feeds the active environment's fixed solar white point through the existing Context-aware grading hook, after selecting the HDR or LDR display source; LDR uses the same owned function without an extra pass.",
       "risk": "medium",
       "files": [
         {

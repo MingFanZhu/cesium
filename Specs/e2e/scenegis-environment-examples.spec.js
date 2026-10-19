@@ -154,6 +154,13 @@ for (const world of ["globe", "planar"]) {
       page.getByRole("button", { name: new RegExp(`${name}$`) });
     const control = (name) => page.getByLabel(name, { exact: true });
     await folder("天空与光照").click();
+    await control("太阳白平衡（HDR / LDR）").uncheck();
+    await page.waitForFunction(
+      () =>
+        window.example.effects.whiteBalance === false &&
+        window.example.viewer.scene.postProcessStages
+          ._sceneGISSolarWhiteBalanceEnabled === false,
+    );
     await control("天空亮度").fill("3.25");
     await control("天空亮度").press("Tab");
     expect(
@@ -199,7 +206,10 @@ for (const world of ["globe", "planar"]) {
       viewer.useDefaultRenderLoop = true;
       return values;
     });
-    expect(clock).toEqual([42, 45, 43, 43, 3643]);
+    // JulianDate's split-day arithmetic can introduce sub-nanosecond rounding.
+    [42, 45, 43, 43, 3643].forEach((expected, index) => {
+      expect(clock[index]).toBeCloseTo(expected, 9);
+    });
     await folder("体积云与云影").click();
     await folder("HDR 与曝光").click();
     await control("HDR 显示").check();

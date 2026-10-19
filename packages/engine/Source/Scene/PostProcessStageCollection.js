@@ -389,12 +389,12 @@ Object.defineProperties(PostProcessStageCollection.prototype, {
           break;
       }
 
-      // SCENEGIS_PATCH_BEGIN SGP-0044: Configure the fresh stage before uniforms and commands exist.
-      SceneGISColorGrading._configureStage(this, tonemapping);
-      // SCENEGIS_PATCH_END SGP-0044
       // SCENEGIS_PATCH_BEGIN SGP-0046: Configure before the fresh display stage creates GPU resources.
       SceneGISDeferredOutput.configure(this, tonemapping);
       // SCENEGIS_PATCH_END SGP-0046
+      // SCENEGIS_PATCH_BEGIN SGP-0044: Compose display white balance after selecting the HDR or LDR source.
+      SceneGISColorGrading._configureStage(this, tonemapping);
+      // SCENEGIS_PATCH_END SGP-0044
       if (useAutoExposure) {
         // SCENEGIS_PATCH_BEGIN SGP-0027: Resolve the current ping-pong result at draw time.
         const collection = this;
@@ -619,7 +619,11 @@ PostProcessStageCollection.prototype.update = function (
   const outputChanged = SceneGISDeferredOutput.update(this, useHdr, displayHdr);
   // SCENEGIS_PATCH_END SGP-0046
   // SCENEGIS_PATCH_BEGIN SGP-0044: Share variant rebuilding with SGP-0027 exposure preparation.
-  const gradingChanged = SceneGISColorGrading._update(this, displayHdr);
+  const gradingChanged = SceneGISColorGrading._update(
+    this,
+    displayHdr,
+    context,
+  );
   if (
     SceneGISAutoExposure.update(this, context, displayHdr) ||
     gradingChanged ||

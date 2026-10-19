@@ -1264,12 +1264,19 @@ GPU 不支持或 HDR 关闭时明确报错；不引入 pre-exposure、EV100 校�
 无额外纹理、FBO 或 pass；普通参数只更新 uniform，启停和原生 variant 变化可重建 stage。
 测光、TAA、光照和天空遮蔽保持独立；预设属于应用配置，不成为引擎隐式默认值。
 
+[ADR-0169](Decisions/ADR-0169-solar-white-balance.md) 在同一显示槽位增加环境固定太阳白点：
+`environmentEffects.whiteBalance` 默认 true，双世界共用 Bruneton demo 的太阳光谱积分白点，
+按 RGB 算术平均归一后逐通道校正。HDR 位于曝光之后、手动调色及 tone curve 之前；
+LDR 位于 clamp/gamma 之前。状态来自已有 active lighting record；停用环境恢复 identity。
+普通开关只更新 uniform，不增加 pass / 目标，不改变光传输、测光或 history。
+全场景颜色统一处理，包含注记 / unlit / emissive；不根据太阳角度或当前白材质自动校正。
+
 ## AgX HDR 显示曲线
 
 [ADR-0164](Decisions/ADR-0164-agx-hdr-display.md) / SGP-0060 在既有 Tonemapper 中增加
 `AGX`，由原生 collection 显示槽位选择自有 stage。沿用一次曝光、可选调色、一次输出 gamma
 及原生生命周期；AgX 内部 2.2 次幂属于返回线性 RGB，不能当作重复显示 gamma 删除。
-保持引擎 PBR Neutral / exposure=1、自动曝光默认关闭；LDR 仍只裁剪 / gamma。
+保持引擎 PBR Neutral / exposure=1、自动曝光默认关闭；LDR 在可选固定太阳白点校正后裁剪 / gamma。
 示例中的 AgX / exposure=10 是来源对照配置，不是太阳倍率或 EV100 标定。没有新增 pass / 目标。
 
 [ADR-0165](Decisions/ADR-0165-diffuse-ground-return-and-symbol-exposure.md)：矢量文字 / 图标
@@ -1283,7 +1290,7 @@ ADR-0044 的 2026-10-17 修订将验收外观提升为引擎默认：两个世�
 backgroundRadianceScale=2.5、surfaceRadianceScale=1.2、aerial / cloud 相对倍率 1 起步。
 这些是显式艺术默认，不改变共同物理单位；调用方可指定中性倍率 1 或其他受支持值。
 默认不随 HDR/LDR 或创建入口变化。HDR 和自动曝光默认关闭；显式 HDR 曝光 / tone
-mapping 与调用方设置保持独立，LDR 保留 clamp / gamma。
+mapping 与调用方设置保持独立，LDR 在固定太阳白点校正后保留 clamp / gamma。
 物理 LUT 保留三波段光谱传输，在 SceneGIS 包装边界按原实现 Sun / Sky 各自系数转为
 线性 sRGB，并共同除以固定日光参考单位 40000 cd/m²，见 ADR-0044。地表、大气、云和
 天空反射共用这一相对光度单位；透射率不转换，已有 RGB 灯光 / 材质不二次转换。

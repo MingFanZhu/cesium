@@ -63,3 +63,10 @@ build/types. Inspect Globe atmosphere and Planar vector pages and record bounded
 draw/byte evidence. Visual acceptance remains with the owner. If this aligned
 reference still fails the intended appearance, compare UE Sky Atmosphere and its
 physical-light/exposure conventions before changing transport or solar constants.
+
+## 2026-10-19 amendment: fixed solar white balance
+
+[ADR-0169](ADR-0169-solar-white-balance.md) adds the active environment's fixed
+solar white point before AgX or any other selected tone curve, and before LDR
+clamp/gamma. Exposure, curve choice and output gamma retain the same contract.
+No AgX implementation or SGP-0060 seam changes are required.

@@ -2524,6 +2524,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
   this._skyReflections ??= new SceneGISSkyReflections(this);
   const record = Object.freeze({
     active: true,
+    whiteBalance: this._owner._whiteBalance,
     skyReflections: this._skyReflections,
     atlasTexture:
       shadow?.outputFramebuffer.getColorTexture(0) ??

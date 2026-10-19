@@ -10341,11 +10341,12 @@ ${hardCascadeLibrary}`;
       }
     });
 
-    it(`validates ${mode} night ambient intensity and keeps it a warm uniform`, async function () {
+    it(`validates ${mode} night ambient intensity and solar white balance as warm state`, async function () {
       await connectControlledCloudMode(mode, () => {
         effects.showClouds = false;
       });
       expect(effects.nightAmbientIntensity).toBe(1.0);
+      expect(effects.whiteBalance).toBe(true);
       const options = {
         mode,
         world: mode === "planar" ? scene.world : undefined,
@@ -10356,6 +10357,16 @@ ${hardCascadeLibrary}`;
           nightAmbientIntensity: 0.5,
         }).nightAmbientIntensity,
       ).toBe(0.5);
+      expect(
+        new SceneGISEnvironmentEffects({ ...options, whiteBalance: false })
+          .whiteBalance,
+      ).toBe(false);
+      expect(
+        () => new SceneGISEnvironmentEffects({ ...options, whiteBalance: 1 }),
+      ).toThrowDeveloperError();
+      expect(() => {
+        effects.whiteBalance = 1;
+      }).toThrowDeveloperError();
       [-0.1, 8.1, NaN, Infinity, "0.5"].forEach((value) => {
         expect(
           () =>
@@ -10387,7 +10398,20 @@ ${hardCascadeLibrary}`;
         ).toBe(value);
       }
       effects.nightAmbientIntensity = 1;
-      expect(request).toHaveBeenCalledTimes(4);
+      const history = spyOn(effects._pipeline, "invalidateCloudHistory");
+      for (const value of [false, true, true]) {
+        effects.whiteBalance = value;
+        effects.update(scene, scene.frameState.time);
+        expect(
+          scene.frameState[
+            mode === "globe"
+              ? "_sceneGISGlobeLighting"
+              : "_sceneGISPlanarLighting"
+          ].whiteBalance,
+        ).toBe(value);
+      }
+      expect(history).not.toHaveBeenCalled();
+      expect(request).toHaveBeenCalledTimes(6);
       expect(fetch).not.toHaveBeenCalled();
       expect(compile).not.toHaveBeenCalled();
       expect(effects._pipeline._resources).toBe(resources);

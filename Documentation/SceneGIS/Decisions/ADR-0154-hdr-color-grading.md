@@ -47,3 +47,11 @@ street E2E and bounded GPU timing cover integration. Final appearance needs owne
 Presets are application configuration and remain in the example; the engine does not
 change lighting, exposure, time or select a look automatically. Global grading does not
 replace light transport, sky occlusion, local exposure or mixed-illuminant correction.
+
+## 2026-10-19 amendment: fixed solar white balance
+
+[ADR-0169](ADR-0169-solar-white-balance.md) reuses this display hook for the active
+environment's fixed solar white point in HDR and LDR. It precedes optional manual
+grading; the manual controller remains HDR-only and disabled by default. SGP-0044
+passes Context to preparation and follows SGP-0046's display-source selection.
+Without an active environment or manual controller, the native shader is unchanged.
