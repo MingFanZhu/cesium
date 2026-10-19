@@ -33,6 +33,7 @@
 - B4 checkpoint `c38d1e86a0`；B5 在 native combine 前按重叠前驱分层，非连续的互不相交面实现真正索引合批。
 - 512 个双层栈从 513 对命令降为 2 对，render/pick 均 4 条；透明混色、覆盖顺序、独立 ID/属性与重建通过。
 - Open discussions: None。
+- Latest evaluation: [精确轮廓合批](discussions/2026-10-19-exact-footprint-batching-evaluation.md)；CPU 精确不交不能直接放宽现有 Shader，已记录两条候选路径及实测成本，未启动下一 phase。
 - Latest review: [B5 review](reviews/2026-10-19-b5-ground-area-ordering.md)
 - Unresolved reviews: None。
 - 已知风险：同步首帧构建、整批剔除与重建；不自动合并 Entity。完全重叠的透明/异色面仍保留逐实例命令。
