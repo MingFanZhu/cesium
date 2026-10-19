@@ -103,7 +103,7 @@ EntityCollection。
 volume、Wall与PolylineVolume，不接受raw Cesium `Geometry`。Geometry构造器复制米制Cartesian3输入，默认以
 第一个规范化顶点的完整XYZ作为origin，并生成local DOUBLE geometry；可选origin同样必须finite。
 
-Polyline Geometry固定`ArcType.NONE`并配对使用`PolylineMaterialAppearance`的Color material。Polygon
+Polyline Geometry固定`ArcType.NONE`并配对使用`PolylineMaterialAppearance`的Color material 或 `PolylineColorAppearance`。Polygon
 Geometry只接受simple outer/direct holes，可选bottom/caps/sides，并配对使用flat
 `PerInstanceColorAppearance`与finite color instance attribute；outline是独立Polyline Geometry。Wrapper固定
 single synchronous standard `Primitive`，pick结果的primitive为public wrapper、required non-null id为
@@ -113,6 +113,65 @@ replacement，跨kind需新建wrapper。GeometryInstance attributes在首次Cont
 last-successful current分离；在normal render成功前，bounds、model matrix、pick/depth继续对应旧current。
 Geometry、Appearance、Material、id与输入attributes由调用方拥有；wrapper只拥有其内部snapshot与
 GPU资源。
+
+## 静态业务图形合批
+
+大量静态图形使用 `SceneGISPlanarPrimitive({ geometryInstances, appearance })`。
+实例采用与原生 `GeometryInstance` 相同的字段形状，直接传普通对象；不需要创建每对象 Primitive，
+也不需要调用私有 geometry factory。球面仍可使用原生 `Primitive({ geometryInstances })`。
+
+```js
+const instances = records.map((record) => ({
+  geometry: new Cesium.SceneGISPlanarPolygonGeometry({
+    positions: record.positions, // Already in the planar world's meter-based CRS.
+  }),
+  id: record,
+  attributes: {
+    color: Cesium.ColorGeometryInstanceAttribute.fromColor(record.color),
+    show: new Cesium.ShowGeometryInstanceAttribute(true),
+  },
+}));
+const batch = scene.primitives.add(
+  new Cesium.SceneGISPlanarPrimitive({
+    geometryInstances: instances,
+    appearance: new Cesium.PerInstanceColorAppearance({
+      flat: true,
+      translucent: false,
+    }),
+  }),
+);
+// After batch.ready becomes true:
+batch.getGeometryInstanceAttributes(records[0]).color =
+  Cesium.ColorGeometryInstanceAttribute.toValue(Cesium.Color.YELLOW);
+batch.getGeometryInstanceAttributes(records[1]).show =
+  Cesium.ShowGeometryInstanceAttribute.toValue(false);
+const sphere = batch.getBoundingSphere(new Cesium.BoundingSphere(), records[0]);
+// scene.pick returns { primitive: batch, id: originalRecord }.
+// Removing from an owning PrimitiveCollection destroys the batch's GPU resources.
+scene.primitives.remove(batch);
+```
+
+- 非空数组内每项有唯一、非空 `id`；所有实例必须具有相同 attributes 名称、类型、维度和 normalize。
+  在需要独立显隐时，为每项预先提供 `show`。共享一个 Appearance，按线、flat 面、open wall、closed 体分组；
+  Box/Cylinder/Ellipsoid/PolylineVolume 可以共用 closed non-flat `PerInstanceColorAppearance` 批次。
+- 普通线可用 `PolylineColorAppearance` 和每项 `color`，或共享 Color `PolylineMaterialAppearance`。
+  不透明 Color material 请显式设置 `translucent: false`，与 deferred opaque depth 状态保持一致；
+  半透明图形使用对应 translucent Appearance，并接受原生批次粒度的透明排序。
+- 每项 `modelMatrix` 在 geometry origin 周围应用；批次 `modelMatrix` 在世界坐标外层应用。
+  最终为 `batchMatrix * translation(origin) * instanceMatrix * localVertex`。坐标中间值为 DOUBLE，
+  由原生 Primitive 合并和 high/low 编码；完整大坐标不会先降成 Float32。
+- 输入列表、矩阵和 attributes 是构造快照；增删对象、改变几何或实例矩阵时重建该批次。
+  颜色、显隐等现有 instance attributes、整体 `modelMatrix` 和 `show` 更新复用 GPU 几何。
+  `geometry`/`id` 单实例快捷入口与数组互斥；数组模式不能通过 `.geometry` setter 改变拓扑。
+- `getBoundingSphere(result)` 返回整批包围球；传 id 返回对应实例包围球；未知 id 抛出 DeveloperError。
+  `getGeometryInstanceAttributes(id)` 的 id 在数组模式必需，未知 id 返回 undefined。
+- 按空间区域、Appearance、透明性及更新频率组织批次，不要把全部城市图形塞进一个批次。
+  原生索引拆分与透明 pass 可能产生多个 VA/command；目标是资源随批次增长，而非随业务对象增长。
+  初次构建仍同步，当前没有新增 Worker 或自动 Entity 合批。
+- `SceneGISPlanarGroundPrimitive` 仍为独立的贴地协议，本入口不改变其单实例限制。
+  原生 Point/Billboard/Label collection 已有共享渲染路径，Model 不属于此几何合批入口。
+
+完整决定见 [ADR-0168](Decisions/ADR-0168-planar-static-batching.md)。
 
 ## C7 普通体与面 Graphics
 
@@ -270,8 +329,8 @@ roles，不是 supported public API。C4 接入点由 `SGP-0001` 追踪；升级
   这是平面 adapter 的局部解释，不改原生 Rectangle 类，也不扩展 Camera 的 Rectangle 入口。
 - 在应用边界保留 finite meter-based Cartesian3，并显式记录所使用的 planar CRS。
 - 对需要确定 terrain 高度的离线或批处理流程，先使用显式 sampler，再写入 absolute position。
-- 大量静态内容优先按业务生命周期分组到少量`CustomDataSource`，通过collection add/remove控制批次；不要依赖
-  private visualizer、Buffer owner或underscore root export实现应用级batch API。
+- 大量普通静态线面/体优先使用上面的公开 `geometryInstances` 入口。`CustomDataSource` 只组织生命周期，
+  不会自动把现有逐 Entity 的线面/体合批；不要依赖 private visualizer、Buffer owner 或 underscore root export。
 - 动态更新只修改实际变化的Property；需要百万级专题数据、跨Entity geometry merge或空间索引时，应建立独立
   扩展，而不是继续扩大首版Entity compatibility adapter。
 - 不要使用 `Scene.getHeight/updateHeight`、`scene.pickPosition` 或 `world.pickTerrain` 替代 Entity

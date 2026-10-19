@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面静态图形合批</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #view {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      #panel {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        width: 320px;
+        padding: 18px;
+        color: #e8edf6;
+        background: #102136ed;
+        border: 1px solid #42607c;
+        border-radius: 8px;
+        font:
+          14px/1.6 system-ui,
+          sans-serif;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 20px;
+      }
+      button {
+        margin: 4px 4px 4px 0;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+      output {
+        display: block;
+        white-space: pre-line;
+        margin-top: 10px;
+      }
+      p {
+        margin: 8px 0;
+        color: #b4c7dc;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="view"></div>
+    <section id="panel">
+      <h1>平面静态图形合批</h1>
+      <p>
+        1024
+        个独立业务面，位于两千万米坐标附近。点击图形可单独改色；两种组织方式使用同一份数据。
+      </p>
+      <button id="batch">使用合批</button>
+      <button id="individual">逐对象对照</button>
+      <button id="toggle">隐藏隔列</button>
+      <button id="home">恢复视角</button>
+      <output id="stats">正在初始化…</output>
+      <output id="picked">点击图形查看业务 ID</output>
+      <p>计时为本机 CPU 构建与提交耗时，不代表 GPU 完成时间或跨设备性能。</p>
+    </section>
+    <script type="module">
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const center = 20000000;
+      const world = new C.SceneGISPlanarWorld({
+        coordinateSystem: new C.SceneGISPlanarCoordinateSystem({
+          crs: "EPSG:3857",
+          extent: new C.SceneGISPlanarExtent({
+            minimumX: center - 400,
+            minimumY: center - 400,
+            maximumX: center + 400,
+            maximumY: center + 400,
+          }),
+        }),
+        maximumLevel: 0,
+        baseColor: C.Color.fromCssColorString("#182b42"),
+      });
+      const widget = new C.CesiumWidget("view", {
+        world,
+        useDefaultRenderLoop: false,
+        skyBox: false,
+        skyAtmosphere: false,
+      });
+      const scene = widget.scene;
+      scene.msaaSamples = 1;
+      const collection = scene.primitives.add(new C.PrimitiveCollection());
+      const records = Array.from({ length: 1024 }, (_, index) => {
+        const x = center + ((index % 32) - 16) * 12;
+        const y = center + (Math.floor(index / 32) - 16) * 12;
+        return {
+          id: { index, name: `业务面 ${index}` },
+          geometry: new C.SceneGISPlanarPolygonGeometry({
+            positions: [
+              new C.Cartesian3(x, y, 1),
+              new C.Cartesian3(x + 9, y, 1),
+              new C.Cartesian3(x + 9, y + 9, 1),
+              new C.Cartesian3(x, y + 9, 1),
+            ],
+          }),
+          attributes: {
+            color: C.ColorGeometryInstanceAttribute.fromColor(
+              C.Color.fromHsl((index % 32) / 40 + 0.05, 0.65, 0.55),
+            ),
+            show: new C.ShowGeometryInstanceAttribute(true),
+          },
+        };
+      });
+      let owners = [];
+      let hidden = false;
+      function home() {
+        scene.camera.setView({
+          destination: new C.Cartesian3(center - 6, center - 300, 530),
+          orientation: {
+            direction: new C.Cartesian3(0, 0.5, -0.866025403784),
+            up: new C.Cartesian3(0, 0.866025403784, 0.5),
+          },
+        });
+      }
+      function frame() {
+        widget.resize();
+        widget.render();
+      }
+      function build(useBatch) {
+        collection.removeAll();
+        owners = [];
+        hidden = false;
+        const start = performance.now();
+        const appearance = new C.PerInstanceColorAppearance({
+          flat: true,
+          translucent: false,
+        });
+        if (useBatch) {
+          const primitive = collection.add(
+            new C.SceneGISPlanarPrimitive({
+              geometryInstances: records,
+              appearance,
+            }),
+          );
+          owners = records.map(() => primitive);
+        } else {
+          owners = records.map((record) =>
+            collection.add(
+              new C.SceneGISPlanarPrimitive({ ...record, appearance }),
+            ),
+          );
+        }
+        frame();
+        const initialMs = performance.now() - start;
+        const samples = [];
+        for (let i = 0; i < 30; i++) {
+          const start = performance.now();
+          frame();
+          if (i >= 10) {
+            samples.push(performance.now() - start);
+          }
+        }
+        samples.sort((a, b) => a - b);
+        const unique = [...new Set(owners)];
+        // Private counters are diagnostic evidence for this example only.
+        const result = {
+          mode: useBatch ? "合批" : "逐对象",
+          objects: records.length,
+          primitives: unique.length,
+          vertexArrays: unique.reduce(
+            (sum, owner) => sum + owner._current._va.length,
+            0,
+          ),
+          colorCommands: unique.reduce(
+            (sum, owner) => sum + owner._current._colorCommands.length,
+            0,
+          ),
+          initialMs,
+          medianMs: samples[10],
+          p95Ms: samples[19],
+        };
+        document.querySelector("#stats").textContent =
+          `${result.mode} · ${result.objects} 个对象\nPrimitive / VA / 颜色命令：${result.primitives} / ${result.vertexArrays} / ${result.colorCommands}\n首次构建与提交：${initialMs.toFixed(1)} ms\n20 帧提交 median / P95：${result.medianMs.toFixed(2)} / ${result.p95Ms.toFixed(2)} ms`;
+        document.querySelector("#picked").textContent = "点击图形查看业务 ID";
+        document.querySelector("#toggle").textContent = "隐藏隔列";
+        return result;
+      }
+      function toggle() {
+        hidden = !hidden;
+        for (let i = 0; i < records.length; i += 2) {
+          owners[i].getGeometryInstanceAttributes(records[i].id).show =
+            C.ShowGeometryInstanceAttribute.toValue(!hidden);
+        }
+        document.querySelector("#toggle").textContent = hidden
+          ? "显示全部"
+          : "隐藏隔列";
+        frame();
+      }
+      const handler = new C.ScreenSpaceEventHandler(scene.canvas);
+      handler.setInputAction((event) => {
+        const picked = scene.pick(event.position);
+        if (picked?.id?.index === undefined) {
+          return;
+        }
+        picked.primitive.getGeometryInstanceAttributes(picked.id).color =
+          C.ColorGeometryInstanceAttribute.toValue(C.Color.WHITE);
+        document.querySelector("#picked").textContent =
+          `${picked.id.name} 已改为白色`;
+        frame();
+      }, C.ScreenSpaceEventType.LEFT_CLICK);
+      document.querySelector("#batch").onclick = () => build(true);
+      document.querySelector("#individual").onclick = () => build(false);
+      document.querySelector("#toggle").onclick = toggle;
+      document.querySelector("#home").onclick = home;
+      home();
+      const initial = build(true);
+      widget.useDefaultRenderLoop = true;
+      window.planarBatchExample = { widget, records, build, toggle, initial };
+      window.addEventListener("pagehide", (event) => {
+        if (event.persisted || widget.isDestroyed()) {
+          return;
+        }
+        handler.destroy();
+        widget.destroy();
+        if (!world.isDestroyed()) {
+          world.destroy();
+        }
+      });
+    </script>
+  </body>
+</html>

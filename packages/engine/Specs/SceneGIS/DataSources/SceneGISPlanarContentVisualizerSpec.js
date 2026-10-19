@@ -43,11 +43,11 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
   const modelUrl = "./Data/Models/glTF-2.0/BoxTextured/glTF/BoxTextured.gltf";
   let scene;
 
-  beforeAll(function () {
+  beforeEach(function () {
     scene = createScene({ canvas: createCanvas(128, 128) });
   });
 
-  afterAll(function () {
+  afterEach(function () {
     scene.destroyForSpecs();
   });
 
@@ -315,6 +315,8 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
     world.getTerrainHeight = jasmine
       .createSpy("getTerrainHeight")
       .and.returnValue(4);
+    // Ground graphics require the scene-owned world and its surface depth.
+    scene._initializeWorld(world);
     const collection = new EntityCollection();
     const solid = new SceneGISPlanarSolidVisualizer(world, scene, collection);
     const area = new SceneGISPlanarAreaVisualizer(world, scene, collection);
@@ -564,7 +566,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarContentVisualizer", function () {
       expect(
         primitives.every((primitive) => primitive.isDestroyed()),
       ).toBeTrue();
-      world.destroy();
+      // The scene owns this world and releases it in afterEach.
     }
   });
 });

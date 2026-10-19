@@ -2,11 +2,13 @@ import BoundingSphere from "../../Core/BoundingSphere.js";
 import ComponentDatatype from "../../Core/ComponentDatatype.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import GeometryInstance from "../../Core/GeometryInstance.js";
+import GeometryPipeline from "../../Core/GeometryPipeline.js";
 import Matrix4 from "../../Core/Matrix4.js";
 import destroyObject from "../../Core/destroyObject.js";
 import Material from "../../Scene/Material.js";
 import PerInstanceColorAppearance from "../../Scene/PerInstanceColorAppearance.js";
 import PolylineMaterialAppearance from "../../Scene/PolylineMaterialAppearance.js";
+import PolylineColorAppearance from "../../Scene/PolylineColorAppearance.js";
 import Primitive from "../../Scene/Primitive.js";
 import ShadowMode from "../../Scene/ShadowMode.js";
 import validatePlanarShadowMode from "./_private/_SceneGISPlanarShadowMode.js";
@@ -81,12 +83,20 @@ function getGeometryKind(geometry) {
 
 function validateAppearance(kind, appearance, attributes) {
   if (kind === "polyline") {
+    if (appearance instanceof PolylineColorAppearance) {
+      if (attributes?.color?.value?.length !== 4) {
+        throw new DeveloperError(
+          "PolylineColorAppearance requires a color instance attribute.",
+        );
+      }
+      return;
+    }
     if (
       !(appearance instanceof PolylineMaterialAppearance) ||
       appearance.material?.type !== Material.ColorType
     ) {
       throw new DeveloperError(
-        "Polyline geometry requires a Color PolylineMaterialAppearance.",
+        "Polyline geometry requires PolylineColorAppearance or a Color PolylineMaterialAppearance.",
       );
     }
     return;
@@ -194,12 +204,12 @@ function cloneAttributes(attributes) {
   return result;
 }
 
-function prepareCandidateAttributes(wrapper) {
-  const attributes = cloneAttributes(wrapper._attributes);
+function prepareCandidateAttributes(wrapper, source, id) {
+  const attributes = cloneAttributes(source);
   if (wrapper._current?.ready !== true) {
     return attributes;
   }
-  const current = wrapper._current.getGeometryInstanceAttributes(wrapper._id);
+  const current = wrapper._current.getGeometryInstanceAttributes(id);
   for (const name of Object.keys(attributes)) {
     const value = current[name];
     if (value === undefined || typeof value.slice !== "function") {
@@ -218,6 +228,81 @@ function computeWorldMatrix(geometry, modelMatrix, result) {
   return Matrix4.multiply(scratchTranslation, modelMatrix, result);
 }
 
+function snapshotInstances(options) {
+  if (
+    options.geometry !== undefined ||
+    options.id !== undefined ||
+    options.attributes !== undefined
+  ) {
+    throw new DeveloperError(
+      "geometryInstances cannot be combined with geometry, id, or attributes.",
+    );
+  }
+  const input = options.geometryInstances;
+  if (!Array.isArray(input) || input.length === 0) {
+    throw new DeveloperError("geometryInstances must be a non-empty array.");
+  }
+  const ids = new Set();
+  const boundsById = new Map();
+  let bounds;
+  const instances = input.map(function (source) {
+    validateGeometry(source?.geometry);
+    if (source.id === undefined || source.id === null || ids.has(source.id)) {
+      throw new DeveloperError(
+        "Each geometry instance must have a unique, non-null id.",
+      );
+    }
+    ids.add(source.id);
+    const attributes = cloneAttributes(source.attributes);
+    const geometryKind = getGeometryKind(source.geometry);
+    validateAppearance(geometryKind, options.appearance, attributes);
+    const modelMatrix = source.modelMatrix ?? Matrix4.IDENTITY;
+    validateMatrix(modelMatrix);
+    const instance = {
+      geometry: source.geometry,
+      id: source.id,
+      attributes,
+      modelMatrix: Matrix4.clone(modelMatrix),
+    };
+    source.geometry._getLocalBoundingSphere(scratchSphere);
+    computeWorldMatrix(source.geometry, modelMatrix, scratchWorldMatrix);
+    const sphere = BoundingSphere.transform(
+      scratchSphere,
+      scratchWorldMatrix,
+      new BoundingSphere(),
+    );
+    boundsById.set(source.id, sphere);
+    bounds =
+      bounds === undefined
+        ? BoundingSphere.clone(sphere)
+        : BoundingSphere.union(bounds, sphere, bounds);
+    return instance;
+  });
+  const first = instances[0].attributes;
+  const names = Object.keys(first);
+  for (let i = 1; i < instances.length; i++) {
+    const attributes = instances[i].attributes;
+    if (
+      Object.keys(attributes).length !== names.length ||
+      names.some(function (name) {
+        const attribute = attributes[name];
+        return (
+          attribute === undefined ||
+          attribute.componentDatatype !== first[name].componentDatatype ||
+          attribute.componentsPerAttribute !==
+            first[name].componentsPerAttribute ||
+          (attribute.normalize ?? false) !== (first[name].normalize ?? false)
+        );
+      })
+    ) {
+      throw new DeveloperError(
+        "Batched geometry instances must use the same attribute schema.",
+      );
+    }
+  }
+  return { instances, bounds, boundsById };
+}
+
 function ensureAlive(primitive) {
   if (primitive.isDestroyed()) {
     throw new DeveloperError("This SceneGISPlanarPrimitive was destroyed.");
@@ -225,40 +310,65 @@ function ensureAlive(primitive) {
 }
 
 function createInternal(wrapper, attributes) {
-  const instance = new GeometryInstance({
-    geometry: wrapper._geometry._createGeometry(),
-    id: wrapper._id,
-    pickPrimitive: wrapper,
-    attributes: cloneAttributes(attributes),
-  });
+  const batch = wrapper._batch;
+  const instance =
+    batch === undefined
+      ? new GeometryInstance({
+          geometry: wrapper._geometry._createGeometry(),
+          id: wrapper._id,
+          pickPrimitive: wrapper,
+          attributes: cloneAttributes(attributes),
+        })
+      : batch.instances.map(function (source, index) {
+          const instance = new GeometryInstance({
+            geometry: source.geometry._createGeometry(),
+            modelMatrix: computeWorldMatrix(
+              source.geometry,
+              source.modelMatrix,
+              new Matrix4(),
+            ),
+            id: source.id,
+            pickPrimitive: wrapper,
+            attributes: cloneAttributes(attributes[index]),
+          });
+          // Bake in DOUBLE precision before the native combine/high-low encoding path.
+          // Identity instance matrices also keep subsequent batch modelMatrix updates exact.
+          return GeometryPipeline.transformToWorldCoordinates(instance);
+        });
   const primitive = new Primitive({
     geometryInstances: instance,
     appearance: wrapper._appearance,
-    modelMatrix: computeWorldMatrix(
-      wrapper._geometry,
-      wrapper._modelMatrix,
-      new Matrix4(),
-    ),
+    modelMatrix:
+      batch === undefined
+        ? computeWorldMatrix(
+            wrapper._geometry,
+            wrapper._modelMatrix,
+            new Matrix4(),
+          )
+        : wrapper._modelMatrix,
     show: wrapper._show,
     shadows: wrapper._shadows,
     allowPicking: wrapper._allowPicking,
     asynchronous: false,
-    releaseGeometryInstances: false,
+    releaseGeometryInstances: batch !== undefined,
   });
   return primitive;
 }
 
 /**
- * Renders one supported planar geometry through Cesium's synchronous standard Primitive path.
+ * Renders a planar geometry or a static batch through Cesium's synchronous standard Primitive path.
+ * Batch topology and instance transforms are construction snapshots; create a new primitive to change them.
+ * Group instances spatially and by compatible appearance to bound synchronous construction and culling costs.
  *
  * @alias SceneGISPlanarPrimitive
  * @constructor
  * @param {object} options Object with the following properties:
- * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry} options.geometry The planar geometry snapshot.
- * @param {PolylineMaterialAppearance|PerInstanceColorAppearance} options.appearance The compatible caller-owned appearance.
- * @param {*} options.id The non-null caller-owned pick identifier.
- * @param {Object.<string, GeometryInstanceAttribute>} [options.attributes] Geometry instance attributes with valid component datatype, one to four components, boolean normalization, and one complete finite value.
- * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] A finite affine local transform.
+ * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry} [options.geometry] The planar geometry snapshot. Required unless geometryInstances is supplied.
+ * @param {SceneGISPlanarPrimitive.GeometryInstanceOptions[]} [options.geometryInstances] A non-empty static batch. Mutually exclusive with geometry, id, and attributes. Instances must share a compatible appearance and identical attribute schemas.
+ * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance} options.appearance The compatible caller-owned appearance.
+ * @param {*} [options.id] The required non-null pick identifier for the single-geometry form.
+ * @param {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [options.attributes] Geometry instance attributes with valid component datatype, one to four components, boolean normalization, and one complete finite value.
+ * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] A finite affine transform. Applied around the geometry origin for a single geometry, or to world coordinates for a batch.
  * @param {boolean} [options.show=true] Whether the primitive is shown.
  * @param {ShadowMode} [options.shadows=ShadowMode.DISABLED] Whether the primitive casts or receives geometry shadows.
  * @param {boolean} [options.allowPicking=true] Whether picking resources are created.
@@ -266,13 +376,21 @@ function createInternal(wrapper, attributes) {
  */
 function SceneGISPlanarPrimitive(options) {
   options = options ?? {};
-  validateGeometry(options.geometry);
-  const geometryKind = getGeometryKind(options.geometry);
-  if (options.id === undefined || options.id === null) {
-    throw new DeveloperError("id is required.");
+  const batch =
+    options.geometryInstances === undefined
+      ? undefined
+      : snapshotInstances(options);
+  let geometryKind;
+  let attributes;
+  if (batch === undefined) {
+    validateGeometry(options.geometry);
+    geometryKind = getGeometryKind(options.geometry);
+    if (options.id === undefined || options.id === null) {
+      throw new DeveloperError("id is required.");
+    }
+    attributes = cloneAttributes(options.attributes);
+    validateAppearance(geometryKind, options.appearance, attributes);
   }
-  const attributes = cloneAttributes(options.attributes);
-  validateAppearance(geometryKind, options.appearance, attributes);
   const modelMatrix = Matrix4.clone(options.modelMatrix ?? Matrix4.IDENTITY);
   validateMatrix(modelMatrix);
   const show = options.show ?? true;
@@ -281,6 +399,7 @@ function SceneGISPlanarPrimitive(options) {
     throw new DeveloperError("show and allowPicking must be boolean.");
   }
   this._geometry = options.geometry;
+  this._batch = batch;
   this._geometryKind = geometryKind;
   this._appearance = options.appearance;
   this._attributes = attributes;
@@ -296,6 +415,27 @@ function SceneGISPlanarPrimitive(options) {
   this._candidateRequired = true;
   this._context = undefined;
 }
+
+/**
+ * A construction-time planar geometry instance, using the native GeometryInstance option shape.
+ * The geometry and id remain caller-owned; attributes and modelMatrix are copied.
+ *
+ * @typedef {object} SceneGISPlanarPrimitive.GeometryInstanceOptions
+ * @property {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry} geometry The immutable planar geometry.
+ * @property {*} id A unique, non-null pick identifier within this batch.
+ * @property {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [attributes] Native per-instance attributes, such as color and show. Every instance must use the same schema.
+ * @property {Matrix4} [modelMatrix=Matrix4.IDENTITY] A finite affine transform around this geometry's origin. The world transform is batch.modelMatrix * translation(geometry.origin) * instance.modelMatrix.
+ */
+
+/**
+ * The structural attribute contract, including native color, show, distance, and custom attributes.
+ *
+ * @typedef {object} SceneGISPlanarPrimitive.InstanceAttribute
+ * @property {ComponentDatatype} componentDatatype The component datatype.
+ * @property {number} componentsPerAttribute The number of components, from one to four.
+ * @property {boolean} [normalize=false] Whether integer components are normalized.
+ * @property {number[]|Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array} value One complete instance value.
+ */
 
 Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
   /**
@@ -318,9 +458,10 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
   },
   /**
    * Gets or sets a planar geometry of the kind fixed at construction. Replacement is promoted on a normal render pass.
+   * Undefined for a batch; batch topology cannot be changed through this property.
    *
    * @memberof SceneGISPlanarPrimitive.prototype
-   * @type {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry}
+   * @type {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry|undefined}
    * @exception {DeveloperError} The value is not the construction-time geometry kind.
    */
   geometry: {
@@ -330,6 +471,11 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
     set: function (value) {
       ensureAlive(this);
+      if (this._batch !== undefined) {
+        throw new DeveloperError(
+          "Create a new primitive to replace batched geometry.",
+        );
+      }
       validateGeometry(value);
       if (getGeometryKind(value) !== this._geometryKind) {
         throw new DeveloperError(
@@ -351,7 +497,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
    * Gets or sets a caller-owned appearance compatible with the construction-time geometry kind.
    *
    * @memberof SceneGISPlanarPrimitive.prototype
-   * @type {PolylineMaterialAppearance|PerInstanceColorAppearance}
+   * @type {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance}
    * @exception {DeveloperError} The value is incompatible with the construction-time geometry kind or attributes.
    */
   appearance: {
@@ -361,7 +507,17 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
     set: function (value) {
       ensureAlive(this);
-      validateAppearance(this._geometryKind, value, this._attributes);
+      if (this._batch === undefined) {
+        validateAppearance(this._geometryKind, value, this._attributes);
+      } else {
+        for (const instance of this._batch.instances) {
+          validateAppearance(
+            getGeometryKind(instance.geometry),
+            value,
+            instance.attributes,
+          );
+        }
+      }
       if (value !== this._appearance) {
         this._appearance = value;
         this._candidateRequired = true;
@@ -369,7 +525,8 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
   },
   /**
-   * Gets or sets a finite affine transform applied around the geometry origin.
+   * Gets or sets a finite affine transform applied around the single geometry origin,
+   * or to the world coordinates of a batch. Does not rebuild geometry.
    *
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {Matrix4}
@@ -384,11 +541,15 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
       validateMatrix(value);
       Matrix4.clone(value, this._modelMatrix);
       if (this._current !== undefined) {
-        computeWorldMatrix(
-          this._currentGeometry,
-          this._modelMatrix,
-          this._current.modelMatrix,
-        );
+        if (this._batch !== undefined) {
+          Matrix4.clone(value, this._current.modelMatrix);
+        } else {
+          computeWorldMatrix(
+            this._currentGeometry,
+            this._modelMatrix,
+            this._current.modelMatrix,
+          );
+        }
       }
     },
   },
@@ -415,7 +576,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
     },
   },
   /**
-   * Gets the caller-owned pick identifier.
+   * Gets the caller-owned pick identifier for a single geometry. Undefined for a batch.
    *
    * @memberof SceneGISPlanarPrimitive.prototype
    * @type {*}
@@ -467,7 +628,12 @@ SceneGISPlanarPrimitive.prototype.update = function (frameState) {
         "SceneGISPlanarPrimitive requires a scene3DOnly frame state.",
       );
     }
-    const candidateAttributes = prepareCandidateAttributes(this);
+    const candidateAttributes =
+      this._batch === undefined
+        ? prepareCandidateAttributes(this, this._attributes, this._id)
+        : this._batch.instances.map((instance) =>
+            prepareCandidateAttributes(this, instance.attributes, instance.id),
+          );
     const candidate = createInternal(this, candidateAttributes);
     const commandList = frameState.commandList;
     const candidateCommands = [];
@@ -488,7 +654,13 @@ SceneGISPlanarPrimitive.prototype.update = function (frameState) {
     const old = this._current;
     this._current = candidate;
     this._currentGeometry = this._geometry;
-    this._attributes = candidateAttributes;
+    if (this._batch === undefined) {
+      this._attributes = candidateAttributes;
+    } else {
+      for (let i = 0; i < this._batch.instances.length; i++) {
+        this._batch.instances[i].attributes = candidateAttributes[i];
+      }
+    }
     this._candidateRequired = false;
     for (let i = 0; i < candidateCommands.length; i++) {
       commandList.push(candidateCommands[i]);
@@ -502,30 +674,49 @@ SceneGISPlanarPrimitive.prototype.update = function (frameState) {
 };
 
 /**
- * Gets the mutable attributes for the current geometry instance. Assigned supported values are preserved across same-kind replacement.
+ * Gets native mutable attributes for an instance. Assign values to the returned attribute properties
+ * to update the GPU without rebuilding geometry. Values survive compatible appearance replacement.
  *
- * @returns {object} The current geometry instance attributes.
+ * @param {*} [id] The instance identifier. Required for a batch; defaults to this.id for a single geometry.
+ * @returns {object|undefined} The current geometry instance attributes, or undefined when the id is not found.
  * @exception {DeveloperError} The primitive is destroyed or is not ready.
  */
-SceneGISPlanarPrimitive.prototype.getGeometryInstanceAttributes = function () {
+SceneGISPlanarPrimitive.prototype.getGeometryInstanceAttributes = function (
+  id,
+) {
   ensureAlive(this);
   if (!this.ready) {
     throw new DeveloperError("The primitive must be ready.");
   }
-  return this._current.getGeometryInstanceAttributes(this._id);
+  if (id === undefined && this._batch !== undefined) {
+    throw new DeveloperError("id is required for a batch.");
+  }
+  return this._current.getGeometryInstanceAttributes(id ?? this._id);
 };
 
 /**
  * Computes the current world-space bounding sphere.
  *
  * @param {BoundingSphere} result The object onto which to store the result.
+ * @param {*} [id] An optional batch instance identifier. Omit to get the entire primitive's sphere.
  * @returns {BoundingSphere} The modified result.
- * @exception {DeveloperError} The primitive is destroyed or result is invalid.
+ * @exception {DeveloperError} The primitive is destroyed, result is invalid, or the id is not found.
  */
-SceneGISPlanarPrimitive.prototype.getBoundingSphere = function (result) {
+SceneGISPlanarPrimitive.prototype.getBoundingSphere = function (result, id) {
   ensureAlive(this);
   if (!(result instanceof BoundingSphere)) {
     throw new DeveloperError("result is required.");
+  }
+  if (this._batch !== undefined) {
+    const bounds =
+      id === undefined ? this._batch.bounds : this._batch.boundsById.get(id);
+    if (bounds === undefined) {
+      throw new DeveloperError("The geometry instance id was not found.");
+    }
+    return BoundingSphere.transform(bounds, this._modelMatrix, result);
+  }
+  if (id !== undefined && id !== this._id) {
+    throw new DeveloperError("The geometry instance id was not found.");
   }
   const geometry = this._currentGeometry ?? this._geometry;
   geometry._getLocalBoundingSphere(scratchSphere);
@@ -554,6 +745,7 @@ SceneGISPlanarPrimitive.prototype.destroy = function () {
   this._current?.destroy();
   this._current = undefined;
   this._currentGeometry = undefined;
+  this._batch = undefined;
   return destroyObject(this);
 };
 

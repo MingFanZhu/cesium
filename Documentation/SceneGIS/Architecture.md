@@ -732,12 +732,21 @@ C4 baseline与persistent resource hard gates，只有可重复热点才允许在
 C6建立public `SceneGISPlanarPrimitive`、`SceneGISPlanarPolylineGeometry`与
 `SceneGISPlanarPolygonGeometry`。Public Geometry接收米制world Cartesian3 snapshot，自动以完整XYZ local
 origin重基并输出DOUBLE local geometry；Primitive wrapper内部只使用Cesium standard synchronous
-`Primitive`，固定single GeometryInstance，保留Appearance、attributes、picking、bounds、model matrix和GPU
+`Primitive`，C6 单实例入口保留Appearance、attributes、picking、bounds、model matrix和GPU
 lifecycle。Public model matrix是围绕geometry origin的local transform，最终matrix为
 `translation(origin) * modelMatrix`。只接受明确审计的SceneGIS geometry与Color Appearance pair，不宣布raw
 Cesium Geometry自动具有planar语义。Geometry变化使用normal-render candidate/current，pick/depth只复用last
 current；Context、replacement与destroy必须原子且exactly once。Polyline/Polygon Entity adapter复用同一public
 wrapper，不保留experimental Buffer双路径；width改为finite nonnegative number，0隐藏。完整决定见ADR-0018。
+
+ADR-0168 扩宽普通 wrapper 的单实例边界：`geometryInstances` 接收兼容 Appearance 的静态实例数组，
+复用原生 GeometryPipeline / Primitive 的 DOUBLE transform、combine、high/low encoding 与 BatchTable。
+每项保留唯一业务 id、attributes 与 origin-local modelMatrix；批次 modelMatrix 作用于世界坐标。
+不再为每个业务对象建立独立 Primitive。线可选 `PolylineColorAppearance` 实现独立颜色；attributes schema
+必须一致。拓扑与实例变换为构造快照，颜色/显隐通过 `getGeometryInstanceAttributes(id)` 更新；
+批次与单实例 bounds 通过 `getBoundingSphere(result, id)` 获取。初始化完成释放原生中间 GeometryInstance
+数组，保留后续 appearance replacement 所需的 CPU descriptor。应用按空间与 Appearance 分批；
+Entity visualizer 的逐对象动态更新粒度和 Ground 的单实例契约不因此改变。
 
 C7将public Primitive扩展到`SceneGISPlanarBoxGeometry`、`SceneGISPlanarCylinderGeometry`与
 `SceneGISPlanarEllipsoidGeometry`。三种volume使用closed、non-flat `PerInstanceColorAppearance`；Plane、
