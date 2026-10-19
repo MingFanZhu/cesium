@@ -109,11 +109,12 @@ function syncBaseCommand(command, modelMatrix, boundingVolume) {
  * stencil mask, depth function, or terrain-classification pass changes.
  *
  * @param {object} owner The public planar ground primitive.
- * @param {object[]} extents The stable world XY extents in instance order.
+ * @param {object[]} extents The stable world XY extents in internal instance order.
+ * @param {object[]} instanceIds The business IDs in the same internal order.
  * @returns {object} The hook and stable derived command arrays.
  * @private
  */
-function createSceneGISPlanarGroundCommands(owner, extents) {
+function createSceneGISPlanarGroundCommands(owner, extents, instanceIds) {
   const stencilCommands = [];
   const colorCommands = [];
   const pickStencilCommands = [];
@@ -130,9 +131,8 @@ function createSceneGISPlanarGroundCommands(owner, extents) {
   let colorUniformMap;
 
   function buildRanges(primitive, mergeOpaque) {
-    const instances = owner._batch.instances;
     const offsets = primitive._pickOffsets;
-    const schema = instances[0].attributes.color;
+    const schema = owner._batch.instances[0].attributes.color;
     const mergeAreas =
       mergeOpaque &&
       schema.componentDatatype === ComponentDatatype.UNSIGNED_BYTE &&
@@ -146,7 +146,7 @@ function createSceneGISPlanarGroundCommands(owner, extents) {
     for (let i = 0; i < offsets.length; i++) {
       const offset = offsets[i];
       const color = mergeAreas
-        ? primitive.getGeometryInstanceAttributes(instances[i].id).color
+        ? primitive.getGeometryInstanceAttributes(instanceIds[i]).color
         : undefined;
       const extent = extents[i];
       const matchesColor =

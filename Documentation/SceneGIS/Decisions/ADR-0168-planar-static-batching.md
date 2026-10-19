@@ -89,6 +89,18 @@ ClassificationPrimitive 的 extent 路径按 VA 提交 stencil/fill 两条命令
 升级须同时复核 stencil 精确轮廓、extent FS discard 与 stencil 清零的执行关系、原生 pick varying 和
 linear/log globe-depth 重建；用凹面/孔洞/相邻边、宽 envelope 低视角、透明重叠和独立 ID/显隐验证。
 
+### B5 保持覆盖顺序的非连续合批
+
+B5 在 native combine 前重排内部 polygon 实例：按原顺序计算相交前驱的最大层号加一，
+将同层互不相交的实例连续存放。全部相交对保持输入顺序，不能用忽略传递顺序的 first-fit 装箱。
+已有 extent 裁剪与 stencil/fill 分组直接使用新的连续 index ranges；不新增索引副本或 VA。
+RBush 中被更晚 extent 完全包含的前驱可移除，因为新节点覆盖其全部未来相交约束且层号更高。
+
+构造快照和公开 ID 顺序不变；内部 batchId、pick offsets、extents 和命令 ID 列表共同使用新顺序。
+排序包含隐藏/透明实例，不依赖当前颜色或显隐；属性变化继续原位更新，重建时重新生成相同空间顺序。
+Command hook 只保留轻量 extents/ID，不能延长原生 releaseGeometryInstances 所释放的几何缓冲生命周期。
+升级新增复核点为 PrimitivePipeline 的实例顺序、batchId 与 combine/pick offsets 对应关系。
+
 复核 GeometryPipeline 的 position/prevPosition/nextPosition、normal 变换，PrimitivePipeline 的
 scene3DOnly/combine/high-low 路径，BatchTable 的实例 attributes、ID 和 Primitive 生命周期。
 用不同 origin 的大坐标像素/pick 测试及对象数与命令/VA 数对照证明其仍在真实合批。

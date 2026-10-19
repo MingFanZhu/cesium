@@ -22,8 +22,11 @@ Primitive、VA 和 DrawCommand，同时保持独立 ID、颜色、显隐、实�
 | B2    | completed | [贴地线面合批](2026-10-19-b2-ground-instances.md) 实现、生命周期、像素/pick、资源对照、SDK 交付与 review 已完成                      |
 | B3    | completed | [贴地线 draw call 合批](2026-10-19-b3-ground-line-draws.md)；每 VA 一条命令，独立属性/拾取、坡面/低视角、交付与 review 完成          |
 | B4    | completed | [贴地面 draw call 合批](2026-10-19-b4-ground-area-draws.md)；空间分组共享 stencil/fill，独立属性/拾取、透明/孔洞、交付与 review 完成 |
+| B5    | completed | [非连续贴地面合批](2026-10-19-b5-ground-area-ordering.md)；保持相交先后关系的内部排序、真实索引合并、透明与拾取回归完成              |
 
 ## 整体验收与风险
+
+B5 已完成：512 个双层栈从 513 对 stencil/fill 降至 2 对，输入不连续的互不相交实例真实合批；重叠顺序及属性、pick 不变。
 
 B4 已完成：[贴地面 draw call 合批](2026-10-19-b4-ground-area-draws.md)，在保留独立颜色、显隐、拾取及重叠顺序的前提下减少 area 命令。
 

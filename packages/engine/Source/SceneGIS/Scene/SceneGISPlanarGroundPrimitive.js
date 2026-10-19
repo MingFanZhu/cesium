@@ -1,3 +1,4 @@
+import RBush from "rbush";
 import BoundingSphere from "../../Core/BoundingSphere.js";
 import Cartesian3 from "../../Core/Cartesian3.js";
 import ColorGeometryInstanceAttribute from "../../Core/ColorGeometryInstanceAttribute.js";
@@ -270,6 +271,39 @@ function snapshotBatch(options) {
   };
 }
 
+function orderGroundAreas(extents) {
+  const tree = new RBush();
+  const layers = [];
+  for (let i = 0; i < extents.length; i++) {
+    const extent = extents[i];
+    let layer = 0;
+    for (const earlier of tree.search(extent)) {
+      if (
+        extent.minX < earlier.maxX &&
+        extent.maxX > earlier.minX &&
+        extent.minY < earlier.maxY &&
+        extent.maxY > earlier.minY
+      ) {
+        // Every overlapping predecessor must be drawn before this instance.
+        layer = Math.max(layer, earlier.layer + 1);
+        if (
+          extent.minX <= earlier.minX &&
+          extent.minY <= earlier.minY &&
+          extent.maxX >= earlier.maxX &&
+          extent.maxY >= earlier.maxY
+        ) {
+          // This later, containing extent subsumes all future constraints from
+          // the earlier one, including long stacks with identical footprints.
+          tree.remove(earlier);
+        }
+      }
+    }
+    tree.insert({ ...extent, layer });
+    (layers[layer] ??= []).push(i);
+  }
+  return layers.flat();
+}
+
 function createCandidate(primitive, frameState) {
   const entries = primitive._batch?.instances ?? [
     {
@@ -283,8 +317,8 @@ function createCandidate(primitive, frameState) {
   let volume;
   let bounds;
   let vertexCount = 0;
-  const extents = [];
-  const instances = entries.map(function (entry) {
+  let extents = [];
+  let instances = entries.map(function (entry) {
     const created = SceneGISPlanarGroundVolume.create(
       primitive._world,
       entry.geometry,
@@ -320,6 +354,13 @@ function createCandidate(primitive, frameState) {
       "Ground batches above 65535 vertices require uint element indices.",
     );
   }
+  if (primitive._batch !== undefined && primitive._geometryKind === "polygon") {
+    // Native combine creates contiguous indices and matching batch IDs / pick
+    // offsets in this order; keep the public snapshot in its original order.
+    const order = orderGroundAreas(extents);
+    instances = order.map((index) => instances[index]);
+    extents = order.map((index) => extents[index]);
+  }
   const internalAppearance =
     primitive._geometryKind === "polyline"
       ? new Appearance({
@@ -339,7 +380,11 @@ function createCandidate(primitive, frameState) {
           closed: true,
           translucent: false,
         });
-  const commands = createSceneGISPlanarGroundCommands(primitive, extents);
+  const commands = createSceneGISPlanarGroundCommands(
+    primitive,
+    extents,
+    instances.map((instance) => instance.id),
+  );
   const candidate = new Primitive({
     geometryInstances:
       primitive._batch === undefined ? instances[0] : instances,

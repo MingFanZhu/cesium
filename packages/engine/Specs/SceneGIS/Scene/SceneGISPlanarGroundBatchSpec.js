@@ -270,6 +270,106 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundBatch", function () {
     expect(va.isDestroyed()).toBeTrue();
   });
 
+  it("batches 512 nonconsecutive two-layer stacks and retains ID updates across rebuilding", function () {
+    const instances = Array.from({ length: 1024 }, (_, id) => {
+      const cell = Math.floor(id / 2);
+      return {
+        id,
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: ring(
+            ((cell % 32) - 16) * 5 + (id % 2) * 0.5,
+            (Math.floor(cell / 32) - 8) * 5,
+            1.5,
+          ),
+        }),
+        attributes: attributes(
+          (id % 2 === 0 ? Color.RED : Color.BLUE).withAlpha(0.5),
+        ),
+      };
+    });
+    view(0, 0, true);
+    const expected = baseline([instances[544], instances[545]]);
+    const primitive = add(instances);
+    expect(render()).toEqual(expected);
+    expect(pick()).toEqual({ primitive, id: 545 });
+    const commands = primitive._currentCommands;
+    expect(commands.colorCommands.length).toBe(2);
+    expect(commands.stencilCommands.length).toBe(2);
+    expect(commands.pickColorCommands.length).toBe(2);
+    expect(commands.pickStencilCommands.length).toBe(2);
+    const current = primitive._current;
+    const va = current._va[0];
+    const command = commands.colorCommands[0];
+    expect(current._va.length).toBe(1);
+    expect(current.geometryInstances).toBeUndefined();
+    expect(instances.map((instance) => instance.id)).toEqual(
+      Array.from({ length: 1024 }, (_, id) => id),
+    );
+    primitive.getGeometryInstanceAttributes(545).show = new Uint8Array([0]);
+    expect(render()[0]).toBeGreaterThan(render()[2]);
+    expect(pick()).toEqual({ primitive, id: 544 });
+    primitive.getGeometryInstanceAttributes(544).color =
+      ColorGeometryInstanceAttribute.toValue(Color.CYAN);
+    const changed = render();
+    expect(changed[1]).toBeGreaterThan(200);
+    view(5, 0, true);
+    expect(render()).toEqual(expected);
+    expect(pick()).toEqual({ primitive, id: 547 });
+    expect(primitive._current).toBe(current);
+    expect(current._va[0]).toBe(va);
+    expect(commands.colorCommands[0]).toBe(command);
+    expect(commands.colorCommands.length).toBe(2);
+    primitive.appearance = new PerInstanceColorAppearance({ flat: true });
+    view(0, 0, true);
+    expect(render()).toEqual(changed);
+    expect(pick()).toEqual({ primitive, id: 544 });
+    expect(current.isDestroyed()).toBeTrue();
+    expect(va.isDestroyed()).toBeTrue();
+  });
+
+  it("preserves transitive overlap order when a later area is disjoint from the first", function () {
+    const instances = [
+      polygon("a", -3, Color.RED.withAlpha(0.5)),
+      polygon("b", 0, Color.GREEN),
+      polygon("c", 3, Color.BLUE.withAlpha(0.5)),
+      polygon("d", 9, Color.CYAN.withAlpha(0.5)),
+    ];
+    const samples = [-1.5, 1.5, 9];
+    const expected = samples.map((x) => {
+      view(x, 0, true);
+      return baseline(instances);
+    });
+    const primitive = add(instances);
+    for (let i = 0; i < samples.length; i++) {
+      view(samples[i], 0, true);
+      expect(render()).toEqual(expected[i]);
+      expect(pick()).toEqual({ primitive, id: ["b", "c", "d"][i] });
+    }
+    expect(primitive._currentCommands.colorCommands.length).toBe(3);
+    expect(primitive._currentCommands.pickColorCommands.length).toBe(3);
+  });
+
+  it("retains larger predecessors when only part of their extent is covered", function () {
+    const instances = [
+      {
+        ...polygon("large", 0, Color.RED.withAlpha(0.5)),
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: ring(0, 0, 4),
+        }),
+      },
+      polygon("left", -3, Color.BLUE.withAlpha(0.5)),
+      polygon("right", 3, Color.CYAN.withAlpha(0.5)),
+      polygon("disjoint", 10, Color.GREEN),
+    ];
+    view(3, 0, true);
+    const expected = baseline(instances);
+    const primitive = add(instances);
+    expect(render()).toEqual(expected);
+    expect(pick()).toEqual({ primitive, id: "right" });
+    expect(primitive._currentCommands.colorCommands.length).toBe(2);
+    expect(primitive._currentCommands.pickColorCommands.length).toBe(2);
+  });
+
   it("keeps projected volumes isolated through low views and linear/log depth on sloped terrain", async function () {
     const instances = [
       polygon(1),

@@ -64,6 +64,7 @@
       <select id="kind" aria-label="图形类型">
         <option value="ordinary">普通面 · 独立颜色</option>
         <option value="ground-area">贴地面 · 独立颜色</option>
+        <option value="ground-area-overlap">贴地面 · 交错双层叠面</option>
         <option value="ground-line">贴地线 · 独立颜色与宽度</option>
       </select>
       <button id="batch">使用合批</button>
@@ -103,9 +104,13 @@
       const collection = scene.primitives.add(new C.PrimitiveCollection());
       let records;
       function createRecords(kind) {
+        const overlap = kind === "ground-area-overlap";
         return Array.from({ length: 1024 }, (_, index) => {
-          const x = center + ((index % 32) - 16) * 12;
-          const y = center + (Math.floor(index / 32) - 16) * 12;
+          const cell = overlap ? Math.floor(index / 2) : index;
+          const offset = overlap ? (index % 2) * 2 : 0;
+          const x = center + ((cell % 32) - 16) * 12 + offset;
+          const y =
+            center + (Math.floor(cell / 32) - (overlap ? 8 : 16)) * 12 + offset;
           return {
             id: { index, name: `业务对象 ${index}` },
             geometry:
@@ -127,7 +132,11 @@
                   }),
             attributes: {
               color: C.ColorGeometryInstanceAttribute.fromColor(
-                C.Color.fromHsl((index % 32) / 40 + 0.05, 0.65, 0.55),
+                overlap
+                  ? (index % 2 === 0 ? C.Color.ORANGE : C.Color.CYAN).withAlpha(
+                      0.55,
+                    )
+                  : C.Color.fromHsl((index % 32) / 40 + 0.05, 0.65, 0.55),
               ),
               show: new C.ShowGeometryInstanceAttribute(true),
             },
@@ -238,20 +247,26 @@
             ? "普通面共享几何与绘制命令。"
             : kind === "ground-area"
               ? "范围不相交的贴地面共享一条模板命令与一条颜色命令；每个对象可独立改色、显隐和拾取。重叠区域保留绘制顺序。"
-              : "贴地线从地表深度判断每个片元的线段范围，独立颜色、宽度和拾取共用一个绘制命令，无逐对象模板命令。";
+              : kind === "ground-area-overlap"
+                ? "512 组双层透明面按下层、上层交错输入。跨组互不相交的面重排合批，只需两对模板/颜色命令；隐藏上层可拾取下层对象。"
+                : "贴地线从地表深度判断每个片元的线段范围，独立颜色、宽度和拾取共用一个绘制命令，无逐对象模板命令。";
         document.querySelector("#picked").textContent = "点击图形查看业务 ID";
-        document.querySelector("#toggle").textContent = "隐藏隔列";
+        document.querySelector("#toggle").textContent =
+          kind === "ground-area-overlap" ? "隐藏上层" : "隐藏隔列";
         return result;
       }
       function toggle() {
         hidden = !hidden;
-        for (let i = 0; i < records.length; i += 2) {
+        const overlap = currentKind === "ground-area-overlap";
+        for (let i = overlap ? 1 : 0; i < records.length; i += 2) {
           owners[i].getGeometryInstanceAttributes(records[i].id).show =
             C.ShowGeometryInstanceAttribute.toValue(!hidden);
         }
         document.querySelector("#toggle").textContent = hidden
           ? "显示全部"
-          : "隐藏隔列";
+          : overlap
+            ? "隐藏上层"
+            : "隐藏隔列";
         frame();
       }
       const handler = new C.ScreenSpaceEventHandler(scene.canvas);
