@@ -4,10 +4,16 @@ in vec2 incomingDirection;
 in vec2 outgoingDirection;
 in float lineWidth;
 in float expandDirection;
+in vec4 segmentNormals;
+in vec4 segmentOffsets;
 in vec4 color;
 in float batchId;
 
 out vec4 v_color;
+out vec4 v_startPlane;
+out vec4 v_endPlane;
+out vec4 v_rightPlane;
+out float v_halfWidth;
 
 void main()
 {
@@ -34,10 +40,23 @@ void main()
         czm_normal * vec3(outgoingPerpendicular, 0.0)
     );
     vec4 positionEC = czm_modelViewRelativeToEye * position;
+    vec3 startEC = positionEC.xyz +
+        (czm_modelViewRelativeToEye * vec4(segmentOffsets.xy, 0.0, 0.0)).xyz;
+    vec3 endEC = positionEC.xyz +
+        (czm_modelViewRelativeToEye * vec4(segmentOffsets.zw, 0.0, 0.0)).xyz;
+    vec3 startNormalEC = normalize(czm_normal * vec3(segmentNormals.xy, 0.0));
+    vec3 endNormalEC = normalize(czm_normal * vec3(segmentNormals.zw, 0.0));
+    vec2 forward = segmentOffsets.zw - segmentOffsets.xy;
+    vec3 rightNormalEC = normalize(czm_normal * vec3(-forward.y, forward.x, 0.0));
+    v_startPlane = vec4(startNormalEC, -dot(startNormalEC, startEC));
+    v_endPlane = vec4(endNormalEC, -dot(endNormalEC, endEC));
+    v_rightPlane = vec4(rightNormalEC, -dot(rightNormalEC, startEC));
+    v_halfWidth = lineWidth * 0.5;
     // RTE positioning keeps the EPSG:3857-scale origin out of the FLOAT route
     // attributes; meters-per-pixel then expands both height faces along the
     // same eye-space miter/start/end plane family.
-    float halfWidthMeters = lineWidth * 0.5 *
+    // Rasterize a conservative volume; the fragment shader decides the actual width.
+    float halfWidthMeters = lineWidth *
         max(0.0, czm_metersPerPixel(positionEC));
     float miterProjection = max(abs(dot(miterEC, rightEC)), 0.25);
     positionEC.xyz +=

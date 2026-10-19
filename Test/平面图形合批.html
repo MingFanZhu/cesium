@@ -240,7 +240,7 @@
             ? "普通面共享几何与绘制命令。"
             : kind === "ground-area"
               ? "相同不透明颜色的贴地面在模板计数容量内合并命令；改变颜色后自动重新分组，拾取仍逐对象隔离。"
-              : "贴地线共享几何资源；交叉线需要保留逐对象模板与颜色命令，以维持颜色、宽度和拾取结果。";
+              : "贴地线从地表深度判断每个片元的线段范围，独立颜色、宽度和拾取共用一个绘制命令，无逐对象模板命令。";
         document.querySelector("#picked").textContent = "点击图形查看业务 ID";
         document.querySelector("#toggle").textContent = "隐藏隔列";
         return result;

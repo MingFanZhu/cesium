@@ -112,6 +112,9 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
     expect(SceneGISPlanarGroundLineShader.fragmentShaderSource).toContain(
       "czm_writeDepthClamp()",
     );
+    expect(SceneGISPlanarGroundLineShader.fragmentShaderSource).toContain(
+      "czm_globeDepthTexture",
+    );
   });
 
   it("validates implicit clamp, support, attributes, and non-extruded polygons", function () {
@@ -221,14 +224,13 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
         (command) => command.pass === Pass.TERRAIN_CLASSIFICATION,
       ),
     ).toBeTrue();
-    expect(primitive._currentCommands.stencilCommands.length).toBe(1);
+    expect(primitive._currentCommands.stencilCommands.length).toBe(0);
     expect(primitive._currentCommands.colorCommands.length).toBe(1);
     frameState.passes.render = false;
     frameState.passes.pick = true;
     frameState.commandList.length = 0;
     primitive.update(frameState);
     expect(frameState.commandList).toEqual([
-      primitive._currentCommands.pickStencilCommands[0],
       primitive._currentCommands.pickColorCommands[0],
     ]);
     frameState.passes.depth = true;
@@ -333,5 +335,23 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
         passes: { render: true },
       });
     }).toThrowDeveloperError();
+  });
+
+  it("rejects missing depth textures before creating a ground line candidate", function () {
+    const primitive = line();
+    world.update(scene.frameState);
+    const context = scene.context;
+    const depthTexture = context._depthTexture;
+    const webgl2 = context._webgl2;
+    try {
+      context._depthTexture = context._webgl2 = false;
+      expect(SceneGISPlanarGroundPrimitive.isSupported(scene)).toBeFalse();
+      expect(() => primitive.update(scene.frameState)).toThrowDeveloperError();
+      expect(primitive._current).toBeUndefined();
+    } finally {
+      context._depthTexture = depthTexture;
+      context._webgl2 = webgl2;
+      primitive.destroy();
+    }
   });
 });

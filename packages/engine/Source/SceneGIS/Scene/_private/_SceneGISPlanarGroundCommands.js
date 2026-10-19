@@ -82,6 +82,13 @@ const pickRenderStateOptions = {
   depthMask: false,
 };
 
+const lineRenderStateOptions = {
+  // Segment volumes use inside-out winding, so this draws their far side once.
+  cull: { enabled: true },
+  depthMask: false,
+  blending: BlendingState.PRE_MULTIPLIED_ALPHA_BLEND,
+};
+
 function syncBaseCommand(command, modelMatrix, boundingVolume) {
   command.modelMatrix = modelMatrix;
   command.boundingVolume = boundingVolume;
@@ -93,8 +100,9 @@ function syncBaseCommand(command, modelMatrix, boundingVolume) {
 /**
  * Creates the standard Primitive queue hook used by planar ground volumes.
  *
- * The two-command z-fail structure follows the algorithmic roles in Cesium's
- * ClassificationPrimitive at upstream baseline
+ * Area z-fail commands follow ClassificationPrimitive. Lines follow the
+ * one-command-per-VA, depth-clipped volume role of GroundPolylinePrimitive at
+ * upstream baseline
  * 6d5d8b1f0725b6f831b336463f4b11c98023427b. Recheck that source when its
  * stencil mask, depth function, or terrain-classification pass changes.
  *
@@ -110,6 +118,7 @@ function createSceneGISPlanarGroundCommands(owner) {
   let stencilDepthRenderState;
   let colorRenderState;
   let pickRenderState;
+  let lineRenderState;
   let ranges;
   let rangesDirty = true;
 
@@ -164,14 +173,42 @@ function createSceneGISPlanarGroundCommands(owner) {
     _sourcePickCommands,
     modelMatrix,
   ) {
+    Primitive._updateBoundingVolumes(primitive, frameState, modelMatrix, false);
+    const boundingVolumes = primitive._boundingSphereWC;
+    const commandList = frameState.commandList;
+    if (owner._geometryKind === "polyline") {
+      if (
+        frameState.passes.depth ||
+        (!frameState.passes.render &&
+          !(frameState.passes.pick && primitive.allowPicking))
+      ) {
+        return;
+      }
+      lineRenderState ??= RenderState.fromCache(lineRenderStateOptions);
+      const commands = frameState.passes.render
+        ? colorCommands
+        : pickColorCommands;
+      commands.length = sourceColorCommands.length;
+      for (let i = 0; i < sourceColorCommands.length; i++) {
+        const command = DrawCommand.shallowClone(
+          sourceColorCommands[i],
+          commands[i],
+        );
+        syncBaseCommand(command, modelMatrix, boundingVolumes[i]);
+        command.owner = owner;
+        command.pass = Pass.TERRAIN_CLASSIFICATION;
+        command.renderState = lineRenderState;
+        command.pickId = primitive.allowPicking ? "v_pickColor" : undefined;
+        commands[i] = command;
+        commandList.push(command);
+      }
+      return;
+    }
     stencilDepthRenderState ??= RenderState.fromCache(
       stencilDepthRenderStateOptions,
     );
     colorRenderState ??= RenderState.fromCache(colorRenderStateOptions);
     pickRenderState ??= RenderState.fromCache(pickRenderStateOptions);
-    Primitive._updateBoundingVolumes(primitive, frameState, modelMatrix, false);
-    const boundingVolumes = primitive._boundingSphereWC;
-    const commandList = frameState.commandList;
     const batch = owner._batch !== undefined;
     if (batch && frameState.passes.render && rangesDirty) {
       updateRanges(primitive);

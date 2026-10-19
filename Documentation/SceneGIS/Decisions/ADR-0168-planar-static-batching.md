@@ -62,6 +62,16 @@ ClassificationPrimitive 范围命令与 classification mask。
 
 ## 升级检查
 
+### B3 贴地线片元范围判定
+
+B3 替代 B2 对 line 必须逐实例 stencil/color 的限制。原生 `GroundPolylinePrimitive.createCommands` 按 VA
+建立 terrain 命令，`PolylineShadowVolumeFS` 读取 `czm_globeDepthTexture` 并以 start/end/right plane 和 pixel width
+判断地表片元。Planar 采用同样的分工：稳定 XY segment volume、保守 VS 扩张、FS 地表位置裁剪和原生 per-instance picking。
+只借鉴该算法，不复制其 ellipsoid、2D/morph 和材质实现；不修改 Scene pass，不增加 depth target 或 CPU terrain clipping。
+Line 一条命令覆盖一个 VA，不再需要 per-instance offset；area 继续 B2 stencil 契约。
+Ground 支持检测加入 depth texture 能力；升级须复核当前 frustum 的 globe-depth copy、log depth reconstruction、
+back-face volume rasterization 和 pick derived Shader。
+
 复核 GeometryPipeline 的 position/prevPosition/nextPosition、normal 变换，PrimitivePipeline 的
 scene3DOnly/combine/high-low 路径，BatchTable 的实例 attributes、ID 和 Primitive 生命周期。
 用不同 origin 的大坐标像素/pick 测试及对象数与命令/VA 数对照证明其仍在真实合批。

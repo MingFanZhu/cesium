@@ -50,6 +50,9 @@
 
 ## 边界与剩余风险
 
+B3 后继已按用户要求处理 line draw call，见 [B3 review](2026-10-19-b3-ground-line-draws.md)；
+以下 B2 性能与边界保留为当时的 checkpoint 事实，其中 line 逐实例命令限制由 B3 替代。
+
 - 修改均位于 SceneGIS-owned 路径；upstream-owned files=0，新增/变更 SGP=0；生成 shader JS、barrel、声明与 Build 不提交。
 - 同步首次构建、拓扑更改整批重建，SDK 仍应按空间/样式/更新频率分批；不自动合并 Entity。
 - Ground 采用原生 offsets 与 BatchTable dirty 私有语义，已写入升级检查；非 uint Context 需要调用方较小批次。

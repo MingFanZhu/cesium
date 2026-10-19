@@ -13,13 +13,16 @@ import {
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarGroundPrimitive,
+  SceneGISPlanarHeightmapTerrainData,
   SceneGISPlanarPolygonGeometry,
   SceneGISPlanarPolylineGeometry,
   SceneGISPlanarWorld,
+  SceneTransforms,
   ShowGeometryInstanceAttribute,
 } from "../../../index.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
+import pollToPromise from "../../../../../Specs/pollToPromise.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarGroundBatch", function () {
   const center = 20000000;
@@ -82,6 +85,18 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundBatch", function () {
       geometry: new SceneGISPlanarPolygonGeometry({
         positions: ring(x, 0, 2),
         holes,
+      }),
+      attributes: attributes(color),
+    };
+  }
+  function line(id, positions, width = 8, color = Color.RED) {
+    return {
+      id,
+      geometry: new SceneGISPlanarPolylineGeometry({
+        positions: positions.map(
+          ([x, y]) => new Cartesian3(center + x, center + y, 40),
+        ),
+        width,
       }),
       attributes: attributes(color),
     };
@@ -246,10 +261,227 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundBatch", function () {
     render();
     expect(pick()).toEqual({ primitive, id: "horizontal" });
     expect(primitive._current._va.length).toBe(1);
+    expect(primitive._currentCommands.colorCommands.length).toBe(1);
+    expect(primitive._currentCommands.pickColorCommands.length).toBe(1);
+    expect(primitive._currentCommands.stencilCommands.length).toBe(0);
     primitive.getGeometryInstanceAttributes("horizontal").color =
       ColorGeometryInstanceAttribute.toValue(Color.CYAN);
     const pixel = render();
     expect(pixel[1]).toBeGreaterThan(pixel[0]);
+  });
+
+  it("renders and picks 1024 independent lines with one command and stable warm resources", function () {
+    const instances = Array.from({ length: 1024 }, (_, id) => {
+      const x = ((id % 32) - 16) * 5;
+      const y = (Math.floor(id / 32) - 16) * 5;
+      return line(
+        id,
+        [
+          [x, y],
+          [x + 3, y],
+        ],
+        4 + (id % 3) * 2,
+      );
+    });
+    const primitive = add(
+      instances,
+      new PolylineColorAppearance({ translucent: false }),
+    );
+    view(1, 0);
+    expect(render()[0]).toBeGreaterThan(100);
+    const current = primitive._current;
+    const va = current._va[0];
+    const command = primitive._currentCommands.colorCommands[0];
+    expect(scene.context.uniformState.globeDepthTexture).toBeDefined();
+    expect(current._va.length).toBe(1);
+    expect(primitive._currentCommands.colorCommands.length).toBe(1);
+    expect(primitive._currentCommands.stencilCommands.length).toBe(0);
+    expect(pick()).toEqual({ primitive, id: 528 });
+    expect(primitive._currentCommands.pickColorCommands.length).toBe(1);
+    primitive.getGeometryInstanceAttributes(528).color =
+      ColorGeometryInstanceAttribute.toValue(Color.BLUE);
+    expect(render()[2]).toBeGreaterThan(100);
+    primitive.getGeometryInstanceAttributes(528).show = new Uint8Array([0]);
+    render();
+    expect(pick()?.primitive).not.toBe(primitive);
+    for (let i = 0; i < 5; i++) {
+      render();
+    }
+    expect(primitive._current).toBe(current);
+    expect(current._va[0]).toBe(va);
+    expect(primitive._currentCommands.colorCommands[0]).toBe(command);
+  });
+
+  it("keeps distinct pixel widths and ordered translucent overlap in a single line draw", function () {
+    const appearance = new PolylineColorAppearance();
+    const widths = add(
+      [
+        line(
+          1,
+          [
+            [-3, 0],
+            [3, 0],
+          ],
+          4,
+        ),
+        line(
+          2,
+          [
+            [-3, 2],
+            [3, 2],
+          ],
+          12,
+          Color.BLUE,
+        ),
+      ],
+      appearance,
+    );
+    render();
+    const strip = scene.context.readPixels({
+      x: 64,
+      y: 0,
+      width: 1,
+      height: 128,
+    });
+    let red = 0;
+    let blue = 0;
+    for (let i = 0; i < strip.length; i += 4) {
+      red += Number(strip[i] > strip[i + 2] + 50);
+      blue += Number(strip[i + 2] > strip[i] + 50);
+    }
+    expect(Math.abs(red - 4)).toBeLessThanOrEqual(1);
+    expect(Math.abs(blue - 12)).toBeLessThanOrEqual(1);
+    scene.primitives.remove(widths);
+    const overlap = [
+      line(
+        1,
+        [
+          [-3, 0],
+          [3, 0],
+        ],
+        12,
+        Color.RED.withAlpha(0.5),
+      ),
+      line(
+        2,
+        [
+          [0, -3],
+          [0, 3],
+        ],
+        8,
+        Color.BLUE.withAlpha(0.5),
+      ),
+    ];
+    const expected = baseline(overlap, appearance);
+    const primitive = add(overlap, appearance);
+    expect(render()).toEqual(expected);
+    expect(pick()).toEqual({ primitive, id: 2 });
+    expect(primitive._currentCommands.colorCommands.length).toBe(1);
+  });
+
+  it("clips line caps and sky and keeps joins through linear/log depth and low views", function () {
+    const primitive = add(
+      [
+        line(
+          1,
+          [
+            [-3, 0],
+            [0, 0],
+            [0, 3],
+          ],
+          10,
+        ),
+      ],
+      new PolylineColorAppearance(),
+    );
+    for (const logarithmic of [false, true]) {
+      scene.logarithmicDepthBuffer = logarithmic;
+      for (const degrees of [85, 45, 10]) {
+        const angle = (degrees * Math.PI) / 180;
+        const s = Math.sin(angle);
+        const c = Math.cos(angle);
+        scene.camera.setView({
+          destination: new Cartesian3(center, center - 10 * c, 10 * s),
+          orientation: {
+            direction: new Cartesian3(0, c, -s),
+            up: new Cartesian3(0, s, c),
+          },
+        });
+        expect(render()[0]).toBeGreaterThan(100);
+        expect(pick()).toEqual({ primitive, id: 1 });
+      }
+    }
+    view(-3.5, 0);
+    render();
+    expect(pick()?.primitive).not.toBe(primitive);
+    scene.primitives.remove(primitive);
+    view(105, 0);
+    const sky = render();
+    const outside = add(
+      [
+        line(
+          2,
+          [
+            [95, 0],
+            [110, 0],
+          ],
+          12,
+        ),
+      ],
+      new PolylineColorAppearance(),
+    );
+    expect(render()).toEqual(sky);
+    expect(pick()?.primitive).not.toBe(outside);
+  });
+
+  it("classifies the current sloped terrain depth while keeping the line mesh", async function () {
+    const primitive = add(
+      [
+        line(
+          1,
+          [
+            [-5, 0],
+            [5, 0],
+          ],
+          12,
+        ),
+      ],
+      new PolylineColorAppearance(),
+    );
+    render();
+    const va = primitive._current._va[0];
+    const data = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array([-20, 20, -20, 20]),
+      width: 2,
+      height: 2,
+    });
+    world.terrainProvider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: -20,
+      maximumHeight: 20,
+      maximumLevel: 0,
+      errorEvent: new Event(),
+      getLevelMaximumGeometricError: () => 1,
+      requestTileGeometry: () => Promise.resolve(data),
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+    };
+    await pollToPromise(() => {
+      render();
+      return (
+        world.getTerrainHeight(new Cartesian3(center + 2, center, 0)) !==
+        undefined
+      );
+    });
+    view(0, 0, true);
+    render();
+    const point = SceneTransforms.worldToWindowCoordinates(
+      scene,
+      new Cartesian3(center + 2, center, 0.4),
+    );
+    expect(scene.pick(point)).toEqual({ primitive, id: 1 });
+    expect(primitive._current._va[0]).toBe(va);
+    expect(primitive._currentCommands.colorCommands.length).toBe(1);
   });
 
   it("updates shared line material colors without replacing the batch", function () {

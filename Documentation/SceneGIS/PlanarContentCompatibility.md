@@ -70,15 +70,18 @@ RectangleGraphics 的米制 west/south/east/north 是明确的平面适配约定
 
 ## Direct Primitive matrix
 
-`SceneGISPlanarPrimitive` 接受七种 public Geometry。Polyline 使用 `PolylineMaterialAppearance`；Polygon 使用 flat
+`SceneGISPlanarPrimitive` 接受七种 public Geometry。Polyline 使用 Color `PolylineMaterialAppearance` 或 `PolylineColorAppearance`；Polygon 使用 flat
 `PerInstanceColorAppearance`；Box/Cylinder/Ellipsoid/Wall/PolylineVolume 使用 compatible closed/open non-flat
-`PerInstanceColorAppearance`。一个 wrapper 的 geometry kind 在构造时确定，replacement 只允许同 kind。它拥有自己
+`PerInstanceColorAppearance`。单实例 wrapper 的 geometry kind 在构造时确定，replacement 只允许同 kind。
+静态 geometryInstances 数组支持兼容 Appearance 合批，closed solid 可混合 kind；拓扑更改重建批次。它拥有自己
 创建的 standard synchronous `Primitive`，不拥有 caller collection、Appearance 或 Entity。
 
 `SceneGISPlanarGroundPrimitive`只接受existing planar Polyline或non-extruded Polygon Geometry、live World与compatible
 Color appearance。Clamp是implicit；public height-reference options不存在。它通过`Pass.TERRAIN_CLASSIFICATION`提交
 stable GPU shadow/segment volumes；不读取actual terrain triangles、不发terrain request、不拥有World/provider，也不提供
 extrusion、RELATIVE、classification、zIndex、arbitrary material或arbitrary model matrix。
+静态 ground 数组同批仅包含线或面。Line 要求 depth texture，按地表片元裁剪，每 VA 一条颜色命令并保持独立 pick ID；
+area 延续 stencil 范围隔离，完整边界见 ADR-0168 与 PlanarContentGuide。
 
 两种 wrapper 都保留 caller `id` 用于 picking，提供 last-successful current bounds，固定单 Context，并在 candidate
 failure/replacement/destroy 中维持 exactly-once ownership。

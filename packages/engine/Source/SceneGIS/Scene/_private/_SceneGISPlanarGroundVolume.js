@@ -84,6 +84,16 @@ function createPolygonVolume(geometry, batchOrigin) {
   return { values, indices, origin, footprintPoints: flattened };
 }
 
+function joinNormal(ax, ay, bx, by) {
+  const aLength = Math.hypot(ax, ay);
+  const bLength = Math.hypot(bx, by);
+  const x = (aLength === 0 ? 0 : ax / aLength) + bx / bLength;
+  const y = (aLength === 0 ? 0 : ay / aLength) + by / bLength;
+  const length = Math.hypot(x, y);
+  // A reversal has no bisector; its segment keeps a perpendicular end cap.
+  return length === 0 ? [bx / bLength, by / bLength] : [x / length, y / length];
+}
+
 function createPolylineVolume(geometry, batchOrigin) {
   const source = geometry._getDrapeSource();
   const origin = batchOrigin ?? source.origin;
@@ -91,6 +101,8 @@ function createPolylineVolume(geometry, batchOrigin) {
   const previousValues = [];
   const nextValues = [];
   const expandDirections = [];
+  const segmentNormals = [];
+  const segmentOffsets = [];
   const indices = [];
   // Inside-out winding matches the shadow-volume role used by Cesium's
   // GroundPolylineGeometry at the documented upstream baseline.
@@ -118,6 +130,8 @@ function createPolylineVolume(geometry, batchOrigin) {
       i > 0 ? positions[i - 1] : closed ? positions[last - 1] : a;
     const next =
       i + 2 < positions.length ? positions[i + 2] : closed ? positions[1] : b;
+    const startNormal = joinNormal(a.x - previous.x, a.y - previous.y, dx, dy);
+    const endNormal = joinNormal(b.x - next.x, b.y - next.y, -dx, -dy);
     const previousPoints = [previous, a, a, previous, previous, a, a, previous];
     const nextPoints = [b, next, next, b, b, next, next, b];
     const sides = [1, 1, 1, 1, -1, -1, -1, -1];
@@ -135,6 +149,13 @@ function createPolylineVolume(geometry, batchOrigin) {
         nextPoints[vertex].y - endpoints[vertex].y,
       );
       expandDirections.push(sides[vertex]);
+      segmentNormals.push(...startNormal, ...endNormal);
+      segmentOffsets.push(
+        a.x - endpoints[vertex].x,
+        a.y - endpoints[vertex].y,
+        b.x - endpoints[vertex].x,
+        b.y - endpoints[vertex].y,
+      );
     }
     for (const index of boxIndices) {
       indices.push(start + index);
@@ -147,6 +168,8 @@ function createPolylineVolume(geometry, batchOrigin) {
     previousValues,
     nextValues,
     expandDirections,
+    segmentNormals,
+    segmentOffsets,
     width: source.width,
     footprintPoints: positions,
   };
@@ -238,6 +261,16 @@ SceneGISPlanarGroundVolume.create = function (world, geometry, batchOrigin) {
       componentDatatype: ComponentDatatype.FLOAT,
       componentsPerAttribute: 1,
       values: new Float32Array(points.length).fill(data.width),
+    });
+    attributes.segmentNormals = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 4,
+      values: new Float32Array(data.segmentNormals),
+    });
+    attributes.segmentOffsets = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 4,
+      values: new Float32Array(data.segmentOffsets),
     });
   }
   const raw = new Geometry({

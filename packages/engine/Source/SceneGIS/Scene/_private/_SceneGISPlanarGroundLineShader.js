@@ -10,8 +10,10 @@ import vertexShaderSource from "../../../Shaders/SceneGIS/PlanarGround/SceneGISP
  * The segment/end-plane role follows the algorithmic structure of Cesium's
  * GroundPolylinePrimitive and PolylineShadowVolume shaders at upstream
  * baseline 6d5d8b1f0725b6f831b336463f4b11c98023427b. Recheck those sources
- * when their eye-space width convention or terrain-classification pass
- * changes. This shader contains no ellipsoid, map projection, or terrain-tile
+ * when their eye-space width convention, globe-depth copy/reconstruction,
+ * or terrain-classification pass changes. Fragment clipping uses the current
+ * surface position, keeping color and picking in a shared VA draw.
+ * This shader contains no ellipsoid, map projection, or terrain-tile
  * dependency.
  *
  * @private

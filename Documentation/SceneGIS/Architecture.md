@@ -786,9 +786,11 @@ detach只更新uniform/model transform/bounds，不替换footprint VA、index、
 ADR-0168 为 Ground wrapper 增加同 kind 的静态 `geometryInstances`，共享一个原生 Primitive/VA/BatchTable。
 保留每项 original id、attributes、bounds，single Context、same-kind candidate/current 与 exactly-once lifecycle。
 线用 DOUBLE 点差生成 origin-independent 方向与逐顶点 width；批次共用 XY origin 与 normalized Z envelope。
-不同颜色、半透明对象和线以原生 pick offsets 隔离 stencil/color；连续同色不透明面在 classification mask
-容量内合并，picking 始终逐实例隔离。命令数依样式与类型而变，不承诺 ground 一次 draw call。
-拓扑变化重建批次，属性变化复用几何；超过 65535 顶点要求 uint element indices。
+不同颜色、半透明面以原生 pick offsets 隔离 stencil/color；连续同色不透明面在 classification mask
+容量内合并，面的 picking 逐实例隔离。B3 贴地线按原生 GroundPolylinePrimitive 分工，读取当前
+`czm_globeDepthTexture`，按 segment width/start/end plane 做片元裁剪；每 VA 共用一个颜色/拾取命令，
+无需 stencil 计数与逐实例 offsets。Line 必须支持 depth texture，不能静默回退旧 stencil 路径。
+拓扑变化重建批次，属性变化复用几何；超过 65535 顶点的贴地面要求 uint element indices，线复用原生拆分。
 Pick/depth使用已建立current的命令路径；不读取actual terrain triangles、不发
 terrain request、不改变SSE/cache/readiness，也不存在C9 fallback。Polyline clamp与non-extruded Polygon、Ellipse、Rectangle、
 Corridor的批准CLAMP组合使用该backend。完整决定见ADR-0023。
@@ -835,7 +837,7 @@ MVT 保持 CRS 无关，source/World 显式匹配单根 tile matrix；首轮 EPS
 
 地形优先矢量直接绘制，不采用地图颜色 RTT 主路线。
 Depth/stencil ground 是需证明批量、层序、alpha 和 pick 的候选，
-既有 single-instance GroundPrimitive 契约不被自动扩宽。
+公开 GroundPrimitive 的静态合批由 ADR-0168 单独定义，矢量 runtime 不隐式复用该业务图形入口。
 地图图元按 [ADR-0061](Decisions/ADR-0061-owned-vector-tile-primitives.md) 自行管理
 geometry、GPU buffers、Shader、DrawCommand 与 feature pick；复用 Cesium 通用 Renderer/Scene，
 不通过大量修改 native Primitive/Polyline 来扩展地图样式能力。

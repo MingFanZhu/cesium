@@ -310,6 +310,7 @@ function createCandidate(primitive, frameState) {
   });
   if (
     primitive._batch !== undefined &&
+    primitive._geometryKind === "polygon" &&
     vertexCount > 65535 &&
     !frameState.context.elementIndexUint
   ) {
@@ -346,7 +347,8 @@ function createCandidate(primitive, frameState) {
     allowPicking: primitive._allowPicking,
     cull: false,
     modelMatrix: volume.modelMatrix,
-    _createPickOffsets: primitive._batch !== undefined,
+    _createPickOffsets:
+      primitive._batch !== undefined && primitive._geometryKind === "polygon",
     _updateAndQueueCommandsFunction: commands.updateAndQueue,
   });
   candidate.show =
@@ -437,9 +439,10 @@ function preserveCurrentAttributes(primitive) {
 
 /**
  * Renders planar polylines or non-extruded polygons clamped to the current planar surface.
- * A static batch shares one native Primitive and its vertex buffers. Stencil/color ranges remain
- * isolated for picking, different colors, translucent objects, and lines. Compatible opaque area
- * ranges are coalesced within the stencil counter capacity.
+ * A static batch shares one native Primitive and its vertex buffers. Lines use one command per
+ * vertex array with fragment clipping against surface depth. Area stencil/color ranges remain
+ * isolated for picking, different colors, and translucent objects. Compatible opaque area ranges
+ * are coalesced within the stencil counter capacity.
  *
  * @alias SceneGISPlanarGroundPrimitive
  * @constructor
@@ -585,14 +588,17 @@ Object.defineProperties(SceneGISPlanarGroundPrimitive.prototype, {
 });
 
 /**
- * Returns whether the scene provides the stencil buffer required by planar
- * ground rendering.
+ * Returns whether the scene provides the stencil buffer and depth textures required
+ * to support both planar ground polygons and polylines.
  *
  * @param {Scene} scene The scene to test.
  * @returns {boolean} Whether planar ground rendering is supported.
  */
 SceneGISPlanarGroundPrimitive.isSupported = function (scene) {
-  return scene?.context?.stencilBuffer === true;
+  return (
+    scene?.context?.stencilBuffer === true &&
+    scene.context.depthTexture === true
+  );
 };
 
 SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
@@ -616,6 +622,9 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
     throw new DeveloperError(
       "SceneGISPlanarGroundPrimitive requires a stencil buffer.",
     );
+  }
+  if (this._geometryKind === "polyline" && !frameState.context.depthTexture) {
+    throw new DeveloperError("Planar ground polylines require depth textures.");
   }
   if (!frameState.passes.render && this._current === undefined) {
     return;

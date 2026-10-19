@@ -23,6 +23,9 @@ Primitive、VA 和 DrawCommand，同时保持独立 ID、颜色、显隐、实�
 
 ## 整体验收与风险
 
+B3 已完成：[贴地线 draw call 合批](2026-10-19-b3-ground-line-draws.md)。对照原生
+GroundPolylinePrimitive 补齐 fragment footprint 判定，使 ground line 命令按 VA 而非实例数增长；B1/B2 checkpoint 保留。
+
 - 不再要求每个普通静态业务对象对应一个 Primitive；保留原有单 geometry API。
 - 合批对象维持独立业务 ID；颜色/显隐修改不重建几何。
 - 大坐标使用 DOUBLE 和原生 high/low 编码；不进入 Globe 的 2D 投影或 IDL 路径。
