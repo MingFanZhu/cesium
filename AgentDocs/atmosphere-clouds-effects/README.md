@@ -2,14 +2,18 @@
 
 ## Status
 
-- Latest standalone checkpoint: [Planar 超高空大气边界精度](plans/2026-10-15-planar-high-altitude-precision.md)
+- Latest standalone checkpoint: [南京综合环境调试示例](plans/2026-10-19-integrated-environment-example.md) — completed。
+  双世界 39 个环境参数、引擎默认值、原生 Clock/Timeline 和球面图层选择器；两项综合 E2E、目录检查、布局及生命周期验证通过。
+  [示例评审](reviews/2026-10-19-integrated-environment-example.md)已完成；无产品或 upstream/SGP 改动。
+- Current handoff: 新入口 `Test/AdvancedEnvironment/综合环境.html?world=globe|planar` 已加入目录，可用于后续环境调试；未激活产品实现阶段。
+- Previous standalone checkpoint: [Planar 超高空大气边界精度](plans/2026-10-15-planar-high-altitude-precision.md)
   — 2026-10-15 实现与技术验证完成，2026-10-16 负责人视觉验收通过；
   [技术评审](reviews/2026-10-15-planar-high-altitude-precision.md)保留两项已复现的基线 fixture 失败。
   只修正 Planar slab 数值精度，默认环境保持开启。
 - Previous standalone checkpoint: [Globe 近距离空气透视精度](plans/2026-10-12-globe-near-aerial-precision.md)
   — WebGL 街区近景水平亮线已修复；技术验证完成，2026-10-12 负责人确认消失，视觉验收通过。
   [技术评审](reviews/2026-10-12-globe-near-aerial-precision.md)记录 GPU 回归、性能与既有 strict-WebGL fixture 限制。
-- Current handoff: Planar 超高空大气精度 standalone 已关闭，代码、Specs、ADR 与验收记录
+- Previous handoff: Planar 超高空大气精度 standalone 已关闭，代码、Specs、ADR 与验收记录
   收口到 `scenegis/develop` 的独立本地提交；无 upstream / SGP 增量，未推送。
   历史背景 fixture 问题仍由环境维护负责人后续处理，未激活新的阶段。
 - Previous standalone checkpoint: [云与 TAA 配准](plans/2026-10-02-cloud-taa-registration.md) — 2026-10-08 owner approved committing the current result and moving to a new major stage; dual-world regressions and 60x playback verified; remaining strict-WebGL fixture errors retained in review; ADR-0048 / ADR-0094; no upstream delta.

@@ -3,6 +3,284 @@ import { test, expect } from "@playwright/test";
 const features = ["物理大气", "高度雾", "体积云", "日月光照", "泛光与光晕"];
 
 for (const world of ["globe", "planar"]) {
+  test(`Integrated environment ${world}: defaults, native widgets and lifecycle`, async ({
+    page,
+  }, info) => {
+    test.setTimeout(120000);
+    const errors = [];
+    const external = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") {
+        errors.push(message.text());
+      }
+    });
+    await page.route("**/*", (route) => {
+      const url = new URL(route.request().url());
+      if (url.hostname === "localhost" || url.protocol === "data:") {
+        return route.continue();
+      }
+      external.push(url.href);
+      return route.abort();
+    });
+    await page.goto(`/Test/AdvancedEnvironment/综合环境.html?world=${world}`);
+    await page.waitForFunction(() => window.example?.effects.ready);
+    const initial = await page.evaluate(async (world) => {
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const { viewer, effects, gui, environment, defaults } = window.example;
+      // Freeze only the test. Cloud time's startup value is captured before
+      // any animation ticks, independently of the native clock playback state.
+      viewer.clock.shouldAnimate = false;
+      const properties = Object.entries(
+        Object.getOwnPropertyDescriptors(
+          C.SceneGISEnvironmentEffects.prototype,
+        ),
+      )
+        .filter(([, descriptor]) => descriptor.set !== undefined)
+        .map(([name]) => name)
+        .sort();
+      const controls = gui
+        .controllersRecursive()
+        .filter((control) => control.object === effects)
+        .map((control) => control.property)
+        .sort();
+      const element = document.createElement("div");
+      element.style.cssText =
+        "width:32px;height:32px;position:absolute;left:-100px";
+      document.body.appendChild(element);
+      const reference = new C.Viewer(element, {
+        ...(world === "planar"
+          ? {
+              planarWorld: {
+                crs: "LOCAL",
+                extent: {
+                  minimumX: -100000,
+                  minimumY: -100000,
+                  maximumX: 100000,
+                  maximumY: 100000,
+                },
+                maximumLevel: 0,
+              },
+            }
+          : { baseLayer: false }),
+        useDefaultRenderLoop: false,
+        baseLayerPicker: false,
+        geocoder: false,
+        animation: false,
+        timeline: false,
+        homeButton: false,
+        navigationHelpButton: false,
+        sceneModePicker: false,
+        fullscreenButton: false,
+        infoBox: false,
+        selectionIndicator: false,
+      });
+      const mismatches = properties.filter(
+        (name) =>
+          (name === "cloudTime" ? defaults[name] : effects[name]) !==
+          reference.scene.environmentEffects[name],
+      );
+      const displayMatches =
+        viewer.scene.highDynamicRange === reference.scene.highDynamicRange &&
+        viewer.scene.postProcessStages.tonemapper ===
+          reference.scene.postProcessStages.tonemapper &&
+        viewer.scene.postProcessStages.exposure ===
+          reference.scene.postProcessStages.exposure;
+      reference.destroy();
+      element.remove();
+      const center =
+        world === "globe"
+          ? C.Cartographic.fromCartesian(viewer.camera.positionWC)
+          : new C.WebMercatorProjection().unproject(viewer.camera.positionWC);
+      return {
+        properties,
+        controls,
+        mismatches,
+        displayMatches,
+        defaultOwner: effects === viewer.scene.environmentEffects,
+        explicitEffects: viewer.scene.controllerHost._controllers.filter(
+          (controller) => controller instanceof C.SceneGISEnvironmentEffects,
+        ).length,
+        location: [
+          C.Math.toDegrees(center.longitude),
+          C.Math.toDegrees(center.latitude),
+          center.height,
+        ],
+        astronomical: environment?.directionMode,
+        reference: environment
+          ? [
+              C.Math.toDegrees(environment.originLongitude),
+              C.Math.toDegrees(environment.originLatitude),
+            ]
+          : undefined,
+        imageryCount:
+          viewer.baseLayerPicker?.viewModel.imageryProviderViewModels.length ??
+          0,
+        terrainCount:
+          viewer.baseLayerPicker?.viewModel.terrainProviderViewModels.length ??
+          0,
+      };
+    }, world);
+    expect(initial.controls).toEqual(initial.properties);
+    expect(initial.mismatches).toEqual([]);
+    expect(initial.displayMatches).toBe(true);
+    expect(initial.defaultOwner).toBe(true);
+    expect(initial.explicitEffects).toBe(0);
+    expect(initial.location[0]).toBeCloseTo(118.7969, 5);
+    expect(initial.location[1]).toBeCloseTo(32.0603, 5);
+    expect(initial.location[2]).toBeCloseTo(2500, 3);
+    await expect(
+      page.locator(".cesium-viewer-animationContainer"),
+    ).toBeVisible();
+    await expect(page.locator(".cesium-timeline-main")).toBeVisible();
+    if (world === "globe") {
+      expect(initial.imageryCount).toBeGreaterThan(10);
+      expect(initial.terrainCount).toBe(2);
+      await page.locator(".cesium-baseLayerPicker-selected").click();
+      await expect(
+        page.locator(".cesium-baseLayerPicker-dropDown"),
+      ).toBeVisible();
+      await page
+        .locator(".cesium-baseLayerPicker-item")
+        .filter({ hasText: "WGS84 Ellipsoid" })
+        .click();
+    } else {
+      expect(initial.astronomical).toBe("astronomical");
+      expect(initial.reference[0]).toBeCloseTo(118.7969, 5);
+      expect(initial.reference[1]).toBeCloseTo(32.0603, 5);
+      expect(initial.imageryCount).toBe(0);
+    }
+    const folder = (name) =>
+      page.getByRole("button", { name: new RegExp(`${name}$`) });
+    const control = (name) => page.getByLabel(name, { exact: true });
+    await folder("天空与光照").click();
+    await control("天空亮度").fill("3.25");
+    await control("天空亮度").press("Tab");
+    expect(
+      await page.evaluate(() => window.example.effects.backgroundRadianceScale),
+    ).toBe(3.25);
+    if (world === "planar") {
+      await expect(control("空气透视距离倍率")).toBeDisabled();
+    }
+    await folder("天空与光照").click();
+    await folder("高度雾").click();
+    await control("雾密度").fill("0.00004");
+    await control("雾密度").press("Tab");
+    expect(
+      await page.evaluate(() => window.example.effects.heightFogDensity),
+    ).toBe(0.00004);
+    await folder("高度雾").click();
+    await folder("体积云与云影").click();
+    await control("云质量").selectOption({ label: "低" });
+    await control("云时间（秒）").fill("42");
+    await control("云时间（秒）").press("Tab");
+    await control("体积云").check();
+    const clock = await page.evaluate(async () => {
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const { viewer, effects } = window.example;
+      viewer.useDefaultRenderLoop = false;
+      const clock = viewer.clock;
+      clock.canAnimate = true;
+      clock.clockStep = C.ClockStep.TICK_DEPENDENT;
+      const values = [effects.cloudTime];
+      clock.shouldAnimate = true;
+      clock.multiplier = 3;
+      clock.tick();
+      values.push(effects.cloudTime);
+      clock.multiplier = -2;
+      clock.tick();
+      values.push(effects.cloudTime);
+      clock.shouldAnimate = false;
+      clock.tick();
+      values.push(effects.cloudTime);
+      C.JulianDate.addHours(clock.currentTime, 1, clock.currentTime);
+      clock.tick();
+      values.push(effects.cloudTime);
+      viewer.useDefaultRenderLoop = true;
+      return values;
+    });
+    expect(clock).toEqual([42, 45, 43, 43, 3643]);
+    await folder("体积云与云影").click();
+    await folder("HDR 与曝光").click();
+    await control("HDR 显示").check();
+    await control("手动曝光").fill("2");
+    await control("手动曝光").press("Tab");
+    await folder("HDR 与曝光").click();
+    await folder("泛光与光晕").click();
+    await control("泛光").check();
+    await control("泛光强度").fill("0.2");
+    await control("泛光强度").press("Tab");
+    expect(
+      await page.evaluate(() => window.example.effects.bloomIntensity),
+    ).toBe(0.2);
+    await folder("泛光与光晕").click();
+    await page.waitForFunction(() => window.example.effects.ready);
+    await page.screenshot({ path: info.outputPath(`${world}-adjusted.png`) });
+    const beforeReset = await page.evaluate(async () => {
+      const C = await import("/Build/CesiumUnminified/index.js");
+      return C.JulianDate.toIso8601(window.example.viewer.clock.currentTime);
+    });
+    await folder("恢复环境默认值").click();
+    const restored = await page.evaluate(async () => {
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const { effects, viewer, defaults, displayDefaults } = window.example;
+      return {
+        mismatches: Object.keys(defaults).filter(
+          (key) => effects[key] !== defaults[key],
+        ),
+        hdr: viewer.scene.highDynamicRange === displayDefaults.highDynamicRange,
+        exposure:
+          viewer.scene.postProcessStages.exposure === displayDefaults.exposure,
+        time: C.JulianDate.toIso8601(viewer.clock.currentTime),
+      };
+    });
+    expect(restored).toEqual({
+      mismatches: [],
+      hdr: true,
+      exposure: true,
+      time: beforeReset,
+    });
+    await page.waitForFunction(() => window.example.effects.ready);
+    await expect(page.locator("#error")).toBeEmpty();
+    await page.screenshot({ path: info.outputPath(`${world}-defaults.png`) });
+    const disposed = await page.evaluate(() => {
+      const { viewer, effects } = window.example;
+      const clock = viewer.clock;
+      window.dispatchEvent(
+        new PageTransitionEvent("pagehide", { persisted: true }),
+      );
+      const retained = !viewer.isDestroyed();
+      window.dispatchEvent(
+        new PageTransitionEvent("pagehide", { persisted: false }),
+      );
+      window.example.destroy();
+      const time = effects.cloudTime;
+      clock.tick();
+      return {
+        retained,
+        destroyed: viewer.isDestroyed(),
+        ready: effects.ready,
+        stableTime: time === effects.cloudTime,
+        tickListeners: clock.onTick.numberOfListeners,
+        effectListeners: effects.errorEvent.numberOfListeners,
+        gui: document.querySelectorAll(".lil-gui").length,
+      };
+    });
+    expect(disposed).toEqual({
+      retained: true,
+      destroyed: true,
+      ready: false,
+      stableTime: true,
+      tickListeners: 0,
+      effectListeners: 0,
+      gui: 0,
+    });
+    expect(external).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+}
+
+for (const world of ["globe", "planar"]) {
   test(`Night stars ${world}: local assets, controls and camera`, async ({
     page,
   }) => {

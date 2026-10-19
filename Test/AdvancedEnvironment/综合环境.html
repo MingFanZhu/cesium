@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>南京 · 综合环境调试</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+    <style>
+      aside {
+        max-height: calc(100% - 150px);
+        width: 320px;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+      }
+      #controls {
+        position: static;
+        overflow: auto;
+        min-height: 0;
+        max-height: none;
+      }
+      #controls > .lil-gui {
+        width: 100%;
+      }
+      #status,
+      #error {
+        margin: 4px 0;
+      }
+      #error:empty {
+        display: none;
+      }
+      @media (max-width: 700px) {
+        aside {
+          width: 270px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>南京 · 综合环境调试</h1>
+      <p>
+        <a href="?world=globe">球面</a> · <a href="?world=planar">平面</a> ·
+        <a href="示例目录.html">环境示例目录</a>
+      </p>
+      <details>
+        <summary>使用说明</summary>
+        <p>
+          参数初值直接读取引擎默认环境。展开分组调节，输入框可输入精确值；恢复默认值保留当前视角、日期和图层。
+          泛光、光晕需同时开启 HDR。
+        </p>
+        <p>
+          底部为原生时钟和时间轴（UTC，北京时间为
+          UTC+8）。播放、倒放和拖动时间轴会同步日月、星空与云时间。
+          手动修改云时间后，从该值继续随时钟变化。
+        </p>
+        <p id="worldHelp"></p>
+      </details>
+      <p id="status" role="status">正在加载环境…</p>
+      <p id="error" role="alert"></p>
+      <div id="controls"></div>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./综合环境.js"></script>
+  </body>
+</html>
