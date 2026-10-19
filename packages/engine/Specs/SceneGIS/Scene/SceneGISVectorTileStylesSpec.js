@@ -2,6 +2,7 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  Event,
   ColorGeometryInstanceAttribute,
   PerInstanceColorAppearance,
   OrthographicFrustum,
@@ -9,6 +10,7 @@ import {
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
+  SceneGISPlanarHeightmapTerrainData,
   SceneGISPlanarPrimitive,
   SceneGISPlanarPolygonGeometry,
   SceneGISVectorTileLayer,
@@ -402,6 +404,124 @@ describe("SceneGIS/Scene/SceneGISVectorTileStyles", function () {
     scene.renderForSpecs();
     expect(layer._drawOrder[0]._resources).toBe(resources);
     expect(layer.statistics.uploads).toBe(uploads);
+  });
+
+  [false, true].forEach(function (ground) {
+    it(`bounds magnified fill fringes to a device pixel with matching picks in ${ground ? "ground" : "flat"} rendering`, async function () {
+      const world = scene.world;
+      if (ground) {
+        world.terrainProvider = {
+          tilingScheme: world.tilingScheme,
+          minimumHeight: 0,
+          maximumHeight: 0,
+          maximumLevel: 0,
+          errorEvent: new Event(),
+          getLevelMaximumGeometricError: () => 1,
+          getTileDataAvailable: () => true,
+          loadTileDataAvailability: () => undefined,
+          requestTileGeometry: () =>
+            Promise.resolve(
+              new SceneGISPlanarHeightmapTerrainData({
+                width: 2,
+                height: 2,
+                buffer: new Float32Array(4),
+              }),
+            ),
+        };
+      }
+      scene.camera.frustum = new PerspectiveFrustum({
+        fov: Math.PI / 3,
+        aspectRatio: 1,
+        near: 1,
+        far: 5000,
+      });
+      scene.camera.position = new Cartesian3(0, -200, 10);
+      scene.camera.direction = Cartesian3.normalize(
+        new Cartesian3(0, 200, -10),
+        new Cartesian3(),
+      );
+      scene.camera.up = Cartesian3.cross(
+        scene.camera.right,
+        scene.camera.direction,
+        new Cartesian3(),
+      );
+      await draw(
+        [
+          feature(
+            "area",
+            [
+              [
+                [-2048, -2048],
+                [0, -2048],
+                [0, 2048],
+                [-2048, 2048],
+              ],
+            ],
+            3,
+          ),
+        ],
+        definition("fill", { "fill-color": "red", "fill-opacity": 0.5 }),
+      );
+      await pollToPromise(() => {
+        scene.renderForSpecs();
+        return world.tilesLoaded;
+      });
+      const resources = layer._drawOrder[0]._resources;
+      const uploads = layer.statistics.uploads;
+      scene.canvas.style.width = "128px";
+      scene.canvas.style.height = "128px";
+      for (const ratio of [1, 2]) {
+        const size = 128 * ratio;
+        scene.canvas.width = size;
+        scene.canvas.height = size;
+        scene.pixelRatio = ratio;
+        if (ratio === 2) {
+          // Exercise both screen derivatives, not only an axis-aligned edge.
+          scene.camera.twistLeft(0.25);
+        }
+        scene.renderForSpecs();
+        expect(scene.drawingBufferWidth).toBe(size);
+        expect(scene.canvas.clientWidth).toBe(128);
+        const pixels = scene.context.readPixels({ width: size, height: size });
+        const slope = scene.camera.upWC.x / scene.camera.rightWC.x;
+        let softened = 0;
+        for (const row of [24, 56, 66]) {
+          const y = row * ratio;
+          const edge = size / 2 - (y + 0.5 - size / 2) * slope;
+          const edgeX = Math.floor(edge);
+          let transition = 0;
+          for (let x = edgeX - 4; x < edgeX + 8; x++) {
+            const red = pixels[(y * size + x) * 4];
+            if (red > 0 && red < 120) {
+              transition++;
+            }
+          }
+          softened += transition;
+          expect(transition)
+            .withContext(`DPR ${ratio}, row ${y}`)
+            .toBeLessThanOrEqual(2);
+          expect(pixels[(y * size + edgeX - 4) * 4]).toEqualEpsilon(128, 1);
+          expect(pixels[(y * size + edgeX + 2) * 4]).toBe(0);
+          expect(
+            scene.pick(
+              new Cartesian2((edgeX - 3.5) / ratio, (size - y - 0.5) / ratio),
+              1,
+              1,
+            )?.id.featureId,
+          ).toBe("area");
+          expect(
+            scene.pick(
+              new Cartesian2((edgeX + 2.5) / ratio, (size - y - 0.5) / ratio),
+              1,
+              1,
+            ),
+          ).toBeUndefined();
+        }
+        expect(softened).withContext(`DPR ${ratio}`).toBeGreaterThan(0);
+      }
+      expect(layer._drawOrder[0]._resources).toBe(resources);
+      expect(layer.statistics.uploads).toBe(uploads);
+    });
   });
 
   it("softens line and circle edges without changing their opaque colors", async function () {

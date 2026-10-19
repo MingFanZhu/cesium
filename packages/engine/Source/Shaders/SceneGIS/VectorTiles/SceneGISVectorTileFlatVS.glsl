@@ -23,7 +23,9 @@ void main()
     vec4 p = czm_translateRelativeToEye(position3DHigh, position3DLow);
 #ifdef SCENEGIS_VECTOR_FRINGE
     p.xy += fringe.xy * u_sceneGISVectorMetersPerPixel / czm_pixelRatio;
-    v_fringe = fringe.z;
+    // Interpolate zero in the core exactly; interpolating one can round down
+    // and lose opacity when the fragment shader normalizes a narrow fringe.
+    v_fringe = 1.0 - fringe.z;
 #endif
     gl_Position = czm_modelViewProjectionRelativeToEye * p;
     gl_Position.z = clamp(gl_Position.z, -gl_Position.w, gl_Position.w);

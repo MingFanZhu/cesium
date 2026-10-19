@@ -36,6 +36,16 @@ SCENEGIS_VECTOR_INPUT vec4 v_strokeColor;
 #endif
 #ifdef SCENEGIS_VECTOR_FRINGE
 SCENEGIS_VECTOR_INPUT float v_fringe;
+#ifdef SCENEGIS_VECTOR_GROUND
+float groundFringeAA;
+#endif
+
+float vectorFringeWidth(float fringe)
+{
+    // The ground-space envelope can span many pixels near the camera. Its
+    // derivative measures one device pixel; retain smaller distant envelopes.
+    return clamp(length(vec2(dFdx(fringe), dFdy(fringe))), 0.000001, 1.0);
+}
 #endif
 #ifdef SCENEGIS_VECTOR_LINE
 uniform float u_sceneGISVectorReferenceDepth;
@@ -95,6 +105,10 @@ float lineCoverage(float scale)
 
 void main()
 {
+#if defined(SCENEGIS_VECTOR_FRINGE) && !defined(SCENEGIS_VECTOR_GROUND)
+    // Derivatives must precede non-uniform discard, including tile clipping.
+    float fringeAA = vectorFringeWidth(v_fringe);
+#endif
 #ifdef SCENEGIS_VECTOR_GROUND
     vec2 local = groundCoordinates();
 #elif defined(SCENEGIS_VECTOR_TERRAIN_ANCHOR)
@@ -170,7 +184,11 @@ void main()
 #elif defined(SCENEGIS_VECTOR_LINE)
     out_FragColor = fill * lineCoverage(lineScale);
 #elif defined(SCENEGIS_VECTOR_FRINGE)
-    out_FragColor = fill * v_fringe;
+#ifdef SCENEGIS_VECTOR_GROUND
+    float fringeAA = groundFringeAA;
+#endif
+    float fringeCoverage = clamp(1.0 - v_fringe / fringeAA, 0.0, 1.0);
+    out_FragColor = fill * fringeCoverage;
 #else
     out_FragColor = fill;
 #endif

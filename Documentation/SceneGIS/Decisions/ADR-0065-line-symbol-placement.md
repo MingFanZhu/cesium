@@ -71,3 +71,25 @@ camera/zoom/cover 变化只在 normal update 重投影、避让与发布；缓�
 仅对相机推导的 style zoom 在距整数小于 1e-10 时吸附，连续 zoom 与显式 Style.evaluateLayer 输入不量化。
 使用原有五个公共入口；unsupported shaping、Polygon placement、variable anchor、
 icon-text-fit、SDF icons 与 terrain/Globe 保持显式后续边界。
+
+## 2026-10-19：近景贴地尺寸上限
+
+本节修订上述 2026-09-14 map-pitch 尺寸规律。近地浅俯角时，视轴参考点可以比可见
+近处锚点远数十倍；原 blend 虽缩小地面字形，经过透视后仍产生
+`0.5 + 0.5 * referenceDepth / anchorDepth` 的无界近景放大。
+
+透视 map-pitched text/icon 在沿线排布前使用
+`metersPerPixel = min(referenceMpp, 1 / sigmaMax(J))`，其中 `J` 是锚点处从地图米到 CSS
+屏幕坐标的二维 Jacobian，`sigmaMax` 为其最大奇异值。用相邻一个地图米的既有地表取样
+形成局部基向量，并对当前投影矩阵及透视除法求导，包含离轴伸长、Globe 局部度量和地形坡度。
+只用 anchor/reference 深度比会漏掉宽视场离轴伸长，不能作为屏幕尺寸上限的依据。
+
+该统一比例抑制局部过度伸长，同时保留倾斜压缩和道路弯曲；远处沿用参考地面尺寸自然缩小，
+不再保留旧的 0.5 远景 blend。它不将两个方向分别拉伸到固定宽高，不引入俯角阈值、
+历史帧状态或 loaded tile level 驱动字号。有限字形跨越明显深度/地形变化时仍是局部近似，
+不保证所有字形边长严格小于或等于标称字号，也不消除 glyph 贴地造成的压扁。
+
+Geometry、glyph advance 和 collision 共用同一比例，当前 draw/pick 继续一致；viewport
+对齐和正交保持既有路径，style zoom 与 source SSE 不变。缓存继续按实际几何尺度更新，
+没有新增 GPU 资源、渲染通道或 Worker 协议。修复与验证见
+[有界计划](../../../AgentDocs/vector-tiles/plans/2026-10-19-near-view-style-scale.md)。

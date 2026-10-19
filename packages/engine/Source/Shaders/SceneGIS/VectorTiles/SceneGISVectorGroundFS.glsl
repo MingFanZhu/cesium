@@ -44,12 +44,26 @@ float planarGroundEdge(vec2 a, vec2 b, vec2 local)
 
 vec2 groundCoordinates()
 {
+#ifdef SCENEGIS_VECTOR_FRINGE
+#ifdef SCENEGIS_VECTOR_GLOBE_TERRAIN
+    vec3 fringe = v_terrainFringe;
+#else
+    vec3 fringe = vec3(groundVertex(v_groundIndices.x, 0).w,
+        groundVertex(v_groundIndices.y, 0).w, groundVertex(v_groundIndices.z, 0).w);
+#endif
+    // Flat per-triangle attributes make this branch uniform within a primitive.
+    // Only varying fringes need derivatives; constant cores retain early culling.
+    bool deferDiscard = any(notEqual(fringe, fringe.xxx));
+#else
+    const bool deferDiscard = false;
+#endif
 #ifdef SCENEGIS_VECTOR_PLANAR_TRANSPARENT
     float depth = texture(u_sceneGISPlanarVectorDepth, gl_FragCoord.xy / czm_viewport.zw).r;
 #else
     float depth = czm_unpackDepth(texture(czm_globeDepthTexture, gl_FragCoord.xy / czm_viewport.zw));
 #endif
-    if (depth == 0.0 || depth == 1.0) discard;
+    bool rejected = depth == 0.0 || depth == 1.0;
+    if (rejected && !deferDiscard) discard;
 #ifdef SCENEGIS_VECTOR_PLANAR_TRANSPARENT
     vec4 eye = sceneGISPlanarVectorEye(gl_FragCoord.xy, depth);
 #else
@@ -79,7 +93,8 @@ vec2 groundCoordinates()
 #endif
     float viewDepth = -eye.z;
     groundViewDepth = viewDepth;
-    if (viewDepth <= u_sceneGISVectorDepthRange.x || viewDepth > u_sceneGISVectorDepthRange.y) discard;
+    rejected = rejected || viewDepth <= u_sceneGISVectorDepthRange.x || viewDepth > u_sceneGISVectorDepthRange.y;
+    if (rejected && !deferDiscard) discard;
 #ifdef SCENEGIS_VECTOR_GLOBE_TERRAIN
     vec2 a = v_terrainAB.xy, b = v_terrainAB.zw, c = v_terrainC.xy;
 #else
@@ -90,9 +105,10 @@ vec2 groundCoordinates()
 #ifdef SCENEGIS_VECTOR_GLOBE
     vec3 globeLocal = globeLocalPosition(eye.xyz, v_groundFrame);
     vec2 approximate = globeFrame(v_groundFrame, 0).xy + globeLocal.xy / globeFrame(v_groundFrame, 3).zw;
-    if (groundCross(c - b, approximate - b) < -v_globeLinearError * length(c - b) ||
+    rejected = rejected || groundCross(c - b, approximate - b) < -v_globeLinearError * length(c - b) ||
         groundCross(a - c, approximate - c) < -v_globeLinearError * length(a - c) ||
-        groundCross(b - a, approximate - a) < -v_globeLinearError * length(b - a)) discard;
+        groundCross(b - a, approximate - a) < -v_globeLinearError * length(b - a);
+    if (rejected && !deferDiscard) discard;
     vec2 local = globeCoordinates(globeLocal, v_groundFrame);
 #else
     vec2 local = (czm_inverseModelView * eye).xy;
@@ -106,14 +122,15 @@ vec2 groundCoordinates()
     vec3 edges = vec3(planarGroundEdge(b, c, local), planarGroundEdge(c, a, local), planarGroundEdge(a, b, local));
 #endif
 #ifdef SCENEGIS_VECTOR_GLOBE
-    if (!groundEdge(edges.x, c - b) || !groundEdge(edges.y, a - c) || !groundEdge(edges.z, b - a)) discard;
+    rejected = rejected || !groundEdge(edges.x, c - b) || !groundEdge(edges.y, a - c) || !groundEdge(edges.z, b - a);
 #else
     // Match the rasterized prism's edge ownership in window coordinates, including camera roll.
     mat2 localToWindow = inverse(mat2(dFdx(local), dFdy(local)));
-    if (!groundEdge(edges.x, localToWindow * (c - b)) ||
+    rejected = rejected || !groundEdge(edges.x, localToWindow * (c - b)) ||
         !groundEdge(edges.y, localToWindow * (a - c)) ||
-        !groundEdge(edges.z, localToWindow * (b - a))) discard;
+        !groundEdge(edges.z, localToWindow * (b - a));
 #endif
+    if (rejected && !deferDiscard) discard;
     float area = groundCross(b - a, c - a);
     if (area <= 0.0) discard;
     vec3 weights = edges / area;
@@ -142,12 +159,15 @@ vec2 groundCoordinates()
     v_pickColor = groundFetch(u_sceneGISGroundPicks, u_sceneGISGroundPickSize, token);
 #endif
 #ifdef SCENEGIS_VECTOR_FRINGE
-#ifdef SCENEGIS_VECTOR_GLOBE_TERRAIN
-    v_fringe = dot(weights, v_terrainFringe);
-#else
-    v_fringe = dot(weights, vec3(groundVertex(v_groundIndices.x, 0).w,
-        groundVertex(v_groundIndices.y, 0).w, groundVertex(v_groundIndices.z, 0).w));
-#endif
+    // Preserve zero core distance exactly. Independent Globe edge inversions
+    // can leave a small residual in the sum of barycentric weights.
+    v_fringe = (1.0 - fringe.x) - dot(weights.yz, fringe.yz - fringe.xx);
+    groundFringeAA = 1.0;
+    if (deferDiscard) {
+        groundFringeAA = vectorFringeWidth(v_fringe);
+    }
+    // Keep helper invocations alive until all coverage derivatives are computed.
+    if (rejected) discard;
 #endif
 #ifdef SCENEGIS_VECTOR_LINE
 #ifdef SCENEGIS_VECTOR_GLOBE_TERRAIN

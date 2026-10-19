@@ -117,7 +117,8 @@ const layout = {
 
 rotation auto 在 point 为 viewport、沿线为 map；pitch auto 跟随 rotation。
 map pitch 的四角是真实世界顶点，透视时随地面缩短和缩放；viewport pitch 的尺寸为 CSS pixels。
-map-pitched 文字和图标还按 anchor 与视轴参考点的距离做部分透视补偿，缓和近景过大和远景过小；
+map-pitched 文字和图标按 anchor 处的实际二维投影限制近景伸长，包含宽视场的离轴变化；
+远处保持参考地面尺寸并自然透视缩小，不按俯角切换字号，也不以 source tile level 代替 style zoom。
 字号、沿线间距、碰撞和拾取使用同一地面比例。它仍保留透视和倾斜压缩，不保证固定屏幕尺寸；
 正交及中心参考比例保持，具体公式与 MapLibre 兼容边界见 ADR-0065。
 文字按当前投影方向应用 keep-upright；箭头默认 icon-keep-upright=false，保留道路方向，

@@ -328,7 +328,7 @@ function geometry(scene, candidate, shaped, text, metersPerPixel) {
   let { plane } = settings;
   const { mapPitch, along, rotation, angle, flip, maxAngle } = settings;
   if (mapPitch) {
-    metersPerPixel *= perspectiveScale(scene, candidate.position);
+    metersPerPixel = mapMetersPerPixel(scene, candidate, metersPerPixel);
   }
   let cached = shaped._projectionGeometry;
   const reusable = mapPitch || !along;
@@ -473,7 +473,7 @@ function collision(scene, candidate, shaped, text, metersPerPixel) {
   }
   const { mapPitch, along, angle, flip } = settings;
   if (mapPitch) {
-    metersPerPixel *= perspectiveScale(scene, candidate.position);
+    metersPerPixel = mapMetersPerPixel(scene, candidate, metersPerPixel);
   }
   let plane = settings.plane;
   let proxies;
@@ -578,16 +578,62 @@ function collision(scene, candidate, shaped, text, metersPerPixel) {
   return { boxes };
 }
 
-function perspectiveScale(scene, point) {
+const anchorClip = new Cartesian4();
+const axisClip = new Cartesian4();
+const pixelAxisX = new Cartesian2();
+const pixelAxisY = new Cartesian2();
+
+function screenDerivative(scene, candidate, x, y, result) {
+  const axis = terrainPoint(scene, x, y);
+  Cartesian3.subtract(axis, candidate.position, axis);
+  const camera = scene.camera;
+  axisClip.x = Cartesian3.dot(axis, camera.rightWC);
+  axisClip.y = Cartesian3.dot(axis, camera.upWC);
+  axisClip.z = -Cartesian3.dot(axis, camera.directionWC);
+  axisClip.w = 0;
+  Matrix4.multiplyByVector(camera.frustum.projectionMatrix, axisClip, axisClip);
+  // Differentiate the perspective divide at the anchor, including off-axis
+  // stretch. A finite screen-space difference would distort very near labels.
+  result.x =
+    ((axisClip.x - (anchorClip.x / anchorClip.w) * axisClip.w) / anchorClip.w) *
+    (scene.canvas.clientWidth * 0.5);
+  result.y =
+    ((axisClip.y - (anchorClip.y / anchorClip.w) * axisClip.w) / anchorClip.w) *
+    (scene.canvas.clientHeight * 0.5);
+}
+
+function mapMetersPerPixel(scene, candidate, metersPerPixel) {
   if (scene.camera.frustum.projectionMatrix[15] !== 0) {
-    return 1;
+    return metersPerPixel;
   }
-  // MapLibre's map-pitched symbol compensation blends viewport and ground
-  // scaling. Apply it before bending so glyph spacing and collision agree.
-  return Math.min(
-    4,
-    Math.max(0, 0.5 + (0.5 * depth(scene, point)) / scene.referenceDepth),
+  const camera = scene.camera;
+  const position = Cartesian3.subtract(
+    candidate.position,
+    camera.positionWC,
+    new Cartesian3(),
   );
+  anchorClip.x = Cartesian3.dot(position, camera.rightWC);
+  anchorClip.y = Cartesian3.dot(position, camera.upWC);
+  anchorClip.z = -Cartesian3.dot(position, camera.directionWC);
+  anchorClip.w = 1;
+  Matrix4.multiplyByVector(
+    camera.frustum.projectionMatrix,
+    anchorClip,
+    anchorClip,
+  );
+  const anchor = candidate.anchor.position;
+  // Sample the existing surface in map metres; this includes local Globe metric
+  // and terrain slope without treating the style reference as a local pixel.
+  screenDerivative(scene, candidate, anchor.x + 1, anchor.y, pixelAxisX);
+  screenDerivative(scene, candidate, anchor.x, anchor.y + 1, pixelAxisY);
+  const xx = Cartesian2.magnitudeSquared(pixelAxisX);
+  const yy = Cartesian2.magnitudeSquared(pixelAxisY);
+  const xy = Cartesian2.dot(pixelAxisX, pixelAxisY);
+  const stretch = Math.sqrt(0.5 * (xx + yy + Math.hypot(xx - yy, 2 * xy)));
+  // The largest singular value bounds local stretch in every map direction.
+  // A single scale preserves foreshortening; distant labels keep their ground
+  // size and shrink naturally. Bending and collision use this same scale.
+  return Math.min(metersPerPixel, 1 / stretch);
 }
 
 /** Separates current glyph drawing from placement collision envelopes. @private */

@@ -1353,12 +1353,13 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     );
   });
 
-  it("compensates near and far road-label sizes at shallow pitch while preserving center and orthographic scale", async function () {
+  it("bounds near road-label sizes at shallow pitch while preserving far, center and orthographic scale", async function () {
     const pitch = (5 * Math.PI) / 180;
     const locations = [
-      { y: -40 / Math.cos(pitch), text: "A", scale: 0.75 },
+      { y: -68 / Math.cos(pitch), text: "AAAA", scale: 0.15 },
+      { y: -40 / Math.cos(pitch), text: "A", scale: 0.5 },
       { y: 0, text: "AA", scale: 1 },
-      { y: 80 / Math.cos(pitch), text: "AAA", scale: 1.5 },
+      { y: 80 / Math.cos(pitch), text: "AAA", scale: 1 },
     ];
     spyOn(source, "requestTile").and.resolveTo(
       tile(
@@ -1402,7 +1403,7 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     const runtime = layer._symbols;
     const atlas = [...runtime.assets.pages.values()][0].texture;
     const check = (orthographic) => {
-      expect(runtime._placed.length).toBe(3);
+      expect(runtime._placed.length).toBe(4);
       for (const { text, scale } of locations) {
         const c = runtime._placed.find((c) => c.text === text);
         const quad = c._geometry.text.quads[0];
@@ -1416,6 +1417,15 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
           orthographic ? 1 : scale,
           8,
         );
+        if (!orthographic && scale < 1) {
+          const corners = c.projected.text.quads[0].corners;
+          const width = Math.hypot(
+            corners[1][0] - corners[0][0],
+            corners[1][1] - corners[0][1],
+          );
+          // Inspect actual projected glyphs, including their corner depths.
+          expect(width / (box[2] - box[0])).toBeLessThan(1.15);
+        }
         const envelope = Projection.collision(
           runtime._projection,
           c,
@@ -1439,6 +1449,45 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     runtime._placed.forEach((c, i) =>
       expect(c._geometry.text.quads).toBe(quads[i]),
     );
+    // Sweep a fixed camera position without waiting for placement snapshots.
+    // Published glyphs must use each current view, including near the horizon.
+    // Keep the small fixture above the style's minzoom throughout the sweep.
+    scene.camera.frustum.fov = (19 * Math.PI) / 180;
+    for (let i = 0; i <= 32; i++) {
+      const angle = ((1.09 + (6.91 * i) / 32) * Math.PI) / 180;
+      scene.camera.direction = new Cartesian3(
+        0,
+        Math.cos(angle),
+        -Math.sin(angle),
+      );
+      scene.camera.up = new Cartesian3(0, Math.sin(angle), Math.cos(angle));
+      scene.renderForSpecs();
+      let near = 0;
+      for (const candidate of runtime._placed) {
+        const delta = Cartesian3.subtract(
+          candidate.position,
+          scene.camera.positionWC,
+          new Cartesian3(),
+        );
+        const depth = Cartesian3.dot(delta, scene.camera.directionWC);
+        if (!candidate._visible || depth >= layer._referenceDepth) {
+          continue;
+        }
+        near++;
+        const corners = candidate.projected.text.quads[0].corners;
+        const box = candidate.shaped.text.quads[0].box;
+        expect(
+          Math.hypot(
+            corners[1][0] - corners[0][0],
+            corners[1][1] - corners[0][1],
+          ) /
+            (box[2] - box[0]),
+        )
+          .withContext(`pitch ${angle}, text ${candidate.text}`)
+          .toBeLessThan(1.15);
+      }
+      expect(near).toBeGreaterThan(0);
+    }
     scene.camera.frustum = new OrthographicFrustum({
       width: 128,
       aspectRatio: 1,
@@ -1449,6 +1498,77 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     check(true);
     expect([...runtime.assets.pages.values()][0].texture).toBe(atlas);
     expect(layer.statistics.symbolFailures).toBe(0);
+  });
+
+  it("limits off-axis map glyph stretch using the actual projection", function () {
+    const pitch = (5 * Math.PI) / 180;
+    scene.camera.frustum = new PerspectiveFrustum({
+      fov: (2 * Math.PI) / 3,
+      aspectRatio: 1,
+      near: 1,
+      far: 1000,
+    });
+    scene.camera.position = new Cartesian3(
+      0,
+      -80 * Math.cos(pitch),
+      80 * Math.sin(pitch),
+    );
+    scene.camera.direction = new Cartesian3(
+      0,
+      Math.cos(pitch),
+      -Math.sin(pitch),
+    );
+    scene.camera.up = new Cartesian3(0, Math.sin(pitch), Math.cos(pitch));
+    const projection = Projection.snapshot(scene, undefined, 80);
+    const metersPerPixel =
+      (160 * Math.tan(Math.PI / 3)) / scene.canvas.clientWidth;
+    for (const x of [0, 18]) {
+      const position = new Cartesian3(x, -68 / Math.cos(pitch), 0);
+      const candidate = {
+        anchor: { position },
+        position,
+        screen: Projection.visible(projection, position),
+        evaluated: {
+          layout: {
+            "symbol-placement": "point",
+            "text-rotation-alignment": "map",
+            "text-pitch-alignment": "map",
+            "text-rotate": 56,
+            "text-max-angle": 45,
+          },
+        },
+      };
+      expect(candidate.screen).toBeDefined();
+      const shaped = {
+        box: [-4, -4, 4, 4],
+        quads: [{ box: [-4, -4, 4, 4], page: 0, rect: [0, 0, 8, 8], scale: 1 }],
+      };
+      const projected = Projection.shape(
+        projection,
+        candidate,
+        shaped,
+        true,
+        metersPerPixel,
+      );
+      const q = projected.quads[0].corners;
+      // The depth-only cap stretches this 8 px edge to 14.09 px at x=18.
+      expect(Math.hypot(q[1][0] - q[0][0], q[1][1] - q[0][1]))
+        .withContext(`anchor x=${x}`)
+        .toBeLessThan(8.8);
+      const envelope = Projection.collision(
+        projection,
+        candidate,
+        shaped,
+        true,
+        metersPerPixel,
+      ).boxes[0];
+      for (const [px, py] of q) {
+        expect(px).toBeGreaterThanOrEqual(envelope[0]);
+        expect(px).toBeLessThanOrEqual(envelope[2]);
+        expect(py).toBeGreaterThanOrEqual(envelope[1]);
+        expect(py).toBeLessThanOrEqual(envelope[3]);
+      }
+    }
   });
 
   it("rejects short and sharp paths and suppresses repeated names without suppressing distinct names", async function () {

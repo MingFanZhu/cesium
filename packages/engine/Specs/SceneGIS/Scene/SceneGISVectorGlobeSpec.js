@@ -225,6 +225,62 @@ describe("SceneGIS/Scene/SceneGISVectorGlobe", function () {
       expect(scene.pick(new Cartesian2(138, 200), 1, 1)).toBeUndefined();
     });
   });
+  [0, 100].forEach(function (height) {
+    it(`bounds magnified Globe fill fringes on the current surface at height ${height}`, async function () {
+      if (height) {
+        globe.terrainProvider = new CustomHeightmapTerrainProvider({
+          width: 16,
+          height: 16,
+          callback: () => new Float32Array(256).fill(height),
+        });
+      }
+      scene.camera.lookAt(
+        Coordinates.position(target.x, target.y, height),
+        new HeadingPitchRange(0, (-1.09 * Math.PI) / 180, 3391),
+      );
+      scene.camera.lookAtTransform(Matrix4.IDENTITY);
+      scene.camera.frustum.fov = Math.PI / 3;
+      scene.camera.frustum.far = 5000;
+      const layer = add(
+        [feature(3, [[0, 0, 2048, 0, 2048, 4096, 0, 4096]], "area")],
+        [
+          {
+            id: "area",
+            type: "fill",
+            paint: { "fill-color": "red", "fill-opacity": 0.5 },
+          },
+        ],
+      );
+      await ready(layer);
+      const resources = layer._drawOrder.map((batch) => batch._resources);
+      const uploads = layer.statistics.uploads;
+      const pixels = scene.context.readPixels({ width: 256, height: 256 });
+      for (const y of [56, 112]) {
+        let transition = 0;
+        for (let x = 120; x < 152; x++) {
+          const red = pixels[(y * 256 + x) * 4];
+          if (red > 0 && red < 120) {
+            transition++;
+          }
+        }
+        expect(transition).withContext(`row ${y}`).toBeLessThanOrEqual(2);
+        expect(pixels[(y * 256 + 124) * 4])
+          .withContext(`core row ${y}`)
+          .toEqualEpsilon(128, 1);
+        expect(pixels[(y * 256 + 131) * 4]).toBe(0);
+      }
+      expect(scene.pick(new Cartesian2(124.5, 199.5), 1, 1)?.id.featureId).toBe(
+        "area",
+      );
+      expect(scene.pick(new Cartesian2(131.5, 199.5), 1, 1)).toBeUndefined();
+      scene.renderForSpecs();
+      expect(layer._drawOrder.map((batch) => batch._resources)).toEqual(
+        resources,
+      );
+      expect(layer.statistics.uploads).toBe(uploads);
+    });
+  });
+
   it("dynamic rules update Globe drawing and picking without replacing the layer or sources", async function () {
     const layer = add(
       [feature(3, [[1400, 1400, 2700, 1400, 2700, 2700, 1400, 2700]])],

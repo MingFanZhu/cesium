@@ -105,6 +105,27 @@ Fill interior 保持 earcut triangles；隐式 AA 使用 polygon/hole 边界外�
 不同 feature 的重叠继续 source-over，几何自相交不额外引入隐式 union。
 Circle blur 为相对外半径的软边距离，device-pixel AA 保证高 DPR 下合理的边缘覆盖。
 
+### 2026-10-19：填充边缘的实际屏幕覆盖
+
+Fill fringe 的参考地面像素包络在近地浅俯角下可能被透视放大为多像素模糊带。
+保留原 fringe 几何作为保守包络。插值 `d = 1 - coverage`，以其屏幕梯度长度 `g` 计算
+`clamp(1 - d / clamp(g, 1e-6, 1), 0, 1)`。
+放大的外侧过渡收紧到一个 device pixel；原先不足一像素的远景包络保持。
+Core 插值精确的零，避免 GPU 对常值 1 的透视插值舍入导致核心颜色变淡；
+ground 使用保持常值的 affine interpolation，避免独立曲面边逆投影的重心权重和残差。
+微小正分母只避免常值 core 的 0/0，不用增加 epsilon 或颜色容差掩盖插值误差。
+
+按 [GLSL ES 3.00 §6.4](https://registry.khronos.org/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf)，
+导数必须先于非一致 `discard`：flat 在 main 入口求导；ground 对变化的 fringe 延后原有
+深度/区域/边界剔除，求导后再裁剪。常值 core 不求导，保留提前剔除。
+这是 per-primitive 属性判定，不是俯角阈值；变化 fringe 的被拒片元会多做曲面反投影，成本需实测。
+
+Flat、Planar ground、Globe 与 native 派生 pick 共用既有 fragment source，颜色、alpha、
+要素顺序和 holes 保持同一覆盖协议。不增加 VA、sampler、uniform、pass 或几何重建，
+不扩大远景包络，不以该修复宣称解决整片地表的空气透视或几何简化。
+Style zoom、source SSE、实际边界坐标与线宽契约保持；见
+[修复计划](../../../AgentDocs/vector-tiles/plans/2026-10-19-near-view-style-scale.md)。
+
 ## Qualification and limits
 
 默认画风发生变化，新增 Test 样式图集需负责人视觉确认；自动化覆盖端点/拐角/gap/dash、

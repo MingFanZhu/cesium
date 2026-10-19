@@ -494,6 +494,8 @@ Line width/gap/offset 从参考平面的 CSS pixel 换算为米，再参与投�
 俯视缩放保持参考宽度；近处 width/gap/blur 的解析覆盖抑制额外透视放大，远处仍透视收缩。
 Offset 和 dash/pattern 的纵向 station 不随此补偿变化，正 offset 向线方向右侧移动。
 Circle 保持屏幕对齐与 CSS 尺寸。Fill AA 关闭时仅绘制 interior，显式 outline 也遵循该开关。
+Fill 的隐式 fringe 按实际屏幕导数限制近处过渡带为一个 device pixel，保留远处不足一像素的原包络；
+不改变面边界、style zoom 或 SSE 选级。核心颜色不参与边缘淡出。
 内建 coverage 在关闭 MSAA/FXAA 的 Context 下验证，Map color 始终直接矢量绘制。
 
 Dash 数组交替为 dash/gap，以当前 line-width 为单位；允许零长 dash 的圆点，

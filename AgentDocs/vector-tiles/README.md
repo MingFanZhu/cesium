@@ -12,10 +12,10 @@
 | Current phase            | D2 技术完成，等待动态规则人工视觉 gate                                                                                   |
 | Active phase plan        | None；[D2](plans/2026-10-16-d2-layer-style-runtime.md) technical completed                                               |
 | Last completed phase     | D2：Layer 动态样式运行时；D1 checkpoint `7414056515`                                                                     |
-| Active standalone plan   | None                                                                                                                     |
+| Active standalone plan   | None；[近地样式尺度](plans/2026-10-19-near-view-style-scale.md) completed                                                |
 | Architecture contact     | 当前 Agent                                                                                                               |
 | Execution contact        | 当前 Agent                                                                                                               |
-| Last updated             | `2026-10-16`                                                                                                             |
+| Last updated             | `2026-10-19`                                                                                                             |
 
 ## Scope
 
@@ -62,6 +62,25 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - V3B1 ADR：[ADR-0062](../../Documentation/SceneGIS/Decisions/ADR-0062-vector-stroke-and-coverage.md)；无新增 SGP。
 
 ## Current handoff
+
+2026-10-19 负责人确认按诊断方向修复文字放大与 fill 边缘模糊，保留 SSE、不增加俯角阈值。
+[有界修复计划](plans/2026-10-19-near-view-style-scale.md) completed，技术实现与
+[方法复审](reviews/2026-10-19-near-view-style-scale.md)已完成。负责人要求质疑方法后，
+首轮深度比例 clamp 已被局部地表→屏幕 Jacobian 最大伸长约束替代；远景按负责人选择继续
+透视缩小。8 px 离轴反例由 14.09 px 恢复至 7.74 px。Fill 使用实际屏幕距离，修正导数
+执行顺序及 core 插值精度。129 项相关开发版 Specs 和 7 项最终发布版专项通过。
+原视角及 121 帧连续倾角往返已验证：26 块可见瓦片保持，无整层停绘/标注失败，
+被测近景首字形边长最大 1.0301 倍；原相机和显示配置已恢复。负责人确认效果并明确要求提交，
+本项人工 gate 通过，由 Architecture 形成独立本地 checkpoint，提交号由本文件 Git 历史定位；
+不推送。D2 的人工 gate 独立保留。
+本项 discussion 已 resolved，最新 self-review 为上述方法复审；无 upstream-owned 修改或 SGP。
+
+2026-10-19 负责人报告近地浅俯角字体放大与面变模糊。
+[同视角诊断](discussions/2026-10-19-near-view-style-scale.md)确认 source SSE 与全局 style zoom 分离：
+旧 map-pitch symbol 补偿仍保留近景放大，fill fringe 的地面像素带也随参考距离放大。
+相机位置不变，俯角由约 1.09° 改为 5° 时，参考距离由 3391 m 降为 731 m，
+近处 14px Spree 的理论标量倍率由 10.91 降为 2.32。这是修改前的历史诊断，
+后继实现与复审见上文；D2 gate 保持独立。
 
 2026-10-16 负责人确认按 [Globe 地平线样式比例计划](plans/2026-10-16-horizon-style-scale.md)
 修复中心朝天、下方有地表时整层隐藏；当前 standalone completed，负责人视觉 gate 已通过。既有 SSE cover 不变，
