@@ -101,6 +101,18 @@ RBush 中被更晚 extent 完全包含的前驱可移除，因为新节点覆盖
 Command hook 只保留轻量 extents/ID，不能延长原生 releaseGeometryInstances 所释放的几何缓冲生命周期。
 升级新增复核点为 PrimitivePipeline 的实例顺序、batchId 与 combine/pick offsets 对应关系。
 
+### B6 不改 Shader 的安全范围放宽
+
+bbox 交叠不再必然冲突，但仅当交叠矩形与双方实际填充轮廓均为空时允许合批。
+一般 polygon/polygon 不交不足以证明安全，尤其孔洞内另有独立对象时仍须隔离；area Shader 的 extent 归属协议不变。
+使用环边/矩形相交与含孔包含判定，边界接触及不能可靠证明的分离保守处理。
+
+静态规划同时计算 layer 与最后冲突前驱，排序后将前驱转为内部索引。commands 只比较此前驱是否落入当前 range，
+不在 render、pick 或属性更新时重复执行空间判断，也不保存全部相交边或闭体 buffers。
+包含剪枝仅保留可证明同时包含旧 bbox 与填充区域的情形：同一 geometry、bbox 及逐环逐点 XY 完全相同，
+或实心轴对齐矩形包含旧 bbox。XY 等价不依赖原输入 Z；不同起点/绕向不强行归一化，只会少做剪枝。
+一般凹面/孔洞的 bbox 包含不能删除前驱；升级须同时复核偏序与最后冲突前驱的传递。
+
 复核 GeometryPipeline 的 position/prevPosition/nextPosition、normal 变换，PrimitivePipeline 的
 scene3DOnly/combine/high-low 路径，BatchTable 的实例 attributes、ID 和 Primitive 生命周期。
 用不同 origin 的大坐标像素/pick 测试及对象数与命令/VA 数对照证明其仍在真实合批。

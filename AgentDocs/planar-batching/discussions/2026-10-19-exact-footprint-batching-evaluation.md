@@ -8,6 +8,7 @@
 - Baseline: `2c1aa2a22b`，B5 已完成
 - ADR: [ADR-0168](../../../Documentation/SceneGIS/Decisions/ADR-0168-planar-static-batching.md)
 - SGP: None；产品源码及 upstream-owned files 均未修改
+- Successor: [B6 安全范围放宽](../plans/2026-10-19-b6-safe-footprint-batching.md) 已实现；以下保留本次评估时的结论与数据。
 
 ## 结论
 

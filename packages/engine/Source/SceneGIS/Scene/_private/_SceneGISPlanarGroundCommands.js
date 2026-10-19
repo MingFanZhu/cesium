@@ -1,4 +1,3 @@
-import RBush from "rbush";
 import BlendingState from "../../../Scene/BlendingState.js";
 import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import DepthFunction from "../../../Scene/DepthFunction.js";
@@ -109,12 +108,12 @@ function syncBaseCommand(command, modelMatrix, boundingVolume) {
  * stencil mask, depth function, or terrain-classification pass changes.
  *
  * @param {object} owner The public planar ground primitive.
- * @param {object[]} extents The stable world XY extents in internal instance order.
  * @param {object[]} instanceIds The business IDs in the same internal order.
+ * @param {number[]} lastConflicts The last conflicting predecessor indices for areas.
  * @returns {object} The hook and stable derived command arrays.
  * @private
  */
-function createSceneGISPlanarGroundCommands(owner, extents, instanceIds) {
+function createSceneGISPlanarGroundCommands(owner, instanceIds, lastConflicts) {
   const stencilCommands = [];
   const colorCommands = [];
   const pickStencilCommands = [];
@@ -138,7 +137,7 @@ function createSceneGISPlanarGroundCommands(owner, extents, instanceIds) {
       schema.componentDatatype === ComponentDatatype.UNSIGNED_BYTE &&
       schema.normalize;
     const result = [];
-    const tree = new RBush();
+    let runStart = 0;
     let run;
     let previousColor;
     let sameColor = true;
@@ -148,7 +147,6 @@ function createSceneGISPlanarGroundCommands(owner, extents, instanceIds) {
       const color = mergeAreas
         ? primitive.getGeometryInstanceAttributes(instanceIds[i]).color
         : undefined;
-      const extent = extents[i];
       const matchesColor =
         mergeAreas &&
         color[3] === 255 &&
@@ -157,17 +155,9 @@ function createSceneGISPlanarGroundCommands(owner, extents, instanceIds) {
         color[1] === previousColor[1] &&
         color[2] === previousColor[2] &&
         color[3] === previousColor[3];
-      // Disjoint footprints never accumulate stencil counts at a surface point.
-      // Touching edges are allowed; only overlapping interiors require isolation.
-      const overlaps = tree
-        .search(extent)
-        .some(
-          (other) =>
-            extent.minX < other.maxX &&
-            extent.maxX > other.minX &&
-            extent.minY < other.maxY &&
-            extent.maxY > other.minY,
-        );
+      // The static plan includes both surface overlap and extent ownership.
+      // Attribute changes only need an index comparison, not geometry queries.
+      const overlaps = lastConflicts[i] >= runStart;
       const merge =
         run !== undefined &&
         run.index === offset.index &&
@@ -185,9 +175,8 @@ function createSceneGISPlanarGroundCommands(owner, extents, instanceIds) {
         result.push(run);
         count = 1;
         sameColor = true;
-        tree.clear();
+        runStart = i;
       }
-      tree.insert(extent);
       previousColor = color;
     }
     return result;

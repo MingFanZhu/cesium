@@ -370,6 +370,153 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundBatch", function () {
     expect(primitive._currentCommands.pickColorCommands.length).toBe(2);
   });
 
+  it("merges 1024 concave areas whose common extents contain neither footprint", function () {
+    const shapes = [
+      [
+        [0, 0],
+        [10, 0],
+        [10, 2],
+        [2, 2],
+        [2, 10],
+        [0, 10],
+      ],
+      [
+        [5, 13],
+        [13, 13],
+        [13, 5],
+        [15, 5],
+        [15, 15],
+        [5, 15],
+      ],
+    ];
+    const instances = Array.from({ length: 1024 }, (_, id) => {
+      const cell = Math.floor(id / 2);
+      const x = ((cell % 32) - 16) * 5;
+      const y = (Math.floor(cell / 32) - 8) * 5;
+      return {
+        id,
+        geometry: new SceneGISPlanarPolygonGeometry({
+          positions: shapes[id % 2].map(
+            ([a, b]) =>
+              new Cartesian3(center + x + a / 4, center + y + b / 4, 0),
+          ),
+        }),
+        attributes: attributes(
+          (id % 2 ? Color.BLUE : Color.RED).withAlpha(0.5),
+        ),
+      };
+    });
+    view(0.25, 1);
+    const expected = baseline([instances[544], instances[545]]);
+    const primitive = add(instances);
+    expect(render()).toEqual(expected);
+    expect(pick()).toEqual({ primitive, id: 544 });
+    const commands = primitive._currentCommands;
+    expect(commands.colorCommands.length).toBe(1);
+    expect(commands.pickColorCommands.length).toBe(1);
+    const current = primitive._current;
+    const va = current._va[0];
+    const command = commands.colorCommands[0];
+    primitive.getGeometryInstanceAttributes(544).color =
+      ColorGeometryInstanceAttribute.toValue(Color.CYAN);
+    expect(render()[1]).toBeGreaterThan(200);
+    primitive.getGeometryInstanceAttributes(544).show = new Uint8Array([0]);
+    expect(render().slice(0, 3)).toEqual([0, 0, 0]);
+    expect(pick()?.id).toBeUndefined();
+    view(3.5, 2, true);
+    expect(render()[2]).toBeGreaterThan(100);
+    expect(pick()).toEqual({ primitive, id: 545 });
+    expect(primitive._current).toBe(current);
+    expect(current._va[0]).toBe(va);
+    expect(commands.colorCommands[0]).toBe(command);
+    expect(commands.colorCommands.length).toBe(1);
+  });
+
+  it("matches separate concave areas at low angles with a wide terrain envelope", async function () {
+    const data = new SceneGISPlanarHeightmapTerrainData({
+      buffer: new Float32Array(4),
+      width: 2,
+      height: 2,
+    });
+    world.terrainProvider = {
+      tilingScheme: world.tilingScheme,
+      minimumHeight: -80,
+      maximumHeight: 80,
+      maximumLevel: 0,
+      errorEvent: new Event(),
+      getLevelMaximumGeometricError: () => 1,
+      requestTileGeometry: () => Promise.resolve(data),
+      getTileDataAvailable: () => true,
+      loadTileDataAvailability: () => undefined,
+    };
+    await pollToPromise(() => {
+      render();
+      return (
+        world.getTerrainHeight(new Cartesian3(center, center, 0)) !== undefined
+      );
+    });
+    const instances = [
+      [
+        [-4, -4],
+        [4, -4],
+        [4, -2],
+        [-2, -2],
+        [-2, 4],
+        [-4, 4],
+      ],
+      [
+        [0, 6],
+        [6, 6],
+        [6, 0],
+        [8, 0],
+        [8, 8],
+        [0, 8],
+      ],
+    ].map((points, id) => ({
+      id,
+      geometry: new SceneGISPlanarPolygonGeometry({
+        positions: points.map(
+          ([x, y]) => new Cartesian3(center + x, center + y, 0),
+        ),
+      }),
+      attributes: attributes((id ? Color.BLUE : Color.RED).withAlpha(0.5)),
+    }));
+    const primitive = add(instances);
+    for (const logarithmic of [false, true]) {
+      scene.logarithmicDepthBuffer = logarithmic;
+      for (const degrees of [90, 25, 5]) {
+        const angle = (degrees * Math.PI) / 180;
+        const s = Math.sin(angle),
+          c = Math.cos(angle);
+        for (const [x, y, id] of [
+          [-3, 1, 0],
+          [7, 3, 1],
+          [1, 1, undefined],
+        ]) {
+          scene.camera.setView({
+            destination: new Cartesian3(
+              center + x,
+              center + y - 12 * c,
+              12 * s,
+            ),
+            orientation: {
+              direction: new Cartesian3(0, c, -s),
+              up: new Cartesian3(0, s, c),
+            },
+          });
+          scene.camera.frustum.far = 1000;
+          primitive.show = false;
+          const expected = baseline(instances);
+          primitive.show = true;
+          expect(render()).toEqual(expected);
+          expect(pick()?.id).toBe(id);
+        }
+      }
+    }
+    expect(primitive._currentCommands.colorCommands.length).toBe(1);
+    expect(primitive._currentCommands.pickColorCommands.length).toBe(1);
+  });
+
   it("keeps projected volumes isolated through low views and linear/log depth on sloped terrain", async function () {
     const instances = [
       polygon(1),

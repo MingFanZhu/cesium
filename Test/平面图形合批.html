@@ -65,6 +65,7 @@
         <option value="ordinary">普通面 · 独立颜色</option>
         <option value="ground-area">贴地面 · 独立颜色</option>
         <option value="ground-area-overlap">贴地面 · 交错双层叠面</option>
+        <option value="ground-area-concave">贴地面 · 凹面共同空区</option>
         <option value="ground-line">贴地线 · 独立颜色与宽度</option>
       </select>
       <button id="batch">使用合批</button>
@@ -105,12 +106,32 @@
       let records;
       function createRecords(kind) {
         const overlap = kind === "ground-area-overlap";
+        const concave = kind === "ground-area-concave";
+        const paired = overlap || concave;
+        const shapes = [
+          [
+            [0, 0],
+            [10, 0],
+            [10, 2],
+            [2, 2],
+            [2, 10],
+            [0, 10],
+          ],
+          [
+            [5, 13],
+            [13, 13],
+            [13, 5],
+            [15, 5],
+            [15, 15],
+            [5, 15],
+          ],
+        ];
         return Array.from({ length: 1024 }, (_, index) => {
-          const cell = overlap ? Math.floor(index / 2) : index;
+          const cell = paired ? Math.floor(index / 2) : index;
           const offset = overlap ? (index % 2) * 2 : 0;
           const x = center + ((cell % 32) - 16) * 12 + offset;
           const y =
-            center + (Math.floor(cell / 32) - (overlap ? 8 : 16)) * 12 + offset;
+            center + (Math.floor(cell / 32) - (paired ? 8 : 16)) * 12 + offset;
           return {
             id: { index, name: `业务对象 ${index}` },
             geometry:
@@ -123,16 +144,21 @@
                     width: 2 + (index % 3) * 2,
                   })
                 : new C.SceneGISPlanarPolygonGeometry({
-                    positions: [
-                      new C.Cartesian3(x, y, 1),
-                      new C.Cartesian3(x + 9, y, 1),
-                      new C.Cartesian3(x + 9, y + 9, 1),
-                      new C.Cartesian3(x, y + 9, 1),
-                    ],
+                    positions: concave
+                      ? shapes[index % 2].map(
+                          ([a, b]) =>
+                            new C.Cartesian3(x + a * 0.75, y + b * 0.75, 1),
+                        )
+                      : [
+                          new C.Cartesian3(x, y, 1),
+                          new C.Cartesian3(x + 9, y, 1),
+                          new C.Cartesian3(x + 9, y + 9, 1),
+                          new C.Cartesian3(x, y + 9, 1),
+                        ],
                   }),
             attributes: {
               color: C.ColorGeometryInstanceAttribute.fromColor(
-                overlap
+                paired
                   ? (index % 2 === 0 ? C.Color.ORANGE : C.Color.CYAN).withAlpha(
                       0.55,
                     )
@@ -249,16 +275,23 @@
               ? "范围不相交的贴地面共享一条模板命令与一条颜色命令；每个对象可独立改色、显隐和拾取。重叠区域保留绘制顺序。"
               : kind === "ground-area-overlap"
                 ? "512 组双层透明面按下层、上层交错输入。跨组互不相交的面重排合批，只需两对模板/颜色命令；隐藏上层可拾取下层对象。"
-                : "贴地线从地表深度判断每个片元的线段范围，独立颜色、宽度和拾取共用一个绘制命令，无逐对象模板命令。";
+                : kind === "ground-area-concave"
+                  ? "512 对透明凹面的包围框交叠，但交叠区域在两片实际轮廓中都为空。整批共用一对模板/颜色命令，改色、显隐和拾取仍独立。"
+                  : "贴地线从地表深度判断每个片元的线段范围，独立颜色、宽度和拾取共用一个绘制命令，无逐对象模板命令。";
         document.querySelector("#picked").textContent = "点击图形查看业务 ID";
         document.querySelector("#toggle").textContent =
-          kind === "ground-area-overlap" ? "隐藏上层" : "隐藏隔列";
+          kind === "ground-area-overlap"
+            ? "隐藏上层"
+            : kind === "ground-area-concave"
+              ? "隐藏青色凹面"
+              : "隐藏隔列";
         return result;
       }
       function toggle() {
         hidden = !hidden;
         const overlap = currentKind === "ground-area-overlap";
-        for (let i = overlap ? 1 : 0; i < records.length; i += 2) {
+        const concave = currentKind === "ground-area-concave";
+        for (let i = overlap || concave ? 1 : 0; i < records.length; i += 2) {
           owners[i].getGeometryInstanceAttributes(records[i].id).show =
             C.ShowGeometryInstanceAttribute.toValue(!hidden);
         }
@@ -266,7 +299,9 @@
           ? "显示全部"
           : overlap
             ? "隐藏上层"
-            : "隐藏隔列";
+            : concave
+              ? "隐藏青色凹面"
+              : "隐藏隔列";
         frame();
       }
       const handler = new C.ScreenSpaceEventHandler(scene.canvas);
