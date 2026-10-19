@@ -2,7 +2,11 @@
 
 ## Status
 
-- Latest standalone checkpoint: [南京综合环境调试示例](plans/2026-10-19-integrated-environment-example.md) — completed。
+- Latest standalone: [高度雾完整可见段积分](plans/2026-10-19-height-fog-visible-segment.md) — implementation verified，负责人视觉判断保留。
+  移除双世界 300 km 介质截断，Globe 按误差上界裁剪稀薄尾部，每次最多 16 次密度采样；
+  当前视角、连续高度 / 倾角、精度与资源验证见[技术评审](reviews/2026-10-19-height-fog-visible-segment.md)。
+  2026-10-19 负责人要求将已验证修复形成独立本地提交，不推送。
+- Previous standalone checkpoint: [南京综合环境调试示例](plans/2026-10-19-integrated-environment-example.md) — completed。
   双世界 39 个环境参数、引擎默认值、原生 Clock/Timeline 和球面图层选择器；两项综合 E2E、目录检查、布局及生命周期验证通过。
   [示例评审](reviews/2026-10-19-integrated-environment-example.md)已完成；无产品或 upstream/SGP 改动。
 - Current handoff: 新入口 `Test/AdvancedEnvironment/综合环境.html?world=globe|planar` 已加入目录，可用于后续环境调试；未激活产品实现阶段。
@@ -31,7 +35,8 @@
   before claiming a complete strict-validation suite pass; they do not reopen the
   accepted cloud quality work automatically.
 - Previous standalone plan: [程序星空](plans/2026-09-30-procedural-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
-- Latest technical review: [Planar 超高空大气边界精度](reviews/2026-10-15-planar-high-altitude-precision.md).
+- Latest technical review: [高度雾完整可见段积分](reviews/2026-10-19-height-fog-visible-segment.md).
+- Previous technical review: [Planar 超高空大气边界精度](reviews/2026-10-15-planar-high-altitude-precision.md).
 - Previous technical review: [Globe 近距离空气透视精度](reviews/2026-10-12-globe-near-aerial-precision.md).
 - Previous technical review: [云与 TAA 配准](reviews/2026-10-02-cloud-taa-registration.md).
 - Previous technical review: [程序星空](reviews/2026-09-30-procedural-stars.md).

@@ -1,6 +1,6 @@
 const float SCENEGIS_HEIGHT_FOG_SUPPORT_TOP = 60000.0;
-const float SCENEGIS_HEIGHT_FOG_MAX_DISTANCE = 300000.0;
 const int SCENEGIS_HEIGHT_FOG_GLOBE_SAMPLE_COUNT = 16;
+const float SCENEGIS_HEIGHT_FOG_TAIL_OPTICAL_DEPTH = 1.0e-7;
 
 float sceneGISHeightFogDensityAtHeight(
     float height,
@@ -35,8 +35,6 @@ bool sceneGISHeightFogPlanarSegment(
         segmentStart = max(max(min(first, second), 0.0), startDistance);
         segmentEnd = min(max(first, second), distanceLimit);
     }
-    segmentEnd = min(
-        segmentEnd, segmentStart + SCENEGIS_HEIGHT_FOG_MAX_DISTANCE);
     return segmentEnd > segmentStart;
 }
 
@@ -93,8 +91,6 @@ bool sceneGISHeightFogGlobeSegment(
         bottomNear > segmentStart) {
         segmentEnd = min(segmentEnd, bottomNear);
     }
-    segmentEnd = min(
-        segmentEnd, segmentStart + SCENEGIS_HEIGHT_FOG_MAX_DISTANCE);
     return segmentEnd > segmentStart;
 }
 
@@ -148,6 +144,39 @@ float sceneGISHeightFogGlobeOpticalDepth(
     float heightFalloff,
     float baseHeight)
 {
+    float segmentLength = segmentEnd - segmentStart;
+    if (density <= 0.0 || segmentLength <= 0.0) {
+        return 0.0;
+    }
+    if (heightFalloff <= 1.0e-10) {
+        return min(sceneGISHeightFogDensityAtHeight(
+            rayOrigin.z, density, heightFalloff, baseHeight) * segmentLength, 80.0);
+    }
+    vec3 virtualOrigin = vec3(
+        rayOrigin.xy, SCENEGIS_BOTTOM_RADIUS + rayOrigin.z);
+    // Bound the omitted optical depth by sigma(cutoff) * the FULL visible
+    // length. This concentrates the fixed quadrature on contributing heights
+    // without discarding a distant ground segment or either limb of a tangent.
+    float cutoffHeight = baseHeight + log(
+        density * segmentLength / SCENEGIS_HEIGHT_FOG_TAIL_OPTICAL_DEPTH) /
+        heightFalloff;
+    if (cutoffHeight < 0.0) {
+        return 0.0;
+    }
+    if (cutoffHeight < SCENEGIS_HEIGHT_FOG_SUPPORT_TOP) {
+        float nearDistance;
+        float farDistance;
+        if (!sceneGISHeightFogSphereInterval(virtualOrigin, viewDirection,
+                SCENEGIS_BOTTOM_RADIUS + cutoffHeight,
+                nearDistance, farDistance)) {
+            return 0.0;
+        }
+        segmentStart = max(segmentStart, nearDistance);
+        segmentEnd = min(segmentEnd, farDistance);
+        if (segmentEnd <= segmentStart) {
+            return 0.0;
+        }
+    }
     const float nodes[8] = float[8](
         0.0950125098,
         0.2816035508,
@@ -166,8 +195,6 @@ float sceneGISHeightFogGlobeOpticalDepth(
         0.0951585117,
         0.0622535239,
         0.0271524594);
-    vec3 virtualOrigin = vec3(
-        rayOrigin.xy, SCENEGIS_BOTTOM_RADIUS + rayOrigin.z);
     float midpoint = 0.5 * (segmentStart + segmentEnd);
     float halfLength = 0.5 * (segmentEnd - segmentStart);
     float integral = 0.0;

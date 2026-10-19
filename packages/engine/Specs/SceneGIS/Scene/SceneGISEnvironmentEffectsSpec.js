@@ -17562,9 +17562,7 @@ ${hardCascadeLibrary}`;
     expect(heightFogSource).toContain("sceneGISHeightFogDirectionalSource");
     expect(heightFogSource).toContain("SCENEGIS_SOLAR_IRRADIANCE * scattering");
     expect(heightFogSource).not.toContain("sceneGISHeightFogChromaticity");
-    expect(heightFogSource).toContain(
-      "segmentStart + SCENEGIS_HEIGHT_FOG_MAX_DISTANCE",
-    );
+    expect(heightFogSource).not.toContain("SCENEGIS_HEIGHT_FOG_MAX_DISTANCE");
     expect(heightFogSource).not.toContain("backgroundRadianceScale");
     expect(heightFogSource).not.toContain("aerialRadianceScale");
     expect(backgroundFragmentSource).toContain(

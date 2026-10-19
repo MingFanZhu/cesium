@@ -167,3 +167,33 @@ multiplier或把visual failure包装成quality preset。
 ## 2026-10-12 WebGL maintenance backport
 
 Globe background and stars omit their early height-fog application. The existing Aerial pass applies fog once after transparent composition; a 50% fog retains 50%, not 25%, of a clear-sky input. Planar ordering remains unchanged. Backported from `4ee99433ab` (source decision ADR-0131); no new pass, resource or public API.
+
+## 2026-10-19 完整可见段积分修订
+
+本修订替代上文固定 `300000 m` in-medium cap 及对应验收要求；公共
+`heightFogStartDistance` 的范围和语义保持不变。336 km 高空斜视地平线时，
+射线在雾层内约 535 km，旧上限在约 21 km 高度终止，遗漏近地的主要雾量。
+Globe / Planar 均使用由真实接收距离、介质边界和 start distance 裁剪的完整可见段，
+不得再按相机俯角或固定介质长度截断。
+
+Planar 保留常量成本解析积分。Globe 对每次光学厚度积分仍最多执行 16 次
+Gauss-Legendre 密度采样；uniform fog 使用解析长度乘密度。非均匀雾先计算
+稀薄尾部的可忽略高度，再与该高度对应的球壳求交，集中原有采样预算：
+
+```text
+L = full visible segment length
+epsilonTau = 1e-7
+cutoffHeight = baseHeight + log(density * L / epsilonTau) / heightFalloff
+```
+
+裁掉的部分满足 `sigma(height) <= epsilonTau / L`，故其光学厚度总和不超过
+`epsilonTau`；这只是尾部省略误差上界，求积误差仍按原 `0.005` fog amount / `2%`
+optical depth 条件验证。球壳求交保留切线两侧的贡献，不从入层点单向截取固定距离。
+cutoff 高于原 60 km support 时保留完整段，低于地面或不与可见段相交时贡献为零。
+均匀密度分支和既有 finite/saturation guards 继续适用。
+
+默认密度、最大不透明度、光照代表点规则、合成顺序、阴影规则均不变；阴影分段
+复用同一积分函数，每次积分的预算不增加。无新增 pass、program 类别、资源、
+公共参数、uniform 或 upstream seam。改动仅位于 SceneGIS-owned Shader / Specs，
+无 SGP 增量。数值、当前场景、连续相机运动和 GPU timing 证据见
+[修复评审](../../../AgentDocs/atmosphere-clouds-effects/reviews/2026-10-19-height-fog-visible-segment.md)。
