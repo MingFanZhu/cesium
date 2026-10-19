@@ -746,7 +746,7 @@ ADR-0168 扩宽普通 wrapper 的单实例边界：`geometryInstances` 接收兼
 必须一致。拓扑与实例变换为构造快照，颜色/显隐通过 `getGeometryInstanceAttributes(id)` 更新；
 批次与单实例 bounds 通过 `getBoundingSphere(result, id)` 获取。初始化完成释放原生中间 GeometryInstance
 数组，保留后续 appearance replacement 所需的 CPU descriptor。应用按空间与 Appearance 分批；
-Entity visualizer 的逐对象动态更新粒度和 Ground 的单实例契约不因此改变。
+Entity visualizer 仍使用逐对象动态更新粒度；Ground 批次见下文。
 
 C7将public Primitive扩展到`SceneGISPlanarBoxGeometry`、`SceneGISPlanarCylinderGeometry`与
 `SceneGISPlanarEllipsoidGeometry`。三种volume使用closed、non-flat `PerInstanceColorAppearance`；Plane、
@@ -783,8 +783,13 @@ volume与dedicated SceneGIS ground-line Shader。两者都只从caller-owned ter
 `minimumHeight`/`maximumHeight`建立height envelope；无provider使用围绕Z=0的非退化padding。Provider attach、replace、
 detach只更新uniform/model transform/bounds，不替换footprint VA、index、DrawCommand或Shader，也不订阅tile、LOD或revision。
 
-Ground wrapper继续保留single logical GeometryInstance、original id、CPU attributes、bounds、single Context、same-kind
-candidate/current与exactly-once lifecycle。Pick/depth使用已建立current的命令路径；不读取actual terrain triangles、不发
+ADR-0168 为 Ground wrapper 增加同 kind 的静态 `geometryInstances`，共享一个原生 Primitive/VA/BatchTable。
+保留每项 original id、attributes、bounds，single Context、same-kind candidate/current 与 exactly-once lifecycle。
+线用 DOUBLE 点差生成 origin-independent 方向与逐顶点 width；批次共用 XY origin 与 normalized Z envelope。
+不同颜色、半透明对象和线以原生 pick offsets 隔离 stencil/color；连续同色不透明面在 classification mask
+容量内合并，picking 始终逐实例隔离。命令数依样式与类型而变，不承诺 ground 一次 draw call。
+拓扑变化重建批次，属性变化复用几何；超过 65535 顶点要求 uint element indices。
+Pick/depth使用已建立current的命令路径；不读取actual terrain triangles、不发
 terrain request、不改变SSE/cache/readiness，也不存在C9 fallback。Polyline clamp与non-extruded Polygon、Ellipse、Rectangle、
 Corridor的批准CLAMP组合使用该backend。完整决定见ADR-0023。
 

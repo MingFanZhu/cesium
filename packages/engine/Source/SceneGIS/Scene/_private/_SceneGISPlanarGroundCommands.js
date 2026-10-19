@@ -1,4 +1,5 @@
 import BlendingState from "../../../Scene/BlendingState.js";
+import ComponentDatatype from "../../../Core/ComponentDatatype.js";
 import DepthFunction from "../../../Scene/DepthFunction.js";
 import Primitive from "../../../Scene/Primitive.js";
 import StencilConstants from "../../../Scene/StencilConstants.js";
@@ -109,6 +110,52 @@ function createSceneGISPlanarGroundCommands(owner) {
   let stencilDepthRenderState;
   let colorRenderState;
   let pickRenderState;
+  let ranges;
+  let rangesDirty = true;
+
+  function updateRanges(primitive) {
+    const instances = owner._batch.instances;
+    const offsets = primitive._pickOffsets;
+    const schema = instances[0].attributes.color;
+    const mergeAreas =
+      owner._geometryKind === "polygon" &&
+      schema.componentDatatype === ComponentDatatype.UNSIGNED_BYTE &&
+      schema.normalize;
+    const result = [];
+    let run;
+    let previousColor;
+    let count = 0;
+    for (let i = 0; i < offsets.length; i++) {
+      const offset = offsets[i];
+      const color = mergeAreas
+        ? primitive.getGeometryInstanceAttributes(instances[i].id).color
+        : undefined;
+      // The classification bits count closed-volume crossings. A full wrap would
+      // erase coverage when all footprints overlap, even when their colors match.
+      const merge =
+        mergeAreas &&
+        color[3] === 255 &&
+        previousColor !== undefined &&
+        count < StencilConstants.CLASSIFICATION_MASK &&
+        run.index === offset.index &&
+        run.offset + run.count === offset.offset &&
+        color[0] === previousColor[0] &&
+        color[1] === previousColor[1] &&
+        color[2] === previousColor[2] &&
+        color[3] === previousColor[3];
+      if (merge) {
+        run.count += offset.count;
+        count++;
+      } else {
+        run = { ...offset };
+        result.push(run);
+        count = 1;
+      }
+      previousColor = color;
+    }
+    ranges = result;
+    rangesDirty = false;
+  }
 
   function updateAndQueue(
     primitive,
@@ -125,15 +172,27 @@ function createSceneGISPlanarGroundCommands(owner) {
     Primitive._updateBoundingVolumes(primitive, frameState, modelMatrix, false);
     const boundingVolumes = primitive._boundingSphereWC;
     const commandList = frameState.commandList;
-    const length = sourceColorCommands.length;
-    stencilCommands.length = length;
-    colorCommands.length = length;
-    pickStencilCommands.length = length;
-    pickColorCommands.length = length;
+    const batch = owner._batch !== undefined;
+    if (batch && frameState.passes.render && rangesDirty) {
+      updateRanges(primitive);
+    }
+    const activeRanges = batch
+      ? frameState.passes.render
+        ? ranges
+        : primitive._pickOffsets
+      : undefined;
+    const length = activeRanges?.length ?? sourceColorCommands.length;
+    if (frameState.passes.render) {
+      stencilCommands.length = colorCommands.length = length;
+    } else if (frameState.passes.pick && !frameState.passes.depth) {
+      pickStencilCommands.length = pickColorCommands.length = length;
+    }
 
     for (let i = 0; i < length; ++i) {
-      const source = sourceColorCommands[i];
-      syncBaseCommand(source, modelMatrix, boundingVolumes[i]);
+      const range = activeRanges?.[i];
+      const sourceIndex = range?.index ?? i;
+      const source = sourceColorCommands[sourceIndex];
+      syncBaseCommand(source, modelMatrix, boundingVolumes[sourceIndex]);
 
       if (frameState.passes.render) {
         const stencil = DrawCommand.shallowClone(source, stencilCommands[i]);
@@ -151,6 +210,10 @@ function createSceneGISPlanarGroundCommands(owner) {
         color.cull = false;
         color.pickId = undefined;
         colorCommands[i] = color;
+        if (batch) {
+          stencil.offset = color.offset = range.offset;
+          stencil.count = color.count = range.count;
+        }
 
         commandList.push(stencil, color);
       } else if (frameState.passes.pick && !frameState.passes.depth) {
@@ -174,6 +237,10 @@ function createSceneGISPlanarGroundCommands(owner) {
         color.pickOnly = false;
         color.pickId = primitive.allowPicking ? "v_pickColor" : undefined;
         pickColorCommands[i] = color;
+        if (batch) {
+          stencil.offset = color.offset = range.offset;
+          stencil.count = color.count = range.count;
+        }
 
         commandList.push(stencil, color);
       }
@@ -182,6 +249,9 @@ function createSceneGISPlanarGroundCommands(owner) {
 
   return {
     updateAndQueue,
+    invalidate: function () {
+      rangesDirty = true;
+    },
     stencilCommands,
     colorCommands,
     pickStencilCommands,

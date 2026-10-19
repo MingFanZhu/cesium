@@ -9,6 +9,7 @@ import Appearance from "../../Scene/Appearance.js";
 import Material from "../../Scene/Material.js";
 import PerInstanceColorAppearance from "../../Scene/PerInstanceColorAppearance.js";
 import PolylineMaterialAppearance from "../../Scene/PolylineMaterialAppearance.js";
+import PolylineColorAppearance from "../../Scene/PolylineColorAppearance.js";
 import Primitive from "../../Scene/Primitive.js";
 import SceneGISPlanarPolygonGeometry from "../Core/SceneGISPlanarPolygonGeometry.js";
 import SceneGISPlanarPolylineGeometry from "../Core/SceneGISPlanarPolylineGeometry.js";
@@ -117,12 +118,20 @@ function cloneAttributes(source = {}) {
 
 function validateAppearance(geometryKind, appearance, attributes) {
   if (geometryKind === "polyline") {
+    if (appearance instanceof PolylineColorAppearance) {
+      if (attributes.color?.value?.length !== 4) {
+        throw new DeveloperError(
+          "PolylineColorAppearance requires a color instance attribute.",
+        );
+      }
+      return;
+    }
     if (
       !(appearance instanceof PolylineMaterialAppearance) ||
       appearance.material?.type !== Material.ColorType
     ) {
       throw new DeveloperError(
-        "Polyline geometry requires a Color PolylineMaterialAppearance.",
+        "Polyline geometry requires PolylineColorAppearance or a Color PolylineMaterialAppearance.",
       );
     }
     return;
@@ -178,23 +187,136 @@ function validateOptions(options) {
   return { geometryKind, attributes, show, allowPicking };
 }
 
-function createCandidate(primitive, frameState) {
-  const volume = SceneGISPlanarGroundVolume.create(
-    primitive._world,
-    primitive._geometry,
-  );
-  const attributes = cloneAttributes(primitive._attributes);
-  if (primitive._geometryKind === "polyline") {
-    attributes.color = ColorGeometryInstanceAttribute.fromColor(
-      primitive._appearance.material.uniforms.color,
+function snapshotBatch(options) {
+  const input = options.geometryInstances;
+  if (
+    !Array.isArray(input) ||
+    input.length === 0 ||
+    options.geometry !== undefined ||
+    options.id !== undefined ||
+    options.attributes !== undefined ||
+    options.modelMatrix !== undefined
+  ) {
+    throw new DeveloperError(
+      "geometryInstances must be a non-empty array and cannot be combined with geometry, id, attributes, or modelMatrix.",
     );
   }
-  const instance = new GeometryInstance({
-    geometry: volume.geometry,
-    id: primitive._id,
-    pickPrimitive: primitive,
-    attributes,
+  const ids = new Set();
+  const boundsById = new Map();
+  let bounds;
+  let first;
+  const instances = input.map(function (source) {
+    if (source?.modelMatrix !== undefined) {
+      throw new DeveloperError("Ground instances do not support modelMatrix.");
+    }
+    const validated = validateOptions({
+      ...options,
+      geometry: source?.geometry,
+      id: source?.id,
+      attributes: source?.attributes,
+    });
+    if (ids.has(source.id)) {
+      throw new DeveloperError("Each ground instance must have a unique id.");
+    }
+    ids.add(source.id);
+    if (first !== undefined && first.geometryKind !== validated.geometryKind) {
+      throw new DeveloperError(
+        "A ground batch must contain only polygons or only polylines.",
+      );
+    }
+    const attributes = validated.attributes;
+    if (first !== undefined) {
+      const names = Object.keys(first.attributes);
+      if (
+        Object.keys(attributes).length !== names.length ||
+        names.some(
+          (name) =>
+            attributes[name]?.componentDatatype !==
+              first.attributes[name].componentDatatype ||
+            attributes[name]?.componentsPerAttribute !==
+              first.attributes[name].componentsPerAttribute ||
+            (attributes[name]?.normalize ?? false) !==
+              (first.attributes[name].normalize ?? false),
+        )
+      ) {
+        throw new DeveloperError(
+          "Ground instances must use the same attribute schema.",
+        );
+      }
+    }
+    first ??= validated;
+    const presentation = SceneGISPlanarGroundVolume.createPresentationBounds(
+      source.geometry,
+    );
+    boundsById.set(source.id, presentation);
+    const sphere = new BoundingSphere(
+      presentation.center,
+      presentation.horizontalRadius,
+    );
+    bounds =
+      bounds === undefined
+        ? sphere
+        : BoundingSphere.union(bounds, sphere, bounds);
+    return { geometry: source.geometry, id: source.id, attributes };
   });
+  return {
+    instances,
+    validated: first,
+    boundsById,
+    presentationBounds: {
+      center: bounds.center,
+      horizontalRadius: bounds.radius,
+    },
+  };
+}
+
+function createCandidate(primitive, frameState) {
+  const entries = primitive._batch?.instances ?? [
+    {
+      geometry: primitive._geometry,
+      id: primitive._id,
+      attributes: primitive._attributes,
+    },
+  ];
+  const origin =
+    primitive._batch === undefined ? undefined : entries[0].geometry.origin;
+  let volume;
+  let bounds;
+  let vertexCount = 0;
+  const instances = entries.map(function (entry) {
+    const created = SceneGISPlanarGroundVolume.create(
+      primitive._world,
+      entry.geometry,
+      origin,
+    );
+    volume ??= created;
+    bounds =
+      bounds === undefined
+        ? BoundingSphere.clone(created.geometry.boundingSphere)
+        : BoundingSphere.union(bounds, created.geometry.boundingSphere, bounds);
+    vertexCount += created.geometry.attributes.position.values.length / 3;
+    const attributes = cloneAttributes(entry.attributes);
+    if (primitive._appearance instanceof PolylineMaterialAppearance) {
+      attributes.color = ColorGeometryInstanceAttribute.fromColor(
+        primitive._appearance.material.uniforms.color,
+      );
+    }
+    return new GeometryInstance({
+      geometry: created.geometry,
+      id: entry.id,
+      pickPrimitive: primitive,
+      attributes,
+    });
+  });
+  if (
+    primitive._batch !== undefined &&
+    vertexCount > 65535 &&
+    !frameState.context.elementIndexUint
+  ) {
+    throw new DeveloperError(
+      "Ground batches above 65535 vertices require uint element indices.",
+    );
+  }
   const internalAppearance =
     primitive._geometryKind === "polyline"
       ? new Appearance({
@@ -214,28 +336,28 @@ function createCandidate(primitive, frameState) {
           closed: true,
           translucent: false,
         });
-  if (primitive._geometryKind === "polyline") {
-    internalAppearance.uniforms = {
-      u_sceneGISGroundLineWidth: volume.width,
-    };
-  }
   const commands = createSceneGISPlanarGroundCommands(primitive);
   const candidate = new Primitive({
-    geometryInstances: instance,
+    geometryInstances:
+      primitive._batch === undefined ? instances[0] : instances,
     appearance: internalAppearance,
     asynchronous: false,
-    releaseGeometryInstances: false,
+    releaseGeometryInstances: primitive._batch !== undefined,
     allowPicking: primitive._allowPicking,
     cull: false,
     modelMatrix: volume.modelMatrix,
+    _createPickOffsets: primitive._batch !== undefined,
     _updateAndQueueCommandsFunction: commands.updateAndQueue,
   });
   candidate.show =
     primitive._show &&
     primitive._world.show &&
     !(
-      primitive._geometryKind === "polyline" && primitive._geometry.width === 0
+      primitive._geometryKind === "polyline" && primitive._geometry?.width === 0
     );
+  const commandList = frameState.commandList;
+  const candidateCommands = [];
+  frameState.commandList = candidateCommands;
   try {
     candidate.update(frameState);
   } catch (error) {
@@ -245,12 +367,27 @@ function createCandidate(primitive, frameState) {
       // Preserve the original initialization error.
     }
     throw error;
+  } finally {
+    frameState.commandList = commandList;
   }
-  return { candidate, commands, volume };
+  return {
+    candidate,
+    commands,
+    candidateCommands,
+    volume: {
+      ...volume,
+      geometry: { boundingSphere: bounds },
+      presentationBounds:
+        primitive._batch?.presentationBounds ?? volume.presentationBounds,
+    },
+  };
 }
 
 function syncCurrentPolylineColor(primitive) {
-  if (primitive._geometryKind !== "polyline" || !primitive._current?.ready) {
+  if (
+    !(primitive._appearance instanceof PolylineMaterialAppearance) ||
+    !primitive._current?.ready
+  ) {
     return;
   }
   const desired = ColorGeometryInstanceAttribute.toValue(
@@ -267,8 +404,15 @@ function syncCurrentPolylineColor(primitive) {
   ) {
     return;
   }
-  primitive._current.getGeometryInstanceAttributes(primitive._id).color =
-    desired;
+  if (primitive._batch === undefined) {
+    primitive._current.getGeometryInstanceAttributes(primitive._id).color =
+      desired;
+  } else {
+    for (const instance of primitive._batch.instances) {
+      primitive._current.getGeometryInstanceAttributes(instance.id).color =
+        desired;
+    }
+  }
   primitive._currentColor ??= new Uint8Array(4);
   primitive._currentColor.set(desired);
 }
@@ -277,35 +421,47 @@ function preserveCurrentAttributes(primitive) {
   if (primitive._current?.ready !== true) {
     return;
   }
-  const current = primitive._current.getGeometryInstanceAttributes(
-    primitive._id,
-  );
-  for (const name of Object.keys(primitive._attributes)) {
-    const value = current[name];
-    if (value !== undefined) {
-      primitive._attributes[name].value = value.slice();
+  const entries = primitive._batch?.instances ?? [
+    { id: primitive._id, attributes: primitive._attributes },
+  ];
+  for (const entry of entries) {
+    const current = primitive._current.getGeometryInstanceAttributes(entry.id);
+    for (const name of Object.keys(entry.attributes)) {
+      const value = current[name];
+      if (value !== undefined) {
+        entry.attributes[name].value = value.slice();
+      }
     }
   }
 }
 
 /**
- * Renders one planar polyline or non-extruded polygon clamped to the current planar surface.
+ * Renders planar polylines or non-extruded polygons clamped to the current planar surface.
+ * A static batch shares one native Primitive and its vertex buffers. Stencil/color ranges remain
+ * isolated for picking, different colors, translucent objects, and lines. Compatible opaque area
+ * ranges are coalesced within the stencil counter capacity.
  *
  * @alias SceneGISPlanarGroundPrimitive
  * @constructor
  * @param {object} options Object with the following properties:
  * @param {SceneGISPlanarWorld} options.world The live caller-owned planar world.
- * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry} options.geometry The source footprint. Source Z values are ignored by the clamp backend.
- * @param {PolylineMaterialAppearance|PerInstanceColorAppearance} options.appearance The compatible caller-owned Color appearance.
- * @param {*} options.id The non-null caller-owned pick identifier.
- * @param {Object.<string, GeometryInstanceAttribute>} [options.attributes] Instance attributes.
+ * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry} [options.geometry] The source footprint, required unless geometryInstances is supplied. Source Z values are ignored.
+ * @param {SceneGISPlanarGroundPrimitive.GeometryInstanceOptions[]} [options.geometryInstances] A non-empty static batch of only polylines or only polygons. Mutually exclusive with geometry, id, and attributes. Topology changes require a new batch.
+ * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance} options.appearance The compatible caller-owned Color appearance.
+ * @param {*} [options.id] The required non-null identifier for a single geometry.
+ * @param {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [options.attributes] Instance attributes.
  * @param {boolean} [options.show=true] Whether the primitive is shown.
  * @param {boolean} [options.allowPicking=true] Whether picking resources are created.
  * @exception {DeveloperError} The world, geometry, appearance, id, attributes, or boolean options are invalid.
  */
 function SceneGISPlanarGroundPrimitive(options) {
   options = options ?? {};
-  const validated = validateOptions(options);
+  const batch =
+    options.geometryInstances === undefined
+      ? undefined
+      : snapshotBatch(options);
+  const validated = batch?.validated ?? validateOptions(options);
+  this._batch = batch;
   this._world = options.world;
   this._geometry = options.geometry;
   this._geometryKind = validated.geometryKind;
@@ -315,6 +471,7 @@ function SceneGISPlanarGroundPrimitive(options) {
   this._allowPicking = validated.allowPicking;
   this._id = options.id;
   this._desiredPresentationBounds =
+    batch?.presentationBounds ??
     SceneGISPlanarGroundVolume.createPresentationBounds(options.geometry);
   this._current = undefined;
   this._currentCommands = undefined;
@@ -330,6 +487,15 @@ function SceneGISPlanarGroundPrimitive(options) {
   this._currentColor = undefined;
 }
 
+/**
+ * A static ground footprint instance. Inputs are copied; geometry and id remain caller-owned.
+ *
+ * @typedef {object} SceneGISPlanarGroundPrimitive.GeometryInstanceOptions
+ * @property {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry} geometry The source footprint. Only non-extruded polygons are accepted. Source Z is ignored.
+ * @property {*} id A unique, non-null business identifier within the batch.
+ * @property {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [attributes] Native per-instance attributes with an identical schema across the batch.
+ */
+
 Object.defineProperties(SceneGISPlanarGroundPrimitive.prototype, {
   geometry: {
     get: function () {
@@ -338,6 +504,11 @@ Object.defineProperties(SceneGISPlanarGroundPrimitive.prototype, {
     },
     set: function (value) {
       ensureAlive(this);
+      if (this._batch !== undefined) {
+        throw new DeveloperError(
+          "Create a new primitive to replace batched ground geometry.",
+        );
+      }
       if (kind(value) !== this._geometryKind) {
         throw new DeveloperError(
           "geometry replacement must preserve the construction-time geometry kind.",
@@ -367,7 +538,13 @@ Object.defineProperties(SceneGISPlanarGroundPrimitive.prototype, {
     },
     set: function (value) {
       ensureAlive(this);
-      validateAppearance(this._geometryKind, value, this._attributes);
+      if (this._batch === undefined) {
+        validateAppearance(this._geometryKind, value, this._attributes);
+      } else {
+        for (const instance of this._batch.instances) {
+          validateAppearance(this._geometryKind, value, instance.attributes);
+        }
+      }
       if (value !== this._appearance) {
         this._appearance = value;
         this._candidateRequired = true;
@@ -453,7 +630,7 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
     this._currentOrigin = Cartesian3.clone(created.volume.origin);
     this._currentEnvelope = created.volume.envelope;
     this._currentPresentationBounds = created.volume.presentationBounds;
-    if (this._geometryKind === "polyline") {
+    if (this._appearance instanceof PolylineMaterialAppearance) {
       this._currentColor = ColorGeometryInstanceAttribute.toValue(
         this._appearance.material.uniforms.color,
         this._currentColor,
@@ -469,6 +646,9 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
     );
     this._candidateRequired = false;
     this._context = frameState.context;
+    for (const command of created.candidateCommands) {
+      frameState.commandList.push(command);
+    }
     previous?.destroy();
     return;
   }
@@ -496,16 +676,29 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
       );
     }
   }
+  if (this._current._batchTable?._batchValuesDirty) {
+    this._currentCommands.invalidate();
+  }
   this._current.update(frameState);
 };
 
+/**
+ * Gets mutable native instance attributes. Assign a property such as color or show to update the batch.
+ *
+ * @param {*} [id] Required for a batch; defaults to this.id for a single geometry.
+ * @returns {object|undefined} The attributes, or undefined when the id is not found.
+ * @exception {DeveloperError} The primitive is destroyed, not ready, or a batch id is missing.
+ */
 SceneGISPlanarGroundPrimitive.prototype.getGeometryInstanceAttributes =
-  function () {
+  function (id) {
     ensureAlive(this);
     if (!this.ready) {
       throw new DeveloperError("The primitive must be ready.");
     }
-    return this._current.getGeometryInstanceAttributes(this._id);
+    if (id === undefined && this._batch !== undefined) {
+      throw new DeveloperError("id is required for a ground batch.");
+    }
+    return this._current.getGeometryInstanceAttributes(id ?? this._id);
   };
 
 /**
@@ -515,18 +708,27 @@ SceneGISPlanarGroundPrimitive.prototype.getGeometryInstanceAttributes =
  * use the private shadow-volume bounds.
  *
  * @param {BoundingSphere} result The object onto which to store the result.
+ * @param {*} [id] An optional batch instance id. Omit to bound the entire primitive.
  * @returns {BoundingSphere} The modified result parameter.
- * @exception {DeveloperError} The result is missing or the primitive is destroyed.
+ * @exception {DeveloperError} The result is missing, the id is unknown, or the primitive is destroyed.
  */
-SceneGISPlanarGroundPrimitive.prototype.getBoundingSphere = function (result) {
+SceneGISPlanarGroundPrimitive.prototype.getBoundingSphere = function (
+  result,
+  id,
+) {
   ensureAlive(this);
   if (!(result instanceof BoundingSphere)) {
     throw new DeveloperError("result is required.");
   }
   const presentationBounds =
-    this._currentPresentationBounds ?? this._desiredPresentationBounds;
+    id === undefined
+      ? (this._currentPresentationBounds ?? this._desiredPresentationBounds)
+      : (this._batch?.boundsById.get(id) ??
+        (id === this._id
+          ? (this._currentPresentationBounds ?? this._desiredPresentationBounds)
+          : undefined));
   if (presentationBounds === undefined) {
-    throw new DeveloperError("The primitive must be ready.");
+    throw new DeveloperError("The geometry instance id was not found.");
   }
   return SceneGISPlanarGroundVolume.updatePresentationBoundingSphere(
     this._world,
@@ -545,6 +747,7 @@ SceneGISPlanarGroundPrimitive.prototype.destroy = function () {
   this._currentCommands = undefined;
   this._desiredPresentationBounds = undefined;
   this._currentPresentationBounds = undefined;
+  this._batch = undefined;
   return destroyObject(this);
 };
 

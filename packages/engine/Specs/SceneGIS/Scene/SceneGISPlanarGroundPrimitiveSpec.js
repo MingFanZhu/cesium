@@ -104,7 +104,7 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundPrimitive", function () {
       "czm_gammaCorrect(v_color)",
     );
     expect(SceneGISPlanarGroundLineShader.vertexShaderSource).toContain(
-      "u_sceneGISGroundLineWidth",
+      "in float lineWidth",
     );
     expect(SceneGISPlanarGroundLineShader.vertexShaderSource).toContain(
       "czm_metersPerPixel(positionEC)",

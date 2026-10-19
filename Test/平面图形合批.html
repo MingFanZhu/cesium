@@ -37,6 +37,11 @@
         padding: 6px 10px;
         cursor: pointer;
       }
+      select {
+        padding: 6px;
+        width: 100%;
+        margin: 8px 0;
+      }
       output {
         display: block;
         white-space: pre-line;
@@ -54,14 +59,20 @@
       <h1>平面静态图形合批</h1>
       <p>
         1024
-        个独立业务面，位于两千万米坐标附近。点击图形可单独改色；两种组织方式使用同一份数据。
+        个独立业务对象，位于两千万米坐标附近。点击图形可单独改色；两种组织方式使用同一份数据。
       </p>
+      <select id="kind" aria-label="图形类型">
+        <option value="ordinary">普通面 · 独立颜色</option>
+        <option value="ground-area">贴地面 · 相同颜色</option>
+        <option value="ground-line">贴地线 · 独立颜色与宽度</option>
+      </select>
       <button id="batch">使用合批</button>
       <button id="individual">逐对象对照</button>
       <button id="toggle">隐藏隔列</button>
       <button id="home">恢复视角</button>
       <output id="stats">正在初始化…</output>
       <output id="picked">点击图形查看业务 ID</output>
+      <p id="explanation"></p>
       <p>计时为本机 CPU 构建与提交耗时，不代表 GPU 完成时间或跨设备性能。</p>
     </section>
     <script type="module">
@@ -90,29 +101,44 @@
       const scene = widget.scene;
       scene.msaaSamples = 1;
       const collection = scene.primitives.add(new C.PrimitiveCollection());
-      const records = Array.from({ length: 1024 }, (_, index) => {
-        const x = center + ((index % 32) - 16) * 12;
-        const y = center + (Math.floor(index / 32) - 16) * 12;
-        return {
-          id: { index, name: `业务面 ${index}` },
-          geometry: new C.SceneGISPlanarPolygonGeometry({
-            positions: [
-              new C.Cartesian3(x, y, 1),
-              new C.Cartesian3(x + 9, y, 1),
-              new C.Cartesian3(x + 9, y + 9, 1),
-              new C.Cartesian3(x, y + 9, 1),
-            ],
-          }),
-          attributes: {
-            color: C.ColorGeometryInstanceAttribute.fromColor(
-              C.Color.fromHsl((index % 32) / 40 + 0.05, 0.65, 0.55),
-            ),
-            show: new C.ShowGeometryInstanceAttribute(true),
-          },
-        };
-      });
+      let records;
+      function createRecords(kind) {
+        return Array.from({ length: 1024 }, (_, index) => {
+          const x = center + ((index % 32) - 16) * 12;
+          const y = center + (Math.floor(index / 32) - 16) * 12;
+          return {
+            id: { index, name: `业务对象 ${index}` },
+            geometry:
+              kind === "ground-line"
+                ? new C.SceneGISPlanarPolylineGeometry({
+                    positions: [
+                      new C.Cartesian3(x, y, 30),
+                      new C.Cartesian3(x + 9, y + 9, 30),
+                    ],
+                    width: 2 + (index % 3) * 2,
+                  })
+                : new C.SceneGISPlanarPolygonGeometry({
+                    positions: [
+                      new C.Cartesian3(x, y, 1),
+                      new C.Cartesian3(x + 9, y, 1),
+                      new C.Cartesian3(x + 9, y + 9, 1),
+                      new C.Cartesian3(x, y + 9, 1),
+                    ],
+                  }),
+            attributes: {
+              color: C.ColorGeometryInstanceAttribute.fromColor(
+                kind === "ground-area"
+                  ? C.Color.fromCssColorString("#43bec5")
+                  : C.Color.fromHsl((index % 32) / 40 + 0.05, 0.65, 0.55),
+              ),
+              show: new C.ShowGeometryInstanceAttribute(true),
+            },
+          };
+        });
+      }
       let owners = [];
       let hidden = false;
+      let currentKind;
       function home() {
         scene.camera.setView({
           destination: new C.Cartesian3(center - 6, center - 300, 530),
@@ -130,14 +156,27 @@
         collection.removeAll();
         owners = [];
         hidden = false;
+        const kind = document.querySelector("#kind").value;
+        if (kind !== currentKind) {
+          records = createRecords(kind);
+          currentKind = kind;
+        }
+        const ground = kind !== "ordinary";
+        const Primitive = ground
+          ? C.SceneGISPlanarGroundPrimitive
+          : C.SceneGISPlanarPrimitive;
         const start = performance.now();
-        const appearance = new C.PerInstanceColorAppearance({
-          flat: true,
-          translucent: false,
-        });
+        const appearance =
+          kind === "ground-line"
+            ? new C.PolylineColorAppearance({ translucent: false })
+            : new C.PerInstanceColorAppearance({
+                flat: true,
+                translucent: false,
+              });
         if (useBatch) {
           const primitive = collection.add(
-            new C.SceneGISPlanarPrimitive({
+            new Primitive({
+              ...(ground ? { world } : {}),
               geometryInstances: records,
               appearance,
             }),
@@ -146,7 +185,11 @@
         } else {
           owners = records.map((record) =>
             collection.add(
-              new C.SceneGISPlanarPrimitive({ ...record, appearance }),
+              new Primitive({
+                ...(ground ? { world } : {}),
+                ...record,
+                appearance,
+              }),
             ),
           );
         }
@@ -165,6 +208,7 @@
         // Private counters are diagnostic evidence for this example only.
         const result = {
           mode: useBatch ? "合批" : "逐对象",
+          kind,
           objects: records.length,
           primitives: unique.length,
           vertexArrays: unique.reduce(
@@ -172,7 +216,17 @@
             0,
           ),
           colorCommands: unique.reduce(
-            (sum, owner) => sum + owner._current._colorCommands.length,
+            (sum, owner) =>
+              sum +
+              (ground
+                ? owner._currentCommands.colorCommands.length
+                : owner._current._colorCommands.length),
+            0,
+          ),
+          stencilCommands: unique.reduce(
+            (sum, owner) =>
+              sum +
+              (ground ? owner._currentCommands.stencilCommands.length : 0),
             0,
           ),
           initialMs,
@@ -180,7 +234,13 @@
           p95Ms: samples[19],
         };
         document.querySelector("#stats").textContent =
-          `${result.mode} · ${result.objects} 个对象\nPrimitive / VA / 颜色命令：${result.primitives} / ${result.vertexArrays} / ${result.colorCommands}\n首次构建与提交：${initialMs.toFixed(1)} ms\n20 帧提交 median / P95：${result.medianMs.toFixed(2)} / ${result.p95Ms.toFixed(2)} ms`;
+          `${result.mode} · ${result.objects} 个对象\nPrimitive / VA：${result.primitives} / ${result.vertexArrays}\n颜色 / 模板命令：${result.colorCommands} / ${result.stencilCommands}\n首次构建与提交：${initialMs.toFixed(1)} ms\n20 帧提交 median / P95：${result.medianMs.toFixed(2)} / ${result.p95Ms.toFixed(2)} ms`;
+        document.querySelector("#explanation").textContent =
+          kind === "ordinary"
+            ? "普通面共享几何与绘制命令。"
+            : kind === "ground-area"
+              ? "相同不透明颜色的贴地面在模板计数容量内合并命令；改变颜色后自动重新分组，拾取仍逐对象隔离。"
+              : "贴地线共享几何资源；交叉线需要保留逐对象模板与颜色命令，以维持颜色、宽度和拾取结果。";
         document.querySelector("#picked").textContent = "点击图形查看业务 ID";
         document.querySelector("#toggle").textContent = "隐藏隔列";
         return result;
@@ -212,10 +272,19 @@
       document.querySelector("#individual").onclick = () => build(false);
       document.querySelector("#toggle").onclick = toggle;
       document.querySelector("#home").onclick = home;
+      document.querySelector("#kind").onchange = () => build(true);
       home();
       const initial = build(true);
       widget.useDefaultRenderLoop = true;
-      window.planarBatchExample = { widget, records, build, toggle, initial };
+      window.planarBatchExample = {
+        widget,
+        get records() {
+          return records;
+        },
+        build,
+        toggle,
+        initial,
+      };
       window.addEventListener("pagehide", (event) => {
         if (event.persisted || widget.isDestroyed()) {
           return;

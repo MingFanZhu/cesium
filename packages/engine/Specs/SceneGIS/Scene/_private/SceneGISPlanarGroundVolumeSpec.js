@@ -72,12 +72,12 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundVolume", function () {
       expect(volume.geometry.indices.length).toBeGreaterThan(0);
       expect(volume.geometry.boundingSphere.radius).toBeGreaterThan(0);
       expect(
-        Array.from(volume.geometry.attributes.previousPosition.values).every(
+        Array.from(volume.geometry.attributes.incomingDirection.values).every(
           Number.isFinite,
         ),
       ).toBeTrue();
       expect(
-        Array.from(volume.geometry.attributes.nextPosition.values).every(
+        Array.from(volume.geometry.attributes.outgoingDirection.values).every(
           Number.isFinite,
         ),
       ).toBeTrue();
@@ -90,13 +90,13 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundVolume", function () {
         width: 3.5,
       }),
     );
-    const turnPrevious = turn.geometry.attributes.previousPosition.values;
-    const turnNext = turn.geometry.attributes.nextPosition.values;
-    expect(Array.from(turnPrevious.slice(3, 6))).toEqual(
-      Array.from(turnPrevious.slice(24, 27)),
+    const turnPrevious = turn.geometry.attributes.incomingDirection.values;
+    const turnNext = turn.geometry.attributes.outgoingDirection.values;
+    expect(Array.from(turnPrevious.slice(2, 4))).toEqual(
+      Array.from(turnPrevious.slice(16, 18)),
     );
-    expect(Array.from(turnNext.slice(3, 6))).toEqual(
-      Array.from(turnNext.slice(24, 27)),
+    expect(Array.from(turnNext.slice(2, 4))).toEqual(
+      Array.from(turnNext.slice(16, 18)),
     );
 
     const loop = SceneGISPlanarGroundVolume.create(
@@ -106,16 +106,16 @@ describe("SceneGIS/Scene/SceneGISPlanarGroundVolume", function () {
         width: 3.5,
       }),
     );
-    const loopPrevious = loop.geometry.attributes.previousPosition.values;
-    const loopNext = loop.geometry.attributes.nextPosition.values;
-    const finalEndpointOffset = (2 * 8 + 1) * 3;
-    expect(Array.from(loopPrevious.slice(0, 3))).toEqual(
+    const loopPrevious = loop.geometry.attributes.incomingDirection.values;
+    const loopNext = loop.geometry.attributes.outgoingDirection.values;
+    const finalEndpointOffset = (2 * 8 + 1) * 2;
+    expect(Array.from(loopPrevious.slice(0, 2))).toEqual(
       Array.from(
-        loopPrevious.slice(finalEndpointOffset, finalEndpointOffset + 3),
+        loopPrevious.slice(finalEndpointOffset, finalEndpointOffset + 2),
       ),
     );
-    expect(Array.from(loopNext.slice(0, 3))).toEqual(
-      Array.from(loopNext.slice(finalEndpointOffset, finalEndpointOffset + 3)),
+    expect(Array.from(loopNext.slice(0, 2))).toEqual(
+      Array.from(loopNext.slice(finalEndpointOffset, finalEndpointOffset + 2)),
     );
   });
 

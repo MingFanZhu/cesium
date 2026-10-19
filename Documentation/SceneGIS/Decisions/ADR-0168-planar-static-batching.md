@@ -39,6 +39,27 @@ high/low encoding。完整世界坐标的 DOUBLE CPU 中间值不会造成 Float
 不把原有逐 Entity 的动态适配路径宣称为自动合批，也不改球面 Primitive 行为。
 Ground 的 stencil/segment/envelope 协议需要单独审计，B1 不扩大其支持面。
 
+## B2 贴地线面
+
+项目负责人已明确要求同轮覆盖贴地线面。SceneGISPlanarGroundPrimitive 增加同 geometry kind 的静态数组，
+复用同步 Primitive/BatchTable/VA；各实例保持 id、attributes、width 与 presentation bounds。
+不引入第二套 ground backend，也不改变 implicit clamp、无任意 modelMatrix/Material 的边界。
+
+共用 XY origin 与 normalized Z envelope；line 用 CPU DOUBLE 点差生成 FLOAT 方向，避免不同 origin 的
+FLOAT previous/next 点失真；width 改为顶点属性。Provider 变化只更新共享矩阵与包围体。
+
+Ground 颜色正确性优先：沿用原生 ClassificationPrimitive 无 extent picking 的 offset/count 思路，
+不同颜色、透明对象和线按实例范围交替 stencil/color，仍共享一个 Primitive/VA。
+连续同色不透明 polygon 可合并，但单组最多 `StencilConstants.CLASSIFICATION_MASK`（15）个闭体，
+避免 16 个重叠面使 stencil 计数归零；picking 继续逐实例范围隔离。
+因此普通批次颜色命令近似按 VA 数增长，ground 的命令数依颜色/透明性/几何类型而变，不能把共享 VA
+等同于所有场景只需一个 draw call。BatchTable 标脏后才重新规划范围，warm 不逐实例扫描颜色。
+
+大批次需要 uint element indices；超过 65535 顶点且 Context 无该能力时在 GPU 创建前明确拒绝，
+不使用原生 16-bit split 后无法完整表达单实例的 offset，也不自行复制索引拆分算法。
+新增升级复核点：Primitive `_createPickOffsets`/`_pickOffsets`、BatchTable `_batchValuesDirty`、
+ClassificationPrimitive 范围命令与 classification mask。
+
 ## 升级检查
 
 复核 GeometryPipeline 的 position/prevPosition/nextPosition、normal 变换，PrimitivePipeline 的

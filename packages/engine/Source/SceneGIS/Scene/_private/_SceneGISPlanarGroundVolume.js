@@ -37,9 +37,9 @@ function addVertex(values, point, z, origin) {
   return values.length / 3 - 1;
 }
 
-function createPolygonVolume(geometry) {
+function createPolygonVolume(geometry, batchOrigin) {
   const source = geometry._getDrapeSource();
-  const origin = source.origin;
+  const origin = batchOrigin ?? source.origin;
   const values = [];
   const indices = [];
   const flattened = source.rings.flat();
@@ -84,9 +84,9 @@ function createPolygonVolume(geometry) {
   return { values, indices, origin, footprintPoints: flattened };
 }
 
-function createPolylineVolume(geometry) {
+function createPolylineVolume(geometry, batchOrigin) {
   const source = geometry._getDrapeSource();
-  const origin = source.origin;
+  const origin = batchOrigin ?? source.origin;
   const values = [];
   const previousValues = [];
   const nextValues = [];
@@ -125,15 +125,14 @@ function createPolylineVolume(geometry) {
     for (let vertex = 0; vertex < 8; ++vertex) {
       const z = heights[vertex];
       addVertex(values, endpoints[vertex], z, origin);
+      // Subtract in CPU DOUBLE precision before storing origin-independent directions.
       previousValues.push(
-        previousPoints[vertex].x - origin.x,
-        previousPoints[vertex].y - origin.y,
-        z,
+        endpoints[vertex].x - previousPoints[vertex].x,
+        endpoints[vertex].y - previousPoints[vertex].y,
       );
       nextValues.push(
-        nextPoints[vertex].x - origin.x,
-        nextPoints[vertex].y - origin.y,
-        z,
+        nextPoints[vertex].x - endpoints[vertex].x,
+        nextPoints[vertex].y - endpoints[vertex].y,
       );
       expandDirections.push(sides[vertex]);
     }
@@ -201,11 +200,11 @@ SceneGISPlanarGroundVolume.createPresentationBounds = function (geometry) {
   return createPresentationBounds(points);
 };
 
-SceneGISPlanarGroundVolume.create = function (world, geometry) {
+SceneGISPlanarGroundVolume.create = function (world, geometry, batchOrigin) {
   const data =
     geometry instanceof SceneGISPlanarPolygonGeometry
-      ? createPolygonVolume(geometry)
-      : createPolylineVolume(geometry);
+      ? createPolygonVolume(geometry, batchOrigin)
+      : createPolylineVolume(geometry, batchOrigin);
   const envelope = getEnvelope(world);
   const typedValues = new Float64Array(data.values);
   const points = new Array(typedValues.length / 3);
@@ -220,20 +219,25 @@ SceneGISPlanarGroundVolume.create = function (world, geometry) {
     }),
   });
   if (data.nextValues !== undefined) {
-    attributes.previousPosition = new GeometryAttribute({
+    attributes.incomingDirection = new GeometryAttribute({
       componentDatatype: ComponentDatatype.FLOAT,
-      componentsPerAttribute: 3,
+      componentsPerAttribute: 2,
       values: new Float32Array(data.previousValues),
     });
-    attributes.nextPosition = new GeometryAttribute({
+    attributes.outgoingDirection = new GeometryAttribute({
       componentDatatype: ComponentDatatype.FLOAT,
-      componentsPerAttribute: 3,
+      componentsPerAttribute: 2,
       values: new Float32Array(data.nextValues),
     });
     attributes.expandDirection = new GeometryAttribute({
       componentDatatype: ComponentDatatype.FLOAT,
       componentsPerAttribute: 1,
       values: new Float32Array(data.expandDirections),
+    });
+    attributes.lineWidth = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 1,
+      values: new Float32Array(points.length).fill(data.width),
     });
   }
   const raw = new Geometry({

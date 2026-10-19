@@ -1,21 +1,19 @@
 in vec3 position3DHigh;
 in vec3 position3DLow;
-in vec3 previousPosition;
-in vec3 nextPosition;
+in vec2 incomingDirection;
+in vec2 outgoingDirection;
+in float lineWidth;
 in float expandDirection;
 in vec4 color;
 in float batchId;
 
 out vec4 v_color;
 
-uniform float u_sceneGISGroundLineWidth;
-
 void main()
 {
     vec4 position = czm_computePosition();
-    vec3 localPosition = position3DHigh + position3DLow;
-    vec2 incoming = localPosition.xy - previousPosition.xy;
-    vec2 outgoing = nextPosition.xy - localPosition.xy;
+    vec2 incoming = incomingDirection;
+    vec2 outgoing = outgoingDirection;
     float incomingLengthSquared = dot(incoming, incoming);
     float outgoingLengthSquared = dot(outgoing, outgoing);
     incoming = incomingLengthSquared > 0.0
@@ -39,7 +37,7 @@ void main()
     // RTE positioning keeps the EPSG:3857-scale origin out of the FLOAT route
     // attributes; meters-per-pixel then expands both height faces along the
     // same eye-space miter/start/end plane family.
-    float halfWidthMeters = u_sceneGISGroundLineWidth * 0.5 *
+    float halfWidthMeters = lineWidth * 0.5 *
         max(0.0, czm_metersPerPixel(positionEC));
     float miterProjection = max(abs(dot(miterEC, rightEC)), 0.25);
     positionEC.xyz +=

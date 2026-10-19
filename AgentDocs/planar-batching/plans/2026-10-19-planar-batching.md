@@ -1,7 +1,7 @@
 # 平面静态业务图形批量渲染
 
 - Plan type: `extension`
-- Status: `active`
+- Status: `completed`
 - Owner role: architecture
 - Created / Updated: `2026-10-19`
 - Base checkpoint: `f12f0d800e`
@@ -19,7 +19,7 @@ Primitive、VA 和 DrawCommand，同时保持独立 ID、颜色、显隐、实�
 | Phase | 状态      | 目标与 gate                                                                                                                   |
 | ----- | --------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | B1    | completed | 普通 SceneGISPlanarPrimitive 实例数组、精度、像素/pick、attributes、warm resources、构建/types 与 review 已完成；形成独立提交 |
-| B2    | pending   | 用户已确认贴地线面纳入范围；B1 提交后审计 stencil overlap、line attributes、terrain envelope，并建立 phase plan               |
+| B2    | completed | [贴地线面合批](2026-10-19-b2-ground-instances.md) 实现、生命周期、像素/pick、资源对照、SDK 交付与 review 已完成               |
 
 ## 整体验收与风险
 

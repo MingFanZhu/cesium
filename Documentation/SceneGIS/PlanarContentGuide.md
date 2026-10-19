@@ -168,8 +168,32 @@ scene.primitives.remove(batch);
 - 按空间区域、Appearance、透明性及更新频率组织批次，不要把全部城市图形塞进一个批次。
   原生索引拆分与透明 pass 可能产生多个 VA/command；目标是资源随批次增长，而非随业务对象增长。
   初次构建仍同步，当前没有新增 Worker 或自动 Entity 合批。
-- `SceneGISPlanarGroundPrimitive` 仍为独立的贴地协议，本入口不改变其单实例限制。
-  原生 Point/Billboard/Label collection 已有共享渲染路径，Model 不属于此几何合批入口。
+- 原生 Point/Billboard/Label collection 已有共享渲染路径，Model 不属于此几何合批入口。
+
+贴地线和非拉伸面使用相同的描述数组，但传给 `SceneGISPlanarGroundPrimitive`，并提供 live `world`：
+
+```js
+const groundBatch = scene.primitives.add(
+  new Cesium.SceneGISPlanarGroundPrimitive({
+    world,
+    geometryInstances: instances,
+    appearance: new Cesium.PerInstanceColorAppearance({ flat: true }),
+  }),
+);
+// The same per-id color/show, picking and bounding-sphere APIs apply.
+```
+
+- 一批仅包含 Polygon 或仅包含 Polyline。贴地线使用 `PolylineColorAppearance` 支持独立颜色，
+  或用 Color `PolylineMaterialAppearance` 共享颜色；每条线可有不同 width。
+- 坐标只消费 XY，Z 自动贴合当前平面地形；不接受实例或批次 modelMatrix。Provider/LOD 变化不重建几何。
+- 一批共享 Primitive、VA 和 BatchTable。不同颜色、半透明面、贴地线保留逐实例 stencil/color 范围；
+  连续相同不透明颜色的面每组最多 15 个，以免重叠闭体使 stencil 计数回绕。拾取始终保留逐实例隔离。
+  因此资源合并不等于所有 ground 对象只需一次 draw call，也不保证透明面可按颜色重排。
+- 超过 65535 顶点的 ground 批次要求 uint element indices；不支持该能力的 Context 会在 GPU 分配前拒绝，
+  SDK 可按空间区域构建较小批次。
+
+可运行对照见 [平面图形合批](../../Test/平面图形合批.html)：同一组 1024 对象可切换普通面、贴地面、
+贴地线，比较实际 Primitive/VA/颜色与模板命令数，并验证独立改色、显隐和拾取。
 
 完整决定见 [ADR-0168](Decisions/ADR-0168-planar-static-batching.md)。
 
@@ -329,7 +353,7 @@ roles，不是 supported public API。C4 接入点由 `SGP-0001` 追踪；升级
   这是平面 adapter 的局部解释，不改原生 Rectangle 类，也不扩展 Camera 的 Rectangle 入口。
 - 在应用边界保留 finite meter-based Cartesian3，并显式记录所使用的 planar CRS。
 - 对需要确定 terrain 高度的离线或批处理流程，先使用显式 sampler，再写入 absolute position。
-- 大量普通静态线面/体优先使用上面的公开 `geometryInstances` 入口。`CustomDataSource` 只组织生命周期，
+- 大量普通或贴地静态线面/体优先使用上面的公开 `geometryInstances` 入口。`CustomDataSource` 只组织生命周期，
   不会自动把现有逐 Entity 的线面/体合批；不要依赖 private visualizer、Buffer owner 或 underscore root export。
 - 动态更新只修改实际变化的Property；需要百万级专题数据、跨Entity geometry merge或空间索引时，应建立独立
   扩展，而不是继续扩大首版Entity compatibility adapter。
