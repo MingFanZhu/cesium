@@ -200,6 +200,12 @@ describe("SceneGIS/Scene/SceneGISViewshed", function () {
     expect(analysis.analysisReady).toBe(false);
     expect(analysis.status).toBe("loading");
     expect(center()).not.toEqual([0, 255, 0, 255]);
+    world.opacity = 0.5;
+    render();
+    expect(analysis.analysisReady).toBe(true);
+    world.opacity = 1;
+    render();
+    expect(analysis.analysisReady).toBe(false);
     const terrain = world._surface._terrain;
     let starts = terrain._debug.startedMeshTasks;
     let promotions = terrain._debug.promotions;

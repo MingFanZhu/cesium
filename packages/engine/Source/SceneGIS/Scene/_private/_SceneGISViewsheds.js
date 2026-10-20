@@ -240,7 +240,7 @@ const Viewsheds = {
               if (!frame.globeTranslucencyState.translucent) {
                 complete = GlobeSelection.collect(state, observerFrame);
               }
-            } else {
+            } else if (state.world._surface._opacity >= 1) {
               complete = state.terrainView?.ready === true;
               if (state.terrainView?.error) {
                 throw state.terrainView.error;

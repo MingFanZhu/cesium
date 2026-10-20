@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>双世界可视域分析</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      aside {
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        width: 288px;
+        max-height: calc(100% - 48px);
+        overflow: auto;
+        padding: 14px;
+        border-radius: 8px;
+        background: #f5f8fbf2;
+        color: #233341;
+        font: 13px/1.6 system-ui;
+      }
+      h3 {
+        margin: 0 0 8px;
+      }
+      label {
+        display: block;
+        margin: 5px 0;
+      }
+      select,
+      button,
+      input {
+        font: inherit;
+      }
+      input[type="number"] {
+        width: 64px;
+      }
+      input[type="range"] {
+        width: 150px;
+        vertical-align: middle;
+      }
+      button {
+        margin: 3px 0;
+      }
+      p {
+        margin: 8px 0;
+      }
+      #status {
+        white-space: pre-line;
+      }
+      #error {
+        color: #a52b28;
+      }
+      .visible {
+        color: #087b46;
+      }
+      .hidden {
+        color: #bd3838;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h3>定向可视域 · 双世界</h3>
+      <label
+        >世界
+        <select id="world">
+          <option value="globe">球面 ECEF</option>
+          <option value="planar">平面 XYZ</option>
+        </select></label
+      >
+      <label
+        >数据
+        <select id="sample">
+          <option value="blocks">本地测试街区</option>
+          <option value="tiles">3D Tiles 倾斜摄影</option>
+          <option value="mesh">S3M 精模 CBD</option>
+          <option value="instances">S3M 实例化</option>
+          <option value="oblique">S3M 倾斜（需本地缓存）</option>
+        </select></label
+      >
+      <button id="home">查看场景</button>
+      <button id="observerView">观察点视角</button>
+      <label><input id="enabled" type="checkbox" checked /> 显示分析</label>
+      <label><input id="source" type="checkbox" checked /> 显示遮挡模型</label>
+      <label
+        ><input id="flatten" type="checkbox" /> 压平 3D Tiles 到局部 1 米</label
+      >
+      <label>观察点局部 X / Y / Z（米）</label>
+      <input id="x" type="number" step="1" aria-label="观察点 X" />
+      <input id="y" type="number" step="1" aria-label="观察点 Y" />
+      <input id="z" type="number" step="1" aria-label="观察点 Z" />
+      <label
+        >朝向
+        <input
+          id="heading"
+          type="range"
+          min="-180"
+          max="180"
+          value="0"
+        /><output id="headingValue">0°</output></label
+      >
+      <label
+        >俯仰
+        <input id="pitch" type="range" min="-85" max="85" value="-5" /><output
+          id="pitchValue"
+          >-5°</output
+        ></label
+      >
+      <label
+        >水平视角
+        <input id="horizontal" type="number" min="10" max="170" value="100" />
+        °</label
+      >
+      <label
+        >垂直视角
+        <input id="vertical" type="number" min="10" max="170" value="70" />
+        °</label
+      >
+      <label
+        >分析半径
+        <input id="distance" type="number" min="1" step="10" value="300" />
+        米</label
+      >
+      <label
+        >深度图
+        <select id="resolution">
+          <option>256</option>
+          <option>512</option>
+          <option selected>1024</option>
+          <option>2048</option>
+        </select></label
+      >
+      <label
+        >深度容差
+        <input id="bias" type="number" min="0" step="0.05" value="0.1" />
+        米</label
+      >
+      <p>
+        <span class="visible">绿色：可见</span> ·
+        <span class="hidden">红色：被遮挡</span
+        ><br />未加载完整、失败或范围外保持原色。
+      </p>
+      <p id="status">准备场景…</p>
+      <p id="error" role="alert"></p>
+      <details>
+        <summary>边界与操作</summary>
+        <p>
+          鼠标控制主相机，分析观察点独立不动。只分析不透明与 MASK
+          表面，不含注记、透明水面和地形裙边。分辨率与数据 LOD
+          限制薄墙、边缘精度。平面坐标不自动投影，球面使用南京附近 ENU
+          局部坐标。增加容差会放过较薄的遮挡，应结合模型精度使用。时间显示为 CPU
+          提交开销，不是 GPU 时间。
+        </p>
+      </details>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./Viewshed/example.js"></script>
+  </body>
+</html>

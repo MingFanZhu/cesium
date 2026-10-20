@@ -16,6 +16,12 @@
 
 ## Scope
 
+2026-10-21 可视域集成中修正 lighting pipeline 的 Shader / uniformMap 配对：
+程序化 IBL 在 geometry 与 lighting 准备之间就绪时，不再混用不同分支。
+变更范围为 owned `_SceneGISDeferredLighting.js`，无新增上游补丁、资源或
+曝光调整；实现和验证归入 [Viewshed V3](../viewshed/plans/2026-10-21-v3-qualification.md)，
+21 项 DeferredLighting Specs 通过，原始失败交互由双世界街区 E2E 覆盖。
+
 2026-10-20 深度维护：[空视图深度 plan](plans/2026-10-20-empty-frame-depth.md) completed，修复空视锥列表跳过
 原生深度初始化的问题，新增 2 项 GPU 回归及 21 项相关回归通过。
 [review](reviews/2026-10-20-empty-frame-depth.md) 记录首次空帧、连续空帧、恢复几何和资源所有权证据；

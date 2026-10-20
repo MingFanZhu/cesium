@@ -6,8 +6,8 @@
 - Status: `active`
 - Planning model: `extension`
 - Active extension plan: [directed viewshed](plans/2026-10-21-extension.md)
-- Current phase: V2 — completed, checkpoint pending
-- Active phase plan: [V2](plans/2026-10-21-v2-integration.md)
+- Current phase: V3 — technically completed, visual acceptance pending
+- Active phase plan: [V3](plans/2026-10-21-v3-qualification.md)
 - Active standalone plan: None
 - Architecture / execution contact: current task, no independent agent
 - Last updated: 2026-10-21
@@ -21,7 +21,8 @@
 - Source: `packages/engine/Source/SceneGIS/Scene/`
 - Specs: `packages/engine/Specs/SceneGIS/Scene/`
 - Shader: `packages/engine/Source/Shaders/SceneGIS/Viewshed/`
-- Test / Sandcastle: V3 创建验收示例；无新增 Sandcastle
+- Test: `Test/可视域分析.html`、`Specs/e2e/scenegis-viewshed.spec.js`
+- Public guide: [Viewshed](../../Documentation/SceneGIS/Viewshed.md)
 - Branch: `feature/viewshed`
 - ADR: [0176](../../Documentation/SceneGIS/Decisions/ADR-0176-observer-viewshed.md)
 - SGP: SGP-0065（V1 无上游修改）
@@ -29,7 +30,8 @@
 ## Current handoff
 
 用户已同意总体方案；V1 checkpoint 为 `04101ff1ea`。
-V2 已接入独立数据选取与公开 API，通过集成验证和[自审](reviews/2026-10-21-v2.md)；V3 尚未进入。
-暂无 open discussion 或阻塞 review；既有 Surface 透明像素失败仍按 V2 review 保留。
-风险：Globe / Planar 的单视图选取状态、LOD 覆盖完整性、MASK / clipping、
-多视锥主深度、模型动态变形与资源生命周期。按 phase plan 验证后独立提交。
+V2 checkpoint `c2a91dceb7` 已接入独立数据选取与公开 API，并通过[自审](reviews/2026-10-21-v2.md)。
+V3 技术 gate 已通过：[最新 review](reviews/2026-10-21-v3.md) 记录 10 项 dev E2E、
+3 项 release smoke、暖态 CPU 和 4 MiB 深度资源。最终负责人视觉验收待确认。
+暂无 open discussion 或阻塞 review；粗糙倾斜摄影采样噪点、有限精度和既有
+Surface 透明像素失败明确保留。下一步由负责人检查页面，再决定 SDK 集成。

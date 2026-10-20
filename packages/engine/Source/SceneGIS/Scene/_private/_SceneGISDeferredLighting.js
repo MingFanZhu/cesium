@@ -469,6 +469,7 @@ function createGroup(renderer, model, key, family, edl) {
   builder.addDefine("SCENEGIS_DEFERRED_LIGHTING", undefined, fragment);
   builder.addDefine("SCENEGIS_GEOMETRY_SHADOW", undefined, fragment);
   builder.addFragmentLines([inputs, common]);
+  let materialUniforms;
   if (model) {
     for (const define of [
       "HAS_POINT_CLOUD_COLOR_STYLE",
@@ -527,6 +528,9 @@ function createGroup(renderer, model, key, family, edl) {
     if (key.includes("HAS_SELECTED_FEATURE_ID")) {
       builder.addDefine("SCENEGIS_DEFERRED_FEATURE_STYLE", undefined, fragment);
     }
+    // Procedural IBL can finish between native model preparation and lighting
+    // preparation. Pair this generated lighting variant with its own uniforms.
+    materialUniforms = resources.uniformMap;
   } else if (family === "phong") {
     builder.addDefine("SCENEGIS_DEFERRED_PHONG_LIGHTING", undefined, fragment);
     if (key === "sun") {
@@ -615,6 +619,7 @@ function createGroup(renderer, model, key, family, edl) {
     u_sceneGISDeferredGroup: () => group.id,
   };
   group.uniforms.u_sceneGISExtensions = () => source()._extensions.texture;
+  group.uniforms = combine(group.uniforms, materialUniforms);
   if (edl) {
     group.uniforms = PointEDL.uniforms(edl, group.uniforms);
   }
@@ -749,7 +754,8 @@ function prepareGroups(renderer, ranges) {
         if (
           group &&
           (group.extensionKey !== renderer._extensionLayout.key ||
-            group.edl !== edl)
+            group.edl !== edl ||
+            group.sourceUniforms !== command.uniformMap)
         ) {
           group.command.shaderProgram.destroy();
           group = undefined;
