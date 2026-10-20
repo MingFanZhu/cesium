@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>模型局部压平</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+    <style>
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+      input[type="range"] {
+        width: 160px;
+        vertical-align: middle;
+      }
+      button,
+      select {
+        padding: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>模型局部压平</h1>
+      <p>
+        <a href="?world=globe">球面实景</a> ·
+        <a href="?world=planar">平面实景</a> ·
+        <a href="?world=globe&sample=grid">球面网格</a> ·
+        <a href="?world=planar&sample=grid">平面网格</a>
+      </p>
+      <label><input id="enabled" type="checkbox" checked /> 启用压平</label>
+      <label
+        >范围
+        <select id="shape">
+          <option value="hole">矩形带孔洞</option>
+          <option value="concave">凹面带孔洞</option>
+          <option value="rectangle">矩形</option>
+        </select></label
+      >
+      <label
+        >目标高度
+        <input id="height" type="range" min="-80" max="160" value="5" /><output
+          id="heightValue"
+          >5 米</output
+        ></label
+      >
+      <label
+        >范围大小
+        <input id="size" type="range" min="25" max="250" value="70" /><output
+          id="sizeValue"
+          >70 米</output
+        ></label
+      >
+      <label
+        >中心 X <input id="centerX" type="range" min="-230" max="230" value="0"
+      /></label>
+      <label
+        >中心 Y <input id="centerY" type="range" min="-230" max="230" value="0"
+      /></label>
+      <label
+        ><input id="outline" type="checkbox" checked /> 显示目标平面轮廓</label
+      >
+      <label><input id="environment" type="checkbox" /> 高级环境</label>
+      <label><input id="coarse" type="checkbox" /> 使用粗级（网格示例）</label>
+      <button id="home">回到示例视角</button>
+      <button id="top">俯视检查</button>
+      <p>
+        高度为局部坐标 Z。球面使用局部 ENU 水平面；平面使用世界
+        Z。仅移动已有顶点，边缘三角形会形成斜坡，孔洞内部保留原高度。
+      </p>
+      <p>
+        轮廓表示目标高度，可能被未压平的表面遮挡。改变范围时重建范围纹理；拖动高度不重建。
+      </p>
+      <p id="status">正在加载本地数据…</p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./ModelFlatten/example.js"></script>
+  </body>
+</html>

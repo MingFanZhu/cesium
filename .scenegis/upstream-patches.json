@@ -2,6 +2,31 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0064",
+      "title": "Maintain conservative bounds for explicit model flatten shaders",
+      "status": "active",
+      "reason": "Native CustomShader changes mesh positions without updating tile or draw-command bounds. Delegate conservative bounds to the owned SceneGISModelFlatten instance, preserving source bounds and default paths.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Cesium3DTile.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Model/ModelDrawCommand.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISModelFlattenSpec.js",
+        "Specs/e2e/scenegis-model-flatten.spec.js",
+        "packages/engine/Specs/Scene/Model/ModelDrawCommandSpec.js",
+        "packages/engine/Specs/Scene/Cesium3DTileSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0175-model-flatten.md",
+      "removalCondition": "Native CustomShader supports conservative deformation bounds for tile traversal and all derived draw commands."
+    },
+    {
       "id": "SGP-0044",
       "title": "Integrate optional HDR color grading with native tone curves",
       "status": "active",

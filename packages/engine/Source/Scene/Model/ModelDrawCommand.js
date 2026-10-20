@@ -1,4 +1,7 @@
 import BoundingSphere from "../../Core/BoundingSphere.js";
+// SCENEGIS_PATCH_BEGIN SGP-0064: Keep draw and shadow bounds consistent with flattening.
+import SceneGISModelFlatten from "../../SceneGIS/Scene/SceneGISModelFlatten.js";
+// SCENEGIS_PATCH_END SGP-0064
 import Cartesian2 from "../../Core/Cartesian2.js";
 import CesiumMath from "../../Core/Math.js";
 import Check from "../../Core/Check.js";
@@ -563,6 +566,9 @@ function updateDebugShowBoundingVolume(drawCommand) {
  * @private
  */
 ModelDrawCommand.prototype.pushCommands = function (frameState, result) {
+  // SCENEGIS_PATCH_BEGIN SGP-0064: Update shared bounds before any derived command is submitted.
+  SceneGISModelFlatten._updateCommandBounds(this);
+  // SCENEGIS_PATCH_END SGP-0064
   const use2D = shouldUse2DCommands(this, frameState);
 
   if (use2D && !this._has2DCommands) {

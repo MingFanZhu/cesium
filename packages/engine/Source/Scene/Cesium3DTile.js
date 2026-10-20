@@ -1,4 +1,7 @@
 import BoundingSphere from "../Core/BoundingSphere.js";
+// SCENEGIS_PATCH_BEGIN SGP-0064: Include explicit flattening in tile bounds.
+import SceneGISModelFlatten from "../SceneGIS/Scene/SceneGISModelFlatten.js";
+// SCENEGIS_PATCH_END SGP-0064
 import Cartesian3 from "../Core/Cartesian3.js";
 import Color from "../Core/Color.js";
 import ColorGeometryInstanceAttribute from "../Core/ColorGeometryInstanceAttribute.js";
@@ -579,7 +582,12 @@ Object.defineProperties(Cesium3DTile.prototype, {
    */
   boundingVolume: {
     get: function () {
-      return this._boundingVolume;
+      // SCENEGIS_PATCH_BEGIN SGP-0064: Preserve original bounds for restoration.
+      return SceneGISModelFlatten._tileBounds(
+        this._tileset.customShader,
+        this._boundingVolume,
+      );
+      // SCENEGIS_PATCH_END SGP-0064
     },
   },
 
@@ -596,7 +604,12 @@ Object.defineProperties(Cesium3DTile.prototype, {
    */
   contentBoundingVolume: {
     get: function () {
-      return this._contentBoundingVolume ?? this._boundingVolume;
+      // SCENEGIS_PATCH_BEGIN SGP-0064: Cover flattened content independently.
+      return SceneGISModelFlatten._tileBounds(
+        this._tileset.customShader,
+        this._contentBoundingVolume ?? this._boundingVolume,
+      );
+      // SCENEGIS_PATCH_END SGP-0064
     },
   },
 
@@ -610,7 +623,9 @@ Object.defineProperties(Cesium3DTile.prototype, {
    */
   boundingSphere: {
     get: function () {
-      return this._boundingVolume.boundingSphere;
+      // SCENEGIS_PATCH_BEGIN SGP-0064: Framing must include displaced vertices.
+      return this.boundingVolume.boundingSphere;
+      // SCENEGIS_PATCH_END SGP-0064
     },
   },
 
@@ -1520,9 +1535,11 @@ function getBoundingVolume(tile, frameState) {
     );
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0064: Use conservative bounds in native traversal.
   return frameState.mode !== SceneMode.SCENE3D
     ? tile._boundingVolume2D
-    : tile._boundingVolume;
+    : tile.boundingVolume;
+  // SCENEGIS_PATCH_END SGP-0064
 }
 
 /**
@@ -1547,9 +1564,11 @@ function getContentBoundingVolume(tile, frameState) {
       sphere.radius,
     );
   }
+  // SCENEGIS_PATCH_BEGIN SGP-0064: Use conservative bounds for content culling.
   return frameState.mode !== SceneMode.SCENE3D
     ? tile._contentBoundingVolume2D
-    : tile._contentBoundingVolume;
+    : tile.contentBoundingVolume;
+  // SCENEGIS_PATCH_END SGP-0064
 }
 
 /**

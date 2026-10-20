@@ -916,6 +916,14 @@ budgeted placement 与 current-camera drawing；静态 UV/paint/pick 和动态 g
 按 [ADR-0078](Decisions/ADR-0078-icon-text-fit.md)，fit icon 的 content/stretch 切片与 UV 在 Worker
 准备，尺寸缩放复用既有 shaping cache。逻辑文字边界独立于 SDF border，变量 anchor 的图文选择必须一致。
 
+## 模型局部压平
+
+模型局部压平按 [ADR-0175](Decisions/ADR-0175-model-flatten.md) 使用显式
+`SceneGISModelFlatten` / `CustomShader` 实例及局部米制范围纹理；不修改内置 GLSL。
+SGP-0064 仅把原生 tile 与 draw-command 包围体接入保守变形范围，保留原始包围体、
+原生加载和 SSE。球面 ENU 平面不等于等椭球高，平面不自动投影。首版只移动静态网格
+已有顶点，不切分拓扑；范围/Context/纹理归实例所有，SDK 封装须待视觉验收。
+
 ## 验证架构
 
 SceneGIS 使用四层验证：
