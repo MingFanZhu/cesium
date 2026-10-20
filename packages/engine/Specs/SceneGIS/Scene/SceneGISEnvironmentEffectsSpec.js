@@ -3390,8 +3390,8 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       shadowLength = 10000;
       expect(render().slice(0, 3)).toEqual([0, 0, 0]);
 
-      // Exercise the actual clear-depth Aerial composition. Zero-length clouds
-      // preserve the input; shadow length changes clear sky even without a cloud hit.
+      // Clear-depth Aerial applies fog once, then shadow length changes the
+      // transported sky even without a visible cloud hit.
       const temporary = [];
       const tex = (values) => {
         const texture = new Texture({
@@ -3432,6 +3432,10 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
         u_altitude: () => 1000,
         u_sunDirection: () => Cartesian3.UNIT_Z,
         u_heightFogInscatteringScale: () => clearFogAmbient,
+        u_heightFogDirectionalInscatteringScale: () => 0,
+        u_heightFogDensity: () => 0.000008,
+        u_heightFogHeightFalloff: () => 0.0002,
+        u_heightFogStartDistance: () => 0,
       };
       const aerial = () =>
         executeHalfFloatQuad(
@@ -3447,12 +3451,18 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
           { uniformMap: aerialUniforms },
         )[0];
       try {
-        expect(aerial()).toEqual([0.25, 0.25, 0.25, 1]);
+        const litClear = aerial();
+        const verticalFogDepth =
+          (0.000008 / 0.0002) * (Math.exp(-0.2) - Math.exp(-12));
+        expect(litClear).toEqualEpsilon(
+          [...Array(3).fill(0.25 * Math.exp(-verticalFogDepth)), 1],
+          0.001,
+        );
         packedDistance = tex([0, 0, 1, 10 / 2048]);
         const shadowedClear = aerial();
-        expect(shadowedClear[0]).toBeLessThan(0.25);
+        expect(shadowedClear[0]).toBeLessThan(litClear[0]);
         clearFogAmbient = 1;
-        expect(aerial()).toEqual(shadowedClear);
+        expect(aerial()[0]).toBeGreaterThan(shadowedClear[0]);
       } finally {
         temporary.forEach((texture) => texture.destroy());
       }
@@ -3525,11 +3535,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     const cloudMeanFourFrontFarTexture = cloudDistanceAt(4000.0, 100000.0);
     const deltaOnlyAerialSource = aerialFragmentSource
       .replace(
-        `if (isClearDepth && !u_showClouds
-        #ifdef SCENEGIS_GLOBE
-        && !u_showHeightFog
-        #endif
-        )`,
+        `if (isClearDepth && !u_showClouds && !u_showHeightFog)`,
         `if (isClearDepth && !u_showClouds)`,
       )
       .replace(
@@ -10114,7 +10120,8 @@ ${hardCascadeLibrary}`;
     expect(destroyAerialLogDepthProgram).toHaveBeenCalledTimes(1);
     effects.connectedCallback(element);
     await publishPlanarResources();
-  });
+    // Two cold shader generations must finish before Jasmine tears down the scene.
+  }, 120000);
 
   it("keeps hidden Planar medium passes idle while physical lighting is ready and allocates aerial HDR only on demand", async function () {
     connectPlanar();
@@ -17694,7 +17701,7 @@ ${hardCascadeLibrary}`;
     expect(heightFogSource).not.toContain("SCENEGIS_HEIGHT_FOG_MAX_DISTANCE");
     expect(heightFogSource).not.toContain("backgroundRadianceScale");
     expect(heightFogSource).not.toContain("aerialRadianceScale");
-    expect(backgroundFragmentSource).toContain(
+    expect(backgroundFragmentSource).not.toContain(
       "sceneGISApplyExponentialHeightFog",
     );
     expect(aerialFragmentSource).toContain("sceneGISApplyExponentialHeightFog");
@@ -18813,6 +18820,159 @@ ${hardCascadeLibrary}`;
     }
   });
 
+  it("fogs Planar horizon coverage once after background and annotation composition on the actual GPU", async function () {
+    connectPlanar();
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    await publishPlanarResources();
+    let showFog = false;
+    const textures = [];
+    const texture = (values, datatype = PixelDatatype.HALF_FLOAT) => {
+      const result = new Texture({
+        context: scene.context,
+        width: 1,
+        height: 1,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: datatype,
+        source: {
+          width: 1,
+          height: 1,
+          arrayBufferView:
+            datatype === PixelDatatype.FLOAT
+              ? new Float32Array(values)
+              : new Uint16Array(values.map(encodeFloat16)),
+        },
+      });
+      textures.push(result);
+      return result;
+    };
+    const uniforms = {
+      ...effects._pipeline._uniformMap,
+      u_perspective: () => true,
+      u_sceneDepthPerspective: () => true,
+      u_frustum: () => Cartesian4.ZERO,
+      u_sceneDepthFrustum: () => Cartesian4.ZERO,
+      u_linearSceneDepth: () => true,
+      u_cameraDirection: () => Cartesian3.UNIT_Y,
+      u_cameraRight: () => Cartesian3.UNIT_X,
+      u_cameraUp: () => Cartesian3.UNIT_Z,
+      u_altitude: () => 2213,
+      u_sunDirection: () => Cartesian3.UNIT_Z,
+      u_showAerialPerspective: () => false,
+      u_showHeightFog: () => showFog,
+      u_showClouds: () => false,
+      u_heightFogDensity: () => 0.000008,
+      u_heightFogHeightFalloff: () => 0.0002,
+      u_heightFogStartDistance: () => 250,
+      u_heightFogMaximumOpacity: () => 0.7,
+      // Pure absorption isolates composition from the authored fog light.
+      u_heightFogInscatteringScale: () => 0,
+      u_heightFogDirectionalInscatteringScale: () => 0,
+    };
+    const library = [
+      atmosphereSource,
+      cloudShadowSource,
+      heightFogSource,
+      cloudSource,
+      planarCloudTransportSource,
+    ];
+    const background = () =>
+      executeHalfFloatQuad([...library, backgroundFragmentSource], {
+        uniformMap: uniforms,
+      })[0];
+    try {
+      const clearBackground = background();
+      showFog = true;
+      const fogBackground = background();
+      expect(fogBackground).toEqual(clearBackground);
+      const clearDepth = texture([0, 0, 0, 1], PixelDatatype.FLOAT);
+      const finiteDepth = texture([1000000, 0, 0, 1], PixelDatatype.FLOAT);
+      for (const coverage of [0, 0.5, 1]) {
+        const color = texture([
+          ...fogBackground
+            .slice(0, 3)
+            .map((c) => c * (1 - coverage) + 0.5 * coverage),
+          0.375,
+        ]);
+        for (const depth of [clearDepth, finiteDepth]) {
+          const render = () =>
+            executeHalfFloatQuad([...library, aerialFragmentSource], {
+              defines: ["SCENEGIS_NO_CLOUDS"],
+              uniformMap: {
+                ...uniforms,
+                u_colorTexture: () => color,
+                u_depthTexture: () => depth,
+              },
+            })[0];
+          showFog = false;
+          const unattenuated = render();
+          showFog = true;
+          const fogged = render();
+          for (let c = 0; c < 3; ++c) {
+            expect(fogged[c])
+              .withContext(
+                `coverage ${coverage}, clear ${depth === clearDepth}`,
+              )
+              .toEqualEpsilon(unattenuated[c] * 0.3, 0.001);
+          }
+          expect(fogged[3]).toBe(0.375);
+        }
+      }
+      // The light sample must approach the same height from either side of
+      // the horizon. A geometric midpoint jumps toward the 60 km slab top.
+      const horizonFog = executeHalfFloatQuad(
+        [
+          ...library,
+          `uniform sampler2D u_transmittanceTexture;
+          uniform sampler2D u_irradianceTexture;
+          void main() {
+            float mu = (floor(gl_FragCoord.x) - 1.0) * 0.0001;
+            out_FragColor = vec4(sceneGISApplyExponentialHeightFog(
+              u_transmittanceTexture, u_irradianceTexture, vec3(0.0),
+              vec3(0.0, 0.0, 2213.0), normalize(vec3(0.0, 1.0, mu)),
+              normalize(vec3(0.0, 0.6, 0.8)), 1.0e9, 0.0,
+              0.000008, 0.0002, 0.0, 250.0, 0.7, 2.5, 0.35, 0.0, 8.0), 1.0);
+          }`,
+        ],
+        { width: 3, uniformMap: uniforms },
+      );
+      for (const side of [0, 2]) {
+        for (let c = 0; c < 3; ++c) {
+          expect(horizonFog[side][c])
+            .withContext(`horizon side ${side}, channel ${c}`)
+            .toEqualEpsilon(horizonFog[1][c], horizonFog[1][c] * 0.02);
+        }
+      }
+      const quantiles = executeHalfFloatQuad(
+        [
+          ...library,
+          `void main() {
+            float index = floor(gl_FragCoord.x);
+            float mu = index < 3.0 ? (index - 1.0) * 0.0001 : (index == 3.0 ? 0.3 : -0.3);
+            float falloff = index == 0.0 ? 0.0 : 0.0002;
+            float density = index == 3.0 ? 0.0000001 : 0.000008;
+            vec3 origin = vec3(0.0, 0.0, 2213.0);
+            vec3 direction = normalize(vec3(0.0, 1.0, mu));
+            float start; float end;
+            sceneGISHeightFogPlanarSegment(origin, direction, 1.0e6, 250.0, start, end);
+            float tau = sceneGISHeightFogPlanarOpticalDepth(origin, direction, start, end, density, falloff, 0.0);
+            float sampleDistance = sceneGISHeightFogPlanarSampleDistance(origin, direction, start, end, tau, density, falloff, 0.0);
+            float prefix = sceneGISHeightFogPlanarOpticalDepth(origin, direction, start, sampleDistance, density, falloff, 0.0);
+            out_FragColor = vec4((1.0-exp(-prefix))/(1.0-exp(-tau)),
+              float(sampleDistance >= start && sampleDistance <= end), 0.0, 1.0);
+          }`,
+        ],
+        { width: 5, uniformMap: uniforms },
+      );
+      for (const pixel of quantiles) {
+        expect(pixel).toEqualEpsilon([0.5, 1, 0, 1], 0.003);
+      }
+    } finally {
+      textures.forEach((value) => value.destroy());
+    }
+  });
+
   it("qualifies the Planar final medium composition on immutable HDR inputs", async function () {
     connectPlanar();
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
@@ -18999,6 +19159,7 @@ ${hardCascadeLibrary}`;
       try {
         for (const [depth, state, index, label] of [
           [finiteDepthTexture, states.fog, 0, "finite fog"],
+          [clearDepthTexture, states.fog, 0, "clear fog"],
           [clearDepthTexture, [false, true, true], 1, "cloud fog"],
         ]) {
           const one = render(depth, state, blackInput, 1, blackCloud)[index];
@@ -19040,7 +19201,7 @@ ${hardCascadeLibrary}`;
         const scaled = background(2.5);
         for (let channel = 0; channel < 3; channel++) {
           expect(scaled[channel])
-            .withContext("background fog")
+            .withContext("physical background")
             .toEqualEpsilon(one[channel] * 2.5, 0.003);
         }
         const directional = executeHalfFloatQuad(
@@ -19077,8 +19238,8 @@ ${hardCascadeLibrary}`;
         expect(pixel).toEqual(storedInput);
       }
       expect(clear.aerial[0]).toEqual(clear.baseline[0]);
-      expect(clear.fog[0]).toEqual(clear.baseline[0]);
-      expect(clear.combined[0]).toEqual(clear.baseline[0]);
+      expect(clear.fog[0]).not.toEqual(clear.baseline[0]);
+      expect(clear.combined[0]).toEqual(clear.fog[0]);
       expect(finite.aerial[0]).not.toEqual(finite.baseline[0]);
       expect(finite.fog[0]).not.toEqual(finite.baseline[0]);
       expect(rgbEnergy(finite.combined[0])).toBeGreaterThan(0.0);

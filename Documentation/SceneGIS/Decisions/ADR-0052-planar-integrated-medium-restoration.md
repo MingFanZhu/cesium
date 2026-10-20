@@ -1,5 +1,10 @@
 # ADR-0052：Planar Integrated-medium Restoration and Requalification
 
+The [ADR-0045 horizon amendment](ADR-0045-dual-world-exponential-height-fog.md)
+supersedes P10's pre-fogged Background / clear-Aerial shadow-difference timing.
+Both clear and finite scene color now receive fog in Aerial after coverage
+composition. Cloud geometry, shadow-prefix transport and resource budgets remain.
+
 P9 supersedes only this decision's retained stationary spatial reconstruction
 and cloudTime-based STBN policy. See the [ADR-0048 P9 amendment](ADR-0048-globe-temporal-stabilization-performance-policy.md#p9-amendment--shared-planar-medium-reconstruction)
 for shared medium pixel phases and existing-history temporal accumulation.

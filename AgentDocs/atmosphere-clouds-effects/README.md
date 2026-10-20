@@ -2,9 +2,13 @@
 
 ## Status
 
-- Latest standalone：[平面局部行星大气](plans/2026-10-20-planar-local-planet.md) — withdrawn；ADR-0170 撤销。
+- Latest standalone：[平面地平线高度雾合成](plans/2026-10-20-planar-horizon-fog-composition.md) — implementation verified；负责人视觉验收待定。
+  统一最终雾合成，使用吸收透射中点取样，修复透明边缘差异与水平光源跳变；
+  5 项 focused GPU / lifecycle Specs、构建及连续视角验证通过。[技术自审](reviews/2026-10-20-planar-horizon-fog-composition.md)；按负责人要求形成本地提交。
+
+- Previous standalone：[平面局部行星大气](plans/2026-10-20-planar-local-planet.md) — withdrawn；ADR-0170 撤销。
   负责人考虑 GIS 常用高空视角，要求移除局部球壳模式并恢复严格平面单一路径；[技术评审](reviews/2026-10-20-planar-local-planet.md)保留试验与撤销证据。
-- Current handoff：局部行星模式已移除，当前页恢复严格平面及刷新前高空视角；此前方向性散射、雾与自动曝光改动保留。
+- Previous handoff：局部行星模式已移除，当前页恢复严格平面及刷新前高空视角；此前方向性散射、雾与自动曝光改动保留。
   有限光程 GPU / 高空 E2E / 构建类型检查通过；另两项像素 fixture 失败尚未定位，详见 review。
   2026-10-20 按负责人要求分项形成本地提交并汇入 `scenegis/develop`，未推送；不关闭尚待视觉判断或回归维护的事项。
 

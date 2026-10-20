@@ -14,15 +14,6 @@ uniform vec3 u_vertical;
 uniform vec3 u_sunDirection;
 uniform float u_altitude;
 uniform float u_backgroundRadianceScale;
-uniform bool u_showHeightFog;
-uniform float u_heightFogDensity;
-uniform float u_heightFogHeightFalloff;
-uniform float u_heightFogBaseHeight;
-uniform float u_heightFogStartDistance;
-uniform float u_heightFogMaximumOpacity;
-uniform float u_heightFogInscatteringScale;
-uniform float u_heightFogDirectionalInscatteringScale;
-uniform float u_heightFogDirectionalInscatteringExponent;
 uniform sampler2D u_transmittanceTexture;
 uniform sampler3D u_scatteringTexture;
 uniform sampler2D u_irradianceTexture;
@@ -78,27 +69,6 @@ void main()
     vec3 physicalRadiance = sceneGISApplySunDisk(
         radiance, viewDirection, sunDirection, transmittance);
     vec3 sceneLinearRadiance = physicalRadiance * u_backgroundRadianceScale;
-    #ifndef SCENEGIS_GLOBE
-    // Globe fog is applied once after translucent composition in AerialFS.
-    if (u_showHeightFog) {
-        sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
-            u_transmittanceTexture, u_irradianceTexture,
-            sceneLinearRadiance,
-            rayOrigin,
-            viewDirection,
-            sunDirection,
-            SCENEGIS_PLANAR_BACKGROUND_DISTANCE,
-            0.0,
-            u_heightFogDensity,
-            u_heightFogHeightFalloff,
-            u_heightFogBaseHeight,
-            u_heightFogStartDistance,
-            u_heightFogMaximumOpacity,
-            u_backgroundRadianceScale,
-            u_heightFogInscatteringScale,
-            u_heightFogDirectionalInscatteringScale,
-            u_heightFogDirectionalInscatteringExponent);
-    }
-    #endif
+    // Both worlds apply fog after scene coverage has been composed in AerialFS.
     out_FragColor = vec4(sceneGISGuardHdrStorage(sceneLinearRadiance), 1.0);
 }

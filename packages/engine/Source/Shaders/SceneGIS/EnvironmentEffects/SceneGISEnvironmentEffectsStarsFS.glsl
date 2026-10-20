@@ -11,12 +11,6 @@ uniform vec3 u_vertical;
 uniform vec3 u_sunDirection;
 uniform float u_altitude;
 uniform float u_starIntensity;
-uniform bool u_showHeightFog;
-uniform float u_heightFogDensity;
-uniform float u_heightFogHeightFalloff;
-uniform float u_heightFogBaseHeight;
-uniform float u_heightFogStartDistance;
-uniform float u_heightFogMaximumOpacity;
 uniform sampler2D u_transmittanceTexture;
 uniform sampler3D u_scatteringTexture;
 uniform sampler2D u_irradianceTexture;
@@ -74,15 +68,6 @@ void main()
         false, intersectsAtmosphere, transmittance);
     #endif
     vec3 radiance = v_starRadiance * transmittance * (weight * visibility * u_starIntensity);
-    #ifndef SCENEGIS_GLOBE
-    if (u_showHeightFog) {
-        // The background already includes fog inscattering. Attenuate stars only.
-        radiance = sceneGISApplyExponentialHeightFog(
-            u_transmittanceTexture, u_irradianceTexture, radiance, rayOrigin, viewDirection, sunDirection,
-            SCENEGIS_PLANAR_BACKGROUND_DISTANCE, 0.0,
-            u_heightFogDensity, u_heightFogHeightFalloff, u_heightFogBaseHeight,
-            u_heightFogStartDistance, u_heightFogMaximumOpacity, 0.0, 0.0, 0.0, 1.0);
-    }
-    #endif
+    // AerialFS attenuates the combined background and star radiance once.
     out_FragColor = vec4(sceneGISGuardHdrStorage(radiance), 0.0);
 }

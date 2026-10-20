@@ -135,6 +135,39 @@ float sceneGISHeightFogPlanarOpticalDepth(
     return startDensity * scaledDistance;
 }
 
+float sceneGISHeightFogPlanarSampleDistance(
+    vec3 rayOrigin,
+    vec3 viewDirection,
+    float segmentStart,
+    float segmentEnd,
+    float opticalDepth,
+    float density,
+    float heightFalloff,
+    float baseHeight)
+{
+    if (opticalDepth <= 0.0) {
+        return segmentStart;
+    }
+    // One source sample at the midpoint of absorbed transmittance, not metric
+    // distance. In a thick grazing ray the visible fog is near the camera,
+    // even when the geometric segment ends at the distant top of the slab.
+    float sampleDepth = opticalDepth < 1.0e-2
+        ? opticalDepth * (0.5 - opticalDepth * 0.125)
+        : -log(0.5 + 0.5 * exp(-opticalDepth));
+    float startDensity = sceneGISHeightFogDensityAtHeight(
+        rayOrigin.z + viewDirection.z * segmentStart,
+        density, heightFalloff, baseHeight);
+    float rate = heightFalloff * viewDirection.z;
+    float opticalDistance = sampleDepth / startDensity;
+    float x = rate * opticalDistance;
+    // Stable analytic inverse of sigma0 * (1 - exp(-rate * distance)) / rate.
+    // The series includes the exact horizontal and constant-density limit.
+    float distance = abs(x) < 1.0e-2
+        ? opticalDistance * (1.0 + x * (0.5 + x / 3.0))
+        : -log(1.0 - x) / rate;
+    return segmentStart + clamp(distance, 0.0, segmentEnd - segmentStart);
+}
+
 float sceneGISHeightFogGlobeOpticalDepth(
     vec3 rayOrigin,
     vec3 viewDirection,
@@ -333,7 +366,13 @@ vec3 sceneGISApplyExponentialHeightFog(
     float fogAmount = min(
         1.0 - exp(-clamp(opticalDepth, 0.0, 80.0)),
         maximumOpacity);
+    #ifdef SCENEGIS_GLOBE
     float representativeDistance = 0.5 * (segmentStart + segmentEnd);
+    #else
+    float representativeDistance = sceneGISHeightFogPlanarSampleDistance(
+        rayOrigin, viewDirection, segmentStart, segmentEnd, opticalDepth,
+        density, heightFalloff, baseHeight);
+    #endif
     vec3 sunColor = sceneGISSunRadianceToScene(SCENEGIS_SOLAR_IRRADIANCE) *
         sceneGISHeightFogSunTransmittance(
             transmittanceTexture,

@@ -1,5 +1,29 @@
 # ADR-0045：Dual-world Exponential Height Fog
 
+## 2026-10-20 Planar horizon continuity and final fog composition
+
+Planar now shares the final-composition timing already used by Globe: Background
+and additive stars contain no height fog. Aerial applies it once to clear-depth
+scene color after fractional coverage is composed, as it does for finite
+receivers. Apply the Planar cloud-shadow atmosphere correction before this fog;
+the former pre-fogged-background affine difference is no longer needed.
+This avoids unattenuated glyph edges beside attenuated opaque glyph interiors.
+
+Planar source lighting retains one sample, now at the midpoint of absorbed
+transmittance: `tau(sample) = -log((1 + exp(-tau(total))) / 2)`. Invert the
+existing exponential optical-depth integral analytically. Taylor limits retain
+accuracy for optically thin, horizontal and constant-density segments. The
+geometric midpoint previously jumped toward 30 km altitude just above the
+horizon, despite most visible fog being near the camera; the measured blue
+source discontinuity was about 30%. The new location follows the contributing
+medium continuously without a pitch threshold, radius or additional LUT lookup.
+
+This remains a single-sample lighting approximation, not a new physical multiple
+scattering model. Globe integration/sampling, fixed planar geometry, fog defaults,
+maximum opacity, radiance calibration, pass/resource budgets and public API
+remain unchanged. See the
+[maintenance plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-20-planar-horizon-fog-composition.md).
+
 ## 2026-10-20 source-domain clarification
 
 The [ADR-0044 amendment](ADR-0044-separate-background-aerial-radiance-calibration.md)

@@ -158,11 +158,7 @@ void main()
     #ifdef SCENEGIS_GLOBE
     isClearDepth = isClearDepth || !u_hasCurrentGlobeDepth;
     #endif
-    if (isClearDepth && !u_showClouds
-        #ifdef SCENEGIS_GLOBE
-        && !u_showHeightFog
-        #endif
-        ) {
+    if (isClearDepth && !u_showClouds && !u_showHeightFog) {
         out_FragColor = inputColor;
         return;
     }
@@ -250,6 +246,16 @@ void main()
             (clearRadiance - unshadowedRadiance) *
             globeAtmosphereRadianceScale;
     }
+    #else
+    if (isClearDepth && u_showAerialPerspective && shadowLength > 0.0) {
+        sceneLinearRadiance -= sceneGISPlanarCloudShadowRadiance(
+            u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
+            rayOrigin, viewDirection, sunDirection, distanceToPoint, shadowLength) *
+            (u_backgroundRadianceScale * u_aerialRadianceScale);
+    }
+    #endif
+    // Apply fog after background, stars and fractional scene coverage in both
+    // worlds. Pre-fogging the background leaves clear-depth glyph edges unfogged.
     if (isClearDepth && u_showHeightFog) {
         sceneLinearRadiance = sceneGISApplyExponentialHeightFog(
             u_transmittanceTexture, u_irradianceTexture,
@@ -269,35 +275,6 @@ void main()
             u_heightFogDirectionalInscatteringScale,
             u_heightFogDirectionalInscatteringExponent);
     }
-    #endif
-    #ifndef SCENEGIS_GLOBE
-    if (isClearDepth && shadowLength > 0.0) {
-        vec3 delta = vec3(0.0);
-        if (u_showAerialPerspective) {
-            delta = -sceneGISPlanarCloudShadowRadiance(
-                u_transmittanceTexture, u_scatteringTexture, u_irradianceTexture,
-                rayOrigin, viewDirection, sunDirection, distanceToPoint, shadowLength) *
-                (u_backgroundRadianceScale * u_aerialRadianceScale);
-        }
-        if (u_showHeightFog) {
-            // Background already contains the lit fog. Its affine difference
-            // attenuates the atmosphere correction and changes directional fog once.
-            delta = sceneGISApplyExponentialHeightFog(
-                u_transmittanceTexture, u_irradianceTexture, delta, rayOrigin, viewDirection, sunDirection,
-                distanceToPoint, shadowLength, u_heightFogDensity,
-                u_heightFogHeightFalloff, u_heightFogBaseHeight, u_heightFogStartDistance,
-                u_heightFogMaximumOpacity, u_backgroundRadianceScale, u_heightFogInscatteringScale,
-                u_heightFogDirectionalInscatteringScale, u_heightFogDirectionalInscatteringExponent) -
-                sceneGISApplyExponentialHeightFog(
-                u_transmittanceTexture, u_irradianceTexture, vec3(0.0), rayOrigin, viewDirection, sunDirection,
-                distanceToPoint, 0.0, u_heightFogDensity,
-                u_heightFogHeightFalloff, u_heightFogBaseHeight, u_heightFogStartDistance,
-                u_heightFogMaximumOpacity, u_backgroundRadianceScale, u_heightFogInscatteringScale,
-                u_heightFogDirectionalInscatteringScale, u_heightFogDirectionalInscatteringExponent);
-        }
-        sceneLinearRadiance += delta;
-    }
-    #endif
     // Keep the receiver guard shared by both medium contributions. Repeating
     // it in chained conditions can lose the combined result on ANGLE/D3D11.
     if (!isClearDepth) {
