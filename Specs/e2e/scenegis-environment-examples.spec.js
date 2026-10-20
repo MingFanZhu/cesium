@@ -575,6 +575,64 @@ for (const world of ["球面", "平面"]) {
   }
 }
 
+test("Planar integrated environment retains strict optics at high altitude", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/Test/AdvancedEnvironment/综合环境.html?world=planar");
+  await page.waitForFunction(() => window.example?.effects.ready);
+  await expect(
+    page.getByRole("combobox", { name: "平面大气几何" }),
+  ).toHaveCount(0);
+  const result = await page.evaluate(async () => {
+    const C = await import("/Build/CesiumUnminified/index.js");
+    const { viewer, effects } = window.example;
+    viewer.clock.shouldAnimate = false;
+    effects.showClouds = false;
+    effects.showHeightFog = false;
+    const resources = effects._pipeline._resources;
+    const position = C.Cartesian3.clone(viewer.camera.positionWC);
+    position.z = 1000000;
+    viewer.camera.setView({
+      destination: position,
+      orientation: {
+        direction: new C.Cartesian3(0, 0, -1),
+        up: C.Cartesian3.UNIT_Y,
+      },
+    });
+    await new Promise((resolve) => {
+      const remove = viewer.scene.postRender.addEventListener(() => {
+        remove();
+        resolve();
+      });
+      viewer.scene.requestRender();
+    });
+    effects.enabled = false;
+    effects.enabled = true;
+    const stable = effects._pipeline._resources === resources;
+    const dimensions = [
+      resources.irradianceTexture.width,
+      resources.irradianceTexture.height,
+    ];
+    const ready = effects.ready;
+    window.example.destroy();
+    return {
+      stable,
+      dimensions,
+      ready,
+      released: resources.scatteringTexture.isDestroyed(),
+    };
+  });
+  expect(result).toEqual({
+    stable: true,
+    dimensions: [64, 16],
+    ready: true,
+    released: true,
+  });
+  expect(errors).toEqual([]);
+});
+
 test("Functional catalogs and legacy redirects resolve", async ({
   page,
   request,

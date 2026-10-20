@@ -2,7 +2,18 @@
 
 ## Status
 
-- Latest standalone: [双世界太阳泛光形状修复](plans/2026-10-19-solar-bloom-footprint.md) — implementation verified，负责人视觉判断保留。
+- Latest standalone：[平面局部行星大气](plans/2026-10-20-planar-local-planet.md) — withdrawn；ADR-0170 撤销。
+  负责人考虑 GIS 常用高空视角，要求移除局部球壳模式并恢复严格平面单一路径；[技术评审](reviews/2026-10-20-planar-local-planet.md)保留试验与撤销证据。
+- Current handoff：局部行星模式已移除，当前页恢复严格平面及刷新前高空视角；此前方向性散射、雾与自动曝光改动保留。
+  有限光程 GPU / 高空 E2E / 构建类型检查通过；另两项像素 fixture 失败尚未定位，详见 review。
+  2026-10-20 按负责人要求分项形成本地提交并汇入 `scenegis/develop`，未推送；不关闭尚待视觉判断或回归维护的事项。
+
+- Previous standalone: [平面方向性多次散射](plans/2026-10-20-planar-directional-scattering.md) — implementation verified；负责人视觉判断保留。
+  离线按 Rayleigh / Mie 相函数卷积方向性源，运行时布局和开销不变；[技术评审](reviews/2026-10-20-planar-directional-scattering.md)。
+- Previous standalone: [平面中午高度雾亮度域](plans/2026-10-20-planar-fog-source-domain.md) — implementation verified；负责人视觉判断保留。
+  统一两世界 fog source 倍率和 scene RGB directional source，修正平面暗蓝地平线带；5 项相关 GPU / lifecycle 测试通过。
+- Previous standalone: [综合环境自动曝光对照](plans/2026-10-20-integrated-auto-exposure.md) — completed；复用既有直方图自动曝光，开放对照控件与可选诊断；两世界综合 E2E 通过。
+- Previous standalone: [双世界太阳泛光形状修复](plans/2026-10-19-solar-bloom-footprint.md) — implementation verified，负责人视觉判断保留。
   两世界统一六方向模糊，保留原预算与太阳辐射；按负责人要求将默认 bloomIntensity 降为 0.005。
   六项相关 Specs、构建与类型检查通过；[技术评审](reviews/2026-10-19-solar-bloom-footprint.md)。2026-10-20 按负责人要求纳入本地提交，未推送。
 - Previous standalone: [综合环境矢量验收图层](plans/2026-10-19-integrated-vector-layer.md) — completed；2026-10-19 负责人视觉验收通过。
@@ -15,7 +26,10 @@
 - Previous standalone: [高度雾完整可见段积分](plans/2026-10-19-height-fog-visible-segment.md) — implementation verified，负责人视觉判断保留。
   移除双世界 300 km 介质截断，Globe 按误差上界裁剪稀薄尾部，每次最多 16 次密度采样；
   当前视角、连续高度 / 倾角、精度与资源验证见[技术评审](reviews/2026-10-19-height-fog-visible-segment.md)。
-- Current handoff: 太阳泛光形状修复与默认强度调整已完成技术验证，当前页面保留原视角、时刻和图层，强度更新为 0.005；2026-10-20 按负责人要求形成独立本地提交，未推送。
+- Previous handoff: 平面方向性多次散射已实现；两页保留南京中午同向视角、关闭高度雾及手动曝光，供负责人视觉判断。
+- Previous handoff: 平面高度雾 source-domain 修复完成技术验证；此前自动曝光与高度雾工作区改动保留。
+- Previous handoff: 综合环境自动曝光对照已完成技术验证；代码初始仍关闭，负责人暂缓继续排查自动曝光。
+- Previous handoff: 太阳泛光形状修复与默认强度调整已完成技术验证，2026-10-20 按负责人要求形成本地提交 `550652d3e6`，未推送。
 - Previous handoff: 2026-10-19 按负责人要求移除 MVT 专用水面，并将有效改动分项形成独立本地提交；不推送。
   高度雾 checkpoint `8131844823`，白平衡 checkpoint `1ba75c7ce5`；矢量示例与撤销记录随本次收口提交。
   综合环境水域保持普通 fill，保留原 WaterSurface；MVT 撤销记录见[矢量扩展索引](../vector-tiles/README.md)。
@@ -49,7 +63,11 @@
   before claiming a complete strict-validation suite pass; they do not reopen the
   accepted cloud quality work automatically.
 - Previous standalone plan: [程序星空](plans/2026-09-30-procedural-stars.md) — implemented; technical review passed; owner visual acceptance pending; ADR-0107; no upstream delta.
-- Latest technical review: [双世界太阳泛光形状修复](reviews/2026-10-19-solar-bloom-footprint.md).
+- Latest technical review: [平面局部行星大气](reviews/2026-10-20-planar-local-planet.md).
+- Previous technical review: [平面方向性多次散射](reviews/2026-10-20-planar-directional-scattering.md).
+- Previous technical review: [平面中午高度雾亮度域](reviews/2026-10-20-planar-fog-source-domain.md).
+- Previous technical review: [综合环境自动曝光对照](reviews/2026-10-20-integrated-auto-exposure.md).
+- Previous technical review: [双世界太阳泛光形状修复](reviews/2026-10-19-solar-bloom-footprint.md).
 - Previous technical review: [综合环境矢量验收图层](reviews/2026-10-19-integrated-vector-layer.md).
 - Previous technical review: [固定太阳白点显示校正](reviews/2026-10-19-solar-white-balance.md).
 - Previous technical review: [高度雾完整可见段积分](reviews/2026-10-19-height-fog-visible-segment.md).
