@@ -172,6 +172,22 @@ underground 状态误判为错误。
 
 ## 升级检查点
 
+### 2026-10-20 amendment：有效锚点旋转优先于 center extent clamp
+
+负责人确认：Surface 中键拾取到合法 depth/terrain/bounded Z=0 anchor 时，旋转及其惯性
+保持 press-time pivot、window anchor 和 distance，允许屏幕中心落地点越出 World extent。
+高空且相机位于 extent 外时，center clamp 会额外平移 Camera 并破坏 orbit，因此有效锚点
+路径不再执行该平移。下一次中键同步也必须先保留 Camera pose，再从当前画面重新解析 anchor。
+
+该修订取代本 ADR、ADR-0004 与 ADR-0025 对有效锚点旋转保留的 center clamp 限制；
+pointer miss 的 center fallback、pan、wheel、Home 与初始同步继续使用原边界规则。
+不扩大合法 anchor 的 extent，不修改 public pick 或 pitch limit。ADR-0026 的 endpoint terrain
+clearance 始终优先；碰撞纠正时不保证原有半径/屏幕锚点。Underground 行为不变。
+没有新的公开参数、逐帧 terrain picking、资源或 SGP。
+实现与验证见[维护计划](../../../AgentDocs/planar-terrain-advanced/plans/2026-10-20-anchored-orbit-boundary.md)。
+
+### 上游升级复核
+
 每次 Cesium 升级复核：
 
 - `Scene.pickPosition`、`pickPositionSupported`、`useDepthPicking`、`pickTranslucentDepth` 和 depth cache 的时序；

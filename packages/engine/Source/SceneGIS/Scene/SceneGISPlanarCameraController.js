@@ -537,6 +537,7 @@ function SceneGISPlanarCameraController(options) {
   this._rotatePivot = new Cartesian3();
   this._rotateWindowAnchor = new Cartesian2();
   this._rotateDistance = 0.0;
+  this._rotateHasSurfaceAnchor = false;
   this._rotatePitchDirection = 0.0;
   this._zoomAnchor = new Cartesian3();
   this._dragTarget = new Cartesian3();
@@ -924,6 +925,7 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
   scene,
   allowHome,
   clearanceSurfaceHeight,
+  clampTarget = true,
 ) {
   const camera = scene.camera;
   let worldPose = SceneGISPlanarCamera.getWorldPose(camera, scratchCameraPose);
@@ -975,7 +977,11 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
   if (!valid) {
     return false;
   }
-  this._applyTargetClamp(scene, target);
+  if (clampTarget) {
+    this._applyTargetClamp(scene, target);
+  } else {
+    Cartesian3.clone(target, this._target);
+  }
   this._surfaceHeight = surfaceHeight;
   const synchronizedPose = SceneGISPlanarCamera.getHeadingPitch(camera);
   const synchronizedWorldPose = SceneGISPlanarCamera.getWorldPose(
@@ -1091,7 +1097,12 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
       start,
       this._rotatePivot,
     );
+    this._rotateHasSurfaceAnchor = defined(pivot);
     if (!pivot) {
+      // Middle-drag synchronization defers clamping until the pointer is picked.
+      if (this._navigationMode === "surface") {
+        this._applyTargetClamp(scene, undefined, this._target.z);
+      }
       Cartesian3.clone(this._target, this._rotatePivot);
       getCenter(scene, this._rotateWindowAnchor);
     } else {
@@ -1153,7 +1164,7 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     scratchUp,
     scratchRight,
   );
-  // Boundary and clearance corrections must not grow the held orbit radius.
+  // Clearance corrections must not grow the held orbit radius.
   positionForWindowAnchor(
     scene,
     this._rotatePivot,
@@ -1179,7 +1190,13 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     scratchUp,
   );
   if (!allowsCrossing) {
-    this._applyTargetClamp(scene, undefined, this._dragTarget.z);
+    if (this._rotateHasSurfaceAnchor) {
+      // A valid pointer pivot owns the orbit, even when the center ray leaves
+      // the extent. Translating the camera here would move that pivot on screen.
+      getCenterPlaneTarget(scene, this._dragTarget.z, this._target);
+    } else {
+      this._applyTargetClamp(scene, undefined, this._dragTarget.z);
+    }
     Cartesian3.clone(this._target, this._dragTarget);
   }
 };
@@ -1364,7 +1381,13 @@ SceneGISPlanarCameraController.prototype.update = function (scene, time) {
   const dragStarting =
     (middleWillRun && !this._rotateActive) || (leftWillRun && !this._panActive);
   const dragRigReady =
-    !dragStarting || this._syncRig(scene, true, clearanceSurfaceHeight);
+    !dragStarting ||
+    this._syncRig(
+      scene,
+      true,
+      clearanceSurfaceHeight,
+      !(middleWillRun && this._navigationMode === "surface"),
+    );
   let inputMayMoveCamera = false;
   try {
     if (dragRigReady && middleWillRun) {

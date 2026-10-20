@@ -559,7 +559,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
       expect(controller._inertia.type).toBeUndefined();
     });
 
-    it("keeps the orbit distance bounded when inertia reaches the surface pitch limit", function () {
+    it("keeps anchored surface orbit through inertia and a new press beyond the center boundary", function () {
       SceneGISPlanarCamera.setWorldPose(
         scene.camera,
         new Cartesian3(0.0, -120.0, 90.0),
@@ -567,16 +567,27 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
         new Cartesian3(0.0, 0.6, 0.8),
       );
       controller.firstUpdate(scene, time);
+      const anchor = new Cartesian2(center.x, scene.canvas.clientHeight * 0.7);
       queueMovement(
         CameraEventType.MIDDLE_DRAG,
-        center,
-        new Cartesian2(center.x, center.y - scene.canvas.clientHeight * 0.15),
+        anchor,
+        new Cartesian2(anchor.x, anchor.y - scene.canvas.clientHeight * 0.15),
       );
       controller._aggregator._pressTime[`${CameraEventType.MIDDLE_DRAG}`] =
         new Date();
       controller.update(scene, time);
       const distance = controller._rotateDistance;
+      const pivot = Cartesian3.clone(controller._rotatePivot);
+      const actualDistance = Cartesian3.distance(
+        scene.camera.positionWC,
+        pivot,
+      );
       release(CameraEventType.MIDDLE_DRAG);
+      const releasedPitch = controller._pitch;
+      advance();
+      expect(controller._inertia.running).toBe(true);
+      expect(controller._pitch).toBeGreaterThan(releasedPitch);
+      expect(project(scene, pivot)).toEqualEpsilon(anchor, 1e-9);
       for (let i = 0; i < 20; i++) {
         advance();
       }
@@ -587,6 +598,19 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
       }
       expect(scene.camera.positionWC).toEqualEpsilon(limited, 1e-9);
       expect(controller._rotateDistance).toBe(distance);
+      expect(
+        Cartesian3.distance(scene.camera.positionWC, pivot),
+      ).toEqualEpsilon(actualDistance, 1e-9);
+      expect(project(scene, pivot)).toEqualEpsilon(anchor, 1e-9);
+      expect(controller._target.y).toBeGreaterThan(128.0);
+      queueMovement(CameraEventType.MIDDLE_DRAG, anchor, anchor);
+      controller._aggregator._pressTime[`${CameraEventType.MIDDLE_DRAG}`] =
+        new Date();
+      advance();
+      expect(controller._inertia.running).toBe(false);
+      expect(scene.camera.positionWC).toEqualEpsilon(limited, 1e-9);
+      expect(controller._rotatePivot).toEqualEpsilon(pivot, 1e-9);
+      expect(controller._rotateDistance).toEqualEpsilon(distance, 1e-9);
     });
 
     it("applies surface clearance during coast and allows underground pivot crossing", function () {
@@ -2032,7 +2056,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     expect(scene.camera.rightWC.z).toBeCloseTo(0.0, 12);
   });
 
-  it("keeps held surface rotation stable at the pitch and extent limits", function () {
+  it("keeps anchored surface orbit stable beyond the center extent at the pitch limit", function () {
     const scene = createWidget();
     controller = new SceneGISPlanarCameraController({ world });
     widget.addController(controller);
@@ -2067,7 +2091,11 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
         pointer = end;
       }
       expect(controller._pitch).toBe(-CesiumMath.toRadians(5.0));
-      expect(controller._target.y).toBe(128.0);
+      expect(controller._target.y).toBeGreaterThan(128.0);
+      expect(project(scene, controller._rotatePivot)).toEqualEpsilon(
+        controller._rotateWindowAnchor,
+        1e-9,
+      );
       const limitedPosition = Cartesian3.clone(scene.camera.positionWC);
       const pivot = Cartesian3.clone(controller._rotatePivot);
       const terrainCalls = world.pickTerrain.calls.count();
@@ -2098,6 +2126,74 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
       expect(controller._rotateActive).toBe(false);
     }
     expect(controller.viewHome).not.toHaveBeenCalled();
+  });
+
+  it("starts anchored surface orbit outside the extent without moving the camera before picking", function () {
+    const offset = 70000000.0;
+    const scene = createWidget(offset);
+    controller = new SceneGISPlanarCameraController({ world });
+    widget.addController(controller);
+    const orthographic = createFrusta()[2];
+    orthographic.width = 2000.0;
+    spyOn(scene, "pickPosition").and.returnValue(undefined);
+    spyOn(world, "pickTerrain").and.returnValue(undefined);
+    spyOn(controller, "viewHome").and.callThrough();
+    const pivot = new Cartesian3(offset, offset, 0.0);
+    for (const frustum of [perspective(), orthographic]) {
+      scene.camera.frustum = frustum;
+      controller.firstUpdate(scene, JulianDate.now());
+      const initial = new Cartesian3(offset, offset - 1500.0, 1500.0);
+      SceneGISPlanarCamera.setWorldPose(
+        scene.camera,
+        initial,
+        new Cartesian3(0.0, 0.8, -0.6),
+        new Cartesian3(0.0, 0.6, 0.8),
+      );
+      const anchor = project(scene, pivot);
+      queueMovement(CameraEventType.MIDDLE_DRAG, anchor, anchor);
+      controller.update(scene, JulianDate.now());
+      expect(scene.camera.positionWC).toEqualEpsilon(initial, 1e-8);
+      expect(controller._rotatePivot).toEqualEpsilon(pivot, 1e-8);
+      expect(controller._target.y).toBeGreaterThan(offset + 128.0);
+      queueMovement(
+        CameraEventType.MIDDLE_DRAG,
+        anchor,
+        new Cartesian2(anchor.x, anchor.y - scene.canvas.clientHeight * 0.2),
+      );
+      controller.update(scene, JulianDate.now());
+      expect(project(scene, pivot)).toEqualEpsilon(anchor, 1e-8);
+      expect(
+        Cartesian3.distance(scene.camera.positionWC, pivot),
+      ).toEqualEpsilon(Cartesian3.distance(initial, pivot), 1e-8);
+      releaseButton(CameraEventType.MIDDLE_DRAG);
+      controller.update(scene, JulianDate.now());
+    }
+    expect(controller.viewHome).not.toHaveBeenCalled();
+  });
+
+  it("retains the bounded center fallback when a surface orbit has no pointer anchor", function () {
+    const scene = createWidget();
+    scene.camera.frustum = perspective();
+    controller = new SceneGISPlanarCameraController({ world });
+    widget.addController(controller);
+    controller.firstUpdate(scene, JulianDate.now());
+    spyOn(scene, "pickPosition").and.returnValue(undefined);
+    spyOn(world, "pickTerrain").and.returnValue(undefined);
+    spyOn(world, "pick").and.returnValue(undefined);
+    SceneGISPlanarCamera.setWorldPose(
+      scene.camera,
+      new Cartesian3(200.0, 200.0, 100.0),
+      new Cartesian3(0.0, 0.0, -1.0),
+      Cartesian3.UNIT_Y,
+    );
+    const pointer = new Cartesian2(10.0, 10.0);
+    queueMovement(CameraEventType.MIDDLE_DRAG, pointer, pointer);
+    controller.update(scene, JulianDate.now());
+    expect(controller._rotatePivot).toEqual(new Cartesian3(128.0, 128.0, 0.0));
+    expect(scene.camera.positionWC).toEqualEpsilon(
+      new Cartesian3(128.0, 128.0, 100.0),
+      1e-9,
+    );
   });
 
   it("preserves wheel zoom when a held surface rotation continues", function () {

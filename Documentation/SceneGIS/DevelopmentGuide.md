@@ -519,6 +519,8 @@ lookAtWorldPosition 的固定 +Z up、四类 frustum 的 public getPickRay 和 f
   Home、feature/整体 disable、mode 切换、flight/tracking suspension 与 disconnect 必须取消且不重放。
 - Public `world.pick`/`pickFromWindowPosition`与Home仍是Z=0 contract；center rig按actual-cover terrain→
   resident camera-surface height/Z=0 fallback解析，target clamp只限制X/Y并保留target Z。
+  Surface 有效锚点的中键旋转和惯性允许 center target 越界；开始新中键手势时不得先执行 center clamp
+  移动 Camera 再拾取。Pointer miss fallback、pan、wheel 与初始同步保留边界，terrain clearance 始终优先。
 - `navigationMode`只接受`"surface"`/`"underground"`且默认surface；setter切换必须隔离held input，但不移动
   Camera、调用Home或查询terrain。Viewer通过`planarCameraController`配置，不增加Viewer option或Event。
 - Observed relationship是private resident height→Z=0 fallback，不能自动切mode。Surface只接纳上侧/负pitch；

@@ -12,11 +12,12 @@
 - Latest completed phase:
   [A7 平面高级地形统一资格与交付](plans/2026-08-11-phase-a7-unified-qualification-and-delivery.md)
 - Active standalone plan: None
+- Pending orbit visual acceptance: [地表锚点旋转与中心边界解耦](plans/2026-10-20-anchored-orbit-boundary.md)
 - Pending visual acceptance: [地形元数据接入](plans/2026-09-18-terrain-layer-metadata.md)
 - Latest completed standalone plan: [地形剖切与多边形裁剪](plans/2026-09-18-terrain-clipping.md)（技术与视觉验收通过）
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
-- Last updated: `2026-09-18`
+- Last updated: `2026-10-20`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -63,6 +64,13 @@
   复用合法 SGP
 
 ## Current handoff
+
+2026-10-20：高空、extent 外相机围绕有效地表锚点旋转时，center target clamp 会额外拉远相机。
+本轮按负责人确认保留有效锚点 orbit，允许 center target 越界，并处理再次拖动；
+pan boundary、pointer miss fallback 与 terrain clearance 保持。61 项 Controller 与 5 项真实 terrain/depth Specs
+通过，当前综合页高空连续旋转、惯性和再次拖动实测通过；见[计划](plans/2026-10-20-anchored-orbit-boundary.md)
+和[技术自审](reviews/2026-10-20-anchored-orbit-boundary.md)。待负责人视觉复测；
+2026-10-20 按负责人要求形成本地提交并汇入 `scenegis/develop`，未推送。
 
 2026-09-18：平面剖切和多边形裁剪已实现，直接复用原生 Cesium collection / polygon API。
 91 项相关 Specs、2 项真实地形 dev/release E2E、完整 build/release/types 与 engine tarball 定向 smoke 通过。
