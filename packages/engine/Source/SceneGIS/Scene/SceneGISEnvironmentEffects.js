@@ -998,7 +998,7 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
   },
   /**
    * Gets or sets the scene-linear scale applied to physical background radiance.
-   * Also calibrates aerial and cloud radiance. The default appearance scale is
+   * Also calibrates aerial, cloud and height-fog source radiance. The default appearance scale is
    * 2.5 in both worlds, independently of display HDR or exposure.
    *
    * @memberof SceneGISEnvironmentEffects.prototype
@@ -1714,7 +1714,7 @@ SceneGISEnvironmentEffects.prototype._validateRenderFrame = function () {
  * @property {number} [cloudWindSpeed=20.0] Cloud advection speed in meters per second in the inclusive range 0–200.
  * @property {number} [cloudTime=0.0] Caller-owned simulation seconds in the inclusive range -1000000000–1000000000.
  * @property {number} [cloudRadianceScale] Cloud radiance calibration relative to backgroundRadianceScale in the inclusive range 0–64. Defaults to 1.0 in both worlds.
- * @property {number} [backgroundRadianceScale=2.5] Scene-linear scale applied to physical background radiance, in the inclusive range 0–64. The default appearance scale is the same in both worlds.
+ * @property {number} [backgroundRadianceScale=2.5] Scene-linear scale applied to background, aerial, cloud and height-fog source radiance, in the inclusive range 0–64. The default appearance scale is the same in both worlds.
  * @property {number} [aerialRadianceScale=1.0] Aerial radiance scale in the inclusive range 0–64, relative to backgroundRadianceScale on both worlds.
  * @property {number} [aerialPerspectiveDistanceScale] Finite-receiver atmospheric lookup distance scale in [0, 8]. Defaults to 0.5 on Globe and 1.0 on Planar; Planar requires one. Scales scattering and attenuation together, excluding initial vacuum. Does not change background sky, lighting or geometry.
  * @property {number} [surfaceRadianceScale=1.2] Globe, Planar surface and physical model direct/diffuse sky radiance scale, in the inclusive range 0–64. Independent of display HDR and exposure.

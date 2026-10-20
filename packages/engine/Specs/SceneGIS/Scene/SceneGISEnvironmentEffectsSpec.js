@@ -3593,13 +3593,7 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       );
     expect(deltaOnlyAerialSource).not.toBe(aerialFragmentSource);
     const normalizedSunFogSource = heightFogSource.replace(
-      `    #ifdef SCENEGIS_GLOBE
-    return numerator;
-    #else
-    float denominator = sceneGISHeightFogMaxComponent(
-        SCENEGIS_SOLAR_IRRADIANCE);
-    return numerator / max(denominator, 1.0e-8);
-    #endif`,
+      `    return numerator;`,
       `    float denominator = sceneGISHeightFogMaxComponent(
         SCENEGIS_SOLAR_IRRADIANCE);
     return numerator / max(denominator, 1.0e-8);`,
@@ -18930,7 +18924,13 @@ ${hardCascadeLibrary}`;
       cloud: [false, false, true],
       combined: [true, true, true],
     };
-    const render = (depthTexture, state, colorTexture = inputTexture) =>
+    const render = (
+      depthTexture,
+      state,
+      colorTexture = inputTexture,
+      sourceScale = 10.0,
+      cloudTexture = cloudColorTexture,
+    ) =>
       executeHalfFloatQuad(
         [
           atmosphereSource,
@@ -18962,7 +18962,7 @@ ${hardCascadeLibrary}`;
               ),
             u_altitude: () => 30000.0,
             u_aerialRadianceScale: () => 1.0,
-            u_backgroundRadianceScale: () => 10.0,
+            u_backgroundRadianceScale: () => sourceScale,
             u_showAerialPerspective: () => state[0],
             u_showHeightFog: () => state[1],
             u_showClouds: () => state[2],
@@ -18979,13 +18979,84 @@ ${hardCascadeLibrary}`;
             u_transmittanceTexture: () => resources.transmittanceTexture,
             u_scatteringTexture: () => resources.scatteringTexture,
             u_irradianceTexture: () => resources.irradianceTexture,
-            u_cloudColorTexture: () => cloudColorTexture,
+            u_cloudColorTexture: () => cloudTexture,
             u_cloudDistanceTexture: () => cloudDistanceTexture,
           },
         },
       );
 
     try {
+      // Black inputs isolate fog source energy from independently authored surface/cloud colors.
+      const blackInput = makeHalfTexture(
+        inputPixels.map(() => [0, 0, 0, alpha]),
+      );
+      const blackCloud = makeHalfTexture([
+        [0, 0, 0, 1],
+        [0, 0, 0, 0.5],
+        [0, 0, 0, 0.65],
+        [0, 0, 0, 0.4],
+      ]);
+      try {
+        for (const [depth, state, index, label] of [
+          [finiteDepthTexture, states.fog, 0, "finite fog"],
+          [clearDepthTexture, [false, true, true], 1, "cloud fog"],
+        ]) {
+          const one = render(depth, state, blackInput, 1, blackCloud)[index];
+          const scaled = render(depth, state, blackInput, 2.5, blackCloud)[
+            index
+          ];
+          expect(rgbEnergy(one)).toBeGreaterThan(0);
+          for (let channel = 0; channel < 3; channel++) {
+            expect(scaled[channel])
+              .withContext(label)
+              .toEqualEpsilon(one[channel] * 2.5, 0.003);
+          }
+          expect(scaled[3]).toBe(alpha);
+        }
+        const background = (scale) =>
+          executeHalfFloatQuad(
+            [
+              atmosphereSource,
+              cloudShadowSource,
+              heightFogSource,
+              backgroundFragmentSource,
+            ],
+            {
+              uniformMap: {
+                ...effects._pipeline._uniformMap,
+                u_perspective: () => true,
+                u_frustum: () => new Cartesian4(0, 0, 0, 0),
+                u_cameraDirection: () => Cartesian3.UNIT_Y,
+                u_cameraRight: () => Cartesian3.UNIT_X,
+                u_cameraUp: () => Cartesian3.UNIT_Z,
+                u_altitude: () => 706,
+                u_sunDirection: () => Cartesian3.UNIT_Z,
+                u_showHeightFog: () => true,
+                u_backgroundRadianceScale: () => scale,
+              },
+            },
+          )[0];
+        const one = background(1);
+        const scaled = background(2.5);
+        for (let channel = 0; channel < 3; channel++) {
+          expect(scaled[channel])
+            .withContext("background fog")
+            .toEqualEpsilon(one[channel] * 2.5, 0.003);
+        }
+        const directional = executeHalfFloatQuad(
+          [
+            atmosphereSource,
+            cloudShadowSource,
+            heightFogSource,
+            `void main() { out_FragColor = vec4(sceneGISHeightFogDirectionalSource(vec3(0.7, 0.8, 0.9)), 1.0); }`,
+          ],
+          { uniformMap: effects._pipeline._uniformMap },
+        )[0];
+        expect(directional).toEqualEpsilon([0.7, 0.8, 0.9, 1.0], 0.001);
+      } finally {
+        blackInput.destroy();
+        blackCloud.destroy();
+      }
       const clear = {};
       const finite = {};
       for (const [name, state] of Object.entries(states)) {

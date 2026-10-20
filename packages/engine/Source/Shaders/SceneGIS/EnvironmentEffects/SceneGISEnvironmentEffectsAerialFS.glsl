@@ -286,13 +286,13 @@ void main()
                 u_transmittanceTexture, u_irradianceTexture, delta, rayOrigin, viewDirection, sunDirection,
                 distanceToPoint, shadowLength, u_heightFogDensity,
                 u_heightFogHeightFalloff, u_heightFogBaseHeight, u_heightFogStartDistance,
-                u_heightFogMaximumOpacity, 1.0, u_heightFogInscatteringScale,
+                u_heightFogMaximumOpacity, u_backgroundRadianceScale, u_heightFogInscatteringScale,
                 u_heightFogDirectionalInscatteringScale, u_heightFogDirectionalInscatteringExponent) -
                 sceneGISApplyExponentialHeightFog(
                 u_transmittanceTexture, u_irradianceTexture, vec3(0.0), rayOrigin, viewDirection, sunDirection,
                 distanceToPoint, 0.0, u_heightFogDensity,
                 u_heightFogHeightFalloff, u_heightFogBaseHeight, u_heightFogStartDistance,
-                u_heightFogMaximumOpacity, 1.0, u_heightFogInscatteringScale,
+                u_heightFogMaximumOpacity, u_backgroundRadianceScale, u_heightFogInscatteringScale,
                 u_heightFogDirectionalInscatteringScale, u_heightFogDirectionalInscatteringExponent);
         }
         sceneLinearRadiance += delta;
@@ -355,11 +355,7 @@ void main()
                 u_heightFogBaseHeight,
                 u_heightFogStartDistance,
                 u_heightFogMaximumOpacity,
-                #ifdef SCENEGIS_GLOBE
                 u_backgroundRadianceScale,
-                #else
-                1.0,
-                #endif
                 u_heightFogInscatteringScale,
                 u_heightFogDirectionalInscatteringScale,
                 u_heightFogDirectionalInscatteringExponent);
@@ -440,11 +436,7 @@ void main()
                     u_heightFogBaseHeight,
                     u_heightFogStartDistance,
                     u_heightFogMaximumOpacity,
-                    #ifdef SCENEGIS_GLOBE
                     u_backgroundRadianceScale,
-                    #else
-                    1.0,
-                    #endif
                     u_heightFogInscatteringScale,
                     u_heightFogDirectionalInscatteringScale,
                     u_heightFogDirectionalInscatteringExponent) * cloudOpacity;

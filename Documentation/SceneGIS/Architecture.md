@@ -323,6 +323,10 @@ P4按ADR-0050的Planar amendment以fixed +Z复用同一readable-night source与-
 P5按ADR-0042/0044修订计算完整Planar atmosphere slab路径，解析积分不得再按cloud/fog march预算裁剪。
 Planar aerial与Globe一样使用`backgroundRadianceScale * aerialRadianceScale`，统一远景和天空的scene-linear source单位；
 surface/cloud material与fog标定、光学系数和LUT不变，资源与lookup数量不增加。
+ADR-0044 / ADR-0045 的 2026-10-20 修订进一步统一两世界高度雾的 source domain：
+Background、有限深度 Aerial、cloud fog 与 shadow delta 均使用 `backgroundRadianceScale`；
+directional source 接收 scene RGB，不再次除以 spectral solar max。保留各自几何、密度积分、
+最大不透明度和固定计算预算，不通过俯角阈值或增大密度补偿色差。
 
 ### 平面地形 Core 契约
 

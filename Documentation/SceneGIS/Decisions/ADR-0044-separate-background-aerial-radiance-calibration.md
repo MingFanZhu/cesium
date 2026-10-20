@@ -1,5 +1,23 @@
 # ADR-0044：Separate Background and Aerial Radiance Calibration
 
+## 2026-10-20 amendment: Planar height-fog source domain
+
+The matched noon view exposes the legacy Planar fog coefficient of 1 while sky
+and aerial sources use backgroundRadianceScale (currently 2.5). Increasing fog
+opacity therefore pulls the horizon toward a separately dimmed source. Extend
+the accepted Globe source-domain contract to Planar Background, finite Aerial,
+cloud optical fog and the lit/shadowed affine difference: all pass the same
+backgroundRadianceScale. The two fog inscattering scales remain relative artistic
+controls; density, transmittance, maximum opacity and aerialRadianceScale are
+independent. This supersedes the Planar coefficient freeze in A5/P5 below.
+
+Planar directional fog also consumes scene-linear solar/primary-light irradiance
+directly, as Globe does, removing the retained division by spectral solar max.
+Keep the shared ambient tint, independent flat-slab LUT and geometry, primary
+Moon/light scale and shadow integration. No display compensation, new default,
+distance/pitch threshold, resource, lookup or upstream change is introduced.
+See the [maintenance plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-20-planar-fog-source-domain.md).
+
 ## 状态
 
 - Status：`approved`

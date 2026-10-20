@@ -94,11 +94,7 @@ void main()
             u_heightFogBaseHeight,
             u_heightFogStartDistance,
             u_heightFogMaximumOpacity,
-            #ifdef SCENEGIS_GLOBE
             u_backgroundRadianceScale,
-            #else
-            1.0,
-            #endif
             u_heightFogInscatteringScale,
             u_heightFogDirectionalInscatteringScale,
             u_heightFogDirectionalInscatteringExponent);

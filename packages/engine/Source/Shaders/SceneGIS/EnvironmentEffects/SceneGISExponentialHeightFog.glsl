@@ -265,13 +265,8 @@ vec3 sceneGISHeightFogAmbientSource(vec3 sunColor)
 vec3 sceneGISHeightFogDirectionalSource(vec3 sunColor)
 {
     vec3 numerator = max(sunColor, vec3(0.0));
-    #ifdef SCENEGIS_GLOBE
+    // Both worlds receive primary irradiance already converted to scene RGB.
     return numerator;
-    #else
-    float denominator = sceneGISHeightFogMaxComponent(
-        SCENEGIS_SOLAR_IRRADIANCE);
-    return numerator / max(denominator, 1.0e-8);
-    #endif
 }
 
 vec3 sceneGISApplyExponentialHeightFog(

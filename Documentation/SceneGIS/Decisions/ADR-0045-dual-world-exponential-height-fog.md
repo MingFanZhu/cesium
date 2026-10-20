@@ -1,5 +1,15 @@
 # ADR-0045：Dual-world Exponential Height Fog
 
+## 2026-10-20 source-domain clarification
+
+The [ADR-0044 amendment](ADR-0044-separate-background-aerial-radiance-calibration.md)
+supersedes the retained Planar source-domain exception: both worlds scale fog
+inscattering with backgroundRadianceScale, including background, finite geometry,
+cloud optical and shadow-difference consumers. Directional fog uses scene RGB
+primary irradiance without a second spectral-reference normalization. The shared
+ambient tint and explicit inscattering coefficients remain; extinction, opacity,
+fixed-Z/spherical geometry and integration accuracy are unchanged.
+
 ## 状态
 
 - Status：`approved`
