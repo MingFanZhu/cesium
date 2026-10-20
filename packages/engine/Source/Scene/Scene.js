@@ -1836,15 +1836,15 @@ Object.defineProperties(Scene.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0046: Document the deferred default without adding JSDoc tag text.
   /**
    * The sample rate of multisample antialiasing (values greater than 1 enable MSAA).
+   * SceneGIS deferred rendering rejects multisampling; use FXAA or temporal antialiasing.
    * @memberof Scene.prototype
    * @type {number}
-   * SCENEGIS_PATCH_BEGIN SGP-0046: Expose the single-sample deferred default.
    * @default 1
-   * SceneGIS deferred rendering rejects multisampling; use FXAA or temporal antialiasing.
-   * SCENEGIS_PATCH_END SGP-0046
    */
+  // SCENEGIS_PATCH_END SGP-0046
   msaaSamples: {
     get: function () {
       return this._msaaSamples;

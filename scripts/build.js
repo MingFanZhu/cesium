@@ -419,7 +419,9 @@ export async function bundleWorkers(options) {
   const workers = await globby(["packages/engine/Source/Workers/**"]);
   const workerConfig = defaultESBuildOptions();
   workerConfig.bundle = true;
-  workerConfig.external = ["fs", "path"];
+  // SCENEGIS_PATCH_BEGIN SGP-0061: Draco keeps node:fs inside its Node-only branch.
+  workerConfig.external = ["fs", "path", "node:fs"];
+  // SCENEGIS_PATCH_END SGP-0061
 
   if (options.iife) {
     let contents = ``;
