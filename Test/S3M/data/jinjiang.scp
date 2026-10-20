@@ -1,0 +1,29 @@
+{
+  "asset": "SuperMap public Jinjiang sample, qualified root subset",
+  "version": 1,
+  "lodType": "Replace",
+  "extensions": { "s3m:FileType": "OSGBFile" },
+  "position": {
+    "units": "Degree",
+    "x": 118.55916,
+    "y": 24.80964,
+    "z": 0
+  },
+  "tiles": [
+    {
+      "url": "https://www.supermapol.com/realspace/services/3D-JinJiangS3MB/rest/realspace/datas/Combine/data/path/Tile_0000_0000_0000_0001/Tile_0000_0000_0000_0001.s3mb",
+      "boundingbox": {
+        "min": {
+          "x": -517.6873168945312,
+          "y": -2040.410034179688,
+          "z": 24.68715858459473
+        },
+        "max": {
+          "x": 333.5984802246094,
+          "y": 8.554417610168457,
+          "z": 131.6703948974609
+        }
+      }
+    }
+  ]
+}

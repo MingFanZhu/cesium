@@ -2,13 +2,16 @@
 
 ## Metadata
 
-- Status: `open`
+- Status: `resolved` for the initial 1.0 profile；新版资格 deferred
 - Owner role: `architecture`
 - Created / Updated: `2026-10-20`
 - Related plan: [兼容性评估](../plans/2026-10-20-compatibility-audit.md)
-- Resulting ADR / Related SGP: None
+- Resulting ADR: ADR-0174；Related SGP: None
 
 ## Baseline and sources
+
+下文保留最初评估的证据和未决项；后续处置见末节，不把实现后的验证回写成
+评估时已经掌握的事实。
 
 当前仓库为 Cesium 1.144.0，评估时 HEAD 为 `b4d7f1b469`。外部源码固定为
 SuperMap/s3m-spec 的 `462cf06b95857fe2410dce9aecbfd8e4c16e84fc`。
@@ -111,3 +114,14 @@ Deferred material layout requires ordinary depth-writing opaque commands.
   卸载、球面和平面契约。每个阶段以真实数据验收。
 - 公共 API、Worker 或上游 hook 落地前完成 Architecture / ADR / SGP 流程。
   当前没有修改运行时，没有承诺“全部 S3M 兼容”。
+
+## Implementation resolution
+
+[S1](../plans/2026-10-20-phase-s1-model-bridge.md) 和
+[S2](../plans/2026-10-20-phase-s2-layer.md) 已落实推荐方向：Worker 解码、
+原生 Model、三类 PageLOD、显式 World 放置、原生拾取、定位和资源回收。
+精模与实例化使用仓库离线 fixture；晋江使用官方服务有界子树的本地资格缓存。
+完整结果与残余风险见 [S2 review](../reviews/2026-10-20-s2-review.md)。
+
+新增格式、压缩与商业材质仍由 architecture 角色在取得样例后另开 phase；
+高斯按用户要求不接入。旧 CBD 服务全树及其部署 CORS 不属于本轮通过范围。

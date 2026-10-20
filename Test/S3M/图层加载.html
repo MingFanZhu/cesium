@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>S3M 图层加载</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #cesiumContainer {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      #panel {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        width: 310px;
+        padding: 14px;
+        background: #fffffff0;
+        color: #263744;
+        font: 14px/1.6 sans-serif;
+        border-radius: 5px;
+      }
+      h3 {
+        margin: 0 0 10px;
+      }
+      label {
+        display: block;
+        margin: 6px 0;
+      }
+      select,
+      button {
+        font: inherit;
+      }
+      #status {
+        white-space: pre-wrap;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+    <div id="panel">
+      <h3>S3M 官方样例</h3>
+      <label
+        >世界
+        <select id="world">
+          <option value="globe">球面</option>
+          <option value="planar">平面米制 XYZ</option>
+        </select></label
+      >
+      <label
+        >数据
+        <select id="sample">
+          <option value="mesh">精模 CBD（本地）</option>
+          <option value="instances">实例化构件（本地）</option>
+          <option value="oblique">晋江倾斜摄影（官方在线子区）</option>
+        </select></label
+      >
+      <button id="locate">定位</button>
+      <label><input id="show" type="checkbox" checked /> 显示图层</label>
+      <label><input id="environment" type="checkbox" /> 高级环境</label>
+      <label
+        >LOD 范围倍率
+        <input
+          id="lod"
+          type="range"
+          min="0.25"
+          max="8"
+          step="0.25"
+          value="1"
+        /><span id="lodValue">1</span></label
+      >
+      <p>
+        点击模型查看对象 ID。平面使用显式放置矩阵，不自动投影。CBD
+        仓库样例只含完整的前两级；在线倾斜摄影最多加载至第 1
+        层，不可用时可选择本地样例。
+      </p>
+      <div id="status">正在加载配置…</div>
+    </div>
+    <script type="module">
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const params = new URLSearchParams(location.search);
+      const worldName = params.get("world") === "planar" ? "planar" : "globe";
+      const sample = ["mesh", "instances", "oblique"].includes(
+        params.get("sample"),
+      )
+        ? params.get("sample")
+        : "mesh";
+      document.querySelector("#world").value = worldName;
+      document.querySelector("#sample").value = sample;
+      for (const id of ["world", "sample"]) {
+        document.querySelector(`#${id}`).onchange = (event) => {
+          params.set(id, event.target.value);
+          location.search = params.toString();
+        };
+      }
+      const world =
+        worldName === "planar"
+          ? new C.SceneGISPlanarWorld({
+              coordinateSystem: new C.SceneGISPlanarCoordinateSystem({
+                extent: new C.SceneGISPlanarExtent({
+                  minimumX: 12995000,
+                  minimumY: 3995000,
+                  maximumX: 13005000,
+                  maximumY: 4005000,
+                }),
+                crs: "LOCAL:METERS",
+              }),
+              maximumLevel: 0,
+              baseColor: C.Color.fromCssColorString("#5a6870"),
+            })
+          : undefined;
+      const viewer = new C.Viewer("cesiumContainer", {
+        ...(world
+          ? { world }
+          : { baseLayer: false, baseLayerPicker: false, geocoder: false }),
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+      });
+      viewer.clock.currentTime = C.JulianDate.fromIso8601(
+        "2026-10-20T04:00:00Z",
+      );
+      viewer.clock.shouldAnimate = false;
+      if (viewer.scene.globe) {
+        viewer.scene.globe.baseColor = C.Color.fromCssColorString("#5a6870");
+      }
+      document.querySelector("#environment").checked =
+        viewer.scene.environmentEffects.enabled;
+      document.querySelector("#environment").onchange = (event) => {
+        viewer.scene.environmentEffects.enabled = event.target.checked;
+      };
+      const urls = {
+        mesh: "./data/CBD/cbd.scp",
+        instances: "./data/comModel/comModel.scp",
+        oblique: "./data/jinjiang.scp",
+      };
+      let layer;
+      let picked = "尚未拾取";
+      let failure = "";
+      let removeRender;
+      const handler = new C.ScreenSpaceEventHandler(viewer.canvas);
+      window.s3mExample = { viewer };
+      window.addEventListener("pagehide", (event) => {
+        if (event.persisted || viewer.isDestroyed()) {
+          return;
+        }
+        removeRender?.();
+        handler.destroy();
+        viewer.destroy();
+      });
+      try {
+        layer = await C.SceneGISS3MLayer.fromUrl(urls[sample], {
+          ...(world
+            ? {
+                world,
+                modelMatrix: C.Matrix4.fromTranslation(
+                  new C.Cartesian3(13000000, 4000000, 0),
+                ),
+              }
+            : {}),
+          maximumDepth:
+            sample === "oblique" ? 1 : sample === "mesh" ? 2 : Infinity,
+          credit: new C.Credit("S3M 示例数据：SuperMap"),
+        });
+        if (viewer.isDestroyed()) {
+          layer.destroy();
+          throw new Error("The example was closed while loading.");
+        }
+        viewer.scene.primitives.add(layer);
+        window.s3mExample.layer = layer;
+        layer.tileFailed.addEventListener((error) => {
+          failure = error.message ?? String(error);
+        });
+        const locate = () => {
+          const sphere = layer.boundingSphere;
+          viewer.camera.flyToBoundingSphere(sphere, {
+            duration: 0,
+            offset: new C.HeadingPitchRange(0.4, -0.6, sphere.radius * 2.6),
+          });
+        };
+        document.querySelector("#locate").onclick = locate;
+        document.querySelector("#show").onchange = (event) => {
+          layer.show = event.target.checked;
+          viewer.scene.requestRender();
+        };
+        document.querySelector("#lod").oninput = (event) => {
+          layer.lodRangeScale = Number(event.target.value);
+          document.querySelector("#lodValue").textContent = event.target.value;
+        };
+        handler.setInputAction((event) => {
+          const hit = viewer.scene.pick(event.position);
+          picked =
+            hit?.primitive?.id === layer &&
+            typeof hit.getProperty === "function"
+              ? `ID: ${hit.getProperty("s3mId") || "无业务 ID"}\n类型: ${hit.getProperty("idKind")}\n几何: ${hit.getProperty("geometry")}`
+              : "未命中 S3M";
+        }, C.ScreenSpaceEventType.LEFT_CLICK);
+        removeRender = viewer.scene.postRender.addEventListener(() => {
+          const s = layer.statistics;
+          document.querySelector("#status").textContent =
+            `${layer.tilesLoaded ? "当前视图已就绪" : "加载中"} · ${s.selectedPages ?? 0} 个渲染页 · LOD ${s.selectedDepth ?? 0}\n` +
+            `缓存 ${s.cachedTiles ?? 0} 个瓦片 · 请求 ${s.requests ?? 0} · 失败 ${s.failedTiles ?? 0}\n` +
+            `GPU 缓冲/纹理约 ${(((s.geometryByteLength ?? 0) + (s.texturesByteLength ?? 0)) / 1048576).toFixed(1)} MiB\n${picked}${failure ? `\n加载错误：${failure}` : ""}`;
+        });
+        locate();
+      } catch (error) {
+        document.querySelector("#status").textContent =
+          `加载失败：${error.message ?? error}。请选择本地样例继续。`;
+      }
+    </script>
+  </body>
+</html>

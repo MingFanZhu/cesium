@@ -10,11 +10,11 @@
 
 ## Findings
 
-| ID      | Severity | Status | Owner role   | Finding                            | Disposition / evidence                                 | Follow-up                                                                              |
-| ------- | -------- | ------ | ------------ | ---------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| S3M-A01 | high     | open   | architecture | 原样加载器不满足渲染及全局状态契约 | 两组绘制被 deferred 校验拒绝；导入替换 Scene.pick      | [渲染适配](../discussions/2026-10-20-loading-boundaries.md#rendering-and-lifecycle)    |
-| S3M-A02 | high     | open   | architecture | 新版与压缩组合证据不足             | 9 个模型文件均为 1.0；新版 metadata 不证明普通模型解码 | [格式边界](../discussions/2026-10-20-loading-boundaries.md#format-and-coordinate-gaps) |
-| S3M-A03 | high     | open   | architecture | 平面坐标不适用 scene mode 启发式   | 平面仍使用 SCENE3D，会被套经纬度 ENU                   | [坐标契约](../discussions/2026-10-20-loading-boundaries.md#format-and-coordinate-gaps) |
+| ID      | Severity | Status   | Owner role   | Finding                            | Disposition / evidence                                            | Follow-up                            |
+| ------- | -------- | -------- | ------------ | ---------------------------------- | ----------------------------------------------------------------- | ------------------------------------ |
+| S3M-A01 | high     | fixed    | architecture | 原样加载器不满足渲染及全局状态契约 | 改为 Worker→GLB→原生 Model；没有导入旧 renderer 或修改 Scene.pick | [S2 review](2026-10-20-s2-review.md) |
+| S3M-A02 | high     | deferred | architecture | 新版与压缩组合证据不足             | 首版限定实际资格的 1.0；新版需要新数据再立 phase                  | [S2 review](2026-10-20-s2-review.md) |
+| S3M-A03 | high     | fixed    | architecture | 平面坐标不适用 scene mode 启发式   | 显式 live World + 米制矩阵，错误绑定前置拒绝，双 World E2E 通过   | [S2 review](2026-10-20-s2-review.md) |
 
 ## Validation reviewed
 
@@ -28,5 +28,6 @@
 
 ## Conclusion
 
-评估足够确认“解析可复用，但不能原样插入”。open finding 是实现准入条件，
-不会因评估完成而关闭。尚无性能、完整 LOD、材质、拾取或球面 / 平面画面验收。
+评估确认“解析可复用，但不能原样插入”。以上表格已按后续实现证据更新；
+当时尚未验证的 LOD、拾取、双世界和资源验证见 S2 review。
+新版格式仍明确 deferred，不因首版实现完成而关闭。

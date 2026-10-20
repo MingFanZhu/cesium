@@ -1,6 +1,6 @@
 # ADR-0174: S3M model loading through the native Model pipeline
 
-- Status: accepted for implementation; qualification pending
+- Status: accepted; initial 1.0 profile qualified, owner visual acceptance pending
 - Date: 2026-10-20
 - Plan: [S3M loading](../../../AgentDocs/s3m/plans/2026-10-20-s3m-loading.md)
 - Upstream seams: None planned
@@ -30,8 +30,8 @@ lighting interpretation in this profile.
 DXT decoding produces ordinary PNG images inside the GLB. This trades decode work
 and GPU texture size for native loader ownership and broad WebGL compatibility;
 measure the bounded sample cost. Preserve feature IDs through native structural
-metadata. Geometry without authored IDs remains pickable with explicit synthetic
-tile/geometry identity, never a fabricated business ID.
+metadata. Geometry without authored IDs remains pickable with explicit geometry
+identity within its native Model, never a fabricated business ID.
 
 ## Runtime and World boundaries
 
@@ -40,12 +40,23 @@ as a Cesium3DTileset or reinterpret all ranges as geometric error. Keep parent
 coverage until replacement content is ready. Native Resource / RequestScheduler,
 Model and Camera remain responsible for their existing lower-level contracts.
 
-The planned public SceneGISS3MLayer uses explicit live planar World binding and
+The public SceneGISS3MLayer uses explicit live planar World binding and
 an application-supplied local-to-World modelMatrix. Globe geographic insertion
 uses the explicit SCP Degree position with ENU, matching the qualified official
 loader; other CRS placement requires an explicit matrix. World identity is checked
 before resource mutation. Bounding spheres support native Camera framing in both
-worlds. No Viewer prototype changes are required.
+worlds. No Viewer prototype changes are required. The update contract reads the
+owning Scene through the existing frameState.camera._scene reference; recheck
+this internal relationship, memory-GLB basePath cache identity and feature metadata
+when upgrading Cesium.
+
+Every converted page receives a layer/tile/page/generation-unique Resource cache
+identity. Async callbacks stage CPU results; normal render frames own selection,
+GPU preparation and LRU eviction. Completion validity uses a closure function so
+destroyObject cannot replace a callback guard with a throwing destroyed method.
+The budget is a soft content/GPU limit and preserves visible coverage and ancestors.
+Pixel range mode retains framebuffer pixels; geometric-error mode accounts for
+pixel ratio. Distance and geometric-error ranges follow the placement matrix scale.
 
 ## Build and ownership
 
