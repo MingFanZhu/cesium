@@ -2,6 +2,33 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0065",
+      "title": "Integrate independent observer viewshed selection and capture",
+      "status": "active",
+      "reason": "ADR-0176 delegates observer capture to owned helpers, exposes native terrain command generation and scales tile SSE to an explicit observer viewport. Default rendering remains unchanged when no analysis is registered.",
+      "risk": "high",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/GlobeSurfaceTileProvider.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Cesium3DTile.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISViewshedSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISViewshedDepthSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0176-observer-viewshed.md",
+      "removalCondition": "Native Scene supports independent analysis views with shared terrain and tile resources, explicit view resolution and preserved main-view state."
+    },
+    {
       "id": "SGP-0064",
       "title": "Maintain conservative bounds for explicit model flatten shaders",
       "status": "active",

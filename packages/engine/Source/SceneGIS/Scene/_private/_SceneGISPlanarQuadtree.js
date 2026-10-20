@@ -104,7 +104,9 @@ SceneGISPlanarQuadtree.computeScreenSpaceError = function (
   geometricError,
   maximumDistance = Infinity,
 ) {
-  const height = frameState.context.drawingBufferHeight;
+  const height =
+    frameState._sceneGISObserverViewport ??
+    frameState.context.drawingBufferHeight;
   if (height === 0) {
     return 0.0;
   }
@@ -203,6 +205,13 @@ SceneGISPlanarQuadtree.prototype.beginFrame = function (frameNumber) {
   this._debug.culled = 0;
   this._debug.selected = 0;
   this._debug.sseComputations = 0;
+};
+
+/** Creates selection-only state borrowing this tree's tile cache. @private */
+SceneGISPlanarQuadtree.prototype.createObserverView = function () {
+  const view = new SceneGISPlanarQuadtree(this._tilingScheme);
+  view._tiles = this._tiles;
+  return view;
 };
 
 SceneGISPlanarQuadtree.prototype.getOrCreateTile = function (x, y, level) {

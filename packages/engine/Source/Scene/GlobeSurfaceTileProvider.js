@@ -631,6 +631,21 @@ class GlobeSurfaceTileProvider {
    * @param {QuadtreeTile} tile The tile to load.
    */
   loadTile(frameState, tile) {
+    // SCENEGIS_PATCH_BEGIN SGP-0065: Reuse the native load budget for observer-only terrain geometry.
+    if (frameState._sceneGISObserverTerrainTiles?.has(tile)) {
+      GlobeSurfaceTile.processStateMachine(
+        tile,
+        frameState,
+        this.terrainProvider,
+        this.vectorProvider,
+        this._imageryLayers,
+        this.quadtree,
+        this._vertexArraysToDestroy,
+        true,
+      );
+      return;
+    }
+    // SCENEGIS_PATCH_END SGP-0065
     // We don't want to load imagery until we're certain that the terrain tiles are actually visible.
     // So if our bounding volume isn't accurate because it came from another tile, load terrain only
     // initially. If we load some terrain and suddenly have a more accurate bounding volume and the
@@ -1070,6 +1085,19 @@ class GlobeSurfaceTileProvider {
     ++debug.tilesRendered;
     debug.texturesRendered += readyTextureCount;
   }
+
+  // SCENEGIS_PATCH_BEGIN SGP-0065: Append native observer commands without replacing main-view command slots.
+  /** @private */
+  renderSceneGISObserverTile(tile, frameState) {
+    const skirts = this.showSkirts;
+    try {
+      this.showSkirts = false;
+      addDrawCommandsForTile(this, tile, frameState);
+    } finally {
+      this.showSkirts = skirts;
+    }
+  }
+  // SCENEGIS_PATCH_END SGP-0065
 
   /**
    * Gets the distance from the camera to the closest point on the tile.  This is used for level-of-detail selection.

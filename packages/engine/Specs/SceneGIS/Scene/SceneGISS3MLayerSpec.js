@@ -293,4 +293,43 @@ describe("SceneGIS/Scene/SceneGISS3MLayer", function () {
     layer.update(f);
     expect(layer.tilesLoaded).toBe(true);
   });
+
+  it("protects offscreen observer LOD without replacing main selection or readiness", async function () {
+    await create({ maximumCachedTiles: 1 });
+    const f = frame();
+    const { parent, child, parentModel } = parentAndChild();
+    const observer = {
+      camera: f.camera,
+      cullingVolume: f.cullingVolume,
+      resolution: 128,
+      sources: [layer],
+      sourceStates: new Map(),
+    };
+    f.cullingVolume = { computeVisibility: () => Intersect.OUTSIDE };
+    f._sceneGISViewsheds = [observer];
+    layer.update(f);
+    const selection = observer.sourceStates.get(layer);
+    expect(selection.ready).toBe(false);
+    expect(selection.selected[0].model).toBe(parentModel);
+    expect(layer._protected.has(parent)).toBe(true);
+    expect(layer._protected.has(child)).toBe(true);
+    expect(layer.tilesLoaded).toBe(true);
+    expect(layer._selected.length).toBe(0);
+    const childModel = model();
+    child.pages = [{ model: childModel, sphere: childModel.boundingSphere }];
+    child.state = "ready";
+    layer.update(f);
+    expect(selection.ready).toBe(true);
+    expect(selection.selected[0].model).toBe(childModel);
+    expect(childModel.destroy).not.toHaveBeenCalled();
+    child.state = "failed";
+    layer.update(f);
+    expect(selection.ready).toBe(false);
+    expect(selection.error.message).toContain("S3M observer content failed");
+    expect(layer.tilesLoaded).toBe(true);
+    child.state = "ready";
+    f._sceneGISViewsheds = [];
+    layer.update(f);
+    expect(layer.statistics.cachedTiles).toBe(1);
+  });
 });

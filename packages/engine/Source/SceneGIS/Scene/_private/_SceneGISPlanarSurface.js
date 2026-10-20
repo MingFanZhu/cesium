@@ -494,6 +494,7 @@ function getCommand(
   enableLighting,
   material,
   advancedLighting,
+  commandState = tile,
 ) {
   const terrainContent = tile.terrainEntry?.activeContent;
   const terrainReady = defined(terrainContent?.mesh);
@@ -513,8 +514,8 @@ function getCommand(
     materialSource,
     advancedLighting,
   );
-  if (!defined(tile.command)) {
-    tile.command = new DrawCommand({
+  if (!defined(commandState.command)) {
+    commandState.command = new DrawCommand({
       boundingVolume: tile.commandBoundingVolume,
       modelMatrix: tile.modelMatrix,
       primitiveType: PrimitiveType.TRIANGLE_STRIP,
@@ -535,27 +536,27 @@ function getCommand(
       castShadows: false,
       receiveShadows: false,
     });
-    tile._imageryCommandLayerCount = layerCount;
-    tile._lightingCommandEnabled = enableLighting;
-    tile._lightingCommandNormalMode = normalMode;
-    tile._materialCommand = material;
-    tile._materialCommandSource = materialSource;
+    commandState._imageryCommandLayerCount = layerCount;
+    commandState._lightingCommandEnabled = enableLighting;
+    commandState._lightingCommandNormalMode = normalMode;
+    commandState._materialCommand = material;
+    commandState._materialCommandSource = materialSource;
     ++surface._debug.createdCommands;
   } else if (
-    tile._imageryCommandLayerCount !== layerCount ||
-    tile._lightingCommandEnabled !== enableLighting ||
-    tile._lightingCommandNormalMode !== normalMode ||
-    tile._materialCommand !== material ||
-    tile._materialCommandSource !== materialSource ||
-    tile.command.shaderProgram !== shaderProgram
+    commandState._imageryCommandLayerCount !== layerCount ||
+    commandState._lightingCommandEnabled !== enableLighting ||
+    commandState._lightingCommandNormalMode !== normalMode ||
+    commandState._materialCommand !== material ||
+    commandState._materialCommandSource !== materialSource ||
+    commandState.command.shaderProgram !== shaderProgram
   ) {
-    if (tile.command.shaderProgram !== shaderProgram) {
+    if (commandState.command.shaderProgram !== shaderProgram) {
       // HDR can be disabled while the base shader changes. Drop dormant
       // derived commands so re-enabling HDR cannot replay old uniforms.
-      tile.command.derivedCommands = {};
-      tile.command.shaderProgram = shaderProgram;
+      commandState.command.derivedCommands = {};
+      commandState.command.shaderProgram = shaderProgram;
     }
-    tile.command.uniformMap = createUniformMap(
+    commandState.command.uniformMap = createUniformMap(
       surface,
       tile,
       layerCount,
@@ -563,29 +564,33 @@ function getCommand(
       material,
       advancedLighting,
     );
-    tile._imageryCommandLayerCount = layerCount;
-    tile._lightingCommandEnabled = enableLighting;
-    tile._lightingCommandNormalMode = normalMode;
-    tile._materialCommand = material;
-    tile._materialCommandSource = materialSource;
+    commandState._imageryCommandLayerCount = layerCount;
+    commandState._lightingCommandEnabled = enableLighting;
+    commandState._lightingCommandNormalMode = normalMode;
+    commandState._materialCommand = material;
+    commandState._materialCommandSource = materialSource;
   }
-  tile.command.boundingVolume = tile.commandBoundingVolume;
+  commandState.command.boundingVolume = tile.commandBoundingVolume;
   const translucent = surface._opacity < 1.0;
-  tile.command.pass = translucent ? Pass.TRANSLUCENT : Pass.GLOBE;
-  tile.command.renderState = translucent
+  commandState.command.pass = translucent ? Pass.TRANSLUCENT : Pass.GLOBE;
+  commandState.command.renderState = translucent
     ? surface._translucentRenderState
     : surface._renderState;
-  tile.command.castShadows = ShadowMode.castShadows(surface._shadows);
-  tile.command.receiveShadows = ShadowMode.receiveShadows(surface._shadows);
-  tile.command.modelMatrix = tile.modelMatrix;
-  tile.command.primitiveType = terrainReady
+  commandState.command.castShadows = ShadowMode.castShadows(surface._shadows);
+  commandState.command.receiveShadows = ShadowMode.receiveShadows(
+    surface._shadows,
+  );
+  commandState.command.modelMatrix = tile.modelMatrix;
+  commandState.command.primitiveType = terrainReady
     ? PrimitiveType.TRIANGLES
     : PrimitiveType.TRIANGLE_STRIP;
-  tile.command.vertexArray = terrainReady
+  commandState.command.vertexArray = terrainReady
     ? terrainContent.vertexArray
     : surface._vertexArray;
-  tile.command.count = terrainReady ? terrainContent.mesh.indexCount : 4;
-  return tile.command;
+  commandState.command.count = terrainReady
+    ? terrainContent.mesh.indexCount
+    : 4;
+  return commandState.command;
 }
 
 function countMaterialSamplers(shaderSource) {
@@ -677,6 +682,47 @@ function updateTileSlots(surface, tile, layers) {
     slot.colorToAlpha.w = defined(target) ? 1.0 : 0.0;
     slot.colorToAlphaThreshold = layer.colorToAlphaThreshold;
   }
+}
+
+function selectObservers(
+  surface,
+  frameState,
+  maximumLevel,
+  maximumScreenSpaceError,
+) {
+  const tree = surface._quadtree;
+  const views = [];
+  for (const observer of frameState._sceneGISViewsheds ?? []) {
+    if (!observer.terrain || observer.world._surface !== surface) {
+      continue;
+    }
+    const view = (observer.terrainView ??= {
+      quadtree: tree.createObserverView(),
+      commandStates: new WeakMap(),
+      ready: false,
+    });
+    const selection = view.quadtree;
+    selection._minimumHeight = tree._minimumHeight;
+    selection._maximumHeight = tree._maximumHeight;
+    selection.beginFrame(frameState.frameNumber);
+    selection.selectTiles(
+      {
+        context: frameState.context,
+        camera: observer.camera,
+        cullingVolume: observer.cullingVolume,
+        pixelRatio: 1,
+        _sceneGISObserverViewport: observer.resolution,
+      },
+      maximumLevel,
+      maximumScreenSpaceError,
+      surface._terrain?.geometricErrors,
+    );
+    for (const key of selection._protectedKeys) {
+      tree._protectedKeys.add(key);
+    }
+    views.push(view);
+  }
+  return views;
 }
 
 SceneGISPlanarSurface.prototype.beginFrame = function (frameState) {
@@ -814,7 +860,13 @@ SceneGISPlanarSurface.prototype.render = function (
     this._terrain?.geometricErrors,
     maximumTiltedTileDistance,
   );
-  if (desiredTiles.length === 0) {
+  const observerViews = selectObservers(
+    this,
+    frameState,
+    maximumLevel,
+    maximumScreenSpaceError,
+  );
+  if (desiredTiles.length === 0 && observerViews.length === 0) {
     this._tilesLoaded = true;
     return;
   }
@@ -830,12 +882,41 @@ SceneGISPlanarSurface.prototype.render = function (
     ++this._debug.createdTextures;
   }
   const loadTiles = this._quadtree.getLoadTiles();
+  let preparedLoads = loadTiles;
+  let preparedDesired = desiredTiles;
+  if (observerViews.length) {
+    const combinedLoads = new Set(loadTiles);
+    const combinedDesired = new Set(desiredTiles);
+    for (const view of observerViews) {
+      for (const tile of view.quadtree.getLoadTiles()) {
+        combinedLoads.add(tile);
+      }
+      for (const tile of view.quadtree._idealTiles) {
+        combinedDesired.add(tile);
+      }
+    }
+    preparedLoads = [...combinedLoads];
+    preparedDesired = [...combinedDesired];
+  }
   this._terrain?.prepare(
     frameState.context,
-    loadTiles,
-    desiredTiles,
+    preparedLoads,
+    preparedDesired,
     frameState.frameNumber,
   );
+  for (const view of observerViews) {
+    const selection = view.quadtree;
+    view.error = this._terrain?.getAnalysisError(selection.getLoadTiles());
+    view.ready = selection._idealTiles.every(
+      (tile) => !this._terrain || this._terrain.isAnalysisReady(tile),
+    );
+    view.tiles = selection.resolveRenderTiles(
+      (tile) => !this._terrain || this._terrain.isAnalysisReady(tile),
+    );
+    for (const key of selection._protectedKeys) {
+      this._quadtree._protectedKeys.add(key);
+    }
+  }
   const tiles = this._quadtree.resolveRenderTiles((tile) =>
     defined(this._terrain) ? this._terrain.isRenderable(tile) : true,
   );
@@ -846,7 +927,10 @@ SceneGISPlanarSurface.prototype.render = function (
     frameState.frameNumber,
   );
   this._tilesLoaded =
-    (!defined(this._terrain) || this._terrain.tilesLoaded) &&
+    (!defined(this._terrain) ||
+      (observerViews.length
+        ? this._terrain.areTilesLoaded(loadTiles, desiredTiles)
+        : this._terrain.tilesLoaded)) &&
     (shownLayers.length === 0 || this._imagery.tilesLoaded);
   const terrainProvider = this._terrain?.provider;
   if (defined(terrainProvider?.credit)) {
@@ -901,6 +985,36 @@ SceneGISPlanarSurface.prototype.render = function (
   this._publishedMaterial = material;
   this._publishedMaterialSource = material?.shaderSource;
   releaseStaleMaterialShaders(this, this._publishedMaterialSource);
+};
+
+/** Emits observer-only commands borrowing current terrain geometry. @private */
+SceneGISPlanarSurface.prototype.appendObserverCommands = function (
+  observer,
+  frameState,
+) {
+  const view = observer.terrainView;
+  if (!view || this._opacity < 1) {
+    return;
+  }
+  for (const tile of view.tiles ?? []) {
+    let cache = view.commandStates.get(tile);
+    if (!cache) {
+      cache = {};
+      view.commandStates.set(tile, cache);
+    }
+    const command = getCommand(
+      this,
+      tile,
+      0,
+      false,
+      this._publishedMaterial,
+      false,
+      cache,
+    );
+    command.count =
+      tile.terrainEntry?.activeContent?.mesh?.surfaceIndexCount ?? 4;
+    frameState.commandList.push(command);
+  }
 };
 
 SceneGISPlanarSurface.prototype.endFrame = function (tileCacheSize) {

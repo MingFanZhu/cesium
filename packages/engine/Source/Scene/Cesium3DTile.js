@@ -942,8 +942,13 @@ Cesium3DTile.prototype.getScreenSpaceError = function (
   }
   const { camera, context } = frameState;
   let frustum = camera.frustum;
-  const width = context.drawingBufferWidth;
-  const height = context.drawingBufferHeight * heightFraction;
+  // SCENEGIS_PATCH_BEGIN SGP-0065: Use explicit observer depth-map resolution for independent tile selection.
+  const width =
+    frameState._sceneGISObserverViewport ?? context.drawingBufferWidth;
+  const height =
+    (frameState._sceneGISObserverViewport ?? context.drawingBufferHeight) *
+    heightFraction;
+  // SCENEGIS_PATCH_END SGP-0065
   let error;
   if (
     frameState.mode === SceneMode.SCENE2D ||

@@ -151,8 +151,10 @@ function refinePage(layer, page, frameState) {
     return distance * layer._lodRangeScale < page.range;
   }
   frameState.camera.frustum.getPixelDimensions(
-    frameState.context.drawingBufferWidth,
-    frameState.context.drawingBufferHeight,
+    frameState._sceneGISObserverViewport ??
+      frameState.context.drawingBufferWidth,
+    frameState._sceneGISObserverViewport ??
+      frameState.context.drawingBufferHeight,
     distance,
     page.rangeMode === 1 ? 1 : (frameState.pixelRatio ?? 1),
     pixelScratch,
@@ -611,10 +613,18 @@ SceneGISS3MLayer.prototype._advance = function (tile, frameState) {
   }
 };
 
-SceneGISS3MLayer.prototype._select = function (tile, frameState) {
+SceneGISS3MLayer.prototype._select = function (tile, frameState, observer) {
   this._protected.add(tile);
   tile.lastUsed = this._frame;
   if (!isReady(tile)) {
+    if (observer) {
+      observer.ready = false;
+      if (tile.state === "failed") {
+        observer.error = new RuntimeError(
+          `S3M observer content failed: ${tile.resource.url}`,
+        );
+      }
+    }
     if (tile.state !== "failed") {
       this._tilesLoaded = false;
       this._request(tile);
@@ -638,13 +648,16 @@ SceneGISS3MLayer.prototype._select = function (tile, frameState) {
         child = newTile(page.child, page.sphere, tile.depth + 1);
         this._tiles.set(page.child.url, child);
       }
-      this._select(child, frameState);
+      this._select(child, frameState, observer);
       if (isReady(child)) {
         continue;
       }
     }
     if (page.model) {
-      this._selected.push({ model: page.model, depth: tile.depth });
+      (observer?.selected ?? this._selected).push({
+        model: page.model,
+        depth: tile.depth,
+      });
     }
   }
 };
@@ -742,6 +755,36 @@ SceneGISS3MLayer.prototype.update = function (frameState) {
         this._select(root, frameState);
       }
     }
+    const mainTilesLoaded = this._tilesLoaded;
+    for (const observer of frameState._sceneGISViewsheds ?? []) {
+      if (!observer.sources.includes(this)) {
+        continue;
+      }
+      let selection = observer.sourceStates.get(this);
+      if (!selection) {
+        selection = { selected: [], ready: false, error: undefined };
+        observer.sourceStates.set(this, selection);
+      }
+      selection.selected.length = 0;
+      selection.ready = true;
+      selection.error = undefined;
+      const observerFrame = {
+        ...frameState,
+        camera: observer.camera,
+        cullingVolume: observer.cullingVolume,
+        pixelRatio: 1,
+        _sceneGISObserverViewport: observer.resolution,
+      };
+      for (const root of this._roots) {
+        if (
+          observer.cullingVolume.computeVisibility(root.sphere) !==
+          Intersect.OUTSIDE
+        ) {
+          this._select(root, observerFrame, selection);
+        }
+      }
+    }
+    this._tilesLoaded = mainTilesLoaded;
     this._cache();
     if (!this._tilesLoaded) {
       frameState.afterRender.push(

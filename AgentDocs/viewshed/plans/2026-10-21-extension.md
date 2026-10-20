@@ -11,7 +11,7 @@
 - Related discussions: user-approved observer depth / independent streaming proposal
 - Related reviews: None
 - ADR: [0176](../../../Documentation/SceneGIS/Decisions/ADR-0176-observer-viewshed.md)
-- SGP: None at V1; register actual upstream seams before editing
+- SGP: SGP-0065（V2 integration；V1 无上游修改）
 
 ## Objective
 
@@ -47,11 +47,11 @@
 
 ## Phase roadmap
 
-| Phase | Objective                                       | Dependencies  | Entry gate                       | Exit gate                                          | Status    | Phase plan                   |
-| ----- | ----------------------------------------------- | ------------- | -------------------------------- | -------------------------------------------------- | --------- | ---------------------------- |
-| V1    | 独立深度资源、原生命令派生和精度基础            | 当前 renderer | 源码边界明确                     | GPU discard / 变换 / 状态恢复 / 释放通过，独立提交 | completed | [V1](2026-10-21-v1-depth.md) |
-| V2    | 观察点数据选取、加载状态、World 绑定 API 与显示 | V1 commit     | 重新核对各 provider 的状态和预算 | 屏幕外遮挡、加载与动态更新正确，独立提交           | planned   | Not entered                  |
-| V3    | 双世界综合示例、集成回归与性能验收              | V2 commit     | 功能可完整运行                   | 可复现画面、生命周期与运行开销证据，独立提交       | planned   | Not entered                  |
+| Phase | Objective                                       | Dependencies  | Entry gate                       | Exit gate                                          | Status    | Phase plan                         |
+| ----- | ----------------------------------------------- | ------------- | -------------------------------- | -------------------------------------------------- | --------- | ---------------------------------- |
+| V1    | 独立深度资源、原生命令派生和精度基础            | 当前 renderer | 源码边界明确                     | GPU discard / 变换 / 状态恢复 / 释放通过，独立提交 | completed | [V1](2026-10-21-v1-depth.md)       |
+| V2    | 观察点数据选取、加载状态、World 绑定 API 与显示 | V1 commit     | 重新核对各 provider 的状态和预算 | 屏幕外遮挡、加载与动态更新正确，独立提交           | completed | [V2](2026-10-21-v2-integration.md) |
+| V3    | 双世界综合示例、集成回归与性能验收              | V2 commit     | 功能可完整运行                   | 可复现画面、生命周期与运行开销证据，独立提交       | planned   | Not entered                        |
 
 ## Cross-phase validation
 
@@ -73,5 +73,5 @@ LOD、MASK / clipping / flatten、实例化与动画分别设置直接证据。
 
 ## Progress and handoff
 
-V1 completed，等待 checkpoint；V2 尚未进入。当前任务承担架构、实现和自审；未启用独立 Agent。
+V1 completed，checkpoint `04101ff1ea`；V2 completed，等待 checkpoint。当前任务承担架构、实现和自审；未启用独立 Agent。
 每阶段完成代码、测试、ADR / SGP 与 review 后创建本地 checkpoint 再进入下一阶段。

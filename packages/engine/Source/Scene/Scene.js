@@ -4,6 +4,9 @@ import SceneGISTemporalAntialiasing from "../SceneGIS/Scene/_private/_SceneGISTe
 // SCENEGIS_PATCH_BEGIN SGP-0024: Schedule explicit local environment captures.
 import SceneGISReflectionProbes from "../SceneGIS/Scene/_private/_SceneGISReflectionProbes.js";
 // SCENEGIS_PATCH_END SGP-0024
+// SCENEGIS_PATCH_BEGIN SGP-0065: Schedule explicit observer selection and depth capture.
+import SceneGISViewsheds from "../SceneGIS/Scene/_private/_SceneGISViewsheds.js";
+// SCENEGIS_PATCH_END SGP-0065
 // SCENEGIS_PATCH_BEGIN SGP-0017: Schedule local water with shared opaque inputs.
 import SceneGISWaterFrame from "../SceneGIS/Scene/_private/_SceneGISWaterFrame.js";
 // SCENEGIS_PATCH_END SGP-0017
@@ -4115,6 +4118,11 @@ function executeCommandsInViewport(firstViewport, scene, passState) {
     scene.frameState.commandList.length = 0;
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0065: Publish observer requests before shared terrain and model preparation.
+  if (firstViewport) {
+    SceneGISViewsheds.prepare(scene);
+  }
+  // SCENEGIS_PATCH_END SGP-0065
   updateAndRenderPrimitives(scene);
 
   // SCENEGIS_PATCH_BEGIN SGP-0024: Capture complete ready sources before main-camera culling.
@@ -4137,6 +4145,11 @@ function executeCommandsInViewport(firstViewport, scene, passState) {
   }
 
   executeCommands(scene, passState);
+  // SCENEGIS_PATCH_BEGIN SGP-0065: Capture after main geometry, before display post-processing.
+  if (firstViewport) {
+    SceneGISViewsheds.execute(scene);
+  }
+  // SCENEGIS_PATCH_END SGP-0065
 }
 
 const scratchCullingVolume = new CullingVolume();

@@ -8,6 +8,7 @@ import Event from "../../../Core/Event.js";
 import IndexDatatype from "../../../Core/IndexDatatype.js";
 import Request from "../../../Core/Request.js";
 import RequestType from "../../../Core/RequestType.js";
+import RuntimeError from "../../../Core/RuntimeError.js";
 import TileProviderError from "../../../Core/TileProviderError.js";
 import VertexArray from "../../../Renderer/VertexArray.js";
 import SceneGISPlanarQuantizedMeshTerrainData from "../../Core/SceneGISPlanarQuantizedMeshTerrainData.js";
@@ -1430,6 +1431,66 @@ SceneGISPlanarTerrain.prototype.prepare = function (
 
 SceneGISPlanarTerrain.prototype.isRenderable = function (tile) {
   return defined(tile.terrainEntry?.activeContent);
+};
+
+/** Reports main-view loading independently of observer work sharing the budget. @private */
+SceneGISPlanarTerrain.prototype.areTilesLoaded = function (
+  tiles,
+  desiredTiles,
+) {
+  if (!this._provider) {
+    return true;
+  }
+  const directKeys = new Set();
+  for (const desired of desiredTiles) {
+    let x = desired.x;
+    let y = desired.y;
+    for (let level = desired.level; level >= 0; level--) {
+      directKeys.add(`${level}/${x}/${y}`);
+      x = Math.floor(x / 2);
+      y = Math.floor(y / 2);
+    }
+  }
+  return tiles.every((tile) => {
+    const entry = tile.terrainEntry;
+    return (
+      (defined(entry.activeContent) ||
+        entry.fallbackState !== FallbackState.QUEUED) &&
+      (!directKeys.has(tile.key) ||
+        entry.state === State.READY ||
+        (isTerminal(entry) && entry.fallbackState !== FallbackState.QUEUED))
+    );
+  });
+};
+
+/** Analysis excludes unknown flat placeholders and unfinished source data. @private */
+SceneGISPlanarTerrain.prototype.isAnalysisReady = function (tile) {
+  const entry = tile.terrainEntry;
+  return (
+    defined(entry?.activeContent?.mesh) &&
+    (entry.state === State.READY ||
+      (entry.state === State.UNAVAILABLE &&
+        entry.fallbackState === FallbackState.READY &&
+        entry.activeContent.source === Source.UPSAMPLED))
+  );
+};
+
+/** Returns a coverage error instead of accepting a failed or unknown flat tile. @private */
+SceneGISPlanarTerrain.prototype.getAnalysisError = function (tiles) {
+  for (const tile of tiles) {
+    const entry = tile.terrainEntry;
+    if (
+      entry?.state === State.FAILED ||
+      entry?.fallbackState === FallbackState.FAILED ||
+      (entry?.state === State.UNAVAILABLE &&
+        entry.activeContent?.source === Source.FLAT)
+    ) {
+      return new RuntimeError(
+        `Observer terrain coverage is unavailable at ${tile.key}.`,
+      );
+    }
+  }
+  return undefined;
 };
 
 SceneGISPlanarTerrain.prototype.destroy = function () {

@@ -6,7 +6,7 @@
 - Date: 2026-10-21
 - Owner: current task architecture self-review
 - Related plan: [viewshed](../../../AgentDocs/viewshed/plans/2026-10-21-extension.md)
-- Related patch: None in V1; later upstream seams registered before implementation
+- Related patch: SGP-0065 (Scene.js, GlobeSurfaceTileProvider.js, Cesium3DTile.js)
 
 ## Context
 
@@ -41,6 +41,25 @@ requires complete invalidation evidence rather than a guessed settling delay.
 V1 implements only the private depth foundation. V2 introduces independent
 selection, explicit loading state and public integration. V3 qualifies the full
 product in both worlds. No public API or complete support is claimed by V1.
+
+The public experimental `SceneGISViewshed` extends PostProcessStage and is owned
+by the bound Scene's postProcessStages. `analysisReady` is independent of the
+native stage's resource `ready`. Opaque terrain is optional; models, native tile
+sets, S3M and supported primitives are explicit borrowed sources. Camera-scaled
+models, frozen traversal and stereo rendering are excluded from this contract.
+
+Planar selection workspaces share a tile map and merge requests before one
+terrain preparation budget. S3M unions observer protection before eviction.
+Globe traverses the shared terrain hierarchy and uses the native load queue,
+appending skirt-free commands without changing main selection history.
+Native 3D Tiles reuses `updateForPass(SHADOW)` and an explicit observer viewport.
+Base / skip traversal does not publish pass readiness, so coverage checks the
+native SSE frontier and selected content, including incremental texture loading.
+
+The display shader compares reciprocal-depth receiver planes at the sampled
+observer texel center. This removes shallow-angle self-occlusion without an
+angle-dependent tolerance. Current main-depth reprojection removes TAA jitter;
+observer capture never inherits it. Missing coverage leaves the picture unchanged.
 
 ## Ownership, cost and upgrade boundary
 
