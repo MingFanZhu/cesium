@@ -139,4 +139,14 @@ private module basename、debug counter 和内部 command/cache entry 都不是�
   无underscore拼写、declarations与API HTML必须保持public absent。
 - 继续验证12个SceneGIS GLSL source与12个generated shader modules。Package consumer不得伪造DOM/WebGL Viewer运行，也不得把
   soft-private export描述为稳定public API。
-- 3D Tiles MostDetailed、格式转换、clustering、planar Fog/Shadow仍是独立后继能力；本交付矩阵不得被用作支持声明。
+- 3D Tiles MostDetailed、CZML/KML 转换、clustering 的资格不能由 I5 推导；GeoJSON 显式适配见下节。
+
+## GeoJSON 显式加载
+
+- 复核 ADR-0172 / SGP-0062：native `GeoJsonDataSource` preload 的 options 归一化与 CRS
+  callback、TopoJSON 解码、线面 arcType、二维夹紧与三维高度、load/process 事件语义。
+- 未配置 planar 时保持 ECEF/RHUMB；显式绑定的 source 只进入同一 World 的 planar gate，
+  不能借升级放开所有 DataSource 或启用 clustering。
+- 复核返回 scratch 的逐坐标快照、异步请求期间 World 销毁、load/process 配置继承与坐标域隔离。
+- 运行 native GeoJSON、SceneGISPlanarGeoJson 与 gate Specs，以及 dev/release 的本地
+  `scenegis-planar-geojson` E2E；验证声明包含 native PlanarOptions，private helper 不成为公共类型。

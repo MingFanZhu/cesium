@@ -722,13 +722,20 @@ GPU depth/stencil backend，且不自行发起terrain request。完整当前矩�
 [PlanarContentCompatibility](PlanarContentCompatibility.md)。
 
 C4 只为 live `SceneGISPlanarWorld` 安装 per-instance `DataSourceDisplay.visualizersCallback`；默认 Globe、
-`globe:false` 和其他 World 保持 Cesium 默认 callback。Planar gate 仅接受 `CustomDataSource`、disabled
+`globe:false` 和其他 World 保持 Cesium 默认 callback。Planar gate 接受 `CustomDataSource` 或按
+[ADR-0172](Decisions/ADR-0172-planar-geojson-loading.md) 显式绑定当前 World 的 `GeoJsonDataSource`，并要求 disabled
 `EntityCluster` 和批准的 Entity 内建 Property allowlist；业务属性可复用 `Entity.addProperty` 或 `Entity.properties`。
 第一次合法 update 原子追加 C2/C3 children，
 后续每帧先于 child normal update 和低层资源 mutation 复验动态 profile；同步 collection listener 可以更新
 CPU tracking。Model/Polyline/Polygon 使用 per-DataSource primitive
 container，pick 继续返回 original Entity，bounds 由现有 `DataSourceDisplay` 联合。唯一上游缝隙位于
 `CesiumWidget.js`，由 `SGP-0001` 与 ADR-0016 追踪。
+
+GeoJSON 使用 native `load/process` 的 `planar: { world, projectCoordinates }` 配置，坐标转换在加载时执行。
+首次调用固定实例的 globe/planar 坐标模式；后续省略配置继承绑定，拒绝更换 World 或转换函数。
+World CRS 仍为 opaque metadata，不触发默认投影；调用方解释原坐标与 CRS。SGP-0062 只向原生
+`GeoJsonDataSource.js` 注入加载 context、坐标 callback 和直线/显式贴地面语义；不复制解析器、
+全局注册转换、修改默认 Globe visualizer 或增加逐帧重投影。数据源只供绑定 World 使用。
 
 C5的批量边界保持C1-C4 ownership：Anchor继续使用Cesium pool，Model逐实例，Polyline/Polygon继续
 per-Entity owner；“批量性能”是固定moderate profile资格，不自动引入第二套batch scene graph。先建立

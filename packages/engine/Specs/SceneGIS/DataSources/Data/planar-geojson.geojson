@@ -1,0 +1,46 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "ground-area",
+      "properties": { "title": "带孔贴地面", "fill": "#27c4a8", "fill-opacity": 0.65, "stroke": "#ffffff", "stroke-width": 3 },
+      "geometry": { "type": "Polygon", "coordinates": [
+        [[118.791,32.057],[118.804,32.057],[118.804,32.065],[118.791,32.065],[118.791,32.057]],
+        [[118.795,32.059],[118.795,32.063],[118.800,32.063],[118.800,32.059],[118.795,32.059]]
+      ] }
+    },
+    {
+      "type": "Feature",
+      "id": "raised-area",
+      "properties": { "title": "绝对高度 450 米", "fill": "#e29445", "fill-opacity": 0.85, "stroke": "#fff2bf", "stroke-width": 3 },
+      "geometry": { "type": "Polygon", "coordinates": [
+        [[118.770,32.057,450],[118.784,32.057,450],[118.784,32.065,450],[118.770,32.065,450],[118.770,32.057,450]]
+      ] }
+    },
+    {
+      "type": "Feature",
+      "id": "ground-line",
+      "properties": { "title": "贴地线", "stroke": "#52baff", "stroke-width": 7 },
+      "geometry": { "type": "LineString", "coordinates": [[118.770,32.053],[118.787,32.054],[118.805,32.053]] }
+    },
+    {
+      "type": "Feature",
+      "id": "raised-line",
+      "properties": { "title": "普通线", "stroke": "#ff77c3", "stroke-width": 6 },
+      "geometry": { "type": "LineString", "coordinates": [[118.770,32.069,400],[118.785,32.069,400]] }
+    },
+    {
+      "type": "Feature",
+      "id": "ground-point",
+      "properties": { "title": "贴地点", "marker-color": "#35d6af", "marker-symbol": "G", "用途": "测试原生属性与拾取" },
+      "geometry": { "type": "Point", "coordinates": [118.799,32.069] }
+    },
+    {
+      "type": "Feature",
+      "id": "raised-point",
+      "properties": { "title": "三维点 600 米", "marker-color": "#ffcc66", "marker-symbol": "Z" },
+      "geometry": { "type": "Point", "coordinates": [118.775,32.055,600] }
+    }
+  ]
+}

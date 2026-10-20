@@ -25,6 +25,9 @@ import EntityCluster from "./EntityCluster.js";
 import EntityCollection from "./EntityCollection.js";
 import PolygonGraphics from "./PolygonGraphics.js";
 import PolylineGraphics from "./PolylineGraphics.js";
+// SCENEGIS_PATCH_BEGIN SGP-0062: Keep planar coordinate policy outside the native parser.
+import SceneGISPlanarGeoJson from "../SceneGIS/DataSources/_private/_SceneGISPlanarGeoJson.js";
+// SCENEGIS_PATCH_END SGP-0062
 
 function defaultCrsFunction(coordinates) {
   return Cartesian3.fromDegrees(coordinates[0], coordinates[1], coordinates[2]);
@@ -394,7 +397,11 @@ function createLineString(
   polylineGraphics.positions = new ConstantProperty(
     coordinatesArrayToCartesianArray(coordinates, crsFunction),
   );
-  polylineGraphics.arcType = ArcType.RHUMB;
+  // SCENEGIS_PATCH_BEGIN SGP-0062: Projected edges are straight in planar world coordinates.
+  polylineGraphics.arcType = defined(options.planar)
+    ? ArcType.NONE
+    : ArcType.RHUMB;
+  // SCENEGIS_PATCH_END SGP-0062
 }
 
 function processLineString(
@@ -483,7 +490,9 @@ function createPolygon(dataSource, geoJson, crsFunction, coordinates, options) {
   polygon.outlineColor = outlineColorProperty;
   polygon.outlineWidth = widthProperty;
   polygon.material = material;
-  polygon.arcType = ArcType.RHUMB;
+  // SCENEGIS_PATCH_BEGIN SGP-0062: Preserve native globe arcs outside explicit planar loading.
+  polygon.arcType = defined(options.planar) ? ArcType.NONE : ArcType.RHUMB;
+  // SCENEGIS_PATCH_END SGP-0062
 
   const holes = [];
   for (let i = 1, len = coordinates.length; i < len; i++) {
@@ -506,6 +515,15 @@ function createPolygon(dataSource, geoJson, crsFunction, coordinates, options) {
   } else if (!options.clampToGround) {
     polygon.height = 0;
   }
+  // SCENEGIS_PATCH_BEGIN SGP-0062: Planar ground geometry uses an explicit height reference.
+  if (
+    defined(options.planar) &&
+    positions[0].length === 2 &&
+    options.clampToGround
+  ) {
+    polygon.heightReference = HeightReference.CLAMP_TO_GROUND;
+  }
+  // SCENEGIS_PATCH_END SGP-0062
 
   const entity = createObject(
     geoJson,
@@ -548,6 +566,31 @@ function processTopology(dataSource, geoJson, geometry, crsFunction, options) {
   }
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0062: Expose explicit per-source planar projection options.
+/**
+ * Projects an input GeoJSON coordinate into a planar world's meter coordinates.
+ * The result is copied, so a reusable scratch Cartesian3 is supported. The callback
+ * must interpret or reject any supplied CRS metadata; no CRS is inferred from the world.
+ *
+ * @callback GeoJsonDataSource.ProjectCoordinates
+ * @param {number[]} coordinates The original coordinate, after any TopoJSON decoding.
+ * @param {object|undefined} crs The root GeoJSON CRS metadata, or undefined for standard WGS84 GeoJSON.
+ * @returns {Cartesian3} A finite position in the target world's X-east, Y-north, Z-up coordinates.
+ */
+
+/**
+ * An explicit planar coordinate binding for a GeoJsonDataSource.
+ * The first load or process call fixes the coordinate mode. Subsequent calls inherit
+ * this binding when omitted and cannot change the world or projection callback.
+ * Create a new data source to change coordinate domains. The world is not owned.
+ *
+ * @typedef {object} GeoJsonDataSource.PlanarOptions
+ * @property {SceneGISPlanarWorld} world The live planar world that will display the data source.
+ * @property {GeoJsonDataSource.ProjectCoordinates} projectCoordinates Converts each input coordinate into world meters.
+ */
+// SCENEGIS_PATCH_END SGP-0062
+
+// SCENEGIS_PATCH_BEGIN SGP-0062: Extend native load options without changing globe defaults.
 /**
  * @typedef {object} GeoJsonDataSource.LoadOptions
  *
@@ -563,7 +606,9 @@ function processTopology(dataSource, geoJson, geometry, crsFunction, options) {
  * @property {Color} [fill=GeoJsonDataSource.fill] The default color for polygon interiors.
  * @property {boolean} [clampToGround=GeoJsonDataSource.clampToGround] true if we want the geometry features (polygons or linestrings) clamped to the ground.
  * @property {Credit|string} [credit] A credit for the data source, which is displayed on the canvas.
+ * @property {GeoJsonDataSource.PlanarOptions} [planar] Explicit planar coordinates and target world. Omit on the first load to retain native globe coordinates.
  */
+// SCENEGIS_PATCH_END SGP-0062
 
 /**
  * A {@link DataSource} which processes both
@@ -912,8 +957,11 @@ function preload(that, data, options, clear) {
   }
   //>>includeEnd('debug');
 
-  DataSource.setLoading(that, true);
+  // SCENEGIS_PATCH_BEGIN SGP-0062: Reject coordinate-domain changes before loading or fetching.
   options = options ?? Frozen.EMPTY_OBJECT;
+  const planar = SceneGISPlanarGeoJson.prepare(that, options.planar);
+  DataSource.setLoading(that, true);
+  // SCENEGIS_PATCH_END SGP-0062
 
   // User specified credit
   let credit = options.credit;
@@ -941,6 +989,9 @@ function preload(that, data, options, clear) {
   }
 
   options = {
+    // SCENEGIS_PATCH_BEGIN SGP-0062: Carry the instance context through native option normalization.
+    planar: planar,
+    // SCENEGIS_PATCH_END SGP-0062
     describe: options.describe ?? defaultDescribeProperty,
     markerSize: options.markerSize ?? defaultMarkerSize,
     markerSymbol: options.markerSymbol ?? defaultMarkerSymbol,
@@ -1001,7 +1052,11 @@ function load(that, geoJson, options, sourceUri, clear) {
   const crs = geoJson.crs;
   let crsFunction = crs !== null ? defaultCrsFunction : null;
 
-  if (defined(crs)) {
+  // SCENEGIS_PATCH_BEGIN SGP-0062: Explicit planar projection replaces only coordinate conversion.
+  if (defined(options.planar)) {
+    crsFunction = SceneGISPlanarGeoJson.createCrsFunction(options.planar, crs);
+  } else if (defined(crs)) {
+    // SCENEGIS_PATCH_END SGP-0062
     if (!defined(crs.properties)) {
       throw new RuntimeError("crs.properties is undefined.");
     }

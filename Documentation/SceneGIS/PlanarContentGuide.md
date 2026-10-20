@@ -267,8 +267,8 @@ Surface ground snapshot与World late queue已删除，不存在fallback。完整
 
 `CesiumWidget({ world })` 和 `Viewer({ world })` 只在 `world` 是 live `SceneGISPlanarWorld` 时安装
 instance-local planar visualizer callback；其他 World、`globe:false` 与默认 Globe 继续使用 Cesium 默认
-callback。Planar callback 只接受 `CustomDataSource`，因此 `widget.entities`、`viewer.entities` 和显式加入
-`dataSources` 的 `CustomDataSource` 属于 supported path，GeoJSON/CZML/KML 等 DataSource 不属于本阶段。
+callback。`widget.entities`、`viewer.entities` 和显式加入 `dataSources` 的 `CustomDataSource` 属于
+supported path；ADR-0172 另接纳显式绑定当前 World 的 `GeoJsonDataSource`。CZML/KML 不在支持范围。
 
 第一次合法 update 先完整验证 World/Scene identity、`EntityCluster.enabled === false` 与所有 Entity 的
 top-level Property profile，再原子追加 Anchor、Model、Polyline、Polygon、Solid、Area、Route、Path children；
@@ -285,6 +285,51 @@ DataSource ordering、remove 与 destroy 沿用 `DataSourceDisplay` lifecycle；
 EntityCluster、EntityCollection、Scene 或 World。Pick id 保持 original Entity，Viewer selection、InfoBox 与
 `DataSourceDisplay.getBoundingSphere` 复用现有流程。
 
+## GeoJSON / TopoJSON 加载
+
+保留原生 `GeoJsonDataSource` 及 `load/process`，显式提供目标 World 和坐标转换：
+
+```js
+const projection = new Cesium.WebMercatorProjection();
+const source = await Cesium.GeoJsonDataSource.load("data.geojson", {
+  planar: {
+    world: viewer.scene.world,
+    projectCoordinates(coordinates, crs) {
+      if (crs !== undefined) {
+        throw new Error("Expected WGS84 GeoJSON without a CRS override.");
+      }
+      return projection.project(
+        Cesium.Cartographic.fromDegrees(
+          coordinates[0],
+          coordinates[1],
+          coordinates[2] ?? 0,
+        ),
+      );
+    },
+  },
+  clampToGround: true,
+});
+await viewer.dataSources.add(source);
+await viewer.zoomTo(source);
+```
+
+- 示例 World 必须使用相同 Web Mercator 米制坐标；引擎不根据 `world.coordinateSystem.crs` 猜测投影。
+  对本地 XY GeoJSON，可显式用 `new Cartesian3(c[0], c[1], c[2] ?? 0)`。
+  自定义 CRS metadata 会作为第二参数传入，由应用解释或拒绝；`crs:null` 保持 native no-op。
+- 支持原生 Point / LineString / Polygon、multi、GeometryCollection、FeatureCollection、TopoJSON、
+  simplestyle、属性和描述；返回值是原生 Entity，可继续修改 graphics、显隐和拾取。
+- callback 返回有限 `Cartesian3`，可复用 scratch。转换只在加载时执行，不会逐帧重投影。
+- 首次 `load/process` 确定坐标模式，后续省略 `planar` 自动继承 World 与 callback；不同 World、
+  callback 或从 Globe 改为 planar 需要新建数据源，避免已有 Entity 混用坐标。
+  样式和 `clampToGround` 仍是每次加载选项，不自动继承。
+- 二维点/面在 clamp 开启时贴地；三维点/面保留绝对高度。线的 `clampToGround` 为 true 时忽略
+  顶点 Z 贴合地表。线面均采用平面直线边；原有 hole、extent、graphics profile 限制继续有效。
+- 未配置 `planar` 的原生数据源继续输出 ECEF，只用于 Globe；配置后的数据源只供绑定 World 使用。
+  `show`、loading/error、credits、DataSource add/remove 与资源销毁复用 Cesium，不拥有 World。
+
+本地可运行示例：[平面 GeoJSON](../../Test/平面GeoJSON.html)。
+长期决定及上游集成边界见 [ADR-0172](Decisions/ADR-0172-planar-geojson-loading.md)。
+
 ## Compatibility matrix
 
 完整、绑定Cesium `1.144`交付基线的逐类型与package inventory见
@@ -300,7 +345,8 @@ EntityCluster、EntityCollection、Scene 或 World。Pick id 保持 original Ent
 | Box、Cylinder、Ellipsoid、Plane、Ellipse、Rectangle    | public volume/lowered area + private adapter         | C7 direct/C4 automatic |
 | Corridor、Wall、PolylineVolume、Path                   | public lowering/Geometry + private adapter           | C8 direct/C4 automatic |
 | `Cesium3DTilesetGraphics`                              | unsupported                                          | 独立扩展               |
-| GeoJSON、CZML、KML 自动 planar 转换                    | unsupported                                          | 独立扩展               |
+| GeoJSON / TopoJSON 显式 planar 转换                    | 原生 loader + instance projection                    | ADR-0172               |
+| CZML、KML 自动 planar 转换                             | unsupported                                          | 独立扩展               |
 | Globe ground、geodesic/rhumb                           | 禁止隐式进入                                         | 不复用                 |
 | tracking、`flyTo`、`zoomTo`                            | 复用原入口；支持明确的平面 Entity/DataSource profile | API integration I2/I3  |
 

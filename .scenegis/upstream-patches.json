@@ -1237,6 +1237,26 @@
       "tests": ["scripts/scenegis/draco-worker-build.test.mjs"],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0171-draco-worker-node-fs-build.md",
       "removalCondition": "The upstream worker bundler accepts Draco's guarded node:fs import, or the dependency no longer includes that Node branch."
+    },
+    {
+      "id": "SGP-0062",
+      "title": "Load native GeoJSON into an explicit planar world",
+      "status": "active",
+      "reason": "ADR-0172 adds an instance-bound planar load context, explicit per-coordinate projection, straight edges and explicit ground polygon height semantics. The native parser, styling, entities, events and globe defaults remain shared; projection validation and display gating stay SceneGIS-owned.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/DataSources/GeoJsonDataSource.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/DataSources/SceneGISPlanarGeoJsonSpec.js",
+        "packages/engine/Specs/DataSources/GeoJsonDataSourceSpec.js",
+        "Specs/e2e/scenegis-planar-geojson.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0172-planar-geojson-loading.md",
+      "removalCondition": "Native GeoJsonDataSource provides equivalent instance-local world-coordinate loading and explicit planar geometry semantics."
     }
   ]
 }

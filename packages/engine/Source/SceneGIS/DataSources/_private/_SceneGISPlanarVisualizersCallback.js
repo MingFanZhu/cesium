@@ -3,6 +3,7 @@ import DeveloperError from "../../../Core/DeveloperError.js";
 import destroyObject from "../../../Core/destroyObject.js";
 import CustomDataSource from "../../../DataSources/CustomDataSource.js";
 import Entity from "../../../DataSources/Entity.js";
+import GeoJsonDataSource from "../../../DataSources/GeoJsonDataSource.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
 import SceneGISPlanarAnchorVisualizer from "./_SceneGISPlanarAnchorVisualizer.js";
 import SceneGISPlanarAreaVisualizer from "./_SceneGISPlanarAreaVisualizer.js";
@@ -73,9 +74,15 @@ function validateGate(gate) {
   if (scene.isDestroyed?.() === true || scene.world !== world) {
     throw new DeveloperError("scene must remain associated with world.");
   }
-  if (!(dataSource instanceof CustomDataSource)) {
+  if (
+    !(dataSource instanceof CustomDataSource) &&
+    !(
+      dataSource instanceof GeoJsonDataSource &&
+      dataSource._sceneGISGeoJson?.world === world
+    )
+  ) {
     throw new DeveloperError(
-      "Planar visualization only supports CustomDataSource instances.",
+      "Planar visualization requires CustomDataSource or GeoJsonDataSource loaded for this world.",
     );
   }
   if (entityCluster.enabled !== false) {
