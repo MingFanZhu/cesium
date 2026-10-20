@@ -343,6 +343,10 @@ SceneGISPlanarPathVisualizer.prototype._onCollectionChanged = function (
   changed,
 ) {
   const add = (entity) => {
+    const previous = this._items.get(entity.id);
+    if (previous !== undefined && previous.entity !== entity) {
+      remove(entity);
+    }
     if (entity._path !== undefined && !this._items.contains(entity.id)) {
       this._items.set(entity.id, { entity, owner: undefined, sampled: [] });
     }

@@ -608,6 +608,10 @@ SceneGISPlanarModelVisualizer.prototype._onCollectionChanged = function (
   changed,
 ) {
   const add = (entity) => {
+    const previous = this._items.get(entity.id);
+    if (previous !== undefined && previous.entity !== entity) {
+      remove(entity);
+    }
     if (!hasModelGraphic(entity) || this._items.contains(entity.id)) {
       return;
     }

@@ -553,7 +553,8 @@ lookAtWorldPosition 的固定 +Z up、四类 frustum 的 public getPickRay 和 f
 - Automatic adapter 使用 instance-owned graphic/config allowlist，并替换而非追加会消费相同 graphics 的
   默认 Globe visualizer。Unsupported 输入必须在低层资源 mutation 前抛 `DeveloperError`，不得 warning、
   silent ignore或Globe fallback。
-- C4 automatic path 只接受 live planar World、`CustomDataSource` 与 disabled `EntityCluster`。业务 metadata
+- C4 automatic path 接受 live planar World、`CustomDataSource`、显式绑定当前 World 的 GeoJSON/CZML
+  与 disabled `EntityCluster`。业务 metadata
   可使用 `Entity.properties` 或原生 `Entity.addProperty`；gate 只对 Entity.prototype 上的内建 Property 执行
   supported allowlist，未支持的标准 Graphics 在 child normal update 和低层资源 mutation 前拒绝。
   自定义属性不自动成为可绘制 Graphics；同步 collection listener 可以先更新 CPU tracking。

@@ -1257,6 +1257,31 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0172-planar-geojson-loading.md",
       "removalCondition": "Native GeoJsonDataSource provides equivalent instance-local world-coordinate loading and explicit planar geometry semantics."
+    },
+    {
+      "id": "SGP-0063",
+      "title": "Bind native CZML to an explicit planar world",
+      "status": "active",
+      "reason": "ADR-0173 reuses native CZML temporal parsing with an instance-local fixed meter-coordinate policy and validates the bound World before display updates, including Globe misuse.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/DataSources/CzmlDataSource.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/DataSources/DataSourceDisplay.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/DataSources/SceneGISPlanarCzmlSpec.js",
+        "packages/engine/Specs/DataSources/CzmlDataSourceSpec.js",
+        "packages/engine/Specs/DataSources/DataSourceDisplaySpec.js",
+        "Specs/e2e/scenegis-planar-czml.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0173-planar-czml-loading.md",
+      "removalCondition": "Native CZML and DataSourceDisplay provide equivalent instance-bound planar coordinates and World validation."
     }
   ]
 }

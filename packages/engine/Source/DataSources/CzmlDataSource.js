@@ -1,4 +1,7 @@
 import ArcType from "../Core/ArcType.js";
+// SCENEGIS_PATCH_BEGIN SGP-0063: Isolate the explicit planar coordinate policy.
+import SceneGISPlanarCzml from "../SceneGIS/DataSources/_private/_SceneGISPlanarCzml.js";
+// SCENEGIS_PATCH_END SGP-0063
 import BoundingRectangle from "../Core/BoundingRectangle.js";
 import Cartesian2 from "../Core/Cartesian2.js";
 import Cartesian3 from "../Core/Cartesian3.js";
@@ -4735,6 +4738,9 @@ function load(dataSource, czml, options, clear) {
   //>>includeEnd('debug');
 
   options = options ?? Frozen.EMPTY_OBJECT;
+  // SCENEGIS_PATCH_BEGIN SGP-0063: Fix the instance coordinate domain before fetching.
+  SceneGISPlanarCzml.prepare(dataSource, options.planar);
+  // SCENEGIS_PATCH_END SGP-0063
 
   let promise = czml;
   let sourceUri = options.sourceUri;
@@ -4780,6 +4786,9 @@ function load(dataSource, czml, options, clear) {
 }
 
 function loadCzml(dataSource, czml, sourceUri, clear) {
+  // SCENEGIS_PATCH_BEGIN SGP-0063: Validate resolved input and World before clearing entities.
+  SceneGISPlanarCzml.validate(dataSource, czml);
+  // SCENEGIS_PATCH_END SGP-0063
   DataSource.setLoading(dataSource, true);
   const entityCollection = dataSource._entityCollection;
 
@@ -4824,6 +4833,20 @@ function DocumentPacket() {
   this.clock = undefined;
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0063: Document explicit instance-level planar loading.
+/**
+ * Fixed Cartesian loading into a caller-owned planar world. Positions are already
+ * in world meters (X east, Y north, Z up); no projection is performed.
+ * The first load/process fixes the instance coordinate domain. Subsequent calls
+ * may omit this option but cannot change the world. Create a new data source to
+ * change domains. Only FIXED positions are supported; geographic positions,
+ * INERTIAL frames, and orientation.velocityReference are rejected.
+ * The data source can only be visualized in its bound live world.
+ *
+ * @typedef {object} CzmlDataSource.PlanarOptions
+ * @property {SceneGISPlanarWorld} world The live world owning the coordinate domain.
+ */
+
 /**
  * @typedef {object} CzmlDataSource.LoadOptions
  *
@@ -4831,7 +4854,9 @@ function DocumentPacket() {
  *
  * @property {Resource|string} [sourceUri] Overrides the url to use for resolving relative links.
  * @property {Credit|string} [credit] A credit for the data source, which is displayed on the canvas.
+ * @property {CzmlDataSource.PlanarOptions} [planar] Explicit planar binding. Omit on a new instance for native globe CZML.
  */
+// SCENEGIS_PATCH_END SGP-0063
 
 /**
  * A {@link DataSource} which processes {@link https://github.com/AnalyticalGraphicsInc/czml-writer/wiki/CZML-Guide|CZML}.

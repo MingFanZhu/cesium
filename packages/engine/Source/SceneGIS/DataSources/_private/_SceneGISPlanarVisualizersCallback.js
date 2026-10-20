@@ -2,6 +2,7 @@ import defined from "../../../Core/defined.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import destroyObject from "../../../Core/destroyObject.js";
 import CustomDataSource from "../../../DataSources/CustomDataSource.js";
+import CzmlDataSource from "../../../DataSources/CzmlDataSource.js";
 import Entity from "../../../DataSources/Entity.js";
 import GeoJsonDataSource from "../../../DataSources/GeoJsonDataSource.js";
 import SceneGISPlanarWorld from "../../Scene/SceneGISPlanarWorld.js";
@@ -79,10 +80,14 @@ function validateGate(gate) {
     !(
       dataSource instanceof GeoJsonDataSource &&
       dataSource._sceneGISGeoJson?.world === world
+    ) &&
+    !(
+      dataSource instanceof CzmlDataSource &&
+      dataSource._sceneGISCzml?.world === world
     )
   ) {
     throw new DeveloperError(
-      "Planar visualization requires CustomDataSource or GeoJsonDataSource loaded for this world.",
+      "Planar visualization requires CustomDataSource, GeoJsonDataSource or CzmlDataSource loaded for this world.",
     );
   }
   if (entityCluster.enabled !== false) {

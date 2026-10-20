@@ -1,4 +1,7 @@
 import ApproximateTerrainHeights from "../Core/ApproximateTerrainHeights.js";
+// SCENEGIS_PATCH_BEGIN SGP-0063: Validate explicit CZML World bindings before rendering.
+import SceneGISPlanarCzml from "../SceneGIS/DataSources/_private/_SceneGISPlanarCzml.js";
+// SCENEGIS_PATCH_END SGP-0063
 import BoundingSphere from "../Core/BoundingSphere.js";
 import Check from "../Core/Check.js";
 import defined from "../Core/defined.js";
@@ -305,6 +308,9 @@ DataSourceDisplay.prototype.update = function (time) {
   const length = dataSources.length;
   for (i = 0; i < length; i++) {
     const dataSource = dataSources.get(i);
+    // SCENEGIS_PATCH_BEGIN SGP-0063: Reject a mismatched or destroyed World before child updates.
+    SceneGISPlanarCzml.validateScene(dataSource, this._scene);
+    // SCENEGIS_PATCH_END SGP-0063
     if (defined(dataSource.update)) {
       result = dataSource.update(time) && result;
     }

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "document",
+    "version": "1.0",
+    "name": "平面动态巡检",
+    "clock": {
+      "interval": "2026-10-20T04:00:00Z/2026-10-20T04:02:00Z",
+      "currentTime": "2026-10-20T04:00:30Z",
+      "multiplier": 1,
+      "range": "LOOP_STOP",
+      "step": "SYSTEM_CLOCK_MULTIPLIER"
+    }
+  },
+  {
+    "id": "vehicle",
+    "name": "巡检对象",
+    "description": "原生 CZML 采样位置；坐标直接为当前 World 的米制 XYZ。",
+    "availability": "2026-10-20T04:00:00Z/2026-10-20T04:02:00Z",
+    "position": {
+      "epoch": "2026-10-20T04:00:00Z",
+      "referenceFrame": "FIXED",
+      "interpolationAlgorithm": "LINEAR",
+      "interpolationDegree": 1,
+      "cartesian": [
+        0, 12999400, 3999700, 100,
+        30, 13000000, 3999700, 160,
+        60, 13000600, 4000200, 240,
+        90, 13000000, 4000500, 160,
+        120, 12999400, 3999700, 100
+      ]
+    },
+    "viewFrom": { "cartesian": [0, -900, 650] },
+    "point": {
+      "pixelSize": 16,
+      "color": { "rgba": [255, 195, 45, 255] },
+      "outlineColor": { "rgba": [255, 255, 255, 255] },
+      "outlineWidth": 2
+    },
+    "label": {
+      "text": "巡检对象",
+      "font": "16px sans-serif",
+      "pixelOffset": { "cartesian2": [0, -28] },
+      "fillColor": { "rgba": [255, 235, 170, 255] }
+    },
+    "path": {
+      "leadTime": 15,
+      "trailTime": 45,
+      "resolution": 5,
+      "width": 5,
+      "material": { "solidColor": { "color": { "rgba": [255, 195, 45, 255] } } }
+    }
+  },
+  {
+    "id": "zone",
+    "name": "作业范围",
+    "polygon": {
+      "positions": {
+        "cartesian": [
+          12999200, 3999400, 0,
+          13000800, 3999400, 0,
+          13000800, 4000700, 0,
+          12999200, 4000700, 0
+        ]
+      },
+      "height": 1,
+      "outline": true,
+      "outlineColor": { "rgba": [80, 180, 230, 255] },
+      "material": { "solidColor": { "color": { "rgba": [40, 110, 170, 160] } } }
+    }
+  },
+  {
+    "id": "timed-box",
+    "name": "定时显示的设备",
+    "availability": "2026-10-20T04:00:20Z/2026-10-20T04:01:00Z",
+    "position": { "cartesian": [12999600, 4000200, 65] },
+    "orientation": { "unitQuaternion": [0, 0, 0, 1] },
+    "box": {
+      "dimensions": { "cartesian": [100, 100, 130] },
+      "material": { "solidColor": { "color": { "rgba": [80, 220, 170, 255] } } }
+    }
+  }
+]

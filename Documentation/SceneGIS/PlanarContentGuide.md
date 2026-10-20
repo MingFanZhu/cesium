@@ -389,6 +389,32 @@ runtime文件随engine tarball交付。自动生成的JS barrel按仓库soft-pri
 
 ## Enforcement 与 ownership
 
+### 原生 CZML
+
+```js
+const source = await Cesium.CzmlDataSource.load("vehicles.czml", {
+  planar: { world: viewer.scene.world },
+});
+await viewer.dataSources.add(source);
+await viewer.zoomTo(source);
+viewer.trackedEntity = source.entities.getById("vehicle");
+await source.process(nextPackets);
+```
+
+`cartesian` / `cartesianVelocity` 使用当前 World 米制 XYZ，无自动投影；`referenceFrame`
+省略或 `"FIXED"`。采样插值、availability、document clock、load 替换、process 合并和删除
+沿用 Cesium；显式 quaternion 按固定平面坐标轴解释。Path 复用既有 FIXED 采样和 lead/trail 窗口。
+调用方用原生 `viewer.clock`、`clockTrackedDataSource`、timeline 控制播放。
+
+第一次 load/process 固定实例坐标域；后续省略 `planar` 复用绑定，不能更换 World。
+`load` 会替换 Entity 实例；若要继续跟随，应重新取得新 Entity 并设置 `trackedEntity`。
+数据源不能用于其他 World 或 Globe；World 必须保持存活。经纬度位置、INERTIAL 系、
+`orientation.velocityReference` 拒绝；后者的原生实现依赖椭球法线。
+图形材质与字段继续遵守当前平面兼容性矩阵，不承诺任意 CZML 都可无修改用于平面。
+本地示例为 `Test/平面CZML.html`，决策见 [ADR-0173](Decisions/ADR-0173-planar-czml-loading.md)。
+
+### 通用边界
+
 Automatic planar adapter 采用 instance-owned allowlist，不同时运行会消费相同 graphics 的默认 Globe
 visualizer。已知 unsupported graphic 或 approved graphic 中未支持的配置必须在该 Entity 的资源
 mutation 前抛 `DeveloperError`；不得 silent ignore、warning 后继续或 fallback 到 Globe path。

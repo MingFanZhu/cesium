@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>平面 CZML · 动态对象与轨迹</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #view {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      #panel {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        width: 270px;
+        padding: 18px;
+        border-radius: 8px;
+        background: #102136ee;
+        color: #edf5ff;
+        font:
+          14px/1.6 system-ui,
+          sans-serif;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 8px;
+      }
+      p {
+        color: #bed1e2;
+      }
+      button {
+        margin: 3px;
+        padding: 6px 9px;
+        cursor: pointer;
+      }
+      label,
+      output {
+        display: block;
+        margin-top: 10px;
+      }
+      output {
+        white-space: pre-line;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="view"></div>
+    <section id="panel">
+      <h1>平面 CZML</h1>
+      <p>
+        黄色巡检对象与动态轨迹。绿色设备只在第 20—60
+        秒出现。使用下方原生时钟播放或拖动时间轴。
+      </p>
+      <button id="home">初始视角</button>
+      <button id="zoom">定位全部</button>
+      <button id="fly">飞到对象</button>
+      <button id="follow">跟随对象</button>
+      <button id="unfollow">停止跟随</button>
+      <button id="process">增量改变颜色</button>
+      <button id="reload">重新加载</button>
+      <label><input id="visible" type="checkbox" checked /> 显示数据源</label>
+      <p>
+        本地示意数据，直接使用世界米制
+        XYZ，无自动投影。点击对象可查看原始实体信息。
+      </p>
+      <output id="status">正在加载…</output>
+    </section>
+    <script type="module">
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const world = new C.SceneGISPlanarWorld({
+        coordinateSystem: new C.SceneGISPlanarCoordinateSystem({
+          extent: new C.SceneGISPlanarExtent({
+            minimumX: 12997000,
+            minimumY: 3997000,
+            maximumX: 13003000,
+            maximumY: 4003000,
+          }),
+          crs: "LOCAL:METERS",
+        }),
+        maximumLevel: 0,
+        baseColor: C.Color.fromCssColorString("#243b50"),
+      });
+      const viewer = new C.Viewer("view", { world, fullscreenButton: false });
+      viewer.scene.environmentEffects.enabled = false;
+      viewer.scene.highDynamicRange = false;
+      viewer.clock.shouldAnimate = false;
+      const status = document.getElementById("status");
+      const url =
+        "/packages/engine/Specs/SceneGIS/DataSources/Data/planar-czml.czml";
+      const source = new C.CzmlDataSource();
+      function home() {
+        viewer.trackedEntity = undefined;
+        viewer.camera.setView({
+          destination: new C.Cartesian3(13000000, 3998300, 3000),
+          orientation: { heading: 0, pitch: -Math.PI / 3, roll: 0 },
+        });
+      }
+      home();
+      try {
+        await source.load(url, { planar: { world } });
+        await viewer.dataSources.add(source);
+        viewer.clockTrackedDataSource = source;
+        viewer.timeline.zoomTo(source.clock.startTime, source.clock.stopTime);
+        viewer.clock.shouldAnimate = false;
+        const entity = () => source.entities.getById("vehicle");
+        const run = (callback) => async () => {
+          try {
+            await callback();
+          } catch (error) {
+            status.textContent = error.message;
+          }
+        };
+        document.getElementById("home").onclick = home;
+        document.getElementById("zoom").onclick = run(() =>
+          viewer.zoomTo(source),
+        );
+        document.getElementById("fly").onclick = run(() =>
+          viewer.flyTo(entity(), { duration: 1 }),
+        );
+        document.getElementById("follow").onclick = () => {
+          viewer.trackedEntity = entity();
+        };
+        document.getElementById("unfollow").onclick = () => {
+          viewer.trackedEntity = undefined;
+        };
+        document.getElementById("process").onclick = run(() =>
+          source.process({
+            id: "vehicle",
+            point: { color: { rgba: [255, 100, 120, 255] } },
+            path: {
+              material: {
+                solidColor: { color: { rgba: [255, 100, 120, 255] } },
+              },
+            },
+          }),
+        );
+        document.getElementById("reload").onclick = run(async () => {
+          viewer.trackedEntity = undefined;
+          await source.load(url);
+          viewer.clock.currentTime = C.JulianDate.clone(
+            source.clock.currentTime,
+          );
+        });
+        document.getElementById("visible").onchange = (event) => {
+          source.show = event.target.checked;
+        };
+        const removeTick = viewer.clock.onTick.addEventListener((clock) => {
+          const p = entity()?.position.getValue(clock.currentTime);
+          status.textContent = p
+            ? `XYZ：${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)} 米`
+            : "当前时间不在对象的有效期内";
+        });
+        window.planarCzmlExample = { viewer, world, source, home };
+        window.addEventListener("pagehide", (event) => {
+          if (!event.persisted && !viewer.isDestroyed()) {
+            removeTick();
+            viewer.destroy();
+            if (!world.isDestroyed()) {
+              world.destroy();
+            }
+          }
+        });
+      } catch (error) {
+        status.textContent = error.message;
+        throw error;
+      }
+    </script>
+  </body>
+</html>

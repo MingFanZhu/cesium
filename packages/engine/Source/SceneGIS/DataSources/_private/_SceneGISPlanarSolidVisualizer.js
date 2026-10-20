@@ -642,6 +642,10 @@ SceneGISPlanarSolidVisualizer.prototype._onCollectionChanged = function (
     entity._cylinder !== undefined ||
     entity._ellipsoid !== undefined;
   const add = (entity) => {
+    const previous = this._items.get(entity.id);
+    if (previous !== undefined && previous.entity !== entity) {
+      remove(entity);
+    }
     if (hasGraphic(entity) && !this._items.contains(entity.id)) {
       this._items.set(entity.id, { entity, owners: {} });
     }

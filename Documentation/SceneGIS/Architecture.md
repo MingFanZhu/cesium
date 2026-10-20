@@ -737,6 +737,13 @@ World CRS 仍为 opaque metadata，不触发默认投影；调用方解释原坐
 `GeoJsonDataSource.js` 注入加载 context、坐标 callback 和直线/显式贴地面语义；不复制解析器、
 全局注册转换、修改默认 Globe visualizer 或增加逐帧重投影。数据源只供绑定 World 使用。
 
+CZML 使用 native `load/process` 的 `planar: { world }` 显式绑定，坐标直接为 World 米制 XYZ。
+首次调用固定坐标域；原生采样、插值、availability、clock、reference 和增量包语义保持。
+SGP-0063 在 `CzmlDataSource.js` 加入加载策略，在 `DataSourceDisplay.js` 的正常 update 前校验
+绑定 World（包括 Globe 错用和异步加载后绑定）；平面 gate 接纳同 World 的 CZML。
+经纬度位置、非 FIXED 系和椭球 velocity orientation 拒绝，不自动投影或注册全局 updater。
+完整边界见 [ADR-0173](Decisions/ADR-0173-planar-czml-loading.md)。
+
 C5的批量边界保持C1-C4 ownership：Anchor继续使用Cesium pool，Model逐实例，Polyline/Polygon继续
 per-Entity owner；“批量性能”是固定moderate profile资格，不自动引入第二套batch scene graph。先建立
 C4 baseline与persistent resource hard gates，只有可重复热点才允许在现有private visualizer内消除静态CPU
