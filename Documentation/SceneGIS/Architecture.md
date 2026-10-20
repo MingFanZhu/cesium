@@ -69,6 +69,7 @@ AgentDocs/**
 scripts/scenegis/**
 packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js
 packages/engine/Source/Workers/SceneGISVectorTileWorker.js
+packages/engine/Source/Workers/SceneGISS3mWorker.js
 ```
 
 所有权按照“上游基线中是否已经存在该路径”判断，而不是按照当前分支中文件所在目录判断。修改 upstream-owned file 必须登记 SGP；新增 SceneGIS-owned file 不需要 SGP。
@@ -77,6 +78,9 @@ packages/engine/Source/Workers/SceneGISVectorTileWorker.js
 `packages/engine/Source/Workers/SceneGISVectorTileWorker.js`（ADR-0067）是批准的精确 owned Worker entries。
 它们不在上游基线中，只接入 Cesium 现有 Worker 构建链，算法继续位于 `Source/SceneGIS/**`。
 这些例外不授权其他 `Source/Workers` 文件；新增 entry 仍需重新审计、ADR 与所有权说明。
+
+ADR-0174 批准精确 owned entry `SceneGISS3mWorker.js`：仅执行 S3M 解码与内存 GLB
+准备，主体位于 SceneGIS Core；复用现有 Worker 构建与原生 Model 渲染，不引入全局 loader。
 
 `packages/engine/Source/Shaders/SceneGIS/**/*.glsl` 是 ADR-0030 批准的 SceneGIS shader source root。
 它复用 Cesium 现有 `Source/Shaders/**` GLSL-to-JS 构建链；相邻生成 `.js` 是忽略的 build artifact，
