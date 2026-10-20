@@ -98,6 +98,8 @@ for (const world of ["globe", "planar"]) {
         mismatches,
         displayMatches,
         defaultOwner: effects === viewer.scene.environmentEffects,
+        autoExposureDisabled: !window.example.autoExposure.enabled,
+        autoExposureUnallocated: !window.example.autoExposure._state,
         explicitEffects: viewer.scene.controllerHost._controllers.filter(
           (controller) => controller instanceof C.SceneGISEnvironmentEffects,
         ).length,
@@ -125,6 +127,8 @@ for (const world of ["globe", "planar"]) {
     expect(initial.mismatches).toEqual([]);
     expect(initial.displayMatches).toBe(true);
     expect(initial.defaultOwner).toBe(true);
+    expect(initial.autoExposureDisabled).toBe(true);
+    expect(initial.autoExposureUnallocated).toBe(true);
     expect(initial.explicitEffects).toBe(0);
     expect(initial.location[0]).toBeCloseTo(118.7969, 5);
     expect(initial.location[1]).toBeCloseTo(32.0603, 5);
@@ -215,6 +219,44 @@ for (const world of ["globe", "planar"]) {
     await control("HDR 显示").check();
     await control("手动曝光").fill("2");
     await control("手动曝光").press("Tab");
+    await control("HDR 显示").uncheck();
+    await control("自动曝光").check();
+    await page.waitForFunction(() => window.example.autoExposure.ready);
+    await expect(control("HDR 显示")).toBeChecked();
+    await control("锁定当前曝光").check();
+    const readExposure = () =>
+      page.evaluate(() => {
+        const { viewer, autoExposure } = window.example;
+        return Array.from(
+          viewer.scene.context.readPixels({
+            framebuffer: autoExposure._state.result.framebuffer,
+            width: 1,
+            height: 1,
+          }),
+        );
+      });
+    const locked = await readExposure();
+    await control("曝光补偿（档）").fill("1");
+    await control("曝光补偿（档）").press("Tab");
+    await control("显示测光读数（诊断）").check();
+    await expect(page.locator("#exposureStatus")).toContainText("合成");
+    const compensated = await readExposure();
+    expect(compensated[1]).toBeCloseTo(locked[1], 5);
+    expect(locked[0] / compensated[0]).toBeCloseTo(2, 5);
+    expect(1 / compensated[0]).toBeCloseTo(2 ** compensated[1] * 2 * 2, 3);
+    await expect(page.locator("#exposureStatus")).toContainText(
+      `合成 ${(1 / compensated[0]).toFixed(3)}×`,
+    );
+    await control("HDR 显示").uncheck();
+    await expect(control("自动曝光")).not.toBeChecked();
+    expect(
+      await page.evaluate(() => ({
+        released: window.example.autoExposure._state === undefined,
+        manual: window.example.viewer.scene.postProcessStages.exposure,
+      })),
+    ).toEqual({ released: true, manual: 2 });
+    await control("自动曝光").check();
+    await page.waitForFunction(() => window.example.autoExposure.ready);
     await folder("HDR 与曝光").click();
     await folder("泛光与光晕").click();
     await control("泛光").check();
@@ -233,8 +275,20 @@ for (const world of ["globe", "planar"]) {
     await folder("恢复环境默认值").click();
     const restored = await page.evaluate(async () => {
       const C = await import("/Build/CesiumUnminified/index.js");
-      const { effects, viewer, defaults, displayDefaults } = window.example;
+      const {
+        effects,
+        viewer,
+        defaults,
+        displayDefaults,
+        autoExposure,
+        autoExposureDefaults,
+        exposureState,
+      } = window.example;
       return {
+        autoExposureMismatches: Object.keys(autoExposureDefaults).filter(
+          (key) => autoExposure[key] !== autoExposureDefaults[key],
+        ),
+        diagnostics: exposureState.diagnostics,
         mismatches: Object.keys(defaults).filter(
           (key) => effects[key] !== defaults[key],
         ),
@@ -245,6 +299,8 @@ for (const world of ["globe", "planar"]) {
       };
     });
     expect(restored).toEqual({
+      autoExposureMismatches: [],
+      diagnostics: false,
       mismatches: [],
       hdr: true,
       exposure: true,
@@ -254,7 +310,7 @@ for (const world of ["globe", "planar"]) {
     await expect(page.locator("#error")).toBeEmpty();
     await page.screenshot({ path: info.outputPath(`${world}-defaults.png`) });
     const disposed = await page.evaluate(() => {
-      const { viewer, effects } = window.example;
+      const { viewer, effects, autoExposure } = window.example;
       const clock = viewer.clock;
       window.dispatchEvent(
         new PageTransitionEvent("pagehide", { persisted: true }),
@@ -269,6 +325,7 @@ for (const world of ["globe", "planar"]) {
       return {
         retained,
         destroyed: viewer.isDestroyed(),
+        autoExposureDestroyed: autoExposure.isDestroyed(),
         ready: effects.ready,
         stableTime: time === effects.cloudTime,
         tickListeners: clock.onTick.numberOfListeners,
@@ -279,6 +336,7 @@ for (const world of ["globe", "planar"]) {
     expect(disposed).toEqual({
       retained: true,
       destroyed: true,
+      autoExposureDestroyed: true,
       ready: false,
       stableTime: true,
       tickListeners: 0,

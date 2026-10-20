@@ -33,6 +33,11 @@
       #vectorStatus {
         font-size: 12px;
       }
+      #exposureStatus {
+        font-size: 12px;
+        white-space: pre-line;
+        margin: 4px 0;
+      }
       #vectorError {
         color: #a00000;
       }
@@ -61,6 +66,20 @@
           泛光、光晕需同时开启 HDR。
         </p>
         <p>
+          “HDR 与曝光 → 自动曝光对照”复用引擎直方图测光，初始关闭。
+          开启自动曝光会开启 HDR；关闭 HDR
+          会关闭自动曝光。手动曝光在自动模式下仍作为额外倍率，建议先保持 1。
+          锁定固定自动倍率，补偿每增加 1
+          档使合成倍率翻倍；切换视角后可点“立即重新测光”。
+          恢复环境默认值同时恢复自动曝光参数。
+        </p>
+        <p>
+          可选诊断每秒最多读取 4 次 GPU
+          结果，会有少量同步开销。自动/目标倍率不含补偿，合成倍率包含补偿与手动曝光。
+          测光亮度为加权、截尾后的几何平均相对亮度，不是物理
+          EV100；适应使用真实经过时间，暂停原生时钟仍会适应。
+        </p>
+        <p>
           底部为原生时钟和时间轴（UTC，北京时间为
           UTC+8）。播放、倒放和拖动时间轴会同步日月、星空与云时间。
           手动修改云时间后，从该值继续随时钟变化。
@@ -74,6 +93,7 @@
         </p>
       </details>
       <p id="status" role="status">正在加载环境…</p>
+      <p id="exposureStatus" role="status"></p>
       <p id="error" role="alert"></p>
       <p id="vectorStatus" role="status"></p>
       <p id="vectorError" role="alert"></p>

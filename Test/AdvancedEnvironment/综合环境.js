@@ -1,4 +1,4 @@
-/* global document, window, URLSearchParams */
+/* global document, window, URLSearchParams, performance */
 import * as C from "/Build/CesiumUnminified/index.js";
 import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
 import exposeExample from "/Test/example-lifecycle.js";
@@ -61,6 +61,36 @@ const viewer = new C.Viewer("map", {
 });
 const scene = viewer.scene;
 const effects = scene.environmentEffects;
+const autoExposure = new C.SceneGISAutoExposure({ scene });
+const exposureFields = [
+  ["locked", "锁定当前曝光"],
+  ["exposureCompensation", "曝光补偿（档）", -10, 10, 0.1],
+  ["speedUp", "适应亮处（档/秒）", 0.01, 100, 0.01],
+  ["speedDown", "适应暗处（档/秒）", 0.01, 100, 0.01],
+  ["minimumExposure", "最低自动倍率", 1 / 65536, 1, 1 / 65536],
+  ["maximumExposure", "最高自动倍率", 1, 65536, 1],
+  ["centerWeight", "中央测光权重", 0, 1, 0.01],
+  ["lowPercent", "忽略暗部比例", 0, 0.49, 0.01],
+  ["highPercent", "保留亮度上限分位", 0.5, 1, 0.01],
+];
+const autoExposureDefaults = Object.fromEntries(
+  ["enabled", ...exposureFields.map(([key]) => key)].map((key) => [
+    key,
+    autoExposure[key],
+  ]),
+);
+const exposureState = {
+  diagnostics: false,
+  get enabled() {
+    return autoExposure.enabled;
+  },
+  set enabled(value) {
+    if (value) {
+      scene.highDynamicRange = true;
+    }
+    autoExposure.enabled = value;
+  },
+};
 // The native picker disables terrain depth for Ellipsoid; active effects need it.
 const removeTerrainChanged =
   scene.globe?.terrainProviderChanged.addEventListener(() => {
@@ -98,6 +128,7 @@ function home() {
         }
       : { heading: 0, pitch, roll: 0 },
   });
+  autoExposure.reset();
   scene.requestRender();
 }
 home();
@@ -193,6 +224,9 @@ const gui = new GUI({
 const actions = {
   home,
   reset() {
+    Object.assign(autoExposure, autoExposureDefaults);
+    autoExposure.reset();
+    exposureState.diagnostics = false;
     Object.assign(effects, defaults);
     scene.highDynamicRange = displayDefaults.highDynamicRange;
     scene.postProcessStages.tonemapper = displayDefaults.tonemapper;
@@ -225,7 +259,15 @@ for (const [title, ...fields] of groups) {
   folder.close();
 }
 const display = gui.addFolder("HDR 与曝光");
-display.add(scene, "highDynamicRange").name("HDR 显示").listen();
+display
+  .add(scene, "highDynamicRange")
+  .name("HDR 显示")
+  .listen()
+  .onChange((enabled) => {
+    if (!enabled) {
+      autoExposure.enabled = false;
+    }
+  });
 display
   .add(scene.postProcessStages, "tonemapper", C.Tonemapper)
   .name("色调映射")
@@ -233,6 +275,26 @@ display
 display
   .add(scene.postProcessStages, "exposure", 0.01, 64, 0.01)
   .name("手动曝光")
+  .listen();
+const exposureFolder = display.addFolder("自动曝光对照");
+const automatic = exposureFolder
+  .add(exposureState, "enabled")
+  .name("自动曝光")
+  .listen();
+if (!C.SceneGISAutoExposure.isSupported(scene)) {
+  automatic.disable();
+  automatic.domElement.title = "此设备不支持自动曝光所需的 WebGL2 浮点目标。";
+}
+for (const [property, label, ...range] of exposureFields) {
+  exposureFolder
+    .add(autoExposure, property, ...range)
+    .name(label)
+    .listen();
+}
+exposureFolder.add(autoExposure, "reset").name("立即重新测光");
+exposureFolder
+  .add(exposureState, "diagnostics")
+  .name("显示测光读数（诊断）")
   .listen();
 display.close();
 gui.onChange(() => scene.requestRender());
@@ -245,16 +307,61 @@ const removeRenderError = scene.renderError.addEventListener((...args) => {
   error.textContent = `渲染错误：${args[1].message}`;
 });
 const status = document.getElementById("status");
+const exposureStatus = document.getElementById("exposureStatus");
+let lastExposureRead = -Infinity;
+let exposureReadout = "";
 const removeStatus = scene.postRender.addEventListener(() => {
   const text = `${planar ? "平面" : "球面"} · ${!effects.enabled ? "环境已关闭" : effects.ready ? "环境已就绪" : "正在加载环境…"}`;
   if (status.textContent !== text) {
     status.textContent = text;
   }
+  let exposureText;
+  if (!scene.highDynamicRange) {
+    exposureText = "曝光：LDR（自动曝光已关闭）";
+  } else if (!autoExposure.enabled) {
+    exposureText = `曝光：手动 ${scene.postProcessStages.exposure.toFixed(3)}×`;
+  } else if (!autoExposure.ready) {
+    exposureText = "曝光：等待测光";
+  } else {
+    exposureText = `曝光：自动${autoExposure.locked ? "（已锁定）" : "（适应中）"}`;
+    if (exposureState.diagnostics) {
+      const now = performance.now();
+      if (now - lastExposureRead >= 250) {
+        // Example-only diagnostic: read the existing 1x1 result, never the image.
+        // RGBA stores divisor, adapted log2 gain, target log2 gain, mean log2 luminance.
+        const [divisor, adapted, target, meanLog] = scene.context.readPixels({
+          framebuffer: autoExposure._state.result.framebuffer,
+          width: 1,
+          height: 1,
+        });
+        exposureReadout = `自动 ${Math.pow(2, adapted).toFixed(3)}× · 目标 ${Math.pow(2, target).toFixed(3)}×\n合成 ${(1 / divisor).toFixed(3)}× · 测光亮度 ${Math.pow(2, meanLog).toPrecision(4)}`;
+        lastExposureRead = now;
+      }
+      exposureText += `\n${exposureReadout}`;
+    }
+  }
+  if (!autoExposure.ready || !exposureState.diagnostics) {
+    lastExposureRead = -Infinity;
+    exposureReadout = "";
+  }
+  if (exposureStatus.textContent !== exposureText) {
+    exposureStatus.textContent = exposureText;
+  }
 });
 exposeExample(
   viewer,
   gui,
-  { effects, environment, defaults, displayDefaults, actions, vectors },
+  {
+    effects,
+    environment,
+    defaults,
+    displayDefaults,
+    actions,
+    vectors,
+    autoExposure,
+    autoExposureDefaults,
+    exposureState,
+  },
   () => {
     removeTick();
     removeStatus();
@@ -265,6 +372,6 @@ exposeExample(
     if (environment) {
       viewer.removeController(environment);
     }
-    // The default effects belong to Scene and are released by Viewer.destroy().
+    // Effects and auto exposure belong to Scene and are released by Viewer.destroy().
   },
 );
