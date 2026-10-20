@@ -3027,6 +3027,13 @@ function executeCommands(scene, passState) {
   const numFrustums = frustumCommandsList.length;
 
   // SCENEGIS_PATCH_BEGIN SGP-0046: Preflight deferred material ownership before effect or opaque submission.
+  if (numFrustums === 0) {
+    // Empty views skip the per-frustum clears but still publish native depth.
+    scene._depthClearCommand.execute(context, passState);
+    if (context.stencilBuffer) {
+      scene._stencilClearCommand.execute(context, passState);
+    }
+  }
   scene._sceneGISDeferred?.preparePlanarVectors(passState);
   scene._sceneGISDeferred?.prepareVectorPicks(passState);
   if (!picking) {

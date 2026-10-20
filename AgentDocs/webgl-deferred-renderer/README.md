@@ -12,9 +12,14 @@
 | Active phase plan                | 无                                                                                     |
 | Last completed phase             | [P4g：全部 DrawCommand 生产者接入](plans/2026-10-15-p4g-all-draw-command-producers.md) |
 | Architecture / execution contact | 当前任务                                                                               |
-| Last updated                     | `2026-10-17`                                                                           |
+| Last updated                     | `2026-10-20`                                                                           |
 
 ## Scope
+
+2026-10-20 深度维护：[空视图深度 plan](plans/2026-10-20-empty-frame-depth.md) completed，修复空视锥列表跳过
+原生深度初始化的问题，新增 2 项 GPU 回归及 21 项相关回归通过。
+[review](reviews/2026-10-20-empty-frame-depth.md) 记录首次空帧、连续空帧、恢复几何和资源所有权证据；
+本增量不改变环境画质参数，SDK 需同步本次引擎检查点后复验南京场景。
 
 2026-10-17 提交收口：负责人已授权将本轮环境维护整体提交到 `scenegis/develop`。
 [环境辐亮度 standalone plan](plans/2026-10-16-environment-radiance.md) 标记 completed，
