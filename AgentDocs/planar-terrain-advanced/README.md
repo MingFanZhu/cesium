@@ -11,7 +11,7 @@
 - Active phase plan: None
 - Latest completed phase:
   [A7 平面高级地形统一资格与交付](plans/2026-08-11-phase-a7-unified-qualification-and-delivery.md)
-- Active standalone plan: None
+- Active standalone plan: [缺失子级地形连续覆盖](plans/2026-10-20-missing-terrain-cover.md)
 - Pending orbit visual acceptance: [地表锚点旋转与中心边界解耦](plans/2026-10-20-anchored-orbit-boundary.md)
 - Pending visual acceptance: [地形元数据接入](plans/2026-09-18-terrain-layer-metadata.md)
 - Latest completed standalone plan: [地形剖切与多边形裁剪](plans/2026-09-18-terrain-clipping.md)（技术与视觉验收通过）
@@ -64,6 +64,13 @@
   复用合法 SGP
 
 ## Current handoff
+
+2026-10-20：模型压平与 S3M 已快进合并到 `scenegis/develop@12171614c5`。
+多级地形缺失时的 FLAT 提前发布与高度包围体收紧已修复，
+见[独立维护计划](plans/2026-10-20-missing-terrain-cover.md)与
+[技术自审](reviews/2026-10-20-missing-terrain-cover.md)。
+17 项 runtime、两项新增 GPU 连续覆盖、18 项 Quadtree 通过；扩大检查的三项旧像素失败
+已在旧实现复现，详见 review。按负责人要求形成本地提交，未推送；原场景复测待定，原 A1–A7 完成状态保持。
 
 2026-10-20：高空、extent 外相机围绕有效地表锚点旋转时，center target clamp 会额外拉远相机。
 本轮按负责人确认保留有效锚点 orbit，允许 center target 越界，并处理再次拖动；

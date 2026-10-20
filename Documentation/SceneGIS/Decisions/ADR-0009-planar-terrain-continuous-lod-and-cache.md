@@ -123,6 +123,10 @@ Provider contract 要求存在完整 `1 x 1` Level 0 root：
 Recoverable pending flat content 不提前通过四子门禁；terminal flat content 才能作为稳定 child
 fallback source。
 
+Direct terminal 不代表 fallback terminal。连续缺失多级时，中间父级仍可能等待祖先上采样；
+子级必须等待父级 active terrain data，不能把缺少 active content 解释为 Z=0。
+仅当直接父级已有 READY 的 FLAT fallback 且 direct 已 terminal 时，才允许继续传播 flat。
+
 ### Availability 协议
 
 T3 放宽 T2 的临时 provider-level preflight：`provider.maximumLevel` 只需是
@@ -201,7 +205,8 @@ skirtHeight = max(edgeHeight - skirtDepth, provider.minimumHeight)
 
 - selection/SSE OBB 只描述 surface，不把 skirt 当作可见地形高度；
 - direct 仍可能到达时，selection height interval 保持 provider global range 与当前 fallback 的并集；
-- direct 已 READY 或 terminal 后可以收紧到 stable active surface range；
+- direct 已 READY，或 direct terminal 且 active fallback 已 READY 后，才可以收紧到 stable
+  active surface range；等待或刷新 fallback 时继续保留保守高度范围；
 - command BoundingSphere 必须包含实际 skirt minimum，保证 near/far 与 depth fitting；
 - shared GPU index buffer key 至少包含 grid width/height/skirt topology，并使用 reference count。
 

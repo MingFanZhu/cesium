@@ -21,6 +21,7 @@ import {
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
+  SceneGISPlanarQuantizedMeshTerrainData,
   SceneGISPlanarGroundPrimitive,
   SceneGISPlanarPolygonGeometry,
   SceneGISPlanarPolylineGeometry,
@@ -1370,6 +1371,93 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       world._surface._terrain.Source.DIRECT,
     );
     expect(world._surface._terrain._debug).toEqual(afterDirect);
+  });
+
+  [false, true].forEach(function (quantized) {
+    it(`retains elevated cover across consecutive missing terrain levels (${quantized ? "quantized" : "heightmap"})`, async function () {
+      const world = createWorld({
+        maximumLevel: 2,
+        maximumScreenSpaceError: 1e9,
+      });
+      const data = quantized
+        ? new SceneGISPlanarQuantizedMeshTerrainData({
+            quantizedVertices: new Uint16Array([
+              0, 32767, 0, 32767, 0, 0, 32767, 32767, 32767, 32767, 32767,
+              32767,
+            ]),
+            indices: new Uint16Array([0, 1, 2, 1, 3, 2]),
+            westIndices: new Uint16Array([0, 2]),
+            southIndices: new Uint16Array([1, 0]),
+            eastIndices: new Uint16Array([3, 1]),
+            northIndices: new Uint16Array([2, 3]),
+            quantizedMinimumHeight: 0,
+            quantizedMaximumHeight: 40,
+          })
+        : new SceneGISPlanarHeightmapTerrainData({
+            buffer: new Float32Array([40, 40, 40, 40]),
+            width: 2,
+            height: 2,
+          });
+      const request = jasmine.createSpy("request").and.resolveTo(data);
+      world.terrainProvider = {
+        tilingScheme: world.tilingScheme,
+        minimumHeight: 0,
+        maximumHeight: 80,
+        maximumLevel: 2,
+        errorEvent: new Event(),
+        getLevelMaximumGeometricError: (level) => 4 / 2 ** level,
+        getTileDataAvailable: (x, y, level) => level === 0,
+        loadTileDataAvailability: () => undefined,
+        requestTileGeometry: request,
+      };
+      scene = createPlanarScene(world, 64, 64);
+      pointCameraAt(world, 256);
+      await renderUntil(() => world.tilesLoaded);
+      const surface = world._surface;
+      const terrain = surface._terrain;
+      expect(surface._quadtree._renderTiles.map((tile) => tile.key)).toEqual([
+        "0/0/0",
+      ]);
+
+      world.maximumScreenSpaceError = 0.001;
+      let previous = { ...terrain._debug };
+      await renderUntil(() => {
+        const tiles = surface._quadtree._renderTiles;
+        expect(tiles.length).toBeGreaterThan(0);
+        for (const tile of tiles) {
+          expect(tile.terrainEntry.activeSource).not.toBe(terrain.Source.FLAT);
+          expect(tile.terrainEntry.mesh.minimumHeight).toBeCloseTo(40, 6);
+          expect(tile.terrainEntry.mesh.maximumHeight).toBeCloseTo(40, 6);
+        }
+        const position = scene.pickPosition(new Cartesian2(32, 32));
+        expect(position).toBeDefined();
+        expect(position.z).toBeCloseTo(40, 3);
+        const debug = terrain._debug;
+        expect(debug.promotions - previous.promotions).toBeLessThanOrEqual(2);
+        expect(
+          debug.startedMeshTasks +
+            debug.startedUpsampleTasks -
+            previous.startedMeshTasks -
+            previous.startedUpsampleTasks,
+        ).toBeLessThanOrEqual(2);
+        previous = { ...debug };
+        return world.tilesLoaded;
+      });
+      expect(
+        surface._quadtree._renderTiles.every((tile) => tile.level === 2),
+      ).toBe(true);
+      expect(request).toHaveBeenCalledTimes(1);
+      const settled = { ...terrain._debug };
+      scene.renderForSpecs();
+      expect(terrain._debug).toEqual(settled);
+      world.terrainProvider = undefined;
+      expect(terrain._debug.destroyedVertexArrays).toBe(
+        terrain._debug.createdVertexArrays,
+      );
+      expect(terrain._debug.destroyedVertexBuffers).toBe(
+        terrain._debug.createdVertexBuffers,
+      );
+    });
   });
 
   it("defers culled bridge direct work until it enters the visible chain", async function () {

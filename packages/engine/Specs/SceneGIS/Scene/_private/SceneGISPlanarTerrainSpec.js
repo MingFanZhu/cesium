@@ -176,6 +176,57 @@ describe("SceneGIS/Scene/SceneGISPlanarTerrain", function () {
     runtime.destroy();
   });
 
+  it("waits for parent fallback across consecutive unavailable terrain levels", function () {
+    const fixture = createFixture({
+      getTileDataAvailable: (x, y, level) => level === 0,
+      requestTileGeometry: () => undefined,
+    });
+    const child = new SceneGISPlanarTile(fixture.tilingScheme, 0, 0, 1);
+    const grandchild = new SceneGISPlanarTile(fixture.tilingScheme, 0, 0, 2);
+    const tiles = [fixture.tile, child, grandchild];
+    const runtime = new SceneGISPlanarTerrain(
+      (callback) => tiles.forEach(callback),
+      (x, y, level) => tiles[level],
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+    runtime.prepare(undefined, tiles, [grandchild], 1);
+
+    for (const tile of [child, grandchild]) {
+      expect(tile.terrainEntry.state).toBe(runtime.State.UNAVAILABLE);
+      expect(runtime.isRenderable(tile)).toBe(false);
+      expect(tile.minimumHeight).toBe(fixture.provider.minimumHeight);
+      expect(tile.maximumHeight).toBe(fixture.provider.maximumHeight);
+    }
+    expect(runtime.tilesLoaded).toBe(false);
+    runtime.destroy();
+  });
+
+  it("propagates confirmed terminal flat terrain through missing levels", function () {
+    const fixture = createFixture({ getTileDataAvailable: () => false });
+    const tiles = [0, 1, 2].map(
+      (level) => new SceneGISPlanarTile(fixture.tilingScheme, 0, 0, level),
+    );
+    const runtime = new SceneGISPlanarTerrain(
+      (callback) => tiles.forEach(callback),
+      (x, y, level) => tiles[level],
+    );
+    runtime.setProvider(
+      fixture.provider,
+      validateTerrainProvider(fixture.provider, fixture.tilingScheme, 2),
+    );
+    runtime.prepare(undefined, tiles, [tiles[2]], 1);
+
+    for (const tile of tiles) {
+      expect(tile.terrainEntry.activeSource).toBe(runtime.Source.FLAT);
+      expect(runtime.isRenderable(tile)).toBe(true);
+    }
+    expect(runtime.tilesLoaded).toBe(true);
+    runtime.destroy();
+  });
+
   it("rolls back quantized position and normal buffers when owned index creation fails", function () {
     const fixture = createFixture();
     const quantizedData = createQuantizedData();

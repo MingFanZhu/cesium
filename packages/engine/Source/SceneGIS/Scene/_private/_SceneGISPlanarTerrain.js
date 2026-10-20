@@ -1157,7 +1157,14 @@ SceneGISPlanarTerrain.prototype._queueFallback = function (tile, entry) {
       entry.fallbackState = FallbackState.QUEUED;
       entry.fallbackSourceTile = parent;
     }
-  } else if (isTerminal(entry) && isTerminal(parentEntry ?? {})) {
+  } else if (
+    isTerminal(entry) &&
+    isTerminal(parentEntry ?? {}) &&
+    parentContent?.source === Source.FLAT &&
+    parentEntry.fallbackState === FallbackState.READY
+  ) {
+    // Missing direct data does not imply flat terrain. Wait until the parent
+    // has resolved its fallback before propagating a terminal flat surface.
     if (entry.activeSource !== Source.FLAT) {
       const flat = createFlatContent(++this._contentRevision);
       const old = entry.fallbackContent;
@@ -1235,7 +1242,10 @@ SceneGISPlanarTerrain.prototype._promoteFallback = function (
 
 SceneGISPlanarTerrain.prototype._updateBounds = function (tile, entry) {
   const activeMesh = entry.activeContent?.mesh;
-  if (entry.state === State.READY || isTerminal(entry)) {
+  const fallbackReady =
+    defined(entry.activeContent) && entry.fallbackState === FallbackState.READY;
+  // An unavailable direct tile may still be waiting for elevated parent data.
+  if (entry.state === State.READY || (isTerminal(entry) && fallbackReady)) {
     const minimum = activeMesh?.minimumHeight ?? 0.0;
     const maximum = activeMesh?.maximumHeight ?? 0.0;
     tile.updateHeightRange(minimum, maximum);
