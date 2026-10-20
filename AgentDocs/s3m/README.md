@@ -5,10 +5,10 @@
 | Field                  | Value                                                       |
 | ---------------------- | ----------------------------------------------------------- |
 | Extension slug         | `s3m`                                                       |
-| Status                 | `implemented`；负责人视觉验收待进行                         |
+| Status                 | `completed`；负责人视觉验收通过                             |
 | Planning model         | `extension`                                                 |
 | Active extension plan  | None；[已完成首版](plans/2026-10-20-s3m-loading.md)         |
-| Current phase          | S1 / S2 实现、自动化验收与自检完成                          |
+| Current phase          | S1 / S2 实现、自动化验收、自检与负责人视觉验收完成          |
 | Active phase plan      | None；[已完成 S2](plans/2026-10-20-phase-s2-layer.md)       |
 | Active standalone plan | None；[已完成评估](plans/2026-10-20-compatibility-audit.md) |
 | Architecture contact   | 当前任务自检                                                |
@@ -34,8 +34,9 @@
 
 ## Current handoff
 
-S1 检查点 `1a15263a2b`。S2 已完成 Layer、LOD、严格 World 绑定、定位和示例。
+S1 检查点 `1a15263a2b`，S2 检查点 `ec2d5fc702`。
+S2 已完成 Layer、LOD、严格 World 绑定、定位和示例。
 12 Specs、2 bridge E2E 通过；三类数据双世界 6 场景在开发及发布 runtime 均通过，
 发布版包含环境开启和热帧资源稳定检查；完整构建与类型检查通过。
-当前交付等待负责人视觉判断。新版格式继续 deferred，由 architecture 角色在取得
+负责人于 `2026-10-20` 确认本轮视觉验收通过。新版格式继续 deferred，由 architecture 角色在取得
 样例后另立 phase；其余限制见 S2 review。未推送或合并功能分支。

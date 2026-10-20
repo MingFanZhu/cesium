@@ -44,7 +44,10 @@ World contract, range modes, failure/lifecycle and atomic replacement. Real WebG
 tests exercise three sample categories in both Worlds, LOD/picking/framing,
 cache eviction and disposal. Record actual sample costs, run full release build,
 type generation/checks and scoped lint. Review, document residual format/material
-limits and create the S2 checkpoint. User visual acceptance remains pending.
+limits and create the S2 checkpoint.
+
+S2 checkpoint: `ec2d5fc702`. The owner confirmed visual acceptance on
+2026-10-20; the initial qualified profile is complete.
 
 ## Results and deviations
 

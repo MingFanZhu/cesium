@@ -1,6 +1,6 @@
 # ADR-0174: S3M model loading through the native Model pipeline
 
-- Status: accepted; initial 1.0 profile qualified, owner visual acceptance pending
+- Status: accepted; initial 1.0 profile qualified, owner visual acceptance confirmed on 2026-10-20
 - Date: 2026-10-20
 - Plan: [S3M loading](../../../AgentDocs/s3m/plans/2026-10-20-s3m-loading.md)
 - Upstream seams: None planned
