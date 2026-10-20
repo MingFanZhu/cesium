@@ -3,7 +3,7 @@
   "preset": "earth-flat-precomputed-v1",
   "generator": {
     "path": "scripts/scenegis/generate-planar-earth-luts.mjs",
-    "version": "scene-gis-flat-atmosphere-4",
+    "version": "scene-gis-flat-atmosphere-5",
     "runtimeDependencies": []
   },
   "source": {
@@ -53,8 +53,10 @@
       "viewSamples": 24,
       "viewParameter": "per-channel absorbed transmittance",
       "minimumViewTransmittance": 5.960464477539063e-8,
-      "angularZenithSamples": 12,
-      "angularAzimuthSamples": 8,
+      "angularZenithSamples": 32,
+      "angularRule": "Gauss-Legendre split at the horizon, periodic azimuth",
+      "harmonicDegree": 16,
+      "angularAzimuthSamples": 64,
       "multipleScatteringOrders": [
         2,
         3,
@@ -63,6 +65,7 @@
       "sourceHeightSamples": 32,
       "sourceSunSamples": 32
     },
+    "scatteringDensity": "real cosine spherical harmonics; separate normalized Rayleigh and Cornette-Shanks Mie phase convolution; direction-resolved orders 2-4",
     "multipleScatteringOrders": [
       2,
       3,
@@ -119,11 +122,11 @@
     },
     "scattering.bin": {
       "bytes": 8388608,
-      "sha256": "802B9CFB4E796BAA59D33017D8EF3725A99C8421F6CB4941446F68B3BEBD65E2"
+      "sha256": "172FD773426B5223A9490B8B7D008FC6B7ADEF2A2AF82A216AE431F1CC5FC7E1"
     },
     "irradiance.bin": {
       "bytes": 8192,
-      "sha256": "647A70C8B00B4045230C385FEC6C2A7F62D24BCE038AA05FE16467DFABCFC2A3"
+      "sha256": "7634B9DCD8132387FDA3C5F660C211B195D6CABCC72B82532487DA57C0E473BC"
     },
     "LICENSE.txt": {
       "bytes": 4239,

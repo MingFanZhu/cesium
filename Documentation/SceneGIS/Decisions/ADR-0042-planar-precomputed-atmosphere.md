@@ -193,3 +193,28 @@ deterministic manifest 和 package verifier；transmittance bytes、物理参数
 directional transport 或 Globe 逐像素一致。当前实施与技术 / 视觉 gate 记录于
 [维护 plan](../../../AgentDocs/webgl-deferred-renderer/plans/2026-10-16-environment-radiance.md)
 及其 review。
+
+## Directional multiple scattering（2026-10-20）
+
+负责人授权取消高阶方向平均近似。Version 5 在离线源网格上保存到 degree 16 的
+real cosine spherical harmonics（每颜色 153 系数）。Sun 与 +Z 所在平面的反射对称性
+使 sine 系数为零。入射 L(n-1) 和地面 `T * albedo/pi * E(n-2)` 先投影，再分别乘以
+Rayleigh / Cornette–Shanks Mie 相函数的 Legendre convolution eigenvalues 及局部密度、
+散射系数，形成该阶的方向性散射源。Rayleigh 保留 l=0、2；Mie 使用解析归一化 moments，
+不通过经验 tint 或相函数参数修改来对齐球面。
+
+入射角积分采用上下半球各 16 个 Gauss–Legendre zenith nodes、64 个 periodic azimuth
+samples。沿 fixed-Z 光路的 view/Sun 方向不变，先积分 source coefficients 与单次散射
+Rayleigh/Mie 系数，再对每个输出方向求值，避免重复积分路径。Ground diffuse irradiance
+仍为上半球余弦积分；阶次归属、原有 24 samples/channel 光程积分及 32×32 源网格不变。
+
+输出仍为原格式的 combined scattering 与 total irradiance；原有 8 个 scattering-cosine
+samples、32 个 Sun samples、纹理尺寸及 runtime GLSL 完全不变。非物理参数组合的 LUT
+边缘沿有效 relative-azimuth 边界延拓；有效方向依旧由实际 view/Sun 点积求值。
+通过 generator 重建资产和 provenance，批准哈希与 package verifier 同步。Globe 与
+transmittance 资产不变，无新增 public API、pass、lookup、capability、资源或 SGP。
+
+直接角积分验证覆盖中午和低太阳高度，独立检查 phase normalization、方向性与 ground
+order ownership。有限四阶、球谐截断和输出插值仍是近似；flat slab 水平无限光程与球壳
+曲率差异保留，不以逐像素接近 Globe 作为物理正确性的替代判据。
+实施与成本证据见[独立计划](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-20-planar-directional-scattering.md)。

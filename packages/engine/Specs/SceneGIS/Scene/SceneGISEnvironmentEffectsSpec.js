@@ -8777,12 +8777,12 @@ ${hardCascadeLibrary}`;
       },
     );
     // Independent CPU reference: decode the frozen binary16 total-irradiance
-    // asset, subtract the generator's analytic direct term at each stored sample,
+    // version 5 asset, subtract analytic direct light at each stored sample,
     // then bilinearly interpolate. The old endpoint subtraction erased red sky.
     const expected = [
-      [0.0444151131, 0.1107607233, 0.2488528041],
-      [0.0416698528, 0.104393376, 0.2342744566],
-      [0.0178550497, 0.046087535, 0.1127015994],
+      [0.0444151131, 0.1117372858, 0.2498293666],
+      [0.0426464153, 0.1060962784, 0.2362275816],
+      [0.0179771201, 0.0464247415, 0.1133264532],
       [0, 0, 0],
     ];
     for (let i = 0; i < expected.length; i++) {

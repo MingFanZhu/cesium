@@ -13,6 +13,7 @@ import {
   generateAssetBuffers,
   generateTarget,
   integrateSingleRadiance,
+  sampleMultipleSource,
   integrateSourceRadiance,
   integrateTotalRadiance,
   transmittance,
@@ -90,6 +91,102 @@ async function trackedBuffers() {
   };
 }
 
+test("retains directional multiple scattering against direct angular convolution at noon and low Sun", (t) => {
+  let maximumError = 0;
+  const result = createMultipleSourceGrid(32, 16);
+  const height = 60000 * (0.5 / 16) ** 2;
+  const rayleighPhase = (nu) => (3 / (16 * Math.PI)) * (1 + nu * nu);
+  const miePhase = (nu) =>
+    ((3 / (8 * Math.PI)) * 0.36 * (1 + nu * nu)) /
+    (2.64 * (1.64 - 1.6 * nu) ** 1.5);
+  for (const sunIndex of [19, 29]) {
+    const sunMu = ((2 * (sunIndex + 0.5)) / 32 - 1) ** 2;
+    const views = [
+      [sunMu, 0],
+      [0, 0],
+      [0, Math.PI],
+      [-0.05, 0],
+      [0.5, 0],
+      [0.5, Math.PI],
+    ];
+    const reference = views.map(() => [0, 0, 0]);
+    const groundE0 = transmittance(0, sunMu).map(
+      (v, c) => v * sunMu * [1.474, 1.8504, 1.91198][c],
+    );
+    // Independent dense midpoint angular integration, with the actual phase
+    // functions rather than their harmonic eigenvalues. Only L1 transport is
+    // shared; its path quadrature has a separate dense-reference test below.
+    const count = 128;
+    for (let j = 0; j < count; j++) {
+      const mu = -1 + (2 * (j + 0.5)) / count;
+      const forward = integrateSingleRadiance(height, mu, sunMu, 1);
+      const backward = integrateSingleRadiance(height, mu, sunMu, -1);
+      const mie = forward.map(
+        (v, c) => (v - backward[c]) / (miePhase(1) - miePhase(-1)),
+      );
+      const rayleigh = backward.map(
+        (v, c) => (v - mie[c] * miePhase(-1)) / rayleighPhase(-1),
+      );
+      const groundT = mu < 0 ? transmittance(height, mu) : [0, 0, 0];
+      for (let k = 0; k < count; k++) {
+        const phi = (2 * Math.PI * (k + 0.5)) / count;
+        const nu =
+          mu * sunMu +
+          Math.sqrt((1 - mu * mu) * (1 - sunMu * sunMu)) * Math.cos(phi);
+        const incoming = rayleigh.map(
+          (v, c) =>
+            v * rayleighPhase(nu) +
+            mie[c] * miePhase(nu) +
+            ((groundT[c] * 0.1) / Math.PI) * groundE0[c],
+        );
+        for (let v = 0; v < views.length; v++) {
+          const [viewMu, viewPhi] = views[v];
+          const scatteringCosine =
+            mu * viewMu +
+            Math.sqrt((1 - mu * mu) * (1 - viewMu * viewMu)) *
+              Math.cos(phi - viewPhi);
+          for (let c = 0; c < 3; c++) {
+            const scattering =
+              [5.802e-6, 1.3558e-5, 3.31e-5][c] *
+                Math.exp(-height / 8000) *
+                rayleighPhase(scatteringCosine) +
+              3.996e-6 * Math.exp(-height / 1200) * miePhase(scatteringCosine);
+            reference[v][c] +=
+              (incoming[c] * scattering * 4 * Math.PI) / (count * count);
+          }
+        }
+      }
+    }
+    const actual = views.map(([mu, phi]) =>
+      sampleMultipleSource(
+        result.orderGrids[0],
+        height,
+        mu,
+        sunMu,
+        mu * sunMu +
+          Math.sqrt((1 - mu * mu) * (1 - sunMu * sunMu)) * Math.cos(phi),
+      ),
+    );
+    for (let v = 0; v < views.length; v++) {
+      for (let c = 0; c < 3; c++) {
+        const error = Math.abs(actual[v][c] / reference[v][c] - 1);
+        maximumError = Math.max(maximumError, error);
+        assert.ok(
+          error < 0.02,
+          `sun=${sunMu}, view=${views[v]}, channel=${c}: ${actual[v][c]} vs ${reference[v][c]}`,
+        );
+      }
+    }
+    assert.ok(
+      actual.some((value) => Math.abs(value[0] / actual[2][0] - 1) > 0.05),
+      "the source must retain directionality",
+    );
+  }
+  t.diagnostic(
+    `Maximum direct angular convolution relative error: ${maximumError}`,
+  );
+});
+
 test("generates deterministic packed finite energy with orders 2 through 4", () => {
   const options = {
     dimensions: {
@@ -126,6 +223,7 @@ test("isolates the single seed and each multiple-scattering recurrence order", (
   let singleCalls = 0;
   let sourceCalls = 0;
   const seed = [1, 2, 3];
+  const y00 = 1 / Math.sqrt(4 * Math.PI);
   const result = createMultipleSourceGrid(1, 1, {
     groundAlbedo: [0, 0, 0],
     singleRadiance: () => {
@@ -135,20 +233,20 @@ test("isolates the single seed and each multiple-scattering recurrence order", (
     sourceRadiance: (...args) => {
       sourceCalls++;
       const previous = args[4];
-      return Array.from(previous.values);
+      return Array.from(previous.values.slice(0, 3), (value) => value * y00);
     },
   });
 
-  assert.equal(singleCalls, 12 * 8);
-  assert.equal(sourceCalls, 2 * 12 * 8);
+  assert.equal(singleCalls, 32 * 64);
+  assert.equal(sourceCalls, 2 * 32 * 64);
   assert.equal(result.orderGrids.length, 3);
   for (let channel = 0; channel < 3; channel++) {
     const order2 = result.orderGrids[0].values[channel];
     const order3 = result.orderGrids[1].values[channel];
     const order4 = result.orderGrids[2].values[channel];
-    const recurrence = order2 / seed[channel];
-    assert.ok(Math.abs(order3 - order2 * recurrence) < 1e-24);
-    assert.ok(Math.abs(order4 - order3 * recurrence) < 1e-30);
+    const recurrence = (order2 * y00) / seed[channel];
+    assert.ok(Math.abs(order3 / (order2 * recurrence) - 1) < 1e-12);
+    assert.ok(Math.abs(order4 / (order3 * recurrence) - 1) < 1e-12);
     assert.equal(result.grid.values[channel], order2 + order3 + order4);
   }
 });
@@ -161,10 +259,10 @@ test("includes ground-reflected sunlight in the second scattering order", () => 
   const solar = [1.474, 1.8504, 1.91198];
   const groundT = transmittance(0, sunMu);
   const meanGroundT = [0, 0, 0];
-  for (let i = 0; i < 6; i++) {
-    const t = transmittance(height, -1 + (2 * (i + 0.5)) / 12);
+  for (let i = 0; i < 2048; i++) {
+    const t = transmittance(height, -1 + (i + 0.5) / 2048);
     for (let c = 0; c < 3; c++) {
-      meanGroundT[c] += t[c] / 12;
+      meanGroundT[c] += t[c] / 4096;
     }
   }
   for (let c = 0; c < 3; c++) {
@@ -179,11 +277,12 @@ test("includes ground-reflected sunlight in the second scattering order", () => 
       meanGroundT[c] *
       scattering;
     const added =
-      reflecting.orderGrids[0].values[3 + c] -
-      black.orderGrids[0].values[3 + c];
+      (reflecting.orderGrids[0].values[3 * 153 + c] -
+        black.orderGrids[0].values[3 * 153 + c]) /
+      Math.sqrt(4 * Math.PI);
     assert.ok(expected > 0);
     assert.ok(
-      Math.abs(added / expected - 1) < 1e-10,
+      Math.abs(added / expected - 1) < 0.002,
       `${added} vs ${expected}`,
     );
   }
@@ -200,24 +299,22 @@ test("feeds single-order ground irradiance back without repeating direct sunligh
   // E1 must feed order 3; E2 (including the earlier ground bounce) feeds order 4.
   for (let j = 0; j < 48; j++) {
     const mu = (j + 0.5) / 48;
-    const second = integrateSourceRadiance(
-      0,
-      mu,
-      sunMu,
-      0,
-      result.orderGrids[0],
-    );
-    for (let c = 0; c < 3; c++) {
-      expected[1][c] += (second[c] * mu * 2 * Math.PI) / 48;
-    }
     for (let k = 0; k < 32; k++) {
       const cosine =
         mu * sunMu +
         Math.sqrt((1 - mu * mu) * (1 - sunMu * sunMu)) *
           Math.cos((2 * Math.PI * (k + 0.5)) / 32);
       const first = integrateSingleRadiance(0, mu, sunMu, cosine);
+      const second = integrateSourceRadiance(
+        0,
+        mu,
+        sunMu,
+        cosine,
+        result.orderGrids[0],
+      );
       for (let c = 0; c < 3; c++) {
         expected[0][c] += (first[c] * mu * 2 * Math.PI) / (48 * 32);
+        expected[1][c] += (second[c] * mu * 2 * Math.PI) / (48 * 32);
       }
     }
   }
@@ -225,10 +322,9 @@ test("feeds single-order ground irradiance back without repeating direct sunligh
     for (let c = 0; c < 3; c++) {
       const actual = result.groundIrradianceOrders[order + 1][1][c];
       assert.ok(expected[order][c] > 0);
-      // The retained 12x8 angular rule under-resolves the single-Mie peak;
-      // allow its measured 5% error, while checking the isotropic E2 at 2%.
+      // A separate uniform hemisphere integral checks both directional orders.
       assert.ok(
-        Math.abs(actual / expected[order][c] - 1) < (order === 0 ? 0.06 : 0.02),
+        Math.abs(actual / expected[order][c] - 1) < 0.02,
         `E${order + 1}/${c}: ${actual} vs ${expected[order][c]}`,
       );
     }
@@ -241,8 +337,10 @@ test("keeps flat-slab nights dark and excludes the final ground reflection from 
     for (let y = 0; y < order.height; y++) {
       for (let x = 0; x < order.width / 2; x++) {
         assertVectorClose(
-          Array.from(order.values.slice((y * 4 + x) * 3, (y * 4 + x + 1) * 3)),
-          [0, 0, 0],
+          Array.from(
+            order.values.slice((y * 4 + x) * 459, (y * 4 + x + 1) * 459),
+          ),
+          Array(459).fill(0),
         );
       }
     }
@@ -271,6 +369,7 @@ test("composes true-boundary horizontal and shallow segments through analytic tr
   const zeroMultiple = {
     width: 1,
     height: 1,
+    degree: 0,
     values: new Float64Array(3),
   };
   const distances = [50000, 150000, 300000];
@@ -359,6 +458,7 @@ test("computes direct plus cosine-weighted diffuse irradiance reference values",
   const zeroMultiple = {
     width: 1,
     height: 1,
+    degree: 0,
     values: new Float64Array(3),
   };
   assertVectorClose(

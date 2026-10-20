@@ -18,7 +18,16 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { isDeepStrictEqual } from "node:util";
 
-export const generatorVersion = "scene-gis-flat-atmosphere-4";
+import {
+  coefficientCount,
+  cosineBasis,
+  relativeAzimuth,
+  phaseEigenvalues,
+  gaussLegendre,
+  evaluateCoefficients,
+} from "./planar-scattering-harmonics.mjs";
+
+export const generatorVersion = "scene-gis-flat-atmosphere-5";
 export const dimensions = Object.freeze({
   transmittance: Object.freeze([256, 64]),
   scattering: Object.freeze([256, 128, 32]),
@@ -45,12 +54,20 @@ const quadrature = Object.freeze({
   viewSamples: 24,
   viewParameter: "per-channel absorbed transmittance",
   minimumViewTransmittance: 2 ** -24,
-  angularZenithSamples: 12,
-  angularAzimuthSamples: 8,
+  angularZenithSamples: 32,
+  angularRule: "Gauss-Legendre split at the horizon, periodic azimuth",
+  harmonicDegree: 16,
+  angularAzimuthSamples: 64,
   multipleScatteringOrders: Object.freeze([2, 3, 4]),
   sourceHeightSamples: 32,
   sourceSunSamples: 32,
 });
+
+const hemisphereNodes = gaussLegendre(
+  quadrature.angularZenithSamples / 2,
+  0,
+  1,
+);
 
 export const approvedFiles = Object.freeze({
   "transmittance.bin": Object.freeze({
@@ -59,11 +76,11 @@ export const approvedFiles = Object.freeze({
   }),
   "scattering.bin": Object.freeze({
     bytes: 8388608,
-    sha256: "802B9CFB4E796BAA59D33017D8EF3725A99C8421F6CB4941446F68B3BEBD65E2",
+    sha256: "172FD773426B5223A9490B8B7D008FC6B7ADEF2A2AF82A216AE431F1CC5FC7E1",
   }),
   "irradiance.bin": Object.freeze({
     bytes: 8192,
-    sha256: "647A70C8B00B4045230C385FEC6C2A7F62D24BCE038AA05FE16467DFABCFC2A3",
+    sha256: "7634B9DCD8132387FDA3C5F660C211B195D6CABCC72B82532487DA57C0E473BC",
   }),
   "LICENSE.txt": Object.freeze({
     bytes: 4239,
@@ -257,35 +274,6 @@ function sampleGrid(grid, height, sunMu, channels = 3) {
   return result;
 }
 
-function scatteringSource(
-  height,
-  sunMu,
-  cosineTheta,
-  sourceGrid,
-  includeSingle,
-) {
-  const sunT =
-    sunMu > 0
-      ? transmittance(height, sunMu)
-      : physical.groundAlbedo.map(() => 0);
-  const rayleigh = density(height, physical.rayleighScaleHeightMeters);
-  const mie = density(height, physical.mieScaleHeightMeters);
-  const multiple = sourceGrid
-    ? sampleGrid(sourceGrid, height, sunMu)
-    : [0, 0, 0];
-  return physical.solarIrradiance.map((solar, channel) => {
-    const single = includeSingle
-      ? solar *
-        sunT[channel] *
-        (physical.rayleighScatteringPerMeter[channel] *
-          rayleigh *
-          rayleighPhase(cosineTheta) +
-          physical.mieScatteringPerMeter[channel] * mie * miePhase(cosineTheta))
-      : 0;
-    return single + multiple[channel];
-  });
-}
-
 function createTransportSamples(height, viewMu) {
   const boundary = boundaryDistance(height, viewMu);
   if (!(boundary > 0) || !Number.isFinite(boundary)) {
@@ -331,6 +319,79 @@ function createTransportSamples(height, viewMu) {
   return samples;
 }
 
+// Integrate direction-independent coefficients once per height/view/Sun path.
+// In a flat atmosphere the view and Sun angles are constant along the path.
+function integrateTransportCoefficients(
+  height,
+  viewMu,
+  sunMu,
+  sourceGrid,
+  includeSingle,
+  samples,
+) {
+  const degree = sourceGrid?.degree ?? 0;
+  const result = {
+    degree,
+    rayleigh: [0, 0, 0],
+    mie: [0, 0, 0],
+    multiple: new Float64Array(3 * coefficientCount(degree)),
+  };
+  const distance = boundaryDistance(height, viewMu);
+  if (!(distance > 0)) {
+    return result;
+  }
+  const path = Number.isFinite(distance)
+    ? (samples ?? createTransportSamples(height, viewMu))
+    : extinctionAtHeight(height).map((extinction, channel) => ({
+        height,
+        channel,
+        weight: 1 / extinction,
+      }));
+  for (const sample of path) {
+    const c = sample.channel;
+    if (includeSingle && sunMu > 0) {
+      const solar =
+        physical.solarIrradiance[c] *
+        transmittance(sample.height, sunMu)[c] *
+        sample.weight;
+      result.rayleigh[c] +=
+        solar *
+        physical.rayleighScatteringPerMeter[c] *
+        density(sample.height, physical.rayleighScaleHeightMeters);
+      result.mie[c] +=
+        solar *
+        physical.mieScatteringPerMeter[c] *
+        density(sample.height, physical.mieScaleHeightMeters);
+    }
+    if (sourceGrid) {
+      const source = sampleGrid(
+        sourceGrid,
+        sample.height,
+        sunMu,
+        result.multiple.length,
+      );
+      for (let i = c; i < source.length; i += 3) {
+        result.multiple[i] += source[i] * sample.weight;
+      }
+    }
+  }
+  return result;
+}
+
+function evaluateTransport(transport, viewMu, sunMu, nu, basis) {
+  const multiple = evaluateCoefficients(
+    transport.multiple,
+    basis ??
+      cosineBasis(transport.degree, viewMu, relativeAzimuth(viewMu, sunMu, nu)),
+  );
+  return multiple.map(
+    (value, c) =>
+      value +
+      transport.rayleigh[c] * rayleighPhase(nu) +
+      transport.mie[c] * miePhase(nu),
+  );
+}
+
 function integrateTransport(
   height,
   viewMu,
@@ -340,35 +401,26 @@ function integrateTransport(
   includeSingle,
   samples,
 ) {
-  const distance = boundaryDistance(height, viewMu);
-  if (!(distance > 0)) {
-    return [0, 0, 0];
-  }
-  if (!Number.isFinite(distance)) {
-    const source = scatteringSource(
+  return evaluateTransport(
+    integrateTransportCoefficients(
       height,
+      viewMu,
       sunMu,
-      cosineTheta,
       sourceGrid,
       includeSingle,
-    );
-    const extinction = extinctionAtHeight(height);
-    return source.map(
-      (value, channel) => value / Math.max(extinction[channel], 1e-30),
-    );
-  }
-  const radiance = [0, 0, 0];
-  for (const sample of samples ?? createTransportSamples(height, viewMu)) {
-    const source = scatteringSource(
-      sample.height,
-      sunMu,
-      cosineTheta,
-      sourceGrid,
-      includeSingle,
-    );
-    radiance[sample.channel] += source[sample.channel] * sample.weight;
-  }
-  return radiance;
+      samples,
+    ),
+    viewMu,
+    sunMu,
+    cosineTheta,
+  );
+}
+
+export function sampleMultipleSource(grid, height, viewMu, sunMu, nu) {
+  return evaluateCoefficients(
+    sampleGrid(grid, height, sunMu, coefficientCount(grid.degree) * 3),
+    cosineBasis(grid.degree, viewMu, relativeAzimuth(viewMu, sunMu, nu)),
+  );
 }
 
 export function integrateSingleRadiance(
@@ -428,42 +480,49 @@ export function integrateTotalRadiance(
 }
 
 export function createMultipleSourceGrid(width, height, options = {}) {
-  const singleRadiance = options.singleRadiance ?? integrateSingleRadiance;
-  const sourceRadiance = options.sourceRadiance ?? integrateSourceRadiance;
+  const degree = options.harmonicDegree ?? quadrature.harmonicDegree;
+  const channels = coefficientCount(degree) * 3;
+  const zenithCount =
+    options.angularZenithSamples ?? quadrature.angularZenithSamples;
+  const azimuthCount =
+    options.angularAzimuthSamples ?? quadrature.angularAzimuthSamples;
+  const directions = [
+    ...gaussLegendre(zenithCount / 2, -1, 0),
+    ...gaussLegendre(zenithCount / 2, 0, 1),
+  ].map((node) => ({
+    ...node,
+    azimuths: Array.from(Array(azimuthCount).keys(), (k) => {
+      const phi = (2 * Math.PI * (k + 0.5)) / azimuthCount;
+      return { phi, basis: cosineBasis(degree, node.mu, phi) };
+    }),
+  }));
   const groundAlbedo = options.groundAlbedo ?? physical.groundAlbedo;
   const paths = Array.from(Array(height).keys(), (y) =>
-    Array.from(Array(quadrature.angularZenithSamples).keys(), (zenith) =>
-      createTransportSamples(
-        texelHeight(y, height),
-        -1 + (2 * (zenith + 0.5)) / quadrature.angularZenithSamples,
-      ),
+    directions.map(({ mu }) =>
+      createTransportSamples(texelHeight(y, height), mu),
     ),
   );
-  let previous = {
+  const makeGrid = () => ({
     width,
     height,
-    values: new Float64Array(width * height * 3),
-  };
-  const accumulated = new Float64Array(width * height * 3);
+    degree,
+    values: new Float64Array(width * height * channels),
+  });
+  let previous = makeGrid();
+  const accumulated = makeGrid();
   const orderEnergy = [];
   const orderGrids = [];
   const groundIrradianceOrders = [];
-  const groundPaths = Array.from(
-    Array(quadrature.angularZenithSamples).keys(),
-    (zenith) =>
-      createTransportSamples(
-        0,
-        (zenith + 0.5) / quadrature.angularZenithSamples,
-      ),
+  const groundPaths = hemisphereNodes.map(({ mu }) =>
+    createTransportSamples(0, mu),
   );
   let groundIrradiance = Array.from(Array(width).keys(), (x) =>
     directIrradiance(0, texelSignedSquare(x, width)),
   );
   for (const order of quadrature.multipleScatteringOrders) {
-    // Order n receives paths with n-1 events. A ground reflection is one event,
-    // so its incident irradiance must contain exactly n-2 events, not their sum.
+    // A ground reflection is one event: order n receives ground irradiance n-2.
     groundIrradianceOrders.push(groundIrradiance);
-    const current = new Float64Array(width * height * 3);
+    const current = makeGrid();
     let energy = 0;
     for (let y = 0; y < height; y++) {
       const sampleHeight = texelHeight(y, height);
@@ -474,72 +533,82 @@ export function createMultipleSourceGrid(width, height, options = {}) {
       const mie = density(sampleHeight, physical.mieScaleHeightMeters);
       for (let x = 0; x < width; x++) {
         const sunMu = texelSignedSquare(x, width);
-        const meanRadiance = [0, 0, 0];
-        for (
-          let zenith = 0;
-          zenith < quadrature.angularZenithSamples;
-          zenith++
-        ) {
-          const incomingMu =
-            -1 + (2 * (zenith + 0.5)) / quadrature.angularZenithSamples;
-          const groundT =
-            incomingMu < 0
-              ? transmittance(sampleHeight, incomingMu)
-              : [0, 0, 0];
-          for (
-            let azimuth = 0;
-            azimuth < quadrature.angularAzimuthSamples;
-            azimuth++
-          ) {
-            const phi =
-              (2 * Math.PI * (azimuth + 0.5)) /
-              quadrature.angularAzimuthSamples;
-            const cosineTheta =
-              incomingMu * sunMu +
-              Math.sqrt(Math.max(1 - incomingMu * incomingMu, 0)) *
-                Math.sqrt(Math.max(1 - sunMu * sunMu, 0)) *
-                Math.cos(phi);
+        const moments = new Float64Array(channels);
+        for (let j = 0; j < directions.length; j++) {
+          const { mu, weight, azimuths } = directions[j];
+          const groundT = mu < 0 ? transmittance(sampleHeight, mu) : [0, 0, 0];
+          const transport = integrateTransportCoefficients(
+            sampleHeight,
+            mu,
+            sunMu,
+            order === 2 ? undefined : previous,
+            order === 2,
+            paths[y][j],
+          );
+          for (const { phi, basis } of azimuths) {
+            const nu =
+              mu * sunMu +
+              Math.sqrt((1 - mu * mu) * (1 - sunMu * sunMu)) * Math.cos(phi);
             const incoming =
-              order === 2
-                ? singleRadiance(
+              order === 2 && options.singleRadiance
+                ? options.singleRadiance(
                     sampleHeight,
-                    incomingMu,
+                    mu,
                     sunMu,
-                    cosineTheta,
-                    paths[y][zenith],
+                    nu,
+                    paths[y][j],
                   )
-                : sourceRadiance(
-                    sampleHeight,
-                    incomingMu,
-                    sunMu,
-                    cosineTheta,
-                    previous,
-                    paths[y][zenith],
-                  );
-            for (let channel = 0; channel < 3; channel++) {
-              meanRadiance[channel] +=
-                incoming[channel] +
-                (groundT[channel] *
-                  groundAlbedo[channel] *
-                  groundIrradiance[x][channel]) /
-                  Math.PI;
+                : order > 2 && options.sourceRadiance
+                  ? options.sourceRadiance(
+                      sampleHeight,
+                      mu,
+                      sunMu,
+                      nu,
+                      previous,
+                      paths[y][j],
+                    )
+                  : evaluateTransport(
+                      transport,
+                      mu,
+                      sunMu,
+                      nu,
+                      order === 2 ? undefined : basis,
+                    );
+            for (let c = 0; c < 3; c++) {
+              const value =
+                ((incoming[c] +
+                  (groundT[c] * groundAlbedo[c] * groundIrradiance[x][c]) /
+                    Math.PI) *
+                  weight *
+                  2 *
+                  Math.PI) /
+                azimuthCount;
+              for (let k = 0; k < basis.length; k++) {
+                moments[3 * k + c] += value * basis[k];
+              }
             }
           }
         }
-        const angularCount =
-          quadrature.angularZenithSamples * quadrature.angularAzimuthSamples;
-        const offset = (y * width + x) * 3;
-        for (let channel = 0; channel < 3; channel++) {
-          const scattering =
-            physical.rayleighScatteringPerMeter[channel] * rayleigh +
-            physical.mieScatteringPerMeter[channel] * mie;
-          const value = Math.max(
-            (meanRadiance[channel] / angularCount) * scattering,
-            0,
-          );
-          current[offset + channel] = value;
-          accumulated[offset + channel] += value;
-          energy += value;
+        const offset = (y * width + x) * channels;
+        for (let l = 0; l <= degree; l++) {
+          const phase = phaseEigenvalues(l, physical.miePhaseFunctionG);
+          for (let m = 0; m <= l; m++) {
+            for (let c = 0; c < 3; c++) {
+              const k = 3 * ((l * (l + 1)) / 2 + m) + c;
+              const value =
+                moments[k] *
+                (physical.rayleighScatteringPerMeter[c] *
+                  rayleigh *
+                  phase.rayleigh +
+                  physical.mieScatteringPerMeter[c] * mie * phase.mie);
+              current.values[offset + k] = value;
+              accumulated.values[offset + k] += value;
+              // The zeroth moment alone measures angular mean energy.
+              if (l === 0) {
+                energy += value / Math.sqrt(4 * Math.PI);
+              }
+            }
+          }
         }
       }
     }
@@ -558,15 +627,10 @@ export function createMultipleSourceGrid(width, height, options = {}) {
         );
       }
     }
-    previous = { width, height, values: current };
-    orderGrids.push(previous);
+    previous = current;
+    orderGrids.push(current);
   }
-  return {
-    grid: { width, height, values: accumulated },
-    orderEnergy,
-    orderGrids,
-    groundIrradianceOrders,
-  };
+  return { grid: accumulated, orderEnergy, orderGrids, groundIrradianceOrders };
 }
 
 function directIrradiance(height, sunMu) {
@@ -579,36 +643,32 @@ function directIrradiance(height, sunMu) {
 
 function diffuseIrradiance(height, sunMu, multipleGrid, paths, includeSingle) {
   const irradiance = [0, 0, 0];
-  const directionWeight =
-    (2 * Math.PI) /
-    (quadrature.angularZenithSamples * quadrature.angularAzimuthSamples);
-  for (let zenith = 0; zenith < quadrature.angularZenithSamples; zenith++) {
-    const incomingMu = (zenith + 0.5) / quadrature.angularZenithSamples;
-    const samples =
-      paths?.[zenith] ?? createTransportSamples(height, incomingMu);
-    for (
-      let azimuth = 0;
-      azimuth < quadrature.angularAzimuthSamples;
-      azimuth++
-    ) {
-      const phi =
-        (2 * Math.PI * (azimuth + 0.5)) / quadrature.angularAzimuthSamples;
-      const cosineTheta =
-        incomingMu * sunMu +
-        Math.sqrt(Math.max(1 - incomingMu * incomingMu, 0)) *
-          Math.sqrt(Math.max(1 - sunMu * sunMu, 0)) *
-          Math.cos(phi);
-      const incoming = integrateTransport(
-        height,
-        incomingMu,
+  for (let j = 0; j < hemisphereNodes.length; j++) {
+    const { mu, weight } = hemisphereNodes[j];
+    const transport = integrateTransportCoefficients(
+      height,
+      mu,
+      sunMu,
+      multipleGrid,
+      includeSingle,
+      paths?.[j],
+    );
+    for (let k = 0; k < quadrature.angularAzimuthSamples; k++) {
+      const phi = (2 * Math.PI * (k + 0.5)) / quadrature.angularAzimuthSamples;
+      const nu =
+        mu * sunMu +
+        Math.sqrt((1 - mu * mu) * (1 - sunMu * sunMu)) * Math.cos(phi);
+      const incoming = evaluateTransport(
+        transport,
+        mu,
         sunMu,
-        cosineTheta,
-        multipleGrid,
-        includeSingle,
-        samples,
+        nu,
+        cosineBasis(transport.degree, mu, phi),
       );
-      for (let channel = 0; channel < 3; channel++) {
-        irradiance[channel] += incoming[channel] * incomingMu * directionWeight;
+      for (let c = 0; c < 3; c++) {
+        irradiance[c] +=
+          (incoming[c] * mu * weight * 2 * Math.PI) /
+          quadrature.angularAzimuthSamples;
       }
     }
   }
@@ -669,6 +729,7 @@ export function generateAssetBuffers(options = {}) {
   const sourceHeight =
     options.sourceHeightSamples ?? quadrature.sourceHeightSamples;
   const multiple = createMultipleSourceGrid(sourceWidth, sourceHeight, {
+    ...options,
     groundAlbedo: options.groundAlbedo,
   });
 
@@ -694,24 +755,26 @@ export function generateAssetBuffers(options = {}) {
     for (let y = 0; y < scatterHeight; y++) {
       const viewMu = texelSignedSquare(y, scatterHeight);
       const samples = createTransportSamples(height, viewMu);
-      for (let x = 0; x < scatterWidth; x++) {
-        const nuIndex = x % 8;
-        const sunIndex = Math.floor(x / 8);
-        const sunCount = Math.max(Math.floor(scatterWidth / 8), 1);
+      const sunCount = Math.max(Math.floor(scatterWidth / 8), 1);
+      for (let sunIndex = 0; sunIndex < sunCount; sunIndex++) {
         const sunMu = texelSignedSquare(sunIndex, sunCount);
-        const nu = -1 + (2 * (nuIndex + 0.5)) / 8;
-        const radiance = integrateTotalRadiance(
+        const transport = integrateTransportCoefficients(
           height,
           viewMu,
           sunMu,
-          nu,
           multiple.grid,
+          true,
           samples,
         );
-        encodeRgba(radiance, Math.max(radiance[0], 0)).copy(
-          scatteringBuffer,
-          ((z * scatterHeight + y) * scatterWidth + x) * 8,
-        );
+        for (let nuIndex = 0; nuIndex < 8; nuIndex++) {
+          const x = sunIndex * 8 + nuIndex;
+          const nu = -1 + (2 * (nuIndex + 0.5)) / 8;
+          const radiance = evaluateTransport(transport, viewMu, sunMu, nu);
+          encodeRgba(radiance, Math.max(radiance[0], 0)).copy(
+            scatteringBuffer,
+            ((z * scatterHeight + y) * scatterWidth + x) * 8,
+          );
+        }
       }
     }
   }
@@ -720,13 +783,8 @@ export function generateAssetBuffers(options = {}) {
   const irradianceBuffer = Buffer.alloc(irrWidth * irrHeight * 8);
   for (let y = 0; y < irrHeight; y++) {
     const height = texelHeight(y, irrHeight);
-    const paths = Array.from(
-      Array(quadrature.angularZenithSamples).keys(),
-      (zenith) =>
-        createTransportSamples(
-          height,
-          (zenith + 0.5) / quadrature.angularZenithSamples,
-        ),
+    const paths = hemisphereNodes.map(({ mu }) =>
+      createTransportSamples(height, mu),
     );
     for (let x = 0; x < irrWidth; x++) {
       const sunMu = texelSignedSquare(x, irrWidth);
@@ -813,6 +871,8 @@ function createProvenance(files) {
       segmentRule:
         "intersect untruncated geometric ray with slab and retain the complete visible segment",
       quadrature,
+      scatteringDensity:
+        "real cosine spherical harmonics; separate normalized Rayleigh and Cornette-Shanks Mie phase convolution; direction-resolved orders 2-4",
       multipleScatteringOrders: quadrature.multipleScatteringOrders,
       runtimeEvaluation:
         "true-boundary entry/endpoint radiance differencing with analytic segment transmittance",
