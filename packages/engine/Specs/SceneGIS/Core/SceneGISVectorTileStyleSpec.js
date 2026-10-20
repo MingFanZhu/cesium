@@ -20,6 +20,44 @@ describe("SceneGIS/Core/SceneGISVectorTileStyle", function () {
     return { id: "42", type: 2, properties };
   }
 
+  it("treats omitted zoom bounds independently without clamping style evaluation", function () {
+    for (const limits of [
+      {},
+      { minzoom: 0 },
+      { maxzoom: 24 },
+      { minzoom: 0, maxzoom: 24 },
+    ]) {
+      const style = new SceneGISVectorTileStyle(json(limits));
+      const input = feature();
+      let cached;
+      for (const zoom of [-2, 0, 23.999, 24, 26, 0, -2]) {
+        const visible =
+          (limits.minzoom === undefined || zoom >= limits.minzoom) &&
+          (limits.maxzoom === undefined || zoom < limits.maxzoom);
+        expect(style.evaluateLayer("roads", input, zoom).show).toBe(visible);
+        cached = style._evaluateVisibleLayer("roads", input, zoom, cached);
+        expect(cached !== undefined).toBe(visible);
+        if (cached) {
+          expect(cached.zoom).toBe(zoom);
+        }
+      }
+      expect(style.getLayerDefinition("roads").minzoom).toBe(limits.minzoom);
+      expect(style.getLayerDefinition("roads").maxzoom).toBe(limits.maxzoom);
+    }
+    for (const definition of [
+      { layout: { visibility: "none" } },
+      { filter: ["==", "kind", "road"] },
+    ]) {
+      const style = new SceneGISVectorTileStyle(json(definition));
+      for (const zoom of [-2, 26]) {
+        expect(style.evaluateLayer("roads", feature(), zoom).show).toBe(false);
+        expect(
+          style._evaluateVisibleLayer("roads", feature(), zoom),
+        ).toBeUndefined();
+      }
+    }
+  });
+
   it("preserves complete independent snapshots when deriving a rule", function () {
     const input = json({
       paint: { "line-width": 3 },

@@ -12,10 +12,10 @@
 | Current phase            | D2 技术完成，等待动态规则人工视觉 gate                                                                                   |
 | Active phase plan        | None；[D2](plans/2026-10-16-d2-layer-style-runtime.md) technical completed                                               |
 | Last completed phase     | D2：Layer 动态样式运行时；D1 checkpoint `7414056515`                                                                     |
-| Active standalone plan   | None；[近地样式尺度](plans/2026-10-19-near-view-style-scale.md) completed                                                |
+| Active standalone plan   | None；[未声明缩放范围](plans/2026-10-20-implicit-zoom-bounds.md) completed                                               |
 | Architecture contact     | 当前 Agent                                                                                                               |
 | Execution contact        | 当前 Agent                                                                                                               |
-| Last updated             | `2026-10-19`                                                                                                             |
+| Last updated             | `2026-10-20`                                                                                                             |
 
 ## Scope
 
@@ -62,6 +62,13 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - V3B1 ADR：[ADR-0062](../../Documentation/SceneGIS/Decisions/ADR-0062-vector-stroke-and-coverage.md)；无新增 SGP。
 
 ## Current handoff
+
+2026-10-20：已修复两世界极端视角被隐含 `[0,24)` 排除的问题，并将极近视角的重复线标注锚点
+改为紧凑范围与可见性裁剪后展开，消除原球面 Worker 内存错误。显式范围、SSE、连续 style zoom、
+米/像素与字号保持原值。负责人确认视觉验收通过，相关 Specs 为 151 通过 / 1 项既有失败；
+见 [standalone plan](plans/2026-10-20-implicit-zoom-bounds.md) 与
+[review](reviews/2026-10-20-implicit-zoom-bounds.md)。2026-10-20 按负责人要求形成本地提交并汇入
+`scenegis/develop`，未推送；D2 原人工 gate 独立保留。
 
 2026-10-19 负责人撤销 MVT 专用水面及自动水域材质方案。未提交的实现、专属示例、测试和过程文档已清除，
 保留原 `SceneGISWaterSurface`，综合环境中的矢量水域继续使用普通 `fill`。本项无待继续的实现或视觉 gate，

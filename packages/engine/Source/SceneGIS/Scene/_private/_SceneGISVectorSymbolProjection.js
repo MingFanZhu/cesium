@@ -6,8 +6,9 @@ import Matrix4 from "../../../Core/Matrix4.js";
 import Line from "../../Core/_private/_SceneGISVectorSymbolLine.js";
 import EllipsoidalOccluder from "../../../Core/EllipsoidalOccluder.js";
 import GlobeCoordinates from "../../Core/_private/_SceneGISVectorGlobeCoordinates.js";
+import OrientedBoundingBox from "../../../Core/OrientedBoundingBox.js";
 
-function snapshot(scene, terrain, referenceDepth) {
+function snapshot(scene, terrain, referenceDepth, heights) {
   const camera = scene.camera,
     frustum = camera.frustum;
   const position = camera.positionWC,
@@ -33,6 +34,8 @@ function snapshot(scene, terrain, referenceDepth) {
   // instead of invoking that work for every anchor and glyph corner.
   return {
     terrain,
+    minimumHeight: heights?.x ?? 0,
+    maximumHeight: heights?.y ?? 0,
     planes,
     referenceDepth: referenceDepth ?? -position.z / direction.z,
     horizon: terrain?.ellipsoid
@@ -63,6 +66,42 @@ function snapshot(scene, terrain, referenceDepth) {
       clientHeight: scene.canvas.clientHeight,
     },
   };
+}
+
+function segmentBounds(scene, a, b) {
+  const bounds = [
+    Math.min(a.x, b.x),
+    Math.min(a.y, b.y),
+    scene.minimumHeight,
+    Math.max(a.x, b.x),
+    Math.max(a.y, b.y),
+    scene.maximumHeight,
+  ];
+  if (scene.terrain?.ellipsoid) {
+    // A Mercator segment remains inside its geographic rectangle. The native
+    // volume includes curvature and the same conservative terrain height range.
+    const box = OrientedBoundingBox.fromRectangle(
+      GlobeCoordinates.rectangle({
+        minimumX: bounds[0],
+        minimumY: bounds[1],
+        maximumX: bounds[3],
+        maximumY: bounds[4],
+      }),
+      scene.minimumHeight,
+      scene.maximumHeight,
+      scene.terrain.ellipsoid,
+    );
+    const center = box.center,
+      axes = box.halfAxes;
+    for (let i = 0; i < 3; i++) {
+      const radius =
+        Math.abs(axes[i]) + Math.abs(axes[i + 3]) + Math.abs(axes[i + 6]);
+      const component = i === 0 ? center.x : i === 1 ? center.y : center.z;
+      bounds[i] = component - radius;
+      bounds[i + 3] = component + radius;
+    }
+  }
+  return bounds;
 }
 
 function intersectsBounds(scene, bounds) {
@@ -645,5 +684,6 @@ const SceneGISVectorSymbolProjection = {
   snapshot,
   attach,
   intersectsBounds,
+  segmentBounds,
 };
 export default SceneGISVectorSymbolProjection;

@@ -2,6 +2,7 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  OrthographicFrustum,
   SceneTransforms,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
@@ -129,6 +130,64 @@ describe("SceneGIS/Scene/SceneGISVectorTileLayer", function () {
   function polygon() {
     return feature(3, [[1888, 1888, 2208, 1888, 2208, 2208, 1888, 2208]]);
   }
+
+  it("submits and picks omitted zoom bounds across zero and twenty-four while retaining explicit ranges and cached batches", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      data([feature(1, [[2048, 2048]])]),
+    );
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 256,
+      aspectRatio: 1,
+      near: 1,
+      far: 1000,
+    });
+    const layer = add([
+      {
+        id: "background",
+        type: "background",
+        paint: { "background-color": "blue" },
+      },
+      definition(
+        "circle",
+        { "circle-color": "red", "circle-radius": 12 },
+        "unbounded",
+      ),
+      {
+        ...definition(
+          "circle",
+          { "circle-color": "lime", "circle-radius": 12 },
+          "bounded",
+        ),
+        minzoom: 0,
+        maxzoom: 24,
+      },
+    ]);
+    await loaded(layer);
+    const entry = [...layer._sources.get("test").entries.values()][0];
+    const original = entry.batches.get("unbounded")[0];
+    const background = layer._backgrounds[0].batch;
+    for (const zoom of [-1, 0, 23.5, 24, 25, 0, -1]) {
+      scene.camera.frustum.width = 128 / 2 ** zoom;
+      await loaded(layer);
+      expect(layer.statistics.zoom).toEqualEpsilon(zoom, 1e-9);
+      expect(layer._metersPerPixel).toEqualEpsilon(
+        1024 / (512 * 2 ** zoom),
+        1e-12,
+      );
+      expect(entry.batches.get("unbounded")[0]).toBe(original);
+      expect(layer._backgrounds[0].batch).toBe(background);
+      const bounded = zoom >= 0 && zoom < 24;
+      expect(layer.statistics.drawCommands).toBe(bounded ? 3 : 2);
+      expect(scene.pick(new Cartesian2(32, 32))?.id.styleLayer).toBe(
+        bounded ? "bounded" : "unbounded",
+      );
+      expect(layer.statistics.renderedTiles).toBe(1);
+    }
+    expect(source.requestTile.calls.count()).toBe(1);
+    const resources = original._resources;
+    scene.primitives.remove(layer);
+    expect(resources.isDestroyed()).toBeTrue();
+  });
 
   it("dynamic rules replace background paint and restore its default visibility", async function () {
     const layer = add([

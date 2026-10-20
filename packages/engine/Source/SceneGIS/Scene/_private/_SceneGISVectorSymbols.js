@@ -1,4 +1,5 @@
 import RuntimeError from "../../../Core/RuntimeError.js";
+import EncodedCartesian3 from "../../../Core/EncodedCartesian3.js";
 import Layout from "../../Core/_private/_SceneGISVectorSymbolLayout.js";
 import Shaping from "./_SceneGISVectorSymbolShaping.js";
 import Assets from "./_SceneGISVectorSymbolAssets.js";
@@ -6,6 +7,7 @@ import Projection from "./_SceneGISVectorSymbolProjection.js";
 import Batches from "./_SceneGISVectorSymbolBatches.js";
 import GlobeCoordinates from "../../Core/_private/_SceneGISVectorGlobeCoordinates.js";
 import State from "../../Core/_private/_SceneGISVectorState.js";
+import Line from "../../Core/_private/_SceneGISVectorSymbolLine.js";
 
 function inRegion(point, bounds, world) {
   return (
@@ -45,8 +47,8 @@ function metersPerPixel(runtime, zoom) {
 function eligible(definition, zoom) {
   return (
     definition.type === "symbol" &&
-    zoom >= (definition.minzoom ?? 0) &&
-    zoom < (definition.maxzoom ?? 24)
+    zoom >= (definition.minzoom ?? -Infinity) &&
+    zoom < (definition.maxzoom ?? Infinity)
   );
 }
 
@@ -60,6 +62,7 @@ function tileCandidates(runtime, entry, order) {
   let result = cached.layers.get(order);
   if (!result || result.symbols !== layer) {
     result = [];
+    const runs = [];
     const definition = runtime.owner._records[order].definition;
     for (const label of layer?.labels ?? []) {
       const identity = Object.freeze({
@@ -70,30 +73,81 @@ function tileCandidates(runtime, entry, order) {
         properties: label.feature.properties,
         tile: Object.freeze({ x: entry.x, y: entry.y, level: entry.level }),
       });
+      const base = {
+        ...label.names,
+        label,
+        entry,
+        symbols: layer,
+        order,
+        identity,
+        tileKey: entry.key,
+        key: label.key,
+        tolerance:
+          (2 * (entry.bounds.maximumX - entry.bounds.minimumX)) / layer.extent,
+      };
       for (const anchor of label.anchors) {
-        result.push({
-          ...label.names,
-          ...anchor,
-          anchor,
-          label,
-          entry,
-          symbols: layer,
-          order,
-          identity,
-          tileKey: entry.key,
-          key: label.key,
-          id: ++runtime._nextId,
-          tolerance:
-            (2 * (entry.bounds.maximumX - entry.bounds.minimumX)) /
-            layer.extent,
-        });
+        result.push({ ...base, ...anchor, anchor, id: ++runtime._nextId });
+      }
+      for (const run of label.runs) {
+        runs.push({ ...run, base, anchors: new Map() });
       }
     }
     runtime.statistics.candidateBuilds += result.length;
-    result = { candidates: result, symbols: layer };
+    result = { candidates: result, runs, symbols: layer };
     cached.layers.set(order, result);
   }
   return result;
+}
+
+function* queryRun(runtime, run, projection, first, end, previous, current) {
+  yield;
+  const a = Line.sample(run.line, run.start + first * run.spacing);
+  const b = Line.sample(run.line, run.start + (end - 1) * run.spacing);
+  if (
+    !Projection.intersectsBounds(
+      projection,
+      Projection.segmentBounds(projection, a, b),
+    )
+  ) {
+    return;
+  }
+  if (end - first > 1) {
+    const middle = Math.floor((first + end) / 2);
+    yield* queryRun(runtime, run, projection, first, middle, previous, current);
+    yield* queryRun(runtime, run, projection, middle, end, previous, current);
+    return;
+  }
+  let candidate = previous.get(first);
+  if (!candidate) {
+    const anchor = {
+      position: { x: a.x, y: a.y, z: 0 },
+      line: run.line,
+      station: run.start + first * run.spacing,
+    };
+    anchor.encoded = EncodedCartesian3.fromCartesian(anchor.position);
+    candidate = { ...run.base, ...anchor, anchor, id: ++runtime._nextId };
+    runtime.statistics.candidateBuilds++;
+  }
+  current.set(first, candidate);
+  yield candidate;
+}
+
+function* queryTile(runtime, cached, projection) {
+  yield* queryCandidates(cached.index, projection);
+  for (const run of cached.runs) {
+    const previous = run.anchors;
+    // Retain only the current view's anchors, reusing identities in its overlap.
+    run.anchors = new Map();
+    yield* queryRun(
+      runtime,
+      run,
+      projection,
+      run.first,
+      run.end,
+      previous,
+      run.anchors,
+    );
+  }
 }
 
 function* indexCandidates(candidates, projection, axis = "x") {
@@ -201,7 +255,7 @@ function* collect(runtime, job) {
     }
     for (const [entry, regions] of job.cover.get(definition.source) ?? []) {
       const cached = tileCandidates(runtime, entry, order);
-      if (cached.candidates.length === 0) {
+      if (cached.candidates.length === 0 && cached.runs.length === 0) {
         continue;
       }
       if (!cached.index || cached.terrain !== job.projection.terrain) {
@@ -211,8 +265,11 @@ function* collect(runtime, job) {
         );
         cached.terrain = job.projection.terrain;
       }
-      for (const base of queryCandidates(cached.index, job.projection)) {
+      for (const base of queryTile(runtime, cached, job.projection)) {
         yield;
+        if (!base) {
+          continue;
+        }
         Projection.attach(job.projection, base);
         if (
           !regions.some((region) =>
@@ -849,6 +906,11 @@ SceneGISVectorSymbols.prototype.update = function (frameState, zoom) {
     this.owner.scene,
     this.owner._terrain,
     this.owner._referenceDepth,
+    this.owner._globe
+      ? this.owner._globeSelectionHeights
+      : this.owner._ground
+        ? this.owner._groundHeights
+        : undefined,
   );
   this._metersPerPixel = metersPerPixel(this, zoom);
   let changed = view !== this._drawView || content !== this._drawContent;

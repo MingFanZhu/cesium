@@ -23,6 +23,8 @@ import Assets from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorSymbo
 import SourceResource from "../../../Source/Core/Resource.js";
 import SourceRuntimeError from "../../../Source/Core/RuntimeError.js";
 import Projection from "../../../Source/SceneGIS/Scene/_private/_SceneGISVectorSymbolProjection.js";
+import GlobeCoordinates from "../../../Source/SceneGIS/Core/_private/_SceneGISVectorGlobeCoordinates.js";
+import Ellipsoid from "../../../Source/Core/Ellipsoid.js";
 import { encodeGlyphs, glyph } from "../Core/vectorSymbolFixture.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -185,6 +187,41 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     scene.destroyForSpecs();
     image?.remove();
     image = undefined;
+  });
+
+  it("places and picks symbols with omitted zoom bounds across the conventional range", async function () {
+    spyOn(source, "requestTile").and.resolveTo(tile());
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 256,
+      aspectRatio: 1,
+      near: 1,
+      far: 1000,
+    });
+    const layer = add([
+      definition("unbounded"),
+      {
+        ...definition("bounded", {
+          "text-offset": [1, 0],
+          "text-allow-overlap": true,
+        }),
+        minzoom: 0,
+        maxzoom: 24,
+      },
+    ]);
+    for (const zoom of [-1, 0, 24, 25, -1]) {
+      scene.camera.frustum.width = 128 / 2 ** zoom;
+      await loaded(layer);
+      expect(layer.statistics.symbolFailures).toBe(0);
+      expect(layer.statistics.placedSymbols).toBe(
+        zoom >= 0 && zoom < 24 ? 2 : 1,
+      );
+      expect(scene.pick(new Cartesian2(30, 32), 1, 1)?.id.styleLayer).toBe(
+        "unbounded",
+      );
+      expect(layer.statistics.zoom).toEqualEpsilon(zoom, 1e-9);
+    }
+    expect(source.requestTile.calls.count()).toBe(1);
   });
 
   [false, true].forEach(function (icon) {
@@ -1166,6 +1203,96 @@ describe("SceneGIS/Scene/SceneGISVectorSymbols", function () {
     expect(va.isDestroyed()).toBeTrue();
     expect(fixedBuffer.isDestroyed()).toBeTrue();
     expect(dynamicBuffer.isDestroyed()).toBeTrue();
+  });
+
+  it("prunes compact overzoom line ranges before materializing anchors and still picks after panning", async function () {
+    spyOn(source, "requestTile").and.resolveTo(
+      tile([
+        road(
+          [
+            [-500, 0],
+            [500, 0],
+          ],
+          "A",
+        ),
+      ]),
+    );
+    spyOn(Resource.prototype, "fetchArrayBuffer").and.resolveTo(bytes);
+    const zoom = 25.25;
+    const spacing = (250 * 2) / 2 ** Math.floor(zoom);
+    const center = -500 + (Math.floor(500 / spacing) + 0.5) * spacing;
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 128 / 2 ** zoom,
+      aspectRatio: 1,
+      near: 1,
+      far: 1000,
+    });
+    scene.camera.position.x = center;
+    const layer = add([
+      definition("labels", {
+        "symbol-placement": "line",
+        "text-pitch-alignment": "viewport",
+      }),
+    ]);
+    for (const x of [center, center + spacing * 2, center]) {
+      scene.camera.position.x = x;
+      layer._symbols._nextPlacementTime = 0;
+      await loaded(layer);
+      expect(layer.statistics.zoom).toBeCloseTo(zoom, 8);
+      expect(layer.statistics.placedSymbols).toBe(1);
+      expect(layer.statistics.symbolCandidates).toBe(1);
+      const candidate = layer._symbols._placed[0];
+      expect(candidate.anchor.position.x).toBeCloseTo(x, 10);
+      expect(scene.pick(glyphCenter(candidate), 1, 1).id.featureId).toBe(
+        "road",
+      );
+    }
+    const runtime = layer._symbols;
+    expect(runtime.statistics.candidateBuilds).toBeLessThan(10);
+    const cached = [...runtime._tileLayouts.values()][0].layers.get(0);
+    expect(cached.runs.reduce((n, run) => n + run.anchors.size, 0)).toBe(1);
+    const resources = [...runtime._groups.values()].map(
+      (batch) => batch.resources.vertexArray,
+    );
+    scene.primitives.remove(layer);
+    expect(resources.every((resource) => resource.isDestroyed())).toBeTrue();
+  });
+
+  it("bounds compact line ranges conservatively across globe curvature and terrain heights", function () {
+    const projection = {
+      terrain: { ellipsoid: Ellipsoid.WGS84 },
+      minimumHeight: -500,
+      maximumHeight: 9000,
+    };
+    for (const [a, b] of [
+      [
+        { x: -19000000, y: -10000000 },
+        { x: 19000000, y: 10000000 },
+      ],
+      [
+        { x: 19000000, y: 18000000 },
+        { x: 20000000, y: 19000000 },
+      ],
+      [
+        { x: 12000000, y: 3500000 },
+        { x: 12000000.00001, y: 3500000 },
+      ],
+    ]) {
+      const bounds = Projection.segmentBounds(projection, a, b);
+      for (const height of [-500, 0, 9000]) {
+        for (let i = 0; i <= 16; i++) {
+          const point = GlobeCoordinates.position(
+            a.x + ((b.x - a.x) * i) / 16,
+            a.y + ((b.y - a.y) * i) / 16,
+            height,
+          );
+          [point.x, point.y, point.z].forEach((value, axis) => {
+            expect(value).toBeGreaterThanOrEqual(bounds[axis] - 1e-7);
+            expect(value).toBeLessThanOrEqual(bounds[axis + 3] + 1e-7);
+          });
+        }
+      }
+    }
   });
 
   it("finishes a budgeted cohort during continuous motion while drawing and picking the current camera", async function () {

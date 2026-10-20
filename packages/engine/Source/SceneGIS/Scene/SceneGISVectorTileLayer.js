@@ -61,7 +61,8 @@ function recordSignature(record, zoom) {
   if (record.keyZoom !== zoom || record.keyState !== record.stateRevision) {
     const definition = record.definition;
     record.key = [
-      zoom >= (definition.minzoom ?? 0) && zoom < (definition.maxzoom ?? 24),
+      zoom >= (definition.minzoom ?? -Infinity) &&
+        zoom < (definition.maxzoom ?? Infinity),
       record.style._getGeometryKey(definition.id, zoom, record.context),
       record.filterZoom ? Math.floor(zoom) : "",
       record.stateRevision ?? 0,

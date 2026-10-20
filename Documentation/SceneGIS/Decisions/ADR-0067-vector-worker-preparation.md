@@ -61,3 +61,18 @@ barrel 排除 Worker entry，npm files 包含 Source/Build。该精确 owned 例
 验证真实 TaskProcessor transfer、生命周期、当前 view readiness、覆盖/alpha/pick、冷加载性能及
 installed package 资源 URL；不提交生成结果，不将 flat 资格扩大为 terrain/Globe。
 升级时重新检查 TaskProcessor 异常/传输/销毁、bundleWorkers 和 npm 资源边界。
+
+## 2026-10-20：重复线锚点延迟展开
+
+自由相机的 style zoom 可以超出传统 0–24。沿线标注继续使用原整数 zoom 的 spacing，
+但 Worker 将重复锚点表示为共享路径、起点、步长及分段 station 索引范围，不再逐个创建对象。
+每个范围只跨一个原始线段；point、line-center 和短线中心锚点保持原表示。
+
+主线程在既有 2 ms placement budget 内递归剔除范围，只有通过保守视锥包围体的叶子才创建候选。
+Planar 使用 XY 包围盒和已有 provider 高度范围；Globe 使用原生 rectangle OBB 与当前发布地形
+高度范围，包含曲率，不用端点 ECEF 弦替代地表包围体。精确可见性、遮挡、排序、碰撞、最大候选预算
+和当前相机绘制保持原路径。每个范围只缓存最近 placement 查询的候选，交集复用 identity；
+离屏候选、旧瓦片和销毁按原生命周期释放。没有新增 zoom/俯角阈值、间距放大或数量截断。
+
+此内部 Worker 结果布局与主 bundle 同步构建，不增加公共 API、Worker entry、上游补丁或资源 URL。
+验证与剩余边界见[评审](../../../AgentDocs/vector-tiles/reviews/2026-10-20-implicit-zoom-bounds.md)。

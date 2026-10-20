@@ -181,6 +181,71 @@ describe("SceneGIS/Core/SceneGISVectorWorker", function () {
     expect(result.image.arrayBufferView.byteLength).toBeGreaterThan(0);
   });
 
+  it("keeps extreme overzoom line anchors as compact exact station ranges", async function () {
+    const result = await processor.scheduleTask({
+      kind: "tile",
+      configuration: {
+        extent: {
+          minimumX: -512,
+          minimumY: -512,
+          maximumX: 512,
+          maximumY: 512,
+        },
+        style: {
+          ...style,
+          layers: [
+            {
+              ...style.layers[1],
+              layout: {
+                ...style.layers[1].layout,
+                "symbol-placement": "line",
+                "symbol-spacing": 250,
+              },
+            },
+          ],
+        },
+      },
+      data: {
+        layers: [
+          {
+            name: "data",
+            version: 2,
+            extent: 4096,
+            features: [
+              {
+                id: "road",
+                type: 2,
+                properties: {},
+                geometry: {
+                  parts: [new Float64Array([0, 2048, 2048, 2048, 4096, 0])],
+                  polygonStarts: new Uint32Array(),
+                },
+              },
+            ],
+          },
+        ],
+      },
+      tile: { x: 0, y: 0, level: 0 },
+      maximumLevel: 0,
+      zoom: 26,
+      records: [{ id: "labels", order: 0 }],
+    });
+    const label = result.symbols[0][1].labels[0];
+    expect(label.anchors.length).toBe(0);
+    expect(label.runs.length).toBe(2);
+    const [first, second] = label.runs;
+    const spacing = (250 * 2) / 2 ** 26;
+    expect(first.spacing).toBe(spacing);
+    expect(first.start).toBe(spacing * 0.5);
+    expect(first.first).toBe(0);
+    expect(second.first).toBe(first.end);
+    expect(second.line).toBe(first.line);
+    expect(second.end).toBe(Math.ceil(first.line.length / spacing - 0.5));
+    expect(second.end).toBeGreaterThan(100000000);
+    expect(JSON.stringify(label).length).toBeLessThan(10000);
+    expect(result.errors).toEqual([]);
+  });
+
   it("transfers ground triangle tables with exact feature tokens and byte accounting", async function () {
     const bytes = fixture([
       {

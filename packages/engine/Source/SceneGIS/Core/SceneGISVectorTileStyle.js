@@ -725,8 +725,8 @@ SceneGISVectorTileStyle.prototype.evaluateLayer = function (
     }
   }
   const show =
-    zoom >= (layer.minzoom ?? 0) &&
-    zoom < (layer.maxzoom ?? 24) &&
+    zoom >= (layer.minzoom ?? -Infinity) &&
+    zoom < (layer.maxzoom ?? Infinity) &&
     layout.visibility !== "none" &&
     compiled.filter.filter(layoutGlobals, input);
   return {
@@ -842,7 +842,10 @@ SceneGISVectorTileStyle.prototype._evaluateVisibleLayer = function (
 ) {
   const compiled = getLayer(this, layerId);
   const layer = compiled.definition;
-  if (zoom < (layer.minzoom ?? 0) || zoom >= (layer.maxzoom ?? 24)) {
+  if (
+    zoom < (layer.minzoom ?? -Infinity) ||
+    zoom >= (layer.maxzoom ?? Infinity)
+  ) {
     return undefined;
   }
   const input = previous?.input ?? styleFeature(feature);

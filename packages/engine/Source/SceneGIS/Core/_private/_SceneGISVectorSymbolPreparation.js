@@ -39,6 +39,7 @@ function featureAnchors(
   zoom,
 ) {
   const result = [];
+  const runs = [];
   const placement = layout["symbol-placement"];
   for (const part of feature.geometry.parts) {
     if (feature.type === 1) {
@@ -66,6 +67,26 @@ function featureAnchors(
       ? Line.clip(points, entry.bounds)
       : [points]) {
       const line = Line.path(clipped);
+      if (placement === "line" && line.length >= spacing) {
+        // Keep the exact station lattice without allocating every overzoomed
+        // anchor. Each range stays on one segment for conservative view pruning.
+        const start = spacing * 0.5;
+        const count = Math.ceil((line.length - start) / spacing);
+        for (let i = 1; i < line.points.length; i++) {
+          const first = Math.max(
+            0,
+            Math.ceil((line.distances[i - 1] - start) / spacing),
+          );
+          const end = Math.min(
+            count,
+            Math.ceil((line.distances[i] - start) / spacing),
+          );
+          if (first < end) {
+            runs.push({ line, start, spacing, first, end });
+          }
+        }
+        continue;
+      }
       for (const station of Line.anchors(line, spacing, placement)) {
         const anchor = Line.sample(line, station);
         result.push({
@@ -76,7 +97,7 @@ function featureAnchors(
       }
     }
   }
-  return result;
+  return { anchors: result, runs };
 }
 
 /** Tile-local symbol filtering, paths and anchors, executed in the Worker. @private */
@@ -122,7 +143,7 @@ function prepareVectorSymbols(
       );
       continue;
     }
-    const anchors = featureAnchors(
+    const { anchors, runs } = featureAnchors(
       feature,
       evaluation.value.layout,
       coordinates,
@@ -143,6 +164,7 @@ function prepareVectorSymbols(
       evaluation,
       names,
       anchors,
+      runs,
       key: JSON.stringify([
         definition.source,
         definition.id,

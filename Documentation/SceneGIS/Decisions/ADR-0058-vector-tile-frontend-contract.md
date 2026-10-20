@@ -74,6 +74,11 @@ V1 profile 名为 `scenegis-vector-v1`：
 `evaluateLayer(layerId, feature, zoom)` 返回显式 show、基础 layer 信息及 layout/paint 值，
 保留 style layer 顺序。Paint 按 fractional zoom，layout/filter 按 floor zoom；
 minzoom inclusive/maxzoom exclusive，visibility=none 或 filter 不匹配时 show=false。
+2026-10-20 amendment：SceneGIS 自由相机允许负 style zoom 与大于等于 24 的 style zoom。
+按负责人确认，未声明 minzoom/maxzoom 的一侧无界，显式值仍严格执行；该策略统一用于公开求值、
+renderer 缓存/批次签名和 symbol eligibility。缺省无界是 SceneGIS 对 GL 地图常规缩放范围的明确扩展，
+不改输入校验、source 层级、SSE、原始 style zoom 或实际米/像素，不把 Infinity 写进样式快照。
+维护与验证见[计划](../../../AgentDocs/vector-tiles/plans/2026-10-20-implicit-zoom-bounds.md)。
 Color 对调用方表现为 Cesium Color，不泄漏 MapLibre expression/Color 对象。
 Property 的 constant/source/camera/composite 分类可查询，供 V2 建立失效边界；
 本阶段没有 GPU 更新或自动 mutation observer。

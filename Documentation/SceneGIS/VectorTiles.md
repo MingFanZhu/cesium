@@ -282,6 +282,9 @@ ID 与超安全整数属性在样式中使用十进制 string，原始属性不�
 显式 to-number 选择浮点转换；需要精确匹配大整数时使用 string。
 合法表达式的缺失值/运行时类型错误采用依赖库的规范默认行为。
 Paint 与 symbol 的 text-size/icon-size 使用 fractional zoom，其余 layout/filter 使用 floor zoom；minzoom 包含、maxzoom 不包含。
+SceneGIS 中未声明 minzoom/maxzoom 的一侧不限制缩放范围；例如仅设置 minzoom: 14 的图层在 zoom ≥ 24 时仍可见。
+显式 minzoom: 0 或 maxzoom: 24 仍严格执行。缺省语义适用于背景、几何和标注，visibility/filter 不变。
+连续 style zoom 和真实 metersPerPixel 不截断到 0–24；source 的 minzoom/maxzoom 是瓦片层级限制，保持原有规则。
 `constant/source/camera/composite` 分类供后续 renderer 确定失效范围。
 
 Style zoom 与 source level 独立。`computeStyleZoom(rootWidth, metersPerPixel, tileSize=512)`
