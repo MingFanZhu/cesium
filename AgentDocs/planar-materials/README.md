@@ -16,11 +16,13 @@
 - Source: `packages/engine/Source/SceneGIS/{Core,Scene,DataSources}` 与 owned GLSL。
 - Specs: `packages/engine/Specs/SceneGIS`。
 - Examples: `Test/平面材质.html`、`Test/平面折线材质.html`。
-- M1–M3 integration: `scenegis/develop`; M4 branch: `feature/planar-polyline-materials`。
+- M1–M4 integration: `scenegis/develop`; M4 source branch: `feature/planar-polyline-materials`。
 - ADR: [ADR-0178](../../Documentation/SceneGIS/Decisions/ADR-0178-planar-materials.md)、[ADR-0182](../../Documentation/SceneGIS/Decisions/ADR-0182-planar-polyline-materials.md)
 - SGP: None。
 
 ## Current handoff
+
+- 2026-10-22: 按项目负责人要求，将 M4 `65f7a79219` 快进合入 `scenegis/develop`，无冲突；本地工作分支已切回 develop，未推送远程。合并未改变已验证的实现。
 
 - 2026-10-21: activate M4 / ADR-0182 on `feature/planar-polyline-materials` after
   owner authorization. Reuse native Material and existing pixel-width line paths;
@@ -30,4 +32,4 @@
 - Open discussions: None。
 - Latest review: [M4](reviews/2026-10-22-m4-polyline-materials.md) technical passed；无未解决实现 finding。
 - Known risks: 纹理接缝、透明语义、stencil/discard、动态纹理所有权。
-- Next action: M4 技术完成，本轮作为独立本地阶段检查点；项目负责人验收 `Test/平面折线材质.html`，视觉结论尚未记录。
+- Next action: M4 已合入 develop；项目负责人可继续使用 `Test/平面折线材质.html`，独立视觉结论尚未记录。
