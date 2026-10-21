@@ -55,6 +55,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
       "u_contrast0 != 1.0",
       "u_hue0 != 0.0",
       "u_saturation0 != 1.0",
+      "czm_gammaCorrect(max(sample0.rgb, vec3(0.0)))",
       "sample0.a * u_alpha0",
     ];
     for (let i = 1; i < ordered.length; ++i) {
@@ -65,7 +66,10 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     expect(shader).toContain("vec3(1.0 / u_gamma0)");
     expect(shader).toContain("czm_hue(sample0.rgb, u_hue0)");
     expect(shader).toContain("czm_saturation(sample0.rgb, u_saturation0)");
-    expect(shader).not.toContain("czm_gammaCorrect");
+    expect(shader.match(/czm_gammaCorrect/g).length).toBe(1);
+    expect(SceneGISPlanarSurfaceShader.createFragmentShader(0)).not.toContain(
+      "czm_gammaCorrect",
+    );
   });
 
   it("lights the fully composed color from a stable planar-up geometric normal", function () {

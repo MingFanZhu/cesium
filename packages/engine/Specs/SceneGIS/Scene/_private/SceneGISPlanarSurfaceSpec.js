@@ -75,6 +75,8 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     // These fixtures assert linear imagery/terrain composition. Display gamma
     // is covered separately by the deferred display Specs.
     result.gamma = 1;
+    // Isolate Surface pixels from time-dependent atmosphere and background sky.
+    result.environmentEffects.enabled = false;
     result.destroyForSpecs = function () {
       const sceneCanvas = this.canvas;
       this.destroy();
@@ -194,6 +196,172 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     if (scene && !scene.isDestroyed()) {
       scene.destroyForSpecs();
     }
+  });
+
+  describe("imagery linear input", function () {
+    function addImage(world, rgba) {
+      const image = document.createElement("canvas");
+      image.width = image.height = 1;
+      const context = image.getContext("2d");
+      context.putImageData(
+        new ImageData(new Uint8ClampedArray(rgba), 1, 1),
+        0,
+        0,
+      );
+      return world.imageryLayers.addImageryProvider({
+        tilingScheme: world.tilingScheme,
+        minimumLevel: 0,
+        maximumLevel: 0,
+        tileWidth: 1,
+        tileHeight: 1,
+        hasAlphaChannel: true,
+        errorEvent: new Event(),
+        requestImage: () => Promise.resolve(image),
+      });
+    }
+
+    async function initialize(world) {
+      scene = createPlanarScene(world, 32, 32);
+      scene.gamma = 2.2;
+      pointCameraAt(world);
+      await renderUntil(() => world.tilesLoaded);
+    }
+
+    function pixel() {
+      return Array.from(
+        scene.context.readPixels({ x: 16, y: 16, width: 1, height: 1 }),
+      );
+    }
+
+    function display(rgb) {
+      return [...rgb.map((value) => 255 * Math.pow(value, 1 / 2.2)), 255];
+    }
+
+    for (const rgba of [
+      [128, 128, 128, 255],
+      [64, 128, 192, 255],
+    ]) {
+      it(`round trips display RGB ${rgba.slice(0, 3)} through linear LDR storage`, async function () {
+        const world = createWorld({ maximumLevel: 0 });
+        addImage(world, rgba);
+        await initialize(world);
+        expect(pixel()).toEqualEpsilon(rgba, 2);
+      });
+    }
+
+    it("decodes each filtered image before alpha blending and retains warm resources", async function () {
+      const world = createWorld({ maximumLevel: 0 });
+      const bottomRgb = [32, 80, 160];
+      const topRgb = [192, 128, 64];
+      addImage(world, [...bottomRgb, 255]);
+      const top = addImage(world, [...topRgb, 128]);
+      top.alpha = 0.5;
+      await initialize(world);
+      const surface = world._surface;
+      const tile = surface._quadtree._renderTiles[0];
+      const command = tile.command;
+      const shader = command.shaderProgram;
+      const va = command.vertexArray;
+      const texture = tile.imageryBindings.get(top).desired.texture;
+      const debug = { ...surface._imagery._debug };
+      const shaderCount = surface._shaderPrograms.size;
+      const bottom = bottomRgb.map((value) => Math.pow(value / 255, 2.2));
+      const alpha = (128 / 255) * top.alpha;
+      const expected = (filtered) =>
+        display(
+          bottom.map(
+            (value, i) =>
+              value * (1 - alpha) +
+              Math.pow(Math.max(filtered[i], 0), 2.2) * alpha,
+          ),
+        );
+      expect(pixel()).toEqualEpsilon(expected(topRgb.map((v) => v / 255)), 2);
+
+      top.gamma = 2;
+      top.brightness = 0.6;
+      scene.renderForSpecs();
+      expect(pixel()).toEqualEpsilon(
+        expected(topRgb.map((v) => Math.sqrt(v / 255) * 0.6)),
+        2,
+      );
+
+      // Contrast can produce negative channels; the linear albedo cannot be negative.
+      top.gamma = 1;
+      top.brightness = 1;
+      top.contrast = 3;
+      scene.renderForSpecs();
+      expect(pixel()).toEqualEpsilon(
+        expected(topRgb.map((v) => (v / 255 - 0.5) * 3 + 0.5)),
+        2,
+      );
+
+      // Matching remains in raw image RGB, before all filters and decoding.
+      top.colorToAlpha = Color.fromBytes(...topRgb);
+      top.colorToAlphaThreshold = 0.01;
+      scene.renderForSpecs();
+      expect(pixel()).toEqualEpsilon([...bottomRgb, 255], 2);
+      expect(surface._quadtree._renderTiles[0]).toBe(tile);
+      expect(surface._renderCommands).toEqual([command]);
+      expect(command.shaderProgram).toBe(shader);
+      expect(command.vertexArray).toBe(va);
+      expect(tile.imageryBindings.get(top).desired.texture).toBe(texture);
+      expect(surface._imagery._debug).toEqual(debug);
+      expect(surface._shaderPrograms.size).toBe(shaderCount);
+      scene.destroyForSpecs();
+      expect(texture.isDestroyed()).toBe(true);
+      expect(va.isDestroyed()).toBe(true);
+    });
+
+    it("shares linear input with Material in HDR and LDR without decoding Material or base color again", async function () {
+      const world = createWorld({
+        maximumLevel: 0,
+        baseColor: new Color(0.25, 0.25, 0.25),
+      });
+      const imagery = addImage(world, [128, 128, 128, 255]);
+      await initialize(world);
+      const material = new Material({
+        fabric: {
+          uniforms: { weight: 0.0 },
+          source: `uniform float weight;
+czm_material czm_getMaterial(czm_materialInput inputValue) {
+    czm_material result = czm_getDefaultMaterial(inputValue);
+    result.diffuse = vec3(pow(128.0 / 255.0, 2.2));
+    result.alpha = weight;
+    return result;
+}`,
+        },
+      });
+      try {
+        world.material = material;
+        for (const hdr of [false, true]) {
+          scene.highDynamicRange = hdr;
+          material.uniforms.weight = 0;
+          scene.renderForSpecs();
+          const imagePixel = pixel();
+          material.uniforms.weight = 1;
+          scene.renderForSpecs();
+          expect(pixel())
+            .withContext(`HDR display ${hdr}`)
+            .toEqualEpsilon(imagePixel, 2);
+        }
+        scene.highDynamicRange = false;
+        world.material = undefined;
+        world.opacity = 0.5;
+        scene.renderForSpecs();
+        const halfLinear = Math.pow(128 / 255, 2.2) * 0.5;
+        expect(pixel()).toEqualEpsilon(
+          display([halfLinear, halfLinear, halfLinear]),
+          2,
+        );
+        world.opacity = 1;
+        imagery.show = false;
+        scene.renderForSpecs();
+        expect(pixel()).toEqualEpsilon(display([0.25, 0.25, 0.25]), 2);
+      } finally {
+        world.material = undefined;
+        material.destroy();
+      }
+    });
   });
 
   it("composes imagery before surface opacity and preserves the published command snapshot", async function () {

@@ -811,6 +811,10 @@ scene.postProcessStages.exposure = 10;
 示例提供曲线 / 手动曝光控件。AgX 复用调色和输出 gamma，保持 alpha；LDR 忽略曝光与曲线。
 本地保留 Cesium 的可配置 gamma，和 Three.js 的 sRGB 输出传递函数并非逐像素相同。
 
+平面栅格影像按 ADR-0031 在每层滤镜后解码，再在线性域混合与光照；默认 `scene.gamma=2.2`
+的 LDR 输出会还原未受光照影响的原始影像颜色。图层 `gamma` 仍是独立艺术滤镜，通常保持 1，
+无需手动设为 1/2.2 来抵消偏白。`baseColor` 与 Material diffuse 保持线性输入。
+
 按 ADR-0165，矢量文字 / 图标抵消曝光增益，继续接受 AgX 等曲线和调色；提高 exposure
 不会再同时冲白注记。alpha、样式顺序、地形 / 外部模型遮挡与拾取规则不变。自动曝光仍
 默认关闭；显式启用时补偿使用上一完成帧的自动增益，适应期间可能有一帧亮度比值变化。

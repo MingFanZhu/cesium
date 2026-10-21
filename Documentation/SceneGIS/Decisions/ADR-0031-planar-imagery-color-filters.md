@@ -60,3 +60,22 @@ uniform limit、identity branches、shader key、normal/depth replay以及dev/re
 - Shader顺序、完整uniform shape、identity bypass与normal-render snapshot Specs。
 - 本地real-Context pixels覆盖五个scalar filter、color-to-alpha、multi-layer alpha/order与默认像素。
 - 复跑lit terrain qualification，并完成build/types/docs/package/gallery/static/ownership audits。
+
+## 2026-10-21 修订：共享线性渲染管线的影像输入
+
+ADR-0161 统一了 HDR / LDR 的内部线性存储，LDR 输出也执行 `1 / scene.gamma`。
+同源 World Imagery 对照确认：原 Planar 缺少输入解码，中灰 128 被输出为 186；
+Globe 的 identity 图层则通过 `czm_gammaCorrect` 解码。此前 gamma=1 的测试未覆盖该缺陷。
+见 [finding 与验证](../../../AgentDocs/planar-surface-styling/reviews/2026-10-21-imagery-linear-input.md)。
+
+本修订取代上文“不做默认 gamma 解码”的旧前提。raw color-to-alpha、图层艺术 gamma、
+brightness、contrast、hue、saturation 仍在显示 RGB 上按原顺序执行；之后逐层使用
+`czm_gammaCorrect(max(rgb, vec3(0.0)))` 解码，再执行 sample alpha × layer alpha 的线性混合。
+非负限制来自滤镜可能产生负通道、幂函数对负输入未定义；不限制大于 1 的 HDR 值。
+图层 `gamma` 仍是艺术滤镜，不能代替由 `scene.gamma` 控制的输入/输出传递函数。
+
+默认影像与 Globe 使用同一 gamma 解码，非默认滤镜仍遵守 Planar 既有作用域，并不宣称
+与 Globe 的 `APPLY_GAMMA` 覆盖分支逐像素等价。`baseColor`、Material diffuse 和矢量叠加
+保持既有线性输入，不能对最终地表合成色再次解码。透明 Surface 与 opaque capture 共用
+相同影像入口；复用 `czm_gamma` automatic uniform，不增加 pass、per-layer uniform、texture、
+shader key 或资源生命周期。

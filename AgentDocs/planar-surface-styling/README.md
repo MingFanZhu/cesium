@@ -1,5 +1,11 @@
 # SceneGIS Planar Surface Styling
 
+## 2026-10-21 后续修复
+
+- Latest standalone plan：[平面影像线性输入](plans/2026-10-21-imagery-linear-input.md)，completed。
+- Review：[颜色空间评审](reviews/2026-10-21-imagery-linear-input.md)，技术检查通过，项目负责人视觉验收待反馈。
+- 修复共享线性管线下栅格影像偏白；历史 S1–S4 状态不变。
+
 ## Metadata
 
 | Field                  | Value                                                            |
@@ -13,7 +19,7 @@
 | Active standalone plan | None                                                             |
 | Architecture contact   | Architecture Agent                                               |
 | Execution contact      | Execution Agent                                                  |
-| Last updated           | `2026-08-13`                                                     |
+| Last updated           | `2026-10-21`                                                     |
 
 ## Scope
 
@@ -49,13 +55,14 @@
   focused re-review已批准代码、release evidence与Sandcastle launcher，S4-R001至S4-R003及S4-T007全部fixed。端口释放后，
   同一Playwright config/project/spec的headed dev与release E2E均通过；项目负责人已使用修复后的launcher完成final visual/manual
   gate并授权进入下一扩展。默认headless `--use-angle=gl`在当前NVIDIA环境的Context初始化失败保留为工具链风险。
-- Next action: 本扩展关闭；后继能力进入独立`planar-environment`扩展，不在本目录追加S5。
+- Next action: S1–S4 已关闭；影像输入修复已通过技术检查，等待项目负责人视觉反馈，不新增 S5。
 - Current phase status: S1=`completed`；S2=`completed`；S3=`completed`；S4=`completed`。
 - Open discussions: None；S3 已确认复用 Cesium `Material`/Fabric source与uniform lifecycle，但由SceneGIS组装
   planar inputs，并冻结caller ownership、north-clockwise aspect、sampler budget与normal-render publication边界。
-- Latest review:
+- Historical S4 review:
   [S4 unified qualification and delivery](reviews/2026-08-12-s4-unified-qualification-delivery.md)为`approved`；headed dev/release
   E2E、launcher follow-up与项目负责人final manual gate均已通过。
+- Latest review: [影像线性输入](reviews/2026-10-21-imagery-linear-input.md)，技术检查通过。
 - Unresolved reviews: None。
 - Known risks: S3使用Cesium `Material._uniforms` soft-private seam；默认headless OpenGL ANGLE在当前NVIDIA环境不能初始化
   完整Viewer；中文长文本需要保持compact overlay/credit-safe布局。

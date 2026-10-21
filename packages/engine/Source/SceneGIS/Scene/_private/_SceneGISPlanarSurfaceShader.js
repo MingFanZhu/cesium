@@ -79,6 +79,10 @@ function createFragmentShader(
     if (u_saturation${i} != 1.0) {
         sample${i}.rgb = czm_saturation(sample${i}.rgb, u_saturation${i});
     }
+    // Imagery filters operate on display RGB. Decode each layer before linear
+    // alpha composition and lighting; Material and base color are already linear.
+    // Contrast/hue can produce negative channels, outside the power-law domain.
+    sample${i}.rgb = czm_gammaCorrect(max(sample${i}.rgb, vec3(0.0)));
     color.rgb = mix(color.rgb, sample${i}.rgb, sample${i}.a * u_alpha${i});`);
   }
   const dynamicLayers = `${declarations.join("\n")}
