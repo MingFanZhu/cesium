@@ -5,6 +5,8 @@ import Cartesian3 from "../../../../Source/Core/Cartesian3.js";
 import Color from "../../../../Source/Core/Color.js";
 import ColorMaterialProperty from "../../../../Source/DataSources/ColorMaterialProperty.js";
 import EntityCollection from "../../../../Source/DataSources/EntityCollection.js";
+import Event from "../../../../Source/Core/Event.js";
+import Material from "../../../../Source/Scene/Material.js";
 import JulianDate from "../../../../Source/Core/JulianDate.js";
 import PolylineGraphics from "../../../../Source/DataSources/PolylineGraphics.js";
 import PrimitiveCollection from "../../../../Source/Scene/PrimitiveCollection.js";
@@ -64,6 +66,72 @@ describe("SceneGIS/DataSources/SceneGISPlanarPolylineVisualizer", function () {
       }),
     });
   }
+
+  [false, true].forEach(function (ground) {
+    it(`updates nonconstant uniforms at frozen time and owns derived materials (ground=${ground})`, function () {
+      let type = Material.PolylineArrowType;
+      let color = Color.RED;
+      let fail = false;
+      const property = {
+        isConstant: false,
+        definitionChanged: new Event(),
+        getType: () => type,
+        getValue: jasmine.createSpy("getValue").and.callFake((t, result) => {
+          if (fail) {
+            throw new Error("material evaluation failed");
+          }
+          result.color = Color.clone(color, result.color);
+          return result;
+        }),
+        equals: (other) => other === property,
+      };
+      const fromType = spyOn(Material, "fromType").and.callThrough();
+      [0, 1, 2, 3].forEach(function () {
+        const entity = addPolyline({
+          material: property,
+          graphic: { clampToGround: ground },
+        });
+        visualizer.update(time);
+        const owner = visualizer._items.get(entity.id).owner;
+        const value = owner.appearance.material;
+        color = Color.BLUE.withAlpha(0.4);
+        const calls = property.getValue.calls.count();
+        visualizer.update(time);
+        expect(property.getValue.calls.count()).toBe(calls + 1);
+        expect(visualizer._items.get(entity.id).owner).toBe(owner);
+        expect(value.uniforms.color).toEqual(color);
+        type =
+          type === Material.PolylineArrowType
+            ? Material.PolylineDashType
+            : Material.PolylineArrowType;
+        fail = true;
+        expect(() => visualizer.update(time)).toThrowError(
+          "material evaluation failed",
+        );
+        expect(
+          fromType.calls.mostRecent().returnValue.isDestroyed(),
+        ).toBeTrue();
+        expect(visualizer._items.get(entity.id).owner).toBe(owner);
+        fail = false;
+        visualizer.update(time);
+        expect(value.isDestroyed()).toBeTrue();
+        const replacement = visualizer._items.get(entity.id).owner;
+        expect(replacement.appearance.material.type).toBe(type);
+        entity.polyline.positions = [
+          new Cartesian3(-20, 5, 8),
+          new Cartesian3(20, 5, 8),
+        ];
+        visualizer.update(time);
+        expect(replacement.appearance.material.isDestroyed()).toBeTrue();
+        const moved = visualizer._items.get(entity.id).owner.appearance
+          .material;
+        collection.remove(entity);
+        visualizer.update(time);
+        expect(moved.isDestroyed()).toBeTrue();
+        expect(scene.primitives.length).toBe(0);
+      });
+    });
+  });
 
   it("adapts straight Entity geometry to the public primitive", function () {
     const entity = addPolyline({ width: 300.5 });

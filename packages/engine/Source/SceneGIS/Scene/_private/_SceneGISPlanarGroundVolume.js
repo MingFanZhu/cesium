@@ -127,7 +127,7 @@ function joinNormal(ax, ay, bx, by) {
   return length === 0 ? [bx / bLength, by / bLength] : [x / length, y / length];
 }
 
-function createPolylineVolume(geometry, batchOrigin) {
+function createPolylineVolume(geometry, batchOrigin, material) {
   const source = geometry._getDrapeSource();
   const origin = batchOrigin ?? source.origin;
   const values = [];
@@ -136,6 +136,7 @@ function createPolylineVolume(geometry, batchOrigin) {
   const expandDirections = [];
   const segmentNormals = [];
   const segmentOffsets = [];
+  const segmentTexture = material ? [] : undefined;
   const indices = [];
   // Inside-out winding matches the shadow-volume role used by Cesium's
   // GroundPolylineGeometry at the documented upstream baseline.
@@ -148,6 +149,16 @@ function createPolylineVolume(geometry, batchOrigin) {
   const closed =
     positions[0].x === positions[last].x &&
     positions[0].y === positions[last].y;
+  const lengths = [0];
+  for (let i = 1; material && i <= last; ++i) {
+    lengths.push(
+      lengths[i - 1] +
+        Math.hypot(
+          positions[i].x - positions[i - 1].x,
+          positions[i].y - positions[i - 1].y,
+        ),
+    );
+  }
   for (let i = 0; i < last; ++i) {
     const a = positions[i];
     const b = positions[i + 1];
@@ -183,6 +194,12 @@ function createPolylineVolume(geometry, batchOrigin) {
       );
       expandDirections.push(sides[vertex]);
       segmentNormals.push(...startNormal, ...endNormal);
+      if (material) {
+        segmentTexture.push(
+          lengths[i] / lengths[last],
+          magnitude / lengths[last],
+        );
+      }
       segmentOffsets.push(
         a.x - endpoints[vertex].x,
         a.y - endpoints[vertex].y,
@@ -203,6 +220,7 @@ function createPolylineVolume(geometry, batchOrigin) {
     expandDirections,
     segmentNormals,
     segmentOffsets,
+    segmentTexture,
     width: source.width,
     footprintPoints: positions,
   };
@@ -265,7 +283,7 @@ SceneGISPlanarGroundVolume.create = function (
   const data =
     geometry instanceof SceneGISPlanarPolygonGeometry
       ? createPolygonVolume(geometry, batchOrigin)
-      : createPolylineVolume(geometry, batchOrigin);
+      : createPolylineVolume(geometry, batchOrigin, material);
   const envelope = getEnvelope(world);
   const typedValues = new Float64Array(data.values);
   const points = new Array(typedValues.length / 3);
@@ -286,11 +304,18 @@ SceneGISPlanarGroundVolume.create = function (
       values: new Float32Array(data.extentValues),
     });
   }
-  if (material) {
+  if (material && data.extentValues !== undefined) {
     attributes.groundRotation = new GeometryAttribute({
       componentDatatype: ComponentDatatype.FLOAT,
       componentsPerAttribute: 1,
       values: new Float32Array(points.length).fill(geometry.stRotation),
+    });
+  }
+  if (material && data.segmentTexture !== undefined) {
+    attributes.segmentTexture = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 2,
+      values: new Float32Array(data.segmentTexture),
     });
   }
   if (data.nextValues !== undefined) {

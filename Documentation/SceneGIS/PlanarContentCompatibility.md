@@ -46,7 +46,7 @@ Package smoke 从 repo 外 consumer 使用 bare ESM `@cesium/engine`、`@cesium/
 | Billboard      | `Entity.position`                             | anchor-level NONE/clamp/relative                    | local image；low-level reference 固定 NONE          | Anchor；Anchor focused + C10 qualification            |
 | Label          | `Entity.position`                             | anchor-level NONE/clamp/relative                    | fixed planar anchor                                 | Anchor；Anchor focused + C10 qualification            |
 | Model          | `Entity.position` + optional Quaternion       | anchor-level NONE/clamp/relative                    | local glTF；fixed planar transform；无 ENU/clamping | Model；Model focused + C10 qualification/E2E          |
-| Polyline       | supplied `positions`                          | NONE ordinary；`clampToGround:true` continuous      | straight `ArcType.NONE`；Color material             | Polyline；Polyline/Ground focused + C10 qualification |
+| Polyline       | supplied `positions`                          | NONE ordinary；`clampToGround:true` continuous      | straight `ArcType.NONE`；Fabric (ADR-0182)          | Polyline；Polyline/Ground focused + C10 qualification |
 | Polygon        | hierarchy + scalar/per-position height        | ordinary；non-extruded CLAMP uses GPU surface clamp | simple outer + direct holes；caps/sides             | Polygon；Polygon/Ground focused + C10 qualification   |
 | Box            | center `Entity.position`                      | anchor-level NONE/clamp/relative + lower support    | complete dimensions；Color only                     | Solid；Solid focused + C10 cohort                     |
 | Cylinder       | center `Entity.position`                      | anchor-level NONE/clamp/relative + lower support    | cylinder/cone；Color only                           | Solid；Solid focused + C10 cohort                     |
@@ -71,14 +71,14 @@ RectangleGraphics 的米制 west/south/east/north 是明确的平面适配约定
 
 ## Direct Primitive matrix
 
-`SceneGISPlanarPrimitive` 接受七种 public Geometry。Polyline 使用 Color `PolylineMaterialAppearance` 或 `PolylineColorAppearance`；Polygon 使用 flat
+`SceneGISPlanarPrimitive` 接受七种 public Geometry。Polyline 使用原生 Material / Fabric `PolylineMaterialAppearance` 或逐实例颜色 `PolylineColorAppearance`；Polygon 使用 flat
 `PerInstanceColorAppearance`；Box/Cylinder/Ellipsoid/Wall/PolylineVolume 使用 compatible closed/open non-flat
 `PerInstanceColorAppearance`。单实例 wrapper 的 geometry kind 在构造时确定，replacement 只允许同 kind。
 静态 geometryInstances 数组支持兼容 Appearance 合批，closed solid 可混合 kind；拓扑更改重建批次。它拥有自己
 创建的 standard synchronous `Primitive`，不拥有 caller collection、Appearance 或 Entity。
 
 `SceneGISPlanarGroundPrimitive`只接受existing planar Polyline或non-extruded Polygon Geometry、live World与compatible
-Color appearance。Clamp是implicit；public height-reference options不存在。它通过`Pass.TERRAIN_CLASSIFICATION`提交
+appearance（面 MaterialAppearance 见 ADR-0178，线 PolylineMaterialAppearance 见 ADR-0182）。Clamp是implicit；public height-reference options不存在。它通过`Pass.TERRAIN_CLASSIFICATION`提交
 stable GPU shadow/segment volumes；不读取actual terrain triangles、不发terrain request、不拥有World/provider，也不提供
 extrusion、RELATIVE、classification、zIndex、arbitrary material或arbitrary model matrix。
 静态 ground 数组同批仅包含线或面，均要求 depth texture。Line 按地表片元裁剪，每 VA 一条颜色命令并保持独立 pick ID；
@@ -94,7 +94,7 @@ failure/replacement/destroy 中维持 exactly-once ownership。
 - 未绑定当前 World 的 `GeoJsonDataSource`、其他格式 DataSource、enabled clustering、同时运行默认 Globe visualizer。
 - 隐式/逐帧 reprojection、Cartographic/Ellipsoid/ENU、geodesic/rhumb、IDL wrap 与格式自动转换。
   GeoJSON / TopoJSON 的显式加载转换见 ADR-0172；不改变运行时坐标契约。
-- Arbitrary Material、custom shader、terrain request from content、continuous ground for Model/solid/Wall/
+- 超出 ADR-0178 / ADR-0182 st/uniform 契约的 Material、外层 custom shader、terrain request from content、continuous ground for Model/solid/Wall/
   PolylineVolume/Path。
 - Globe-specific graphics fields。Unsupported combinations must fail fast; they are not silently ignored.
 

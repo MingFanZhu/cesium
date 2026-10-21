@@ -3,6 +3,29 @@ import Cartesian3 from "../../../Source/Core/Cartesian3.js";
 import SceneGISPlanarPolylineGeometry from "../../../Source/SceneGIS/Core/SceneGISPlanarPolylineGeometry.js";
 
 describe("SceneGIS/Core/SceneGISPlanarPolylineGeometry", function () {
+  it("uses cumulative XYZ length and a single closed-loop seam", function () {
+    const points = [
+      new Cartesian3(0, 0, 0),
+      new Cartesian3(3, 0, 4),
+      new Cartesian3(3, 12, 4),
+      new Cartesian3(0, 0, 0),
+    ];
+    const attributes = new SceneGISPlanarPolylineGeometry({
+      positions: points,
+      width: 12,
+    })._createGeometry().attributes;
+    const total = 5 + 12 + 13;
+    expect(attributes.st.values[4]).toEqualEpsilon(5 / total, 1e-7);
+    expect(attributes.st.values[12]).toEqualEpsilon(17 / total, 1e-7);
+    expect(Array.from(attributes.st.values.slice(-4))).toEqual([1, 0, 1, 1]);
+    expect(Array.from(attributes.prevPosition.values.slice(0, 3))).toEqual([
+      3, 12, 4,
+    ]);
+    expect(Array.from(attributes.nextPosition.values.slice(-3))).toEqual([
+      3, 0, 4,
+    ]);
+  });
+
   it("snapshots positions and rebases EPSG:3857-scale coordinates", function () {
     const positions = [
       new Cartesian3(20000000.0, -20000000.0, 10.0),

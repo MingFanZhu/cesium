@@ -6,10 +6,19 @@ in float lineWidth;
 in float expandDirection;
 in vec4 segmentNormals;
 in vec4 segmentOffsets;
+#ifndef SCENEGIS_GROUND_MATERIAL
 in vec4 color;
+#else
+in vec2 segmentTexture;
+#endif
 in float batchId;
 
+#ifndef SCENEGIS_GROUND_MATERIAL
 out vec4 v_color;
+#else
+out vec4 v_lineTexture;
+out float v_polylineAngle;
+#endif
 out vec4 v_startPlane;
 out vec4 v_endPlane;
 out vec4 v_rightPlane;
@@ -52,6 +61,17 @@ void main()
     v_endPlane = vec4(endNormalEC, -dot(endNormalEC, endEC));
     v_rightPlane = vec4(rightNormalEC, -dot(rightNormalEC, startEC));
     v_halfWidth = lineWidth * 0.5;
+#ifdef SCENEGIS_GROUND_MATERIAL
+    vec3 forwardEC = normalize(czm_normal * vec3(forward, 0.0));
+    // Normalize miter-plane distances so centerline progress is metric, while joins share s.
+    v_lineTexture = vec4(segmentTexture,
+        max(dot(startNormalEC, forwardEC), 1.0e-7),
+        max(dot(endNormalEC, -forwardEC), 1.0e-7));
+    vec2 screenDirection = forwardEC.xy;
+    float angle = dot(screenDirection, screenDirection) > 0.0
+        ? atan(-screenDirection.y, screenDirection.x) : 0.0;
+    v_polylineAngle = floor(angle / czm_piOverFour + 0.5) * czm_piOverFour;
+#endif
     // RTE positioning keeps the EPSG:3857-scale origin out of the FLOAT route
     // attributes; meters-per-pixel then expands both height faces along the
     // same eye-space miter/start/end plane family.
@@ -61,6 +81,8 @@ void main()
     float miterProjection = max(abs(dot(miterEC, rightEC)), 0.25);
     positionEC.xyz +=
         miterEC * expandDirection * (halfWidthMeters / miterProjection);
+#ifndef SCENEGIS_GROUND_MATERIAL
     v_color = color;
+#endif
     gl_Position = czm_depthClamp(czm_projection * positionEC);
 }

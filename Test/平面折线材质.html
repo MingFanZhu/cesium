@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>平面折线材质验收</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #view {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      body {
+        background: #0b1825;
+      }
+      #panel {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        width: 260px;
+        padding: 18px;
+        background: #102136ed;
+        color: #e7f1ff;
+        font: 14px/1.7 system-ui;
+        border-radius: 8px;
+      }
+      h1 {
+        font-size: 21px;
+        margin: 0 0 10px;
+      }
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+      input,
+      select {
+        vertical-align: middle;
+      }
+      button {
+        padding: 6px 10px;
+        margin: 6px 4px 0 0;
+      }
+      output {
+        display: block;
+        white-space: pre-line;
+        color: #a7e4ed;
+      }
+      a {
+        color: #a7e4ed;
+      }
+      #error {
+        color: #ffb2b2;
+      }
+      p {
+        margin: 8px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="view"></div>
+    <section id="panel">
+      <h1>平面折线 · Fabric</h1>
+      <p>
+        左列普通线，右列贴地线。上排 Entity 箭头，中排 Primitive 虚线，下排
+        Entity 闭合流动边界。
+      </p>
+      <label
+        >材质效果
+        <select id="effect">
+          <option value="mixed">分别展示</option>
+          <option value="flow">秒制流动</option>
+          <option value="arrow">原生箭头</option>
+          <option value="dash">原生虚线</option>
+        </select></label
+      >
+      <label>颜色 <input id="color" type="color" value="#35d8ed" /></label>
+      <label
+        >透明度
+        <input id="alpha" type="range" min="0" max="1" step="0.05" value="0.85"
+      /></label>
+      <label
+        >线宽（像素）<input
+          id="width"
+          type="range"
+          min="2"
+          max="30"
+          step="1"
+          value="18"
+      /></label>
+      <label
+        >倾角 <input id="pitch" type="range" min="12" max="90" value="60"
+      /></label>
+      <label
+        >位置偏移 <input id="offset" type="range" min="-40" max="40" value="0"
+      /></label>
+      <label><input id="freeze" type="checkbox" /> 冻结 Viewer clock</label>
+      <label><input id="terrain" type="checkbox" checked /> 本地起伏地形</label>
+      <button id="rebuild">移除并重建</button
+      ><button id="toggle">切换显隐</button><button id="home">恢复视角</button>
+      <output id="status">初始化…</output
+      ><output id="picked">点击线条查看 ID</output><output id="error"></output>
+      <p>
+        s 按累计长度归一化；闭合起点为唯一 1→0
+        接缝。冻结后改变颜色、透明度，属性仍逐帧读取。虚线间隔遵循原生屏幕像素规则。
+      </p>
+      <a href="/Test/平面材质.html">面材质示例</a>
+    </section>
+    <script type="module" src="./平面折线材质.js"></script>
+  </body>
+</html>

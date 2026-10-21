@@ -6,6 +6,8 @@ import BoundingSphereState from "../../../DataSources/BoundingSphereState.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import Color from "../../../Core/Color.js";
 import ColorMaterialProperty from "../../../DataSources/ColorMaterialProperty.js";
+import MaterialProperty from "../../../DataSources/MaterialProperty.js";
+import { getPlanarFillMaterial } from "./_SceneGISPlanarFillMaterial.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import DistanceDisplayCondition from "../../../Core/DistanceDisplayCondition.js";
 import EntityCollection from "../../../DataSources/EntityCollection.js";
@@ -60,11 +62,8 @@ function validateUnsupported(graphic, time) {
 
 function getColor(graphic, time) {
   const material = graphic._material;
-  if (material === undefined) {
+  if (material === undefined || !(material instanceof ColorMaterialProperty)) {
     return Color.clone(Color.WHITE);
-  }
-  if (!(material instanceof ColorMaterialProperty)) {
-    throw new DeveloperError("material must be a ColorMaterialProperty.");
   }
   const color = Color.clone(
     value(material.color, time, Color.WHITE, scratchColor),
@@ -93,6 +92,7 @@ function computeState(visualizer, item, time) {
   if (!Number.isFinite(width) || width < 0) {
     throw new DeveloperError("width must be a finite nonnegative number.");
   }
+  const material = getPlanarFillMaterial(graphic, time);
   const color = getColor(graphic, time);
   const positions = optional(graphic._positions, time);
   if (positions === undefined) {
@@ -154,59 +154,74 @@ function computeState(visualizer, item, time) {
     positions: resolved,
     width,
     color,
+    material,
     distanceDisplayCondition,
     ground: clampToGround,
     boundingSphere,
-    signature: `${distanceDisplayCondition !== undefined}|${clampToGround}|${resolved.length}|${resolved.map((p) => `${p.x},${p.y},${p.z}`).join(";")}|${width}`,
+    signature: `${material?.type ?? Material.ColorType}|${distanceDisplayCondition !== undefined}|${clampToGround}|${resolved.length}|${resolved.map((p) => `${p.x},${p.y},${p.z}`).join(";")}|${width}`,
   };
 }
 
 function createOwner(visualizer, item, state) {
-  const material = Material.fromType(Material.ColorType, {
-    color: Color.clone(state.color),
-  });
-  const appearance = new PolylineMaterialAppearance({
-    material,
-    translucent: state.color.alpha < 1.0,
-  });
-  const PrimitiveType = state.ground
-    ? SceneGISPlanarGroundPrimitive
-    : SceneGISPlanarPrimitive;
-  const primitive = new PrimitiveType({
-    ...(state.ground
-      ? {
-          world: visualizer._world,
-        }
-      : {}),
-    geometry: new SceneGISPlanarPolylineGeometry({
-      positions: state.positions,
-      width: state.width,
-    }),
-    appearance,
-    attributes:
-      state.distanceDisplayCondition === undefined
-        ? undefined
-        : {
-            distanceDisplayCondition:
-              SceneGISPlanarDistanceDisplayCondition.createAttribute(
-                state.distanceDisplayCondition,
-              ),
-          },
-    id: item.entity,
-  });
   const owner = new SceneGISPlanarPrimitiveOwner(visualizer._primitives);
-  owner.add(primitive);
-  owner.primitive = primitive;
-  owner.collection = primitive;
-  owner.appearance = appearance;
-  owner.signature = state.signature;
-  owner.distanceDisplayCondition = DistanceDisplayCondition.clone(
-    state.distanceDisplayCondition,
-  );
-  owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
-  owner.setShadows(state.shadows);
-  owner.shown = true;
-  return owner;
+  try {
+    const material = owner.ownMaterial(
+      Material.fromType(state.material?.type ?? Material.ColorType),
+    );
+    if (state.material !== undefined) {
+      MaterialProperty.getValue(
+        state.material.time,
+        state.material.property,
+        material,
+      );
+    } else {
+      Color.clone(state.color, material.uniforms.color);
+    }
+    const appearance = new PolylineMaterialAppearance({
+      material,
+      translucent: true,
+    });
+    const PrimitiveType = state.ground
+      ? SceneGISPlanarGroundPrimitive
+      : SceneGISPlanarPrimitive;
+    const primitive = new PrimitiveType({
+      ...(state.ground
+        ? {
+            world: visualizer._world,
+          }
+        : {}),
+      geometry: new SceneGISPlanarPolylineGeometry({
+        positions: state.positions,
+        width: state.width,
+      }),
+      appearance,
+      attributes:
+        state.distanceDisplayCondition === undefined
+          ? undefined
+          : {
+              distanceDisplayCondition:
+                SceneGISPlanarDistanceDisplayCondition.createAttribute(
+                  state.distanceDisplayCondition,
+                ),
+            },
+      id: item.entity,
+    });
+    owner.add(primitive);
+    owner.primitive = primitive;
+    owner.collection = primitive;
+    owner.appearance = appearance;
+    owner.signature = state.signature;
+    owner.distanceDisplayCondition = DistanceDisplayCondition.clone(
+      state.distanceDisplayCondition,
+    );
+    owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
+    owner.setShadows(state.shadows);
+    owner.shown = true;
+    return owner;
+  } catch (error) {
+    owner.destroy();
+    throw error;
+  }
 }
 
 function boundingSphereEquals(left, right) {
@@ -224,7 +239,15 @@ function applyState(owner, state) {
   ) {
     return false;
   }
-  Color.clone(state.color, owner.appearance.material.uniforms.color);
+  if (state.material !== undefined) {
+    MaterialProperty.getValue(
+      state.material.time,
+      state.material.property,
+      owner.appearance.material,
+    );
+  } else {
+    Color.clone(state.color, owner.appearance.material.uniforms.color);
+  }
   if (!boundingSphereEquals(owner.boundingSphere, state.boundingSphere)) {
     BoundingSphere.clone(state.boundingSphere, owner.boundingSphere);
   }

@@ -479,15 +479,63 @@ Polygon 的 stRotation 围绕 UV 中心旋转，Entity 的 Polygon/Ellipse/Recta
 贴地 UV 从真实表面深度和 XY extent 重建，先裁剪再旋转。MaterialAppearance 的
 Material/flat/faceForward 被接纳，外层自定义 Shader 不接入。
 空间相交对象保留覆盖顺序及透明叠加；互不冲突对象可合批。
-贴地 Fabric 使用 material.alpha 表达透明，禁止 discard；拾取始终以足迹判断（含透明像素）。
+贴地面 Fabric 使用 material.alpha 表达透明，禁止 discard；拾取始终以足迹判断（含透明像素）。
 
 Polygon/Plane/Ellipse/Rectangle/Box/Cylinder/Ellipsoid/Wall/PolylineVolume/Corridor
 的 Entity material 接受原生 MaterialProperty，例如 ImageMaterialProperty 和 CheckerboardMaterialProperty。
 自定义 MaterialProperty 遵守原生 getType/getValue 与 Fabric 类型注册约定；同类型 uniform 更新复用几何，
-类型切换构建候选 owner。实体与地表仍采用当前 World 的米制坐标。Polyline、Path 和轮廓仍仅支持 Color。
+类型切换构建候选 owner。实体与地表仍采用当前 World 的米制坐标。Polyline 的扩展见下节；Path 和 Polygon outline 的属性入口保持原边界。
 
 Image 含 alpha 时，直接 Fabric 需按原生 Material 契约声明 translucency；
 Entity 可使用 ImageMaterialProperty({ image, transparent: true })。
 显式 textureCoordinates、连续路径 UV 展开以及 Model CustomShader 不在本轮范围。
 
 本地验收入口：`Test/平面材质.html`，包括地形、低倾角、动态 Entity 材质与 128 对象批。
+
+## 平面折线材质（ADR-0182）
+
+`SceneGISPlanarPrimitive` 与 `SceneGISPlanarGroundPrimitive` 的折线接受原生
+`PolylineMaterialAppearance({ material })`。支持 Color、PolylineArrow、PolylineDash，
+以及只依赖 `materialInput.st` 和 uniforms 的自定义 Fabric。直接传入的 Material
+由调用方管理；每批共享一种材质，不自动乘实例 color。需要逐实例颜色继续使用
+`PolylineColorAppearance`。每个实例的 show、distanceDisplayCondition 和 id 保留。
+
+```js
+const material = Cesium.Material.fromType("PolylineDash", {
+  color: Cesium.Color.CYAN,
+  gapColor: Cesium.Color.TRANSPARENT,
+  dashLength: 24,
+});
+const line = new Cesium.SceneGISPlanarGroundPrimitive({
+  world,
+  geometry: new Cesium.SceneGISPlanarPolylineGeometry({ positions, width: 12 }),
+  appearance: new Cesium.PolylineMaterialAppearance({ material }),
+  id: "route",
+});
+scene.primitives.add(line);
+// Uniform updates keep geometry and VA; caller releases material after removing line.
+material.uniforms.color.alpha = 0.5;
+```
+
+普通线的 s 来自源 XYZ 累计长度 / 总长度，贴地线使用 XY 长度（忽略源 Z）；
+每实例独立从 0 到 1。普通线沿原生屏幕扩展网格插值，折角附近不承诺每个像素对应
+精确世界弧长；贴地线按深度重建点至 miter 端面的距离插值。t 为沿行进方向的右 0、
+左 1。重复首点形成闭合 miter 和唯一的 1→0 接缝，周期纹理应在该处一致；Arrow
+在闭合终点结束。width 保留已有像素宽度含义及地形投影方式。地形 LOD、相机和
+modelMatrix 不重算源长度参数，修改 positions 时重新计算。
+
+原生 Dash 的周期/相位基于屏幕像素和量化方向，不是世界米制的沿线 s。
+贴地线支持原生 Dash 的 discard；透明/丢弃像素不可拾取。这与贴地面的足迹拾取不同。
+外层自定义 Shader、依赖任意 varying 或 TBN 光照的 Fabric 不属于贴地线契约。
+
+原生 `PolylineGraphics.material` 接受 `PolylineArrowMaterialProperty`、
+`PolylineDashMaterialProperty` 和遵循原生 getType/getValue 的自定义 MaterialProperty。
+同类型每次 Visualizer.update 都读取属性并修改 uniforms，Viewer clock 冻结亦然；
+类型变化替换必要外观，positions/width 变化替换几何。移除/销毁/候选失败释放派生 Material，
+不销毁调用方 MaterialProperty。自定义 Fabric 类型先通过原生 Material 构造注册。
+
+秒制动画在 MaterialProperty.getValue 中使用
+`JulianDate.secondsDifference(time, epoch)`，引擎不隐式注入 time/frameNumber。
+冻结 Viewer clock 会冻结此动画，但外部颜色等非恒定属性仍会读取。
+本地例子 `Test/平面折线材质.html` 演示 Entity、Primitive、起伏地形、闭合边界、
+颜色/透明度/效果切换、位置修改、拾取和重复增删。

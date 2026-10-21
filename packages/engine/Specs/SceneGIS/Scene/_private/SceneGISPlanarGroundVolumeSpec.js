@@ -5,6 +5,34 @@ import SceneGISPlanarPolylineGeometry from "../../../../Source/SceneGIS/Core/Sce
 import SceneGISPlanarGroundVolume from "../../../../Source/SceneGIS/Scene/_private/_SceneGISPlanarGroundVolume.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarGroundVolume", function () {
+  it("encodes XY metric intervals only for material lines", function () {
+    const geometry = new SceneGISPlanarPolylineGeometry({
+      positions: [
+        new Cartesian3(0, 0, 10),
+        new Cartesian3(10, 0, 1000),
+        new Cartesian3(10, 30, 0),
+      ],
+      width: 12,
+    });
+    const world = { terrainProvider: undefined };
+    const attributes = SceneGISPlanarGroundVolume.create(
+      world,
+      geometry,
+      undefined,
+      true,
+    ).geometry.attributes;
+    expect(Array.from(attributes.segmentTexture.values.slice(0, 2))).toEqual([
+      0, 0.25,
+    ]);
+    expect(Array.from(attributes.segmentTexture.values.slice(16, 18))).toEqual([
+      0.25, 0.75,
+    ]);
+    expect(
+      SceneGISPlanarGroundVolume.create(world, geometry).geometry.attributes
+        .segmentTexture,
+    ).toBeUndefined();
+  });
+
   it("builds a closed large-offset area volume with an outer ring and hole", function () {
     const offset = 20037508.342789244;
     const geometry = new SceneGISPlanarPolygonGeometry({

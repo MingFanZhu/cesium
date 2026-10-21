@@ -1,6 +1,5 @@
 import BoundingSphere from "../../Core/BoundingSphere.js";
 import Cartesian3 from "../../Core/Cartesian3.js";
-import ColorGeometryInstanceAttribute from "../../Core/ColorGeometryInstanceAttribute.js";
 import ComponentDatatype from "../../Core/ComponentDatatype.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import GeometryInstance from "../../Core/GeometryInstance.js";
@@ -145,10 +144,10 @@ function validateAppearance(geometryKind, appearance, attributes) {
     }
     if (
       !(appearance instanceof PolylineMaterialAppearance) ||
-      appearance.material?.type !== Material.ColorType
+      !(appearance.material instanceof Material)
     ) {
       throw new DeveloperError(
-        "Polyline geometry requires PolylineColorAppearance or a Color PolylineMaterialAppearance.",
+        "Polyline geometry requires PolylineColorAppearance or a PolylineMaterialAppearance with a Material.",
       );
     }
     return;
@@ -302,7 +301,8 @@ function createCandidate(primitive, frameState) {
   const origin =
     primitive._batch === undefined ? undefined : entries[0].geometry.origin;
   const materialAppearance =
-    primitive._appearance instanceof MaterialAppearance;
+    primitive._appearance instanceof MaterialAppearance ||
+    primitive._appearance instanceof PolylineMaterialAppearance;
   let volume;
   let bounds;
   let vertexCount = 0;
@@ -323,11 +323,6 @@ function createCandidate(primitive, frameState) {
         : BoundingSphere.union(bounds, created.geometry.boundingSphere, bounds);
     vertexCount += created.geometry.attributes.position.values.length / 3;
     const attributes = cloneAttributes(entry.attributes);
-    if (primitive._appearance instanceof PolylineMaterialAppearance) {
-      attributes.color = ColorGeometryInstanceAttribute.fromColor(
-        primitive._appearance.material.uniforms.color,
-      );
-    }
     return new GeometryInstance({
       geometry: created.geometry,
       id: entry.id,
@@ -362,11 +357,12 @@ function createCandidate(primitive, frameState) {
   const internalAppearance =
     primitive._geometryKind === "polyline"
       ? new Appearance({
-          vertexShaderSource: SceneGISPlanarGroundLineShader.vertexShaderSource,
+          vertexShaderSource:
+            defines + SceneGISPlanarGroundLineShader.vertexShaderSource,
           fragmentShaderSource:
-            SceneGISPlanarGroundLineShader.fragmentShaderSource,
+            defines + SceneGISPlanarGroundLineShader.fragmentShaderSource,
           renderState: Appearance.getDefaultRenderState(false, true),
-          closed: true,
+          closed: !materialAppearance,
           translucent: false,
         })
       : new Appearance({
@@ -437,40 +433,6 @@ function createCandidate(primitive, frameState) {
   };
 }
 
-function syncCurrentPolylineColor(primitive) {
-  if (
-    !(primitive._appearance instanceof PolylineMaterialAppearance) ||
-    !primitive._current?.ready
-  ) {
-    return;
-  }
-  const desired = ColorGeometryInstanceAttribute.toValue(
-    primitive._appearance.material.uniforms.color,
-    primitive._colorScratch,
-  );
-  const current = primitive._currentColor;
-  if (
-    current !== undefined &&
-    current[0] === desired[0] &&
-    current[1] === desired[1] &&
-    current[2] === desired[2] &&
-    current[3] === desired[3]
-  ) {
-    return;
-  }
-  if (primitive._batch === undefined) {
-    primitive._current.getGeometryInstanceAttributes(primitive._id).color =
-      desired;
-  } else {
-    for (const instance of primitive._batch.instances) {
-      primitive._current.getGeometryInstanceAttributes(instance.id).color =
-        desired;
-    }
-  }
-  primitive._currentColor ??= new Uint8Array(4);
-  primitive._currentColor.set(desired);
-}
-
 function preserveCurrentAttributes(primitive) {
   if (primitive._current?.ready !== true) {
     return;
@@ -496,8 +458,9 @@ function preserveCurrentAttributes(primitive) {
  * a stencil/color pair, including for picking. Overlapping areas retain input order; compatible
  * opaque color ranges can also coalesce within the stencil counter capacity.
  * Material batches share one Fabric material and merge only spatially compatible ranges.
- * Picking tests footprints, including zero-alpha material pixels. Ground Fabric must use
- * material.alpha instead of discard to preserve stencil cleanup.
+ * Area picking tests footprints, including zero-alpha pixels; area Fabric must use alpha
+ * instead of discard for stencil cleanup. Line picking follows material alpha/discard coverage.
+ * Line Fabric uses cumulative XY st.s and pixel-width st.t; native Arrow and Dash are supported.
  *
  * @alias SceneGISPlanarGroundPrimitive
  * @constructor
@@ -541,8 +504,6 @@ function SceneGISPlanarGroundPrimitive(options) {
   this._currentPresentationBounds = undefined;
   this._candidateRequired = true;
   this._context = undefined;
-  this._colorScratch = new Uint8Array(4);
-  this._currentColor = undefined;
 }
 
 /**
@@ -697,12 +658,6 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
     this._currentOrigin = Cartesian3.clone(created.volume.origin);
     this._currentEnvelope = created.volume.envelope;
     this._currentPresentationBounds = created.volume.presentationBounds;
-    if (this._appearance instanceof PolylineMaterialAppearance) {
-      this._currentColor = ColorGeometryInstanceAttribute.toValue(
-        this._appearance.material.uniforms.color,
-        this._currentColor,
-      );
-    }
     this._currentBoundingSphere = BoundingSphere.transform(
       created.volume.geometry.boundingSphere,
       created.volume.modelMatrix,
@@ -724,15 +679,21 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
   }
   this._current.show = isEffectivelyShown(this);
   if (frameState.passes.render) {
-    if (this._currentAppearance instanceof MaterialAppearance) {
+    if (
+      this._currentAppearance instanceof MaterialAppearance ||
+      this._currentAppearance instanceof PolylineMaterialAppearance
+    ) {
       if (
         this._current.appearance.material !== this._currentAppearance.material
       ) {
-        validateGroundMaterial(this._currentAppearance.material);
+        validateAppearance(
+          this._geometryKind,
+          this._currentAppearance,
+          this._attributes,
+        );
       }
       this._current.appearance.material = this._currentAppearance.material;
     }
-    syncCurrentPolylineColor(this);
     const modelMatrix = this._current.modelMatrix;
     const envelope = SceneGISPlanarGroundVolume.updateEnvelope(
       this._world,

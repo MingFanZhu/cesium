@@ -95,10 +95,10 @@ function validateAppearance(kind, appearance, attributes) {
     }
     if (
       !(appearance instanceof PolylineMaterialAppearance) ||
-      appearance.material?.type !== Material.ColorType
+      !(appearance.material instanceof Material)
     ) {
       throw new DeveloperError(
-        "Polyline geometry requires PolylineColorAppearance or a Color PolylineMaterialAppearance.",
+        "Polyline geometry requires PolylineColorAppearance or a PolylineMaterialAppearance with a Material.",
       );
     }
     return;
@@ -338,7 +338,20 @@ function createInternal(wrapper, attributes) {
             blending: BlendingState.DISABLED,
           },
         })
-      : appearance;
+      : appearance instanceof PolylineMaterialAppearance
+        ? new PolylineMaterialAppearance({
+            material: appearance.material,
+            translucent: false,
+            // The native getter adds a material-dependent POLYLINE_DASH define.
+            // Retain the raw source so later material swaps can remove that define.
+            vertexShaderSource: appearance._vertexShaderSource,
+            fragmentShaderSource: appearance.fragmentShaderSource,
+            renderState: {
+              ...appearance.renderState,
+              blending: BlendingState.DISABLED,
+            },
+          })
+        : appearance;
   const batch = wrapper._batch;
   const instance =
     batch === undefined
@@ -396,6 +409,7 @@ function createInternal(wrapper, attributes) {
  * Renders a planar geometry or a static batch through Cesium's synchronous standard Primitive path.
  * Batch topology and instance transforms are construction snapshots; create a new primitive to change them.
  * Group instances spatially and by compatible appearance to bound synchronous construction and culling costs.
+ * Lines support PolylineMaterialAppearance with native Fabric (including Arrow/Dash).
  * Non-line geometry supports MaterialAppearance and caller-owned Fabric materials. A batch shares
  * one material; instance color attributes are only consumed by the color appearances.
  * Native solids use native UVs; polygon, wall, and swept surfaces use normalized dominant-axis
@@ -711,7 +725,10 @@ SceneGISPlanarPrimitive.prototype.update = function (frameState) {
     return;
   }
   if (this._current !== undefined) {
-    if (this._currentAppearance instanceof MaterialAppearance) {
+    if (
+      this._currentAppearance instanceof MaterialAppearance ||
+      this._currentAppearance instanceof PolylineMaterialAppearance
+    ) {
       this._current.appearance.material = this._currentAppearance.material;
     }
     this._current.update(frameState);

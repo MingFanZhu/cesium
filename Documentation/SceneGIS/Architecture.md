@@ -778,7 +778,15 @@ pick 保持足迹语义；禁止 Fabric discard，透明用 material.alpha。
 Polygon/Area/Solid/Route Entity adapter 复用原生 MaterialProperty，按类型持有材质，
 同类型变化仅更新 uniform；替换、移除和候选失败释放其自行创建的材质。
 Polygon/Ellipse/Rectangle 支持 finite stRotation，显式 textureCoordinates 仍不接入；
-线与 Path 保持原 Color-only 边界。
+线材质扩展见 ADR-0182；Path 的 MaterialProperty 与 Polygon outline API 仍保持原边界。
+
+ADR-0182 允许普通及贴地 Polyline 使用原生 PolylineMaterialAppearance / Fabric，
+PolylineGraphics 使用同一 MaterialProperty/owner 协议，冻结 clock 时仍逐次 update 求值。
+普通线 s 按源 XYZ 累计长度归一化，贴地线按 XY；每实例独立，闭合线仅有起点 1→0 接缝。
+保留原生像素宽度扩展及折角插值；贴地线从深度与端面重建 st，使用既有单 volume draw。
+原生 Arrow/Dash 与 st/uniform Fabric 可用；Dash 仍按屏幕像素周期。
+线无 stencil 清理，允许 discard，并按材质覆盖拾取；贴地面 no-discard/足迹拾取规则不变。
+Primitive 借用 Material，Entity 拥有派生 Material；逐实例颜色仍用 PolylineColorAppearance。
 
 ADR-0168 扩宽普通 wrapper 的单实例边界：`geometryInstances` 接收兼容 Appearance 的静态实例数组，
 复用原生 GeometryPipeline / Primitive 的 DOUBLE transform、combine、high/low encoding 与 BatchTable。

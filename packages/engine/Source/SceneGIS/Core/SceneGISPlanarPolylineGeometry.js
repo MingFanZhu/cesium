@@ -19,6 +19,10 @@ function cloneFinitePosition(position, name) {
 
 /**
  * A CPU-only immutable description of a straight planar polyline.
+ * Material st.s is cumulative XYZ length / total length; ground rendering uses XY length.
+ * st.t runs from right (0) to left (1): native screen expansion for ordinary lines,
+ * XY width for ground lines. Repeating the first position
+ * closes the miter join with one 1-to-0 UV seam. Every batch instance starts its own UV.
  *
  * @alias SceneGISPlanarPolylineGeometry
  * @constructor
@@ -122,7 +126,7 @@ Object.defineProperties(SceneGISPlanarPolylineGeometry.prototype, {
 
 /** @private */
 SceneGISPlanarPolylineGeometry.prototype._createGeometry = function () {
-  return PolylineGeometry.createGeometry(
+  const geometry = PolylineGeometry.createGeometry(
     new PolylineGeometry({
       positions: this._localPositions,
       width: this._width,
@@ -130,6 +134,34 @@ SceneGISPlanarPolylineGeometry.prototype._createGeometry = function () {
       vertexFormat: PolylineMaterialAppearance.VERTEX_FORMAT,
     }),
   );
+  // Remap the native index-based s after native duplicate removal. Keep its width/tessellation.
+  const attributes = geometry.attributes;
+  const positions = attributes.position.values;
+  const st = attributes.st.values;
+  const count = (positions.length / 3 + 4) / 4;
+  const distances = [0];
+  const points = [];
+  for (let i = 0; i < count; ++i) {
+    const index = i === 0 ? 0 : i * 4 - 2;
+    points.push(Cartesian3.unpack(positions, index * 3, new Cartesian3()));
+    if (i > 0) {
+      distances.push(
+        distances[i - 1] + Cartesian3.distance(points[i - 1], points[i]),
+      );
+    }
+  }
+  for (let i = 0; i < st.length; i += 2) {
+    st[i] = distances[Math.round(st[i] * (count - 1))] / distances[count - 1];
+  }
+  if (Cartesian3.equals(points[0], points[count - 1])) {
+    const previous = attributes.prevPosition.values;
+    const next = attributes.nextPosition.values;
+    for (let i = 0; i < 2; ++i) {
+      Cartesian3.pack(points[count - 2], previous, i * 3);
+      Cartesian3.pack(points[1], next, positions.length - 6 + i * 3);
+    }
+  }
+  return geometry;
 };
 
 /** @private */
