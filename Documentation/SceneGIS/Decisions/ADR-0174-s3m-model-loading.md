@@ -58,6 +58,24 @@ The budget is a soft content/GPU limit and preserves visible coverage and ancest
 Pixel range mode retains framebuffer pixels; geometric-error mode accounts for
 pixel ratio. Distance and geometric-error ranges follow the placement matrix scale.
 
+### Runtime placement (2026-10-21)
+
+Expose a live, assignable `modelMatrix`, following the native tileset property
+usage but retaining S3M's complete local-to-World placement semantics. Assignment
+clones and requests rendering; in-place edits are detected on the next normal
+render frame. Public bounds reflect the requested placement immediately, while
+pick-only passes retain the last rendered placement.
+
+Keep authored local root/page bounds and unscaled PageLOD ranges. A changed
+matrix updates cached and pending Models and derives bounds and metric ranges
+from those originals, before main and observer selection. Native Model bounds
+remain authoritative for ready leaves with placeholder S3M metadata. Reapply
+placement when async Models are published, so promises completing across edits
+cannot restore an older transform. Do not redecode, discard the cache or rebuild
+resources solely for a placement edit. Unchanged frames only compare two matrices;
+an edit performs linear work over cached tiles/pages. Explicit World identity,
+format qualification and native instance transforms remain unchanged.
+
 ## Build and ownership
 
 Approve the exact new owned entry

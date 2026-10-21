@@ -2,6 +2,7 @@ import {
   BoundingSphere,
   Cartesian3,
   DeveloperError,
+  Event,
   Intersect,
   Matrix4,
   Model,
@@ -97,7 +98,14 @@ describe("SceneGIS/Scene/SceneGISS3MLayer", function () {
   function model() {
     return {
       ready: true,
-      boundingSphere: new BoundingSphere(Cartesian3.ZERO, 1),
+      modelMatrix: Matrix4.clone(Matrix4.IDENTITY),
+      errorEvent: new Event(),
+      get boundingSphere() {
+        return BoundingSphere.transform(
+          new BoundingSphere(Cartesian3.ZERO, 1),
+          this.modelMatrix,
+        );
+      },
       update: jasmine.createSpy("update"),
       statistics: { geometryByteLength: 10, texturesByteLength: 20 },
       isDestroyed: () => false,
@@ -112,6 +120,8 @@ describe("SceneGIS/Scene/SceneGISS3MLayer", function () {
     });
     const child = {
       resource: childResource,
+      localSphere: new BoundingSphere(Cartesian3.ZERO, 1),
+      sphere: new BoundingSphere(Cartesian3.ZERO, 1),
       state: "loading",
       generation: 0,
       depth: 1,
@@ -120,9 +130,11 @@ describe("SceneGIS/Scene/SceneGISS3MLayer", function () {
     };
     const page = {
       model: parentModel,
+      localSphere: new BoundingSphere(Cartesian3.ZERO, 1),
       sphere: new BoundingSphere(Cartesian3.ZERO, 1),
       rangeMode,
       range,
+      localRange: range,
       child: childResource,
     };
     parent.pages = [page];
@@ -142,6 +154,151 @@ describe("SceneGIS/Scene/SceneGISS3MLayer", function () {
     spyOn(layer, "_request");
     expect(() => layer.update(f)).toThrowError(DeveloperError);
     expect(layer._request).not.toHaveBeenCalled();
+  });
+
+  it("exposes complete live placement and immediate bounds without publishing a pick transform", async function () {
+    await create();
+    const f = frame();
+    const { parentModel } = parentAndChild();
+    layer.update(f);
+    const requested = Matrix4.fromScale(new Cartesian3(2, 3, 4));
+    requested[12] = 30;
+    layer.modelMatrix = requested;
+    requested[12] = 90;
+    expect(layer.modelMatrix[12]).toBe(30);
+    expect(layer.tilesLoaded).toBe(false);
+    expect(f.camera._scene.requestRender).toHaveBeenCalled();
+    layer.show = false;
+    expect(layer.boundingSphere.center).toEqual(new Cartesian3(30, 0, 0));
+    expect(layer.boundingSphere.radius).toBeCloseTo(Math.sqrt(3) * 4, 10);
+    layer.show = true;
+    layer.modelMatrix[13] = 20;
+    expect(layer.boundingSphere.center).toEqual(new Cartesian3(30, 20, 0));
+    f.passes = { pick: true };
+    layer.update(f);
+    expect(parentModel.modelMatrix).toEqual(Matrix4.IDENTITY);
+    f.passes = { render: true };
+    layer.update(f);
+    expect(parentModel.modelMatrix).toEqual(layer.modelMatrix);
+    expect(layer._roots[0].sphere.center).toEqual(new Cartesian3(30, 20, 0));
+    expect(layer._selected[0].model).toBe(parentModel);
+    expect(parentModel.destroy).not.toHaveBeenCalled();
+    // Repeated changes always recompute from local source bounds.
+    layer.modelMatrix = Matrix4.IDENTITY;
+    layer.update(f);
+    expect(layer.boundingSphere.radius).toBeCloseTo(Math.sqrt(3), 10);
+    expect(layer._roots[0].sphere.center).toEqual(Cartesian3.ZERO);
+    const publishedSphere = layer._roots[0].pages[0].sphere;
+    layer.update(f);
+    expect(layer._roots[0].pages[0].sphere).toBe(publishedSphere);
+  });
+
+  it("rescales authored metric ranges and uses new bounds for main and observer culling", async function () {
+    await create();
+    const f = frame();
+    const { page, parentModel, child } = parentAndChild(0, 2);
+    const observer = {
+      camera: f.camera,
+      cullingVolume: {
+        computeVisibility: (sphere) =>
+          sphere.center.x > 10 ? Intersect.INSIDE : Intersect.OUTSIDE,
+      },
+      resolution: 128,
+      sources: [layer],
+      sourceStates: new Map(),
+    };
+    f._sceneGISViewsheds = [observer];
+    f.cullingVolume = { computeVisibility: () => Intersect.OUTSIDE };
+    layer.update(f);
+    expect(observer.sourceStates.get(layer).selected.length).toBe(0);
+    const placement = Matrix4.fromUniformScale(3);
+    placement[12] = 20;
+    layer.modelMatrix = placement;
+    layer.update(f);
+    expect(observer.sourceStates.get(layer).selected[0].model).toBe(
+      parentModel,
+    );
+    expect(page.sphere.center.x).toBe(20);
+    expect(child.sphere.center.x).toBe(20);
+    expect(page.range).toBe(6);
+    expect(layer._selected.length).toBe(0);
+    for (const [mode, expected] of [
+      [1, 2],
+      [2, 8],
+    ]) {
+      page.rangeMode = mode;
+      layer.modelMatrix = Matrix4.fromUniformScale(4);
+      layer.update(f);
+      expect(page.range).toBe(expected);
+      layer.modelMatrix = Matrix4.IDENTITY;
+      layer.update(f);
+      expect(page.range).toBe(2);
+    }
+    expect(layer.statistics.requests).toBe(0);
+  });
+
+  it("applies the latest placement to Models completed after a transform change", async function () {
+    await create();
+    let resolve;
+    spyOn(Model, "fromGltfAsync").and.returnValue(
+      new Promise((r) => {
+        resolve = r;
+      }),
+    );
+    const tile = layer._roots[0];
+    tile.decoded = {
+      pages: [
+        {
+          glb: new Uint8Array(1),
+          center: [0, 0, 0],
+          radius: 1,
+          range: 2,
+          rangeMode: 0,
+        },
+      ],
+    };
+    const preparation = layer._prepareModels(tile);
+    const placement = Matrix4.fromUniformScale(2);
+    placement[12] = 40;
+    layer.modelMatrix = placement;
+    const f = frame();
+    layer.update(f);
+    const candidate = model();
+    resolve(candidate);
+    await preparation;
+    // An in-place edit after promise completion must be applied on publication too.
+    layer.modelMatrix[13] = 25;
+    layer.update(f);
+    expect(candidate.modelMatrix).toEqual(layer.modelMatrix);
+    expect(tile.pages[0].sphere.center).toEqual(new Cartesian3(40, 25, 0));
+    expect(tile.pages[0].sphere.radius).toBe(2);
+    expect(tile.pages[0].range).toBe(4);
+    expect(layer._selected[0].model).toBe(candidate);
+    expect(Model.fromGltfAsync).toHaveBeenCalledTimes(1);
+    expect(layer.statistics.requests).toBe(0);
+    expect(candidate.destroy).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid matrix assignment and validates in-place edits before render mutation", async function () {
+    await create();
+    const instance = layer;
+    for (const invalid of [
+      undefined,
+      new Matrix4(),
+      Object.assign(Matrix4.clone(Matrix4.IDENTITY), { 3: 1 }),
+      Object.assign(Matrix4.clone(Matrix4.IDENTITY), { 12: NaN }),
+    ]) {
+      expect(() => {
+        instance.modelMatrix = invalid;
+      }).toThrowDeveloperError();
+      expect(layer.modelMatrix).toEqual(Matrix4.IDENTITY);
+    }
+    layer.modelMatrix[0] = NaN;
+    spyOn(layer, "_advance");
+    expect(() => layer.update(frame())).toThrowDeveloperError();
+    expect(layer._advance).not.toHaveBeenCalled();
+    expect(() => layer.boundingSphere).toThrowDeveloperError();
+    expect(layer._appliedMatrix).toEqual(Matrix4.IDENTITY);
   });
 
   it("derives direct and iServer URLs while preserving headers and query parameters", async function () {

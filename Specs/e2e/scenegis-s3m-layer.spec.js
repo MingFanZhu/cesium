@@ -180,6 +180,123 @@ for (const planar of [false, true]) {
           report.hits.some((hit) => hit.kind === "object" && hit.id !== ""),
         ).toBe(true);
       }
+      const transformed = await page.evaluate(async () => {
+        const t = window.s3mLayerTest;
+        const { C, viewer, layer } = t;
+        const initial = C.Matrix4.clone(layer.modelMatrix);
+        const originalCamera = {
+          destination: C.Cartesian3.clone(viewer.camera.positionWC),
+          orientation: {
+            direction: C.Cartesian3.clone(viewer.camera.directionWC),
+            up: C.Cartesian3.clone(viewer.camera.upWC),
+          },
+        };
+        const models = [...layer._tiles.values()].flatMap((tile) =>
+          tile.pages.map((page) => page.model).filter(Boolean),
+        );
+        const before = layer.statistics;
+        const local = C.Matrix4.fromRotationTranslation(
+          C.Matrix3.fromRotationZ(0.35),
+          new C.Cartesian3(150, 80, 50),
+        );
+        C.Matrix4.multiplyByUniformScale(local, 1.2, local);
+        layer.modelMatrix = C.Matrix4.multiply(initial, local, new C.Matrix4());
+        const delta = C.Matrix4.multiply(
+          layer.modelMatrix,
+          C.Matrix4.inverse(initial, new C.Matrix4()),
+          new C.Matrix4(),
+        );
+        const direction = C.Matrix4.multiplyByPointAsVector(
+          delta,
+          originalCamera.orientation.direction,
+          new C.Cartesian3(),
+        );
+        const up = C.Matrix4.multiplyByPointAsVector(
+          delta,
+          originalCamera.orientation.up,
+          new C.Cartesian3(),
+        );
+        viewer.camera.setView({
+          destination: C.Matrix4.multiplyByPoint(
+            delta,
+            originalCamera.destination,
+            new C.Cartesian3(),
+          ),
+          orientation: {
+            direction: C.Cartesian3.normalize(direction, direction),
+            up: C.Cartesian3.normalize(up, up),
+          },
+        });
+        await new Promise((resolve) => {
+          const remove = viewer.scene.postRender.addEventListener(() => {
+            remove();
+            resolve();
+          });
+        });
+        const hits = [];
+        for (let y = 90; y < 500 && hits.length < 8; y += 12) {
+          for (let x = 180; x < 800 && hits.length < 8; x += 12) {
+            const hit = viewer.scene.pick(new C.Cartesian2(x, y));
+            if (
+              hit?.primitive?.id === layer &&
+              typeof hit.getProperty === "function"
+            ) {
+              hits.push({
+                id: hit.getProperty("s3mId"),
+                kind: hit.getProperty("idKind"),
+              });
+            }
+          }
+        }
+        t.restoreTransform = { initial, originalCamera, models };
+        return {
+          hits,
+          before,
+          after: layer.statistics,
+          applied: models.every((model) =>
+            C.Matrix4.equals(model.modelMatrix, layer.modelMatrix),
+          ),
+          retained: models.every((model) => !model.isDestroyed()),
+          errors: t.renderErrors,
+        };
+      });
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `${name}-${planar ? "planar" : "globe"}-transformed.png`,
+        ),
+      });
+      await testInfo.attach("transform-report", {
+        body: JSON.stringify(transformed, null, 2),
+        contentType: "application/json",
+      });
+      expect(transformed.errors).toEqual([]);
+      expect(transformed.applied && transformed.retained).toBe(true);
+      expect(transformed.after).toEqual(transformed.before);
+      expect(transformed.hits.length).toBeGreaterThan(0);
+      expect(
+        transformed.hits.some((hit) =>
+          report.hits.some(
+            (original) => original.id === hit.id && original.kind === hit.kind,
+          ),
+        ),
+      ).toBe(true);
+      const restored = await page.evaluate(async () => {
+        const { C, viewer, layer, restoreTransform } = window.s3mLayerTest;
+        const { initial, originalCamera, models } = restoreTransform;
+        C.Matrix4.clone(initial, layer.modelMatrix);
+        viewer.camera.setView(originalCamera);
+        viewer.scene.requestRender();
+        await new Promise((resolve) => {
+          const remove = viewer.scene.postRender.addEventListener(() => {
+            remove();
+            resolve();
+          });
+        });
+        return models.every((model) =>
+          C.Matrix4.equals(model.modelMatrix, initial),
+        );
+      });
+      expect(restored).toBe(true);
       await page.evaluate(() => {
         const t = window.s3mLayerTest;
         t.viewer.scene.environmentEffects.enabled = true;

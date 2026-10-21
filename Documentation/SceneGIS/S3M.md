@@ -72,6 +72,36 @@ viewer.scene.primitives.remove(layer); // Default collection ownership destroys 
 `s3mId` 为空字符串。不会伪造业务 ID。实例化保留原始实例 ID，按实例颜色分组后
 交给原生 GPU instancing，不按每个业务对象创建独立 Model。
 
+## 运行时变换
+
+`layer.modelMatrix` 可读写，也允许原地修改，支持平移、旋转和缩放。它是完整的
+**S3M 局部米制坐标到当前 World 的放置矩阵**；球面默认值已包含 SCP 的 ENU
+定位，赋值会替换整个放置矩阵。需要相对初始位置调整时，应先保存初始矩阵并组合：
+
+```js
+const initialMatrix = Cesium.Matrix4.clone(layer.modelMatrix);
+// Move 20 metres along the original local up axis; preserve the ENU frame.
+layer.modelMatrix = Cesium.Matrix4.multiplyByTranslation(
+  initialMatrix,
+  new Cesium.Cartesian3(0, 0, 20),
+  new Cesium.Matrix4(),
+);
+viewer.camera.flyToBoundingSphere(layer.boundingSphere);
+
+// Restore in place. In requestRenderMode, explicitly request a frame.
+Cesium.Matrix4.clone(initialMatrix, layer.modelMatrix);
+viewer.scene.requestRender();
+```
+
+赋值会复制输入并请求渲染；`boundingSphere` 立即反映新矩阵，可在首次渲染前定位。
+下一正常渲染帧同步更新已缓存模型、瓦片包围体、距离与几何误差 LOD 阈值，像素
+LOD 阈值保持像素单位。异步完成的模型也使用最新矩阵；不会因修改矩阵而重新解码、
+清空缓存或重建 GPU 模型。位置变化导致新区域可见时，仍按正常 LOD 选择请求数据。
+单独的拾取帧沿用上一正常渲染帧的位置，与当前画面保持一致。
+
+矩阵必须有限、仿射且最大缩放非零。变换不会改变绑定的 World，也不会自动投影
+数据坐标或重新解释实例内部变换。示例提供局部 XYZ 偏移、旋转、缩放和复位控件。
+
 ## 本轮资格范围
 
 已用官方精模 CBD、comModel 实例化构件、晋江倾斜摄影在球面与平面验证。

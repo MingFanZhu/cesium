@@ -34,22 +34,26 @@ function validatePlacement(options) {
     );
   }
   if (matrix !== undefined) {
-    for (let i = 0; i < 16; i++) {
-      if (!Number.isFinite(matrix[i])) {
-        throw new DeveloperError("modelMatrix must be finite and affine.");
-      }
+    validateMatrix(matrix);
+  }
+}
+
+function validateMatrix(matrix) {
+  for (let i = 0; i < 16; i++) {
+    if (!Number.isFinite(matrix?.[i])) {
+      throw new DeveloperError("modelMatrix must be finite and affine.");
     }
-    if (
-      matrix[3] !== 0 ||
-      matrix[7] !== 0 ||
-      matrix[11] !== 0 ||
-      matrix[15] !== 1 ||
-      Matrix4.getMaximumScale(matrix) === 0
-    ) {
-      throw new DeveloperError(
-        "modelMatrix must be finite and affine with nonzero scale.",
-      );
-    }
+  }
+  if (
+    matrix[3] !== 0 ||
+    matrix[7] !== 0 ||
+    matrix[11] !== 0 ||
+    matrix[15] !== 1 ||
+    Matrix4.getMaximumScale(matrix) === 0
+  ) {
+    throw new DeveloperError(
+      "modelMatrix must be finite and affine with nonzero scale.",
+    );
   }
 }
 
@@ -111,16 +115,19 @@ function readConfig(config, options) {
     ) {
       throw new RuntimeError("Invalid S3M root URL or bounding box.");
     }
-    const sphere = BoundingSphere.fromCornerPoints(min, max);
-    return { url: tile.url, sphere: BoundingSphere.transform(sphere, matrix) };
+    return {
+      url: tile.url,
+      localSphere: BoundingSphere.fromCornerPoints(min, max),
+    };
   });
   return { matrix, roots };
 }
 
-function newTile(resource, sphere, depth) {
+function newTile(resource, localSphere, matrix, depth) {
   return {
     resource,
-    sphere,
+    localSphere: BoundingSphere.clone(localSphere),
+    sphere: BoundingSphere.transform(localSphere, matrix),
     depth,
     state: "unloaded",
     generation: 0,
@@ -137,6 +144,50 @@ function newTile(resource, sphere, depth) {
 
 function isReady(tile) {
   return tile?.state === "ready";
+}
+
+function placePage(layer, page) {
+  if (page.model) {
+    page.model.modelMatrix = Matrix4.clone(
+      layer._appliedMatrix,
+      page.model.modelMatrix,
+    );
+  }
+  if (!page.child && page.model?.ready) {
+    // Legacy leaf metadata may contain placeholder bounds. Native Model computes
+    // its actual world bounds from the new matrix without requiring a draw.
+    BoundingSphere.clone(page.model.boundingSphere, page.sphere);
+  } else {
+    BoundingSphere.transform(
+      page.localSphere,
+      layer._appliedMatrix,
+      page.sphere,
+    );
+  }
+  page.range =
+    page.localRange * (page.rangeMode === 1 ? 1 : layer._matrixScale);
+}
+
+function updatePlacement(layer) {
+  if (Matrix4.equals(layer._matrix, layer._appliedMatrix)) {
+    return;
+  }
+  validateMatrix(layer._matrix);
+  Matrix4.clone(layer._matrix, layer._appliedMatrix);
+  layer._matrixScale = Matrix4.getMaximumScale(layer._appliedMatrix);
+  for (const tile of layer._tiles.values()) {
+    BoundingSphere.transform(
+      tile.localSphere,
+      layer._appliedMatrix,
+      tile.sphere,
+    );
+    for (const page of tile.pages) {
+      placePage(layer, page);
+    }
+    for (const page of tile.pending ?? []) {
+      placePage(layer, page);
+    }
+  }
 }
 
 const pixelScratch = new Cartesian2();
@@ -194,6 +245,7 @@ function SceneGISS3MLayer(options) {
   const { matrix, roots } = readConfig(options._config, options);
   this._world = options.world;
   this._matrix = matrix;
+  this._appliedMatrix = Matrix4.clone(matrix);
   this._matrixScale = Matrix4.getMaximumScale(matrix);
   this._resource = options._resource;
   this._guid = createGuid();
@@ -264,12 +316,12 @@ function SceneGISS3MLayer(options) {
     const resource = this._resource.getDerivedResource({
       url: `${prefix}${root.url.replace(/^\.\//, "")}`,
     });
-    const tile = newTile(resource, root.sphere, 0);
+    const tile = newTile(resource, root.localSphere, matrix, 0);
     this._tiles.set(resource.url, tile);
     return tile;
   });
   this._boundingSphere = BoundingSphere.fromBoundingSpheres(
-    roots.map((r) => r.sphere),
+    this._roots.map((r) => r.sphere),
   );
 }
 
@@ -307,6 +359,30 @@ SceneGISS3MLayer.fromUrl = async function (url, options = {}) {
 };
 
 Object.defineProperties(SceneGISS3MLayer.prototype, {
+  /**
+   * Complete local-metre-to-World placement matrix, including the SCP ENU frame
+   * when the Globe placement was inferred. Assigning replaces that placement;
+   * it is not an extra transform multiplied by the SCP frame.
+   * Assignment clones the input and requests a frame. The getter returns a live
+   * matrix, like Cesium3DTileset.modelMatrix; after editing it in place, request
+   * a frame when using Scene.requestRenderMode.
+   * Normal rendering applies changes to cached and subsequently loaded content,
+   * culling and LOD without decoding again. Pick-only passes retain the last
+   * normal-render placement. boundingSphere reflects edits immediately.
+   * @memberof SceneGISS3MLayer.prototype
+   * @type {Matrix4}
+   * @exception {DeveloperError} The matrix must be finite and affine with nonzero scale.
+   */
+  modelMatrix: {
+    get: function () {
+      return this._matrix;
+    },
+    set: function (value) {
+      validateMatrix(value);
+      Matrix4.clone(value, this._matrix);
+      this._wake();
+    },
+  },
   /** @memberof SceneGISS3MLayer.prototype
    * @type {SceneGISPlanarWorld|undefined}
    * @readonly
@@ -323,6 +399,13 @@ Object.defineProperties(SceneGISS3MLayer.prototype, {
    */
   boundingSphere: {
     get: function () {
+      validateMatrix(this._matrix);
+      BoundingSphere.fromBoundingSpheres(
+        this._roots.map((root) =>
+          BoundingSphere.transform(root.localSphere, this._matrix),
+        ),
+        this._boundingSphere,
+      );
       return BoundingSphere.clone(this._boundingSphere);
     },
   },
@@ -334,7 +417,9 @@ Object.defineProperties(SceneGISS3MLayer.prototype, {
    */
   tilesLoaded: {
     get: function () {
-      return this._tilesLoaded;
+      return (
+        this._tilesLoaded && Matrix4.equals(this._matrix, this._appliedMatrix)
+      );
     },
   },
   /** Receives (error, contentUrl) once per failed content load; no automatic retry.
@@ -491,7 +576,7 @@ SceneGISS3MLayer.prototype._prepareModels = function (tile) {
       model = await Model.fromGltfAsync({
         gltf: record.glb,
         basePath: identity,
-        modelMatrix: this._matrix,
+        modelMatrix: this._appliedMatrix,
         upAxis: Axis.Z,
         forwardAxis: Axis.X,
         id: this,
@@ -508,14 +593,15 @@ SceneGISS3MLayer.prototype._prepareModels = function (tile) {
         return undefined;
       }
     }
-    const sphere = BoundingSphere.transform(
-      new BoundingSphere(Cartesian3.fromArray(record.center), record.radius),
-      this._matrix,
+    const localSphere = new BoundingSphere(
+      Cartesian3.fromArray(record.center),
+      record.radius,
     );
     return {
       model,
-      sphere,
-      range: record.range * (record.rangeMode === 1 ? 1 : this._matrixScale),
+      localSphere,
+      sphere: BoundingSphere.transform(localSphere, this._appliedMatrix),
+      localRange: record.range,
       rangeMode: record.rangeMode,
       child: record.child
         ? tile.resource.getDerivedResource({ url: record.child })
@@ -550,7 +636,10 @@ SceneGISS3MLayer.prototype._advance = function (tile, frameState) {
     tile.pending = undefined;
     tile.state = "processing";
     const generation = tile.generation;
-    for (const { model } of tile.pages) {
+    for (const page of tile.pages) {
+      // A Model promise may finish after any number of placement edits.
+      placePage(this, page);
+      const model = page.model;
       model?.errorEvent.addEventListener((error) => {
         if (validCompletion(this, tile, generation)) {
           tile.failure = error;
@@ -645,7 +734,12 @@ SceneGISS3MLayer.prototype._select = function (tile, frameState, observer) {
     ) {
       let child = this._tiles.get(page.child.url);
       if (!child) {
-        child = newTile(page.child, page.sphere, tile.depth + 1);
+        child = newTile(
+          page.child,
+          page.localSphere,
+          this._appliedMatrix,
+          tile.depth + 1,
+        );
         this._tiles.set(page.child.url, child);
       }
       this._select(child, frameState, observer);
@@ -740,6 +834,7 @@ SceneGISS3MLayer.prototype.update = function (frameState) {
   if (normal) {
     this._scene = scene;
     this._context = frameState.context;
+    updatePlacement(this);
     this._frame++;
     for (const tile of this._tiles.values()) {
       this._advance(tile, frameState);

@@ -23,6 +23,8 @@
         color: #263744;
         font: 14px/1.6 sans-serif;
         border-radius: 5px;
+        max-height: calc(100% - 52px);
+        overflow-y: auto;
       }
       h3 {
         margin: 0 0 10px;
@@ -34,6 +36,9 @@
       select,
       button {
         font: inherit;
+      }
+      input[type="number"] {
+        width: 80px;
       }
       #status {
         white-space: pre-wrap;
@@ -61,6 +66,47 @@
         </select></label
       >
       <button id="locate">定位</button>
+      <details>
+        <summary>运行时 modelMatrix</summary>
+        <label
+          >局部 X 偏移（米）<input
+            id="offsetX"
+            type="number"
+            value="0"
+            step="10"
+        /></label>
+        <label
+          >局部 Y 偏移（米）<input
+            id="offsetY"
+            type="number"
+            value="0"
+            step="10"
+        /></label>
+        <label
+          >局部 Z 偏移（米）<input
+            id="offsetZ"
+            type="number"
+            value="0"
+            step="10"
+        /></label>
+        <label
+          >绕局部 Z 旋转（度）<input
+            id="heading"
+            type="number"
+            value="0"
+            step="10"
+        /></label>
+        <label
+          >统一缩放<input
+            id="scale"
+            type="number"
+            value="1"
+            min="0.01"
+            step="0.1"
+        /></label>
+        <button id="resetTransform">恢复初始矩阵</button>
+        <p>在初始放置矩阵上组合局部变换；修改后可点击“定位”。</p>
+      </details>
       <label><input id="show" type="checkbox" checked /> 显示图层</label>
       <label><input id="environment" type="checkbox" /> 高级环境</label>
       <label
@@ -174,6 +220,41 @@
         }
         viewer.scene.primitives.add(layer);
         window.s3mExample.layer = layer;
+        const initialMatrix = C.Matrix4.clone(layer.modelMatrix);
+        const transformIds = [
+          "offsetX",
+          "offsetY",
+          "offsetZ",
+          "heading",
+          "scale",
+        ];
+        const applyTransform = () => {
+          const values = transformIds.map(
+            (id) => document.querySelector(`#${id}`).valueAsNumber,
+          );
+          if (!values.every(Number.isFinite) || values[4] <= 0) {
+            return;
+          }
+          const local = C.Matrix4.fromRotationTranslation(
+            C.Matrix3.fromRotationZ(C.Math.toRadians(values[3])),
+            new C.Cartesian3(values[0], values[1], values[2]),
+          );
+          C.Matrix4.multiplyByUniformScale(local, values[4], local);
+          layer.modelMatrix = C.Matrix4.multiply(
+            initialMatrix,
+            local,
+            new C.Matrix4(),
+          );
+        };
+        for (const id of transformIds) {
+          document.querySelector(`#${id}`).oninput = applyTransform;
+        }
+        document.querySelector("#resetTransform").onclick = () => {
+          for (const id of transformIds) {
+            document.querySelector(`#${id}`).value = id === "scale" ? "1" : "0";
+          }
+          layer.modelMatrix = initialMatrix;
+        };
         layer.tileFailed.addEventListener((error) => {
           failure = error.message ?? String(error);
         });
