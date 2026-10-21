@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: extension
-- Status: active
+- Status: implemented; owner visual acceptance pending
 - Owner role: architecture
 - Architecture review: confirmed；用户已同意实施
 - Architecture reviewer: current task self-review
@@ -64,14 +64,14 @@ depth resolution / bias、sources、terrain、opacity、enabled、showFrustum。
 
 ## Phase roadmap
 
-| Phase | Objective                            | Entry gate                          | Exit gate                                                                       | Status      |
-| ----- | ------------------------------------ | ----------------------------------- | ------------------------------------------------------------------------------- | ----------- |
-| P1    | 提炼共享观察通道，保持 Viewshed 行为 | ADR / SGP、源码与 phase plan 已核对 | 深度、offscreen selection、严格绑定、shadow / 多实例隔离回归通过并提交          | completed   |
-| P2    | 视频资源、公开 API、遮挡投射         | P1 已提交；当前 phase plan 已建立   | 新帧 / 暂停 / seek / 换源 / 比例 / 颜色 / 销毁测试，build / types，通过后提交   | completed   |
-| P3    | 双世界示例、集成与开销验收           | P2 已提交；资格 plan 已建立         | 地形 / Model / 3D Tiles / S3M、共存、有限性能证据与本地视频示例，提交后视觉验收 | not started |
+| Phase | Objective                            | Entry gate                          | Exit gate                                                                       | Status    |
+| ----- | ------------------------------------ | ----------------------------------- | ------------------------------------------------------------------------------- | --------- |
+| P1    | 提炼共享观察通道，保持 Viewshed 行为 | ADR / SGP、源码与 phase plan 已核对 | 深度、offscreen selection、严格绑定、shadow / 多实例隔离回归通过并提交          | completed |
+| P2    | 视频资源、公开 API、遮挡投射         | P1 已提交；当前 phase plan 已建立   | 新帧 / 暂停 / seek / 换源 / 比例 / 颜色 / 销毁测试，build / types，通过后提交   | completed |
+| P3    | 双世界示例、集成与开销验收           | P2 已提交；资格 plan 已建立         | 地形 / Model / 3D Tiles / S3M、共存、有限性能证据与本地视频示例，提交后视觉验收 | completed |
 
 每阶段完成代码、Specs、ADR / SGP 与 review 后形成独立本地提交，再进入下一阶段。
-当前阶段：[P2](2026-10-21-p2-media.md) 已完成；P3 尚未激活。
+[P3](2026-10-21-p3-qualification.md) 技术验证已完成，待负责人视觉验收。
 
 ## Media update and bounded cost
 

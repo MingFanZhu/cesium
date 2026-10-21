@@ -1,11 +1,11 @@
 # Discussion: 视频投射与可视域共享什么
 
 - Type: discussion
-- Status: resolved as implementation proposal
+- Status: resolved; implemented by ADR-0177
 - Owner role: architecture
 - Created / Updated: 2026-10-21
 - Plan: [extension](../plans/2026-10-21-extension.md)
-- Resulting ADR: 待 P1 激活前登记
+- Resulting ADR: [ADR-0177](../../../Documentation/SceneGIS/Decisions/ADR-0177-video-projection.md)
 - Related SGP: SGP-0065
 
 ## Source facts and options
@@ -26,3 +26,6 @@ PostProcessStage 的 image uniform 不提供完整持续视频更新。Material 
 首版借用 HTMLVideoElement，提供 GIS 显示融合；播放器和物理投影光源不在范围内。
 准备完成，尚无视频产品代码。P1 先证明 Viewshed 行为不变并提交，再进入视频帧管理。
 公开名称与画幅参数仍是建议，以进入 P2 时的 phase plan / ADR 为准。
+
+实施记录：P1 / P2 已提交，P3 技术验证见 [review](../reviews/2026-10-21-p3.md)。
+上述建议已按阶段落地，首版透明前景限制见正式 API 文档。

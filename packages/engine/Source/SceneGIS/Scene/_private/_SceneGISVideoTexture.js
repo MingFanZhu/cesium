@@ -54,6 +54,7 @@ class VideoTexture {
     };
     for (const name of ["emptied", "loadstart"]) {
       listen(name, () => {
+        this._cancel();
         this.ready = false;
         this.error = undefined;
         dirty();
@@ -64,7 +65,11 @@ class VideoTexture {
       this.ready = false;
       dirty();
     });
-    for (const name of ["loadeddata", "seeked", "resize"]) {
+    listen("resize", () => {
+      this.ready = false;
+      dirty();
+    });
+    for (const name of ["loadeddata", "seeked"]) {
       listen(name, dirty);
     }
     listen("error", () => {

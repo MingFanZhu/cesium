@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>双世界视频投射</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      aside {
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        width: 288px;
+        max-height: calc(100% - 48px);
+        overflow: auto;
+        padding: 14px;
+        border-radius: 8px;
+        background: #f5f8fbf2;
+        color: #233341;
+        font: 13px/1.6 system-ui;
+      }
+      h3 {
+        margin: 0 0 8px;
+      }
+      label {
+        display: block;
+        margin: 5px 0;
+      }
+      select,
+      button,
+      input {
+        font: inherit;
+      }
+      input[type="number"] {
+        width: 64px;
+      }
+      input[type="range"] {
+        width: 150px;
+        vertical-align: middle;
+      }
+      button {
+        margin: 3px 0;
+      }
+      p {
+        margin: 8px 0;
+      }
+      #status {
+        white-space: pre-line;
+      }
+      #error {
+        color: #a52b28;
+      }
+      .visible {
+        color: #087b46;
+      }
+      .hidden {
+        color: #bd3838;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h3>视频投射 · 双世界</h3>
+      <label
+        >世界
+        <select id="world">
+          <option value="globe">球面 ECEF</option>
+          <option value="planar">平面 XYZ</option>
+        </select></label
+      >
+      <label
+        >数据
+        <select id="sample">
+          <option value="blocks">本地测试街区</option>
+          <option value="tiles">3D Tiles 倾斜摄影</option>
+          <option value="mesh">S3M 精模 CBD</option>
+          <option value="instances">S3M 实例化</option>
+          <option value="oblique">S3M 倾斜（需本地缓存）</option>
+        </select></label
+      >
+      <label
+        >视频源
+        <select id="mediaSource">
+          <option value="calibration">本地校准视频</option>
+          <option value="trailer">本地示例短片</option>
+          <option value="file">选择本机视频</option>
+        </select></label
+      >
+      <label
+        >校准尺寸
+        <select id="mediaSize">
+          <option value="720">1280 × 720</option>
+          <option value="1080">1920 × 1080</option>
+        </select></label
+      >
+      <input id="mediaFile" type="file" accept="video/*" hidden />
+      <video
+        id="video"
+        controls
+        muted
+        playsinline
+        style="width: 100%; background: #111"
+      ></video>
+      <label
+        >投射不透明度
+        <input id="opacity" type="range" min="0" max="1" step="0.05" value="1"
+      /></label>
+      <label><input id="flipY" type="checkbox" /> 上下翻转视频</label>
+      <label
+        ><input id="second" type="checkbox" /> 第二路投射（独立深度）</label
+      >
+      <label><input id="viewshed" type="checkbox" /> 同时显示可视域</label>
+      <label><input id="shadows" type="checkbox" /> 同时启用太阳阴影</label>
+      <label><input id="hdr" type="checkbox" /> HDR 显示</label>
+      <button id="home">查看场景</button>
+      <button id="observerView">观察点视角</button>
+      <label><input id="enabled" type="checkbox" checked /> 显示视频投射</label>
+      <label
+        ><input id="frustum" type="checkbox" checked />
+        显示观察范围辅助线</label
+      >
+      <label><input id="source" type="checkbox" checked /> 显示遮挡模型</label>
+      <label
+        ><input id="flatten" type="checkbox" /> 压平 3D Tiles 到局部 1 米</label
+      >
+      <label>观察点局部 X / Y / Z（米）</label>
+      <input id="x" type="number" step="1" aria-label="观察点 X" />
+      <input id="y" type="number" step="1" aria-label="观察点 Y" />
+      <input id="z" type="number" step="1" aria-label="观察点 Z" />
+      <label
+        >朝向
+        <input
+          id="heading"
+          type="range"
+          min="-180"
+          max="180"
+          value="0"
+        /><output id="headingValue">0°</output></label
+      >
+      <label
+        >俯仰
+        <input id="pitch" type="range" min="-85" max="85" value="-5" /><output
+          id="pitchValue"
+          >-5°</output
+        ></label
+      >
+      <label
+        >水平视角
+        <input id="horizontal" type="number" min="10" max="170" value="100" />
+        °</label
+      >
+      <label
+        >垂直视角
+        <input id="vertical" type="number" min="10" max="170" value="70" />
+        °</label
+      >
+      <label
+        >投射半径
+        <input id="distance" type="number" min="1" step="10" value="300" />
+        米</label
+      >
+      <label
+        >深度图
+        <select id="resolution">
+          <option>256</option>
+          <option>512</option>
+          <option selected>1024</option>
+          <option>2048</option>
+        </select></label
+      >
+      <label
+        >深度容差
+        <input id="bias" type="number" min="0" step="0.05" value="0.1" />
+        米</label
+      >
+      <p>
+        黄色线为投射范围，视频按原比例留空。黑色是视频内容；缺少视频帧或遮挡数据时保留原画面。
+      </p>
+      <p id="status">准备场景…</p>
+      <p id="error" role="alert"></p>
+      <details>
+        <summary>边界与操作</summary>
+        <p>
+          鼠标操作主相机，投射相机独立。预览可播放和暂停；视频由页面拥有。投射使用不透明深度，在最终画面叠加，不是物理投影灯，不支持透明前景正确透射。时间统计为
+          CPU 提交开销。S3M 倾斜样例需本地缓存，其余样例随仓库提供。
+        </p>
+      </details>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./VideoProjection/example.js"></script>
+  </body>
+</html>

@@ -336,6 +336,40 @@ describe("SceneGIS/Scene/SceneGISVideoProjection", function () {
     expect(second.track.readyState).toBe("live");
   });
 
+  it("invalidates callbacks and texture dimensions when the same video element changes stream", async function () {
+    setup();
+    const first = await video(32, 32, "red");
+    const callbacks = [];
+    const request = first.element.requestVideoFrameCallback.bind(first.element);
+    spyOn(first.element, "requestVideoFrameCallback").and.callFake(
+      (callback) => {
+        callbacks.push(callback);
+        return request(callback);
+      },
+    );
+    add(first.element, []);
+    await until(() => projection.videoReady);
+    const oldTexture = projection._observer.media.texture;
+    const obsolete = callbacks[callbacks.length - 1];
+    const second = await video(64, 32, "blue");
+    first.element.srcObject = second.stream;
+    const playing = first.element.play();
+    second.track.requestFrame();
+    await playing;
+    await until(
+      () =>
+        projection.videoReady &&
+        projection._observer.media.texture.width === 64,
+    );
+    first.element.pause();
+    expect(oldTexture.isDestroyed()).toBe(true);
+    expect(projection.video).toBe(first.element);
+    const currentCallback = projection._observer.media._callback;
+    obsolete();
+    expect(projection._observer.media._callback).toBe(currentCallback);
+    expect(projection.error).toBeUndefined();
+  });
+
   it("defines transparent foreground as a display overlay and preserves the scene outside projection", async function () {
     setup();
     const floor = await box(0, 0, -0.2, new Cartesian3(50, 50, 0.2));
