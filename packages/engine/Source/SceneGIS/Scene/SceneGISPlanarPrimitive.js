@@ -6,6 +6,8 @@ import GeometryPipeline from "../../Core/GeometryPipeline.js";
 import Matrix4 from "../../Core/Matrix4.js";
 import destroyObject from "../../Core/destroyObject.js";
 import Material from "../../Scene/Material.js";
+import MaterialAppearance from "../../Scene/MaterialAppearance.js";
+import BlendingState from "../../Scene/BlendingState.js";
 import PerInstanceColorAppearance from "../../Scene/PerInstanceColorAppearance.js";
 import PolylineMaterialAppearance from "../../Scene/PolylineMaterialAppearance.js";
 import PolylineColorAppearance from "../../Scene/PolylineColorAppearance.js";
@@ -104,6 +106,12 @@ function validateAppearance(kind, appearance, attributes) {
   const polygon = kind === "polygon";
   const wall = kind === "wall";
   const volume = !polygon && !wall;
+  if (appearance instanceof MaterialAppearance) {
+    if (!(appearance.material instanceof Material)) {
+      throw new DeveloperError("MaterialAppearance requires a Material.");
+    }
+    return;
+  }
   if (
     !(appearance instanceof PerInstanceColorAppearance) ||
     (polygon && appearance.flat !== true) ||
@@ -310,18 +318,47 @@ function ensureAlive(primitive) {
 }
 
 function createInternal(wrapper, attributes) {
+  const appearance = wrapper._appearance;
+  // Native getRenderState enables blending for translucent material alpha, but
+  // does not remove blending inherited from a translucent constructor default.
+  // Keep that base state opaque without mutating the caller-owned appearance.
+  const internalAppearance =
+    appearance instanceof MaterialAppearance
+      ? new MaterialAppearance({
+          material: appearance.material,
+          materialSupport: appearance.materialSupport,
+          flat: appearance.flat,
+          faceForward: appearance.faceForward,
+          closed: appearance.closed,
+          translucent: false,
+          vertexShaderSource: appearance.vertexShaderSource,
+          fragmentShaderSource: appearance.fragmentShaderSource,
+          renderState: {
+            ...appearance.renderState,
+            blending: BlendingState.DISABLED,
+          },
+        })
+      : appearance;
   const batch = wrapper._batch;
   const instance =
     batch === undefined
       ? new GeometryInstance({
-          geometry: wrapper._geometry._createGeometry(),
+          geometry: wrapper._geometry._createGeometry(
+            wrapper._appearance instanceof MaterialAppearance
+              ? wrapper._appearance.vertexFormat
+              : undefined,
+          ),
           id: wrapper._id,
           pickPrimitive: wrapper,
           attributes: cloneAttributes(attributes),
         })
       : batch.instances.map(function (source, index) {
           const instance = new GeometryInstance({
-            geometry: source.geometry._createGeometry(),
+            geometry: source.geometry._createGeometry(
+              wrapper._appearance instanceof MaterialAppearance
+                ? wrapper._appearance.vertexFormat
+                : undefined,
+            ),
             modelMatrix: computeWorldMatrix(
               source.geometry,
               source.modelMatrix,
@@ -337,7 +374,7 @@ function createInternal(wrapper, attributes) {
         });
   const primitive = new Primitive({
     geometryInstances: instance,
-    appearance: wrapper._appearance,
+    appearance: internalAppearance,
     modelMatrix:
       batch === undefined
         ? computeWorldMatrix(
@@ -359,13 +396,17 @@ function createInternal(wrapper, attributes) {
  * Renders a planar geometry or a static batch through Cesium's synchronous standard Primitive path.
  * Batch topology and instance transforms are construction snapshots; create a new primitive to change them.
  * Group instances spatially and by compatible appearance to bound synchronous construction and culling costs.
+ * Non-line geometry supports MaterialAppearance and caller-owned Fabric materials. A batch shares
+ * one material; instance color attributes are only consumed by the color appearances.
+ * Native solids use native UVs; polygon, wall, and swept surfaces use normalized dominant-axis
+ * face projection, with seams where the dominant axis changes. Material and appearance remain caller-owned.
  *
  * @alias SceneGISPlanarPrimitive
  * @constructor
  * @param {object} options Object with the following properties:
  * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry|SceneGISPlanarBoxGeometry|SceneGISPlanarCylinderGeometry|SceneGISPlanarEllipsoidGeometry|SceneGISPlanarWallGeometry|SceneGISPlanarPolylineVolumeGeometry} [options.geometry] The planar geometry snapshot. Required unless geometryInstances is supplied.
  * @param {SceneGISPlanarPrimitive.GeometryInstanceOptions[]} [options.geometryInstances] A non-empty static batch. Mutually exclusive with geometry, id, and attributes. Instances must share a compatible appearance and identical attribute schemas.
- * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance} options.appearance The compatible caller-owned appearance.
+ * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance|MaterialAppearance} options.appearance The compatible caller-owned appearance.
  * @param {*} [options.id] The required non-null pick identifier for the single-geometry form.
  * @param {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [options.attributes] Geometry instance attributes with valid component datatype, one to four components, boolean normalization, and one complete finite value.
  * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] A finite affine transform. Applied around the geometry origin for a single geometry, or to world coordinates for a batch.
@@ -497,7 +538,7 @@ Object.defineProperties(SceneGISPlanarPrimitive.prototype, {
    * Gets or sets a caller-owned appearance compatible with the construction-time geometry kind.
    *
    * @memberof SceneGISPlanarPrimitive.prototype
-   * @type {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance}
+   * @type {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance|MaterialAppearance}
    * @exception {DeveloperError} The value is incompatible with the construction-time geometry kind or attributes.
    */
   appearance: {
@@ -653,6 +694,7 @@ SceneGISPlanarPrimitive.prototype.update = function (frameState) {
     this._context = frameState.context;
     const old = this._current;
     this._current = candidate;
+    this._currentAppearance = this._appearance;
     this._currentGeometry = this._geometry;
     if (this._batch === undefined) {
       this._attributes = candidateAttributes;
@@ -669,6 +711,9 @@ SceneGISPlanarPrimitive.prototype.update = function (frameState) {
     return;
   }
   if (this._current !== undefined) {
+    if (this._currentAppearance instanceof MaterialAppearance) {
+      this._current.appearance.material = this._currentAppearance.material;
+    }
     this._current.update(frameState);
   }
 };

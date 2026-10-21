@@ -1,3 +1,4 @@
+import createSceneGISPlanarMaterialGeometry from "./_private/_SceneGISPlanarMaterialGeometry.js";
 import BoundingSphere from "../../Core/BoundingSphere.js";
 import Cartesian2 from "../../Core/Cartesian2.js";
 import Cartesian3 from "../../Core/Cartesian3.js";
@@ -164,11 +165,17 @@ function validateHoles(outer, holes) {
  * @param {Cartesian3[]} [options.bottomPositions] Flattened bottom vertices matching all normalized top rings.
  * @param {boolean} [options.closeTop=true] Whether to create the top cap.
  * @param {boolean} [options.closeBottom=true] Whether to create the bottom cap.
+ * @param {number} [options.stRotation=0] Texture-coordinate rotation in radians about the normalized UV center.
  * @param {Cartesian3} [options.origin] The local origin.
  * @exception {DeveloperError} The rings, bottom positions, flags, or derived geometry are invalid.
  */
 function SceneGISPlanarPolygonGeometry(options) {
   options = options ?? {};
+  const stRotation = options.stRotation ?? 0;
+  if (!Number.isFinite(stRotation)) {
+    throw new DeveloperError("stRotation must be finite.");
+  }
+  this._stRotation = stRotation;
   const outer = normalizeRing(options.positions, "positions");
   const holeSource = options.holes ?? [];
   if (!Array.isArray(holeSource)) {
@@ -283,6 +290,17 @@ function SceneGISPlanarPolygonGeometry(options) {
 
 Object.defineProperties(SceneGISPlanarPolygonGeometry.prototype, {
   /**
+   * Gets the texture-coordinate rotation in radians.
+   * @memberof SceneGISPlanarPolygonGeometry.prototype
+   * @type {number}
+   * @readonly
+   */
+  stRotation: {
+    get: function () {
+      return this._stRotation;
+    },
+  },
+  /**
    * Gets a cloned snapshot of the normalized outer top ring.
    *
    * @memberof SceneGISPlanarPolygonGeometry.prototype
@@ -345,12 +363,14 @@ Object.defineProperties(SceneGISPlanarPolygonGeometry.prototype, {
 });
 
 /** @private */
-SceneGISPlanarPolygonGeometry.prototype._createGeometry = function () {
+SceneGISPlanarPolygonGeometry.prototype._createGeometry = function (
+  vertexFormat,
+) {
   const values = new Float64Array(this._localPositions.length * 3);
   for (let i = 0; i < this._localPositions.length; i++) {
     Cartesian3.pack(this._localPositions[i], values, i * 3);
   }
-  return new Geometry({
+  const geometry = new Geometry({
     attributes: new GeometryAttributes({
       position: new GeometryAttribute({
         componentDatatype: ComponentDatatype.DOUBLE,
@@ -365,6 +385,40 @@ SceneGISPlanarPolygonGeometry.prototype._createGeometry = function () {
     primitiveType: PrimitiveType.TRIANGLES,
     boundingSphere: BoundingSphere.clone(this._boundingSphere),
   });
+  if (vertexFormat !== undefined && this._bottomPositions !== undefined) {
+    // Color-only polygons are double-sided. Material appearances may cull and
+    // light their sides, so orient outer walls outward and hole walls inward.
+    const indices = geometry.indices;
+    let cursor =
+      this._topTriangles.length *
+      (Number(this._closeTop) + Number(this._closeBottom));
+    for (let r = 0; r < this._rings.length; r++) {
+      const ring = this._rings[r];
+      let area = 0;
+      for (let i = 0; i < ring.length; i++) {
+        const a = ring[i];
+        const b = ring[(i + 1) % ring.length];
+        area +=
+          (a.x - ring[0].x) * (b.y - ring[0].y) -
+          (b.x - ring[0].x) * (a.y - ring[0].y);
+      }
+      const reverse = r === 0 ? area > 0 : area < 0;
+      for (let i = 0; i < ring.length * 2; i++, cursor += 3) {
+        if (reverse) {
+          const swap = indices[cursor + 1];
+          indices[cursor + 1] = indices[cursor + 2];
+          indices[cursor + 2] = swap;
+        }
+      }
+    }
+  }
+  return vertexFormat === undefined
+    ? geometry
+    : createSceneGISPlanarMaterialGeometry(
+        geometry,
+        vertexFormat,
+        this._stRotation,
+      );
 };
 /** @private */
 SceneGISPlanarPolygonGeometry.prototype._getLocalBoundingSphere = function (

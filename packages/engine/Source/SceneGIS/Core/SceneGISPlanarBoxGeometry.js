@@ -79,7 +79,7 @@ Object.defineProperties(SceneGISPlanarBoxGeometry.prototype, {
 });
 
 /** @private */
-SceneGISPlanarBoxGeometry.prototype._createGeometry = function () {
+SceneGISPlanarBoxGeometry.prototype._createGeometry = function (vertexFormat) {
   const half = Cartesian3.multiplyByScalar(
     this._dimensions,
     0.5,
@@ -89,7 +89,7 @@ SceneGISPlanarBoxGeometry.prototype._createGeometry = function () {
     new BoxGeometry({
       minimum: Cartesian3.negate(half, new Cartesian3()),
       maximum: half,
-      vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+      vertexFormat: vertexFormat ?? PerInstanceColorAppearance.VERTEX_FORMAT,
     }),
   );
 };

@@ -95,13 +95,15 @@ Object.defineProperties(SceneGISPlanarEllipsoidGeometry.prototype, {
 });
 
 /** @private */
-SceneGISPlanarEllipsoidGeometry.prototype._createGeometry = function () {
+SceneGISPlanarEllipsoidGeometry.prototype._createGeometry = function (
+  vertexFormat,
+) {
   return EllipsoidGeometry.createGeometry(
     new EllipsoidGeometry({
       radii: this._radii,
       stackPartitions: this._stackPartitions,
       slicePartitions: this._slicePartitions,
-      vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+      vertexFormat: vertexFormat ?? PerInstanceColorAppearance.VERTEX_FORMAT,
     }),
   );
 };

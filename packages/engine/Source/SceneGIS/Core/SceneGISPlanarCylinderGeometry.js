@@ -98,14 +98,16 @@ Object.defineProperties(SceneGISPlanarCylinderGeometry.prototype, {
 });
 
 /** @private */
-SceneGISPlanarCylinderGeometry.prototype._createGeometry = function () {
+SceneGISPlanarCylinderGeometry.prototype._createGeometry = function (
+  vertexFormat,
+) {
   return CylinderGeometry.createGeometry(
     new CylinderGeometry({
       length: this._length,
       topRadius: this._topRadius,
       bottomRadius: this._bottomRadius,
       slices: this._slices,
-      vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
+      vertexFormat: vertexFormat ?? PerInstanceColorAppearance.VERTEX_FORMAT,
     }),
   );
 };

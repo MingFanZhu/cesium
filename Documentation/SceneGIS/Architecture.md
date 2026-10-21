@@ -768,6 +768,12 @@ Cesium Geometry自动具有planar语义。Geometry变化使用normal-render cand
 current；Context、replacement与destroy必须原子且exactly once。Polyline/Polygon Entity adapter复用同一public
 wrapper，不保留experimental Buffer双路径；width改为finite nonnegative number，0隐藏。完整决定见ADR-0018。
 
+ADR-0178 扩宽普通非线图元的 Color-only 边界，支持原生 MaterialAppearance / Fabric。
+按 vertexFormat 生成自有几何的 UV、法线和切线；原生实体使用原生 factory。
+颜色路径保留原有属性与成本。每批共享材质，独立 show/id 保持，调用方拥有 Material。
+内部外观以不透明基础混合状态接入原生动态透明分流，不修改借用 appearance。
+贴地面与 Entity 的接入资格按该扩展后续阶段记录。
+
 ADR-0168 扩宽普通 wrapper 的单实例边界：`geometryInstances` 接收兼容 Appearance 的静态实例数组，
 复用原生 GeometryPipeline / Primitive 的 DOUBLE transform、combine、high/low encoding 与 BatchTable。
 每项保留唯一业务 id、attributes 与 origin-local modelMatrix；批次 modelMatrix 作用于世界坐标。

@@ -1,0 +1,32 @@
+# 平面材质扩展
+
+- Plan type: `extension`
+- Status: `active`
+- Owner role: architecture
+- Architecture review: `confirmed`（当前任务源码核对）
+- Created / Updated: `2026-10-21`
+- ADR: [ADR-0178](../../../Documentation/SceneGIS/Decisions/ADR-0178-planar-materials.md)
+- SGP: None。
+
+## Objective and boundaries
+
+普通面、贴地面及其 Entity 入口支持 Cesium Material / Fabric：图片、程序纹理与动态 uniform。
+继续使用当前世界米制 XYZ；原生 Primitive、Material 和 BatchTable 承担已有职责。
+保留既有逐实例颜色 API、合批、独立显隐与拾取、透明覆盖顺序。
+不复制原生渲染器，不修改默认球面材质，不新增 MVT 或 Model CustomShader 支持。
+本轮聚焦面材质，线材质 Color 限制保持。
+
+## Phase roadmap
+
+| Phase | Objective                            | Dependencies            | Exit gate                                          | Status    |
+| ----- | ------------------------------------ | ----------------------- | -------------------------------------------------- | --------- |
+| M1    | 普通面 MaterialAppearance 与几何属性 | 既有 Primitive/deferred | GPU、几何、生命周期、build/types、review、独立提交 | completed |
+| M2    | 贴地面 Fabric、深度坐标与有序合批    | M1 checkpoint           | 重叠/孔洞/透明/pick/低视角、预算与独立提交         | pending   |
+| M3    | Entity MaterialProperty、示例与交付  | M2 checkpoint           | 动态更新/销毁、综合画面、完整构建类型、review      | pending   |
+
+## Acceptance and risks
+
+每阶段只细化当前源码事实，完成后先提交再进入下一阶段。
+颜色快路径保持原几何/资源成本；材质按兼容 Appearance 分批，不承诺不同材质共用 draw。
+验证真实像素、属性更新、pick、销毁及 warm VA/program identity，记录构建和命令成本。
+自动化技术证据与最终负责人视觉验收分别记录；任意外层 shader 不扩大为支持承诺。

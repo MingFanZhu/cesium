@@ -1,3 +1,4 @@
+import createSceneGISPlanarMaterialGeometry from "./_private/_SceneGISPlanarMaterialGeometry.js";
 import BoundingSphere from "../../Core/BoundingSphere.js";
 import Cartesian3 from "../../Core/Cartesian3.js";
 import ComponentDatatype from "../../Core/ComponentDatatype.js";
@@ -190,14 +191,14 @@ Object.defineProperties(SceneGISPlanarWallGeometry.prototype, {
 });
 
 /** @private */
-SceneGISPlanarWallGeometry.prototype._createGeometry = function () {
+SceneGISPlanarWallGeometry.prototype._createGeometry = function (vertexFormat) {
   const positionValues = new Float64Array(this._localPositions.length * 3);
   const normalValues = new Float32Array(this._normals.length * 3);
   for (let i = 0; i < this._localPositions.length; i++) {
     Cartesian3.pack(this._localPositions[i], positionValues, i * 3);
     Cartesian3.pack(this._normals[i], normalValues, i * 3);
   }
-  return new Geometry({
+  const geometry = new Geometry({
     attributes: new GeometryAttributes({
       position: new GeometryAttribute({
         componentDatatype: ComponentDatatype.DOUBLE,
@@ -217,6 +218,9 @@ SceneGISPlanarWallGeometry.prototype._createGeometry = function () {
     primitiveType: PrimitiveType.TRIANGLES,
     boundingSphere: BoundingSphere.clone(this._boundingSphere),
   });
+  return vertexFormat === undefined
+    ? geometry
+    : createSceneGISPlanarMaterialGeometry(geometry, vertexFormat);
 };
 
 /** @private */
