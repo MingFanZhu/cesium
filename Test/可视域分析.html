@@ -89,6 +89,10 @@
       <button id="home">查看场景</button>
       <button id="observerView">观察点视角</button>
       <label><input id="enabled" type="checkbox" checked /> 显示分析</label>
+      <label
+        ><input id="frustum" type="checkbox" checked />
+        显示观察范围辅助线</label
+      >
       <label><input id="source" type="checkbox" checked /> 显示遮挡模型</label>
       <label
         ><input id="flatten" type="checkbox" /> 压平 3D Tiles 到局部 1 米</label
@@ -146,7 +150,7 @@
       <p>
         <span class="visible">绿色：可见</span> ·
         <span class="hidden">红色：被遮挡</span
-        ><br />未加载完整、失败或范围外保持原色。
+        ><br />亮黄色线：观察范围边界。未加载完整、失败或范围外保持原色。
       </p>
       <p id="status">准备场景…</p>
       <p id="error" role="alert"></p>

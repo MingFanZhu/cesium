@@ -133,6 +133,74 @@ describe("SceneGIS/Scene/SceneGISViewshed", function () {
   });
 
   [false, true].forEach((globe) => {
+    it(`isolates display guides from analysis and reuses geometry in ${globe ? "Globe" : "Planar"}`, async function () {
+      setup(globe);
+      const floor = await box(0, 0, -0.2, new Cartesian3(50, 50, 0.2));
+      const wall = await box(0, 0, 3, new Cartesian3(4, 1, 6));
+      const first = add([floor, wall]);
+      await until(() => first.analysisReady && first.ready);
+      const original = center();
+      const draws = first.statistics.drawCalls;
+      expect(first.showFrustum).toBe(false);
+      expect(first._viewshed.frustumGuide).toBeUndefined();
+      first.showFrustum = true;
+      const scene3DOnly = scene.frameState.scene3DOnly;
+      expect(center()).toEqual(original);
+      expect(scene.frameState.scene3DOnly).toBe(scene3DOnly);
+      expect(first.statistics.drawCalls).toBe(draws);
+      const guide = first._viewshed.frustumGuide;
+      const primitive = guide._primitive;
+      const va = primitive._va[0];
+      const commands = scene.frameState.commandList.filter(
+        (c) => c.owner === primitive,
+      );
+      expect(commands.length).toBe(1);
+      expect(commands[0].renderState.depthMask).toBe(false);
+      expect(commands[0].castShadows).toBe(false);
+      expect(primitive.allowPicking).toBe(false);
+      first.showFrustum = false;
+      render();
+      expect(
+        scene.frameState.commandList.some((c) => c.owner === primitive),
+      ).toBe(false);
+      expect(va.isDestroyed()).toBe(false);
+      first.enabled = false;
+      first.showFrustum = true;
+      first.setView({
+        position: point(2, -10, 2),
+        direction: vector(0.2, 1, 0),
+        up: vector(0, 0, 1),
+      });
+      render();
+      expect(first._viewshed.frustumGuide).toBe(guide);
+      expect(primitive._va[0]).toBe(va);
+      expect(
+        Matrix4.getTranslation(primitive.modelMatrix, new Cartesian3()),
+      ).toEqualEpsilon(point(2, -10, 2), 1e-8);
+      const second = add([], { enabled: false, showFrustum: true });
+      render();
+      const secondGuide = second._viewshed.frustumGuide;
+      expect(secondGuide).not.toBe(guide);
+      expect(second._viewshed.depth).toBeUndefined();
+      first.setView({
+        position: point(2, -10, 2),
+        direction: vector(0, 1, 0),
+        up: vector(0, 0, 1),
+        distance: 50,
+        horizontalAngle: 0.8,
+      });
+      render();
+      expect(guide.isDestroyed()).toBe(true);
+      expect(va.isDestroyed()).toBe(true);
+      const replacement = first._viewshed.frustumGuide;
+      scene.postProcessStages.remove(first);
+      expect(replacement.isDestroyed()).toBe(true);
+      expect(secondGuide.isDestroyed()).toBe(false);
+      scene.postProcessStages.remove(second);
+      expect(secondGuide.isDestroyed()).toBe(true);
+      expect(wall.isDestroyed()).toBe(false);
+    });
+
     it(`classifies an offscreen wall in ${globe ? "Globe" : "Planar"} and updates after visibility changes`, async function () {
       setup(globe);
       const floor = await box(0, 0, -0.2, new Cartesian3(50, 50, 0.2));

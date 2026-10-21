@@ -122,6 +122,7 @@ function rebuild() {
       resolution: +$("resolution").value,
       depthBias: +$("bias").value,
       enabled: $("enabled").checked,
+      showFrustum: $("frustum").checked,
       visibleColor: C.Color.fromCssColorString("#15bc72").withAlpha(0.6),
       hiddenColor: C.Color.fromCssColorString("#f14c50").withAlpha(0.6),
     }),
@@ -193,6 +194,11 @@ $("enabled").onchange = (e) => {
   if (analysis) {
     analysis.enabled = e.target.checked;
     scene.requestRender();
+  }
+};
+$("frustum").onchange = (e) => {
+  if (analysis) {
+    analysis.showFrustum = e.target.checked;
   }
 };
 $("source").onchange = (e) => {

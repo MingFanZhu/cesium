@@ -60,6 +60,7 @@ function positive(value, name) {
  * @param {Color} [options.visibleColor=Color.GREEN] Visible overlay color and opacity.
  * @param {Color} [options.hiddenColor=Color.RED] Occluded overlay color and opacity.
  * @param {boolean} [options.enabled=true] Whether to select, capture and display.
+ * @param {boolean} [options.showFrustum=false] Show the observer range outline independently of enabled.
  * @param {string} [options.name] Unique native post-process stage name.
  * @exception {DeveloperError} Invalid geometry, unsupported source or Scene / World mismatch.
  * @example
@@ -105,6 +106,9 @@ class SceneGISViewshed extends PostProcessStage {
     if (typeof terrain !== "boolean") {
       throw new DeveloperError("terrain must be boolean.");
     }
+    if (typeof (options.showFrustum ?? false) !== "boolean") {
+      throw new DeveloperError("showFrustum must be boolean.");
+    }
     const state = {
       scene,
       world: options.world,
@@ -125,6 +129,8 @@ class SceneGISViewshed extends PostProcessStage {
       terrainView: undefined,
       depth: undefined,
       sourceStates: new Map(),
+      showFrustum: options.showFrustum ?? false,
+      frustumGuide: undefined,
       visible: Color.clone(options.visibleColor ?? Color.GREEN.withAlpha(0.35)),
       hidden: Color.clone(options.hiddenColor ?? Color.RED.withAlpha(0.35)),
     };
@@ -171,6 +177,26 @@ class SceneGISViewshed extends PostProcessStage {
    */
   get world() {
     return this._viewshed.world;
+  }
+
+  /**
+   * Shows a yellow outline of the angular, near-plane and radial range boundaries.
+   * Independent of enabled and coverage readiness. The outline is depth-tested,
+   * does not write depth, cast shadows, occlude analysis or participate in picking.
+   * Hidden geometry is retained for reuse and released when this stage is destroyed.
+   * @type {boolean}
+   * @default false
+   */
+  get showFrustum() {
+    return this._viewshed.showFrustum;
+  }
+
+  set showFrustum(value) {
+    if (typeof value !== "boolean") {
+      throw new DeveloperError("showFrustum must be boolean.");
+    }
+    this._viewshed.showFrustum = value;
+    this._viewshed.scene.requestRender();
   }
 
   /** Whether the current observer depth has complete selected source coverage.
@@ -302,6 +328,7 @@ class SceneGISViewshed extends PostProcessStage {
     const state = this._viewshed;
     state.scene._sceneGISViewsheds.delete(this);
     state.depth?.destroy();
+    state.frustumGuide?.destroy();
     state.commands.length = 0;
     state.sourceStates.clear();
     return super.destroy();

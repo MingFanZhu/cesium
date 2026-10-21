@@ -76,6 +76,30 @@ export, exact area statistics and transparent volumetric transmission.
 
 ## Verification
 
+### Observer range guide amendment (2026-10-21)
+
+Add the per-instance boolean `showFrustum`, default false, independent of stage
+enabled and coverage readiness. The guide outlines the intersection of the
+observer's near plane, angular cone and radial distance sphere. Native
+DebugCameraPrimitive is unsuitable: it includes filled planes, writes depth and
+rebuilds every frame; its rectangular far plane also exceeds the radial range.
+Use a small owned local line Geometry with native Primitive and translucent flat
+PerInstanceColorAppearance. Depth testing remains enabled, depth writes and
+shadow casting are disabled, and the helper never enters pick/depth passes or
+borrowed occluder lists. No new Shader or upstream integration is needed.
+
+The existing observer prepare hook updates guides even when capture is disabled.
+Pose changes update only the matrix; near, range or angle changes rebuild the
+geometry. Hidden guides retain resources; stage destruction releases them.
+The helper temporarily selects native 3D-only geometry preparation and restores
+FrameState in finally, preventing ellipsoid projection / date-line splitting of
+observer-local coordinates even when the host Scene is morphable.
+Circular boundaries use at most PI/64 radians per segment. Each visible guide
+adds one source draw command and no offscreen targets or observer capture work; native
+translucent/OIT execution can expand the submitted command. Public type generation,
+boundary geometry, dual-world rendering, isolation and lifecycle checks accompany
+this amendment.
+
 GPU evidence must cover discard and original vertex transformations, offscreen
 occluders, stream readiness, large coordinates, depth precision, independent
 instances and destruction. Integration includes Globe / Planar terrain, native

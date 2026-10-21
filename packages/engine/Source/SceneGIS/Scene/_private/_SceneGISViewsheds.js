@@ -19,6 +19,7 @@ import SceneGISPlanarPrimitive from "../SceneGISPlanarPrimitive.js";
 import SceneGISS3MLayer from "../SceneGISS3MLayer.js";
 import Depth from "./_SceneGISViewshedDepth.js";
 import GlobeSelection from "./_SceneGISViewshedGlobe.js";
+import FrustumGuide from "./_SceneGISViewshedFrustum.js";
 
 function contains(collection, source) {
   if (collection.contains(source)) {
@@ -197,10 +198,13 @@ const Viewsheds = {
       return;
     }
     for (const stage of scene._sceneGISViewsheds ?? []) {
-      if (!stage.enabled || !scene.postProcessStages.contains(stage)) {
+      if (!scene.postProcessStages.contains(stage)) {
         continue;
       }
       const state = stage._viewshed;
+      if (!stage.enabled && !state.showFrustum) {
+        continue;
+      }
       if (
         state.world !== scene.world ||
         scene.mode !== SceneMode.SCENE3D ||
@@ -209,6 +213,16 @@ const Viewsheds = {
         throw new DeveloperError(
           "Viewshed requires its original World in SCENE3D.",
         );
+      }
+      if (state.showFrustum) {
+        if (!state.frustumGuide?.matches(state)) {
+          state.frustumGuide?.destroy();
+          state.frustumGuide = new FrustumGuide(state);
+        }
+        state.frustumGuide.update(state, frame);
+      }
+      if (!stage.enabled) {
+        continue;
       }
       this.validateSources(scene, state.sources);
       state.analysisReady = false;

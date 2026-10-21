@@ -80,10 +80,54 @@ for (const world of ["planar", "globe"]) {
   }, info) => {
     test.setTimeout(90000);
     const errors = await open(page, world, "blocks");
+    await expect(page.locator("#frustum")).toBeChecked();
+    const guideState = await page.evaluate(() => {
+      const { analysis } = window.viewshedExample;
+      return {
+        shown: analysis.showFrustum,
+        draws: analysis.statistics.drawCalls,
+      };
+    });
+    expect(guideState.shown).toBe(true);
+    await page.evaluate(() => {
+      const t = window.viewshedExample;
+      const pose = t.pose();
+      t.viewer.camera.viewBoundingSphere(
+        new t.C.BoundingSphere(pose.position, pose.distance),
+        new t.C.HeadingPitchRange(0.5, -0.4, pose.distance * 2.8),
+      );
+      t.viewer.camera.lookAtTransform(t.C.Matrix4.IDENTITY);
+    });
+    await colors(page);
+    await page.screenshot({
+      path: info.outputPath(`${world}-range-guide.png`),
+    });
+    await page.click("#home");
+    await page.uncheck("#frustum");
+    await nextFrame(page);
+    expect(
+      await page.evaluate(() => window.viewshedExample.analysis.showFrustum),
+    ).toBe(false);
     const initial = await colors(page);
     expect(initial.red).toBeGreaterThan(100);
     expect(initial.green).toBeGreaterThan(100);
     await page.screenshot({ path: info.outputPath(`${world}-blocks.png`) });
+    expect(
+      await page.evaluate(
+        () => window.viewshedExample.analysis.statistics.drawCalls,
+      ),
+    ).toBe(guideState.draws);
+    await page.check("#frustum");
+    await page.uncheck("#enabled");
+    await nextFrame(page);
+    expect(
+      await page.evaluate(() => {
+        const { analysis } = window.viewshedExample;
+        return analysis.showFrustum && !analysis.enabled;
+      }),
+    ).toBe(true);
+    await page.check("#enabled");
+    await page.uncheck("#frustum");
     await page.uncheck("#source");
     const clear = await colors(page);
     expect(clear.red).toBeLessThan(initial.red * 0.1);

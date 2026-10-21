@@ -30,6 +30,20 @@ Globe 的 `position / direction / up` 使用 ECEF；平面 World 使用当前世
 米制 XYZ，无隐式投影。`setView` 每次提供完整姿态；未提供的标量沿用原值。
 分析视角独立于主相机，不会改变相机跟随、定位或太阳阴影设置。
 
+`showFrustum` 构造选项及可写属性控制观察范围辅助线，默认 false；验收示例默认开启。
+亮黄色线表示水平 / 垂直视角、near 平面与分析半径的边界，远端为球面圆弧，
+不会把矩形捕获视锥远端四角误当作径向范围。圆弧采用有限线段近似。
+它独立于 `enabled` 和数据 readiness，关闭分析着色后仍可检查观察点范围。
+辅助线受场景遮挡，不写深度、不参与拾取、投影或任何观察点的遮挡分析。
+位置 / 朝向更新复用几何，仅距离 / near / 视角变化重建；隐藏保留缓存，
+移除 stage 时自动释放。无需调用方另加 Primitive。
+
+```js
+analysis.showFrustum = true;
+analysis.enabled = false; // Keep the guide while hiding the analysis colors.
+analysis.showFrustum = false;
+```
+
 ## 数据与状态
 
 - `sources` 支持同一 Scene 中的 Model、Cesium3DTileset、SceneGISS3MLayer、
