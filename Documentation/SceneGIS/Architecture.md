@@ -772,7 +772,13 @@ ADR-0178 扩宽普通非线图元的 Color-only 边界，支持原生 MaterialAp
 按 vertexFormat 生成自有几何的 UV、法线和切线；原生实体使用原生 factory。
 颜色路径保留原有属性与成本。每批共享材质，独立 show/id 保持，调用方拥有 Material。
 内部外观以不透明基础混合状态接入原生动态透明分流，不修改借用 appearance。
-贴地面与 Entity 的接入资格按该扩展后续阶段记录。
+贴地面以深度重建 XY UV 与表面 normal/TBN 接入 Fabric，沿用 z-fail 与保序分组；
+材质批仅合并空间无冲突范围，不使用同色 opaque overlap 快路径。Stencil 不求值材质，
+pick 保持足迹语义；禁止 Fabric discard，透明用 material.alpha。
+Polygon/Area/Solid/Route Entity adapter 复用原生 MaterialProperty，按类型持有材质，
+同类型变化仅更新 uniform；替换、移除和候选失败释放其自行创建的材质。
+Polygon/Ellipse/Rectangle 支持 finite stRotation，显式 textureCoordinates 仍不接入；
+线与 Path 保持原 Color-only 边界。
 
 ADR-0168 扩宽普通 wrapper 的单实例边界：`geometryInstances` 接收兼容 Appearance 的静态实例数组，
 复用原生 GeometryPipeline / Primitive 的 DOUBLE transform、combine、high/low encoding 与 BatchTable。

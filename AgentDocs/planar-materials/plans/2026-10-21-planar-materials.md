@@ -18,11 +18,11 @@
 
 ## Phase roadmap
 
-| Phase | Objective                            | Dependencies            | Exit gate                                          | Status    |
-| ----- | ------------------------------------ | ----------------------- | -------------------------------------------------- | --------- |
-| M1    | 普通面 MaterialAppearance 与几何属性 | 既有 Primitive/deferred | GPU、几何、生命周期、build/types、review、独立提交 | completed |
-| M2    | 贴地面 Fabric、深度坐标与有序合批    | M1 checkpoint           | 重叠/孔洞/透明/pick/低视角、预算与独立提交         | pending   |
-| M3    | Entity MaterialProperty、示例与交付  | M2 checkpoint           | 动态更新/销毁、综合画面、完整构建类型、review      | pending   |
+| Phase                                       | Objective                            | Dependencies            | Exit gate                                          | Status    |
+| ------------------------------------------- | ------------------------------------ | ----------------------- | -------------------------------------------------- | --------- |
+| [M1](2026-10-21-m1-ordinary-materials.md)   | 普通面 MaterialAppearance 与几何属性 | 既有 Primitive/deferred | GPU、几何、生命周期、build/types、review、独立提交 | completed |
+| [M2](2026-10-21-m2-ground-materials.md)     | 贴地面 Fabric、深度坐标与有序合批    | M1 checkpoint           | 重叠/孔洞/透明/pick/低视角、预算与独立提交         | completed |
+| [M3](2026-10-21-m3-entity-qualification.md) | Entity MaterialProperty、示例与交付  | M2 checkpoint           | 动态更新/销毁、综合画面、完整构建类型、review      | completed |
 
 ## Acceptance and risks
 
@@ -30,3 +30,5 @@
 颜色快路径保持原几何/资源成本；材质按兼容 Appearance 分批，不承诺不同材质共用 draw。
 验证真实像素、属性更新、pick、销毁及 warm VA/program identity，记录构建和命令成本。
 自动化技术证据与最终负责人视觉验收分别记录；任意外层 shader 不扩大为支持承诺。
+
+技术阶段 M1–M3 均完成并建立独立检查点；整体视觉验收由项目负责人在综合示例确认。

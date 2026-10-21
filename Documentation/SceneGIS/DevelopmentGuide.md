@@ -577,7 +577,7 @@ lookAtWorldPosition 的固定 +Z up、四类 frustum 的 public getPickRay 和 f
 - C6 public Geometry必须clone finite米制Cartesian3输入、以完整XYZ local origin重基，并只输出审计过的
   standard Geometry vertex format。Polyline固定`ArcType.NONE`；Polygon只使用XY triangulation，不调用Ellipsoid
   subdivision或ground path。
-- C6 public Primitive固定single GeometryInstance与`asynchronous:false`，只接受approved SceneGIS geometry/
+- C6 public Primitive使用single或static batch GeometryInstance与`asynchronous:false`，只接受approved SceneGIS geometry/
   Appearance pair。Geometry replacement只在normal render通过candidate/current完成；pick/depth不得promote，失败
   保留current。第二Context、invalid matrix/bounds和destroyed use必须在mutation前拒绝。
 - Polyline/Polygon automatic Entity adapter必须复用public SceneGISPlanarPrimitive，并保留original Entity id、
@@ -593,8 +593,9 @@ lookAtWorldPosition 的固定 +Z up、四类 frustum 的 public getPickRay 和 f
   height，Rectangle coordinates按meters严格有序。C7的Ellipse/Rectangle generated-vertex terrain sampling是历史
   行为，C9 actual-cover drape也已被C11 GPU area backend取代；ordinary `NONE` geometry仍可以越过extent。
 - Planar callback完整顺序固定为gate、Anchor、Model、Polyline、Polygon、Solid、Area、Route、Path。六类C7
-  Graphics只支持Color material、
-  原生 ShadowMode 与批准字段；partial Ellipsoid、Rectangle granularity、stRotation、classification和zIndex必须在
+  面 Graphics 按 ADR-0178 支持原生 MaterialProperty；Color 保留快速路径，其余类型由 adapter 拥有生成的 Material。
+  同类型更新只改 uniform，类型改变原子替换 owner；Polygon/Ellipse/Rectangle 支持 finite stRotation。
+  原生 ShadowMode 与其他批准字段不变；partial Ellipsoid、Rectangle granularity、classification和zIndex必须在
   child低层mutation前拒绝。
 - C8 public Wall Geometry必须使用XY route与explicit top/bottom生成open non-flat mesh；PolylineVolume Geometry的
   shape +X映射route-left、+Y映射world-up，并以planar corner stations生成closed mesh。不得调用upstream
@@ -607,7 +608,7 @@ lookAtWorldPosition 的固定 +Z up、四类 frustum 的 public getPickRay 和 f
 - C9 actual-mesh、ground snapshot与World late queue已由C11删除，不得恢复或保留fallback。Planar Surface commands使用
   existing `Pass.GLOBE`；area/polyline ground commands使用existing `Pass.TERRAIN_CLASSIFICATION`。
 - C11 Ground Primitive只接受existing non-extruded planar Polygon或Polyline Geometry、live World与compatible Color
-  appearance。Clamp是implicit；不得提供`heightReference`、`extrudedHeightReference`、任意modelMatrix、classification、
+  appearance（面另接纳 ADR-0178 MaterialAppearance）。Clamp是implicit；不得提供`heightReference`、`extrudedHeightReference`、任意modelMatrix、classification、
   zIndex或arbitrary Material。Ordinary NONE继续使用普通Primitive。
 - Area使用stable planar shadow volume与z-fail stencil-depth/color/pick；Polyline使用stable segment volume与dedicated
   SceneGIS ground-line Shader。两者不得读取actual terrain triangles、发request或改变SSE/LRU/`tilesLoaded`。

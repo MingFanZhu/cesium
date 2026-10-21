@@ -13,7 +13,11 @@ import EntityCollection from "../../../DataSources/EntityCollection.js";
 import Property from "../../../DataSources/Property.js";
 import BoundingSphereState from "../../../DataSources/BoundingSphereState.js";
 import HeightReference from "../../../Scene/HeightReference.js";
-import PerInstanceColorAppearance from "../../../Scene/PerInstanceColorAppearance.js";
+import {
+  getPlanarFillMaterial,
+  createPlanarFillAppearance,
+  updatePlanarFillMaterial,
+} from "./_SceneGISPlanarFillMaterial.js";
 import ShadowMode from "../../../Scene/ShadowMode.js";
 import destroyObject from "../../../Core/destroyObject.js";
 import SceneGISPlanarBoxGeometry from "../../Core/SceneGISPlanarBoxGeometry.js";
@@ -76,7 +80,7 @@ function finiteColor(color, name) {
 function getFillColor(graphic, time) {
   const material = graphic._material;
   if (material !== undefined && !(material instanceof ColorMaterialProperty)) {
-    throw new DeveloperError("material must be a ColorMaterialProperty.");
+    return Color.clone(Color.WHITE);
   }
   return finiteColor(
     value(material?._color, time, Color.WHITE, scratchColor),
@@ -349,8 +353,10 @@ function computeGraphicState(visualizer, item, name, time) {
   const effectiveFill = fill && fillColor.alpha > 0;
   const effectiveOutline =
     outline && common.width > 0 && outlineColor.alpha > 0;
+  const material = getPlanarFillMaterial(graphic, time);
   return {
     shown: true,
+    material,
     shadows: validatePlanarShadowMode(
       value(graphic._shadows, time, ShadowMode.DISABLED),
     ),
@@ -365,6 +371,7 @@ function computeGraphicState(visualizer, item, name, time) {
     origin: center,
     modelMatrix,
     signature: [
+      material === undefined ? "color" : `fabric:${material.type}`,
       name,
       JSON.stringify(geometry),
       matrixKey(modelMatrix),
@@ -403,61 +410,72 @@ function createOutlineAttributes(state) {
 }
 function createOwner(visualizer, item, state) {
   const owner = new SceneGISPlanarPrimitiveOwner(visualizer._primitives);
-  if (state.fill) {
-    const primitive = new SceneGISPlanarPrimitive({
-      geometry: state.geometry,
-      appearance: new PerInstanceColorAppearance({
-        flat: false,
-        closed: true,
-        translucent: state.fillColor.alpha < 1,
-      }),
-      attributes: createAttributes(state, state.fillColor),
-      modelMatrix: state.modelMatrix,
-      id: item.entity,
-    });
-    owner.add(primitive);
-    owner.fillPrimitive = primitive;
-  }
-  if (state.outline) {
-    for (const positions of state.outlines) {
+  try {
+    if (state.fill) {
       const primitive = new SceneGISPlanarPrimitive({
-        geometry: new SceneGISPlanarPolylineGeometry({
-          positions,
-          width: state.outlineWidth,
-          origin: state.origin,
+        geometry: state.geometry,
+        appearance: createPlanarFillAppearance(owner, state, {
+          flat: false,
+          closed: true,
+          translucent: state.fillColor.alpha < 1,
         }),
-        appearance: new PolylineMaterialAppearance({
-          material: Material.fromType(Material.ColorType, {
-            color: Color.clone(state.outlineColor),
-          }),
-          translucent: state.outlineColor.alpha < 1,
-        }),
-        attributes: createOutlineAttributes(state),
+        attributes: createAttributes(state, state.fillColor),
         modelMatrix: state.modelMatrix,
         id: item.entity,
       });
       owner.add(primitive);
-      (owner.outlinePrimitives ??= []).push(primitive);
+      owner.fillPrimitive = primitive;
     }
-  }
-  owner.signature = state.signature;
-  owner.fillColor = Color.clone(state.fillColor);
-  owner.outlineColor = Color.clone(state.outlineColor);
-  owner.condition = cloneCondition(state.condition);
-  owner.setShadows(state.shadows);
-  owner.shown = true;
-  owner.boundingSphere = new BoundingSphere();
-  let hasSphere = false;
-  for (const primitive of owner.primitives) {
-    const sphere = primitive.getBoundingSphere(scratchSphere);
-    if (!hasSphere) {
-      BoundingSphere.clone(sphere, owner.boundingSphere);
-    } else {
-      BoundingSphere.union(owner.boundingSphere, sphere, owner.boundingSphere);
+    if (state.outline) {
+      for (const positions of state.outlines) {
+        const primitive = new SceneGISPlanarPrimitive({
+          geometry: new SceneGISPlanarPolylineGeometry({
+            positions,
+            width: state.outlineWidth,
+            origin: state.origin,
+          }),
+          appearance: new PolylineMaterialAppearance({
+            material: owner.ownMaterial(
+              Material.fromType(Material.ColorType, {
+                color: Color.clone(state.outlineColor),
+              }),
+            ),
+            translucent: state.outlineColor.alpha < 1,
+          }),
+          attributes: createOutlineAttributes(state),
+          modelMatrix: state.modelMatrix,
+          id: item.entity,
+        });
+        owner.add(primitive);
+        (owner.outlinePrimitives ??= []).push(primitive);
+      }
     }
-    hasSphere = true;
+    owner.signature = state.signature;
+    owner.fillColor = Color.clone(state.fillColor);
+    owner.outlineColor = Color.clone(state.outlineColor);
+    owner.condition = cloneCondition(state.condition);
+    owner.setShadows(state.shadows);
+    owner.shown = true;
+    owner.boundingSphere = new BoundingSphere();
+    let hasSphere = false;
+    for (const primitive of owner.primitives) {
+      const sphere = primitive.getBoundingSphere(scratchSphere);
+      if (!hasSphere) {
+        BoundingSphere.clone(sphere, owner.boundingSphere);
+      } else {
+        BoundingSphere.union(
+          owner.boundingSphere,
+          sphere,
+          owner.boundingSphere,
+        );
+      }
+      hasSphere = true;
+    }
+    return owner;
+  } catch (error) {
+    owner.destroy();
+    throw error;
   }
-  return owner;
 }
 function sameCondition(left, right) {
   return (
@@ -474,6 +492,7 @@ function cloneCondition(condition) {
     : { near: condition.near, far: condition.far };
 }
 function applyState(owner, state) {
+  updatePlanarFillMaterial(owner, state);
   const styleChanged =
     !Color.equals(owner.fillColor, state.fillColor) ||
     !Color.equals(owner.outlineColor, state.outlineColor) ||

@@ -16,7 +16,11 @@ import EntityCollection from "../../../DataSources/EntityCollection.js";
 import Property from "../../../DataSources/Property.js";
 import HeightReference from "../../../Scene/HeightReference.js";
 import Material from "../../../Scene/Material.js";
-import PerInstanceColorAppearance from "../../../Scene/PerInstanceColorAppearance.js";
+import {
+  getPlanarFillMaterial,
+  createPlanarFillAppearance,
+  updatePlanarFillMaterial,
+} from "./_SceneGISPlanarFillMaterial.js";
 import PolylineMaterialAppearance from "../../../Scene/PolylineMaterialAppearance.js";
 import ShadowMode from "../../../Scene/ShadowMode.js";
 import SceneGISPlanarPolygonGeometry from "../../Core/SceneGISPlanarPolygonGeometry.js";
@@ -59,7 +63,7 @@ function materialColor(graphic, time) {
     graphic._material !== undefined &&
     !(graphic._material instanceof ColorMaterialProperty)
   ) {
-    throw new DeveloperError("material must be a ColorMaterialProperty.");
+    return Color.clone(Color.WHITE);
   }
   return colorValue(
     graphic._material?._color,
@@ -485,8 +489,10 @@ function createState(visualizer, item, name, time) {
   if (!shown) {
     return { shown: false };
   }
+  const material = getPlanarFillMaterial(graphic, time);
   return {
     shown: true,
+    material,
     shadows: validatePlanarShadowMode(
       value(graphic._shadows, time, ShadowMode.DISABLED),
     ),
@@ -501,6 +507,7 @@ function createState(visualizer, item, name, time) {
     condition: common.condition,
     ground,
     signature: [
+      material === undefined ? "color" : `fabric:${material.type}`,
       name,
       `${geometry._origin.x},${geometry._origin.y},${geometry._origin.z}`,
       JSON.stringify(geometry._localPositions),
@@ -528,94 +535,101 @@ function instanceAttributes(color, condition) {
 }
 function createOwner(visualizer, item, state) {
   const owner = new SceneGISPlanarPrimitiveOwner(visualizer._primitives);
-  if (state.fill) {
-    const wall = state.name === "wall";
-    const polygon = state.name === "corridor";
-    const PrimitiveType = state.ground
-      ? SceneGISPlanarGroundPrimitive
-      : SceneGISPlanarPrimitive;
-    const primitive = new PrimitiveType({
-      ...(state.ground
-        ? {
-            world: visualizer._world,
-          }
-        : {}),
-      geometry: state.geometry,
-      appearance: new PerInstanceColorAppearance({
-        flat: polygon,
-        closed: !polygon && !wall,
-        translucent: state.color.alpha < 1.0,
-      }),
-      attributes: instanceAttributes(state.color, state.condition),
-      id: item.entity,
-    });
-    owner.add(primitive);
-    owner.fillPrimitive = primitive;
-  }
-  for (let i = 0; i < state.outlines.length; i++) {
-    const positions = state.outlines[i];
-    const groundReference = state.outlineReferences[i];
-    const endpointReferences = Array.isArray(groundReference)
-      ? groundReference
-      : undefined;
-    const usesGround = endpointReferences
-      ? endpointReferences.some(
-          (reference) => reference !== HeightReference.NONE,
-        )
-      : groundReference !== HeightReference.NONE;
-    const PrimitiveType = usesGround
-      ? SceneGISPlanarGroundPrimitive
-      : SceneGISPlanarPrimitive;
-    const primitive = new PrimitiveType({
-      ...(usesGround
-        ? {
-            world: visualizer._world,
-          }
-        : {}),
-      geometry: new SceneGISPlanarPolylineGeometry({
-        positions,
-        width: state.outlineWidth,
-      }),
-      appearance: new PolylineMaterialAppearance({
-        material: Material.fromType(Material.ColorType, {
-          color: Color.clone(state.outlineColor),
+  try {
+    if (state.fill) {
+      const wall = state.name === "wall";
+      const polygon = state.name === "corridor";
+      const PrimitiveType = state.ground
+        ? SceneGISPlanarGroundPrimitive
+        : SceneGISPlanarPrimitive;
+      const primitive = new PrimitiveType({
+        ...(state.ground
+          ? {
+              world: visualizer._world,
+            }
+          : {}),
+        geometry: state.geometry,
+        appearance: createPlanarFillAppearance(owner, state, {
+          flat: polygon,
+          closed: !polygon && !wall,
+          translucent: state.color.alpha < 1.0,
         }),
-        translucent: state.outlineColor.alpha < 1.0,
-      }),
-      attributes:
-        state.condition === undefined
-          ? undefined
-          : {
-              distanceDisplayCondition:
-                DistanceDisplayConditionGeometryInstanceAttribute.fromDistanceDisplayCondition(
-                  state.condition,
-                ),
-            },
-      id: item.entity,
-    });
-    owner.add(primitive);
-    (owner.outlinePrimitives ??= []).push(primitive);
-  }
-  owner.signature = state.signature;
-  owner.color = Color.clone(state.color);
-  owner.outlineColor = Color.clone(state.outlineColor);
-  owner.condition = state.condition;
-  owner.setShadows(state.shadows);
-  owner.shown = true;
-  owner.boundingSphere = new BoundingSphere();
-  for (let i = 0; i < owner.primitives.length; i++) {
-    owner.primitives[i].getBoundingSphere(scratchSphere);
-    if (i === 0) {
-      BoundingSphere.clone(scratchSphere, owner.boundingSphere);
-    } else {
-      BoundingSphere.union(
-        owner.boundingSphere,
-        scratchSphere,
-        owner.boundingSphere,
-      );
+        attributes: instanceAttributes(state.color, state.condition),
+        id: item.entity,
+      });
+      owner.add(primitive);
+      owner.fillPrimitive = primitive;
     }
+    for (let i = 0; i < state.outlines.length; i++) {
+      const positions = state.outlines[i];
+      const groundReference = state.outlineReferences[i];
+      const endpointReferences = Array.isArray(groundReference)
+        ? groundReference
+        : undefined;
+      const usesGround = endpointReferences
+        ? endpointReferences.some(
+            (reference) => reference !== HeightReference.NONE,
+          )
+        : groundReference !== HeightReference.NONE;
+      const PrimitiveType = usesGround
+        ? SceneGISPlanarGroundPrimitive
+        : SceneGISPlanarPrimitive;
+      const primitive = new PrimitiveType({
+        ...(usesGround
+          ? {
+              world: visualizer._world,
+            }
+          : {}),
+        geometry: new SceneGISPlanarPolylineGeometry({
+          positions,
+          width: state.outlineWidth,
+        }),
+        appearance: new PolylineMaterialAppearance({
+          material: owner.ownMaterial(
+            Material.fromType(Material.ColorType, {
+              color: Color.clone(state.outlineColor),
+            }),
+          ),
+          translucent: state.outlineColor.alpha < 1.0,
+        }),
+        attributes:
+          state.condition === undefined
+            ? undefined
+            : {
+                distanceDisplayCondition:
+                  DistanceDisplayConditionGeometryInstanceAttribute.fromDistanceDisplayCondition(
+                    state.condition,
+                  ),
+              },
+        id: item.entity,
+      });
+      owner.add(primitive);
+      (owner.outlinePrimitives ??= []).push(primitive);
+    }
+    owner.signature = state.signature;
+    owner.color = Color.clone(state.color);
+    owner.outlineColor = Color.clone(state.outlineColor);
+    owner.condition = state.condition;
+    owner.setShadows(state.shadows);
+    owner.shown = true;
+    owner.boundingSphere = new BoundingSphere();
+    for (let i = 0; i < owner.primitives.length; i++) {
+      owner.primitives[i].getBoundingSphere(scratchSphere);
+      if (i === 0) {
+        BoundingSphere.clone(scratchSphere, owner.boundingSphere);
+      } else {
+        BoundingSphere.union(
+          owner.boundingSphere,
+          scratchSphere,
+          owner.boundingSphere,
+        );
+      }
+    }
+    return owner;
+  } catch (error) {
+    owner.destroy();
+    throw error;
   }
-  return owner;
 }
 function sameCondition(a, b) {
   return (
@@ -624,6 +638,7 @@ function sameCondition(a, b) {
   );
 }
 function applyState(owner, state) {
+  updatePlanarFillMaterial(owner, state);
   const changed =
     !Color.equals(owner.color, state.color) ||
     !Color.equals(owner.outlineColor, state.outlineColor) ||

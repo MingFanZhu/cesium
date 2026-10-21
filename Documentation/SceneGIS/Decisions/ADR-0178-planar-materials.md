@@ -56,3 +56,9 @@ Ground 接纳 MaterialAppearance 的 Material/flat/faceForward，使用自有 vo
 UV 从表面深度与每对象 XY extent 重建，再应用 stRotation；normal/TBN 从表面导数重建。
 材质透明不影响 stencil 建立与清除，禁止 discard；pick 保持原生 GroundPrimitive 的足迹语义。
 材质范围禁止同色重叠合并，空间无冲突范围仍可共用命令；动态材质与 provider envelope 不重建 VA。
+
+## M3 Entity ownership
+
+四类面 Visualizer 共享 MaterialProperty 桥，Color 保留原路径。非 Color 类型加入几何 signature，
+同类型仅更新 uniform；类型变化沿用候选替换并释放旧 owner。PrimitiveOwner 记录其创建的材质，
+先销毁 Primitive 再销毁 Material，候选构造失败也清理；调用方 Material 所有权不改变。

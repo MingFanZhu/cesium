@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面材质验收</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #view {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      #panel {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        width: 280px;
+        padding: 16px;
+        background: #102136ed;
+        color: #e7f1ff;
+        font: 14px/1.7 system-ui;
+        border-radius: 8px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 8px;
+      }
+      button {
+        margin: 4px;
+        padding: 5px 10px;
+      }
+      label {
+        display: block;
+      }
+      input {
+        vertical-align: middle;
+      }
+      output {
+        display: block;
+        white-space: pre-line;
+        color: #b7e4ef;
+      }
+      p {
+        margin: 8px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="view"></div>
+    <section id="panel">
+      <h1>平面材质验收</h1>
+      <p>
+        前排：普通图片、贴地带孔图片、透明重叠面。后排：Entity
+        动态棋盘与图片、Fabric 动画批。
+      </p>
+      <label
+        >倾角 <input id="pitch" type="range" min="8" max="90" value="55" />
+        <span id="angle">55°</span></label
+      >
+      <label
+        >批量透明度
+        <input id="alpha" type="range" min="0" max="1" step="0.05" value="0.85"
+      /></label>
+      <label><input id="terrain" type="checkbox" /> 起伏地形</label>
+      <label><input id="animate" type="checkbox" checked /> 动画 uniform</label>
+      <button id="reset">恢复视角</button
+      ><button id="toggle">隐藏选中批对象</button>
+      <output id="status">正在初始化…</output
+      ><output id="picked">点击图形查看 ID</output>
+      <p>
+        批次共享一种材质，每个对象可独立显隐、拾取。图片由本地 Canvas
+        生成，无外部数据请求。
+      </p>
+    </section>
+    <script type="module">
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const center = 20000000;
+      const point = (x, y, z = 0) =>
+        new C.Cartesian3(center + x, center + y, z);
+      const world = new C.SceneGISPlanarWorld({
+        coordinateSystem: new C.SceneGISPlanarCoordinateSystem({
+          crs: "EPSG:3857",
+          extent: new C.SceneGISPlanarExtent({
+            minimumX: center - 1000,
+            minimumY: center - 1000,
+            maximumX: center + 1000,
+            maximumY: center + 1000,
+          }),
+        }),
+        maximumLevel: 0,
+        baseColor: C.Color.fromCssColorString("#20324b"),
+      });
+      const viewer = new C.Viewer("view", {
+        world,
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+      });
+      const scene = viewer.scene;
+      scene.environmentEffects.enabled = false;
+      scene.highDynamicRange = false;
+      scene.light = new C.DirectionalLight({
+        direction: new C.Cartesian3(0, 0, -1),
+      });
+      const materials = [];
+      function material(options) {
+        const value = new C.Material(options);
+        materials.push(value);
+        return value;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 256;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#11a8ce";
+      ctx.fillRect(0, 0, 128, 256);
+      ctx.fillStyle = "#fbb344";
+      ctx.fillRect(128, 0, 128, 256);
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 3;
+      for (let i = 0; i <= 256; i += 32) {
+        ctx.strokeRect(i, 0, 32, 256);
+        ctx.strokeRect(0, i, 256, 32);
+      }
+      ctx.fillStyle = "#122638";
+      ctx.font = "bold 56px sans-serif";
+      ctx.fillText("XY", 75, 148);
+      const image = material({
+        fabric: { type: C.Material.ImageType, uniforms: { image: canvas } },
+      });
+      function geometry(x, y, size = 60, z = 0, holes = false) {
+        const ring = (r) =>
+          [
+            [-r, -r],
+            [r, -r],
+            [r, r],
+            [-r, r],
+          ].map(([a, b]) => point(x + a, y + b, z));
+        return new C.SceneGISPlanarPolygonGeometry({
+          positions: ring(size / 2),
+          holes: holes ? [ring(size / 7)] : [],
+          stRotation: 0,
+        });
+      }
+      function add(ground, entries, value) {
+        const Type = ground
+          ? C.SceneGISPlanarGroundPrimitive
+          : C.SceneGISPlanarPrimitive;
+        return scene.primitives.add(
+          new Type({
+            ...(ground ? { world } : {}),
+            geometryInstances: entries,
+            appearance: new C.MaterialAppearance({
+              material: value,
+              flat: true,
+            }),
+          }),
+        );
+      }
+      add(
+        false,
+        [{ geometry: geometry(-100, -60, 65, 15), id: "普通图片" }],
+        image,
+      );
+      add(
+        true,
+        [{ geometry: geometry(0, -60, 65, 0, true), id: "贴地图片（孔洞）" }],
+        image,
+      );
+      const translucent = material({
+        fabric: {
+          type: "PlanarOverlapDemo",
+          uniforms: { alpha: 0.55 },
+          source:
+            "czm_material czm_getMaterial(czm_materialInput materialInput) { czm_material m=czm_getDefaultMaterial(materialInput); m.diffuse=mix(vec3(0.1,0.8,1.0),vec3(1.0,0.2,0.2),materialInput.st.x); m.alpha=alpha; return m; }",
+        },
+      });
+      add(
+        true,
+        [
+          { geometry: geometry(85, -70, 55), id: "透明下层" },
+          { geometry: geometry(110, -50, 55), id: "透明上层" },
+        ],
+        translucent,
+      );
+      const fabric = material({
+        fabric: {
+          type: "PlanarBatchDemo",
+          uniforms: { phase: 0, alpha: 0.85 },
+          source:
+            "czm_material czm_getMaterial(czm_materialInput materialInput) { czm_material m=czm_getDefaultMaterial(materialInput); float wave=0.5+0.5*sin(materialInput.st.x*12.0+phase); m.diffuse=mix(vec3(0.1,0.3,0.9),vec3(0.1,0.95,0.65),wave); m.alpha=alpha; return m; }",
+        },
+      });
+      const batch = add(
+        true,
+        Array.from({ length: 128 }, (_, i) => ({
+          geometry: geometry(60 + (i % 16) * 6, 10 + Math.floor(i / 16) * 6, 5),
+          id: `批对象 ${i}`,
+          attributes: { show: new C.ShowGeometryInstanceAttribute(true) },
+        })),
+        fabric,
+      );
+      let phase = 0;
+      viewer.entities.add({
+        id: "Entity 动态棋盘",
+        position: point(-100, 35),
+        ellipse: {
+          semiMajorAxis: 32,
+          semiMinorAxis: 23,
+          height: 10,
+          material: new C.CheckerboardMaterialProperty({
+            evenColor: new C.CallbackProperty(
+              () => C.Color.fromHsl((phase * 0.04) % 1, 0.7, 0.6),
+              false,
+            ),
+            oddColor: C.Color.WHITE,
+            repeat: new C.Cartesian2(5, 5),
+          }),
+        },
+      });
+      viewer.entities.add({
+        id: "Entity 图片方盒",
+        position: point(0, 35, 18),
+        box: {
+          dimensions: new C.Cartesian3(45, 45, 36),
+          material: new C.ImageMaterialProperty({ image: canvas }),
+        },
+      });
+      const provider = {
+        tilingScheme: world.tilingScheme,
+        minimumHeight: 0,
+        maximumHeight: 12,
+        maximumLevel: 0,
+        errorEvent: new C.Event(),
+        getLevelMaximumGeometricError: () => 1,
+        getTileDataAvailable: () => true,
+        loadTileDataAvailability: () => undefined,
+        requestTileGeometry: () =>
+          Promise.resolve(
+            new C.SceneGISPlanarHeightmapTerrainData({
+              width: 9,
+              height: 9,
+              buffer: Float32Array.from(
+                { length: 81 },
+                (_, i) =>
+                  6 +
+                  6 *
+                    Math.sin((i % 9) * 0.8) *
+                    Math.cos(Math.floor(i / 9) * 0.8),
+              ),
+            }),
+          ),
+      };
+      function home() {
+        const angle = Number(document.querySelector("#pitch").value);
+        const p = C.Math.toRadians(angle);
+        document.querySelector("#angle").textContent = `${angle}°`;
+        viewer.camera.setView({
+          destination: point(-40, -450 * Math.cos(p), 450 * Math.sin(p)),
+          orientation: {
+            direction: new C.Cartesian3(0, Math.cos(p), -Math.sin(p)),
+            up: new C.Cartesian3(0, Math.sin(p), Math.cos(p)),
+          },
+        });
+      }
+      document.querySelector("#pitch").oninput = home;
+      document.querySelector("#reset").onclick = () => {
+        document.querySelector("#pitch").value = 55;
+        home();
+      };
+      document.querySelector("#alpha").oninput = (e) => {
+        fabric.uniforms.alpha = Number(e.target.value);
+      };
+      document.querySelector("#terrain").onchange = (e) => {
+        world.terrainProvider = e.target.checked ? provider : undefined;
+      };
+      let selected;
+      const handler = new C.ScreenSpaceEventHandler(scene.canvas);
+      handler.setInputAction((e) => {
+        const p = scene.pick(e.position);
+        selected = p?.primitive === batch ? p.id : undefined;
+        document.querySelector("#picked").textContent = p
+          ? `拾取：${p.id?.id ?? p.id}`
+          : "未拾取图形";
+      }, C.ScreenSpaceEventType.LEFT_CLICK);
+      document.querySelector("#toggle").onclick = () => {
+        if (selected !== undefined) {
+          const a = batch.getGeometryInstanceAttributes(selected);
+          a.show = [a.show[0] ? 0 : 1];
+        }
+      };
+      let last = performance.now();
+      const removeTick = scene.preUpdate.addEventListener(() => {
+        const now = performance.now();
+        if (document.querySelector("#animate").checked) {
+          phase += (now - last) / 1000;
+          fabric.uniforms.phase = phase;
+        }
+        last = now;
+      });
+      const removeStats = scene.postRender.addEventListener(() => {
+        if (batch.ready) {
+          document.querySelector("#status").textContent =
+            `128 个材质对象 · ${batch._current._va.length} VA\n模板 / 颜色命令：${batch._currentCommands.stencilCommands.length} / ${batch._currentCommands.colorCommands.length}\n地形：${world.terrainProvider ? (world.tilesLoaded ? "已加载" : "加载中") : "平面"}`;
+        }
+      });
+      home();
+      window.planarMaterialExample = { viewer, world, batch, home };
+      window.addEventListener("pagehide", (event) => {
+        if (event.persisted || viewer.isDestroyed()) {
+          return;
+        }
+        removeTick();
+        removeStats();
+        handler.destroy();
+        viewer.destroy();
+        for (const value of materials) {
+          value.destroy();
+        }
+        if (!world.isDestroyed()) {
+          world.destroy();
+        }
+      });
+    </script>
+  </body>
+</html>

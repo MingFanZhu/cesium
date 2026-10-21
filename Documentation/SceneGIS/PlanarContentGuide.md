@@ -211,13 +211,12 @@ const groundBatch = scene.primitives.add(
 
 Public `SceneGISPlanarBoxGeometry`、`SceneGISPlanarCylinderGeometry`与
 `SceneGISPlanarEllipsoidGeometry`接收finite meter-based center和各自positive dimensions，并生成以center为
-origin的local DOUBLE volume mesh。它们只与closed、non-flat `PerInstanceColorAppearance`配对；wrapper仍在
+origin的local DOUBLE volume mesh。Color 路径与closed、non-flat `PerInstanceColorAppearance`配对，材质路径使用 `MaterialAppearance`；wrapper仍在
 construction时固定geometry kind。
 
 Automatic Solid profile支持Box、Cylinder与full Ellipsoid。Entity.position表示center；`NONE`保留center Z，
 clamp/relative先按C1 resolver解析anchor，再分别增加`dimensions.z / 2`、`length / 2`或`radii.z`。Entity
-orientation是fixed planar quaternion，倾斜后不重新求terrain接触。Partial/inner Ellipsoid和
-非Color material会fail-fast。
+orientation是fixed planar quaternion，倾斜后不重新求terrain接触。Partial/inner Ellipsoid 仍会fail-fast；面材质扩展见下文 ADR-0178。
 
 Plane、Ellipse与Rectangle由private Area adapter降级到public Polygon/Polyline。Plane使用完整Entity position、
 orientation和local Plane equation，不支持HeightReference。Ellipse position只提供center X/Y，height/ref决定Z，
@@ -246,8 +245,8 @@ extent时当前Path隐藏，不clip。
 ## C11 GPU Surface Clamp 契约
 
 Public `SceneGISPlanarGroundPrimitive`复用existing public Polyline或non-extruded Polygon Geometry，并要求live planar
-World与compatible Color appearance。Clamp是implicit；不再接受public `heightReference`或
-`extrudedHeightReference`，也不接受arbitrary modelMatrix、classification、zIndex或arbitrary Material。Ordinary NONE
+World与compatible Color appearance；面另支持 MaterialAppearance。Clamp是implicit；不再接受public `heightReference`或
+`extrudedHeightReference`，也不接受arbitrary modelMatrix、classification或zIndex。Ordinary NONE
 内容继续使用`SceneGISPlanarPrimitive`。
 
 Planar Surface先在existing `Pass.GLOBE`写入color/depth，ground随后在existing
@@ -450,3 +449,45 @@ Solid、Area、Route、Polyline、Polygon 和 Model 的动态 ShadowMode 更新�
 不改变 caller Property，不因阴影开关重建几何。SceneGISPlanarPrimitive.shadows 同样沿用该 enum。
 全局开启使用 Viewer.shadows，地形使用 Viewer.terrainShadows / world.shadows。
 连续 ground classification 覆盖并非 caster mesh，本次不赋予额外阴影能力。
+
+## 平面面材质（ADR-0178）
+
+普通非线图元与贴地 Polygon 支持原生 `MaterialAppearance` / `Material` / Fabric：
+Image、Checkerboard 等内建材质和自定义 Fabric 均沿用原生纹理与 uniform 生命周期。
+每批共享一种材质；多材质请分批。材质不自动乘 per-instance color，独立 show/id/pick 保持。
+直接传入的 Material 由调用方拥有，在移除 Primitive 后销毁；Entity adapter 自行创建的 Material 则自行释放。
+
+```js
+const material = Cesium.Material.fromType("Image", { image: canvas });
+const primitive = new Cesium.SceneGISPlanarPrimitive({
+  geometry: new Cesium.SceneGISPlanarPolygonGeometry({
+    positions,
+    stRotation: Math.PI / 4,
+  }),
+  appearance: new Cesium.MaterialAppearance({ material, flat: true }),
+  id: "image-area",
+});
+scene.primitives.add(primitive);
+// Material uniforms can change without rebuilding geometry.
+material.uniforms.repeat = new Cesium.Cartesian2(2, 2);
+```
+
+普通 Polygon/Wall/PolylineVolume 采用逐三角面主轴 bbox UV；跨主轴存在接缝，
+并非沿线连续展开。Box/Cylinder/Ellipsoid 复用原生 UV；按 vertexFormat 生成 normal/st/TBN。
+Polygon 的 stRotation 围绕 UV 中心旋转，Entity 的 Polygon/Ellipse/Rectangle 同样可用。
+
+贴地 UV 从真实表面深度和 XY extent 重建，先裁剪再旋转。MaterialAppearance 的
+Material/flat/faceForward 被接纳，外层自定义 Shader 不接入。
+空间相交对象保留覆盖顺序及透明叠加；互不冲突对象可合批。
+贴地 Fabric 使用 material.alpha 表达透明，禁止 discard；拾取始终以足迹判断（含透明像素）。
+
+Polygon/Plane/Ellipse/Rectangle/Box/Cylinder/Ellipsoid/Wall/PolylineVolume/Corridor
+的 Entity material 接受原生 MaterialProperty，例如 ImageMaterialProperty 和 CheckerboardMaterialProperty。
+自定义 MaterialProperty 遵守原生 getType/getValue 与 Fabric 类型注册约定；同类型 uniform 更新复用几何，
+类型切换构建候选 owner。实体与地表仍采用当前 World 的米制坐标。Polyline、Path 和轮廓仍仅支持 Color。
+
+Image 含 alpha 时，直接 Fabric 需按原生 Material 契约声明 translucency；
+Entity 可使用 ImageMaterialProperty({ image, transparent: true })。
+显式 textureCoordinates、连续路径 UV 展开以及 Model CustomShader 不在本轮范围。
+
+本地验收入口：`Test/平面材质.html`，包括地形、低倾角、动态 Entity 材质与 128 对象批。

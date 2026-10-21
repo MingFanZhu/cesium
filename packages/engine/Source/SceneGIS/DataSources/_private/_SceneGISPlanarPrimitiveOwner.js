@@ -53,6 +53,7 @@ function SceneGISPlanarPrimitiveOwner(primitiveCollection) {
   }
   this.primitiveCollection = primitiveCollection;
   this.primitives = [];
+  this.materials = [];
   this.collections = this.primitives;
   this.destroyed = false;
 }
@@ -63,6 +64,11 @@ SceneGISPlanarPrimitiveOwner.prototype.add = function (primitive) {
   }
   this.primitives.push(primitive);
   return primitive;
+};
+
+SceneGISPlanarPrimitiveOwner.prototype.ownMaterial = function (material) {
+  this.materials.push(material);
+  return material;
 };
 
 SceneGISPlanarPrimitiveOwner.prototype.insert = function () {
@@ -111,6 +117,10 @@ SceneGISPlanarPrimitiveOwner.prototype.destroy = function () {
   if (cleanupError !== undefined) {
     throw cleanupError;
   }
+  for (const material of this.materials) {
+    material.destroy();
+  }
+  this.materials.length = 0;
 };
 
 export default SceneGISPlanarPrimitiveOwner;

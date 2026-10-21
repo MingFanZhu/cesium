@@ -12,7 +12,11 @@ import DistanceDisplayCondition from "../../../Core/DistanceDisplayCondition.js"
 import EntityCollection from "../../../DataSources/EntityCollection.js";
 import HeightReference from "../../../Scene/HeightReference.js";
 import Material from "../../../Scene/Material.js";
-import PerInstanceColorAppearance from "../../../Scene/PerInstanceColorAppearance.js";
+import {
+  getPlanarFillMaterial,
+  createPlanarFillAppearance,
+  updatePlanarFillMaterial,
+} from "./_SceneGISPlanarFillMaterial.js";
 import PolylineMaterialAppearance from "../../../Scene/PolylineMaterialAppearance.js";
 import Property from "../../../DataSources/Property.js";
 import ShadowMode from "../../../Scene/ShadowMode.js";
@@ -55,7 +59,7 @@ function getFillColor(graphic, time) {
     return Color.clone(Color.WHITE);
   }
   if (!(material instanceof ColorMaterialProperty)) {
-    throw new DeveloperError("material must be a ColorMaterialProperty.");
+    return Color.clone(Color.WHITE);
   }
   const color = Color.clone(
     value(material.color, time, Color.WHITE, scratchColor),
@@ -70,7 +74,6 @@ function validateUnsupported(graphic, time) {
     throw new DeveloperError("arcType must be ArcType.NONE when defined.");
   }
   const unsupportedProperties = [
-    ["stRotation", graphic._stRotation],
     ["granularity", graphic._granularity],
     ["textureCoordinates", graphic._textureCoordinates],
     ["classificationType", graphic._classificationType],
@@ -441,8 +444,15 @@ function computeState(visualizer, item, time) {
   const geometryKey = allWorldPositions
     .map((p) => `${p.x},${p.y},${p.z}`)
     .join(";");
+  const stRotation = value(graphic._stRotation, time, 0);
+  if (!Number.isFinite(stRotation)) {
+    throw new DeveloperError("stRotation must be finite.");
+  }
+  const material = getPlanarFillMaterial(graphic, time);
   return {
     shown: true,
+    material,
+    stRotation,
     shadows: validatePlanarShadowMode(
       value(graphic._shadows, time, ShadowMode.DISABLED),
     ),
@@ -465,6 +475,8 @@ function computeState(visualizer, item, time) {
     outlineColor,
     outlineWidth,
     signature: [
+      stRotation,
+      material === undefined ? "color" : `fabric:${material.type}`,
       distanceDisplayCondition !== undefined,
       geometryKey,
       fill,
@@ -492,83 +504,91 @@ function createOwner(visualizer, item, state) {
             ),
         };
   let fillPrimitive;
-  if (state.fill) {
-    const PrimitiveType = state.ground
-      ? SceneGISPlanarGroundPrimitive
-      : SceneGISPlanarPrimitive;
-    fillPrimitive = new PrimitiveType({
-      ...(state.ground
-        ? {
-            world: visualizer._world,
-          }
-        : {}),
-      geometry: new SceneGISPlanarPolygonGeometry({
-        positions: state.topRings[0],
-        holes: state.topRings.slice(1),
-        bottomPositions: state.bottomPositions,
-        closeTop: state.closeTop,
-        closeBottom: state.closeBottom,
-      }),
-      appearance: new PerInstanceColorAppearance({
-        flat: true,
-        translucent: state.fillColor.alpha < 1.0,
-        closed: false,
-      }),
-      attributes: {
-        ...distanceAttributes,
-        color: ColorGeometryInstanceAttribute.fromColor(state.fillColor),
-      },
-      id: item.entity,
-    });
-    owner.add(fillPrimitive);
+  try {
+    if (state.fill) {
+      const PrimitiveType = state.ground
+        ? SceneGISPlanarGroundPrimitive
+        : SceneGISPlanarPrimitive;
+      fillPrimitive = new PrimitiveType({
+        ...(state.ground
+          ? {
+              world: visualizer._world,
+            }
+          : {}),
+        geometry: new SceneGISPlanarPolygonGeometry({
+          stRotation: state.stRotation,
+          positions: state.topRings[0],
+          holes: state.topRings.slice(1),
+          bottomPositions: state.bottomPositions,
+          closeTop: state.closeTop,
+          closeBottom: state.closeBottom,
+        }),
+        appearance: createPlanarFillAppearance(owner, state, {
+          flat: true,
+          translucent: state.fillColor.alpha < 1.0,
+          closed: false,
+        }),
+        attributes: {
+          ...distanceAttributes,
+          color: ColorGeometryInstanceAttribute.fromColor(state.fillColor),
+        },
+        id: item.entity,
+      });
+      owner.add(fillPrimitive);
+    }
+    const outlinePrimitives = [];
+    for (let i = 0; i < state.outlinePositions.length; i++) {
+      const material = owner.ownMaterial(
+        Material.fromType(Material.ColorType, {
+          color: Color.clone(state.outlineColor),
+        }),
+      );
+      const groundReference = state.outlineReferences[i];
+      const endpointReferences = Array.isArray(groundReference)
+        ? groundReference
+        : undefined;
+      const usesGround = endpointReferences
+        ? endpointReferences.some(
+            (reference) => reference !== HeightReference.NONE,
+          )
+        : groundReference !== HeightReference.NONE;
+      const PrimitiveType = usesGround
+        ? SceneGISPlanarGroundPrimitive
+        : SceneGISPlanarPrimitive;
+      const primitive = new PrimitiveType({
+        ...(usesGround
+          ? {
+              world: visualizer._world,
+            }
+          : {}),
+        geometry: new SceneGISPlanarPolylineGeometry({
+          positions: state.outlinePositions[i],
+          width: state.outlineWidth,
+        }),
+        appearance: new PolylineMaterialAppearance({
+          material,
+          translucent: state.outlineColor.alpha < 1.0,
+        }),
+        attributes: distanceAttributes,
+        id: item.entity,
+      });
+      owner.add(primitive);
+      outlinePrimitives.push(primitive);
+    }
+    owner.fillPrimitive = fillPrimitive;
+    owner.outlinePrimitives = outlinePrimitives;
+    owner.signature = state.signature;
+    owner.distanceDisplayCondition = DistanceDisplayCondition.clone(
+      state.distanceDisplayCondition,
+    );
+    owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
+    owner.setShadows(state.shadows);
+    owner.shown = true;
+    return owner;
+  } catch (error) {
+    owner.destroy();
+    throw error;
   }
-  const outlinePrimitives = [];
-  for (let i = 0; i < state.outlinePositions.length; i++) {
-    const material = Material.fromType(Material.ColorType, {
-      color: Color.clone(state.outlineColor),
-    });
-    const groundReference = state.outlineReferences[i];
-    const endpointReferences = Array.isArray(groundReference)
-      ? groundReference
-      : undefined;
-    const usesGround = endpointReferences
-      ? endpointReferences.some(
-          (reference) => reference !== HeightReference.NONE,
-        )
-      : groundReference !== HeightReference.NONE;
-    const PrimitiveType = usesGround
-      ? SceneGISPlanarGroundPrimitive
-      : SceneGISPlanarPrimitive;
-    const primitive = new PrimitiveType({
-      ...(usesGround
-        ? {
-            world: visualizer._world,
-          }
-        : {}),
-      geometry: new SceneGISPlanarPolylineGeometry({
-        positions: state.outlinePositions[i],
-        width: state.outlineWidth,
-      }),
-      appearance: new PolylineMaterialAppearance({
-        material,
-        translucent: state.outlineColor.alpha < 1.0,
-      }),
-      attributes: distanceAttributes,
-      id: item.entity,
-    });
-    owner.add(primitive);
-    outlinePrimitives.push(primitive);
-  }
-  owner.fillPrimitive = fillPrimitive;
-  owner.outlinePrimitives = outlinePrimitives;
-  owner.signature = state.signature;
-  owner.distanceDisplayCondition = DistanceDisplayCondition.clone(
-    state.distanceDisplayCondition,
-  );
-  owner.boundingSphere = BoundingSphere.clone(state.boundingSphere);
-  owner.setShadows(state.shadows);
-  owner.shown = true;
-  return owner;
 }
 
 function boundingSphereEquals(left, right) {
@@ -578,6 +598,7 @@ function boundingSphereEquals(left, right) {
 }
 
 function applyState(owner, state) {
+  updatePlanarFillMaterial(owner, state);
   if (
     !SceneGISPlanarDistanceDisplayCondition.update(
       owner,
