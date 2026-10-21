@@ -5,6 +5,7 @@ import Color from "../../Core/Color.js";
 import CoplanarPolygonGeometry from "../../Core/CoplanarPolygonGeometry.js";
 import destroyObject from "../../Core/destroyObject.js";
 import DeveloperError from "../../Core/DeveloperError.js";
+import Ellipsoid from "../../Core/Ellipsoid.js";
 import JulianDate from "../../Core/JulianDate.js";
 import Matrix3 from "../../Core/Matrix3.js";
 import Matrix4 from "../../Core/Matrix4.js";
@@ -19,12 +20,15 @@ import ShaderProgram from "../../Renderer/ShaderProgram.js";
 import ShaderSource from "../../Renderer/ShaderSource.js";
 import VertexArray from "../../Renderer/VertexArray.js";
 import SceneMode from "../../Scene/SceneMode.js";
+import Globe from "../../Scene/Globe.js";
 import ray from "../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import vertex from "../../Shaders/SceneGIS/Water/SceneGISWaterVS.js";
 import fragment from "../../Shaders/SceneGIS/Water/SceneGISWaterFS.js";
+import curvedSurface from "../../Shaders/SceneGIS/Water/SceneGISWaterCurvedSurface.js";
 import WaterFrame from "./_private/_SceneGISWaterFrame.js";
 import WindWaves from "./SceneGISWindWaves.js";
 import WaterMesh from "./_private/_SceneGISWaterMesh.js";
+import EllipsoidWaterMesh from "./_private/_SceneGISEllipsoidWaterMesh.js";
 import EnvironmentLighting from "./_private/_SceneGISModelEnvironmentLighting.js";
 
 function cloneHierarchy(hierarchy) {
@@ -60,6 +64,18 @@ const transposeScratch = new Matrix3();
 const orthogonalScratch = new Matrix3();
 
 function validate(surface) {
+  if (surface._ellipsoidMesh) {
+    if (!Matrix4.equals(surface.modelMatrix, Matrix4.IDENTITY)) {
+      throw new DeveloperError(
+        "Ellipsoid water requires identity modelMatrix. Author ECEF positions and ellipsoid heights instead.",
+      );
+    }
+    number(surface.maximumScreenSpaceError, "maximumScreenSpaceError", 0.1);
+    number(surface.maximumTileCount, "maximumTileCount", 4, 4096);
+    if (!Number.isInteger(surface.maximumTileCount)) {
+      throw new DeveloperError("maximumTileCount must be an integer.");
+    }
+  }
   if (
     typeof surface.show !== "boolean" ||
     typeof surface.reflections !== "boolean"
@@ -121,10 +137,15 @@ function validate(surface) {
 }
 
 /**
- * A local, above-water lake, river or pool surface with depth-based transmission,
+ * An above-water lake, river or pool surface with depth-based transmission,
  * animated normal waves, dielectric reflection and shallow contact foam.
  * Add it to Scene.primitives. PolygonHierarchy positions are local XY meters with z = 0;
  * modelMatrix places the plane in either World. Globe callers normally use an ENU transform.
+ * Explicit geometryMode "ellipsoid" instead accepts ECEF positions and a constant ellipsoid
+ * height, or per-position heights interpolated in a fixed regional chart. It requires windWaves,
+ * an identity modelMatrix and a matching Globe ellipsoid. Rings must fit one open tangent
+ * hemisphere; their edges are straight in the regional gnomonic chart. This is regional visual
+ * wind synthesis with projection distortion, not global ocean or hydraulic simulation.
  * Requires SCENE3D, HDR and WebGL2 floating-point targets. Native Water materials are unchanged.
  * Uses opaque scene depth/color, so underwater viewing, overlapping water layers and translucent
  * submerged objects are not supported. Reflection misses use the physical sky when active,
@@ -135,7 +156,13 @@ function validate(surface) {
  * @alias SceneGISWaterSurface
  * @constructor
  * @param {object} options Initialization options.
- * @param {PolygonHierarchy} options.polygonHierarchy Local plane polygon, including optional holes. Copied at construction.
+ * @param {PolygonHierarchy} options.polygonHierarchy Local XY or explicit ellipsoid-mode ECEF polygon, including holes. Copied at construction.
+ * @param {string} [options.geometryMode="local"] "local" or "ellipsoid"; fixed at construction.
+ * @param {Ellipsoid} [options.ellipsoid=Ellipsoid.WGS84] Curved-mode ellipsoid, copied at construction. Must match the Globe.
+ * @param {number} [options.height=0] Curved-mode ellipsoid height in meters, fixed at construction.
+ * @param {boolean} [options.perPositionHeight=false] Use ECEF boundary heights instead of height in curved mode. Fixed at construction.
+ * @param {number} [options.maximumScreenSpaceError=2] Curved grid curvature error target in pixels, at least 0.1.
+ * @param {number} [options.maximumTileCount=512] Curved quadtree leaf budget, integer in [4, 4096]. The budget can limit requested accuracy.
  * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world transform.
  * @param {*} [options.id] Pick identifier.
  * @param {boolean} [options.show=true] Whether to draw the surface.
@@ -167,7 +194,10 @@ function validate(surface) {
  * }));
  */
 function SceneGISWaterSurface(options = {}) {
-  this._hierarchy = cloneHierarchy(options.polygonHierarchy);
+  this._geometryMode = options.geometryMode ?? "local";
+  if (this._geometryMode !== "local" && this._geometryMode !== "ellipsoid") {
+    throw new DeveloperError('geometryMode must be "local" or "ellipsoid".');
+  }
   this._windWaves = options.windWaves;
   this._meshSpacing = options.meshSpacing ?? 1;
   number(this._meshSpacing, "meshSpacing", 0.25, 4);
@@ -177,6 +207,41 @@ function SceneGISWaterSurface(options = {}) {
   ) {
     throw new DeveloperError("windWaves must be a SceneGISWindWaves instance.");
   }
+  if (this._geometryMode === "ellipsoid") {
+    if (!this._windWaves) {
+      throw new DeveloperError("Ellipsoid water requires windWaves.");
+    }
+    const ellipsoid = options.ellipsoid ?? Ellipsoid.WGS84;
+    if (!(ellipsoid instanceof Ellipsoid) || ellipsoid.minimumRadius <= 0) {
+      throw new DeveloperError("ellipsoid must have positive radii.");
+    }
+    const height = options.height ?? 0,
+      perPositionHeight = options.perPositionHeight ?? false;
+    if (!Number.isFinite(height) || typeof perPositionHeight !== "boolean") {
+      throw new DeveloperError(
+        "height must be finite and perPositionHeight must be boolean.",
+      );
+    }
+    this._ellipsoidMesh = new EllipsoidWaterMesh(
+      options.polygonHierarchy,
+      Ellipsoid.clone(ellipsoid),
+      height,
+      perPositionHeight,
+      this._meshSpacing,
+    );
+  } else {
+    this._hierarchy = cloneHierarchy(options.polygonHierarchy);
+  }
+  /**
+   * Curved grid curvature error target in pixels.
+   * @type {number}
+   */
+  this.maximumScreenSpaceError = options.maximumScreenSpaceError ?? 2;
+  /**
+   * Curved quadtree leaf budget.
+   * @type {number}
+   */
+  this.maximumTileCount = options.maximumTileCount ?? 512;
   /**
    * Rigid local-to-world transform.
    * @type {Matrix4}
@@ -286,9 +351,21 @@ function SceneGISWaterSurface(options = {}) {
 
 function waterVertex(surface) {
   return new ShaderSource({
-    defines: surface._windWaves ? ["SCENEGIS_WIND_WAVES"] : [],
+    defines: waterDefines(surface),
     sources: [vertex],
   });
+}
+function waterDefines(surface) {
+  const defines = surface._windWaves ? ["SCENEGIS_WIND_WAVES"] : [];
+  if (surface._ellipsoidMesh) {
+    defines.push("SCENEGIS_CURVED_WATER");
+  }
+  return defines;
+}
+function waterAttributes(surface) {
+  return surface._ellipsoidMesh
+    ? EllipsoidWaterMesh.attributeLocations
+    : { position: 0, waveData: 1 };
 }
 const inverseScratch = new Matrix4();
 const cameraScratch = new Cartesian3();
@@ -387,17 +464,20 @@ function updateTiles(surface, frameState) {
 
 function createResources(surface, frameState) {
   const context = frameState.context;
-  const geometry = CoplanarPolygonGeometry.createGeometry(
-    new CoplanarPolygonGeometry({
-      polygonHierarchy: surface._hierarchy,
-      vertexFormat: VertexFormat.POSITION_ONLY,
-    }),
-  );
-  if (!geometry) {
+  const curved = surface._ellipsoidMesh;
+  const geometry = curved
+    ? undefined
+    : CoplanarPolygonGeometry.createGeometry(
+        new CoplanarPolygonGeometry({
+          polygonHierarchy: surface._hierarchy,
+          vertexFormat: VertexFormat.POSITION_ONLY,
+        }),
+      );
+  if (!curved && !geometry) {
     throw new DeveloperError("The water polygon must have a nonzero area.");
   }
-  surface._localBounds = geometry.boundingSphere;
-  if (surface._windWaves) {
+  surface._localBounds = curved ? curved.root.bounds : geometry.boundingSphere;
+  if (surface._windWaves && !curved) {
     surface._mesh = new WaterMesh(
       geometry,
       surface._hierarchy,
@@ -411,20 +491,22 @@ function createResources(surface, frameState) {
   const state = WaterFrame.get(frameState);
   surface._command = new DrawCommand({
     owner: surface,
-    vertexArray: VertexArray.fromGeometry({
-      context,
-      geometry,
-      attributeLocations: { position: 0, waveData: 1 },
-      bufferUsage: BufferUsage.STATIC_DRAW,
-    }),
+    vertexArray: curved
+      ? undefined
+      : VertexArray.fromGeometry({
+          context,
+          geometry,
+          attributeLocations: { position: 0, waveData: 1 },
+          bufferUsage: BufferUsage.STATIC_DRAW,
+        }),
     shaderProgram: ShaderProgram.fromCache({
       context,
       vertexShaderSource: waterVertex(surface),
       fragmentShaderSource: new ShaderSource({
-        defines: surface._windWaves ? ["SCENEGIS_WIND_WAVES"] : [],
-        sources: [ray, fragment],
+        defines: waterDefines(surface),
+        sources: [curvedSurface, ray, fragment],
       }),
-      attributeLocations: { position: 0, waveData: 1 },
+      attributeLocations: waterAttributes(surface),
     }),
     renderState: RenderState.fromCache({
       depthTest: { enabled: true },
@@ -452,6 +534,7 @@ function createResources(surface, frameState) {
       u_wavePeriod: () => surface._windWaves.patchLength,
       u_waveResolution: () => surface._windWaves.resolution,
       u_waveLodScale: () => surface._mesh.lodScale,
+      u_waterCurvatureRadius: () => surface._ellipsoidMesh.radius,
       u_displacement0: () =>
         surface._windWaves._state.bands[0].output.getColorTexture(0),
       u_displacement1: () =>
@@ -478,6 +561,30 @@ function createResources(surface, frameState) {
 }
 
 Object.defineProperties(SceneGISWaterSurface.prototype, {
+  /**
+   * Geometry coordinate contract.
+   * @memberof SceneGISWaterSurface.prototype
+   * @type {string}
+   * @readonly
+   */
+  geometryMode: {
+    get() {
+      return this._geometryMode;
+    },
+  },
+  /**
+   * A snapshot of curved mesh selection and cache statistics; undefined for local water.
+   * @memberof SceneGISWaterSurface.prototype
+   * @type {SceneGISWaterSurface.MeshStatistics|undefined}
+   * @readonly
+   */
+  statistics: {
+    get() {
+      return this._ellipsoidMesh
+        ? { ...this._ellipsoidMesh.statistics }
+        : undefined;
+    },
+  },
   /**
    *  Borrowed wind simulation; destroy it only after removing its surfaces.
    * @memberof SceneGISWaterSurface.prototype
@@ -524,6 +631,18 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
   }
   const c = frameState.context;
   const state = WaterFrame.get(frameState);
+  if (
+    this._ellipsoidMesh &&
+    (!(state.world instanceof Globe) ||
+      !Cartesian3.equals(
+        state.ellipsoid.radii,
+        this._ellipsoidMesh.ellipsoid.radii,
+      ))
+  ) {
+    throw new DeveloperError(
+      "Ellipsoid water requires a Globe with the configured ellipsoid.",
+    );
+  }
   if (
     frameState.mode !== SceneMode.SCENE3D ||
     !state.hdr ||
@@ -584,23 +703,23 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
           ),
         );
       }
-      if (this._windWaves) {
-        source.defines.push("SCENEGIS_WIND_WAVES");
-      }
-      source.sources.push(ray, fragment);
+      source.defines.push(...waterDefines(this));
+      source.sources.push(curvedSurface, ray, fragment);
       const previous = command.shaderProgram;
       command.shaderProgram = ShaderProgram.fromCache({
         context: c,
         vertexShaderSource: waterVertex(this),
         fragmentShaderSource: source,
-        attributeLocations: { position: 0, waveData: 1 },
+        attributeLocations: waterAttributes(this),
       });
       previous.destroy();
       this._lightingMode = lightingMode;
     }
     state.surfaces.push(this);
   }
-  if (this._mesh) {
+  if (this._ellipsoidMesh) {
+    this._ellipsoidMesh.update(this, frameState);
+  } else if (this._mesh) {
     updateTiles(this, frameState);
   } else {
     frameState.commandList.push(command);
@@ -619,6 +738,7 @@ SceneGISWaterSurface.prototype.isDestroyed = function () {
  * @returns {undefined}
  */
 SceneGISWaterSurface.prototype.destroy = function () {
+  this._ellipsoidMesh?.destroy();
   if (this._mesh) {
     for (const tile of this._mesh.tiles) {
       for (const entry of tile.cache) {
@@ -626,9 +746,23 @@ SceneGISWaterSurface.prototype.destroy = function () {
       }
     }
   }
-  this._command?.vertexArray.destroy();
+  this._command?.vertexArray?.destroy();
   this._command?.shaderProgram.destroy();
   this._pickId?.destroy();
   return destroyObject(this);
 };
+/**
+ * Curved-water mesh statistics from the most recent render update. Counts start at zero
+ * before the first update, except for the single CPU root. Byte counts exclude FFT and
+ * Scene-owned capture textures. A pick pass does not change this snapshot.
+ * @typedef {object} SceneGISWaterSurface.MeshStatistics
+ * @property {number} visitedTiles Number of CPU nodes considered in selection.
+ * @property {number} selectedTiles Number of visible mesh draw commands.
+ * @property {boolean} budgetLimited Whether the leaf budget prevented further refinement.
+ * @property {number} cachedTiles Retained CPU nodes, including nodes without a GPU mesh.
+ * @property {number} geometryBytes Total retained GPU mesh bytes.
+ * @property {number} inactiveGeometryBytes GPU bytes not drawn in the last update, capped at 16 MiB.
+ * @property {number} triangles Number of selected triangles.
+ * @property {number} geometryBuilds Number of GPU meshes built in the last update.
+ */
 export default SceneGISWaterSurface;

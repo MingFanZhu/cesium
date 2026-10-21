@@ -8,12 +8,12 @@
 | Status                 | `active`                                                                    |
 | Planning model         | `extension`                                                                 |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                  |
-| Current phase          | R24 completed and visually accepted                                         |
-| Active phase plan      | [R24](plans/2026-10-12-r24-color-grading.md)                                |
+| Current phase          | R25 technically verified; owner visual gate pending                         |
+| Active phase plan      | [R25](plans/2026-10-21-r25-curved-water.md)                                 |
 | Active standalone plan | None; [completed night emission](plans/2026-10-12-street-night-emission.md) |
 | Architecture contact   | Current task                                                                |
 | Execution contact      | Current task                                                                |
-| Last updated           | `2026-10-13`                                                                |
+| Last updated           | `2026-10-21`                                                                |
 
 ## Scope
 
@@ -34,6 +34,15 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-21: owner authorizes regional curved rivers/lakes, automatic mesh LOD and the
+  existing FFT. [R25](plans/2026-10-21-r25-curved-water.md) / ADR-0179 adds an explicit
+  ellipsoid geometry mode while retaining local water. Global ocean work stays deferred.
+  [Technical review](reviews/2026-10-21-r25-curved-water.md) records 7 feature Specs,
+  22 water/FFT regressions, lake/river and both-world local-water E2E, release/types,
+  measured runtime and synchronous cold-build cost. All paths are SceneGIS-owned;
+  SGP-0017 is unchanged. Owner visual acceptance and cold-build tolerance remain pending.
+  No next phase is active.
 
 - After R24 checkpoint `2e09227156`, the owner reports weak nighttime emission.
   [Focused maintenance](plans/2026-10-12-street-night-emission.md) diagnoses a disabled

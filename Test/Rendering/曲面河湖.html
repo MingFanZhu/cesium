@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>大范围曲面河湖</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>大范围曲面河湖</h1>
+      <p>椭球曲面、自动网格 LOD、共享 FFT。范围与水位为本地构造的验收数据。</p>
+      <p>
+        湖面包含凹岸线与岛屿孔洞；河流使用沿程变化的椭球高。关闭高度雾观察地平线。
+      </p>
+      <p>
+        <a href="?sample=lake">大湖</a> · <a href="?sample=river">长河</a> ·
+        <a href="玄武湖风浪.html?world=planar">平面风浪</a> ·
+        <a href="示例目录.html">目录</a>
+      </p>
+      <p id="status">正在生成水面…</p>
+      <p id="pick">单击水面检查拾取。</p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./曲面河湖.js"></script>
+  </body>
+</html>

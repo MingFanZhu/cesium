@@ -78,7 +78,11 @@ vec4 sceneGISSSRTrace(vec3 position, vec4 ray)
                 #ifdef SCENEGIS_WIND_WAVES
                 // A displaced water interface must not reflect the opaque lake bed.
                 vec3 hitPosition = sceneGISSSRPosition(uv * size, surface);
+                #ifdef SCENEGIS_CURVED_WATER
+                if (sceneGISWaterMeanOffset(hitPosition) < 0.0) { return vec4(0.0); }
+                #else
                 if ((czm_inverseModelView * vec4(hitPosition, 1.0)).z < 0.0) { return vec4(0.0); }
+                #endif
                 #endif
                 float edge = min(min(uv.x, uv.y), min(1.0 - uv.x, 1.0 - uv.y));
                 float confidence = smoothstep(0.0, 0.06, edge);

@@ -43,6 +43,8 @@ const SceneGISWaterFrame = {
   prepare(scene) {
     const state = SceneGISWaterFrame.get(scene.frameState);
     state.hdr = scene._hdr;
+    state.world = scene.world;
+    state.ellipsoid = scene.ellipsoid;
     state.near = scene.camera.frustum.near;
     state.surfaces.length = 0;
     state.ready = false;

@@ -18,7 +18,7 @@ function clip(points, axis, boundary, sign) {
     }
     if (insideA !== insideB) {
       const t = (boundary - a[axis]) / (b[axis] - a[axis]);
-      const v = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      const v = a.map((value, j) => value + (b[j] - value) * t);
       v[axis] = boundary;
       output.push(v);
     }
@@ -139,7 +139,7 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
     }
     const index = positions.length / 3;
     vertices.set(key, index);
-    positions.push(p[0], p[1], 0);
+    positions.push(p[0], p[1], p[2] ?? 0);
     let distance = 16;
     for (const [a, b] of tile.shores) {
       distance = Math.min(distance, distanceSquared(p[0], p[1], a, b));
@@ -162,14 +162,16 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
           const a = cell[i],
             b = cell[(i + 1) % cell.length];
           border.push(a);
-          // Every LOD retains the finest tile-edge vertices. No skirts or neighbor-dependent cracks.
+          // Local grids retain finest edges; curved grids supply shared neighbor coordinates.
           let axis;
+          let edge;
           if (
             Math.abs(a[0] - b[0]) < 1e-8 &&
             (Math.abs(a[0] - tile.x) < 1e-8 ||
               Math.abs(a[0] - tile.x - size) < 1e-8)
           ) {
             axis = 1;
+            edge = Math.abs(a[0] - tile.x) < 1e-8 ? 0 : 1;
           }
           if (
             Math.abs(a[1] - b[1]) < 1e-8 &&
@@ -177,17 +179,32 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
               Math.abs(a[1] - tile.y - size) < 1e-8)
           ) {
             axis = 0;
+            edge = Math.abs(a[1] - tile.y) < 1e-8 ? 2 : 3;
           }
           if (axis !== undefined) {
             const low = Math.min(a[axis], b[axis]),
               high = Math.max(a[axis], b[axis]);
             const points = [];
-            for (
-              let v = (Math.floor(low / fine) + 1) * fine;
-              v < high - 1e-8;
-              v += fine
-            ) {
+            const coordinates = tile.edgeCoordinates?.[edge];
+            const values = coordinates ?? [];
+            if (!coordinates) {
+              for (
+                let v = (Math.floor(low / fine) + 1) * fine;
+                v < high - 1e-8;
+                v += fine
+              ) {
+                values.push(v);
+              }
+            }
+            for (const v of values) {
+              if (v <= low + 1e-8 || v >= high - 1e-8) {
+                continue;
+              }
               const p = a.slice();
+              if (p.length > 2) {
+                p[2] =
+                  a[2] + (b[2] - a[2]) * ((v - a[axis]) / (b[axis] - a[axis]));
+              }
               p[axis] = v;
               points.push(p);
             }
@@ -214,10 +231,11 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
           continue;
         }
         // A center fan preserves collinear boundary vertices on coarse tiles.
-        const center = [0, 0];
+        const center = cell[0].map(() => 0);
         for (const p of cell) {
-          center[0] += p[0] / cell.length;
-          center[1] += p[1] / cell.length;
+          for (let j = 0; j < center.length; ++j) {
+            center[j] += p[j] / cell.length;
+          }
         }
         const c = vertex(center);
         for (let i = 0; i < border.length; ++i) {
@@ -239,9 +257,13 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
   return new Geometry({
     attributes: {
       position: new GeometryAttribute({
-        componentDatatype: ComponentDatatype.FLOAT,
+        componentDatatype: this.doublePrecision
+          ? ComponentDatatype.DOUBLE
+          : ComponentDatatype.FLOAT,
         componentsPerAttribute: 3,
-        values: new Float32Array(positions),
+        values: this.doublePrecision
+          ? new Float64Array(positions)
+          : new Float32Array(positions),
       }),
       waveData: new GeometryAttribute({
         componentDatatype: ComponentDatatype.FLOAT,
@@ -254,3 +276,4 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
   });
 };
 export default SceneGISWaterMesh;
+export { bounds, rectangle, segments };

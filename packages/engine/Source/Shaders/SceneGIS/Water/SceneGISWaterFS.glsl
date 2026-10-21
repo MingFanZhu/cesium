@@ -18,6 +18,9 @@ uniform float u_refractionStrength;
 uniform bool u_reflections;
 in vec3 v_positionEC;
 in vec2 v_waterPosition;
+#ifdef SCENEGIS_CURVED_WATER
+uniform vec2 u_waterFoamOffset;
+#endif
 #ifdef SCENEGIS_WIND_WAVES
 uniform sampler2D u_waveNormal0;
 uniform sampler2D u_waveNormal1;
@@ -75,6 +78,10 @@ float sceneGISWaterFoam(float depth, float footprint, vec2 flow)
     // Drift in local meters; two different velocities gently break up foam clusters.
     float travel = u_time * u_waveLength / czm_twoPi;
     vec2 p = v_waterPosition - flow * travel * 0.08;
+    #ifdef SCENEGIS_CURVED_WATER
+    // FFT coordinates repeat; procedural shoreline noise uses the shared chart instead.
+    p += u_waterFoamOffset;
+    #endif
     vec2 across = vec2(-flow.y, flow.x);
     float clusters = mix(0.5, sceneGISWaterNoise(p * 0.75), exp(-footprint * footprint));
     float breakup = mix(0.5, sceneGISWaterNoise(p * 1.9 + across * travel * 0.13),
@@ -95,7 +102,13 @@ float sceneGISWaterFoam(float depth, float footprint, vec2 flow)
 void main()
 {
     vec3 view = normalize(-v_positionEC);
+    #ifdef SCENEGIS_CURVED_WATER
+    vec3 up = normalize(v_waterUpEC);
+    vec3 east = normalize(v_waterEastEC - up * dot(up, v_waterEastEC));
+    mat3 waterFrame = mat3(east, cross(up, east), up);
+    #else
     vec3 up = normalize(czm_normal * vec3(0.0, 0.0, 1.0));
+    #endif
     vec3 beam = czm_lightColorHdr;
     vec3 diffuseLight = vec3(1.0);
     #ifdef SCENEGIS_WATER_PHYSICAL
@@ -112,7 +125,11 @@ void main()
     vec4 n0 = texture(u_waveNormal0, v_waterPosition / u_wavePeriod + 0.5 / u_waveResolution);
     vec4 n1 = texture(u_waveNormal1, v_waterPosition / (u_wavePeriod * 4.0) + 0.5 / u_waveResolution);
     vec2 gradient = n0.xy / max(n0.z, 0.1) + n1.xy / max(n1.z, 0.1);
+    #ifdef SCENEGIS_CURVED_WATER
+    vec3 normal = normalize(waterFrame * vec3(gradient * v_shoreFade, 1.0));
+    #else
     vec3 normal = normalize(czm_normal * vec3(gradient * v_shoreFade, 1.0));
+    #endif
     crestFoam = max(n0.a, n1.a) * v_shoreFade;
     #else
     vec2 across = vec2(-d.y, d.x);
@@ -129,15 +146,24 @@ void main()
     vec3 bottom = sceneGISSSRPosition(gl_FragCoord.xy, max(bottomDepth, waterDepth));
     bool hasBottom = bottomDepth > waterDepth;
     float pathLength = hasBottom ? length(bottom - v_positionEC) : 0.0;
+    #ifdef SCENEGIS_CURVED_WATER
+    float verticalDepth = hasBottom ? max(sceneGISWaterMeanOffset(v_positionEC) - sceneGISWaterMeanOffset(bottom), 0.0) : u_foamWidth;
+    #else
     float verticalDepth = hasBottom ? max(dot(v_positionEC - bottom, up), 0.0) : u_foamWidth;
+    #endif
 
     // Offset only submerged samples. Foreground objects must never bleed through water.
     vec2 offset = (normal.xy - up.xy) * u_refractionStrength * min(pathLength, 4.0) / max(waterDepth, 1.0);
     vec2 refractedUV = uv + offset;
     float refractedDepth = texture(u_depth, clamp(refractedUV, vec2(0.0), vec2(1.0))).r;
     vec3 refractedPoint = sceneGISSSRPosition(refractedUV * size, refractedDepth);
+    #ifdef SCENEGIS_CURVED_WATER
+    bool aboveWater = sceneGISWaterMeanOffset(refractedPoint) >= sceneGISWaterMeanOffset(v_positionEC);
+    #else
+    bool aboveWater = dot(refractedPoint - v_positionEC, up) >= 0.0;
+    #endif
     if (any(lessThan(refractedUV, vec2(0.0))) || any(greaterThan(refractedUV, vec2(1.0))) ||
-        refractedDepth <= waterDepth || dot(refractedPoint - v_positionEC, up) >= 0.0) { refractedUV = uv; }
+        refractedDepth <= waterDepth || aboveWater) { refractedUV = uv; }
     vec4 background = textureLod(u_color, refractedUV, 0.0);
     vec3 transmission = hasBottom ? exp(-u_absorption * pathLength) : vec3(0.0);
     vec3 water = background.rgb * transmission + u_waterColor * diffuseLight * (vec3(1.0) - transmission);

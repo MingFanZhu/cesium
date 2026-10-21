@@ -981,13 +981,67 @@ waves.destroy();
 每个 128² 双频段实例增加 32 次小尺寸 GPU 绘制及约 2.17 MiB 纹理，暂停复用；风浪模拟不增加几何预通道。
 额外网格按距离生成，最多保留 16 MiB 非当前 LOD 缓存。位移过滤沿相机距离连续变化，
 接边顶点与内部使用相同规则，避免分块边缘保留额外高频波浪而形成高光网格。波谱有周期、截断和均匀水深限制，
-没有沿岸绕射、浅水流动、破碎浪或水下相机；Globe 仍使用局部 ENU 平面，不是全球曲面海洋。
+没有沿岸绕射、浅水流动、破碎浪或水下相机；默认模式在 Globe 使用局部 ENU 平面。
+区域曲面入口见下一节，两个模式均不是全球海洋模拟。
 
 人工入口 `Test/Rendering/玄武湖风浪.html?world=planar` / `world=globe`，
 可选 `quality=64|128|256`。数据目录记录 OSM 许可，地形和植被为示意。
 自动验证使用 `SceneGIS/Scene/SceneGISWindWaves`、`SceneGIS/Scene/SceneGISWaterSurface`
 和 `Test/Rendering/playwright.wind-water.config.mjs`；GPU 数值与独立 CPU DFT 对照。
 实现、边界和实测预算见 ADR-0101 与 R22 review。
+
+## 区域曲面河湖使用与验证
+
+Globe 上的大范围河湖显式启用 `geometryMode: "ellipsoid"`，传入 ECEF 轮廓。
+默认的局部 XY 水面入口保持不变，普通法线水面也保留。曲面要求现有 `SceneGISWindWaves`：
+
+```js
+scene.highDynamicRange = true;
+const waves = new Cesium.SceneGISWindWaves({ resolution: 128, windSpeed: 10 });
+const water = scene.primitives.add(
+  new Cesium.SceneGISWaterSurface({
+    geometryMode: "ellipsoid",
+    polygonHierarchy: new Cesium.PolygonHierarchy(
+      Cesium.Cartesian3.fromDegreesArray([
+        117.6, 31.3, 119.1, 31.3, 119.1, 32.6, 117.6, 32.6,
+      ]),
+    ),
+    height: 30,
+    windWaves: waves,
+    maximumScreenSpaceError: 2,
+    maximumTileCount: 512,
+  }),
+);
+// After removing every surface that borrows this simulation:
+scene.primitives.remove(water);
+waves.destroy();
+```
+
+`height` 为固定椭球高。河流可用 `fromDegreesArrayHeights` 并设置
+`perPositionHeight: true`，水位沿固定 chart 三角形线性插值；不是沿地形自动铺水，
+也不是水文计算。轮廓、孔洞、椭球、模式和水位在构造时复制，修改这些输入需要重建水面。
+`ellipsoid` 默认 WGS84，必须与 Globe 一致；`modelMatrix` 必须一直为 identity。
+曲面入口拒绝 Planar World，平面场景继续使用 `local`。
+
+固定区域 chart 跨日期变更线不拆相位，但轮廓必须处于同一个开放切向半球。
+边是 chart 中的直线；复杂 GIS 岸线按所需曲线精度提供采样点。曲面跟随椭球，
+FFT 使用区域米制 chart 并存在投影畸变。区域光学使用局部曲面近似；没有全球海洋掩膜、
+海拔转换、水下相机、透明水下对象或多层水面支持。
+
+网格按 16×16 单元分块，结合约 8 个绘制缓冲像素的单元尺度及
+`maximumScreenSpaceError` 曲率目标自动细分。`meshSpacing` 是最小间距，
+`maximumTileCount` 限制四叉树叶节点数量，预算不足时精度目标可能达不到。
+`water.statistics` 返回最新 render 帧的快照：`selectedTiles` 为可见命令数，
+`geometryBuilds` 为本帧构建数，`budgetLimited` 提示细分受限；`geometryBytes`
+包含在用和闲置 GPU 网格，`inactiveGeometryBytes` 不超过 16 MiB。
+`cachedTiles` 为 CPU 节点数，并非全部持有 GPU 网格。FFT 和 Scene 共享目标不计入这些字节。
+局部模式的 `statistics` 为 undefined。首次构建是同步的，快速跳到未缓存区域可能产生短暂停顿。
+
+人工入口 `Test/Rendering/曲面河湖.html?sample=lake` / `sample=river`，包含岛屿、
+凹岸线、沿程水位、近景、低角度和高空切换，使用本地确定性示意几何。
+严格 GPU Specs 为 `SceneGISEllipsoidWater`；E2E 入口
+`Test/Rendering/playwright.curved-water.config.mjs`，回归沿用 WaterSurface/WindWaves 和双 World 玄武湖示例。
+设计与已知性能范围见 ADR-0179、R25 plan/review。
 
 ## 可编程 GPU 粒子使用与验证
 

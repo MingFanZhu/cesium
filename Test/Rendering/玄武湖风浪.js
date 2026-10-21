@@ -96,7 +96,8 @@ const localToWorld = planar
   ? C.Matrix4.fromTranslation(origin)
   : C.Transforms.eastNorthUpToFixedFrame(origin);
 
-scene.msaaSamples = 4;
+scene.msaaSamples = 1;
+scene.postProcessStages.fxaa.enabled = true;
 viewer.clock.currentTime = C.JulianDate.fromIso8601("2026-06-21T08:00:00Z");
 const fftResolution = Number(
   new URLSearchParams(window.location.search).get("quality") ?? 128,

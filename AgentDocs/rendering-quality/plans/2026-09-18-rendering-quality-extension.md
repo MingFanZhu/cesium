@@ -28,6 +28,11 @@
 - 本轮路线图不承诺 WebGPU、路径追踪、全功能实时 GI 或所有后续候选都会实施。
 - 不把素材质量、影像自带阴影或数据 LOD 跳变全部归因于后处理算法。
 
+2026-10-21: R25 extends the existing local-water scope to regional ellipsoid rivers/lakes,
+automatic bounded mesh LOD and shared FFT. Global ocean coverage and hydrodynamics remain
+excluded. [Active R25 plan](2026-10-21-r25-curved-water.md), ADR-0179; no parallel phase.
+Implementation and technical review are complete; owner visual acceptance remains pending.
+
 ## Stable architecture boundaries
 
 - 默认保留 Cesium 的 `Viewer.shadows`、`scene.shadowMap`、`ShadowMode`、模型 PBR

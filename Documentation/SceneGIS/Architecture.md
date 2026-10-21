@@ -1242,6 +1242,24 @@ local XY 米制平面，modelMatrix 使用刚体变换；Globe 采用 ENU，Plan
 非当前网格缓存不超过 16 MiB。复用 R8 opaque/天空输入及延迟绘制缝隙，不新增上游补丁。
 这是均匀平均水深下的风浪外观，不承诺岸边绕射、地形驱动水流、洪水、破碎浪或水文预测。
 
+## 区域曲面河湖（R25）
+
+[ADR-0179](Decisions/ADR-0179-regional-curved-water.md) 在 WaterSurface 上增加显式
+`geometryMode: "ellipsoid"`，使用 ECEF 轮廓、椭球水位和现有 FFT；默认 `local` 保留。
+曲面只用于匹配椭球的 Globe，要求 identity modelMatrix；不自动投影 Planar 坐标，也不查询地形。
+轮廓和孔洞在固定的 geodetic-normal gnomonic chart 中一次三角化，再按需裁剪为四叉树网格。
+顶点通过椭球反算和相对块坐标跟随曲率，常量水位或逐点水位沿三角形插值。
+
+选级结合屏幕网格尺度与曲率误差；公共叶节点预算限制最坏选级规模，不能视为绝对精度保证。
+不同 LOD 的相邻边共享细分坐标，波浪相位和过滤足迹跨块连续。各块共用同一 FFT，
+不增加模拟和全屏 pass。非当前 GPU 网格缓存上限 16 MiB，旧 CPU 子树按节点预算清理。
+构建仍同步进行，复杂轮廓或首次大幅视角跳转可能产生构建停顿，应通过 statistics 和代表性数据评估。
+
+曲面法线参与光照、位移与水上判断；接触深度、折射和 SSR 采用相机相对的局部密切球近似，
+保留 R8 的屏幕空间光学限制。区域 chart 有投影畸变，不承诺全球海洋、全球 FFT 连续场或水动力学。
+数据须落在一个开放切向半球；大范围水位仍是椭球高，不自动等同海拔或大地水准面。
+所有实现使用 SceneGIS-owned 路径，复用 SGP-0017，无新增上游集成缝隙。
+
 ## 可编程 GPU 粒子
 
 [ADR-0102](Decisions/ADR-0102-gpu-particle-foundation.md) 增加独立的
