@@ -28,7 +28,11 @@ The first version composites SDR video after exposure / tone mapping with explic
 opacity, preserving target alpha and treating black as content. It is a display
 overlay, not a physical light. Media aspect and UV orientation are separate from
 observer FOV and depth resolution. Transparent transmission and transparent
-receivers are excluded; P2 freezes the exact foreground policy with source evidence.
+receivers are excluded. The native user stage runs after transparent composition;
+therefore a transparent foreground pixel above an opaque receiver can be covered
+by this overlay. This is an explicit first-version limitation, verified by a GPU
+test, not an optical transmission claim. Correct foreground recomposition remains
+outside this display-overlay contract.
 Multiple stages follow native collection order. No observer capture deduplication
 or static-depth cache is introduced without a complete invalidation contract.
 
@@ -41,3 +45,18 @@ coexistence and resource destruction. Existing Viewshed regressions gate the
 shared extraction. Public API requires full build and generated types checks.
 SDK integration, optical calibration, 360-degree and physical illumination are
 separate work. Final rendering acceptance belongs to the project owner.
+
+## P2 API and media contract
+
+`SceneGISVideoProjection` composes ObserverState. Geometry and source parameters
+match Viewshed; mutable media, opacity and flipY are separate from FOV. Contain
+media aspect without stretching, leave letterbox regions intact. Texture handles
+HTML top-left input; flipY is an additional presentation flip. The caller owns
+playback / CORS / streams. Require native video frame callbacks; do not emulate
+them with unconditional frame uploads. Media failures stop notifications until
+source replacement or reload. Seek, load and resize events invalidate media;
+callback generation rejects obsolete notifications after replacement/destruction.
+
+Separate videoReady, analysisReady and projectionReady from inherited ready.
+Expose cumulative upload counts / RGBA bytes and latest CPU submission times,
+without claiming GPU timings. See [VideoProjection](../VideoProjection.md).
