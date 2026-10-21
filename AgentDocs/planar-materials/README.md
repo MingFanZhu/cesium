@@ -16,14 +16,14 @@
 - Source: `packages/engine/Source/SceneGIS/{Core,Scene,DataSources}` 与 owned GLSL。
 - Specs: `packages/engine/Specs/SceneGIS`。
 - Example: 资格阶段建立 `Test/平面材质.html`。
-- Branch: `feature/planar-materials`
+- Integration branch: `scenegis/develop`（来源 `feature/planar-materials`）
 - ADR: [ADR-0178](../../Documentation/SceneGIS/Decisions/ADR-0178-planar-materials.md)
 - SGP: None。
 
 ## Current handoff
 
-- M1 已提交 4264d02bd0；M2 已提交 b875cb79a9；M3 技术完成，本阶段提交作为独立检查点；待项目负责人视觉验收。
+- M1 `4264d02bd0`、M2 `b875cb79a9`、M3 `2663f9bd37` 已按项目负责人要求快进合入 `scenegis/develop`，无冲突。
 - Open discussions: None。
 - Latest review: [M3](reviews/2026-10-21-m3-entity-qualification.md) technical passed；无未解决 finding。
 - Known risks: 纹理接缝、透明语义、stencil/discard、动态纹理所有权。
-- Next action: 项目负责人检查 Test/平面材质.html；技术代码准备完成，可在验收后合并。
+- Next action: 合并已完成；项目负责人可在 Test/平面材质.html 继续视觉验收，独立视觉结论尚未记录。
