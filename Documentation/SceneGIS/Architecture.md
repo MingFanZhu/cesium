@@ -1235,8 +1235,10 @@ local XY 米制平面，modelMatrix 使用刚体变换；Globe 采用 ENU，Plan
 `windWaves: SceneGISWindWaves`，Globe / Planar 共用接口。模拟由调用方所有，可在同一 Context
 及对齐的局部坐标中共享；先移除借用的水面，再销毁模拟，最后销毁 Viewer/Context。
 
-初始 JONSWAP/TMA 频谱在参数变化时由 CPU 生成，双频段演化、IFFT、位移及法线由 GPU 完成，
-无运行时读回。Scene time 和配置均不变时复用输出；show=false 不推进模拟。128 米分块裁剪
+初始 JONSWAP/TMA 频谱在参数变化时由 CPU 生成，三频段演化、IFFT、位移及法线由 GPU 完成，
+无运行时读回。[ADR-0181](Decisions/ADR-0181-multiscale-lake-waves.md) 使用 L、4L、L/8 三个周期与互补径向频窗；
+`directionalSpread` 控制归一化方向分布，短波更分散，`rippleIntensity` 仅控制细波幅度。
+河流私有双频带保持独立。Scene time 和配置均不变时复用输出；show=false 不推进模拟。128 米分块裁剪
 原始轮廓与孔洞，距离 LOD 保留一致的细分边界。位移按共享 LOD 比例的连续顶点距离和像素足迹过滤，
 不得在分块边缘重置波浪精度；包围体涵盖位移。
 非当前网格缓存不超过 16 MiB。复用 R8 opaque/天空输入及延迟绘制缝隙，不新增上游补丁。

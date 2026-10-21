@@ -25,6 +25,7 @@ out float v_shoreFade;
 #ifdef SCENEGIS_WIND_WAVES
 uniform sampler2D u_displacement0;
 uniform sampler2D u_displacement1;
+uniform sampler2D u_displacement2;
 uniform float u_wavePeriod;
 uniform float u_waveResolution;
 uniform float u_waveLodScale;
@@ -60,7 +61,8 @@ void main() {
     #endif
     #ifdef SCENEGIS_WIND_WAVES
     vec3 displacement = (sceneGISWaveDisplacement(u_displacement0, u_wavePeriod, spacing) +
-        sceneGISWaveDisplacement(u_displacement1, u_wavePeriod * 4.0, spacing)) * waveData.x;
+        sceneGISWaveDisplacement(u_displacement1, u_wavePeriod * 4.0, spacing) +
+        sceneGISWaveDisplacement(u_displacement2, u_wavePeriod * 0.125, spacing)) * waveData.x;
     #ifdef SCENEGIS_CURVED_WATER
     vec3 waterNorth = normalize(cross(waterNormal, waterEast));
     local += mat3(waterEast, waterNorth, waterNormal) * displacement;

@@ -25,6 +25,8 @@ const fields = [
   "amplitudeScale",
   "choppiness",
   "whitecapIntensity",
+  "directionalSpread",
+  "rippleIntensity",
 ];
 const ranges = [
   [0, 40],
@@ -33,6 +35,8 @@ const ranges = [
   [0, 4],
   [0, 1],
   [0, 1],
+  [0, 1],
+  [0, 4],
 ];
 const repeat = new Sampler({
   wrapS: TextureWrap.REPEAT,
@@ -80,10 +84,10 @@ function target(context, size, datatype) {
 }
 
 /**
- * Reusable two-band FFT wind waves for SceneGISWaterSurface. Uses a seeded JONSWAP/TMA
+ * Reusable three-band FFT wind waves for SceneGISWaterSurface. Uses a seeded JONSWAP/TMA
  * spectrum, finite-depth dispersion and local XY meters. This is visual wave synthesis,
  * not a hydraulic solver or a prediction of measured weather/bathymetry. Spectra repeat
- * over patchLength and four times patchLength; wavelengths outside the represented frequency bands
+ * over patchLength, four times patchLength and patchLength / 8; wavelengths outside the represented bands
  * are omitted. Wind and fetch describe a steady wind sea, without island diffraction.
  * Attach through WaterSurface's windWaves option. One object may be shared by surfaces
  * using aligned local coordinates in the same Scene context. The caller owns this object:
@@ -98,8 +102,10 @@ function target(context, size, datatype) {
  * @param {number} [options.amplitudeScale=1] Artistic displacement multiplier in [0, 4].
  * @param {number} [options.choppiness=0.7] Horizontal crest displacement strength in [0, 1].
  * @param {number} [options.whitecapIntensity=0.3] Compression-based crest foam strength in [0, 1].
+ * @param {number} [options.directionalSpread=0.7] Angular spreading in [0, 1], increasingly broad above the spectral peak. Zero retains narrow wind-aligned waves.
+ * @param {number} [options.rippleIntensity=1] Fine-band amplitude multiplier in [0, 4].
  * @param {number} [options.resolution=128] Immutable FFT size: 32, 64, 128 or 256.
- * @param {number} [options.patchLength=64] Immutable short-band period in meters, in [16, 1024].
+ * @param {number} [options.patchLength=64] Immutable base-band period in meters, in [16, 1024].
  * @param {number} [options.seed=12345] Immutable unsigned 32-bit random seed.
  */
 function SceneGISWindWaves(options = {}) {
@@ -140,6 +146,16 @@ function SceneGISWindWaves(options = {}) {
    * @type {number}
    */
   this.whitecapIntensity = options.whitecapIntensity ?? 0.3;
+  /**
+   * Angular spread in [0, 1]; short waves spread more than long waves.
+   * @type {number}
+   */
+  this.directionalSpread = options.directionalSpread ?? 0.7;
+  /**
+   * Fine-band amplitude multiplier in [0, 4].
+   * @type {number}
+   */
+  this.rippleIntensity = options.rippleIntensity ?? 1;
   this._resolution = options.resolution ?? 128;
   this._patchLength = options.patchLength ?? 64;
   this._seed = options.seed ?? 12345;
@@ -176,7 +192,7 @@ Object.defineProperties(SceneGISWindWaves.prototype, {
     },
   },
   /**
-   *  Short-band period in meters.
+   *  Base-band period in meters.
    * @memberof SceneGISWindWaves.prototype
    * @type {number}
    * @readonly
@@ -288,7 +304,7 @@ SceneGISWindWaves.prototype._update = function (frameState, timeScale = 1) {
     const generated = this._spectrum(this);
     this._significantWaveHeight = generated.significantWaveHeight;
     this._maximumDisplacement = generated.maximumDisplacement;
-    for (let i = 0; i < 2; ++i) {
+    for (let i = 0; i < generated.bands.length; ++i) {
       const data = generated.bands[i];
       if (!state.bands[i]) {
         state.bands[i] = {

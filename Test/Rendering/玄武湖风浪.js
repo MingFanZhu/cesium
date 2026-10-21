@@ -213,6 +213,8 @@ gui
 gui.add(waves, "fetchLength", 100, 5000, 50).name("有效风区 m");
 gui.add(waves, "waterDepth", 0.3, 10, 0.1).name("谱平均水深 m");
 gui.add(waves, "amplitudeScale", 0, 3, 0.05).name("艺术波高倍率");
+gui.add(waves, "directionalSpread", 0, 1, 0.05).name("波浪方向分散度");
+gui.add(waves, "rippleIntensity", 0, 4, 0.1).name("细浪强度");
 gui.add(waves, "choppiness", 0, 1, 0.05).name("波峰锐度");
 gui.add(waves, "whitecapIntensity", 0, 1, 0.05).name("浪尖白沫");
 gui

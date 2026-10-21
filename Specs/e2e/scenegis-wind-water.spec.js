@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 for (const world of ["planar", "globe"]) {
   test(`Xuanwu Lake ${world} initializes, changes wind/view and releases shared resources`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`/Test/Rendering/玄武湖风浪.html?world=${world}`);
@@ -10,6 +10,9 @@ for (const world of ["planar", "globe"]) {
       () => window.example?.waters[0]?.ready && window.example.waves.ready,
     );
     await expect(page.locator("#error")).toHaveText("");
+    await page.screenshot({
+      path: testInfo.outputPath(`${world}-lake-near.png`),
+    });
     expect(
       await page.evaluate(
         () => window.example.waters[0]._hierarchy.holes.length,

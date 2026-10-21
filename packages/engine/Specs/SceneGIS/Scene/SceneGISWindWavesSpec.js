@@ -50,6 +50,14 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
     expect(
       () => new SceneGISWindWaves({ waterDepth: 0 }),
     ).toThrowDeveloperError();
+    for (const options of [
+      { directionalSpread: -0.1 },
+      { directionalSpread: 1.1 },
+      { rippleIntensity: NaN },
+      { rippleIntensity: 4.1 },
+    ]) {
+      expect(() => new SceneGISWindWaves(options)).toThrowDeveloperError();
+    }
     waves = new SceneGISWindWaves();
     expect(waves.ready).toBeFalse();
     expect(waves._state).toBeUndefined();
@@ -62,7 +70,11 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
     });
     const a = spectrum(waves),
       b = spectrum(waves);
-    expect(a.bands[0].data).toEqual(b.bands[0].data);
+    expect(a.bands.map((band) => band.length)).toEqual([16, 64, 2]);
+    for (let i = 0; i < a.bands.length; ++i) {
+      expect(a.bands[i].data).toEqual(b.bands[i].data);
+      expect(a.bands[i].data.every(Number.isFinite)).toBeTrue();
+    }
     expect(a.significantWaveHeight).toBeGreaterThan(0.05);
     waves.waterDepth = 0.2;
     const shallow = spectrum(waves);
@@ -72,6 +84,43 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
     const calm = spectrum(waves);
     expect(calm.significantWaveHeight).toBe(0);
     expect(calm.bands.every((b) => b.data.every((v) => v === 0))).toBeTrue();
+  });
+  it("broadens short-wave directions and isolates ripple amplitude from larger waves", function () {
+    waves = new SceneGISWindWaves({ directionalSpread: 0 });
+    const narrow = spectrum(waves);
+    waves.directionalSpread = 1;
+    const broad = spectrum(waves);
+    function crossWindFraction(band) {
+      const n = waves.resolution;
+      let total = 0,
+        cross = 0;
+      for (let y = 0; y < n; ++y) {
+        for (let x = 0; x < n; ++x) {
+          const kx = x < n / 2 ? x : x - n;
+          const ky = y < n / 2 ? y : y - n;
+          const i = (y * n + x) * 4;
+          const energy = band.data[i] ** 2 + band.data[i + 1] ** 2;
+          total += energy;
+          if (Math.abs(ky) > Math.abs(kx)) {
+            cross += energy;
+          }
+        }
+      }
+      return cross / total;
+    }
+    expect(crossWindFraction(broad.bands[2])).toBeGreaterThan(
+      crossWindFraction(narrow.bands[2]) * 2,
+    );
+    waves.rippleIntensity = 0;
+    const noRipples = spectrum(waves);
+    expect(noRipples.bands[0].data).toEqual(broad.bands[0].data);
+    expect(noRipples.bands[1].data).toEqual(broad.bands[1].data);
+    expect(
+      noRipples.bands[2].data.every((v, i) => i % 4 === 2 || v === 0),
+    ).toBeTrue();
+    expect(broad.maximumDisplacement).toBeGreaterThan(
+      noRipples.maximumDisplacement,
+    );
   });
   function half(v) {
     const sign = v & 32768 ? -1 : 1,
@@ -84,7 +133,7 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
         : fraction * 2 ** -24)
     );
   }
-  it("matches a direct CPU Fourier sum for both GPU bands and reuses frozen simulation", function () {
+  it("matches a direct CPU Fourier sum for every GPU band and reuses frozen simulation", function () {
     context = createContext();
     waves = new SceneGISWindWaves({
       resolution: 32,
@@ -113,7 +162,7 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
       }
       return result;
     }
-    for (let b = 0; b < 2; ++b) {
+    for (let b = 0; b < initial.bands.length; ++b) {
       const output = waves._state.bands[b].output;
       for (const [x, y] of [
         [0, 0],
@@ -131,7 +180,12 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
         expect(Number.isFinite(pixels[0])).toBeTrue();
       }
     }
-    const textures = waves._state.bands.map((b) => b.output.getColorTexture(0));
+    expect(waves._state.bands.length).toBe(3);
+    const textures = waves._state.bands.flatMap((b) => [
+      b.initial,
+      b.output.getColorTexture(0),
+      b.output.getColorTexture(1),
+    ]);
     const spy = spyOn(context, "draw").and.callThrough();
     update(1.25);
     expect(spy).not.toHaveBeenCalled();
@@ -148,7 +202,7 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
         half,
       ),
     ).toEqual([0, 0, 0, 1]);
-    expect(waves._state.bands[0].output.getColorTexture(0)).toBe(textures[0]);
+    expect(waves._state.bands[0].output.getColorTexture(0)).toBe(textures[1]);
     waves.destroy();
     expect(textures.every((t) => t.isDestroyed())).toBeTrue();
     waves = undefined;
@@ -255,8 +309,9 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
             primitiveType: PrimitiveType.POINTS,
             modelMatrix: Matrix4.IDENTITY,
             uniformMap: {
-              u_displacement0: () => displacement,
+              u_displacement0: () => zero,
               u_displacement1: () => zero,
+              u_displacement2: () => displacement,
               u_wavePeriod: () => 16,
               u_waveResolution: () => 32,
               u_waveLodScale: () => mesh.lodScale,

@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                    |
 | Planning model         | `extension`                                                                 |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                  |
-| Current phase          | R26 accepted; lake quality assessment requested                             |
-| Active phase plan      | [R26](plans/2026-10-21-r26-river-surface.md)                                |
+| Current phase          | R27 multiscale lake waves                                                   |
+| Active phase plan      | [R27](plans/2026-10-21-r27-lake-wave-quality.md)                            |
 | Active standalone plan | None; [completed night emission](plans/2026-10-12-street-night-emission.md) |
 | Architecture contact   | Current task                                                                |
 | Execution contact      | Current task                                                                |
@@ -34,6 +34,15 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-21: R27 implementation and technical verification are complete. The
+  [review](reviews/2026-10-21-r27-lake-wave-quality.md) records 40 feature/regression
+  Specs, three browser cases and measured third-band cost. Owner visual acceptance
+  in the curved-lake example remains pending; inherited cold-build limits stay open.
+
+- 2026-10-21: after R26 acceptance checkpoint `32dc94f984`, activate R27 / ADR-0181.
+  The owner selects the curved-lake example. Broaden wind-wave directions and add an
+  independent ripple frequency band; preserve the accepted private river spectrum.
 
 - 2026-10-21: owner visually accepts R26 random FFT waves at `c6a5da44d2`. Record a
   separate acceptance checkpoint before planning lake-quality work. Shared cold mesh

@@ -141,6 +141,7 @@ const settings = {
       ? C.Cartesian3.fromDegrees(118.59, 31.87, 60)
       : C.Cartesian3.fromDegrees(118.55, 31.85, 30);
     const poses = {
+      浪面特写: [120, -0.06],
       水面近景: [800, -0.09],
       低角度远眺: [30000, -0.08],
       全域鸟瞰: [230000, -0.95],
@@ -152,7 +153,13 @@ const settings = {
   },
 };
 gui
-  .add(settings, "view", ["水面近景", "低角度远眺", "全域鸟瞰", "高空"])
+  .add(settings, "view", [
+    "浪面特写",
+    "水面近景",
+    "低角度远眺",
+    "全域鸟瞰",
+    "高空",
+  ])
   .name("观察位置")
   .onChange(settings.viewAt);
 gui
@@ -170,6 +177,8 @@ gui
 gui.add(water, "maximumScreenSpaceError", 0.5, 8, 0.5).name("曲率误差（像素）");
 gui.add(water, "maximumTileCount", 64, 1024, 32).name("网格块上限");
 gui.add(waves, "windSpeed", 0, 20, 0.5).name("风速（米/秒）");
+gui.add(waves, "directionalSpread", 0, 1, 0.05).name("波浪方向分散度");
+gui.add(waves, "rippleIntensity", 0, 4, 0.1).name("细浪强度");
 gui.add(waves, "choppiness", 0, 1, 0.05).name("浪尖程度");
 gui.add(water, "roughness", 0.02, 0.5, 0.01).name("粗糙度");
 gui.add(water, "reflections").name("场景倒影");

@@ -970,15 +970,17 @@ waves.destroy();
 `windSpeed` 为水面上方 10 米风速（m/s）；`windDirection` 为局部 XY 中波浪传播的去向，
 不是气象学的来向。`fetchLength` 为有效风区长度，`waterDepth` 为谱和色散使用的均匀平均水深，
 不会移动实际湖底。`amplitudeScale` 是艺术倍率；`choppiness` 控制水平位移；
-`whitecapIntensity` 控制波峰压缩产生的白沫。物理参数可动态修改，直接重建谱而不模拟气象渐变。
+`whitecapIntensity` 控制波峰压缩产生的白沫。`directionalSpread`（默认 0.7，范围 0–1）
+控制波浪方向的分散程度，短波更分散，0 保留原来的窄方向分布。`rippleIntensity`
+（默认 1，范围 0–4）只缩放细波频段，不改变大波。参数可动态修改，直接重建谱而不模拟气象渐变。
 
-`resolution`（32/64/128/256）、`patchLength`（默认 64 米，第二频段为四倍）、`seed`、
+`resolution`（32/64/128/256）、`patchLength`（默认 64 米，另外两个频段为四倍和八分之一）、`seed`、
 水面的 `windWaves` 和 `meshSpacing` 在构造后只读。风浪替代原来的法线波，原有
 `waveAmplitude/waveLength/flowSpeed` 不控制 FFT；`flowSpeed/waveLength` 仍用于浅岸泡沫漂移。
 反射、折射、吸收、粗糙度和岸边泡沫沿用既有属性。轮廓边缘 4 米内衰减位移，保留岸线和孔洞。
 不同水面共享模拟时须使用对齐的局部坐标；独立方位或水位可使用独立实例。
 
-每个 128² 双频段实例增加 32 次小尺寸 GPU 绘制及约 2.17 MiB 纹理，暂停复用；风浪模拟不增加几何预通道。
+每个 128² 三频段实例增加 48 次小尺寸 GPU 绘制及约 2.75 MiB 纹理，暂停复用；风浪模拟不增加几何预通道。
 额外网格按距离生成，最多保留 16 MiB 非当前 LOD 缓存。位移过滤沿相机距离连续变化，
 接边顶点与内部使用相同规则，避免分块边缘保留额外高频波浪而形成高光网格。波谱有周期、截断和均匀水深限制，
 没有沿岸绕射、浅水流动、破碎浪或水下相机；默认模式在 Globe 使用局部 ENU 平面。
@@ -988,7 +990,8 @@ waves.destroy();
 可选 `quality=64|128|256`。数据目录记录 OSM 许可，地形和植被为示意。
 自动验证使用 `SceneGIS/Scene/SceneGISWindWaves`、`SceneGIS/Scene/SceneGISWaterSurface`
 和 `Test/Rendering/playwright.wind-water.config.mjs`；GPU 数值与独立 CPU DFT 对照。
-实现、边界和实测预算见 ADR-0101 与 R22 review。
+曲面湖泊主验收入口为 `Test/Rendering/曲面河湖.html?sample=lake`，新增“浪面特写”视角和两项风浪参数。
+实现、边界和实测预算见 ADR-0101、ADR-0181 与 R22 / R27 review。
 
 ## 区域曲面河湖使用与验证
 

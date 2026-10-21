@@ -420,3 +420,15 @@ bloom adjustment on 2026-10-13; form its independent checkpoint with no next pha
 The owner visually accepts random directional river waves at `c6a5da44d2`. R26 is
 complete; inherited synchronous mesh construction remains an open limitation. The
 owner requests lake-wave quality improvements as the next separate scope.
+
+### R27 activation, 2026-10-21
+
+After acceptance checkpoint `32dc94f984`, activate
+[R27](2026-10-21-r27-lake-wave-quality.md) / ADR-0181 for broader directional wind
+waves and a separate ripple band. The curved-lake example is the primary owner
+acceptance case. Preserve the accepted private river spectrum and existing optics.
+
+R27 implementation and technical review are complete. The
+[review](../reviews/2026-10-21-r27-lake-wave-quality.md) records directional/fine-band
+coverage, GPU and storage cost, and retained cold-build limitations. Owner visual
+acceptance remains pending; no next phase is activated.

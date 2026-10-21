@@ -558,10 +558,14 @@ function createResources(surface, frameState) {
         surface._windWaves._state.bands[0].output.getColorTexture(0),
       u_displacement1: () =>
         surface._windWaves._state.bands[1].output.getColorTexture(0),
+      u_displacement2: () =>
+        surface._windWaves._state.bands[2].output.getColorTexture(0),
       u_waveNormal0: () =>
         surface._windWaves._state.bands[0].output.getColorTexture(1),
       u_waveNormal1: () =>
         surface._windWaves._state.bands[1].output.getColorTexture(1),
+      u_waveNormal2: () =>
+        surface._windWaves._state.bands[2].output.getColorTexture(1),
       u_time: () =>
         (surface._time * surface.flowSpeed * Math.PI * 2) / surface.waveLength,
       u_foamWidth: () => surface.foamWidth,

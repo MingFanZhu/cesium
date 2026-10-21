@@ -24,6 +24,7 @@ uniform vec2 u_waterFoamOffset;
 #ifdef SCENEGIS_WIND_WAVES
 uniform sampler2D u_waveNormal0;
 uniform sampler2D u_waveNormal1;
+uniform sampler2D u_waveNormal2;
 uniform float u_wavePeriod;
 uniform float u_waveResolution;
 #endif
@@ -131,13 +132,14 @@ void main()
     #ifdef SCENEGIS_WIND_WAVES
     vec4 n0 = texture(u_waveNormal0, v_waterPosition / u_wavePeriod + 0.5 / u_waveResolution);
     vec4 n1 = texture(u_waveNormal1, v_waterPosition / (u_wavePeriod * 4.0) + 0.5 / u_waveResolution);
-    vec2 gradient = n0.xy / max(n0.z, 0.1) + n1.xy / max(n1.z, 0.1);
+    vec4 n2 = texture(u_waveNormal2, v_waterPosition / (u_wavePeriod * 0.125) + 0.5 / u_waveResolution);
+    vec2 gradient = n0.xy / max(n0.z, 0.1) + n1.xy / max(n1.z, 0.1) + n2.xy / max(n2.z, 0.1);
     #ifdef SCENEGIS_CURVED_WATER
     vec3 normal = normalize(waterFrame * vec3(gradient * v_shoreFade, 1.0));
     #else
     vec3 normal = normalize(czm_normal * vec3(gradient * v_shoreFade, 1.0));
     #endif
-    crestFoam = max(n0.a, n1.a) * v_shoreFade;
+    crestFoam = max(max(n0.a, n1.a), n2.a) * v_shoreFade;
     #elif defined(SCENEGIS_RIVER_WATER)
     vec3 normal = up;
     #else
