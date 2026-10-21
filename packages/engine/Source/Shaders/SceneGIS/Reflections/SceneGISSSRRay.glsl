@@ -75,7 +75,7 @@ vec4 sceneGISSSRTrace(vec3 position, vec4 ray)
             float travel = length(p - position);
             if (surface > 0.0 && error >= 0.0 && error <= u_thickness && travel > 4.0 * bias)
             {
-                #ifdef SCENEGIS_WIND_WAVES
+                #if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_RIVER_WATER)
                 // A displaced water interface must not reflect the opaque lake bed.
                 vec3 hitPosition = sceneGISSSRPosition(uv * size, surface);
                 #ifdef SCENEGIS_CURVED_WATER

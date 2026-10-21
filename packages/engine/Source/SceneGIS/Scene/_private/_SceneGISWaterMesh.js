@@ -127,6 +127,8 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
   const fine = this.spacing,
     step = fine * 2 ** level,
     size = this.size;
+  const river = this.river;
+  const riverData = [];
   const positions = [],
     waveData = [],
     indices = [],
@@ -140,6 +142,9 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
     const index = positions.length / 3;
     vertices.set(key, index);
     positions.push(p[0], p[1], p[2] ?? 0);
+    if (river) {
+      riverData.push(p[3], p[4], p[5]);
+    }
     let distance = 16;
     for (const [a, b] of tile.shores) {
       distance = Math.min(distance, distanceSquared(p[0], p[1], a, b));
@@ -201,9 +206,9 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
                 continue;
               }
               const p = a.slice();
-              if (p.length > 2) {
-                p[2] =
-                  a[2] + (b[2] - a[2]) * ((v - a[axis]) / (b[axis] - a[axis]));
+              for (let j = 2; j < p.length; ++j) {
+                p[j] =
+                  a[j] + (b[j] - a[j]) * ((v - a[axis]) / (b[axis] - a[axis]));
               }
               p[axis] = v;
               points.push(p);
@@ -254,7 +259,7 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
       }
     }
   }
-  return new Geometry({
+  const geometry = new Geometry({
     attributes: {
       position: new GeometryAttribute({
         componentDatatype: this.doublePrecision
@@ -274,6 +279,14 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
     indices: IndexDatatype.createTypedArray(positions.length / 3, indices),
     boundingSphere: BoundingSphere.clone(tile.bounds),
   });
+  if (river) {
+    geometry.attributes.riverData = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 3,
+      values: new Float32Array(riverData),
+    });
+  }
+  return geometry;
 };
 export default SceneGISWaterMesh;
 export { bounds, rectangle, segments };

@@ -10,14 +10,20 @@ out vec3 v_waterBaseEC;
 out vec3 v_waterUpEC;
 out vec3 v_waterEastEC;
 #endif
-#ifdef SCENEGIS_WIND_WAVES
+#ifdef SCENEGIS_RIVER_WATER
+in vec3 riverData;
+out vec3 v_riverData;
+#endif
+#if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_RIVER_WATER)
 in vec2 waveData;
+out float v_shoreFade;
+#endif
+#ifdef SCENEGIS_WIND_WAVES
 uniform sampler2D u_displacement0;
 uniform sampler2D u_displacement1;
 uniform float u_wavePeriod;
 uniform float u_waveResolution;
 uniform float u_waveLodScale;
-out float v_shoreFade;
 vec3 sceneGISWaveDisplacement(sampler2D wave, float period, float spacing) {
     // Texture texel zero represents local position zero, not the texel corner.
     #ifdef SCENEGIS_CURVED_WATER
@@ -31,8 +37,10 @@ vec3 sceneGISWaveDisplacement(sampler2D wave, float period, float spacing) {
 #endif
 void main() {
     vec3 local = position;
-    #ifdef SCENEGIS_WIND_WAVES
+    #if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_CURVED_WATER)
     vec3 undisplacedEC = (czm_modelView * vec4(position, 1.0)).xyz;
+    #endif
+    #ifdef SCENEGIS_WIND_WAVES
     float eyeDepth = abs(undisplacedEC.z);
     float pixelSpacing = 2.0 * (czm_projection[3][3] == 0.0 ? eyeDepth : 1.0) /
         (czm_viewport.w * abs(czm_projection[1][1]));
@@ -50,13 +58,20 @@ void main() {
     #ifdef SCENEGIS_CURVED_WATER
     vec3 waterNorth = normalize(cross(waterNormal, waterEast));
     local += mat3(waterEast, waterNorth, waterNormal) * displacement;
-    v_waterBaseEC = undisplacedEC;
-    v_waterUpEC = czm_normal * waterNormal;
-    v_waterEastEC = czm_normal * waterEast;
     #else
     local += displacement;
     #endif
+    #endif
+    #if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_RIVER_WATER)
     v_shoreFade = waveData.x;
+    #endif
+    #ifdef SCENEGIS_CURVED_WATER
+    v_waterBaseEC = undisplacedEC;
+    v_waterUpEC = czm_normal * waterNormal;
+    v_waterEastEC = czm_normal * waterEast;
+    #endif
+    #ifdef SCENEGIS_RIVER_WATER
+    v_riverData = riverData;
     #endif
     vec4 p = czm_modelView * vec4(local, 1.0);
     v_positionEC = p.xyz;

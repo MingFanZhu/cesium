@@ -101,5 +101,6 @@ coverage or a globally continuous FFT field. Tile budget can prevent target SSE;
 reports this. Offscreen show=true may still update FFT as in R22. Older R22 owner findings
 remain in their original review and are not closed by this implementation.
 
-No next phase is authorized. Continue R25 only for owner findings or explicit changes to
-the cold-build requirement; otherwise await the lake/river example visual gate.
+At the R25 checkpoint no next phase was authorized. The owner subsequently authorized
+[R26 river surfaces](../plans/2026-10-21-r26-river-surface.md); R25 visual acceptance and
+the cold-build limitation above remain open.

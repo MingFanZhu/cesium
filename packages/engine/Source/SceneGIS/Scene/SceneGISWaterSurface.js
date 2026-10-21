@@ -24,6 +24,7 @@ import Globe from "../../Scene/Globe.js";
 import ray from "../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import vertex from "../../Shaders/SceneGIS/Water/SceneGISWaterVS.js";
 import fragment from "../../Shaders/SceneGIS/Water/SceneGISWaterFS.js";
+import riverFlow from "../../Shaders/SceneGIS/Water/SceneGISRiverFlow.js";
 import curvedSurface from "../../Shaders/SceneGIS/Water/SceneGISWaterCurvedSurface.js";
 import WaterFrame from "./_private/_SceneGISWaterFrame.js";
 import WindWaves from "./SceneGISWindWaves.js";
@@ -64,7 +65,7 @@ const transposeScratch = new Matrix3();
 const orthogonalScratch = new Matrix3();
 
 function validate(surface) {
-  if (surface._ellipsoidMesh) {
+  if (surface._gridMesh) {
     if (!Matrix4.equals(surface.modelMatrix, Matrix4.IDENTITY)) {
       throw new DeveloperError(
         "Ellipsoid water requires identity modelMatrix. Author ECEF positions and ellipsoid heights instead.",
@@ -207,7 +208,12 @@ function SceneGISWaterSurface(options = {}) {
   ) {
     throw new DeveloperError("windWaves must be a SceneGISWindWaves instance.");
   }
-  if (this._geometryMode === "ellipsoid") {
+  this._gridMesh = options._riverMesh;
+  this._river = options._river;
+  this._pickOwner = options._river ?? this;
+  if (this._gridMesh) {
+    // Prepared river geometry shares the water renderer without changing its public coordinate modes.
+  } else if (this._geometryMode === "ellipsoid") {
     if (!this._windWaves) {
       throw new DeveloperError("Ellipsoid water requires windWaves.");
     }
@@ -232,6 +238,7 @@ function SceneGISWaterSurface(options = {}) {
   } else {
     this._hierarchy = cloneHierarchy(options.polygonHierarchy);
   }
+  this._gridMesh ??= this._ellipsoidMesh;
   /**
    * Curved grid curvature error target in pixels.
    * @type {number}
@@ -357,13 +364,16 @@ function waterVertex(surface) {
 }
 function waterDefines(surface) {
   const defines = surface._windWaves ? ["SCENEGIS_WIND_WAVES"] : [];
-  if (surface._ellipsoidMesh) {
+  if (surface._gridMesh) {
     defines.push("SCENEGIS_CURVED_WATER");
+  }
+  if (surface._river) {
+    defines.push("SCENEGIS_RIVER_WATER");
   }
   return defines;
 }
 function waterAttributes(surface) {
-  return surface._ellipsoidMesh
+  return surface._gridMesh
     ? EllipsoidWaterMesh.attributeLocations
     : { position: 0, waveData: 1 };
 }
@@ -464,7 +474,7 @@ function updateTiles(surface, frameState) {
 
 function createResources(surface, frameState) {
   const context = frameState.context;
-  const curved = surface._ellipsoidMesh;
+  const curved = surface._gridMesh;
   const geometry = curved
     ? undefined
     : CoplanarPolygonGeometry.createGeometry(
@@ -485,7 +495,7 @@ function createResources(surface, frameState) {
     );
   }
   surface._pickId = context.createPickId({
-    primitive: surface,
+    primitive: surface._pickOwner,
     id: surface.id,
   });
   const state = WaterFrame.get(frameState);
@@ -504,7 +514,7 @@ function createResources(surface, frameState) {
       vertexShaderSource: waterVertex(surface),
       fragmentShaderSource: new ShaderSource({
         defines: waterDefines(surface),
-        sources: [curvedSurface, ray, fragment],
+        sources: [curvedSurface, ray, riverFlow, fragment],
       }),
       attributeLocations: waterAttributes(surface),
     }),
@@ -534,7 +544,12 @@ function createResources(surface, frameState) {
       u_wavePeriod: () => surface._windWaves.patchLength,
       u_waveResolution: () => surface._windWaves.resolution,
       u_waveLodScale: () => surface._mesh.lodScale,
-      u_waterCurvatureRadius: () => surface._ellipsoidMesh.radius,
+      u_waterCurvatureRadius: () => surface._gridMesh.radius,
+      u_riverTime: () => surface._time % 8,
+      u_currentSpeedScale: () => surface._river.currentSpeedScale,
+      u_currentRippleLength: () => surface._river.currentRippleLength,
+      u_currentRippleAmplitude: () => surface._river.currentRippleAmplitude,
+      u_currentFoamIntensity: () => surface._river.currentFoamIntensity,
       u_displacement0: () =>
         surface._windWaves._state.bands[0].output.getColorTexture(0),
       u_displacement1: () =>
@@ -580,9 +595,7 @@ Object.defineProperties(SceneGISWaterSurface.prototype, {
    */
   statistics: {
     get() {
-      return this._ellipsoidMesh
-        ? { ...this._ellipsoidMesh.statistics }
-        : undefined;
+      return this._gridMesh ? { ...this._gridMesh.statistics } : undefined;
     },
   },
   /**
@@ -704,7 +717,7 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
         );
       }
       source.defines.push(...waterDefines(this));
-      source.sources.push(curvedSurface, ray, fragment);
+      source.sources.push(curvedSurface, ray, riverFlow, fragment);
       const previous = command.shaderProgram;
       command.shaderProgram = ShaderProgram.fromCache({
         context: c,
@@ -717,8 +730,8 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
     }
     state.surfaces.push(this);
   }
-  if (this._ellipsoidMesh) {
-    this._ellipsoidMesh.update(this, frameState);
+  if (this._gridMesh) {
+    this._gridMesh.update(this, frameState);
   } else if (this._mesh) {
     updateTiles(this, frameState);
   } else {
@@ -738,7 +751,7 @@ SceneGISWaterSurface.prototype.isDestroyed = function () {
  * @returns {undefined}
  */
 SceneGISWaterSurface.prototype.destroy = function () {
-  this._ellipsoidMesh?.destroy();
+  this._gridMesh?.destroy();
   if (this._mesh) {
     for (const tile of this._mesh.tiles) {
       for (const entry of tile.cache) {

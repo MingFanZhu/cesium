@@ -1043,6 +1043,52 @@ FFT 使用区域米制 chart 并存在投影畸变。区域光学使用局部曲
 `Test/Rendering/playwright.curved-water.config.mjs`，回归沿用 WaterSurface/WindWaves 和双 World 玄武湖示例。
 设计与已知性能范围见 ADR-0179、R25 plan/review。
 
+## 河流水位、流向与风浪
+
+`SceneGISRiverSurface` 是独立河流图元，复用现有水面绘制。先开启 HDR，再明确绑定 World：
+
+```js
+const river = scene.primitives.add(
+  new Cesium.SceneGISRiverSurface({
+    world: scene.world,
+    // Globe: ECEF positions containing ellipsoid heights, in downstream order.
+    positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+      118.7, 32.1, 25, 118.72, 32.11, 22, 118.75, 32.1, 20,
+    ]),
+    widths: [120, 180, 140],
+    speeds: [0.6, 1.2, 0.8],
+    currentSpeedScale: 1,
+    maximumTileCount: 256,
+    // windWaves: waves, // Optional, caller-owned, independent from river current.
+  }),
+);
+```
+
+Planar 的 `positions` 改为当前 World 的 `new Cartesian3(x, y, z)` 米制坐标，z 是显式水位；
+不能把经纬度或 ECEF 直接传给 Planar。`widths` 是全宽，`speeds` 是沿中心线的非负 m/s，
+二者均可传统一数值或与 positions 等长的数组。位置顺序决定正向流动，0 表示不平流；
+水位与速度独立输入，允许显式表达坡度，但不自动求解水力学或判断水位是否合理。
+
+`polygonHierarchy` 可精确裁剪岸线与岛屿孔洞，其高度被忽略；mask 不扩大中心线宽度包络。
+过急且过宽的弯道可能折叠或自交，此时构造会报错，应修改中心线采样或宽度。
+Globe 使用区域 chart，宽度按控制点局部度量换算，沿程距离采用椭球测地线；
+远离 chart 中心的形状和材质仍有投影畸变，不是全球连续流场。
+
+`currentSpeedScale`、`currentRippleAmplitude`、`currentRippleLength` 和
+`currentFoamIntensity` 为运行时控制。纹理平流和法线波纹表达流动外观；双相位周期为 8 秒，
+不累计随时间增长的变形。Scene time 可暂停、回退；变更流速参数会重新求值当前相位。
+可选 `windWaves` 另行产生 FFT 风浪，不随河流流速改变；关闭水流仍可保留风浪。
+共有的水色、吸收、粗糙度、倒影、接触泡沫、显隐和 id 均可修改。
+
+几何输入在构造时复制，不提供原位编辑；替换河流后再销毁不再使用的 caller-owned FFT。
+拾取返回 `{ primitive: river, id }`，`getBoundingSphere()` 返回 World 空间保守包围球，
+`statistics` 沿用水面 LOD/缓存指标。首次到访高精度区域仍可能同步构建较多网格。
+
+人工入口 `Test/Rendering/河流水面.html?world=globe` / `world=planar`，使用本地示意河道和河床，
+提供水位、流速、独立风浪、控制点标注和近/远/低角度视角。自动化入口：
+`SceneGISRiverSurface` Specs、`Test/Rendering/playwright.river-water.config.mjs`。
+接口边界与性能证据见 ADR-0180 和 R26 review；视觉效果仍需项目负责人验收。
+
 ## 可编程 GPU 粒子使用与验证
 
 把 `SceneGISGpuParticleSystem` 加入 `scene.primitives`，由用户 GLSL 定义运动规律：

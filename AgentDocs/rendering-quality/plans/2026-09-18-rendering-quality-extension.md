@@ -30,8 +30,14 @@
 
 2026-10-21: R25 extends the existing local-water scope to regional ellipsoid rivers/lakes,
 automatic bounded mesh LOD and shared FFT. Global ocean coverage and hydrodynamics remain
-excluded. [Active R25 plan](2026-10-21-r25-curved-water.md), ADR-0179; no parallel phase.
+excluded. [R25 plan](2026-10-21-r25-curved-water.md), ADR-0179; no parallel phase.
 Implementation and technical review are complete; owner visual acceptance remains pending.
+
+After the independent R25 checkpoint, the owner authorizes [R26 directed river surfaces](2026-10-21-r26-river-surface.md).
+R26 implementation and technical qualification are complete; its owner visual gate is
+pending. It adds authored channel height/current semantics on shared water rendering.
+R25 visual follow-up remains recorded. Branching, waterfalls and hydraulic simulation
+stay outside this extension phase. No next implementation phase is active.
 
 ## Stable architecture boundaries
 

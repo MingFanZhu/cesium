@@ -1,6 +1,6 @@
 # Phase R25: Regional ellipsoid water
 
-- Type: phase; status: active, technical gate passed, owner visual gate pending; created: 2026-10-21
+- Type: phase; status: implementation checkpointed, owner visual follow-up pending; created: 2026-10-21
 - Parent: [rendering quality](2026-09-18-rendering-quality-extension.md)
 - Owner/reviewer: current task, implementation and architecture self-review
 - Architecture review: confirmed from R8/R22 source and ownership boundaries
@@ -76,4 +76,5 @@ unrelated native Globe black-background assertion are recorded in the review.
 
 Next owner action: visually inspect `Test/Rendering/曲面河湖.html` for lake/river,
 near/low/high views and animated waves, and judge whether first-visit construction cost
-is acceptable for representative data. No new rendering phase or global-ocean work is active.
+is acceptable for representative data. R26 was subsequently authorized for a dedicated
+river class; the R25 visual/cold-build gate remains open. Global-ocean work stays excluded.

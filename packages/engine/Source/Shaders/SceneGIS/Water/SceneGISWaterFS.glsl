@@ -26,6 +26,8 @@ uniform sampler2D u_waveNormal0;
 uniform sampler2D u_waveNormal1;
 uniform float u_wavePeriod;
 uniform float u_waveResolution;
+#endif
+#if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_RIVER_WATER)
 in float v_shoreFade;
 #endif
 
@@ -104,6 +106,11 @@ void main()
     vec3 view = normalize(-v_positionEC);
     #ifdef SCENEGIS_CURVED_WATER
     vec3 up = normalize(v_waterUpEC);
+    #ifdef SCENEGIS_RIVER_WATER
+    vec3 meanNormal = normalize(cross(dFdx(v_waterBaseEC), dFdy(v_waterBaseEC)));
+    up = dot(meanNormal, up) < 0.0 ? -meanNormal : meanNormal;
+    sceneGISRiverUpEC = up;
+    #endif
     vec3 east = normalize(v_waterEastEC - up * dot(up, v_waterEastEC));
     mat3 waterFrame = mat3(east, cross(up, east), up);
     #else
@@ -131,6 +138,8 @@ void main()
     vec3 normal = normalize(czm_normal * vec3(gradient * v_shoreFade, 1.0));
     #endif
     crestFoam = max(n0.a, n1.a) * v_shoreFade;
+    #elif defined(SCENEGIS_RIVER_WATER)
+    vec3 normal = up;
     #else
     vec2 across = vec2(-d.y, d.x);
     vec2 slope = sceneGISWaterWave(d, 1.0, 1.0, 0.0, footprint);
@@ -138,6 +147,10 @@ void main()
     slope += sceneGISWaterWave(normalize(d - across * 0.8), 0.19, 2.6, 3.2, footprint) * 0.3;
     slope += sceneGISWaterWave(across, 0.08, 3.9, 0.7, footprint) * 0.15;
     vec3 normal = normalize(czm_normal * normalize(vec3(-slope, 1.0)));
+    #endif
+    #ifdef SCENEGIS_RIVER_WATER
+    vec2 current = sceneGISRiverCurrent();
+    normal = sceneGISRiverNormal(normal, up, current.x * u_currentRippleAmplitude * v_shoreFade);
     #endif
     vec2 size = vec2(textureSize(u_depth, 0));
     vec2 uv = gl_FragCoord.xy / size;
@@ -194,7 +207,13 @@ void main()
     float lightFresnel = 0.02037 + 0.97963 * pow(1.0 - max(dot(view, halfVector), 0.0), 5.0);
     color += beam * (distribution * visibility * lightFresnel * nDotL);
 
+    #ifdef SCENEGIS_RIVER_WATER
+    float currentFoam = smoothstep(0.65, 0.9, current.y);
+    float contact = u_foamWidth > 0.0 ? (1.0 - smoothstep(0.0, u_foamWidth, verticalDepth)) * u_foamIntensity : 0.0;
+    float foam = max(crestFoam, currentFoam * max(contact, u_currentFoamIntensity * v_shoreFade));
+    #else
     float foam = max(crestFoam, sceneGISWaterFoam(verticalDepth, footprint, d));
+    #endif
     color = mix(color, vec3(0.8) * diffuseLight, clamp(foam, 0.0, 1.0));
     out_FragColor = vec4(max(color, vec3(0.0)), 1.0);
 }

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>河流水面 · 水位与流向</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>河流水面 · 水位与流向</h1>
+      <p>
+        独立河流对象：沿程水位、变宽弯道、分段流速、岛屿孔洞和自动网格 LOD。
+      </p>
+      <p>
+        示意河道从西向东流，水位逐渐下降。默认仅显示河流纹理流动，可叠加独立 FFT
+        风浪。
+      </p>
+      <p>
+        本地构造的河岸和河床用于验收；水位与流速均为显式输入，不进行水动力求解。
+      </p>
+      <p>
+        <a href="?world=globe">球面</a> · <a href="?world=planar">平面</a> ·
+        <a href="示例目录.html">目录</a>
+      </p>
+      <p id="status">正在创建河流…</p>
+      <p id="pick">单击水面检查拾取。</p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./河流水面.js"></script>
+  </body>
+</html>

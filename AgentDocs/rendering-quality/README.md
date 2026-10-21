@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                    |
 | Planning model         | `extension`                                                                 |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                  |
-| Current phase          | R25 technically verified; owner visual gate pending                         |
-| Active phase plan      | [R25](plans/2026-10-21-r25-curved-water.md)                                 |
+| Current phase          | R26 implemented; owner visual gate pending                                  |
+| Active phase plan      | [R26](plans/2026-10-21-r26-river-surface.md)                                |
 | Active standalone plan | None; [completed night emission](plans/2026-10-12-street-night-emission.md) |
 | Architecture contact   | Current task                                                                |
 | Execution contact      | Current task                                                                |
@@ -35,6 +35,13 @@
 
 ## Current handoff
 
+- 2026-10-21: after R25 checkpoint `d2ef77d1cd`, the owner authorizes a distinct river
+  class for authored along-channel heights and changing flow. [R26](plans/2026-10-21-r26-river-surface.md)
+  / ADR-0180 is implemented. [Technical review](reviews/2026-10-21-r26-river-surface.md)
+  records qualification and retained synchronous build cost. Confluences, branches,
+  waterfalls and hydraulic simulation are explicitly excluded. Owner visual acceptance
+  is pending; R25 visual/cold-build follow-up stays open in its review.
+
 - 2026-10-21: owner authorizes regional curved rivers/lakes, automatic mesh LOD and the
   existing FFT. [R25](plans/2026-10-21-r25-curved-water.md) / ADR-0179 adds an explicit
   ellipsoid geometry mode while retaining local water. Global ocean work stays deferred.
@@ -42,7 +49,7 @@
   22 water/FFT regressions, lake/river and both-world local-water E2E, release/types,
   measured runtime and synchronous cold-build cost. All paths are SceneGIS-owned;
   SGP-0017 is unchanged. Owner visual acceptance and cold-build tolerance remain pending.
-  No next phase is active.
+  R26 was subsequently authorized above; these R25 findings remain open.
 
 - After R24 checkpoint `2e09227156`, the owner reports weak nighttime emission.
   [Focused maintenance](plans/2026-10-12-street-night-emission.md) diagnoses a disabled
