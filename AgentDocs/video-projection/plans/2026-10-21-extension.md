@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: extension
-- Status: implemented; owner visual acceptance pending
+- Status: completed; owner visual acceptance confirmed 2026-10-21
 - Owner role: architecture
 - Architecture review: confirmed；用户已同意实施
 - Architecture reviewer: current task self-review
@@ -71,7 +71,7 @@ depth resolution / bias、sources、terrain、opacity、enabled、showFrustum。
 | P3    | 双世界示例、集成与开销验收           | P2 已提交；资格 plan 已建立         | 地形 / Model / 3D Tiles / S3M、共存、有限性能证据与本地视频示例，提交后视觉验收 | completed |
 
 每阶段完成代码、Specs、ADR / SGP 与 review 后形成独立本地提交，再进入下一阶段。
-[P3](2026-10-21-p3-qualification.md) 技术验证已完成，待负责人视觉验收。
+[P3](2026-10-21-p3-qualification.md) 技术验证已完成，负责人于 2026-10-21 确认视觉验收通过。
 
 ## Media update and bounded cost
 

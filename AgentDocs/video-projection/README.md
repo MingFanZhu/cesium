@@ -3,10 +3,10 @@
 ## Metadata
 
 - Extension slug: video-projection
-- Status: implemented; owner visual acceptance pending
+- Status: completed; owner visual acceptance confirmed 2026-10-21
 - Planning model: extension
 - Active extension plan: [video projection](plans/2026-10-21-extension.md)
-- Current phase: P3 technically completed
+- Current phase: P3 completed and accepted
 - Active phase plan: none; latest [P3](plans/2026-10-21-p3-qualification.md)
 - Architecture / execution: current task; no independent agent
 - Updated: 2026-10-21
@@ -26,15 +26,17 @@
 
 ## Handoff
 
-P1 e24e1d8f09 and P2 b2471eef12 are separate checkpoints. P3 technical checks are
-complete; its checkpoint includes example, integration Specs and source-reset fix.
+P1 e24e1d8f09, P2 b2471eef12 and P3 81e3609272 are separate checkpoints.
+P3 includes example, integration Specs and source-reset fix. The owner confirmed
+visual acceptance on 2026-10-21.
 [Latest review](reviews/2026-10-21-p3.md) contains bounded performance evidence.
 [P1 review](reviews/2026-10-21-p1.md), [P2 review](reviews/2026-10-21-p2.md) and
 [preparation](reviews/2026-10-21-preparation.md) retain phase history.
 [Reuse discussion](discussions/2026-10-21-observer-reuse.md) is resolved by ADR-0177.
 
-No open blocking review. Next: owner visual acceptance in Globe / Planar, then
-separately authorize SDK integration or merge. No push or merge performed here.
+No open blocking review or remaining phase gate. The owner requested committing
+acceptance and switching back to scenegis/develop. Feature commits remain on
+feature/video-projection; SDK integration or merge requires a separate instruction.
 Known limits: finite depth / LOD precision, SDR display overlay including possible
 transparent foreground coverage, browser CORS / decoding, per-instance depth and
 texture costs. Full AgentDocs formatting has unrelated historical warnings.

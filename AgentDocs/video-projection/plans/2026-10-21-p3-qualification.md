@@ -1,7 +1,7 @@
 # Phase P3: Dual-world examples and qualification
 
 - Type: phase
-- Status: completed (technical); visual acceptance pending
+- Status: completed; owner visual acceptance confirmed 2026-10-21
 - Owner: current task architecture / execution
 - Architecture review: confirmed
 - Date: 2026-10-21
@@ -38,4 +38,5 @@ regressions. Complete technical qualification and commit; owner visual gate stay
 Eight GPU Specs, eleven development E2E, three release smoke E2E and release build
 passed. Same-element stream replacement callback invalidation was fixed with a
 regression. Bounded CPU / GPU / upload evidence and remaining limits are in the
-[P3 review](../reviews/2026-10-21-p3.md). Owner visual gate remains pending.
+[P3 review](../reviews/2026-10-21-p3.md). The owner confirmed visual acceptance on
+2026-10-21. Phase checkpoint: 81e3609272.
