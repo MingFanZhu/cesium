@@ -252,7 +252,11 @@ const labels = profile.map((p, i) =>
   }),
 );
 function setCamera(range, pitch, targetX = 0) {
-  const target = point(targetX, 0, 24 - targetX * 0.002 + settings.level);
+  const target = point(
+    targetX,
+    320 * Math.sin(targetX / 750),
+    24 - targetX * 0.002 + settings.level,
+  );
   const frame = planar
     ? C.Matrix4.fromTranslation(target)
     : C.Transforms.eastNorthUpToFixedFrame(target);
@@ -289,7 +293,8 @@ function setCamera(range, pitch, targetX = 0) {
 function viewAt(name) {
   const poses = {
     水面近景: [180, -0.16],
-    弯道鸟瞰: [1500, -0.85],
+    浪面特写: [60, -0.08, 150],
+    弯道鸟瞰: [1500, -0.85, 1000],
     全河鸟瞰: [5500, -1.1],
     低角度远眺: [3500, -0.06],
     高空: [150000, -1.3],
@@ -299,6 +304,7 @@ function viewAt(name) {
 gui
   .add(settings, "view", [
     "水面近景",
+    "浪面特写",
     "弯道鸟瞰",
     "全河鸟瞰",
     "低角度远眺",

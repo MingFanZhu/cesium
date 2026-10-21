@@ -1,6 +1,6 @@
 # Phase R26: Directed river surfaces
 
-- Type: phase; status: visual correction implemented, owner gate pending; created: 2026-10-21
+- Type: phase; status: FFT wave replacement implemented, owner gate pending; updated: 2026-10-21
 - Parent: [rendering quality](2026-09-18-rendering-quality-extension.md)
 - Owner/reviewer: current task, implementation and architecture self-review
 - Architecture review: confirmed from R8/R22/R25 source and water scheduling
@@ -8,6 +8,35 @@
 - Predecessor: R25 checkpoint d2ef77d1cd; its visual/cold-build follow-up remains recorded
 
 ## Authorized scope
+
+### Second visual correction: random directional wave fields
+
+The owner rejected checkpoint 47f56ad792's four coherent sine bands: crests still span
+the channel and displacement looks flat. Replace their generation, rather than adding
+phase noise or increasing amplitude alone. References are Unity HDRP's current-sector
+sampling and separate agitation/ripple bands; no upstream implementation is copied.
+
+- Reuse WindWaves' lazy GPU FFT/evolution/texture lifecycle through a private spectrum
+  factory. River owns a deterministic 128-square, two-band random spectrum with broad
+  angular spread. Existing optional windWaves remains separately borrowed and unchanged.
+- Interpolate chart-space downstream vectors through the same clipped source triangles.
+  Sample two adjacent fixed angular sectors, not coordinates rotated by a continuously
+  changing angle. Sample in the regional metric chart, without width-dependent UV scale.
+- Use coarse agitation and fine ripple bands, filtered by geometry/pixel footprints.
+  Smoothly bound the normalized random heights to the existing amplitude contract;
+  use the identical field for displacement and fine fragment normals. Keep shoreline
+  fade, shared LOD edges, picking and conservative bounds.
+- Keep bounded two-phase current advection. FFT dispersion uses Scene time independently:
+  zero current stops transport, not wave evolution; pausing/seeking the clock affects both.
+  Changing dominant wavelength scales dispersion time without accumulating integration error.
+- Verify deterministic/random directional spectrum, production vertex transport with a
+  frozen FFT field, independent evolution, mixed-LOD direction continuity, both-world
+  rendering/picking/clock/ownership, relevant FFT/water regressions and browser views.
+  Record incremental FFT pass/storage and measured frame cost. No stochastic tiling,
+  hydraulic simulation, new public type or change to the inherited cold-build scheduler.
+
+Implementation, verification and review results will be appended to the existing R26
+review. Owner visual judgment remains the final gate; do not mark appearance accepted.
 
 Add SceneGISRiverSurface for a single ordered, continuous river in Globe and Planar.
 The owner explicitly excludes confluences, branches, waterfalls, hydraulic simulation
@@ -107,3 +136,12 @@ release, including measured downstream GPU vertex motion; both-world E2E passes.
 Release/types/tsc pass. The [review](../reviews/2026-10-21-r26-river-surface.md) records
 the corrected findings and a focused alternating GPU/CPU measurement at the owner's
 original camera. Owner visual acceptance and the inherited cold-build limit remain open.
+
+## Random FFT correction handoff
+
+Second correction is implemented and technically reviewed in the existing R26 review.
+Ten feature Specs cover the production GPU field and the shared water regressions remain
+green. Both Worlds cover six saved views and a continuous camera tour. Release/types
+pass. River owns two FFT bands; optional wind remains borrowed. No upstream-owned files
+or SGP change. The owner visual gate and synchronous cold-build limitation remain open;
+no subsequent rendering phase is activated.

@@ -146,3 +146,67 @@ findings remain in their own reviews. Visual flow is not mass/energy conservatio
 profile edits replace the primitive, speed changes reevaluate the current phase, and
 Globe chart distortion/above-water/screen-space limitations remain documented.
 No confluences, branching, waterfalls, hydrodynamics or ocean work is activated.
+
+## Random FFT replacement after second owner feedback
+
+Review target: replacement of checkpoint 47f56ad792's coherent waves; reviewer and
+implementation owner: current task. Architecture/code self-review confirms the narrow
+SceneGIS-owned spectrum factory, current ownership, shared water pipeline and no change
+to public WindWaves behavior. The technical review is separate from owner visual approval.
+
+- **Finding 6, P2, fixed in implementation; visual gate pending — coherent cross-channel crests:**
+  the four sine modes and nonzero transverse envelope still produced long bands. Replace
+  them with seeded two-dimensional agitation/ripple spectra, broad angular support and
+  eight fixed-direction sampling sectors. Interpolated flow vectors survive clipping and
+  mixed LOD. Meter-space sampling does not stretch with channel width. The GPU vertex
+  test establishes downstream advection, different profiles 20 m across the channel,
+  quarter-turn equivalence, sector-boundary continuity and distant/shore attenuation.
+  Directional spectra have unit variance and substantial off-axis energy. This is evidence
+  of the intended mechanism, not a numerical substitute for owner judgment of appearance.
+- **Finding 7, contract clarification, implemented — transport is not wave evolution:** zero current
+  freezes transport of a frozen field, while FFT dispersion continues. Tests cover both,
+  clock pause/seek-back, phase wrap, exact World rejection before GPU allocation, optional
+  wind independence and destruction of owned current textures while retaining borrowed wind.
+  Runtime wavelength scales sample coordinates and dispersion time; public displacement
+  bounds and default 0.12 m amplitude / 12 m wavelength stay intact.
+
+Ten RiverSurface Specs pass in development and release with strict WebGL validation.
+Shared release regressions pass: 17 WaterSurface, 7 EllipsoidWater, 5 WindWaves. Both-world
+browser tests cover near water, wave close-up, bends, overview, low angle, high altitude,
+19 continuous camera samples, picking, cache and teardown. In-app inspection at the
+owner's original Globe view shows fragmented, differently sized crests instead of the
+previous full-channel bands; final owner acceptance remains pending. The example keeps
+0.3 m / 14 m and zero artistic foam, explains zero-flow versus clock pause, and adds a
+wave close-up anchored on the actual centerline.
+
+### Cost and retained limits
+
+Windows / RTX 3060 Ti / ANGLE D3D11; browser suite uses Chromium at 1185×800, HDR, physical
+sky and SSR. Eight valid GPU timer samples of the current FFT update alone give medians
+0.155 ms Planar and 0.156 ms Globe. Each advancing update uses 32 draws into 128×128 MRT
+buffers. Allocated FFT textures total 2,271,912 bytes (about 2.17 MiB), including mipmaps.
+No full-screen scene pass, per-frame CPU mesh mutation or product GPU readback is added.
+These measurements do not include the extra wave texture sampling inside the water draw.
+
+In the same run, near-view full-scene GPU medians with current waves are 1.88 / 2.48 ms
+(Planar / Globe); hidden-water medians are 0.61 / 0.62 ms. These include all water optics
+and changed coverage, so they are not an isolated incremental shader cost or comparable
+with the preceding checkpoint's differently sized user-camera sample. Frozen-time warm
+near-view CPU medians are 4.9 / 7.3 ms. New close-up mesh visits still take 55 / 64 ms.
+An earlier run reached 338 ms on the first Globe overview frame, including first-use scene work. The
+inherited synchronous-build limitation remains open; this correction does not fix it.
+
+The spectrum is visual synthesis, not hydraulic or obstacle-driven waves. Geometric
+waves remain vertical; fine normals and separate optional wind retain their roles.
+Finite FFT patches repeat, and sector/transport crossfades can attenuate variance.
+Aperiodic tiling remains deferred unless visual evidence justifies its extra samples.
+Regional chart distortion and above-water screen-space optics remain unchanged.
+All touched product files are SceneGIS-owned; upstream-owned changes: none. SGP-0017
+is reused unchanged. Owner visual acceptance is the next step in the existing R26 plan.
+
+Release build, generated declarations and TypeScript checks pass; existing upstream
+JSDoc warnings remain without new river warnings. Scoped ESLint/format checks and patch
+audit qualify the SceneGIS-owned implementation. Full AgentDocs markdownlint passes;
+the required full formatting check reports the same 562 unchanged files. Changed
+documents pass scoped formatting. No generated
+files are committed. Technical checkpoint is ready; no next phase is activated.

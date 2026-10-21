@@ -550,6 +550,10 @@ function createResources(surface, frameState) {
       u_currentRippleLength: () => surface._river.currentRippleLength,
       u_currentRippleAmplitude: () => surface._river.currentRippleAmplitude,
       u_currentFoamIntensity: () => surface._river.currentFoamIntensity,
+      u_riverDisplacement0: () =>
+        surface._river._waves._state.bands[0].output.getColorTexture(0),
+      u_riverDisplacement1: () =>
+        surface._river._waves._state.bands[1].output.getColorTexture(0),
       u_displacement0: () =>
         surface._windWaves._state.bands[0].output.getColorTexture(0),
       u_displacement1: () =>
@@ -678,6 +682,12 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
   }
   if (this._windWaves && frameState.passes.render) {
     this._windWaves._update(frameState);
+  }
+  if (this._river && frameState.passes.render) {
+    this._river._waves._update(
+      frameState,
+      Math.sqrt(12 / this._river.currentRippleLength),
+    );
   }
   const command = this._command;
   command.modelMatrix = this.modelMatrix;

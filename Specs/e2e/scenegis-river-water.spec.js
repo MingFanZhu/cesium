@@ -18,7 +18,15 @@ for (const world of ["planar", "globe"]) {
       window.example.viewer.clock.shouldAnimate = false;
     });
     const measurements = [];
-    for (const view of ["全河鸟瞰", "水面近景", "低角度远眺", "高空"]) {
+    for (const view of [
+      "全河鸟瞰",
+      "弯道鸟瞰",
+      "水面近景",
+      "浪面特写",
+      "低角度远眺",
+      "高空",
+    ]) {
+      await page.getByRole("combobox", { name: "观察位置" }).selectOption(view);
       measurements.push(
         await page.evaluate(async (view) => {
           const e = window.example,
@@ -76,9 +84,53 @@ for (const world of ["planar", "globe"]) {
       render();
       const unchangedWind = e.waves._state.seconds === windSeconds;
       const gpu = [];
+      const fft = {};
       const gl = s.context._gl,
         ext = gl.getExtension("EXT_disjoint_timer_query_webgl2");
       if (ext) {
+        const times = [];
+        const simulation = e.river._waves;
+        for (let i = 0; i < 8; ++i) {
+          await new Promise((r) => requestAnimationFrame(r));
+          const q = gl.createQuery();
+          const time = C.JulianDate.addSeconds(
+            e.viewer.clock.currentTime,
+            (i + 1) / 60,
+            new C.JulianDate(),
+          );
+          gl.beginQuery(ext.TIME_ELAPSED_EXT, q);
+          simulation._update(
+            { context: s.context, time },
+            Math.sqrt(12 / e.river.currentRippleLength),
+          );
+          gl.endQuery(ext.TIME_ELAPSED_EXT);
+          while (!gl.getQueryParameter(q, gl.QUERY_RESULT_AVAILABLE)) {
+            await new Promise((r) => requestAnimationFrame(r));
+          }
+          if (!gl.getParameter(ext.GPU_DISJOINT_EXT)) {
+            times.push(gl.getQueryParameter(q, gl.QUERY_RESULT) / 1e6);
+          }
+          gl.deleteQuery(q);
+        }
+        times.sort((a, b) => a - b);
+        fft.medianMilliseconds = times[Math.floor(times.length / 2)];
+        fft.draws = simulation._state.draws;
+        const targets = [
+          ...simulation._state.buffers,
+          ...simulation._state.bands.map((b) => b.output),
+        ];
+        fft.textureBytes =
+          targets.reduce(
+            (sum, t) =>
+              sum +
+              t.getColorTexture(0).sizeInBytes +
+              t.getColorTexture(1).sizeInBytes,
+            0,
+          ) +
+          simulation._state.bands.reduce(
+            (sum, b) => sum + b.initial.sizeInBytes,
+            0,
+          );
         for (const condition of [
           "current-flat",
           "current-waves",
@@ -137,6 +189,7 @@ for (const world of ["planar", "globe"]) {
         pickedRiver: picked?.primitive === water,
         stats,
         gpu,
+        fft,
         boundFinite: Number.isFinite(bound.radius) && bound.radius > 0,
         destroyed:
           water.isDestroyed() &&

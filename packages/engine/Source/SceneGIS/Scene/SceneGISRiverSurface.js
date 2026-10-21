@@ -4,6 +4,8 @@ import DeveloperError from "../../Core/DeveloperError.js";
 import Globe from "../../Scene/Globe.js";
 import SceneGISPlanarWorld from "./SceneGISPlanarWorld.js";
 import SceneGISWaterSurface from "./SceneGISWaterSurface.js";
+import SceneGISWindWaves from "./SceneGISWindWaves.js";
+import riverSpectrum from "./_private/_SceneGISRiverSpectrum.js";
 import RiverGeometry from "./_private/_SceneGISRiverGeometry.js";
 import WaterMesh from "./_private/_SceneGISEllipsoidWaterMesh.js";
 import WaterFrame from "./_private/_SceneGISWaterFrame.js";
@@ -36,7 +38,9 @@ function validate(river) {
  * Globe rivers use the regional water chart and mesh LOD, with projection distortion away from
  * its origin. Adjacent sections are joined with miters; folded or self-touching corridors are
  * rejected. This is visual current advection, not hydraulics, branching, waterfalls or global oceans.
- * Optional caller-owned windWaves add independent FFT wind waves; current speed does not alter them.
+ * Owns two random FFT wave bands, locally oriented along the river. Current speed transports
+ * the waves independently of their intrinsic evolution; zero current does not freeze waves.
+ * Optional caller-owned windWaves add independent wind waves; current speed does not alter them.
  * Requires SCENE3D, HDR and WebGL2 floating-point targets. Shares SceneGISWaterSurface's opaque
  * depth/color optics and its above-water, nonoverlapping-surface limitations.
  *
@@ -123,6 +127,12 @@ function SceneGISRiverSurface(options = {}) {
     modelMatrix: undefined,
     _riverMesh: this._mesh,
     _river: this,
+  });
+  this._waves = new SceneGISWindWaves({
+    resolution: 128,
+    choppiness: 0,
+    whitecapIntensity: 0,
+    _spectrum: riverSpectrum,
   });
 }
 
@@ -417,11 +427,12 @@ SceneGISRiverSurface.prototype.isDestroyed = function () {
 };
 
 /**
- * Releases owned geometry, shaders and picking resources. The World and wind simulation are borrowed.
+ * Releases owned geometry, river FFT, shaders and picking resources. The World and optional wind simulation are borrowed.
  * @returns {undefined}
  */
 SceneGISRiverSurface.prototype.destroy = function () {
   this._surface.destroy();
+  this._waves.destroy();
   return destroyObject(this);
 };
 

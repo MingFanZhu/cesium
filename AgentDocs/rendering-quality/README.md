@@ -8,7 +8,7 @@
 | Status                 | `active`                                                                    |
 | Planning model         | `extension`                                                                 |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                  |
-| Current phase          | R26 directed-wave correction; owner visual gate pending                     |
+| Current phase          | R26 random FFT waves; owner visual gate pending                             |
 | Active phase plan      | [R26](plans/2026-10-21-r26-river-surface.md)                                |
 | Active standalone plan | None; [completed night emission](plans/2026-10-12-street-night-emission.md) |
 | Architecture contact   | Current task                                                                |
@@ -34,6 +34,13 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-21: owner rejects the coherent crests at checkpoint `47f56ad792` and approves
+  random FFT fields with local flow orientation. The same R26 now owns two broadly
+  directional wave bands and samples adjacent fixed angular sectors; authored transport
+  is independent from intrinsic dispersion. Ten feature Specs and both-world browser
+  coverage verify the replacement; [R26 review](reviews/2026-10-21-r26-river-surface.md)
+  records performance, ownership and retained limitations. Visual acceptance is pending.
 
 - 2026-10-21: owner feedback on the R26 checkpoint rejects broad white streaks and
   normal-only ripples. The same phase now shares actual vertex/normal waves along the

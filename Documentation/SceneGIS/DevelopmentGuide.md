@@ -1075,12 +1075,14 @@ Globe 使用区域 chart，宽度按控制点局部度量换算，沿程距离�
 远离 chart 中心的形状和材质仍有投影畸变，不是全球连续流场。
 
 `currentSpeedScale`、`currentRippleAmplitude`、`currentRippleLength` 和
-`currentFoamIntensity` 为运行时控制。顺流波浪同时改变顶点高度与法线，沿河道坐标传播；
+`currentFoamIntensity` 为运行时控制。河流自持两组随机 FFT 波场，按局部流向采样，同时改变顶点高度与法线；
 `currentRippleAmplitude` 是最大位移上限（默认 0.12 m），`currentRippleLength` 是主波长
-（默认 12 m），近岸衰减，远处按网格与像素尺度过滤。多频率叠加的实际浪高通常小于上限。
+（默认 12 m），近岸衰减，远处按网格与像素尺度过滤。大波主导几何，细波补充法线，实际浪高小于上限；有限 FFT 区块仍有空间周期。
 双相位周期为 32 秒，不累计随时间增长的变形。Scene time 可暂停、回退；变更流速参数会重新求值当前相位。
 `currentFoamIntensity` 是艺术性白色流纹，默认 0，不代表物理破浪；与接触泡沫分开。
-可选 `windWaves` 另行产生 FFT 风浪，不随河流流速改变；关闭水流仍可保留风浪。
+流速只控制搬运，设为零仍会发生波浪自身演化；暂停 Scene clock 才会冻结全部波动。
+可选 `windWaves` 另行叠加风浪，不随河流流速改变。内部河流 FFT 由 RiverSurface 创建和销毁，
+128² 双频带每次时间变化执行 32 个小尺寸绘制 pass，纹理约占 2.17 MiB；隐藏和拾取不推进模拟。
 共有的水色、吸收、粗糙度、倒影、接触泡沫、显隐和 id 均可修改。
 
 几何输入在构造时复制，不提供原位编辑；替换河流后再销毁不再使用的 caller-owned FFT。

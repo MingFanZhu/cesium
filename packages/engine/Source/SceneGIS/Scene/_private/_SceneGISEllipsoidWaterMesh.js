@@ -412,6 +412,7 @@ const attributeLocations = {
   waterEast: 3,
   wavePosition: 4,
   riverData: 5,
+  riverFlow: 6,
 };
 SceneGISEllipsoidWaterMesh.attributeLocations = attributeLocations;
 
@@ -464,6 +465,7 @@ SceneGISEllipsoidWaterMesh.prototype.update = function (surface, frame) {
     node.foamOffset ??= new Cartesian2();
     node.foamOffset.x = node.x - node.offset.x;
     node.foamOffset.y = node.y - node.offset.y;
+    node.riverOffset ??= new Cartesian2(node.x, node.y);
     node.command ??= new DrawCommand({
       owner: surface,
       pass: Pass.OPAQUE,
@@ -474,6 +476,7 @@ SceneGISEllipsoidWaterMesh.prototype.update = function (surface, frame) {
       ...base.uniformMap,
       u_waterOffset: () => node.offset,
       u_waterFoamOffset: () => node.foamOffset,
+      u_riverOffset: () => node.riverOffset,
     };
     Object.assign(command.uniformMap, base.uniformMap);
     command.vertexArray = entry.vertexArray;

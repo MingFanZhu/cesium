@@ -12,7 +12,11 @@ out vec3 v_waterEastEC;
 #endif
 #ifdef SCENEGIS_RIVER_WATER
 in vec3 riverData;
+in vec2 riverFlow;
+uniform vec2 u_riverOffset;
 out vec3 v_riverData;
+out vec2 v_riverFlow;
+out vec2 v_riverPosition;
 #endif
 #if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_RIVER_WATER)
 in vec2 waveData;
@@ -73,8 +77,11 @@ void main() {
     v_waterEastEC = czm_normal * waterEast;
     #endif
     #ifdef SCENEGIS_RIVER_WATER
-    local += waterNormal * (sceneGISRiverHeight(riverData, spacing) * waveData.x);
+    vec2 riverPosition = wavePosition + u_riverOffset;
+    local += waterNormal * (sceneGISRiverHeight(riverPosition, riverFlow, riverData.z, spacing) * waveData.x);
     v_riverData = riverData;
+    v_riverFlow = riverFlow;
+    v_riverPosition = riverPosition;
     #endif
     vec4 p = czm_modelView * vec4(local, 1.0);
     v_positionEC = p.xyz;

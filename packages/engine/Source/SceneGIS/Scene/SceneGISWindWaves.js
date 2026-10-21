@@ -158,6 +158,8 @@ function SceneGISWindWaves(options = {}) {
   }
   validate(this);
   this._state = undefined;
+  // RiverSurface supplies normalized visual bands without changing the public wind spectrum.
+  this._spectrum = options._spectrum ?? spectrum;
   this._significantWaveHeight = 0;
   this._maximumDisplacement = 0;
 }
@@ -221,7 +223,7 @@ Object.defineProperties(SceneGISWindWaves.prototype, {
 /**
  * @private
  */
-SceneGISWindWaves.prototype._update = function (frameState) {
+SceneGISWindWaves.prototype._update = function (frameState, timeScale = 1) {
   validate(this);
   const context = frameState.context,
     n = this.resolution;
@@ -275,11 +277,15 @@ SceneGISWindWaves.prototype._update = function (frameState) {
     fields.some((key, i) => this[key] !== state.config[i]) ||
     this.windDirection.x !== state.config[fields.length] ||
     this.windDirection.y !== state.config[fields.length + 1];
-  if (!changed && JulianDate.equals(state.time, frameState.time)) {
+  if (
+    !changed &&
+    state.timeScale === timeScale &&
+    JulianDate.equals(state.time, frameState.time)
+  ) {
     return;
   }
   if (changed) {
-    const generated = spectrum(this);
+    const generated = this._spectrum(this);
     this._significantWaveHeight = generated.significantWaveHeight;
     this._maximumDisplacement = generated.maximumDisplacement;
     for (let i = 0; i < 2; ++i) {
@@ -299,7 +305,9 @@ SceneGISWindWaves.prototype._update = function (frameState) {
       .map((key) => this[key])
       .concat(this.windDirection.x, this.windDirection.y);
   }
-  state.seconds = JulianDate.secondsDifference(frameState.time, state.epoch);
+  state.timeScale = timeScale;
+  state.seconds =
+    JulianDate.secondsDifference(frameState.time, state.epoch) * timeScale;
   state.draws = 0;
   for (const band of state.bands) {
     state.band = band;

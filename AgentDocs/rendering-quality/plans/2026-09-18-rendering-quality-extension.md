@@ -35,8 +35,9 @@ Implementation and technical review are complete; owner visual acceptance remain
 
 After the independent R25 checkpoint, the owner authorizes [R26 directed river surfaces](2026-10-21-r26-river-surface.md).
 R26's first implementation is checkpointed at `0adb7fe888`; owner feedback reopens its
-white-streak and directed-wave visuals. The same phase now adds actual current-wave
-displacement and disables default artistic streaks. Its owner visual gate is
+white-streak and directed-wave visuals. Its coherent sine replacement at `47f56ad792`
+was also rejected visually; the same phase now uses random FFT bands with local flow
+orientation and separate transport/dispersion. Default artistic streaks stay off. Its owner visual gate is
 pending. It adds authored channel height/current semantics on shared water rendering.
 R25 visual follow-up remains recorded. Branching, waterfalls and hydraulic simulation
 stay outside this extension phase. No next implementation phase is active.

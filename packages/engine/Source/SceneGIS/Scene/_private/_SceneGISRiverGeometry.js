@@ -159,6 +159,8 @@ function SceneGISRiverGeometry(options, ellipsoid) {
       stations[i],
       transverseScale,
       speeds[i],
+      tx / length,
+      ty / length,
     ]);
     right.push([
       p.x - nx * offset,
@@ -167,6 +169,8 @@ function SceneGISRiverGeometry(options, ellipsoid) {
       stations[i],
       -transverseScale,
       speeds[i],
+      tx / length,
+      ty / length,
     ]);
   }
   const ring = [...left, ...right.slice().reverse()];

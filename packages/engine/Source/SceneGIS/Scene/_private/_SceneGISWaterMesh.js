@@ -129,6 +129,7 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
     size = this.size;
   const river = this.river;
   const riverData = [];
+  const riverFlow = [];
   const positions = [],
     waveData = [],
     indices = [],
@@ -144,6 +145,7 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
     positions.push(p[0], p[1], p[2] ?? 0);
     if (river) {
       riverData.push(p[3], p[4], p[5]);
+      riverFlow.push(p[6], p[7]);
     }
     let distance = 16;
     for (const [a, b] of tile.shores) {
@@ -284,6 +286,11 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
       componentDatatype: ComponentDatatype.FLOAT,
       componentsPerAttribute: 3,
       values: new Float32Array(riverData),
+    });
+    geometry.attributes.riverFlow = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 2,
+      values: new Float32Array(riverFlow),
     });
   }
   return geometry;

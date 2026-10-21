@@ -150,7 +150,7 @@ void main()
     #endif
     #ifdef SCENEGIS_RIVER_WATER
     vec2 current = sceneGISRiverCurrent();
-    normal = sceneGISRiverNormal(normal, up, current.x * u_currentRippleAmplitude * v_shoreFade);
+    normal = sceneGISRiverNormal(normal, up, current.x * v_shoreFade);
     #endif
     vec2 size = vec2(textureSize(u_depth, 0));
     vec2 uv = gl_FragCoord.xy / size;

@@ -23,6 +23,7 @@ import {
   VertexArray,
 } from "../../../index.js";
 import RiverGeometry from "../../../Source/SceneGIS/Scene/_private/_SceneGISRiverGeometry.js";
+import riverSpectrum from "../../../Source/SceneGIS/Scene/_private/_SceneGISRiverSpectrum.js";
 import Mesh from "../../../Source/SceneGIS/Scene/_private/_SceneGISEllipsoidWaterMesh.js";
 import riverFlow from "../../../Source/Shaders/SceneGIS/Water/SceneGISRiverFlow.js";
 import waterVertex from "../../../Source/Shaders/SceneGIS/Water/SceneGISWaterVS.js";
@@ -142,6 +143,41 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
     expect(area).toEqualEpsilon(2800, 1e-3);
   });
 
+  it("builds deterministic two-dimensional spectra with downstream bias and separate scales", function () {
+    const options = { resolution: 128, seed: 12345 };
+    const a = riverSpectrum(options),
+      b = riverSpectrum(options);
+    const other = riverSpectrum({ ...options, seed: 12346 });
+    expect(a.bands.map((v) => v.length)).toEqual([96, 24]);
+    for (let band = 0; band < 2; ++band) {
+      const data = a.bands[band].data;
+      expect(data).toEqual(b.bands[band].data);
+      expect(data).not.toEqual(other.bands[band].data);
+      let total = 0,
+        cross = 0,
+        downstream = 0;
+      for (let y = 0; y < 128; ++y) {
+        for (let x = 0; x < 128; ++x) {
+          const i = (y * 128 + x) * 4;
+          const energy = 2 * (data[i] ** 2 + data[i + 1] ** 2);
+          total += energy;
+          if (
+            Math.abs(y < 64 ? y : y - 128) >
+            Math.abs(x < 64 ? x : x - 128) * 0.5
+          ) {
+            cross += energy;
+          }
+          if (x > 0 && x < 64) {
+            downstream += energy;
+          }
+        }
+      }
+      expect(total).toEqualEpsilon(1, 1e-6);
+      expect(cross / total).toBeGreaterThan(0.3);
+      expect(downstream / total).toBeGreaterThan(0.7);
+    }
+  });
+
   it("keeps height, flow and mixed LOD edge attributes continuous through bends", function () {
     const m = mesh({
       positions: [
@@ -186,7 +222,12 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
           new Cartesian3(),
         );
         const key = `${Math.round(w.x * 10000)},${Math.round(w.y * 10000)}`;
-        const v = [w.z, ...data.slice(i, i + 3)];
+        const flow = g.attributes.riverFlow.values;
+        const v = [
+          w.z,
+          ...data.slice(i, i + 3),
+          ...flow.slice((i / 3) * 2, (i / 3) * 2 + 2),
+        ];
         if (shared.has(key)) {
           const previous = shared.get(key);
           v.forEach((value, j) =>
@@ -311,9 +352,16 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
     scene.camera.frustum.near = 0.1;
     scene.camera.frustum.far = 500;
   }
-  it("displaces actual vertices downstream, freezes zero current and filters unresolved waves", function () {
+  it("transports FFT vertex heights downstream, rotates sectors continuously and filters unresolved waves", function () {
     const context = createContext();
     const frame = createFrameState(context);
+    frame.time = JulianDate.clone(time);
+    const currentWaves = new SceneGISWindWaves({
+      resolution: 128,
+      choppiness: 0,
+      _spectrum: riverSpectrum,
+    });
+    currentWaves._update(frame);
     frame.camera.position = new Cartesian3(0, 0, 100);
     frame.camera.direction = new Cartesian3(0, 0, -1);
     frame.camera.up = Cartesian3.clone(Cartesian3.UNIT_Y);
@@ -346,7 +394,9 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
     let seconds = 0,
       amplitude = 1,
       speedScale = 1,
-      shore = 1;
+      shore = 1,
+      transverse = 7,
+      angle = 0;
     function height(station) {
       const va = new VertexArray({
         context,
@@ -355,8 +405,15 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
           { index: 1, value: [shore, 0.25] },
           { index: 2, value: [0, 0, 1] },
           { index: 3, value: [1, 0, 0] },
-          { index: 4, value: [0, 0] },
+          {
+            index: 4,
+            value: [
+              station * Math.cos(angle) - transverse * Math.sin(angle),
+              station * Math.sin(angle) + transverse * Math.cos(angle),
+            ],
+          },
           { index: 5, value: [station, 7, 2] },
+          { index: 6, value: [Math.cos(angle), Math.sin(angle)] },
         ],
       });
       try {
@@ -369,6 +426,11 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
           modelMatrix: Matrix4.IDENTITY,
           uniformMap: {
             u_waterOffset: () => ({ x: 0, y: 0 }),
+            u_riverOffset: () => ({ x: 0, y: 0 }),
+            u_riverDisplacement0: () =>
+              currentWaves._state.bands[0].output.getColorTexture(0),
+            u_riverDisplacement1: () =>
+              currentWaves._state.bands[1].output.getColorTexture(0),
             u_riverTime: () => seconds,
             u_currentRippleAmplitude: () => amplitude,
             u_currentRippleLength: () => 12,
@@ -383,6 +445,19 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
     try {
       const before = Array.from({ length: 81 }, (_, i) => height(i * 0.5));
       expect(Math.max(...before) - Math.min(...before)).toBeGreaterThan(50);
+      transverse = 27;
+      const across = Array.from({ length: 81 }, (_, i) => height(i * 0.5));
+      expect(
+        across.reduce((sum, v, i) => sum + Math.abs(v - before[i]), 0) / 81,
+      ).toBeGreaterThan(15);
+      transverse = 7;
+      angle = Math.PI / 2;
+      expect(height(3)).toEqualEpsilon(before[6], 1);
+      angle = -0.00001;
+      const seam = height(3);
+      angle = 0.00001;
+      expect(height(3)).toEqualEpsilon(seam, 1);
+      angle = 0;
       seconds = 1;
       const after = Array.from({ length: 81 }, (_, i) => height(i * 0.5));
       // Measure the direction and distance of the GPU height profile, not a CPU copy of the shader.
@@ -401,6 +476,16 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
       const frozen = height(3);
       seconds = 13;
       expect(height(3)).toBe(frozen);
+      frame.time = JulianDate.addSeconds(time, 2, new JulianDate());
+      currentWaves._update(frame);
+      expect(height(3)).not.toBe(frozen); // Intrinsic waves evolve even without transport.
+      const evolved = height(3);
+      currentWaves._update(frame, 0.5);
+      const slowed = height(3);
+      expect(slowed).not.toBe(evolved);
+      frame.time = JulianDate.addSeconds(time, 1, new JulianDate());
+      currentWaves._update(frame);
+      expect(height(3)).toBe(slowed); // Same dispersion phase after a warm wavelength edit.
       amplitude = 0;
       expect(height(3)).toEqualEpsilon(128, 1);
       amplitude = 1;
@@ -412,6 +497,7 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
       expect(height(3)).toEqualEpsilon(128, 1);
     } finally {
       program.destroy();
+      currentWaves.destroy();
       context.destroyForSpecs();
     }
   });
@@ -466,18 +552,29 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
       scene.renderForSpecs(time);
       const frozen = scene.context.readPixels();
       scene.renderForSpecs(JulianDate.addSeconds(time, 1.25, new JulianDate()));
-      expect(scene.context.readPixels()).toEqual(frozen);
+      expect(scene.context.readPixels()).not.toEqual(frozen);
+      const evolved = scene.context.readPixels();
+      scene.renderForSpecs(JulianDate.addSeconds(time, 1.25, new JulianDate()));
+      expect(scene.context.readPixels()).toEqual(evolved);
       river.id = "edited";
       scene.renderForSpecs(time);
       expect(scene.pick(screen).id).toBe("edited");
       river.show = false;
+      const fftTime = JulianDate.clone(river._waves._state.time);
       scene.renderForSpecs(time);
+      expect(river._waves._state.time).toEqual(fftTime);
       expect(scene.pick(screen)?.id).not.toBe("edited");
       const arrays = [...river._mesh.nodes].flatMap((n) =>
         n.cache.map((e) => e.vertexArray),
       );
       const pickColor = river._surface._pickId.color;
+      const currentWaves = river._waves;
+      const currentTexture =
+        currentWaves._state.bands[0].output.getColorTexture(0);
       scene.primitives.remove(river);
+      expect(
+        currentWaves.isDestroyed() && currentTexture.isDestroyed(),
+      ).toBeTrue();
       expect(arrays.every((a) => a.isDestroyed())).toBeTrue();
       expect(scene.context.getObjectByPickColor(pickColor)).toBeUndefined();
     });
@@ -511,6 +608,7 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
     scene.primitives.add(wrong);
     expect(() => scene.renderForSpecs(time)).toThrowDeveloperError();
     expect(wrong.ready).toBeFalse();
+    expect(wrong._waves._state).toBeUndefined();
     scene.primitives.remove(wrong);
     other.destroy();
     river.currentSpeedScale = -1;

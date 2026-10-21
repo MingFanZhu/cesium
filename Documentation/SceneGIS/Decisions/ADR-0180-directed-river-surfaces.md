@@ -33,26 +33,44 @@ while pick IDs report the public RiverSurface. Mean-surface slope affects the ta
 frame and contact/refraction/reflection tests. Planar uses direct XYZ and a flat-world
 curvature term; Globe follows its actual ellipsoid with local optical approximation.
 
-Use a shared, bounded multiband height field for vertex displacement and fragment normals
-in river coordinates, driven by authored local speed and simulation time. Non-harmonic
-bands and transverse phase modulation break up uniform parallel crests. The amplitude
-is an upper bound, included in public, draw and selection bounds; shore fade pins banks
-and holes to their authored mean height. Continuous per-position mesh/pixel filtering
-retains shared LOD edge heights and suppresses unresolved geometric waves. Fragment
-normals retain finer resolved detail, as in the existing FFT water path.
+RiverSurface owns a deterministic two-band 128-square FFT simulation through a private
+spectrum factory in the existing WindWaves backend. The generic wind spectrum and public
+WindWaves API remain unchanged. Broad angular spectra replace the rejected coherent sine
+bands: agitation has a reference wavelength of 12 m, ripples 2 m. Each band is normalized
+to unit variance; a smooth h/sqrt(1+h*h) mapping and convex weights retain the configured
+maximum vertical displacement. This is an authored visual spectrum, not a wind estimate.
 
-Two staggered advections with smooth blending bound stretching under varying velocity.
-Filter the phases independently so an invisible wrapping phase cannot change the active
-pattern. Current phase is a direct function of Scene time (32-second cycle); parameter
-changes reevaluate that phase. This is a visual advection model, not a wave dispersion
-or hydraulic solver. Artistic current streaks are opt-in (default zero); contact and
-FFT breaking foam remain separate. Default maximum amplitude is 0.12 m and dominant
-wavelength is 12 m, replacing the initial normal-only ripples after owner visual feedback.
-Optional existing SceneGISWindWaves adds independent wind waves;
-current controls must never overwrite wind direction or wind speed. Caller owns the FFT;
-the river owns its composed surface/mesh. Scene retains ownership of shared captures.
+Interpolated downstream vectors stay attached to source triangles through clipping and
+LOD. Sample adjacent fixed directions in eight angular sectors, following the design
+of [HDRP currents](https://anisb.github.io/2026/09/26/currents-in-hdrps-water-system/).
+This implementation is written independently, without copying upstream source. Use
+regional metric chart coordinates rather than width-scaled UVs or continuously rotating
+the chart about its origin. Two staggered bounded advections transport these coordinates
+at authored local speed. Filter each phase/sector independently; differentiate advected
+coordinates before fixed rotation, not the discrete sector index. Sector and phase blends
+can attenuate variance; they do not assert energy conservation. Stochastic aperiodic tiling
+is deferred until repetition is established as a visual limitation.
 
-No new upstream file, SGP, framebuffer, global registration, Worker or asset is required.
+The same field drives vertical vertices and fragment height gradients. Continuous
+mesh/pixel footprints filter geometry, while fragments retain resolved fine ripples.
+Shore fade pins banks and holes; public, selection and command bounds include the maximum
+amplitude. Geometry does not introduce horizontal choppy displacement in this correction.
+Artistic foam remains opt-in and follows random crests, separate from contact/wind foam.
+
+FFT dispersion evolves on Scene time independently from current transport. Zero current
+stops advection, not wave evolution. Clock pause/reverse affects both. Changing dominant
+wavelength scales sampling and dispersion time by square-root wavelength similarity;
+controls reevaluate phase, rather than integrate hydraulic state. Default amplitude and
+wavelength remain 0.12 m / 12 m. The original 32-second bounded transport cycle remains.
+
+Optional existing SceneGISWindWaves remains independently borrowed; current controls
+never overwrite its wind settings. River owns its composed surface/mesh and current FFT;
+Scene owns shared captures. Hidden rivers and pick passes do not advance FFT. Lazy GPU
+resources are released with RiverSurface. At 128-square resolution, the reused backend
+adds 32 small simulation draws per time change and about 2.17 MiB of textures per river,
+including mipmaps. No per-vertex CPU update or GPU readback is used in the product.
+
+No new upstream file, SGP, scene-wide pass, global registration, Worker or asset is required.
 Source, GLSL and Specs follow existing build discovery; full release/types qualify the API.
 
 ## Alternatives and limits
