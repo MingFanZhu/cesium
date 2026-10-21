@@ -5,7 +5,7 @@
       "id": "SGP-0065",
       "title": "Integrate independent observer viewshed selection and capture",
       "status": "active",
-      "reason": "ADR-0176 delegates observer capture to owned helpers, exposes native terrain command generation and scales tile SSE to an explicit observer viewport. Default rendering remains unchanged when no analysis is registered.",
+      "reason": "ADR-0177 shares the observer coordinator between Viewshed and VideoProjection. ADR-0176 delegates observer capture to owned helpers, exposes native terrain command generation and scales tile SSE to an explicit observer viewport. Default rendering remains unchanged when no analysis is registered.",
       "risk": "high",
       "files": [
         {

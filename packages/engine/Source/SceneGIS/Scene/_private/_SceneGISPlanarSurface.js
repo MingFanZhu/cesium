@@ -692,7 +692,7 @@ function selectObservers(
 ) {
   const tree = surface._quadtree;
   const views = [];
-  for (const observer of frameState._sceneGISViewsheds ?? []) {
+  for (const observer of frameState._sceneGISObservers ?? []) {
     if (
       !observer.terrain ||
       observer.world._surface !== surface ||

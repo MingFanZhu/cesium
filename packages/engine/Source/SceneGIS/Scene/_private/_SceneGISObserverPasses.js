@@ -50,7 +50,7 @@ function contentComplete(content) {
 
 function appendModel(model, frameState, update) {
   if (model.minimumPixelSize !== 0) {
-    throw new DeveloperError("Viewshed occluders require minimumPixelSize=0.");
+    throw new DeveloperError("Observer occluders require minimumPixelSize=0.");
   }
   if (update) {
     model.update(frameState);
@@ -161,7 +161,7 @@ function withView(state, callback) {
 }
 
 /** Explicit Scene integration for directed observer analysis. @private */
-const Viewsheds = {
+const ObserverPasses = {
   withView,
 
   validateSources(scene, sources) {
@@ -182,7 +182,7 @@ const Viewsheds = {
       }
       if (source.isDestroyed() || !contains(scene.primitives, source)) {
         throw new DeveloperError(
-          "Viewshed sources must belong to the bound Scene.",
+          "Observer sources must belong to the bound Scene.",
         );
       }
     }
@@ -191,17 +191,17 @@ const Viewsheds = {
 
   prepare(scene) {
     const frame = scene.frameState;
-    const active = (frame._sceneGISViewsheds ??= []);
+    const active = (frame._sceneGISObservers ??= []);
     active.length = 0;
     frame._sceneGISObserverTerrainTiles?.clear();
     if (!frame.passes.render || frame.passes.pick || frame.passes.depth) {
       return;
     }
-    for (const stage of scene._sceneGISViewsheds ?? []) {
+    for (const stage of scene._sceneGISObservers ?? []) {
       if (!scene.postProcessStages.contains(stage)) {
         continue;
       }
-      const state = stage._viewshed;
+      const state = stage._observer;
       if (!stage.enabled && !state.showFrustum) {
         continue;
       }
@@ -211,7 +211,7 @@ const Viewsheds = {
         scene.useWebVR
       ) {
         throw new DeveloperError(
-          "Viewshed requires its original World in SCENE3D.",
+          "Observer requires its original World in SCENE3D.",
         );
       }
       if (state.showFrustum) {
@@ -244,7 +244,7 @@ const Viewsheds = {
       return;
     }
     const mainCommands = frame.commandList;
-    for (const state of frame._sceneGISViewsheds ?? []) {
+    for (const state of frame._sceneGISObservers ?? []) {
       const start = performance.now();
       let complete = true;
       try {
@@ -269,7 +269,7 @@ const Viewsheds = {
             if (source instanceof Cesium3DTileset) {
               if (source.debugFreezeFrame) {
                 throw new DeveloperError(
-                  "Viewshed requires live tile traversal (debugFreezeFrame=false).",
+                  "Observer requires live tile traversal (debugFreezeFrame=false).",
                 );
               }
               let passState = state.sourceStates.get(source);
@@ -362,4 +362,4 @@ const Viewsheds = {
   },
 };
 
-export default Viewsheds;
+export default ObserverPasses;

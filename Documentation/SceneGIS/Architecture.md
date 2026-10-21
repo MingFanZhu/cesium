@@ -1359,3 +1359,9 @@ Globe 默认 0.5、有限范围 [0, 8]；1 保留原物理查询距离，0 同�
 ADR-0161 / SGP-0046：WebGL 延迟入口统一使用高级物理环境；原生 sky / Sun bloom / 可见 Fog / Globe ground atmosphere 与 daylight 不再执行。保留调用方对象、Fog 瓦片剔除以及高级环境使用的 Moon / 星历。scene.environmentEffects 只读访问显式控制器或 Scene 自有默认实例，默认开启大气、空气透视和高度雾；云及其阴影 / 光束、bloom、lens flare 默认关闭且云资源按需冷加载。显式环境（包括 disabled）优先，默认让位释放 GPU，移除后恢复原设置；World 变更前释放自有实例，不销毁调用方控制器。显示 HDR 开关不限制内部物理计算，也不由默认创建改写。Planar 复用显式 light authority；没有时提供固定 Z 默认方向，不猜地理坐标。
 
 Globe / Planar 均允许调用方安装 scene.light DirectionalLight；自动主光让位，统一驱动地表、模型、云和现有阴影。恢复 SunLight 后恢复自动太阳 / 月亮主光。自定义光对象不被改写或销毁，天空与天体仍按既有星历或 Planar 天体方向；环境释放只恢复仍归其持有的光源。
+
+## Shared directed observers
+
+ADR-0177 将 Viewshed / VideoProjection 组织为独立公共 stage，共享自有 observer state、
+coordinator 和 GLSL 遮挡判定。Scene、Planar Surface、S3M 只依赖通用 observer 协议；
+SGP-0065 保留原有调度位置。每实例独立深度资源，不覆盖太阳 shadowMap，不拥有来源几何。

@@ -851,7 +851,7 @@ SceneGISS3MLayer.prototype.update = function (frameState) {
       }
     }
     const mainTilesLoaded = this._tilesLoaded;
-    for (const observer of frameState._sceneGISViewsheds ?? []) {
+    for (const observer of frameState._sceneGISObservers ?? []) {
       if (!observer.sources.includes(this)) {
         continue;
       }

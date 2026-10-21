@@ -5,7 +5,7 @@ import SceneGISTemporalAntialiasing from "../SceneGIS/Scene/_private/_SceneGISTe
 import SceneGISReflectionProbes from "../SceneGIS/Scene/_private/_SceneGISReflectionProbes.js";
 // SCENEGIS_PATCH_END SGP-0024
 // SCENEGIS_PATCH_BEGIN SGP-0065: Schedule explicit observer selection and depth capture.
-import SceneGISViewsheds from "../SceneGIS/Scene/_private/_SceneGISViewsheds.js";
+import SceneGISObserverPasses from "../SceneGIS/Scene/_private/_SceneGISObserverPasses.js";
 // SCENEGIS_PATCH_END SGP-0065
 // SCENEGIS_PATCH_BEGIN SGP-0017: Schedule local water with shared opaque inputs.
 import SceneGISWaterFrame from "../SceneGIS/Scene/_private/_SceneGISWaterFrame.js";
@@ -4120,7 +4120,7 @@ function executeCommandsInViewport(firstViewport, scene, passState) {
 
   // SCENEGIS_PATCH_BEGIN SGP-0065: Publish observer requests before shared terrain and model preparation.
   if (firstViewport) {
-    SceneGISViewsheds.prepare(scene);
+    SceneGISObserverPasses.prepare(scene);
   }
   // SCENEGIS_PATCH_END SGP-0065
   updateAndRenderPrimitives(scene);
@@ -4147,7 +4147,7 @@ function executeCommandsInViewport(firstViewport, scene, passState) {
   executeCommands(scene, passState);
   // SCENEGIS_PATCH_BEGIN SGP-0065: Capture after main geometry, before display post-processing.
   if (firstViewport) {
-    SceneGISViewsheds.execute(scene);
+    SceneGISObserverPasses.execute(scene);
   }
   // SCENEGIS_PATCH_END SGP-0065
 }

@@ -145,7 +145,7 @@ for (const world of ["planar", "globe"]) {
     const stable = await page.evaluate(async () => {
       const t = window.viewshedExample;
       const scene = t.viewer.scene;
-      const depth = t.analysis._viewshed.depth.texture;
+      const depth = t.analysis._observer.depth.texture;
       scene.pick(new t.C.Cartesian2(800, 400));
       const matrix = t.C.Matrix4.clone(scene.camera.viewMatrix);
       const pose = t.pose();
@@ -168,9 +168,9 @@ for (const world of ["planar", "globe"]) {
         },
       });
       return {
-        sameDepth: t.analysis._viewshed.depth.texture === depth,
+        sameDepth: t.analysis._observer.depth.texture === depth,
         unchangedPose: t.C.Cartesian3.equals(
-          t.analysis._viewshed.camera.positionWC,
+          t.analysis._observer.camera.positionWC,
           pose.position,
         ),
         mainChanged: !t.C.Matrix4.equals(matrix, scene.camera.viewMatrix),
@@ -214,7 +214,7 @@ for (const world of ["planar", "globe"]) {
       };
       const on = measure(true),
         off = measure(false);
-      const depth = t.analysis._viewshed.depth.texture;
+      const depth = t.analysis._observer.depth.texture;
       const report = {
         off,
         on,
@@ -234,13 +234,13 @@ for (const world of ["planar", "globe"]) {
     expect(performance.on.coverageComplete).toBe(true);
     const lifecycle = await page.evaluate(() => {
       const t = window.viewshedExample;
-      const depth = t.analysis._viewshed.depth.texture;
+      const depth = t.analysis._observer.depth.texture;
       const sources = [...t.sources];
       t.viewer.scene.postProcessStages.remove(t.analysis);
       const result = {
         depth: depth.isDestroyed(),
         sourcesLive: sources.every((s) => !s.isDestroyed()),
-        observers: t.viewer.scene._sceneGISViewsheds.size,
+        observers: t.viewer.scene._sceneGISObservers.size,
         errors: t.errors,
       };
       t.viewer.destroy();

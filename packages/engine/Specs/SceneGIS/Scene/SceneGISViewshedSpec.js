@@ -142,13 +142,13 @@ describe("SceneGIS/Scene/SceneGISViewshed", function () {
       const original = center();
       const draws = first.statistics.drawCalls;
       expect(first.showFrustum).toBe(false);
-      expect(first._viewshed.frustumGuide).toBeUndefined();
+      expect(first._observer.frustumGuide).toBeUndefined();
       first.showFrustum = true;
       const scene3DOnly = scene.frameState.scene3DOnly;
       expect(center()).toEqual(original);
       expect(scene.frameState.scene3DOnly).toBe(scene3DOnly);
       expect(first.statistics.drawCalls).toBe(draws);
-      const guide = first._viewshed.frustumGuide;
+      const guide = first._observer.frustumGuide;
       const primitive = guide._primitive;
       const va = primitive._va[0];
       const commands = scene.frameState.commandList.filter(
@@ -172,16 +172,16 @@ describe("SceneGIS/Scene/SceneGISViewshed", function () {
         up: vector(0, 0, 1),
       });
       render();
-      expect(first._viewshed.frustumGuide).toBe(guide);
+      expect(first._observer.frustumGuide).toBe(guide);
       expect(primitive._va[0]).toBe(va);
       expect(
         Matrix4.getTranslation(primitive.modelMatrix, new Cartesian3()),
       ).toEqualEpsilon(point(2, -10, 2), 1e-8);
       const second = add([], { enabled: false, showFrustum: true });
       render();
-      const secondGuide = second._viewshed.frustumGuide;
+      const secondGuide = second._observer.frustumGuide;
       expect(secondGuide).not.toBe(guide);
-      expect(second._viewshed.depth).toBeUndefined();
+      expect(second._observer.depth).toBeUndefined();
       first.setView({
         position: point(2, -10, 2),
         direction: vector(0, 1, 0),
@@ -192,7 +192,7 @@ describe("SceneGIS/Scene/SceneGISViewshed", function () {
       render();
       expect(guide.isDestroyed()).toBe(true);
       expect(va.isDestroyed()).toBe(true);
-      const replacement = first._viewshed.frustumGuide;
+      const replacement = first._observer.frustumGuide;
       scene.postProcessStages.remove(first);
       expect(replacement.isDestroyed()).toBe(true);
       expect(secondGuide.isDestroyed()).toBe(false);
@@ -209,10 +209,10 @@ describe("SceneGIS/Scene/SceneGISViewshed", function () {
       add([floor, wall]);
       await until(() => analysis.analysisReady && analysis.ready);
       expect(center()).toEqual([255, 0, 0, 255]);
-      const depth = analysis._viewshed.depth.texture;
+      const depth = analysis._observer.depth.texture;
       lookAtGround(0, 12, 4);
       expect(center()).toEqual([255, 0, 0, 255]);
-      expect(analysis._viewshed.depth.texture).toBe(depth);
+      expect(analysis._observer.depth.texture).toBe(depth);
       expect(scene.frameState.camera).toBe(scene.camera);
       wall.show = false;
       expect(center()).toEqual([0, 255, 0, 255]);
@@ -292,7 +292,7 @@ describe("SceneGIS/Scene/SceneGISViewshed", function () {
       return analysis.analysisReady;
     });
     expect(center()).toEqual([0, 255, 0, 255]);
-    const view = analysis._viewshed.terrainView;
+    const view = analysis._observer.terrainView;
     const tile = view.tiles[0];
     expect(view.commandStates.get(tile).command).not.toBe(tile.command);
     expect(view.commandStates.get(tile).command.vertexArray).toBe(
@@ -351,13 +351,13 @@ describe("SceneGIS/Scene/SceneGISViewshed", function () {
       resolution: 32,
     });
     await until(() => analysis.analysisReady);
-    const selected = analysis._viewshed.globeSelection.tiles;
+    const selected = analysis._observer.globeSelection.tiles;
     expect(selected.length).toBeGreaterThan(0);
     expect(analysis.statistics.drawCalls).toBeGreaterThan(0);
     expect(
       world._surface._tilesToRender.some((tile) => selected.includes(tile)),
     ).toBe(false);
-    const commands = analysis._viewshed.commands;
+    const commands = analysis._observer.commands;
     for (const command of commands) {
       expect(command.count).toBe(
         command.owner.data.renderedMesh.indexCountWithoutSkirts,

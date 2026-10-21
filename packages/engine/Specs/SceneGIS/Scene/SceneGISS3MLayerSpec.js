@@ -207,7 +207,7 @@ describe("SceneGIS/Scene/SceneGISS3MLayer", function () {
       sources: [layer],
       sourceStates: new Map(),
     };
-    f._sceneGISViewsheds = [observer];
+    f._sceneGISObservers = [observer];
     f.cullingVolume = { computeVisibility: () => Intersect.OUTSIDE };
     layer.update(f);
     expect(observer.sourceStates.get(layer).selected.length).toBe(0);
@@ -463,7 +463,7 @@ describe("SceneGIS/Scene/SceneGISS3MLayer", function () {
       sourceStates: new Map(),
     };
     f.cullingVolume = { computeVisibility: () => Intersect.OUTSIDE };
-    f._sceneGISViewsheds = [observer];
+    f._sceneGISObservers = [observer];
     layer.update(f);
     const selection = observer.sourceStates.get(layer);
     expect(selection.ready).toBe(false);
@@ -485,7 +485,7 @@ describe("SceneGIS/Scene/SceneGISS3MLayer", function () {
     expect(selection.error.message).toContain("S3M observer content failed");
     expect(layer.tilesLoaded).toBe(true);
     child.state = "ready";
-    f._sceneGISViewsheds = [];
+    f._sceneGISObservers = [];
     layer.update(f);
     expect(layer.statistics.cachedTiles).toBe(1);
   });

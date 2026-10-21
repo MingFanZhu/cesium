@@ -1,30 +1,9 @@
-import Cartesian2 from "../../Core/Cartesian2.js";
-import Cartesian3 from "../../Core/Cartesian3.js";
 import Color from "../../Core/Color.js";
 import DeveloperError from "../../Core/DeveloperError.js";
-import Event from "../../Core/Event.js";
-import Matrix4 from "../../Core/Matrix4.js";
-import PerspectiveFrustum from "../../Core/PerspectiveFrustum.js";
-import ContextLimits from "../../Renderer/ContextLimits.js";
-import Camera from "../../Scene/Camera.js";
 import PostProcessStage from "../../Scene/PostProcessStage.js";
-import SceneMode from "../../Scene/SceneMode.js";
-import Viewsheds from "./_private/_SceneGISViewsheds.js";
+import Observer from "./_private/_SceneGISObserverState.js";
+import observerShader from "../../Shaders/SceneGIS/Viewshed/SceneGISObserverVisibility.js";
 import fragmentShader from "../../Shaders/SceneGIS/Viewshed/SceneGISViewshed.js";
-
-function finiteVector(value, name) {
-  if (!value || ![value.x, value.y, value.z].every(Number.isFinite)) {
-    throw new DeveloperError(`${name} must be a finite Cartesian3.`);
-  }
-  return Cartesian3.clone(value);
-}
-
-function positive(value, name) {
-  if (!Number.isFinite(value) || value <= 0) {
-    throw new DeveloperError(`${name} must be finite and positive.`);
-  }
-  return value;
-}
 
 /**
  * Directed, depth-map viewshed bound to one Scene and World. Add it to that
@@ -74,93 +53,25 @@ function positive(value, name) {
  */
 class SceneGISViewshed extends PostProcessStage {
   constructor(options = {}) {
-    const scene = options.scene;
-    if (
-      !scene ||
-      scene.isDestroyed() ||
-      !options.world ||
-      options.world !== scene.world ||
-      scene.mode !== SceneMode.SCENE3D ||
-      scene.useWebVR ||
-      !scene.context.webgl2
-    ) {
-      throw new DeveloperError(
-        "Viewshed requires its live SCENE3D Scene and exact World.",
-      );
-    }
-    const resolution = options.resolution ?? 1024;
-    if (
-      !Number.isInteger(resolution) ||
-      resolution < 16 ||
-      resolution > ContextLimits.maximumTextureSize
-    ) {
-      throw new DeveloperError(
-        "resolution must be an integer from 16 to maximumTextureSize.",
-      );
-    }
-    const depthBias = options.depthBias ?? 0.1;
-    if (!Number.isFinite(depthBias) || depthBias < 0) {
-      throw new DeveloperError("depthBias must be finite and non-negative.");
-    }
-    const terrain = options.terrain ?? true;
-    if (typeof terrain !== "boolean") {
-      throw new DeveloperError("terrain must be boolean.");
-    }
-    if (typeof (options.showFrustum ?? false) !== "boolean") {
-      throw new DeveloperError("showFrustum must be boolean.");
-    }
-    const state = {
-      scene,
-      world: options.world,
-      camera: new Camera(scene),
-      resolution,
-      terrain,
-      depthBias,
-      sources: Viewsheds.validateSources(scene, options.sources ?? []),
-      commands: [],
-      viewToObserver: new Matrix4(),
-      inverseProjection: new Matrix4(),
-      depthRange: new Cartesian2(),
-      analysisReady: false,
-      status: "loading",
-      error: undefined,
-      errorEvent: new Event(),
-      statistics: { drawCalls: 0, captureMilliseconds: 0 },
-      terrainView: undefined,
-      depth: undefined,
-      sourceStates: new Map(),
-      showFrustum: options.showFrustum ?? false,
-      frustumGuide: undefined,
-      visible: Color.clone(options.visibleColor ?? Color.GREEN.withAlpha(0.35)),
-      hidden: Color.clone(options.hiddenColor ?? Color.RED.withAlpha(0.35)),
-    };
+    const state = Observer.create(options);
+    state.visible = Color.clone(
+      options.visibleColor ?? Color.GREEN.withAlpha(0.35),
+    );
+    state.hidden = Color.clone(
+      options.hiddenColor ?? Color.RED.withAlpha(0.35),
+    );
     super({
       name: options.name,
-      fragmentShader,
+      fragmentShader: observerShader + fragmentShader,
       uniforms: {
-        u_analysisReady: () => state.analysisReady,
-        u_observerDepth: () =>
-          state.depth?.texture ?? scene.context.defaultTexture,
-        u_surfaceDepth: () => Viewsheds.surfaceDepth(scene),
-        u_viewToObserver: () => state.viewToObserver,
-        u_inverseMainProjection: () => state.inverseProjection,
-        u_observerProjection: () => state.camera.frustum.projectionMatrix,
-        u_depthRange: () => state.depthRange,
-        u_distance: () => state.distance,
-        u_depthBias: () => state.depthBias,
-        u_mainPerspective: () => state.perspective,
-        u_mainJitter: () => {
-          const temporal = scene._sceneGISTemporalAntialiasing?._state;
-          return temporal?.active ? temporal.jitter : Cartesian2.ZERO;
-        },
+        ...Observer.uniforms(state),
         u_visibleColor: () => state.visible,
         u_hiddenColor: () => state.hidden,
       },
     });
-    this._viewshed = state;
+    this._observer = state;
     this.enabled = options.enabled ?? true;
-    this.setView(options);
-    (scene._sceneGISViewsheds ??= new Set()).add(this);
+    (state.scene._sceneGISObservers ??= new Set()).add(this);
   }
 
   /** Exact Scene owning this analysis.
@@ -168,7 +79,7 @@ class SceneGISViewshed extends PostProcessStage {
    * @readonly
    */
   get scene() {
-    return this._viewshed.scene;
+    return this._observer.scene;
   }
 
   /** Exact World bound at construction.
@@ -176,7 +87,7 @@ class SceneGISViewshed extends PostProcessStage {
    * @readonly
    */
   get world() {
-    return this._viewshed.world;
+    return this._observer.world;
   }
 
   /**
@@ -188,15 +99,15 @@ class SceneGISViewshed extends PostProcessStage {
    * @default false
    */
   get showFrustum() {
-    return this._viewshed.showFrustum;
+    return this._observer.showFrustum;
   }
 
   set showFrustum(value) {
     if (typeof value !== "boolean") {
       throw new DeveloperError("showFrustum must be boolean.");
     }
-    this._viewshed.showFrustum = value;
-    this._viewshed.scene.requestRender();
+    this._observer.showFrustum = value;
+    this._observer.scene.requestRender();
   }
 
   /** Whether the current observer depth has complete selected source coverage.
@@ -204,7 +115,7 @@ class SceneGISViewshed extends PostProcessStage {
    * @readonly
    */
   get analysisReady() {
-    return this.enabled && this._viewshed.analysisReady;
+    return this.enabled && this._observer.analysisReady;
   }
 
   /** One of loading, ready, disabled or error.
@@ -212,7 +123,7 @@ class SceneGISViewshed extends PostProcessStage {
    * @readonly
    */
   get status() {
-    return this.enabled ? this._viewshed.status : "disabled";
+    return this.enabled ? this._observer.status : "disabled";
   }
 
   /** Most recent coverage or capture failure; undefined after a successful capture.
@@ -220,7 +131,7 @@ class SceneGISViewshed extends PostProcessStage {
    * @readonly
    */
   get error() {
-    return this._viewshed.error;
+    return this._observer.error;
   }
 
   /** Raised with a coverage or capture error. Invalid bindings still throw.
@@ -228,7 +139,7 @@ class SceneGISViewshed extends PostProcessStage {
    * @readonly
    */
   get errorEvent() {
-    return this._viewshed.errorEvent;
+    return this._observer.errorEvent;
   }
 
   /** Snapshot of the most recent capture draw calls and CPU submission time.
@@ -236,7 +147,7 @@ class SceneGISViewshed extends PostProcessStage {
    * @readonly
    */
   get statistics() {
-    return { ...this._viewshed.statistics };
+    return { ...this._observer.statistics };
   }
 
   /**
@@ -252,67 +163,12 @@ class SceneGISViewshed extends PostProcessStage {
    * @param {number} [options.verticalAngle] Vertical angle in radians.
    */
   setView(options) {
-    const state = this._viewshed;
-    const position = finiteVector(options.position, "position");
-    const direction = finiteVector(options.direction, "direction");
-    const up = finiteVector(options.up, "up");
-    if (
-      Cartesian3.magnitudeSquared(direction) === 0 ||
-      Cartesian3.magnitudeSquared(up) === 0
-    ) {
-      throw new DeveloperError("direction and up must be nonzero.");
-    }
-    Cartesian3.normalize(direction, direction);
-    Cartesian3.normalize(up, up);
-    const right = Cartesian3.cross(direction, up, new Cartesian3());
-    if (Cartesian3.magnitudeSquared(right) < 1e-12) {
-      throw new DeveloperError("direction and up must not be parallel.");
-    }
-    Cartesian3.normalize(right, right);
-    Cartesian3.cross(right, direction, up);
-    const distance = positive(
-      options.distance ?? state.distance ?? 1000,
-      "distance",
-    );
-    const near = positive(options.near ?? state.near ?? 0.5, "near");
-    const horizontal = positive(
-      options.horizontalAngle ?? state.horizontal ?? Math.PI / 2,
-      "horizontalAngle",
-    );
-    const vertical = positive(
-      options.verticalAngle ?? state.vertical ?? Math.PI / 3,
-      "verticalAngle",
-    );
-    if (near >= distance || horizontal >= Math.PI || vertical >= Math.PI) {
-      throw new DeveloperError(
-        "near must be below distance and angles below PI.",
-      );
-    }
-    state.distance = distance;
-    state.near = near;
-    state.horizontal = horizontal;
-    state.vertical = vertical;
-    const aspectRatio = Math.tan(horizontal / 2) / Math.tan(vertical / 2);
-    state.camera.frustum = new PerspectiveFrustum({
-      near,
-      far: distance,
-      aspectRatio,
-      fov: aspectRatio >= 1 ? horizontal : vertical,
-    });
-    state.camera.setView({
-      destination: position,
-      orientation: { direction, up },
-    });
-    state.depthRange.x = near;
-    state.depthRange.y = distance;
-    state.analysisReady = false;
-    state.status = "loading";
-    state.scene.requestRender();
+    Observer.setView(this._observer, options);
   }
 
   /** @private */
   update(context, useLogDepth) {
-    const state = this._viewshed;
+    const state = this._observer;
     if (context !== state.scene.context || state.world !== state.scene.world) {
       throw new DeveloperError(
         "Viewshed cannot be used with a different Scene or World.",
@@ -325,12 +181,7 @@ class SceneGISViewshed extends PostProcessStage {
    * @returns {undefined}
    */
   destroy() {
-    const state = this._viewshed;
-    state.scene._sceneGISViewsheds.delete(this);
-    state.depth?.destroy();
-    state.frustumGuide?.destroy();
-    state.commands.length = 0;
-    state.sourceStates.clear();
+    Observer.destroy(this);
     return super.destroy();
   }
 }
