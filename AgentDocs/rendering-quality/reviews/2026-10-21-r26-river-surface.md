@@ -5,7 +5,7 @@
 - Reviewer/implementation owner: current task, source-based architecture self-review
 - Parent: [R26 phase plan](../plans/2026-10-21-r26-river-surface.md)
 - ADR: ADR-0180; existing SGP-0017 reused unchanged
-- Disposition: technical checks pass; owner visual acceptance pending
+- Disposition: technical checks pass; random FFT replacement owner visually accepted
 
 ## Scope and integration
 
@@ -210,3 +210,10 @@ audit qualify the SceneGIS-owned implementation. Full AgentDocs markdownlint pas
 the required full formatting check reports the same 562 unchanged files. Changed
 documents pass scoped formatting. No generated
 files are committed. Technical checkpoint is ready; no next phase is activated.
+
+## Owner acceptance, 2026-10-21
+
+The owner visually accepts checkpoint `c6a5da44d2`, closing finding 6 and the R26
+appearance gate. Shared cold-build and screen-space limitations remain recorded above.
+Lake wave quality is a separate requested follow-up; do not reuse river transport as
+a lake contract or reopen the accepted river appearance without a concrete regression.

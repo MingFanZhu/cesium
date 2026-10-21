@@ -8,7 +8,7 @@
 | Status                 | `active`                                                                    |
 | Planning model         | `extension`                                                                 |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                  |
-| Current phase          | R26 random FFT waves; owner visual gate pending                             |
+| Current phase          | R26 accepted; lake quality assessment requested                             |
 | Active phase plan      | [R26](plans/2026-10-21-r26-river-surface.md)                                |
 | Active standalone plan | None; [completed night emission](plans/2026-10-12-street-night-emission.md) |
 | Architecture contact   | Current task                                                                |
@@ -34,6 +34,10 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-21: owner visually accepts R26 random FFT waves at `c6a5da44d2`. Record a
+  separate acceptance checkpoint before planning lake-quality work. Shared cold mesh
+  construction limitations remain recorded, with no implied scheduling fix.
 
 - 2026-10-21: owner rejects the coherent crests at checkpoint `47f56ad792` and approves
   random FFT fields with local flow orientation. The same R26 now owns two broadly

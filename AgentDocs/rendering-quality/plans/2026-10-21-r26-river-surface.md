@@ -1,6 +1,6 @@
 # Phase R26: Directed river surfaces
 
-- Type: phase; status: FFT wave replacement implemented, owner gate pending; updated: 2026-10-21
+- Type: phase; status: completed, owner visually accepted; updated: 2026-10-21
 - Parent: [rendering quality](2026-09-18-rendering-quality-extension.md)
 - Owner/reviewer: current task, implementation and architecture self-review
 - Architecture review: confirmed from R8/R22/R25 source and water scheduling
@@ -145,3 +145,10 @@ green. Both Worlds cover six saved views and a continuous camera tour. Release/t
 pass. River owns two FFT bands; optional wind remains borrowed. No upstream-owned files
 or SGP change. The owner visual gate and synchronous cold-build limitation remain open;
 no subsequent rendering phase is activated.
+
+## Owner acceptance
+
+On 2026-10-21 the owner visually accepts the random FFT replacement at `c6a5da44d2`.
+R26 visual work is complete. The shared synchronous cold-build limitation remains open
+in R25/R26 reviews; acceptance does not assert that construction scheduling was fixed.
+The owner requests a separate assessment and improvement of lake waves.

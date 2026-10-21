@@ -414,3 +414,9 @@ a threshold above its range. Qualify example parameters in both Worlds without c
 the renderer, authored materials, accepted daytime picture or deferred GI scope.
 Both-world verification and review are complete. The owner visually accepts the street
 bloom adjustment on 2026-10-13; form its independent checkpoint with no next phase active.
+
+### R26 acceptance, 2026-10-21
+
+The owner visually accepts random directional river waves at `c6a5da44d2`. R26 is
+complete; inherited synchronous mesh construction remains an open limitation. The
+owner requests lake-wave quality improvements as the next separate scope.
