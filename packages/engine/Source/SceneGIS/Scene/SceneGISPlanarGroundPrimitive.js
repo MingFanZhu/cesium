@@ -6,6 +6,7 @@ import DeveloperError from "../../Core/DeveloperError.js";
 import GeometryInstance from "../../Core/GeometryInstance.js";
 import destroyObject from "../../Core/destroyObject.js";
 import Appearance from "../../Scene/Appearance.js";
+import MaterialAppearance from "../../Scene/MaterialAppearance.js";
 import Material from "../../Scene/Material.js";
 import PerInstanceColorAppearance from "../../Scene/PerInstanceColorAppearance.js";
 import PolylineMaterialAppearance from "../../Scene/PolylineMaterialAppearance.js";
@@ -117,6 +118,21 @@ function cloneAttributes(source = {}) {
   return result;
 }
 
+function validateGroundMaterial(material) {
+  if (!(material instanceof Material)) {
+    throw new DeveloperError("MaterialAppearance requires a Material.");
+  }
+  const source = material.shaderSource.replace(
+    /\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,
+    "",
+  );
+  if (/\bdiscard\s*;/.test(source)) {
+    throw new DeveloperError(
+      "Ground Fabric must use material.alpha instead of discard.",
+    );
+  }
+}
+
 function validateAppearance(geometryKind, appearance, attributes) {
   if (geometryKind === "polyline") {
     if (appearance instanceof PolylineColorAppearance) {
@@ -135,6 +151,10 @@ function validateAppearance(geometryKind, appearance, attributes) {
         "Polyline geometry requires PolylineColorAppearance or a Color PolylineMaterialAppearance.",
       );
     }
+    return;
+  }
+  if (appearance instanceof MaterialAppearance) {
+    validateGroundMaterial(appearance.material);
     return;
   }
   if (
@@ -281,6 +301,8 @@ function createCandidate(primitive, frameState) {
   ];
   const origin =
     primitive._batch === undefined ? undefined : entries[0].geometry.origin;
+  const materialAppearance =
+    primitive._appearance instanceof MaterialAppearance;
   let volume;
   let bounds;
   let vertexCount = 0;
@@ -291,6 +313,7 @@ function createCandidate(primitive, frameState) {
       primitive._world,
       entry.geometry,
       origin,
+      materialAppearance,
     );
     volume ??= created;
     extents.push(created.extent);
@@ -333,6 +356,9 @@ function createCandidate(primitive, frameState) {
     lastConflicts = plan.lastConflicts;
     instances = order.map((index) => instances[index]);
   }
+  const defines = materialAppearance
+    ? "#define SCENEGIS_GROUND_MATERIAL\n"
+    : "";
   const internalAppearance =
     primitive._geometryKind === "polyline"
       ? new Appearance({
@@ -345,17 +371,24 @@ function createCandidate(primitive, frameState) {
         })
       : new Appearance({
           vertexShaderSource:
-            SceneGISPlanarGroundLineShader.areaVertexShaderSource,
+            defines + SceneGISPlanarGroundLineShader.areaVertexShaderSource,
           fragmentShaderSource:
-            SceneGISPlanarGroundLineShader.areaFragmentShaderSource,
+            defines + SceneGISPlanarGroundLineShader.areaFragmentShaderSource,
           renderState: Appearance.getDefaultRenderState(false, true),
-          closed: true,
+          // The queue hook owns volume state; generate one source command per VA.
+          closed: !materialAppearance,
           translucent: false,
         });
+  if (materialAppearance) {
+    internalAppearance.material = primitive._appearance.material;
+    internalAppearance.flat = primitive._appearance.flat;
+    internalAppearance.faceForward = primitive._appearance.faceForward;
+  }
   const commands = createSceneGISPlanarGroundCommands(
     primitive,
     instances.map((instance) => instance.id),
     lastConflicts,
+    materialAppearance,
   );
   const candidate = new Primitive({
     geometryInstances:
@@ -461,7 +494,10 @@ function preserveCurrentAttributes(primitive) {
  * A static batch shares one native Primitive and its vertex buffers. Lines use one command per
  * vertex array with fragment clipping against surface depth. Areas with disjoint XY extents share
  * a stencil/color pair, including for picking. Overlapping areas retain input order; compatible
- * opaque area ranges can also coalesce within the stencil counter capacity.
+ * opaque color ranges can also coalesce within the stencil counter capacity.
+ * Material batches share one Fabric material and merge only spatially compatible ranges.
+ * Picking tests footprints, including zero-alpha material pixels. Ground Fabric must use
+ * material.alpha instead of discard to preserve stencil cleanup.
  *
  * @alias SceneGISPlanarGroundPrimitive
  * @constructor
@@ -469,7 +505,7 @@ function preserveCurrentAttributes(primitive) {
  * @param {SceneGISPlanarWorld} options.world The live caller-owned planar world.
  * @param {SceneGISPlanarPolylineGeometry|SceneGISPlanarPolygonGeometry} [options.geometry] The source footprint, required unless geometryInstances is supplied. Source Z values are ignored.
  * @param {SceneGISPlanarGroundPrimitive.GeometryInstanceOptions[]} [options.geometryInstances] A non-empty static batch of only polylines or only polygons. Mutually exclusive with geometry, id, and attributes. Topology changes require a new batch.
- * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance} options.appearance The compatible caller-owned Color appearance.
+ * @param {PolylineMaterialAppearance|PolylineColorAppearance|PerInstanceColorAppearance|MaterialAppearance} options.appearance The compatible caller-owned appearance. Area Fabric uses depth-reconstructed XY coordinates, rotated by geometry.stRotation; caller owns the material. Custom outer shaders are not used.
  * @param {*} [options.id] The required non-null identifier for a single geometry.
  * @param {Object.<string, SceneGISPlanarPrimitive.InstanceAttribute>} [options.attributes] Instance attributes.
  * @param {boolean} [options.show=true] Whether the primitive is shown.
@@ -657,6 +693,7 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
     this._current = created.candidate;
     this._currentCommands = created.commands;
     this._currentGeometry = this._geometry;
+    this._currentAppearance = this._appearance;
     this._currentOrigin = Cartesian3.clone(created.volume.origin);
     this._currentEnvelope = created.volume.envelope;
     this._currentPresentationBounds = created.volume.presentationBounds;
@@ -687,6 +724,14 @@ SceneGISPlanarGroundPrimitive.prototype.update = function (frameState) {
   }
   this._current.show = isEffectivelyShown(this);
   if (frameState.passes.render) {
+    if (this._currentAppearance instanceof MaterialAppearance) {
+      if (
+        this._current.appearance.material !== this._currentAppearance.material
+      ) {
+        validateGroundMaterial(this._currentAppearance.material);
+      }
+      this._current.appearance.material = this._currentAppearance.material;
+    }
     syncCurrentPolylineColor(this);
     const modelMatrix = this._current.modelMatrix;
     const envelope = SceneGISPlanarGroundVolume.updateEnvelope(

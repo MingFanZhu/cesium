@@ -256,7 +256,12 @@ SceneGISPlanarGroundVolume.createPresentationBounds = function (geometry) {
   return createPresentationBounds(points);
 };
 
-SceneGISPlanarGroundVolume.create = function (world, geometry, batchOrigin) {
+SceneGISPlanarGroundVolume.create = function (
+  world,
+  geometry,
+  batchOrigin,
+  material = false,
+) {
   const data =
     geometry instanceof SceneGISPlanarPolygonGeometry
       ? createPolygonVolume(geometry, batchOrigin)
@@ -279,6 +284,13 @@ SceneGISPlanarGroundVolume.create = function (world, geometry, batchOrigin) {
       componentDatatype: ComponentDatatype.FLOAT,
       componentsPerAttribute: 4,
       values: new Float32Array(data.extentValues),
+    });
+  }
+  if (material) {
+    attributes.groundRotation = new GeometryAttribute({
+      componentDatatype: ComponentDatatype.FLOAT,
+      componentsPerAttribute: 1,
+      values: new Float32Array(points.length).fill(geometry.stRotation),
     });
   }
   if (data.nextValues !== undefined) {

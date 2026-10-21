@@ -49,3 +49,10 @@ deferred native appearance 标记。验证像素、孔洞/重叠、拾取、动�
 
 Polygon 材质几何单独校正 outer/hole 侧面绕序，配合有符号主轴 UV 保持外法线和 TBN。
 颜色几何保持原样；native solids 的 UV 不经过自有投影 helper。
+
+## M2 Ground integration
+
+Ground 接纳 MaterialAppearance 的 Material/flat/faceForward，使用自有 volume Shader；外层自定义 Shader 不接入。
+UV 从表面深度与每对象 XY extent 重建，再应用 stRotation；normal/TBN 从表面导数重建。
+材质透明不影响 stencil 建立与清除，禁止 discard；pick 保持原生 GroundPrimitive 的足迹语义。
+材质范围禁止同色重叠合并，空间无冲突范围仍可共用命令；动态材质与 provider envelope 不重建 VA。

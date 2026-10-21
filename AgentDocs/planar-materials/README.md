@@ -4,7 +4,7 @@
 - Status: `active`
 - Planning model: `extension`
 - Active extension plan: [总体计划](plans/2026-10-21-planar-materials.md)
-- Current phase / active plan: [M1 普通面材质](plans/2026-10-21-m1-ordinary-materials.md)
+- Current phase / active plan: [M2 贴地面材质](plans/2026-10-21-m2-ground-materials.md)
 - Architecture / execution contact: 当前任务
 - Last updated: `2026-10-21`
 
@@ -22,8 +22,8 @@
 
 ## Current handoff
 
-- M1 技术完成，待独立检查点；M2 / M3 尚未进入。
+- M1 已提交 4264d02bd0；M2 technical passed，待检查点；M3 尚未进入。
 - Open discussions: None。
-- Latest review: [M1](reviews/2026-10-21-m1-ordinary-materials.md) technical passed；无未解决 finding。
+- Latest review: [M2](reviews/2026-10-21-m2-ground-materials.md) technical passed；无未解决 finding。
 - Known risks: 纹理接缝、透明语义、stencil/discard、动态纹理所有权。
-- Next action: 完成 M1 实现、GPU/生命周期验证与独立本地检查点，再激活 M2。
+- Next action: 完成 M2 贴地材质、GPU/生命周期验证与独立本地检查点。

@@ -113,7 +113,12 @@ function syncBaseCommand(command, modelMatrix, boundingVolume) {
  * @returns {object} The hook and stable derived command arrays.
  * @private
  */
-function createSceneGISPlanarGroundCommands(owner, instanceIds, lastConflicts) {
+function createSceneGISPlanarGroundCommands(
+  owner,
+  instanceIds,
+  lastConflicts,
+  material = false,
+) {
   const stencilCommands = [];
   const colorCommands = [];
   const pickStencilCommands = [];
@@ -128,12 +133,14 @@ function createSceneGISPlanarGroundCommands(owner, instanceIds, lastConflicts) {
   let sourceUniformMap;
   let stencilUniformMap;
   let colorUniformMap;
+  let pickUniformMap;
 
   function buildRanges(primitive, mergeOpaque) {
     const offsets = primitive._pickOffsets;
     const schema = owner._batch.instances[0].attributes.color;
     const mergeAreas =
       mergeOpaque &&
+      !material &&
       schema.componentDatatype === ComponentDatatype.UNSIGNED_BYTE &&
       schema.normalize;
     const result = [];
@@ -230,10 +237,16 @@ function createSceneGISPlanarGroundCommands(owner, instanceIds, lastConflicts) {
       stencilUniformMap = {
         ...sourceUniformMap,
         u_sceneGISGroundAreaColor: () => false,
+        u_sceneGISGroundAreaPick: () => false,
       };
       colorUniformMap = {
         ...sourceUniformMap,
         u_sceneGISGroundAreaColor: () => true,
+        u_sceneGISGroundAreaPick: () => false,
+      };
+      pickUniformMap = {
+        ...colorUniformMap,
+        u_sceneGISGroundAreaPick: () => true,
       };
     }
     const batch = owner._batch !== undefined;
@@ -304,8 +317,8 @@ function createSceneGISPlanarGroundCommands(owner, instanceIds, lastConflicts) {
         color.owner = owner;
         color.pass = Pass.TERRAIN_CLASSIFICATION;
         color.renderState = pickRenderState;
-        color.uniformMap = colorUniformMap;
         color.cull = false;
+        color.uniformMap = pickUniformMap;
         color.pickOnly = false;
         color.pickId = primitive.allowPicking ? "v_pickColor" : undefined;
         pickColorCommands[i] = color;
