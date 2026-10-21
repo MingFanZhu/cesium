@@ -2,7 +2,9 @@
 
 ## Status
 
-- Latest standalone：[平面地平线高度雾合成](plans/2026-10-20-planar-horizon-fog-composition.md) — implementation verified；负责人视觉验收待定。
+- Latest standalone：[综合环境同源影像](plans/2026-10-21-integrated-imagery.md) — completed；双世界默认使用指定的 EPSG:3857 World Imagery，保留中性影像参数。
+  综合页 E2E、真实公网加载与画面检查通过；[技术自审](reviews/2026-10-21-integrated-imagery.md)。只改示例和测试，不改环境颜色或引擎。
+- Previous standalone：[平面地平线高度雾合成](plans/2026-10-20-planar-horizon-fog-composition.md) — implementation verified；负责人视觉验收待定。
   统一最终雾合成，使用吸收透射中点取样，修复透明边缘差异与水平光源跳变；
   5 项 focused GPU / lifecycle Specs、构建及连续视角验证通过。[技术自审](reviews/2026-10-20-planar-horizon-fog-composition.md)；按负责人要求形成本地提交。
 

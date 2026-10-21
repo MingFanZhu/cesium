@@ -18,8 +18,12 @@ HDR、tone mapper 和 exposure。初值及恢复值读取引擎，不采用分�
 平面空气透视距离倍率按契约固定为 1，控件显示但不可编辑。默认环境中的云、云影、体积光、泛光和光晕开关保持关闭，
 可在面板中自行开启；泛光/光晕还需要 HDR。原生 Animation/Timeline 控制播放、倒放和 seek，云时间编辑会重新锚定同一 Clock。
 “恢复环境默认值”保留相机、日期和图层；“回到南京视角”回到 118.7969°E、32.0603°N、2500 m。
-球面保留原生影像/地形目录，初始为本地 Natural Earth/椭球；在线选项依赖网络及服务授权，沿用 SDK 凭据配置。
-平面使用南京 EPSG:3857 坐标、本地底色地表和显式南京天文参考。新页不新增渲染实现。
+球面和平面默认使用同一 ArcGIS World Imagery EPSG:3857 影像，直接请求
+`https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`，
+256 像素、level 0–18，两侧图层亮度/对比度/饱和度/gamma 保持 1，色相 0、不透明度 1。
+球面保留原生影像/地形目录和初始椭球；离线可选择本地 Natural Earth。
+平面使用南京 EPSG:3857 坐标和显式南京天文参考，可关闭“显示 World Imagery”回到本地底色。
+在线数据依赖网络，失败会提示；其他服务沿用 SDK 凭据配置。新页不新增渲染实现或颜色补偿。
 
 分项示例默认完全本地：Globe 使用内置 Natural Earth 影像和椭球地表，Planar 使用本地米制
 底色地表；远近模型使用仓库已有 Box glTF。Planar 的南京天文参考显式配置，不从 CRS 推断。

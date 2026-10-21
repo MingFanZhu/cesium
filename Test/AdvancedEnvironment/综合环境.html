@@ -38,10 +38,12 @@
         white-space: pre-line;
         margin: 4px 0;
       }
-      #vectorError {
+      #vectorError,
+      #imageryError {
         color: #a00000;
       }
-      #vectorError:empty {
+      #vectorError:empty,
+      #imageryError:empty {
         display: none;
       }
       @media (max-width: 700px) {
@@ -95,6 +97,7 @@
       <p id="status" role="status">正在加载环境…</p>
       <p id="exposureStatus" role="status"></p>
       <p id="error" role="alert"></p>
+      <p id="imageryError" role="alert"></p>
       <p id="vectorStatus" role="status"></p>
       <p id="vectorError" role="alert"></p>
       <div id="controls"></div>

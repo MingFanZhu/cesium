@@ -9,6 +9,7 @@ for (const world of ["globe", "planar"]) {
     test.setTimeout(120000);
     const errors = [];
     const external = [];
+    const imageryRequests = [];
     page.on("pageerror", (error) => errors.push(error.message));
     page.on("console", (message) => {
       if (message.type() === "error") {
@@ -19,6 +20,18 @@ for (const world of ["globe", "planar"]) {
       const url = new URL(route.request().url());
       if (url.hostname === "localhost" || url.protocol === "data:") {
         return route.continue();
+      }
+      if (
+        url.hostname === "services.arcgisonline.com" &&
+        /^\/ArcGIS\/rest\/services\/World_Imagery\/MapServer\/tile\/\d+\/\d+\/\d+$/.test(
+          url.pathname,
+        )
+      ) {
+        imageryRequests.push(url.pathname);
+        return route.fulfill({
+          path: "Specs/Data/Images/Red256x256.png",
+          contentType: "image/png",
+        });
       }
       external.push(url.href);
       return route.abort();
@@ -92,7 +105,29 @@ for (const world of ["globe", "planar"]) {
         world === "globe"
           ? C.Cartographic.fromCartesian(viewer.camera.positionWC)
           : new C.WebMercatorProjection().unproject(viewer.camera.positionWC);
+      const imageryLayer = (
+        viewer.planarWorld?.imageryLayers ?? viewer.imageryLayers
+      ).get(0);
+      const provider = window.example.imageryProvider;
       return {
+        imagery: {
+          sameProvider: imageryLayer.imageryProvider === provider,
+          projection:
+            world === "planar"
+              ? provider.tilingScheme === viewer.planarWorld.tilingScheme
+              : provider.tilingScheme instanceof C.WebMercatorTilingScheme,
+          maximumLevel: provider.maximumLevel,
+          size: [provider.tileWidth, provider.tileHeight],
+          alpha: provider.hasAlphaChannel,
+          adjustments: [
+            imageryLayer.alpha,
+            imageryLayer.brightness,
+            imageryLayer.contrast,
+            imageryLayer.hue,
+            imageryLayer.saturation,
+            imageryLayer.gamma,
+          ],
+        },
         properties,
         controls,
         mismatches,
@@ -124,6 +159,16 @@ for (const world of ["globe", "planar"]) {
       };
     }, world);
     expect(initial.controls).toEqual(initial.properties);
+    expect(initial.imagery).toEqual({
+      sameProvider: true,
+      projection: true,
+      maximumLevel: 18,
+      size: [256, 256],
+      alpha: false,
+      adjustments: [1, 1, 1, 0, 1, 1],
+    });
+    expect(imageryRequests.length).toBeGreaterThan(0);
+    await expect(page.locator("#imageryError")).toBeEmpty();
     expect(initial.mismatches).toEqual([]);
     expect(initial.displayMatches).toBe(true);
     expect(initial.defaultOwner).toBe(true);
@@ -153,6 +198,13 @@ for (const world of ["globe", "planar"]) {
       expect(initial.reference[0]).toBeCloseTo(118.7969, 5);
       expect(initial.reference[1]).toBeCloseTo(32.0603, 5);
       expect(initial.imageryCount).toBe(0);
+      await page.getByLabel("显示 World Imagery", { exact: true }).uncheck();
+      expect(
+        await page.evaluate(
+          () => window.example.viewer.planarWorld.imageryLayers.get(0).show,
+        ),
+      ).toBe(false);
+      await page.getByLabel("显示 World Imagery", { exact: true }).check();
     }
     const folder = (name) =>
       page.getByRole("button", { name: new RegExp(`${name}$`) });
@@ -330,6 +382,8 @@ for (const world of ["globe", "planar"]) {
         stableTime: time === effects.cloudTime,
         tickListeners: clock.onTick.numberOfListeners,
         effectListeners: effects.errorEvent.numberOfListeners,
+        imageryListeners:
+          window.example.imageryProvider.errorEvent.numberOfListeners,
         gui: document.querySelectorAll(".lil-gui").length,
       };
     });
@@ -341,6 +395,7 @@ for (const world of ["globe", "planar"]) {
       stableTime: true,
       tickListeners: 0,
       effectListeners: 0,
+      imageryListeners: 0,
       gui: 0,
     });
     expect(external).toEqual([]);

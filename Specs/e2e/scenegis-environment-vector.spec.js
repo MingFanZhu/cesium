@@ -22,6 +22,17 @@ async function vectorRoutes(page) {
     if (url.hostname === "localhost" || url.protocol === "data:") {
       return route.continue();
     }
+    if (
+      url.hostname === "services.arcgisonline.com" &&
+      url.pathname.startsWith(
+        "/ArcGIS/rest/services/World_Imagery/MapServer/tile/",
+      )
+    ) {
+      return route.fulfill({
+        path: "Specs/Data/Images/Red256x256.png",
+        contentType: "image/png",
+      });
+    }
     if (url.hostname === "tiles.openfreemap.org") {
       if (url.pathname === "/planet") {
         observed.metadata++;

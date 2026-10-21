@@ -16,8 +16,19 @@ const origin = new C.WebMercatorProjection().project(
   C.Cartographic.fromDegrees(longitude, latitude),
 );
 const modeOptions = {};
+const imageryOptions = {
+  url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  maximumLevel: 18,
+  tileWidth: 256,
+  tileHeight: 256,
+  hasAlphaChannel: false,
+  credit:
+    "Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community",
+};
+let imageryProvider;
+let planarImageryLayer;
 if (planar) {
-  // Online MVT uses the standard single-root Web Mercator tile matrix.
+  // Raster and MVT share the standard single-root Web Mercator tile matrix.
   const halfWorld = Math.PI * 6378137;
   modeOptions.planarWorld = {
     crs: "EPSG:3857",
@@ -31,16 +42,29 @@ if (planar) {
   };
   modeOptions.baseLayerPicker = false;
 } else {
-  // Keep the native catalog, initially selecting its bundled offline assets.
+  // Retain the native catalog and its local fallback while selecting the same
+  // explicit raster service used by the planar comparison.
   const imagery = C.createDefaultImageryProviderViewModels();
   const terrain = C.createDefaultTerrainProviderViewModels();
+  imageryProvider = new C.UrlTemplateImageryProvider({
+    ...imageryOptions,
+    tilingScheme: new C.WebMercatorTilingScheme(),
+  });
+  const comparisonImagery = new C.ProviderViewModel({
+    name: "World Imagery（对照）",
+    category: "SceneGIS",
+    tooltip: "ArcGIS World Imagery，EPSG:3857；球面与平面共用影像源。",
+    iconUrl: C.buildModuleUrl(
+      "Widgets/Images/ImageryProviders/ArcGisMapServiceWorldImagery.png",
+    ),
+    creationFunction: () => imageryProvider,
+  });
+  imagery.unshift(comparisonImagery);
   Object.assign(modeOptions, {
     baseLayerPicker: true,
     imageryProviderViewModels: imagery,
     terrainProviderViewModels: terrain,
-    selectedImageryProviderViewModel: imagery.find((item) =>
-      item.name.startsWith("Natural Earth"),
-    ),
+    selectedImageryProviderViewModel: comparisonImagery,
     selectedTerrainProviderViewModel: terrain.find(
       (item) => item.name === "WGS84 Ellipsoid",
     ),
@@ -60,6 +84,20 @@ const viewer = new C.Viewer("map", {
   selectionIndicator: false,
 });
 const scene = viewer.scene;
+if (planar) {
+  imageryProvider = new C.SceneGISPlanarUrlTemplateImageryProvider({
+    ...imageryOptions,
+    tilingScheme: viewer.planarWorld.tilingScheme,
+  });
+  planarImageryLayer =
+    viewer.planarWorld.imageryLayers.addImageryProvider(imageryProvider);
+}
+const imageryError = document.getElementById("imageryError");
+const removeImageryError = imageryProvider.errorEvent.addEventListener(() => {
+  imageryError.textContent = planar
+    ? "World Imagery 请求失败，请检查网络；可关闭影像继续使用本地底色。"
+    : "World Imagery 请求失败，请检查网络；可在图层选择器切换本地 Natural Earth。";
+});
 const effects = scene.environmentEffects;
 const autoExposure = new C.SceneGISAutoExposure({ scene });
 const exposureFields = [
@@ -112,8 +150,8 @@ if (planar) {
   viewer.addController(environment);
 }
 document.getElementById("worldHelp").textContent = planar
-  ? "平面采用南京 Web Mercator 坐标和南京天文参考点，初始为本地底色地表。空气透视距离倍率按引擎契约固定为 1。"
-  : "右上角为原生影像与地形选择器。初始为本地 Natural Earth 和椭球；在线图层依赖网络及相应服务授权，Cesium ion 使用 SDK 的令牌配置。";
+  ? "平面采用南京 Web Mercator 坐标和南京天文参考点，默认加载 World Imagery（EPSG:3857），需联网；关闭影像可回到本地底色。空气透视距离倍率按引擎契约固定为 1。"
+  : "右上角为原生影像与地形选择器。初始为 World Imagery（EPSG:3857）和椭球，需联网；可切换本地 Natural Earth。Cesium ion 使用 SDK 的令牌配置。";
 
 function home() {
   const pitch = C.Math.toRadians(-12);
@@ -239,6 +277,9 @@ const actions = {
 gui.add(actions, "home").name("回到南京视角");
 gui.add(actions, "reset").name("恢复环境默认值");
 gui.add(effects, "enabled").name("高级环境总开关").listen();
+if (planarImageryLayer) {
+  gui.add(planarImageryLayer, "show").name("显示 World Imagery").listen();
+}
 const vectors = installVectorInspection(viewer, gui);
 for (const [title, ...fields] of groups) {
   const folder = gui.addFolder(title);
@@ -361,6 +402,7 @@ exposeExample(
     autoExposure,
     autoExposureDefaults,
     exposureState,
+    imageryProvider,
   },
   () => {
     removeTick();
@@ -368,6 +410,7 @@ exposeExample(
     removeError();
     removeRenderError();
     removeTerrainChanged?.();
+    removeImageryError();
     vectors.destroy();
     if (environment) {
       viewer.removeController(environment);
