@@ -1,23 +1,34 @@
 import {
   Cartesian3,
   Color,
+  ClearCommand,
   DirectionalLight,
+  DrawCommand,
   Ellipsoid,
   Globe,
   JulianDate,
   Matrix4,
+  OrthographicFrustum,
   PolygonHierarchy,
+  PrimitiveType,
   SceneGISRiverSurface,
   SceneGISWindWaves,
   SceneGISPlanarWorld,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneTransforms,
+  ShaderProgram,
+  ShaderSource,
   Transforms,
+  VertexArray,
 } from "../../../index.js";
 import RiverGeometry from "../../../Source/SceneGIS/Scene/_private/_SceneGISRiverGeometry.js";
 import Mesh from "../../../Source/SceneGIS/Scene/_private/_SceneGISEllipsoidWaterMesh.js";
+import riverFlow from "../../../Source/Shaders/SceneGIS/Water/SceneGISRiverFlow.js";
+import waterVertex from "../../../Source/Shaders/SceneGIS/Water/SceneGISWaterVS.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
+import createContext from "../../../../../Specs/createContext.js";
+import createFrameState from "../../../../../Specs/createFrameState.js";
 import createScene from "../../../../../Specs/createScene.js";
 
 describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
@@ -300,11 +311,127 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
     scene.camera.frustum.near = 0.1;
     scene.camera.frustum.far = 500;
   }
+  it("displaces actual vertices downstream, freezes zero current and filters unresolved waves", function () {
+    const context = createContext();
+    const frame = createFrameState(context);
+    frame.camera.position = new Cartesian3(0, 0, 100);
+    frame.camera.direction = new Cartesian3(0, 0, -1);
+    frame.camera.up = Cartesian3.clone(Cartesian3.UNIT_Y);
+    frame.camera.right = Cartesian3.clone(Cartesian3.UNIT_X);
+    frame.camera.frustum = new OrthographicFrustum({
+      width: 0.01,
+      aspectRatio: 1,
+      near: 0.1,
+      far: 1000,
+    });
+    context.uniformState.update(frame);
+    const program = ShaderProgram.fromCache({
+      context,
+      vertexShaderSource: new ShaderSource({
+        defines: [
+          "SCENEGIS_CURVED_WATER",
+          "SCENEGIS_RIVER_WATER",
+          "SCENEGIS_RIVER_VERTEX",
+        ],
+        sources: [
+          riverFlow,
+          ShaderSource.replaceMain(waterVertex, "waterMain"),
+          "void main() { waterMain(); gl_Position = vec4(0.0, 0.0, 0.0, 1.0); gl_PointSize = 1.0; }",
+        ],
+      }),
+      fragmentShaderSource:
+        "in vec3 v_positionEC; void main() { out_FragColor = vec4((v_positionEC.z + 100.0) * 0.5 + 0.5, 0.0, 0.0, 1.0); }",
+      attributeLocations: Mesh.attributeLocations,
+    });
+    let seconds = 0,
+      amplitude = 1,
+      speedScale = 1,
+      shore = 1;
+    function height(station) {
+      const va = new VertexArray({
+        context,
+        attributes: [
+          { index: 0, value: [0, 0, 0] },
+          { index: 1, value: [shore, 0.25] },
+          { index: 2, value: [0, 0, 1] },
+          { index: 3, value: [1, 0, 0] },
+          { index: 4, value: [0, 0] },
+          { index: 5, value: [station, 7, 2] },
+        ],
+      });
+      try {
+        ClearCommand.ALL.execute(context);
+        new DrawCommand({
+          vertexArray: va,
+          shaderProgram: program,
+          count: 1,
+          primitiveType: PrimitiveType.POINTS,
+          modelMatrix: Matrix4.IDENTITY,
+          uniformMap: {
+            u_waterOffset: () => ({ x: 0, y: 0 }),
+            u_riverTime: () => seconds,
+            u_currentRippleAmplitude: () => amplitude,
+            u_currentRippleLength: () => 12,
+            u_currentSpeedScale: () => speedScale,
+          },
+        }).execute(context);
+        return context.readPixels()[0];
+      } finally {
+        va.destroy();
+      }
+    }
+    try {
+      const before = Array.from({ length: 81 }, (_, i) => height(i * 0.5));
+      expect(Math.max(...before) - Math.min(...before)).toBeGreaterThan(50);
+      seconds = 1;
+      const after = Array.from({ length: 81 }, (_, i) => height(i * 0.5));
+      // Measure the direction and distance of the GPU height profile, not a CPU copy of the shader.
+      const errors = Array.from({ length: 13 }, (_, i) => {
+        const shift = i - 6;
+        return {
+          shift,
+          error: before
+            .slice(6, -6)
+            .reduce((sum, v, j) => sum + (v - after[j + 6 + shift]) ** 2, 0),
+        };
+      });
+      errors.sort((a, b) => a.error - b.error);
+      expect(errors[0].shift).toBe(4); // Two meters downstream in one second.
+      speedScale = 0;
+      const frozen = height(3);
+      seconds = 13;
+      expect(height(3)).toBe(frozen);
+      amplitude = 0;
+      expect(height(3)).toEqualEpsilon(128, 1);
+      amplitude = 1;
+      shore = 0;
+      expect(height(3)).toEqualEpsilon(128, 1);
+      shore = 1;
+      frame.camera.frustum.width = 100;
+      context.uniformState.update(frame);
+      expect(height(3)).toEqualEpsilon(128, 1);
+    } finally {
+      program.destroy();
+      context.destroyForSpecs();
+    }
+  });
   [true, false].forEach(function (planar) {
     it(`renders, animates, picks and releases river resources in ${planar ? "Planar" : "Globe"}`, function () {
       setup(planar);
       scene.renderForSpecs(time);
       expect(river.ready).toBeTrue();
+      const bound = river.getBoundingSphere();
+      river.currentRippleAmplitude += 0.5;
+      expect(river.getBoundingSphere().radius - bound.radius).toEqualEpsilon(
+        0.5,
+        1e-9,
+      );
+      scene.renderForSpecs(time);
+      for (const node of river._mesh.selected) {
+        expect(
+          node.command.boundingVolume.radius - node.bounds.radius,
+        ).toEqualEpsilon(river.currentRippleAmplitude, 1e-9);
+      }
       const screen = SceneTransforms.worldToWindowCoordinates(
         scene,
         point(10, 0, 0),
@@ -325,11 +452,11 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
       scene.renderForSpecs(time);
       expect(scene.context.readPixels()).toEqual(before);
       scene.renderForSpecs(
-        JulianDate.addSeconds(time, 7.9999, new JulianDate()),
+        JulianDate.addSeconds(time, 31.9999, new JulianDate()),
       );
       const phaseEnd = scene.context.readPixels();
       scene.renderForSpecs(
-        JulianDate.addSeconds(time, 8.0001, new JulianDate()),
+        JulianDate.addSeconds(time, 32.0001, new JulianDate()),
       );
       const phaseStart = scene.context.readPixels();
       expect(

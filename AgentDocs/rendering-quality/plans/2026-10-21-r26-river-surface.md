@@ -1,6 +1,6 @@
 # Phase R26: Directed river surfaces
 
-- Type: phase; status: implementation complete, owner visual gate pending; created: 2026-10-21
+- Type: phase; status: visual correction implemented, owner gate pending; created: 2026-10-21
 - Parent: [rendering quality](2026-09-18-rendering-quality-extension.md)
 - Owner/reviewer: current task, implementation and architecture self-review
 - Architecture review: confirmed from R8/R22/R25 source and water scheduling
@@ -76,3 +76,34 @@ findings, their fixes, CPU/GPU costs and inherited synchronous first-visit limit
 Next owner action: inspect `Test/Rendering/河流水面.html` in Globe and Planar, especially
 bends, changing flow speed, zero current, water-level adjustment and optional wind.
 The technical checkpoint does not claim visual acceptance. No next phase is active.
+
+## Owner feedback: white streaks and directed waves
+
+The owner rejected the broad regular white stripes and weak regular normal ripples.
+At the reported near-water Globe view, setting currentFoamIntensity from 0.2 to zero
+removes the broad white stripes; the remaining narrow highlights are water lighting.
+The current river branch only perturbs fragment normals, so current waves have no
+geometric height despite the existing mesh LOD. Reopen R26 from checkpoint 0adb7fe888.
+
+Correction: disable artistic current foam by default. Share a bounded, multiband
+river-coordinate height field between vertex displacement and fragment normals;
+positive station advection follows bends and authored speeds. Retain the independent
+optional FFT wind source and two-phase advection for bounded distortion with varying
+speed. Use continuous position-dependent mesh/pixel filtering, shore fade, and include
+the maximum authored current amplitude in culling, draw and public bounds. No extra
+render pass, texture, simulation state, mesh rebuild or upstream integration is needed.
+Expose amplitude and wavelength in the example, with a near-water view for acceptance.
+
+Validation targets actual GPU displacement, downstream phase motion, zero amplitude
+and speed, clock continuity/reversal, LOD edges, both-world near/low/high views, optional
+FFT and resource reuse. Measure the extra warm CPU/GPU cost against zero amplitude;
+retain the existing synchronous cold-build finding. Update ADR/API semantics and rerun
+focused Specs, release/type checks and technical review before the visual handoff.
+
+Correction implemented: shared four-band vertex/normal height field, 32-second smooth
+phase blending, continuous filtering, displacement-aware bounds, opt-in artistic foam,
+and example amplitude/wavelength controls. Nine feature Specs pass in development and
+release, including measured downstream GPU vertex motion; both-world E2E passes.
+Release/types/tsc pass. The [review](../reviews/2026-10-21-r26-river-surface.md) records
+the corrected findings and a focused alternating GPU/CPU measurement at the owner's
+original camera. Owner visual acceptance and the inherited cold-build limit remain open.

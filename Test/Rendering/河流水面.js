@@ -108,12 +108,13 @@ const profile = xs.map((x, i) => ({
   speed: 0.6 + (0.8 * (i % 4)) / 3,
 }));
 const settings = {
-  view: "弯道鸟瞰",
+  view: "水面近景",
   wind: false,
   level: 0,
   currentSpeedScale: 1,
-  currentRippleAmplitude: 0.035,
-  currentFoamIntensity: 0.2,
+  currentRippleAmplitude: 0.3,
+  currentRippleLength: 14,
+  currentFoamIntensity: 0,
   show: true,
   maximumTileCount: 256,
   showProfile: false,
@@ -154,6 +155,7 @@ function rebuild() {
       id: "沿程河流",
       currentSpeedScale: settings.currentSpeedScale,
       currentRippleAmplitude: settings.currentRippleAmplitude,
+      currentRippleLength: settings.currentRippleLength,
       currentFoamIntensity: settings.currentFoamIntensity,
       maximumTileCount: settings.maximumTileCount,
       show: settings.show,
@@ -311,8 +313,9 @@ gui
   .onFinishChange(rebuild);
 [
   ["currentSpeedScale", "河流流速倍率", 0, 3, 0.05],
-  ["currentRippleAmplitude", "流动波纹幅度 m", 0, 0.15, 0.005],
-  ["currentFoamIntensity", "流动水纹", 0, 1, 0.02],
+  ["currentRippleAmplitude", "顺流浪幅上限 m", 0, 0.8, 0.01],
+  ["currentRippleLength", "顺流主波长 m", 4, 32, 0.5],
+  ["currentFoamIntensity", "艺术泡沫（可选）", 0, 1, 0.02],
   ["maximumTileCount", "网格块上限", 32, 512, 16],
 ].forEach(([name, label, lo, hi, step]) => {
   gui

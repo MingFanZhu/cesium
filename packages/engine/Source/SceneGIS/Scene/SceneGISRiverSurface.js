@@ -53,9 +53,9 @@ function validate(river) {
  * @param {number} [options.maximumScreenSpaceError=2] Curvature error target in pixels.
  * @param {number} [options.maximumTileCount=512] Quadtree leaf budget, integer in [4, 4096].
  * @param {number} [options.currentSpeedScale=1] Nonnegative multiplier of authored current speeds.
- * @param {number} [options.currentRippleAmplitude=0.025] Normal-only current ripple amplitude in meters.
- * @param {number} [options.currentRippleLength=3] Current pattern scale in meters, at least 0.01.
- * @param {number} [options.currentFoamIntensity=0.15] Advected current streak strength in [0, 1].
+ * @param {number} [options.currentRippleAmplitude=0.12] Maximum current-wave vertical displacement in meters. Also controls wave normals.
+ * @param {number} [options.currentRippleLength=12] Dominant current-wave length in meters, at least 0.01.
+ * @param {number} [options.currentFoamIntensity=0] Optional artistic current streak strength in [0, 1]; not simulated breaking foam.
  * @param {boolean} [options.show=true] Whether the river is visible.
  * @param {*} [options.id] Pick identifier.
  * @param {Color} [options.waterColor] Scene-linear deep-water scattering color; defaults to (0.015, 0.12, 0.14).
@@ -95,20 +95,20 @@ function SceneGISRiverSurface(options = {}) {
    */
   this.currentSpeedScale = options.currentSpeedScale ?? 1;
   /**
-   * Normal-only current ripple amplitude in meters.
+   * Maximum current-wave vertical displacement in meters. Also controls wave normals.
    * @type {number}
    */
-  this.currentRippleAmplitude = options.currentRippleAmplitude ?? 0.025;
+  this.currentRippleAmplitude = options.currentRippleAmplitude ?? 0.12;
   /**
-   * Current pattern scale in meters, at least 0.01.
+   * Dominant current-wave length in meters, at least 0.01.
    * @type {number}
    */
-  this.currentRippleLength = options.currentRippleLength ?? 3;
+  this.currentRippleLength = options.currentRippleLength ?? 12;
   /**
-   * Advected current streak strength in [0, 1].
+   * Optional artistic current streak strength in [0, 1]; not simulated breaking foam.
    * @type {number}
    */
-  this.currentFoamIntensity = options.currentFoamIntensity ?? 0.15;
+  this.currentFoamIntensity = options.currentFoamIntensity ?? 0;
   validate(this);
   const ellipsoid = world instanceof Globe ? world.ellipsoid : undefined;
   const domain = new RiverGeometry(options, ellipsoid);
@@ -380,13 +380,14 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
 });
 
 /**
- * Gets a conservative World-space bound of the complete river and optional wind displacement.
+ * Gets a conservative World-space bound including current and optional wind displacement.
  * @param {BoundingSphere} [result] Object receiving the bound.
  * @returns {BoundingSphere} The bound.
  */
 SceneGISRiverSurface.prototype.getBoundingSphere = function (result) {
   result = BoundingSphere.clone(this._mesh.root.bounds, result);
   result.radius += this.windWaves?._maximumDisplacement ?? 0;
+  result.radius += this.currentRippleAmplitude;
   return result;
 };
 

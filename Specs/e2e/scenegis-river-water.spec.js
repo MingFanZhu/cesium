@@ -79,8 +79,18 @@ for (const world of ["planar", "globe"]) {
       const gl = s.context._gl,
         ext = gl.getExtension("EXT_disjoint_timer_query_webgl2");
       if (ext) {
-        for (const show of [true, false]) {
-          e.river.show = show;
+        for (const condition of [
+          "current-flat",
+          "current-waves",
+          "current-and-wind",
+          "hidden",
+        ]) {
+          e.settings.wind = condition === "current-and-wind";
+          e.rebuild();
+          e.river.currentSpeedScale = 1;
+          e.river.currentRippleAmplitude =
+            condition === "current-flat" ? 0 : 0.3;
+          e.river.show = condition !== "hidden";
           render();
           const times = [];
           for (let i = 0; i < 5; ++i) {
@@ -104,7 +114,7 @@ for (const world of ["planar", "globe"]) {
           }
           times.sort((a, b) => a - b);
           gpu.push({
-            show,
+            condition,
             medianMilliseconds: times[Math.floor(times.length / 2)],
           });
         }

@@ -422,7 +422,8 @@ SceneGISEllipsoidWaterMesh.prototype.update = function (surface, frame) {
   }
   const selected = this.select(
     frame,
-    surface.windWaves?._maximumDisplacement ?? 0,
+    (surface.windWaves?._maximumDisplacement ?? 0) +
+      (surface._river?.currentRippleAmplitude ?? 0),
     surface.maximumScreenSpaceError,
     surface.maximumTileCount,
   );

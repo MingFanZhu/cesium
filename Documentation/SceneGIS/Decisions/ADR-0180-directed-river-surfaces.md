@@ -33,11 +33,22 @@ while pick IDs report the public RiverSurface. Mean-surface slope affects the ta
 frame and contact/refraction/reflection tests. Planar uses direct XYZ and a flat-world
 curvature term; Globe follows its actual ellipsoid with local optical approximation.
 
-Use bounded two-phase procedural ripple/foam advection in river coordinates, driven by
-authored local speed and simulation time. This avoids indefinitely stretching a pattern
-under varying velocity. Filter the two phases independently before blending so an
-invisible wrapping phase cannot change the active pattern. Current phase is a direct
-function of Scene time (8-second cycle); current parameter changes reevaluate that phase. Optional existing SceneGISWindWaves adds independent wind waves;
+Use a shared, bounded multiband height field for vertex displacement and fragment normals
+in river coordinates, driven by authored local speed and simulation time. Non-harmonic
+bands and transverse phase modulation break up uniform parallel crests. The amplitude
+is an upper bound, included in public, draw and selection bounds; shore fade pins banks
+and holes to their authored mean height. Continuous per-position mesh/pixel filtering
+retains shared LOD edge heights and suppresses unresolved geometric waves. Fragment
+normals retain finer resolved detail, as in the existing FFT water path.
+
+Two staggered advections with smooth blending bound stretching under varying velocity.
+Filter the phases independently so an invisible wrapping phase cannot change the active
+pattern. Current phase is a direct function of Scene time (32-second cycle); parameter
+changes reevaluate that phase. This is a visual advection model, not a wave dispersion
+or hydraulic solver. Artistic current streaks are opt-in (default zero); contact and
+FFT breaking foam remain separate. Default maximum amplitude is 0.12 m and dominant
+wavelength is 12 m, replacing the initial normal-only ripples after owner visual feedback.
+Optional existing SceneGISWindWaves adds independent wind waves;
 current controls must never overwrite wind direction or wind speed. Caller owns the FFT;
 the river owns its composed surface/mesh. Scene retains ownership of shared captures.
 

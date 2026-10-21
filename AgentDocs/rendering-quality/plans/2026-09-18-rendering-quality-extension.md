@@ -34,7 +34,9 @@ excluded. [R25 plan](2026-10-21-r25-curved-water.md), ADR-0179; no parallel phas
 Implementation and technical review are complete; owner visual acceptance remains pending.
 
 After the independent R25 checkpoint, the owner authorizes [R26 directed river surfaces](2026-10-21-r26-river-surface.md).
-R26 implementation and technical qualification are complete; its owner visual gate is
+R26's first implementation is checkpointed at `0adb7fe888`; owner feedback reopens its
+white-streak and directed-wave visuals. The same phase now adds actual current-wave
+displacement and disables default artistic streaks. Its owner visual gate is
 pending. It adds authored channel height/current semantics on shared water rendering.
 R25 visual follow-up remains recorded. Branching, waterfalls and hydraulic simulation
 stay outside this extension phase. No next implementation phase is active.

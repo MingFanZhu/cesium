@@ -8,7 +8,7 @@
 | Status                 | `active`                                                                    |
 | Planning model         | `extension`                                                                 |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                  |
-| Current phase          | R26 implemented; owner visual gate pending                                  |
+| Current phase          | R26 directed-wave correction; owner visual gate pending                     |
 | Active phase plan      | [R26](plans/2026-10-21-r26-river-surface.md)                                |
 | Active standalone plan | None; [completed night emission](plans/2026-10-12-street-night-emission.md) |
 | Architecture contact   | Current task                                                                |
@@ -34,6 +34,12 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-21: owner feedback on the R26 checkpoint rejects broad white streaks and
+  normal-only ripples. The same phase now shares actual vertex/normal waves along the
+  river chart and disables artistic foam by default. Nine feature Specs, 29 water
+  regressions, both-world E2E and release/types pass. Runtime evidence and remaining
+  owner visual/cold-build gates are recorded in the R26 review below.
 
 - 2026-10-21: after R25 checkpoint `d2ef77d1cd`, the owner authorizes a distinct river
   class for authored along-channel heights and changing flow. [R26](plans/2026-10-21-r26-river-surface.md)

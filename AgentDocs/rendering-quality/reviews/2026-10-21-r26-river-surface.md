@@ -19,7 +19,8 @@ Picking reports RiverSurface. FFT is optional and caller-owned, independent from
 The only preparation seam is private options on the SceneGIS-owned WaterSurface composer.
 Default local and existing ellipsoid WaterSurface contracts remain unchanged. River
 mean-surface normals and local optical tests account for authored slope; Planar has no
-planet curvature term. Current ripples affect normals, not geometry or a hydraulic state.
+planet curvature term. After owner feedback, current waves affect geometry and normals
+through one bounded height field; they do not represent a hydraulic state.
 No new framebuffer, flow texture, full-screen pass, Worker, external asset or global registry.
 
 All changed files are SceneGIS-owned. **Upstream-owned files changed: none.** SGP-0017
@@ -28,7 +29,7 @@ and no generated status. Public declarations contain the new constructor, readon
 statistics and borrowed wind, numeric current controls and getBoundingSphere; private
 chart/domain classes do not leak into generated declarations.
 
-## Verification
+## Initial checkpoint verification
 
 - Eight feature Specs pass in development and release with WebGL validation: input and
   topology validation; concavity/hole clipping without mask-height contamination;
@@ -49,7 +50,7 @@ chart/domain classes do not leak into generated declarations.
   562 unchanged files with formatting issues; all modified documents pass scoped formatting.
   Unrelated existing formatting warnings are left intact.
 
-## Construction and runtime evidence
+## Initial checkpoint construction and runtime evidence
 
 Windows, RTX 3060 Ti / ANGLE D3D11, Playwright Chromium 151.0.7922.34, 1185×800,
 HDR with MSAA 1 / FXAA, physical sky and water SSR; no height fog/clouds. The deterministic
@@ -92,6 +93,51 @@ isolated FFT cost or a sustained frame-rate guarantee. Product code does no GPU 
    acceptability; reopening requires an explicitly designed bounded build scheduler or
    Worker path, not hidden fallback water or settling frames. Owner/next step: project
    owner visual gate in the linked phase plan; execution role follows concrete feedback.
+4. **P2, fixed — broad white current streaks:** at the owner's reported near-water Globe
+   view, disabling currentFoamIntensity removes the broad stripes. They were artistic
+   foam, not wave geometry or obligatory lighting. Default intensity is now zero and
+   the example labels this opt-in control explicitly. Contact and optional FFT foam
+   retain their own semantics. Owner visual acceptance of the replacement is pending.
+5. **P2, fixed — current waves had no displacement:** vertex and fragment stages now
+   share four non-harmonic, modulated river-coordinate bands. Smooth staggered phases
+   wrap every 32 seconds, retain authored downstream advection and bound distortion.
+   Height weights sum to at most one. Public, selection and command bounds include
+   currentRippleAmplitude; near-bank fade and continuous LOD/pixel filtering remain.
+   The GPU test reads the actual production vertex output: a 2 m/s profile shifts
+   2 m downstream in one second; zero speed freezes, zero amplitude and shoreline fade
+   remove displacement, and unresolved distant waves converge to the mean surface.
+
+## Visual correction verification and cost
+
+Nine RiverSurface Specs pass in development and release with strict WebGL validation,
+including actual vertex motion, runtime bounds in both Worlds, clock seek-back and
+32-second wrap continuity. Both-world browser E2E passes near/low/high views, the
+19-sample camera sweep, picking, optional FFT and teardown. In-app inspection restores
+the owner's original Globe camera after reloading the new implementation. Release,
+generated declarations and TypeScript checks pass; existing upstream JSDoc warnings
+remain. No upstream-owned file or SGP changed.
+The 29 shared-water regressions pass again in release with WebGL validation (17 local
+WaterSurface, 7 ellipsoid water, 5 FFT). Changed-source lint, patch audit and full
+AgentDocs markdownlint pass. Full AgentDocs formatting still reports the same 562
+unchanged files; all files touched by this correction pass scoped formatting.
+
+The revised example uses 0.3 m maximum amplitude, 14 m dominant wavelength and no
+artistic foam; engine defaults are 0.12 m / 12 m / zero foam. Actual multiband heights
+are below the configured upper bound. Defaults apply only to RiverSurface.
+
+At the owner's original near-water Globe camera, RTX 3060 Ti / ANGLE D3D11, 1001×826,
+physical sky, SSR, no FFT: alternate zero amplitude / 0.3 m amplitude for 20 frames,
+discard the first four and retain eight valid GPU samples per condition. Full-frame
+GPU medians are 5.88 / 6.64 ms; CPU medians 1.95 / 2.20 ms. The moving-wave condition
+selects 19 tiles, 7759 triangles, about 3.04 MiB cached meshes, zero geometry builds.
+Both conditions execute the same shader; the difference includes coverage and SSR ray
+changes, not an isolated instruction-cost measurement. No new texture/pass or per-frame
+mesh update is introduced. Original cold-build limitations remain open; E2E starts
+in the detailed near view now, so subsequent near-view timings are cache hits, not
+evidence that first-build cost was fixed. Current-only near-view warm CPU medians are
+4.6 ms Planar / 8.9 ms Globe in the browser run; background build activity makes those
+values indicative only. The isolated in-app alternating sample above is the runtime
+comparison used for this correction.
 
 ## Remaining gate
 

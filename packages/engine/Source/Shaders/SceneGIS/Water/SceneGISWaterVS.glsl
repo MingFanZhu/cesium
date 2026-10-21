@@ -40,7 +40,7 @@ void main() {
     #if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_CURVED_WATER)
     vec3 undisplacedEC = (czm_modelView * vec4(position, 1.0)).xyz;
     #endif
-    #ifdef SCENEGIS_WIND_WAVES
+    #if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_RIVER_WATER)
     float eyeDepth = abs(undisplacedEC.z);
     float pixelSpacing = 2.0 * (czm_projection[3][3] == 0.0 ? eyeDepth : 1.0) /
         (czm_viewport.w * abs(czm_projection[1][1]));
@@ -53,6 +53,8 @@ void main() {
     float meshSpacing = waveData.y * max(1.0, length(undisplacedEC) * u_waveLodScale);
     #endif
     float spacing = max(meshSpacing, pixelSpacing);
+    #endif
+    #ifdef SCENEGIS_WIND_WAVES
     vec3 displacement = (sceneGISWaveDisplacement(u_displacement0, u_wavePeriod, spacing) +
         sceneGISWaveDisplacement(u_displacement1, u_wavePeriod * 4.0, spacing)) * waveData.x;
     #ifdef SCENEGIS_CURVED_WATER
@@ -71,6 +73,7 @@ void main() {
     v_waterEastEC = czm_normal * waterEast;
     #endif
     #ifdef SCENEGIS_RIVER_WATER
+    local += waterNormal * (sceneGISRiverHeight(riverData, spacing) * waveData.x);
     v_riverData = riverData;
     #endif
     vec4 p = czm_modelView * vec4(local, 1.0);

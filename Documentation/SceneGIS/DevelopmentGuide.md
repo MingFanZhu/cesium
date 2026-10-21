@@ -1075,13 +1075,16 @@ Globe 使用区域 chart，宽度按控制点局部度量换算，沿程距离�
 远离 chart 中心的形状和材质仍有投影畸变，不是全球连续流场。
 
 `currentSpeedScale`、`currentRippleAmplitude`、`currentRippleLength` 和
-`currentFoamIntensity` 为运行时控制。纹理平流和法线波纹表达流动外观；双相位周期为 8 秒，
-不累计随时间增长的变形。Scene time 可暂停、回退；变更流速参数会重新求值当前相位。
+`currentFoamIntensity` 为运行时控制。顺流波浪同时改变顶点高度与法线，沿河道坐标传播；
+`currentRippleAmplitude` 是最大位移上限（默认 0.12 m），`currentRippleLength` 是主波长
+（默认 12 m），近岸衰减，远处按网格与像素尺度过滤。多频率叠加的实际浪高通常小于上限。
+双相位周期为 32 秒，不累计随时间增长的变形。Scene time 可暂停、回退；变更流速参数会重新求值当前相位。
+`currentFoamIntensity` 是艺术性白色流纹，默认 0，不代表物理破浪；与接触泡沫分开。
 可选 `windWaves` 另行产生 FFT 风浪，不随河流流速改变；关闭水流仍可保留风浪。
 共有的水色、吸收、粗糙度、倒影、接触泡沫、显隐和 id 均可修改。
 
 几何输入在构造时复制，不提供原位编辑；替换河流后再销毁不再使用的 caller-owned FFT。
-拾取返回 `{ primitive: river, id }`，`getBoundingSphere()` 返回 World 空间保守包围球，
+拾取返回 `{ primitive: river, id }`，`getBoundingSphere()` 返回包含水流和风浪位移的 World 空间保守包围球，
 `statistics` 沿用水面 LOD/缓存指标。首次到访高精度区域仍可能同步构建较多网格。
 
 人工入口 `Test/Rendering/河流水面.html?world=globe` / `world=planar`，使用本地示意河道和河床，

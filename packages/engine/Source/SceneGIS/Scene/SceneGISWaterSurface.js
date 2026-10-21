@@ -358,8 +358,8 @@ function SceneGISWaterSurface(options = {}) {
 
 function waterVertex(surface) {
   return new ShaderSource({
-    defines: waterDefines(surface),
-    sources: [vertex],
+    defines: [...waterDefines(surface), "SCENEGIS_RIVER_VERTEX"],
+    sources: [riverFlow, vertex],
   });
 }
 function waterDefines(surface) {
@@ -545,7 +545,7 @@ function createResources(surface, frameState) {
       u_waveResolution: () => surface._windWaves.resolution,
       u_waveLodScale: () => surface._mesh.lodScale,
       u_waterCurvatureRadius: () => surface._gridMesh.radius,
-      u_riverTime: () => surface._time % 8,
+      u_riverTime: () => surface._time % 32,
       u_currentSpeedScale: () => surface._river.currentSpeedScale,
       u_currentRippleLength: () => surface._river.currentRippleLength,
       u_currentRippleAmplitude: () => surface._river.currentRippleAmplitude,
