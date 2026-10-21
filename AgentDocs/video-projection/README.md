@@ -10,7 +10,7 @@
 - Active phase plan: none; latest [P3](plans/2026-10-21-p3-qualification.md)
 - Architecture / execution: current task; no independent agent
 - Updated: 2026-10-21
-- Branch: feature/video-projection
+- Integrated branch: scenegis/develop; source branch: feature/video-projection
 
 ## Engineering links
 
@@ -34,9 +34,10 @@ visual acceptance on 2026-10-21.
 [preparation](reviews/2026-10-21-preparation.md) retain phase history.
 [Reuse discussion](discussions/2026-10-21-observer-reuse.md) is resolved by ADR-0177.
 
-No open blocking review or remaining phase gate. The owner requested committing
-acceptance and switching back to scenegis/develop. Feature commits remain on
-feature/video-projection; SDK integration or merge requires a separate instruction.
+No open blocking review or remaining phase gate. On 2026-10-21 the owner requested
+merging Viewshed and VideoProjection into scenegis/develop. Both branches were
+fast-forwarded into develop through 613f45c782, with no conflicts or runtime changes.
+SDK integration remains separate work; feature branches are retained.
 Known limits: finite depth / LOD precision, SDR display overlay including possible
 transparent foreground coverage, browser CORS / decoding, per-instance depth and
 texture costs. Full AgentDocs formatting has unrelated historical warnings.

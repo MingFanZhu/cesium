@@ -23,7 +23,7 @@
 - Shader: `packages/engine/Source/Shaders/SceneGIS/Viewshed/`
 - Test: `Test/可视域分析.html`、`Specs/e2e/scenegis-viewshed.spec.js`
 - Public guide: [Viewshed](../../Documentation/SceneGIS/Viewshed.md)
-- Branch: `feature/viewshed`
+- Integrated branch: `scenegis/develop`; source branch: `feature/viewshed`
 - ADR: [0176](../../Documentation/SceneGIS/Decisions/ADR-0176-observer-viewshed.md)
 - SGP: SGP-0065（V1 无上游修改）
 
@@ -40,3 +40,8 @@ V3 checkpoint `62cc7be37e` 已完成。观察范围辅助线 standalone 已通�
 见[最新 review](reviews/2026-10-21-frustum-guide.md)：14 项 Specs、2 项双世界 E2E、
 完整构建与类型检查通过，无上游接点改动。示例默认开启，API 默认关闭，
 可独立切换。负责人已确认亮黄色辅助线并要求提交；SDK 集成待后续安排。
+
+2026-10-21：按负责人要求，`feature/viewshed` 与完整包含它的
+`feature/video-projection` 已快进合入 `scenegis/develop`，集成到 `613f45c782`。
+无冲突或运行时代码变更，复用已完成的技术验证。视频投射提炼的共享 observer 通道
+也已纳入，见 [Video Projection](../video-projection/README.md)。功能分支保留。
