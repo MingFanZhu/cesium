@@ -752,6 +752,12 @@ function prepareGroups(renderer, ranges) {
         const key = groupKey(info, edl);
         renderer._hasFeatureStyle ||= key.includes("HAS_SELECTED_FEATURE_ID");
         let group = groups.get(key);
+        // Material capture resolves one group per owner/lighting key. Primitive
+        // material uniforms differ, but must not invalidate a group already
+        // selected this frame. Recheck its representative binding next frame.
+        if (group?.seen) {
+          continue;
+        }
         if (
           group &&
           (group.extensionKey !== renderer._extensionLayout.key ||
@@ -770,9 +776,6 @@ function prepareGroups(renderer, ranges) {
             edl,
           );
           groups.set(key, group);
-        }
-        if (group.seen) {
-          continue;
         }
         group.seen = true;
         group.id = renderer._groups.length + 1;

@@ -1,6 +1,8 @@
 # Reviews
 
-- [R28 directional environment occlusion](2026-10-22-r28-directional-occlusion.md): technical review complete; owner visual gate and end-to-end performance limitation remain explicit.
+- [R29 directional occlusion cost](2026-10-22-r29-directional-occlusion-cost.md): removes reproduced duplicate lighting groups; preserves pictures and records remaining end-to-end cost.
+
+- [R28 directional environment occlusion](2026-10-22-r28-directional-occlusion.md): owner visually accepted; historical end-to-end performance limitation continues in R29.
 
 - [Directional environment occlusion assessment](2026-10-22-directional-occlusion-assessment.md): `completed`; GTSO first recommendation, full diffuse dependencies and implementation gates remain explicit.
 

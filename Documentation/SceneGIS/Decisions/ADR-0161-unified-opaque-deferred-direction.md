@@ -638,3 +638,19 @@ the material shader. SGP-0013 invalidates the native shadow-receive variant on t
 layout change. Preserve terrain self-shadowing, filter settings and resource budget.
 The current owner defers explicit local reflection probes and transparent-object
 water SSR reflections; neither is claimed as qualified by P4g.
+
+## Model lighting group reuse
+
+R29 selects a model/lighting-key group once per frame. A later primitive with a
+different native material uniformMap must not invalidate that selected group:
+per-primitive material inputs are already captured in the G-buffer, while the
+lighting pipeline generates model-level uniforms. Material capture resolves the
+same selected group ID for every matching primitive. This removes unused
+full-screen lighting commands and repeated shader construction/cache queries.
+
+At the next frame, retain invalidation for a changed representative uniformMap,
+extension layout, EDL and lighting defines. In particular, preserve the paired
+native IBL shader/uniform generation needed when asynchronous environment data
+becomes ready. Do not freeze live Model lighting values or merge distinct models.
+No upstream seam or shader algorithm changes in this amendment. See the
+[R29 review](../../../AgentDocs/rendering-quality/reviews/2026-10-22-r29-directional-occlusion-cost.md).

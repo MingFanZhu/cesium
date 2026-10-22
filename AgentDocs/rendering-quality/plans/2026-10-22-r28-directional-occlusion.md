@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Type: phase; status: implemented, owner visual gate pending; date: 2026-10-22.
+- Type: phase; status: completed, owner visually accepted; date: 2026-10-22.
 - Parent: [rendering quality](2026-09-18-rendering-quality-extension.md).
 - Entry: owner approves the [assessment](../reviews/2026-10-22-directional-occlusion-assessment.md).
 - Predecessors: R27 checkpoint `0d4b58b8a4`; imagery/audit checkpoint `b31f09bdff`.
@@ -64,3 +64,6 @@ Technical implementation, bounded tests and self-review are complete; see the
 performance/visual findings. The end-to-end 0.5 ms target is not met; estimator-only
 cost is not a substitute. Default remains off. Owner visual gate is pending; no
 next phase is activated. A local checkpoint retains code, Specs, ADR/SGP and docs.
+
+Owner accepted the improved detail on 2026-10-22 and requests cost optimization.
+R28 is preserved at `023016e69c`; follow-up is [R29](2026-10-22-r29-directional-occlusion-cost.md).

@@ -1,6 +1,6 @@
 # ADR-0184: Directional environment specular occlusion
 
-- Date: 2026-10-22; status: implemented; owner visual acceptance pending.
+- Date: 2026-10-22; status: implemented; owner visually accepted.
 - Phase: [R28](../../../AgentDocs/rendering-quality/plans/2026-10-22-r28-directional-occlusion.md).
 - Amends: ADR-0084 / ADR-0093; integrates with ADR-0158 / ADR-0161.
 - Upstream seam: SGP-0014, native `LightingStageFS.glsl`, `ImageBasedLightingStageFS.glsl`, and `PostProcessStageCollection.js` documentation.
@@ -54,6 +54,9 @@ full-resolution spatial filtering and native Cesium material conventions. Licens
 and provenance records accompany the distribution under `Assets/SceneGIS`.
 
 Implementation evidence and measured limitations: [R28 review](../../../AgentDocs/rendering-quality/reviews/2026-10-22-r28-directional-occlusion.md).
+The owner accepts R28 detail improvements. [R29](../../../AgentDocs/rendering-quality/reviews/2026-10-22-r29-directional-occlusion-cost.md)
+removes redundant deferred lighting groups without changing this algorithm,
+sampling, storage or defaults; both-world before/after images match exactly.
 
 ## Upgrade and acceptance
 

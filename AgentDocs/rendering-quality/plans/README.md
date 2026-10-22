@@ -1,6 +1,8 @@
 # Plans
 
-- [R28 directional environment occlusion](2026-10-22-r28-directional-occlusion.md): `implemented`; owner visual gate pending, default-off GTSO; measured end-to-end cost remains above target.
+- [R29 directional occlusion cost](2026-10-22-r29-directional-occlusion-cost.md): `completed`; accepted pictures preserved, redundant model lighting draws removed; remaining incremental GPU cost recorded.
+
+- [R28 directional environment occlusion](2026-10-22-r28-directional-occlusion.md): `completed`; owner visually accepted, default-off GTSO; measured end-to-end cost remains above target.
 
 - [Directional environment occlusion assessment](2026-10-22-directional-occlusion-assessment.md): `completed`; baseline measured, implementation remains a proposal.
 

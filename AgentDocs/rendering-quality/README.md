@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R28 directional environment occlusion                                                                    |
-| Active phase plan      | [R28](plans/2026-10-22-r28-directional-occlusion.md)                                                     |
+| Current phase          | None; R29 completed                                                                                      |
+| Active phase plan      | None; [completed R29](plans/2026-10-22-r29-directional-occlusion-cost.md)                                |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
@@ -35,8 +35,17 @@
 
 ## Current handoff
 
-- 2026-10-22: R28 implementation and [technical review](reviews/2026-10-22-r28-directional-occlusion.md)
-  are complete; owner visual gate is pending. Optional directional environment
+- 2026-10-22: [R29 optimization/review](reviews/2026-10-22-r29-directional-occlusion-cost.md)
+  complete. Bistro lighting groups/draws fall 627 to 1, geometry remains 627;
+  all eight Globe/Planar PNG pairs are pixel-identical. Native light/binding updates
+  and lifetime checks pass in normal and release builds. Recorded CPU cost improves
+  substantially; incremental GPU cost remains above the original target. No next
+  phase, merge or default change is activated.
+
+- 2026-10-22: owner visually accepts R28 (`023016e69c`) and authorizes [R29 cost optimization](plans/2026-10-22-r29-directional-occlusion-cost.md). CPU profiling reproduces repeated model lighting-group rebuilds. Preserve the accepted shader quality, sampling and defaults.
+
+- 2026-10-22 historical R28 delivery: implementation and [technical review](reviews/2026-10-22-r28-directional-occlusion.md)
+  are complete; owner visual gate was pending, now accepted above. Optional directional environment
   specular occlusion works in both worlds. GPU estimator increment is 0.19–0.21 ms,
   but whole-frame increment is 2.9–3.2 ms on the measured Bistro scene, exceeding
   the investigation target. Defaults stay off; no next phase is activated.

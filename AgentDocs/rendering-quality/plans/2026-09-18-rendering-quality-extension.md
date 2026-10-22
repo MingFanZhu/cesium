@@ -1,5 +1,15 @@
 # Extension Plan: Rendering Quality
 
+## R29 activation, 2026-10-22
+
+The owner visually accepts R28 at `023016e69c` and authorizes performance work in
+[R29](2026-10-22-r29-directional-occlusion-cost.md). Preserve the accepted shading
+and sampling. Profile full-frame costs and remove reproduced redundant lighting
+work; do not activate a new diffuse or atmosphere algorithm. R29 is now complete:
+duplicate light draws are removed with pixel-identical accepted pictures, and
+remaining incremental GPU cost is documented in its review. No next phase is
+activated; the R28 activation text below is historical.
+
 ## R28 activation, 2026-10-22
 
 After R27 checkpoint `0d4b58b8a4` and the separate imagery/assessment checkpoint

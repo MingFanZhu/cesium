@@ -16,6 +16,12 @@
 
 ## Scope
 
+2026-10-22 maintenance: rendering-quality [R29](../rendering-quality/plans/2026-10-22-r29-directional-occlusion-cost.md)
+fixes repeated per-model lighting-group selection in the owned deferred helper.
+The [review](../rendering-quality/reviews/2026-10-22-r29-directional-occlusion-cost.md)
+records preserved images and native binding updates, reduced light draws and cost.
+This does not reactivate the deferred renderer's completed phase plan.
+
 2026-10-21 可视域集成中修正 lighting pipeline 的 Shader / uniformMap 配对：
 程序化 IBL 在 geometry 与 lighting 准备之间就绪时，不再混用不同分支。
 变更范围为 owned `_SceneGISDeferredLighting.js`，无新增上游补丁、资源或

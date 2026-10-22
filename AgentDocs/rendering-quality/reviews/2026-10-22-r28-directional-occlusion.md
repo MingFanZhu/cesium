@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Type: review; status: technical review complete, owner visual gate pending.
+- Type: review; status: technical review complete, owner visually accepted; historical cost limitation continues in R29.
 - Updated: 2026-10-22; architecture / execution / reviewer: current task, self-review.
 - Target: [R28](../plans/2026-10-22-r28-directional-occlusion.md), ADR-0184 / SGP-0014.
 - Parent: [rendering quality](../plans/2026-09-18-rendering-quality-extension.md).
@@ -112,3 +112,9 @@ this opt-in until the owner judges useful gains on the target GIS assets.
 Technical implementation is ready for a local checkpoint and owner evaluation.
 Do not merge, enable by default, activate full directional diffuse or any later
 phase on the basis of this review. R27 historical findings remain unchanged.
+
+## Owner gate update
+
+On 2026-10-22 the owner accepts the improved detail and retains the feature. F4 is
+resolved. F2 continues in the authorized [R29 cost phase](../plans/2026-10-22-r29-directional-occlusion-cost.md).
+The measurements above remain the R28 historical baseline.

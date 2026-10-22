@@ -1,4 +1,5 @@
 import {
+  Axis,
   Cartesian2,
   Cartesian3,
   Color,
@@ -188,6 +189,111 @@ describe("SceneGIS/Scene/SceneGISDeferredLighting", function () {
     scene?.destroyForSpecs();
     borrowed.splice(0).forEach((resource) => resource.destroy());
     scene = renderer = undefined;
+  });
+  it("selects one lighting group for different primitive uniforms and preserves native updates", async function () {
+    setup();
+    const ibl = new ImageBasedLighting({
+      imageBasedLightingFactor: Cartesian2.ZERO,
+    });
+    borrowed.push(ibl);
+    const model = scene.primitives.add(
+      await Model.fromGltfAsync({
+        url: "./Data/Models/glTF-2.0/Box/glTF/Box.gltf",
+        modelMatrix: Matrix4.fromTranslation(new Cartesian3(7000000, 0, 0)),
+        upAxis: Axis.Z,
+        forwardAxis: Axis.X,
+        imageBasedLighting: ibl,
+        gltfCallback(gltf) {
+          const primitive = gltf.meshes[0].primitives[0];
+          gltf.materials = [
+            [1, 0, 0, 1],
+            [0, 1, 0, 1],
+          ].map((baseColorFactor) => ({
+            pbrMetallicRoughness: {
+              baseColorFactor,
+              metallicFactor: 0,
+              roughnessFactor: 0.6,
+            },
+          }));
+          gltf.meshes = [0, 1].map((material) => ({
+            primitives: [{ ...primitive, material }],
+          }));
+          gltf.nodes = [
+            { name: "left", mesh: 0, translation: [-1.5, 0, 0] },
+            { name: "right", mesh: 1, translation: [1.5, 0, 0] },
+          ];
+          gltf.scenes[0].nodes = [0, 1];
+        },
+      }),
+    );
+    await pollToPromise(() => {
+      render();
+      return model.ready;
+    });
+    const ao = scene.postProcessStages.ambientOcclusion;
+    ao.enabled = true;
+    for (const directional of [false, true]) {
+      ao.uniforms.directionalOcclusion = directional;
+      render();
+      expect(renderer.drawCount).toBe(2);
+      expect(renderer.groupCount).toBe(1);
+      expect(renderer.lightDrawCount).toBe(1);
+      expect(
+        new Set(
+          scene.frameState.commandList
+            .filter((c) => c.owner === model)
+            .map((c) => c.uniformMap),
+        ).size,
+      ).toBe(2);
+      expect(color(20)[0]).toBeGreaterThan(color(20)[1] + 0.2);
+      expect(color(44)[1]).toBeGreaterThan(color(44)[0] + 0.2);
+      const group = renderer._groups[0];
+      render();
+      expect(renderer._groups[0].command.shaderProgram).toBe(
+        group.command.shaderProgram,
+      );
+    }
+    const lookup = spyOn(
+      scene.context.shaderCache,
+      "getShaderProgram",
+    ).and.callThrough();
+    render();
+    expect(
+      lookup.calls
+        .allArgs()
+        .filter(([options]) =>
+          options.fragmentShaderSource.defines.includes(
+            "SCENEGIS_DEFERRED_LIGHTING",
+          ),
+        ).length,
+    ).toBe(0);
+    const before = renderer._groups[0];
+    model.lightColor = new Cartesian3(1, 1, 1);
+    render();
+    expect(renderer._groups[0]).not.toBe(before);
+    const changed = renderer._groups[0];
+    const red = color(20)[0];
+    model.lightColor = new Cartesian3(0.1, 0.1, 0.1);
+    render();
+    expect(renderer._groups[0].command.shaderProgram).toBe(
+      changed.command.shaderProgram,
+    );
+    expect(color(20)[0]).toBeLessThan(red * 0.5);
+    const green = color(44);
+    model.getNode("left").show = false;
+    render();
+    expect(renderer.groupCount).toBe(1);
+    expect(renderer.drawCount).toBe(1);
+    expect(color(20)[0]).toBeLessThan(0.01);
+    expect(color(44)).toEqualEpsilon(green, 0.001);
+    model.getNode("left").show = true;
+    render();
+    expect(renderer.groupCount).toBe(1);
+    expect(renderer.drawCount).toBe(2);
+    expect(color(44)).toEqualEpsilon(green, 0.001);
+    scene.primitives.remove(model);
+    render();
+    expect(renderer._models.size).toBe(0);
   });
   it("preserves opaque and translucent native silhouettes with deferred model lighting", async function () {
     setup();
