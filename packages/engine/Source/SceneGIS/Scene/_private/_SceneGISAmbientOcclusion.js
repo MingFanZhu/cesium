@@ -5,6 +5,7 @@ import DeveloperError from "../../../Core/DeveloperError.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
 import RuntimeError from "../../../Core/RuntimeError.js";
 import ClearCommand from "../../../Renderer/ClearCommand.js";
+import DrawCommand from "../../../Renderer/DrawCommand.js";
 import FramebufferManager from "../../../Renderer/FramebufferManager.js";
 import Pass from "../../../Renderer/Pass.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
@@ -16,6 +17,7 @@ import common from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOCommon.
 import debug from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODebug.js";
 import estimate from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOEstimate.js";
 import filter from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAOFilter.js";
+import directional from "../../../Shaders/SceneGIS/AmbientOcclusion/SceneGISAODirectional.js";
 import LightingMrt from "./_SceneGISLightingMrt.js";
 import IndirectLighting from "./_SceneGISScreenSpaceIndirectLighting.js";
 
@@ -45,6 +47,8 @@ SceneGISAmbientOcclusion.createStage = function () {
     ready: false,
     context: undefined,
     values: {},
+    receivers: new WeakMap(),
+    shaders: new WeakMap(),
   };
   const uniforms = {
     intensity: 1.5,
@@ -54,6 +58,7 @@ SceneGISAmbientOcclusion.createStage = function () {
     stepCount: 8,
     randomTexture: undefined,
     ambientOcclusionOnly: false,
+    directionalOcclusion: false,
   };
   const stage = new PostProcessStage({
     name: "czm_ambient_occlusion_debug",
@@ -79,11 +84,16 @@ SceneGISAmbientOcclusion.prepare = function (scene) {
   const ao = scene.postProcessStages.ambientOcclusion;
   const state = ao._sceneGISAmbientOcclusion;
   state.ready = false;
+  state.directionalReady = false;
   state.mainPass = false;
   state.mainActive = false;
   state.prepassDraws = 0;
+  state.estimatePasses = 0;
   scene.frameState._sceneGISAmbientOcclusion = ao.enabled;
   if (!ao.enabled) {
+    if (state.directionalAllocated) {
+      releaseEstimate(state);
+    }
     LightingMrt.destroy(state);
     state.raw?.destroy();
     state.raw = undefined;
@@ -105,6 +115,10 @@ SceneGISAmbientOcclusion.prepare = function (scene) {
   for (const name of parameterNames) {
     u[name] = uniformValue(state.uniforms[name]);
   }
+  u.directionalOcclusion = uniformValue(state.uniforms.directionalOcclusion);
+  if (typeof u.directionalOcclusion !== "boolean") {
+    throw new DeveloperError("AO directionalOcclusion must be a boolean.");
+  }
   if (
     !Number.isFinite(u.lengthCap) ||
     u.lengthCap <= 0 ||
@@ -125,8 +139,24 @@ SceneGISAmbientOcclusion.prepare = function (scene) {
   state.context = context;
 };
 
+function releaseEstimate(state) {
+  for (const name of ["estimate", "filtered"]) {
+    state[name]?.destroy();
+    state[name] = undefined;
+  }
+  for (const name of ["estimateCommand", "filterCommand"]) {
+    state[name]?.shaderProgram.destroy();
+    state[name] = undefined;
+  }
+  state.directionalAllocated = false;
+}
+
 function allocate(state, scene, sourceDepth) {
   const context = scene.context;
+  const useDirection = state.values.directionalOcclusion;
+  if (state.estimate && state.directionalAllocated !== useDirection) {
+    releaseEstimate(state);
+  }
 
   if (!defined(sourceDepth) && !defined(state.linearDepth)) {
     state.linearDepth = new FramebufferManager({
@@ -135,15 +165,21 @@ function allocate(state, scene, sourceDepth) {
     });
   }
   if (!defined(state.estimate)) {
-    state.estimate = new FramebufferManager();
-    state.filtered = new FramebufferManager({ pixelFormat: PixelFormat.RED });
+    state.directionalAllocated = useDirection;
+    state.estimate = new FramebufferManager({
+      colorAttachmentsLength: useDirection ? 2 : 1,
+    });
+    state.filtered = new FramebufferManager({
+      pixelFormat: useDirection ? PixelFormat.RGBA : PixelFormat.RED,
+    });
+    const defines = useDirection ? ["SCENEGIS_DIRECTIONAL_OCCLUSION"] : [];
     state.clearLinear = new ClearCommand({ color: Color.TRANSPARENT });
     const uniforms = {
       u_linearDepth: () => state.sourceDepth,
       u_radius: () => state.values.lengthCap,
     };
     state.estimateCommand = context.createViewportQuadCommand(
-      new ShaderSource({ sources: [common, estimate] }),
+      new ShaderSource({ defines, sources: [common, estimate] }),
       {
         owner: state,
         uniformMap: combine(uniforms, {
@@ -154,11 +190,12 @@ function allocate(state, scene, sourceDepth) {
       },
     );
     state.filterCommand = context.createViewportQuadCommand(
-      new ShaderSource({ sources: [common, filter] }),
+      new ShaderSource({ defines, sources: [common, filter] }),
       {
         owner: state,
         uniformMap: combine(uniforms, {
           u_estimate: () => state.estimate.getColorTexture(),
+          u_moment: () => state.estimate.getColorTexture(1),
           u_intensity: () => state.values.intensity,
         }),
       },
@@ -214,12 +251,86 @@ SceneGISAmbientOcclusion.execute = function (scene, passState) {
 };
 
 function estimateOcclusion(state, context, passState) {
+  if (state.ready) {
+    return;
+  }
   passState.framebuffer = state.estimate.framebuffer;
   state.estimateCommand.execute(context, passState);
   passState.framebuffer = state.filtered.framebuffer;
   state.filterCommand.execute(context, passState);
   state.ready = true;
+  state.estimatePasses = (state.estimatePasses ?? 0) + 1;
 }
+
+// The deferred producer calls this only after the full opaque depth is published.
+SceneGISAmbientOcclusion.beforeLighting = function (
+  scene,
+  passState,
+  sourceDepth,
+) {
+  const state =
+    scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
+  if (
+    !scene.frameState._sceneGISAmbientOcclusion ||
+    !state.values.directionalOcclusion
+  ) {
+    return;
+  }
+  const original = passState.framebuffer;
+  try {
+    allocate(state, scene, sourceDepth);
+    estimateOcclusion(state, scene.context, passState);
+    state.directionalReady = true;
+  } finally {
+    passState.framebuffer = original;
+  }
+};
+
+SceneGISAmbientOcclusion.receiver = function (scene, command) {
+  const state =
+    scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion;
+  const shader = command.shaderProgram;
+  const flags = shader.fragmentShaderSource.defines;
+  if (
+    !state.directionalReady ||
+    !flags.includes("LIGHTING_PBR") ||
+    !flags.includes("HAS_NORMALS")
+  ) {
+    return command;
+  }
+  let cached = state.receivers.get(command);
+  if (!cached) {
+    cached = { command: new DrawCommand() };
+    state.receivers.set(command, cached);
+  }
+  if (cached.sourceUniforms !== command.uniformMap) {
+    cached.sourceUniforms = command.uniformMap;
+    cached.uniformMap = combine(command.uniformMap, {
+      u_sceneGISDirectionalOcclusion: () => state.filtered.getColorTexture(),
+    });
+  }
+  let program = state.shaders.get(shader);
+  if (!program) {
+    const name = "sceneGIS_directional_environment_occlusion";
+    const cache = scene.context.shaderCache;
+    program = cache.getDerivedShaderProgram(shader, name);
+    if (!program) {
+      const fs = shader.fragmentShaderSource.clone();
+      fs.defines.push("SCENEGIS_DIRECTIONAL_OCCLUSION");
+      fs.sources.unshift(directional);
+      program = cache.createDerivedShaderProgram(shader, name, {
+        vertexShaderSource: shader.vertexShaderSource,
+        fragmentShaderSource: fs,
+        attributeLocations: shader._attributeLocations,
+      });
+    }
+    state.shaders.set(shader, program);
+  }
+  const derived = DrawCommand.shallowClone(command, cached.command);
+  derived.shaderProgram = program;
+  derived.uniformMap = cached.uniformMap;
+  return derived;
+};
 
 SceneGISAmbientOcclusion.resolveShared = function (
   scene,
@@ -271,13 +382,13 @@ SceneGISAmbientOcclusion.resolve = function (scene, passState, frustum) {
 SceneGISAmbientOcclusion.destroy = function (stage) {
   const state = stage._sceneGISAmbientOcclusion;
   state.ready = false;
+  state.directionalReady = false;
+  state.receivers = new WeakMap();
+  state.shaders = new WeakMap();
+  releaseEstimate(state);
   LightingMrt.destroy(state);
-  for (const name of ["raw", "linearDepth", "estimate", "filtered"]) {
+  for (const name of ["raw", "linearDepth"]) {
     state[name]?.destroy();
-    state[name] = undefined;
-  }
-  for (const name of ["estimateCommand", "filterCommand"]) {
-    state[name]?.shaderProgram.destroy();
     state[name] = undefined;
   }
 };

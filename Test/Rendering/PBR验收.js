@@ -238,6 +238,7 @@ const baseline = Object.freeze({
   ssil: false,
   aoIntensity: 0.8,
   aoRadius: 0.7,
+  directionalOcclusion: false,
 });
 const trial = { ...baseline, ao: true, ssr: true, specularAA: true };
 const rendering = street ? { ...trial } : undefined;
@@ -375,6 +376,11 @@ const state = {
     ao.enabled = settings.ao;
     ao.uniforms.intensity = settings.aoIntensity;
     ao.uniforms.lengthCap = settings.aoRadius;
+    if (ao.uniforms.directionalOcclusion !== settings.directionalOcclusion) {
+      ao.uniforms.directionalOcclusion = settings.directionalOcclusion;
+      ssr.reset();
+      taa.reset();
+    }
     ssr.enabled = settings.ssr;
     ssil.enabled = settings.ssil;
     taa.enabled = settings.antialiasing === "TAA";
@@ -736,6 +742,10 @@ function createReferenceControls() {
   });
   trialFolder.add(trial, "shadows").name("几何阴影").onChange(state.apply);
   trialFolder.add(trial, "ao").name("环境光遮蔽").onChange(state.apply);
+  trialFolder
+    .add(trial, "directionalOcclusion")
+    .name("方向性环境反射遮蔽")
+    .onChange(state.apply);
   trialFolder
     .add(trial, "aoIntensity", 0, 2, 0.05)
     .name("遮蔽强度")

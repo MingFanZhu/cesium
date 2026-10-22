@@ -284,41 +284,48 @@ describe("SceneGIS/Scene/SceneGISScreenSpaceReflections", function () {
     render();
     expect(pixel(receiver)).toEqual(rough);
   });
-  it("captures independent clearcoat and custom material directions after native evaluation", async function () {
-    setup();
-    await models(true);
-    expect(effect._state.mainPass).toBe(true);
-    expect(effect._state.main.framebuffer.numberOfColorAttachments).toBe(7);
-    expect(effect._state.captureDraws).toBe(0);
-    const receiver = point(0, -0.4, 0.4);
-    const base = sample(effect._state.raw.getColorTexture(1), receiver);
-    const coat = sample(effect._state.raw.getColorTexture(2), receiver);
-    expect(base[3]).toEqualEpsilon(0.03, 0.001);
-    expect(coat[3]).toEqualEpsilon(0.25, 0.001);
-    expect(Math.abs(base[0] - coat[0])).toBeGreaterThan(0.05);
-  });
-  it("supports orthographic multi-frustum depth, native AO/shadows and picking without changing capture", async function () {
-    setup(true, true);
-    const { box, floor } = await models();
-    floor.shadows = box.shadows = ShadowMode.ENABLED;
-    scene.shadowMap.enabled = true;
-    scene.postProcessStages.ambientOcclusion.enabled = true;
-    render();
-    expect(effect.ready).toBe(true);
-    expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
-    expect(effect._state.mainPass).toBe(true);
-    expect(effect._state.captureDraws).toBe(0);
-    const receiver = point(0, -1, 0);
-    const depth = sample(effect._state.depth.getColorTexture(), receiver)[0];
-    expect(depth).toBeGreaterThan(10);
-    expect(depth).toBeLessThan(40);
-    const before = pixel(receiver);
-    const captures = effect._state.captureDraws;
-    const p = SceneTransforms.worldToWindowCoordinates(scene, point(0, 4, 6));
-    expect(scene.pick(p)).toBeDefined();
-    expect(effect._state.captureDraws).toBe(captures);
-    render();
-    expect(pixel(receiver)).toEqual(before);
+  [false, true].forEach(function (directional) {
+    it(`captures independent clearcoat and custom material directions after native evaluation (directional=${directional})`, async function () {
+      setup();
+      scene.postProcessStages.ambientOcclusion.enabled = true;
+      scene.postProcessStages.ambientOcclusion.uniforms.directionalOcclusion =
+        directional;
+      await models(true);
+      expect(effect._state.mainPass).toBe(true);
+      expect(effect._state.main.framebuffer.numberOfColorAttachments).toBe(8);
+      expect(effect._state.captureDraws).toBe(0);
+      const receiver = point(0, -0.4, 0.4);
+      const base = sample(effect._state.raw.getColorTexture(1), receiver);
+      const coat = sample(effect._state.raw.getColorTexture(2), receiver);
+      expect(base[3]).toEqualEpsilon(0.03, 0.001);
+      expect(coat[3]).toEqualEpsilon(0.25, 0.001);
+      expect(Math.abs(base[0] - coat[0])).toBeGreaterThan(0.05);
+    });
+    it(`supports orthographic multi-frustum depth, native AO/shadows and picking without changing capture (directional=${directional})`, async function () {
+      setup(true, true);
+      const { box, floor } = await models();
+      floor.shadows = box.shadows = ShadowMode.ENABLED;
+      scene.shadowMap.enabled = true;
+      scene.postProcessStages.ambientOcclusion.enabled = true;
+      scene.postProcessStages.ambientOcclusion.uniforms.directionalOcclusion =
+        directional;
+      render();
+      expect(effect.ready).toBe(true);
+      expect(scene._view.frustumCommandsList.length).toBeGreaterThan(1);
+      expect(effect._state.mainPass).toBe(true);
+      expect(effect._state.captureDraws).toBe(0);
+      const receiver = point(0, -1, 0);
+      const depth = sample(effect._state.depth.getColorTexture(), receiver)[0];
+      expect(depth).toBeGreaterThan(10);
+      expect(depth).toBeLessThan(40);
+      const before = pixel(receiver);
+      const captures = effect._state.captureDraws;
+      const p = SceneTransforms.worldToWindowCoordinates(scene, point(0, 4, 6));
+      expect(scene.pick(p)).toBeDefined();
+      expect(effect._state.captureDraws).toBe(captures);
+      render();
+      expect(pixel(receiver)).toEqual(before);
+    });
   });
   it("validates attachment, reuses disabled resources, replaces resized targets and releases Scene-owned resources", function () {
     setup();

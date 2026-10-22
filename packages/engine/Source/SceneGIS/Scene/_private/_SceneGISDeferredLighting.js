@@ -55,6 +55,7 @@ import MaterialExtensions from "./_SceneGISDeferredMaterialExtensions.js";
 import DepthFunction from "../../../Scene/DepthFunction.js";
 import DeferredInverse from "./_SceneGISDeferredInverse.js";
 import LightingMrt from "./_SceneGISLightingMrt.js";
+import AmbientOcclusion from "./_SceneGISAmbientOcclusion.js";
 import LocalLights from "./_SceneGISLocalLights.js";
 import SurfaceWeather from "./_SceneGISSurfaceWeather.js";
 import PlanarEnvironmentLighting from "./_SceneGISPlanarEnvironmentLighting.js";
@@ -1888,6 +1889,7 @@ class _SceneGISDeferredLighting {
     if (inverse) {
       command = this._inverse.lightCommand(command);
     } else {
+      command = AmbientOcclusion.receiver(scene, command);
       if (!group.vectorOverlay) {
         command = DeferredDebug.lighting(this, command);
         command = classificationLighting(this, command);
@@ -1935,6 +1937,7 @@ class _SceneGISDeferredLighting {
     const pass = scene.context.uniformState.pass;
     try {
       const shared = this._captureDepth(passState);
+      AmbientOcclusion.beforeLighting(scene, passState, this._linearDepth);
       scene.context.uniformState.updatePass(Pass.OPAQUE);
       if (this._inverse && !this._multiFrustum) {
         this._lightInverse(passState);

@@ -1,5 +1,7 @@
 # Plans
 
+- [R28 directional environment occlusion](2026-10-22-r28-directional-occlusion.md): `implemented`; owner visual gate pending, default-off GTSO; measured end-to-end cost remains above target.
+
 - [Directional environment occlusion assessment](2026-10-22-directional-occlusion-assessment.md): `completed`; baseline measured, implementation remains a proposal.
 
 - [Globe / Planar material and lighting audit](2026-10-22-material-lighting-audit.md): `completed`; filter-domain and existing test findings remain open.

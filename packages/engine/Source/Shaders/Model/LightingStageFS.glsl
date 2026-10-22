@@ -87,6 +87,11 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
         sceneGISSSRCoatDirection = reflect(-viewDirection, normal);
         #endif
         // SCENEGIS_PATCH_END SGP-0016
+        // SCENEGIS_PATCH_BEGIN SGP-0014: Directional visibility uses the independent native clearcoat ray.
+        #ifdef SCENEGIS_DIRECTIONAL_OCCLUSION
+        sceneGISOcclusionCoatDirection = reflect(-viewDirection, normal);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0014
         // SCENEGIS_PATCH_BEGIN SGP-0024: Clearcoat shares the position-aware local reflection source.
         #ifdef SCENEGIS_LOCAL_PROBES
         vec3 iblColor = computeSpecularIBL(reflectMC, NdotV, f0, roughness, position, reflect(-viewDirection, normal));
@@ -111,7 +116,7 @@ vec3 addClearcoatReflection(vec3 baseLayerColor, vec3 position, vec3 lightDirect
     // SCENEGIS_PATCH_END SGP-0026
 
     // SCENEGIS_PATCH_BEGIN SGP-0014: Capture layered indirect energy for main-pass AO.
-    #ifdef SCENEGIS_AO_MAIN
+    #if defined(SCENEGIS_AO_MAIN) && !defined(SCENEGIS_DIRECTIONAL_OCCLUSION)
     sceneGISScaleIndirect(1.0 - clearcoatFactor * F);
     #ifdef SPECULAR_IBL
     sceneGISRecordIndirect(iblColor * material.occlusion * clearcoatFactor);
@@ -178,7 +183,7 @@ vec3 computePbrLighting(in czm_modelMaterial material, in vec3 position)
         // SCENEGIS_PATCH_BEGIN SGP-0014: Record indirect energy for shared screen-space visibility.
         vec3 indirectColor = computeIBL(position, normal, lightDirection, lightColorHdr, material);
         color += indirectColor;
-        #ifdef SCENEGIS_AO_MAIN
+        #if defined(SCENEGIS_AO_MAIN) && !defined(SCENEGIS_DIRECTIONAL_OCCLUSION)
         sceneGISRecordIndirect(indirectColor);
         #endif
         // SCENEGIS_PATCH_END SGP-0014

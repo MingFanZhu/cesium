@@ -3,6 +3,20 @@ uniform float u_bias;
 uniform int u_directions;
 uniform int u_steps;
 
+#ifdef SCENEGIS_DIRECTIONAL_OCCLUSION
+layout(location = 1) out vec4 sceneGISMomentOutput;
+
+// Algorithm 2 adapted from Intel XeGTAO, MIT (see Assets/SceneGIS/Occlusion).
+vec2 sceneGISAOMoment(vec2 h, float n)
+{
+    float t = (6.0*sin(h.x-n)-sin(3.0*h.x-n)+6.0*sin(h.y-n)-sin(3.0*h.y-n)
+        +16.0*sin(n)-3.0*(sin(h.x+n)+sin(h.y+n))) / 12.0;
+    float v = (-cos(3.0*h.x-n)-cos(3.0*h.y-n)+8.0*cos(n)
+        -3.0*(cos(h.x+n)+cos(h.y+n))) / 12.0;
+    return vec2(t, v);
+}
+#endif
+
 // Analytic cosine-weighted hemisphere slice integral (GTAO).
 float sceneGISAOIntegral(float h, float n)
 {
@@ -13,6 +27,10 @@ void main()
 {
     ivec2 pixel = ivec2(gl_FragCoord.xy);
     float depth = sceneGISAODepth(pixel);
+    #ifdef SCENEGIS_DIRECTIONAL_OCCLUSION
+    sceneGISMomentOutput = vec4(0.5, 0.5, 0.5, 1.0);
+    vec3 moment = vec3(0.0);
+    #endif
     if (depth <= 0.0) { out_FragColor = vec4(1.0); return; }
     vec3 p = sceneGISAOPosition(gl_FragCoord.xy, depth);
     vec3 v = czm_inverseProjection == mat4(0.0) ? vec3(0.0, 0.0, 1.0) : normalize(-p);
@@ -60,8 +78,16 @@ void main()
         vec2 angles = vec2(-1.0, 1.0) * acos(clamp(horizon, -1.0, 1.0));
         angles = clamp(angles, bounds.x, bounds.y);
         visibility += normalLength * (sceneGISAOIntegral(angles.x, normalAngle) + sceneGISAOIntegral(angles.y, normalAngle));
+        #ifdef SCENEGIS_DIRECTIONAL_OCCLUSION
+        vec2 sliceMoment = sceneGISAOMoment(angles, normalAngle);
+        moment += normalLength * (sliceMoment.x * tangent + sliceMoment.y * v);
+        #endif
     }
     // Normalize the finite angular quadrature by the open hemisphere so exposed
     // slopes remain white for every spatial sampling phase.
     out_FragColor = vec4(clamp(visibility / unoccluded, 0.0, 1.0), n * 0.5 + 0.5);
+    #ifdef SCENEGIS_DIRECTIONAL_OCCLUSION
+    // Keep the unnormalized moment through filtering; a closed aperture has no direction.
+    sceneGISMomentOutput = vec4(moment / (2.0 * unoccluded) * 0.5 + 0.5, 1.0);
+    #endif
 }

@@ -1,5 +1,13 @@
 # Extension Plan: Rendering Quality
 
+## R28 activation, 2026-10-22
+
+After R27 checkpoint `0d4b58b8a4` and the separate imagery/assessment checkpoint
+`b31f09bdff`, the owner approves [R28 directional environment occlusion](2026-10-22-r28-directional-occlusion.md).
+Implement optional GTSO using existing screen depth and native environment lighting.
+Full directional diffuse and Planar irradiance changes remain candidates. Historical
+visual/cold-build findings remain recorded; R28 is the only active implementation.
+
 ## Metadata
 
 - Plan type: `extension`

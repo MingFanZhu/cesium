@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R27 multiscale lake waves                                                                                |
-| Active phase plan      | [R27](plans/2026-10-21-r27-lake-wave-quality.md)                                                         |
+| Current phase          | R28 directional environment occlusion                                                                    |
+| Active phase plan      | [R28](plans/2026-10-22-r28-directional-occlusion.md)                                                     |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
@@ -34,6 +34,18 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-22: R28 implementation and [technical review](reviews/2026-10-22-r28-directional-occlusion.md)
+  are complete; owner visual gate is pending. Optional directional environment
+  specular occlusion works in both worlds. GPU estimator increment is 0.19–0.21 ms,
+  but whole-frame increment is 2.9–3.2 ms on the measured Bistro scene, exceeding
+  the investigation target. Defaults stay off; no next phase is activated.
+
+- 2026-10-22: owner approves R28 implementation after assessment checkpoint `b31f09bdff`.
+  [Active plan](plans/2026-10-22-r28-directional-occlusion.md) / ADR-0184 / SGP-0014
+  adds optional environment specular occlusion, retaining scalar diffuse AO and
+  strict Planar atmosphere. R27 code checkpoint is `0d4b58b8a4`; its historical
+  visual and cold-build records remain unchanged.
 
 - 2026-10-22: [directional environment occlusion assessment](reviews/2026-10-22-directional-occlusion-assessment.md)
   is complete. Both-world scalar AO baselines pass; measured estimate/filter cost is

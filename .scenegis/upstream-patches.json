@@ -365,7 +365,7 @@
       "id": "SGP-0014",
       "title": "Integrate current-frame ambient occlusion into indirect lighting",
       "status": "active",
-      "reason": "Native final-color AO cannot preserve direct light, emissive and atmosphere. Shared screen lighting records indirect energy separately; the deferred pipeline removes the old geometry prepass and standalone opaque AO receiver while retaining the indirect recorders.",
+      "reason": "Native final-color AO cannot preserve direct light, emissive and atmosphere. Shared screen lighting records indirect energy separately; the deferred pipeline removes the old geometry prepass and standalone opaque AO receiver while retaining the indirect recorders. ADR-0184 adds optional directional environment visibility at native base/clearcoat IBL while preserving scalar diffuse AO and SSR replacement semantics.",
       "risk": "high",
       "files": [
         {
@@ -399,12 +399,17 @@
         {
           "path": "packages/engine/Source/Shaders/Model/ModelColorStageFS.glsl",
           "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ImageBasedLightingStageFS.glsl",
+          "markerMode": "paired"
         }
       ],
       "tests": [
-        "packages/engine/Specs/SceneGIS/Scene/SceneGISAmbientOcclusionSpec.js"
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISAmbientOcclusionSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISDirectionalOcclusionSpec.js"
       ],
-      "decision": "Documentation/SceneGIS/Decisions/ADR-0093-main-pass-ambient-occlusion.md",
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0184-directional-environment-occlusion.md",
       "removalCondition": "Native renderer provides current-frame AO and compatible per-material indirect-light integration."
     },
     {

@@ -183,8 +183,13 @@ Object.defineProperties(PostProcessStageCollection.prototype, {
    * <li><code>stepCount</code>: positive integer samples per ray, default <code>8</code>.</li>
    * <li><code>randomTexture</code>: accepted but unused; sampling uses stable spatial noise.</li>
    * <li><code>ambientOcclusionOnly</code>: show filtered visibility instead of scene color, default <code>false</code>.</li>
+   * <li><code>directionalOcclusion</code>: optional directional environment specular visibility for opaque/MASK PBR,
+   * including independent clearcoat directions, default <code>false</code>. Accepts a boolean or a callback
+   * returning a boolean; requires this stage to be enabled. Diffuse visibility remains scalar.</li>
    * </ul>
-   * <p>Resources are reused while disabled and released with this collection. Screen-space
+   * <p>Scalar resources are reused while disabled. Directional estimate/filter resources are released on disable
+   * or layout change; all resources are released with this collection. Direct light, emission and resolved SSR
+   * hits are not multiplied by directional environment visibility. Screen-space
    * sampling cannot recover offscreen or hidden occluders. Transparent and classification
    * receivers are outside the initial qualification.</p>
    *

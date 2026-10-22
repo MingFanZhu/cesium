@@ -1143,6 +1143,24 @@ primitive 与带法线的 PBR model。透明、classification、vector、label �
 不引入历史帧、相机 jitter 或第二套公开开关。帧缓冲由 native AO composite 的 owned state 所有，
 关闭时保留以便复用、resize 时替换、collection 销毁时释放；ShaderCache 管理派生程序。
 
+## 方向性环境反射遮蔽（R28）
+
+[ADR-0184](Decisions/ADR-0184-directional-environment-occlusion.md) / SGP-0014 为既有 AO 增加
+默认关闭的 `uniforms.directionalOcclusion`。复用当前 deferred opaque 全视图深度及 GTAO
+径向采样，估计可见半球的一阶矩，用原有几何法线/深度权重过滤。方向信息只作用于不透明/MASK
+原生 PBR 的环境镜面项，基础层与 clearcoat 分别使用各自的原生反射方向，保留各向异性。
+不得替换材质法线、改变直接光/自发光，或对 SSR 已命中反射再次乘环境遮蔽。
+
+方向模式在 deferred 光照前运行一次估计/滤波；原来稍后的 AO 合成不重复估计，也不重复
+遮蔽已处理的 PBR。其漫反射仍用相同标量可见度，其他光照类型保持已有标量修正。两次全屏
+pass 和原有径向深度采样数不变，独占估计/滤波目标由 5 B/pixel 增为 12 B/pixel。方向资源
+在关闭、布局改变、resize、destroy 时释放/替换；派生 Shader 属原生源程序缓存，热帧禁止
+重复源码键查询。借用的主深度不由 AO 释放。
+
+严格 Planar 大气、LUT 和原生透明路径不变；半透明反向分类独立工作集不消费主视图方向。
+方向性漫反射需要独立的天空辐照度方案，未由本阶段隐式启用。屏幕外、隐藏层及多个开口的
+限制必须保留，不能用调色或相机角度阈值掩盖。
+
 ## 物理天空镜面 IBL（R3）
 
 [ADR-0085](Decisions/ADR-0085-physical-sky-specular-ibl.md) / SGP-0015 为 Globe / Planar

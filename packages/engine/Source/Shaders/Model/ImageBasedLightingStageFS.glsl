@@ -67,6 +67,11 @@ vec3 computeSpecularIBL(vec3 cubeDir, float NdotV, vec3 f0, float roughness)
     specularSample = sceneGISProbeRadiance(specularSample, positionEC, rayEC, roughness);
     #endif
     // SCENEGIS_PATCH_END SGP-0024
+    // SCENEGIS_PATCH_BEGIN SGP-0014: Occlude only the environment before clearcoat SSR recording.
+    #ifdef SCENEGIS_DIRECTIONAL_OCCLUSION
+    specularSample *= sceneGISSpecularVisibility(sceneGISOcclusionCoatDirection, roughness);
+    #endif
+    // SCENEGIS_PATCH_END SGP-0014
     // SCENEGIS_PATCH_BEGIN SGP-0016: Substitute clearcoat radiance before its native BRDF weight.
     #ifdef SCENEGIS_SSR_MAIN
     specularSample = sceneGISSSR(specularSample, sceneGISSSRCoatDirection, roughness, true);
@@ -131,6 +136,11 @@ vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material)
         vec3 FmsEms = FssEss * averageFresnel * Ems / (1.0 - averageFresnel * Ems);
         vec3 dielectricScattering = (1.0 - FssEss - FmsEms) * material.diffuse;
         vec3 diffuseContribution = irradiance * (FmsEms + dielectricScattering) * model_iblFactor.x;
+        // SCENEGIS_PATCH_BEGIN SGP-0014: Retain scalar diffuse visibility in directional PBR lighting.
+        #ifdef SCENEGIS_DIRECTIONAL_OCCLUSION
+        diffuseContribution *= sceneGISDiffuseVisibility();
+        #endif
+        // SCENEGIS_PATCH_END SGP-0014
     #else
         vec3 diffuseContribution = vec3(0.0);
     #endif
@@ -158,6 +168,11 @@ vec3 textureIBL(vec3 viewDirectionEC, vec3 normalEC, czm_modelMaterial material)
         radiance = sceneGISProbeRadiance(radiance, positionEC, reflectEC, roughness);
         #endif
         // SCENEGIS_PATCH_END SGP-0024
+        // SCENEGIS_PATCH_BEGIN SGP-0014: Keep the native ray and BRDF while occluding environment radiance.
+        #ifdef SCENEGIS_DIRECTIONAL_OCCLUSION
+        radiance *= sceneGISSpecularVisibility(reflectEC, roughness);
+        #endif
+        // SCENEGIS_PATCH_END SGP-0014
         // SCENEGIS_PATCH_BEGIN SGP-0016: Record the native anisotropic response for screen-space reflections.
         #ifdef SCENEGIS_SSR_MAIN
         radiance = sceneGISSSR(radiance, reflectEC, roughness, false);

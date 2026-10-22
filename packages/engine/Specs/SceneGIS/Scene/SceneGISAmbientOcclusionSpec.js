@@ -271,6 +271,42 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     render();
     expect(pixel(0, -3.5)[0]).toBeGreaterThan(249);
   });
+  it("validates the optional direction layout and releases it on resize, disable and destroy", function () {
+    setup();
+    expect(ao.uniforms.directionalOcclusion).toBe(false);
+    ao.uniforms.directionalOcclusion = "invalid";
+    expect(render).toThrowDeveloperError();
+    let directional = true;
+    ao.uniforms.directionalOcclusion = () => directional;
+    render();
+    const state = ao._sceneGISAmbientOcclusion;
+    const moment = state.estimate.getColorTexture(1);
+    const filtered = state.filtered.getColorTexture();
+    render();
+    expect(state.estimatePasses).toBe(1);
+    expect(state.estimate.getColorTexture(1)).toBe(moment);
+    scene.canvas.width = 160;
+    render();
+    expect(moment.isDestroyed()).toBe(true);
+    expect(filtered.isDestroyed()).toBe(true);
+    const resized = state.estimate.getColorTexture(1);
+    directional = false;
+    render();
+    expect(resized.isDestroyed()).toBe(true);
+    expect(state.directionalReady).toBe(false);
+    directional = true;
+    render();
+    const disabled = state.filtered.getColorTexture();
+    ao.enabled = false;
+    render();
+    expect(disabled.isDestroyed()).toBe(true);
+    ao.enabled = true;
+    render();
+    const destroyed = state.estimate.getColorTexture(1);
+    scene.destroyForSpecs();
+    scene = undefined;
+    expect(destroyed.isDestroyed()).toBe(true);
+  });
   it("preserves direct light and uses the ambient fraction on terrain", function () {
     setup();
     render();
@@ -310,80 +346,107 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     render();
     expect(pixel(0, -3.5)[0]).toBeGreaterThan(249);
   });
-  it("occludes model IBL but preserves direct and emissive HDR radiance", async function () {
-    setup();
-    box.show = false;
-    scene.highDynamicRange = true;
-    const customShader = new CustomShader({
-      uniforms: {
-        u_emission: {
-          type: UniformType.VEC3,
-          value: new Cartesian3(2, 1, 0.5),
+  [false, true].forEach(function (directional) {
+    it(`occludes model IBL but preserves direct and emissive HDR radiance (directional=${directional})`, async function () {
+      setup();
+      ao.uniforms.directionalOcclusion = directional;
+      box.show = false;
+      scene.highDynamicRange = true;
+      const customShader = new CustomShader({
+        uniforms: {
+          u_emission: {
+            type: UniformType.VEC3,
+            value: new Cartesian3(2, 1, 0.5),
+          },
+          u_discard: { type: UniformType.BOOL, value: false },
         },
-        u_discard: { type: UniformType.BOOL, value: false },
-      },
-      fragmentShaderText: `void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
+        fragmentShaderText: `void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
         material.diffuse = vec3(0.5);
         if (u_discard) { discard; }
         material.roughness = 1.0;
         material.emissive = u_emission;
       }`,
-    });
-    const ibl = new ImageBasedLighting({
-      imageBasedLightingFactor: Cartesian2.ZERO,
-    });
-    const model = await Model.fromGltfAsync({
-      url: "./Data/Models/glTF-2.0/Box/glTF/Box.gltf",
-      modelMatrix: Matrix4.fromTranslation(new Cartesian3(0, 0, 3)),
-      scale: 6,
-      imageBasedLighting: ibl,
-      customShader,
-    });
-    scene.primitives.add(model);
-    await pollToPromise(() => {
+      });
+      const ibl = new ImageBasedLighting({
+        imageBasedLightingFactor: Cartesian2.ZERO,
+      });
+      const model = await Model.fromGltfAsync({
+        url: "./Data/Models/glTF-2.0/Box/glTF/Box.gltf",
+        modelMatrix: Matrix4.fromTranslation(new Cartesian3(0, 0, 3)),
+        scale: 6,
+        imageBasedLighting: ibl,
+        customShader,
+      });
+      scene.primitives.add(model);
+      const lookup = spyOn(
+        scene.context.shaderCache,
+        "getDerivedShaderProgram",
+      ).and.callThrough();
+      await pollToPromise(() => {
+        render();
+        return model.ready;
+      });
       render();
-      return model.ready;
+      const emissive = pixel(0, -3, 0.5);
+      const directionLookups = () =>
+        lookup.calls
+          .allArgs()
+          .filter(
+            (args) => args[1] === "sceneGIS_directional_environment_occlusion",
+          );
+      const resolved = new Set(directionLookups().map((args) => args[0]));
+      expect(resolved.size > 0).toBe(directional);
+      lookup.calls.reset();
+      render();
+      // Native asynchronous IBL readiness may introduce a new source program.
+      expect(directionLookups().every((args) => !resolved.has(args[0]))).toBe(
+        true,
+      );
+      expect(emissive.slice(0, 3).some((c) => c > 0)).toBe(true);
+      ao.enabled = false;
+      render();
+      expect(pixel(0, -3, 0.5)).toEqualEpsilon(emissive, 1);
+      customShader.setUniform("u_emission", Cartesian3.ZERO);
+      scene.light.color = Color.BLACK;
+      ibl.sphericalHarmonicCoefficients = Array.from({ length: 9 }, (_, i) =>
+        i === 0 ? new Cartesian3(2, 2, 2) : new Cartesian3(),
+      );
+      ibl.imageBasedLightingFactor = new Cartesian2(1, 0);
+      render();
+      const openIBL = pixel(0, -3, 0.5)[0];
+      ao.enabled = true;
+      render();
+      const occluded = pixel(0, -3, 0.5)[0];
+      expect(openIBL).toBeGreaterThan(occluded + 5);
+      ao.uniforms.directionalOcclusion = !directional;
+      render();
+      expect(pixel(0, -3, 0.5)[0]).toEqualEpsilon(occluded, 1);
+      ao.uniforms.directionalOcclusion = directional;
+      expect(ao._sceneGISAmbientOcclusion.mainPass).toBe(true);
+      expect(ao._sceneGISAmbientOcclusion.prepassDraws).toBe(0);
+      ao.uniforms.ambientOcclusionOnly = true;
+      render();
+      const contact = pixel(0, -3.5)[0];
+      customShader.setUniform("u_discard", true);
+      render();
+      expect(pixel(0, -3.5)[0]).toBeGreaterThan(contact + 5);
+      customShader.setUniform("u_discard", false);
+      scene.highDynamicRange = false;
+      ao.uniforms.ambientOcclusionOnly = true;
+      render();
+      expect(ao._sceneGISAmbientOcclusion.prepassDraws).toBe(0);
+      expect(pixel(0, -3.5)[0]).toBeLessThan(230);
+      customShader.setUniform("u_discard", true);
+      render();
+      expect(pixel(0, -3.5)[0]).toBeGreaterThan(249);
+      scene.primitives.remove(model);
+      customShader.destroy();
+      ibl.destroy();
     });
-    render();
-    const emissive = pixel(0, -3, 0.5);
-    expect(emissive.slice(0, 3).some((c) => c > 0)).toBe(true);
-    ao.enabled = false;
-    render();
-    expect(pixel(0, -3, 0.5)).toEqualEpsilon(emissive, 1);
-    customShader.setUniform("u_emission", Cartesian3.ZERO);
-    scene.light.color = Color.BLACK;
-    ibl.sphericalHarmonicCoefficients = Array.from({ length: 9 }, (_, i) =>
-      i === 0 ? new Cartesian3(2, 2, 2) : new Cartesian3(),
-    );
-    ibl.imageBasedLightingFactor = new Cartesian2(1, 0);
-    render();
-    const openIBL = pixel(0, -3, 0.5)[0];
-    ao.enabled = true;
-    render();
-    expect(openIBL).toBeGreaterThan(pixel(0, -3, 0.5)[0] + 5);
-    expect(ao._sceneGISAmbientOcclusion.mainPass).toBe(true);
-    expect(ao._sceneGISAmbientOcclusion.prepassDraws).toBe(0);
-    ao.uniforms.ambientOcclusionOnly = true;
-    render();
-    const contact = pixel(0, -3.5)[0];
-    customShader.setUniform("u_discard", true);
-    render();
-    expect(pixel(0, -3.5)[0]).toBeGreaterThan(contact + 5);
-    customShader.setUniform("u_discard", false);
-    scene.highDynamicRange = false;
-    ao.uniforms.ambientOcclusionOnly = true;
-    render();
-    expect(ao._sceneGISAmbientOcclusion.prepassDraws).toBe(0);
-    expect(pixel(0, -3.5)[0]).toBeLessThan(230);
-    customShader.setUniform("u_discard", true);
-    render();
-    expect(pixel(0, -3.5)[0]).toBeGreaterThan(249);
-    scene.primitives.remove(model);
-    customShader.destroy();
-    ibl.destroy();
   });
   it("preserves native alpha-mask and moving model clipping coverage in shared deferred depth", async function () {
     setup();
+    ao.uniforms.directionalOcclusion = true;
     box.show = false;
     ao.uniforms.ambientOcclusionOnly = true;
     const basePath = "./Data/Models/glTF-2.0/BoxCutout/glTF/";
@@ -505,6 +568,8 @@ describe("SceneGIS/Scene/SceneGISAmbientOcclusion", function () {
     expect(ao._sceneGISAmbientOcclusion.mainPass).toBe(true);
     expect(ao._sceneGISAmbientOcclusion.prepassDraws).toBe(0);
     scene.highDynamicRange = false;
+    // AO sky identity is independent of the final solar white-point transform.
+    scene.environmentEffects.whiteBalance = false;
     scene.camera.setView({
       destination: local(0, -25, 25),
       orientation: {

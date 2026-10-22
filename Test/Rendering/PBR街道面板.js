@@ -289,6 +289,7 @@ export default function createStreetControls(options) {
 
   const ao = gui.addFolder("环境光遮蔽").close();
   render(ao, "ao", "启用环境光遮蔽");
+  render(ao, "directionalOcclusion", "方向性环境反射遮蔽");
   render(ao, "aoIntensity", "遮蔽强度", [0, 2, 0.05]);
   render(ao, "aoRadius", "遮蔽半径（米）", [0.1, 2, 0.1]);
   const reflection = gui.addFolder("屏幕空间反射").close();

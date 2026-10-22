@@ -766,6 +766,34 @@ R14 按 [ADR-0093](Decisions/ADR-0093-main-pass-ambient-occlusion.md) 在合格 
 回归覆盖 AO/SSR/Water Specs、资源生命周期和固定实景；更改 Model/terrain 的后光照颜色
 分支时必须同时更新间接光的线性响应或明确排除该分支。
 
+### 方向性环境反射遮蔽（R28）
+
+按 [ADR-0184](Decisions/ADR-0184-directional-environment-occlusion.md) 可选开启：
+
+```js
+const ao = viewer.scene.postProcessStages.ambientOcclusion;
+ao.enabled = true;
+ao.uniforms.directionalOcclusion = true; // Default false; a boolean callback is also accepted.
+```
+
+当前 deferred 管线直接复用完整 opaque 深度，不增加几何重画；方向估计与原有 AO 共用
+径向深度采样及两次全屏估计/滤波。过滤后的 bent direction 仅用于基础层和 clearcoat 的
+环境镜面遮蔽，保留原生材质法线、粗糙度、各向异性和 BRDF。漫反射仍使用同一标量 AO，
+不修改太阳直射、自发光或背景；SSR 命中结果不再重复乘环境遮蔽。
+
+适用于 Globe / Planar 的不透明及 MASK PBR Model / 3D Tiles，包含显式 IBL；普通地表、
+Phong 图元沿用标量 AO。透明接收与半透明反向分类独立工作集不接入，单层屏幕深度无法
+补齐屏幕外或隐藏遮挡，也不能用单个可见锥精确描述多个开口。严格平面大气保持原样。
+
+新增开关默认 false；方向模式将估计/滤波存储从 5 B/pixel 增至 12 B/pixel，1280×800
+增加约 6.84 MiB（不含 driver padding）。关闭 AO、切回标量、resize 或 Scene 销毁时释放或
+替换方向资源。派生光照程序由原生 ShaderCache 随源程序管理；热帧按 Shader 实例复用。
+上述 R2/R13/R14 是历史接入记录，当前共享深度与资源边界以 ADR-0158/0161/0184 为准。
+
+人工对比入口为 `Test/Rendering/PBR综合验收.html?world=globe|planar`，在环境遮蔽面板切换
+“方向性环境反射遮蔽”。自动验证为 `SceneGISDirectionalOcclusionSpec`、现有 AO/SSR Specs
+及 `Test/playwright.directional-occlusion.config.mjs`。性能和画面结论见 R28 review。
+
 ## 验证物理天空环境反射
 
 开启已有 SceneGISEnvironmentEffects 后，Globe / Planar 的原生 PBR Model 与 3D Tiles 默认镜面

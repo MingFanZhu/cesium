@@ -324,6 +324,9 @@ function allocate(scene, state, selected) {
           scene._sceneGISScreenSpaceIndirectLighting._state.result.getColorTexture(),
         u_occlusion: () =>
           scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion.filtered.getColorTexture(),
+        u_directionalOcclusion: () =>
+          scene.postProcessStages.ambientOcclusion._sceneGISAmbientOcclusion
+            .directionalReady,
       },
     },
   );

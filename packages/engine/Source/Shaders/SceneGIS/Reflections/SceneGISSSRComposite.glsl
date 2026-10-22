@@ -11,6 +11,7 @@ uniform sampler2D u_coatEnvironment;
 #ifdef SCENEGIS_AO_MAIN
 uniform sampler2D u_indirect;
 uniform sampler2D u_occlusion;
+uniform bool u_directionalOcclusion;
 #endif
 #ifdef SCENEGIS_SSIL_MAIN
 uniform sampler2D u_ssil;
@@ -36,7 +37,10 @@ void main()
     #endif
     #ifdef SCENEGIS_AO_MAIN
     float visibility = texelFetch(u_occlusion, pixel, 0).r;
-    correction = visibility * correction + (visibility - 1.0) * texelFetch(u_indirect, pixel, 0).rgb;
+    // Directional PBR already occludes its environment at lighting, and SSR hits
+    // replace that environment without reapplying screen-space ambient visibility.
+    correction *= u_directionalOcclusion ? 1.0 : visibility;
+    correction += (visibility - 1.0) * texelFetch(u_indirect, pixel, 0).rgb;
     #endif
     // Apply the signed replacement delta without flattening native MSAA color samples.
     #ifdef SCENEGIS_SSIL_MAIN
