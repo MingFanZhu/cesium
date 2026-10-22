@@ -140,6 +140,12 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
       .concat(255);
   }
 
+  function display(rgb) {
+    return rgb
+      .map((value) => 255 * Math.pow(Math.min(1, Math.max(0, value)), 1 / 2.2))
+      .concat(255);
+  }
+
   beforeEach(function () {
     container = document.createElement("div");
     container.style.width = "16px";
@@ -167,7 +173,8 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
     );
     createWidget(world);
 
-    expect(world.tilesLoaded).toBe(true);
+    // Adding a shown layer invalidates readiness before its first request.
+    expect(world.tilesLoaded).toBe(false);
     expect(widget.scene).toRenderAndCall(expectSolid([0, 0, 255, 255]));
     expect(world.tilesLoaded).toBe(false);
     await settleImage();
@@ -230,9 +237,10 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
     widget.render();
     await settleImage();
     expect(widget.scene).toRenderAndCall(function (rgba) {
-      expect(Math.abs(rgba[0] - 128)).toBeLessThanOrEqual(1);
+      const halfLinear = display([0.5, 0, 0.5]);
+      expect(Math.abs(rgba[0] - halfLinear[0])).toBeLessThanOrEqual(1);
       expect(rgba[1]).toBe(0);
-      expect(Math.abs(rgba[2] - 128)).toBeLessThanOrEqual(1);
+      expect(Math.abs(rgba[2] - halfLinear[2])).toBeLessThanOrEqual(1);
       expect(rgba[3]).toBe(255);
     });
     expect(world._surface._debug.submittedCommands).toBe(1);
@@ -267,29 +275,41 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
       shaderMapSize: surface._shaderPrograms.size,
     };
 
+    const linear = [64, 128, 192].map((v) => Math.pow(v / 255, 2.2));
     layer.brightness = 0.5;
     expect(widget.scene).toRenderAndCall(
-      expectApproximateSolid([32, 64, 96, 255]),
+      expectApproximateSolid(display(linear.map((v) => v * 0.5))),
     );
     layer.brightness = 1.0;
     layer.contrast = 0.5;
     expect(widget.scene).toRenderAndCall(
-      expectApproximateSolid([96, 128, 160, 255]),
+      expectApproximateSolid(display(linear.map((v) => (v - 0.5) * 0.5 + 0.5))),
     );
     layer.contrast = 1.0;
     layer.gamma = 2.0;
     expect(widget.scene).toRenderAndCall(
-      expectApproximateSolid([128, 181, 221, 255]),
+      expectApproximateSolid(
+        display([64, 128, 192].map((v) => Math.sqrt(v / 255))),
+      ),
     );
     layer.gamma = 1.0;
     layer.saturation = 0.0;
     expect(widget.scene).toRenderAndCall(
-      expectApproximateSolid([119, 119, 119, 255]),
+      expectApproximateSolid(
+        display(
+          Array(3).fill(
+            linear[0] * 0.2125 + linear[1] * 0.7154 + linear[2] * 0.0721,
+          ),
+        ),
+      ),
     );
     layer.saturation = 1.0;
     layer.hue = Math.PI;
     expect(widget.scene).toRenderAndCall(
-      expectApproximateSolid(hueExpected([64, 128, 192], Math.PI), 3),
+      expectApproximateSolid(
+        display(hueExpected(linear, Math.PI).slice(0, 3)),
+        3,
+      ),
     );
 
     expect(requestImage).toHaveBeenCalledTimes(1);
@@ -326,17 +346,17 @@ describe("SceneGIS/Widget/SceneGISPlanarImageryCesiumWidget", function () {
 
     top.colorToAlpha = Color.RED;
     expect(widget.scene).toRenderAndCall(
-      expectApproximateSolid([128, 0, 128, 255], 1),
+      expectApproximateSolid(display([0.5, 0, 0.5]), 1),
     );
     top.colorToAlpha = Color.BLUE;
     top.colorToAlphaThreshold = 0.0;
     expect(widget.scene).toRenderAndCall(
-      expectApproximateSolid([128, 0, 128, 255], 1),
+      expectApproximateSolid(display([0.5, 0, 0.5]), 1),
     );
     top.colorToAlpha = undefined;
     top.brightness = 0.5;
     expect(widget.scene).toRenderAndCall(
-      expectApproximateSolid([128, 0, 64, 255], 1),
+      expectApproximateSolid(display([0.5, 0, 0.25]), 1),
     );
   });
 

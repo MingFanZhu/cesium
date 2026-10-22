@@ -79,3 +79,32 @@ brightness、contrast、hue、saturation 仍在显示 RGB 上按原顺序执行�
 保持既有线性输入，不能对最终地表合成色再次解码。透明 Surface 与 opaque capture 共用
 相同影像入口；复用 `czm_gamma` automatic uniform，不增加 pass、per-layer uniform、texture、
 shader key 或资源生命周期。
+
+## 2026-10-22 修订：以 Globe 现有滤镜顺序为兼容基准
+
+项目负责人明确选择 Cesium Globe 的计算与滤镜/解码顺序，取代上一修订中 Planar
+非默认滤镜独立使用显示 RGB 的约定。Globe 源码保持原样，不修正其 gamma=1 的分支跳变。
+
+参考 Cesium 1.144 基线 `6d5d8b1f0725b6f831b336463f4b11c98023427b` 的
+`Scene/GlobeSurfaceTileProvider.js` 和 `Shaders/GlobeFS.glsl#sampleAndBlend`：
+
+1. 原始纹理覆盖与 color-to-alpha 判断保持在所有颜色变换之前。
+2. 参与当前绘制批次的 READY 影像中，任意 layer alpha 非零且 gamma 非默认，
+   则所有层执行 `pow(rgb, 1/gamma)`，不再调用 `czm_gammaCorrect`。
+   否则所有层使用 `czm_gammaCorrect`，由当前 HDR 宏与 `czm_gamma` 决定转换。
+3. 此后按 brightness、contrast、hue、saturation 顺序计算，再乘 sample/layer alpha
+   自底向上混合。没有滤镜后的第二次解码或负通道截断；输出阶段保持原 clamp/gamma。
+
+Planar 使用每 tile 的一个布尔快照/uniform 表达原生批次 `APPLY_GAMMA` 选择，
+而非引入滤镜 shader variants。参与条件在 normal render 发布；隐藏、alpha=0、
+无 READY 贡献的层不改变该选择。图层 alpha=0 不触发新请求策略或缓存释放。
+其余 identity 滤镜继续精确跳过，数学上等价于原生中性参数。
+
+当前 Planar baseColor 合成基底与 Surface 输出是不透明的，因此保留已有 RGB mix；
+世界透明度仍由独立 opacity 管理，不借此扩展 Globe 的 cutout/day-night/multipass 能力。
+Material、baseColor、矢量与最后一次显示转换不变。没有上游修改或新 SGP。
+源码同步只迁移必要分支数学，不复制 Globe 的椭球采样和渲染器。
+
+升级时重新对照上述官方函数的分支范围、排除条件和滤镜顺序。验证以双世界同输入的
+实际像素为准，包括非默认 gamma 对同批次其他图层的影响。兼容性选择会改变旧 Planar
+非默认滤镜输出；旧截图应按新契约验收，不用曝光补偿。

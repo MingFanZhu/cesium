@@ -627,12 +627,15 @@ mutation 前原子失败；P5 不使用 multipass，也不改变 P3 geometry/SSE
 
 每个shown layer固定携带brightness、contrast、hue、saturation、gamma与color-to-alpha完整uniform shape；
 filter mutation只在下一次normal render发布到per-tile slot，depth/pick replay继续读取最后发布快照。
-默认值由shader精确branch跳过，filter不改变shader key、request、texture、binding、mesh、VA、command或
+非 gamma 滤镜默认值由 shader 精确 branch 跳过，filter 不改变 shader key、request、texture、binding、mesh、VA、command 或
 ShaderProgram identity。raw sample处理顺序、颜色空间与公共契约见[ADR-0031](Decisions/ADR-0031-planar-imagery-color-filters.md)。
 
-共享线性渲染下，栅格影像在各层显示 RGB 滤镜之后、alpha 混合之前通过 `czm_gammaCorrect`
-解码；HDR/LDR 使用同一输入。`baseColor`、Material diffuse 和矢量叠加保留既有线性域，
-不得对整个地表结果重复解码。该边界不新增 pass、texture 或 shader variant。
+平面影像以原生 Globe 的计算顺序为准：raw color-to-alpha 后，先进行 gamma 分支处理，
+再依次 brightness、contrast、hue、saturation、alpha 混合。整个 tile command 中任一 READY、
+alpha 非零的参与层使用非默认 gamma 时，所有层均采用 `pow(rgb, 1/gamma)`；否则采用
+`czm_gammaCorrect`。隐藏、未 READY 或无覆盖的层不启用该分支。该布尔状态随 slots 一起发布。
+HDR/LDR 使用同一输入，保留 Globe 在 gamma=1 附近的分支跳变。`baseColor`、Material diffuse
+和矢量叠加保留既有线性域，不对整个地表结果重复解码，不新增 pass、texture 或 shader variant。
 
 `scenegis-planar-imagery` 是 engine-level Sandcastle 人工案例，只通过显式 `CesiumWidget({ world })`
 和 controller registration 组装能力。Viewer 与 widgets 自动集成属于 P6，不得从该示例反向形成

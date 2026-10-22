@@ -234,7 +234,12 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     }
 
     function display(rgb) {
-      return [...rgb.map((value) => 255 * Math.pow(value, 1 / 2.2)), 255];
+      return [
+        ...rgb.map(
+          (value) => 255 * Math.pow(Math.max(0, Math.min(1, value)), 1 / 2.2),
+        ),
+        255,
+      ];
     }
 
     for (const rgba of [
@@ -249,7 +254,7 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       });
     }
 
-    it("decodes each filtered image before alpha blending and retains warm resources", async function () {
+    it("matches Globe filter domains before alpha blending and retains warm resources", async function () {
       const world = createWorld({ maximumLevel: 0 });
       const bottomRgb = [32, 80, 160];
       const topRgb = [192, 128, 64];
@@ -267,31 +272,33 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       const shaderCount = surface._shaderPrograms.size;
       const bottom = bottomRgb.map((value) => Math.pow(value / 255, 2.2));
       const alpha = (128 / 255) * top.alpha;
-      const expected = (filtered) =>
+      const expected = (filtered, base = bottom) =>
         display(
-          bottom.map(
-            (value, i) =>
-              value * (1 - alpha) +
-              Math.pow(Math.max(filtered[i], 0), 2.2) * alpha,
-          ),
+          base.map((value, i) => value * (1 - alpha) + filtered[i] * alpha),
         );
-      expect(pixel()).toEqualEpsilon(expected(topRgb.map((v) => v / 255)), 2);
+      expect(pixel()).toEqualEpsilon(
+        expected(topRgb.map((v) => Math.pow(v / 255, 2.2))),
+        2,
+      );
 
       top.gamma = 2;
       top.brightness = 0.6;
       scene.renderForSpecs();
       expect(pixel()).toEqualEpsilon(
-        expected(topRgb.map((v) => Math.sqrt(v / 255) * 0.6)),
+        expected(
+          topRgb.map((v) => Math.sqrt(v / 255) * 0.6),
+          bottomRgb.map((v) => v / 255),
+        ),
         2,
       );
 
-      // Contrast can produce negative channels; the linear albedo cannot be negative.
+      // Globe keeps negative filtered channels until composition and display output.
       top.gamma = 1;
       top.brightness = 1;
       top.contrast = 3;
       scene.renderForSpecs();
       expect(pixel()).toEqualEpsilon(
-        expected(topRgb.map((v) => (v / 255 - 0.5) * 3 + 0.5)),
+        expected(topRgb.map((v) => (Math.pow(v / 255, 2.2) - 0.5) * 3 + 0.5)),
         2,
       );
 
@@ -310,6 +317,46 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
       scene.destroyForSpecs();
       expect(texture.isDestroyed()).toBe(true);
       expect(va.isDestroyed()).toBe(true);
+    });
+
+    it("uses only ready, visible, nonzero-alpha layers to select batch gamma and snapshots depth replay", async function () {
+      const world = createWorld({ maximumLevel: 0 });
+      const rgb = [64, 128, 192];
+      addImage(world, [...rgb, 255]);
+      // A masked texel still enables Globe's batch gamma branch.
+      const top = addImage(world, [255, 0, 0, 255]);
+      top.colorToAlpha = Color.RED;
+      top.colorToAlphaThreshold = 0.01;
+      await initialize(world);
+      const command = world._surface._renderCommands[0];
+      expect(pixel()).toEqualEpsilon([...rgb, 255], 2);
+      expect(command.uniformMap.u_sceneGISImageryApplyGamma()).toBe(false);
+
+      top.gamma = 2;
+      world.render({
+        ...scene.frameState,
+        passes: { render: false, pick: true, depth: true },
+        commandList: [],
+      });
+      expect(command.uniformMap.u_sceneGISImageryApplyGamma()).toBe(false);
+      scene.renderForSpecs();
+      expect(command.uniformMap.u_sceneGISImageryApplyGamma()).toBe(true);
+      expect(pixel()).toEqualEpsilon(display(rgb.map((v) => v / 255)), 2);
+
+      top.alpha = 0;
+      scene.renderForSpecs();
+      expect(command.uniformMap.u_sceneGISImageryApplyGamma()).toBe(false);
+      expect(pixel()).toEqualEpsilon([...rgb, 255], 2);
+      top.alpha = 1;
+      top.show = false;
+      scene.renderForSpecs();
+      expect(pixel()).toEqualEpsilon([...rgb, 255], 2);
+      top.show = true;
+      await renderUntil(() => world.tilesLoaded);
+      expect(pixel()).toEqualEpsilon(display(rgb.map((v) => v / 255)), 2);
+      top.gamma = 1;
+      scene.renderForSpecs();
+      expect(pixel()).toEqualEpsilon([...rgb, 255], 2);
     });
 
     it("shares linear input with Material in HDR and LDR without decoding Material or base color again", async function () {
@@ -1852,6 +1899,8 @@ czm_material czm_getMaterial(czm_materialInput inputValue) {
     expect(slot.colorToAlpha).toBe(colorToAlpha);
     expect(command.uniformMap.u_brightness0()).toBe(0.25);
     expect(command.uniformMap.u_gamma0()).toBe(2.0);
+    // A pending image cannot change the decode domain of other ready layers.
+    expect(command.uniformMap.u_sceneGISImageryApplyGamma()).toBe(false);
     expect(command.uniformMap.u_colorToAlphaThreshold0()).toBe(0.2);
     expect(colorToAlpha).toEqual(new Cartesian4(0.1, 0.2, 0.3, 1.0));
     expect(tile.command).toBe(command);

@@ -45,17 +45,17 @@ describe("SceneGIS/Scene/SceneGISPlanarSurfaceShader", function () {
     }
   });
 
-  it("filters raw samples in the approved order with exact identity bypasses", function () {
+  it("uses the Globe batch gamma branch before brightness, contrast, hue and saturation", function () {
     const shader = SceneGISPlanarSurfaceShader.createFragmentShader(1);
     const ordered = [
       "vec4 sample0 = texture",
       "u_colorToAlpha0.a > 0.5",
-      "u_gamma0 != 1.0",
+      "if (u_sceneGISImageryApplyGamma)",
+      "czm_gammaCorrect(sample0.rgb)",
       "u_brightness0 != 1.0",
       "u_contrast0 != 1.0",
       "u_hue0 != 0.0",
       "u_saturation0 != 1.0",
-      "czm_gammaCorrect(max(sample0.rgb, vec3(0.0)))",
       "sample0.a * u_alpha0",
     ];
     for (let i = 1; i < ordered.length; ++i) {

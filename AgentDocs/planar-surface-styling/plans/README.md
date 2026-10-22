@@ -1,5 +1,8 @@
 # Planar Surface Styling Plans
 
+- [Globe filter compatibility](2026-10-22-globe-filter-compatibility.md)
+  （standalone completed，技术验证通过，保留原生 gamma 分支行为）
+
 - [Extension plan](2026-08-12-planar-surface-styling-extension.md)
 - [S1 phase plan](2026-08-12-phase-s1-shader-source-foundation.md)
   （`completed`，Architecture review approved）

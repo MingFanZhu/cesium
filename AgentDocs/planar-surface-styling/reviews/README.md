@@ -1,5 +1,8 @@
 # Planar Surface Styling Reviews
 
+- [Globe filter compatibility](2026-10-22-globe-filter-compatibility.md)
+  （technical self-review approved，项目负责人视觉反馈待补）
+
 - [S1 Shader source and delivery foundation](2026-08-12-s1-shader-source-foundation.md)
   （`approved`，无 unresolved finding）
 - [S2 Planar imagery color filters](2026-08-12-s2-planar-imagery-color-filters.md)

@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                       |
-| ---------------------- | --------------------------------------------------------------------------- |
-| Extension slug         | `rendering-quality`                                                         |
-| Status                 | `active`                                                                    |
-| Planning model         | `extension`                                                                 |
-| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                  |
-| Current phase          | R27 multiscale lake waves                                                   |
-| Active phase plan      | [R27](plans/2026-10-21-r27-lake-wave-quality.md)                            |
-| Active standalone plan | None; [completed night emission](plans/2026-10-12-street-night-emission.md) |
-| Architecture contact   | Current task                                                                |
-| Execution contact      | Current task                                                                |
-| Last updated           | `2026-10-21`                                                                |
+| Field                  | Value                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| Extension slug         | `rendering-quality`                                                                                      |
+| Status                 | `active`                                                                                                 |
+| Planning model         | `extension`                                                                                              |
+| Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
+| Current phase          | R27 multiscale lake waves                                                                                |
+| Active phase plan      | [R27](plans/2026-10-21-r27-lake-wave-quality.md)                                                         |
+| Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
+| Architecture contact   | Current task                                                                                             |
+| Execution contact      | Current task                                                                                             |
+| Last updated           | `2026-10-22`                                                                                             |
 
 ## Scope
 
@@ -34,6 +34,22 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-22: [directional environment occlusion assessment](reviews/2026-10-22-directional-occlusion-assessment.md)
+  is complete. Both-world scalar AO baselines pass; measured estimate/filter cost is
+  about 1.89 ms at 1280×800 on the recorded GPU, without added geometry rendering.
+  Recommend bounded GTSO first. Full directional diffuse has a Planar irradiance
+  dependency; SSR composition and storage costs are explicit implementation gates.
+  No directional renderer, API/default change or next phase is activated.
+
+- 2026-10-22: bounded Globe / Planar material audit complete. The
+  [review](reviews/2026-10-22-material-lighting-audit.md) records matching default
+  imagery/PBR controls and a reproduced Globe imagery gamma discontinuity. Four
+  browser cases pass; GPU suites report 53 passed / 3 existing imagery failures.
+  The owner then selects Globe as reference; the
+  [compatibility follow-up](../planar-surface-styling/reviews/2026-10-22-globe-filter-compatibility.md)
+  aligns Planar and resolves all three imagery test failures. Globe and lighting
+  defaults are preserved. Earlier water findings remain separate.
 
 - 2026-10-21: R27 implementation and technical verification are complete. The
   [review](reviews/2026-10-21-r27-lake-wave-quality.md) records 40 feature/regression

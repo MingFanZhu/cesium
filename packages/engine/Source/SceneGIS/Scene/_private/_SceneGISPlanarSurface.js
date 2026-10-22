@@ -452,6 +452,11 @@ function createUniformMap(
       return surface._lambertDiffuseMultiplier;
     };
   }
+  if (layerCount > 0) {
+    uniformMap.u_sceneGISImageryApplyGamma = function () {
+      return tile._imageryApplyGamma;
+    };
+  }
   for (let i = 0; i < layerCount; ++i) {
     uniformMap[`u_texture${i}`] = function () {
       return tile._imagerySlots[i].texture;
@@ -653,11 +658,13 @@ function updateTileSlots(surface, tile, layers) {
   if (layers.length === 0) {
     if (defined(tile._imagerySlots)) {
       tile._imagerySlots.length = 0;
+      tile._imageryApplyGamma = false;
     }
     return;
   }
   const slots = (tile._imagerySlots ??= []);
   slots.length = layers.length;
+  let applyGamma = false;
   for (let i = 0; i < layers.length; ++i) {
     const layer = layers[i];
     const binding = tile.imageryBindings.get(layer);
@@ -675,6 +682,10 @@ function updateTileSlots(surface, tile, layers) {
     slot.hue = layer.hue;
     slot.saturation = layer.saturation;
     slot.gamma = layer.gamma;
+    // GlobeSurfaceTileProvider selects APPLY_GAMMA for the entire draw, excluding
+    // unready images and zero-alpha layers, even when a ready texel is masked out.
+    applyGamma ||=
+      defined(selected) && layer.alpha !== 0.0 && 1.0 / layer.gamma !== 1.0;
     const target = layer._colorToAlpha;
     slot.colorToAlpha.x = target?.red ?? 0.0;
     slot.colorToAlpha.y = target?.green ?? 0.0;
@@ -682,6 +693,7 @@ function updateTileSlots(surface, tile, layers) {
     slot.colorToAlpha.w = defined(target) ? 1.0 : 0.0;
     slot.colorToAlphaThreshold = layer.colorToAlphaThreshold;
   }
+  tile._imageryApplyGamma = applyGamma;
 }
 
 function selectObservers(

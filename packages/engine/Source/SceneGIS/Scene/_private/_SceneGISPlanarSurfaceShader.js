@@ -36,6 +36,9 @@ function createFragmentShader(
 ) {
   const declarations = [];
   const composition = [];
+  if (layerCount > 0) {
+    declarations.push("uniform bool u_sceneGISImageryApplyGamma;");
+  }
   for (let i = 0; i < layerCount; ++i) {
     declarations.push(`uniform sampler2D u_texture${i};`);
     declarations.push(`uniform vec4 u_translationScale${i};`);
@@ -64,8 +67,11 @@ function createFragmentShader(
             u_colorToAlphaThreshold${i}) {
         sample${i}.a = 0.0;
     }
-    if (u_gamma${i} != 1.0) {
+    // Match GlobeFS: one gamma branch for every participating layer in this draw.
+    if (u_sceneGISImageryApplyGamma) {
         sample${i}.rgb = pow(sample${i}.rgb, vec3(1.0 / u_gamma${i}));
+    } else {
+        sample${i}.rgb = czm_gammaCorrect(sample${i}.rgb);
     }
     if (u_brightness${i} != 1.0) {
         sample${i}.rgb = mix(vec3(0.0), sample${i}.rgb, u_brightness${i});
@@ -79,10 +85,6 @@ function createFragmentShader(
     if (u_saturation${i} != 1.0) {
         sample${i}.rgb = czm_saturation(sample${i}.rgb, u_saturation${i});
     }
-    // Imagery filters operate on display RGB. Decode each layer before linear
-    // alpha composition and lighting; Material and base color are already linear.
-    // Contrast/hue can produce negative channels, outside the power-law domain.
-    sample${i}.rgb = czm_gammaCorrect(max(sample${i}.rgb, vec3(0.0)));
     color.rgb = mix(color.rgb, sample${i}.rgb, sample${i}.a * u_alpha${i});`);
   }
   const dynamicLayers = `${declarations.join("\n")}
