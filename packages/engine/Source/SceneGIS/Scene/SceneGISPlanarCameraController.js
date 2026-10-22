@@ -143,6 +143,7 @@ function cancelInterruptedInertia(controller, scene) {
   if (newPress || changedPose) {
     const type = inertia.type;
     inertia.type = undefined;
+    inertia.running = false;
     if (
       changedPose ||
       !aggregator.isButtonDown(CameraEventType.LEFT_DRAG) ||
@@ -433,6 +434,7 @@ function normalizeUndergroundTangent(controller, scene) {
     scratchDirection,
     scratchUp,
     scratchRight,
+    controller._roll,
   );
   positionForWindowAnchor(
     scene,
@@ -546,6 +548,7 @@ function SceneGISPlanarCameraController(options) {
   this._surfaceHeight = undefined;
   this._heading = 0.0;
   this._pitch = MINIMUM_PITCH;
+  this._roll = 0.0;
   this._minimumRange = undefined;
   this._quarantinedLeft = false;
   this._quarantinedMiddle = false;
@@ -948,7 +951,6 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
   let valid =
     defined(target) &&
     pose.valid &&
-    Math.abs(pose.roll) <= CesiumMath.EPSILON8 &&
     (this._navigationMode === "surface"
       ? locallyAbove && above && negativePitch
       : (above && pose.pitch < 0.0) || (below && pose.pitch > 0.0));
@@ -967,12 +969,7 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
       pose.pitch >= MINIMUM_PITCH - PITCH_ROUND_TRIP_TOLERANCE &&
       pose.pitch <= MAXIMUM_PITCH + PITCH_ROUND_TRIP_TOLERANCE;
     valid =
-      defined(target) &&
-      pose.valid &&
-      Math.abs(pose.roll) <= CesiumMath.EPSILON8 &&
-      locallyAbove &&
-      above &&
-      negativePitch;
+      defined(target) && pose.valid && locallyAbove && above && negativePitch;
   }
   if (!valid) {
     return false;
@@ -998,6 +995,7 @@ SceneGISPlanarCameraController.prototype._syncRig = function (
       ? MAXIMUM_UNDERGROUND_PITCH
       : MAXIMUM_PITCH;
   this._heading = CesiumMath.zeroToTwoPi(synchronizedPose.heading);
+  this._roll = synchronizedPose.roll;
   this._pitch = CesiumMath.clamp(
     synchronizedPose.pitch,
     synchronizedMinimumPitch,
@@ -1157,12 +1155,18 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     minimumPitch,
     maximumPitch,
   );
+  // Unroll only as the orbit moves, including inertia. Keep zero-delta presses
+  // unchanged and use the same angular travel as heading/pitch navigation.
+  const roll =
+    Math.sign(this._roll) *
+    Math.max(0.0, Math.abs(this._roll) - Math.hypot(dx, dy) * ROTATE_RATE);
   SceneGISPlanarCamera.getAxes(
     this._heading,
     this._pitch,
     scratchDirection,
     scratchUp,
     scratchRight,
+    roll,
   );
   // Clearance corrections must not grow the held orbit radius.
   positionForWindowAnchor(
@@ -1189,6 +1193,7 @@ SceneGISPlanarCameraController.prototype._rotate = function (scene, movement) {
     scratchDirection,
     scratchUp,
   );
+  this._roll = roll;
   if (!allowsCrossing) {
     if (this._rotateHasSurfaceAnchor) {
       // A valid pointer pivot owns the orbit, even when the center ray leaves
@@ -1587,6 +1592,7 @@ SceneGISPlanarCameraController.prototype.viewHome = function (scene) {
   Cartesian3.clone(home.target, this._target);
   this._heading = 0.0;
   this._pitch = MINIMUM_PITCH;
+  this._roll = 0.0;
   this._getRanges(scene);
 };
 

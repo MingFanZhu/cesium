@@ -11,13 +11,15 @@
 - Active phase plan: None
 - Latest completed phase:
   [A7 平面高级地形统一资格与交付](plans/2026-08-11-phase-a7-unified-qualification-and-delivery.md)
-- Active standalone plan: [缺失子级地形连续覆盖](plans/2026-10-20-missing-terrain-cover.md)
+- Active standalone plan: None；[Roll 导航维护](plans/2026-10-22-camera-roll-navigation.md) 技术完成
+- Pending roll visual acceptance: [技术自审](reviews/2026-10-22-camera-roll-navigation.md)
+- Previous maintenance: [缺失子级地形连续覆盖](plans/2026-10-20-missing-terrain-cover.md)
 - Pending orbit visual acceptance: [地表锚点旋转与中心边界解耦](plans/2026-10-20-anchored-orbit-boundary.md)
 - Pending visual acceptance: [地形元数据接入](plans/2026-09-18-terrain-layer-metadata.md)
 - Latest completed standalone plan: [地形剖切与多边形裁剪](plans/2026-09-18-terrain-clipping.md)（技术与视觉验收通过）
 - Architecture contact: Architecture Agent
 - Execution contact: Execution Agent
-- Last updated: `2026-10-20`
+- Last updated: `2026-10-22`
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -64,6 +66,11 @@
   复用合法 SGP
 
 ## Current handoff
+
+2026-10-22：负责人确认保留平面 Camera 的程序 roll，pan/wheel 不清零，中键围绕有效
+锚点逐步扶正。[Roll 导航维护](plans/2026-10-22-camera-roll-navigation.md) 技术完成，
+102 项 Specs 与两种投影真实鼠标 E2E 通过，[review](reviews/2026-10-22-camera-roll-navigation.md)
+记录验证与手感验收边界。只调整 owned controller；既有 terrain/orbit 未决视觉记录保持原状态。
 
 2026-10-20：模型压平与 S3M 已快进合并到 `scenegis/develop@12171614c5`。
 多级地形缺失时的 FLAT 提前发布与高度包围体收紧已修复，

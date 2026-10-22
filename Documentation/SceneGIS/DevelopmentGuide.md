@@ -507,6 +507,11 @@ lookAtWorldPosition 的固定 +Z up、四类 frustum 的 public getPickRay 和 f
 正交 move / rotate 保持宽度，zoom 改变 span；changed 不能使用 positionCartographic.height 计算平移比例，
 还须检测无位移的正交缩放。负 roll 读取与 Cesium 的非负一周范围一致；应用位置一律使用 Cartesian 状态。
 
+合法 roll 不得作为 controller Home/rejection 条件；initial/idle/pan/wheel 保留姿态。
+中键按实际 angular travel 逐步扶正，zero-delta press 不改姿态，完整 HPR 参与固定
+window anchor 解算。惯性、再次 press、外部 pose、非 identity transform、nadir 等价
+分解与 underground tangent release 必须验证；不增加 idle animation。见 ADR-0004 的 roll 修订。
+
 实现或评审planar controller gesture时同时检查：
 
 - Pan、rotate与wheel共享一份private anchor resolver，严格按合法in-extent rendered depth、

@@ -2,6 +2,8 @@
 
 ## Maintenance
 
+- [平面相机 Roll 与导航接管](2026-10-22-camera-roll-navigation.md)（技术完成；102 Specs、2 browser E2E 通过，负责人视觉确认待定）
+
 - [平面地形剖切与多边形裁剪](2026-09-18-terrain-clipping.md)（completed；共面裙边修复与负责人视觉验收通过）
 
 - [地形元数据接入与 TileWorker 核验](2026-09-18-terrain-layer-metadata.md)（active；技术验证完成，负责人视觉验收待定）

@@ -1,5 +1,7 @@
 # Planar Terrain Advanced Reviews
 
+- [平面相机 Roll 导航](2026-10-22-camera-roll-navigation.md)（技术通过；保留姿态与连续扶正，负责人视觉确认待定）
+
 - [平面地形裁剪](2026-09-18-terrain-clipping.md)
   （approved；累计 92 项相关 Specs、2 项真实地形 E2E 与 engine tarball 定向 smoke；共面裙边修复及负责人视觉验收通过）
 

@@ -613,6 +613,50 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
       expect(controller._rotateDistance).toEqualEpsilon(distance, 1e-9);
     });
 
+    it("continues rolled orbit inertia and yields to an external pose before the next press", function () {
+      scene.camera.setView({
+        destination: new Cartesian3(0, -30, 30),
+        orientation: { heading: 0.25, pitch: -0.9, roll: 0.6 },
+      });
+      const home = spyOn(controller, "viewHome").and.callThrough();
+      queueMovement(
+        CameraEventType.MIDDLE_DRAG,
+        center,
+        new Cartesian2(center.x + 4, center.y),
+      );
+      controller._aggregator._pressTime[`${CameraEventType.MIDDLE_DRAG}`] =
+        new Date();
+      controller.update(scene, time);
+      const pivot = Cartesian3.clone(controller._rotatePivot);
+      const releasedRoll = SceneGISPlanarCamera.getHeadingPitch(
+        scene.camera,
+      ).roll;
+      const terrain = spyOn(world, "pickTerrain").and.callThrough();
+      release(CameraEventType.MIDDLE_DRAG);
+      advance();
+      expect(controller._inertia.running).toBe(true);
+      expect(
+        SceneGISPlanarCamera.getHeadingPitch(scene.camera).roll,
+      ).toBeLessThan(releasedRoll);
+      expect(project(scene, pivot)).toEqualEpsilon(center, 1e-8);
+      expect(terrain).not.toHaveBeenCalled();
+      scene.camera.setView({
+        destination: new Cartesian3(0, -30, 30),
+        orientation: { heading: 0.25, pitch: -0.9, roll: -0.8 },
+      });
+      const position = Cartesian3.clone(scene.camera.positionWC);
+      const up = Cartesian3.clone(scene.camera.upWC);
+      advance();
+      expect(controller._inertia.type).toBeUndefined();
+      expect(scene.camera.positionWC).toEqualEpsilon(position, 1e-12);
+      expect(scene.camera.upWC).toEqualEpsilon(up, 1e-12);
+      queueMovement(CameraEventType.MIDDLE_DRAG, center, center);
+      controller.update(scene, time);
+      expect(scene.camera.positionWC).toEqualEpsilon(position, 1e-10);
+      expect(scene.camera.upWC).toEqualEpsilon(up, 1e-12);
+      expect(home).not.toHaveBeenCalled();
+    });
+
     it("applies surface clearance during coast and allows underground pivot crossing", function () {
       move(CameraEventType.LEFT_DRAG);
       release(CameraEventType.LEFT_DRAG);
@@ -661,6 +705,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
       direction,
       up,
       new Cartesian3(),
+      0.45,
     );
     SceneGISPlanarCamera.setWorldPose(
       scene.camera,
@@ -1613,6 +1658,10 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     });
     widget.addController(controller);
     controller.viewHome(scene);
+    scene.camera.setView({
+      destination: new Cartesian3(0, -30, 30),
+      orientation: { heading: 0, pitch: -CesiumMath.PI_OVER_FOUR, roll: 1.1 },
+    });
     controller.firstUpdate(scene, JulianDate.now());
     const center = new Cartesian2(
       scene.canvas.clientWidth * 0.5,
@@ -1626,7 +1675,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     const homeSpy = spyOn(controller, "viewHome").and.callThrough();
     const tangentEnd = new Cartesian2(
       center.x,
-      center.y - scene.canvas.clientHeight * 0.5,
+      center.y - scene.canvas.clientHeight * 0.25,
     );
 
     queueMovement(CameraEventType.MIDDLE_DRAG, center, tangentEnd);
@@ -1636,8 +1685,16 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     const heightCalls = heightSpy.calls.count();
     const terrainCalls = terrainSpy.calls.count();
 
+    const remainingRoll = SceneGISPlanarCamera.getHeadingPitch(
+      scene.camera,
+    ).roll;
+    expect(remainingRoll).toBeGreaterThan(0.3);
+
     releaseButton(CameraEventType.MIDDLE_DRAG);
     controller.update(scene, JulianDate.now());
+    expect(
+      SceneGISPlanarCamera.getHeadingPitch(scene.camera).roll,
+    ).toEqualEpsilon(remainingRoll, 1e-12);
     expect(scene.camera.positionWC.z).toBeLessThan(pivot.z);
     expect(Math.abs(controller._pitch)).toBeLessThan(1e-4);
     expect(heightSpy.calls.count()).toBe(heightCalls);
@@ -1649,7 +1706,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     queueMovement(
       CameraEventType.LEFT_DRAG,
       center,
-      new Cartesian2(center.x + 5.0, center.y),
+      new Cartesian2(center.x - 5.0, center.y),
     );
     controller.update(scene, JulianDate.now());
     expect(controller._panActive).toBe(true);
@@ -1913,7 +1970,7 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
     expect(scene.camera.positionWC).toEqual(external);
   });
 
-  it("preserves nadir heading through a non-identity transform and homes rolled poses", function () {
+  it("preserves nadir heading through a non-identity transform and zooms rolled poses", function () {
     const scene = createWidget();
     scene.camera.frustum = perspective();
     scene.camera._setTransform(
@@ -1963,12 +2020,101 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
       new Cartesian2(0, -120),
     );
     controller.update(scene, JulianDate.now());
-    expect(scene.camera.directionWC).toEqualEpsilon(
-      new Cartesian3(0.0, 0.0, -1.0),
-      1e-12,
-    );
-    expect(scene.camera.upWC).toEqualEpsilon(Cartesian3.UNIT_Y, 1e-12);
-    expect(controller._heading).toBe(0.0);
+    expect(scene.camera.directionWC).toEqualEpsilon(direction, 1e-12);
+    expect(scene.camera.upWC).toEqualEpsilon(rolledUp, 1e-12);
+    expect(controller._heading).toEqualEpsilon(0.4, 1e-12);
+  });
+
+  [0, 1, 2, 3].forEach((frustumIndex) => {
+    it(`preserves rolled initial idle pan and zoom poses with frustum ${frustumIndex}`, function () {
+      const scene = createWidget();
+      scene.camera.frustum = createFrusta()[frustumIndex];
+      scene.camera.setView({
+        destination: new Cartesian3(0, -30, 30),
+        orientation: { heading: 0.25, pitch: -0.9, roll: -0.4 },
+        endTransform: Matrix4.fromTranslation(new Cartesian3(500, -700, 100)),
+      });
+      const position = Cartesian3.clone(scene.camera.positionWC);
+      const direction = Cartesian3.clone(scene.camera.directionWC);
+      const up = Cartesian3.clone(scene.camera.upWC);
+      controller = new SceneGISPlanarCameraController({ world });
+      controller.inertiaTranslate = controller.inertiaZoom = 0;
+      widget.addController(controller);
+      const home = spyOn(controller, "viewHome").and.callThrough();
+      controller.firstUpdate(scene, JulianDate.now());
+      controller.update(scene, JulianDate.now());
+      expect(scene.camera.positionWC).toEqualEpsilon(position, 1e-10);
+      expect(scene.camera.upWC).toEqualEpsilon(up, 1e-12);
+      const pointer = new Cartesian2(110, 55);
+      const anchor = intersectAtHeight(scene, pointer, 0);
+      const end = new Cartesian2(112, 56);
+      queueMovement(CameraEventType.LEFT_DRAG, pointer, end);
+      controller.update(scene, JulianDate.now());
+      expect(project(scene, anchor)).toEqualEpsilon(end, 1e-8);
+      releaseButton(CameraEventType.LEFT_DRAG);
+      controller.update(scene, JulianDate.now());
+      const zoomAnchor = intersectAtHeight(scene, pointer, 0);
+      const range = getZoomRange(scene);
+      queueMovement(CameraEventType.WHEEL, pointer, new Cartesian2(0, 5));
+      Cartesian2.clone(pointer, controller._aggregator._currentMousePosition);
+      controller.update(scene, JulianDate.now());
+      expect(getZoomRange(scene)).toBeLessThan(range);
+      expect(project(scene, zoomAnchor)).toEqualEpsilon(pointer, 1e-8);
+      expect(scene.camera.directionWC).toEqualEpsilon(direction, 1e-12);
+      expect(scene.camera.upWC).toEqualEpsilon(up, 1e-12);
+      expect(home).not.toHaveBeenCalled();
+    });
+
+    it(`unrolls a held orbit continuously without a zero-delta jump with frustum ${frustumIndex}`, function () {
+      const scene = createWidget();
+      scene.camera.frustum = createFrusta()[frustumIndex];
+      const roll = frustumIndex % 2 ? -0.4 : 0.4;
+      scene.camera.setView({
+        destination: new Cartesian3(0, -30, 30),
+        orientation: { heading: 0.25, pitch: -0.9, roll },
+      });
+      controller = new SceneGISPlanarCameraController({ world });
+      controller.inertiaSpin = 0;
+      widget.addController(controller);
+      controller.firstUpdate(scene, JulianDate.now());
+      const home = spyOn(controller, "viewHome").and.callThrough();
+      const initial = Cartesian3.clone(scene.camera.positionWC);
+      const up = Cartesian3.clone(scene.camera.upWC);
+      const pointer = new Cartesian2(115, 60);
+      const pivot = intersectAtHeight(scene, pointer, 0);
+      queueMovement(CameraEventType.MIDDLE_DRAG, pointer, pointer);
+      controller.update(scene, JulianDate.now());
+      expect(scene.camera.positionWC).toEqualEpsilon(initial, 1e-10);
+      expect(scene.camera.upWC).toEqualEpsilon(up, 1e-12);
+      const distance = controller._rotateDistance;
+      let previous = Math.abs(roll);
+      for (let i = 0; i < 40; i++) {
+        const start = new Cartesian2(pointer.x + i, pointer.y);
+        const end = new Cartesian2(start.x + 1, start.y);
+        queueMovement(CameraEventType.MIDDLE_DRAG, start, end);
+        controller.update(scene, JulianDate.now());
+        const current = Math.abs(
+          SceneGISPlanarCamera.getHeadingPitch(scene.camera).roll,
+        );
+        expect(current).toBeLessThanOrEqual(previous + 1e-12);
+        expect(Math.abs(current - previous)).toBeLessThan(0.03);
+        expect(project(scene, pivot)).toEqualEpsilon(pointer, 1e-8);
+        expect(controller._rotateDistance).toBe(distance);
+        if (i === 0) {
+          expect(current).toBeGreaterThan(0.3);
+          expect(current).toBeLessThan(0.4);
+        }
+        previous = current;
+      }
+      expect(previous).toBeLessThan(1e-12);
+      releaseButton(CameraEventType.MIDDLE_DRAG);
+      controller.update(scene, JulianDate.now());
+      const settled = Cartesian3.clone(scene.camera.positionWC);
+      queueMovement(CameraEventType.MIDDLE_DRAG, pointer, pointer);
+      controller.update(scene, JulianDate.now());
+      expect(scene.camera.positionWC).toEqualEpsilon(settled, 1e-10);
+      expect(home).not.toHaveBeenCalled();
+    });
   });
 
   it("does not mutate the camera for input on a zero-sized canvas", function () {
@@ -2143,12 +2289,10 @@ describe("SceneGIS/Scene/SceneGISPlanarCameraController", function () {
       scene.camera.frustum = frustum;
       controller.firstUpdate(scene, JulianDate.now());
       const initial = new Cartesian3(offset, offset - 1500.0, 1500.0);
-      SceneGISPlanarCamera.setWorldPose(
-        scene.camera,
-        initial,
-        new Cartesian3(0.0, 0.8, -0.6),
-        new Cartesian3(0.0, 0.6, 0.8),
-      );
+      scene.camera.setView({
+        destination: initial,
+        orientation: { heading: 0, pitch: -Math.atan(0.75), roll: 0.2 },
+      });
       const anchor = project(scene, pivot);
       queueMovement(CameraEventType.MIDDLE_DRAG, anchor, anchor);
       controller.update(scene, JulianDate.now());

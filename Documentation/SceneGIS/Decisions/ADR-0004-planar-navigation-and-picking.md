@@ -428,6 +428,27 @@ P4 不以人工鼠标操作或 Sandcastle 代替自动化 Specs。
 
 ## 升级检查点
 
+### 2026-10-22 Roll 导航修订
+
+此修订替代上文 P4/P7 的 zero-roll admission 与 non-zero-roll → Home 条款。
+合法 orthonormal Camera 姿态允许 signed roll；initial sync、idle、pan 和 wheel
+不因 roll 清零或 Home。Public Camera 的 setView / flyTo / HPR 继续沿用 ADR-0037。
+其他已有 pitch、surface-side、center boundary 与 terrain clearance 条件保持。
+
+中键旋转保存按下时的完整 pivot、window anchor 和 distance。Controller 保存 signed
+roll，并按每次 normalized mouse travel × 既有 ROTATE_RATE 等量减小其绝对值，
+最短方向收敛至 0；零 movement 保留姿态。使用包含剩余 roll 的完整 axes 解算锚点
+位置，不能先清零再拾取。惯性复用同一状态，外部 pose / 新 press 取消余速。
+手势结束时尚未消除的 roll 留给后续中键操作；没有 idle timer、自动动画或新 public
+rate。Underground tangent release 的既有微量 pitch 修正保留剩余 roll。
+
+垂直方向 heading/roll 的等价分解沿用 Camera helper，不能据此推断画面被自动扶正。
+有效锚点允许 center 越界、pan/wheel boundary 和 endpoint terrain clearance 继续由
+ADR-0024 / ADR-0026 负责。碰撞校正优先于严格固定轨道。没有新增 upstream seam。
+实现与证据见 [roll 维护计划](../../../AgentDocs/planar-terrain-advanced/plans/2026-10-22-camera-roll-navigation.md)。
+
+### 常规升级检查
+
 每次 Cesium 升级检查：
 
 - `Controller`、`ControllerHost`、`CesiumWidget.addController/removeController` 的
