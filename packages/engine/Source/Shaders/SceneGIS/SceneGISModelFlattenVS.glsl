@@ -34,7 +34,7 @@ void vertexMain(VertexInput vsInput, inout czm_modelVertexOutput vsOutput)
         return;
     }
     vec3 local = (u_sgModelToFlatten * vec4(vsOutput.positionMC, 1.0)).xyz;
-    if (sgFlattenContains(local.xy)) {
+    if (sgFlattenContains(local.xy) != u_sgFlattenInverse) {
         v_sgFlattened = abs(local.z - u_sgFlattenHeight) > 0.00001 ? 1.0 : 0.0;
         local.z = u_sgFlattenHeight;
         vsOutput.positionMC = (u_sgFlattenToModel * vec4(local, 1.0)).xyz;

@@ -52,6 +52,7 @@ describe("SceneGIS/Scene/SceneGISModelFlatten", function () {
     ]);
     const s = make({ modelMatrix: matrix, polygonHierarchy: polygon });
     expect(s instanceof CustomShader).toBe(true);
+    expect(s.inverse).toBe(false);
     matrix[12] = 0;
     polygon.positions[0].x = 400;
     expect(s.modelMatrix[12]).toBe(13000000);
@@ -129,6 +130,48 @@ describe("SceneGIS/Scene/SceneGISModelFlatten", function () {
     }).toThrowDeveloperError();
     expect(s.height).toBe(0);
   });
+  it("validates inverse mode atomically and preserves shader resources on toggles", function () {
+    expect(() => make({ inverse: 1 })).toThrowDeveloperError();
+    const s = make({ inverse: true });
+    const edges = s.uniforms.u_sgFlattenEdges.value;
+    const vertexShader = s.vertexShaderText;
+    expect(s.inverse).toBe(true);
+    expect(() => {
+      s.inverse = "false";
+    }).toThrowDeveloperError();
+    expect(s.inverse).toBe(true);
+    s.inverse = false;
+    expect(s.inverse).toBe(false);
+    expect(s.uniforms.u_sgFlattenEdges.value).toBe(edges);
+    expect(s.vertexShaderText).toBe(vertexShader);
+  });
+  it("updates inverse tile bounds outside the polygon and restores cached exact volumes", function () {
+    const s = make({ height: -100 });
+    const source = new TileBoundingSphere(new Cartesian3(100, 0, 40), 5);
+    expect(SceneGISModelFlatten._tileBounds(s, source)).toBe(source);
+    s.inverse = true;
+    const expanded = SceneGISModelFlatten._tileBounds(s, source);
+    expect(expanded).not.toBe(source);
+    expect(
+      Cartesian3.distance(expanded.center, new Cartesian3(100, 0, -100)),
+    ).toBeLessThan(expanded.radius);
+    expect(SceneGISModelFlatten._tileBounds(s, source)).toBe(expanded);
+    s.height = 150;
+    expect(
+      Cartesian3.distance(
+        SceneGISModelFlatten._tileBounds(s, source).center,
+        new Cartesian3(100, 0, 150),
+      ),
+    ).toBeLessThan(expanded.radius);
+    s.inverse = false;
+    expect(SceneGISModelFlatten._tileBounds(s, source)).toBe(source);
+    s.inverse = true;
+    expect(SceneGISModelFlatten._tileBounds(s, source)).not.toBe(source);
+    s.enabled = false;
+    expect(SceneGISModelFlatten._tileBounds(s, source)).toBe(source);
+    expect(source.center).toEqual(new Cartesian3(100, 0, 40));
+    expect(source.radius).toBe(5);
+  });
   it("covers lowered and raised vertices without mutating source tile bounds", function () {
     const s = make({ height: -100 });
     const original = new TileBoundingSphere(new Cartesian3(0, 0, 40), 5);
@@ -173,6 +216,19 @@ describe("SceneGIS/Scene/SceneGISModelFlatten", function () {
       expanded.radius,
     );
     expect(Cartesian3.distance(source.center, point(100))).toBeLessThan(1e-8);
+    const outside = (z) =>
+      Matrix4.multiplyByPoint(
+        frame,
+        new Cartesian3(200, 100, z),
+        new Cartesian3(),
+      );
+    const exterior = new TileBoundingSphere(outside(100), 10);
+    expect(SceneGISModelFlatten._tileBounds(s, exterior)).toBe(exterior);
+    s.inverse = true;
+    const inverseBounds = SceneGISModelFlatten._tileBounds(s, exterior);
+    expect(
+      Cartesian3.distance(inverseBounds.center, outside(-50)),
+    ).toBeLessThan(inverseBounds.radius);
   });
   it("restores command bounds on disable, replacement and model movement", function () {
     const s = make({ height: -100 });
@@ -199,6 +255,15 @@ describe("SceneGIS/Scene/SceneGISModelFlatten", function () {
     SceneGISModelFlatten._updateCommandBounds(command);
     expect(result.radius).toBe(5);
     expect(result.center.x).toBe(200);
+    s.inverse = true;
+    SceneGISModelFlatten._updateCommandBounds(command);
+    expect(
+      Cartesian3.distance(result.center, new Cartesian3(200, 0, -100)),
+    ).toBeLessThan(result.radius);
+    s.inverse = false;
+    SceneGISModelFlatten._updateCommandBounds(command);
+    expect(result.radius).toBe(5);
+    expect(result.center).toEqual(new Cartesian3(200, 0, 40));
     command.runtimePrimitive.node.instances = { transformInWorldSpace: true };
     expect(() =>
       SceneGISModelFlatten._updateCommandBounds(command),

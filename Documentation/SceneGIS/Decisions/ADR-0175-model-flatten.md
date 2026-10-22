@@ -2,6 +2,7 @@
 
 - Status: implemented and automatically qualified; visual acceptance pending
 - Date: 2026-10-20
+- Amended: 2026-10-22, inverse vertex selection
 - Plan: [model-flatten](../../../AgentDocs/model-flatten/plans/2026-10-20-flatten.md)
 - Upstream integration: SGP-0064
 
@@ -43,6 +44,24 @@ or disabling culling.
 
 Raster masks are deferred until complex-region performance warrants their
 resolution tradeoff. Mesh splitting is a different capability.
+
+## Inverse selection amendment
+
+Constructor option and mutable boolean `inverse` default to false. True preserves
+the polygon body and outer boundary, while its exterior, holes and hole boundaries
+flatten to the same local `height`. This exactly complements the existing vertex
+membership test. It operates only on consuming models, with no fragment clipping,
+topology change or additional pass. A uniform toggle preserves shader and texture
+identity; the bounds revision changes so native traversal sees current volumes.
+
+In inverse mode, the owned bounds helper cannot reject spheres outside the polygon
+AABB. It conservatively unions every source sphere with its height projection,
+including possibly protected content. No inside-AABB containment shortcut is safe
+for arbitrary concavity and holes. This can increase selected content and reduce
+culling efficiency; native SSE and scheduling remain unchanged. The existing
+SGP-0064 seams suffice without modifying upstream files.
+
+Maintenance plan: [inverse flattening](../../../AgentDocs/model-flatten/plans/2026-10-22-inverse.md).
 
 ## Ownership, delivery and validation
 

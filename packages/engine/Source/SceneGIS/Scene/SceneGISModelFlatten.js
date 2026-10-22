@@ -117,7 +117,8 @@ function preparePolygon(hierarchy) {
 }
 
 /**
- * Flattens existing mesh vertices inside a local XY polygon to a local Z plane.
+ * Flattens existing mesh vertices inside a local XY polygon to a local Z plane,
+ * or outside it when inverse is true.
  * Assign this instance to {@link Cesium3DTileset#customShader}. The immutable
  * polygon supports concavity and direct holes; its Z coordinates are ignored.
  * Globe callers supply an ENU frame; a constant ENU Z is not ellipsoid height.
@@ -139,6 +140,7 @@ function preparePolygon(hierarchy) {
  * @param {Matrix4} options.modelMatrix Right-handed rigid local-to-world transform, copied at construction.
  * @param {number} options.height Target local Z in meters.
  * @param {boolean} [options.enabled=true] Whether to deform the mesh.
+ * @param {boolean} [options.inverse=false] Preserve the polygon and flatten its complement, including holes.
  * @exception {DeveloperError} The frame, polygon, height or rendering context is unsupported.
  * @example
  * const flatten = new Cesium.SceneGISModelFlatten({
@@ -156,6 +158,10 @@ class SceneGISModelFlatten extends CustomShader {
     const enabled = options.enabled ?? true;
     if (typeof enabled !== "boolean") {
       throw new DeveloperError("enabled must be boolean.");
+    }
+    const inverse = options.inverse ?? false;
+    if (typeof inverse !== "boolean") {
+      throw new DeveloperError("inverse must be boolean.");
     }
     super({
       uniforms: {
@@ -175,6 +181,7 @@ class SceneGISModelFlatten extends CustomShader {
         u_sgFlattenBounds: { type: UniformType.VEC4, value: polygon.bounds },
         u_sgFlattenHeight: { type: UniformType.FLOAT, value: height },
         u_sgFlattenEnabled: { type: UniformType.BOOL, value: enabled },
+        u_sgFlattenInverse: { type: UniformType.BOOL, value: inverse },
         u_sgModelToFlatten: { type: UniformType.MAT4, value: new Matrix4() },
         u_sgFlattenToModel: { type: UniformType.MAT4, value: new Matrix4() },
       },
@@ -228,6 +235,26 @@ class SceneGISModelFlatten extends CustomShader {
     this._revision++;
   }
 
+  /** Whether to preserve the polygon and flatten its complement within the model.
+   * In inverse mode, the outer boundary stays at its original height, while holes
+   * and their boundaries are flattened. Crossing triangles are not split.
+   * Changing this value does not rebuild the shader or polygon texture.
+   * @type {boolean}
+   * @default false
+   */
+  get inverse() {
+    return this.uniforms.u_sgFlattenInverse.value;
+  }
+  set inverse(value) {
+    if (typeof value !== "boolean") {
+      throw new DeveloperError("inverse must be boolean.");
+    }
+    if (value !== this.inverse) {
+      this.uniforms.u_sgFlattenInverse.value = value;
+      this._revision++;
+    }
+  }
+
   /** A copy of the immutable local-to-world frame.
    * @type {Matrix4}
    * @readonly
@@ -274,7 +301,11 @@ class SceneGISModelFlatten extends CustomShader {
     );
     const r = source.radius;
     const b = this._bounds;
-    if (p.x + r < b.x || p.x - r > b.z || p.y + r < b.y || p.y - r > b.w) {
+    // In inverse mode, even spheres outside the polygon can be deformed.
+    if (
+      !this.inverse &&
+      (p.x + r < b.x || p.x - r > b.z || p.y + r < b.y || p.y - r > b.w)
+    ) {
       return BoundingSphere.clone(source, result);
     }
     p.z = this.height;

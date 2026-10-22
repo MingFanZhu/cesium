@@ -32,6 +32,9 @@
       </p>
       <label><input id="enabled" type="checkbox" checked /> 启用压平</label>
       <label
+        ><input id="inverse" type="checkbox" /> 反向压平（保留选中区域）</label
+      >
+      <label
         >范围
         <select id="shape">
           <option value="hole">矩形带孔洞</option>
@@ -68,7 +71,7 @@
       <button id="top">俯视检查</button>
       <p>
         高度为局部坐标 Z。球面使用局部 ENU 水平面；平面使用世界
-        Z。仅移动已有顶点，边缘三角形会形成斜坡，孔洞内部保留原高度。
+        Z。仅移动已有顶点，边缘三角形会形成斜坡。默认压平选区、保留孔洞；反向时保留选区，压平外部和孔洞。
       </p>
       <p>
         轮廓表示目标高度，可能被未压平的表面遮挡。改变范围时重建范围纹理；拖动高度不重建。

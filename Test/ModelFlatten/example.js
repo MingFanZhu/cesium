@@ -123,6 +123,7 @@ function replaceRange() {
     modelMatrix: frame,
     height: +document.getElementById("height").value,
     enabled: document.getElementById("enabled").checked,
+    inverse: document.getElementById("inverse").checked,
   });
   const previous = flatten;
   flatten = next;
@@ -177,6 +178,9 @@ const api = {
 window.flattenExample = api;
 document.getElementById("enabled").onchange = (e) => {
   flatten.enabled = e.target.checked;
+};
+document.getElementById("inverse").onchange = (e) => {
+  flatten.inverse = e.target.checked;
 };
 document.getElementById("height").oninput = (e) => {
   flatten.height = +e.target.value;

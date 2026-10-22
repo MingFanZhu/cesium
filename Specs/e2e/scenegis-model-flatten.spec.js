@@ -17,6 +17,7 @@ async function frame(page) {
 async function heights(page, positions) {
   return page.evaluate((positions) => {
     const { C, viewer, frame, tileset } = window.flattenExample;
+    const primitives = (window.flattenExample.pickedPrimitives ??= new Map());
     const inverse = C.Matrix4.inverseTransformation(frame, new C.Matrix4());
     return positions.map(([x, y, z]) => {
       const p = C.Matrix4.multiplyByPoint(
@@ -30,8 +31,13 @@ async function heights(page, positions) {
       );
       const hit = viewer.scene.pick(screen);
       const depth = viewer.scene.pickPosition(screen);
+      const key = `${x},${y}`;
+      if (!primitives.has(key)) {
+        primitives.set(key, hit?.primitive);
+      }
       return {
         picked: !!hit,
+        samePrimitive: !!hit && hit.primitive === primitives.get(key),
         z: depth
           ? C.Matrix4.multiplyByPoint(inverse, depth, new C.Cartesian3()).z
           : null,
@@ -126,6 +132,57 @@ for (const world of ["planar", "globe"]) {
       };
     });
     expect(warm.textureBytes).toBe(8192);
+    await page.check("#inverse");
+    await frame(page);
+    const invertedSamples = samples.map(([x, y, z], i) => [
+      x,
+      y,
+      i === 0 ? z : 5,
+    ]);
+    const inverted = await heights(page, invertedSamples);
+    inverted.forEach((r, i) => {
+      expect(r.picked).toBe(true);
+      expect(r.samePrimitive).toBe(true);
+      expect(r.z).toBeCloseTo(invertedSamples[i][2], 0);
+    });
+    await page.screenshot({
+      path: testInfo.outputPath(`${world}-inverse-grid.png`),
+    });
+    warm.inverse = await page.evaluate(() => {
+      const t = window.flattenExample;
+      const timings = [];
+      for (let i = 0; i < 200; i++) {
+        const start = performance.now();
+        for (let j = 0; j < 100; j++) {
+          t.C.SceneGISModelFlatten._tileBounds(
+            t.flatten,
+            t.tileset.root._boundingVolume,
+          );
+        }
+        timings.push(performance.now() - start);
+      }
+      timings.sort((a, b) => a - b);
+      return { median100Queries: timings[100], p95: timings[190] };
+    });
+    await page.evaluate(() => {
+      window.flattenExample.flatten.height = -50;
+    });
+    await frame(page);
+    const lowered = await heights(
+      page,
+      samples.map(([x, y, z], i) => [x, y, i === 0 ? z : -50]),
+    );
+    lowered.forEach((r, i) =>
+      expect(r.z).toBeCloseTo(i === 0 ? samples[i][2] : -50, 0),
+    );
+    // Disabling also restores the source while inverse mode remains selected.
+    await page.uncheck("#enabled");
+    await frame(page);
+    (await heights(page, samples)).forEach((r, i) =>
+      expect(r.z).toBeCloseTo(samples[i][2], 0),
+    );
+    await page.check("#enabled");
+    await page.uncheck("#inverse");
     await page.evaluate(() => {
       window.flattenExample.flatten.height = 170;
     });
@@ -175,6 +232,28 @@ for (const world of ["planar", "globe"]) {
     const narrow = await heights(page, [[-40, 40, 170]]);
     expect(narrow[0].picked).toBe(true);
     expect(narrow[0].z).toBeCloseTo(170, 0);
+    // Inverse deformation must also survive culling above the source geometry.
+    await page.check("#inverse");
+    await page.evaluate(() => {
+      const { C, viewer, frame } = window.flattenExample;
+      viewer.camera.setView({
+        destination: C.Matrix4.multiplyByPoint(
+          frame,
+          new C.Cartesian3(85, -230, 190),
+          new C.Cartesian3(),
+        ),
+        orientation: {
+          direction: C.Cartesian3.clone(viewer.camera.directionWC),
+          up: C.Cartesian3.clone(viewer.camera.upWC),
+        },
+      });
+    });
+    await frame(page);
+    const inverseNarrow = await heights(page, [[85, 80, 170]]);
+    expect(inverseNarrow[0].picked).toBe(true);
+    expect(inverseNarrow[0].samePrimitive).toBe(true);
+    expect(inverseNarrow[0].z).toBeCloseTo(170, 0);
+    await page.uncheck("#inverse");
     await page.evaluate(() => {
       const t = window.flattenExample;
       t.viewer.camera.frustum.fov = Math.PI / 3;
@@ -248,6 +327,22 @@ for (const world of ["planar", "globe"]) {
     await frame(page);
     await page.screenshot({
       path: testInfo.outputPath(`${world}-photogrammetry.png`),
+    });
+    await page.check("#inverse");
+    // Range replacement must retain the selected mode and release the old shader.
+    await page.evaluate(() => {
+      window.flattenExample.previousShader = window.flattenExample.flatten;
+    });
+    await page.selectOption("#shape", "concave");
+    await frame(page);
+    expect(
+      await page.evaluate(() => ({
+        inverse: window.flattenExample.flatten.inverse,
+        oldDestroyed: window.flattenExample.previousShader.isDestroyed(),
+      })),
+    ).toEqual({ inverse: true, oldDestroyed: true });
+    await page.screenshot({
+      path: testInfo.outputPath(`${world}-inverse-photogrammetry.png`),
     });
     expect(await page.evaluate(() => window.flattenExample.errors)).toEqual([]);
     expect(
