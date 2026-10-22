@@ -4,6 +4,8 @@
 
 当前 review：
 
+- [平面影像分屏](2026-10-22-imagery-split.md)（技术通过，负责人视觉验收待定）。
+
 - [通用影像来源](2026-09-18-imagery-protocols.md)（approved；技术自审与负责人视觉验收通过）
 
 - [P8 release qualification review](2026-08-06-p8-release-qualification.md)

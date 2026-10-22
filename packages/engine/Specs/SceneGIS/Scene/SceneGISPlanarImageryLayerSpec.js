@@ -6,6 +6,7 @@ import {
   SceneGISPlanarImageryLayer,
   SceneGISPlanarImageryLayerCollection,
   SceneGISPlanarTilingScheme,
+  SplitDirection,
 } from "../../../index.js";
 
 describe("SceneGIS/Scene/SceneGISPlanarImageryLayer", function () {
@@ -32,6 +33,54 @@ describe("SceneGIS/Scene/SceneGISPlanarImageryLayer", function () {
       requestImage: function () {},
     };
   }
+
+  it("validates native split directions and notifies only on change", function () {
+    const provider = createProvider();
+    const layer = new SceneGISPlanarImageryLayer(provider);
+    const changed = jasmine.createSpy("changed");
+    layer._changeListener = changed;
+    expect(layer.splitDirection).toBe(SplitDirection.NONE);
+    for (const direction of [
+      SplitDirection.LEFT,
+      SplitDirection.RIGHT,
+      SplitDirection.NONE,
+    ]) {
+      const configured = new SceneGISPlanarImageryLayer(provider, {
+        splitDirection: direction,
+      });
+      expect(configured.splitDirection).toBe(direction);
+      configured.destroy();
+      layer.splitDirection = direction;
+      layer.splitDirection = direction;
+    }
+    expect(changed).toHaveBeenCalledTimes(3);
+    expect(changed).toHaveBeenCalledWith(layer, "splitDirection");
+    for (const invalid of [
+      2,
+      -2,
+      0.5,
+      Number.NaN,
+      Infinity,
+      "LEFT",
+      undefined,
+      null,
+    ]) {
+      expect(() => {
+        layer.splitDirection = invalid;
+      }).toThrowDeveloperError();
+      expect(layer.splitDirection).toBe(SplitDirection.NONE);
+      if (invalid !== undefined && invalid !== null) {
+        expect(
+          () =>
+            new SceneGISPlanarImageryLayer(provider, {
+              splitDirection: invalid,
+            }),
+        ).toThrowDeveloperError();
+      }
+    }
+    expect(changed).toHaveBeenCalledTimes(3);
+    layer.destroy();
+  });
 
   it("owns show and alpha state without owning the provider", function () {
     const provider = createProvider();

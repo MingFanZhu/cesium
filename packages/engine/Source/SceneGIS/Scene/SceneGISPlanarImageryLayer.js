@@ -2,11 +2,22 @@ import Color from "../../Core/Color.js";
 import destroyObject from "../../Core/destroyObject.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import Frozen from "../../Core/Frozen.js";
+import SplitDirection from "../../Scene/SplitDirection.js";
 import { validateImageryProvider } from "./_private/_SceneGISPlanarImagery.js";
 
 function validateAlpha(value) {
   if (!Number.isFinite(value) || value < 0.0 || value > 1.0) {
     throw new DeveloperError("alpha must be a finite number from zero to one.");
+  }
+}
+
+function validateSplitDirection(value) {
+  if (
+    value !== SplitDirection.LEFT &&
+    value !== SplitDirection.NONE &&
+    value !== SplitDirection.RIGHT
+  ) {
+    throw new DeveloperError("splitDirection must be a SplitDirection value.");
   }
 }
 
@@ -79,6 +90,7 @@ function colorsEqualRgb(left, right) {
  * @param {object} [options] Object with the following properties:
  * @param {boolean} [options.show=true] Whether the layer is shown.
  * @param {number} [options.alpha=1.0] The layer opacity.
+ * @param {SplitDirection} [options.splitDirection=SplitDirection.NONE] The side of {@link Scene#splitPosition} on which to display this layer.
  * @param {number} [options.brightness=1.0] The layer brightness.
  * @param {number} [options.contrast=1.0] The layer contrast.
  * @param {number} [options.hue=0.0] The layer hue rotation in radians.
@@ -87,13 +99,14 @@ function colorsEqualRgb(left, right) {
  * @param {Color} [options.colorToAlpha] The raw sampled RGB color made transparent.
  * @param {number} [options.colorToAlphaThreshold=0.004] The strict maximum-channel RGB distance used by color-to-alpha.
  *
- * @exception {DeveloperError} The provider, show flag, alpha, or filter options are invalid.
+ * @exception {DeveloperError} The provider, show flag, alpha, split direction, or filter options are invalid.
  */
 function SceneGISPlanarImageryLayer(imageryProvider, options) {
   validateImageryProvider(imageryProvider);
   options = options ?? Frozen.EMPTY_OBJECT;
   const show = options.show ?? true;
   const alpha = options.alpha ?? 1.0;
+  const splitDirection = options.splitDirection ?? SplitDirection.NONE;
   const brightness = options.brightness ?? 1.0;
   const contrast = options.contrast ?? 1.0;
   const hue = options.hue ?? 0.0;
@@ -105,6 +118,7 @@ function SceneGISPlanarImageryLayer(imageryProvider, options) {
     throw new DeveloperError("show must be a boolean.");
   }
   validateAlpha(alpha);
+  validateSplitDirection(splitDirection);
   validateNonNegative("brightness", brightness);
   validateNonNegative("contrast", contrast);
   validateFinite("hue", hue);
@@ -116,6 +130,7 @@ function SceneGISPlanarImageryLayer(imageryProvider, options) {
   this._imageryProvider = imageryProvider;
   this._show = show;
   this._alpha = alpha;
+  this._splitDirection = splitDirection;
   this._brightness = brightness;
   this._contrast = contrast;
   this._hue = hue;
@@ -174,6 +189,28 @@ Object.defineProperties(SceneGISPlanarImageryLayer.prototype, {
       if (value !== this._alpha) {
         this._alpha = value;
         this._changeListener?.(this, "alpha");
+      }
+    },
+  },
+  /**
+   * Gets or sets the side of {@link Scene#splitPosition} on which this imagery
+   * layer is displayed. Splitting affects imagery color only, not surface depth
+   * or tile loading. Use {@link Scene#requestRender} after changing the split
+   * direction or splitPosition when explicit rendering is enabled.
+   * @memberof SceneGISPlanarImageryLayer.prototype
+   * @type {SplitDirection}
+   * @default SplitDirection.NONE
+   * @exception {DeveloperError} The assigned value is not LEFT, NONE, or RIGHT.
+   */
+  splitDirection: {
+    get: function () {
+      return this._splitDirection;
+    },
+    set: function (value) {
+      validateSplitDirection(value);
+      if (value !== this._splitDirection) {
+        this._splitDirection = value;
+        this._changeListener?.(this, "splitDirection");
       }
     },
   },

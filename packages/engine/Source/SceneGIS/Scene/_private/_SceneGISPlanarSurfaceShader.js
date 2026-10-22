@@ -44,6 +44,7 @@ function createFragmentShader(
     declarations.push(`uniform vec4 u_translationScale${i};`);
     declarations.push(`uniform vec4 u_coverage${i};`);
     declarations.push(`uniform float u_alpha${i};`);
+    declarations.push(`uniform float u_splitDirection${i};`);
     declarations.push(`uniform float u_brightness${i};`);
     declarations.push(`uniform float u_contrast${i};`);
     declarations.push(`uniform float u_hue${i};`);
@@ -72,6 +73,11 @@ function createFragmentShader(
         sample${i}.rgb = pow(sample${i}.rgb, vec3(1.0 / u_gamma${i}));
     } else {
         sample${i}.rgb = czm_gammaCorrect(sample${i}.rgb);
+    }
+    // Match GlobeFS: mask only this layer, preserving surface color and depth.
+    if ((u_splitDirection${i} < 0.0 && gl_FragCoord.x > czm_splitPosition) ||
+        (u_splitDirection${i} > 0.0 && gl_FragCoord.x < czm_splitPosition)) {
+        sample${i}.a = 0.0;
     }
     if (u_brightness${i} != 1.0) {
         sample${i}.rgb = mix(vec3(0.0), sample${i}.rgb, u_brightness${i});

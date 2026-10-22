@@ -471,6 +471,7 @@ function createUniformMap(
       return tile._imagerySlots[i].alpha;
     };
     for (const name of [
+      "splitDirection",
       "brightness",
       "contrast",
       "hue",
@@ -677,6 +678,7 @@ function updateTileSlots(surface, tile, layers) {
     slot.translationScale = binding.translationScale;
     slot.coverage = binding.coverage;
     slot.alpha = layer.alpha;
+    slot.splitDirection = layer.splitDirection;
     slot.brightness = layer.brightness;
     slot.contrast = layer.contrast;
     slot.hue = layer.hue;

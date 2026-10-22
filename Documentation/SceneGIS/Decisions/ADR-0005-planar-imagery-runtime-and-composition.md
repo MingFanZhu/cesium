@@ -413,6 +413,34 @@ subsystem。
 
 ## 升级检查点
 
+### 2026-10-22 修订：原生语义的影像分屏
+
+`SceneGISPlanarImageryLayer` 增加构造选项和可写属性 `splitDirection`，默认
+`SplitDirection.NONE`。复用原生 `SplitDirection.LEFT / NONE / RIGHT`；invalid 值在
+赋值及通知前拒绝，重复赋值无操作。场景位置直接使用原生 `scene.splitPosition`，
+有效区间 `[0,1]`、原生初始值 `0`；不创建第二个 World splitPosition 或分屏控制器。
+
+只迁移官方基线 `6d5d8b1f0725b6f831b336463f4b11c98023427b` 的
+`Shaders/GlobeFS.glsl#sampleAndBlend` 中必要的 alpha 屏蔽数学：LEFT 在
+`gl_FragCoord.x > czm_splitPosition` 时为透明，RIGHT 在 `<` 时透明，等于时双方保留。
+`Renderer/UniformState.js` 将 normalized 场景位置换算为 drawing-buffer 像素，
+因此无需自定义 CSS/DPR uniform。后续 Cesium 升级同步检查上述比较与坐标定义。
+
+每层方向加入现有 normal-render slot/uniform 快照，depth replay 不发布未绘制的
+layer mutation。分屏只影响该影像 sample alpha，不 `discard` 地表，不裁剪 geometry、
+depth、Material 或矢量；原有 color-to-alpha、coverage、alpha、gamma 批次选择与层序保持。
+遮掉的图层仍参与既有请求/readiness 与 sampler 预算，不增加瓦片调度侧剔除。
+
+方向切换、分屏线移动只更新 uniform，不增加 shader variant、纹理、pass 或 draw call。
+方向值通过原有 layer notification 发布；与现有滤镜和原生 splitPosition 一样，
+requestRenderMode 下应用修改后显式调用 `scene.requestRender()`。
+
+本修订为现有单次绘制的局部能力扩展；不支持水平/任意形状分屏或独立相机视口。
+全部实现、Specs、示例均为 SceneGIS-owned，无 upstream 修改及新 SGP。
+见[维护计划](../../../AgentDocs/planar-world/plans/2026-10-22-imagery-split.md)。
+
+### 常规升级检查
+
 每次Cesium升级检查：
 
 - `Resource.fetchImage`对`Request`、`undefined` throttling、flipY、ImageBitmap和cancel的

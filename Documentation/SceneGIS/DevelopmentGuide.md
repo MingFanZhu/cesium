@@ -374,6 +374,11 @@ Sandcastle集成、gallery兼容性或维护既有案例时才继续修改它们
 BBOX 不变，边界外只让该层透明。明确 image HTTP 404 进入 UNAVAILABLE；其他错误仍报告。
 WMTS labels 按 canonical level 索引；TMS metadata 分辨率识别最低层级，Origin 保持全球原点。
 
+影像分屏按 ADR-0005 的 2026-10-22 修订使用原生 SplitDirection / scene.splitPosition。
+验证 LEFT/RIGHT/NONE、0/1 端点、透明层序与 coverage 叠加；被屏蔽一侧必须保留
+地表深度。分屏方向走 normal-render slot 快照，不触发请求、shader/command 重建；
+浏览器检查 CSS/drawing-buffer 比例、resize 和显式 requestRender。
+
 ### 平面 URL Heightmap Provider 检查
 
 `SceneGISPlanarLayerTerrainProvider` 是 ADR-0080 的独立服务入口，负责异步 layer.json、显式平面 profile、

@@ -11,10 +11,10 @@
 | Current phase          | None                                                                                    |
 | Active phase plan      | None                                                                                    |
 | Proposed phase plan    | None                                                                                    |
-| Active standalone plan | None；[局部影像](plans/2026-10-15-sparse-imagery.md) (`completed`)                      |
+| Active standalone plan | None；[平面影像分屏](plans/2026-10-22-imagery-split.md) 技术完成，视觉验收待定          |
 | Architecture contact   | Architecture Agent                                                                      |
 | Execution contact      | Execution Agent                                                                         |
-| Last updated           | `2026-10-15`                                                                            |
+| Last updated           | `2026-10-22`                                                                            |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -62,6 +62,12 @@
 - SGP: `SGP-0001`（`active`）；`SGP-0002`（`active`，仅跟踪 P6 `Viewer.js` 缝隙）
 
 ## Current handoff
+
+2026-10-22：平面影像已接入原生 `SplitDirection` / `scene.splitPosition`。
+沿用单地表绘制与原有 SSE/加载，不裁掉地表深度。67 项 Specs、两项 dev/release
+真实浏览器分屏检查、完整 build/release/types/tsc 通过；见[技术自审](reviews/2026-10-22-imagery-split.md)。
+本地[影像分屏示例](../../Test/Planar/影像分屏.html) 待负责人验收。无上游/SGP 改动；
+负责人随后要求在 `scenegis/develop` 形成本地提交检查点，未要求推送。
 
 2026-10-15：负责人已确认 [局部影像与最低层级契约](discussions/2026-10-15-sparse-imagery-confirmed-contract.md)
 （`resolved`）：覆盖范围由 SDK 配置，数据层级连续，tile HTTP 404 表示缺图；

@@ -4,6 +4,8 @@
 
 ## 当前计划
 
+- 最近 standalone plan：[平面影像分屏](2026-10-22-imagery-split.md)（技术完成，视觉验收待定）。
+
 - 最近完成 standalone plan：[通用影像来源](2026-09-18-imagery-protocols.md)（completed；负责人验收通过）
 
 - 总体计划（extension plan）：

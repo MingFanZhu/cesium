@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 影像分屏</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+    <style>
+      #splitter {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: white;
+        box-shadow: 0 0 5px #172c40;
+        z-index: 3;
+        cursor: ew-resize;
+        touch-action: none;
+        transform: translateX(-50%);
+      }
+      #splitter::after {
+        content: "↔";
+        position: absolute;
+        top: 55%;
+        left: -17px;
+        width: 38px;
+        height: 38px;
+        line-height: 38px;
+        text-align: center;
+        border-radius: 50%;
+        background: white;
+        color: #172c40;
+        font-size: 25px;
+      }
+      aside {
+        z-index: 4;
+      }
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+      input[type="range"] {
+        width: 150px;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div
+      id="splitter"
+      role="separator"
+      aria-label="影像分屏线"
+      aria-orientation="vertical"
+      tabindex="0"
+    ></div>
+    <aside>
+      <h1>影像分屏</h1>
+      <p>左侧原色，右侧灰度。使用本地示意影像和地形，可拖动白线对比。</p>
+      <label
+        >分屏位置
+        <input
+          id="position"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="0.5"
+      /></label>
+      <label
+        >右层透明度
+        <input id="alpha" type="range" min="0" max="1" step="0.01" value="1"
+      /></label>
+      <label><input id="show" type="checkbox" checked />显示右层</label>
+      <label
+        >右层范围
+        <select id="direction">
+          <option value="1">右侧</option>
+          <option value="-1">左侧</option>
+          <option value="0">全屏</option>
+        </select></label
+      >
+      <p>
+        <button id="swap">交换左右</button> <button id="reset">恢复默认</button>
+      </p>
+      <p>
+        <button id="overhead">俯视</button>
+        <button id="oblique">倾斜视角</button>
+      </p>
+      <p><a href="示例目录.html">示例目录</a></p>
+      <p>
+        沿用 layer.splitDirection 与
+        scene.splitPosition；分屏仅影响影像，不裁掉地形。
+      </p>
+      <div id="error"></div>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module">
+      import * as C from "/Build/CesiumUnminified/index.js";
+      import exposeExample from "/Test/example-lifecycle.js";
+
+      const viewer = new C.Viewer("map", {
+        planarWorld: {
+          crs: "LOCAL",
+          extent: {
+            minimumX: -10000,
+            minimumY: -10000,
+            maximumX: 10000,
+            maximumY: 10000,
+          },
+          maximumLevel: 3,
+          baseColor: C.Color.fromCssColorString("#263b4d"),
+        },
+        baseLayerPicker: false,
+        geocoder: false,
+        homeButton: false,
+        sceneModePicker: false,
+        navigationHelpButton: false,
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+        requestRenderMode: true,
+        maximumRenderTimeChange: Infinity,
+      });
+      const scene = viewer.scene;
+      scene.environmentEffects.enabled = false;
+      const world = viewer.planarWorld;
+      const provider = new C.SceneGISPlanarUrlTemplateImageryProvider({
+        url: "/Test/Planar/data/grid.png",
+        tilingScheme: world.tilingScheme,
+        maximumLevel: 0,
+      });
+      const left = world.imageryLayers.add(
+        new C.SceneGISPlanarImageryLayer(provider, {
+          splitDirection: C.SplitDirection.LEFT,
+        }),
+      );
+      const right = world.imageryLayers.add(
+        new C.SceneGISPlanarImageryLayer(provider, {
+          splitDirection: C.SplitDirection.RIGHT,
+          saturation: 0,
+        }),
+      );
+      world.terrainProvider =
+        new C.SceneGISPlanarUrlTemplateHeightmapTerrainProvider({
+          url: "/Test/Planar/data/height.png",
+          tilingScheme: world.tilingScheme,
+          maximumLevel: 0,
+          heightmapWidth: 65,
+          heightmapHeight: 65,
+          format: "image",
+          minimumHeight: 0,
+          maximumHeight: 3000,
+          structure: {
+            elementsPerHeight: 1,
+            stride: 4,
+            heightScale: 3000 / 255,
+          },
+        });
+      const splitter = document.getElementById("splitter");
+      const position = document.getElementById("position");
+      function setSplit(value) {
+        scene.splitPosition = Math.max(0, Math.min(1, value));
+        splitter.style.left = `${scene.splitPosition * 100}%`;
+        splitter.setAttribute(
+          "aria-valuenow",
+          String(Math.round(scene.splitPosition * 100)),
+        );
+        position.value = String(scene.splitPosition);
+        scene.requestRender();
+      }
+      function move(event) {
+        const rect = viewer.canvas.getBoundingClientRect();
+        setSplit((event.clientX - rect.left) / rect.width);
+      }
+      splitter.onpointerdown = (event) => {
+        splitter.setPointerCapture(event.pointerId);
+        move(event);
+      };
+      splitter.onpointermove = (event) => {
+        if (splitter.hasPointerCapture(event.pointerId)) {
+          move(event);
+        }
+      };
+      splitter.onpointerup = (event) =>
+        splitter.releasePointerCapture(event.pointerId);
+      splitter.onkeydown = (event) => {
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          event.preventDefault();
+          setSplit(
+            scene.splitPosition + (event.key === "ArrowLeft" ? -0.01 : 0.01),
+          );
+        }
+      };
+      position.oninput = () => setSplit(Number(position.value));
+      document.getElementById("alpha").oninput = (event) => {
+        right.alpha = Number(event.target.value);
+        scene.requestRender();
+      };
+      document.getElementById("show").onchange = (event) => {
+        right.show = event.target.checked;
+        scene.requestRender();
+      };
+      document.getElementById("direction").onchange = (event) => {
+        right.splitDirection = Number(event.target.value);
+        scene.requestRender();
+      };
+      document.getElementById("swap").onclick = () => {
+        const value = left.splitDirection;
+        left.splitDirection = right.splitDirection;
+        right.splitDirection = value;
+        document.getElementById("direction").value = String(
+          right.splitDirection,
+        );
+        scene.requestRender();
+      };
+      document.getElementById("reset").onclick = () => {
+        left.splitDirection = C.SplitDirection.LEFT;
+        right.splitDirection = C.SplitDirection.RIGHT;
+        right.show = true;
+        right.alpha = 1;
+        document.getElementById("direction").value = "1";
+        document.getElementById("show").checked = true;
+        document.getElementById("alpha").value = "1";
+        setSplit(0.5);
+      };
+      function view(oblique) {
+        viewer.camera.setView({
+          destination: oblique
+            ? new C.Cartesian3(0, -14000, 11000)
+            : new C.Cartesian3(0, 0, 17000),
+          orientation: {
+            heading: 0,
+            pitch: oblique ? -Math.atan2(11000, 14000) : -Math.PI / 2,
+            roll: 0,
+          },
+        });
+        scene.requestRender();
+      }
+      document.getElementById("overhead").onclick = () => view(false);
+      document.getElementById("oblique").onclick = () => view(true);
+      scene.renderError.addEventListener((_scene, error) => {
+        document.getElementById("error").textContent = error.message;
+      });
+      exposeExample(viewer, { destroy() {} }, { world, left, right, setSplit });
+      setSplit(0.5);
+      view(false);
+    </script>
+  </body>
+</html>

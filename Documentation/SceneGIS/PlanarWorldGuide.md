@@ -359,6 +359,30 @@ provider 的 `tilingScheme` 必须与 `world.tilingScheme` 是同一对象，不
 
 `world.tilesLoaded` 是当前视图 terrain coverage/readiness 与 shown imagery readiness 的合取。对 imagery contribution，运行时请求 desired tile 与 minimumLevel ancestor bootstrap；可复用 cache 中最近的 ready ancestor，但不会主动请求中间 ancestor。Recoverable terrain 或 imagery direct content 仍 pending 时结果保持 `false`；terminal failure 配合稳定 fallback 时可 settled。移除 layer、替换 provider 或销毁 world 会取消/隔离请求并释放对应资源，late settlement 不得重新进入 cache。
 
+### 影像分屏
+
+与球面一样使用原生 `SplitDirection` 和 `scene.splitPosition`：
+
+```js
+const left = viewer.planarWorld.imageryLayers.add(
+  new SceneGISPlanarImageryLayer(leftProvider, {
+    splitDirection: SplitDirection.LEFT,
+  }),
+);
+const right =
+  viewer.planarWorld.imageryLayers.addImageryProvider(rightProvider);
+right.splitDirection = SplitDirection.RIGHT;
+viewer.scene.splitPosition = 0.5;
+viewer.scene.requestRender();
+```
+
+位置是视口从左到右的 `[0,1]` 比例，原生默认值为 `0`。方向默认 `NONE`，全屏显示；
+可以随时修改左右方向、透明度、显隐与图层顺序。requestRenderMode 下修改方向或位置后
+显式请求一帧。分屏只屏蔽影像颜色贡献，另一侧仍保留底层影像/底色和地形深度；
+不会裁掉地形、Material、矢量或模型，也不会暂停被屏蔽侧的瓦片加载。
+
+示例：[影像分屏](../../Test/Planar/影像分屏.html)，支持拖动分屏线与倾斜地形视角。
+
 ## 地形、光照与数据边界
 
 ### 通过 layer.json 加载地形服务

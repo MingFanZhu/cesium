@@ -26,6 +26,7 @@ import {
   SceneGISPlanarPolygonGeometry,
   SceneGISPlanarPolylineGeometry,
   SceneGISPlanarWorld,
+  SplitDirection,
 } from "../../../../index.js";
 import createCanvas from "../../../../../../Specs/createCanvas.js";
 import getWebGLStub from "../../../../../../Specs/getWebGLStub.js";
@@ -196,6 +197,95 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     if (scene && !scene.isDestroyed()) {
       scene.destroyForSpecs();
     }
+  });
+
+  it("splits imagery in screen pixels while retaining composition, depth and warm resources", async function () {
+    const world = createWorld({ maximumLevel: 0, baseColor: Color.BLUE });
+    function addImage(color) {
+      const image = document.createElement("canvas");
+      image.width = image.height = 1;
+      const context = image.getContext("2d");
+      context.fillStyle = color;
+      context.fillRect(0, 0, 1, 1);
+      return world.imageryLayers.addImageryProvider({
+        tilingScheme: world.tilingScheme,
+        minimumLevel: 0,
+        maximumLevel: 0,
+        tileWidth: 1,
+        tileHeight: 1,
+        hasAlphaChannel: true,
+        errorEvent: new Event(),
+        requestImage: () => Promise.resolve(image),
+      });
+    }
+    const left = addImage("red");
+    const right = addImage("lime");
+    left.splitDirection = SplitDirection.LEFT;
+    right.splitDirection = SplitDirection.RIGHT;
+    scene = createPlanarScene(world, 32, 32);
+    scene.splitPosition = 0.5;
+    pointCameraAt(world);
+    await renderUntil(() => world.tilesLoaded);
+    const pixel = (x) =>
+      Array.from(scene.context.readPixels({ x, y: 16, width: 1, height: 1 }));
+    expect(pixel(8)).toEqual([255, 0, 0, 255]);
+    expect(pixel(24)).toEqual([0, 255, 0, 255]);
+    const surface = world._surface;
+    const tile = surface._quadtree._renderTiles[0];
+    const command = tile.command;
+    const shader = command.shaderProgram;
+    const uniforms = command.uniformMap;
+    const vertexArray = command.vertexArray;
+    const before = { ...surface._imagery._debug };
+    const createdShaders = surface._debug.createdShaders;
+    const createdCommands = surface._debug.createdCommands;
+    for (const [position, expectedLeft, expectedRight] of [
+      [0, [0, 255, 0, 255], [0, 255, 0, 255]],
+      [1, [255, 0, 0, 255], [255, 0, 0, 255]],
+      [0.25, [0, 255, 0, 255], [0, 255, 0, 255]],
+      [0.75, [255, 0, 0, 255], [0, 255, 0, 255]],
+    ]) {
+      scene.splitPosition = position;
+      scene.renderForSpecs();
+      expect(pixel(8)).withContext(`split=${position}`).toEqual(expectedLeft);
+      expect(pixel(24)).withContext(`split=${position}`).toEqual(expectedRight);
+    }
+    scene.splitPosition = 0.5;
+    right.splitDirection = SplitDirection.NONE;
+    right.alpha = 0.5;
+    scene.renderForSpecs();
+    expect(pixel(8)).toEqualEpsilon([128, 128, 0, 255], 1);
+    expect(pixel(24)).toEqualEpsilon([0, 128, 128, 255], 1);
+    world.imageryLayers.lowerToBottom(right);
+    scene.renderForSpecs();
+    expect(pixel(8)).toEqual([255, 0, 0, 255]);
+    expect(pixel(24)).toEqualEpsilon([0, 128, 128, 255], 1);
+    // Mask both layers on the right: the opaque base and its depth must survive.
+    right.splitDirection = SplitDirection.LEFT;
+    scene.renderForSpecs();
+    expect(pixel(24)).toEqual([0, 0, 255, 255]);
+    if (scene.pickPositionSupported && !window.webglStub) {
+      for (const x of [8, 24]) {
+        const position = scene.pickPosition(new Cartesian2(x, 16));
+        expect(position).toBeDefined();
+        expect(position.z).toEqualEpsilon(0, 0.01);
+      }
+    }
+    expect(tile.command).toBe(command);
+    expect(command.shaderProgram).toBe(shader);
+    expect(command.uniformMap).toBe(uniforms);
+    expect(command.vertexArray).toBe(vertexArray);
+    expect(surface._imagery._debug).toEqual(before);
+    expect(surface._debug.createdShaders).toBe(createdShaders);
+    expect(surface._debug.createdCommands).toBe(createdCommands);
+    expect(surface._renderCommands.length).toBe(1);
+    expect(world.tilesLoaded).toBeTrue();
+    world.imageryLayers.removeAll();
+    scene.renderForSpecs();
+    expect(surface._imagery._debug.destroyedTextures).toBe(
+      before.createdTextures,
+    );
+    expect(pixel(8)).toEqual([0, 0, 255, 255]);
   });
 
   describe("imagery linear input", function () {
@@ -1877,10 +1967,12 @@ czm_material czm_getMaterial(czm_materialInput inputValue) {
     expect(colorToAlpha.w).toBe(0.0);
 
     layer.brightness = 0.25;
+    layer.splitDirection = SplitDirection.LEFT;
     layer.gamma = 2.0;
     layer.colorToAlpha = new Color(0.1, 0.2, 0.3, 0.0);
     layer.colorToAlphaThreshold = 0.2;
     expect(command.uniformMap.u_brightness0()).toBe(1.0);
+    expect(command.uniformMap.u_splitDirection0()).toBe(SplitDirection.NONE);
     expect(command.uniformMap.u_gamma0()).toBe(1.0);
     expect(colorToAlpha.w).toBe(0.0);
 
@@ -1891,6 +1983,7 @@ czm_material czm_getMaterial(czm_materialInput inputValue) {
     };
     world.render(depthFrameState);
     expect(depthFrameState.commandList).toEqual([command]);
+    expect(command.uniformMap.u_splitDirection0()).toBe(SplitDirection.NONE);
     expect(command.uniformMap.u_brightness0()).toBe(1.0);
     expect(colorToAlpha.w).toBe(0.0);
 
@@ -1898,6 +1991,7 @@ czm_material czm_getMaterial(czm_materialInput inputValue) {
     expect(tile._imagerySlots[0]).toBe(slot);
     expect(slot.colorToAlpha).toBe(colorToAlpha);
     expect(command.uniformMap.u_brightness0()).toBe(0.25);
+    expect(command.uniformMap.u_splitDirection0()).toBe(SplitDirection.LEFT);
     expect(command.uniformMap.u_gamma0()).toBe(2.0);
     // A pending image cannot change the decode domain of other ready layers.
     expect(command.uniformMap.u_sceneGISImageryApplyGamma()).toBe(false);
@@ -2648,6 +2742,12 @@ czm_material czm_getMaterial(czm_materialInput inputValue) {
     expect(sample(0, 0)).toEqual([0, 255, 0, 255]);
     expect(sample(20, 0)).toEqual([255, 0, 0, 255]);
     expect(sample(0, -20)).toEqual([255, 0, 0, 255]);
+    layer.splitDirection = SplitDirection.RIGHT;
+    scene.splitPosition = 0.5;
+    scene.renderForSpecs();
+    expect(sample(-4, 0)).toEqual([255, 0, 0, 255]);
+    expect(sample(2, 0)).toEqual([0, 255, 0, 255]);
+    expect(sample(20, 0)).toEqual([255, 0, 0, 255]);
     const surface = world._surface;
     expect(surface._renderCommands.length).toBe(
       surface._quadtree._renderTiles.length,
