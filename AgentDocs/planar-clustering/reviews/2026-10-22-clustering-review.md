@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: `approved`（技术 review；负责人视觉验收待确认）
+- Status: `approved`（技术 review 完成；负责人已指示合并）
 - Reviewer role: `architecture`，当前维护 Agent 自审
 - Created / Updated: `2026-10-22`
 - Review target: 本轮实现、Specs、Viewer E2E、ADR-0183 / SGP-0066
@@ -33,4 +33,5 @@
 
 没有未解决的产品实现 finding。聚类沿用原生屏幕布局语义，不是 terrain occlusion；
 自定义大簇图标不参与第二次碰撞排布，无稳定簇 ID。不同 DataSource 默认独立。
-负责人在 Test/平面聚类.html 视觉验收；当前分支等待确认后合入 develop。
+负责人已指示合并；实现提交 `7920311615` 已快进合入 `scenegis/develop`，无额外源码修改。
+既有 Specs、构建与截图证据仍适用；本轮仅更新交接记录与清理已合并的本地分支，未推送。

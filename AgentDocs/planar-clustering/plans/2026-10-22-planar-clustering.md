@@ -50,7 +50,8 @@
 同机性能与截图、生命周期证据见 review；唯一 upstream-owned file 为 EntityCluster.js / SGP-0066。
 实施中发现原生 Point public screen projection 的额外 Y 翻转，增加窄 projection hook 与混合类型离中心回归。
 DataSourceDisplay.ready 为 sticky 状态，E2E 明确完成原有 deferred gate 激活，再等待 atlas readiness。
-负责人视觉验收待确认，代码仍在 feature/planar-clustering；未合并或推送。
+负责人已指示合并，实现提交 `7920311615` 已快进合入 `scenegis/develop`，未推送。
+本地聚类功能分支及其他已合并分支已清理；保留 develop 与 WebGPU 分支，提交历史完整保留。
 
 AgentDocs 全量 markdownlint 通过；全量 Prettier 保留 572 个既有文件告警，与开始基线一致。
 本轮扩展全部文档和修改的正式文档通过 scoped 格式检查；没有批量格式化历史资料。
