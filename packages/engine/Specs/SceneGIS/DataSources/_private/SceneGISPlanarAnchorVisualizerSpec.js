@@ -70,7 +70,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarAnchorVisualizer", function () {
     );
   }
 
-  it("rejects enabled clustering before subscription or slot mutation", function () {
+  it("rejects enabled clustering in a scene not bound to its World", function () {
     cluster.enabled = true;
     expect(function () {
       return new SceneGISPlanarAnchorVisualizer(
@@ -84,7 +84,7 @@ describe("SceneGIS/DataSources/SceneGISPlanarAnchorVisualizer", function () {
     expect(cluster._pointCollection).toBeUndefined();
   });
 
-  it("rejects clustering enabled after construction without mutating slots", function () {
+  it("rejects enabled clustering after construction in an unbound scene", function () {
     const entity = collection.add({
       id: "cluster-toggle",
       position: new Cartesian3(1.0, 2.0, 3.0),

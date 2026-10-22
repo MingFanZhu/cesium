@@ -8,7 +8,7 @@ Specs 与相关 ADR 仍是可执行契约的事实源。
 
 - 坐标是米制 `Cartesian3`，固定轴为 X east、Y north、Z up；应用负责 CRS 转换和数据一致性。
 - World 只支持 `SCENE3D`。Automatic Entity path 接受 `CustomDataSource` 和显式绑定当前 World 的
-  `GeoJsonDataSource`（ADR-0172），并要求 `EntityCluster.enabled === false`。
+  `GeoJsonDataSource`（ADR-0172）或 `CzmlDataSource`（ADR-0173）；支持原生 `EntityCluster`（ADR-0183）。
 - Automatic path 是 instance-owned gate 加八个 child visualizer，共九个 visualizer object；它不会并行运行消费相同
   Graphics 的默认 Globe visualizer。
 - Anchor X/Y 使用 World inclusive extent。普通 Geometry 可在合法 anchor 下延伸出 extent；ground footprint必须通过
@@ -91,7 +91,7 @@ failure/replacement/destroy 中维持 exactly-once ownership。
 ## 明确不支持
 
 - `Cesium3DTilesetGraphics`、3D Tiles/classification、ordered ground layers 与 Globe GroundPrimitive path。
-- 未绑定当前 World 的 `GeoJsonDataSource`、其他格式 DataSource、enabled clustering、同时运行默认 Globe visualizer。
+- 未绑定当前 World 的 `GeoJsonDataSource` / `CzmlDataSource`、其他格式 DataSource、同时运行默认 Globe visualizer。
 - 隐式/逐帧 reprojection、Cartographic/Ellipsoid/ENU、geodesic/rhumb、IDL wrap 与格式自动转换。
   GeoJSON / TopoJSON 的显式加载转换见 ADR-0172；不改变运行时坐标契约。
 - 超出 ADR-0178 / ADR-0182 st/uniform 契约的 Material、外层 custom shader、terrain request from content、continuous ground for Model/solid/Wall/

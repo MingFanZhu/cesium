@@ -90,8 +90,8 @@ function validateGate(gate) {
       "Planar visualization requires CustomDataSource, GeoJsonDataSource or CzmlDataSource loaded for this world.",
     );
   }
-  if (entityCluster.enabled !== false) {
-    throw new DeveloperError("entityCluster must remain disabled.");
+  if (entityCluster._scene !== scene) {
+    throw new DeveloperError("entityCluster must belong to scene.");
   }
   validateEntityProfile(dataSource);
 }

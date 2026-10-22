@@ -125,8 +125,62 @@ function validateImageSubRegion(subRegion) {
   }
 }
 
-function hide(slot) {
+const clusterProperties = new Set([
+  "pixelSize",
+  "outlineWidth",
+  "scale",
+  "font",
+  "text",
+  "style",
+  "showBackground",
+  "backgroundPadding",
+  "pixelOffset",
+  "eyeOffset",
+  "horizontalOrigin",
+  "verticalOrigin",
+  "width",
+  "height",
+  "rotation",
+  "alignedAxis",
+  "scaleByDistance",
+  "pixelOffsetScaleByDistance",
+  "sizeInMeters",
+]);
+
+function recordClusterState(visualizer, item, name, position, properties) {
+  if (!visualizer._cluster.enabled) {
+    return;
+  }
+  const key = `${name}ClusterState`;
+  let state = item[key];
+  if (state === undefined) {
+    state = item[key] = { position: new Cartesian3(), properties: {} };
+    visualizer._cluster._clusterDirty = true;
+  }
+  if (!Cartesian3.equals(state.position, position)) {
+    Cartesian3.clone(position, state.position);
+    visualizer._cluster._clusterDirty = true;
+  }
+  for (const propertyName in properties) {
+    if (!clusterProperties.has(propertyName)) {
+      continue;
+    }
+    const current = properties[propertyName];
+    const previous = state.properties[propertyName];
+    if (current !== previous && !(current?.equals?.(previous) === true)) {
+      state.properties[propertyName] = current?.clone
+        ? current.clone(previous)
+        : current;
+      visualizer._cluster._clusterDirty = true;
+    }
+  }
+}
+
+function hide(slot, cluster) {
   if (slot !== undefined) {
+    if (slot.show) {
+      cluster._clusterDirty = true;
+    }
     slot.show = false;
   }
 }
@@ -137,6 +191,7 @@ function releaseGraphic(item, entity, cluster, name) {
   }
   cluster[`remove${name[0].toUpperCase()}${name.slice(1)}`](entity);
   item[name] = undefined;
+  item[`${name}ClusterState`] = undefined;
   if (name === "billboard") {
     item.billboardImage = undefined;
   }
@@ -187,7 +242,7 @@ function updatePoint(visualizer, item, time, commonShow) {
     ? resolvePosition(visualizer, entity, graphic, time)
     : undefined;
   if (!show || position === undefined) {
-    hide(item.point);
+    hide(item.point, visualizer._cluster);
     return;
   }
 
@@ -214,8 +269,10 @@ function updatePoint(visualizer, item, time, commonShow) {
     point.id = entity;
     point.position = position;
     Object.assign(point, properties);
+    visualizer._cluster._clusterDirty ||= !point.show;
     point.show = true;
     item.point = point;
+    recordClusterState(visualizer, item, "point", position, properties);
   } catch (error) {
     if (isNew) {
       visualizer._cluster.removePoint(entity);
@@ -237,7 +294,7 @@ function updateBillboard(visualizer, item, time, commonShow) {
     ? resolvePosition(visualizer, entity, graphic, time)
     : undefined;
   if (!show || position === undefined || image === undefined) {
-    hide(item.billboard);
+    hide(item.billboard, visualizer._cluster);
     return;
   }
 
@@ -279,14 +336,24 @@ function updateBillboard(visualizer, item, time, commonShow) {
     billboard.heightReference = HeightReference.NONE;
     Object.assign(billboard, properties);
     if (item.billboardImage !== image) {
+      visualizer._cluster._clusterDirty = true;
       billboard.image = image;
       item.billboardImage = image;
     }
     if (subRegion !== undefined) {
       billboard.setImageSubRegion(image, subRegion);
     }
+    if (!BoundingRectangle.equals(item.billboardSubRegion, subRegion)) {
+      visualizer._cluster._clusterDirty = true;
+      item.billboardSubRegion = BoundingRectangle.clone(
+        subRegion,
+        item.billboardSubRegion,
+      );
+    }
+    visualizer._cluster._clusterDirty ||= !billboard.show;
     billboard.show = true;
     item.billboard = billboard;
+    recordClusterState(visualizer, item, "billboard", position, properties);
   } catch (error) {
     if (isNew) {
       visualizer._cluster.removeBillboard(entity);
@@ -309,7 +376,7 @@ function updateLabel(visualizer, item, time, commonShow) {
     ? resolvePosition(visualizer, entity, graphic, time)
     : undefined;
   if (!show || position === undefined || text === undefined) {
-    hide(item.label);
+    hide(item.label, visualizer._cluster);
     return;
   }
 
@@ -358,8 +425,10 @@ function updateLabel(visualizer, item, time, commonShow) {
     label.position = position;
     label.heightReference = HeightReference.NONE;
     Object.assign(label, properties);
+    visualizer._cluster._clusterDirty ||= !label.show;
     label.show = true;
     item.label = label;
+    recordClusterState(visualizer, item, "label", position, properties);
   } catch (error) {
     if (isNew) {
       visualizer._cluster.removeLabel(entity);
@@ -370,7 +439,7 @@ function updateLabel(visualizer, item, time, commonShow) {
 
 /**
  * Visualizes planar Point, Billboard, and Label graphics using a caller-owned
- * disabled EntityCluster as a primitive pool.
+ * EntityCluster for primitive pooling and optional screen-space clustering.
  *
  * @alias SceneGISPlanarAnchorVisualizer
  * @constructor
@@ -388,17 +457,19 @@ function SceneGISPlanarAnchorVisualizer(
   if (scene === undefined || scene.isDestroyed?.() === true) {
     throw new DeveloperError("scene must be a live Scene.");
   }
-  if (
-    !(entityCluster instanceof EntityCluster) ||
-    entityCluster.enabled !== false
-  ) {
-    throw new DeveloperError("entityCluster must be disabled.");
+  if (!(entityCluster instanceof EntityCluster)) {
+    throw new DeveloperError("entityCluster is required.");
   }
   if (!(entityCollection instanceof EntityCollection)) {
     throw new DeveloperError("entityCollection is required.");
   }
   if (entityCluster._scene !== undefined && entityCluster._scene !== scene) {
     throw new DeveloperError("entityCluster must belong to scene.");
+  }
+  if (entityCluster.enabled && scene.world !== world) {
+    throw new DeveloperError(
+      "Enabled entityCluster must belong to the planar World scene.",
+    );
   }
 
   if (entityCluster._scene === undefined) {
@@ -420,8 +491,10 @@ SceneGISPlanarAnchorVisualizer.prototype.update = function (time) {
   if (time === undefined) {
     throw new DeveloperError("time is required.");
   }
-  if (this._cluster.enabled !== false) {
-    throw new DeveloperError("entityCluster must remain disabled.");
+  if (this._cluster.enabled && this._scene.world !== this._world) {
+    throw new DeveloperError(
+      "Enabled entityCluster must remain bound to the planar World scene.",
+    );
   }
   const items = this._items.values;
   for (let i = 0; i < items.length; i++) {

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>平面聚类</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #view {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      #panel {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        width: 260px;
+        padding: 18px;
+        background: #102136ed;
+        color: #edf5ff;
+        font: 14px/1.65 system-ui;
+        border-radius: 8px;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 8px;
+      }
+      p {
+        margin: 8px 0;
+      }
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+      input {
+        vertical-align: middle;
+      }
+      button {
+        margin: 5px 4px 0 0;
+        padding: 6px 10px;
+      }
+      output {
+        display: block;
+        white-space: pre-line;
+        color: #a7e4ed;
+      }
+      #error {
+        color: #ffb2b2;
+      }
+      #picked {
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="view"></div>
+    <section id="panel">
+      <h1>平面 · 原生聚类</h1>
+      <p>
+        288
+        个本地对象：圆点、图标与文字。滚轮放大拆簇，单击显示成员，双击聚类定位成员范围。
+      </p>
+      <label><input id="enabled" type="checkbox" checked /> 启用聚类</label>
+      <label
+        >聚类范围 <input id="range" type="range" min="0" max="120" value="65" />
+        <span id="rangeValue">65</span> px</label
+      >
+      <label
+        >最少成员 <input id="minimum" type="number" min="2" max="100" value="3"
+      /></label>
+      <label
+        ><input id="points" type="checkbox" checked /> 点
+        <input id="billboards" type="checkbox" checked /> 图标
+        <input id="labels" type="checkbox" checked /> 文字</label
+      >
+      <label><input id="show" type="checkbox" checked /> 数据源显隐</label>
+      <label><input id="ortho" type="checkbox" /> 正交投影</label>
+      <label
+        >首组位移 <input id="offset" type="range" min="0" max="900" value="0"
+      /></label>
+      <label
+        ><input id="animate" type="checkbox" /> 动态位置（随 Viewer
+        clock）</label
+      >
+      <button id="home">全览</button><button id="readd">移除再添加</button>
+      <output id="status"></output><output id="picked">尚未拾取</output
+      ><output id="error"></output>
+    </section>
+    <script type="module" src="./平面聚类.js"></script>
+  </body>
+</html>

@@ -2,6 +2,26 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0066",
+      "title": "Reuse native EntityCluster in planar worlds",
+      "status": "active",
+      "reason": "ADR-0183 supplies an instance-local planar visibility and invalidation policy without ellipsoid occlusion or cartographic-height history. Native pools, screen-space clustering, events and the default globe path remain shared.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/DataSources/EntityCluster.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/DataSources/SceneGISPlanarClusteringSpec.js",
+        "packages/engine/Specs/DataSources/EntityClusterSpec.js",
+        "Specs/e2e/scenegis-planar-clustering.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0183-planar-clustering.md",
+      "removalCondition": "Native EntityCluster provides an equivalent instance-local spatial policy suitable for planar worlds."
+    },
+    {
       "id": "SGP-0065",
       "title": "Integrate independent observer viewshed selection and capture",
       "status": "active",

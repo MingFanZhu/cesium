@@ -716,7 +716,7 @@ fallback 到 Globe path。完整决定见
 [ADR-0013](Decisions/ADR-0013-planar-content-position-height-and-compatibility.md)，使用边界见
 [PlanarContentGuide](PlanarContentGuide.md)。
 
-C2 的 private Anchor visualizer 只复用 caller-owned disabled `EntityCluster` pools；Point 永远是
+C2 的 private Anchor visualizer 复用 caller-owned `EntityCluster` pools；ADR-0183 开放可选聚类。Point 永远是
 `PointPrimitive`，Billboard/Label 只接收 resolver 产生的 absolute position 并固定 low-level
 `HeightReference.NONE`。Private Model visualizer 使用 fixed planar translation/quaternion matrix，直接
 管理 `Model.fromGltfAsync` generation 与 `scene.primitives` ownership，不调用 Entity ENU 或 Model
@@ -731,7 +731,7 @@ GPU depth/stencil backend，且不自行发起terrain request。完整当前矩�
 
 C4 只为 live `SceneGISPlanarWorld` 安装 per-instance `DataSourceDisplay.visualizersCallback`；默认 Globe、
 `globe:false` 和其他 World 保持 Cesium 默认 callback。Planar gate 接受 `CustomDataSource` 或按
-[ADR-0172](Decisions/ADR-0172-planar-geojson-loading.md) 显式绑定当前 World 的 `GeoJsonDataSource`，并要求 disabled
+[ADR-0172](Decisions/ADR-0172-planar-geojson-loading.md) 显式绑定当前 World 的 `GeoJsonDataSource`，并要求同 Scene 的
 `EntityCluster` 和批准的 Entity 内建 Property allowlist；业务属性可复用 `Entity.addProperty` 或 `Entity.properties`。
 第一次合法 update 原子追加 C2/C3 children，
 后续每帧先于 child normal update 和低层资源 mutation 复验动态 profile；同步 collection listener 可以更新
@@ -751,6 +751,11 @@ SGP-0063 在 `CzmlDataSource.js` 加入加载策略，在 `DataSourceDisplay.js`
 绑定 World（包括 Globe 错用和异步加载后绑定）；平面 gate 接纳同 World 的 CZML。
 经纬度位置、非 FIXED 系和椭球 velocity orientation 拒绝，不自动投影或注册全局 updater。
 完整边界见 [ADR-0173](Decisions/ADR-0173-planar-czml-loading.md)。
+
+ADR-0183 / SGP-0066 为上述路径开放原生 `dataSource.clustering`：复用 KDBush、pools、类型开关、
+clusterEvent 和 Entity 拾取。实例策略统一三种 anchor 的屏幕坐标，跳过椭球遮挡及 cartographic-height
+历史复用；投影/视口、解析位置、显隐与屏幕尺寸改变才重新聚类，静态帧不重建索引。
+聚类表示屏幕布局，不提供地形遮挡分析、跨 DataSource 合并或稳定 cluster ID；默认球面算法不变。
 
 C5的批量边界保持C1-C4 ownership：Anchor继续使用Cesium pool，Model逐实例，Polyline/Polygon继续
 per-Entity owner；“批量性能”是固定moderate profile资格，不自动引入第二套batch scene graph。先建立

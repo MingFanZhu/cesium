@@ -14,6 +14,9 @@ import PointPrimitive from "../Scene/PointPrimitive.js";
 import PointPrimitiveCollection from "../Scene/PointPrimitiveCollection.js";
 import SceneMode from "../Scene/SceneMode.js";
 import KDBush from "kdbush";
+// SCENEGIS_PATCH_BEGIN SGP-0066: Supply instance-local planar clustering semantics.
+import SceneGISPlanarEntityCluster from "../SceneGIS/DataSources/_private/_SceneGISPlanarEntityCluster.js";
+// SCENEGIS_PATCH_END SGP-0066
 
 /**
  * Defines how screen space objects (billboards, points, labels) are clustered.
@@ -202,7 +205,11 @@ function getScreenSpacePositions(
       continue;
     }
 
-    const coord = item.computeScreenSpacePosition(scene);
+    // SCENEGIS_PATCH_BEGIN SGP-0066: Use one planar window-coordinate convention for all graphic types.
+    const coord = defined(entityCluster._sceneGISPlanar)
+      ? entityCluster._sceneGISPlanar.computeScreenSpacePosition(item)
+      : item.computeScreenSpacePosition(scene);
+    // SCENEGIS_PATCH_END SGP-0066
     if (!defined(coord)) {
       continue;
     }
@@ -222,6 +229,12 @@ const neighborBoundingRectangleScratch = new BoundingRectangle();
 
 function createDeclutterCallback(entityCluster) {
   return function (amount) {
+    // SCENEGIS_PATCH_BEGIN SGP-0066: Observe planar view changes in update after Entity properties are applied.
+    const planar = entityCluster._sceneGISPlanar;
+    if (defined(planar) && defined(amount)) {
+      return;
+    }
+    // SCENEGIS_PATCH_END SGP-0066
     if ((defined(amount) && amount < 0.05) || !entityCluster.enabled) {
       return;
     }
@@ -236,9 +249,12 @@ function createDeclutterCallback(entityCluster) {
       (!defined(labelCollection) &&
         !defined(billboardCollection) &&
         !defined(pointCollection)) ||
-      (!entityCluster._clusterBillboards &&
+      // SCENEGIS_PATCH_BEGIN SGP-0066: Clear former planar clusters when all types are excluded.
+      (!defined(planar) &&
+        !entityCluster._clusterBillboards &&
         !entityCluster._clusterLabels &&
         !entityCluster._clusterPoints)
+      // SCENEGIS_PATCH_END SGP-0066
     ) {
       return;
     }
@@ -280,11 +296,19 @@ function createDeclutterCallback(entityCluster) {
     const newClusters = [];
 
     const previousHeight = entityCluster._previousHeight;
-    const currentHeight = scene.camera.positionCartographic.height;
+    // SCENEGIS_PATCH_BEGIN SGP-0066: Planar coordinates have no ellipsoid horizon or height history.
+    const currentHeight = defined(planar)
+      ? undefined
+      : scene.camera.positionCartographic.height;
 
     const ellipsoid = scene.ellipsoid;
     const cameraPosition = scene.camera.positionWC;
-    const occluder = new EllipsoidalOccluder(ellipsoid, cameraPosition);
+    const occluder =
+      planar ?? new EllipsoidalOccluder(ellipsoid, cameraPosition);
+    if (defined(planar)) {
+      planar.prepare(entityCluster);
+    }
+    // SCENEGIS_PATCH_END SGP-0066
 
     const points = [];
     if (entityCluster._clusterLabels) {
@@ -506,6 +530,9 @@ function createDeclutterCallback(entityCluster) {
 }
 
 EntityCluster.prototype._initialize = function (scene) {
+  // SCENEGIS_PATCH_BEGIN SGP-0066: Bind the spatial policy to this cluster's Scene lifetime.
+  this._sceneGISPlanar = SceneGISPlanarEntityCluster.create(scene, this);
+  // SCENEGIS_PATCH_END SGP-0066
   this._scene = scene;
 
   const cluster = createDeclutterCallback(this);
@@ -881,6 +908,10 @@ EntityCluster.prototype.update = function (frameState) {
     return;
   }
 
+  // SCENEGIS_PATCH_BEGIN SGP-0066: Observe planar projection and viewport changes without rebuilding static clusters.
+  this._sceneGISPlanar?.update(this);
+  // SCENEGIS_PATCH_END SGP-0066
+
   // If clustering is enabled before the label collection is updated,
   // the glyphs haven't been created so the screen space bounding boxes
   // are incorrect.
@@ -957,6 +988,9 @@ EntityCluster.prototype.update = function (frameState) {
  * </p>
  */
 EntityCluster.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0066: Release spatial snapshots before native reusable teardown.
+  this._sceneGISPlanar = undefined;
+  // SCENEGIS_PATCH_END SGP-0066
   if (defined(this._removeEventListener)) {
     this._removeEventListener();
     this._removeEventListener = undefined;

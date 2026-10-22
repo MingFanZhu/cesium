@@ -1,0 +1,17 @@
+/* global process */
+import { defineConfig } from "@playwright/test";
+export default defineConfig({
+  testDir: "../Specs/e2e",
+  testMatch: "scenegis-planar-clustering.spec.js",
+  outputDir: "../Build/Specs/e2e/planar-clustering",
+  timeout: 120000,
+  workers: 1,
+  retries: 0,
+  reporter: "list",
+  projects: [{ name: "development" }, { name: "release" }],
+  use: {
+    channel: "chromium",
+    baseURL: process.env.SCENEGIS_TEST_BASE_URL ?? "http://localhost:8080",
+    viewport: { width: 1280, height: 900 },
+  },
+});

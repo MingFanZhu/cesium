@@ -152,7 +152,7 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     }
   });
 
-  it("allows metadata and recovers after invalid profile and cluster correction", function () {
+  it("allows enabled clustering and recovers after invalid profile correction", function () {
     const visualizers = createCallbackState();
     const entity = dataSource.entities.add({
       id: "metadata",
@@ -165,10 +165,6 @@ describe("SceneGIS/DataSources/_SceneGISPlanarVisualizersCallback", function () 
     entity.tileset = undefined;
 
     cluster.enabled = true;
-    expect(function () {
-      visualizers[0].update(time);
-    }).toThrowDeveloperError();
-    cluster.enabled = false;
     expect(visualizers[0].update(time)).toBe(false);
 
     for (let i = visualizers.length - 1; i >= 0; i--) {

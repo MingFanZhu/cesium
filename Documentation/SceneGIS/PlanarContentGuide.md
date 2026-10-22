@@ -53,7 +53,7 @@ transform API。
 
 ## C2 Anchor 与 Model profile
 
-C2 的 private Anchor visualizer 复用 caller-owned、`enabled === false` 的 `EntityCluster` pool，一个实例
+C2 的 private Anchor visualizer 复用 caller-owned `EntityCluster` pool，一个实例
 处理 Point、Billboard 与 Label。三类 graphic 都先经 position resolver 得到 absolute planar
 `Cartesian3`；Point 始终使用 `PointPrimitive`，低层 Billboard/Label 的 `heightReference` 固定为
 `NONE`。临时 hidden、position undefined 或 outside 只隐藏并保留 slot；graphic、position 或 Entity
@@ -63,6 +63,36 @@ Anchor 支持当前 Point/Billboard/Label 中不进入 Globe path 的 direct pro
 scale、outline、font/style、pixel/eye offset、origin、distance/translucency scaling、distance display、
 disable-depth、split direction，以及 Billboard 的 size/image/subregion/rotation/aligned-axis。`alignedAxis`
 按固定 planar world axis 解释。
+
+### 原生聚类
+
+按 [ADR-0183](Decisions/ADR-0183-planar-clustering.md)，已支持的平面 DataSource 可以直接启用原生聚类：
+
+```js
+const source = new Cesium.CustomDataSource("points");
+source.clustering.enabled = true;
+source.clustering.pixelRange = 60;
+source.clustering.minimumClusterSize = 3;
+source.clustering.clusterEvent.addEventListener((entities, cluster) => {
+  cluster.point.show = true;
+  cluster.point.pixelSize = 36;
+  cluster.point.color = Cesium.Color.CYAN;
+  cluster.point.id = entities;
+  cluster.label.text = String(entities.length);
+});
+await viewer.dataSources.add(source);
+```
+
+坐标仍是当前 World 米制 XYZ。Point / Billboard / Label 参与；`clusterPoints`、`clusterBillboards`、
+`clusterLabels` 可分别关闭，`enabled=false` 恢复原图形。`pixelRange` 为 CSS 像素，兼容透视与正交。
+默认关闭聚类；`viewer.entities` 可经 `viewer.dataSourceDisplay.defaultDataSource.clustering` 配置。
+显式绑定 World 的 GeoJSON/CZML 使用同一入口，不改变加载与采样语义。
+
+位置、显隐、文字/尺寸、相机投影或视口变化会重新聚类，动态 Property 即使 clock 冻结也会读取。
+静止画面复用结果。`clusterEvent` 的成员保留原 Entity；默认 label.id 是成员数组，使用自定义 point/billboard
+时按示例设置 id。`scene.pick(...).id` 是该数组或未聚类的原 Entity；可显式 `viewer.zoomTo(members)`。
+原生聚类不对自定义聚类图标做第二次碰撞排布，不提供稳定簇 ID 或地形遮挡分析；不同 DataSource 独立聚类。
+示例：`Test/平面聚类.html`。数据源移除和 Viewer 销毁仍由原生 collection 释放资源，应用移除自建事件订阅。
 
 C2 的 private Model visualizer 直接使用 `Model.fromGltfAsync` 与 `scene.primitives`。URI 和
 `incrementallyLoadTextures` 定义 load generation；position、terrain height、orientation 和 style 更新

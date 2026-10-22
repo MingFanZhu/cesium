@@ -554,14 +554,15 @@ lookAtWorldPosition 的固定 +Z up、四类 frustum 的 public getPickRay 和 f
   默认 Globe visualizer。Unsupported 输入必须在低层资源 mutation 前抛 `DeveloperError`，不得 warning、
   silent ignore或Globe fallback。
 - C4 automatic path 接受 live planar World、`CustomDataSource`、显式绑定当前 World 的 GeoJSON/CZML
-  与 disabled `EntityCluster`。业务 metadata
+  与同 Scene 的 `EntityCluster`（ADR-0183 支持可选聚类）。业务 metadata
   可使用 `Entity.properties` 或原生 `Entity.addProperty`；gate 只对 Entity.prototype 上的内建 Property 执行
   supported allowlist，未支持的标准 Graphics 在 child normal update 和低层资源 mutation 前拒绝。
   自定义属性不自动成为可绘制 Graphics；同步 collection listener 可以先更新 CPU tracking。
 - 升级时复核 default visualizer、clamping、model matrix、`DataSourceDisplay` callback/update snapshot、
   per-DataSource primitive container、ordering 和 destroy lifecycle。
-- C2 Anchor只使用caller-owned disabled `EntityCluster` pool，低层对象接收absolute planar position；
+- C2 Anchor使用caller-owned `EntityCluster` pool，低层对象接收absolute planar position；
   temporary hidden/outside保留slot，graphic/entity removal与destroy成对归还。
+  开启聚类时，解析后位置、显隐和屏幕包围盒属性变更标脏，不能每帧无条件重建索引。
 - C2 Model的URI/load-time generation、candidate与active primitive必须隔离；Promise completion只缓存并
   request render，下一normal update才add。Stale、replacement和destroy路径都要exactly-once cleanup。
 - Model transform只使用fixed planar translation/normalized Quaternion。不要调用`computeModelMatrix`、

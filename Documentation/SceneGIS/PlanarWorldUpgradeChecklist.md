@@ -63,7 +63,7 @@ two-vertex-buffer rollback/release；不得引入其无关normal compression API
 | planar Entity/DataSource framing与InfoBox zoom fallback                  | private framing helper、SGP-0005、ADR-0006/0037                     | high   | exact target identity、snapshot/loading listener、operation identity、PENDING/DONE/FAILED、Camera bounds handoff、tracking互斥       |
 | planar Entity tracking与Viewer interaction                               | private tracker、SGP-0006、ADR-0038                                 | high   | FIXED/AUTODETECT/ENU、native Clock、viewFrom/bounds acquisition、input token、flight/framing/Home/remove、InfoBox/double-click       |
 | planar API unified qualification与installed delivery                     | I5 focused Specs/E2E/package verifier                               | high   | declarative Viewer→Camera→framing→tracking→Scene safety、private tar/soft-private hiding、ADR/SGP final status                       |
-| Point/Billboard/Label pools与Model async lifecycle                       | private Anchor/Model visualizers                                    | high   | disabled EntityCluster、original Entity pick、generation isolation、late settlement、exact release                                   |
+| Point/Billboard/Label pools与Model async lifecycle                       | private Anchor/Model visualizers、SGP-0066                          | high   | EntityCluster planar policy、window Y、projection/viewport dirty、original Entity pick、generation isolation、exact release          |
 | standard synchronous Primitive/GeometryInstance与per-DataSource ordering | public planar Primitive/Geometry、private Polyline/Polygon adapters | high   | scene3DOnly local DOUBLE、origin/model matrix、pickPrimitive、Appearance vertex format、candidate/current、move/remove/destroy       |
 | Core local volume、route-derived mesh与Path fixed sampler                | C7/C8 public Geometry、Solid/Area/Route/Path adapters               | high   | coordinate-neutral Core facts、normal/closed matrix、corner stations、FIXED `_subSample`、callback order与private generation         |
 | planar depth/stencil ground classification                               | C11 Ground Primitive、GroundCommands/Volume/LineShader              | high   | `Pass.GLOBE`/`TERRAIN_CLASSIFICATION` ordering、z-fail stencil、line shader、provider envelope、linear/log depth、pick/lifecycle     |
@@ -146,7 +146,7 @@ private module basename、debug counter 和内部 command/cache entry 都不是�
 - 复核 ADR-0172 / SGP-0062：native `GeoJsonDataSource` preload 的 options 归一化与 CRS
   callback、TopoJSON 解码、线面 arcType、二维夹紧与三维高度、load/process 事件语义。
 - 未配置 planar 时保持 ECEF/RHUMB；显式绑定的 source 只进入同一 World 的 planar gate，
-  不能借升级放开所有 DataSource 或启用 clustering。
+  不能借升级放开所有 DataSource；聚类资格独立由 ADR-0183 定义。
 - 复核返回 scratch 的逐坐标快照、异步请求期间 World 销毁、load/process 配置继承与坐标域隔离。
 - 运行 native GeoJSON、SceneGISPlanarGeoJson 与 gate Specs，以及 dev/release 的本地
   `scenegis-planar-geojson` E2E；验证声明包含 native PlanarOptions，private helper 不成为公共类型。
