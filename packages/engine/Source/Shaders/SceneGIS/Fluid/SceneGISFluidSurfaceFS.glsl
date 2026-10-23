@@ -1,21 +1,40 @@
-in vec2 v_corner;
 flat in vec3 v_centerEC;
-uniform float u_renderRadius;
+flat in mat3 v_inverseShape;
 uniform float u_thicknessScale;
 uniform sampler2D u_depth;
 uniform vec2 u_surfaceSize;
 void main() {
-    float r2 = dot(v_corner, v_corner);
-    if (r2 >= 1.0) { discard; }
-    float halfThickness = sqrt(1.0 - r2) * u_renderRadius;
-    vec3 p = v_centerEC + vec3(v_corner * u_renderRadius, halfThickness);
+    vec2 ndc = gl_FragCoord.xy / u_surfaceSize * 2.0 - 1.0;
+    vec3 origin;
+    vec3 direction;
+    if (czm_projection[3][3] == 0.0) {
+        origin = vec3(0.0);
+        direction = normalize(vec3((ndc + vec2(czm_projection[2][0], czm_projection[2][1])) /
+            vec2(czm_projection[0][0], czm_projection[1][1]), -1.0));
+    } else {
+        // Cesium deliberately supplies a zero inverseProjection for 3D ortho.
+        origin = vec3((ndc - vec2(czm_projection[3][0], czm_projection[3][1])) /
+            vec2(czm_projection[0][0], czm_projection[1][1]), -czm_currentFrustum.x);
+        direction = vec3(0.0, 0.0, -1.0);
+    }
+    vec3 o = v_inverseShape * (origin - v_centerEC);
+    vec3 d = v_inverseShape * direction;
+    float a = dot(d, d);
+    float b = dot(o, d);
+    // Distance to the closest point avoids subtracting two large quadratic terms.
+    float midpoint = -b / a;
+    vec3 closest = o + midpoint * d;
+    float discriminant = 1.0 - dot(closest, closest);
+    if (discriminant <= 0.0) { discard; }
+    float halfLength = sqrt(discriminant / a);
+    vec3 p = origin + direction * (midpoint - halfLength);
     float depth = -p.z;
     if (depth <= czm_currentFrustum.x || depth >= czm_currentFrustum.y) { discard; }
     float opaque = texture(u_depth, gl_FragCoord.xy / u_surfaceSize).r;
     if (opaque > 0.0 && opaque <= depth) { discard; }
     #ifdef FLUID_THICKNESS
-    float thickness = 2.0 * halfThickness;
-    if (opaque > 0.0) { thickness = min(thickness, opaque - depth); }
+    float thickness = 2.0 * halfLength;
+    if (opaque > 0.0) { thickness = min(thickness, (opaque - depth) / -direction.z); }
     out_FragColor = vec4(thickness * u_thicknessScale, 0.0, 0.0, 1.0);
     #else
     vec4 clip = czm_projection * vec4(p, 1.0);

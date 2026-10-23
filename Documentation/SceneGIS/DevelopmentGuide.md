@@ -1591,10 +1591,48 @@ request-render 应用需要自行请求连续渲染。`destroy()` 释放所有�
 处于相近量级，过密发射会由密度约束产生显著压力和飞溅。碰撞为显式局部闭合盒边界，场景中
 其他建筑仅参与可见遮挡与光学，不会自动成为碰撞体。连续表面由屏幕深度、厚度、双边平滑和
 法线重建得到；厚度按粒子体积归一化，复用水体 Fresnel/GGX、天空、SSR 与 opaque 折射。
-`renderRadius` 是可实时修改的重建半径（米），范围为 `particleSpacing` 的 0.5～1.5 倍；
+`renderRadius` 是可实时修改的等体积球重建半径（米），范围为 `particleSpacing` 的 0.5～1.5 倍；
 暂停时也在下一帧生效，不重置粒子或重新分配 GPU 纹理。半径会影响水团连接与外观，
 厚度归一化与裁剪包围体同步更新；碰撞半径、静止间距和模拟体积保持不变。
 流体透射捕获包含实际天空背景，clear-depth 仍用于区分天空和 opaque 遮挡；无需地面覆盖水柱。
+
+`surfaceAnisotropy` 默认 1、范围 [0,1]，根据邻域将渲染粒子拟合成等体积椭球；0 使用球形。
+最大半轴小于 `1.6 * renderRadius`，可以在暂停状态下对照，不影响模拟、重力和碰撞。
+首次开启分配 `maximumParticles * 48` bytes 的 GPU 形状纹理，关闭后保留到图元销毁。
+有新粒子状态时每渲染帧增加一次粒子规模 Shape pass；暂停和强度调整复用缓存，不回读 CPU。
+这能改善水柱/薄层形状，但主液体分辨率仍由粒子采样决定。
+
+`sprayIntensity` 默认 0，范围 [0,4]，启用 GPU 次级飞沫。高速低密度表层和盒碰撞产生
+细小水滴，使用独立重力、空气阻力和 0.35～0.9 秒寿命；碰到盒边界或进入密集液体时回收。
+`sprayParticleRadius` 默认 `particleSpacing * 0.12`，可在其 0.04～0.25 倍范围修改，含暂停状态。
+它们是透明视觉细节，不反馈主液体质量/动量、不参与厚度平滑或 picking depth；未实现泡沫与气泡。
+`sprayIntensity=0` 隐藏并停止生成，已分配飞沫仍随正常模拟步老化；暂停/隐藏冻结两套粒子，reset 清空飞沫。
+首次启用模拟步创建同主粒子容量的次级池，固定 `maximumParticles * 64` bytes，保留到销毁。
+每个模拟步增加一次粒子规模 MRT，绘制走已有透明阶段；场景 OIT 的共享开销另计。
+常规运行不做 CPU 粒子回读。飞沫受实体与重建液面遮挡，但不增加主液体的物理解算分辨率。
+
+`emitterOrientation` 为可实时修改的单位 `Quaternion`，默认 `IDENTITY`。它将喷口 XY 圆盘
+和 `emitterVelocity` 从喷口坐标旋转到模拟局部坐标，只影响下一步新生粒子，不改变已有水流、
+`emitterPosition`、重力或容器。构造时复制传入值；运行时可以原地更新四元数。旋转后的圆盘
+连同碰撞半径必须位于容器内，非单位四元数报错。侧向沿局部 -Y 喷射的配置示例：
+
+```js
+fluid.emitterPosition = new Cesium.Cartesian3(0, 0, 1);
+Cesium.Quaternion.fromAxisAngle(
+  Cesium.Cartesian3.UNIT_X,
+  Cesium.Math.PI_OVER_TWO,
+  fluid.emitterOrientation,
+);
+fluid.emitterVelocity = new Cesium.Cartesian3(0, 0, 3);
+```
+
+独立 `Test/Rendering/水管破洞喷射.html` 提供破口仰角、速度、发射率、泄漏启停、暂停、
+粒子重建半径和重置控制，两种 world 使用同一局部喷口配置。它演示外部射流，不计算管内压力；
+展示管壁不参与物理碰撞。
+破管示例使用 3.25 厘米 spacing 和 8192 容量；“近看喷流”和“水流形状重建”可做暂停对照。
+示例启用飞沫，提供强度/半径控件；主液体重建半径 0.026 米，飞沫默认半径 0.0045 米。
+减半 spacing 对相同体积约需八倍粒子，必须同时规划发射率、寿命、容量及实际 GPU 预算，
+不能只减小渲染半径来增加模拟细节。
 
 可运行 `Test/Rendering/流体模拟喷泉.html`，使用球面/平面入口和暂停、发射、重置控制。
 `Test/Rendering/流体求解器验证.html` 提供有界硬件 GPU timer 测量。自动验证入口是

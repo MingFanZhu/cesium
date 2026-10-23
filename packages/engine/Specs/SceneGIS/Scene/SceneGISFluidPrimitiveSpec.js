@@ -2,6 +2,8 @@ import {
   Cartesian3,
   Color,
   Matrix4,
+  Quaternion,
+  OrthographicFrustum,
   Transforms,
   Globe,
   JulianDate,
@@ -254,6 +256,110 @@ describe("SceneGIS/Scene/SceneGISFluidPrimitive", function () {
     expect(frames.every((framebuffer) => framebuffer.isDestroyed())).toBeTrue();
   });
 
+  [true, false].forEach(function (planar) {
+    it(`renders transparent spray with opaque and liquid occlusion in ${planar ? "Planar" : "Globe"}`, function () {
+      setup(planar, {
+        maximumParticles: 16,
+        initialParticles: 0,
+        sprayIntensity: 1,
+        sprayParticleRadius: 0.025,
+        reflectionColor: new Cartesian3(4, 4, 4),
+      });
+      scene.camera.setView({
+        destination: point(0, -0.5, 1),
+        orientation: { direction: direction(0, 1, 0), up: direction(0, 0, 1) },
+      });
+      render();
+      const solver = fluid._solver;
+      solver.initializeSpray();
+      function upload(texture, values) {
+        const array = new Float32Array(16 * 4);
+        array.set(values);
+        texture.copyFrom({
+          source: {
+            width: solver.width,
+            height: solver.height,
+            arrayBufferView: array,
+          },
+        });
+      }
+      upload(
+        solver.spray[solver.sprayIndex].getColorTexture(0),
+        [0, 0, 1, 0.5],
+      );
+      upload(
+        solver.spray[solver.sprayIndex].getColorTexture(1),
+        [0, 0, 0, 0.75],
+      );
+      render();
+      const sprayPixel = pixel(point(0, 0, 1));
+      const command = fluid._surface.sprayCommand;
+      expect(command.renderState.depthMask).toBeFalse();
+      fluid.sprayIntensity = 0;
+      render();
+      expect(pixel(point(0, 0, 1))).not.toEqual(sprayPixel);
+      const wall = box(
+        new Cartesian3(0, -0.15, 1),
+        new Cartesian3(0.2, 0.05, 0.2),
+        Color.RED,
+      );
+      render();
+      const blocked = pixel(point(0, 0, 1));
+      fluid.sprayIntensity = 1;
+      render();
+      expect(pixel(point(0, 0, 1))).toEqual(blocked);
+      scene.primitives.remove(wall);
+      // The main reconstructed surface must also occlude a droplet behind it.
+      upload(solver.position, [0, -0.15, 1, 2]);
+      solver.surfaceDirty = true;
+      solver.neighborhoodValid = false;
+      render();
+      const behindWater = pixel(point(0, 0, 1));
+      fluid.sprayIntensity = 0;
+      render();
+      expect(pixel(point(0, 0, 1))).toEqual(behindWater);
+      fluid.sprayIntensity = 1;
+      const execute = spyOn(solver.sprayCommand, "execute").and.callThrough();
+      const targets = solver.targets.slice();
+      const bytes = fluid.textureMemoryInBytes;
+      fluid.sprayParticleRadius = 0.01;
+      render(1);
+      expect(execute).not.toHaveBeenCalled();
+      expect(solver.targets).toEqual(targets);
+      expect(fluid.textureMemoryInBytes).toBe(bytes);
+      fluid.show = false;
+      render(2);
+      fluid.show = true;
+      render(3);
+      expect(execute).not.toHaveBeenCalled();
+      fluid.reset();
+      render(3);
+      expect(execute.calls.count()).toBe(1);
+      scene.primitives.remove(fluid);
+      expect(targets.every((target) => target.isDestroyed())).toBeTrue();
+      expect(scene.context._gl.getError()).toBe(0);
+    });
+  });
+
+  it("validates optional spray controls before allocating resources", function () {
+    for (const sprayIntensity of [-1, 4.1, NaN]) {
+      expect(
+        () => new SceneGISFluidPrimitive({ sprayIntensity }),
+      ).toThrowDeveloperError();
+    }
+    for (const sprayParticleRadius of [0, 0.1, NaN]) {
+      expect(
+        () => new SceneGISFluidPrimitive({ sprayParticleRadius }),
+      ).toThrowDeveloperError();
+    }
+    setup();
+    expect(fluid.sprayIntensity).toBe(0);
+    expect(fluid.sprayParticleRadius).toEqualEpsilon(0.012, 1e-10);
+    fluid.sprayIntensity = Infinity;
+    expect(() => render()).toThrowDeveloperError();
+    expect(fluid.ready).toBeFalse();
+  });
+
   it("validates immutable layout and mutable rigid transforms", function () {
     expect(
       () => new SceneGISFluidPrimitive({ maximumParticles: 63 }),
@@ -266,6 +372,55 @@ describe("SceneGIS/Scene/SceneGISFluidPrimitive", function () {
     ).toThrowDeveloperError();
     setup();
     fluid.modelMatrix = Matrix4.fromUniformScale(2);
+    expect(() => render()).toThrowDeveloperError();
+  });
+
+  it("owns and validates emitter orientation and the rotated disk extent", function () {
+    const orientation = Quaternion.fromAxisAngle(
+      Cartesian3.UNIT_Y,
+      Math.PI / 2,
+    );
+    const options = {
+      emitterPosition: new Cartesian3(0.95, 0, 1),
+      emitterRadius: 0.2,
+      emitterOrientation: orientation,
+    };
+    const primitive = new SceneGISFluidPrimitive(options);
+    expect(primitive.emitterOrientation).toEqual(orientation);
+    expect(primitive.emitterOrientation).not.toBe(orientation);
+    primitive.destroy();
+    expect(
+      () =>
+        new SceneGISFluidPrimitive({
+          ...options,
+          emitterOrientation: Quaternion.IDENTITY,
+        }),
+    ).toThrowDeveloperError();
+    expect(
+      () =>
+        new SceneGISFluidPrimitive({
+          ...options,
+          emitterPosition: new Cartesian3(0, 0, 0.15),
+        }),
+    ).toThrowDeveloperError();
+    [
+      new Quaternion(0, 0, 0, 0),
+      new Quaternion(0, 0, 0, 2),
+      new Quaternion(NaN, 0, 0, 1),
+    ].forEach(function (emitterOrientation) {
+      expect(
+        () => new SceneGISFluidPrimitive({ emitterOrientation }),
+      ).toThrowDeveloperError();
+    });
+    setup(true, { emitterPosition: new Cartesian3(0, 0, 1) });
+    render();
+    const reset = spyOn(fluid._solver, "reset").and.callThrough();
+    const resources = fluid._solver.targets.slice();
+    Quaternion.clone(orientation, fluid.emitterOrientation);
+    render();
+    expect(reset).not.toHaveBeenCalled();
+    expect(fluid._solver.targets).toEqual(resources);
+    fluid.emitterOrientation.w = 2;
     expect(() => render()).toThrowDeveloperError();
   });
 
@@ -286,7 +441,7 @@ describe("SceneGIS/Scene/SceneGISFluidPrimitive", function () {
       read(fluid._surface.inputDepth).filter((v) => v > 0).length,
     ).toBeGreaterThan(before);
     expect(fluid._surface.command.boundingVolume.radius).toEqualEpsilon(
-      bounds + 0.1,
+      bounds + 0.1 * 1.6,
       1e-12,
     );
     expect(fluid.textureMemoryInBytes).toBe(memory);
@@ -307,6 +462,118 @@ describe("SceneGIS/Scene/SceneGISFluidPrimitive", function () {
       }).toThrowDeveloperError();
       expect(fluid.renderRadius).toBe(0.05);
     });
+  });
+
+  it("changes surface shape without restarting simulation and reuses paused shape resources", function () {
+    setup(true, { surfaceAnisotropy: 0 });
+    render();
+    expect(fluid._solver.shape).toBeUndefined();
+    const bytes = fluid.textureMemoryInBytes;
+    const reset = spyOn(fluid._solver, "reset").and.callThrough();
+    fluid.surfaceAnisotropy = 1;
+    render();
+    const shape = fluid._solver.shape;
+    expect(fluid.textureMemoryInBytes - bytes).toBe(
+      fluid.maximumParticles * 48,
+    );
+    const execute = spyOn(
+      fluid._solver.shapeCommand,
+      "execute",
+    ).and.callThrough();
+    fluid.surfaceAnisotropy = 0.5;
+    render();
+    fluid.surfaceAnisotropy = 0;
+    render();
+    expect(execute).not.toHaveBeenCalled();
+    expect(reset).not.toHaveBeenCalled();
+    fluid.surfaceAnisotropy = 1;
+    fluid.reset();
+    render();
+    expect(execute.calls.count()).toBe(1);
+    expect(fluid._solver.shape).toBe(shape);
+    [-0.1, 1.1, NaN].forEach(function (surfaceAnisotropy) {
+      expect(
+        () => new SceneGISFluidPrimitive({ surfaceAnisotropy }),
+      ).toThrowDeveloperError();
+    });
+    scene.destroyForSpecs();
+    scene = undefined;
+    expect(shape.isDestroyed()).toBeTrue();
+  });
+
+  it("reconstructs analytic ray depth and clips optical thickness at opaque geometry", function () {
+    setup(true, {
+      initialParticles: 1,
+      initialDimensions: new Cartesian3(1, 1, 1),
+      initialMinimum: new Cartesian3(0, 0, 0.5),
+      renderRadius: 0.08,
+    });
+    scene.camera.setView({
+      destination: point(0, -2, 0.5),
+      orientation: { direction: direction(0, 1, 0), up: direction(0, 0, 1) },
+    });
+    render();
+    const tangent = Math.tan(scene.camera.frustum.fovy / 2) / 128;
+    const ray = Cartesian3.normalize(
+      new Cartesian3(tangent, tangent, -1),
+      new Cartesian3(),
+    );
+    const b = 2 * ray.z;
+    const half = Math.sqrt(b * b - (4 - 0.08 ** 2));
+    const index = (64 * 128 + 64) * 4;
+    const depth = -ray.z * (-b - half);
+    const scale = 0.1 ** 3 / ((4 / 3) * Math.PI * 0.08 ** 3);
+    expect(
+      read(fluid._surface.targets[0].getColorTexture())[index],
+    ).toEqualEpsilon(depth, 0.0001);
+    expect(
+      read(fluid._surface.targets[1].getColorTexture())[index],
+    ).toEqualEpsilon(half * 2 * scale, 0.0002);
+    box(
+      new Cartesian3(0, 0.15, 0.5),
+      new Cartesian3(0.5, 0.3, 0.5),
+      Color.WHITE,
+    );
+    render();
+    expect(
+      read(fluid._surface.targets[1].getColorTexture())[index],
+    ).toEqualEpsilon(((2 - depth) / -ray.z) * scale, 0.0002);
+    scene.camera.frustum = new OrthographicFrustum({
+      width: 1,
+      aspectRatio: 1,
+      near: 0.1,
+      far: 100,
+    });
+    render();
+    const orthoHalf = Math.sqrt(0.08 ** 2 - 2 * (0.5 / 128) ** 2);
+    expect(
+      read(fluid._surface.targets[0].getColorTexture())[index],
+    ).toEqualEpsilon(2 - orthoHalf, 0.0001);
+    expect(
+      read(fluid._surface.targets[1].getColorTexture())[index],
+    ).toEqualEpsilon(orthoHalf * scale, 0.0002);
+    expect(scene.context._gl.getError()).toBe(0);
+  });
+
+  it("keeps separated depth layers distinct while smoothing a liquid surface", function () {
+    setup(true, { renderRadius: 0.08 });
+    render();
+    const surface = fluid._surface;
+    const values = new Float32Array(128 * 128);
+    for (let i = 0; i < values.length; i++) {
+      values[i] = i % 128 < 64 ? 2 : 2.1;
+    }
+    surface.inputDepth = surface.targets[0].getColorTexture();
+    surface.inputDepth.copyFrom({
+      source: { width: 128, height: 128, arrayBufferView: values },
+    });
+    surface.direction.x = 1;
+    surface.direction.y = 0;
+    surface.commands[2].framebuffer = surface.targets[2].framebuffer;
+    surface.commands[2].execute(scene.context);
+    const output = read(surface.targets[2].getColorTexture());
+    expect(output[(64 * 128 + 63) * 4]).toEqualEpsilon(2, 0.000001);
+    expect(output[(64 * 128 + 64) * 4]).toEqualEpsilon(2.1, 0.000001);
   });
 
   [false, true].forEach(function (shared) {

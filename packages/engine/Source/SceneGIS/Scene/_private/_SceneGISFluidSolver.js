@@ -4,8 +4,10 @@ import Cartesian3 from "../../../Core/Cartesian3.js";
 import Cartesian4 from "../../../Core/Cartesian4.js";
 import destroyObject from "../../../Core/destroyObject.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
+import Matrix3 from "../../../Core/Matrix3.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
 import RuntimeError from "../../../Core/RuntimeError.js";
+import Quaternion from "../../../Core/Quaternion.js";
 import ContextLimits from "../../../Renderer/ContextLimits.js";
 import Framebuffer from "../../../Renderer/Framebuffer.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
@@ -19,6 +21,8 @@ import sort from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidSort.js";
 import ranges from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidRanges.js";
 import constraint from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidConstraint.js";
 import finish from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidFinish.js";
+import shape from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidShape.js";
+import spray from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidSpray.js";
 
 function target(solver, width, height, count = 1) {
   const textures = [];
@@ -144,6 +148,8 @@ function SceneGISFluidSolver(context, options) {
   this.spawn = new Cartesian4();
   this.cursor = 0;
   this.serial = 0;
+  this.sprayIndex = 0;
+  this.sprayStep = 0;
   this.dt = 0;
   this.resetting = false;
   this.buildKeys = false;
@@ -155,6 +161,7 @@ function SceneGISFluidSolver(context, options) {
     options.initialDimensions ?? Cartesian3.ONE,
   );
   this.parameters = options;
+  this.emitterRotation = new Matrix3();
   this.uniforms = {
     u_position: () => this.inputPosition,
     u_velocity: () => this.inputVelocity,
@@ -176,6 +183,11 @@ function SceneGISFluidSolver(context, options) {
     u_dt: () => this.dt,
     u_gravity: () => this.parameters.gravity,
     u_emitterPosition: () => this.parameters.emitterPosition,
+    u_emitterRotation: () =>
+      Matrix3.fromQuaternion(
+        this.parameters.emitterOrientation ?? Quaternion.IDENTITY,
+        this.emitterRotation,
+      ),
     u_emitterVelocity: () => this.parameters.emitterVelocity,
     u_emitterRadius: () => this.parameters.emitterRadius,
     u_lifetime: () => this.parameters.particleLifetime,
@@ -188,6 +200,12 @@ function SceneGISFluidSolver(context, options) {
     u_rangeWidth: () => this.rangeWidth,
     u_restitution: () => this.parameters.restitution,
     u_damping: () => this.parameters.damping,
+    u_sprayPosition: () => this.spray[this.sprayIndex].getColorTexture(0),
+    u_sprayVelocity: () => this.spray[this.sprayIndex].getColorTexture(1),
+    u_sprayIntensity: () => this.parameters.sprayIntensity ?? 0,
+    u_sprayStep: () => this.sprayStep,
+    u_sprayReset: () => this.sprayReset,
+    u_beforeVelocity: () => this.predicted.getColorTexture(1),
   };
   this.particleRenderState = RenderState.fromCache({
     viewport: new BoundingRectangle(0, 0, this.width, this.height),
@@ -238,6 +256,8 @@ Object.defineProperties(SceneGISFluidSolver.prototype, {
 });
 
 SceneGISFluidSolver.prototype.reset = function () {
+  this.surfaceDirty = true;
+  this.neighborhoodValid = false;
   this.cursor = this.initialCount % this.capacity;
   this.serial = this.initialCount;
   this.resetting = true;
@@ -251,9 +271,17 @@ SceneGISFluidSolver.prototype.reset = function () {
   draw(this, this.finishCommand, this.buffers[1 - this.index]);
   this.index = 1 - this.index;
   this.resetting = false;
+  this.sprayStep = 0;
+  if (this.spray) {
+    this.sprayReset = true;
+    draw(this, this.sprayCommand, this.spray[1 - this.sprayIndex]);
+    this.sprayIndex = 1 - this.sprayIndex;
+    this.sprayReset = false;
+  }
 };
 
 SceneGISFluidSolver.prototype.buildNeighborhood = function (position) {
+  this.neighborhoodValid = true;
   this.inputPosition = position;
   this.neighborPosition = position;
   this.buildKeys = true;
@@ -272,6 +300,7 @@ SceneGISFluidSolver.prototype.buildNeighborhood = function (position) {
 };
 
 SceneGISFluidSolver.prototype.step = function (dt, births, parameters) {
+  this.surfaceDirty = true;
   this.parameters = parameters;
   this.dt = dt;
   this.drawCount = 0;
@@ -294,6 +323,53 @@ SceneGISFluidSolver.prototype.step = function (dt, births, parameters) {
   this.index = 1 - this.index;
   this.cursor = (this.cursor + births) % this.capacity;
   this.serial = (this.serial + births) % 16777216;
+  if (parameters.sprayIntensity > 0 || this.spray) {
+    this.initializeSpray();
+    this.inputPosition = this.position;
+    this.inputVelocity = this.velocity;
+    draw(this, this.sprayCommand, this.spray[1 - this.sprayIndex]);
+    this.sprayIndex = 1 - this.sprayIndex;
+    this.sprayStep = (this.sprayStep + 1) % 16777216;
+  }
+};
+
+SceneGISFluidSolver.prototype.initializeSpray = function () {
+  if (this.spray) {
+    return;
+  }
+  this.spray = [
+    target(this, this.width, this.height, 2),
+    target(this, this.width, this.height, 2),
+  ];
+  this.sprayCommand = command(this, spray);
+  this.sprayReset = true;
+  draw(this, this.sprayCommand, this.spray[1 - this.sprayIndex]);
+  this.sprayIndex = 1 - this.sprayIndex;
+  this.sprayReset = false;
+};
+
+SceneGISFluidSolver.prototype.updateSurface = function () {
+  if (!this.shape) {
+    if (
+      ContextLimits.maximumColorAttachments < 3 ||
+      ContextLimits.maximumDrawBuffers < 3
+    ) {
+      throw new RuntimeError(
+        "Anisotropic fluid surfaces require three floating-point color attachments.",
+      );
+    }
+    this.shape = target(this, this.width, this.height, 3);
+    this.shapeCommand = command(this, shape);
+  }
+  if (!this.surfaceDirty) {
+    return;
+  }
+  if (!this.neighborhoodValid) {
+    this.buildNeighborhood(this.position);
+  }
+  this.inputPosition = this.position;
+  draw(this, this.shapeCommand, this.shape);
+  this.surfaceDirty = false;
 };
 
 SceneGISFluidSolver.prototype.isDestroyed = function () {

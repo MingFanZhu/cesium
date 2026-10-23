@@ -2,6 +2,7 @@ uniform bool u_reset;
 uniform float u_dt;
 uniform vec3 u_gravity;
 uniform vec3 u_emitterPosition;
+uniform mat3 u_emitterRotation;
 uniform vec3 u_emitterVelocity;
 uniform float u_emitterRadius;
 uniform float u_lifetime;
@@ -27,8 +28,8 @@ void main() {
             float serial = u_spawn.z + float(birth);
             float angle = serial * 2.39996323;
             float radius = u_emitterRadius * sqrt(fract(serial * 0.754877666 + 0.5));
-            p = vec4(u_emitterPosition + vec3(cos(angle), sin(angle), 0.0) * radius, u_lifetime);
-            v = u_emitterVelocity;
+            p = vec4(u_emitterPosition + u_emitterRotation * (vec3(cos(angle), sin(angle), 0.0) * radius), u_lifetime);
+            v = u_emitterRotation * u_emitterVelocity;
             dt *= (float(birth) + 0.5) / max(u_spawn.y, 1.0);
         }
         if (p.w > 0.0) {

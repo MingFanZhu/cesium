@@ -6,7 +6,7 @@ void main() {
     ivec2 pixel = ivec2(gl_FragCoord.xy);
     float center = texelFetch(u_fluidDepth, pixel, 0).r;
     if (center <= 0.0) { out_FragColor = vec4(0.0); return; }
-    float sigma = u_renderRadius;
+    float sigma = u_renderRadius * 0.5;
     float pixelRadius = abs(czm_projection[1][1]) * float(size.y) * u_renderRadius * 0.5;
     if (czm_projection[3][3] == 0.0) { pixelRadius /= center; }
     float screenSigma = clamp(pixelRadius * 0.6, 1.0, 7.0);
@@ -17,6 +17,8 @@ void main() {
         ivec2 samplePixel = clamp(pixel + offset, ivec2(0), size - 1);
         float depth = texelFetch(u_fluidDepth, samplePixel, 0).r;
         if (depth <= 0.0) { continue; }
+        // Keep separate front layers from melting together at inner silhouettes.
+        if (abs(depth - center) > u_renderRadius) { continue; }
         float difference = (depth - center) / sigma;
         float w = exp(-float(i * i) / (2.0 * screenSigma * screenSigma) - difference * difference * 0.5);
         sum += w * depth;

@@ -17,6 +17,8 @@ import vertex from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidSurfaceVS.js";
 import fragment from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidSurfaceFS.js";
 import smooth from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidSmooth.js";
 import composite from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidComposite.js";
+import sprayVertex from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidSprayVS.js";
+import sprayFragment from "../../../Shaders/SceneGIS/Fluid/SceneGISFluidSprayFS.js";
 import ray from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import optics from "../../../Shaders/SceneGIS/Water/SceneGISWaterOptics.js";
 import viewportVertex from "../../../Shaders/ViewportQuadVS.js";
@@ -56,7 +58,19 @@ function SceneGISFluidSurface(primitive, frameState) {
   const state = WaterFrame.get(frameState);
   this.uniforms = {
     u_particles: () => primitive._solver.position,
+    u_shape0: () =>
+      primitive._solver.shape?.getColorTexture(0) ?? context.defaultTexture,
+    u_shape1: () =>
+      primitive._solver.shape?.getColorTexture(1) ?? context.defaultTexture,
+    u_shape2: () =>
+      primitive._solver.shape?.getColorTexture(2) ?? context.defaultTexture,
+    u_surfaceAnisotropy: () => primitive.surfaceAnisotropy,
     u_renderRadius: () => primitive._renderRadius,
+    u_sprayPosition: () =>
+      primitive._solver.spray[primitive._solver.sprayIndex].getColorTexture(0),
+    u_sprayVelocity: () =>
+      primitive._solver.spray[primitive._solver.sprayIndex].getColorTexture(1),
+    u_sprayRadius: () => primitive.sprayParticleRadius,
     u_thicknessScale: () =>
       primitive._config.particleSpacing ** 3 /
       ((4 / 3) * Math.PI * primitive._renderRadius ** 3),
@@ -134,7 +148,11 @@ SceneGISFluidSurface.prototype.update = function (frameState) {
   this.sky?.update(frameState);
   this.radianceScale = record?.surfaceRadianceScale ?? 1;
   const mode = record?.active ? (planar ? "planar" : "globe") : "none";
-  if (this.mode !== mode) {
+  const createSpray =
+    this.primitive.sprayIntensity > 0 &&
+    this.primitive._solver.spray &&
+    !this.sprayCommand;
+  if (this.mode !== mode || createSpray) {
     const source =
       mode === "none"
         ? new ShaderSource()
@@ -145,6 +163,34 @@ SceneGISFluidSurface.prototype.update = function (frameState) {
         this.uniforms,
         EnvironmentLighting.surfaceUniforms(frameState, planar),
       );
+    }
+    if (createSpray) {
+      this.sprayCommand = new DrawCommand({
+        // Spray belongs to the ordinary transparent phase, after water depth.
+        owner: this,
+        vertexArray: this.context.getViewportQuadVertexArray(),
+        instanceCount: this.primitive.maximumParticles,
+        uniformMap: this.uniforms,
+        pass: Pass.TRANSLUCENT,
+        renderState: RenderState.fromCache({
+          depthTest: { enabled: true },
+          depthMask: false,
+          blending: BlendingState.ALPHA_BLEND,
+        }),
+      });
+      this.commands.push(this.sprayCommand);
+    }
+    if (this.sprayCommand) {
+      const spraySource = source.clone();
+      spraySource.sources.push(optics, sprayFragment);
+      const previous = this.sprayCommand.shaderProgram;
+      this.sprayCommand.shaderProgram = ShaderProgram.fromCache({
+        context: this.context,
+        vertexShaderSource: sprayVertex,
+        fragmentShaderSource: spraySource,
+        attributeLocations: { position: 0, textureCoordinates: 1 },
+      });
+      previous?.destroy();
     }
     source.sources.push(ray, optics, composite);
     const previous = this.command.shaderProgram;
@@ -161,6 +207,9 @@ SceneGISFluidSurface.prototype.update = function (frameState) {
 
 SceneGISFluidSurface.prototype.prepare = function (scene) {
   const primitive = this.primitive;
+  if (primitive.surfaceAnisotropy > 0) {
+    primitive._solver.updateSurface();
+  }
   const width = Math.max(
     1,
     Math.ceil(scene.drawingBufferWidth * primitive._resolutionScale),
@@ -211,7 +260,7 @@ SceneGISFluidSurface.prototype.isDestroyed = function () {
   return false;
 };
 SceneGISFluidSurface.prototype.destroy = function () {
-  this.commands.forEach((command) => command.shaderProgram.destroy());
+  this.commands.forEach((command) => command.shaderProgram?.destroy());
   this.targets.forEach((target) => target.destroy());
   return destroyObject(this);
 };

@@ -5,6 +5,7 @@ import DeveloperError from "../../Core/DeveloperError.js";
 import JulianDate from "../../Core/JulianDate.js";
 import Matrix3 from "../../Core/Matrix3.js";
 import Matrix4 from "../../Core/Matrix4.js";
+import Quaternion from "../../Core/Quaternion.js";
 import RuntimeError from "../../Core/RuntimeError.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import Solver from "./_private/_SceneGISFluidSolver.js";
@@ -38,6 +39,14 @@ function validate(primitive) {
   number(primitive.restitution, "restitution", 0, 1);
   number(primitive.damping, "damping", 0, 100);
   number(primitive.roughness, "roughness", 0.02, 1);
+  number(primitive.surfaceAnisotropy, "surfaceAnisotropy", 0, 1);
+  number(primitive.sprayIntensity, "sprayIntensity", 0, 4);
+  number(
+    primitive.sprayParticleRadius,
+    "sprayParticleRadius",
+    primitive._config.particleSpacing * 0.04,
+    primitive._config.particleSpacing * 0.25,
+  );
   number(primitive.refractionStrength, "refractionStrength", 0, 1);
   for (const name of ["gravity", "emitterPosition", "emitterVelocity"]) {
     vector(primitive[name], name);
@@ -68,11 +77,20 @@ function validate(primitive) {
     );
   }
   const config = primitive._config;
-  for (const axis of ["x", "y", "z"]) {
+  const orientation = primitive.emitterOrientation;
+  for (const component of ["x", "y", "z", "w"]) {
+    number(orientation?.[component], "emitterOrientation", -Infinity);
+  }
+  if (Math.abs(Quaternion.magnitudeSquared(orientation) - 1) > 1e-6) {
+    throw new DeveloperError("emitterOrientation must be a unit quaternion.");
+  }
+  Matrix3.fromQuaternion(orientation, rotation);
+  const axes = ["x", "y", "z"];
+  for (let i = 0; i < 3; i++) {
+    const axis = axes[i];
     const margin =
-      axis === "z"
-        ? config.particleRadius
-        : config.particleRadius + primitive.emitterRadius;
+      config.particleRadius +
+      primitive.emitterRadius * Math.hypot(rotation[i], rotation[i + 3]);
     if (
       primitive.emitterPosition[axis] < config.minimum[axis] + margin ||
       primitive.emitterPosition[axis] > config.maximum[axis] - margin
@@ -105,6 +123,9 @@ function validate(primitive) {
  * @param {number} [options.smoothingRadius] Neighbor kernel radius, default 2.5 times spacing.
  * @param {number} [options.particleRadius] Collision radius, default 0.4 times spacing.
  * @param {number} [options.renderRadius] Mutable reconstruction radius in meters, default 0.8 times spacing.
+ * @param {number} [options.surfaceAnisotropy=1] Neighborhood-shaped reconstruction, from 0 (spheres) to 1 (ellipsoids).
+ * @param {number} [options.sprayIntensity=0] Passive GPU spray generation strength, 0 to 4. Zero hides spray and stops new spray births.
+ * @param {number} [options.sprayParticleRadius] Spray radius in meters, default 0.12 times spacing; range 0.04 to 0.25 times spacing.
  * @param {number} [options.solverIterations=2] Immutable density iterations, integer 1 to 8.
  * @param {number} [options.timeStep=0.016666666666666666] Fixed simulated seconds per step, from 1/240 to 1/30.
  * @param {number} [options.maximumSubSteps=2] Maximum catch-up steps per frame, integer 1 to 4; excess elapsed time is discarded.
@@ -113,9 +134,10 @@ function validate(primitive) {
  * @param {Cartesian3} [options.initialMinimum] Lattice origin, default container minimum plus collision radius.
  * @param {Cartesian3} [options.initialDimensions] Positive integer lattice dimensions, default (1,1,1).
  * @param {Cartesian3} [options.gravity] Local acceleration, default (0,0,-9.81).
- * @param {Cartesian3} [options.emitterPosition] Local XY disk center, default (0,0,0.15).
- * @param {Cartesian3} [options.emitterVelocity] Birth velocity, default (0,0,4).
- * @param {number} [options.emitterRadius=0.05] Disk radius in local XY.
+ * @param {Cartesian3} [options.emitterPosition] Disk center in simulation coordinates, default (0,0,0.15).
+ * @param {Quaternion} [options.emitterOrientation=Quaternion.IDENTITY] Unit rotation from emitter to simulation coordinates.
+ * @param {Cartesian3} [options.emitterVelocity] Birth velocity in emitter coordinates, default (0,0,4).
+ * @param {number} [options.emitterRadius=0.05] Disk radius in emitter XY.
  * @param {number} [options.emissionRate=120] Births per simulated second.
  * @param {number} [options.particleLifetime=8] Lifetime in simulated seconds; expired slots are inactive.
  * @param {number} [options.restitution=0.05] Box collision restitution, 0 to 1.
@@ -268,21 +290,31 @@ function SceneGISFluidPrimitive(options = {}) {
    */
   this.emissionRate = options.emissionRate ?? 120;
   /**
-   * Local emitter disk center.
+   * Emitter disk center in simulation coordinates.
    * @type {Cartesian3}
    */
   this.emitterPosition = Cartesian3.clone(
     options.emitterPosition ?? new Cartesian3(0, 0, 0.15),
   );
   /**
-   * Local birth velocity.
+   * Unit rotation from emitter coordinates to simulation coordinates. Rotates the
+   * emission disk and birth velocity only. Changes affect new particles on the next
+   * simulation step; existing particles, gravity and the container are unchanged.
+   * Defaults to Quaternion.IDENTITY. Zero and non-unit quaternions are invalid.
+   * @type {Quaternion}
+   */
+  this.emitterOrientation = Quaternion.clone(
+    options.emitterOrientation ?? Quaternion.IDENTITY,
+  );
+  /**
+   * Birth velocity in emitter coordinates, rotated by emitterOrientation.
    * @type {Cartesian3}
    */
   this.emitterVelocity = Cartesian3.clone(
     options.emitterVelocity ?? new Cartesian3(0, 0, 4),
   );
   /**
-   * Local XY disk radius.
+   * Disk radius in emitter XY before applying emitterOrientation.
    * @type {number}
    */
   this.emitterRadius = options.emitterRadius ?? 0.05;
@@ -344,6 +376,33 @@ function SceneGISFluidPrimitive(options = {}) {
    * @type {boolean}
    */
   this.reflections = options.reflections ?? true;
+  /**
+   * Volume-preserving neighborhood shape strength, from 0 (spheres) to 1.
+   * Only changes rendering, including while paused. Maximum semi-axis is less
+   * than 1.6 times renderRadius. Shape resources are created lazily when nonzero,
+   * retained until destruction, and recomputed only after simulation or reset.
+   * @type {number}
+   */
+  this.surfaceAnisotropy = options.surfaceAnisotropy ?? 1;
+  /**
+   * Passive spray strength, from 0 to 4. Default 0. Fast surface flow and box
+   * impacts generate secondary droplets, without changing the main fluid mass.
+   * Zero hides spray and stops its births; allocated droplets keep aging on
+   * simulation steps. Pausing or hiding freezes both pools. Reset clears spray.
+   * The pool has maximumParticles slots, allocated on the first enabled step,
+   * with 64 bytes per slot retained until destruction. No CPU particle readback.
+   * @type {number}
+   */
+  this.sprayIntensity = options.sprayIntensity ?? 0;
+  /**
+   * Visual spray radius in meters, from 0.04 to 0.25 times particleSpacing.
+   * Default 0.12 times spacing. Takes effect while paused without reallocation.
+   * Droplets have size variation and bounded motion streaks. Spray is transparent
+   * visual detail, with gravity, drag, finite lifetime and box/liquid reabsorption;
+   * it does not contribute to fluid thickness, picking depth or density constraints.
+   * @type {number}
+   */
+  this.sprayParticleRadius = options.sprayParticleRadius ?? spacing * 0.12;
   this._sceneGISWater = true;
   // Suspended fluid transmits visible background as well as opaque geometry.
   this._sceneGISWaterBackground = true;
@@ -357,13 +416,13 @@ function SceneGISFluidPrimitive(options = {}) {
     config.minimum,
     config.maximum,
   );
-  this._localBounds.radius += this._renderRadius;
+  this._localBounds.radius += this._renderRadius * 1.6;
   validate(this);
 }
 
 Object.defineProperties(SceneGISFluidPrimitive.prototype, {
   /**
-   * Particle reconstruction radius in meters, from 0.5 to 1.5 times the immutable
+   * Volume-equivalent reconstruction radius in meters, from 0.5 to 1.5 times the immutable
    * particleSpacing. Takes effect on the next render, including while paused.
    * Changes visible size and smoothing without resetting particles or allocating
    * GPU resources. Rest volume, neighbor spacing and collision radius are unchanged.
@@ -390,7 +449,7 @@ Object.defineProperties(SceneGISFluidPrimitive.prototype, {
         config.maximum,
         this._localBounds,
       );
-      this._localBounds.radius += value;
+      this._localBounds.radius += value * 1.6;
     },
   },
   /**
@@ -485,6 +544,7 @@ SceneGISFluidPrimitive.prototype.update = function (frameState) {
       ...this._config,
       gravity: this.gravity,
       emitterPosition: this.emitterPosition,
+      emitterOrientation: this.emitterOrientation,
       emitterVelocity: this.emitterVelocity,
       emitterRadius: this.emitterRadius,
       particleLifetime: this.particleLifetime,
@@ -533,6 +593,12 @@ SceneGISFluidPrimitive.prototype.update = function (frameState) {
   );
   water.surfaces.push(this);
   frameState.commandList.push(command);
+  if (this.sprayIntensity > 0 && this._solver.spray) {
+    const spray = this._surface.sprayCommand;
+    spray.modelMatrix = this.modelMatrix;
+    spray.boundingVolume = command.boundingVolume;
+    frameState.commandList.push(spray);
+  }
 };
 /**
  * @private

@@ -45,10 +45,10 @@ void main() {
     vec3 dx = rightPoint.w > 0.0 && (leftPoint.w <= 0.0 || abs(right.z) < abs(left.z)) ? right : left;
     vec3 dy = abovePoint.w > 0.0 && (belowPoint.w <= 0.0 || abs(above.z) < abs(below.z)) ? above : below;
     vec3 normal = normalize(cross(dx, dy));
-    vec3 view = normalize(-v_positionEC);
+    vec3 view = czm_projection[3][3] == 0.0 ? normalize(-v_positionEC) : vec3(0.0, 0.0, 1.0);
     if (dot(normal, view) < 0.0) { normal = -normal; }
     float thickness = texture(u_fluidThickness, uv).r;
-    if (opaque > depth) { thickness = min(thickness, opaque - depth); }
+    if (opaque > depth) { thickness = min(thickness, (opaque - depth) / view.z); }
     vec2 refractedUV = uv + normal.xy * u_refractionStrength * min(thickness, 1.0) / max(depth, 0.1);
     float refractedDepth = texture(u_depth, clamp(refractedUV, vec2(0.0), vec2(1.0))).r;
     if (any(lessThan(refractedUV, vec2(0.0))) || any(greaterThan(refractedUV, vec2(1.0))) ||
