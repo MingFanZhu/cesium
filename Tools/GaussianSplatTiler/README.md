@@ -15,7 +15,8 @@ node Tools/GaussianSplatTiler/src/segmentedCli.js validate output-scene
 npm test --prefix Tools/GaussianSplatTiler
 ```
 
-输入为 Gaussian PLY，保留位置、旋转、尺度、不透明度及球谐系数。源坐标以米为单位，
+输入为 binary little-endian Gaussian PLY，保留位置、旋转、尺度、不透明度及球谐系数。
+流式读取器不接受 ASCII PLY。源坐标以米为单位，
 当前 ABI 要求 `metersPerUnit=1`、proper rigid transform，不能用矩阵缩放代替单位转换。
 `--coordinate-system local|ecef`、`--local-origin x,y,z`、`--local-to-fixed` 的 16 个
 列主序元素用于数据放置元信息；工具不自动推断 CRS 或投影。
@@ -28,6 +29,17 @@ worker 数影响 CPU/RAM，并非实时或固定内存保证。失败清理自�
 输出包含 `scene.mcl.json`、`scene.mci` 和 Core/SH packs。部署时保留目录结构，
 HTTP 服务应支持 byte Range。图元 URL 指向 `scene.mcl.json`。
 保持旧 MCI4/GSP 格式、CRC 与 producer policy，原分段产品无需重切。
+
+生成并查看本地合成示例（输出目录已存在时会拒绝覆盖）：
+
+```powershell
+node Tools/GaussianSplatTiler/examples/create-demo.js
+npm start
+```
+
+打开 `/Test/Rendering/分段高斯泼溅.html`。生成的 7680 点双环位于
+`Build/SceneGISGaussianDemo`，不提交二进制产物。
+引擎 API 与部署说明见 [GaussianSplats](../../Documentation/SceneGIS/GaussianSplats.md)。
 
 ## 已有 LOD 导入
 

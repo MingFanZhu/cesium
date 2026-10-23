@@ -3,11 +3,11 @@
 ## Metadata
 
 - Extension slug: `gaussian-splats`
-- Status: active
+- Status: completed
 - Planning model: extension
-- Active extension plan: [迁移](plans/2026-10-23-migration.md)
-- Current phase: P1
-- Active phase plan: [协议与 CPU 工具](plans/2026-10-23-p1-tool-and-protocol.md)
+- Active extension plan: 无；[已完成迁移](plans/2026-10-23-migration.md)
+- Current phase: P2 completed
+- Active phase plan: 无；[已完成原生渲染](plans/2026-10-23-p2-native-rendering.md)
 - Architecture / execution contact: 本任务
 - Last updated: 2026-10-23
 
@@ -21,12 +21,14 @@
 - Source: `packages/engine/Source/SceneGIS/{Core,Renderer,Scene}`
 - Tool: `Tools/GaussianSplatTiler`
 - Specs: `packages/engine/Specs/SceneGIS` 与工具 Node tests
-- Example: P2 建立 Test 入口
+- Example: [分段高斯泼溅](../../Test/Rendering/分段高斯泼溅.html)
+- API: [使用说明](../../Documentation/SceneGIS/GaussianSplats.md)
 - Branch: `feature/gaussian-segmented`
 - ADR: [ADR-0188](../../Documentation/SceneGIS/Decisions/ADR-0188-segmented-gaussian-migration.md)
-- SGP: P1 无
+- SGP: SGP-0067（`Renderer/createUniform.js`）
 
 ## Current handoff
 
-范围已按负责人最新指示缩减为分段路线。P1 正在提取共享依赖与工具。
-无 open discussion；review 尚未建立。下一步完成 P1 验证、review 和本地提交，再进入 P2。
+P1 已提交 `040e7d72f6`；P2 已实现并完成 review，按阶段独立 checkpoint 交付。
+无 open discussion；[P2 review](reviews/2026-10-23-p2-rendering.md) 关闭 G3 并记录验证边界。
+保留现有工作分支待负责人决定集成；不自动 push 或合并 develop。

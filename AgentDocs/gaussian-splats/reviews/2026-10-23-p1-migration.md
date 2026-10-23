@@ -12,11 +12,11 @@
 
 ## Findings
 
-| ID  | Severity | Finding                                      | Disposition | Evidence / follow-up                                                                                                        |
-| --- | -------- | -------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| G1  | medium   | 旧 builder hash helper 引入 fixed10 全部入口 | fixed       | 提取 sourceHash；无固定网格 builder/reader；同输入 MCI、manifest、pack 三文件逐字节一致                                     |
-| G2  | medium   | 分段 normalization 仍调用 fixed10 XY 校验    | fixed       | 保留通用 workers/坐标参数，XYZ cell 独立校验；CLI 三种 cell size 和无效输入通过                                             |
-| G3  | medium   | 旧 runtime 测试中 24 项原工作树已失败        | deferred    | 原工作树 58 项中 34 pass / 24 fail，与迁入时完全一致；未复制失效用例。P2 对当前 GPU receipt、SH、排序及资源生命周期建立资格 |
+| ID  | Severity | Finding                                      | Disposition | Evidence / follow-up                                                                                                          |
+| --- | -------- | -------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| G1  | medium   | 旧 builder hash helper 引入 fixed10 全部入口 | fixed       | 提取 sourceHash；无固定网格 builder/reader；同输入 MCI、manifest、pack 三文件逐字节一致                                       |
+| G2  | medium   | 分段 normalization 仍调用 fixed10 XY 校验    | fixed       | 保留通用 workers/坐标参数，XYZ cell 独立校验；CLI 三种 cell size 和无效输入通过                                               |
+| G3  | medium   | 旧 runtime 测试中 24 项原工作树已失败        | fixed       | 旧失效用例不作为资格；[P2 review](2026-10-23-p2-rendering.md) 记录 248 项当前引擎 Specs 对 receipts、SH、排序和生命周期的验证 |
 
 G3 包括过时二维 origin/非 400000 part fixture、以未补齐 raw bytes 充当 GPU atlas
 bytes 的 receipts、旧 canonical planner 与指标精确值。这些证据不能作为当前实现通过项；
@@ -33,5 +33,5 @@ bytes 的 receipts、旧 canonical planner 与指标精确值。这些证据不�
 
 ## Gate 与剩余风险
 
-P1 实现与 review 通过，可以提交 checkpoint。G3 由本任务在 P2 继续处置；
-P1 不代表渲染资格，大型真实资产性能与用户视觉验收仍未完成。
+P1 实现与 review 通过，checkpoint 为 `040e7d72f6`。G3 已由本任务在 P2 关闭；
+P1 单独不代表渲染资格，大型真实资产性能与用户视觉验收仍需后续数据验收。

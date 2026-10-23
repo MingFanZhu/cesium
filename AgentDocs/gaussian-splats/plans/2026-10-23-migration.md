@@ -3,13 +3,13 @@
 ## Metadata
 
 - Plan type: extension
-- Status: active
+- Status: completed
 - Owner role: architecture
 - Architecture review: confirmed（本任务）
 - Created / updated: 2026-10-23
-- Related discussions / reviews: None
+- Related discussions / reviews: [P2 review](../reviews/2026-10-23-p2-rendering.md)
 - ADR: [ADR-0188](../../../Documentation/SceneGIS/Decisions/ADR-0188-segmented-gaussian-migration.md)
-- SGP: P1 None
+- SGP: P1 None；P2 SGP-0067
 
 ## 目标与边界
 
@@ -24,10 +24,10 @@
 
 ## Phase roadmap
 
-| Phase | Objective           | Dependencies  | Entry gate       | Exit gate                                     | Status  | Plan                                     |
-| ----- | ------------------- | ------------- | ---------------- | --------------------------------------------- | ------- | ---------------------------------------- |
-| P1    | 共享协议与 CPU 工具 | 无            | 依赖调查与 ADR   | Node/CLI 验证、review、本地提交               | active  | [P1](2026-10-23-p1-tool-and-protocol.md) |
-| P2    | 原生分段渲染与交付  | P1 checkpoint | 重新审计渲染接入 | Specs、构建/类型、示例/性能、review、本地提交 | pending | 待进入时建立                             |
+| Phase | Objective           | Dependencies  | Entry gate       | Exit gate                                     | Status    | Plan                                     |
+| ----- | ------------------- | ------------- | ---------------- | --------------------------------------------- | --------- | ---------------------------------------- |
+| P1    | 共享协议与 CPU 工具 | 无            | 依赖调查与 ADR   | Node/CLI 验证、review、本地提交               | completed | [P1](2026-10-23-p1-tool-and-protocol.md) |
+| P2    | 原生分段渲染与交付  | P1 checkpoint | 重新审计渲染接入 | Specs、构建/类型、示例/性能、review、本地提交 | completed | [P2](2026-10-23-p2-native-rendering.md)  |
 
 ## 整体验收与风险
 
@@ -39,4 +39,5 @@
 
 ## Handoff
 
-当前 P1；下阶段细节必须在 P1 提交后据源码建立。
+P1 checkpoint 为 `040e7d72f6`。P2 实现及资格见对应 review；本次范围已完成。
+大型真实资产与目标设备性能、负责人视觉验收属于后续数据验收，不由合成样本推断。

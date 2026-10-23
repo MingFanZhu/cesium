@@ -1362,6 +1362,25 @@
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0173-planar-czml-loading.md",
       "removalCondition": "Native CZML and DataSourceDisplay provide equivalent instance-bound planar coordinates and World validation."
+    },
+    {
+      "id": "SGP-0067",
+      "title": "Bind unsigned integer Gaussian texture arrays",
+      "status": "active",
+      "reason": "Segmented Gaussian Core and SH pages use RGBA32UI arrays. Dispatch the native unsigned integer array uniform type to the existing UniformSampler without a second binding system.",
+      "risk": "low",
+      "files": [
+        {
+          "path": "packages/engine/Source/Renderer/createUniform.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Renderer/SceneGISGaussianTextureArraySpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISGaussianSegmentedRenderingSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0188-segmented-gaussian-migration.md",
+      "removalCondition": "Native uniform dispatch supports UNSIGNED_INT_SAMPLER_2D_ARRAY."
     }
   ]
 }

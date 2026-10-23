@@ -38,6 +38,10 @@ function createUniform(gl, activeUniform, uniformName, location) {
     // SCENEGIS_PATCH_END SGP-0059
     case gl.UNSIGNED_INT_SAMPLER_2D:
       return new UniformSampler(gl, activeUniform, uniformName, location);
+    // SCENEGIS_PATCH_BEGIN SGP-0067: Bind unsigned integer Gaussian page arrays.
+    case gl.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+      return new UniformSampler(gl, activeUniform, uniformName, location);
+    // SCENEGIS_PATCH_END SGP-0067
     case gl.INT:
     case gl.BOOL:
       return new UniformInt(gl, activeUniform, uniformName, location);

@@ -71,6 +71,8 @@ Tools/GaussianSplatTiler/**
 packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js
 packages/engine/Source/Workers/SceneGISVectorTileWorker.js
 packages/engine/Source/Workers/SceneGISS3mWorker.js
+packages/engine/Source/Workers/SceneGISGaussianSortWorker.js
+packages/engine/Source/Workers/SceneGISGaussianMappingWorker.js
 ```
 
 所有权按照“上游基线中是否已经存在该路径”判断，而不是按照当前分支中文件所在目录判断。修改 upstream-owned file 必须登记 SGP；新增 SceneGIS-owned file 不需要 SGP。
@@ -100,6 +102,13 @@ ADR-0188 批准 `Tools/GaussianSplatTiler/**` 为独立 Node.js CPU 切片工具
 引擎不得反向依赖 Tools 或 Node.js。工具不加入 Cesium workspace、不进入引擎 npm 包，
 从完整仓库运行，独立 CLI、测试与文档自行维护。升级时核对协议、Worker 和包内源码依赖。
 固定网格加载/切片、训练蒸馏和 SDK 均不属于此次移植范围。
+
+ADR-0188 批准两个精确 Worker entries：`SceneGISGaussianSortWorker.js` 与
+`SceneGISGaussianMappingWorker.js`，仅包装 Core private handlers，复用原生 TaskProcessor
+和构建 glob。`SceneGISGaussianSegmentedPrimitive` 接入既有 Gaussian pass，不新增 Scene pass。
+SGP-0067 仅扩展 unsigned integer array sampler 分派。移除图元时同步释放依赖 Context 的
+VAO/shader，随后异步收敛 Worker/page ownership；Scene 销毁不要求继续 render 或等待 Worker。
+整数数组纹理归图元自有。
 
 `AgentDocs/**` 是架构 Agent、执行 Agent 和评审 Agent 之间的持久协作区。它不属于 Cesium 或 SceneGIS 的运行时代码，不得被 engine、widgets、Sandcastle、构建或发布流程导入，也不进入 npm 产物。未来如果工具需要读取该目录，必须先通过 ADR 明确协议、失败行为和发布影响。
 
