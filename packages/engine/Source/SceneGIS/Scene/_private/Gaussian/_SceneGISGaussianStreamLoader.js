@@ -7,6 +7,7 @@ import destroyObject from "../../../../Core/destroyObject.js";
 import DeveloperError from "../../../../Core/DeveloperError.js";
 import Request from "../../../../Core/Request.js";
 import RequestScheduler from "../../../../Core/RequestScheduler.js";
+import RequestState from "../../../../Core/RequestState.js";
 import RequestType from "../../../../Core/RequestType.js";
 import Resource from "../../../../Core/Resource.js";
 import RuntimeError from "../../../../Core/RuntimeError.js";
@@ -967,11 +968,18 @@ _SceneGISGaussianStreamLoader.prototype._startTask = function (
     )
     .catch(
       function (error) {
-        if (
-          task.cancelled ||
-          this._isDestroyed ||
-          error?.name === "AbortError"
-        ) {
+        if (task.cancelled || this._isDestroyed) {
+          task.state = "cancelled";
+          return;
+        }
+        if (request.state === RequestState.CANCELLED) {
+          // Scheduler contention defers live demand without spending a retry.
+          task.state = "queued";
+          task.attempts--;
+          task.readyAt = 0;
+          return;
+        }
+        if (error?.name === "AbortError") {
           task.state = "cancelled";
           return;
         }
