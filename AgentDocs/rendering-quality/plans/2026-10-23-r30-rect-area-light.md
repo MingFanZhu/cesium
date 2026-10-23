@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Type: phase; status: completed (technical); date: 2026-10-23.
+- Type: phase; status: completed; date: 2026-10-23.
 - Parent: [rendering quality](2026-09-18-rendering-quality-extension.md).
 - Owner authorization: add a rectangle to the existing lighting system.
 - Baseline: `71b47223a4`; branch: `feature/rect-area-light`.
@@ -61,5 +61,6 @@ No change to unrelated rendering visual gates or the WebGPU branch.
 Dev/release each pass 31 focused cases; one old bloom expectation fails identically
 on the baseline. Four both-world/product E2E cases, complete builds and public
 types pass. Reviewed images and bounded timing/storage evidence are recorded in
-the review. Create the independent local checkpoint; owner visual acceptance and
-merge remain pending. No subsequent phase is activated.
+the review. The independent local checkpoint is `02644b6ecc`. The owner visually
+accepts R30 on 2026-10-23 and requests the acceptance record commit, completing
+the phase gate. Merge remains pending. No subsequent phase is activated.

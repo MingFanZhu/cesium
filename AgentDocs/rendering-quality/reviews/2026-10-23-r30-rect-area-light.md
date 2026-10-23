@@ -45,7 +45,7 @@ lit terrain, OIT and SSR/SSIL share the light table; no upstream seam is added.
   example uses only local Box models. Width, back-face/double-sided/off restoration,
   pixel output, stable MRT/table/program identities and release/recreate/destroy
   pass without page/render errors. Representative wide/small pictures were inspected;
-  owner visual acceptance remains pending.
+  the owner visually accepts checkpoint `02644b6ecc` on 2026-10-23.
 - Complete development/release builds, type generation and TypeScript checks pass.
   Generated types expose the new class and all fields, and collection signatures
   include it. Private fit data stays private. The copied license is present in the
@@ -93,6 +93,7 @@ under `Build/Specs/rect-light-research/`; no logs or generated binaries are comm
 ## Gate
 
 Technical architecture/code review is complete with no unresolved blocking finding.
-Create the independent local R30 checkpoint on `feature/rect-area-light`. Owner
-visual acceptance and any merge remain pending; older rendering visual gates and
+The independent local R30 checkpoint is `02644b6ecc` on `feature/rect-area-light`.
+The owner visually accepts it on 2026-10-23 and requests the acceptance record
+commit; R30 is complete. Merge remains pending; older rendering visual gates and
 the independent WebGPU branch remain unchanged. No next phase is activated.

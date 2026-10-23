@@ -11,8 +11,9 @@ single-sampler integration; previous visual gates stay recorded independently.
 
 R30 implementation and [technical review](../reviews/2026-10-23-r30-rect-area-light.md)
 are complete, with both-world/dev-release pictures, GPU evidence and public types.
-Create its independent local checkpoint. Owner visual acceptance and merge remain
-pending; no next phase is active.
+Its independent local checkpoint is `02644b6ecc`. The owner visually accepts R30
+on 2026-10-23 and requests the acceptance record commit. R30 is complete; merge
+remains pending and no next phase is active.
 
 ## R29 activation, 2026-10-22
 

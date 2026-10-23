@@ -8,7 +8,7 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | None; R30 technically completed, owner visual gate pending                                               |
+| Current phase          | None; R30 completed and visually accepted                                                                |
 | Active phase plan      | None; [completed R30](plans/2026-10-23-r30-rect-area-light.md)                                           |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
@@ -42,8 +42,9 @@
   R30 is now technically complete; [review](reviews/2026-10-23-r30-rect-area-light.md)
   records dev/release 31 passing focused cases each, one reproduced baseline bloom
   expectation, four browser cases, builds/types, GPU cost and inspected pictures.
-  Form its local checkpoint on `feature/rect-area-light`; owner visual acceptance
-  and merge remain pending. No next phase is active.
+  Its local checkpoint is `02644b6ecc` on `feature/rect-area-light`. The owner
+  visually accepts R30 on 2026-10-23 and requests the acceptance record commit.
+  Merge remains pending. No next phase is active.
 
 - 2026-10-22: [R29 optimization/review](reviews/2026-10-22-r29-directional-occlusion-cost.md)
   complete. Bistro lighting groups/draws fall 627 to 1, geometry remains 627;
