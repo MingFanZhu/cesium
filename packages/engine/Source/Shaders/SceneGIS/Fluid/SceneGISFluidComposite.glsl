@@ -13,26 +13,34 @@ uniform float u_radianceScale;
 uniform bool u_reflections;
 // The shared WaterFrame derived shader reads this reconstructed eye position.
 vec3 v_positionEC;
-vec4 fluidSurfacePoint(vec2 uv, float fallback) {
-    float depth = texture(u_fluidDepth, clamp(uv, vec2(0.0), vec2(1.0))).r;
+vec4 fluidSurfacePoint(ivec2 pixel, float fallback) {
+    ivec2 size = textureSize(u_fluidDepth, 0);
+    if (any(lessThan(pixel, ivec2(0))) || any(greaterThanEqual(pixel, size))) { return vec4(0.0); }
+    float depth = texelFetch(u_fluidDepth, pixel, 0).r;
+    vec2 uv = (vec2(pixel) + 0.5) / vec2(size);
     return vec4(sceneGISSSRPosition(uv * vec2(textureSize(u_depth, 0)), depth > 0.0 ? depth : fallback), depth);
 }
 void main() {
     vec2 size = vec2(textureSize(u_depth, 0));
     vec2 uv = gl_FragCoord.xy / size;
-    float depth = texture(u_fluidDepth, uv).r;
+    ivec2 surfaceSize = textureSize(u_fluidDepth, 0);
+    ivec2 surfacePixel = ivec2(uv * vec2(surfaceSize));
+    float depth = texelFetch(u_fluidDepth, surfacePixel, 0).r;
     float opaque = texture(u_depth, uv).r;
     if (depth <= czm_currentFrustum.x || depth >= czm_currentFrustum.y || (opaque > 0.0 && opaque <= depth)) { discard; }
     v_positionEC = sceneGISSSRPosition(gl_FragCoord.xy, depth);
-    vec2 texel = 1.0 / vec2(textureSize(u_fluidDepth, 0));
-    vec4 rightPoint = fluidSurfacePoint(uv + vec2(texel.x, 0.0), depth);
-    vec4 leftPoint = fluidSurfacePoint(uv - vec2(texel.x, 0.0), depth);
-    vec4 abovePoint = fluidSurfacePoint(uv + vec2(0.0, texel.y), depth);
-    vec4 belowPoint = fluidSurfacePoint(uv - vec2(0.0, texel.y), depth);
-    vec3 right = rightPoint.xyz - v_positionEC;
-    vec3 left = v_positionEC - leftPoint.xyz;
-    vec3 above = abovePoint.xyz - v_positionEC;
-    vec3 below = v_positionEC - belowPoint.xyz;
+    // Differentiate on the reconstruction grid. Screen UV offsets can round to
+    // a different nearest texel at reduced resolution, creating row/column seams.
+    vec2 surfaceUV = (vec2(surfacePixel) + 0.5) / vec2(surfaceSize);
+    vec3 surfacePoint = sceneGISSSRPosition(surfaceUV * size, depth);
+    vec4 rightPoint = fluidSurfacePoint(surfacePixel + ivec2(1, 0), depth);
+    vec4 leftPoint = fluidSurfacePoint(surfacePixel - ivec2(1, 0), depth);
+    vec4 abovePoint = fluidSurfacePoint(surfacePixel + ivec2(0, 1), depth);
+    vec4 belowPoint = fluidSurfacePoint(surfacePixel - ivec2(0, 1), depth);
+    vec3 right = rightPoint.xyz - surfacePoint;
+    vec3 left = surfacePoint - leftPoint.xyz;
+    vec3 above = abovePoint.xyz - surfacePoint;
+    vec3 below = surfacePoint - belowPoint.xyz;
     // A missing silhouette neighbor must not flatten the surface normal.
     vec3 dx = rightPoint.w > 0.0 && (leftPoint.w <= 0.0 || abs(right.z) < abs(left.z)) ? right : left;
     vec3 dy = abovePoint.w > 0.0 && (belowPoint.w <= 0.0 || abs(above.z) < abs(below.z)) ? above : below;

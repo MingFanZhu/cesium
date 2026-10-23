@@ -170,6 +170,7 @@ gui.add(fluid, "paused").name("暂停模拟");
 gui.add(fluid, "show").name("显示液体");
 gui.add(fluid, "emissionRate", 0, 1500, 10).name("每秒发射数");
 gui.add(fluid.emitterVelocity, "z", 1, 6, 0.1).name("喷射速度");
+gui.add(fluid, "renderRadius", 0.0325, 0.0975, 0.0005).name("粒子半径（米）");
 gui.add(fluid, "roughness", 0.02, 0.5, 0.01).name("表面粗糙度");
 gui.add(fluid, "reflections").name("场景反射");
 gui.add(fluid, "reset").name("重置流体");

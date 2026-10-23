@@ -4,18 +4,18 @@
 
 ## Metadata
 
-| Field                  | Value                                    |
-| ---------------------- | ---------------------------------------- |
-| Extension slug         | `fluid-simulation`                       |
-| Status                 | `completed`                              |
-| Planning model         | `extension`                              |
-| Active extension plan  | [首版](plans/2026-10-23-native-fluid.md) |
-| Current phase          | None; engine delivery completed          |
-| Active phase plan      | None                                     |
-| Active standalone plan | None                                     |
-| Architecture contact   | Current task / self-review               |
-| Execution contact      | Current task                             |
-| Last updated           | `2026-10-23`                             |
+| Field                  | Value                                                   |
+| ---------------------- | ------------------------------------------------------- |
+| Extension slug         | `fluid-simulation`                                      |
+| Status                 | `completed`                                             |
+| Planning model         | `extension`                                             |
+| Active extension plan  | [首版](plans/2026-10-23-native-fluid.md)                |
+| Current phase          | None; engine delivery completed                         |
+| Active phase plan      | None                                                    |
+| Active standalone plan | None; [法线细线已完成](plans/2026-10-23-normal-seam.md) |
+| Architecture contact   | Current task / self-review                              |
+| Execution contact      | Current task                                            |
+| Last updated           | `2026-10-23`                                            |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -44,9 +44,13 @@
 ## Current handoff
 
 - Current state: P1 `e2fb6a0dee`, P2 `fc0cbc030e`; native engine API/surface and release qualified.
+- Follow-up: runtime `renderRadius` and full HDR background transmission completed and reviewed.
+- Follow-up: reduced-resolution normal seam corrected with integer reconstruction-grid neighbors.
 - Next action: SDK integration belongs to the caller; no SDK work in this task.
 - Current phase status: P1/P2 completed; proposed P3 removed from scope by project owner.
 - Open discussions: none; [algorithm and rendering](discussions/2026-10-23-algorithm.md) resolved.
 - Unresolved reviews: none; [P1](reviews/2026-10-23-p1.md) and [P2](reviews/2026-10-23-p2.md) resolved.
+- Previous review: [size and horizon](reviews/2026-10-23-size-horizon.md), resolved; 8 fluid + 17 water Specs pass.
+- Latest review: [normal seam](reviews/2026-10-23-normal-seam.md), resolved; 9 fluid Specs pass.
 - Known risks: sorting bandwidth / worst-case neighbor density; screen-space front-layer approximation;
   box collision only; visual quality remains subject to project owner judgment.

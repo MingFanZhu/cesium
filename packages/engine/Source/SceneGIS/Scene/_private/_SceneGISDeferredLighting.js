@@ -1954,7 +1954,13 @@ class _SceneGISDeferredLighting {
       if (this._vectorOverlays) {
         this._drawLight(this._vectorOverlays.group, passState, shared);
       }
-      if (!shared && scene.frameState._sceneGISWater.surfaces.length > 0) {
+      const waterSurfaces = scene.frameState._sceneGISWater.surfaces;
+      this._waterBackground = waterSurfaces.some(
+        (surface) => surface._sceneGISWaterBackground === true,
+      );
+      // Shared lighting radiance excludes clear depth. Suspended fluid also needs
+      // the actual background already rendered into the main HDR color target.
+      if ((!shared || this._waterBackground) && waterSurfaces.length > 0) {
         this._waterColor ??= new FramebufferManager({
           pixelDatatype: PixelDatatype.HALF_FLOAT,
         });
@@ -1964,11 +1970,12 @@ class _SceneGISDeferredLighting {
           scene.drawingBufferHeight,
         );
         this._copyWater ??= scene.context.createViewportQuadCommand(
-          "uniform sampler2D u_color; uniform sampler2D u_depth; void main() { ivec2 p=ivec2(gl_FragCoord.xy); out_FragColor=texelFetch(u_depth,p,0).r>0.0 ? vec4(texelFetch(u_color,p,0).rgb,1.0) : vec4(0.0); }",
+          "uniform sampler2D u_color; uniform sampler2D u_depth; uniform bool u_background; void main() { ivec2 p=ivec2(gl_FragCoord.xy); out_FragColor=u_background || texelFetch(u_depth,p,0).r>0.0 ? vec4(texelFetch(u_color,p,0).rgb,1.0) : vec4(0.0); }",
           {
             uniformMap: {
               u_color: () => this._source.getColorTexture(0),
               u_depth: () => this._linearDepth,
+              u_background: () => this._waterBackground,
             },
           },
         );

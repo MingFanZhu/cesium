@@ -64,3 +64,23 @@ depth 的自动化验证。复用 WaterFrame 场景捕获和 owned 光学 helper
 初次 6 样本 32.4～39.4 ms，后续场景/表面/完整帧分段测量中的完整帧 4.47～4.90 ms。
 CPU 完整帧约 1.5～1.8 ms；这些是当前驱动/场景条件下的有限样本，不据此承诺固定 60 FPS。
 预算包括示例场景和环境；透明前层近似、密集邻域开销和缺少刚体/网格碰撞仍是明确限制。
+
+## 粒子大小与背景透射修正
+
+公开可写 `renderRadius`（米，spacing 的 0.5～1.5 倍），改变重建、平滑和包围体，
+暂停时也生效，不改求解器布局、rest volume 或 collision radius，不分配新 GPU 资源。
+
+Fluid 通过 owned 私有标记 `_sceneGISWaterBackground` 声明完整背景透射需求。
+Deferred 复用 water color 捕获，将背景绘制和 opaque 光照后的主 HDR 颜色整体复制；
+共享 SSR/SSIL radiance 不包含 clear-depth 背景，因此该场景也执行 water capture。
+WaterFrame 保持原有捕获优先级与真实 opaque depth。水面独立使用时保持原来协议。
+此处直接借用已绘制的背景，避免用反射 cubemap 近似可见天空亮度、太阳、星空或隐藏状态。
+
+普通喷泉仍为每帧一次已有颜色 copy，无新增纹理；共享 lighting MRT 时增加一次全屏 copy，
+复用 Scene-owned RGBA16F water target（含 mipmaps 约 `width * height * 8 * 4/3` bytes）。
+资源随 Scene 销毁；图元只借用，不销毁此捕获。Specs 验证暂停调大小不重置/重分配、
+clear-depth 彩色背景透射、共享 SSR、每帧一次 copy、纹理复用与 Scene 销毁释放。
+
+液面法线差分统一使用整数重建格点和对应像素中心，避免降采样后以连续 screen UV
+偏移读取 nearest depth 时在 texel 边界跳行。最终合成位置仍由实际屏幕像素重建，
+不改变输出深度与遮挡契约。透视解析斜平面回归及实际暂停画面验证该修正。

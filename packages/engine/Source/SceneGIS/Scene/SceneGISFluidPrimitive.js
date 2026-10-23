@@ -104,7 +104,7 @@ function validate(primitive) {
  * @param {number} [options.particleSpacing=0.065] Rest spacing; determines rest particle volume.
  * @param {number} [options.smoothingRadius] Neighbor kernel radius, default 2.5 times spacing.
  * @param {number} [options.particleRadius] Collision radius, default 0.4 times spacing.
- * @param {number} [options.renderRadius] Reconstruction radius, default 0.8 times spacing.
+ * @param {number} [options.renderRadius] Mutable reconstruction radius in meters, default 0.8 times spacing.
  * @param {number} [options.solverIterations=2] Immutable density iterations, integer 1 to 8.
  * @param {number} [options.timeStep=0.016666666666666666] Fixed simulated seconds per step, from 1/240 to 1/30.
  * @param {number} [options.maximumSubSteps=2] Maximum catch-up steps per frame, integer 1 to 4; excess elapsed time is discarded.
@@ -345,6 +345,8 @@ function SceneGISFluidPrimitive(options = {}) {
    */
   this.reflections = options.reflections ?? true;
   this._sceneGISWater = true;
+  // Suspended fluid transmits visible background as well as opaque geometry.
+  this._sceneGISWaterBackground = true;
   this._solver = undefined;
   this._surface = undefined;
   this._lastTime = undefined;
@@ -360,6 +362,37 @@ function SceneGISFluidPrimitive(options = {}) {
 }
 
 Object.defineProperties(SceneGISFluidPrimitive.prototype, {
+  /**
+   * Particle reconstruction radius in meters, from 0.5 to 1.5 times the immutable
+   * particleSpacing. Takes effect on the next render, including while paused.
+   * Changes visible size and smoothing without resetting particles or allocating
+   * GPU resources. Rest volume, neighbor spacing and collision radius are unchanged.
+   *
+   * @memberof SceneGISFluidPrimitive.prototype
+   * @type {number}
+   * @exception {DeveloperError} The radius is non-finite or outside the supported range.
+   */
+  renderRadius: {
+    get() {
+      return this._renderRadius;
+    },
+    set(value) {
+      const config = this._config;
+      number(
+        value,
+        "renderRadius",
+        config.particleSpacing * 0.5,
+        config.particleSpacing * 1.5,
+      );
+      this._renderRadius = value;
+      BoundingSphere.fromCornerPoints(
+        config.minimum,
+        config.maximum,
+        this._localBounds,
+      );
+      this._localBounds.radius += value;
+    },
+  },
   /**
    * Immutable particle slot capacity.
    * @memberof SceneGISFluidPrimitive.prototype

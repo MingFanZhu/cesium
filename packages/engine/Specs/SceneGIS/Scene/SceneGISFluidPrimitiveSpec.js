@@ -20,6 +20,10 @@ import {
   PixelFormat,
   PixelDatatype,
   SceneGISTemporalAntialiasing,
+  SceneGISScreenSpaceReflections,
+  Sampler,
+  TextureMinificationFilter,
+  TextureMagnificationFilter,
 } from "../../../index.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -265,6 +269,90 @@ describe("SceneGIS/Scene/SceneGISFluidPrimitive", function () {
     expect(() => render()).toThrowDeveloperError();
   });
 
+  it("changes reconstruction size while paused without resetting or reallocating", function () {
+    setup(true, { renderRadius: 0.05 });
+    render();
+    const solver = fluid._solver;
+    const frames = fluid._surface.targets.map((target) => target.framebuffer);
+    const memory = fluid.textureMemoryInBytes;
+    const bounds = fluid._surface.command.boundingVolume.radius;
+    const before = read(fluid._surface.inputDepth).filter((v) => v > 0).length;
+    const reset = spyOn(solver, "reset").and.callThrough();
+    const step = spyOn(solver, "step").and.callThrough();
+    fluid.renderRadius = 0.15;
+    render();
+    expect(fluid.renderRadius).toBe(0.15);
+    expect(
+      read(fluid._surface.inputDepth).filter((v) => v > 0).length,
+    ).toBeGreaterThan(before);
+    expect(fluid._surface.command.boundingVolume.radius).toEqualEpsilon(
+      bounds + 0.1,
+      1e-12,
+    );
+    expect(fluid.textureMemoryInBytes).toBe(memory);
+    expect(fluid._surface.targets.map((target) => target.framebuffer)).toEqual(
+      frames,
+    );
+    expect(reset).not.toHaveBeenCalled();
+    expect(step).not.toHaveBeenCalled();
+    fluid.renderRadius = 0.05;
+    render();
+    expect(fluid._surface.command.boundingVolume.radius).toEqualEpsilon(
+      bounds,
+      1e-12,
+    );
+    [0, NaN, 0.151].forEach(function (value) {
+      expect(() => {
+        fluid.renderRadius = value;
+      }).toThrowDeveloperError();
+      expect(fluid.renderRadius).toBe(0.05);
+    });
+  });
+
+  [false, true].forEach(function (shared) {
+    it(`transmits clear-depth background with ${shared ? "shared SSR" : "standalone"} capture`, function () {
+      setup(true, {
+        absorption: Cartesian3.ZERO,
+        reflectionColor: Cartesian3.ZERO,
+        refractionStrength: 0,
+      });
+      scene.light.intensity = 0;
+      scene.backgroundColor = new Color(0.8, 0.1, 0.05, 1);
+      scene.camera.setView({
+        destination: point(0, -2.5, 0.2),
+        orientation: { direction: direction(0, 1, 0), up: direction(0, 0, 1) },
+      });
+      const reflections = shared
+        ? new SceneGISScreenSpaceReflections({ scene, enabled: true })
+        : undefined;
+      render();
+      const water = scene.frameState._sceneGISWater;
+      const index = (64 * 128 + 64) * 4;
+      expect(read(water.depthTexture)[index]).toBe(0);
+      expect(read(water.colorTexture)[index]).toBeGreaterThan(0.5);
+      const wet = pixel(point(0, 0, 0.2));
+      expect(wet[0]).toBeGreaterThan(100);
+      expect(wet[0]).toBeGreaterThan(wet[1] + 40);
+      if (shared) {
+        expect(reflections._state.main).toBeDefined();
+      }
+      const capture = scene._sceneGISDeferred._waterColor.getColorTexture();
+      const copy = spyOn(
+        scene._sceneGISDeferred._copyWater,
+        "execute",
+      ).and.callThrough();
+      render();
+      expect(copy.calls.count()).toBe(1);
+      expect(scene._sceneGISDeferred._waterColor.getColorTexture()).toBe(
+        capture,
+      );
+      expect(scene.context._gl.getError()).toBe(0);
+      scene.destroyForSpecs();
+      scene = undefined;
+      expect(capture.isDestroyed()).toBeTrue();
+    });
+  });
+
   it("publishes reconstructed final depth for TAA and releases resized screen targets", function () {
     setup();
     const taa = new SceneGISTemporalAntialiasing({ scene, enabled: true });
@@ -298,5 +386,108 @@ describe("SceneGIS/Scene/SceneGISFluidPrimitive", function () {
     expect(fluid._solver.targets).toEqual(resources);
     expect(fluid._surface.command.modelMatrix).toEqual(fluid.modelMatrix);
     expect(scene.context._gl.getError()).toBe(0);
+  });
+
+  it("reconstructs a constant plane normal across reduced-resolution texel boundaries", function () {
+    setup(true, { resolutionScale: 0.75 });
+    // Match the reported 1001 x 826 viewport and its 751 x 620 depth texture.
+    scene.canvas.width = 1001;
+    scene.canvas.height = 826;
+    scene.camera.frustum.aspectRatio = 1001 / 826;
+    render();
+    expect(fluid._surface.size.x).toBe(751);
+    const values = new Float32Array(751 * 620);
+    const tangentY = Math.tan(scene.camera.frustum.fovy * 0.5);
+    const tangentX = tangentY * scene.camera.frustum.aspectRatio;
+    for (let y = 0; y < 620; y++) {
+      for (let x = 0; x < 751; x++) {
+        values[y * 751 + x] =
+          3 /
+          (1 -
+            0.4 * ((2 * (x + 0.5)) / 751 - 1) * tangentX -
+            0.5 * ((2 * (y + 0.5)) / 620 - 1) * tangentY);
+      }
+    }
+    const plane = new Texture({
+      context: scene.context,
+      pixelFormat: PixelFormat.RED,
+      pixelDatatype: PixelDatatype.FLOAT,
+      flipY: false,
+      sampler: new Sampler({
+        minificationFilter: TextureMinificationFilter.NEAREST,
+        magnificationFilter: TextureMagnificationFilter.NEAREST,
+      }),
+      source: { width: 751, height: 620, arrayBufferView: values },
+    });
+    const empty = new Texture({
+      context: scene.context,
+      pixelFormat: PixelFormat.RED,
+      pixelDatatype: PixelDatatype.FLOAT,
+      source: {
+        width: 1001,
+        height: 826,
+        arrayBufferView: new Float32Array(1001 * 826),
+      },
+    });
+    const output = new Framebuffer({
+      context: scene.context,
+      colorTextures: [
+        new Texture({
+          context: scene.context,
+          width: 1001,
+          height: 826,
+          pixelFormat: PixelFormat.RGBA,
+          pixelDatatype: PixelDatatype.FLOAT,
+        }),
+      ],
+    });
+    const source =
+      fluid._surface.command.shaderProgram.fragmentShaderSource.clone();
+    // Observe the production reconstructed normal before optical shading and tone mapping.
+    source.sources = source.sources.map((text) =>
+      text.replace(
+        "out_FragColor = vec4(max(color, vec3(0.0)), 1.0);",
+        "out_FragColor = vec4(normal, 1.0);",
+      ),
+    );
+    const command = scene.context.createViewportQuadCommand(source, {
+      uniformMap: {
+        ...fluid._surface.uniforms,
+        u_fluidDepth: () => plane,
+        u_depth: () => empty,
+      },
+      framebuffer: output,
+    });
+    try {
+      command.execute(scene.context);
+      const pixels = scene.context.readPixels({
+        framebuffer: output,
+        x: 470,
+        y: 200,
+        width: 50,
+        height: 20,
+      });
+      const expected = Cartesian3.normalize(
+        new Cartesian3(0.4, 0.5, 1),
+        new Cartesian3(),
+      );
+      let maximumError = 0;
+      for (let y = 0; y < 20; y++) {
+        for (let x = 0; x < 50; x++) {
+          const offset = (y * 50 + x) * 4;
+          maximumError = Math.max(
+            maximumError,
+            Cartesian3.distance(Cartesian3.fromArray(pixels, offset), expected),
+          );
+        }
+      }
+      expect(maximumError).toBeLessThan(0.0002);
+      expect(scene.context._gl.getError()).toBe(0);
+    } finally {
+      command.shaderProgram.destroy();
+      output.destroy();
+      plane.destroy();
+      empty.destroy();
+    }
   });
 });

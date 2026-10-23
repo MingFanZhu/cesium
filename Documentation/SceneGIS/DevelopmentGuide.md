@@ -1573,6 +1573,7 @@ const fluid = scene.primitives.add(
 );
 fluid.emitting = false;
 fluid.paused = true;
+fluid.renderRadius = 0.07;
 fluid.reset();
 scene.primitives.remove(fluid);
 ```
@@ -1590,7 +1591,10 @@ request-render 应用需要自行请求连续渲染。`destroy()` 释放所有�
 处于相近量级，过密发射会由密度约束产生显著压力和飞溅。碰撞为显式局部闭合盒边界，场景中
 其他建筑仅参与可见遮挡与光学，不会自动成为碰撞体。连续表面由屏幕深度、厚度、双边平滑和
 法线重建得到；厚度按粒子体积归一化，复用水体 Fresnel/GGX、天空、SSR 与 opaque 折射。
-渲染半径会影响水团连接与外观；不是粒子的碰撞半径。
+`renderRadius` 是可实时修改的重建半径（米），范围为 `particleSpacing` 的 0.5～1.5 倍；
+暂停时也在下一帧生效，不重置粒子或重新分配 GPU 纹理。半径会影响水团连接与外观，
+厚度归一化与裁剪包围体同步更新；碰撞半径、静止间距和模拟体积保持不变。
+流体透射捕获包含实际天空背景，clear-depth 仍用于区分天空和 opaque 遮挡；无需地面覆盖水柱。
 
 可运行 `Test/Rendering/流体模拟喷泉.html`，使用球面/平面入口和暂停、发射、重置控制。
 `Test/Rendering/流体求解器验证.html` 提供有界硬件 GPU timer 测量。自动验证入口是
