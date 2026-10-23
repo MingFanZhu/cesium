@@ -1133,6 +1133,14 @@ SGP-0047 显式排除 shadow caster 的局部颜色派生；ShaderCache 仍拥�
 描述对象无 GPU 资源、可共享；超限报错，不静默选灯。局部阴影、体积散射、GI、自动 glTF
 灯节点导入和自定义光照 shader 不在首轮资格内。
 
+[ADR-0186](Decisions/ADR-0186-rectangular-area-lights.md) / R30 增加
+`SceneGISRectAreaLight`，与点光/聚光共用集合容量、接收路径与生命周期。矩形宽高与
+方向构成真实面光积分；漫反射裁剪到接收半球，GGX/clearcoat 使用固定版本 LTC 拟合。
+面光 intensity 是线性 HDR 辐亮度，固定亮度时面积增大会增加出光量，区别于点光的一米
+照度尺度。默认单面、可双面，range 对中心距离平滑衰减。参数轴和 LTC 数据复用同一
+整数纹理，不新增 sampler、pass 或 framebuffer；无活动矩形时沿用原四行参数布局。
+Phong 的镜面项映射至 GGX；各向异性材质使用 isotropic 面光高光，不增加局部阴影。
+
 SGP-0020 修正原生 bloom 在 HDR tone mapping 前使用 8 位中间结果的暗部条带和自发光截断。
 已有 bloom stages 跟随 Scene framebuffer 精度，HDR/LDR 变化由 native texture cache 重建，
 提取的 RGB 不得为负。沿用原生控制和资源所有权；不创建第二套公开泛光效果。

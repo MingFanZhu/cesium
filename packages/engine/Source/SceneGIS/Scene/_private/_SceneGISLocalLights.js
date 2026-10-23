@@ -9,6 +9,7 @@ import SceneMode from "../../../Scene/SceneMode.js";
 import localLights from "../../../Shaders/SceneGIS/Rendering/SceneGISLocalLights.js";
 import localPbr from "../../../Shaders/SceneGIS/Rendering/SceneGISLocalPbr.js";
 import SceneGISSpotLight from "../SceneGISSpotLight.js";
+import SceneGISRectAreaLight from "../SceneGISRectAreaLight.js";
 import LightTiles from "./_SceneGISLightTiles.js";
 import Validation from "./_SceneGISLightValidation.js";
 
@@ -23,6 +24,8 @@ function createState(collection) {
     shaders: new WeakMap(),
     position: new Cartesian3(),
     direction: new Cartesian3(),
+    right: new Cartesian3(),
+    up: new Cartesian3(),
   };
   state.uniforms = {
     u_sceneGISLightCount: () => state.count,
@@ -30,6 +33,7 @@ function createState(collection) {
     u_sceneGISLightIndexRow: () => state.tiles.indexRow,
     u_sceneGISLightGrid: () => state.tiles.grid,
     u_sceneGISLightTiled: () => collection._tiled,
+    u_sceneGISLightHeaderRow: () => state.tiles.headerRow,
   };
   return state;
 }
@@ -57,8 +61,14 @@ SceneGISLocalLights.prepare = function (scene, camera = scene.camera) {
     throw new DeveloperError("Local lighting requires SCENE3D.");
   }
   const view = camera.viewMatrix;
+  let rectangles = false;
   for (const light of collection._lights) {
-    Validation.point(light);
+    const rectangle = light instanceof SceneGISRectAreaLight;
+    if (rectangle) {
+      Validation.rectangle(light);
+    } else {
+      Validation.point(light);
+    }
     const spot = light instanceof SceneGISSpotLight;
     if (spot) {
       Validation.spot(light);
@@ -78,8 +88,26 @@ SceneGISLocalLights.prepare = function (scene, camera = scene.camera) {
     data[offset + 4] = color.red * light.intensity;
     data[offset + 5] = color.green * light.intensity;
     data[offset + 6] = color.blue * light.intensity;
-    data[offset + 7] = light.radius * light.radius;
-    if (spot) {
+    data[offset + 7] = rectangle ? 0 : light.radius * light.radius;
+    if (rectangle) {
+      rectangles = true;
+      Cartesian3.normalize(light.direction, state.direction);
+      Cartesian3.normalize(light.up, state.up);
+      Cartesian3.cross(state.direction, state.up, state.right);
+      Cartesian3.normalize(state.right, state.right);
+      Cartesian3.cross(state.right, state.direction, state.up);
+      Matrix4.multiplyByPointAsVector(view, state.right, state.right);
+      Matrix4.multiplyByPointAsVector(view, state.up, state.up);
+      const axes = LightTiles.maximumLights * 16 + (state.count - 1) * 8;
+      data[axes] = state.right.x * light.width * 0.5;
+      data[axes + 1] = state.right.y * light.width * 0.5;
+      data[axes + 2] = state.right.z * light.width * 0.5;
+      data[axes + 3] = light.twoSided ? 1 : 0;
+      data[axes + 4] = state.up.x * light.height * 0.5;
+      data[axes + 5] = state.up.y * light.height * 0.5;
+      data[axes + 6] = state.up.z * light.height * 0.5;
+      data[offset + 12] = -2;
+    } else if (spot) {
       Cartesian3.normalize(light.direction, state.direction);
       Matrix4.multiplyByPointAsVector(view, state.direction, state.direction);
       const outer = Math.cos(light.outerConeAngle);
@@ -93,6 +121,7 @@ SceneGISLocalLights.prepare = function (scene, camera = scene.camera) {
     }
   }
   if (state.count) {
+    state.tiles.hasRectangles = rectangles;
     scene.frameState._sceneGISLocalLightTextureCount = 1;
     state.tiles.update(
       state.count,

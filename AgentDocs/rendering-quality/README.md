@@ -8,12 +8,12 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | None; R29 completed                                                                                      |
-| Active phase plan      | None; [completed R29](plans/2026-10-22-r29-directional-occlusion-cost.md)                                |
+| Current phase          | None; R30 technically completed, owner visual gate pending                                               |
+| Active phase plan      | None; [completed R30](plans/2026-10-23-r30-rect-area-light.md)                                           |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
-| Last updated           | `2026-10-22`                                                                                             |
+| Last updated           | `2026-10-23`                                                                                             |
 
 ## Scope
 
@@ -34,6 +34,16 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-23: owner requests rectangular area lighting. Activate
+  [R30](plans/2026-10-23-r30-rect-area-light.md), ADR-0186, on the completed
+  `71b47223a4` baseline. Reuse the light collection and shared forward/deferred
+  shader; no upstream seam is planned. Earlier visual gates remain independent.
+  R30 is now technically complete; [review](reviews/2026-10-23-r30-rect-area-light.md)
+  records dev/release 31 passing focused cases each, one reproduced baseline bloom
+  expectation, four browser cases, builds/types, GPU cost and inspected pictures.
+  Form its local checkpoint on `feature/rect-area-light`; owner visual acceptance
+  and merge remain pending. No next phase is active.
 
 - 2026-10-22: [R29 optimization/review](reviews/2026-10-22-r29-directional-occlusion-cost.md)
   complete. Bistro lighting groups/draws fall 627 to 1, geometry remains 627;

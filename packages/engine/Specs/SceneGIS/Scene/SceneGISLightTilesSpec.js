@@ -11,6 +11,7 @@ import {
   RenderState,
   SceneGISLightCollection,
   SceneGISPointLight,
+  SceneGISRectAreaLight,
   SceneGISSpotLight,
 } from "../../../index.js";
 import localLightsShader from "../../../Source/Shaders/SceneGIS/Rendering/SceneGISLocalLights.js";
@@ -178,6 +179,34 @@ describe("SceneGIS/Scene/SceneGISLightTiles", function () {
     equivalent();
     depth = 12;
     equivalent();
+  });
+
+  it("preserves mixed rectangular candidates, finite ranges and rotated wide panels", function () {
+    for (let i = 0; i < 40; ++i) {
+      add(new Cartesian3(i - 20, 0, -5), 7, i % 2 === 0);
+      lights.add(
+        new SceneGISRectAreaLight({
+          position: world(new Cartesian3(i - 20, 2, -8)),
+          direction: Matrix4.multiplyByPointAsVector(
+            scene.camera.inverseViewMatrix,
+            new Cartesian3(0.2, 0, -1),
+            new Cartesian3(),
+          ),
+          up: Matrix4.multiplyByPointAsVector(
+            scene.camera.inverseViewMatrix,
+            new Cartesian3(1, 1, 0),
+            new Cartesian3(),
+          ),
+          width: 8,
+          height: 0.5,
+          range: 6,
+          intensity: 0.1,
+        }),
+      );
+    }
+    equivalent();
+    expect(lights._state.tiles.headerRow).toBe(38);
+    expect(lights._state.tiles.maximumTileCount).toBeLessThan(80);
   });
 
   it("does not truncate 256 overlapping lights or alter their accumulation order", function () {

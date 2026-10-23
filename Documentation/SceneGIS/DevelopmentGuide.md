@@ -960,6 +960,42 @@ MRT 用带宽/显存换取绘制和完整着色次数下降；必须在真实场
 GPU 回归入口为 SceneGIS/Scene/SceneGISScreenSpaceReflections，关联 AO、sky reflections、physical model
 和原生 IBL pipeline Specs；Shader 修改须先 gulp build。验证记录见 R6 review，架构边界见 ADR-0086。
 
+## 矩形面光源
+
+矩形光与点光、聚光共用 `SceneGISLightCollection`（总容量 256，含隐藏灯）：
+
+```js
+const lights = new Cesium.SceneGISLightCollection({ scene: viewer.scene });
+const panel = lights.add(
+  new Cesium.SceneGISRectAreaLight({
+    position: new Cesium.Cartesian3(0, 0, 6), // Planar coordinates; use ECEF in Globe.
+    direction: new Cesium.Cartesian3(0, 0, -1),
+    up: Cesium.Cartesian3.UNIT_Y,
+    width: 4,
+    height: 2,
+    intensity: 8,
+    range: 30,
+    color: new Cesium.Color(1, 0.8, 0.5),
+  }),
+);
+panel.width = 8;
+viewer.scene.requestRender();
+```
+
+position 为面板中心，direction 为发光法线，up 控制高度方向；宽度方向是
+`cross(direction, up)`。两方向必须非零且不平行，运行时自动正交化；宽高、range 用米。
+默认单面，可设置 `twoSided=true`。intensity 为线性 HDR 面辐亮度，固定值下增大面积
+会增加总出光量，与点光/聚光的一米照度尺度不同；range 按中心距离在积分后平滑衰减。
+支持 PBR/clearcoat、Phong（含透明）和 lit terrain；使用 LTC 计算矩形高光。
+Phong 镜面转换为 GGX，anisotropy 的面光镜面项使用 isotropic 拟合。
+灯本身不创建可见几何，不投射局部阴影，也不照亮体积介质。
+
+集合由 Scene 销毁，描述对象不需要 destroy；request-render 模式修改属性后手动请求帧。
+人工入口 [矩形光源](../../Test/Rendering/矩形光源.html) 提供 Globe/Planar、宽高、旋转、
+倾斜、单双面和照明开关。验证入口为 `SceneGISRectAreaLight`、`SceneGISLightCollection`、
+`SceneGISLightTiles` Specs，以及 `Test/Rendering/playwright.rect-area-light.config.mjs`。
+固定版本数据、许可、存储与算法边界见 ADR-0186。
+
 ## 局部水面使用与验证
 
 先设置 `scene.highDynamicRange = true`，再把 `SceneGISWaterSurface` 加入 `scene.primitives`。

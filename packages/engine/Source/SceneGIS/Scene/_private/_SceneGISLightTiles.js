@@ -7,6 +7,7 @@ import PixelFormat from "../../../Core/PixelFormat.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
 import Sampler from "../../../Renderer/Sampler.js";
 import Texture from "../../../Renderer/Texture.js";
+import createLtcData from "../../Renderer/_private/_SceneGISLtcData.js";
 
 const maximumLights = 256;
 const tileSize = 32;
@@ -99,8 +100,10 @@ function SceneGISLightTiles(context) {
   }
   this._context = context;
   this.grid = new Cartesian2();
-  this.parameters = new Float32Array(maximumLights * 16);
+  this.parameters = new Float32Array(maximumLights * 24);
   this._parameterBits = new Uint32Array(this.parameters.buffer);
+  this._baseBits = this._parameterBits.subarray(0, maximumLights * 16);
+  this._axisBits = this._parameterBits.subarray(maximumLights * 16);
   this._bounds = new Int32Array(maximumLights * 4);
   this._visible = new Uint8Array(maximumLights);
   this._corner = new Cartesian4();
@@ -112,6 +115,10 @@ function SceneGISLightTiles(context) {
   this.referenceCount = 0;
   this.maximumTileCount = 0;
   this.byteLength = 0;
+  this.hasRectangles = false;
+  this.headerRow = parameterRows;
+  this._ltc = undefined;
+  this._ltcTexture = undefined;
 }
 
 SceneGISLightTiles.maximumLights = maximumLights;
@@ -164,7 +171,8 @@ SceneGISLightTiles.prototype.update = function (count, camera, width, height) {
     );
   }
   const headerRows = headers.length / indicesPerRow;
-  this.indexRow = parameterRows + headerRows;
+  this.headerRow = parameterRows + (this.hasRectangles ? 34 : 0);
+  this.indexRow = this.headerRow + headerRows;
   const capacityRows = this.indexRow + this._indices.length / indicesPerRow;
   if (!this.texture || this.texture.height < capacityRows) {
     this.texture?.destroy();
@@ -188,8 +196,22 @@ SceneGISLightTiles.prototype.update = function (count, camera, width, height) {
   }
   // One integer texture preserves parameter float bits and exact integer indices,
   // leaving sampler slots available for native materials and reflection probes.
-  upload(this.texture, this._parameterBits, 0, parameterRows);
-  upload(this.texture, headers, parameterRows, headerRows);
+  upload(this.texture, this._baseBits, 0, parameterRows);
+  if (this.hasRectangles) {
+    upload(this.texture, this._axisBits, parameterRows, 2);
+    if (this._ltcTexture !== this.texture) {
+      if (!this._ltc) {
+        const data = createLtcData();
+        this._ltc = new Uint32Array(data.buffer);
+      }
+      upload(this.texture, this._ltc, parameterRows + 2, 32);
+      this._ltcTexture = this.texture;
+    }
+  } else {
+    // Headers/indices may occupy the LUT region while no rectangles are active.
+    this._ltcTexture = undefined;
+  }
+  upload(this.texture, headers, this.headerRow, headerRows);
   upload(this.texture, this._indices, this.indexRow, indexRows);
   this.referenceCount = references;
   this.maximumTileCount = maximum;

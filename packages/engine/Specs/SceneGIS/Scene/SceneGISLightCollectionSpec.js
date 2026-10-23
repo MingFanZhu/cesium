@@ -5,6 +5,7 @@ import {
   Color,
   ColorGeometryInstanceAttribute,
   CustomShader,
+  CustomShaderTranslucencyMode,
   DirectionalLight,
   Event,
   GeometryInstance,
@@ -19,12 +20,14 @@ import {
   Primitive,
   SceneGISLightCollection,
   SceneGISPointLight,
+  SceneGISRectAreaLight,
   SceneGISSpotLight,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarHeightmapTerrainData,
   SceneGISPlanarWorld,
   SceneGISScreenSpaceReflections,
+  SceneGISScreenSpaceIndirectLighting,
   SceneTransforms,
   ShadowMode,
   Transforms,
@@ -109,8 +112,11 @@ describe("SceneGIS/Scene/SceneGISLightCollection", function () {
       }),
     );
   }
-  async function floor(unlit = false) {
+  async function floor(unlit = false, translucent = false) {
     shader = new CustomShader({
+      translucencyMode: translucent
+        ? CustomShaderTranslucencyMode.TRANSLUCENT
+        : CustomShaderTranslucencyMode.INHERIT,
       lightingModel: unlit ? LightingModel.UNLIT : LightingModel.PBR,
       uniforms: {
         u_emission: { type: UniformType.VEC3, value: new Cartesian3() },
@@ -149,6 +155,20 @@ describe("SceneGIS/Scene/SceneGISLightCollection", function () {
         color,
         intensity: 150,
         range: 50,
+      }),
+    );
+  }
+  function rectLamp() {
+    return lights.add(
+      new SceneGISRectAreaLight({
+        position: point(0, 0, 8),
+        direction: vector(0, 0, -1),
+        up: vector(0, 1, 0),
+        width: 8,
+        height: 4,
+        intensity: 12,
+        range: 50,
+        color: Color.RED,
       }),
     );
   }
@@ -239,6 +259,41 @@ describe("SceneGIS/Scene/SceneGISLightCollection", function () {
 
   [true, false].forEach(function (planar) {
     const name = planar ? "Planar" : "Globe";
+    [false, true].forEach(function (translucent) {
+      it(`${name}: integrates rectangular PBR/clearcoat lighting in ${translucent ? "transparent forward" : "opaque deferred"} receivers`, async function () {
+        setup(planar);
+        if (scene.environmentEffects) {
+          scene.environmentEffects.enabled = false;
+        }
+        await floor(false, translucent);
+        const panel = lights.add(
+          new SceneGISRectAreaLight({
+            position: point(0, 0, 8),
+            direction: vector(0, 0, -1),
+            up: vector(0, 1, 0),
+            width: 8,
+            height: 4,
+            intensity: 12,
+            range: 50,
+            color: Color.RED,
+          }),
+        );
+        const lit = sample();
+        expect(lit[0]).toBeGreaterThan(40);
+        expect(lit[2]).toBeLessThan(3);
+        panel.width = 2;
+        expect(sample()[0]).toBeLessThan(lit[0] - 10);
+        panel.width = 8;
+        panel.direction = vector(0, 0, 1);
+        expect(sample()[0]).toBeLessThan(3);
+        panel.twoSided = true;
+        expect(sample()).toEqualEpsilon(lit, 2);
+        scene.camera.moveRight(2);
+        expect(sample()[0]).toEqualEpsilon(lit[0], 5);
+        lights.show = false;
+        expect(sample()[0]).toBeLessThan(3);
+      });
+    });
     it(`${name}: adds colored PBR/clearcoat sources, smooth distance falloff and finite range in HDR/LDR`, async function () {
       setup(planar);
       await floor();
@@ -363,107 +418,118 @@ describe("SceneGIS/Scene/SceneGISLightCollection", function () {
       await floor(true);
       const before = sample();
       lamp();
+      rectLamp();
       expect(sample()).toEqual(before);
     });
 
-    it(`${name}: lights native Phong opaque and translucent receivers without changing pick`, function () {
-      setup(planar);
-      const primitive = scene.primitives.add(
-        new Primitive({
-          geometryInstances: new GeometryInstance({
-            geometry: BoxGeometry.fromDimensions({
-              dimensions: new Cartesian3(30, 30, 1),
-              vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
-            }),
-            modelMatrix: Matrix4.multiplyByTranslation(
-              frame,
-              new Cartesian3(0, 0, -0.5),
-              new Matrix4(),
-            ),
-            attributes: {
-              color: ColorGeometryInstanceAttribute.fromColor(
-                new Color(0.3, 0.3, 0.3, 0.7),
-              ),
-            },
-            id: "local-floor",
-          }),
-          appearance: new PerInstanceColorAppearance({
-            translucent: false,
-            closed: true,
-          }),
-          asynchronous: false,
-        }),
-      );
-      const before = sample()[0];
-      lamp();
-      expect(sample()[0]).toBeGreaterThan(before + 20);
-      expect(scene.pick(new Cartesian2(64, 64)).id).toBe("local-floor");
-      primitive.appearance = new PerInstanceColorAppearance({
-        translucent: true,
-        closed: true,
-      });
-      expect(sample()[0]).toBeGreaterThan(30);
-      lights.show = false;
-      const dim = sample()[0];
-      lights.show = true;
-      expect(sample()[0]).toBeGreaterThan(dim + 10);
-      caster();
-      primitive.shadows = ShadowMode.RECEIVE_ONLY;
-      const unshadowed = sample();
-      scene.shadowMap.enabled = true;
-      scene.shadowMap.size = 256;
-      scene.shadowMap.maximumDistance = 100;
-      scene.shadowMap.darkness = 0;
-      expect(sample()).toEqualEpsilon(unshadowed, 2);
-    });
-
-    it(`${name}: adds local diffuse light to lit terrain`, async function () {
-      setup(planar, true);
-      if (planar) {
-        world.terrainProvider = {
-          tilingScheme: world.tilingScheme,
-          minimumHeight: 0,
-          maximumHeight: 0,
-          maximumLevel: 0,
-          errorEvent: new Event(),
-          getLevelMaximumGeometricError: () => 16,
-          requestTileGeometry: () =>
-            Promise.resolve(
-              new SceneGISPlanarHeightmapTerrainData({
-                buffer: new Float32Array(17 * 17),
-                width: 17,
-                height: 17,
+    [false, true].forEach(function (rectangle) {
+      const source = rectangle ? rectLamp : lamp;
+      const kind = rectangle ? "rectangle" : "point";
+      it(`${name}: lights native Phong opaque and translucent receivers without changing pick (${kind})`, function () {
+        setup(planar);
+        const primitive = scene.primitives.add(
+          new Primitive({
+            geometryInstances: new GeometryInstance({
+              geometry: BoxGeometry.fromDimensions({
+                dimensions: new Cartesian3(30, 30, 1),
+                vertexFormat: PerInstanceColorAppearance.VERTEX_FORMAT,
               }),
-            ),
-          getTileDataAvailable: () => true,
-          loadTileDataAvailability: () => undefined,
-        };
-      }
-      await pollToPromise(
-        () => {
-          scene.renderForSpecs();
-          return world.tilesLoaded;
-        },
-        { timeout: 10000 },
-      );
-      lights.show = false;
-      const before = sample();
-      lamp();
-      lights.show = true;
-      const after = sample();
-      expect(after[0]).toBeGreaterThan(before[0] + 20);
-      expect(after[1]).toEqualEpsilon(before[1], 2);
+              modelMatrix: Matrix4.multiplyByTranslation(
+                frame,
+                new Cartesian3(0, 0, -0.5),
+                new Matrix4(),
+              ),
+              attributes: {
+                color: ColorGeometryInstanceAttribute.fromColor(
+                  new Color(0.3, 0.3, 0.3, 0.7),
+                ),
+              },
+              id: "local-floor",
+            }),
+            appearance: new PerInstanceColorAppearance({
+              translucent: false,
+              closed: true,
+            }),
+            asynchronous: false,
+          }),
+        );
+        const before = sample()[0];
+        source();
+        expect(sample()[0]).toBeGreaterThan(before + 20);
+        expect(scene.pick(new Cartesian2(64, 64)).id).toBe("local-floor");
+        primitive.appearance = new PerInstanceColorAppearance({
+          translucent: true,
+          closed: true,
+        });
+        expect(sample()[0]).toBeGreaterThan(30);
+        lights.show = false;
+        const dim = sample()[0];
+        lights.show = true;
+        expect(sample()[0]).toBeGreaterThan(dim + 10);
+        caster();
+        primitive.shadows = ShadowMode.RECEIVE_ONLY;
+        const unshadowed = sample();
+        scene.shadowMap.enabled = true;
+        scene.shadowMap.size = 256;
+        scene.shadowMap.maximumDistance = 100;
+        scene.shadowMap.darkness = 0;
+        expect(sample()).toEqualEpsilon(unshadowed, 2);
+      });
+
+      it(`${name}: adds local diffuse light to lit terrain (${kind})`, async function () {
+        setup(planar, true);
+        if (planar) {
+          world.terrainProvider = {
+            tilingScheme: world.tilingScheme,
+            minimumHeight: 0,
+            maximumHeight: 0,
+            maximumLevel: 0,
+            errorEvent: new Event(),
+            getLevelMaximumGeometricError: () => 16,
+            requestTileGeometry: () =>
+              Promise.resolve(
+                new SceneGISPlanarHeightmapTerrainData({
+                  buffer: new Float32Array(17 * 17),
+                  width: 17,
+                  height: 17,
+                }),
+              ),
+            getTileDataAvailable: () => true,
+            loadTileDataAvailability: () => undefined,
+          };
+        }
+        await pollToPromise(
+          () => {
+            scene.renderForSpecs();
+            return world.tilesLoaded;
+          },
+          { timeout: 10000 },
+        );
+        lights.show = false;
+        const before = sample();
+        source();
+        lights.show = true;
+        const after = sample();
+        expect(after[0]).toBeGreaterThan(before[0] + 20);
+        expect(after[1]).toEqualEpsilon(before[1], 2);
+      });
     });
   });
 
-  it("includes local lighting in the SSR capture path and detaches cleanly", async function () {
+  it("includes rectangular lighting in SSR/SSIL capture and detaches cleanly", async function () {
     setup();
     scene.highDynamicRange = true;
     await floor();
     const effect = new SceneGISScreenSpaceReflections({ scene, enabled: true });
+    const indirect = new SceneGISScreenSpaceIndirectLighting({
+      scene,
+      enabled: true,
+    });
     lamp();
+    rectLamp();
     expect(sample()[0]).toBeGreaterThan(40);
     expect(effect._ready).toBe(true);
+    expect(indirect.ready).toBe(true);
     // Lit sources can be captured in the main MRT pass or the compatible replay path.
     expect(
       effect._state.captureDraws + effect._state.mainDraws,

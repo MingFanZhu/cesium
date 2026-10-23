@@ -1,5 +1,19 @@
 # Extension Plan: Rendering Quality
 
+## R30 activation, 2026-10-23
+
+The owner requests rectangular area lighting on the existing light system after
+the completed R29 and Planar depth-test checkpoints. Activate
+[R30](2026-10-23-r30-rect-area-light.md): shared LTC rectangular direct lighting,
+an independent both-world fixture and bounded validation. Local shadows, textured
+emitters and anisotropic LTC remain outside scope. ADR-0186 records API and
+single-sampler integration; previous visual gates stay recorded independently.
+
+R30 implementation and [technical review](../reviews/2026-10-23-r30-rect-area-light.md)
+are complete, with both-world/dev-release pictures, GPU evidence and public types.
+Create its independent local checkpoint. Owner visual acceptance and merge remain
+pending; no next phase is active.
+
 ## R29 activation, 2026-10-22
 
 The owner visually accepts R28 at `023016e69c` and authorizes performance work in

@@ -4,6 +4,7 @@ import Frozen from "../../Core/Frozen.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import LightTiles from "./_private/_SceneGISLightTiles.js";
 import SceneGISPointLight from "./SceneGISPointLight.js";
+import SceneGISRectAreaLight from "./SceneGISRectAreaLight.js";
 
 /**
  * A tiled-light collection attached to one WebGL2 Scene. Adds up to 256 local
@@ -83,14 +84,17 @@ Object.defineProperties(SceneGISLightCollection.prototype, {
 
 /**
  * Adds a descriptor; adding the same instance again returns it without duplication.
- * @param {SceneGISPointLight|SceneGISSpotLight} light The light to borrow.
- * @returns {SceneGISPointLight|SceneGISSpotLight} The supplied light.
+ * @param {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} light The light to borrow.
+ * @returns {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} The supplied light.
  * @exception {DeveloperError} The light type must be supported and capacity must not be exceeded.
  */
 SceneGISLightCollection.prototype.add = function (light) {
-  if (!(light instanceof SceneGISPointLight)) {
+  if (
+    !(light instanceof SceneGISPointLight) &&
+    !(light instanceof SceneGISRectAreaLight)
+  ) {
     throw new DeveloperError(
-      "light must be a SceneGISPointLight or SceneGISSpotLight.",
+      "light must be a SceneGISPointLight, SceneGISSpotLight or SceneGISRectAreaLight.",
     );
   }
   if (this.contains(light)) {
@@ -104,7 +108,7 @@ SceneGISLightCollection.prototype.add = function (light) {
   return light;
 };
 
-/** @param {SceneGISPointLight|SceneGISSpotLight} light The light to remove.
+/** @param {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} light The light to remove.
  * @returns {boolean} Whether it was removed. */
 SceneGISLightCollection.prototype.remove = function (light) {
   const index = this._lights.indexOf(light);
@@ -120,13 +124,13 @@ SceneGISLightCollection.prototype.removeAll = function () {
   this._lights.length = 0;
   this._scene.requestRender();
 };
-/** @param {SceneGISPointLight|SceneGISSpotLight} light The light to find.
+/** @param {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} light The light to find.
  * @returns {boolean} Whether the collection contains the light. */
 SceneGISLightCollection.prototype.contains = function (light) {
   return this._lights.includes(light);
 };
 /** @param {number} index An integer in [0, length).
- * @returns {SceneGISPointLight|SceneGISSpotLight} The light at the index. */
+ * @returns {SceneGISPointLight|SceneGISSpotLight|SceneGISRectAreaLight} The light at the index. */
 SceneGISLightCollection.prototype.get = function (index) {
   if (!Number.isInteger(index) || index < 0 || index >= this.length) {
     throw new DeveloperError("index must be an integer in [0, length).");

@@ -24,7 +24,7 @@ function vector(name, value) {
 
 /** @private */
 const SceneGISLightValidation = {
-  point(light) {
+  common(light) {
     vector("position", light.position);
     const color = light.color;
     if (
@@ -45,7 +45,33 @@ const SceneGISLightValidation = {
     }
     number("intensity", light.intensity, 0);
     number("range", light.range, 0, false);
+  },
+  point(light) {
+    SceneGISLightValidation.common(light);
     number("radius", light.radius, 0, false);
+  },
+  rectangle(light) {
+    SceneGISLightValidation.common(light);
+    vector("direction", light.direction);
+    vector("up", light.up);
+    const d = light.direction;
+    const u = light.up;
+    if (
+      Math.hypot(
+        d.y * u.z - d.z * u.y,
+        d.z * u.x - d.x * u.z,
+        d.x * u.y - d.y * u.x,
+      ) === 0
+    ) {
+      throw new DeveloperError(
+        "direction and up must be nonzero and independent.",
+      );
+    }
+    number("width", light.width, 0, false);
+    number("height", light.height, 0, false);
+    if (typeof light.twoSided !== "boolean") {
+      throw new DeveloperError("twoSided must be a boolean.");
+    }
   },
   spot(light) {
     vector("direction", light.direction);

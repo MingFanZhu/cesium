@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>矩形面光源</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>矩形面光源</h1>
+      <p>
+        面板向下照亮漫反射地面和三块金属板。左至右粗糙度为
+        0.12、0.35、0.7，可观察矩形高光的形状与展宽。
+      </p>
+      <p>
+        调节宽高和旋转，观察高光变化。固定亮度时，面积越大，总出光量越多。背面默认不发光；勾选“双面发光”可恢复背面照明。
+      </p>
+      <p>面板模型仅作位置标记，其显示与照明独立。当前局部光源不投射阴影。</p>
+      <p>
+        <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
+        <a href="夜景光照.html">点光与聚光</a> ·
+        <a href="示例目录.html">效果目录</a>
+      </p>
+      <p id="status" role="status">正在加载本地模型…</p>
+      <div id="error" role="alert"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./矩形光源.js"></script>
+  </body>
+</html>
