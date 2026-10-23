@@ -11,10 +11,10 @@
 | Current phase          | None                                                                                    |
 | Active phase plan      | None                                                                                    |
 | Proposed phase plan    | None                                                                                    |
-| Active standalone plan | None；[平面影像分屏](plans/2026-10-22-imagery-split.md) 技术完成，视觉验收待定          |
+| Active standalone plan | None；[地形深度测试](plans/2026-10-23-terrain-depth-test.md) 已完成并通过视觉验收       |
 | Architecture contact   | Architecture Agent                                                                      |
 | Execution contact      | Execution Agent                                                                         |
-| Last updated           | `2026-10-22`                                                                            |
+| Last updated           | `2026-10-23`                                                                            |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -62,6 +62,16 @@
 - SGP: `SGP-0001`（`active`）；`SGP-0002`（`active`，仅跟踪 P6 `Viewer.js` 缝隙）
 
 ## Current handoff
+
+2026-10-23：按负责人要求补齐 `depthTestAgainstTerrain`。默认 true，复用原生
+classification→depth clear 和延迟地形深度，见[独立计划](plans/2026-10-23-terrain-depth-test.md)、
+[ADR-0185](../../Documentation/SceneGIS/Decisions/ADR-0185-planar-terrain-depth-test.md)。
+SGP-0001 跟踪唯一上游修改 Scene.js。专项 dev/release GPU 各 7/7、World 共 54/54、
+贴地 21/21、注记 8/8、两项浏览器对照与完整构建/类型检查通过，见
+[技术自审](reviews/2026-10-23-terrain-depth-test.md)。Globe 30/31，旧云测试失败已在原源码复现。
+2026-10-23 负责人确认本地[开关示例](../../Test/地形深度测试.html) 验收通过，
+并要求在 scenegis/develop 形成独立本地提交；未要求推送。
+默认 true；pickPosition 保留原生深度合并边界。既有视觉未决事项保持。
 
 2026-10-22：平面影像已接入原生 `SplitDirection` / `scene.splitPosition`。
 沿用单地表绘制与原有 SSE/加载，不裁掉地表深度。67 项 Specs、两项 dev/release

@@ -482,7 +482,7 @@
       "id": "SGP-0001",
       "title": "Add primary world lifecycle and integration slots",
       "status": "active",
-      "reason": "Scene and CesiumWidget currently route primary-world lifecycle and DataSource visualization exclusively through Globe-oriented defaults, so a non-Globe world cannot participate without impersonating Globe.",
+      "reason": "Scene and CesiumWidget currently route primary-world lifecycle and DataSource visualization exclusively through Globe-oriented defaults, so a non-Globe world cannot participate without impersonating Globe. ADR-0185 also accepts an explicit optional false terrain-depth policy on non-Globe worlds, retaining the native classification and depth-clear order without a spherical DepthPlane.",
       "risk": "high",
       "files": [
         {
@@ -496,6 +496,9 @@
       ],
       "tests": [
         "packages/engine/Specs/SceneGIS/Scene/SceneGISWorldSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarDepthTestSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarWorldSpec.js",
+        "Specs/e2e/scenegis-planar-depth-test.spec.js",
         "packages/engine/Specs/SceneGIS/Widget/SceneGISWorldCesiumWidgetSpec.js",
         "packages/engine/Specs/SceneGIS/DataSources/_SceneGISPlanarVisualizersCallbackSpec.js",
         "packages/engine/Specs/SceneGIS/Widget/SceneGISPlanarContentCesiumWidgetSpec.js",

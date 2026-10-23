@@ -89,6 +89,23 @@ viewer.removeController(environment);
 viewer.destroy();
 ```
 
+## 地形深度测试
+
+`viewer.planarWorld.depthTestAgainstTerrain` 与 Globe 的同名属性控制相同的遮挡关系。
+平面默认 `true`，保留地形对普通对象的遮挡；设为 `false` 后，地下对象也可绘制在地形上，
+对象彼此之间仍正常进行深度测试。它不会关闭地形本身的绘制、贴地分类或高程查询。
+
+```js
+viewer.planarWorld.depthTestAgainstTerrain = false;
+viewer.scene.requestRender();
+```
+
+该属性只接受 boolean，不作为构造参数。Globe 原生默认值仍为 `false`。
+`scene.pick` 可识别显示的地下对象；`pickPosition` 延续原有深度拾取策略，不保证穿透地形
+返回地下对象坐标。需要实际地形位置时使用 `world.pickTerrain`，需要已有地形高程时使用 `world.getTerrainHeight`。
+透明地表继续遵循 `world.opacity` 和 `scene.pickTranslucentDepth`。
+本地对照页：[地形深度测试](../../Test/地形深度测试.html)。
+
 Imagery filter直接修改layer属性，并在下一次normal render生效；不会重新请求或上传texture。默认值保持现有
 planar sampled color space。`colorToAlpha`比较raw sampled RGB，getter/setter均defensive clone；设置为
 `undefined`可禁用。filter执行顺序固定为color-to-alpha、gamma、brightness、contrast、hue、saturation，再应用

@@ -9,6 +9,12 @@ void main()
     // Negative tags identify depth-writing annotations over the material below.
     bool annotation = surface.y < 0.0;
     surface.y = abs(surface.y);
+    if (!annotation && u_clearGlobeDepth) {
+        float group = texelFetch(u_material, pixel, 0).a;
+        if (group == -3.0 || group == -5.0) {
+            discard;
+        }
+    }
     if (surface.x <= 0.0 || surface.y > u_frustumTag) {
         discard;
     }
@@ -16,9 +22,6 @@ void main()
         // A nearer opaque segment occludes transparency in every farther segment.
         gl_FragDepth = 0.0;
     } else {
-        if (!annotation && u_clearGlobeDepth && texelFetch(u_material, pixel, 0).a == -3.0) {
-            discard;
-        }
         #ifdef LOG_DEPTH_READ_ONLY
         gl_FragDepth = log2(max(1.0, surface.x - czm_currentFrustum.x + 1.0))
             / czm_log2FarDepthFromNearPlusOne;

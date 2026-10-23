@@ -410,6 +410,12 @@ actual render tiles，pick+depth 继续精确 replay 最近 normal-render comman
 
 ### 平面地形查询、拾取与独立采样
 
+按 [ADR-0185](Decisions/ADR-0185-planar-terrain-depth-test.md)，平面 World 的
+`depthTestAgainstTerrain` 默认 true；false 在地形分类后复用原生深度清除，
+保持普通对象之间的遮挡。SGP-0001 仅接入显式可选的 World 深度策略，
+Globe 的 DepthPlane 仍限定于 Globe。地形查询与分类保留真实地表；延迟地形深度和
+多视锥透明恢复共享既有资源，不能通过关闭地表 depthTest/depthMask 代替此开关。
+
 平面地形的读取接口必须区分数据来源。`SceneGISPlanarWorld.getTerrainHeight` 只读取 canonical
 quadtree cache 中最深的 resident `DIRECT`/`UPSAMPLED` active mesh，并按实际 Float32 surface
 triangles求高程；它不创建 tile、不更新 LRU，也不把 `FLAT` 当作已知 terrain。`world.pickTerrain`

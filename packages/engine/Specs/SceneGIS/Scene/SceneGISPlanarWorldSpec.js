@@ -102,6 +102,7 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     expect(world.tileCacheSize).toBe(100);
     expect(world.baseColor).toEqual(Color.GRAY);
     expect(world.opacity).toBe(1);
+    expect(world.depthTestAgainstTerrain).toBe(true);
     expect(world.enableLighting).toBe(false);
     expect(world.lambertDiffuseMultiplier).toBe(0.9);
     expect(world.show).toBe(true);
@@ -144,6 +145,24 @@ describe("SceneGIS/Scene/SceneGISPlanarWorld", function () {
     }
     expect(world.baseColor).toEqual(Color.GRAY);
     expect(world._surface._quadtree._tiles.size).toBe(0);
+    world.destroy();
+  });
+
+  it("validates terrain depth testing without changing surface resources", function () {
+    const world = createWorld();
+    const surface = world._surface;
+    world.depthTestAgainstTerrain = false;
+    expect(world.depthTestAgainstTerrain).toBe(false);
+    for (const value of [0, 1, "false", null, undefined, {}]) {
+      expect(() => {
+        world.depthTestAgainstTerrain = value;
+      }).toThrowDeveloperError();
+      expect(world.depthTestAgainstTerrain).toBe(false);
+    }
+    world.depthTestAgainstTerrain = true;
+    expect(world.depthTestAgainstTerrain).toBe(true);
+    expect(world._surface).toBe(surface);
+    expect(surface._quadtree._tiles.size).toBe(0);
     world.destroy();
   });
 

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>平面地形深度测试</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #viewer {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      #panel {
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        max-width: 290px;
+        padding: 18px;
+        color: #e5edf4;
+        background: #182332ed;
+        border-radius: 8px;
+        font: 14px/1.7 sans-serif;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+      p {
+        margin: 12px 0 0;
+        color: #b9c7d6;
+      }
+      label {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="viewer"></div>
+    <div id="panel">
+      <h1>平面地形深度测试</h1>
+      <label><input id="depthTest" type="checkbox" checked />地形遮挡</label>
+      <p>
+        灰色地形高程 30
+        米。开启时遮挡红色地下盒体；关闭后可见。蓝色地上盒体始终遮挡后方对象。
+      </p>
+    </div>
+    <script type="module">
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const viewer = new C.Viewer("viewer", {
+        planarWorld: {
+          extent: {
+            minimumX: -100,
+            minimumY: -100,
+            maximumX: 100,
+            maximumY: 100,
+          },
+          maximumLevel: 0,
+          baseColor: new C.Color(0.32, 0.38, 0.42, 1),
+        },
+        animation: false,
+        timeline: false,
+        homeButton: false,
+      });
+      const world = viewer.planarWorld;
+      viewer.scene.environmentEffects.enabled = false;
+      world.terrainProvider = {
+        tilingScheme: world.tilingScheme,
+        minimumHeight: 30,
+        maximumHeight: 30,
+        maximumLevel: 0,
+        errorEvent: new C.Event(),
+        getLevelMaximumGeometricError: () => 0,
+        getTileDataAvailable: () => true,
+        loadTileDataAvailability: () => undefined,
+        requestTileGeometry: () =>
+          Promise.resolve(
+            new C.SceneGISPlanarHeightmapTerrainData({
+              buffer: new Float32Array(4).fill(30),
+              width: 2,
+              height: 2,
+            }),
+          ),
+      };
+      const boxes = [];
+      for (const [id, position, color] of [
+        ["地下盒体", new C.Cartesian3(0, 0, 10), C.Color.RED],
+        ["地上盒体", new C.Cartesian3(-14, -18, 50), C.Color.BLUE],
+      ]) {
+        boxes.push(
+          viewer.scene.primitives.add(
+            new C.Primitive({
+              asynchronous: false,
+              geometryInstances: new C.GeometryInstance({
+                id,
+                geometry: C.BoxGeometry.fromDimensions({
+                  dimensions: new C.Cartesian3(30, 30, 20),
+                  vertexFormat: C.PerInstanceColorAppearance.FLAT_VERTEX_FORMAT,
+                }),
+                modelMatrix: C.Matrix4.fromTranslation(position),
+                attributes: {
+                  color: C.ColorGeometryInstanceAttribute.fromColor(color),
+                },
+              }),
+              appearance: new C.PerInstanceColorAppearance({
+                flat: true,
+                translucent: false,
+                closed: true,
+              }),
+            }),
+          ),
+        );
+      }
+      const target = new C.Cartesian3(0, 0, 30);
+      const destination = new C.Cartesian3(100, -150, 180);
+      viewer.camera.setView({
+        destination,
+        orientation: {
+          direction: C.Cartesian3.normalize(
+            C.Cartesian3.subtract(target, destination, new C.Cartesian3()),
+            new C.Cartesian3(),
+          ),
+          up: C.Cartesian3.UNIT_Z,
+        },
+      });
+      document
+        .querySelector("#depthTest")
+        .addEventListener("change", (event) => {
+          world.depthTestAgainstTerrain = event.target.checked;
+          viewer.scene.requestRender();
+        });
+      window.depthTestExample = { viewer, world, boxes };
+      window.addEventListener("pagehide", (event) => {
+        if (!event.persisted && !viewer.isDestroyed()) {
+          viewer.destroy();
+        }
+      });
+    </script>
+  </body>
+</html>

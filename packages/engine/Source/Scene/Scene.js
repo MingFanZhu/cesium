@@ -4232,14 +4232,18 @@ Scene.prototype.updateEnvironment = function () {
       : undefined;
   }
 
-  const clearGlobeDepth = (environmentState.clearGlobeDepth =
-    defined(globe) &&
-    globe.show &&
-    (!globe.depthTestAgainstTerrain || this.mode === SceneMode.SCENE2D));
+  // SCENEGIS_PATCH_BEGIN SGP-0001: Honor an explicit terrain-depth policy on the primary world.
+  const world = this._world;
+  const clearGlobeDepth = (environmentState.clearGlobeDepth = defined(globe)
+    ? globe.show &&
+      (!globe.depthTestAgainstTerrain || this.mode === SceneMode.SCENE2D)
+    : defined(world) && world.show && world.depthTestAgainstTerrain === false);
   const useDepthPlane = (environmentState.useDepthPlane =
+    defined(globe) &&
     clearGlobeDepth &&
     this.mode === SceneMode.SCENE3D &&
     globeTranslucencyState.useDepthPlane);
+  // SCENEGIS_PATCH_END SGP-0001
   if (useDepthPlane) {
     // Update the depth plane that is rendered in 3D when the primitives are
     // not depth tested against terrain so primitives on the backface

@@ -10,6 +10,25 @@ import PixelDatatype from "../../../Renderer/PixelDatatype.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
 import DeferredLayout from "./_SceneGISDeferredLayout.js";
 import DepthFunction from "../../../Scene/DepthFunction.js";
+import BillboardCollection from "../../../Scene/BillboardCollection.js";
+
+const terrainDepthSource = `
+  uniform sampler2D u_sceneGISAnnotationMaterial;
+  uniform bool u_sceneGISAnnotationClearTerrain;
+  bool sceneGISAnnotationTerrain(vec2 surface) {
+    return u_sceneGISAnnotationClearTerrain && surface.y > 0.0
+      && texelFetch(u_sceneGISAnnotationMaterial, ivec2(gl_FragCoord.xy), 0).a == -5.0;
+  }
+`;
+
+function terrainDepthUniforms(renderer) {
+  const scene = renderer._scene;
+  return {
+    u_sceneGISAnnotationMaterial: () => renderer._raw.getColorTexture(2),
+    u_sceneGISAnnotationClearTerrain: () =>
+      !scene.globe && scene.world?.depthTestAgainstTerrain === false,
+  };
+}
 
 function orderedExtrusion(renderer, source, cached) {
   const context = renderer._scene.context;
@@ -73,13 +92,15 @@ function splitCommand(renderer, source, translucent, cached) {
         ShaderSource.replaceMain(s, "sceneGISAnnotationMain"),
       );
       fs.sources.push(`
+        ${terrainDepthSource}
         uniform sampler2D u_sceneGISAnnotationSurface;
         uniform float u_sceneGISAnnotationTag;
         uniform bool u_sceneGISAnnotationMulti;
         void main() {
           if (u_sceneGISAnnotationMulti) {
             vec2 surface = texelFetch(u_sceneGISAnnotationSurface, ivec2(gl_FragCoord.xy), 0).rg;
-            if (surface.x > 0.0 && abs(surface.y) < u_sceneGISAnnotationTag) { discard; }
+            if (surface.x > 0.0 && abs(surface.y) < u_sceneGISAnnotationTag
+                && !sceneGISAnnotationTerrain(surface)) { discard; }
           }
           sceneGISAnnotationMain();
         }
@@ -108,6 +129,7 @@ function splitCommand(renderer, source, translucent, cached) {
         u_sceneGISAnnotationSurface: () => renderer.opaqueDepthTexture,
         u_sceneGISAnnotationTag: () => renderer._annotations.tag,
         u_sceneGISAnnotationMulti: () => renderer._multiFrustum,
+        ...terrainDepthUniforms(renderer),
       });
       cached.sourceUniforms = source.uniformMap;
     }
@@ -116,7 +138,47 @@ function splitCommand(renderer, source, translucent, cached) {
   return command;
 }
 
+function applyTerrainDepthPolicy(renderer) {
+  const scene = renderer._scene;
+  const world = scene.world;
+  if (scene.globe || typeof world?.depthTestAgainstTerrain !== "boolean") {
+    return;
+  }
+  // Native billboards also test czm_globeDepthTexture in their shader. Adapt
+  // their explicit test for planar color, ID picking and depth-only commands.
+  const commands = scene.frameState.commandList;
+  for (let i = 0; i < commands.length; i++) {
+    const source = commands[i];
+    if (!(source.owner instanceof BillboardCollection)) {
+      continue;
+    }
+    const cache = (renderer._terrainDepthCommands ??= new WeakMap());
+    let cached = cache.get(source);
+    if (!cached) {
+      cached = { command: new DrawCommand() };
+      cache.set(source, cached);
+    }
+    const command = DrawCommand.shallowClone(source, cached.command);
+    if (cached.sourceUniforms !== source.uniformMap) {
+      const uniforms = source.uniformMap;
+      cached.uniformMap = combine(
+        {
+          u_coarseDepthTestDistance: () =>
+            world.depthTestAgainstTerrain
+              ? uniforms.u_coarseDepthTestDistance()
+              : 0,
+        },
+        uniforms,
+      );
+      cached.sourceUniforms = uniforms;
+    }
+    command.uniformMap = cached.uniformMap;
+    commands[i] = command;
+  }
+}
+
 function prepareCommands(renderer) {
+  applyTerrainDepthPolicy(renderer);
   const { passes, commandList } = renderer._scene.frameState;
   if (!passes.render || passes.pick || passes.depth || passes.pickVoxel) {
     return;
@@ -340,6 +402,7 @@ function execute(renderer, command, passState) {
       ShaderSource.replaceMain(s, "sceneGISAnnotationDepthMain"),
     );
     fs.sources.push(`
+      ${state.multi && !vector ? terrainDepthSource : ""}
       uniform sampler2D u_sceneGISAnnotationMaterialDepth;
       uniform float u_sceneGISAnnotationDepthTag;
       ${vector ? "" : "layout(location=1) out vec4 sceneGISAnnotationDepth;"}
@@ -349,7 +412,8 @@ function execute(renderer, command, passState) {
           state.multi && !vector
             ? `
           vec2 surface = texelFetch(u_sceneGISAnnotationMaterialDepth, ivec2(gl_FragCoord.xy), 0).rg;
-          if (surface.x > 0.0 && surface.y < u_sceneGISAnnotationDepthTag) { discard; }
+          if (surface.x > 0.0 && surface.y < u_sceneGISAnnotationDepthTag
+              && !sceneGISAnnotationTerrain(surface)) { discard; }
         `
             : ""
         }
@@ -379,6 +443,7 @@ function execute(renderer, command, passState) {
     cached.uniformMap = combine(command.uniformMap, {
       u_sceneGISAnnotationMaterialDepth: () => renderer._linearDepth,
       u_sceneGISAnnotationDepthTag: () => state.tag,
+      ...terrainDepthUniforms(renderer),
     });
     cached.sourceUniforms = command.uniformMap;
   }

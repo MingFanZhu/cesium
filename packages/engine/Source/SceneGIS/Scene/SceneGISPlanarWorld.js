@@ -232,6 +232,7 @@ function SceneGISPlanarWorld(options) {
   this._tileCacheSize = tileCacheSize;
   this._baseColor = Color.clone(baseColor);
   this._opacity = 1.0;
+  this._depthTestAgainstTerrain = true;
   this._enableLighting = enableLighting;
   this._shadows = shadows;
   this._lambertDiffuseMultiplier = lambertDiffuseMultiplier;
@@ -253,6 +254,31 @@ function SceneGISPlanarWorld(options) {
 }
 
 Object.defineProperties(SceneGISPlanarWorld.prototype, {
+  /**
+   * Gets or sets whether ordinary scene content is depth-tested against terrain.
+   * When false, terrain depth is cleared after ground classification, while
+   * content still depth-tests against other content. Terrain queries and ground
+   * classification retain the actual terrain surface. The default preserves
+   * planar terrain occlusion and differs from {@link Globe#depthTestAgainstTerrain}.
+   * Changes take effect on the next render; call Scene.requestRender when using
+   * requestRenderMode.
+   *
+   * @memberof SceneGISPlanarWorld.prototype
+   * @type {boolean}
+   * @default true
+   * @exception {DeveloperError} The value is not a boolean.
+   */
+  depthTestAgainstTerrain: {
+    get: function () {
+      return this._depthTestAgainstTerrain;
+    },
+    set: function (value) {
+      if (typeof value !== "boolean") {
+        throw new DeveloperError("depthTestAgainstTerrain must be a boolean.");
+      }
+      this._depthTestAgainstTerrain = value;
+    },
+  },
   /**
    * Gets or sets whether terrain casts or receives geometry shadows. Scene
    * shadows must also be enabled. Only submitted terrain tiles cast shadows.

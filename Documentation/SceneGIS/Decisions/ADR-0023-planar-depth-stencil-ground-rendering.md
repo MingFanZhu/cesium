@@ -62,6 +62,10 @@ planar surface color/depth (Pass.GLOBE)
 `pickPosition`。P3/P4已有surface command replay只允许按真实pick/depth事实做最小调整；不得造成重复提交、selection
 mutation或allocation regression。
 
+2026-10-23：[ADR-0185](ADR-0185-planar-terrain-depth-test.md) 补齐可选
+`world.depthTestAgainstTerrain=false`，在分类之后清除普通内容的地形深度。
+默认 true 保留上述行为；分类始终先使用实际地表深度，不关闭 Surface 的深度写入。
+
 若真实WebGL证明现有pass slots不能满足normal、pick、depth或地下相机语义，Execution必须暂停并回报Architecture。
 未经新ADR/SGP不得修改upstream `Pass.js`、`Scene.js`或新增Scene pass。
 
