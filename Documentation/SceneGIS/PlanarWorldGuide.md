@@ -128,6 +128,19 @@ compile/link、sampler预算与像素结果。
 terrain/imagery复用exact `world.tilingScheme`。生产应用必须遵守服务条款、展示 attribution，并
 处理CORS、限流和服务失败。自动化测试应使用本地provider，不依赖公网。
 
+## 模型多区域裁剪
+
+原生 glTF `Model` 和 `Cesium3DTileset` 也支持平面多区域裁剪，分别设置它们自身的
+`clippingPolygons`。用法与下面的 World 多边形集合相同；区域使用当前 World 的绝对 XY 米制坐标，
+不随模型的 `modelMatrix` 移动，Z 忽略。多个简单外环取并集，支持凹环、动态 `positions`、
+add/remove/removeAll、enabled 和 inverse。模型和地形分别配置，不能将同一个集合交给多个 owner，
+可以用相同的 polygon 数据构造各自的集合。
+
+正常 render 发布区域数据，拾取、深度和阴影沿用相同的片元裁剪。集合替换或模型/tileset 销毁会释放资源。
+`quality` 和 `debugShowDistanceTexture` 只控制球面距离场，不影响平面精确边判断；裁剪不创建封口或侧壁。
+这项能力适用于低层原生 Model / tileset；没有向 `ModelGraphics` 增加新属性或扩大分类模型支持。
+示例：`Test/Planar/模型多区域裁剪.html`；设计见 ADR-0189。
+
 ## 地形剖切与多边形裁剪
 
 与 Globe 一样，为 `world.clippingPlanes`、`world.clippingPolygons` 设置原生 Cesium 集合：

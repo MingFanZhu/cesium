@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平面 · 模型多区域裁剪</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>模型多区域裁剪</h1>
+      <p>
+        左侧为 glTF Model，右侧为原生 3D
+        Tiles。每个对象使用两个世界坐标区域，可反向保留区域内部。
+      </p>
+      <p>
+        移动裁剪范围与移动模型分别控制；地形裁剪可独立启用。裁剪隐藏片元，不生成切面。
+      </p>
+      <p>
+        <a href="示例目录.html">示例目录</a> ·
+        <a href="模型多区域裁剪.js">查看源码</a>
+      </p>
+      <p id="status">正在加载本地模型…</p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./模型多区域裁剪.js"></script>
+  </body>
+</html>

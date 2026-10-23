@@ -21,6 +21,9 @@ import ClippingPolygon from "./ClippingPolygon.js";
 import ComputeCommand from "../Renderer/ComputeCommand.js";
 import PolygonSignedDistanceFS from "../Shaders/PolygonSignedDistanceFS.js";
 import Pass from "../Renderer/Pass.js";
+// SCENEGIS_PATCH_BEGIN SGP-0068: Delegate Cartesian polygon resources to the planar adapter.
+import SceneGISPlanarModelClipping from "../SceneGIS/Scene/_private/_SceneGISPlanarModelClipping.js";
+// SCENEGIS_PATCH_END SGP-0068
 
 /**
  * Specifies a set of clipping polygons. Clipping polygons selectively disable rendering in a region
@@ -262,6 +265,13 @@ Object.defineProperties(ClippingPolygonCollection.prototype, {
    */
   clippingPolygonsState: {
     get: function () {
+      // SCENEGIS_PATCH_BEGIN SGP-0068: Planar counts and inverse are dynamic uniforms.
+      if (this._sceneGISPlanarClipping) {
+        return this._sceneGISPlanarClipping.counts.y > 0
+          ? Number.MAX_SAFE_INTEGER
+          : 0;
+      }
+      // SCENEGIS_PATCH_END SGP-0068
       return this.inverse ? -this.extentsCount : this.extentsCount;
     },
   },
@@ -652,6 +662,11 @@ const textureResolutionScratch = new Cartesian2();
  * @throws {RuntimeError} ClippingPolygonCollections are only supported for WebGL 2
  */
 ClippingPolygonCollection.prototype.update = function (frameState) {
+  // SCENEGIS_PATCH_BEGIN SGP-0068: Avoid spherical packing for the active planar world.
+  if (SceneGISPlanarModelClipping.update(this, frameState)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0068
   const context = frameState.context;
 
   if (!ClippingPolygonCollection.isSupported(frameState)) {
@@ -858,6 +873,12 @@ function createDebugCommand(texture, context) {
  * @param {FrameState} frameState
  */
 ClippingPolygonCollection.prototype.queueCommands = function (frameState) {
+  // SCENEGIS_PATCH_BEGIN SGP-0068: XY edges need no signed-distance compute pass.
+  if (this._sceneGISPlanarClipping) {
+    SceneGISPlanarModelClipping.queueCommands(this, frameState);
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0068
   if (defined(this._signedDistanceComputeCommand)) {
     frameState.commandList.push(this._signedDistanceComputeCommand);
   }
@@ -906,6 +927,11 @@ const scratchRectanglePolygon = new Rectangle();
  */
 ClippingPolygonCollection.prototype.computeIntersectionWithBoundingVolume =
   function (tileBoundingVolume, ellipsoid) {
+    // SCENEGIS_PATCH_BEGIN SGP-0068: Keep planar bounds out of ellipsoid conversion.
+    if (this._sceneGISPlanarClipping) {
+      return SceneGISPlanarModelClipping.intersection(this);
+    }
+    // SCENEGIS_PATCH_END SGP-0068
     const polygons = this._polygons;
     const length = polygons.length;
 
@@ -1119,6 +1145,10 @@ ClippingPolygonCollection.prototype.isDestroyed = function () {
  * @see ClippingPolygonCollection#isDestroyed
  */
 ClippingPolygonCollection.prototype.destroy = function () {
+  // SCENEGIS_PATCH_BEGIN SGP-0068: Release collection-owned planar clipping resources.
+  this._sceneGISPlanarClipping?.destroy();
+  this._sceneGISPlanarClipping = undefined;
+  // SCENEGIS_PATCH_END SGP-0068
   if (defined(this._signedDistanceComputeCommand)) {
     this._signedDistanceComputeCommand.canceled = true;
   }

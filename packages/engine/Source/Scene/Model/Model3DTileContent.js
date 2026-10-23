@@ -291,13 +291,17 @@ class Model3DTileContent {
 
     // Updating clipping polygons requires more effort because of ownership checks
     const tilesetClippingPolygons = tileset.clippingPolygons;
-    if (defined(tilesetClippingPolygons) && tile.clippingPolygonsDirty) {
+    // SCENEGIS_PATCH_BEGIN SGP-0068: Detach a collection removed from the owning tileset.
+    if (tile.clippingPolygonsDirty) {
       // Dereference the clipping polygons from the model if they are irrelevant.
       model._clippingPolygons =
-        tilesetClippingPolygons.enabled && tile._isClippedByPolygon
+        defined(tilesetClippingPolygons) &&
+        tilesetClippingPolygons.enabled &&
+        tile._isClippedByPolygon
           ? tilesetClippingPolygons
           : undefined;
     }
+    // SCENEGIS_PATCH_END SGP-0068
 
     // If the model references a different ClippingPolygonCollection from the tileset,
     // update the model to use the new ClippingPolygonCollection.

@@ -2,6 +2,35 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0068",
+      "title": "Route native model polygon clipping through planar XY regions",
+      "status": "active",
+      "reason": "Native clipping polygon packing, tile intersection and model shaders assume spherical coordinates. An owned adapter reuses planar terrain edge evaluation while retaining native Model and tileset collection ownership.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/ClippingPolygonCollection.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Model/ModelClippingPolygonsPipelineStage.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Model/Model3DTileContent.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarModelClippingSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarClippingSpec.js",
+        "packages/engine/Specs/Scene/ClippingPolygonCollectionSpec.js",
+        "packages/engine/Specs/Scene/Model/ModelClippingPolygonsPipelineStageSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0189-planar-model-clipping.md",
+      "removalCondition": "Native clipping polygons support equivalent planar Cartesian coordinates, tile bounds and model fragment evaluation."
+    },
+    {
       "id": "SGP-0066",
       "title": "Reuse native EntityCluster in planar worlds",
       "status": "active",

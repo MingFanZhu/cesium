@@ -972,6 +972,14 @@ budgeted placement 与 current-camera drawing；静态 UV/paint/pick 和动态 g
 按 [ADR-0078](Decisions/ADR-0078-icon-text-fit.md)，fit icon 的 content/stretch 切片与 UV 在 Worker
 准备，尺寸缩放复用既有 shaping cache。逻辑文字边界独立于 SDF border，变量 anchor 的图文选择必须一致。
 
+## 模型多区域裁剪
+
+原生 Model / Cesium3DTileset 的平面多区域裁剪按
+[ADR-0189](Decisions/ADR-0189-planar-model-clipping.md) 复用 `clippingPolygons` 集合和地形 XY 边算法。
+SGP-0068 只在原生集合生命周期、范围判断及 Model polygon stage 分派到自有适配器；
+集合拥有一张数据纹理，瓦片模型借用。坐标是 World 绝对米制 XY，模型移动不带动区域。
+颜色、拾取、深度和阴影共用 discard，不生成切面，不执行球面距离纹理计算。
+
 ## 模型局部压平
 
 模型局部压平按 [ADR-0175](Decisions/ADR-0175-model-flatten.md) 使用显式

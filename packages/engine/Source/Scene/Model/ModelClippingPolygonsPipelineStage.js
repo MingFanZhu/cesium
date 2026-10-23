@@ -2,6 +2,9 @@ import combine from "../../Core/combine.js";
 import ModelClippingPolygonsStageVS from "../../Shaders/Model/ModelClippingPolygonsStageVS.js";
 import ModelClippingPolygonsStageFS from "../../Shaders/Model/ModelClippingPolygonsStageFS.js";
 import ShaderDestination from "../../Renderer/ShaderDestination.js";
+// SCENEGIS_PATCH_BEGIN SGP-0068: Share the planar terrain clipping evaluator with native models.
+import SceneGISPlanarModelClipping from "../../SceneGIS/Scene/_private/_SceneGISPlanarModelClipping.js";
+// SCENEGIS_PATCH_END SGP-0068
 
 /**
  * The model clipping planes stage is responsible for applying clipping planes to the model.
@@ -37,6 +40,11 @@ ModelClippingPolygonsPipelineStage.process = function (
   model,
   frameState,
 ) {
+  // SCENEGIS_PATCH_BEGIN SGP-0068: Select XY shaders for a planar collection snapshot.
+  if (SceneGISPlanarModelClipping.process(renderResources, model, frameState)) {
+    return;
+  }
+  // SCENEGIS_PATCH_END SGP-0068
   const clippingPolygons = model.clippingPolygons;
   const shaderBuilder = renderResources.shaderBuilder;
 
