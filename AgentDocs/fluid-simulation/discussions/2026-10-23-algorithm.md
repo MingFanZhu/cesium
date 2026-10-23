@@ -1,6 +1,6 @@
 # Algorithm and continuous surface
 
-- Type: discussion; Status: open; Created / Updated: 2026-10-23
+- Type: discussion; Status: resolved; Created / Updated: 2026-10-23
 - Owner: architecture; Related plan: [extension](../plans/2026-10-23-native-fluid.md)
 - Resulting ADR / SGP: ADR-0187 / none
 
@@ -23,5 +23,6 @@ Primary design references (independent implementation, no vendor code copied):
   screen-space depth / thickness, bilateral smoothing and surface shading.
 
 P1 selects bounded-correction PBF with one conservative sorted grid per step, supported by
-independent numeric checks and hardware timing in ADR-0187. Rendering discussion remains open
-for P2; whole-scene opacity must never hide depth failures.
+independent numeric checks and hardware timing in ADR-0187. P2 uses volume-normalized screen-space
+thickness, bilateral depth and shared water optics with real fragment/final depth. Native occlusion
+and TAA depth checks passed; no whole-scene opacity workaround.

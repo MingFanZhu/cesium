@@ -192,22 +192,11 @@ void main()
     vec4 hit = u_reflections ? sceneGISSSRTrace(v_positionEC, vec4(reflected, u_roughness)) : vec4(0.0);
     vec3 reflection = mix(environment, hit.rgb, hit.a);
     float nDotV = max(dot(normal, view), 0.001);
-    float fresnel = 0.02037 + 0.97963 * pow(1.0 - nDotV, 5.0);
+    float fresnel = sceneGISWaterFresnel(nDotV);
     vec3 color = mix(water, reflection, fresnel);
 
     // Dielectric GGX sun highlight; the sky probe excludes the solar disk.
-    vec3 light = normalize(czm_lightDirectionEC);
-    vec3 halfVector = normalize(light + view);
-    float nDotL = max(dot(normal, light), 0.0);
-    float nDotH = max(dot(normal, halfVector), 0.0);
-    float alpha = max(u_roughness * u_roughness, 0.0025);
-    float a2 = alpha * alpha;
-    float denominator = nDotH * nDotH * (a2 - 1.0) + 1.0;
-    float distribution = a2 / (czm_pi * denominator * denominator);
-    float visibility = 0.5 / max(nDotL * sqrt(nDotV * nDotV * (1.0 - a2) + a2) +
-        nDotV * sqrt(nDotL * nDotL * (1.0 - a2) + a2), 0.001);
-    float lightFresnel = 0.02037 + 0.97963 * pow(1.0 - max(dot(view, halfVector), 0.0), 5.0);
-    color += beam * (distribution * visibility * lightFresnel * nDotL);
+    color += sceneGISWaterHighlight(normal, view, beam, u_roughness);
 
     #ifdef SCENEGIS_RIVER_WATER
     float currentFoam = smoothstep(0.65, 0.9, current.y);

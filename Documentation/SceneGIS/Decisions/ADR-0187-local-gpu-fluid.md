@@ -1,6 +1,6 @@
 # ADR-0187：局部 GPU 流体
 
-- 状态：Accepted（P1 求解器；渲染/API 随 P2 补充）
+- 状态：Accepted
 - 日期：2026-10-23
 - 关联：ADR-0087、ADR-0102；无新增 upstream 修改 / SGP
 - 计划：[fluid-simulation](../../../AgentDocs/fluid-simulation/README.md)
@@ -46,3 +46,21 @@ headless 环境的 Microsoft Basic Render Driver 只用于正确性，不能替�
 
 - [Position Based Fluids](https://mmacklin.com/pbf_sig_preprint.pdf)
 - [Fluid Simulation in Alice](https://developer.download.nvidia.com/tools/docs/Fluid_Rendering_Alice.pdf)
+
+## P2：原生图元与连续表面
+
+`SceneGISFluidPrimitive` 提供不可变布局和可变发射 / 暂停 / 刚体放置，默认容量 4096、
+1/60 s 固定步长、最多追赶 2 步，超出丢弃；时间倒退重置，隐藏 / 暂停不追赶。
+资源懒创建并绑定单一 Context，由 PrimitiveCollection 正常拥有；无运行时粒子回读。
+
+Instanced spheres 写最近线性深度；R16F 加法厚度按 rest volume / sphere volume 归一化，
+避免重建半径增大导致吸收体积无故增大。两次双边平滑、有效邻居法线重建形成连续前表面。
+最终合成拒绝 opaque 前景，写真实/log depth 和共享 final depth；通过 pickPosition 与 TAA
+depth 的自动化验证。复用 WaterFrame 场景捕获和 owned 光学 helper、环境光照、天空及 SSR。
+改动均为 SceneGIS-owned；沿用现有 WaterFrame 调度，不修改上游文件或新增 SGP。
+
+默认 reconstruction scale 0.75；1920×919 画面自有 GPU 纹理/深度缓冲约 16.64 MB，
+求解 86 draw，重建/合成 5 draw。RTX 3060 Ti / Chrome 155 的完整示例计时存在明显波动：
+初次 6 样本 32.4～39.4 ms，后续场景/表面/完整帧分段测量中的完整帧 4.47～4.90 ms。
+CPU 完整帧约 1.5～1.8 ms；这些是当前驱动/场景条件下的有限样本，不据此承诺固定 60 FPS。
+预算包括示例场景和环境；透明前层近似、密集邻域开销和缺少刚体/网格碰撞仍是明确限制。

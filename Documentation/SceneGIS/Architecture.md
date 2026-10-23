@@ -1467,3 +1467,15 @@ Globe / Planar 均允许调用方安装 scene.light DirectionalLight；自动主
 ADR-0177 将 Viewshed / VideoProjection 组织为独立公共 stage，共享自有 observer state、
 coordinator 和 GLSL 遮挡判定。Scene、Planar Surface、S3M 只依赖通用 observer 协议；
 SGP-0065 保留原有调度位置。每实例独立深度资源，不覆盖太阳 shadowMap，不拥有来源几何。
+
+## 局部 GPU 流体
+
+ADR-0187：`SceneGISFluidPrimitive` 是独立于 GPU 粒子特效和 FFT 水面的原生图元。
+PBF 求解、排序网格邻域、密度约束与局部盒碰撞全部驻留 GPU；禁止常规帧 CPU 粒子回读。
+固定容量与固定步长，超出追赶预算丢弃时间；布局不可变，控制项和刚体放置可以更新。
+球面 ENU 与平面米制共用局部状态；物理碰撞不使用屏幕深度替代。
+
+连续液面在 owned WaterFrame 的可选 `_prepareWaterSurface` hook 中重建；复用现有
+opaque HDR / linear depth 捕获、世界光照、天空反射与 SSR，不新增 upstream seam。
+图元拥有求解和屏幕目标；Scene 拥有被借用的场景输入。最终液面写真实深度和 TAA/final-depth。
+首版限定相机在液体外、屏幕空间前层、简单盒容器，不支持透明递归折射或任意网格碰撞。

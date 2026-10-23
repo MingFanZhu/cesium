@@ -1552,3 +1552,46 @@ grading.tint = 0.03;
 重置 TAA/SSR。全局白平衡不能同时消除阳光与蓝天等混合光源，也不能补充建筑对天空的遮挡。
 `Test/Rendering/PBR综合验收.html` 的“画面风格与白平衡”提供三种起点及自定义参数；预设
 只调整颜色与 tone mapper，保持时间、光照、大气和曝光配置。完整边界见 ADR-0154。
+
+## 原生局部流体与喷泉
+
+`SceneGISFluidPrimitive` 可直接放入 `Scene.primitives`，不替换 `SceneGISGpuParticleSystem`。
+开启 HDR，球面使用 ENU，平面使用米制刚体矩阵。所有模拟量为局部米 / 秒；`modelMatrix`
+变更会整体移动已有液体和容器，不重新发射粒子，也不支持缩放矩阵。
+
+```js
+scene.highDynamicRange = true;
+const fluid = scene.primitives.add(
+  new Cesium.SceneGISFluidPrimitive({
+    modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(origin),
+    maximumParticles: 4096,
+    emissionRate: 270,
+    emitterPosition: new Cesium.Cartesian3(0, 0, 0.3),
+    emitterVelocity: new Cesium.Cartesian3(0.2, 0, 4.8),
+    emitterRadius: 0.07,
+  }),
+);
+fluid.emitting = false;
+fluid.paused = true;
+fluid.reset();
+scene.primitives.remove(fluid);
+```
+
+容量是 16～16384 的 2 次幂，默认 4096；不是活跃数量或跨设备帧率保证。发射循环替换最旧槽位，
+寿命到期失活。`initialParticles` / `initialDimensions` / `initialMinimum` 可指定重置时水池晶格。
+布局、容器、核半径、求解迭代、步长和重建分辨率创建后固定；需要改变时重新创建图元。
+
+默认 `timeStep=1/60`、`maximumSubSteps=2`，Scene 时间的余量累积，超出追赶上限的时间丢弃；
+暂停和隐藏期间不追赶，时间倒退重置。相同时间和 pick pass 不推进。`emitting=false` 只停止新生，
+`paused=true` 保留画面，`reset()` 在下一可见 render（含暂停状态）恢复初始晶格并复位发射序列。
+request-render 应用需要自行请求连续渲染。`destroy()` 释放所有自有 GPU 资源，容器默认负责销毁。
+
+`particleSpacing` 决定粒子体积；建议发射率与 `π * emitterRadius² * speed / particleSpacing³`
+处于相近量级，过密发射会由密度约束产生显著压力和飞溅。碰撞为显式局部闭合盒边界，场景中
+其他建筑仅参与可见遮挡与光学，不会自动成为碰撞体。连续表面由屏幕深度、厚度、双边平滑和
+法线重建得到；厚度按粒子体积归一化，复用水体 Fresnel/GGX、天空、SSR 与 opaque 折射。
+渲染半径会影响水团连接与外观；不是粒子的碰撞半径。
+
+可运行 `Test/Rendering/流体模拟喷泉.html`，使用球面/平面入口和暂停、发射、重置控制。
+`Test/Rendering/流体求解器验证.html` 提供有界硬件 GPU timer 测量。自动验证入口是
+`SceneGISFluidSolverSpec` / `SceneGISFluidPrimitiveSpec`。详细边界和证据见 ADR-0187。

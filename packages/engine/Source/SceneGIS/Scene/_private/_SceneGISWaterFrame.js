@@ -253,6 +253,7 @@ const SceneGISWaterFrame = {
       for (let i = 0; i < range.indices[Pass.OPAQUE]; ++i) {
         const command = range.commands[Pass.OPAQUE][i];
         if (SceneGISWaterFrame.isWater(command)) {
+          command.owner._prepareWaterSurface?.(scene, passState);
           executeCommand(command, scene, passState);
         }
       }

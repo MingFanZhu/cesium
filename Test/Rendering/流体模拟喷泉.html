@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>流体模拟喷泉 · SceneGIS</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>流体模拟喷泉</h1>
+      <p>
+        观察喷流、水团和水池中的相互作用。可暂停观察表面，关闭发射观察回落。
+      </p>
+      <p>
+        <a href="?world=planar">平面米制</a> ·
+        <a href="?world=globe">球面 ENU</a>
+      </p>
+      <p id="status">正在初始化…</p>
+      <div id="error"></div>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./流体模拟喷泉.js"></script>
+  </body>
+</html>

@@ -10,8 +10,8 @@
 | Status                 | `active`                                 |
 | Planning model         | `extension`                              |
 | Active extension plan  | [首版](plans/2026-10-23-native-fluid.md) |
-| Current phase          | P1 GPU solver qualification              |
-| Active phase plan      | [P1](plans/2026-10-23-p1-gpu-solver.md)  |
+| Current phase          | P2 surface and native API                |
+| Active phase plan      | [P2](plans/2026-10-23-p2-surface-api.md) |
 | Active standalone plan | None                                     |
 | Architecture contact   | Current task / self-review               |
 | Execution contact      | Current task                             |
@@ -42,9 +42,9 @@
 
 ## Current handoff
 
-- Current state: P1 solver qualified; strict Specs 4/4 and hardware GPU timing recorded.
-- Next action: P1 checkpoint, then establish P2 surface/API phase plan.
-- Current phase status: P1 completed, checkpoint pending.
+- Current state: P1 committed `e2fb6a0dee`; P2 API/surface qualified with native depth and lifecycle.
+- Next action: P2 checkpoint, then establish SDK P3 phase plan.
+- Current phase status: P2 completed, checkpoint pending.
 - Open discussions: [algorithm and rendering](discussions/2026-10-23-algorithm.md).
-- Unresolved reviews: none; [P1 self-review](reviews/2026-10-23-p1.md) resolved.
+- Unresolved reviews: none; [P1](reviews/2026-10-23-p1.md) and [P2](reviews/2026-10-23-p2.md) resolved.
 - Known risks: sorting bandwidth / worst-case neighbor density; screen-space layer approximation; SDK workspace contains unrelated changes to preserve.

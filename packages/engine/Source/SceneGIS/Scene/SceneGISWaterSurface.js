@@ -24,6 +24,7 @@ import Globe from "../../Scene/Globe.js";
 import ray from "../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import vertex from "../../Shaders/SceneGIS/Water/SceneGISWaterVS.js";
 import fragment from "../../Shaders/SceneGIS/Water/SceneGISWaterFS.js";
+import optics from "../../Shaders/SceneGIS/Water/SceneGISWaterOptics.js";
 import riverFlow from "../../Shaders/SceneGIS/Water/SceneGISRiverFlow.js";
 import curvedSurface from "../../Shaders/SceneGIS/Water/SceneGISWaterCurvedSurface.js";
 import WaterFrame from "./_private/_SceneGISWaterFrame.js";
@@ -514,7 +515,7 @@ function createResources(surface, frameState) {
       vertexShaderSource: waterVertex(surface),
       fragmentShaderSource: new ShaderSource({
         defines: waterDefines(surface),
-        sources: [curvedSurface, ray, riverFlow, fragment],
+        sources: [curvedSurface, ray, riverFlow, optics, fragment],
       }),
       attributeLocations: waterAttributes(surface),
     }),
@@ -731,7 +732,7 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
         );
       }
       source.defines.push(...waterDefines(this));
-      source.sources.push(curvedSurface, ray, riverFlow, fragment);
+      source.sources.push(curvedSurface, ray, riverFlow, optics, fragment);
       const previous = command.shaderProgram;
       command.shaderProgram = ShaderProgram.fromCache({
         context: c,
