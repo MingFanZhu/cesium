@@ -42,4 +42,5 @@ Implemented native API, conservative bounds, fixed-step controls, screen-space s
 volume-normalized thickness, bilateral depth, valid-neighbor normals, shared optics and true depth.
 5/5 primitive Specs, 4/4 solver Specs, 17/17 water regression; release fluid suite 9/9. Builds and
 generated types passed. Globe/Planar preview and bounded hardware profiling recorded in ADR-0187.
-[Self-review](../reviews/2026-10-23-p2.md) resolved. No upstream file changes. P2 checkpoint pending.
+[Self-review](../reviews/2026-10-23-p2.md) resolved. No upstream file changes. P2 checkpoint `fc0cbc030e`.
+The project owner subsequently excluded SDK changes; P3 is not activated in this task.
