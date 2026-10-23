@@ -87,8 +87,8 @@ bool sceneGISHeightFogGlobeSegment(
             viewDirection,
             SCENEGIS_BOTTOM_RADIUS,
             bottomNear,
-            bottomFar) &&
-        bottomNear > segmentStart) {
+            bottomFar)) {
+        // Ground still ends the medium when it lies before the fog start.
         segmentEnd = min(segmentEnd, bottomNear);
     }
     return segmentEnd > segmentStart;

@@ -20151,6 +20151,84 @@ ${hardCascadeLibrary}`;
     expect(maximumStep).toBeLessThan(0.0001);
   }, 120000);
 
+  it("clips Globe height fog at ground before or at the fog start distance on the actual GPU", async function () {
+    await connectControlledCloudMode("globe", function () {
+      effects.showClouds = false;
+    });
+    if (!SceneGISEnvironmentEffects.isSupported(scene)) {
+      return;
+    }
+    const resources = effects._pipeline._resources;
+    const pixels = executeHalfFloatQuad(
+      [
+        brunetonDefinitionsSource,
+        brunetonCommonSource,
+        brunetonRuntimeSource,
+        atmosphereSource,
+        heightFogSource,
+        `precision highp float;
+        precision highp sampler3D;
+        uniform sampler2D u_transmittance;
+        uniform sampler2D u_irradiance;
+        void main() {
+          int i = int(gl_FragCoord.x);
+          vec3 origin = vec3(0.0, 0.0, 128.0);
+          vec3 direction = vec3(0.0, 0.0, -1.0);
+          float distance = 1.0e9;
+          float startDistance = 250.0;
+          if (i == 1) { distance = 5000.0; }
+          if (i == 2) { distance = 50.0; }
+          if (i == 3) { startDistance = 128.0; }
+          if (i == 4) { startDistance = 64.0; }
+          if (i == 5) { direction.z = 1.0; distance = 1000.0; }
+          if (i == 6) { origin.z = 0.0; startDistance = 0.0; }
+          float segmentStart;
+          float segmentEnd;
+          bool intersects = sceneGISHeightFogGlobeSegment(
+              origin, direction, distance, startDistance,
+              segmentStart, segmentEnd);
+          vec3 color = sceneGISApplyExponentialHeightFog(
+              u_transmittance, u_irradiance, vec3(0.25, 0.5, 0.75),
+              origin, direction, vec3(0.0, 0.0, 1.0), distance, 0.0,
+              0.001, 0.0, 0.0, startDistance, 1.0, 1.0, 0.0, 0.0, 8.0);
+          out_FragColor = vec4(color, float(intersects));
+        }`,
+      ],
+      {
+        width: 7,
+        defines: resources.aerialProgram.fragmentShaderSource.defines,
+        uniformMap: {
+          u_transmittance: () => resources.transmittanceTexture,
+          u_irradiance: () => resources.irradianceTexture,
+        },
+      },
+    );
+    // Clear depth, a deep receiver, a near receiver, equality, and a surface
+    // origin all have no visible medium when ground is at or before fog start.
+    for (const i of [0, 1, 2, 3, 6]) {
+      expect(pixels[i]).withContext(`ray ${i}`).toEqual([0.25, 0.5, 0.75, 0.0]);
+    }
+    // A constant density gives an independent Beer-Lambert reference for the
+    // remaining above-ground segment and an upward finite ray.
+    for (const [i, distance] of [
+      [4, 64.0],
+      [5, 750.0],
+    ]) {
+      const transmittance = Math.exp(-0.001 * distance);
+      expect(pixels[i])
+        .withContext(`ray ${i}`)
+        .toEqualEpsilon(
+          [
+            0.25 * transmittance,
+            0.5 * transmittance,
+            0.75 * transmittance,
+            1.0,
+          ],
+          0.001,
+        );
+    }
+  }, 120000);
+
   it("clips finite Globe aerial rays at the atmosphere boundaries", async function () {
     await connectControlledCloudMode("globe", function () {
       effects.showClouds = false;

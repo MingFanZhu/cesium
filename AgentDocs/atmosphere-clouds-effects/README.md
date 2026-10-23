@@ -2,7 +2,11 @@
 
 ## Status
 
-- Latest standalone：[综合环境同源影像](plans/2026-10-21-integrated-imagery.md) — completed；双世界默认使用指定的 EPSG:3857 World Imagery，保留中性影像参数。
+- Latest standalone：[球面透明地表高度雾截断](plans/2026-10-23-globe-translucent-height-fog.md) — implementation verified；负责人视觉验收待定。
+  修正地表交点早于或等于起雾距离时遗漏地面截断；开发 / release GPU 回归、默认参数画面与资源生命周期通过。
+  [技术自审](reviews/2026-10-23-globe-translucent-height-fog.md)；[人工示例](../../Test/透明地表大气.html)。SDK 仍引用旧引擎 `b7ab45e`，未改其引擎锁定或分发文件。
+
+- Previous standalone：[综合环境同源影像](plans/2026-10-21-integrated-imagery.md) — completed；双世界默认使用指定的 EPSG:3857 World Imagery，保留中性影像参数。
   综合页 E2E、真实公网加载与画面检查通过；[技术自审](reviews/2026-10-21-integrated-imagery.md)。只改示例和测试，不改环境颜色或引擎。
 - Previous standalone：[平面地平线高度雾合成](plans/2026-10-20-planar-horizon-fog-composition.md) — implementation verified；负责人视觉验收待定。
   统一最终雾合成，使用吸收透射中点取样，修复透明边缘差异与水平光源跳变；

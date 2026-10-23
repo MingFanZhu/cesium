@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>透明地表大气</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>透明地表大气</h1>
+      <p>
+        相机位于地上约 131 米，透过地表观察地下管廊。保留默认高度雾与大气参数。
+      </p>
+      <p>调整透明度和起雾距离，检查地表后方是否出现异常弧形亮带。</p>
+      <p>网格影像由本地生成，无需在线服务。</p>
+      <p><a href="/Test/AdvancedEnvironment/示例目录.html">环境示例目录</a></p>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module">
+      import * as C from "/Build/CesiumUnminified/index.js";
+      import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
+      import exposeExample from "/Test/example-lifecycle.js";
+
+      const viewer = new C.Viewer("map", {
+        baseLayer: new C.ImageryLayer(new C.GridImageryProvider()),
+        baseLayerPicker: false,
+        geocoder: false,
+        homeButton: false,
+        sceneModePicker: false,
+        projectionPicker: false,
+        navigationHelpButton: false,
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+        infoBox: false,
+        selectionIndicator: false,
+      });
+      const scene = viewer.scene;
+      const effects = scene.environmentEffects;
+      viewer.clock.currentTime = C.JulianDate.fromIso8601(
+        "2026-10-23T12:00:00+08:00",
+      );
+      viewer.clock.shouldAnimate = false;
+      scene.screenSpaceCameraController.enableCollisionDetection = false;
+      scene.globe.depthTestAgainstTerrain = true;
+      scene.globe.translucency.enabled = true;
+      scene.globe.translucency.frontFaceAlpha = 0.4;
+      scene.globe.translucency.backFaceAlpha = 0.4;
+      const origin = C.Cartesian3.fromDegrees(118.78, 32.04);
+      const frame = C.Transforms.eastNorthUpToFixedFrame(origin);
+      for (const [x, dimensions, color] of [
+        [0, new C.Cartesian3(140, 14, 18), "#ffb454"],
+        [35, new C.Cartesian3(14, 120, 18), "#46d4db"],
+      ]) {
+        const position = C.Matrix4.multiplyByPoint(
+          frame,
+          new C.Cartesian3(x, 0, -30),
+          new C.Cartesian3(),
+        );
+        viewer.entities.add({
+          position,
+          orientation: C.Transforms.headingPitchRollQuaternion(
+            position,
+            new C.HeadingPitchRoll(),
+          ),
+          box: { dimensions, material: C.Color.fromCssColorString(color) },
+        });
+      }
+      function resetView() {
+        viewer.camera.flyToBoundingSphere(
+          new C.BoundingSphere(origin, 250 / 3),
+          {
+            duration: 0,
+            offset: new C.HeadingPitchRange(0, -0.55, 250),
+          },
+        );
+      }
+      resetView();
+      const controls = { alpha: 0.4, resetView };
+      const gui = new GUI({
+        title: document.title,
+        container: document.getElementById("controls"),
+      });
+      gui
+        .add(controls, "alpha", 0, 1, 0.01)
+        .name("地表不透明度")
+        .onChange((alpha) => {
+          scene.globe.translucency.frontFaceAlpha = alpha;
+          scene.globe.translucency.backFaceAlpha = alpha;
+        });
+      gui.add(effects, "showHeightFog").name("高度雾");
+      gui
+        .add(effects, "heightFogStartDistance", 0, 1000, 1)
+        .name("起雾距离（米）");
+      gui.add(effects, "showAtmosphere").name("物理天空");
+      gui.add(effects, "showAerialPerspective").name("空气透视");
+      gui.add(controls, "resetView").name("恢复视角");
+      exposeExample(viewer, gui, { effects });
+    </script>
+  </body>
+</html>
