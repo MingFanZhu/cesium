@@ -67,6 +67,7 @@ Documentation/SceneGIS/**
 AgentDocs/**
 .scenegis/**
 scripts/scenegis/**
+Tools/GaussianSplatTiler/**
 packages/engine/Source/Workers/SceneGISPlanarTerrainWorker.js
 packages/engine/Source/Workers/SceneGISVectorTileWorker.js
 packages/engine/Source/Workers/SceneGISS3mWorker.js
@@ -91,6 +92,14 @@ license/provenance、format、尺寸和资源预算审计的版本化静态资�
 build/npm 产物。Runtime 使用 `buildModuleUrl("Assets/SceneGIS/...")` 定位，不依赖公网 URL、本机路径或临时 clone。
 
 ## Agent 协作文档边界
+
+### 分段 Gaussian 数据工具
+
+ADR-0188 批准 `Tools/GaussianSplatTiler/**` 为独立 Node.js CPU 切片工具根目录。
+浏览器可用的分段协议和数学实现位于 `Source/SceneGIS/Core`，工具通过显式相对路径共用；
+引擎不得反向依赖 Tools 或 Node.js。工具不加入 Cesium workspace、不进入引擎 npm 包，
+从完整仓库运行，独立 CLI、测试与文档自行维护。升级时核对协议、Worker 和包内源码依赖。
+固定网格加载/切片、训练蒸馏和 SDK 均不属于此次移植范围。
 
 `AgentDocs/**` 是架构 Agent、执行 Agent 和评审 Agent 之间的持久协作区。它不属于 Cesium 或 SceneGIS 的运行时代码，不得被 engine、widgets、Sandcastle、构建或发布流程导入，也不进入 npm 产物。未来如果工具需要读取该目录，必须先通过 ADR 明确协议、失败行为和发布影响。
 

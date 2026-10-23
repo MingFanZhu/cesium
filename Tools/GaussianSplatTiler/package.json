@@ -1,0 +1,22 @@
+{
+  "name": "@scenegis/gaussian-splat-tiler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SceneGIS segmented Gaussian CPU tiler",
+  "license": "Apache-2.0",
+  "bin": {
+    "scenegis-splat-segmented": "./src/segmentedCli.js",
+    "scenegis-splat-prebuilt-lod": "./src/prebuiltLodCli.js"
+  },
+  "exports": {
+    ".": "./src/segmentedBuilder.js",
+    "./prebuilt-lod": "./src/prebuiltLodBuilder.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js test/runtime/*.test.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
