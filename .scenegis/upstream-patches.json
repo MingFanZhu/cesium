@@ -2,6 +2,27 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0069",
+      "title": "Prepare cached shader programs without blocking link-status queries",
+      "status": "active",
+      "reason": "ADR-0190 lets environment cloud programs poll KHR completion while native ShaderProgram retains linking, reflection, cache and pending-handle ownership.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Renderer/ShaderProgram.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Renderer/SceneGISShaderPreparationSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISCloudPreparationSpec.js",
+        "packages/engine/Specs/Renderer/ShaderProgramSpec.js",
+        "packages/engine/Specs/Renderer/ShaderCacheSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0190-cloud-shader-preparation.md",
+      "removalCondition": "Native ShaderProgram provides equivalent cached asynchronous preparation and pending resource cleanup."
+    },
+    {
       "id": "SGP-0068",
       "title": "Route native model polygon clipping through planar XY regions",
       "status": "active",

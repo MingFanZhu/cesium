@@ -572,11 +572,15 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     // is covered by SceneGISDefaultEnvironmentSpec.
     const showClouds = effects.showClouds;
     effects.showClouds = true;
+    scene.updateFrameState();
     effects.firstUpdate(scene, scene.frameState.time);
-    await pollToPromise(function () {
-      effects.update(scene, scene.frameState.time);
-      return effects.ready;
-    });
+    await pollToPromise(
+      function () {
+        effects.update(scene, scene.frameState.time);
+        return effects.ready;
+      },
+      { timeout: 60000 },
+    );
     effects.showClouds = showClouds;
   }
 
@@ -1434,11 +1438,15 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
     if (typeof beforeFirstUpdate === "function") {
       beforeFirstUpdate();
     }
+    scene.updateFrameState();
     effects.firstUpdate(scene, scene.frameState.time);
-    await pollToPromise(function () {
-      effects.update(scene, scene.frameState.time);
-      return effects.ready;
-    });
+    await pollToPromise(
+      function () {
+        effects.update(scene, scene.frameState.time);
+        return effects.ready;
+      },
+      { timeout: 60000 },
+    );
   }
 
   function disconnectControlledCloudMode() {
@@ -10923,6 +10931,11 @@ ${hardCascadeLibrary}`;
 
   it("executes one lazy cloud MRT and resizes only for quality", async function () {
     const world = connectPlanar();
+    function render() {
+      // This fixture connects controllers directly rather than through the host.
+      effects.update(scene, scene.frameState.time);
+      scene.renderForSpecs();
+    }
     if (!SceneGISEnvironmentEffects.isSupported(scene)) {
       return;
     }
@@ -10967,7 +10980,7 @@ ${hardCascadeLibrary}`;
       return originalResolveExecute.apply(this, arguments);
     });
 
-    scene.renderForSpecs();
+    render();
     const mediumFramebuffer = resources.cloudFramebuffer;
     expect(mediumFramebuffer).toBeDefined();
     expect(mediumFramebuffer.getColorTexture(0).width).toBe(
@@ -11024,7 +11037,7 @@ ${hardCascadeLibrary}`;
     expect(cloudDistances[3]).toBeGreaterThanOrEqual(0.0);
     expect(cloudDistances[3]).toBeLessThanOrEqual(1.0);
 
-    scene.renderForSpecs();
+    render();
     expect(resolveHistoryValidity.at(-1)).toBe(true);
 
     // The constant daytime LUT includes direct solar irradiance. Supply the
@@ -11035,7 +11048,7 @@ ${hardCascadeLibrary}`;
       new Cartesian3(),
     );
     environment.update(scene, scene.frameState.time);
-    scene.renderForSpecs();
+    render();
     expect(resolveHistoryValidity.at(-1)).toBe(false);
     const nightCloudColor = readCloudAttachment(
       mediumFramebuffer.getColorTexture(0),
@@ -11052,7 +11065,15 @@ ${hardCascadeLibrary}`;
 
     const initialUseLogDepth = scene.logarithmicDepthBuffer;
     scene.logarithmicDepthBuffer = !initialUseLogDepth;
-    scene.renderForSpecs();
+    scene.updateFrameState();
+    await pollToPromise(
+      function () {
+        effects.update(scene, scene.frameState.time);
+        return effects.ready;
+      },
+      { timeout: 60000 },
+    );
+    render();
     expect(resolveHistoryValidity.at(-1)).toBe(false);
     expect(resources.cloudCommand.shaderProgram).toBe(
       scene.frameState.useLogDepth
@@ -11071,7 +11092,7 @@ ${hardCascadeLibrary}`;
     effects.cloudQuality = "low";
     scene.canvas.width = 4;
     scene.canvas.height = 4;
-    scene.renderForSpecs();
+    render();
     expect(resolveHistoryValidity.at(-1)).toBe(false);
     expect(effects._pipeline._cloudHistoryValid).toBe(true);
     const lowFramebuffer = resources.cloudFramebuffer;
@@ -11085,7 +11106,7 @@ ${hardCascadeLibrary}`;
     expect(destroyMedium).toHaveBeenCalledTimes(1);
     const destroyLow = spyOn(lowFramebuffer, "destroy").and.callThrough();
     effects.cloudQuality = "high";
-    scene.renderForSpecs();
+    render();
     expect(resources.cloudFramebuffer).not.toBe(lowFramebuffer);
     expect(resources.cloudFramebuffer.getColorTexture(0).width).toBe(
       Math.ceil(scene.context.drawingBufferWidth * 0.75),
@@ -11115,7 +11136,7 @@ ${hardCascadeLibrary}`;
       globeResources.cloudResolveCommand,
       "execute",
     ).and.callThrough();
-    scene.renderForSpecs();
+    render();
     const medium = globeResources.cloudFramebuffer;
     const histories = [
       globeResources.cloudHistoryFramebuffer0,
@@ -11133,10 +11154,10 @@ ${hardCascadeLibrary}`;
       ]).toEqual([9, 5]);
       expect(history.getColorTexture(1)).toBeDefined();
     }
-    scene.renderForSpecs();
+    render();
     expect(globeResources.cloudFramebuffer).toBe(medium);
     effects.cloudQuality = "high";
-    scene.renderForSpecs();
+    render();
     expect(globeRenderer._uniformMap.u_cloudTracePhased()).toBe(false);
     expect([
       globeResources.cloudFramebuffer.getColorTexture(0).width,
@@ -11148,7 +11169,7 @@ ${hardCascadeLibrary}`;
     expect(globeResolve).toHaveBeenCalledTimes(3);
     expect(globeRenderer._cloudHistoryDiagnostics.historyValid).toBe(false);
     disconnectControlledCloudMode();
-  });
+  }, 120000);
 
   it("renders Planar P1 clouds above 100 km without a camera-distance density fade", async function () {
     await connectControlledCloudMode("planar");
@@ -13193,7 +13214,16 @@ ${hardCascadeLibrary}`;
     const resources = effects._pipeline._resources;
     const productCloud = resources.cloudProgram;
     const productCloudLogarithmic = resources.cloudLogDepthProgram;
-    const productResolve = resources.cloudResolveProgram;
+    // This controlled fixture switches to an orthographic, linear-depth view.
+    // Prepare that resolve variant explicitly before replacing the producer.
+    const productResolve =
+      resources.cloudResolveProgram ??
+      createEnvironmentEffectsProgramForSpecs(
+        scene.context,
+        cloudResolveFragmentSource,
+        true,
+      );
+    resources.cloudResolveProgram = productResolve;
     const productResolveLogarithmic = resources.cloudResolveLogDepthProgram;
 
     function historyManager() {

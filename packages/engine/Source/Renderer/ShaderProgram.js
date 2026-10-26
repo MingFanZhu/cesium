@@ -37,6 +37,10 @@ function ShaderProgram(options) {
   this._attributeLocations = options.attributeLocations;
 
   this._program = undefined;
+  // SCENEGIS_PATCH_BEGIN SGP-0069: Own asynchronous compile handles in the cached program.
+  this._pendingLink = undefined;
+  this._parallelShaderCompile = undefined;
+  // SCENEGIS_PATCH_END SGP-0069
   this._numberOfVertexAttributes = undefined;
   this._vertexAttributes = undefined;
   this._uniformsByName = undefined;
@@ -181,7 +185,9 @@ function handleUniformPrecisionMismatches(
 
 const consolePrefix = "[Cesium WebGL] ";
 
-function createAndLinkProgram(gl, shader) {
+// SCENEGIS_PATCH_BEGIN SGP-0069: Allow submission before querying link status.
+function createAndLinkProgram(gl, shader, deferLink = false) {
+  // SCENEGIS_PATCH_END SGP-0069
   const vsSource = shader._vertexShaderText;
   const fsSource = shader._fragmentShaderText;
 
@@ -211,6 +217,23 @@ function createAndLinkProgram(gl, shader) {
   }
 
   gl.linkProgram(program);
+  // SCENEGIS_PATCH_BEGIN SGP-0069: Keep native validation shared by both initialization paths.
+  if (deferLink) {
+    return { program, vertexShader, fragmentShader };
+  }
+  return completeProgramLink(gl, shader, program, vertexShader, fragmentShader);
+}
+
+function completeProgramLink(
+  gl,
+  shader,
+  program,
+  vertexShader,
+  fragmentShader,
+) {
+  const vsSource = shader._vertexShaderText;
+  const fsSource = shader._fragmentShaderText;
+  // SCENEGIS_PATCH_END SGP-0069
   let log;
 
   // For performance: if linker succeeds, return without checking compile status
@@ -467,7 +490,19 @@ function reinitialize(shader) {
   const oldProgram = shader._program;
 
   const gl = shader._gl;
-  const program = createAndLinkProgram(gl, shader, shader._debugShaders);
+  // SCENEGIS_PATCH_BEGIN SGP-0069: A synchronous caller finishes the same pending link.
+  const pending = shader._pendingLink;
+  shader._pendingLink = undefined;
+  const program = defined(pending)
+    ? completeProgramLink(
+        gl,
+        shader,
+        pending.program,
+        pending.vertexShader,
+        pending.fragmentShader,
+      )
+    : createAndLinkProgram(gl, shader);
+  // SCENEGIS_PATCH_END SGP-0069
   const numberOfVertexAttributes = gl.getProgramParameter(
     program,
     gl.ACTIVE_ATTRIBUTES,
@@ -537,6 +572,46 @@ function reinitialize(shader) {
     };
   }
 }
+
+// SCENEGIS_PATCH_BEGIN SGP-0069: Poll completion without forcing link or reflection waits.
+/**
+ * Submits compilation once and returns whether the program can be used.
+ * Without KHR_parallel_shader_compile, initialization remains synchronous.
+ * @returns {boolean} Whether linking and uniform initialization are complete.
+ * @private
+ */
+ShaderProgram.prototype._prepare = function () {
+  if (defined(this._program)) {
+    return true;
+  }
+  const gl = this._gl;
+  if (this._parallelShaderCompile === undefined) {
+    this._parallelShaderCompile = gl.getExtension(
+      "KHR_parallel_shader_compile",
+    );
+  }
+  const extension = this._parallelShaderCompile;
+  if (defined(extension)) {
+    this._pendingLink ??= createAndLinkProgram(gl, this, true);
+    if (
+      !gl.getProgramParameter(
+        this._pendingLink.program,
+        extension.COMPLETION_STATUS_KHR,
+      )
+    ) {
+      return false;
+    }
+  }
+  // Preparation runs between draws; preserve the caller's current binding.
+  const currentProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+  try {
+    initialize(this);
+  } finally {
+    gl.useProgram(currentProgram);
+  }
+  return true;
+};
+// SCENEGIS_PATCH_END SGP-0069
 
 ShaderProgram.prototype._bind = function () {
   initialize(this);
@@ -613,7 +688,20 @@ ShaderProgram.prototype.destroy = function () {
 };
 
 ShaderProgram.prototype.finalDestroy = function () {
-  this._gl.deleteProgram(this._program);
+  // SCENEGIS_PATCH_BEGIN SGP-0069: Cancel outstanding compilation without querying completion.
+  const pending = this._pendingLink;
+  if (defined(pending)) {
+    this._gl.detachShader(pending.program, pending.vertexShader);
+    this._gl.detachShader(pending.program, pending.fragmentShader);
+    this._gl.deleteShader(pending.vertexShader);
+    this._gl.deleteShader(pending.fragmentShader);
+    this._gl.deleteProgram(pending.program);
+    this._pendingLink = undefined;
+  }
+  if (defined(this._program)) {
+    this._gl.deleteProgram(this._program);
+  }
+  // SCENEGIS_PATCH_END SGP-0069
   return destroyObject(this);
 };
 export default ShaderProgram;

@@ -335,6 +335,7 @@ function setPipelineEnabled(controller, enabled) {
   pipeline.invalidateCloudHistory(enabled ? "enable" : "disable");
   pipeline.enabled = enabled;
   if (!enabled) {
+    pipeline.cancelCloudPreparation();
     pipeline.releaseGlobeLighting();
     pipeline.detach();
   }
@@ -522,26 +523,53 @@ function beginGeneration(controller, scene) {
 }
 
 function publishPendingResources(controller, scene) {
+  const pipeline = controller._pipeline;
   try {
     if (defined(controller._pendingBuffers)) {
       const buffers = controller._pendingBuffers;
       controller._pendingBuffers = undefined;
-      controller._pipeline.publishResources(scene.context, buffers);
+      // Publish the atmosphere while cloud programs compile independently.
+      pipeline.publishResources(scene.context, {
+        transmittance: buffers.transmittance,
+        scattering: buffers.scattering,
+        irradiance: buffers.irradiance,
+      });
+      if (defined(buffers.cloudShape)) {
+        controller._pendingCloudBuffers = buffers;
+      }
       controller._ready = true;
     }
-    if (defined(controller._pendingCloudBuffers)) {
-      const buffers = controller._pendingCloudBuffers;
-      controller._pendingCloudBuffers = undefined;
-      controller._pipeline.publishCloudResources(scene.context, buffers);
+    if (!controller._showClouds) {
+      pipeline.cancelCloudPreparation();
+    } else if (
+      controller._ready &&
+      (defined(controller._pendingCloudBuffers) || pipeline.hasCloudTextures())
+    ) {
+      if (
+        pipeline.prepareCloudResources(
+          scene.context,
+          controller._pendingCloudBuffers,
+        )
+      ) {
+        controller._pendingCloudBuffers = undefined;
+      }
     }
     if (
       controller._ready &&
       controller._showClouds &&
-      !controller._pipeline.hasCloudResources() &&
+      !pipeline.hasCloudTextures() &&
       !controller._cloudGenerationStarted
     ) {
       void fetchEnvironmentAssets(controller, controller._generation, true);
     }
+  } catch (error) {
+    raiseGenerationError(controller, controller._generation, error);
+  }
+}
+
+function prepareLighting(controller, scene, time) {
+  try {
+    controller._pipeline.prepareGlobeLighting(scene.frameState, time);
   } catch (error) {
     raiseGenerationError(controller, controller._generation, error);
   }
@@ -561,18 +589,18 @@ function activate(controller, scene, time) {
   if (controller._pipeline.hasResources()) {
     controller._ready = true;
     publishPendingResources(controller, scene);
-    controller._pipeline.prepareGlobeLighting(scene.frameState, time);
+    prepareLighting(controller, scene, time);
     updateGlobeCelestialLifecycle(controller);
     return;
   }
   if (controller._mode === globeMode) {
-    controller._pipeline.prepareGlobeLighting(scene.frameState, time);
+    prepareLighting(controller, scene, time);
     updateGlobeCelestialLifecycle(controller);
   }
   beginGeneration(controller, scene);
   publishPendingResources(controller, scene);
   if (controller._ready) {
-    controller._pipeline.prepareGlobeLighting(scene.frameState, time);
+    prepareLighting(controller, scene, time);
     updateGlobeCelestialLifecycle(controller);
   }
 }
@@ -894,10 +922,18 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       return this._world;
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {boolean} @readonly */
+  /**
+   * Whether the atmosphere and enabled clouds are ready for the current depth mode.
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {boolean}
+   * @readonly
+   */
   ready: {
     get: function () {
-      return this._ready;
+      return (
+        this._ready &&
+        (!this._enabled || !this._showClouds || this._pipeline.cloudsReady())
+      );
     },
   },
   /** @memberof SceneGISEnvironmentEffects.prototype @type {Event} @readonly */
@@ -1662,7 +1698,7 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
     selectGlobeLight(this, scene);
   }
   if (this._mode === globeMode && !this._ready) {
-    this._pipeline.prepareGlobeLighting(scene.frameState, time);
+    prepareLighting(this, scene, time);
     updateGlobeCelestialLifecycle(this);
   }
   if (!this._pipeline.hasResources()) {
@@ -1670,7 +1706,7 @@ SceneGISEnvironmentEffects.prototype.update = function (scene, time) {
   }
   publishPendingResources(this, scene);
   if (this._ready) {
-    this._pipeline.prepareGlobeLighting(scene.frameState, time);
+    prepareLighting(this, scene, time);
     updateGlobeCelestialLifecycle(this);
   }
 };

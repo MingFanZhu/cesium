@@ -2,6 +2,16 @@
 
 ## Status
 
+- Latest standalone：[体积云异步准备](plans/2026-10-26-cloud-shader-preparation.md) — completed；负责人批准本地提交。
+  当前深度三程序按需准备、KHR 非阻塞完成查询、可选云影与候选回收；ADR-0190 / SGP-0069。
+  [技术自审](reviews/2026-10-26-cloud-shader-preparation.md)。画质、预计算资源与既有视觉待办保持原范围。
+  等价新源三程序对照：同步主线程等待 12.96 s；异步总完成 8.61 s、准备调用最大 0.7 ms。
+  新增 9 项、原生 129 项及双世界 MRT 回归通过；实际两世界云 / 云影检查通过。
+- Latest investigation：[体积云首次创建耗时](discussions/2026-10-26-cloud-startup-compilation.md) — diagnosis completed；按上方 standalone plan 实施第一轮优化。
+  平面首次云资源发布约 26.19 秒，其中同步 Shader 编译 / 链接约 26.12 秒；预计算资源已正确加载。
+  缓存补测确认球面原结果受编译缓存影响，不能直接作为双世界冷编译对比；同一球面 resolve 等价改名变体首次约 5.07 秒、重复约 0.19 秒。
+  本项仅记录实测与优化方向，不改变渲染实现，也不关闭既有视觉 / regression 待办。
+
 - Latest standalone：[球面透明地表高度雾截断](plans/2026-10-23-globe-translucent-height-fog.md) — implementation verified；负责人视觉验收待定。
   修正地表交点早于或等于起雾距离时遗漏地面截断；开发 / release GPU 回归、默认参数画面与资源生命周期通过。
   [技术自审](reviews/2026-10-23-globe-translucent-height-fog.md)；[人工示例](../../Test/透明地表大气.html)。SDK 仍引用旧引擎 `b7ab45e`，未改其引擎锁定或分发文件。

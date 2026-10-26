@@ -515,6 +515,7 @@ function createProgram(
   globeCloudLibrarySource = globeCloudSource,
   vertexShaderSource = vertexSource,
   locations = attributeLocations,
+  waitForLink = true,
 ) {
   const defines = globe
     ? [
@@ -565,7 +566,9 @@ function createProgram(
     attributeLocations: locations,
   });
   try {
-    program._bind();
+    if (waitForLink) {
+      program._bind();
+    }
   } catch (error) {
     destroyResource(program);
     throw error;
@@ -573,7 +576,7 @@ function createProgram(
   return program;
 }
 
-function createPostProgram(context, fragmentSource) {
+function createPostProgram(context, fragmentSource, waitForLink = true) {
   const program = ShaderProgram.fromCache({
     context,
     vertexShaderSource: vertexSource,
@@ -581,7 +584,9 @@ function createPostProgram(context, fragmentSource) {
     attributeLocations,
   });
   try {
-    program._bind();
+    if (waitForLink) {
+      program._bind();
+    }
   } catch (error) {
     destroyResource(program);
     throw error;
@@ -757,7 +762,14 @@ function ensureBloomResources(renderer, context, width, height) {
   return candidate;
 }
 
+function cancelShadowPreparation(renderer) {
+  destroyResource(renderer._pendingShadowPrograms?.program);
+  destroyResource(renderer._pendingShadowPrograms?.resolveProgram);
+  renderer._pendingShadowPrograms = undefined;
+}
+
 function destroyGlobeShadowResources(renderer) {
+  cancelShadowPreparation(renderer);
   const shadow = renderer._globeShadowResources;
   if (!defined(shadow)) {
     return;
@@ -770,20 +782,10 @@ function destroyGlobeShadowResources(renderer) {
   renderer._globeShadowResources = undefined;
 }
 
-function createGlobeShadowResources(renderer, context, resolution) {
+function createGlobeShadowResources(renderer, context, resolution, programs) {
   const atlasSize = resolution * 2;
-  const candidate = {};
+  const candidate = programs;
   try {
-    candidate.program = createProgram(
-      context,
-      cloudShadowFragmentSource,
-      renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE,
-      ["SCENEGIS_CLOUD_SHADOW_PASS"],
-    );
-    candidate.resolveProgram = createPostProgram(
-      context,
-      cloudShadowResolveFragmentSource,
-    );
     candidate.currentFramebuffer = new FramebufferManager({
       colorAttachmentsLength: 2,
       depth: false,
@@ -865,7 +867,47 @@ function ensureGlobeShadowResources(renderer, context, resolution) {
     current.resolveCommand.vertexArray = renderer._resources.vertexArray;
     return current;
   }
-  const candidate = createGlobeShadowResources(renderer, context, resolution);
+  let programs = renderer._pendingShadowPrograms;
+  try {
+    if (!defined(programs)) {
+      programs = {};
+      renderer._pendingShadowPrograms = programs;
+      programs.program = createProgram(
+        context,
+        cloudShadowFragmentSource,
+        renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE,
+        ["SCENEGIS_CLOUD_SHADOW_PASS"],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+      );
+      programs.resolveProgram = createPostProgram(
+        context,
+        cloudShadowResolveFragmentSource,
+        false,
+      );
+    }
+    const ready = programs.program._prepare();
+    const resolveReady = programs.resolveProgram._prepare();
+    if (!ready || !resolveReady) {
+      renderer._scene.requestRender();
+      return undefined;
+    }
+  } catch (error) {
+    destroyResource(programs.program);
+    destroyResource(programs.resolveProgram);
+    renderer._pendingShadowPrograms = undefined;
+    throw error;
+  }
+  renderer._pendingShadowPrograms = undefined;
+  const candidate = createGlobeShadowResources(
+    renderer,
+    context,
+    resolution,
+    programs,
+  );
   renderer._globeShadowResources = candidate;
   if (defined(current)) {
     destroyResource(current.currentFramebuffer);
@@ -1421,8 +1463,14 @@ function createStars(renderer, context, candidate, globe) {
   });
 }
 
-function createCloudResources(renderer, context, buffers, vertexArray) {
-  const candidate = {};
+function createCloudResources(
+  renderer,
+  context,
+  buffers,
+  vertexArray,
+  programs,
+) {
+  const candidate = programs ?? {};
   const globe = renderer._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
   const renderState = RenderState.fromCache({
     cull: { enabled: false },
@@ -1430,24 +1478,30 @@ function createCloudResources(renderer, context, buffers, vertexArray) {
     depthMask: false,
   });
   try {
-    candidate.cloudProgram = createProgram(context, cloudFragmentSource, globe);
-    candidate.cloudLogDepthProgram = createProgram(
-      context,
-      cloudFragmentSource,
-      globe,
-      ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
-    );
-    candidate.cloudResolveProgram = createProgram(
-      context,
-      cloudResolveFragmentSource,
-      globe,
-    );
-    candidate.cloudResolveLogDepthProgram = createProgram(
-      context,
-      cloudResolveFragmentSource,
-      globe,
-      ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
-    );
+    if (!defined(programs)) {
+      candidate.cloudProgram = createProgram(
+        context,
+        cloudFragmentSource,
+        globe,
+      );
+      candidate.cloudLogDepthProgram = createProgram(
+        context,
+        cloudFragmentSource,
+        globe,
+        ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
+      );
+      candidate.cloudResolveProgram = createProgram(
+        context,
+        cloudResolveFragmentSource,
+        globe,
+      );
+      candidate.cloudResolveLogDepthProgram = createProgram(
+        context,
+        cloudResolveFragmentSource,
+        globe,
+        ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
+      );
+    }
     const createVolume = globe
       ? createCloudBaseLevelTexture3D
       : createCloudTexture3D;
@@ -1499,7 +1553,7 @@ function createCloudResources(renderer, context, buffers, vertexArray) {
     };
     candidate.cloudCommand = new DrawCommand({
       vertexArray: vertexArray,
-      shaderProgram: candidate.cloudProgram,
+      shaderProgram: candidate.cloudProgram ?? candidate.cloudLogDepthProgram,
       uniformMap: cloudUniformMap,
       renderState,
       primitiveType: PrimitiveType.TRIANGLE_STRIP,
@@ -1508,7 +1562,8 @@ function createCloudResources(renderer, context, buffers, vertexArray) {
     });
     candidate.cloudResolveCommand = new DrawCommand({
       vertexArray: vertexArray,
-      shaderProgram: candidate.cloudResolveProgram,
+      shaderProgram:
+        candidate.cloudResolveProgram ?? candidate.cloudResolveLogDepthProgram,
       uniformMap: cloudUniformMap,
       renderState,
       primitiveType: PrimitiveType.TRIANGLE_STRIP,
@@ -2041,6 +2096,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._world = options.world;
   this._owner = options.owner;
   this._resources = undefined;
+  this._pendingCloudResources = undefined;
   this._bloomResources = undefined;
   this._worldToStars = Matrix3.clone(Matrix3.IDENTITY);
   this._starObserver = new Cartesian3();
@@ -2123,6 +2179,7 @@ function SceneGISEnvironmentEffectsRenderer(options) {
   this._cloudHistoryPendingResetReason = "initial";
   this._cloudBufferDimensions = new Cartesian2();
   this._globeShadowResources = undefined;
+  this._pendingShadowPrograms = undefined;
   this._shadowCascadeIndex = 0;
   this._shadowCascadeCount = 0;
   this._shadowNear = 0.1;
@@ -2412,6 +2469,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.publishResources = function (
   buffers,
 ) {
   const candidate = createResources(this, context, buffers);
+  this.cancelCloudPreparation();
   const previous = this._resources;
   this._resources = candidate;
   this.invalidateCloudHistory("generation-replacement");
@@ -2419,42 +2477,104 @@ SceneGISEnvironmentEffectsRenderer.prototype.publishResources = function (
 };
 
 SceneGISEnvironmentEffectsRenderer.prototype.hasCloudResources = function () {
+  const resources = this._resources;
+  return (
+    this.hasCloudTextures() &&
+    defined(
+      this._scene.frameState.useLogDepth
+        ? resources.cloudLogDepthProgram
+        : resources.cloudProgram,
+    )
+  );
+};
+
+SceneGISEnvironmentEffectsRenderer.prototype.hasCloudTextures = function () {
   return defined(this._resources?.cloudShapeTexture);
 };
 
-SceneGISEnvironmentEffectsRenderer.prototype.publishCloudResources = function (
+SceneGISEnvironmentEffectsRenderer.prototype.cloudsReady = function () {
+  return (
+    this.hasCloudResources() &&
+    ((!this._owner._showCloudShadows && !this._owner._showCrepuscularRays) ||
+      defined(this._globeShadowResources))
+  );
+};
+
+SceneGISEnvironmentEffectsRenderer.prototype.cancelCloudPreparation =
+  function () {
+    destroyResources(this._pendingCloudResources?.resources);
+    this._pendingCloudResources = undefined;
+  };
+
+SceneGISEnvironmentEffectsRenderer.prototype.prepareCloudResources = function (
   context,
   buffers,
 ) {
-  const resources = this._resources;
-  const candidate = createCloudResources(
-    this,
-    context,
-    buffers,
-    resources.vertexArray,
-  );
-  const globe = this._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
+  if (this.hasCloudResources()) {
+    return true;
+  }
+  const useLogDepth = this._scene.frameState.useLogDepth;
+  let pending = this._pendingCloudResources;
   try {
-    candidate.aerialProgram = createProgram(
-      context,
-      aerialFragmentSource,
-      globe,
-    );
-    candidate.aerialLogDepthProgram = createProgram(
-      context,
-      aerialFragmentSource,
-      globe,
-      ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"],
-    );
+    if (!defined(pending)) {
+      pending = { useLogDepth, resources: {} };
+      this._pendingCloudResources = pending;
+      const globe = this._mode === SceneGISAtmosphereReferenceFrame.GLOBE;
+      const defines = useLogDepth ? ["LOG_DEPTH", "LOG_DEPTH_READ_ONLY"] : [];
+      const suffix = useLogDepth ? "LogDepthProgram" : "Program";
+      for (const [name, source] of [
+        ["cloud", cloudFragmentSource],
+        ["cloudResolve", cloudResolveFragmentSource],
+        ["aerial", aerialFragmentSource],
+      ]) {
+        pending.resources[`${name}${suffix}`] = createProgram(
+          context,
+          source,
+          globe,
+          defines,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          false,
+        );
+      }
+    }
+    let ready = true;
+    // Visit every program even while an earlier one is pending, submitting all links.
+    for (const program of Object.values(pending.resources)) {
+      ready = program._prepare() && ready;
+    }
+    if (!ready) {
+      this._scene.requestRender();
+      return false;
+    }
+    this._pendingCloudResources = undefined;
+    const resources = this._resources;
+    const candidate = this.hasCloudTextures()
+      ? pending.resources
+      : createCloudResources(
+          this,
+          context,
+          buffers,
+          resources.vertexArray,
+          pending.resources,
+        );
+    const aerialKey = pending.useLogDepth
+      ? "aerialLogDepthProgram"
+      : "aerialProgram";
+    destroyResource(resources[aerialKey]);
+    Object.assign(resources, candidate);
+    this.invalidateCloudHistory("cloud-resources");
+    if (pending.useLogDepth !== useLogDepth) {
+      this._scene.requestRender();
+      return false;
+    }
+    return true;
   } catch (error) {
-    destroyResources(candidate);
+    this.cancelCloudPreparation();
     throw error;
   }
-  destroyResource(resources.aerialProgram);
-  destroyResource(resources.aerialLogDepthProgram);
-  Object.assign(resources, candidate);
-  resources.aerialCommand.shaderProgram = resources.aerialProgram;
-  this.invalidateCloudHistory("cloud-resources");
 };
 
 SceneGISEnvironmentEffectsRenderer.prototype.hasResources = function () {
@@ -2485,6 +2605,9 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
     this._shadowCameraRelative,
   );
   let shadow;
+  if (!this._owner._showCloudShadows && !this._owner._showCrepuscularRays) {
+    cancelShadowPreparation(this);
+  }
   if (
     this._showClouds &&
     this.hasCloudResources() &&
@@ -2496,7 +2619,13 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
       frameState.context,
       profile.shadowResolution,
     );
-    updateGlobeShadowCascades(this, frameState, profile);
+  }
+  if (defined(shadow)) {
+    updateGlobeShadowCascades(
+      this,
+      frameState,
+      cloudQualityProfiles[this._owner._cloudQuality],
+    );
     shadow.historyValid = shadowHistoryContinuous(this);
     Cartesian3.subtract(
       this._shadowOrigin,
@@ -2538,11 +2667,13 @@ SceneGISEnvironmentEffectsRenderer.prototype.prepareGlobeLighting = function (
     near: this._shadowNear,
     far: this._shadowFar,
     showCloudShadows:
+      defined(shadow) &&
       this._showClouds &&
       this.hasCloudResources() &&
       this._owner._showCloudShadows &&
       this._shadowCloudCasterActive,
     showCrepuscularRays:
+      defined(shadow) &&
       this._showClouds &&
       this.hasCloudResources() &&
       this._owner._showCrepuscularRays &&
@@ -2617,6 +2748,10 @@ SceneGISEnvironmentEffectsRenderer.prototype.setShow = function (
 ) {
   if (this._showClouds !== showClouds) {
     this.invalidateCloudHistory("show-clouds");
+  }
+  if (!showClouds) {
+    this.cancelCloudPreparation();
+    cancelShadowPreparation(this);
   }
   this._showAtmosphere = showAtmosphere;
   this._showAerialPerspective = showAerialPerspective;
@@ -3221,6 +3356,14 @@ function executeCloudResolve(renderer, context, depthTexture) {
 function executeCloudPass(renderer, context, depthTexture) {
   const owner = renderer._owner;
   if (
+    renderer._showClouds &&
+    renderer.hasCloudTextures() &&
+    !renderer.hasCloudResources()
+  ) {
+    // Native depth selection may change after the controller update this frame.
+    renderer._scene.requestRender();
+  }
+  if (
     !renderer._showClouds ||
     !renderer.hasCloudResources() ||
     owner._cloudDensity <= 0.0 ||
@@ -3498,6 +3641,7 @@ SceneGISEnvironmentEffectsRenderer.prototype.executeHdr = function (
 };
 
 SceneGISEnvironmentEffectsRenderer.prototype.releaseResources = function () {
+  this.cancelCloudPreparation();
   this.releaseGlobeLighting();
   destroyResources(this._resources);
   destroyBloomResources(this._bloomResources);
