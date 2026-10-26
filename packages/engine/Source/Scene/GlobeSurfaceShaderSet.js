@@ -5,6 +5,9 @@ import destroyObject from "../Core/destroyObject.js";
 import TerrainQuantization from "../Core/TerrainQuantization.js";
 import ShaderProgram from "../Renderer/ShaderProgram.js";
 import VectorCommon from "../Shaders/VectorCommon.js";
+// SCENEGIS_PATCH_BEGIN SGP-0070: Evaluate spherical clipping from precise RTC fragment positions.
+import sceneGISGlobeClipping from "../Shaders/SceneGIS/SceneGISGlobeClipping.js";
+// SCENEGIS_PATCH_END SGP-0070
 // SCENEGIS_PATCH_BEGIN SGP-0009: Inject the optional SceneGIS Globe surface lighting library.
 import sceneGISBrunetonAtmosphere from "../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonAtmosphere.js";
 import sceneGISBrunetonCommon from "../Shaders/SceneGIS/EnvironmentEffects/SceneGISBrunetonCommon.js";
@@ -382,6 +385,9 @@ class GlobeSurfaceShaderSet {
       }
 
       if (enableClippingPolygons) {
+        // SCENEGIS_PATCH_BEGIN SGP-0070: Compile the precision path only for clipped terrain.
+        fs.sources.unshift(sceneGISGlobeClipping);
+        // SCENEGIS_PATCH_END SGP-0070
         fs.defines.push("ENABLE_CLIPPING_POLYGONS");
         vs.defines.push("ENABLE_CLIPPING_POLYGONS");
 

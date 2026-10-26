@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>球面地表裁剪近景</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>球面地表裁剪近景</h1>
+      <p>原生多边形裁剪；绿色地表、红色直壁、蓝色坑底，坑深 30 米。</p>
+      <p>
+        ENU 原点 118.78° / 32.04°；80 × 220 米矩形。对照裁剪平面、裙边和 LOD。
+      </p>
+      <p id="status">准备场景…</p>
+    </aside>
+    <div id="controls"></div>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module" src="./球面地表裁剪.js"></script>
+  </body>
+</html>

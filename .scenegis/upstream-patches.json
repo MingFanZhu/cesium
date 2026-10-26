@@ -2,6 +2,48 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0070",
+      "title": "Preserve near-field precision in globe polygon clipping",
+      "status": "active",
+      "reason": "Rebase distance-field inputs before Float32 packing and evaluate spherical clipping from interpolated RTC positions instead of rounded world positions and interpolated angles.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Specs/Scene/ClippingPolygonCollectionSpec.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/ClippingPolygonCollection.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/PolygonSignedDistanceFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/GlobeSurfaceShaderSet.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/GlobeSurfaceTileProvider.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/GlobeVS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/GlobeFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISGlobeClippingSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0191-globe-clipping-precision.md",
+      "removalCondition": "Native globe polygon clipping preserves sub-meter coordinates through packing, distance-field generation and per-fragment terrain evaluation."
+    },
+    {
       "id": "SGP-0069",
       "title": "Prepare cached shader programs without blocking link-status queries",
       "status": "active",

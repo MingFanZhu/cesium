@@ -96,8 +96,12 @@ uniform vec4 u_clippingPlanesEdgeStyle;
 
 #ifdef ENABLE_CLIPPING_POLYGONS
 uniform highp sampler2D u_clippingDistance;
-in vec2 v_clippingPosition;
-flat in int v_regionIndex;
+// SCENEGIS_PATCH_BEGIN SGP-0070: Keep the globe center split until projection in the fragment shader.
+uniform highp sampler2D u_clippingExtents;
+uniform vec3 u_center3D;
+uniform vec3 u_sceneGISClippingCenterLow;
+in vec3 v_sceneGISClippingPosition;
+// SCENEGIS_PATCH_END SGP-0070
 #endif
 
 #if defined(GROUND_ATMOSPHERE) || defined(FOG) && defined(DYNAMIC_ATMOSPHERE_LIGHTING) && (defined(ENABLE_VERTEX_LIGHTING) || defined(ENABLE_DAYNIGHT_SHADING))
@@ -487,7 +491,11 @@ void main()
 // SCENEGIS_PATCH_BEGIN SGP-0051: Submit surface data without evaluating any light.
 #ifdef SCENEGIS_DEFERRED_GLOBE_CAPTURE
     #ifdef ENABLE_CLIPPING_POLYGONS
-    clipPolygons(u_clippingDistance, CLIPPING_POLYGON_REGIONS_LENGTH, v_clippingPosition, v_regionIndex);
+    // SCENEGIS_PATCH_END SGP-0051
+    // SCENEGIS_PATCH_BEGIN SGP-0070: Share precise clipping with the deferred material path.
+    sceneGISGlobeClipPolygons(u_clippingDistance, u_clippingExtents, u_center3D, u_sceneGISClippingCenterLow, v_sceneGISClippingPosition);
+    // SCENEGIS_PATCH_END SGP-0070
+    // SCENEGIS_PATCH_BEGIN SGP-0051: Continue the deferred material path after polygon clipping.
     #endif
     #ifdef SCENEGIS_GLOBE_SURFACE_LIGHTING
         #ifdef SCENEGIS_GLOBE_SURFACE_TERRAIN_NORMAL
@@ -612,9 +620,9 @@ void main()
 #endif
 
 #ifdef ENABLE_CLIPPING_POLYGONS
-    vec2 clippingPosition = v_clippingPosition;
-    int regionIndex = v_regionIndex;
-    clipPolygons(u_clippingDistance, CLIPPING_POLYGON_REGIONS_LENGTH, clippingPosition, regionIndex);
+    // SCENEGIS_PATCH_BEGIN SGP-0070: Evaluate the spherical region at the terrain fragment.
+    sceneGISGlobeClipPolygons(u_clippingDistance, u_clippingExtents, u_center3D, u_sceneGISClippingCenterLow, v_sceneGISClippingPosition);
+    // SCENEGIS_PATCH_END SGP-0070
 #endif
 
 #ifdef HIGHLIGHT_FILL_TILE

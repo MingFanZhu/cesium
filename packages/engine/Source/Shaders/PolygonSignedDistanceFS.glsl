@@ -36,9 +36,9 @@ vec2 getPolygonPosition(int i) {
 }
 
 vec2 getCoordinates(vec2 textureCoordinates, vec4 extents) {
-    float latitude = mix(extents.x, extents.x + 1.0 / extents.z, textureCoordinates.y);
-    float longitude = mix(extents.y, extents.y + 1.0 / extents.w, textureCoordinates.x);
-    return vec2(latitude, longitude);
+    // SCENEGIS_PATCH_BEGIN SGP-0070: Stay in normalized region coordinates; never reconstruct absolute angles.
+    return textureCoordinates.yx;
+    // SCENEGIS_PATCH_END SGP-0070
 }
 
 void main() {
@@ -122,7 +122,9 @@ void main() {
         }
 
         // Normalize the range to [0,1]
-        vec4 result = (s * vec4(clipAmount * length(extents.zw))) / 2.0 + 0.5;
+        // SCENEGIS_PATCH_BEGIN SGP-0070: The distance is already measured in region texture coordinates.
+        vec4 result = vec4(s * clipAmount * 0.5 + 0.5);
+        // SCENEGIS_PATCH_END SGP-0070
         // In the case where we've iterated through multiple polygons, take the minimum
         out_FragColor = min(out_FragColor, result);
 

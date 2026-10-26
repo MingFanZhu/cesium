@@ -249,7 +249,15 @@ describe("Scene/ClippingPolygonCollection", function () {
     polygons.update(scene.frameState);
 
     const args = spy.calls.argsFor(spy.calls.count() - 2);
-    const arrayBufferView = args[8];
+    // SCENEGIS_PATCH_BEGIN SGP-0070: Decode the region-local protocol before checking the existing spherical values.
+    const arrayBufferView = new Float32Array(args[8]);
+    const extent = polygons._extentsFloat32View;
+    for (let i = 2; i < 6 + polygon.length * 2; ++i) {
+      const axis = i % 2;
+      const origin = i === 4 || i === 5 ? 0.0 : extent[axis];
+      arrayBufferView[i] = origin + arrayBufferView[i] / extent[axis + 2];
+    }
+    // SCENEGIS_PATCH_END SGP-0070
     expect(arrayBufferView).toBeDefined();
     expect(arrayBufferView[0]).toBe(5); // number of positions
     expect(arrayBufferView[1]).toBe(0); // extents index

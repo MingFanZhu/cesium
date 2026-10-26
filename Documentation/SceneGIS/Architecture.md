@@ -511,6 +511,14 @@ pyramid；provider只拥有Resource/config/Event和global Credit reference，glo
 必须使用本地stub，不得依赖公网。完整决定见
 [ADR-0011](Decisions/ADR-0011-planar-url-template-heightmap-terrain-provider.md)。
 
+### 球面地形裁剪
+
+球面 Globe 保留原生 ClippingPolygonCollection 的球面、凹环与多区域语义。
+按 [ADR-0191](Decisions/ADR-0191-globe-clipping-precision.md) / SGP-0070，距离场顶点在
+CPU double 中先减区域原点再转 Float32；地形插值 RTC 位置，fragment 保留中心高低位后
+计算球面坐标。不得用提高纹理分辨率、全局关闭 skirts 或扩大坑壁替代坐标精度修复。
+几何、terrain provider 和 collection 资源所有权仍由原生管线持有。
+
 ### 平面地形裁剪
 
 `SceneGISPlanarWorld.clippingPlanes` / `clippingPolygons` 复用 Cesium 原生集合和 polygon 类型，

@@ -1771,6 +1771,9 @@ const scratchInverseTransposeClippingPlanesMatrix = new Matrix4();
  * @ignore
  */
 function createTileUniformMap(frameState, globeSurfaceTileProvider) {
+  // SCENEGIS_PATCH_BEGIN SGP-0070: Retain center residuals in the owning tile uniform map.
+  const clippingCenterLow = new Cartesian3();
+  // SCENEGIS_PATCH_END SGP-0070
   const uniformMap = {
     // SCENEGIS_PATCH_BEGIN SGP-0009: Read the explicit current-frame SceneGIS Globe lighting record.
     u_sceneGISCloudShadowAtlas: function () {
@@ -1873,6 +1876,18 @@ function createTileUniformMap(frameState, globeSurfaceTileProvider) {
     u_center3D: function () {
       return this.properties.center3D;
     },
+    // SCENEGIS_PATCH_BEGIN SGP-0070: Supply the low component lost by the native vec3 center uniform.
+    u_sceneGISClippingRound: function () {
+      return 1.0;
+    },
+    u_sceneGISClippingCenterLow: function () {
+      const center = this.properties.center3D;
+      clippingCenterLow.x = center.x - Math.fround(center.x);
+      clippingCenterLow.y = center.y - Math.fround(center.y);
+      clippingCenterLow.z = center.z - Math.fround(center.z);
+      return clippingCenterLow;
+    },
+    // SCENEGIS_PATCH_END SGP-0070
     u_verticalExaggerationAndRelativeHeight: function () {
       return this.properties.verticalExaggerationAndRelativeHeight;
     },

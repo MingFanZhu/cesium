@@ -580,12 +580,15 @@ function packPolygonsAsFloats(clippingPolygonCollection) {
   // For each polygon:
   //   [0] vertexCount - the number of vertices in the polygon
   //   [1] extentsIndex - index into the extents texture for this polygon's bounding rectangle
-  //   [2] south - southern boundary of the individual polygon extent (radians)
-  //   [3] west - western boundary of the individual polygon extent (radians)
+  // SCENEGIS_PATCH_BEGIN SGP-0070: Document the normalized payload shared with the SDF shader.
+  // Entries [2..] use region-local normalized latitude/longitude coordinates.
+  //   [2] south - southern boundary of the individual polygon extent
+  //   [3] west - western boundary of the individual polygon extent
   //   [4] latitudeRange - (north - south) for the individual polygon extent
   //   [5] longitudeRange - (east - west) for the individual polygon extent
   //   [6..6+2*vertexCount-1] pairs of (latitude, longitude) for each vertex,
   //       computed as fastApproximateAtan2 values to match the shader
+  // SCENEGIS_PATCH_END SGP-0070
 
   // Sort polygon indices by extentsIndex so polygons sharing the same extent are packed together
   // Can enable optimizations in the shader
@@ -601,13 +604,22 @@ function packPolygonsAsFloats(clippingPolygonCollection) {
     polygonsFloat32View[floatIndex++] = length;
     polygonsFloat32View[floatIndex++] = extentsIndexByPolygon.get(polygonIndex);
 
-    // Pack the individual polygon extent
+    // SCENEGIS_PATCH_BEGIN SGP-0070: Normalize before Float32 packing using the exact uploaded origin and scale.
+    const region = extentsList[extentsIndexByPolygon.get(polygonIndex)];
+    const south = Math.fround(region.south);
+    const west = Math.fround(region.west);
+    const latitudeScale = Math.fround(1.0 / (region.north - region.south));
+    const longitudeScale = Math.fround(1.0 / (region.east - region.west));
     const polygonExtent = polygonExtentsCache[polygonIndex];
-    polygonsFloat32View[floatIndex++] = polygonExtent.south;
-    polygonsFloat32View[floatIndex++] = polygonExtent.west;
     polygonsFloat32View[floatIndex++] =
-      polygonExtent.north - polygonExtent.south;
-    polygonsFloat32View[floatIndex++] = polygonExtent.east - polygonExtent.west;
+      (polygonExtent.south - south) * latitudeScale;
+    polygonsFloat32View[floatIndex++] =
+      (polygonExtent.west - west) * longitudeScale;
+    polygonsFloat32View[floatIndex++] =
+      (polygonExtent.north - polygonExtent.south) * latitudeScale;
+    polygonsFloat32View[floatIndex++] =
+      (polygonExtent.east - polygonExtent.west) * longitudeScale;
+    // SCENEGIS_PATCH_END SGP-0070
 
     // Pack the polygon positions into the polygon texture array buffer
     for (let i = 0; i < length; ++i) {
@@ -626,8 +638,12 @@ function packPolygonsAsFloats(clippingPolygonCollection) {
         spherePoint.y,
       );
 
-      polygonsFloat32View[floatIndex++] = latitudeApproximation;
-      polygonsFloat32View[floatIndex++] = longitudeApproximation;
+      // SCENEGIS_PATCH_BEGIN SGP-0070: Keep local angular detail before conversion to Float32.
+      polygonsFloat32View[floatIndex++] =
+        (latitudeApproximation - south) * latitudeScale;
+      polygonsFloat32View[floatIndex++] =
+        (longitudeApproximation - west) * longitudeScale;
+      // SCENEGIS_PATCH_END SGP-0070
     }
   }
 
