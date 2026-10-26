@@ -2,7 +2,19 @@
 
 ## Status
 
-- Latest standalone：[体积云异步准备](plans/2026-10-26-cloud-shader-preparation.md) — completed；负责人批准本地提交。
+- Latest handoff：2026-10-26 负责人要求提交当前云优化；在 `scenegis/develop` 按启动性能、画质修复形成两个本地提交，不推送。
+  保留评审中已有的有限采样噪声、性能与 legacy fixture 维护事项；本次提交不代表整套历史测试全部通过。
+- Latest standalone：[中质量云重建](plans/2026-10-26-medium-cloud-reconstruction.md) — completed；负责人接受当前结果并要求提交。
+  四分之一像素追踪保留，现有邻域改用相位对称的 Gaussian 去颗粒；同输入高频残差下降约 50%，帧间亮度波动下降约 39%。
+  [技术自审](reviews/2026-10-26-medium-cloud-reconstruction.md)记录七项 GPU 回归与 resolve 1.200 / 1.214 ms；ADR-0048，无 upstream / SGP 增量。
+- Previous standalone：[云底扰动分层线](plans/2026-10-26-cloud-bottom-turbulence-continuity.md) — completed；2026-10-26 负责人接受分层线修复，纳入画质提交。
+  共享 remap 保留递减范围符号，消除 30% 层高处的扰动突变；两项 strict GPU Specs 覆盖球面 / 平面本体和云影。
+  [技术自审](reviews/2026-10-26-cloud-bottom-turbulence-continuity.md)记录原视角切线消失及 trace GPU 6.58 / 7.98 ms；ADR-0046，无 upstream / SGP 增量。
+- Previous standalone：[高质量球面云历史支持](plans/2026-10-26-high-cloud-temporal-support.md) — completed；负责人批准当前云优化提交，保留残余噪声与 fixture 维护事项。
+  全分辨率云复用体积支持与 receiver 筛选，并补齐 producer miss 的 receiver，避免透明邻域被误排除。
+  五项 focused strict GPU Specs 通过；同帧薄边透明度 / 亮度波动下降约 84.3% / 82.4%，采样预算不变。
+  [技术自审](reviews/2026-10-26-high-cloud-temporal-support.md)记录严格 GPU 测试、移动验证及既有 fixture 限制；ADR-0048，无 upstream / SGP 增量。
+- Previous standalone：[体积云异步准备](plans/2026-10-26-cloud-shader-preparation.md) — completed；负责人批准本地提交。
   当前深度三程序按需准备、KHR 非阻塞完成查询、可选云影与候选回收；ADR-0190 / SGP-0069。
   [技术自审](reviews/2026-10-26-cloud-shader-preparation.md)。画质、预计算资源与既有视觉待办保持原范围。
   等价新源三程序对照：同步主线程等待 12.96 s；异步总完成 8.61 s、准备调用最大 0.7 ms。

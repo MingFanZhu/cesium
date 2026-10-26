@@ -821,3 +821,16 @@ the same physical units. Ground bounce and directional Moon remain successors.
 ## 2026-10-12 WebGL maintenance backport
 
 Backport `5bede894ca` numerical corrections: local metric shell intersections avoid subtracting squared planet radii; history variance clipping ignores only FP32 roundoff on constant RGB axes; native-resolution spatial resolve uses exact fragment centers. No ray/sample budget, resource, history-weight or public-API change.
+
+## 2026-10-26: Descending cloud material remap correction
+
+Shared Globe/Planar material remapping preserves the sign of the input range.
+The authored bottom-turbulence profile maps height fractions 0..0.3 to weights
+1..0. A positive-only denominator guard had inverted this into a hard 0-to-1
+jump at 30% layer height, cutting both visible density and shadow density.
+Retain the existing epsilon magnitude while preserving descending ranges;
+ascending mappings keep their previous formula. This restores the pinned
+material's continuous bottom fade without changing assets, sampling budgets,
+lighting, public configuration or resources. Cloud-bottom shapes can change
+because displacement is again applied at its intended heights. See the
+[continuity plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-26-cloud-bottom-turbulence-continuity.md).

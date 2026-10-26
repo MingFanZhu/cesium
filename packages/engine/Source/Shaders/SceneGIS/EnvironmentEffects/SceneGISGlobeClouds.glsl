@@ -349,8 +349,11 @@ float sceneGISGlobeCloudWeatherChannel(
 
 float sceneGISGlobeCloudRemap(float value, float minimum, float maximum)
 {
+    // Descending height profiles must retain the sign of their range.
+    float range = maximum - minimum;
+    float denominator = range < 0.0 ? min(range, -1.0e-4) : max(range, 1.0e-4);
     return clamp(
-        (value - minimum) / max(maximum - minimum, 1.0e-4),
+        (value - minimum) / denominator,
         0.0,
         1.0);
 }

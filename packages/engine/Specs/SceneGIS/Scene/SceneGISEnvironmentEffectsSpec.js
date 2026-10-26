@@ -2292,7 +2292,11 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       uniform vec2 u_cloudDepthOffset;
       uniform vec2 u_cloudPreviousDepthOffset;
       uniform bool u_cloudHistoryReprojection;
-      const float SCENEGIS_CLOUD_DISTANCE_ENCODING = 1000000.0;`,
+      uniform bool u_linearSceneDepth;
+      uniform bool u_sceneDepthPerspective;
+      uniform vec4 u_sceneDepthFrustum;
+      const float SCENEGIS_CLOUD_DISTANCE_ENCODING = 1000000.0;
+      bool sceneGISCloudUsesSupportedHistory() { return u_cloudTracePhased; }`,
       cloudSource.slice(
         cloudSource.indexOf("bool sceneGISIsClearResolvedDepth"),
         cloudSource.indexOf("const int SCENEGIS_CLOUD_PRIMARY_MAX_STEPS"),
@@ -2329,6 +2333,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
           u_cloudDepthOffset: () => offset,
           u_cloudPreviousDepthOffset: () => Cartesian2.ZERO,
           u_cloudHistoryReprojection: () => moving,
+          u_linearSceneDepth: () => false,
+          u_sceneDepthPerspective: () => false,
+          u_sceneDepthFrustum: () => new Cartesian4(-2.5, 2.5, -2.5, 2.5),
         },
       })[12];
     }
@@ -2430,6 +2437,9 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
       u_cloudHistoryColorTexture: () => historyColor,
       u_cloudHistoryDistanceTexture: () => historyDistance,
       u_cloudTracePhased: () => true,
+      u_linearSceneDepth: () => false,
+      u_sceneDepthPerspective: () => true,
+      u_sceneDepthFrustum: () => frustum,
       u_cloudStbnSlice: () => (phase + 0.5) / 64,
       u_cloudHistoryValid: () => motion,
       u_cloudHistoryWeight: () => (motion ? 0.82 : 0),
@@ -2552,14 +2562,14 @@ describe("SceneGIS/Scene/SceneGISEnvironmentEffects", function () {
             .withContext("subpixel history on the same receiver plane")
             .toEqualEpsilon(0.5 * 0.18 + filtered * 0.82, 0.002);
           const nearestSource = cloudResolveFragmentSource.replace(
-            "if (u_cloudTracePhased && u_cloudHistoryReprojection && currentValid) {",
+            "if (supportedHistory && u_cloudHistoryReprojection && currentValid) {",
             "if (false) {",
           );
           expect(draw(globe, nearestSource)[2 * 8 + 4][0])
             .withContext("nearest history loses fractional motion")
             .toEqualEpsilon(0.5 * 0.18 + 0.8 * 0.82, 0.002);
           const formerReceiver = nearestSource.replace(
-            "if (u_cloudTracePhased && u_cloudHistoryReprojection) {",
+            "if (sceneGISCloudUsesSupportedHistory() && u_cloudHistoryReprojection) {",
             "if (false) {",
           );
           expect(draw(globe, formerReceiver)[2 * 8 + 4][0])
@@ -12041,7 +12051,7 @@ ${hardCascadeLibrary}`;
         );
       });
       const oldCloudPointGate = cloudResolveFragmentSource.replace(
-        "if (u_cloudTracePhased) {\n        vec2 precisionRadius",
+        "if (supportedHistory) {\n        vec2 precisionRadius",
         "if (false) {\n        vec2 precisionRadius",
       );
       expect(oldCloudPointGate).not.toBe(cloudResolveFragmentSource);
@@ -13458,8 +13468,8 @@ ${hardCascadeLibrary}`;
       resources.cloudResolveProgram = productResolve;
       resources.cloudResolveLogDepthProgram = productResolveLogarithmic;
 
-      // A true cloud/clear silhouette must reject prior cloud color, even
-      // when that color falls inside the neighborhood variance bounds.
+      // A cloud/clear silhouette retains bounded transparent history only
+      // where the current neighborhood still supports a cloud anchor.
       const edgeProgram = cloudSentinelProgram(
         "out_FragData_0 = gl_FragCoord.x < 8.0 ? vec4(0.0, 0.0, 0.0, 1.0) : vec4(0.125, 0.25, 0.375, 0.75);",
         [0.025, 0.0245, 1.0, "step(8.0, gl_FragCoord.x)"],
@@ -13476,11 +13486,13 @@ ${hardCascadeLibrary}`;
       );
       expect(clearSpatial.slice(0, 3)).toEqual([0.0, 0.0, 0.0]);
       copyHistory(
-        () => noisyColor,
+        () => [0.0, 0.0, 0.0, 1.0],
         () => [0.0, 0.0, 1.0, 0.0],
       );
       scene.renderForSpecs(fixedTime);
-      expect(readResolvedPixel().color).toEqual(edgeSpatial.color);
+      const edgeResolved = readResolvedPixel().color;
+      expect(edgeResolved[0]).toBeLessThan(edgeSpatial.color[0]);
+      expect(edgeResolved[3]).toBeGreaterThan(edgeSpatial.color[3]);
       expect(
         readHalfTexturePixel(historyManager().getColorTexture(0), 6, 4),
       ).toEqual(clearSpatial);
@@ -13547,7 +13559,8 @@ ${hardCascadeLibrary}`;
         return [
           semanticDistances[0] + 0.002 * delta,
           semanticDistances[1] - 0.002 * delta,
-          semanticDistances[2],
+          // Clear depth is a class sentinel, not a reprojected surface point.
+          1.0,
           packedAlpha,
         ];
       }
@@ -13587,8 +13600,11 @@ ${hardCascadeLibrary}`;
       expect(clampedHistory.color[1]).toBeLessThanOrEqual(0.2501);
       expect(clampedHistory.color[2]).toBeLessThanOrEqual(0.2501);
       expect(clampedHistory.distance[3]).toBe(1.0);
-      expect(clampedHistory.distance[0]).toEqualEpsilon(0.025, 0.0001);
-      expect(clampedHistory.distance[1]).toEqualEpsilon(0.0245, 0.0001);
+      effects._pipeline.invalidateCloudHistory("spec-current-metadata");
+      scene.renderForSpecs(fixedTime);
+      expect(clampedHistory.distance.slice(0, 3)).toEqual(
+        readResolvedPixel().distance.slice(0, 3),
+      );
       expect(clampedHistory.distance[2]).toBe(1.0);
 
       const secondCurrentProgram = cloudSentinelProgram(
@@ -13606,13 +13622,14 @@ ${hardCascadeLibrary}`;
         "continuous-reprojected",
       );
       const secondTransition = readResolvedPixel();
-      expect(secondTransition.distance[0]).toEqualEpsilon(0.025, 0.0001);
-      expect(secondTransition.distance[1]).toEqualEpsilon(0.0245, 0.0001);
       expect(secondTransition.distance[2]).toBe(1.0);
 
       effects._pipeline.invalidateCloudHistory("spec-spatial-baseline");
       scene.renderForSpecs(fixedTime);
       const spatialOnly = readResolvedPixel();
+      expect(secondTransition.distance.slice(0, 3)).toEqual(
+        spatialOnly.distance.slice(0, 3),
+      );
       expect(secondTransition.color).not.toEqual(spatialOnly.color);
 
       resetPreviousCamera(false);

@@ -1126,3 +1126,69 @@ adding an internal animation clock. Existing wind reprojection, per-pixel depth
 and support qualification, 0.9/0.82 weights, STBN phases, trace budgets and resource
 lifecycle are unchanged. No Shader, public API, pass, texture or upstream patch
 is added. Large disocclusions and actual light changes still lose history.
+
+## 2026-10-26: Full-resolution Globe temporal support
+
+The high-quality stationary owner view reproduces substantial grain: only
+18.2% of cloud pixels accept history in a native diagnostic frame. The old
+nonphased path compares stochastic mean/front positions as fixed surfaces,
+mixes neighboring receiver distances, and rejects already variance-clipped
+RGBA by additional fixed thresholds. Those assumptions do not follow from
+tracing every pixel instead of one phase of a 2x2 grid.
+
+Full-resolution Globe traces now share the existing supported-volume history
+policy with phased traces. Raster dimensions select this case; high remains
+full resolution and is not assigned a phase. Its source pixel is the current
+texel, with the existing high spatial kernel. The same 3x3 neighborhood must
+pass receiver-plane, depth-class and foreground checks before contributing
+color, clipping statistics or projected cloud support. Published receiver
+distance comes from the current target depth, not a weighted neighboring depth.
+
+Exact stationary rays retain the existing nonnegative/foreground, receiver,
+ray-alignment and local-support requirements, without matching random
+longitudinal positions. Moving rays retain the step-derived support interval
+and independently qualified four-tap optical history. Gamma-1 clipping bounds
+RGB and transmittance without an additional magnitude gate. Current-domain
+mean/front/receiver metadata, global cuts, 0.9/0.82 weights, independent shadow
+history and STBN progression remain authoritative.
+
+This supersedes the earlier medium-only restriction for full-resolution Globe
+tracing. Reduced nonphased Globe and Planar retain their policies. No public
+API, material, sampling budget, texture, pass or upstream seam changes.
+High adds receiver depth reads within its existing neighborhood and up to eight
+history reads during motion. Validate the bounded GPU cost, foreground and
+disocclusion behavior; finite sampling still permits residual grain. See the
+[standalone plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-26-high-cloud-temporal-support.md).
+
+The producer must publish current receiver distance for these full-resolution
+traces even when the march misses the cloud. A miss keeps zero mean/front and
+invalid cloud presence, but its receiver is still the actual opaque depth (or
+the clear sentinel). Otherwise receiver qualification rejects transparent
+neighbors, and a sparse hit clips transparent history to an opaque cloud edge.
+Apply the same full-resolution/phased predicate at publication and resolve;
+reduced nonphased Globe publication remains unchanged. This corrects the
+initial high integration, which extended resolve without extending the
+producer's existing phased-only receiver publication. Do not weaken receiver
+checks or retain unsupported history to hide that metadata inconsistency.
+
+## 2026-10-26: Medium Globe reconstruction footprint
+
+In the owner's stationary medium view, history passes for all 819,200 sampled
+cloud-body pixels, but phased tent reconstruction has a single stochastic ray
+at sampled pixels and two or four rays elsewhere. Temporal accumulation alone
+does not remove this phase-dependent spatial noise.
+
+Globe phased tracing now reconstructs with a 1.5-full-pixel Gaussian inside the
+existing qualified 3x3 neighborhood. Use the actual full-pixel source offset,
+including odd-size clamping. Exclude offsets at or beyond three full pixels on
+either axis to keep the support symmetric when the target lies between phase
+samples. Normalize the surviving weights as before; constant signals and linear
+signals away from boundaries retain their value and center in every phase.
+The existing deterministic exponential approximation evaluates the kernel.
+
+Receiver and foreground qualification, transparent samples, current metadata,
+variance clipping, temporal weights and phase progression remain unchanged.
+There are no additional reads, passes, resources or traced rays. Full-resolution,
+reduced nonphased and Planar kernels retain their previous behavior. This replaces
+the medium tent kernel policy; its bounded smoothing trades some sub-three-pixel
+cloud detail for reduced grain. See the [plan](../../../AgentDocs/atmosphere-clouds-effects/plans/2026-10-26-medium-cloud-reconstruction.md).

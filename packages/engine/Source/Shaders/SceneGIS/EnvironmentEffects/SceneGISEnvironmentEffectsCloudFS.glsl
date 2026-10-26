@@ -229,7 +229,10 @@ void main()
     #endif
     bool publishSceneDistance = true;
     #ifdef SCENEGIS_GLOBE
-    publishSceneDistance = u_cloudTracePhased;
+    // Supported-history reconstruction also consumes transparent samples.
+    // Ray misses leave march distances at zero, but still share the receiver.
+    publishSceneDistance = u_cloudTracePhased || all(equal(
+        ivec2(u_cloudBufferDimensions), textureSize(u_depthTexture, 0)));
     #endif
     if (publishSceneDistance) {
         cloudDistances.z = isClearDepth ? 1.0 : clamp(

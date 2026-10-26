@@ -199,6 +199,18 @@ bool sceneGISCloudHistoryCoordinates(
         historyCoordinates);
 }
 
+bool sceneGISCloudUsesSupportedHistory()
+{
+    #ifdef SCENEGIS_GLOBE
+    // Full-resolution Globe tracing samples the same stochastic volume as
+    // phased tracing; its depth estimates are not fixed surface positions.
+    return u_cloudTracePhased || all(equal(
+        textureSize(u_cloudLowDistanceTexture, 0), textureSize(u_depthTexture, 0)));
+    #else
+    return u_cloudTracePhased;
+    #endif
+}
+
 float sceneGISCloudHalfFloatUlp(float encodedValue)
 {
     float magnitude = abs(encodedValue);
@@ -232,7 +244,7 @@ float sceneGISCloudHalfFloatPositionToleranceMeters(
 float sceneGISCloudHistoryPositionToleranceMeters(float previous, float current)
 {
     float tolerance = sceneGISCloudHalfFloatPositionToleranceMeters(previous, current);
-    if (u_cloudTracePhased) {
+    if (sceneGISCloudUsesSupportedHistory()) {
         vec2 span = u_cloudPreviousFrustum.yw - u_cloudPreviousFrustum.xz;
         float radius = 0.5 * length(span /
             vec2(textureSize(u_cloudHistoryDistanceTexture, 0)));
@@ -286,7 +298,7 @@ bool sceneGISCloudSceneHistoryCompatible(
     }
     float tolerance = sceneGISCloudHistoryPositionToleranceMeters(
         previousDistance, currentDistance);
-    if (u_cloudTracePhased && u_cloudHistoryReprojection) {
+    if (sceneGISCloudUsesSupportedHistory() && u_cloudHistoryReprojection) {
         // Cloud and receiver have different parallax. Reprojection at cloud
         // depth need not observe the same point on a continuous receiver.
         float normalMagnitude = length(receiverNormal);
@@ -451,6 +463,7 @@ bool sceneGISCloudHistoryTapCompatible(
 
 void main()
 {
+    bool supportedHistory = sceneGISCloudUsesSupportedHistory();
     vec2 lowDimensions = vec2(textureSize(u_cloudLowDistanceTexture, 0));
     vec2 fullDimensions = vec2(textureSize(u_depthTexture, 0));
     float spatialSharpness = lowDimensions.x / max(fullDimensions.x, 1.0) > 0.6
@@ -538,13 +551,32 @@ void main()
             vec4 colorSample = texelFetch(u_cloudLowColorTexture, texel, 0);
             bool finiteColorSample = all(equal(colorSample, colorSample)) &&
                 all(lessThanEqual(abs(colorSample), vec4(65504.0)));
-            if (u_cloudTracePhased) {
-                ivec2 sourcePixel = sceneGISCloudTraceFullPixel(
-                    texel, ivec2(fullDimensions), u_cloudStbnSlice);
+            if (supportedHistory) {
+                ivec2 sourcePixel = u_cloudTracePhased
+                    ? sceneGISCloudTraceFullPixel(
+                        texel, ivec2(fullDimensions), u_cloudStbnSlice)
+                    : texel;
                 vec2 sourceUv = (vec2(sourcePixel) + 0.5) / fullDimensions;
                 vec2 tent = max(1.0 - abs(floor(gl_FragCoord.xy) -
                     vec2(sourcePixel)) * 0.5, vec2(0.0));
                 float weight = tent.x * tent.y;
+                #ifdef SCENEGIS_GLOBE
+                if (u_cloudTracePhased) {
+                    // A 1.5-pixel Gaussian removes single-ray noise even at the
+                    // sampled phase. Keep the support symmetric at half-grid
+                    // positions so the kernel cannot shift with the phase.
+                    vec2 offset = floor(gl_FragCoord.xy) - vec2(sourcePixel);
+                    weight = all(lessThan(abs(offset), vec2(3.0)))
+                        ? sceneGISCloudDeterministicExp2Negative(
+                            dot(offset, offset) * 0.3205988979753252)
+                        : 0.0;
+                }
+                #endif
+                if (!u_cloudTracePhased) {
+                    vec2 delta = vec2(x, y) - (fraction - vec2(0.5));
+                    weight = sceneGISCloudDeterministicExp2Negative(
+                        dot(delta, delta) * spatialSharpness);
+                }
                 float sourceRawDepth = texture(u_depthTexture,
                     sourceUv + u_cloudDepthOffset).r;
                 bool sourceClear = sceneGISIsClearResolvedDepth(sourceRawDepth);
@@ -728,7 +760,7 @@ void main()
     vec4 spatialColor = colorSum / max(weightSum, 1.0e-6);
     vec4 spatialDistance = distanceSum / max(distanceWeightSum, 1.0e-6);
     bool spatialValid = distanceWeightSum > 1.0e-6;
-    if (u_cloudTracePhased && !spatialValid &&
+    if (supportedHistory && !spatialValid &&
         weightSum > 0.0 && cloudAnchorCount > 0.0) {
         // A transparent tent estimate still belongs to the locally sampled
         // volume. Supply a current anchor for reprojection and composition,
@@ -745,7 +777,7 @@ void main()
     if (!spatialValid) {
         spatialDistance.xyz = vec3(0.0, 0.0, sceneDistance);
     }
-    if (u_cloudTracePhased) {
+    if (supportedHistory) {
         spatialDistance.z = sceneDistance;
         if (weightSum <= 0.0) {
             spatialColor = vec4(0.0, 0.0, 0.0, 1.0);
@@ -759,7 +791,7 @@ void main()
     }
     #endif
     #ifdef SCENEGIS_GLOBE
-    if (u_cloudTracePhased && weightSum <= 0.0) {
+    if (supportedHistory && weightSum <= 0.0) {
         out_FragData_0 = spatialColor;
         out_FragData_1 = spatialDistance;
         return;
@@ -791,7 +823,7 @@ void main()
         currentFrontAnchor,
         currentSceneAnchor);
     vec2 continuousHistoryCoordinates = historyCoordinates;
-    if (u_cloudTracePhased) {
+    if (supportedHistory) {
         if (!reprojectedPositionValid) {
             out_FragData_0 = spatialColor;
             out_FragData_1 = spatialDistance;
@@ -866,7 +898,7 @@ void main()
         all(greaterThanEqual(projectedHistory, cloudSupportMinimum - precisionRadius)) &&
         all(lessThanEqual(projectedHistory, cloudSupportMaximum + precisionRadius));
     #endif
-    if (u_cloudTracePhased) {
+    if (supportedHistory) {
         vec2 precisionRadius = vec2(
             sceneGISCloudHistoryPositionToleranceMeters(historyDistance.x, spatialDistance.x),
             sceneGISCloudHistoryPositionToleranceMeters(historyDistance.y, spatialDistance.y));
@@ -895,7 +927,7 @@ void main()
         abs(clippedHistoryColor.rgb - spatialColor.rgb),
         vec3(0.25) + 0.25 * max(clippedHistoryColor.rgb, spatialColor.rgb)));
     bool cloudPresenceCompatible = currentValid && previousValid;
-    if (u_cloudTracePhased) {
+    if (supportedHistory) {
         // Available transparent history is a volume estimate, not a history
         // failure. Qualified neighborhood clipping bounds HDR color and
         // coverage without a second magnitude-dependent rejection threshold.
@@ -907,7 +939,7 @@ void main()
             distanceCompatible && transmittanceCompatible && radianceCompatible
         ? 1.0
         : 0.0;
-    if (u_cloudTracePhased && u_cloudHistoryReprojection && currentValid) {
+    if (supportedHistory && u_cloudHistoryReprojection && currentValid) {
         // Reconstruct optical history at the subpixel position. Metadata stays
         // nearest per tap; a foreground or different receiver cannot bleed into
         // the cloud merely because it is inside the bilinear footprint.
