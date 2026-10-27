@@ -11,6 +11,7 @@ import {
 import Color from "../../Core/Color.js";
 import DeveloperError from "../../Core/DeveloperError.js";
 import State from "./_private/_SceneGISVectorState.js";
+import BuildingMaterial from "./_private/_SceneGISVectorBuildingMaterial.js";
 
 const profile = {
   symbol: {
@@ -86,6 +87,7 @@ const profile = {
       "fill-extrusion-base",
       "fill-extrusion-vertical-gradient",
       "fill-extrusion-pattern",
+      ...BuildingMaterial.properties,
     ],
     layout: ["visibility"],
   },
@@ -173,6 +175,8 @@ const rootKeys = [
   "layers",
   "glyphs",
   "sprite",
+  "materials",
+  "materialOrigin",
 ];
 const sourceKeys = [
   "type",
@@ -282,6 +286,7 @@ function validate(style) {
   if (!style || typeof style !== "object") {
     return errors;
   }
+  BuildingMaterial.validate(style, errors);
   if (style.sprite !== undefined && typeof style.sprite !== "string") {
     errors.push("style.sprite: only a single sprite URL is supported.");
   }
@@ -364,7 +369,34 @@ function validate(style) {
     });
   }
   try {
-    errors.push(...validateStyleMin(style).map((error) => error.message));
+    // Validate the native profile without mutating MapLibre's shared specification.
+    const native = { ...style };
+    delete native.materials;
+    delete native.materialOrigin;
+    native.layers = style.layers?.map((layer) => {
+      const paint = { ...layer.paint };
+      for (const key of BuildingMaterial.properties) {
+        delete paint[key];
+      }
+      return { ...layer, paint };
+    });
+    errors.push(...validateStyleMin(native).map((error) => error.message));
+    for (const layer of style.layers ?? []) {
+      for (const key of BuildingMaterial.properties) {
+        if (layer.paint?.[key] !== undefined) {
+          if (
+            typeof layer.paint[key] !== "string" &&
+            !Array.isArray(layer.paint[key])
+          ) {
+            errors.push(`${layer.id}.${key}: expected a string or expression.`);
+          }
+          normalizePropertyExpression(
+            layer.paint[key],
+            BuildingMaterial.specification,
+          );
+        }
+      }
+    }
   } catch (error) {
     errors.push(`style: ${error.message}`);
   }
@@ -390,7 +422,9 @@ function compileLayer(layer) {
       if (name === "text-radial-offset" && layer[scope]?.[name] === undefined) {
         continue;
       }
-      const property = specification[name];
+      const property = BuildingMaterial.properties.includes(name)
+        ? BuildingMaterial.specification
+        : specification[name];
       const value = layer[scope]?.[name] ?? property.default;
       if (value !== undefined) {
         compiled[scope][name] = normalizePropertyExpression(value, property);

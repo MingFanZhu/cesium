@@ -950,6 +950,7 @@ Circle/symbol 保持制图颜色；Planar native geometry-shadow 资格不随此
 外部材质先于地图建筑收集，共用一次延迟光照。同一地图建筑与注记遵循样式层序，
 地形判断锚点可见性，外部 Model / 3D Tiles 保持物理遮挡。保留 source-over 颜色和实心注记深度；
 不得将注记颜色写入物理材质。条件外部 / 地形深度快照及拾取 MRT 的预算由 ADR-0161 管理。
+建筑材质按 [ADR-0192](Decisions/ADR-0192-vector-building-materials.md) 使用 Style 具名材质库、墙/顶选择器和区域米制坐标。共享图集在 vector Worker 生成隔离 mip，不按材质拆批；保留 vector G-buffer 的三字节 style tag 与 `-6` 组标识，法线 alpha 单独区分 PBR。材质资源由 Layer 所有，天空反射资源由环境所有。
 Line 按 ADR-0062 在实际地表 / 平面交点的解析覆盖中限制近处放大，保留远处透视收缩；
 style zoom、source LOD 和纵向花纹 station 不随宽度补偿改变。
 按 [ADR-0072](Decisions/ADR-0072-vector-surface-transparency.md)，Layer opacity 只乘各要素样式 alpha，

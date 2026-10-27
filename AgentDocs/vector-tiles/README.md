@@ -5,17 +5,17 @@
 | Field                    | Value                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
 | Extension slug           | `vector-tiles`                                                                                                           |
-| Status                   | `active`（动态绘制规则；此前扩展已验收）                                                                                 |
+| Status                   | `active`（建筑材质；D2 人工 gate 独立保留）                                                                              |
 | Planning model           | `extension`                                                                                                              |
-| Active extension plan    | [动态绘制规则](plans/2026-10-16-dynamic-style-extension.md)                                                              |
+| Active extension plan    | [建筑材质](plans/2026-10-27-building-materials-extension.md)                                                             |
 | Completed extension plan | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md)、[总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase            | D2 技术完成，等待动态规则人工视觉 gate                                                                                   |
-| Active phase plan        | None；[D2](plans/2026-10-16-d2-layer-style-runtime.md) technical completed                                               |
-| Last completed phase     | D2：Layer 动态样式运行时；D1 checkpoint `7414056515`                                                                     |
+| Current phase            | B1 completed；B2 待 checkpoint                                                                                           |
+| Active phase plan        | None；[B1](plans/2026-10-27-b1-material-contract.md) completed                                                           |
+| Last completed phase     | B1：材质数据与坐标；[review](reviews/2026-10-27-b1-material-contract.md)                                                 |
 | Active standalone plan   | None；[未声明缩放范围](plans/2026-10-20-implicit-zoom-bounds.md) completed                                               |
 | Architecture contact     | 当前 Agent                                                                                                               |
 | Execution contact        | 当前 Agent                                                                                                               |
-| Last updated             | `2026-10-20`                                                                                                             |
+| Last updated             | `2026-10-27`                                                                                                             |
 
 ## Scope
 
@@ -62,6 +62,8 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 - V3B1 ADR：[ADR-0062](../../Documentation/SceneGIS/Decisions/ADR-0062-vector-stroke-and-coverage.md)；无新增 SGP。
 
 ## Current handoff
+
+2026-10-27：建筑材质扩展按 [ADR-0192](../../Documentation/SceneGIS/Decisions/ADR-0192-vector-building-materials.md) 开始；分支 `feature/mvt-building-materials`，复用现有引擎链路。示例使用 OpenFreeMap 公网纽约数据，不保留街区快照；纹理随示例分发。原动态规则 [D2 review](reviews/2026-10-16-d2-layer-style-runtime.md) 的负责人视觉 gate 仍 pending。
 
 2026-10-20：已修复两世界极端视角被隐含 `[0,24)` 排除的问题，并将极近视角的重复线标注锚点
 改为紧凑范围与可见性裁剪后展开，消除原球面 Worker 内存错误。显式范围、SSE、连续 style zoom、

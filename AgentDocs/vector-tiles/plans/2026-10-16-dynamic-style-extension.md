@@ -1,7 +1,7 @@
 # Extension Plan：Layer 动态绘制规则
 
 - Type: extension plan
-- Status: active
+- Status: completed (technical); owner visual gate pending
 - Created / updated: 2026-10-16
 - Owner: 当前 Agent，Architecture / implementation self-review
 - Baseline: `scenegis/develop@5d847ca8c6`
@@ -41,5 +41,5 @@ D1 提交后再依据当前代码细化 D2，不以 D1 私有 helper 宣称 API 
 
 SDK 仍固定旧引擎；最终交付明确 API、提交与升级条件。不得由此工作修改 SDK lock 或产物。
 七个公开方法、完整文档与双世界示例已完成，验证和剩余事项见 [D2 review](../reviews/2026-10-16-d2-layer-style-runtime.md)。
-本 extension 保持 active，仅等待新增动态规则的负责人视觉验收；先前大气修复的“通过”不挪用为本项验收。
+本 extension 技术完成，仍等待新增动态规则的负责人视觉验收；当前 active extension 转为 [建筑材质](2026-10-27-building-materials-extension.md)；先前大气修复的“通过”不挪用为本项验收。
 此前扩展及 P4e 的验收状态不变；本工作不扩展地下/背面排序、复杂 shaping 等历史延期能力。
