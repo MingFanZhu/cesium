@@ -97,6 +97,27 @@ describe("SceneGIS/Core/SceneGISVectorBuildingMaterial", function () {
         .evaluateLayer("buildings", feature, 16).paint[Material.properties[0]],
     ).toBe("");
   });
+  it("selects nonempty materials from decoded string IDs using explicit numeric conversion", function () {
+    const style = new Style(json())._withRule(
+      "buildings",
+      "paint",
+      Material.properties[0],
+      ["case", ["==", ["%", ["to-number", ["id"], 0], 2], 0], "glass", "brick"],
+    );
+    for (const [id, expected] of [
+      ["3782590822", "glass"],
+      ["3782590823", "brick"],
+      [undefined, "glass"],
+    ]) {
+      const paint = style.evaluateLayer(
+        "buildings",
+        { ...feature, id },
+        16,
+      ).paint;
+      expect(paint[Material.properties[0]]).toBe(expected);
+      expect(Material.resolve(style, paint, false)[0]).toBeDefined();
+    }
+  });
   it("rejects invalid factors, origin, repeat, selectors and unknown material names", function () {
     for (const edit of [
       (s) => {

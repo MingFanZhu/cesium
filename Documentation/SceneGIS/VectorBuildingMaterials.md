@@ -84,18 +84,20 @@ Planar 的 source/world 轴应已是实际米，原点也使用该轴。区域�
 
 ## 稳定选择与生命周期
 
-选择器支持现有 string 表达式，可按属性 `match` / `case`，或稳定的数字 `id` 取模，例如：
+选择器支持现有 string 表达式，可按属性 `match` / `case`，或稳定 ID 取模。
+MVT uint64 ID 解码后保留为字符串；数值运算必须显式 `to-number`，例如：
 
 ```js
 layer.setPaintProperty("buildings", "fill-extrusion-wall-material", [
   "case",
-  ["==", ["%", ["coalesce", ["id"], 0], 3], 0],
+  ["==", ["%", ["to-number", ["id"], 0], 3], 0],
   "glass",
   "brick",
 ]);
 ```
 
 使用源数据中跨瓦片、LOD 稳定的 ID/属性；没有 ID 时上例一致落入 glass，不会生成随机身份。
+超过 JavaScript safe integer 的 ID 不应转数值取模，应使用字符串 `match` 或源属性分类。
 相同直线墙段、固定 roof XY 和物理高度保持纹理相位；源轮廓简化、朝向变化、独立地形 anchor 或 ID/属性变化仍可能形成接缝。
 不做楼栋拓扑拼接，不承诺任意 LOD 轮廓之间无跳变。
 
@@ -118,3 +120,6 @@ AO 与 `SceneGISScreenSpaceIndirectLighting` 沿用现有开关与预算。
 没有物理环境时保留矢量的简化太阳/环境光，但没有物理天空反射。
 
 实现边界见 [ADR-0192](Decisions/ADR-0192-vector-building-materials.md)。
+
+公网纽约的白天/傍晚、Globe/Planar 和材质开关对照见
+[建筑材质示例](../../Test/vector-tiles/building-materials/README.md)。

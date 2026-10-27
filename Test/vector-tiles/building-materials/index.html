@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>纽约 · 建筑材质 | SceneGIS</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <div class="eyebrow">SCENEGIS / MATERIAL STUDY</div>
+      <h1>纽约建筑材质</h1>
+      <p>窗格、玻璃与砖石，随太阳变化。</p>
+      <nav>
+        <a href="?world=globe">球面</a><a href="?world=planar">平面</a
+        ><span id="mode"></span>
+      </nav>
+      <div class="row">
+        <button data-time="day">白天</button
+        ><button data-time="evening">傍晚</button>
+      </div>
+      <div class="row">
+        <button data-view="near">街区近景</button
+        ><button data-view="far">远景 / LOD</button>
+      </div>
+      <label
+        ><input id="material" type="checkbox" checked />建筑 PBR 材质</label
+      >
+      <label
+        ><input id="reflection" type="checkbox" checked />屏幕空间反射</label
+      >
+      <label><input id="shadows" type="checkbox" checked />建筑阴影</label>
+      <label><input id="boundaries" type="checkbox" />瓦片边界</label>
+      <p class="detail">
+        石材、红砖与三色幕墙，层高约 3.2 m。墙面与屋顶独立选材；风格由属性和稳定
+        ID 决定。
+      </p>
+      <output id="status">正在连接 OpenFreeMap…</output>
+      <output id="pick">单击建筑查看属性</output>
+      <output id="error" role="alert"></output>
+      <button id="reload">重新加载图层 / 网络重试</button>
+      <p class="credit">
+        公网纽约数据 · 无离线快照<br /><a href="https://openfreemap.org/"
+          >OpenFreeMap</a
+        >
+        / <a href="https://openmaptiles.org/">OpenMapTiles</a> /
+        <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a
+        ><br />纹理：原创 AI 立面 /
+        <a href="https://ambientcg.com/">ambientCG · CC0</a> ·
+        <a href="./README.md">说明与许可</a>
+      </p>
+    </aside>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

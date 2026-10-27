@@ -9,8 +9,8 @@
 | Planning model           | `extension`                                                                                                              |
 | Active extension plan    | [建筑材质](plans/2026-10-27-building-materials-extension.md)                                                             |
 | Completed extension plan | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md)、[总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase            | B2 completed；待独立 checkpoint 后激活 B3                                                                                |
-| Active phase plan        | [B2](plans/2026-10-27-b2-material-rendering.md)                                                                          |
+| Current phase            | B3：纽约公网示例与交付                                                                                                   |
+| Active phase plan        | [B3](plans/2026-10-27-b3-nyc-material-example.md)                                                                        |
 | Last completed phase     | B2：材质渲染；[review](reviews/2026-10-27-b2-material-rendering.md)                                                      |
 | Active standalone plan   | None；[未声明缩放范围](plans/2026-10-20-implicit-zoom-bounds.md) completed                                               |
 | Architecture contact     | 当前 Agent                                                                                                               |
@@ -63,7 +63,13 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 
 ## Current handoff
 
-2026-10-27：建筑材质扩展按 [ADR-0192](../../Documentation/SceneGIS/Decisions/ADR-0192-vector-building-materials.md) 开始；分支 `feature/mvt-building-materials`，复用现有引擎链路。示例使用 OpenFreeMap 公网纽约数据，不保留街区快照；纹理随示例分发。原动态规则 [D2 review](reviews/2026-10-16-d2-layer-style-runtime.md) 的负责人视觉 gate 仍 pending。
+2026-10-27：建筑材质 B1/B2 已实现并分别提交 `43a656d184` / `d7319e1f05`。
+B3 原创石材、砖窗、平屋顶与 CC0 玻璃组合已交付，修复实景字符串 ID 取模导致白墙的示例错误；
+[技术自审](reviews/2026-10-27-b3-material-example.md) 通过，负责人新画面视觉 gate pending。
+复用原引擎调度/Worker/合批/拾取/销毁；公网纽约数据不保留街区快照。
+开发因原工作区并发高斯工作隔离到 `feature/mvt-building-materials-rendering`，交付汇回
+`feature/mvt-building-materials`，不推送。原动态规则 [D2 review](reviews/2026-10-16-d2-layer-style-runtime.md)
+负责人视觉 gate 独立保留 pending。
 
 2026-10-20：已修复两世界极端视角被隐含 `[0,24)` 排除的问题，并将极近视角的重复线标注锚点
 改为紧凑范围与可见性裁剪后展开，消除原球面 Worker 内存错误。显式范围、SSE、连续 style zoom、
