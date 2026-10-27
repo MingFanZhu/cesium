@@ -1,3 +1,4 @@
+import Matrix3 from "../../../Core/Matrix3.js";
 import Cartesian4 from "../../../Core/Cartesian4.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import ShadowMode from "../../../Scene/ShadowMode.js";
@@ -29,6 +30,12 @@ function record(owner) {
 
 /** Binds the current World lighting and native surface-shadow receiver. @private */
 const VectorEnvironment = {
+  updateReflections(owner, frameState) {
+    const lighting = record(owner);
+    if (lighting?.active && frameState.passes.render) {
+      lighting.skyReflections?.update(frameState);
+    }
+  },
   active(owner) {
     return record(owner)?.active === true;
   },
@@ -66,12 +73,12 @@ const VectorEnvironment = {
           owner._scene.frameState.shadowState.lightShadowsEnabled &&
           map()._shadowMapTexture !== undefined &&
           !map()._outOfView,
-        shadowMap_texture: () =>
+        u_vectorShadowTexture: () =>
           map()._shadowMapTexture ?? owner._scene.context.defaultTexture,
-        shadowMap_matrix: () => map()._shadowMapMatrix,
-        shadowMap_cascadeSplits: () => map()._cascadeSplits,
+        u_vectorShadowMatrix: () => map()._shadowMapMatrix,
+        u_vectorShadowCascadeSplits: () => map()._cascadeSplits,
         shadowMap_cascadeMatrices: () => map()._cascadeMatrices,
-        shadowMap_lightDirectionEC: () => map()._lightDirectionEC,
+        u_vectorShadowLightDirectionEC: () => map()._lightDirectionEC,
         u_vectorShadowTexelBias: () =>
           Cartesian4.fromElements(
             1 / map()._textureSize.x,
@@ -92,6 +99,16 @@ const VectorEnvironment = {
           ),
       });
     }
+    const sky = () =>
+      getRecord()?.active ? getRecord().skyReflections : undefined;
+    Object.assign(result, {
+      u_vectorMaterialSky: () =>
+        sky()?.texture ?? owner._scene.context.defaultCubeMap,
+      u_vectorMaterialSkyReady: () => sky()?.texture !== undefined,
+      u_vectorMaterialSkyFrame: () => sky()?.worldToLocal ?? Matrix3.IDENTITY,
+      u_vectorMaterialSkyLod: () => sky()?.maximumMipmapLevel ?? 0,
+      u_vectorMaterialSkyScale: () => getRecord()?.surfaceRadianceScale ?? 0,
+    });
     return result;
   },
 };

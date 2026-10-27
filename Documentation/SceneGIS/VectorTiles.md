@@ -6,6 +6,9 @@
 
 ## 当前交付范围
 
+MVT 建筑墙面/屋顶的共享 PBR 材质、米制重复、属性/ID 选择和资源配置见
+[建筑材质](VectorBuildingMaterials.md)。纯色与 sprite pattern 保持原接口。
+
 2026-09-17 四类样式增强已实现，覆盖 Planar/Globe；本轮技术资格与人工 gate 见
 [增强计划](../../AgentDocs/vector-tiles/plans/2026-09-17-style-enhancements-extension.md)。
 

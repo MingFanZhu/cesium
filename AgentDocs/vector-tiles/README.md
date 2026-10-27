@@ -9,9 +9,9 @@
 | Planning model           | `extension`                                                                                                              |
 | Active extension plan    | [建筑材质](plans/2026-10-27-building-materials-extension.md)                                                             |
 | Completed extension plan | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md)、[总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase            | B1 completed；B2 待 checkpoint                                                                                           |
-| Active phase plan        | None；[B1](plans/2026-10-27-b1-material-contract.md) completed                                                           |
-| Last completed phase     | B1：材质数据与坐标；[review](reviews/2026-10-27-b1-material-contract.md)                                                 |
+| Current phase            | B2 completed；待独立 checkpoint 后激活 B3                                                                                |
+| Active phase plan        | [B2](plans/2026-10-27-b2-material-rendering.md)                                                                          |
+| Last completed phase     | B2：材质渲染；[review](reviews/2026-10-27-b2-material-rendering.md)                                                      |
 | Active standalone plan   | None；[未声明缩放范围](plans/2026-10-20-implicit-zoom-bounds.md) completed                                               |
 | Architecture contact     | 当前 Agent                                                                                                               |
 | Execution contact        | 当前 Agent                                                                                                               |

@@ -1,6 +1,12 @@
 #define SCENEGIS_DEFERRED_VECTOR_MATERIAL
+#ifdef SCENEGIS_VECTOR_PBR
+#define SCENEGIS_DIRECT_SHADOW_RECEIVER
+#endif
 #ifdef SCENEGIS_DEFERRED_VECTOR_CAPTURE
 void sceneGISRecordVector(vec4 color, vec3 normalEC);
+#ifdef SCENEGIS_VECTOR_PBR
+void sceneGISRecordVectorPbr(vec4 color, vec3 normalEC, float roughness, float metallic, vec3 emissive);
+#endif
 #endif
 uniform float u_sceneGISVectorOpacity;
 uniform vec4 u_sceneGISVectorTileClip;
@@ -22,6 +28,27 @@ void main()
 {
     if (v_local.x < u_sceneGISVectorTileClip.x || v_local.x >= u_sceneGISVectorTileClip.z ||
         v_local.y > u_sceneGISVectorTileClip.w || v_local.y <= u_sceneGISVectorTileClip.y) discard;
+#ifdef SCENEGIS_VECTOR_PBR
+    if (v_materialCoordinate.z >= 0.0) {
+        vec3 normalEC = normalize(v_normalEC), color, emissive;
+        float roughness, metallic;
+        vectorMaterial(v_positionEC, normalEC, color, roughness, metallic, emissive);
+        color *= v_gradient;
+        float alpha = v_color.a * u_sceneGISVectorOpacity;
+        if (alpha == 0.0) discard;
+#ifdef SCENEGIS_DEFERRED_VECTOR_CAPTURE
+        sceneGISRecordVectorPbr(vec4(color, alpha), normalEC, roughness, metallic, emissive);
+#else
+        float visibility = 1.0;
+#ifdef SCENEGIS_GEOMETRY_SHADOW
+        visibility = sceneGISGeometryShadow();
+#endif
+        color = vectorPbrRadiance(color, metallic, roughness, emissive, v_positionEC, normalEC, visibility);
+#endif
+        out_FragColor = vec4(color, alpha);
+        return;
+    }
+#endif
     vec4 material = v_color;
 #ifdef SCENEGIS_VECTOR_PATTERN
     vec2 coordinate = v_patternCoordinate.z > 0.5 ?

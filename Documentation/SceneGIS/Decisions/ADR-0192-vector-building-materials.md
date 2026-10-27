@@ -45,3 +45,11 @@ emission alpha 继续保存阴影可见度。Legacy vector 编码与光照保持
 使用已批准 GLSL root、普通 JS barrel 和原 vector Worker entry，不手工改生成物。
 复核 native PBR、shared MRT response、style tag、shadow visibility 与 Worker transfer 协议。
 公共 API 交付运行完整 build/type/release 及双世界实际 GPU 验证。
+
+## B2 实现补充
+
+借用 Scene 的 `brdfLutGenerator` 按需准备 LUT，避免纯矢量场景依赖 Model 先加载。
+IBL 的 split-sum / multiple-scattering 权重是对 `packages/engine/Source/Shaders/Model/ImageBasedLightingStageFS.glsl` 的小段适配，来源基线 `6d5d8b1f0725b6f831b336463f4b11c98023427b`；升级 native BRDF、LUT 或该权重时同步复核。直接光调用原生 `czm_pbrLighting`，不复制 BRDF。
+法线 mip 长度不足增加粗糙度，最终粗糙度限制为 `[0.04,1]`；图像 alpha 忽略，材质因子和颜色不受 fill-extrusion-color 染色。原 vertical-gradient 作为 base color 调制保留，可显式关闭。
+材质采用原生几何 caster/receiver；仅不透明材质投影。原矢量地表阴影的私有 uniform 改用 vector 前缀，避免与原生几何接收者同名声明。
+级联区间权重的两次 `step` 来自 `Shaders/Builtin/Functions/cascadeWeights.glsl`，沿用上述官方基线与升级复核条件；私有 split uniform 避免 builtin 自动注入与 SceneGIS 原生级联 Shader 重复声明，矩阵仍借用原生 `czm_cascadeMatrix`。

@@ -6,7 +6,7 @@
 - Owner: 当前 Agent，architecture / implementation / self-review
 - Branch: `feature/mvt-building-materials`
 - Base: `e534dd9abc`
-- Current phase: B1 completed; B2 pending checkpoint
+- Current phase: [B2](2026-10-27-b2-material-rendering.md) completed, checkpoint pending; B1 checkpoint `43a656d184`
 - Related: ADR-0074、ADR-0075、ADR-0161；新决定 ADR-0192
 
 ## 目标与边界
@@ -22,7 +22,7 @@
 | Phase | 范围                                          | 退出条件                                                | 状态      |
 | ----- | --------------------------------------------- | ------------------------------------------------------- | --------- |
 | B1    | Style、材质参数、稳定坐标和 Worker atlas 契约 | Core/Worker 专项、自审、独立本地提交                    | completed |
-| B2    | 共享资源、材质采样、延迟/透明光照与反射       | GPU、排序/拾取/销毁、自审、独立本地提交                 | planned   |
+| B2    | 共享资源、材质采样、延迟/透明光照与反射       | GPU、排序/拾取/销毁、自审、独立本地提交                 | completed |
 | B3    | OpenFreeMap 纽约、免费纹理、白天/傍晚及交付   | 构建类型、真实画面、接缝/远景/性能证据，负责人视觉 gate | planned   |
 
 各阶段只在进入时细化实现；不推送。既有 D2 动态规则人工 gate 独立保留，

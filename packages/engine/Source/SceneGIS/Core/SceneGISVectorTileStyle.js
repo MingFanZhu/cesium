@@ -512,8 +512,27 @@ function evaluateProperties(
 }
 
 /**
+ * A shared opaque building surface. Color textures use sRGB; factors use linear RGB.
+ * Maps of one material must have identical dimensions. Image alpha is ignored.
+ * @typedef {object} SceneGISVectorTileStyle.BuildingMaterial
+ * @property {number[]} repeat Texture width and height in physical meters.
+ * @property {string} [baseColorTexture] Base color image URL.
+ * @property {string} [normalTexture] OpenGL tangent-space normal image URL (+Y up).
+ * @property {string} [metallicRoughnessTexture] Numeric image URL: G roughness, B metallic.
+ * @property {string} [emissiveTexture] Emissive color image URL.
+ * @property {number[]} [baseColor=[1,1,1]] Linear RGB base color multiplier in [0,1].
+ * @property {number[]} [emissive=[0,0,0]] Nonnegative linear RGB emissive multiplier.
+ * @property {number} [roughness=1] Perceptual roughness multiplier in [0,1].
+ * @property {number} [metallic=0] Metallic multiplier in [0,1].
+ * @property {number} [normalScale=1] Nonnegative normal XY multiplier.
+ */
+
+/**
  * Compiles the scenegis-vector-v1 subset of Style v8 with the independent MapLibre style frontend.
  * The input JSON is copied. This object owns no renderer, requests, or GPU resources.
+ * Optional root <code>materials</code> maps names to {@link SceneGISVectorTileStyle.BuildingMaterial}.
+ * It requires a stable regional <code>materialOrigin</code> XY: source EPSG:3857 on Globe
+ * (using the origin latitude's meter scale), or physical world meter axes on Planar.
  * @alias SceneGISVectorTileStyle
  * @constructor
  * @experimental This API is experimental and subject to change.

@@ -4,10 +4,20 @@ void main()
     if (texelFetch(u_sceneGISDeferredSpecular, pixel, 0).a != u_sceneGISDeferredGroup) {
         discard;
     }
-    vec3 albedo = texelFetch(u_sceneGISDeferredDiffuse, pixel, 0).rgb;
+    vec4 base = texelFetch(u_sceneGISDeferredDiffuse, pixel, 0);
+    vec3 albedo = base.rgb;
     vec3 normalEC = normalize(texelFetch(u_sceneGISDeferredNormal, pixel, 0).xyz);
     float depth = texelFetch(u_linearDepth, pixel, 0).r;
     vec3 positionEC = sceneGISAOPosition(gl_FragCoord.xy, depth);
+#ifdef SCENEGIS_VECTOR_PBR
+    float packedRoughness = texelFetch(u_sceneGISDeferredNormal, pixel, 0).a;
+    if (packedRoughness >= 1.0) {
+        vec3 emission = texelFetch(u_sceneGISDeferredEmission, pixel, 0).rgb;
+        out_FragColor = vec4(vectorPbrRadiance(albedo, base.a, packedRoughness - 1.0, emission,
+            positionEC, normalEC, sceneGISGeometryShadow()), 1.0);
+        return;
+    }
+#endif
 #ifdef SCENEGIS_VECTOR_ENVIRONMENT
     vec3 color = vectorSurfaceRadiance(albedo, positionEC, normalEC);
 #else
