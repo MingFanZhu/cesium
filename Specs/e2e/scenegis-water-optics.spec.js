@@ -48,12 +48,18 @@ for (const world of ["planar", "globe"]) {
       8,
     );
     expect(edited.scattering).toEqual({ x: 0.2, y: 0.2, z: 0.2 });
-    // Fix the simulation epoch for reproducible preset and both-world screenshots.
+    // Rewind explicitly, then integrate four simulation seconds. Model startup
+    // time must not accidentally leave the paused foam field freshly reset.
     await page.evaluate(async () => {
       const C = await import("/Build/CesiumUnminified/index.js");
-      window.example.viewer.clock.currentTime = C.JulianDate.fromIso8601(
-        "2026-06-21T10:00:04Z",
-      );
+      const e = window.example,
+        v = e.viewer;
+      v.useDefaultRenderLoop = false;
+      v.clock.currentTime = C.JulianDate.clone(e.water._epoch);
+      v.render();
+      C.JulianDate.addSeconds(v.clock.currentTime, 4, v.clock.currentTime);
+      v.render();
+      v.useDefaultRenderLoop = true;
     });
     for (const preset of ["原有配色", "清水", "湖水", "浑水"]) {
       await page
@@ -125,6 +131,58 @@ for (const world of ["planar", "globe"]) {
     });
     await page.getByRole("button", { name: "恢复视角", exact: true }).click();
     await page.waitForFunction(() => !window.example.water._underwater?.active);
+    // Owner-reported close views: foam beside a steep obstacle and shoreline,
+    // and the magnified caustic receiver beneath the camera.
+    for (const [name, eye, target] of [
+      ["wall-foam", [15, 0, 8], [8, 6.5, 0]],
+      ["shore-foam", [17, -5, 4], [21, 0, 0]],
+      ["caustics-close", [0, -2, -1.1], [0, 0, -2.1]],
+    ]) {
+      await page.evaluate(
+        async ({ eye, target }) => {
+          const C = await import("/Build/CesiumUnminified/index.js"),
+            e = window.example;
+          const direction = C.Cartesian3.normalize(
+            C.Cartesian3.subtract(
+              new C.Cartesian3(...target),
+              new C.Cartesian3(...eye),
+              new C.Cartesian3(),
+            ),
+            new C.Cartesian3(),
+          );
+          e.viewer.camera.setView({
+            destination: C.Matrix4.multiplyByPoint(
+              e.water.modelMatrix,
+              new C.Cartesian3(...eye),
+              new C.Cartesian3(),
+            ),
+            orientation: {
+              direction: C.Matrix4.multiplyByPointAsVector(
+                e.water.modelMatrix,
+                direction,
+                new C.Cartesian3(),
+              ),
+              up: C.Matrix4.multiplyByPointAsVector(
+                e.water.modelMatrix,
+                C.Cartesian3.UNIT_Z,
+                new C.Cartesian3(),
+              ),
+            },
+          });
+          await new Promise((resolve) => {
+            const remove = e.viewer.scene.postRender.addEventListener(() => {
+              remove();
+              resolve();
+            });
+          });
+        },
+        { eye, target },
+      );
+      await page.screenshot({
+        path: testInfo.outputPath(`${world}-${name}.png`),
+      });
+    }
+    await page.getByRole("button", { name: "恢复视角", exact: true }).click();
     const timing = await page.evaluate(async () => {
       const e = window.example,
         v = e.viewer,
@@ -204,9 +262,10 @@ for (const world of ["planar", "globe"]) {
       }
       const fieldBytes =
         field.data.byteLength +
-        field.size ** 2 * 8 * (2 + 4 / 3) +
-        129 ** 2 * 8 +
-        128 ** 2 * 6 * 2;
+        field.size ** 2 * 8 * 2 +
+        (field.causticsSize ** 2 * 8 * 4) / 3 +
+        (field.gridSize + 1) ** 2 * 8 +
+        field.gridSize ** 2 * 6 * ((field.gridSize + 1) ** 2 > 65535 ? 4 : 2);
       const debug = gl.getExtension("WEBGL_debug_renderer_info");
       v.useDefaultRenderLoop = true;
       return {

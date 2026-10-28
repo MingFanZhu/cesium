@@ -286,11 +286,15 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     expect(water._field.data[0]).toEqualEpsilon(0.2, 1e-6);
     render(JulianDate.addSeconds(time, 1, new JulianDate()));
     const field = water._field;
-    const before = scene.context.readPixels({
-      framebuffer: field.caustics,
-      width: 32,
-      height: 32,
-    });
+    const causticPixels = () =>
+      scene.context.readPixels({
+        framebuffer: field.caustics,
+        x: field.causticsSize / 2 - 16,
+        y: field.causticsSize / 2 - 16,
+        width: 32,
+        height: 32,
+      });
+    const before = causticPixels();
     expect(Array.from(before).some((v, i) => i % 4 === 0 && v > 0)).toBeTrue();
     expect(
       scene.context.readPixels({
@@ -305,30 +309,18 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     scene.camera.moveRight(2);
     render(JulianDate.addSeconds(time, 1, new JulianDate()));
     expect(draw).not.toHaveBeenCalled();
-    expect(
-      scene.context.readPixels({
-        framebuffer: field.caustics,
-        width: 32,
-        height: 32,
-      }),
-    ).toEqual(before);
+    expect(causticPixels()).toEqual(before);
     render(JulianDate.addSeconds(time, 2, new JulianDate()));
     expect(draw).toHaveBeenCalled();
-    expect(
-      scene.context.readPixels({
-        framebuffer: field.caustics,
-        width: 32,
-        height: 32,
-      }),
-    ).not.toEqual(before);
+    expect(causticPixels()).not.toEqual(before);
     borrowedWaves.windSpeed = 0;
     render(JulianDate.addSeconds(time, 2, new JulianDate()));
     // A flat interface has unit area ratio, rather than an unrelated animated texture.
     expect(
       scene.context.readPixels({
         framebuffer: field.caustics,
-        x: 16,
-        y: 16,
+        x: field.causticsSize / 2,
+        y: field.causticsSize / 2,
         width: 1,
         height: 1,
       })[0],
@@ -341,6 +333,94 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     scene.primitives.remove(water);
     water = undefined;
     expect(targets.every((t) => t.isDestroyed())).toBeTrue();
+  });
+  it("generates contact foam on every side of a vertical obstacle without shallow samples", function () {
+    const depths = new Float32Array(64 * 64).fill(2);
+    for (let y = 0; y < 64; ++y) {
+      for (let x = 0; x < 64; ++x) {
+        if (
+          Math.abs(-4 + (x * 8) / 63) < 0.9 &&
+          Math.abs(-4 + (y * 8) / 63) < 0.9
+        ) {
+          depths[y * 64 + x] = -8;
+        }
+      }
+    }
+    setup(true, false, false, undefined, {
+      bathymetry: {
+        rectangle: new BoundingRectangle(-4, -4, 8, 8),
+        width: 64,
+        height: 64,
+        depths,
+      },
+      foamIntensity: 1,
+      foamWidth: 0.4,
+      flowSpeed: 0,
+    });
+    render();
+    render(JulianDate.addSeconds(time, 2, new JulianDate()));
+    const field = water._field;
+    const sample = (x, y) =>
+      scene.context.readPixels({
+        framebuffer: field.foam[field.index],
+        x,
+        y,
+        width: 1,
+        height: 1,
+      })[0];
+    for (const [x, y] of [
+      [40, 32],
+      [23, 32],
+      [32, 40],
+      [32, 23],
+    ]) {
+      expect(sample(x, y)).toBeGreaterThan(0x2e66); // Half-float coverage > 0.1.
+    }
+    expect(sample(3, 3)).toBe(0); // Uniformly deep water has no source.
+    expect(sample(32, 32)).toBe(0); // Dry obstacle has no foam.
+    expect(field.caustics).toBeUndefined(); // Foam alone does not allocate the larger caustic targets.
+    expect(field.vertices).toBeUndefined();
+    water.causticsIntensity = 1;
+    render(JulianDate.addSeconds(time, 2, new JulianDate()));
+    expect(field.caustics.getColorTexture(0).width).toBe(field.causticsSize);
+  });
+  it("computes metric shore distance on a non-square bathymetry grid", function () {
+    const depths = new Float32Array(8 * 6).fill(3);
+    const dry = [
+      [2, 3],
+      [5, 1],
+    ];
+    dry.forEach(([x, y]) => {
+      depths[y * 8 + x] = -1;
+    });
+    const surface = new SceneGISWaterSurface({
+      polygonHierarchy: ring(12),
+      bathymetry: {
+        rectangle: new BoundingRectangle(0, 0, 14, 5),
+        width: 8,
+        height: 6,
+        depths,
+      },
+    });
+    for (let y = 0; y < 6; ++y) {
+      for (let x = 0; x < 8; ++x) {
+        const isDry = depths[y * 8 + x] <= 0;
+        let nearest = Infinity;
+        for (let b = 0; b < 6; ++b) {
+          for (let a = 0; a < 8; ++a) {
+            if (depths[b * 8 + a] <= 0 !== isDry) {
+              nearest = Math.min(nearest, Math.hypot(2 * (x - a), y - b));
+            }
+          }
+        }
+        const expected = (isDry ? -1 : 1) * Math.max(0, nearest - 0.5);
+        expect(surface._field.data[(y * 8 + x) * 4 + 3]).toEqualEpsilon(
+          expected,
+          1e-6,
+        );
+      }
+    }
+    surface.destroy();
   });
   it("rejects submerged geometry from wind-wave reflection rays", function () {
     borrowedWaves = new SceneGISWindWaves({

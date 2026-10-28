@@ -39,6 +39,89 @@ const mipmapped = new Sampler({
   magnificationFilter: TextureMagnificationFilter.LINEAR,
 });
 
+// Lower envelope of squared-distance parabolas, in metric coordinates.
+// Separable Euclidean transform following Felzenszwalb and Huttenlocher (2012).
+function distanceLine(input, output, count, spacing, sites, limits) {
+  let last = -1;
+  for (let q = 0; q < count; ++q) {
+    if (!Number.isFinite(input[q])) {
+      continue;
+    }
+    let crossing = -Infinity;
+    while (last >= 0) {
+      const p = sites[last];
+      crossing =
+        (input[q] - input[p]) / (2 * spacing * (q - p)) +
+        (spacing * (q + p)) / 2;
+      if (crossing > limits[last]) {
+        break;
+      }
+      --last;
+    }
+    sites[++last] = q;
+    limits[last] = last === 0 ? -Infinity : crossing;
+    limits[last + 1] = Infinity;
+  }
+  if (last < 0) {
+    output.fill(Infinity, 0, count);
+    return;
+  }
+  let site = 0;
+  for (let q = 0; q < count; ++q) {
+    const x = q * spacing;
+    while (limits[site + 1] < x) {
+      ++site;
+    }
+    const p = sites[site];
+    output[q] = (x - p * spacing) ** 2 + input[p];
+  }
+}
+
+function shorelineDistances(depths, width, height, dx, dy, dry) {
+  const size = Math.max(width, height);
+  const input = new Float64Array(size);
+  const output = new Float64Array(size);
+  const sites = new Int32Array(size);
+  const limits = new Float64Array(size + 1);
+  const result = new Float64Array(width * height);
+  for (let y = 0; y < height; ++y) {
+    for (let x = 0; x < width; ++x) {
+      input[x] = depths[y * width + x] <= 0 === dry ? 0 : Infinity;
+    }
+    distanceLine(input, output, width, dx, sites, limits);
+    result.set(output.subarray(0, width), y * width);
+  }
+  for (let x = 0; x < width; ++x) {
+    for (let y = 0; y < height; ++y) {
+      input[y] = result[y * width + x];
+    }
+    distanceLine(input, output, height, dy, sites, limits);
+    for (let y = 0; y < height; ++y) {
+      // Dry samples represent cells; the interface lies between sample centers.
+      result[y * width + x] = Number.isFinite(output[y])
+        ? Math.max(0, Math.sqrt(output[y]) - Math.min(dx, dy) * 0.5)
+        : Math.hypot(width * dx, height * dy);
+    }
+  }
+  return result;
+}
+
+function createTarget(context, size) {
+  return new Framebuffer({
+    context,
+    colorTextures: [
+      new Texture({
+        context,
+        width: size,
+        height: size,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: PixelDatatype.HALF_FLOAT,
+        sampler: linear,
+      }),
+    ],
+  });
+}
+
 /** Surface-owned, camera-independent bathymetry, shallow foam and refracted caustics. @private */
 class SceneGISWaterField {
   constructor(options, hierarchy) {
@@ -66,6 +149,22 @@ class SceneGISWaterField {
     this.width = width;
     this.height = height;
     this.data = new Float32Array(width * height * 4);
+    const shore = shorelineDistances(
+      depths,
+      width,
+      height,
+      r.width / (width - 1),
+      r.height / (height - 1),
+      true,
+    );
+    const water = shorelineDistances(
+      depths,
+      width,
+      height,
+      r.width / (width - 1),
+      r.height / (height - 1),
+      false,
+    );
     const edges = segments(hierarchy);
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
@@ -90,11 +189,16 @@ class SceneGISWaterField {
         this.data[i + 1] = inside ? 1 : 0;
         const fade = Math.min(1, Math.sqrt(shoreDistance) / 4);
         this.data[i + 2] = fade * fade * (3 - 2 * fade);
+        this.data[i + 3] =
+          depths[y * width + x] <= 0
+            ? -water[y * width + x]
+            : shore[y * width + x];
       }
     }
     this.inverse = new Matrix4();
     this.light = new Cartesian3();
     this.transport = new Cartesian2();
+    this.offset = new Cartesian2();
   }
 
   create(surface, context) {
@@ -116,33 +220,22 @@ class SceneGISWaterField {
       },
     });
     this.size = Math.min(512, Math.max(this.width, this.height));
-    const target = () =>
-      new Framebuffer({
-        context,
-        colorTextures: [
-          new Texture({
-            context,
-            width: this.size,
-            height: this.size,
-            pixelFormat: PixelFormat.RGBA,
-            pixelDatatype: PixelDatatype.HALF_FLOAT,
-            sampler: linear,
-          }),
-        ],
-      });
-    this.foam = [target(), target()];
-    this.caustics = target();
+    this.causticsSize = Math.min(512, Math.max(256, this.size * 2));
+    this.gridSize = this.causticsSize / 2;
+    this.foam = [
+      createTarget(context, this.size),
+      createTarget(context, this.size),
+    ];
     this.index = 0;
     const viewport = new BoundingRectangle(0, 0, this.size, this.size);
     this.clear = new ClearCommand({
       color: Color.TRANSPARENT,
-      renderState: RenderState.fromCache({ viewport }),
     });
-    for (const f of [...this.foam, this.caustics]) {
+    for (const f of this.foam) {
       this.clear.framebuffer = f;
       this.clear.execute(context);
     }
-    const uniforms = {
+    this.uniforms = {
       ...surface._command.uniformMap,
       u_bathymetry: () => this.bed,
       u_previousFoam: () => this.foam[1 - this.index].getColorTexture(0),
@@ -151,16 +244,24 @@ class SceneGISWaterField {
       u_fieldReset: () => this.reset,
       u_foamTransport: () => this.transport,
       u_fieldLight: () => this.light,
-      u_fieldSpacing: () => Math.max(this.rectangle.z, this.rectangle.w) / 128,
+      u_fieldSpacing: () =>
+        Math.max(this.rectangle.z, this.rectangle.w) / this.gridSize,
     };
     this.foamCommand = context.createViewportQuadCommand(foamShader, {
       owner: this,
-      uniformMap: uniforms,
+      uniformMap: this.uniforms,
       renderState: RenderState.fromCache({ viewport }),
     });
-    const n = 128,
+  }
+
+  createCaustics(surface, context) {
+    this.caustics = createTarget(context, this.causticsSize);
+    const n = this.gridSize,
       positions = new Float32Array((n + 1) ** 2 * 2),
-      indices = new Uint16Array(n * n * 6);
+      indices =
+        (n + 1) ** 2 > 65535
+          ? new Uint32Array(n * n * 6)
+          : new Uint16Array(n * n * 6);
     for (let y = 0; y <= n; ++y) {
       for (let x = 0; x <= n; ++x) {
         const i = y * (n + 1) + x;
@@ -192,7 +293,7 @@ class SceneGISWaterField {
     this.causticsCommand = new DrawCommand({
       owner: this,
       vertexArray: this.vertices,
-      uniformMap: uniforms,
+      uniformMap: this.uniforms,
       framebuffer: this.caustics,
       shaderProgram: ShaderProgram.fromCache({
         context,
@@ -204,7 +305,12 @@ class SceneGISWaterField {
         fragmentShaderSource: causticsFS,
       }),
       renderState: RenderState.fromCache({
-        viewport,
+        viewport: new BoundingRectangle(
+          0,
+          0,
+          this.causticsSize,
+          this.causticsSize,
+        ),
         depthMask: false,
         blending: {
           enabled: true,
@@ -259,10 +365,14 @@ class SceneGISWaterField {
       (surface._windWaves?.windSpeed ?? surface.flowSpeed) * 0.03,
       this.transport,
     );
+    Cartesian2.multiplyByScalar(this.transport, surface._time, this.offset);
     this.index = 1 - this.index;
     this.foamCommand.framebuffer = this.foam[this.index];
     this.foamCommand.execute(context);
     if (surface.causticsIntensity > 0) {
+      if (!this.caustics) {
+        this.createCaustics(surface, context);
+      }
       this.clear.framebuffer = this.caustics;
       this.clear.execute(context);
       this.causticsCommand.execute(context);

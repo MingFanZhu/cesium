@@ -1,9 +1,13 @@
 import {
   Cartesian3,
+  Cartesian4,
   Framebuffer,
   PixelDatatype,
   PixelFormat,
   Texture,
+  Sampler,
+  TextureMinificationFilter,
+  TextureMagnificationFilter,
 } from "../../../index.js";
 import optics from "../../../Source/Shaders/SceneGIS/Water/SceneGISWaterOptics.js";
 import effects from "../../../Source/Shaders/SceneGIS/Water/SceneGISWaterEffects.js";
@@ -64,6 +68,69 @@ describe("SceneGIS/Scene/SceneGISWaterOptics", function () {
       context.readPixels({ framebuffer: target, width: 1, height: 1 }),
     );
   }
+  it("reconstructs magnified caustics with a continuous cubic kernel", function () {
+    const data = new Float32Array(8 * 8 * 4);
+    for (let y = 0; y < 8; ++y) {
+      for (let x = 0; x < 8; ++x) {
+        data[(y * 8 + x) * 4] = ((x * 3 + y * 5) % 7) / 2;
+      }
+    }
+    const texture = new Texture({
+      context,
+      pixelFormat: PixelFormat.RGBA,
+      pixelDatatype: PixelDatatype.FLOAT,
+      sampler: new Sampler({
+        minificationFilter: TextureMinificationFilter.LINEAR,
+        magnificationFilter: TextureMagnificationFilter.LINEAR,
+      }),
+      source: { width: 8, height: 8, arrayBufferView: data },
+      flipY: false,
+    });
+    let coordinate = 0.4;
+    command = context.createViewportQuadCommand(
+      `${effects}
+      uniform float u_coordinate;
+      void main() { out_FragColor = vec4(sceneGISWaterFocus(vec2(u_coordinate, 0.47), 0.01), 0.0, 0.0, 1.0); }`,
+      {
+        framebuffer: target,
+        uniformMap: {
+          u_causticsMap: () => texture,
+          u_fieldRectangle: () => new Cartesian4(0, 0, 8, 8),
+          u_coordinate: () => coordinate,
+        },
+      },
+    );
+    // Independent 16-tap convolution checks the optimized four-bilinear-tap path,
+    // including continuity across a texel boundary.
+    const kernel = (distance) => {
+      const x = Math.abs(distance);
+      return x < 1
+        ? (4 - 6 * x * x + 3 * x ** 3) / 6
+        : x < 2
+          ? (2 - x) ** 3 / 6
+          : 0;
+    };
+    try {
+      for (coordinate of [0.3, 0.4, 0.4374, 0.4375, 0.4376, 0.6]) {
+        let expected = 0;
+        for (let y = 0; y < 8; ++y) {
+          for (let x = 0; x < 8; ++x) {
+            expected +=
+              data[(y * 8 + x) * 4] *
+              kernel(x - (coordinate * 8 - 0.5)) *
+              kernel(y - (0.47 * 8 - 0.5));
+          }
+        }
+        command.execute(context);
+        expect(
+          context.readPixels({ framebuffer: target, width: 1, height: 1 })[0],
+          // Hardware bilinear weights may use eight fractional bits.
+        ).toEqualEpsilon(expected, 3 / 256);
+      }
+    } finally {
+      texture.destroy();
+    }
+  });
   it("matches independent single-scattering quadrature including transparent, thin and deep limits", function () {
     // Midpoint integration along the viewing ray, independently including incident-light depth.
     function reference(channel) {

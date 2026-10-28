@@ -1,6 +1,6 @@
 # R33: Local underwater medium and bottom caustics
 
-- Type: phase plan; status: technically complete, owner visual gate pending; 2026-10-28.
+- Type: phase plan; status: visual correction technically complete, owner visual gate pending; 2026-10-28.
 - Owner/roles: current architecture and implementation task.
 - Baseline: R32 checkpoint `8a5600d08a`; owner requests continued water improvements.
 - Parent: [roadmap](2026-09-18-rendering-quality-extension.md).
@@ -58,6 +58,34 @@ References: [Crest underwater](https://docs.crest.waveharmonic.com/Manual/Basics
 [GPU Gems caustics](https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-2-rendering-water-caustics).
 
 ## Handoff
+
+### Owner visual findings after checkpoint 31366c3238
+
+Continue R33, without a new subsystem or upstream seam. Three reproduced issues:
+uniform perforated foam bands; coarse caustic facets/texels in close views; missing
+foam on some vertical-wall sides. Source facts: the shore generator samples only
+positive shallow depth, which may be absent across an abrupt height discontinuity;
+the caustic mesh is fixed at 128 cells and its fragment area ratio is constant per
+triangle. The field path multiplies coverage by uniformly large bubble openings.
+
+1. Compute metric signed distance between wet/dry bathymetry samples once with a separable squared
+   Euclidean distance transform; store it in the unused bathymetry alpha channel.
+   Combine depth and horizontal proximity for generation around steep walls.
+   Preserve fixed world coordinates, pause and resource ownership.
+2. Use concentration to form multiscale foam patches and filtered small bubbles,
+   avoiding the repeated large punched holes. Keep physical diffuse lighting.
+3. Refine the caustic projection grid, interpolate a sampled refraction Jacobian
+   continuously, and use cubic B-spline magnification with mipmapped minification.
+   Bound the target to 512 square; keep actual FFT normals and displacement.
+4. GPU regressions: all four sides of a dry obstacle, no source in uniformly deep
+   water, calm-interface unit focusing, continuous reconstruction and cleanup.
+   Capture close foam/caustics in both worlds and record the incremental field cost.
+
+References: [distance transform](https://cs.brown.edu/people/pfelzens/papers/dt-final.pdf),
+[cubic reconstruction](https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-20-fast-third-order-texture-filtering).
+These are bounded rendering approximations, not a hydraulic impact/splash solver.
+The follow-up review records the completed 49-case release regression, both-world
+close captures, build/types, lazy caustic allocation and measured field-generation cost.
 
 [Technical review](../reviews/2026-10-28-r33-local-underwater.md) records source
 review, 68 release GPU cases, both-world browser runs, resource cost and open limits.

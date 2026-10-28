@@ -411,7 +411,7 @@ foamControls
   .onChange(applyControls);
 foamControls
   .add(state, "foamWidth", 0, 1.5, 0.05)
-  .name("泡沫水深（米）")
+  .name("浅水／岸距（米）")
   .onChange(applyControls);
 
 gui.add(viewer.clock, "shouldAnimate").name("时间动画");

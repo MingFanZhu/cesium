@@ -2,7 +2,7 @@
 
 - Type: review; owner/author: current architecture and execution task; 2026-10-28.
 - Target: [R33 plan](../plans/2026-10-28-r33-local-underwater.md), ADR-0196.
-- Status: technical gate complete; owner visual gate pending.
+- Status: R33 visual follow-up technically complete; owner visual gate pending.
 - Baseline: R32 `8a5600d08a`; no SDK changes.
 
 ## Algorithm implementation and findings
@@ -100,3 +100,48 @@ decreasing light depth, including the zero exponent limit and zero extinction.
 
 Architecture self-review approves a separate local R33 checkpoint; no further phase
 is activated automatically. The current task creates that checkpoint under AGENTS.
+
+## Visual follow-up after 31366c3238
+
+Owner screenshots reopen three findings. This continues R33 rather than activating
+another phase; original evidence above belongs to the first checkpoint.
+
+- Fixed, missing wall sides: a tall dry top and deep bottom may contain no shallow
+  samples. Height interpolation also moves the wet/dry transition according to wall
+  height. A one-time separable metric distance transform now fills bathymetry alpha
+  with signed shoreline distance. Wet classification and contact source use it;
+  shallow depth remains an additional generator. A non-square-grid brute-force
+  reference and a four-sided vertical obstacle GPU case pass; distant deep water
+  and dry interiors remain zero. Current transport can still create asymmetric
+  coverage; this is not a splash or obstacle-flow solver.
+- Improved, uniform perforated bands: concentration drives multiscale rafts and
+  smaller, density-dependent bubble openings. Detail uses the field transport offset.
+  Both-world close screenshots show broken shore patches and foam on both visible
+  wall sides; the owner's final realism judgement remains open.
+- Fixed, caustic facets and magnified texel seams: replace per-triangle derivative
+  intensity with a vertex-sampled refraction Jacobian, refine the default fixture
+  grid 128 -> 256 and map 256 -> 512, and reconstruct magnified samples with four
+  bilinear taps implementing a cubic B-spline. Minification retains mipmaps.
+  Independent 16-tap convolution validates values across texel boundaries, allowing
+  hardware interpolation precision; a flat FFT interface still has unit focusing.
+  Focusing remains band-limited by the finite grid, without unbounded detail.
+- Fixed validation fixture: a hard-coded paused wall-clock timestamp could rewind
+  past startup and clear all foam just before capture. Browser tests now explicitly
+  reset to the surface epoch and advance four simulation seconds before comparison.
+  This uses the normal reset/time contract, without product settling frames.
+
+Final release validation: WaterSurface/WaterOptics 31, RiverSurface 11,
+EllipsoidWater 7 (49 total), plus two both-world browser cases including close
+wall/shore/underwater receiver views, camera movement and cleanup. No unrelated
+SSR/cloud tests repeated. Source/build/type checks are recorded for this follow-up.
+
+The 256-input fixture owns about 6.67 MiB per initialized field with caustics,
+versus 2.98 MiB previously. Foam-only fields own 2 MiB; caustic targets/mesh are now
+allocated only on first enable, retained for reuse and destroyed with the surface.
+On RTX 3060 Ti / Chrome 156, eight GPU queries around caustic clear + projection
+draw + mip generation measured 0.072–0.079 ms (median about 0.074 ms). This is the
+field-generation cost, not whole-frame overhead or a cross-device guarantee;
+screen composition, FFT and CPU construction are excluded. No runtime readback.
+
+Architecture self-review approves the bounded R33 correction checkpoint. No SDK,
+upstream-owned file or SGP modification; prior R25/R27 and remaining R33 limits stay open.

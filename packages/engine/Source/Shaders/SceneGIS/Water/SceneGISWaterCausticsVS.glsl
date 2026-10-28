@@ -3,8 +3,7 @@ uniform sampler2D u_bathymetry;
 uniform vec4 u_fieldRectangle;
 uniform vec3 u_fieldLight;
 uniform float u_fieldSpacing;
-out vec3 v_source;
-out vec3 v_receiver;
+out float v_focus;
 out vec2 v_sourceUV;
 
 float bedDepth(vec2 p)
@@ -22,20 +21,36 @@ vec3 projectBed(vec3 p, vec3 direction)
     }
     return hit;
 }
-void main()
+void refractedPair(vec2 p, out vec3 source, out vec3 receiver)
 {
-    vec2 p = u_fieldRectangle.xy + position * u_fieldRectangle.zw;
     vec3 displaced, normal;
     sceneGISWaterFieldWave(p, u_fieldSpacing, displaced, normal);
     #ifdef SCENEGIS_WIND_WAVES
     vec2 size = vec2(textureSize(u_bathymetry, 0));
-    float fade = texture(u_bathymetry, (position * (size - 1.0) + 0.5) / size).b;
+    vec2 uv = (p - u_fieldRectangle.xy) / u_fieldRectangle.zw;
+    float fade = texture(u_bathymetry, (uv * (size - 1.0) + 0.5) / size).b;
     displaced = mix(vec3(p, 0.0), displaced, fade);
     normal = normalize(vec3(normal.xy * fade, normal.z));
     #endif
     vec3 light = normalize(u_fieldLight);
-    v_source = projectBed(vec3(p, 0.0), refract(-light, vec3(0.0, 0.0, 1.0), 1.0 / 1.333));
-    v_receiver = projectBed(displaced, refract(-light, normal, 1.0 / 1.333));
+    source = projectBed(vec3(p, 0.0), refract(-light, vec3(0.0, 0.0, 1.0), 1.0 / 1.333));
+    receiver = projectBed(displaced, refract(-light, normal, 1.0 / 1.333));
+}
+void main()
+{
+    vec2 p = u_fieldRectangle.xy + position * u_fieldRectangle.zw;
+    vec3 source, receiver, sx0, sx1, sy0, sy1, rx0, rx1, ry0, ry1;
+    refractedPair(p, source, receiver);
+    float h = u_fieldSpacing * 0.5;
+    refractedPair(p - vec2(h, 0.0), sx0, rx0);
+    refractedPair(p + vec2(h, 0.0), sx1, rx1);
+    refractedPair(p - vec2(0.0, h), sy0, ry0);
+    refractedPair(p + vec2(0.0, h), sy1, ry1);
+    // Sample the continuous refraction Jacobian at vertices, then interpolate.
+    // Fragment derivatives of triangle positions give a visible constant per face.
+    float sourceArea = length(cross(sx1 - sx0, sy1 - sy0));
+    float receiverArea = length(cross(rx1 - rx0, ry1 - ry0));
+    v_focus = min(sourceArea / max(receiverArea, 1e-8), 8.0);
     v_sourceUV = position;
-    gl_Position = vec4((v_receiver.xy - u_fieldRectangle.xy) / u_fieldRectangle.zw * 2.0 - 1.0, 0.0, 1.0);
+    gl_Position = vec4((receiver.xy - u_fieldRectangle.xy) / u_fieldRectangle.zw * 2.0 - 1.0, 0.0, 1.0);
 }

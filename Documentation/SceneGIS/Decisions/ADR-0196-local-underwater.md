@@ -50,11 +50,23 @@ clears history, and zero foam intensity disables output. It follows Crest's
 depth-driven persistent foam structure, without claiming a shallow-water solver.
 Without bathymetry the existing screen-depth contact approximation remains.
 
+The R33 visual follow-up adds a metric signed shoreline distance in the unused
+bathymetry alpha channel. A separable squared Euclidean transform is evaluated
+once for wet and dry samples, following
+[Felzenszwalb and Huttenlocher](https://cs.brown.edu/people/pfelzens/papers/dt-final.pdf).
+Wet classification uses this distance rather than interpolated height across a
+tall wall. Foam generation uses both shallow depth and horizontal shore proximity,
+with `foamWidth` setting the range in meters. This prevents missing wall sides when
+no shallow-depth samples exist. The boundary remains limited by supplied grid
+spacing; it does not infer subgrid obstacles or solve impact/obstacle flow.
+Concentration controls irregular multiscale rafts with filtered centimeter-scale
+bubbles; surface detail follows the field's transport offset.
+
 `causticsIntensity` defaults to zero, is mutable in [0, 2], requires bathymetry and
 applies to local water. The accepted algorithm replaces an unaccepted independent
-procedural slope draft: project a 128-by-128 grid along actual refracted wave
-normals onto bathymetry; compute reference/refracted triangle area ratios using
-screen derivatives; add overlapping contributions into a filtered fixed local
+procedural slope draft: project a grid along actual refracted wave
+normals onto bathymetry; compute reference/refracted area ratios from central
+differences of the mapping at vertices and interpolate; add overlapping contributions into a filtered fixed local
 map. FFT mode samples the existing three-band displacement/normal fields with a
 grid-footprint mip level. Analytic mode shares the surface slope function. This
 follows [Evan Wallace's demonstrated area-ratio method](https://madebyevan.com/webgl-water/)
@@ -68,9 +80,15 @@ explicit approximations; this does not solve refractive object shadows, recursiv
 photon transport or exact caustics on vertical walls. The map is generated on the
 authored bed, so tall objects use an approximate projection of the same field.
 
-Per surface with bathymetry, the field owns one RGBA32F depth/mask texture, two
-RGBA16F foam targets and one mipmapped RGBA16F caustic target. Output size is the
-larger input dimension, capped at 512. It adds one foam draw and, while caustics
+Per surface with bathymetry, the field owns one RGBA32F depth/mask/distance texture
+and two RGBA16F foam targets. Foam size is the larger input dimension, capped at 512.
+The caustic target and mesh are allocated only on first use: a mipmapped RGBA16F map
+twice the foam size, clamped to [256, 512], and a grid with half that many cells per
+axis. Vertex Jacobians avoid constant-per-triangle intensity; magnified samples use
+[four-tap cubic B-spline reconstruction](https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-20-fast-third-order-texture-filtering),
+transitioning to ordinary mip filtering at a one-texel footprint. At a 256-square
+input the textures/mesh total about 6.67 MiB, or 2 MiB before caustics are enabled.
+It adds one foam draw and, while caustics
 are enabled, one mesh draw plus clear/mipmap generation on changed simulation or
 lighting state. Camera movement alone does not update these fields. A frozen
 simulation does not consume settling frames. All resources are primitive-owned.

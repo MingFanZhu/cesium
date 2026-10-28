@@ -35,6 +35,13 @@
 
 ## Current handoff
 
+- R33 visual correction after `31366c3238`: metric signed shoreline distance fixes
+  missing vertical-wall foam; multiscale rafts replace uniform large holes; continuous
+  refraction Jacobians and cubic magnification remove close caustic facets/seams.
+  [Review](reviews/2026-10-28-r33-local-underwater.md) records 49 release cases,
+  both-world close captures and the bounded field cost. Owner visual gate remains
+  open; no next phase or SDK change is included.
+
 - R33 active after R32 checkpoint `8a5600d08a`: [finite local underwater plan](plans/2026-10-28-r33-local-underwater.md).
   Owner requires concrete mature-algorithm implementation. Replace the draft independent
   slope caustic with actual wave refraction and projected area ratios; add explicit

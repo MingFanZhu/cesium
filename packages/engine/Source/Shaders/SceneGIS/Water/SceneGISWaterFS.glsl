@@ -13,6 +13,7 @@ uniform float u_radianceScale;
 uniform float u_roughness;
 uniform float u_foamWidth;
 uniform float u_foamIntensity;
+uniform vec2 u_shoreFoamOffset;
 uniform float u_refractionStrength;
 uniform bool u_reflections;
 in vec3 v_positionEC;
@@ -58,9 +59,32 @@ float sceneGISWaterBubbles(vec2 p, float footprint)
     return mix(film, 0.65, smoothstep(0.25, 0.9, footprint));
 }
 
+float sceneGISWaterFoamCoverage(float density, vec2 p, float footprint)
+{
+    // Concentration controls irregular rafts; centimeter-scale bubbles provide
+    // detail inside the rafts instead of punching equal holes through a stripe.
+    vec2 warp = vec2(sceneGISWaterNoise(p * 0.8), sceneGISWaterNoise(p * 0.8 + 37.0));
+    vec2 q = p + (warp - 0.5) * 0.45;
+    float large = mix(0.5, sceneGISWaterNoise(q * 2.1), exp(-footprint * footprint * 4.0));
+    float small = mix(0.5, sceneGISWaterNoise(q * 7.5), exp(-footprint * footprint * 56.0));
+    float strands = mix(0.5, sceneGISWaterNoise(q * 21.0), exp(-footprint * footprint * 440.0));
+    float threshold = smoothstep(0.25, 0.75, large * 0.5 + small * 0.35 + strands * 0.15);
+    float aa = min(0.24, 0.045 + footprint * 1.5);
+    float rafts = smoothstep(threshold - aa, threshold + aa, density) * smoothstep(0.0, 0.08, density);
+    float bubbles = sceneGISWaterBubbles(q * 40.0, footprint * 40.0);
+    float microCoverage = mix(bubbles, 1.0, smoothstep(0.25, 0.8, density));
+    return rafts * mix(0.25, 1.0, microCoverage);
+}
+
 float sceneGISWaterFoam(float depth, float footprint, vec2 flow)
 {
     if (u_foamWidth == 0.0 || u_foamIntensity == 0.0 || (!u_hasWaterField && depth >= u_foamWidth)) { return 0.0; }
+    if (u_hasWaterField) {
+        vec2 uv = (v_waterPosition - u_fieldRectangle.xy) / u_fieldRectangle.zw;
+        if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) { return 0.0; }
+        float density = texture(u_shoreFoam, uv).r;
+        return sceneGISWaterFoamCoverage(density, v_waterPosition - u_shoreFoamOffset, footprint);
+    }
     float shallow = clamp(depth / u_foamWidth, 0.0, 1.0);
     // Drift in local meters; two different velocities gently break up foam clusters.
     float travel = u_time * u_waveLength / czm_twoPi;
@@ -83,11 +107,6 @@ float sceneGISWaterFoam(float depth, float footprint, vec2 flow)
     float bubbles = sceneGISWaterBubbles(bubblePosition, footprint * 9.0);
     float coverage = smoothstep(threshold - aa, threshold + aa, pattern + (bubbles - 0.65) * 0.07);
     float fade = 1.0 - smoothstep(0.55, 1.0, shallow);
-    if (u_hasWaterField) {
-        vec2 uv = (v_waterPosition - u_fieldRectangle.xy) / u_fieldRectangle.zw;
-        if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) { return 0.0; }
-        return texture(u_shoreFoam, uv).r * bubbles * (0.65 + grain * 0.35);
-    }
     return coverage * bubbles * (0.45 + grain * 0.55) * fade * u_foamIntensity;
 }
 
@@ -269,9 +288,8 @@ void main()
     #ifdef SCENEGIS_CURVED_WATER
     foamPosition += u_waterFoamOffset;
     #endif
-    float clusters = mix(0.5, sceneGISWaterNoise(foamPosition * 1.7), exp(-footprint * footprint * 3.0));
-    float bubbles = sceneGISWaterBubbles(foamPosition * 12.0 + clusters, footprint * 12.0);
-    float crestCoverage = smoothstep(0.04, 0.65, crestFoam) * mix(0.55, 1.0, clusters) * bubbles;
+    if (u_hasWaterField) { foamPosition = v_waterPosition - u_shoreFoamOffset; }
+    float crestCoverage = sceneGISWaterFoamCoverage(smoothstep(0.04, 0.65, crestFoam), foamPosition, footprint);
     foam = max(foam, crestCoverage);
     // Foam replaces the wet interface, including its sharp specular lobe.
     color = mix(color, vec3(0.8) * diffuseLight, clamp(foam, 0.0, 1.0));

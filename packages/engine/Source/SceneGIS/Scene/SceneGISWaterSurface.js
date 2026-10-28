@@ -202,7 +202,7 @@ function validate(surface) {
  * @param {number} [options.waveLength=3.0] Largest normal-wave wavelength in meters.
  * @param {Cartesian2} [options.flowDirection=Cartesian2.UNIT_X] Local flow direction; need not be normalized.
  * @param {number} [options.flowSpeed=0.6] Wave phase speed in meters per second.
- * @param {number} [options.foamWidth=0.3] Depth range of shallow contact foam in meters; zero disables it.
+ * @param {number} [options.foamWidth=0.3] Shallow contact depth range in meters; with bathymetry also the horizontal shoreline range. Zero disables it.
  * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
  * @param {number} [options.underwaterDepth=0] Local volume depth below the mean surface in meters; zero disables underwater viewing. Local geometry only, at most 256 boundary segments including holes. Mean-height immersion, not a wave-exact meniscus.
  * @param {SceneGISWaterSurface.Bathymetry} [options.bathymetry] Immutable copied local depth field for camera-independent shore foam and caustics.
@@ -361,7 +361,7 @@ function SceneGISWaterSurface(options = {}) {
    */
   this.flowSpeed = options.flowSpeed ?? 0.6;
   /**
-   * Contact foam depth range in meters.
+   * Contact foam depth range in meters; with bathymetry also the horizontal shoreline range.
    * @type {number}
    */
   this.foamWidth = options.foamWidth ?? 0.3;
@@ -640,6 +640,7 @@ function createResources(surface, frameState) {
         (surface._time * surface.flowSpeed * Math.PI * 2) / surface.waveLength,
       u_foamWidth: () => surface.foamWidth,
       u_foamIntensity: () => surface.foamIntensity,
+      u_shoreFoamOffset: () => surface._field?.offset ?? Cartesian2.ZERO,
       u_underwaterDepth: () => surface.underwaterDepth,
       u_cameraDepth: () =>
         surface._underwater?.active ? -surface._underwater.camera.z : 0,
