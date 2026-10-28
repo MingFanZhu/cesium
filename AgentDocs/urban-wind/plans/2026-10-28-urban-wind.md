@@ -23,12 +23,12 @@ particle extensions remain independent. Graph omits recent symbols; source reads
 
 ## Roadmap
 
-| Phase | Objective                                           | Entry                 | Exit                                                                           | Status                                         |
-| ----- | --------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------- |
-| W1    | Solver, units, periodic grids, ownership/time       | Source/papers checked | Conservation, uniform/shear decay, GPU tests, 128×128×32 budget, review/commit | completed; [plan](2026-10-28-w1-solver.md)     |
-| W2    | Static masks, geometry voxelization and boundaries  | W1 checkpoint         | Channel/wake/solid/oblique flow, limited grid comparison, review/commit        | completed; [plan](2026-10-28-w2-boundaries.md) |
-| W3    | Tracer and shared volume/streamline/slice consumers | W2 checkpoint         | Transport/no-flux/depth/pause/lifecycle/query, review/commit                   | planned                                        |
-| W4    | Both-world city example, SDK instructions           | W3 checkpoint         | Reproducible views, performance, release/types, review/commit                  | planned                                        |
+| Phase | Objective                                           | Entry                 | Exit                                                                           | Status                                             |
+| ----- | --------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------- |
+| W1    | Solver, units, periodic grids, ownership/time       | Source/papers checked | Conservation, uniform/shear decay, GPU tests, 128×128×32 budget, review/commit | completed; [plan](2026-10-28-w1-solver.md)         |
+| W2    | Static masks, geometry voxelization and boundaries  | W1 checkpoint         | Channel/wake/solid/oblique flow, limited grid comparison, review/commit        | completed; [plan](2026-10-28-w2-boundaries.md)     |
+| W3    | Tracer and shared volume/streamline/slice consumers | W2 checkpoint         | Transport/no-flux/depth/pause/lifecycle/query, review/commit                   | completed; [plan](2026-10-28-w3-tracer-display.md) |
+| W4    | Both-world city example, SDK instructions           | W3 checkpoint         | Reproducible views, performance, release/types, review/commit                  | planned                                            |
 
 ## Risks and acceptance
 

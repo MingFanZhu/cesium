@@ -4,18 +4,18 @@ WebGL2 局部空气 LBM 与被动示踪；独立于 PBF 液体，不修改 SDK �
 
 ## Metadata
 
-| Field                  | Value                                           |
-| ---------------------- | ----------------------------------------------- |
-| Extension slug         | `urban-wind`                                    |
-| Status                 | `active`                                        |
-| Planning model         | `extension`                                     |
-| Active extension plan  | [roadmap](plans/2026-10-28-urban-wind.md)       |
-| Current phase          | W2                                              |
-| Active phase plan      | [boundaries](plans/2026-10-28-w2-boundaries.md) |
-| Active standalone plan | None                                            |
-| Architecture contact   | Current task / self-review                      |
-| Execution contact      | Current task                                    |
-| Last updated           | `2026-10-28`                                    |
+| Field                  | Value                                                   |
+| ---------------------- | ------------------------------------------------------- |
+| Extension slug         | `urban-wind`                                            |
+| Status                 | `active`                                                |
+| Planning model         | `extension`                                             |
+| Active extension plan  | [roadmap](plans/2026-10-28-urban-wind.md)               |
+| Current phase          | W3                                                      |
+| Active phase plan      | [tracer/display](plans/2026-10-28-w3-tracer-display.md) |
+| Active standalone plan | None                                                    |
+| Architecture contact   | Current task / self-review                              |
+| Execution contact      | Current task                                            |
+| Last updated           | `2026-10-28`                                            |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -38,8 +38,9 @@ WebGL2 局部空气 LBM 与被动示踪；独立于 PBF 液体，不修改 SDK �
 
 ## Current handoff
 
-- Current: W1 checkpoint `1b915bd940`; W2 boundaries/geometry completed and reviewed.
+- Current: W1 checkpoint `1b915bd940`, W2 checkpoint `b86f621118`; W3 completed and reviewed.
 - Discussion: [model](discussions/2026-10-28-model.md), resolved for W1.
-- Review: [W1](reviews/2026-10-28-w1-solver.md) and [W2](reviews/2026-10-28-w2-boundaries.md), approved.
+- Review: [W1](reviews/2026-10-28-w1-solver.md), [W2](reviews/2026-10-28-w2-boundaries.md)
+  and [W3](reviews/2026-10-28-w3-tracer-display.md), approved.
 - Risks: near-half relaxation time at air viscosity; coarse walls, open boundaries and unresolved LES.
 - Owner visual judgment remains required for final city presentation.

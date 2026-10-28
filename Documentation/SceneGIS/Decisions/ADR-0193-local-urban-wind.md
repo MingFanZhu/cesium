@@ -1,6 +1,6 @@
 # ADR-0193: Local GPU urban wind
 
-- Status: accepted through W2; date: 2026-10-28.
+- Status: accepted through W3; date: 2026-10-28.
 - Plan: [urban-wind](../../../AgentDocs/urban-wind/README.md); upstream files / SGP: none.
 
 ## Source facts and decision
@@ -70,6 +70,31 @@ distributions, two collision draws (4+1) and one macro draw. getGpuField publish
 modelMatrix, generation/version and completed simulationTime. Cell-centered storage; consumers
 use defined trilinear interpolation. Borrow descriptor/textures; resolve identities after swaps,
 never mutate/destroy them. No per-frame full-field readback/upload or raw-GL simulation backend.
+
+## Passive scalar and display
+
+A separate transport pass follows every completed velocity step. Two RGBA32F atlases store
+dimensionless concentration in R and outgoing scalar CFL in G. Conservative face-centered upwind
+advection and centered diffusion use shared velocities; solids/walls/slip have zero normal flux,
+periodic faces wrap and open incoming concentration is zero. Explicit diffusion requires
+6Ddt/dx²<=0.5, leaving advective headroom under the low-Mach contract. No clipping of negative values.
+First-order numerical diffusion and absence of a turbulent-Schmidt scalar closure limit accuracy.
+Sources are at most 16 local spheres, uniform rate per fluid cell in tracer units/s. Source changes
+do not reset flow; reset clears concentration. There is no pollutant mass calibration.
+
+`SceneGISWindFieldSampling` supplies GLSL and uniform callbacks resolving live descriptor getters.
+Cell-centered trilinear display interpolation renormalizes fluid-corner weights; inside solids or
+outside the domain returns zero. This is not the conservative transport stencil.
+`sampleAsync` snapshots one nearest cell through existing Context PBO and Sync interfaces, up to
+16 outstanding calls; it reports snapshot version/time and rejects on producer destruction.
+
+`SceneGISWindVisualization` owns its PostProcessStage and ordinary translucent line command.
+Volume uses deterministic midpoint ray samples, concentration opacity and speed/concentration
+colors. Ray end is clipped to scene opaque depth; transparent surfaces are not occluders.
+Horizontal slice uses the same field and opacity. GPU midpoint-integrated instantaneous streamlines
+stop at solids/domain bounds. They do not advance particles or represent pollutant trajectories.
+No wall-clock animation, repeated simulation, Voxel metadata rebuilding or per-frame field transfer.
+Destroy consumers before producer; scene collection destruction also releases the stage and lines.
 
 ## Validation and limitations
 

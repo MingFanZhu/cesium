@@ -7,6 +7,8 @@ import RuntimeError from "../../Core/RuntimeError.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import model from "../Core/_private/_SceneGISWindModel.js";
 import Solver from "./_private/_SceneGISWindSolver.js";
+import Tracer from "./_private/_SceneGISWindTracer.js";
+import sample from "./_private/_SceneGISWindQuery.js";
 
 function validateControls(simulation) {
   if (
@@ -31,6 +33,7 @@ function validateControls(simulation) {
  * @typedef {object} SceneGISWindSimulation.GpuField
  * @property {SceneGISWindSimulation.GpuTexture} velocityTexture RGBA32F: local velocity xyz in m/s and dimensionless density ratio w.
  * @property {SceneGISWindSimulation.GpuTexture} solidTexture RGBA8: red equals one for solid, zero for fluid.
+ * @property {SceneGISWindSimulation.GpuTexture} concentrationTexture RGBA32F: r dimensionless tracer, g local outgoing transport CFL; b/a reserved zero.
  * @property {Cartesian3} dimensions Read-only cell counts.
  * @property {Cartesian3} minimum Read-only local domain minimum in meters.
  * @property {number} cellSize Cubic cell width in meters.
@@ -38,6 +41,7 @@ function validateControls(simulation) {
  * @property {Matrix4} modelMatrix Current rigid local-to-world transform, borrowed read-only.
  * @property {number} version Monotonically increasing completed-state version, including reset.
  * @property {number} generation Reset generation.
+ * @property {string} contextId Renderer context identity; consumers must use the same context.
  * @property {number} simulationTime Completed physical seconds since reset.
  */
 
@@ -85,6 +89,8 @@ function validateControls(simulation) {
  * @param {Cartesian3} [options.acceleration=Cartesian3.ZERO] Constant physical body acceleration in m/s^2 (MRT Guo forcing).
  * @param {SceneGISWindSimulation.BoundaryConditions} [options.boundaryConditions] Six domain faces.
  * @param {Uint8Array} [options.solidMask] Copied x-fastest 0/1 cells, index x+nx*(y+ny*z).
+ * @param {number} [options.tracerDiffusivity=0] Explicit scalar diffusivity in m^2/s; 6*D*dt/dx^2 <= 0.5. First-order upwind also has numerical diffusion.
+ * @param {SceneGISWindSimulation.TracerSource[]} [options.tracerSources=[]] Up to 16 passive source spheres.
  * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world placement, copied.
  * @param {boolean} [options.paused=false] Initially pause physical time accumulation.
  * @param {number} [options.maximumStepsPerFrame=4] Maximum fixed steps per normal frame, integer 1..64.
@@ -101,6 +107,11 @@ function validateControls(simulation) {
  */
 function SceneGISWindSimulation(options = {}) {
   this._config = model.configure(options);
+  this._diffusivity = options.tracerDiffusivity ?? 0;
+  Tracer.validateDiffusivity(this._diffusivity, this._config);
+  this._sources = Tracer.sources(options.tracerSources ?? []);
+  this._tracer = undefined;
+  this._queries = new Set();
   /**
    * Rigid placement. Moving it does not alter the local solution.
    * @type {Matrix4}
@@ -129,6 +140,16 @@ function SceneGISWindSimulation(options = {}) {
   this._field = undefined;
   validateControls(this);
 }
+
+/**
+ * A spherical, dimensionless passive source. Injection is uniform per fluid cell whose center
+ * lies in the sphere. Solids receive none; a source can overlap domain limits. Rate is not mass/s.
+ * @typedef {object} SceneGISWindSimulation.TracerSource
+ * @property {Cartesian3} position Simulation-local meters.
+ * @property {number} radius Positive radius in meters.
+ * @property {number} rate Nonnegative tracer units per second per fluid cell.
+ * @property {boolean} [enabled=true] Whether to inject.
+ */
 
 /**
  * Face modes: "wind" classifies inward/outward/tangent prescribed wind as inlet/outlet/slip;
@@ -209,7 +230,7 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
    */
   textureByteLength: {
     get() {
-      return this._solver?.byteLength ?? 0;
+      return (this._solver?.byteLength ?? 0) + (this._tracer?.byteLength ?? 0);
     },
   },
 });
@@ -244,6 +265,55 @@ SceneGISWindSimulation.prototype.getGpuField = function () {
   return this._field;
 };
 
+/**
+ * Replace source configuration atomically without clearing concentration or resetting velocity.
+ * New injection takes effect on the next physical step. Inputs are copied.
+ * @param {SceneGISWindSimulation.TracerSource[]} sources At most 16 spheres.
+ */
+SceneGISWindSimulation.prototype.setTracerSources = function (sources) {
+  this._sources = Tracer.sources(sources);
+  this._tracer?.setSources(this._sources);
+};
+
+/**
+ * Snapshot one nearest cell without blocking on a full field readback. The returned Promise uses
+ * native PBO/fence polling; at most 16 requests can be outstanding. Destruction rejects them.
+ * Call after ready. Position must be inside the half-open local domain.
+ * @param {Cartesian3} position Local meters.
+ * @returns {Promise<SceneGISWindSimulation.Sample>} Completed snapshot with its version/time.
+ */
+SceneGISWindSimulation.prototype.sampleAsync = function (position) {
+  model.finiteVector("sample position", position);
+  if (!this.ready || this._queries.size >= 16) {
+    throw new DeveloperError(
+      "sampleAsync requires ready state and fewer than 16 outstanding requests.",
+    );
+  }
+  const c = this._config,
+    cell = new Cartesian3();
+  for (const a of ["x", "y", "z"]) {
+    cell[a] = Math.floor((position[a] - c.minimum[a]) / c.cellSize);
+    if (cell[a] < 0 || cell[a] >= c.dimensions[a]) {
+      throw new DeveloperError(
+        "sample position must be inside the local domain.",
+      );
+    }
+  }
+  return sample(this, cell);
+};
+
+/**
+ * @typedef {object} SceneGISWindSimulation.Sample
+ * @property {Cartesian3} velocity Local m/s.
+ * @property {number} density Dimensionless density ratio.
+ * @property {number} concentration Dimensionless tracer amount.
+ * @property {number} tracerCfl Outgoing scalar CFL; values >1 violate positivity stability.
+ * @property {boolean} solid Whether the sampled cell is solid.
+ * @property {Cartesian3} cell Integer cell index.
+ * @property {number} version Snapshot version.
+ * @property {number} simulationTime Snapshot physical seconds.
+ */
+
 function createField(simulation) {
   const c = simulation._config;
   return Object.freeze({
@@ -252,6 +322,9 @@ function createField(simulation) {
     },
     get solidTexture() {
       return simulation._solver.solid;
+    },
+    get concentrationTexture() {
+      return simulation._tracer.texture;
     },
     dimensions: Object.freeze(Cartesian3.clone(c.dimensions)),
     minimum: Object.freeze(Cartesian3.clone(c.minimum)),
@@ -267,6 +340,9 @@ function createField(simulation) {
     },
     get generation() {
       return simulation._generation;
+    },
+    get contextId() {
+      return simulation._solver.context.id;
     },
     get simulationTime() {
       return simulation.simulationTime;
@@ -291,6 +367,12 @@ SceneGISWindSimulation.prototype.update = function (frameState) {
     : 0;
   if (!this._solver) {
     this._solver = new Solver(frameState.context, this._config);
+    try {
+      this._tracer = new Tracer(this._solver, this._diffusivity, this._sources);
+    } catch (error) {
+      this._solver = this._solver.destroy();
+      throw error;
+    }
     this._field = createField(this);
     this._version++;
     elapsed = 0;
@@ -300,6 +382,7 @@ SceneGISWindSimulation.prototype.update = function (frameState) {
   this._lastSteps = 0;
   if (this._reset || elapsed < 0) {
     this._solver.reset();
+    this._tracer.reset();
     this._debt = this._steps = this._queued = 0;
     this._generation++;
     this._version++;
@@ -315,6 +398,7 @@ SceneGISWindSimulation.prototype.update = function (frameState) {
   const manual = Math.min(this._queued, count);
   for (let i = 0; i < count; i++) {
     this._solver.step();
+    this._tracer.step();
     this._steps++;
     this._version++;
     this._lastSteps++;
@@ -333,6 +417,10 @@ SceneGISWindSimulation.prototype.isDestroyed = function () {
  * @returns {undefined}
  */
 SceneGISWindSimulation.prototype.destroy = function () {
+  for (const query of this._queries) {
+    query.cancel();
+  }
+  this._tracer = this._tracer?.destroy();
   this._solver = this._solver?.destroy();
   this._field = undefined;
   return destroyObject(this);
