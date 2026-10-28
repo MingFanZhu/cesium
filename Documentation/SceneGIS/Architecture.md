@@ -73,6 +73,7 @@ packages/engine/Source/Workers/SceneGISVectorTileWorker.js
 packages/engine/Source/Workers/SceneGISS3mWorker.js
 packages/engine/Source/Workers/SceneGISGaussianSortWorker.js
 packages/engine/Source/Workers/SceneGISGaussianMappingWorker.js
+packages/engine/Source/Workers/SceneGISVoxelizeWorker.js
 ```
 
 所有权按照“上游基线中是否已经存在该路径”判断，而不是按照当前分支中文件所在目录判断。修改 upstream-owned file 必须登记 SGP；新增 SceneGIS-owned file 不需要 SGP。
@@ -1513,6 +1514,12 @@ PBF 求解、排序网格邻域、密度约束与局部盒碰撞全部驻留 GPU
 opaque HDR / linear depth 捕获、世界光照、天空反射与 SSR，不新增 upstream seam。
 图元拥有求解和屏幕目标；Scene 拥有被借用的场景输入。最终液面写真实深度和 TAA/final-depth。
 首版限定相机在液体外、屏幕空间前层、简单盒容器，不支持透明递归折射或任意网格碰撞。
+
+## 静态网格体素化
+
+ADR-0194 批准独立静态网格体素化与精确 owned Worker entry `SceneGISVoxelizeWorker.js`。
+算法位于 SceneGIS Core，复用原生 TaskProcessor/build，不从屏幕深度推断实体。
+表面保守占据与网格封闭区域填充分开；显式米制网格、预算和 caller-owned 输出可以被风场等消费者复用。
 
 ## 局部城市空气流动
 
