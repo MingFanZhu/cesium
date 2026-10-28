@@ -37,10 +37,22 @@
         <select id="mode">
           <option value="volume">示踪体积</option>
           <option value="slice">水平切片</option>
-          <option value="none">仅流线</option>
+          <option value="none" selected>GPU 风场粒子</option>
         </select></label
       >
-      <label><input id="lines" type="checkbox" checked /> 显示瞬时流线</label>
+      <label
+        ><input id="particles" type="checkbox" checked /> 显示 GPU
+        风场粒子</label
+      >
+      <label
+        >粒子宽度<input
+          id="size"
+          type="range"
+          min="0.25"
+          max="1.5"
+          step="0.05"
+          value="0.65"
+      /></label>
       <label><input id="source" type="checkbox" checked /> 注入示踪物</label>
       <label
         >颜色
@@ -94,7 +106,7 @@
         </div>
       </div>
       <p class="note">
-        颜色可选风速或示踪量；体积透明度来自计算的示踪量。流线是当前速度场的积分曲线。理想化街区，非工程预测。
+        颜色可选风速或示踪量；体积透明度来自计算的示踪量。短粒子沿计算风速运动，暂停时冻结；粒子密度不代表示踪浓度。理想化街区，非工程预测。
       </p>
     </section>
     <aside>

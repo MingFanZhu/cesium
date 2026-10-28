@@ -33,3 +33,13 @@ Implementation is independently written using existing Cesium renderer interface
 ## P2 amendment: initial fill and draw-local styling
 
 [ADR-0103](ADR-0103-aerial-weather.md) adds optional immutable initialParticles and renderShader. Reset/rewind fills initialParticles instead of always clearing; zero retains P1 behavior. Initial slots start at age zero, and the emission cursor/seed continue after them. The render function styleParticle operates on a vertex-local copy with the same uniformMap; it never changes persistent state. Bounds must include styling. This generic hook supports view-dependent presentation under frozen simulation and contains no weather behavior.
+
+## Urban wind amendment: external simulation clock
+
+[W5](../../../AgentDocs/urban-wind/plans/2026-10-28-w5-particles.md) adds optional immutable
+`timeSource(): number`, returning absolute simulation seconds. Default Scene JulianDate arithmetic
+is preserved, including precision. External equal values freeze GPU state, rewind resets, and
+observed hidden/paused frames consume external time without catching up. Pick never invokes the
+callback or advances state. Values must be finite; no implicit dt clamp or force is introduced.
+The wind adapter reads completed simulationTime and generation from its public GPU descriptor.
+Generic particles do not know about wind, LBM or concentration. Upstream files / SGP: none.

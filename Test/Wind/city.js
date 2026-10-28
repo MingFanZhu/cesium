@@ -216,25 +216,17 @@ function createWind() {
       enableGpuTiming: true,
     }),
   );
-  const seeds = [];
-  for (const x of [-92, -52, -12, 28, 68]) {
-    for (const y of [-80, -40, 0, 40, 80]) {
-      for (const z of [6, 18, 34]) {
-        seeds.push(new C.Cartesian3(x, y, z));
-      }
-    }
-  }
   display = scene.primitives.add(
     new C.SceneGISWindVisualization({
       scene,
       simulation: wind,
       mode: $("mode").value,
-      showStreamlines: $("lines").checked,
+      showParticles: $("particles").checked,
       colorBy: $("color").value,
       colorMaximum: $("color").value === "speed" ? 5.5 : 2,
       extinction: Number($("opacity").value),
       sliceHeight: Number($("height").value),
-      streamlineSeeds: seeds,
+      particleSize: Number($("size").value),
     }),
   );
   $("run").textContent = "运行";
@@ -308,7 +300,11 @@ scene.postRender.addEventListener(() => {
     timingSamples.push(timing.millisecondsPerStep);
     lastTimingVersion = timing.version;
   }
-  if (probePending && wind.ready && wind.pendingTime < 1e-8) {
+  if (
+    probePending &&
+    wind.ready &&
+    wind.pendingTime < wind.timeStep * (1 - 1e-9)
+  ) {
     completed = {
       wallSeconds: (performance.now() - started) / 1000,
       simulationSeconds: wind.simulationTime - startedSimulation,
@@ -331,13 +327,13 @@ scene.postRender.addEventListener(() => {
       ]
     : undefined;
   $("status").textContent =
-    wind.pendingTime > 1e-8
+    wind.pendingTime >= wind.timeStep * (1 - 1e-9)
       ? "正在计算固定步长…"
       : wind.paused
         ? `已暂停 · ${wind.simulationTime.toFixed(2)} 秒`
         : "运行中";
   $("metrics").textContent =
-    `${planar ? "平面 World" : "球面 ENU"} · 128 × 128 × 32\n524,288 格 · dx 2 m · dt 0.02 s\nGPU 场显存 ${(wind.textureByteLength / 1048576).toFixed(2)} MiB\n求解 + 输运 ${median === undefined ? (wind.gpuTimingSupported ? "等待计时" : "GPU 计时不可用") : `${median.toFixed(3)} ms/步（中位数）`}\n本帧 ${wind.stepsLastFrame} 步 / 上限 ${wind.maximumStepsPerFrame}\n模拟 ${wind.simulationTime.toFixed(2)} s · 待计算 ${wind.pendingTime.toFixed(2)} s\n批次墙钟 ${elapsed.toFixed(2)} s · 比例 ${ratio.toFixed(2)}×`;
+    `${planar ? "平面 World" : "球面 ENU"} · 128 × 128 × 32\n524,288 格 · dx 2 m · dt 0.02 s\nGPU 场显存 ${(wind.textureByteLength / 1048576).toFixed(2)} MiB\nGPU 粒子 ${display.particleCount.toLocaleString()} · ${(display.particleTextureByteLength / 1048576).toFixed(2)} MiB\n求解 + 输运 ${median === undefined ? (wind.gpuTimingSupported ? "等待计时" : "GPU 计时不可用") : `${median.toFixed(3)} ms/步（中位数）`}\n本帧 ${wind.stepsLastFrame} 步 / 上限 ${wind.maximumStepsPerFrame}\n模拟 ${wind.simulationTime.toFixed(2)} s · 待计算 ${wind.pendingTime.toFixed(2)} s\n批次墙钟 ${elapsed.toFixed(2)} s · 比例 ${ratio.toFixed(2)}×`;
   if (window.windExample) {
     window.windExample.timingSamples = timingSamples;
   }
@@ -390,9 +386,14 @@ $("mode").onchange = () => {
     display.mode = $("mode").value;
   }
 };
-$("lines").onchange = () => {
+$("particles").onchange = () => {
   if (display) {
-    display.showStreamlines = $("lines").checked;
+    display.showParticles = $("particles").checked;
+  }
+};
+$("size").oninput = () => {
+  if (display) {
+    display.particleSize = Number($("size").value);
   }
 };
 $("source").onchange = () => wind?.setTracerSources(sources());

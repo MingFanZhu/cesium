@@ -1221,6 +1221,9 @@ life/age 单位秒。age/seed 由底层维护，其余字段由 Shader 保存和
 `initialParticles` 默认 0；可在构造时指定初始填充数量。
 `reset()` 在下一可见且未暂停的正常帧重新填充并重启序列，复用已有资源；Scene 时间倒退同样重置。
 向前跳时直接把实际 dt 传给 Shader，调用方须选择适合的积分方案，没有隐式限步或补帧。
+需要绑定独立求解器时，可在构造参数传 `timeSource: () => completedSeconds`。
+该回调返回有限的绝对模拟秒数；相同值冻结，倒退重置，拾取不调用它。
+隐藏/暂停期间观察到的时间不补算。不传时保留原有 Scene 时间语义。
 `modelMatrix` 必须是刚体变换，修改后已有粒子一起移动；Globe 使用 ENU，Planar 使用笛卡尔放置。
 可选 `renderShader` 定义 `void styleParticle(inout SceneGISParticle p)`，在顶点副本上修改
 显示属性，支持冻结模拟后随相机变化的呈现；不回写 GPU 状态。uniformMap 同时供模拟和绘制使用。

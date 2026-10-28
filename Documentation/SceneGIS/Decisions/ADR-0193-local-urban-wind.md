@@ -107,6 +107,25 @@ Reset cancels already queued work; explicit step calls after reset execute on th
 
 Public API, reproducible city evidence and SDK usage are documented in [UrbanWind](../UrbanWind.md).
 
+## W5: GPU flow particles
+
+Owner feedback replaces the default instantaneous lines with 4096 directional GPU markers.
+Visualization composes the existing SceneGISGpuParticleSystem; its narrow `timeSource` hook
+uses completed simulation seconds rather than wall/Scene time. Generation changes reset the
+deterministic particle state. Hidden periods consume the clock, so re-show does not catch up.
+Particle state is 128 bytes/allocated slot, 0.50 MiB for 4096; no field readback or producer-private
+access. Native instanced translucent quads provide opaque depth testing and OIT.
+
+RK2 visual advection uses substeps <= physical timeStep and samples the latest completed field
+through public WindFieldSampling. Intermediate velocity snapshots inside a render batch are not
+retained: this is approximate marker advection and may vary with compute batch in unsteady flow.
+The separately evolved conservative scalar remains the concentration authority. Deterministic
+random values seed/recycle positions only; there is no velocity noise. Cell traversal tests whole
+segments, including corner crossings; collision/outflow recycles the marker rather than tunnelling.
+Solid seeds remain invisible until recycled into fluid. Short screen-oriented ellipses and lifetime
+fading are draw-local style, not accumulated screen trails. Pause is stable and camera changes do
+not leave ghost geometry. Explicit legacy `showStreamlines=true` remains supported.
+
 ## Validation and limitations
 
 W1: collision conservation, basis/units, CPU/GPU comparison, uniform/shear decay, scheduling and

@@ -4,18 +4,26 @@ import {
   Color,
   ColorGeometryInstanceAttribute,
   GeometryInstance,
+  Framebuffer,
   Globe,
   JulianDate,
   Matrix4,
   PerInstanceColorAppearance,
+  PixelDatatype,
+  PixelFormat,
   Primitive,
+  SceneGISWindFieldSampling,
   SceneGISWindSimulation,
   SceneGISWindVisualization,
   SceneGISPlanarCoordinateSystem,
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
   Transforms,
+  Texture,
+  ShaderSource,
 } from "../../../index.js";
+import particleShader from "../../../Source/Shaders/SceneGIS/Wind/SceneGISWindParticleUpdate.js";
+import particleStruct from "../../../Source/Shaders/SceneGIS/Particles/SceneGISParticleState.js";
 import createScene from "../../../../../Specs/createScene.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import pollToPromise from "../../../../../Specs/pollToPromise.js";
@@ -23,12 +31,158 @@ import pollToPromise from "../../../../../Specs/pollToPromise.js";
 describe("SceneGIS/Scene/SceneGISWindVisualization", function () {
   let scene, wind, view;
   const time = JulianDate.fromIso8601("2026-10-28T00:00:00Z");
+  function particleState(attachment = 0) {
+    const state = view._particles._state;
+    const texture = state.buffers[state.index].getColorTexture(attachment);
+    const target = new Framebuffer({
+      context: scene.context,
+      colorTextures: [texture],
+      destroyAttachments: false,
+    });
+    try {
+      return Array.from(
+        scene.context.readPixels({
+          framebuffer: target,
+          width: texture.width,
+          height: texture.height,
+        }),
+      );
+    } finally {
+      target.destroy();
+    }
+  }
   afterEach(function () {
     if (view && !view.isDestroyed()) {
       scene.primitives.remove(view);
     }
     scene?.destroyForSpecs();
     scene = wind = view = undefined;
+  });
+  it("rejects solid crossings including corner intersections with fluid endpoints on GPU", function () {
+    scene = createScene({ canvas: createCanvas(4, 4) });
+    const mask = new Uint8Array(8 * 8 * 8);
+    mask[2 + 8 * (2 + 8 * 2)] = 1;
+    wind = scene.primitives.add(
+      new SceneGISWindSimulation({
+        dimensions: new Cartesian3(8, 8, 8),
+        cellSize: 1,
+        timeStep: 1,
+        kinematicViscosity: 0.1,
+        windSpeed: 0.02,
+        solidMask: mask,
+        paused: true,
+      }),
+    );
+    scene.renderForSpecs(time);
+    const target = new Framebuffer({
+      context: scene.context,
+      colorTextures: [
+        new Texture({
+          context: scene.context,
+          width: 1,
+          height: 1,
+          pixelFormat: PixelFormat.RGBA,
+          pixelDatatype: PixelDatatype.FLOAT,
+        }),
+      ],
+    });
+    const command = scene.context.createViewportQuadCommand(
+      new ShaderSource({
+        sources: [
+          particleStruct,
+          SceneGISWindFieldSampling.shaderSource,
+          particleShader,
+          `void main() {
+        out_FragColor = vec4(
+          windParticleClear(vec3(1.95,2.05,2.5),vec3(2.10,1.95,2.5)) ? 1.0 : 0.0,
+          windParticleClear(vec3(1.9,2.5,2.5),vec3(2.1,2.5,2.5)) ? 1.0 : 0.0,
+          windParticleClear(vec3(1.8,1.8,2.5),vec3(1.9,1.9,2.5)) ? 1.0 : 0.0,
+          windParticleClear(vec3(0.1,1.0,1.0),vec3(-0.1,1.0,1.0)) ? 1.0 : 0.0);
+      }`,
+        ],
+      }),
+      {
+        framebuffer: target,
+        uniformMap: SceneGISWindFieldSampling.createUniformMap(
+          wind.getGpuField(),
+        ),
+      },
+    );
+    try {
+      command.execute(scene.context);
+      expect(
+        Array.from(
+          scene.context.readPixels({
+            framebuffer: target,
+            width: 1,
+            height: 1,
+          }),
+        ),
+      ).toEqual([0, 0, 1, 0]);
+    } finally {
+      command.shaderProgram.destroy();
+      target.destroy();
+    }
+  });
+  it("advects GPU markers by completed physical time, freezes, resets and releases borrowed-field consumers", function () {
+    scene = createScene({ canvas: createCanvas(32, 32) });
+    wind = scene.primitives.add(
+      new SceneGISWindSimulation({
+        dimensions: new Cartesian3(8, 8, 8),
+        cellSize: 1,
+        timeStep: 1,
+        kinematicViscosity: 0.1,
+        windSpeed: 0.02,
+        paused: true,
+        boundaryConditions: {
+          xMin: "periodic",
+          xMax: "periodic",
+          yMin: "periodic",
+          yMax: "periodic",
+          zMin: "periodic",
+          zMax: "periodic",
+        },
+      }),
+    );
+    view = scene.primitives.add(
+      new SceneGISWindVisualization({
+        scene,
+        simulation: wind,
+        mode: "none",
+        particleCount: 128,
+      }),
+    );
+    scene.renderForSpecs(time);
+    const first = particleState(),
+      styles = particleState(3);
+    const buffers = view._particles._state.buffers.slice();
+    expect(view.particleTextureByteLength).toBe(12 * 11 * 128);
+    expect(view.showStreamlines).toBeFalse();
+    wind.step();
+    scene.renderForSpecs(time);
+    const moved = particleState();
+    let compared = 0;
+    for (let i = 0; i < 128; i++) {
+      const k = i * 4;
+      if (styles[k] + 1 < styles[k + 1]) {
+        expect(moved.slice(k, k + 3)).toEqualEpsilon(
+          [first[k] + 0.02, first[k + 1], first[k + 2]],
+          2e-5,
+        );
+        compared++;
+      }
+    }
+    expect(compared).toBeGreaterThan(100);
+    scene.renderForSpecs(JulianDate.addSeconds(time, 99, new JulianDate()));
+    expect(particleState()).toEqual(moved);
+    wind.reset();
+    scene.renderForSpecs(time);
+    expect(particleState()).toEqual(first);
+    expect(view._particles._state.buffers).toEqual(buffers);
+    const field = wind.getGpuField();
+    scene.primitives.remove(view);
+    expect(buffers.every((b) => b.isDestroyed())).toBeTrue();
+    expect(field.velocityTexture.isDestroyed()).toBeFalse();
   });
   [false, true].forEach(function (planar) {
     it(`renders tracer volume/slice, preserves pause and occludes behind geometry in ${planar ? "Planar" : "Globe"}`, async function () {
@@ -159,12 +313,14 @@ describe("SceneGIS/Scene/SceneGISWindVisualization", function () {
       expect(pixel()).toEqual(covered);
       const stage = view._stage,
         program = view._command.shaderProgram,
-        array = view._array;
+        array = view._array,
+        particleBuffers = view._particles._state.buffers.slice();
       view.show = true;
       scene.renderForSpecs(later);
       scene.primitives.remove(view);
       expect(stage.isDestroyed()).toBeTrue();
       expect(array.isDestroyed()).toBeTrue();
+      expect(particleBuffers.every((b) => b.isDestroyed())).toBeTrue();
       expect(wind.isDestroyed()).toBeFalse();
       scene.renderForSpecs(later);
       expect(pixel()).toEqual(covered);

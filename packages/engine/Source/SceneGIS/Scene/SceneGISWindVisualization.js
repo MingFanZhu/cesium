@@ -21,11 +21,19 @@ import display from "../../Shaders/SceneGIS/Wind/SceneGISWindDisplay.js";
 import volume from "../../Shaders/SceneGIS/Wind/SceneGISWindVolume.js";
 import vertex from "../../Shaders/SceneGIS/Wind/SceneGISWindStreamlineVS.js";
 import fragment from "../../Shaders/SceneGIS/Wind/SceneGISWindStreamlineFS.js";
+import createWindParticles from "./_private/_SceneGISWindParticles.js";
 
 function validate(v) {
   if (
     typeof v.show !== "boolean" ||
     typeof v.showStreamlines !== "boolean" ||
+    typeof v.showParticles !== "boolean" ||
+    !Number.isFinite(v.particleSize) ||
+    v.particleSize <= 0 ||
+    v.particleSize > 4 ||
+    !Number.isFinite(v.particleOpacity) ||
+    v.particleOpacity < 0 ||
+    v.particleOpacity > 1 ||
     !["volume", "slice", "none"].includes(v.mode) ||
     !["speed", "concentration"].includes(v.colorBy) ||
     !Number.isFinite(v.colorMaximum) ||
@@ -38,6 +46,7 @@ function validate(v) {
   }
 }
 function release(v) {
+  v._particles = v._particles?.destroy();
   v._removePreUpdate?.();
   v._removePreUpdate = undefined;
   if (v._stage && !v._scene.isDestroyed()) {
@@ -187,7 +196,11 @@ function create(v, context, field) {
  * @param {SceneGISWindSimulation} options.simulation Ready or pending field producer.
  * @param {boolean} [options.show=true] Display enabled.
  * @param {string} [options.mode="volume"] "volume", "slice" or "none".
- * @param {boolean} [options.showStreamlines=true] Show instantaneous lines.
+ * @param {boolean} [options.showStreamlines=false] Show legacy instantaneous lines.
+ * @param {boolean} [options.showParticles=true] Show GPU flow markers, clocked by completed simulation time. They sample the latest completed field during each render batch; they are not conservative concentration transport.
+ * @param {number} [options.particleCount=4096] Immutable particle capacity, integer 1..65536.
+ * @param {number} [options.particleSize=0.65] Marker width in meters, (0,4]; projected length is at most five times the width.
+ * @param {number} [options.particleOpacity=0.75] Marker opacity in [0,1], independent of tracer concentration.
  * @param {string} [options.colorBy="speed"] "speed" or "concentration".
  * @param {number} [options.colorMaximum=10] Color scale maximum, m/s or tracer units.
  * @param {number} [options.extinction=0.15] Visual opacity coefficient per meter per tracer unit.
@@ -204,7 +217,21 @@ function SceneGISWindVisualization(options) {
   this._simulation = options.simulation;
   /** @type {boolean} */ this.show = options.show ?? true;
   /** @type {string} */ this.mode = options.mode ?? "volume";
-  /** @type {boolean} */ this.showStreamlines = options.showStreamlines ?? true;
+  /** @type {boolean} */ this.showStreamlines =
+    options.showStreamlines ?? false;
+  /** @type {boolean} */ this.showParticles = options.showParticles ?? true;
+  /** @type {number} */ this.particleSize = options.particleSize ?? 0.65;
+  /** @type {number} */ this.particleOpacity = options.particleOpacity ?? 0.75;
+  this._particleCount = options.particleCount ?? 4096;
+  if (
+    !Number.isInteger(this._particleCount) ||
+    this._particleCount < 1 ||
+    this._particleCount > 65536
+  ) {
+    throw new DeveloperError("particleCount must be an integer 1..65536.");
+  }
+  this._particles = undefined;
+  this._particleGeneration = undefined;
   /** @type {string} */ this.colorBy = options.colorBy ?? "speed";
   /** @type {number} */ this.colorMaximum = options.colorMaximum ?? 10;
   /** @type {number} */ this.extinction = options.extinction ?? 0.15;
@@ -237,6 +264,30 @@ function SceneGISWindVisualization(options) {
   this._stage = this._command = this._array = undefined;
   validate(this);
 }
+Object.defineProperties(SceneGISWindVisualization.prototype, {
+  /**
+   * Immutable GPU marker capacity.
+   * @memberof SceneGISWindVisualization.prototype
+   * @type {number}
+   * @readonly
+   */
+  particleCount: {
+    get() {
+      return this._particleCount;
+    },
+  },
+  /**
+   * Allocated particle state bytes; excludes borrowed wind fields and scene post-process targets.
+   * @memberof SceneGISWindVisualization.prototype
+   * @type {number}
+   * @readonly
+   */
+  particleTextureByteLength: {
+    get() {
+      return this._particles?.textureMemoryInBytes ?? 0;
+    },
+  },
+});
 /** @private */
 SceneGISWindVisualization.prototype.update = function (frameState) {
   if (!frameState.passes.render) {
@@ -264,6 +315,18 @@ SceneGISWindVisualization.prototype.update = function (frameState) {
     this._scene.camera.inverseViewMatrix,
     this._eyeToLocal,
   );
+  if (this.show && this.showParticles && !this._particles) {
+    this._particles = createWindParticles(this, field, this._bounds);
+  }
+  if (this._particles) {
+    if (this._particleGeneration !== field.generation) {
+      this._particles.reset();
+      this._particleGeneration = field.generation;
+    }
+    this._particles.show = this.show && this.showParticles;
+    this._particles.modelMatrix = field.modelMatrix;
+    this._particles.update(frameState);
+  }
   if (this.show && this.showStreamlines) {
     this._command.modelMatrix = field.modelMatrix;
     BoundingSphere.transform(

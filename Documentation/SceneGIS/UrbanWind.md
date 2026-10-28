@@ -64,8 +64,11 @@ const display = scene.primitives.add(
   new C.SceneGISWindVisualization({
     scene,
     simulation: wind,
-    mode: "volume",
-    showStreamlines: true,
+    mode: "none", // GPU flow particles; use "volume" or "slice" to add tracer display.
+    showParticles: true,
+    particleCount: 4096,
+    particleSize: 0.65,
+    particleOpacity: 0.75,
     colorBy: "speed",
     colorMaximum: 5.5,
     extinction: 0.075,
@@ -83,20 +86,26 @@ scene.requestRender();
 
 ## 配置与控制
 
-| 类别         | API / 单位                                                                  | 修改行为                 |
-| ------------ | --------------------------------------------------------------------------- | ------------------------ |
-| 网格         | dimensions，minimum 米，cellSize 米；三轴均不少于 4，最多 2,097,152 格      | 重建实例                 |
-| 时间与物性   | timeStep 秒，kinematicViscosity m²/s，smagorinskyConstant                   | 重建实例                 |
-| 来流         | windSpeed m/s；windDirection 弧度，从局部 +X 逆时针的**流向**               | 重建实例                 |
-| 初始场与障碍 | initialVelocity m/s；solidMask                                              | 重建实例                 |
-| 边界         | boundaryConditions 六个面                                                   | 重建实例                 |
-| 扩散         | tracerDiffusivity m²/s，默认 0                                              | 重建实例                 |
-| 示踪源       | setTracerSources(sources)；球心、半径米，rate 示踪量/秒/流体格，enabled     | 下一物理步生效，不重置   |
-| 放置         | modelMatrix 刚性变换                                                        | 只改变放置，不改变局部解 |
-| 调度         | paused，maximumStepsPerFrame（1..64）                                       | 即时控制                 |
-| 步进         | step(count)，reset()                                                        | 下一正常渲染处理         |
-| 显示         | show，mode，showStreamlines，colorBy，colorMaximum，extinction，sliceHeight | 不推进物理               |
-| 流线布局     | streamlineSeeds（1..256），streamlineSegments（1..64）                      | 重建显示组件             |
+| 类别         | API / 单位                                                                           | 修改行为                 |
+| ------------ | ------------------------------------------------------------------------------------ | ------------------------ |
+| 网格         | dimensions，minimum 米，cellSize 米；三轴均不少于 4，最多 2,097,152 格               | 重建实例                 |
+| 时间与物性   | timeStep 秒，kinematicViscosity m²/s，smagorinskyConstant                            | 重建实例                 |
+| 来流         | windSpeed m/s；windDirection 弧度，从局部 +X 逆时针的**流向**                        | 重建实例                 |
+| 初始场与障碍 | initialVelocity m/s；solidMask                                                       | 重建实例                 |
+| 边界         | boundaryConditions 六个面                                                            | 重建实例                 |
+| 扩散         | tracerDiffusivity m²/s，默认 0                                                       | 重建实例                 |
+| 示踪源       | setTracerSources(sources)；球心、半径米，rate 示踪量/秒/流体格，enabled              | 下一物理步生效，不重置   |
+| 放置         | modelMatrix 刚性变换                                                                 | 只改变放置，不改变局部解 |
+| 调度         | paused，maximumStepsPerFrame（1..64）                                                | 即时控制                 |
+| 步进         | step(count)，reset()                                                                 | 下一正常渲染处理         |
+| 显示         | show，mode，showStreamlines，colorBy，colorMaximum，extinction，sliceHeight          | 不推进物理               |
+| 流线布局     | streamlineSeeds（1..256），streamlineSegments（1..64）                               | 重建显示组件             |
+| GPU 粒子     | showParticles（默认 true），particleSize 米（0..4，不含 0），particleOpacity（0..1） | 即时显示控制             |
+| 粒子容量     | particleCount（1..65536，默认 4096）                                                 | 重建显示组件             |
+
+默认 `showStreamlines=false`，可显式开启原有瞬时线。`particleTextureByteLength`
+返回消费者自有粒子纹理字节数，4096 个粒子占 0.50 MiB；不包含借用的风场或场景后处理目标。
+显示组件移除会释放这些资源，不会销毁风场。
 
 `reset()` 清除已有队列、速度、示踪量和模拟时间；紧随其后的 `step(n)` 在重置后执行。
 来流、格网、边界等物理快照不能通过运行时赋值偷偷修改。源关闭后，已有示踪量继续输运。
@@ -186,6 +195,15 @@ scene.primitives.remove(wind);
 
 体积和切片透明度来自示踪量，风速/示踪量仅选择颜色。体积射线在不透明建筑/地形深度处结束；
 透明物体不作为遮挡。流线采用半格弧长 midpoint 积分，是瞬时曲线，不是粒子轨迹。
+默认 GPU 粒子使用原生透明深度/OIT，短轴宽度为 particleSize，长轴随投影风向调整，
+最大为宽度的五倍。颜色仍由 colorBy 控制；粒子透明度来自可视化寿命淡入淡出，
+粒子数量/密度不代表浓度。位置随机数只用于确定性播种和回收，不扰动速度求解。
+
+粒子读取公开 GPU 场，并用已完成的 simulationTime 推进；暂停冻结、单步推进，
+generation 变化重置粒子。RK2 子步不大于物理 timeStep，整段体素遍历阻止穿过固体，
+出界或碰撞后重新播种。一帧批量求解多个步骤时，粒子使用该批次**最终速度快照**，
+因此非定常流下的粒子轨迹会随批次略变；不能作为精确拉格朗日轨迹或污染物质量输运。
+浓度始终来自独立的逐物理步守恒输运。隐藏期间不补算粒子历史。
 显示不使用墙钟动画；暂停后的相同视角保持稳定。后处理开关在 preUpdate 同步，
 与 Scene 早于 primitive.update 的后处理资源配置保持一致。
 
@@ -214,6 +232,18 @@ GPU 场共 119.25 MiB：768×768 atlas，11 个速度/分布 RGBA32F、2 个示�
 | 球面 +X，热启动     |     80 |           1.629 |       7.66 |    10.44× |
 | 球面 30°，热启动    |     40 |           1.672 |       3.75 |    10.67× |
 | 平面 +X，独立运行   |     40 |           1.640 |       4.05 |     9.88× |
+
+W5 改为 4096 个 GPU 粒子后，1575×892 视口、每帧上限 16、粒子宽度 0.65 m：
+
+| 案例              | 模拟秒 | 求解+输运 GPU ms/步中位数 | 批次墙钟秒 | 模拟/墙钟 |
+| ----------------- | -----: | ------------------------: | ---------: | --------: |
+| 平面 +X，热启动   |     40 |                     1.617 |       3.27 |    12.25× |
+| 平面 +X，页面重载 |     40 |                     1.623 |       3.82 |    10.46× |
+| 球面 +X，页面切换 |     40 |                     1.627 |       3.90 |    10.25× |
+
+粒子新增 0.50 MiB 状态，每个时间变化的显示帧一次小尺寸 MRT 更新、一次实例绘制。
+上述 GPU 查询不包含粒子；墙钟包含粒子更新和显示，不能从跨次墙钟差值推断其精确 GPU 成本。
+截图按默认 40 秒复现，保存在本机忽略目录 `Build/wind-evidence/particles-*-40s.jpg`。
 
 计时包围整个固定步批次，包含速度与示踪，不包含显示；墙钟包含页面显示/调度，
 首次初始化另含编译分配。只读 `gpuTiming` 返回 millisecondsPerStep、steps、version。
