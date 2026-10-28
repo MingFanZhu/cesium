@@ -270,7 +270,6 @@ function SceneGISVectorTileBatch(owner, tile, prepared, allowPicking, record) {
   }
   this._ground = !!prepared.ground;
   this._pattern = prepared.pattern ?? false;
-  this._material = prepared.material ?? false;
   this._kind = prepared.kind;
   this._minimumHeight = prepared.minimumHeight ?? 0;
   this._maximumHeight = prepared.maximumHeight ?? 0;
@@ -372,7 +371,6 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
     ...(this._pattern
       ? this._owner._patterns.uniformMap(this._tileBounds)
       : {}),
-    ...(this._material ? this._owner._materials.uniformMap() : {}),
     u_sceneGISVectorOpacity: () => this._owner.opacity,
     ...(extrusion
       ? {
@@ -436,8 +434,6 @@ SceneGISVectorTileBatch.prototype.update = function (frameState) {
 function updateExtrusionState(batch, command) {
   const translucent =
     batch._pattern || batch._styleOpacity * batch._owner.opacity < 1;
-  command.castShadows = batch._material && !translucent;
-  command.receiveShadows = batch._material;
   const opaqueWorld = batch._owner._globe
     ? !batch._owner._scene.globe.translucency.enabled
     : batch._owner._world.opacity === 1;
@@ -498,8 +494,6 @@ SceneGISVectorTileBatch.prototype.setRegions = function (regions) {
       }
       EnvironmentResources.setProgram(published.render, source.shaderProgram);
       published.render.pass = source.pass;
-      published.render.castShadows = source.castShadows;
-      published.render.receiveShadows = source.receiveShadows;
       published.render.renderState = source.renderState;
       this.renderCommands.push(published.render);
       index++;

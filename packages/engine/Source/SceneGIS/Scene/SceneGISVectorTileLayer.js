@@ -24,9 +24,6 @@ import GlobeCover from "./_private/_SceneGISVectorGlobeCover.js";
 import GlobeTerrain from "./_private/_SceneGISVectorGlobeTerrain.js";
 import extrusionAnchoring from "./_private/_SceneGISVectorExtrusionAnchoring.js";
 import GlobeBackground from "./_private/_SceneGISVectorGlobeBackground.js";
-import BuildingMaterial from "../Core/_private/_SceneGISVectorBuildingMaterial.js";
-import Materials from "./_private/_SceneGISVectorMaterials.js";
-import VectorEnvironment from "./_private/_SceneGISVectorEnvironment.js";
 import Patterns from "./_private/_SceneGISVectorPatterns.js";
 import State from "../Core/_private/_SceneGISVectorState.js";
 import StateStore from "./_private/_SceneGISVectorStateStore.js";
@@ -355,10 +352,7 @@ function validatePreparedTile(result, records, allowPicking) {
 }
 
 function prepareEntry(layer, state, entry, zoom) {
-  if (
-    (layer._patterns && !layer._patterns.loaded) ||
-    (layer._materials && !layer._materials.loaded)
-  ) {
+  if (layer._patterns && !layer._patterns.loaded) {
     return;
   }
   if (entry.work || layer._preparing >= 2 || !layer._workers.available) {
@@ -512,10 +506,6 @@ function createBatches(layer, state, entry, frameState, budget) {
   }
   while (work.cursor < work.items.length) {
     const { id, item } = work.items[work.cursor];
-    if (item.material && !layer._materials.ready) {
-      work.cursor++;
-      continue;
-    }
     if (
       budget.bytes > 0 &&
       (performance.now() >= budget.deadline ||
@@ -866,8 +856,7 @@ function publishOrder(layer) {
  * @param {number} [options.maximumUploadBytesPerFrame=4194304] Soft tile buffer upload byte budget per normal frame. One indivisible batch may exceed it.
  * @param {number} [options.maximumSymbolCandidates=2048] Maximum point-symbol candidates per view, selected by style priority.
  * @param {number} [options.maximumGlyphRanges=64] Maximum cached 256-code-point glyph pages per symbol cohort. An atomic replacement may additionally retain the published cohort's pages until commit, at most twice this limit.
- * @param {number} [options.maximumSymbolRequests=4] Maximum concurrent glyph/sprite resource jobs and material image requests.
- * @param {number} [options.maximumMaterialTextureBytes=67108864] Maximum shared building material atlas bytes, including the parameter table. Decoded source images obey the same bound.
+ * @param {number} [options.maximumSymbolRequests=4] Maximum concurrent glyph/sprite resource jobs.
  * @param {number} [options.opacity=1] Per-feature opacity multiplier in [0, 1]; not composited group opacity.
  * @param {boolean} [options.show=true] Whether the layer is shown.
  * @param {boolean} [options.allowPicking=true] Whether feature pick resources are created.
@@ -1000,11 +989,6 @@ function SceneGISVectorTileLayer(options) {
     "maximumSymbolRequests",
     4,
   );
-  this._maximumMaterialTextureBytes = integerOption(
-    options,
-    "maximumMaterialTextureBytes",
-    64 * 1024 * 1024,
-  );
   const extent = this._extent;
   this._workers = new WorkerPool({
     extent: {
@@ -1024,15 +1008,6 @@ function SceneGISVectorTileLayer(options) {
         this,
         maximumSymbolCandidates,
         maximumGlyphRanges,
-        maximumSymbolRequests,
-      )
-    : undefined;
-  this._materials = this._records.some(({ definition }) =>
-    BuildingMaterial.used(definition),
-  )
-    ? new Materials(
-        this,
-        this._maximumMaterialTextureBytes,
         maximumSymbolRequests,
       )
     : undefined;
@@ -1135,7 +1110,6 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
       return (
         this._tilesLoaded &&
         (this._patterns?.loaded ?? true) &&
-        (this._materials?.loaded ?? true) &&
         (this._symbols?.loaded ?? true) &&
         (!this._globe ||
           (!GlobeTerrain.pending(this) &&
@@ -1200,8 +1174,6 @@ Object.defineProperties(SceneGISVectorTileLayer.prototype, {
           0,
         ),
         uploads: this._uploads,
-        materialTextureBytes: this._materials?.resources?.byteLength ?? 0,
-        pendingMaterialRequests: this._materials?.pending ?? 0,
         zoom: this._zoom,
         ...(this._symbols
           ? {
@@ -1321,11 +1293,6 @@ SceneGISVectorTileLayer.prototype.update = function (frameState) {
         -frameState.camera.positionWC.z / frameState.camera.directionWC.z;
     }
     this._patterns?.update(frameState.context);
-    this._materials?.update(frameState.context);
-    if (this._materials?.ready) {
-      frameState.brdfLutGenerator.update(frameState);
-      VectorEnvironment.updateReflections(this, frameState);
-    }
     updateBackgrounds(this, zoom, frameState);
     updateSources(this, zoom, frameState);
     if (this._symbols) {
@@ -1385,13 +1352,6 @@ function setRule(layer, layerId, scope, name, value) {
     );
   }
   layer._style = style;
-  if (!layer._materials && BuildingMaterial.used(record.definition)) {
-    layer._materials = new Materials(
-      layer,
-      layer._maximumMaterialTextureBytes,
-      layer._maximumSymbolRequests,
-    );
-  }
   layer._records[index] = record;
   layer._workers.configuration = {
     ...layer._workers.configuration,
@@ -1587,7 +1547,6 @@ SceneGISVectorTileLayer.prototype.destroy = function () {
       state._sceneGISSurfaceOverlays = undefined;
     }
   }
-  this._materials?.destroy();
   this._workers.destroy();
   this._symbols?.destroy();
   this._patterns?.destroy();

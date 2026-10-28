@@ -97,7 +97,6 @@ function prepareVectorBatch(item, allowPicking, ground = false) {
         maximumHeight = Math.max(maximumHeight, extrusion[i]);
       }
       result.push({
-        material: item.material,
         kind: item.kind,
         pattern:
           item.pattern ??

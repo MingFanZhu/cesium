@@ -137,15 +137,6 @@ void sceneGISRecordPlanar(vec4 color, vec3 normalEC, vec3 geometryNormalEC, vec3
 #elif defined(SCENEGIS_DEFERRED_VECTOR_CAPTURE)
 uniform vec2 u_sceneGISVectorMapRange;
 uniform float u_sceneGISVectorStyleOrder;
-void sceneGISRecordVector(vec4 color, vec3 normalEC);
-void sceneGISRecordVectorPbr(vec4 color, vec3 normalEC, float roughness, float metallic, vec3 emissive)
-{
-    sceneGISRecordVector(color, normalEC);
-    sceneGISDeferredDiffuseValue.a = metallic;
-    sceneGISDeferredNormalValue.a = roughness + 1.0;
-    sceneGISDeferredEmissionValue = emissive;
-}
-
 void sceneGISRecordVector(vec4 color, vec3 normalEC)
 {
     sceneGISDeferredDiffuseValue = color;

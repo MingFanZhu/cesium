@@ -5,17 +5,17 @@
 | Field                    | Value                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
 | Extension slug           | `vector-tiles`                                                                                                           |
-| Status                   | `active`（建筑材质；D2 人工 gate 独立保留）                                                                              |
+| Status                   | `active`（动态绘制规则；此前扩展已验收）                                                                                 |
 | Planning model           | `extension`                                                                                                              |
-| Active extension plan    | [建筑材质](plans/2026-10-27-building-materials-extension.md)                                                             |
+| Active extension plan    | [动态绘制规则](plans/2026-10-16-dynamic-style-extension.md)                                                              |
 | Completed extension plan | [四类样式增强](plans/2026-09-17-style-enhancements-extension.md)、[总体计划](plans/2026-09-12-vector-tiles-extension.md) |
-| Current phase            | B3：纽约公网示例与交付                                                                                                   |
-| Active phase plan        | [B3](plans/2026-10-27-b3-nyc-material-example.md)                                                                        |
-| Last completed phase     | B2：材质渲染；[review](reviews/2026-10-27-b2-material-rendering.md)                                                      |
+| Current phase            | D2 技术完成，等待动态规则人工视觉 gate                                                                                   |
+| Active phase plan        | None；[D2](plans/2026-10-16-d2-layer-style-runtime.md) technical completed                                               |
+| Last completed phase     | D2：Layer 动态样式运行时；D1 checkpoint `7414056515`                                                                     |
 | Active standalone plan   | None；[未声明缩放范围](plans/2026-10-20-implicit-zoom-bounds.md) completed                                               |
 | Architecture contact     | 当前 Agent                                                                                                               |
 | Execution contact        | 当前 Agent                                                                                                               |
-| Last updated             | `2026-10-27`                                                                                                             |
+| Last updated             | `2026-10-28`                                                                                                             |
 
 ## Scope
 
@@ -63,13 +63,12 @@ Buffer vector 与 VectorProvider 链路。MVT 解析保持 CRS 无关，tile mat
 
 ## Current handoff
 
-2026-10-27：建筑材质 B1/B2 已实现并分别提交 `43a656d184` / `d7319e1f05`。
-B3 原创石材、砖窗、平屋顶与 CC0 玻璃组合已交付，修复实景字符串 ID 取模导致白墙的示例错误；
-[技术自审](reviews/2026-10-27-b3-material-example.md) 通过，负责人新画面视觉 gate pending。
-复用原引擎调度/Worker/合批/拾取/销毁；公网纽约数据不保留街区快照。
-开发因原工作区并发高斯工作隔离到 `feature/mvt-building-materials-rendering`，交付汇回
-`feature/mvt-building-materials`，不推送。原动态规则 [D2 review](reviews/2026-10-16-d2-layer-style-runtime.md)
-负责人视觉 gate 独立保留 pending。
+2026-10-28：负责人实际查看后认为建筑 PBR 材质效果不佳，明确要求撤回并删除。
+已撤回 `43a656d184`、`d7319e1f05`、`678cfe1dc7` 的实现、Specs、示例、贴图、API/ADR 和阶段文档；
+引擎恢复到 `e534dd9abc` 的原有纯色/pattern 链路。本方案取消，没有待继续的实现或视觉 gate；
+原 D2 gate 与其他扩展保持原状态。删除本轮内容依据负责人的直接指令，提交历史保留撤回依据。
+撤回验证：引擎 Source/Specs 与实施前基线无差异；buildRelease、buildTs/tsc 通过，
+原有 Core/Globe/Planar pattern 专项 14/14 通过；无 upstream-owned file 修改或 SGP。
 
 2026-10-20：已修复两世界极端视角被隐含 `[0,24)` 排除的问题，并将极近视角的重复线标注锚点
 改为紧凑范围与可见性裁剪后展开，消除原球面 Worker 内存错误。显式范围、SSE、连续 style zoom、

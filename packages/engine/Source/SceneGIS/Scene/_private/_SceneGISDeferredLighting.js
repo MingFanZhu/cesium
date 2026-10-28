@@ -30,7 +30,6 @@ import lighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredLighti
 import phongLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPhongLighting.js";
 import pointLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPointLighting.js";
 import planarLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredPlanarLighting.js";
-import vectorPbrLighting from "../../../Shaders/SceneGIS/VectorTiles/SceneGISVectorPbrLighting.js";
 import vectorLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredVectorLighting.js";
 import VectorEnvironmentResources from "../../Renderer/_private/_SceneGISVectorEnvironmentResources.js";
 import globeLighting from "../../../Shaders/SceneGIS/Rendering/SceneGISDeferredGlobeLighting.js";
@@ -177,7 +176,7 @@ function shaderInfo(renderer, command) {
         source.includes("#define SCENEGIS_DEFERRED_VECTOR_MATERIAL"),
       ),
       vectorDefines: fs.defines.filter((define) =>
-        /^(SCENEGIS_VECTOR_PBR$|SCENEGIS_VECTOR_ENVIRONMENT$|SCENEGIS_VECTOR_SHADOWS$|SCENEGIS_VECTOR_SHADOW_CASCADES$|USE_SHADOW_DEPTH_TEXTURE$|USE_SOFT_SHADOWS$|SCENEGIS_GLOBE$|COMBINED_SCATTERING_TEXTURES$|TRANSMITTANCE_TEXTURE_|SCATTERING_TEXTURE_|IRRADIANCE_TEXTURE_)/.test(
+        /^(SCENEGIS_VECTOR_ENVIRONMENT$|SCENEGIS_VECTOR_SHADOWS$|SCENEGIS_VECTOR_SHADOW_CASCADES$|USE_SHADOW_DEPTH_TEXTURE$|USE_SOFT_SHADOWS$|SCENEGIS_GLOBE$|COMBINED_SCATTERING_TEXTURES$|TRANSMITTANCE_TEXTURE_|SCATTERING_TEXTURE_|IRRADIANCE_TEXTURE_)/.test(
           define,
         ),
       ),
@@ -558,11 +557,6 @@ function createGroup(renderer, model, key, family, edl) {
         ),
       );
     }
-    if (key.includes("SCENEGIS_VECTOR_PBR")) {
-      builder.addDefine("LIGHTING_PBR", undefined, fragment);
-      builder.addDefine("HAS_NORMALS", undefined, fragment);
-      builder.addFragmentLines(vectorPbrLighting);
-    }
   } else if (family === "globe") {
     builder.addDefine("SCENEGIS_DEFERRED_GLOBE_LIGHTING", undefined, fragment);
     for (const define of key) {
@@ -712,12 +706,7 @@ function prepareGroups(renderer, ranges) {
           continue;
         }
         if (info.vector) {
-          if (
-            !vectorCommand ||
-            info.vectorDefines.includes("SCENEGIS_VECTOR_PBR")
-          ) {
-            vectorCommand = command;
-          }
+          vectorCommand ??= command;
           continue;
         }
         if (info.planar) {

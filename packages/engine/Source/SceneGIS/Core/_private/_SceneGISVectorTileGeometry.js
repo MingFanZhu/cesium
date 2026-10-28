@@ -13,7 +13,6 @@ import Dashes from "./_SceneGISVectorTileDashes.js";
 import extrusionGeometry from "./_SceneGISVectorExtrusionGeometry.js";
 import Pattern from "./_SceneGISVectorPattern.js";
 import State from "./_SceneGISVectorState.js";
-import BuildingMaterial from "./_SceneGISVectorBuildingMaterial.js";
 
 function attribute(values, size, double = false) {
   return new GeometryAttribute({
@@ -347,15 +346,7 @@ SceneGISVectorTileGeometry.build = function (
       }
     } else if (definition.type === "fill-extrusion") {
       if (color.alpha > 0) {
-        const materials = BuildingMaterial.used(definition)
-          ? BuildingMaterial.resolve(style, paint, stateContext?.globe)
-          : undefined;
-        const geometry = extrusionGeometry(
-          feature,
-          coordinates,
-          paint,
-          materials,
-        );
+        const geometry = extrusionGeometry(feature, coordinates, paint);
         if (geometry) {
           main.push(makeInstance(geometry, id, color));
         }
@@ -393,7 +384,6 @@ SceneGISVectorTileGeometry.build = function (
       dashIntervals: dashes.values,
       uniformPaint,
       pattern: definition.paint?.[`${definition.type}-pattern`] !== undefined,
-      material: BuildingMaterial.used(definition),
     });
   }
   if (outlines.length > 0) {

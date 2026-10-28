@@ -5,7 +5,6 @@ import Geometry from "../../../Core/Geometry.js";
 import GeometryAttribute from "../../../Core/GeometryAttribute.js";
 import IndexDatatype from "../../../Core/IndexDatatype.js";
 import PrimitiveType from "../../../Core/PrimitiveType.js";
-import BuildingMaterial from "./_SceneGISVectorBuildingMaterial.js";
 
 function attribute(values, size, double = false) {
   return new GeometryAttribute({
@@ -18,7 +17,7 @@ function attribute(values, size, double = false) {
 }
 
 /** Builds roofs and walls in projected tile coordinates in the vector Worker. @private */
-function extrusionGeometry(feature, coordinates, paint, materials) {
+function extrusionGeometry(feature, coordinates, paint) {
   const base = Math.max(0, paint["fill-extrusion-base"]);
   const height = Math.max(0, paint["fill-extrusion-height"]);
   if (height <= base) {
@@ -30,7 +29,6 @@ function extrusionGeometry(feature, coordinates, paint, materials) {
     data = [],
     gradients = [],
     patternCoordinates = [],
-    materialCoordinates = [],
     indices = [];
   const patterned = paint["fill-extrusion-pattern"] !== undefined;
   const parts = feature.geometry.parts;
@@ -66,7 +64,7 @@ function extrusionGeometry(feature, coordinates, paint, materials) {
     const outer = rings[0];
     const cx = outer.reduce((sum, p) => sum + p.x, 0) / outer.length;
     const cy = outer.reduce((sum, p) => sum + p.y, 0) / outer.length;
-    function vertex(point, z, normal, top, wall, distance = 0, tangent, start) {
+    function vertex(point, z, normal, top, wall, distance = 0) {
       positions.push(point.x, point.y, z);
       normals.push(...normal);
       anchors.push(point.x, point.y);
@@ -79,18 +77,6 @@ function extrusionGeometry(feature, coordinates, paint, materials) {
           wall ? distance : point.x,
           wall ? z : point.y,
           wall ? 1 : 0,
-        );
-      }
-      if (materials) {
-        materialCoordinates.push(
-          ...BuildingMaterial.coordinates(
-            materials[wall ? 0 : 1],
-            coordinates,
-            point,
-            z,
-            wall ? tangent : undefined,
-            start,
-          ),
         );
       }
     }
@@ -151,15 +137,10 @@ function extrusionGeometry(feature, coordinates, paint, materials) {
           0,
         ];
         const offset = positions.length / 3;
-        const direction = b.x > a.x || (b.x === a.x && b.y > a.y) ? 1 : -1;
-        const tangent = [
-          (direction * (b.x - a.x)) / length,
-          (direction * (b.y - a.y)) / length,
-        ];
-        vertex(a, base, normal, 0, true, start, tangent, a);
-        vertex(b, base, normal, 0, true, distance, tangent, a);
-        vertex(b, height, normal, 1, true, distance, tangent, a);
-        vertex(a, height, normal, 1, true, start, tangent, a);
+        vertex(a, base, normal, 0, true, start);
+        vertex(b, base, normal, 0, true, distance);
+        vertex(b, height, normal, 1, true, distance);
+        vertex(a, height, normal, 1, true, start);
         for (const index of sign > 0
           ? [0, 1, 2, 0, 2, 3]
           : [0, 2, 1, 0, 3, 2]) {
@@ -178,9 +159,6 @@ function extrusionGeometry(feature, coordinates, paint, materials) {
       vectorAnchor: attribute(anchors, 2),
       extrusionData: attribute(data, 4),
       extrusionGradient: attribute(gradients, 1),
-      ...(materials
-        ? { materialCoordinate: attribute(materialCoordinates, 3) }
-        : {}),
       ...(patterned
         ? { patternCoordinate: attribute(patternCoordinates, 3) }
         : {}),

@@ -15,7 +15,6 @@ import IconFit from "./_SceneGISVectorIconFit.js";
 import prepareGlobeGeometry from "./_SceneGISVectorGlobeGeometry.js";
 import TerrainIndex from "./_SceneGISVectorGlobeTerrainIndex.js";
 import extrusionTerrain from "./_SceneGISVectorExtrusionTerrain.js";
-import buildMaterialAtlas from "./_SceneGISVectorMaterialAtlas.js";
 
 function transfer(value, objects, seen = new Set()) {
   if (!value || typeof value !== "object" || seen.has(value)) {
@@ -56,9 +55,7 @@ function createVectorTaskHandler() {
       style = new Style(parameters.style);
     }
     let result;
-    if (parameters.kind === "materials") {
-      result = buildMaterialAtlas(parameters);
-    } else if (parameters.kind === "terrain") {
+    if (parameters.kind === "terrain") {
       result = TerrainIndex.build(parameters);
     } else if (parameters.kind === "extrusion-terrain") {
       result = extrusionTerrain(parameters);
