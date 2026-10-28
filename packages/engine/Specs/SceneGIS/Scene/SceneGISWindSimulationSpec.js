@@ -11,6 +11,14 @@ import createFrameState from "../../../../../Specs/createFrameState.js";
 
 describe("SceneGIS/Scene/SceneGISWindSimulation", function () {
   let context, solver, simulation;
+  const periodic = {
+    xMin: "periodic",
+    xMax: "periodic",
+    yMin: "periodic",
+    yMax: "periodic",
+    zMin: "periodic",
+    zMax: "periodic",
+  };
   function config(overrides = {}) {
     return model.configure({
       dimensions: new Cartesian3(4, 8, 4),
@@ -19,6 +27,8 @@ describe("SceneGIS/Scene/SceneGISWindSimulation", function () {
       kinematicViscosity: 0.1,
       initialVelocity: new Cartesian3(0.02, 0, 0),
       smagorinskyConstant: 0,
+      windSpeed: 0,
+      boundaryConditions: periodic,
       ...overrides,
     });
   }
@@ -215,8 +225,134 @@ describe("SceneGIS/Scene/SceneGISWindSimulation", function () {
     expect(errors[1]).toBeLessThan(0.02);
   });
 
+  it("preserves oblique open flow and specular top/bottom", function () {
+    solver = new Solver(
+      context,
+      config({
+        dimensions: new Cartesian3(12, 12, 4),
+        windSpeed: 0.025,
+        windDirection: Math.PI / 6,
+        initialVelocity: undefined,
+        boundaryConditions: { zMin: "slip", zMax: "slip" },
+      }),
+    );
+    for (let i = 0; i < 100; i++) {
+      solver.step();
+    }
+    const v = read(solver.velocity);
+    for (const cell of [
+      [0, 0, 0],
+      [5, 5, 2],
+      [11, 11, 3],
+    ]) {
+      const p = 4 * pixel(...cell);
+      expect(v[p]).toEqualEpsilon(0.025 * Math.cos(Math.PI / 6), 2e-6);
+      expect(v[p + 1]).toEqualEpsilon(0.0125, 2e-6);
+      expect(v[p + 3]).toEqualEpsilon(1, 2e-6);
+    }
+  });
+
+  it("converges toward the forced Poiseuille reference with halfway no-slip walls", function () {
+    const errors = [];
+    for (const ny of [8, 16]) {
+      const dx = 8 / ny,
+        dt = dx * dx,
+        force = 0.0002;
+      solver = new Solver(
+        context,
+        config({
+          dimensions: new Cartesian3(4, ny, 4),
+          cellSize: dx,
+          timeStep: dt,
+          acceleration: new Cartesian3(force, 0, 0),
+          initialVelocity: Cartesian3.ZERO,
+          boundaryConditions: { ...periodic, yMin: "wall", yMax: "wall" },
+        }),
+      );
+      upload((x, y) => {
+        const h = (y + 0.5) * dx;
+        const u = (((force * h * (8 - h)) / 0.2) * dt) / dx;
+        return equilibrium([u, 0, 0]).map((v, i) => {
+          const c = model.directions[i],
+            a = (force * dt * dt) / dx;
+          return (
+            v +
+            0.5 *
+              model.weights[i] *
+              ((3 * (c[0] - u) + 9 * c[0] * u * c[0]) * a)
+          );
+        });
+      });
+      for (let i = 0; i < 300 / (dx * dx); i++) {
+        solver.step();
+      }
+      const v = read(solver.velocity);
+      let error = 0,
+        denominator = 0;
+      for (let y = 0; y < ny; y++) {
+        const h = (y + 0.5) * dx,
+          expected = (force * h * (8 - h)) / 0.2;
+        error += (v[pixel(1, y, 1) * 4] - expected) ** 2;
+        denominator += expected ** 2;
+        expect(v[pixel(1, y, 1) * 4 + 1]).toEqualEpsilon(0, 1e-6);
+      }
+      errors.push(Math.sqrt(error / denominator));
+      solver.destroy();
+      solver = undefined;
+    }
+    expect(errors[0]).toBeLessThan(0.04);
+    expect(errors[1]).toBeLessThan(0.012);
+    expect(errors[1]).toBeLessThan(errors[0]);
+    console.log("Wind Poiseuille relative L2", errors);
+  });
+
+  it("resolves a solid obstacle wake and checks downstream-buffer sensitivity", function () {
+    const probes = [];
+    for (const nx of [24, 32]) {
+      const n = new Cartesian3(nx, 12, 8);
+      const mask = new Uint8Array(nx * 12 * 8);
+      for (let z = 0; z < 4; z++) {
+        for (let y = 4; y < 8; y++) {
+          for (let x = 7; x < 10; x++) {
+            mask[x + nx * (y + 12 * z)] = 1;
+          }
+        }
+      }
+      solver = new Solver(
+        context,
+        config({
+          dimensions: n,
+          windSpeed: 0.03,
+          initialVelocity: undefined,
+          kinematicViscosity: 0.04,
+          solidMask: mask,
+          boundaryConditions: { zMin: "wall", zMax: "slip" },
+        }),
+      );
+      for (let i = 0; i < 500; i++) {
+        solver.step();
+      }
+      const v = read(solver.velocity);
+      expect(Array.from(v).every(Number.isFinite)).toBe(true);
+      expect(
+        Array.from(v.slice(4 * pixel(8, 5, 2), 4 * pixel(8, 5, 2) + 3)),
+      ).toEqual([0, 0, 0]);
+      const wake = v[4 * pixel(12, 5, 2)],
+        side = v[4 * pixel(8, 1, 2)];
+      expect(wake).toBeLessThan(side * 0.75);
+      expect(side).toBeGreaterThan(0);
+      probes.push(wake);
+      solver.destroy();
+      solver = undefined;
+    }
+    expect(Math.abs(probes[0] - probes[1]) / 0.03).toBeLessThan(0.08);
+    console.log("Wind downstream buffer wake probes", probes);
+  });
+
   it("owns fixed stepping once per normal frame and releases shared field textures", function () {
     simulation = new SceneGISWindSimulation({
+      windSpeed: 0,
+      boundaryConditions: periodic,
       dimensions: new Cartesian3(4, 4, 4),
       cellSize: 1,
       timeStep: 1,

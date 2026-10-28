@@ -53,8 +53,11 @@ function validateControls(simulation) {
  * GPU-resident local isothermal air flow using D3Q19 MRT and optional Smagorinsky LES.
  * Mount once in Scene.primitives before GPU field consumers. No display is created by this
  * object. The collection normally owns destruction. Globe and Planar use the same local-meter
- * solver; modelMatrix must be rigid. This experimental version has periodic domain faces and
- * explicit voxel bounce-back solids. It is not a certified engineering CFD solver.
+ * solver; modelMatrix must be rigid. Static solids and no-slip faces use halfway bounce-back.
+ * Open faces lie at the outer cell centers; wall/slip faces lie at domain faces. Inlets use
+ * non-equilibrium extrapolation; outlets use first-order convection at prescribed normal wind.
+ * Keep recirculation away from outlets and verify downstream buffer sensitivity.
+ * It is not a certified engineering CFD solver.
  *
  * Layout and physical options are construction snapshots. Recreate to change them. Fixed dt
  * converts uL=u*dt/dx and tau=0.5+3*nu*dt/dx^2. Require input Mach<=0.1 and
@@ -76,7 +79,11 @@ function validateControls(simulation) {
  * @param {number} [options.timeStep=0.02] Fixed physical seconds per step.
  * @param {number} [options.kinematicViscosity=0.000015] Molecular kinematic viscosity in m^2/s.
  * @param {number} [options.smagorinskyConstant=0.12] Constant in [0,0.2]; zero disables LES.
- * @param {Cartesian3} [options.initialVelocity=new Cartesian3(5,0,0)] Initial fluid velocity in local m/s.
+ * @param {number} [options.windSpeed=5] Prescribed horizontal speed in m/s.
+ * @param {number} [options.windDirection=0] Flow-towards angle, radians counterclockwise from local +X.
+ * @param {Cartesian3} [options.initialVelocity] Initial fluid m/s; defaults to the prescribed wind.
+ * @param {Cartesian3} [options.acceleration=Cartesian3.ZERO] Constant physical body acceleration in m/s^2 (MRT Guo forcing).
+ * @param {SceneGISWindSimulation.BoundaryConditions} [options.boundaryConditions] Six domain faces.
  * @param {Uint8Array} [options.solidMask] Copied x-fastest 0/1 cells, index x+nx*(y+ny*z).
  * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world placement, copied.
  * @param {boolean} [options.paused=false] Initially pause physical time accumulation.
@@ -122,6 +129,21 @@ function SceneGISWindSimulation(options = {}) {
   this._field = undefined;
   validateControls(this);
 }
+
+/**
+ * Face modes: "wind" classifies inward/outward/tangent prescribed wind as inlet/outlet/slip;
+ * "inlet" and "outlet" require the corresponding nonzero normal wind component.
+ * "wall" is no-slip; "slip" is specular free-slip; "periodic" must be paired on an axis.
+ * Oblique wind can have two inlets and two outlets. At mixed open corners inlet takes priority;
+ * multiple outlets use the sum of their one-sided convective fluxes.
+ * @typedef {object} SceneGISWindSimulation.BoundaryConditions
+ * @property {string} [xMin="wind"] Minimum X face.
+ * @property {string} [xMax="wind"] Maximum X face.
+ * @property {string} [yMin="wind"] Minimum Y face.
+ * @property {string} [yMax="wind"] Maximum Y face.
+ * @property {string} [zMin="wall"] Ground face.
+ * @property {string} [zMax="slip"] Top face.
+ */
 
 Object.defineProperties(SceneGISWindSimulation.prototype, {
   /**

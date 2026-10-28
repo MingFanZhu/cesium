@@ -1,6 +1,6 @@
 # ADR-0193: Local GPU urban wind
 
-- Status: accepted for W1; date: 2026-10-28.
+- Status: accepted through W2; date: 2026-10-28.
 - Plan: [urban-wind](../../../AgentDocs/urban-wind/README.md); upstream files / SGP: none.
 
 ## Source facts and decision
@@ -33,7 +33,29 @@ Require 0.5000001<tau0<=2; unsupported combinations throw without changing visco
 FP32 stores g=f-w to reduce equilibrium cancellation. City air viscosity is near the stability
 limit and requires explicit qualification; do not advertise quantitative engineering accuracy.
 Local cell centers minimum+(index+0.5)dx, rigid modelMatrix to Globe ENU or planar World;
-no scale/shear/implicit CRS conversion. W1 periodic boundaries; W2 separately qualifies physical faces.
+no scale/shear/implicit CRS conversion.
+
+## Static geometry, faces and forcing
+
+`SceneGISWindObstacleMask.fromExtrudedPolygons` accepts explicit simple XY rings, bottom/top
+and a rigid geometry-local to simulation-local transform. Cell-center containment of closed prisms
+is unioned with an optional horizontal ground half-space. Concave rings supported; holes,
+self-intersections and scale rejected. Subcell geometry can be missed; no arbitrary scene mesh access.
+
+Default horizontal faces classify prescribed flow-towards direction by inward/outward/tangent normal
+as inlet/outlet/slip. Bottom is no-slip, top specular slip; periodic faces must be paired.
+Building and wall links use halfway bounce-back. Open nodes are at outer cell centers.
+Inlet reconstructs equilibrium at prescribed velocity plus the previous adjacent post-collision
+non-equilibrium distribution; density is extrapolated. At mixed open corners inlet wins.
+Outlet explicitly advances each population with the sum of one-sided convective fluxes at the
+prescribed normal wind speed. This is a first-order absorbing approximation, not a reflection-free
+or backflow-stable condition. Place recirculation well upstream and test downstream buffer length.
+
+Optional constant physical acceleration uses Guo forcing in moment space:
+`g' = g - M^-1 S M(g-geq) + (I-M^-1 S M/2)F`.
+Collision velocity uses pre-collision momentum plus half force; published velocity subtracts half
+force from stored post-collision momentum. Nonequilibrium stress includes the half-force correction.
+No random perturbation, velocity clamp, viscosity increase or automatic divergence reset.
 
 ## Scheduling and sharing
 
@@ -61,5 +83,8 @@ seconds, not only FPS. Independent experiments/domain/grid convergence are requi
 - [d'Humieres et al., 2002](https://ntrs.nasa.gov/api/citations/20020075050/downloads/20020075050.pdf), Appendix A MRT.
 - [Premnath, Pattison and Banerjee](https://arxiv.org/abs/0901.2786), Smagorinsky and wall limitations.
 - [lbmpy Smagorinsky derivation](https://pycodegen.walberla.net/docs/lbmpy/1.4/notebooks/06_tutorial_modifying_method_smagorinsky.html), relaxation quadratic.
+- [Guo, Zheng and Shi, 2002, forcing](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.65.046308).
+- [Guo, Zheng and Shi, 2002, non-equilibrium extrapolation](https://cpb.iphy.ac.cn/en/article/doi/10.1088/1009-1963/11/4/310).
+- [Yang, 2013, convective outflow analysis](https://www.sciencedirect.com/science/article/pii/S0898122112006736).
 
 Independently written from equations; no third-party solver source copied.

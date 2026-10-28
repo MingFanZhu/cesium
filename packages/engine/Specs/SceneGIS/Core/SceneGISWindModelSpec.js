@@ -31,6 +31,7 @@ describe("SceneGIS/Core/SceneGISWindModel", function () {
       timeStep: 0.01,
       kinematicViscosity: 0.1,
       initialVelocity: new Cartesian3(1, 0.5, 0),
+      windSpeed: 0,
     };
     const c = model.configure(options);
     expect(c.tau).toEqualEpsilon(0.512, 1e-14);
@@ -53,8 +54,22 @@ describe("SceneGIS/Core/SceneGISWindModel", function () {
       { modelMatrix: Matrix4.fromUniformScale(2) },
       { maximumStepsPerFrame: 0 },
       { paused: 1 },
+      { boundaryConditions: { xMin: "periodic" } },
+      { boundaryConditions: { xMax: "inlet" } },
+      { boundaryConditions: { north: "wall" } },
+      { windSpeed: -1 },
+      { acceleration: new Cartesian3(NaN, 0, 0) },
     ]) {
       expect(() => new SceneGISWindSimulation(options)).toThrowDeveloperError();
     }
+  });
+  it("classifies oblique wind faces and converts physical forcing", function () {
+    const c = model.configure({
+      windDirection: Math.PI / 4,
+      acceleration: new Cartesian3(0.01, 0, 0),
+    });
+    expect(c.boundaryMin).toEqual(new Cartesian3(3, 3, 1));
+    expect(c.boundaryMax).toEqual(new Cartesian3(4, 4, 2));
+    expect(c.latticeAcceleration.x).toEqualEpsilon(0.000002, 1e-12);
   });
 });

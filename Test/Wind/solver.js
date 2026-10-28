@@ -36,6 +36,14 @@ try {
   ]) {
     const config = C._SceneGISWindModel.configure({
       dimensions: new C.Cartesian3(...dimensions),
+      boundaryConditions: {
+        xMin: "periodic",
+        xMax: "periodic",
+        yMin: "periodic",
+        yMax: "periodic",
+        zMin: "periodic",
+        zMax: "periodic",
+      },
     });
     solver = new C._SceneGISWindSolver(context, config);
     solver.step();

@@ -142,9 +142,23 @@ function configure(options) {
       "Lattice relaxation time must satisfy 0.5000001 < tau <= 2; adjust the explicitly specified grid/time/viscosity.",
     );
   }
-  const velocity = Cartesian3.clone(
-    options.initialVelocity ?? new Cartesian3(5, 0, 0),
+  const windSpeed = options.windSpeed ?? 5;
+  const windDirection = options.windDirection ?? 0;
+  if (
+    !Number.isFinite(windSpeed) ||
+    windSpeed < 0 ||
+    !Number.isFinite(windDirection)
+  ) {
+    throw new DeveloperError(
+      "windSpeed must be nonnegative and windDirection finite radians.",
+    );
+  }
+  const wind = new Cartesian3(
+    windSpeed * Math.cos(windDirection),
+    windSpeed * Math.sin(windDirection),
+    0,
   );
+  const velocity = Cartesian3.clone(options.initialVelocity ?? wind);
   const minimum = Cartesian3.clone(options.minimum ?? Cartesian3.ZERO);
   finiteVector("initialVelocity", velocity);
   finiteVector("minimum", minimum);
@@ -153,10 +167,83 @@ function configure(options) {
     timeStep / cellSize,
     new Cartesian3(),
   );
-  if (Math.sqrt(3) * Cartesian3.magnitude(latticeVelocity) > 0.1 + 1e-12) {
+  const latticeWind = Cartesian3.multiplyByScalar(
+    wind,
+    timeStep / cellSize,
+    new Cartesian3(),
+  );
+  if (
+    Math.sqrt(3) *
+      Math.max(
+        Cartesian3.magnitude(latticeVelocity),
+        Cartesian3.magnitude(latticeWind),
+      ) >
+    0.1 + 1e-12
+  ) {
     throw new DeveloperError(
       "Initial lattice Mach number must not exceed 0.1.",
     );
+  }
+  const acceleration = Cartesian3.clone(
+    options.acceleration ?? Cartesian3.ZERO,
+  );
+  finiteVector("acceleration", acceleration);
+  const latticeAcceleration = Cartesian3.multiplyByScalar(
+    acceleration,
+    (timeStep * timeStep) / cellSize,
+    new Cartesian3(),
+  );
+  const defaults = {
+    xMin: "wind",
+    xMax: "wind",
+    yMin: "wind",
+    yMax: "wind",
+    zMin: "wall",
+    zMax: "slip",
+  };
+  const boundaries = { ...defaults, ...options.boundaryConditions };
+  if (Object.keys(boundaries).some((k) => !(k in defaults))) {
+    throw new DeveloperError(
+      "Unknown boundary face; use xMin/xMax/yMin/yMax/zMin/zMax.",
+    );
+  }
+  const boundaryMin = new Cartesian3();
+  const boundaryMax = new Cartesian3();
+  for (const axis of ["x", "y", "z"]) {
+    if (
+      (boundaries[`${axis}Min`] === "periodic") !==
+      (boundaries[`${axis}Max`] === "periodic")
+    ) {
+      throw new DeveloperError(
+        "Periodic boundaries must be paired on each axis.",
+      );
+    }
+    for (const [suffix, sign, target] of [
+      ["Min", -1, boundaryMin],
+      ["Max", 1, boundaryMax],
+    ]) {
+      const type = boundaries[axis + suffix];
+      const normalSpeed = latticeWind[axis] * sign;
+      const codes = { periodic: 0, wall: 1, slip: 2, inlet: 3, outlet: 4 };
+      const effective =
+        type === "wind"
+          ? Math.abs(normalSpeed) < 1e-12
+            ? "slip"
+            : normalSpeed < 0
+              ? "inlet"
+              : "outlet"
+          : type;
+      if (
+        !(effective in codes) ||
+        (effective === "inlet" && normalSpeed >= 0) ||
+        (effective === "outlet" && normalSpeed <= 0)
+      ) {
+        throw new DeveloperError(
+          "Boundary must be periodic/wall/slip/wind or an inlet/outlet aligned with the prescribed wind.",
+        );
+      }
+      target[axis] = codes[effective];
+    }
   }
   const mask = options.solidMask;
   if (
@@ -180,6 +267,11 @@ function configure(options) {
     minimum,
     velocity,
     latticeVelocity,
+    latticeWind,
+    latticeAcceleration,
+    boundaries,
+    boundaryMin,
+    boundaryMax,
     solidMask: mask ? mask.slice() : new Uint8Array(count),
   };
 }

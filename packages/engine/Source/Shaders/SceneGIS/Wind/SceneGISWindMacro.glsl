@@ -11,5 +11,5 @@ void main() {
         rho += g;
         momentum += vec3(WIND_C[i]) * g;
     }
-    out_FragColor = vec4(momentum / rho * u_velocityScale, rho);
+    out_FragColor = vec4((momentum / rho - 0.5*u_acceleration) * u_velocityScale, rho);
 }
