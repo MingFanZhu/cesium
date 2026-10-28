@@ -70,7 +70,9 @@ atlas 按配置和设备限制预分配，`maximumGpuPageBytes` 不能按当前�
 ## 切片与部署
 
 CPU 工具位于 [Tools/GaussianSplatTiler](../../Tools/GaussianSplatTiler/README.md)，
-从完整仓库运行，Node.js 22+，不需要训练框架。支持 binary little-endian Gaussian PLY 和已有 PLY LOD 打包。
+从完整仓库运行，Node.js 22+，不需要训练框架。支持 binary little/big-endian Gaussian PLY 和已有 PLY LOD 打包。
+全部参数、坐标系/中心点配置及普通切片的大坐标精度限制见
+[切片器使用说明](../../Tools/GaussianSplatTiler/使用说明.md)。
 分段层次的 XYZ cell 参数不是旧 fixed10 XY 产品路线；保留其参数是为了兼容当前分段协议。
 
 部署保留 `scene.mcl.json`、`scene.mci`、`packs/` 相对结构，服务器需要 byte Range 支持；

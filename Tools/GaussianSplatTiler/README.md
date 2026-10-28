@@ -4,6 +4,9 @@ Node.js 22+，从完整 SceneGIS 仓库运行，无额外 npm 依赖或训练框
 仅生成 `segmented-active-cut-v3` 产品，不提供 fixed10 加载/切片。
 分段层次自身仍使用可配置 XYZ cell（默认 10×10×20 米），这与旧 fixed10 XY 渲染路线不同。
 
+完整操作步骤、全部 CLI / LOD manifest 参数、已有 CRS/中心点及大坐标精度限制，见
+[切片器使用说明](使用说明.md)。
+
 ## 使用
 
 在仓库根目录执行，输出目录必须尚不存在：
@@ -15,16 +18,25 @@ node Tools/GaussianSplatTiler/src/segmentedCli.js validate output-scene
 npm test --prefix Tools/GaussianSplatTiler
 ```
 
-输入为 binary little-endian Gaussian PLY，保留位置、旋转、尺度、不透明度及球谐系数。
+输入为 binary little-endian 或 big-endian Gaussian PLY，读取位置、旋转、尺度、不透明度及球谐系数。
 流式读取器不接受 ASCII PLY。源坐标以米为单位，
 当前 ABI 要求 `metersPerUnit=1`、proper rigid transform，不能用矩阵缩放代替单位转换。
 `--coordinate-system local|ecef`、`--local-origin x,y,z`、`--local-to-fixed` 的 16 个
-列主序元素用于数据放置元信息；工具不自动推断 CRS 或投影。
+列主序元素用于数据放置元信息；工具不自动推断 CRS 或投影。`localOrigin` 不加减顶点，
+PLY 的 EPSG/offset 注释不自动定位。普通切片的大坐标 Float32 限制及局部化方法见完整说明。
+
+普通 `scene.report.json` 的 `coordinate.sourceComments` 保存源 EPSG/offset 数值，
+`source.comments` 保留原始注释数值文本，供后续定位计算使用。运行时不读取报告，也不会
+自动应用这些偏移；字段说明和精度边界见 [原始定位信息](使用说明.md#从报告取得原始定位信息)。
 
 `--workers` 默认取可用并行度减一并限制在 1–32。单物理 part 上限 400000 splats；
 `--batch-size` 默认 16384，`--max-pack-bytes` 默认 512MiB，
 `--temporary-directory` 可指定临时盘。需为 PLY、临时 spool 和产品预留足够磁盘；
 worker 数影响 CPU/RAM，并非实时或固定内存保证。失败清理自有临时目录，不覆盖既有输出。
+
+普通 build 的分块阶段采用有界 runs 和磁盘归并，不分配全源点数大小的排序/反向索引数组。
+排序临时文件每点 `76 + 4 * f_rest数量` bytes，归并最坏约两倍，需额外预留 LOD/产品空间。
+分块进度写入 stderr；后续 LOD 内存仍随 workers 增长，大数据可先显式使用 `--workers 2`。
 
 输出包含 `scene.mcl.json`、`scene.mci` 和 Core/SH packs。部署时保留目录结构，
 HTTP 服务应支持 byte Range。图元 URL 指向 `scene.mcl.json`。

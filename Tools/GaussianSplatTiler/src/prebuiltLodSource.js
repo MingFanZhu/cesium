@@ -6,6 +6,7 @@ import {
   readPlyHeader,
   streamPlyVertexBatches,
 } from "./io/ply/PlyStreamReader.js";
+import { collectPlyCoordinateComments } from "./io/ply/coordinateComments.js";
 import {
   inspectGaussianPlySchema,
   gaussianCorePropertyNames,
@@ -98,33 +99,12 @@ export async function readPrebuiltLodManifest(file) {
     }
     inputs.push({ input, header, schema, snapshot });
   }
-  // PLY comments are preserved as evidence. They are not an ECEF transform.
-  const coordinates = new Map();
-  for (const item of inputs) {
-    for (const comment of item.header.comments ?? []) {
-      const match = /^(epsg|offsetx|offsety|offsetz)\s+(.+)$/i.exec(
-        comment.trim(),
-      );
-      if (!match) {
-        continue;
-      }
-      const key = match[1].toLowerCase(),
-        value = Number(match[2]);
-      if (
-        !Number.isFinite(value) ||
-        (coordinates.has(key) && coordinates.get(key) !== value)
-      ) {
-        throw new Error(
-          "Conflicting or invalid PLY coordinate metadata: " + key,
-        );
-      }
-      coordinates.set(key, value);
-    }
-  }
   return {
     manifest,
     inputs,
-    coordinateComments: Object.fromEntries(coordinates),
+    coordinateComments: collectPlyCoordinateComments(
+      inputs.map((item) => item.header),
+    ),
   };
 }
 

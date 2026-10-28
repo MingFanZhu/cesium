@@ -31,11 +31,12 @@ import {
 } from "../chunkReduction.js";
 import { ChunkReductionPool } from "../chunkReductionPool.js";
 import { createEncodedPageSpool } from "../encodedPageSpool.js";
-import { streamFixedRangeRawGaussianBlocks } from "../fixedRangeRawGaussianSpool.js";
 import {
-  normalizeSegmentedBuilderOptions,
-  partitionPlyIntoSegmentedXyzCells,
-} from "../segmentedPartition.js";
+  partitionPlyToDisk,
+  streamDiskPartition,
+} from "../segmentedDiskPartition.js";
+import { normalizeSegmentedBuilderOptions } from "../segmentedPartition.js";
+import { collectPlyCoordinateComments } from "../io/ply/coordinateComments.js";
 import { writePayloadPacks } from "../packing.js";
 
 import { sha256FileBounded } from "../sourceHash.js";
@@ -315,7 +316,7 @@ export async function buildSegmentedHierarchyProductArtifact(
   let pageSpool;
   let published = false;
   let rawSpoolDirectory;
-  let rawSourceSpoolBytes = 0;
+  let rawSourceSpoolBytes;
   let activeRawSpoolBytes = 0;
   let temporaryDiskPeakBytes = 0;
   let peakInFlight = 0;
@@ -334,11 +335,22 @@ export async function buildSegmentedHierarchyProductArtifact(
   try {
     await injection(rawOptions, "after-staging");
     await mkdir(temporaryDirectory, { recursive: true });
+    let sourceCoordinateComments;
+    const partition = await partitionPlyToDisk(input, {
+      ...rawOptions,
+      temporaryDirectory,
+      async onHeaderValidated(context) {
+        sourceCoordinateComments = collectPlyCoordinateComments([
+          context.header,
+        ]);
+        await rawOptions.onHeaderValidated?.(context);
+      },
+    });
+    rawSpoolDirectory = partition.directory;
+    rawSourceSpoolBytes = partition.plan.totalRecordBytes;
+    activeRawSpoolBytes = rawSourceSpoolBytes;
+    temporaryDiskPeakBytes = partition.plan.peakBytes;
     executor = createExecutor(options.workers);
-    const partition = await partitionPlyIntoSegmentedXyzCells(
-      input,
-      rawOptions,
-    );
     pageSpool = await createEncodedPageSpool({ temporaryDirectory });
     seedSpool = await createProxySeedSpool({
       temporaryDirectory,
@@ -562,28 +574,21 @@ export async function buildSegmentedHierarchyProductArtifact(
       await commitLeaf({ ...settled.entry, result: settled.result });
     }
 
-    for await (const raw of streamFixedRangeRawGaussianBlocks(
-      input,
-      partition,
-      {
-        batchSize: options.batchSize,
-        temporaryDirectory,
-        releaseSpatialWorkingSet: true,
-        onSpoolCreated(directory, plan) {
-          rawSpoolDirectory = directory;
-          rawSourceSpoolBytes = plan.totalRecordBytes;
-          activeRawSpoolBytes = plan.totalRecordBytes;
-          sampleTemporaryDisk();
-          rawOptions.onRawSpoolCreated?.(directory, plan);
-        },
-        onSpoolRemoved(directory) {
-          rawSpoolDirectory = undefined;
-          activeRawSpoolBytes = 0;
-          sampleTemporaryDisk();
-          rawOptions.onRawSpoolRemoved?.(directory);
-        },
+    for await (const raw of streamDiskPartition(partition, {
+      onSpoolCreated(directory, plan) {
+        rawSpoolDirectory = directory;
+        rawSourceSpoolBytes = plan.totalRecordBytes;
+        activeRawSpoolBytes = plan.totalRecordBytes;
+        sampleTemporaryDisk();
+        rawOptions.onRawSpoolCreated?.(directory, plan);
       },
-    )) {
+      onSpoolRemoved(directory) {
+        rawSpoolDirectory = undefined;
+        activeRawSpoolBytes = 0;
+        sampleTemporaryDisk();
+        rawOptions.onRawSpoolRemoved?.(directory);
+      },
+    })) {
       const chunk = partition.chunks[sourceOrdinal];
       while (
         pending.size &&
@@ -1332,6 +1337,7 @@ export async function buildSegmentedHierarchyProductArtifact(
       visualErrorBinCount: VISUAL_ERROR_BIN_COUNT,
       source: {
         sha256: sourceShaHex,
+        comments: partition.header.comments,
         vertexCount: partition.pointCount,
         retainedSplatCount,
         coverageMass: sourceCoverageMass,
@@ -1342,6 +1348,8 @@ export async function buildSegmentedHierarchyProductArtifact(
         metersPerUnit: options.metersPerUnit,
         localOrigin: options.localOrigin,
         localToFixed: options.localToFixed,
+        sourceComments: sourceCoordinateComments,
+        note: "PLY CRS comments are provenance only; no projection conversion or datum inference.",
       },
       cellSizeMeters: options.cellSizeMeters,
       occupiedLeafCount: hierarchy.leafCount,
@@ -1379,6 +1387,7 @@ export async function buildSegmentedHierarchyProductArtifact(
       seedSpoolPeakBytes: seedSpool.peakBytes,
       proxySeedBytes: seedSpool.byteLength - PROXY_SEED_FILE_HEADER_BYTES,
       rawSourceSpoolBytes,
+      spatialSort: partition.plan,
       encodedPageSpoolBytes: pageSpool.byteLength,
       temporaryDiskPeakBytes,
       completedCorePackBytes: packing.packs

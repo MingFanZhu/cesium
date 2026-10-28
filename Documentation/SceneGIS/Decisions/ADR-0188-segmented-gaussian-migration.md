@@ -69,3 +69,19 @@ P2：严格 WebGL Specs、真实 Worker、资源释放、球面/平面示例、�
 可复现性能与视觉证据。数值测试不替代负责人视觉验收。
 
 用法与预算边界见 [GaussianSplats](../GaussianSplats.md)。
+
+### 2026-10-27：大规模源数据的磁盘分块
+
+213607102 点的真实 PLY 在全量 radix temporaryIndices 分配时失败；原分块同时需要
+约 28 bytes/source point 的排序数组，后续还有全量反向映射。普通 CLI 统一改用
+Tools-owned 有界 runs / 多轮磁盘归并，保留 global Morton、source ID 稳定次序和 400000
+点物理 part；不修改 MCI/GSP、producer policy、shared radix 或浏览器运行时。
+
+排序 runs 最多 262144 点，归并最多 32 路、每路约 1 MiB 缓冲；内存元信息随 occupied
+cells/parts/runs 增长。排序文件每点 12 bytes key + 原 raw record，归并输入与输出并存，
+临时盘峰值至多约两倍排序数据。reducer workers 在排序完成后创建，其内存仍由并发和
+每 part 数据决定，不宣称整个构建固定内存。所有磁盘文件属于本次 mkdtemp owner，
+正常完成、错误和迭代提前结束释放；强制进程终止后的残留仍由操作者确认处理。
+
+分块进度走 CLI stderr，成功结果保持 stdout JSON。完整真实数据分块读回、旧产品字节
+一致性及清理回归证据由 [内存修复 plan](../../../AgentDocs/gaussian-splats/plans/2026-10-27-bounded-partition.md) 跟踪。

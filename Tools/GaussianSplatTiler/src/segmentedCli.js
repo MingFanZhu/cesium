@@ -136,10 +136,19 @@ async function main(argv = process.argv.slice(2)) {
     if (parsed.positional.length !== 1 || !parsed.options.output) {
       throw new Error("build requires <input.ply> --output <directory>");
     }
+    let lastProgress = 0;
     result = await buildSegmentedGaussianScene(
       parsed.positional[0],
       parsed.options.output,
-      buildOptions(parsed.options),
+      {
+        ...buildOptions(parsed.options),
+        onProgress(event) {
+          if (Date.now() - lastProgress >= 2000) {
+            console.error(JSON.stringify(event));
+            lastProgress = Date.now();
+          }
+        },
+      },
     );
   } else if (parsed.command === "inspect") {
     if (parsed.positional.length !== 1) {

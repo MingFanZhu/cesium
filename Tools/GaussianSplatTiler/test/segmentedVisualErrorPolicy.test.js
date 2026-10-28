@@ -46,7 +46,7 @@ test("segmented visual-error policy: public validation accepts only known identi
   const output = path.join(parent, "scene");
   try {
     const fixture = fileURLToPath(
-      new URL("./t1a-tree-product-v1.ply", import.meta.url),
+      new URL("./fixtures/t1a-tree-product-v1.ply", import.meta.url),
     );
     const built = await buildSegmentedGaussianScene(fixture, output, {
       fixedGridOrigin: [0, 0, 0],
