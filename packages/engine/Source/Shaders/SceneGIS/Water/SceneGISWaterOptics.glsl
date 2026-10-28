@@ -21,3 +21,30 @@ vec3 sceneGISWaterTransmission(vec3 background, vec3 scattering, vec3 absorption
     vec3 transmission = exp(-absorption * thickness);
     return background * transmission + scattering * (vec3(1.0) - transmission);
 }
+
+// Cosine between incoming light travel and outgoing travel toward the camera.
+float sceneGISWaterPhase(float cosine, float g) {
+    float denominator = 1.0 + g * g - 2.0 * g * clamp(cosine, -1.0, 1.0);
+    return (1.0 - g * g) / (4.0 * czm_pi * denominator * sqrt(denominator));
+}
+
+vec3 sceneGISWaterExtinguished(vec3 opticalDepth) {
+    // Preserve the thin-medium limit without cancellation in 1 - exp(-x).
+    return mix(vec3(1.0) - exp(-opticalDepth), opticalDepth * (vec3(1.0) - 0.5 * opticalDepth),
+        lessThan(opticalDepth, vec3(0.001)));
+}
+
+vec3 sceneGISWaterMedium(vec3 background, vec3 absorption, vec3 scattering,
+    float distance, bool hasBottom, float viewCosine, float lightCosine,
+    vec3 directSource, vec3 skySource) {
+    vec3 extinction = absorption + scattering;
+    vec3 transmission = hasBottom ? exp(-extinction * distance) : vec3(0.0);
+    // At s along the viewing path, incident light travels s * muView / muLight.
+    float directScale = 1.0 + viewCosine / lightCosine;
+    float skyScale = 1.0 + viewCosine / (2.0 / 3.0);
+    vec3 directIntegral = hasBottom ? sceneGISWaterExtinguished(extinction * distance * directScale) : vec3(1.0);
+    vec3 skyIntegral = hasBottom ? sceneGISWaterExtinguished(extinction * distance * skyScale) : vec3(1.0);
+    vec3 albedo = scattering / max(extinction, vec3(1.0e-20));
+    return background * transmission + albedo *
+        (directSource * directIntegral / directScale + skySource * skyIntegral / skyScale);
+}

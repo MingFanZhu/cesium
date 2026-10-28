@@ -90,6 +90,7 @@ function validate(surface) {
   number(surface.flowSpeed, "flowSpeed", 0);
   number(surface.foamWidth, "foamWidth", 0);
   number(surface.foamIntensity, "foamIntensity", 0, 1);
+  number(surface.scatteringAnisotropy, "scatteringAnisotropy", -0.9, 0.9);
   number(surface.refractionStrength, "refractionStrength", 0, 1);
   number(surface.maximumReflectionDistance, "maximumReflectionDistance", 0.001);
   number(surface.reflectionThickness, "reflectionThickness", 0.001);
@@ -104,6 +105,9 @@ function validate(surface) {
   }
   for (const channel of ["x", "y", "z"]) {
     number(surface.absorption?.[channel], `absorption.${channel}`, 0);
+    if (surface.scattering !== undefined) {
+      number(surface.scattering?.[channel], `scattering.${channel}`, 0);
+    }
   }
   if (
     !Number.isFinite(surface.flowDirection?.x) ||
@@ -168,8 +172,10 @@ function validate(surface) {
  * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world transform.
  * @param {*} [options.id] Pick identifier.
  * @param {boolean} [options.show=true] Whether to draw the surface.
- * @param {Color} [options.waterColor] Scene-linear deep-water scattering color; defaults to (0.015, 0.12, 0.14). Alpha is ignored.
+ * @param {Color} [options.waterColor] Legacy scene-linear deep-water scattering color; defaults to (0.015, 0.12, 0.14). Ignored when scattering is defined. Alpha is ignored.
  * @param {Cartesian3} [options.absorption] RGB absorption per meter; defaults to (0.45, 0.12, 0.06).
+ * @param {Cartesian3} [options.scattering] Optional nonnegative RGB scattering per meter. Enables homogeneous single-scattering optics; undefined retains waterColor optics. Zero enables absorption-only optics.
+ * @param {number} [options.scatteringAnisotropy=0] Henyey-Greenstein mean cosine in [-0.9, 0.9]; positive favors forward light travel. Used only with scattering.
  * @param {Color} [options.reflectionColor] Scene-linear environment radiance without physical sky; defaults to (0.2, 0.3, 0.4).
  * @param {number} [options.roughness=0.12] Perceptual roughness in [0.02, 1].
  * @param {SceneGISWindWaves} [options.windWaves] Optional caller-owned wind simulation. Fixed at construction; replaces normal-only waves.
@@ -266,7 +272,8 @@ function SceneGISWaterSurface(options = {}) {
    */
   this.show = options.show ?? true;
   /**
-   * Scene-linear deep-water scattering color. Alpha is ignored.
+   * Legacy scene-linear deep-water scattering color. Ignored when scattering is defined.
+   * Alpha is ignored.
    * @type {Color}
    */
   this.waterColor = Color.clone(
@@ -279,6 +286,19 @@ function SceneGISWaterSurface(options = {}) {
   this.absorption = Cartesian3.clone(
     options.absorption ?? new Cartesian3(0.45, 0.12, 0.06),
   );
+  /**
+   * Nonnegative finite RGB scattering coefficients in inverse meters. Copied at construction.
+   * Defined values enable homogeneous single scattering; undefined restores legacy waterColor optics.
+   * Zero means absorption only. Changing this property updates uniforms without reallocating resources.
+   * @type {Cartesian3|undefined}
+   */
+  this.scattering = Cartesian3.clone(options.scattering);
+  /**
+   * Henyey-Greenstein mean cosine in [-0.9, 0.9]. Positive favors forward light travel.
+   * Only affects the direct single-scattering source when scattering is defined.
+   * @type {number}
+   */
+  this.scatteringAnisotropy = options.scatteringAnisotropy ?? 0;
   /**
    * Environment radiance when no physical sky is active.
    * @type {Color}
@@ -531,6 +551,9 @@ function createResources(surface, frameState) {
       u_color: () => state.colorTexture ?? context.defaultTexture,
       u_waterColor: () => surface.waterColor,
       u_absorption: () => surface.absorption,
+      u_mediumOptics: () => surface.scattering !== undefined,
+      u_scattering: () => surface.scattering ?? Cartesian3.ZERO,
+      u_scatteringAnisotropy: () => surface.scatteringAnisotropy,
       u_reflectionColor: () => surface.reflectionColor,
       u_sky: () => surface._sky?.texture ?? context.defaultCubeMap,
       u_hasSky: () => !!surface._sky?.texture,

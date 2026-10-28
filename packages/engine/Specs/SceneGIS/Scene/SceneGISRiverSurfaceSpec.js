@@ -579,6 +579,25 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
       expect(scene.context.getObjectByPickColor(pickColor)).toBeUndefined();
     });
   });
+  it("forwards medium optics and updates the shared water material without rebuilding geometry", function () {
+    setup(true);
+    scene.renderForSpecs(time);
+    const surface = river._surface;
+    const mesh = river._mesh;
+    const program = surface._command.shaderProgram;
+    river.scattering = new Cartesian3(0.1, 0.2, 0.3);
+    river.scatteringAnisotropy = 0.5;
+    scene.renderForSpecs(time);
+    expect(surface.scattering).toBe(river.scattering);
+    expect(surface.scatteringAnisotropy).toBe(0.5);
+    expect(surface._command.uniformMap.u_mediumOptics()).toBeTrue();
+    expect(surface._command.shaderProgram).toBe(program);
+    expect(river._mesh).toBe(mesh);
+    river.scattering = undefined;
+    scene.renderForSpecs(time);
+    expect(surface._command.uniformMap.u_mediumOptics()).toBeFalse();
+  });
+
   it("keeps FFT wind independent from current controls and borrows its textures", function () {
     setup(true, true);
     scene.renderForSpecs(time);

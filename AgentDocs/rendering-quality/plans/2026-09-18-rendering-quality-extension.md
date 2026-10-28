@@ -1,5 +1,26 @@
 # Extension Plan: Rendering Quality
 
+## Water-quality roadmap, 2026-10-28
+
+The owner approves improving medium optics, shoreline/crest foam and underwater
+effects. Extend the former above-water scope in separate phases; preserve local
+ENU, metric Planar, curved-water and river geometry, existing reflection captures
+and resource ownership. SDK and hydraulic simulation remain excluded.
+
+- R31 technically complete, owner visual gate pending: [water optics and comparison fixture](2026-10-28-r31-water-optics.md),
+  separate absorption/scattering, coherent refraction and authoring presets.
+  [Review](../reviews/2026-10-28-r31-water-optics.md) records verification and limits;
+  its independent local checkpoint is the commit containing the R31 implementation.
+- R32 planned after R31 checkpoint: persistent foam generation, transport and
+  dissipation with stable shoreline/depth inputs; independently validate costs.
+- R33 planned after R32 checkpoint: water-bottom caustics and underwater medium,
+  waterline transitions and below-surface interface. Determine integration and
+  finite-water boundaries from the then-current source; no premature API design.
+
+Each phase requires technical review and a separate local commit before the next.
+Visual acceptance uses both worlds, shallow slopes, vertical walls, depth changes
+and moving cameras. Earlier R25 cold mesh and R27 visual findings stay open.
+
 ## R30 activation, 2026-10-23
 
 The owner requests rectangular area lighting on the existing light system after

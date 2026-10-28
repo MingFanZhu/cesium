@@ -1041,6 +1041,33 @@ Scene 销毁释放；启用 SSR 时借用已有捕获，避免重复 replay。Sh
 
 ## 风浪水面使用与验证
 
+### 水体吸收与散射
+
+`SceneGISWaterSurface` 和 `SceneGISRiverSurface` 可通过 `scattering` 启用系数式水体光学：
+
+```js
+water.absorption = new Cesium.Cartesian3(0.18, 0.055, 0.028);
+water.scattering = new Cesium.Cartesian3(0.012, 0.018, 0.016);
+water.scatteringAnisotropy = 0.35;
+```
+
+`absorption` 和 `scattering` 都是 RGB 三通道的每米系数，必须非负且有限，不是 sRGB 颜色，
+不能把 CSS 十六进制色值直接填入。吸收决定哪些颜色随距离消失；散射既增加消光，也控制
+水体中的散射光。`scatteringAnisotropy` 默认 0，范围 [-0.9, 0.9]；正值偏向沿入射光传播方向
+散射，负值偏向反向，仅影响直接光散射。天空用半球平均近似，当前为均匀介质单次散射。
+
+`scattering` 默认 `undefined`，保留原 `waterColor` 模型。定义后 `waterColor` 不参与计算；
+设为 `Cartesian3.ZERO` 表示仅吸收，重新设为 `undefined` 恢复原模型。构造时复制系数，
+运行时可替换或修改其分量，在下次正常帧验证并更新 uniform；不重建网格、纹理或 shader。
+折射接受的颜色和深度成对使用，无有效底面时按无限深水处理，不推断真实湖底。
+
+`Test/Planar/局部水面.html` 提供原有配色、清水、湖水、浑水预设，并可独立切换法线波纹和
+FFT 风浪。预设是外观演示，不代表实测水质。示例使用固定光照倍率 1，保留相同曝光进行比较。
+资源销毁顺序仍是移除全部借用水面，再销毁风浪模拟，最后销毁 Viewer。
+焦散、水下相机、持久泡沫模拟不由本选项启用；边界和算法见 ADR-0194。
+
+### 风浪配置
+
 `SceneGISWindWaves` 是可选的可共享模拟，传入现有水面即可启用真实几何位移：
 
 ```js

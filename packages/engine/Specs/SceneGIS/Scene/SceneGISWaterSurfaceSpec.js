@@ -26,6 +26,7 @@ import {
   Model,
   Texture,
   PixelFormat,
+  PixelDatatype,
 } from "../../../index.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -487,6 +488,104 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     expect(red).toBeGreaterThan(10);
   });
 
+  it("attenuates the accepted refracted depth at a submerged depth step", function () {
+    setup(true, true);
+    scene.camera.setView({
+      destination: point(0, 0, 10),
+      orientation: { direction: vector(0, 0, -1), up: vector(0, 1, 0) },
+    });
+    scene.camera.frustum.width = 12;
+    water.waveAmplitude = 0.2;
+    water.refractionStrength = 1;
+    water.absorption = new Cartesian3(0.15, 0.15, 0.15);
+    render();
+    const textures = [];
+    function depthTexture(value) {
+      const data = new Float32Array(128 * 128 * 4);
+      for (let y = 0; y < 128; y++) {
+        for (let x = 0; x < 128; x++) {
+          const i = (y * 128 + x) * 4;
+          data[i] = value ?? (x < 64 ? 15 : 30);
+          data[i + 3] = 1;
+        }
+      }
+      const texture = new Texture({
+        context: scene.context,
+        pixelFormat: PixelFormat.RGBA,
+        pixelDatatype: PixelDatatype.FLOAT,
+        source: { width: 128, height: 128, arrayBufferView: data },
+      });
+      textures.push(texture);
+      return texture;
+    }
+    try {
+      const near = depthTexture(15),
+        far = depthTexture(30),
+        stepped = depthTexture();
+      water._command.uniformMap.u_color = () => scene.context.defaultTexture;
+      function capture(texture) {
+        water._command.uniformMap.u_depth = () => texture;
+        render();
+        return scene.context.readPixels();
+      }
+      const nearPixels = capture(near),
+        farPixels = capture(far),
+        stepPixels = capture(stepped);
+      let acrossLeft = 0,
+        acrossRight = 0;
+      for (let y = 20; y < 108; y++) {
+        for (let x = 20; x < 108; x++) {
+          const i = (y * 128 + x) * 4;
+          if (Math.abs(nearPixels[i] - farPixels[i]) < 20) {
+            continue;
+          }
+          if (x < 62 && Math.abs(stepPixels[i] - farPixels[i]) <= 1) {
+            acrossLeft++;
+          }
+          if (x > 65 && Math.abs(stepPixels[i] - nearPixels[i]) <= 1) {
+            acrossRight++;
+          }
+        }
+      }
+      expect(acrossLeft).toBeGreaterThan(20);
+      expect(acrossRight).toBeGreaterThan(20);
+    } finally {
+      textures.forEach((texture) => texture.destroy());
+    }
+  });
+
+  [true, false].forEach(function (planar) {
+    it(`switches coefficient optics in ${planar ? "Planar" : "Globe"} without changing resources or legacy defaults`, function () {
+      setup(planar);
+      render();
+      const p = point(4, 0, 0),
+        legacy = pixel(p);
+      const program = water._command.shaderProgram,
+        va = water._command.vertexArray;
+      const input = scene.frameState._sceneGISWater.colorTexture;
+      water.scattering = Cartesian3.clone(Cartesian3.ZERO);
+      render();
+      expect(pixel(p)).toEqual(legacy);
+      water.scattering = new Cartesian3(0.4, 0.7, 0.3);
+      water.scatteringAnisotropy = 0.6;
+      render();
+      const coefficient = pixel(p);
+      expect(coefficient).not.toEqual(legacy);
+      water.waterColor = Color.clone(Color.RED);
+      render();
+      expect(pixel(p)).toEqual(coefficient);
+      expect(water._command.shaderProgram).toBe(program);
+      expect(water._command.vertexArray).toBe(va);
+      expect(scene.frameState._sceneGISWater.colorTexture).toBe(input);
+      water.scattering = undefined;
+      water.waterColor = Color.clone(Color.BLACK);
+      render();
+      expect(pixel(p)).toEqual(legacy);
+      water.scattering = new Cartesian3(NaN, 0, 0);
+      expect(render).toThrowDeveloperError();
+    });
+  });
+
   it("uses deep-water scattering without a captured bottom even at zero absorption", function () {
     setup(false);
     scene.globe.show = false;
@@ -605,6 +704,25 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     expect(finalTexture.isDestroyed()).toBe(true);
   });
   it("rejects invalid geometry and material values and supports HDR-disabled display", function () {
+    for (const options of [
+      { scattering: new Cartesian3(-1, 0, 0) },
+      { scattering: new Cartesian3(0, Infinity, 0) },
+      { scatteringAnisotropy: 1 },
+      { scatteringAnisotropy: -1 },
+    ]) {
+      expect(
+        () =>
+          new SceneGISWaterSurface({ polygonHierarchy: ring(1), ...options }),
+      ).toThrowDeveloperError();
+    }
+    const scattering = new Cartesian3(0.1, 0.2, 0.3);
+    const surface = new SceneGISWaterSurface({
+      polygonHierarchy: ring(1),
+      scattering,
+    });
+    expect(surface.scattering).toEqual(scattering);
+    expect(surface.scattering).not.toBe(scattering);
+    surface.destroy();
     expect(
       () => new SceneGISWaterSurface({ polygonHierarchy: ring(1, 2) }),
     ).toThrowDeveloperError();

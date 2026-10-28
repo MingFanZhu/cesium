@@ -1,4 +1,7 @@
 uniform vec3 u_waterColor;
+uniform bool u_mediumOptics;
+uniform vec3 u_scattering;
+uniform float u_scatteringAnisotropy;
 uniform vec4 u_pickColor;
 uniform vec3 u_absorption;
 uniform vec3 u_reflectionColor;
@@ -119,9 +122,11 @@ void main()
     #endif
     vec3 beam = czm_lightColorHdr;
     vec3 diffuseLight = vec3(1.0);
+    vec3 skyRadiance = vec3(1.0);
     #ifdef SCENEGIS_WATER_PHYSICAL
     beam = sceneGISModelDirectSource(v_positionEC, beam);
-    diffuseLight = sceneGISModelSkyIrradiance(v_positionEC, up) +
+    skyRadiance = sceneGISModelSkyIrradiance(v_positionEC, up);
+    diffuseLight = skyRadiance +
         beam * (max(dot(up, czm_lightDirectionEC), 0.0) / czm_pi);
     #endif
     // Only the above-water interface is qualified.
@@ -178,10 +183,34 @@ void main()
     bool aboveWater = dot(refractedPoint - v_positionEC, up) >= 0.0;
     #endif
     if (any(lessThan(refractedUV, vec2(0.0))) || any(greaterThan(refractedUV, vec2(1.0))) ||
-        refractedDepth <= waterDepth || aboveWater) { refractedUV = uv; }
+        refractedDepth <= waterDepth || aboveWater) {
+        refractedUV = uv;
+    } else {
+        bottom = refractedPoint;
+        hasBottom = true;
+        pathLength = length(bottom - v_positionEC);
+    }
     vec4 background = textureLod(u_color, refractedUV, 0.0);
-    vec3 transmission = hasBottom ? exp(-u_absorption * pathLength) : vec3(0.0);
-    vec3 water = background.rgb * transmission + u_waterColor * diffuseLight * (vec3(1.0) - transmission);
+    vec3 water;
+    if (u_mediumOptics) {
+        vec3 light = normalize(czm_lightDirectionEC);
+        float airCosine = max(dot(up, light), 0.0);
+        // Refraction of incident light through the mean surface, IOR = 1.333.
+        float eta = 1.0 / 1.333;
+        float lightCosine = sqrt(1.0 - eta * eta * (1.0 - airCosine * airCosine));
+        vec3 lightTravel = -eta * (light - up * dot(up, light)) - up * lightCosine;
+        vec3 toSurface = hasBottom && pathLength > 0.0 ? (v_positionEC - bottom) / pathLength : view;
+        float phase = sceneGISWaterPhase(dot(lightTravel, toSurface), u_scatteringAnisotropy);
+        vec3 directSource = beam * (airCosine / lightCosine) *
+            (1.0 - sceneGISWaterFresnel(airCosine)) * phase;
+        // Isotropic upper-hemisphere sky approximation; the helper returns irradiance/pi.
+        vec3 skySource = skyRadiance * (0.5 * (1.0 - sceneGISWaterFresnel(2.0 / 3.0)));
+        water = sceneGISWaterMedium(background.rgb, u_absorption, u_scattering, pathLength,
+            hasBottom, max(dot(toSurface, up), 0.0), lightCosine, directSource, skySource);
+    } else {
+        vec3 transmission = hasBottom ? exp(-u_absorption * pathLength) : vec3(0.0);
+        water = background.rgb * transmission + u_waterColor * diffuseLight * (vec3(1.0) - transmission);
+    }
 
     vec3 reflected = reflect(-view, normal);
     vec3 environment = u_reflectionColor;

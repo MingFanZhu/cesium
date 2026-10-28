@@ -84,8 +84,8 @@ const effects = new C.SceneGISEnvironmentEffects({
   showBloom: false,
   showLensFlare: false,
   showMoonlight: false,
-  surfaceRadianceScale: 3,
-  backgroundRadianceScale: 3,
+  surfaceRadianceScale: 1,
+  backgroundRadianceScale: 1,
 });
 viewer.addController(effects);
 viewer.clock.shouldAnimate = true;
@@ -103,6 +103,13 @@ const ssr = new C.SceneGISScreenSpaceReflections({
 });
 const state = {
   roughness: 0.12,
+  preset: "清水",
+  waveMode: "FFT 风浪",
+  show: true,
+  reflections: true,
+  refractionStrength: 0.2,
+  foamIntensity: 0.35,
+  foamWidth: 0.35,
   reset() {
     const direction = C.Cartesian3.normalize(
       new C.Cartesian3(-19, 38, -18),
@@ -136,47 +143,135 @@ const state = {
 viewer.clock.currentTime = C.JulianDate.fromIso8601("2026-06-21T10:00:00Z");
 state.reset();
 const shaders = [];
-const water = scene.primitives.add(
-  new C.SceneGISWaterSurface({
-    polygonHierarchy: new C.PolygonHierarchy([
-      new C.Cartesian3(-24, -21, 0),
-      new C.Cartesian3(24, -21, 0),
-      new C.Cartesian3(24, 21, 0),
-      new C.Cartesian3(-24, 21, 0),
-    ]),
-    modelMatrix: C.Matrix4.multiplyByTranslation(
-      localToWorld,
-      new C.Cartesian3(0, 0, 2.5),
-      new C.Matrix4(),
-    ),
-    id: "local-water",
-    waveAmplitude: 0.06,
-    roughness: 0.12,
-    foamWidth: 0.35,
-    foamIntensity: 0.35,
-  }),
+const waves = new C.SceneGISWindWaves({
+  resolution: 128,
+  patchLength: 32,
+  windSpeed: 5,
+  fetchLength: 300,
+  waterDepth: 2,
+  amplitudeScale: 0.6,
+  whitecapIntensity: 0.15,
+});
+const waters = [undefined, waves].map((windWaves) =>
+  scene.primitives.add(
+    new C.SceneGISWaterSurface({
+      windWaves,
+      meshSpacing: 0.5,
+      polygonHierarchy: new C.PolygonHierarchy([
+        new C.Cartesian3(-24, -21, 0),
+        new C.Cartesian3(24, -21, 0),
+        new C.Cartesian3(24, 21, 0),
+        new C.Cartesian3(-24, 21, 0),
+      ]),
+      modelMatrix: C.Matrix4.multiplyByTranslation(
+        localToWorld,
+        new C.Cartesian3(0, 0, 2.5),
+        new C.Matrix4(),
+      ),
+      id: windWaves ? "wind-water" : "normal-water",
+      waveAmplitude: 0.06,
+      roughness: 0.12,
+      foamWidth: 0.35,
+      foamIntensity: 0.35,
+    }),
+  ),
 );
+const water = waters[1];
+const presets = {
+  原有配色: { absorption: [0.45, 0.12, 0.06], scattering: undefined, g: 0 },
+  清水: {
+    absorption: [0.18, 0.055, 0.028],
+    scattering: [0.012, 0.018, 0.016],
+    g: 0.35,
+  },
+  湖水: {
+    absorption: [0.35, 0.12, 0.075],
+    scattering: [0.1, 0.16, 0.11],
+    g: 0.45,
+  },
+  浑水: { absorption: [0.6, 0.8, 1.15], scattering: [1.2, 0.95, 0.6], g: 0.4 },
+};
+function applyPreset() {
+  const preset = presets[state.preset];
+  for (const surface of waters) {
+    surface.absorption = new C.Cartesian3(...preset.absorption);
+    surface.scattering = preset.scattering
+      ? new C.Cartesian3(...preset.scattering)
+      : undefined;
+    surface.scatteringAnisotropy = preset.g;
+  }
+}
+function applyControls() {
+  waters.forEach((surface, i) => {
+    surface.show = state.show && i === (state.waveMode === "FFT 风浪" ? 1 : 0);
+    for (const key of [
+      "roughness",
+      "reflections",
+      "refractionStrength",
+      "foamIntensity",
+      "foamWidth",
+    ]) {
+      surface[key] = state[key];
+    }
+  });
+}
+applyPreset();
+applyControls();
 const gui = new GUI({
   title: `${planar ? "平面" : "球面"}局部水面`,
   container: document.getElementById("controls"),
 });
-gui.add(water, "show").name("显示水面");
-gui.add(water, "reflections").name("场景倒影");
-gui.add(water, "waveAmplitude", 0, 0.2, 0.005).name("波纹幅度（米）");
-gui.add(water, "waveLength", 0.5, 8, 0.1).name("波长（米）");
-gui.add(water, "flowSpeed", 0, 2, 0.05).name("流速（米／秒）");
-gui.add(water, "roughness", 0.02, 0.6, 0.01).name("粗糙度");
-gui.add(water, "refractionStrength", 0, 1, 0.01).name("折射强度");
-gui.add(water, "foamIntensity", 0, 1, 0.05).name("浅岸泡沫");
-gui.add(water, "foamWidth", 0, 1.5, 0.05).name("泡沫水深（米）");
+gui
+  .add(state, "preset", Object.keys(presets))
+  .name("水体预设")
+  .onChange(applyPreset);
+gui
+  .add(state, "waveMode", ["法线波纹", "FFT 风浪"])
+  .name("波浪模式")
+  .onChange(applyControls);
+gui.add(state, "show").name("显示水面").onChange(applyControls);
+gui.add(state, "reflections").name("场景倒影").onChange(applyControls);
+gui
+  .add(state, "roughness", 0.02, 0.6, 0.01)
+  .name("粗糙度")
+  .onChange(applyControls);
+gui
+  .add(state, "refractionStrength", 0, 1, 0.01)
+  .name("折射强度")
+  .onChange(applyControls);
+const normalControls = gui.addFolder("法线波纹参数").close();
+normalControls
+  .add(waters[0], "waveAmplitude", 0, 0.2, 0.005)
+  .name("波纹幅度（米）");
+normalControls.add(waters[0], "waveLength", 0.5, 8, 0.1).name("波长（米）");
+normalControls
+  .add(waters[0], "flowSpeed", 0, 2, 0.05)
+  .name("相位速度（米／秒）");
+const windControls = gui.addFolder("FFT 风浪参数").close();
+windControls.add(waves, "windSpeed", 0, 12, 0.1).name("风速（米／秒）");
+windControls.add(waves, "amplitudeScale", 0, 2, 0.05).name("浪幅比例");
+windControls.add(waves, "whitecapIntensity", 0, 1, 0.05).name("浪尖白沫");
+const foamControls = gui.addFolder("接触泡沫参数").close();
+foamControls
+  .add(state, "foamIntensity", 0, 1, 0.05)
+  .name("浅岸泡沫")
+  .onChange(applyControls);
+foamControls
+  .add(state, "foamWidth", 0, 1.5, 0.05)
+  .name("泡沫水深（米）")
+  .onChange(applyControls);
 
 gui.add(viewer.clock, "shouldAnimate").name("时间动画");
 gui.add(state, "reset").name("恢复视角");
 exposeExample(
   viewer,
   gui,
-  { effects, environment, models, state, ssr, water },
+  { effects, environment, models, state, ssr, water, waters, waves },
   () => {
+    for (const surface of waters) {
+      scene.primitives.remove(surface);
+    }
+    waves.destroy();
     viewer.removeController(effects);
     if (environment) {
       viewer.removeController(environment);

@@ -64,6 +64,8 @@ function validate(river) {
  * @param {*} [options.id] Pick identifier.
  * @param {Color} [options.waterColor] Scene-linear deep-water scattering color; defaults to (0.015, 0.12, 0.14).
  * @param {Cartesian3} [options.absorption] RGB absorption per meter; defaults to (0.45, 0.12, 0.06).
+ * @param {Cartesian3} [options.scattering] Optional nonnegative RGB scattering per meter; enables coefficient optics instead of waterColor.
+ * @param {number} [options.scatteringAnisotropy=0] Scattering mean cosine in [-0.9, 0.9]; positive favors forward light travel.
  * @param {Color} [options.reflectionColor] Scene-linear environment radiance without physical sky; defaults to (0.2, 0.3, 0.4).
  * @param {number} [options.roughness=0.12] Perceptual roughness in [0.02, 1].
  * @param {number} [options.foamWidth=0.3] Shallow contact foam depth range in meters.
@@ -164,7 +166,7 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
   },
   /**
-   * Scene-linear deep-water scattering color.
+   * Legacy scene-linear deep-water scattering color; ignored when scattering is defined.
    * @memberof SceneGISRiverSurface.prototype
    * @type {Color}
    */
@@ -187,6 +189,32 @@ Object.defineProperties(SceneGISRiverSurface.prototype, {
     },
     set(value) {
       this._surface.absorption = value;
+    },
+  },
+  /**
+   * Optional nonnegative RGB scattering coefficients per meter. Undefined restores legacy optics.
+   * @memberof SceneGISRiverSurface.prototype
+   * @type {Cartesian3|undefined}
+   */
+  scattering: {
+    get() {
+      return this._surface.scattering;
+    },
+    set(value) {
+      this._surface.scattering = value;
+    },
+  },
+  /**
+   * Henyey-Greenstein mean cosine in [-0.9, 0.9]; positive favors forward light travel.
+   * @memberof SceneGISRiverSurface.prototype
+   * @type {number}
+   */
+  scatteringAnisotropy: {
+    get() {
+      return this._surface.scatteringAnisotropy;
+    },
+    set(value) {
+      this._surface.scatteringAnisotropy = value;
     },
   },
   /**

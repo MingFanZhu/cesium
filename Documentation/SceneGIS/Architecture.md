@@ -1317,6 +1317,12 @@ local XY 米制平面，modelMatrix 使用刚体变换；Globe 采用 ENU，Plan
 默认波纹随 Scene time 演化，仅改变法线；散射、泡沫和直接高光借用现有物理光源，不对水下快照重新照明。
 首轮资格为水上观察、局部单层水面和 opaque 水下几何，不扩展为海洋、水下相机或多层透射。
 
+[ADR-0194](Decisions/ADR-0194-water-medium-optics.md) 为 WaterSurface / RiverSurface 增加可选
+`scattering` 和 `scatteringAnisotropy`。定义 scattering 时使用按米计的吸收、散射与单次散射
+解析积分，undefined 保留 waterColor；不增加资源、绘制通道或回读。折射接受的颜色与深度
+必须来自同一采样位置，已受光的底面只做消光，不再次照明。无底面保持无限深水近似。
+此扩展仍为水上单层光学，水下相机及焦散由后续阶段独立定义。
+
 ## 风驱动湖面（R22）
 
 [ADR-0101](Decisions/ADR-0101-wind-water-spectrum.md) 在原有 WaterSurface 上增加可选的
