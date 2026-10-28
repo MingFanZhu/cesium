@@ -9,6 +9,7 @@ import model from "../Core/_private/_SceneGISWindModel.js";
 import Solver from "./_private/_SceneGISWindSolver.js";
 import Tracer from "./_private/_SceneGISWindTracer.js";
 import sample from "./_private/_SceneGISWindQuery.js";
+import GpuTimer from "./_private/_SceneGISWindGpuTimer.js";
 
 function validateControls(simulation) {
   if (
@@ -94,6 +95,7 @@ function validateControls(simulation) {
  * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world placement, copied.
  * @param {boolean} [options.paused=false] Initially pause physical time accumulation.
  * @param {number} [options.maximumStepsPerFrame=4] Maximum fixed steps per normal frame, integer 1..64.
+ * @param {boolean} [options.enableGpuTiming=false] Collect asynchronous GPU batch timing when the WebGL extension exists.
  * @throws {DeveloperError} Invalid grid, units, controls or rigid transform.
  * @throws {RuntimeError} First update lacks SCENE3D/WebGL2/four float attachments or atlas capacity.
  * @experimental This API is subject to change while urban-flow qualification is in progress.
@@ -107,6 +109,11 @@ function validateControls(simulation) {
  */
 function SceneGISWindSimulation(options = {}) {
   this._config = model.configure(options);
+  this._enableGpuTiming = options.enableGpuTiming ?? false;
+  if (typeof this._enableGpuTiming !== "boolean") {
+    throw new DeveloperError("enableGpuTiming must be boolean.");
+  }
+  this._timer = undefined;
   this._diffusivity = options.tracerDiffusivity ?? 0;
   Tracer.validateDiffusivity(this._diffusivity, this._config);
   this._sources = Tracer.sources(options.tracerSources ?? []);
@@ -167,6 +174,29 @@ function SceneGISWindSimulation(options = {}) {
  */
 
 Object.defineProperties(SceneGISWindSimulation.prototype, {
+  /**
+   * Whether requested GPU timing is supported after initialization.
+   * @memberof SceneGISWindSimulation.prototype
+   * @type {boolean}
+   * @readonly
+   */
+  gpuTimingSupported: {
+    get() {
+      return this._timer?.supported ?? false;
+    },
+  },
+  /**
+   * Latest non-disjoint completed batch measurement, excluding drawing and initial allocation.
+   * Polls during normal renders; undefined before completion, when disabled or unsupported.
+   * @memberof SceneGISWindSimulation.prototype
+   * @type {SceneGISWindSimulation.GpuTiming|undefined}
+   * @readonly
+   */
+  gpuTiming: {
+    get() {
+      return this._timer?.result;
+    },
+  },
   /**
    * Whether GPU state is allocated.
    * @memberof SceneGISWindSimulation.prototype
@@ -236,6 +266,13 @@ Object.defineProperties(SceneGISWindSimulation.prototype, {
 });
 
 /**
+ * @typedef {object} SceneGISWindSimulation.GpuTiming
+ * @property {number} millisecondsPerStep GPU elapsed batch milliseconds / completed steps, velocity plus tracer.
+ * @property {number} steps Number of physical steps in the measured batch.
+ * @property {number} version Completed field version at batch end.
+ */
+
+/**
  * Queue fixed steps, including while paused; the per-frame budget still applies.
  * @param {number} [count=1] Integer 1..1000000.
  */
@@ -252,7 +289,9 @@ SceneGISWindSimulation.prototype.step = function (count = 1) {
   }
   this._queued += count;
 };
-/** Restore initial fields/time on the next normal render, even paused, and cancel queued work. */
+/** Restore initial fields/time on the next normal render and cancel already queued work.
+ * Steps queued after this call execute after the reset, including while paused.
+ */
 SceneGISWindSimulation.prototype.reset = function () {
   this._reset = true;
   this._queued = 0;
@@ -374,16 +413,24 @@ SceneGISWindSimulation.prototype.update = function (frameState) {
       throw error;
     }
     this._field = createField(this);
+    if (this._enableGpuTiming) {
+      this._timer = new GpuTimer(frameState.context);
+    }
     this._version++;
     elapsed = 0;
   }
   this._lastFrame = frameState.frameNumber;
   this._lastTime = JulianDate.clone(frameState.time, this._lastTime);
   this._lastSteps = 0;
+  this._timer?.poll();
   if (this._reset || elapsed < 0) {
     this._solver.reset();
     this._tracer.reset();
-    this._debt = this._steps = this._queued = 0;
+    this._timer?.clear();
+    this._debt = this._steps = 0;
+    if (!this._reset) {
+      this._queued = 0;
+    }
     this._generation++;
     this._version++;
     this._reset = false;
@@ -396,12 +443,19 @@ SceneGISWindSimulation.prototype.update = function (frameState) {
   const automatic = this.paused ? 0 : Math.floor((this._debt + dt * 1e-9) / dt);
   const count = Math.min(this.maximumStepsPerFrame, automatic + this._queued);
   const manual = Math.min(this._queued, count);
-  for (let i = 0; i < count; i++) {
-    this._solver.step();
-    this._tracer.step();
-    this._steps++;
-    this._version++;
-    this._lastSteps++;
+  if (count > 0) {
+    this._timer?.begin();
+  }
+  try {
+    for (let i = 0; i < count; i++) {
+      this._solver.step();
+      this._tracer.step();
+      this._steps++;
+      this._version++;
+      this._lastSteps++;
+    }
+  } finally {
+    this._timer?.end(this._lastSteps, this._version);
   }
   this._queued -= manual;
   this._debt = Math.max(0, this._debt - (count - manual) * dt);
@@ -417,6 +471,7 @@ SceneGISWindSimulation.prototype.isDestroyed = function () {
  * @returns {undefined}
  */
 SceneGISWindSimulation.prototype.destroy = function () {
+  this._timer = this._timer?.destroy();
   for (const query of this._queries) {
     query.cancel();
   }

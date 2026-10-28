@@ -359,6 +359,7 @@ describe("SceneGIS/Scene/SceneGISWindSimulation", function () {
       kinematicViscosity: 0.1,
       initialVelocity: new Cartesian3(0.02, 0, 0),
       maximumStepsPerFrame: 2,
+      enableGpuTiming: true,
     });
     const frame = createFrameState(context);
     const start = JulianDate.fromIso8601("2026-10-28T00:00:00Z");
@@ -393,12 +394,22 @@ describe("SceneGIS/Scene/SceneGISWindSimulation", function () {
     expect(field.version).toBeGreaterThan(version);
     expect(field.generation).toEqual(1);
     expect(field.velocityTexture).toBe(texture);
+    simulation.step(10);
+    simulation.reset();
+    simulation.step(2);
+    tick(9, 7);
+    expect(simulation.simulationTime).toEqual(2);
+    expect(simulation.pendingTime).toEqual(0);
+    expect(field.generation).toEqual(2);
+    expect(typeof simulation.gpuTimingSupported).toEqual("boolean");
+    const timer = simulation._timer;
     const owned = simulation._solver.targets.flatMap((t) =>
       Array.from({ length: t.numberOfColorAttachments }, (_, i) =>
         t.getColorTexture(i),
       ),
     );
     simulation.destroy();
+    expect(timer.isDestroyed()).toBeTrue();
     expect(texture.isDestroyed()).toBe(true);
     for (const t of owned) {
       expect(t.isDestroyed()).toBe(true);

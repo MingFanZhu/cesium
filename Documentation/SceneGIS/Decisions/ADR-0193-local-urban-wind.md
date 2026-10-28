@@ -1,6 +1,6 @@
 # ADR-0193: Local GPU urban wind
 
-- Status: accepted through W3; date: 2026-10-28.
+- Status: accepted through W4; date: 2026-10-28.
 - Plan: [urban-wind](../../../AgentDocs/urban-wind/README.md); upstream files / SGP: none.
 
 ## Source facts and decision
@@ -95,6 +95,17 @@ Horizontal slice uses the same field and opacity. GPU midpoint-integrated instan
 stop at solids/domain bounds. They do not advance particles or represent pollutant trajectories.
 No wall-clock animation, repeated simulation, Voxel metadata rebuilding or per-frame field transfer.
 Destroy consumers before producer; scene collection destruction also releases the stage and lines.
+Stage enable changes publish at Scene.preUpdate, before native post-process allocation/selection.
+Primitive update occurs later and must not change that frame's active post-process chain.
+
+Optional GPU instrumentation owns at most four pending EXT_disjoint_timer_query_webgl2 queries.
+It wraps only the full fixed-step batch, reports milliseconds/step plus batch size/version and never
+blocks for results. Unsupported extension is explicit, disjoint results are discarded, external
+queries are not nested. The helper accesses WebGL only for timer objects; all numerical resources
+and commands remain native Renderer objects. Reset/destroy clears pending measurements.
+Reset cancels already queued work; explicit step calls after reset execute on the restored state.
+
+Public API, reproducible city evidence and SDK usage are documented in [UrbanWind](../UrbanWind.md).
 
 ## Validation and limitations
 

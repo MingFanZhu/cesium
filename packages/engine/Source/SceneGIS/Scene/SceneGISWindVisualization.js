@@ -38,6 +38,8 @@ function validate(v) {
   }
 }
 function release(v) {
+  v._removePreUpdate?.();
+  v._removePreUpdate = undefined;
   if (v._stage && !v._scene.isDestroyed()) {
     v._scene.postProcessStages.remove(v._stage);
   } else if (v._stage && !v._stage.isDestroyed()) {
@@ -145,6 +147,13 @@ function create(v, context, field) {
         uniforms,
       }),
     );
+    // Scene configures the post-process chain before primitive updates. Publish enable changes
+    // at preUpdate, so allocation, execution and output selection use the same stage set.
+    v._stage.enabled = false;
+    v._removePreUpdate = v._scene.preUpdate.addEventListener(() => {
+      validate(v);
+      v._stage.enabled = v.show && v.mode !== "none";
+    });
     const size = Cartesian3.multiplyByScalar(n, dx, new Cartesian3());
     v._bounds = new BoundingSphere(
       Cartesian3.add(
@@ -255,7 +264,6 @@ SceneGISWindVisualization.prototype.update = function (frameState) {
     this._scene.camera.inverseViewMatrix,
     this._eyeToLocal,
   );
-  this._stage.enabled = this.show && this.mode !== "none";
   if (this.show && this.showStreamlines) {
     this._command.modelMatrix = field.modelMatrix;
     BoundingSphere.transform(

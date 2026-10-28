@@ -1,8 +1,8 @@
 # Extension Plan: Local urban wind
 
-- Type: extension; status: active; owner: architecture / current task.
+- Type: extension; status: completed (first implementation); owner: architecture / current task.
 - Created / updated: 2026-10-28; architecture review: confirmed (self-review).
-- Discussion: [model](../discussions/2026-10-28-model.md); review: pending; ADR: 0193; SGP: none.
+- Discussion: [model](../discussions/2026-10-28-model.md); review: [W4](../reviews/2026-10-28-w4-city.md); ADR: 0193; SGP: none.
 
 ## Objective and boundaries
 
@@ -28,7 +28,7 @@ particle extensions remain independent. Graph omits recent symbols; source reads
 | W1    | Solver, units, periodic grids, ownership/time       | Source/papers checked | Conservation, uniform/shear decay, GPU tests, 128×128×32 budget, review/commit | completed; [plan](2026-10-28-w1-solver.md)         |
 | W2    | Static masks, geometry voxelization and boundaries  | W1 checkpoint         | Channel/wake/solid/oblique flow, limited grid comparison, review/commit        | completed; [plan](2026-10-28-w2-boundaries.md)     |
 | W3    | Tracer and shared volume/streamline/slice consumers | W2 checkpoint         | Transport/no-flux/depth/pause/lifecycle/query, review/commit                   | completed; [plan](2026-10-28-w3-tracer-display.md) |
-| W4    | Both-world city example, SDK instructions           | W3 checkpoint         | Reproducible views, performance, release/types, review/commit                  | planned                                            |
+| W4    | Both-world city example, SDK instructions           | W3 checkpoint         | Reproducible views, performance, release/types, review/commit                  | completed; [plan](2026-10-28-w4-city.md)           |
 
 ## Risks and acceptance
 

@@ -160,10 +160,14 @@ describe("SceneGIS/Scene/SceneGISWindVisualization", function () {
       const stage = view._stage,
         program = view._command.shaderProgram,
         array = view._array;
+      view.show = true;
+      scene.renderForSpecs(later);
       scene.primitives.remove(view);
       expect(stage.isDestroyed()).toBeTrue();
       expect(array.isDestroyed()).toBeTrue();
       expect(wind.isDestroyed()).toBeFalse();
+      scene.renderForSpecs(later);
+      expect(pixel()).toEqual(covered);
       scene.destroyForSpecs();
       scene = undefined;
       expect(program.isDestroyed()).toBeTrue();
