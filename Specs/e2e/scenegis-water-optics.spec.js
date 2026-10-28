@@ -99,28 +99,63 @@ for (const world of ["planar", "globe"]) {
     await page
       .getByRole("combobox", { name: "波浪模式", exact: true })
       .selectOption({ label: "FFT 风浪" });
+    await page.getByRole("button", { name: "进入水下", exact: true }).click();
+    await page.waitForFunction(
+      () =>
+        window.example.water._underwater?.active &&
+        window.example.water._underwater.texture,
+    );
+    await expect(page.locator("#error")).toHaveText("");
+    await page.screenshot({
+      path: testInfo.outputPath(`${world}-underwater.png`),
+    });
+    await page.getByRole("button", { name: "水下仰视", exact: true }).click();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          const remove =
+            window.example.viewer.scene.postRender.addEventListener(() => {
+              remove();
+              resolve();
+            });
+        }),
+    );
+    await page.screenshot({
+      path: testInfo.outputPath(`${world}-underwater-up.png`),
+    });
+    await page.getByRole("button", { name: "恢复视角", exact: true }).click();
+    await page.waitForFunction(() => !window.example.water._underwater?.active);
     const timing = await page.evaluate(async () => {
       const e = window.example,
         v = e.viewer,
         gl = v.scene.context._gl;
       v.useDefaultRenderLoop = false;
-      const scattering = e.water.scattering;
-      // Compile both paths before timing; no fixed settling frames or product overrides.
-      e.water.scattering = undefined;
+      const C = await import("/Build/CesiumUnminified/index.js");
+      const foam = e.water.foamIntensity,
+        caustics = e.water.causticsIntensity;
+      // Warm the actual enabled/disabled paths before timing animated frames.
+      e.water.foamIntensity = e.water.causticsIntensity = 0;
       v.render();
-      e.water.scattering = scattering;
+      e.water.foamIntensity = foam;
+      e.water.causticsIntensity = caustics;
       v.render();
       const ext = gl.getExtension("EXT_disjoint_timer_query_webgl2");
       const samples = [];
       if (ext) {
         for (let i = 0; i < 12; i++) {
-          const medium = i % 2 === 1;
-          e.water.scattering = medium ? scattering : undefined;
+          const effects = i % 2 === 1;
+          e.water.foamIntensity = effects ? foam : 0;
+          e.water.causticsIntensity = effects ? caustics : 0;
+          C.JulianDate.addSeconds(
+            v.clock.currentTime,
+            1 / 60,
+            v.clock.currentTime,
+          );
           const query = gl.createQuery();
           gl.beginQuery(ext.TIME_ELAPSED_EXT, query);
           v.render();
           gl.endQuery(ext.TIME_ELAPSED_EXT);
-          samples.push({ query, medium });
+          samples.push({ query, effects });
         }
         gl.flush();
         const deadline = performance.now() + 5000;
@@ -141,15 +176,37 @@ for (const world of ["planar", "globe"]) {
           gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE),
         );
       const measurements = valid
-        ? samples.map(({ query, medium }) => ({
-            medium,
+        ? samples.map(({ query, effects }) => ({
+            effects,
             milliseconds: gl.getQueryParameter(query, gl.QUERY_RESULT) / 1e6,
           }))
         : [];
       for (const { query } of samples) {
         gl.deleteQuery(query);
       }
-      e.water.scattering = scattering;
+      e.water.foamIntensity = foam;
+      e.water.causticsIntensity = caustics;
+      v.render();
+      const field = e.water._field;
+      const half = (v) =>
+        (v & 32768 ? -1 : 1) *
+        ((v >> 10) & 31
+          ? (1 + (v & 1023) / 1024) * 2 ** (((v >> 10) & 31) - 15)
+          : (v & 1023) * 2 ** -24);
+      const pixels = v.scene.context.readPixels({
+        framebuffer: field.foam[field.index],
+        width: field.size,
+        height: field.size,
+      });
+      let foamMaximum = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        foamMaximum = Math.max(foamMaximum, half(pixels[i]));
+      }
+      const fieldBytes =
+        field.data.byteLength +
+        field.size ** 2 * 8 * (2 + 4 / 3) +
+        129 ** 2 * 8 +
+        128 ** 2 * 6 * 2;
       const debug = gl.getExtension("WEBGL_debug_renderer_info");
       v.useDefaultRenderLoop = true;
       return {
@@ -157,8 +214,11 @@ for (const world of ["planar", "globe"]) {
           ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)
           : "unavailable",
         measurements,
+        foamMaximum,
+        fieldBytes,
       };
     });
+    expect(timing.foamMaximum).toBeGreaterThan(0.05);
     const timingPath = testInfo.outputPath(`${world}-gpu-cost.json`);
     await writeFile(timingPath, JSON.stringify(timing, null, 2));
     await testInfo.attach(`${world}-gpu-cost`, {

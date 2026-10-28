@@ -27,6 +27,7 @@ import {
   Texture,
   PixelFormat,
   PixelDatatype,
+  BoundingRectangle,
 } from "../../../index.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
 import createScene from "../../../../../Specs/createScene.js";
@@ -90,7 +91,13 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
       }),
     );
   }
-  function setup(planar = true, orthographic = false, hole = false, windWaves) {
+  function setup(
+    planar = true,
+    orthographic = false,
+    hole = false,
+    windWaves,
+    options = {},
+  ) {
     scene = createScene({ canvas: createCanvas(128, 128), scene3DOnly: true });
     scene.highDynamicRange = true;
     scene.fog.enabled = false;
@@ -159,6 +166,7 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
         waterColor: Color.BLACK,
         reflectionColor: Color.BLACK,
         absorption: new Cartesian3(1, 0, 0),
+        ...options,
       }),
     );
     flat(
@@ -172,6 +180,52 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
     );
   }
   [true, false].forEach(function (planar) {
+    it(`bounds underwater absorption by the local volume and holes in ${planar ? "Planar" : "Globe"}`, function () {
+      setup(planar, false, true);
+      const down = (x) =>
+        scene.camera.setView({
+          destination: point(x, 0, -0.25),
+          orientation: { direction: vector(0, 0, -1), up: vector(0, 1, 0) },
+        });
+      const center = () =>
+        Array.from(
+          scene.context.readPixels({ x: 64, y: 64, width: 1, height: 1 }),
+        );
+      down(6);
+      render();
+      const clear = center();
+      water.underwaterDepth = 2;
+      water.scattering = Cartesian3.clone(Cartesian3.ZERO);
+      render();
+      expect(water._underwater.active).toBeTrue();
+      expect(scene.frameState._sceneGISWater.ready).toBeTrue();
+      expect(center()[0]).toBeLessThan(clear[0] * 0.9);
+      expect(center()[1]).toEqualEpsilon(clear[1], 1);
+      const texture = water._underwater.texture;
+      down(0);
+      render();
+      expect(water._underwater.active).toBeFalse();
+      expect(center()).toEqual(clear);
+      down(13);
+      render();
+      expect(water._underwater.active).toBeFalse();
+      expect(center()).toEqual(clear);
+      down(6);
+      water.underwaterDepth = 0;
+      render();
+      expect(center()).toEqual(clear);
+      water.underwaterDepth = 2;
+      water.reflectionColor = Color.BLUE;
+      scene.camera.setView({
+        destination: point(6, 0, -0.25),
+        orientation: { direction: vector(0, 0, 1), up: vector(0, 1, 0) },
+      });
+      render();
+      expect(center()[2]).toBeGreaterThan(100);
+      scene.primitives.remove(water);
+      water = undefined;
+      expect(texture.isDestroyed()).toBeTrue();
+    });
     it(`renders displaced wind water and hole picking in ${planar ? "Planar" : "Globe"} without owning the simulation`, function () {
       const waves = new SceneGISWindWaves({
         resolution: 32,
@@ -209,6 +263,85 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
       waves.destroy();
     });
   });
+  it("keeps bathymetry foam and actual FFT caustics independent of camera movement", function () {
+    borrowedWaves = new SceneGISWindWaves({
+      resolution: 32,
+      patchLength: 16,
+      windSpeed: 8,
+    });
+    const depths = new Float32Array(32 * 32).fill(0.2);
+    setup(true, false, false, borrowedWaves, {
+      bathymetry: {
+        rectangle: new BoundingRectangle(-12, -12, 24, 24),
+        width: 32,
+        height: 32,
+        depths,
+      },
+      foamIntensity: 0.8,
+      foamWidth: 0.5,
+      causticsIntensity: 1,
+    });
+    render();
+    depths.fill(50);
+    expect(water._field.data[0]).toEqualEpsilon(0.2, 1e-6);
+    render(JulianDate.addSeconds(time, 1, new JulianDate()));
+    const field = water._field;
+    const before = scene.context.readPixels({
+      framebuffer: field.caustics,
+      width: 32,
+      height: 32,
+    });
+    expect(Array.from(before).some((v, i) => i % 4 === 0 && v > 0)).toBeTrue();
+    expect(
+      scene.context.readPixels({
+        framebuffer: field.foam[field.index],
+        x: 16,
+        y: 16,
+        width: 1,
+        height: 1,
+      })[0],
+    ).toBeGreaterThan(0);
+    const draw = spyOn(field.causticsCommand, "execute").and.callThrough();
+    scene.camera.moveRight(2);
+    render(JulianDate.addSeconds(time, 1, new JulianDate()));
+    expect(draw).not.toHaveBeenCalled();
+    expect(
+      scene.context.readPixels({
+        framebuffer: field.caustics,
+        width: 32,
+        height: 32,
+      }),
+    ).toEqual(before);
+    render(JulianDate.addSeconds(time, 2, new JulianDate()));
+    expect(draw).toHaveBeenCalled();
+    expect(
+      scene.context.readPixels({
+        framebuffer: field.caustics,
+        width: 32,
+        height: 32,
+      }),
+    ).not.toEqual(before);
+    borrowedWaves.windSpeed = 0;
+    render(JulianDate.addSeconds(time, 2, new JulianDate()));
+    // A flat interface has unit area ratio, rather than an unrelated animated texture.
+    expect(
+      scene.context.readPixels({
+        framebuffer: field.caustics,
+        x: 16,
+        y: 16,
+        width: 1,
+        height: 1,
+      })[0],
+    ).toEqualEpsilon(0x3c00, 4);
+    const targets = [
+      field.bed,
+      field.caustics.getColorTexture(0),
+      ...field.foam.map((f) => f.getColorTexture(0)),
+    ];
+    scene.primitives.remove(water);
+    water = undefined;
+    expect(targets.every((t) => t.isDestroyed())).toBeTrue();
+  });
   it("rejects submerged geometry from wind-wave reflection rays", function () {
     borrowedWaves = new SceneGISWindWaves({
       resolution: 32,
@@ -240,6 +373,46 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
         expect(pixel(point(x, y, 0))[0]).toBeLessThan(2);
       }
     }
+  });
+  it("reflects a continuous submerged bottom from the FFT underside at a coarse ray budget", function () {
+    borrowedWaves = new SceneGISWindWaves({
+      resolution: 32,
+      patchLength: 16,
+      windSpeed: 0,
+    });
+    setup(true, false, false, borrowedWaves);
+    water.underwaterDepth = 2;
+    water.absorption = Cartesian3.clone(Cartesian3.ZERO);
+    scene.camera.setView({
+      destination: point(0, -4, -0.5),
+      orientation: {
+        direction: Cartesian3.normalize(vector(0, 4, 0.5), new Cartesian3()),
+        up: vector(0, 0, 1),
+      },
+    });
+    render();
+    const without = scene.context.readPixels();
+    water.reflections = true;
+    water.reflectionSteps = 16;
+    render();
+    expect(
+      scene.context
+        .readPixels()
+        .some((v, i) => i % 4 !== 3 && v > without[i] + 20),
+    ).toBeTrue();
+    // Every ray in this TIR patch sees the same white floor. Long projected
+    // strides must not alternate between that floor and the black environment.
+    const patch = scene.context.readPixels({
+      x: 48,
+      y: 82,
+      width: 32,
+      height: 26,
+    });
+    let darkest = 255;
+    for (let i = 0; i < patch.length; i += 4) {
+      darkest = Math.min(darkest, patch[i]);
+    }
+    expect(darkest).toBeGreaterThan(150);
   });
   afterEach(function () {
     if (borrowedWaves && !borrowedWaves.isDestroyed()) {
@@ -709,6 +882,24 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
       { scattering: new Cartesian3(0, Infinity, 0) },
       { scatteringAnisotropy: 1 },
       { scatteringAnisotropy: -1 },
+      { underwaterDepth: -1 },
+      { causticsIntensity: 1 },
+      {
+        bathymetry: {
+          rectangle: new BoundingRectangle(0, 0, 2, 2),
+          width: 2,
+          height: 2,
+          depths: new Float32Array([0, 1, NaN, 2]),
+        },
+      },
+      {
+        bathymetry: {
+          rectangle: new BoundingRectangle(0, 0, 0, 2),
+          width: 2,
+          height: 2,
+          depths: new Float32Array(4),
+        },
+      },
     ]) {
       expect(
         () =>

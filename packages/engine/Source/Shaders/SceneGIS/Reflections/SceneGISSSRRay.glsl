@@ -44,6 +44,7 @@ vec4 sceneGISSSRTrace(vec3 position, vec4 ray)
     int steps = min(u_stepCount, int(ceil(pixels)));
     float increment = endT / float(steps);
     float previousDepth = -start.z;
+    float previousSurface = texture(u_depth, uv0).r;
     float previousT = 0.0;
     for (int i = 1; i <= 256; ++i)
     {
@@ -55,7 +56,11 @@ vec4 sceneGISSSRTrace(vec3 position, vec4 ray)
         float surface = texture(u_depth, uv).r;
         float nearZ = min(previousDepth, z);
         float farZ = max(previousDepth, z);
-        if (surface > 0.0 && farZ >= surface && nearZ <= surface + u_thickness && float(i) * pixels / float(steps) > 2.0)
+        // A long stride can cross a sloped receiver without overlapping its
+        // thickness at either sample. Bracket the signed depth gap as well.
+        bool fromBehind = previousSurface > 0.0 && previousDepth >= previousSurface;
+        bool bracket = previousSurface > 0.0 && fromBehind != (z >= surface);
+        if (surface > 0.0 && (bracket || (farZ >= surface && nearZ <= surface + u_thickness)) && float(i) * pixels / float(steps) > 2.0)
         {
             float lo = previousT;
             float hi = t;
@@ -66,22 +71,26 @@ vec4 sceneGISSSRTrace(vec3 position, vec4 ray)
                 vec2 midUV = uv0 + delta * mid;
                 float midZ = -mix(start.z / h0.w, end.z / h1.w, mid) / mix(1.0 / h0.w, 1.0 / h1.w, mid);
                 float midSurface = texture(u_depth, midUV).r;
-                if (midSurface > 0.0 && midZ >= midSurface) { hi = mid; } else { lo = mid; }
+                bool behind = midSurface > 0.0 && midZ >= midSurface;
+                if (behind != fromBehind) { hi = mid; } else { lo = mid; }
             }
-            uv = uv0 + delta * hi;
-            p = mix(start / h0.w, end / h1.w, hi) / mix(1.0 / h0.w, 1.0 / h1.w, hi);
-            surface = texture(u_depth, uv).r;
-            float error = -p.z - surface;
+            // Choose the bracket endpoint behind the receiver for either ray direction.
+            float hitT = fromBehind ? lo : hi;
+            uv = uv0 + delta * hitT;
+            p = mix(start / h0.w, end / h1.w, hitT) / mix(1.0 / h0.w, 1.0 / h1.w, hitT);
+            float hitSurface = texture(u_depth, uv).r;
+            float error = -p.z - hitSurface;
             float travel = length(p - position);
-            if (surface > 0.0 && error >= 0.0 && error <= u_thickness && travel > 4.0 * bias)
+            if (hitSurface > 0.0 && error >= 0.0 && error <= u_thickness && travel > 4.0 * bias)
             {
                 #if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_RIVER_WATER)
-                // A displaced water interface must not reflect the opaque lake bed.
-                vec3 hitPosition = sceneGISSSRPosition(uv * size, surface);
+                // Reflections stay in the incident medium: air above, water below.
+                vec3 hitPosition = sceneGISSSRPosition(uv * size, hitSurface);
                 #ifdef SCENEGIS_CURVED_WATER
                 if (sceneGISWaterMeanOffset(hitPosition) < 0.0) { return vec4(0.0); }
                 #else
-                if ((czm_inverseModelView * vec4(hitPosition, 1.0)).z < 0.0) { return vec4(0.0); }
+                float hitHeight = (czm_inverseModelView * vec4(hitPosition, 1.0)).z;
+                if (hitHeight * czm_inverseModelView[3].z < 0.0) { return vec4(0.0); }
                 #endif
                 #endif
                 float edge = min(min(uv.x, uv.y), min(1.0 - uv.x, 1.0 - uv.y));
@@ -89,13 +98,14 @@ vec4 sceneGISSSRTrace(vec3 position, vec4 ray)
                 confidence *= 1.0 - smoothstep(0.8 * u_maximumDistance, u_maximumDistance, travel);
                 confidence *= 1.0 - smoothstep(0.5 * u_maximumRoughness, u_maximumRoughness, ray.w);
                 float projectedWidth = ray.w * ray.w * travel * abs(czm_projection[1][1]) * size.y * 0.5;
-                if (czm_projection[3][3] == 0.0) { projectedWidth /= max(surface, 0.001); }
+                if (czm_projection[3][3] == 0.0) { projectedWidth /= max(hitSurface, 0.001); }
                 float lod = log2(max(1.0, projectedWidth));
                 vec4 color = textureLod(u_color, uv, lod);
                 return vec4(color.rgb / max(color.a, 0.001), confidence * clamp(color.a, 0.0, 1.0));
             }
         }
         previousDepth = z;
+        previousSurface = surface;
         previousT = t;
     }
     return vec4(0.0);

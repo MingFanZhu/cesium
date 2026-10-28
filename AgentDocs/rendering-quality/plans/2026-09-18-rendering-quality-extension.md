@@ -11,12 +11,12 @@ and resource ownership. SDK and hydraulic simulation remain excluded.
   separate absorption/scattering, coherent refraction and authoring presets.
   [Review](../reviews/2026-10-28-r31-water-optics.md) records verification and limits;
   its independent local checkpoint is the commit containing the R31 implementation.
-- R32 active: [editable colors and persistent FFT foam](2026-10-28-r32-water-foam.md).
+- R32 checkpoint `8a5600d08a`: [editable colors and persistent FFT foam](2026-10-28-r32-water-foam.md).
   Source review narrows this checkpoint to crest history and filtered contact foam;
   stable bathymetry-driven shoreline transport remains a separate follow-up.
-- R33 planned after R32 checkpoint: water-bottom caustics and underwater medium,
-  waterline transitions and below-surface interface. Determine integration and
-  finite-water boundaries from the then-current source; no premature API design.
+- R33 active: [local underwater and stable depth fields](2026-10-28-r33-local-underwater.md).
+  Actual-wave projected caustics, bathymetry-driven shore foam, finite local medium
+  and underside Fresnel/TIR. Mean-height immersion; wave-exact meniscus stays deferred.
 
 Each phase requires technical review and a separate local commit before the next.
 Visual acceptance uses both worlds, shallow slopes, vertical walls, depth changes

@@ -14,7 +14,10 @@ const sampler = new Sampler({
   magnificationFilter: TextureMagnificationFilter.LINEAR,
 });
 
-function hasVisibleWater(ranges) {
+function hasVisibleWater(ranges, surfaces) {
+  if (surfaces.some((surface) => surface._underwater?.active)) {
+    return true;
+  }
   for (const range of ranges) {
     for (let i = 0; i < range.indices[Pass.OPAQUE]; ++i) {
       if (SceneGISWaterFrame.isWater(range.commands[Pass.OPAQUE][i])) {
@@ -71,7 +74,7 @@ const SceneGISWaterFrame = {
         scene._sceneGISEnvironmentEffectsPipeline?.needsSceneDepth) ||
         ranges.some((range) => range.indices[Pass.VOXELS] > 0)) &&
       !scene._sceneGISTemporalAntialiasing?._state?.active &&
-      hasVisibleWater(ranges);
+      hasVisibleWater(ranges, scene.frameState._sceneGISWater?.surfaces ?? []);
     if (!needed) {
       SceneGISWaterFrame.releaseFinalDepth(scene);
       return;
@@ -183,7 +186,7 @@ const SceneGISWaterFrame = {
       return;
     }
     const ranges = scene._view.frustumCommandsList;
-    if (!hasVisibleWater(ranges)) {
+    if (!hasVisibleWater(ranges, s.surfaces)) {
       return;
     }
     const deferred = scene._sceneGISDeferred;
@@ -250,6 +253,11 @@ const SceneGISWaterFrame = {
     s.drawing = true;
     try {
       scene.context.uniformState.updatePass(Pass.OPAQUE);
+      if (range === scene._view.frustumCommandsList[0]) {
+        for (const surface of s.surfaces) {
+          surface._underwater?.draw(surface, scene, passState);
+        }
+      }
       for (let i = 0; i < range.indices[Pass.OPAQUE]; ++i) {
         const command = range.commands[Pass.OPAQUE][i];
         if (SceneGISWaterFrame.isWater(command)) {

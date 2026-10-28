@@ -1066,6 +1066,48 @@ FFT 风浪。预设是外观演示，不代表实测水质。示例使用固定�
 资源销毁顺序仍是移除全部借用水面，再销毁风浪模拟，最后销毁 Viewer。
 焦散、水下相机、持久泡沫模拟不由本选项启用；边界和算法见 ADR-0194。
 
+### 可编辑颜色、稳定岸沫与水下视角
+
+局部水面示例的预设仅填充编辑项，选择后仍可改透射颜色、着色距离、散射颜色、浑浊度。
+颜色选择器输入 sRGB；示例先转为 linear，再按 `absorption = -log(transmission) / distance`
+和 `scattering = linearScatteringColor * turbidity` 转成引擎系数。黑色透射钳至 1e-4，
+保证系数有限。这些颜色描述介质，最终像素仍由光程、受光和反射决定，不是固定透明度。
+
+局部 `SceneGISWaterSurface` 可额外配置：
+
+```js
+const water = new Cesium.SceneGISWaterSurface({
+  polygonHierarchy,
+  modelMatrix,
+  windWaves: waves,
+  underwaterDepth: 3,
+  bathymetry: {
+    rectangle: new Cesium.BoundingRectangle(-24, -21, 48, 42),
+    width: 256,
+    height: 256,
+    depths, // Float32Array, 256 * 256 signed water depths in meters.
+  },
+  causticsIntensity: 1,
+});
+```
+
+- `underwaterDepth`：平均水面下的有限容积深度，默认 0 关闭。支持平面和球面 ENU 的
+  local 水面、凹轮廓及孔洞，总边数不超过 256；相机在容积内才启用。真实 opaque 水底会
+  提前截断视线。当前按平均水位判断浸没，不包含波浪逐像素浸没和弯月面。
+- `bathymetry`：可选、构造时复制的固定水深场。width/height 为 2–1024 的整数；
+  depths 按行存储，列沿局部 X 增大、行沿局部 Y 增大，首末格点覆盖 rectangle 边界。
+  正值在水下，0 是岸线，负值为陆地；孔洞仍受原轮廓约束。数据来自调用方地形或模型，
+  引擎不会隐式回读场景。当前不支持动态替换。需要浮点纹理线性过滤。
+- 提供 bathymetry 后，岸沫在固定局部场中按浅水生成、输运、衰减；暂停复用、倒放重置。
+  不提供时保留原屏幕深度接触泡沫。`foamWidth` 为浅水生成范围，`foamIntensity` 为生成强度。
+- `causticsIntensity`：默认 0，范围 0–2，要求 bathymetry。从实际 FFT 位移和法线（或
+  同一套解析波纹）折射网格并计算投影面积比，形成可过滤的固定焦散图。它调制已受光的
+  opaque 快照；不等同于光子追踪，不包含折射遮挡，竖直面和高出水底的物体使用近似投影。
+- 上述新参数只支持 local 模式。区域曲面和 RiverSurface 保持原光学能力；半透明水下物体、
+  多层重叠水域暂不在资格内。移除水面会释放深度场、泡沫历史、焦散图和水下程序；风浪仍归调用方。
+
+算法、资源成本及参考实现见 ADR-0195、ADR-0196。新增水下视角与焦散有独立的 GUI 开关。
+
 ### 风浪配置
 
 `SceneGISWindWaves` 是可选的可共享模拟，传入现有水面即可启用真实几何位移：

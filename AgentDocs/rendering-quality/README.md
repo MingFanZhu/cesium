@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R32 editable colors and foam                                                                             |
-| Active phase plan      | [R32](plans/2026-10-28-r32-water-foam.md)                                                                |
+| Current phase          | R33 local underwater and depth-driven foam                                                               |
+| Active phase plan      | [R33](plans/2026-10-28-r33-local-underwater.md)                                                          |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
@@ -35,12 +35,20 @@
 
 ## Current handoff
 
+- R33 active after R32 checkpoint `8a5600d08a`: [finite local underwater plan](plans/2026-10-28-r33-local-underwater.md).
+  Owner requires concrete mature-algorithm implementation. Replace the draft independent
+  slope caustic with actual wave refraction and projected area ratios; add explicit
+  stable bathymetry for persistent shallow foam. No SDK or upstream edits.
+  R33 is technically complete; [review](reviews/2026-10-28-r33-local-underwater.md)
+  records 68 release GPU cases and both-world dev/release browser verification.
+  Owner visual gate remains open; this phase commit is the independent checkpoint.
+
 - 2026-10-28 continuation: owner requests editable colors and more foam/underwater work.
   R31 checkpoint is `b80c216473`. R32 adds open optical color controls and persistent
   FFT whitecaps; [plan](plans/2026-10-28-r32-water-foam.md) records the bounded scope.
   Stable bathymetry-based shoreline transport remains follow-up; screen-depth contact
   remains explicit. [Technical review](reviews/2026-10-28-r32-water-foam.md) records completed checks
-  and the reproduced baseline river finding. R33 starts after the independent R32 checkpoint.
+  and the corrected river baseline investigation. R33 starts after the independent R32 checkpoint.
 
 - 2026-10-28: owner approves the water-quality roadmap. Activate R31 / ADR-0194
   for optional coefficient optics, consistent refraction and a both-world fixture.

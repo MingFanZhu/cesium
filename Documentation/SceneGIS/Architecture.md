@@ -1321,11 +1321,17 @@ local XY 米制平面，modelMatrix 使用刚体变换；Globe 采用 ENU，Plan
 `scattering` 和 `scatteringAnisotropy`。定义 scattering 时使用按米计的吸收、散射与单次散射
 解析积分，undefined 保留 waterColor；不增加资源、绘制通道或回读。折射接受的颜色与深度
 必须来自同一采样位置，已受光的底面只做消光，不再次照明。无底面保持无限深水近似。
-此扩展仍为水上单层光学，水下相机及焦散由后续阶段独立定义。
+R31 为水上单层光学；R33 的有限水域扩展见下文。
 
 [ADR-0195](Decisions/ADR-0195-water-foam-history.md) 在 FFT finalize 中积累白沫历史。
 `foamHalfLife` 以模拟秒控制衰减；新增每频段一张法线历史纹理，不增加 draw。
 示例颜色选择器按明确光程转为吸收系数，预设仅填充可编辑值。
+
+[ADR-0196](Decisions/ADR-0196-local-underwater.md) 在 local 水面中增加显式 `underwaterDepth`
+与复制的 `bathymetry`。水下合成复用 SGP-0017 现有 owned helper，在最近 frustum 的
+opaque 后、透明物体前执行；凹轮廓、孔洞、容积底和 opaque 深度限制光程，无逐帧回读。
+`causticsIntensity` 使用实际波面折射网格的面积比形成局部焦散图；同一水深场驱动持久岸沫。
+固定场和水下程序归图元所有。曲面/河流容积、半透明水下物体、重叠介质及波浪精确弯月面不在首版资格内。
 
 ## 风驱动湖面（R22）
 

@@ -6,6 +6,7 @@ import {
   Texture,
 } from "../../../index.js";
 import optics from "../../../Source/Shaders/SceneGIS/Water/SceneGISWaterOptics.js";
+import effects from "../../../Source/Shaders/SceneGIS/Water/SceneGISWaterEffects.js";
 import createContext from "../../../../../Specs/createContext.js";
 
 describe("SceneGIS/Scene/SceneGISWaterOptics", function () {
@@ -46,7 +47,7 @@ describe("SceneGIS/Scene/SceneGISWaterOptics", function () {
   });
   function draw(body) {
     command ??= context.createViewportQuadCommand(
-      `${optics}
+      `${optics}\n${effects}
       uniform vec3 u_absorption, u_scattering, u_background, u_direct, u_sky;
       uniform float u_distance, u_viewCosine, u_lightCosine, u_cosine, u_g;
       uniform bool u_hasBottom;
@@ -133,5 +134,46 @@ describe("SceneGIS/Scene/SceneGISWaterOptics", function () {
       }
       out_FragColor = vec4(sum * (czm_pi / 512.0), 0.0, 0.0, 1.0);`)[0],
     ).toEqualEpsilon(1, 0.0001);
+  });
+  it("integrates underwater rays toward and away from light, including the parallel exponent limit", function () {
+    state.absorption = new Cartesian3(0.2, 0.1, 0);
+    state.scattering = new Cartesian3(0.05, 0.3, 0);
+    state.lightCosine = 0.8;
+    const body = `out_FragColor = vec4(sceneGISWaterUnderwater(u_background, u_absorption, u_scattering,
+      u_distance, 3.0, 3.0 - u_distance * u_viewCosine, u_direct, u_sky, u_lightCosine), 1.0);`;
+    for (const slope of [-0.6, 0, 0.8, 0.800001]) {
+      state.viewCosine = slope;
+      state.distance = 2;
+      const reference = ["x", "y", "z"].map((c) => {
+        const ext = state.absorption[c] + state.scattering[c];
+        let value = state.background[c] * Math.exp(-ext * state.distance);
+        const dt = state.distance / 16000;
+        for (let i = 0; i < 16000; ++i) {
+          const t = (i + 0.5) * dt,
+            depth = 3 - slope * t;
+          value +=
+            state.scattering[c] *
+            Math.exp(-ext * t) *
+            (state.direct[c] * Math.exp((-ext * depth) / 0.8) +
+              state.sky[c] * Math.exp((-ext * depth) / (2 / 3))) *
+            dt;
+        }
+        return value;
+      });
+      expect(draw(body).slice(0, 3)).toEqualEpsilon(reference, 0.00002);
+    }
+  });
+  it("uses the physical water-to-air critical angle", function () {
+    const body =
+      "out_FragColor = vec4(sceneGISWaterExitFresnel(u_cosine), 0.0, 0.0, 1.0);";
+    state.cosine = 1;
+    expect(draw(body)[0]).toEqualEpsilon(
+      ((1.333 - 1) / (1.333 + 1)) ** 2,
+      1e-6,
+    );
+    state.cosine = 0.5;
+    expect(draw(body)[0]).toBe(1);
+    state.cosine = 0.8;
+    expect(draw(body)[0]).toBeLessThan(1);
   });
 });

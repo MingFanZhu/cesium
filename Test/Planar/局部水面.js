@@ -115,6 +115,14 @@ const state = {
   refractionStrength: 0.2,
   foamIntensity: 0.35,
   foamWidth: 0.35,
+  underwater: true,
+  causticsIntensity: 1,
+  dive() {
+    underwaterView(false);
+  },
+  lookUp() {
+    underwaterView(true);
+  },
   reset() {
     const direction = C.Cartesian3.normalize(
       new C.Cartesian3(-19, 38, -18),
@@ -178,9 +186,47 @@ const waters = [undefined, waves].map((windWaves) =>
       roughness: 0.12,
       foamWidth: 0.35,
       foamIntensity: 0.35,
+      underwaterDepth: 2.5,
+      causticsIntensity: 1,
+      bathymetry: createBathymetry(),
     }),
   ),
 );
+function createBathymetry() {
+  const width = 256,
+    height = 256;
+  const depths = new Float32Array(width * height);
+  // Sample the authored bank planes and boxes once, independently of the camera.
+  const boxes = [
+    [-9, 7, 3, 3, 8],
+    [8, 9, 4, 4, 10],
+    [0, 12, 6, 4, 4],
+    [-13, -4, 5, 5, 2.3],
+    [6, -4, 4, 3, 1.5],
+  ];
+  for (let y = 0; y < height; ++y) {
+    for (let x = 0; x < width; ++x) {
+      const px = -24 + (x / (width - 1)) * 48,
+        py = -21 + (y / (height - 1)) * 42;
+      let bed =
+        0.4 +
+        3.1 *
+          Math.max(0, (Math.abs(px) - 17) / 7, (py - 11) / 10, (-10 - py) / 11);
+      for (const [bx, by, sx, sy, top] of boxes) {
+        if (Math.abs(px - bx) < sx / 2 && Math.abs(py - by) < sy / 2) {
+          bed = Math.max(bed, top);
+        }
+      }
+      depths[y * width + x] = 2.5 - bed;
+    }
+  }
+  return {
+    rectangle: new C.BoundingRectangle(-24, -21, 48, 42),
+    width,
+    height,
+    depths,
+  };
+}
 const water = waters[1];
 const presets = {
   原有配色: { absorption: [0.45, 0.12, 0.06], scattering: undefined, g: 0 },
@@ -258,9 +304,40 @@ function applyControls() {
       "refractionStrength",
       "foamIntensity",
       "foamWidth",
+      "causticsIntensity",
     ]) {
       surface[key] = state[key];
     }
+    surface.underwaterDepth = state.underwater ? 2.5 : 0;
+  });
+}
+function underwaterView(upward) {
+  const direction = C.Cartesian3.normalize(
+    new C.Cartesian3(0, upward ? 0.35 : 1, upward ? 1 : 0.05),
+    new C.Cartesian3(),
+  );
+  const right = C.Cartesian3.normalize(
+    C.Cartesian3.cross(direction, C.Cartesian3.UNIT_Z, new C.Cartesian3()),
+    new C.Cartesian3(),
+  );
+  viewer.camera.setView({
+    destination: C.Matrix4.multiplyByPoint(
+      localToWorld,
+      new C.Cartesian3(0, -7, 1.4),
+      new C.Cartesian3(),
+    ),
+    orientation: {
+      direction: C.Matrix4.multiplyByPointAsVector(
+        localToWorld,
+        direction,
+        new C.Cartesian3(),
+      ),
+      up: C.Matrix4.multiplyByPointAsVector(
+        localToWorld,
+        C.Cartesian3.cross(right, direction, new C.Cartesian3()),
+        new C.Cartesian3(),
+      ),
+    },
   });
 }
 applyPreset();
@@ -338,6 +415,17 @@ foamControls
   .onChange(applyControls);
 
 gui.add(viewer.clock, "shouldAnimate").name("时间动画");
+const underwaterControls = gui.addFolder("水下效果");
+underwaterControls
+  .add(state, "underwater")
+  .name("水下视效")
+  .onChange(applyControls);
+underwaterControls
+  .add(state, "causticsIntensity", 0, 2, 0.05)
+  .name("水底焦散")
+  .onChange(applyControls);
+underwaterControls.add(state, "dive").name("进入水下");
+underwaterControls.add(state, "lookUp").name("水下仰视");
 gui.add(state, "reset").name("恢复视角");
 exposeExample(
   viewer,

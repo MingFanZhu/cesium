@@ -11,10 +11,6 @@ uniform mat3 u_skyWorldToLocal;
 uniform float u_skyLod;
 uniform float u_radianceScale;
 uniform float u_roughness;
-uniform float u_waveAmplitude;
-uniform float u_waveLength;
-uniform vec2 u_flowDirection;
-uniform float u_time;
 uniform float u_foamWidth;
 uniform float u_foamIntensity;
 uniform float u_refractionStrength;
@@ -23,13 +19,6 @@ in vec3 v_positionEC;
 in vec2 v_waterPosition;
 #ifdef SCENEGIS_CURVED_WATER
 uniform vec2 u_waterFoamOffset;
-#endif
-#ifdef SCENEGIS_WIND_WAVES
-uniform sampler2D u_waveNormal0;
-uniform sampler2D u_waveNormal1;
-uniform sampler2D u_waveNormal2;
-uniform float u_wavePeriod;
-uniform float u_waveResolution;
 #endif
 #if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_RIVER_WATER)
 in float v_shoreFade;
@@ -45,14 +34,6 @@ float sceneGISWaterNoise(vec2 p)
         dot(i + vec2(0.0, 1.0), vec2(127.1, 311.7)),
         dot(i + vec2(1.0), vec2(127.1, 311.7)))) * 43758.5453);
     return mix(mix(h.x, h.y, f.x), mix(h.z, h.w, f.x), f.y);
-}
-
-vec2 sceneGISWaterWave(vec2 direction, float scale, float speed, float phase, float footprint)
-{
-    float k = czm_twoPi / (u_waveLength * scale);
-    float bandLimit = exp(-k * k * footprint * footprint);
-    float angle = k * dot(direction, v_waterPosition) - u_time * speed + phase;
-    return direction * (cos(angle) * k * u_waveAmplitude * scale * bandLimit);
 }
 
 float sceneGISWaterBubbles(vec2 p, float footprint)
@@ -79,7 +60,7 @@ float sceneGISWaterBubbles(vec2 p, float footprint)
 
 float sceneGISWaterFoam(float depth, float footprint, vec2 flow)
 {
-    if (u_foamWidth == 0.0 || u_foamIntensity == 0.0 || depth >= u_foamWidth) { return 0.0; }
+    if (u_foamWidth == 0.0 || u_foamIntensity == 0.0 || (!u_hasWaterField && depth >= u_foamWidth)) { return 0.0; }
     float shallow = clamp(depth / u_foamWidth, 0.0, 1.0);
     // Drift in local meters; two different velocities gently break up foam clusters.
     float travel = u_time * u_waveLength / czm_twoPi;
@@ -102,6 +83,11 @@ float sceneGISWaterFoam(float depth, float footprint, vec2 flow)
     float bubbles = sceneGISWaterBubbles(bubblePosition, footprint * 9.0);
     float coverage = smoothstep(threshold - aa, threshold + aa, pattern + (bubbles - 0.65) * 0.07);
     float fade = 1.0 - smoothstep(0.55, 1.0, shallow);
+    if (u_hasWaterField) {
+        vec2 uv = (v_waterPosition - u_fieldRectangle.xy) / u_fieldRectangle.zw;
+        if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) { return 0.0; }
+        return texture(u_shoreFoam, uv).r * bubbles * (0.65 + grain * 0.35);
+    }
     return coverage * bubbles * (0.45 + grain * 0.55) * fade * u_foamIntensity;
 }
 
@@ -129,8 +115,8 @@ void main()
     diffuseLight = skyRadiance +
         beam * (max(dot(up, czm_lightDirectionEC), 0.0) / czm_pi);
     #endif
-    // Only the above-water interface is qualified.
-    if (dot(up, view) <= 0.0) { discard; }
+    bool belowWater = dot(up, view) <= 0.0;
+    if (belowWater && (u_underwaterDepth == 0.0 || u_cameraDepth <= 0.0)) { discard; }
     float footprint = max(length(dFdx(v_waterPosition)), length(dFdy(v_waterPosition)));
     vec2 d = normalize(u_flowDirection);
     float crestFoam = 0.0;
@@ -148,11 +134,7 @@ void main()
     #elif defined(SCENEGIS_RIVER_WATER)
     vec3 normal = up;
     #else
-    vec2 across = vec2(-d.y, d.x);
-    vec2 slope = sceneGISWaterWave(d, 1.0, 1.0, 0.0, footprint);
-    slope += sceneGISWaterWave(normalize(d + across * 0.6), 0.47, 1.7, 1.4, footprint) * 0.5;
-    slope += sceneGISWaterWave(normalize(d - across * 0.8), 0.19, 2.6, 3.2, footprint) * 0.3;
-    slope += sceneGISWaterWave(across, 0.08, 3.9, 0.7, footprint) * 0.15;
+    vec2 slope = sceneGISWaterSlope(v_waterPosition, footprint);
     vec3 normal = normalize(czm_normal * normalize(vec3(-slope, 1.0)));
     #endif
     #ifdef SCENEGIS_RIVER_WATER
@@ -163,6 +145,43 @@ void main()
     vec2 uv = gl_FragCoord.xy / size;
     float bottomDepth = texture(u_depth, uv).r;
     float waterDepth = -v_positionEC.z;
+    if (belowWater) {
+        vec3 inward = -normal;
+        float cosine = clamp(dot(inward, view), 0.0, 1.0);
+        float fresnel = sceneGISWaterExitFresnel(cosine);
+        vec3 outside = u_reflectionColor;
+        vec3 transmitted = refract(-view, inward, 1.333);
+        if (u_hasSky && fresnel < 1.0) {
+            outside = textureLod(u_sky, u_skyWorldToLocal * (czm_inverseViewRotation * transmitted),
+                u_roughness * u_skyLod).rgb * u_radianceScale;
+        }
+        vec3 opaque = sceneGISSSRPosition(gl_FragCoord.xy, bottomDepth);
+        if (bottomDepth > waterDepth && dot(opaque - v_positionEC, up) > 0.0) {
+            outside = textureLod(u_color, uv, 0.0).rgb;
+        }
+        vec3 reflected = reflect(-view, inward);
+        vec4 hit = u_reflections ? sceneGISSSRTrace(v_positionEC, vec4(reflected, u_roughness)) : vec4(0.0);
+        vec3 deep = u_mediumOptics ? u_scattering / max(u_absorption + u_scattering, vec3(1e-8)) * skyRadiance * 0.49 : u_waterColor * skyRadiance;
+        vec3 background = mix(outside, mix(deep, hit.rgb, hit.a), fresnel);
+        float distance = length(v_positionEC);
+        vec3 color;
+        if (u_mediumOptics) {
+            float eta = 1.0 / 1.333;
+            vec3 light = normalize(czm_lightDirectionEC);
+            float airCosine = max(dot(up, light), 0.0);
+            float lightCosine = sqrt(1.0 - eta * eta * (1.0 - airCosine * airCosine));
+            vec3 travel = -eta * (light - up * dot(up, light)) - up * lightCosine;
+            vec3 direct = beam * (airCosine / lightCosine) * (1.0 - sceneGISWaterFresnel(airCosine)) *
+                sceneGISWaterPhase(dot(travel, view), u_scatteringAnisotropy);
+            color = sceneGISWaterUnderwater(background, u_absorption, u_scattering, distance,
+                u_cameraDepth, 0.0, direct, skyRadiance * 0.49, lightCosine);
+        } else {
+            vec3 transmission = exp(-u_absorption * distance);
+            color = background * transmission + deep * (vec3(1.0) - transmission);
+        }
+        out_FragColor = vec4(max(color, vec3(0.0)), 1.0);
+        return;
+    }
     vec3 bottom = sceneGISSSRPosition(gl_FragCoord.xy, max(bottomDepth, waterDepth));
     bool hasBottom = bottomDepth > waterDepth;
     float pathLength = hasBottom ? length(bottom - v_positionEC) : 0.0;
@@ -191,6 +210,17 @@ void main()
         pathLength = length(bottom - v_positionEC);
     }
     vec4 background = textureLod(u_color, refractedUV, 0.0);
+    #ifndef SCENEGIS_CURVED_WATER
+    if (hasBottom && u_causticsIntensity > 0.0) {
+        vec3 receiver = (czm_inverseModelView * vec4(bottom, 1.0)).xyz;
+        float pixelSize = max(length(dFdx(receiver.xy)), length(dFdy(receiver.xy)));
+        vec3 receiverCross = cross(dFdx(bottom), dFdy(bottom));
+        float facing = abs(dot(receiverCross, up)) / max(length(receiverCross), 1e-8);
+        float focusing = sceneGISWaterCaustics(receiver.xy, max(-receiver.z, 0.0), pixelSize,
+            max(dot(up, czm_lightDirectionEC), 0.0));
+        background.rgb *= mix(1.0, focusing, facing * facing);
+    }
+    #endif
     vec3 water;
     if (u_mediumOptics) {
         vec3 light = normalize(czm_lightDirectionEC);

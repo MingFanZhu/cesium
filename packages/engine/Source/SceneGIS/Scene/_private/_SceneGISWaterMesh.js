@@ -296,4 +296,4 @@ SceneGISWaterMesh.prototype.createGeometry = function (tile, level) {
   return geometry;
 };
 export default SceneGISWaterMesh;
-export { bounds, rectangle, segments };
+export { bounds, rectangle, segments, distanceSquared };
