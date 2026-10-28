@@ -205,3 +205,28 @@ flow is introduced. The owner retains final visual acceptance; R25/R27 findings
 remain open. All changed implementation paths are SceneGIS-owned; SGP-0017 is
 unchanged. The bounded checks and source review are complete. Architecture
 self-review approves a separate local material checkpoint; no next phase is activated.
+
+## Other water examples — 2026-10-29
+
+Review target: example parameter maintenance after `24bdc6f939`; current task owns
+implementation and architecture self-review. No engine code or public API change.
+The Xuanwu lake, curved lake/channel and river examples use coefficient optics,
+editable transmission/scattering colors and presets, moderated shore foam, and
+explicit wind-foam intensity/lifetime. The lake keeps its wind presets; calm wind
+disables whitecaps. River artistic current foam remains opt-in. Color/foam values
+are applied to the current primitive after river reconstruction or asynchronous
+Xuanwu geometry creation. The shared module is solely Test GUI assembly.
+
+Six browser cases pass using the installed Chrome and existing development bundle:
+both Worlds for Xuanwu and river, plus both curved samples. Checks cover sRGB
+conversion, presets/custom edits, coefficient/foam propagation, river reconstruction,
+view/LOD transitions, animation and destruction. Close screenshots for all sample
+types are inspected. The default bundled Chromium executable was unavailable;
+an ignored local config selected installed Chrome without changing repository test
+configuration. No product build was necessary for example-only changes. Scoped
+ESLint, explicit Prettier, Markdown lint and diff checks pass.
+
+No new blocking findings. Existing regional cold-build and foam realism limits
+remain; these examples have no authored bathymetry or underwater medium/caustics.
+Diagnostic rendering fixtures retain their fixed isolation parameters. All paths
+are SceneGIS-owned; no upstream file or SGP change. Owner R33 visual gate stays open.

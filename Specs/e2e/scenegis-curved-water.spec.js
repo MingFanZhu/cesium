@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import checkWaterAppearance from "./scenegis-water-appearance-checks.js";
 for (const sample of ["lake", "river"]) {
   test(`curved ${sample}: near/high camera, animation, bounded LOD and lifecycle`, async ({
     page,
@@ -13,6 +14,7 @@ for (const sample of ["lake", "river"]) {
         document.querySelector("#error").textContent.length > 0,
     );
     await expect(page.locator("#error")).toHaveText("");
+    await checkWaterAppearance(page, sample === "river" ? "河水" : "清水");
     await page.evaluate(() => {
       window.example.viewer.useDefaultRenderLoop = false;
       window.example.viewer.clock.shouldAnimate = false;

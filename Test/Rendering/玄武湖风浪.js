@@ -2,6 +2,7 @@
 import * as C from "/Build/CesiumUnminified/index.js";
 import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
 import exposeExample from "/Test/example-lifecycle.js";
+import waterAppearanceControls from "./water-appearance-controls.js";
 
 const planar =
   new URLSearchParams(window.location.search).get("world") !== "globe";
@@ -108,6 +109,8 @@ const waves = new C.SceneGISWindWaves({
   waterDepth: 2,
   windDirection: new C.Cartesian2(-1, 1),
   resolution: fftResolution,
+  whitecapIntensity: 0.18,
+  foamHalfLife: 2,
 });
 const waters = [],
   shoreObjects = [];
@@ -122,7 +125,6 @@ const state = {
   animate: true,
   showWater: true,
   reflections: true,
-  roughness: 0.12,
   changeView() {
     const views = {
       水面近景: [
@@ -174,16 +176,22 @@ const state = {
   calm() {
     waves.windSpeed = 2;
     waves.amplitudeScale = 1;
+    waves.whitecapIntensity = 0;
+    waves.foamHalfLife = 0.8;
     gui.controllersRecursive().forEach((c) => c.updateDisplay());
   },
   breeze() {
     waves.windSpeed = 8;
     waves.amplitudeScale = 1;
+    waves.whitecapIntensity = 0.18;
+    waves.foamHalfLife = 2;
     gui.controllersRecursive().forEach((c) => c.updateDisplay());
   },
   strong() {
     waves.windSpeed = 14;
     waves.amplitudeScale = 1;
+    waves.whitecapIntensity = 0.35;
+    waves.foamHalfLife = 2.5;
     gui.controllersRecursive().forEach((c) => c.updateDisplay());
   },
 };
@@ -217,10 +225,12 @@ gui.add(waves, "directionalSpread", 0, 1, 0.05).name("波浪方向分散度");
 gui.add(waves, "rippleIntensity", 0, 4, 0.1).name("细浪强度");
 gui.add(waves, "choppiness", 0, 1, 0.05).name("波峰锐度");
 gui.add(waves, "whitecapIntensity", 0, 1, 0.05).name("浪尖白沫");
-gui
-  .add(state, "roughness", 0.04, 0.4, 0.01)
-  .name("水面粗糙度")
-  .onChange((v) => waters.forEach((w) => (w.roughness = v)));
+gui.add(waves, "foamHalfLife", 0, 10, 0.1).name("白沫半衰期（秒）");
+const appearance = waterAppearanceControls(gui, () => waters, {
+  preset: "湖水",
+  foamWidth: 0.35,
+  foamIntensity: 0.25,
+});
 gui
   .add(state, "reflections")
   .name("屏幕空间倒影")
@@ -250,7 +260,7 @@ const removeStatus = scene.postRender.addEventListener(() => {
 exposeExample(
   viewer,
   gui,
-  { effects, environment, waves, waters, state },
+  { effects, environment, waves, waters, state, appearance },
   () => {
     removeStatus();
     for (const water of waters) {
@@ -363,15 +373,14 @@ async function load() {
       windWaves: waves,
       meshSpacing: 1,
       id: "xuanwu-water",
-      roughness: state.roughness,
-      waterColor: new C.Color(0.018, 0.08, 0.065),
-      absorption: new C.Cartesian3(0.45, 0.2, 0.14),
-      foamIntensity: 0.3,
+      show: state.showWater,
+      reflections: state.reflections,
       reflectionSteps: 32,
       maximumReflectionDistance: 500,
     }),
   );
   waters.push(water);
+  appearance.apply();
   // Stylized park vegetation gives scale and reflection references; no surveyed vegetation is claimed.
   const instances = [];
   let seed = 7;

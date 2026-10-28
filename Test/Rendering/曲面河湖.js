@@ -2,6 +2,7 @@
 import * as C from "/Build/CesiumUnminified/index.js";
 import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
 import exposeExample from "/Test/example-lifecycle.js";
+import waterAppearanceControls from "./water-appearance-controls.js";
 
 const river =
   new URLSearchParams(window.location.search).get("sample") === "river";
@@ -40,12 +41,15 @@ const effects = new C.SceneGISEnvironmentEffects({
 });
 viewer.addController(effects);
 const waves = new C.SceneGISWindWaves({
-  windSpeed: 10,
+  windSpeed: river ? 6 : 10,
   windDirection: new C.Cartesian2(1, 0.5),
-  fetchLength: 20000,
-  waterDepth: 30,
+  fetchLength: river ? 5000 : 20000,
+  waterDepth: river ? 12 : 30,
   resolution: 128,
   patchLength: 128,
+  amplitudeScale: river ? 0.7 : 1,
+  whitecapIntensity: river ? 0.12 : 0.25,
+  foamHalfLife: river ? 1.5 : 2,
 });
 const lake = new C.PolygonHierarchy(
   C.Cartesian3.fromDegreesArray([
@@ -80,11 +84,7 @@ const water = scene.primitives.add(
     maximumScreenSpaceError: 2,
     maximumTileCount: 512,
     id: river ? "曲面河流" : "曲面湖泊",
-    waterColor: new C.Color(0.018, 0.09, 0.11),
-    absorption: new C.Cartesian3(0.24, 0.08, 0.04),
     reflectionSteps: 32,
-    foamWidth: 2,
-    foamIntensity: 0.4,
   }),
 );
 const constructionMilliseconds = performance.now() - start;
@@ -180,7 +180,13 @@ gui.add(waves, "windSpeed", 0, 20, 0.5).name("风速（米/秒）");
 gui.add(waves, "directionalSpread", 0, 1, 0.05).name("波浪方向分散度");
 gui.add(waves, "rippleIntensity", 0, 4, 0.1).name("细浪强度");
 gui.add(waves, "choppiness", 0, 1, 0.05).name("浪尖程度");
-gui.add(water, "roughness", 0.02, 0.5, 0.01).name("粗糙度");
+gui.add(waves, "whitecapIntensity", 0, 1, 0.05).name("浪尖白沫");
+gui.add(waves, "foamHalfLife", 0, 10, 0.1).name("白沫半衰期（秒）");
+const appearance = waterAppearanceControls(gui, () => [water], {
+  preset: river ? "河水" : "清水",
+  foamWidth: river ? 0.5 : 0.4,
+  foamIntensity: river ? 0.2 : 0.25,
+});
 gui.add(water, "reflections").name("场景倒影");
 gui
   .add(settings, "heightFog")
@@ -213,6 +219,7 @@ exposeExample(
     waves,
     settings,
     effects,
+    appearance,
     constructionMilliseconds,
   },
   () => {

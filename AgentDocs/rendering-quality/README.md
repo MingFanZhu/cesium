@@ -13,7 +13,7 @@
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
-| Last updated           | `2026-10-28`                                                                                             |
+| Last updated           | `2026-10-29`                                                                                             |
 
 ## Scope
 
@@ -34,6 +34,13 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-29 example maintenance after `24bdc6f939`: Xuanwu, curved lake/channel
+  and river now use editable coefficient-optics palettes with distinct defaults,
+  shore-foam controls and explicit FFT foam lifetime. River rebuilds retain edits.
+  Six existing browser cases pass with color/control checks and close captures;
+  no renderer, SDK, upstream or new phase change. R33 visual limits remain open;
+  see the current [review](reviews/2026-10-28-r33-local-underwater.md).
 
 - R33 material follow-up after `30ec19eb80`: replace procedural foam holes with a
   pinned MIT Crest density asset, concentration-selected films, anisotropic

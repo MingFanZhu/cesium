@@ -2,6 +2,7 @@
 import * as C from "/Build/CesiumUnminified/index.js";
 import GUI from "/Test/lib/lil-gui/lil-gui.esm.min.js";
 import exposeExample from "/Test/example-lifecycle.js";
+import waterAppearanceControls from "./water-appearance-controls.js";
 
 const planar =
   new URLSearchParams(window.location.search).get("world") === "planar";
@@ -98,6 +99,9 @@ const waves = new C.SceneGISWindWaves({
   fetchLength: 1500,
   waterDepth: 3,
   windDirection: new C.Cartesian2(0, 1),
+  amplitudeScale: 0.6,
+  whitecapIntensity: 0.08,
+  foamHalfLife: 1.5,
 });
 const xs = Array.from(Array(17).keys(), (i) => -2400 + i * 300);
 const profile = xs.map((x, i) => ({
@@ -124,6 +128,11 @@ const gui = new GUI({
   container: document.getElementById("controls"),
 });
 let river, constructionMilliseconds;
+const appearance = waterAppearanceControls(gui, () => (river ? [river] : []), {
+  preset: "河水",
+  foamWidth: 0.5,
+  foamIntensity: 0.2,
+});
 function rebuild() {
   if (river) {
     scene.primitives.remove(river);
@@ -159,12 +168,10 @@ function rebuild() {
       currentFoamIntensity: settings.currentFoamIntensity,
       maximumTileCount: settings.maximumTileCount,
       show: settings.show,
-      waterColor: new C.Color(0.018, 0.085, 0.09),
-      absorption: new C.Cartesian3(0.24, 0.1, 0.06),
       reflectionSteps: 32,
-      foamWidth: 0.8,
     }),
   );
+  appearance.apply();
   constructionMilliseconds = performance.now() - start;
   if (window.example) {
     window.example.river = river;
@@ -332,6 +339,8 @@ gui
     });
 });
 gui.add(waves, "windSpeed", 0, 12, 0.2).name("独立风速 m/s");
+gui.add(waves, "whitecapIntensity", 0, 1, 0.05).name("风浪白沫");
+gui.add(waves, "foamHalfLife", 0, 10, 0.1).name("风浪白沫半衰期（秒）");
 gui
   .add(settings, "show")
   .name("显示河流")
@@ -372,6 +381,7 @@ exposeExample(
     setCamera,
     viewAt,
     effects,
+    appearance,
     point,
     constructionMilliseconds,
   },

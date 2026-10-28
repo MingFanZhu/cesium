@@ -59,6 +59,24 @@ References: [Crest underwater](https://docs.crest.waveharmonic.com/Manual/Basics
 
 ## Handoff
 
+### Other water examples — 2026-10-29
+
+After material checkpoint `24bdc6f939`, update the Xuanwu, curved lake/channel and
+river examples to coefficient optics and editable color presets. Share only the
+example GUI assembly; retain distinct lake/river defaults, expose shore foam and
+FFT foam lifetime, and preserve edits when the river is rebuilt or lake geometry
+arrives asynchronously. Do not enable unsupported regional/river underwater
+volumes or fabricate bathymetry. Rendering diagnostic fixtures retain their fixed
+isolation parameters. Validate color conversion, preset edits, rebuild persistence,
+both Worlds and curved samples through the existing browser suites and captures.
+No renderer, SDK, upstream, public API or phase boundary change is planned.
+
+Completed: the three examples share a GUI-only assembly module; the four sample
+defaults are documented in DevelopmentGuide. Six existing browser cases pass
+with color conversion, custom/preset edits, river reconstruction, near/high views
+and destruction checks. Close captures are reviewed; scoped lint/format checks
+pass. Existing R33 visual acceptance remains open.
+
 ### Texture and material follow-up after 30ec19eb80
 
 Owner approves the source-based Crest/HDRP assessment. Continue R33: preserve the

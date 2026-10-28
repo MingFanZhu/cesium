@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import checkWaterAppearance from "./scenegis-water-appearance-checks.js";
 
 for (const world of ["planar", "globe"]) {
   test(`river ${world}: continuous LOD, independent wind, bounds and lifecycle`, async ({
@@ -13,6 +14,7 @@ for (const world of ["planar", "globe"]) {
         document.querySelector("#error").textContent.length > 0,
     );
     await expect(page.locator("#error")).toHaveText("");
+    await checkWaterAppearance(page, "河水");
     await page.evaluate(() => {
       window.example.viewer.useDefaultRenderLoop = false;
       window.example.viewer.clock.shouldAnimate = false;

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import checkWaterAppearance from "./scenegis-water-appearance-checks.js";
 for (const world of ["planar", "globe"]) {
   test(`Xuanwu Lake ${world} initializes, changes wind/view and releases shared resources`, async ({
     page,
@@ -10,6 +11,7 @@ for (const world of ["planar", "globe"]) {
       () => window.example?.waters[0]?.ready && window.example.waves.ready,
     );
     await expect(page.locator("#error")).toHaveText("");
+    await checkWaterAppearance(page, "湖水");
     await page.screenshot({
       path: testInfo.outputPath(`${world}-lake-near.png`),
     });
