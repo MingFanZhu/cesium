@@ -25,6 +25,29 @@ for (const world of ["planar", "globe"]) {
     await page
       .getByRole("checkbox", { name: "时间动画", exact: true })
       .uncheck();
+    const edited = await page.evaluate(() => {
+      const e = window.example;
+      const controls = e.gui.controllersRecursive();
+      controls
+        .find((c) => c.property === "transmissionColor")
+        .setValue("#80b0d0");
+      controls.find((c) => c.property === "colorDistance").setValue(4);
+      controls
+        .find((c) => c.property === "scatteringColor")
+        .setValue("#ffffff");
+      controls.find((c) => c.property === "turbidity").setValue(0.2);
+      return {
+        preset: e.state.preset,
+        absorption: e.water.absorption,
+        scattering: e.water.scattering,
+      };
+    });
+    expect(edited.preset).toBe("自定义");
+    expect(edited.absorption.x).toBeCloseTo(
+      -Math.log(((128 / 255 + 0.055) / 1.055) ** 2.4) / 4,
+      8,
+    );
+    expect(edited.scattering).toEqual({ x: 0.2, y: 0.2, z: 0.2 });
     // Fix the simulation epoch for reproducible preset and both-world screenshots.
     await page.evaluate(async () => {
       const C = await import("/Build/CesiumUnminified/index.js");

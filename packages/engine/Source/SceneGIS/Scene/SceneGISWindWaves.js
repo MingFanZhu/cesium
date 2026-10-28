@@ -45,6 +45,13 @@ const repeat = new Sampler({
   magnificationFilter: TextureMagnificationFilter.LINEAR,
 });
 function validate(waves) {
+  if (
+    !Number.isFinite(waves.foamHalfLife) ||
+    waves.foamHalfLife < 0 ||
+    waves.foamHalfLife > 30
+  ) {
+    throw new DeveloperError("foamHalfLife must be in [0, 30] seconds.");
+  }
   for (let i = 0; i < fields.length; ++i) {
     const value = waves[fields[i]],
       range = ranges[i];
@@ -102,6 +109,7 @@ function target(context, size, datatype) {
  * @param {number} [options.amplitudeScale=1] Artistic displacement multiplier in [0, 4].
  * @param {number} [options.choppiness=0.7] Horizontal crest displacement strength in [0, 1].
  * @param {number} [options.whitecapIntensity=0.3] Compression-based crest foam strength in [0, 1].
+ * @param {number} [options.foamHalfLife=2] Whitecap half-life in simulation seconds, in [0, 30]. Zero disables history. Rewind or wave configuration changes reset history.
  * @param {number} [options.directionalSpread=0.7] Angular spreading in [0, 1], increasingly broad above the spectral peak. Zero retains narrow wind-aligned waves.
  * @param {number} [options.rippleIntensity=1] Fine-band amplitude multiplier in [0, 4].
  * @param {number} [options.resolution=128] Immutable FFT size: 32, 64, 128 or 256.
@@ -146,6 +154,11 @@ function SceneGISWindWaves(options = {}) {
    * @type {number}
    */
   this.whitecapIntensity = options.whitecapIntensity ?? 0.3;
+  /**
+   * Whitecap coverage half-life in simulation seconds, in [0, 30]. Zero uses instantaneous foam.
+   * @type {number}
+   */
+  this.foamHalfLife = options.foamHalfLife ?? 2;
   /**
    * Angular spread in [0, 1]; short waves spread more than long waves.
    * @type {number}
@@ -263,6 +276,7 @@ SceneGISWindWaves.prototype._update = function (frameState, timeScale = 1) {
       bands: [],
       buffers: [target(context, n), target(context, n)],
       seconds: 0,
+      foamShift: new Cartesian2(),
       axis: 0,
       halfSpan: 1,
     };
@@ -275,7 +289,11 @@ SceneGISWindWaves.prototype._update = function (frameState, timeScale = 1) {
       u_axis: () => state.axis,
       u_halfSpan: () => state.halfSpan,
       u_spacing: () => state.band.length / n,
-      u_whitecapIntensity: () => this.whitecapIntensity,
+      u_whitecapIntensity: () =>
+        state.band.length >= this.patchLength ? this.whitecapIntensity : 0,
+      u_foamHistory: () => state.band.history,
+      u_foamDecay: () => state.foamDecay,
+      u_foamShift: () => state.foamShift,
     };
     const renderState = RenderState.fromCache({
       viewport: new BoundingRectangle(0, 0, n, n),
@@ -295,6 +313,7 @@ SceneGISWindWaves.prototype._update = function (frameState, timeScale = 1) {
     this.windDirection.y !== state.config[fields.length + 1];
   if (
     !changed &&
+    state.halfLife === this.foamHalfLife &&
     state.timeScale === timeScale &&
     JulianDate.equals(state.time, frameState.time)
   ) {
@@ -307,10 +326,20 @@ SceneGISWindWaves.prototype._update = function (frameState, timeScale = 1) {
     for (let i = 0; i < generated.bands.length; ++i) {
       const data = generated.bands[i];
       if (!state.bands[i]) {
+        const output = target(context, n, PixelDatatype.HALF_FLOAT);
+        const history = texture(context, n, PixelDatatype.HALF_FLOAT);
         state.bands[i] = {
           length: data.length,
           initial: texture(context, n),
-          output: target(context, n, PixelDatatype.HALF_FLOAT),
+          output,
+          primary: output,
+          history,
+          extraNormal: history,
+          alternate: new Framebuffer({
+            context,
+            colorTextures: [output.getColorTexture(0), history],
+            destroyAttachments: false,
+          }),
         };
       }
       state.bands[i].initial.copyFrom({
@@ -321,12 +350,30 @@ SceneGISWindWaves.prototype._update = function (frameState, timeScale = 1) {
       .map((key) => this[key])
       .concat(this.windDirection.x, this.windDirection.y);
   }
+  const nextSeconds =
+    JulianDate.secondsDifference(frameState.time, state.epoch) * timeScale;
+  const delta = nextSeconds - state.seconds;
+  const reset =
+    changed ||
+    state.timeScale !== timeScale ||
+    delta < 0 ||
+    this.foamHalfLife === 0;
+  state.foamDecay = reset ? 0 : Math.pow(2, -delta / this.foamHalfLife);
+  Cartesian2.normalize(this.windDirection, state.foamShift);
+  Cartesian2.multiplyByScalar(
+    state.foamShift,
+    reset ? 0 : this.windSpeed * 0.03 * delta,
+    state.foamShift,
+  );
+  state.halfLife = this.foamHalfLife;
   state.timeScale = timeScale;
   state.seconds =
     JulianDate.secondsDifference(frameState.time, state.epoch) * timeScale;
   state.draws = 0;
   for (const band of state.bands) {
     state.band = band;
+    band.history = band.output.getColorTexture(1);
+    band.output = band.output === band.primary ? band.alternate : band.primary;
     let index = 0;
     const draw = (command, framebuffer) => {
       command.framebuffer = framebuffer;
@@ -366,7 +413,9 @@ SceneGISWindWaves.prototype.destroy = function () {
   if (s) {
     for (const band of s.bands) {
       band.initial.destroy();
-      band.output.destroy();
+      band.alternate.destroy();
+      band.extraNormal.destroy();
+      band.primary.destroy();
     }
     for (const b of s.buffers) {
       b.destroy();

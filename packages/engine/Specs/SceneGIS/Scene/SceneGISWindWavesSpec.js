@@ -4,6 +4,7 @@ import {
   CoplanarPolygonGeometry,
   ClearCommand,
   DrawCommand,
+  Framebuffer,
   Matrix4,
   OrthographicFrustum,
   PrimitiveType,
@@ -55,6 +56,8 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
       { directionalSpread: 1.1 },
       { rippleIntensity: NaN },
       { rippleIntensity: 4.1 },
+      { foamHalfLife: -1 },
+      { foamHalfLife: Infinity },
     ]) {
       expect(() => new SceneGISWindWaves(options)).toThrowDeveloperError();
     }
@@ -133,6 +136,71 @@ describe("SceneGIS/Scene/SceneGISWindWaves", function () {
         : fraction * 2 ** -24)
     );
   }
+  it("ages and transports GPU foam history, freezes with time and clears on rewind", function () {
+    context = createContext();
+    waves = new SceneGISWindWaves({
+      resolution: 32,
+      patchLength: 16,
+      amplitudeScale: 0,
+      windSpeed: 10,
+      foamHalfLife: 2,
+    });
+    update();
+    const band = waves._state.bands[0];
+    const history = new Uint16Array(32 * 32 * 4);
+    for (let y = 0; y < 32; ++y) {
+      for (let x = 0; x < 16; ++x) {
+        history[(y * 32 + x) * 4 + 3] = 0x3c00;
+      }
+    }
+    band.output
+      .getColorTexture(1)
+      .copyFrom({
+        source: { width: 32, height: 32, arrayBufferView: history },
+      });
+    function foam(x) {
+      const framebuffer = new Framebuffer({
+        context,
+        colorTextures: [band.output.getColorTexture(1)],
+        destroyAttachments: false,
+      });
+      try {
+        return half(
+          context.readPixels({ framebuffer, x, y: 4, width: 1, height: 1 })[3],
+        );
+      } finally {
+        framebuffer.destroy();
+      }
+    }
+    update(2);
+    expect(foam(8)).toEqualEpsilon(0.5, 0.002);
+    // Wind drift moves the formerly empty first texel beyond the original x=15 edge.
+    expect(foam(16)).toBeGreaterThan(0.4);
+    expect(foam(24)).toBe(0);
+    const spy = spyOn(context, "draw").and.callThrough();
+    update(2);
+    expect(spy).not.toHaveBeenCalled();
+    update(4);
+    expect(foam(8)).toEqualEpsilon(0.25, 0.002);
+    update(1);
+    expect(foam(8)).toBe(0);
+    band.output
+      .getColorTexture(1)
+      .copyFrom({
+        source: { width: 32, height: 32, arrayBufferView: history },
+      });
+    waves.foamHalfLife = 0;
+    update(1);
+    expect(foam(8)).toBe(0);
+    const textures = waves._state.bands.flatMap((b) => [
+      b.primary.getColorTexture(0),
+      b.primary.getColorTexture(1),
+      b.extraNormal,
+    ]);
+    waves.destroy();
+    expect(textures.every((t) => t.isDestroyed())).toBeTrue();
+    waves = undefined;
+  });
   it("matches a direct CPU Fourier sum for every GPU band and reuses frozen simulation", function () {
     context = createContext();
     waves = new SceneGISWindWaves({

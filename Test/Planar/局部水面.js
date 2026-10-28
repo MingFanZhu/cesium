@@ -105,6 +105,11 @@ const state = {
   roughness: 0.12,
   preset: "清水",
   waveMode: "FFT 风浪",
+  transmissionColor: "#ffffff",
+  colorDistance: 5,
+  scatteringColor: "#ffffff",
+  turbidity: 0.018,
+  anisotropy: 0.35,
   show: true,
   reflections: true,
   refractionStrength: 0.2,
@@ -191,14 +196,57 @@ const presets = {
   },
   浑水: { absorption: [0.6, 0.8, 1.15], scattering: [1.2, 0.95, 0.6], g: 0.4 },
 };
+function srgbToLinear(value) {
+  return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+}
+function linearToSrgb(value) {
+  return value <= 0.0031308
+    ? value * 12.92
+    : 1.055 * value ** (1 / 2.4) - 0.055;
+}
+function cssToLinear(css) {
+  const c = C.Color.fromCssColorString(css);
+  return [c.red, c.green, c.blue].map(srgbToLinear);
+}
+function linearToCss(rgb) {
+  return new C.Color(...rgb.map(linearToSrgb)).toCssHexString();
+}
+function applyColors() {
+  const a = cssToLinear(state.transmissionColor).map(
+    (v) => -Math.log(Math.max(v, 1e-4)) / state.colorDistance,
+  );
+  const s = cssToLinear(state.scatteringColor).map((v) => v * state.turbidity);
+  for (const surface of waters) {
+    surface.absorption = new C.Cartesian3(...a);
+    surface.scattering = new C.Cartesian3(...s);
+    surface.scatteringAnisotropy = state.anisotropy;
+  }
+}
+function editColors() {
+  state.preset = "自定义";
+  applyColors();
+}
 function applyPreset() {
   const preset = presets[state.preset];
-  for (const surface of waters) {
-    surface.absorption = new C.Cartesian3(...preset.absorption);
-    surface.scattering = preset.scattering
-      ? new C.Cartesian3(...preset.scattering)
-      : undefined;
-    surface.scatteringAnisotropy = preset.g;
+  if (!preset) {
+    return;
+  }
+  state.colorDistance = 5;
+  state.transmissionColor = linearToCss(
+    preset.absorption.map((a) => Math.exp(-a * state.colorDistance)),
+  );
+  state.turbidity = preset.scattering ? Math.max(...preset.scattering) : 0;
+  state.scatteringColor = linearToCss(
+    preset.scattering
+      ? preset.scattering.map((s) => s / state.turbidity)
+      : [1, 1, 1],
+  );
+  state.anisotropy = preset.g;
+  applyColors();
+  if (!preset.scattering) {
+    waters.forEach((surface) => {
+      surface.scattering = undefined;
+    });
   }
 }
 function applyControls() {
@@ -222,9 +270,36 @@ const gui = new GUI({
   container: document.getElementById("controls"),
 });
 gui
-  .add(state, "preset", Object.keys(presets))
+  .add(state, "preset", [...Object.keys(presets), "自定义"])
+  .listen()
   .name("水体预设")
   .onChange(applyPreset);
+const colorControls = gui.addFolder("水体颜色");
+colorControls
+  .addColor(state, "transmissionColor")
+  .name("透射颜色")
+  .listen()
+  .onChange(editColors);
+colorControls
+  .add(state, "colorDistance", 0.2, 30, 0.1)
+  .name("着色距离（米）")
+  .listen()
+  .onChange(editColors);
+colorControls
+  .addColor(state, "scatteringColor")
+  .name("散射颜色")
+  .listen()
+  .onChange(editColors);
+colorControls
+  .add(state, "turbidity", 0, 3, 0.005)
+  .name("浑浊度（每米）")
+  .listen()
+  .onChange(editColors);
+colorControls
+  .add(state, "anisotropy", -0.9, 0.9, 0.05)
+  .name("散射方向性")
+  .listen()
+  .onChange(editColors);
 gui
   .add(state, "waveMode", ["法线波纹", "FFT 风浪"])
   .name("波浪模式")
@@ -251,6 +326,7 @@ const windControls = gui.addFolder("FFT 风浪参数").close();
 windControls.add(waves, "windSpeed", 0, 12, 0.1).name("风速（米／秒）");
 windControls.add(waves, "amplitudeScale", 0, 2, 0.05).name("浪幅比例");
 windControls.add(waves, "whitecapIntensity", 0, 1, 0.05).name("浪尖白沫");
+windControls.add(waves, "foamHalfLife", 0, 10, 0.1).name("白沫半衰期（秒）");
 const foamControls = gui.addFolder("接触泡沫参数").close();
 foamControls
   .add(state, "foamIntensity", 0, 1, 0.05)

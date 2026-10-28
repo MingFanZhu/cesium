@@ -1094,7 +1094,9 @@ waves.destroy();
 `windSpeed` 为水面上方 10 米风速（m/s）；`windDirection` 为局部 XY 中波浪传播的去向，
 不是气象学的来向。`fetchLength` 为有效风区长度，`waterDepth` 为谱和色散使用的均匀平均水深，
 不会移动实际湖底。`amplitudeScale` 是艺术倍率；`choppiness` 控制水平位移；
-`whitecapIntensity` 控制波峰压缩产生的白沫。`directionalSpread`（默认 0.7，范围 0–1）
+`whitecapIntensity` 控制波峰压缩产生的白沫。`foamHalfLife`（默认 2 秒，范围 0–30）
+控制白沫残留；0 为瞬时白沫，暂停冻结，倒放或波浪参数改变清空历史。
+`directionalSpread`（默认 0.7，范围 0–1）
 控制波浪方向的分散程度，短波更分散，0 保留原来的窄方向分布。`rippleIntensity`
 （默认 1，范围 0–4）只缩放细波频段，不改变大波。参数可动态修改，直接重建谱而不模拟气象渐变。
 

@@ -1323,6 +1323,10 @@ local XY 米制平面，modelMatrix 使用刚体变换；Globe 采用 ENU，Plan
 必须来自同一采样位置，已受光的底面只做消光，不再次照明。无底面保持无限深水近似。
 此扩展仍为水上单层光学，水下相机及焦散由后续阶段独立定义。
 
+[ADR-0195](Decisions/ADR-0195-water-foam-history.md) 在 FFT finalize 中积累白沫历史。
+`foamHalfLife` 以模拟秒控制衰减；新增每频段一张法线历史纹理，不增加 draw。
+示例颜色选择器按明确光程转为吸收系数，预设仅填充可编辑值。
+
 ## 风驱动湖面（R22）
 
 [ADR-0101](Decisions/ADR-0101-wind-water-spectrum.md) 在原有 WaterSurface 上增加可选的

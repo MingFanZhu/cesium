@@ -93,7 +93,7 @@ float sceneGISWaterFoam(float depth, float footprint, vec2 flow)
     float breakup = mix(0.5, sceneGISWaterNoise(p * 1.9 + across * travel * 0.13),
         exp(-footprint * footprint * 6.0));
     float pattern = mix(clusters, breakup, 0.28);
-    float threshold = mix(0.43, 0.78, smoothstep(0.0, 1.0, shallow));
+    float threshold = mix(0.32, 0.7, smoothstep(0.0, 1.0, shallow));
     float aa = min(0.25, 0.055 + footprint * 0.45);
     // Retain large patches at distance instead of fading the entire shore into a white stripe.
     float grain = mix(0.5, sceneGISWaterNoise(p * 23.0 + breakup),
@@ -230,10 +230,20 @@ void main()
     #ifdef SCENEGIS_RIVER_WATER
     float currentFoam = smoothstep(0.65, 0.9, current.y);
     float contact = u_foamWidth > 0.0 ? (1.0 - smoothstep(0.0, u_foamWidth, verticalDepth)) * u_foamIntensity : 0.0;
-    float foam = max(crestFoam, currentFoam * max(contact, u_currentFoamIntensity * v_shoreFade));
+    float foam = currentFoam * max(contact, u_currentFoamIntensity * v_shoreFade);
     #else
-    float foam = max(crestFoam, sceneGISWaterFoam(verticalDepth, footprint, d));
+    float foam = sceneGISWaterFoam(verticalDepth, footprint, d);
     #endif
+    // Break continuous crest masks into rafts and bubble openings, filtered in meters.
+    vec2 foamPosition = v_waterPosition - d * u_time * u_waveLength / czm_twoPi * 0.08;
+    #ifdef SCENEGIS_CURVED_WATER
+    foamPosition += u_waterFoamOffset;
+    #endif
+    float clusters = mix(0.5, sceneGISWaterNoise(foamPosition * 1.7), exp(-footprint * footprint * 3.0));
+    float bubbles = sceneGISWaterBubbles(foamPosition * 12.0 + clusters, footprint * 12.0);
+    float crestCoverage = smoothstep(0.04, 0.65, crestFoam) * mix(0.55, 1.0, clusters) * bubbles;
+    foam = max(foam, crestCoverage);
+    // Foam replaces the wet interface, including its sharp specular lobe.
     color = mix(color, vec3(0.8) * diffuseLight, clamp(foam, 0.0, 1.0));
     out_FragColor = vec4(max(color, vec3(0.0)), 1.0);
 }

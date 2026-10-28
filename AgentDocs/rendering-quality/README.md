@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R31 water optics                                                                                         |
-| Active phase plan      | [R31](plans/2026-10-28-r31-water-optics.md)                                                              |
+| Current phase          | R32 editable colors and foam                                                                             |
+| Active phase plan      | [R32](plans/2026-10-28-r32-water-foam.md)                                                                |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
@@ -34,6 +34,13 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- 2026-10-28 continuation: owner requests editable colors and more foam/underwater work.
+  R31 checkpoint is `b80c216473`. R32 adds open optical color controls and persistent
+  FFT whitecaps; [plan](plans/2026-10-28-r32-water-foam.md) records the bounded scope.
+  Stable bathymetry-based shoreline transport remains follow-up; screen-depth contact
+  remains explicit. [Technical review](reviews/2026-10-28-r32-water-foam.md) records completed checks
+  and the reproduced baseline river finding. R33 starts after the independent R32 checkpoint.
 
 - 2026-10-28: owner approves the water-quality roadmap. Activate R31 / ADR-0194
   for optional coefficient optics, consistent refraction and a both-world fixture.
