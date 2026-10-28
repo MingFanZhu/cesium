@@ -1513,3 +1513,15 @@ PBF 求解、排序网格邻域、密度约束与局部盒碰撞全部驻留 GPU
 opaque HDR / linear depth 捕获、世界光照、天空反射与 SSR，不新增 upstream seam。
 图元拥有求解和屏幕目标；Scene 拥有被借用的场景输入。最终液面写真实深度和 TAA/final-depth。
 首版限定相机在液体外、屏幕空间前层、简单盒容器，不支持透明递归折射或任意网格碰撞。
+
+## 局部城市空气流动
+
+ADR-0193 增加独立 `SceneGISWindSimulation`，局部米制等距立方网格的 WebGL2 D3Q19 MRT
+与 Smagorinsky LES；不复用 PBF 液体物理。一个 producer 拥有固定物理步长和 GPU 场，
+normal-render 按 frame number 去重；显示、拾取和阴影不得推进求解。预算限制步数，
+不得隐式改变黏度或物理时间步。Globe ENU / Planar 只通过刚性放置区分。
+
+GPU 消费者借用明确布局、格心位置、米制速度、版本和所有权的 live descriptor；
+不得每帧回读完整场、重建 Voxel metadata 或读取任意场景对象的私有几何。
+静态障碍必须显式输入。W1 仅资格化周期小网格；物理边界、输运和城市可视化按阶段推进。
+粗网格交互 LES 不构成工程定量精度声明，必须独立验证网格、边界与实验数据。
