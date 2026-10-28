@@ -75,8 +75,7 @@ function createFragmentShader(
         sample${i}.rgb = czm_gammaCorrect(sample${i}.rgb);
     }
     // Match GlobeFS: mask only this layer, preserving surface color and depth.
-    if ((u_splitDirection${i} < 0.0 && gl_FragCoord.x > czm_splitPosition) ||
-        (u_splitDirection${i} > 0.0 && gl_FragCoord.x < czm_splitPosition)) {
+    if (!czm_SceneGISSplitVisible(u_splitDirection${i})) {
         sample${i}.a = 0.0;
     }
     if (u_brightness${i} != 1.0) {

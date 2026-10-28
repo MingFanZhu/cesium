@@ -1699,8 +1699,11 @@ Object.defineProperties(Scene.prototype, {
     },
   },
 
+  // SCENEGIS_PATCH_BEGIN SGP-0071: Document both native split axes.
   /**
-   * Gets or sets the position of the splitter within the viewport.  Valid values are between 0.0 and 1.0.
+   * Gets or sets the position of the splitter within the viewport. Valid values are between 0.0 and 1.0.
+   * For LEFT/RIGHT, zero is the left edge and one is the right edge.
+   * For TOP/BOTTOM, zero is the top edge and one is the bottom edge.
    * @memberof Scene.prototype
    *
    * @type {number}
@@ -1713,6 +1716,7 @@ Object.defineProperties(Scene.prototype, {
       this._frameState.splitPosition = value;
     },
   },
+  // SCENEGIS_PATCH_END SGP-0071
 
   /**
    * The distance from the camera at which to disable the depth test of billboards, labels and points

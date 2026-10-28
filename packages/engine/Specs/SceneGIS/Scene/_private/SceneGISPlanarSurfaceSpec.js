@@ -280,6 +280,48 @@ describe("SceneGIS/Scene/SceneGISPlanarSurface", function () {
     expect(surface._debug.createdCommands).toBe(createdCommands);
     expect(surface._renderCommands.length).toBe(1);
     expect(world.tilesLoaded).toBeTrue();
+    // Vertical clipping uses the height, measured from the top, independently
+    // of the width. Reuse warm commands and keep depth where imagery is masked.
+    scene.canvas.width = 48;
+    scene.canvas.height = 32;
+    scene.camera.frustum.aspectRatio = 48 / 32;
+    left.splitDirection = SplitDirection.TOP;
+    right.splitDirection = SplitDirection.BOTTOM;
+    right.alpha = 1;
+    const verticalPixel = (y) =>
+      Array.from(scene.context.readPixels({ x: 24, y, width: 1, height: 1 }));
+    for (const [position, top, bottom] of [
+      [0, Color.LIME, Color.LIME],
+      [0.25, Color.LIME, Color.LIME],
+      [0.5, Color.RED, Color.LIME],
+      [0.75, Color.RED, Color.RED],
+      [1, Color.RED, Color.RED],
+    ]) {
+      scene.splitPosition = position;
+      scene.renderForSpecs();
+      expect(verticalPixel(23))
+        .withContext(`top at ${position}`)
+        .toEqual(top.toBytes());
+      expect(verticalPixel(8))
+        .withContext(`bottom at ${position}`)
+        .toEqual(bottom.toBytes());
+    }
+    scene.splitPosition = 0.5;
+    right.splitDirection = SplitDirection.TOP;
+    scene.renderForSpecs();
+    expect(verticalPixel(8)).toEqual([0, 0, 255, 255]);
+    if (scene.pickPositionSupported && !window.webglStub) {
+      for (const y of [8, 24]) {
+        const position = scene.pickPosition(new Cartesian2(24, y));
+        expect(position).toBeDefined();
+        expect(position.z).toEqualEpsilon(0, 0.01);
+      }
+    }
+    expect(tile.command).toBe(command);
+    expect(command.shaderProgram).toBe(shader);
+    expect(surface._imagery._debug).toEqual(before);
+    expect(surface._debug.createdShaders).toBe(createdShaders);
+    expect(surface._debug.createdCommands).toBe(createdCommands);
     world.imageryLayers.removeAll();
     scene.renderForSpecs();
     expect(surface._imagery._debug.destroyedTextures).toBe(

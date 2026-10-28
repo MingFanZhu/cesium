@@ -266,15 +266,11 @@ vec4 sampleAndBlend(
 #endif
 
 #ifdef APPLY_SPLIT
-    float splitPosition = czm_splitPosition;
-    // Split to the left
-    if (split < 0.0 && gl_FragCoord.x > splitPosition) {
-       alpha = 0.0;
+    // SCENEGIS_PATCH_BEGIN SGP-0071: Mask imagery using the shared split predicate.
+    if (!czm_SceneGISSplitVisible(split)) {
+        alpha = 0.0;
     }
-    // Split to the right
-    else if (split > 0.0 && gl_FragCoord.x < splitPosition) {
-       alpha = 0.0;
-    }
+    // SCENEGIS_PATCH_END SGP-0071
 #endif
 
 #ifdef APPLY_BRIGHTNESS

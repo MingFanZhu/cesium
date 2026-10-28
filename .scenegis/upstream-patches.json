@@ -2,6 +2,68 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0071",
+      "title": "Extend native screen splitting to top and bottom",
+      "status": "active",
+      "reason": "Share one private split predicate across all existing splitDirection consumers, retaining native left/right values, image-only alpha masking and shadow-map exclusions. A drawing-buffer Y coordinate adds top/bottom support without new resources or passes.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/SplitDirection.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Scene.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/FrameState.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Renderer/UniformState.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Renderer/AutomaticUniforms.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Splitter.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/GlobeFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/Model/ModelSplitterStageFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/BillboardCollectionFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/PointPrimitiveCollectionFS.glsl",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Shaders/PrimitiveGaussianSplatFS.glsl",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISSplitSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/SceneGISPlanarImageryLayerSpec.js",
+        "packages/engine/Specs/SceneGIS/Scene/_private/SceneGISPlanarSurfaceSpec.js",
+        "Specs/e2e/scenegis-planar-imagery-split.spec.js",
+        "Specs/e2e/scenegis-top-bottom-split.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0193-top-bottom-split.md",
+      "removalCondition": "Native splitting supports equivalent top/bottom directions across all existing consumers."
+    },
+    {
       "id": "SGP-0070",
       "title": "Preserve near-field precision in globe polygon clipping",
       "status": "active",

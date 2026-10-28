@@ -362,13 +362,16 @@ function FrameState(context, creditDisplay, jobScheduler) {
     outOfView: true,
   };
 
+  // SCENEGIS_PATCH_BEGIN SGP-0071: Document the shared normalized split position.
   /**
    * The position of the splitter to use when rendering different things on either side of a splitter.
-   * This value should be between 0.0 and 1.0 with 0 being the far left of the viewport and 1 being the far right of the viewport.
+   * This value is between 0.0 and 1.0, measured left to right for LEFT/RIGHT
+   * and top to bottom for TOP/BOTTOM.
    * @type {number}
    * @default 0.0
    */
   this.splitPosition = 0.0;
+  // SCENEGIS_PATCH_END SGP-0071
 
   /**
    * Distances to the near and far planes of the camera frustums

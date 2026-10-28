@@ -56,6 +56,7 @@ SceneGIS 的主要目标是：
 ```text
 packages/engine/Source/SceneGIS/**
 packages/engine/Source/Shaders/SceneGIS/**/*.glsl
+packages/engine/Source/Shaders/Builtin/Functions/SceneGISSplitVisible.glsl
 packages/engine/Source/Assets/SceneGIS/**
 packages/engine/Specs/SceneGIS/**
 packages/widgets/Source/SceneGIS/**
@@ -230,7 +231,12 @@ proposed ranges的并集覆盖changed lines，使任一retired登记可独立移
 | CSS 与 UI                      | engine 与 widgets 规则不同                            | UI 保持在 widgets 包边界内                                                      |
 | 模块副作用                     | 受 tree-shaking 和 `sideEffects` 影响                 | 优先显式安装或注册 API                                                          |
 
-Shader builtin、额外 SceneGIS Worker 入口以及严格私有 barrel 当前仍是延迟决策，不在没有真实功能和源码证据时预设答案。SceneGIS GLSL source/delivery 以 ADR-0030 为准；已批准的 terrain 与 vector Worker 入口分别以 ADR-0027、ADR-0067 为准。
+通用 Shader builtin 策略、额外 SceneGIS Worker 入口以及严格私有 barrel 当前仍是延迟决策，不在没有真实功能和源码证据时预设答案。SceneGIS GLSL source/delivery 以 ADR-0030 为准；已批准的 terrain 与 vector Worker 入口分别以 ADR-0027、ADR-0067 为准。
+
+ADR-0193 为原生左右/上下分屏批准唯一 owned builtin `SceneGISSplitVisible.glsl`，
+由既有 Builtin/Functions 扫描生成 `czm_SceneGISSplitVisible`。SGP-0071 发布 Y 像素位置并
+接入全部已有 splitDirection 消费者；不手写 CzmBuiltins.js、不增加动态注册或新资源。
+`scene.splitPosition` 在上下模式从屏幕顶部 0 到底部 1；影像仅屏蔽 alpha，保留地表深度。
 
 ## 渲染扩展原则
 

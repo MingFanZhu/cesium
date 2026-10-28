@@ -196,6 +196,9 @@ function UniformState() {
   this._invertClassificationColor = undefined;
 
   this._splitPosition = 0.0;
+  // SCENEGIS_PATCH_BEGIN SGP-0071: Cache the vertical split in drawing-buffer pixels.
+  this._sceneGISSplitPositionY = 0.0;
+  // SCENEGIS_PATCH_END SGP-0071
   this._pixelSizePerMeter = undefined;
   this._geometricToleranceOverMeter = undefined;
 
@@ -1565,6 +1568,10 @@ UniformState.prototype.update = function (frameState) {
   // Convert the relative splitPosition to absolute pixel coordinates
   this._splitPosition =
     frameState.splitPosition * frameState.context.drawingBufferWidth;
+  // SCENEGIS_PATCH_BEGIN SGP-0071: Convert top-down split positions to WebGL Y.
+  this._sceneGISSplitPositionY =
+    (1.0 - frameState.splitPosition) * frameState.context.drawingBufferHeight;
+  // SCENEGIS_PATCH_END SGP-0071
   const fov = camera.frustum.fov;
   const viewport = this._viewport;
   let pixelSizePerMeter;

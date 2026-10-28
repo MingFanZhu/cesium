@@ -43,6 +43,8 @@ describe("SceneGIS/Scene/SceneGISPlanarImageryLayer", function () {
     for (const direction of [
       SplitDirection.LEFT,
       SplitDirection.RIGHT,
+      SplitDirection.TOP,
+      SplitDirection.BOTTOM,
       SplitDirection.NONE,
     ]) {
       const configured = new SceneGISPlanarImageryLayer(provider, {
@@ -53,11 +55,11 @@ describe("SceneGIS/Scene/SceneGISPlanarImageryLayer", function () {
       layer.splitDirection = direction;
       layer.splitDirection = direction;
     }
-    expect(changed).toHaveBeenCalledTimes(3);
+    expect(changed).toHaveBeenCalledTimes(5);
     expect(changed).toHaveBeenCalledWith(layer, "splitDirection");
     for (const invalid of [
-      2,
-      -2,
+      3,
+      -3,
       0.5,
       Number.NaN,
       Infinity,
@@ -78,7 +80,7 @@ describe("SceneGIS/Scene/SceneGISPlanarImageryLayer", function () {
         ).toThrowDeveloperError();
       }
     }
-    expect(changed).toHaveBeenCalledTimes(3);
+    expect(changed).toHaveBeenCalledTimes(5);
     layer.destroy();
   });
 

@@ -15,7 +15,9 @@ function validateSplitDirection(value) {
   if (
     value !== SplitDirection.LEFT &&
     value !== SplitDirection.NONE &&
-    value !== SplitDirection.RIGHT
+    value !== SplitDirection.RIGHT &&
+    value !== SplitDirection.TOP &&
+    value !== SplitDirection.BOTTOM
   ) {
     throw new DeveloperError("splitDirection must be a SplitDirection value.");
   }

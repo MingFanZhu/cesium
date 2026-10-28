@@ -124,9 +124,13 @@ for (const build of ["dev", "release"]) {
       });
       const before = resources();
       const times = {};
-      for (const enabled of [false, true]) {
-        left.splitDirection = enabled ? -1 : 0;
-        right.splitDirection = enabled ? 1 : 0;
+      for (const [mode, first, second] of [
+        ["none", 0, 0],
+        ["leftRight", -1, 1],
+        ["topBottom", -2, 2],
+      ]) {
+        left.splitDirection = first;
+        right.splitDirection = second;
         const samples = [];
         for (let i = 0; i < 30; i++) {
           setSplit(i / 29);
@@ -135,7 +139,7 @@ for (const build of ["dev", "release"]) {
           samples.push(performance.now() - start);
         }
         samples.sort((a, b) => a - b);
-        times[enabled ? "split" : "none"] = {
+        times[mode] = {
           median: samples[15],
           p95: samples[28],
         };

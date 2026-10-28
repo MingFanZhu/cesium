@@ -7,8 +7,9 @@ in float v_splitDirection;
 
 void main()
 {
-    if (v_splitDirection < 0.0 && gl_FragCoord.x > czm_splitPosition) discard;
-    if (v_splitDirection > 0.0 && gl_FragCoord.x < czm_splitPosition) discard;
+    // SCENEGIS_PATCH_BEGIN SGP-0071: Share native split-axis semantics.
+    if (!czm_SceneGISSplitVisible(v_splitDirection)) discard;
+    // SCENEGIS_PATCH_END SGP-0071
 
     // The distance in UV space from this fragment to the center of the point, at most 0.5.
     float distanceToCenter = length(gl_PointCoord - vec2(0.5));

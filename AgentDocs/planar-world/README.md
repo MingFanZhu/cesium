@@ -11,10 +11,10 @@
 | Current phase          | None                                                                                    |
 | Active phase plan      | None                                                                                    |
 | Proposed phase plan    | None                                                                                    |
-| Active standalone plan | None；[地形深度测试](plans/2026-10-23-terrain-depth-test.md) 已完成并通过视觉验收       |
+| Active standalone plan | [球面与平面上下分屏](plans/2026-10-28-top-bottom-split.md)（completed，负责人已确认）   |
 | Architecture contact   | Architecture Agent                                                                      |
 | Execution contact      | Execution Agent                                                                         |
-| Last updated           | `2026-10-23`                                                                            |
+| Last updated           | `2026-10-28`                                                                            |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -62,6 +62,14 @@
 - SGP: `SGP-0001`（`active`）；`SGP-0002`（`active`，仅跟踪 P6 `Viewer.js` 缝隙）
 
 ## Current handoff
+
+2026-10-28：负责人要求上下对比且不限于影像，使用原生 SplitDirection.TOP/BOTTOM 与
+共享 Scene.splitPosition，覆盖全部已有消费者；见 [ADR-0193](../../Documentation/SceneGIS/Decisions/ADR-0193-top-bottom-split.md)。
+SGP-0071 跟踪 11 个上游最小接入。实现与技术验收完成，见[技术自审](reviews/2026-10-28-top-bottom-split.md)：
+68 项定向 Specs、6 项 dev/release 浏览器回归、完整构建和类型检查通过。
+更广 Planar 检查的旧裙边裁剪失败已在 HEAD 原实现复现。负责人于 2026-10-28 确认本次结果，
+并要求在 scenegis/develop 形成本地提交检查点；未要求推送。示例为 [分屏对比](../../Test/分屏对比.html)，
+TB-05 已关闭；旧分屏 review 的历史记录保持。
 
 2026-10-23：按负责人要求补齐 `depthTestAgainstTerrain`。默认 true，复用原生
 classification→depth clear 和延迟地形深度，见[独立计划](plans/2026-10-23-terrain-depth-test.md)、

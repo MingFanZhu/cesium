@@ -1809,6 +1809,16 @@ const AutomaticUniforms = {
     },
   }),
 
+  // SCENEGIS_PATCH_BEGIN SGP-0071: Supply the private vertical split coordinate.
+  czm_sceneGISSplitPositionY: new AutomaticUniform({
+    size: 1,
+    datatype: WebGLConstants.FLOAT,
+    getValue: function (uniformState) {
+      return uniformState._sceneGISSplitPositionY;
+    },
+  }),
+  // SCENEGIS_PATCH_END SGP-0071
+
   /**
    * An automatic GLSL uniform scalar representing the geometric tolerance per meter
    */

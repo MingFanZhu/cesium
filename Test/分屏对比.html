@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>上下与左右分屏对比</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+    <style>
+      #splitter {
+        position: absolute;
+        z-index: 3;
+        background: white;
+        box-shadow: 0 0 5px #172c40;
+        touch-action: none;
+      }
+      #splitter.horizontal {
+        left: 0;
+        width: 100%;
+        height: 4px;
+        cursor: ns-resize;
+        transform: translateY(-50%);
+      }
+      #splitter.vertical {
+        top: 0;
+        height: 100%;
+        width: 4px;
+        cursor: ew-resize;
+        transform: translateX(-50%);
+      }
+      #splitter::after {
+        content: "拖动";
+        position: absolute;
+        left: 65%;
+        top: -15px;
+        padding: 4px 10px;
+        background: white;
+        border-radius: 16px;
+        color: #172c40;
+        white-space: nowrap;
+      }
+      #splitter.vertical::after {
+        left: -24px;
+        top: 65%;
+      }
+      aside {
+        z-index: 4;
+      }
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="splitter" role="separator" aria-label="分屏线" tabindex="0"></div>
+    <aside>
+      <h1>上下与左右分屏对比</h1>
+      <p>
+        <a href="?world=globe">球面世界</a> ·
+        <a href="?world=planar">平面世界</a>
+      </p>
+      <p>
+        同一场景对比两组影像、模型、Billboard 和点。青色为 A，橙色为
+        B；白线可拖动。
+      </p>
+      <label
+        >方向
+        <select id="axis">
+          <option value="horizontal">上下</option>
+          <option value="vertical">左右</option>
+        </select></label
+      >
+      <label
+        >位置
+        <input
+          id="position"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="0.5"
+      /></label>
+      <label><input id="imagery" type="checkbox" checked />影像参与对比</label>
+      <label
+        ><input id="objects" type="checkbox" checked />模型、Billboard
+        和点参与对比</label
+      >
+      <button id="swap">交换 A / B</button>
+      <button id="reset">恢复视角</button>
+      <p>上／左：原色影像；下／右：灰度影像。关闭某类对比时，全屏显示 B。</p>
+      <p>
+        上下模式的 scene.splitPosition 从顶部 0 到底部
+        1；影像裁剪不影响地表深度。
+      </p>
+      <div id="error"></div>
+    </aside>
+    <script>
+      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
+    </script>
+    <script type="module">
+      import * as C from "/Build/CesiumUnminified/index.js";
+      import exposeExample from "/Test/example-lifecycle.js";
+
+      const planar =
+        new URLSearchParams(location.search).get("world") === "planar";
+      const viewer = new C.Viewer("map", {
+        ...(planar
+          ? {
+              planarWorld: {
+                crs: "LOCAL",
+                extent: {
+                  minimumX: -1000,
+                  minimumY: -1000,
+                  maximumX: 1000,
+                  maximumY: 1000,
+                },
+                maximumLevel: 2,
+              },
+            }
+          : { baseLayer: false }),
+        baseLayerPicker: false,
+        geocoder: false,
+        homeButton: false,
+        sceneModePicker: false,
+        navigationHelpButton: false,
+        animation: false,
+        timeline: false,
+        fullscreenButton: false,
+        requestRenderMode: true,
+        maximumRenderTimeChange: Infinity,
+      });
+      const scene = viewer.scene;
+      scene.environmentEffects.enabled = false;
+      scene.highDynamicRange = false;
+      scene.msaaSamples = 1;
+      if (scene.skyAtmosphere) {
+        scene.skyAtmosphere.show = false;
+      }
+      const origin = C.Cartesian3.fromDegrees(118.78, 32.04);
+      const transform = planar
+        ? C.Matrix4.IDENTITY
+        : C.Transforms.eastNorthUpToFixedFrame(origin);
+      const positionAt = (x, y, z) =>
+        C.Matrix4.multiplyByPoint(
+          transform,
+          new C.Cartesian3(x, y, z),
+          new C.Cartesian3(),
+        );
+      const world = planar ? viewer.planarWorld : scene.globe;
+      const layers = planar ? world.imageryLayers : viewer.imageryLayers;
+      const groups = [[], []];
+      const imagery = [];
+      const models = [];
+      let horizontal = true;
+      let swapped = false;
+      const splitter = document.getElementById("splitter");
+      const input = document.getElementById("position");
+      function setSplit(value) {
+        scene.splitPosition = Math.max(0, Math.min(1, value));
+        splitter.className = horizontal ? "horizontal" : "vertical";
+        splitter.style.top = horizontal ? `${100 * scene.splitPosition}%` : "0";
+        splitter.style.left = horizontal
+          ? "0"
+          : `${100 * scene.splitPosition}%`;
+        splitter.setAttribute(
+          "aria-orientation",
+          horizontal ? "horizontal" : "vertical",
+        );
+        splitter.setAttribute(
+          "aria-valuenow",
+          String(Math.round(100 * scene.splitPosition)),
+        );
+        input.value = String(scene.splitPosition);
+        scene.requestRender();
+      }
+      function applyDirections() {
+        const directions = horizontal
+          ? [C.SplitDirection.TOP, C.SplitDirection.BOTTOM]
+          : [C.SplitDirection.LEFT, C.SplitDirection.RIGHT];
+        groups.forEach((objects, i) => {
+          const direction = directions[swapped ? 1 - i : i];
+          for (const object of objects) {
+            const enabled = document.getElementById(
+              imagery.includes(object) ? "imagery" : "objects",
+            ).checked;
+            object.show = enabled || i === 1;
+            object.splitDirection = enabled ? direction : C.SplitDirection.NONE;
+          }
+        });
+        setSplit(scene.splitPosition);
+      }
+      function setAxis(value) {
+        horizontal = value === "horizontal";
+        document.getElementById("axis").value = value;
+        applyDirections();
+      }
+      function resetView() {
+        const target = C.Matrix4.multiplyByTranslation(
+          transform,
+          new C.Cartesian3(0, 0, 60),
+          new C.Matrix4(),
+        );
+        scene.camera.lookAtTransform(target, new C.Cartesian3(0, -560, 470));
+        scene.requestRender();
+      }
+      exposeExample(
+        viewer,
+        { destroy() {} },
+        { world, groups, imagery, models, setSplit, setAxis, C },
+      );
+      scene.renderError.addEventListener((_scene, error) => {
+        document.getElementById("error").textContent = error.message;
+      });
+      try {
+        const provider = planar
+          ? new C.SceneGISPlanarUrlTemplateImageryProvider({
+              url: "/Test/Planar/data/grid.png",
+              tilingScheme: world.tilingScheme,
+              maximumLevel: 0,
+            })
+          : await C.SingleTileImageryProvider.fromUrl(
+              "/Test/Planar/data/grid.png",
+              {
+                rectangle: C.Rectangle.fromDegrees(
+                  118.7694,
+                  32.031,
+                  118.7906,
+                  32.049,
+                ),
+              },
+            );
+        const billboards = scene.primitives.add(new C.BillboardCollection());
+        const points = scene.primitives.add(new C.PointPrimitiveCollection());
+        const icon = document.createElement("canvas");
+        icon.width = icon.height = 32;
+        const ctx = icon.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, 32, 32);
+        for (let i = 0; i < 2; i++) {
+          const color = C.Color.fromCssColorString(
+            i === 0 ? "#00cfff" : "#ff791f",
+          );
+          const layer = layers.addImageryProvider(provider);
+          layer.saturation = i === 0 ? 1 : 0;
+          imagery.push(layer);
+          const matrix = C.Matrix4.multiplyByTranslation(
+            transform,
+            new C.Cartesian3(-100, 0, 60),
+            new C.Matrix4(),
+          );
+          const model = await C.Model.fromGltfAsync({
+            url: "/Specs/Data/Models/glTF-2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+            modelMatrix: matrix,
+            scale: 100,
+            color,
+            colorBlendMode: C.ColorBlendMode.REPLACE,
+          });
+          scene.primitives.add(model);
+          models.push(model);
+          groups[i].push(
+            layer,
+            model,
+            billboards.add({
+              position: positionAt(50, 0, 60),
+              image: icon,
+              width: 90,
+              height: 90,
+              color,
+            }),
+            points.add({
+              position: positionAt(170, 0, 60),
+              pixelSize: 90,
+              color,
+            }),
+          );
+        }
+        setSplit(0.5);
+        applyDirections();
+        resetView();
+      } catch (error) {
+        document.getElementById("error").textContent = error.message;
+        throw error;
+      }
+      const move = (event) => {
+        const rect = viewer.canvas.getBoundingClientRect();
+        setSplit(
+          horizontal
+            ? (event.clientY - rect.top) / rect.height
+            : (event.clientX - rect.left) / rect.width,
+        );
+      };
+      splitter.onpointerdown = (event) => {
+        splitter.setPointerCapture(event.pointerId);
+        move(event);
+      };
+      splitter.onpointermove = (event) => {
+        if (splitter.hasPointerCapture(event.pointerId)) {
+          move(event);
+        }
+      };
+      splitter.onpointerup = (event) =>
+        splitter.releasePointerCapture(event.pointerId);
+      splitter.onkeydown = (event) => {
+        const negative = horizontal ? "ArrowUp" : "ArrowLeft";
+        const positive = horizontal ? "ArrowDown" : "ArrowRight";
+        if (event.key === negative || event.key === positive) {
+          event.preventDefault();
+          setSplit(
+            scene.splitPosition + (event.key === negative ? -0.01 : 0.01),
+          );
+        }
+      };
+      input.oninput = () => setSplit(Number(input.value));
+      document.getElementById("axis").onchange = (event) =>
+        setAxis(event.target.value);
+      for (const id of ["imagery", "objects"]) {
+        document.getElementById(id).onchange = applyDirections;
+      }
+      document.getElementById("swap").onclick = () => {
+        swapped = !swapped;
+        applyDirections();
+      };
+      document.getElementById("reset").onclick = resetView;
+    </script>
+  </body>
+</html>

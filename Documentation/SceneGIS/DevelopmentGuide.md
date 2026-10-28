@@ -379,6 +379,24 @@ WMTS labels 按 canonical level 索引；TMS metadata 分辨率识别最低层�
 地表深度。分屏方向走 normal-render slot 快照，不触发请求、shader/command 重建；
 浏览器检查 CSS/drawing-buffer 比例、resize 和显式 requestRender。
 
+上下分屏按 [ADR-0193](Decisions/ADR-0193-top-bottom-split.md) 扩展原生枚举为
+`SplitDirection.TOP` / `BOTTOM`，所有已有 `splitDirection` 的消费者沿用同一 API。
+包括 Globe / Planar imagery、Model / Cesium3DTileset、Billboard、PointPrimitive 和
+原生 Gaussian / Splitter 路径；不为没有该属性的对象（例如 Label）自动新增分屏。
+
+```js
+scene.splitPosition = 0.5; // Top is 0; bottom is 1.
+first.splitDirection = Cesium.SplitDirection.TOP;
+second.splitDirection = Cesium.SplitDirection.BOTTOM;
+scene.requestRender();
+```
+
+`NONE` 仍为全屏，`LEFT` / `RIGHT` 仍从左至右计算；全 Scene 共用一个 splitPosition。
+逐对象选择方向，可以只对比模型而不分割底图。影像只影响该层颜色，其他消费者沿用 discard、
+拾取和原有阴影策略；Model 的方向变化仍沿用原生 command 重建行为。
+共享 helper 使用绘制缓冲区 Y，按枚举区间判断浮点 varying，不精确比较插值后的方向值。
+开发示例：[分屏对比](../../Test/分屏对比.html)，`?world=globe` / `?world=planar`。
+
 ### 平面 URL Heightmap Provider 检查
 
 `SceneGISPlanarLayerTerrainProvider` 是 ADR-0080 的独立服务入口，负责异步 layer.json、显式平面 profile、

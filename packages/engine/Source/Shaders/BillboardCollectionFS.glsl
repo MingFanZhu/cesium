@@ -126,12 +126,11 @@ void writeDepth(float eyeDepth, float globeDepth, float distanceToEllipsoid) {
 
 void main()
 {
-    if (v_splitDirectionAndEllipsoidDepthEC.x < 0.0 && gl_FragCoord.x > czm_splitPosition) {
+    // SCENEGIS_PATCH_BEGIN SGP-0071: Share native split-axis semantics.
+    if (!czm_SceneGISSplitVisible(v_splitDirectionAndEllipsoidDepthEC.x)) {
         discard;
     }
-    if (v_splitDirectionAndEllipsoidDepthEC.x > 0.0 && gl_FragCoord.x < czm_splitPosition) {
-        discard;
-    }
+    // SCENEGIS_PATCH_END SGP-0071
 
     if (getDepthTestEnabled()) {
         vec2 fragSt = gl_FragCoord.xy / czm_viewport.zw;
