@@ -45,6 +45,7 @@ const SceneGISWaterFrame = {
   },
   prepare(scene) {
     const state = SceneGISWaterFrame.get(scene.frameState);
+    state.requestRender ??= () => scene.requestRender();
     state.hdr = scene._hdr;
     state.world = scene.world;
     state.ellipsoid = scene.ellipsoid;
@@ -271,6 +272,7 @@ const SceneGISWaterFrame = {
   },
   destroy(scene) {
     SceneGISWaterFrame.releaseFinalDepth(scene);
+    scene.frameState._sceneGISWater?.foamMaterial?.destroy();
     scene.frameState._sceneGISWater = undefined;
   },
 };

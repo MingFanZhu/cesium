@@ -1,0 +1,30 @@
+{
+  "source": {
+    "repository": "https://github.com/wave-harmonic/crest",
+    "revision": "db0658ff0b2e93e4a9e28cc2867509658b0ecc00",
+    "path": "crest/Assets/Crest/Crest/Textures/Foam2.png"
+  },
+  "license": "MIT",
+  "copyright": "Copyright (c) 2019 Wave Harmonic and contributors",
+  "files": {
+    "Foam2.png": {
+      "sha256": "0f11e52a0bba9eaefd6eb26684de18784058de208d602496df2c0f82ac950ad6",
+      "bytes": 98476,
+      "width": 450,
+      "height": 450,
+      "format": "PNG grayscale 8-bit",
+      "colorSpace": "linear data",
+      "modifications": "none"
+    },
+    "LICENSE.txt": {
+      "sha256": "c19990f81e87a54e85aeb3c14325abe855a3678572e19aa206fb0dcf308b25ed"
+    }
+  },
+  "runtime": {
+    "upload": "RGBA8",
+    "wrap": "repeat",
+    "filter": "trilinear mipmap",
+    "ownership": "one texture per Scene, lazy, released with Scene",
+    "network": "packaged asset only"
+  }
+}

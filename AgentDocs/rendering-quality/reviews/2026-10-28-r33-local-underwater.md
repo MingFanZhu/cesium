@@ -145,3 +145,63 @@ screen composition, FFT and CPU construction are excluded. No runtime readback.
 
 Architecture self-review approves the bounded R33 correction checkpoint. No SDK,
 upstream-owned file or SGP modification; prior R25/R27 and remaining R33 limits stay open.
+
+## Foam texture/material follow-up after 30ec19eb80
+
+Owner approves the mature-engine assessment and continuation. Architecture and
+implementation review are performed by the current task. The change preserves
+the existing foam concentration simulation and targets material appearance.
+
+- Replaced procedural circular holes with the unmodified Crest `Foam2.png` density
+  asset, pinned to `db0658ff0b2e93e4a9e28cc2867509658b0ecc00`. MIT license, copyright,
+  source path, dimensions and hashes accompany the bitmap in the approved owned
+  asset root. Its density data is decoded/uploaded without sRGB conversion.
+- Concentration controls textured films; fine and rotated coarse samples reduce
+  repetition. Height differences give a 3 mm foam relief, with physical diffuse
+  and rough GGX lighting separate from the water highlight. Close visual review
+  found grazing blur; anisotropic filtering and differentiating filtered height
+  at a texel step retain lateral detail. There is no new draw or GPU readback.
+- One Scene-owned lazy texture is shared by surfaces. Zero foam starts no load;
+  geometry remains ready/visible during loading. Completion requests rendering,
+  failures surface as render errors, and late images are closed after destruction.
+  Removing a borrowing surface retains the shared material until Scene destruction.
+- Specs explicitly wait for the material when testing foam pixels. Geometry
+  readiness does not imply texture readiness. Partial-concentration coverage tests
+  now distinguish translucent films from fully opaque foam. River phase-wrap
+  comparison uses equal 0.2 ms steps before/across the boundary: a period crossing
+  may not exceed the adjacent ordinary change by more than one output code. The
+  observed Planar maximum was 2 codes across the wrap versus 4 on the ordinary
+  step, identifying texture-edge sampling rather than a period discontinuity.
+  Exact frozen-frame equality remains required. No product time reset or settling
+  frame was added.
+
+Validation evidence: four focused material GPU cases pass and cover packaged loading,
+destroy-before-load, errors without retry, density progression, relief/light
+response and distant filtering. Water integration covers lazy/shared ownership,
+zero-foam image identity and Scene cleanup. Release water/optics/material 36,
+river 11 and curved-water 7 cases pass (54 total). Both-world release E2E
+passes with close wall, shore and grazing foam views, motion and destruction.
+The owner's current IAB page is refreshed with the original default settings.
+
+Development/release builds, generated types and tsc pass. Npm's actual packlist
+includes the bitmap, full license and provenance for root and engine packages;
+source/root Source/dev/release bytes match. The initial whole-root npm dry-run was
+stopped because it traversed/compressed unrelated local build artifacts; packlist
+and exact copied-asset checks provide the relevant delivery evidence. ESLint,
+explicit Markdown formatting/lint and upstream audit are part of this checkpoint.
+
+Increment: one RGBA8 mip chain, 1,080,000 accounted bytes (about 1.03 MiB) per Scene,
+one sampler, six filtered fetches only on foam fragments; the source PNG is 98,476
+bytes. A frozen 1185x800 grazing view on RTX 3060 Ti / Chrome 156 alternated eight
+old/new water-draw GPU queries. Median cost is approximately 3.49 / 3.45 ms; one
+new-path sample reached 11.81 ms. This is not a demonstrated speedup or a whole-frame
+budget guarantee. It shows similar typical draw cost in this fixture, with no
+extra pass. Do not rerun merely to remove the outlier.
+
+Open visual limits: continuous shallow/contact generation still tends toward a
+shore band, texture repetition remains possible, and fine relief is a shading
+approximation. No subsurface bubble layer, breaking waves, impact spray or hydraulic
+flow is introduced. The owner retains final visual acceptance; R25/R27 findings
+remain open. All changed implementation paths are SceneGIS-owned; SGP-0017 is
+unchanged. The bounded checks and source review are complete. Architecture
+self-review approves a separate local material checkpoint; no next phase is activated.

@@ -502,10 +502,12 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
     }
   });
   [true, false].forEach(function (planar) {
-    it(`renders, animates, picks and releases river resources in ${planar ? "Planar" : "Globe"}`, function () {
+    it(`renders, animates, picks and releases river resources in ${planar ? "Planar" : "Globe"}`, async function () {
       setup(planar);
       scene.renderForSpecs(time);
       expect(river.ready).toBeTrue();
+      await scene.frameState._sceneGISWater.foamMaterial._promise;
+      scene.renderForSpecs(time);
       const bound = river.getBoundingSphere();
       river.currentRippleAmplitude += 0.5;
       expect(river.getBoundingSphere().radius - bound.radius).toEqualEpsilon(
@@ -538,6 +540,10 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
       scene.renderForSpecs(time);
       expect(scene.context.readPixels()).toEqual(before);
       scene.renderForSpecs(
+        JulianDate.addSeconds(time, 31.9997, new JulianDate()),
+      );
+      const phaseBefore = scene.context.readPixels();
+      scene.renderForSpecs(
         JulianDate.addSeconds(time, 31.9999, new JulianDate()),
       );
       const phaseEnd = scene.context.readPixels();
@@ -545,9 +551,13 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
         JulianDate.addSeconds(time, 32.0001, new JulianDate()),
       );
       const phaseStart = scene.context.readPixels();
-      expect(
-        phaseStart.every((v, i) => Math.abs(v - phaseEnd[i]) <= 1),
-      ).toBeTrue();
+      const difference = (a, b) =>
+        Math.max(...a.map((v, i) => Math.abs(v - b[i])));
+      // The phase boundary must be as continuous as an adjacent equal-duration
+      // step, allowing one output code for rounding of filtered texture coverage.
+      expect(difference(phaseStart, phaseEnd)).toBeLessThanOrEqual(
+        Math.max(1, difference(phaseEnd, phaseBefore)) + 1,
+      );
       river.currentSpeedScale = 0;
       scene.renderForSpecs(time);
       const frozen = scene.context.readPixels();

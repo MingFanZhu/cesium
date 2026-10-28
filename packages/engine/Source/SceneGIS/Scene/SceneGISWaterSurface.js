@@ -25,6 +25,8 @@ import ray from "../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import vertex from "../../Shaders/SceneGIS/Water/SceneGISWaterVS.js";
 import fragment from "../../Shaders/SceneGIS/Water/SceneGISWaterFS.js";
 import optics from "../../Shaders/SceneGIS/Water/SceneGISWaterOptics.js";
+import foamMaterial from "../../Shaders/SceneGIS/Water/SceneGISWaterFoam.js";
+import WaterFoam from "./_private/_SceneGISWaterFoam.js";
 import waterEffects from "../../Shaders/SceneGIS/Water/SceneGISWaterEffects.js";
 import fieldWaves from "../../Shaders/SceneGIS/Water/SceneGISWaterFieldWaves.js";
 import WaterField from "./_private/_SceneGISWaterField.js";
@@ -176,7 +178,9 @@ function validate(surface) {
  * otherwise reflectionColor. The scattering tint and foam follow physical lighting when active.
  * Animation follows Scene time; no render loop is started. In requestRenderMode, request a frame
  * after editing these properties, just as for other application-managed primitives.
- * The collection owns the primitive; its Scene owns the shared capture targets.
+ * The collection owns the primitive; its Scene owns the shared capture targets and foam texture.
+ * Foam detail loads asynchronously from the packaged Assets/SceneGIS/Water/Foam resource.
+ * Water geometry remains visible while loading; failures are reported through Scene rendering errors.
  * @alias SceneGISWaterSurface
  * @constructor
  * @param {object} options Initialization options.
@@ -580,6 +584,7 @@ function createResources(surface, frameState) {
           optics,
           fieldWaves,
           waterEffects,
+          foamMaterial,
           fragment,
         ],
       }),
@@ -640,6 +645,8 @@ function createResources(surface, frameState) {
         (surface._time * surface.flowSpeed * Math.PI * 2) / surface.waveLength,
       u_foamWidth: () => surface.foamWidth,
       u_foamIntensity: () => surface.foamIntensity,
+      u_foamDetail: () => state.foamMaterial?.texture ?? context.defaultTexture,
+      u_hasFoamDetail: () => !!state.foamMaterial?.texture,
       u_shoreFoamOffset: () => surface._field?.offset ?? Cartesian2.ZERO,
       u_underwaterDepth: () => surface.underwaterDepth,
       u_cameraDepth: () =>
@@ -784,6 +791,14 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
   );
   this._pickId.object.id = this.id;
   if (frameState.passes.render) {
+    const foamEnabled =
+      (this.foamIntensity > 0 && this.foamWidth > 0) ||
+      this._windWaves?.whitecapIntensity > 0 ||
+      this._river?.currentFoamIntensity > 0;
+    if (foamEnabled) {
+      state.foamMaterial ??= new WaterFoam(state.requestRender);
+      state.foamMaterial.update(c);
+    }
     this._epoch ??= JulianDate.clone(frameState.time);
     this._time = JulianDate.secondsDifference(frameState.time, this._epoch);
     const record = frameState._sceneGISPlanarLighting?.active
@@ -820,6 +835,7 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
         optics,
         fieldWaves,
         waterEffects,
+        foamMaterial,
         fragment,
       );
       const previous = command.shaderProgram;

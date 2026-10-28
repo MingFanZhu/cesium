@@ -59,6 +59,32 @@ References: [Crest underwater](https://docs.crest.waveharmonic.com/Manual/Basics
 
 ## Handoff
 
+### Texture and material follow-up after 30ec19eb80
+
+Owner approves the source-based Crest/HDRP assessment. Continue R33: preserve the
+existing shore/crest concentration simulation and replace procedural holes with a
+pinned, MIT-licensed Crest foam-density texture. Use concentration thresholding,
+multiscale sampling, mip filtering, and texture-derived foam normals with separate
+diffuse/rough specular lighting. No hydraulic solver, SDK or new public API.
+
+The inspected Crest revision is `db0658ff0b2e93e4a9e28cc2867509658b0ecc00`.
+Its `Foam2.png` is a 450-square grayscale density map; `foam.png` is a photograph
+with baked color/lighting and is not selected. Vendor the unmodified density map,
+full MIT notice and provenance under the approved runtime asset root. Reuse
+`copyEngineAssets` and `buildModuleUrl`; do not modify build integration.
+
+One lazily loaded mipmapped texture is shared by water surfaces through their
+Scene-owned WaterFrame state. Loading does not prevent geometry/water rendering;
+foam appears after upload and requests a render. Loading failure is surfaced as
+a render error, without a procedural fallback or retry loop. Scene destruction
+releases the texture and closes late images. Zero foam does not initiate loading.
+
+Validate actual packaged asset loading, no-foam identity, density progression,
+normal/light response, mip stability, destruction during loading and shared
+ownership. Reuse both-world water/river/curved suites and close E2E views, retaining
+the pre-change captures. Record bounded water-draw GPU cost and resource delta.
+Review image quality before the independent checkpoint; owner visual gate remains.
+
 ### Owner visual findings after checkpoint 31366c3238
 
 Continue R33, without a new subsystem or upstream seam. Three reproduced issues:

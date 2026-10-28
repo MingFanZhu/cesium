@@ -17,6 +17,9 @@ and resource ownership. SDK and hydraulic simulation remain excluded.
 - R33 active: [local underwater and stable depth fields](2026-10-28-r33-local-underwater.md).
   Actual-wave projected caustics, bathymetry-driven shore foam, finite local medium
   and underside Fresnel/TIR. Mean-height immersion; wave-exact meniscus stays deferred.
+  The owner-approved material follow-up after `30ec19eb80` replaces procedural
+  foam detail with licensed texture films and separate relief lighting; it retains
+  the concentration simulation and does not activate another phase.
 
 Each phase requires technical review and a separate local commit before the next.
 Visual acceptance uses both worlds, shallow slopes, vertical walls, depth changes

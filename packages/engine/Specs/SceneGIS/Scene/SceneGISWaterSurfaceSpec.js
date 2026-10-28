@@ -263,6 +263,41 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
       waves.destroy();
     });
   });
+  it("lazily shares the foam material and keeps water identical when foam is disabled", async function () {
+    setup();
+    render();
+    const state = scene.frameState._sceneGISWater;
+    expect(state.foamMaterial).toBeUndefined();
+    const before = scene.context.readPixels();
+    water.foamIntensity = 1;
+    render();
+    await state.foamMaterial._promise;
+    render();
+    const material = state.foamMaterial;
+    const texture = material.texture;
+    expect(texture).toBeDefined();
+    const second = scene.primitives.add(
+      new SceneGISWaterSurface({
+        polygonHierarchy: ring(1),
+        modelMatrix: transform,
+        foamIntensity: 1,
+        reflections: false,
+      }),
+    );
+    render();
+    expect(second._command.uniformMap.u_foamDetail()).toBe(texture);
+    scene.primitives.remove(second);
+    expect(texture.isDestroyed()).toBeFalse();
+    water.foamIntensity = 0;
+    render();
+    expect(scene.context.readPixels()).toEqual(before);
+    scene.primitives.remove(water);
+    water = undefined;
+    expect(texture.isDestroyed()).toBeFalse();
+    scene.destroyForSpecs();
+    scene = undefined;
+    expect(texture.isDestroyed()).toBeTrue();
+  });
   it("keeps bathymetry foam and actual FFT caustics independent of camera movement", function () {
     borrowedWaves = new SceneGISWindWaves({
       resolution: 32,
@@ -881,7 +916,10 @@ describe("SceneGIS/Scene/SceneGISWaterSurface", function () {
       const deep = pixel(point(5, 0, 0));
       const targets = scene.frameState._sceneGISWater.raw;
       const program = water._command.shaderProgram;
-      water.foamIntensity = 1;
+      // Partial concentration must preserve open water between textured films.
+      water.foamIntensity = 0.5;
+      render();
+      await scene.frameState._sceneGISWater.foamMaterial._promise;
       render();
       const foam = scene.context.readPixels();
       const patch = scene.context.readPixels({

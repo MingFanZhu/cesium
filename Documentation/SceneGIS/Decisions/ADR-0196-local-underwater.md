@@ -59,8 +59,46 @@ tall wall. Foam generation uses both shallow depth and horizontal shore proximit
 with `foamWidth` setting the range in meters. This prevents missing wall sides when
 no shallow-depth samples exist. The boundary remains limited by supplied grid
 spacing; it does not infer subgrid obstacles or solve impact/obstacle flow.
-Concentration controls irregular multiscale rafts with filtered centimeter-scale
-bubbles; surface detail follows the field's transport offset.
+Surface detail follows the field's transport offset. The later material correction
+replaces procedural holes with density-thresholded texture films and relief shading,
+as described below; the generation/transport field remains unchanged.
+
+## Foam material and packaged resource
+
+The R33 material follow-up uses the unmodified `Foam2.png` from Crest revision
+`db0658ff0b2e93e4a9e28cc2867509658b0ecc00`, under MIT (Wave Harmonic and contributors).
+The 450-square, 8-bit grayscale PNG is a linear density map, not sRGB albedo.
+`Assets/SceneGIS/Water/Foam/` contains it, its complete license and a machine-readable
+provenance manifest with fixed revision/path, dimensions, sizes and SHA-256 hashes.
+Existing `copyEngineAssets` carries all three files into development/release,
+root Source and engine/root npm packages. No runtime external URL is used.
+
+Rendering follows the separation in [Crest foam](https://docs.crest.waveharmonic.com/Manual/Appearance/Foam.html)
+and its [pinned OceanFoam shader](https://github.com/wave-harmonic/crest/blob/db0658ff0b2e93e4a9e28cc2867509658b0ecc00/crest/Assets/Crest/Crest/Shaders/OceanFoam.hlsl):
+concentration selects texture coverage, transported texture coordinates define
+films, and texture height differences perturb the foam normal. SceneGIS uses a
+one-meter fine tile and a rotated coarse modulation; explicit gradients, trilinear
+mips and up to 8x anisotropy retain grazing detail. A 3 mm relief scale feeds existing
+physical diffuse lighting and a separate rough GGX lobe (roughness 0.65). The
+material replaces the wet-interface color/highlight by coverage. These constants
+are internal material choices, not a physical bubble-size or fluid-solver contract.
+GLSL is independently written; the bitmap is the attributed third-party asset.
+
+The Scene-owned WaterFrame lazily holds one shared RGBA8 mipmapped texture, about
+1.03 MiB, regardless of the number of water surfaces. Disabled contact/crest/river
+foam does not start a load. Loading retains the visible water geometry without
+foam detail; `ready` continues to describe geometry readiness. Completion requests
+a render; upload occurs in the next normal update. Fetch failure raises a rendering
+error, without silent procedural fallback or retry. Destroying one surface does
+not release the shared material; Scene destruction does, including closing an image
+that arrives after destruction. This adds one sampler and six filtered texture
+lookups at foam-covered fragments, with no new draw, framebuffer or CPU readback.
+
+This follow-up does not change the shallow source into an impact solver. Continuous
+near-wall generation can still form a band. Subsurface bubbles, breaking waves,
+spray and foam-driven volumetric scattering remain outside this material change.
+
+## Caustics
 
 `causticsIntensity` defaults to zero, is mutable in [0, 2], requires bathymetry and
 applies to local water. The accepted algorithm replaces an unaccepted independent

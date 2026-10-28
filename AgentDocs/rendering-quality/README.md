@@ -35,6 +35,16 @@
 
 ## Current handoff
 
+- R33 material follow-up after `30ec19eb80`: replace procedural foam holes with a
+  pinned MIT Crest density asset, concentration-selected films, anisotropic
+  filtering and independently lit foam normals/rough highlights. Preserve the
+  existing concentration fields. One lazy Scene-owned texture serves all water
+  surfaces; no new public API, SDK or upstream change. The current
+  [plan](plans/2026-10-28-r33-local-underwater.md) and
+  [review](reviews/2026-10-28-r33-local-underwater.md) record resource delivery,
+  close comparisons, 54 passing release GPU cases, both-world browser checks and
+  remaining visual limitations. Technically complete; owner visual gate stays open.
+
 - R33 visual correction after `31366c3238`: metric signed shoreline distance fixes
   missing vertical-wall foam; multiscale rafts replace uniform large holes; continuous
   refraction Jacobians and cubic magnification remove close caustic facets/seams.

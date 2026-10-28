@@ -19,6 +19,8 @@ for (const world of ["planar", "globe"]) {
     await page.waitForFunction(
       () =>
         window.example?.water.ready &&
+        window.example.viewer.scene.frameState._sceneGISWater?.foamMaterial
+          ?.texture &&
         window.example.models.length === 6 &&
         window.example.models.every((m) => m.ready),
     );
@@ -136,6 +138,7 @@ for (const world of ["planar", "globe"]) {
     for (const [name, eye, target] of [
       ["wall-foam", [15, 0, 8], [8, 6.5, 0]],
       ["shore-foam", [17, -5, 4], [21, 0, 0]],
+      ["foam-detail", [21.1, -1.5, 0.55], [21.65, 0, 0]],
       ["caustics-close", [0, -2, -1.1], [0, 0, -2.1]],
     ]) {
       await page.evaluate(
