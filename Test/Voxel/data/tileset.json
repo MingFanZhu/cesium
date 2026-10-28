@@ -1,0 +1,56 @@
+{
+  "asset": {
+    "version": "1.1",
+    "gltfUpAxis": "Z"
+  },
+  "geometricError": 32,
+  "root": {
+    "boundingVolume": {
+      "box": [0, 0, 28, 128, 0, 0, 0, 128, 0, 0, 0, 28]
+    },
+    "geometricError": 32,
+    "refine": "REPLACE",
+    "children": [
+      {
+        "boundingVolume": {
+          "box": [0, 0, 28, 64, 0, 0, 0, 64, 0, 0, 0, 28]
+        },
+        "transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -64, -64, 0, 1],
+        "geometricError": 0,
+        "content": {
+          "uri": "block-0.gltf"
+        }
+      },
+      {
+        "boundingVolume": {
+          "box": [0, 0, 28, 64, 0, 0, 0, 64, 0, 0, 0, 28]
+        },
+        "transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 64, -64, 0, 1],
+        "geometricError": 0,
+        "content": {
+          "uri": "block-1.gltf"
+        }
+      },
+      {
+        "boundingVolume": {
+          "box": [0, 0, 28, 64, 0, 0, 0, 64, 0, 0, 0, 28]
+        },
+        "transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -64, 64, 0, 1],
+        "geometricError": 0,
+        "content": {
+          "uri": "block-2.gltf"
+        }
+      },
+      {
+        "boundingVolume": {
+          "box": [0, 0, 28, 64, 0, 0, 0, 64, 0, 0, 0, 28]
+        },
+        "transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 64, 64, 0, 1],
+        "geometricError": 0,
+        "content": {
+          "uri": "block-3.gltf"
+        }
+      }
+    ]
+  }
+}

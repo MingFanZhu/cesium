@@ -170,6 +170,26 @@ describe("SceneGIS/Core/SceneGISVoxelizer", function () {
     expect(volume(fine) - exact).toBeLessThan(volume(coarse) - exact);
   });
 
+  it("preserves exact grid-face contacts when large world translations cancel", async function () {
+    create({ fillMode: "enclosed" });
+    const mesh = box(2, 6);
+    const reference = await voxelizer.voxelize([mesh]);
+    voxelizer.destroy();
+    const placement = Transforms.eastNorthUpToFixedFrame(
+      Cartesian3.fromDegrees(-74.006, 40.713, 1),
+    );
+    create({ fillMode: "enclosed", modelMatrix: placement });
+    mesh.modelMatrix = placement;
+    const placed = await voxelizer.voxelize([mesh]);
+    expect(placed.data).toEqual(reference.data);
+    expect(placed.statistics.surfaceCells).toBe(
+      reference.statistics.surfaceCells,
+    );
+    expect(placed.statistics.interiorCells).toBe(
+      reference.statistics.interiorCells,
+    );
+  });
+
   it("rejects invalid geometry and explicit work budgets, then remains reusable", async function () {
     create({ maximumCandidateTests: 1 });
     await expectAsync(voxelizer.voxelize([box()])).toBeRejectedWithError(

@@ -2781,6 +2781,13 @@ function requestTiles(tileset) {
   }
 }
 
+// SCENEGIS_PATCH_BEGIN SGP-0071: Reuse native requests for explicit regional geometry jobs.
+/** @private */
+Cesium3DTileset.prototype._requestSceneGISGeometryTile = function (tile) {
+  requestContent(this, tile);
+};
+// SCENEGIS_PATCH_END SGP-0071
+
 /**
  * @private
  * @param {Error} error

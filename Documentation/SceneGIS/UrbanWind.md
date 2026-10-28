@@ -84,6 +84,10 @@ scene.requestRender();
 `solidMask` 也可以直接传入：`Uint8Array`，每格 0/1，索引 `x+nx*(y+ny*z)`。
 输入被复制，构造后修改原数组无效。
 
+静态 3D Tiles 可先通过 `SceneGIS3DTilesVoxelizer` 按指定区域和格宽主动加载并体素化，
+再用 `SceneGISVoxelizer.createSolidMask(result)` 初始化同一网格的风场。
+完整调用、数据所有权及非闭合模型限制见 [静态体素化接入说明](StaticVoxelization.md)。
+
 ## 配置与控制
 
 | 类别         | API / 单位                                                                           | 修改行为                 |

@@ -2,6 +2,28 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0071",
+      "title": "Expose explicit regional geometry loading and static triangle snapshots",
+      "status": "active",
+      "reason": "An owned voxelization job needs camera-independent native tile requests and decoded static Model geometry without publishing private runtime graphs or replacing the native loaders.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "packages/engine/Source/Scene/Cesium3DTileset.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Scene/Model/Model3DTileContent.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Scene/SceneGIS3DTilesVoxelizerSpec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0194-static-mesh-voxelization.md",
+      "removalCondition": "Native tilesets expose equivalent bounded regional geometry requests and static decoded triangle snapshots with explicit ownership."
+    },
+    {
       "id": "SGP-0070",
       "title": "Preserve near-field precision in globe polygon clipping",
       "status": "active",

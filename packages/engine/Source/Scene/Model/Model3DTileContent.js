@@ -1,4 +1,7 @@
 import Color from "../../Core/Color.js";
+// SCENEGIS_PATCH_BEGIN SGP-0071: Visit explicit static geometry without exposing the private Model.
+import readStaticTriangles from "../../SceneGIS/Scene/_private/_SceneGISReadModelTriangles.js";
+// SCENEGIS_PATCH_END SGP-0071
 import combine from "../../Core/combine.js";
 import defined from "../../Core/defined.js";
 import destroyObject from "../../Core/destroyObject.js";
@@ -28,6 +31,13 @@ import Model from "./Model.js";
  * @private
  */
 class Model3DTileContent {
+  // SCENEGIS_PATCH_BEGIN SGP-0071: Delegate decoded static triangle snapshots to the owned adapter.
+  /** @private */
+  _sceneGISVisitStaticTriangles(visitor) {
+    readStaticTriangles(this._model, visitor);
+  }
+  // SCENEGIS_PATCH_END SGP-0071
+
   /**
    *
    * @param {Cesium3DTileset} tileset

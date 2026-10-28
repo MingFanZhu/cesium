@@ -3,14 +3,14 @@
 ## Metadata
 
 - Plan type: `extension`
-- Status: `active`
+- Status: `completed`
 - Owner role: `architecture`
 - Architecture review: `confirmed`
 - Architecture reviewer: current engine agent
-- Created / updated: `2026-10-28`
-- Related discussions / reviews: None yet
+- Created / updated: `2026-10-28` / `2026-10-29`
+- Related discussions / reviews: [V2 approved](../reviews/2026-10-29-v2-tiles.md)
 - ADR: [0194](../../../Documentation/SceneGIS/Decisions/ADR-0194-static-mesh-voxelization.md)
-- SGP: None in V1
+- SGP: None in V1; `SGP-0071` in V2
 
 ## Objective and boundaries
 
@@ -24,10 +24,10 @@
 
 ## Phase roadmap
 
-| Phase | Objective                                              | Entry gate                        | Exit gate                                             | Status    | Plan                        |
-| ----- | ------------------------------------------------------ | --------------------------------- | ----------------------------------------------------- | --------- | --------------------------- |
-| V1    | 通用网格、Worker、占据结果与预算/生命周期              | Core/Worker 构建路由确认          | 数值 Specs、Worker 取消、构建/类型、review 和独立提交 | completed | [V1](2026-10-28-v1-core.md) |
-| V2    | 区域 3D Tiles 主动加载、静态快照、SDK 文档及可复现实例 | V1 已提交，重查 native loader/LOD | 离屏区域、LOD、变换/实例、失败/取消、双世界及完整交付 | pending   | 尚未进入                    |
+| Phase | Objective                                              | Entry gate                        | Exit gate                                             | Status    | Plan                         |
+| ----- | ------------------------------------------------------ | --------------------------------- | ----------------------------------------------------- | --------- | ---------------------------- |
+| V1    | 通用网格、Worker、占据结果与预算/生命周期              | Core/Worker 构建路由确认          | 数值 Specs、Worker 取消、构建/类型、review 和独立提交 | completed | [V1](2026-10-28-v1-core.md)  |
+| V2    | 区域 3D Tiles 主动加载、静态快照、SDK 文档及可复现实例 | V1 已提交，重查 native loader/LOD | 离屏区域、LOD、变换/实例、失败/取消、双世界及完整交付 | completed | [V2](2026-10-28-v2-tiles.md) |
 
 ## Cross-phase validation and acceptance
 

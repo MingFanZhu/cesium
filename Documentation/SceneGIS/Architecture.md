@@ -1521,6 +1521,12 @@ ADR-0194 批准独立静态网格体素化与精确 owned Worker entry `SceneGIS
 算法位于 SceneGIS Core，复用原生 TaskProcessor/build，不从屏幕深度推断实体。
 表面保守占据与网格封闭区域填充分开；显式米制网格、预算和 caller-owned 输出可以被风场等消费者复用。
 
+`SceneGIS3DTilesVoxelizer` 按显式区域和源 geometricError 主动加载静态瓦片，独立于显示相机。
+SGP-0071 只增加原生请求与静态三角形访问的两个窄小缝隙，复用加载、解码、缓存和实例变换。
+网格格宽与源 LOD 误差分别配置；缺失或不支持的内容中止完整结果，不当作空域。
+读取是一次性几何快照，输出所有权属于调用方；不改变源 tileset 或 SDK 的生命周期。
+公开接口、填充限制和 SDK 接入见 [StaticVoxelization.md](StaticVoxelization.md)。
+
 ## 局部城市空气流动
 
 ADR-0193 增加独立 `SceneGISWindSimulation`，局部米制等距立方网格的 WebGL2 D3Q19 MRT

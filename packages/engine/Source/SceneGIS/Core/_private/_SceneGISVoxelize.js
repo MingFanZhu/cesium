@@ -63,7 +63,7 @@ function fillEnclosed(data, nx, ny, nz) {
   return interior;
 }
 
-function addAxis(axes, x, y, z, a, b, c) {
+function addAxis(axes, x, y, z, a, b, c, coordinateEpsilon) {
   const scale = Math.max(Math.abs(x), Math.abs(y), Math.abs(z));
   if (scale === 0) {
     return;
@@ -75,6 +75,7 @@ function addAxis(axes, x, y, z, a, b, c) {
   const q = x * b.x + y * b.y + z * b.z;
   const r = x * c.x + y * c.y + z * c.z;
   const epsilon =
+    coordinateEpsilon * (Math.abs(x) + Math.abs(y) + Math.abs(z)) +
     32 * Number.EPSILON * Math.max(1, Math.abs(p), Math.abs(q), Math.abs(r));
   axes.push([
     x,
@@ -118,6 +119,24 @@ function _SceneGISVoxelize(parameters, transferableObjects = []) {
   let surfaceCells = 0;
   for (const mesh of meshes) {
     Matrix4.multiply(inverse, mesh.modelMatrix, transform);
+    // Account for cancellation when world-scale translations (e.g. ECEF) are composed.
+    // This is a floating-point error bound, not a physical dilation or hole repair.
+    const transformEpsilon =
+      (64 *
+        Number.EPSILON *
+        Math.max(
+          1,
+          Math.abs(grid.modelMatrix[12]),
+          Math.abs(grid.modelMatrix[13]),
+          Math.abs(grid.modelMatrix[14]),
+          Math.abs(mesh.modelMatrix[12]),
+          Math.abs(mesh.modelMatrix[13]),
+          Math.abs(mesh.modelMatrix[14]),
+          Math.abs(grid.minimum.x),
+          Math.abs(grid.minimum.y),
+          Math.abs(grid.minimum.z),
+        )) /
+      grid.cellSize;
     const positions = mesh.positions;
     const indices = mesh.indices;
     const vertexCount = positions.length / 3;
@@ -157,16 +176,17 @@ function _SceneGISVoxelize(parameters, transferableObjects = []) {
         );
       }
       const epsilon =
+        transformEpsilon +
         32 *
-        Number.EPSILON *
-        Math.max(
-          1,
-          ...[a, b, c].flatMap((p) => [
-            Math.abs(p.x),
-            Math.abs(p.y),
-            Math.abs(p.z),
-          ]),
-        );
+          Number.EPSILON *
+          Math.max(
+            1,
+            ...[a, b, c].flatMap((p) => [
+              Math.abs(p.x),
+              Math.abs(p.y),
+              Math.abs(p.z),
+            ]),
+          );
       const loX = Math.max(0, Math.ceil(Math.min(a.x, b.x, c.x) - epsilon) - 1);
       const loY = Math.max(0, Math.ceil(Math.min(a.y, b.y, c.y) - epsilon) - 1);
       const loZ = Math.max(0, Math.ceil(Math.min(a.z, b.z, c.z) - epsilon) - 1);
@@ -192,11 +212,11 @@ function _SceneGISVoxelize(parameters, transferableObjects = []) {
         );
       }
       const axes = [];
-      addAxis(axes, normal.x, normal.y, normal.z, a, b, c);
+      addAxis(axes, normal.x, normal.y, normal.z, a, b, c, epsilon);
       for (const edge of [e0, e1, e2]) {
-        addAxis(axes, 0, edge.z, -edge.y, a, b, c);
-        addAxis(axes, -edge.z, 0, edge.x, a, b, c);
-        addAxis(axes, edge.y, -edge.x, 0, a, b, c);
+        addAxis(axes, 0, edge.z, -edge.y, a, b, c, epsilon);
+        addAxis(axes, -edge.z, 0, edge.x, a, b, c, epsilon);
+        addAxis(axes, edge.y, -edge.x, 0, a, b, c, epsilon);
       }
       for (let z = loZ; z <= hiZ; z++) {
         for (let y = loY; y <= hiY; y++) {
