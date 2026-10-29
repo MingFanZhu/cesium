@@ -27,8 +27,14 @@ automatic compatibility checks or registry publication.
 - Tests: owned Node build tests and `Specs/e2e/scenegis-distribution.spec.js`.
 - Branch: `feature/scenegis-distribution`.
 - ADR: [ADR-0205](../../Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md).
-- SGP: `SGP-0073`.
+- SGP: `SGP-0073`, `SGP-0074`.
 - Open discussion: none. No separate review agent requested.
+
+## Latest maintenance
+
+[Asset directory correction](plans/2026-10-29-asset-directories.md): completed and
+[reviewed](reviews/2026-10-29-asset-directories.md). SGP-0074 filters directory entries in the
+shared asset stream. Rebuilt artifact has zero empty directories; 8 Node and 7 browser tests pass.
 
 ## Current handoff
 

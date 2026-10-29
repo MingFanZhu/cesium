@@ -4,7 +4,7 @@
 - Date: 2026-10-29
 - Owner: Architecture Agent
 - Related extension: [engine-distribution](../../../AgentDocs/engine-distribution/README.md)
-- Upstream patch: SGP-0073
+- Upstream patches: SGP-0073, SGP-0074
 
 ## Context
 
@@ -45,7 +45,7 @@ custom tags. SDK consumers use the package ESM and metadata only.
 Retain native build, release and type checks. Verify exported public declaration values,
 both globals/module imports, actual Worker/WASM/images at root and nested mounts, both
 World lifecycles, static search, type/anchor links and extension coverage. Audit all
-upstream hunks against SGP-0073. Recheck bundler option forwarding, inline Worker injection,
+upstream hunks against SGP-0073 and SGP-0074. Recheck bundler option forwarding, inline Worker injection,
 JSDoc helper pruning/link allocation and declaration postprocessing on upstream upgrades.
 
 This adds packaging/documentation cost only; it does not change simulation/render algorithms,
@@ -65,3 +65,12 @@ are declared for TypeScript. Full target and docs-only target include the SDK ha
 Integration and metadata details: [Distribution](../Distribution.md). Review evidence:
 [D1](../../../AgentDocs/engine-distribution/reviews/2026-10-29-d1-runtime.md),
 [D2](../../../AgentDocs/engine-distribution/reviews/2026-10-29-d2-documentation.md).
+
+## Static asset stream correction
+
+SGP-0074 filters directory Vinyl entries in the native copyFiles stream. The source
+exclusion globs previously retained directory Vinyl entries, producing empty Core/Scene/
+Shaders/SceneGIS trees even though their JS/GLSL files were correctly bundled and excluded.
+Only real files are copied; gulp.dest creates their parents. Existing resource selections,
+bytes, widget remapping and runtime URLs remain unchanged. This applies to native Cesium
+targets as well as SceneGIS and requires no post-build deletion or separate asset whitelist.

@@ -4,6 +4,9 @@ import { existsSync, statSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { EOL } from "node:os";
 import path from "node:path";
+// SCENEGIS_PATCH_BEGIN SGP-0074: Filter directory Vinyl entries before asset output.
+import { Transform } from "node:stream";
+// SCENEGIS_PATCH_END SGP-0074
 import { finished } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 
@@ -707,6 +710,17 @@ const externalResolvePlugin = {
 export async function copyFiles(globs, destination, base) {
   const stream = gulp
     .src(globs, { base: base ?? "", encoding: false })
+    // SCENEGIS_PATCH_BEGIN SGP-0074: Only files belong in the static asset stream.
+    .pipe(
+      new Transform({
+        objectMode: true,
+        // eslint-disable-next-line no-unused-vars -- Node passes the callback as the third argument.
+        transform(file, encoding, callback) {
+          callback(null, file.isDirectory() ? undefined : file);
+        },
+      }),
+    )
+    // SCENEGIS_PATCH_END SGP-0074
     .pipe(gulp.dest(destination));
 
   await finished(stream);

@@ -2,6 +2,25 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0074",
+      "title": "Copy static asset files without emitting source directory entries",
+      "status": "active",
+      "reason": "Native file exclusion globs leave directory Vinyl entries in the static asset stream, so gulp.dest reproduces empty source-only trees in bundled distributions. Excluding directories at the shared file input preserves real files and parent path creation.",
+      "risk": "low",
+      "files": [
+        {
+          "path": "scripts/build.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "scripts/scenegis/asset-copy.test.mjs",
+        "Specs/e2e/scenegis-distribution.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md",
+      "removalCondition": "Native copyFiles excludes directory entries while preserving nested static files and widget remapping."
+    },
+    {
       "id": "SGP-0073",
       "title": "Support a SceneGIS branded distribution from the native build",
       "status": "active",
