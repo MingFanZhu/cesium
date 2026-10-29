@@ -72,7 +72,8 @@ scene.camera.setView({
     up: C.Matrix4.multiplyByPointAsVector(modelMatrix, up, new C.Cartesian3()),
   },
 });
-const tileset = scene.primitives.add(
+const sourceLayer = scene.primitives.add(new C.PrimitiveCollection());
+const tileset = sourceLayer.add(
   await C.Cesium3DTileset.fromUrl("./data/tileset.json", {
     modelMatrix,
     modelUpAxis: C.Axis.Z,

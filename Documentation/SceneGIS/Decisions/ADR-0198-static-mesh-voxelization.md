@@ -28,6 +28,13 @@ Approve exactly `packages/engine/Source/Workers/SceneGISVoxelizeWorker.js` as a 
 
 ## 3D Tiles adapter
 
+V3 qualifies sources nested at any depth in this Scene's native
+PrimitiveCollection hierarchy. Reachability uses public length/get/contains,
+not SDK types or private collection storage. Validate the native tileset identity
+and repeat membership checks until snapshot handoff to the Worker. Removing an
+ancestor is source removal; no reparenting, duplicate attachment or ownership
+change is performed. Existing cross-context/static-transform constraints remain.
+
 `SceneGIS3DTilesVoxelizer` is a one-shot primitive attached to the same Scene as an explicitly supplied tileset. It actively loads an explicit grid region at a source geometric-error ceiling, independently of camera SSE. Source `geometricError` and cell size are distinct. Preserve [OGC 3D Tiles refinement semantics](https://docs.ogc.org/cs/22-025r4/22-025r4.html): ADD retains ancestor content, REPLACE substitutes selected descendants. Containers (empty, external, implicit) are traversed; missing or failed geometry rejects the complete result, never becomes empty. A terminal tile above the requested error also fails. The result reports selected URLs/errors and timing rather than using `tilesLoaded`, which only describes a view.
 
 SGP-0072 exposes two private integration seams: `Cesium3DTileset._requestSceneGISGeometryTile` calls its existing request pipeline; `Model3DTileContent._sceneGISVisitStaticTriangles` delegates to an owned ModelReader adapter. The public entry is the SceneGIS job, not those private hooks. No change to display selection arrays, main camera, request scheduler, native decoders or cache ownership. The bounded region walk pins required native content; processing remains in native prePassesUpdate. Snapshot updates content with a temporary command list restored in finally, then reads the decoded static positions/indices and native node/instance transforms once. No every-frame mesh readback.

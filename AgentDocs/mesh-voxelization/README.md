@@ -6,8 +6,8 @@
 - Status: `completed`
 - Planning model: `extension`
 - Active extension plan: [Roadmap](plans/2026-10-28-extension.md)
-- Current phase: V2, completed
-- Active phase plan: [V2](plans/2026-10-28-v2-tiles.md)
+- Current phase: V3 nested Scene membership, completed
+- Active phase plan: None; [completed V3](plans/2026-10-29-v3-scene-membership.md)
 - Architecture / execution contact: current engine agent
 - Last updated: `2026-10-29`
 
@@ -26,6 +26,10 @@
 - SGP: `SGP-0072` (V2 native loading and static geometry seams).
 
 ## Current handoff
+
+- V3 [review](reviews/2026-10-29-v3-scene-membership.md) approves nested native
+  source membership, same-Scene validation and lifecycle tests. All 19 adapter
+  Specs plus build/types pass; SGP-0072 unchanged. No next voxel phase is active.
 
 - Integrated V1 `4f17f2cc05` and V2 `52350f32a7` into `scenegis/develop` on 2026-10-29. During integration, the voxel ADR/patch were renumbered to ADR-0198 / SGP-0072 because develop independently assigned ADR-0194 / SGP-0071 to water optics / screen splitting. All references and patch markers follow the new IDs; runtime behavior is unchanged.
 - Integration validation: build, generated types, TypeScript and upstream audit pass; ADR/SGP IDs are unique. The combined wind/particles/voxel selection passed 56 of 57 Specs initially. The remaining native Draco case passed after refreshing the ignored WASM to match develop's installed Draco 1.5.9 dependency; the prior local binary was stale. No decoder code or package manifest changed.

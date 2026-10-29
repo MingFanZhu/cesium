@@ -3,7 +3,11 @@ import {
   Cartesian3,
   Cesium3DTileset,
   Matrix4,
+  PrimitiveCollection,
   RuntimeError,
+  SceneGISPlanarCoordinateSystem,
+  SceneGISPlanarExtent,
+  SceneGISPlanarWorld,
   SceneGIS3DTilesVoxelizer,
   Transforms,
 } from "../../../index.js";
@@ -187,6 +191,109 @@ describe("SceneGIS/Scene/SceneGIS3DTilesVoxelizer", function () {
     for (const url of urls) {
       URL.revokeObjectURL(url);
     }
+  });
+
+  function nest() {
+    scene.primitives.destroyPrimitives = false;
+    scene.primitives.remove(tileset);
+    scene.primitives.destroyPrimitives = true;
+    const parent = scene.primitives.add(new PrimitiveCollection());
+    const layer = parent.add(new PrimitiveCollection());
+    layer.add(tileset);
+    return { parent, layer };
+  }
+  [false, true].forEach(function (planar) {
+    it(`loads nested native sources without reparenting in ${planar ? "Planar" : "Globe"}`, async function () {
+      if (planar) {
+        scene._initializeWorld(
+          new SceneGISPlanarWorld({
+            coordinateSystem: new SceneGISPlanarCoordinateSystem({
+              extent: new SceneGISPlanarExtent({
+                minimumX: -100,
+                maximumX: 100,
+                minimumY: -100,
+                maximumY: 100,
+              }),
+            }),
+            maximumLevel: 0,
+          }),
+        );
+      }
+      const placement = planar
+        ? Matrix4.IDENTITY
+        : Transforms.eastNorthUpToFixedFrame(
+            Cartesian3.fromDegrees(-74, 40, 100),
+          );
+      await load(tile(geometry()), placement);
+      const { parent, layer } = nest();
+      start({
+        grid: {
+          dimensions: new Cartesian3(32, 8, 8),
+          cellSize: 1,
+          fillMode: "enclosed",
+          modelMatrix: placement,
+        },
+      });
+      const result = await finish();
+      expect(result.statistics.surfaceCells).toBe(152);
+      expect(result.statistics.interiorCells).toBe(64);
+      expect(scene.primitives.contains(tileset)).toBeFalse();
+      expect(layer.length).toBe(1);
+      expect(layer.get(0)).toBe(tileset);
+      scene.primitives.remove(job);
+      expect(tileset.isDestroyed()).toBeFalse();
+      expect(parent.contains(layer)).toBeTrue();
+    });
+  });
+  it("rejects unmounted, cross-Scene and non-native sources", async function () {
+    await load(tile(geometry()));
+    const other = createScene();
+    try {
+      expect(() => start({ scene: other })).toThrowDeveloperError();
+      expect(() =>
+        start({ tileset: new PrimitiveCollection() }),
+      ).toThrowDeveloperError();
+      scene.primitives.destroyPrimitives = false;
+      scene.primitives.remove(tileset);
+      scene.primitives.destroyPrimitives = true;
+      expect(() => start()).toThrowDeveloperError();
+      other.primitives.add(tileset);
+      expect(() => start()).toThrowDeveloperError();
+    } finally {
+      other.destroyForSpecs();
+    }
+  });
+  ["source", "ancestor", "destroy"].forEach(function (action) {
+    it(`rejects nested source ${action} before snapshot completion`, async function () {
+      await load(tile(geometry()));
+      const { parent, layer } = nest();
+      start();
+      if (action === "source") {
+        layer.destroyPrimitives = false;
+        layer.remove(tileset);
+      } else {
+        scene.primitives.destroyPrimitives = action === "destroy";
+        scene.primitives.remove(parent);
+        scene.primitives.destroyPrimitives = true;
+      }
+      try {
+        await expectAsync(finish()).toBeRejectedWithError(
+          RuntimeError,
+          /removed or destroyed/,
+        );
+      } finally {
+        if (!parent.isDestroyed()) {
+          if (scene.primitives.contains(parent)) {
+            scene.primitives.remove(parent);
+          } else {
+            parent.destroy();
+          }
+        }
+        if (!tileset.isDestroyed()) {
+          tileset.destroy();
+        }
+      }
+    });
   });
 
   it("actively loads an offscreen region, preserves camera and publishes independent occupancy", async function () {

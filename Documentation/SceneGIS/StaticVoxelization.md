@@ -39,8 +39,12 @@ try {
 `minimum` 是局部网格最小角，`dimensions` 是正整数格数，`cellSize` 是米制立方格宽。
 上例覆盖 256 × 256 × 64 米。`modelMatrix` 只允许刚体变换：Globe 使用 ENU，
 Planar 使用其 World 坐标中的刚体矩阵；不自动转换 CRS，也不自动移动源 tileset。
-源数据与网格必须处于同一个世界坐标系。源 tileset 与 job 需直接挂载在同一
-`scene.primitives`，使用 WebGL2 / SCENE3D；不支持 Cesium 的 SCENE2D/MORPHING。
+源数据与网格必须处于同一个世界坐标系。源 tileset 可以位于当前 Scene 任意层级的原生
+`PrimitiveCollection`；job 挂载到同一 Scene，使用 WebGL2 / SCENE3D。
+SDK 可直接传入 `tileset: layer.nativeLayer`，前提是它为原生 `Cesium3DTileset` 且已归属
+该 Scene。引擎不依赖 SDK 图层类型，不移动源、不重复挂载、不改变集合的销毁所有权。
+跨 Scene、未挂载源以及快照完成前移除源或祖先集合都会失败；静态变换约束保持不变。
+不支持 Cesium 的 SCENE2D/MORPHING。
 
 `maximumGeometricError` 必须显式指定，单位为经过 tile transform 缩放后的世界米。
 它选择源模型 LOD，**不等于体素格宽，也不是实际建筑误差证明**。REPLACE 选择目标子层，
@@ -169,6 +173,7 @@ const simulation = scene.primitives.add(
 
 运行仓库开发服务器后打开 `/Test/Voxel/?world=globe` 或 `?world=planar`。
 四个本地 glTF 瓦片包含八栋解析盒建筑，默认 128×128×32 / 2 米；可以选择 1/2/4 米，
+源 tileset 挂在原生 PrimitiveCollection 子层，展示与 SDK layer.nativeLayer 相同的调用方式。
 对照源建筑、表面格心和水平切片。示例仅组装公开 API、显示结果与导出，不实现体素算法。
 导出文件使用 4-byte little-endian JSON header 长度、UTF-8 JSON header、原始 Uint8
 occupancy；这是示例的简易封装，不是新的引擎交换格式。通用 SDK 可自行保存 metadata + array。

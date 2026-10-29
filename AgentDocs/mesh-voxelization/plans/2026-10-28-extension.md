@@ -3,7 +3,7 @@
 ## Metadata
 
 - Plan type: `extension`
-- Status: `completed`
+- Status: `completed`; V3 Scene membership qualified.
 - Owner role: `architecture`
 - Architecture review: `confirmed`
 - Architecture reviewer: current engine agent
@@ -30,6 +30,10 @@
 | V2    | 区域 3D Tiles 主动加载、静态快照、SDK 文档及可复现实例 | V1 已提交，重查 native loader/LOD | 离屏区域、LOD、变换/实例、失败/取消、双世界及完整交付 | completed | [V2](2026-10-28-v2-tiles.md) |
 
 ## Cross-phase validation and acceptance
+
+V3 extends source membership to native collections at any depth in the supplied
+Scene. [Phase plan](2026-10-29-v3-scene-membership.md). Existing source loading,
+snapshot, transform and borrowed-ownership contracts remain.
 
 - 保守三角形覆盖、封闭/开口体、网格边界、裁剪、坐标变换和格宽对比。
 - 数组布局 x-fastest；格心坐标与风场一致；调用方数据不被 detach 或改写。

@@ -7,7 +7,9 @@ import Intersect from "../../Core/Intersect.js";
 import Matrix4 from "../../Core/Matrix4.js";
 import RuntimeError from "../../Core/RuntimeError.js";
 import Cesium3DTileRefine from "../../Scene/Cesium3DTileRefine.js";
+import Cesium3DTileset from "../../Scene/Cesium3DTileset.js";
 import Cesium3DTilesetTraversal from "../../Scene/Cesium3DTilesetTraversal.js";
+import PrimitiveCollection from "../../Scene/PrimitiveCollection.js";
 import SceneMode from "../../Scene/SceneMode.js";
 import SceneGISVoxelizer from "../Core/SceneGISVoxelizer.js";
 
@@ -16,6 +18,28 @@ function integer(name, value) {
     throw new DeveloperError(`${name} must be a positive safe integer.`);
   }
   return value;
+}
+
+function belongsToScene(scene, tileset) {
+  const pending = [scene.primitives];
+  const visited = new Set();
+  while (pending.length > 0) {
+    const collection = pending.pop();
+    if (visited.has(collection)) {
+      continue;
+    }
+    visited.add(collection);
+    if (collection.contains(tileset)) {
+      return true;
+    }
+    for (let i = 0; i < collection.length; i++) {
+      const child = collection.get(i);
+      if (child instanceof PrimitiveCollection) {
+        pending.push(child);
+      }
+    }
+  }
+  return false;
 }
 
 function regionVolume(grid) {
@@ -185,8 +209,9 @@ function finish(job, status, value) {
 
 /**
  * A one-shot, camera-independent 3D Tiles geometry-to-voxel job. Mount it in Scene.primitives
- * after the source tileset and await resultPromise. The source must remain directly mounted
- * in the same Scene, with static geometry and transforms, until the snapshot completes.
+ * after the source tileset and await resultPromise. The source must remain reachable through
+ * native PrimitiveCollections in the same Scene, with static geometry and transforms,
+ * until the snapshot completes. The job never reparents or attaches the borrowed source.
  *
  * Actively loads the grid region through the native tile request/cache/decoder pipeline.
  * Includes all source triangles regardless of style, visibility, transparency or clipping.
@@ -221,13 +246,13 @@ function SceneGIS3DTilesVoxelizer(options = {}) {
   const { scene, tileset } = options;
   if (
     !scene ||
-    !tileset ||
+    scene.isDestroyed() ||
+    !(tileset instanceof Cesium3DTileset) ||
     tileset.isDestroyed() ||
-    !scene.primitives.contains(tileset) ||
-    typeof tileset._requestSceneGISGeometryTile !== "function"
+    !belongsToScene(scene, tileset)
   ) {
     throw new DeveloperError(
-      "tileset must be a live Cesium3DTileset directly mounted in scene.primitives.",
+      "tileset must be a live native Cesium3DTileset belonging to this Scene's PrimitiveCollection hierarchy.",
     );
   }
   const error = options.maximumGeometricError;
@@ -281,7 +306,7 @@ function SceneGIS3DTilesVoxelizer(options = {}) {
 /**
  * @typedef {object} SceneGIS3DTilesVoxelizer.Options
  * @property {Scene} scene Owning Scene, in SCENE3D with WebGL2.
- * @property {Cesium3DTileset} tileset Explicit static source, directly mounted in this Scene.
+ * @property {Cesium3DTileset} tileset Borrowed static source in this Scene's native PrimitiveCollection hierarchy, at any depth.
  * @property {SceneGISVoxelizer.Options} grid Grid region and geometry/computation budgets.
  * @property {number} maximumGeometricError Source LOD tolerance in world meters, independent of cell size.
  * Terminal tiles exceeding it fail; ADD ancestors remain included as required by the source hierarchy.
@@ -392,7 +417,7 @@ SceneGIS3DTilesVoxelizer.prototype.update = function (frameState) {
     }
     if (
       this._tileset.isDestroyed() ||
-      !this._scene.primitives.contains(this._tileset)
+      !belongsToScene(this._scene, this._tileset)
     ) {
       throw new RuntimeError(
         "The source tileset was removed or destroyed during voxelization.",
