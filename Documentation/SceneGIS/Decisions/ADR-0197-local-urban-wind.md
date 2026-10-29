@@ -109,6 +109,10 @@ Public API, reproducible city evidence and SDK usage are documented in [UrbanWin
 
 ## W5: GPU flow particles
 
+The W5 storage/style implementation below is superseded by ADR-0203 W6:
+independent dimensions and wind-owned two-attachment state with optional GPU
+trajectory history. The solver, tracer, public field and batch approximation remain.
+
 Owner feedback replaces the default instantaneous lines with 4096 directional GPU markers.
 Visualization composes the existing SceneGISGpuParticleSystem; its narrow `timeSource` hook
 uses completed simulation seconds rather than wall/Scene time. Generation changes reset the

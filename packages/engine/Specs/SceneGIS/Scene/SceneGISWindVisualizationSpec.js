@@ -32,7 +32,7 @@ describe("SceneGIS/Scene/SceneGISWindVisualization", function () {
   let scene, wind, view;
   const time = JulianDate.fromIso8601("2026-10-28T00:00:00Z");
   function particleState(attachment = 0) {
-    const state = view._particles._state;
+    const state = view._particles;
     const texture = state.buffers[state.index].getColorTexture(attachment);
     const target = new Framebuffer({
       context: scene.context,
@@ -154,9 +154,9 @@ describe("SceneGIS/Scene/SceneGISWindVisualization", function () {
     );
     scene.renderForSpecs(time);
     const first = particleState(),
-      styles = particleState(3);
-    const buffers = view._particles._state.buffers.slice();
-    expect(view.particleTextureByteLength).toBe(12 * 11 * 128);
+      styles = particleState(1);
+    const buffers = view._particles.buffers.slice();
+    expect(view.particleTextureByteLength).toBe(12 * 11 * 64);
     expect(view.showStreamlines).toBeFalse();
     wind.step();
     scene.renderForSpecs(time);
@@ -178,7 +178,7 @@ describe("SceneGIS/Scene/SceneGISWindVisualization", function () {
     wind.reset();
     scene.renderForSpecs(time);
     expect(particleState()).toEqual(first);
-    expect(view._particles._state.buffers).toEqual(buffers);
+    expect(view._particles.buffers).toEqual(buffers);
     const field = wind.getGpuField();
     scene.primitives.remove(view);
     expect(buffers.every((b) => b.isDestroyed())).toBeTrue();
@@ -314,7 +314,7 @@ describe("SceneGIS/Scene/SceneGISWindVisualization", function () {
       const stage = view._stage,
         program = view._command.shaderProgram,
         array = view._array,
-        particleBuffers = view._particles._state.buffers.slice();
+        particleBuffers = view._particles.buffers.slice();
       view.show = true;
       scene.renderForSpecs(later);
       scene.primitives.remove(view);

@@ -4,18 +4,18 @@ WebGL2 局部空气 LBM 与被动示踪；独立于 PBF 液体，不修改 SDK �
 
 ## Metadata
 
-| Field                  | Value                                                     |
-| ---------------------- | --------------------------------------------------------- |
-| Extension slug         | `urban-wind`                                              |
-| Status                 | `completed`                                               |
-| Planning model         | `extension`                                               |
-| Active extension plan  | [roadmap](plans/2026-10-28-urban-wind.md)                 |
-| Current phase          | W5 completed                                              |
-| Active phase plan      | None; last: [particles](plans/2026-10-28-w5-particles.md) |
-| Active standalone plan | None                                                      |
-| Architecture contact   | Current task / self-review                                |
-| Execution contact      | Current task                                              |
-| Last updated           | `2026-10-29`                                              |
+| Field                  | Value                                                              |
+| ---------------------- | ------------------------------------------------------------------ |
+| Extension slug         | `urban-wind`                                                       |
+| Status                 | `completed`                                                        |
+| Planning model         | `extension`                                                        |
+| Active extension plan  | [roadmap](plans/2026-10-28-urban-wind.md)                          |
+| Current phase          | W6 technically complete; owner visual gate pending                 |
+| Active phase plan      | None; [completed W6](plans/2026-10-29-w6-particle-trajectories.md) |
+| Active standalone plan | None                                                               |
+| Architecture contact   | Current task / self-review                                         |
+| Execution contact      | Current task                                                       |
+| Last updated           | `2026-10-29`                                                       |
 
 允许的扩展状态为 `proposed`、`active`、`paused`、`completed` 或 `retired`。
 
@@ -33,10 +33,16 @@ WebGL2 局部空气 LBM 与被动示踪；独立于 PBF 液体，不修改 SDK �
 
 - Source: `packages/engine/Source/SceneGIS/{Core,Scene}/`, `Source/Shaders/SceneGIS/Wind/`
 - Specs: `packages/engine/Specs/SceneGIS/{Core,Scene}/`; examples: `Test/Wind/`; no Sandcastle.
-- Branch: `scenegis/develop`; original feature baseline: `9ac687a4bc`.
+- Branch: `feature/wind-display-api`; base: `scenegis/develop`; original feature baseline: `9ac687a4bc`.
 - ADR: [0197](../../Documentation/SceneGIS/Decisions/ADR-0197-local-urban-wind.md); SGP: none planned.
 
 ## Current handoff
+
+- W6 [review](reviews/2026-10-29-w6-particle-trajectories.md) approves independent
+  dimensions and GPU three-dimensional history. Owner drops compatibility;
+  particleSize is removed. Fifteen development GPU, 34 related release and two
+  city browser cases plus full build/types pass. No solver/SDK/upstream changes;
+  owner visual acceptance pending. API/defaults/cost: UrbanWind and ADR-0203.
 
 - Integrated W1–W5 and generic voxelization into `scenegis/develop` on 2026-10-29. The wind ADR is now ADR-0197 to avoid the independently assigned split-view ADR-0193; implementation is unchanged by this identifier reconciliation.
 

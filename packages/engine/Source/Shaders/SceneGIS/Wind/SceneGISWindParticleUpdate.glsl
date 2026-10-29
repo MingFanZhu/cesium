@@ -1,7 +1,7 @@
 uniform float u_windTimeStep;
 
-// At most three voxel faces can be crossed by a sub-cell RK2 step. Check the
-// whole segment, including short intersections near corners, rather than endpoints alone.
+// Check the whole segment, including corners. History chords can span multiple
+// cells even though individual low-Mach integration substeps are sub-cell.
 bool windParticleClear(vec3 start, vec3 end) {
     if (sceneGISWindSolid(start) || sceneGISWindSolid(end)) return false;
     vec3 a = (start - u_sgWindMinimum) / u_sgWindCellSize;
@@ -12,7 +12,8 @@ bool windParticleClear(vec3 start, vec3 end) {
     vec3 inv = 1.0 / max(abs(d), vec3(1e-20));
     vec3 edge = mix(a - floor(a), floor(a) + 1.0 - a, greaterThan(d, vec3(0.0)));
     vec3 next = edge * inv;
-    for (int i = 0; i < 4; ++i) {
+    int budget = int(u_sgWindDimensions.x + u_sgWindDimensions.y + u_sgWindDimensions.z) + 3;
+    for (int i = 0; i < budget; ++i) {
         if (all(equal(cell, target))) return true;
         int axis = next.x <= next.y && next.x <= next.z ? 0 : next.y <= next.z ? 1 : 2;
         cell[axis] += direction[axis];

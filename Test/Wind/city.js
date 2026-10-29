@@ -195,6 +195,35 @@ function destroyWind() {
 function sources() {
   return sourceDefinitions.map((s) => ({ ...s, enabled: $("source").checked }));
 }
+function createDisplay() {
+  if (display && !display.isDestroyed()) {
+    scene.primitives.remove(display);
+  }
+  display = scene.primitives.add(
+    new C.SceneGISWindVisualization({
+      scene,
+      simulation: wind,
+      mode: $("mode").value,
+      showParticles: $("particles").checked,
+      particleCount: 1536,
+      particleWidth: Number($("size").value),
+      particleWidthUnits: "pixels",
+      particleLength: Number($("length").value),
+      particleOpacity: Number($("particle-alpha").value),
+      showTrails: $("trails").checked,
+      trailDuration: Number($("duration").value),
+      trailSegments: Number($("segments").value),
+      trailFade: Number($("fade").value),
+      colorBy: $("color").value,
+      colorMaximum: $("color").value === "speed" ? 5.5 : 2,
+      extinction: Number($("opacity").value),
+      sliceHeight: Number($("height").value),
+    }),
+  );
+  if (window.windExample) {
+    window.windExample.display = display;
+  }
+}
 function createWind() {
   destroyWind();
   wind = scene.primitives.add(
@@ -216,19 +245,7 @@ function createWind() {
       enableGpuTiming: true,
     }),
   );
-  display = scene.primitives.add(
-    new C.SceneGISWindVisualization({
-      scene,
-      simulation: wind,
-      mode: $("mode").value,
-      showParticles: $("particles").checked,
-      colorBy: $("color").value,
-      colorMaximum: $("color").value === "speed" ? 5.5 : 2,
-      extinction: Number($("opacity").value),
-      sliceHeight: Number($("height").value),
-      particleSize: Number($("size").value),
-    }),
-  );
+  createDisplay();
   $("run").textContent = "运行";
   $("probes").textContent = "计算完成后读取少量格点";
   window.windExample = { viewer, wind, display };
@@ -393,7 +410,29 @@ $("particles").onchange = () => {
 };
 $("size").oninput = () => {
   if (display) {
-    display.particleSize = Number($("size").value);
+    display.particleWidth = Number($("size").value);
+  }
+};
+[
+  ["length", "particleLength"],
+  ["duration", "trailDuration"],
+  ["fade", "trailFade"],
+  ["particle-alpha", "particleOpacity"],
+].forEach(([id, property]) => {
+  $(id).oninput = () => {
+    if (display) {
+      display[property] = Number($(id).value);
+    }
+  };
+});
+$("trails").onchange = () => {
+  if (display) {
+    display.showTrails = $("trails").checked;
+  }
+};
+$("segments").onchange = () => {
+  if (wind) {
+    createDisplay();
   }
 };
 $("source").onchange = () => wind?.setTracerSources(sources());

@@ -1,8 +1,8 @@
 # Extension Plan: Local urban wind
 
-- Type: extension; status: completed through W5; owner: architecture / current task.
+- Type: extension; status: technically completed through W6; owner: architecture / current task.
 - Created / updated: 2026-10-28; architecture review: confirmed (self-review).
-- Discussion: [model](../discussions/2026-10-28-model.md); review: [W4](../reviews/2026-10-28-w4-city.md); ADR: 0193; SGP: none.
+- Discussion: [model](../discussions/2026-10-28-model.md); review: [W4](../reviews/2026-10-28-w4-city.md); ADR: 0197 / 0203; SGP: none.
 
 ## Objective and boundaries
 
@@ -34,6 +34,10 @@ particle extensions remain independent. Graph omits recent symbols; source reads
 
 ## Risks and acceptance
 
+W6 adds independent marker dimensions and GPU-resident sampled 3D trajectories,
+without changing solver/scalar physics. [Phase plan](2026-10-29-w6-particle-trajectories.md)
+defines current API, sampling, memory and lifecycle gates; ADR-0203 records the protocol.
+
 Near-half relaxation at real air viscosity is a numerical risk, not permission to raise viscosity.
 FP32 deviation populations reduce cancellation; actual Reynolds/grid limits must remain explicit.
 Uniform inlet is not a measured atmospheric boundary layer. Stair-step solids, fixed LES and open
@@ -42,3 +46,7 @@ Reject invalid parameters; never silently clip velocity or reset divergence. Con
 the solver or destroy borrowed textures. Final evidence includes GPU ms/step, bytes, grid,
 steps/frame and simulated/wall seconds; display FPS is insufficient. Each phase has its own local
 Chinese commit. City visual acceptance remains with the owner.
+
+W6 technical gate is complete; [review](../reviews/2026-10-29-w6-particle-trajectories.md)
+records verification, thin-path pictures and bounded resource/draw cost. Owner
+visual acceptance is pending; no next phase is active.

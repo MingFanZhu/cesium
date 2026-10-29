@@ -45,13 +45,57 @@
         风场粒子</label
       >
       <label
-        >粒子宽度<input
+        >粒子宽度 · px<input
           id="size"
           type="range"
-          min="0.25"
-          max="1.5"
+          min="0.5"
+          max="4"
+          step="0.1"
+          value="1.4"
+      /></label>
+      <label
+        >粒子长度 · m<input
+          id="length"
+          type="range"
+          min="0.5"
+          max="12"
+          step="0.5"
+          value="2.5"
+      /></label>
+      <label><input id="trails" type="checkbox" checked /> 三维历史拖尾</label>
+      <label
+        >拖尾时长 · 模拟秒<input
+          id="duration"
+          type="range"
+          min="1"
+          max="12"
+          step="0.5"
+          value="8"
+      /></label>
+      <label
+        >历史段数<select id="segments">
+          <option>16</option>
+          <option>32</option>
+          <option selected>64</option>
+        </select></label
+      >
+      <label
+        >尾部渐隐<input
+          id="fade"
+          type="range"
+          min="0"
+          max="4"
+          step="0.1"
+          value="1.2"
+      /></label>
+      <label
+        >粒子与拖尾透明度<input
+          id="particle-alpha"
+          type="range"
+          min="0"
+          max="1"
           step="0.05"
-          value="0.65"
+          value="0.85"
       /></label>
       <label><input id="source" type="checkbox" checked /> 注入示踪物</label>
       <label
@@ -106,7 +150,7 @@
         </div>
       </div>
       <p class="note">
-        颜色可选风速或示踪量；体积透明度来自计算的示踪量。短粒子沿计算风速运动，暂停时冻结；粒子密度不代表示踪浓度。理想化街区，非工程预测。
+        拖尾记录粒子三维积分位置，时长按已完成模拟秒计；像素宽度保持细风迹，暂停冻结，重生断尾。批次内使用最终速度快照。粒子数量不代表示踪浓度；体积透明度来自独立输运。理想化街区，非工程预测。
       </p>
     </section>
     <aside>

@@ -28,9 +28,20 @@ function validate(v) {
     typeof v.show !== "boolean" ||
     typeof v.showStreamlines !== "boolean" ||
     typeof v.showParticles !== "boolean" ||
-    !Number.isFinite(v.particleSize) ||
-    v.particleSize <= 0 ||
-    v.particleSize > 4 ||
+    typeof v.showTrails !== "boolean" ||
+    !["meters", "pixels"].includes(v.particleWidthUnits) ||
+    !Number.isFinite(v.particleWidth) ||
+    v.particleWidth <= 0 ||
+    v.particleWidth > 64 ||
+    !Number.isFinite(v.particleLength) ||
+    v.particleLength <= 0 ||
+    v.particleLength > 256 ||
+    !Number.isFinite(v.trailDuration) ||
+    v.trailDuration <= 0 ||
+    v.trailDuration > 120 ||
+    !Number.isFinite(v.trailFade) ||
+    v.trailFade < 0 ||
+    v.trailFade > 8 ||
     !Number.isFinite(v.particleOpacity) ||
     v.particleOpacity < 0 ||
     v.particleOpacity > 1 ||
@@ -183,7 +194,11 @@ function create(v, context, field) {
 
 /**
  * GPU wind volume, horizontal tracer slice and instantaneous streamlines. Add to Scene.primitives
- * after the simulation. It owns one post-process stage and line resources, never the simulation.
+ * after the simulation. It owns display commands, particle state/history and one post-process
+ * stage, never the simulation. Marker/ribbon dimensions and opacity are live display controls.
+ * Trails sample actual RK2 positions at uniform completed-time intervals, using the final
+ * velocity snapshot of each render batch. Rebirths break trajectories. Hidden periods discard
+ * history without catch-up; reset/rewind clears it. Pause retains unchanged positions/history.
  * Volume/slice alpha derives only from computed dimensionless tracer. Color may show speed or tracer.
  * Opaque buildings/terrain terminate volume rays; transparent surfaces do not occlude this post stage.
  * Streamlines follow the current field with midpoint integration at half-cell arclength, terminating
@@ -196,11 +211,17 @@ function create(v, context, field) {
  * @param {SceneGISWindSimulation} options.simulation Ready or pending field producer.
  * @param {boolean} [options.show=true] Display enabled.
  * @param {string} [options.mode="volume"] "volume", "slice" or "none".
- * @param {boolean} [options.showStreamlines=false] Show legacy instantaneous lines.
+ * @param {boolean} [options.showStreamlines=false] Show instantaneous streamlines.
  * @param {boolean} [options.showParticles=true] Show GPU flow markers, clocked by completed simulation time. They sample the latest completed field during each render batch; they are not conservative concentration transport.
  * @param {number} [options.particleCount=4096] Immutable particle capacity, integer 1..65536.
- * @param {number} [options.particleSize=0.65] Marker width in meters, (0,4]; projected length is at most five times the width.
+ * @param {number} [options.particleWidth=1.4] Independent marker/ribbon width, (0,64], in particleWidthUnits.
+ * @param {string} [options.particleWidthUnits="pixels"] Drawing-buffer "pixels" or "meters". Pixel widths stay thin at close range.
+ * @param {number} [options.particleLength=2.5] Independent marker length in meters, (0,256].
  * @param {number} [options.particleOpacity=0.75] Marker opacity in [0,1], independent of tracer concentration.
+ * @param {boolean} [options.showTrails=false] Draw sampled three-dimensional particle trajectories, not screen persistence.
+ * @param {number} [options.trailDuration=4] Retained completed simulation seconds, (0,120]. Changing it restarts history only.
+ * @param {number} [options.trailSegments=32] Immutable history capacity, integer 1..128. Padded particle/history textures together must not exceed 64 MiB.
+ * @param {number} [options.trailFade=1] Tail opacity exponent in [0,8]; zero disables age fading. particleOpacity scales both markers and ribbons.
  * @param {string} [options.colorBy="speed"] "speed" or "concentration".
  * @param {number} [options.colorMaximum=10] Color scale maximum, m/s or tracer units.
  * @param {number} [options.extinction=0.15] Visual opacity coefficient per meter per tracer unit.
@@ -220,8 +241,22 @@ function SceneGISWindVisualization(options) {
   /** @type {boolean} */ this.showStreamlines =
     options.showStreamlines ?? false;
   /** @type {boolean} */ this.showParticles = options.showParticles ?? true;
-  /** @type {number} */ this.particleSize = options.particleSize ?? 0.65;
+  /** @type {number} */ this.particleWidth = options.particleWidth ?? 1.4;
+  /** @type {number} */ this.particleLength = options.particleLength ?? 2.5;
+  /** @type {string} */ this.particleWidthUnits =
+    options.particleWidthUnits ?? "pixels";
   /** @type {number} */ this.particleOpacity = options.particleOpacity ?? 0.75;
+  /** @type {boolean} */ this.showTrails = options.showTrails ?? false;
+  /** @type {number} */ this.trailDuration = options.trailDuration ?? 4;
+  /** @type {number} */ this.trailFade = options.trailFade ?? 1;
+  this._trailSegments = options.trailSegments ?? 32;
+  if (
+    !Number.isInteger(this._trailSegments) ||
+    this._trailSegments < 1 ||
+    this._trailSegments > 128
+  ) {
+    throw new DeveloperError("trailSegments must be an integer 1..128.");
+  }
   this._particleCount = options.particleCount ?? 4096;
   if (
     !Number.isInteger(this._particleCount) ||
@@ -229,6 +264,15 @@ function SceneGISWindVisualization(options) {
     this._particleCount > 65536
   ) {
     throw new DeveloperError("particleCount must be an integer 1..65536.");
+  }
+  const width = Math.ceil(Math.sqrt(this._particleCount));
+  const slots = width * Math.ceil(this._particleCount / width);
+  const columns = Math.ceil(Math.sqrt(this._trailSegments + 1));
+  const rows = Math.ceil((this._trailSegments + 1) / columns);
+  if (slots * (64 + 16 * columns * rows) > 64 * 1048576) {
+    throw new DeveloperError(
+      "Padded particle and trail textures exceed the 64 MiB capacity limit.",
+    );
   }
   this._particles = undefined;
   this._particleGeneration = undefined;
@@ -277,7 +321,7 @@ Object.defineProperties(SceneGISWindVisualization.prototype, {
     },
   },
   /**
-   * Allocated particle state bytes; excludes borrowed wind fields and scene post-process targets.
+   * Allocated particle and history texture bytes; excludes borrowed wind fields and scene targets.
    * @memberof SceneGISWindVisualization.prototype
    * @type {number}
    * @readonly
@@ -287,10 +331,32 @@ Object.defineProperties(SceneGISWindVisualization.prototype, {
       return this._particles?.textureMemoryInBytes ?? 0;
     },
   },
+  /**
+   * Immutable history segment capacity. One additional sampled position is retained.
+   * @memberof SceneGISWindVisualization.prototype
+   * @type {number}
+   * @readonly
+   */
+  trailSegments: {
+    get() {
+      return this._trailSegments;
+    },
+  },
+  /**
+   * Allocated history texture bytes, a subset of particleTextureByteLength. Zero before first enable.
+   * @memberof SceneGISWindVisualization.prototype
+   * @type {number}
+   * @readonly
+   */
+  trailTextureByteLength: {
+    get() {
+      return this._particles?.historyByteLength ?? 0;
+    },
+  },
 });
 /** @private */
 SceneGISWindVisualization.prototype.update = function (frameState) {
-  if (!frameState.passes.render) {
+  if (!frameState.passes.render || frameState.passes.pick) {
     return;
   }
   validate(this);
@@ -316,15 +382,18 @@ SceneGISWindVisualization.prototype.update = function (frameState) {
     this._eyeToLocal,
   );
   if (this.show && this.showParticles && !this._particles) {
-    this._particles = createWindParticles(this, field, this._bounds);
+    this._particles = createWindParticles(
+      this,
+      field,
+      this._bounds,
+      frameState.context,
+    );
   }
   if (this._particles) {
     if (this._particleGeneration !== field.generation) {
       this._particles.reset();
       this._particleGeneration = field.generation;
     }
-    this._particles.show = this.show && this.showParticles;
-    this._particles.modelMatrix = field.modelMatrix;
     this._particles.update(frameState);
   }
   if (this.show && this.showStreamlines) {
