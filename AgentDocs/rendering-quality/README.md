@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R35 profile-aware underwater volumes                                                                     |
-| Active phase plan      | [R35](plans/2026-10-29-r35-profile-underwater.md)                                                        |
+| Current phase          | R36 technically complete; owner visual gate pending                                                      |
+| Active phase plan      | None; [completed R36](plans/2026-10-29-r36-regional-caustics.md)                                         |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
@@ -35,14 +35,17 @@
 
 ## Current handoff
 
-- R35 active after R34 checkpoint `f15b53ade7`: owner requests variable-level
-  river underwater viewing and curved caustics. [R35](plans/2026-10-29-r35-profile-underwater.md)
-  first adds the authoritative prepared profile and ray clipping; R36 curved
-  bathymetry/caustics follows only after its independent checkpoint. No SDK work.
+- R36 technically complete: [plan](plans/2026-10-29-r36-regional-caustics.md) /
+  [review](reviews/2026-10-29-r36-regional-caustics.md) / ADR-0201 add explicit
+  regional bathymetry and actual-wave caustics shared above/below water. Four new
+  development and 69 related release GPU cases, 11 browser cases and full build/types
+  pass. About 0.35 ms lake / 0.50 ms river caustic draw on the recorded GPU. No SDK
+  or upstream changes; owner visual gate pending. No next phase is active.
 
-  R35 technical gate is complete; [review](reviews/2026-10-29-r35-profile-underwater.md)
+- R35 checkpoint `68d879be82`: original-profile underwater volumes for variable
+  ellipsoid water and directed rivers in both Worlds. [Review](reviews/2026-10-29-r35-profile-underwater.md)
   records 65 development / six release GPU cases, six browser cases and full
-  build/types. Owner visual gate remains pending; form its checkpoint before R36.
+  build/types. Owner visual gate remains pending independently of R36.
 
 - R34 technically complete: [plan](plans/2026-10-29-r34-globe-underwater.md) /
   [review](reviews/2026-10-29-r34-globe-underwater.md) / ADR-0199 extend finite

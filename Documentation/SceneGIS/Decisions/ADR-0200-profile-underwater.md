@@ -42,3 +42,5 @@ the domain only after its borrowers, preserving the caller-owned wind simulation
 Curved bathymetry and actual-wave caustics follow in a separate phase. Static
 geometry, local curvature approximation, finite resource ceilings and the previous
 wave-meniscus/translucent/multilayer limits remain explicit.
+
+The subsequent field contract and implementation are recorded in ADR-0201.

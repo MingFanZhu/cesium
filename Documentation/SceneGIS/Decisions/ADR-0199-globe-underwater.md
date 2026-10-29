@@ -31,7 +31,7 @@ submerged receivers when viewed from below. Normal and pick passes do not advanc
 additional simulation work.
 
 The caller authors a finite depth; opaque bottom geometry can truncate it earlier.
-Bathymetry and caustics remain local-only. Varying per-position heights and
+At this checkpoint bathymetry and caustics remain local-only. Varying per-position heights and
 RiverSurface volumes are explicit unsupported inputs; constant per-position levels
 may use the same volume. The bottom must remain above the curvature center.
 Wave-exact immersion, overlapping layers and translucent underwater objects retain

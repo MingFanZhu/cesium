@@ -23,9 +23,9 @@ function prepare(polygons) {
       const gy =
         ((b[0] - a[0]) * (c[2] - a[2]) - (c[0] - a[0]) * (b[2] - a[2])) / area;
       triangles.push({
-        a: a.slice(0, 3),
-        b: b.slice(0, 3),
-        c: c.slice(0, 3),
+        a: a.slice(),
+        b: b.slice(),
+        c: c.slice(),
         gx,
         gy,
         bounds: [
@@ -112,7 +112,7 @@ class SceneGISWaterDomain {
     });
   }
 
-  sample(x, y, result) {
+  sample(x, y, result, flow) {
     for (let i = 0; i < this.nodes.length;) {
       const node = this.nodes[i],
         b = node.bounds;
@@ -130,6 +130,18 @@ class SceneGISWaterDomain {
           result.x = t.a[2] + t.gx * (x - t.a[0]) + t.gy * (y - t.a[1]);
           result.y = t.gx;
           result.z = t.gy;
+          if (flow) {
+            const area = cross(t.a, t.b, t.c[0], t.c[1]);
+            const b = cross(t.c, t.a, x, y) / area;
+            const c = cross(t.a, t.b, x, y) / area;
+            const interpolate = (index) =>
+              t.a[index] +
+              b * (t.b[index] - t.a[index]) +
+              c * (t.c[index] - t.a[index]);
+            flow.x = interpolate(6);
+            flow.y = interpolate(7);
+            flow.z = interpolate(5);
+          }
           return true;
         }
       }

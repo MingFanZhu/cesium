@@ -71,6 +71,8 @@ function validate(river) {
  * @param {number} [options.foamWidth=0.3] Shallow contact foam depth range in meters.
  * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
  * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated river profile in meters. Zero disables underwater viewing. Up to 256 source shore segments and 1024 prepared triangles; curved optics use a local sphere approximation.
+ * @param {SceneGISWaterSurface.Bathymetry} [options.bathymetry] Explicit regional depth patch with an upright field-to-World modelMatrix.
+ * @param {number} [options.causticsIntensity=0] Actual-wave caustic strength in [0, 2]; requires bathymetry.
  * @param {number} [options.refractionStrength=0.2] Screen-space refraction distortion in [0, 1].
  * @param {boolean} [options.reflections=true] Whether to trace scene reflections.
  * @param {number} [options.maximumReflectionDistance=100] Maximum reflected ray length in meters.
@@ -140,6 +142,19 @@ function SceneGISRiverSurface(options = {}) {
 }
 
 Object.defineProperties(SceneGISRiverSurface.prototype, {
+  /**
+   * Actual-wave caustic strength in [0, 2]; requires explicit bathymetry.
+   * @memberof SceneGISRiverSurface.prototype
+   * @type {number}
+   */
+  causticsIntensity: {
+    get() {
+      return this._surface.causticsIntensity;
+    },
+    set(value) {
+      this._surface.causticsIntensity = value;
+    },
+  },
   /**
    * Finite vertical depth below the interpolated mean river profile, in meters. Zero disables underwater viewing.
    * @memberof SceneGISRiverSurface.prototype

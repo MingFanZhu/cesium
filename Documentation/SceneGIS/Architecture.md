@@ -1348,6 +1348,12 @@ RiverSurface 水下容积。CPU 和 GPU 共用原始准备三角形的固定 BVH
 仍复用既有 opaque 捕获和单次介质合成。Surface 独占共享的 profile texture，使用者借用，
 销毁顺序先释放使用者再释放域；最多 1024 源三角形与 256 源岸线段。曲面焦散另行扩展。
 
+[ADR-0201](Decisions/ADR-0201-regional-water-fields.md) 进一步支持曲面及双 World 河流焦散。
+调用方显式提供 upright field `modelMatrix` 和有限米制水深格网；引擎从原始水面准备水位、
+相位、切向和流向，直接复用同一套 wind/current FFT 的折射面积比。水上及水下共用
+eye-to-field 接收点变换和固定图，不依赖屏幕深度推断水底。场资源归 Surface，静态几何
+编辑需重建；相机移动不更新，暂停保持稳定。仍是局部投影近似，不新增 upstream seam。
+
 ## 风驱动湖面（R22）
 
 [ADR-0101](Decisions/ADR-0101-wind-water-spectrum.md) 在原有 WaterSurface 上增加可选的

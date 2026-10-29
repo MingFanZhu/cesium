@@ -33,8 +33,12 @@ void main()
     float startDepth = sceneGISWaterVolumeDepth(origin);
     float endDepth = max(sceneGISWaterVolumeDepth(end), 0.0);
     if (opaqueDistance <= distance && endDepth > 0.0) {
-        float footprint = max(length(dFdx(end.xy)), length(dFdy(end.xy)));
-        background *= sceneGISWaterCaustics(end.xy, -end.z, footprint, airCosine);
+        vec3 receiverEC = originEC + directionEC * distance;
+        vec3 receiver = sceneGISWaterFieldPoint(receiverEC);
+        float footprint = max(length(dFdx(receiver.xy)), length(dFdy(receiver.xy)));
+        vec3 receiverCross = cross(dFdx(receiverEC), dFdy(receiverEC));
+        float facing = abs(dot(receiverCross, up)) / max(length(receiverCross), 1e-8);
+        background *= mix(1.0, sceneGISWaterCaustics(receiver.xy, endDepth, footprint, airCosine), facing * facing);
     }
     vec3 color;
     if (u_mediumOptics) {

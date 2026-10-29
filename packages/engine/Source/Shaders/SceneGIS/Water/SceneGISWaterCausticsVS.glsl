@@ -1,22 +1,28 @@
 in vec2 position;
 uniform sampler2D u_bathymetry;
+#ifndef SCENEGIS_REGIONAL_FIELD
 uniform vec4 u_fieldRectangle;
+#endif
 uniform vec3 u_fieldLight;
 uniform float u_fieldSpacing;
 out float v_focus;
 out vec2 v_sourceUV;
 
-float bedDepth(vec2 p)
+float bedLevel(vec2 p)
 {
     vec2 size = vec2(textureSize(u_bathymetry, 0));
     vec2 uv = (p - u_fieldRectangle.xy) / u_fieldRectangle.zw;
-    return max(texture(u_bathymetry, (clamp(uv, 0.0, 1.0) * (size - 1.0) + 0.5) / size).r, 0.0);
+    float mean = 0.0;
+    #ifdef SCENEGIS_REGIONAL_FIELD
+    mean = textureLod(u_fieldSurface, sceneGISRegionalUV(p), 0.0).z;
+    #endif
+    return mean - max(textureLod(u_bathymetry, (clamp(uv, 0.0, 1.0) * (size - 1.0) + 0.5) / size, 0.0).r, 0.0);
 }
 vec3 projectBed(vec3 p, vec3 direction)
 {
     vec3 hit = p;
     for (int i = 0; i < 3; ++i) {
-        float travel = (p.z + bedDepth(hit.xy)) / max(-direction.z, 0.05);
+        float travel = (p.z - bedLevel(hit.xy)) / max(-direction.z, 0.05);
         hit = p + direction * max(travel, 0.0);
     }
     return hit;
@@ -24,6 +30,14 @@ vec3 projectBed(vec3 p, vec3 direction)
 void refractedPair(vec2 p, out vec3 source, out vec3 receiver)
 {
     vec3 displaced, normal;
+    #ifdef SCENEGIS_REGIONAL_FIELD
+    vec3 mean, meanNormal;
+    sceneGISRegionalWave(p, u_fieldSpacing, false, mean, meanNormal);
+    sceneGISRegionalWave(p, u_fieldSpacing, true, displaced, normal);
+    vec3 light = normalize(u_fieldLight);
+    source = projectBed(mean, refract(-light, meanNormal, 1.0 / 1.333));
+    receiver = projectBed(displaced, refract(-light, normal, 1.0 / 1.333));
+    #else
     sceneGISWaterFieldWave(p, u_fieldSpacing, displaced, normal);
     #ifdef SCENEGIS_WIND_WAVES
     vec2 size = vec2(textureSize(u_bathymetry, 0));
@@ -35,6 +49,7 @@ void refractedPair(vec2 p, out vec3 source, out vec3 receiver)
     vec3 light = normalize(u_fieldLight);
     source = projectBed(vec3(p, 0.0), refract(-light, vec3(0.0, 0.0, 1.0), 1.0 / 1.333));
     receiver = projectBed(displaced, refract(-light, normal, 1.0 / 1.333));
+    #endif
 }
 void main()
 {

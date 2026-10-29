@@ -132,3 +132,7 @@ It adds one foam draw and, while caustics
 are enabled, one mesh draw plus clear/mipmap generation on changed simulation or
 lighting state. Camera movement alone does not update these fields. A frozen
 simulation does not consume settling frames. All resources are primitive-owned.
+
+ADR-0201 subsequently extends this field to regional ellipsoid water and directed
+rivers using an explicit upright authoring frame and original-profile sampling.
+The local descriptor and ownership remain unchanged.

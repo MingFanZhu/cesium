@@ -123,6 +123,7 @@ const settings = {
   maximumTileCount: 256,
   showProfile: false,
   underwater: true,
+  caustics: 1,
 };
 const gui = new GUI({
   title: planar ? "平面河流" : "球面河流",
@@ -170,6 +171,20 @@ function rebuild() {
       maximumTileCount: settings.maximumTileCount,
       show: settings.show,
       underwaterDepth: settings.underwater ? 6 : 0,
+      bathymetry: {
+        modelMatrix: planar
+          ? C.Matrix4.fromTranslation(
+              point(profile[9].x, profile[9].y, profile[9].z),
+            )
+          : C.Transforms.eastNorthUpToFixedFrame(
+              point(profile[9].x, profile[9].y, profile[9].z),
+            ),
+        rectangle: new C.BoundingRectangle(-24, -24, 48, 48),
+        width: 257,
+        height: 257,
+        depths: new Float32Array(257 * 257).fill(3 + settings.level),
+      },
+      causticsIntensity: settings.caustics,
       reflectionSteps: 32,
     }),
   );
@@ -300,7 +315,7 @@ function setCamera(range, pitch, targetX = 0) {
   scene.camera.frustum.near = 0.1;
 }
 function viewAt(name) {
-  if (name === "水下顺流" || name === "水下仰视") {
+  if (name === "水下顺流" || name === "水下仰视" || name === "水下焦散") {
     const p = profile[9],
       destination = point(p.x, p.y, p.z + settings.level - 0.8);
     const frame = planar
@@ -309,7 +324,11 @@ function viewAt(name) {
     const slope =
       (profile[10].y - profile[8].y) / (profile[10].x - profile[8].x);
     const direction = C.Cartesian3.normalize(
-      new C.Cartesian3(1, slope, name === "水下仰视" ? 1 : -0.08),
+      new C.Cartesian3(
+        1,
+        slope,
+        name === "水下仰视" ? 1 : name === "水下焦散" ? -0.65 : -0.08,
+      ),
       new C.Cartesian3(),
     );
     scene.camera.setView({
@@ -350,10 +369,17 @@ gui
     "高空",
     "水下顺流",
     "水下仰视",
+    "水下焦散",
   ])
   .name("观察位置")
   .onChange(viewAt);
 gui.add(settings, "wind").name("叠加 FFT 风浪").onChange(rebuild);
+gui
+  .add(settings, "caustics", 0, 2, 0.1)
+  .name("焦散强度")
+  .onChange((value) => {
+    river.causticsIntensity = value;
+  });
 gui
   .add(settings, "underwater")
   .name("水下模式")

@@ -1085,9 +1085,9 @@ FFT 风浪。预设是外观演示，不代表实测水质。示例使用固定�
 | 曲面长河           | 河水     | 0.5 m / 0.2     | 0.12 / 1.5 s                   |
 | 河流水面           | 河水     | 0.5 m / 0.2     | 0.08 / 1.5 s（默认不叠加风浪） |
 
-这三个示例仍采用屏幕深度接触岸沫，未提供固定水深场或启用焦散。
-曲面大湖额外提供水下模式及显式示意湖底；玄武湖与变水位河流未启用水下介质。
-局部水面的固定水深场演示保持独立。
+曲面河湖和河流水面示例提供显式局部水深场、焦散与水下模式；玄武湖仍采用屏幕深度接触岸沫。
+曲面湖泊的“浅水焦散 / 浅水俯视”及双 World 河流的“水下焦散”用于近景验收。
+局部水面的固定水深场演示保持独立。焦散区域外不应用固定场效果。
 
 局部 `SceneGISWaterSurface` 可额外配置：
 
@@ -1108,7 +1108,7 @@ const water = new Cesium.SceneGISWaterSurface({
 ```
 
 - `underwaterDepth`：平均水面下的有限容积深度，默认 0 关闭。支持平面和球面 ENU 的
-  local 水面，以及恒定椭球高的 ellipsoid 水面；凹轮廓及孔洞总边数不超过 256。
+  local 水面、ellipsoid 水面及双 World 变水位 RiverSurface；源岸线总边数不超过 256。
   相机在容积内才启用。真实 opaque 水底会
   提前截断视线。当前按平均水位判断浸没，不包含波浪逐像素浸没和弯月面。
 - `bathymetry`：可选、构造时复制的固定水深场。width/height 为 2–1024 的整数；
@@ -1130,8 +1130,7 @@ const water = new Cesium.SceneGISWaterSurface({
   焦散图独立于泡沫分辨率，为泡沫场尺寸的两倍，限制在 256–512；折射网格为焦散图尺寸的一半。
   顶点聚光强度连续插值，放大时采用三次 B-spline 重建，缩小时采用 mipmap，避免近景块状接缝。
   256 水深场示例启用焦散约占每个水面 6.67 MiB 的场纹理和网格；只用岸沫不创建焦散资源。
-- `bathymetry` 和 `causticsIntensity` 只支持 local 模式。区域曲面水下模式见下节；
-  RiverSurface、半透明水下物体和多层重叠水域暂不在资格内。
+- 区域曲面及 RiverSurface 使用下面的显式坐标入口；半透明水下物体和多层重叠水域暂不在资格内。
   移除水面会释放深度场、泡沫历史、焦散图和水下程序；风浪仍归调用方。
 
 算法、资源成本及参考实现见 ADR-0195、ADR-0196。新增水下视角与焦散有独立的 GUI 开关。
@@ -1236,8 +1235,59 @@ GPU 光程采用随相机重定位的曲率球壳，球形 Globe 上精确，扁
 仍按平均水位判断浸没，不包含随波浪变化的弯月面。`perPositionHeight: true` 时，水下深度
 沿原始 chart 三角形的插值水位向下量取，不取最低水位，也不依赖当前相机 LOD。
 源岸线总计最多 256 段，变水位容积最多 1024 个准备后的三角形；超出预算会报错。
-曲面 bathymetry 和焦散在后续阶段扩展；水深不会从地形或屏幕深度隐式推导。
-接口与资格见 ADR-0199、ADR-0200。
+水深不会从地形或屏幕深度隐式推导。接口与资格见 ADR-0199、ADR-0200。
+
+曲面湖泊、变水位曲面及 `SceneGISRiverSurface` 共用 `bathymetry` / `causticsIntensity`。
+区域模式必须给水深场增加 `modelMatrix`：Globe 用场中心的 ENU（可绕 Z 旋转），Planar
+用 World Z 向上的刚性变换。禁止缩放、倾斜；rectangle 的 X/Y 坐标均须在 ±4096 m 内。
+格点深度沿该 frame 的 -Z，从该格点的**实际插值平均水面**向下量取。它不是相对 frame
+原点的绝对高程。正值湿、零或负值干；数据、frame、轮廓在构造时复制，变更后需重建。
+
+```js
+const bathymetry = {
+  modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(
+    Cesium.Cartesian3.fromDegrees(118.551, 31.85, 30),
+  ),
+  rectangle: new Cesium.BoundingRectangle(-24, -24, 48, 48),
+  width: 257,
+  height: 257,
+  depths: new Float32Array(257 * 257).fill(3), // Explicit demonstration bed.
+};
+const lake = scene.primitives.add(
+  new Cesium.SceneGISWaterSurface({
+    geometryMode: "ellipsoid",
+    polygonHierarchy,
+    height: 30,
+    windWaves: waves,
+    underwaterDepth: 10,
+    bathymetry,
+    causticsIntensity: 1,
+  }),
+);
+// RiverSurface accepts the same three options in Globe or Planar:
+const river = scene.primitives.add(
+  new Cesium.SceneGISRiverSurface({
+    world: scene.world,
+    positions,
+    widths,
+    speeds,
+    underwaterDepth: 10,
+    bathymetry: riverBathymetry,
+    causticsIntensity: 1,
+  }),
+);
+```
+
+引擎从原始源三角形准备固定水位、chart 相位、法线和流向图，不读取当前 LOD。
+风浪相位与水面分块保持周期一致，河流使用同一套沿流向输运的 FFT；水下和水上接收点
+统一变换到 field frame。相机移动不重建焦散，暂停复用，光照/波浪变化才更新。
+固定网格最多支持 1024 个源三角形；孔洞和河道 mask 保持源几何约束。
+区域网格还拥有两张 RGBA32F 准备图，河流另有一张流向图；257² 示例场纹理约
+6.70 MiB（湖）/ 7.71 MiB（河），不含折射网格、原始 profile 表、FFT 和场景捕获。
+48 m 示例的网格间距约 0.1875 m；用同样分辨率覆盖公里范围会滤掉细小焦散。
+这是有限局部切向水深场和 opaque 接收面的近似光照投影，不能代替精确全局光传输。
+移除图元释放全部 field；风浪仍须在所有借用图元移除后、Scene 销毁前销毁。
+验证入口 `playwright.water-caustics.config.mjs` 与 `SceneGISRegionalWaterField`；决策见 ADR-0201。
 
 网格按 16×16 单元分块，结合约 8 个绘制缓冲像素的单元尺度及
 `maximumScreenSpaceError` 曲率目标自动细分。`meshSpacing` 是最小间距，

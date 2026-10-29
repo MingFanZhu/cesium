@@ -5,6 +5,13 @@ uniform bool u_hasWaterField;
 uniform vec4 u_fieldRectangle;
 uniform sampler2D u_causticsMap;
 uniform sampler2D u_shoreFoam;
+uniform sampler2D u_bathymetry;
+uniform mat4 u_eyeToField;
+
+vec3 sceneGISWaterFieldPoint(vec3 eye)
+{
+    return (u_eyeToField * vec4(eye, 1.0)).xyz;
+}
 
 // Cubic B-spline reconstruction using four bilinear taps (GPU Gems 2, ch. 20).
 // Restrict it to magnification; ordinary trilinear mip filtering handles distance.
@@ -37,6 +44,9 @@ float sceneGISWaterCaustics(vec2 p, float depth, float footprint, float sunCosin
     if (!u_hasWaterField || u_causticsIntensity == 0.0 || depth <= 0.0) { return 1.0; }
     vec2 uv = (p - u_fieldRectangle.xy) / u_fieldRectangle.zw;
     if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) { return 1.0; }
+    vec2 size = vec2(textureSize(u_bathymetry, 0));
+    vec2 bed = texture(u_bathymetry, (uv * (size - 1.0) + 0.5) / size).rg;
+    if (bed.x <= 0.0 || bed.y < 0.5) { return 1.0; }
     float focus = sceneGISWaterFocus(uv, footprint);
     float visibility = exp(-depth * 0.12) * smoothstep(0.0, 0.3, sunCosine);
     return max(0.0, 1.0 + (clamp(focus, 0.0, 8.0) - 1.0) * u_causticsIntensity * 0.5 * visibility);

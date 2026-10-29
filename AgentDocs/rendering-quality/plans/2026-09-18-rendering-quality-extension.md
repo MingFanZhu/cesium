@@ -37,14 +37,17 @@ Each phase requires technical review and a separate local commit before the next
 The owner requests both curved-water caustics and variable-level river underwater
 viewing after R34 checkpoint `f15b53ade7`. Deliver in dependency order:
 
-- R35 active: [profile-aware underwater volumes](2026-10-29-r35-profile-underwater.md).
+- R35 completed at `68d879be82`: [profile-aware underwater volumes](2026-10-29-r35-profile-underwater.md).
   Reuse original prepared height triangles for both CPU immersion and GPU ray clipping.
   Qualify per-position ellipsoid water and directed RiverSurface in both Worlds,
   retaining actual corridor/mask boundaries, finite depth and resource ownership.
-- R36 pending, after the R35 checkpoint: curved bathymetry and actual-wave caustics,
+- R36 technically complete after that checkpoint: [regional bathymetry and actual-wave caustics](2026-10-29-r36-regional-caustics.md),
   shared by above/below views. Define the explicit public bed-coordinate contract
   from the completed profile representation; preserve camera-independent fields,
   pause and bounded texture/projection budgets. No implicit depth capture or SDK work.
+
+R36 [review](../reviews/2026-10-29-r36-regional-caustics.md) records the completed
+technical gate; owner visual acceptance remains pending and no next phase is active.
 
 Each stage requires numerical/rendering/lifecycle tests, representative pictures,
 bounded performance evidence and its own local checkpoint. Existing independent

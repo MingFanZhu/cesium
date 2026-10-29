@@ -29,7 +29,7 @@ float sceneGISWaterFoamDensity(float depth)
 {
     if (u_foamWidth == 0.0 || u_foamIntensity == 0.0) { return 0.0; }
     if (u_hasWaterField) {
-        vec2 uv = (v_waterPosition - u_fieldRectangle.xy) / u_fieldRectangle.zw;
+        vec2 uv = (sceneGISWaterFieldPoint(v_positionEC).xy - u_fieldRectangle.xy) / u_fieldRectangle.zw;
         if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) { return 0.0; }
         return texture(u_shoreFoam, uv).r;
     }
@@ -155,17 +155,15 @@ void main()
         pathLength = length(bottom - v_positionEC);
     }
     vec4 background = textureLod(u_color, refractedUV, 0.0);
-    #ifndef SCENEGIS_CURVED_WATER
     if (hasBottom && u_causticsIntensity > 0.0) {
-        vec3 receiver = (czm_inverseModelView * vec4(bottom, 1.0)).xyz;
+        vec3 receiver = sceneGISWaterFieldPoint(bottom);
         float pixelSize = max(length(dFdx(receiver.xy)), length(dFdy(receiver.xy)));
         vec3 receiverCross = cross(dFdx(bottom), dFdy(bottom));
         float facing = abs(dot(receiverCross, up)) / max(length(receiverCross), 1e-8);
-        float focusing = sceneGISWaterCaustics(receiver.xy, max(-receiver.z, 0.0), pixelSize,
+        float focusing = sceneGISWaterCaustics(receiver.xy, max(dot(v_positionEC - bottom, up), 0.0), pixelSize,
             max(dot(up, czm_lightDirectionEC), 0.0));
         background.rgb *= mix(1.0, focusing, facing * facing);
     }
-    #endif
     vec3 water;
     if (u_mediumOptics) {
         vec3 light = normalize(czm_lightDirectionEC);
@@ -214,7 +212,7 @@ void main()
     #ifdef SCENEGIS_CURVED_WATER
     foamPosition += u_waterFoamOffset;
     #endif
-    if (u_hasWaterField) { foamPosition = v_waterPosition - u_shoreFoamOffset; }
+    if (u_hasWaterField) { foamPosition = sceneGISWaterFieldPoint(v_positionEC).xy - u_shoreFoamOffset; }
     foam = max(foam, smoothstep(0.04, 0.65, crestFoam));
     // Evaluate derivatives before nonuniform coverage branches for stable mip selection.
     vec2 foamDx = dFdx(v_waterPosition), foamDy = dFdy(v_waterPosition);

@@ -29,6 +29,9 @@ import foamShader from "../../../Shaders/SceneGIS/Water/SceneGISWaterFieldFS.js"
 import wavesShader from "../../../Shaders/SceneGIS/Water/SceneGISWaterFieldWaves.js";
 import causticsVS from "../../../Shaders/SceneGIS/Water/SceneGISWaterCausticsVS.js";
 import causticsFS from "../../../Shaders/SceneGIS/Water/SceneGISWaterCausticsFS.js";
+import riverFlow from "../../../Shaders/SceneGIS/Water/SceneGISRiverFlow.js";
+import regionalShader from "../../../Shaders/SceneGIS/Water/SceneGISWaterRegionalField.js";
+import RegionalField from "./_SceneGISWaterRegionalField.js";
 
 const linear = new Sampler({
   minificationFilter: TextureMinificationFilter.LINEAR,
@@ -124,7 +127,7 @@ function createTarget(context, size) {
 
 /** Surface-owned, camera-independent bathymetry, shallow foam and refracted caustics. @private */
 class SceneGISWaterField {
-  constructor(options, hierarchy) {
+  constructor(options, hierarchy, mesh, domain) {
     const { width, height, depths, rectangle: r } = options;
     if (
       !Number.isInteger(width) ||
@@ -148,6 +151,12 @@ class SceneGISWaterField {
     this.rectangle = new Cartesian4(r.x, r.y, r.width, r.height);
     this.width = width;
     this.height = height;
+    this.regional = mesh ? new RegionalField(options, mesh, domain) : undefined;
+    if (!mesh && options.modelMatrix !== undefined) {
+      throw new DeveloperError(
+        "Local bathymetry uses the water modelMatrix; do not supply a separate field frame.",
+      );
+    }
     this.data = new Float32Array(width * height * 4);
     const shore = shorelineDistances(
       depths,
@@ -165,7 +174,7 @@ class SceneGISWaterField {
       r.height / (height - 1),
       false,
     );
-    const edges = segments(hierarchy);
+    const edges = mesh ? [] : segments(hierarchy);
     for (let y = 0; y < height; ++y) {
       for (let x = 0; x < width; ++x) {
         const px = r.x + (x / (width - 1)) * r.width,
@@ -185,10 +194,14 @@ class SceneGISWaterField {
           }
         }
         const i = (y * width + x) * 4;
+        if (this.regional) {
+          inside = this.regional.surface[i + 3] > 0;
+        }
         this.data[i] = depths[y * width + x];
         this.data[i + 1] = inside ? 1 : 0;
         const fade = Math.min(1, Math.sqrt(shoreDistance) / 4);
-        this.data[i + 2] = fade * fade * (3 - 2 * fade);
+        this.data[i + 2] =
+          this.regional?.tangent[i + 2] ?? fade * fade * (3 - 2 * fade);
         this.data[i + 3] =
           depths[y * width + x] <= 0
             ? -water[y * width + x]
@@ -196,6 +209,7 @@ class SceneGISWaterField {
       }
     }
     this.inverse = new Matrix4();
+    this.eyeToField = new Matrix4();
     this.light = new Cartesian3();
     this.transport = new Cartesian2();
     this.offset = new Cartesian2();
@@ -219,6 +233,25 @@ class SceneGISWaterField {
         arrayBufferView: this.data,
       },
     });
+    if (this.regional) {
+      for (const name of ["surface", "tangent", "flow"]) {
+        if (!this.regional[name]) {
+          continue;
+        }
+        this[`${name}Map`] = new Texture({
+          context,
+          flipY: false,
+          pixelFormat: PixelFormat.RGBA,
+          pixelDatatype: PixelDatatype.FLOAT,
+          sampler: linear,
+          source: {
+            width: this.width,
+            height: this.height,
+            arrayBufferView: this.regional[name],
+          },
+        });
+      }
+    }
     this.size = Math.min(512, Math.max(this.width, this.height));
     this.causticsSize = Math.min(512, Math.max(256, this.size * 2));
     this.gridSize = this.causticsSize / 2;
@@ -246,6 +279,18 @@ class SceneGISWaterField {
       u_fieldLight: () => this.light,
       u_fieldSpacing: () =>
         Math.max(this.rectangle.z, this.rectangle.w) / this.gridSize,
+      u_fieldSurface: () => this.surfaceMap,
+      u_fieldTangent: () => this.tangentMap,
+      u_fieldFlow: () => this.flowMap,
+      u_fieldChartOrigin: () => this.regional.chartOrigin,
+      u_fieldWindOrigin: () => {
+        const period = surface._windWaves.patchLength * 4;
+        const { chartOrigin, windOrigin } = this.regional;
+        windOrigin.x = ((chartOrigin.x % period) + period) % period;
+        windOrigin.y = ((chartOrigin.y % period) + period) % period;
+        return windOrigin;
+      },
+      u_fieldEast: () => this.regional.east,
     };
     this.foamCommand = context.createViewportQuadCommand(foamShader, {
       owner: this,
@@ -299,8 +344,14 @@ class SceneGISWaterField {
         context,
         attributeLocations: { position: 0 },
         vertexShaderSource: new ShaderSource({
-          defines: surface._windWaves ? ["SCENEGIS_WIND_WAVES"] : [],
-          sources: [wavesShader, causticsVS],
+          defines: [
+            ...(surface._windWaves ? ["SCENEGIS_WIND_WAVES"] : []),
+            ...(this.regional ? ["SCENEGIS_REGIONAL_FIELD"] : []),
+            ...(surface._river
+              ? ["SCENEGIS_RIVER_WATER", "SCENEGIS_RIVER_VERTEX"]
+              : []),
+          ],
+          sources: [wavesShader, riverFlow, regionalShader, causticsVS],
         }),
         fragmentShaderSource: causticsFS,
       }),
@@ -331,7 +382,10 @@ class SceneGISWaterField {
     if (!this.bed) {
       this.create(surface, context);
     }
-    Matrix4.inverseTransformation(surface.modelMatrix, this.inverse);
+    Matrix4.inverseTransformation(
+      this.regional?.modelMatrix ?? surface.modelMatrix,
+      this.inverse,
+    );
     Matrix4.multiplyByPointAsVector(
       this.inverse,
       context.uniformState.lightDirectionWC,
@@ -353,6 +407,13 @@ class SceneGISWaterField {
       this.light.y,
       this.light.z,
       ...(surface._windWaves?._state.config ?? []),
+      ...(surface._river
+        ? [
+            surface._river.currentSpeedScale,
+            surface._river.currentRippleAmplitude,
+            surface._river.currentRippleLength,
+          ]
+        : []),
     ];
     if (this.config && config.every((v, i) => v === this.config[i])) {
       return;
@@ -360,6 +421,17 @@ class SceneGISWaterField {
     this.reset = !this.config || surface._time < this.config[0];
     this.delta = this.reset ? 0 : surface._time - this.config[0];
     Cartesian2.normalize(direction, this.transport);
+    if (this.regional) {
+      const { east } = this.regional;
+      const x = this.transport.x,
+        y = this.transport.y;
+      Cartesian2.fromElements(
+        east.x * x - east.y * y,
+        east.y * x + east.x * y,
+        this.transport,
+      );
+      Cartesian2.normalize(this.transport, this.transport);
+    }
     Cartesian2.multiplyByScalar(
       this.transport,
       (surface._windWaves?.windSpeed ?? surface.flowSpeed) * 0.03,
@@ -385,6 +457,9 @@ class SceneGISWaterField {
 
   destroy() {
     this.bed?.destroy();
+    this.surfaceMap?.destroy();
+    this.tangentMap?.destroy();
+    this.flowMap?.destroy();
     this.foam?.forEach((f) => f.destroy());
     this.caustics?.destroy();
     this.foamCommand?.shaderProgram.destroy();
