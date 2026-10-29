@@ -122,6 +122,7 @@ const settings = {
   show: true,
   maximumTileCount: 256,
   showProfile: false,
+  underwater: true,
 };
 const gui = new GUI({
   title: planar ? "平面河流" : "球面河流",
@@ -168,6 +169,7 @@ function rebuild() {
       currentFoamIntensity: settings.currentFoamIntensity,
       maximumTileCount: settings.maximumTileCount,
       show: settings.show,
+      underwaterDepth: settings.underwater ? 6 : 0,
       reflectionSteps: 32,
     }),
   );
@@ -298,6 +300,36 @@ function setCamera(range, pitch, targetX = 0) {
   scene.camera.frustum.near = 0.1;
 }
 function viewAt(name) {
+  if (name === "水下顺流" || name === "水下仰视") {
+    const p = profile[9],
+      destination = point(p.x, p.y, p.z + settings.level - 0.8);
+    const frame = planar
+      ? C.Matrix4.IDENTITY
+      : C.Transforms.eastNorthUpToFixedFrame(destination);
+    const slope =
+      (profile[10].y - profile[8].y) / (profile[10].x - profile[8].x);
+    const direction = C.Cartesian3.normalize(
+      new C.Cartesian3(1, slope, name === "水下仰视" ? 1 : -0.08),
+      new C.Cartesian3(),
+    );
+    scene.camera.setView({
+      destination,
+      orientation: {
+        direction: C.Matrix4.multiplyByPointAsVector(
+          frame,
+          direction,
+          new C.Cartesian3(),
+        ),
+        up: C.Matrix4.multiplyByPointAsVector(
+          frame,
+          C.Cartesian3.UNIT_Z,
+          new C.Cartesian3(),
+        ),
+      },
+    });
+    scene.camera.frustum.near = 0.1;
+    return;
+  }
   const poses = {
     水面近景: [180, -0.16],
     浪面特写: [60, -0.08, 150],
@@ -316,10 +348,18 @@ gui
     "全河鸟瞰",
     "低角度远眺",
     "高空",
+    "水下顺流",
+    "水下仰视",
   ])
   .name("观察位置")
   .onChange(viewAt);
 gui.add(settings, "wind").name("叠加 FFT 风浪").onChange(rebuild);
+gui
+  .add(settings, "underwater")
+  .name("水下模式")
+  .onChange((value) => {
+    river.underwaterDepth = value ? 6 : 0;
+  });
 gui
   .add(settings, "level", -2, 3, 0.1)
   .name("整体水位偏移 m")

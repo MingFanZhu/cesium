@@ -16,11 +16,13 @@ import optics from "../../../Shaders/SceneGIS/Water/SceneGISWaterOptics.js";
 import effects from "../../../Shaders/SceneGIS/Water/SceneGISWaterEffects.js";
 import fragment from "../../../Shaders/SceneGIS/Water/SceneGISUnderwaterFS.js";
 import volume from "../../../Shaders/SceneGIS/Water/SceneGISUnderwaterVolume.js";
+import profile from "../../../Shaders/SceneGIS/Water/SceneGISWaterProfile.js";
+import polynomial from "../../../Shaders/SceneGIS/Water/SceneGISWaterPolynomial.js";
 import EnvironmentLighting from "./_SceneGISModelEnvironmentLighting.js";
 
 /** Finite local or regional curved medium, without full-resolution targets. @private */
 class SceneGISUnderwater {
-  constructor(hierarchy, mesh) {
+  constructor(hierarchy, mesh, domain) {
     const edges = [];
     function visit(ring) {
       const p = ring.positions;
@@ -31,7 +33,13 @@ class SceneGISUnderwater {
       }
       ring.holes?.forEach(visit);
     }
-    visit(hierarchy);
+    if (domain) {
+      for (const [a, b] of mesh.root.shores) {
+        edges.push(a.x, a.y, b.x, b.y);
+      }
+    } else {
+      visit(hierarchy);
+    }
     if (edges.length > 256 * 4) {
       throw new DeveloperError(
         "Underwater volumes support at most 256 boundary segments.",
@@ -43,6 +51,9 @@ class SceneGISUnderwater {
     this.waterToEye = new Matrix3();
     this.camera = new Cartesian3();
     this.mesh = mesh;
+    this.domain = domain;
+    this.profile = new Cartesian3();
+    this.profileRange = new Cartesian2();
     if (mesh) {
       this.height = mesh.root.minHeight;
       this.radius = mesh.radius + this.height;
@@ -62,27 +73,45 @@ class SceneGISUnderwater {
   }
 
   update(surface, frameState) {
+    let altitude;
     if (this.mesh) {
       const { ellipsoid, chart } = this.mesh;
-      const c = ellipsoid.cartesianToCartographic(
-        frameState.camera.positionWC,
-        this.cartographic,
-      );
-      if (!c) {
-        this.active = false;
-        return;
+      if (ellipsoid) {
+        const c = ellipsoid.cartesianToCartographic(
+          frameState.camera.positionWC,
+          this.cartographic,
+        );
+        if (!c) {
+          this.active = false;
+          return;
+        }
+        const n = ellipsoid.geodeticSurfaceNormalCartographic(c, this.normal);
+        const denominator = Cartesian3.dot(n, chart.up);
+        if (denominator <= 0) {
+          this.active = false;
+          return;
+        }
+        this.camera.x =
+          (chart.radius * Cartesian3.dot(n, chart.east)) / denominator;
+        this.camera.y =
+          (chart.radius * Cartesian3.dot(n, chart.north)) / denominator;
+        altitude = c.height;
+      } else {
+        this.camera.x = frameState.camera.positionWC.x - chart.origin.x;
+        this.camera.y = frameState.camera.positionWC.y - chart.origin.y;
+        altitude = frameState.camera.positionWC.z;
       }
-      const n = ellipsoid.geodeticSurfaceNormalCartographic(c, this.normal);
-      const denominator = Cartesian3.dot(n, chart.up);
-      if (denominator <= 0) {
-        this.active = false;
-        return;
+      if (this.domain) {
+        if (!this.domain.sample(this.camera.x, this.camera.y, this.profile)) {
+          this.active = false;
+          return;
+        }
+        this.height = this.profile.x;
+        this.radius = this.mesh.radius + this.height;
+        this.profileRange.x = this.domain.minimum - this.height;
+        this.profileRange.y = this.domain.maximum - this.height;
       }
-      this.camera.x =
-        (chart.radius * Cartesian3.dot(n, chart.east)) / denominator;
-      this.camera.y =
-        (chart.radius * Cartesian3.dot(n, chart.north)) / denominator;
-      this.camera.z = c.height - this.height;
+      this.camera.z = altitude - this.height;
     } else {
       Matrix4.inverseTransformation(surface.modelMatrix, this.inverse);
       Matrix4.multiplyByPoint(
@@ -93,8 +122,8 @@ class SceneGISUnderwater {
     }
     const p = this.camera,
       e = this.edges;
-    let inside = false;
-    for (let i = 0; i < e.length; i += 4) {
+    let inside = !!this.domain;
+    for (let i = 0; !this.domain && i < e.length; i += 4) {
       const ax = e[i],
         ay = e[i + 1],
         bx = e[i + 2],
@@ -113,16 +142,26 @@ class SceneGISUnderwater {
       p.z < 0 &&
       p.z > -surface.underwaterDepth;
     if (this.active && this.mesh) {
-      this.cartographic.height = this.height;
-      this.mesh.ellipsoid.cartographicToCartesian(
-        this.cartographic,
-        this.anchor,
-      );
-      Transforms.eastNorthUpToFixedFrame(
-        this.anchor,
-        this.mesh.ellipsoid,
-        this.transform,
-      );
+      if (this.mesh.ellipsoid) {
+        this.cartographic.height = this.height;
+        this.mesh.ellipsoid.cartographicToCartesian(
+          this.cartographic,
+          this.anchor,
+        );
+        Transforms.eastNorthUpToFixedFrame(
+          this.anchor,
+          this.mesh.ellipsoid,
+          this.transform,
+        );
+      } else {
+        Cartesian3.fromElements(
+          this.mesh.chart.origin.x,
+          this.mesh.chart.origin.y,
+          this.height,
+          this.anchor,
+        );
+        Matrix4.fromTranslation(this.anchor, this.transform);
+      }
       Matrix4.inverseTransformation(this.transform, this.inverse);
       Matrix3.multiply(
         this.worldToChart,
@@ -139,6 +178,7 @@ class SceneGISUnderwater {
       return;
     }
     const context = scene.context;
+    this.domain?.create(context);
     this.texture ??= new Texture({
       context,
       pixelFormat: PixelFormat.RGBA,
@@ -161,10 +201,21 @@ class SceneGISUnderwater {
       if (mode !== "none") {
         source.defines.push("SCENEGIS_WATER_PHYSICAL");
       }
-      if (this.mesh) {
+      if (this.mesh?.ellipsoid) {
         source.defines.push("SCENEGIS_ELLIPSOID_UNDERWATER");
       }
-      source.sources.push(ray, optics, effects, volume, fragment);
+      if (this.domain) {
+        source.defines.push("SCENEGIS_PROFILE_WATER");
+      }
+      source.sources.push(
+        ray,
+        optics,
+        effects,
+        profile,
+        polynomial,
+        volume,
+        fragment,
+      );
       this.command = context.createViewportQuadCommand(source, {
         owner: this,
         renderState: RenderState.fromCache({
@@ -181,6 +232,10 @@ class SceneGISUnderwater {
           u_chartRadius: () => this.mesh.radius,
           u_waterToChart: () => this.waterToChart,
           u_chartCamera: () => this.chartCamera,
+          u_waterProfile: () => this.domain.texture,
+          u_profileNodeCount: () => this.domain.nodes.length,
+          u_profileAnchor: () => this.height - this.domain.reference,
+          u_profileRange: () => this.profileRange,
         },
       });
       this.mode = mode;

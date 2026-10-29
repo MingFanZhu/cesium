@@ -38,3 +38,11 @@ Wave-exact immersion, overlapping layers and translucent underwater objects reta
 ADR-0196's limits. Edge texture and shader belong to the water primitive and are
 released with it; shared opaque inputs and borrowed wind simulation keep their
 existing owners. Disabled defaults allocate no volume resources.
+
+## Subsequent profile qualification
+
+[ADR-0200](ADR-0200-profile-underwater.md) subsequently extends the same option to
+varying per-position ellipsoid surfaces and directed Globe/Planar RiverSurface.
+The original constant-height path remains; curved bathymetry/caustics follow in a
+separate stage. The exclusions above describe the R34 checkpoint, not a permanent
+prohibition of the later profile extension.

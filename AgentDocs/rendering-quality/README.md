@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R34 technically complete; owner visual gate pending                                                      |
-| Active phase plan      | None; last: [R34](plans/2026-10-29-r34-globe-underwater.md)                                              |
+| Current phase          | R35 profile-aware underwater volumes                                                                     |
+| Active phase plan      | [R35](plans/2026-10-29-r35-profile-underwater.md)                                                        |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
@@ -34,6 +34,15 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- R35 active after R34 checkpoint `f15b53ade7`: owner requests variable-level
+  river underwater viewing and curved caustics. [R35](plans/2026-10-29-r35-profile-underwater.md)
+  first adds the authoritative prepared profile and ray clipping; R36 curved
+  bathymetry/caustics follows only after its independent checkpoint. No SDK work.
+
+  R35 technical gate is complete; [review](reviews/2026-10-29-r35-profile-underwater.md)
+  records 65 development / six release GPU cases, six browser cases and full
+  build/types. Owner visual gate remains pending; form its checkpoint before R36.
 
 - R34 technically complete: [plan](plans/2026-10-29-r34-globe-underwater.md) /
   [review](reviews/2026-10-29-r34-globe-underwater.md) / ADR-0199 extend finite

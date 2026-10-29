@@ -1342,6 +1342,12 @@ opaque 后、透明物体前执行；凹轮廓、孔洞、容积底和 opaque �
 沿用 R25 的局部光学近似。共用原来的单次介质合成与反射输入，不增加 framebuffer、原生缝隙或回读。
 变水位曲面、RiverSurface 容积、曲面 bathymetry/焦散和多层介质仍不在资格内。
 
+[ADR-0200](Decisions/ADR-0200-profile-underwater.md) 后续支持变水位曲面及 Globe / Planar
+RiverSurface 水下容积。CPU 和 GPU 共用原始准备三角形的固定 BVH，不读取当前 LOD；
+垂直水深跟随实际插值河面，河道与 mask 取交集。平面光程解析裁剪，曲面用有界多项式求交；
+仍复用既有 opaque 捕获和单次介质合成。Surface 独占共享的 profile texture，使用者借用，
+销毁顺序先释放使用者再释放域；最多 1024 源三角形与 256 源岸线段。曲面焦散另行扩展。
+
 ## 风驱动湖面（R22）
 
 [ADR-0101](Decisions/ADR-0101-wind-water-spectrum.md) 在原有 WaterSurface 上增加可选的

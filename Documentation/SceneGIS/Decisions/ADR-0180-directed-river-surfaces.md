@@ -84,3 +84,8 @@ This is single-reach above-water visual rendering. Confluences, branches, waterf
 hydrodynamics, terrain excavation, global oceans and geoid conversion are excluded.
 Runtime profile editing requires replacement; material/current scale controls are warm
 uniform edits. Synchronous mesh construction and screen-space optical limits remain.
+
+[ADR-0200](ADR-0200-profile-underwater.md) adds opt-in finite underwater viewing via
+`underwaterDepth`, following the original interpolated profile in either World.
+This extends the initial above-water qualification without changing hydraulic or
+geometry-editing scope.

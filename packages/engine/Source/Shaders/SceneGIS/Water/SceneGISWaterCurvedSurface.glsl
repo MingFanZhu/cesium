@@ -3,8 +3,8 @@ in vec3 v_waterBaseEC;
 in vec3 v_waterUpEC;
 in vec3 v_waterEastEC;
 uniform float u_waterCurvatureRadius;
-#ifdef SCENEGIS_RIVER_WATER
-vec3 sceneGISRiverUpEC;
+#ifdef SCENEGIS_PROFILE_WATER
+vec3 sceneGISProfileUpEC;
 #endif
 
 // A local osculating-sphere correction keeps contact tests camera-relative. It avoids
@@ -13,8 +13,8 @@ vec3 sceneGISRiverUpEC;
 float sceneGISWaterMeanOffset(vec3 pointEC)
 {
     vec3 delta = pointEC - v_waterBaseEC;
-    #ifdef SCENEGIS_RIVER_WATER
-    float vertical = dot(delta, sceneGISRiverUpEC);
+    #ifdef SCENEGIS_PROFILE_WATER
+    float vertical = dot(delta, sceneGISProfileUpEC);
     #else
     float vertical = dot(delta, normalize(v_waterUpEC));
     #endif

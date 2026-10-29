@@ -2,6 +2,79 @@ import { test, expect } from "@playwright/test";
 import checkWaterAppearance from "./scenegis-water-appearance-checks.js";
 
 for (const world of ["planar", "globe"]) {
+  test(`river ${world}: profile underwater, runtime disable and shared-domain disposal`, async ({
+    page,
+  }, testInfo) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(`/Test/Rendering/河流水面.html?world=${world}`);
+    await page.waitForFunction(() => window.example?.river.ready);
+    await page
+      .getByRole("checkbox", { name: "时间动画", exact: true })
+      .uncheck();
+    await page
+      .getByRole("combobox", { name: "观察位置", exact: true })
+      .selectOption("水下顺流");
+    await page.waitForFunction(
+      () => window.example.river._surface._underwater?.active,
+    );
+    await page.screenshot({
+      path: testInfo.outputPath(`${world}-underwater.png`),
+    });
+    const result = await page.evaluate(async () => {
+      const e = window.example,
+        s = e.viewer.scene;
+      e.viewer.useDefaultRenderLoop = false;
+      const render = () => {
+        s.initializeFrame();
+        s.render(e.viewer.clock.currentTime);
+      };
+      render();
+      const medium = e.river._surface._underwater,
+        texture = e.river._surface._domain.texture;
+      const seconds = e.river._waves._state.seconds;
+      render();
+      const paused = seconds === e.river._waves._state.seconds;
+      e.river.underwaterDepth = 0;
+      render();
+      const disabled = !medium.active;
+      e.river.underwaterDepth = 6;
+      e.viewAt("水下仰视");
+      render();
+      const immersed = medium.active;
+      const triangles = medium.domain.triangles.length,
+        bytes = texture.sizeInBytes + medium.texture.sizeInBytes;
+      e.settings.level = 0.5;
+      e.rebuild();
+      e.viewAt("水下顺流");
+      render();
+      const rebuilt =
+        e.river.underwaterDepth === 6 &&
+        e.river._surface._underwater.active &&
+        texture.isDestroyed();
+      const finalTexture = e.river._surface._domain.texture;
+      e.destroy();
+      return {
+        paused,
+        disabled,
+        immersed,
+        rebuilt,
+        destroyed: finalTexture.isDestroyed() && e.viewer.isDestroyed(),
+        triangles,
+        bytes,
+      };
+    });
+    expect(
+      result.paused &&
+        result.disabled &&
+        result.immersed &&
+        result.rebuilt &&
+        result.destroyed,
+    ).toBe(true);
+    expect(result.triangles).toBeLessThanOrEqual(1024);
+    expect(errors).toEqual([]);
+    console.log("Directed river underwater", world, result);
+  });
   test(`river ${world}: continuous LOD, independent wind, bounds and lifecycle`, async ({
     page,
   }, testInfo) => {

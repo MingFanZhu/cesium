@@ -79,7 +79,7 @@ const water = scene.primitives.add(
     polygonHierarchy: hierarchy,
     height: 30,
     perPositionHeight: river,
-    underwaterDepth: river ? 0 : 25,
+    underwaterDepth: 25,
     windWaves: waves,
     meshSpacing: 1,
     maximumScreenSpaceError: 2,
@@ -90,13 +90,20 @@ const water = scene.primitives.add(
 );
 const constructionMilliseconds = performance.now() - start;
 
-function land(polygon, height, id, color = "#647050") {
+function land(
+  polygon,
+  height,
+  id,
+  color = "#647050",
+  perPositionHeight = false,
+) {
   return scene.primitives.add(
     new C.Primitive({
       geometryInstances: new C.GeometryInstance({
         geometry: new C.PolygonGeometry({
           polygonHierarchy: polygon,
-          height,
+          height: perPositionHeight ? undefined : height,
+          perPositionHeight,
           granularity: C.Math.toRadians(0.025),
           vertexFormat: C.PerInstanceColorAppearance.VERTEX_FORMAT,
         }),
@@ -161,6 +168,15 @@ if (!river) {
       }),
     );
   }
+} else {
+  const bed = new C.PolygonHierarchy(
+    channel.positions.map((p) => {
+      const c = C.Ellipsoid.WGS84.cartesianToCartographic(p);
+      c.height -= 12;
+      return C.Ellipsoid.WGS84.cartographicToCartesian(c);
+    }),
+  );
+  land(bed, 0, "示意变水位河床", "#899a91", true);
 }
 const gui = new GUI({
   title: river ? "曲面河流" : "曲面湖泊",
@@ -171,11 +187,13 @@ const settings = {
   animate: true,
   show: true,
   heightFog: false,
-  underwater: !river,
+  underwater: true,
   viewAt(name) {
     if (name === "水下近景" || name === "水下仰视") {
       viewer.camera.setView({
-        destination: C.Cartesian3.fromDegrees(118.55, 31.85, 25),
+        destination: river
+          ? C.Cartesian3.fromDegrees(118.59, 31.87, 55)
+          : C.Cartesian3.fromDegrees(118.55, 31.85, 25),
         orientation: {
           heading: 0,
           pitch: name === "水下仰视" ? 0.6 : -0.22,
@@ -206,7 +224,8 @@ gui
     "低角度远眺",
     "全域鸟瞰",
     "高空",
-    ...(!river ? ["水下近景", "水下仰视"] : []),
+    "水下近景",
+    "水下仰视",
   ])
   .name("观察位置")
   .onChange(settings.viewAt);
@@ -236,14 +255,12 @@ const appearance = waterAppearanceControls(gui, () => [water], {
   foamIntensity: river ? 0.2 : 0.25,
 });
 gui.add(water, "reflections").name("场景倒影");
-if (!river) {
-  gui
-    .add(settings, "underwater")
-    .name("水下模式")
-    .onChange((value) => {
-      water.underwaterDepth = value ? 25 : 0;
-    });
-}
+gui
+  .add(settings, "underwater")
+  .name("水下模式")
+  .onChange((value) => {
+    water.underwaterDepth = value ? 25 : 0;
+  });
 gui
   .add(settings, "heightFog")
   .name("高度雾")

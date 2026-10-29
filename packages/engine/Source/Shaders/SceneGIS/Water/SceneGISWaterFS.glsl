@@ -41,10 +41,10 @@ void main()
     vec3 view = normalize(-v_positionEC);
     #ifdef SCENEGIS_CURVED_WATER
     vec3 up = normalize(v_waterUpEC);
-    #ifdef SCENEGIS_RIVER_WATER
+    #ifdef SCENEGIS_PROFILE_WATER
     vec3 meanNormal = normalize(cross(dFdx(v_waterBaseEC), dFdy(v_waterBaseEC)));
     up = dot(meanNormal, up) < 0.0 ? -meanNormal : meanNormal;
-    sceneGISRiverUpEC = up;
+    sceneGISProfileUpEC = up;
     #endif
     vec3 east = normalize(v_waterEastEC - up * dot(up, v_waterEastEC));
     mat3 waterFrame = mat3(east, cross(up, east), up);

@@ -1228,14 +1228,16 @@ waves.destroy();
 FFT 使用区域米制 chart 并存在投影畸变。区域光学使用局部曲面近似；没有全球海洋掩膜、
 海拔转换、透明水下对象或多层水面支持。
 
-恒定水位的大湖可设置 `underwaterDepth`，或运行时赋值 `water.underwaterDepth = 25`。
+曲面湖泊和变水位曲面均可设置 `underwaterDepth`，或运行时赋值 `water.underwaterDepth = 25`。
 上例的平均水位为椭球高 30 m，有限容积底为 5 m；已有 opaque 湖底会提前截断视线。
 设置 0 关闭。相机判断使用真实椭球高，并保留固定轮廓、凹岸线和孔洞；不要求当前相机能看到水面。
 GPU 光程采用随相机重定位的曲率球壳，球形 Globe 上精确，扁椭球上沿用区域光学近似，
 不等于精确的全球椭球平行曲面求交。水下仰视复用水到空气的 Fresnel、全内反射和水底 SSR。
-仍按平均水位判断浸没，不包含随波浪变化的弯月面。`perPositionHeight: true` 只有全部水位
-恒定时可用；变水位曲面和 `SceneGISRiverSurface` 设置正水下深度会报错。
-曲面 bathymetry 和焦散仍不支持；水深不会从地形或屏幕深度隐式推导。接口与资格见 ADR-0199。
+仍按平均水位判断浸没，不包含随波浪变化的弯月面。`perPositionHeight: true` 时，水下深度
+沿原始 chart 三角形的插值水位向下量取，不取最低水位，也不依赖当前相机 LOD。
+源岸线总计最多 256 段，变水位容积最多 1024 个准备后的三角形；超出预算会报错。
+曲面 bathymetry 和焦散在后续阶段扩展；水深不会从地形或屏幕深度隐式推导。
+接口与资格见 ADR-0199、ADR-0200。
 
 网格按 16×16 单元分块，结合约 8 个绘制缓冲像素的单元尺度及
 `maximumScreenSpaceError` 曲率目标自动细分。`meshSpacing` 是最小间距，
@@ -1269,6 +1271,7 @@ const river = scene.primitives.add(
     speeds: [0.6, 1.2, 0.8],
     currentSpeedScale: 1,
     maximumTileCount: 256,
+    underwaterDepth: 6,
     // windWaves: waves, // Optional, caller-owned, independent from river current.
   }),
 );
@@ -1295,12 +1298,18 @@ Globe 使用区域 chart，宽度按控制点局部度量换算，沿程距离�
 128² 双频带每次时间变化执行 32 个小尺寸绘制 pass，纹理约占 2.17 MiB；隐藏和拾取不推进模拟。
 共有的水色、吸收、粗糙度、倒影、接触泡沫、显隐和 id 均可修改。
 
+`river.underwaterDepth` 与 WaterSurface 的同名属性一致，默认 0 关闭，Globe 和 Planar 都可用。
+它是原始插值河面以下的垂直深度；实际 opaque 河床可提前截断视线。相机需同时位于河道宽度
+包络和可选 mask 内，孔洞保持为空。固定水位与变水位、沿程坡度和弯道共用同一原始几何域，
+不按最近中心线或当前 LOD 猜测水位。单个水体不得重叠；半透明水下物体和逐波弯月面仍不支持。
+
 几何输入在构造时复制，不提供原位编辑；替换河流后再销毁不再使用的 caller-owned FFT。
 拾取返回 `{ primitive: river, id }`，`getBoundingSphere()` 返回包含水流和风浪位移的 World 空间保守包围球，
 `statistics` 沿用水面 LOD/缓存指标。首次到访高精度区域仍可能同步构建较多网格。
 
 人工入口 `Test/Rendering/河流水面.html?world=globe` / `world=planar`，使用本地示意河道和河床，
-提供水位、流速、独立风浪、控制点标注和近/远/低角度视角。自动化入口：
+提供水位、流速、独立风浪、控制点标注和近/远/低角度视角，以及“水下顺流”“水下仰视”和水下模式开关。
+水位或风浪重建保留该开关。自动化入口：
 `SceneGISRiverSurface` Specs、`Test/Rendering/playwright.river-water.config.mjs`。
 接口边界与性能证据见 ADR-0180 和 R26 review；视觉效果仍需项目负责人验收。
 

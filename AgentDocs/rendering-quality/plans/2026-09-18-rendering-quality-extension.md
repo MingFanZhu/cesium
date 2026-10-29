@@ -31,6 +31,25 @@ and resource ownership. SDK and hydraulic simulation remain excluded.
   remains open; no next implementation phase is active.
 
 Each phase requires technical review and a separate local commit before the next.
+
+### Curved caustics and variable-level underwater continuation, 2026-10-29
+
+The owner requests both curved-water caustics and variable-level river underwater
+viewing after R34 checkpoint `f15b53ade7`. Deliver in dependency order:
+
+- R35 active: [profile-aware underwater volumes](2026-10-29-r35-profile-underwater.md).
+  Reuse original prepared height triangles for both CPU immersion and GPU ray clipping.
+  Qualify per-position ellipsoid water and directed RiverSurface in both Worlds,
+  retaining actual corridor/mask boundaries, finite depth and resource ownership.
+- R36 pending, after the R35 checkpoint: curved bathymetry and actual-wave caustics,
+  shared by above/below views. Define the explicit public bed-coordinate contract
+  from the completed profile representation; preserve camera-independent fields,
+  pause and bounded texture/projection budgets. No implicit depth capture or SDK work.
+
+Each stage requires numerical/rendering/lifecycle tests, representative pictures,
+bounded performance evidence and its own local checkpoint. Existing independent
+visual gates remain recorded; no global oceans, hydraulic transport, overlapping
+media, translucent submerged receivers or wave-exact menisci are activated.
 Visual acceptance uses both worlds, shallow slopes, vertical walls, depth changes
 and moving cameras. Earlier R25 cold mesh and R27 visual findings stay open.
 

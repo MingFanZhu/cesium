@@ -228,7 +228,7 @@ describe("SceneGIS/Scene/SceneGISGlobeUnderwater", function () {
     });
   }
 
-  it("validates unsupported variable levels and curved bathymetry without allocating GPU resources", function () {
+  it("accepts variable levels and validates curved bathymetry without allocating GPU resources", function () {
     waves = new SceneGISWindWaves({ resolution: 32 });
     const hierarchy = polygon(117, 30, 118, 31);
     const options = {
@@ -242,9 +242,12 @@ describe("SceneGIS/Scene/SceneGISGlobeUnderwater", function () {
     expect(water.ready).toBeFalse();
     expect(water.underwaterDepth).toBe(2);
     hierarchy.positions[0] = Cartesian3.fromDegrees(117, 30, 10);
-    expect(
-      () => new SceneGISWaterSurface({ ...options, perPositionHeight: true }),
-    ).toThrowDeveloperError();
+    const varying = new SceneGISWaterSurface({
+      ...options,
+      perPositionHeight: true,
+    });
+    expect(varying.ready).toBeFalse();
+    varying.destroy();
     expect(
       () =>
         new SceneGISWaterSurface({

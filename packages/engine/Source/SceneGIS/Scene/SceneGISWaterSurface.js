@@ -32,6 +32,7 @@ import fieldWaves from "../../Shaders/SceneGIS/Water/SceneGISWaterFieldWaves.js"
 import WaterField from "./_private/_SceneGISWaterField.js";
 import Cartesian4 from "../../Core/Cartesian4.js";
 import Underwater from "./_private/_SceneGISUnderwater.js";
+import WaterDomain from "./_private/_SceneGISWaterDomain.js";
 import riverFlow from "../../Shaders/SceneGIS/Water/SceneGISRiverFlow.js";
 import curvedSurface from "../../Shaders/SceneGIS/Water/SceneGISWaterCurvedSurface.js";
 import WaterFrame from "./_private/_SceneGISWaterFrame.js";
@@ -106,13 +107,11 @@ function validate(surface) {
     throw new DeveloperError("Caustics require local water geometry.");
   }
   if (surface._gridMesh && surface.underwaterDepth > 0) {
-    const mesh = surface._ellipsoidMesh;
-    if (!mesh || Math.abs(mesh.root.maxHeight - mesh.root.minHeight) > 1e-7) {
-      throw new DeveloperError(
-        "Curved underwater volumes require constant-height ellipsoid water; varying heights and RiverSurface are not supported.",
-      );
-    }
-    if (surface.underwaterDepth >= mesh.radius + mesh.root.minHeight) {
+    const mesh = surface._gridMesh;
+    if (
+      mesh.ellipsoid &&
+      surface.underwaterDepth >= mesh.radius + mesh.root.minHeight
+    ) {
       throw new DeveloperError(
         "underwaterDepth must leave the curved bottom above the curvature center.",
       );
@@ -182,7 +181,7 @@ function validate(surface) {
  * wind synthesis with projection distortion, not global ocean or hydraulic simulation.
  * Requires SCENE3D, HDR and WebGL2 floating-point targets. Native Water materials are unchanged.
  * Uses opaque scene depth/color. Underwater viewing is opt-in through underwaterDepth for
- * local geometry and constant-height ellipsoid geometry;
+ * local geometry, per-position ellipsoid geometry and directed river profiles;
  * overlapping water layers and translucent submerged objects are not supported. Reflection misses use the physical sky when active,
  * otherwise reflectionColor. The scattering tint and foam follow physical lighting when active.
  * Animation follows Scene time; no render loop is started. In requestRenderMode, request a frame
@@ -217,7 +216,7 @@ function validate(surface) {
  * @param {number} [options.flowSpeed=0.6] Wave phase speed in meters per second.
  * @param {number} [options.foamWidth=0.3] Shallow contact depth range in meters; with bathymetry also the horizontal shoreline range. Zero disables it.
  * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
- * @param {number} [options.underwaterDepth=0] Finite volume depth below the mean surface in meters; zero disables underwater viewing. Supports local and constant-height ellipsoid geometry, at most 256 boundary segments including holes. Curved ray clipping uses a camera-relative sphere approximation. Mean-height immersion, not a wave-exact meniscus.
+ * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated mean surface in meters; zero disables underwater viewing. At most 256 source shore segments and 1024 prepared profile triangles. Curved ray clipping uses a camera-relative sphere approximation. Mean-height immersion, not a wave-exact meniscus.
  * @param {SceneGISWaterSurface.Bathymetry} [options.bathymetry] Immutable copied local depth field for camera-independent shore foam and caustics.
  * @param {number} [options.causticsIntensity=0] Approximate bottom light focusing strength in [0, 2]. Local geometry only.
  * @param {number} [options.refractionStrength=0.2] Screen-space refraction distortion in [0, 1].
@@ -280,6 +279,10 @@ function SceneGISWaterSurface(options = {}) {
     this._hierarchy = cloneHierarchy(options.polygonHierarchy);
   }
   this._gridMesh ??= this._ellipsoidMesh;
+  this._profileWater =
+    !!this._gridMesh &&
+    (!!this._river ||
+      this._gridMesh.root.maxHeight - this._gridMesh.root.minHeight > 1e-7);
   if (options.bathymetry !== undefined) {
     if (this._gridMesh) {
       throw new DeveloperError("Bathymetry requires local water geometry.");
@@ -384,8 +387,8 @@ function SceneGISWaterSurface(options = {}) {
    */
   this.foamIntensity = options.foamIntensity ?? 0.5;
   /**
-   * Finite underwater volume depth in meters. Zero disables the effect. Supports local and constant-height ellipsoid geometry.
-   * Curved clipping uses a camera-relative sphere approximation; varying-height rivers are unsupported.
+   * Finite vertical underwater depth below the interpolated mean surface, in meters. Zero disables the effect.
+   * Supports local, per-position ellipsoid and directed river profiles. Curved clipping uses a camera-relative sphere approximation.
    * Uses mean-height immersion; concave boundaries and holes are supported, up to 256 segments.
    * @type {number}
    */
@@ -442,6 +445,9 @@ function waterDefines(surface) {
   }
   if (surface._river) {
     defines.push("SCENEGIS_RIVER_WATER");
+  }
+  if (surface._profileWater) {
+    defines.push("SCENEGIS_PROFILE_WATER");
   }
   return defines;
 }
@@ -859,9 +865,13 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
       this._lightingMode = lightingMode;
     }
     if (this.underwaterDepth > 0) {
+      if (this._profileWater) {
+        this._domain ??= new WaterDomain(this._gridMesh);
+      }
       this._underwater ??= new Underwater(
-        this._hierarchy ?? this._ellipsoidMesh.hierarchy,
-        this._ellipsoidMesh,
+        this._hierarchy ?? this._gridMesh?.hierarchy,
+        this._gridMesh,
+        this._domain,
       );
     }
     this._underwater?.update(this, frameState);
@@ -891,6 +901,7 @@ SceneGISWaterSurface.prototype.isDestroyed = function () {
 SceneGISWaterSurface.prototype.destroy = function () {
   this._underwater?.destroy();
   this._field?.destroy();
+  this._domain?.destroy();
   this._gridMesh?.destroy();
   if (this._mesh) {
     for (const tile of this._mesh.tiles) {

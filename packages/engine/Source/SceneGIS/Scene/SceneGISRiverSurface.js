@@ -42,7 +42,7 @@ function validate(river) {
  * the waves independently of their intrinsic evolution; zero current does not freeze waves.
  * Optional caller-owned windWaves add independent wind waves; current speed does not alter them.
  * Requires SCENE3D, HDR and WebGL2 floating-point targets. Shares SceneGISWaterSurface's opaque
- * depth/color optics and its above-water, nonoverlapping-surface limitations.
+ * depth/color optics and optional finite underwater viewing. Water bodies must not overlap.
  *
  * @alias SceneGISRiverSurface
  * @constructor
@@ -70,6 +70,7 @@ function validate(river) {
  * @param {number} [options.roughness=0.12] Perceptual roughness in [0.02, 1].
  * @param {number} [options.foamWidth=0.3] Shallow contact foam depth range in meters.
  * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
+ * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated river profile in meters. Zero disables underwater viewing. Up to 256 source shore segments and 1024 prepared triangles; curved optics use a local sphere approximation.
  * @param {number} [options.refractionStrength=0.2] Screen-space refraction distortion in [0, 1].
  * @param {boolean} [options.reflections=true] Whether to trace scene reflections.
  * @param {number} [options.maximumReflectionDistance=100] Maximum reflected ray length in meters.
@@ -139,6 +140,19 @@ function SceneGISRiverSurface(options = {}) {
 }
 
 Object.defineProperties(SceneGISRiverSurface.prototype, {
+  /**
+   * Finite vertical depth below the interpolated mean river profile, in meters. Zero disables underwater viewing.
+   * @memberof SceneGISRiverSurface.prototype
+   * @type {number}
+   */
+  underwaterDepth: {
+    get() {
+      return this._surface.underwaterDepth;
+    },
+    set(value) {
+      this._surface.underwaterDepth = value;
+    },
+  },
   /**
    * Whether the river is visible.
    * @memberof SceneGISRiverSurface.prototype
