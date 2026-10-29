@@ -2,6 +2,34 @@
   "schemaVersion": 1,
   "patches": [
     {
+      "id": "SGP-0073",
+      "title": "Support a SceneGIS branded distribution from the native build",
+      "status": "active",
+      "reason": "Reuse native bundles with a SceneGIS IIFE global/file and resolve branded resource URLs while retaining all Cesium targets and module identities.",
+      "risk": "medium",
+      "files": [
+        {
+          "path": "scripts/build.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "packages/engine/Source/Core/buildModuleUrl.js",
+          "markerMode": "paired"
+        },
+        {
+          "path": "gulpfile.js",
+          "markerMode": "paired"
+        }
+      ],
+      "tests": [
+        "packages/engine/Specs/SceneGIS/Core/SceneGISBuildModuleUrlSpec.js",
+        "scripts/scenegis/distribution.test.mjs",
+        "Specs/e2e/scenegis-distribution.spec.js"
+      ],
+      "decision": "Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md",
+      "removalCondition": "Native build and resource resolver offer equivalent distribution branding and base URL options."
+    },
+    {
       "id": "SGP-0072",
       "title": "Expose explicit regional geometry loading and static triangle snapshots",
       "status": "active",
@@ -1490,7 +1518,9 @@
           "markerMode": "paired"
         }
       ],
-      "tests": ["scripts/scenegis/draco-worker-build.test.mjs"],
+      "tests": [
+        "scripts/scenegis/draco-worker-build.test.mjs"
+      ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0171-draco-worker-node-fs-build.md",
       "removalCondition": "The upstream worker bundler accepts Draco's guarded node:fs import, or the dependency no longer includes that Node branch."
     },

@@ -1606,3 +1606,11 @@ maximumUnderwaterBoundaryBytes 为构造预算，默认 8 MiB、最多 64 MiB，
 underwaterBoundaryByteLength 报告实际分配。预算不足报错，不简化数据或静默截断遍历。
 水下对象自有一张 lazy RGBA32F 索引纹理，保留既有合成及销毁顺序，无新 target/pass/SGP。
 变水位剖面的 1024 三角形预算独立保留；密集相交/重叠包围盒仍可能退化为线性查询。
+
+## SceneGIS 品牌发行
+
+[ADR-0205](Decisions/ADR-0205-scenegis-distribution.md) / SGP-0073 复用原生构建和同一份源码，
+生成独立 `Build/SceneGIS`，不重命名 workspace 或公共类。下游只组合单一 ESM 入口，
+引擎不依赖 SDK。SCENEGIS_BASE_URL 优先于 CESIUM_BASE_URL；直接 ESM 使用 import.meta.url，
+脚本识别 SceneGIS.js / Cesium.js。文档展示映射在生成期完成，保留原始符号标识；
+自有构建与文档生成器位于 scripts/scenegis，产物不入 Git。

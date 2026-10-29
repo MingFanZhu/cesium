@@ -3,9 +3,10 @@ import DeveloperError from "./DeveloperError.js";
 import getAbsoluteUri from "./getAbsoluteUri.js";
 import Resource from "./Resource.js";
 
-/*global CESIUM_BASE_URL,define,require*/
-
-const cesiumScriptRegex = /((?:.*\/)|^)Cesium\.js(?:\?|\#|$)/;
+// SCENEGIS_PATCH_BEGIN SGP-0073: Recognize either distribution without renaming modules.
+/*global SCENEGIS_BASE_URL,CESIUM_BASE_URL,define,require*/
+const cesiumScriptRegex = /((?:.*\/)|^)(?:Cesium|SceneGIS)\.js(?:\?|\#|$)/;
+// SCENEGIS_PATCH_END SGP-0073
 function getBaseUrlFromCesiumScript() {
   const scripts = document.getElementsByTagName("script");
   for (let i = 0, len = scripts.length; i < len; ++i) {
@@ -39,7 +40,11 @@ function getCesiumBaseUrl() {
   }
 
   let baseUrlString;
-  if (typeof CESIUM_BASE_URL !== "undefined") {
+  // SCENEGIS_PATCH_BEGIN SGP-0073: The branded resource root takes precedence.
+  if (typeof SCENEGIS_BASE_URL !== "undefined") {
+    baseUrlString = SCENEGIS_BASE_URL;
+  } else if (typeof CESIUM_BASE_URL !== "undefined") {
+    // SCENEGIS_PATCH_END SGP-0073
     baseUrlString = CESIUM_BASE_URL;
   } else if (defined(import.meta?.url)) {
     // ESM
@@ -63,7 +68,9 @@ function getCesiumBaseUrl() {
   //>>includeStart('debug', pragmas.debug);
   if (!defined(baseUrlString)) {
     throw new DeveloperError(
-      "Unable to determine Cesium base URL automatically, try defining a global variable called CESIUM_BASE_URL.",
+      // SCENEGIS_PATCH_BEGIN SGP-0073: Explain both explicit resource roots.
+      "Unable to determine the engine base URL automatically, try defining SCENEGIS_BASE_URL or CESIUM_BASE_URL.",
+      // SCENEGIS_PATCH_END SGP-0073
     );
   }
   //>>includeEnd('debug');

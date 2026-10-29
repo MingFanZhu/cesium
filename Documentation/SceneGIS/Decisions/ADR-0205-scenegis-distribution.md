@@ -1,0 +1,53 @@
+# ADR-0205: SceneGIS branded single-source distribution
+
+- Status: accepted (implementation in progress)
+- Date: 2026-10-29
+- Owner: Architecture Agent
+- Related extension: [engine-distribution](../../../AgentDocs/engine-distribution/README.md)
+- Upstream patch: SGP-0073
+
+## Context
+
+The root generated Cesium barrel already combines native engine, Widgets and SceneGIS
+extensions. Existing builders handle embedded/module Workers, static assets, CSS and
+JSDoc/tsd-jsdoc. IIFE global/file names and buildModuleUrl script detection assume Cesium.
+The SDK needs a self-contained branded artifact and source-derived API data, without
+depending on the source checkout or loading a second engine module.
+
+## Decision
+
+Generate `Build/SceneGIS` using the existing source barrels and native builders. Emit
+SceneGIS.js (IIFE global SceneGIS), index.js (one ESM named-export entry), SceneGIS.d.ts
+(external module with `export as namespace SceneGIS`) and index.d.ts (relative-entry shim).
+Generated package metadata declares ESM, its single export/types entry and asset paths.
+All original symbol/class names, including Scene, ImageryLayer, I3SLayer, Panorama and
+VERSION, remain unchanged. SDK naming composition belongs downstream. No version lock
+or automatic runtime compatibility checks are introduced.
+
+SGP-0073 minimally parameterizes the native bundler's global name and extends native URL
+resolution. SCENEGIS_BASE_URL precedes CESIUM_BASE_URL; absent globals, direct ESM uses
+import.meta.url and IIFE recognizes SceneGIS.js as well as Cesium.js. Explicit setBaseUrl
+retains its existing cached override behavior. Configure a resource root before first
+resource use when renaming/rebundling files. Original Cesium targets retain their defaults.
+Worker embedded identifiers and native workspace packages remain unchanged.
+
+Owned orchestration and generators live in `scripts/scenegis/**`; generated artifacts
+stay ignored under Build. The JSDoc target reuses the current source include/exclude and
+custom tags. Brand display and links are mapped at generation, never by rewriting the
+source tree. Canonical doclet longnames remain stable; display names are SceneGIS-qualified.
+Static pages, metadata, images, scripts and styles are delivered together under Documentation.
+Metadata excludes AST/code/comment internals and absolute build-machine paths while
+preserving public parameters, returns, typedefs, enums, events, inheritance, examples and
+custom tags. SDK consumers use the package ESM and metadata only.
+
+## Verification and upgrade boundary
+
+Retain native build, release and type checks. Verify exported public declaration values,
+both globals/module imports, actual Worker/WASM/images at root and nested mounts, both
+World lifecycles, static search, type/anchor links and extension coverage. Audit all
+upstream hunks against SGP-0073. Recheck bundler option forwarding, inline Worker injection,
+JSDoc helper pruning/link allocation and declaration postprocessing on upstream upgrades.
+
+This adds packaging/documentation cost only; it does not change simulation/render algorithms,
+rename native types, publish an npm package or modify the SDK. Rebundled ESM requires an
+explicit asset URL because import.meta.url then belongs to the downstream output.
