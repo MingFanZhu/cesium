@@ -56,6 +56,21 @@ media, translucent submerged receivers or wave-exact menisci are activated.
 Visual acceptance uses both worlds, shallow slopes, vertical walls, depth changes
 and moving cameras. Earlier R25 cold mesh and R27 visual findings stay open.
 
+## R37 activation, 2026-10-29
+
+After R36 checkpoint `e467891320`, the owner explicitly removes authored depth
+grids and persistent shore transport. [R37](2026-10-29-r37-screen-water-effects.md)
+unifies visible-depth contact foam and approximate caustics in all water modes,
+retaining FFT whitecaps and original-geometry underwater membership. This revises
+the R33/R36 field scope; their records and remaining visual findings stay traceable.
+No SDK, global ocean or hydraulic work.
+
+R37 is technically complete. The
+[review](../reviews/2026-10-29-r37-screen-water-effects.md) records GPU/browser
+coverage, simplified interfaces, retained geometry membership and the cost moved
+from fixed grids to visible fragments. Owner visual acceptance is pending;
+form its independent local checkpoint without activating another phase.
+
 ## R30 activation, 2026-10-23
 
 The owner requests rectangular area lighting on the existing light system after

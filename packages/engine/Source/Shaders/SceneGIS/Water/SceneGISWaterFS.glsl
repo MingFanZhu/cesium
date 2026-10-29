@@ -13,7 +13,6 @@ uniform float u_radianceScale;
 uniform float u_roughness;
 uniform float u_foamWidth;
 uniform float u_foamIntensity;
-uniform vec2 u_shoreFoamOffset;
 uniform float u_refractionStrength;
 uniform bool u_reflections;
 in vec3 v_positionEC;
@@ -28,11 +27,6 @@ in float v_shoreFade;
 float sceneGISWaterFoamDensity(float depth)
 {
     if (u_foamWidth == 0.0 || u_foamIntensity == 0.0) { return 0.0; }
-    if (u_hasWaterField) {
-        vec2 uv = (sceneGISWaterFieldPoint(v_positionEC).xy - u_fieldRectangle.xy) / u_fieldRectangle.zw;
-        if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) { return 0.0; }
-        return texture(u_shoreFoam, uv).r;
-    }
     return (1.0 - smoothstep(0.0, u_foamWidth, depth)) * u_foamIntensity;
 }
 
@@ -83,8 +77,8 @@ void main()
     vec3 normal = normalize(czm_normal * normalize(vec3(-slope, 1.0)));
     #endif
     #ifdef SCENEGIS_RIVER_WATER
-    vec2 current = sceneGISRiverCurrent();
-    normal = sceneGISRiverNormal(normal, up, current.x * v_shoreFade);
+    float current = sceneGISRiverCurrent();
+    normal = sceneGISRiverNormal(normal, up, current * v_shoreFade);
     #endif
     vec2 size = vec2(textureSize(u_depth, 0));
     vec2 uv = gl_FragCoord.xy / size;
@@ -155,15 +149,29 @@ void main()
         pathLength = length(bottom - v_positionEC);
     }
     vec4 background = textureLod(u_color, refractedUV, 0.0);
-    if (hasBottom && u_causticsIntensity > 0.0) {
-        vec3 receiver = sceneGISWaterFieldPoint(bottom);
-        float pixelSize = max(length(dFdx(receiver.xy)), length(dFdy(receiver.xy)));
-        vec3 receiverCross = cross(dFdx(bottom), dFdy(bottom));
-        float facing = abs(dot(receiverCross, up)) / max(length(receiverCross), 1e-8);
-        float focusing = sceneGISWaterCaustics(receiver.xy, max(dot(v_positionEC - bottom, up), 0.0), pixelSize,
-            max(dot(up, czm_lightDirectionEC), 0.0));
-        background.rgb *= mix(1.0, focusing, facing * facing);
-    }
+    #ifdef SCENEGIS_CURVED_WATER
+    vec3 causticUp = normalize(v_waterUpEC);
+    vec3 causticEast = normalize(v_waterEastEC - causticUp * dot(v_waterEastEC, causticUp));
+    mat3 causticFrame = mat3(causticEast, cross(causticUp, causticEast), causticUp);
+    vec3 causticOrigin = v_waterBaseEC;
+    #else
+    mat3 causticFrame = mat3(czm_modelView);
+    vec3 causticOrigin = (czm_modelView * vec4(v_waterPosition, 0.0, 1.0)).xyz;
+    #endif
+    #ifdef SCENEGIS_RIVER_WATER
+    vec2 riverPhase = v_riverPosition;
+    vec3 currentFlow = vec3(v_riverFlow, v_riverData.z);
+    #else
+    vec2 riverPhase = v_waterPosition;
+    vec3 currentFlow = vec3(1.0, 0.0, 0.0);
+    #endif
+    #if defined(SCENEGIS_WIND_WAVES) || defined(SCENEGIS_RIVER_WATER)
+    float waveFade = v_shoreFade;
+    #else
+    float waveFade = 1.0;
+    #endif
+    background.rgb *= sceneGISWaterCaustics(bottom, causticOrigin, up, causticFrame,
+        v_waterPosition, riverPhase, currentFlow, waveFade, hasBottom);
     vec3 water;
     if (u_mediumOptics) {
         vec3 light = normalize(czm_lightDirectionEC);
@@ -200,19 +208,12 @@ void main()
     // Dielectric GGX sun highlight; the sky probe excludes the solar disk.
     color += sceneGISWaterHighlight(normal, view, beam, u_roughness);
 
-    #ifdef SCENEGIS_RIVER_WATER
-    float currentFoam = smoothstep(0.65, 0.9, current.y);
-    float contact = u_foamWidth > 0.0 ? (1.0 - smoothstep(0.0, u_foamWidth, verticalDepth)) * u_foamIntensity : 0.0;
-    float foam = currentFoam * max(contact, u_currentFoamIntensity * v_shoreFade);
-    #else
     float foam = sceneGISWaterFoamDensity(verticalDepth);
-    #endif
     // Break continuous crest masks into rafts and bubble openings, filtered in meters.
     vec2 foamPosition = v_waterPosition - d * u_time * u_waveLength / czm_twoPi * 0.08;
     #ifdef SCENEGIS_CURVED_WATER
     foamPosition += u_waterFoamOffset;
     #endif
-    if (u_hasWaterField) { foamPosition = sceneGISWaterFieldPoint(v_positionEC).xy - u_shoreFoamOffset; }
     foam = max(foam, smoothstep(0.04, 0.65, crestFoam));
     // Evaluate derivatives before nonuniform coverage branches for stable mip selection.
     vec2 foamDx = dFdx(v_waterPosition), foamDy = dFdy(v_waterPosition);

@@ -32,14 +32,29 @@ void main()
     float airCosine = max(dot(up, czm_lightDirectionEC), 0.0);
     float startDepth = sceneGISWaterVolumeDepth(origin);
     float endDepth = max(sceneGISWaterVolumeDepth(end), 0.0);
-    if (opaqueDistance <= distance && endDepth > 0.0) {
-        vec3 receiverEC = originEC + directionEC * distance;
-        vec3 receiver = sceneGISWaterFieldPoint(receiverEC);
-        float footprint = max(length(dFdx(receiver.xy)), length(dFdy(receiver.xy)));
-        vec3 receiverCross = cross(dFdx(receiverEC), dFdy(receiverEC));
-        float facing = abs(dot(receiverCross, up)) / max(length(receiverCross), 1e-8);
-        background *= mix(1.0, sceneGISWaterCaustics(receiver.xy, endDepth, footprint, airCosine), facing * facing);
-    }
+    #ifdef SCENEGIS_WATER_CAUSTICS
+    vec3 receiverEC = originEC + directionEC * distance;
+    #ifdef SCENEGIS_ELLIPSOID_UNDERWATER
+    vec3 geoUp = normalize(end + vec3(0.0, 0.0, u_volumeRadius));
+    vec3 chartEast = vec3(u_waterToChart[0].x, u_waterToChart[1].x, u_waterToChart[2].x);
+    vec3 east = normalize(chartEast - geoUp * dot(chartEast, geoUp));
+    #else
+    vec3 geoUp = vec3(0.0, 0.0, 1.0), east = vec3(1.0, 0.0, 0.0);
+    #endif
+    vec3 mean = end + geoUp * endDepth;
+    vec3 meanEC = receiverEC + u_waterToEye * geoUp * endDepth;
+    vec3 meanNormal = u_waterToEye * sceneGISWaterVolumeUp(end);
+    mat3 waveFrame = u_waterToEye * mat3(east, cross(geoUp, east), geoUp);
+    vec2 phase = sceneGISVolumeChart(mean).xy;
+    vec3 flow = vec3(1.0, 0.0, 0.0);
+    bool valid = opaqueDepth > 0.0 && opaqueDistance <= distance && endDepth > 0.0;
+    #ifdef SCENEGIS_RIVER_WATER
+    bool inside = sceneGISProfileFlow(phase, flow);
+    valid = valid && inside;
+    #endif
+    background *= sceneGISWaterCaustics(receiverEC, meanEC, meanNormal, waveFrame,
+        phase, phase, flow, 1.0, valid);
+    #endif
     vec3 color;
     if (u_mediumOptics) {
         float eta = 1.0 / 1.333;

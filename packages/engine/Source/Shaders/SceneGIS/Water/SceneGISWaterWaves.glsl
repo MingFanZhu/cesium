@@ -29,7 +29,7 @@ vec2 sceneGISWaterSlope(vec2 p, float footprint)
         sceneGISWaterSlopeBand(p, across, 0.08, 3.9, 0.7, footprint) * 0.15;
 }
 
-void sceneGISWaterFieldWave(vec2 p, float spacing, out vec3 position, out vec3 normal)
+void sceneGISWaterWave(vec2 p, float spacing, out vec3 position, out vec3 normal)
 {
     position = vec3(p, 0.0);
     #ifdef SCENEGIS_WIND_WAVES

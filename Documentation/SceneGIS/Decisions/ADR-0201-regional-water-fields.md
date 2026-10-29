@@ -1,5 +1,7 @@
 # ADR-0201: Explicit regional water fields
 
+> Current qualification (2026-10-29): Superseded by ADR-0202: regional depth grids and prepared effect fields are removed at the owner's request. This document preserves the earlier design and measurements.
+
 - Status: accepted and implemented; 2026-10-29.
 - Related: ADR-0196, ADR-0199, ADR-0200; SGP-0017 unchanged.
 - Phase: [R36](../../../AgentDocs/rendering-quality/plans/2026-10-29-r36-regional-caustics.md).

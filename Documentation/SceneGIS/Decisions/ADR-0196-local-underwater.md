@@ -1,5 +1,7 @@
 # ADR-0196: Finite local underwater rendering
 
+> Current qualification (2026-10-29): Fixed bathymetry, persistent shore transport and fixed caustics are superseded by ADR-0202. Original underwater geometry and the shared foam material remain.
+
 - Status: accepted; 2026-10-28.
 - Related: ADR-0087, ADR-0194, ADR-0195; SGP-0017 remains unchanged.
 

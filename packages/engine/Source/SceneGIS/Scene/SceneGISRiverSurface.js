@@ -15,7 +15,6 @@ function validate(river) {
     ["currentSpeedScale", 0, Infinity],
     ["currentRippleAmplitude", 0, Infinity],
     ["currentRippleLength", 0.01, Infinity],
-    ["currentFoamIntensity", 0, 1],
   ]) {
     const value = river[name];
     if (!Number.isFinite(value) || value < minimum || value > maximum) {
@@ -59,7 +58,6 @@ function validate(river) {
  * @param {number} [options.currentSpeedScale=1] Nonnegative multiplier of authored current speeds.
  * @param {number} [options.currentRippleAmplitude=0.12] Maximum current-wave vertical displacement in meters. Also controls wave normals.
  * @param {number} [options.currentRippleLength=12] Dominant current-wave length in meters, at least 0.01.
- * @param {number} [options.currentFoamIntensity=0] Optional artistic current streak strength in [0, 1]; not simulated breaking foam.
  * @param {boolean} [options.show=true] Whether the river is visible.
  * @param {*} [options.id] Pick identifier.
  * @param {Color} [options.waterColor] Scene-linear deep-water scattering color; defaults to (0.015, 0.12, 0.14).
@@ -71,8 +69,7 @@ function validate(river) {
  * @param {number} [options.foamWidth=0.3] Shallow contact foam depth range in meters.
  * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
  * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated river profile in meters. Zero disables underwater viewing. Up to 256 source shore segments and 1024 prepared triangles; curved optics use a local sphere approximation.
- * @param {SceneGISWaterSurface.Bathymetry} [options.bathymetry] Explicit regional depth patch with an upright field-to-World modelMatrix.
- * @param {number} [options.causticsIntensity=0] Actual-wave caustic strength in [0, 2]; requires bathymetry.
+ * @param {number} [options.causticsIntensity=0] Approximate visible-receiver caustic strength in [0, 2]. Uses scene depth and actual waves.
  * @param {number} [options.refractionStrength=0.2] Screen-space refraction distortion in [0, 1].
  * @param {boolean} [options.reflections=true] Whether to trace scene reflections.
  * @param {number} [options.maximumReflectionDistance=100] Maximum reflected ray length in meters.
@@ -113,11 +110,6 @@ function SceneGISRiverSurface(options = {}) {
    * @type {number}
    */
   this.currentRippleLength = options.currentRippleLength ?? 12;
-  /**
-   * Optional artistic current streak strength in [0, 1]; not simulated breaking foam.
-   * @type {number}
-   */
-  this.currentFoamIntensity = options.currentFoamIntensity ?? 0;
   validate(this);
   const ellipsoid = world instanceof Globe ? world.ellipsoid : undefined;
   const domain = new RiverGeometry(options, ellipsoid);
@@ -143,7 +135,7 @@ function SceneGISRiverSurface(options = {}) {
 
 Object.defineProperties(SceneGISRiverSurface.prototype, {
   /**
-   * Actual-wave caustic strength in [0, 2]; requires explicit bathymetry.
+   * Approximate visible-receiver caustic strength in [0, 2]. Uses scene depth and actual waves.
    * @memberof SceneGISRiverSurface.prototype
    * @type {number}
    */

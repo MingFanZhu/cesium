@@ -118,7 +118,6 @@ const settings = {
   currentSpeedScale: 1,
   currentRippleAmplitude: 0.3,
   currentRippleLength: 14,
-  currentFoamIntensity: 0,
   show: true,
   maximumTileCount: 256,
   showProfile: false,
@@ -167,23 +166,9 @@ function rebuild() {
       currentSpeedScale: settings.currentSpeedScale,
       currentRippleAmplitude: settings.currentRippleAmplitude,
       currentRippleLength: settings.currentRippleLength,
-      currentFoamIntensity: settings.currentFoamIntensity,
       maximumTileCount: settings.maximumTileCount,
       show: settings.show,
       underwaterDepth: settings.underwater ? 6 : 0,
-      bathymetry: {
-        modelMatrix: planar
-          ? C.Matrix4.fromTranslation(
-              point(profile[9].x, profile[9].y, profile[9].z),
-            )
-          : C.Transforms.eastNorthUpToFixedFrame(
-              point(profile[9].x, profile[9].y, profile[9].z),
-            ),
-        rectangle: new C.BoundingRectangle(-24, -24, 48, 48),
-        width: 257,
-        height: 257,
-        depths: new Float32Array(257 * 257).fill(3 + settings.level),
-      },
       causticsIntensity: settings.caustics,
       reflectionSteps: 32,
     }),
@@ -394,7 +379,6 @@ gui
   ["currentSpeedScale", "河流流速倍率", 0, 3, 0.05],
   ["currentRippleAmplitude", "顺流浪幅上限 m", 0, 0.8, 0.01],
   ["currentRippleLength", "顺流主波长 m", 4, 32, 0.5],
-  ["currentFoamIntensity", "艺术泡沫（可选）", 0, 1, 0.02],
   ["maximumTileCount", "网格块上限", 32, 512, 16],
 ].forEach(([name, label, lo, hi, step]) => {
   gui

@@ -228,7 +228,7 @@ describe("SceneGIS/Scene/SceneGISGlobeUnderwater", function () {
     });
   }
 
-  it("accepts variable levels and validates curved bathymetry without allocating GPU resources", function () {
+  it("accepts variable levels and validates finite depth without allocating GPU resources", function () {
     waves = new SceneGISWindWaves({ resolution: 32 });
     const hierarchy = polygon(117, 30, 118, 31);
     const options = {
@@ -254,9 +254,6 @@ describe("SceneGIS/Scene/SceneGISGlobeUnderwater", function () {
           ...options,
           underwaterDepth: Ellipsoid.WGS84.minimumRadius + 30,
         }),
-    ).toThrowDeveloperError();
-    expect(
-      () => new SceneGISWaterSurface({ ...options, bathymetry: {} }),
     ).toThrowDeveloperError();
   });
 

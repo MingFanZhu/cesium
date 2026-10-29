@@ -16,7 +16,9 @@
       <p>法线波纹改变表面反光；FFT 风浪具有几何起伏和浪尖白沫。</p>
       <p>关闭水面可查看水下结构；关闭时间动画可固定对比画面。</p>
       <p>进入水下观察距离雾化、焦散与仰视全反射；恢复视角返回水上。</p>
-      <p>岸沫使用固定水深场，焦散随实际波面折射生成；浸没按平均水位判断。</p>
+      <p>
+        接触白沫与近似焦散读取屏幕深度，无需水深格网；浸没按真实水域和平均水位判断。
+      </p>
       <p>
         <a href="?world=planar">平面</a> · <a href="?world=globe">球面</a> ·
         <a href="示例目录.html">目录</a>
@@ -25,9 +27,7 @@
       <div id="error"></div>
     </aside>
     <div id="controls"></div>
-    <script>
-      window.CESIUM_BASE_URL = "/Build/CesiumUnminified/";
-    </script>
+    <script src="../cesium-base-url.js"></script>
     <script type="module" src="./局部水面.js"></script>
   </body>
 </html>

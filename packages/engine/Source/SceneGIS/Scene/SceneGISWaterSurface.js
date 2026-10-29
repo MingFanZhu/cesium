@@ -28,9 +28,8 @@ import optics from "../../Shaders/SceneGIS/Water/SceneGISWaterOptics.js";
 import foamMaterial from "../../Shaders/SceneGIS/Water/SceneGISWaterFoam.js";
 import WaterFoam from "./_private/_SceneGISWaterFoam.js";
 import waterEffects from "../../Shaders/SceneGIS/Water/SceneGISWaterEffects.js";
-import fieldWaves from "../../Shaders/SceneGIS/Water/SceneGISWaterFieldWaves.js";
-import WaterField from "./_private/_SceneGISWaterField.js";
-import Cartesian4 from "../../Core/Cartesian4.js";
+import waterWaves from "../../Shaders/SceneGIS/Water/SceneGISWaterWaves.js";
+import caustics from "../../Shaders/SceneGIS/Water/SceneGISWaterCaustics.js";
 import Underwater from "./_private/_SceneGISUnderwater.js";
 import WaterDomain from "./_private/_SceneGISWaterDomain.js";
 import riverFlow from "../../Shaders/SceneGIS/Water/SceneGISRiverFlow.js";
@@ -100,9 +99,6 @@ function validate(surface) {
   number(surface.foamIntensity, "foamIntensity", 0, 1);
   number(surface.underwaterDepth, "underwaterDepth", 0);
   number(surface.causticsIntensity, "causticsIntensity", 0, 2);
-  if (surface.causticsIntensity > 0 && !surface._field) {
-    throw new DeveloperError("Caustics require explicit bathymetry.");
-  }
   if (surface._gridMesh && surface.underwaterDepth > 0) {
     const mesh = surface._gridMesh;
     if (
@@ -211,11 +207,10 @@ function validate(surface) {
  * @param {number} [options.waveLength=3.0] Largest normal-wave wavelength in meters.
  * @param {Cartesian2} [options.flowDirection=Cartesian2.UNIT_X] Local flow direction; need not be normalized.
  * @param {number} [options.flowSpeed=0.6] Wave phase speed in meters per second.
- * @param {number} [options.foamWidth=0.3] Shallow contact depth range in meters; with bathymetry also the horizontal shoreline range. Zero disables it.
+ * @param {number} [options.foamWidth=0.3] Screen-depth contact range in meters. Zero disables it.
  * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
  * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated mean surface in meters; zero disables underwater viewing. At most 256 source shore segments and 1024 prepared profile triangles. Curved ray clipping uses a camera-relative sphere approximation. Mean-height immersion, not a wave-exact meniscus.
- * @param {SceneGISWaterSurface.Bathymetry} [options.bathymetry] Immutable copied depth patch for camera-independent shore foam and caustics.
- * @param {number} [options.causticsIntensity=0] Actual-wave bottom light focusing strength in [0, 2]; requires explicit bathymetry.
+ * @param {number} [options.causticsIntensity=0] Approximate visible-receiver caustic strength in [0, 2]. Zero disables it; uses scene depth and actual waves.
  * @param {number} [options.refractionStrength=0.2] Screen-space refraction distortion in [0, 1].
  * @param {boolean} [options.reflections=true] Whether to trace scene reflections. Sky reflection remains enabled.
  * @param {number} [options.maximumReflectionDistance=100.0] Maximum reflected ray length in meters.
@@ -280,17 +275,6 @@ function SceneGISWaterSurface(options = {}) {
     !!this._gridMesh &&
     (!!this._river ||
       this._gridMesh.root.maxHeight - this._gridMesh.root.minHeight > 1e-7);
-  if (options.bathymetry !== undefined) {
-    if (this._gridMesh) {
-      this._domain = new WaterDomain(this._gridMesh);
-    }
-    this._field = new WaterField(
-      options.bathymetry,
-      this._hierarchy,
-      this._gridMesh,
-      this._domain,
-    );
-  }
   /**
    * Curved grid curvature error target in pixels.
    * @type {number}
@@ -379,7 +363,7 @@ function SceneGISWaterSurface(options = {}) {
    */
   this.flowSpeed = options.flowSpeed ?? 0.6;
   /**
-   * Contact foam depth range in meters; with bathymetry also the horizontal shoreline range.
+   * Screen-depth contact range in meters. Zero disables it.
    * @type {number}
    */
   this.foamWidth = options.foamWidth ?? 0.3;
@@ -396,7 +380,7 @@ function SceneGISWaterSurface(options = {}) {
    */
   this.underwaterDepth = options.underwaterDepth ?? 0;
   /**
-   * Actual-wave bottom-caustics strength in [0, 2]. Requires explicit bathymetry.
+   * Approximate visible-receiver caustic strength in [0, 2]. Uses scene depth and actual waves.
    * @type {number}
    */
   this.causticsIntensity = options.causticsIntensity ?? 0;
@@ -600,7 +584,8 @@ function createResources(surface, frameState) {
           ray,
           riverFlow,
           optics,
-          fieldWaves,
+          waterWaves,
+          caustics,
           waterEffects,
           foamMaterial,
           fragment,
@@ -642,7 +627,6 @@ function createResources(surface, frameState) {
       u_currentSpeedScale: () => surface._river.currentSpeedScale,
       u_currentRippleLength: () => surface._river.currentRippleLength,
       u_currentRippleAmplitude: () => surface._river.currentRippleAmplitude,
-      u_currentFoamIntensity: () => surface._river.currentFoamIntensity,
       u_riverDisplacement0: () =>
         surface._river._waves._state.bands[0].output.getColorTexture(0),
       u_riverDisplacement1: () =>
@@ -665,27 +649,10 @@ function createResources(surface, frameState) {
       u_foamIntensity: () => surface.foamIntensity,
       u_foamDetail: () => state.foamMaterial?.texture ?? context.defaultTexture,
       u_hasFoamDetail: () => !!state.foamMaterial?.texture,
-      u_shoreFoamOffset: () => surface._field?.offset ?? Cartesian2.ZERO,
       u_underwaterDepth: () => surface.underwaterDepth,
       u_cameraDepth: () =>
         surface._underwater?.active ? -surface._underwater.camera.z : 0,
       u_causticsIntensity: () => surface.causticsIntensity,
-      u_hasWaterField: () => !!surface._field,
-      u_fieldRectangle: () => surface._field?.rectangle ?? Cartesian4.ZERO,
-      u_eyeToField: () =>
-        surface._field
-          ? Matrix4.multiply(
-              surface._field.inverse,
-              context.uniformState.inverseView,
-              surface._field.eyeToField,
-            )
-          : Matrix4.IDENTITY,
-      u_bathymetry: () => surface._field?.bed ?? context.defaultTexture,
-      u_causticsMap: () =>
-        surface._field?.caustics?.getColorTexture(0) ?? context.defaultTexture,
-      u_shoreFoam: () =>
-        surface._field?.foam?.[surface._field.index].getColorTexture(0) ??
-        context.defaultTexture,
       u_refractionStrength: () => surface.refractionStrength,
       u_reflections: () => surface.reflections,
       u_maximumDistance: () => surface.maximumReflectionDistance,
@@ -820,8 +787,7 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
   if (frameState.passes.render) {
     const foamEnabled =
       (this.foamIntensity > 0 && this.foamWidth > 0) ||
-      this._windWaves?.whitecapIntensity > 0 ||
-      this._river?.currentFoamIntensity > 0;
+      this._windWaves?.whitecapIntensity > 0;
     if (foamEnabled) {
       state.foamMaterial ??= new WaterFoam(state.requestRender);
       state.foamMaterial.update(c);
@@ -860,7 +826,8 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
         ray,
         riverFlow,
         optics,
-        fieldWaves,
+        waterWaves,
+        caustics,
         waterEffects,
         foamMaterial,
         fragment,
@@ -886,7 +853,6 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
       );
     }
     this._underwater?.update(this, frameState);
-    this._field?.update(this, frameState);
     state.surfaces.push(this);
   }
   if (this._gridMesh) {
@@ -911,7 +877,6 @@ SceneGISWaterSurface.prototype.isDestroyed = function () {
  */
 SceneGISWaterSurface.prototype.destroy = function () {
   this._underwater?.destroy();
-  this._field?.destroy();
   this._domain?.destroy();
   this._gridMesh?.destroy();
   if (this._mesh) {
@@ -939,19 +904,5 @@ SceneGISWaterSurface.prototype.destroy = function () {
  * @property {number} inactiveGeometryBytes GPU bytes not drawn in the last update, capped at 16 MiB.
  * @property {number} triangles Number of selected triangles.
  * @property {number} geometryBuilds Number of GPU meshes built in the last update.
- */
-/**
- * Immutable bathymetry patch. Depths are positive below the actual mean surface,
- * zero at the shoreline and negative on dry land, measured down the field Z axis.
- * Grid vertices span rectangle edges; rows run from minimum to maximum Y.
- * Data is copied and GPU resources belong to the surface. Effects apply only inside
- * the patch. Regional patches sample the original profile (up to 1024 prepared triangles),
- * independently of visible LOD. Choose metric grid spacing fine enough for the waves.
- * @typedef {object} SceneGISWaterSurface.Bathymetry
- * @property {BoundingRectangle} rectangle Local XY footprint in meters.
- * @property {Matrix4} [modelMatrix] Required for regional water/rivers: rigid upright field-to-World frame (Globe ENU, Planar Z-up), with rectangle XY within +/-4096 meters. Omit for local geometry, which uses the surface modelMatrix.
- * @property {number} width Grid columns, integer in [2, 1024].
- * @property {number} height Grid rows, integer in [2, 1024].
- * @property {Float32Array} depths Row-major signed water depths, width * height entries.
  */
 export default SceneGISWaterSurface;

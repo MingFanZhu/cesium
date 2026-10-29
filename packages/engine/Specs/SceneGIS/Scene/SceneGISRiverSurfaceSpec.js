@@ -339,7 +339,6 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
         polygonHierarchy: mask,
         windWaves: waves,
         id: "river",
-        currentFoamIntensity: 1,
         currentRippleLength: 12,
         reflections: false,
         maximumTileCount: 32,
@@ -504,6 +503,11 @@ describe("SceneGIS/Scene/SceneGISRiverSurface", function () {
   [true, false].forEach(function (planar) {
     it(`renders, animates, picks and releases river resources in ${planar ? "Planar" : "Globe"}`, async function () {
       setup(planar);
+      scene.light = new DirectionalLight({
+        direction: vector(0.3, 0.2, -1),
+        color: Color.WHITE,
+      });
+      river.roughness = 0.6;
       scene.renderForSpecs(time);
       expect(river.ready).toBeTrue();
       await scene.frameState._sceneGISWater.foamMaterial._promise;

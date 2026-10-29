@@ -50,8 +50,7 @@ for (const world of ["planar", "globe"]) {
       8,
     );
     expect(edited.scattering).toEqual({ x: 0.2, y: 0.2, z: 0.2 });
-    // Rewind explicitly, then integrate four simulation seconds. Model startup
-    // time must not accidentally leave the paused foam field freshly reset.
+    // Freeze the actual wave epoch for reproducible above/below views.
     await page.evaluate(async () => {
       const C = await import("/Build/CesiumUnminified/index.js");
       const e = window.example,
@@ -248,27 +247,7 @@ for (const world of ["planar", "globe"]) {
       e.water.foamIntensity = foam;
       e.water.causticsIntensity = caustics;
       v.render();
-      const field = e.water._field;
-      const half = (v) =>
-        (v & 32768 ? -1 : 1) *
-        ((v >> 10) & 31
-          ? (1 + (v & 1023) / 1024) * 2 ** (((v >> 10) & 31) - 15)
-          : (v & 1023) * 2 ** -24);
-      const pixels = v.scene.context.readPixels({
-        framebuffer: field.foam[field.index],
-        width: field.size,
-        height: field.size,
-      });
-      let foamMaximum = 0;
-      for (let i = 0; i < pixels.length; i += 4) {
-        foamMaximum = Math.max(foamMaximum, half(pixels[i]));
-      }
-      const fieldBytes =
-        field.data.byteLength +
-        field.size ** 2 * 8 * 2 +
-        (field.causticsSize ** 2 * 8 * 4) / 3 +
-        (field.gridSize + 1) ** 2 * 8 +
-        field.gridSize ** 2 * 6 * ((field.gridSize + 1) ** 2 > 65535 ? 4 : 2);
+      const effectFieldBytes = e.water._field === undefined ? 0 : -1;
       const debug = gl.getExtension("WEBGL_debug_renderer_info");
       v.useDefaultRenderLoop = true;
       return {
@@ -276,11 +255,10 @@ for (const world of ["planar", "globe"]) {
           ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)
           : "unavailable",
         measurements,
-        foamMaximum,
-        fieldBytes,
+        effectFieldBytes,
       };
     });
-    expect(timing.foamMaximum).toBeGreaterThan(0.05);
+    expect(timing.effectFieldBytes).toBe(0);
     const timingPath = testInfo.outputPath(`${world}-gpu-cost.json`);
     await writeFile(timingPath, JSON.stringify(timing, null, 2));
     await testInfo.attach(`${world}-gpu-cost`, {

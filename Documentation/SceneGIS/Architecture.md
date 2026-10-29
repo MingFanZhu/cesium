@@ -1354,6 +1354,14 @@ RiverSurface 水下容积。CPU 和 GPU 共用原始准备三角形的固定 BVH
 eye-to-field 接收点变换和固定图，不依赖屏幕深度推断水底。场资源归 Surface，静态几何
 编辑需重建；相机移动不更新，暂停保持稳定。仍是局部投影近似，不新增 upstream seam。
 
+[ADR-0202](Decisions/ADR-0202-screen-water-effects.md) 按用户决定移除上述固定水深格网、
+区域准备图、持久岸沫和焦散图。当前接触白沫及近似焦散统一读取既有 opaque 快照；
+保留 FFT 风浪白沫和真实水域几何的浸没/光程裁剪。公共接口仅保留白沫范围/强度、
+焦散强度和有限 underwaterDepth；不保留旧格网接口或专门的迁移校验。
+焦散在水上/水下原 pass 内估算局部折射光束面积比，来源为实际波浪和主光；无新增 target、
+场格网、回读或 history。河流原始 profile BVH 额外保存源流向/速度，每节点 7 texel，
+其他 profile 仍为 4 texel。深度仅代表当前可见 opaque 接收面，不用于推断完整建筑/地形或水域归属。
+
 ## 风驱动湖面（R22）
 
 [ADR-0101](Decisions/ADR-0101-wind-water-spectrum.md) 在原有 WaterSurface 上增加可选的

@@ -1085,55 +1085,45 @@ FFT 风浪。预设是外观演示，不代表实测水质。示例使用固定�
 | 曲面长河           | 河水     | 0.5 m / 0.2     | 0.12 / 1.5 s                   |
 | 河流水面           | 河水     | 0.5 m / 0.2     | 0.08 / 1.5 s（默认不叠加风浪） |
 
-曲面河湖和河流水面示例提供显式局部水深场、焦散与水下模式；玄武湖仍采用屏幕深度接触岸沫。
-曲面湖泊的“浅水焦散 / 浅水俯视”及双 World 河流的“水下焦散”用于近景验收。
-局部水面的固定水深场演示保持独立。焦散区域外不应用固定场效果。
-
-局部 `SceneGISWaterSurface` 可额外配置：
+局部水面、曲面河湖及双 World 河流共用屏幕空间接触白沫和近似焦散，
+不需要水深数组、格网范围、分辨率或额外水底坐标系。
 
 ```js
-const water = new Cesium.SceneGISWaterSurface({
-  polygonHierarchy,
-  modelMatrix,
-  windWaves: waves,
-  underwaterDepth: 3,
-  bathymetry: {
-    rectangle: new Cesium.BoundingRectangle(-24, -21, 48, 42),
-    width: 256,
-    height: 256,
-    depths, // Float32Array, 256 * 256 signed water depths in meters.
-  },
-  causticsIntensity: 1,
-});
+const water = scene.primitives.add(
+  new Cesium.SceneGISWaterSurface({
+    polygonHierarchy,
+    modelMatrix,
+    windWaves: waves,
+    underwaterDepth: 3,
+    foamWidth: 0.35,
+    foamIntensity: 0.35,
+    causticsIntensity: 1,
+  }),
+);
 ```
 
-- `underwaterDepth`：平均水面下的有限容积深度，默认 0 关闭。支持平面和球面 ENU 的
-  local 水面、ellipsoid 水面及双 World 变水位 RiverSurface；源岸线总边数不超过 256。
-  相机在容积内才启用。真实 opaque 水底会
-  提前截断视线。当前按平均水位判断浸没，不包含波浪逐像素浸没和弯月面。
-- `bathymetry`：可选、构造时复制的固定水深场。width/height 为 2–1024 的整数；
-  depths 按行存储，列沿局部 X 增大、行沿局部 Y 增大，首末格点覆盖 rectangle 边界。
-  正值在水下，0 是岸线，负值为陆地；孔洞仍受原轮廓约束。数据来自调用方地形或模型，
-  引擎不会隐式回读场景。当前不支持动态替换。需要浮点纹理线性过滤。
-- 提供 bathymetry 后，岸沫在固定局部场中按浅水生成、输运、衰减；暂停复用、倒放重置。
-  不提供时保留原屏幕深度接触泡沫。`foamWidth` 同时表示浅水深度和到岸线的水平距离，
-  `foamIntensity` 为生成强度。固定水深场会预计算水陆距离，避免竖直墙边没有浅水格点而漏生成。
-  四面墙均可生成，流向和衰减仍会造成覆盖差异；这不是撞击飞溅或绕流求解。
-- 泡沫外观使用随引擎打包的 Crest MIT 密度纹理，浓度控制细膜覆盖，独立法线与粗糙高光
-  表现表面起伏。同一 Scene 的水面共享约 1.03 MiB 纹理；首次启用泡沫时异步加载，期间
-  水面继续显示，加载完成自动请求一帧。`ready` 仍仅表示几何就绪；资源加载失败通过
-  Scene 渲染错误报告。部署时须保留 `Assets/SceneGIS/Water/Foam/` 内的纹理、许可和来源记录。
-  图元移除不销毁共享纹理，Scene 销毁才释放。岸边持续生成的白带与水下气泡不是此次材质改进解决的内容。
-- `causticsIntensity`：默认 0，范围 0–2，要求 bathymetry。从实际 FFT 位移和法线（或
-  同一套解析波纹）折射网格并计算投影面积比，形成可过滤的固定焦散图。它调制已受光的
-  opaque 快照；不等同于光子追踪，不包含折射遮挡，竖直面和高出水底的物体使用近似投影。
-  焦散图独立于泡沫分辨率，为泡沫场尺寸的两倍，限制在 256–512；折射网格为焦散图尺寸的一半。
-  顶点聚光强度连续插值，放大时采用三次 B-spline 重建，缩小时采用 mipmap，避免近景块状接缝。
-  256 水深场示例启用焦散约占每个水面 6.67 MiB 的场纹理和网格；只用岸沫不创建焦散资源。
-- 区域曲面及 RiverSurface 使用下面的显式坐标入口；半透明水下物体和多层重叠水域暂不在资格内。
-  移除水面会释放深度场、泡沫历史、焦散图和水下程序；风浪仍归调用方。
+- `underwaterDepth`：平均水面下的有限容积深度，默认 0 关闭。它定义有效介质范围，
+  不是实测水底高程。支持 local、ellipsoid 和双 World 变水位 RiverSurface。
+  相机归属由原始水域轮廓、孔洞和插值水位决定，源岸线最多 256 段，变水位源三角形最多 1024 个。
+  实际可见 opaque 水底提前截断视线；按平均水位判断浸没，不包含逐波弯月面。
+- `foamWidth`：接触深度范围，米，默认 0.3；`foamIntensity`：强度 0–1，默认 0.5。
+  每帧根据水面和当前 opaque 深度的距离生成接触覆盖，湖泊、曲面及河流使用同一项。
+  没有有效底面时没有接触白沫；风浪白沫仍由 FFT 独立产生。没有持久岸沫输运或屏幕外状态。
+- 白沫外观继续使用随引擎打包的 Crest MIT 密度纹理，覆盖率控制细膜，独立法线及粗糙高光
+  表现起伏。同一 Scene 共享约 1.03 MiB，首次需要时异步加载；`ready` 仅表示几何就绪。
+  部署保留 `Assets/SceneGIS/Water/Foam/` 的资源、许可和来源记录。图元移除不销毁共享材质，
+  Scene 销毁时释放。它不求解气泡、破浪飞溅或水力学。
+- `causticsIntensity`：默认 0 关闭，范围 0–2；开启后使用可见 opaque 接收面、实际波浪
+  和当前主光方向计算局部折射光束面积比。水上和水下共用算法，不增加水深场、焦散图或专用绘制通道。
+  深度、接收面朝向和低光照角度衰减效果；使用实际波浪的空间相位和像素尺度过滤。
+  这是单分支局部聚光近似，不累积光子，不求解屏幕外折射遮挡；水底遮挡、尚未加载几何、
+  透明物体和深度突变处的信息不完整，不能视为精确全局光传输。
+- 相机移动会重新计算可见接收面；固定视角和模拟时间时画面稳定。范围不再受某个固定水深格网限制。
+  风浪的 `whitecapIntensity`、`foamHalfLife` 与 FFT 历史保持不变，倒放/改波浪配置按既有规则重置。
+- `SceneGISWindWaves.waterDepth` 仍是频谱模型的平均水深参数，可保持默认；它不提供效果水底格网。
 
-算法、资源成本及参考实现见 ADR-0195、ADR-0196。新增水下视角与焦散有独立的 GUI 开关。
+局部水面示例支持球面 ENU / Planar；曲面湖泊的“浅水焦散 / 浅水俯视”及河流的
+“水下焦散”展示可见面效果。设计与边界见 ADR-0195、ADR-0199、ADR-0200、ADR-0202。
 
 ### 风浪配置
 
@@ -1235,24 +1225,12 @@ GPU 光程采用随相机重定位的曲率球壳，球形 Globe 上精确，扁
 仍按平均水位判断浸没，不包含随波浪变化的弯月面。`perPositionHeight: true` 时，水下深度
 沿原始 chart 三角形的插值水位向下量取，不取最低水位，也不依赖当前相机 LOD。
 源岸线总计最多 256 段，变水位容积最多 1024 个准备后的三角形；超出预算会报错。
-水深不会从地形或屏幕深度隐式推导。接口与资格见 ADR-0199、ADR-0200。
+水下归属不从屏幕图像猜测；当前可见 opaque 深度可截断光程。接口与资格见 ADR-0199、ADR-0200。
 
-曲面湖泊、变水位曲面及 `SceneGISRiverSurface` 共用 `bathymetry` / `causticsIntensity`。
-区域模式必须给水深场增加 `modelMatrix`：Globe 用场中心的 ENU（可绕 Z 旋转），Planar
-用 World Z 向上的刚性变换。禁止缩放、倾斜；rectangle 的 X/Y 坐标均须在 ±4096 m 内。
-格点深度沿该 frame 的 -Z，从该格点的**实际插值平均水面**向下量取。它不是相对 frame
-原点的绝对高程。正值湿、零或负值干；数据、frame、轮廓在构造时复制，变更后需重建。
+曲面水面和河流直接设置 `causticsIntensity`、`foamWidth`、`foamIntensity`，无需提供水底格网。
+几何、真实水位和原始 chart 相位保持原有输入；屏幕深度只确定可见接收面。
 
 ```js
-const bathymetry = {
-  modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(
-    Cesium.Cartesian3.fromDegrees(118.551, 31.85, 30),
-  ),
-  rectangle: new Cesium.BoundingRectangle(-24, -24, 48, 48),
-  width: 257,
-  height: 257,
-  depths: new Float32Array(257 * 257).fill(3), // Explicit demonstration bed.
-};
 const lake = scene.primitives.add(
   new Cesium.SceneGISWaterSurface({
     geometryMode: "ellipsoid",
@@ -1260,34 +1238,30 @@ const lake = scene.primitives.add(
     height: 30,
     windWaves: waves,
     underwaterDepth: 10,
-    bathymetry,
+    foamWidth: 0.35,
+    foamIntensity: 0.3,
     causticsIntensity: 1,
   }),
 );
-// RiverSurface accepts the same three options in Globe or Planar:
 const river = scene.primitives.add(
   new Cesium.SceneGISRiverSurface({
     world: scene.world,
     positions,
     widths,
     speeds,
-    underwaterDepth: 10,
-    bathymetry: riverBathymetry,
+    underwaterDepth: 6,
+    foamWidth: 0.4,
+    foamIntensity: 0.3,
     causticsIntensity: 1,
   }),
 );
 ```
 
-引擎从原始源三角形准备固定水位、chart 相位、法线和流向图，不读取当前 LOD。
-风浪相位与水面分块保持周期一致，河流使用同一套沿流向输运的 FFT；水下和水上接收点
-统一变换到 field frame。相机移动不重建焦散，暂停复用，光照/波浪变化才更新。
-固定网格最多支持 1024 个源三角形；孔洞和河道 mask 保持源几何约束。
-区域网格还拥有两张 RGBA32F 准备图，河流另有一张流向图；257² 示例场纹理约
-6.70 MiB（湖）/ 7.71 MiB（河），不含折射网格、原始 profile 表、FFT 和场景捕获。
-48 m 示例的网格间距约 0.1875 m；用同样分辨率覆盖公里范围会滤掉细小焦散。
-这是有限局部切向水深场和 opaque 接收面的近似光照投影，不能代替精确全局光传输。
-移除图元释放全部 field；风浪仍须在所有借用图元移除后、Scene 销毁前销毁。
-验证入口 `playwright.water-caustics.config.mjs` 与 `SceneGISRegionalWaterField`；决策见 ADR-0201。
+变水位河流的水下焦散从原始几何 BVH 读取插值流向/速度，沿用同一河流 FFT；
+河流节点使用 7 个 RGBA32F texel，其他 profile 使用 4 个，不增加独立场纹理。
+源几何编辑仍需重建；移除图元释放几何/程序，caller-owned 风浪须在移除所有借用者后、Scene 销毁前销毁。
+`SceneGISScreenWaterEffects` 覆盖效果回归，`playwright.water-caustics.config.mjs` 为球面/河流画面和绘制耗时入口。
+接口简化与近似边界见 ADR-0202。
 
 网格按 16×16 单元分块，结合约 8 个绘制缓冲像素的单元尺度及
 `maximumScreenSpaceError` 曲率目标自动细分。`meshSpacing` 是最小间距，
@@ -1337,12 +1311,11 @@ Planar 的 `positions` 改为当前 World 的 `new Cartesian3(x, y, z)` 米制�
 Globe 使用区域 chart，宽度按控制点局部度量换算，沿程距离采用椭球测地线；
 远离 chart 中心的形状和材质仍有投影畸变，不是全球连续流场。
 
-`currentSpeedScale`、`currentRippleAmplitude`、`currentRippleLength` 和
-`currentFoamIntensity` 为运行时控制。河流自持两组随机 FFT 波场，按局部流向采样，同时改变顶点高度与法线；
+`currentSpeedScale`、`currentRippleAmplitude` 和 `currentRippleLength` 为运行时控制。河流自持两组随机 FFT 波场，按局部流向采样，同时改变顶点高度与法线；
 `currentRippleAmplitude` 是最大位移上限（默认 0.12 m），`currentRippleLength` 是主波长
 （默认 12 m），近岸衰减，远处按网格与像素尺度过滤。大波主导几何，细波补充法线，实际浪高小于上限；有限 FFT 区块仍有空间周期。
 双相位周期为 32 秒，不累计随时间增长的变形。Scene time 可暂停、回退；变更流速参数会重新求值当前相位。
-`currentFoamIntensity` 是艺术性白色流纹，默认 0，不代表物理破浪；与接触泡沫分开。
+河流接触白沫使用同一屏幕深度项，与河流波峰无关；叠加 `windWaves` 时另外显示 FFT 风浪白沫。
 流速只控制搬运，设为零仍会发生波浪自身演化；暂停 Scene clock 才会冻结全部波动。
 可选 `windWaves` 另行叠加风浪，不随河流流速改变。内部河流 FFT 由 RiverSurface 创建和销毁，
 128² 双频带每次时间变化执行 32 个小尺寸绘制 pass，纹理约占 2.17 MiB；隐藏和拾取不推进模拟。

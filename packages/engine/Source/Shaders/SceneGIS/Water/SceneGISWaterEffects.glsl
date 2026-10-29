@@ -1,56 +1,5 @@
 uniform float u_underwaterDepth;
 uniform float u_cameraDepth;
-uniform float u_causticsIntensity;
-uniform bool u_hasWaterField;
-uniform vec4 u_fieldRectangle;
-uniform sampler2D u_causticsMap;
-uniform sampler2D u_shoreFoam;
-uniform sampler2D u_bathymetry;
-uniform mat4 u_eyeToField;
-
-vec3 sceneGISWaterFieldPoint(vec3 eye)
-{
-    return (u_eyeToField * vec4(eye, 1.0)).xyz;
-}
-
-// Cubic B-spline reconstruction using four bilinear taps (GPU Gems 2, ch. 20).
-// Restrict it to magnification; ordinary trilinear mip filtering handles distance.
-float sceneGISWaterFocus(vec2 uv, float footprint)
-{
-    vec2 size = vec2(textureSize(u_causticsMap, 0));
-    vec2 dx = vec2(footprint / u_fieldRectangle.z, 0.0);
-    vec2 dy = vec2(0.0, footprint / u_fieldRectangle.w);
-    float linearFocus = textureGrad(u_causticsMap, uv, dx, dy).r;
-    float width = max(dx.x * size.x, dy.y * size.y);
-    if (width >= 1.0) { return linearFocus; }
-    vec2 p = uv * size - 0.5, f = fract(p), cell = floor(p);
-    vec2 w0 = pow(1.0 - f, vec2(3.0)) / 6.0;
-    vec2 w1 = (3.0 * f * f * f - 6.0 * f * f + 4.0) / 6.0;
-    vec2 w2 = (-3.0 * f * f * f + 3.0 * f * f + 3.0 * f + 1.0) / 6.0;
-    vec2 w3 = f * f * f / 6.0;
-    vec2 g0 = w0 + w1, g1 = w2 + w3;
-    vec2 a = (cell - 0.5 + w1 / g0) / size;
-    vec2 b = (cell + 1.5 + w3 / g1) / size;
-    float smoothFocus =
-        g0.y * (g0.x * textureLod(u_causticsMap, a, 0.0).r +
-            g1.x * textureLod(u_causticsMap, vec2(b.x, a.y), 0.0).r) +
-        g1.y * (g0.x * textureLod(u_causticsMap, vec2(a.x, b.y), 0.0).r +
-            g1.x * textureLod(u_causticsMap, b, 0.0).r);
-    return mix(smoothFocus, linearFocus, smoothstep(0.5, 1.0, width));
-}
-
-float sceneGISWaterCaustics(vec2 p, float depth, float footprint, float sunCosine)
-{
-    if (!u_hasWaterField || u_causticsIntensity == 0.0 || depth <= 0.0) { return 1.0; }
-    vec2 uv = (p - u_fieldRectangle.xy) / u_fieldRectangle.zw;
-    if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) { return 1.0; }
-    vec2 size = vec2(textureSize(u_bathymetry, 0));
-    vec2 bed = texture(u_bathymetry, (uv * (size - 1.0) + 0.5) / size).rg;
-    if (bed.x <= 0.0 || bed.y < 0.5) { return 1.0; }
-    float focus = sceneGISWaterFocus(uv, footprint);
-    float visibility = exp(-depth * 0.12) * smoothstep(0.0, 0.3, sunCosine);
-    return max(0.0, 1.0 + (clamp(focus, 0.0, 8.0) - 1.0) * u_causticsIntensity * 0.5 * visibility);
-}
 
 // Exact dielectric water-to-air Fresnel; return one beyond the critical angle.
 float sceneGISWaterExitFresnel(float cosine)

@@ -84,9 +84,10 @@ class SceneGISWaterDomain {
       node.escape = this.nodes.length;
     };
     build(this.triangles.slice());
-    this.data = new Float32Array(this.nodes.length * 16);
+    this.width = this.triangles[0].a.length > 3 ? 7 : 4;
+    this.data = new Float32Array(this.nodes.length * this.width * 4);
     this.nodes.forEach((node, index) => {
-      const offset = index * 16,
+      const offset = index * this.width * 4,
         t = node.triangle;
       this.data.set(node.bounds, offset);
       this.data[offset + 13] = node.escape;
@@ -108,11 +109,19 @@ class SceneGISWaterDomain {
           ],
           offset + 4,
         );
+        if (this.width === 7) {
+          for (const [i, vertex] of [t.a, t.b, t.c].entries()) {
+            this.data.set(
+              [vertex[6], vertex[7], vertex[5], 0],
+              offset + 16 + i * 4,
+            );
+          }
+        }
       }
     });
   }
 
-  sample(x, y, result, flow) {
+  sample(x, y, result) {
     for (let i = 0; i < this.nodes.length;) {
       const node = this.nodes[i],
         b = node.bounds;
@@ -130,18 +139,6 @@ class SceneGISWaterDomain {
           result.x = t.a[2] + t.gx * (x - t.a[0]) + t.gy * (y - t.a[1]);
           result.y = t.gx;
           result.z = t.gy;
-          if (flow) {
-            const area = cross(t.a, t.b, t.c[0], t.c[1]);
-            const b = cross(t.c, t.a, x, y) / area;
-            const c = cross(t.a, t.b, x, y) / area;
-            const interpolate = (index) =>
-              t.a[index] +
-              b * (t.b[index] - t.a[index]) +
-              c * (t.c[index] - t.a[index]);
-            flow.x = interpolate(6);
-            flow.y = interpolate(7);
-            flow.z = interpolate(5);
-          }
           return true;
         }
       }
@@ -158,7 +155,7 @@ class SceneGISWaterDomain {
       sampler: Sampler.NEAREST,
       flipY: false,
       source: {
-        width: 4,
+        width: this.width,
         height: this.nodes.length,
         arrayBufferView: this.data,
       },

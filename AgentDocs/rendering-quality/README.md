@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R36 technically complete; owner visual gate pending                                                      |
-| Active phase plan      | None; [completed R36](plans/2026-10-29-r36-regional-caustics.md)                                         |
+| Current phase          | R37 technically complete; owner visual gate pending                                                      |
+| Active phase plan      | None; [completed R37](plans/2026-10-29-r37-screen-water-effects.md)                                      |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
@@ -34,6 +34,14 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- R37 technically complete after `e467891320`: owner removes explicit depth grids
+  and persistent shore transport. [Plan](plans/2026-10-29-r37-screen-water-effects.md) /
+  [review](reviews/2026-10-29-r37-screen-water-effects.md) / ADR-0202 unify visible-depth
+  contact foam and approximate caustics; keep FFT whitecaps and original-geometry
+  underwater membership. All 86 related release GPU cases, final three configuration
+  checks, fourteen browser cases and build/types pass. No migration exceptions,
+  SDK or upstream changes. Owner visual gate pending; no next phase active.
 
 - R36 technically complete: [plan](plans/2026-10-29-r36-regional-caustics.md) /
   [review](reviews/2026-10-29-r36-regional-caustics.md) / ADR-0201 add explicit

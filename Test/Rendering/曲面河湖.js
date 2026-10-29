@@ -72,7 +72,7 @@ const channel = new C.PolygonHierarchy(
   ]),
 );
 const hierarchy = river ? channel : lake;
-const fieldFrame = C.Transforms.eastNorthUpToFixedFrame(
+const shallowFrame = C.Transforms.eastNorthUpToFixedFrame(
   C.Cartesian3.fromDegrees(river ? 118.591 : 118.551, 31.85, river ? 60 : 30),
 );
 const start = performance.now();
@@ -83,13 +83,6 @@ const water = scene.primitives.add(
     height: 30,
     perPositionHeight: river,
     underwaterDepth: 25,
-    bathymetry: {
-      modelMatrix: fieldFrame,
-      rectangle: new C.BoundingRectangle(-24, -24, 48, 48),
-      width: 257,
-      height: 257,
-      depths: new Float32Array(257 * 257).fill(river ? 12 : 3),
-    },
     causticsIntensity: 1,
     windWaves: waves,
     meshSpacing: 1,
@@ -164,7 +157,7 @@ if (!river) {
           ),
         },
       }),
-      modelMatrix: fieldFrame,
+      modelMatrix: shallowFrame,
       asynchronous: false,
       appearance: new C.PerInstanceColorAppearance({
         flat: true,
@@ -193,7 +186,7 @@ if (!river) {
             ),
           },
         }),
-        modelMatrix: fieldFrame,
+        modelMatrix: shallowFrame,
         asynchronous: false,
         appearance: new C.PerInstanceColorAppearance({
           flat: false,
@@ -259,7 +252,7 @@ const settings = {
     if (name === "浅水焦散" || name === "浅水俯视") {
       viewer.camera.setView({
         destination: C.Matrix4.multiplyByPoint(
-          fieldFrame,
+          shallowFrame,
           new C.Cartesian3(0, -5, name === "浅水焦散" ? -0.8 : 5),
           new C.Cartesian3(),
         ),

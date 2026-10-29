@@ -188,45 +188,9 @@ const waters = [undefined, waves].map((windWaves) =>
       foamIntensity: 0.35,
       underwaterDepth: 2.5,
       causticsIntensity: 1,
-      bathymetry: createBathymetry(),
     }),
   ),
 );
-function createBathymetry() {
-  const width = 256,
-    height = 256;
-  const depths = new Float32Array(width * height);
-  // Sample the authored bank planes and boxes once, independently of the camera.
-  const boxes = [
-    [-9, 7, 3, 3, 8],
-    [8, 9, 4, 4, 10],
-    [0, 12, 6, 4, 4],
-    [-13, -4, 5, 5, 2.3],
-    [6, -4, 4, 3, 1.5],
-  ];
-  for (let y = 0; y < height; ++y) {
-    for (let x = 0; x < width; ++x) {
-      const px = -24 + (x / (width - 1)) * 48,
-        py = -21 + (y / (height - 1)) * 42;
-      let bed =
-        0.4 +
-        3.1 *
-          Math.max(0, (Math.abs(px) - 17) / 7, (py - 11) / 10, (-10 - py) / 11);
-      for (const [bx, by, sx, sy, top] of boxes) {
-        if (Math.abs(px - bx) < sx / 2 && Math.abs(py - by) < sy / 2) {
-          bed = Math.max(bed, top);
-        }
-      }
-      depths[y * width + x] = 2.5 - bed;
-    }
-  }
-  return {
-    rectangle: new C.BoundingRectangle(-24, -21, 48, 42),
-    width,
-    height,
-    depths,
-  };
-}
 const water = waters[1];
 const presets = {
   原有配色: { absorption: [0.45, 0.12, 0.06], scattering: undefined, g: 0 },

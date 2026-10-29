@@ -18,6 +18,9 @@ import fragment from "../../../Shaders/SceneGIS/Water/SceneGISUnderwaterFS.js";
 import volume from "../../../Shaders/SceneGIS/Water/SceneGISUnderwaterVolume.js";
 import profile from "../../../Shaders/SceneGIS/Water/SceneGISWaterProfile.js";
 import polynomial from "../../../Shaders/SceneGIS/Water/SceneGISWaterPolynomial.js";
+import waves from "../../../Shaders/SceneGIS/Water/SceneGISWaterWaves.js";
+import river from "../../../Shaders/SceneGIS/Water/SceneGISRiverFlow.js";
+import caustics from "../../../Shaders/SceneGIS/Water/SceneGISWaterCaustics.js";
 import EnvironmentLighting from "./_SceneGISModelEnvironmentLighting.js";
 
 /** Finite local or regional curved medium, without full-resolution targets. @private */
@@ -70,6 +73,7 @@ class SceneGISUnderwater {
       this.worldToChart = Matrix3.transpose(basis, basis);
     }
     this.active = false;
+    this.commands = new Map();
   }
 
   update(surface, frameState) {
@@ -192,8 +196,16 @@ class SceneGISUnderwater {
       },
     });
     const mode = surface._lightingMode;
-    if (!this.command || this.mode !== mode) {
-      this.command?.shaderProgram.destroy();
+    if (this.mode !== mode) {
+      for (const command of this.commands.values()) {
+        command.shaderProgram.destroy();
+      }
+      this.commands.clear();
+      this.mode = mode;
+    }
+    const enabled = surface.causticsIntensity > 0;
+    this.command = this.commands.get(enabled);
+    if (!this.command) {
       const source =
         mode === "none"
           ? new ShaderSource()
@@ -207,6 +219,15 @@ class SceneGISUnderwater {
       if (this.domain) {
         source.defines.push("SCENEGIS_PROFILE_WATER");
       }
+      if (enabled) {
+        source.defines.push("SCENEGIS_WATER_CAUSTICS");
+      }
+      if (enabled && surface._windWaves) {
+        source.defines.push("SCENEGIS_WIND_WAVES");
+      }
+      if (enabled && surface._river) {
+        source.defines.push("SCENEGIS_RIVER_WATER", "SCENEGIS_RIVER_VERTEX");
+      }
       source.sources.push(
         ray,
         optics,
@@ -214,6 +235,9 @@ class SceneGISUnderwater {
         profile,
         polynomial,
         volume,
+        waves,
+        river,
+        caustics,
         fragment,
       );
       this.command = context.createViewportQuadCommand(source, {
@@ -238,7 +262,7 @@ class SceneGISUnderwater {
           u_profileRange: () => this.profileRange,
         },
       });
-      this.mode = mode;
+      this.commands.set(enabled, this.command);
     }
     Matrix4.multiply(
       this.inverse,
@@ -254,7 +278,10 @@ class SceneGISUnderwater {
 
   destroy() {
     this.texture?.destroy();
-    this.command?.shaderProgram.destroy();
+    for (const command of this.commands.values()) {
+      command.shaderProgram.destroy();
+    }
+    this.commands.clear();
   }
 }
 export default SceneGISUnderwater;

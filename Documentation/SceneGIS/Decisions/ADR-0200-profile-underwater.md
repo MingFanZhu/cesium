@@ -1,5 +1,7 @@
 # ADR-0200: Prepared-profile underwater volumes
 
+> Current qualification (2026-10-29): ADR-0202 retains this volume geometry and extends river nodes from four to seven texels for source current records; fixed bathymetry is removed.
+
 - Status: accepted and implemented; 2026-10-29.
 - Related: ADR-0180, ADR-0196, ADR-0199; SGP-0017 unchanged.
 - Phase: [R35](../../../AgentDocs/rendering-quality/plans/2026-10-29-r35-profile-underwater.md).

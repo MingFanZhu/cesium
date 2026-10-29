@@ -3,7 +3,6 @@ uniform float u_riverTime;
 uniform float u_currentSpeedScale;
 uniform float u_currentRippleLength;
 uniform float u_currentRippleAmplitude;
-uniform float u_currentFoamIntensity;
 uniform sampler2D u_riverDisplacement0;
 uniform sampler2D u_riverDisplacement1;
 
@@ -19,6 +18,9 @@ float sceneGISRiverSample(sampler2D field, vec2 p, vec2 direction, float period,
     float lod = max(0.0, log2(spacing * 128.0 / period));
     return textureLod(field, uv, lod).z;
     #else
+    if (spacing > 0.0) {
+        return textureLod(field, uv, max(0.0, log2(spacing * 128.0 / period))).z;
+    }
     // Differentiate advected metric coordinates, not the discrete sector index.
     // The two sectors agree at a boundary even when their unused UVs jump.
     vec2 dx = sceneGISRiverRotate(dFdx(p), direction) / period;
@@ -69,12 +71,9 @@ in vec3 v_riverData;
 in vec2 v_riverFlow;
 in vec2 v_riverPosition;
 
-vec2 sceneGISRiverCurrent()
+float sceneGISRiverCurrent()
 {
-    float height = sceneGISRiverHeight(v_riverPosition, v_riverFlow, v_riverData.z, 0.0);
-    // Optional artistic foam follows the random crests rather than channel-wide sine stripes.
-    float foam = 0.5 + 0.5 * height / max(u_currentRippleAmplitude, 1.0e-6);
-    return vec2(height, foam);
+    return sceneGISRiverHeight(v_riverPosition, v_riverFlow, v_riverData.z, 0.0);
 }
 
 vec3 sceneGISRiverNormal(vec3 normal, vec3 up, float height)

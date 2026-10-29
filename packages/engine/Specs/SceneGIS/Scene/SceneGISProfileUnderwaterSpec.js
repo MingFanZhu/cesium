@@ -187,6 +187,63 @@ describe("SceneGIS/Scene/SceneGISProfileUnderwater", function () {
     };
   }
 
+  it("interpolates GPU river currents from original triangle records without a grid", function () {
+    const mesh = new Mesh(
+      undefined,
+      undefined,
+      0,
+      true,
+      1,
+      new RiverGeometry(
+        {
+          positions: [new Cartesian3(0, 0, 20), new Cartesian3(100, 0, 10)],
+          widths: 20,
+          speeds: [1, 3],
+        },
+        undefined,
+      ),
+    );
+    domain = new Domain(mesh);
+    context = createContext();
+    domain.create(context);
+    expect(domain.width).toBe(7);
+    target = new Framebuffer({
+      context,
+      colorTextures: [
+        new Texture({
+          context,
+          width: 1,
+          height: 1,
+          pixelFormat: PixelFormat.RGBA,
+          pixelDatatype: PixelDatatype.FLOAT,
+        }),
+      ],
+    });
+    command = context.createViewportQuadCommand(
+      new ShaderSource({
+        defines: ["SCENEGIS_PROFILE_WATER", "SCENEGIS_RIVER_WATER"],
+        sources: [
+          profileShader,
+          "void main(){vec3 flow;bool inside=sceneGISProfileFlow(vec2(20.0,5.0),flow);out_FragColor=vec4(flow,inside?1.0:0.0);}",
+        ],
+      }),
+      {
+        framebuffer: target,
+        uniformMap: {
+          u_waterProfile: () => domain.texture,
+          u_profileNodeCount: () => domain.nodes.length,
+        },
+      },
+    );
+    command.execute(context);
+    const value = context.readPixels({
+      framebuffer: target,
+      width: 1,
+      height: 1,
+    });
+    expect(Array.from(value)).toEqualEpsilon([1, 0, 1.4, 1], 1e-6);
+  });
+
   it("intersects sloping planar surface and cap analytically instead of using one minimum water level", function () {
     const h = harness(planarMesh(), new Cartesian3(50, 3, 14.75));
     expect(h.draw(Cartesian3.UNIT_X)[0]).toEqualEpsilon(2.5, 1e-4);
