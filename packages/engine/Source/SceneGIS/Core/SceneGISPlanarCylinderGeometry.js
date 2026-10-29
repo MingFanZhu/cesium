@@ -65,31 +65,51 @@ function SceneGISPlanarCylinderGeometry(options) {
 }
 
 Object.defineProperties(SceneGISPlanarCylinderGeometry.prototype, {
-  /** @memberof SceneGISPlanarCylinderGeometry.prototype @type {Cartesian3} @readonly */
+  /**
+   * @memberof SceneGISPlanarCylinderGeometry.prototype
+   * @type {Cartesian3}
+   * @readonly
+   */
   center: {
     get: function () {
       return Cartesian3.clone(this._origin);
     },
   },
-  /** @memberof SceneGISPlanarCylinderGeometry.prototype @type {number} @readonly */
+  /**
+   * @memberof SceneGISPlanarCylinderGeometry.prototype
+   * @type {number}
+   * @readonly
+   */
   length: {
     get: function () {
       return this._length;
     },
   },
-  /** @memberof SceneGISPlanarCylinderGeometry.prototype @type {number} @readonly */
+  /**
+   * @memberof SceneGISPlanarCylinderGeometry.prototype
+   * @type {number}
+   * @readonly
+   */
   topRadius: {
     get: function () {
       return this._topRadius;
     },
   },
-  /** @memberof SceneGISPlanarCylinderGeometry.prototype @type {number} @readonly */
+  /**
+   * @memberof SceneGISPlanarCylinderGeometry.prototype
+   * @type {number}
+   * @readonly
+   */
   bottomRadius: {
     get: function () {
       return this._bottomRadius;
     },
   },
-  /** @memberof SceneGISPlanarCylinderGeometry.prototype @type {number} @readonly */
+  /**
+   * @memberof SceneGISPlanarCylinderGeometry.prototype
+   * @type {number}
+   * @readonly
+   */
   slices: {
     get: function () {
       return this._slices;

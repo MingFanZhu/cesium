@@ -910,13 +910,21 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       setRenderBoolean(this, "_whiteBalance", value);
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {string} @readonly */
+  /**
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {string}
+   * @readonly
+   */
   mode: {
     get: function () {
       return this._mode;
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {SceneGISPlanarWorld|undefined} @readonly */
+  /**
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {SceneGISPlanarWorld|undefined}
+   * @readonly
+   */
   world: {
     get: function () {
       return this._world;
@@ -936,7 +944,11 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       );
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {Event} @readonly */
+  /**
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {Event}
+   * @readonly
+   */
   errorEvent: {
     get: function () {
       return this._errorEvent;
@@ -1377,7 +1389,10 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       setRenderBoolean(this, "_showLensFlare", value);
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {number} */
+  /**
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
   bloomThreshold: {
     get: function () {
       return this._bloomThreshold;
@@ -1386,7 +1401,10 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       setWarmNumber(this, "_bloomThreshold", value, 0.0, 65504.0);
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {number} */
+  /**
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
   bloomIntensity: {
     get: function () {
       return this._bloomIntensity;
@@ -1395,7 +1413,10 @@ Object.defineProperties(SceneGISEnvironmentEffects.prototype, {
       setWarmNumber(this, "_bloomIntensity", value, 0.0, 64.0);
     },
   },
-  /** @memberof SceneGISEnvironmentEffects.prototype @type {number} */
+  /**
+   * @memberof SceneGISEnvironmentEffects.prototype
+   * @type {number}
+   */
   lensFlareIntensity: {
     get: function () {
       return this._lensFlareIntensity;

@@ -1,7 +1,7 @@
 # SceneGIS distribution extension plan
 
 - Type: extension plan
-- Status: active
+- Status: completed
 - Owner: Architecture Agent
 - Date: 2026-10-29
 - ADR: [0205](../../../Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md)
@@ -16,10 +16,10 @@ Build outputs and doclets are generated artifacts, never hand maintained or comm
 
 ## Roadmap
 
-| Phase                                  | Entry                                         | Exit                                                                                                 | Status    |
-| -------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------- |
-| [D1 runtime](2026-10-29-d1-runtime.md) | Current bundler/URL/type chain inspected      | IIFE/ESM, resources, declarations, focused tests, review and local commit                            | completed |
-| D2 documentation and handoff           | D1 committed; recheck JSDoc template and tags | Complete static docs, doclets/index, offline bundle verification, SDK guide, review and local commit | pending   |
+| Phase                                              | Entry                                         | Exit                                                                                                 | Status    |
+| -------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------- |
+| [D1 runtime](2026-10-29-d1-runtime.md)             | Current bundler/URL/type chain inspected      | IIFE/ESM, resources, declarations, focused tests, review and local commit                            | completed |
+| [D2 documentation](2026-10-29-d2-documentation.md) | D1 committed; recheck JSDoc template and tags | Complete static docs, doclets/index, offline bundle verification, SDK guide, review and local commit | completed |
 
 ## Risks and overall acceptance
 
@@ -32,3 +32,9 @@ Build outputs and doclets are generated artifacts, never hand maintained or comm
   global precedence, docs search/links and native plus extension export coverage.
 - Complete each phase before activating the next; no manual product visual gate is added
   for this distribution-only task.
+
+## Final gate
+
+D1 checkpoint `99c7ce81ca`; [D2 review](../reviews/2026-10-29-d2-documentation.md) approved.
+All requested engine distribution/docs contracts verified. No SDK edits, publishing or runtime
+version checks. See the [SDK handoff guide](../../../Documentation/SceneGIS/Distribution.md).

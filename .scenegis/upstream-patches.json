@@ -24,7 +24,8 @@
       "tests": [
         "packages/engine/Specs/SceneGIS/Core/SceneGISBuildModuleUrlSpec.js",
         "scripts/scenegis/distribution.test.mjs",
-        "Specs/e2e/scenegis-distribution.spec.js"
+        "Specs/e2e/scenegis-distribution.spec.js",
+        "scripts/scenegis/documentation.test.mjs"
       ],
       "decision": "Documentation/SceneGIS/Decisions/ADR-0205-scenegis-distribution.md",
       "removalCondition": "Native build and resource resolver offer equivalent distribution branding and base URL options."

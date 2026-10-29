@@ -7,6 +7,7 @@ import ts from "typescript";
 import { buildCesium, buildEngine, buildWidgets } from "../build.js";
 
 import { getDistributionSymbols } from "./distribution-symbols.mjs";
+import { buildDocumentation } from "./build-documentation.mjs";
 
 export const distributionDirectory = "Build/SceneGIS";
 
@@ -51,7 +52,7 @@ export function createDistributionDeclarations(source, symbols, version) {
       return text.replace(/\bCesium\./g, "SceneGIS.");
     })
     .join("\n\n");
-  return `// Generated from the current engine and Widgets JSDoc.\nexport as namespace SceneGIS;\n\n${
+  return `// Generated from the current engine and Widgets JSDoc.\nexport as namespace SceneGIS;\ndeclare global {\n  var SCENEGIS_BASE_URL: string | undefined;\n  var CESIUM_BASE_URL: string | undefined;\n}\n\n${
     body
   }\n${
     version === undefined
@@ -120,6 +121,7 @@ export async function buildDistribution() {
   ]) {
     await copyFile(file, path.join(distributionDirectory, file));
   }
+  await buildDocumentation();
 }
 
 if (

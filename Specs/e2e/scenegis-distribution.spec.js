@@ -126,3 +126,50 @@ for (const [format, mount, base] of [
     });
   });
 }
+
+test("standalone nested documentation searches members and follows type links", async ({
+  page,
+  request,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(`${prefix}index.html`);
+  await page
+    .locator("#ClassFilter")
+    .fill("SceneGISWindVisualization trailDuration");
+  const result = page
+    .locator("#SceneGISSearchResults a")
+    .filter({ hasText: "trailDuration" });
+  await expect(result).toHaveCount(1);
+  await result.click();
+  await expect(page).toHaveURL(
+    /SceneGISWindVisualization\.html\?search=.*#trailDuration/,
+  );
+  await expect(page.locator('[id="trailDuration"]')).toBeVisible();
+  await page.goto(`${prefix}Viewer.html`);
+  await page.locator('#main a[href="Scene.html"]').first().click();
+  await expect(page).toHaveURL(/\/Scene\.html$/);
+  await expect(page.locator('[id="preRender"]')).toBeVisible();
+  await info.attach("api-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("api-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  const index = await (await request.get(`${prefix}api-index.json`)).json();
+  expect(
+    index.symbols.some(
+      (symbol) => symbol.id === "SceneGISWindVisualization#trailDuration",
+    ),
+  ).toBe(true);
+  expect(errors).toEqual([]);
+});

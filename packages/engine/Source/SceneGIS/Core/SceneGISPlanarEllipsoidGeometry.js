@@ -68,25 +68,41 @@ function SceneGISPlanarEllipsoidGeometry(options) {
 }
 
 Object.defineProperties(SceneGISPlanarEllipsoidGeometry.prototype, {
-  /** @memberof SceneGISPlanarEllipsoidGeometry.prototype @type {Cartesian3} @readonly */
+  /**
+   * @memberof SceneGISPlanarEllipsoidGeometry.prototype
+   * @type {Cartesian3}
+   * @readonly
+   */
   center: {
     get: function () {
       return Cartesian3.clone(this._origin);
     },
   },
-  /** @memberof SceneGISPlanarEllipsoidGeometry.prototype @type {Cartesian3} @readonly */
+  /**
+   * @memberof SceneGISPlanarEllipsoidGeometry.prototype
+   * @type {Cartesian3}
+   * @readonly
+   */
   radii: {
     get: function () {
       return Cartesian3.clone(this._radii);
     },
   },
-  /** @memberof SceneGISPlanarEllipsoidGeometry.prototype @type {number} @readonly */
+  /**
+   * @memberof SceneGISPlanarEllipsoidGeometry.prototype
+   * @type {number}
+   * @readonly
+   */
   stackPartitions: {
     get: function () {
       return this._stackPartitions;
     },
   },
-  /** @memberof SceneGISPlanarEllipsoidGeometry.prototype @type {number} @readonly */
+  /**
+   * @memberof SceneGISPlanarEllipsoidGeometry.prototype
+   * @type {number}
+   * @readonly
+   */
   slicePartitions: {
     get: function () {
       return this._slicePartitions;

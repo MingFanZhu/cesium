@@ -98,6 +98,7 @@ void [scene, world, viewer, VERSION, I3SLayer, Panorama];
       path.join(fixture, "global.cts"),
       `
 /// <reference path="../SceneGIS/SceneGIS.d.ts" />
+globalThis.SCENEGIS_BASE_URL = "/vendor/SceneGIS/";
 const position = new SceneGIS.Cartesian3(1, 2, 3);
 const options: SceneGIS.Viewer.ConstructorOptions = { baseLayer: false };
 void [position, options, SceneGIS.VERSION];

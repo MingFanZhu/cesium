@@ -27,6 +27,7 @@ import {
 
 // SCENEGIS_PATCH_BEGIN SGP-0073: Expose the owned branded distribution task.
 export { buildDistribution as buildSceneGIS } from "./scripts/scenegis/build-distribution.mjs";
+export { buildDocumentation as buildSceneGISDocs } from "./scripts/scenegis/build-documentation.mjs";
 // SCENEGIS_PATCH_END SGP-0073
 
 // Determines the scope of the workspace packages. If the scope is set to cesium, the workspaces should be @cesium/engine.

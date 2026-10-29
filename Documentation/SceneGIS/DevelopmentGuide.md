@@ -9,6 +9,13 @@ PrimitiveCollection 中的 Cesium3DTileset，可直接传 SDK 的 layer.nativeLa
 
 文档中的“必须”和“不得”表示强制要求，“建议”表示默认选择；偏离建议时应在代码评审、SGP 或 ADR 中说明理由。
 
+## SceneGIS 品牌发行
+
+`npx gulp buildSceneGIS` 生成完整的 `Build/SceneGIS`，包含单一 ESM、SceneGIS 全局脚本、
+独立类型、Workers/Assets/ThirdParty/Widgets、许可证及完整 API 文档和 JSON 元数据。
+`npx gulp buildSceneGISDocs` 只刷新文档。下游 SDK 只消费该发行目录；资源基址、
+类型与元数据格式见 [Distribution.md](Distribution.md)。原 Cesium 构建命令保持不变。
+
 ## 开始任务前
 
 按以下顺序准备：

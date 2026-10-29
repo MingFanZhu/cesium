@@ -1,6 +1,6 @@
 # ADR-0205: SceneGIS branded single-source distribution
 
-- Status: accepted (implementation in progress)
+- Status: accepted and implemented
 - Date: 2026-10-29
 - Owner: Architecture Agent
 - Related extension: [engine-distribution](../../../AgentDocs/engine-distribution/README.md)
@@ -51,3 +51,17 @@ JSDoc helper pruning/link allocation and declaration postprocessing on upstream 
 This adds packaging/documentation cost only; it does not change simulation/render algorithms,
 rename native types, publish an npm package or modify the SDK. Rebundled ESM requires an
 explicit asset URL because import.meta.url then belongs to the downstream output.
+
+## Implementation outcome
+
+D1 checkpoint `99c7ce81ca` implements branded runtime/resources/types. D2 delivers 533 pages
+and 7,943 canonical symbol records using a composed native publisher, a generated template,
+and member-level static search. All metadata URLs resolve; source AST, raw comments and
+machine paths are excluded. Actual barrel exportName is optional for type-only global symbols.
+The branded publisher uses native flat navigation and omits source-checkout links; native docs
+remain unchanged. Fifteen malformed owned getter tags were fixed at source. BASE_URL globals
+are declared for TypeScript. Full target and docs-only target include the SDK handoff README.
+
+Integration and metadata details: [Distribution](../Distribution.md). Review evidence:
+[D1](../../../AgentDocs/engine-distribution/reviews/2026-10-29-d1-runtime.md),
+[D2](../../../AgentDocs/engine-distribution/reviews/2026-10-29-d2-documentation.md).
