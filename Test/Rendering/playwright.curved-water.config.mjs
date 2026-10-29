@@ -9,7 +9,7 @@ export default defineConfig({
   retries: 0,
   reporter: "list",
   use: {
-    channel: "chromium",
+    channel: process.env.CESIUM_TEST_BROWSER ?? "chromium",
     baseURL: process.env.SCENEGIS_TEST_BASE_URL ?? "http://localhost:8080",
     viewport: { width: 1185, height: 800 },
   },

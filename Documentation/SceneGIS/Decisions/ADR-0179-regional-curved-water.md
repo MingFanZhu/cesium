@@ -46,3 +46,10 @@ example, bounded construction/runtime measurements and release/types precede del
 
 All added implementation and GLSL use existing SceneGIS-owned roots and build discovery.
 No generated file is committed. SGP-0017 is reused without modification.
+
+## Subsequent underwater qualification
+
+[ADR-0199](ADR-0199-globe-underwater.md) adds finite underwater viewing for
+constant-height regional water through the existing `underwaterDepth` option.
+The above-water qualification of R25 is retained as historical scope; variable
+levels, RiverSurface volumes and curved bathymetry/caustics remain excluded.

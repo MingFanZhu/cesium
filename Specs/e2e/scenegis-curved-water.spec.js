@@ -1,5 +1,167 @@
 import { test, expect } from "@playwright/test";
 import checkWaterAppearance from "./scenegis-water-appearance-checks.js";
+
+test("curved lake underwater: entry, underside, pause, bounded composition and disposal", async ({
+  page,
+}, testInfo) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/Test/Rendering/曲面河湖.html?sample=lake");
+  await page.waitForFunction(() => window.example?.water.ready);
+  await page.getByRole("checkbox", { name: "时间动画", exact: true }).uncheck();
+  await page
+    .getByRole("combobox", { name: "观察位置", exact: true })
+    .selectOption({ label: "水下近景" });
+  await page.waitForFunction(() => window.example.water._underwater?.active);
+  await expect(page.locator("#error")).toHaveText("");
+  const metrics = await page.evaluate(async () => {
+    const e = window.example,
+      s = e.viewer.scene;
+    e.viewer.useDefaultRenderLoop = false;
+    const render = () => {
+      s.initializeFrame();
+      s.render(e.viewer.clock.currentTime);
+    };
+    render();
+    const medium = e.water._underwater,
+      gl = s.context._gl;
+    const execute = medium.command.execute;
+    const ext = gl.getExtension("EXT_disjoint_timer_query_webgl2");
+    const gpu = [],
+      cpu = [],
+      draws = [];
+    let count = 0,
+      query;
+    medium.command.execute = function (context, passState) {
+      ++count;
+      if (query) {
+        gl.beginQuery(ext.TIME_ELAPSED_EXT, query);
+      }
+      try {
+        return execute.call(this, context, passState);
+      } finally {
+        if (query) {
+          gl.endQuery(ext.TIME_ELAPSED_EXT);
+        }
+      }
+    };
+    try {
+      for (let i = 0; i < 6; ++i) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        gl.finish();
+        count = 0;
+        query = ext ? gl.createQuery() : undefined;
+        const start = performance.now();
+        render();
+        cpu.push(performance.now() - start);
+        draws.push(count);
+        if (query) {
+          const q = query;
+          query = undefined;
+          while (!gl.getQueryParameter(q, gl.QUERY_RESULT_AVAILABLE)) {
+            await new Promise((resolve) => requestAnimationFrame(resolve));
+          }
+          if (!gl.getParameter(ext.GPU_DISJOINT_EXT)) {
+            gpu.push(gl.getQueryParameter(q, gl.QUERY_RESULT) / 1e6);
+          }
+          gl.deleteQuery(q);
+        }
+      }
+    } finally {
+      medium.command.execute = execute;
+    }
+    const seconds = e.waves._state.seconds;
+    render();
+    return {
+      draws,
+      gpu,
+      cpu,
+      paused: seconds === e.waves._state.seconds,
+      extraTextureBytes: medium.texture.sizeInBytes,
+      width: s.drawingBufferWidth,
+      height: s.drawingBufferHeight,
+      selectedTiles: e.water.statistics.selectedTiles,
+      frustums: s._view.frustumCommandsList.length,
+    };
+  });
+  expect(metrics.draws).toEqual([1, 1, 1, 1, 1, 1]);
+  expect(metrics.paused).toBe(true);
+  expect(metrics.selectedTiles).toBeLessThanOrEqual(512);
+  expect(metrics.extraTextureBytes).toBe(11 * 16);
+  await page.screenshot({
+    path: testInfo.outputPath("globe-underwater-near.png"),
+  });
+  await page
+    .getByRole("combobox", { name: "观察位置", exact: true })
+    .selectOption({ label: "水下仰视" });
+  expect(
+    await page.evaluate(() => {
+      const e = window.example,
+        s = e.viewer.scene;
+      s.initializeFrame();
+      s.render(e.viewer.clock.currentTime);
+      return e.water._underwater.active;
+    }),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("globe-underwater-up.png"),
+  });
+  await page.getByRole("checkbox", { name: "水下模式", exact: true }).uncheck();
+  expect(
+    await page.evaluate(() => {
+      const e = window.example,
+        s = e.viewer.scene;
+      s.initializeFrame();
+      s.render(e.viewer.clock.currentTime);
+      return {
+        depth: e.water.underwaterDepth,
+        active: e.water._underwater.active,
+      };
+    }),
+  ).toEqual({ depth: 0, active: false });
+  await page.getByRole("checkbox", { name: "水下模式", exact: true }).check();
+  const result = await page.evaluate(async () => {
+    const C = await import("/Build/CesiumUnminified/index.js");
+    const e = window.example,
+      s = e.viewer.scene;
+    const render = () => {
+      s.initializeFrame();
+      s.render(e.viewer.clock.currentTime);
+    };
+    s.camera.setView({
+      destination: C.Cartesian3.fromDegrees(118.55, 31.85, 31),
+    });
+    render();
+    const above = !e.water._underwater.active;
+    s.camera.setView({ destination: C.Cartesian3.fromDegrees(116, 31.85, 25) });
+    render();
+    const outside = !e.water._underwater.active;
+    e.settings.viewAt("水下近景");
+    render();
+    const entered = e.water._underwater.active,
+      texture = e.water._underwater.texture;
+    e.destroy();
+    return {
+      above,
+      outside,
+      entered,
+      destroyed:
+        texture.isDestroyed() &&
+        e.water.isDestroyed() &&
+        e.waves.isDestroyed() &&
+        e.viewer.isDestroyed(),
+    };
+  });
+  expect(result).toEqual({
+    above: true,
+    outside: true,
+    entered: true,
+    destroyed: true,
+  });
+  expect(errors).toEqual([]);
+  console.log("Globe underwater metrics", metrics);
+});
+
 for (const sample of ["lake", "river"]) {
   test(`curved ${sample}: near/high camera, animation, bounded LOD and lifecycle`, async ({
     page,

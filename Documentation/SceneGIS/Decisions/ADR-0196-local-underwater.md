@@ -7,8 +7,10 @@
 uses local meters below the mean water plane. A positive value opts a local-mode
 polygon into a finite extruded volume. It supports Planar and Globe ENU placement,
 concave outlines and nested holes; at most 256 total boundary segments. Regional
-ellipsoid and river geometry reject this option rather than silently tinting an
-incorrect volume. Author the cap to match the intended pool depth; actual opaque
+ellipsoid and river geometry originally rejected this option in R33.
+[ADR-0199](ADR-0199-globe-underwater.md) subsequently extends the same API to
+constant-height regional ellipsoid water; varying-height rivers remain unsupported.
+Author the cap to match the intended pool depth; actual opaque
 bottom geometry terminates visible rays earlier. The camera must be inside the
 volume. Water bodies must not overlap.
 

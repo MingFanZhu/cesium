@@ -21,6 +21,15 @@ and resource ownership. SDK and hydraulic simulation remain excluded.
   foam detail with licensed texture films and separate relief lighting; it retains
   the concentration simulation and does not activate another phase.
 
+- R34 technically complete, 2026-10-29: [regional Globe underwater](2026-10-29-r34-globe-underwater.md)
+  extends finite underwater viewing to constant-height ellipsoid water. Reuse the
+  existing chart, optical model and render schedule; varying-height rivers,
+  curved bathymetry/caustics and global oceans remain excluded. R33 implementation
+  checkpoints exist; its owner visual gate is retained independently. R34's
+  [review](../reviews/2026-10-29-r34-globe-underwater.md) records completed strict
+  GPU/browser/build checks and bounded composition cost. Owner visual acceptance
+  remains open; no next implementation phase is active.
+
 Each phase requires technical review and a separate local commit before the next.
 Visual acceptance uses both worlds, shallow slopes, vertical walls, depth changes
 and moving cameras. Earlier R25 cold mesh and R27 visual findings stay open.

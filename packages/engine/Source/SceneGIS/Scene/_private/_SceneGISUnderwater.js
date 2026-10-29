@@ -1,8 +1,11 @@
+import Cartesian2 from "../../../Core/Cartesian2.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
+import Cartographic from "../../../Core/Cartographic.js";
 import DeveloperError from "../../../Core/DeveloperError.js";
 import Matrix3 from "../../../Core/Matrix3.js";
 import Matrix4 from "../../../Core/Matrix4.js";
 import PixelFormat from "../../../Core/PixelFormat.js";
+import Transforms from "../../../Core/Transforms.js";
 import PixelDatatype from "../../../Renderer/PixelDatatype.js";
 import RenderState from "../../../Renderer/RenderState.js";
 import Sampler from "../../../Renderer/Sampler.js";
@@ -12,11 +15,12 @@ import ray from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import optics from "../../../Shaders/SceneGIS/Water/SceneGISWaterOptics.js";
 import effects from "../../../Shaders/SceneGIS/Water/SceneGISWaterEffects.js";
 import fragment from "../../../Shaders/SceneGIS/Water/SceneGISUnderwaterFS.js";
+import volume from "../../../Shaders/SceneGIS/Water/SceneGISUnderwaterVolume.js";
 import EnvironmentLighting from "./_SceneGISModelEnvironmentLighting.js";
 
-/** Finite local-water medium. Surface-owned, with no full-resolution targets. @private */
+/** Finite local or regional curved medium, without full-resolution targets. @private */
 class SceneGISUnderwater {
-  constructor(hierarchy) {
+  constructor(hierarchy, mesh) {
     const edges = [];
     function visit(ring) {
       const p = ring.positions;
@@ -38,16 +42,55 @@ class SceneGISUnderwater {
     this.eyeToWater = new Matrix4();
     this.waterToEye = new Matrix3();
     this.camera = new Cartesian3();
+    this.mesh = mesh;
+    if (mesh) {
+      this.height = mesh.root.minHeight;
+      this.radius = mesh.radius + this.height;
+      this.cartographic = new Cartographic();
+      this.normal = new Cartesian3();
+      this.anchor = new Cartesian3();
+      this.transform = new Matrix4();
+      this.chartCamera = new Cartesian2();
+      this.waterToChart = new Matrix3();
+      const basis = new Matrix3();
+      Matrix3.setColumn(basis, 0, mesh.chart.east, basis);
+      Matrix3.setColumn(basis, 1, mesh.chart.north, basis);
+      Matrix3.setColumn(basis, 2, mesh.chart.up, basis);
+      this.worldToChart = Matrix3.transpose(basis, basis);
+    }
     this.active = false;
   }
 
   update(surface, frameState) {
-    Matrix4.inverseTransformation(surface.modelMatrix, this.inverse);
-    Matrix4.multiplyByPoint(
-      this.inverse,
-      frameState.camera.positionWC,
-      this.camera,
-    );
+    if (this.mesh) {
+      const { ellipsoid, chart } = this.mesh;
+      const c = ellipsoid.cartesianToCartographic(
+        frameState.camera.positionWC,
+        this.cartographic,
+      );
+      if (!c) {
+        this.active = false;
+        return;
+      }
+      const n = ellipsoid.geodeticSurfaceNormalCartographic(c, this.normal);
+      const denominator = Cartesian3.dot(n, chart.up);
+      if (denominator <= 0) {
+        this.active = false;
+        return;
+      }
+      this.camera.x =
+        (chart.radius * Cartesian3.dot(n, chart.east)) / denominator;
+      this.camera.y =
+        (chart.radius * Cartesian3.dot(n, chart.north)) / denominator;
+      this.camera.z = c.height - this.height;
+    } else {
+      Matrix4.inverseTransformation(surface.modelMatrix, this.inverse);
+      Matrix4.multiplyByPoint(
+        this.inverse,
+        frameState.camera.positionWC,
+        this.camera,
+      );
+    }
     const p = this.camera,
       e = this.edges;
     let inside = false;
@@ -69,6 +112,26 @@ class SceneGISUnderwater {
       inside &&
       p.z < 0 &&
       p.z > -surface.underwaterDepth;
+    if (this.active && this.mesh) {
+      this.cartographic.height = this.height;
+      this.mesh.ellipsoid.cartographicToCartesian(
+        this.cartographic,
+        this.anchor,
+      );
+      Transforms.eastNorthUpToFixedFrame(
+        this.anchor,
+        this.mesh.ellipsoid,
+        this.transform,
+      );
+      Matrix4.inverseTransformation(this.transform, this.inverse);
+      Matrix3.multiply(
+        this.worldToChart,
+        Matrix4.getMatrix3(this.transform, this.waterToChart),
+        this.waterToChart,
+      );
+      this.chartCamera.x = p.x;
+      this.chartCamera.y = p.y;
+    }
   }
 
   draw(surface, scene, passState) {
@@ -98,7 +161,10 @@ class SceneGISUnderwater {
       if (mode !== "none") {
         source.defines.push("SCENEGIS_WATER_PHYSICAL");
       }
-      source.sources.push(ray, optics, effects, fragment);
+      if (this.mesh) {
+        source.defines.push("SCENEGIS_ELLIPSOID_UNDERWATER");
+      }
+      source.sources.push(ray, optics, effects, volume, fragment);
       this.command = context.createViewportQuadCommand(source, {
         owner: this,
         renderState: RenderState.fromCache({
@@ -111,6 +177,10 @@ class SceneGISUnderwater {
           u_edgeCount: () => this.edges.length / 4,
           u_eyeToWater: () => this.eyeToWater,
           u_waterToEye: () => this.waterToEye,
+          u_volumeRadius: () => this.radius,
+          u_chartRadius: () => this.mesh.radius,
+          u_waterToChart: () => this.waterToChart,
+          u_chartCamera: () => this.chartCamera,
         },
       });
       this.mode = mode;

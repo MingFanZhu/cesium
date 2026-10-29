@@ -1336,6 +1336,12 @@ opaque 后、透明物体前执行；凹轮廓、孔洞、容积底和 opaque �
 `causticsIntensity` 使用实际波面折射网格的面积比形成局部焦散图；同一水深场驱动持久岸沫。
 固定场和水下程序归图元所有。曲面/河流容积、半透明水下物体、重叠介质及波浪精确弯月面不在首版资格内。
 
+[ADR-0199](Decisions/ADR-0199-globe-underwater.md) 将 `underwaterDepth` 扩展到恒定椭球高的
+`geometryMode: "ellipsoid"` 水面。相机浸没使用真实椭球高和固定 chart 轮廓，GPU 使用随相机
+重定位的曲率球壳裁剪光程，保留孔洞、有限深度与 opaque 截断；球体上为精确球壳，扁椭球上
+沿用 R25 的局部光学近似。共用原来的单次介质合成与反射输入，不增加 framebuffer、原生缝隙或回读。
+变水位曲面、RiverSurface 容积、曲面 bathymetry/焦散和多层介质仍不在资格内。
+
 ## 风驱动湖面（R22）
 
 [ADR-0101](Decisions/ADR-0101-wind-water-spectrum.md) 在原有 WaterSurface 上增加可选的

@@ -87,7 +87,8 @@ vec4 sceneGISSSRTrace(vec3 position, vec4 ray)
                 // Reflections stay in the incident medium: air above, water below.
                 vec3 hitPosition = sceneGISSSRPosition(uv * size, hitSurface);
                 #ifdef SCENEGIS_CURVED_WATER
-                if (sceneGISWaterMeanOffset(hitPosition) < 0.0) { return vec4(0.0); }
+                float cameraHeight = sceneGISWaterMeanOffset(vec3(0.0));
+                if (sceneGISWaterMeanOffset(hitPosition) * cameraHeight < 0.0) { return vec4(0.0); }
                 #else
                 float hitHeight = (czm_inverseModelView * vec4(hitPosition, 1.0)).z;
                 if (hitHeight * czm_inverseModelView[3].z < 0.0) { return vec4(0.0); }

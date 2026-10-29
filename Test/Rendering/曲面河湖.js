@@ -79,6 +79,7 @@ const water = scene.primitives.add(
     polygonHierarchy: hierarchy,
     height: 30,
     perPositionHeight: river,
+    underwaterDepth: river ? 0 : 25,
     windWaves: waves,
     meshSpacing: 1,
     maximumScreenSpaceError: 2,
@@ -89,7 +90,7 @@ const water = scene.primitives.add(
 );
 const constructionMilliseconds = performance.now() - start;
 
-function land(polygon, height, id) {
+function land(polygon, height, id, color = "#647050") {
   return scene.primitives.add(
     new C.Primitive({
       geometryInstances: new C.GeometryInstance({
@@ -101,7 +102,7 @@ function land(polygon, height, id) {
         }),
         attributes: {
           color: C.ColorGeometryInstanceAttribute.fromColor(
-            C.Color.fromCssColorString("#647050"),
+            C.Color.fromCssColorString(color),
           ),
         },
         id,
@@ -126,6 +127,40 @@ if (!river) {
     "湖岸",
   );
   land(lake.holes[0], 36, "岛屿");
+  land(lake, 10, "示意湖底", "#899a91");
+  const bedFrame = C.Transforms.eastNorthUpToFixedFrame(
+    C.Cartesian3.fromDegrees(118.55, 31.85, 10),
+  );
+  const markers = [
+    [-12, 15, 8, "#bc7658"],
+    [9, 25, 14, "#e2d6ad"],
+    [-8, 42, 12, "#769aa5"],
+    [16, 58, 18, "#bdc5a5"],
+  ];
+  for (const [x, y, height, color] of markers) {
+    scene.primitives.add(
+      new C.Primitive({
+        geometryInstances: new C.GeometryInstance({
+          geometry: C.BoxGeometry.fromDimensions({
+            dimensions: new C.Cartesian3(3, 3, height),
+            vertexFormat: C.PerInstanceColorAppearance.VERTEX_FORMAT,
+          }),
+          modelMatrix: C.Matrix4.fromTranslation(
+            new C.Cartesian3(x, y, height / 2),
+          ),
+          attributes: {
+            color: C.ColorGeometryInstanceAttribute.fromColor(
+              C.Color.fromCssColorString(color),
+            ),
+          },
+          id: "水下深度标记",
+        }),
+        modelMatrix: bedFrame,
+        appearance: new C.PerInstanceColorAppearance({ translucent: false }),
+        asynchronous: false,
+      }),
+    );
+  }
 }
 const gui = new GUI({
   title: river ? "曲面河流" : "曲面湖泊",
@@ -136,7 +171,19 @@ const settings = {
   animate: true,
   show: true,
   heightFog: false,
+  underwater: !river,
   viewAt(name) {
+    if (name === "水下近景" || name === "水下仰视") {
+      viewer.camera.setView({
+        destination: C.Cartesian3.fromDegrees(118.55, 31.85, 25),
+        orientation: {
+          heading: 0,
+          pitch: name === "水下仰视" ? 0.6 : -0.22,
+          roll: 0,
+        },
+      });
+      return;
+    }
     const target = river
       ? C.Cartesian3.fromDegrees(118.59, 31.87, 60)
       : C.Cartesian3.fromDegrees(118.55, 31.85, 30);
@@ -159,6 +206,7 @@ gui
     "低角度远眺",
     "全域鸟瞰",
     "高空",
+    ...(!river ? ["水下近景", "水下仰视"] : []),
   ])
   .name("观察位置")
   .onChange(settings.viewAt);
@@ -188,6 +236,14 @@ const appearance = waterAppearanceControls(gui, () => [water], {
   foamIntensity: river ? 0.2 : 0.25,
 });
 gui.add(water, "reflections").name("场景倒影");
+if (!river) {
+  gui
+    .add(settings, "underwater")
+    .name("水下模式")
+    .onChange((value) => {
+      water.underwaterDepth = value ? 25 : 0;
+    });
+}
 gui
   .add(settings, "heightFog")
   .name("高度雾")

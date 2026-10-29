@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R33 local underwater and depth-driven foam                                                               |
-| Active phase plan      | [R33](plans/2026-10-28-r33-local-underwater.md)                                                          |
+| Current phase          | R34 technically complete; owner visual gate pending                                                      |
+| Active phase plan      | None; last: [R34](plans/2026-10-29-r34-globe-underwater.md)                                              |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
@@ -34,6 +34,14 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- R34 technically complete: [plan](plans/2026-10-29-r34-globe-underwater.md) /
+  [review](reviews/2026-10-29-r34-globe-underwater.md) / ADR-0199 extend finite
+  underwater viewing to constant-height regional ellipsoid water. Seventy-four
+  development GPU cases, nine release cases, three browser cases and build/types
+  pass. About 0.242 ms measured resolve GPU time; no new full-resolution target,
+  upstream or SDK changes. Owner R34 visual gate remains open, independently of
+  the earlier R33 gate. No next implementation phase is active.
 
 - 2026-10-29 example maintenance after `24bdc6f939`: Xuanwu, curved lake/channel
   and river now use editable coefficient-optics palettes with distinct defaults,

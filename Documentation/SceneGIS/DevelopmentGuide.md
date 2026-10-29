@@ -1085,8 +1085,9 @@ FFT 风浪。预设是外观演示，不代表实测水质。示例使用固定�
 | 曲面长河           | 河水     | 0.5 m / 0.2     | 0.12 / 1.5 s                   |
 | 河流水面           | 河水     | 0.5 m / 0.2     | 0.08 / 1.5 s（默认不叠加风浪） |
 
-这三个示例仍采用屏幕深度接触岸沫；未提供固定水深场，未启用水下介质或焦散。
-局部水面的水下视角与固定水深场演示保持独立。
+这三个示例仍采用屏幕深度接触岸沫，未提供固定水深场或启用焦散。
+曲面大湖额外提供水下模式及显式示意湖底；玄武湖与变水位河流未启用水下介质。
+局部水面的固定水深场演示保持独立。
 
 局部 `SceneGISWaterSurface` 可额外配置：
 
@@ -1107,7 +1108,8 @@ const water = new Cesium.SceneGISWaterSurface({
 ```
 
 - `underwaterDepth`：平均水面下的有限容积深度，默认 0 关闭。支持平面和球面 ENU 的
-  local 水面、凹轮廓及孔洞，总边数不超过 256；相机在容积内才启用。真实 opaque 水底会
+  local 水面，以及恒定椭球高的 ellipsoid 水面；凹轮廓及孔洞总边数不超过 256。
+  相机在容积内才启用。真实 opaque 水底会
   提前截断视线。当前按平均水位判断浸没，不包含波浪逐像素浸没和弯月面。
 - `bathymetry`：可选、构造时复制的固定水深场。width/height 为 2–1024 的整数；
   depths 按行存储，列沿局部 X 增大、行沿局部 Y 增大，首末格点覆盖 rectangle 边界。
@@ -1128,8 +1130,9 @@ const water = new Cesium.SceneGISWaterSurface({
   焦散图独立于泡沫分辨率，为泡沫场尺寸的两倍，限制在 256–512；折射网格为焦散图尺寸的一半。
   顶点聚光强度连续插值，放大时采用三次 B-spline 重建，缩小时采用 mipmap，避免近景块状接缝。
   256 水深场示例启用焦散约占每个水面 6.67 MiB 的场纹理和网格；只用岸沫不创建焦散资源。
-- 上述新参数只支持 local 模式。区域曲面和 RiverSurface 保持原光学能力；半透明水下物体、
-  多层重叠水域暂不在资格内。移除水面会释放深度场、泡沫历史、焦散图和水下程序；风浪仍归调用方。
+- `bathymetry` 和 `causticsIntensity` 只支持 local 模式。区域曲面水下模式见下节；
+  RiverSurface、半透明水下物体和多层重叠水域暂不在资格内。
+  移除水面会释放深度场、泡沫历史、焦散图和水下程序；风浪仍归调用方。
 
 算法、资源成本及参考实现见 ADR-0195、ADR-0196。新增水下视角与焦散有独立的 GUI 开关。
 
@@ -1203,6 +1206,7 @@ const water = scene.primitives.add(
       ]),
     ),
     height: 30,
+    underwaterDepth: 25,
     windWaves: waves,
     maximumScreenSpaceError: 2,
     maximumTileCount: 512,
@@ -1222,7 +1226,16 @@ waves.destroy();
 固定区域 chart 跨日期变更线不拆相位，但轮廓必须处于同一个开放切向半球。
 边是 chart 中的直线；复杂 GIS 岸线按所需曲线精度提供采样点。曲面跟随椭球，
 FFT 使用区域米制 chart 并存在投影畸变。区域光学使用局部曲面近似；没有全球海洋掩膜、
-海拔转换、水下相机、透明水下对象或多层水面支持。
+海拔转换、透明水下对象或多层水面支持。
+
+恒定水位的大湖可设置 `underwaterDepth`，或运行时赋值 `water.underwaterDepth = 25`。
+上例的平均水位为椭球高 30 m，有限容积底为 5 m；已有 opaque 湖底会提前截断视线。
+设置 0 关闭。相机判断使用真实椭球高，并保留固定轮廓、凹岸线和孔洞；不要求当前相机能看到水面。
+GPU 光程采用随相机重定位的曲率球壳，球形 Globe 上精确，扁椭球上沿用区域光学近似，
+不等于精确的全球椭球平行曲面求交。水下仰视复用水到空气的 Fresnel、全内反射和水底 SSR。
+仍按平均水位判断浸没，不包含随波浪变化的弯月面。`perPositionHeight: true` 只有全部水位
+恒定时可用；变水位曲面和 `SceneGISRiverSurface` 设置正水下深度会报错。
+曲面 bathymetry 和焦散仍不支持；水深不会从地形或屏幕深度隐式推导。接口与资格见 ADR-0199。
 
 网格按 16×16 单元分块，结合约 8 个绘制缓冲像素的单元尺度及
 `maximumScreenSpaceError` 曲率目标自动细分。`meshSpacing` 是最小间距，
@@ -1235,7 +1248,8 @@ FFT 使用区域米制 chart 并存在投影畸变。区域光学使用局部曲
 
 人工入口 `Test/Rendering/曲面河湖.html?sample=lake` / `sample=river`，包含岛屿、
 凹岸线、沿程水位、近景、低角度和高空切换，使用本地确定性示意几何。
-严格 GPU Specs 为 `SceneGISEllipsoidWater`；E2E 入口
+大湖额外有“水下近景”“水下仰视”和“水下模式”开关，湖底和立柱提供显式深度参照。
+严格 GPU Specs 为 `SceneGISEllipsoidWater` 和 `SceneGISGlobeUnderwater`；E2E 入口
 `Test/Rendering/playwright.curved-water.config.mjs`，回归沿用 WaterSurface/WindWaves 和双 World 玄武湖示例。
 设计与已知性能范围见 ADR-0179、R25 plan/review。
 

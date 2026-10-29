@@ -102,13 +102,21 @@ function validate(surface) {
   if (surface.causticsIntensity > 0 && !surface._field) {
     throw new DeveloperError("Caustics require explicit bathymetry.");
   }
-  if (
-    surface._gridMesh &&
-    (surface.underwaterDepth > 0 || surface.causticsIntensity > 0)
-  ) {
-    throw new DeveloperError(
-      "Underwater volumes and caustics require local water geometry.",
-    );
+  if (surface._gridMesh && surface.causticsIntensity > 0) {
+    throw new DeveloperError("Caustics require local water geometry.");
+  }
+  if (surface._gridMesh && surface.underwaterDepth > 0) {
+    const mesh = surface._ellipsoidMesh;
+    if (!mesh || Math.abs(mesh.root.maxHeight - mesh.root.minHeight) > 1e-7) {
+      throw new DeveloperError(
+        "Curved underwater volumes require constant-height ellipsoid water; varying heights and RiverSurface are not supported.",
+      );
+    }
+    if (surface.underwaterDepth >= mesh.radius + mesh.root.minHeight) {
+      throw new DeveloperError(
+        "underwaterDepth must leave the curved bottom above the curvature center.",
+      );
+    }
   }
   number(surface.scatteringAnisotropy, "scatteringAnisotropy", -0.9, 0.9);
   number(surface.refractionStrength, "refractionStrength", 0, 1);
@@ -163,8 +171,8 @@ function validate(surface) {
 }
 
 /**
- * An above-water lake, river or pool surface with depth-based transmission,
- * animated normal waves, dielectric reflection and shallow contact foam.
+ * A lake, river or pool surface with depth-based transmission, animated normal waves,
+ * dielectric reflection, shallow contact foam and optional finite underwater viewing.
  * Add it to Scene.primitives. PolygonHierarchy positions are local XY meters with z = 0;
  * modelMatrix places the plane in either World. Globe callers normally use an ENU transform.
  * Explicit geometryMode "ellipsoid" instead accepts ECEF positions and a constant ellipsoid
@@ -173,7 +181,8 @@ function validate(surface) {
  * hemisphere; their edges are straight in the regional gnomonic chart. This is regional visual
  * wind synthesis with projection distortion, not global ocean or hydraulic simulation.
  * Requires SCENE3D, HDR and WebGL2 floating-point targets. Native Water materials are unchanged.
- * Uses opaque scene depth/color. Local underwater viewing is opt-in through underwaterDepth;
+ * Uses opaque scene depth/color. Underwater viewing is opt-in through underwaterDepth for
+ * local geometry and constant-height ellipsoid geometry;
  * overlapping water layers and translucent submerged objects are not supported. Reflection misses use the physical sky when active,
  * otherwise reflectionColor. The scattering tint and foam follow physical lighting when active.
  * Animation follows Scene time; no render loop is started. In requestRenderMode, request a frame
@@ -208,7 +217,7 @@ function validate(surface) {
  * @param {number} [options.flowSpeed=0.6] Wave phase speed in meters per second.
  * @param {number} [options.foamWidth=0.3] Shallow contact depth range in meters; with bathymetry also the horizontal shoreline range. Zero disables it.
  * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
- * @param {number} [options.underwaterDepth=0] Local volume depth below the mean surface in meters; zero disables underwater viewing. Local geometry only, at most 256 boundary segments including holes. Mean-height immersion, not a wave-exact meniscus.
+ * @param {number} [options.underwaterDepth=0] Finite volume depth below the mean surface in meters; zero disables underwater viewing. Supports local and constant-height ellipsoid geometry, at most 256 boundary segments including holes. Curved ray clipping uses a camera-relative sphere approximation. Mean-height immersion, not a wave-exact meniscus.
  * @param {SceneGISWaterSurface.Bathymetry} [options.bathymetry] Immutable copied local depth field for camera-independent shore foam and caustics.
  * @param {number} [options.causticsIntensity=0] Approximate bottom light focusing strength in [0, 2]. Local geometry only.
  * @param {number} [options.refractionStrength=0.2] Screen-space refraction distortion in [0, 1].
@@ -375,7 +384,8 @@ function SceneGISWaterSurface(options = {}) {
    */
   this.foamIntensity = options.foamIntensity ?? 0.5;
   /**
-   * Finite local underwater volume depth in meters. Zero disables the effect. Requires local geometry.
+   * Finite underwater volume depth in meters. Zero disables the effect. Supports local and constant-height ellipsoid geometry.
+   * Curved clipping uses a camera-relative sphere approximation; varying-height rivers are unsupported.
    * Uses mean-height immersion; concave boundaries and holes are supported, up to 256 segments.
    * @type {number}
    */
@@ -849,7 +859,10 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
       this._lightingMode = lightingMode;
     }
     if (this.underwaterDepth > 0) {
-      this._underwater ??= new Underwater(this._hierarchy);
+      this._underwater ??= new Underwater(
+        this._hierarchy ?? this._ellipsoidMesh.hierarchy,
+        this._ellipsoidMesh,
+      );
     }
     this._underwater?.update(this, frameState);
     this._field?.update(this, frameState);
