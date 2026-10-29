@@ -1,5 +1,5 @@
-uniform sampler2D u_edges;
-uniform int u_edgeCount;
+uniform sampler2D u_boundary;
+uniform int u_boundaryNodeCount;
 #ifdef SCENEGIS_ELLIPSOID_UNDERWATER
 uniform float u_volumeRadius;
 uniform float u_chartRadius;
@@ -85,8 +85,7 @@ float sceneGISWaterShellHit(vec3 origin, vec3 direction, float depth)
 }
 #endif
 
-#ifdef SCENEGIS_PROFILE_WATER
-bool sceneGISProfileHalfplane(float a,float b,inout float lo,inout float hi)
+bool sceneGISWaterHalfplane(float a,float b,inout float lo,inout float hi)
 {
     if(b==0.0){return a>=0.0;}
     float t=-a/b;
@@ -94,15 +93,16 @@ bool sceneGISProfileHalfplane(float a,float b,inout float lo,inout float hi)
     return lo<=hi;
 }
 
-bool sceneGISProfileBox(vec4 bounds,vec2 start,vec2 velocity,float z,float dz,inout float lo,inout float hi)
+bool sceneGISWaterBox(vec4 bounds,vec2 start,vec2 velocity,float z,float dz,inout float lo,inout float hi)
 {
     vec2 a=start-bounds.xy,b=bounds.zw-start;
-    return sceneGISProfileHalfplane(a.x*z,a.x*dz+velocity.x,lo,hi)&&
-        sceneGISProfileHalfplane(a.y*z,a.y*dz+velocity.y,lo,hi)&&
-        sceneGISProfileHalfplane(b.x*z,b.x*dz-velocity.x,lo,hi)&&
-        sceneGISProfileHalfplane(b.y*z,b.y*dz-velocity.y,lo,hi);
+    return sceneGISWaterHalfplane(a.x*z,a.x*dz+velocity.x,lo,hi)&&
+        sceneGISWaterHalfplane(a.y*z,a.y*dz+velocity.y,lo,hi)&&
+        sceneGISWaterHalfplane(b.x*z,b.x*dz-velocity.x,lo,hi)&&
+        sceneGISWaterHalfplane(b.y*z,b.y*dz-velocity.y,lo,hi);
 }
 
+#ifdef SCENEGIS_PROFILE_WATER
 #ifdef SCENEGIS_ELLIPSOID_UNDERWATER
 float sceneGISProfileShellRoot(vec3 p,vec3 v,float height,float rate,float c,float depth)
 {
@@ -126,7 +126,7 @@ float sceneGISProfileRay(vec3 origin,vec3 direction,vec2 start,vec2 velocity,flo
         vec4 bounds=texelFetch(u_waterProfile,ivec2(0,node),0);
         vec4 data=texelFetch(u_waterProfile,ivec2(3,node),0);
         float lo=0.0,hi=limit;
-        if(!sceneGISProfileBox(bounds,start,velocity,z,dz,lo,hi)) {node=int(data.y);continue;}
+        if(!sceneGISWaterBox(bounds,start,velocity,z,dz,lo,hi)) {node=int(data.y);continue;}
         if(data.z>0.0){
             vec4 ab=texelFetch(u_waterProfile,ivec2(1,node),0);
             vec4 cg=texelFetch(u_waterProfile,ivec2(2,node),0);
@@ -135,7 +135,7 @@ float sceneGISProfileRay(vec3 origin,vec3 direction,vec2 start,vec2 velocity,flo
             for(int i=0;i<3;++i){
                 vec2 edge=vertices[(i+1)%3]-vertices[i];
                 float side=sceneGISWaterCross(edge,start-vertices[i]);
-                hit=hit&&sceneGISProfileHalfplane(side*z,side*dz+sceneGISWaterCross(edge,velocity),lo,hi);
+                hit=hit&&sceneGISWaterHalfplane(side*z,side*dz+sceneGISWaterCross(edge,velocity),lo,hi);
             }
             if(hit&&hi>lo){
                 #ifdef SCENEGIS_ELLIPSOID_UNDERWATER
@@ -168,6 +168,66 @@ float sceneGISProfileRay(vec3 origin,vec3 direction,vec2 start,vec2 velocity,flo
 }
 #endif
 
+vec4 sceneGISWaterBoundaryTexel(int index)
+{
+    int width=textureSize(u_boundary,0).x;
+    return texelFetch(u_boundary,ivec2(index%width,index/width),0);
+}
+
+// One stackless traversal serves origin parity and the nearest finite ray.
+bool sceneGISWaterBoundaryRay(vec2 start,vec2 velocity,float z,float dz,inout float distance)
+{
+    #ifdef SCENEGIS_PROFILE_WATER
+    bool inside=true;
+    #else
+    bool inside=false;
+    #endif
+    int node=0;
+    while(node<u_boundaryNodeCount){
+        vec4 bounds=sceneGISWaterBoundaryTexel(node*2);
+        vec4 data=sceneGISWaterBoundaryTexel(node*2+1);
+        bool point=false;
+        #ifndef SCENEGIS_PROFILE_WATER
+        point=start.y>=bounds.y&&start.y<=bounds.w&&start.x<bounds.z;
+        #endif
+        float lo=0.0,hi=distance;
+        if(dz<0.0){hi=min(hi,-z/dz);}
+        bool ray=sceneGISWaterBox(bounds,start,velocity,z,dz,lo,hi)&&hi>0.0;
+        if(!point&&!ray){node=int(data.x);continue;}
+        for(int j=0;j<4;++j){
+            if(j>=int(data.z)){break;}
+            vec4 edge=sceneGISWaterBoundaryTexel(int(data.y)+j);
+            vec2 a=edge.xy,b=edge.zw,segment=b-a;
+            #ifndef SCENEGIS_PROFILE_WATER
+            if(point&&(a.y>start.y)!=(b.y>start.y)&&
+                start.x<(b.x-a.x)*(start.y-a.y)/(b.y-a.y)+a.x){inside=!inside;}
+            #endif
+            if(!ray){continue;}
+            #ifdef SCENEGIS_ELLIPSOID_UNDERWATER
+            float side=sceneGISWaterCross(a-start,segment);
+            float denominator=sceneGISWaterCross(velocity,segment)-side*dz;
+            if(abs(denominator)>1e-8){
+                float t=side*z/denominator,endZ=z+t*dz;
+                if(t>0.0&&t<distance&&endZ>0.0){
+                    vec2 hit=start+velocity*t/endZ;
+                    float u=dot(hit-a,segment)/dot(segment,segment);
+                    if(u>=0.0&&u<=1.0){distance=t;}
+                }
+            }
+            #else
+            float denominator=sceneGISWaterCross(velocity,segment);
+            if(abs(denominator)>1e-8){
+                float t=sceneGISWaterCross(a-start,segment)/denominator;
+                float u=sceneGISWaterCross(a-start,velocity)/denominator;
+                if(t>0.0&&u>=0.0&&u<=1.0){distance=min(distance,t);}
+            }
+            #endif
+        }
+        ++node;
+    }
+    return inside;
+}
+
 bool sceneGISWaterVolumeRay(vec3 origin, vec3 direction, out float distance)
 {
     float depth = sceneGISWaterVolumeDepth(origin);
@@ -191,8 +251,8 @@ bool sceneGISWaterVolumeRay(vec3 origin, vec3 direction, out float distance)
     #else
     vec2 start = origin.xy;
     distance = 1e20;
-    #ifdef SCENEGIS_PROFILE_WATER
     float chartZ=1.0;vec3 chartDirection=vec3(direction.xy,0.0);vec2 velocity=direction.xy;
+    #ifdef SCENEGIS_PROFILE_WATER
     if(direction.z>0.0){distance=(u_profileRange.y-origin.z)/direction.z;}
     if(direction.z<0.0){distance=(u_profileRange.x-u_underwaterDepth-origin.z)/direction.z;}
     #else
@@ -200,37 +260,7 @@ bool sceneGISWaterVolumeRay(vec3 origin, vec3 direction, out float distance)
     if (direction.z < 0.0) { distance = min(distance, (-u_underwaterDepth - origin.z) / direction.z); }
     #endif
     #endif
-    bool inside = false;
-    for (int i = 0; i < u_edgeCount; ++i) {
-        vec4 edge = texelFetch(u_edges, ivec2(i, 0), 0);
-        vec2 a = edge.xy, b = edge.zw, segment = b - a;
-        #ifndef SCENEGIS_PROFILE_WATER
-        if ((a.y > start.y) != (b.y > start.y) &&
-            start.x < (b.x - a.x) * (start.y - a.y) / (b.y - a.y) + a.x) { inside = !inside; }
-        #else
-        inside=true;
-        #endif
-        #ifdef SCENEGIS_ELLIPSOID_UNDERWATER
-        float side = sceneGISWaterCross(a - start, segment);
-        float denominator = sceneGISWaterCross(velocity, segment) - side * chartDirection.z;
-        if (abs(denominator) > 1e-8) {
-            float t = side * chartZ / denominator;
-            float endZ = chartZ + t * chartDirection.z;
-            if (t > 0.0 && t < distance && endZ > 0.0) {
-                vec2 hit = start + velocity * t / endZ;
-                float u = dot(hit - a, segment) / dot(segment, segment);
-                if (u >= 0.0 && u <= 1.0) { distance = t; }
-            }
-        }
-        #else
-        float denominator = sceneGISWaterCross(direction.xy, segment);
-        if (abs(denominator) > 1e-8) {
-            float t = sceneGISWaterCross(a - start, segment) / denominator;
-            float u = sceneGISWaterCross(a - start, direction.xy) / denominator;
-            if (t > 0.0 && u >= 0.0 && u <= 1.0) { distance = min(distance, t); }
-        }
-        #endif
-    }
+    bool inside = sceneGISWaterBoundaryRay(start,velocity,chartZ,chartDirection.z,distance);
     #ifdef SCENEGIS_PROFILE_WATER
     distance=sceneGISProfileRay(origin,direction,start,velocity,chartZ,chartDirection.z,distance);
     #endif

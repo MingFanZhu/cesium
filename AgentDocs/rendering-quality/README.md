@@ -8,8 +8,8 @@
 | Status                 | `active`                                                                                                 |
 | Planning model         | `extension`                                                                                              |
 | Active extension plan  | [roadmap](plans/2026-09-18-rendering-quality-extension.md)                                               |
-| Current phase          | R37 technically complete; owner visual gate pending                                                      |
-| Active phase plan      | None; [completed R37](plans/2026-10-29-r37-screen-water-effects.md)                                      |
+| Current phase          | R38 technically complete; owner visual gate pending                                                      |
+| Active phase plan      | None; [completed R38](plans/2026-10-29-r38-water-boundary-bvh.md)                                        |
 | Active standalone plan | None; [completed directional occlusion assessment](plans/2026-10-22-directional-occlusion-assessment.md) |
 | Architecture contact   | Current task                                                                                             |
 | Execution contact      | Current task                                                                                             |
@@ -34,6 +34,13 @@
 - R1 example: [级联阴影](../../Test/Planar/级联阴影.html).
 
 ## Current handoff
+
+- R38 technically complete after `066143a580`: replace full shore scan/256-edge ceiling with
+  shared original-edge BVH queries and explicit byte budget. [Plan](plans/2026-10-29-r38-water-boundary-bvh.md)
+  / [review](reviews/2026-10-29-r38-water-boundary-bvh.md) / ADR-0204; 94 release
+  GPU cases, two large-boundary browser cases and full build/types pass. No SDK/
+  upstream change. Profile triangle budget remains independent; owner visual gate
+  pending. No next phase active.
 
 - R37 technically complete after `e467891320`: owner removes explicit depth grids
   and persistent shore transport. [Plan](plans/2026-10-29-r37-screen-water-effects.md) /

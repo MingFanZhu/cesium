@@ -536,3 +536,13 @@ R27 implementation and technical review are complete. The
 [review](../reviews/2026-10-21-r27-lake-wave-quality.md) records directional/fine-band
 coverage, GPU and storage cost, and retained cold-build limitations. Owner visual
 acceptance remains pending; no next phase is activated.
+
+## R38 activation, 2026-10-29
+
+Owner identifies the per-pixel linear shoreline bottleneck. [R38](2026-10-29-r38-water-boundary-bvh.md)
+adds a static edge BVH with byte-based limits, retaining true geometry/holes and
+local/curved/profile behavior. ADR-0204; no SDK/upstream changes.
+
+R38 technical gate is complete: [review](../reviews/2026-10-29-r38-water-boundary-bvh.md)
+records 94 release cases, two browser cases, direct GPU comparison and memory.
+Owner visual acceptance remains separate; no next implementation phase is active.

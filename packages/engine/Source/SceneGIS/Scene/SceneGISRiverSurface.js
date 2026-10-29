@@ -68,7 +68,8 @@ function validate(river) {
  * @param {number} [options.roughness=0.12] Perceptual roughness in [0.02, 1].
  * @param {number} [options.foamWidth=0.3] Shallow contact foam depth range in meters.
  * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
- * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated river profile in meters. Zero disables underwater viewing. Up to 256 source shore segments and 1024 prepared triangles; curved optics use a local sphere approximation.
+ * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated river profile in meters. Zero disables underwater viewing. Original shores are indexed; profiles retain a separate 1024-triangle budget. Curved optics use a local sphere approximation.
+ * @param {number} [options.maximumUnderwaterBoundaryBytes=8388608] Immutable shoreline index texture budget including padding, integer bytes in [1,67108864]. Geometry is not simplified to fit.
  * @param {number} [options.causticsIntensity=0] Approximate visible-receiver caustic strength in [0, 2]. Uses scene depth and actual waves.
  * @param {number} [options.refractionStrength=0.2] Screen-space refraction distortion in [0, 1].
  * @param {boolean} [options.reflections=true] Whether to trace scene reflections.
@@ -134,6 +135,28 @@ function SceneGISRiverSurface(options = {}) {
 }
 
 Object.defineProperties(SceneGISRiverSurface.prototype, {
+  /**
+   * Immutable shoreline index budget in bytes.
+   * @memberof SceneGISRiverSurface.prototype
+   * @type {number}
+   * @readonly
+   */
+  maximumUnderwaterBoundaryBytes: {
+    get() {
+      return this._surface.maximumUnderwaterBoundaryBytes;
+    },
+  },
+  /**
+   * Allocated shoreline index texture bytes; zero until an active underwater draw.
+   * @memberof SceneGISRiverSurface.prototype
+   * @type {number}
+   * @readonly
+   */
+  underwaterBoundaryByteLength: {
+    get() {
+      return this._surface.underwaterBoundaryByteLength;
+    },
+  },
   /**
    * Approximate visible-receiver caustic strength in [0, 2]. Uses scene depth and actual waves.
    * @memberof SceneGISRiverSurface.prototype

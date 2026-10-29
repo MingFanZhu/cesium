@@ -18,15 +18,14 @@ import {
   SceneGISPlanarExtent,
   SceneGISPlanarWorld,
   SceneGISRiverSurface,
-  Sampler,
   ShaderSource,
   Texture,
   Transforms,
   _SceneGISWaterDomain as Domain,
+  _SceneGISUnderwater as Underwater,
 } from "../../../index.js";
 import Mesh from "../../../Source/SceneGIS/Scene/_private/_SceneGISEllipsoidWaterMesh.js";
 import RiverGeometry from "../../../Source/SceneGIS/Scene/_private/_SceneGISRiverGeometry.js";
-import Underwater from "../../../Source/SceneGIS/Scene/_private/_SceneGISUnderwater.js";
 import profileShader from "../../../Source/Shaders/SceneGIS/Water/SceneGISWaterProfile.js";
 import polynomial from "../../../Source/Shaders/SceneGIS/Water/SceneGISWaterPolynomial.js";
 import volume from "../../../Source/Shaders/SceneGIS/Water/SceneGISUnderwaterVolume.js";
@@ -105,18 +104,7 @@ describe("SceneGIS/Scene/SceneGISProfileUnderwater", function () {
     expect(medium.active).toBeTrue();
     context = createContext();
     domain.create(context);
-    edges = new Texture({
-      context,
-      pixelFormat: PixelFormat.RGBA,
-      pixelDatatype: PixelDatatype.FLOAT,
-      sampler: Sampler.NEAREST,
-      flipY: false,
-      source: {
-        width: medium.edges.length / 4,
-        height: 1,
-        arrayBufferView: medium.edges,
-      },
-    });
+    edges = medium.boundary.createTexture(context);
     target = new Framebuffer({
       context,
       colorTextures: [
@@ -161,8 +149,8 @@ describe("SceneGIS/Scene/SceneGISProfileUnderwater", function () {
           u_profileNodeCount: () => domain.nodes.length,
           u_profileAnchor: () => medium.height - domain.reference,
           u_profileRange: () => medium.profileRange,
-          u_edges: () => edges,
-          u_edgeCount: () => medium.edges.length / 4,
+          u_boundary: () => edges,
+          u_boundaryNodeCount: () => medium.boundary.nodes.length,
           u_underwaterDepth: () => 2,
           u_cameraDepth: () => -medium.camera.z,
           u_volumeRadius: () => medium.radius,
@@ -428,6 +416,7 @@ describe("SceneGIS/Scene/SceneGISProfileUnderwater", function () {
           widths: 24,
           polygonHierarchy: convert(source),
           currentRippleAmplitude: 0,
+          maximumUnderwaterBoundaryBytes: 1048576,
           foamIntensity: 0,
           absorption: new Cartesian3(0.5, 0, 0),
           scattering: Cartesian3.ZERO,
@@ -470,6 +459,8 @@ describe("SceneGIS/Scene/SceneGISProfileUnderwater", function () {
       river.underwaterDepth = 2;
       scene.renderForSpecs(time);
       expect(river._surface._underwater.active).toBeTrue();
+      expect(river.maximumUnderwaterBoundaryBytes).toBe(1048576);
+      expect(river.underwaterBoundaryByteLength).toBeGreaterThan(0);
       expect(pixel()[0]).toBeLessThan(clear[0] * 0.9);
       const frozen = pixel();
       scene.renderForSpecs(time);

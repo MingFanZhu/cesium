@@ -1,16 +1,12 @@
 import Cartesian2 from "../../../Core/Cartesian2.js";
 import Cartesian3 from "../../../Core/Cartesian3.js";
 import Cartographic from "../../../Core/Cartographic.js";
-import DeveloperError from "../../../Core/DeveloperError.js";
 import Matrix3 from "../../../Core/Matrix3.js";
 import Matrix4 from "../../../Core/Matrix4.js";
-import PixelFormat from "../../../Core/PixelFormat.js";
 import Transforms from "../../../Core/Transforms.js";
-import PixelDatatype from "../../../Renderer/PixelDatatype.js";
 import RenderState from "../../../Renderer/RenderState.js";
-import Sampler from "../../../Renderer/Sampler.js";
 import ShaderSource from "../../../Renderer/ShaderSource.js";
-import Texture from "../../../Renderer/Texture.js";
+import Boundary from "./_SceneGISWaterBoundary.js";
 import ray from "../../../Shaders/SceneGIS/Reflections/SceneGISSSRRay.js";
 import optics from "../../../Shaders/SceneGIS/Water/SceneGISWaterOptics.js";
 import effects from "../../../Shaders/SceneGIS/Water/SceneGISWaterEffects.js";
@@ -25,7 +21,7 @@ import EnvironmentLighting from "./_SceneGISModelEnvironmentLighting.js";
 
 /** Finite local or regional curved medium, without full-resolution targets. @private */
 class SceneGISUnderwater {
-  constructor(hierarchy, mesh, domain) {
+  constructor(hierarchy, mesh, domain, maximumBoundaryBytes) {
     const edges = [];
     function visit(ring) {
       const p = ring.positions;
@@ -43,12 +39,7 @@ class SceneGISUnderwater {
     } else {
       visit(hierarchy);
     }
-    if (edges.length > 256 * 4) {
-      throw new DeveloperError(
-        "Underwater volumes support at most 256 boundary segments.",
-      );
-    }
-    this.edges = new Float32Array(edges);
+    this.boundary = new Boundary(edges, maximumBoundaryBytes);
     this.inverse = new Matrix4();
     this.eyeToWater = new Matrix4();
     this.waterToEye = new Matrix3();
@@ -124,21 +115,8 @@ class SceneGISUnderwater {
         this.camera,
       );
     }
-    const p = this.camera,
-      e = this.edges;
-    let inside = !!this.domain;
-    for (let i = 0; !this.domain && i < e.length; i += 4) {
-      const ax = e[i],
-        ay = e[i + 1],
-        bx = e[i + 2],
-        by = e[i + 3];
-      if (
-        ay > p.y !== by > p.y &&
-        p.x < ((bx - ax) * (p.y - ay)) / (by - ay) + ax
-      ) {
-        inside = !inside;
-      }
-    }
+    const p = this.camera;
+    const inside = !!this.domain || this.boundary.contains(p.x, p.y);
     this.active =
       surface.show &&
       surface.underwaterDepth > 0 &&
@@ -183,18 +161,7 @@ class SceneGISUnderwater {
     }
     const context = scene.context;
     this.domain?.create(context);
-    this.texture ??= new Texture({
-      context,
-      pixelFormat: PixelFormat.RGBA,
-      pixelDatatype: PixelDatatype.FLOAT,
-      sampler: Sampler.NEAREST,
-      flipY: false,
-      source: {
-        width: this.edges.length / 4,
-        height: 1,
-        arrayBufferView: this.edges,
-      },
-    });
+    this.texture ??= this.boundary.createTexture(context);
     const mode = surface._lightingMode;
     if (this.mode !== mode) {
       for (const command of this.commands.values()) {
@@ -248,8 +215,8 @@ class SceneGISUnderwater {
         }),
         uniformMap: {
           ...surface._command.uniformMap,
-          u_edges: () => this.texture,
-          u_edgeCount: () => this.edges.length / 4,
+          u_boundary: () => this.texture,
+          u_boundaryNodeCount: () => this.boundary.nodes.length,
           u_eyeToWater: () => this.eyeToWater,
           u_waterToEye: () => this.waterToEye,
           u_volumeRadius: () => this.radius,

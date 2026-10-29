@@ -209,7 +209,8 @@ function validate(surface) {
  * @param {number} [options.flowSpeed=0.6] Wave phase speed in meters per second.
  * @param {number} [options.foamWidth=0.3] Screen-depth contact range in meters. Zero disables it.
  * @param {number} [options.foamIntensity=0.5] Contact foam strength in [0, 1].
- * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated mean surface in meters; zero disables underwater viewing. At most 256 source shore segments and 1024 prepared profile triangles. Curved ray clipping uses a camera-relative sphere approximation. Mean-height immersion, not a wave-exact meniscus.
+ * @param {number} [options.underwaterDepth=0] Finite vertical depth below the interpolated mean surface in meters; zero disables underwater viewing. Original shores use a spatial index; variable profiles retain a separate 1024-triangle budget. Curved ray clipping uses a camera-relative sphere approximation. Mean-height immersion, not a wave-exact meniscus.
+ * @param {number} [options.maximumUnderwaterBoundaryBytes=8388608] Immutable shoreline index texture budget including padding. Positive integer bytes, at most 67108864. Input geometry is never simplified to fit.
  * @param {number} [options.causticsIntensity=0] Approximate visible-receiver caustic strength in [0, 2]. Zero disables it; uses scene depth and actual waves.
  * @param {number} [options.refractionStrength=0.2] Screen-space refraction distortion in [0, 1].
  * @param {boolean} [options.reflections=true] Whether to trace scene reflections. Sky reflection remains enabled.
@@ -227,6 +228,17 @@ function validate(surface) {
  * }));
  */
 function SceneGISWaterSurface(options = {}) {
+  this._maximumUnderwaterBoundaryBytes =
+    options.maximumUnderwaterBoundaryBytes ?? 8388608;
+  if (
+    !Number.isSafeInteger(this._maximumUnderwaterBoundaryBytes) ||
+    this._maximumUnderwaterBoundaryBytes < 1 ||
+    this._maximumUnderwaterBoundaryBytes > 67108864
+  ) {
+    throw new DeveloperError(
+      "maximumUnderwaterBoundaryBytes must be an integer in [1, 67108864].",
+    );
+  }
   this._geometryMode = options.geometryMode ?? "local";
   if (this._geometryMode !== "local" && this._geometryMode !== "ellipsoid") {
     throw new DeveloperError('geometryMode must be "local" or "ellipsoid".');
@@ -375,7 +387,7 @@ function SceneGISWaterSurface(options = {}) {
   /**
    * Finite vertical underwater depth below the interpolated mean surface, in meters. Zero disables the effect.
    * Supports local, per-position ellipsoid and directed river profiles. Curved clipping uses a camera-relative sphere approximation.
-   * Uses mean-height immersion; concave boundaries and holes are supported, up to 256 segments.
+   * Uses mean-height immersion; the original concave boundaries and holes are spatially indexed.
    * @type {number}
    */
   this.underwaterDepth = options.underwaterDepth ?? 0;
@@ -668,6 +680,28 @@ function createResources(surface, frameState) {
 
 Object.defineProperties(SceneGISWaterSurface.prototype, {
   /**
+   * Immutable shoreline index texture budget in bytes, including padding.
+   * @memberof SceneGISWaterSurface.prototype
+   * @type {number}
+   * @readonly
+   */
+  maximumUnderwaterBoundaryBytes: {
+    get() {
+      return this._maximumUnderwaterBoundaryBytes;
+    },
+  },
+  /**
+   * Allocated shoreline index texture bytes. Zero before the first active underwater draw.
+   * @memberof SceneGISWaterSurface.prototype
+   * @type {number}
+   * @readonly
+   */
+  underwaterBoundaryByteLength: {
+    get() {
+      return this._underwater?.texture?.sizeInBytes ?? 0;
+    },
+  },
+  /**
    * Geometry coordinate contract.
    * @memberof SceneGISWaterSurface.prototype
    * @type {string}
@@ -850,6 +884,7 @@ SceneGISWaterSurface.prototype.update = function (frameState) {
         this._hierarchy ?? this._gridMesh?.hierarchy,
         this._gridMesh,
         this._profileWater ? this._domain : undefined,
+        this._maximumUnderwaterBoundaryBytes,
       );
     }
     this._underwater?.update(this, frameState);

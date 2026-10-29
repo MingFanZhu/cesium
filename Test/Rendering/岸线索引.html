@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>水下岸线空间索引</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="/Test/examples.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <aside>
+      <h1>水下岸线空间索引</h1>
+      <p>原始湖岸与两座岛屿，不做几何简化。水下归属和视线裁剪共用 BVH。</p>
+      <p>
+        <a href="?world=globe">球面曲面</a> · <a href="?world=planar">平面</a>
+      </p>
+      <label
+        >外环顶点
+        <select id="count">
+          <option>64</option>
+          <option>256</option>
+          <option selected>1024</option>
+          <option>4096</option>
+        </select></label
+      >
+      <p>
+        <button id="underwater">水下观察</button>
+        <button id="above">俯视轮廓</button>
+      </p>
+      <pre id="statistics"></pre>
+      <p>
+        岸线预算默认 8 MiB，可设置到 64
+        MiB；预算不足会报错，不裁掉岛屿或简化边界。变水位剖面另有 1024
+        三角形预算。
+      </p>
+      <div id="error"></div>
+    </aside>
+    <script src="../cesium-base-url.js"></script>
+    <script type="module" src="./岸线索引.js"></script>
+  </body>
+</html>

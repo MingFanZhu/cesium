@@ -1109,7 +1109,9 @@ const water = scene.primitives.add(
 
 - `underwaterDepth`：平均水面下的有限容积深度，默认 0 关闭。它定义有效介质范围，
   不是实测水底高程。支持 local、ellipsoid 和双 World 变水位 RiverSurface。
-  相机归属由原始水域轮廓、孔洞和插值水位决定，源岸线最多 256 段，变水位源三角形最多 1024 个。
+  相机归属由原始水域轮廓、孔洞和插值水位决定，岸线使用 BVH，不再限制为 256 段。
+  maximumUnderwaterBoundaryBytes 构造项默认 8 MiB，允许正整数字节到 64 MiB，包含纹理 padding；超出报错，不自动简化。
+  underwaterBoundaryByteLength 只读返回已分配岸线纹理字节，首次实际水下绘制前为 0。变水位源三角形另有 1024 个预算。
   实际可见 opaque 水底提前截断视线；按平均水位判断浸没，不包含逐波弯月面。
 - `foamWidth`：接触深度范围，米，默认 0.3；`foamIntensity`：强度 0–1，默认 0.5。
   每帧根据水面和当前 opaque 深度的距离生成接触覆盖，湖泊、曲面及河流使用同一项。
@@ -1229,7 +1231,10 @@ GPU 光程采用随相机重定位的曲率球壳，球形 Globe 上精确，扁
 不等于精确的全球椭球平行曲面求交。水下仰视复用水到空气的 Fresnel、全内反射和水底 SSR。
 仍按平均水位判断浸没，不包含随波浪变化的弯月面。`perPositionHeight: true` 时，水下深度
 沿原始 chart 三角形的插值水位向下量取，不取最低水位，也不依赖当前相机 LOD。
-源岸线总计最多 256 段，变水位容积最多 1024 个准备后的三角形；超出预算会报错。
+外环、岛屿和嵌套孔洞共用静态岸线 BVH；射线求交与内外判断只检查候选边。
+岸线预算按 maximumUnderwaterBoundaryBytes 控制，原始数据不简化，不截断查询；最坏情况仍可能线性退化。
+变水位容积独立保留 1024 个准备后三角形预算，不由岸线优化隐式扩大。
+SceneGISRiverSurface 提供同名预算和字节统计属性。大轮廓示例为 Test/Rendering/岸线索引.html?world=globe 或 planar。
 水下归属不从屏幕图像猜测；当前可见 opaque 深度可截断光程。接口与资格见 ADR-0199、ADR-0200。
 
 曲面水面和河流直接设置 `causticsIntensity`、`foamWidth`、`foamIntensity`，无需提供水底格网。

@@ -1,5 +1,7 @@
 # ADR-0200: Prepared-profile underwater volumes
 
+> Current shore qualification (2026-10-29): ADR-0204 replaces the historical 256-edge ceiling with indexed original-edge queries and a byte budget; the profile triangle budget remains independent.
+>
 > Current qualification (2026-10-29): ADR-0202 retains this volume geometry and extends river nodes from four to seven texels for source current records; fixed bathymetry is removed.
 
 - Status: accepted and implemented; 2026-10-29.

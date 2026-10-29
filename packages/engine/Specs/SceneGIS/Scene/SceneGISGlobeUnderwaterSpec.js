@@ -17,14 +17,13 @@ import {
   PixelFormat,
   PolygonHierarchy,
   Primitive,
-  Sampler,
   SceneGISWaterSurface,
   SceneGISWindWaves,
   ShaderSource,
   Texture,
   Transforms,
+  _SceneGISUnderwater as Underwater,
 } from "../../../index.js";
-import Underwater from "../../../Source/SceneGIS/Scene/_private/_SceneGISUnderwater.js";
 import Mesh from "../../../Source/SceneGIS/Scene/_private/_SceneGISEllipsoidWaterMesh.js";
 import volume from "../../../Source/Shaders/SceneGIS/Water/SceneGISUnderwaterVolume.js";
 import createCanvas from "../../../../../Specs/createCanvas.js";
@@ -132,18 +131,7 @@ describe("SceneGIS/Scene/SceneGISGlobeUnderwater", function () {
       ],
     });
     const medium = new Underwater(hierarchy);
-    edges = new Texture({
-      context,
-      pixelFormat: PixelFormat.RGBA,
-      pixelDatatype: PixelDatatype.FLOAT,
-      sampler: Sampler.NEAREST,
-      flipY: false,
-      source: {
-        width: medium.edges.length / 4,
-        height: 1,
-        arrayBufferView: medium.edges,
-      },
-    });
+    edges = medium.boundary.createTexture(context);
     const state = {
       origin: new Cartesian3(0, 0, -0.25),
       direction: Cartesian3.clone(Cartesian3.UNIT_Z),
@@ -167,8 +155,8 @@ describe("SceneGIS/Scene/SceneGISGlobeUnderwater", function () {
       {
         framebuffer: target,
         uniformMap: {
-          u_edges: () => edges,
-          u_edgeCount: () => medium.edges.length / 4,
+          u_boundary: () => edges,
+          u_boundaryNodeCount: () => medium.boundary.nodes.length,
           u_underwaterDepth: () => 2,
           u_cameraDepth: () => 0.25,
           u_volumeRadius: () => 6371000,

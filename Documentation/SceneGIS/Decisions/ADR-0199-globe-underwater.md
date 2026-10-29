@@ -1,5 +1,7 @@
 # ADR-0199: Regional Globe underwater volumes
 
+> Current shore qualification (2026-10-29): ADR-0204 replaces the historical 256-edge ceiling with indexed original-edge queries and a byte budget; the profile triangle budget remains independent.
+
 - Status: accepted, implemented; owner visual gate pending; 2026-10-29.
 - Related: ADR-0179, ADR-0194, ADR-0196; SGP-0017 unchanged.
 - Phase: [R34](../../../AgentDocs/rendering-quality/plans/2026-10-29-r34-globe-underwater.md).
