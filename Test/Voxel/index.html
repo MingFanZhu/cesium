@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SceneGIS · 区域体素化</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <style>
+      html,
+      body,
+      #view {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        font:
+          14px system-ui,
+          sans-serif;
+      }
+      aside {
+        position: absolute;
+        left: 24px;
+        top: 24px;
+        bottom: 40px;
+        overflow: auto;
+        width: 304px;
+        box-sizing: border-box;
+        padding: 22px;
+        border: 1px solid #476072;
+        border-radius: 12px;
+        color: #e8f2f6;
+        background: #102432ed;
+        box-shadow: 0 10px 36px #0006;
+      }
+      small {
+        color: #6ad6cf;
+        letter-spacing: 0.14em;
+      }
+      h1 {
+        margin: 8px 0;
+        font-size: 26px;
+      }
+      p {
+        color: #b6cbd6;
+        line-height: 1.6;
+      }
+      nav {
+        display: flex;
+        gap: 14px;
+        margin: 15px 0;
+      }
+      a {
+        color: #83e9dd;
+      }
+      label {
+        display: block;
+        margin: 14px 0;
+      }
+      select,
+      button {
+        background: #243f50;
+        color: #effaff;
+        border: 1px solid #6a8597;
+        border-radius: 5px;
+        padding: 6px 9px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+      }
+      #run {
+        background: #157c79;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      #slice {
+        width: 150px;
+        vertical-align: middle;
+      }
+      #map {
+        width: 258px;
+        height: 258px;
+        image-rendering: pixelated;
+        background: #0e1921;
+        border: 1px solid #416074;
+      }
+      #stats {
+        white-space: pre-wrap;
+        font:
+          12px/1.7 ui-monospace,
+          monospace;
+        padding: 12px 0;
+      }
+      #status {
+        min-height: 22px;
+        color: #83e9dd;
+        margin-top: 12px;
+      }
+      .legend {
+        font-size: 12px;
+        color: #a5bfcf;
+        margin-top: 7px;
+      }
+      .note {
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="view"></div>
+    <aside>
+      <small>SCENEGIS / VOXEL GRID</small>
+      <h1>从建筑到网格</h1>
+      <p>指定区域与格宽，主动加载静态 3D Tiles，生成独立的体素占据信息。</p>
+      <nav>
+        <a href="?world=globe">球面 ENU</a
+        ><a href="?world=planar">平面 World</a>
+      </nav>
+      <label
+        >格宽
+        <select id="cell">
+          <option value="4">4 米</option>
+          <option value="2" selected>2 米</option>
+          <option value="1">1 米</option>
+        </select></label
+      >
+      <label
+        >规则
+        <select id="fill">
+          <option value="enclosed" selected>表面 + 封闭区域</option>
+          <option value="surface">仅表面</option>
+        </select></label
+      >
+      <div class="row">
+        <button id="run">生成体素</button
+        ><button id="cancel" disabled>取消</button
+        ><button id="download" disabled>导出</button>
+      </div>
+      <div id="status" role="status">准备数据…</div>
+      <label
+        ><input id="buildings" type="checkbox" checked /> 显示源建筑
+        <input id="points" type="checkbox" checked /> 表面格心</label
+      >
+      <label
+        >切片 <input id="slice" type="range" min="0" max="31" value="10" /><span
+          id="height"
+        ></span
+      ></label>
+      <canvas
+        id="map"
+        width="128"
+        height="128"
+        aria-label="体素水平切片"
+      ></canvas>
+      <div class="legend">青色：表面　金色：填充内部　深色：空</div>
+      <div id="stats">尚无体素结果</div>
+      <p class="note">
+        256 × 256 × 64 米固定区域。模型由本地解析几何构成，源 LOD 误差为
+        0。封闭填充不等于模型水密性证明；切片直接读取体素结果。
+      </p>
+    </aside>
+    <script type="module" src="./voxel.js"></script>
+  </body>
+</html>

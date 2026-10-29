@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SceneGIS · 局部城市风场</title>
+    <link rel="stylesheet" href="/Build/CesiumUnminified/Widgets/widgets.css" />
+    <link rel="stylesheet" href="./wind.css" />
+  </head>
+  <body>
+    <div id="view"></div>
+    <header>
+      <span class="eyebrow">SCENEGIS / LOCAL AIRFLOW</span>
+      <h1>城市里的风</h1>
+      <p>静态建筑绕流 · 被动示踪扩散 · GPU 三维计算</p>
+      <nav>
+        <a href="?world=globe">球面 ENU</a
+        ><a href="?world=planar">平面 World</a>
+      </nav>
+    </header>
+    <section class="controls">
+      <div class="row">
+        <button id="run">运行</button><button id="step">单步</button
+        ><button id="reset">重置</button>
+      </div>
+      <label
+        >可复现时刻
+        <select id="snapshot">
+          <option value="0">初始场</option>
+          <option value="20">20 秒</option>
+          <option value="40" selected>40 秒</option>
+          <option value="80">80 秒</option></select
+        ><button id="compute">计算至此</button></label
+      >
+      <label
+        >显示
+        <select id="mode">
+          <option value="volume">示踪体积</option>
+          <option value="slice">水平切片</option>
+          <option value="none" selected>GPU 风场粒子</option>
+        </select></label
+      >
+      <label
+        ><input id="particles" type="checkbox" checked /> 显示 GPU
+        风场粒子</label
+      >
+      <label
+        >粒子宽度<input
+          id="size"
+          type="range"
+          min="0.25"
+          max="1.5"
+          step="0.05"
+          value="0.65"
+      /></label>
+      <label><input id="source" type="checkbox" checked /> 注入示踪物</label>
+      <label
+        >颜色
+        <select id="color">
+          <option value="speed">风速 · m/s</option>
+          <option value="concentration">示踪量 · 无量纲</option>
+        </select></label
+      >
+      <label
+        >切片高度
+        <input
+          id="height"
+          type="range"
+          min="2"
+          max="60"
+          step="2"
+          value="10"
+        /><output id="heightValue">10 m</output></label
+      >
+      <label
+        >示踪可见度
+        <input
+          id="opacity"
+          type="range"
+          min="0.025"
+          max="1"
+          step="0.025"
+          value="0.075"
+      /></label>
+      <label
+        >每帧步数上限
+        <select id="budget">
+          <option>4</option>
+          <option>8</option>
+          <option selected>16</option>
+          <option>32</option>
+        </select></label
+      >
+      <label
+        >来流方向
+        <select id="direction">
+          <option value="0">+X · 0°</option>
+          <option value="30">斜向 · 30°</option>
+        </select></label
+      >
+      <button id="recreate">按方向重建并重置</button>
+      <div class="legend">
+        <i></i>
+        <div>
+          <span id="legendMin">0 m/s</span><span id="legendMax">5.5 m/s</span>
+        </div>
+      </div>
+      <p class="note">
+        颜色可选风速或示踪量；体积透明度来自计算的示踪量。短粒子沿计算风速运动，暂停时冻结；粒子密度不代表示踪浓度。理想化街区，非工程预测。
+      </p>
+    </section>
+    <aside>
+      <strong id="status">初始化…</strong>
+      <pre id="metrics"></pre>
+      <details>
+        <summary>数值探针与限制</summary>
+        <pre id="probes">计算完成后读取少量格点</pre>
+        <p>
+          空气黏度 1.5×10⁻⁵ m²/s；Smagorinsky
+          Cₛ=0.12。阶梯边界、未解析壁面、迎风输运数值扩散与对流出口均需独立验证。
+        </p>
+      </details>
+      <div class="row">
+        <button id="camera">恢复视角</button
+        ><button id="destroy">销毁风场</button>
+      </div>
+    </aside>
+    <script type="module" src="./city.js"></script>
+  </body>
+</html>

@@ -74,6 +74,7 @@ packages/engine/Source/Workers/SceneGISVectorTileWorker.js
 packages/engine/Source/Workers/SceneGISS3mWorker.js
 packages/engine/Source/Workers/SceneGISGaussianSortWorker.js
 packages/engine/Source/Workers/SceneGISGaussianMappingWorker.js
+packages/engine/Source/Workers/SceneGISVoxelizeWorker.js
 ```
 
 所有权按照“上游基线中是否已经存在该路径”判断，而不是按照当前分支中文件所在目录判断。修改 upstream-owned file 必须登记 SGP；新增 SceneGIS-owned file 不需要 SGP。
@@ -1537,3 +1538,29 @@ PBF 求解、排序网格邻域、密度约束与局部盒碰撞全部驻留 GPU
 opaque HDR / linear depth 捕获、世界光照、天空反射与 SSR，不新增 upstream seam。
 图元拥有求解和屏幕目标；Scene 拥有被借用的场景输入。最终液面写真实深度和 TAA/final-depth。
 首版限定相机在液体外、屏幕空间前层、简单盒容器，不支持透明递归折射或任意网格碰撞。
+
+## 静态网格体素化
+
+ADR-0198 批准独立静态网格体素化与精确 owned Worker entry `SceneGISVoxelizeWorker.js`。
+算法位于 SceneGIS Core，复用原生 TaskProcessor/build，不从屏幕深度推断实体。
+表面保守占据与网格封闭区域填充分开；显式米制网格、预算和 caller-owned 输出可以被风场等消费者复用。
+
+`SceneGIS3DTilesVoxelizer` 按显式区域和源 geometricError 主动加载静态瓦片，独立于显示相机。
+SGP-0072 只增加原生请求与静态三角形访问的两个窄小缝隙，复用加载、解码、缓存和实例变换。
+网格格宽与源 LOD 误差分别配置；缺失或不支持的内容中止完整结果，不当作空域。
+读取是一次性几何快照，输出所有权属于调用方；不改变源 tileset 或 SDK 的生命周期。
+公开接口、填充限制和 SDK 接入见 [StaticVoxelization.md](StaticVoxelization.md)。
+
+## 局部城市空气流动
+
+ADR-0197 增加独立 `SceneGISWindSimulation`，局部米制等距立方网格的 WebGL2 D3Q19 MRT
+与 Smagorinsky LES；不复用 PBF 液体物理。一个 producer 拥有固定物理步长和 GPU 场，
+normal-render 按 frame number 去重；显示、拾取和阴影不得推进求解。预算限制步数，
+不得隐式改变黏度或物理时间步。Globe ENU / Planar 只通过刚性放置区分。
+
+GPU 消费者借用明确布局、格心位置、米制速度、版本和所有权的 live descriptor；
+不得每帧回读完整场、重建 Voxel metadata 或读取任意场景对象的私有几何。
+静态障碍必须显式输入。显式挤出多边形按格心生成掩码；物理边界和独立的守恒示踪输运
+由 producer 固定步长调度。公开 sampling adapter 与显示组件借用同一 GPU 场；少量查询
+使用原生 PBO/fence。体渲染按不透明深度截断，透明表面不作为体积遮挡物。
+粗网格交互 LES 不构成工程定量精度声明，必须独立验证网格、边界与实验数据。

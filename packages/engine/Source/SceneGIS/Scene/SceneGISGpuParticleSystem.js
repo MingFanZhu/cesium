@@ -33,6 +33,23 @@ const transpose = new Matrix3();
 const orthogonal = new Matrix3();
 const seedPeriod = 16777216;
 
+function currentTime(system, frameState) {
+  if (!system._timeSource) {
+    return frameState.time;
+  }
+  const seconds = system._timeSource();
+  if (!Number.isFinite(seconds)) {
+    throw new DeveloperError("timeSource must return finite seconds.");
+  }
+  return seconds;
+}
+
+function rememberTime(system, time) {
+  system._lastTime = system._timeSource
+    ? time
+    : JulianDate.clone(time, system._lastTime);
+}
+
 function validate(system) {
   if (typeof system.show !== "boolean" || typeof system.paused !== "boolean") {
     throw new DeveloperError("show and paused must be boolean.");
@@ -276,6 +293,7 @@ function createResources(system, context) {
  * @param {number} [options.initialParticles=0] Immutable initial/reset fill, integer from zero through maximumParticles. These particles initialize at age zero before regular emission.
  * @param {number} [options.seed=0] Immutable seed offset, integer in [0, 16777215].
  * @param {number} [options.emissionRate=1000] Births per second; finite and nonnegative.
+ * @param {Function} [options.timeSource] Immutable callback returning absolute simulation seconds. Defaults to Scene time. Equal values freeze, decreasing values reset; hidden/paused normal updates consume time without catch-up. Called only during normal rendering.
  * @param {Matrix4} [options.modelMatrix=Matrix4.IDENTITY] Rigid local-to-world transform; use ENU for Globe.
  * @param {HTMLImageElement|HTMLCanvasElement|ImageBitmap} [options.image] Decoded sprite image. Uploaded GPU copy is owned by this primitive; the input is borrowed. Undefined uses a soft disc.
  * @param {boolean} [options.show=true] Show and simulate the system.
@@ -346,6 +364,13 @@ function SceneGISGpuParticleSystem(options = {}) {
     }
   }
   this._image = options.image;
+  if (
+    options.timeSource !== undefined &&
+    typeof options.timeSource !== "function"
+  ) {
+    throw new DeveloperError("timeSource must be a function.");
+  }
+  this._timeSource = options.timeSource;
   /**
    * Show and simulate; observed hidden frames pause the simulation clock.
    * @type {boolean}
@@ -487,9 +512,10 @@ SceneGISGpuParticleSystem.prototype.reset = function () {
 /** @private */
 SceneGISGpuParticleSystem.prototype.update = function (frameState) {
   const normal = frameState.passes.render;
+  const time = normal ? currentTime(this, frameState) : undefined;
   if (!this.show || (normal && this.paused)) {
     if (normal) {
-      this._lastTime = JulianDate.clone(frameState.time, this._lastTime);
+      rememberTime(this, time);
     }
     if (!this.show) {
       return;
@@ -505,9 +531,12 @@ SceneGISGpuParticleSystem.prototype.update = function (frameState) {
   }
   if (normal && !this.paused) {
     state = this._state ??= createResources(this, frameState.context);
-    let dt = this._lastTime
-      ? JulianDate.secondsDifference(frameState.time, this._lastTime)
-      : 0;
+    let dt =
+      this._lastTime !== undefined
+        ? this._timeSource
+          ? time - this._lastTime
+          : JulianDate.secondsDifference(time, this._lastTime)
+        : 0;
     if (dt < 0) {
       this._reset = true;
     }
@@ -540,7 +569,7 @@ SceneGISGpuParticleSystem.prototype.update = function (frameState) {
       this._serial = (this._serial + emitted) % seedPeriod;
       this._reset = false;
     }
-    this._lastTime = JulianDate.clone(frameState.time, this._lastTime);
+    rememberTime(this, time);
   }
   if (!state) {
     return;

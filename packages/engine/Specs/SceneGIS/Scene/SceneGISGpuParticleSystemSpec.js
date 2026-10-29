@@ -130,6 +130,29 @@ describe("SceneGIS/Scene/SceneGISGpuParticleSystem", function () {
     expect(read()[3]).toBe(-1);
     expect(read(0, 1)[3]).toBe(-1);
   });
+  it("uses an external simulation clock independently of Scene, including freeze, rewind and reset", function () {
+    context = createContext();
+    let seconds = 0;
+    create({ initialParticles: 4, emissionRate: 0, timeSource: () => seconds });
+    life = 100;
+    tick(0);
+    seconds = 0.25;
+    tick(100);
+    expect(read()).toEqualEpsilon([0.5, 0, 0.1875, 0.25], 1e-6);
+    const snapshot = read();
+    tick(200);
+    expect(read()).toEqual(snapshot);
+    seconds = 0.5;
+    tick(300, false);
+    expect(read()).toEqual(snapshot);
+    tick(300);
+    expect(read()).toEqualEpsilon([1, 0, 0.25, 0.5], 1e-6);
+    seconds = 0;
+    tick(400);
+    expect(read()).toEqual([0, 0, 0, 0]);
+    seconds = Number.NaN;
+    expect(() => tick(401)).toThrowDeveloperError();
+  });
   it("fills initial slots on first/reset frames and continues the emission sequence", function () {
     context = createContext();
     create({ initialParticles: 2 });

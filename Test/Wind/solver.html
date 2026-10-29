@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh">
+  <meta charset="utf-8" />
+  <title>三维风场求解器性能测量</title>
+  <style>
+    body {
+      background: #142033;
+      color: #dbe9fa;
+      font: 15px system-ui;
+      padding: 24px;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+    canvas {
+      display: none;
+    }
+  </style>
+  <h1>三维风场：GPU 求解测量</h1>
+  <p>测量周期均匀场，尚不表示城市绕流精度。显示 FPS 不作为求解速度。</p>
+  <canvas width="16" height="16"></canvas>
+  <pre id="result">正在测量…</pre>
+  <script type="module" src="./solver.js"></script>
+</html>

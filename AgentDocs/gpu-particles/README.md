@@ -1,5 +1,9 @@
 # GPU Particles
 
+2026-10-28 wind follow-up adds the narrow optional `timeSource` clock callback; default Scene-time
+behavior is preserved. This work is tracked in the existing [urban-wind W5 plan](../urban-wind/plans/2026-10-28-w5-particles.md),
+not a new weather phase. See ADR-0102 amendment and the generic clock regression Spec.
+
 P5 completed: [unified weather composition](plans/2026-09-30-p5-weather-composition.md),
 following checkpoint 51be32aa8d. Existing fog/surface/lens effects are integrated into
 SceneGISWeather with explicit manual control. ADR-0106; no upstream changes.
