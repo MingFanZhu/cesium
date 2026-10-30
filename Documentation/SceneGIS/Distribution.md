@@ -147,7 +147,8 @@ scope、memberof、exportName、url 和摘要，供 SDK 搜索。枚举索引 ki
 读取 Documentation/locales.json 获取语言名称和相对路径，再消费对应目录的
 api-doclets.json 与 api-index.json。所有语言保留相同 id、类型、exportName 和相对页面/锚点，
 因此 SDK 可以复用自己的路由与类型链接映射。HTML 顶部可切换同一页面并保留查询词与锚点；
-搜索支持符号名称和对应语言的说明。
+静态页面的搜索仅筛选侧栏列出的类、命名空间等 API 名称，不搜索说明或成员方法。
+完整 api-index.json 仍保留全部符号与摘要，供 SDK 自行决定搜索范围。
 
 翻译词条独立保存在 Documentation/i18n，通用工具位于 scripts/docs-i18n，
 不修改引擎源码注释，不参与运行时打包。按原始符号 ID、字段与原文摘要匹配，先合并翻译，

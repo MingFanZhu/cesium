@@ -40,7 +40,7 @@ fields remain visibly identified as English. Full translation is incremental edi
 
 Test named fields, overloads, missing/stale/obsolete records, duplicate rejection, protected
 markup and code, captions, and namespace independence. Build both locales from source;
-verify public coverage, every page/anchor, semantic metadata preservation, Chinese search,
+verify public coverage, every page/anchor, semantic metadata preservation, localized sidebar name filtering,
 type links and locale navigation in a real browser. Run the corresponding full distribution
 and type checks once. No native file needs modification or SGP for this addition.
 

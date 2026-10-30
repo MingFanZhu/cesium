@@ -2,17 +2,18 @@
 
 ## Metadata
 
-| Field                 | Value                                         |
-| --------------------- | --------------------------------------------- |
-| Extension slug        | `engine-distribution`                         |
-| Status                | `completed`                                   |
-| Planning model        | `extension`                                   |
-| Active extension plan | [Distribution](plans/2026-10-29-extension.md) |
-| Current phase         | D1, D2 and localization complete              |
-| Active phase plan     | None                                          |
-| Architecture contact  | Architecture Agent (current task)             |
-| Execution contact     | Execution Agent (current task)                |
-| Last updated          | 2026-10-30                                    |
+| Field                  | Value                                         |
+| ---------------------- | --------------------------------------------- |
+| Extension slug         | `engine-distribution`                         |
+| Status                 | `completed`                                   |
+| Planning model         | `extension`                                   |
+| Active extension plan  | [Distribution](plans/2026-10-29-extension.md) |
+| Current phase          | D1, D2 and localization complete              |
+| Active standalone plan | None                                          |
+| Active phase plan      | None                                          |
+| Architecture contact   | Architecture Agent (current task)             |
+| Execution contact      | Execution Agent (current task)                |
+| Last updated           | 2026-10-30                                    |
 
 ## Scope
 
@@ -40,6 +41,12 @@ and brand-specific directories. Chinese coverage is 3,150/17,631 fields (17.9%),
 Each locale delivers 533 pages and 7,943 symbols. No source comments or SDK changes.
 
 ## Latest maintenance
+
+[Sidebar name filtering](plans/2026-10-30-sidebar-search.md) is completed and
+[reviewed](reviews/2026-10-30-sidebar-search.md): only names in the generated navigation match.
+Full SDK metadata remains intact; translation review is build-time source-hash comparison.
+Nine metadata tests, ten translation fixtures and two focused browser cases pass.
+No upstream or runtime changes.
 
 [Asset directory correction](plans/2026-10-29-asset-directories.md): completed and
 [reviewed](reviews/2026-10-29-asset-directories.md). SGP-0074 filters directory entries in the

@@ -127,11 +127,17 @@ for (const [format, mount, base] of [
   });
 }
 
-test("standalone nested documentation searches members and follows type links", async ({
+test("standalone nested documentation filters sidebar names and follows type links", async ({
   page,
   request,
 }, info) => {
   const errors = [];
+  const indexRequests = [];
+  page.on("request", (request) => {
+    if (request.url().endsWith("/api-index.json")) {
+      indexRequests.push(request.url());
+    }
+  });
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("response", (response) => {
     if (response.status() >= 400) {
@@ -143,16 +149,21 @@ test("standalone nested documentation searches members and follows type links", 
   );
   const prefix = "/deep/site/vendor/engine/Documentation/";
   await page.goto(`${prefix}index.html`);
-  await page
-    .locator("#ClassFilter")
-    .fill("SceneGISWindVisualization trailDuration");
+  const filter = page.locator("#ClassFilter");
+  await filter.fill("trailDuration");
+  await expect(page.locator("#SceneGISSearchResults a")).toHaveCount(0);
+  await filter.fill("GPU wind volume");
+  await expect(page.locator("#SceneGISSearchResults a")).toHaveCount(0);
+  await filter.fill("");
+  await expect(page.locator("#ClassList")).toBeVisible();
+  await filter.fill("windvisualization");
   const result = page
     .locator("#SceneGISSearchResults a")
-    .filter({ hasText: "trailDuration" });
+    .filter({ hasText: "SceneGISWindVisualization" });
   await expect(result).toHaveCount(1);
-  await result.click();
+  await filter.press("Enter");
   await expect(page).toHaveURL(
-    /SceneGISWindVisualization\.html\?search=.*#trailDuration/,
+    /SceneGISWindVisualization\.html\?search=windvisualization$/,
   );
   await expect(page.locator('[id="trailDuration"]')).toBeVisible();
   await page.goto(`${prefix}Viewer.html`);
@@ -172,9 +183,10 @@ test("standalone nested documentation searches members and follows type links", 
     ),
   ).toBe(true);
   expect(errors).toEqual([]);
+  expect(indexRequests).toEqual([]);
 });
 
-test("Chinese documentation searches prose and switches the same symbol between languages", async ({
+test("Chinese documentation filters sidebar names and switches the same symbol between languages", async ({
   page,
 }, info) => {
   const errors = [];
@@ -191,6 +203,10 @@ test("Chinese documentation searches prose and switches the same symbol between 
   await page.goto(`${prefix}zh-CN/index.html`);
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
   await page.locator("#ClassFilter").fill("风场体渲染");
+  await expect(page.locator("#SceneGISSearchResults a")).toHaveCount(0);
+  await page.locator("#ClassFilter").fill("trailDuration");
+  await expect(page.locator("#SceneGISSearchResults a")).toHaveCount(0);
+  await page.locator("#ClassFilter").fill("SceneGISWindVisualization");
   const result = page
     .locator("#SceneGISSearchResults a")
     .filter({ hasText: "SceneGISWindVisualization" });

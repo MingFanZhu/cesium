@@ -17,9 +17,13 @@
   const results = document.createElement("div");
   results.id = "SceneGISSearchResults";
   input.closest(".search-wrapper").after(results);
-  const indexUrl = new URL("../api-index.json", document.currentScript.src);
-  let symbols;
-  let failure;
+  const symbols = Array.from(
+    navigation.querySelectorAll("li[data-name]"),
+    (item) => ({
+      name: item.dataset.name,
+      url: item.querySelector("a").getAttribute("href"),
+    }),
+  );
   const query = new URLSearchParams(window.location.search).get("search") ?? "";
   input.value = query;
 
@@ -33,17 +37,9 @@
     const status = document.createElement("p");
     status.setAttribute("role", "status");
     results.append(status);
-    if (!symbols) {
-      status.textContent = failure ? messages.failed : messages.loading;
-      return;
-    }
     const terms = value.split(/\s+/);
     const matches = symbols.filter((symbol) =>
-      terms.every((term) =>
-        `${symbol.displayName} ${symbol.summary ?? ""}`
-          .toLowerCase()
-          .includes(term),
-      ),
+      terms.every((term) => symbol.name.toLowerCase().includes(term)),
     );
     status.textContent = messages.results
       .replace("{shown}", Math.min(matches.length, 80))
@@ -52,11 +48,10 @@
     for (const symbol of matches.slice(0, 80)) {
       const item = document.createElement("li");
       const link = document.createElement("a");
-      const url = new URL(symbol.url, indexUrl);
+      const url = new URL(symbol.url, window.location.href);
       url.searchParams.set("search", input.value);
       link.href = url.href;
-      link.textContent = symbol.displayName;
-      link.title = `${symbol.kind}: ${symbol.summary ?? symbol.name}`;
+      link.textContent = symbol.name;
       item.append(link);
       list.append(item);
     }
@@ -76,20 +71,5 @@
       input.select();
     }
   });
-  fetch(indexUrl)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Search index HTTP ${response.status}`);
-      }
-      return response.json();
-    })
-    .then((index) => {
-      symbols = index.symbols;
-      search();
-    })
-    .catch(() => {
-      failure = true;
-      search();
-    });
   search();
 })();
