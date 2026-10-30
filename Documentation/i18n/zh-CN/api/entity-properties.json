@@ -1,0 +1,2292 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "CallbackPositionProperty.Callback",
+      "field": "description",
+      "sourceHash": "sha256:08bd292c0c4676354b2285d6cf5cf484806035e730eaac32bd96069e335f2a4a",
+      "text": "返回位置属性值的函数。"
+    },
+    {
+      "id": "CallbackPositionProperty.Callback",
+      "field": "params/result/description",
+      "sourceHash": "sha256:1c8ba760835ff5541fcd55cfc611590b591037109dd6bd9c3f9936d5b2f1754d",
+      "text": "用于存储结果的对象。省略时，函数必须创建并返回新实例。"
+    },
+    {
+      "id": "CallbackPositionProperty.Callback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a0b4eb3e090d1905f6ff80f4552b964fa021c4be42177376f154c7abc997288",
+      "text": "修改后的 result 参数；未提供 result 或其类型不受支持时，返回新实例。"
+    },
+    {
+      "id": "CallbackPositionProperty",
+      "field": "description",
+      "sourceHash": "sha256:de315a97f359d73f2ed03dce13c4ab021ed07831d40f6f90e3385dec6c925d2e",
+      "text": "通过回调函数按需计算值的 {@link PositionProperty}。"
+    },
+    {
+      "id": "CallbackPositionProperty",
+      "field": "params/callback/description",
+      "sourceHash": "sha256:80dde55a23a00feff1c27e23525f666606088f5e917f12f75d9519d26e85a170",
+      "text": "计算位置属性值时调用的函数。"
+    },
+    {
+      "id": "CallbackPositionProperty",
+      "field": "params/isConstant/description",
+      "sourceHash": "sha256:71b0d646b63daf2e879243dec6c289e54e83e4ba584f3289d23f4a94739b8dfb",
+      "text": "回调每次都返回相同值时为 <code>true</code>，返回值会变化时为 <code>false</code>。"
+    },
+    {
+      "id": "CallbackPositionProperty",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:04b10bdf6d93d55bba6d3eaed7c7e116ee6f8cfa53b272460e6daff3e50ec10f",
+      "text": "定义位置所使用的参考系。"
+    },
+    {
+      "id": "CallbackPositionProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "CallbackPositionProperty#getValue",
+      "field": "description",
+      "sourceHash": "sha256:1e1143eda6c89c02a62c9c7dc75b5d33bb267811f85df628614b712c3b0f20eb",
+      "text": "获取指定时刻在固定参考系中的属性值。"
+    },
+    {
+      "id": "CallbackPositionProperty#getValueInReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:0e0181e02436fbc4da884638809efd0b83cb4896b1b2581ddaf0d2ca44d0d46e",
+      "text": "获取指定时刻在指定参考系中的属性值。"
+    },
+    {
+      "id": "CallbackPositionProperty#getValueInReferenceFrame",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:805a7a0ee552ea3d6590960dd6f157da0cbe0900843b07c1dbde98077e0006b3",
+      "text": "结果所需的 referenceFrame。"
+    },
+    {
+      "id": "CallbackPositionProperty#getValueInReferenceFrame",
+      "field": "params/time/description",
+      "sourceHash": "sha256:0e230fdc0f6ea29ab74feb31244405e8aaf53df3b81aa616c08f69b81879f510",
+      "text": "需要获取值的时刻。"
+    },
+    {
+      "id": "CallbackPositionProperty#isConstant",
+      "field": "description",
+      "sourceHash": "sha256:49a7bbd1de64c3a1b1acf85ce177a918dd2a88f79da4ec6a4e9b3b2e42e06a54",
+      "text": "获取指示此属性是否为常量的值。"
+    },
+    {
+      "id": "CallbackPositionProperty#referenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:c17fc1fc2ace9156ca70721a1a154599015616534d6266b15627fa05b7f7d7f5",
+      "text": "获取定义位置所使用的参考系。"
+    },
+    {
+      "id": "CallbackPositionProperty#setCallback",
+      "field": "description",
+      "sourceHash": "sha256:d5a356e4a35f5daa52417b96912cce2a1e395d9991d1e538f09cfa8eced881fd",
+      "text": "设置使用的回调函数。"
+    },
+    {
+      "id": "CallbackPositionProperty#setCallback",
+      "field": "params/callback/description",
+      "sourceHash": "sha256:04b5b9d4a8b064a2a4c00cc116dfdb7313ae36bc6ce65fcca97413e7821791d1",
+      "text": "计算属性值时调用的函数。"
+    },
+    {
+      "id": "CallbackPositionProperty#setCallback",
+      "field": "params/isConstant/description",
+      "sourceHash": "sha256:71b0d646b63daf2e879243dec6c289e54e83e4ba584f3289d23f4a94739b8dfb",
+      "text": "回调每次都返回相同值时为 <code>true</code>，返回值会变化时为 <code>false</code>。"
+    },
+    {
+      "id": "CallbackProperty.Callback",
+      "field": "description",
+      "sourceHash": "sha256:527c76da95ccf990110f7c4757fdbff5ff4c5e731d40b440071178d3b1162d94",
+      "text": "返回属性值的函数。"
+    },
+    {
+      "id": "CallbackProperty.Callback",
+      "field": "params/result/description",
+      "sourceHash": "sha256:1c8ba760835ff5541fcd55cfc611590b591037109dd6bd9c3f9936d5b2f1754d",
+      "text": "用于存储结果的对象。省略时，函数必须创建并返回新实例。"
+    },
+    {
+      "id": "CallbackProperty.Callback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3a0b4eb3e090d1905f6ff80f4552b964fa021c4be42177376f154c7abc997288",
+      "text": "修改后的 result 参数；未提供 result 或其类型不受支持时，返回新实例。"
+    },
+    {
+      "id": "CallbackProperty",
+      "field": "description",
+      "sourceHash": "sha256:1d6013413fd689071ec3fda83e63d0ff5390bfd75fda7246a5c6fc8c039d97a2",
+      "text": "通过回调函数按需计算值的 {@link Property}。"
+    },
+    {
+      "id": "CallbackProperty",
+      "field": "params/callback/description",
+      "sourceHash": "sha256:04b5b9d4a8b064a2a4c00cc116dfdb7313ae36bc6ce65fcca97413e7821791d1",
+      "text": "计算属性值时调用的函数。"
+    },
+    {
+      "id": "CallbackProperty",
+      "field": "params/isConstant/description",
+      "sourceHash": "sha256:71b0d646b63daf2e879243dec6c289e54e83e4ba584f3289d23f4a94739b8dfb",
+      "text": "回调每次都返回相同值时为 <code>true</code>，返回值会变化时为 <code>false</code>。"
+    },
+    {
+      "id": "CallbackProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:e2422675395d5359e6a98548599e9c3d68e30e095efaa4c66a05cc7cbce262cd",
+      "text": "获取属性定义发生变化时触发的事件。每次调用 setCallback 都会改变定义。"
+    },
+    {
+      "id": "CallbackProperty#getValue",
+      "field": "description",
+      "sourceHash": "sha256:7362ddef20b36b70d851108007396d338be40ecd97b52ccfb1d6e4f96aac5d6b",
+      "text": "获取属性值。"
+    },
+    {
+      "id": "CallbackProperty#getValue",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8502ec829a03ad1149235420af2fc42eb328f37547069d94645319aa760813e7",
+      "text": "修改后的 result 参数；未提供 result 或其类型不受支持时，返回新实例。"
+    },
+    {
+      "id": "CallbackProperty#isConstant",
+      "field": "description",
+      "sourceHash": "sha256:49a7bbd1de64c3a1b1acf85ce177a918dd2a88f79da4ec6a4e9b3b2e42e06a54",
+      "text": "获取指示此属性是否为常量的值。"
+    },
+    {
+      "id": "CallbackProperty#setCallback",
+      "field": "description",
+      "sourceHash": "sha256:d5a356e4a35f5daa52417b96912cce2a1e395d9991d1e538f09cfa8eced881fd",
+      "text": "设置使用的回调函数。"
+    },
+    {
+      "id": "CallbackProperty#setCallback",
+      "field": "params/callback/description",
+      "sourceHash": "sha256:04b5b9d4a8b064a2a4c00cc116dfdb7313ae36bc6ce65fcca97413e7821791d1",
+      "text": "计算属性值时调用的函数。"
+    },
+    {
+      "id": "CallbackProperty#setCallback",
+      "field": "params/isConstant/description",
+      "sourceHash": "sha256:71b0d646b63daf2e879243dec6c289e54e83e4ba584f3289d23f4a94739b8dfb",
+      "text": "回调每次都返回相同值时为 <code>true</code>，返回值会变化时为 <code>false</code>。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:9af938404da9747896901c16f69325ae4ce3e2c1b9802f741ca295f89d067cd3",
+      "text": "将属性映射到棋盘格 {@link Material} uniform 的 {@link MaterialProperty}。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty",
+      "field": "params/options.evenColor/description",
+      "sourceHash": "sha256:524bea13b2d298c9332d8a3a9800ea1ad23de2a3e5fe5cb508a63bcae8c363ca",
+      "text": "指定第一种 {@link Color} 的 Property。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty",
+      "field": "params/options.oddColor/description",
+      "sourceHash": "sha256:c674341bcce7eeb5521d897d213fd2688b4f3edff494ffbb37451a6c8d6b4d3d",
+      "text": "指定第二种 {@link Color} 的 Property。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty",
+      "field": "params/options.repeat/description",
+      "sourceHash": "sha256:39bf027662591105b1477820b48967492dd8849a962c5a847e74238d05e181e5",
+      "text": "值为 {@link Cartesian2} 的 Property，指定各方向的格子重复次数。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty#evenColor",
+      "field": "description",
+      "sourceHash": "sha256:d48dc45eea50758f23f8d78bb50362e200cf0d8c425127cbb72e42ef88093372",
+      "text": "获取或设置指定第一种 {@link Color} 的 Property。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty#oddColor",
+      "field": "description",
+      "sourceHash": "sha256:0d14a5300267156b12594a542584a4ae584b5c0a37038295a44a0d9ce3ef750c",
+      "text": "获取或设置指定第二种 {@link Color} 的 Property。"
+    },
+    {
+      "id": "CheckerboardMaterialProperty#repeat",
+      "field": "description",
+      "sourceHash": "sha256:2d4c29efea0d5e89775435653a5a016ce890a6f50f103d7e592bf31af086e877",
+      "text": "获取或设置值为 {@link Cartesian2} 的 Property，指定各方向的格子重复次数。"
+    },
+    {
+      "id": "ColorMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:99510a4032460ff0544a4e00ff22a4a0029b89e6f8f79fb1a7947f22ff1379ac",
+      "text": "将属性映射到纯色 {@link Material} uniform 的 {@link MaterialProperty}。"
+    },
+    {
+      "id": "ColorMaterialProperty",
+      "field": "params/color/description",
+      "sourceHash": "sha256:216cf4b90868aa17b87f8016c6ddb33dd73601266d371b229a7c2a6098bdb3f4",
+      "text": "使用的 {@link Color} Property。"
+    },
+    {
+      "id": "ColorMaterialProperty#color",
+      "field": "description",
+      "sourceHash": "sha256:c8043a9d6b9d939167da4b6d0206ae1c5fa99843764f49f876d040f749a3db52",
+      "text": "获取或设置值为 {@link Color} 的 {@link Property}。"
+    },
+    {
+      "id": "ColorMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "ColorMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "ColorMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "ColorMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "CompositeMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:486751910bf5b4c43709ba9415c643eee253510564bfba5c5acb20acf30f958c",
+      "text": "同时实现 {@link MaterialProperty} 的 {@link CompositeProperty}。"
+    },
+    {
+      "id": "CompositeMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:20dd451ba2987f8ebc14790edca657c22c775f1ade9e7966fd365f20b4326fa3",
+      "text": "获取属性定义发生变化时触发的事件。区间集合改变，或某个区间内 Property 的定义改变时，都会触发此事件。"
+    },
+    {
+      "id": "CompositeMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "CompositeMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "CompositeMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "CompositeMaterialProperty#intervals",
+      "field": "description",
+      "sourceHash": "sha256:bbfab826211c3e05a1c136bc92a2cbaf2e29b87741cb6d87003686d362866753",
+      "text": "获取时间区间集合。"
+    },
+    {
+      "id": "CompositePositionProperty",
+      "field": "description",
+      "sourceHash": "sha256:02210efa4c4ab1b38f53ff20b98ef1571e7b845078132adec122087ba6fc0f51",
+      "text": "同时实现 {@link PositionProperty} 的 {@link CompositeProperty}。"
+    },
+    {
+      "id": "CompositePositionProperty",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:04b10bdf6d93d55bba6d3eaed7c7e116ee6f8cfa53b272460e6daff3e50ec10f",
+      "text": "定义位置所使用的参考系。"
+    },
+    {
+      "id": "CompositePositionProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:20dd451ba2987f8ebc14790edca657c22c775f1ade9e7966fd365f20b4326fa3",
+      "text": "获取属性定义发生变化时触发的事件。区间集合改变，或某个区间内 Property 的定义改变时，都会触发此事件。"
+    },
+    {
+      "id": "CompositePositionProperty#getValue",
+      "field": "description",
+      "sourceHash": "sha256:1e1143eda6c89c02a62c9c7dc75b5d33bb267811f85df628614b712c3b0f20eb",
+      "text": "获取指定时刻在固定参考系中的属性值。"
+    },
+    {
+      "id": "CompositePositionProperty#getValueInReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:0e0181e02436fbc4da884638809efd0b83cb4896b1b2581ddaf0d2ca44d0d46e",
+      "text": "获取指定时刻在指定参考系中的属性值。"
+    },
+    {
+      "id": "CompositePositionProperty#getValueInReferenceFrame",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:805a7a0ee552ea3d6590960dd6f157da0cbe0900843b07c1dbde98077e0006b3",
+      "text": "结果所需的 referenceFrame。"
+    },
+    {
+      "id": "CompositePositionProperty#getValueInReferenceFrame",
+      "field": "params/time/description",
+      "sourceHash": "sha256:0e230fdc0f6ea29ab74feb31244405e8aaf53df3b81aa616c08f69b81879f510",
+      "text": "需要获取值的时刻。"
+    },
+    {
+      "id": "CompositePositionProperty#intervals",
+      "field": "description",
+      "sourceHash": "sha256:bbfab826211c3e05a1c136bc92a2cbaf2e29b87741cb6d87003686d362866753",
+      "text": "获取时间区间集合。"
+    },
+    {
+      "id": "CompositePositionProperty#referenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:8d5bc1bfd9e98e6c147a8ce45c64ffe5fefa1e900da892bdbca2fd3012257d4f",
+      "text": "获取或设置此位置属性对外呈现的参考系。组成此对象的各个 PositionProperty 均有自己的参考系，因此此属性仅向客户端提供一个首选参考系。"
+    },
+    {
+      "id": "CompositeProperty",
+      "field": "description",
+      "sourceHash": "sha256:79886e05e72c0ff6e625720a26a7c822e72d45a063353c31b541a03575bd7752",
+      "text": "由 {@link TimeIntervalCollection} 定义的 {@link Property}。每个 {@link TimeInterval} 的 data 属性是另一个 Property 实例，并在给定时刻求值。"
+    },
+    {
+      "id": "CompositeProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:20dd451ba2987f8ebc14790edca657c22c775f1ade9e7966fd365f20b4326fa3",
+      "text": "获取属性定义发生变化时触发的事件。区间集合改变，或某个区间内 Property 的定义改变时，都会触发此事件。"
+    },
+    {
+      "id": "CompositeProperty#intervals",
+      "field": "description",
+      "sourceHash": "sha256:bbfab826211c3e05a1c136bc92a2cbaf2e29b87741cb6d87003686d362866753",
+      "text": "获取时间区间集合。"
+    },
+    {
+      "id": "ConstantPositionProperty",
+      "field": "description",
+      "sourceHash": "sha256:cf32b2fc4ae99d21ad5f26b8f1c2a8e89f8d271ec906317fb3316dd1a8b19461",
+      "text": "值相对于其定义时的 {@link ReferenceFrame} 保持不变的 {@link PositionProperty}。"
+    },
+    {
+      "id": "ConstantPositionProperty",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:04b10bdf6d93d55bba6d3eaed7c7e116ee6f8cfa53b272460e6daff3e50ec10f",
+      "text": "定义位置所使用的参考系。"
+    },
+    {
+      "id": "ConstantPositionProperty",
+      "field": "params/value/description",
+      "sourceHash": "sha256:0243288ef588a8e46b4b1d7cf3887aa55f356a2fc7fa767998a62d127001b699",
+      "text": "属性值。"
+    },
+    {
+      "id": "ConstantPositionProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "ConstantPositionProperty#getValue",
+      "field": "description",
+      "sourceHash": "sha256:1e1143eda6c89c02a62c9c7dc75b5d33bb267811f85df628614b712c3b0f20eb",
+      "text": "获取指定时刻在固定参考系中的属性值。"
+    },
+    {
+      "id": "ConstantPositionProperty#getValueInReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:0e0181e02436fbc4da884638809efd0b83cb4896b1b2581ddaf0d2ca44d0d46e",
+      "text": "获取指定时刻在指定参考系中的属性值。"
+    },
+    {
+      "id": "ConstantPositionProperty#getValueInReferenceFrame",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:805a7a0ee552ea3d6590960dd6f157da0cbe0900843b07c1dbde98077e0006b3",
+      "text": "结果所需的 referenceFrame。"
+    },
+    {
+      "id": "ConstantPositionProperty#getValueInReferenceFrame",
+      "field": "params/time/description",
+      "sourceHash": "sha256:0e230fdc0f6ea29ab74feb31244405e8aaf53df3b81aa616c08f69b81879f510",
+      "text": "需要获取值的时刻。"
+    },
+    {
+      "id": "ConstantPositionProperty#referenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:c17fc1fc2ace9156ca70721a1a154599015616534d6266b15627fa05b7f7d7f5",
+      "text": "获取定义位置所使用的参考系。"
+    },
+    {
+      "id": "ConstantPositionProperty#setValue",
+      "field": "description",
+      "sourceHash": "sha256:07c2a75a899bf1b4e30af4166bf07e9455f0515a67912d05771b196b7a76c021",
+      "text": "设置属性值。"
+    },
+    {
+      "id": "ConstantPositionProperty#setValue",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:04b10bdf6d93d55bba6d3eaed7c7e116ee6f8cfa53b272460e6daff3e50ec10f",
+      "text": "定义位置所使用的参考系。"
+    },
+    {
+      "id": "ConstantPositionProperty#setValue",
+      "field": "params/value/description",
+      "sourceHash": "sha256:0243288ef588a8e46b4b1d7cf3887aa55f356a2fc7fa767998a62d127001b699",
+      "text": "属性值。"
+    },
+    {
+      "id": "ConstantProperty",
+      "field": "description",
+      "sourceHash": "sha256:899dee2c522a540bb9d4e014452ba40cb1f31dfdcfd28800cade4be789f3366e",
+      "text": "值不随模拟时间变化的 {@link Property}。"
+    },
+    {
+      "id": "ConstantProperty",
+      "field": "params/value/description",
+      "sourceHash": "sha256:0243288ef588a8e46b4b1d7cf3887aa55f356a2fc7fa767998a62d127001b699",
+      "text": "属性值。"
+    },
+    {
+      "id": "ConstantProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:20dd451ba2987f8ebc14790edca657c22c775f1ade9e7966fd365f20b4326fa3",
+      "text": "获取属性定义发生变化时触发的事件。调用 setValue 并传入与当前值不同的数据时，定义发生变化。"
+    },
+    {
+      "id": "ConstantProperty#getValue",
+      "field": "description",
+      "sourceHash": "sha256:7362ddef20b36b70d851108007396d338be40ecd97b52ccfb1d6e4f96aac5d6b",
+      "text": "获取属性值。"
+    },
+    {
+      "id": "ConstantProperty#getValue",
+      "field": "params/time/description",
+      "sourceHash": "sha256:fb232b7f20797157f6854bd74e351b984d104c4c22ffaecd19e0ec9c93a0a077",
+      "text": "需要获取值的时刻。由于值不随时间变化，此参数不使用。"
+    },
+    {
+      "id": "ConstantProperty#isConstant",
+      "field": "description",
+      "sourceHash": "sha256:43861e0f45951d3a98bac4fef1e576d730b969ee703f1ae26028f82a175d6869",
+      "text": "获取指示此属性是否为常量的值。始终返回 <code>true</code>。"
+    },
+    {
+      "id": "ConstantProperty#setValue",
+      "field": "description",
+      "sourceHash": "sha256:07c2a75a899bf1b4e30af4166bf07e9455f0515a67912d05771b196b7a76c021",
+      "text": "设置属性值。"
+    },
+    {
+      "id": "ConstantProperty#setValue",
+      "field": "params/value/description",
+      "sourceHash": "sha256:0243288ef588a8e46b4b1d7cf3887aa55f356a2fc7fa767998a62d127001b699",
+      "text": "属性值。"
+    },
+    {
+      "id": "ConstantProperty#toString",
+      "field": "description",
+      "sourceHash": "sha256:5e446c07652036722334a0f9f5d15ab4181c895d8a9dd22ebf19a039030e4385",
+      "text": "创建表示此属性值的字符串。"
+    },
+    {
+      "id": "ConstantProperty#toString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5da7b62740850fc70645e1b3267978b74c1218aa719ebfddcd0204bc58e56710",
+      "text": "表示此属性值的字符串。"
+    },
+    {
+      "id": "ConstantProperty#valueOf",
+      "field": "description",
+      "sourceHash": "sha256:0c7b8681d197dfa04b0ce28561742a60c53da1b01af054c6db3df2da8015f180",
+      "text": "获取此属性的值。"
+    },
+    {
+      "id": "ConstantProperty#valueOf",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:001bf81a5083df715c7e5964732773fcbd5ee80310b0e1844743557d51548735",
+      "text": "此属性的值。"
+    },
+    {
+      "id": "ExtrapolationType.EXTRAPOLATE",
+      "field": "description",
+      "sourceHash": "sha256:659e7d9618319f809df254cbcd541c32bdda60cbf59e9b1e093e3544bbd87e61",
+      "text": "对值进行外推。"
+    },
+    {
+      "id": "ExtrapolationType.HOLD",
+      "field": "description",
+      "sourceHash": "sha256:645446f34d2206870ea1d6334efa3838bd861a629344e0167d3fae2dc124df3e",
+      "text": "在样本数据范围之外使用第一个或最后一个值。"
+    },
+    {
+      "id": "ExtrapolationType.NONE",
+      "field": "description",
+      "sourceHash": "sha256:439679def543211bac040ec1d11af7263cd10f003b137d3ede1564f15cb9f1df",
+      "text": "不进行外推。"
+    },
+    {
+      "id": "ExtrapolationType",
+      "field": "description",
+      "sourceHash": "sha256:cdb077d32d41a6a9ab78fda6c9cca67de284c814ca99b6c5175942dca7ea285b",
+      "text": "决定查询超出可用数据范围时，如何对插值结果进行外推的常量。"
+    },
+    {
+      "id": "ExtrapolationType",
+      "field": "properties/EXTRAPOLATE/description",
+      "sourceHash": "sha256:659e7d9618319f809df254cbcd541c32bdda60cbf59e9b1e093e3544bbd87e61",
+      "text": "对值进行外推。"
+    },
+    {
+      "id": "ExtrapolationType",
+      "field": "properties/HOLD/description",
+      "sourceHash": "sha256:645446f34d2206870ea1d6334efa3838bd861a629344e0167d3fae2dc124df3e",
+      "text": "在样本数据范围之外使用第一个或最后一个值。"
+    },
+    {
+      "id": "ExtrapolationType",
+      "field": "properties/NONE/description",
+      "sourceHash": "sha256:439679def543211bac040ec1d11af7263cd10f003b137d3ede1564f15cb9f1df",
+      "text": "不进行外推。"
+    },
+    {
+      "id": "GridMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:7e5cd88042990d269dc1aea235fedf06de34570552c842ebd26e0460562b1d33",
+      "text": "将属性映射到网格 {@link Material} uniform 的 {@link MaterialProperty}。"
+    },
+    {
+      "id": "GridMaterialProperty",
+      "field": "params/options.cellAlpha/description",
+      "sourceHash": "sha256:33f0a9e20e8c53b1a9587f34bcf84975466005bcccdb596d9f434117537d930b",
+      "text": "指定网格单元 alpha 值的数值 Property。"
+    },
+    {
+      "id": "GridMaterialProperty",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:88f0376dba238313581628d2e7c7ab814306167d59fea033a53f15550e05b560",
+      "text": "指定网格 {@link Color} 的 Property。"
+    },
+    {
+      "id": "GridMaterialProperty",
+      "field": "params/options.lineCount/description",
+      "sourceHash": "sha256:88b9e512f4256833e26a6a457b1c808b14531a0ceb9042ef28dbbeffbf63b0a9",
+      "text": "值为 {@link Cartesian2} 的 Property，指定沿各轴的网格线数量。"
+    },
+    {
+      "id": "GridMaterialProperty",
+      "field": "params/options.lineOffset/description",
+      "sourceHash": "sha256:772233882fc7ab34454b68d715f14ce4fddec4f75e95ecc9122f110aa07288b9",
+      "text": "值为 {@link Cartesian2} 的 Property，指定沿各轴的网格线起始偏移。"
+    },
+    {
+      "id": "GridMaterialProperty",
+      "field": "params/options.lineThickness/description",
+      "sourceHash": "sha256:6b39de442be2ced20ad3d8d2bafe9658d52329dbbbd966288fbaf0019c88ebf7",
+      "text": "值为 {@link Cartesian2} 的 Property，指定沿各轴的网格线宽度。"
+    },
+    {
+      "id": "GridMaterialProperty#cellAlpha",
+      "field": "description",
+      "sourceHash": "sha256:8c69b665bf3c9fdd28f66442a84bc272c3b9ff15ee3b8cc4ead7fdf603e0274d",
+      "text": "获取或设置指定网格单元 alpha 值的数值 Property。"
+    },
+    {
+      "id": "GridMaterialProperty#color",
+      "field": "description",
+      "sourceHash": "sha256:4427c117144c7205e75d6e8d88af5c7a18d08c353d223be049a0da2fc80be576",
+      "text": "获取或设置指定网格 {@link Color} 的 Property。"
+    },
+    {
+      "id": "GridMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "GridMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "GridMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "GridMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "GridMaterialProperty#lineCount",
+      "field": "description",
+      "sourceHash": "sha256:a89f2fa239e5ede4e3b4ce365246583a563e6fb674152567f63b6e7f463bb448",
+      "text": "获取或设置值为 {@link Cartesian2} 的 Property，指定沿各轴的网格线数量。"
+    },
+    {
+      "id": "GridMaterialProperty#lineOffset",
+      "field": "description",
+      "sourceHash": "sha256:d4c1ab643df0db0a8f3e450ce6ef7af4edbf2eba62a158814fb6903015c3ed71",
+      "text": "获取或设置值为 {@link Cartesian2} 的 Property，指定沿各轴的网格线起始偏移。"
+    },
+    {
+      "id": "GridMaterialProperty#lineThickness",
+      "field": "description",
+      "sourceHash": "sha256:6177199d8a9bfab3df3c449577472d3d39334865ee0f7f009898699c5fc2ca43",
+      "text": "获取或设置值为 {@link Cartesian2} 的 Property，指定沿各轴的网格线宽度。"
+    },
+    {
+      "id": "ImageMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:b878a993fd5df853f1ea9d323f1a8e372bacf91474e544561314e2bc1f95d8d1",
+      "text": "将属性映射到图像 {@link Material} uniform 的 {@link MaterialProperty}。"
+    },
+    {
+      "id": "ImageMaterialProperty",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:d19a5d74ceb85ce1c138dd17f7c94c9272c22d9665d5af6b8f4c21d05dd2371b",
+      "text": "应用到图像的颜色。"
+    },
+    {
+      "id": "ImageMaterialProperty",
+      "field": "params/options.image/description",
+      "sourceHash": "sha256:74840746603daa27f778b0b8af33f3d02e754fdac07ab27a7b6b10ac011f72e4",
+      "text": "指定 Image、URL、Canvas 或 Video 的 Property。"
+    },
+    {
+      "id": "ImageMaterialProperty",
+      "field": "params/options.repeat/description",
+      "sourceHash": "sha256:1979dca7471da4178d1eeb4ae069748689f3e5388c78e646999b0ba02585a61c",
+      "text": "值为 {@link Cartesian2} 的 Property，指定图像在各方向的重复次数。"
+    },
+    {
+      "id": "ImageMaterialProperty",
+      "field": "params/options.transparent/description",
+      "sourceHash": "sha256:6aa183774094139798d76e5798e619afdbd3ee685c63d7cb54f2117e732e78bf",
+      "text": "图像含有透明部分（例如 PNG 中的透明区域）时，应设为 true。"
+    },
+    {
+      "id": "ImageMaterialProperty#color",
+      "field": "description",
+      "sourceHash": "sha256:c9ad2d8a8eedffaaceb6ffc8c5f8bcedda2f8bece76b9f8c83e7101a8847a874",
+      "text": "获取或设置指定图像着色颜色的 Color Property。"
+    },
+    {
+      "id": "ImageMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "ImageMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "ImageMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "ImageMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "ImageMaterialProperty#image",
+      "field": "description",
+      "sourceHash": "sha256:c35037cd4f35333590298407269b2c61d0d9d1551c8eadb4a8ffe953a1033049",
+      "text": "获取或设置指定所用 Image、URL、Canvas 或 Video 的 Property。"
+    },
+    {
+      "id": "ImageMaterialProperty#repeat",
+      "field": "description",
+      "sourceHash": "sha256:34f7f4db98574a0b897df826fefbdb7c513318324c43a1dd239fc96c06002bf6",
+      "text": "获取或设置值为 {@link Cartesian2} 的 Property，指定图像在各方向的重复次数。"
+    },
+    {
+      "id": "ImageMaterialProperty#transparent",
+      "field": "description",
+      "sourceHash": "sha256:3ab418a55a23e4904f7d94c91a9c244c3a569a72ca5d47d933f8642689605980",
+      "text": "获取或设置指定图像是否包含透明部分的布尔 Property。"
+    },
+    {
+      "id": "MaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:ddd013719f3852f1fcb16bf39f96b8338d376cf08f0d004c6e3a62696a4ff103",
+      "text": "表示 {@link Material} uniform 的全部 {@link Property} 对象所遵循的接口。此类型为接口，不能直接实例化。"
+    },
+    {
+      "id": "MaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "MaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "MaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "MaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "NodeTransformationProperty",
+      "field": "description",
+      "sourceHash": "sha256:d83e4c0e15114f5effa1da6d703c9f42bd6d70384d61efb21a33830d46415fbe",
+      "text": "产生 {@link TranslationRotationScale} 数据的 {@link Property}。"
+    },
+    {
+      "id": "NodeTransformationProperty",
+      "field": "params/options.rotation/description",
+      "sourceHash": "sha256:4c000a7ddc0d195f525204648547f4f6d8b9f301ce88f0dfd45b435f769b3d5f",
+      "text": "值为 {@link Quaternion} 的 Property，指定应用到节点的 (x, y, z, w) 旋转。"
+    },
+    {
+      "id": "NodeTransformationProperty",
+      "field": "params/options.scale/description",
+      "sourceHash": "sha256:761d3327c13bd20bc3914e720f2002892dbe11e1e0c3d3616ba84d204c047d44",
+      "text": "值为 {@link Cartesian3} 的 Property，指定应用到节点的 (x, y, z) 缩放。"
+    },
+    {
+      "id": "NodeTransformationProperty",
+      "field": "params/options.translation/description",
+      "sourceHash": "sha256:c50c318833fbadae03aace100502554c3b760f5645b83ea2434a3102194ac401",
+      "text": "值为 {@link Cartesian3} 的 Property，指定应用到节点的 (x, y, z) 平移。"
+    },
+    {
+      "id": "NodeTransformationProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "NodeTransformationProperty#rotation",
+      "field": "description",
+      "sourceHash": "sha256:13f9461d5d43b34543d5beca8aa62e21c02d9e820eb847128f4456ef9542ef20",
+      "text": "获取或设置值为 {@link Quaternion} 的 Property，指定应用到节点的 (x, y, z, w) 旋转。"
+    },
+    {
+      "id": "NodeTransformationProperty#scale",
+      "field": "description",
+      "sourceHash": "sha256:1d8f8bce72ca5c6154aba33d958257302e83470f45ab22ad8470a18b5493cda8",
+      "text": "获取或设置值为 {@link Cartesian3} 的 Property，指定应用到节点的 (x, y, z) 缩放。"
+    },
+    {
+      "id": "NodeTransformationProperty#translation",
+      "field": "description",
+      "sourceHash": "sha256:e01a43dfe16ab3b360fcef02cf08526e24cd2e167dca99db0ed56f95b0f0dfd7",
+      "text": "获取或设置值为 {@link Cartesian3} 的 Property，指定应用到节点的 (x, y, z) 平移。"
+    },
+    {
+      "id": "PolylineArrowMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:69d699368deee7140d057d70d21fecf9b850c5d83b662a21f231b6337faed3c4",
+      "text": "将属性映射到 PolylineArrow {@link Material} uniform 的 {@link MaterialProperty}。"
+    },
+    {
+      "id": "PolylineArrowMaterialProperty",
+      "field": "params/color/description",
+      "sourceHash": "sha256:216cf4b90868aa17b87f8016c6ddb33dd73601266d371b229a7c2a6098bdb3f4",
+      "text": "使用的 {@link Color} Property。"
+    },
+    {
+      "id": "PolylineArrowMaterialProperty#color",
+      "field": "description",
+      "sourceHash": "sha256:c8043a9d6b9d939167da4b6d0206ae1c5fa99843764f49f876d040f749a3db52",
+      "text": "获取或设置值为 {@link Color} 的 {@link Property}。"
+    },
+    {
+      "id": "PolylineArrowMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "PolylineArrowMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "PolylineArrowMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "PolylineArrowMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:cf18a9aca440cca5b6f3d9e352dfc15d4a2348457c10206be82a2215833b490f",
+      "text": "将属性映射到折线虚线 {@link Material} uniform 的 {@link MaterialProperty}。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:6d6cd81572bc1ec010b723ee8b53fbf14465d3ce566d0dd2b089be6adecc3100",
+      "text": "指定线条 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty",
+      "field": "params/options.dashLength/description",
+      "sourceHash": "sha256:f673ef66301ba1094488bc30e78b1baeea349778d6da69d44d2f65978e5d5196",
+      "text": "指定虚线图案长度的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty",
+      "field": "params/options.dashPattern/description",
+      "sourceHash": "sha256:7b54082283c6d251b1d2fdad43b2f56df7dbd9f380d9315cb328664cf5ec2dc1",
+      "text": "指定虚线 16 位图案的数值 Property。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty",
+      "field": "params/options.gapColor/description",
+      "sourceHash": "sha256:1a0a83c0f74fc04304845196b00cc65073e6d29c1fa02c4617ad8aa6c2ef956b",
+      "text": "指定线条间隙 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty#color",
+      "field": "description",
+      "sourceHash": "sha256:973936855726add4a508d03dffd27c1d23abd43e815c2b90190de1e1b8133f62",
+      "text": "获取或设置指定线条 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty#dashLength",
+      "field": "description",
+      "sourceHash": "sha256:1c585eb1c01499ec76f7ab14f661f01337371bfb1e8a623c6558267ccc90dd83",
+      "text": "获取或设置指定虚线一个周期长度的数值 Property。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty#dashPattern",
+      "field": "description",
+      "sourceHash": "sha256:a397ceddd18e2e49ebd2a4ae2667e4fd9ada43f2eb3c0f16f1516df73cbd6a50",
+      "text": "获取或设置指定虚线图案的数值 Property。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty#gapColor",
+      "field": "description",
+      "sourceHash": "sha256:d2e498ca2d4d81ffeb7991ee908729aa94cca65735457926feab68e1b6d3e7fa",
+      "text": "获取或设置指定线条间隙 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "PolylineDashMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:ce06500ad30ebcc53b8c94fad2113b4f89d1b1460b2c2cd7ae89d3404cdab7e0",
+      "text": "将属性映射到折线发光 {@link Material} uniform 的 {@link MaterialProperty}。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:6d6cd81572bc1ec010b723ee8b53fbf14465d3ce566d0dd2b089be6adecc3100",
+      "text": "指定线条 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty",
+      "field": "params/options.glowPower/description",
+      "sourceHash": "sha256:edf9a21e10768b9a2967941af9f5fdee4779d57f28612a6a4e123f0bb5360b92",
+      "text": "指定发光强度的数值 Property，以总线宽的比例表示。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty",
+      "field": "params/options.taperPower/description",
+      "sourceHash": "sha256:38648a6f829025f0d43cb8443d6862a8a6c8e1318028852e4ad2a2cbc0aeb55e",
+      "text": "指定渐细效果强度的数值 Property，以总线长的比例表示。为 1.0 或更大时，不使用渐细效果。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty#color",
+      "field": "description",
+      "sourceHash": "sha256:973936855726add4a508d03dffd27c1d23abd43e815c2b90190de1e1b8133f62",
+      "text": "获取或设置指定线条 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty#glowPower",
+      "field": "description",
+      "sourceHash": "sha256:78680389faab8284ef774bb29b6d10ddf9fe994033fa169eb7f70456264dec6d",
+      "text": "获取或设置指定发光强度的数值 Property，以总线宽的比例表示，小于 1.0。"
+    },
+    {
+      "id": "PolylineGlowMaterialProperty#taperPower",
+      "field": "description",
+      "sourceHash": "sha256:b745ed21ac05bf8183f81af44720101733ccdc91ec96e5eb5b38b6ee76e3ed0f",
+      "text": "获取或设置指定渐细效果强度的数值 Property，以总线长的比例表示。为 1.0 或更大时，不使用渐细效果。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:a6da9c11badec5e87e4c4ce8cc6b17511ed6db6d2f3f362a11a8221c133f0b3c",
+      "text": "将属性映射到折线轮廓 {@link Material} uniform 的 {@link MaterialProperty}。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty",
+      "field": "params/options.color/description",
+      "sourceHash": "sha256:6d6cd81572bc1ec010b723ee8b53fbf14465d3ce566d0dd2b089be6adecc3100",
+      "text": "指定线条 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty",
+      "field": "params/options.outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty",
+      "field": "params/options.outlineWidth/description",
+      "sourceHash": "sha256:385e07595016d9991d805bc1ff67409b7c2c5f3e5a5e8eeafeda7a380586aeb7",
+      "text": "指定轮廓宽度的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty#color",
+      "field": "description",
+      "sourceHash": "sha256:973936855726add4a508d03dffd27c1d23abd43e815c2b90190de1e1b8133f62",
+      "text": "获取或设置指定线条 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineOutlineMaterialProperty#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:119eac28c5143238b460f98df3ad8dd4453978def08bc49de3415a561f4a0f04",
+      "text": "获取或设置指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "PositionProperty",
+      "field": "description",
+      "sourceHash": "sha256:1e51be185a53690d89a12e2170ceb0522193d6940e89d4776a8a98bdf0fccb1b",
+      "text": "通过 {@link Cartesian3} 世界位置及关联的 {@link ReferenceFrame} 定义位置的全部 {@link Property} 对象所遵循的接口。此类型为接口，不能直接实例化。"
+    },
+    {
+      "id": "PositionProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "PositionProperty#getValue",
+      "field": "description",
+      "sourceHash": "sha256:1e1143eda6c89c02a62c9c7dc75b5d33bb267811f85df628614b712c3b0f20eb",
+      "text": "获取指定时刻在固定参考系中的属性值。"
+    },
+    {
+      "id": "PositionProperty#getValueInReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:0e0181e02436fbc4da884638809efd0b83cb4896b1b2581ddaf0d2ca44d0d46e",
+      "text": "获取指定时刻在指定参考系中的属性值。"
+    },
+    {
+      "id": "PositionProperty#getValueInReferenceFrame",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:805a7a0ee552ea3d6590960dd6f157da0cbe0900843b07c1dbde98077e0006b3",
+      "text": "结果所需的 referenceFrame。"
+    },
+    {
+      "id": "PositionProperty#getValueInReferenceFrame",
+      "field": "params/time/description",
+      "sourceHash": "sha256:0e230fdc0f6ea29ab74feb31244405e8aaf53df3b81aa616c08f69b81879f510",
+      "text": "需要获取值的时刻。"
+    },
+    {
+      "id": "PositionProperty#referenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:01f3d2c309c6d2c0466f603f3c4768cb61c83b9aa107dcea538796e5c7ada16c",
+      "text": "获取定义位置所使用的参考系。"
+    },
+    {
+      "id": "PositionPropertyArray",
+      "field": "description",
+      "sourceHash": "sha256:289bc6d83354ec6dfcf924c33daec55d32a42eab052c2bb1d868174db5f520ad",
+      "text": "值为数组的 {@link Property}，数组各项为其他 PositionProperty 实例的计算结果。"
+    },
+    {
+      "id": "PositionPropertyArray",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:04b10bdf6d93d55bba6d3eaed7c7e116ee6f8cfa53b272460e6daff3e50ec10f",
+      "text": "定义位置所使用的参考系。"
+    },
+    {
+      "id": "PositionPropertyArray",
+      "field": "params/value/description",
+      "sourceHash": "sha256:e1a7f88f467b89007d6e967f168f5c4c8d1de16649d00805018c6368bd34a029",
+      "text": "Property 实例数组。"
+    },
+    {
+      "id": "PositionPropertyArray#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:389f0d79948b28759e2116e98b7c34402fbce0e084208cbaf7222586a553164c",
+      "text": "获取属性定义发生变化时触发的事件。调用 setValue 传入与当前值不同的数据，或数组中的某个属性发生变化时，定义发生变化。"
+    },
+    {
+      "id": "PositionPropertyArray#getValue",
+      "field": "description",
+      "sourceHash": "sha256:7362ddef20b36b70d851108007396d338be40ecd97b52ccfb1d6e4f96aac5d6b",
+      "text": "获取属性值。"
+    },
+    {
+      "id": "PositionPropertyArray#getValueInReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:0e0181e02436fbc4da884638809efd0b83cb4896b1b2581ddaf0d2ca44d0d46e",
+      "text": "获取指定时刻在指定参考系中的属性值。"
+    },
+    {
+      "id": "PositionPropertyArray#getValueInReferenceFrame",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:805a7a0ee552ea3d6590960dd6f157da0cbe0900843b07c1dbde98077e0006b3",
+      "text": "结果所需的 referenceFrame。"
+    },
+    {
+      "id": "PositionPropertyArray#getValueInReferenceFrame",
+      "field": "params/time/description",
+      "sourceHash": "sha256:0e230fdc0f6ea29ab74feb31244405e8aaf53df3b81aa616c08f69b81879f510",
+      "text": "需要获取值的时刻。"
+    },
+    {
+      "id": "PositionPropertyArray#isConstant",
+      "field": "description",
+      "sourceHash": "sha256:8e2151deea3bab7f57afad655143af88f46be90a74c671228c76286915826135",
+      "text": "获取指示此属性是否为常量的值。数组中全部属性项均为常量时，此属性才视为常量。"
+    },
+    {
+      "id": "PositionPropertyArray#referenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:c17fc1fc2ace9156ca70721a1a154599015616534d6266b15627fa05b7f7d7f5",
+      "text": "获取定义位置所使用的参考系。"
+    },
+    {
+      "id": "PositionPropertyArray#setValue",
+      "field": "description",
+      "sourceHash": "sha256:07c2a75a899bf1b4e30af4166bf07e9455f0515a67912d05771b196b7a76c021",
+      "text": "设置属性值。"
+    },
+    {
+      "id": "PositionPropertyArray#setValue",
+      "field": "params/value/description",
+      "sourceHash": "sha256:e1a7f88f467b89007d6e967f168f5c4c8d1de16649d00805018c6368bd34a029",
+      "text": "Property 实例数组。"
+    },
+    {
+      "id": "Property",
+      "field": "description",
+      "sourceHash": "sha256:e1c60511599c2e3b4761e8ca1956f111ed9e95cb926d588f4103fbd91daf0cc9",
+      "text": "全部属性的接口，表示一个可以随时间变化的值。此类型为接口，不能直接实例化。"
+    },
+    {
+      "id": "Property#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "PropertyArray",
+      "field": "description",
+      "sourceHash": "sha256:2835e48f264df9061b41eba78a64091119f315ee4e0617a707ceb14ef28d10bf",
+      "text": "值为数组的 {@link Property}，数组各项为其他属性实例的计算结果。"
+    },
+    {
+      "id": "PropertyArray",
+      "field": "params/value/description",
+      "sourceHash": "sha256:e1a7f88f467b89007d6e967f168f5c4c8d1de16649d00805018c6368bd34a029",
+      "text": "Property 实例数组。"
+    },
+    {
+      "id": "PropertyArray#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:389f0d79948b28759e2116e98b7c34402fbce0e084208cbaf7222586a553164c",
+      "text": "获取属性定义发生变化时触发的事件。调用 setValue 传入与当前值不同的数据，或数组中的某个属性发生变化时，定义发生变化。"
+    },
+    {
+      "id": "PropertyArray#getValue",
+      "field": "description",
+      "sourceHash": "sha256:7362ddef20b36b70d851108007396d338be40ecd97b52ccfb1d6e4f96aac5d6b",
+      "text": "获取属性值。"
+    },
+    {
+      "id": "PropertyArray#getValue",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:454dddd3b440b765589c1b95aa4253eb3d6c513256ed01036b4cdd83d5862699",
+      "text": "修改后的 result 参数，包含在指定时刻对各内部属性求值得到的值；未提供 result 时，返回新数组。"
+    },
+    {
+      "id": "PropertyArray#isConstant",
+      "field": "description",
+      "sourceHash": "sha256:8e2151deea3bab7f57afad655143af88f46be90a74c671228c76286915826135",
+      "text": "获取指示此属性是否为常量的值。数组中全部属性项均为常量时，此属性才视为常量。"
+    },
+    {
+      "id": "PropertyArray#setValue",
+      "field": "description",
+      "sourceHash": "sha256:07c2a75a899bf1b4e30af4166bf07e9455f0515a67912d05771b196b7a76c021",
+      "text": "设置属性值。"
+    },
+    {
+      "id": "PropertyArray#setValue",
+      "field": "params/value/description",
+      "sourceHash": "sha256:e1a7f88f467b89007d6e967f168f5c4c8d1de16649d00805018c6368bd34a029",
+      "text": "Property 实例数组。"
+    },
+    {
+      "id": "PropertyBag",
+      "field": "description",
+      "sourceHash": "sha256:ce6588f76709faa56660587f6dac4bbcbb6d46b98240a3ddd14edf718f59dc03",
+      "text": "值为键值映射的 {@link Property}，将属性名映射到其他属性的计算结果。"
+    },
+    {
+      "id": "PropertyBag",
+      "field": "params/createPropertyCallback/description",
+      "sourceHash": "sha256:264cbe69cd3919021573002560794b69adedd72a76043de73927526a64a31aab",
+      "text": "value 中某个值不是 Property 时调用的函数。"
+    },
+    {
+      "id": "PropertyBag",
+      "field": "params/value/description",
+      "sourceHash": "sha256:8e5ecffebc4ddc1ec2d8c021cf3ef3ac62544f692f2784ed5121b79993f08ee9",
+      "text": "将属性名映射到属性的键值对象。"
+    },
+    {
+      "id": "PropertyBag#addProperty",
+      "field": "description",
+      "sourceHash": "sha256:efeee099416bd6e447cf76e76b0a89a8028c42e3ed837e5c7e7282228f9751f9",
+      "text": "向此对象添加属性。"
+    },
+    {
+      "id": "PropertyBag#addProperty",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:7a47771fd78499f69840264a2e9c4a9318b0bee9a27b1d1784aff871b70193d4",
+      "text": "\"propertyName\" 已注册为属性。"
+    },
+    {
+      "id": "PropertyBag#addProperty",
+      "field": "params/createPropertyCallback/description",
+      "sourceHash": "sha256:db76c717da3307498805b7762eb9024ed2167a96ddaad3501e263e67a5538267",
+      "text": "新属性被赋予非 Property 值时调用的函数。"
+    },
+    {
+      "id": "PropertyBag#addProperty",
+      "field": "params/propertyName/description",
+      "sourceHash": "sha256:f7b3e0b44b21eb5b3f88966ae0d4b9a6bdf280b1c14ec444127233cb413efa3a",
+      "text": "要添加的属性名称。"
+    },
+    {
+      "id": "PropertyBag#addProperty",
+      "field": "params/value/description",
+      "sourceHash": "sha256:9fc8bb3445efaab310241d737b6f08e3cc3320ec90292473556be8101242d910",
+      "text": "新属性的值（若提供）。"
+    },
+    {
+      "id": "PropertyBag#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:4e8d2a12fbfe483cd03f548fc2da317835fe6ae0631c9253b77e79b3db373c70",
+      "text": "获取所含属性集合变化，或其中任一属性自身变化时触发的事件。"
+    },
+    {
+      "id": "PropertyBag#getValue",
+      "field": "description",
+      "sourceHash": "sha256:da99b28ca9b3d5fdb9fc1da2018737680e38cf4110c229626795c81b5d9ec52f",
+      "text": "获取此属性的值。在指定时刻对各内部属性求值，并以对象返回属性名到结果值的映射。"
+    },
+    {
+      "id": "PropertyBag#getValue",
+      "field": "params/result/description",
+      "sourceHash": "sha256:3d0a9b7adb1986ca3dbabd17a43914c1ec9f4db551442de5f1a90f0ff2c070d9",
+      "text": "用于存储结果的对象；省略时创建并返回新实例。result 中不属于此 PropertyBag 的属性保持原样。"
+    },
+    {
+      "id": "PropertyBag#hasProperty",
+      "field": "description",
+      "sourceHash": "sha256:8813d41da8a87e5495b82609c110a5d8bbaa932abea1a4fefaf0e5c5b1eb3d28",
+      "text": "判断此对象是否定义了指定名称的属性。"
+    },
+    {
+      "id": "PropertyBag#hasProperty",
+      "field": "params/propertyName/description",
+      "sourceHash": "sha256:ccf146ea2925506a54693deaeafa850b8ec6ac0a3edfa8f3894bf95dc47032ac",
+      "text": "需要检查的属性名称。"
+    },
+    {
+      "id": "PropertyBag#hasProperty",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:8779c9acdf9d397bc2677fdab7edfb7d27c14245edd8c8c272c8ec6683ed192e",
+      "text": "对象已定义此名称的属性时为 true，否则为 false。"
+    },
+    {
+      "id": "PropertyBag#isConstant",
+      "field": "description",
+      "sourceHash": "sha256:4b3d5ed7257f43f2c23d8a000e48cc315a61d5a6fde72af8f6d84139edbfe0aa",
+      "text": "获取指示此属性是否为常量的值。对象中全部属性项均为常量时，此属性才视为常量。"
+    },
+    {
+      "id": "PropertyBag#merge",
+      "field": "params/createPropertyCallback/description",
+      "sourceHash": "sha256:264cbe69cd3919021573002560794b69adedd72a76043de73927526a64a31aab",
+      "text": "value 中某个值不是 Property 时调用的函数。"
+    },
+    {
+      "id": "PropertyBag#propertyNames",
+      "field": "description",
+      "sourceHash": "sha256:b6567a0bd0cb8e14e90f1c2541aae86a91051254205b56fe69c194505c7fe7ca",
+      "text": "获取此实例上全部已注册属性的名称。"
+    },
+    {
+      "id": "PropertyBag#removeProperty",
+      "field": "description",
+      "sourceHash": "sha256:0ca8c2246105a38f123955f47a8bf4829075fa5a38e36518bf3b72a132af8ef2",
+      "text": "移除先前通过 addProperty 添加的属性。"
+    },
+    {
+      "id": "PropertyBag#removeProperty",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:14f5d058f494e778d04fa4e464aaee18986d2d3d98aed7572a6e100ae864384f",
+      "text": "\"propertyName\" 不是已注册属性。"
+    },
+    {
+      "id": "PropertyBag#removeProperty",
+      "field": "params/propertyName/description",
+      "sourceHash": "sha256:53ac7d2e726afc2dd504315043b19e5d1e8df5d9dba448468682ad0f3b1c8b0b",
+      "text": "要移除的属性名称。"
+    },
+    {
+      "id": "ReferenceFrame.FIXED",
+      "field": "description",
+      "sourceHash": "sha256:38617375dee383061ea509d35be6bb544aae36a4f9d936afa348eaa14104d273",
+      "text": "固定参考系。"
+    },
+    {
+      "id": "ReferenceFrame.INERTIAL",
+      "field": "description",
+      "sourceHash": "sha256:d19551e6af2c3b8e9e3326f37e8d2b517d23065e25e2db87b1188f0548f40c4d",
+      "text": "惯性参考系。"
+    },
+    {
+      "id": "ReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:460fdf6496ea83464fea66087100c112c28a378ccd3904e080e3f0cd0e654bb1",
+      "text": "用于标识常见参考系的常量。"
+    },
+    {
+      "id": "ReferenceFrame",
+      "field": "properties/FIXED/description",
+      "sourceHash": "sha256:38617375dee383061ea509d35be6bb544aae36a4f9d936afa348eaa14104d273",
+      "text": "固定参考系。"
+    },
+    {
+      "id": "ReferenceFrame",
+      "field": "properties/INERTIAL/description",
+      "sourceHash": "sha256:d19551e6af2c3b8e9e3326f37e8d2b517d23065e25e2db87b1188f0548f40c4d",
+      "text": "惯性参考系。"
+    },
+    {
+      "id": "ReferenceProperty.fromString",
+      "field": "description",
+      "sourceHash": "sha256:421c9516a5b320e191faacb3ce405777512d8aa611c475ff1e1471890892f720",
+      "text": "根据用于解析引用的实体集合及指定目标实体 id 和属性的字符串创建新实例。字符串格式为 \"objectId#foo.bar\"，其中 # 分隔 id 与属性路径，. 分隔子属性。如果引用标识或任意子属性包含 #、. 或 \\，必须进行转义。"
+    },
+    {
+      "id": "ReferenceProperty.fromString",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:4db425e3882ed9eb80b9ced3fc7fdc65292bebec7a26d200984791f9c056f1dd",
+      "text": "referenceString 无效。"
+    },
+    {
+      "id": "ReferenceProperty.fromString",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:962ca4f44a9eadcf55cf60f09bd841ce2a076a75c5642e2f04fc3d5323cbe625",
+      "text": "新的 ReferenceProperty 实例。"
+    },
+    {
+      "id": "ReferenceProperty",
+      "field": "description",
+      "sourceHash": "sha256:7904662dd4b8bdb94441f46fcd585a3ca927fa460cc244b66e1ffa4dbb41b51f",
+      "text": "透明地链接到指定对象上另一个属性的 {@link Property}。"
+    },
+    {
+      "id": "ReferenceProperty",
+      "field": "params/targetCollection/description",
+      "sourceHash": "sha256:c004882a3fa0357f7e5eb62563304bd7f5b2a4ed31513b813b07bdcd84163481",
+      "text": "用于解析引用的实体集合。"
+    },
+    {
+      "id": "ReferenceProperty",
+      "field": "params/targetId/description",
+      "sourceHash": "sha256:1823eaf2da0e466221f4d54a57d8b490593eb25920a76f4c2962ff523b6ec0ae",
+      "text": "被引用实体的 id。"
+    },
+    {
+      "id": "ReferenceProperty",
+      "field": "params/targetPropertyNames/description",
+      "sourceHash": "sha256:e49820e63ae94f20e547174a2aa2787dea0d9b8bd5707c0693ab04b70f9fe543",
+      "text": "需要访问的目标实体属性名称。"
+    },
+    {
+      "id": "ReferenceProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:af74ea31b89db452831f21f1ca98e6d8035799c348f1b77496f407d33b078a40",
+      "text": "获取属性定义发生变化时触发的事件。被引用属性的定义变化时，此属性的定义随之变化。"
+    },
+    {
+      "id": "ReferenceProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:258d8f5e540bf491ea535d9d5cd17b1e19a0481cdb5a99a2504b8b7874f035fe",
+      "text": "获取指定时刻的 {@link Material} 类型。仅当被引用属性为 {@link MaterialProperty} 时有效。"
+    },
+    {
+      "id": "ReferenceProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "ReferenceProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "ReferenceProperty#getValueInReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:3ef8b6b6ac087366b6941c0c05dec9894407719154938f9bd1274d53d72e214d",
+      "text": "获取指定时刻在指定参考系中的属性值。仅当被引用属性为 {@link PositionProperty} 时有效。"
+    },
+    {
+      "id": "ReferenceProperty#getValueInReferenceFrame",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:805a7a0ee552ea3d6590960dd6f157da0cbe0900843b07c1dbde98077e0006b3",
+      "text": "结果所需的 referenceFrame。"
+    },
+    {
+      "id": "ReferenceProperty#getValueInReferenceFrame",
+      "field": "params/time/description",
+      "sourceHash": "sha256:0e230fdc0f6ea29ab74feb31244405e8aaf53df3b81aa616c08f69b81879f510",
+      "text": "需要获取值的时刻。"
+    },
+    {
+      "id": "ReferenceProperty#isConstant",
+      "field": "description",
+      "sourceHash": "sha256:49a7bbd1de64c3a1b1acf85ce177a918dd2a88f79da4ec6a4e9b3b2e42e06a54",
+      "text": "获取指示此属性是否为常量的值。"
+    },
+    {
+      "id": "ReferenceProperty#referenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:2d0aeac6ee4738ab6ce34d8575bd123337c4c29f78f82080cdc5a158b875447f",
+      "text": "获取定义位置所使用的参考系。仅当被引用属性为 {@link PositionProperty} 时有效。"
+    },
+    {
+      "id": "ReferenceProperty#resolvedProperty",
+      "field": "description",
+      "sourceHash": "sha256:8adb2b13b15fd2a3279ecb7c58b838e41f332a9193cbc8661300320597623607",
+      "text": "获取底层被引用属性解析后的实例。"
+    },
+    {
+      "id": "ReferenceProperty#targetCollection",
+      "field": "description",
+      "sourceHash": "sha256:b1f75f3b9cdb5d570921f96909323c6cb2ae1395643c5acd1c81ca6330cfc147",
+      "text": "获取包含被引用实体的集合。"
+    },
+    {
+      "id": "ReferenceProperty#targetId",
+      "field": "description",
+      "sourceHash": "sha256:0320732d531e5b1643c469b94db15eba1f92fac9abcb1c75cea5ac1bc1f8c8ae",
+      "text": "获取被引用实体的 id。"
+    },
+    {
+      "id": "ReferenceProperty#targetPropertyNames",
+      "field": "description",
+      "sourceHash": "sha256:a947a4aef7778db87e3355f1826e1ff061246b9432833711736d76c039aa2c22",
+      "text": "获取用于访问被引用属性的属性名称数组。"
+    },
+    {
+      "id": "SampledPositionProperty",
+      "field": "description",
+      "sourceHash": "sha256:23ec1aac933e7eb0be9bdf5c8c51438753c20503eb8cf9cc7ac47e7ff752899f",
+      "text": "同时实现 {@link PositionProperty} 的 {@link SampledProperty}。"
+    },
+    {
+      "id": "SampledPositionProperty",
+      "field": "params/numberOfDerivatives/description",
+      "sourceHash": "sha256:506b4790670ff0331cb170aada43ad4077f273702781587878f089c1bf8d5319",
+      "text": "每个位置所附带的导数数量，例如速度、加速度等。"
+    },
+    {
+      "id": "SampledPositionProperty",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:04b10bdf6d93d55bba6d3eaed7c7e116ee6f8cfa53b272460e6daff3e50ec10f",
+      "text": "定义位置所使用的参考系。"
+    },
+    {
+      "id": "SampledPositionProperty#addSample",
+      "field": "description",
+      "sourceHash": "sha256:bb7b71ef9911b90f56c69db76fceea9c0da36ccfa9d0deec2f71851b2438f15f",
+      "text": "添加一个新样本。"
+    },
+    {
+      "id": "SampledPositionProperty#addSample",
+      "field": "params/derivatives/description",
+      "sourceHash": "sha256:f1dbe56768d0d658d3708b6b6d26de683e416f43b04f3ffd1ccc6e9dc2af7234",
+      "text": "指定时刻的导数值数组。"
+    },
+    {
+      "id": "SampledPositionProperty#addSample",
+      "field": "params/position/description",
+      "sourceHash": "sha256:415b596ee906af04a878cc38f7bfd03a2a08ad734377687e3aefbd2072e7e8ef",
+      "text": "指定时刻的位置。"
+    },
+    {
+      "id": "SampledPositionProperty#addSample",
+      "field": "params/time/description",
+      "sourceHash": "sha256:cd30d61310a7a10a09056a23b58bd966d8a3728b022ee33158f08f843773f25a",
+      "text": "采样时刻。"
+    },
+    {
+      "id": "SampledPositionProperty#addSamples",
+      "field": "description",
+      "sourceHash": "sha256:43bbf3bc48e986304966afb5b5dd96738f7b2610578bcba94d456cc99ca59c86",
+      "text": "通过相互对应的并行数组添加多个样本。"
+    },
+    {
+      "id": "SampledPositionProperty#addSamples",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ab46b26a655bc1947873924b524ef498cfc1ed953d702e5257075263a23218f4",
+      "text": "全部数组的长度必须相同。"
+    },
+    {
+      "id": "SampledPositionProperty#addSamples",
+      "field": "params/derivatives/description",
+      "sourceHash": "sha256:9e2eae39f057405e96f85c15e01799f56314b2f1ab2005275bd77037acfd7d67",
+      "text": "二维数组，每项包含对应时间索引处的导数值数组。"
+    },
+    {
+      "id": "SampledPositionProperty#addSamples",
+      "field": "params/positions/description",
+      "sourceHash": "sha256:e9e9c99afeec7eec592149ec30df020877dd26b04b5f71afe74ea6ce144bb9fb",
+      "text": "Cartesian3 位置实例数组，各项对应同索引的采样时刻。"
+    },
+    {
+      "id": "SampledPositionProperty#addSamples",
+      "field": "params/times/description",
+      "sourceHash": "sha256:7c822347c3d03d5e9c77993683a4621c7eb83b5b4d76f0944625f9dd8ed5c2f2",
+      "text": "JulianDate 实例数组，每项表示一个采样时刻。"
+    },
+    {
+      "id": "SampledPositionProperty#addSamplesPackedArray",
+      "field": "description",
+      "sourceHash": "sha256:fd51f9b1097908646350a1feed15f58f1db9437bf01e4800a60aa00cb73934e2",
+      "text": "通过一个打包数组添加样本。每个样本依次包含日期，以及对应值和导数的打包表示。"
+    },
+    {
+      "id": "SampledPositionProperty#addSamplesPackedArray",
+      "field": "params/epoch/description",
+      "sourceHash": "sha256:4ef695a1c3b8095c72a67505e05a3b7d5c53d78c685f98604b0388114a0094eb",
+      "text": "packedSamples 中的日期若为数值，则视为相对于此历元的秒偏移。"
+    },
+    {
+      "id": "SampledPositionProperty#addSamplesPackedArray",
+      "field": "params/packedSamples/description",
+      "sourceHash": "sha256:28ab24dbef1753cc99531945e13a36d161f99b5aa6255f2f55a35cc76ee06523",
+      "text": "打包样本数组。"
+    },
+    {
+      "id": "SampledPositionProperty#backwardExtrapolationDuration",
+      "field": "description",
+      "sourceHash": "sha256:4d6f54e668a0c2c5f63c3b7d3e452153c933e264e1d6c766bd238b463b9cbc0d",
+      "text": "获取或设置允许向过去外推的时长，超过后属性值为 undefined。0 表示无限外推。"
+    },
+    {
+      "id": "SampledPositionProperty#backwardExtrapolationType",
+      "field": "description",
+      "sourceHash": "sha256:29639eaa49715927c12031ddab924acddb7fadf48489b8fecd68166a520e8ba9",
+      "text": "获取或设置查询早于全部可用样本的时刻时所用的外推类型。"
+    },
+    {
+      "id": "SampledPositionProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "SampledPositionProperty#forwardExtrapolationDuration",
+      "field": "description",
+      "sourceHash": "sha256:ece58cce4d9012a7d02338b7fe927a3ca95e0a8c0ed32358fba8e4470edb6604",
+      "text": "获取或设置允许向未来外推的时长，超过后属性值为 undefined。0 表示无限外推。"
+    },
+    {
+      "id": "SampledPositionProperty#forwardExtrapolationType",
+      "field": "description",
+      "sourceHash": "sha256:44e268c368d626a7f75030dce2ac0a4196e8fe8d219745bd4a98aa4be8ff50bd",
+      "text": "获取或设置查询晚于全部可用样本的时刻时所用的外推类型。"
+    },
+    {
+      "id": "SampledPositionProperty#getValue",
+      "field": "description",
+      "sourceHash": "sha256:80a9bba76847d9711ce609b3f640594ff19fb00cb624042adffa82170ad8ee1a",
+      "text": "获取指定时刻的位置。"
+    },
+    {
+      "id": "SampledPositionProperty#getValueInReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:30e038aa416fecfd5e5d1adef9f76cdcb0ad6bc0aee8cee51dfe07075f81d9ea",
+      "text": "获取指定时刻在指定参考系中的位置。"
+    },
+    {
+      "id": "SampledPositionProperty#getValueInReferenceFrame",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:805a7a0ee552ea3d6590960dd6f157da0cbe0900843b07c1dbde98077e0006b3",
+      "text": "结果所需的 referenceFrame。"
+    },
+    {
+      "id": "SampledPositionProperty#getValueInReferenceFrame",
+      "field": "params/time/description",
+      "sourceHash": "sha256:0e230fdc0f6ea29ab74feb31244405e8aaf53df3b81aa616c08f69b81879f510",
+      "text": "需要获取值的时刻。"
+    },
+    {
+      "id": "SampledPositionProperty#interpolationAlgorithm",
+      "field": "description",
+      "sourceHash": "sha256:8a7e0be9c1321fc3760170013a260b48ebcdccf5ecfb5b49203302c4c38d616e",
+      "text": "获取求值使用的插值算法。请调用 <code>setInterpolationOptions</code> 设置。"
+    },
+    {
+      "id": "SampledPositionProperty#interpolationDegree",
+      "field": "description",
+      "sourceHash": "sha256:d1d7a77deb74b4b8fe39ea791521d5e768f9571cb987677d106dc3aaa31905be",
+      "text": "获取求值使用的插值次数。请调用 <code>setInterpolationOptions</code> 设置。"
+    },
+    {
+      "id": "SampledPositionProperty#numberOfDerivatives",
+      "field": "description",
+      "sourceHash": "sha256:ab4fb9e6eb8ac8c7286609a7105a43e079547715e4caea74ea522f1aa75dba3c",
+      "text": "此属性包含的导数数量：0 表示仅有位置，1 表示还包含速度，依此类推。"
+    },
+    {
+      "id": "SampledPositionProperty#referenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:c17fc1fc2ace9156ca70721a1a154599015616534d6266b15627fa05b7f7d7f5",
+      "text": "获取定义位置所使用的参考系。"
+    },
+    {
+      "id": "SampledPositionProperty#removeSample",
+      "field": "description",
+      "sourceHash": "sha256:ab8ed804c67d6850e519ec891e03aaeacb2c760bc33165c9842f714f39a3f72f",
+      "text": "移除指定时刻的样本（若存在）。"
+    },
+    {
+      "id": "SampledPositionProperty#removeSample",
+      "field": "params/time/description",
+      "sourceHash": "sha256:cd30d61310a7a10a09056a23b58bd966d8a3728b022ee33158f08f843773f25a",
+      "text": "采样时刻。"
+    },
+    {
+      "id": "SampledPositionProperty#removeSample",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b60a3a63a699de4f48787c24348f8bb3b51637033be8b74edee210c547a1783f",
+      "text": "已移除指定时刻样本时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "SampledPositionProperty#removeSamples",
+      "field": "description",
+      "sourceHash": "sha256:c0855e6c9df9bbf3797a27e93ebbeaa6b5913ef3af67facc6c2ac05cbd57a6e3",
+      "text": "移除指定时间区间内的全部样本。"
+    },
+    {
+      "id": "SampledPositionProperty#removeSamples",
+      "field": "params/time/description",
+      "sourceHash": "sha256:7ea8f0d2bb835b33388523bc2d4611289379953e8b0feb05741decfc313b785a",
+      "text": "需要移除全部样本的时间区间。"
+    },
+    {
+      "id": "SampledPositionProperty#setInterpolationOptions",
+      "field": "description",
+      "sourceHash": "sha256:18fab849589af4343d1e350ce59239305afe88102c883d15d79702e6ae66d4d0",
+      "text": "设置位置插值所用的算法和次数。"
+    },
+    {
+      "id": "SampledPositionProperty#setInterpolationOptions",
+      "field": "params/options.interpolationAlgorithm/description",
+      "sourceHash": "sha256:d28b4f367dfc0d60ed9d5678566c54bfa051d695ad75881e3d56477e9dd4cff6",
+      "text": "新的插值算法。为 undefined 时，保留现有设置。"
+    },
+    {
+      "id": "SampledPositionProperty#setInterpolationOptions",
+      "field": "params/options.interpolationDegree/description",
+      "sourceHash": "sha256:ab10a69ca85627bb6f344e5628a595a009964b680dae1f3037366654807cc0d6",
+      "text": "新的插值次数。为 undefined 时，保留现有设置。"
+    },
+    {
+      "id": "SampledProperty",
+      "field": "description",
+      "sourceHash": "sha256:89a167890f36de86e11e52f2f0a76d22431accee694c883bdd3fb95b790ba859",
+      "text": "根据所提供样本集、指定插值算法和次数，在给定时刻插值得到值的 {@link Property}。"
+    },
+    {
+      "id": "SampledProperty",
+      "field": "params/derivativeTypes/description",
+      "sourceHash": "sha256:f28c804a74a77bc1fce9b3eab0b856c997c113a3af8518f13ff40a7a5cb3d7d1",
+      "text": "提供后，表示样本包含指定类型的导数信息。"
+    },
+    {
+      "id": "SampledProperty",
+      "field": "params/type/description",
+      "sourceHash": "sha256:c927530024c7c9525873f4a2528324ce0995da5b3cbfcdfa18b2e28511dd99fc",
+      "text": "属性类型。"
+    },
+    {
+      "id": "SampledProperty#addSample",
+      "field": "description",
+      "sourceHash": "sha256:bb7b71ef9911b90f56c69db76fceea9c0da36ccfa9d0deec2f71851b2438f15f",
+      "text": "添加一个新样本。"
+    },
+    {
+      "id": "SampledProperty#addSample",
+      "field": "params/derivatives/description",
+      "sourceHash": "sha256:b0b411e24bfa6e41bb1eff99599a3a22d1dd31d938c26dda2709b1f20fdab602",
+      "text": "指定时刻的导数数组。"
+    },
+    {
+      "id": "SampledProperty#addSample",
+      "field": "params/time/description",
+      "sourceHash": "sha256:cd30d61310a7a10a09056a23b58bd966d8a3728b022ee33158f08f843773f25a",
+      "text": "采样时刻。"
+    },
+    {
+      "id": "SampledProperty#addSample",
+      "field": "params/value/description",
+      "sourceHash": "sha256:83b9db9a2b370bb311f188b2070d3ba2c8c6e3769de148908f7b3a23dd8edbdf",
+      "text": "指定时刻的值。"
+    },
+    {
+      "id": "SampledProperty#addSamples",
+      "field": "description",
+      "sourceHash": "sha256:e2476e40df8dd3b0938676291be0b81595fc4912127f58d9d1653ff026b38c9b",
+      "text": "添加样本数组。"
+    },
+    {
+      "id": "SampledProperty#addSamples",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6924d33a8741b39f4c93ab8a5919d663388b16e9ec2c2af908ec2085d65f257e",
+      "text": "times 和 values 的长度必须相同。"
+    },
+    {
+      "id": "SampledProperty#addSamples",
+      "field": "exceptions/1/description",
+      "sourceHash": "sha256:f9548e14a1dfe7e366adb10f350f068f89d2156eb36dc6ca42469f8f0dfc4e5a",
+      "text": "times 和 derivativeValues 的长度必须相同。"
+    },
+    {
+      "id": "SampledProperty#addSamples",
+      "field": "params/derivativeValues/description",
+      "sourceHash": "sha256:1af4b0927fe9dfe173a2ac267a43a48cf2e89d83199ff2e702af40df9f45cd5b",
+      "text": "二维数组，每项包含对应时间索引处的导数数组。"
+    },
+    {
+      "id": "SampledProperty#addSamples",
+      "field": "params/times/description",
+      "sourceHash": "sha256:7c822347c3d03d5e9c77993683a4621c7eb83b5b4d76f0944625f9dd8ed5c2f2",
+      "text": "JulianDate 实例数组，每项表示一个采样时刻。"
+    },
+    {
+      "id": "SampledProperty#addSamples",
+      "field": "params/values/description",
+      "sourceHash": "sha256:07bc6c7727a55b4fe066cc6c1dde8c87fdd1ebe350443efdf4ff204915544f14",
+      "text": "值数组，各项对应 times 中同索引的时刻。"
+    },
+    {
+      "id": "SampledProperty#addSamplesPackedArray",
+      "field": "description",
+      "sourceHash": "sha256:fd51f9b1097908646350a1feed15f58f1db9437bf01e4800a60aa00cb73934e2",
+      "text": "通过一个打包数组添加样本。每个样本依次包含日期，以及对应值和导数的打包表示。"
+    },
+    {
+      "id": "SampledProperty#addSamplesPackedArray",
+      "field": "params/epoch/description",
+      "sourceHash": "sha256:4ef695a1c3b8095c72a67505e05a3b7d5c53d78c685f98604b0388114a0094eb",
+      "text": "packedSamples 中的日期若为数值，则视为相对于此历元的秒偏移。"
+    },
+    {
+      "id": "SampledProperty#addSamplesPackedArray",
+      "field": "params/packedSamples/description",
+      "sourceHash": "sha256:28ab24dbef1753cc99531945e13a36d161f99b5aa6255f2f55a35cc76ee06523",
+      "text": "打包样本数组。"
+    },
+    {
+      "id": "SampledProperty#backwardExtrapolationDuration",
+      "field": "description",
+      "sourceHash": "sha256:4d6f54e668a0c2c5f63c3b7d3e452153c933e264e1d6c766bd238b463b9cbc0d",
+      "text": "获取或设置允许向过去外推的时长，超过后属性值为 undefined。0 表示无限外推。"
+    },
+    {
+      "id": "SampledProperty#backwardExtrapolationType",
+      "field": "description",
+      "sourceHash": "sha256:29639eaa49715927c12031ddab924acddb7fadf48489b8fecd68166a520e8ba9",
+      "text": "获取或设置查询早于全部可用样本的时刻时所用的外推类型。"
+    },
+    {
+      "id": "SampledProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "SampledProperty#derivativeTypes",
+      "field": "description",
+      "sourceHash": "sha256:331085b65d043328e2052f8ba407baca362454f052d444e076efc31e714f3b5c",
+      "text": "获取此属性使用的导数类型。"
+    },
+    {
+      "id": "SampledProperty#forwardExtrapolationDuration",
+      "field": "description",
+      "sourceHash": "sha256:ece58cce4d9012a7d02338b7fe927a3ca95e0a8c0ed32358fba8e4470edb6604",
+      "text": "获取或设置允许向未来外推的时长，超过后属性值为 undefined。0 表示无限外推。"
+    },
+    {
+      "id": "SampledProperty#forwardExtrapolationType",
+      "field": "description",
+      "sourceHash": "sha256:44e268c368d626a7f75030dce2ac0a4196e8fe8d219745bd4a98aa4be8ff50bd",
+      "text": "获取或设置查询晚于全部可用样本的时刻时所用的外推类型。"
+    },
+    {
+      "id": "SampledProperty#getSample",
+      "field": "description",
+      "sourceHash": "sha256:2e352bae32d03181190171f7af7f7d1de6d2664568cb9569cdef9238a0577e8f",
+      "text": "获取指定索引对应样本的时刻。负索引可从末尾反向访问样本列表。"
+    },
+    {
+      "id": "SampledProperty#getSample",
+      "field": "params/index/description",
+      "sourceHash": "sha256:2ade3477c4e158d265ab7c41a027b0ba6d6fcf45ca7be78b3b9b7f5744a1fe49",
+      "text": "样本列表的索引。"
+    },
+    {
+      "id": "SampledProperty#getSample",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:56393422e768af3066b8caf5138ebc17873da1fc70a1006822e5514c8d4cf45b",
+      "text": "样本的 JulianDate 时刻；获取失败时为 undefined。"
+    },
+    {
+      "id": "SampledProperty#interpolationAlgorithm",
+      "field": "description",
+      "sourceHash": "sha256:128d7e20e3aa181a3146fa73932ac399e0766b67133c6a597aa5816cba3b2a00",
+      "text": "获取求值所用的插值算法。"
+    },
+    {
+      "id": "SampledProperty#interpolationDegree",
+      "field": "description",
+      "sourceHash": "sha256:38a726816872c8023832f5a66bcdd49910ca9e56fe54821ac6843207fecddf5e",
+      "text": "获取求值所用的插值次数。"
+    },
+    {
+      "id": "SampledProperty#removeSample",
+      "field": "description",
+      "sourceHash": "sha256:ab8ed804c67d6850e519ec891e03aaeacb2c760bc33165c9842f714f39a3f72f",
+      "text": "移除指定时刻的样本（若存在）。"
+    },
+    {
+      "id": "SampledProperty#removeSample",
+      "field": "params/time/description",
+      "sourceHash": "sha256:cd30d61310a7a10a09056a23b58bd966d8a3728b022ee33158f08f843773f25a",
+      "text": "采样时刻。"
+    },
+    {
+      "id": "SampledProperty#removeSample",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b60a3a63a699de4f48787c24348f8bb3b51637033be8b74edee210c547a1783f",
+      "text": "已移除指定时刻样本时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "SampledProperty#removeSamples",
+      "field": "description",
+      "sourceHash": "sha256:c0855e6c9df9bbf3797a27e93ebbeaa6b5913ef3af67facc6c2ac05cbd57a6e3",
+      "text": "移除指定时间区间内的全部样本。"
+    },
+    {
+      "id": "SampledProperty#removeSamples",
+      "field": "params/time/description",
+      "sourceHash": "sha256:7ea8f0d2bb835b33388523bc2d4611289379953e8b0feb05741decfc313b785a",
+      "text": "需要移除全部样本的时间区间。"
+    },
+    {
+      "id": "SampledProperty#setInterpolationOptions",
+      "field": "description",
+      "sourceHash": "sha256:4f17b09b90d6daf81a1af3ee33712326e296f8eeeb96388538ad925f64ba1646",
+      "text": "设置值插值所用的算法和次数。"
+    },
+    {
+      "id": "SampledProperty#setInterpolationOptions",
+      "field": "params/options.interpolationAlgorithm/description",
+      "sourceHash": "sha256:d28b4f367dfc0d60ed9d5678566c54bfa051d695ad75881e3d56477e9dd4cff6",
+      "text": "新的插值算法。为 undefined 时，保留现有设置。"
+    },
+    {
+      "id": "SampledProperty#setInterpolationOptions",
+      "field": "params/options.interpolationDegree/description",
+      "sourceHash": "sha256:ab10a69ca85627bb6f344e5628a595a009964b680dae1f3037366654807cc0d6",
+      "text": "新的插值次数。为 undefined 时，保留现有设置。"
+    },
+    {
+      "id": "SampledProperty#type",
+      "field": "description",
+      "sourceHash": "sha256:ce40f3c3f84004b047d11824b4ccd709ee7c210a0419f6c0ceb78feb1d433909",
+      "text": "获取属性类型。"
+    },
+    {
+      "id": "StripeMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:48ae98c6a2d5931b1fa288de2b3e36ef7a6fe74b63c81f7093203c1da627cbff",
+      "text": "将属性映射到条纹 {@link Material} uniform 的 {@link MaterialProperty}。"
+    },
+    {
+      "id": "StripeMaterialProperty",
+      "field": "params/options.evenColor/description",
+      "sourceHash": "sha256:524bea13b2d298c9332d8a3a9800ea1ad23de2a3e5fe5cb508a63bcae8c363ca",
+      "text": "指定第一种 {@link Color} 的 Property。"
+    },
+    {
+      "id": "StripeMaterialProperty",
+      "field": "params/options.oddColor/description",
+      "sourceHash": "sha256:c674341bcce7eeb5521d897d213fd2688b4f3edff494ffbb37451a6c8d6b4d3d",
+      "text": "指定第二种 {@link Color} 的 Property。"
+    },
+    {
+      "id": "StripeMaterialProperty",
+      "field": "params/options.offset/description",
+      "sourceHash": "sha256:c3cc9083ccefdc327af9a06cf8438c1cddb66157106fc73fd11638b64bce4edd",
+      "text": "指定材质从图案何处开始的数值 Property。"
+    },
+    {
+      "id": "StripeMaterialProperty",
+      "field": "params/options.orientation/description",
+      "sourceHash": "sha256:897e03a0282307b4728e5dd52ded31de791a7a3f8991256d15f593e213c6f2f6",
+      "text": "指定 {@link StripeOrientation} 的 Property。"
+    },
+    {
+      "id": "StripeMaterialProperty",
+      "field": "params/options.repeat/description",
+      "sourceHash": "sha256:85912c18f612bd57daca00d70461dcd1e4a6bf34995098f15304f9511a6b2ea1",
+      "text": "指定条纹重复次数的数值 Property。"
+    },
+    {
+      "id": "StripeMaterialProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "StripeMaterialProperty#evenColor",
+      "field": "description",
+      "sourceHash": "sha256:d48dc45eea50758f23f8d78bb50362e200cf0d8c425127cbb72e42ef88093372",
+      "text": "获取或设置指定第一种 {@link Color} 的 Property。"
+    },
+    {
+      "id": "StripeMaterialProperty#getType",
+      "field": "description",
+      "sourceHash": "sha256:bbda90963882411b479d6fbf3005a697ddf4a3163c02a77962a8eb737e5057b1",
+      "text": "获取指定时刻的 {@link Material} 类型。"
+    },
+    {
+      "id": "StripeMaterialProperty#getType",
+      "field": "params/time/description",
+      "sourceHash": "sha256:c762cc931cdbf4916c170050ed90ed84b3b203c28824c38552338a92ed8c655f",
+      "text": "需要获取类型的时刻。"
+    },
+    {
+      "id": "StripeMaterialProperty#getType",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15174184731fd692332798f5c4e30a5e7f89e104b9cedf5c313655e8c972a06c",
+      "text": "材质类型。"
+    },
+    {
+      "id": "StripeMaterialProperty#oddColor",
+      "field": "description",
+      "sourceHash": "sha256:0d14a5300267156b12594a542584a4ae584b5c0a37038295a44a0d9ce3ef750c",
+      "text": "获取或设置指定第二种 {@link Color} 的 Property。"
+    },
+    {
+      "id": "StripeMaterialProperty#offset",
+      "field": "description",
+      "sourceHash": "sha256:7edbb8e6f627cce6a06e8d91d70eaf21bb128febf4666cea8d734e5ea62f1e6c",
+      "text": "获取或设置指定图案绘制起点的数值 Property。0.0 为偶数条纹颜色的起点，1.0 为奇数条纹颜色的起点，2.0 再次回到偶数条纹颜色；其他整数或小数值依此对应。"
+    },
+    {
+      "id": "StripeMaterialProperty#orientation",
+      "field": "description",
+      "sourceHash": "sha256:241b5ccd26847e6891fe65257b10fdde4ad67cdca6f0a2d93fde5fe54b5630c0",
+      "text": "获取或设置指定 {@link StripeOrientation} 的 Property。"
+    },
+    {
+      "id": "StripeMaterialProperty#repeat",
+      "field": "description",
+      "sourceHash": "sha256:e24c2f4b714e8a964e3bd438be51437c3ec2aadb2a078bc55abb9f39f5123cd7",
+      "text": "获取或设置指定条纹重复次数的数值 Property。"
+    },
+    {
+      "id": "StripeOrientation.HORIZONTAL",
+      "field": "description",
+      "sourceHash": "sha256:6de1fd2695fc5b04d0ff62e7384cc5601a9d5ddccd15c63b0ef26c1e544e785a",
+      "text": "水平方向。"
+    },
+    {
+      "id": "StripeOrientation.VERTICAL",
+      "field": "description",
+      "sourceHash": "sha256:e03fc889f09a4267537c3475b7f645fac5ff8684c80945ce61d06ea484a69287",
+      "text": "垂直方向。"
+    },
+    {
+      "id": "StripeOrientation",
+      "field": "description",
+      "sourceHash": "sha256:3718ee43d9d26dace000dfbfadeaf35dcc618a120a94354a698bf9259c7967f3",
+      "text": "定义 {@link StripeMaterialProperty} 中条纹的方向。"
+    },
+    {
+      "id": "StripeOrientation",
+      "field": "properties/HORIZONTAL/description",
+      "sourceHash": "sha256:6de1fd2695fc5b04d0ff62e7384cc5601a9d5ddccd15c63b0ef26c1e544e785a",
+      "text": "水平方向。"
+    },
+    {
+      "id": "StripeOrientation",
+      "field": "properties/VERTICAL/description",
+      "sourceHash": "sha256:e03fc889f09a4267537c3475b7f645fac5ff8684c80945ce61d06ea484a69287",
+      "text": "垂直方向。"
+    },
+    {
+      "id": "TimeIntervalCollectionPositionProperty",
+      "field": "description",
+      "sourceHash": "sha256:7343d839f9c5751ff4a4f3901eaca828679e4fdf5c23b43c65aba4f953274893",
+      "text": "同时实现 {@link PositionProperty} 的 {@link TimeIntervalCollectionProperty}。"
+    },
+    {
+      "id": "TimeIntervalCollectionPositionProperty",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:04b10bdf6d93d55bba6d3eaed7c7e116ee6f8cfa53b272460e6daff3e50ec10f",
+      "text": "定义位置所使用的参考系。"
+    },
+    {
+      "id": "TimeIntervalCollectionPositionProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:9df9024b7dd47021e44ca5e7d20e36e4753b6865c4d752e46300c71e7572f0c7",
+      "text": "获取属性定义发生变化时触发的事件。若对同一时刻调用 getValue 会返回不同结果，则视为定义发生变化。"
+    },
+    {
+      "id": "TimeIntervalCollectionPositionProperty#getValue",
+      "field": "description",
+      "sourceHash": "sha256:1e1143eda6c89c02a62c9c7dc75b5d33bb267811f85df628614b712c3b0f20eb",
+      "text": "获取指定时刻在固定参考系中的属性值。"
+    },
+    {
+      "id": "TimeIntervalCollectionPositionProperty#getValueInReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:0e0181e02436fbc4da884638809efd0b83cb4896b1b2581ddaf0d2ca44d0d46e",
+      "text": "获取指定时刻在指定参考系中的属性值。"
+    },
+    {
+      "id": "TimeIntervalCollectionPositionProperty#getValueInReferenceFrame",
+      "field": "params/referenceFrame/description",
+      "sourceHash": "sha256:805a7a0ee552ea3d6590960dd6f157da0cbe0900843b07c1dbde98077e0006b3",
+      "text": "结果所需的 referenceFrame。"
+    },
+    {
+      "id": "TimeIntervalCollectionPositionProperty#getValueInReferenceFrame",
+      "field": "params/time/description",
+      "sourceHash": "sha256:0e230fdc0f6ea29ab74feb31244405e8aaf53df3b81aa616c08f69b81879f510",
+      "text": "需要获取值的时刻。"
+    },
+    {
+      "id": "TimeIntervalCollectionPositionProperty#intervals",
+      "field": "description",
+      "sourceHash": "sha256:bbfab826211c3e05a1c136bc92a2cbaf2e29b87741cb6d87003686d362866753",
+      "text": "获取时间区间集合。"
+    },
+    {
+      "id": "TimeIntervalCollectionPositionProperty#referenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:c17fc1fc2ace9156ca70721a1a154599015616534d6266b15627fa05b7f7d7f5",
+      "text": "获取定义位置所使用的参考系。"
+    },
+    {
+      "id": "TimeIntervalCollectionProperty",
+      "field": "description",
+      "sourceHash": "sha256:afd5f7b552e3e08ea8601ddba151b5bb047bc3ddd3609dc4d2d886831e3f6cf3",
+      "text": "由 {@link TimeIntervalCollection} 定义的 {@link Property}，每个 {@link TimeInterval} 的 data 属性表示该时段的值。"
+    },
+    {
+      "id": "TimeIntervalCollectionProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:20dd451ba2987f8ebc14790edca657c22c775f1ade9e7966fd365f20b4326fa3",
+      "text": "获取属性定义发生变化时触发的事件。所用时间区间集合改变时会触发此事件。"
+    },
+    {
+      "id": "TimeIntervalCollectionProperty#intervals",
+      "field": "description",
+      "sourceHash": "sha256:bbfab826211c3e05a1c136bc92a2cbaf2e29b87741cb6d87003686d362866753",
+      "text": "获取时间区间集合。"
+    },
+    {
+      "id": "TrackingReferenceFrame.AUTODETECT",
+      "field": "description",
+      "sourceHash": "sha256:9df3aae2f6b74b60cf8b0cc1b0ff2cfb48d413304eaa44f65bcd481313d6e1aa",
+      "text": "自动检测算法。根据实体轨迹自动选择跟踪参考系：靠近地表、移动较慢的对象采用实体的局部东—北—天参考系；卫星等较快对象采用 VVLH（载体速度／局部水平）参考系。"
+    },
+    {
+      "id": "TrackingReferenceFrame.ENU",
+      "field": "description",
+      "sourceHash": "sha256:c78a63099f4b99d89441dc3b16c73606345ee48711babffb7c433d99384967de",
+      "text": "实体的局部东—北—天参考系。"
+    },
+    {
+      "id": "TrackingReferenceFrame.INERTIAL",
+      "field": "description",
+      "sourceHash": "sha256:e7f04dfaa9ee5cf0bd08e354437a3e2e73d1c0da6cfad65f0bb91fee3ac85c13",
+      "text": "实体的惯性参考系。实体未定义 orientation 属性时，回退到自动检测算法。"
+    },
+    {
+      "id": "TrackingReferenceFrame.VELOCITY",
+      "field": "description",
+      "sourceHash": "sha256:6cf932b48b20e264b8f6c9e0793a98aa2df5de511fc251a7541a7228980b5bce",
+      "text": "实体的惯性参考系，朝向固定为 {@link VelocityOrientationProperty}，忽略实体自身的 orientation。"
+    },
+    {
+      "id": "TrackingReferenceFrame",
+      "field": "description",
+      "sourceHash": "sha256:167c773f2f76e95064b41698f3e558e03b432de3f2afde17901bba7368f107aa",
+      "text": "用于标识常见跟踪参考系的常量。"
+    },
+    {
+      "id": "TrackingReferenceFrame",
+      "field": "properties/AUTODETECT/description",
+      "sourceHash": "sha256:9df3aae2f6b74b60cf8b0cc1b0ff2cfb48d413304eaa44f65bcd481313d6e1aa",
+      "text": "自动检测算法。根据实体轨迹自动选择跟踪参考系：靠近地表、移动较慢的对象采用实体的局部东—北—天参考系；卫星等较快对象采用 VVLH（载体速度／局部水平）参考系。"
+    },
+    {
+      "id": "TrackingReferenceFrame",
+      "field": "properties/ENU/description",
+      "sourceHash": "sha256:c78a63099f4b99d89441dc3b16c73606345ee48711babffb7c433d99384967de",
+      "text": "实体的局部东—北—天参考系。"
+    },
+    {
+      "id": "TrackingReferenceFrame",
+      "field": "properties/INERTIAL/description",
+      "sourceHash": "sha256:e7f04dfaa9ee5cf0bd08e354437a3e2e73d1c0da6cfad65f0bb91fee3ac85c13",
+      "text": "实体的惯性参考系。实体未定义 orientation 属性时，回退到自动检测算法。"
+    },
+    {
+      "id": "TrackingReferenceFrame",
+      "field": "properties/VELOCITY/description",
+      "sourceHash": "sha256:6cf932b48b20e264b8f6c9e0793a98aa2df5de511fc251a7541a7228980b5bce",
+      "text": "实体的惯性参考系，朝向固定为 {@link VelocityOrientationProperty}，忽略实体自身的 orientation。"
+    },
+    {
+      "id": "VelocityOrientationProperty",
+      "field": "description",
+      "sourceHash": "sha256:9ac5a239edcb03e7cf857851a10f9b048928db5e09479be1f361399560ef568e",
+      "text": "根据所提供 {@link PositionProperty} 的速度，计算 {@link Quaternion} 旋转的 {@link Property}。"
+    },
+    {
+      "id": "VelocityOrientationProperty",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:3ead0c5fbd2d900ac1e36939c51617620d50c617c35cd16052525351b8271f49",
+      "text": "用于确定向上方向的椭球。"
+    },
+    {
+      "id": "VelocityOrientationProperty",
+      "field": "params/position/description",
+      "sourceHash": "sha256:76e46189c6502125862585fc85aace1fc192592c9410e17d2d577856888cdec0",
+      "text": "用于计算朝向的位置属性。"
+    },
+    {
+      "id": "VelocityOrientationProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:affc2f0159c240221828c4549baab39620316023d9fcc590c326792579423c24",
+      "text": "获取属性定义发生变化时触发的事件。"
+    },
+    {
+      "id": "VelocityOrientationProperty#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:776070d9998f1f98eff5f993de7990ddec79a1f33af8c4506947d9f9eaa7beb6",
+      "text": "获取或设置用于确定向上方向的椭球。"
+    },
+    {
+      "id": "VelocityOrientationProperty#isConstant",
+      "field": "description",
+      "sourceHash": "sha256:49a7bbd1de64c3a1b1acf85ce177a918dd2a88f79da4ec6a4e9b3b2e42e06a54",
+      "text": "获取指示此属性是否为常量的值。"
+    },
+    {
+      "id": "VelocityOrientationProperty#position",
+      "field": "description",
+      "sourceHash": "sha256:5505907917f6859ed4f47d79371bc03f49c21ad0c02de6c670501719e93753f0",
+      "text": "获取或设置用于计算朝向的位置属性。"
+    },
+    {
+      "id": "VelocityVectorProperty",
+      "field": "description",
+      "sourceHash": "sha256:4277194acd078792e33ce110aca311ddd90b65424eb29f16c5f99fcf69675562",
+      "text": "根据所提供 {@link PositionProperty} 的速度，计算 {@link Cartesian3} 向量的 {@link Property}。"
+    },
+    {
+      "id": "VelocityVectorProperty",
+      "field": "params/normalize/description",
+      "sourceHash": "sha256:7136761ffb46a7d2964a96e683245640efba3fcc00d23984ba3967fd3e1c0b8a",
+      "text": "是否归一化计算得到的速度向量。"
+    },
+    {
+      "id": "VelocityVectorProperty",
+      "field": "params/position/description",
+      "sourceHash": "sha256:a1210e5a05794dce6e8f909e764d80940de1154ce038f43d24178ebbd881d6ff",
+      "text": "用于计算速度的位置属性。"
+    },
+    {
+      "id": "VelocityVectorProperty#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:affc2f0159c240221828c4549baab39620316023d9fcc590c326792579423c24",
+      "text": "获取属性定义发生变化时触发的事件。"
+    },
+    {
+      "id": "VelocityVectorProperty#isConstant",
+      "field": "description",
+      "sourceHash": "sha256:49a7bbd1de64c3a1b1acf85ce177a918dd2a88f79da4ec6a4e9b3b2e42e06a54",
+      "text": "获取指示此属性是否为常量的值。"
+    },
+    {
+      "id": "VelocityVectorProperty#normalize",
+      "field": "description",
+      "sourceHash": "sha256:602674b371d23233ef92ed94251735077a243bce0492a5a96e51cba9940bdf48",
+      "text": "获取或设置是否归一化此属性生成的向量。"
+    },
+    {
+      "id": "VelocityVectorProperty#position",
+      "field": "description",
+      "sourceHash": "sha256:26547933912799c409dbf4500098c6869208a1b2803646850f1644ce96c86ab4",
+      "text": "获取或设置用于计算速度向量的位置属性。"
+    }
+  ]
+}

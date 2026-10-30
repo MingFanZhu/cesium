@@ -362,3 +362,36 @@ test("rendering documentation displays pixel sizing and shader resource ownershi
   });
   expect(errors).toEqual([]);
 });
+
+test("entity data documentation displays temporal evaluation and reusable clustering", async ({
+  page,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  const prefix = "/deep/site/vendor/engine/Documentation/";
+  await page.goto(
+    `${prefix}SampledPositionProperty.html#backwardExtrapolationDuration`,
+  );
+  await expect(
+    page.locator('[id="backwardExtrapolationDuration"]'),
+  ).toBeVisible();
+  await expect(page.locator("#main")).toContainText("0 表示无限外推");
+  await page.goto(`${prefix}EntityCluster.html#destroy`);
+  await expect(page.locator('[id="destroy"]')).toBeVisible();
+  await expect(page.locator("#main")).toContainText("此对象可再次使用");
+  await info.attach("entity-data-documentation", {
+    body: await page.screenshot({
+      path: info.outputPath("entity-data-documentation.png"),
+    }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});

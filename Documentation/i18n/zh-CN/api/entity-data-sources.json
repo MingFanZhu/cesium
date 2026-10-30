@@ -1,0 +1,1512 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "CompositeEntityCollection",
+      "field": "description",
+      "sourceHash": "sha256:e8c26f42dca2c5e9d295d9bc32849556d66b5f070280a866d27191514f5dd6d7",
+      "text": "将多个 {@link EntityCollection} 实例合成为一个集合，同时保留原集合和实体。相同 ID 的 Entity 出现在多个集合时，会合并为一个新实体实例，且不修改原实体。同一实体的同名属性存在于多个集合时，采用所属集合列表中最后一个集合的属性。CompositeEntityCollection 可用于几乎所有使用 EntityCollection 的场合。"
+    },
+    {
+      "id": "CompositeEntityCollection",
+      "field": "params/collections/description",
+      "sourceHash": "sha256:ddd2d019cf98878a5318372a1a9adf917e3f37acc3c00b0f41bdd102321c9031",
+      "text": "初始待合并的 EntityCollection 实例列表。"
+    },
+    {
+      "id": "CompositeEntityCollection",
+      "field": "params/owner/description",
+      "sourceHash": "sha256:5f143433725288a917167bd1b5892cd225a8cc5c9b7e4e67fbdfe6fe4af9813e",
+      "text": "创建此集合的数据源或复合实体集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#addCollection",
+      "field": "description",
+      "sourceHash": "sha256:a1d95897b6bc6ae5696794a68470356c8ae9a370d11d8503cf50aa2a1548897d",
+      "text": "将集合加入组合。"
+    },
+    {
+      "id": "CompositeEntityCollection#addCollection",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:b2a48c0ca8e058a2f4fa28e0546f08ee893220ca2dc9782648827fe0afaee5c4",
+      "text": "提供 index 时，必须大于等于零，且小于等于集合数量。"
+    },
+    {
+      "id": "CompositeEntityCollection#addCollection",
+      "field": "params/collection/description",
+      "sourceHash": "sha256:a81dd592a93b87eaaa517c04432716d04748189031ff37a7cfac01d8f8980590",
+      "text": "要添加的集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#addCollection",
+      "field": "params/index/description",
+      "sourceHash": "sha256:cd5ffa961726bbec9ff3e9289fccfee206e95a9d1176710b972aefb00e11d730",
+      "text": "添加集合的索引。省略时，添加到所有现有集合之上。"
+    },
+    {
+      "id": "CompositeEntityCollection#collectionChanged",
+      "field": "description",
+      "sourceHash": "sha256:09e8d322cbcc673b32d252074c2f75f64043307155d19630f8c717854783e766",
+      "text": "获取实体加入或移出集合时触发的事件，回调类型为 {@link EntityCollection.collectionChangedEventCallback}。"
+    },
+    {
+      "id": "CompositeEntityCollection#computeAvailability",
+      "field": "description",
+      "sourceHash": "sha256:132d0cf6260fbde2bdb892509a9e9e9db195cd42e7b2a92fdb579b7c6a5d329e",
+      "text": "计算集合中实体的最大可用时间范围。若同时包含无限期和有限期数据，只返回有限期数据对应的区间；若全部数据都无限期可用，则返回无限区间。"
+    },
+    {
+      "id": "CompositeEntityCollection#computeAvailability",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:643ddcad2a4a9268acf732678f797274c5b9e8866ac26e1d5c89e0fe2ebd33ec",
+      "text": "集合中实体的可用时间范围。"
+    },
+    {
+      "id": "CompositeEntityCollection#contains",
+      "field": "description",
+      "sourceHash": "sha256:45697aea4f805a7ff2a4ee0decda94119826654550a7becb9877d3d414069b6b",
+      "text": "若给定实体在此集合中，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "CompositeEntityCollection#contains",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:efc8e5328a51fbe4b0dbfa74e8176092a8a4bc7afd6e949be39207c2e12dfd34",
+      "text": "实体。"
+    },
+    {
+      "id": "CompositeEntityCollection#contains",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:e597222f97db6a31e66a37dfd38952ee1ca3fcdc451044714d7a3b107d7add26",
+      "text": "若给定实体在此集合中，则返回 true；否则返回 false。"
+    },
+    {
+      "id": "CompositeEntityCollection#containsCollection",
+      "field": "description",
+      "sourceHash": "sha256:84b8a5292cf0eadc143aaa5a86d21fa822aee7545f79d4c80ab1252dce26ec9a",
+      "text": "检查组合是否包含指定集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#containsCollection",
+      "field": "params/collection/description",
+      "sourceHash": "sha256:8da7f420e75a92730d0a90b58352abd4a253628cbb68be0c6067aff99bab8c45",
+      "text": "要检查的集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#containsCollection",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:89579a19c80523479621fae8820e18da84ab57914d2850a436badb846ed039e9",
+      "text": "组合包含此集合时为 true，否则为 false。"
+    },
+    {
+      "id": "CompositeEntityCollection#getById",
+      "field": "description",
+      "sourceHash": "sha256:425df8be4b6d7d9ac83f9d44e5dc02da8c58e5071fc932d76927646fc8898feb",
+      "text": "获取指定 ID 的实体。"
+    },
+    {
+      "id": "CompositeEntityCollection#getById",
+      "field": "params/id/description",
+      "sourceHash": "sha256:f39daac4b43c32f4c7b5880c379a446c5f9e0f019de2333f80aa67a24f225317",
+      "text": "要获取的实体 ID。"
+    },
+    {
+      "id": "CompositeEntityCollection#getById",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3c9d428b9435081d03e49eddbc8c8e1cf5fbbe1048873f552ce52dca4eed2963",
+      "text": "指定 ID 的实体；若集合中不存在此 ID，则返回 undefined。"
+    },
+    {
+      "id": "CompositeEntityCollection#getCollection",
+      "field": "description",
+      "sourceHash": "sha256:6ed56ff392d638869547203a7081fbb4a2a3bb3b03c209fa977e55f3ac6536f2",
+      "text": "按索引从组合中获取集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#getCollection",
+      "field": "params/index/description",
+      "sourceHash": "sha256:fd6dee5a50020d7b4037ddac52c7ca24022528843aab8b1947472f651e2bd099",
+      "text": "要获取的索引。"
+    },
+    {
+      "id": "CompositeEntityCollection#getCollectionsLength",
+      "field": "description",
+      "sourceHash": "sha256:5d8ce8be06958ed4ae2634f6467be639d617103b2836a38affbcab2ef02dbcd8",
+      "text": "获取组合中的集合数量。"
+    },
+    {
+      "id": "CompositeEntityCollection#id",
+      "field": "description",
+      "sourceHash": "sha256:b11a6b3b5b178e3bd4040008244885fc4d88c673fea196af0681d6b939fcd975",
+      "text": "获取此集合的全局唯一标识符。"
+    },
+    {
+      "id": "CompositeEntityCollection#indexOfCollection",
+      "field": "description",
+      "sourceHash": "sha256:c01318bcfdf14acafadf751310b2f50c4d557652131dedc940404a828d41c134",
+      "text": "确定指定集合在组合中的索引。"
+    },
+    {
+      "id": "CompositeEntityCollection#indexOfCollection",
+      "field": "params/collection/description",
+      "sourceHash": "sha256:2a2ee33ffbe8fca38bd43a4be983ad8044ce389421579327513becd6209f286a",
+      "text": "要查找索引的集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#indexOfCollection",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5ce3940cd086a9f3615149ded0fb5a3bb679acb5ef1dacbba2886773a94e3a9c",
+      "text": "集合在组合中的索引；不存在时为 -1。"
+    },
+    {
+      "id": "CompositeEntityCollection#lowerCollection",
+      "field": "description",
+      "sourceHash": "sha256:b72d8d83ba62e16f91bdbba401dd5c706a80d30c4094e9c77e48ca906268d80b",
+      "text": "将集合在组合中下移一个位置。"
+    },
+    {
+      "id": "CompositeEntityCollection#lowerCollection",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ab6a3b8abecc0002ffd4896d03c83bf37b2971db43f2b909a594c3666c82b12d",
+      "text": "collection 不在此组合中。"
+    },
+    {
+      "id": "CompositeEntityCollection#lowerCollection",
+      "field": "params/collection/description",
+      "sourceHash": "sha256:ef1ad53839609fa15ecd3bb99848772b5d7f105bb2496610729e1a8e0551c6a4",
+      "text": "要移动的集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#lowerCollectionToBottom",
+      "field": "description",
+      "sourceHash": "sha256:a30c7bf2e4dc95b01324fb241f52bed819d6b77c77d2a0959c85ea39a03fe65a",
+      "text": "将集合移到组合底部。"
+    },
+    {
+      "id": "CompositeEntityCollection#lowerCollectionToBottom",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ab6a3b8abecc0002ffd4896d03c83bf37b2971db43f2b909a594c3666c82b12d",
+      "text": "collection 不在此组合中。"
+    },
+    {
+      "id": "CompositeEntityCollection#lowerCollectionToBottom",
+      "field": "params/collection/description",
+      "sourceHash": "sha256:ef1ad53839609fa15ecd3bb99848772b5d7f105bb2496610729e1a8e0551c6a4",
+      "text": "要移动的集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#owner",
+      "field": "description",
+      "sourceHash": "sha256:5f4403c8dddfe0f69d42316609eaedd95be8051a63d2324a3c46c40fa210d775",
+      "text": "获取此组合实体集合的所有者，即创建它的数据源或组合实体集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#raiseCollection",
+      "field": "description",
+      "sourceHash": "sha256:ec07f3e6d78b3a4477eb42f2703175da6828c3397aa62bfaf7f5f1eae5264e9d",
+      "text": "将集合在组合中上移一个位置。"
+    },
+    {
+      "id": "CompositeEntityCollection#raiseCollection",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ab6a3b8abecc0002ffd4896d03c83bf37b2971db43f2b909a594c3666c82b12d",
+      "text": "collection 不在此组合中。"
+    },
+    {
+      "id": "CompositeEntityCollection#raiseCollection",
+      "field": "params/collection/description",
+      "sourceHash": "sha256:ef1ad53839609fa15ecd3bb99848772b5d7f105bb2496610729e1a8e0551c6a4",
+      "text": "要移动的集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#raiseCollectionToTop",
+      "field": "description",
+      "sourceHash": "sha256:de6ce948cb4ae787a5c7d26da6e149680facd0f91b355e737fbad27d9e8a4a46",
+      "text": "将集合移到组合顶部。"
+    },
+    {
+      "id": "CompositeEntityCollection#raiseCollectionToTop",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:ab6a3b8abecc0002ffd4896d03c83bf37b2971db43f2b909a594c3666c82b12d",
+      "text": "collection 不在此组合中。"
+    },
+    {
+      "id": "CompositeEntityCollection#raiseCollectionToTop",
+      "field": "params/collection/description",
+      "sourceHash": "sha256:ef1ad53839609fa15ecd3bb99848772b5d7f105bb2496610729e1a8e0551c6a4",
+      "text": "要移动的集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#removeAllCollections",
+      "field": "description",
+      "sourceHash": "sha256:2faf61eff8a14b0a63f25c1b045fc1f654b7c0ee06961c72e57eebe428faf9b5",
+      "text": "从组合中移除全部集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#removeCollection",
+      "field": "description",
+      "sourceHash": "sha256:7fdc4c66e7c9a7a760fff5cb45a32caccc44de2b15805e6f1516a7d6a1dae6d6",
+      "text": "如果指定集合存在，则从组合中移除。"
+    },
+    {
+      "id": "CompositeEntityCollection#removeCollection",
+      "field": "params/collection/description",
+      "sourceHash": "sha256:1efb2778f575b05ffd0d8348d1aad3a3cce172335996da56a716f458242bfeb2",
+      "text": "要移除的集合。"
+    },
+    {
+      "id": "CompositeEntityCollection#removeCollection",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:50b9fd94f0febeeeed7f75e18de22f8eed324d666cd43312c7383c157e447172",
+      "text": "集合原本在组合中且已移除时为 true；原本不在组合中时为 false。"
+    },
+    {
+      "id": "CompositeEntityCollection#resumeEvents",
+      "field": "description",
+      "sourceHash": "sha256:050718b7e854b9734c1cf2b65c8565c0d8f5f7851f498232aa86627d797a675d",
+      "text": "恢复在条目加入或移出时立即触发 {@link EntityCollection#collectionChanged} 事件。暂停期间的全部修改会在调用此函数时合并为一个事件；解除暂停后也会重新合成集合。此函数使用引用计数，可多次调用，但必须与 suspendEvents 调用配对。事件恢复机制另见 {@link EntityCollection#resumeEvents}。"
+    },
+    {
+      "id": "CompositeEntityCollection#resumeEvents",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:6d117b25e0a3d0a4186563a34595f55ee309ef5534b52fcf5219f7d9a4082f30",
+      "text": "不能在 suspendEvents 之前调用 resumeEvents。"
+    },
+    {
+      "id": "CompositeEntityCollection#suspendEvents",
+      "field": "description",
+      "sourceHash": "sha256:8fdf432eaa765da0144f1afc7fa51f0151c848ee35f2dd135c167031f2ae12d0",
+      "text": "暂停触发 {@link EntityCollection#collectionChanged} 事件，直到调用对应的 {@link EntityCollection#resumeEvents}，届时通过一个事件报告全部暂停期间的操作，便于高效批量添加和移除条目。暂停期间也会暂停成本可能较高的集合重新合成。可多次调用，但必须有对应的 {@link EntityCollection#resumeEvents} 调用。"
+    },
+    {
+      "id": "CompositeEntityCollection#values",
+      "field": "description",
+      "sourceHash": "sha256:74ddf4aca8cc8a4be83dddc184dff008492c3a17c4bc0294cc57317d12b63b48",
+      "text": "获取集合中 Entity 实例的数组。不要直接修改此数组。"
+    },
+    {
+      "id": "CzmlDataSource.load",
+      "field": "description",
+      "sourceHash": "sha256:2bbf9070d5e2f5d0c7b1a3f507524ec2484199b9238b7f7917c1e510432c014a",
+      "text": "使用所提供的 CZML 数据加载一个新实例，并返回 Promise。"
+    },
+    {
+      "id": "CzmlDataSource.load",
+      "field": "params/czml/description",
+      "sourceHash": "sha256:256c4de04d3dc241bac13b8b28395c6f368f2e89411452f87ad65231e36c3a61",
+      "text": "要处理的 URL 或 CZML 对象。"
+    },
+    {
+      "id": "CzmlDataSource.load",
+      "field": "params/options/description",
+      "sourceHash": "sha256:6d3565bbafa26048e29e2a6fb6e5eca0fb1bcc394011fab179647bb04d7d4158",
+      "text": "指定配置选项的对象。"
+    },
+    {
+      "id": "CzmlDataSource.load",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0d7e006a8fe41b111276c2f7709469f3ee163363ce60969078659d163a9f0358",
+      "text": "数据处理完成后兑现为新实例的 Promise。"
+    },
+    {
+      "id": "CzmlDataSource.LoadOptions",
+      "field": "description",
+      "sourceHash": "sha256:82311a010ff93cf32b524facfa38f0db0e481225e51d22440370a7fd94c94d94",
+      "text": "<code>load</code> 方法的初始化选项。"
+    },
+    {
+      "id": "CzmlDataSource.LoadOptions",
+      "field": "properties/planar/description",
+      "sourceHash": "sha256:137dabe7b6326e32689b8b0c58c97f38d1d6b549a68913ca6a744cdc0974758c",
+      "text": "显式绑定平面世界。新实例省略此项时，按原生球面 CZML 加载。"
+    },
+    {
+      "id": "CzmlDataSource.LoadOptions",
+      "field": "properties/sourceUri/description",
+      "sourceHash": "sha256:06640beed562f3b57ecefb0d4d37f3bf4b6bb145cbe76ef9b89a95458e9e8a31",
+      "text": "覆盖用于解析相对链接的 URL。"
+    },
+    {
+      "id": "CzmlDataSource.PlanarOptions",
+      "field": "description",
+      "sourceHash": "sha256:69dfb9943bbbd36e6005952530dfa1407c4b3843ea907f88ddab9cdd7834ee09",
+      "text": "将固定笛卡尔坐标加载到调用者拥有的平面世界。位置已是世界坐标，单位为米，X 向东、Y 向北、Z 向上，不再执行投影。首次 load/process 会固定实例的坐标域；后续调用可省略此选项，但不能更换世界。需要更换坐标域时，应创建新数据源。仅支持 FIXED 位置；拒绝地理位置、INERTIAL 参考系及 orientation.velocityReference。数据源只能在其绑定且仍存活的世界中可视化。"
+    },
+    {
+      "id": "CzmlDataSource.PlanarOptions",
+      "field": "properties/world/description",
+      "sourceHash": "sha256:33023218b6e8e674d4839b757dce951bb946c2821830ff4e38c820dbae9574be",
+      "text": "拥有此坐标域、仍存活的世界。"
+    },
+    {
+      "id": "CzmlDataSource.processMaterialPacketData",
+      "field": "description",
+      "sourceHash": "sha256:232a541c9d01596c0d58851a52dd5e40e00afafef4c034a221153969012f5bbe",
+      "text": "供自定义 CZML 更新函数使用的辅助函数，根据 CZML 数据包创建或更新 {@link MaterialProperty}。"
+    },
+    {
+      "id": "CzmlDataSource.processMaterialPacketData",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:d85c7d237de040df5f3cbdb9b00a48cb6126ccd5c296ece0f511b1e35bf5d975",
+      "text": "正在处理的集合。"
+    },
+    {
+      "id": "CzmlDataSource.processMaterialPacketData",
+      "field": "params/interval/description",
+      "sourceHash": "sha256:688d1e43a1e6f30a4b0179cc54495bbdb1443c7740a29f36aedf741c496daa87",
+      "text": "限定数据有效时间的区间。"
+    },
+    {
+      "id": "CzmlDataSource.processMaterialPacketData",
+      "field": "params/object/description",
+      "sourceHash": "sha256:24cd11d3b2eead8c9d6d1a0902a61cc47a57228fcd85b183ac3450f67188ec4f",
+      "text": "需要添加或更新属性的对象。"
+    },
+    {
+      "id": "CzmlDataSource.processMaterialPacketData",
+      "field": "params/packetData/description",
+      "sourceHash": "sha256:0d619f73340a539e87063a29301d61b9ee3010fbf9b111132096476d23056b9e",
+      "text": "正在处理的 CZML 数据包。"
+    },
+    {
+      "id": "CzmlDataSource.processMaterialPacketData",
+      "field": "params/propertyName/description",
+      "sourceHash": "sha256:ca9b4f82aff46f2ef585f7ddd4997de3311dfe49a3ebde101d1782dad4267071",
+      "text": "对象上的属性名称。"
+    },
+    {
+      "id": "CzmlDataSource.processMaterialPacketData",
+      "field": "params/sourceUri/description",
+      "sourceHash": "sha256:81417ece9e8b0be986a58ebd02901812269ef1a0cfdaed6143f1ab6f06e3938d",
+      "text": "正在处理数据的来源 URI。"
+    },
+    {
+      "id": "CzmlDataSource.processPacketData",
+      "field": "description",
+      "sourceHash": "sha256:6ec9623cde95e36ce34250d8fbe4259950e1c54fbb1dd434053fd2f23ddfd529",
+      "text": "供自定义 CZML 更新函数使用的辅助函数，根据 CZML 数据包创建或更新 {@link Property}。"
+    },
+    {
+      "id": "CzmlDataSource.processPacketData",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:d85c7d237de040df5f3cbdb9b00a48cb6126ccd5c296ece0f511b1e35bf5d975",
+      "text": "正在处理的集合。"
+    },
+    {
+      "id": "CzmlDataSource.processPacketData",
+      "field": "params/interval/description",
+      "sourceHash": "sha256:688d1e43a1e6f30a4b0179cc54495bbdb1443c7740a29f36aedf741c496daa87",
+      "text": "限定数据有效时间的区间。"
+    },
+    {
+      "id": "CzmlDataSource.processPacketData",
+      "field": "params/object/description",
+      "sourceHash": "sha256:24cd11d3b2eead8c9d6d1a0902a61cc47a57228fcd85b183ac3450f67188ec4f",
+      "text": "需要添加或更新属性的对象。"
+    },
+    {
+      "id": "CzmlDataSource.processPacketData",
+      "field": "params/packetData/description",
+      "sourceHash": "sha256:0d619f73340a539e87063a29301d61b9ee3010fbf9b111132096476d23056b9e",
+      "text": "正在处理的 CZML 数据包。"
+    },
+    {
+      "id": "CzmlDataSource.processPacketData",
+      "field": "params/propertyName/description",
+      "sourceHash": "sha256:ca9b4f82aff46f2ef585f7ddd4997de3311dfe49a3ebde101d1782dad4267071",
+      "text": "对象上的属性名称。"
+    },
+    {
+      "id": "CzmlDataSource.processPacketData",
+      "field": "params/sourceUri/description",
+      "sourceHash": "sha256:81417ece9e8b0be986a58ebd02901812269ef1a0cfdaed6143f1ab6f06e3938d",
+      "text": "正在处理数据的来源 URI。"
+    },
+    {
+      "id": "CzmlDataSource.processPacketData",
+      "field": "params/type/description",
+      "sourceHash": "sha256:ef6274346bae626eb0f373925bacad0a1ff918c4d0192fe21c41b5b8f1e137bc",
+      "text": "所处理属性的构造函数。"
+    },
+    {
+      "id": "CzmlDataSource.processPositionPacketData",
+      "field": "description",
+      "sourceHash": "sha256:696777f46602f4c810bffb34d91d93889b7aefd734b0211da18ee402d802f920",
+      "text": "供自定义 CZML 更新函数使用的辅助函数，根据 CZML 数据包创建或更新 {@link PositionProperty}。"
+    },
+    {
+      "id": "CzmlDataSource.processPositionPacketData",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:d85c7d237de040df5f3cbdb9b00a48cb6126ccd5c296ece0f511b1e35bf5d975",
+      "text": "正在处理的集合。"
+    },
+    {
+      "id": "CzmlDataSource.processPositionPacketData",
+      "field": "params/interval/description",
+      "sourceHash": "sha256:688d1e43a1e6f30a4b0179cc54495bbdb1443c7740a29f36aedf741c496daa87",
+      "text": "限定数据有效时间的区间。"
+    },
+    {
+      "id": "CzmlDataSource.processPositionPacketData",
+      "field": "params/object/description",
+      "sourceHash": "sha256:24cd11d3b2eead8c9d6d1a0902a61cc47a57228fcd85b183ac3450f67188ec4f",
+      "text": "需要添加或更新属性的对象。"
+    },
+    {
+      "id": "CzmlDataSource.processPositionPacketData",
+      "field": "params/packetData/description",
+      "sourceHash": "sha256:0d619f73340a539e87063a29301d61b9ee3010fbf9b111132096476d23056b9e",
+      "text": "正在处理的 CZML 数据包。"
+    },
+    {
+      "id": "CzmlDataSource.processPositionPacketData",
+      "field": "params/propertyName/description",
+      "sourceHash": "sha256:ca9b4f82aff46f2ef585f7ddd4997de3311dfe49a3ebde101d1782dad4267071",
+      "text": "对象上的属性名称。"
+    },
+    {
+      "id": "CzmlDataSource.processPositionPacketData",
+      "field": "params/sourceUri/description",
+      "sourceHash": "sha256:81417ece9e8b0be986a58ebd02901812269ef1a0cfdaed6143f1ab6f06e3938d",
+      "text": "正在处理数据的来源 URI。"
+    },
+    {
+      "id": "CzmlDataSource.updaters",
+      "field": "description",
+      "sourceHash": "sha256:3549359228fa3772ca6b2b1f3e0981812a0248643a6e887443b7202b7fe1f0b6",
+      "text": "获取 CZML 处理函数数组。"
+    },
+    {
+      "id": "CzmlDataSource",
+      "field": "description",
+      "sourceHash": "sha256:3f61eefa77de9e062cc5a9940a2e5d38e4b885f115d5df5a72ff83e696f6cd8e",
+      "text": "处理 {@link https://github.com/AnalyticalGraphicsInc/czml-writer/wiki/CZML-Guide|CZML} 的 {@link DataSource}。"
+    },
+    {
+      "id": "CzmlDataSource",
+      "field": "params/name/description",
+      "sourceHash": "sha256:652acd595dbf7a94a0264a0c59b53ab5fe5d992cb2190f988f601a271d8f1001",
+      "text": "可选的数据源名称。若已加载文档包含名称，则会覆盖此值。"
+    },
+    {
+      "id": "CzmlDataSource#changedEvent",
+      "field": "description",
+      "sourceHash": "sha256:b94ff7939ceab7c88b90056e7db7bae1fdfa9de04248c03da5809a400b5399bc",
+      "text": "获取底层数据发生变化时触发的事件。"
+    },
+    {
+      "id": "CzmlDataSource#clock",
+      "field": "description",
+      "sourceHash": "sha256:a89a3c850b386a6297ec857f83995fd3a250b1f6f1d4291ddbc537041321f146",
+      "text": "获取已加载 CZML 定义的时钟设置。若 CZML 未显式定义时钟，则返回全部对象合并后的可用时间范围；仅有静态数据时，此值为 undefined。"
+    },
+    {
+      "id": "CzmlDataSource#clustering",
+      "field": "description",
+      "sourceHash": "sha256:ccbf53f979b29ab36bf723f1ee1016f1ceb9246f68c2d4af95eb91b26fe56eeb",
+      "text": "获取或设置此数据源的聚合选项。此对象可由多个数据源共享。"
+    },
+    {
+      "id": "CzmlDataSource#credit",
+      "field": "description",
+      "sourceHash": "sha256:4b2913219f37c9058f57b4a2e330d28e8a372eac9ed782cf1eba2ace672fdd93",
+      "text": "获取为此数据源显示的版权信息。"
+    },
+    {
+      "id": "CzmlDataSource#entities",
+      "field": "description",
+      "sourceHash": "sha256:976b78e6c2b5f9a8351a5240d327e0812b07c6b42a809b150295d1df26821435",
+      "text": "获取 {@link Entity} 实例集合。"
+    },
+    {
+      "id": "CzmlDataSource#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:829f0851bfbe71a9601c4d0b1b13331625861008f3e81636dc2c24937b8110a5",
+      "text": "获取处理过程中发生错误时触发的事件。"
+    },
+    {
+      "id": "CzmlDataSource#isLoading",
+      "field": "description",
+      "sourceHash": "sha256:c8cccd6d79eb71061719faa92a252268a663761ddc5753ba0ae028ddc3997f7f",
+      "text": "获取指示数据源当前是否正在加载数据的值。"
+    },
+    {
+      "id": "CzmlDataSource#load",
+      "field": "description",
+      "sourceHash": "sha256:482172ba0f3bcde474049eeea624be4ca28fe54e7caf888e20da7e5174588a5c",
+      "text": "加载所提供的 URL 或 CZML 对象，并替换全部现有数据。"
+    },
+    {
+      "id": "CzmlDataSource#load",
+      "field": "params/czml/description",
+      "sourceHash": "sha256:256c4de04d3dc241bac13b8b28395c6f368f2e89411452f87ad65231e36c3a61",
+      "text": "要处理的 URL 或 CZML 对象。"
+    },
+    {
+      "id": "CzmlDataSource#load",
+      "field": "params/options/description",
+      "sourceHash": "sha256:6d3565bbafa26048e29e2a6fb6e5eca0fb1bcc394011fab179647bb04d7d4158",
+      "text": "指定配置选项的对象。"
+    },
+    {
+      "id": "CzmlDataSource#load",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4eba4775736dc2dec57d2d8eb4c8cba3f415d77caf3272baf058a1e9cfd800d7",
+      "text": "数据处理完成后兑现为当前实例的 Promise。"
+    },
+    {
+      "id": "CzmlDataSource#loadingEvent",
+      "field": "description",
+      "sourceHash": "sha256:755e0027e6456715daa06d4c30c338e4c40fe5f6c46e5ff5204d1b37923a35c7",
+      "text": "获取数据源开始或停止加载时触发的事件。"
+    },
+    {
+      "id": "CzmlDataSource#name",
+      "field": "description",
+      "sourceHash": "sha256:306f5f63bf12315087abf4967af6e0520cba885e677c6ab2393e3dbf79c09c02",
+      "text": "获取此实例便于阅读的名称。"
+    },
+    {
+      "id": "CzmlDataSource#process",
+      "field": "description",
+      "sourceHash": "sha256:2126cfded0315d4afab4b208249031587b716236c2565c11af4106ddfabcc5a5",
+      "text": "处理所提供的 URL 或 CZML 对象，保留全部现有数据。"
+    },
+    {
+      "id": "CzmlDataSource#process",
+      "field": "params/czml/description",
+      "sourceHash": "sha256:256c4de04d3dc241bac13b8b28395c6f368f2e89411452f87ad65231e36c3a61",
+      "text": "要处理的 URL 或 CZML 对象。"
+    },
+    {
+      "id": "CzmlDataSource#process",
+      "field": "params/options/description",
+      "sourceHash": "sha256:6d3565bbafa26048e29e2a6fb6e5eca0fb1bcc394011fab179647bb04d7d4158",
+      "text": "指定配置选项的对象。"
+    },
+    {
+      "id": "CzmlDataSource#process",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4eba4775736dc2dec57d2d8eb4c8cba3f415d77caf3272baf058a1e9cfd800d7",
+      "text": "数据处理完成后兑现为当前实例的 Promise。"
+    },
+    {
+      "id": "CzmlDataSource#show",
+      "field": "description",
+      "sourceHash": "sha256:7438e871c41fb26d7b878ea3fa3e3e858a9c50539f22293dc33344d6e4d2de4c",
+      "text": "获取是否应显示此数据源。"
+    },
+    {
+      "id": "CzmlDataSource#update",
+      "field": "description",
+      "sourceHash": "sha256:1e0435ea19f0d20fefa920889b7b1616587fb32f18c1cce5fa8871ac0702120a",
+      "text": "将数据源更新到给定时间。此函数为可选实现，适用于根据当前动画时间或场景状态获取数据的数据源。若已实现，{@link DataSourceDisplay} 会每帧调用一次 update。"
+    },
+    {
+      "id": "CzmlDataSource#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:b97f4749b707cb6e854fe296c681cdbf68d422843d5bbbecef133d0d26261eea",
+      "text": "模拟时间。"
+    },
+    {
+      "id": "CzmlDataSource#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2f15539ce01e1ceafc6d9cbeaddeef19b2c2193ce995e615e2b5d2d550433d2c",
+      "text": "若此数据源已准备好在给定时间显示，则为 true；否则为 false。"
+    },
+    {
+      "id": "DataSource",
+      "field": "description",
+      "sourceHash": "sha256:d08cc0ad10d328714061347d93672ac9fb1b8f58c4e523440882e4b005651056",
+      "text": "数据源接口，将任意数据转换为可供通用访问的 {@link EntityCollection}。此对象用于描述接口，不应直接实例化。"
+    },
+    {
+      "id": "DataSource#changedEvent",
+      "field": "description",
+      "sourceHash": "sha256:b94ff7939ceab7c88b90056e7db7bae1fdfa9de04248c03da5809a400b5399bc",
+      "text": "获取底层数据发生变化时触发的事件。"
+    },
+    {
+      "id": "DataSource#clock",
+      "field": "description",
+      "sourceHash": "sha256:45e20395dc324ed250124d9e3d1f37d363a4f1575570fff44d5565e1b07b49a6",
+      "text": "获取此数据源首选的时钟设置。"
+    },
+    {
+      "id": "DataSource#clustering",
+      "field": "description",
+      "sourceHash": "sha256:ccbf53f979b29ab36bf723f1ee1016f1ceb9246f68c2d4af95eb91b26fe56eeb",
+      "text": "获取或设置此数据源的聚合选项。此对象可由多个数据源共享。"
+    },
+    {
+      "id": "DataSource#entities",
+      "field": "description",
+      "sourceHash": "sha256:976b78e6c2b5f9a8351a5240d327e0812b07c6b42a809b150295d1df26821435",
+      "text": "获取 {@link Entity} 实例集合。"
+    },
+    {
+      "id": "DataSource#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:829f0851bfbe71a9601c4d0b1b13331625861008f3e81636dc2c24937b8110a5",
+      "text": "获取处理过程中发生错误时触发的事件。"
+    },
+    {
+      "id": "DataSource#isLoading",
+      "field": "description",
+      "sourceHash": "sha256:c8cccd6d79eb71061719faa92a252268a663761ddc5753ba0ae028ddc3997f7f",
+      "text": "获取指示数据源当前是否正在加载数据的值。"
+    },
+    {
+      "id": "DataSource#loadingEvent",
+      "field": "description",
+      "sourceHash": "sha256:632815ae467eb1d50e819ab892fbdcd15413aff73d3f7aa6182e17dffb32405b",
+      "text": "获取 isLoading 的值变化时触发的事件。"
+    },
+    {
+      "id": "DataSource#name",
+      "field": "description",
+      "sourceHash": "sha256:306f5f63bf12315087abf4967af6e0520cba885e677c6ab2393e3dbf79c09c02",
+      "text": "获取此实例便于阅读的名称。"
+    },
+    {
+      "id": "DataSource#show",
+      "field": "description",
+      "sourceHash": "sha256:7438e871c41fb26d7b878ea3fa3e3e858a9c50539f22293dc33344d6e4d2de4c",
+      "text": "获取是否应显示此数据源。"
+    },
+    {
+      "id": "DataSource#update",
+      "field": "description",
+      "sourceHash": "sha256:1e0435ea19f0d20fefa920889b7b1616587fb32f18c1cce5fa8871ac0702120a",
+      "text": "将数据源更新到给定时间。此函数为可选实现，适用于根据当前动画时间或场景状态获取数据的数据源。若已实现，{@link DataSourceDisplay} 会每帧调用一次 update。"
+    },
+    {
+      "id": "DataSource#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:b97f4749b707cb6e854fe296c681cdbf68d422843d5bbbecef133d0d26261eea",
+      "text": "模拟时间。"
+    },
+    {
+      "id": "DataSource#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2f15539ce01e1ceafc6d9cbeaddeef19b2c2193ce995e615e2b5d2d550433d2c",
+      "text": "若此数据源已准备好在给定时间显示，则为 true；否则为 false。"
+    },
+    {
+      "id": "DataSourceClock",
+      "field": "description",
+      "sourceHash": "sha256:7bf11f7bc51ceadafb0c40972740765c28b9ab2082851cad1800225304501cbb",
+      "text": "表示特定 {@link DataSource} 期望使用的时钟设置，数据源加载后可将这些设置应用到 {@link Clock}。"
+    },
+    {
+      "id": "DataSourceClock#clockRange",
+      "field": "description",
+      "sourceHash": "sha256:13debd3f1fca7b9ccb36278c575ac75af8636fc18c0a54db4661dce1ae4625ee",
+      "text": "获取或设置期望的时钟范围设置。参见 {@link Clock#clockRange}。"
+    },
+    {
+      "id": "DataSourceClock#clockStep",
+      "field": "description",
+      "sourceHash": "sha256:8281cc1e6222617ffdf27a0f9457208f2adb46dbe46f4a2284a089f9d984ecaa",
+      "text": "获取或设置期望的时钟步进设置。参见 {@link Clock#clockStep}。"
+    },
+    {
+      "id": "DataSourceClock#clone",
+      "field": "description",
+      "sourceHash": "sha256:dea72b1b7ba8f3f3bc9580854365c31eee1a9c78cbdf083fcd96e1d3e6155f8e",
+      "text": "复制 DataSourceClock 实例。"
+    },
+    {
+      "id": "DataSourceClock#currentTime",
+      "field": "description",
+      "sourceHash": "sha256:e433f90ac26868f4f2190577a1d38f17bdbf691e1e1e8749d80c168bb0dccbaa",
+      "text": "获取或设置加载此数据源时希望采用的当前时间。参见 {@link Clock#currentTime}。"
+    },
+    {
+      "id": "DataSourceClock#definitionChanged",
+      "field": "description",
+      "sourceHash": "sha256:3fb6db309817d30446ef9dc0ea292fcfc3ad9e395f858430e5f4398ae64e1fc8",
+      "text": "获取任意属性被重新赋值时触发的事件。"
+    },
+    {
+      "id": "DataSourceClock#equals",
+      "field": "description",
+      "sourceHash": "sha256:84eeed00a83a1e2cf5124c1052fa2bdf55085ed033a6afdc24d1917e74c3ce73",
+      "text": "此 DataSourceClock 与另一个等价时返回 true。"
+    },
+    {
+      "id": "DataSourceClock#equals",
+      "field": "params/other/description",
+      "sourceHash": "sha256:d21c987d00c60a439de1a47f32d159e54146b593fb265a1b39af48aa15e0beeb",
+      "text": "用于比较的另一个 DataSourceClock。"
+    },
+    {
+      "id": "DataSourceClock#equals",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:a86e9d0c32eb6d7daae4031f29a42ac52c132bdacb45a10189d850a452ec8af3",
+      "text": "两个 DataSourceClock 相等时为 <code>true</code>，否则为 <code>false</code>。"
+    },
+    {
+      "id": "DataSourceClock#getValue",
+      "field": "description",
+      "sourceHash": "sha256:a0b00332c1cad2804e6ab69264eae5563180b93d5a407f7f5c38b54114c853c7",
+      "text": "将此时钟实例的设置作为 {@link Clock} 对象获取。"
+    },
+    {
+      "id": "DataSourceClock#multiplier",
+      "field": "description",
+      "sourceHash": "sha256:9fe6e1c292d2fb3a60422074bb06375bec1ff2fc62be2b03e793a6c01cf6b222",
+      "text": "获取或设置期望的时钟倍率。参见 {@link Clock#multiplier}。"
+    },
+    {
+      "id": "DataSourceClock#startTime",
+      "field": "description",
+      "sourceHash": "sha256:5b58010b2790b06492f0f46a9d5fa92f85f5e5e579bb39c522ac155c2da3ddb3",
+      "text": "获取或设置期望的时钟开始时间。参见 {@link Clock#startTime}。"
+    },
+    {
+      "id": "DataSourceClock#stopTime",
+      "field": "description",
+      "sourceHash": "sha256:7eacd6d4780892d91a3ff1e8fafc7f6ecf493423a7860772e988bb78c838cc0a",
+      "text": "获取或设置期望的时钟停止时间。参见 {@link Clock#stopTime}。"
+    },
+    {
+      "id": "DataSourceDisplay.defaultVisualizersCallback",
+      "field": "description",
+      "sourceHash": "sha256:876d15bfa640d363cece6171d6d4ff74f945718f1b43104fb365b82c674bb454",
+      "text": "获取或设置创建可视化器数组的默认函数。默认使用全部标准可视化器。"
+    },
+    {
+      "id": "DataSourceDisplay.VisualizersCallback",
+      "field": "description",
+      "sourceHash": "sha256:aa1e78d9e0b2a4dd7c7e05f3346842e45db170f9e6631c117bd8202d99dbb446",
+      "text": "创建用于显示数据的可视化器数组的函数。"
+    },
+    {
+      "id": "DataSourceDisplay.VisualizersCallback",
+      "field": "params/dataSource/description",
+      "sourceHash": "sha256:9f26bd63b3b3439315673e96251010f4395dc7c27c3fac7d11d6f25ae4581243",
+      "text": "需要为其创建可视化器的数据源。"
+    },
+    {
+      "id": "DataSourceDisplay.VisualizersCallback",
+      "field": "params/entityCluster/description",
+      "sourceHash": "sha256:ba420348a3478086c20c3170bb0e2890ddb89fc27f7577b61eb04b27753a0cf2",
+      "text": "需要为其创建可视化器的实体聚合器。"
+    },
+    {
+      "id": "DataSourceDisplay.VisualizersCallback",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:c823d66c4d0460e90a42b1f6d6a468d301fa9d189255e246ee10e066fc305831",
+      "text": "需要为其创建可视化器的场景。"
+    },
+    {
+      "id": "DataSourceDisplay.VisualizersCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:751860fb39aea37d266d824136190f1d255492e6789ac3442ea7f447b67c8a26",
+      "text": "用于显示数据的可视化器数组。"
+    },
+    {
+      "id": "DataSourceDisplay",
+      "field": "description",
+      "sourceHash": "sha256:49ec6ba583e8950dc5d81efaebfbbfb26f7d52d9387f47fd0b5db21904198824",
+      "text": "显示一组 {@link DataSource} 实例。"
+    },
+    {
+      "id": "DataSourceDisplay",
+      "field": "params/options.dataSourceCollection/description",
+      "sourceHash": "sha256:0ffe1a6ec414a0b7e2d28c2fe9c7941816231e37790f22f174e05f06e47b4dc8",
+      "text": "需要显示的数据源集合。"
+    },
+    {
+      "id": "DataSourceDisplay",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:2a189ff2ecdbe6c30e3cc6d0ec200423dcd0c8c98e334eec2d0cef27bf618dd4",
+      "text": "显示数据的场景。"
+    },
+    {
+      "id": "DataSourceDisplay",
+      "field": "params/options.visualizersCallback/description",
+      "sourceHash": "sha256:fa03d59dd6b1bbf4e0db5f45f473e488908b8688d952801b12153d1ac93e59dc",
+      "text": "创建可视化器数组的函数。为 undefined 时使用全部标准可视化器。"
+    },
+    {
+      "id": "DataSourceDisplay#dataSources",
+      "field": "description",
+      "sourceHash": "sha256:c107bb934dec7f6d9085990eaddb3f5672d1bf3bb24c0f26a5210b3a1803d1f4",
+      "text": "获取需要显示的数据源集合。"
+    },
+    {
+      "id": "DataSourceDisplay#defaultDataSource",
+      "field": "description",
+      "sourceHash": "sha256:4ebea2f3a1779cf7853f97fe64a1c9a65afe5f8a5f49fb996ec9d030f2124f4c",
+      "text": "获取默认数据源实例，用于手动创建和显示不属于特定数据源的实体。此实例始终可用，但不会出现在 dataSources 集合中。"
+    },
+    {
+      "id": "DataSourceDisplay#destroy",
+      "field": "description",
+      "sourceHash": "sha256:b385add820d9f47d540aad147f1cdf85f05e8c6cb81c3928a59c8fd5f7bd8d69",
+      "text": "销毁此对象持有的 WebGL 资源。显式销毁可确定地释放 WebGL 资源，而不依赖垃圾回收器回收此对象。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。因此，应像示例中那样将返回值（<code>undefined</code>）赋给该对象变量。"
+    },
+    {
+      "id": "DataSourceDisplay#isDestroyed",
+      "field": "description",
+      "sourceHash": "sha256:aea7b697937631c90ae3fc0ec55b81ba0ddc7abe4d6045848b2031f9bed60091",
+      "text": "若此对象已销毁，返回 true；否则返回 false。<br /><br />对象销毁后不应再使用；调用除 <code>isDestroyed</code> 以外的任何函数都会抛出 {@link DeveloperError}。"
+    },
+    {
+      "id": "DataSourceDisplay#ready",
+      "field": "description",
+      "sourceHash": "sha256:92eda90eac0e850dd753eb73ec51e2dbffd89b160dde95bf79fd53645b9d2607",
+      "text": "获取指示数据源中的全部实体是否就绪的值。"
+    },
+    {
+      "id": "DataSourceDisplay#scene",
+      "field": "description",
+      "sourceHash": "sha256:4d951e85ff05c58125be6fcff69e97fbfb300e8a9037109f7705cc1809e70396",
+      "text": "获取与此显示对象关联的场景。"
+    },
+    {
+      "id": "DataSourceDisplay#update",
+      "field": "description",
+      "sourceHash": "sha256:621191e69ad78e945d36769411c161dd2ce71cfec210635946cc2a8999fc701e",
+      "text": "将显示更新到指定时刻。"
+    },
+    {
+      "id": "DataSourceDisplay#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:b97f4749b707cb6e854fe296c681cdbf68d422843d5bbbecef133d0d26261eea",
+      "text": "模拟时间。"
+    },
+    {
+      "id": "DataSourceDisplay#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:76b2e2dc6f188f8ad83e6c9598e2b3f7016c0d62a047e932c91dd601047ebcee",
+      "text": "全部数据源都可供显示时为 true，否则为 false。"
+    },
+    {
+      "id": "EntityCluster.newClusterCallback",
+      "field": "description",
+      "sourceHash": "sha256:de28df2d11edf059fe60e9ebdf7c2ce8d31f39ae3a02daf3fb90618893be847b",
+      "text": "用于设置聚合样式的事件监听函数。"
+    },
+    {
+      "id": "EntityCluster.newClusterCallback",
+      "field": "params/cluster/description",
+      "sourceHash": "sha256:637e8be420f5f5cc5760e7036090580d08f53a6d9d1a1c118f8336df59d8700a",
+      "text": "包含用于表示此实体簇的 Billboard、Label 和 Point 图元的对象。"
+    },
+    {
+      "id": "EntityCluster.newClusterCallback",
+      "field": "params/clusteredEntities/description",
+      "sourceHash": "sha256:3ea20166915821e716454022c403f8785e630f2b7eb45a69eae6cf8c609bc415",
+      "text": "此簇包含的实体数组。"
+    },
+    {
+      "id": "EntityCluster",
+      "field": "description",
+      "sourceHash": "sha256:5753c89ab37fe6c6890815cc5eb28daf1be9d47184fb06e66b79b7cf7acdda67",
+      "text": "定义如何聚合广告牌、点和标签等屏幕空间对象。"
+    },
+    {
+      "id": "EntityCluster",
+      "field": "params/options.clusterBillboards/description",
+      "sourceHash": "sha256:3b86cce9447d967b53552d01663d8d5f4096bf606dfbb5401fcc26c14ebb5ebb",
+      "text": "是否聚合实体的广告牌。"
+    },
+    {
+      "id": "EntityCluster",
+      "field": "params/options.clusterLabels/description",
+      "sourceHash": "sha256:0897c4aa83a3e3b60d93630a9058b5c42ff99221f229b4a86e08b45a9b13dfb1",
+      "text": "是否聚合实体的标签。"
+    },
+    {
+      "id": "EntityCluster",
+      "field": "params/options.clusterPoints/description",
+      "sourceHash": "sha256:97704760666875382e8a09ab265a6153958d6858119c7850e23ec5f9d009cf65",
+      "text": "是否聚合实体的点。"
+    },
+    {
+      "id": "EntityCluster",
+      "field": "params/options.enabled/description",
+      "sourceHash": "sha256:8a8175c90b6c6d6cd6de35cc873aab17f3d3321b696196b0a03aa10de151b3fd",
+      "text": "是否启用聚合。"
+    },
+    {
+      "id": "EntityCluster",
+      "field": "params/options.minimumClusterSize/description",
+      "sourceHash": "sha256:a444cdf3200e4aa0fdf74e3a04029097469c473de7c84c2ae009e3398ee351f0",
+      "text": "形成聚合所需的最少屏幕空间对象数量。"
+    },
+    {
+      "id": "EntityCluster",
+      "field": "params/options.pixelRange/description",
+      "sourceHash": "sha256:f3e22af90336abccac93c0cc03ad19ea5606fe5bf522eaa7abc507490c34cc30",
+      "text": "扩展屏幕空间包围盒的像素范围。"
+    },
+    {
+      "id": "EntityCluster",
+      "field": "params/options.show/description",
+      "sourceHash": "sha256:28956f256bcee174e04a259af4e7e5370c7dedf8833c359175f2c8e94f26b9dd",
+      "text": "决定是否显示聚合中的实体。"
+    },
+    {
+      "id": "EntityCluster#clusterBillboards",
+      "field": "description",
+      "sourceHash": "sha256:c43fb2679ed2524830f6f050f257c0084e993e878b3f310b73b83825ddb4dffc",
+      "text": "获取或设置是否启用广告牌实体聚合。"
+    },
+    {
+      "id": "EntityCluster#clusterEvent",
+      "field": "description",
+      "sourceHash": "sha256:b3de4d76fc95d1baf207b6a31342d49ce649a91876958ce93e8ce5df98e4956c",
+      "text": "获取新实体簇即将显示时触发的事件，监听器签名参见 {@link EntityCluster.newClusterCallback}。"
+    },
+    {
+      "id": "EntityCluster#clusterLabels",
+      "field": "description",
+      "sourceHash": "sha256:fb5ea6560154d59ac4ad66596180ed3dde3a775af02293a71997fb2096d1975f",
+      "text": "获取或设置是否启用标签实体聚合。"
+    },
+    {
+      "id": "EntityCluster#clusterPoints",
+      "field": "description",
+      "sourceHash": "sha256:c8087c0f9b9987db6237023f4b89394c4c093c9ba0c05f2cb3c7197f6635ed21",
+      "text": "获取或设置是否启用点实体聚合。"
+    },
+    {
+      "id": "EntityCluster#destroy",
+      "field": "description",
+      "sourceHash": "sha256:a8e912e91d2f0c88404572ee0c0779f03f0eb4ae78b95f1bb417eb8f268935e2",
+      "text": "销毁此对象持有的 WebGL 资源，以便确定地释放资源，而不依赖垃圾回收。\n<p>\n与其他使用 WebGL 资源的对象不同，此对象可再次使用，例如数据源从一个集合移除后加入另一个集合时。\n</p>"
+    },
+    {
+      "id": "EntityCluster#enabled",
+      "field": "description",
+      "sourceHash": "sha256:84561ae375cb10cb637ccd80c586cd4978ffa743b38498159edc35bb1f95c3a3",
+      "text": "获取或设置是否启用聚合。"
+    },
+    {
+      "id": "EntityCluster#minimumClusterSize",
+      "field": "description",
+      "sourceHash": "sha256:8af5e4d04014a932637d10def5bfaff22c34146ff5c71b4d67bd36b7a372f3d5",
+      "text": "获取或设置形成聚合所需的最少屏幕空间对象数量。"
+    },
+    {
+      "id": "EntityCluster#pixelRange",
+      "field": "description",
+      "sourceHash": "sha256:158e8a4f2e9da9c5f2cf2c7ff8ec9e416d1102285d8da80f3412210bb4d17c55",
+      "text": "获取或设置扩展屏幕空间包围盒的像素范围。"
+    },
+    {
+      "id": "EntityCluster#show",
+      "field": "description",
+      "sourceHash": "sha256:aad929fde2503184ec74080e87c1639cbc02eb12ae06c0723989d9129c6aea99",
+      "text": "决定是否显示此集合中的实体。"
+    },
+    {
+      "id": "EntityView.defaultOffset3D",
+      "field": "description",
+      "sourceHash": "sha256:57a9cec34e202dabd7fdc8735e7f3c08af72b59c45e6ebb75b932e5d1ceb1086",
+      "text": "获取或设置用于初始化后续 EntityView 的相机偏移。"
+    },
+    {
+      "id": "EntityView",
+      "field": "description",
+      "sourceHash": "sha256:4d15217b92f632b4877c9e97859bc3f690b83b2ce7cf65849df2600130104ce9",
+      "text": "用于让相机跟踪实体的辅助对象。"
+    },
+    {
+      "id": "EntityView",
+      "field": "params/ellipsoid/description",
+      "sourceHash": "sha256:2d2f0f3ccdc2a2818d411c09b8711e3fbebcb07b0700887a6bd3491540258ab7",
+      "text": "用于确定相机朝向的椭球。"
+    },
+    {
+      "id": "EntityView",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:07b30b76580015f0275ccd12c7a987c2542f412ebe065b0fb57107c7d7610166",
+      "text": "相机要跟踪的实体。"
+    },
+    {
+      "id": "EntityView",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:8b946b3f807ba504154c53e1a0e99d13f1f95a05dae4d9d424bb921a39857aed",
+      "text": "使用的场景。"
+    },
+    {
+      "id": "EntityView#boundingSphere",
+      "field": "description",
+      "sourceHash": "sha256:852df92fab5c911bc5c124b45a7a29bea3f15685af09771256b708a2e1dd309c",
+      "text": "对象的包围球。"
+    },
+    {
+      "id": "EntityView#ellipsoid",
+      "field": "description",
+      "sourceHash": "sha256:2d2f0f3ccdc2a2818d411c09b8711e3fbebcb07b0700887a6bd3491540258ab7",
+      "text": "用于确定相机朝向的椭球。"
+    },
+    {
+      "id": "EntityView#entity",
+      "field": "description",
+      "sourceHash": "sha256:07b30b76580015f0275ccd12c7a987c2542f412ebe065b0fb57107c7d7610166",
+      "text": "相机要跟踪的实体。"
+    },
+    {
+      "id": "EntityView#scene",
+      "field": "description",
+      "sourceHash": "sha256:37da7de06c6bb42bfe1c0b7f2a68e47ca7af13c21ecf78be23e09c2fbaf15b09",
+      "text": "跟踪对象所用的场景。"
+    },
+    {
+      "id": "EntityView#update",
+      "field": "description",
+      "sourceHash": "sha256:331e5fb2f1057d7d5bf98e6659924362d03a07193bfa8ded928f65cd7bbb9d73",
+      "text": "应在每个动画帧调用，以将相机更新到最新设置。"
+    },
+    {
+      "id": "EntityView#update",
+      "field": "params/boundingSphere/description",
+      "sourceHash": "sha256:dbe8e903bdad429f95c9903954237b2a6cff25f2459d1515fb64c43e256cb7be",
+      "text": "对象的包围球。"
+    },
+    {
+      "id": "EntityView#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:02ac9feab8e5cce2dcb1a60625a565a28002c0ccd0cc8ad8ed4ff4faae78a337",
+      "text": "当前动画时刻。"
+    },
+    {
+      "id": "GpxDataSource.load",
+      "field": "description",
+      "sourceHash": "sha256:d5b9a8f3cca0236eafda1317bfe2237bfa22c27b754dc8c5a226b5c7e38b3fa9",
+      "text": "使用所提供的 GPX 数据加载一个新实例，并返回 Promise。"
+    },
+    {
+      "id": "GpxDataSource.load",
+      "field": "params/data/description",
+      "sourceHash": "sha256:8481cfcaf8f60fde474bdba2607dc96617df36e339077bd43ff2dcef0f285356",
+      "text": "URL、已解析的 GPX 文档，或包含 GPX 二进制数据的 Blob。"
+    },
+    {
+      "id": "GpxDataSource.load",
+      "field": "params/options.clampToGround/description",
+      "sourceHash": "sha256:c295d7aaa9191ce94bb0ec95cc75eed5f82a8123f4765309818c1de6d460a76c",
+      "text": "符号应与地形位于相同高度时为 true。"
+    },
+    {
+      "id": "GpxDataSource.load",
+      "field": "params/options.routeColor/description",
+      "sourceHash": "sha256:27e1305eb429471c2d8fbad2627fdb42d9ef89ab9399681e7e3954ea3f21691c",
+      "text": "路线线条使用的颜色。"
+    },
+    {
+      "id": "GpxDataSource.load",
+      "field": "params/options.trackColor/description",
+      "sourceHash": "sha256:8dc8148e7304f56fa34946a5f9dc16d90f4e0c569a616531f4e000888f3c5036",
+      "text": "轨迹线条使用的颜色。"
+    },
+    {
+      "id": "GpxDataSource.load",
+      "field": "params/options.trackImage/description",
+      "sourceHash": "sha256:fd0b96f1b76eaa5410620e5349d45177e586aff8ea0a82601b03f17b08c76d7d",
+      "text": "轨迹广告牌使用的图像。"
+    },
+    {
+      "id": "GpxDataSource.load",
+      "field": "params/options.waypointImage/description",
+      "sourceHash": "sha256:8a0f700a8e6c3c1644b3857e5f74e02587e056d73f175048cfbca19e1ee44729",
+      "text": "航点广告牌使用的图像。"
+    },
+    {
+      "id": "GpxDataSource.load",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:b006bd9702a2cc1f95bbcd3e715f2c6d096d8b780d890833fb8000d50b50f795",
+      "text": "GPX 加载完成后兑现为新 GpxDataSource 实例的 Promise。"
+    },
+    {
+      "id": "GpxDataSource",
+      "field": "description",
+      "sourceHash": "sha256:b94a80138b5314bd793658f148fb1b431c673078d2f6ed71366503a024c15d89",
+      "text": "处理 GPS 交换格式（GPX）的 {@link DataSource}。"
+    },
+    {
+      "id": "GpxDataSource#changedEvent",
+      "field": "description",
+      "sourceHash": "sha256:b94ff7939ceab7c88b90056e7db7bae1fdfa9de04248c03da5809a400b5399bc",
+      "text": "获取底层数据发生变化时触发的事件。"
+    },
+    {
+      "id": "GpxDataSource#clock",
+      "field": "description",
+      "sourceHash": "sha256:63d57a366c30e3db6d0d29ec6c45ce965286ddf89f84411b76e46f34303a6704",
+      "text": "获取已加载 GPX 定义的时钟设置，表示全部动态数据的总可用时间区间。GPX 不含动态数据时，此值为 undefined。"
+    },
+    {
+      "id": "GpxDataSource#clustering",
+      "field": "description",
+      "sourceHash": "sha256:ccbf53f979b29ab36bf723f1ee1016f1ceb9246f68c2d4af95eb91b26fe56eeb",
+      "text": "获取或设置此数据源的聚合选项。此对象可由多个数据源共享。"
+    },
+    {
+      "id": "GpxDataSource#creator",
+      "field": "description",
+      "sourceHash": "sha256:85e2b4026f9ce57c8bedc9ba63ab0add3d231c785cb0f762f4792990dd692395",
+      "text": "获取 GPX 文档的创建者。"
+    },
+    {
+      "id": "GpxDataSource#entities",
+      "field": "description",
+      "sourceHash": "sha256:976b78e6c2b5f9a8351a5240d327e0812b07c6b42a809b150295d1df26821435",
+      "text": "获取 {@link Entity} 实例集合。"
+    },
+    {
+      "id": "GpxDataSource#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:829f0851bfbe71a9601c4d0b1b13331625861008f3e81636dc2c24937b8110a5",
+      "text": "获取处理过程中发生错误时触发的事件。"
+    },
+    {
+      "id": "GpxDataSource#isLoading",
+      "field": "description",
+      "sourceHash": "sha256:c8cccd6d79eb71061719faa92a252268a663761ddc5753ba0ae028ddc3997f7f",
+      "text": "获取指示数据源当前是否正在加载数据的值。"
+    },
+    {
+      "id": "GpxDataSource#load",
+      "field": "description",
+      "sourceHash": "sha256:58f20914baae620419b1357cc50026607bd55ff43cf236040476ae9854e63cbe",
+      "text": "异步加载所提供的 GPX 数据，替换全部现有数据。"
+    },
+    {
+      "id": "GpxDataSource#load",
+      "field": "params/data/description",
+      "sourceHash": "sha256:2c8fe1f07eda8678f8d7eaeaf7051a19902a9dfefc7a5adb719d23a2da764750",
+      "text": "URL、已解析的 GPX 文档，或包含 GPX 二进制数据的 Blob。"
+    },
+    {
+      "id": "GpxDataSource#load",
+      "field": "params/options.clampToGround/description",
+      "sourceHash": "sha256:c295d7aaa9191ce94bb0ec95cc75eed5f82a8123f4765309818c1de6d460a76c",
+      "text": "符号应与地形位于相同高度时为 true。"
+    },
+    {
+      "id": "GpxDataSource#load",
+      "field": "params/options.routeColor/description",
+      "sourceHash": "sha256:27e1305eb429471c2d8fbad2627fdb42d9ef89ab9399681e7e3954ea3f21691c",
+      "text": "路线线条使用的颜色。"
+    },
+    {
+      "id": "GpxDataSource#load",
+      "field": "params/options.trackColor/description",
+      "sourceHash": "sha256:8dc8148e7304f56fa34946a5f9dc16d90f4e0c569a616531f4e000888f3c5036",
+      "text": "轨迹线条使用的颜色。"
+    },
+    {
+      "id": "GpxDataSource#load",
+      "field": "params/options.trackImage/description",
+      "sourceHash": "sha256:fd0b96f1b76eaa5410620e5349d45177e586aff8ea0a82601b03f17b08c76d7d",
+      "text": "轨迹广告牌使用的图像。"
+    },
+    {
+      "id": "GpxDataSource#load",
+      "field": "params/options.waypointImage/description",
+      "sourceHash": "sha256:8a0f700a8e6c3c1644b3857e5f74e02587e056d73f175048cfbca19e1ee44729",
+      "text": "航点广告牌使用的图像。"
+    },
+    {
+      "id": "GpxDataSource#load",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f9d6cb4d6c06fe54899033ea1281842ec8448372aa536b1f7db5838e95f3f5aa",
+      "text": "GPX 加载完成后兑现为当前实例的 Promise。"
+    },
+    {
+      "id": "GpxDataSource#loadingEvent",
+      "field": "description",
+      "sourceHash": "sha256:755e0027e6456715daa06d4c30c338e4c40fe5f6c46e5ff5204d1b37923a35c7",
+      "text": "获取数据源开始或停止加载时触发的事件。"
+    },
+    {
+      "id": "GpxDataSource#metadata",
+      "field": "description",
+      "sourceHash": "sha256:82230e945cf628bc2648245966fab91ceb6e35a82d45f3cec34b30e62486a0c2",
+      "text": "获取包含 GPX 文件元数据的对象。"
+    },
+    {
+      "id": "GpxDataSource#name",
+      "field": "description",
+      "sourceHash": "sha256:2a89e0eb062e7b725e76a8d2055b98c28b4e129572988bfbbec732c18273f172",
+      "text": "获取此实例便于阅读的名称，加载时会自动设为 GPX 文档名称。"
+    },
+    {
+      "id": "GpxDataSource#show",
+      "field": "description",
+      "sourceHash": "sha256:7438e871c41fb26d7b878ea3fa3e3e858a9c50539f22293dc33344d6e4d2de4c",
+      "text": "获取是否应显示此数据源。"
+    },
+    {
+      "id": "GpxDataSource#update",
+      "field": "description",
+      "sourceHash": "sha256:1e0435ea19f0d20fefa920889b7b1616587fb32f18c1cce5fa8871ac0702120a",
+      "text": "将数据源更新到给定时间。此函数为可选实现，适用于根据当前动画时间或场景状态获取数据的数据源。若已实现，{@link DataSourceDisplay} 会每帧调用一次 update。"
+    },
+    {
+      "id": "GpxDataSource#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:b97f4749b707cb6e854fe296c681cdbf68d422843d5bbbecef133d0d26261eea",
+      "text": "模拟时间。"
+    },
+    {
+      "id": "GpxDataSource#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2f15539ce01e1ceafc6d9cbeaddeef19b2c2193ce995e615e2b5d2d550433d2c",
+      "text": "若此数据源已准备好在给定时间显示，则为 true；否则为 false。"
+    },
+    {
+      "id": "GpxDataSource#version",
+      "field": "description",
+      "sourceHash": "sha256:785610fe97ec132104d23b4d42bc36938c4f4c714ef52cac80bea397c2b95276",
+      "text": "获取正在使用的 GPX Schema 版本。"
+    },
+    {
+      "id": "KmlDataSource.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:f85679097b77b14133c53c4fac1b34bdb3e23f9373fbc20b52a5ecdb16e60d73",
+      "text": "创建 KmlDataSource 或调用静态 `load` 方法的选项。"
+    },
+    {
+      "id": "KmlDataSource.ConstructorOptions",
+      "field": "properties/camera/description",
+      "sourceHash": "sha256:125b482d85797aa943f2fb31b20947761c13b516820b6280995e9b08a37d9839",
+      "text": "用于 viewRefreshModes，并将相机属性发送到网络链接的相机。"
+    },
+    {
+      "id": "KmlDataSource.ConstructorOptions",
+      "field": "properties/canvas/description",
+      "sourceHash": "sha256:de44aad6fc7538230340be0238e639a445a77220b3c90a06807e9873b51ea2f5",
+      "text": "用于向网络链接发送视图属性的画布。"
+    },
+    {
+      "id": "KmlDataSource.ConstructorOptions",
+      "field": "properties/clampToGround/description",
+      "sourceHash": "sha256:3f0bd86ee9d1620b8367a1f9e46137c54661acdfe3326a95a9dd687d99a47fe0",
+      "text": "需要将 Polygon、LineString 和 LinearRing 几何要素贴地时为 true。"
+    },
+    {
+      "id": "KmlDataSource.ConstructorOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:872397455e6a0810cbd1228cf72f7367941101df45124821d41f85934c2e0a9e",
+      "text": "地理计算使用的全局椭球。"
+    },
+    {
+      "id": "KmlDataSource.ConstructorOptions",
+      "field": "properties/screenOverlayContainer/description",
+      "sourceHash": "sha256:dadf9af2ad5d9e6e84f4ef896b8317723217b3ab4da4d00b694ca95f41c6f377",
+      "text": "ScreenOverlay 图像的容器。"
+    },
+    {
+      "id": "KmlDataSource.ConstructorOptions",
+      "field": "properties/sourceUri/description",
+      "sourceHash": "sha256:ad96b78a860ac30707ba39dbcb9291a329208d0024f740b0f2110530399feda3",
+      "text": "覆盖用于解析相对链接和其他 KML 网络功能的 URL。"
+    },
+    {
+      "id": "KmlDataSource.load",
+      "field": "description",
+      "sourceHash": "sha256:7e415f4797d381f025e9a320ff1c56427bcf4b461c76a43bc636d3e6f73017b7",
+      "text": "使用所提供的 KML 数据加载一个新实例，并返回 Promise。"
+    },
+    {
+      "id": "KmlDataSource.load",
+      "field": "params/data/description",
+      "sourceHash": "sha256:71bef7d428ddb6433a38acce86e75e090796a58ecedcc8bc8078f605fbd29506",
+      "text": "URL、已解析的 KML 文档，或包含 KMZ 二进制数据的 Blob。"
+    },
+    {
+      "id": "KmlDataSource.load",
+      "field": "params/options/description",
+      "sourceHash": "sha256:6d3565bbafa26048e29e2a6fb6e5eca0fb1bcc394011fab179647bb04d7d4158",
+      "text": "指定配置选项的对象。"
+    },
+    {
+      "id": "KmlDataSource.load",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:d0215e653c6096edc10ec825ae486b45ad7f0e19adc2816d71da95a8d744a31d",
+      "text": "KML 加载完成后兑现为新 KmlDataSource 实例的 Promise。"
+    },
+    {
+      "id": "KmlDataSource.LoadOptions",
+      "field": "description",
+      "sourceHash": "sha256:5e3c01752e997730d82166eb49f290de565acb3df9106d3398b7903fcd5dc02c",
+      "text": "`load` 方法的初始化选项。"
+    },
+    {
+      "id": "KmlDataSource.LoadOptions",
+      "field": "properties/clampToGround/description",
+      "sourceHash": "sha256:3f0bd86ee9d1620b8367a1f9e46137c54661acdfe3326a95a9dd687d99a47fe0",
+      "text": "需要将 Polygon、LineString 和 LinearRing 几何要素贴地时为 true。"
+    },
+    {
+      "id": "KmlDataSource.LoadOptions",
+      "field": "properties/ellipsoid/description",
+      "sourceHash": "sha256:872397455e6a0810cbd1228cf72f7367941101df45124821d41f85934c2e0a9e",
+      "text": "地理计算使用的全局椭球。"
+    },
+    {
+      "id": "KmlDataSource.LoadOptions",
+      "field": "properties/screenOverlayContainer/description",
+      "sourceHash": "sha256:dadf9af2ad5d9e6e84f4ef896b8317723217b3ab4da4d00b694ca95f41c6f377",
+      "text": "ScreenOverlay 图像的容器。"
+    },
+    {
+      "id": "KmlDataSource.LoadOptions",
+      "field": "properties/sourceUri/description",
+      "sourceHash": "sha256:ad96b78a860ac30707ba39dbcb9291a329208d0024f740b0f2110530399feda3",
+      "text": "覆盖用于解析相对链接和其他 KML 网络功能的 URL。"
+    },
+    {
+      "id": "KmlDataSource",
+      "field": "classdesc",
+      "sourceHash": "sha256:cced237cab3621402d6177a6ecc452169e824a02ecada975f9e81bf6cee1b358",
+      "text": "处理 Keyhole 标记语言 2.2（KML）的 {@link DataSource}。\n<p>\n当前 KML 支持尚不完整，但已支持标准的大部分功能及 Google 的 <code>gx</code> 扩展命名空间。支持与不支持功能的详细列表参见 GitHub 问题 {@link https://github.com/CesiumGS/cesium/issues/873|#873}。遇到大部分不支持的功能时，引擎也会向控制台输出提示。\n</p>\n<p>\n非视觉要素数据（例如 <code>atom:author</code> 和 <code>ExtendedData</code>）通过 {@link KmlFeatureData} 实例公开，并添加到每个 {@link Entity} 的 <code>kml</code> 属性中。\n</p>"
+    },
+    {
+      "id": "KmlDataSource#camera",
+      "field": "description",
+      "sourceHash": "sha256:85af7db2e552d48fca39ef74d28b7b7589c9c7f209b626bace6d6fd8853a735d",
+      "text": "发送网络请求时，使用此 {@link Camera} 的位置和朝向填充各相机参数。当 <code>viewRefreshMode</code> 为 <code>onStop</code> 时，相机移动情况决定何时触发 NetworkLink 刷新。"
+    },
+    {
+      "id": "KmlDataSource#canvas",
+      "field": "description",
+      "sourceHash": "sha256:a1351705a9ac67cd420bf150840deeb9bed008cf347c37b9ffd27828d4255742",
+      "text": "使用此 Canvas 的当前尺寸填充 Link 中的客户端宽高参数。"
+    },
+    {
+      "id": "KmlDataSource#changedEvent",
+      "field": "description",
+      "sourceHash": "sha256:b94ff7939ceab7c88b90056e7db7bae1fdfa9de04248c03da5809a400b5399bc",
+      "text": "获取底层数据发生变化时触发的事件。"
+    },
+    {
+      "id": "KmlDataSource#clock",
+      "field": "description",
+      "sourceHash": "sha256:c4dc03ac6d349c32d3dfb15051ea0825318aeb67ad4c2f2f952c6478cbd956e8",
+      "text": "获取已加载 KML 定义的时钟设置，表示全部动态数据的总可用时间区间。KML 不含动态数据时，此值为 undefined。"
+    },
+    {
+      "id": "KmlDataSource#clustering",
+      "field": "description",
+      "sourceHash": "sha256:ccbf53f979b29ab36bf723f1ee1016f1ceb9246f68c2d4af95eb91b26fe56eeb",
+      "text": "获取或设置此数据源的聚合选项。此对象可由多个数据源共享。"
+    },
+    {
+      "id": "KmlDataSource#credit",
+      "field": "description",
+      "sourceHash": "sha256:4b2913219f37c9058f57b4a2e330d28e8a372eac9ed782cf1eba2ace672fdd93",
+      "text": "获取为此数据源显示的版权信息。"
+    },
+    {
+      "id": "KmlDataSource#destroy",
+      "field": "description",
+      "sourceHash": "sha256:dc0a0ad1dae680e5af6fc5f3ca686b2ad89be78b658d964181089d30aff06ccd",
+      "text": "清理数据源创建的非实体元素。目前仅影响 ScreenOverlay 元素。"
+    },
+    {
+      "id": "KmlDataSource#entities",
+      "field": "description",
+      "sourceHash": "sha256:976b78e6c2b5f9a8351a5240d327e0812b07c6b42a809b150295d1df26821435",
+      "text": "获取 {@link Entity} 实例集合。"
+    },
+    {
+      "id": "KmlDataSource#errorEvent",
+      "field": "description",
+      "sourceHash": "sha256:829f0851bfbe71a9601c4d0b1b13331625861008f3e81636dc2c24937b8110a5",
+      "text": "获取处理过程中发生错误时触发的事件。"
+    },
+    {
+      "id": "KmlDataSource#isLoading",
+      "field": "description",
+      "sourceHash": "sha256:c8cccd6d79eb71061719faa92a252268a663761ddc5753ba0ae028ddc3997f7f",
+      "text": "获取指示数据源当前是否正在加载数据的值。"
+    },
+    {
+      "id": "KmlDataSource#kmlTours",
+      "field": "description",
+      "sourceHash": "sha256:bc04f846ed1eccb2e9275acbd5a67514fc4601132f24610ab2e8c078a47d3230",
+      "text": "获取 KML Tour，用于按指定时间间隔引导相机到达目标位置。"
+    },
+    {
+      "id": "KmlDataSource#load",
+      "field": "description",
+      "sourceHash": "sha256:2c98e939b949233ad10d8f526df68ebb884e68ee4ea9c058696cdbcd77934a11",
+      "text": "异步加载所提供的 KML 数据，替换全部现有数据。"
+    },
+    {
+      "id": "KmlDataSource#load",
+      "field": "params/data/description",
+      "sourceHash": "sha256:71bef7d428ddb6433a38acce86e75e090796a58ecedcc8bc8078f605fbd29506",
+      "text": "URL、已解析的 KML 文档，或包含 KMZ 二进制数据的 Blob。"
+    },
+    {
+      "id": "KmlDataSource#load",
+      "field": "params/options/description",
+      "sourceHash": "sha256:6d3565bbafa26048e29e2a6fb6e5eca0fb1bcc394011fab179647bb04d7d4158",
+      "text": "指定配置选项的对象。"
+    },
+    {
+      "id": "KmlDataSource#load",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:15c00007fb14602827075eae7fddfec9902a0a1c3acd3bb92a9004ed1a3ac9e9",
+      "text": "KML 加载完成后兑现为当前实例的 Promise。"
+    },
+    {
+      "id": "KmlDataSource#loadingEvent",
+      "field": "description",
+      "sourceHash": "sha256:755e0027e6456715daa06d4c30c338e4c40fe5f6c46e5ff5204d1b37923a35c7",
+      "text": "获取数据源开始或停止加载时触发的事件。"
+    },
+    {
+      "id": "KmlDataSource#name",
+      "field": "description",
+      "sourceHash": "sha256:6deaf7cce286a143b847bad1c3227593c6b7018ac57efe60d226ed8b1afaa7c0",
+      "text": "获取或设置此实例便于阅读的名称，加载时会自动设为 KML 文档名称。"
+    },
+    {
+      "id": "KmlDataSource#refreshEvent",
+      "field": "description",
+      "sourceHash": "sha256:0b025f8a40eeda976302bcc79b5f16acf27b300027e2e1f2006dcc16e034ea44",
+      "text": "获取数据源刷新网络链接时触发的事件。"
+    },
+    {
+      "id": "KmlDataSource#show",
+      "field": "description",
+      "sourceHash": "sha256:7438e871c41fb26d7b878ea3fa3e3e858a9c50539f22293dc33344d6e4d2de4c",
+      "text": "获取是否应显示此数据源。"
+    },
+    {
+      "id": "KmlDataSource#unsupportedNodeEvent",
+      "field": "description",
+      "sourceHash": "sha256:a149735940e0c88cb32111c0f60c95a2c8730920a7c933192f3f602cf39ba127",
+      "text": "获取数据源发现不支持的节点类型时触发的事件。"
+    },
+    {
+      "id": "KmlDataSource#update",
+      "field": "description",
+      "sourceHash": "sha256:2b0513fc44957a3cd848bdd501db09a69a7ea8e4919ef2b78f2ab6b9dd8bd0e5",
+      "text": "更新需要刷新的 NetworkLink。"
+    },
+    {
+      "id": "KmlDataSource#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:b97f4749b707cb6e854fe296c681cdbf68d422843d5bbbecef133d0d26261eea",
+      "text": "模拟时间。"
+    },
+    {
+      "id": "KmlDataSource#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:2f15539ce01e1ceafc6d9cbeaddeef19b2c2193ce995e615e2b5d2d550433d2c",
+      "text": "若此数据源已准备好在给定时间显示，则为 true；否则为 false。"
+    }
+  ]
+}

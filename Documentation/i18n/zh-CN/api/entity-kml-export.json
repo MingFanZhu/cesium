@@ -1,0 +1,372 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "exportKml",
+      "field": "description",
+      "sourceHash": "sha256:7a71ce742d1bdb1f6579820b37a3a81ee456ecd61e5c4db5bde8aa040cb228ed",
+      "text": "将 EntityCollection 导出为 KML 文档。仅导出 Point、Billboard、Model、Path、Polygon 和 Polyline 几何。Entity 属性与 KML Feature 属性并非一一对应。例如，某些实体属性随时间变化，但 KML 不支持其动态变化，此时采用 options.time 处的值；未指定时，采用 EntityCollection 时间区间起点的值。对 KML 支持的动态属性，若为 {@link SampledProperty} 则使用已有样本，否则按 options.sampleDuration 采样。具有动态位置的 Point、Billboard、Model 和 Path 会导出为 gx:Track 要素。KML 无法表示全部材质，较复杂材质仅采用主颜色。Canvas 对象导出为 PNG 图像。"
+    },
+    {
+      "id": "exportKml",
+      "field": "params/options.defaultAvailability/description",
+      "sourceHash": "sha256:b31f8f374d37d4dbca9e286f60d896d2ee983901d4e11a984675ebab8cf6de47",
+      "text": "实体未定义 availability 时所用的采样区间。"
+    },
+    {
+      "id": "exportKml",
+      "field": "params/options.ellipsoid/description",
+      "sourceHash": "sha256:69575acca0430f07c961a568fdc2ce903d9d5e9039ac366de80773664927065e",
+      "text": "输出文件所用的椭球。"
+    },
+    {
+      "id": "exportKml",
+      "field": "params/options.entities/description",
+      "sourceHash": "sha256:bd4a42e2e47fcc20428e7123574571a07abe4728e3ff888e89224fb484705b8a",
+      "text": "要导出为 KML 的 EntityCollection。"
+    },
+    {
+      "id": "exportKml",
+      "field": "params/options.kmz/description",
+      "sourceHash": "sha256:cded6bd236d50dc7eaf7f0e5f38e381e1061cedc34c620fdc35c0bbd1954b02b",
+      "text": "为 true 时，将 KML 和外部文件压缩为 KMZ 文件。"
+    },
+    {
+      "id": "exportKml",
+      "field": "params/options.modelCallback/description",
+      "sourceHash": "sha256:9ba0354e90055baf105c65c2b0a67c67a6a68d70b6f684ad393ca004d36d8605",
+      "text": "接收 {@link ModelGraphics} 实例并返回 KML 所用 URI 的回调。实体集合中存在模型时必填。"
+    },
+    {
+      "id": "exportKml",
+      "field": "params/options.sampleDuration/description",
+      "sourceHash": "sha256:1cf219ff03554da6dc286ffbe92840a4050c77491ef6af8b81c496e7e4339242",
+      "text": "对 KML 中动态属性进行采样的时间间隔，单位为秒。"
+    },
+    {
+      "id": "exportKml",
+      "field": "params/options.time/description",
+      "sourceHash": "sha256:2bb4331a24ba5a78709a25b2c246095c634b69c7c5ac4b49274c395645eea8e8",
+      "text": "用于获取在 KML 中不随时间变化的属性值的时刻。"
+    },
+    {
+      "id": "exportKml",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:cc7f33c3c9df2f604a0dfd9d2d9a5bf9de2c1cee9c7e13c4c67956532f29e14a",
+      "text": "兑现为包含 KML 字符串和外部文件 Blob 字典的对象的 Promise；options.kmz 为 true 时，兑现为包含 KMZ 文件 Blob 的对象。"
+    },
+    {
+      "id": "exportKmlModelCallback",
+      "field": "description",
+      "sourceHash": "sha256:155d1e34ace53e04fa3a9146f90aed0f52598956f7bade3e5c951633f3bc0ce1",
+      "text": "由于 KML 不支持 glTF 模型，需要此回调指定 KML 文档中模型所用的 URL。也可用它向 <code>externalFiles</code> 对象添加其他文件；导出 KMZ 时这些文件会嵌入包内，否则与 KML 字符串一起返回。"
+    },
+    {
+      "id": "exportKmlModelCallback",
+      "field": "params/externalFiles/description",
+      "sourceHash": "sha256:d1a30f2b7b79c7a3a1bc8c502998a0d8d2678e296ef66b28246ea3d6498477c2",
+      "text": "将文件名映射到 Blob 或兑现为 Blob 的 Promise 的对象。"
+    },
+    {
+      "id": "exportKmlModelCallback",
+      "field": "params/model/description",
+      "sourceHash": "sha256:3cc20c1ca469e66f6c90c8b666810c5dc934f8d7f29e51ae02b3f24ae02baaf2",
+      "text": "Entity 的 ModelGraphics 实例。"
+    },
+    {
+      "id": "exportKmlModelCallback",
+      "field": "params/time/description",
+      "sourceHash": "sha256:7a9d738ecbaf2eba8d85ef37c48dd6ce1efa6cd531169fecaa7e9730f6257008",
+      "text": "获取各属性值时使用的时刻。"
+    },
+    {
+      "id": "exportKmlModelCallback",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:89c32bd2980e2f5106b794282b46065b3433088773d80925fc90ab05848d1002",
+      "text": "KML 文档中 href 所用的 URL。"
+    },
+    {
+      "id": "exportKmlResultKml",
+      "field": "properties/externalFiles/description",
+      "sourceHash": "sha256:8bf03475d33d0047a56c14120731c92df80920bca06280703bc70747d46e63dc",
+      "text": "外部文件的对象字典。"
+    },
+    {
+      "id": "exportKmlResultKml",
+      "field": "properties/kml/description",
+      "sourceHash": "sha256:fbd1c63745ad2dfd75dfb16212d5d0cdc865892bc8953003e72c0e8f2928acc6",
+      "text": "生成的 KML。"
+    },
+    {
+      "id": "exportKmlResultKmz",
+      "field": "properties/kmz/description",
+      "sourceHash": "sha256:885a88da1dfd44f8d501044e865981d1ef7f93cecd9ad9068fbc8e13003ff422",
+      "text": "生成的 KMZ 文件。"
+    },
+    {
+      "id": "KmlCamera",
+      "field": "description",
+      "sourceHash": "sha256:0509dd7bb5067a20ca63caca2b7ac3c055aed75ca042837207a65c7e2b53cd3f",
+      "text": "表示 KML 中的 <Camera> 元素。"
+    },
+    {
+      "id": "KmlCamera",
+      "field": "params/headingPitchRoll/description",
+      "sourceHash": "sha256:2abd21c1a82b935c27adc7bbb58fa3bffd349a1d8a292ad6f97e7f8d23d6f35a",
+      "text": "相机朝向。"
+    },
+    {
+      "id": "KmlCamera",
+      "field": "params/position/description",
+      "sourceHash": "sha256:fa6c1ebb4d80bae7cddffd9e80e7c267242cec167136eeb62e21751c289ff1c9",
+      "text": "相机位置。"
+    },
+    {
+      "id": "KmlLookAt",
+      "field": "params/headingPitchRange/description",
+      "sourceHash": "sha256:2abd21c1a82b935c27adc7bbb58fa3bffd349a1d8a292ad6f97e7f8d23d6f35a",
+      "text": "相机朝向。"
+    },
+    {
+      "id": "KmlLookAt",
+      "field": "params/position/description",
+      "sourceHash": "sha256:fa6c1ebb4d80bae7cddffd9e80e7c267242cec167136eeb62e21751c289ff1c9",
+      "text": "相机位置。"
+    },
+    {
+      "id": "KmlTour",
+      "field": "description",
+      "sourceHash": "sha256:0f0f4855d999fad2c289ef8548d426a7e6391dcc1ce664c94cb522977cfc0470",
+      "text": "描述 KmlTour，使用 KmlTourFlyTo 和 KmlTourWait 按指定时间间隔引导相机到达目标位置。"
+    },
+    {
+      "id": "KmlTour",
+      "field": "params/id/description",
+      "sourceHash": "sha256:5f0f2297194679de799e9aa4c6ee2ba444551ad39aac6bd16b0da7ee673105ff",
+      "text": "从 KML 解析得到的 id。"
+    },
+    {
+      "id": "KmlTour",
+      "field": "params/name/description",
+      "sourceHash": "sha256:dedc618799fa4008d4345b614d0b618b2f808100260c797dbbb59f6f067fc3a7",
+      "text": "从 KML 解析得到的名称。"
+    },
+    {
+      "id": "KmlTour",
+      "field": "params/playlist/description",
+      "sourceHash": "sha256:29b0cb68f7abaa4f00843c954b90dd4ad5857cf729c25d2283093630f0818811",
+      "text": "包含 KmlTourFlyTo 和 KmlTourWait 的数组。"
+    },
+    {
+      "id": "KmlTour#addPlaylistEntry",
+      "field": "description",
+      "sourceHash": "sha256:cce03df21e07e12c6cb62b26feb7b51736e3802aab6904db767f59880013b14d",
+      "text": "向此导览的播放列表添加条目。"
+    },
+    {
+      "id": "KmlTour#addPlaylistEntry",
+      "field": "params/entry/description",
+      "sourceHash": "sha256:1f1488982376405dbc16ba1e62ad7762326114a5dee54233b655c6297aabd0c2",
+      "text": "要添加到播放列表的条目。"
+    },
+    {
+      "id": "KmlTour#entryEnd",
+      "field": "description",
+      "sourceHash": "sha256:ef5d266543cd8c997c075141f0c951fa887ae3fdc5329dd5771d4f18e4fcb4f4",
+      "text": "播放列表中的条目播放结束时触发的事件。\n\n事件回调接收以下参数：\n1. entry：当前条目。\n2. terminated：因调用 {@link KmlTour#stop} 而终止播放时为 true。"
+    },
+    {
+      "id": "KmlTour#entryStart",
+      "field": "description",
+      "sourceHash": "sha256:3f4188e7f9c6788f0d5cfea93758037261e8eabc7a4fa5d4ac53bf18b8e44c2d",
+      "text": "播放列表中的条目开始播放时触发的事件。\n\n事件回调的第一个参数为当前条目。"
+    },
+    {
+      "id": "KmlTour#id",
+      "field": "description",
+      "sourceHash": "sha256:51b0d2ed369ba34d40f05118ae95d446b4c5a1fd4d1e00a9dbca78a2b87ea8b1",
+      "text": "KML gx:Tour 条目的 ID。"
+    },
+    {
+      "id": "KmlTour#name",
+      "field": "description",
+      "sourceHash": "sha256:e076c9a3a29bf872174067b2bf122f44cc939ab6fd2b906573b0c1f2d46d3ee7",
+      "text": "导览名称。"
+    },
+    {
+      "id": "KmlTour#play",
+      "field": "description",
+      "sourceHash": "sha256:8442441e41625ff54780268b3d00c885271a5db254c03775ce69b8470600f4e7",
+      "text": "播放此导览。"
+    },
+    {
+      "id": "KmlTour#play",
+      "field": "params/cameraOptions/description",
+      "sourceHash": "sha256:9a00fc78424c9d38021ab27d3126a33eaeba1491be79011de0af9399debe1b6f",
+      "text": "这些选项会与 FlyTo 播放列表条目的 {@link Camera#flyTo} 选项合并。"
+    },
+    {
+      "id": "KmlTour#play",
+      "field": "params/widget/description",
+      "sourceHash": "sha256:e22cffc47b20ea3536c6830e80a3608e93fd9f777051e62f4d11820646288a5c",
+      "text": "控件。"
+    },
+    {
+      "id": "KmlTour#playlist",
+      "field": "description",
+      "sourceHash": "sha256:f630cbc1a2bed662a5e08168ef5e13cb9b75ec8b61fe3e118e1b6d3b7cf5b12b",
+      "text": "播放列表条目数组。"
+    },
+    {
+      "id": "KmlTour#playlistIndex",
+      "field": "description",
+      "sourceHash": "sha256:fdc8a10e8df94345665c076aa14a6e017a054b1110a59d609649d011b5323caa",
+      "text": "播放列表当前条目的索引。"
+    },
+    {
+      "id": "KmlTour#stop",
+      "field": "description",
+      "sourceHash": "sha256:96ffca22dc412121484dd4f8d7f5db55e76f8bf1fb000e3aef8f6b77bd552f11",
+      "text": "停止当前正在播放的导览。"
+    },
+    {
+      "id": "KmlTour#tourEnd",
+      "field": "description",
+      "sourceHash": "sha256:a5a988c0c6801985472d1c5a216bec29c4732fa1a529f9039ef747e795531f49",
+      "text": "全部播放列表条目播放完毕，或导览播放被取消时触发的事件。\n\n若播放被终止，事件回调的 terminated 参数为 true。"
+    },
+    {
+      "id": "KmlTour#tourStart",
+      "field": "description",
+      "sourceHash": "sha256:06a71c89d39dc408000bf6bdd0e8e0b0f73e009b13806fc43660b838bd1c3428",
+      "text": "导览开始时、任何播放列表条目开始之前触发的事件。"
+    },
+    {
+      "id": "KmlTourFlyTo.DoneCallback",
+      "field": "description",
+      "sourceHash": "sha256:196800d01fc80f35a305a63a44874c770d21017f0e6edcd683f4e1f7208c4aa8",
+      "text": "飞行完成后执行的函数。"
+    },
+    {
+      "id": "KmlTourFlyTo.DoneCallback",
+      "field": "params/terminated/description",
+      "sourceHash": "sha256:b0fd6a71093e4aaa35f596b53c8c64164b027dc1baa858dc46d338c9c2e23147",
+      "text": "条目播放完成前调用了 {@link KmlTourFlyTo#stop} 时为 true。"
+    },
+    {
+      "id": "KmlTourFlyTo",
+      "field": "description",
+      "sourceHash": "sha256:c147688b95d99ad33e890eb633d9c14abf6b2d18a0655f5aad193e1f31018ffb",
+      "text": "将 KmlTour 过渡到下一个目标位置。使用指定 flyToMode，在给定秒数内完成过渡。"
+    },
+    {
+      "id": "KmlTourFlyTo",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:a9f91659292cea27a0696ab5d57b9caf59b68349acd87216ce5881d98d49743c",
+      "text": "条目持续时间。"
+    },
+    {
+      "id": "KmlTourFlyTo",
+      "field": "params/flyToMode/description",
+      "sourceHash": "sha256:c6ee45a5a04bea99d1a679b03ab0edfd9036dc430b23b0704b78ebc4e0a7854e",
+      "text": "KML 飞行模式，例如 bounce、smooth。"
+    },
+    {
+      "id": "KmlTourFlyTo",
+      "field": "params/view/description",
+      "sourceHash": "sha256:3b710d57e3f6eaa06a8bbff18f47b0ed8bd0df2cf22105faad5ff714ffbf83b4",
+      "text": "KmlCamera 或 KmlLookAt。"
+    },
+    {
+      "id": "KmlTourFlyTo#getCameraOptions",
+      "field": "description",
+      "sourceHash": "sha256:bfc200981c29f903d66faf07d9e29744bc4445d95a5bed85f1510b326ecd2b20",
+      "text": "根据 this.view 类型返回 {@link Camera#flyTo} 或 {@link Camera#flyToBoundingSphere} 的选项。"
+    },
+    {
+      "id": "KmlTourFlyTo#getCameraOptions",
+      "field": "params/cameraOptions/description",
+      "sourceHash": "sha256:d83971ee120aac1e252634bf84d0d15ef3bcd2ea109412e4bccb69b04f78ecba",
+      "text": "需要与生成结果合并的选项，参见 {@link Camera#flyTo}。"
+    },
+    {
+      "id": "KmlTourFlyTo#getCameraOptions",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:c14b61505de70536784e69a4e63aa241603a19c49946a733024ee590b9e9f184",
+      "text": "{@link Camera#flyTo} 或 {@link Camera#flyToBoundingSphere} 的选项。"
+    },
+    {
+      "id": "KmlTourFlyTo#play",
+      "field": "description",
+      "sourceHash": "sha256:435b4be78566181fdfd0d53e16e4b29e9174b9d17adac1c0fe84dda6b59776e9",
+      "text": "播放此播放列表条目。"
+    },
+    {
+      "id": "KmlTourFlyTo#play",
+      "field": "params/camera/description",
+      "sourceHash": "sha256:00c5883c09946f749a2ad5fbb0ff3bce86e513653f81fc5bbd1d02187c8ab231",
+      "text": "引擎相机。"
+    },
+    {
+      "id": "KmlTourFlyTo#play",
+      "field": "params/cameraOptions/description",
+      "sourceHash": "sha256:ce702df442512b74bfcb0ce089a8f2d4fa85fd56d933fe1c7a3cf50d9bf4f5bb",
+      "text": "将与相机 flyTo 选项合并的选项，参见 {@link Camera#flyTo}。"
+    },
+    {
+      "id": "KmlTourFlyTo#play",
+      "field": "params/done/description",
+      "sourceHash": "sha256:0d6c9001e3197356f9212f071b6a504ca451763f62cd5405ee6f2d55c470aca8",
+      "text": "播放结束时调用的函数。"
+    },
+    {
+      "id": "KmlTourFlyTo#stop",
+      "field": "description",
+      "sourceHash": "sha256:91e2c706877b27d2ff328d2f350639709295f6888866e7b3b246576d1c6fbfca",
+      "text": "停止执行当前条目，并取消相机 flyTo。"
+    },
+    {
+      "id": "KmlTourWait.DoneCallback",
+      "field": "description",
+      "sourceHash": "sha256:8f247c619d58d80eee8ec3efd022c6f0412028f40318954f7a517587b3e71a5e",
+      "text": "播放结束时调用的函数。"
+    },
+    {
+      "id": "KmlTourWait.DoneCallback",
+      "field": "params/terminated/description",
+      "sourceHash": "sha256:fa781b8e033d898a61780b3302df5529e3fe7e4d740cd547bbcdcd2d12f9cf71",
+      "text": "条目播放完成前调用了 {@link KmlTourWait#stop} 时为 true。"
+    },
+    {
+      "id": "KmlTourWait",
+      "field": "description",
+      "sourceHash": "sha256:a179293e6b06947d7fde01436ea22dec31dda3e4fd854ee8c8a64e2bedef85fd",
+      "text": "使 KmlTour 暂停指定秒数。"
+    },
+    {
+      "id": "KmlTourWait",
+      "field": "params/duration/description",
+      "sourceHash": "sha256:a9f91659292cea27a0696ab5d57b9caf59b68349acd87216ce5881d98d49743c",
+      "text": "条目持续时间。"
+    },
+    {
+      "id": "KmlTourWait#play",
+      "field": "description",
+      "sourceHash": "sha256:435b4be78566181fdfd0d53e16e4b29e9174b9d17adac1c0fe84dda6b59776e9",
+      "text": "播放此播放列表条目。"
+    },
+    {
+      "id": "KmlTourWait#play",
+      "field": "params/done/description",
+      "sourceHash": "sha256:0d6c9001e3197356f9212f071b6a504ca451763f62cd5405ee6f2d55c470aca8",
+      "text": "播放结束时调用的函数。"
+    },
+    {
+      "id": "KmlTourWait#stop",
+      "field": "description",
+      "sourceHash": "sha256:1a0759c23c9cc65d5e5b4231aba955c1976a0a06d5fdb839fb44df416c1ac813",
+      "text": "停止执行当前条目，并取消当前定时器。"
+    }
+  ]
+}

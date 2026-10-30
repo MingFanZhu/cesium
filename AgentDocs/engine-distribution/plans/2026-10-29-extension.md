@@ -63,9 +63,11 @@ phases, each reviewed and committed before the next begins. No new runtime or ge
 - [T2 loading and time](2026-10-30-t2-loading-time-translation.md): active after T1 checkpoint
   `7141d62015`; 60 resource/time/terrain/provider roots with 1,699 missing fields.
 - [T3 rendering](2026-10-30-t3-rendering-translation.md): completed and reviewed; 1,560 new
-  records complete 80 roots and reach 63.1% coverage. Ready for its checkpoint.
-- Data/property/geometry follows in a separate phase, elaborated only after the T3 checkpoint.
-- T4 remainder and final gate: cover every remaining native field, resolve changed/unused
+  records complete 80 roots and reach 63.1% coverage. Checkpoint `1b84d87298`.
+- [T4 entity data](2026-10-30-t4-data-translation.md): completed and reviewed; 1,471 new
+  records complete 91 roots and reach 72.7% coverage. Ready for its checkpoint.
+- Geometry/numerics and remainder phases will be elaborated after each checkpoint.
+- Remainder and final gate: cover every remaining native field, resolve changed/unused
   catalog records, and verify missing/stale/unused are all zero. Preserve semantic metadata,
   code, links and Chinese owned-source separation throughout.
 

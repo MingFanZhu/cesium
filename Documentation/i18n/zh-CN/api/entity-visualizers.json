@@ -1,0 +1,1416 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "BillboardVisualizer",
+      "field": "description",
+      "sourceHash": "sha256:b57a2e52735df3deba135d7ebe9b54a38ba557419069622df5d2069e1fb3af19",
+      "text": "将 {@link Entity#billboard} 映射为 {@link Billboard} 的 {@link Visualizer}。"
+    },
+    {
+      "id": "BillboardVisualizer",
+      "field": "params/entityCluster/description",
+      "sourceHash": "sha256:752a9872004cb5321dd2ced1e80bf965f82b2bd374019b33daf8bf989b53dfd7",
+      "text": "用于管理广告牌集合的实体聚合器，也可选择与其他实体一起聚合。"
+    },
+    {
+      "id": "BillboardVisualizer",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:0c5cdb4697066aaa2d6d81502fd2e771bdab8f7aab0ea529ac7f45e213071df0",
+      "text": "需要可视化的 entityCollection。"
+    },
+    {
+      "id": "BillboardVisualizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:9e0365f47822415211f1eab0999e5c2c6ed40514a98d53e54525504378a3e128",
+      "text": "移除并销毁此实例创建的全部图元。"
+    },
+    {
+      "id": "BillboardVisualizer#update",
+      "field": "description",
+      "sourceHash": "sha256:70cc8c49e8cfd1b2ec0b2f1213f952878d7f8dac200d04c7df6b57bc08f2e0df",
+      "text": "更新此可视化器创建的图元，使其与指定时刻对应的 Entity 状态一致。"
+    },
+    {
+      "id": "BillboardVisualizer#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:986bd88fc02f545beb5f88ed861a140912ca9fcb25c3e6ea9b5f7c8b6b8da746",
+      "text": "需要更新到的时刻。"
+    },
+    {
+      "id": "BillboardVisualizer#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f92bf13c1c9ee1ce387f3059a0b1bcebe43ccfb530ca6a0726be7cd392d63ecf",
+      "text": "此函数始终返回 true。"
+    },
+    {
+      "id": "BoxGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:381a3bec4839abc473e7f3c77df6f53f1e866c31cd454b3a547d7a15b5d26adc",
+      "text": "用于盒体的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "BoxGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "BoxGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "BoxGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "BoxGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "BoxGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "BoxGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "BoxGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "BoxGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "Cesium3DTilesetVisualizer",
+      "field": "description",
+      "sourceHash": "sha256:8803e9a00c578a7744b1d2beee458c841174d50b514d26285e09147d0c49f094",
+      "text": "将 {@link Entity#tileset} 映射为 {@link Cesium3DTileset} 的 {@link Visualizer}。"
+    },
+    {
+      "id": "Cesium3DTilesetVisualizer",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:0c5cdb4697066aaa2d6d81502fd2e771bdab8f7aab0ea529ac7f45e213071df0",
+      "text": "需要可视化的 entityCollection。"
+    },
+    {
+      "id": "Cesium3DTilesetVisualizer",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:35e23338e68e9ffc0525578796b8d20b9a2235618c950648256fd513e03d57c4",
+      "text": "图元将渲染到的场景。"
+    },
+    {
+      "id": "Cesium3DTilesetVisualizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:9e0365f47822415211f1eab0999e5c2c6ed40514a98d53e54525504378a3e128",
+      "text": "移除并销毁此实例创建的全部图元。"
+    },
+    {
+      "id": "Cesium3DTilesetVisualizer#update",
+      "field": "description",
+      "sourceHash": "sha256:36c161623384457d3ff788e9f1d151f4cd11726dcc3d17d0a5e90c09ce76ac06",
+      "text": "更新此可视化器创建的瓦片集，使其与指定时刻对应的 Entity 状态一致。"
+    },
+    {
+      "id": "Cesium3DTilesetVisualizer#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:986bd88fc02f545beb5f88ed861a140912ca9fcb25c3e6ea9b5f7c8b6b8da746",
+      "text": "需要更新到的时刻。"
+    },
+    {
+      "id": "Cesium3DTilesetVisualizer#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f92bf13c1c9ee1ce387f3059a0b1bcebe43ccfb530ca6a0726be7cd392d63ecf",
+      "text": "此函数始终返回 true。"
+    },
+    {
+      "id": "CorridorGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:3278b9c1be75897898be8070b64c1888c1fee4f11d0266d1c066443412bb1c6d",
+      "text": "用于走廊的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "CorridorGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "CorridorGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "CorridorGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "CorridorGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "CorridorGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "CorridorGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "CorridorGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "CorridorGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "CylinderGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:7c7f18b527ef6b6ef0b9810ffe3a3dafc6668faaafef6113fd4c01241829f87c",
+      "text": "用于圆柱体的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "CylinderGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "CylinderGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "CylinderGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "CylinderGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "CylinderGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "CylinderGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "CylinderGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "CylinderGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "EllipseGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:af89bf3676d5239625926cd3eafe82cc2dbb0bac114213f1669859b6f9d9a3db",
+      "text": "用于椭圆的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "EllipseGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "EllipseGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "EllipseGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "EllipseGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "EllipseGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "EllipseGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "EllipseGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "EllipseGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "EllipseGeometryUpdater#onTerrain",
+      "field": "description",
+      "sourceHash": "sha256:0d6b7c34b135939af2aafced5b3dbdc9380e6979d5bef32f1380cbecab110a61",
+      "text": "获取指示几何体是否应绘制在地形上的值。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:148f9cf71caf3442b500955bb6440e9dae60ce05610e713ea7e36aad289579c4",
+      "text": "用于椭球的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createFillGeometryInstance",
+      "field": "params/modelMatrixResult/description",
+      "sourceHash": "sha256:eb5bc9e10b0665244808f3374ac466aba5f76bfe6f73aa70529145f3ea36a1de",
+      "text": "用于存储模型矩阵计算结果。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createFillGeometryInstance",
+      "field": "params/skipModelMatrix/description",
+      "sourceHash": "sha256:0ac7738ac54feeffa5feb2d8e950d8a0b31e51c411763dc5be80f8bacde65123",
+      "text": "是否跳过为几何实例计算模型矩阵。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createOutlineGeometryInstance",
+      "field": "params/modelMatrixResult/description",
+      "sourceHash": "sha256:eb5bc9e10b0665244808f3374ac466aba5f76bfe6f73aa70529145f3ea36a1de",
+      "text": "用于存储模型矩阵计算结果。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createOutlineGeometryInstance",
+      "field": "params/skipModelMatrix/description",
+      "sourceHash": "sha256:0ac7738ac54feeffa5feb2d8e950d8a0b31e51c411763dc5be80f8bacde65123",
+      "text": "是否跳过为几何实例计算模型矩阵。"
+    },
+    {
+      "id": "EllipsoidGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "GeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:b4203564c6989850c04f208d56efa47dd0aaad0e3a3a0fa3e7833c2d47521d7c",
+      "text": "用于更新几何实体的抽象类。"
+    },
+    {
+      "id": "GeometryUpdater",
+      "field": "params/options.entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "GeometryUpdater",
+      "field": "params/options.geometryOptions/description",
+      "sourceHash": "sha256:aecd3c34508a64e5a4cb33d383374cbc64eb537833e2062da1b04f07fe3b5b68",
+      "text": "几何选项。"
+    },
+    {
+      "id": "GeometryUpdater",
+      "field": "params/options.geometryPropertyName/description",
+      "sourceHash": "sha256:1ee651d342acb96864d68e7bc97327c929912c62e0d78d0f0123b74e6e5888a8",
+      "text": "几何属性名称。"
+    },
+    {
+      "id": "GeometryUpdater",
+      "field": "params/options.observedPropertyNames/description",
+      "sourceHash": "sha256:4ecfa2737b58c3c549bb106620c2e183241db8970d75fa4ebdde3afe2cf5ab5d",
+      "text": "此几何体关注的实体属性。"
+    },
+    {
+      "id": "GeometryUpdater",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "GeometryUpdater#classificationTypeProperty",
+      "field": "description",
+      "sourceHash": "sha256:d0fc73fa0f7429e270be334f3dcba4b1dbdb39c89a0ffd14b632ce0c5dd00d07",
+      "text": "获取值为 {@link ClassificationType} 的 Property，指定几何体贴地时对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "GeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "GeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "GeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "GeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "GeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "GeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "GeometryUpdater#destroy",
+      "field": "description",
+      "sourceHash": "sha256:47df16be45a0a918c47ce4f56214efd2e94f422eb5b696da3b1fa633b9f7d6d4",
+      "text": "销毁此对象使用的资源。对象销毁后不应继续使用。"
+    },
+    {
+      "id": "GeometryUpdater#distanceDisplayConditionProperty",
+      "field": "description",
+      "sourceHash": "sha256:9fb79b9ad4105948f1f7d608032d885a1b0df2204d5215aecedc59f068ad9a3e",
+      "text": "获取值为 {@link DistanceDisplayCondition} 的 Property，指定几何体在距相机多远时显示。"
+    },
+    {
+      "id": "GeometryUpdater#entity",
+      "field": "description",
+      "sourceHash": "sha256:ed39449a078acccdf472c8e6e94694aa497edc1a823b75282b8425b591dfcf5e",
+      "text": "获取与此几何体关联的实体。"
+    },
+    {
+      "id": "GeometryUpdater#fillEnabled",
+      "field": "description",
+      "sourceHash": "sha256:c038bdfd96952e7799cbcca620a2c58c0deaba8b18b01de5f65218e988faa05a",
+      "text": "获取指示几何体是否包含填充部分的值。"
+    },
+    {
+      "id": "GeometryUpdater#fillMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:5c63268a54396f25c91f48155cae1caa1534fa4b5ef9565ba2f03b501f5b740a",
+      "text": "获取用于填充几何体的材质属性。"
+    },
+    {
+      "id": "GeometryUpdater#geometryChanged",
+      "field": "description",
+      "sourceHash": "sha256:702a662415639cc4ed8b8a8db91aa4221057bfbf1cda5d16da6a0cac86fcd3d3",
+      "text": "获取此更新器的公开属性发生变化时触发的事件。"
+    },
+    {
+      "id": "GeometryUpdater#hasConstantFill",
+      "field": "description",
+      "sourceHash": "sha256:5d5d80ae7aac650025d5a7dc6241ea0fb962dc1c635992cd5780b348f65a163f",
+      "text": "获取指示填充可见性是否不随模拟时间变化的值。"
+    },
+    {
+      "id": "GeometryUpdater#hasConstantOutline",
+      "field": "description",
+      "sourceHash": "sha256:398d301d878a8919dffbe8fbdc469d1a0d82b342c53d9189c8ea7b80c2526fe0",
+      "text": "获取指示轮廓可见性是否不随模拟时间变化的值。"
+    },
+    {
+      "id": "GeometryUpdater#id",
+      "field": "description",
+      "sourceHash": "sha256:8f6a618137f75df15892dd3d6b27a347ed99d7871d8a3d9de7af5b53adc03909",
+      "text": "获取与此更新器关联的唯一 ID。"
+    },
+    {
+      "id": "GeometryUpdater#isClosed",
+      "field": "description",
+      "sourceHash": "sha256:05e53ba3a16926813d09175617730301adee798cf390668d4948aad87c71ee70",
+      "text": "获取指示几何体是否封闭的值，仅对静态几何体有效。"
+    },
+    {
+      "id": "GeometryUpdater#isDynamic",
+      "field": "description",
+      "sourceHash": "sha256:feb16aa24b3ac74de7029d58fd75b529992ad1913724f33f254736c5d7271480",
+      "text": "获取指示几何体是否随时间变化的值。"
+    },
+    {
+      "id": "GeometryUpdater#isFilled",
+      "field": "description",
+      "sourceHash": "sha256:25f51e6d1390cb1d56f6e12c0a3df84c9ef04f32754e3da4c613b7cb2c87653d",
+      "text": "检查几何体在指定时刻是否显示填充。"
+    },
+    {
+      "id": "GeometryUpdater#isFilled",
+      "field": "params/time/description",
+      "sourceHash": "sha256:56f6c5ae7002fcbebc695d91d973865738b9095b8802d51e8055ebf60937700a",
+      "text": "需要获取可见性的时刻。"
+    },
+    {
+      "id": "GeometryUpdater#isFilled",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5ef9b5d8d9b823cd5aa4d090452dc73ece8cbf6832af9ab6a6cca23936d6278e",
+      "text": "几何体在指定时刻显示填充时为 true，否则为 false。"
+    },
+    {
+      "id": "GeometryUpdater#isOutlineVisible",
+      "field": "description",
+      "sourceHash": "sha256:d564d44dd34293b45897f045a21834bc856a9875ad1b9b978fdfb00800c565c1",
+      "text": "检查几何体在指定时刻是否显示轮廓。"
+    },
+    {
+      "id": "GeometryUpdater#isOutlineVisible",
+      "field": "params/time/description",
+      "sourceHash": "sha256:56f6c5ae7002fcbebc695d91d973865738b9095b8802d51e8055ebf60937700a",
+      "text": "需要获取可见性的时刻。"
+    },
+    {
+      "id": "GeometryUpdater#isOutlineVisible",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3c941ac75ad31604fc24df9380c2fbaec0c5ed07c8008a9490531186eec43bdf",
+      "text": "几何体在指定时刻显示轮廓时为 true，否则为 false。"
+    },
+    {
+      "id": "GeometryUpdater#outlineColorProperty",
+      "field": "description",
+      "sourceHash": "sha256:92b30a839a8e82ee444253b2cd6c5af5a3d2e503e80ae484970aea31ca4e75d3",
+      "text": "获取几何轮廓的 {@link Color} 属性。"
+    },
+    {
+      "id": "GeometryUpdater#outlineEnabled",
+      "field": "description",
+      "sourceHash": "sha256:398d301d878a8919dffbe8fbdc469d1a0d82b342c53d9189c8ea7b80c2526fe0",
+      "text": "获取指示轮廓可见性是否不随模拟时间变化的值。"
+    },
+    {
+      "id": "GeometryUpdater#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:56fc9a7bd159f1e59cd39c876976e51b27f963a5effef80aa616324f9a61755d",
+      "text": "获取几何轮廓的固定宽度，单位为像素。仅当 isDynamic 为 false 时有效。"
+    },
+    {
+      "id": "GeometryUpdater#shadowsProperty",
+      "field": "description",
+      "sourceHash": "sha256:babaa8e7923cbf40defa361bbd99158298eb47cf3de52c7ccadceb7b4ee8776f",
+      "text": "获取指定几何体是否投射或接收来自光源的阴影的属性。"
+    },
+    {
+      "id": "GeometryVisualizer",
+      "field": "description",
+      "sourceHash": "sha256:f98670e7e1fa69f9ce1245f4e94d042a75e1074fb2c97ee735d99155828decbd",
+      "text": "用于显示 {@link Primitive} 实例表示的几何体的通用可视化器。"
+    },
+    {
+      "id": "GeometryVisualizer",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:0c5cdb4697066aaa2d6d81502fd2e771bdab8f7aab0ea529ac7f45e213071df0",
+      "text": "需要可视化的 entityCollection。"
+    },
+    {
+      "id": "GeometryVisualizer",
+      "field": "params/groundPrimitives/description",
+      "sourceHash": "sha256:358b863730f3def83ff954cad771cee4de5e26dc6e5067660ff07f60773f4a0a",
+      "text": "用于添加实体相关贴地图元的集合。"
+    },
+    {
+      "id": "GeometryVisualizer",
+      "field": "params/primitives/description",
+      "sourceHash": "sha256:a347ba318b2e9d101edbe4a970ec086816a1e33dbf0f8997b0ac8b5d0f9a35ba",
+      "text": "用于添加实体相关图元的集合。"
+    },
+    {
+      "id": "GeometryVisualizer",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:35e23338e68e9ffc0525578796b8d20b9a2235618c950648256fd513e03d57c4",
+      "text": "图元将渲染到的场景。"
+    },
+    {
+      "id": "GeometryVisualizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:9e0365f47822415211f1eab0999e5c2c6ed40514a98d53e54525504378a3e128",
+      "text": "移除并销毁此实例创建的全部图元。"
+    },
+    {
+      "id": "GeometryVisualizer#update",
+      "field": "description",
+      "sourceHash": "sha256:757796a28e1c64830f02c5acfacd8bdf906c7ef4564c654282401a72e090e870",
+      "text": "更新此可视化器创建的全部图元，使其与指定时刻对应的 Entity 状态一致。"
+    },
+    {
+      "id": "GeometryVisualizer#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:986bd88fc02f545beb5f88ed861a140912ca9fcb25c3e6ea9b5f7c8b6b8da746",
+      "text": "需要更新到的时刻。"
+    },
+    {
+      "id": "GeometryVisualizer#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4b25f5c94c1828db127268c00f72e9fe828befeaca30e4ad37edd7d607a9c709",
+      "text": "成功更新到指定时刻时为 true；等待异步图元创建完成时为 false。"
+    },
+    {
+      "id": "GroundGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:9eff71f0600dfba2a6ea681fac1e5e13fb447ec52a801e0cd03800d889c6bfe4",
+      "text": "用于更新贴地几何实体的抽象类。"
+    },
+    {
+      "id": "GroundGeometryUpdater",
+      "field": "params/options.entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "GroundGeometryUpdater",
+      "field": "params/options.geometryOptions/description",
+      "sourceHash": "sha256:aecd3c34508a64e5a4cb33d383374cbc64eb537833e2062da1b04f07fe3b5b68",
+      "text": "几何选项。"
+    },
+    {
+      "id": "GroundGeometryUpdater",
+      "field": "params/options.geometryPropertyName/description",
+      "sourceHash": "sha256:1ee651d342acb96864d68e7bc97327c929912c62e0d78d0f0123b74e6e5888a8",
+      "text": "几何属性名称。"
+    },
+    {
+      "id": "GroundGeometryUpdater",
+      "field": "params/options.observedPropertyNames/description",
+      "sourceHash": "sha256:4ecfa2737b58c3c549bb106620c2e183241db8970d75fa4ebdde3afe2cf5ab5d",
+      "text": "此几何体关注的实体属性。"
+    },
+    {
+      "id": "GroundGeometryUpdater",
+      "field": "params/options.scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "GroundGeometryUpdater#destroy",
+      "field": "description",
+      "sourceHash": "sha256:47df16be45a0a918c47ce4f56214efd2e94f422eb5b696da3b1fa633b9f7d6d4",
+      "text": "销毁此对象使用的资源。对象销毁后不应继续使用。"
+    },
+    {
+      "id": "GroundGeometryUpdater#zIndex",
+      "field": "description",
+      "sourceHash": "sha256:d010d0ddad68c7fb5b20dd61d28410fc57cc213c6a5e57ffb2a0c5ab0584765a",
+      "text": "获取 zIndex。"
+    },
+    {
+      "id": "LabelVisualizer",
+      "field": "description",
+      "sourceHash": "sha256:e3b172e4f2af924dc22ebcdbf25dbd4f20d61edee44e1b4a2b2a656379073562",
+      "text": "将 {@link Entity#label} 中的 {@link LabelGraphics} 实例映射为 {@link Label} 的 {@link Visualizer}。"
+    },
+    {
+      "id": "LabelVisualizer",
+      "field": "params/entityCluster/description",
+      "sourceHash": "sha256:752a9872004cb5321dd2ced1e80bf965f82b2bd374019b33daf8bf989b53dfd7",
+      "text": "用于管理标签集合的实体聚合器，也可选择与其他实体一起聚合。"
+    },
+    {
+      "id": "LabelVisualizer",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:0c5cdb4697066aaa2d6d81502fd2e771bdab8f7aab0ea529ac7f45e213071df0",
+      "text": "需要可视化的 entityCollection。"
+    },
+    {
+      "id": "LabelVisualizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:9e0365f47822415211f1eab0999e5c2c6ed40514a98d53e54525504378a3e128",
+      "text": "移除并销毁此实例创建的全部图元。"
+    },
+    {
+      "id": "LabelVisualizer#update",
+      "field": "description",
+      "sourceHash": "sha256:70cc8c49e8cfd1b2ec0b2f1213f952878d7f8dac200d04c7df6b57bc08f2e0df",
+      "text": "更新此可视化器创建的图元，使其与指定时刻对应的 Entity 状态一致。"
+    },
+    {
+      "id": "LabelVisualizer#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:986bd88fc02f545beb5f88ed861a140912ca9fcb25c3e6ea9b5f7c8b6b8da746",
+      "text": "需要更新到的时刻。"
+    },
+    {
+      "id": "LabelVisualizer#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f92bf13c1c9ee1ce387f3059a0b1bcebe43ccfb530ca6a0726be7cd392d63ecf",
+      "text": "此函数始终返回 true。"
+    },
+    {
+      "id": "ModelVisualizer",
+      "field": "description",
+      "sourceHash": "sha256:a5c963093bfcdd62de1407109c90f47c201da97abcc03508f5ec94d961aad93f",
+      "text": "将 {@link Entity#model} 映射为 {@link Model} 的 {@link Visualizer}。"
+    },
+    {
+      "id": "ModelVisualizer",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:0c5cdb4697066aaa2d6d81502fd2e771bdab8f7aab0ea529ac7f45e213071df0",
+      "text": "需要可视化的 entityCollection。"
+    },
+    {
+      "id": "ModelVisualizer",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:35e23338e68e9ffc0525578796b8d20b9a2235618c950648256fd513e03d57c4",
+      "text": "图元将渲染到的场景。"
+    },
+    {
+      "id": "ModelVisualizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:9e0365f47822415211f1eab0999e5c2c6ed40514a98d53e54525504378a3e128",
+      "text": "移除并销毁此实例创建的全部图元。"
+    },
+    {
+      "id": "ModelVisualizer#update",
+      "field": "description",
+      "sourceHash": "sha256:36c161623384457d3ff788e9f1d151f4cd11726dcc3d17d0a5e90c09ce76ac06",
+      "text": "更新此可视化器创建的模型，使其与指定时刻对应的 Entity 状态一致。"
+    },
+    {
+      "id": "ModelVisualizer#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:986bd88fc02f545beb5f88ed861a140912ca9fcb25c3e6ea9b5f7c8b6b8da746",
+      "text": "需要更新到的时刻。"
+    },
+    {
+      "id": "ModelVisualizer#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f92bf13c1c9ee1ce387f3059a0b1bcebe43ccfb530ca6a0726be7cd392d63ecf",
+      "text": "此函数始终返回 true。"
+    },
+    {
+      "id": "PathVisualizer",
+      "field": "description",
+      "sourceHash": "sha256:771bd14acb51e454d1b123370e9e9f4358732eecaaa25953410a3356181703ec",
+      "text": "将 {@link Entity#path} 映射为 {@link Polyline} 的 {@link Visualizer}。"
+    },
+    {
+      "id": "PathVisualizer",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:0c5cdb4697066aaa2d6d81502fd2e771bdab8f7aab0ea529ac7f45e213071df0",
+      "text": "需要可视化的 entityCollection。"
+    },
+    {
+      "id": "PathVisualizer",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:35e23338e68e9ffc0525578796b8d20b9a2235618c950648256fd513e03d57c4",
+      "text": "图元将渲染到的场景。"
+    },
+    {
+      "id": "PathVisualizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:9e0365f47822415211f1eab0999e5c2c6ed40514a98d53e54525504378a3e128",
+      "text": "移除并销毁此实例创建的全部图元。"
+    },
+    {
+      "id": "PathVisualizer#update",
+      "field": "description",
+      "sourceHash": "sha256:757796a28e1c64830f02c5acfacd8bdf906c7ef4564c654282401a72e090e870",
+      "text": "更新此可视化器创建的全部图元，使其与指定时刻对应的 Entity 状态一致。"
+    },
+    {
+      "id": "PathVisualizer#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:986bd88fc02f545beb5f88ed861a140912ca9fcb25c3e6ea9b5f7c8b6b8da746",
+      "text": "需要更新到的时刻。"
+    },
+    {
+      "id": "PathVisualizer#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f92bf13c1c9ee1ce387f3059a0b1bcebe43ccfb530ca6a0726be7cd392d63ecf",
+      "text": "此函数始终返回 true。"
+    },
+    {
+      "id": "PlaneGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:5dc97b5e59fae031176b170e2f6f5e538bf1a128b480cf4ffb92df80db0fe3b3",
+      "text": "用于平面的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "PlaneGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "PlaneGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "PlaneGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "PlaneGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "PlaneGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "PlaneGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "PlaneGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "PlaneGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "PointVisualizer",
+      "field": "description",
+      "sourceHash": "sha256:8691fe56221001b911dc6a2eba3ff14bfe140282c24f727e5190d1c5ff4b9377",
+      "text": "将 {@link Entity#point} 映射为 {@link PointPrimitive} 的 {@link Visualizer}。"
+    },
+    {
+      "id": "PointVisualizer",
+      "field": "params/entityCluster/description",
+      "sourceHash": "sha256:752a9872004cb5321dd2ced1e80bf965f82b2bd374019b33daf8bf989b53dfd7",
+      "text": "用于管理点图元集合的实体聚合器，也可选择与其他实体一起聚合。"
+    },
+    {
+      "id": "PointVisualizer",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:0c5cdb4697066aaa2d6d81502fd2e771bdab8f7aab0ea529ac7f45e213071df0",
+      "text": "需要可视化的 entityCollection。"
+    },
+    {
+      "id": "PointVisualizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:9e0365f47822415211f1eab0999e5c2c6ed40514a98d53e54525504378a3e128",
+      "text": "移除并销毁此实例创建的全部图元。"
+    },
+    {
+      "id": "PointVisualizer#update",
+      "field": "description",
+      "sourceHash": "sha256:70cc8c49e8cfd1b2ec0b2f1213f952878d7f8dac200d04c7df6b57bc08f2e0df",
+      "text": "更新此可视化器创建的图元，使其与指定时刻对应的 Entity 状态一致。"
+    },
+    {
+      "id": "PointVisualizer#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:986bd88fc02f545beb5f88ed861a140912ca9fcb25c3e6ea9b5f7c8b6b8da746",
+      "text": "需要更新到的时刻。"
+    },
+    {
+      "id": "PointVisualizer#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:f92bf13c1c9ee1ce387f3059a0b1bcebe43ccfb530ca6a0726be7cd392d63ecf",
+      "text": "此函数始终返回 true。"
+    },
+    {
+      "id": "PolygonGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:f0a16c4e6cbbeb022daf14c01657ee037db075c426aa368abdc4e8b4e1be9056",
+      "text": "用于多边形的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "PolygonGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "PolygonGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "PolygonGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "PolygonGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "PolygonGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "PolygonGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "PolygonGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "PolygonGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "PolylineGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:a04efabc0815199add6469dde9b22d1997b28f38bf732c3873b8839628fa9df4",
+      "text": "用于折线的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "PolylineGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "PolylineGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#arcType",
+      "field": "description",
+      "sourceHash": "sha256:608577603b7d11719cc1ee3a614e267dc2773fb5f16e18d61780536038f73276",
+      "text": "获取定义折线连接方式的 arcType 属性。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#clampToGround",
+      "field": "description",
+      "sourceHash": "sha256:9007bb901ff29f89390d0f270e19b7dd947a3bace1d6c0a5491d1c93d10b6a5e",
+      "text": "获取指示几何体是否贴地的值。不支持地形折线时返回 false。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#classificationTypeProperty",
+      "field": "description",
+      "sourceHash": "sha256:d0fc73fa0f7429e270be334f3dcba4b1dbdb39c89a0ffd14b632ce0c5dd00d07",
+      "text": "获取值为 {@link ClassificationType} 的 Property，指定几何体贴地时对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#depthFailMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:6528c74e0275c58827a3800c748848a2be2a4154ad2b701d0c66aab329cc6794",
+      "text": "获取几何体深度测试失败时使用的填充材质属性。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#destroy",
+      "field": "description",
+      "sourceHash": "sha256:47df16be45a0a918c47ce4f56214efd2e94f422eb5b696da3b1fa633b9f7d6d4",
+      "text": "销毁此对象使用的资源。对象销毁后不应继续使用。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#distanceDisplayConditionProperty",
+      "field": "description",
+      "sourceHash": "sha256:9fb79b9ad4105948f1f7d608032d885a1b0df2204d5215aecedc59f068ad9a3e",
+      "text": "获取值为 {@link DistanceDisplayCondition} 的 Property，指定几何体在距相机多远时显示。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#entity",
+      "field": "description",
+      "sourceHash": "sha256:ed39449a078acccdf472c8e6e94694aa497edc1a823b75282b8425b591dfcf5e",
+      "text": "获取与此几何体关联的实体。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#fillEnabled",
+      "field": "description",
+      "sourceHash": "sha256:c038bdfd96952e7799cbcca620a2c58c0deaba8b18b01de5f65218e988faa05a",
+      "text": "获取指示几何体是否包含填充部分的值。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#fillMaterialProperty",
+      "field": "description",
+      "sourceHash": "sha256:5c63268a54396f25c91f48155cae1caa1534fa4b5ef9565ba2f03b501f5b740a",
+      "text": "获取用于填充几何体的材质属性。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#geometryChanged",
+      "field": "description",
+      "sourceHash": "sha256:702a662415639cc4ed8b8a8db91aa4221057bfbf1cda5d16da6a0cac86fcd3d3",
+      "text": "获取此更新器的公开属性发生变化时触发的事件。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#hasConstantFill",
+      "field": "description",
+      "sourceHash": "sha256:5d5d80ae7aac650025d5a7dc6241ea0fb962dc1c635992cd5780b348f65a163f",
+      "text": "获取指示填充可见性是否不随模拟时间变化的值。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#hasConstantOutline",
+      "field": "description",
+      "sourceHash": "sha256:4dd07b2a0bdfb8400854d1a59cbdca24ab684daa5a0ac465aea730478fbdaea2",
+      "text": "获取指示轮廓可见性是否不随模拟时间变化的值。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#id",
+      "field": "description",
+      "sourceHash": "sha256:8f6a618137f75df15892dd3d6b27a347ed99d7871d8a3d9de7af5b53adc03909",
+      "text": "获取与此更新器关联的唯一 ID。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#isClosed",
+      "field": "description",
+      "sourceHash": "sha256:05e53ba3a16926813d09175617730301adee798cf390668d4948aad87c71ee70",
+      "text": "获取指示几何体是否封闭的值，仅对静态几何体有效。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#isDynamic",
+      "field": "description",
+      "sourceHash": "sha256:feb16aa24b3ac74de7029d58fd75b529992ad1913724f33f254736c5d7271480",
+      "text": "获取指示几何体是否随时间变化的值。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#isFilled",
+      "field": "description",
+      "sourceHash": "sha256:25f51e6d1390cb1d56f6e12c0a3df84c9ef04f32754e3da4c613b7cb2c87653d",
+      "text": "检查几何体在指定时刻是否显示填充。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#isFilled",
+      "field": "params/time/description",
+      "sourceHash": "sha256:56f6c5ae7002fcbebc695d91d973865738b9095b8802d51e8055ebf60937700a",
+      "text": "需要获取可见性的时刻。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#isFilled",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:5ef9b5d8d9b823cd5aa4d090452dc73ece8cbf6832af9ab6a6cca23936d6278e",
+      "text": "几何体在指定时刻显示填充时为 true，否则为 false。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#isOutlineVisible",
+      "field": "description",
+      "sourceHash": "sha256:d564d44dd34293b45897f045a21834bc856a9875ad1b9b978fdfb00800c565c1",
+      "text": "检查几何体在指定时刻是否显示轮廓。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#isOutlineVisible",
+      "field": "params/time/description",
+      "sourceHash": "sha256:56f6c5ae7002fcbebc695d91d973865738b9095b8802d51e8055ebf60937700a",
+      "text": "需要获取可见性的时刻。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#isOutlineVisible",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:3c941ac75ad31604fc24df9380c2fbaec0c5ed07c8008a9490531186eec43bdf",
+      "text": "几何体在指定时刻显示轮廓时为 true，否则为 false。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#outlineColorProperty",
+      "field": "description",
+      "sourceHash": "sha256:92b30a839a8e82ee444253b2cd6c5af5a3d2e503e80ae484970aea31ca4e75d3",
+      "text": "获取几何轮廓的 {@link Color} 属性。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#outlineEnabled",
+      "field": "description",
+      "sourceHash": "sha256:398d301d878a8919dffbe8fbdc469d1a0d82b342c53d9189c8ea7b80c2526fe0",
+      "text": "获取指示轮廓可见性是否不随模拟时间变化的值。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#shadowsProperty",
+      "field": "description",
+      "sourceHash": "sha256:babaa8e7923cbf40defa361bbd99158298eb47cf3de52c7ccadceb7b4ee8776f",
+      "text": "获取指定几何体是否投射或接收来自光源的阴影的属性。"
+    },
+    {
+      "id": "PolylineGeometryUpdater#zIndex",
+      "field": "description",
+      "sourceHash": "sha256:d010d0ddad68c7fb5b20dd61d28410fc57cc213c6a5e57ffb2a0c5ab0584765a",
+      "text": "获取 zIndex。"
+    },
+    {
+      "id": "PolylineVisualizer",
+      "field": "description",
+      "sourceHash": "sha256:1622f089ca1e223977a00fcb06a72fa1152c44c8cc832aa49995225526c1c4a2",
+      "text": "用于显示 {@link Primitive} 实例表示的折线的可视化器。"
+    },
+    {
+      "id": "PolylineVisualizer",
+      "field": "params/entityCollection/description",
+      "sourceHash": "sha256:0c5cdb4697066aaa2d6d81502fd2e771bdab8f7aab0ea529ac7f45e213071df0",
+      "text": "需要可视化的 entityCollection。"
+    },
+    {
+      "id": "PolylineVisualizer",
+      "field": "params/groundPrimitives/description",
+      "sourceHash": "sha256:358b863730f3def83ff954cad771cee4de5e26dc6e5067660ff07f60773f4a0a",
+      "text": "用于添加实体相关贴地图元的集合。"
+    },
+    {
+      "id": "PolylineVisualizer",
+      "field": "params/primitives/description",
+      "sourceHash": "sha256:a347ba318b2e9d101edbe4a970ec086816a1e33dbf0f8997b0ac8b5d0f9a35ba",
+      "text": "用于添加实体相关图元的集合。"
+    },
+    {
+      "id": "PolylineVisualizer",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:35e23338e68e9ffc0525578796b8d20b9a2235618c950648256fd513e03d57c4",
+      "text": "图元将渲染到的场景。"
+    },
+    {
+      "id": "PolylineVisualizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:9e0365f47822415211f1eab0999e5c2c6ed40514a98d53e54525504378a3e128",
+      "text": "移除并销毁此实例创建的全部图元。"
+    },
+    {
+      "id": "PolylineVisualizer#update",
+      "field": "description",
+      "sourceHash": "sha256:757796a28e1c64830f02c5acfacd8bdf906c7ef4564c654282401a72e090e870",
+      "text": "更新此可视化器创建的全部图元，使其与指定时刻对应的 Entity 状态一致。"
+    },
+    {
+      "id": "PolylineVisualizer#update",
+      "field": "params/time/description",
+      "sourceHash": "sha256:986bd88fc02f545beb5f88ed861a140912ca9fcb25c3e6ea9b5f7c8b6b8da746",
+      "text": "需要更新到的时刻。"
+    },
+    {
+      "id": "PolylineVisualizer#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:4b25f5c94c1828db127268c00f72e9fe828befeaca30e4ad37edd7d607a9c709",
+      "text": "成功更新到指定时刻时为 true；等待异步图元创建完成时为 false。"
+    },
+    {
+      "id": "PolylineVolumeGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:710fa497d956dd020fcb691429621d70823be6b21554eb68c93ec98f6d355234",
+      "text": "用于折线体的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "PolylineVolumeGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "PolylineVolumeGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "PolylineVolumeGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "PolylineVolumeGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "PolylineVolumeGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "PolylineVolumeGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "PolylineVolumeGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "PolylineVolumeGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "RectangleGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:e255c624c348647ea13fc2a1ccd86a57ef2e6bb2de7e1d397b2b1a4bb9ccc043",
+      "text": "用于矩形的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "RectangleGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "RectangleGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "RectangleGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "RectangleGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "RectangleGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "RectangleGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "RectangleGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "RectangleGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "Visualizer",
+      "field": "description",
+      "sourceHash": "sha256:4672baa7a02635a220869c912f69f4e3b463a233948206226a5c085826670f5a",
+      "text": "可视化器接口。可视化器作为 {@link DataSourceDisplay} 的插件，渲染与 {@link DataSource} 实例关联的数据。此对象用于描述接口，不应直接实例化。"
+    },
+    {
+      "id": "Visualizer#destroy",
+      "field": "description",
+      "sourceHash": "sha256:2e839003719929fb93dc97eadd2b38e5fb156c6503d8d24ca23f24e4fe844585",
+      "text": "移除全部可视化内容，并清理与此实例关联的资源。"
+    },
+    {
+      "id": "Visualizer#update",
+      "field": "description",
+      "sourceHash": "sha256:4d4eaaaa9a0dd22dddc88f32d5ed6cb5f5df7df70669295c2bb91ed8b7f9e91c",
+      "text": "将可视化更新到指定时刻。"
+    },
+    {
+      "id": "Visualizer#update",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:0bf199318d952d473963a1dad3e0d7e956af72a27e729fba34374b1ffe59c7a9",
+      "text": "已更新到指定时刻时为 true；可视化器等待异步操作完成后才能更新数据时为 false。"
+    },
+    {
+      "id": "WallGeometryUpdater",
+      "field": "description",
+      "sourceHash": "sha256:bcb76d7c6225c88f92030a8129e1de06ce0011733fc02d51cb4caa851eec12aa",
+      "text": "用于墙体的 {@link GeometryUpdater}。客户端通常通过 {@link DataSourceDisplay} 使用，不直接创建此类。"
+    },
+    {
+      "id": "WallGeometryUpdater",
+      "field": "params/entity/description",
+      "sourceHash": "sha256:7ab09345ab1a1acf3ceac45b104dd57196b3863693e4606f7c034e11e3f2a6f5",
+      "text": "包含待可视化几何体的实体。"
+    },
+    {
+      "id": "WallGeometryUpdater",
+      "field": "params/scene/description",
+      "sourceHash": "sha256:edf19330c504e907591e46d19e22ef7a21c68a3d3c4494564523fa60a2a3d994",
+      "text": "用于可视化的场景。"
+    },
+    {
+      "id": "WallGeometryUpdater#createFillGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:3c6e692fd162a70710d296b5091b7d00f9b9822dcdcec12db98faf6016536db8",
+      "text": "创建表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "WallGeometryUpdater#createFillGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:f5361495d6b1e473f42acbea9b4558f0b887c254167f7edf25d9028455ebea51",
+      "text": "此实例不表示填充几何体。"
+    },
+    {
+      "id": "WallGeometryUpdater#createFillGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:77214eefde231198d59f4320bec9f503a2d4f97efdb8b27bb577c5f31417a162",
+      "text": "表示几何填充部分的几何实例。"
+    },
+    {
+      "id": "WallGeometryUpdater#createOutlineGeometryInstance",
+      "field": "description",
+      "sourceHash": "sha256:9e75c535e5bb1e9cafaba777ae48b20a08e98a20a7217679cad053477fca330a",
+      "text": "创建表示几何轮廓部分的几何实例。"
+    },
+    {
+      "id": "WallGeometryUpdater#createOutlineGeometryInstance",
+      "field": "exceptions/0/description",
+      "sourceHash": "sha256:a13a30f0f2ccf57e0c534670863d3c2f2b6714ce20b29fbade7476028992892d",
+      "text": "此实例不表示轮廓几何体。"
+    },
+    {
+      "id": "WallGeometryUpdater#createOutlineGeometryInstance",
+      "field": "returns/0/description",
+      "sourceHash": "sha256:951b4f7a72d5af541a8af3a87c17762a1210c723539e72e3c8e151a74401434d",
+      "text": "表示几何轮廓部分的几何实例。"
+    }
+  ]
+}

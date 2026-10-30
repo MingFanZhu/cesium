@@ -154,6 +154,97 @@ const roots = new Set([
   "CloudCollection",
   "CloudType",
   "CumulusCloud",
+  "BillboardGraphics",
+  "BillboardVisualizer",
+  "BoxGeometryUpdater",
+  "BoxGraphics",
+  "CallbackPositionProperty",
+  "CallbackProperty",
+  "Cesium3DTilesetGraphics",
+  "Cesium3DTilesetVisualizer",
+  "CheckerboardMaterialProperty",
+  "ColorMaterialProperty",
+  "CompositeEntityCollection",
+  "CompositeMaterialProperty",
+  "CompositePositionProperty",
+  "CompositeProperty",
+  "ConstantPositionProperty",
+  "ConstantProperty",
+  "CorridorGeometryUpdater",
+  "CorridorGraphics",
+  "CylinderGeometryUpdater",
+  "CylinderGraphics",
+  "CzmlDataSource",
+  "DataSource",
+  "DataSourceClock",
+  "DataSourceDisplay",
+  "EllipseGeometryUpdater",
+  "EllipseGraphics",
+  "EllipsoidGeometryUpdater",
+  "EllipsoidGraphics",
+  "EntityCluster",
+  "EntityView",
+  "ExtrapolationType",
+  "GeometryUpdater",
+  "GeometryVisualizer",
+  "GpxDataSource",
+  "GridMaterialProperty",
+  "GroundGeometryUpdater",
+  "ImageMaterialProperty",
+  "KmlCamera",
+  "KmlDataSource",
+  "KmlLookAt",
+  "KmlTour",
+  "KmlTourFlyTo",
+  "KmlTourWait",
+  "LabelGraphics",
+  "LabelVisualizer",
+  "MaterialProperty",
+  "ModelGraphics",
+  "ModelVisualizer",
+  "NodeTransformationProperty",
+  "PathGraphics",
+  "PathVisualizer",
+  "PlaneGeometryUpdater",
+  "PlaneGraphics",
+  "PointGraphics",
+  "PointVisualizer",
+  "PolygonGeometryUpdater",
+  "PolygonGraphics",
+  "PolylineArrowMaterialProperty",
+  "PolylineDashMaterialProperty",
+  "PolylineGeometryUpdater",
+  "PolylineGlowMaterialProperty",
+  "PolylineGraphics",
+  "PolylineOutlineMaterialProperty",
+  "PolylineVisualizer",
+  "PolylineVolumeGeometryUpdater",
+  "PolylineVolumeGraphics",
+  "PositionProperty",
+  "PositionPropertyArray",
+  "Property",
+  "PropertyArray",
+  "PropertyBag",
+  "RectangleGeometryUpdater",
+  "RectangleGraphics",
+  "ReferenceFrame",
+  "ReferenceProperty",
+  "SampledPositionProperty",
+  "SampledProperty",
+  "StripeMaterialProperty",
+  "StripeOrientation",
+  "TimeIntervalCollectionPositionProperty",
+  "TimeIntervalCollectionProperty",
+  "TrackingReferenceFrame",
+  "VelocityOrientationProperty",
+  "VelocityVectorProperty",
+  "Visualizer",
+  "WallGeometryUpdater",
+  "WallGraphics",
+  "exportKml",
+  "exportKmlModelCallback",
+  "exportKmlResultKml",
+  "exportKmlResultKmz",
   "ImageryProvider",
   "Terrain",
   "TerrainProvider",
@@ -354,6 +445,71 @@ test("rendering prose preserves sizing, ownership, clipping and verified shader 
     asyncOption("GroundPolylinePrimitive"),
     /必须先调用 initializeTerrainHeights/,
   );
+});
+
+test("entity data prose preserves evaluation, frames, events and reusable resources", () => {
+  assert.match(
+    lookup.get("CallbackProperty.Callback").description,
+    /返回属性值/,
+  );
+  assert.match(
+    lookup.get("Resource.RetryCallback").description,
+    /资源加载失败/,
+  );
+  assert.match(
+    lookup.get("Cesium3DTilesetGraphics#uri").description,
+    /3D Tiles 瓦片集/,
+  );
+  assert.match(lookup.get("ModelGraphics#uri").description, /glTF 资源/);
+  assert.match(
+    lookup.get("CompositeProperty#definitionChanged").description,
+    /区间集合改变.*Property.*定义改变/,
+  );
+  assert.match(
+    lookup.get("ConstantProperty#definitionChanged").description,
+    /setValue/,
+  );
+  assert.match(
+    lookup.get("TimeIntervalCollectionProperty#definitionChanged").description,
+    /时间区间集合改变/,
+  );
+  assert.match(
+    lookup.get("PropertyBag#getValue").params.find((p) => p.name === "result")
+      .description,
+    /不属于此 PropertyBag 的属性保持原样/,
+  );
+  assert.match(
+    lookup
+      .get("SampledPositionProperty#addSamplesPackedArray")
+      .params.find((p) => p.name === "epoch").description,
+    /历元的秒偏移/,
+  );
+  assert.match(
+    lookup.get("SampledPositionProperty#backwardExtrapolationDuration")
+      .description,
+    /0 表示无限外推/,
+  );
+  assert.match(lookup.get("EntityCluster#destroy").description, /可再次使用/);
+  assert.match(
+    lookup.get("GeometryUpdater#hasConstantFill").description,
+    /不随模拟时间变化/,
+  );
+  assert.doesNotMatch(
+    lookup.get("GeometryUpdater#classificationTypeProperty").description,
+    /设置/,
+  );
+  assert.match(
+    lookup
+      .get("EllipsoidGeometryUpdater#createFillGeometryInstance")
+      .params.find((p) => p.name === "skipModelMatrix").description,
+    /跳过/,
+  );
+  assert.match(
+    lookup.get("CzmlDataSource.PlanarOptions").description,
+    /单位为米.*X 向东.*拒绝地理位置/s,
+  );
+  assert.ok(lookup.get("LabelGraphics#text").description.includes("'\\n'"));
+  assert.match(lookup.get("exportKml").description, /并非一一对应/);
 });
 
 test("spatial units, ownership, boundary conditions and callback limits reach metadata", () => {

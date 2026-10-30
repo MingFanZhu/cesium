@@ -1,0 +1,3264 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": [
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:03c9cdeb68cd6f5d89696509c76197ff1251c521ce7611217dea746b52b087a5",
+      "text": "BillboardGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/alignedAxis/description",
+      "sourceHash": "sha256:332bb189d412a68f219d5acde4c3ff8b349af9ed37fdcc798cb92aecf033afef",
+      "text": "值为 {@link Cartesian3} 的 Property，指定作为旋转轴的单位向量。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:7c755ec2a7c3a9ca26c3dec2831394b19c00f64a44a49fbd0845a1612a591c76",
+      "text": "指定图像着色 {@link Color} 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/disableDepthTestDistance/description",
+      "sourceHash": "sha256:f3154f7addd1552bd94472a5e6c474012ea9faa6b6249afbc7d9c9e3c4b7ebff",
+      "text": "指定禁用深度测试的相机距离阈值的 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:b96b5637a75ec3a32e7290ac697aedd6feb747c7b5211862000e982ff957c7a8",
+      "text": "指定广告牌在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/eyeOffset/description",
+      "sourceHash": "sha256:48b89e7fd849b5a9a359d79f7881649acb0dd48b37a77fdb665094b96d6b2db5",
+      "text": "值为 {@link Cartesian3} 的 Property，指定眼坐标偏移。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/height/description",
+      "sourceHash": "sha256:7652685bb7c5d2447f1c3aca232b755219b08047b5689a5350a9d0fa910cae53",
+      "text": "指定广告牌高度的数值 Property，单位为像素，覆盖图像原始尺寸。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:ca289e1fefbfe09bf2a9923ffd99208e128d10dfa2f4d85594992c73cca6df59",
+      "text": "指定高度参考基准的 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/horizontalOrigin/description",
+      "sourceHash": "sha256:858c2f102eada3ac25ad6f6411dc2d3fb0180215cf35977b54c524ba4083174f",
+      "text": "指定 {@link HorizontalOrigin} 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/image/description",
+      "sourceHash": "sha256:cb400307313f760a72ada5a34d1c61f319b1155da6884f7011dbe09e6af8af5d",
+      "text": "指定广告牌所用 Image、URI 或 Canvas 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/imageSubRegion/description",
+      "sourceHash": "sha256:f55b1c5a360811f299ff2e2a4b39d4b878c3e7f9b9a2010d0e4f6d926836999f",
+      "text": "指定 {@link BoundingRectangle} 的 Property，用于选择图像子区域而非整张图像。以图像左下角为原点，单位为像素。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/pixelOffset/description",
+      "sourceHash": "sha256:a1b556e46bf0d3e6b38b2a05b73a54d10e0eea02fb55c904646c7448b63c703c",
+      "text": "值为 {@link Cartesian2} 的 Property，指定像素偏移。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/pixelOffsetScaleByDistance/description",
+      "sourceHash": "sha256:f33407ee0ed7f5cfb4e3bf3958262fc69bed1b0db7458f365158f05a11a997bf",
+      "text": "值为 {@link NearFarScalar} 的 Property，用于根据到相机的距离设置 pixelOffset。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/rotation/description",
+      "sourceHash": "sha256:048dd66b3d1c82d47536b1ca296b240fb379c9beb6d95aa6121c0be005ecb7d3",
+      "text": "指定绕 alignedAxis 旋转角度的数值 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/scale/description",
+      "sourceHash": "sha256:645984183939c5cc53ed3c3a57978b90fb008d14129d8753c9a3e6b896ff9ab1",
+      "text": "指定图像尺寸缩放值的数值 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/scaleByDistance/description",
+      "sourceHash": "sha256:f8dbbd8a0d1e187c0a14be9ff088497b0a5461cb869d9701053d6368ea5c6441",
+      "text": "值为 {@link NearFarScalar} 的 Property，用于根据到相机的距离缩放对象。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:bd5f809b43cb5e8ec25ead994cc31c7497cef9cead92a4b262dfb6316b06e04c",
+      "text": "指定广告牌可见性的布尔 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/sizeInMeters/description",
+      "sourceHash": "sha256:8ba9819b39a9169581b98f01dd7ea9a582be99d5f850de43d2443a06572e17af",
+      "text": "指定广告牌尺寸是否以米计量的布尔 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/splitDirection/description",
+      "sourceHash": "sha256:e554c93ac8dde0ddb548d29abf6b77eee4766e7f9452ad826177272a6985e9ed",
+      "text": "指定广告牌 {@link SplitDirection} 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/translucencyByDistance/description",
+      "sourceHash": "sha256:88f30817bc06c96114ee7841253b3565ff1510caa123f1bec702dcd5f77c96f5",
+      "text": "值为 {@link NearFarScalar} 的 Property，用于根据到相机的距离设置半透明值。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/verticalOrigin/description",
+      "sourceHash": "sha256:538295eca0f58a66b799eaf181a8f2b075dd37f752398af489dea451f7918afc",
+      "text": "指定 {@link VerticalOrigin} 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics.ConstructorOptions",
+      "field": "properties/width/description",
+      "sourceHash": "sha256:c950e31219cf2a821a040fec4518b512a78034d5eab8ec68700c3dba6470d40b",
+      "text": "指定广告牌宽度的数值 Property，单位为像素，覆盖图像原始尺寸。"
+    },
+    {
+      "id": "BillboardGraphics",
+      "field": "description",
+      "sourceHash": "sha256:ae1eb1bdd66b9e45ca3f1b3b8542438544f891195d50b24dd1bf7ddfc3fec8fa",
+      "text": "描述位于所属 {@link Entity} 位置处的二维图标。\n<p>\n<div align='center'>\n<img src='Images/Billboard.png' width='400' height='300' /><br />\n广告牌示例\n</div>\n</p>"
+    },
+    {
+      "id": "BillboardGraphics#alignedAxis",
+      "field": "description",
+      "sourceHash": "sha256:42fea6384a81f3fd3d1136641133925efa981cece5ff54086143a240b09a1660",
+      "text": "获取或设置值为 {@link Cartesian3} 的 Property，指定固定参考系中作为旋转轴的单位向量。设为 Cartesian3.ZERO 时，以屏幕上方向作为旋转基准。"
+    },
+    {
+      "id": "BillboardGraphics#color",
+      "field": "description",
+      "sourceHash": "sha256:1ce41be7977bd5e3f6632d4a31d5bce3881f06b4dbbae0d61831b67eb73f6cf9",
+      "text": "获取或设置指定 {@link Color} 的 Property，用于与 <code>image</code> 相乘。常见用途有两种：多个广告牌共用一张白色纹理，分别使用不同颜色得到彩色广告牌；或通过颜色的 alpha 分量实现半透明。alpha 为 <code>0.0</code> 时完全透明，为 <code>1.0</code> 时不透明。\r<p>\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><code>default</code><br/><img src='Images/Billboard.setColor.Alpha255.png' width='250' height='188' /></td>\r<td align='center'><code>alpha : 0.5</code><br/><img src='Images/Billboard.setColor.Alpha127.png' width='250' height='188' /></td>\r</tr></table>\r</div>\r</p>"
+    },
+    {
+      "id": "BillboardGraphics#disableDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:aa0b32cdff61ca417310b582153d07f621329cae49321b3a182985f71f7fe5cf",
+      "text": "获取或设置禁用深度测试的相机距离阈值，例如用于避免被地形裁剪。设为零时始终执行深度测试；设为 Number.POSITIVE_INFINITY 时始终不执行深度测试。"
+    },
+    {
+      "id": "BillboardGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:99b0389171437390de5f95fa5c5d16e2bfdfde825a7e5f25bcd4a92d370cca28",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定广告牌在距相机多远时显示。"
+    },
+    {
+      "id": "BillboardGraphics#eyeOffset",
+      "field": "description",
+      "sourceHash": "sha256:1774365b129d04620dcbdead6f769c4a261b4fc3617e7ad984a85e1406ea8443",
+      "text": "获取或设置值为 {@link Cartesian3} 的 Property，指定广告牌在眼坐标中的偏移。这里的眼坐标为左手坐标系，<code>x</code> 向观察者右侧，<code>y</code> 向上，<code>z</code> 指向屏幕内部。\n<p>\n眼坐标偏移常用于排列位于同一位置的多个广告牌或对象，例如将广告牌放在对应三维模型上方。\n</p>\n下图中广告牌位于地心，但通过眼坐标偏移，无论视角或地球朝向如何，它都出现在地球上方。\n<p>\n<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><img src='Images/Billboard.setEyeOffset.one.png' width='250' height='188' /></td>\r<td align='center'><img src='Images/Billboard.setEyeOffset.two.png' width='250' height='188' /></td>\r</tr></table>\r<code>b.eyeOffset = new Cartesian3(0.0, 8000000.0, 0.0);</code>\r</div>\r</p>"
+    },
+    {
+      "id": "BillboardGraphics#height",
+      "field": "description",
+      "sourceHash": "sha256:a24a35ae4d3d5c590ccaf90f1b7cf929fa260c5046b15fe4189c6162a16dd7b7",
+      "text": "获取或设置指定广告牌高度的数值 Property，单位为像素。为 undefined 时使用图像原始高度。"
+    },
+    {
+      "id": "BillboardGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics#horizontalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:fe15bec2596c1954c12879633cf43c7fea201529739f18ad6c5b1a15c5111f0c",
+      "text": "获取或设置指定 {@link HorizontalOrigin} 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics#image",
+      "field": "description",
+      "sourceHash": "sha256:9564694530b7ce2bd93ae098b626120d728c8be03d57f56451827bef31db55b3",
+      "text": "获取或设置指定广告牌所用 Image、URI 或 Canvas 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics#imageSubRegion",
+      "field": "description",
+      "sourceHash": "sha256:09885bb8882a58de2303bbe9d28488f2098355cbc4f83d9ee4f0f2da7529f875",
+      "text": "获取或设置指定 {@link BoundingRectangle} 的 Property，用于选择 <code>image</code> 的子区域而非整张图像。以图像左下角为原点，单位为像素。"
+    },
+    {
+      "id": "BillboardGraphics#pixelOffset",
+      "field": "description",
+      "sourceHash": "sha256:41d684ea83fa93fc7ad2b36206db56113c1d466e7d03ece52958ce82c977a544",
+      "text": "获取或设置值为 {@link Cartesian2} 的 Property，指定广告牌相对于原点的屏幕空间像素偏移。常用于排列位于同一位置的广告牌和标签，例如图像与文字。屏幕空间原点位于画布左上角；<code>x</code> 从左向右增加，<code>y</code> 从上向下增加。\r<p>\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><code>default</code><br/><img src='Images/Billboard.setPixelOffset.default.png' width='250' height='188' /></td>\r<td align='center'><code>b.pixeloffset = new Cartesian2(50, 25);</code><br/><img src='Images/Billboard.setPixelOffset.x50y-25.png' width='250' height='188' /></td>\r</tr></table>\r黄色点表示广告牌原点。\r</div>\r</p>"
+    },
+    {
+      "id": "BillboardGraphics#pixelOffsetScaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:c92f6f63cf2722147b10bea03ea5112d8ce6a3596c7803564172f5b630794a20",
+      "text": "获取或设置值为 {@link NearFarScalar} 的 Property，根据到相机的距离确定广告牌的像素偏移缩放。当相机距离处于指定范围内时，缩放值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，保持为最近端点值。"
+    },
+    {
+      "id": "BillboardGraphics#rotation",
+      "field": "description",
+      "sourceHash": "sha256:e73d8aa3d9f50042c31c65946570a6da99c807c2cbdf36e5705fda53521ca019",
+      "text": "获取或设置指定图像相对于 <code>alignedAxis</code> 逆时针旋转角度的数值 Property。"
+    },
+    {
+      "id": "BillboardGraphics#scale",
+      "field": "description",
+      "sourceHash": "sha256:0b61591b07c1ac70cf325677c32606961e263004fdb5b29f57d7e1ab2eb8419b",
+      "text": "获取或设置指定图像统一缩放值的数值 Property。大于 <code>1.0</code> 时放大广告牌，小于 <code>1.0</code> 时缩小。\r<p>\r<div align='center'>\r<img src='Images/Billboard.setScale.png' width='400' height='300' /><br/>\r上图从左到右的缩放值分别为 <code>0.5</code>、<code>1.0</code> 和 <code>2.0</code>。\r</div>\r</p>"
+    },
+    {
+      "id": "BillboardGraphics#scaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:88e9155d7509ab631e5278936a8ea638e55204adde2d633e5e47b365e349eabe",
+      "text": "获取或设置值为 {@link NearFarScalar} 的 Property，根据到相机的距离确定广告牌缩放。当相机距离处于指定范围内时，缩放值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，保持为最近端点值。"
+    },
+    {
+      "id": "BillboardGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:1d58d79f128aa7511f7a079cd9d6a98e2b6fe51a6b38a5b52f29908452e439ca",
+      "text": "获取或设置指定广告牌可见性的布尔 Property。"
+    },
+    {
+      "id": "BillboardGraphics#sizeInMeters",
+      "field": "description",
+      "sourceHash": "sha256:67bf7cd3fcb3cc68a1644fff7f79b3468f7fb9ee40d6ab8109bd2e34cc3875f3",
+      "text": "获取或设置指定广告牌尺寸是否以米计量的布尔 Property。"
+    },
+    {
+      "id": "BillboardGraphics#splitDirection",
+      "field": "description",
+      "sourceHash": "sha256:b0d086d1b73cb82baa4b69340c70efd930d59c53423aa4e5d2888f59c703438a",
+      "text": "获取或设置指定广告牌 {@link SplitDirection} 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics#translucencyByDistance",
+      "field": "description",
+      "sourceHash": "sha256:fdfe9bd0e37a58c184e011931e1fa4995daecccaccaefdb504ef60c2696eeab6",
+      "text": "获取或设置值为 {@link NearFarScalar} 的 Property，根据到相机的距离确定广告牌半透明值。当相机距离处于指定范围内时，半透明值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，保持为最近端点值。"
+    },
+    {
+      "id": "BillboardGraphics#verticalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:4f590550bde2dd6761635e97720d5cebdcd44b448ca3f448356fb58a5a985329",
+      "text": "获取或设置指定 {@link VerticalOrigin} 的 Property。"
+    },
+    {
+      "id": "BillboardGraphics#width",
+      "field": "description",
+      "sourceHash": "sha256:ff97b91f7ebfbaabded28402464bbe9d864a478c4703b244bd56ee16d3cc69e9",
+      "text": "获取或设置指定广告牌宽度的数值 Property，单位为像素。为 undefined 时使用图像原始宽度。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:2b01ca1d4f645604c503cf2bff0b4c00a8df74cd7c4a48dfecc87594255bf38a",
+      "text": "BoxGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/dimensions/description",
+      "sourceHash": "sha256:e1bf9799cd7e82787db819d543d8fc84eec3a277e52f9627b359051e10ee53fe",
+      "text": "值为 {@link Cartesian3} 的 Property，指定盒体长、宽和高。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:2024182b41efea3be1f9cbb732ff5eb494cb7abb8ef3c5c302740b9ef9310272",
+      "text": "指定盒体在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:057d276716c3b4a721305b10cac4e749a5533c845dc84d07b816b5ea409ffbb0",
+      "text": "指定是否使用所提供材质填充盒体的布尔 Property。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:c7b33863148a43aa1f335b6449a2d32203ad0fcf8bfcb93494074540e8843b52",
+      "text": "指定相对于实体位置的高度参考基准的 Property。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:12778448002df822a29783bba0087e44f50ff5efe9f5eacf623cb6ccc36b8a68",
+      "text": "指定盒体填充材质的 Property。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:d4619979233b22df80c27c8f769e0968e7af74877ca0b4da1dc4aebcf80f7300",
+      "text": "指定是否绘制盒体轮廓的布尔 Property。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:4142265eb7a60b0cf0317462fe87f3c04158fe0362e5b89cd5fe52af2b8e76d1",
+      "text": "指定盒体是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "BoxGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:7f7b98c9c50584fef55769e752eee54e852379aed2864037d226b8de5d3f453f",
+      "text": "指定盒体可见性的布尔 Property。"
+    },
+    {
+      "id": "BoxGraphics",
+      "field": "description",
+      "sourceHash": "sha256:d74b1ec6f47bd8b52f5223bb9bf42d4f19034bd9506a50997b990910212ae225",
+      "text": "描述盒体，其中心位置和朝向由所属 {@link Entity} 决定。"
+    },
+    {
+      "id": "BoxGraphics#dimensions",
+      "field": "description",
+      "sourceHash": "sha256:12b9906bdc820aa6db83bb8092ff8b730182adb42ca0a45bced6c5a8170fb703",
+      "text": "获取或设置值为 {@link Cartesian3} 的 Property，指定盒体长、宽和高。"
+    },
+    {
+      "id": "BoxGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:2b03ab5735df0055631527b0a52b6d095e782ad80303f38bd15b550bf8ed4ab1",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定盒体在距相机多远时显示。"
+    },
+    {
+      "id": "BoxGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:d9531480a00ae240eab755c7c6037c5fd5f50445e628fd082fe95bc48aa197e7",
+      "text": "获取或设置指定是否使用所提供材质填充盒体的布尔 Property。"
+    },
+    {
+      "id": "BoxGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "BoxGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:a7b9ada3f35ece6c744e3c483f4c2a2a116cf0d4012284b5cbffb973e1413e2e",
+      "text": "获取或设置盒体的填充材质。"
+    },
+    {
+      "id": "BoxGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:9fe3a6dc18207eb2c19b71c3216c057c502817e1469e878b3ce8b59a0ad041b0",
+      "text": "获取或设置指定是否绘制盒体轮廓的 Property。"
+    },
+    {
+      "id": "BoxGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "BoxGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "BoxGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:0963ceef6caa4c4b1984b6ed5f087056590fa35416edc9653b826690dac7f64a",
+      "text": "获取或设置枚举 Property，指定盒体是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "BoxGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:e5b910504b020637a0eeb2f7ac3fa2437f0a2d2f73973c60b8b49ac9cee341a5",
+      "text": "获取或设置指定盒体可见性的布尔 Property。"
+    },
+    {
+      "id": "Cesium3DTilesetGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:ebfadd70054166e1d403a6d148dbfb70c32775e8651c4cbd49b4d6c901c8dac1",
+      "text": "Cesium3DTilesetGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "Cesium3DTilesetGraphics.ConstructorOptions",
+      "field": "properties/maximumScreenSpaceError/description",
+      "sourceHash": "sha256:955ae732559380fcda9f25a316fb0bcc4da2ca56d30fe25910b684e830c7c73a",
+      "text": "用于驱动细节层级细化的最大屏幕空间误差，可以是数值或 Property。"
+    },
+    {
+      "id": "Cesium3DTilesetGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:a3ca8f930b5f5aa0c6823215e8a2c720395683b27b4549d4ba431fe043ad16b6",
+      "text": "指定瓦片集可见性的布尔 Property。"
+    },
+    {
+      "id": "Cesium3DTilesetGraphics.ConstructorOptions",
+      "field": "properties/uri/description",
+      "sourceHash": "sha256:a07373fef95b9c6215bca8edca8e7de8cdcd81c1b21ed89a43b5aad1716d2013",
+      "text": "指定瓦片集 URI 的字符串或 Resource Property。"
+    },
+    {
+      "id": "Cesium3DTilesetGraphics",
+      "field": "description",
+      "sourceHash": "sha256:fa39cf04408b49ce1352dbef31c049721c01f9758392c132ebdcdd05364f392f",
+      "text": "由 {@link Entity} 表示的 3D Tiles 瓦片集。其 modelMatrix 由所属 Entity 的位置和朝向决定；position 为 undefined 时不设置 modelMatrix。"
+    },
+    {
+      "id": "Cesium3DTilesetGraphics#maximumScreenSpaceError",
+      "field": "description",
+      "sourceHash": "sha256:3089fb3ff455d348e7c463140fcbbbaa207e0f3df340f034d053de36e99cb3f2",
+      "text": "获取或设置用于驱动细节层级细化的最大屏幕空间误差。"
+    },
+    {
+      "id": "Cesium3DTilesetGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:6ba4878e013054100d337812520740ac0eba46629026bf51b17362f6d3780666",
+      "text": "获取或设置指定瓦片集可见性的布尔 Property。"
+    },
+    {
+      "id": "Cesium3DTilesetGraphics#uri",
+      "field": "description",
+      "sourceHash": "sha256:b191dae36c2ebdfe70d8416bcc22e01dc7e517efb82bbe7e3b296fb4d87bf553",
+      "text": "获取或设置指定 3D Tiles 瓦片集 URI 的字符串 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:7e99e93da7c39a76797434cea331330542e40a1a5dbc0633e09b03e90c9384ac",
+      "text": "CorridorGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/classificationType/description",
+      "sourceHash": "sha256:c2ea168b35538ef16643327f031c675dd33f24e8c3dd1c7a7a7875024ea325e3",
+      "text": "指定走廊贴地时对地形、3D Tiles 或两者进行分类的枚举 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/cornerType/description",
+      "sourceHash": "sha256:69f6b1e6c0d9847a53491aced41cf98b6a717a554738bbbc72a46c44ef2e9140",
+      "text": "值为 {@link CornerType} 的 Property，指定转角样式。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:a21697766545a350ef9b07bf414e281fb296ee49c3d2ccf4ffa68b995f5f1fc9",
+      "text": "指定走廊在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/extrudedHeight/description",
+      "sourceHash": "sha256:a8c5f8ba10ca6ddc25dc05981e88dfcf7580974627edbe6d49b0a464305bc3b7",
+      "text": "指定走廊拉伸面相对于椭球表面高度的数值 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/extrudedHeightReference/description",
+      "sourceHash": "sha256:384c9e5a951839784e3bbf8e27c702525659d162b47333b24e668565078643e1",
+      "text": "指定 extrudedHeight 参考基准的 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:f54cc4d5fcf9ab6b3a36e457a89c1a9e05a304d05705aeaa90ba7acf030a0516",
+      "text": "指定是否使用所提供材质填充走廊的布尔 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/granularity/description",
+      "sourceHash": "sha256:1ec84a78dbf7c92381b80a05fc7bc7c71366f1cca560ed5c0035ebd63294e2b5",
+      "text": "指定经纬度采样间隔的数值 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/height/description",
+      "sourceHash": "sha256:7d7c837e3f01c6874601c792bed1bcd9380d562f1cf780d5a3f2a923cc04fc63",
+      "text": "指定走廊相对于椭球表面高度的数值 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:ca289e1fefbfe09bf2a9923ffd99208e128d10dfa2f4d85594992c73cca6df59",
+      "text": "指定高度参考基准的 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:92049d34e1af03b59e1571c1b2e5daab3d7c41d93f8709c1115c65aa9efa9387",
+      "text": "指定走廊填充材质的 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:b366fde7b2df31263b90d176bd43dbc004a5d54d8a7ab017468436b3deca2ee6",
+      "text": "指定是否绘制走廊轮廓的布尔 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/positions/description",
+      "sourceHash": "sha256:5935d04ba838a004ea33967b8b305e5e20b846044994262eb0f497589c267456",
+      "text": "指定 {@link Cartesian3} 位置数组的 Property，这些位置定义走廊中心线。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:0405dd61fd3ed0668cf6525db0a82d24ef62d7528e6a172da6d27dd3d2bda32a",
+      "text": "指定走廊是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:65a20c1989802fa2e6792f32249498eb854cc40c81144985f3bf2405ae8fb4e1",
+      "text": "指定走廊可见性的布尔 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/width/description",
+      "sourceHash": "sha256:2d42a0d0dbdbed0c7f907d3d55a0a17eb5ae3d5e8af977385a4c3592ff5826b1",
+      "text": "指定走廊两侧边缘间距的数值 Property。"
+    },
+    {
+      "id": "CorridorGraphics.ConstructorOptions",
+      "field": "properties/zIndex/description",
+      "sourceHash": "sha256:e0036acb40ae9d3e5a7959a3c0656b59a72eeab8a8f2ea3dad290b1673fcf100",
+      "text": "指定走廊排序 zIndex 的 Property。仅当 height 和 extrudedHeight 均为 undefined，且走廊为静态时生效。"
+    },
+    {
+      "id": "CorridorGraphics",
+      "field": "description",
+      "sourceHash": "sha256:168727f5d1e92ff9086e88f473de21afbba73ca7fd2f7b6abe729a9c7e1f622b",
+      "text": "描述走廊，即由中心线和宽度定义、贴合地球曲率的形状。可位于表面或一定高度处，也可选择拉伸成体积。"
+    },
+    {
+      "id": "CorridorGraphics#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:178a46e8686a488a75f68f317b7412a6dd430073e98097bb9fc3c105c83ed085",
+      "text": "获取或设置值为 {@link ClassificationType} 的 Property，指定走廊贴地时对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "CorridorGraphics#cornerType",
+      "field": "description",
+      "sourceHash": "sha256:d9626d8c69288e0e27d69b1127e58b29c51a8a53a5c18c4ad6df31233ac2d8fd",
+      "text": "获取或设置值为 {@link CornerType} 的 Property，指定转角样式。"
+    },
+    {
+      "id": "CorridorGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:ad512d9863b0c78329a1a6ba2be44dbb362b30f4176709fac903859f02c373db",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定走廊在距相机多远时显示。"
+    },
+    {
+      "id": "CorridorGraphics#extrudedHeight",
+      "field": "description",
+      "sourceHash": "sha256:c255fcad843663ff9c81a716e1efa7a869878663ae09988a01c8684f2216ed7e",
+      "text": "获取或设置指定走廊拉伸高度的数值 Property。设置后，将生成从 height 到此高度之间的走廊形体。"
+    },
+    {
+      "id": "CorridorGraphics#extrudedHeightReference",
+      "field": "description",
+      "sourceHash": "sha256:55b4a7fe71ef2b71328fd74273b68921bb199c07c1ef9ee36d7e13f2f50a511b",
+      "text": "获取或设置指定拉伸 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "CorridorGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:e3f171ab354b75454683027d82cb8371c9bcc52aaee08175e6e602d5537d4eda",
+      "text": "获取或设置指定是否使用所提供材质填充走廊的布尔 Property。"
+    },
+    {
+      "id": "CorridorGraphics#granularity",
+      "field": "description",
+      "sourceHash": "sha256:c1c14a2238770f777e108188bc0092a1ccc94efb184e92829aa34f41d5a28495",
+      "text": "获取或设置指定经纬度点之间采样间隔的数值 Property。"
+    },
+    {
+      "id": "CorridorGraphics#height",
+      "field": "description",
+      "sourceHash": "sha256:2f153e53c85b6ef3611a30104e40887caf48466abe5b529a82d7cffa9a24131f",
+      "text": "获取或设置指定走廊高度的数值 Property。"
+    },
+    {
+      "id": "CorridorGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "CorridorGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:a15a3400112111a75ba72ceb54f8a8b6989852997411ef76d3850a4c2ec77df5",
+      "text": "获取或设置指定走廊填充材质的 Property。"
+    },
+    {
+      "id": "CorridorGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:d89425b4e513d5e3ccace89b66b05e0a07b88f413adecf90d3f1a8966ff307dd",
+      "text": "获取或设置指定是否绘制走廊轮廓的 Property。"
+    },
+    {
+      "id": "CorridorGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "CorridorGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "CorridorGraphics#positions",
+      "field": "description",
+      "sourceHash": "sha256:9dabf5cd9120bcc822edb68daa0de422e536b30f4db7dba23dc39b675bf49bb3",
+      "text": "获取或设置指定 {@link Cartesian3} 位置数组的 Property，这些位置定义走廊中心线。"
+    },
+    {
+      "id": "CorridorGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:c976a64a37036b0678d3e37e3979026458d67be9da9b7f341958fc920376c8ad",
+      "text": "获取或设置枚举 Property，指定走廊是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "CorridorGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:47a3eb9fd7b809b034e69664b6c7519a8976fa391b87278857203f45a4e7af64",
+      "text": "获取或设置指定走廊可见性的布尔 Property。"
+    },
+    {
+      "id": "CorridorGraphics#width",
+      "field": "description",
+      "sourceHash": "sha256:119eac28c5143238b460f98df3ad8dd4453978def08bc49de3415a561f4a0f04",
+      "text": "获取或设置指定走廊两侧边缘间距的数值 Property。"
+    },
+    {
+      "id": "CorridorGraphics#zIndex",
+      "field": "description",
+      "sourceHash": "sha256:332b183573ff6c2c18adc797db228694c8b204f6ab886600dad50bd2ec1228ca",
+      "text": "获取或设置指定走廊排序的 zIndex Property。仅当走廊为静态，且未指定 height 和 extrudedHeight 时生效。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:0be528ff2080ce6639172161e330233736818c539ec5ec888e2f25c6a68494d2",
+      "text": "CylinderGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/bottomRadius/description",
+      "sourceHash": "sha256:1473366d0fc0139a3a128292c449653fbb8e39cefc008f8d172dda1834f6df3a",
+      "text": "指定圆柱体底面半径的数值 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:83484414a2005b6bfae7cc91579a58350cb19e1abccce1bc209e66bd867f9143",
+      "text": "指定圆柱体在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:c3b5488ef640fd9a81969b4b011547e75c69555666eb7dfdb37275919c7419c2",
+      "text": "指定是否使用所提供材质填充圆柱体的布尔 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:c7b33863148a43aa1f335b6449a2d32203ad0fcf8bfcb93494074540e8843b52",
+      "text": "指定相对于实体位置的高度参考基准的 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/length/description",
+      "sourceHash": "sha256:7b511669a4b2b14a6c02fa31eae2b188c05d085cfb053f7b24d9a839f46f89c9",
+      "text": "指定圆柱体长度的数值 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:aa3396ce79da86f00922bf83449f28fe81e1d9c4f0c67556c196dc2501259cd1",
+      "text": "指定圆柱体填充材质的 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/numberOfVerticalLines/description",
+      "sourceHash": "sha256:af175ad87e9600d98b4fa9f11e5154f9ff25c4c5c928b1cb8cb2e92e261d7499",
+      "text": "指定沿周边绘制多少条竖向轮廓线的数值 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:cf1c588738089f2e2e200e311ee303cca34fe2ef0a331120c84ddac6831337cc",
+      "text": "指定是否绘制圆柱体轮廓的布尔 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:78e32096fc51c1c762c2437e6014ebcc5739afe7f645ebb24023b1cf53975154",
+      "text": "指定圆柱体是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:189664f293a2c55f076cd3b220cf0e63052a11f6f95ac1016adf46ec54f8255b",
+      "text": "指定圆柱体可见性的布尔 Property。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/slices/description",
+      "sourceHash": "sha256:95ad204fa875343c5b81962a10a099c4327449a6bbce10e0ad8ab24cc6c8e7ed",
+      "text": "圆柱体周边的边数。"
+    },
+    {
+      "id": "CylinderGraphics.ConstructorOptions",
+      "field": "properties/topRadius/description",
+      "sourceHash": "sha256:efeb50ac242a7074b1400b20f1767dfad32e8c311bba09c63708b16e6772d5c6",
+      "text": "指定圆柱体顶面半径的数值 Property。"
+    },
+    {
+      "id": "CylinderGraphics",
+      "field": "description",
+      "sourceHash": "sha256:dc57066ccd94a1953a439f06f79b9c7e8c78cce12a146b22fda84a2e36e4da57",
+      "text": "描述由长度、顶面半径和底面半径定义的圆柱体、圆台或圆锥。中心位置和朝向由所属 {@link Entity} 决定。"
+    },
+    {
+      "id": "CylinderGraphics#bottomRadius",
+      "field": "description",
+      "sourceHash": "sha256:d2b4a4782aa07b583577b531f94d378e7fb754a298536c92ed1e3463a51cba0d",
+      "text": "获取或设置指定圆柱体底面半径的数值 Property。"
+    },
+    {
+      "id": "CylinderGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:bcfe73db9c942a97d9a31db282f7c8d2eaf9a85dc6f31dad855b471f1e85dae3",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定圆柱体在距相机多远时显示。"
+    },
+    {
+      "id": "CylinderGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:63f48fed911ceab1c703d0c28e664841822c2f12310cf04bd6e56527039506bf",
+      "text": "获取或设置指定是否使用所提供材质填充圆柱体的布尔 Property。"
+    },
+    {
+      "id": "CylinderGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "CylinderGraphics#length",
+      "field": "description",
+      "sourceHash": "sha256:89f147c7717f96b412396d17b034c7eb2a74e3e046b52c4b53290fb25fdcd6db",
+      "text": "获取或设置指定圆柱体长度的数值 Property。"
+    },
+    {
+      "id": "CylinderGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:f3685fefe9416e2def53ecbfc0326a3a8f075bba249881735b6e5a06ac062592",
+      "text": "获取或设置指定圆柱体填充材质的 Property。"
+    },
+    {
+      "id": "CylinderGraphics#numberOfVerticalLines",
+      "field": "description",
+      "sourceHash": "sha256:c7ebd192661f83dc44a8d16794cd8a97b6a89f089636cb801afd8d44eae5b079",
+      "text": "获取或设置指定沿周边绘制多少条竖向轮廓线的 Property。"
+    },
+    {
+      "id": "CylinderGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:dc515b64ec46f6a3d685e43738184dad980134fafbef3c738d156417fa2edfc7",
+      "text": "获取或设置指定是否绘制圆柱体轮廓的布尔 Property。"
+    },
+    {
+      "id": "CylinderGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "CylinderGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "CylinderGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:fb5cc6bf43d6c512e4572190437271c6836db224c637a03fad40df3df886d70a",
+      "text": "获取或设置枚举 Property，指定圆柱体是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "CylinderGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:3e27132e70a4409c077025043d2c86a234ac62f84e3b220670f3310a29b7ad96",
+      "text": "获取或设置指定圆柱体可见性的布尔 Property。"
+    },
+    {
+      "id": "CylinderGraphics#slices",
+      "field": "description",
+      "sourceHash": "sha256:c465fe76f080b3a76e671c297415d4dcd00446f7ee99cedea5d6275be26e7d24",
+      "text": "获取或设置指定圆柱体周边边数的 Property。"
+    },
+    {
+      "id": "CylinderGraphics#topRadius",
+      "field": "description",
+      "sourceHash": "sha256:d37f6a8f409fad64854a31d3236cd0091d1573c485f622c5a77e708ae792bcf5",
+      "text": "获取或设置指定圆柱体顶面半径的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:86f20b6f954accaf64fc3da21dccdee8acf7fa3e5400fd222aabe48cf0af5549",
+      "text": "EllipseGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/classificationType/description",
+      "sourceHash": "sha256:112f33248222ef512dd9e9afdfd19c49dcaf53f9c13b5a131964dce7db246f2e",
+      "text": "指定椭圆贴地时对地形、3D Tiles 或两者进行分类的枚举 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:e098edf77b2815626fa991022fafe8df1f8fa77539195d9ba64506ecd83d9332",
+      "text": "指定椭圆在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/extrudedHeight/description",
+      "sourceHash": "sha256:9b72e72bd237825084afaa4d68b86f3872bdfce52f940887b44606bb6ff5703b",
+      "text": "指定椭圆拉伸面相对于椭球表面高度的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/extrudedHeightReference/description",
+      "sourceHash": "sha256:384c9e5a951839784e3bbf8e27c702525659d162b47333b24e668565078643e1",
+      "text": "指定 extrudedHeight 参考基准的 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:b4430084286bed125e8fc8225e5d8c00556060d3dbb5949e890ad3e302a5d11c",
+      "text": "指定是否使用所提供材质填充椭圆的布尔 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/granularity/description",
+      "sourceHash": "sha256:eaf2e81fd8234902fcec6fb482039c8eba87b506ea5319e27e5778ea57db0886",
+      "text": "指定椭圆上相邻采样点角度间隔的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/height/description",
+      "sourceHash": "sha256:9cd44f6e109b1f0614ce7ad7a38528ae4f0e67b2a4fa304b4c7b7c57b856e643",
+      "text": "指定椭圆相对于椭球表面高度的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:ca289e1fefbfe09bf2a9923ffd99208e128d10dfa2f4d85594992c73cca6df59",
+      "text": "指定高度参考基准的 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:3c438aa409e0483bbf40a678bdbdbe5e3b846a0e2096546afc01ce5cc116ec38",
+      "text": "指定椭圆填充材质的 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/numberOfVerticalLines/description",
+      "sourceHash": "sha256:af175ad87e9600d98b4fa9f11e5154f9ff25c4c5c928b1cb8cb2e92e261d7499",
+      "text": "指定沿周边绘制多少条竖向轮廓线的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:b76b6d95698200f49a818d197e59625717d0eda8f5a70c2ddebf3ad2651c8b52",
+      "text": "指定是否绘制椭圆轮廓的布尔 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/rotation/description",
+      "sourceHash": "sha256:097033305757b2cc2dac1a55c47f791d10de1f25bddf9e9ed090e8137c4e8da5",
+      "text": "指定椭圆从北方向逆时针旋转角度的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/semiMajorAxis/description",
+      "sourceHash": "sha256:2a21629b343b13a4fcf1ca0c5d9b8541d1afcbf0240c5358c8a4d34aaedbbbc6",
+      "text": "指定半长轴的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/semiMinorAxis/description",
+      "sourceHash": "sha256:4844a90958372300f5dc24a97297512a8ad48637c85a94c3c4eb452277024fda",
+      "text": "指定半短轴的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:ad4e653bcb53224095e2666e9afe13635dbda7d36c88f67839605134ecf8efe5",
+      "text": "指定椭圆是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:8f86bd977624345732d6741624611edc267912a0bb27d65bbcbe9d5c98c46a70",
+      "text": "指定椭圆可见性的布尔 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/stRotation/description",
+      "sourceHash": "sha256:3ad427a1a99b2366ca372955b672e92cd8461f4829f9a4d6a63ae31742ff57c0",
+      "text": "指定椭圆纹理从北方向逆时针旋转角度的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics.ConstructorOptions",
+      "field": "properties/zIndex/description",
+      "sourceHash": "sha256:396a72988c1971d8448a394cd12ffd42f5008b3e6d7d2d39ac79d42a373e927a",
+      "text": "指定椭圆 zIndex 的 Property，用于贴地几何排序。仅当椭圆为常量，且未指定 height 和 extrudedHeight 时生效。"
+    },
+    {
+      "id": "EllipseGraphics",
+      "field": "description",
+      "sourceHash": "sha256:33cda87bbed6508d5dd5cd3efee2a181274eb141b09e703525922b4920a3dfed",
+      "text": "描述由中心点、半长轴和半短轴定义的椭圆。椭圆贴合地球曲率，可位于表面或一定高度处，也可选择拉伸成体积。中心点由所属 {@link Entity} 决定。"
+    },
+    {
+      "id": "EllipseGraphics#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:f0efb5769bb90183c27a4ba58fdbc117d0dd6df18417e5597dd9e5aa02f3e377",
+      "text": "获取或设置值为 {@link ClassificationType} 的 Property，指定椭圆贴地时对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "EllipseGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:495b8de23f7a2508fd9d317a8710b31b1ee460b7c41e1245c785e5fc371bb216",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定椭圆在距相机多远时显示。"
+    },
+    {
+      "id": "EllipseGraphics#extrudedHeight",
+      "field": "description",
+      "sourceHash": "sha256:4c6a9f9ce7dcd1dc75c6ceadc0e8f7e27dbf43d211dc03cc21c79054c771a413",
+      "text": "获取或设置指定椭圆拉伸高度的数值 Property。设置后，将生成从 height 到此高度之间的形体。"
+    },
+    {
+      "id": "EllipseGraphics#extrudedHeightReference",
+      "field": "description",
+      "sourceHash": "sha256:55b4a7fe71ef2b71328fd74273b68921bb199c07c1ef9ee36d7e13f2f50a511b",
+      "text": "获取或设置指定拉伸 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "EllipseGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:c86cae7ddebc78b102b4ca65adec1b53b651ce9ed5fc28c02ca0cbb2a84146ef",
+      "text": "获取或设置指定是否使用所提供材质填充椭圆的布尔 Property。"
+    },
+    {
+      "id": "EllipseGraphics#granularity",
+      "field": "description",
+      "sourceHash": "sha256:370b01770a6ea1895a0294a023987925eeb4e3341fb3cc0a31052b02ad65eefc",
+      "text": "获取或设置指定椭圆上相邻采样点角度间隔的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics#height",
+      "field": "description",
+      "sourceHash": "sha256:a98c8bbce0d3416fae471ab38003e0ea2345e4eddd364ed851adfa74a60dae3c",
+      "text": "获取或设置指定椭圆高度的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "EllipseGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:a0b688df47e8c3dab6b590b287e2ecd59f7bf75aa6ace81b4bfcbfceabe2287a",
+      "text": "获取或设置指定椭圆填充材质的 Property。"
+    },
+    {
+      "id": "EllipseGraphics#numberOfVerticalLines",
+      "field": "description",
+      "sourceHash": "sha256:c9051310a8c32238ba4a55fc6cfce14078ca1907f8b1dfe32f338a1b820dacf5",
+      "text": "获取或设置指定沿周边绘制多少条竖向轮廓线的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:2832bb0cca33b89ff2bca0dbdca7fda097978cfc1c4cf29d655c88b5d875cd5b",
+      "text": "获取或设置指定是否绘制椭圆轮廓的 Property。"
+    },
+    {
+      "id": "EllipseGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "EllipseGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "EllipseGraphics#rotation",
+      "field": "description",
+      "sourceHash": "sha256:d4409ded9c90857dd58f9b3e12f8d9188ba383d69a748888494e954a3070f2d5",
+      "text": "获取或设置指定椭圆从北方向逆时针旋转角度的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics#semiMajorAxis",
+      "field": "description",
+      "sourceHash": "sha256:74614c384d71724d95782bb7d5533ccc5a0075ee9a5db28f2ce97dcb85d02237",
+      "text": "获取或设置指定半长轴的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics#semiMinorAxis",
+      "field": "description",
+      "sourceHash": "sha256:40da3aa4063d90cfb170c6f718aa5e4f48978419b47f98c12c104d33e945c10c",
+      "text": "获取或设置指定半短轴的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:608b08e3e4a177a4efa1f573f6495262f78f8d37fe0e6fa6efe67523aaa4d5a9",
+      "text": "获取或设置枚举 Property，指定椭圆是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "EllipseGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:5f65f4e70e89683c84bc479a4d96d9d05edbf0bebc657208eb1cbb66088d2974",
+      "text": "获取或设置指定椭圆可见性的布尔 Property。"
+    },
+    {
+      "id": "EllipseGraphics#stRotation",
+      "field": "description",
+      "sourceHash": "sha256:9b44937411031b965dfe3cbcaa2ea946c4abcf5bf2f8c355b612de2f8e78fa74",
+      "text": "获取或设置指定椭圆纹理从北方向逆时针旋转角度的数值 Property。"
+    },
+    {
+      "id": "EllipseGraphics#zIndex",
+      "field": "description",
+      "sourceHash": "sha256:47fcabaf6f6c44126660ac9903d421f298dc7d1629a911608600589f3b872c0c",
+      "text": "获取或设置指定椭圆排序的 zIndex Property。仅当椭圆为常量，且未指定 height 和 extrudedHeight 时生效。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:a5c8656bed5704bcd4bf438d7231473e60c35403b544a662f5977bd226837e55",
+      "text": "EllipsoidGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:544d78cdd5bc1db18b240820b37f9cf25885710b138a70e34b13323e40aee167",
+      "text": "指定椭球在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:2c4715b6f3f945bae508b7824f453597cdb99c96f33d602f74b37d47c3dab86e",
+      "text": "指定是否使用所提供材质填充椭球的布尔 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:c7b33863148a43aa1f335b6449a2d32203ad0fcf8bfcb93494074540e8843b52",
+      "text": "指定相对于实体位置的高度参考基准的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/innerRadii/description",
+      "sourceHash": "sha256:9265b65bfa5b79a5ec6803973838aa7409b6c604c1246f216217886eee8101b8",
+      "text": "值为 {@link Cartesian3} 的 Property，指定椭球内半径。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:ae3fe3d0380f737b45cde36e2987b14b6c2104fe6287286d77bd7f84916722ee",
+      "text": "指定椭球填充材质的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/maximumClock/description",
+      "sourceHash": "sha256:3a68e1a3fb396a939ca81e2f19946ff4309fe893c5b6ce9562c9f7e5a4f14c33",
+      "text": "指定椭球最大方位角（clock）的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/maximumCone/description",
+      "sourceHash": "sha256:e847f8ca654aa967054c0b26d069ca31860c2f3583f91d95b8362af7a64fb882",
+      "text": "指定椭球最大锥角（cone）的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/minimumClock/description",
+      "sourceHash": "sha256:6f5318beb2943277123b83f985847806989468bd9d35eb5674d59db6142e99a3",
+      "text": "指定椭球最小方位角（clock）的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/minimumCone/description",
+      "sourceHash": "sha256:dc69a0e653bbb35bcddc440b8ea66b4e8ff082c00ff16b499ce6deccc0566667",
+      "text": "指定椭球最小锥角（cone）的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:1c5bd014b92b0f0a08b89514165b19e40a49fc068e40e718d6000d8eb22e9e8e",
+      "text": "指定是否绘制椭球轮廓的布尔 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/radii/description",
+      "sourceHash": "sha256:49653deddfd89e42cc78dd4e4b92c4e20d92605d98a30df74c1104fe641e9884",
+      "text": "值为 {@link Cartesian3} 的 Property，指定椭球各轴半径。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:6ce40ebc39ab0b4842da6838e4d57b1d2e83e18d2bb2caaa14078dcaf6faaa5a",
+      "text": "指定椭球是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:6d57b2d610b49aeaf2e3b770f3d912b4c4a3107d56e421bfd0b673eb7d506297",
+      "text": "指定椭球可见性的布尔 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/slicePartitions/description",
+      "sourceHash": "sha256:1228995967e370bee696ef4ece7daea86f7f5ec5db5c58d8b45711b4373bb9d7",
+      "text": "指定径向切分数量的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/stackPartitions/description",
+      "sourceHash": "sha256:6fef3ca04596ebe0cfbd69167d2ba745d1b6a496d3776e66bb69a6dc0737953f",
+      "text": "指定纬向分层数量的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics.ConstructorOptions",
+      "field": "properties/subdivisions/description",
+      "sourceHash": "sha256:2dd10c402f0fa363a619ef4b4b8ca1c7bb4a2bfed21b4291816dfa824f172bdb",
+      "text": "指定每个轮廓环采样数量的 Property，用于确定曲线细分程度。"
+    },
+    {
+      "id": "EllipsoidGraphics",
+      "field": "description",
+      "sourceHash": "sha256:171f074376d8968fb5ef2fcde1fd8c1ca76ebe84eddb37e2f55b6905fb0049c3",
+      "text": "描述椭球或球体，其中心位置和朝向由所属 {@link Entity} 决定。"
+    },
+    {
+      "id": "EllipsoidGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:c09e4c1b4a4b20551cd9d59fda6c2f9163b4c1a1e2859fc52b8e3006090b2389",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定椭球在距相机多远时显示。"
+    },
+    {
+      "id": "EllipsoidGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:d07617c2912ae6baeb3f2fd730ebb824da570dc2cb5db61bdc0a8fa8ad1404a6",
+      "text": "获取或设置指定是否使用所提供材质填充椭球的布尔 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#innerRadii",
+      "field": "description",
+      "sourceHash": "sha256:d272db7af325019d5c231e7000d5ee0334b2e9138786953c8619c61d6a034e7b",
+      "text": "获取或设置值为 {@link Cartesian3} 的 {@link Property}，指定椭球内半径。"
+    },
+    {
+      "id": "EllipsoidGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:9901037e23aff41c17d266aab1f69ce03554ba423b1623c9a6777a29e034ff53",
+      "text": "获取或设置指定椭球填充材质的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#maximumClock",
+      "field": "description",
+      "sourceHash": "sha256:fba91ccae0e054387cfee2eea2feb469a530cd1b0049f76e4571fc00e4000c3e",
+      "text": "获取或设置指定椭球最大方位角（clock）的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#maximumCone",
+      "field": "description",
+      "sourceHash": "sha256:e3a800aed149c98a2ffcb55bcf651d42f5dc8d65856cf8b99d393dc29808782e",
+      "text": "获取或设置指定椭球最大锥角（cone）的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#minimumClock",
+      "field": "description",
+      "sourceHash": "sha256:34e6dc5d999372ffc7bdc1e3cd61ca9be811837c390c1958e0fe20bf7f6061b6",
+      "text": "获取或设置指定椭球最小方位角（clock）的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#minimumCone",
+      "field": "description",
+      "sourceHash": "sha256:4f1a7ed00c59bcf0628eb92db193dbe05e7ab74b896b0e747a747cdfce72a3c1",
+      "text": "获取或设置指定椭球最小锥角（cone）的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:0405a44543bded0c0c2e1db0929285e8f40b4813dad9ae4166fc569f8a32138f",
+      "text": "获取或设置指定是否绘制椭球轮廓的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "EllipsoidGraphics#radii",
+      "field": "description",
+      "sourceHash": "sha256:f7253b3d3edad7489ad9638fbd4710100c418fd309a29177600c6ac95d91b7fe",
+      "text": "获取或设置值为 {@link Cartesian3} 的 {@link Property}，指定椭球各轴半径。"
+    },
+    {
+      "id": "EllipsoidGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:bd4ad97228e5ca19a89d1bcf984782cea94b8ed76388533aef85deedddf191dc",
+      "text": "获取或设置枚举 Property，指定椭球是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "EllipsoidGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:783dd818745c0ea5075c3f16256306a2edb0f90216144050801fc25e8cef8e6b",
+      "text": "获取或设置指定椭球可见性的布尔 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#slicePartitions",
+      "field": "description",
+      "sourceHash": "sha256:52aa725f2a619b6e9cf165e1939fd51c16a1745623294d24ae4b6863761c7b1a",
+      "text": "获取或设置指定每 360 度径向切分数量的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#stackPartitions",
+      "field": "description",
+      "sourceHash": "sha256:cb9b37ae9eddbe3f061f0435a180c9cc0dd98ef4eb1bbec320221d4fbae01e25",
+      "text": "获取或设置指定纬向分层数量的 Property。"
+    },
+    {
+      "id": "EllipsoidGraphics#subdivisions",
+      "field": "description",
+      "sourceHash": "sha256:16df233c9e9ddf1faefdac0cfd84bd340a803409086953e6d5b7d502237a5d6f",
+      "text": "获取或设置指定每个轮廓环采样数量的 Property，用于确定曲线细分程度。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:5fd9707a0a6510af345455d7584ae358250f0545b18cded018f384b18787c63e",
+      "text": "LabelGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/backgroundColor/description",
+      "sourceHash": "sha256:a049b4447086112c95aaf29106c6a51ee864c80688d2a2c3b5126b7ea7800fc2",
+      "text": "指定背景 {@link Color} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/backgroundPadding/description",
+      "sourceHash": "sha256:bde61b5cd26f11369cbc47a5f9b8ea16760a017a09bbdd0eb69c1fdb7ca6db16",
+      "text": "值为 {@link Cartesian2} 的 Property，指定背景水平和垂直内边距，单位为像素。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/disableDepthTestDistance/description",
+      "sourceHash": "sha256:f3154f7addd1552bd94472a5e6c474012ea9faa6b6249afbc7d9c9e3c4b7ebff",
+      "text": "指定禁用深度测试的相机距离阈值的 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:e382b3851f081e0682b46191def8d244bc1e79ce05160bf483ff2e079dad9f18",
+      "text": "指定标签在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/eyeOffset/description",
+      "sourceHash": "sha256:48b89e7fd849b5a9a359d79f7881649acb0dd48b37a77fdb665094b96d6b2db5",
+      "text": "值为 {@link Cartesian3} 的 Property，指定眼坐标偏移。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/fillColor/description",
+      "sourceHash": "sha256:7bffad07ecce1c59fd99cd801aae08d8f5271282847222e09521d8bb6d68cb7d",
+      "text": "指定填充 {@link Color} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/font/description",
+      "sourceHash": "sha256:7410192eb077b05fc664f04263b67a6d4eb818df7faf03dd21eb237a4271966e",
+      "text": "指定 CSS 字体的 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:ca289e1fefbfe09bf2a9923ffd99208e128d10dfa2f4d85594992c73cca6df59",
+      "text": "指定高度参考基准的 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/horizontalOrigin/description",
+      "sourceHash": "sha256:858c2f102eada3ac25ad6f6411dc2d3fb0180215cf35977b54c524ba4083174f",
+      "text": "指定 {@link HorizontalOrigin} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:8d036b4bfacc5631ab11e6e0951d0522be9e3ec28252d3b16f38549906035e53",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:344afc0cc40265ff6ce3f3bcf48df71946146722618f953ec8982d640ed82504",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/pixelOffset/description",
+      "sourceHash": "sha256:a1b556e46bf0d3e6b38b2a05b73a54d10e0eea02fb55c904646c7448b63c703c",
+      "text": "值为 {@link Cartesian2} 的 Property，指定像素偏移。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/pixelOffsetScaleByDistance/description",
+      "sourceHash": "sha256:f33407ee0ed7f5cfb4e3bf3958262fc69bed1b0db7458f365158f05a11a997bf",
+      "text": "值为 {@link NearFarScalar} 的 Property，用于根据到相机的距离设置 pixelOffset。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/scale/description",
+      "sourceHash": "sha256:036c8fedec32cd75a284784dd892893cbcafcdb2a823ae8a86c9ebc54d5f4cbf",
+      "text": "指定文字缩放值的数值 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/scaleByDistance/description",
+      "sourceHash": "sha256:ac45cce211357a6a6e8eaa92e228992a97668a4d4c4246fa9fa1e14c77c53fc3",
+      "text": "值为 {@link NearFarScalar} 的 Property，用于根据到相机的距离设置缩放值。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:c773a3f729238e3fb836cda87f7d3fa5b1e123c5235ef58a239a0134136e2032",
+      "text": "指定标签可见性的布尔 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/showBackground/description",
+      "sourceHash": "sha256:371f20f19af78e816eaa7221f64e4144bc79d755ca1247668b5bf991419b7e97",
+      "text": "指定标签后方背景可见性的布尔 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/style/description",
+      "sourceHash": "sha256:33b19232e67898288b44f95898957d3e21307941a2c99b8fddad40713810a886",
+      "text": "指定 {@link LabelStyle} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/text/description",
+      "sourceHash": "sha256:3b02018fa9185b486e6e31548720eb7251c2208e81ccd6afbe6b8d9f67a70292",
+      "text": "指定文字的 Property，支持显式换行符 '\\n'。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/translucencyByDistance/description",
+      "sourceHash": "sha256:88f30817bc06c96114ee7841253b3565ff1510caa123f1bec702dcd5f77c96f5",
+      "text": "值为 {@link NearFarScalar} 的 Property，用于根据到相机的距离设置半透明值。"
+    },
+    {
+      "id": "LabelGraphics.ConstructorOptions",
+      "field": "properties/verticalOrigin/description",
+      "sourceHash": "sha256:538295eca0f58a66b799eaf181a8f2b075dd37f752398af489dea451f7918afc",
+      "text": "指定 {@link VerticalOrigin} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics",
+      "field": "description",
+      "sourceHash": "sha256:e37c2969c16973cd9ac6b0ab521cf55016e940b9c065fde239091b0b7c85289a",
+      "text": "描述位于所属 {@link Entity} 位置处的二维标签。\n<p>\n<div align='center'>\n<img src='Images/Label.png' width='400' height='300' /><br />\n标签示例\n</div>\n</p>"
+    },
+    {
+      "id": "LabelGraphics#backgroundColor",
+      "field": "description",
+      "sourceHash": "sha256:5dde56e2d21778a67c8c3c4707c575cd4430c7301e2ead6fa4ed900b6846ccc2",
+      "text": "获取或设置指定背景 {@link Color} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics#backgroundPadding",
+      "field": "description",
+      "sourceHash": "sha256:2bd6dbfc70df8b848a910918b825a5f2b9808c8cb140e1cf44221147c8703cad",
+      "text": "获取或设置值为 {@link Cartesian2} 的 Property，指定标签背景的水平和垂直内边距，单位为像素。"
+    },
+    {
+      "id": "LabelGraphics#disableDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:aa0b32cdff61ca417310b582153d07f621329cae49321b3a182985f71f7fe5cf",
+      "text": "获取或设置禁用深度测试的相机距离阈值，例如用于避免被地形裁剪。设为零时始终执行深度测试；设为 Number.POSITIVE_INFINITY 时始终不执行深度测试。"
+    },
+    {
+      "id": "LabelGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:cbb92b957206a2cebbe596811eec92725e108354c096838958005c41ddc1fb69",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定标签在距相机多远时显示。"
+    },
+    {
+      "id": "LabelGraphics#eyeOffset",
+      "field": "description",
+      "sourceHash": "sha256:97fa90c63a77e077f67ee7fc1b1629f443081820fe430317212c573ee9ce8e83",
+      "text": "获取或设置值为 {@link Cartesian3} 的 Property，指定标签在眼坐标中的偏移。这里的眼坐标为左手坐标系，<code>x</code> 向观察者右侧，<code>y</code> 向上，<code>z</code> 指向屏幕内部。\n<p>\n眼坐标偏移常用于排列位于同一位置的多个标签或对象，例如将标签放在对应三维模型上方。\n</p>\n下图中标签位于地心，但通过眼坐标偏移，无论视角或地球朝向如何，它都出现在地球上方。\n<p>\n<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><img src='Images/Billboard.setEyeOffset.one.png' width='250' height='188' /></td>\r<td align='center'><img src='Images/Billboard.setEyeOffset.two.png' width='250' height='188' /></td>\r</tr></table>\r<code>l.eyeOffset = new Cartesian3(0.0, 8000000.0, 0.0);</code><br /><br />\r</div>\r</p>"
+    },
+    {
+      "id": "LabelGraphics#fillColor",
+      "field": "description",
+      "sourceHash": "sha256:6c9ed9197c5e1f107a9cb68ae6d05e38d7faa4e063a2a63e63da73cfb04e411e",
+      "text": "获取或设置指定填充 {@link Color} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics#font",
+      "field": "description",
+      "sourceHash": "sha256:b6533c0ce3fffc75f366200534015dbcc901cd229b11191a5803ed1cf8660ece",
+      "text": "获取或设置采用 CSS 语法指定字体的字符串 Property。"
+    },
+    {
+      "id": "LabelGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics#horizontalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:fe15bec2596c1954c12879633cf43c7fea201529739f18ad6c5b1a15c5111f0c",
+      "text": "获取或设置指定 {@link HorizontalOrigin} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:ffd83c518c437f113278caf407e81b38c32cd2fbc05fb7972842796dc95721a4",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:cd0edd1f00e487f6ebc3fbe133646577b74f81b70d0249fb0a8cce670066e5d5",
+      "text": "获取或设置指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "LabelGraphics#pixelOffset",
+      "field": "description",
+      "sourceHash": "sha256:0a85c088050442baca65adb4bbcd88fbffe6fea8b135f0c7c17e462708768176",
+      "text": "获取或设置值为 {@link Cartesian2} 的 Property，指定标签相对于原点的屏幕空间像素偏移。常用于排列位于同一位置的多个标签与广告牌，例如图像与文字。屏幕空间原点位于画布左上角；<code>x</code> 从左向右增加，<code>y</code> 从上向下增加。\r<p>\r<div align='center'>\r<table border='0' cellpadding='5'><tr>\r<td align='center'><code>default</code><br/><img src='Images/Label.setPixelOffset.default.png' width='250' height='188' /></td>\r<td align='center'><code>l.pixeloffset = new Cartesian2(25, 75);</code><br/><img src='Images/Label.setPixelOffset.x50y-25.png' width='250' height='188' /></td>\r</tr></table>\r黄色点表示标签原点。\r</div>\r</p>"
+    },
+    {
+      "id": "LabelGraphics#pixelOffsetScaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:d335c1387f095f36fb43da2716bc55db4abe1c6fd3eb91b4035bce01d2c4e153",
+      "text": "获取或设置值为 {@link NearFarScalar} 的 Property，根据到相机的距离确定标签的像素偏移缩放。当相机距离处于指定范围内时，缩放值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，保持为最近端点值。"
+    },
+    {
+      "id": "LabelGraphics#scale",
+      "field": "description",
+      "sourceHash": "sha256:38428d344193d249c00a0c5a5f6583fcb0f5e7071db30037ce6fdf54e7f8b7d6",
+      "text": "获取或设置指定标签统一缩放值的数值 Property。大于 <code>1.0</code> 时放大标签，小于 <code>1.0</code> 时缩小。\r<p>\r<div align='center'>\r<img src='Images/Label.setScale.png' width='400' height='300' /><br/>\r上图从左到右的缩放值分别为 <code>0.5</code>、<code>1.0</code> 和 <code>2.0</code>。\r</div>\r</p>"
+    },
+    {
+      "id": "LabelGraphics#scaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:ac38840c229c040a39587858068a6832e8e58b6146c983865b2eb2a2310ae272",
+      "text": "获取或设置根据标签到相机距离变化的近远距离缩放属性。当相机距离处于指定范围内时，缩放值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，缩放值保持为最近端点值。为 undefined 时禁用 scaleByDistance。"
+    },
+    {
+      "id": "LabelGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:ca1e8b7902128bf5dbc4b0bdb784786963a6aa87be68bb5dfa85d41140008ad1",
+      "text": "获取或设置指定标签可见性的布尔 Property。"
+    },
+    {
+      "id": "LabelGraphics#showBackground",
+      "field": "description",
+      "sourceHash": "sha256:122ec462b6e75c3a14cda7ce53ffbc5ff69e852874bd06d93de09bb11777c597",
+      "text": "获取或设置指定标签后方背景可见性的布尔 Property。"
+    },
+    {
+      "id": "LabelGraphics#style",
+      "field": "description",
+      "sourceHash": "sha256:a6dc4800c1e593ef7d57a5bbc045498cf4106fab2d13d086884a30687282a2a2",
+      "text": "获取或设置指定 {@link LabelStyle} 的 Property。"
+    },
+    {
+      "id": "LabelGraphics#text",
+      "field": "description",
+      "sourceHash": "sha256:093b10e546dcb4912c717d7586d39dadd496f2636319eb986b15bbca97d760f7",
+      "text": "获取或设置指定标签文字的字符串 Property，支持显式换行符 '\\n'。"
+    },
+    {
+      "id": "LabelGraphics#translucencyByDistance",
+      "field": "description",
+      "sourceHash": "sha256:a939e07b972175564eaaaae13c17a37a222c2ada18fd6825c560cfda2829572a",
+      "text": "获取或设置值为 {@link NearFarScalar} 的 Property，根据到相机的距离确定标签半透明值。当相机距离处于指定范围内时，半透明值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，保持为最近端点值。"
+    },
+    {
+      "id": "LabelGraphics#verticalOrigin",
+      "field": "description",
+      "sourceHash": "sha256:4f590550bde2dd6761635e97720d5cebdcd44b448ca3f448356fb58a5a985329",
+      "text": "获取或设置指定 {@link VerticalOrigin} 的 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:af1cabf0e982b7760b3eb9164b9d97cb7825a39e8165c527179b9f699e8857a2",
+      "text": "ModelGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/articulations/description",
+      "sourceHash": "sha256:dc653d4d3f73315143792cc9cc55dd8fee3655b20cd12d169e2edd68a177a66b",
+      "text": "一个对象，键由关节名称、一个空格及阶段名称组成，值为数值属性。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/clampAnimations/description",
+      "sourceHash": "sha256:9df70d0c1f34388a31ebd50e24bdb4062eb3f64d3190c982c4e5a2e433688f6c",
+      "text": "指定 glTF 动画在没有关键帧的时间段内是否保持最后姿态的布尔 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/clippingPlanes/description",
+      "sourceHash": "sha256:f6a2ab3b1aa6f14ef676af4bc9fc759278495447d4b113057a774f8b4f1e4a8f",
+      "text": "指定 {@link ClippingPlaneCollection} 的 Property，用于选择性禁用模型部分区域的渲染。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:b62c1babee8a0b4ed926e51702c00b700d0e279228a71596b1a2ff3bc2d11667",
+      "text": "指定与模型渲染颜色混合的 {@link Color} 的 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/colorBlendAmount/description",
+      "sourceHash": "sha256:83a88be56eeda1b0c424a269928b31a5d05ce28d4bc5082bca9f565874b84cf2",
+      "text": "当 <code>colorBlendMode</code> 为 <code>MIX</code> 时指定颜色强度的数值 Property。0.0 表示模型原始渲染颜色，1.0 表示纯色，中间值表示两者混合。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/colorBlendMode/description",
+      "sourceHash": "sha256:3bc5d48554edd6f2671e69ac08ea9902e882fa706a11c5cfdd00952703d997c6",
+      "text": "指定颜色与模型混合方式的枚举 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/customShader/description",
+      "sourceHash": "sha256:4a2908e2ce922a7678fd9749b72a802918e902e33567a7e1113e6099b9ecaeb1",
+      "text": "指定应用到此模型的 {@link CustomShader} 的 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:5bded85a55b2021b214d2daf1052d2f4c2a59ed025f10bef1e21522fb0ebb950",
+      "text": "指定模型在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/enableVerticalExaggeration/description",
+      "sourceHash": "sha256:aaf49081263009e1c00a2560fabebba1bb0ec04f9dd6c060ab7ce20cbd596443",
+      "text": "指定是否沿椭球法线夸张显示模型的布尔 Property，适用于 {@link Scene.verticalExaggeration} 不为 <code>1.0</code> 时。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/environmentMapOptions/description",
+      "sourceHash": "sha256:c487c6ecfd6a3991e0e5284401862c10ca29bc80f1a4a8f5338123dc57730f18",
+      "text": "管理此实体动态环境贴图的属性。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:ca289e1fefbfe09bf2a9923ffd99208e128d10dfa2f4d85594992c73cca6df59",
+      "text": "指定高度参考基准的 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/imageBasedLightingFactor/description",
+      "sourceHash": "sha256:1ec968f4c67ce7e4e0681e992cd02a3d9e320b10f8195452ed0eaf87581c8ef9",
+      "text": "指定漫反射及镜面反射图像光照贡献的 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/incrementallyLoadTextures/description",
+      "sourceHash": "sha256:3003573fcd8b9002650e9a3dbad5008e01b69dc197f7923410f3a9536596d97f",
+      "text": "决定模型加载后是否允许继续流式加载纹理。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/lightColor/description",
+      "sourceHash": "sha256:648c4fcb4e53f0aa3b4d43cb3230c051b566b23841953760021806c0b22060e9",
+      "text": "指定模型着色光源颜色的 Property。为 <code>undefined</code> 时使用场景的光源颜色。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/maximumScale/description",
+      "sourceHash": "sha256:4853017dff37e6141da176d099de45efdd275950259e97abf8afd4237d44fc8a",
+      "text": "模型的最大缩放值，是 minimumPixelSize 引起缩放的上限。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/minimumPixelSize/description",
+      "sourceHash": "sha256:70262fc9a2510700d3c7ec7e116ee90efcb9e7b85a913729aec5f4abb52a0d0e",
+      "text": "指定模型近似最小像素尺寸的数值 Property，不受视图缩放影响。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/nodeTransformations/description",
+      "sourceHash": "sha256:1bf76280b4f7cf86e55f29b5ab37d73f16e46d1f51371d3bf60a3c32392cf4dc",
+      "text": "一个对象，键为节点名称，值为描述节点变换的 {@link TranslationRotationScale} Property。此变换叠加在 glTF 定义的节点已有变换之后，不会替换原变换。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/runAnimations/description",
+      "sourceHash": "sha256:940afe1bcb1cdf0cb5e44a30bbfef7fc0a4b6c40b3c5462d459a29c3bd13a052",
+      "text": "指定是否启动模型中 glTF 动画的布尔 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/scale/description",
+      "sourceHash": "sha256:bc23d4911a3df567ffa5112c157e080020240752beadf89a761b087c19773e87",
+      "text": "指定统一线性缩放值的数值 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:2a934c53d8543946e6a444a9cd4456f5a4d4c8cedfe9e7c2ba88efcc5751e536",
+      "text": "指定模型是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:934b8f009f37254fa6a0608a67b393dc97bf78f34912464564de5510c1506322",
+      "text": "指定模型可见性的布尔 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/silhouetteColor/description",
+      "sourceHash": "sha256:4802fdbb3544313d1f37abc1141c18a0e2388fa0810126c8c5c01f82dbfb5063",
+      "text": "指定剪影 {@link Color} 的 Property。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/silhouetteSize/description",
+      "sourceHash": "sha256:bf1f09d454f4f0bb16d87b03abf56efca620c48a18002d7c7783bddc8d1a2ce2",
+      "text": "指定剪影尺寸的数值 Property，单位为像素。"
+    },
+    {
+      "id": "ModelGraphics.ConstructorOptions",
+      "field": "properties/uri/description",
+      "sourceHash": "sha256:e156dc2db7e4c8bed837e4b48e9d57ac8bdbb597f485afffcd0937b96aa73ab2",
+      "text": "指定 glTF 资源 URI 的字符串或 Resource Property。"
+    },
+    {
+      "id": "ModelGraphics",
+      "field": "description",
+      "sourceHash": "sha256:b2c089422ff669fbf45215411724567f71bff39f50cded6c43306bf084b7ff2b",
+      "text": "基于 {@link https://github.com/KhronosGroup/glTF|glTF} 的三维模型。glTF 是面向 WebGL、OpenGL ES 和 OpenGL 的运行时资源格式。模型位置和朝向由所属 {@link Entity} 决定。\n<p>\n支持 glTF 几何、材质、动画和蒙皮，目前不支持资源中的相机和光源。\n</p>"
+    },
+    {
+      "id": "ModelGraphics#articulations",
+      "field": "description",
+      "sourceHash": "sha256:f1e39f22bcb701adea54d80de06084a72b4b79c6c3bf402037978a2cf40e8e11",
+      "text": "获取或设置应用到模型的关节数值集合，以 {@link PropertyBag} 表示。键由关节名称、一个空格及阶段名称组成。"
+    },
+    {
+      "id": "ModelGraphics#clampAnimations",
+      "field": "description",
+      "sourceHash": "sha256:d481f478e4e4409e2c4a3f4a077ab64d235cc5b9d64149a5c513fafdd5ee9980",
+      "text": "获取或设置布尔 Property，指定 glTF 动画在没有关键帧的时间段内是否保持最后姿态。"
+    },
+    {
+      "id": "ModelGraphics#clippingPlanes",
+      "field": "description",
+      "sourceHash": "sha256:f6a2ab3b1aa6f14ef676af4bc9fc759278495447d4b113057a774f8b4f1e4a8f",
+      "text": "指定 {@link ClippingPlaneCollection} 的 Property，用于选择性禁用模型部分区域的渲染。"
+    },
+    {
+      "id": "ModelGraphics#color",
+      "field": "description",
+      "sourceHash": "sha256:02638e012c65ea680945b4b6faa429b1d748e32823e028043e5d5d5e20d96ccb",
+      "text": "获取或设置指定与模型渲染颜色混合的 {@link Color} 的 Property。"
+    },
+    {
+      "id": "ModelGraphics#colorBlendAmount",
+      "field": "description",
+      "sourceHash": "sha256:2cb81be81bf8074a6822af58d95705a620c6a71a7ddc0aec11fb77849770c7a2",
+      "text": "当 <code>colorBlendMode</code> 为 MIX 时指定颜色强度的数值 Property。0.0 表示模型原始渲染颜色，1.0 表示纯色，中间值表示两者混合。"
+    },
+    {
+      "id": "ModelGraphics#colorBlendMode",
+      "field": "description",
+      "sourceHash": "sha256:51ab0631e1a87f0692fe69a2717649352d19439e2ca2ad7e27f4e1c8041d6da5",
+      "text": "获取或设置指定颜色与模型混合方式的枚举 Property。"
+    },
+    {
+      "id": "ModelGraphics#customShader",
+      "field": "description",
+      "sourceHash": "sha256:d0dedc5bfcf9c7b2a6752a40419aadd69d1038723b96418290393751460e1173",
+      "text": "获取或设置应用到模型的 {@link CustomShader}。为 <code>undefined</code> 时，不使用自定义着色器代码。"
+    },
+    {
+      "id": "ModelGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:582b94f66356dfad28f402483be5016b9f1af73e5abc00f86bb54eeb113125d8",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定模型在距相机多远时显示。"
+    },
+    {
+      "id": "ModelGraphics#enableVerticalExaggeration",
+      "field": "description",
+      "sourceHash": "sha256:3758b817913b881688ad032261f167ea5a81d11b4c54e80aaa575a66c5249490",
+      "text": "获取或设置布尔 Property，指定在 {@link Scene.verticalExaggeration} 不为 <code>1.0</code> 时，是否沿椭球法线夸张显示模型。"
+    },
+    {
+      "id": "ModelGraphics#environmentMapOptions",
+      "field": "description",
+      "sourceHash": "sha256:689bf96c772f842ed112b57e270f6605e7a5f5f3cc3d67594d3a922c6eafb430",
+      "text": "获取或设置应用到模型的 {@link DynamicEnvironmentMapManager.ConstructorOptions}，以 {@link PropertyBag} 表示。"
+    },
+    {
+      "id": "ModelGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "ModelGraphics#imageBasedLightingFactor",
+      "field": "description",
+      "sourceHash": "sha256:5bb13e4b220901a68f980bed08379d10e5eb1ed0546ceb37a8697b3e138a853b",
+      "text": "值为 {@link Cartesian2} 的 Property，用于缩放漫反射和镜面反射图像光照对最终颜色的贡献。"
+    },
+    {
+      "id": "ModelGraphics#incrementallyLoadTextures",
+      "field": "description",
+      "sourceHash": "sha256:387a60dd5c0c6a0efe074df9bddb294556759104ddc74908a91d767fcdfb9e16",
+      "text": "获取或设置布尔 Property，指定模型加载后是否允许继续流式加载纹理。"
+    },
+    {
+      "id": "ModelGraphics#lightColor",
+      "field": "description",
+      "sourceHash": "sha256:1baea3cff1436d448874e75e302e5e70490735baa101d9981005abaaecee51a2",
+      "text": "值为 {@link Cartesian3} 的 Property，指定模型着色所用的光源颜色。为 <code>undefined</code> 时使用场景的光源颜色。"
+    },
+    {
+      "id": "ModelGraphics#maximumScale",
+      "field": "description",
+      "sourceHash": "sha256:34d2f7097de5758647041311c0cf170dc70d05affae470a4f2569a0ef937fff6",
+      "text": "获取或设置指定模型最大缩放值的数值 Property，作为 {@link ModelGraphics#minimumPixelSize} 引起缩放的上限。"
+    },
+    {
+      "id": "ModelGraphics#minimumPixelSize",
+      "field": "description",
+      "sourceHash": "sha256:3ee06023dc2ebe30224d3c03cf1f54b13b0c87ee0d5b23261120ad001236424e",
+      "text": "获取或设置指定模型近似最小像素尺寸的数值 Property，不受视图缩放影响。可用于确保拉远视角后模型仍可见。为 <code>0.0</code> 时，不强制最小尺寸。"
+    },
+    {
+      "id": "ModelGraphics#nodeTransformations",
+      "field": "description",
+      "sourceHash": "sha256:6c19ec205ac3ba05d135321817d2b91eadf6f34f3e7ff10a3b5ac95de499d292",
+      "text": "获取或设置应用到模型的节点变换集合，以 {@link PropertyBag} 表示。键为节点名称，值为描述节点变换的 {@link TranslationRotationScale} Property。此变换叠加在 glTF 定义的节点已有变换之后，不会替换原变换。"
+    },
+    {
+      "id": "ModelGraphics#runAnimations",
+      "field": "description",
+      "sourceHash": "sha256:31579e09ea2c32ce0b9a5fd6d2316eeced8b9be0f1d9d0bd658b60c660d95145",
+      "text": "获取或设置指定是否运行 glTF 动画的布尔 Property。"
+    },
+    {
+      "id": "ModelGraphics#scale",
+      "field": "description",
+      "sourceHash": "sha256:92f41de67ed0008e51c47740c2d58c7252d8114a6544ded9af4eb449f90d8e8d",
+      "text": "获取或设置指定模型统一线性缩放值的数值 Property。大于 1.0 时放大，小于 1.0 时缩小。"
+    },
+    {
+      "id": "ModelGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:cb7be01d5466fb4efecfe1fd3015b7808896acdc5da6329056a9954906d78ced",
+      "text": "获取或设置枚举 Property，指定模型是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "ModelGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:6ba4878e013054100d337812520740ac0eba46629026bf51b17362f6d3780666",
+      "text": "获取或设置指定模型可见性的布尔 Property。"
+    },
+    {
+      "id": "ModelGraphics#silhouetteColor",
+      "field": "description",
+      "sourceHash": "sha256:fea588ec1d37ef34cbdbad173a350d01fb2ce37130adde85190d401b44f86d58",
+      "text": "获取或设置指定剪影 {@link Color} 的 Property。"
+    },
+    {
+      "id": "ModelGraphics#silhouetteSize",
+      "field": "description",
+      "sourceHash": "sha256:1c01aaa8c688a55485f66339065cf8dfb3ab04ce4b1cf2a819c2479a72fd2cb5",
+      "text": "获取或设置指定剪影尺寸的数值 Property，单位为像素。"
+    },
+    {
+      "id": "ModelGraphics#uri",
+      "field": "description",
+      "sourceHash": "sha256:b191dae36c2ebdfe70d8416bcc22e01dc7e517efb82bbe7e3b296fb4d87bf553",
+      "text": "获取或设置指定 glTF 资源 URI 的字符串 Property。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:341ef06a3dfc3b3f3eb4c433e76957452b4580bf52bf6b2a8e91d7131fcfb404",
+      "text": "PathGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:71ba78a3bc6992c53a55caebee5f749623f9618b9ea7946a87edda13628edd8a",
+      "text": "指定路径在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "properties/leadTime/description",
+      "sourceHash": "sha256:0093613d0a7ad6e06c818f7b8e2448bfa36ca0b6a57295917f4d7975bbeac13d",
+      "text": "指定显示对象未来多少秒路径的 Property。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:d81e107677fd4e614bdc0c8ab7c56608af891b68eb8188c674d535e4c0b8fc55",
+      "text": "指定路径绘制材质的 Property。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "properties/materialMode/description",
+      "sourceHash": "sha256:8de795ef037faf86df7000ecd81794860d192e416469f5c1331df875507a5007",
+      "text": "指定材质属性沿路径应用方式的 Property。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "properties/relativeTo/description",
+      "sourceHash": "sha256:23cb7b19318573c0b8cae4c1c084a15ce5666357b80101ed4bd7bb3ba8489282",
+      "text": "指定路径显示参考系的 Property。可使用其他实体的 id，使路径相对于该实体显示；也可用字符串 \"FIXED\" 或 \"INERTIAL\"，在相应参考系中显示。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "properties/resolution/description",
+      "sourceHash": "sha256:6ff8cc909a8e14377452d4d6b43d986c6ce2b0ce7de9abe1dc56e5f676cadd7f",
+      "text": "指定位置采样最大时间步长的数值 Property，单位为秒。允许正小数；在 PORTIONS materialMode 下，非正值会采用默认的 60 秒分辨率。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:a1b8422c4e8be4e7f6def0383046f579907ad69ced0adbeea56370bf4f37c380",
+      "text": "指定路径可见性的布尔 Property。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "properties/trailTime/description",
+      "sourceHash": "sha256:566f65d20d885e078e3f3d7a6941cdc7b7ec5f371455577bae20ed3b686ee553",
+      "text": "指定显示对象过去多少秒路径的 Property。"
+    },
+    {
+      "id": "PathGraphics.ConstructorOptions",
+      "field": "properties/width/description",
+      "sourceHash": "sha256:9d6c52fde802fff53b3203a6c6ee86aa13eb6aed12352f97650c08d1caf482bf",
+      "text": "指定宽度的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PathGraphics",
+      "field": "description",
+      "sourceHash": "sha256:6e3f8788f82168195be7e2eeaf4f248e22c965b8912d848589d0446c83f3cd52",
+      "text": "描述 {@link Entity} 随时间移动形成的路径折线。"
+    },
+    {
+      "id": "PathGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:71dfdd5930a07ea06d9b53f06620cde2bf65ebb1f0a9f6e06639be811ba284cf",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定路径在距相机多远时显示。"
+    },
+    {
+      "id": "PathGraphics#leadTime",
+      "field": "description",
+      "sourceHash": "sha256:be9f99ebed76f2d9c893af3eb0a1b53efa7b3a793cc09bf933c37cbb8f6099bc",
+      "text": "获取或设置指定显示对象未来多少秒路径的 Property。"
+    },
+    {
+      "id": "PathGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:c3b105b974526804c1f9158ee1525804a1ee5c4b2fb189207c2b725790b0c755",
+      "text": "获取或设置指定路径绘制材质的 Property。"
+    },
+    {
+      "id": "PathGraphics#relativeTo",
+      "field": "description",
+      "sourceHash": "sha256:64a4bd2700d55ffab2693164c1c853029d750264e88a1819d407236fea48dfe4",
+      "text": "获取或设置路径显示所用的参考系。可使用其他实体的 id，使路径相对于该实体显示；也可用字符串 \"FIXED\" 或 \"INERTIAL\"，在相应参考系中显示。"
+    },
+    {
+      "id": "PathGraphics#resolution",
+      "field": "description",
+      "sourceHash": "sha256:e768c768301469bb86cc4e76d5f4701f1de2f21fa5264da13b8cd9f2cdd9671a",
+      "text": "获取或设置指定位置采样最大时间步长的 Property，单位为秒。允许正小数；在 PORTIONS materialMode 下，非正值会采用默认的 60 秒分辨率。"
+    },
+    {
+      "id": "PathGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:13db523da8e2ae2497cd605b30ef92810d5892093dcf54dc1890364f8ba1813e",
+      "text": "获取或设置指定路径可见性的布尔 Property。"
+    },
+    {
+      "id": "PathGraphics#trailTime",
+      "field": "description",
+      "sourceHash": "sha256:a86c98fd6147ea04d4309fe51c10d1cf9403fb1076f1b4792a3424fe13ed1656",
+      "text": "获取或设置指定显示对象过去多少秒路径的 Property。"
+    },
+    {
+      "id": "PathGraphics#width",
+      "field": "description",
+      "sourceHash": "sha256:7a7fdf37ddbcb962400bc2eab0785d2f0e98b7eca57818a19baa0d1e54910446",
+      "text": "获取或设置指定宽度的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:c3dc18284f208afa4383be162aa9b23b7d29d5a1fbc8e07cee4e1c543b7661eb",
+      "text": "PlaneGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/dimensions/description",
+      "sourceHash": "sha256:34e0c190bf386c61b23e74c8eaaf0aef4ca2dc09e4af93c0ce97be165d52ba20",
+      "text": "值为 {@link Cartesian2} 的 Property，指定平面宽度和高度。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:6b7e285bb0ea907126768ea148375df8d792eef16b8ad1bd497067a489d041bc",
+      "text": "指定平面在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:54b2026298d0cff973782909998b88957349b6ed47d3a583617fe9ea63161d5b",
+      "text": "指定是否使用所提供材质填充平面的布尔 Property。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:007fd62aa0ce0703d8c674782265555bdf964cd75048b46dcbfc2d6ac4e41435",
+      "text": "指定平面填充材质的 Property。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:a8df8ea77649b240198428ff8312aa0520fc345d705879933810515d0178c4ff",
+      "text": "指定是否绘制平面轮廓的布尔 Property。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/plane/description",
+      "sourceHash": "sha256:f276c5591e67f1192b14b535bf8370e56e0b928bf2c280ba79ee26837bde7d08",
+      "text": "值为 {@link Plane} 的 Property，指定平面法线和距离。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:a704f8397870603c7b4f906fcb6885983b2646617874f9cb8733adff1133348a",
+      "text": "指定平面是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "PlaneGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:5ec47642a7f514631b76760b3cb9d1e58f2f7cd3b8842b46223661691f1efa19",
+      "text": "指定平面可见性的布尔 Property。"
+    },
+    {
+      "id": "PlaneGraphics",
+      "field": "description",
+      "sourceHash": "sha256:74d7bbac0b6b9c6a7bb0f171224670f8063a83605104a77e21193fb7f9526f07",
+      "text": "描述平面，其中心位置和朝向由所属 {@link Entity} 决定。"
+    },
+    {
+      "id": "PlaneGraphics#dimensions",
+      "field": "description",
+      "sourceHash": "sha256:4ce7fe60e24a0d1b820a2a7889517b953daeeab0d52bfe278cdfe4d5f126a19c",
+      "text": "获取或设置值为 {@link Cartesian2} 的 Property，指定平面宽度和高度。"
+    },
+    {
+      "id": "PlaneGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:91c645f772e6c9c121b22b3740abb9ab92e653afd56c4661a04786b5c4a912a0",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定平面在距相机多远时显示。"
+    },
+    {
+      "id": "PlaneGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:adab888ab356cd6a8ede24d013199508cab7528bcc31e5ec40e5dd31b3d2a501",
+      "text": "获取或设置指定是否使用所提供材质填充平面的布尔 Property。"
+    },
+    {
+      "id": "PlaneGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:425e197bf59f942194f3645f84fc5e37a53f4763d3dd80641bf6e0acf98e319a",
+      "text": "获取或设置平面的填充材质。"
+    },
+    {
+      "id": "PlaneGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:ef0bdd803774511f9a622f0f47c1e4aa7cb7bdeda521369cddb0fb87832d16d4",
+      "text": "获取或设置指定是否绘制平面轮廓的 Property。"
+    },
+    {
+      "id": "PlaneGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PlaneGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "PlaneGraphics#plane",
+      "field": "description",
+      "sourceHash": "sha256:917675a2ec4b38c7518b61079fad9a86b92dc2cd37c926834d483e65386f43d4",
+      "text": "获取或设置值为 {@link Plane} 的 Property，指定平面法线和距离。"
+    },
+    {
+      "id": "PlaneGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:24327a76d27cc32a7acfed5fc1f611dca30103fd662a775e9bb9d125957390fd",
+      "text": "获取或设置枚举 Property，指定平面是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "PlaneGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:f0b06fe397d21231c7529a56424ad4e45811a017c8e6f0d0838f3f12ce0c4038",
+      "text": "获取或设置指定平面可见性的布尔 Property。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:8ffef36f97da50853ea1a5a1153d38e65f927fb579c04012beb77e3f06bc4703",
+      "text": "PointGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/color/description",
+      "sourceHash": "sha256:f17ad790ef374509ce76e8cbaad6395bbfd7faaa5281e3beea109958cc1aa013",
+      "text": "指定点 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/disableDepthTestDistance/description",
+      "sourceHash": "sha256:f3154f7addd1552bd94472a5e6c474012ea9faa6b6249afbc7d9c9e3c4b7ebff",
+      "text": "指定禁用深度测试的相机距离阈值的 Property。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:d3a4b3ee65cd2f9df72e4ba9864afdf2653147935a40ad671d8f9e5959398a8a",
+      "text": "指定点在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:ca289e1fefbfe09bf2a9923ffd99208e128d10dfa2f4d85594992c73cca6df59",
+      "text": "指定高度参考基准的 Property。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:6e02e5015654f2cec03991359788abb83fa7d4ae0401d64c7dadd1eb7fc610a4",
+      "text": "指定轮廓宽度的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/pixelSize/description",
+      "sourceHash": "sha256:41a21f6f072e43702cf9f808018ad923a7579764fdc9ecebfdc611a2738b81d6",
+      "text": "指定尺寸的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/scaleByDistance/description",
+      "sourceHash": "sha256:7a876c01c30c30537e67e0b43d66a002d294f15776ad9e359403c961dba42667",
+      "text": "值为 {@link NearFarScalar} 的 Property，用于根据距离缩放点。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:c909a8c645743184553f6914b1dc59eaa93e923f843e885c44f2091ea3a02967",
+      "text": "指定点可见性的布尔 Property。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/splitDirection/description",
+      "sourceHash": "sha256:43ebb2fa33bff84753a9ed55dee8b5e4db3859c3b6b8427676a275f3719a7c52",
+      "text": "指定应用到点的 {@link SplitDirection} 的 Property。"
+    },
+    {
+      "id": "PointGraphics.ConstructorOptions",
+      "field": "properties/translucencyByDistance/description",
+      "sourceHash": "sha256:88f30817bc06c96114ee7841253b3565ff1510caa123f1bec702dcd5f77c96f5",
+      "text": "值为 {@link NearFarScalar} 的 Property，用于根据到相机的距离设置半透明值。"
+    },
+    {
+      "id": "PointGraphics",
+      "field": "description",
+      "sourceHash": "sha256:a959e64533b345772d2fba581dfd9cc373ee877cb9859b85661233c0985cb2c0",
+      "text": "描述位于所属 {@link Entity} 位置处的图形点。"
+    },
+    {
+      "id": "PointGraphics#color",
+      "field": "description",
+      "sourceHash": "sha256:147f58f668c9bc07a2bdcebdd4d0163077f0b4234154ce6ae66a06f4cab8ace9",
+      "text": "获取或设置指定点 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PointGraphics#disableDepthTestDistance",
+      "field": "description",
+      "sourceHash": "sha256:aa0b32cdff61ca417310b582153d07f621329cae49321b3a182985f71f7fe5cf",
+      "text": "获取或设置禁用深度测试的相机距离阈值，例如用于避免被地形裁剪。设为零时始终执行深度测试；设为 Number.POSITIVE_INFINITY 时始终不执行深度测试。"
+    },
+    {
+      "id": "PointGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:5f0c1cac3f7f7eea361b01d7c259e842aa884276e0bd576bc8c31f8c1c4a3365",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定点在距相机多远时显示。"
+    },
+    {
+      "id": "PointGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "PointGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PointGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:ca0cf9664cf3fe4680e972b6f3a4a7c197202e0104f2dccb290cea0d2e70d614",
+      "text": "获取或设置指定轮廓宽度的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PointGraphics#pixelSize",
+      "field": "description",
+      "sourceHash": "sha256:0866c26d687a0d7bc64f6e0bad80139730cd513e0b71bec7e395cfcd3afb26dc",
+      "text": "获取或设置指定尺寸的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PointGraphics#scaleByDistance",
+      "field": "description",
+      "sourceHash": "sha256:4f9c90fb78af0446f62749c65e84254f289c808f4a2925d7369f93fc0a312850",
+      "text": "获取或设置值为 {@link NearFarScalar} 的 Property，用于根据距离缩放点。为 undefined 时，使用固定尺寸。"
+    },
+    {
+      "id": "PointGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:9dbeb47770757ac96d362a10270d7986dbad08a739ee53526fc6b5a60a52fdb5",
+      "text": "获取或设置指定点可见性的布尔 Property。"
+    },
+    {
+      "id": "PointGraphics#splitDirection",
+      "field": "description",
+      "sourceHash": "sha256:86d19abe4d884e31df68c9fe963cfc7e7a01f9317434c37811f20b1d95207a93",
+      "text": "获取或设置指定点 {@link SplitDirection} 的 Property。"
+    },
+    {
+      "id": "PointGraphics#translucencyByDistance",
+      "field": "description",
+      "sourceHash": "sha256:32c6819d62bdea15dceab1234744e7a5cbd6e1d03e40762dc4aa34a0e1783813",
+      "text": "获取或设置值为 {@link NearFarScalar} 的 Property，根据到相机的距离确定点的半透明值。当相机距离处于指定范围内时，半透明值在 {@link NearFarScalar#nearValue} 与 {@link NearFarScalar#farValue} 之间插值，距离上下界由 {@link NearFarScalar#near} 和 {@link NearFarScalar#far} 指定。超出范围时，保持为最近端点值。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:eca119e83363556d442f3ddd183b3046352323342d2098377415e866e9dbada1",
+      "text": "PolygonGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/arcType/description",
+      "sourceHash": "sha256:6723d4de1bb3d490a550ea874a4b81ff5de2851bbd122b437c220c159f802751",
+      "text": "多边形边缘遵循的线段类型。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/classificationType/description",
+      "sourceHash": "sha256:68ae26b1575ad6715bd90f0a65f2c2b62a16174ef6af38663d1e09082bba6a45",
+      "text": "指定多边形贴地时对地形、3D Tiles 或两者进行分类的枚举 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/closeBottom/description",
+      "sourceHash": "sha256:3b59bf226520325151fff72d0240b0ca1c123672b14de356cf24133b32fb446a",
+      "text": "为 false 时，拉伸多边形的底部保持开放。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/closeTop/description",
+      "sourceHash": "sha256:0441dc930add0a22c1c8819b0793f8d81253d2fd7d780e8083eaf1a061382925",
+      "text": "为 false 时，拉伸多边形的顶部保持开放。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:51b04108175bfdb9da2a32e916ad688fde407306e119525a6b7bcfcad68fb8d2",
+      "text": "指定多边形在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/extrudedHeight/description",
+      "sourceHash": "sha256:0bc61bae602cfbd2e91cf5bc2853e23f3a0c7ebaa4e4a09c448494586b7497e6",
+      "text": "指定多边形拉伸面相对于椭球表面高度的数值 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/extrudedHeightReference/description",
+      "sourceHash": "sha256:384c9e5a951839784e3bbf8e27c702525659d162b47333b24e668565078643e1",
+      "text": "指定 extrudedHeight 参考基准的 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:c34c0307c86961b19fda55979e062d5d44c40262cb2a9af665989548f2537453",
+      "text": "指定是否使用所提供材质填充多边形的布尔 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/granularity/description",
+      "sourceHash": "sha256:21c9a40442dd09d782a67c2fac19ef43664b02aa2035d610ca055106d09b277f",
+      "text": "指定相邻经纬度点角度间隔的数值 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/height/description",
+      "sourceHash": "sha256:c3085864671d3155fec74790398e799448c7f3837efae5b74333537178d40f68",
+      "text": "指定多边形相对于椭球表面高度的数值 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:ca289e1fefbfe09bf2a9923ffd99208e128d10dfa2f4d85594992c73cca6df59",
+      "text": "指定高度参考基准的 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/hierarchy/description",
+      "sourceHash": "sha256:089a5ce543a374756425b3d967cf676f014b4b2a74a0b12c761523356d3d409b",
+      "text": "指定 {@link PolygonHierarchy} 的 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:4248cb571663240be37fbb06f0fcd9f0a7128b4094128e7f6ca9e116e3634e46",
+      "text": "指定多边形填充材质的 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:5ce09d318c51c1ba306dad6fe0966e9cf9b4b0f44addd0b2e4271e5dfe866844",
+      "text": "指定是否绘制多边形轮廓的布尔 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/perPositionHeight/description",
+      "sourceHash": "sha256:d14a5da31ed0247942a1a5b13dd4dc85e4a137462d11857eae4aa47ba2981406",
+      "text": "指定是否使用每个位置自身高度的布尔值。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:d3019e68c68d8b7f7daa0e9bab96a170e79ce8eac9edbdce539ca7b99a6b9103",
+      "text": "指定多边形是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:7816e6b1feb015d0d5b0030ab76021723bf668b2626be2457418c418da98e011",
+      "text": "指定多边形可见性的布尔 Property。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/stRotation/description",
+      "sourceHash": "sha256:35862310a2c67251a6e5d880570a1e44a1cc8b5f94c9421ee72d7f0197f803cb",
+      "text": "指定多边形纹理从北方向逆时针旋转角度的数值 Property。仅在未定义 textureCoordinates 时生效。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/textureCoordinates/description",
+      "sourceHash": "sha256:0ffa30881ef8e0ca9e772202b3f793c5ca785697c0e9a8667b7f75f1cc3bdb1f",
+      "text": "使用由 {@link Cartesian2} 点组成的 {@link PolygonHierarchy} 指定纹理坐标的 Property。对贴地图元无效。"
+    },
+    {
+      "id": "PolygonGraphics.ConstructorOptions",
+      "field": "properties/zIndex/description",
+      "sourceHash": "sha256:c59895bcd9f1bac2c57be59b3d72df7b264a627c54bbf5ce50ef26aaca8716d6",
+      "text": "指定贴地几何排序 zIndex 的 Property。仅当多边形为常量，且未指定 height 和 extrudedHeight 时生效。"
+    },
+    {
+      "id": "PolygonGraphics",
+      "field": "description",
+      "sourceHash": "sha256:245082c40e4728e3034832cb84fede79f0f60cc40c8ac238d6a17d7dc7a6417d",
+      "text": "描述由线性环层级定义的多边形，包括外轮廓及任意嵌套孔洞。多边形贴合地球曲率，可位于表面或一定高度处，也可选择拉伸成体积。"
+    },
+    {
+      "id": "PolygonGraphics#arcType",
+      "field": "description",
+      "sourceHash": "sha256:94275ad2078997440e7f35589c95750f6fcaeb9403b6a5d06bc2930b12f40467",
+      "text": "获取或设置值为 {@link ArcType} 的 Property，指定多边形边缘使用的线段类型。"
+    },
+    {
+      "id": "PolygonGraphics#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:7dba961c02495f02859b6374234c811846c5a279a1988a26cddfdf4b3cc0858a",
+      "text": "获取或设置值为 {@link ClassificationType} 的 Property，指定多边形贴地时对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "PolygonGraphics#closeBottom",
+      "field": "description",
+      "sourceHash": "sha256:199f4ee8224964f1667d9f50f74c4ab9e77abdd7b8beaf4dd3521a9437968e8f",
+      "text": "获取或设置指定是否包含拉伸多边形底面的布尔值。"
+    },
+    {
+      "id": "PolygonGraphics#closeTop",
+      "field": "description",
+      "sourceHash": "sha256:8cb82fbe5c68688993ec85b37dbe65dcd7f6eef118b629b99e8324105db63541",
+      "text": "获取或设置指定是否包含拉伸多边形顶面的布尔值。"
+    },
+    {
+      "id": "PolygonGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:bcdbe0c83b65bf3aa4a96a5a8835adfac6a9c420fc9dec6fe524dc886479d919",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定多边形在距相机多远时显示。"
+    },
+    {
+      "id": "PolygonGraphics#extrudedHeight",
+      "field": "description",
+      "sourceHash": "sha256:696275d5756d76b31afb1654cbf4f6e1eda02717ded1eaf946719b98aa132551",
+      "text": "获取或设置指定多边形拉伸高度的数值 Property。若 {@link PolygonGraphics#perPositionHeight} 为 false，则形体从 {@link PolygonGraphics#height} 延伸到此高度；若 {@link PolygonGraphics#perPositionHeight} 为 true，则从 {@link PolygonGraphics#hierarchy} 各位置的自身高度延伸到此高度。"
+    },
+    {
+      "id": "PolygonGraphics#extrudedHeightReference",
+      "field": "description",
+      "sourceHash": "sha256:55b4a7fe71ef2b71328fd74273b68921bb199c07c1ef9ee36d7e13f2f50a511b",
+      "text": "获取或设置指定拉伸 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "PolygonGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:b7d0ac2f0d57685bc5738733431a5bde0350fa5b5c7bc779db55451795e37165",
+      "text": "获取或设置指定是否使用所提供材质填充多边形的布尔 Property。"
+    },
+    {
+      "id": "PolygonGraphics#granularity",
+      "field": "description",
+      "sourceHash": "sha256:8d4625197bed32005acda8671887877cdfc8afd8e81d6933560ec942fa8bf6b7",
+      "text": "获取或设置指定多边形上相邻采样点角度间隔的数值 Property。"
+    },
+    {
+      "id": "PolygonGraphics#height",
+      "field": "description",
+      "sourceHash": "sha256:c557fea79ccbe03711372ac6d60a0bc4da762e02b57b46cdd7eaeb19b7c69807",
+      "text": "获取或设置指定多边形固定高度的数值 Property。"
+    },
+    {
+      "id": "PolygonGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "PolygonGraphics#hierarchy",
+      "field": "description",
+      "sourceHash": "sha256:53367c84bbee78ce39b4021ab17a9ef3d1c930cd6c65d4227a94c0a49bd319c7",
+      "text": "获取或设置指定 {@link PolygonHierarchy} 的 Property。"
+    },
+    {
+      "id": "PolygonGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:1984c6dd116d7654579ab57c94b0d26c7af082e9f3933f939dad9bbb56b3342f",
+      "text": "获取或设置指定多边形填充材质的 Property。"
+    },
+    {
+      "id": "PolygonGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:00361d2c8e5ba0187a5461d61c0abef22fc21238394ebcfa4d39d11fc1538add",
+      "text": "获取或设置指定是否绘制多边形轮廓的 Property。"
+    },
+    {
+      "id": "PolygonGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolygonGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "PolygonGraphics#perPositionHeight",
+      "field": "description",
+      "sourceHash": "sha256:cdc0dad70ab507ce51e21047e6568916e0c50badf1532ece2e433d9d1f28f6ae",
+      "text": "获取或设置指定是否使用每个位置自身高度的布尔值。为 true 时，形状高度由 {@link PolygonGraphics#hierarchy} 各位置的高度分别定义，可不一致；为 false 时，统一使用 {@link PolygonGraphics#height} 指定的高度。"
+    },
+    {
+      "id": "PolygonGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:6802c94b3936a0f45c5c63b0b0c3d021f6f6dfb7d7deaa83ab35b40e2edc40e9",
+      "text": "获取或设置枚举 Property，指定多边形是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "PolygonGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:dff1ddf1b49b54bc0433fe33c6212f9003b4fcde273ac47ccddcced2bba7ebed",
+      "text": "获取或设置指定多边形可见性的布尔 Property。"
+    },
+    {
+      "id": "PolygonGraphics#stRotation",
+      "field": "description",
+      "sourceHash": "sha256:e55c8960e0c1e9bdc49eeeab6bf0f61a4828016886ec01b907c88c3b00d35390",
+      "text": "获取或设置指定多边形纹理从北方向逆时针旋转角度的数值 Property。仅在未定义 textureCoordinates 时生效。"
+    },
+    {
+      "id": "PolygonGraphics#textureCoordinates",
+      "field": "description",
+      "sourceHash": "sha256:0ffa30881ef8e0ca9e772202b3f793c5ca785697c0e9a8667b7f75f1cc3bdb1f",
+      "text": "使用由 {@link Cartesian2} 点组成的 {@link PolygonHierarchy} 指定纹理坐标的 Property。对贴地图元无效。"
+    },
+    {
+      "id": "PolygonGraphics#zIndex",
+      "field": "description",
+      "sourceHash": "sha256:4f4dea2b3c53864ee95d51d9df94cb891bcb62685e36d5194440cb47072c7b36",
+      "text": "获取或设置指定贴地几何排序的 zIndex Property。仅当多边形为常量，且未指定 height 和 extrudedHeight 时生效。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:0e5b3da40e532040df5e36f455125bcd6040250e67b367e03c3f4ddbe0f13d06",
+      "text": "PolylineGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/arcType/description",
+      "sourceHash": "sha256:00a7d6ce70526db9ff8d60ce99e4773532f51fb616c716584055b53cfbb03adf",
+      "text": "折线各线段遵循的线段类型。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/clampToGround/description",
+      "sourceHash": "sha256:186980da9e013e5cef9d90e4ec858080c724132dbaa42cc497e6a7720d71476b",
+      "text": "指定折线是否贴地的布尔 Property。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/classificationType/description",
+      "sourceHash": "sha256:86c0879c904df92966a3152f07075e9a534eed7ecd4f0938cdb0cbf5405699f6",
+      "text": "指定折线贴地时对地形、3D Tiles 或两者进行分类的枚举 Property。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/depthFailMaterial/description",
+      "sourceHash": "sha256:754a05b22949a603c27cfafd523e91b1729245240b5410caa004b179175478dc",
+      "text": "指定折线深度测试失败（例如被地形遮挡）时绘制材质的 Property。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:e4ec24957a1f07e47a7f78dcb966d51a687707e8c71d7db34c18cb80efaa3c80",
+      "text": "指定折线在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/granularity/description",
+      "sourceHash": "sha256:6e57ef48cef464b5debc9a23482eb47ffb4d0ebb26254d01ecf799127b6e5b4d",
+      "text": "指定相邻经纬度点角度间隔的数值 Property，适用于 arcType 不为 ArcType.NONE 时。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:7355b690d6752318ffbad0d22b0b526da157d47fc64113e13b11171663088878",
+      "text": "指定折线绘制材质的 Property。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/positions/description",
+      "sourceHash": "sha256:ff35154e735bead6fa6dbdabe956f07294416a1d9038b1252437f19be127705a",
+      "text": "指定定义线带的 {@link Cartesian3} 位置数组的 Property。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:c7f4c736fe610261ce2a4bac101b6b99b60f412b5a3f1909e9902c920ae14d5d",
+      "text": "指定折线是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:bac521ed97abaab7f80cfd45a9feef7ae23c8f3dbb3424011ba3b5c9173fbac1",
+      "text": "指定折线可见性的布尔 Property。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/width/description",
+      "sourceHash": "sha256:9d6c52fde802fff53b3203a6c6ee86aa13eb6aed12352f97650c08d1caf482bf",
+      "text": "指定宽度的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PolylineGraphics.ConstructorOptions",
+      "field": "properties/zIndex/description",
+      "sourceHash": "sha256:bbee6f7a36b882dc9f44c23acdea2a516d27d8ddf8d9baa195c8c3a6ff969582",
+      "text": "指定贴地几何排序 zIndex 的 Property。仅当 `clampToGround` 为 true 且支持地形折线时生效。"
+    },
+    {
+      "id": "PolylineGraphics",
+      "field": "description",
+      "sourceHash": "sha256:aa077b80b98109609a74eaa626ac2245c424377dd2a08f25409531b576c69d98",
+      "text": "描述折线。前两个位置定义第一条线段，每个后续位置与前一位置定义下一条线段。线段可以直接连接位置、沿大圆弧连接或贴合地形。"
+    },
+    {
+      "id": "PolylineGraphics#arcType",
+      "field": "description",
+      "sourceHash": "sha256:f39c40d887e1ee33e468b54d9026acce5d6b59d32942bfc4eddcf36d93aca611",
+      "text": "获取或设置值为 {@link ArcType} 的 Property，指定线段沿大圆弧、等角航线还是直线连接。"
+    },
+    {
+      "id": "PolylineGraphics#clampToGround",
+      "field": "description",
+      "sourceHash": "sha256:dab0e885e0e862b26cfd6d46ce9eac9adac640a59b390ed59a89fac1d6824031",
+      "text": "获取或设置指定折线是否贴地的布尔 Property。"
+    },
+    {
+      "id": "PolylineGraphics#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:f421cc8f065bdad254d6e348332fa076e435dcd89592723ff6fc26684e716a05",
+      "text": "获取或设置值为 {@link ClassificationType} 的 Property，指定折线贴地时对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "PolylineGraphics#depthFailMaterial",
+      "field": "description",
+      "sourceHash": "sha256:76912450bbd04dd82d10749636fcb636e43772d7dcfe9e099ad6f87e75b612ed",
+      "text": "获取或设置指定折线深度测试失败时绘制材质的 Property。\n<p>\n正确渲染需要 EXT_frag_depth WebGL 扩展。不支持时可能出现显示瑕疵。\n</p>"
+    },
+    {
+      "id": "PolylineGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:06e6df487544f250a695e6631acf36e4f63acc05129d2899275d02d9e6106a64",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定折线在距相机多远时显示。"
+    },
+    {
+      "id": "PolylineGraphics#granularity",
+      "field": "description",
+      "sourceHash": "sha256:9bf6cf3c03b1f8295367f4e59d9e3dec564f6660ce6033dbbee9fd8a281fdee7",
+      "text": "获取或设置指定相邻经纬度点角度间隔的数值 Property，适用于 arcType 不为 ArcType.NONE 且 clampToGround 为 false 时。"
+    },
+    {
+      "id": "PolylineGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:33de8b010f2e918f60d8e3b3ef7c1120c1b653010d6cb9a2e7db0ee55269fe60",
+      "text": "获取或设置指定折线绘制材质的 Property。"
+    },
+    {
+      "id": "PolylineGraphics#positions",
+      "field": "description",
+      "sourceHash": "sha256:3038343ee05b6784eb2e9d8d64fa40bb1502939cae7ff332bf08e760513ad488",
+      "text": "获取或设置指定定义线带的 {@link Cartesian3} 位置数组的 Property。"
+    },
+    {
+      "id": "PolylineGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:79ee8b7f9ec433e149c250ee951bf33ea39d669b4226c6c9db0defc7025b010b",
+      "text": "获取或设置枚举 Property，指定折线是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "PolylineGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:4c579b35057590ce8a0589ccd506c68044df190841c1304bd8a9470e5a6f4b6e",
+      "text": "获取或设置指定折线可见性的布尔 Property。"
+    },
+    {
+      "id": "PolylineGraphics#width",
+      "field": "description",
+      "sourceHash": "sha256:7a7fdf37ddbcb962400bc2eab0785d2f0e98b7eca57818a19baa0d1e54910446",
+      "text": "获取或设置指定宽度的数值 Property，单位为像素。"
+    },
+    {
+      "id": "PolylineGraphics#zIndex",
+      "field": "description",
+      "sourceHash": "sha256:d4bca6f6f9899e32000b7c265db5a7139a3de1c1ef8052da81c740c4025f4a14",
+      "text": "获取或设置指定折线排序的 zIndex Property。仅当 `clampToGround` 为 true 且支持地形折线时生效。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:2d8fa8dad6769d99fec825b9c01207782acdf1cf3e6f357cde0082bf62712221",
+      "text": "PolylineVolumeGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/cornerType/description",
+      "sourceHash": "sha256:69f6b1e6c0d9847a53491aced41cf98b6a717a554738bbbc72a46c44ef2e9140",
+      "text": "值为 {@link CornerType} 的 Property，指定转角样式。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:2ada4b7f0b1e9f178436b560413b46ddbc382830b50a611b54cb7442ac354226",
+      "text": "指定形体在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:ebca5c3e72aef66b2302021c336af96e6b8e816786f6355a4d93b552bbfd8acd",
+      "text": "指定是否使用所提供材质填充形体的布尔 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/granularity/description",
+      "sourceHash": "sha256:21c9a40442dd09d782a67c2fac19ef43664b02aa2035d610ca055106d09b277f",
+      "text": "指定相邻经纬度点角度间隔的数值 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:c07feb954cd2d17dbdfa9deb87357cb3475d20d73d8bb9a843e2fcb63a89fee3",
+      "text": "指定形体填充材质的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:b88d060ce21fc08f494f82f298a45aabf9aee8fbee768c3e6db8b23fc151f3fb",
+      "text": "指定是否绘制形体轮廓的布尔 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/positions/description",
+      "sourceHash": "sha256:f846e44be826cf81fb32d2abea337b50576f30633e08e9ebfc7c075acbb04c8a",
+      "text": "指定定义线带的 {@link Cartesian3} 位置数组的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:7ea0eb0ef076cede4194f2d8b14f94f556dbc3945c59d63c1a1822106ccd7a8e",
+      "text": "指定形体是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/shape/description",
+      "sourceHash": "sha256:1ccf027fcc297a8f660ef98c490f252a03ac667c231aaad0239d387907ba992a",
+      "text": "指定定义拉伸截面形状的 {@link Cartesian2} 位置数组的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:f36548ff316658d333466c01a835f40c416b3340e8ad9d609d83eabf1c5ffdd7",
+      "text": "指定形体可见性的布尔 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics",
+      "field": "description",
+      "sourceHash": "sha256:285fb288e4f4a133d1d217c9cfa797898d9969c84e95c0c91c0de1d6b9782257",
+      "text": "描述由线带及沿其拉伸的二维截面形状定义的折线体。生成的形体贴合地球曲率。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#cornerType",
+      "field": "description",
+      "sourceHash": "sha256:9457ef86a27c7c160c250bc5923bf22c01dc1b75f951392f50a7364569e02389",
+      "text": "获取或设置值为 {@link CornerType} 的 Property，指定转角样式。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:17efa07dbc2f9bfce06b2266f609fc1d134c009c60e5dd7cccda3ab7cf701be2",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定形体在距相机多远时显示。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:994365d07b73af72346aaab4366c6ef722397c28a0b10c06fc1a854cce3a6710",
+      "text": "获取或设置指定是否使用所提供材质填充形体的布尔 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#granularity",
+      "field": "description",
+      "sourceHash": "sha256:a7e048a3cb1524e7053d4c533f8f6dec95fa345702acb0cd7e699f3ae31a197e",
+      "text": "获取或设置指定形体上相邻采样点角度间隔的数值 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:b574fb3de349c2e18d261356cc0b8858be9a451498f21c2c4925c2257cc6e30c",
+      "text": "获取或设置指定形体填充材质的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:cbc319ea4b64925fcec058dc8b5bf82ec0edf78384e81e8a306fb5cd27f477c0",
+      "text": "获取或设置指定是否绘制形体轮廓的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "PolylineVolumeGraphics#positions",
+      "field": "description",
+      "sourceHash": "sha256:92fa76b6a71dabba1733a49266599554bc38ee2e61be73c7f6d8bb1f5120cb16",
+      "text": "获取或设置指定定义线带的 {@link Cartesian3} 位置数组的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:ebc51eb07c27c150b8242a377a11b79a976e81dbc2ccf2aa0eb7d8cb5d8824a2",
+      "text": "获取或设置枚举 Property，指定形体是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#shape",
+      "field": "description",
+      "sourceHash": "sha256:3684898b6cbca136965f395fc45cc6abf5df5f840bfe4a4619203cd4f1e6972c",
+      "text": "获取或设置指定定义拉伸截面形状的 {@link Cartesian2} 位置数组的 Property。"
+    },
+    {
+      "id": "PolylineVolumeGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:4ac01c69dd86c74171722aa0db34abf0e65c44dd384bfa3f66d83fe6ea5a0fe5",
+      "text": "获取或设置指定形体可见性的布尔 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:e294244f215072255764c5fc91b4b3806127e4d0c5b96ef0cbce7deb5b7e846f",
+      "text": "RectangleGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/classificationType/description",
+      "sourceHash": "sha256:57c3d27adba6579a66d7e35f039ebb3cfd44946bdf9af46734f618cee571a2b2",
+      "text": "指定矩形贴地时对地形、3D Tiles 或两者进行分类的枚举 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/coordinates/description",
+      "sourceHash": "sha256:516d89f5069c4c04dcf4a9908d69c62b4921ee64afe65f48da077eb916a6b45d",
+      "text": "指定 {@link Rectangle} 的 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:6ff706420df79eeabe7898b6447b5bd6d86e7ae8330bb9ad74c6710adf5415fa",
+      "text": "指定矩形在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/extrudedHeight/description",
+      "sourceHash": "sha256:3f85fabef75567cc3ba529aea2a0cf9ff16c7c879eb4aa16aa1a3e1eda71fcd8",
+      "text": "指定矩形拉伸面相对于椭球表面高度的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/extrudedHeightReference/description",
+      "sourceHash": "sha256:384c9e5a951839784e3bbf8e27c702525659d162b47333b24e668565078643e1",
+      "text": "指定 extrudedHeight 参考基准的 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:f8db7532f93a709011da9f89de1638de5c3efcab3dc80a9747b8093606cc05a4",
+      "text": "指定是否使用所提供材质填充矩形的布尔 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/granularity/description",
+      "sourceHash": "sha256:0ec50caa1d88d81df3ecc8c545c3bc3557d20d828f32a2a86f8c21a8dd81c5da",
+      "text": "指定矩形上相邻采样点角度间隔的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/height/description",
+      "sourceHash": "sha256:a7986a55cd92804688e13fc98c40b8ee657415d9f14d0cb5c72b39a284c5f57e",
+      "text": "指定矩形相对于椭球表面高度的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/heightReference/description",
+      "sourceHash": "sha256:ca289e1fefbfe09bf2a9923ffd99208e128d10dfa2f4d85594992c73cca6df59",
+      "text": "指定高度参考基准的 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:737419dc3af0e81d18d44ffff43f6cf0e6d664ccddc4b58ee702d09987561e95",
+      "text": "指定矩形填充材质的 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:0506219dbdceca58e3d9c604742abe1573e3bcb549d5798258e56613b30836ef",
+      "text": "指定是否绘制矩形轮廓的布尔 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/rotation/description",
+      "sourceHash": "sha256:aab538cbcb1d2e2afdd470dfc18c1f7b99daf8bd21fc74c6bc6c9ffe2c1f83ca",
+      "text": "指定矩形从北方向顺时针旋转角度的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:9f12eb71d77a0ade86c89e023f99f4a75b1f481be8577e7e0dd331d9ad5e8d58",
+      "text": "指定矩形是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:93af30d0f539b3a1c1948d34e63c6cb5b62a4276fb31877f77886dc17f895287",
+      "text": "指定矩形可见性的布尔 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/stRotation/description",
+      "sourceHash": "sha256:2f2e8c7960c117c029b4e43fe4812f586ee8ca31fb780b12c56776322fcae5a8",
+      "text": "指定矩形纹理从北方向逆时针旋转角度的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics.ConstructorOptions",
+      "field": "properties/zIndex/description",
+      "sourceHash": "sha256:1844c0100f562764a6b73ef207b3c2ab880edf36e1d32c9180f6baa01d2b7acd",
+      "text": "指定贴地几何排序 zIndex 的 Property。仅当矩形为常量，且未指定 height 和 extrudedHeight 时生效。"
+    },
+    {
+      "id": "RectangleGraphics",
+      "field": "description",
+      "sourceHash": "sha256:b9a61dbe3ddfa906c785f138a4cb51149484e7cb023ab8123fa2eb48be440466",
+      "text": "描述 {@link Rectangle} 图形。矩形贴合地球曲率，可位于表面或一定高度处，也可选择拉伸成体积。"
+    },
+    {
+      "id": "RectangleGraphics#classificationType",
+      "field": "description",
+      "sourceHash": "sha256:a04250154ff03f9451b7282b3cce6e34d7fb791703cfa279fba4f691aa8c74bc",
+      "text": "获取或设置值为 {@link ClassificationType} 的 Property，指定矩形贴地时对地形、3D Tiles 或两者进行分类。"
+    },
+    {
+      "id": "RectangleGraphics#coordinates",
+      "field": "description",
+      "sourceHash": "sha256:fde010d27017c8d1223e0fd7eaccbde96059085a3eb1aa23558c64115787601e",
+      "text": "获取或设置指定 {@link Rectangle} 的 Property。"
+    },
+    {
+      "id": "RectangleGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:0b1fed4e8bb4c59687274ff3b22d87e0aed6cd8b6e50bb31e4289a82619591a0",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定矩形在距相机多远时显示。"
+    },
+    {
+      "id": "RectangleGraphics#extrudedHeight",
+      "field": "description",
+      "sourceHash": "sha256:8f81127119922878e9f134a3db66f1e1cbe4f241e3f351c542c8b1f52dc0dcec",
+      "text": "获取或设置指定矩形拉伸高度的数值 Property。设置后，将生成从 height 到此高度之间的形体。"
+    },
+    {
+      "id": "RectangleGraphics#extrudedHeightReference",
+      "field": "description",
+      "sourceHash": "sha256:55b4a7fe71ef2b71328fd74273b68921bb199c07c1ef9ee36d7e13f2f50a511b",
+      "text": "获取或设置指定拉伸 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "RectangleGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:3a9021a6234392c9b6f33c884bc60674ae41697488788ff89a1dd96e5d756d62",
+      "text": "获取或设置指定是否使用所提供材质填充矩形的布尔 Property。"
+    },
+    {
+      "id": "RectangleGraphics#granularity",
+      "field": "description",
+      "sourceHash": "sha256:146b17752318fd44eb2a65614a0330583ab5107c063b190786eb087163eea053",
+      "text": "获取或设置指定矩形上相邻采样点角度间隔的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics#height",
+      "field": "description",
+      "sourceHash": "sha256:328f56a1a89757fa648177eb5b3728a749632c5cff0460b7946cb8cfe69c3d26",
+      "text": "获取或设置指定矩形高度的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics#heightReference",
+      "field": "description",
+      "sourceHash": "sha256:39fd034969f481868440b919a03c7d601837fca429aa9fe0d898dc3037d85bca",
+      "text": "获取或设置指定 {@link HeightReference} 的 Property。"
+    },
+    {
+      "id": "RectangleGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:960374673eb67d33339b5a47881af72ea20d40bf8b26517cb8fb6dfcfd20e07c",
+      "text": "获取或设置指定矩形填充材质的 Property。"
+    },
+    {
+      "id": "RectangleGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:bd66a83a77b5252371ff37f3bc95925de730789b6f9175cbfc57b87fa3cb8310",
+      "text": "获取或设置指定是否绘制矩形轮廓的 Property。"
+    },
+    {
+      "id": "RectangleGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "RectangleGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "RectangleGraphics#rotation",
+      "field": "description",
+      "sourceHash": "sha256:fb98c173b6b8781a86d23d325672a649c9ef16a1c6ccbf29074485f10a38ce2d",
+      "text": "获取或设置指定矩形从北方向顺时针旋转角度的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:e60040e8e63ad27224624453fa50c51921e60e423117f55e5e35be39d52bf37b",
+      "text": "获取或设置枚举 Property，指定矩形是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "RectangleGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:a0470b6800cb71c7ef17108526ba45622cde4eae5c26ddc4d4989b0a0f579f97",
+      "text": "获取或设置指定矩形可见性的布尔 Property。"
+    },
+    {
+      "id": "RectangleGraphics#stRotation",
+      "field": "description",
+      "sourceHash": "sha256:123e2ec9cba94a3bfad01080d7329dad8a123b7476d8587b926076b3b5343d00",
+      "text": "获取或设置指定矩形纹理从北方向逆时针旋转角度的数值 Property。"
+    },
+    {
+      "id": "RectangleGraphics#zIndex",
+      "field": "description",
+      "sourceHash": "sha256:0fe7ac9db86af0d7d7ead37df25a17c05b916a1f648775ed0a90f16bb3b4eba1",
+      "text": "获取或设置指定矩形排序的 zIndex Property。仅当矩形为常量，且未指定 height 和 extrudedHeight 时生效。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "description",
+      "sourceHash": "sha256:33e323e8daf036fd0ef1f30645f8e1a2b3e67537f33589f1c3d41ec6a8b552d5",
+      "text": "WallGraphics 构造函数的初始化选项。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/distanceDisplayCondition/description",
+      "sourceHash": "sha256:c0a39124268d44772302ef885b32a6f0f4f4fd9202e03049f670bb9ee6259d7d",
+      "text": "指定墙体在距相机多远时显示的 Property。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/fill/description",
+      "sourceHash": "sha256:7574cb5f142649fb60060b1563a17f7c692bd24285bccf57ebbbecb147802104",
+      "text": "指定是否使用所提供材质填充墙体的布尔 Property。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/granularity/description",
+      "sourceHash": "sha256:21c9a40442dd09d782a67c2fac19ef43664b02aa2035d610ca055106d09b277f",
+      "text": "指定相邻经纬度点角度间隔的数值 Property。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/material/description",
+      "sourceHash": "sha256:80290b1e3ed701bc60e97cfd64fa1a3ea25b17e27e7ad222a5afc3ac3510a38e",
+      "text": "指定墙体填充材质的 Property。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/maximumHeights/description",
+      "sourceHash": "sha256:ce6103db1526681f172425f1ad2ccc73ad4b29a9bd2518776466d6b56e3d29b1",
+      "text": "指定墙顶高度数组的 Property，用于替代各位置自身的高度。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/minimumHeights/description",
+      "sourceHash": "sha256:69f21c86fff985f74fe8fdc02f53edfa5293cf376d4acd734095b04a0a8e821b",
+      "text": "指定墙底高度数组的 Property，用于替代地球表面高度。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/outline/description",
+      "sourceHash": "sha256:38a3d56bed7ceaf465d81b4ac63c1fee5e17390191b701d6b2f9e03d3c24c1cc",
+      "text": "指定是否绘制墙体轮廓的布尔 Property。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/outlineColor/description",
+      "sourceHash": "sha256:82b7b0690e204ca51230871dccb0067c671d9b4a914b2be0b9ef205a6e0609fd",
+      "text": "指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/outlineWidth/description",
+      "sourceHash": "sha256:2b53c172b405da2fdd785df00889c6995b1f3fb8ebae37f9d515b486ed0baf29",
+      "text": "指定轮廓宽度的数值 Property。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/positions/description",
+      "sourceHash": "sha256:8e0b158b31a0354986a5283146e9b520ac88fad6b281c240299cff6554cba70f",
+      "text": "指定定义墙顶的 {@link Cartesian3} 位置数组的 Property。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/shadows/description",
+      "sourceHash": "sha256:e47331d991773ce1bec66e0e1e0148ca163ce1e5d5f63dd8494b9665b3e2f732",
+      "text": "指定墙体是否投射或接收来自光源的阴影的枚举 Property。"
+    },
+    {
+      "id": "WallGraphics.ConstructorOptions",
+      "field": "properties/show/description",
+      "sourceHash": "sha256:a529a96c36b943b8643f81bb697a096e7a7bf5b5dc061fe1bbd096c27af30bac",
+      "text": "指定墙体可见性的布尔 Property。"
+    },
+    {
+      "id": "WallGraphics",
+      "field": "description",
+      "sourceHash": "sha256:d408b083eef9219300c62bff1658789e37969e41a6cc92450a67b5c0abbc7eee",
+      "text": "描述由线带及可选最高、最低高度定义的二维墙面。墙体贴合地球曲率，可沿表面或一定高度处布置。"
+    },
+    {
+      "id": "WallGraphics#distanceDisplayCondition",
+      "field": "description",
+      "sourceHash": "sha256:c5865289d4aa570a46f569ec56d423b9f87f9844a107f70f9a0c5a74f6f62f59",
+      "text": "获取或设置值为 {@link DistanceDisplayCondition} 的 Property，指定墙体在距相机多远时显示。"
+    },
+    {
+      "id": "WallGraphics#fill",
+      "field": "description",
+      "sourceHash": "sha256:ff836111c200020291201a01b728a22111c32cdd59e7bd0aac8a5be4559a47a7",
+      "text": "获取或设置指定是否使用所提供材质填充墙体的布尔 Property。"
+    },
+    {
+      "id": "WallGraphics#granularity",
+      "field": "description",
+      "sourceHash": "sha256:1f88637fe24656e9262a073e1f56061c95c0eff846b62f60dc2717753c290ac6",
+      "text": "获取或设置指定墙体上相邻采样点角度间隔的数值 Property。"
+    },
+    {
+      "id": "WallGraphics#material",
+      "field": "description",
+      "sourceHash": "sha256:255ded0032912130d4787b42be84a4f967d4e0b51b6edf788a4137fd65a19743",
+      "text": "获取或设置指定墙体填充材质的 Property。"
+    },
+    {
+      "id": "WallGraphics#maximumHeights",
+      "field": "description",
+      "sourceHash": "sha256:83400239003e3a8993a7f033e970f87faaed7683361423c027901a486e76829e",
+      "text": "获取或设置指定墙顶高度数组的 Property，用于替代各位置自身的高度。定义后，数组长度必须与 {@link Wall#positions} 相同。"
+    },
+    {
+      "id": "WallGraphics#minimumHeights",
+      "field": "description",
+      "sourceHash": "sha256:e8ccc23ffa01dc1ac95bc4f98dfabb42ba113230f4339990737678a7c1d7e4cc",
+      "text": "获取或设置指定墙底高度数组的 Property，用于替代地球表面高度。定义后，数组长度必须与 {@link Wall#positions} 相同。"
+    },
+    {
+      "id": "WallGraphics#outline",
+      "field": "description",
+      "sourceHash": "sha256:4db095468428ee115dbdd1ba1ea6986760b7edc4d47e80ad9d2b7a42e2888def",
+      "text": "获取或设置指定是否绘制墙体轮廓的 Property。"
+    },
+    {
+      "id": "WallGraphics#outlineColor",
+      "field": "description",
+      "sourceHash": "sha256:a3ebf43a511341847edaa5d6292948af4f4db44d6b678cfe4e1c398982cc833c",
+      "text": "获取或设置指定轮廓 {@link Color} 的 Property。"
+    },
+    {
+      "id": "WallGraphics#outlineWidth",
+      "field": "description",
+      "sourceHash": "sha256:b10b799a95c5a97c30fe009f7c53d09f715cf5bd1f2fd1b74fb2500beea871d6",
+      "text": "获取或设置指定轮廓宽度的数值 Property。\n<p>\n注意：在 Windows 平台的主流浏览器中会忽略此属性。详情参见 https://github.com/CesiumGS/cesium/issues/40 。\n</p>"
+    },
+    {
+      "id": "WallGraphics#positions",
+      "field": "description",
+      "sourceHash": "sha256:bb9b74214e660553cb7250073e5c80abb606dae084f7d6c7f5cfe332f13b72a5",
+      "text": "获取或设置指定定义墙顶的 {@link Cartesian3} 位置数组的 Property。"
+    },
+    {
+      "id": "WallGraphics#shadows",
+      "field": "description",
+      "sourceHash": "sha256:eef4821466d5bbb9ece9c88584ba39a5aa20586135fb9e072c16fab603677d28",
+      "text": "获取或设置枚举 Property，指定墙体是否投射或接收来自光源的阴影。"
+    },
+    {
+      "id": "WallGraphics#show",
+      "field": "description",
+      "sourceHash": "sha256:40b8036f1534e2cdb68fae2e0edc86084532b9e2d36b0a67648a607ad3d6c9b7",
+      "text": "获取或设置指定墙体可见性的布尔 Property。"
+    }
+  ]
+}
