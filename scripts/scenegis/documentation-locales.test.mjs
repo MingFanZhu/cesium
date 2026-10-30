@@ -85,5 +85,29 @@ test("Chinese source and native translations both reach localized HTML tables", 
   );
   assert.match(page, /<th>名称<\/th>/);
   assert.match(page, /<th class="last">说明<\/th>/);
-  assert.match(page, /Cesium 原生 API 的未译及待复核字段保留英文/);
+});
+
+test("API pages omit process notices and footers, with the report only in homepage resources", async () => {
+  for (const filename of (await readdir(root)).filter((name) =>
+    name.endsWith(".html"),
+  )) {
+    const page = await readFile(new URL(filename, root), "utf8");
+    assert.doesNotMatch(
+      page,
+      /class="(?:doc-coverage|help)"|<footer\b/,
+      filename,
+    );
+    assert.doesNotMatch(
+      page,
+      /SceneGIS 扩展说明直接维护中文|根据当前发行版本的源码生成/,
+      filename,
+    );
+    if (filename === "index.html") {
+      assert.match(page, /文档资源/);
+      assert.match(page, /href="translation-report\.json"/);
+      assert.match(page, /href="\.\.\/README\.md"/);
+    } else {
+      assert.doesNotMatch(page, /href="translation-report\.json"/, filename);
+    }
+  }
 });

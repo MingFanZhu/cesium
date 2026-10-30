@@ -2,18 +2,18 @@
 
 ## Metadata
 
-| Field                  | Value                                                                     |
-| ---------------------- | ------------------------------------------------------------------------- |
-| Extension slug         | `engine-distribution`                                                     |
-| Status                 | `completed`                                                               |
-| Planning model         | `extension`                                                               |
-| Active extension plan  | None; latest [Distribution](plans/2026-10-29-extension.md)                |
-| Current phase          | All phases completed                                                      |
-| Active standalone plan | None; latest [Native batch](plans/2026-10-30-native-translation-batch.md) |
-| Active phase plan      | None; latest [T11](plans/2026-10-30-t11-reference-prose.md)               |
-| Architecture contact   | Architecture Agent (current task)                                         |
-| Execution contact      | Execution Agent (current task)                                            |
-| Last updated           | 2026-10-30                                                                |
+| Field                  | Value                                                               |
+| ---------------------- | ------------------------------------------------------------------- |
+| Extension slug         | `engine-distribution`                                               |
+| Status                 | `completed`                                                         |
+| Planning model         | `extension`                                                         |
+| Active extension plan  | None; latest [Distribution](plans/2026-10-29-extension.md)          |
+| Current phase          | Reader layout cleanup completed                                     |
+| Active standalone plan | None; latest [Reader layout](plans/2026-10-30-doc-reader-layout.md) |
+| Active phase plan      | None; latest [T11](plans/2026-10-30-t11-reference-prose.md)         |
+| Architecture contact   | Architecture Agent (current task)                                   |
+| Execution contact      | Execution Agent (current task)                                      |
+| Last updated           | 2026-10-30                                                          |
 
 ## Scope
 
@@ -46,6 +46,14 @@ Missing/stale/unused are all zero; pure numeric/formula descriptions remain lite
 inventory/report without altering maintained catalogs. Historical bilingual delivery in
 [ADR-0206](../../Documentation/SceneGIS/Decisions/ADR-0206-documentation-localization.md) and
 [localization review](reviews/2026-10-30-localization.md) is superseded by C1/C2.
+
+## Latest reader layout
+
+[Reader layout](plans/2026-10-30-doc-reader-layout.md) is completed and
+[reviewed](reviews/2026-10-30-doc-reader-layout.md): remove translation notices and help/generator
+footers from API pages. The report link lives in homepage resources; maintenance details stay in
+Documentation/i18n/README.md. Docs build, 36 Node checks and three focused browser cases pass.
+All API/translation JSON files are byte-identical; no upstream/runtime/SDK edit.
 
 ## Latest maintenance
 

@@ -59,10 +59,8 @@ async function buildChineseEdition({ symbols, version, output, template }) {
         /<a href="(?:index\.html|https:\/\/cesium\.com\/)"[^>]*><img[^>]*CesiumLogo\.png[^>]*><\/a>/g,
         '<a href="index.html" style="font-weight:700;font-size:24px">SceneGIS</a>',
       )
-      .replace(
-        /<div class="help">[\s\S]*?<\/div>/,
-        `<div class="help">${ui.help}</div>`,
-      );
+      .replace(/<div class="help">[\s\S]*?<\/div>/, "")
+      .replace(/<footer>[\s\S]*?<\/footer>/, "");
     // Source checkouts and hosted source browsers are not required by this artifact.
     if (filename === "sourceLink.tmpl") {
       source = "";
@@ -72,13 +70,6 @@ async function buildChineseEdition({ symbols, version, output, template }) {
     }
     source = source.replace('<html lang="en">', `<html lang="${locale}">`);
     if (filename === "layout.tmpl" || filename === "indexLayout.tmpl") {
-      source = source.replace(
-        /<div id="(?:main|mainIndex)">/,
-        (opening) => `${opening}
-<div class="doc-coverage" style="margin-bottom:1em">
-${ui.coverageNotice}
-</div>`,
-      );
       source = source.replace(
         '<script src="javascript/scenegisDoc.js"></script>',
         `<script id="DocMessages" type="application/json">${JSON.stringify(ui.search).replaceAll("<", "\\u003c")}</script>

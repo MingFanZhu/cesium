@@ -229,6 +229,59 @@ test("single Chinese documentation shows owned source, native translations and s
   expect(errors).toEqual([]);
 });
 
+test("API reader keeps report access in homepage resources without process banners or footers", async ({
+  page,
+  request,
+}, info) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`${response.status()} ${response.url()}`);
+    }
+  });
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1:8104)/, (route) =>
+    route.abort(),
+  );
+  for (const prefix of [
+    "/Documentation/",
+    "/deep/site/vendor/engine/Documentation/",
+  ]) {
+    await page.goto(`${prefix}index.html`);
+    await expect(page.locator(".doc-coverage, .help, footer")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "文档资源" })).toBeVisible();
+    const reportLink = page.getByRole("link", {
+      name: "原生翻译报告",
+      exact: true,
+    });
+    await expect(reportLink).toHaveCount(1);
+    await expect(reportLink).toHaveAttribute("href", "translation-report.json");
+    const report = await request.get(
+      new URL(await reportLink.getAttribute("href"), page.url()).href,
+    );
+    expect(report.ok()).toBe(true);
+    expect((await report.json()).counts.missing).toBe(0);
+    await page.goto(`${prefix}Scene.html`);
+    await expect(page.locator(".doc-coverage, .help, footer")).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: "原生翻译报告", exact: true }),
+    ).toHaveCount(0);
+  }
+  await info.attach("reader-symbol", {
+    body: await page.screenshot({ path: info.outputPath("reader-symbol.png") }),
+    contentType: "image/png",
+  });
+  await page.goto("/deep/site/vendor/engine/Documentation/index.html");
+  await page
+    .getByRole("heading", { name: "文档资源" })
+    .scrollIntoViewIfNeeded();
+  await info.attach("reader-home", {
+    body: await page.screenshot({ path: info.outputPath("reader-home.png") }),
+    contentType: "image/png",
+  });
+  expect(errors).toEqual([]);
+});
+
 test("translated native documentation retains camera units, ownership and tile limits", async ({
   page,
 }, info) => {
